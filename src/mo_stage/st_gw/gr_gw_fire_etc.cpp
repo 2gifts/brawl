@@ -45,11 +45,11 @@ void grGWFireEtc::update(float deltaFrame) {
     if (data == nullptr) {
         return;
     }
-    unk154 -= deltaFrame;
-    if (unk154 < 0.0f) {
-        unk154 = 0.0f;
+    m_timer -= deltaFrame;
+    if (m_timer < 0.0f) {
+        m_timer = 0.0f;
     }
-    switch (unk150) {
+    switch (m_state) {
         case STATE_0:
             setMotion(1, false, true, nullptr);
             setVisibility(false);
@@ -59,24 +59,24 @@ void grGWFireEtc::update(float deltaFrame) {
             unk174[1] = MISTAKE_11;
             unk174[2] = MISTAKE_11;
             unk1E8 = 1;
-            unk150 = STATE_1;
+            m_state = STATE_1;
             break;
         case STATE_1:
-            if (*unk158 == unk15C) {
+            if (*m_sceneIdWork == m_sceneId) {
                 setVisibility(true);
                 unk188.unk58 = data->unk44 + (data->unk48 - data->unk44) * randf();
-                unk150 = STATE_3;
+                m_state = STATE_3;
             }
             break;
         case STATE_2:
             break;
         case STATE_3:
-            if (*unk158 != unk15C) {
-                setMotion(0, false, true, &unk164);
+            if (*m_sceneIdWork != m_sceneId) {
+                setMotion(0, false, true, &m_frameCount);
                 if (m_motionRatio < 0.0f) {
                     m_motionRatio *= -1.0f;
                 }
-                unk150 = STATE_4;
+                m_state = STATE_4;
             } else {
                 if (*unk1E4 == 0) {
                     updateVictim(deltaFrame);
@@ -91,8 +91,8 @@ void grGWFireEtc::update(float deltaFrame) {
             }
             break;
         case STATE_4:
-            if (getMotionFrame(0) >= unk164) {
-                unk150 = STATE_0;
+            if (getMotionFrame(0) >= m_frameCount) {
+                m_state = STATE_0;
             }
             break;
     }
@@ -142,7 +142,7 @@ void grGWFireEtc::updateVictim(float deltaFrame) {
                 switch (victim->unk8) {
                     case STEP_4:
                         if (*unk17C == 2) {
-                            unk154 = data->unk3C;
+                            m_timer = data->unk3C;
                         } else {
                             unk174[2] = MISTAKE_12;
                             victim->unk8 = STEP_REMOVED;
@@ -151,7 +151,7 @@ void grGWFireEtc::updateVictim(float deltaFrame) {
                         break;
                     case STEP_12:
                         if (*unk17C == 1) {
-                            unk154 = data->unk3C;
+                            m_timer = data->unk3C;
                         } else {
                             unk174[1] = MISTAKE_12;
                             victim->unk8 = STEP_REMOVED;
@@ -160,7 +160,7 @@ void grGWFireEtc::updateVictim(float deltaFrame) {
                         break;
                     case STEP_18:
                         if (*unk17C == 0) {
-                            unk154 = data->unk3C;
+                            m_timer = data->unk3C;
                         } else {
                             unk174[0] = MISTAKE_12;
                             victim->unk8 = STEP_REMOVED;
@@ -299,37 +299,37 @@ void grGWFireFighter::update(float deltaFrame) {
     if (data == nullptr) {
         return;
     }
-    unk154 -= deltaFrame;
-    if (unk154 < 0.0f) {
-        unk154 = 0.0f;
+    m_timer -= deltaFrame;
+    if (m_timer < 0.0f) {
+        m_timer = 0.0f;
     }
-    switch (unk150) {
+    switch (m_state) {
         case STATE_0:
             setMotion(1, false, true, nullptr);
             setVisibility(false);
             setNodeVisibility(false, 0, unk174, true, true);
             unk194 = 1;
-            unk150 = STATE_1;
+            m_state = STATE_1;
             break;
         case STATE_1:
-            if (*unk158 == unk15C) {
+            if (*m_sceneIdWork == m_sceneId) {
                 setVisibility(true);
                 if (*unk188 == 255) {
                     *unk188 = 0;
                 }
-                unk154 = data->unk3C;
-                unk150 = STATE_3;
+                m_timer = data->unk3C;
+                m_state = STATE_3;
             }
             break;
         case STATE_2:
             break;
         case STATE_3:
-            if (*unk158 != unk15C) {
-                setMotion(0, false, true, &unk164);
+            if (*m_sceneIdWork != m_sceneId) {
+                setMotion(0, false, true, &m_frameCount);
                 if (m_motionRatio < 0.0f) {
                     m_motionRatio *= -1.0f;
                 }
-                unk150 = STATE_4;
+                m_state = STATE_4;
             } else {
                 if (*unk190 == 0) {
                     updateFighter(deltaFrame);
@@ -341,8 +341,8 @@ void grGWFireFighter::update(float deltaFrame) {
             }
             break;
         case STATE_4:
-            if (getMotionFrame(0) >= unk164) {
-                unk150 = STATE_0;
+            if (getMotionFrame(0) >= m_frameCount) {
+                m_state = STATE_0;
             }
             break;
     }
@@ -353,11 +353,11 @@ void grGWFireFighter::updateFighter(float deltaFrame) {
     if (data == nullptr) {
         return;
     }
-    unk154 -= deltaFrame;
-    if (unk154 < 0.0f) {
-        unk154 = 0.0f;
+    m_timer -= deltaFrame;
+    if (m_timer < 0.0f) {
+        m_timer = 0.0f;
     }
-    if (unk154 == 0.0f) {
+    if (m_timer == 0.0f) {
         float random = randf();
         setNodeVisibility(false, 0, unk178[*unk188], true, false);
         switch (*unk188) {
@@ -439,7 +439,7 @@ void grGWFireFighter::updateFighter(float deltaFrame) {
                 }
                 break;
         }
-        unk154 = data->unk3C;
+        m_timer = data->unk3C;
     }
     setNodeVisibility(true, 0, unk178[*unk188], true, false);
 }
