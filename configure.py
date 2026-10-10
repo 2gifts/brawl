@@ -595,7 +595,6 @@ config.libs = [
         "objects": [
             Object(NonMatching, "RVL_SDK/pad/Pad.c"),
             Object(NonMatching, "RVL_SDK/wpad/WPAD.c"),
-            Object(NonMatching, "RVL_SDK/wpad/WPADHIDParser.c"),
             Object(NonMatching, "RVL_SDK/bte/btm_pm.c"),
             Object(NonMatching, "RVL_SDK/bte/btm_sco.c"),
             Object(NonMatching, "RVL_SDK/bte/btm_sec.c"),
@@ -845,6 +844,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/ipc/memory.c"),
             Object(NonMatching, "RVL_SDK/ipc/ipcProfile.c"),
             Object(Matching, "RVL_SDK/fs/fs.c"),
+            Object(NonMatching, "RVL_SDK/wpad/WPADHIDParser.c"),
             Object(Matching, "RVL_SDK/wpad/WPADEncrypt.c"),
             Object(Matching, "RVL_SDK/wpad/debug_msg.c"),
             Object(Matching, "RVL_SDK/euart/euart.c"),
