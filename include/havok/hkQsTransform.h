@@ -13,7 +13,7 @@ struct hkQsTransform {
     hkQuaternion& getRotation();
 
     void get4x4ColumnMajor(hkReal* m) const;
-    void set4x4ColumnMajor(const hkReal* m);
+    hkBool set4x4ColumnMajor(const hkReal* m);
     void setInverse(const hkQsTransform& t);
     void setMul(const hkQsTransform& a, const hkQsTransform& b);
     void setMulInverseMul(const hkQsTransform& a, const hkQsTransform& b);

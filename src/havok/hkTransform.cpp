@@ -1,8 +1,10 @@
-// Havok translation unit hkTransform.o (main.dol 0x802871F4-0x802878F0).
-// Not yet decompiled. Functions in address order (method names from the Havok TU map; classes still to be identified):
-//   0x802871F4   128  get4x4ColumnMajor   [map: hkTransform__get4x4ColumnMajor]
-//   0x80287274   128  set4x4ColumnMajor   [map: hkTransform__set4x4ColumnMajor]
-//   0x802872F4   244  setInverse   [map: hkTransform__setInverse]
+// hkTransform.o (main.dol 0x802871F4-0x802878F0)
+// rigid transform (3x3 rotation + translation) helpers
+//   0x802871F4   128  get4x4ColumnMajor
+//   0x80287274   128  set4x4ColumnMajor
+//   0x802872F4   244  setInverse
+//   0x802873E8   536  setMul
+//   0x80287600   752  setMulInverseMul
 #pragma fp_contract on
 #include <havok/hkTransform.h>
 
@@ -62,4 +64,42 @@ void hkTransform::setInverse(const hkTransform& t) {
     m_translation.y = negTranslation.z * r.m_col2.y + (negTranslation.x * r.m_col0.y + negTranslation.y * r.m_col1.y);
     m_translation.z = negTranslation.z * r.m_col2.z + (negTranslation.x * r.m_col0.z + negTranslation.y * r.m_col1.z);
     m_translation.w = 0.0f;
+}
+
+// v rotated by r: col0 * x + col1 * y + col2 * z, w ends up 0
+static inline void rotateDir(hkVector4& out, const hkRotation& r, const hkVector4& v) {
+    out.x = r.m_col2.x * v.z + (r.m_col0.x * v.x + r.m_col1.x * v.y);
+    out.y = r.m_col2.y * v.z + (r.m_col0.y * v.x + r.m_col1.y * v.y);
+    out.z = r.m_col2.z * v.z + (r.m_col0.z * v.x + r.m_col1.z * v.y);
+    out.w = 0.0f;
+}
+
+// v rotated by the inverse of r (so r transposed): each lane is v dotted with one column
+static inline void rotateInverseDir(hkVector4& out, const hkRotation& r, const hkVector4& v) {
+    out.x = r.m_col0.z * v.z + (r.m_col0.x * v.x + r.m_col0.y * v.y);
+    out.y = r.m_col1.z * v.z + (r.m_col1.x * v.x + r.m_col1.y * v.y);
+    out.z = r.m_col2.z * v.z + (r.m_col2.x * v.x + r.m_col2.y * v.y);
+    out.w = 0.0f;
+}
+
+// this = a * b. the 3 rotation columns and the translation of b all get rotated by a, then a's translation is added on
+void hkTransform::setMul(const hkTransform& a, const hkTransform& b) {
+    const hkVector4* in = &b.m_rotation.m_col0;
+    hkVector4* out = &m_rotation.m_col0;
+    for (int i = 0; i < 4; i++) {
+        rotateDir(out[i], a.m_rotation, in[i]);
+    }
+    m_translation.add4(a.m_translation);
+}
+
+// this = inverse(a) * b, without ever building the inverse
+void hkTransform::setMulInverseMul(const hkTransform& a, const hkTransform& b) {
+    const hkVector4* in = &b.m_rotation.m_col0;
+    hkVector4* out = &m_rotation.m_col0;
+    for (int i = 0; i < 3; i++) {
+        rotateInverseDir(out[i], a.m_rotation, in[i]);
+    }
+    hkVector4 h;
+    h.setSub4(b.m_translation, a.m_translation);
+    rotateInverseDir(m_translation, a.m_rotation, h);
 }

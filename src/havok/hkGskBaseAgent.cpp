@@ -17,9 +17,8 @@
 #include <havok/hkShapeType.h>
 #include <havok/hkTransform.h>
 
-// Stand-ins for the GSK setup helpers (other units, not recovered yet). fn_80287600 builds the relative transform
-// of the two motions; fn_8031C8CC / fn_8031CD64 initialise the sub-object at 0x0C for a triangle / other shape pair.
-extern "C" void fn_80287600(void* out, void* motionA, void* motionB);
+// Stand-ins for the GSK setup helpers (other units, not recovered yet). fn_8031C8CC / fn_8031CD64 initialise the
+// sub-object at 0x0C for a triangle / other shape pair.
 extern "C" void fn_8031C8CC(void* self, void* shapeA, void* shapeB, void* relative);
 extern "C" void fn_8031CD64(void* self, void* shapeA, void* shapeB, void* relative);
 
@@ -27,7 +26,8 @@ hkGskBaseAgent::hkGskBaseAgent(hkCdBody* bodyA, hkCdBody* bodyB, hkContactMgr* c
     hkTransform relative;
     hkShape* shapeA = bodyA->m_shape;
     hkShape* shapeB = bodyB->m_shape;
-    fn_80287600(&relative, bodyA->m_motion, bodyB->m_motion);
+    // a motion state starts with its hkTransform, so the pointers can be used as transforms directly
+    relative.setMulInverseMul(*(const hkTransform*)bodyA->m_motion, *(const hkTransform*)bodyB->m_motion);
     if (shapeB->getType() == HK_SHAPE_TRIANGLE) {
         fn_8031C8CC(unkC, shapeA, shapeB, &relative);
     } else {
