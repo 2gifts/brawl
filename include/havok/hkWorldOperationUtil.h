@@ -25,6 +25,7 @@ struct hkWorldOperationUtil {
     static hkConstraintInstance* addConstraintImmediately(hkWorld* world, hkConstraintInstance* constraint, bool fireCallback);
     static void markIslandInactive(hkWorld* world, hkSimulationIsland* island);
     static void markIslandActive(hkWorld* world, hkSimulationIsland* island);
+    static void updateEntityBP(hkWorld* world, hkEntity* entity);
     static void addPhantomBP(hkWorld* world, hkPhantom* phantom);
     static void removePhantomBP(hkWorld* world, hkPhantom* phantom);
     static void setRigidBodyMotionType(hkRigidBody* body, u8 motionType, u8 a, u8 b);

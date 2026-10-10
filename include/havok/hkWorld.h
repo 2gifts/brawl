@@ -14,6 +14,7 @@ struct hkConstraintInstance;
 struct hkPhysicsSystem;
 struct hkCollisionFilter;
 struct hkStatisticsCollector;
+struct hkAabb;
 
 // The simulation world (layout partly recovered from hkWorld.cpp asm; the tail after 0x114 is not
 // recovered). Fields marked unk are written by the constructor and not read by the code matched so far.
@@ -26,13 +27,13 @@ struct hkWorld : hkReferencedObject {
     hkArrayBase m_unk40;                            // 0x40 not recovered
     u8 m_unk4C[0x28];                               // 0x4C .. 0x73 not recovered
     hkWorldOperationQueue* m_operationQueue;        // 0x74 (allocated 0x20 bytes in the constructor)
-    int m_unk78;                                    // 0x78 nonzero means pending operations may exist
+    int m_pendingOperationsCount;                                    // 0x78 how many world operations are sitting in the queue
     int m_lockCount;                                // 0x7C incremented around add/remove calls
     int m_unk80;                                    // 0x80 summed with m_lockCount in removePhantom
     u8 m_unk84;                                     // 0x84 flag: operations are being executed
     u8 m_unk85;                                     // 0x85 (initialised to 1)
     int m_unk88;                                    // 0x88
-    int m_unk8C;                                    // 0x8C (initialised to 1)
+    int m_pendingOperationQueueCount;               // 0x8C how many executeAllPending calls are on the stack (starts at 1)
     int m_unk90;                                    // 0x90
     u8 m_unk94[0x08];                               // 0x94 .. 0x9B not recovered
     int m_unk9C;                                    // 0x9C
@@ -55,9 +56,14 @@ struct hkWorld : hkReferencedObject {
     void removeActionImmediately(hkAction* action);
     void addEntityBatch(hkEntity** entities, int count, bool active);
     void removeEntity(hkEntity* entity);
-    void removeEntityBatch(hkEntity** entities);
+    void removeEntityBatch(hkEntity** entities, int count);
+    hkEntity* addEntity(hkEntity* entity, int activation);
+    void activateRegion(hkAabb* aabb);
+    void updateCollisionFilterOnEntity(hkEntity* entity, u8 updateMode, u8 updateShapeCollections);
+    void updateCollisionFilterOnPhantom(hkPhantom* phantom, u8 updateShapeCollections);
+    void updateCollisionFilterOnWorld(u8 updateMode, u8 updateShapeCollections);
     void addAction(hkAction* action);
-    void addConstraint(hkConstraintInstance* constraint);
+    hkConstraintInstance* addConstraint(hkConstraintInstance* constraint);
     void removeConstraint(hkConstraintInstance* constraint);
     void addPhantomBatch(hkPhantom** phantoms, int count);
     void removePhantomBatch(hkPhantom** phantoms, int count);
@@ -71,7 +77,7 @@ struct hkWorld : hkReferencedObject {
     void internal_executePendingOperations();
     // drop one lock and, if that was the last one and something got queued meanwhile, run the queue
     void unlockAndAttemptToExecutePendingOperations() {
-        if (--m_lockCount == 0 && m_unk78 != 0 && !m_unk84) {
+        if (--m_lockCount == 0 && m_pendingOperationsCount != 0 && !m_unk84) {
             internal_executePendingOperations();
         }
     }

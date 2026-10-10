@@ -56,6 +56,7 @@
 #include <havok/hkPhantom.h>
 #include <havok/hkWorldCallbackUtil.h>
 #include <havok/hkWorldOperationUtil.h>
+#include <havok/hkWorldOperationQueue.h>
 
 // Operation record queued while the world is locked (8 bytes). HYPOTHESIS: field names; the
 // type byte selects the deferred operation, the object pointer is its argument.
@@ -64,8 +65,6 @@ struct hkWorldOperationRecord {
     void* m_object; // 0x04
 };
 
-// Queue entry point (hkWorldOperationQueue unit, not recovered yet).
-extern "C" void fn_802F5E44(hkWorldOperationQueue* queue, const void* operation);
 
 void hkWorld::lock() {}
 
@@ -81,7 +80,7 @@ void hkWorld::setGravity(const hkVector4& gravity) {
 
 #pragma dont_inline on
 void hkWorld::queueOperation(const void* operation) { // out of line in the original
-    fn_802F5E44(m_operationQueue, operation);
+    m_operationQueue->queueOperation(*static_cast<const hkWorldOperation::BaseOperation*>(operation));
 }
 #pragma dont_inline reset
 
@@ -115,7 +114,7 @@ static inline void* phantomSlot(hkPhantom* p, int offset) {
 hkPhantom* hkWorld::addPhantom(hkPhantom* phantom) {
     if (m_lockCount + m_unk80 != 0) {
         hkWorldOperationRecord op;
-        op.m_type = 0x0D;
+        op.m_type = hkWorldOperation::PHANTOM_ADD;
         op.m_object = phantom;
         queueOperation(&op);
         return NULL;
@@ -144,7 +143,7 @@ hkPhantom* hkWorld::addPhantom(hkPhantom* phantom) {
 void hkWorld::removePhantom(hkPhantom* phantom) {
     if (m_lockCount + m_unk80 != 0) {
         hkWorldOperationRecord op;
-        op.m_type = 0x0E;
+        op.m_type = hkWorldOperation::PHANTOM_REMOVE;
         op.m_object = phantom;
         queueOperation(&op);
         return;
@@ -182,7 +181,7 @@ void hkWorld::removePhantom(hkPhantom* phantom) {
 void hkWorld::removeAction(hkAction* action) {
     if (m_lockCount != 0) {
         hkWorldOperationRecord op;
-        op.m_type = 0x0B;
+        op.m_type = hkWorldOperation::ACTION_REMOVE;
         op.m_object = action;
         queueOperation(&op);
     } else {
@@ -228,7 +227,7 @@ void hkWorld::removePhysicsSystem(hkPhysicsSystem* system) {
             removeEntity(((hkEntity**)system->m_rigidBodies.m_data)[i]);
         }
     } else {
-        removeEntityBatch((hkEntity**)system->m_rigidBodies.m_data);
+        removeEntityBatch((hkEntity**)system->m_rigidBodies.m_data, system->m_rigidBodies.m_size);
     }
     if (system->m_phantoms.m_size > 0) {
         removePhantomBatch((hkPhantom**)system->m_phantoms.m_data, system->m_phantoms.m_size);

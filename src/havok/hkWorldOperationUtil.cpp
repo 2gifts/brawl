@@ -101,7 +101,7 @@ hkConstraintInstance* hkWorldOperationUtil::addConstraintImmediately(hkWorld* wo
     if (fireCallback) {
         hkWorldCallbackUtil::fireConstraintAdded(world, constraint);
     }
-    if (--world->m_lockCount == 0 && world->m_unk78 != 0 && (s8)world->m_unk84 == 0) {
+    if (--world->m_lockCount == 0 && world->m_pendingOperationsCount != 0 && (s8)world->m_unk84 == 0) {
         world->internal_executePendingOperations();
     }
     return constraint;
@@ -136,7 +136,7 @@ void hkWorldOperationUtil::removeConstraintImmediately(hkWorld* world, hkConstra
             hkWorldCallbackUtil::fireConstraintRemoved(world, constraint);
         }
         hkWorldConstraintUtil::removeConstraint(constraint);
-        if (--world->m_lockCount == 0 && world->m_unk78 != 0 && (s8)world->m_unk84 == 0) {
+        if (--world->m_lockCount == 0 && world->m_pendingOperationsCount != 0 && (s8)world->m_unk84 == 0) {
             world->internal_executePendingOperations();
         }
     }
