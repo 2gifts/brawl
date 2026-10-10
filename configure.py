@@ -574,7 +574,6 @@ config.libs = [
         "objects": [
             Object(NonMatching, "RVL_SDK/bte/sdp_utils.c"),
             Object(NonMatching, "RVL_SDK/tpl/TPL.c"),
-            Object(NonMatching, "RVL_SDK/thp/THPDec.c"),
             Object(NonMatching, "RVL_SDK/thp/THPAudio.c"),
             Object(NonMatching, "RVL_SDK/exi/exi2_link.c"),
             Object(NonMatching, "TMCC_JPEG/tmcc_jpeg_api.c"),
@@ -845,6 +844,7 @@ config.libs = [
             Object(NonMatching, "RVL_SDK/ipc/ipcProfile.c"),
             Object(Matching, "RVL_SDK/fs/fs.c"),
             Object(NonMatching, "RVL_SDK/wpad/WPADHIDParser.c"),
+            Object(Matching, "RVL_SDK/thp/THPDec.c"),
             Object(Matching, "RVL_SDK/wpad/WPADEncrypt.c"),
             Object(Matching, "RVL_SDK/wpad/debug_msg.c"),
             Object(Matching, "RVL_SDK/euart/euart.c"),
