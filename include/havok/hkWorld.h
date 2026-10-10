@@ -59,6 +59,7 @@ struct hkWorld : hkReferencedObject {
     void removeEntityBatch(hkEntity** entities, int count);
     hkEntity* addEntity(hkEntity* entity, int activation);
     void activateRegion(hkAabb* aabb);
+    int stepDeltaTime(hkReal physicsDeltaTime);
     void updateCollisionFilterOnEntity(hkEntity* entity, u8 updateMode, u8 updateShapeCollections);
     void updateCollisionFilterOnPhantom(hkPhantom* phantom, u8 updateShapeCollections);
     void updateCollisionFilterOnWorld(u8 updateMode, u8 updateShapeCollections);

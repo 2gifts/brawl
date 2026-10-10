@@ -57,6 +57,9 @@
 #include <havok/hkWorldCallbackUtil.h>
 #include <havok/hkWorldOperationUtil.h>
 #include <havok/hkWorldOperationQueue.h>
+#include <havok/hkMemory.h>
+#include <havok/hkString.h>
+#include <havok/hkEntity.h>
 
 // Operation record queued while the world is locked (8 bytes). HYPOTHESIS: field names; the
 // type byte selects the deferred operation, the object pointer is its argument.
@@ -175,6 +178,69 @@ void hkWorld::removePhantom(hkPhantom* phantom) {
     phantom->removeReference();
 
     unlockAndAttemptToExecutePendingOperations();
+}
+
+// raw field access for the world's members that nobody has laid out yet (offsets are from the asm)
+template <typename T>
+static inline T& worldField(void* w, int offset) {
+    return *reinterpret_cast<T*>(reinterpret_cast<char*>(w) + offset);
+}
+
+// what the broadphase hands back for an aabb query: the two handles of an overlapping pair
+struct hkRegionHit {
+    void* m_a; // 0x00
+    void* m_b; // 0x04 the one that actually lives in the region
+};
+
+// wakes up every entity in the box. while the world is locked the box is copied and queued instead
+void hkWorld::activateRegion(hkAabb* aabb) {
+    if (m_lockCount != 0) {
+        hkWorldOperation::SingleObjectOperation op;
+        op.m_type = hkWorldOperation::ACTIVATE_REGION;
+        op.m_object = hkMemory::getInstance().allocateChunk(0x20, 4);
+        hkString::memCpy(op.m_object, aabb, 0x20);
+        queueOperation(&op);
+        return;
+    }
+
+    hkArray<hkRegionHit> hits;
+    // HYPOTHESIS: world +0x54 is the broadphase and its vtable 0x34 is "query this aabb into that list"
+    void* broadPhase = worldField<void*>(this, 0x54);
+    typedef void (*QueryFn)(void*, hkAabb*, hkArray<hkRegionHit>*);
+    reinterpret_cast<QueryFn>((*reinterpret_cast<void***>(broadPhase))[0x34 / 4])(broadPhase, aabb, &hits);
+
+    for (int i = 0; i < hits.m_size; i++) {
+        // handle -> collidable (a signed byte offset stored in the handle) -> owner, only if it is an entity (type 1)
+        char* handle = static_cast<char*>(hits[i].m_b);
+        char* collidable = handle + static_cast<s8>(handle[5]);
+        hkEntity* entity = NULL;
+        if (collidable[0x18] == 1) {
+            entity = reinterpret_cast<hkEntity*>(collidable + *reinterpret_cast<int*>(collidable + 0x10));
+        }
+        if (entity != NULL) {
+            entity->activate();
+        }
+    }
+}
+
+// runs the simulation for one step. the original wraps the memory-watchdog part in profiler timer markers
+// (hkMonitorStream), those aren't here
+int hkWorld::stepDeltaTime(hkReal physicsDeltaTime) {
+    typedef int (*StepFn)(void*, hkReal);
+    void* simulation = m_unk08;
+    int result = reinterpret_cast<StepFn>((*reinterpret_cast<void***>(simulation))[0x10 / 4])(simulation, physicsDeltaTime);
+
+    void* watchDog = worldField<void*>(this, 0x50);
+    if (result == 0 && watchDog != NULL) {
+        // HYPOTHESIS: if the memory in use goes over the watchdog's limit (+8) it gets told to free some (vtable 0x10)
+        hkMemory& memory = hkMemory::getInstance();
+        int used = worldField<int>(&memory, 0x28) + worldField<int>(&memory, 0x14);
+        if (used > worldField<int>(watchDog, 8)) {
+            typedef void (*FreeFn)(void*, hkWorld*);
+            reinterpret_cast<FreeFn>((*reinterpret_cast<void***>(watchDog))[0x10 / 4])(watchDog, this);
+        }
+    }
+    return result;
 }
 
 #pragma dont_inline on
