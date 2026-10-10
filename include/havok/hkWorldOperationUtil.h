@@ -8,6 +8,7 @@ struct hkSimulationIsland;
 struct hkConstraintInstance;
 struct hkEntity;
 struct hkRigidBody;
+struct hkPhantom;
 
 // Operations on the world's islands, entities, phantoms and constraints, run while the world is locked
 // or when queued operations are executed.
@@ -24,5 +25,7 @@ struct hkWorldOperationUtil {
     static hkConstraintInstance* addConstraintImmediately(hkWorld* world, hkConstraintInstance* constraint, bool fireCallback);
     static void markIslandInactive(hkWorld* world, hkSimulationIsland* island);
     static void markIslandActive(hkWorld* world, hkSimulationIsland* island);
+    static void addPhantomBP(hkWorld* world, hkPhantom* phantom);
+    static void removePhantomBP(hkWorld* world, hkPhantom* phantom);
     static void setRigidBodyMotionType(hkRigidBody* body, u8 motionType, u8 a, u8 b);
 };
