@@ -1773,6 +1773,7 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "mo_fighter/ft_robot/ft_robot.cpp"),
+            Object(NonMatching, "mo_fighter/ft_robot/ft_robot_articles.cpp"),
             Object(NonMatching, "mo_fighter/ft_robot/ft_robot_status_uniq_process_special_arm_spin.cpp"),
             Object(NonMatching, "mo_fighter/ft_robot/ft_robot_status_uniq_process_special_burner.cpp"),
             Object(Matching, "mo_fighter/ft_robot/ft_robot_status_uniq_process_special_burner_attack.cpp"),
