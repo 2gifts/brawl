@@ -67,9 +67,6 @@ void hkTransformAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     dispatcher->registerCollisionAgent(&plain, HK_SHAPE_TRANSFORM, -1);
 }
 
-// Stand-in for the transform composition used by updateShapeCollectionFilter (not recovered yet).
-extern "C" void fn_802873E8(void* out, void* motion, void* shapeTransform);
-
 // HYPOTHESIS: per-body record handed to the child agent. Layout from the stack copy: 0x00 shape field
 // 0x10, 0x04 shape key, 0x08 pointer to the composed transform, 0x0C the body itself.
 struct hkTransformAgentBodyInfo {
@@ -84,7 +81,8 @@ void hkTransformAgent::updateShapeCollectionFilter(void* unk0, void* unk1, void*
     hkCdBody* body = (hkCdBody*)unk0;
     char* shape = (char*)body->m_shape;
     hkTransform transform;
-    fn_802873E8(&transform, body->m_motion, shape + 0x30);
+    // body's transform composed with the transform shape's own transform (at 0x30 in the shape)
+    transform.setMul(*(const hkTransform*)body->m_motion, *(const hkTransform*)(shape + 0x30));
     hkTransformAgentBodyInfo info;
     info.body = body;
     info.shapeKey = body->m_shapeKey;

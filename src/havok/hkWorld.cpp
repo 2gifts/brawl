@@ -53,6 +53,9 @@
 
 #include <havok/hkWorld.h>
 #include <havok/hkPhysicsSystem.h>
+#include <havok/hkPhantom.h>
+#include <havok/hkWorldCallbackUtil.h>
+#include <havok/hkWorldOperationUtil.h>
 
 // Operation record queued while the world is locked (8 bytes). HYPOTHESIS: field names; the
 // type byte selects the deferred operation, the object pointer is its argument.
@@ -97,6 +100,82 @@ void hkWorld::removeWorldDeletionListener(hkWorldDeletionListener* listener) {
     index = -1;
 found:
     m_worldDeletionListeners[index] = NULL;
+}
+
+// the phantom vtable calls below go through raw slot numbers. hkPhantom.h's slot order doesn't line up with
+// what the asm calls here (it wants 0x14 for the motion state and 0x34 for deallocateInternalArrays), so
+// HYPOTHESIS: that header's slot guesses are a bit off. leaving it alone until a second caller shows up
+typedef hkMotion* (*PhantomGetMotionFn)(hkPhantom*);
+typedef void (*PhantomVoidFn)(hkPhantom*);
+static inline void* phantomSlot(hkPhantom* p, int offset) {
+    return (*(void***)p)[offset / 4];
+}
+
+// returns NULL when the add got queued because the world was locked
+hkPhantom* hkWorld::addPhantom(hkPhantom* phantom) {
+    if (m_lockCount + m_unk80 != 0) {
+        hkWorldOperationRecord op;
+        op.m_type = 0x0D;
+        op.m_object = phantom;
+        queueOperation(&op);
+        return NULL;
+    }
+
+    m_lockCount++;
+
+    // a phantom that came out of a packfile may not have its collidable pointed at a motion state yet
+    if (phantom->m_collidable.m_motion == NULL) {
+        phantom->m_collidable.m_motion = ((PhantomGetMotionFn)phantomSlot(phantom, 0x14))(phantom);
+    }
+
+    phantom->m_world = this;
+    phantom->addReference();
+    m_phantoms.pushBack(phantom);
+
+    hkWorldOperationUtil::addPhantomBP(this, phantom);
+
+    hkWorldCallbackUtil::firePhantomAdded(this, phantom);
+    phantom->firePhantomAdded();
+
+    unlockAndAttemptToExecutePendingOperations();
+    return phantom;
+}
+
+void hkWorld::removePhantom(hkPhantom* phantom) {
+    if (m_lockCount + m_unk80 != 0) {
+        hkWorldOperationRecord op;
+        op.m_type = 0x0E;
+        op.m_object = phantom;
+        queueOperation(&op);
+        return;
+    }
+
+    m_lockCount++;
+
+    hkWorldCallbackUtil::firePhantomRemoved(this, phantom);
+    phantom->firePhantomRemoved();
+
+    hkWorldOperationUtil::removePhantomBP(this, phantom);
+
+    // take it out of the list: last one gets moved into the hole
+    int index = -1;
+    for (int i = 0; i < m_phantoms.m_size; i++) {
+        if (m_phantoms[i] == phantom) {
+            index = i;
+            break;
+        }
+    }
+    m_phantoms.m_size--;
+    m_phantoms[index] = m_phantoms[m_phantoms.m_size];
+    phantom->m_world = NULL;
+
+    // loaded from a packfile (memSize 0) means it might still own empty arrays that need freeing
+    if (phantom->m_memSizeAndFlags == 0) {
+        ((PhantomVoidFn)phantomSlot(phantom, 0x34))(phantom);
+    }
+    phantom->removeReference();
+
+    unlockAndAttemptToExecutePendingOperations();
 }
 
 #pragma dont_inline on

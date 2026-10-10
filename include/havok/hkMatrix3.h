@@ -4,6 +4,7 @@
 #include <StaticAssert.h>
 
 struct hkRotation;
+struct hkQuaternion;
 
 // Local declaration for the math class absent from the BrawlHeaders submodule.
 // Native storage is three columns of four floats. The fourth lanes are retained
@@ -27,7 +28,12 @@ struct __attribute__((aligned(16))) hkMatrix3 {
 };
 
 // HYPOTHESIS: hkRotation specializes the same matrix storage without new fields.
-struct hkRotation : hkMatrix3 {};
+struct hkRotation : hkMatrix3 {
+    // defined in hkRotation.cpp, which has its own (column based) view of the same 0x30 bytes
+    void set(const hkQuaternion& q);
+    // true if the columns are unit length and perpendicular within tolerance. also defined in hkRotation.cpp
+    bool isOrthonormal(float tolerance) const;
+};
 
 static_assert(sizeof(hkMatrix3) == 0x30, "hkMatrix3 size");
 

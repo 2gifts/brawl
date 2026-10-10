@@ -13,9 +13,6 @@
 //   0x80325F8C    80  __sinit_\hkRagdollConstraintData_cpp   [map: hkRagdollConstraintDatacpp____sinit_]
 #include <havok/hkRagdollConstraintData.h>
 
-// HYPOTHESIS: hkRotation::isOrthonormal (hkRotation.cpp, map fn_80285B30) returns an hkBool, read through its byte.
-extern "C" hkBool fn_80285B30(const hkMatrix3* m, float tolerance);
-
 // Constraint info block copied from the data at 0x10 (0x12A bytes). Helper lives in another TU.
 extern "C" void fn_802DE264(void* begin, u32 size, hkConstraintInfo* info);
 
@@ -115,11 +112,11 @@ void hkRagdollConstraintData::getConstraintFrameB(hkMatrix3* out) const {
 // HYPOTHESIS: validity chain. Each test runs only when the previous one passed; the tolerances are unknown.
 hkBool hkRagdollConstraintData::isValid() const {
     bool ok = false;
-    if (fn_80285B30(&m_constraintFrameA, 0.0f).m_bool) {
+    if (static_cast<const hkRotation&>(m_constraintFrameA).isOrthonormal(0.0f)) {
         ok = true;
     }
     bool okB = false;
-    if (ok && fn_80285B30(&m_constraintFrameB, 0.0f).m_bool) {
+    if (ok && static_cast<const hkRotation&>(m_constraintFrameB).isOrthonormal(0.0f)) {
         okB = true;
     }
     bool okC = false;

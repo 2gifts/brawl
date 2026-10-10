@@ -49,6 +49,8 @@ struct hkWorld : hkReferencedObject {
     void queueOperation(const void* operation);
     void addWorldDeletionListener(hkWorldDeletionListener* listener);
     void removeWorldDeletionListener(hkWorldDeletionListener* listener);
+    hkPhantom* addPhantom(hkPhantom* phantom);
+    void removePhantom(hkPhantom* phantom);
     void removeAction(hkAction* action);
     void removeActionImmediately(hkAction* action);
     void addEntityBatch(hkEntity** entities, int count, bool active);
@@ -67,4 +69,10 @@ struct hkWorld : hkReferencedObject {
     void unlockIslandForConstraintUpdate();
     // Runs the queued world operations (map name hkWorld__internal_executePendingOperations, fn_802EFE70).
     void internal_executePendingOperations();
+    // drop one lock and, if that was the last one and something got queued meanwhile, run the queue
+    void unlockAndAttemptToExecutePendingOperations() {
+        if (--m_lockCount == 0 && m_unk78 != 0 && !m_unk84) {
+            internal_executePendingOperations();
+        }
+    }
 };
