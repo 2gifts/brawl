@@ -11,6 +11,18 @@ global_destructor_chain.c:
 	.dtors      start:0x00000000 end:0x00000008
 	.bss        start:0x00000000 end:0x00000004
 
+mo_stage/st_gw/st_gw.cpp:
+	.text       start:0x00000070 end:0x00002ABC
+	.ctors      start:0x00000000 end:0x00000004
+	.rodata     start:0x00000000 end:0x00000030
+	.data       start:0x00000000 end:0x00000920
+	.bss        start:0x00000008 end:0x00000018
+
+mo_stage/st_gw/gr_gw.cpp:
+	.text       start:0x00002ABC end:0x000033A4
+	.rodata     start:0x00000030 end:0x00000048
+	.data       start:0x00000920 end:0x00000BA8
+
 mo_stage/st_gw/gr_gw_scene.cpp:
 	.text       start:0x000033A4 end:0x0000398C
 	.rodata     start:0x00000048 end:0x00000050
@@ -20,6 +32,13 @@ mo_stage/st_gw/gr_gw_scene_chef.cpp:
 	.text       start:0x0000398C end:0x00003A98
 	.data       start:0x00000DF0 end:0x00001048
 
+mo_stage/st_gw/gr_gw_scene_fire.cpp:
+	.text       start:0x00003A98 end:0x00004F5C
+	.ctors      start:0x00000004 end:0x00000008
+	.rodata     start:0x00000050 end:0x00000080
+	.data       start:0x00001048 end:0x00001418
+	.bss        start:0x00000018 end:0x00000028
+
 mo_stage/st_gw/gr_gw_scene_lion.cpp:
 	.text       start:0x00004F5C end:0x00005190
 	.data       start:0x00001418 end:0x00001808
@@ -28,10 +47,62 @@ mo_stage/st_gw/gr_gw_scene_oil.cpp:
 	.text       start:0x00005190 end:0x0000552C
 	.data       start:0x00001808 end:0x00001C78
 
+mo_stage/st_gw/gr_gw_alarm.cpp:
+	.text       start:0x0000552C end:0x00005DAC
+	.rodata     start:0x00000080 end:0x00000098
+	.data       start:0x00001C78 end:0x00001EF8
+
+mo_stage/st_gw/gr_gw_step.cpp:
+	.text       start:0x00005DAC end:0x00006384
+	.rodata     start:0x00000098 end:0x000000A8
+	.data       start:0x00001EF8 end:0x00002130
+
+mo_stage/st_gw/gr_gw_chef_etc.cpp:
+	.text       start:0x00006384 end:0x0000FBB8
+	.rodata     start:0x000000A8 end:0x00000108
+	.data       start:0x00002130 end:0x000043A0
+	.bss        start:0x00000028 end:0x00000150
+
+mo_stage/st_gw/gr_gw_lion_keeper.cpp:
+	.text       start:0x0000FBB8 end:0x00010BB4
+	.rodata     start:0x00000108 end:0x00000138
+	.data       start:0x000043A0 end:0x000048D8
+
+mo_stage/st_gw/gr_gw_oil_guest.cpp:
+	.text       start:0x00010BB4 end:0x00013AE0
+	.rodata     start:0x00000138 end:0x000001B8
+	.data       start:0x000048D8 end:0x00005510
+	.bss        start:0x00000150 end:0x0000015C
+
+mo_stage/st_gw/gr_gw_fire_manhore.cpp:
+	.text       start:0x00013AE0 end:0x000140A4
+	.rodata     start:0x000001B8 end:0x000001C8
+	.data       start:0x00005510 end:0x00005750
+
+mo_stage/st_gw/gr_gw_fire_smoke.cpp:
+	.text       start:0x000140A4 end:0x00014728
+	.rodata     start:0x000001C8 end:0x000001E0
+	.data       start:0x00005750 end:0x00005970
+
 mo_stage/st_gw/gr_gw_fire_etc.cpp:
 	.text       start:0x00014728 end:0x00015C80
 	.rodata     start:0x000001E0 end:0x00000208
 	.data       start:0x00005970 end:0x00006048
+
+mo_stage/st_gw/gr_gw_fire_mistake.cpp:
+	.text       start:0x00015C80 end:0x000162C0
+	.rodata     start:0x00000208 end:0x00000220
+	.data       start:0x00006048 end:0x00006290
+
+mo_stage/st_gw/gr_gw_fire_spring.cpp:
+	.text       start:0x000162C0 end:0x00016AE8
+	.rodata     start:0x00000220 end:0x00000230
+	.data       start:0x00006290 end:0x00006508
+
+mo_stage/st_gw/gr_gw_fire_diver.cpp:
+	.text       start:0x00016AE8 end:0x000172EC
+	.rodata     start:0x00000230 end:0x00000240
+	.data       start:0x00006508 end:0x00006878
 
 mo_stage/mo_stage.cpp:
 	.text       start:0x000172EC end:0x00017388
