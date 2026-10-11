@@ -4,8 +4,12 @@
 #include <wn/wario/wn_wario_bike_link_event.h>
 #include <it/it_manager.h>
 #include <it/item.h>
+#include <ft/wario/ft_wario_unk8.h>
 #include <so/so_module_accesser.h>
 
+// HYPOTHESIS: shared-header records; see ft_wario_unk8.h. Keep native initialization order.
+static ftWarioUnk8 s_unkTag0(0xff, 0);
+static ftWarioUnk8 s_unkTag1(0xff, 1);
 
 void wnWarioBikeStatusUniqProcessItem::initStatus(soModuleAccesser* a) {
     soWorkManageModule& work = a->getWorkManageModule();
@@ -15,25 +19,37 @@ void wnWarioBikeStatusUniqProcessItem::initStatus(soModuleAccesser* a) {
     soLinkModule& link = a->getLinkModule();
     if (link.isModelConstraint()) link.removeModelConstraint(true);
     Vec3f spawnPosition = model.getNodeGlobalPosition(9, false);
+    float facing = posture.getLr();
     bool grounded = a->getGroundModule().isTouch((grCollStatus::TouchMask)8, 0);
     if (!grounded) spawnPosition.m_y += 0.1f;
-    float facing = posture.getLr();
+    soResourceModule* resource = &a->getResourceModule();
     int brresId = work.getInt(0x10000006);
     u8 groupNo = (u8)work.getInt(0x10000005);
-    soResourceModule* resource = &a->getResourceModule();
     int ownerTaskId = link.getParentTaskId(3);
     BaseItem* bike = itManager::getInstance()->createItem(
         &spawnPosition, &spawnPosition, facing, Item_Wario_Bike, 0,
-        ownerTaskId, resource, groupNo, brresId, 0, -1);
+        ownerTaskId, resource, groupNo, brresId, 0, 0xffff);
     if (bike) {
-        bike->setOwnerScale(posture.getScale());
-        Vec3f rotation(0.0f, 0.0f, 0.0f);
+        bike->setOwnerScale(a->getPostureModule().getScale());
+        Vec3f speed(kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1)), 0.0f);
+        Vec3f rotation = model.getNodeGlobalRotation(9, false);
+        if (rotation.m_z != 0.0f) {
+            rotation.m_x += 180.0f;
+            rotation.m_z += 180.0f;
+            rotation.m_y += facing == 1.0f ? 90.0f : 270.0f;
+        } else if (rotation.m_x != 0.0f) {
+            rotation.m_y = 0.0f;
+        } else if (rotation.m_x == 0.0f && rotation.m_z == 0.0f) {
+            // MATCH-ONLY: retain the native repeated tests and Z/Y/X stores.
+            rotation.m_x = rotation.m_y = rotation.m_z = 0.0f;
+        }
         bike->resetRotation(&rotation);
-        Vec2f velocity = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(-1));
-        Vec3f speed(velocity.m_x, velocity.m_y, 0.0f);
+        bike->updateNodeSRT();
         bike->addSpeed(&speed, true);
+        // The native call reads this work value but discards the returned float.
+        work.getFloat(0x11000001);
         bike->resetDamage();
-        ftWarioBikeTaskEvent event(0x45C, bike->getTaskId());
+        ftWarioBikeTaskEvent event(0x45C, bike->m_taskId);
         link.sendEventNodes(7, event, 0);
     }
     work.onFlag(0x2200000B);

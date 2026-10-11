@@ -22,14 +22,16 @@ public:
         Attribute_Ground = 0x3,
         Attribute_Extern2 = 0x4,
     };
-    typedef u16 AttributeMask;
+    // getSumSpeed/getSumSpeed3f load this as a signed halfword.
+    // -1 selects every enabled energy, rather than an attribute-filtered sum.
+    typedef s16 AttributeMask;
     static const AttributeMask ATTRIBUTE_MASK_NONE = 0;
     static const AttributeMask ATTRIBUTE_MASK_MAIN = 1 << Attribute_Main;
     static const AttributeMask ATTRIBUTE_MASK_DAMAGE = 1 << Attribute_Damage;
     static const AttributeMask ATTRIBUTE_MASK_EXTERN = 1 << Attribute_Extern;
     static const AttributeMask ATTRIBUTE_MASK_GROUND = 1 << Attribute_Ground;
     static const AttributeMask ATTRIBUTE_MASK_EXTERN2 = 1 << Attribute_Extern2;
-    static const AttributeMask ATTRIBUTE_MASK_ALL = USHRT_MAX;
+    static const AttributeMask ATTRIBUTE_MASK_ALL = -1;
     struct AttributeFlag {
         union {
             struct {

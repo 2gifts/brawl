@@ -28,12 +28,14 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
 - **A zero-initialized global must live in `.data`:** `#pragma section ".data" ".data"` plus `__declspec(section ".data") s32 X = 0;` (upstream `st_onlinetrainning.cpp`). **MED-HIGH**
 
 ## 2. Inlining
+- **A vector policy macro has no effect:** define `MT_VEC2F_CTOR_NOINLINE`, `MT_VEC2F_ASSIGN_NOINLINE` or `MT_VEC3F_CTOR_NOINLINE` before the first include that reaches `mt_vector.h`, including builder headers. Defining it afterward cannot change an already parsed declaration. Seen: `ft_yoshi_kinetic_transactor.cpp`. **HIGH**
 - A callee that our build inlines but the original calls with `bl`: verify the callee identity and inlining policy; use the documented `dont_inline` / `never_inline` controls when that boundary is supported. Do not add dead statements merely to exceed the inline threshold. The old dead-statement trick was observed in Melee, not evidence of Brawl source structure. **MED**
 - Template or inline member functions that must exist as separate weak functions: explicit instantiation (`template Elm& Arr::at(s32);`) in a unit split by address range. This is how the `so_array_*` units work. **HIGH**
 - Force a direct (non-virtual) call: qualified name (`p->Base::method()`). **HIGH** (C++ rule)
 - Last resorts: inline `asm {}` with `register` locals, or `nofralloc` asm functions (`mt_matrix.cpp`). Mark with `// MATCH-ONLY:` and a reason.
 
 ## 3. Floats
+- **A zero and tuning float occupy the opposite FPRs:** name the zero, store it, then declare/load the tuning local before its store. Predeclaring the tuning local before the zero retained the wrong pair in both Super Dragon helpers. Seen: `ft_yoshi_kinetic_transactor.cpp`. **MED**
 - **Constant pool order is wrong, or a constant is present that nothing uses:** MWCC lays constants out in order of first use. Fixes: a dummy function mentioning the constants in order (`(void) 0.5f; (void) 500.0f;`), or an unused local (`float unusedMin = -90.0f;`, as in `ft_status_uniq_process_glide.cpp`), or `extern const float g_...[]` defined in a data split. Same trick for strings and `.bss` order. Seen in Melee (hundreds of sites), Petari and ours. **HIGH**
 - **A fighter global initializer has uniform offsets that are too large:** check whether local-static singletons were encountered before the globals. Puff needed the parameter-accesser and class-info definitions before its fighter constructor, as in Marth. The initializer then matched without padding. Seen: `src/mo_fighter/ft_purin/ft_purin.cpp`. **MED**
 - **Float literals need the `f` suffix.** Without it you get a double constant (`lfd` plus `frsp`). **HIGH**
@@ -79,6 +81,7 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
 - **A derived virtual call is one slot too late:** compare the exact base and derived formal types in the translation unit. MWCC treats `int` and `long` as different overloads even when both occupy one register. Puff's `Weapon::notifyEventAnimCmd` used `int` while its `StageObject` base used `s32` (`long`), adding a virtual slot and shifting `deactivateArticle`. An opt-in matching declaration repaired the call without changing other translation units. Verify the native vtable and all affected call sites before changing shared declarations. Seen: `include/wn/weapon.h`, `src/mo_fighter/ft_purin/ft_purin.cpp`. **HIGH**
 
 ## 5. Integers and bools
+- **An all-energy mask emits `lis/subi` for 65535 instead of `li -1`:** audit the callee before changing temporaries. Native kinetic speed sums use signed halfword loads and compare against the -1 sentinel; that path sums every enabled energy in reverse order. Correcting `soKineticEnergy::AttributeMask` to `s16` matched Yoshi Egg Roll exit/power callers. Seen: `so/kinetic/so_kinetic_energy.h`, `ft_yoshi_status_uniq_process_special_s_{end,utility}.cpp`. **HIGH**
 - The source type decides extension: `u8` gives `clrlwi r,r,24`, `s8` gives `extsb`, `s16` gives `extsh`, `bool` gives `clrlwi 24`. Many "mysterious" extra instructions are a wrong type (often `s8` that should be `int`, or `u8` that should be `s32`). **HIGH**
 - **Bitfield reads as `lwz` plus `rlwinm`:** read through a raw `*(u32*)((u8*)p + off)` and shift/mask, not through a declared signed bitfield (`so_damage_module_impl.cpp`). **MED**
 - **Loop unrolling happens only for an `int` counter.** `s32` does not unroll. **HIGH** (Melee wiki)

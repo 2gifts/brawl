@@ -5,6 +5,12 @@
 #include <ft/ft_kinetic_energy.h>
 #include <so/so_module_accesser.h>
 
+// MATCH-ONLY: the existing Vec2f::rot ABI takes source in r3, output in r4 and
+// angle in f1. Put angle before output in this call declaration to retain the
+// native argument setup. This adds no helper implementation or new symbol.
+#define rotateLaunchSpeed rot__5Vec2fFP5Vec2ff
+extern "C" void rotateLaunchSpeed(Vec2f* source, float angle, Vec2f* output);
+
 void ftWarioStatusUniqProcessSpecialSEscape::execFixPosCounter(soModuleAccesser* a) {
     // MATCH-ONLY: declaration order preserves native module and vector allocation.
     soGroundModule* ground;
@@ -29,8 +35,8 @@ void ftWarioStatusUniqProcessSpecialSEscape::execFixPosCounter(soModuleAccesser*
         int node = model->getCorrectNodeId(0x12d);
         Vec3f nodePos = model->getNodeGlobalOffsetFromTop(node);
         Vec3f pos;
-        Vec3f posturePos = posture->getPos();
-        Vec3fAdd(&pos, &posturePos, &nodePos);
+        // MATCH-ONLY: keep the posture result as an argument temporary, as in the native frame.
+        Vec3fAdd(&pos, &posture->getPos(), &nodePos);
         Vec2f speed(param->unk10 * lr, param->unk14);
         float angle = 0.0f;
         pos.m_z = 0.0f;
@@ -38,14 +44,13 @@ void ftWarioStatusUniqProcessSpecialSEscape::execFixPosCounter(soModuleAccesser*
         if (link->isLink(6)) {
             ftWarioBikeSpeedEvent event(0x457);
             link->sendEventParents(6, event);
-            Vec3f rot = link->getParentRot(6);
-            float parentAngleX = rot.m_x;
-            angle = parentAngleX * 0.5f;
+            float parentAngleX = link->getParentRot(6).m_x;
+            angle = 0.5f * parentAngleX;
             link->removeModelConstraint(true);
             link->unlink(6);
             a->getSituationModule().setKind(Situation_Air, false);
         }
-        speed.rot(&speed, 0.017453292f * (-angle * lr));
+        rotateLaunchSpeed(&speed, 0.017453292f * (-angle * lr), &speed);
         a->getStageObject().updateNodeSRT();
         ftKineticEnergyStop& horizontal = dynamic_cast<ftKineticEnergyStop&>(*kinetic->getEnergy(3));
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*kinetic->getEnergy(1));

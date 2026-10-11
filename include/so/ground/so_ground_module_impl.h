@@ -1,5 +1,5 @@
-// SHADOW of BrawlHeaders/so/ground/so_ground_module_impl.h: identical except for the FT_MODULE_BUILDER-guarded declarations
-// (constructors/destructors of sora_melee classes that fighter module builders call). Built only for fighter RELs.
+// Local BrawlHeaders shadow: expose fighter-builder constructors and retain
+// full-word masks in the native ground-contact normal/position queries.
 #pragma once
 
 #include <StaticAssert.h>
@@ -82,13 +82,13 @@ public:
     virtual bool isMissStepL(u32 index);
     virtual bool isTouch(grCollStatus::TouchMask, u32 index);
     virtual u8 getTouchCount(u32 index);
-    virtual Vec2f getTouchNormal(grCollStatus::TouchMask, u32 index);
+    virtual Vec2f getTouchNormal(int touchMask, u32 index);
     virtual Vec2f getTouchSpeed(grCollStatus::TouchMask, u32 index);
     virtual Vec2f getAttachMovementSpeed(u32 index);
     virtual Vec2f getAttachNormal(u32 index);
     virtual grCollStatus::TouchMask getTouchFlag(u32 index);
     virtual grCollisionLine::MaterialType getTouchMaterialType(grCollStatus::TouchMask, u32 index);
-    virtual Vec2f getTouchPos(grCollStatus::TouchMask, u32 index);
+    virtual Vec2f getTouchPos(int touchMask, u32 index);
     virtual bool getTouchAttackData(soCollisionAttackData* outAttackData, int* out2, int* out3, u32 index);
     virtual float getTouchLength(grCollStatus::TouchMask, u32 index);
     virtual float getTouchLineRate(grCollStatus::TouchMask, u32 index);
@@ -258,13 +258,13 @@ public:
     virtual bool isMissStepL(u32 index);
     virtual bool isTouch(grCollStatus::TouchMask, u32 index);
     virtual u8 getTouchCount(u32 index);
-    virtual Vec2f getTouchNormal(grCollStatus::TouchMask, u32 index);
+    virtual Vec2f getTouchNormal(int touchMask, u32 index);
     virtual Vec2f getTouchSpeed(grCollStatus::TouchMask, u32 index);
     virtual Vec2f getAttachMovementSpeed(u32 index);
     virtual Vec2f getAttachNormal(u32 index);
     virtual grCollStatus::TouchMask getTouchFlag(u32 index);
     virtual grCollisionLine::MaterialType getTouchMaterialType(grCollStatus::TouchMask, u32 index);
-    virtual Vec2f getTouchPos(grCollStatus::TouchMask, u32 index);
+    virtual Vec2f getTouchPos(int touchMask, u32 index);
     virtual bool getTouchAttackData(soCollisionAttackData* outAttackData, int* out2, int* out3, u32 index);
     virtual float getTouchLength(grCollStatus::TouchMask, u32 index);
     virtual float getTouchLineRate(grCollStatus::TouchMask, u32 index);

@@ -32,11 +32,14 @@ void ftYoshiStatusUniqProcessSpecialSEnd::initStatus(soModuleAccesser* acc) {
         gravity.m_speedY = speed.m_y;
     }
     Vec3f scale;
-    scale.m_x = scale.m_y = scale.m_z = 1.0f;
+    scale.m_x = 1.0f;
+    scale.m_y = 1.0f;
+    scale.m_z = 1.0f;
     model.setNodeScale(2, &scale);
     float lr = work.getFloat(0x21000008);
     if (lr != 0.0f) posture.setLr(lr);
-    work.setFloat(0.0f, 0x21000008);
+    float neutral = 0.0f;
+    work.setFloat(neutral, 0x21000008);
     model.setNodeRotateY(3, 0.0f);
     model.setNodeRotateZ(2, 0.0f);
     acc->getVisibilityModule().set(1, 1);

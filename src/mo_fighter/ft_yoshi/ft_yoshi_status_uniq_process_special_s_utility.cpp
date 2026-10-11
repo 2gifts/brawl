@@ -82,7 +82,8 @@ void ftYoshiStatusUniqProcessSpecialSUtility::resetYoshiSpecialS(soModuleAccesse
     model.setNodeRotateZ(2, 0.0f);
     float lr = work.getFloat(0x21000008);
     if (lr != 0.0f) acc->getPostureModule().setLr(lr);
-    work.setFloat(0.0f, 0x21000008);
+    float neutral = 0.0f;
+    work.setFloat(neutral, 0x21000008);
 }
 void ftYoshiStatusUniqProcessSpecialSUtility::resetYoshiSpecialS2(soModuleAccesser* acc) {
     acc->getStatusModule().getStatusKind();
@@ -109,14 +110,12 @@ void ftYoshiStatusUniqProcessSpecialSUtility::procHit(soModuleAccesser* acc) {
     work.setFloat(speed, 0x21000006);
 }
 void ftYoshiStatusUniqProcessSpecialSUtility::procHitWall(soModuleAccesser* acc, int touch) {
-    // HYPOTHESIS: the original wrapper forwards int unchanged; the existing
-    // ground interface narrows to u8. Observed Egg Roll callers use only 2/4/8.
     // MATCH-ONLY: retain the original aggregate word copy.
     Vec2f normal;
-    Vec2f::copy(normal, acc->getGroundModule().getTouchNormal(static_cast<grCollStatus::TouchMask>(touch), 0));
+    Vec2f::copy(normal, acc->getGroundModule().getTouchNormal(touch, 0));
     // MATCH-ONLY: retain the original aggregate word copy.
     Vec2f position;
-    Vec2f::copy(position, acc->getGroundModule().getTouchPos(static_cast<grCollStatus::TouchMask>(touch), 0));
+    Vec2f::copy(position, acc->getGroundModule().getTouchPos(touch, 0));
     float normalY = normal.m_y;
     float angle = atan2(-normal.m_x, normalY);
     acc->getEffectModule().req(static_cast<EfID>(9), &Vec3f(position.m_x, position.m_y, 0.0f), &Vec3f(0.0f, 0.0f, angle), 1.0f, 0, -1);
