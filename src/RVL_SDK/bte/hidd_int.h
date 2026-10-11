@@ -71,7 +71,7 @@ void hidd_l2c_connected(tHID_CONN *p_hcon);
 tHID_STATUS hidd_conn_snd_data(tSND_DATA_PARAMS *p_data);
 
 tHID_STATUS hidd_mgmt_process_evt(UINT8 event, void *p_data);
-void hidd_proc_repage_timeout(void);
+void hidd_proc_repage_timeout(TIMER_LIST_ENT *p_tle);
 void hidd_mgmt_conn_closed(UINT16 reason);
 
 UINT8 hidd_pm_set_power_mode(tHID_DEV_PWR_MD *p_req_mode);

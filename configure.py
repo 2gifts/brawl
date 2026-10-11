@@ -572,7 +572,6 @@ config.libs = [
         "cflags": cflags_common,
         "host": False,
         "objects": [
-            Object(NonMatching, "RVL_SDK/bte/sdp_utils.c"),
             Object(NonMatching, "RVL_SDK/tpl/TPL.c"),
             Object(NonMatching, "RVL_SDK/thp/THPAudio.c"),
             Object(NonMatching, "RVL_SDK/exi/exi2_link.c"),
@@ -599,8 +598,6 @@ config.libs = [
             Object(NonMatching, "RVL_SDK/bte/btm_sec.c"),
             Object(NonMatching, "RVL_SDK/bte/btu_hcif.c"),
             Object(NonMatching, "RVL_SDK/bte/hcicmds.c"),
-            Object(NonMatching, "RVL_SDK/bte/hidd_conn.c"),
-            Object(NonMatching, "RVL_SDK/bte/hidh_api.c"),
         ],
     },
     # --- sibling-project libraries (begin) ---
@@ -863,6 +860,9 @@ config.libs = [
             Object(Matching, "RVL_SDK/bte/rfc_utils.c"),
             Object(Matching, "RVL_SDK/bte/sdp_discovery.c"),
             Object(Matching, "RVL_SDK/bte/sdp_server.c"),
+            Object(NonMatching, "RVL_SDK/bte/sdp_utils.c"),
+            Object(NonMatching, "RVL_SDK/bte/hidh_api.c"),
+            Object(NonMatching, "RVL_SDK/bte/hidd_conn.c"),
             Object(Matching, "RVL_SDK/bte/gap_conn.c"),
             Object(Matching, "RVL_SDK/bte/gap_utils.c"),
             Object(Matching, "RVL_SDK/bte/gap_api.c"),
