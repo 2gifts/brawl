@@ -439,6 +439,12 @@ sora/gm/gm_common.cpp:
 	.sbss       start:0x805A00E8 end:0x805A00F0
 	.sdata2     start:0x805A1888 end:0x805A18B0
 
+sora/gm/gm_unk_800568C8.cpp:
+	.text       start:0x800568C8 end:0x8005A0E4
+	.rodata     start:0x80406E28 end:0x80407060
+	.data       start:0x8042DC18 end:0x8042E8A8
+	.sdata2     start:0x805A18B0 end:0x805A18D0
+
 sora/gm/gm_syssave_task.cpp:
 	.text       start:0x8005A0E4 end:0x8005A74C
 	.data       start:0x8042E8A8 end:0x8042E980
@@ -484,6 +490,12 @@ sora/ec/ec_mgr.cpp:
 	.bss        start:0x80497810 end:0x80497D20
 	.sdata      start:0x8059CEB0 end:0x8059DAE8
 	.sbss       start:0x805A0148 end:0x805A0170
+
+sora/ec/ec_unk_80061514.cpp:
+	.text       start:0x80061514 end:0x80065458
+	.data       start:0x80453E28 end:0x80453EA0
+	.sdata      start:0x8059DAE8 end:0x8059DB10
+	.sdata2     start:0x805A1958 end:0x805A1988
 
 sora/ec/ec_trace_mgr.cpp:
 	.text       start:0x80065458 end:0x80065B60
@@ -1718,6 +1730,12 @@ nw4r/g3d/g3d_scnchoice.cpp:
 	.data       start:0x80466410 end:0x80466450
 	.sbss       start:0x805A0558 end:0x805A0560
 
+nw4r/g3d/g3d_scngroupex_unk.cpp:
+	.text       start:0x801B3CBC end:0x801B4AF4
+	.rodata     start:0x8040ABF8 end:0x8040AC08
+	.data       start:0x80466450 end:0x804664F8
+	.sdata      start:0x8059E930 end:0x8059E950
+
 nw4r/g3d/g3d_scnmdlexpand.cpp:
 	.text       start:0x801B4AF4 end:0x801B55C4
 	.rodata     start:0x8040AC08 end:0x8040AC20
@@ -2538,6 +2556,9 @@ RVL_SDK/bte/gki_buffer.c:
 
 RVL_SDK/bte/gki_time.c:
 	.text       start:0x8022FDBC end:0x80230314
+
+RVL_SDK/bte/gki_glue_unk.c:
+	.text       start:0x80230314 end:0x802305C8
 
 RVL_SDK/bte/hcisu_h2.c:
 	.text       start:0x80230C4C end:0x80231844
@@ -4464,6 +4485,13 @@ FAT/sd_host.c:
 	.bss        start:0x80563940 end:0x805639C0
 	.sdata      start:0x8059FE98 end:0x8059FEA0
 	.sbss       start:0x805A1230 end:0x805A1250
+
+RVL_SDK/rfl/rfl_manager_unk_a.c:
+	.text       start:0x803CD270 end:0x803CD32C
+
+RVL_SDK/rfl/rfl_manager_unk_b.c:
+	.text       start:0x803CD3B4 end:0x803CD484
+	.data       start:0x80492F50 end:0x80492F60
 
 FAT/pf_clib.c:
 	.text       start:0x803D620C end:0x803D66EC

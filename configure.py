@@ -713,6 +713,9 @@ config.libs = [
             Object(NonMatching, "MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/dolphin_trk_glue.c"),
             Object(NonMatching, "MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/UDP_Stubs.c"),
             Object(NonMatching, "MetroTRK/gamedev/cust_connection/cc/exi2/GCN/EXI2_GDEV_GCN/main.c"),
+            Object(NonMatching, "RVL_SDK/bte/gki_glue_unk.c"),
+            Object(NonMatching, "RVL_SDK/rfl/rfl_manager_unk_a.c"),
+            Object(NonMatching, "RVL_SDK/rfl/rfl_manager_unk_b.c"),
         ],
     },
     # --- sibling-project libraries (begin) ---
@@ -921,6 +924,7 @@ config.libs = [
             Object(NonMatching, "nw4r/snd/snd_WsdPlayer.cpp"),
             Object(Matching, "nw4r/snd/snd_adpcm.cpp"),
             Object(NonMatching, "nw4r/g3d/g3d_scnchoice.cpp"),
+            Object(NonMatching, "nw4r/g3d/g3d_scngroupex_unk.cpp"),
         ],
     },
     {
@@ -1357,6 +1361,8 @@ config.libs = [
             Object(NonMatching, "sora/cm/cm_controller_menu_pad.cpp"),
             Object(NonMatching, "sora/cm/cm_controller_photo.cpp"),
             Object(NonMatching, "sora/cm/cm_controller_fig_disp1.cpp"),
+            Object(NonMatching, "sora/gm/gm_unk_800568C8.cpp"),
+            Object(NonMatching, "sora/ec/ec_unk_80061514.cpp"),
         ],
     },
     # HAVOK-BEGIN
