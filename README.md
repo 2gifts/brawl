@@ -135,8 +135,12 @@ rename symbols, promote units to Matching, or merge changes automatically.
 Validation snapshots
 --------------------
 
-`tools/decomp_build.py` runs on the POSIX build host with `nice`, Ninja, DTK,
-and objdiff available. Start with an initialized, warm checkout. Choose a fresh
+`tools/decomp_build.py` runs with `nice`, Ninja, DTK, and objdiff available.
+On Windows, use native Python and Ninja; `nice` can come from MSYS2. Windows
+uses the compiler and linker directly through `sjiswrap.exe`; POSIX additionally
+requires `wibo`. DTK and objdiff defaults select `.exe` on Windows. Keep native
+Git on Python's PATH so provenance commands use native Windows paths.
+Start with an initialized, warm checkout. Choose a fresh
 external output directory for every run and the same external lock path for all
 cooperating workers:
 
@@ -230,6 +234,40 @@ Normal REL builds link the original object list directly to `.plf`. Preliminary
 ```sh
 ninja build/RSBE01_02/sora_melee/sora_melee.preplf
 ```
+
+Read-only triage
+----------------
+
+`tools/decomp_triage.py` adapts ideas from
+[KakarottoCake/decomp-triage](https://github.com/KakarottoCake/decomp-triage)
+to Brawl's MWCC GC/3.0a5.2. It provides three advisory commands:
+
+```sh
+python3 tools/decomp_triage.py queue --report ../validation/baseline/report.json \
+  --claims ../evidence/claims.txt --output ../evidence/queue.json
+python3 tools/decomp_triage.py frames \
+  --unit wn_wario_bike_status_uniq_process_turn --output ../evidence/frames.json
+python3 tools/decomp_triage.py levers --symptom stack --output ../evidence/levers.json
+```
+
+The queue reads `configure.py` without executing it, lists only NonMatching
+sources, and ranks fighter behavior before stage/item behavior. Missing compiled
+drafts remain unavailable. An external claims snapshot can flag explicit paths
+and module names; inspect the board as well because free-text claims may not map
+to files.
+
+Frame diagnostics read original and compiled PPC ELF objects from `objdiff.json`.
+They compare relocation signatures as well as instruction bytes. Frame-only
+hypotheses accept only recognized stack accesses with the expected displacement
+change; changed literals and object fields are not excused. Relocation labels
+and section offsets can differ between split originals and compiled objects,
+so a diagnostic difference is not itself proof of an incorrect target. Use
+objdiff and the full validation gate for exactness and linked-output decisions.
+
+The levers command searches `TIPS.md`, retaining its stated confidence and
+source hash. Sunshine compiler observations are not treated as proven Brawl
+rules. All three commands leave source, claims, and Matching status untouched;
+generated JSON must be outside the checkout and cannot overwrite existing evidence.
 
 Synthetic tooling tests require no game assets:
 
