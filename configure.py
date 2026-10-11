@@ -5931,7 +5931,9 @@ config.libs = [
         "mw_version": config.linker_version,
         "cflags": cflags_rel,
         "host": False,
-        "objects": [],
+        "objects": [
+            Object(Matching, "mo_menu/mu_select_character_access.cpp"),
+        ],
     },
     {
         "lib": "sora_menu_sel_stage",
