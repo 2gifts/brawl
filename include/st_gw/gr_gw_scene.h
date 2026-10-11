@@ -5,16 +5,16 @@
 class stDataMultiContainer;
 
 class grGWScene : public grGW {
-private:
-    u8 unk174;
-    float unk178;
-    float* unk17C;
-    Vec3f* unk180;
-    u8* unk184;
-    u8* unk188;
-    u8 unk18C;
-    u8 unk18D;
-    stDataMultiContainer* unk190;
+protected:
+    u8 m_stateEvent;
+    float m_timerEvent;
+    float* m_frameWork;
+    Vec3f* m_posGimmickWork;
+    u8* m_ctrlStepWork;
+    u8* m_eventWork;
+    u8 m_first;
+    u8 m_eventOn;
+    stDataMultiContainer* m_tblStep;
 
 public:
     static grGWScene* create(int modelIndex, const char* nodeName, const char* taskName);

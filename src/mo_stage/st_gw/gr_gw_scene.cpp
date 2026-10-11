@@ -31,15 +31,15 @@ grGWScene* grGWScene::create(int modelIndex, const char* nodeName, const char* t
 }
 
 grGWScene::grGWScene(const char* taskName) : grGW(taskName) {
-    unk174 = 0;
-    unk178 = 0.0f;
-    unk17C = nullptr;
-    unk180 = nullptr;
-    unk184 = nullptr;
-    unk188 = nullptr;
-    unk18C = 1;
-    unk18D = 0;
-    unk190 = nullptr;
+    m_stateEvent = 0;
+    m_timerEvent = 0.0f;
+    m_frameWork = nullptr;
+    m_posGimmickWork = nullptr;
+    m_ctrlStepWork = nullptr;
+    m_eventWork = nullptr;
+    m_first = 1;
+    m_eventOn = 0;
+    m_tblStep = nullptr;
 }
 
 grGWScene::~grGWScene() { }
@@ -50,62 +50,62 @@ void grGWScene::update(float deltaFrame) {
     if (data == nullptr) {
         return;
     }
-    unk154 -= deltaFrame;
-    if (unk154 < 0.0f) {
-        unk154 = 0.0f;
+    m_timer -= deltaFrame;
+    if (m_timer < 0.0f) {
+        m_timer = 0.0f;
     }
-    switch (unk150) {
+    switch (m_state) {
         case State_0:
-            setMotion(0, false, true, &unk164);
-            setMotionFrame(unk164, 0);
+            setMotion(0, false, true, &m_frameCount);
+            setMotionFrame(m_frameCount, 0);
             setVisibility(false);
             setEnableCollisionStatus(false);
             clearStep();
-            if (unk15C != 0) {
-                unk18C = 0;
+            if (m_sceneId != 0) {
+                m_first = 0;
             }
-            unk174 = 0;
-            unk178 = 0.0f;
-            unk150 = State_1;
+            m_stateEvent = 0;
+            m_timerEvent = 0.0f;
+            m_state = State_1;
             break;
         case State_1:
-            if (*unk158 == unk15C) {
-                if (unk18C == 1) {
+            if (*m_sceneIdWork == m_sceneId) {
+                if (m_first == 1) {
                     setMotion(1, false, true, nullptr);
-                    unk18C = 0;
-                    unk160 = 0.0f;
+                    m_first = 0;
+                    m_frameLast = 0.0f;
                 } else {
-                    setMotion(0, true, true, &unk164);
-                    setMotionFrame(unk164, 0);
-                    unk160 = unk164;
+                    setMotion(0, true, true, &m_frameCount);
+                    setMotionFrame(m_frameCount, 0);
+                    m_frameLast = m_frameCount;
                     m_motionRatio *= -1.0f;
                 }
                 selectStep();
                 if (randf() < data->unk2C) {
-                    unk18D = 1;
+                    m_eventOn = 1;
                 }
-                unk150 = State_3;
+                m_state = State_3;
             }
             break;
         case State_2:
             break;
         case State_3:
-            if (*unk158 != unk15C) {
-                if (unk184 != nullptr) {
-                    ++*unk184;
+            if (*m_sceneIdWork != m_sceneId) {
+                if (m_ctrlStepWork != nullptr) {
+                    ++*m_ctrlStepWork;
                 }
-                setMotion(0, false, true, &unk164);
+                setMotion(0, false, true, &m_frameCount);
                 if (m_motionRatio < 0.0f) {
                     m_motionRatio *= -1.0f;
                 }
                 updateSubEnd(deltaFrame);
-                unk18D = 0;
-                unk150 = State_4;
+                m_eventOn = 0;
+                m_state = State_4;
             } else {
-                if (getMotionFrame(0) > unk160) {
+                if (getMotionFrame(0) > m_frameLast) {
                     setMotion(1, false, false, nullptr);
                 } else {
-                    unk160 = getMotionFrame(0);
+                    m_frameLast = getMotionFrame(0);
                 }
                 setVisibility(true);
                 setEnableCollisionStatus(true);
@@ -113,8 +113,8 @@ void grGWScene::update(float deltaFrame) {
             }
             break;
         case State_4:
-            if (getMotionFrame(0) >= unk164) {
-                unk150 = State_0;
+            if (getMotionFrame(0) >= m_frameCount) {
+                m_state = State_0;
             }
             break;
     }

@@ -27,16 +27,43 @@ sora/sr/sr_revision.cpp:
 sora/main.cpp:
 	.text       start:0x8000C8E8 end:0x8000C960
 
+sora/gf/gf_3d_scene.cpp:
+	.text       start:0x8000C960 end:0x80010C9C
+	.data       start:0x80420690 end:0x80420730
+	.sbss       start:0x8059FF80 end:0x8059FF88
+	.sdata2     start:0x805A1320 end:0x805A1398
+
 sora/gf/gf_3d_scene_event.cpp:
 	.text       start:0x80010C9C end:0x80010D38
 
 sora/gf/gf_3d_scene_light_resource.cpp:
 	.text       start:0x80010D38 end:0x80010D5C
 
+sora/gf/gf_area.cpp:
+	.text       start:0x80010D5C end:0x80011C74
+	.ctors      start:0x804064E4 end:0x804064E8
+	.data       start:0x80420730 end:0x80420840
+	.bss        start:0x80494880 end:0x80494890
+	.sdata      start:0x8059C428 end:0x8059C468
+	.sbss       start:0x8059FF88 end:0x8059FF90
+	.sdata2     start:0x805A1398 end:0x805A13A8
+
+sora/gf/gf_area_manager.cpp:
+	.text       start:0x80011C74 end:0x800134C0
+	.data       start:0x80420840 end:0x804208B0
+	.sbss       start:0x8059FF90 end:0x8059FF98
+	.sdata2     start:0x805A13A8 end:0x805A13C0
+
 sora/gf/gf_archive_load_thread.cpp:
 	.text       start:0x800134C0 end:0x800134C4
 	.data       start:0x804208B0 end:0x804208F0
 	.sdata      start:0x8059C468 end:0x8059C478
+
+sora/gf/gf_archive.cpp:
+	.text       start:0x800134C4 end:0x80016408
+	.data       start:0x804208F0 end:0x804209D0
+	.sdata      start:0x8059C478 end:0x8059C490
+	.sbss       start:0x8059FF98 end:0x8059FFA0
 
 sora/gf/gf_archive_file.cpp:
 	.text       start:0x80016408 end:0x8001643C
@@ -48,6 +75,27 @@ sora/gf/gf_archive_manager.cpp:
 	.text       start:0x80016688 end:0x800167C4
 	.sbss       start:0x8059FFA0 end:0x8059FFA4
 
+sora/gf/gf_application.cpp:
+	.text       start:0x800167C4 end:0x80017A38
+	.ctors      start:0x804064E8 end:0x804064EC
+	.data       start:0x804209D0 end:0x80420A00
+	.bss        start:0x80494890 end:0x804948A0
+	.sdata      start:0x8059C4AC end:0x8059C4B0
+	.sbss       start:0x8059FFA4 end:0x8059FFB8
+	.sdata2     start:0x805A13C0 end:0x805A13F8
+
+sora/gf/gf_boot_task.cpp:
+	.text       start:0x80017A38 end:0x80018610
+	.data       start:0x80420A00 end:0x80420B88
+	.bss        start:0x804948C0 end:0x804948E8
+	.sdata      start:0x8059C4B0 end:0x8059C4F8
+	.sbss       start:0x8059FFB8 end:0x8059FFC0
+
+sora/gf/gf_camera.cpp:
+	.text       start:0x80018610 end:0x8001A3A4
+	.sbss       start:0x8059FFC0 end:0x8059FFD0
+	.sdata2     start:0x805A13F8 end:0x805A1460
+
 sora/gf/gf_camera_controller.cpp:
 	.text       start:0x8001A3A4 end:0x8001A3AC
 	.data       start:0x80420B88 end:0x80420BA0
@@ -58,6 +106,10 @@ sora/gf/gf_callback.cpp:
 
 sora/gf/gf_decomp.cpp:
 	.text       start:0x8001A48C end:0x8001A5C0
+
+sora/gf/gf_draw.cpp:
+	.text       start:0x8001A5C0 end:0x8001ABE4
+	.sdata2     start:0x805A1460 end:0x805A1480
 
 sora/gf/gf_error_manager.cpp:
 	.text       start:0x8001AF08 end:0x8001B574
@@ -72,20 +124,68 @@ sora/gf/gf_error_check.cpp:
 	.bss        start:0x804948E8 end:0x80494900
 	.sdata      start:0x8059C508 end:0x8059C520
 
+sora/gf/gf_file_io.cpp:
+	.text       start:0x8001B784 end:0x80020B38
+	.ctors      start:0x804064F0 end:0x804064F4
+	.data       start:0x80420FC0 end:0x80421618
+	.bss        start:0x80494900 end:0x80494958
+	.sdata      start:0x8059C520 end:0x8059C5B8
+	.sbss       start:0x8059FFD4 end:0x8059FFF0
+	.sdata2     start:0x805A14B0 end:0x805A14C8
+
 sora/gf/gf_file_io_handle.cpp:
 	.text       start:0x80020B38 end:0x80022054
 
 sora/gf/gf_file_io_request.cpp:
 	.text       start:0x80022054 end:0x80022490
 
+sora/gf/gf_file_io_manager.cpp:
+	.text       start:0x80022490 end:0x800238EC
+	.ctors      start:0x804064F4 end:0x804064F8
+	.data       start:0x80421618 end:0x80421770
+	.sdata      start:0x8059C5B8 end:0x8059C5C8
+	.sbss       start:0x8059FFF0 end:0x8059FFF8
+
+sora/gf/gf_display.cpp:
+	.text       start:0x800238EC end:0x800241B4
+	.sbss       start:0x8059FFF8 end:0x805A0000
+	.sdata2     start:0x805A14C8 end:0x805A14E0
+
 sora/gf/gf_gameframe_counter.cpp:
 	.text       start:0x800241B4 end:0x800242DC
+
+sora/gf/gf_heap_manager.cpp:
+	.text       start:0x800242DC end:0x80024D6C
+	.data       start:0x804224D8 end:0x804228C0
+	.bss        start:0x80494958 end:0x80494DE0
+	.sdata      start:0x8059C628 end:0x8059C640
+	.sbss       start:0x805A0000 end:0x805A0010
+	.sdata2     start:0x805A14E0 end:0x805A1500
 
 sora/gf/gf_keep_fb.cpp:
 	.text       start:0x80024D6C end:0x80024E50
 
+sora/gf/gf_light.cpp:
+	.text       start:0x80024E50 end:0x800259A4
+	.ctors      start:0x804064F8 end:0x804064FC
+	.rodata     start:0x804068B8 end:0x804068F8
+	.bss        start:0x80494DE0 end:0x80495380
+	.sbss       start:0x805A0010 end:0x805A0030
+	.sdata2     start:0x805A1500 end:0x805A1520
+
+sora/gf/gf_memory_pool.cpp:
+	.text       start:0x800259A4 end:0x80026474
+	.data       start:0x804228C0 end:0x80422C68
+	.sdata      start:0x8059C640 end:0x8059C648
+	.sbss       start:0x805A0030 end:0x805A0038
+
 sora/gf/gf_memory_util.cpp:
 	.text       start:0x80026474 end:0x80026478
+
+sora/gf/gf_module.cpp:
+	.text       start:0x80026478 end:0x80027610
+	.data       start:0x80422C68 end:0x80422D10
+	.sbss       start:0x805A0038 end:0x805A0040
 
 sora/gf/gf_model_animation.cpp:
 	.text       start:0x80027610 end:0x80028808
@@ -108,14 +208,33 @@ sora/gf/gf_pad_thread.cpp:
 	.data       start:0x80422E88 end:0x80422EA8
 	.sdata2     start:0x805A1550 end:0x805A1560
 
+sora/gf/gf_rumble.cpp:
+	.text       start:0x8002BAB0 end:0x8002CB1C
+	.data       start:0x80422EA8 end:0x80422EB8
+	.bss        start:0x80495380 end:0x80495390
+	.sbss       start:0x805A0058 end:0x805A0060
+	.sdata2     start:0x805A1560 end:0x805A1570
+
+sora/gf/gf_scene_manager.cpp:
+	.text       start:0x8002CB1C end:0x8002D160
+	.data       start:0x80422EB8 end:0x80422EC8
+	.sdata      start:0x8059C660 end:0x8059C668
+	.sbss       start:0x805A0060 end:0x805A0068
+
 sora/gf/gf_scene_manager_register.cpp:
 	.text       start:0x8002D160 end:0x8002D1A0
+
+gf_scene_manager_register.cpp:
+	.text       start:0x8002D1A0 end:0x8002D3F4
 
 sora/gf/gf_scene_manager_search.cpp:
 	.text       start:0x8002D3F4 end:0x8002D4F4
 
 sora/gf/gf_scene_manager_transition.cpp:
 	.text       start:0x8002D4F4 end:0x8002D6D4
+
+gf_scene_manager_transition.cpp:
+	.text       start:0x8002D6D4 end:0x8002D8B8
 
 sora/gf/gf_task.cpp:
 	.text       start:0x8002D8B8 end:0x8002E09C
@@ -141,6 +260,32 @@ sora/gf/gf_slow_manager.cpp:
 	.sbss       start:0x805A0080 end:0x805A0088
 	.sdata2     start:0x805A15E0 end:0x805A15F0
 
+sora/gf/gf_mii_texture.cpp:
+	.text       start:0x800334E4 end:0x8003623C
+	.data       start:0x80423120 end:0x804231E0
+	.sdata      start:0x8059C698 end:0x8059C6A8
+	.sbss       start:0x805A0088 end:0x805A0090
+	.sdata2     start:0x805A15F0 end:0x805A1670
+
+sora/gf/gf_homemenu.cpp:
+	.text       start:0x8003623C end:0x80037DC8
+	.ctors      start:0x80406504 end:0x80406508
+	.rodata     start:0x80406910 end:0x80406920
+	.data       start:0x804231E0 end:0x80423398
+	.bss        start:0x804953D0 end:0x804976D8
+	.sbss       start:0x805A0090 end:0x805A00A0
+	.sdata2     start:0x805A1670 end:0x805A16E8
+
+sora/gf/gf_crypto_aes.cpp:
+	.text       start:0x80037DD0 end:0x800381E8
+	.data       start:0x80423398 end:0x804233E8
+	.sdata      start:0x8059C6A8 end:0x8059C6B0
+
+gf_video.cpp:
+	.text       start:0x800381E8 end:0x80038684
+	.data       start:0x804233E8 end:0x80423518
+	.sdata2     start:0x805A16E8 end:0x805A16F8
+
 sora/gf/gf_system_callback.cpp:
 	.text       start:0x80038684 end:0x800387AC
 	.ctors      start:0x80406508 end:0x8040650C
@@ -151,6 +296,26 @@ sora/gf/gf_capture_util.cpp:
 	.data       start:0x80423518 end:0x80423550
 	.sdata      start:0x8059C6B0 end:0x8059C6B8
 
+sora/gf/gf_collection_io.cpp:
+	.text       start:0x80038890 end:0x8003CFC0
+	.ctors      start:0x8040650C end:0x80406510
+	.rodata     start:0x80406920 end:0x80406938
+	.data       start:0x80423550 end:0x80423918
+	.bss        start:0x804976D8 end:0x804977A8
+	.sdata      start:0x8059C6B8 end:0x8059C760
+	.sbss       start:0x805A00A8 end:0x805A00B0
+
+sora/gf/gf_crypto_esp.cpp:
+	.text       start:0x8003CFD0 end:0x8003D404
+	.data       start:0x80423918 end:0x80423958
+	.sdata      start:0x8059C760 end:0x8059C768
+	.sbss       start:0x805A00B0 end:0x805A00B8
+
+sora/vc/vc_boot_param.cpp:
+	.text       start:0x8003D404 end:0x8003D794
+	.data       start:0x80423958 end:0x80423980
+	.sdata      start:0x8059C768 end:0x8059C780
+
 sora/gf/gf_monitor.cpp:
 	.text       start:0x8003D794 end:0x8003D864
 	.data       start:0x8042ADD0 end:0x8042AE08
@@ -158,6 +323,14 @@ sora/gf/gf_monitor.cpp:
 
 sora/gf/gf_resource_loader.cpp:
 	.text       start:0x8003D864 end:0x8003DB08
+
+sora/mt/mt_common.cpp:
+	.text       start:0x8003DB08 end:0x8003DBA8
+	.sdata2     start:0x805A16F8 end:0x805A1708
+
+sora/mt/mt_vector.cpp:
+	.text       start:0x8003DBA8 end:0x8003E244
+	.sdata2     start:0x805A1708 end:0x805A1728
 
 sora/mt/mt_vector_old.cpp:
 	.text       start:0x8003E244 end:0x8003E35C
@@ -179,6 +352,15 @@ sora/mt/mt_trig.cpp:
 	.text       start:0x8003FD5C end:0x8003FFC4
 	.sdata2     start:0x805A1770 end:0x805A179C
 
+sora/mt/mt_spline.cpp:
+	.text       start:0x8003FFC4 end:0x800400FC
+	.data       start:0x8042AE6C end:0x8042AEB0
+	.sdata2     start:0x805A179C end:0x805A17A8
+
+sora/mt/mt_coll2d.cpp:
+	.text       start:0x800400FC end:0x8004392C
+	.sdata2     start:0x805A17A8 end:0x805A17E0
+
 sora/mt/mt_prng_log.cpp:
 	.text       start:0x8004392C end:0x80043B18
 	.ctors      start:0x80406514 end:0x80406518
@@ -196,14 +378,41 @@ sora/ut/ut_relocate.cpp:
 	.text       start:0x80043E1C end:0x80044214
 	.data       start:0x8042B598 end:0x8042B5FC
 
+sora/ut/ut_bit_array.cpp:
+	.text       start:0x80044214 end:0x800448F8
+
 sora/ut/ut_list.cpp:
 	.text       start:0x800448F8 end:0x80044AD0
+
+sora/ut/ut_archive_manager.cpp:
+	.text       start:0x80044AD0 end:0x800469E4
+	.ctors      start:0x80406518 end:0x8040651C
+	.data       start:0x8042B5FC end:0x8042B6B8
+	.bss        start:0x804977C0 end:0x804977D0
+	.sdata      start:0x8059C790 end:0x8059C7B0
+	.sbss       start:0x805A00C0 end:0x805A00C8
+
+gf_scn_mdl_mod.cpp:
+	.text       start:0x80046A28 end:0x80048118
+	.data       start:0x8042B6B8 end:0x8042B810
+	.sdata      start:0x8059C7B0 end:0x8059C7E0
+	.sdata2     start:0x805A17E8 end:0x805A17F8
 
 sora/ip/ip_human.cpp:
 	.text       start:0x80048118 end:0x80048548
 	.data       start:0x8042B810 end:0x8042B858
 	.sdata      start:0x8059C7E0 end:0x8059C800
 	.sdata2     start:0x805A17F8 end:0x805A1818
+
+sora/ip/ip_padconfig.cpp:
+	.text       start:0x80048548 end:0x8004A670
+	.sbss       start:0x805A00C8 end:0x805A00D0
+	.sdata2     start:0x805A1818 end:0x805A1860
+
+sora/ip/ip_switch.cpp:
+	.text       start:0x8004A670 end:0x8004AE14
+	.bss        start:0x804977D0 end:0x804977E0
+	.sbss       start:0x805A00D0 end:0x805A00D8
 
 sora/ip/ip_network_producer.cpp:
 	.text       start:0x8004AE14 end:0x8004AFB4
@@ -230,12 +439,72 @@ sora/gm/gm_common.cpp:
 	.sbss       start:0x805A00E8 end:0x805A00F0
 	.sdata2     start:0x805A1888 end:0x805A18B0
 
+sora/gm/gm_unk_800568C8.cpp:
+	.text       start:0x800568C8 end:0x8005A0E4
+	.rodata     start:0x80406E28 end:0x80407060
+	.data       start:0x8042DC18 end:0x8042E8A8
+	.sdata2     start:0x805A18B0 end:0x805A18D0
+
+sora/gm/gm_syssave_task.cpp:
+	.text       start:0x8005A0E4 end:0x8005A74C
+	.data       start:0x8042E8A8 end:0x8042E980
+	.sdata      start:0x8059CE48 end:0x8059CE60
+	.sbss       start:0x805A00F0 end:0x805A0100
+
+sora/ef/ef_effect.cpp:
+	.text       start:0x8005A74C end:0x8005AD04
+	.data       start:0x8042E980 end:0x8042E9B0
+	.sdata      start:0x8059CE60 end:0x8059CE68
+	.sbss       start:0x805A0100 end:0x805A0108
+	.sdata2     start:0x805A18D0 end:0x805A18E8
+
+sora/ef/ef_manager.cpp:
+	.text       start:0x8005AD04 end:0x8005C5B0
+	.ctors      start:0x80406520 end:0x80406524
+	.data       start:0x8042E9B0 end:0x8042EC18
+	.bss        start:0x80497800 end:0x80497810
+	.sdata      start:0x8059CE68 end:0x8059CEA8
+	.sbss       start:0x805A0108 end:0x805A0118
+	.sdata2     start:0x805A18E8 end:0x805A1910
+
+sora/ef/ef_particle.cpp:
+	.text       start:0x8005C634 end:0x8005D558
+	.data       start:0x8042EC18 end:0x8042EC68
+	.sdata      start:0x8059CEA8 end:0x8059CEB0
+	.sbss       start:0x805A0118 end:0x805A0140
+	.sdata2     start:0x805A1910 end:0x805A1918
+
+sora/ef/ef_screen.cpp:
+	.text       start:0x8005D558 end:0x8005E5C8
+	.sbss       start:0x805A0140 end:0x805A0148
+	.sdata2     start:0x805A1918 end:0x805A1958
+
 sora/ef/ef_screen_handle.cpp:
 	.text       start:0x8005E5C8 end:0x8005E5E8
+
+sora/ec/ec_mgr.cpp:
+	.text       start:0x8005E5E8 end:0x80061514
+	.ctors      start:0x80406524 end:0x80406528
+	.rodata     start:0x80407060 end:0x804075C8
+	.data       start:0x8042EC68 end:0x80453E28
+	.bss        start:0x80497810 end:0x80497D20
+	.sdata      start:0x8059CEB0 end:0x8059DAE8
+	.sbss       start:0x805A0148 end:0x805A0170
+
+sora/ec/ec_unk_80061514.cpp:
+	.text       start:0x80061514 end:0x80065458
+	.data       start:0x80453E28 end:0x80453EA0
+	.sdata      start:0x8059DAE8 end:0x8059DB10
+	.sdata2     start:0x805A1958 end:0x805A1988
 
 sora/ec/ec_trace_mgr.cpp:
 	.text       start:0x80065458 end:0x80065B60
 	.sdata2     start:0x805A1988 end:0x805A1990
+
+sora/ec/ec_trace.cpp:
+	.text       start:0x80065B60 end:0x800696B4
+	.data       start:0x80453EA0 end:0x80453F20
+	.sdata2     start:0x805A1990 end:0x805A19E8
 
 sora/ms/ms_message.cpp:
 	.text       start:0x800696B4 end:0x8006C5A0
@@ -244,18 +513,108 @@ sora/ms/ms_message.cpp:
 	.sdata      start:0x8059DB10 end:0x8059DB48
 	.sdata2     start:0x805A19E8 end:0x805A1A38
 
+sora/ms/ms_font.cpp:
+	.text       start:0x8006C5A0 end:0x8006CD8C
+	.ctors      start:0x80406528 end:0x8040652C
+	.data       start:0x80454178 end:0x804541F8
+	.bss        start:0x80497D20 end:0x80497EB8
+	.sbss       start:0x805A0170 end:0x805A01C0
+
+sora/ms/ms_tag_processor.cpp:
+	.text       start:0x8006CD8C end:0x8006EBCC
+	.data       start:0x804541F8 end:0x804543B8
+	.sdata      start:0x8059DB48 end:0x8059DB58
+	.sdata2     start:0x805A1A38 end:0x805A1A70
+
+sora/ms/ms_char_writer.cpp:
+	.text       start:0x8006EBCC end:0x80070AC8
+	.bss        start:0x80497EB8 end:0x80497ED8
+	.sbss       start:0x805A01C0 end:0x805A01C8
+	.sdata2     start:0x805A1A70 end:0x805A1AA0
+
+sora/ms/ms_text_writer.cpp:
+	.text       start:0x80070AC8 end:0x8007266C
+	.ctors      start:0x8040652C end:0x80406530
+	.bss        start:0x80497ED8 end:0x80497F00
+	.sdata      start:0x8059DB58 end:0x8059DB60
+	.sbss       start:0x805A01C8 end:0x805A01D0
+	.sdata2     start:0x805A1AA0 end:0x805A1AC0
+
+sora/ms/ms_tex_obj.cpp:
+	.text       start:0x8007266C end:0x80072968
+	.data       start:0x804543D8 end:0x804543F0
+	.sdata      start:0x8059DB60 end:0x8059DB68
+	.sdata2     start:0x805A1AC0 end:0x805A1AC8
+
+sora/snd/snd_system.cpp:
+	.text       start:0x80072968 end:0x800783EC
+	.rodata     start:0x80407688 end:0x804078E0
+	.data       start:0x804543F0 end:0x80454488
+	.bss        start:0x80497F00 end:0x8049DC00
+	.sdata      start:0x8059DB68 end:0x8059DB70
+	.sbss       start:0x805A01D0 end:0x805A01D8
+	.sdata2     start:0x805A1AC8 end:0x805A1B08
+
+sora/snd/snd_bgm.cpp:
+	.text       start:0x800783EC end:0x80079550
+	.data       start:0x80454488 end:0x80454530
+	.sdata      start:0x8059DB70 end:0x8059DB78
+	.sbss       start:0x805A01D8 end:0x805A01E0
+
+sora/snd/snd_3d_generator.cpp:
+	.text       start:0x80079550 end:0x800797AC
+	.data       start:0x80454530 end:0x80454550
+	.sdata      start:0x8059DB78 end:0x8059DB80
+	.sdata2     start:0x805A1B08 end:0x805A1B10
+
 sora/snd/snd_init_thread.cpp:
 	.text       start:0x800797AC end:0x800798E8
 	.data       start:0x80454550 end:0x80454580
 	.sdata      start:0x8059DB80 end:0x8059DB88
 
+sora/snd/snd_load_thread.cpp:
+	.text       start:0x800798E8 end:0x80079EB8
+	.data       start:0x80454580 end:0x804545B0
+	.sdata      start:0x8059DB88 end:0x8059DB90
+
+sora/snd/snd_doubutsugo_task.cpp:
+	.text       start:0x8007AD48 end:0x8007B0B4
+	.data       start:0x80454618 end:0x804546B0
+	.sdata      start:0x8059DB90 end:0x8059DB98
+	.sdata2     start:0x805A1B10 end:0x805A1B18
+
 sora/mv/mv_THPAudioDecode.cpp:
 	.text       start:0x8007B0B4 end:0x8007B4A4
 	.sbss       start:0x805A01E0 end:0x805A01E4
 
+sora/mv/mv_THPDraw.cpp:
+	.text       start:0x8007B4A4 end:0x8007BC98
+	.sdata2     start:0x805A1B18 end:0x805A1B40
+
+sora/mv/mv_THPPlayer.cpp:
+	.text       start:0x8007BC98 end:0x8007E0EC
+	.data       start:0x804546B0 end:0x804546D0
+	.bss        start:0x8049DC00 end:0x8049DDB0
+	.sdata      start:0x8059DB98 end:0x8059DBA0
+	.sbss       start:0x805A01E4 end:0x805A0200
+	.sdata2     start:0x805A1B40 end:0x805A1B60
+
 sora/mv/mv_THPRead.cpp:
 	.text       start:0x8007E0EC end:0x8007E3A4
 	.sbss       start:0x805A0200 end:0x805A0204
+
+sora/mv/mv_THPVideoDecode.cpp:
+	.text       start:0x8007E3A4 end:0x8007E99C
+	.data       start:0x804546D0 end:0x80454708
+	.sbss       start:0x805A0204 end:0x805A0210
+
+sora/mv/mv_movie_player.cpp:
+	.text       start:0x8007E99C end:0x800800D8
+	.data       start:0x80454708 end:0x80454820
+	.bss        start:0x8049DDB0 end:0x8049DEC8
+	.sdata      start:0x8059DBA0 end:0x8059DBB0
+	.sbss       start:0x805A0210 end:0x805A0268
+	.sdata2     start:0x805A1B60 end:0x805A1B98
 
 sora/ph/ph_container.cpp:
 	.text       start:0x800800D8 end:0x80080B40
@@ -296,9 +655,65 @@ sora/ph/ph_world.cpp:
 sora/ph/ph_Interface.cpp:
 	.text       start:0x8009A104 end:0x8009BA40
 
+sora/ph/ph_math.cpp:
+	.text       start:0x8009BA40 end:0x8009BE1C
+	.sdata2     start:0x805A1D78 end:0x805A1DA0
+
+sora/cm/cm_camera_controller.cpp:
+	.text       start:0x8009BE1C end:0x8009D2DC
+	.data       start:0x80454B78 end:0x80454C78
+	.sdata      start:0x8059DC20 end:0x8059DC30
+	.sbss       start:0x805A0278 end:0x805A0280
+	.sdata2     start:0x805A1DA0 end:0x805A1DC8
+
+sora/cm/cm_quake.cpp:
+	.text       start:0x8009D2DC end:0x8009E3D0
+	.rodata     start:0x804078E0 end:0x804078F8
+	.data       start:0x80454C78 end:0x80454CC0
+	.sbss       start:0x805A0280 end:0x805A0288
+	.sdata2     start:0x805A1DC8 end:0x805A1DE8
+
+sora/cm/cm_subject.cpp:
+	.text       start:0x8009EC5C end:0x8009F560
+	.ctors      start:0x80406530 end:0x80406534
+	.sdata2     start:0x805A1E30 end:0x805A1E80
+
 sora/cm/cm_controller_default.cpp:
 	.text       start:0x8009F560 end:0x8009F564
 	.data       start:0x80454CC0 end:0x80454CD0
+
+sora/cm/cm_controller_ai.cpp:
+	.text       start:0x8009F564 end:0x800A2CE0
+	.data       start:0x80454CD0 end:0x80454D88
+	.sdata      start:0x8059DC30 end:0x8059DC38
+	.sbss       start:0x805A0288 end:0x805A0290
+	.sdata2     start:0x805A1E80 end:0x805A1F18
+
+sora/cm/cm_controller_fighter_target.cpp:
+	.text       start:0x800A3764 end:0x800A3F70
+	.data       start:0x80454DA0 end:0x80454DD8
+	.sdata      start:0x8059DC38 end:0x8059DC40
+	.sdata2     start:0x805A1F60 end:0x805A1F90
+
+sora/cm/cm_controller_adventure.cpp:
+	.text       start:0x800A3F70 end:0x800A624C
+	.ctors      start:0x80406534 end:0x80406538
+	.data       start:0x80454DD8 end:0x80454E70
+	.sdata      start:0x8059DC40 end:0x8059DEA8
+	.sbss       start:0x805A0290 end:0x805A0298
+	.sdata2     start:0x805A1F90 end:0x805A2010
+
+sora/cm/cm_controller_animation.cpp:
+	.text       start:0x800A624C end:0x800A6598
+	.data       start:0x80454E70 end:0x80454EA8
+	.sdata      start:0x8059DEA8 end:0x8059DEB0
+	.sdata2     start:0x805A2010 end:0x805A2020
+
+sora/cm/cm_controller_menu_pad.cpp:
+	.text       start:0x800A6598 end:0x800A68C0
+	.data       start:0x80454EA8 end:0x80454ED8
+	.sdata      start:0x8059DEB0 end:0x8059DEB8
+	.sdata2     start:0x805A2020 end:0x805A2048
 
 sora/cm/cm_controller_menu_fixed.cpp:
 	.text       start:0x800A68C0 end:0x800A6A78
@@ -306,10 +721,39 @@ sora/cm/cm_controller_menu_fixed.cpp:
 	.sdata      start:0x8059DEB8 end:0x8059DEC0
 	.sdata2     start:0x805A2048 end:0x805A2058
 
+sora/cm/cm_controller_photo.cpp:
+	.text       start:0x800A6A78 end:0x800A9760
+	.rodata     start:0x804078F8 end:0x804079C0
+	.data       start:0x80454F10 end:0x80454F98
+	.sdata      start:0x8059DEC0 end:0x8059DED8
+	.sdata2     start:0x805A2058 end:0x805A20F0
+
+sora/cm/cm_controller_fig_disp1.cpp:
+	.text       start:0x800A9760 end:0x800A9DCC
+	.ctors      start:0x80406538 end:0x8040653C
+	.rodata     start:0x804079C0 end:0x80407A30
+	.data       start:0x80454F98 end:0x80454FD0
+	.sdata      start:0x8059DED8 end:0x8059DEE0
+	.sbss       start:0x805A0298 end:0x805A02A0
+	.sdata2     start:0x805A20F0 end:0x805A2150
+
+sora/cm/cm_controller_tech.cpp:
+	.text       start:0x800A9DCC end:0x800AA998
+	.data       start:0x80454FD0 end:0x80455000
+	.sdata      start:0x8059DEE0 end:0x8059DEE8
+	.sdata2     start:0x805A2150 end:0x805A2170
+
 sora/cm/cm_controller_melee_fixed.cpp:
 	.text       start:0x800AA998 end:0x800AA9F8
 	.data       start:0x80455000 end:0x80455038
 	.sdata      start:0x8059DEE8 end:0x8059DEF0
+
+sora/cm/cm_controller_demo.cpp:
+	.text       start:0x800AA9F8 end:0x800AC9B8
+	.rodata     start:0x80407A30 end:0x80407A40
+	.data       start:0x80455038 end:0x80455078
+	.sdata      start:0x8059DEF0 end:0x8059DEF8
+	.sdata2     start:0x805A2170 end:0x805A21D8
 
 sora/cm/cm_stage_param.cpp:
 	.text       start:0x800AC9B8 end:0x800AC9DC
@@ -319,12 +763,22 @@ sora/ty/ty_fig_listmng.cpp:
 	.text       start:0x800AC9DC end:0x800AD808
 	.data       start:0x80455120 end:0x80455180
 
+sora/ty/ty_seal_listmng.cpp:
+	.text       start:0x800AD808 end:0x800AF088
+	.data       start:0x80455180 end:0x804551E8
+	.sdata2     start:0x805A21E8 end:0x805A21F8
+
 sora/mu/mu_menu_lifecycle.cpp:
 	.text       start:0x800AF088 end:0x800AF148
 
 sora/mu/mu_menu.cpp:
 	.text       start:0x800AF148 end:0x800AFB94
 	.sdata2     start:0x805A21F8 end:0x805A2200
+
+sora/mu/mu_menuroot.cpp:
+	.text       start:0x800AFB94 end:0x800B08A8
+	.data       start:0x80455C90 end:0x80455D18
+	.sdata      start:0x8059DF18 end:0x8059DF20
 
 sora/mu/mu_object.cpp:
 	.text       start:0x800B2394 end:0x800B7AA4
@@ -469,15 +923,111 @@ sora/if/if_utility.cpp:
 	.sdata      start:0x8059E488 end:0x8059E4C8
 	.sdata2     start:0x805A26B8 end:0x805A26E8
 
+sora/if/if_wifi_intr_menu.cpp:
+	.text       start:0x800FBB18 end:0x800FC25C
+	.rodata     start:0x804090E0 end:0x804090F0
+	.data       start:0x8045C580 end:0x8045C5B0
+	.sdata      start:0x8059E4C8 end:0x8059E4D8
+	.sdata2     start:0x805A26E8 end:0x805A2708
+
+sora/if/if_wifipr_mngr.cpp:
+	.text       start:0x800FC25C end:0x800FD110
+	.data       start:0x8045C5B0 end:0x8045C678
+	.sdata      start:0x8059E4D8 end:0x8059E4E8
+	.sbss       start:0x805A02F8 end:0x805A0308
+
 sora/if/if_wifipr_task.cpp:
 	.text       start:0x800FD110 end:0x800FD1F8
 	.data       start:0x8045C678 end:0x8045C708
 	.sdata      start:0x8059E4E8 end:0x8059E4F0
 
+sora/if/if_wifipr_center.cpp:
+	.text       start:0x800FD1F8 end:0x800FD510
+	.data       start:0x8045C708 end:0x8045C740
+	.sdata      start:0x8059E4F0 end:0x8059E500
+	.sdata2     start:0x805A2708 end:0x805A2720
+
+sora/if/if_wifipr_player.cpp:
+	.text       start:0x800FD510 end:0x800FE850
+	.rodata     start:0x804090F0 end:0x80409128
+	.data       start:0x8045C740 end:0x8045C788
+	.sdata      start:0x8059E500 end:0x8059E528
+	.sbss       start:0x805A0308 end:0x805A0310
+	.sdata2     start:0x805A2720 end:0x805A2748
+
+sora/if/if_minigame_homerun.cpp:
+	.text       start:0x800FE850 end:0x800FF558
+	.rodata     start:0x80409128 end:0x804091D8
+	.data       start:0x8045C788 end:0x8045C838
+	.sdata      start:0x8059E528 end:0x8059E540
+	.sdata2     start:0x805A2748 end:0x805A2770
+
+sora/if/if_minigame_coin_shooter.cpp:
+	.text       start:0x800FF558 end:0x801048EC
+	.ctors      start:0x80406548 end:0x8040654C
+	.rodata     start:0x804091D8 end:0x80409208
+	.data       start:0x8045C838 end:0x8045CFD8
+	.bss        start:0x8049E560 end:0x8049E57C
+	.sdata      start:0x8059E540 end:0x8059E5C0
+	.sbss       start:0x805A0310 end:0x805A0318
+	.sdata2     start:0x805A2770 end:0x805A27B8
+
+sora/if/if_minigame_training.cpp:
+	.text       start:0x801048EC end:0x80106020
+	.rodata     start:0x80409208 end:0x804092E0
+	.data       start:0x8045CFD8 end:0x8045D060
+	.sdata      start:0x8059E5C0 end:0x8059E5D8
+	.sdata2     start:0x805A27B8 end:0x805A27E0
+
+sora/if/if_adv_mngr.cpp:
+	.text       start:0x80106020 end:0x80107EC4
+	.data       start:0x8045D060 end:0x8045D070
+	.sdata      start:0x8059E5D8 end:0x8059E5F0
+	.sbss       start:0x805A0318 end:0x805A0328
+	.sdata2     start:0x805A27E0 end:0x805A27F8
+
 sora/if/if_adv_task.cpp:
 	.text       start:0x80107EC4 end:0x80108014
 	.data       start:0x8045D070 end:0x8045D0F8
 	.sdata      start:0x8059E5F0 end:0x8059E5F8
+
+sora/if/if_adv_enemy.cpp:
+	.text       start:0x80108014 end:0x8010890C
+	.rodata     start:0x804092E0 end:0x80409310
+	.data       start:0x8045D0F8 end:0x8045D1A0
+	.sdata      start:0x8059E5F8 end:0x8059E618
+	.sbss       start:0x805A0328 end:0x805A0330
+	.sdata2     start:0x805A27F8 end:0x805A2820
+
+sora/if/if_adv_boss.cpp:
+	.text       start:0x8010890C end:0x80109600
+	.rodata     start:0x80409310 end:0x80409340
+	.data       start:0x8045D1A0 end:0x8045D238
+	.sdata      start:0x8059E618 end:0x8059E640
+	.sbss       start:0x805A0330 end:0x805A0338
+	.sdata2     start:0x805A2820 end:0x805A2850
+
+sora/if/if_adv_pause.cpp:
+	.text       start:0x80109600 end:0x8010B76C
+	.rodata     start:0x80409340 end:0x804093B0
+	.data       start:0x8045D238 end:0x8045D348
+	.sdata      start:0x8059E640 end:0x8059E658
+	.sdata2     start:0x805A2850 end:0x805A2870
+
+sora/if/if_adv_hud.cpp:
+	.text       start:0x8010B76C end:0x8010CF44
+	.rodata     start:0x804093B0 end:0x80409420
+	.data       start:0x8045D348 end:0x8045D470
+	.sdata      start:0x8059E658 end:0x8059E690
+	.sbss       start:0x805A0338 end:0x805A0348
+	.sdata2     start:0x805A2870 end:0x805A28C0
+
+sora/if/if_adv_radar.cpp:
+	.text       start:0x8010CF44 end:0x8010EFD4
+	.rodata     start:0x80409420 end:0x804094E8
+	.data       start:0x8045D470 end:0x8045D810
+	.sbss       start:0x805A0348 end:0x805A0350
+	.sdata2     start:0x805A28C0 end:0x805A28C8
 
 sora/if/if_stgedit.cpp:
 	.text       start:0x8010EFD4 end:0x8010F310
@@ -485,11 +1035,23 @@ sora/if/if_stgedit.cpp:
 	.sdata      start:0x8059E690 end:0x8059E6A0
 	.sdata2     start:0x805A28C8 end:0x805A28E8
 
-sora/gr/collision/gr_collision_shape.cpp:
-	.sdata2     start:0x805A2A20 end:0x805A2A2C
+sora/if/if_stgedit_mngr.cpp:
+	.text       start:0x8010F310 end:0x8010F960
+	.data       start:0x8045D840 end:0x8045D8A0
+	.sbss       start:0x805A0350 end:0x805A0360
 
 sora/gr/collision/gr_collision_data.cpp:
 	.text       start:0x80110720 end:0x80110748
+
+sora/gr/collision/gr_collision.cpp:
+	.text       start:0x80110748 end:0x801122E4
+	.ctors      start:0x8040654C end:0x80406550
+	.bss        start:0x8049E57C end:0x8049E588
+	.sbss       start:0x805A0360 end:0x805A0370
+	.sdata2     start:0x805A2908 end:0x805A2928
+
+sora/gr/collision/gr_collision_shape.cpp:
+	.sdata2     start:0x805A2A20 end:0x805A2A2C
 
 sora/gr/collision/gr_collision_handle.cpp:
 	.text       start:0x801122E4 end:0x8011234C
@@ -523,6 +1085,17 @@ sora/gr/collision/gr_collision_shape_circle.cpp:
 	.text       start:0x801330B8 end:0x8013344C
 	.data       start:0x8045DAF0 end:0x8045DB54
 	.sdata2     start:0x805A2A30 end:0x805A2A3C
+
+sora/gr/collision/gr_collision_raycheck.cpp:
+	.text       start:0x8013804C end:0x801385AC
+	.sdata2     start:0x805A2A80 end:0x805A2A88
+
+sora/gr/gr_collconv.cpp:
+	.text       start:0x801385AC end:0x80139570
+	.data       start:0x8045DBB8 end:0x8045DD78
+	.bss        start:0x8049E5A0 end:0x8049EA10
+	.sdata      start:0x8059E6B0 end:0x8059E6D0
+	.sdata2     start:0x805A2A88 end:0x805A2AA8
 
 sora/gr/gr_path.cpp:
 	.text       start:0x80139570 end:0x80139658
@@ -566,13 +1139,65 @@ sora/nt/nt_send.cpp:
 	.data       start:0x8045E000 end:0x8045E018
 	.sbss       start:0x805A0388 end:0x805A038C
 
+sora/nt/nt_tr.cpp:
+	.text       start:0x80143ACC end:0x80146278
+	.data       start:0x8045E7E8 end:0x8045F1D8
+	.sdata2     start:0x805A2B50 end:0x805A2B68
+
+sora/nt/network.cpp:
+	.text       start:0x80146278 end:0x80146E44
+	.ctors      start:0x80406560 end:0x80406564
+	.data       start:0x8045F1D8 end:0x8045F490
+	.bss        start:0x8049EBD0 end:0x8049EBE0
+	.sbss       start:0x805A03B0 end:0x805A03C8
+
+sora/nt/nt_base.cpp:
+	.text       start:0x80146E44 end:0x80147434
+	.ctors      start:0x80406564 end:0x80406568
+	.data       start:0x8045F4A8 end:0x8045F790
+	.bss        start:0x8049EC60 end:0x8049EC78
+	.sdata      start:0x8059E748 end:0x8059E770
+	.sbss       start:0x805A03C8 end:0x805A0430
+
+sora/nt/nt_match.cpp:
+	.text       start:0x80147434 end:0x8014C004
+	.data       start:0x8045F7A8 end:0x80460D40
+	.bss        start:0x8049EC78 end:0x8049EC90
+	.sdata      start:0x8059E770 end:0x8059E7D0
+	.sbss       start:0x805A0430 end:0x805A044C
+	.sdata2     start:0x805A2B68 end:0x805A2B80
+
 sora/nt/nt_offline.cpp:
 	.text       start:0x8014C004 end:0x8014C180
 	.data       start:0x80460D40 end:0x80460D4C
 
+sora/nt/nt_friendinfo.cpp:
+	.text       start:0x8014C180 end:0x8014CC40
+	.ctors      start:0x80406568 end:0x8040656C
+	.data       start:0x80460D4C end:0x80460DC8
+	.bss        start:0x8049EC90 end:0x8049ECB8
+	.sbss       start:0x805A044C end:0x805A0450
+
 sora/nt/d_net_connect.cpp:
 	.text       start:0x8014CC40 end:0x8014CD5C
 	.data       start:0x80460DC8 end:0x80460E00
+
+sora/nt/nt_etc_nwc24.cpp:
+	.text       start:0x8014CD5C end:0x8014E344
+	.ctors      start:0x8040656C end:0x80406570
+	.rodata     start:0x8040965C end:0x80409770
+	.data       start:0x80460E00 end:0x80461030
+	.bss        start:0x8049ECB8 end:0x8049ECE0
+	.sdata      start:0x8059E7D0 end:0x8059E7E0
+	.sbss       start:0x805A0450 end:0x805A0458
+
+sora/nt/nt_etc_xchg.cpp:
+	.text       start:0x8014E344 end:0x8014F6D4
+	.data       start:0x80461030 end:0x80461070
+	.sdata      start:0x8059E7E0 end:0x8059E7E8
+
+sora/nt/nt_etc_global.cpp:
+	.text       start:0x8014F6D4 end:0x80150614
 
 sora/nt/nt_etc_dwc.cpp:
 	.text       start:0x80150614 end:0x80150CE4
@@ -584,9 +1209,67 @@ sora/nt/nt_etc_so.cpp:
 	.text       start:0x80150CE4 end:0x801510F4
 	.data       start:0x804610F8 end:0x80461108
 
+sora/nt/nt_etc_nd.cpp:
+	.text       start:0x801510F4 end:0x80151B38
+	.data       start:0x80461108 end:0x80461390
+
+sora/nt/nt_etc_sbs.cpp:
+	.text       start:0x80151B38 end:0x80152970
+	.ctors      start:0x80406570 end:0x80406574
+	.data       start:0x80461390 end:0x80461668
+	.bss        start:0x8049ECF8 end:0x8049ED20
+	.sdata      start:0x8059E7F0 end:0x8059E800
+
+sora/nt/nt_etc_file.cpp:
+	.text       start:0x80152970 end:0x801542C4
+	.data       start:0x80461668 end:0x804616B8
+
+sora/nt/nt_etc_contribution.cpp:
+	.text       start:0x801542C4 end:0x80154E14
+	.data       start:0x804616B8 end:0x80461718
+	.sdata      start:0x8059E800 end:0x8059E810
+
+sora/nt/nt_etc_watching.cpp:
+	.text       start:0x80154E14 end:0x80157200
+	.data       start:0x80461718 end:0x804620B0
+	.sdata      start:0x8059E810 end:0x8059E818
+
+sora/nt/nt_etc_checkdata.cpp:
+	.text       start:0x80157200 end:0x8015820C
+	.data       start:0x804620B0 end:0x804620F8
+	.sdata      start:0x8059E818 end:0x8059E840
+	.sbss       start:0x805A0458 end:0x805A0460
+
+sora/nt/nt_etc_boottask.cpp:
+	.text       start:0x8015820C end:0x80158638
+	.data       start:0x804620F8 end:0x804621A8
+
+sora/nt/nt_etc_upload_eval.cpp:
+	.text       start:0x80158638 end:0x80158BB8
+	.sbss       start:0x805A0460 end:0x805A0468
+
+sora/ad/ad_keep_manager.cpp:
+	.text       start:0x80158BB8 end:0x8015B09C
+	.ctors      start:0x80406574 end:0x80406578
+	.rodata     start:0x80409770 end:0x80409798
+	.data       start:0x804621A8 end:0x804621C0
+	.bss        start:0x8049ED20 end:0x8049ED58
+	.sdata2     start:0x805A2B80 end:0x805A2BA8
+
 sora/ad/ad_static_data.cpp:
 	.text       start:0x8015B09C end:0x8015B0E0
 	.data       start:0x804621C0 end:0x804629C8
+
+sora/ad/ad_seal_info.cpp:
+	.text       start:0x8015B0E0 end:0x8015B4F0
+	.rodata     start:0x80409798 end:0x804097C8
+	.sdata2     start:0x805A2BA8 end:0x805A2BAC
+
+sora/ad/ad_autosave.cpp:
+	.text       start:0x8015B4F0 end:0x8015BAB0
+	.data       start:0x80462B60 end:0x80462C08
+	.sdata      start:0x8059E840 end:0x8059E848
+	.sbss       start:0x805A0468 end:0x805A0470
 
 sora/st/st_data_container.cpp:
 	.text       start:0x8015BAB0 end:0x8015BBF4
@@ -1042,6 +1725,17 @@ nw4r/g3d/g3d_scnmdl.cpp:
 	.rodata     start:0x8040ABD8 end:0x8040ABF8
 	.data       start:0x804663C8 end:0x80466410
 
+nw4r/g3d/g3d_scnchoice.cpp:
+	.text       start:0x801B3440 end:0x801B3CBC
+	.data       start:0x80466410 end:0x80466450
+	.sbss       start:0x805A0558 end:0x805A0560
+
+nw4r/g3d/g3d_scngroupex_unk.cpp:
+	.text       start:0x801B3CBC end:0x801B4AF4
+	.rodata     start:0x8040ABF8 end:0x8040AC08
+	.data       start:0x80466450 end:0x804664F8
+	.sdata      start:0x8059E930 end:0x8059E950
+
 nw4r/g3d/g3d_scnmdlexpand.cpp:
 	.text       start:0x801B4AF4 end:0x801B55C4
 	.rodata     start:0x8040AC08 end:0x8040AC20
@@ -1267,6 +1961,13 @@ RVL_SDK/base/PPCArch.c:
 	.text       start:0x801D5068 end:0x801D51D8
 	.data       start:0x80466E30 end:0x80466E68
 
+RVL_SDK/os/OS.c:
+	.text       start:0x801D51D8 end:0x801D6640
+	.data       start:0x80466E68 end:0x804670C0
+	.bss        start:0x804DD120 end:0x804DD190
+	.sdata      start:0x8059E980 end:0x8059E9B0
+	.sbss       start:0x805A0630 end:0x805A0678
+
 RVL_SDK/os/OSAlarm.c:
 	.text       start:0x801D6640 end:0x801D6E24
 	.data       start:0x80467258 end:0x80467268
@@ -1286,11 +1987,40 @@ RVL_SDK/os/OSAudioSystem.c:
 	.text       start:0x801D71F4 end:0x801D76A8
 	.data       start:0x80467268 end:0x804672E8
 
+RVL_SDK/os/OSCache.c:
+	.text       start:0x801D76A8 end:0x801D7D78
+	.data       start:0x804672E8 end:0x80467520
+
+RVL_SDK/os/OSContext.c:
+	.text       start:0x801D7D78 end:0x801D8600
+	.data       start:0x80467520 end:0x80467700
+
 RVL_SDK/os/OSError.c:
 	.text       start:0x801D8600 end:0x801D8D34
 	.data       start:0x80467700 end:0x80467A1C
 	.bss        start:0x804DD190 end:0x804DD1D4
 	.sdata      start:0x8059E9C0 end:0x8059E9C8
+
+RVL_SDK/os/OSExec.c:
+	.text       start:0x801D8D34 end:0x801DB3C8
+	.data       start:0x80467A1C end:0x80467E40
+	.bss        start:0x804DD200 end:0x804DD220
+	.sdata      start:0x8059E9C8 end:0x8059E9D8
+	.sbss       start:0x805A0698 end:0x805A06B0
+	.sdata2     start:0x805A36F0 end:0x805A36F8
+
+RVL_SDK/os/OSFatal.c:
+	.text       start:0x801DB3C8 end:0x801DBFEC
+	.bss        start:0x804DD220 end:0x804DD500
+	.sdata      start:0x8059E9D8 end:0x8059E9E0
+	.sdata2     start:0x805A36F8 end:0x805A3738
+
+RVL_SDK/os/OSFont.c:
+	.text       start:0x801DBFEC end:0x801DCF10
+	.data       start:0x80467E40 end:0x80468950
+	.sdata      start:0x8059E9E0 end:0x8059E9E8
+	.sbss       start:0x805A06B0 end:0x805A06C0
+	.sdata2     start:0x805A3738 end:0x805A3740
 
 RVL_SDK/os/OSInterrupt.c:
 	.text       start:0x801DCF10 end:0x801DD694
@@ -1303,6 +2033,10 @@ RVL_SDK/os/OSLink.c:
 RVL_SDK/os/OSMessage.c:
 	.text       start:0x801DE094 end:0x801DE368
 
+RVL_SDK/os/OSMemory.c:
+	.text       start:0x801DE368 end:0x801DEB7C
+	.data       start:0x804689D0 end:0x804689E0
+
 RVL_SDK/os/OSMutex.c:
 	.text       start:0x801DEB7C end:0x801DEE80
 
@@ -1310,12 +2044,31 @@ RVL_SDK/os/OSReboot.c:
 	.text       start:0x801DEF64 end:0x801DEFE4
 	.sbss       start:0x805A06D8 end:0x805A06E0
 
+RVL_SDK/os/OSReset.c:
+	.text       start:0x801DEFE4 end:0x801DF848
+	.data       start:0x804689E0 end:0x80468C68
+	.sdata      start:0x8059E9E8 end:0x8059E9F0
+	.sbss       start:0x805A06E0 end:0x805A06F0
+
 RVL_SDK/os/OSRtc.c:
 	.text       start:0x801DF848 end:0x801E02D4
 	.bss        start:0x804DD500 end:0x804DD554
 
+RVL_SDK/os/OSSemaphore.c:
+	.text       start:0x801E02D4 end:0x801E03FC
+
 RVL_SDK/os/OSSync.c:
 	.text       start:0x801E03FC end:0x801E047C
+
+RVL_SDK/os/OSThread.c:
+	.text       start:0x801E047C end:0x801E1B34
+	.bss        start:0x804DD554 end:0x804DDF60
+	.sdata      start:0x8059E9F0 end:0x8059E9F8
+	.sbss       start:0x805A06F0 end:0x805A0700
+
+RVL_SDK/os/OSTime.c:
+	.text       start:0x801E1B34 end:0x801E21E8
+	.data       start:0x80468C68 end:0x80468CC8
 
 RVL_SDK/os/OSUtf.c:
 	.text       start:0x801E21E8 end:0x801E2420
@@ -1325,6 +2078,12 @@ RVL_SDK/os/OSIpc.c:
 	.text       start:0x801E2420 end:0x801E2448
 	.sdata      start:0x8059E9F8 end:0x8059E9FC
 	.sbss       start:0x805A0700 end:0x805A0704
+
+RVL_SDK/os/OSStateTM.c:
+	.text       start:0x801E2448 end:0x801E2ADC
+	.data       start:0x80474B08 end:0x80474BD0
+	.bss        start:0x804DDF60 end:0x804DE020
+	.sbss       start:0x805A0704 end:0x805A0730
 
 RVL_SDK/os/OSPlayRecord.c:
 	.text       start:0x801E2ADC end:0x801E31D4
@@ -1357,9 +2116,22 @@ RVL_SDK/os/OSPlayTime.c:
 RVL_SDK/os/__ppc_eabi_init.c:
 	.text       start:0x801E4140 end:0x801E41F4
 
+RVL_SDK/exi/EXIBios.c:
+	.text       start:0x801E41F4 end:0x801E5A88
+	.bss        start:0x804DE270 end:0x804DE330
+	.sdata      start:0x8059EA10 end:0x8059EA18
+	.sbss       start:0x805A0768 end:0x805A0770
+
 RVL_SDK/exi/EXIUart.c:
 	.text       start:0x801E5A88 end:0x801E5DBC
 	.sbss       start:0x805A0770 end:0x805A0780
+
+RVL_SDK/si/SIBios.c:
+	.text       start:0x801E5F48 end:0x801E74C8
+	.data       start:0x80474E50 end:0x80474EC0
+	.bss        start:0x804DE330 end:0x804DE550
+	.sdata      start:0x8059EA18 end:0x8059EA20
+	.sbss       start:0x805A0780 end:0x805A0790
 
 RVL_SDK/si/SISamplingRate.c:
 	.text       start:0x801E74C8 end:0x801E75A8
@@ -1371,14 +2143,130 @@ RVL_SDK/db/db.c:
 	.data       start:0x80474F58 end:0x80474F70
 	.sbss       start:0x805A0798 end:0x805A07A0
 
+RVL_SDK/vi/vi.c:
+	.text       start:0x801E7690 end:0x801EA098
+	.data       start:0x80474F70 end:0x804754A8
+	.bss        start:0x804DE550 end:0x804DE6C0
+	.sdata      start:0x8059EA20 end:0x8059EA40
+	.sbss       start:0x805A07A0 end:0x805A0850
+
 RVL_SDK/vi/i2c.c:
 	.text       start:0x801EA098 end:0x801EAAB4
 	.sdata      start:0x8059EA40 end:0x8059EA44
 	.sbss       start:0x805A0850 end:0x805A0854
 
+RVL_SDK/vi/vi3in1.c:
+	.text       start:0x801EAAB4 end:0x801EC158
+	.data       start:0x804754A8 end:0x80475A40
+	.bss        start:0x804DE6C0 end:0x804DE6E0
+	.sdata      start:0x8059EA44 end:0x8059EA60
+	.sbss       start:0x805A0854 end:0x805A0870
+
+RVL_SDK/mtx/mtx.c:
+	.text       start:0x801EC158 end:0x801ECD70
+	.sdata      start:0x8059EA60 end:0x8059EA68
+	.sdata2     start:0x805A3750 end:0x805A3778
+
+RVL_SDK/mtx/mtxvec.c:
+	.text       start:0x801ECD70 end:0x801ECDC4
+
+RVL_SDK/mtx/mtx44.c:
+	.text       start:0x801ECDC4 end:0x801ECFE4
+	.sdata2     start:0x805A3778 end:0x805A3790
+
+RVL_SDK/mtx/vec.c:
+	.text       start:0x801ECFE4 end:0x801ED1EC
+	.sdata2     start:0x805A3790 end:0x805A37A0
+
+RVL_SDK/mtx/quat.c:
+	.text       start:0x801ED1EC end:0x801ED554
+	.rodata     start:0x8040D410 end:0x8040D420
+	.sdata2     start:0x805A37A0 end:0x805A37B0
+
+RVL_SDK/gx/GXInit.c:
+	.text       start:0x801ED554 end:0x801EE720
+	.data       start:0x80475A40 end:0x80475C80
+	.bss        start:0x804DE6E0 end:0x804DE760
+	.sdata      start:0x8059EA68 end:0x8059EA70
+	.sbss       start:0x805A0870 end:0x805A0898
+	.sdata2     start:0x805A37B0 end:0x805A37D8
+
+RVL_SDK/gx/GXFifo.c:
+	.text       start:0x801EE720 end:0x801EF280
+	.data       start:0x80475C80 end:0x80475CB0
+	.bss        start:0x804DED60 end:0x804DEDA8
+	.sbss       start:0x805A0898 end:0x805A08B8
+
+RVL_SDK/gx/GXAttr.c:
+	.text       start:0x801EF280 end:0x801F04A4
+	.data       start:0x80475CB0 end:0x80475F28
+	.sdata      start:0x8059EA70 end:0x8059EA80
+
+RVL_SDK/gx/GXMisc.c:
+	.text       start:0x801F04A4 end:0x801F0E10
+	.sbss       start:0x805A08B8 end:0x805A08D0
+
+RVL_SDK/gx/GXGeometry.c:
+	.text       start:0x801F0E10 end:0x801F13EC
+
+RVL_SDK/gx/GXFrameBuf.c:
+	.text       start:0x801F13EC end:0x801F1FF0
+	.data       start:0x80475F28 end:0x80476270
+	.sdata2     start:0x805A37D8 end:0x805A37E8
+
+RVL_SDK/gx/GXLight.c:
+	.text       start:0x801F1FF0 end:0x801F270C
+	.data       start:0x80476270 end:0x80476290
+	.sdata2     start:0x805A37E8 end:0x805A3820
+
+RVL_SDK/gx/GXTexture.c:
+	.text       start:0x801F270C end:0x801F3750
+	.data       start:0x80476290 end:0x804764B8
+	.sdata      start:0x8059EA80 end:0x8059EAC8
+	.sdata2     start:0x805A3820 end:0x805A3858
+
+RVL_SDK/gx/GXBump.c:
+	.text       start:0x801F3750 end:0x801F3B9C
+	.sdata2     start:0x805A3858 end:0x805A3860
+
 RVL_SDK/gx/GXTev.c:
 	.text       start:0x801F3B9C end:0x801F421C
 	.data       start:0x804764B8 end:0x8047652C
+
+RVL_SDK/gx/GXPixel.c:
+	.text       start:0x801F421C end:0x801F4980
+	.data       start:0x8047652C end:0x80476550
+	.sdata2     start:0x805A3860 end:0x805A38B0
+
+RVL_SDK/gx/GXDraw.c:
+	.text       start:0x801F4980 end:0x801F4D50
+	.bss        start:0x804DEDA8 end:0x804DF030
+	.sdata2     start:0x805A38B0 end:0x805A38D0
+
+RVL_SDK/gx/GXDisplayList.c:
+	.text       start:0x801F4D50 end:0x801F4F20
+	.bss        start:0x804DF030 end:0x804DF740
+
+RVL_SDK/gx/GXTransform.c:
+	.text       start:0x801F4F20 end:0x801F569C
+	.sdata2     start:0x805A38D0 end:0x805A38E8
+
+RVL_SDK/gx/GXPerf.c:
+	.text       start:0x801F569C end:0x801F5ED8
+	.data       start:0x80476550 end:0x80476640
+
+RVL_SDK/dvd/dvdfs.c:
+	.text       start:0x801F5ED8 end:0x801F69D8
+	.data       start:0x80476640 end:0x804767A4
+	.sdata      start:0x8059EAC8 end:0x8059EAD8
+	.sbss       start:0x805A08D0 end:0x805A0900
+
+RVL_SDK/dvd/dvd.c:
+	.text       start:0x801F69D8 end:0x801FB6CC
+	.data       start:0x804767F0 end:0x80476B18
+	.bss        start:0x804DF740 end:0x804E43F0
+	.sdata      start:0x8059EAD8 end:0x8059EAF0
+	.sbss       start:0x805A0900 end:0x805A0998
 
 RVL_SDK/dvd/dvdqueue.c:
 	.text       start:0x801FB6CC end:0x801FB924
@@ -1393,8 +2281,69 @@ RVL_SDK/dvd/dvderror.c:
 RVL_SDK/dvd/dvdidutils.c:
 	.text       start:0x801FC228 end:0x801FC318
 
+RVL_SDK/dvd/dvdFatal.c:
+	.text       start:0x801FC3A0 end:0x801FC4DC
+	.rodata     start:0x8040D420 end:0x8040D440
+	.data       start:0x80476B44 end:0x80476FF8
+	.sbss       start:0x805A09A4 end:0x805A09B0
+	.sdata2     start:0x805A38E8 end:0x805A38F0
+
+RVL_SDK/dvd/dvd_broadway.c:
+	.text       start:0x801FC4DC end:0x801FEBC0
+	.rodata     start:0x8040D440 end:0x8040D460
+	.data       start:0x80476FF8 end:0x80478050
+	.bss        start:0x804E4680 end:0x804E4840
+	.sdata      start:0x8059EAF0 end:0x8059EB08
+	.sbss       start:0x805A09B0 end:0x805A09E0
+
+RVL_SDK/ai/ai.c:
+	.text       start:0x801FEBC0 end:0x801FF138
+	.data       start:0x80478050 end:0x80478098
+	.sdata      start:0x8059EB08 end:0x8059EB10
+	.sbss       start:0x805A09E0 end:0x805A0A20
+
+RVL_SDK/ax/AX.c:
+	.text       start:0x801FF138 end:0x801FF1FC
+	.data       start:0x80478098 end:0x804780E0
+	.sdata      start:0x8059EB10 end:0x8059EB18
+	.sbss       start:0x805A0A20 end:0x805A0A28
+
+RVL_SDK/ax/AXAlloc.c:
+	.text       start:0x801FF1FC end:0x801FF764
+	.bss        start:0x804E4850 end:0x804E4960
+	.sbss       start:0x805A0A28 end:0x805A0A30
+
+RVL_SDK/ax/AXAux.c:
+	.text       start:0x801FF764 end:0x801FFF90
+	.bss        start:0x804E4960 end:0x804E7AE0
+	.sbss       start:0x805A0A30 end:0x805A0A78
+
+RVL_SDK/ax/AXOut.c:
+	.text       start:0x801FFF90 end:0x80201264
+	.data       start:0x804780E0 end:0x8047B140
+	.bss        start:0x804E7AE0 end:0x804E89E0
+	.sdata      start:0x8059EB18 end:0x8059EB20
+	.sbss       start:0x805A0A78 end:0x805A0AD8
+
 RVL_SDK/ax/AXVPB.c:
 	.text       start:0x80201EF8 end:0x80201F38
+
+RVL_SDK/ax/AXProf.c:
+	.text       start:0x802025D4 end:0x80202614
+	.sbss       start:0x805A0B48 end:0x805A0B58
+
+RVL_SDK/axfx/AXFXReverbHi.c:
+	.text       start:0x80202614 end:0x80202710
+	.sdata2     start:0x805A3910 end:0x805A3918
+
+RVL_SDK/axfx/AXFXReverbHiExp.c:
+	.text       start:0x80202710 end:0x80203640
+	.data       start:0x8047B140 end:0x8047B2E0
+	.sdata2     start:0x805A3918 end:0x805A3958
+
+RVL_SDK/axfx/AXFXDelay.c:
+	.text       start:0x80203640 end:0x80203CD4
+	.sdata2     start:0x805A3958 end:0x805A3968
 
 RVL_SDK/axfx/AXFXHooks.c:
 	.text       start:0x80203CD4 end:0x80203D0C
@@ -1408,17 +2357,70 @@ RVL_SDK/mem/mem_heapCommon.c:
 RVL_SDK/mem/mem_expHeap.c:
 	.text       start:0x80204178 end:0x802049BC
 
+RVL_SDK/mem/mem_frameHeap.c:
+	.text       start:0x802049BC end:0x80204E30
+
+RVL_SDK/mem/mem_allocator.c:
+	.text       start:0x80204E30 end:0x80204EB4
+	.sdata2     start:0x805A3968 end:0x805A3978
+
 RVL_SDK/mem/mem_list.c:
 	.text       start:0x80204EB4 end:0x80204FC8
 
+RVL_SDK/cx/CXCompression.c:
+	.text       start:0x80204FC8 end:0x80205530
+
+RVL_SDK/cx/CXUncompression.c:
+	.text       start:0x80205530 end:0x80206308
+
+RVL_SDK/mix/mix.c:
+	.text       start:0x80206308 end:0x8020981C
+	.data       start:0x8047B2E0 end:0x8047BE70
+	.bss        start:0x804E8A80 end:0x804ECE00
+	.sbss       start:0x805A0B5C end:0x805A0B78
+
+RVL_SDK/dsp/dsp.c:
+	.text       start:0x8020981C end:0x80209A98
+	.data       start:0x8047BE70 end:0x8047BEF0
+	.sdata      start:0x8059EB28 end:0x8059EB30
+	.sbss       start:0x805A0B78 end:0x805A0B80
+
 RVL_SDK/dsp/dsp_debug.c:
 	.text       start:0x80209A98 end:0x80209AE8
+
+RVL_SDK/dsp/dsp_task.c:
+	.text       start:0x80209AE8 end:0x8020A37C
+	.data       start:0x8047BEF0 end:0x8047C030
+	.sbss       start:0x805A0B80 end:0x805A0B98
+
+RVL_SDK/card/CARDBios.c:
+	.text       start:0x8020A37C end:0x8020A5E8
+	.data       start:0x8047C030 end:0x8047C090
+	.bss        start:0x804ECE00 end:0x804ED040
+	.sdata      start:0x8059EB30 end:0x8059EB38
+	.sbss       start:0x805A0B98 end:0x805A0BA0
+
+RVL_SDK/nand/nand.c:
+	.text       start:0x8020A5E8 end:0x8020B8A8
 
 RVL_SDK/nand/NANDOpenClose.c:
 	.text       start:0x8020B8A8 end:0x8020C6CC
 	.data       start:0x8047C090 end:0x8047C0A8
 	.sdata      start:0x8059EB38 end:0x8059EB48
 	.sbss       start:0x805A0BA0 end:0x805A0BA4
+
+RVL_SDK/nand/NANDCore.c:
+	.text       start:0x8020C6CC end:0x8020D7BC
+	.rodata     start:0x8040D460 end:0x8040D5A8
+	.data       start:0x8047C0C0 end:0x8047C210
+	.bss        start:0x804ED040 end:0x804ED080
+	.sdata      start:0x8059EB48 end:0x8059EB68
+	.sbss       start:0x805A0BA4 end:0x805A0BB0
+
+RVL_SDK/nand/NANDCheck.c:
+	.text       start:0x8020D7BC end:0x8020DB1C
+	.data       start:0x8047C210 end:0x8047C2C0
+	.sdata      start:0x8059EB68 end:0x8059EB78
 
 RVL_SDK/nand/NANDLogging.c:
 	.text       start:0x8020DB1C end:0x8020E0EC
@@ -1427,10 +2429,37 @@ RVL_SDK/nand/NANDLogging.c:
 	.sdata      start:0x8059EB78 end:0x8059EB7C
 	.sbss       start:0x805A0BB0 end:0x805A0BB8
 
+RVL_SDK/sc/scsystem.c:
+	.text       start:0x8020E0EC end:0x8020FB50
+	.rodata     start:0x8040D5A8 end:0x8040D600
+	.data       start:0x8047C304 end:0x8047C4E0
+	.bss        start:0x804ED380 end:0x804F5520
+	.sdata      start:0x8059EB7C end:0x8059EC88
+	.sbss       start:0x805A0BB8 end:0x805A0BD0
+
+RVL_SDK/sc/scapi.c:
+	.text       start:0x8020FB50 end:0x80210118
+	.bss        start:0x804F5520 end:0x804F6540
+
+RVL_SDK/sc/scapi_prdinfo.c:
+	.text       start:0x80210118 end:0x80210430
+	.data       start:0x8047C4E0 end:0x8047C538
+	.sdata      start:0x8059EC88 end:0x8059ECB0
+	.sbss       start:0x805A0BD0 end:0x805A0BD8
+
+RVL_SDK/wenc/wenc.c:
+	.text       start:0x80210430 end:0x80210708
+	.rodata     start:0x8040D600 end:0x8040D640
+	.sdata2     start:0x805A3978 end:0x805A3980
+
 RVL_SDK/arc/arc.c:
 	.text       start:0x80210708 end:0x80211080
 	.data       start:0x8047C538 end:0x8047C5A4
 	.sdata      start:0x8059ECB0 end:0x8059ECB8
+
+RVL_SDK/esp/esp.c:
+	.text       start:0x80211080 end:0x80211A2C
+	.sdata      start:0x8059ECB8 end:0x8059ECC8
 
 RVL_SDK/ipc/ipcMain.c:
 	.text       start:0x80211A2C end:0x80211AF8
@@ -1488,9 +2517,31 @@ RVL_SDK/wpad/WPADEncrypt.c:
 RVL_SDK/wpad/debug_msg.c:
 	.text       start:0x8022550C end:0x8022555C
 
+RVL_SDK/kpad/KPAD.c:
+	.text       start:0x8022555C end:0x802284C4
+	.data       start:0x8047E1E8 end:0x8047E240
+	.bss        start:0x804F9FC0 end:0x804FB4A0
+	.sdata      start:0x8059ED10 end:0x8059ED80
+	.sbss       start:0x805A0C9C end:0x805A0CC0
+	.sdata2     start:0x805A39E8 end:0x805A3A48
+
 RVL_SDK/euart/euart.c:
 	.text       start:0x802284C4 end:0x80228834
 	.sbss       start:0x805A0CC0 end:0x805A0CD0
+
+RVL_SDK/usb/usb.c:
+	.text       start:0x80228834 end:0x80229960
+	.data       start:0x8047E240 end:0x8047E8D0
+	.sdata      start:0x8059ED80 end:0x8059ED90
+	.sbss       start:0x805A0CD0 end:0x805A0CE0
+
+RVL_SDK/wud/WUD.c:
+	.text       start:0x80229960 end:0x8022E32C
+	.data       start:0x8047E8D0 end:0x8047F830
+	.bss        start:0x804FB4A0 end:0x804FD448
+	.sdata      start:0x8059ED90 end:0x8059ED9C
+	.sbss       start:0x805A0CE0 end:0x805A0D00
+	.sdata2     start:0x805A3A48 end:0x805A3A50
 
 RVL_SDK/wud/WUDHidHost.c:
 	.text       start:0x8022E32C end:0x8022E928
@@ -1498,6 +2549,22 @@ RVL_SDK/wud/WUDHidHost.c:
 
 RVL_SDK/wud/debug_msg.c:
 	.text       start:0x8022E928 end:0x8022E978
+
+RVL_SDK/bte/gki_buffer.c:
+	.text       start:0x8022E978 end:0x8022FDBC
+	.data       start:0x8047FAB0 end:0x8047FBF4
+
+RVL_SDK/bte/gki_time.c:
+	.text       start:0x8022FDBC end:0x80230314
+
+RVL_SDK/bte/gki_glue_unk.c:
+	.text       start:0x80230314 end:0x802305C8
+
+RVL_SDK/bte/hcisu_h2.c:
+	.text       start:0x80230C4C end:0x80231844
+	.bss        start:0x80525F60 end:0x80527FC0
+	.sdata      start:0x8059ED9C end:0x8059EDA8
+	.sbss       start:0x805A0D00 end:0x805A0D18
 
 RVL_SDK/bte/bte_hcisu.c:
 	.text       start:0x80231844 end:0x802318FC
@@ -1511,14 +2578,40 @@ RVL_SDK/bte/bte_logmsg.c:
 	.bss        start:0x80527FC0 end:0x80528790
 	.sdata      start:0x8059EDD8 end:0x8059EDDC
 
+RVL_SDK/bte/bte_main.c:
+	.text       start:0x80231A8C end:0x80231BE4
+	.bss        start:0x805287A0 end:0x805297D0
+	.sdata      start:0x8059EDDC end:0x8059EDE8
+	.sbss       start:0x805A0D20 end:0x805A0D28
+
 RVL_SDK/bte/btu_task1.c:
 	.text       start:0x80231BE4 end:0x80232034
 	.bss        start:0x805297D0 end:0x80529854
 	.sdata      start:0x8059EDE8 end:0x8059EDF0
 	.sbss       start:0x805A0D28 end:0x805A0D30
 
+RVL_SDK/bte/bta_sys_main.c:
+	.text       start:0x80232108 end:0x802325A0
+	.data       start:0x8047FC68 end:0x8047FCA0
+	.bss        start:0x80529854 end:0x805298E8
+	.sbss       start:0x805A0D30 end:0x805A0D40
+
 RVL_SDK/bte/ptim.c:
 	.text       start:0x802325A0 end:0x80232780
+
+RVL_SDK/bte/utl.c:
+	.text       start:0x80232780 end:0x802327C4
+
+RVL_SDK/bte/bta_dm_act.c:
+	.text       start:0x802327C4 end:0x80234B00
+	.rodata     start:0x8040D738 end:0x8040D7E0
+	.data       start:0x8047FCA0 end:0x8047FDE0
+	.bss        start:0x805298E8 end:0x80529918
+	.sdata2     start:0x805A3A68 end:0x805A3A70
+
+RVL_SDK/bte/bta_dm_api.c:
+	.text       start:0x80234B00 end:0x80234F6C
+	.sdata2     start:0x805A3A70 end:0x805A3A80
 
 RVL_SDK/bte/bta_dm_main.c:
 	.text       start:0x80234F6C end:0x802350CC
@@ -1535,11 +2628,37 @@ RVL_SDK/bte/bta_hh_act.c:
 	.data       start:0x8047FE30 end:0x80480328
 	.sdata      start:0x8059EDF0 end:0x8059EDF4
 
+RVL_SDK/bte/bta_hh_api.c:
+	.text       start:0x80237230 end:0x80237600
+	.data       start:0x80480328 end:0x80480358
+	.sdata2     start:0x805A3A80 end:0x805A3A88
+
 RVL_SDK/bte/bta_hh_main.c:
 	.text       start:0x80237600 end:0x80237B54
 	.rodata     start:0x8040D908 end:0x8040D98C
 	.data       start:0x80480358 end:0x80480638
 	.bss        start:0x80529AC8 end:0x80529CF8
+
+RVL_SDK/bte/bta_hh_utils.c:
+	.text       start:0x80237B54 end:0x80237F00
+	.data       start:0x80480638 end:0x804808F8
+
+RVL_SDK/bte/btm_acl.c:
+	.text       start:0x80237F00 end:0x80239C44
+	.data       start:0x804808F8 end:0x80480D18
+
+RVL_SDK/bte/btm_dev.c:
+	.text       start:0x80239C44 end:0x8023A310
+
+RVL_SDK/bte/btm_devctl.c:
+	.text       start:0x8023A310 end:0x8023BDC8
+	.data       start:0x80480D18 end:0x80480F78
+	.sdata      start:0x8059EDF4 end:0x8059EE10
+
+RVL_SDK/bte/btm_inq.c:
+	.text       start:0x8023BDC8 end:0x8023D864
+	.data       start:0x80480F78 end:0x80481188
+	.sdata2     start:0x805A3A88 end:0x805A3A90
 
 RVL_SDK/bte/btm_main.c:
 	.text       start:0x8023D864 end:0x8023D8C0
@@ -1600,9 +2719,43 @@ RVL_SDK/bte/hidh_conn.c:
 	.rodata     start:0x8040D9C0 end:0x8040D9E8
 	.data       start:0x80482490 end:0x80482874
 
+RVL_SDK/bte/l2c_api.c:
+	.text       start:0x8024A304 end:0x8024AED0
+	.data       start:0x80482874 end:0x80483008
+
 RVL_SDK/bte/l2c_csm.c:
 	.text       start:0x8024AED0 end:0x8024C3AC
 	.data       start:0x80483008 end:0x80483840
+
+RVL_SDK/bte/l2c_link.c:
+	.text       start:0x8024C3AC end:0x8024D538
+	.data       start:0x80483840 end:0x80483AB0
+
+RVL_SDK/bte/l2c_main.c:
+	.text       start:0x8024D538 end:0x8024E568
+	.data       start:0x80483AB0 end:0x80483DB0
+	.bss        start:0x8052CDC0 end:0x8052D5A8
+
+RVL_SDK/bte/l2c_utils.c:
+	.text       start:0x8024E568 end:0x8025042C
+	.data       start:0x80483DB0 end:0x80483E98
+	.sdata      start:0x8059EE18 end:0x8059EE28
+
+RVL_SDK/bte/port_api.c:
+	.text       start:0x8025042C end:0x8025047C
+	.bss        start:0x8052D5A8 end:0x8052D9C0
+
+RVL_SDK/bte/port_rfc.c:
+	.text       start:0x8025047C end:0x80251AD0
+	.data       start:0x80483E98 end:0x804842E0
+
+RVL_SDK/bte/port_utils.c:
+	.text       start:0x80251AD0 end:0x80251E50
+	.data       start:0x804842E0 end:0x80484310
+
+RVL_SDK/bte/rfc_l2cap_if.c:
+	.text       start:0x80251E50 end:0x80252784
+	.data       start:0x80484310 end:0x80484450
 
 RVL_SDK/bte/rfc_mx_fsm.c:
 	.text       start:0x80252784 end:0x802533C8
@@ -1612,14 +2765,35 @@ RVL_SDK/bte/rfc_port_fsm.c:
 	.text       start:0x802533C8 end:0x80254568
 	.data       start:0x80484708 end:0x80484A30
 
+RVL_SDK/bte/rfc_port_if.c:
+	.text       start:0x80254568 end:0x80254A94
+
+RVL_SDK/bte/rfc_ts_frames.c:
+	.text       start:0x80254A94 end:0x802560DC
+	.data       start:0x80484A30 end:0x80484B08
+	.sdata      start:0x8059EE28 end:0x8059EE38
+
 RVL_SDK/bte/rfc_utils.c:
 	.text       start:0x802560DC end:0x802568BC
 	.rodata     start:0x8040D9E8 end:0x8040DAE8
 	.data       start:0x80484B08 end:0x80484B94
 
+RVL_SDK/bte/sdp_api.c:
+	.text       start:0x802568BC end:0x80257250
+	.data       start:0x80484B94 end:0x80484BE8
+
+RVL_SDK/bte/sdp_db.c:
+	.text       start:0x80257250 end:0x802583F0
+	.data       start:0x80484BE8 end:0x80484C80
+
 RVL_SDK/bte/sdp_discovery.c:
 	.text       start:0x802583F0 end:0x80259668
 	.data       start:0x80484C80 end:0x80484DDC
+
+RVL_SDK/bte/sdp_main.c:
+	.text       start:0x80259668 end:0x8025A1D4
+	.data       start:0x80484DDC end:0x80485140
+	.bss        start:0x8052D9C0 end:0x80532000
 
 RVL_SDK/bte/sdp_server.c:
 	.text       start:0x8025A1D4 end:0x8025AEE4
@@ -1888,6 +3062,10 @@ havok/hkQuaternion.cpp:
 
 havok/hkRotation.cpp:
 	.text       start:0x80285A6C end:0x80285CCC
+
+havok/hkSweptTransform.cpp:
+	.text       start:0x80285CCC end:0x80285D40
+	.sdata2     start:0x805A3D50 end:0x805A3D58
 
 havok/hkSweptTransformClass.cpp:
 	.text       start:0x80285D40 end:0x80285DA4
@@ -2228,6 +3406,9 @@ havok/hkCapsuleShapeClass.cpp:
 	.bss        start:0x805326E0 end:0x80532708
 	.sdata2     start:0x805A4088 end:0x805A4098
 
+havok/hkShapeCollection.cpp:
+	.text       start:0x802D0818 end:0x802D0828
+
 havok/hkShapeCollectionClass.cpp:
 	extab       start:0x800083D0 end:0x800083D8
 	extabindex  start:0x8000B128 end:0x8000B134
@@ -2399,6 +3580,12 @@ havok/hkReportContactMgr.cpp:
 havok/hk_dynamics_contact_mgr.cpp:
 	.text       start:0x802D7FC8 end:0x802D7FD0
 
+havok/hkSimpleConstraintContactMgr.cpp:
+	.text       start:0x802D8064 end:0x802D94A8
+	.rodata     start:0x80411050 end:0x80411068
+	.data       start:0x804878C8 end:0x80487928
+	.sdata2     start:0x805A41B0 end:0x805A41E8
+
 havok/hkMaterialClass.cpp:
 	.text       start:0x802D94A8 end:0x802D9518
 	.ctors      start:0x804066AC end:0x804066B0
@@ -2459,6 +3646,11 @@ havok/hkGenericConstraintSchemeClass.cpp:
 	.rodata     start:0x80412260 end:0x80412300
 	.bss        start:0x80532E98 end:0x80532EC0
 	.sdata2     start:0x805A42A0 end:0x805A42B8
+
+havok/hkSimpleContactConstraintData.cpp:
+	.text       start:0x802DD63C end:0x802DE624
+	.data       start:0x80487B48 end:0x80487BB4
+	.sdata2     start:0x805A42B8 end:0x805A42E0
 
 havok/hkConstraintDataClass.cpp:
 	.text       start:0x802DE624 end:0x802DE690
@@ -2651,6 +3843,12 @@ havok/hkWorldObjectClass.cpp:
 	.bss        start:0x80533238 end:0x80533260
 	.sdata2     start:0x805A44D8 end:0x805A44E8
 
+havok/hkWorldMemoryWatchDog.cpp:
+	.text       start:0x802F0714 end:0x802F0B40
+	.rodata     start:0x80413FC0 end:0x80413FF8
+	.data       start:0x80488600 end:0x80488618
+	.sdata2     start:0x805A44E8 end:0x805A44F8
+
 havok/hkWorldMemoryWatchDogClass.cpp:
 	.text       start:0x802F0B40 end:0x802F0BA8
 	.ctors      start:0x80406748 end:0x8040674C
@@ -2684,6 +3882,13 @@ havok/hkAgent1nMachine.cpp:
 	extab       start:0x800086AC end:0x8000870C
 	extabindex  start:0x8000B554 end:0x8000B5E4
 	.text       start:0x802FC6AC end:0x802FEDA0
+
+havok/hkLinkedCollidable.cpp:
+	.text       start:0x802FF394 end:0x802FF53C
+	.data       start:0x8048884C end:0x804888A0
+
+havok/hkLinkedCollidable_part2.cpp:
+	.text       start:0x80300488 end:0x803004F4
 
 havok/hkLinkedCollidableClass.cpp:
 	extab       start:0x80008754 end:0x8000875C
@@ -3281,6 +4486,13 @@ FAT/sd_host.c:
 	.sdata      start:0x8059FE98 end:0x8059FEA0
 	.sbss       start:0x805A1230 end:0x805A1250
 
+RVL_SDK/rfl/rfl_manager_unk_a.c:
+	.text       start:0x803CD270 end:0x803CD32C
+
+RVL_SDK/rfl/rfl_manager_unk_b.c:
+	.text       start:0x803CD3B4 end:0x803CD484
+	.data       start:0x80492F50 end:0x80492F60
+
 FAT/pf_clib.c:
 	.text       start:0x803D620C end:0x803D66EC
 
@@ -3371,6 +4583,26 @@ sora/snd/snd_sound_handle.cpp:
 Runtime.PPCEABI.H/__va_arg.c:
 	.text       start:0x803F065C end:0x803F0724
 
+Runtime.PPCEABI.H/global_destructor_chain.c:
+	.text       start:0x803F0724 end:0x803F07D0
+	.bss        start:0x805998E0 end:0x80599BE0
+	.sbss       start:0x805A12D0 end:0x805A12D8
+
+Runtime.PPCEABI.H/NMWException.cpp:
+	.text       start:0x803F07D0 end:0x803F0A1C
+	.sdata      start:0x8059FF20 end:0x8059FF30
+
+Runtime.PPCEABI.H/ptmf.c:
+	.text       start:0x803F0DCC end:0x803F0E84
+
+Runtime.PPCEABI.H/RTTI.c:
+	.text       start:0x803F11E0 end:0x803F11F8
+	.data       start:0x80493D74 end:0x80493D8C
+
+Runtime.PPCEABI.H/runtime.c:
+	.text       start:0x803F11F8 end:0x803F1A08
+	.rodata     start:0x8041F460 end:0x8041F478
+
 Runtime.PPCEABI.H/__init_cpp_exceptions.cpp:
 	.text       start:0x803F1A08 end:0x803F1A78
 	.ctors      start:0x804064E0 end:0x804064E4 rename:.ctors$10
@@ -3378,8 +4610,49 @@ Runtime.PPCEABI.H/__init_cpp_exceptions.cpp:
 	.dtors      start:0x804067E4 end:0x804067E8 rename:.dtors$15
 	.sdata      start:0x8059FF48 end:0x8059FF50
 
+Runtime.PPCEABI.H/Gecko_ExceptionPPC.c:
+	.text       start:0x803F1A78 end:0x803F1B64
+	.bss        start:0x80599BE0 end:0x80599BEC
+
+Runtime.PPCEABI.H/Gecko_ExceptionPPC_part2.c:
+	.text       start:0x803F2948 end:0x803F2A4C
+
+Runtime.PPCEABI.H/Gecko_ExceptionPPC_part3.c:
+	.text       start:0x803F2E4C end:0x803F2F90
+
+Runtime.PPCEABI.H/GCN_mem_alloc.c:
+	.text       start:0x803F2F90 end:0x803F3048
+	.rodata     start:0x8041F478 end:0x8041F4E8
+
+MSL_C/alloc.c:
+	.text       start:0x803F3198 end:0x803F3240
+
+MSL_C/ansi_fp.c:
+	.text       start:0x803F3A54 end:0x803F3B40
+
+MSL_C/ansi_fp_part2.c:
+	.text       start:0x803F3EAC end:0x803F4090
+
 MSL_C/arith.c:
 	.text       start:0x803F5060 end:0x803F5070
+
+MSL_C/buffer_io.c:
+	.text       start:0x803F5070 end:0x803F5098
+
+MSL_C/file_io.c:
+	.text       start:0x803F5A88 end:0x803F5B48
+
+MSL_C/FILE_POS.c:
+	.text       start:0x803F5C38 end:0x803F5CE4
+
+MSL_C/FILE_POS_part2.c:
+	.text       start:0x803F5EA8 end:0x803F5EAC
+
+MSL_C/mbstring.c:
+	.text       start:0x803F5EF4 end:0x803F5F74
+
+MSL_C/mem.c:
+	.text       start:0x803F60F8 end:0x803F619C
 
 MSL_C/mem_funcs.c:
 	.text       start:0x803F619C end:0x803F646C
@@ -3387,8 +4660,37 @@ MSL_C/mem_funcs.c:
 MSL_C/misc_io.c:
 	.text       start:0x803F6568 end:0x803F6578
 
+MSL_C/printf.c:
+	.text       start:0x803F6B74 end:0x803F6D9C
+	.data       start:0x80494424 end:0x804944A8
+
+MSL_C/printf_part2.c:
+	.text       start:0x803F7404 end:0x803F752C
+
+MSL_C/rand.c:
+	.text       start:0x803F8C3C end:0x803F8C64
+	.sdata      start:0x8059FF50 end:0x8059FF60
+
+MSL_C/scanf.c:
+	.text       start:0x803FA078 end:0x803FA108
+
+MSL_C/string.c:
+	.text       start:0x803FA280 end:0x803FA5D0
+
+MSL_C/string_part2.c:
+	.text       start:0x803FA798 end:0x803FA804
+
+MSL_C/wstring.c:
+	.text       start:0x803FC7C8 end:0x803FC828
+
 MSL_C/wchar_io.c:
 	.text       start:0x803FC828 end:0x803FC8AC
+
+MSL_C/uart_console_io.c:
+	.text       start:0x803FC97C end:0x803FC984
+
+MSL_C/abort_exit.c:
+	.text       start:0x803FC9B8 end:0x803FC9BC
 
 MSL_C/extras.c:
 	.text       start:0x803FC9FC end:0x803FCB50
@@ -3475,6 +4777,9 @@ MSL_C/MSL_Common_Embedded/Math/Double_precision/s_ldexp.c:
 	.text       start:0x80400778 end:0x804008E4
 	.sdata2     start:0x805A50D0 end:0x805A50F8
 
+MSL_C/MSL_Common_Embedded/Math/Double_precision/s_modf.c:
+	.text       start:0x804008E4 end:0x804009E0
+
 MSL_C/MSL_Common_Embedded/Math/Double_precision/s_sin.c:
 	.text       start:0x804009E0 end:0x80400AB8
 	.sdata2     start:0x805A50F8 end:0x805A5100
@@ -3518,8 +4823,20 @@ MetroTRK/debugger/embedded/MetroTRK/Portable/nubevent.c:
 	.text       start:0x80400E90 end:0x804010B8
 	.bss        start:0x80599F48 end:0x80599F70
 
+MetroTRK/debugger/embedded/MetroTRK/Portable/nubinit.c:
+	.text       start:0x804010B8 end:0x8040123C
+
 MetroTRK/debugger/embedded/MetroTRK/Portable/msg.c:
 	.text       start:0x8040123C end:0x80401268
+
+MetroTRK/debugger/embedded/MetroTRK/Portable/msgbuf.c:
+	.text       start:0x80401268 end:0x80401AA4
+	.rodata     start:0x80420488 end:0x804204A8
+	.bss        start:0x80599F70 end:0x8059B928
+
+MetroTRK/debugger/embedded/MetroTRK/Portable/serpoll.c:
+	.text       start:0x80401AA4 end:0x80401C50
+	.bss        start:0x8059B928 end:0x8059B940
 
 MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/usr_put.c:
 	.text       start:0x80401C50 end:0x80401CDC
@@ -3527,6 +4844,12 @@ MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/usr_put.c:
 MetroTRK/debugger/embedded/MetroTRK/Portable/dispatch.c:
 	.text       start:0x80401CDC end:0x80401E24
 	.data       start:0x804946F8 end:0x80494764
+
+MetroTRK/debugger/embedded/MetroTRK/Portable/msghndlr.c:
+	.text       start:0x80401E24 end:0x80402F00
+	.rodata     start:0x804204A8 end:0x804204E0
+	.data       start:0x80494764 end:0x804947AC
+	.bss        start:0x8059B940 end:0x8059B948
 
 MetroTRK/debugger/embedded/MetroTRK/Portable/support.c:
 	.text       start:0x80402F00 end:0x804035B4
@@ -3540,11 +4863,31 @@ MetroTRK/debugger/embedded/MetroTRK/Portable/notify.c:
 MetroTRK/debugger/embedded/MetroTRK/Processor/ppc/Generic/flush_cache.c:
 	.text       start:0x80403664 end:0x8040369C
 
+MetroTRK/debugger/embedded/MetroTRK/Portable/mem_TRK.c:
+	.text       start:0x8040369C end:0x80403754
+
 MetroTRK/debugger/embedded/MetroTRK/Portable/string_TRK.c:
 	.text       start:0x80403754 end:0x80403770
 
+MetroTRK/debugger/embedded/MetroTRK/Processor/ppc/Generic/targimpl.c:
+	.text       start:0x80403770 end:0x804051B0
+	.rodata     start:0x804204E0 end:0x8042056C
+	.data       start:0x804947AC end:0x804947D0
+	.bss        start:0x8059B948 end:0x8059BEC8
+
 MetroTRK/debugger/embedded/MetroTRK/Processor/ppc/Generic/mpc_7xx_603e.c:
 	.text       start:0x804051B0 end:0x80405520
+
+MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/dolphin_trk.c:
+	.text       start:0x80405698 end:0x80405B0C
+	.rodata     start:0x8042056C end:0x80420670
+	.data       start:0x804947D0 end:0x80494810
+	.bss        start:0x8059BEC8 end:0x8059BED8
+
+MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/dolphin_trk_glue.c:
+	.text       start:0x80405B0C end:0x80405EB8
+	.data       start:0x80494810 end:0x80494838
+	.bss        start:0x8059BED8 end:0x8059BEE0
 
 MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/targcont.c:
 	.text       start:0x80405EB8 end:0x80405EEC
@@ -3552,6 +4895,14 @@ MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/targcont.c:
 MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/target_options.c:
 	.text       start:0x80405EEC end:0x80405F08
 	.bss        start:0x8059BEE0 end:0x8059BEE4
+
+MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/UDP_Stubs.c:
+	.text       start:0x80405F08 end:0x80405F50
+
+MetroTRK/gamedev/cust_connection/cc/exi2/GCN/EXI2_GDEV_GCN/main.c:
+	.text       start:0x80405F50 end:0x80406210
+	.bss        start:0x8059BEE4 end:0x8059C404
+	.sbss       start:0x805A1308 end:0x805A1314
 
 MetroTRK/gamedev/cust_connection/utils/common/CircleBuffer.c:
 	.text       start:0x80406210 end:0x80406478

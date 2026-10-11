@@ -114,5 +114,11 @@ struct gfPadStatus {
 
     void convSysStatusToMenuStatus(gfPadStatus* destination);
 
+    // Reads the status of a pad from the pad system (index 0xF0 = the pad of the system menu). HYPOTHESIS: the names
+    // come from the symbol map of st_croll, where both are emitted as weak functions.
+    static int gfPadGetSysStatus(int index, gfPadStatus* destination);
+    // Whether a button of the mask was pressed in this frame.
+    bool bitcheckEdgeOn(u32 mask) const;
+
 };
 static_assert(sizeof(gfPadStatus) == 0x40, "Class is the wrong size!");
