@@ -49,7 +49,7 @@ extern void *fn_80229960(UINT32 size);
 extern void fn_802299B0(void *p_mem);
 
 // bte_main.c
-extern void fn_80231BB4(INT8 arg);
+extern void bte_report_state(INT8 state);
 
 /*******************************************************************************
  * functions
@@ -164,7 +164,7 @@ void fn_802305A4(int type, INT8 arg)
 		break;
 
 	case 4:
-		fn_80231BB4(arg);
+		bte_report_state(arg);
 		break;
 	}
 }
