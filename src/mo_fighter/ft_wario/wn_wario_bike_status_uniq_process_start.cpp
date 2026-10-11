@@ -34,9 +34,8 @@ void wnWarioBikeStatusUniqProcessStart::exitStatus(soModuleAccesser* a, int next
             Vec2f direction(1.0f, 0.0f);
             direction.rot(&direction, 0.017453292f * angle);
             direction.m_x *= lr;
-            Vec2f velocity = direction * speed;
             Vec2f launchVelocity;
-            Vec2f::copy(launchVelocity, velocity);
+            Vec2f::copy(launchVelocity, direction * speed);
             normal.setSpeed(&launchVelocity);
             gravity.m_speedY = 0.0f;
             work.onFlag(0x22000006);

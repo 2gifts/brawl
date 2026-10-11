@@ -125,12 +125,17 @@ void wnWarioBikeStatusUniqProcessDrive::execFixPos(soModuleAccesser* a) {
                     angle += param->unk64;
                     if (angle > groundAngle) angle = groundAngle;
                 }
-            } else if (rear && !front) {
+            } else if (!front && rear) {
                 angle -= param->unk64;
-                if (angle < -45.0f) angle = -45.0f;
-            } else if (front && !rear) {
+                // MATCH-ONLY: retain the native support test in each wheel-only path.
+                if (touch) {
+                    if (angle < groundAngle) angle = groundAngle;
+                } else if (angle < -45.0f) angle = -45.0f;
+            } else if (!rear && front) {
                 angle += param->unk64;
-                if (angle > 45.0f) angle = 45.0f;
+                if (touch) {
+                    if (angle > groundAngle) angle = groundAngle;
+                } else if (angle > 45.0f) angle = 45.0f;
             }
             if (touch && 0.0f != wnWarioBikeKineticTransactor::ABS(stickX) && lr != (float)(stickX < 0.0f ? -1 : 1))
                 status.changeStatusRequest(5, a);
@@ -144,13 +149,21 @@ void wnWarioBikeStatusUniqProcessDrive::execFixPos(soModuleAccesser* a) {
     }
     work.setFloat(angle, 0x21000000);
     float speed = normal.getSpeed().length();
-    float minimum = front || rear ? param->unk14 : param->unk20;
-    float maximum = front || rear ? param->unkC : param->unk18;
-    float elapsed = speed - minimum;
-    float range = maximum - minimum;
+    float elapsed;
+    float range;
+    if (front || rear) {
+        float minimum = param->unk14;
+        elapsed = speed - minimum;
+        range = param->unkC - minimum;
+    } else {
+        float minimum = param->unk20;
+        elapsed = speed - minimum;
+        range = param->unk18 - minimum;
+    }
     if (elapsed < 0.0f) elapsed = 0.0f;
     else if (elapsed > range) elapsed = range;
     float fraction = elapsed / range;
-    motion.setRate(param->unk44 + fraction * (param->unk40 - param->unk44));
+    float rate = param->unk44 + fraction * (param->unk40 - param->unk44);
+    motion.setRate(rate);
 }
 wnWarioBikeStatusUniqProcessDrive g_wnWarioBikeStatusUniqProcessDrive;
