@@ -139,7 +139,7 @@ void fn_8022555C(int, int);
 void fn_80225570(int, float, float);
 int fn_8021C938(int);
 void fn_8021C9AC(int, int, int);
-void fn_8021A118(int, void (*)(int));
+void WPADSetConnectCallback(int, void (*)(int));
 void fn_80215FC4(PadStatusRaw*);
 void fn_80215C54(u32);
 int fn_80227728(int, KpadStatusRaw*, int);
@@ -386,7 +386,7 @@ gfPadSystem::gfPadSystem() {
         fn_8021C9AC(3, 0, 0);
     }
     for (int i = 0; i < 4; i++) {
-        fn_8021A118(0, fn_80028B74);
+        WPADSetConnectCallback(0, fn_80028B74);
     }
 
     padInit(&m_sysPadMerged);

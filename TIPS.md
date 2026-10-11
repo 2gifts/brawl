@@ -20,6 +20,9 @@ The same assembly can come from very different C++ (`add r3,r3,r4` could be `x +
 
 ## 2. Inlining
 - A callee that our build inlines but the original calls with `bl`: MWCC inlines by statement count. Padding with dead statements (`if (0) { ... }`) pushes it over the threshold. Seen once with numbers (Melee `ftCo_Guard.c`, 68.76 to 100). **MED**
+- **A split blob that is really several source files (nwc24, so):** calls that crossed file boundaries in the original (`bl`) get inlined when everything shares one TU. `#pragma auto_inline off` for the whole file, then mark the helpers the original did inline within one file as `inline` by hand. A global that was both emitted and inlined into a sibling needs an `inline` helper plus a thin wrapper (`NWC24iRequestShutdown`, `NWC24iRegister`). `#pragma dont_inline on` around a definition also turns off inlining *inside* that function, and `__attribute__((never_inline))` is rejected by GC/3.0a3. Seen: `src/RVL_SDK/nwc24/nwc24.c`, `src/RVL_SDK/so/so.c`. **MED-HIGH**
+- Statics from several original files in one TU share one `.bss` anchor, so functions that touch two of them show small `addi` offset diffs (about 99.9% in objdiff) even though the code is right. Only a real per-file split fixes that. **MED**
+- A pointer test that compiles to `li r0,0` + `cmplw` instead of `cmpwi r3,0` after an inlined helper: write `if (!OSGetCurrentThread())` rather than `== NULL`. Seen: `nwc24.c` calling-status checks. **MED**
 - Template or inline member functions that must exist as separate weak functions: explicit instantiation (`template Elm& Arr::at(s32);`) in a unit split by address range. This is how the `so_array_*` units work. **HIGH**
 - Force a direct (non-virtual) call: qualified name (`p->Base::method()`). **HIGH** (C++ rule)
 - Last resorts: inline `asm {}` with `register` locals, or `nofralloc` asm functions (`mt_matrix.cpp`). Mark with `// MATCH-ONLY:` and a reason.

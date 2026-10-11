@@ -2192,6 +2192,24 @@ static NWC24Err ExecNoParamCommand(const char *user, s32 type, NWC24Err *exResul
     return result;
 }
 
+// HYPOTHESIS: plain "no parameter" scheduler commands 6..9. only the socket library (so.c) calls
+// them, around its startup/cleanup, so they are probably "tell kd the network is going up/down".
+NWC24Err NWC24iExecCmd6(NWC24Err *out) {
+    return ExecNoParamCommand(NULL, 6, out);
+}
+
+NWC24Err NWC24iExecCmd7(NWC24Err *out) {
+    return ExecNoParamCommand(NULL, 7, out);
+}
+
+NWC24Err NWC24iExecCmd8(void) {
+    return ExecNoParamCommand(NULL, 8, NULL);
+}
+
+NWC24Err NWC24iExecCmd9(void) {
+    return ExecNoParamCommand(NULL, 9, NULL);
+}
+
 static inline void InitScdMutex(void) {
     BOOL enabled = OSDisableInterrupts();
 
