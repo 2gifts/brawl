@@ -161,6 +161,29 @@ if 'report' in sys.argv:
         self.assertIn("shasum", state["commands"][4]["argv"])
         self.assertFalse(self.lock.exists())
 
+    def test_evidence_accepts_consecutive_build_batches(self):
+        state = build.run(self.args())
+        state["commands"].insert(4, dict(state["commands"][3]))
+        build.write_json(self.base / "baseline/validation.json", state)
+        build.evidence(self.base / "baseline")
+
+    def test_evidence_checks_every_build_batch(self):
+        state = build.run(self.args())
+        batch = dict(state["commands"][3])
+        batch["log_sha256"] = "0" * 64
+        state["commands"].insert(4, batch)
+        build.write_json(self.base / "baseline/validation.json", state)
+        with self.assertRaises(build.ValidationError):
+            build.evidence(self.base / "baseline")
+
+    def test_evidence_rejects_interrupted_build_role_sequence(self):
+        state = build.run(self.args())
+        state["commands"].insert(4, dict(state["commands"][1]))
+        state["commands"].insert(5, dict(state["commands"][3]))
+        build.write_json(self.base / "baseline/validation.json", state)
+        with self.assertRaises(build.ValidationError):
+            build.evidence(self.base / "baseline")
+
     def test_scoped_is_not_full(self):
         state = build.run(self.args(mode="objects"))
         self.assertFalse(state["full_gate"])

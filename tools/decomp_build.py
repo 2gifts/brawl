@@ -282,7 +282,15 @@ def evidence(path: Path) -> tuple[dict, dict]:
         expected_roles.append("fresh-report")
     elif generation.get("kind") != "reused":
         raise ValidationError("Invalid report generation provenance")
-    if [c.get("role") for c in manifest.get("commands", [])] != expected_roles:
+    # Windows warm builds can require several consecutive Ninja invocations.
+    # Only collapse the build run; preserve the exact order of all other roles
+    # and verify every command's success and log digest below.
+    roles = []
+    for record in manifest.get("commands", []):
+        role = record.get("role")
+        if role != "build" or not roles or roles[-1] != "build":
+            roles.append(role)
+    if roles != expected_roles:
         raise ValidationError("Evidence lacks required validation commands")
     report_path = path / "report.json"
     if json_digest(manifest.get("source", {}).get("inputs")) != manifest.get("source", {}).get("source_fingerprint"):
