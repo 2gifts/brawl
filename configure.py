@@ -948,7 +948,7 @@ config.libs = [
             Object(NonMatching, "RVL_SDK/bte/btm_devctl.c"),
             Object(NonMatching, "RVL_SDK/bte/btm_acl.c"),
             Object(NonMatching, "RVL_SDK/bte/btm_sec.c"),
-            Object(NonMatching, "RVL_SDK/bte/btm_sco.c"),
+            Object(Matching, "RVL_SDK/bte/btm_sco.c"),
             Object(Matching, "RVL_SDK/bte/l2c_link.c"),
             Object(Matching, "RVL_SDK/bte/l2c_main.c"),
             Object(Matching, "RVL_SDK/bte/l2c_api.c"),

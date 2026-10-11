@@ -296,6 +296,17 @@ typedef struct
 	/* 1 byte padding */
 } tBTM_ESCO_INFO; // size 0x24
 
+enum
+{
+	SCO_ST_UNUSED,
+	SCO_ST_LISTENING,
+	SCO_ST_W4_CONN_RSP,
+	SCO_ST_CONNECTING,
+	SCO_ST_CONNECTED,
+	SCO_ST_DISCONNECTING,
+	SCO_ST_PEND_UNPARK,
+};
+
 typedef struct
 {
 	tBTM_SCO_CB		*p_conn_cb;		// size 0x04, offset 0x00
@@ -563,6 +574,7 @@ void btm_clr_inq_db(BD_ADDR p_bda);
 void btm_sec_init(UINT8 sec_mode);
 void btm_sco_init(void);
 UINT8 btm_num_sco_links_active(void);
+UINT8 BTM_NumScoLinks(void);
 void btm_sco_flush_sco_data(UINT16 sco_inx);
 
 // ---
@@ -686,6 +698,7 @@ void btm_esco_proc_conn_chg(UINT8 status, UINT16 handle, UINT8 tx_interval,
                             UINT16 tx_pkt_len);
 BOOLEAN btm_is_sco_active(UINT16 handle);
 UINT8 btm_num_sco_links_active(void);
+UINT8 BTM_NumScoLinks(void);
 BOOLEAN btm_is_any_sco_active(void);
 BOOLEAN btm_is_sco_active_by_bdaddr(BD_ADDR remote_bda);
 
