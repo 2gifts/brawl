@@ -21,6 +21,7 @@ force_active:
 - __dt__13hkSystemClockFv
 - __vt__13hkSystemClock
 - __vt__28hkSingleton<13hkSystemClock>
+- __DVDUnreferencedTime
 
 extract:
 - symbol: HomeBtnIcon

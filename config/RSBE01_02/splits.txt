@@ -2257,13 +2257,13 @@ RVL_SDK/gx/GXPerf.c:
 
 RVL_SDK/dvd/dvdfs.c:
 	.text       start:0x801F5ED8 end:0x801F69D8
-	.data       start:0x80476640 end:0x804767A4
+	.data       start:0x80476640 end:0x804767A8
 	.sdata      start:0x8059EAC8 end:0x8059EAD8
 	.sbss       start:0x805A08D0 end:0x805A0900
 
 RVL_SDK/dvd/dvd.c:
 	.text       start:0x801F69D8 end:0x801FB6CC
-	.data       start:0x804767F0 end:0x80476B18
+	.data       start:0x804767A8 end:0x80476B18
 	.bss        start:0x804DF740 end:0x804E43F0
 	.sdata      start:0x8059EAD8 end:0x8059EAF0
 	.sbss       start:0x805A0900 end:0x805A0998
