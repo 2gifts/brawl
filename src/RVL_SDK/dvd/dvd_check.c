@@ -47,8 +47,8 @@ static inline void showDriveError(void) {
 
 // HYPOTHESIS: boot time check that the drive is a real nintendo one. it pokes two reads at addresses a
 // genuine drive should reject and puts up a fatal error if they work. called once from OSInit when
-// the ios is new enough. no name evidence, so it keeps its address name
-BOOL fn_801FC4EC(void) {
+// the ios is new enough. name is from the public dvd header (the internal funcs list)
+BOOL __DVDCheckDevice(void) {
     OSIOSRev rev;
     u32 offset = 0x460A0000;
 
