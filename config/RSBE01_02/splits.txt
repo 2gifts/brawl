@@ -2782,11 +2782,11 @@ RVL_SDK/bte/rfc_utils.c:
 	.data       start:0x80484B08 end:0x80484B94
 
 RVL_SDK/bte/sdp_api.c:
-	.text       start:0x802568BC end:0x80257250
+	.text       start:0x802568BC end:0x80257724
 	.data       start:0x80484B94 end:0x80484BE8
 
 RVL_SDK/bte/sdp_db.c:
-	.text       start:0x80257250 end:0x802583F0
+	.text       start:0x80257724 end:0x802583F0
 	.data       start:0x80484BE8 end:0x80484C80
 
 RVL_SDK/bte/sdp_discovery.c:
