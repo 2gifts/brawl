@@ -24,7 +24,8 @@ void wnWarioBikeStatusUniqProcessTurnStart::initStatus(soModuleAccesser* a) {
     link.sendEventParents(3, query);
     int random = randi(param->unk7C);
     // Repeated turns increase the chance of the alternate turn path.
-    if (count + (4 - query.unk8) + 1 > random + 1 || count + 1 >= param->unk80)
+    int turnChance = count + (4 - query.unk8);
+    if (turnChance + 1 > random + 1 || count + 1 >= param->unk80)
         work.onFlag(0x22000009);
     work.setInt(count + 1, 0x20000000);
     ftWarioBikeLinkEvent event(0x83a);
@@ -70,7 +71,8 @@ void wnWarioBikeStatusUniqProcessTurnStart::exitStatus(soModuleAccesser* a, int 
         soPostureModule& posture = a->getPostureModule();
         float angle = work.getFloat(0x21000000);
         work.setFloat(-angle, 0x21000000);
-        work.setFloat(-work.getFloat(0x21000002), 0x21000002);
+        float unk2 = work.getFloat(0x21000002);
+        work.setFloat(-unk2, 0x21000002);
         Vec3f rotation(angle, 0.0f, 0.0f);
         posture.setRot(&rotation, 0);
         work.offFlag(0x22000002);

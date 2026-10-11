@@ -43,11 +43,15 @@ void wnWarioBikeStatusUniqProcessTurnEnd::exitStatus(soModuleAccesser* a, int ne
         soPostureModule& posture = a->getPostureModule();
         float angle = work.getFloat(0x21000000);
         work.setFloat(-angle, 0x21000000);
-        work.setFloat(-work.getFloat(0x21000001), 0x21000001);
-        work.setFloat(-work.getFloat(0x21000002), 0x21000002);
-        work.setFloat(-work.getFloat(0x21000003), 0x21000003);
+        float unk1 = work.getFloat(0x21000001);
+        work.setFloat(-unk1, 0x21000001);
+        float unk2 = work.getFloat(0x21000002);
+        work.setFloat(-unk2, 0x21000002);
+        float unk3 = work.getFloat(0x21000003);
+        work.setFloat(-unk3, 0x21000003);
         posture.reverseLr();
-        posture.reverseRotYLr();
+        // Refresh rotation from the new facing rather than negate the old rotation.
+        posture.updateRotYLr();
         Vec3f rotation(angle, 0.0f, 0.0f);
         posture.setRot(&rotation, 0);
         work.offFlag(0x22000002);
