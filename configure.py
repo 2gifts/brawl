@@ -593,11 +593,9 @@ config.libs = [
         "objects": [
             Object(NonMatching, "RVL_SDK/pad/Pad.c"),
             Object(NonMatching, "RVL_SDK/wpad/WPAD.c"),
-            Object(NonMatching, "RVL_SDK/bte/btm_pm.c"),
             Object(NonMatching, "RVL_SDK/bte/btm_sco.c"),
             Object(NonMatching, "RVL_SDK/bte/btm_sec.c"),
             Object(NonMatching, "RVL_SDK/bte/btu_hcif.c"),
-            Object(NonMatching, "RVL_SDK/bte/hcicmds.c"),
         ],
     },
     # --- sibling-project libraries (begin) ---
@@ -860,6 +858,8 @@ config.libs = [
             Object(Matching, "RVL_SDK/bte/rfc_utils.c"),
             Object(Matching, "RVL_SDK/bte/sdp_discovery.c"),
             Object(Matching, "RVL_SDK/bte/sdp_server.c"),
+            Object(Matching, "RVL_SDK/bte/hcicmds.c"),
+            Object(NonMatching, "RVL_SDK/bte/btm_pm.c"),
             Object(NonMatching, "RVL_SDK/bte/sdp_utils.c"),
             Object(NonMatching, "RVL_SDK/bte/hidh_api.c"),
             Object(NonMatching, "RVL_SDK/bte/hidd_conn.c"),
