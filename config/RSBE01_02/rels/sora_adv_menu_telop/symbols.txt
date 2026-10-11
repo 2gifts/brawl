@@ -1,9 +1,9 @@
-fn_38_0 = .text:0x00000000; // type:function size:0xD4
-fn_38_D4 = .text:0x000000D4; // type:function size:0x98
-fn_38_16C = .text:0x0000016C; // type:function size:0x330
-fn_38_49C = .text:0x0000049C; // type:function size:0x1C
-fn_38_4B8 = .text:0x000004B8; // type:function size:0x1C
-fn_38_4D4 = .text:0x000004D4; // type:function size:0x234
+create__14muAdvTelopTaskFPC15muAdvTelopParam = .text:0x00000000; // type:function size:0xD4
+__dt__14muAdvTelopTaskFv = .text:0x000000D4; // type:function size:0x98
+processDefault__14muAdvTelopTaskFv = .text:0x0000016C; // type:function size:0x330
+isAlive__14muAdvTelopTaskCFv = .text:0x0000049C; // type:function size:0x1C
+kill__14muAdvTelopTaskFv = .text:0x000004B8; // type:function size:0x1C
+createData__14muAdvTelopTaskFP9gfArchive = .text:0x000004D4; // type:function size:0x234
 _prolog = .text:0x00000708; // type:function size:0x48 scope:global
 _epilog = .text:0x00000750; // type:function size:0x48 scope:global
 _unresolved = .text:0x00000798; // type:function size:0xC scope:global
