@@ -940,7 +940,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/ipc/memory.c"),
             Object(NonMatching, "RVL_SDK/ipc/ipcProfile.c"),
             Object(Matching, "RVL_SDK/fs/fs.c"),
-            Object(NonMatching, "RVL_SDK/exi/EXIBios.c"),
+            Object(NonMatching, "RVL_SDK/exi/EXIBios.c", extra_cflags=["-schedule off"]),
             Object(NonMatching, "RVL_SDK/wpad/WPADHIDParser.c"),
             Object(Matching, "RVL_SDK/thp/THPDec.c"),
             Object(Matching, "RVL_SDK/wpad/WPADEncrypt.c"),

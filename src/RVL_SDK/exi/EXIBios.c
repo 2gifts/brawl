@@ -29,7 +29,7 @@
 #define EXI_ID_IS_DOL_VIEWER 0x05070000
 
 // low memory words the sdk keeps around
-#define OS_EXI_LAST_INSERT ((volatile s32 *)0x800030C0)
+#define OS_EXI_LAST_INSERT(c) (((volatile s32 *)0x80000000)[0x30C0 / 4 + (c)])
 #define OS_DVD_DEVICE_CODE (*(volatile u16 *)0x800030E6)
 
 typedef struct EXIItem {
@@ -259,7 +259,7 @@ EXICallback EXISetExiCallback(s32 chan, EXICallback callback) {
 }
 
 void EXIProbeReset(void) {
-    OS_EXI_LAST_INSERT[0] = OS_EXI_LAST_INSERT[1] = 0;
+    OS_EXI_LAST_INSERT(0) = OS_EXI_LAST_INSERT(1) = 0;
     Ecb[EXI_CHAN_0].lastInsert = Ecb[EXI_CHAN_1].lastInsert = 0;
     __EXIProbe(EXI_CHAN_0);
     __EXIProbe(EXI_CHAN_1);
@@ -282,27 +282,24 @@ static BOOL __EXIProbe(s32 chan) {
     if (!(exi->state & EXI_STATE_ATTACHED)) {
         if (cpr & EXI_CPR_EXTINT) {
             EXIClearInterrupts(chan, FALSE, FALSE, TRUE);
-            exi->lastInsert = 0;
-            OS_EXI_LAST_INSERT[chan] = 0;
+            OS_EXI_LAST_INSERT(chan) = exi->lastInsert = 0;
         }
 
         if (cpr & EXI_CPR_EXT) {
             s32 time = (s32)(OSTicksToMilliseconds(OSGetTime()) / 100) + 1;
-            if (OS_EXI_LAST_INSERT[chan] == 0) {
-                OS_EXI_LAST_INSERT[chan] = time;
+            if (OS_EXI_LAST_INSERT(chan) == 0) {
+                OS_EXI_LAST_INSERT(chan) = time;
             }
 
-            if (time - OS_EXI_LAST_INSERT[chan] < 3) {
+            if (time - OS_EXI_LAST_INSERT(chan) < 3) {
                 ret = FALSE;
             }
         } else {
-            exi->lastInsert = 0;
-            OS_EXI_LAST_INSERT[chan] = 0;
+            OS_EXI_LAST_INSERT(chan) = exi->lastInsert = 0;
             ret = FALSE;
         }
     } else if (!(cpr & EXI_CPR_EXT) || (cpr & EXI_CPR_EXTINT)) {
-        exi->lastInsert = 0;
-        OS_EXI_LAST_INSERT[chan] = 0;
+        OS_EXI_LAST_INSERT(chan) = exi->lastInsert = 0;
         ret = FALSE;
     }
 
@@ -655,7 +652,7 @@ s32 EXIGetID(s32 chan, u32 dev, u32 *out) {
             return 0;
         }
 
-        if (exi->lastInsert == OS_EXI_LAST_INSERT[chan]) {
+        if (exi->lastInsert == OS_EXI_LAST_INSERT(chan)) {
             *out = exi->id;
             return exi->lastInsert;
         }
@@ -664,7 +661,7 @@ s32 EXIGetID(s32 chan, u32 dev, u32 *out) {
             return 0;
         }
 
-        time = OS_EXI_LAST_INSERT[chan];
+        time = OS_EXI_LAST_INSERT(chan);
     }
 
     enabled = OSDisableInterrupts();
@@ -688,7 +685,7 @@ s32 EXIGetID(s32 chan, u32 dev, u32 *out) {
         EXIDetach(chan);
 
         enabled = OSDisableInterrupts();
-        ret |= time != OS_EXI_LAST_INSERT[chan];
+        ret |= time != OS_EXI_LAST_INSERT(chan);
         if (ret == 0) {
             exi->id = *out;
             exi->lastInsert = time;
