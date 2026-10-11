@@ -2288,13 +2288,20 @@ RVL_SDK/dvd/dvdFatal.c:
 	.sbss       start:0x805A09A4 end:0x805A09B0
 	.sdata2     start:0x805A38E8 end:0x805A38F0
 
-RVL_SDK/dvd/dvd_broadway.c:
-	.text       start:0x801FC4DC end:0x801FEBC0
+RVL_SDK/dvd/dvd_check.c:
+	.text       start:0x801FC4DC end:0x801FC774
 	.rodata     start:0x8040D440 end:0x8040D460
-	.data       start:0x80476FF8 end:0x80478050
-	.bss        start:0x804E4680 end:0x804E4840
-	.sdata      start:0x8059EAF0 end:0x8059EB08
-	.sbss       start:0x805A09B0 end:0x805A09E0
+	.data       start:0x80476FF8 end:0x80477190
+	.bss        start:0x804E4680 end:0x804E46A0
+	.sdata      start:0x8059EAF0 end:0x8059EAF8
+	.sbss       start:0x805A09B0 end:0x805A09B8
+
+RVL_SDK/dvd/dvd_broadway.c:
+	.text       start:0x801FC774 end:0x801FEBC0
+	.data       start:0x80477190 end:0x80478050
+	.bss        start:0x804E46A0 end:0x804E4840
+	.sdata      start:0x8059EAF8 end:0x8059EB08
+	.sbss       start:0x805A09B8 end:0x805A09E0
 
 RVL_SDK/ai/ai.c:
 	.text       start:0x801FEBC0 end:0x801FF138
