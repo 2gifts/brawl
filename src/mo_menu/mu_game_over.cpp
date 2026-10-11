@@ -14,14 +14,12 @@
 #include <types.h>
 
 #include <mu/mu_game_over.h>
+#include <mu/mu_menu_controller.h>
 
 // main.dol functions that have no names (or no matching declarations) yet.
 // sndSystem::playSEwithFixEffect(id, volume?, pitch?)
 // HYPOTHESIS: the two floats are the volume and the pitch (both 1.0 here).
 extern "C" void fn_80074ECC(sndSystem* system, int id, float volume, float pitch);
-// muMenuController::init(pad) / muMenuController::main()
-extern "C" void fn_800B96E8(void* controller, int pad);
-extern "C" void fn_800B9984(void* controller);
 // MuMsg::setFontWidthModeFixed(msg, width) and MuMsg::printData(msg, data, size): the shared header lacks the arguments
 extern "C" void setFontWidthModeFixed__5MuMsgFUlf(MuMsg* msg, u32 msgIndex, float width);
 // MuMsg::create(font setting, heap, heap): the third argument is not a HeapType in the symbol
@@ -66,7 +64,7 @@ muGameOverTask* muGameOverTask::create(const muGameOverParam* param, gfArchive* 
     task->m_unk6C = param->m_unk14;
     task->m_coins /= 10;
     task->m_cost /= 10;
-    fn_800B96E8(task->m_controller, 0xF0);
+    fn_800B96E8(reinterpret_cast<muMenuController*>(task->m_controller), 0xF0);
     task->m_step = Step_Loading;
     task->m_archive = archive;
     return task;
@@ -84,7 +82,7 @@ muGameOverTask::muGameOverTask() : gfTask("GameOver", Category_Menu, 0xF, 8, tru
     m_cost = 0;
     m_noContinue = 0;
     m_unk6C = -1;
-    fn_800B96E8(m_controller, 0xFF);
+    fn_800B96E8(reinterpret_cast<muMenuController*>(m_controller), 0xFF);
     m_coinsAfter = 0;
     m_coinStep = 0;
     m_scoreStep = 0;
@@ -202,7 +200,7 @@ void muGameOverTask::setGameOverObjAction(int action) {
 }
 
 void muGameOverTask::processDefault() {
-    fn_800B9984(m_controller);
+    fn_800B9984(reinterpret_cast<muMenuController*>(m_controller));
     if (m_stepPrev != m_step) {
         if (sStepFuncs[m_step].m_init != NULL) {
             sStepFuncs[m_step].m_init(this);
