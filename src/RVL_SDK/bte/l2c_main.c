@@ -19,6 +19,7 @@
 #include <data_types.h>
 
 #include <btm_api.h>
+#include <btm_int.h>
 #include <btu.h>
 #include <gki.h>
 #include <hcidefs.h>
@@ -31,9 +32,6 @@
  */
 
 static void process_l2cap_cmd(tL2C_LCB *p_lcb, UINT8 *p, UINT16 pkt_len);
-
-// HYPOTHESIS: btm_find_dev_by_handle() + a flag test; not named yet
-extern BOOLEAN fn_80240F8C(UINT16 handle);
 
 /*******************************************************************************
  * variables
@@ -96,7 +94,7 @@ void l2c_rcv_acl_data(BT_HDR *p_msg)
 		if (p_msg->layer_specific == 0 && rcv_cid == L2CAP_SIGNALLING_CID
 		    && (cmd_code == L2CAP_CMD_INFO_REQ
 		        || cmd_code == L2CAP_CMD_CONN_REQ)
-		    && !fn_80240F8C(handle))
+		    && !btm_sec_is_bonding(handle))
 		{
 			L2CAP_TRACE(WARNING, "L2CAP - holding ACL for unknown handle:%d ls:%d cid:%d opcode:%d cur count:%d",
 			            handle, p_msg->layer_specific, rcv_cid, cmd_code,
