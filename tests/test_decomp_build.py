@@ -61,6 +61,52 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(len(build.report_index(report(address="0"), "V")), 1)
 
 
+class ToolchainTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        for name in ("build/tools/sjiswrap.exe", "build/compilers/GC/3.0a5.2/mwcceppc.exe",
+                     "build/compilers/GC/3.0a5.2/mwldeppc.exe"):
+            path = self.root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"synthetic tool")
+
+    def test_windows_uses_native_compiler(self):
+        build.validate_toolchain(self.root, "rule mwcc", True)
+
+    def test_posix_still_requires_wrapper(self):
+        with self.assertRaises(build.ValidationError):
+            build.validate_toolchain(self.root, "rule mwcc", False)
+        (self.root / "build/tools/wibo").write_bytes(b"synthetic wrapper")
+        build.validate_toolchain(self.root, "rule mwcc", False)
+
+    def test_windows_still_requires_linker(self):
+        (self.root / "build/compilers/GC/3.0a5.2/mwldeppc.exe").unlink()
+        with self.assertRaises(build.ValidationError):
+            build.validate_toolchain(self.root, "rule mwcc", True)
+
+
+class BuildCommandTests(unittest.TestCase):
+    def test_posix_retains_single_invocation(self):
+        self.assertEqual(build.build_commands(["ninja", "-j4"], ["a", "b"], False, 1),
+                         [["ninja", "-j4", "a", "b"]])
+
+    def test_windows_preserves_all_targets_with_quoting(self):
+        prefix = ["nice", "-n", "10", "C:/tools with spaces/ninja.exe", "-j4"]
+        targets = [f"build/directory with spaces/unit_{i}.o" for i in range(12)]
+        batches = build.build_commands(prefix, targets, True, 160)
+        self.assertGreater(len(batches), 1)
+        self.assertEqual([item for batch in batches for item in batch[len(prefix):]], targets)
+        for batch in batches:
+            self.assertEqual(batch[:len(prefix)], prefix)
+            self.assertLessEqual(len(build.subprocess.list2cmdline(batch)), 160)
+
+    def test_single_oversized_target_fails(self):
+        with self.assertRaises(build.ValidationError):
+            build.build_commands(["ninja"], ["a" * 50], True, 20)
+
+
 class FixtureTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
