@@ -1,10 +1,30 @@
 // MATCH-ONLY: retain native fighter-module scheduling.
 #pragma scheduling off
+// MATCH-ONLY: MSL's native atan2f wrapper retains the scheduled return sequence.
+#pragma scheduling 603
+#include <internal/math_double.h>
+#pragma scheduling off
+#define MT_VEC3F_CTOR_NOINLINE
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#define MT_VEC3F_BIKE_UTILITY_OPERATORS
+#include <wn/wario/wn_wario_bike_kinetic_transactor.h>
 #include <wn/wario/wn_wario_bike_status_uniq_process.h>
 #include <so/so_module_accesser.h>
 #include <st/st_utility.h>
 #include <math.h>
+
+// MATCH-ONLY: the native wheel probes call MSL's float-returning atan2 wrapper.
+extern "C" float atan2f(float, float) __attribute__((never_inline));
+
+// MATCH-ONLY: keep the pitch vector transient while retaining the native
+// out-of-line construction of the wheel-probe axis and effect arguments.
+static inline void setBikePitch(soPostureModule& posture, float angle) {
+    Vec3f rotation;
+    rotation.m_x = -angle;
+    rotation.m_y = 0.0f;
+    rotation.m_z = 0.0f;
+    posture.setRot(&rotation, 0);
+}
 
 void wnWarioBikeStatusUniqProcessUtility::execStatus(soModuleAccesser* a) {
     soWorkManageModule& work = a->getWorkManageModule();
@@ -21,7 +41,8 @@ void wnWarioBikeStatusUniqProcessUtility::execStatus(soModuleAccesser* a) {
                  (6.2831855f * (2.4f * a->getPostureModule().getScale()));
         work.setFloat(step17, 0x21000006);
     } else {
-        step17 = work.getFloat(0x21000006) * 0.99f;
+        step17 = work.getFloat(0x21000006);
+        step17 *= 0.99f;
         work.setFloat(step17, 0x21000006);
     }
     float step11;
@@ -51,6 +72,10 @@ void wnWarioBikeStatusUniqProcessUtility::execMapCorrection(soModuleAccesser* a)
     dynamic_cast<wnWarioBike&>(a->getStageObject());
     bool wheelie = status.getStatusKind() == 3;
     Vec3f pos = posture.getPos();
+    Vec3f hit17;
+    Vec3f hit11;
+    Vec3f normal17;
+    Vec3f normal11;
     float lr = posture.getLr();
     float angle = work.getFloat(0x21000000);
     float previousAngle = work.getFloat(0x21000001);
@@ -61,8 +86,7 @@ void wnWarioBikeStatusUniqProcessUtility::execMapCorrection(soModuleAccesser* a)
     float angle11 = groundAngle;
     work.setFloat(angle, 0x21000001);
     work.setFloat(groundAngle, 0x21000003);
-    Vec3f rot(-angle, 0.0f, 0.0f);
-    posture.setRot(&rot, 0);
+    setBikePitch(posture, angle);
     // Rotate the two wheel-node offsets by this frame's pitch change, then
     // probe beneath their world positions to find the bike's stage support.
     Vec3f node17 = model.getNodeGlobalOffsetFromTop(0x17);
@@ -75,33 +99,32 @@ void wnWarioBikeStatusUniqProcessUtility::execMapCorrection(soModuleAccesser* a)
     node11.rot(&axis, difference, &rotated11);
     Vec3f probe17 = pos + rotated17;
     Vec3f probe11 = pos + rotated11;
-    float cosine = fabsf((float)cos(0.017453292f * angle));
-    if (fabsf(cosine) < 1.1920929e-7f) cosine = 1.0f;
-    float radius17 = 2.4f * a->getPostureModule().getScale();
-    float extent17 = radius17 / cosine;
-    radius17 = 2.4f * a->getPostureModule().getScale();
-    extent17 = (extent17 + radius17) + 0.1f;
-    float radius11 = 5.5f * a->getPostureModule().getScale();
-    float extent11 = radius11 / cosine;
-    radius11 = 5.5f * a->getPostureModule().getScale();
-    extent11 = (extent11 + radius11) + 0.1f;
-    extent17 += fabsf(rotated17.m_y - node17.m_y);
-    extent11 += fabsf(rotated11.m_y - node11.m_y);
+    float projectedRadius;
+    float cosine = wnWarioBikeKineticTransactor::ABS((float)cos(0.017453292f * angle));
+    if (wnWarioBikeKineticTransactor::ABS(cosine) < 1.1920929e-7f) cosine = 1.0f;
+    soPostureModule& radiusPosture17 = a->getPostureModule();
+    float radius17 = 2.4f * radiusPosture17.getScale();
+    projectedRadius = radius17 / cosine;
+    radius17 = 2.4f * radiusPosture17.getScale();
+    float extent17 = 0.1f + (radius17 + projectedRadius);
+    soPostureModule& radiusPosture11 = a->getPostureModule();
+    float radius11 = 5.5f * radiusPosture11.getScale();
+    projectedRadius = radius11 / cosine;
+    radius11 = 5.5f * radiusPosture11.getScale();
+    float extent11 = 0.1f + (radius11 + projectedRadius);
+    extent17 += wnWarioBikeKineticTransactor::ABS(rotated17.m_y - node17.m_y);
+    extent11 += wnWarioBikeKineticTransactor::ABS(rotated11.m_y - node11.m_y);
     Vec3f down(0.0f, -1000.0f, 0.0f);
-    Vec3f hit17;
-    Vec3f normal17;
-    Vec3f hit11;
-    Vec3f normal11;
     probe17.m_y += 2.4f * a->getPostureModule().getScale();
-    if (stRayCheck(&probe17, &down, &hit17, &normal17, true, 0, false, 1) && fabsf(hit17.m_y - probe17.m_y) <= extent17) {
+    if (stRayCheck(&probe17, &down, &hit17, &normal17, true, 0, false, 1) && wnWarioBikeKineticTransactor::ABS(hit17.m_y - probe17.m_y) <= extent17) {
         // The first probe's angle calculation has an observable call in the original,
         // but its returned angle is unused; only the second probe updates angle11.
-        (void)(float)atan2(-normal17.m_x * lr, normal17.m_y);
+        (void)atan2f(-(normal17.m_x * lr), normal17.m_y);
         contact17 = true;
     }
     probe11.m_y += 5.5f * a->getPostureModule().getScale();
-    if (stRayCheck(&probe11, &down, &hit11, &normal11, true, 0, false, 1) && fabsf(hit11.m_y - probe11.m_y) <= extent11) {
-        angle11 = 57.29578f * (float)atan2(-normal11.m_x * lr, normal11.m_y);
+    if (stRayCheck(&probe11, &down, &hit11, &normal11, true, 0, false, 1) && wnWarioBikeKineticTransactor::ABS(hit11.m_y - probe11.m_y) <= extent11) {
+        angle11 = 57.29578f * atan2f(-(normal11.m_x * lr), normal11.m_y);
         contact11 = true;
     }
     bool touch = ground.isTouch((grCollStatus::TouchMask)8, 0);
@@ -110,14 +133,15 @@ void wnWarioBikeStatusUniqProcessUtility::execMapCorrection(soModuleAccesser* a)
     if (touch && !wheelie) {
         if (contact17 && contact11) {
             Vec3f difference = hit17 - hit11;
-            groundAngle = 57.29578f * (float)atan2(difference.m_y, fabsf(difference.m_x));
+            groundAngle = 57.29578f * atan2f(difference.m_y, wnWarioBikeKineticTransactor::ABS(difference.m_x));
         } else {
-            Vec2f normal = ground.getTouchNormal((grCollStatus::TouchMask)8, 0);
-            groundAngle = 57.29578f * (float)atan2(-normal.m_x * lr, normal.m_y);
+            Vec2f normal;
+            Vec2f::copy(normal, ground.getTouchNormal((grCollStatus::TouchMask)8, 0));
+            groundAngle = 57.29578f * atan2f(-(normal.m_x * lr), normal.m_y);
         }
     } else if (contact17 && contact11 && !wheelie) {
         Vec3f difference = hit17 - hit11;
-        groundAngle = 57.29578f * (float)atan2(difference.m_y, fabsf(difference.m_x));
+        groundAngle = 57.29578f * atan2f(difference.m_y, wnWarioBikeKineticTransactor::ABS(difference.m_x));
     } else if (contact11) {
         groundAngle = angle11;
         pos.m_y = hit11.m_y - rotated11.m_y + 5.5f * a->getPostureModule().getScale();
@@ -157,31 +181,29 @@ void wnWarioBikeStatusUniqProcessUtility::execFixPosCounter(soModuleAccesser* a)
             }
         } else {
             float stick = a->getControllerModule().getStickX();
-            if (fabsf(stick) <= 0.5f) {
+            if (wnWarioBikeKineticTransactor::ABS(stick) <= 0.5f) {
                 if (effectKind != 0x16000e) {
                     if (handle >= 0) effects.kill(handle, false, true);
-                    Vec3f rot(0.0f, 0.0f, 0.0f);
-                    Vec3f pos(0.0f, 0.0f, 0.0f);
-                    handle = effects.reqFollow((EfID)0x16000e, 0x10, &pos, &rot, 1.0f, false, 0, 0, -1);
+                    handle = effects.reqFollow((EfID)0x16000e, 0x10, &Vec3f(0.0f, 0.0f, 0.0f),
+                                               &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, false, 0, 0, -1);
                     work.setInt(handle, 0x20000005);
                     work.setInt(0x16000e, 0x20000006);
                 }
             } else {
+                soPostureModule& posture = a->getPostureModule();
                 float sign = (float)(stick < 0.0f ? -1 : 1);
-                if (sign == a->getPostureModule().getLr() && effectKind != 0x16000b) {
+                if (sign == posture.getLr() && effectKind != 0x16000b) {
                     if (handle >= 0) effects.kill(handle, false, true);
-                    Vec3f rot(0.0f, 0.0f, 0.0f);
-                    Vec3f pos(0.0f, 0.0f, 0.0f);
-                    handle = effects.reqFollow((EfID)0x16000b, 0x10, &pos, &rot, 1.0f, false, 0, 0, -1);
+                    handle = effects.reqFollow((EfID)0x16000b, 0x10, &Vec3f(0.0f, 0.0f, 0.0f),
+                                               &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, false, 0, 0, -1);
                     work.setInt(handle, 0x20000005);
                     work.setInt(0x16000b, 0x20000006);
                 }
             }
         }
     } else if (handle < 0) {
-        Vec3f rot(0.0f, 0.0f, 0.0f);
-        Vec3f pos(0.0f, 0.0f, 0.0f);
-        handle = effects.reqFollow((EfID)0x16000e, 0x10, &pos, &rot, 1.0f, false, 0, 0, -1);
+        handle = effects.reqFollow((EfID)0x16000e, 0x10, &Vec3f(0.0f, 0.0f, 0.0f),
+                                   &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, false, 0, 0, -1);
         work.setInt(handle, 0x20000005);
         work.setInt(0x16000e, 0x20000006);
     }
@@ -189,19 +211,15 @@ void wnWarioBikeStatusUniqProcessUtility::execFixPosCounter(soModuleAccesser* a)
         work.incInt(0x20000004);
         if (speed > 0.7f * param->unkC) {
             if (work.getInt(0x20000004) > 10) {
-                Vec3f rotRange(0.0f, 0.0f, 0.0f);
-                Vec3f posRange(0.0f, 0.0f, 0.0f);
-                Vec3f rot(0.0f, 0.0f, 0.0f);
-                Vec3f pos(-20.0f, 0.0f, 0.0f);
-                effects.req((EfID)0xa, 0, &pos, &rot, 1.0f, &posRange, &rotRange, false, 0);
+                effects.req((EfID)0xa, 0, &Vec3f(-20.0f, 0.0f, 0.0f),
+                            &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, &Vec3f(0.0f, 0.0f, 0.0f),
+                            &Vec3f(0.0f, 0.0f, 0.0f), false, 0);
                 work.setInt(0, 0x20000004);
             }
         } else if (speed > 0.3f * param->unkC && work.getInt(0x20000004) > 5) {
-            Vec3f rotRange(0.0f, 0.0f, 0.0f);
-            Vec3f posRange(0.0f, 0.0f, 0.0f);
-            Vec3f rot(0.0f, 0.0f, 0.0f);
-            Vec3f pos(-10.0f, 0.0f, 0.0f);
-            effects.req((EfID)0x1c, 0, &pos, &rot, 1.0f, &posRange, &rotRange, false, 0);
+            effects.req((EfID)0x1c, 0, &Vec3f(-10.0f, 0.0f, 0.0f),
+                        &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, &Vec3f(0.0f, 0.0f, 0.0f),
+                        &Vec3f(0.0f, 0.0f, 0.0f), false, 0);
             work.setInt(0, 0x20000004);
         }
     }

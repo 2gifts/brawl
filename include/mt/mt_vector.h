@@ -162,6 +162,17 @@ public:
 
         // clang-format off
         asm {
+#ifdef MT_VEC3F_BIKE_UTILITY_OPERATORS
+            // MATCH-ONLY: the native bike Utility operators use this register order.
+            psq_l  fr3, Vec3f.m_x(lhs), 0, 0
+            psq_l  fr1, Vec3f.m_x(rhs), 0, 0
+            psq_l  fr2, Vec3f.m_z(lhs), 1, 0
+            psq_l  fr0, Vec3f.m_z(rhs), 1, 0
+            ps_add fr1, fr3, fr1
+            ps_add fr0, fr2, fr0
+            psq_st fr1, Vec3f.m_x(pOut), 0, 0
+            psq_st fr0, Vec3f.m_z(pOut), 1, 0
+#else
             psq_l  fr0, Vec3f.m_x(lhs),   0, 0
             psq_l  fr2, Vec3f.m_x(rhs),   0, 0
             psq_l  fr1, Vec3f.m_z(lhs),   1, 0
@@ -170,6 +181,7 @@ public:
             ps_add fr1, fr1, fr3
             psq_st fr0, Vec3f.m_x(pOut), 0, 0
             psq_st fr1, Vec3f.m_z(pOut), 1, 0
+#endif
         }
         // clang-format on
     }
@@ -180,6 +192,17 @@ public:
 
         // clang-format off
         asm {
+#ifdef MT_VEC3F_BIKE_UTILITY_OPERATORS
+            // MATCH-ONLY: retain the same native register order for subtraction.
+            psq_l  fr3, Vec3f.m_x(lhs), 0, 0
+            psq_l  fr1, Vec3f.m_x(rhs), 0, 0
+            psq_l  fr2, Vec3f.m_z(lhs), 1, 0
+            psq_l  fr0, Vec3f.m_z(rhs), 1, 0
+            ps_sub fr1, fr3, fr1
+            ps_sub fr0, fr2, fr0
+            psq_st fr1, Vec3f.m_x(pOut), 0, 0
+            psq_st fr0, Vec3f.m_z(pOut), 1, 0
+#else
             psq_l  fr0, Vec3f.m_x(lhs),   0, 0
             psq_l  fr1, Vec3f.m_x(rhs),   0, 0
             psq_l  fr2, Vec3f.m_z(lhs),   1, 0
@@ -188,6 +211,7 @@ public:
             ps_sub fr1, fr2, fr3
             psq_st fr0, Vec3f.m_x(pOut), 0, 0
             psq_st fr1, Vec3f.m_z(pOut), 1, 0
+#endif
         }
         // clang-format on
     }
