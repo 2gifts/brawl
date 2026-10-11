@@ -570,7 +570,6 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "RVL_SDK/bte/sdp_utils.c"),
-            Object(NonMatching, "RVL_SDK/thp/THPAudio.c"),
             Object(NonMatching, "RVL_SDK/exi/exi2_link.c"),
             Object(NonMatching, "TMCC_JPEG/tmcc_jpeg_api.c"),
             Object(NonMatching, "TMCC_JPEG/tmcc_jpeg_decoder.c"),
@@ -847,6 +846,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/tpl/TPL.c"),
             Object(NonMatching, "RVL_SDK/so/so.c"),
             Object(NonMatching, "RVL_SDK/net/net_util.c"),
+            Object(NonMatching, "RVL_SDK/thp/THPAudio.cpp"),
             Object(NonMatching, "RVL_SDK/nwc24/nwc24.c"),
             Object(Matching, "RVL_SDK/wud/WUDHidHost.c"),
             Object(Matching, "RVL_SDK/wud/debug_msg.c"),
