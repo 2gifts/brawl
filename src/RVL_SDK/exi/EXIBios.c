@@ -29,7 +29,8 @@
 #define EXI_ID_IS_DOL_VIEWER 0x05070000
 
 // low memory words the sdk keeps around
-#define OS_EXI_LAST_INSERT(c) (((volatile s32 *)0x80000000)[0x30C0 / 4 + (c)])
+vs32 OS_EXI_LAST_INSERT_TABLE[3] : 0x800030C0;
+#define OS_EXI_LAST_INSERT(c) (OS_EXI_LAST_INSERT_TABLE[(c)])
 #define OS_DVD_DEVICE_CODE (*(volatile u16 *)0x800030E6)
 
 typedef struct EXIItem {
@@ -641,6 +642,7 @@ s32 EXIGetID(s32 chan, u32 dev, u32 *out) {
     s32 ret;
     s32 time;
     BOOL enabled;
+    _Bool isExt;
 
     if (chan == EXI_CHAN_0 && dev == EXI_DEV_NET && IDSerialPort1 != 0) {
         *out = IDSerialPort1;
@@ -665,7 +667,8 @@ s32 EXIGetID(s32 chan, u32 dev, u32 *out) {
     }
 
     enabled = OSDisableInterrupts();
-    ret = !EXILock(chan, dev, (chan < EXI_CHAN_2 && dev == EXI_DEV_EXT) ? UnlockedHandler : NULL);
+    isExt = chan < EXI_CHAN_2 && dev == EXI_DEV_EXT;
+    ret = !EXILock(chan, dev, isExt ? UnlockedHandler : NULL);
     if (ret == 0) {
         ret = !EXISelect(chan, dev, EXI_FREQ_1MHZ);
         if (ret == 0) {
