@@ -1,6 +1,7 @@
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/yoshi/ft_yoshi_builder.h>
+#include <ft/ft_common_data_accesser.h>
 
 #define FT_BC ftYoshiBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -18,6 +19,8 @@ ftYoshi::ftYoshi(s32 entryId,
                                          nwMotionInstHeap) {
     // TODO
 }
+
+void** ftYoshi::getExtendParam() { return m_data->extendParam; }
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftYoshi is done
 void testBuilder() {
@@ -80,7 +83,6 @@ int fn_95_B9B8() { return 0; }
 
 // Field and sub-object accessors.
 u8 fn_95_8008(u8* p) { return *(u8*)(p + 0x4); }
-u8* fn_95_A108(u8* p) { return *(u8**)(p + 0x22284) + 0x7c; }
 u8 fn_95_B428(u8* p) { return *(u8*)(p + 0x44); }
 int fn_95_B5C0(u8* p) { return *(int*)(p + 0x110); }
 u8* fn_95_B614(u8* p, u32 idx) { return p + 4 + (idx << 3); }

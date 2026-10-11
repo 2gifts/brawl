@@ -48,11 +48,16 @@ public:
     typedef ftYoshiKineticModuleBuildConfig KineticModuleBuildConfig;
     typedef ftYoshiGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
-// The constructor's
-// 0x222B0 allocation fixes the size; the members past the builder are not recovered yet.
+// The constructor allocates 0x222B0 bytes. The parameter getter establishes
+// m_data at 0x22284; the remaining tail fields are not recovered yet.
+struct ftData;
+
 class ftYoshi : public ftFighterBuilder<ftYoshiBuildConfig> {
-    u8 unkTail[0x222b0 - sizeof(ftFighterBuilder<ftYoshiBuildConfig>)];
+    u8 unkTail[0x22284 - sizeof(ftFighterBuilder<ftYoshiBuildConfig>)];
+    ftData* m_data; // Instance parameter data, proved by getExtendParam.
+    u8 unk22288[0x28];
 public:
+    void** getExtendParam();
     ftYoshi(s32 entryId,
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
