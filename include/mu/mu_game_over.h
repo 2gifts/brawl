@@ -5,6 +5,7 @@
 #include <gf/gf_scene.h>
 #include <gf/gf_task.h>
 #include <memory.h>
+#include <mu/menu.h>
 #include <mu/mu_msg.h>
 #include <mu/mu_object.h>
 #include <nw4r/g3d/g3d_resfile.h>
@@ -12,12 +13,6 @@
 
 // The scene that shows the game over screen (module sora_scene; only what this menu needs is declared here).
 // HYPOTHESIS: the class hierarchy gfScene <- muMenu <- scGameover follows from the run time type information of the module.
-class muMenu : public gfScene {
-public:
-    muMenu(const char* name) : gfScene(name) { }
-    static int loadMenuSound();
-    static bool isLoadFinishMenuSound();
-};
 class scGameover : public muMenu {
 public:
     scGameover(const char* name) : muMenu(name) { }
