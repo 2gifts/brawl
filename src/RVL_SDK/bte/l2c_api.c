@@ -305,6 +305,7 @@ UINT8 L2CA_DataWrite(UINT16 cid, BT_HDR *p_data)
 	}
 }
 
+// HYPOTHESIS: body guessed from the string pool only, never saw the code.
 BOOLEAN L2CA_Ping(BD_ADDR p_bd_addr, tL2CA_ECHO_RSP_CB *p_callback)
 {
 	tL2C_LCB *p_lcb;
@@ -421,8 +422,7 @@ UINT8 L2CA_SetTraceLevel(UINT8 new_level)
 	return l2cb.l2cap_trace_level;
 }
 
-// HYPOTHESIS: the next three only survive as strings in the original data, i
-// never saw their code, so these are loose guesses.
+// HYPOTHESIS: body guessed from the string pool only, never saw the code.
 BOOLEAN L2CA_SetAclPriority(BD_ADDR bd_addr, UINT8 priority)
 {
 	tL2C_LCB *p_lcb;
@@ -442,6 +442,7 @@ BOOLEAN L2CA_SetAclPriority(BD_ADDR bd_addr, UINT8 priority)
 	return TRUE;
 }
 
+// HYPOTHESIS: body guessed from the string pool only, never saw the code.
 void L2CA_SetCompression(UINT16 local_cid, UINT8 pe_type, UINT8 mem_level,
                          UINT8 wbits, UINT8 direction, UINT8 param_6,
                          UINT8 enable)
@@ -455,6 +456,7 @@ void L2CA_RegisterCompression(tL2CA_COMPRESS_CB *p_cb, signed param)
 	return;
 }
 
+// HYPOTHESIS: body guessed from the string pool only, never saw the code.
 UINT8 L2CA_Flush(UINT16 cid)
 {
 	tL2C_CCB *p_ccb;
@@ -471,6 +473,7 @@ UINT8 L2CA_Flush(UINT16 cid)
 	return (UINT8)num_flushed;
 }
 
+// HYPOTHESIS: body guessed from the string pool only, never saw the code.
 UINT16 L2CA_GetNumQueuedBufs(UINT16 lcid)
 {
 	tL2C_CCB *p_ccb;
