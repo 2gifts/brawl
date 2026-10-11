@@ -34,7 +34,7 @@
 
 typedef void (*AIDMACallback)(void);
 
-const char* __AIVersion = "<< RVL_SDK - AI \trelease build: Nov 30 2006 03:26:11 (0x4199_60831) >>";
+const char* __AIVersion = "<< RVL_SDK - AI \trelease build: May  8 2007 12:54:34 (0x4199_60831) >>";
 
 static AIDMACallback __AID_Callback;
 
@@ -102,8 +102,8 @@ u32 AIGetDMALength(void) {
     return (DSP_HW_REGS[DSP_AI_DMA_CSR] & 0x7FFF) * 32;
 }
 
-AIDMACallback AIGetDMACallback(void) {
-    return __AID_Callback;
+BOOL AICheckInit(void) {
+    return __AI_init_flag;
 }
 
 static void AISetDSPSampleRate(u32 rate);
@@ -164,9 +164,9 @@ void __AIDHandler(s16 intr, OSContext* ctx) {
     OSSetCurrentContext(ctx);
 }
 
-static asm void __AICallbackStackSwitch(register AIDMACallback callback) {
+static asm void __AICallbackStackSwitch(AIDMACallback callback) {
     fralloc
-    mr r31, callback
+    mr r31, r3
 
     lis r5, __OldStack@ha
     addi r5, r5, __OldStack@l

@@ -36,6 +36,13 @@ typedef struct DVDNode {
 extern volatile u32 __DVDLayoutFormat;
 extern BOOL DVDGetCurrentDir(char* buffer, u32 maxlen);
 
+// MATCH-ONLY: retail has 0x10 bytes of unreferenced sbss after the statics (sbss comes out in reverse
+// declaration order, so these sit first), keeps dvd.c's sbss where it is
+#pragma force_active on
+volatile s64 __DVDFsUnreferencedA;
+volatile s64 __DVDFsUnreferencedB;
+#pragma force_active reset
+
 static OSBootInfo* BootInfo;
 static const DVDNode* FstStart;
 static char* FstStringStart;

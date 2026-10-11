@@ -22,6 +22,8 @@ force_active:
 - __vt__13hkSystemClock
 - __vt__28hkSingleton<13hkSystemClock>
 - __DVDUnreferencedTime
+- __DVDFsUnreferencedA
+- __DVDFsUnreferencedB
 - IdleThread
 
 extract:
