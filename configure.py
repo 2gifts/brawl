@@ -2120,7 +2120,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_wario/wn_wario_bike_damage_transactor.cpp"),
             Object(NonMatching, "mo_fighter/ft_wario/wn_wario_bike_status_uniq_process_utility.cpp"),
             Object(NonMatching, "mo_fighter/ft_wario/wn_wario_bike_status_uniq_process_start.cpp"),
-            Object(NonMatching, "mo_fighter/ft_wario/wn_wario_bike_status_uniq_process_drive.cpp"),
+            Object(Matching, "mo_fighter/ft_wario/wn_wario_bike_status_uniq_process_drive.cpp"),
             Object(Matching, "mo_fighter/ft_wario/wn_wario_bike_status_uniq_process_wheelie.cpp"),
             Object(Matching, "mo_fighter/ft_wario/wn_wario_bike_status_uniq_process_turn_start.cpp"),
             Object(Matching, "mo_fighter/ft_wario/wn_wario_bike_status_uniq_process_turn_loop.cpp"),
