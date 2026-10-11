@@ -2819,7 +2819,7 @@ RVL_SDK/thp/THPDec.c:
 	.sbss       start:0x805A0D40 end:0x805A0E68
 	.sdata2     start:0x805A3AB0 end:0x805A3AD0
 
-RVL_SDK/thp/THPAudio.c:
+RVL_SDK/thp/THPAudio.cpp:
 	.text       start:0x8025F508 end:0x8025F99C
 
 RVL_SDK/exi/exi2_link.c:
