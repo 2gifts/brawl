@@ -282,7 +282,15 @@ def evidence(path: Path) -> tuple[dict, dict]:
         expected_roles.append("fresh-report")
     elif generation.get("kind") != "reused":
         raise ValidationError("Invalid report generation provenance")
-    if [c.get("role") for c in manifest.get("commands", [])] != expected_roles:
+    # Windows warm builds can require several consecutive Ninja invocations.
+    # Only collapse the build run; preserve the exact order of all other roles
+    # and verify every command's success and log digest below.
+    roles = []
+    for record in manifest.get("commands", []):
+        role = record.get("role")
+        if role != "build" or not roles or roles[-1] != "build":
+            roles.append(role)
+    if roles != expected_roles:
         raise ValidationError("Evidence lacks required validation commands")
     report_path = path / "report.json"
     if json_digest(manifest.get("source", {}).get("inputs")) != manifest.get("source", {}).get("source_fingerprint"):
@@ -429,6 +437,41 @@ def validate_dependency_paths(log: Path, root: Path) -> None:
             raise ValidationError(f"Foreign cached dependency path: {dependency}")
 
 
+def validate_toolchain(root: Path, graph: str, native_windows: bool) -> None:
+    """Native Windows runs MWCC directly; POSIX builds also need wibo."""
+    if "mwcc" not in graph:
+        return
+    required = [root / "build/tools/sjiswrap.exe"]
+    if not native_windows:
+        required.append(root / "build/tools/wibo")
+    compiler_files = list((root / "build/compilers").rglob("mwcceppc.exe"))
+    linker_files = list((root / "build/compilers").rglob("mwldeppc.exe"))
+    if not compiler_files or not linker_files or not all(p.is_file() for p in required):
+        raise ValidationError("Toolchain is incomplete; validation will not download tools")
+
+
+def build_commands(prefix: list[str], targets: list[str], native_windows: bool,
+                   max_chars: int = 24000) -> list[list[str]]:
+    """Keep warm full builds below Windows' CreateProcess command-line limit.
+
+    Batches run sequentially under the existing shared lock. POSIX retains the
+    original single invocation; Windows quoting is measured with list2cmdline.
+    """
+    if not native_windows:
+        return [prefix + targets]
+    batches, current = [], list(prefix)
+    for target in targets:
+        if len(subprocess.list2cmdline(prefix + [target])) > max_chars:
+            raise ValidationError(f"Build target exceeds Windows command-line budget: {target}")
+        if len(subprocess.list2cmdline(current + [target])) > max_chars:
+            batches.append(current)
+            current = list(prefix)
+        current.append(target)
+    if len(current) > len(prefix) or not batches:
+        batches.append(current)
+    return batches
+
+
 def run(args) -> dict:
     if not re.fullmatch(r"[A-Za-z0-9_]+", args.version):
         raise ValidationError("Invalid binary version identifier")
@@ -475,12 +518,7 @@ def run(args) -> dict:
             command([str(tools["nice"]), "-n", "10", str(tools["python"]), "configure.py", "configure", "--version", args.version, *args.configure_arg], root, output, state["commands"], "configure")
             assert_stable(initial, snapshot(root, tools, manifest_path))
             graph = (root / "build.ninja").read_text(encoding="utf-8")
-            if "mwcc" in graph:
-                required = [root / "build/tools/wibo", root / "build/tools/sjiswrap.exe"]
-                compiler_files = list((root / "build/compilers").rglob("mwcceppc.exe"))
-                linker_files = list((root / "build/compilers").rglob("mwldeppc.exe"))
-                if not compiler_files or not linker_files or not all(p.is_file() for p in required):
-                    raise ValidationError("Toolchain is incomplete; validation will not download tools")
+            validate_toolchain(root, graph, os.name == "nt")
             # Original objdiff targets are SPLIT side-effect files, not
             # individually addressable Ninja outputs. Refresh their producer
             # before freezing generated configuration and comparison ownership.
@@ -513,7 +551,9 @@ def run(args) -> dict:
                     raise ValidationError(f"Original preparation omitted target: {unit['target_path']}")
             targets = args.target if args.mode == "objects" else [f"build/{args.version}/ok", *[u["base_path"] for u in selected["units"] if u.get("base_path") and Path(u["base_path"]).is_file()]]
             targets = [str(Path(t).relative_to(root)) if Path(t).is_absolute() else t for t in targets]
-            command([str(tools["nice"]), "-n", "10", str(tools["ninja"]), f"-j{args.jobs}", *targets], root, output, state["commands"], "build")
+            build_prefix = [str(tools["nice"]), "-n", "10", str(tools["ninja"]), f"-j{args.jobs}"]
+            for argv in build_commands(build_prefix, targets, os.name == "nt"):
+                command(argv, root, output, state["commands"], "build")
             assert_stable(before, snapshot(root, tools, manifest_path, True))
             if args.mode == "full":
                 command([str(tools["nice"]), "-n", "10", str(tools["dtk"]), "shasum", "-c", str(manifest_path)], root, output, state["commands"], "all127-hashes")
@@ -593,8 +633,9 @@ def parser() -> argparse.ArgumentParser:
         p.add_argument("--output", required=True)
         p.add_argument("--lock", required=True)
         p.add_argument("--ninja", default="ninja")
-        p.add_argument("--dtk", default="build/tools/dtk")
-        p.add_argument("--objdiff", default="build/tools/objdiff-cli")
+        executable_suffix = ".exe" if os.name == "nt" else ""
+        p.add_argument("--dtk", default="build/tools/dtk" + executable_suffix)
+        p.add_argument("--objdiff", default="build/tools/objdiff-cli" + executable_suffix)
         if name == "run":
             p.add_argument("--baseline", required=True)
             p.add_argument("--expected-baseline-revision", required=True)
