@@ -104,6 +104,13 @@ Select an object from the left sidebar to begin diffing. Changes to the project 
 
 ![](assets/objdiff.png)
 
+<img width="960" height="615" alt="image" src="https://github.com/user-attachments/assets/6b5a1d14-f2dc-4a4c-a73d-c3cc88def7c0" />
+
+*Thousands of agents prompting together can't be slop*
+
+<details>
+<summary><b>For AI Agents</b></summary>
+
 ## Contributors and AI agents
 
 See [AGENTS.md](AGENTS.md) for the full agent instructions.
@@ -274,3 +281,5 @@ Synthetic tooling tests require no game assets:
 ```sh
 python3 -m unittest discover -s tests -p 'test_decomp_*.py'
 ```
+
+</details>
