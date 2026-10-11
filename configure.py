@@ -1889,8 +1889,8 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_luigi/ft_luigi_status_uniq_process_special_lw.cpp"),
             Object(NonMatching, "mo_fighter/ft_luigi/ft_luigi.cpp"),
             Object(NonMatching, "mo_fighter/ft_luigi/ft_luigi_kinetic_transactor.cpp"),
-            Object(NonMatching, "mo_fighter/ft_luigi/ft_luigi_status_special_s_ram.cpp"),
-            Object(NonMatching, "mo_fighter/ft_luigi/ft_luigi_status_special_s_wall.cpp"),
+            Object(Matching, "mo_fighter/ft_luigi/ft_luigi_status_special_s_ram.cpp"),
+            Object(Matching, "mo_fighter/ft_luigi/ft_luigi_status_special_s_wall.cpp"),
         ],
     },
     {
@@ -2162,7 +2162,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_special_air_s_jump.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_final.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_final_start.cpp"),
-            Object(NonMatching, "mo_fighter/ft_yoshi/ft_yoshi_kinetic_transactor.cpp"),
+            Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_kinetic_transactor.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_catch_pull.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_guard_func.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_guard_on.cpp"),
@@ -5911,7 +5911,9 @@ config.libs = [
         "mw_version": config.linker_version,
         "cflags": cflags_rel,
         "host": False,
-        "objects": [],
+        "objects": [
+            Object(NonMatching, "mo_menu/mu_replay.cpp"),
+        ],
     },
     {
         "lib": "sora_menu_rule",

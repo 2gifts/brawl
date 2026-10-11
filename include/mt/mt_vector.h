@@ -16,7 +16,11 @@ public:
 #ifdef MT_VEC2F_CTOR_NOINLINE
         __attribute__((never_inline)) // MATCH-ONLY: retain a proved out-of-line constructor call.
 #endif
+#ifdef MT_VEC2F_CTOR_OUT_OF_LINE
+        ; // MATCH-ONLY: an owning unit supplies the weak constructor in native order.
+#else
         : m_x(x), m_y(y) { }
+#endif
 
     Vec2f& operator=(const Vec2f& source)
 #ifdef MT_VEC2F_ASSIGN_NOINLINE
