@@ -1,10 +1,15 @@
 #pragma once
 #include <ft/fighter.h>
-// Only the inherited interface is needed by status callbacks. The constructor's
-// 0x222B0 allocation establishes the opaque remainder of this fighter.
+// Status/kinetic view of Yoshi. The constructor allocates 0x222B0 bytes;
+// getExtendParam establishes the instance-data pointer at 0x22284.
+struct ftData;
+
 class ftYoshi : public Fighter {
-    u8 unk194[0x222b0 - sizeof(Fighter)];
+    u8 unkTail[0x22284 - sizeof(Fighter)];
+    ftData* m_data; // Instance parameter data, proved by getExtendParam.
+    u8 unk22288[0x28];
 public:
+    void** getExtendParam();
     void createGuardColorAnim();
     void deleteGuardColorAnim();
     void updateGuardColorAnim();
