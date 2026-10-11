@@ -1910,9 +1910,11 @@ config.libs = [
         "cflags": cflags_fighter,
         "host": False,
         "objects": [
-            # HYPOTHESIS: Object(Matching, ..., extra_cflags=["-DFT_REL_LINK_EXTERN"]) now links (dtk rel make resolves every
-            # symbol), but ft_marth.rel still differs from the original: .text 0x44 short, .data 0x660 long; the order of the weak
-            # functions/vtables/RTTI and a few dtor/stub identities differ. Keep NonMatching until the layout matches.
+            # Object(Matching, ..., extra_cflags=["-DFT_REL_LINK_EXTERN"]) links (dtk rel make resolves every symbol, no further
+            # naming needed) but ft_marth.rel does not hash-match yet: the weak functions and the vtable/RTTI objects are emitted in a
+            # different order, the kinetic pool classes need their native type list form (their RTTI names differ, .data is 0x660
+            # long), the unreferenced weak ftExtendParamAccesserEx virtuals are dropped by the link, and six trivial destructors
+            # have scrambled names. Keep NonMatching until the layout matches.
             Object(NonMatching, "mo_fighter/ft_marth/ft_marth.cpp"),
             Object(Matching, "mo_fighter/ft_marth/ft_marth_status_uniq_process_special_s.cpp"),
             Object(Matching, "mo_fighter/ft_marth/ft_marth_status_uniq_process_special_hi.cpp"),
