@@ -82,7 +82,8 @@ void ftYoshiStatusUniqProcessSpecialSUtility::resetYoshiSpecialS(soModuleAccesse
     model.setNodeRotateZ(2, 0.0f);
     float lr = work.getFloat(0x21000008);
     if (lr != 0.0f) acc->getPostureModule().setLr(lr);
-    work.setFloat(0.0f, 0x21000008);
+    float neutral = 0.0f;
+    work.setFloat(neutral, 0x21000008);
 }
 void ftYoshiStatusUniqProcessSpecialSUtility::resetYoshiSpecialS2(soModuleAccesser* acc) {
     acc->getStatusModule().getStatusKind();

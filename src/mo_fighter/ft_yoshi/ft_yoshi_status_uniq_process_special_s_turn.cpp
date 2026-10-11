@@ -39,18 +39,21 @@ void ftYoshiStatusUniqProcessSpecialSTurn::execStatus(soModuleAccesser* acc) {
     float oldSpeed = work.getFloat(0x21000004);
     ftYoshiStatusUniqProcessSpecialSUtility::setBodyChange(acc);
     ftYoshiStatusUniqProcessSpecialSUtility::setBodyScale(acc);
-    work.setFloat(angle + 0.25132743f * param->turnRotation, 0x21000005);
+    float nextAngle = angle + 0.25132743f * param->turnRotation;
+    work.setFloat(nextAngle, 0x21000005);
     ftYoshiStatusUniqProcessSpecialSUtility::setRot(acc);
+    const float halfTurn = 3.1415927f;
     float oldMagnitude = ftyoshi::ABS(oldSpeed);
     float magnitude = ftyoshi::ABS(velocity.m_x);
-    // MATCH-ONLY: preserve the native discarded out-of-line ABS call.
-    ftyoshi::ABS(param->turnModelAngle);
+    // MATCH-ONLY: retain the discarded ABS call and its native half-turn literal.
+    ftyoshi::ABS(param->turnModelAngle) * halfTurn;
     float modelAngle = ftyoshi::ABS(param->turnModelAngle);
     if (oldSpeed > 0.0f) {
         if (velocity.m_x <= 0.0f) oldMagnitude *= 0.7f;
     } else if (velocity.m_x >= 0.0f) oldMagnitude *= 0.7f;
     float transitionMagnitude = 0.7f * ftyoshi::ABS(oldSpeed);
-    float denominator = ftyoshi::ABS(oldSpeed) + transitionMagnitude;
+    float originalMagnitude = ftyoshi::ABS(oldSpeed);
+    float denominator = originalMagnitude + transitionMagnitude;
     float yaw;
     if (oldSpeed > 0.0f) {
         float delta;
@@ -59,9 +62,10 @@ void ftYoshiStatusUniqProcessSpecialSTurn::execStatus(soModuleAccesser* acc) {
             delta = ftyoshi::ABS(oldSpeed) - currentMagnitude;
         } else {
             float currentMagnitude = ftyoshi::ABS(velocity.m_x);
-            delta = ftyoshi::ABS(oldSpeed) + currentMagnitude;
+            float originalMagnitude = ftyoshi::ABS(oldSpeed);
+            delta = originalMagnitude + currentMagnitude;
         }
-        yaw = 1.5707964f + 3.1415927f * (delta / denominator);
+        yaw = 1.5707964f + halfTurn * (delta / denominator);
     } else {
         float delta;
         if (velocity.m_x < 0.0f) {
@@ -69,14 +73,16 @@ void ftYoshiStatusUniqProcessSpecialSTurn::execStatus(soModuleAccesser* acc) {
             delta = ftyoshi::ABS(oldSpeed) - currentMagnitude;
         } else {
             float currentMagnitude = ftyoshi::ABS(velocity.m_x);
-            delta = ftyoshi::ABS(oldSpeed) + currentMagnitude;
+            float originalMagnitude = ftyoshi::ABS(oldSpeed);
+            delta = originalMagnitude + currentMagnitude;
         }
-        yaw = 4.712389f + 3.1415927f * (delta / denominator);
+        yaw = 4.712389f + halfTurn * (delta / denominator);
     }
     while (yaw < 0.0f) yaw += 6.2831855f;
     while (yaw > 6.2831855f) yaw -= 6.2831855f;
     model.setNodeRotateY(3, yaw * 57.29578f);
-    model.setNodeRotateZ(2, (-param->turnModelAngle + modelAngle * (magnitude / oldMagnitude)) * 57.29578f);
+    float bankAngle = -param->turnModelAngle + modelAngle * (magnitude / oldMagnitude);
+    model.setNodeRotateZ(2, bankAngle * 57.29578f);
     if (ftYoshiStatusUniqProcessSpecialSUtility::checkLife(acc) || ftYoshiStatusUniqProcessSpecialSUtility::checkCancel(acc)) work.setInt(0x11A, 0x20000008);
     else if (((oldSpeed > 0.0f && velocity.m_x < 0.0f) || (oldSpeed <= 0.0f && velocity.m_x > 0.0f)) && ftyoshi::ABS(velocity.m_x) > 0.7f * ftyoshi::ABS(oldSpeed)) {
         work.setInt(0x119, 0x20000008);
@@ -144,8 +150,7 @@ void ftYoshiStatusUniqProcessSpecialSTurn::execFixPosCounter(soModuleAccesser* a
             float yaw = speed.m_x < 0.0f ? -1.5707964f : 1.5707964f;
             float normalY = normal.m_y;
             float slope = atan2(-normal.m_x, normalY);
-            Vec3f rotation;
-            rotation.m_x = 0.0f; rotation.m_y = yaw; rotation.m_z = slope;
+            Vec3f rotation(0.0f, yaw, slope);
             soEffectModule& effect = acc->getEffectModule();
             Vec3f position = posture.getPos();
             effect.req(static_cast<EfID>(10), &position, &rotation, 1.0f, 0, -1);
