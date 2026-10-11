@@ -104,9 +104,13 @@ Select an object from the left sidebar to begin diffing. Changes to the project 
 
 ![](assets/objdiff.png)
 
-<img width="960" height="615" alt="image" src="https://github.com/user-attachments/assets/6b5a1d14-f2dc-4a4c-a73d-c3cc88def7c0" />
+<br><br><br><br><br>
+
+<img width="400" alt="Undertale screenshot with the dialogue: Thousands of people wishing together can't be wrong" src="https://github.com/user-attachments/assets/6b5a1d14-f2dc-4a4c-a73d-c3cc88def7c0" />
 
 *Thousands of agents prompting together can't be slop*
+
+The following section is intended primarily for AI agents...
 
 <details>
 <summary><b>For AI Agents</b></summary>
