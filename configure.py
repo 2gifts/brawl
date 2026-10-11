@@ -970,7 +970,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/bte/rfc_utils.c"),
             Object(Matching, "RVL_SDK/bte/sdp_discovery.c"),
             Object(Matching, "RVL_SDK/bte/sdp_server.c"),
-            Object(NonMatching, "RVL_SDK/bte/btu_hcif.c"),
+            Object(Matching, "RVL_SDK/bte/btu_hcif.c"),
             Object(Matching, "RVL_SDK/bte/hcicmds.c"),
             Object(NonMatching, "RVL_SDK/bte/btm_pm.c"),
             Object(NonMatching, "RVL_SDK/bte/sdp_utils.c"),
