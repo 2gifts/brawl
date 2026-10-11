@@ -2161,7 +2161,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_special_air_s_jump.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_final.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_final_start.cpp"),
-            Object(NonMatching, "mo_fighter/ft_yoshi/ft_yoshi_kinetic_transactor.cpp"),
+            Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_kinetic_transactor.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_catch_pull.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_guard_func.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_guard_on.cpp"),

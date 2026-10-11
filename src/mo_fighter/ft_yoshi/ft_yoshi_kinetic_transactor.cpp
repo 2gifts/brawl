@@ -1,5 +1,6 @@
 // MATCH-ONLY: the native helpers call these vector operations out of line.
 // Set the policy before any builder header can include mt_vector.h.
+#define MT_VEC2F_CTOR_OUT_OF_LINE
 #define MT_VEC2F_CTOR_NOINLINE
 #define MT_VEC2F_ASSIGN_NOINLINE
 #define MT_VEC3F_CTOR_NOINLINE
@@ -14,6 +15,10 @@
 #include <so/so_module_accesser.h>
 #include <ft/builder/ft_builder_kinetic.h>
 
+// MATCH-ONLY: retain the native accesser load followed by a shared flag copy,
+// rather than propagating the flag into two independent immediate loads.
+#pragma push
+#pragma opt_propagation off
 void ftYoshiKineticTransactor::changeKinetic(int mode, void* pools, soModuleAccesser* acc) {
     if (mode <= 0x63) {
         ftKineticTransactor::changeKinetic(mode, pools, acc);
@@ -21,8 +26,9 @@ void ftYoshiKineticTransactor::changeKinetic(int mode, void* pools, soModuleAcce
     }
     // Preprocessing also runs for an unrecognized custom mode.
     Vec2f speed;
+    soModuleAccesser* processAccesser = acc;
     bool process = true;
-    Vec2f::copy(speed, ftKineticTransactHelper::preHelpProcess(acc, process, process));
+    Vec2f::copy(speed, ftKineticTransactHelper::preHelpProcess(processAccesser, process, process));
     switch (mode) {
     case 0x64: {
         bool result = false;
@@ -54,6 +60,7 @@ void ftYoshiKineticTransactor::changeKinetic(int mode, void* pools, soModuleAcce
     }
     ftKineticTransactor::enableOutsideEnergy(acc);
 }
+#pragma pop
 
 // Ground Egg Roll retains the incoming velocity, then applies its own
 // acceleration, braking and speed bounds to Stop energy.
@@ -80,6 +87,9 @@ void ftYoshiKineticTransactor::changeKineticSub(bool*, void*, Vec2f* speed, soMo
     target.m_y = 0.0f;
     stop.m_speedTarget = target;
 }
+
+// MATCH-ONLY: this unit owns the weak constructor between the ground and air helpers.
+__declspec(weak) Vec2f::Vec2f(float x, float y) : m_x(x), m_y(y) {}
 
 // Air Egg Roll separates the entry velocity into gravity and horizontal
 // control before applying the Egg Roll parameter record.
