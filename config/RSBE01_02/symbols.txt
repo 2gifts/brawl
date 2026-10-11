@@ -13083,12 +13083,12 @@ quickSort<Q216hkWorldOperation16BiggestOperation,PFRCQ216hkWorldOperation16Bigge
 quickSortRecursive<Q216hkWorldOperation16BiggestOperation,PFRCQ216hkWorldOperation16BiggestOperationRCQ216hkWorldOperation16BiggestOperation_6hkBool>__11hkAlgorithmFPQ216hkWorldOperation16BiggestOperationiiPFRCQ216hkWorldOperation16BiggestOperationRCQ216hkWorldOperation16BiggestOperation_6hkBool_v = .text:0x802F7744; // type:function size:0x1CC
 insertAt__47hkArray<Q216hkWorldOperation16BiggestOperation>FiRC47hkArray<Q216hkWorldOperation16BiggestOperation> = .text:0x802F7910; // type:function size:0x4E0
 swap__47hkArray<Q216hkWorldOperation16BiggestOperation>FR47hkArray<Q216hkWorldOperation16BiggestOperation> = .text:0x802F7DF0; // type:function size:0x34
-updateEntityBP__19hkWorldOperationUtilFP7hkWorldP8hkEntity = .text:0x802F7E24; // type:function size:0x2D4
-fn_802F80F8 = .text:0x802F80F8; // type:function size:0x184
-addPhantomBP__19hkWorldOperationUtilFP7hkWorldP9hkPhantom = .text:0x802F827C; // type:function size:0x16C
+updateEntityBP__20hkWorldOperationUtilFP7hkWorldP8hkEntity = .text:0x802F7E24; // type:function size:0x2D4
+addEntityBP__20hkWorldOperationUtilFP7hkWorldP8hkEntity = .text:0x802F80F8; // type:function size:0x184
+addPhantomBP__20hkWorldOperationUtilFP7hkWorldP9hkPhantom = .text:0x802F827C; // type:function size:0x16C
 fn_802F83E8 = .text:0x802F83E8; // type:function size:0x19C
-fn_802F8584 = .text:0x802F8584; // type:function size:0x160
-removePhantomBP__19hkWorldOperationUtilFP7hkWorldP9hkPhantom = .text:0x802F86E4; // type:function size:0x128
+removeEntityBP__20hkWorldOperationUtilFP7hkWorldP8hkEntity = .text:0x802F8584; // type:function size:0x160
+removePhantomBP__20hkWorldOperationUtilFP7hkWorldP9hkPhantom = .text:0x802F86E4; // type:function size:0x128
 fn_802F880C = .text:0x802F880C; // type:function size:0xC0
 fn_802F88CC = .text:0x802F88CC; // type:function size:0x128
 fn_802F89F4 = .text:0x802F89F4; // type:function size:0x1D0
