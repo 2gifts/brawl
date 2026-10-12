@@ -13,8 +13,8 @@ public:
     virtual void execStatus(soModuleAccesser* moduleAccesser);
 };
 
-// HYPOTHESIS: aim-tuning constants (c0 default magnitude, c1 small-magnitude limit, c2 maximum magnitude,
-// c3 angle scale, c4 full turn). Values are in the rodata block and are not yet verified.
+// Native tuning block: zero, minimum normal float, unit stick magnitude,
+// radians-to-degrees scale, and a full turn in degrees.
 extern float lbl_122_rodata_40[5];
 
 #pragma dont_inline on
@@ -27,12 +27,15 @@ void ftSnakeStatusUniqProcessNikitaOperation::execStatus(soModuleAccesser* modul
     soControllerModule& controller = *moduleAccesser->m_enumerationStart->m_controllerModule;
     float stickY = controller.getStickY();
     Vec2f stick(controller.getStickX(), stickY);
-    float blend = (*moduleAccesser->m_enumerationStart->m_workManageModule).getFloat(0x21000006);
-    stick.m_x = from.m_x + (stick.m_x - from.m_x) * blend;
-    stick.m_y = from.m_y + (stick.m_y - from.m_y) * blend;
+    stick.m_x = from.m_x + (stick.m_x - from.m_x) *
+        moduleAccesser->m_enumerationStart->m_workManageModule->getFloat(0x21000006);
+    stick.m_y = from.m_y + (stick.m_y - from.m_y) *
+        moduleAccesser->m_enumerationStart->m_workManageModule->getFloat(0x21000006);
     float lengthSquared = stick.m_x * stick.m_x + stick.m_y * stick.m_y;
     float length;
-    if (__fabsf(lengthSquared) > c[1]) {
+    double absolute = __fabs(lengthSquared);
+    float magnitude = absolute;
+    if (magnitude <= c[1]) {
         length = c[0];
     } else {
         length = lengthSquared * rsqrtf(lengthSquared);
@@ -41,15 +44,15 @@ void ftSnakeStatusUniqProcessNikitaOperation::execStatus(soModuleAccesser* modul
         length = c[2];
     }
     (*moduleAccesser->m_enumerationStart->m_motionModule).setWeightRate(c[2] - length - (*moduleAccesser->m_enumerationStart->m_motionModule).getPrevWeight());
-    float angle = static_cast<float>(atan2(stick.m_y, stick.m_x * moduleAccesser->m_enumerationStart->m_postureModule->getLr()));
-    angle = c[3] * angle;
+    float angle = c[3] * static_cast<float>(atan2(stick.m_y, stick.m_x * moduleAccesser->m_enumerationStart->m_postureModule->getLr()));
     if (angle > c[4]) {
         angle -= c[4];
     } else if (angle < c[0]) {
         angle += c[4];
     }
-    // HYPOTHESIS: the final angle is written to the motion module's second-animation rate.
-    (*moduleAccesser->m_enumerationStart->m_motionModule).set2ndRate(angle - (*moduleAccesser->m_enumerationStart->m_motionModule).get2ndFrame());
+    // Advance the second animation toward the wrapped aiming angle.
+    soMotionModule& motion = *moduleAccesser->m_enumerationStart->m_motionModule;
+    motion.set2ndRate(angle - motion.get2ndFrame());
     (*moduleAccesser->m_enumerationStart->m_workManageModule).setFloat(stick.m_x, 0x21000004);
     (*moduleAccesser->m_enumerationStart->m_workManageModule).setFloat(stick.m_y, 0x21000005);
 }
