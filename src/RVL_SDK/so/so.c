@@ -742,14 +742,14 @@ static inline BOOL SOiCanDmaDirect(void *buf, int len) {
 }
 
 int SOiRecvFrom(int unused, int s, void *buf, int len, int flags, SOSockAddr *from) {
-    int fd;
-    int rv;
-    BOOL direct;
-    u8 *args;
-    u8 *data;
-    u8 *addr;
     IOSIoVector *v;
+    u8 *data;
     int argSize;
+    int fd;
+    u8 *args;
+    BOOL direct;
+    int rv;
+    u8 *addr;
 
     if (len > 0x8000) {
         len = 0x8000;
@@ -829,8 +829,8 @@ int SOiSendTo(int unused, int s, const void *buf, int len, int flags, const SOSo
     int fd;
     int rv;
     BOOL direct;
-    u8 *args;
     u8 *data;
+    u8 *args;
 
     rv = SOiEnter(unused, &fd);
     if (rv == 0) {
@@ -1268,15 +1268,15 @@ int SOiEnterConfig(int unused, int *fd, int *flag) {
 }
 
 int SOiGetInterfaceOpt(int unused, int level, int optname, void *optval, int *optlen) {
-    int fd;
-    int flag;
-    int rv;
-    u8 *args;
-    int size;
-    int len;
     int *hdr;
-    int *lenBuf;
     u8 *data;
+    int fd;
+    int len;
+    int size;
+    int flag;
+    u8 *args;
+    int *lenBuf;
+    int rv;
 
     rv = SOiEnterConfig(0, &fd, &flag);
     if (rv == 0) {
@@ -1610,18 +1610,18 @@ int SOCleanup(void) {
 }
 
 int SOGetAddrInfo(const char *node, const char *serv, const SOAddrInfo *hints, SOAddrInfo **res) {
-    int fd;
     int rv;
-    int servLen;
-    int nodeLen;
-    int size;
-    u8 *args;
-    u8 *ai;
     u8 *nodeBuf;
     u8 *servBuf;
-    u8 *hintBuf;
-    SOAddrInfo *it;
+    int size;
+    int nodeLen;
+    u8 *ai;
     u8 *pool;
+    int servLen;
+    SOAddrInfo *it;
+    u8 *args;
+    u8 *hintBuf;
+    int fd;
 
     rv = SOiEnter(0, &fd);
     if (rv == 0) {
