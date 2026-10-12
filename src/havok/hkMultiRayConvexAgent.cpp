@@ -49,8 +49,7 @@ void hkMultiRayConvexAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
 hkMultiRayConvexAgent* hkMultiRayConvexAgent::createConvexMultiRayAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr) {
     hkMultiRayConvexAgent* agent = (hkMultiRayConvexAgent*)hkMemory::getInstance().allocateChunk(sizeof(hkMultiRayConvexAgent), 0x1d);
     agent->m_memSizeAndFlags = sizeof(hkMultiRayConvexAgent);
-    ::new (agent) hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_(a1, a0, a2, contactMgr);
-    return agent;
+    return ::new (agent) hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_(a1, a0, a2, contactMgr);
 }
 
 hkMultiRayConvexAgent* hkMultiRayConvexAgent::createMultiRayConvexAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr) {
@@ -60,12 +59,18 @@ hkMultiRayConvexAgent* hkMultiRayConvexAgent::createMultiRayConvexAgent(void* a0
     return agent;
 }
 
+struct hkContactMgrKeyed : hkReferencedObject {
+    virtual void unk10();
+    virtual void unk14();
+    virtual void unk18(u16 key);
+};
+
 void hkMultiRayConvexAgent::cleanup() {
     int count = m_count;
     for (int i = 0; i < count; i++) {
-        u32 slot = m_slots[i];
+        u16 slot = m_slots[i];
         if (slot != 0xFFFF) {
-            ((hkContactMgr*)unk8)->unk18();
+            ((hkContactMgrKeyed*)unk8)->unk18(slot);
         }
     }
     delete this;

@@ -119,8 +119,8 @@ stDxZebes::stDxZebes() : stMelee("stDxZebes", Stages::DxZebes) {
     memset(&m_mapState, 0, 0x14);
     memset(&m_bgState, 0, 2);
     m_flagStart = false;
-    m_flagFade = true;
     m_motionToggle = 0;
+    m_flagFade = true;
     m_fadeTimer = 500.0f;
     reinterpret_cast<s8&>(m_screenHandle) = -1;
     m_sourceA[0].m_x = -40.5f;

@@ -333,11 +333,11 @@ void soStatusModuleImpl::succeedStatusWork(const soStatusData* statusData) {
             m_generalWork->setIntWork(0, i);
         }
     }
-    s32 floatNum = m_generalWork->getFloatWorkSize();
-    if (floatNum > 31) {
-        floatNum = 31;
+    intNum = m_generalWork->getFloatWorkSize();
+    if (intNum > 31) {
+        intNum = 31;
     }
-    for (s32 i = 0; i < floatNum; i++) {
+    for (s32 i = 0; i < intNum; i++) {
         if ((masks[2] & (1 << i)) == 0) {
             m_generalWork->setFloatWork(0.0f, i);
         }

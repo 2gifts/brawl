@@ -42,7 +42,7 @@ hkShapeCollectionAgent* hkShapeCollectionAgent::createListAAgent(void* a, void* 
 hkShapeCollectionAgent* hkShapeCollectionAgent::createListBAgent(void* a, void* b, void* c, int d) {
     hkShapeCollectionAgent* agent = (hkShapeCollectionAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkShapeCollectionAgent), 0x1d);
     agent->m_memSizeAndFlags = sizeof(hkShapeCollectionAgent);
-    new (agent) hkShapeCollectionAgentVariant(b, a, c, d);
+    agent = new (agent) hkShapeCollectionAgentVariant(b, a, c, d);
     return agent;
 }
 
