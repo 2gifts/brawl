@@ -136,10 +136,11 @@ static void SIInterruptHandler(s16 interrupt, OSContext *context) {
 
     if ((reg & (SI_COMCSR_TCINT | SI_COMCSR_TCINTMSK)) == (SI_COMCSR_TCINT | SI_COMCSR_TCINTMSK)) {
         s32 chan;
+        s32 next;
         u32 sr;
-        SICallback callback;
-        OSTime now;
         s32 i;
+        SICallback callback;
+        SIPacket *packet;
 
         chan = Si.chan;
         sr = CompleteTransfer();
@@ -147,15 +148,16 @@ static void SIInterruptHandler(s16 interrupt, OSContext *context) {
         callback = Si.callback;
         Si.callback = NULL;
 
-        now = __OSGetSystemTime();
+        next = chan;
         for (i = 0; i < SI_MAX_CHAN; i++) {
-            chan++;
-            chan %= SI_MAX_CHAN;
-            if (Packet[chan].chan != SI_CHAN_NONE && Packet[chan].fire <= now) {
-                if (__SITransfer(Packet[chan].chan, Packet[chan].output, Packet[chan].outputBytes,
-                                 Packet[chan].input, Packet[chan].inputBytes, Packet[chan].callback)) {
-                    OSCancelAlarm(&Alarm[chan]);
-                    Packet[chan].chan = SI_CHAN_NONE;
+            next++;
+            next %= SI_MAX_CHAN;
+            packet = &Packet[next];
+            if (packet->chan != SI_CHAN_NONE && packet->fire <= __OSGetSystemTime()) {
+                if (__SITransfer(packet->chan, packet->output, packet->outputBytes, packet->input,
+                                 packet->inputBytes, packet->callback)) {
+                    OSCancelAlarm(&Alarm[next]);
+                    packet->chan = SI_CHAN_NONE;
                 }
                 break;
             }
@@ -186,13 +188,14 @@ static void SIInterruptHandler(s16 interrupt, OSContext *context) {
         for (i = 0; i < SI_MAX_CHAN; i++) {
             u32 sr;
             BOOL ok;
+            BOOL enabled;
 
-            OSDisableInterrupts();
+            enabled = OSDisableInterrupts();
             sr = SI_SR >> ((3 - i) * 8);
             if ((sr & SI_ERROR_NO_RESPONSE) && !(Type[i] & SI_ERROR_BUSY)) {
                 Type[i] = SI_ERROR_NO_RESPONSE;
             }
-            OSRestoreInterrupts(TRUE);
+            OSRestoreInterrupts(enabled);
 
             if (sr & 0x20) {
                 InputBuffer[i][0] = SI_CHAN_IN_HI(i);
