@@ -527,7 +527,6 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "RVL_SDK/net/ncdsystem.c"),
-            Object(NonMatching, "RVL_SDK/net/net_time.c"),
             Object(NonMatching, "RVL_SDK/net/crypto.c"),
             Object(NonMatching, "RVL_SDK/nhttp/nhttp.c"),
             Object(NonMatching, "RVL_SDK/ssl/ssl.c"),
@@ -951,7 +950,8 @@ config.libs = [
             Object(Matching, "RVL_SDK/euart/euart.c"),
             Object(Matching, "RVL_SDK/tpl/TPL.c"),
             Object(NonMatching, "RVL_SDK/so/so.c"),
-            Object(NonMatching, "RVL_SDK/net/net_util.c"),
+            Object(NonMatching, "RVL_SDK/net/net_time.c"),
+            Object(Matching, "RVL_SDK/net/net_util.c"),
             Object(NonMatching, "RVL_SDK/thp/THPAudio.cpp"),
             Object(NonMatching, "RVL_SDK/nwc24/nwc24.c"),
             Object(Matching, "RVL_SDK/wud/WUDHidHost.c"),

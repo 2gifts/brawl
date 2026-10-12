@@ -4441,7 +4441,7 @@ RVL_SDK/net/net_time.c:
 RVL_SDK/net/net_util.c:
 	.text       start:0x8038ED50 end:0x8038F430
 	.rodata     start:0x80415D80 end:0x80415DE0
-	.data       start:0x80491340 end:0x80491360
+	.data       start:0x80491340 end:0x80491398
 	.sdata      start:0x8059FC30 end:0x8059FC38
 
 RVL_SDK/net/crypto.c:
