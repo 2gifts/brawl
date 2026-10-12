@@ -168,7 +168,11 @@ u32 hkModifierConstraintAtom::addModifierDataToConstraintInfo(hkConstraintInfo* 
 u32 hkModifierConstraintAtom::addAllModifierDataToConstraintInfo(hkConstraintInfo* info) {
     u32 flags = 0;
     hkModifierConstraintAtom* atom = this;
-    while (atom->m_type >= 0x17) {
+    while (true) {
+        int type = atom->m_type;
+        if (type < 0x17) {
+            break;
+        }
         flags |= atom->addModifierDataToConstraintInfo(info);
         atom = (hkModifierConstraintAtom*)atom->m_child;
     }

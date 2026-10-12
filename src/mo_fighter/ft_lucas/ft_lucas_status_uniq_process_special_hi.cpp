@@ -11,9 +11,10 @@
 // Native helper: vec2fAngle__FP5Vec2fP5Vec2f at 0x8003DDD0.
 float vec2fAngle(Vec2f*, Vec2f*);
 void ftLucasStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* a) {
-    a->getWorkManageModule().setInt(1, 0x20000003);
+    soWorkManageModule& work = a->getWorkManageModule();
     // HYPOTHESIS: This observed call may lazily initialize or cache fighter data.
     g_ftCommonDataAccesser.getData(Fighter_Lucas);
+    work.setInt(1, 0x20000003);
 }
 void ftLucasStatusUniqProcessSpecialHi::execFixPosCounter(soModuleAccesser* a) {
     soWorkManageModule& work = a->getWorkManageModule();

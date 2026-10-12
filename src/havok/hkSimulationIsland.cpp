@@ -46,19 +46,29 @@ void hkSimulationIsland::addAction(hkAction* action) {
 }
 
 // Clears the matching action slot (nulls are compacted later) and the action's island pointer.
-void hkSimulationIsland::removeAction(hkAction* action) {
-    int index = -1;
-    for (int i = 0; i < m_actions.getSize(); i++) {
-        if (m_actions[i] == action) {
-            index = i;
-            break;
+struct hkSimulationIslandFlags {
+    unsigned char m_stateA : 2;
+    unsigned char m_stateB : 2;
+    unsigned char m_rest : 4;
+};
+
+static int findActionIndex(const hkArray<hkAction*>& actions, hkAction* action) {
+    for (int i = 0; i < actions.getSize(); i++) {
+        if (actions[i] == action) {
+            return i;
         }
     }
+    return -1;
+}
+
+void hkSimulationIsland::removeAction(hkAction* action) {
+    int index = findActionIndex(m_actions, action);
     m_actions[index] = 0;
     *(hkSimulationIsland**)((char*)action + 0x0C) = 0;
     // HYPOTHESIS: bit fields 0xC0 and 0x30 of 0x26, set as in internalRemoveEntity.
-    m_flags26 = (m_flags26 & ~0xC0) | 0x40;
-    m_flags26 = (m_flags26 & ~0x30) | 0x10;
+    hkSimulationIslandFlags* flags = (hkSimulationIslandFlags*)&m_flags26; // MATCH-ONLY: the bit-field view makes MWCC emit rlwimi
+    flags->m_stateA = 1;
+    flags->m_stateB = 1;
 }
 
 // Forwards to the world operation with the world taken from the constraint's owner (world at +0x08 of the

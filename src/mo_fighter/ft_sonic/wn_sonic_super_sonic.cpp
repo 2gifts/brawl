@@ -69,9 +69,10 @@ void wnSonicSuperSonic::processUpdate() {
     m_moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x11000001);
     if (!m_moduleAccesser->getWorkManageModule().isFlag(0x12000003) &&
         m_moduleAccesser->getStatusModule().getStatusKind() == 1) {
+        int threshold = 0;
         soModuleAccesser* acc = m_moduleAccesser;
         soWorkManageModule& work = acc->getWorkManageModule();
-        int threshold = soValueAccesser::getConstantInt(acc, 0x5DC1, 0);
+        threshold = soValueAccesser::getConstantInt(acc, 0x5DC1, 0) - threshold;
         threshold -= soValueAccesser::getConstantInt(acc, 0x5DC0, 0);
         if (work.getInt(0x20000000) <= threshold) {
             m_moduleAccesser->getWorkManageModule().onFlag(0x12000003);
