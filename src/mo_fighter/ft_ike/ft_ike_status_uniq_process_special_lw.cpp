@@ -1,6 +1,33 @@
+#include <ft/fighter.h>
+#include <so/so_module_accesser.h>
+#include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+class ftIkeStatusUniqProcessSpecialLw : public soStatusUniqProcess {
+public:
+    virtual ~ftIkeStatusUniqProcessSpecialLw() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStop(soModuleAccesser* moduleAccesser);
+    virtual void execFixPos(soModuleAccesser* moduleAccesser);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
+};
 
-} // extern "C"
+// HYPOTHESIS: the bodies (about 1 KB of init and per-frame code, plus the fix-position and exit paths) are not
+// reconstructed yet; these stubs keep the class shape and the static instance.
+void ftIkeStatusUniqProcessSpecialLw::initStatus(soModuleAccesser* moduleAccesser) {
+}
+
+void ftIkeStatusUniqProcessSpecialLw::execStatus(soModuleAccesser* moduleAccesser) {
+}
+
+void ftIkeStatusUniqProcessSpecialLw::execStop(soModuleAccesser* moduleAccesser) {
+}
+
+void ftIkeStatusUniqProcessSpecialLw::execFixPos(soModuleAccesser* moduleAccesser) {
+}
+
+void ftIkeStatusUniqProcessSpecialLw::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
+}
+
+ftIkeStatusUniqProcessSpecialLw g_ftIkeStatusUniqProcessSpecialLw;
