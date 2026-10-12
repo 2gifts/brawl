@@ -6208,7 +6208,10 @@ config.libs = [
         "mw_version": config.linker_version,
         "cflags": cflags_rel,
         "host": False,
-        "objects": [],
+        "objects": [
+            Object(NonMatching, "mo_menu/mu_boot_nand.cpp"),
+            Object(NonMatching, "mo_menu/mu_boot_network.cpp"),
+        ],
     },
     {
         "lib": "sora_menu_challenger",
@@ -6357,7 +6360,9 @@ config.libs = [
         "mw_version": config.linker_version,
         "cflags": cflags_rel,
         "host": False,
-        "objects": [],
+        "objects": [
+            Object(NonMatching, "mo_menu/mu_wifi_time_result.cpp"),
+        ],
     },
     {
         "lib": "sora_menu_title",
