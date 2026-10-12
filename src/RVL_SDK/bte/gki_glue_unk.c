@@ -45,8 +45,8 @@
  */
 
 // these two live in the wud code and bounce into its alloc/free callbacks, no names for them yet
-extern void *fn_80229960(UINT32 size);
-extern void fn_802299B0(void *p_mem);
+extern void *WUDiMemAlloc(UINT32 size);
+extern void WUDiMemFree(void *p_mem);
 
 // bte_main.c
 extern void bte_report_state(INT8 state);
@@ -143,7 +143,7 @@ void GKI_exception(UINT16 code, char *msg)
 
 void *GKI_os_malloc(UINT32 size)
 {
-	void *p_mem = fn_80229960(size);
+	void *p_mem = WUDiMemAlloc(size);
 
 	if (p_mem == NULL)
 		return NULL;
@@ -153,7 +153,7 @@ void *GKI_os_malloc(UINT32 size)
 
 void GKI_os_free(void *p_mem)
 {
-	fn_802299B0(p_mem);
+	WUDiMemFree(p_mem);
 }
 
 void fn_802305A4(int type, INT8 arg)

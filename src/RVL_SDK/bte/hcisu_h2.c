@@ -163,7 +163,7 @@ extern void bta_ci_hci_msg_handler(void *p_data);
 extern void fn_802305A4(int type, INT8 arg);
 
 // owned by the wud code, hcisu flips it to say whether the transport is still busy
-extern int lbl_8059ED98;
+extern int bte_hcisu_wait;
 
 /*******************************************************************************
  * local function declarations
@@ -827,7 +827,7 @@ static void hcisu_usb_init(tHCISU_USB_ARGS *p_args)
 	hcisu_usb_cb.state = USB_STATE_READY;
 	GKI_enable();
 
-	lbl_8059ED98 = 1;
+	bte_hcisu_wait = 1;
 }
 
 static void hcisu_usb_open(tHCISU_USB_ARGS *p_args,
@@ -865,7 +865,7 @@ static void hcisu_usb_open(tHCISU_USB_ARGS *p_args,
 			GKI_freebuf(p_buf);
 		}
 
-		lbl_8059ED98 = 0;
+		bte_hcisu_wait = 0;
 	}
 }
 
