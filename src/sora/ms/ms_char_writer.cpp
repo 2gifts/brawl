@@ -56,3 +56,7 @@ f32 ms::CharWriter::Print(u16 character) {
     m_xPos += width;
     return width;
 }
+
+f32 ms::CharWriter::GetFontWidth() const {
+    return m_104 * (m_fontScaleX * (f32) static_cast<nw4r::ut::Font*>(m_font)->GetWidth());
+}

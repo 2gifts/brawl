@@ -2,6 +2,7 @@
 #include <gf/gf_homemenu.h>
 
 extern "C" void fn_80228154(s32 p1);
+extern "C" void fn_80228138(s32 p1);
 
 struct gfHomeMenuFields {
     char unk0[0x9C];
@@ -31,4 +32,14 @@ void gfHomeMenu::start() {
         fn_80228154(3);
     }
     self->unkB0.unkB0Mode = 1;
+}
+
+void gfHomeMenu::kill() {
+    gfHomeMenuFields* self = reinterpret_cast<gfHomeMenuFields*>(this);
+
+    fn_80228138(0);
+    fn_80228138(1);
+    fn_80228138(2);
+    fn_80228138(3);
+    self->unkB0.unkB0Mode = 2;
 }

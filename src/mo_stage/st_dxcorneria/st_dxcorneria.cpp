@@ -146,8 +146,9 @@ bool stDxCorneria::startAppear() {
     if ((u32)index >= 4) {
         index = 4;
     }
+    int base = m_appearKind * 5;
+    int arg = base + index;
     IfSmashAppearTask* task = m_appearTask;
-    int arg = m_appearKind * 5 + index;
     if (task != NULL) {
         task->start(arg);
     }

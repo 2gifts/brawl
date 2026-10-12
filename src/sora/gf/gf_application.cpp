@@ -9,6 +9,14 @@ void fn_801FF1AC();
 void fn_801DF434(s32 arg);
 }
 
+void gfApplication::reset() {
+    VISetBlack(TRUE);
+    VIFlush();
+    fn_801FF1AC();
+    VIWaitForRetrace();
+    VIWaitForRetrace();
+}
+
 void gfApplication::restart() {
     VISetBlack(TRUE);
     VIFlush();

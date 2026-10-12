@@ -1081,7 +1081,7 @@ bool stJungle::isEventEnd(int param1, int* eventState, int* eventDecision) {
     if (m_isEvent == 0) {
         return false;
     }
-    if (7740.0f <= m_scrollDist) {
+    if (m_scrollDist >= 7740.0f) {
         *eventState = 6;
         *eventDecision = 4;
         return true;
