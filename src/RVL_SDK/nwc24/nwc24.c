@@ -7,6 +7,7 @@
 #include "revolution/sc.h"
 #include "revolution/vf.h"
 #include <cstring>
+#include <cstdarg>
 
 // MATCH-ONLY: the original is a bunch of separate source files, here they share one TU so mwcc would
 // happily inline calls that crossed file boundaries. auto_inline is off for the whole file and the
@@ -93,12 +94,14 @@ char *Mail_strcat(char *dst, const char *src) {
 }
 
 char *Mail_strncat(char *dst, const char *src, size_t maxlen) {
-    int len = 0;
-    const char *p = dst;
+    int len;
+    const char *p;
     char *d;
     size_t i;
     char c;
 
+    len = 0;
+    p = dst;
     while (*p != 0) {
         p++;
         len++;
@@ -109,13 +112,264 @@ char *Mail_strncat(char *dst, const char *src, size_t maxlen) {
 
     while (i < maxlen && (c = *src) != 0) {
         *d++ = c;
-        src++;
         i++;
+        src++;
     }
 
-    dst[i + len] = 0;
+    dst[len + i] = 0;
     return dst;
 }
+
+// the little printf the mail code carries around. it only knows %% %c %s %d %u %o %x %X, a width
+// (or *) and a '-' / '0' flag, it builds the output string in place by appending/prepending single chars
+// HYPOTHESIS: the strlen / "put a char on the end" / "shift everything up and put a char at the front"
+// bits were inlined helpers in the original, the unrolled shift loop is mwcc's doing
+
+#pragma auto_inline on
+
+static inline int StrLen(const char *str) {
+    int n = 0;
+
+    while (*str != 0) {
+        n++;
+        str++;
+    }
+
+    return n;
+}
+
+static inline void StrCat(char *dst, const char *src) {
+    int n = 0;
+    const char *p = dst;
+    char *d;
+
+    while (*p != 0) {
+        p++;
+        n++;
+    }
+
+    d = dst + n;
+
+    while (*src != 0) {
+        *d++ = *src++;
+    }
+
+    *d = 0;
+}
+
+// appends one char to the end of a string
+static inline void PutCharBack(char *str, char ch) {
+    int len = StrLen(str);
+    str[len++] = ch;
+    str[len] = 0;
+}
+
+// puts one char in front of a string, moving the rest (and the terminator) up by one
+static inline void PutCharFront(char *str, char ch) {
+    int len = StrLen(str);
+    int i;
+
+    for (i = len; i >= 0; i--) {
+        str[i + 1] = str[i];
+    }
+
+    str[0] = ch;
+}
+
+static int fn_80397878(char *buf, u32 value, int base, int hexOffset, int isSigned, int width, char padCh,
+                       char flag) {
+    int count = 0;
+    int written = 0;
+    int neg;
+    char digit;
+    char c;
+
+    if (isSigned && (value & 0x80000000)) {
+        value = -value;
+        neg = 1;
+    } else {
+        neg = 0;
+    }
+
+    while (value != 0) {
+        digit = value % base;
+        value /= base;
+
+        PutCharFront(buf, digit > 9 ? digit + hexOffset : digit + '0');
+        written++;
+        count++;
+    }
+
+    if (*buf == 0) {
+        PutCharFront(buf, '0');
+        written++;
+        count++;
+    }
+
+    if (padCh != '0') {
+        padCh = ' ';
+    }
+
+    count += neg;
+
+    while (count < width) {
+        if (flag == 'L') {
+            PutCharBack(buf, ' ');
+            written++;
+        } else {
+            PutCharFront(buf, padCh);
+            written++;
+        }
+        count++;
+    }
+
+    if (neg) {
+        PutCharFront(buf, '-');
+    }
+
+    return written;
+}
+
+int Mail_vsprintf(char *buf, char *fmt, va_list args) {
+    int i;
+    int total;
+    int isNumber;
+    int hexOffset;
+    int base;
+    char padCh;
+    int width;
+    int isSigned;
+    char ch;
+    char flag;
+    char lenMod;
+
+    *buf = 0;
+    total = 0;
+
+    while ((ch = *fmt++) != 0) {
+        while (*buf != 0) {
+            buf++;
+        }
+
+        if (ch == '%') {
+            ch = *fmt++;
+            if (ch == '%') {
+                PutCharBack(buf++, ch);
+                total++;
+                continue;
+            }
+            flag = ch;
+            if (ch == '-') {
+                ch = *fmt++;
+            }
+            padCh = ch;
+
+            isSigned = 0;
+            base = 10;
+            hexOffset = '0';
+            isNumber = 0;
+
+            if (ch == '*') {
+                width = va_arg(args, int);
+                ch = *fmt++;
+            } else {
+                width = 0;
+                while (ch >= '0' && ch <= '9') {
+                    width = width * 10 + (ch - '0');
+                    ch = *fmt++;
+                }
+            }
+
+            lenMod = ch & 0xDF;
+            if (lenMod == 'L') {
+                ch = *fmt++;
+            }
+
+            switch (ch) {
+            case 'd':
+                isNumber = 1;
+                isSigned = 1;
+                break;
+            case 'o':
+                isNumber = 1;
+                base = 8;
+                break;
+            case 'u':
+                isNumber = 1;
+                break;
+            case 'x':
+                isNumber = 1;
+                base = 16;
+                hexOffset = 'a' - 10;
+                break;
+            case 'X':
+                isNumber = 1;
+                base = 16;
+                hexOffset = 'A' - 10;
+                break;
+            case 'c':
+                PutCharBack(buf++, va_arg(args, int));
+                total++;
+                break;
+            case 's': {
+                char *str = va_arg(args, char *);
+                int len;
+                char left;
+
+                if (str != NULL) {
+                    len = StrLen(str);
+                    StrCat(buf, str);
+                } else {
+                    len = 0;
+                }
+
+                total += len;
+                left = flag;
+                for (i = len; i < width; i++) {
+                    total++;
+                    if (left == '-') {
+                        PutCharBack(buf, ' ');
+                    } else {
+                        PutCharFront(buf, ' ');
+                    }
+                }
+                break;
+            }
+            }
+
+            if (isNumber) {
+                u32 value;
+
+                if (lenMod == 'L') {
+                    value = va_arg(args, u32);
+                } else if (isSigned) {
+                    value = va_arg(args, s32);
+                } else {
+                    value = va_arg(args, u32);
+                }
+
+                total += fn_80397878(buf, value, base, hexOffset, isSigned, width, padCh, flag);
+            }
+        } else {
+            PutCharBack(buf++, ch);
+            total++;
+        }
+    }
+
+    return total;
+}
+
+int Mail_sprintf(char *buf, char *fmt, ...) {
+    va_list args;
+    int n;
+
+    va_start(args, fmt);
+    n = Mail_vsprintf(buf, fmt, args);
+    va_end(args);
+    return n;
+}
+
+#pragma auto_inline off
 
 /* ---------------------------------------------------------------------------------------------
  * utils
@@ -2582,4 +2836,1678 @@ NWC24Err NWC24GetMsgSize(const NWC24MsgObj *pMsg, u32 *size) {
 
     *size = msg->length;
     return NWC24_OK;
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * system status checks (works out whether the scheduler is allowed to run, and what to tell the user)
+ * ------------------------------------------------------------------------------------------- */
+
+// plain sc items that live in the sc unit, none of them have names yet
+extern u32 fn_80210064(void);
+extern u32 fn_802100A0(void);
+extern u32 fn_802100DC(void);
+extern BOOL fn_8020FC90(void *dst);
+extern s32 NCDiGetEnabledConfigList(u32 *a, u32 *b, u32 *c);
+
+
+static NWC24Err fn_8039A69C(s32 code, u32 mode, u32 *delay);
+static NWC24Err fn_8039A53C(s32 *outCode, u32 mode);
+
+// HYPOTHESIS: reads the id creation stage out of the config
+NWC24Err fn_80399BB8(s32 *stage) {
+    *stage = config->createStage;
+    return NWC24_OK;
+}
+
+// checks a string: not null and not empty, no longer than maxlen, at least minlen
+NWC24Err fn_80399EE0(const char *str, u32 minLen, u32 maxLen) {
+    u32 len;
+
+    if (str == NULL) {
+        return NWC24_ERR_NULL;
+    }
+
+    len = STD_strnlen(str, maxLen + 1);
+    if (len == 0) {
+        return NWC24_ERR_NULL;
+    }
+
+    if (len > maxLen) {
+        return NWC24_ERR_FULL;
+    }
+
+    if (len < minLen) {
+        return NWC24_ERR_FORMAT;
+    }
+
+    return NWC24_OK;
+}
+
+// strlcpy, hands back the number of chars copied
+int fn_80399F5C(char *dst, const char *src, int size) {
+    char *d;
+    int i;
+
+    if (dst == NULL || src == NULL) {
+        return 0;
+    }
+
+    d = dst;
+    i = 0;
+    while (i + 1 < size) {
+        *d = *src;
+        if (*src == 0) {
+            break;
+        }
+
+        src++;
+        i++;
+        d++;
+    }
+
+    if (i + 1 >= size && size != 0) {
+        dst[i] = 0;
+    }
+
+    return i;
+}
+
+NWC24Err fn_8039A350(u32 mode) {
+    NWC24Err result;
+    u8 parental[0x4A];
+    u32 sp18;
+    u32 sp14;
+    u32 sp10;
+    s32 stage;
+    BOOL forScheduler;
+    u32 eula;
+    u32 status;
+    u32 isEnabled;
+    u32 sp08;
+    u32 restrictions;
+
+    GlobalErrorCode = 0;
+
+    if (Opened != NWC24_LIB_OPENED) {
+        result = NWC24_ERR_LIB_NOT_OPENED;
+        goto end;
+    }
+
+    result = -39;
+
+    do {
+        status = SCCheckStatus();
+    } while (status == 1);
+
+    if (status == 2) {
+        GlobalErrorCode = -112 - MANAGE_ERROR_CODE_BASE;
+        goto end;
+    }
+
+    isEnabled = fn_802100DC() & 1;
+    eula = fn_802100A0();
+    restrictions = fn_80210064() & 2;
+    fn_8020FC90(parental);
+
+    if (isEnabled == 0) {
+        GlobalErrorCode = -139 - MANAGE_ERROR_CODE_BASE;
+        goto end;
+    }
+
+    if (eula == 0) {
+        GlobalErrorCode = -107 - MANAGE_ERROR_CODE_BASE;
+        goto end;
+    }
+
+    forScheduler = mode & 1;
+    if (forScheduler && (parental[0] & 0x80) && restrictions != 0) {
+        GlobalErrorCode = -107 - MANAGE_ERROR_CODE_BASE;
+        goto end;
+    }
+
+    result = -31;
+    if (NCDiGetEnabledConfigList(&sp18, &sp14, &sp10) < 0) {
+        GlobalErrorCode = -133 - MANAGE_ERROR_CODE_BASE;
+        goto end;
+    }
+
+    if (sp18 == 0 && sp14 == 0 && sp10 == 0) {
+        GlobalErrorCode = -50299;
+        goto end;
+    }
+
+    if (forScheduler) {
+        fn_80399BB8(&stage);
+        if (stage != NWC24_IDCS_REGISTERED) {
+            GlobalErrorCode = -144 - MANAGE_ERROR_CODE_BASE;
+            goto end;
+        }
+    }
+
+    sp08 = 0;
+    result = fn_8039A53C((s32 *)&sp08, mode);
+    if (result < 0) {
+        GlobalErrorCode = sp08;
+        goto end;
+    }
+
+    if ((result = NWC24iMBoxCheck(0, 0)) == NWC24_ERR_FULL) {
+        GlobalErrorCode = -106 - MANAGE_ERROR_CODE_BASE;
+    }
+
+    if (result != NWC24_ERR_FULL) {
+        result = NWC24_OK;
+    }
+
+end:
+    return result;
+}
+
+// walks the scheduler's recent error list (newest first) until the delays add up to a minute
+static NWC24Err fn_8039A53C(s32 *outCode, u32 mode) {
+    u32 count;
+    u32 n;
+    u32 *stat = (u32 *)NWC24WorkP->WORK_0x400;
+    u32 sum = 0;
+    u32 delay;
+    NWC24Err result;
+    u32 *entry;
+    u32 i;
+    s32 idx;
+
+    *outCode = 0;
+    result = NWC24iGetSchedulerStat(stat, 0x100);
+
+    if (result == NWC24_ERR_FATAL || result == NWC24_ERR_NOMEM || result == -42) {
+        *outCode = result - 0x1AA2C - 1 + 1;
+        return NWC24_ERR_FATAL;
+    }
+
+    if (result != NWC24_OK) {
+        return NWC24_OK;
+    }
+
+    if (mode & 1) {
+        if ((stat[0x44 / 4] & 3) == 3) {
+            return NWC24_OK;
+        }
+    } else if (mode & 2) {
+        if ((stat[0x48 / 4] & 0xF) == 0xF) {
+            return NWC24_OK;
+        }
+    }
+
+    count = stat[0x14 / 4];
+    n = 32;
+    if (count < 32) {
+        n = count;
+    }
+
+    idx = (s32)(count + 31) % 32;
+    for (i = 0; i < n; i++) {
+        entry = &stat[idx];
+        result = fn_8039A69C(entry[0x80 / 4], mode, &delay);
+        if (result != NWC24_OK) {
+            sum += delay;
+            if (sum >= 60) {
+                *outCode = entry[0x80 / 4];
+                return result;
+            }
+        }
+
+        idx--;
+        if (idx < 0) {
+            idx = 31;
+        }
+    }
+
+    *outCode = 0;
+    return NWC24_OK;
+}
+
+// HYPOTHESIS: turns one scheduler error code (a six digit number, digits mean something) into how long the
+// user should be told to wait and whether it counts as a network or server problem
+static NWC24Err fn_8039A69C(s32 code, u32 mode, u32 *delay) {
+    s32 n;
+    s8 d0, d1, d2, d3, d4, d5;
+    s32 low;
+
+    *delay = 0;
+
+    n = -code;
+    d0 = n % 10;
+    n /= 10;
+    d1 = n % 10;
+    n /= 10;
+    d2 = n % 10;
+    n /= 10;
+    d3 = n % 10;
+    n /= 10;
+    d4 = n % 10;
+    n /= 10;
+    d5 = n % 10;
+
+    if (d5 == 0 && d4 == 5) {
+        *delay = 60;
+        return -31;
+    }
+
+    if (d3 == 7) {
+        if (!(mode & 2)) {
+            return NWC24_OK;
+        }
+    } else if (!(mode & 1)) {
+        return NWC24_OK;
+    }
+
+    if (d5 == 1 && d4 == 1) {
+        if (d2 == 1) {
+            return NWC24_OK;
+        }
+
+        if (d2 == 4 && d1 == 0 && d0 == 7) {
+            *delay = 60;
+            return -31;
+        }
+
+        if (!(mode & 1)) {
+            return NWC24_OK;
+        }
+
+        *delay = 30;
+        return -32;
+    } else if (d5 == 1 && d4 == 0) {
+        if (!(mode & 1)) {
+            return NWC24_OK;
+        }
+
+        low = d0 + d1 * 10;
+        switch (d2) {
+        case 0:
+            if (low >= 70) {
+                return NWC24_OK;
+            }
+
+            *delay = 60;
+            switch (low) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+                return -1;
+            case 30:
+            case 31:
+                return -31;
+            case 32:
+                return -32;
+            }
+            return NWC24_OK;
+        case 2:
+            switch (-low) {
+            case -1:
+                *delay = 60;
+                return -1;
+            case -11:
+            case -45:
+                return NWC24_OK;
+            case -31:
+            case -44:
+            case -33:
+                *delay = 60;
+                return -31;
+            case -32:
+                *delay = 20;
+                return -32;
+            }
+            return NWC24_OK;
+        case 3:
+            switch (low) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+            case 13:
+                *delay = 30;
+                return -31;
+            case 6:
+            case 7:
+            case 8:
+                *delay = 20;
+                return -32;
+            }
+            return NWC24_OK;
+        case 4:
+            switch (low) {
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+                *delay = 60;
+                return -32;
+            default:
+                *delay = 20;
+                return -31;
+            }
+        }
+    }
+
+    return NWC24_OK;
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * mail box control files (wc24send.ctl / wc24recv.ctl) and the message files next to them
+ * ------------------------------------------------------------------------------------------- */
+
+#define MBC_MAGIC 0x57635466 // 'WcTf'
+#define MBC_MAGIC_BROKEN 0x42524B4E // 'BRKN'
+#define MBC_VERSION 4
+#define MBC_BLOCK_SIZE 0x80
+#define MBC_FIRST_ENTRY 0x80
+
+// HYPOTHESIS: message ids count up to a million and wrap, so older/newer has to be decided with a window
+#define MSG_ID_WRAP_HIGH 900000
+#define MSG_ID_WRAP_LOW 100000
+
+// how many people have the mbox filesystem mounted, and which box it is mounted for
+static struct {
+    s32 count;
+    NWC24MsgBoxId box;
+} MBoxMount;
+
+extern NWC24Err fn_8039D0EC(NWC24iMBCEntry *entry, NWC24iMsgObj *msg);
+extern NWC24Err fn_8039CF40(NWC24iMsgObj *msg, NWC24iMBCEntry *entry);
+
+static NWC24Err fn_8039C984(NWC24MsgBoxId id, NWC24iMBCHeader **hdrOut);
+static NWC24Err fn_8039CDB4(NWC24MsgBoxId id);
+
+static inline NWC24Err MBoxCtrlPath_i(NWC24MsgBoxId id, char *dst, s32 maxlen) {
+    char *dir = (char *)NWC24GetMBoxDir();
+
+    if (maxlen < STD_strnlen(dir, NWC24i_MBOX_DIR_LENGTH) + 14) {
+        return NWC24_ERR_NOMEM;
+    }
+
+    switch (id) {
+    case NWC24_MSGBOX_SEND:
+        Mail_sprintf(dst, "%s%s", dir, "/wc24send.ctl");
+        break;
+    case NWC24_MSGBOX_RECV:
+        Mail_sprintf(dst, "%s%s", dir, "/wc24recv.ctl");
+        break;
+    default:
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    return NWC24_OK;
+}
+
+static inline NWC24Err MBoxMbxPath_i(NWC24MsgBoxId id, char *dst, s32 maxlen) {
+    char *dir = (char *)NWC24GetMBoxDir();
+
+    if (maxlen < STD_strnlen(dir, NWC24i_MBOX_DIR_LENGTH) + 14) {
+        return NWC24_ERR_NOMEM;
+    }
+
+    switch (id) {
+    case NWC24_MSGBOX_SEND:
+        Mail_sprintf(dst, "%s%s", dir, "/wc24send.mbx");
+        break;
+    case NWC24_MSGBOX_RECV:
+        Mail_sprintf(dst, "%s%s", dir, "/wc24recv.mbx");
+        break;
+    default:
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    return NWC24_OK;
+}
+
+// the files for single messages live on the vf drive, they are named after the message id
+static inline NWC24Err MBoxMsgPath_i(NWC24MsgBoxId id, char *dst, u32 msgId) {
+    switch (id) {
+    case NWC24_MSGBOX_SEND:
+        Mail_sprintf(dst, "@24:/mb/s%07d.msg", msgId);
+        break;
+    case NWC24_MSGBOX_RECV:
+        Mail_sprintf(dst, "@24:/mb/r%07d.msg", msgId);
+        break;
+    default:
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    return NWC24_OK;
+}
+
+static inline NWC24Err MBoxUnmount_i(void) {
+    u32 size;
+    NWC24iMBCHeader *hdr;
+    NWC24Err result;
+
+    if (MBoxMount.count == 0) {
+        return NWC24_OK;
+    }
+
+    if (--MBoxMount.count > 0) {
+        return NWC24_OK;
+    }
+
+    result = fn_8039C984(MBoxMount.box, &hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24CheckSizeVF("@24", &size);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    hdr->freeSpace = size;
+    return NWC24UnmountVF("@24");
+}
+
+// MATCH-ONLY: same again for the copy that sits inside MBoxRemoveMsgFile_i
+static inline NWC24Err MBoxUnmountRm_i(void) {
+    NWC24iMBCHeader *hdr;
+    u32 size;
+    NWC24Err result;
+
+    if (MBoxMount.count == 0) {
+        return NWC24_OK;
+    }
+
+    if (--MBoxMount.count > 0) {
+        return NWC24_OK;
+    }
+
+    result = fn_8039C984(MBoxMount.box, &hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24CheckSizeVF("@24", &size);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    hdr->freeSpace = size;
+    return NWC24UnmountVF("@24");
+}
+
+// MATCH-ONLY: CloseMsg has its own copy of the unmount code, the locals are laid out the other way round
+static inline NWC24Err MBoxUnmountClose_i(void) {
+    NWC24iMBCHeader *hdr;
+    u32 size;
+    NWC24Err result;
+
+    if (MBoxMount.count == 0) {
+        return NWC24_OK;
+    }
+
+    if (--MBoxMount.count > 0) {
+        return NWC24_OK;
+    }
+
+    result = fn_8039C984(MBoxMount.box, &hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24CheckSizeVF("@24", &size);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    hdr->freeSpace = size;
+    return NWC24UnmountVF("@24");
+}
+
+// deletes the single message file and gives the mount back
+static inline NWC24Err MBoxRemoveMsgFile_i(NWC24MsgBoxId id, u32 msgId) {
+    NWC24Err result;
+    NWC24Err del;
+    NWC24Err unmount;
+    char *path;
+
+    result = fn_8039CDB4(id);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    path = NWC24WorkP->pathWork;
+    result = MBoxMsgPath_i(id, path, msgId);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    del = NWC24FDeleteVF(path);
+    unmount = MBoxUnmountRm_i();
+    if (del != NWC24_OK) {
+        return del;
+    }
+
+    return unmount;
+}
+
+// writes the first block (the header) of a control file
+static inline NWC24Err MBoxWriteHeader_i(NWC24iMBCHeader *hdr, NWC24File *file) {
+    NWC24Err result = NWC24FSeek(file, 0, NWC24_SEEK_BEG);
+
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    return NWC24FWrite(hdr, MBC_BLOCK_SIZE, file);
+}
+
+// hands out the next message id of a box
+static inline NWC24Err MBoxGetNextMsgId_i(NWC24iMBCHeader *hdr, u32 *idOut) {
+    if (hdr->magic != MBC_MAGIC) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    if (hdr->nextMsgId > 1000000) {
+        hdr->nextMsgId = 1;
+    }
+
+    *idOut = hdr->nextMsgId;
+    hdr->nextMsgId++;
+    return NWC24_OK;
+}
+
+static inline int CompareMsgId(u32 a, u32 b) {
+    if (a == b) {
+        return 0;
+    }
+
+    if (a > MSG_ID_WRAP_HIGH && b < MSG_ID_WRAP_LOW) {
+        return -1;
+    }
+
+    if (a < MSG_ID_WRAP_LOW && b > MSG_ID_WRAP_HIGH) {
+        return 1;
+    }
+
+    return a > b ? 1 : -1;
+}
+
+NWC24Err NWC24iMBoxGetCtrlFilePath(NWC24MsgBoxId id, char *dst, s32 maxlen) {
+    return MBoxCtrlPath_i(id, dst, maxlen);
+}
+
+// how many messages are in a box
+NWC24Err fn_8039B1C0(NWC24MsgBoxId id, u32 *numMsgs) {
+    NWC24iMBCHeader *hdr;
+    NWC24Err result;
+
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    result = fn_8039C984(id, &hdr);
+    if (result != NWC24_OK) {
+        *numMsgs = 0;
+        return result;
+    }
+
+    *numMsgs = hdr->numMsgs;
+    return NWC24_OK;
+}
+
+// can the current app see this mail box entry?
+static BOOL fn_8039B4C8(NWC24iMBCEntry *entry) {
+    u32 flags = entry->flags;
+
+    if (!(flags & 0x200000)) {
+        return FALSE;
+    }
+
+    if (flags & 0xFE000000) {
+        return FALSE;
+    }
+
+    if (entry->command & 0xFFF80000) {
+        return FALSE;
+    }
+
+    if (flags & NWC24_MSGOBJ_FOR_PUBLIC) {
+        if (entry->appId == 0) {
+            return TRUE;
+        }
+
+        return (NWC24GetAppId() & ~0xFF) == (entry->appId & ~0xFF);
+    }
+
+    if (NWC24GetAppId() == NWC24i_APP_ID_IPL) {
+        return TRUE;
+    }
+
+    if (entry->flags & NWC24_MSGOBJ_FOR_APP) {
+        return TRUE;
+    }
+
+    return (NWC24GetAppId() & ~0xFF) == (entry->appId & ~0xFF);
+}
+
+NWC24Err fn_8039C16C(NWC24MsgBoxId id, u32 msgId, BOOL checkAccess);
+
+NWC24Err fn_8039B5AC(NWC24MsgBoxId id, u32 msgId) {
+    BOOL checkAccess = TRUE;
+
+    if (NWC24IsMsgLibOpenedByTool()) {
+        checkAccess = FALSE;
+    }
+
+    return fn_8039C16C(id, msgId, checkAccess);
+}
+
+NWC24Err fn_8039B244(NWC24iMsgObj *out, NWC24MsgBoxId id, u32 msgId) {
+    NWC24iMBCHeader *hdr;
+    NWC24File file;
+    NWC24Err result;
+    NWC24Err err;
+    NWC24Err closeErr;
+    NWC24iMBCEntry *entry;
+    char *path;
+    u32 count = 0;
+    u32 off;
+
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    entry = &NWC24WorkP->mbcEntry;
+    memset(entry, 0, MBC_BLOCK_SIZE);
+
+    if (msgId == 0) {
+        return NWC24_ERR_HIDDEN;
+    }
+
+    result = fn_8039C984(id, &hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    path = NWC24WorkP->pathWork;
+    result = MBoxCtrlPath_i(id, path, NWC24i_PATH_WORK_SIZE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24FOpen(&file, path, NWC24_OPEN_RW);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24_ERR_NOT_FOUND;
+    for (off = MBC_FIRST_ENTRY; off < hdr->fileSize; off += MBC_BLOCK_SIZE) {
+        err = NWC24FSeek(&file, off, NWC24_SEEK_BEG);
+        if (err != NWC24_OK) {
+            result = err;
+            break;
+        }
+
+        err = NWC24FRead(entry, MBC_BLOCK_SIZE, &file);
+        if (err != NWC24_OK) {
+            result = err;
+            break;
+        }
+
+        if (entry->id != 0) {
+            count++;
+            if (entry->id == msgId) {
+                result = NWC24_ERR_HIDDEN;
+                if (NWC24IsMsgLibOpenedByTool()) {
+                    result = NWC24_OK;
+                    break;
+                }
+
+                if (fn_8039B4C8(entry)) {
+                    result = NWC24_OK;
+                }
+
+                break;
+            }
+        }
+    }
+
+    // the cached message count was wrong, fix it up while the file is open
+    if (result == NWC24_ERR_NOT_FOUND && hdr->numMsgs != count) {
+        hdr->numMsgs = count;
+        MBoxWriteHeader_i(hdr, &file);
+    }
+
+    closeErr = NWC24FClose(&file);
+    if (result != NWC24_OK) {
+        if (msgId == 0) {
+            result = NWC24_ERR_INVALID_VALUE;
+        }
+
+        return result;
+    }
+
+    if (closeErr != NWC24_OK) {
+        return closeErr;
+    }
+
+    fn_8039D0EC(entry, out);
+    return result;
+}
+
+NWC24Err fn_8039B9B0(NWC24MsgBoxId id, u32 msgId, NWC24File *file);
+
+NWC24Err NWC24iMBoxOpenNewMsg(NWC24MsgBoxId id, NWC24File *file, u32 *pMsgID) {
+    NWC24iMBCHeader *hdr;
+    NWC24Err result;
+    char *path;
+
+    result = fn_8039C984(id, &hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = MBoxGetNextMsgId_i(hdr, pMsgID);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = fn_8039CDB4(id);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    path = NWC24WorkP->pathWork;
+    result = MBoxMsgPath_i(id, path, *pMsgID);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    return NWC24FOpen(file, path, NWC24_OPEN_VF_WBUFF);
+}
+
+NWC24Err fn_8039B9B0(NWC24MsgBoxId id, u32 msgId, NWC24File *file) {
+    NWC24Err result;
+    char *path;
+
+    result = fn_8039CDB4(id);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    path = NWC24WorkP->pathWork;
+    result = MBoxMsgPath_i(id, path, msgId);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    return NWC24FOpen(file, path, NWC24_OPEN_VF_RBUFF);
+}
+
+NWC24Err NWC24iMBoxCloseMsg(NWC24File *file) {
+    NWC24Err close;
+    NWC24Err unmount;
+
+    close = NWC24FClose(file);
+    unmount = MBoxUnmountClose_i();
+    if (close != NWC24_OK && unmount != NWC24_OK) {
+        return unmount;
+    }
+
+    return close;
+}
+
+NWC24Err NWC24iMBoxCancelMsg(NWC24File *file, NWC24MsgBoxId id, u32 msgId) {
+    NWC24Err result;
+    NWC24Err err;
+    char *path;
+    NWC24Err close;
+    NWC24Err del;
+
+    close = NWC24FClose(file);
+
+    err = fn_8039CDB4(id);
+    if (err != NWC24_OK) {
+        result = err;
+        goto forceUnmount;
+    }
+
+    path = NWC24WorkP->pathWork;
+    err = MBoxMsgPath_i(id, path, msgId);
+    if (err != NWC24_OK) {
+        result = err;
+        goto forceUnmount;
+    }
+
+    del = NWC24FDeleteVF(path);
+    err = MBoxUnmount_i();
+    if (del != NWC24_OK) {
+        err = del;
+    }
+    result = err;
+
+forceUnmount:
+    MBoxMount.count = 1;
+    err = MBoxUnmount_i();
+
+    if (close != NWC24_OK) {
+        return close;
+    }
+
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    return err != NWC24_OK ? err : NWC24_OK;
+}
+
+// finds (and loads, if needed) the control file header of a box
+static NWC24Err fn_8039C984(NWC24MsgBoxId id, NWC24iMBCHeader **hdrOut) {
+    NWC24Err result = NWC24_OK;
+    NWC24File file;
+    NWC24Err closeErr;
+    NWC24Err err;
+    NWC24iMBCHeader *hdr;
+    char *path;
+
+    if (id == NWC24_MSGBOX_SEND) {
+        *hdrOut = &NWC24WorkP->sendCtrl;
+    } else if (id == NWC24_MSGBOX_RECV) {
+        *hdrOut = &NWC24WorkP->recvCtrl;
+    } else {
+        *hdrOut = NULL;
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    if ((*hdrOut)->magic != MBC_MAGIC) {
+        path = NWC24WorkP->pathWork;
+        result = MBoxCtrlPath_i(id, path, NWC24i_PATH_WORK_SIZE);
+        if (result != NWC24_OK) {
+            return result;
+        }
+
+        result = NWC24FOpen(&file, path, NWC24_OPEN_READ);
+        if (result != NWC24_OK) {
+            return result;
+        }
+
+        hdr = *hdrOut;
+        err = NWC24FSeek(&file, 0, NWC24_SEEK_BEG);
+        if (err != NWC24_OK) {
+            result = err;
+        } else {
+            err = NWC24FRead(hdr, MBC_BLOCK_SIZE, &file);
+            if (err != NWC24_OK) {
+                result = err;
+            } else {
+                result = NWC24_OK;
+                if (hdr->magic != MBC_MAGIC) {
+                    result = NWC24_ERR_BROKEN;
+                }
+            }
+        }
+
+        closeErr = NWC24FClose(&file);
+        if (result == NWC24_OK && closeErr != NWC24_OK) {
+            result = closeErr;
+        }
+    }
+
+    if ((*hdrOut)->version != MBC_VERSION) {
+        return NWC24_ERR_VER_MISMATCH;
+    }
+
+    if ((*hdrOut)->freeChain & 0x1F) {
+        result = NWC24_ERR_BROKEN;
+    }
+
+    return result;
+}
+
+// takes a free block off the free chain and puts the message in it
+static NWC24Err fn_8039CB7C(NWC24iMBCHeader *hdr, NWC24iMsgObj *msg, NWC24File *file) {
+    u32 block = hdr->freeChain;
+    NWC24iMBCEntry *entry = &NWC24WorkP->mbcEntry;
+    NWC24Err result;
+    u32 next;
+
+    if (block == 0) {
+        return NWC24_ERR_FULL;
+    }
+
+    if (block >= hdr->fileSize || (block - MBC_FIRST_ENTRY) % MBC_BLOCK_SIZE != 0) {
+        return NWC24_ERR_BROKEN;
+    }
+
+    result = NWC24FSeek(file, block, NWC24_SEEK_BEG);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24FRead(entry, MBC_BLOCK_SIZE, file);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    next = entry->appId;
+    if (next >= hdr->fileSize || (next - MBC_FIRST_ENTRY) % MBC_BLOCK_SIZE != 0) {
+        return NWC24_ERR_BROKEN;
+    }
+
+    hdr->freeChain = next;
+    fn_8039CF40(msg, entry);
+
+    result = NWC24FSeek(file, block, NWC24_SEEK_BEG);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24FWrite(entry, MBC_BLOCK_SIZE, file);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (hdr->numMsgs == 0) {
+        hdr->oldestMsgId = msg->id;
+    }
+
+    hdr->totalMsgSize += msg->length;
+    hdr->numMsgs++;
+    return NWC24_OK;
+}
+
+// gives a block back to the free chain
+static NWC24Err fn_8039CCC8(NWC24iMBCHeader *hdr, NWC24File *file, u32 block) {
+    NWC24iMBCEntry *entry = &NWC24WorkP->mbcEntry;
+    NWC24Err result;
+
+    result = NWC24FSeek(file, block, NWC24_SEEK_BEG);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24FRead(entry, MBC_BLOCK_SIZE, file);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    hdr->numMsgs--;
+    hdr->totalMsgSize -= entry->length;
+    memset(entry, 0, MBC_BLOCK_SIZE);
+    entry->appId = hdr->freeChain;
+    hdr->freeChain = block;
+
+    result = NWC24FSeek(file, block, NWC24_SEEK_BEG);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    return NWC24FWrite(entry, MBC_BLOCK_SIZE, file);
+}
+
+// mounts the vf drive that holds the message files of one box
+static NWC24Err fn_8039CDB4(NWC24MsgBoxId id) {
+    NWC24Err result;
+    char *path;
+
+    if (MBoxMount.count != 0 && MBoxMount.box != id) {
+        MBoxMount.count = 1;
+        MBoxUnmount_i();
+        return NWC24_ERR_FATAL;
+    }
+
+    if (++MBoxMount.count > 1) {
+        return NWC24_OK;
+    }
+
+    path = NWC24WorkP->pathWork;
+    result = MBoxMbxPath_i(id, path, NWC24i_PATH_WORK_SIZE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24MountVF("@24", path);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    MBoxMount.box = id;
+    return NWC24_OK;
+}
+
+static NWC24Err fn_8039C60C(NWC24iMBCHeader *hdr, NWC24iMsgObj *msg, NWC24File *file, NWC24MsgBoxId id);
+
+NWC24Err NWC24iMBoxAddMsgObj(NWC24MsgBoxId id, NWC24iMsgObj *msg) {
+    NWC24iMBCHeader *hdr;
+    NWC24File file;
+    NWC24Err result;
+    char *path;
+
+    result = fn_8039C984(id, &hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (hdr->numMsgs == hdr->capacity) {
+        return NWC24_ERR_FULL;
+    }
+
+    path = NWC24WorkP->pathWork;
+    result = MBoxCtrlPath_i(id, path, NWC24i_PATH_WORK_SIZE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24FOpen(&file, path, NWC24_OPEN_RW);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = fn_8039CB7C(hdr, msg, &file);
+    if (result == NWC24_OK) {
+        result = fn_8039C60C(hdr, msg, &file, id);
+        if (result != NWC24_OK) {
+            goto close;
+        }
+    } else if (result == NWC24_ERR_BROKEN) {
+        hdr->magic = MBC_MAGIC_BROKEN;
+    } else {
+        goto close;
+    }
+
+    result = MBoxWriteHeader_i(hdr, &file);
+
+close: {
+    NWC24Err closeErr = NWC24FClose(&file);
+
+    return result != NWC24_OK ? result : closeErr;
+}
+}
+
+NWC24Err NWC24iMBoxFlushHeader(NWC24MsgBoxId id) {
+    NWC24iMBCHeader *hdr;
+    NWC24File file;
+    NWC24Err result;
+    NWC24Err closeErr;
+    char *path;
+
+    result = fn_8039C984(id, &hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    path = NWC24WorkP->pathWork;
+    result = MBoxCtrlPath_i(id, path, NWC24i_PATH_WORK_SIZE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24FOpen(&file, path, NWC24_OPEN_RW);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = MBoxWriteHeader_i(hdr, &file);
+
+    closeErr = NWC24FClose(&file);
+    return result != NWC24_OK ? result : closeErr;
+}
+
+// makes room for a message of the given size: the send box just refuses when full, the receive box throws
+// the oldest message out until there is space
+NWC24Err NWC24iMBoxCheck(NWC24MsgBoxId id, u32 size) {
+    NWC24iMBCHeader *hdr;
+    NWC24Err result;
+    u32 limit;
+    volatile u32 oldest;
+
+    if (size >= NWC24i_MBOX_MAX_SIZE) {
+        return NWC24_ERR_OVERFLOW;
+    }
+
+    limit = size + 0x4000;
+    result = fn_8039C984(id, &hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (id == NWC24_MSGBOX_SEND) {
+        if (hdr->numMsgs >= hdr->capacity) {
+            return NWC24_ERR_FULL;
+        }
+
+        if (hdr->freeSpace <= limit) {
+            return NWC24_ERR_FULL;
+        }
+    } else if (id == NWC24_MSGBOX_RECV) {
+        while (hdr->numMsgs >= hdr->capacity || hdr->freeSpace <= limit) {
+            oldest = hdr->oldestMsgId;
+            result = fn_8039C16C(id, oldest, FALSE);
+            if (result != NWC24_OK) {
+                return result;
+            }
+
+            result = fn_8039C984(id, &hdr);
+            if (result != NWC24_OK) {
+                return result;
+            }
+        }
+    } else {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    return NWC24_OK;
+}
+
+// deletes one message from a box (checking if the current app may, unless told not to)
+NWC24Err fn_8039C16C(NWC24MsgBoxId id, u32 msgId, BOOL checkAccess) {
+    NWC24Err err;
+    char *path;
+    u32 off;
+    NWC24File file;
+    u32 appId;
+    u32 count = 0;
+    u32 foundOff = 0;
+    NWC24Err removeErr;
+    NWC24Err writeErr;
+    u32 oldest = 0;
+    NWC24Err result;
+    NWC24iMBCHeader *hdr;
+    NWC24iMBCEntry *entry;
+
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    entry = &NWC24WorkP->mbcEntry;
+    result = fn_8039C984(id, &hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    path = NWC24WorkP->pathWork;
+    result = MBoxCtrlPath_i(id, path, NWC24i_PATH_WORK_SIZE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24FOpen(&file, path, NWC24_OPEN_RW);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24_ERR_NOT_FOUND;
+    for (off = MBC_FIRST_ENTRY; off < hdr->fileSize; off += MBC_BLOCK_SIZE) {
+        writeErr = NWC24FSeek(&file, off, NWC24_SEEK_BEG);
+        if (writeErr != NWC24_OK) {
+            result = writeErr;
+            break;
+        }
+
+        writeErr = NWC24FRead(entry, MBC_BLOCK_SIZE, &file);
+        if (writeErr != NWC24_OK) {
+            result = writeErr;
+            break;
+        }
+
+        if (entry->id == 0) {
+            continue;
+        }
+
+        count++;
+        if (entry->id == msgId) {
+            if (checkAccess) {
+                if ((entry->flags & NWC24_MSGOBJ_FOR_PUBLIC) && entry->appId == 0) {
+                    if (NWC24GetAppId() != NWC24i_APP_ID_IPL) {
+                        result = NWC24_ERR_PROTECTED;
+                        break;
+                    }
+                } else if ((NWC24GetAppId() & ~0xFF) != (entry->appId & ~0xFF)) {
+                    if (!(entry->flags & NWC24_MSGOBJ_FOR_MENU) || NWC24GetAppId() != NWC24i_APP_ID_IPL) {
+                        result = NWC24_ERR_PROTECTED;
+                        break;
+                    }
+                }
+            }
+
+            foundOff = off;
+            result = NWC24_OK;
+        } else if (oldest == 0 || CompareMsgId(oldest, entry->id) > 0) {
+            oldest = entry->id;
+        }
+    }
+
+    if (result == NWC24_ERR_NOT_FOUND && hdr->numMsgs != count) {
+        hdr->numMsgs = count;
+        MBoxWriteHeader_i(hdr, &file);
+    }
+
+    if (result != NWC24_OK) {
+        NWC24FClose(&file);
+        if (msgId == 0) {
+            result = NWC24_ERR_INVALID_VALUE;
+        }
+
+        return result;
+    }
+
+    hdr->oldestMsgId = oldest;
+    removeErr = fn_8039CCC8(hdr, &file, foundOff);
+    err = MBoxRemoveMsgFile_i(id, msgId);
+    if (removeErr != NWC24_OK) {
+        err = removeErr;
+    }
+
+    writeErr = MBoxWriteHeader_i(hdr, &file);
+
+    if (err != NWC24_OK) {
+        writeErr = err;
+    }
+
+    result = NWC24FClose(&file);
+    return writeErr != NWC24_OK ? writeErr : result;
+}
+
+// looks for an older copy of the message that is about to be stored (same tag or same contents) and
+// throws it out, also keeps the oldest message id of the box up to date
+static NWC24Err fn_8039C60C(NWC24iMBCHeader *hdr, NWC24iMsgObj *msg, NWC24File *file, NWC24MsgBoxId id) {
+    NWC24Err result = NWC24_OK;
+    u32 off;
+    u32 oldest = 0;
+    u32 differs;
+    u32 foundId = 0;
+    u32 count = 0;
+    u32 foundOff = 0;
+    NWC24Err removeErr;
+    NWC24iMBCEntry *entry;
+
+    if (id == NWC24_MSGBOX_SEND) {
+        return NWC24_OK;
+    }
+
+    entry = &NWC24WorkP->mbcEntry;
+    for (off = MBC_FIRST_ENTRY; off < hdr->fileSize; off += MBC_BLOCK_SIZE) {
+        if (count >= hdr->numMsgs) {
+            break;
+        }
+
+        result = NWC24FSeek(file, off, NWC24_SEEK_BEG);
+        if (result != NWC24_OK) {
+            break;
+        }
+
+        result = NWC24FRead(entry, MBC_BLOCK_SIZE, file);
+        if (result != NWC24_OK) {
+            break;
+        }
+
+        if (entry->id == 0) {
+            continue;
+        }
+
+        count++;
+        differs = 1;
+        if (entry->id == msg->id) {
+            differs = 0;
+        }
+
+        if ((entry->flags & msg->flags) & 1) {
+            if (entry->appId != msg->appId) {
+                differs = 0;
+            }
+
+            if (entry->from.id != msg->from.id) {
+                differs = 0;
+            }
+        }
+
+        if (differs) {
+            if ((msg->tag & 0xFFFF) != 0 && (entry->tag & 0xFFFF) == (msg->tag & 0xFFFF)) {
+                foundId = entry->id;
+                foundOff = off;
+                continue;
+            }
+
+            if (msg->unk1C != 0 && entry->unk1C == msg->unk1C && entry->flags == msg->flags &&
+                entry->length == msg->length && entry->unk10 == msg->unk10 && entry->createTime == msg->createTime) {
+                foundId = entry->id;
+                foundOff = off;
+                continue;
+            }
+        }
+
+        if (oldest == 0 || CompareMsgId(oldest, entry->id) > 0) {
+            oldest = entry->id;
+        }
+    }
+
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    hdr->oldestMsgId = oldest;
+    if (foundId != 0) {
+        removeErr = fn_8039CCC8(hdr, file, foundOff);
+        result = MBoxRemoveMsgFile_i(id, foundId);
+        if (removeErr != NWC24_OK) {
+            result = removeErr;
+        }
+    }
+
+    return result;
+}
+
+// the message object keeps strings/blobs as {offset, size} pairs, in the control file they are packed into
+// one word (size in the top 12 bits, offset in the low 20)
+static inline u32 PackData_i(const NWC24Data *data) {
+    return (data->size << 20) | (data->offset & 0xFFFFF);
+}
+
+static inline void UnpackData_i(NWC24Data *data, u32 packed) {
+    data->offset = packed & 0xFFFFF;
+    data->size = packed >> 20;
+}
+
+// message object -> control file entry
+NWC24Err fn_8039CF40(NWC24iMsgObj *msg, NWC24iMBCEntry *entry) {
+    entry->id = msg->id;
+    entry->flags = msg->flags;
+    entry->length = msg->length;
+    entry->appId = msg->appId;
+    entry->unk10 = msg->unk10;
+    entry->tag = msg->tag;
+    entry->command = msg->command;
+    entry->unk1C = msg->unk1C;
+    entry->from = msg->from;
+    entry->createTime = msg->createTime;
+    entry->unk2C = msg->unk2C;
+    entry->numTo = msg->numTo;
+    entry->numAttached = msg->numAttached;
+    entry->groupId = msg->groupId;
+    entry->fromField = PackData_i(&msg->fromField);
+    entry->toField = PackData_i(&msg->toField);
+    entry->subject = PackData_i(&msg->subject);
+    entry->contentType = PackData_i(&msg->contentType);
+    entry->txEncoding = PackData_i(&msg->txEncoding);
+    entry->text = msg->text;
+    entry->attached[0] = msg->attached[0];
+    entry->attached[1] = msg->attached[1];
+    entry->attachedSize[0] = msg->attachedSize[0];
+    entry->attachedSize[1] = msg->attachedSize[1];
+    entry->attachedType[0] = msg->attachedType[0];
+    entry->attachedType[1] = msg->attachedType[1];
+    entry->dwcId = msg->dwcId;
+    entry->unk78 = msg->iconNew;
+    return NWC24_OK;
+}
+
+// control file entry -> message object
+NWC24Err fn_8039D0EC(NWC24iMBCEntry *entry, NWC24iMsgObj *msg) {
+    int i;
+
+    msg->id = entry->id;
+    msg->flags = entry->flags;
+    msg->length = entry->length;
+    msg->appId = entry->appId;
+    msg->unk10 = entry->unk10;
+    msg->tag = entry->tag;
+    msg->command = entry->command;
+    msg->unk1C = entry->unk1C;
+    msg->from = entry->from;
+    msg->createTime = entry->createTime;
+    msg->unk2C = entry->unk2C;
+    msg->numTo = entry->numTo;
+    msg->numAttached = entry->numAttached;
+    msg->groupId = entry->groupId;
+    UnpackData_i(&msg->fromField, entry->fromField);
+    UnpackData_i(&msg->toField, entry->toField);
+    UnpackData_i(&msg->subject, entry->subject);
+    UnpackData_i(&msg->contentType, entry->contentType);
+    UnpackData_i(&msg->txEncoding, entry->txEncoding);
+    msg->text = entry->text;
+    msg->attached[0] = entry->attached[0];
+    msg->attached[1] = entry->attached[1];
+    msg->attachedSize[0] = entry->attachedSize[0];
+    msg->attachedSize[1] = entry->attachedSize[1];
+    msg->attachedType[0] = entry->attachedType[0];
+    msg->attachedType[1] = entry->attachedType[1];
+    msg->dwcId = entry->dwcId;
+    msg->iconNew = entry->unk78;
+
+    for (i = 0; i < NWC24i_MSG_RECIPIENT_MAX; i++) {
+        msg->to[i].id = 0;
+    }
+
+    return NWC24_OK;
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * base64 / quoted printable
+ * ------------------------------------------------------------------------------------------- */
+
+// the alphabet, with the pad char on the end
+static char *Base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+// makes a lookup table that maps ascii to the 6 bit value (-1 for everything that is not part of the alphabet)
+void NWC24InitBase64Table(char *table) {
+    int i;
+
+    for (i = 0; i < 256; i++) {
+        table[i] = -1;
+    }
+
+    for (i = 0; i < 26; i++) {
+        table['A' + i] = i;
+    }
+
+    for (i = 0; i < 26; i++) {
+        table['a' + i] = 26 + i;
+    }
+
+    for (i = 0; i < 10; i++) {
+        table['0' + i] = 52 + i;
+    }
+
+    table['+'] = 62;
+    table['/'] = 63;
+}
+
+static NWC24Err fn_8039D30C(const u8 *data, int dataSize, int *dataRead, char *text, int textSize, int *textWritten) {
+    NWC24Err result = NWC24_OK;
+    int in = 0;
+    int out = 0;
+
+    for (; in < dataSize; in += 3) {
+        u32 value;
+        BOOL has1;
+        BOOL has2;
+
+        if (out + 3 >= textSize) {
+            result = NWC24_ERR_OVERFLOW;
+            break;
+        }
+
+        value = data[in];
+        has1 = FALSE;
+        has2 = FALSE;
+        value <<= 8;
+        if (in + 1 < dataSize) {
+            value |= data[in + 1];
+            has1 = TRUE;
+        }
+
+        value <<= 8;
+        if (in + 2 < dataSize) {
+            value |= data[in + 2];
+            has2 = TRUE;
+        }
+
+        text[out] = Base64Chars[(value >> 18) & 0x3F];
+        text[out + 1] = Base64Chars[(value >> 12) & 0x3F];
+        text[out + 2] = Base64Chars[has1 ? (value >> 6) & 0x3F : 64];
+        text[out + 3] = Base64Chars[has2 ? value & 0x3F : 64];
+        out += 4;
+    }
+
+    *textWritten = out;
+    if (dataRead != NULL) {
+        *dataRead = in < dataSize ? in : dataSize;
+    }
+
+    return result;
+}
+
+NWC24Err NWC24Base64Encode(const u8 *data, s32 dataSize, char *text, s32 textSize, u32 *textWritten) {
+    return fn_8039D30C(data, dataSize, NULL, text, textSize, (int *)textWritten);
+}
+
+// goes the other way, skips everything that is not in the alphabet
+NWC24Err fn_8039D45C(const u8 *data, int dataSize, u8 *out, u32 outSize, u32 *outWritten) {
+    char *table = NWC24WorkP->base64Work;
+    int acc = 0;
+    int bits = 0;
+    u32 n = 0;
+    int i;
+
+    for (i = 0; i < dataSize; i++) {
+        s8 value = table[*data];
+
+        if (value >= 0 && value < 64) {
+            bits += 6;
+            acc = (acc << 6) | value;
+            if (bits >= 8) {
+                if (n >= outSize) {
+                    *outWritten = outSize;
+                    return NWC24_ERR_OVERFLOW;
+                }
+
+                bits -= 8;
+                n++;
+                *out++ = acc >> bits;
+            }
+        }
+
+        data++;
+    }
+
+    *outWritten = n;
+    return NWC24_OK;
+}
+
+// HYPOTHESIS: this is the inlined memcpy the compiler unrolled, the loop counter is a signed int
+static inline void CopyBytes_i(char *dst, const char *src, int n) {
+    int i;
+
+    for (i = 0; i < n; i++) {
+        *dst++ = *src++;
+    }
+}
+
+// a hex digit as ascii, the compiler turned the modulo 10 into a multiply so it must be written like that
+static inline int HexDigit_i(int digit) {
+    if (digit >= 10) {
+        return 'A' + digit % 10;
+    }
+
+    return '0' + digit % 10;
+}
+
+static NWC24Err fn_8039D7C4(char *text, u32 textSize, u32 *textWritten, const char *data, u32 dataSize,
+                            u32 *dataRead, BOOL noSoftBreaks) {
+    NWC24Err result = NWC24_OK;
+    int lineLen;
+    u32 written;
+    u32 consumedTotal;
+    char buf[4];
+
+    if (text == NULL) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    if (data == NULL) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    if (dataSize == 0) {
+        return NWC24_ERR_OVERFLOW;
+    }
+
+    if (dataRead != NULL) {
+        *dataRead = 0;
+    }
+
+    if (textWritten != NULL) {
+        *textWritten = 0;
+    }
+
+    lineLen = 0;
+    written = 0;
+    consumedTotal = 0;
+    while (consumedTotal < dataSize) {
+        int consumed;
+        int out;
+        BOOL softBreak = FALSE;
+        char ch = *data;
+
+        if (ch >= 0x21 && ch <= 0x7E && ch != '=') {
+            buf[0] = ch;
+            consumed = 1;
+            out = 1;
+        } else if (consumedTotal + 1 < dataSize && ch == '\r' && data[1] == '\n') {
+            buf[0] = ch;
+            consumed = 2;
+            out = 1;
+            buf[1] = data[1];
+        } else {
+            buf[0] = '=';
+            buf[1] = HexDigit_i((u8)*data >> 4);
+            buf[2] = HexDigit_i(*data & 0xF);
+            consumed = 1;
+            out = 3;
+        }
+
+        if (!noSoftBreaks && lineLen + out >= 75) {
+            softBreak = TRUE;
+            out += 3;
+        }
+
+        if (written + out >= textSize) {
+            result = NWC24_ERR_OVERFLOW;
+            break;
+        }
+
+        written += out;
+        if (softBreak) {
+            *text = '=';
+            lineLen = 0;
+            out -= 3;
+            text[1] = '\r';
+            text[2] = '\n';
+            text += 3;
+        }
+
+        lineLen += out;
+        CopyBytes_i(text, buf, out);
+        text += out;
+        consumedTotal += consumed;
+        data += consumed;
+    }
+
+    if (dataRead != NULL) {
+        *dataRead = consumedTotal;
+    }
+
+    if (textWritten != NULL) {
+        *textWritten = written;
+    }
+
+    return result;
+}
+
+NWC24Err NWC24EncodeQuotedPrintable(char *text, u32 textSize, u32 *textWritten, const u8 *data, u32 dataSize,
+                                    u32 *dataRead) {
+    return fn_8039D7C4(text, textSize, textWritten, (const char *)data, dataSize, dataRead, FALSE);
 }

@@ -569,7 +569,7 @@ config.libs = [
         "cflags": cflags_common,
         "host": False,
         "objects": [
-            Object(NonMatching, "RVL_SDK/exi/exi2_link.c"),
+            Object(NonMatching, "RVL_SDK/exi/exi2_link.c", extra_cflags=["-lang c++"]),
             Object(NonMatching, "TMCC_JPEG/tmcc_jpeg_api.c"),
             Object(NonMatching, "TMCC_JPEG/tmcc_jpeg_decoder.c"),
             Object(NonMatching, "TMCC_JPEG/tmcc_jpeg_encoder.c"),
