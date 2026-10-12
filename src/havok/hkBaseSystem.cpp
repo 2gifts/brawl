@@ -158,7 +158,7 @@ void* hkDummySingleton::create() {
 }
 
 hkStreamWriter* hkDefaultStreambufFactory::openWriter(const char* name) {
-    hkNullStreamWriter* sink = new hkNullStreamWriter();
+    hkStreamWriter* sink = new hkNullStreamWriter();
     hkStreamWriter* writer = new hkBufferedStreamWriter(sink, 0x1000);
     sink->removeReference();
     return writer;

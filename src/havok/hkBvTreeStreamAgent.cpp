@@ -72,6 +72,36 @@ void hkBvTreeStreamAgent::cleanup() {
     delete this;
 }
 
+extern "C" void fn_802FEA54(void* subObject, void* args);
+
+struct FilterArgs {
+    void* a;
+    void* b;
+    u32 bValue;
+    void* c;
+    int unk8;
+};
+
+void hkBvTreeStreamAgent::updateShapeCollectionFilter(void* a, void* b, void* c) {
+    void* inner = *(void**)b;
+    unk10[3] = 0.0f;
+    unk10[2] = 0.0f;
+    unk10[1] = 0.0f;
+    unk10[0] = 0.0f;
+    unk10[7] = 0.0f;
+    unk10[6] = 0.0f;
+    unk10[5] = 0.0f;
+    unk10[4] = 0.0f;
+    u32 bValue = *(u32*)((char*)inner + 0x10);
+    FilterArgs args;
+    args.a = a;
+    args.b = b;
+    args.c = c;
+    args.unk8 = unk8;
+    args.bValue = bValue;
+    fn_802FEA54(&m_list, &args);
+}
+
 // Both forward the list to hkAgent1nMachine (map names hkAgent1nMachine_InvalidateTim / _WarpTime).
 void hkBvTreeStreamAgent::invalidateTim(void* arg) {
     fn_802FC824(&m_list);

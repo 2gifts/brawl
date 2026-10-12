@@ -23,7 +23,7 @@ hkQuaternion& hkQsTransform::getRotation() {
 void hkQuaternion::normalize() {
     hkReal len2 = m_vec.x * m_vec.x + m_vec.y * m_vec.y + m_vec.z * m_vec.z + m_vec.w * m_vec.w;
     hkReal inv = 0.0f;
-    if (len2 == 0.0f) {
+    if (!len2) {
     } else if (len2 <= 0.0f) {
         union {
             u32 i;

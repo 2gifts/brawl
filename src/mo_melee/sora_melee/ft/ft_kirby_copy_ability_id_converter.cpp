@@ -1,6 +1,15 @@
 #include <types.h>
+#include <so/so_module_accesser.h>
+#include <so/stageobject.h>
+#include <ft/kirby/ft_kirby_copy_ability_id_converter.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+extern "C" int fn_27_30FB6C(ftKirbyCopyAbilityIdConverter* self, int unk, int statusKind, int value, bool flag, bool unk2);
 
-} // extern "C"
+int ftKirbyCopyAbilityIdConverter::convCorrectToOrigId(int unk, int statusKind, soModuleAccesser* moduleAccesser, bool unk2)
+{
+    if (moduleAccesser->getStageObject().soGetSubKind() == 5) {
+        int value = moduleAccesser->getWorkManageModule().getInt(0x10000048);
+        return fn_27_30FB6C(this, unk, statusKind, value, true, unk2);
+    }
+    return statusKind;
+}

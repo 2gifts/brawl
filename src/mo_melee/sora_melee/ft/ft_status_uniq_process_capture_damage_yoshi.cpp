@@ -1,5 +1,6 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <so/so_module_accesser.h>
+#include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <ft/ft_status_uniq_process_views.h>
 #include <types.h>
@@ -81,4 +82,21 @@ void ftStatusUniqProcessCaptureDamageYoshi::execFixPos(soModuleAccesser* moduleA
 }
 bool ftStatusUniqProcessCaptureDamageYoshi::checkDamage(soModuleAccesser* moduleAccesser, void*) {
     return reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot34(0x109);
+}
+
+// HYPOTHESIS: shared parameter table and getter, same as the Snake grenade status (names unverified).
+extern u8 lbl_27_bss_7B0C[];
+extern "C" int fn_27_30FA2C(void* table, int kind, int id, soModuleAccesser* acc, int);
+
+float soModuleAccesser::getConstantFloatKirby(s32 id) {
+    return soValueAccesser::getConstantFloat(this, fn_27_30FA2C(lbl_27_bss_7B0C, 1, id, this, 0), 0);
+}
+
+
+// HYPOTHESIS: shared parameter table and getter, same as the Snake grenade status (names unverified).
+extern u8 lbl_27_bss_7B0C[];
+extern "C" int fn_27_30FA2C(void* table, int kind, int id, soModuleAccesser* acc, int);
+
+s32 soModuleAccesser::getConstantIntKirby(s32 id) {
+    return soValueAccesser::getConstantInt(this, fn_27_30FA2C(lbl_27_bss_7B0C, 1, id, this, 0), 0);
 }

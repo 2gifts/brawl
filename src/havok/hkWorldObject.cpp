@@ -26,7 +26,7 @@ hkWorldObject::hkWorldObject(hkFinishLoadedObjectFlag flag) {
     collidable->m_collisionEntries.m_size = 0;
     collidable->m_collisionEntries.m_capacityAndFlags = hkArrayBase::DONT_DEALLOCATE_FLAG;
     if (flag.m_finishing != 0) {
-        collidable->m_ownerOffset = (int)((u8*)this - (u8*)&m_collidable);
+        m_collidable.m_ownerOffset = (int)((u8*)this - (u8*)&m_collidable);
     }
 }
 

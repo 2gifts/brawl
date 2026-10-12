@@ -75,7 +75,7 @@ void hkConvexTranslateShape::getAabb(const hkTransform& xf, hkReal expansion, hk
 
 hkReal hkConvexTranslateShape::getMaximumProjection(const hkVector4& direction) const {
     hkReal childProjection = m_childShape.m_childShape->getMaximumProjection(direction);
-    return childProjection + m_translation.dot3(direction);
+    return childProjection + direction.dot3(m_translation);
 }
 
 // The original also brackets this with the hkMonitorStream timer commands (HK_TIMER); not reproduced here.
