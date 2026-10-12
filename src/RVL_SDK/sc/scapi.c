@@ -37,7 +37,7 @@ extern SCAPI_BOOL SCFindU8Item(u8 *dst, int id);
 extern SCAPI_BOOL SCFindS8Item(s8 *dst, int id);
 extern SCAPI_BOOL SCFindU32Item(u32 *dst, int id);
 extern SCAPI_BOOL SCReplaceU8Item(u8 data, int id);
-extern SCAPI_BOOL fn_8020F4C4(u32 *dst, int id);
+extern SCAPI_BOOL SCFindBoolItem(u32 *dst, int id);
 extern s8 SCGetProductArea(void);
 extern int OSDisableInterrupts(void);
 extern void OSRestoreInterrupts(int);
@@ -259,7 +259,7 @@ u32 fn_80210064(void) {
 u32 fn_802100A0(void) {
     u32 item;
 
-    if (!fn_8020F4C4(&item, ITEM_EULA)) {
+    if (!SCFindBoolItem(&item, ITEM_EULA)) {
         item = 0;
     }
 
