@@ -76,8 +76,9 @@ void bta_ci_hci_msg_handler(void *p_data);
 
 void BTE_InitStack(void);
 
-void BTE_LoadStack(void);
-void BTE_UnloadStack(void);
+int BTE_LoadStack(void);
+void BTE_UnloadStack(void (*p_cback)(UINT8 state));
+void bte_report_state(INT8 state);
 
 #ifdef __cplusplus
 	}

@@ -69,7 +69,7 @@ tHID_STATUS HID_HostGetSDPRecord(BD_ADDR addr, tSDP_DISCOVERY_DB *p_db, UINT32 d
 	hh_cb.p_sdp_db = p_db;
 	SDP_InitDiscoveryDb(p_db, db_len, 1, &uuid_list, 0, NULL);
 
-	if (SDP_ServiceSearchAttributeRequest(addr, p_db, hidh_search_callback))
+	if (SDP_ServiceSearchRequest(addr, p_db, hidh_search_callback))
 	{
 		hh_cb.sdp_cback = sdp_cback;
 		hh_cb.sdp_busy = TRUE;
