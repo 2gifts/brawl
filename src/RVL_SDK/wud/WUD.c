@@ -13,14 +13,8 @@
 #define WUD_LIB_STATUS_READY         3
 #define WUD_PM_SNIFF_MAX_DELAY       8
 
-// MATCH-ONLY: sc/os/bte functions that haven't been named yet
-extern BOOL fn_8020FDF4(const SCBtDeviceInfoArray* pArray); // SCSetBtDeviceInfoArray
-extern void fn_8020FDE8(SCBtDeviceInfoArray* pArray);       // SCGetBtDeviceInfoArray
-extern BOOL fn_8020FE0C(const SCBtCmpDevInfoArray* pArray); // SCSetBtCmpDevInfoArray
-extern void fn_8020FE00(SCBtCmpDevInfoArray* pArray);       // SCGetBtCmpDevInfoArray
-extern void fn_8020F5FC(SCFlushCallback pCallback);         // SCFlushAsync
-extern u32 fn_80230C40(void);                               // bte allocation total
-extern int fn_801D81C4(u32, u32, u32, u32, u32, u32);       // OSSwitchFiberEx
+// MATCH-ONLY: bte, sc and os pieces that have no header yet
+extern u32 BTE_GetMemSize(void);
 extern u8 lbl_805A0C71;                                     // an sc dirty flag, I think
 extern u32 lbl_805A0674;                                    // low word of the boot time
 
@@ -355,7 +349,7 @@ static u8 WUDiSyncStoreDevInfo(void) {
 
     DEBUGPrint("%d devices is stored into SC.\n", i);
 
-    if (fn_8020FDF4(&_scArray)) {
+    if (SCSetBtDeviceInfoArray(&_scArray)) {
         return WUD_STATE_SYNC_SC_FLUSH;
     }
 
@@ -708,7 +702,7 @@ static void WUDiSyncStateMachine(void) {
         p->syncState = WUD_STATE_SYNC_13;
         OSRestoreInterrupts(enabled);
 
-        fn_8020F5FC((SCFlushCallback)WUDiSyncFlushCallback);
+        SCFlushAsync((SCFlushCallback)WUDiSyncFlushCallback);
         break;
     }
 
@@ -798,7 +792,7 @@ static void WUDiSyncStateMachine(void) {
 }
 
 static void WUDiSyncAlarmHandler(OSAlarm* alarm, OSContext* context) {
-    fn_801D81C4((u32)alarm, (u32)context, 0, 0, (u32)WUDiSyncStateMachine, (u32)_fiberStack + sizeof(_fiberStack));
+    OSSwitchFiberEx((u32)alarm, (u32)context, 0, 0, (u32)WUDiSyncStateMachine, (u32)_fiberStack + sizeof(_fiberStack));
 }
 
 // delete state 2: drop every connection
@@ -883,12 +877,12 @@ static void WUDiDeleteStateMachine(void) {
             memset(&_scArray, 0, 0x461);
             memset(&_scCmpArray, 0, 0x205);
 
-            ret1 = fn_8020FDF4(&_scArray);
-            ret2 = fn_8020FE0C(&_scCmpArray);
+            ret1 = SCSetBtDeviceInfoArray(&_scArray);
+            ret2 = SCSetBtCmpDevInfoArray(&_scCmpArray);
 
             if (ret1 | ret2) {
                 p->deleteState = WUD_STATE_DELETE_6;
-                fn_8020F5FC((SCFlushCallback)WUDiDeleteFlushCallback);
+                SCFlushAsync((SCFlushCallback)WUDiDeleteFlushCallback);
             } else {
                 p->deleteState = WUD_STATE_DELETE_DONE;
             }
@@ -923,7 +917,7 @@ static void WUDiDeleteStateMachine(void) {
 }
 
 static void WUDiDeleteAlarmHandler(OSAlarm* alarm, OSContext* context) {
-    fn_801D81C4((u32)alarm, (u32)context, 0, 0, (u32)WUDiDeleteStateMachine, (u32)_fiberStack + sizeof(_fiberStack));
+    OSSwitchFiberEx((u32)alarm, (u32)context, 0, 0, (u32)WUDiDeleteStateMachine, (u32)_fiberStack + sizeof(_fiberStack));
 }
 
 // stack state 2: sort out the devices the controller doesn't know about
@@ -1024,7 +1018,7 @@ static void WUDiStackStateMachine(void) {
 }
 
 static void WUDiStackAlarmHandler(OSAlarm* alarm, OSContext* context) {
-    fn_801D81C4((u32)alarm, (u32)context, 0, 0, (u32)WUDiStackStateMachine, (u32)_fiberStack + sizeof(_fiberStack));
+    OSSwitchFiberEx((u32)alarm, (u32)context, 0, 0, (u32)WUDiStackStateMachine, (u32)_fiberStack + sizeof(_fiberStack));
 }
 
 // init state 2: pull the paired wiimotes out of the sc settings
@@ -1051,8 +1045,8 @@ static u8 WUDiLoadDevInfoFromSC(void) {
     memset(&_scCmpArray, 0, 0x205);
     memset(zero, 0, sizeof(zero));
 
-    fn_8020FDE8(&_scArray);
-    fn_8020FE00(&_scCmpArray);
+    SCGetBtDeviceInfoArray(&_scArray);
+    SCGetBtCmpDevInfoArray(&_scCmpArray);
 
     num = _scArray.num;
     _wcb.syncType = WUD_SYNC_TYPE_STANDARD;
@@ -1131,9 +1125,9 @@ static u8 WUDiLoadDevInfoFromSC(void) {
     _wcb.initState = 3;
 
     memset(&_scCmpArray, 0, 0x205);
-    fn_8020FE0C(&_scCmpArray);
+    SCSetBtCmpDevInfoArray(&_scCmpArray);
 
-    fn_8020F5FC((SCFlushCallback)WUDiInitFlushCallback);
+    SCFlushAsync((SCFlushCallback)WUDiInitFlushCallback);
 
     return 4;
 }
@@ -1178,7 +1172,7 @@ static void WUDiInitStateMachine(void) {
 }
 
 static void WUDiInitAlarmHandler(OSAlarm* alarm, OSContext* context) {
-    fn_801D81C4((u32)alarm, (u32)context, 0, 0, (u32)WUDiInitStateMachine, (u32)_fiberStack + sizeof(_fiberStack));
+    OSSwitchFiberEx((u32)alarm, (u32)context, 0, 0, (u32)WUDiInitStateMachine, (u32)_fiberStack + sizeof(_fiberStack));
 }
 
 static void WUDiShutdownStateMachine(void) {
@@ -1188,12 +1182,12 @@ static void WUDiShutdownStateMachine(void) {
     switch (p->shutdownState) {
     case WUD_STATE_SHUTDOWN_STORE_SETTINGS: {
         if (SCCheckStatus() != SC_STATUS_BUSY) {
-            ok = fn_8020FDF4(&_scArray) & 1;
-            ok &= fn_8020FE0C(&_scCmpArray);
+            ok = SCSetBtDeviceInfoArray(&_scArray) & 1;
+            ok &= SCSetBtCmpDevInfoArray(&_scCmpArray);
 
             if (ok) {
                 _wcb.shutdownState = WUD_STATE_SHUTDOWN_FLUSH_SETTINGS;
-                fn_8020F5FC((SCFlushCallback)WUDiShutFlushCallback);
+                SCFlushAsync((SCFlushCallback)WUDiShutFlushCallback);
             } else {
                 _wcb.shutdownState = WUD_STATE_SHUTDOWN_DONE;
             }
@@ -1210,7 +1204,7 @@ static void WUDiShutdownStateMachine(void) {
 }
 
 static void WUDiShutdownAlarmHandler(OSAlarm* alarm, OSContext* context) {
-    fn_801D81C4((u32)alarm, (u32)context, 0, 0, (u32)WUDiShutdownStateMachine, (u32)_fiberStack + sizeof(_fiberStack));
+    OSSwitchFiberEx((u32)alarm, (u32)context, 0, 0, (u32)WUDiShutdownStateMachine, (u32)_fiberStack + sizeof(_fiberStack));
 }
 
 static void WUDiClearDevices(void) {
@@ -1329,7 +1323,7 @@ void WUDRegisterAllocator(WUDAllocFunc pAllocFunc, WUDFreeFunc pFreeFunc) {
 }
 
 u32 WUDGetAllocatedMemSize(void) {
-    return fn_80230C40();
+    return BTE_GetMemSize();
 }
 
 void WUDShutdown(BOOL saveSimpleDevs) {

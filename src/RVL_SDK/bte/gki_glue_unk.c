@@ -156,7 +156,7 @@ void GKI_os_free(void *p_mem)
 	WUDiMemFree(p_mem);
 }
 
-void fn_802305A4(int type, INT8 arg)
+void bte_usb_state_cback(int type, INT8 arg)
 {
 	switch (type)
 	{

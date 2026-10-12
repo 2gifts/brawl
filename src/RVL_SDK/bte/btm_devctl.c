@@ -355,20 +355,20 @@ void btm_read_hci_buf_size_complete(UINT8 *p, UINT16 evt_len)
 	btm_cb.devcb.retry_count = BTM_DEV_RESET_RETRIES;
 	btm_dev_step_local_ver();
 }
-
 void btm_read_local_version_complete(UINT8 *p, UINT16 evt_len)
 {
+	tBTM_VERSION_INFO *p_ver = &btm_cb.devcb.local_version;
 	UINT8 status;
 
 	STREAM_TO_UINT8(p, &status);
 
 	if (status == HCI_SUCCESS)
 	{
-		STREAM_TO_UINT8(p, &btm_cb.devcb.local_version.hci_version);
-		STREAM_TO_UINT16(p, &btm_cb.devcb.local_version.hci_revision);
-		STREAM_TO_UINT8(p, &btm_cb.devcb.local_version.lmp_version);
-		STREAM_TO_UINT16(p, &btm_cb.devcb.local_version.manufacturer);
-		STREAM_TO_UINT16(p, &btm_cb.devcb.local_version.lmp_subversion);
+		STREAM_TO_UINT8(p, &p_ver->hci_version);
+		STREAM_TO_UINT16(p, &p_ver->hci_revision);
+		STREAM_TO_UINT8(p, &p_ver->lmp_version);
+		STREAM_TO_UINT16(p, &p_ver->manufacturer);
+		STREAM_TO_UINT16(p, &p_ver->lmp_subversion);
 	}
 
 	btm_cb.devcb.state = BTM_DEV_STATE_4;

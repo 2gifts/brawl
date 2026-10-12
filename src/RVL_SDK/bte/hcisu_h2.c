@@ -160,7 +160,7 @@ extern int fn_802298D4(int fd, int req_type, int req, int value, int index, int 
 extern void bta_ci_hci_msg_handler(void *p_data);
 
 // gki_glue_unk.c
-extern void fn_802305A4(int type, INT8 arg);
+extern void bte_usb_state_cback(int type, INT8 arg);
 
 // owned by the wud code, hcisu flips it to say whether the transport is still busy
 extern int bte_hcisu_wait;
@@ -221,10 +221,10 @@ static UINT32 hcisu_usb_override_pid;
 static UINT16 hcisu_h2_receive_msg(UINT16 idx, tHCISU_H2_CB *p_cb)
 {
 	UINT16 count = 0;
-	BOOLEAN msg_received;
 	UINT8 byte;
+	UINT32 len;
+	BOOLEAN msg_received;
 	UINT16 port = idx + 1;
-	UINT16 len;
 
 	if (p_cb->state != H2_STATE_ACTIVE)
 		return 0;
@@ -242,8 +242,8 @@ static UINT16 hcisu_h2_receive_msg(UINT16 idx, tHCISU_H2_CB *p_cb)
 		case H2_RX_MSGTYPE_ST:
 			if (port == H2_PORT_EVT)
 			{
-				p_cb->p_rcv_msg[idx] = GKI_getpoolbuf(GKI_POOL_ID_2);
 				p_cb->rcv_msg_type[idx] = H2_TYPE_EVT;
+				p_cb->p_rcv_msg[idx] = GKI_getpoolbuf(GKI_POOL_ID_2);
 			}
 			else if (port == H2_PORT_ACL)
 			{
@@ -252,8 +252,8 @@ static UINT16 hcisu_h2_receive_msg(UINT16 idx, tHCISU_H2_CB *p_cb)
 			}
 			else if (port == H2_PORT_SCO)
 			{
-				p_cb->p_rcv_msg[idx] = GKI_getpoolbuf(GKI_POOL_ID_1);
 				p_cb->rcv_msg_type[idx] = H2_TYPE_SCO;
+				p_cb->p_rcv_msg[idx] = GKI_getpoolbuf(GKI_POOL_ID_1);
 			}
 			else
 			{
@@ -481,7 +481,7 @@ BOOLEAN hcisu_h2_open(tHCI_CFG *p_cfg)
 	hcisu_h2_cb.state = H2_STATE_ACTIVE;
 
 	hcisu_usb_init(&args);
-	hcisu_usb_open(&args, (tHCISU_USB_STATE_CBACK *)fn_802305A4);
+	hcisu_usb_open(&args, (tHCISU_USB_STATE_CBACK *)bte_usb_state_cback);
 
 	return TRUE;
 }
@@ -508,8 +508,8 @@ unk_t hcisu_h2_handle_event(UINT16 event)
 	return 0;
 }
 
-// HYPOTHESIS: constant that something polls, no idea what 0x14a78 stands for
-int fn_80230C40(void)
+// HYPOTHESIS: this is what WUDGetAllocatedMemSize hands back, so it should be the bte heap size; 0x14a78 is all I know
+int BTE_GetMemSize(void)
 {
 	return 0x14a78;
 }
@@ -585,9 +585,9 @@ static void hcisu_usb_evt_read_cback(int result, void *ctx)
 static void hcisu_usb_acl_read_cback(int result, void *ctx)
 {
 	HC_BT_HDR *p_buf = ctx;
+	UINT8 *p_data;
 	HC_BT_HDR *p_msg;
 	HC_BT_HDR *p_new;
-	UINT8 *p_data;
 
 	if (hcisu_usb_cb.state != USB_STATE_OPEN)
 	{
