@@ -26,6 +26,10 @@ public:
     virtual void notifyEventCollisionHit(float power, soCollisionAttackData*, u32 index, int, soModuleAccesser* moduleAccesser, soCollisionLog*);
 #endif
     virtual void notifyEventCollisionHit2nd(float posX, float collisionLr, soCollisionAttackModule*, soCollisionLog*, u32 groupIndex, soModuleAccesser* moduleAccesser, bool) { }
+#ifdef WN_WEAPON_BUILDER // inline in the article RELs (weak copies)
+    virtual void notifyEventChangeCollisionHit(int index, soModuleAccesser* moduleAccesser) { }
+#else
     virtual void notifyEventChangeCollisionHit(int index, soModuleAccesser* moduleAccesser);
+#endif
 };
 static_assert(sizeof(soCollisionHitEventObserver) == 12, "Class is wrong size!");

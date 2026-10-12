@@ -7,6 +7,7 @@
 #include <so/collision/so_collision_hit_module_impl.h>
 #include <so/damage/so_damage.h>
 #include <so/damage/so_damage_transactor_actor.h>
+#include <so/damage/so_damage_transactor_null.h>
 #include <yk/yk_no_hit_normal.h>
 #include <yk/yakumono.h>
 
@@ -14,41 +15,7 @@
 extern u8 lbl_27_bss_384[];
 extern u8 lbl_27_bss_5FF4[];
 
-// The null damage transactor: a transactor that does nothing and reports "no reaction".
-class soDamageTransactorNull : public soDamageTransactor {
-public:
-    virtual int getDamageValueParam(soModuleAccesser*) { return 0; }
-    virtual bool onDamageChangeStatusRequest(int, soModuleAccesser*, soDamageLog*) { return true; }
-    virtual int getDamageStatusKind(soModuleAccesser*) { return 0; }
-    virtual bool isUseTurnDamage(soModuleAccesser*) { return false; }
-    virtual bool isUseTurn(soModuleAccesser*) { return false; }
-    virtual bool isApplyTurnDamage(soModuleAccesser*) { return true; }
-    virtual int getDamageHeight(soModuleAccesser*, u8) { return 0; }
-    virtual float getHitStopMul(soModuleAccesser*) { return 0.0f; }
-    virtual bool isSlip(soModuleAccesser*, float) { return false; }
-    virtual bool isSleepStatus(soModuleAccesser*) { return false; }
-    virtual bool isParalyzeDamage(soModuleAccesser*) { return false; }
-    virtual void addSleepTime(soModuleAccesser*, soDamage*, soDamageLog*) { }
-    virtual void onFlowerDamage(soModuleAccesser*, soDamage*) { }
-    virtual void onParalyzeDamage(soModuleAccesser*, soDamage*, soDamageLog*) { }
-    virtual void setFlagDownDamage3(soModuleAccesser*, bool) { }
-    virtual bool isCheckGroundDamage(soModuleAccesser*) { return false; }
-    virtual void onGroundDamageAfter(soModuleAccesser*) { }
-    virtual bool onCompositionDamageSpeed(soModuleAccesser*, soDamage*, Vec2f*, int) { return false; }
-    virtual bool onDamage(soModuleAccesser*, soDamage*, soDamageLog*) { return false; }
-    virtual void setupDamageStatusNormal(soModuleAccesser*, soDamage*, soDamageLog*, int) { }
-    virtual void setupDamageStatusTurn(soModuleAccesser*, soDamage*, soDamageLog*) { }
-    virtual void setupSpeedDamage(soModuleAccesser*, soDamage*, soDamageLog*) { }
-    virtual void setupDamageStatusNoReaction(soModuleAccesser*, soDamage*, soDamageLog*) { }
-    virtual void setupDamageFlyRollStatus(float, float, soModuleAccesser*, soDamageLog*) { }
-    virtual float getReactionSub(soModuleAccesser*) { return 0.0f; }
-    virtual float getReactionMul(soModuleAccesser*) { return 1.0f; }
-    virtual float getDamageMul(soModuleAccesser*) { return 1.0f; }
-    virtual void checkCheer(float, float, soModuleAccesser*, soDamageLog*) { }
-    virtual float getDamageForReaction(float damage, soModuleAccesser*) { return damage; }
-    virtual bool checkNoReaction(soModuleAccesser*, soDamage*) { return true; }
-    virtual int checkDownDamage(float, float, soModuleAccesser*) { return 0; }
-};
+// The null damage transactor (so/damage/so_damage_transactor_null.h) answers "no reaction".
 
 // sora_melee's damage module of the gimmicks (HYPOTHESIS: layout and parameters; the constructor and the destructor are
 // sora_melee's own functions).

@@ -70,6 +70,10 @@ public:
         Outside_Damage_Reserved = 0x3
     };
 
+#ifdef WN_WEAPON_BUILDER
+    // MATCH-ONLY: the article RELs call this constructor out of line (weak copy in the unit).
+    soKineticEnergy(bool isNull = false) __attribute__((never_inline)) : soNullable(isNull), soEnable(!isNull) { }
+#endif
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
     virtual Vec2f getSpeed();
     virtual Vec3f getSpeed3f();
@@ -81,8 +85,13 @@ public:
     virtual void mulAccel(Vec3f* accel);
     virtual void reflectSpeed(Vec3f* speed);
     virtual void reflectAccel(Vec3f* accel);
+#ifdef WN_WEAPON_BUILDER // inline in the article RELs (weak copies)
+    virtual void onConsiderGroundFriction() { }
+    virtual void offConsiderGroundFriction() { }
+#else
     virtual void onConsiderGroundFriction();
     virtual void offConsiderGroundFriction();
+#endif
 #ifdef FT_MODULE_BUILDER
     virtual ~soKineticEnergy(); // MATCH-ONLY: out of line in the fighter RELs (ft_builder_noinline.h)
 #else

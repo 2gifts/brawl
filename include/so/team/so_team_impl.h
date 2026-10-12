@@ -8,14 +8,15 @@ class soTeamImpl : public soTeam {
     int m_no;  // +0x08
     int m_2nd; // +0x0C
 public:
-    soTeamImpl(int no);
-    virtual int getNo() const;
+    // MATCH-ONLY: not inlined into the article builders (weak copy in the unit).
+    soTeamImpl(int no) __attribute__((never_inline)) : soTeam(false), m_no(no), m_2nd(-1) { }
+    virtual int getNo() const { return m_no; }
     virtual ~soTeamImpl() { }
-    virtual void setNo(int no);
-    virtual int getIndirectNo() const;
-    virtual void setIndirectNo(int no);
-    virtual int get2nd() const;
-    virtual void set2nd(int no);
-    virtual void reset();
+    virtual void setNo(int no) { m_no = no; }
+    virtual int getIndirectNo() const { return m_no; }
+    virtual void setIndirectNo(int) { }
+    virtual int get2nd() const { return m_2nd; }
+    virtual void set2nd(int no) { m_2nd = no; }
+    virtual void reset() { }
 };
 static_assert(sizeof(soTeamImpl) == 0x10, "Shared weapon team extent");

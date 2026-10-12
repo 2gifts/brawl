@@ -11,7 +11,7 @@
 #include <so/event/so_gimmick_event_presenter.h>
 #include <so/link/so_link_event_presenter.h>
 #include <so/so_null.h>
-#ifdef YK_STAGE_FULL
+#if defined(YK_STAGE_FULL) || defined(WN_WEAPON_BUILDER)
 #include <ip/ip_null.h>
 #endif
 #include <types.h>
@@ -73,7 +73,7 @@ public:
     // TODO: Verify params?
     virtual void updatePosture(bool);
     virtual void processFixPositionPreAnimCmd();
-#ifdef YK_STAGE_FULL
+#if defined(YK_STAGE_FULL) || defined(WN_WEAPON_BUILDER)
     virtual Input* getInput() {
         static IpNull sNullInput;
         return &sNullInput;
@@ -89,7 +89,7 @@ public:
 #else
     virtual bool isActive();
 #endif
-#ifdef YK_STAGE_FULL
+#if defined(YK_STAGE_FULL) || defined(WN_WEAPON_BUILDER)
     virtual bool checkTransitionStatus(u32) { return true; }
 #else
     virtual bool checkTransitionStatus(u32);
@@ -100,7 +100,7 @@ public:
 #else
     virtual void adjustParentGroundCollision(int unk1, float* unk2);
 #endif
-#ifdef YK_STAGE_FULL
+#if defined(YK_STAGE_FULL) || defined(WN_WEAPON_BUILDER)
     virtual bool isTreadPassive() { return false; }
 #else
     virtual bool isTreadPassive();

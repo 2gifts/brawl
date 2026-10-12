@@ -147,7 +147,6 @@ public:
 template <typename BC>
 class soSlowModuleBuilder {
     typename BC::ModuleType m_module;
-    u8 unk38[4]; // HYPOTHESIS: the builder is 0x3C bytes while soSlowModuleImpl is 0x38
 public:
     soSlowModuleBuilder(soModuleAccesser* acc) : m_module(acc) { }
     typename BC::ModuleType* getModule() { return &m_module; }

@@ -197,7 +197,11 @@ public:
     virtual T& at(s32 index);
     virtual const T& at(s32 index) const;
     virtual s32 size() const;
+#ifdef WN_WEAPON_BUILDER // MATCH-ONLY: the article RELs call the sora_melee instances
+    virtual ~soArrayNull();
+#else
     virtual ~soArrayNull() { }
+#endif
     virtual void shift();
     virtual void pop();
     virtual void clear();
@@ -209,7 +213,11 @@ public:
     virtual bool isFull() const;
     virtual void set(s32 startingIndex, const T& element, s32 numIndicesToSet);
 
+#ifdef WN_WEAPON_BUILDER
+    soArrayNull();
+#else
     soArrayNull() { }
+#endif
     soArrayNull(s32 size, s32 = 0) { }
     soArrayNull(s32 size, const T& element, s32) { }
 };

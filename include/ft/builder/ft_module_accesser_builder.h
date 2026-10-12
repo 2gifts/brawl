@@ -36,6 +36,22 @@ struct ftUnknownBuilderPart {
 
 extern char g_soGenerateArticleManageModuleNull[];
 extern char g_soCollisionSearchModuleNull[];
+extern char g_soReflectModuleNull[];
+
+class wnModuleAccesserBuildData;
+
+// soReflectModuleBuilder: fighters have none (an empty slot after the slow module builder whose module is the null reflect
+// module); articles select soReflectModuleBuildConfig<Kind, soReflectModuleImpl> (wn/wn_module_accesser_builder.h).
+// HYPOTHESIS: source name of the null config.
+struct soReflectModuleBuildConfigNull { };
+template <typename BC>
+class soReflectModuleBuilder;
+template <>
+class soReflectModuleBuilder<soReflectModuleBuildConfigNull> {
+public:
+    soReflectModuleBuilder(soModuleAccesser*) { }
+    void* getModule() { return g_soReflectModuleNull; }
+};
 
 // soGenerateArticleManageModuleBuilder of a fighter without articles: an empty class. As a member it still takes
 // 4 bytes (empty class padded to the alignment of the next member), which is what the original layout has.
@@ -74,6 +90,8 @@ public:
 
 class ftCommonBuildConfig {
 public:
+    typedef ftInsideEventManageModuleTypes InsideEventManageModuleTypes;
+    typedef soReflectModuleBuildConfigNull ReflectModuleBuildConfig;
     typedef soGroundModuleBuildConfig<1, soGroundModuleImpl> GroundModuleBuildConfig;
     typedef soPostureModuleBuildConfig<1, soPostureModuleImpl> PostureModuleBuildConfig;
     typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 5, 2, soCollisionAttackModuleImpl, 5, true, true>
@@ -132,7 +150,7 @@ extern char g_soReflectModuleNull[];
 template <class BC>
 class soModuleAccesserBuilder : public utUnCopyable {
 public:
-    soInsideEventManageModuleBuilder<typename BC::InsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> unk194; // +0x0
+    soInsideEventManageModuleBuilder<typename BC::InsideEventManageModuleBuildConfig, typename BC::InsideEventManageModuleTypes> unk194; // +0x0
     soModuleAccesser m_moduleAccsr;                                                                        // +0x9D0
     soHeapModuleBuilder<typename BC::HeapModuleBuildConfig> m_heapModuleBuilder;                           // +0xAB0
     soParamCustomizeModuleBuilder<typename BC::ParamCustomizeModuleBuildConfig> m_paramCustomizeModuleBuilder; // +0xAC8
@@ -180,6 +198,7 @@ public:
     soJostleModuleBuilder<typename BC::JostleModuleBuildConfig> m_jostleModuleBuilder;                                                             // +0x65B8
     soAbnormalModuleBuilder<typename BC::AbnormalModuleBuildConfig> m_abnormalModuleBuilder;                                                           // +0x6604
     soSlowModuleBuilder<typename BC::SlowModuleBuildConfig> m_slowModuleBuilder;                                                               // +0x666C
+    soReflectModuleBuilder<typename BC::ReflectModuleBuildConfig> m_reflectModuleBuilder; // empty for fighters (null reflect module)
     soGlowModuleBuilder<typename BC::GlowModuleBuildConfig> m_glowModuleBuilder;                                                              // +0x66A8
     // end: +0x6828
 
@@ -291,11 +310,15 @@ public:
         m_jostleModuleBuilder(&m_moduleAccsr, fbd.getJostleData()),
         m_abnormalModuleBuilder(&m_moduleAccsr),
         m_slowModuleBuilder(&m_moduleAccsr),
+        m_reflectModuleBuilder(&m_moduleAccsr),
         m_glowModuleBuilder(&m_moduleAccsr) {
         // Register the common work bank only when the build config owns one.
         if (m_generalWorkBuilder.getModule()->isNull() == false)
             m_moduleAccsr.getWorkManageModule().setWork(1, m_generalWorkBuilder.getModule());
     }
+
+    // The article (weapon) construction from its build data; defined in wn/wn_module_accesser_builder.h.
+    soModuleAccesserBuilder(const wnModuleAccesserBuildData& bd, StageObject* owner);
 
     ~soModuleAccesserBuilder() { }
     soModuleAccesser* getModuleAccesser() { return &m_moduleAccsr; }
