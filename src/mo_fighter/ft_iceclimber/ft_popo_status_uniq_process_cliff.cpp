@@ -9,9 +9,10 @@ public:
 
 // Status 0x11e (the popo-only cliff hold) never leaves the cliff on its own.
 bool ftPopoStatusUniqProcessCliff::isLeaveCliff(int status) {
-    if (status == 0x11e) {
+    switch (status) {
+    case 0x11e:
         return false;
-    } else {
+    default:
         return ftStatusUniqProcessCliff::isLeaveCliff(status);
     }
 }

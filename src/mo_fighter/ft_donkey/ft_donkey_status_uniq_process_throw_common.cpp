@@ -78,8 +78,9 @@ void ftDonkeyStatusUniqProcessThrowCommon::initStatus(soModuleAccesser* moduleAc
     param.m_20 = s_throwCommonScale;
     param.m_24 = 1;
     reinterpret_cast<ftLinkModuleStub*>(moduleAccesser->m_enumerationStart->m_linkModule)->unk48(0, &param, 0);
-    soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
-    int linkValue = reinterpret_cast<ftLinkModuleStub*>(moduleAccesser->m_enumerationStart->m_linkModule)->unk54(0);
+    const soModuleEnumeration* enumeration = moduleAccesser->m_enumerationStart;
+    soWorkManageModule& workManage = *enumeration->m_workManageModule;
+    int linkValue = reinterpret_cast<ftLinkModuleStub*>(enumeration->m_linkModule)->unk54(0);
     workManage.setInt(linkValue, 0x20000002);
     moduleAccesser->getWorkManageModule().setInt(param.m_14, 0x20000003);
     moduleAccesser->getWorkManageModule().setInt(param.m_18, 0x20000004);

@@ -53,7 +53,8 @@ void ftGameWatchStatusUniqProcessFinalDash::exitStatus(soModuleAccesser* moduleA
         break;
     default: {
         soKineticEnergyNormal& energy = dynamic_cast<soKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(2));
-        Vec2f speed = energy.getSpeed();
+        Vec2f speed;
+        Vec2f::copy(speed, energy.getSpeed());
         speed.m_x *= soValueAccesser::getConstantFloat(moduleAccesser, 0xc35, 0);
         energy.m_speed.m_x = speed.m_x;
         energy.m_speed.m_y = speed.m_y;

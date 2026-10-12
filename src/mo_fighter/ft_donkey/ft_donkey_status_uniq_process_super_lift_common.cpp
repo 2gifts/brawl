@@ -64,9 +64,10 @@ void ftDonkeyStatusUniqProcessSuperLiftCommon::exitStatus(soModuleAccesser* modu
         return;
     }
     if (nextStatus < 0x9d) {
-        if (nextStatus >= 0x9b) {
-        } else if (nextStatus >= 0x97) {
-            return;
+        if (nextStatus < 0x9b) {
+            if (nextStatus >= 0x97) {
+                return;
+            }
         }
     } else {
         if (nextStatus >= 0x120) {
