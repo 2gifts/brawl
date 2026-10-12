@@ -4316,9 +4316,9 @@ void NWC24InitBase64Table(char *table) {
 }
 
 static NWC24Err fn_8039D30C(const u8 *data, int dataSize, int *dataRead, char *text, int textSize, int *textWritten) {
-    NWC24Err result = NWC24_OK;
-    int in = 0;
     int out = 0;
+    int in = 0;
+    NWC24Err result = NWC24_OK;
 
     for (; in < dataSize; in += 3) {
         u32 value;
@@ -4367,9 +4367,9 @@ NWC24Err NWC24Base64Encode(const u8 *data, s32 dataSize, char *text, s32 textSiz
 // goes the other way, skips everything that is not in the alphabet
 NWC24Err fn_8039D45C(const u8 *data, int dataSize, u8 *out, u32 outSize, u32 *outWritten) {
     char *table = NWC24WorkP->base64Work;
-    int acc = 0;
     int bits = 0;
     u32 n = 0;
+    int acc = 0;
     int i;
 
     for (i = 0; i < dataSize; i++) {
@@ -4726,8 +4726,8 @@ NWC24Err fn_803A0240(u32 appId) {
 static BOOL fn_803A0594(MsgListState *state, NWC24iMBCEntry *entry) {
     u32 flags;
     u32 mode;
-    u32 x;
     u32 y;
+    u32 x;
     BOOL ok;
 
     if (!fn_8039B4C8(entry)) {
@@ -4860,9 +4860,9 @@ NWC24Err fn_803A03F8(MsgListState *state, u32 *ids) {
 // hands out the next batch of messages from the list
 NWC24Err fn_803A02A4(NWC24iMsgObj *out, u32 max, u32 *count, u32 *remaining) {
     MsgListState *state = &MsgList;
-    u32 *ids;
     NWC24Err result;
     u32 i;
+    u32 *ids;
 
     if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
         return NWC24_ERR_LIB_NOT_OPENED;
@@ -5008,13 +5008,13 @@ NWC24Err fn_8039EEF8(NWC24iMsgObj *msg) {
 // RCPT TO: <rcpt> for everybody in the to list
 NWC24Err fn_8039EFE0(NWC24iMsgObj *msg) {
     char *buf = NWC24WorkP->stringWork;
-    char *p = buf;
-    u32 total = 0;
-    NWC24Err result = NWC24_OK;
-    NWC24iAddr *addr = msg->to;
-    int avail = 0x3FE;
     int n;
+    NWC24Err result = NWC24_OK;
+    char *p = buf;
     u32 i;
+    int avail = 0x3FE;
+    u32 total = 0;
+    NWC24iAddr *addr = msg->to;
 
     Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
     for (i = 0; i < msg->numTo; i++, addr++) {
@@ -5094,14 +5094,14 @@ NWC24Err fn_8039F0F4(NWC24iMsgObj *msg) {
 
 // To: (comma separated, folded)
 NWC24Err fn_8039F1F4(NWC24iMsgObj *msg) {
-    char *buf = NWC24WorkP->stringWork;
+    int i;
+    int n;
     char *p;
+    char *buf = NWC24WorkP->stringWork;
+    int total;
+    int avail;
     NWC24iAddr *addr;
     NWC24Err result = NWC24_OK;
-    int avail;
-    int total;
-    int n;
-    int i;
 
     Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
     Mail_strncat(buf, "To: ", NWC24i_STRING_WORK_SIZE);
@@ -5236,13 +5236,13 @@ NWC24Err fn_8039F494(NWC24iMsgObj *msg) {
 
 // X-WiiFace: (base64, folded)
 NWC24Err fn_8039F5B0(NWC24iMsgObj *msg) {
-    char *buf;
-    const u8 *data;
     int remaining;
-    int pos;
-    int chunk;
     u32 n;
+    int pos;
+    const u8 *data;
     NWC24Err result;
+    int chunk;
+    char *buf;
 
     if (msg->face.size == 0) {
         return NWC24_OK;
@@ -5282,8 +5282,8 @@ NWC24Err fn_8039F5B0(NWC24iMsgObj *msg) {
 NWC24Err fn_8039F6B0(NWC24iMsgObj *msg) {
     char *buf;
     const u8 *data;
-    int remaining;
     int pos;
+    int remaining;
     int chunk;
     u32 n;
     NWC24Err result;
@@ -5372,8 +5372,8 @@ NWC24Err fn_8039F7B0(NWC24iMsgObj *msg, int idx) {
 
 // headers for the text part (charset + transfer encoding)
 NWC24Err fn_8039F920(NWC24iMsgObj *msg) {
-    int len = 0;
     char *buf = NWC24WorkP->stringWork;
+    int len = 0;
     char *name;
     NWC24Err result;
 
@@ -5448,8 +5448,8 @@ NWC24Err fn_8039FA54(NWC24iMsgObj *msg) {
 // base64 text, 57 bytes (76 chars) per line
 NWC24Err fn_8039FB14(const u8 *data, int size, u32 *written) {
     char *buf = NWC24WorkP->stringWork;
-    NWC24Err result = NWC24_OK;
     u32 total = 0;
+    NWC24Err result = NWC24_OK;
     u32 n;
 
     while (size >= 57) {
@@ -5497,8 +5497,8 @@ NWC24Err fn_8039FC78(const char *data, int size, u32 *written) {
     char *buf = NWC24WorkP->stringWork;
     NWC24Err result = NWC24_OK;
     u32 total = 0;
-    u32 outN;
     u32 inN;
+    u32 outN;
 
     while (size > 0) {
         if (total > 0) {
@@ -6729,8 +6729,8 @@ NWC24Err fn_803A58C8(NWC24iDlTask *task) {
     NWC24File file;
     NWC24Err result;
     NWC24Err close;
-    NWC24iDlTask *empty;
     u16 id;
+    NWC24iDlTask *empty;
 
     result = NWC24FOpen(&file, DLFilePath, NWC24_OPEN_NAND_RW);
     if (result < 0) {
