@@ -92,13 +92,16 @@ void grJungleAshiba03A::setMotion(u32 animId, bool loop, bool force, float* fram
 }
 
 void grJungleAshiba03A::requestActive() {
-    if (m_state == 1) {
+    // HYPOTHESIS: a one-case switch on m_state emits the cmpwi + beq/b pair seen in the original
+    switch (m_state) {
+    case 1:
         if (m_pressed == 0) {
             setMotion(0, false, false, &m_frameCount);
         } else {
             setMotion(1, false, false, &m_frameCount);
         }
         m_state = 4;
+        break;
     }
 }
 

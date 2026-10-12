@@ -78,24 +78,32 @@ void grJungleSB::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
-            if (m_posWork != NULL) {
+            Vec3f* posWork = m_posWork;
+            if (posWork != NULL) {
                 grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-                data->m_pos.m_x = m_posWork->m_x;
-                data->m_pos.m_y = m_posWork->m_y;
-                data->m_pos.m_z = m_posWork->m_z;
+                // MATCH-ONLY: the first store reloads the node data pointer; reusing `data` swaps the registers
+                calcWorldCallBack->m_nodeCallbackDatas->m_pos.m_x = posWork->m_x;
+                data->m_pos.m_y = posWork->m_y;
+                data->m_pos.m_z = posWork->m_z;
             }
         }
     }
 }
 
 void grJungleSB::requestBreak() {
-    if (m_stateWork != NULL && m_state == 1) {
-        setVisibility(1);
-        setMotion(0, false, false, &m_timer);
-        *m_stateWork = 3;
-        u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x390001));
-        g_ecMgr->setParent(effect, m_sceneModels[0], "StoneN", 0);
-        m_state = 9;
+    if (m_stateWork != NULL) {
+        // HYPOTHESIS: a switch with one case gives the cmpwi/beq/b branch shape of the original
+        switch (m_state) {
+        case 1: {
+            setVisibility(1);
+            setMotion(0, false, false, &m_timer);
+            *m_stateWork = 3;
+            u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x390001));
+            g_ecMgr->setParent(effect, m_sceneModels[0], "StoneN", 0);
+            m_state = 9;
+            break;
+        }
+        }
     }
 }
 

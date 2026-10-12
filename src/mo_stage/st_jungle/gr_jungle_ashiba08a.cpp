@@ -85,10 +85,13 @@ void grJungleAshiba08A::setMotion(u32 animId, bool loop, bool force, float* fram
 }
 
 void grJungleAshiba08A::requestActive() {
-    if (m_state == 1) {
+    // HYPOTHESIS: a single-case switch on m_state, as the sibling state handlers use; the original emits cmpwi/beq/b for it
+    switch (m_state) {
+    case 1:
         setMotion(0, false, false, &m_frameCount);
         setEnableCollisionStatus(false);
         m_state = 4;
+        break;
     }
 }
 

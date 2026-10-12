@@ -46,14 +46,13 @@ void wnWarioBikeDamageTransactorImpl::setupDamageStatusTurn(
     moduleAccesser->getLinkModule().sendEventParents(3, event);
 
     Vec3f reflection(-1.0f, 0.0f, 0.0f);
-    soKineticEnergy::AttributeFlag damageAttribute(1);
-    moduleAccesser->getKineticModule().reflectSpeed(&reflection, damageAttribute);
+    moduleAccesser->getKineticModule().reflectSpeed(&reflection, soKineticEnergy::AttributeFlag(1));
 }
 void wnWarioBikeDamageTransactorImpl::setupSpeedDamage(soModuleAccesser*, soDamage*, soDamageLog*) {}
 void wnWarioBikeDamageTransactorImpl::setupDamageStatusNoReaction(
     soModuleAccesser* moduleAccesser, soDamage* damage, soDamageLog* damageLog) {
     soDamageTransactorActor::setupDamageStatusNoReaction(moduleAccesser, damage, damageLog);
-    WarioBikeNoReactionDamageEvent event(moduleAccesser->getStopModule().getHitStopFrame());
+    WarioBikeNoReactionDamageEvent event(moduleAccesser->getStopModule().getHitStopRealFrame());
     moduleAccesser->getLinkModule().sendEventParents(3, event);
 }
 void wnWarioBikeDamageTransactorImpl::setupDamageFlyRollStatus(float, float, soModuleAccesser*, soDamageLog*) {}

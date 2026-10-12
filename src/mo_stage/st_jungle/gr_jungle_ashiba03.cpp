@@ -36,12 +36,13 @@ grJungleAshiba03* grJungleAshiba03::create(int mdlIndex, const char* tgtNodeName
 }
 
 grJungleAshiba03::~grJungleAshiba03() {
+    // MATCH-ONLY: the original frees these two arrays without an array cookie; deleting through u8* suppresses the cookie that a typed delete[] of a Vec3f-holding element adds
     if (m_hitData != NULL) {
-        delete[] m_hitData;
+        delete[] reinterpret_cast<u8*>(m_hitData);
     }
     m_hitData = NULL;
     if (m_hitSimple != NULL) {
-        delete[] m_hitSimple;
+        delete[] reinterpret_cast<u8*>(m_hitSimple);
     }
     m_hitSimple = NULL;
     if (m_hitSet != NULL) {
@@ -133,13 +134,10 @@ void grJungleAshiba03::updateCallBack(float deltaFrame) {
     grJungleAshiba::updateCallBack(deltaFrame);
     grCalcWorldCallBack* calcWorldCallBack = &m_calcWorldCallBack;
     if (calcWorldCallBack != NULL) {
-        grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-        data[1].m_flags |= 4;
-        data[1].m_nodeIndex = m_node[0];
-        data[1].m_scale.m_x = m_scale.m_x;
-        data[1].m_scale.m_y = m_scale.m_y;
-        data[1].m_scale.m_z = m_scale.m_z;
-        data[1].m_scale.m_y = data[1].m_scale.m_y * m_scaleRate;
+        calcWorldCallBack->m_nodeCallbackDatas[1].m_flags |= 4;
+        calcWorldCallBack->m_nodeCallbackDatas[1].m_nodeIndex = m_node[0];
+        calcWorldCallBack->m_nodeCallbackDatas[1].m_scale = m_scale;
+        calcWorldCallBack->m_nodeCallbackDatas[1].m_scale.m_y *= m_scaleRate;
         Vec3f pos;
         getNodePosition(&pos, 0, m_node[0]);
         m_snd.setPos(&pos);

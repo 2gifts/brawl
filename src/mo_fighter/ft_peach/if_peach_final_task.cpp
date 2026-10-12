@@ -123,9 +123,9 @@ void IfPeachFinalTask::processFixPosition() {
     gfTask* fighterTask = gfTaskScheduler::getInstance()->getTaskById(gfTask::Category_Fighter, m_fighterTaskId);
     ftPeach* peach = dynamic_cast<ftPeach*>(fighterTask);
     if (peach != NULL) fighterSlowRate = soExternalValueAccesser::getSlowRate(peach);
-    rate *= fighterSlowRate;
-    setRate(rate);
-    if (soSlow::getInstance()->isAdjust() == true && m_actionActive == true && m_model->isNodeAnimFinished() == true) {
+    setRate(rate * fighterSlowRate);
+    // HYPOTHESIS: isNodeAnimFinished returns bool in the original; the shadow header declares int, so the result is compared unsigned.
+    if (soSlow::getInstance()->isAdjust() == true && m_actionActive == true && static_cast<u32>(m_model->isNodeAnimFinished()) == 1) {
         gfTask* fighter = gfTaskScheduler::getInstance()->getTaskById(gfTask::Category_Fighter, m_fighterTaskId);
         ftPeach* finalFighter = dynamic_cast<ftPeach*>(fighter);
         if (finalFighter != NULL) finalFighter->endFinalRequest();

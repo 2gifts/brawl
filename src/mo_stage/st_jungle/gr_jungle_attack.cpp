@@ -20,12 +20,14 @@ grJungleAttack::grJungleAttack(const char* taskName) : grJungle(taskName) {
     m_attackOn = 0;
     m_work = NULL;
     grCalcWorldCallBack* callback = &m_calcWorldCallBack;
-    if (callback != NULL) {
-        callback->m_numNodeCallbackData = 1;
-        callback->initialize(false, Heaps::StageInstance);
-        callback->m_nodeCallbackDatas->m_flags |= 1;
-        callback->m_nodeCallbackDatas->m_flags |= 0x10;
+    // MATCH-ONLY: the early return gives the original's branch layout and the separate return block
+    if (callback == NULL) {
+        return;
     }
+    callback->m_numNodeCallbackData = 1;
+    callback->initialize(false, Heaps::StageInstance);
+    callback->m_nodeCallbackDatas->m_flags |= 1;
+    callback->m_nodeCallbackDatas->m_flags |= 0x10;
 }
 
 void grJungleAttack::update(float deltaFrame) {
@@ -70,14 +72,9 @@ void grJungleAttack::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
+            calcWorldCallBack->m_nodeCallbackDatas->m_pos = *m_posWork;
             grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-            data->m_pos.m_x = m_posWork->m_x;
-            data->m_pos.m_y = m_posWork->m_y;
-            data->m_pos.m_z = m_posWork->m_z;
-            data = calcWorldCallBack->m_nodeCallbackDatas;
-            data->m_offsetPos.m_x = m_offset.m_x;
-            data->m_offsetPos.m_y = m_offset.m_y;
-            data->m_offsetPos.m_z = m_offset.m_z;
+            data->m_offsetPos = m_offset;
         }
     }
 }

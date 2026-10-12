@@ -116,7 +116,7 @@ void grJungleAshiba10::resetYakumono() {
         if (state[0] > 1) {
             state[0] = 4;
         }
-        if (m_stateWork[1] >= 2) {
+        if (m_stateWork[1] > 1) {
             m_stateWork[1] = 4;
         }
     }

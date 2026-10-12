@@ -45,8 +45,9 @@ void grJungleLadder::updateYakumono(float deltaFrame) {
     if (m_posWork != NULL) {
         if (m_triggerMade == 1) {
             Vec3f pos;
-            pos.m_x = m_posHashigoWork->m_x;
-            pos.m_y = m_posHashigoWork->m_y;
+            Vec3f* hashigoPos = m_posHashigoWork;
+            pos.m_x = hashigoPos->m_x;
+            pos.m_y = hashigoPos->m_y;
             pos.m_z = 0.0f;
             setPos(&pos);
         } else {
@@ -86,11 +87,9 @@ void grJungleLadder::updateCallBack(float deltaFrame) {
             scnMdl->m_calcWorldCallBack = calcWorldCallBack;
             scnMdl->EnableScnMdlCallbackTiming(1);
             scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[1].m_nodeIndex;
-            if (m_posWork != NULL) {
-                grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-                data[1].m_pos.m_x = m_posWork->m_x;
-                data[1].m_pos.m_y = m_posWork->m_y;
-                data[1].m_pos.m_z = m_posWork->m_z;
+            Vec3f* posWork = m_posWork;
+            if (posWork != NULL) {
+                calcWorldCallBack->m_nodeCallbackDatas[1].m_pos = *posWork;
             }
         }
     }

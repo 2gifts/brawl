@@ -6,10 +6,9 @@
 
 void ftLucasStatusUniqProcessSpecialHiAttackEnd::initStatus(soModuleAccesser* a) {
     soWorkManageModule& work = a->getWorkManageModule();
-    soStatusModule& status = a->getStatusModule();
     soModelModuleImpl& model = dynamic_cast<soModelModuleImpl&>(a->getModelModule());
     float angle = work.getFloat(0x21000004);
-    if (status.getStatusKind() == 0x11e) angle = -angle;
+    if (a->getStatusModule().getStatusKind() == 0x11e) angle *= -1.0f;
     model.setNodeRotateX(3, angle * 57.29578f);
     a->getStageObject().updateNodeSRT();
 }

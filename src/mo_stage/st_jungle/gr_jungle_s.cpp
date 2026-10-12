@@ -40,11 +40,13 @@ grJungleS::grJungleS(const char* taskName) : grJungle(taskName), m_snd() {
     m_dataGroup = NULL;
     m_data = NULL;
     grCalcWorldCallBack* callback = &m_calcWorldCallBack;
-    if (callback != NULL) {
-        callback->m_numNodeCallbackData = 2;
-        callback->initialize(false, Heaps::StageInstance);
-        callback->m_nodeCallbackDatas->m_flags |= 1;
+    if (callback == NULL) {
+        return;
     }
+    callback->m_numNodeCallbackData = 1;
+    callback->initialize(false, Heaps::StageInstance);
+    callback->m_nodeCallbackDatas->m_flags |= 1;
+    callback->m_nodeCallbackDatas->m_flags |= 0x10;
 }
 
 grJungleS::~grJungleS() {
@@ -76,7 +78,7 @@ void grJungleS::update(float deltaFrame) {
         if (m_enableWork != NULL) {
             switch (*m_enableWork) {
             case 0:
-                if (m_isVisible == 1) {
+                if (m_isVisible) {
                     setVisibility(0);
                 }
                 if (m_isEnableCollisionStatus != 0) {
@@ -112,18 +114,20 @@ void grJungleS::updateBreak(float deltaFrame) {
         }
         float* data = static_cast<float*>(getStageData());
         if (data != NULL) {
-            u8 state = m_state;
-            if (state != 1) {
-                if (state == 0) {
-                    m_hp = data[0];
-                    *m_stateWork = 1;
-                    m_state = 1;
-                } else if (state == 9) {
-                    if (*m_stateWork == 4) {
-                        *m_stateWork = 0;
-                        m_state = 0;
-                    }
+            switch (m_state) {
+            case 0:
+                m_hp = data[0];
+                *m_stateWork = 1;
+                m_state = 1;
+                break;
+            case 1:
+                break;
+            case 9:
+                if (*m_stateWork == 4) {
+                    *m_stateWork = 0;
+                    m_state = 0;
                 }
+                break;
             }
         }
     }
@@ -141,11 +145,13 @@ void grJungleS::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
-            if (m_posWork != NULL) {
+            Vec3f* posWork = m_posWork;
+            if (posWork != NULL) {
                 grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-                data->m_pos.m_x = m_posWork->m_x;
-                data->m_pos.m_y = m_posWork->m_y;
-                data->m_pos.m_z = m_posWork->m_z;
+                // MATCH-ONLY: the first store re-reads m_nodeCallbackDatas to get the register allocation of the original
+                calcWorldCallBack->m_nodeCallbackDatas->m_pos.m_x = posWork->m_x;
+                data->m_pos.m_y = posWork->m_y;
+                data->m_pos.m_z = posWork->m_z;
                 data = calcWorldCallBack->m_nodeCallbackDatas;
                 data->m_offsetPos.m_x = m_shake.m_x;
                 data->m_offsetPos.m_y = m_shake.m_y;

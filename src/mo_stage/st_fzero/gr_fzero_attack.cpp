@@ -288,12 +288,22 @@ void grFzeroAttack::updateYakumonoWall(float deltaFrame) {
     case 1:
         if (*m_stateWallWork == 7) {
             setAttack();
-            fzeroWallPosition(m_mtxGimmickWork, &m_pos);
+            float z = m_mtxGimmickWork[39].m[2][3];
+            float y = m_mtxGimmickWork[39].m[1][3];
+            float x = m_mtxGimmickWork[39].m[0][3];
+            m_pos.m_x = x;
+            m_pos.m_y = y;
+            m_pos.m_z = z;
             m_state = 3;
         }
         break;
-    case 3:
-        fzeroWallPosition(mtx, &m_pos);
+    case 3: {
+        float z = mtx[39].m[2][3];
+        float y = mtx[39].m[1][3];
+        float x = mtx[39].m[0][3];
+        m_pos.m_x = x;
+        m_pos.m_y = y;
+        m_pos.m_z = z;
         if (*m_stateWallWork != 7) {
             if (m_attackEnabled == 1) {
                 disableAttack(0);
@@ -302,6 +312,7 @@ void grFzeroAttack::updateYakumonoWall(float deltaFrame) {
             m_state = 1;
         }
         break;
+    }
     }
 }
 
