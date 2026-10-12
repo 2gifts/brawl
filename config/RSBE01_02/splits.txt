@@ -2749,12 +2749,12 @@ RVL_SDK/bte/port_api.c:
 	.bss        start:0x8052D5A8 end:0x8052D9C0
 
 RVL_SDK/bte/port_rfc.c:
-	.text       start:0x8025047C end:0x80251AD0
-	.data       start:0x80483E98 end:0x804842E0
+	.text       start:0x8025047C end:0x80251878
+	.data       start:0x80483E98 end:0x804841C8
 
 RVL_SDK/bte/port_utils.c:
-	.text       start:0x80251AD0 end:0x80251E50
-	.data       start:0x804842E0 end:0x80484310
+	.text       start:0x80251878 end:0x80251E50
+	.data       start:0x804841C8 end:0x80484310
 
 RVL_SDK/bte/rfc_l2cap_if.c:
 	.text       start:0x80251E50 end:0x80252784
