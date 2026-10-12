@@ -1,6 +1,17 @@
+#include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+class soModuleAccesser;
 
-} // extern "C"
+class ftLinkStatusUniqProcessSpecialRSlash : public soStatusUniqProcess {
+public:
+    virtual ~ftLinkStatusUniqProcessSpecialRSlash() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+};
+
+void ftLinkStatusUniqProcessSpecialRSlash::initStatus(soModuleAccesser*) { }
+
+void ftLinkStatusUniqProcessSpecialRSlash::execStatus(soModuleAccesser*) { }
+
+ftLinkStatusUniqProcessSpecialRSlash g_ftLinkStatusUniqProcessSpecialRSlash;
