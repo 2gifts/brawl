@@ -1,6 +1,38 @@
+#define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+// MATCH-ONLY: the -O2,s fighter flags stop the implicit constructor inlining into the static initializer;
+// the Matching neighbours build at the default -O4,p.
+#include <ft/ft_kinetic_energy.h>
+#include <ft/ft_status_uniq_process_capture_pulled.h>
+#include <so/ground/so_ground_module_impl.h>
+#include <so/so_module_accesser.h>
+#include <so/so_value_accesser.h>
+#include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+class ftStatusUniqProcessCaptureDamage : public ftStatusUniqProcessCapturePulled {
+public:
+    virtual ~ftStatusUniqProcessCaptureDamage() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+};
 
-} // extern "C"
+ftStatusUniqProcessCaptureDamage g_ftStatusUniqProcessCaptureDamage;
+
+void ftStatusUniqProcessCaptureDamage::initStatus(soModuleAccesser* moduleAccesser) {
+    ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
+    // HYPOTHESIS: byte 5 is the soKineticEnergy suspend byte; bit 0x80 is an unnamed flag set here.
+    *((u8*)&stop + 5) |= 0x80;
+    int kind = moduleAccesser->getWorkManageModule().getInt(0x20000000);
+    // Damage-state ids 0x7e..0x80 fold to 0x80, 0x81..0x83 fold to 0x83.
+    if (kind >= 0x7e && kind < 0x81) {
+        kind = 0x80;
+    } else if (kind >= 0x81 && kind < 0x84) {
+        kind = 0x83;
+    }
+    moduleAccesser->getWorkManageModule().setInt(kind, 0x20000000);
+    moduleAccesser->getGroundModule().setCorrectIgnoreSlope(1, 0);
+}
+
+void ftStatusUniqProcessCaptureDamage::execStatus(soModuleAccesser* moduleAccesser) {
+    execStatusCommon(moduleAccesser, 0x80, 0x83, 0x20000000);
+}

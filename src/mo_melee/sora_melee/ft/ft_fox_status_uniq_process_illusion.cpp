@@ -1,6 +1,18 @@
+#define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+// Class shapes from the module map; the method bodies are not reconstructed yet.
+class ftFoxStatusUniqProcessIllusion : public soStatusUniqProcess {
+public:
+    virtual ~ftFoxStatusUniqProcessIllusion() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+};
 
-} // extern "C"
+ftFoxStatusUniqProcessIllusion g_ftFoxStatusUniqProcessIllusion;
+
+void ftFoxStatusUniqProcessIllusion::initStatus(soModuleAccesser* moduleAccesser) { }
+void ftFoxStatusUniqProcessIllusion::exitStatus(soModuleAccesser* moduleAccesser, int) { }
+void ftFoxStatusUniqProcessIllusion::execStatus(soModuleAccesser* moduleAccesser) { }

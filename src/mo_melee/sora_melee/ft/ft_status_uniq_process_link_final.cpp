@@ -1,6 +1,22 @@
+#include <ft/ft_status_uniq_process_link_final.h>
+#include <so/so_module_accesser.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+ftStatusUniqProcessLinkFinal g_ftStatusUniqProcessLinkFinal;
 
-} // extern "C"
+void ftStatusUniqProcessLinkFinal::initStatus(soModuleAccesser* moduleAccesser) {
+    // HYPOTHESIS: not yet matched.
+}
+
+void ftStatusUniqProcessLinkFinal::execFixPos(soModuleAccesser* moduleAccesser) {
+    // HYPOTHESIS: not yet matched.
+}
+
+void ftStatusUniqProcessLinkFinal::exitStatus(soModuleAccesser* moduleAccesser, int) {
+    // HYPOTHESIS: not yet matched.
+}
+
+bool ftStatusUniqProcessLinkFinal::checkDamage(soModuleAccesser* moduleAccesser, void*) {
+    moduleAccesser->getStatusModule().changeStatusRequest(0xed, moduleAccesser);
+    return true;
+}

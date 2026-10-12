@@ -1,6 +1,16 @@
+#define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+// Class shapes from the module map; the method bodies are not reconstructed yet.
+class ftStatusUniqProcessCaptainFinalOther : public soStatusUniqProcess {
+public:
+    virtual ~ftStatusUniqProcessCaptainFinalOther() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
+};
 
-} // extern "C"
+ftStatusUniqProcessCaptainFinalOther g_ftStatusUniqProcessCaptainFinalOther;
+
+void ftStatusUniqProcessCaptainFinalOther::initStatus(soModuleAccesser* moduleAccesser) { }
+void ftStatusUniqProcessCaptainFinalOther::exitStatus(soModuleAccesser* moduleAccesser, int) { }
