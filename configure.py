@@ -1678,7 +1678,7 @@ config.libs = [
             Object(Matching, "mo_fighter/ft_dedede/ft_dedede_status_uniq_process_special_super_jump_turn.cpp"),
             Object(NonMatching, "mo_fighter/ft_dedede/ft_dedede_status_uniq_process_special_jet_hammer.cpp"),
             Object(NonMatching, "mo_fighter/ft_dedede/ft_dedede_status_uniq_process_special_waddledee_throw.cpp"),
-            Object(NonMatching, "mo_fighter/ft_dedede/ft_dedede_status_uniq_process_special_waddledee_throw_pickup.cpp"),
+            Object(Matching, "mo_fighter/ft_dedede/ft_dedede_status_uniq_process_special_waddledee_throw_pickup.cpp"),
             Object(NonMatching, "mo_fighter/ft_dedede/ft_dedede_status_uniq_process_final.cpp"),
             Object(NonMatching, "mo_fighter/ft_dedede/ft_dedede.cpp"),
         ],
