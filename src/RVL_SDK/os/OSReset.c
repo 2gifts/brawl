@@ -27,16 +27,12 @@ extern void __OSHotReset(void);
 extern void __OSShutdownToSBY(void);
 extern void __VISetRGBModeImm(void);
 extern void __OSReboot(u32, u32);
-extern u32 lbl_805A0634;
-extern u32 lbl_805A06A4;
+extern BOOL __OSInNandBoot;
+extern BOOL __OSInReboot;
 extern u32 lbl_805A06E0;
 extern u32 lbl_805A06E4;
 
-extern struct {
-    u32 isValid;
-    u32 code;
-    u32 rest[6];
-} lbl_804DD120;
+extern OSExecParams __OSRebootParams;
 
 #define OS_ACTIVE_THREAD_HEAD (*(OSThread **)0x800000DC)
 
@@ -219,7 +215,7 @@ void OSShutdownSystem(void) {
 }
 
 static inline void HotResetOrPanic(void) {
-    if (lbl_805A0634 != 0 || lbl_805A06A4 != 0) {
+    if (__OSInNandBoot != 0 || __OSInReboot != 0) {
         __OSInitSTM();
     }
 
@@ -342,8 +338,8 @@ void __OSHotResetForError(void) {
 }
 
 u32 OSGetResetCode(void) {
-    if (lbl_804DD120.isValid != 0) {
-        return lbl_804DD120.code | 0x80000000;
+    if (__OSRebootParams.valid != 0) {
+        return __OSRebootParams.restartCode | 0x80000000;
     }
 
     return *(volatile u32 *)0xCC003024 >> 3;
