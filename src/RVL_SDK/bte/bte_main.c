@@ -47,7 +47,6 @@ typedef void tBTE_STATE_CBACK(UINT8 state);
  */
 
 // runs func on a separate stack whose top is stack_top, asm glue that lives elsewhere
-extern void fn_801D8194(void (*func)(void), void *stack_top);
 
 // bta_dm_api.c
 extern BOOLEAN BTA_DmIsDeviceUp(void);
@@ -74,7 +73,7 @@ static tBTE_STATE_CBACK *bte_state_cback;
 
 static void bte_alarm_handler(OSAlarm *alarm, OSContext *context)
 {
-	fn_801D8194(btu_task_msg_handler, bte_stack + sizeof bte_stack);
+	OSSwitchFiber((u32)btu_task_msg_handler, (u32)(bte_stack + sizeof bte_stack));
 }
 
 int BTE_LoadStack(void)

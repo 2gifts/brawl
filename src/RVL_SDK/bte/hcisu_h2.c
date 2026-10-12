@@ -148,10 +148,10 @@ extern void fn_801D81C4(void *a, UINT32 b, UINT32 c, UINT32 d, void *func, void 
 extern int IPCCltInit(void);
 
 // usb.c, no names for any of these yet
-extern int fn_80228988(void);
-extern void fn_80228A80(void);
-extern int fn_80228C30(char *name, UINT16 vid, UINT16 pid);
-extern int fn_80228D74(int fd, void (*p_cback)(int), void *ctx);
+extern int IUSB_OpenLib(void);
+extern void IUSB_CloseLib(void);
+extern int IUSB_OpenDeviceIds(char *name, UINT16 vid, UINT16 pid);
+extern int IUSB_CloseDeviceAsync(int fd, void (*p_cback)(int), void *ctx);
 extern int fn_802291D4(int fd, int ep, int len, void *p_data, tUSB_CBACK *p_cback, void *ctx);
 extern int fn_80229248(int fd, int ep, int len, void *p_data, tUSB_CBACK *p_cback, void *ctx);
 extern int fn_802292BC(int fd, int ep, int len, void *p_data, tUSB_CBACK *p_cback, void *ctx);
@@ -523,7 +523,7 @@ static void hcisu_usb_closed_cback(int result)
 	hcisu_usb_cb.ep_unk = 0;
 	hcisu_usb_opened = 0;
 
-	fn_80228A80();
+	IUSB_CloseLib();
 
 	GKI_disable();
 	hcisu_usb_cb.init_done = 0;
@@ -759,7 +759,7 @@ static void hcisu_usb_init(tHCISU_USB_ARGS *p_args)
 	if (IPCCltInit() != 0)
 		return;
 
-	if (fn_80228988() != 0)
+	if (IUSB_OpenLib() != 0)
 		return;
 
 	hcisu_usb_cb.p_open_args = p_args;
@@ -788,16 +788,16 @@ static void hcisu_usb_init(tHCISU_USB_ARGS *p_args)
 	{
 		if (hcisu_usb_which == 0)
 		{
-			fd = fn_80228C30("oh0", (UINT16)vid, (UINT16)pid);
+			fd = IUSB_OpenDeviceIds("oh0", (UINT16)vid, (UINT16)pid);
 		}
 		else if (hcisu_usb_which == 1)
 		{
-			fd = fn_80228C30("oh1", (UINT16)vid, (UINT16)pid);
+			fd = IUSB_OpenDeviceIds("oh1", (UINT16)vid, (UINT16)pid);
 		}
 	}
 	else
 	{
-		fd = fn_80228C30("oh1", (UINT16)vid, (UINT16)pid);
+		fd = IUSB_OpenDeviceIds("oh1", (UINT16)vid, (UINT16)pid);
 	}
 
 	if (fd >= 0)
@@ -1004,12 +1004,12 @@ static void hcisu_usb_close(void)
 		}
 	}
 
-	fn_80228D74(hcisu_usb_cb.fd, hcisu_usb_closed_cback, NULL);
+	IUSB_CloseDeviceAsync(hcisu_usb_cb.fd, hcisu_usb_closed_cback, NULL);
 }
 
 static void hcisu_usb_reset(void)
 {
-	fn_80228A80();
+	IUSB_CloseLib();
 
 	GKI_disable();
 	hcisu_usb_cb.state = USB_STATE_IDLE;
