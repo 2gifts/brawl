@@ -7,7 +7,13 @@
 
 class soParamCustomizeModule : soNullable {
 public:
+    soParamCustomizeModule() : soNullable(false) { }
+#ifdef WN_WEAPON_BUILDER
+    // MATCH-ONLY: not inlined into the derived destructor (weak copy in the article units).
+    virtual ~soParamCustomizeModule() __attribute__((never_inline)) { }
+#else
     virtual ~soParamCustomizeModule() { }
+#endif
     virtual void activate() = 0;
     virtual void setDefault() = 0;
     virtual void addCustomize(u8) = 0;
@@ -32,13 +38,14 @@ class soParamCustomizeModuleImpl : soParamCustomizeModule {
     float m_attackPowerMulScale;
 
 public:
+    soParamCustomizeModuleImpl() : m_attackPowerMulPattern(1.0f), m_attackPowerMulScale(1.0f) { }
     virtual ~soParamCustomizeModuleImpl() { }
-    virtual void activate();
-    virtual void setDefault();
-    virtual void addCustomize(u8);
-    virtual void removeCustomize(u8);
-    virtual bool isCustomize(u32) const;
-    virtual float getAttackPowerMul(void* p1);
+    virtual void activate() { m_attackPowerMulPattern = m_attackPowerMulScale = 1.0f; }
+    virtual void setDefault() { }
+    virtual void addCustomize(u8) { }
+    virtual void removeCustomize(u8) { }
+    virtual bool isCustomize(u32) const { return false; }
+    virtual float getAttackPowerMul(void* p1) { return m_attackPowerMulPattern * m_attackPowerMulScale; }
     virtual void setAttackPowerMulPattern(float pattern) {
         m_attackPowerMulPattern = pattern;
     }
@@ -54,12 +61,12 @@ public:
     virtual float getAttackPowerMulScale() {
         return m_attackPowerMulScale;
     }
-    virtual float getAttackPowerMulArticle();
-    virtual float getAttackReactionMul();
-    virtual float getWalkSpeedMul();
-    virtual int getParamInt(u32, u32);
-    virtual float getParamFloat(u32, u32);
-    virtual void* getParamIndefinite(u32, u32);
+    virtual float getAttackPowerMulArticle() { return 1.0f; }
+    virtual float getAttackReactionMul() { return 1.0f; }
+    virtual float getWalkSpeedMul() { return 1.0f; }
+    virtual int getParamInt(u32, u32) { return 0; }
+    virtual float getParamFloat(u32, u32) { return 0.0f; }
+    virtual void* getParamIndefinite(u32, u32) { return nullptr; }
 };
 static_assert(sizeof(soParamCustomizeModuleImpl) == 16, "Class is wrong size!");
 

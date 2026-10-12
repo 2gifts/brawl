@@ -44,6 +44,7 @@ class soSound3dGeneratorAccesserImpl : public soSound3dGeneratorAccesser {
     GeneratorInstance m_generatorInstance;
 
 public:
+    soSound3dGeneratorAccesserImpl();
     virtual ~soSound3dGeneratorAccesserImpl();
     virtual void activate(Vec3f* pos);
     virtual void deactivate();

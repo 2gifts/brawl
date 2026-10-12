@@ -72,6 +72,7 @@ public:
 template <typename T>
 class soEventUnitNull {
 public:
+    soEventUnitNull() { }
     soEventUnitNull(s16, s16) { }
 };
 static_assert(sizeof(soEventUnitNull<void>) == 1, "Disabled event unit extent");

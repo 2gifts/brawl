@@ -123,6 +123,7 @@ public:
         VirtualNodeCap = N,
     };
     typedef T ModuleType;
+    typedef soModelVirtualNode VirtualNodeType;
 };
 
 template <typename BC>
@@ -152,29 +153,23 @@ public:
     }
 };
 
+template <typename T>
+class soSingletonHolder;
+
+// Without virtual nodes the module takes the null virtual node array of a local singleton (the article builders).
 template <u32 S, typename T>
 class soModelModuleBuilder<soModelModuleBuildConfig<S, 0, T> > {
     soArrayVector<soModelNodeSetUp, S> m_nodeSetUps;
-    soArrayVector<soModelVirtualNode, 0> m_virtualNodes;
+    typedef soSingletonHolder<soArrayNull<typename soModelModuleBuildConfig<S, 0, T>::VirtualNodeType> > NullNodesHolder;
+    NullNodesHolder m_virtualNodes;
     T m_modelModule;
 public:
     static T* getModule(soModelModuleBuilder* b) {
         return &b->m_modelModule;
     }
 
-    soModelModuleBuilder(soModuleAccesser* acc,
-                         void* extendNodeTable,
-                         soEventObserverRegistrationDesc* regDesc,
-                         float modelScale) :
-        m_nodeSetUps(S),
-        m_virtualNodes(),
-        m_modelModule(
-            acc,
-            &m_nodeSetUps,
-            extendNodeTable,
-            &getNullArray<soModelVirtualNode>(),
-            regDesc,
-            modelScale
-        ) {
-    }
+    soModelModuleBuilder(soModuleAccesser* acc, float modelScale, void* extendNodeTbl, soEventObserverRegistrationDesc* regDesc) :
+        m_nodeSetUps(S, 0),
+        m_modelModule(acc, &m_nodeSetUps, modelScale, extendNodeTbl,
+                      NullNodesHolder::getInstance(), regDesc) { }
 };

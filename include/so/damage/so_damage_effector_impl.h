@@ -15,7 +15,15 @@ class soModuleAccesser;
 // pure virtual in soDamageEffectorImpl and its name here is a guess.
 class soDamageEffector : public soNull, public soNullable {
 public:
+#ifdef WN_WEAPON_BUILDER
+    soDamageEffector() : soNullable(false) { }
+#endif
+#ifdef WN_WEAPON_BUILDER
+    // MATCH-ONLY: not inlined into the derived destructor (weak copy in the article units).
+    virtual ~soDamageEffector() __attribute__((never_inline)) { }
+#else
     virtual ~soDamageEffector() { }
+#endif
     virtual void reqShake(soModuleAccesser* moduleAccesser, int situation, Vec2f* normal, soCollisionAttackData* attackData, int hitStopFrame);
     virtual void reqCommonEffect(float power, float reaction, float lr, soModuleAccesser* moduleAccesser, soCollisionAttackData* attackData, soCollisionLog* collisionLog);
     virtual void reqUniqEffect(soModuleAccesser* moduleAccesser, int level, soCollisionAttackData* attackData);
