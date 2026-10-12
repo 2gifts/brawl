@@ -72,7 +72,7 @@ static_assert(sizeof(ipPadTrigger) == 8, "Class is wrong size!");
 class Input {
     bool unk0;
 public:
-#ifdef YK_STAGE_FULL
+#if defined(YK_STAGE_FULL) || defined(WN_WEAPON_BUILDER)
     Input(bool isNull) : unk0(isNull) { } // HYPOTHESIS: seen in the inline constructor of IpNull
 #endif
     Input() : unk0(false) { }

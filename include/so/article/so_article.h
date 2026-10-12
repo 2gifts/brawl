@@ -40,7 +40,11 @@ public:
     virtual void setVisibilityWhole(u8);
     virtual void setVisibility(int, u8);
     virtual void set2nd(u8);
+#ifdef WN_WEAPON_BUILDER // inline in the article RELs (weak copies)
+    virtual void action(int) { }
+#else
     virtual void action(int);
+#endif
     virtual void setSituationKind(SituationKind);
     virtual bool isConstraint();
     virtual void deactivateDescendantForce();
@@ -56,7 +60,11 @@ public:
     virtual void setLogAttackInfo(soLogAttackInfo* logAttackInfo);
     virtual soLogAttackInfo getLogAttackInfo();
     virtual void updateLogAttackInfo();
+#ifdef WN_WEAPON_BUILDER // inline in the article RELs (weak copies)
+    virtual void intrudeLogAttackInfo() { }
+#else
     virtual void intrudeLogAttackInfo();
+#endif
     virtual float getActiveGlobalFrame();
     virtual void setAttackPowerMulPattern(float);
 };

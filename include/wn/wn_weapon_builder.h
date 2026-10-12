@@ -6,6 +6,10 @@
 #include <types.h>
 #include <wn/weapon.h>
 
+#ifdef WN_WEAPON_BUILDER
+// Article units: the generic builder (wnWeaponBuilder<BC> over the article's build config).
+#include <wn/wn_module_accesser_builder.h>
+#else
 template <typename T>
 class wnWeaponBuilder : public Weapon {
 public:
@@ -13,3 +17,4 @@ public:
     // TODO: virtual functions
 };
 static_assert(sizeof(wnWeaponBuilder<void>) == 0x2160, "Class is wrong size!");
+#endif

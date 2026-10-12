@@ -7,7 +7,9 @@
 // argument/return widths are verified.
 class soTeam : public soNullable {
 public:
-#ifdef FT_TEAM_TYPED_INTERFACE
+    soTeam() { }
+    soTeam(bool isNull) : soNullable(isNull) { }
+#if defined(FT_TEAM_TYPED_INTERFACE) || defined(WN_WEAPON_BUILDER)
     virtual ~soTeam();
 #else
     virtual ~soTeam() { }
