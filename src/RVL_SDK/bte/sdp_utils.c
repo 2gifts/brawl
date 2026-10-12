@@ -359,7 +359,8 @@ UINT8 *sdpu_extract_attr_seq(UINT8 *p, UINT16 param_len, tSDP_ATTR_SEQ *p_seq)
 
 	p_seq->num_attr = 0;
 
-	descr = *p++;
+	descr = *p;
+	p += 1;
 	type = descr >> 3;
 	size = descr & 7;
 
@@ -369,7 +370,8 @@ UINT8 *sdpu_extract_attr_seq(UINT8 *p, UINT16 param_len, tSDP_ATTR_SEQ *p_seq)
 	switch (size)
 	{
 	case SIZE_IN_NEXT_BYTE:
-		list_len = *p++;
+		list_len = *p;
+		p += 1;
 		break;
 
 	case SIZE_IN_NEXT_WORD:
@@ -393,7 +395,8 @@ UINT8 *sdpu_extract_attr_seq(UINT8 *p, UINT16 param_len, tSDP_ATTR_SEQ *p_seq)
 
 	for (; p < p_end_list;)
 	{
-		descr = *p++;
+		descr = *p;
+	p += 1;
 		type = descr >> 3;
 		size = descr & 7;
 
@@ -411,7 +414,8 @@ UINT8 *sdpu_extract_attr_seq(UINT8 *p, UINT16 param_len, tSDP_ATTR_SEQ *p_seq)
 			break;
 
 		case SIZE_IN_NEXT_BYTE:
-			attr_len = *p++;
+			attr_len = *p;
+			p += 1;
 			break;
 
 		case SIZE_IN_NEXT_WORD:

@@ -242,8 +242,8 @@ static UINT16 hcisu_h2_receive_msg(UINT16 idx, tHCISU_H2_CB *p_cb)
 		case H2_RX_MSGTYPE_ST:
 			if (port == H2_PORT_EVT)
 			{
-				p_cb->rcv_msg_type[idx] = H2_TYPE_EVT;
 				p_cb->p_rcv_msg[idx] = GKI_getpoolbuf(GKI_POOL_ID_2);
+				p_cb->rcv_msg_type[idx] = H2_TYPE_EVT;
 			}
 			else if (port == H2_PORT_ACL)
 			{
@@ -252,8 +252,8 @@ static UINT16 hcisu_h2_receive_msg(UINT16 idx, tHCISU_H2_CB *p_cb)
 			}
 			else if (port == H2_PORT_SCO)
 			{
-				p_cb->rcv_msg_type[idx] = H2_TYPE_SCO;
 				p_cb->p_rcv_msg[idx] = GKI_getpoolbuf(GKI_POOL_ID_1);
+				p_cb->rcv_msg_type[idx] = H2_TYPE_SCO;
 			}
 			else
 			{
