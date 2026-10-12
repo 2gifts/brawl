@@ -1,8 +1,8 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <so/status/so_status_module_impl.h>
+#include <so/so_module_accesser.h>
 #include <types.h>
 
-// Class shapes from the module map; the method bodies are not reconstructed yet.
 class wnSheikNeedleStatusUniqProcessDrop : public soStatusUniqProcess {
 public:
     virtual ~wnSheikNeedleStatusUniqProcessDrop() { }
@@ -14,5 +14,16 @@ public:
 wnSheikNeedleStatusUniqProcessDrop g_wnSheikNeedleStatusUniqProcessDrop;
 
 void wnSheikNeedleStatusUniqProcessDrop::initStatus(soModuleAccesser* moduleAccesser) { }
-void wnSheikNeedleStatusUniqProcessDrop::exitStatus(soModuleAccesser* moduleAccesser, int) { }
+void wnSheikNeedleStatusUniqProcessDrop::exitStatus(soModuleAccesser* moduleAccesser, int status) {
+    if (status != 3) {
+        soPostureModule& posture = moduleAccesser->getPostureModule();
+        soEffectModule& effect = moduleAccesser->getEffectModule();
+        Vec3f zero(0.0f, 0.0f, 0.0f);
+        posture.setRot(&zero, 0);
+        Vec3f rot(0.0f, 0.0f, 0.0f);
+        Vec3f pos = posture.getPos();
+        // HYPOTHESIS: effect scale from lbl_27_rodata_77D8; effect id 0x22 from the requesting status.
+        effect.req((EfID)0x22, &pos, &rot, 1.0f, 0, -1);
+    }
+}
 void wnSheikNeedleStatusUniqProcessDrop::execFixPos(soModuleAccesser* moduleAccesser) { }
