@@ -29,7 +29,11 @@
 #define EXI_ID_IS_DOL_VIEWER 0x05070000
 
 // low memory words the sdk keeps around
-#define OS_EXI_LAST_INSERT(c) (((volatile s32 *)0x80000000)[0x30C0 / 4 + (c)])
+// 4 mhz clock select, handed to EXISelect by the other exi users
+const u32 __EXIFreq = 4;
+
+vs32 OS_EXI_LAST_INSERT_TABLE[3] : 0x800030C0;
+#define OS_EXI_LAST_INSERT(c) (OS_EXI_LAST_INSERT_TABLE[(c)])
 #define OS_DVD_DEVICE_CODE (*(volatile u16 *)0x800030E6)
 
 typedef struct EXIItem {
@@ -54,7 +58,7 @@ typedef struct EXIData {
 extern u32 __OSGetDIConfig(void);
 extern BOOL __OSInIPL;
 
-const char *__EXIVersion = "<< RVL_SDK - EXI \trelease build: Jun 28 2007 18:29:36 (0x4199_60831) >>";
+const char *__EXIVersion = "<< RVL_SDK - EXI \trelease build: Jun  6 2007 02:56:20 (0x4199_60831) >>";
 
 static EXIData Ecb[3];
 static u32 IDSerialPort1;
@@ -665,7 +669,7 @@ s32 EXIGetID(s32 chan, u32 dev, u32 *out) {
     }
 
     enabled = OSDisableInterrupts();
-    ret = !EXILock(chan, dev, (chan < EXI_CHAN_2 && dev == EXI_DEV_EXT) ? UnlockedHandler : NULL);
+    ret = !EXILock(chan, dev, (chan < EXI_CHAN_2 && dev == EXI_DEV_EXT) ? UnlockedHandler : 0);
     if (ret == 0) {
         ret = !EXISelect(chan, dev, EXI_FREQ_1MHZ);
         if (ret == 0) {

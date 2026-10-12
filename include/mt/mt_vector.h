@@ -73,11 +73,19 @@ public:
         return *this;
     }
 
-    float lengthSq() {
+    // HYPOTHESIS: native calls pass vector addresses; original reference qualifiers are unresolved.
+    float mtVecAngle(Vec2f& other);
+
+    float lengthSq()
+#ifdef MT_VEC2F_LENGTH_SQ_OUT_OF_LINE
+        __attribute__((never_inline)); // MATCH-ONLY: retain the owning Vanish unit's helper calls.
+#else
+    {
         float xSq = m_x * m_x;
         float ySq = m_y * m_y;
         return xSq + ySq;
     }
+#endif
 
     float length() {
         float lengthSquared = this->lengthSq();

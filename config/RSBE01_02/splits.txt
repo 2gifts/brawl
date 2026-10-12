@@ -1963,7 +1963,7 @@ RVL_SDK/base/PPCArch.c:
 
 RVL_SDK/os/OS.c:
 	.text       start:0x801D51D8 end:0x801D6640
-	.data       start:0x80466E68 end:0x804670C0
+	.data       start:0x80466E68 end:0x80467258
 	.bss        start:0x804DD120 end:0x804DD190
 	.sdata      start:0x8059E980 end:0x8059E9B0
 	.sbss       start:0x805A0630 end:0x805A0678
@@ -1997,13 +1997,13 @@ RVL_SDK/os/OSContext.c:
 
 RVL_SDK/os/OSError.c:
 	.text       start:0x801D8600 end:0x801D8D34
-	.data       start:0x80467700 end:0x80467A1C
+	.data       start:0x80467700 end:0x80467A20
 	.bss        start:0x804DD190 end:0x804DD1D4
 	.sdata      start:0x8059E9C0 end:0x8059E9C8
 
 RVL_SDK/os/OSExec.c:
 	.text       start:0x801D8D34 end:0x801DB3C8
-	.data       start:0x80467A1C end:0x80467E40
+	.data       start:0x80467A20 end:0x80467E40
 	.bss        start:0x804DD200 end:0x804DD220
 	.sdata      start:0x8059E9C8 end:0x8059E9D8
 	.sbss       start:0x805A0698 end:0x805A06B0
@@ -2118,9 +2118,11 @@ RVL_SDK/os/__ppc_eabi_init.c:
 
 RVL_SDK/exi/EXIBios.c:
 	.text       start:0x801E41F4 end:0x801E5A88
+	.data       start:0x80474E08 end:0x80474E50
 	.bss        start:0x804DE270 end:0x804DE330
 	.sdata      start:0x8059EA10 end:0x8059EA18
 	.sbss       start:0x805A0768 end:0x805A0770
+	.sdata2     start:0x805A3750 end:0x805A3758
 
 RVL_SDK/exi/EXIUart.c:
 	.text       start:0x801E5A88 end:0x801E5DBC
@@ -2165,7 +2167,7 @@ RVL_SDK/vi/vi3in1.c:
 RVL_SDK/mtx/mtx.c:
 	.text       start:0x801EC158 end:0x801ECD70
 	.sdata      start:0x8059EA60 end:0x8059EA68
-	.sdata2     start:0x805A3750 end:0x805A3778
+	.sdata2     start:0x805A3758 end:0x805A3778
 
 RVL_SDK/mtx/mtxvec.c:
 	.text       start:0x801ECD70 end:0x801ECDC4
@@ -2325,12 +2327,19 @@ RVL_SDK/ax/AXAux.c:
 	.bss        start:0x804E4960 end:0x804E7AE0
 	.sbss       start:0x805A0A30 end:0x805A0A78
 
+RVL_SDK/ax/AXCL.c:
+	.text       start:0x801FFF90 end:0x80200A18
+	.bss        start:0x804E7AE0 end:0x804E7BE0
+	.sbss       start:0x805A0A78 end:0x805A0A98
+
 RVL_SDK/ax/AXOut.c:
-	.text       start:0x801FFF90 end:0x80201264
+	.text       start:0x80200A18 end:0x80201264
+	.bss        start:0x804E7BE0 end:0x804E89E0
+	.sbss       start:0x805A0A98 end:0x805A0AD8
+
+RVL_SDK/ax/DSPCode.c:
 	.data       start:0x804780E0 end:0x8047B140
-	.bss        start:0x804E7AE0 end:0x804E89E0
 	.sdata      start:0x8059EB18 end:0x8059EB20
-	.sbss       start:0x805A0A78 end:0x805A0AD8
 
 RVL_SDK/ax/AXVPB.c:
 	.text       start:0x80201EF8 end:0x80201F38
@@ -4435,7 +4444,7 @@ RVL_SDK/net/net_time.c:
 RVL_SDK/net/net_util.c:
 	.text       start:0x8038ED50 end:0x8038F430
 	.rodata     start:0x80415D80 end:0x80415DE0
-	.data       start:0x80491340 end:0x80491360
+	.data       start:0x80491340 end:0x80491398
 	.sdata      start:0x8059FC30 end:0x8059FC38
 
 RVL_SDK/net/crypto.c:

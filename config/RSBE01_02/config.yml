@@ -25,6 +25,7 @@ force_active:
 - __DVDFsUnreferencedA
 - __DVDFsUnreferencedB
 - IdleThread
+- fn_8038F428
 
 extract:
 - symbol: HomeBtnIcon
