@@ -232,23 +232,18 @@ static void __AXDSPRequestCallback(void *task) {
 void __AXOutInitDSP(void) {
     __AXDSPTask.iram_mmem_addr = (u16 *)axDspSlave;
     __AXDSPTask.iram_length = axDspSlaveLength;
+    __AXDSPTask.priority = 0;
     __AXDSPTask.iram_addr = NULL;
-
+    __AXDSPInitFlag = FALSE;
     __AXDSPTask.dram_mem_addr = (u16 *)__AXDramImage;
     __AXDSPTask.dram_len = sizeof(__AXDramImage);
     __AXDSPTask.dram_addr = DRAM_IMAGE_DSP_ADDR;
-
     __AXDSPTask.dsp_vector = axDspInitVector;
     __AXDSPTask.dsp_res_vector = axDspResumeVector;
-
     __AXDSPTask.init_cb = __AXDSPInitCallback;
     __AXDSPTask.res_cb = __AXDSPResumeCallback;
     __AXDSPTask.done_cb = __AXDSPDoneCallback;
     __AXDSPTask.req_cb = __AXDSPRequestCallback;
-
-    __AXDSPTask.priority = 0;
-
-    __AXDSPInitFlag = FALSE;
     __AXDSPDoneFlag = FALSE;
 
     OSInitThreadQueue(&__AXOutThreadQueue);

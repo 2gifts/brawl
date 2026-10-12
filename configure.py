@@ -620,7 +620,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/dsp/dsp.c", extra_cflags=["-lang c++"]),
             Object(Matching, "RVL_SDK/dsp/dsp_task.c", extra_cflags=["-lang c++"]),
             Object(NonMatching, "RVL_SDK/card/CARDBios.c"),
-            Object(NonMatching, "RVL_SDK/nand/NANDCheck.c"),
+            Object(Matching, "RVL_SDK/nand/NANDCheck.c", extra_cflags=["-lang c++"]),
             Object(Matching, "RVL_SDK/sc/scsystem.c", extra_cflags=["-lang c++"]),
             Object(Matching, "RVL_SDK/sc/scapi.c"),
             Object(Matching, "RVL_SDK/sc/scapi_prdinfo.c"),
