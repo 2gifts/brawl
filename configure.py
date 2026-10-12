@@ -633,7 +633,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/sc/scapi_prdinfo.c"),
             Object(Matching, "RVL_SDK/esp/esp.c", extra_cflags=["-lang c++"]),
             Object(NonMatching, "RVL_SDK/kpad/KPAD.c"),
-            Object(NonMatching, "RVL_SDK/usb/usb.c"),
+            Object(NonMatching, "RVL_SDK/usb/usb.c", extra_cflags=["-lang c++"]),
             Object(NonMatching, "RVL_SDK/wud/WUD.c"),
             Object(NonMatching, "RVL_SDK/bte/gki_buffer.c"),
             Object(NonMatching, "RVL_SDK/bte/gki_time.c"),
