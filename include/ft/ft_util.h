@@ -54,6 +54,10 @@ public:
     // Parameter order is verified from fighter callers and the shared implementation. (Declared by the Sonic status work.)
     static void adjustWall(soModuleAccesser*, float, float, float, int);
 
+    // Ceiling correction restores the supplied facing before adjusting contact.
+    // HYPOTHESIS: formal bool/float order is inferred from callers; their register classes are verified.
+    static void adjustCeil(soModuleAccesser*, bool, float);
+
     // Global multipliers read from the common constants.
     static float getAttackReactionMul(soModuleAccesser* acc);
     static float getAttackPowerMul(soModuleAccesser* acc);

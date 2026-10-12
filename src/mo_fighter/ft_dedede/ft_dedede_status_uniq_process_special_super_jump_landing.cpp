@@ -1,3 +1,4 @@
+#define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <ft/ft_entry.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
@@ -19,7 +20,6 @@ void ftDededeStatusUniqProcessSpecialSuperJumpLanding::initStatus(soModuleAccess
 }
 
 void ftDededeStatusUniqProcessSpecialSuperJumpLanding::execStatus(soModuleAccesser* moduleAccesser) {
-    // HYPOTHESIS: posture getter (slot 0x2c) assumed to be getLr.
     if (moduleAccesser->getPostureModule().getLr() == -1.0f) {
         Vec3f rotate = moduleAccesser->getModelModule().getNodeRotate(6);
         rotate.m_y = 180.0f;
