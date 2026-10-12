@@ -92,19 +92,21 @@ void grJungleAshiba12A::updateCallBack(float deltaFrame) {
     grJungleAshiba::updateCallBack(deltaFrame);
     grCalcWorldCallBack* calcWorldCallBack = &m_calcWorldCallBack;
     if (calcWorldCallBack != NULL) {
+        calcWorldCallBack->m_nodeCallbackDatas->m_flags |= 0x10;
         grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-        data->m_flags |= 0x10;
         data->m_offsetPos.m_x = m_move.m_x;
         data->m_offsetPos.m_y = m_move.m_y;
         data->m_offsetPos.m_z = m_move.m_z;
         Vec3f pos;
-        getNodePosition(&pos, 0, data->m_nodeIndex);
+        getNodePosition(&pos, 0, calcWorldCallBack->m_nodeCallbackDatas->m_nodeIndex);
         m_snd.setPos(&pos);
     }
 }
 
 void grJungleAshiba12A::requestMove() {
-    if (m_state == 1) {
+    // HYPOTHESIS: a one-case switch gives the original's signed cmpwi/beq/b layout
+    switch (m_state) {
+    case 1: {
         g_ecMgr->setDrawPrio(1);
         u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x390003));
         g_ecMgr->setDrawPrio(-1);
@@ -115,5 +117,7 @@ void grJungleAshiba12A::requestMove() {
         m_move.m_z = 0.0f;
         m_timer = 4.0f;
         m_state = 2;
+        break;
+    }
     }
 }

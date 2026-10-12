@@ -87,11 +87,15 @@ void grJungleNB::updateCallBack(float deltaFrame) {
 }
 
 void grJungleNB::requestBreak() {
-    if (m_stateWork != NULL && m_state == 1) {
-        setVisibility(1);
-        setMotion(0, false, false, &m_timer);
-        *m_stateWork = 3;
-        m_state = 9;
+    if (m_stateWork != NULL) {
+        switch (m_state) {
+        case 1:
+            setVisibility(1);
+            setMotion(0, false, false, &m_timer);
+            *m_stateWork = 3;
+            m_state = 9;
+            break;
+        }
     }
 }
 

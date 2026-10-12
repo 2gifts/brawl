@@ -106,10 +106,7 @@ void grJungleAshiba::updateCallBack(float deltaFrame) {
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
             if (m_posWork != NULL) {
-                grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-                data->m_pos.m_x = m_posWork->m_x;
-                data->m_pos.m_y = m_posWork->m_y;
-                data->m_pos.m_z = m_posWork->m_z;
+                calcWorldCallBack->m_nodeCallbackDatas->m_pos = *m_posWork;
             }
         }
     }

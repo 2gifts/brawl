@@ -10,9 +10,13 @@
 void wnYoshiStar::activate(int founderTaskId, int team, Vec3f* pos, float lr) {
     wnActivateDesc desc;
     desc.founderTaskId = founderTaskId;
-    desc.resourceId = desc.unk8 = desc.unkC = 0xFFFF;
-    desc.unk10 = desc.unk14 = -1;
-    desc.unk18 = desc.unk1C = 0;
+    desc.resourceId = 0xFFFF;
+    desc.unk8 = 0xFFFF;
+    desc.unkC = 0xFFFF;
+    desc.unk10 = -1;
+    desc.unk14 = -1;
+    desc.unk18 = 0;
+    desc.unk1C = 0;
 #ifdef MATCHING
     // MATCH-ONLY: retain the native aggregate word copy from the caller position.
     __memcpy(&desc.pos, pos, sizeof(Vec3f));
@@ -27,19 +31,21 @@ void wnYoshiStar::activate(int founderTaskId, int team, Vec3f* pos, float lr) {
     desc.unk40 = 0;
     desc.unk44 = 0x35F;
     desc.unk48 = 0;
-    desc.flags = 0x88;
-    // The consumer reads only the upper two bits of the second flag byte.
-    desc.unk4D = 0;
+    desc.flagsHigh = 1;
+    desc.flagsMidHigh = 0;
+    desc.flagsMidLow = 1;
+    desc.flagsLow = 0;
+    desc.unk4DHigh = 0;
     Weapon::activate(&desc);
     m_moduleAccesser->getStatusModule().changeStatusForce(0, m_moduleAccesser);
     wnKineticEnergyNormal& normal = dynamic_cast<wnKineticEnergyNormal&>(
         *m_moduleAccesser->getKineticModule().getEnergy(0));
+    Vec2f speed;
+    Vec2f accel;
     Vec2f limit;
     Vec2f::copy(limit, normal.m_speedLimit);
-    Vec2f speed;
     speed.m_x = m_param->unk0 * lr;
     speed.m_y = m_param->unk8;
-    Vec2f accel;
     accel.m_x = m_param->unk4 * lr;
     accel.m_y = -m_param->unk10;
     limit.m_y = m_param->unkC;
@@ -52,8 +58,7 @@ void wnYoshiStar::activate(int founderTaskId, int team, Vec3f* pos, float lr) {
 bool wnYoshiStar::notifyEventCollisionAttackCheck(u32 flags) {
     if (flags & 0x13) return true;
     if (flags & 4) {
-        // MATCH-ONLY: express the high-bit test as the native extracted bit value.
-        if ((unkA4 >> 7) == 1) return hop();
+        if ((((u32)unkA4 >> 7) & 1) == 1) return hop();
         return true;
     }
     if ((flags & 8) && m_moduleAccesser->getReflectModule().isReflect() == true) {
@@ -62,8 +67,9 @@ bool wnYoshiStar::notifyEventCollisionAttackCheck(u32 flags) {
         int team = m_moduleAccesser->getReflectModule().getTeam();
         m_moduleAccesser->getTeamModule().setTeam(team, true);
         m_moduleAccesser->getTeamModule().setHitTeam(team);
+        soReflectModule& reflectModule = m_moduleAccesser->getReflectModule();
         soTeamModule& teamModule = m_moduleAccesser->getTeamModule();
-        teamModule.setTeamOwnerId(m_moduleAccesser->getReflectModule().getTaskId());
+        teamModule.setTeamOwnerId(reflectModule.getTaskId());
         return reflect();
     }
     return false;

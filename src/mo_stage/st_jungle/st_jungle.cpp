@@ -172,17 +172,17 @@ void stJungle::createObjBg(int index) {
     Vec3f* posLimit;
     float* frameLoc;
     switch (index) {
-    case 1:
-        ground = grJungleBg::create(0x1B, "TopN", "grJungleLoc");
-        posGimmick = m_posGimmick;
-        frameLoc = &m_scrollDist;
-        posLimit = NULL;
-        break;
     case 0:
         ground = grJungleBg::create(0, "TopN", "grJungleMainBg");
         posLimit = m_limit;
         posGimmick = NULL;
         frameLoc = NULL;
+        break;
+    case 1:
+        ground = grJungleBg::create(0x1B, "TopN", "grJungleLoc");
+        posGimmick = m_posGimmick;
+        frameLoc = &m_scrollDist;
+        posLimit = NULL;
         break;
     default:
         ground = NULL;
@@ -481,9 +481,9 @@ void grJungleAshiba::setEnableWork(u8* enableWork) {
 void stJungle::createObjN(int index) {
     grJungleN* ground;
     Matrix* mtx;
+    int collision;
     u8* state;
     u8* enable;
-    int collision;
     collision = 0;
     state = NULL;
     enable = NULL;
@@ -535,8 +535,7 @@ void grJungleN::setEnableWork(u8* enableWork) {
 void stJungle::createObjNB(int index) {
     grJungleNB* ground;
     Matrix* mtx;
-    u8* state;
-    mtx = NULL;
+    u8* state = NULL;
     switch (index) {
     case 27:
         ground = grJungleNB::create(2, "gr2_StgJungle00NLB", "grJungleMainNLB");
@@ -717,25 +716,25 @@ void stJungle::createObjHashigo() {
 
 void stJungle::createObjHashigo1(int index) {
     grJungleLadder* ground;
+    grGimmickLadderData* data;
     Vec3f* pos;
     Vec3f* posHashigo;
-    grGimmickLadderData* data;
     switch (index) {
-    case 0x23:
-        ground = grJungleLadder::create(0x3D, "StgJungle00LV05Ladder2", "grJungleLadder0502");
-        pos = &m_posGimmick[3];
-        posHashigo = &m_pos3AC[1];
-        data = &m_ladderData[1];
-        break;
     case 0x22:
         ground = grJungleLadder::create(0x3C, "StgJungle00LV05Ladder1", "grJungleLadder0501");
         data = m_ladderData;
-        pos = &m_posGimmick[3];
+        pos = &m_posGimmick[4];
         posHashigo = m_pos3AC;
+        break;
+    case 0x23:
+        ground = grJungleLadder::create(0x3D, "StgJungle00LV05Ladder2", "grJungleLadder0502");
+        pos = &m_posGimmick[4];
+        posHashigo = &m_pos3AC[1];
+        data = &m_ladderData[1];
         break;
     case 0x24:
         ground = grJungleLadder::create(0x3E, "StgJungle00LV07Ladder", "grJungleLadder07");
-        pos = &m_posGimmick[5];
+        pos = &m_posGimmick[6];
         posHashigo = &m_pos3AC[2];
         data = &m_ladderData[2];
         break;
@@ -845,16 +844,18 @@ void stJungle::updateAI(float deltaFrame) {
     if (dist >= 3250.0f) {
         min.m_y = m_limit[1].m_y - 0.25f * (m_limit[1].m_y - m_limit[0].m_y);
     } else if (dist >= 3100.0f) {
-        float c = grJungleClamp((dist - 3100.0f) / 150.0f, 0.0f, 1.0f);
+        float progress = (dist - 3100.0f) / 150.0f;
+        float c = grJungleClamp(progress, 0.0f, 1.0f);
         min.m_y = m_limit[1].m_y - (0.45f - 0.2f * c) * (m_limit[1].m_y - m_limit[0].m_y);
     } else if (dist >= 2300.0f) {
-        float c = grJungleClamp((dist - 2300.0f) / 800.0f, 0.0f, 1.0f);
+        float progress = (dist - 2300.0f) / 800.0f;
+        float c = grJungleClamp(progress, 0.0f, 1.0f);
         min.m_y = m_limit[1].m_y - (0.25f + 0.2f * c) * (m_limit[1].m_y - m_limit[0].m_y);
     } else {
         min.m_y = m_limit[1].m_y - 0.25f * (m_limit[1].m_y - m_limit[0].m_y);
     }
     min.m_x = m_limit[0].m_x;
-    // (the original reads the top of the zone before it is set)
+    // MATCH-ONLY: the original reads max.m_y before it is set below, which keeps the 10.0f load in the schedule.
     max.m_y = max.m_y - 10.0f;
     max.m_x = m_limit[1].m_x;
     max.m_y = m_limit[1].m_y;

@@ -64,11 +64,13 @@ void grJungleWater::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
-            if (m_posWork != NULL) {
-                grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-                data->m_pos.m_x = m_posWork->m_x;
-                data->m_pos.m_y = m_posWork->m_y;
-                data->m_pos.m_z = m_posWork->m_z;
+            grNodeCallbackData* data;
+            Vec3f* posWork = m_posWork;
+            if (posWork != NULL) {
+                data = calcWorldCallBack->m_nodeCallbackDatas;
+                data->m_pos.m_x = posWork->m_x;
+                data->m_pos.m_y = posWork->m_y;
+                data->m_pos.m_z = posWork->m_z;
             }
         }
     }

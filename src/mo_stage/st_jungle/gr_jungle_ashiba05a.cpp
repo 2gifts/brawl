@@ -171,17 +171,19 @@ void grJungleAshiba05A::updateCallBack(float deltaFrame) {
     grJungleAshiba::updateCallBack(deltaFrame);
     grCalcWorldCallBack* calcWorldCallBack = &m_calcWorldCallBack;
     if (calcWorldCallBack != NULL) {
+        calcWorldCallBack->m_nodeCallbackDatas[0].m_flags |= 0x10;
+        // MATCH-ONLY: the original reloads the node data pointer after some stores; these direct accesses force those reloads.
         grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-        data[0].m_flags |= 0x10;
         data[0].m_offsetPos.m_x = m_move.m_x;
         data[0].m_offsetPos.m_y = m_move.m_y;
         data[0].m_offsetPos.m_z = m_move.m_z;
-        data[1].m_flags |= 4;
-        data[1].m_nodeIndex = m_node;
+        calcWorldCallBack->m_nodeCallbackDatas[1].m_flags |= 4;
+        calcWorldCallBack->m_nodeCallbackDatas[1].m_nodeIndex = m_node;
+        data = calcWorldCallBack->m_nodeCallbackDatas;
         data[1].m_scale.m_x = m_scale.m_x;
         data[1].m_scale.m_y = m_scale.m_y;
         data[1].m_scale.m_z = m_scale.m_z;
-        data[1].m_scale.m_y = data[1].m_scale.m_y * m_scaleRate;
+        calcWorldCallBack->m_nodeCallbackDatas[1].m_scale.m_y = calcWorldCallBack->m_nodeCallbackDatas[1].m_scale.m_y * m_scaleRate;
         Vec3f pos;
         getNodePosition(&pos, 0, m_node);
         m_snd.setPos(&pos);
@@ -250,14 +252,19 @@ void grJungleAshiba05A::resetYakumono() {
 
 void grJungleAshiba05A::requestActive() {
     float* data = static_cast<float*>(getStageData());
-    if (data != NULL && m_state == 1) {
-        disableHit(0, 0);
-        m_snd.playSE(static_cast<SndID>(0x1B8C), 0, 0, -1);
-        m_pushes++;
-        m_moveStart.m_x = m_move.m_x;
-        m_moveStart.m_y = m_move.m_y;
-        m_moveStart.m_z = m_move.m_z;
-        m_state = 4;
+    if (data != NULL) {
+        // HYPOTHESIS: a single-case switch on m_state, as the sibling state handlers use; the original emits cmpwi/beq/b for it
+        switch (m_state) {
+        case 1:
+            disableHit(0, 0);
+            m_snd.playSE(static_cast<SndID>(0x1B8C), 0, 0, -1);
+            m_pushes++;
+            m_moveStart.m_x = m_move.m_x;
+            m_moveStart.m_y = m_move.m_y;
+            m_moveStart.m_z = m_move.m_z;
+            m_state = 4;
+            break;
+        }
     }
 }
 

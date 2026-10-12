@@ -27,20 +27,18 @@ void ftLucasStatusUniqProcessSpecialLwHold::initStatus(soModuleAccesser* moduleA
 
 void ftLucasStatusUniqProcessSpecialLwHold::exitStatus(
     soModuleAccesser* moduleAccesser, int nextStatus) {
-    // 0x11F and 0x120 continue the native hold effect and sound lifetime.
     if (nextStatus != 0x11F && nextStatus != 0x120) {
-        soWorkManageModule& work = moduleAccesser->getWorkManageModule();
-        int effect = work.getInt(0x20000003);
+        int effect = moduleAccesser->getWorkManageModule().getInt(0x20000003);
         if (effect >= 0) {
             moduleAccesser->getEffectModule().kill(effect, true, true);
         }
-        work.setInt(-1, 0x20000003);
+        moduleAccesser->getWorkManageModule().setInt(-1, 0x20000003);
 
-        int sound = work.getInt(0x20000002);
+        int sound = moduleAccesser->getWorkManageModule().getInt(0x20000002);
         if (sound >= 0) {
             moduleAccesser->getSoundModule().stopSEHandle(sound, 0);
         }
-        work.setInt(-1, 0x20000002);
+        moduleAccesser->getWorkManageModule().setInt(-1, 0x20000002);
     }
 }
 

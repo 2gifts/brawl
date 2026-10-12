@@ -206,10 +206,13 @@ void stFzero::createObjAshiba(int index) {
 
 void stFzero::createObjWall(int index) {
     grFzeroWall* ground;
-    if (index == 9) {
+    switch (index) {
+    case 9:
         ground = grFzeroWall::create(0x5a, "wall_col", "grFzeroWall");
-    } else {
+        break;
+    default:
         ground = NULL;
+        break;
     }
     if (ground != NULL) {
         addGround(ground);
@@ -294,10 +297,13 @@ void stFzero::createObjWarning(int index) {
 
 void stFzero::createObjMachineNode(int index) {
     grFzeroNode* ground;
-    if (index == 15) {
+    switch (index) {
+    case 15:
         ground = grFzeroNode::create(0x41, "StgFzeroMachineNode", "grFzeroNode");
-    } else {
+        break;
+    default:
         ground = NULL;
+        break;
     }
     if (ground != NULL) {
         addGround(ground);
@@ -428,9 +434,16 @@ void stFzero::update(float deltaFrame) {
     updateScene(deltaFrame);
     updateFloor(deltaFrame);
 
-    // The camera never looks below the lower of the two limit matrices (HYPOTHESIS: they mark the course's floor).
-    Vec3f upper(mtx(22)->m[0][3], mtx(22)->m[1][3], mtx(22)->m[2][3]);
-    Vec3f lower(mtx(23)->m[0][3], mtx(23)->m[1][3], mtx(23)->m[2][3]);
+    // HYPOTHESIS: the two limit matrices mark the course's floor, and the camera never looks below the lower one.
+    // MATCH-ONLY: the components are read into named locals in this order to fix the register assignment.
+    float upperZ = mtx(22)->m[2][3];
+    float upperY = mtx(22)->m[1][3];
+    float upperX = mtx(22)->m[0][3];
+    float lowerZ = mtx(23)->m[2][3];
+    float lowerY = mtx(23)->m[1][3];
+    float lowerX = mtx(23)->m[0][3];
+    Vec3f upper(upperX, upperY, upperZ);
+    Vec3f lower(lowerX, lowerY, lowerZ);
     Vec3f floorPos;
     if (upper.m_y < lower.m_y) {
         floorPos = upper;
@@ -452,7 +465,9 @@ void stFzero::update(float deltaFrame) {
         }
     }
     CameraController::getInstance()->setCameraRange(&range);
-    *(float*)((u8*)CameraController::getInstance() + 0x18C) = 0.0f;
+    // MATCH-ONLY: the store goes through a named pointer so the 0.0f load follows the getInstance call.
+    float* unk18C = (float*)((u8*)CameraController::getInstance() + 0x18C);
+    *unk18C = 0.0f;
 }
 
 // Mirrors the camera's limits into the stage so the hazards can stay inside them.
@@ -502,14 +517,14 @@ void stFzero::updateScene(float deltaFrame) {
     switch (m_sceneState) {
     case 0:
         m_sceneState = 1;
-        // fall through
     case 1:
         switch (m_scene) {
         case 2:
             if (isStageDown() == true) {
-                nw4r::g3d::ResFile posData(m_fileData->getData(Data_Type_Model, 0x65, 0xFFFE));
-                if (posData.ptr()) {
-                    m_stagePositions->loadPositionData(&posData);
+                void* posData = m_fileData->getData(Data_Type_Model, 0x65, 0xFFFE);
+                if (posData != NULL) {
+                    nw4r::g3d::ResFile posFile(posData);
+                    m_stagePositions->loadPositionData(&posFile);
                 }
                 updateStagePositions();
                 m_sceneState = 3;
@@ -521,9 +536,10 @@ void stFzero::updateScene(float deltaFrame) {
         break;
     case 3:
         if (isStageDown() == false) {
-            nw4r::g3d::ResFile posData(m_fileData->getData(Data_Type_Model, 100, 0xFFFE));
-            if (posData.ptr()) {
-                m_stagePositions->loadPositionData(&posData);
+            void* posData = m_fileData->getData(Data_Type_Model, 100, 0xFFFE);
+            if (posData != NULL) {
+                nw4r::g3d::ResFile posFile(posData);
+                m_stagePositions->loadPositionData(&posFile);
             }
             updateStagePositions();
             m_sceneState = 1;

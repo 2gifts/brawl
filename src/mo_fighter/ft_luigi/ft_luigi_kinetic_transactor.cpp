@@ -109,8 +109,8 @@ void ftLuigiKineticTransactor::changeKineticSub3(bool*, void*, Vec2f*, soModuleA
     ftKineticTransactor::changeKineticImpl(6);
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(
         *moduleAccesser->getKineticModule().getEnergy(3));
-    soWorkManageModule& work = moduleAccesser->getWorkManageModule();
-    if (!work.isFlag(0x22000014) && work.isFlag(0x22000013)) {
+    if (!moduleAccesser->getWorkManageModule().isFlag(0x22000014) &&
+        moduleAccesser->getWorkManageModule().isFlag(0x22000013) == true) {
         stop.m_speed = Vec2f(0.0f, 0.0f);
     }
     stop.m_brake = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xFB7, 0), 0.0f);
@@ -175,9 +175,12 @@ void ftLuigiKineticTransactor::changeKineticSub7(bool*, void*, Vec2f*, soModuleA
 }
 
 void ftLuigiKineticTransactor::updateEnergy(ftKineticEnergyMotion* energy, soModuleAccesser* moduleAccesser) {
-    if (moduleAccesser->getKineticModule().getKineticType() == 0x66 &&
-        moduleAccesser->getWorkManageModule().isFlag(0x22000014)) {
-        energy->m_brake = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xFB7, 0), 0.0f);
+    switch (moduleAccesser->getKineticModule().getKineticType()) {
+    case 0x66:
+        if (moduleAccesser->getWorkManageModule().isFlag(0x22000014) == true) {
+            energy->m_brake = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xFB7, 0), 0.0f);
+        }
+        break;
     }
     energy->updateEnergy(moduleAccesser);
 }

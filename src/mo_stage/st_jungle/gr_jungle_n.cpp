@@ -42,11 +42,13 @@ grJungleN::grJungleN(const char* taskName) : grJungle(taskName), m_snd() {
     m_dataGroup = NULL;
     m_data = NULL;
     grCalcWorldCallBack* callback = &m_calcWorldCallBack;
-    if (callback != NULL) {
-        callback->m_numNodeCallbackData = 1;
-        callback->initialize(false, Heaps::StageInstance);
-        callback->m_nodeCallbackDatas->m_flags |= 8;
+    // MATCH-ONLY: the original takes an early return on a null callback address; the test is never false at runtime.
+    if (callback == NULL) {
+        return;
     }
+    callback->m_numNodeCallbackData = 1;
+    callback->initialize(false, Heaps::StageInstance);
+    callback->m_nodeCallbackDatas->m_flags |= 8;
 }
 
 grJungleN::~grJungleN() {
@@ -146,19 +148,19 @@ void grJungleN::updateCallBack(float deltaFrame) {
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
             if (m_mtxWork != NULL) {
+                Matrix mtx = *m_mtxWork;
                 Vec3f offset;
                 offset.m_x = 0.0f;
                 offset.m_y = -0.4f;
                 offset.m_z = 0.0f;
-                Matrix mtx = *m_mtxWork;
                 fn_8003F074(&mtx, offset.m_x, offset.m_y, offset.m_z);
                 fn_8003F074(&mtx, m_shake.m_x, m_shake.m_y, m_shake.m_z);
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix = mtx;
             }
-            Vec3f pos;
-            pos.m_x = calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix(0, 3);
-            pos.m_y = calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix(1, 3);
-            pos.m_z = calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix(2, 3);
+            float posZ = calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix(2, 3);
+            float posY = calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix(1, 3);
+            float posX = calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix(0, 3);
+            Vec3f pos(posX, posY, posZ);
             m_snd.setPos(&pos);
         }
     }
@@ -254,7 +256,9 @@ void grJungleN::onDamage(int index, soDamage* damage, soDamageAttackerInfo* atta
     if (m_stateWork != NULL) {
         float amount = damage->unk4;
         fn_27_26399C(m_yakumono);
-        if (m_state == 1) {
+        // HYPOTHESIS: the original's cmpwi/beq/b branch layout matches a one-case switch on m_state.
+        switch (m_state) {
+        case 1:
             m_hp = m_hp - amount;
             if (m_hp < 0.0f) {
                 m_hp = 0.0f;
@@ -269,6 +273,7 @@ void grJungleN::onDamage(int index, soDamage* damage, soDamageAttackerInfo* atta
             } else {
                 m_snd.playSE(static_cast<SndID>(0x1B93), 0, 0, -1);
             }
+            break;
         }
         m_shakeTimer = 2.5f * randf() + 2.5f;
     }

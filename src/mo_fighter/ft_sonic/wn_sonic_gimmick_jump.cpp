@@ -51,8 +51,11 @@ void wnSonicGimmickJump::activate(int founderTaskId, int resourceId, int team,
     desc.unk48 = 0;
     // HYPOTHESIS: original bitfield names. All bits of flags are defined by
     // native stores; only the cleared top two bits of unk4D are consumed.
-    desc.flags = 0x88;
-    desc.unk4D = 0;
+    desc.flagsHigh = 1;
+    desc.flagsMidHigh = 0;
+    desc.flagsMidLow = 1;
+    desc.flagsLow = 0;
+    desc.unk4DHigh = 0;
     Weapon::activate(&desc);
     if (unk == true) m_moduleAccesser->getWorkManageModule().onFlag(0x12000003);
     m_moduleAccesser->getStatusModule().changeStatusForce(0, m_moduleAccesser);

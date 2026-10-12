@@ -9,8 +9,8 @@
 
 void wnWarioBikeStatusUniqProcessAppeal::execFixPosCounter(soModuleAccesser* a) {
     soWorkManageModule& work = a->getWorkManageModule();
-    soKineticModule& kinetic = a->getKineticModule();
     soCollisionAttackModule& attack = a->getCollisionAttackModule();
+    soKineticModule& kinetic = a->getKineticModule();
     wnWarioBikeParam* param = dynamic_cast<wnWarioBike&>(a->getStageObject()).m_param;
     float speed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1)).length();
     if (speed <= param->unk34) {

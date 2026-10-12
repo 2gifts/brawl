@@ -131,13 +131,10 @@ void grJungleAshiba08::updateCallBack(float deltaFrame) {
     grJungleAshiba::updateCallBack(deltaFrame);
     grCalcWorldCallBack* calcWorldCallBack = &m_calcWorldCallBack;
     if (calcWorldCallBack != NULL) {
-        grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-        data[1].m_flags |= 4;
-        data[1].m_nodeIndex = m_node[0];
-        data[1].m_scale.m_x = m_scale.m_x;
-        data[1].m_scale.m_y = m_scale.m_y;
-        data[1].m_scale.m_z = m_scale.m_z;
-        data[1].m_scale.m_y = data[1].m_scale.m_y * m_scaleRate;
+        calcWorldCallBack->m_nodeCallbackDatas[1].m_flags |= 4;
+        calcWorldCallBack->m_nodeCallbackDatas[1].m_nodeIndex = m_node[0];
+        calcWorldCallBack->m_nodeCallbackDatas[1].m_scale = m_scale;
+        calcWorldCallBack->m_nodeCallbackDatas[1].m_scale.m_y = calcWorldCallBack->m_nodeCallbackDatas[1].m_scale.m_y * m_scaleRate;
         Vec3f pos;
         getNodePosition(&pos, 0, m_node[0]);
         m_snd.setPos(&pos);

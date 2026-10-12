@@ -86,12 +86,25 @@ void grJungleWarning::updateActive(float deltaFrame) {
     }
 }
 
+// HYPOTHESIS: the part of the camera object that holds the size of the screen.
+struct grJungleCameraView {
+    float unk0;
+    float unk4;
+    float m_width;
+    float m_height;
+};
+struct grJungleCameraBytes {
+    char _pad[0x114];
+    grJungleCameraView m_view;
+};
+
 // The sign is in front of the camera: where the line from the camera through the middle of the screen meets the plane of the
 // stage, 20 units in front of it.
 void grJungleWarning::updateCallBack(float deltaFrame) {
+    nw4r::g3d::ScnMdl* scnMdl;
     grCalcWorldCallBack* calcWorldCallBack = &m_calcWorldCallBack;
     if (calcWorldCallBack != NULL) {
-        nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[m_unk1];
+        scnMdl = m_sceneModels[m_unk1];
         if (scnMdl != NULL) {
             if (scnMdl->m_calcWorldCallBack == NULL) {
                 calcWorldCallBack->m_index = 0;
@@ -110,10 +123,9 @@ void grJungleWarning::updateCallBack(float deltaFrame) {
             dir.m_z = 0.0f;
             gfCameraManager* manager = gfCameraManager::getManager();
             if (manager != NULL) {
-                // MATCH-ONLY: the size of the screen is at 0x11C / 0x120 of the camera
-                float* screen = reinterpret_cast<float*>(reinterpret_cast<u8*>(manager) + 0x114);
-                if (screen != NULL) {
-                    fn_80019E88(manager, &dir, 0.5f * screen[2], 0.5f * screen[3]);
+                grJungleCameraView* view = &reinterpret_cast<grJungleCameraBytes*>(manager)->m_view;
+                if (view != NULL) {
+                    fn_80019E88(manager, &dir, 0.5f * view->m_width, 0.5f * view->m_height);
                     struct {
                         Vec3f origin;
                         Vec3f direction;

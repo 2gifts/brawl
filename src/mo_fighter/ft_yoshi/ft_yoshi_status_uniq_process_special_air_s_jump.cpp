@@ -7,6 +7,11 @@
 #include <ft/ft_kinetic_energy.h>
 #include <so/so_module_accesser.h>
 namespace ftyoshi { template <class T> T ABS(T); }
+// MATCH-ONLY: the target copies Vec2f members inline; operator= is out of line in this unit.
+static inline void copyVec2f(Vec2f& dst, const Vec2f& src) {
+    dst.m_x = src.m_x;
+    dst.m_y = src.m_y;
+}
 
 void ftYoshiStatusUniqProcessSpecialAirSJump::initStatus(soModuleAccesser* acc) {
     soWorkManageModule& work = acc->getWorkManageModule();
@@ -15,17 +20,15 @@ void ftYoshiStatusUniqProcessSpecialAirSJump::initStatus(soModuleAccesser* acc) 
     soKineticModule& kinetic = acc->getKineticModule();
     Vec2f speed;
     if (situation.getKind() != Situation_Air) {
-        float lr = posture.getLr();
-        speed.m_x = work.getFloat(0x21000006) * lr;
+        speed.m_x = work.getFloat(0x21000006) * posture.getLr();
         speed.m_y = 0.0f;
     } else {
-        speed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(-1));
+        copyVec2f(speed, kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(-1)));
     }
     kinetic.changeKinetic(0x65, acc);
     ftKineticEnergyController& control = dynamic_cast<ftKineticEnergyController&>(*kinetic.getEnergy(2));
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*kinetic.getEnergy(1));
-    control.m_speed.m_x = speed.m_x;
-    control.m_speed.m_y = 0.0f;
+    copyVec2f(control.m_speed, Vec2f(speed.m_x, 0.0f));
     gravity.m_speedY = speed.m_y;
     work.setInt(-1, 0x20000008);
 }
