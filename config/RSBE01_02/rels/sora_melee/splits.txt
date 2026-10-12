@@ -4721,7 +4721,7 @@ mo_melee/sora_melee/ft/ft_class_info.cpp:
 
 mo_melee/sora_melee/ft/ft_change_succeed_work.cpp:
 	.text       start:0x0013F330 end:0x001400D4
-	.ctors      start:0x00000064 end:0x00000068
+	.ctors      start:0x00000064 end:0x0000006C
 
 mo_melee/sora_melee/so/so_vtable_dt_Null_ftOutsideEventObserver.cpp:
 	.text       start:0x001400D4 end:0x00140114
@@ -4791,7 +4791,6 @@ mo_melee/sora_melee/ft/ft_info.cpp:
 
 mo_melee/sora_melee/ft/ft_area_module_impl.cpp:
 	.text       start:0x0014DFE4 end:0x0014F058
-	.ctors      start:0x0000007C end:0x00000080
 
 mo_melee/sora_melee/so/so_array_vector_destructor_ftAreaModuleImpl_GimmickTermInfo_32.cpp:
 	.text       start:0x0014F058 end:0x0014F098
@@ -5231,7 +5230,6 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_kinoko.cpp:
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_entry.cpp:
 	.text       start:0x0018C2FC end:0x0018CF74
-	.ctors      start:0x00000200 end:0x00000204
 
 mo_melee/sora_melee/so/so_event_unit_work_area_soItemManageEventObserver_1_18CF74.cpp:
 	.text       start:0x0018CF74 end:0x0018D030
@@ -10569,7 +10567,6 @@ mo_melee/sora_melee/so/so_array_list_members_ptr_itFigureArchive_64_part1.cpp:
 
 mo_melee/sora_melee/it/it_manager.cpp:
 	.text       start:0x002A0D38 end:0x002AC298
-	.ctors      start:0x00000320 end:0x00000324
 
 mo_melee/sora_melee/so/so_array_vector_destructor_BaseItem_1.cpp:
 	.text       start:0x002AC298 end:0x002AC2D8
@@ -10860,7 +10857,6 @@ mo_melee/sora_melee/ft/ft_fox_status_uniq_process_final.cpp:
 
 mo_melee/sora_melee/wn/wn_fox_land_master.cpp:
 	.text       start:0x003120B8 end:0x003190B0
-	.ctors      start:0x000003B0 end:0x000003B4
 
 mo_melee/sora_melee/so/so_instance_manager_add_soAnimCmdControlUnit_7.cpp:
 	.text       start:0x003190B0 end:0x00319258
@@ -11115,7 +11111,6 @@ mo_melee/sora_melee/wn/wn_poke_zenigame_water.cpp:
 
 mo_melee/sora_melee/ft/ft_poke_trainer.cpp:
 	.text       start:0x00377C48 end:0x00384E6C
-	.ctors      start:0x0000049C end:0x000004A0
 
 mo_melee/sora_melee/so/so_array_vector_destructor_const_acAnimCmdConv_299.cpp:
 	.text       start:0x00384E6C end:0x00384EAC
