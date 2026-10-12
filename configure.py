@@ -880,7 +880,7 @@ config.libs = [
             Object(NonMatching, "RVL_SDK/gx/GXAttr.c"),
             Object(Matching, "RVL_SDK/gx/GXMisc.c"),
             Object(Matching, "RVL_SDK/gx/GXGeometry.c"),
-            Object(NonMatching, "RVL_SDK/gx/GXFrameBuf.c"),
+            Object(Matching, "RVL_SDK/gx/GXFrameBuf.c"),
             Object(NonMatching, "RVL_SDK/gx/GXLight.c"),
             Object(NonMatching, "RVL_SDK/gx/GXTexture.c"),
             Object(Matching, "RVL_SDK/gx/GXBump.c"),
