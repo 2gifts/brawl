@@ -75,7 +75,8 @@ void ftWarioStatusUniqProcessSpecialLw::execStatus(soModuleAccesser* a) {
                 int maximum = param->unk0;
                 if (frames > maximum * 60) frames = maximum * 60;
                 minimum = param->unk8;
-                frames -= minimum * 60;
+                // MATCH-ONLY: second read of unk8 keeps the native register order.
+                frames -= param->unk8 * 60;
                 if (frames < 0) frames = 0;
                 float range = (float)(maximum - minimum);
                 float elapsed = (float)frames;
