@@ -10,14 +10,13 @@
 #include <it/item.h>
 void ftWarioStatusUniqProcessSpecialS::initStatus(soModuleAccesser* a) {
     // MATCH-ONLY: keep the native declaration order for module registers.
-    soWorkManageModule* work;
     const soModuleEnumeration* modules = a->m_enumerationStart;
     soGenerateArticleManageModule* articles = static_cast<soGenerateArticleManageModule*>(modules->m_generateArticleManageModule);
     soItemManageModule* items = modules->m_itemManageModule;
-    work = modules->m_workManageModule;
+    soWorkManageModule* work = modules->m_workManageModule;
     soStatusModule* status = modules->m_statusModule;
     soLinkModule* link = modules->m_linkModule;
-    StageObject* fighter = &a->getStageObject();
+    StageObject* const fighter = &a->getStageObject();
     ftWarioBikeRiderParam* param;
     if (fighter->soGetSubKind() == 0x15) {
         ftWario& wario = dynamic_cast<ftWario&>(*fighter);
