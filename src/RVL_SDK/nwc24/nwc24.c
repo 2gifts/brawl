@@ -4511,3 +4511,3236 @@ NWC24Err NWC24EncodeQuotedPrintable(char *text, u32 textSize, u32 *textWritten, 
                                     u32 *dataRead) {
     return fn_8039D7C4(text, textSize, textWritten, (const char *)data, dataSize, dataRead, FALSE);
 }
+
+/* ---------------------------------------------------------------------------------------------
+ * message object helpers + message list
+ * ------------------------------------------------------------------------------------------- */
+
+// how big is a base64 part: 4 chars per 3 bytes, a CRLF every 76 chars and the closing line
+static inline u32 Base64PartSize_i(u32 n) {
+    return (n * 4 + 2) / 3 + (n / 57) * 2 + 4;
+}
+
+NWC24Err NWC24SetMsgAttached(NWC24MsgObj *pMsg, const char *data, u32 size, NWC24MIMEType type) {
+    NWC24iMsgObj *msg = (NWC24iMsgObj *)pMsg;
+    u32 total = 0;
+    u32 i;
+
+    if (!(msg->flags & NWC24_MSGOBJ_INITIALIZED) || (msg->flags & NWC24_MSGOBJ_DELIVERING)) {
+        return NWC24_ERR_PROTECTED;
+    }
+
+    if (data == NULL || size == 0) {
+        return NWC24_ERR_NULL;
+    }
+
+    if (msg->numAttached >= NWC24i_MSG_ATTACHMENT_MAX) {
+        return NWC24_ERR_FULL;
+    }
+
+    if (NWC24GetMIMETypeStr(type) == NULL) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    // messages to the public can only carry the plain types
+    if (msg->flags & NWC24_MSGOBJ_FOR_PUBLIC) {
+        if (type != NWC24_TXT_PLAIN && type != NWC24_TXT_HTML && type != NWC24_IMG_JPEG && type != NWC24_APP_OCTET_STREAM) {
+            return NWC24_ERR_NOT_SUPPORTED;
+        }
+    }
+
+    if (type == NWC24_APP_WII_MINIDATA && size > 0x80) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    for (i = 0; i < msg->numAttached; i++) {
+        total += msg->attachedSize[i];
+    }
+
+    total += size;
+    if (total >= 0x245B0) {
+        return NWC24_ERR_OVERFLOW;
+    }
+
+    NWC24Data_SetDataP(&msg->attached[msg->numAttached], data, size);
+    msg->attachedSize[msg->numAttached] = size;
+    msg->attachedType[msg->numAttached] = type;
+    msg->numAttached++;
+    msg->flags |= NWC24_MSGOBJ_MULTIPART;
+    return NWC24_OK;
+}
+
+NWC24Err fn_8039B160(NWC24iMsgObj *msg, u32 *count) {
+    NWC24Err result = NWC24_OK;
+    u32 n = msg->numAttached;
+
+    *count = n;
+    if (n > NWC24i_MSG_ATTACHMENT_MAX) {
+        result = NWC24_ERR_BROKEN;
+    }
+
+    return result;
+}
+
+NWC24Err fn_8039B17C(NWC24iMsgObj *msg, u32 idx, u32 *size) {
+    if (idx >= NWC24i_MSG_ATTACHMENT_MAX || idx >= msg->numAttached) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    *size = msg->attachedSize[idx];
+    return NWC24_OK;
+}
+
+NWC24Err fn_8039B1B0(u32 *src, u32 *dst) {
+    *dst = *src;
+    return NWC24_OK;
+}
+
+// checks the header fields of a message
+NWC24Err fn_8039E9CC(NWC24iMsgObj *msg) {
+    char *it;
+
+    if (msg->numTo == 0) {
+        return NWC24_ERR_NULL;
+    }
+
+    if (msg->numTo > NWC24i_MSG_RECIPIENT_MAX) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    // folded header lines have to start with a blank
+    it = (char *)msg->subject.pData;
+    if (it != NULL) {
+        for (; *it != 0; it++) {
+            if (*it == '\r' && it[1] != '\n') {
+                return NWC24_ERR_FORMAT;
+            }
+
+            if (*it == '\n' && it[1] != ' ') {
+                return NWC24_ERR_FORMAT;
+            }
+        }
+    }
+
+    if (msg->numAttached > NWC24i_MSG_ATTACHMENT_MAX) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    return NWC24_OK;
+}
+
+// works out how big the finished message gets and makes sure the box has room for it
+NWC24Err fn_8039EA6C(NWC24iMsgObj *msg, NWC24MsgBoxId id) {
+    u32 total = 0;
+    u32 extra;
+    int i;
+    NWC24Err result;
+
+    for (i = 0; i < msg->numAttached; i++) {
+        total = total + (msg->attachedSize[i] * 4 + 2) / 3 + msg->attachedSize[i] / 57 * 2 + 4;
+    }
+
+    switch (msg->encoding) {
+    case NWC24_ENC_7BIT:
+    case NWC24_ENC_8BIT:
+        extra = msg->text.size;
+        break;
+    case NWC24_ENC_BASE64:
+        extra = Base64PartSize_i(msg->text.size);
+        break;
+    case NWC24_ENC_QUOTED_PRINTABLE:
+        extra = msg->text.size * 4 / 3;
+        break;
+    default:
+        extra = 0;
+        break;
+    }
+
+    total += extra;
+    if (total >= NWC24i_MBOX_MAX_SIZE) {
+        return NWC24_ERR_OVERFLOW;
+    }
+
+    result = NWC24iMBoxCheck(id, total + 0x400);
+    return result != NWC24_OK ? result : NWC24_OK;
+}
+
+// the state of the "list my messages" calls
+typedef struct MsgListState {
+    u32 valid;
+    u32 pos;
+    u32 count;
+    u32 total;
+    u32 flags;
+    NWC24MsgBoxId box;
+    NWC24UserId from;
+    u32 appId;
+    u32 tagFilter;
+} MsgListState;
+
+static MsgListState MsgList;
+
+static NWC24iMBCEntry ListEntry;
+
+NWC24Err fn_803A0158(void) {
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    MsgList.valid = 0;
+    MsgList.pos = 0;
+    MsgList.count = 0;
+    MsgList.total = 0;
+    MsgList.flags = 0;
+    MsgList.box = NWC24_MSGBOX_RECV;
+    MsgList.from = 0;
+    MsgList.appId = 0;
+    MsgList.tagFilter = 0;
+    return NWC24_OK;
+}
+
+NWC24Err fn_803A01D0(NWC24MsgBoxId box) {
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    if (box != NWC24_MSGBOX_SEND && box != NWC24_MSGBOX_RECV) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    MsgList.box = box;
+    return NWC24_OK;
+}
+
+NWC24Err fn_803A0240(u32 appId) {
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    MsgList.flags |= 0x20;
+    MsgList.appId = appId;
+    return NWC24_OK;
+}
+
+// does a mail box entry pass the filters that were set up for the list?
+static BOOL fn_803A0594(MsgListState *state, NWC24iMBCEntry *entry) {
+    u32 flags;
+    u32 mode;
+    u32 x;
+    u32 y;
+    BOOL ok;
+
+    if (!fn_8039B4C8(entry)) {
+        return FALSE;
+    }
+
+    flags = state->flags;
+    if ((flags & 1) && !(entry->flags & NWC24_MSGOBJ_FOR_MENU)) {
+        return FALSE;
+    }
+
+    if ((flags & 0x20) && state->appId != entry->appId) {
+        return FALSE;
+    }
+
+    if (flags & 0x10) {
+        if (!(entry->flags & NWC24_MSGOBJ_FOR_RECIPIENT)) {
+            return FALSE;
+        }
+
+        if (state->from != entry->from.id) {
+            return FALSE;
+        }
+    }
+
+    if (flags & 0x100) {
+        mode = state->tagFilter >> 16;
+        x = state->tagFilter & 0xFFFF;
+        y = entry->tag & 0xFFFF;
+
+        switch (mode) {
+        case 0:
+            ok = x != y;
+            break;
+        case 1:
+            ok = x == y;
+            break;
+        case 2:
+            ok = x >= y;
+            break;
+        case 3:
+            ok = x <= y;
+            break;
+        case 4:
+            ok = (x & y) != 0;
+            break;
+        default:
+            ok = FALSE;
+            break;
+        }
+
+        if (!ok) {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+// reads the control file of the chosen box and writes the ids of everything that passes the filters
+NWC24Err fn_803A03F8(MsgListState *state, u32 *ids) {
+    u32 matched = 0;
+    u32 numMsgs;
+    NWC24File file;
+    NWC24iMBCHeader *hdr;
+    NWC24Err result;
+    NWC24Err err;
+    char *path;
+    u32 off;
+
+    state->count = 0;
+    state->total = 0;
+
+    err = fn_8039B1C0(state->box, &numMsgs);
+    if (err != NWC24_OK) {
+        return err;
+    }
+
+    if (numMsgs == 0) {
+        return NWC24_OK;
+    }
+
+    if (state->box == NWC24_MSGBOX_SEND) {
+        hdr = &NWC24WorkP->sendCtrl;
+    } else if (state->box == NWC24_MSGBOX_RECV) {
+        hdr = &NWC24WorkP->recvCtrl;
+    }
+
+    path = NWC24WorkP->pathWork;
+    err = NWC24iMBoxGetCtrlFilePath(state->box, path, NWC24i_PATH_WORK_SIZE);
+    if (err != NWC24_OK) {
+        return err;
+    }
+
+    err = NWC24FOpen(&file, path, NWC24_OPEN_READ);
+    if (err != NWC24_OK) {
+        return err;
+    }
+
+    result = NWC24_ERR_BROKEN;
+    for (off = MBC_FIRST_ENTRY; off < hdr->fileSize; off += MBC_BLOCK_SIZE) {
+        NWC24FSeek(&file, off, NWC24_SEEK_BEG);
+        err = NWC24FRead(&ListEntry, MBC_BLOCK_SIZE, &file);
+        if (err != NWC24_OK) {
+            result = err;
+            break;
+        }
+
+        if (ListEntry.id != 0 && ListEntry.id <= 1000000) {
+            if (fn_803A0594(state, &ListEntry)) {
+                ids[state->count++] = ListEntry.id;
+            }
+
+            matched++;
+            if (matched == numMsgs) {
+                result = NWC24_OK;
+                break;
+            }
+        }
+    }
+
+    NWC24FClose(&file);
+    if (result != NWC24_OK) {
+    }
+
+    state->total = state->count;
+    return NWC24_OK;
+}
+
+// hands out the next batch of messages from the list
+NWC24Err fn_803A02A4(NWC24iMsgObj *out, u32 max, u32 *count, u32 *remaining) {
+    MsgListState *state = &MsgList;
+    u32 *ids;
+    NWC24Err result;
+    u32 i;
+
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    *count = 0;
+    *remaining = 0;
+    ids = (u32 *)NWC24WorkP->WORK_0x1400;
+    if (out == NULL && max != 0) {
+        return NWC24_ERR_NULL;
+    }
+
+    if (state->valid == 0) {
+        Mail_memset(ids, 0, 0x1000);
+        result = fn_803A03F8(state, ids);
+        if (result != NWC24_OK) {
+            return result;
+        }
+
+        state->valid = 1;
+    }
+
+    if (state->total == 0) {
+        return NWC24_OK;
+    }
+
+    for (i = 0; i < state->total; i++) {
+        if (i >= max) {
+            break;
+        }
+
+        result = fn_8039B244(out, state->box, ids[state->pos++]);
+        if (result != NWC24_OK) {
+            return result;
+        }
+
+        (*count)++;
+        out++;
+    }
+
+    state->total -= *count;
+    *remaining = state->total;
+    return NWC24_OK;
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * committing a message: builds the mail text (smtp envelope + headers + body parts) in the mailbox file
+ * ------------------------------------------------------------------------------------------- */
+
+// the file the message text is currently being written into
+static NWC24File *OutFile;
+
+// the pieces of the multipart headers, kept as pointers because that is what the sdk did
+static char *PartTypeFmt = "Content-Type: %s;\r\n name=%c%07d.%s\r\n";
+static char *PartEncodingFmt = "Content-Transfer-Encoding: base64\r\n";
+static char *PartDispositionFmt = "Content-Disposition: attachment;\r\n filename=%c%07d.%s\r\n\r\n";
+static char *TextTypeFmt = "Content-Type: text/plain; charset=%s\r\n";
+static char *TextEncodingFmt = "Content-Transfer-Encoding: %s\r\n\r\n";
+
+// HYPOTHESIS: a switch somewhere, a message sent to your own id lands in the receive box
+static BOOL SendToSelfIsReceive = TRUE;
+
+// writes a mail address, either "w<id>@domain" or a plain string
+NWC24Err fn_8039EDE8(NWC24iAddr *addr, u32 flags, char *dst, int maxlen, int *written) {
+    NWC24Err result = NWC24_OK;
+    char *domain;
+    char idStr[24];
+    int n;
+
+    if (flags & 1) {
+        domain = (char *)NWC24GetAccountDomain();
+        n = Mail_strlen(domain);
+        if (n <= 0) {
+            result = NWC24_ERR_CONFIG;
+        } else if (n + 0x12 >= maxlen) {
+            result = NWC24_ERR_NOMEM;
+        } else {
+            NWC24iConvIdToStr(addr->id, idStr);
+            n = Mail_sprintf(dst, "%c%s%s", 'w', idStr, domain);
+            if (n == 0) {
+                result = NWC24_ERR_FATAL;
+            } else {
+                *written = n;
+            }
+        }
+    } else if (flags & 2) {
+        if (addr->data.size + 3 >= (u32)maxlen) {
+            result = NWC24_ERR_NOMEM;
+        } else {
+            n = Mail_sprintf(dst, "%s", addr->data.pData);
+            if (n == 0) {
+                result = NWC24_ERR_FATAL;
+            } else {
+                *written = n;
+            }
+        }
+    } else {
+        result = NWC24_ERR_INVALID_VALUE;
+    }
+
+    return result;
+}
+
+// MAIL FROM: <sender>
+NWC24Err fn_8039EEF8(NWC24iMsgObj *msg) {
+    char *buf = NWC24WorkP->stringWork;
+    char *p;
+    int n;
+    int len;
+    int mode;
+    NWC24Err result;
+
+    Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
+    Mail_strncat(buf, "MAIL FROM: ", 0x3FE);
+    p = buf + 11;
+
+    mode = 1;
+    if (msg->flags & NWC24_MSGOBJ_FLAG_20) {
+        mode = 2;
+    }
+
+    result = fn_8039EDE8(&msg->from, mode, p, 0x3FE, &n);
+    if (result == NWC24_OK) {
+        p += n;
+        p[0] = '\r';
+        p[1] = '\n';
+        len = n + 13;
+        if (0x3FE - len <= 0) {
+            return NWC24_ERR_NOMEM;
+        }
+    }
+
+    if (result == NWC24_OK) {
+        result = NWC24FWrite(NWC24WorkP, len, OutFile);
+        if (result == NWC24_OK) {
+            msg->length += len;
+        }
+    }
+
+    return result;
+}
+
+// RCPT TO: <rcpt> for everybody in the to list
+NWC24Err fn_8039EFE0(NWC24iMsgObj *msg) {
+    char *buf = NWC24WorkP->stringWork;
+    char *p = buf;
+    u32 total = 0;
+    NWC24Err result = NWC24_OK;
+    NWC24iAddr *addr = msg->to;
+    int avail = 0x3FE;
+    int n;
+    u32 i;
+
+    Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
+    for (i = 0; i < msg->numTo; i++, addr++) {
+        Mail_strncat(p, "RCPT TO: ", avail);
+        p += 9;
+
+        result = fn_8039EDE8(addr, msg->flags, p, avail, &n);
+        if (result != NWC24_OK) {
+            break;
+        }
+
+        p += n;
+        *p = '\r';
+        p[1] = '\n';
+        p += 2;
+
+        avail -= n + 11;
+        total += n + 11;
+        if (avail <= 0) {
+            result = NWC24_ERR_NOMEM;
+            break;
+        }
+    }
+
+    if (result == NWC24_OK) {
+        result = NWC24FWrite(NWC24WorkP, total, OutFile);
+        if (result == NWC24_OK) {
+            msg->length += total;
+        }
+    }
+
+    return result;
+}
+
+// From:
+NWC24Err fn_8039F0F4(NWC24iMsgObj *msg) {
+    char *buf = NWC24WorkP->stringWork;
+    char *p;
+    int n;
+    int len;
+    int mode;
+    NWC24Err result;
+
+    Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
+    Mail_strncat(buf, "From: ", 0x3FE);
+    p = buf + 6;
+    msg->fromField.offset = msg->length + 6;
+
+    mode = 1;
+    if (msg->flags & NWC24_MSGOBJ_FLAG_20) {
+        mode = 2;
+    }
+
+    result = fn_8039EDE8(&msg->from, mode, p, 0x3FE, &n);
+    if (result == NWC24_OK) {
+        p += n;
+        p[0] = '\r';
+        p[1] = '\n';
+        len = n + 8;
+        if (0x3FE - len <= 0) {
+            return NWC24_ERR_NOMEM;
+        }
+    }
+
+    if (result == NWC24_OK) {
+        result = NWC24FWrite(NWC24WorkP, len, OutFile);
+        if (result == NWC24_OK) {
+            u32 end = msg->length + len;
+
+            msg->length = end;
+            msg->fromField.size = end - msg->fromField.offset - 2;
+        }
+    }
+
+    return result;
+}
+
+// To: (comma separated, folded)
+NWC24Err fn_8039F1F4(NWC24iMsgObj *msg) {
+    char *buf = NWC24WorkP->stringWork;
+    char *p;
+    NWC24iAddr *addr;
+    NWC24Err result = NWC24_OK;
+    int avail;
+    int total;
+    int n;
+    int i;
+
+    Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
+    Mail_strncat(buf, "To: ", NWC24i_STRING_WORK_SIZE);
+    msg->toField.offset = msg->length + 4;
+
+    p = buf + 4;
+    addr = msg->to;
+    total = 4;
+    avail = 0x3FC;
+    for (i = 0; i < msg->numTo; i++, addr++) {
+        result = fn_8039EDE8(addr, msg->flags, p, avail, &n);
+        if (result != NWC24_OK) {
+            break;
+        }
+
+        avail -= n;
+        p += n;
+        total += n;
+        if (avail <= 4) {
+            result = NWC24_ERR_NOMEM;
+            break;
+        }
+
+        if (i < msg->numTo - 1) {
+            p[0] = ',';
+            p[1] = '\r';
+            p[2] = '\n';
+            p[3] = ' ';
+            total += 4;
+            avail -= 4;
+            p += 4;
+        }
+    }
+
+    p[0] = '\r';
+    p[1] = '\n';
+
+    if (result == NWC24_OK) {
+        result = NWC24FWrite(NWC24WorkP, total + 2, OutFile);
+        if (result == NWC24_OK) {
+            u32 end = msg->length + total + 2;
+
+            msg->length = end;
+            msg->toField.size = end - msg->toField.offset - 2;
+        }
+    }
+
+    return result;
+}
+
+static char *MonthNames[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+extern void fn_8038EC6C(OSCalendarTime *ct);
+NWC24Err fn_803A1344(NWC24Date *date, s32 minutes);
+
+// Date:
+NWC24Err fn_8039F35C(NWC24iMsgObj *msg) {
+    NWC24Date date;
+    OSCalendarTime ct;
+    char *buf;
+    int len;
+    NWC24Err result;
+
+    NWC24Date_Init(&date);
+    fn_8038EC6C(&ct);
+
+    date.year = ct.year;
+    date.month = ct.mon + 1;
+    date.day = ct.mday;
+    date.hour = ct.hour;
+    date.min = ct.min;
+    date.sec = ct.sec;
+
+    if (date.month > 12) {
+        return NWC24_ERR_FORMAT;
+    }
+
+    NWC24iDateToMinutes(&msg->createTime, &date);
+    if (msg->flags & 0x1000000) {
+        fn_803A1344(&date, msg->unk2C);
+    }
+
+    buf = NWC24WorkP->stringWork;
+    Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
+    Mail_sprintf(buf, "Date: %02d %s %d %02d:%02d:%02d -0000\r\n", date.day, MonthNames[date.month - 1], date.year, date.hour,
+                 date.min, date.sec);
+
+    len = Mail_strlen(buf);
+    result = NWC24FWrite(buf, len, OutFile);
+    if (result == NWC24_OK) {
+        msg->length += len;
+    }
+
+    return result;
+}
+
+// X-Wii-AppId:
+NWC24Err fn_8039F494(NWC24iMsgObj *msg) {
+    char *buf = NWC24WorkP->stringWork;
+    u32 flags = 0;
+    char tmp[16];
+    int len;
+    NWC24Err result;
+
+    Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
+    Mail_strcpy(buf, "X-Wii-AppId: ");
+
+    if (!NWC24IsMsgLibOpenedByTool() && NWC24GetAppId() != NWC24i_APP_ID_IPL && msg->appId != FOURCC('H', 'A', 'C', 'A')) {
+        msg->appId = NWC24GetAppId();
+    }
+
+    if (msg->flags & NWC24_MSGOBJ_FOR_APP) {
+        flags |= 1;
+    }
+
+    if (msg->flags & NWC24_MSGOBJ_FOR_MENU) {
+        flags |= 2;
+    }
+
+    Mail_memset(tmp, 0, sizeof(tmp));
+    Mail_sprintf(tmp, "%d-%08X-%04X\r\n", flags, msg->appId, msg->groupId);
+    Mail_strcat(buf, tmp);
+
+    len = Mail_strlen(buf);
+    result = NWC24FWrite(buf, len, OutFile);
+    if (result == NWC24_OK) {
+        msg->length += len;
+    }
+
+    return result;
+}
+
+// X-WiiFace: (base64, folded)
+NWC24Err fn_8039F5B0(NWC24iMsgObj *msg) {
+    char *buf;
+    const u8 *data;
+    int remaining;
+    int pos;
+    int chunk;
+    u32 n;
+    NWC24Err result;
+
+    if (msg->face.size == 0) {
+        return NWC24_OK;
+    }
+
+    buf = NWC24WorkP->stringWork;
+    Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
+    Mail_strcpy(buf, "X-WiiFace:");
+
+    data = (const u8 *)msg->face.pData;
+    remaining = msg->face.size;
+    pos = 10;
+    while (remaining > 0) {
+        buf[pos++] = ' ';
+        chunk = remaining;
+        if (chunk > 42) {
+            chunk = 42;
+        }
+
+        NWC24Base64Encode(data, chunk, buf + pos, 0x4C, &n);
+        data += chunk;
+        remaining -= chunk;
+        pos += n;
+        buf[pos++] = '\r';
+        buf[pos++] = '\n';
+    }
+
+    result = NWC24FWrite(buf, pos, OutFile);
+    if (result == NWC24_OK) {
+        msg->length += pos;
+    }
+
+    return result;
+}
+
+// X-Wii-AltName: (base64, folded)
+NWC24Err fn_8039F6B0(NWC24iMsgObj *msg) {
+    char *buf;
+    const u8 *data;
+    int remaining;
+    int pos;
+    int chunk;
+    u32 n;
+    NWC24Err result;
+
+    if (msg->alt.size == 0) {
+        return NWC24_OK;
+    }
+
+    buf = NWC24WorkP->stringWork;
+    Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
+    Mail_strcpy(buf, "X-Wii-AltName:");
+
+    data = (const u8 *)msg->alt.pData;
+    remaining = msg->alt.size;
+    pos = 14;
+    while (remaining > 0) {
+        buf[pos++] = ' ';
+        chunk = remaining;
+        if (chunk > 42) {
+            chunk = 42;
+        }
+
+        NWC24Base64Encode(data, chunk, buf + pos, 0x4C, &n);
+        data += chunk;
+        remaining -= chunk;
+        pos += n;
+        buf[pos++] = '\r';
+        buf[pos++] = '\n';
+    }
+
+    result = NWC24FWrite(buf, pos, OutFile);
+    if (result == NWC24_OK) {
+        msg->length += pos;
+    }
+
+    return result;
+}
+
+// header of one attachment part
+NWC24Err fn_8039F7B0(NWC24iMsgObj *msg, int idx) {
+    char *buf;
+    char *mimeStr;
+    char *suffix;
+    int n1;
+    int n2;
+    int n3;
+    int total;
+    NWC24Err result;
+
+    Mail_memset(NWC24WorkP->stringWork, 0, NWC24i_STRING_WORK_SIZE);
+    buf = NWC24WorkP->stringWork;
+
+    mimeStr = (char *)NWC24GetMIMETypeStr(msg->attachedType[idx]);
+    suffix = (char *)NWC24iGetMIMETypeSuffix(msg->attachedType[idx]);
+
+    if (Mail_strlen(PartTypeFmt) + Mail_strlen(PartEncodingFmt) + Mail_strlen(PartDispositionFmt) + Mail_strlen(mimeStr) + 4 >=
+        NWC24i_STRING_WORK_SIZE) {
+        return NWC24_ERR_NOMEM;
+    }
+
+    n1 = Mail_sprintf(buf, PartTypeFmt, mimeStr, (char)('a' + idx), msg->id, suffix);
+    if (n1 <= 0) {
+        return NWC24_ERR_FAILED;
+    }
+
+    buf += n1;
+    n2 = Mail_sprintf(buf, PartEncodingFmt);
+    if (n2 <= 0) {
+        return NWC24_ERR_FAILED;
+    }
+
+    total = n1 + n2;
+    n3 = Mail_sprintf(buf + n2, PartDispositionFmt, (char)('a' + idx), msg->id, suffix);
+    if (n3 <= 0) {
+        return NWC24_ERR_FAILED;
+    }
+
+    total += n3;
+    result = NWC24FWrite(NWC24WorkP, total, OutFile);
+    if (result == NWC24_OK) {
+        msg->length += total;
+    }
+
+    return result;
+}
+
+// headers for the text part (charset + transfer encoding)
+NWC24Err fn_8039F920(NWC24iMsgObj *msg) {
+    int len = 0;
+    char *buf = NWC24WorkP->stringWork;
+    char *name;
+    NWC24Err result;
+
+    Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
+
+    name = (char *)NWC24GetCharsetStr(msg->charset);
+    if (name != NULL) {
+        Mail_sprintf(buf, TextTypeFmt, name);
+        msg->contentType.offset = msg->length + 0x22;
+        msg->contentType.size = Mail_strlen(name) + 1;
+        len = Mail_strlen(buf);
+        buf += len;
+    }
+
+    name = (char *)NWC24GetEncodingStr(msg->encoding);
+    if (name != NULL) {
+        Mail_sprintf(buf, TextEncodingFmt, name);
+        msg->txEncoding.offset = len + msg->length + 0x1B;
+        msg->txEncoding.size = Mail_strlen(name) + 1;
+        len += Mail_strlen(buf);
+    }
+
+    if (len == 0) {
+        return NWC24_OK;
+    }
+
+    result = NWC24FWrite(NWC24WorkP, len, OutFile);
+    if (result == NWC24_OK) {
+        msg->length += len;
+    }
+
+    return result;
+}
+
+NWC24Err fn_8039FB14(const u8 *data, int size, u32 *written);
+NWC24Err fn_8039FC78(const char *data, int size, u32 *written);
+
+// the body text
+NWC24Err fn_8039FA54(NWC24iMsgObj *msg) {
+    NWC24Err result;
+    u32 written;
+
+    if (msg->text.size == 0) {
+        return NWC24_ERR_NULL;
+    }
+
+    switch (msg->encoding) {
+    case NWC24_ENC_7BIT:
+    case NWC24_ENC_8BIT:
+        result = NWC24FWrite(msg->text.pData, msg->text.size, OutFile);
+        written = msg->text.size;
+        break;
+    case NWC24_ENC_BASE64:
+        result = fn_8039FB14((const u8 *)msg->text.pData, msg->text.size, &written);
+        break;
+    case NWC24_ENC_QUOTED_PRINTABLE:
+        result = fn_8039FC78((const char *)msg->text.pData, msg->text.size, &written);
+        break;
+    default:
+        result = NWC24_ERR_INVALID_VALUE;
+        break;
+    }
+
+    if (result == NWC24_OK) {
+        msg->dwcId.offset = msg->text.size;
+        msg->length += written;
+    }
+
+    return result;
+}
+
+// base64 text, 57 bytes (76 chars) per line
+NWC24Err fn_8039FB14(const u8 *data, int size, u32 *written) {
+    char *buf = NWC24WorkP->stringWork;
+    NWC24Err result = NWC24_OK;
+    u32 total = 0;
+    u32 n;
+
+    while (size >= 57) {
+        Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
+        result = NWC24Base64Encode(data, 57, buf, 0x4C, &n);
+        if (result != NWC24_OK) {
+            break;
+        }
+
+        buf[n++] = '\r';
+        buf[n++] = '\n';
+        buf[n] = 0;
+        result = NWC24FWrite(buf, n, OutFile);
+        if (result != NWC24_OK) {
+            break;
+        }
+
+        data += 57;
+        size -= 57;
+        total += n;
+    }
+
+    if (result == NWC24_OK) {
+        Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
+        result = NWC24Base64Encode(data, size, buf, 0x4C, &n);
+        if (result == NWC24_OK) {
+            buf[n++] = '\r';
+            buf[n++] = '\n';
+            buf[n++] = '\r';
+            buf[n++] = '\n';
+            buf[n] = 0;
+            result = NWC24FWrite(buf, n, OutFile);
+            if (result == NWC24_OK) {
+                total += n;
+            }
+        }
+    }
+
+    *written = total;
+    return result;
+}
+
+// quoted printable text, the soft line break has to go out between the chunks
+NWC24Err fn_8039FC78(const char *data, int size, u32 *written) {
+    char *buf = NWC24WorkP->stringWork;
+    NWC24Err result = NWC24_OK;
+    u32 total = 0;
+    u32 outN;
+    u32 inN;
+
+    while (size > 0) {
+        if (total > 0) {
+            Mail_memcpy(buf, "=\r\n", 3);
+            result = NWC24FWrite(buf, 3, OutFile);
+            if (result != NWC24_OK) {
+                break;
+            }
+
+            total += 3;
+        }
+
+        Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
+        result = NWC24EncodeQuotedPrintable(buf, 0x400, &outN, (const u8 *)data, size, &inN);
+        if (result != NWC24_OK && result != NWC24_ERR_OVERFLOW) {
+            break;
+        }
+
+        result = NWC24FWrite(buf, outN, OutFile);
+        if (result != NWC24_OK) {
+            break;
+        }
+
+        data += inN;
+        size -= inN;
+        total += outN;
+    }
+
+    *written = total;
+    return result;
+}
+
+// writes a buffer into the message file and counts it
+static inline NWC24Err WriteBuf_i(NWC24iMsgObj *msg, char *buf, int len) {
+    NWC24Err result = NWC24FWrite(buf, len, OutFile);
+
+    if (result == NWC24_OK) {
+        msg->length += len;
+    }
+
+    return result;
+}
+
+// also used to separate parts of the message, "boundary" goes in here
+static char BoundaryStr[40];
+
+NWC24Err NWC24CommitMsgInternal(NWC24iMsgObj *msg, NWC24MsgBoxId id) {
+    NWC24File file;
+    NWC24Data subject;
+    NWC24Data text;
+    NWC24Data attached[NWC24i_MSG_ATTACHMENT_MAX];
+    NWC24UserId myId;
+    u32 msgId;
+    char tmp[32];
+    char *work;
+    char *domain;
+    NWC24Err result;
+    NWC24Err err;
+    NWC24Err addErr;
+    int len;
+    int i;
+    u32 mb;
+
+    NWC24Data_Init(&subject);
+    NWC24Data_Init(&text);
+    for (i = 0; i < NWC24i_MSG_ATTACHMENT_MAX; i++) {
+        NWC24Data_Init(&attached[i]);
+    }
+
+    NWC24iSetErrorCode(0);
+
+    result = fn_8039E9CC(msg);
+    if (result != NWC24_OK) {
+        goto done;
+    }
+
+    result = fn_8039EA6C(msg, id);
+    if (result != NWC24_OK) {
+        goto done;
+    }
+
+    err = NWC24iMBoxOpenNewMsg(id, &file, &msgId);
+    if (err != NWC24_OK) {
+        result = err;
+        goto finish;
+    }
+
+    msg->id = msgId;
+    msg->length = 0;
+    OutFile = &file;
+
+    if (id == NWC24_MSGBOX_SEND) {
+        err = fn_8039EEF8(msg);
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+
+        err = fn_8039EFE0(msg);
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+
+        work = NWC24WorkP->stringWork;
+        Mail_strcpy(work, "DATA\r\n");
+        err = WriteBuf_i(msg, work, Mail_strlen(work));
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+    }
+
+    err = fn_8039F35C(msg);
+    if (err != NWC24_OK) {
+        NWC24FClose(&file);
+        result = err;
+        goto finish;
+    }
+
+    err = fn_8039F0F4(msg);
+    if (err != NWC24_OK) {
+        NWC24FClose(&file);
+        result = err;
+        goto finish;
+    }
+
+    err = fn_8039F1F4(msg);
+    if (err != NWC24_OK) {
+        NWC24FClose(&file);
+        result = err;
+        goto finish;
+    }
+
+    // Message-Id
+    work = NWC24WorkP->stringWork;
+    domain = (char *)NWC24GetAccountDomain();
+    NWC24GetMyUserId(&myId);
+    Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+    Mail_strcpy(work, "Message-Id: <");
+    Mail_memset(tmp, 0, 0x20);
+    Mail_sprintf(tmp, "%05X%08X%08X%08X", msg->id, (u32)(myId >> 32), (u32)myId, msg->createTime);
+    Mail_strcat(work, tmp);
+    Mail_strcat(work, domain);
+    Mail_strcat(work, ">\r\n");
+    len = Mail_strlen(work);
+    err = WriteBuf_i(msg, work, len);
+    if (err != NWC24_OK) {
+        NWC24FClose(&file);
+        result = err;
+        goto finish;
+    }
+
+    // Subject
+    subject.offset = msg->length + 9;
+    if (msg->subject.size == 0) {
+        err = NWC24_ERR_NULL;
+    } else {
+        work = NWC24WorkP->stringWork;
+        Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+        Mail_strcpy(work, "Subject: ");
+        Mail_strncat(work, (const char *)msg->subject.pData, 0x3FD);
+        Mail_strncat(work, "\r\n", NWC24i_STRING_WORK_SIZE);
+        len = STD_strnlen(work, NWC24i_STRING_WORK_SIZE);
+        err = WriteBuf_i(msg, work, len);
+    }
+
+    if (err == NWC24_OK) {
+        subject.size = msg->length - subject.offset - 2;
+    } else if (err == NWC24_ERR_NULL) {
+        err = NWC24_OK;
+        subject.offset = 0;
+    }
+
+    if (err != NWC24_OK) {
+        NWC24FClose(&file);
+        result = err;
+        goto finish;
+    }
+
+    if (msg->flags & NWC24_MSGOBJ_FOR_RECIPIENT) {
+        err = fn_8039F494(msg);
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+
+        if (msg->command == 0) {
+            err = NWC24_OK;
+        } else {
+            work = NWC24WorkP->stringWork;
+            Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+            Mail_sprintf(work, "X-Wii-Cmd: %08X\r\n", msg->command);
+            len = Mail_strlen(work);
+            err = WriteBuf_i(msg, work, len);
+        }
+
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+
+        if (msg->tag == 0) {
+            err = NWC24_OK;
+        } else {
+            work = NWC24WorkP->stringWork;
+            Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+            Mail_sprintf(work, "X-Wii-Tag: %08X\r\n", msg->tag);
+            len = Mail_strlen(work);
+            err = WriteBuf_i(msg, work, len);
+        }
+
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+
+        if (!(msg->flags & NWC24_MSGOBJ_DWC)) {
+            err = NWC24_OK;
+        } else {
+            work = NWC24WorkP->stringWork;
+            Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+            Mail_sprintf(work, "X-Wii-DWCId: %08X\r\n", msg->dwcId.size);
+            len = Mail_strlen(work);
+            err = WriteBuf_i(msg, work, len);
+        }
+
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+
+        err = fn_8039F6B0(msg);
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+
+        err = fn_8039F5B0(msg);
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+
+        if (msg->iconNew == 0 || msg->iconNew == 0x80000000) {
+            err = NWC24_OK;
+        } else {
+            work = NWC24WorkP->stringWork;
+            Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+            Mail_sprintf(work, "X-Wii-IconNew: %08X\r\n", msg->iconNew);
+            len = Mail_strlen(work);
+            err = WriteBuf_i(msg, work, len);
+        }
+
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+
+        if (msg->msgBoard != 0) {
+            if (!(msg->msgBoard & 0x80000000)) {
+                err = NWC24_OK;
+            } else {
+                work = NWC24WorkP->stringWork;
+                Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+                Mail_strcpy(work, "X-Wii-MB-NoReply: -\r\n");
+                err = NWC24FWrite(work, 0x15, OutFile);
+                if (err == NWC24_OK) {
+                    msg->length += 0x15;
+                }
+            }
+
+            if (err != NWC24_OK) {
+                NWC24FClose(&file);
+                result = err;
+                goto finish;
+            }
+
+            mb = msg->msgBoard & 0xFFFF;
+            if (mb == 0) {
+                err = NWC24_OK;
+            } else {
+                work = NWC24WorkP->stringWork;
+                Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+                Mail_sprintf(work, "X-Wii-MB-RegDate: %04X\r\n", mb);
+                len = STD_strnlen(work, NWC24i_STRING_WORK_SIZE);
+                err = WriteBuf_i(msg, work, len);
+            }
+
+            if (err != NWC24_OK) {
+                NWC24FClose(&file);
+                result = err;
+                goto finish;
+            }
+
+            mb = msg->msgBoard & 0xFF0000;
+            if (mb == 0) {
+                err = NWC24_OK;
+            } else {
+                work = NWC24WorkP->stringWork;
+                Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+                Mail_sprintf(work, "X-Wii-MB-Delay: %02X\r\n", mb >> 16);
+                len = STD_strnlen(work, NWC24i_STRING_WORK_SIZE);
+                err = WriteBuf_i(msg, work, len);
+            }
+
+            if (err != NWC24_OK) {
+                NWC24FClose(&file);
+                result = err;
+                goto finish;
+            }
+        }
+    }
+
+    // raw extra headers from the app
+    if (msg->user.size == 0) {
+        err = NWC24_OK;
+    } else {
+        err = NWC24FWrite(msg->user.pData, msg->user.size, OutFile);
+        if (err == NWC24_OK) {
+            msg->length += msg->user.size;
+        }
+    }
+
+    if (err != NWC24_OK) {
+        NWC24FClose(&file);
+        result = err;
+        goto finish;
+    }
+
+    Mail_memset(BoundaryStr, 0, 0x28);
+    Mail_sprintf(BoundaryStr, "Boundary-NWC24-%08X%05X", msg->createTime, msg->id);
+
+    work = NWC24WorkP->stringWork;
+    Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+    Mail_strcpy(work, "MIME-Version: 1.0\r\n");
+    if (msg->flags & NWC24_MSGOBJ_MULTIPART) {
+        Mail_strcat(work, "Content-Type: multipart/mixed;\r\n boundary=\"");
+        Mail_strcat(work, BoundaryStr);
+        Mail_strcat(work, "\"\r\n");
+    }
+
+    len = Mail_strlen(work);
+    result = WriteBuf_i(msg, work, len);
+    if (result != NWC24_OK) {
+        NWC24FClose(&file);
+        goto finish;
+    }
+
+    if (msg->flags & NWC24_MSGOBJ_MULTIPART) {
+        msg->unk10 = msg->length;
+        work = NWC24WorkP->stringWork;
+        Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+        Mail_sprintf(work, "\r\n--%s", BoundaryStr);
+        Mail_strcat(work, "\r\n");
+        len = Mail_strlen(work);
+        result = WriteBuf_i(msg, work, len);
+        if (result != NWC24_OK) {
+            NWC24FClose(&file);
+            goto finish;
+        }
+    }
+
+    err = fn_8039F920(msg);
+    if (err != NWC24_OK) {
+        NWC24FClose(&file);
+        result = err;
+        goto finish;
+    }
+
+    if (!(msg->flags & NWC24_MSGOBJ_MULTIPART)) {
+        msg->unk10 = msg->length;
+    }
+
+    text.offset = msg->length;
+    err = fn_8039FA54(msg);
+    if (err == NWC24_ERR_NULL) {
+        err = NWC24_OK;
+    }
+
+    if (err != NWC24_OK) {
+        NWC24FClose(&file);
+        result = err;
+        goto finish;
+    }
+
+    text.size = msg->length - text.offset;
+
+    for (i = 0; i < msg->numAttached; i++) {
+        work = NWC24WorkP->stringWork;
+        Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+        Mail_sprintf(work, "\r\n--%s", BoundaryStr);
+        Mail_strcat(work, "\r\n");
+        len = Mail_strlen(work);
+        err = WriteBuf_i(msg, work, len);
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+
+        err = fn_8039F7B0(msg, i);
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+
+        attached[i].offset = msg->length;
+        {
+            u32 written;
+
+            err = fn_8039FB14((const u8 *)msg->attached[i].pData, msg->attached[i].size, &written);
+            if (err == NWC24_OK) {
+                msg->length += written;
+            }
+        }
+
+        if (err != NWC24_OK) {
+            NWC24FClose(&file);
+            result = err;
+            goto finish;
+        }
+
+        attached[i].size = msg->length - attached[i].offset;
+
+        if (i == msg->numAttached - 1) {
+            work = NWC24WorkP->stringWork;
+            Mail_memset(work, 0, NWC24i_STRING_WORK_SIZE);
+            Mail_sprintf(work, "\r\n--%s", BoundaryStr);
+            Mail_strcat(work, "--\r\n");
+            len = Mail_strlen(work);
+            err = WriteBuf_i(msg, work, len);
+            if (err != NWC24_OK) {
+                NWC24FClose(&file);
+                result = err;
+                goto finish;
+            }
+        }
+    }
+
+    result = NWC24_OK;
+
+finish:
+    if (result == NWC24_OK) {
+        err = NWC24iMBoxCloseMsg(&file);
+    } else {
+        NWC24iMBoxCancelMsg(&file, id, msgId);
+        NWC24iMBoxFlushHeader(id);
+        goto done;
+    }
+
+    msg->subject = subject;
+    msg->flags |= NWC24_MSGOBJ_DELIVERING;
+    msg->text = text;
+    msg->attached[0] = attached[0];
+    msg->attached[1] = attached[1];
+
+    if (id == NWC24_MSGBOX_RECV) {
+        msg->flags |= NWC24_MSGOBJ_TO_RECV;
+    } else if (id == NWC24_MSGBOX_SEND) {
+        msg->flags |= NWC24_MSGOBJ_TO_SEND;
+    }
+
+    addErr = NWC24iMBoxAddMsgObj(id, msg);
+    result = err != NWC24_OK ? err : addErr;
+
+    if (id == NWC24_MSGBOX_RECV) {
+        u32 arrived = NWC24_MSG_ARRIVED;
+
+        if (msg->flags & NWC24_MSGOBJ_FOR_MENU) {
+            arrived |= NWC24_MSG_ARRIVED_FOR_MENU;
+        }
+
+        NWC24iSetNewMsgArrived(arrived);
+    }
+
+done:
+    // a few of these errors are worth showing to the user
+    if (result == NWC24_ERR_FULL || (result <= -16 && result >= -21) || result == -38 || result == -41 || result == -43 ||
+        result == -46) {
+        NWC24iSetErrorCode(result - NWC24i_MSG_ERROR_CODE_BASE);
+    }
+
+    return result;
+}
+
+NWC24Err NWC24CommitMsg(NWC24MsgObj *pMsg) {
+    NWC24iMsgObj *msg = (NWC24iMsgObj *)pMsg;
+    NWC24MsgBoxId id = NWC24_MSGBOX_SEND;
+    NWC24UserId myId;
+
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    if (!(msg->flags & NWC24_MSGOBJ_INITIALIZED) || (msg->flags & NWC24_MSGOBJ_DELIVERING)) {
+        return NWC24_ERR_PROTECTED;
+    }
+
+    // a message to yourself skips the send box and lands in the receive box directly
+    if (SendToSelfIsReceive && (msg->flags & NWC24_MSGOBJ_FOR_RECIPIENT)) {
+        NWC24GetMyUserId(&myId);
+        if (msg->numTo == 1 && msg->to[0].id == myId) {
+            id = NWC24_MSGBOX_RECV;
+        }
+    }
+
+    return NWC24CommitMsgInternal(msg, id);
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * dates (days / minutes since 1900, calendar conversions)
+ * ------------------------------------------------------------------------------------------- */
+
+static const u8 DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+static const u16 DaysBeforeMonth[12] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
+
+#define NWC24i_EPOCH_1900_TO_1970 2208988800LL
+
+static inline BOOL IsLeapYear_i(int year) {
+    return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+}
+
+// days since 1 jan 1900, -1 when the date does not exist
+s32 fn_803A1678(u16 year, u8 month, u8 day) {
+    s32 days;
+    int y;
+
+    if (year < NWC24i_YEAR_MIN || month < NWC24i_MONTH_MIN || month > NWC24i_MONTH_MAX) {
+        return -1;
+    }
+
+    if (month == 2 && IsLeapYear_i(year)) {
+        if (day < NWC24i_DAY_MIN || day > 29) {
+            return -1;
+        }
+    } else if (day < NWC24i_DAY_MIN || DaysInMonth[month - 1] < day) {
+        return -1;
+    }
+
+    days = DaysBeforeMonth[month - 1] + (day - 1);
+    if (month >= 3 && IsLeapYear_i(year)) {
+        days++;
+    }
+
+    y = year - NWC24i_YEAR_MIN;
+    return days + y * 365 + (y + 299) / 400 + ((y - 1) / 4 - (y - 1) / 100);
+}
+
+NWC24Err NWC24iDateToMinutes(s32 *minutes, const NWC24Date *date) {
+    s32 days;
+    s32 minOfDay;
+
+    days = fn_803A1678(date->year, date->month, date->day);
+    if (days == -1) {
+        return NWC24_ERR_FAILED;
+    }
+
+    if (date->hour > 23 || date->min > 59) {
+        minOfDay = -1;
+    } else {
+        minOfDay = date->min + date->hour * 60;
+    }
+
+    if (minOfDay == -1 || date->sec > 60) {
+        return NWC24_ERR_FAILED;
+    }
+
+    *minutes = minOfDay + days * 1440;
+    return NWC24_OK;
+}
+
+// splits a day count back into year / month / day
+void fn_803A183C(u16 *year, u8 *month, u8 *day, int days);
+
+NWC24Err fn_803A1344(NWC24Date *date, s32 minutes) {
+    int clamped = minutes;
+    int days;
+    int rem;
+
+    if (minutes < 0) {
+        clamped = 0;
+    }
+
+    days = clamped / 1440;
+    rem = clamped % 1440;
+    date->hour = rem / 60;
+    date->min = rem % 60;
+    fn_803A183C(&date->year, &date->month, &date->day, days);
+    return NWC24_OK;
+}
+
+NWC24Err NWC24iEpochSecondsToDate(NWC24Date *date, s64 timestamp) {
+    int minutes;
+
+    if (timestamp + NWC24i_EPOCH_1900_TO_1970 < 0) {
+        timestamp = -NWC24i_EPOCH_1900_TO_1970;
+    }
+
+    date->sec = (timestamp + NWC24i_EPOCH_1900_TO_1970) % 60;
+    minutes = (timestamp + NWC24i_EPOCH_1900_TO_1970) / 60;
+    if (minutes < 0) {
+        minutes = 0;
+    }
+
+    date->hour = minutes % 1440 / 60;
+    date->min = minutes % 1440 % 60;
+    fn_803A183C(&date->year, &date->month, &date->day, minutes / 1440);
+    return NWC24_OK;
+}
+
+NWC24Err NWC24iDateToOSCalendarTime(OSCalendarTime *ct, const NWC24Date *date) {
+    int month = date->month - 1;
+    int yday;
+
+    ct->year = date->year;
+    ct->mon = month;
+    ct->mday = date->day;
+    ct->hour = date->hour;
+    ct->min = date->min;
+    ct->sec = date->sec;
+    ct->msec = 0;
+    ct->usec = 0;
+
+    yday = DaysBeforeMonth[month] + date->day - 1;
+    ct->yday = yday;
+    if (IsLeapYear_i(date->year) && date->month > 2) {
+        ct->yday++;
+    }
+
+    ct->wday = (fn_803A1678(date->year, date->month, date->day) + 1) % 7;
+    return NWC24_OK;
+}
+
+void fn_803A183C(u16 *year, u8 *month, u8 *day, int days) {
+    int saved;
+    int ylen;
+
+    *year = NWC24i_YEAR_MIN;
+    *month = 1;
+    *day = 1;
+    if (days < 0) {
+        return;
+    }
+
+    while (TRUE) {
+        saved = days;
+        ylen = IsLeapYear_i(*year) ? 366 : 365;
+        days -= ylen;
+        if (days < 0) {
+            days = saved;
+            break;
+        }
+
+        (*year)++;
+    }
+
+    while (TRUE) {
+        saved = days;
+        if (*month == 2 && IsLeapYear_i(*year)) {
+            days -= 29;
+        } else {
+            days -= DaysInMonth[*month - 1];
+        }
+
+        if (days < 0) {
+            break;
+        }
+
+        (*month)++;
+    }
+
+    *day += saved;
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * friend list accessors (the list file has a 128 bit "slot is used" map at 0x10 and 0x140 byte records)
+ * ------------------------------------------------------------------------------------------- */
+
+#define FL_RECORD_SIZE 0x140
+#define FL_RECORDS_OFFSET 0x360
+
+NWC24Err fn_803A1CDC(u32 *info, u32 idx);
+
+// reads one record and fills in some of its state from the map
+NWC24Err fn_803A19D8(u32 *info, u32 idx) {
+    NWC24iFLHeader *hdr;
+    NWC24Err result;
+
+    result = fn_803A1CDC(info, idx);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (info[0] == 1) {
+        Mail_memset(&info[0x48 / 4], 0, 0xF8);
+    }
+
+    result = GetCachedFLHeader(&hdr);
+    if (result == NWC24_OK) {
+        result = (((u32 *)hdr->unk10)[idx >> 5] >> (idx & 31)) & 1;
+    }
+
+    if (result == 1) {
+        info[1] = 2;
+    }
+
+    return NWC24_OK;
+}
+
+// capacity of the list
+NWC24Err fn_803A1A7C(u32 *count) {
+    NWC24iFLHeader *hdr;
+    NWC24Err result;
+
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    result = GetCachedFLHeader(&hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    *count = hdr->capacity;
+    return NWC24_OK;
+}
+
+// how many slots are in use
+NWC24Err fn_803A1AE8(u32 *count) {
+    NWC24iFLHeader *hdr;
+    NWC24Err result;
+    u32 used = 0;
+    u32 i;
+    u32 j;
+
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    *count = 0;
+    result = GetCachedFLHeader(&hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    for (i = 0; i < 4; i++) {
+        u32 word = ((u32 *)hdr->unk10)[i];
+
+        for (j = 0; j < 32; j++) {
+            if (word & 1) {
+                used++;
+            }
+
+            word >>= 1;
+        }
+    }
+
+    *count = used;
+    return NWC24_OK;
+}
+
+// does this slot hold a friend code?
+NWC24Err fn_803A1C10(u32 idx) {
+    NWC24iFLHeader *hdr;
+    NWC24Err result;
+
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    result = GetCachedFLHeader(&hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (idx >= hdr->capacity) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    return hdr->friendCodes[idx] != 0;
+}
+
+// reads one record from the list file
+NWC24Err fn_803A1CDC(u32 *info, u32 idx) {
+    NWC24iFLHeader *hdr;
+    NWC24File file;
+    NWC24Err result;
+    NWC24Err read;
+
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    if ((u32)info & 0x1F) {
+        return NWC24_ERR_ALIGNMENT;
+    }
+
+    result = GetCachedFLHeader(&hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (idx >= hdr->capacity) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    if (hdr->friendCodes[idx] == 0) {
+        return NWC24_ERR_NULL;
+    }
+
+    result = NWC24FOpen(&file, FLFilePath, NWC24_OPEN_NAND_RBUFF);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    NWC24FSeek(&file, idx * FL_RECORD_SIZE + FL_RECORDS_OFFSET, NWC24_SEEK_BEG);
+    read = NWC24FRead(info, FL_RECORD_SIZE, &file);
+    result = NWC24FClose(&file);
+    if (read != NWC24_OK) {
+        result = read;
+    }
+
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    return NWC24_OK;
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * download task list (/shared2/wc24/nwc24dl.bin)
+ * ------------------------------------------------------------------------------------------- */
+
+#define DL_HEADER_SIZE 0x800
+#define DL_TASK_SIZE 0x200
+#define DL_TASK_FLAG_ANYONE 0x40
+#define DL_TASK_FLAG_NO_LIMITS 0x40000000
+
+static const char *DLFilePath = "/shared2/wc24/nwc24dl.bin";
+
+// HYPOTHESIS: when set the interval / count limits are not enforced
+static BOOL DlIgnoreLimits;
+
+extern int snprintf(char *, size_t, const char *, ...);
+extern unsigned long strtoul(const char *, char **, int);
+
+static inline NWC24iDlEntry *DlEntry_i(u16 i);
+
+static inline BOOL SameAppId_i(u32 a, u32 b) {
+    return (a & ~0xFF) == (b & ~0xFF);
+}
+
+static inline NWC24iDlHeader *DlHeader_i(void) {
+    return NWC24WorkP != NULL ? (NWC24iDlHeader *)NWC24WorkP->dlHeader : NULL;
+}
+
+static inline NWC24iDlEntry *DlEntry_i(u16 i) {
+    return &DlHeader_i()->entries[i];
+}
+
+// the app that owns a task, or one with the same group, may change it
+static inline NWC24Err CheckDlTask_i(const NWC24iDlTask *task, BOOL wantWrite) {
+    NWC24iDlHeader *hdr = DlHeader_i();
+
+    if (task == NULL) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    if (hdr == NULL) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    if (wantWrite && !NWC24IsMsgLibOpenedByTool()) {
+        u32 appId = task->appId;
+        BOOL same = (NWC24GetAppId() & ~0xFF) == (appId & ~0xFF);
+
+        if (!same) {
+            BOOL ok = FALSE;
+            u16 group = task->groupId;
+
+            if ((task->flags & DL_TASK_FLAG_ANYONE) && group == NWC24GetGroupId()) {
+                ok = TRUE;
+            }
+
+            if (!ok) {
+                return NWC24_ERR_PROTECTED;
+            }
+        }
+    }
+
+    if (task->id != 0xFFFF && task->id >= hdr->maxTasks) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    return NWC24_OK;
+}
+
+NWC24Err NWC24CheckDlTask(const NWC24DlTask *pTask, BOOL wantWrite) {
+    return CheckDlTask_i((const NWC24iDlTask *)pTask, wantWrite);
+}
+
+// stamps "now + minutes" into the next-update time of the task's list entry
+static inline void SetNextTime_i(NWC24iDlTask *task, u32 minutes) {
+    s64 now = 0;
+    NWC24Err result;
+
+    result = NWC24iGetUniversalTime(&now);
+    if (result >= 0) {
+        s64 when = now + task->interval * 60;
+
+        result = CheckDlTask_i(task, FALSE);
+        if (result == NWC24_OK) {
+            u16 id = task->id;
+
+            if (id != 0xFFFF) {
+                DlHeader_i()->entries[id].nextTime = when / 60;
+            }
+        }
+    }
+}
+
+// sets up a fresh task of the given type
+NWC24Err fn_803A2A18(NWC24iDlTask *task, int type) {
+    char dir[64] = {0};
+    u32 titleHi;
+    u32 titleLo;
+    NWC24iDlHeader *hdr;
+    NWC24Err result;
+    BOOL isOctet;
+
+    NANDGetHomeDir(dir);
+    dir[15] = 0;
+    titleHi = strtoul(&dir[7], NULL, 16);
+    dir[24] = 0;
+    titleLo = strtoul(&dir[16], NULL, 16);
+
+    hdr = DlHeader_i();
+    if (hdr == NULL) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    if (task == NULL) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    if (type >= 4) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    memset(task, 0, DL_TASK_SIZE);
+    task->type = type;
+    task->priority = 0x7F;
+    task->appId = NWC24GetAppId();
+    task->groupId = NWC24GetGroupId();
+    task->titleIdHi = titleHi;
+    task->titleIdLo = titleLo;
+    task->id = 0xFFFF;
+    task->count = 1;
+    task->interval = 0xB40;
+    task->margin = 0x5A0;
+
+    isOctet = type == NWC24_DLTYPE_OCTETSTREAM_V1 || type == NWC24_DLTYPE_OCTETSTREAM_V2;
+    if (isOctet) {
+        strcpy(task->fileName, "content.bin");
+    }
+
+    result = CheckDlTask_i(task, TRUE);
+    return result >> 31;
+}
+
+// how often (in minutes) the task should run
+NWC24Err fn_803A2C58(NWC24iDlTask *task, u32 interval) {
+    NWC24Err result;
+
+    result = CheckDlTask_i(task, TRUE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (!DlIgnoreLimits && task->id >= DlHeader_i()->privateTasks && !(task->flags & DL_TASK_FLAG_NO_LIMITS)) {
+        if (interval < 180 || interval > 10080) {
+            return NWC24_ERR_INVALID_VALUE;
+        }
+    }
+
+    if (task->interval != interval) {
+        task->interval = interval;
+        if (task->id != 0xFFFF) {
+            SetNextTime_i(task, interval);
+        }
+    }
+
+    return NWC24_OK;
+}
+
+// the url to download from, http or https
+NWC24Err fn_803A2EA4(NWC24iDlTask *task, const char *url) {
+    NWC24Err result;
+
+    result = CheckDlTask_i(task, TRUE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = fn_80399EE0(url, 7, 0x100);
+    if (result >= 0) {
+        if (strncmp(url, "http://", 7) != 0 && strncmp(url, "https://", 8) != 0) {
+            result = NWC24_ERR_FORMAT;
+        } else {
+            result = NWC24_OK;
+        }
+    }
+
+    if (result < 0) {
+        return result;
+    }
+
+    if (!DlIgnoreLimits && (task->flags & 4) && strncmp(url, "http://", 7) == 0) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    fn_80399F5C(task->url, url, 0xEC);
+    return NWC24_OK;
+}
+
+// task flags
+NWC24Err fn_803A3064(NWC24iDlTask *task, u32 flags) {
+    NWC24Err result;
+
+    result = CheckDlTask_i(task, TRUE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (!DlIgnoreLimits && (flags & 4) && strncmp(task->url, "http://", 7) == 0) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    switch (task->type) {
+    case NWC24_DLTYPE_MULTIPART_V1:
+    case NWC24_DLTYPE_OCTETSTREAM_V1:
+        // the old types know nothing about the newer flag bits
+        if ((flags & 0x80000000) | (flags & 0x38)) {
+            return -40;
+        }
+        break;
+    default:
+        break;
+    }
+
+    task->flags = flags;
+    return NWC24_OK;
+}
+
+// how many times the task may run
+NWC24Err fn_803A31D0(NWC24iDlTask *task, int count) {
+    NWC24Err result;
+
+    result = CheckDlTask_i(task, TRUE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (count < 1 || (task->id >= DlHeader_i()->privateTasks && !(task->flags & DL_TASK_FLAG_NO_LIMITS) && count > 100)) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    task->count = count;
+    return NWC24_OK;
+}
+
+// ---- list entry accessors, they get handed to the sorter below ----
+
+u32 fn_803A5C38(u16 idx) {
+    return DlHeader_i()->entries[idx].lastAccess;
+}
+
+u32 fn_803A5C60(u16 idx) {
+    return DlHeader_i()->entries[idx].nextTime;
+}
+
+u8 fn_803A5C88(u16 idx) {
+    return DlHeader_i()->entries[idx].flags;
+}
+
+// ---- raw file helpers ----
+
+// writes some data (and then some zero padding) at an offset into a file, creating it if needed
+NWC24Err fn_803A5A8C(const char *path, u32 offset, const void *data, u32 len, u32 pad) {
+    NWC24File file;
+    NWC24Err result;
+    NWC24Err close;
+    u32 i;
+    u8 zero;
+
+    result = NWC24FOpen(&file, path, NWC24_OPEN_NAND_WBUFF);
+    if (result < 0) {
+        return result;
+    }
+
+    result = NWC24FSeek(&file, offset, NWC24_SEEK_BEG);
+    if (result < 0) {
+        return result;
+    }
+
+    if (data != NULL && len != 0) {
+        result = NWC24FWrite(data, len, &file);
+    }
+
+    for (i = 0; i < pad; i++) {
+        zero = 0;
+        result = NWC24FWrite(&zero, 1, &file);
+        if (result < 0) {
+            break;
+        }
+    }
+
+    close = NWC24FClose(&file);
+    return result != NWC24_OK ? result : close;
+}
+
+// reads some data from an offset in a file
+NWC24Err fn_803A5B84(const char *path, u32 offset, void *buf, u32 len) {
+    NWC24File file;
+    NWC24Err result;
+    NWC24Err close;
+
+    result = NWC24FOpen(&file, path, NWC24_OPEN_NAND_RBUFF);
+    if (result < 0) {
+        return result;
+    }
+
+    result = NWC24FSeek(&file, offset, NWC24_SEEK_BEG);
+    if (result < 0) {
+        return result;
+    }
+
+    if (buf != NULL && len != 0) {
+        result = NWC24FRead(buf, len, &file);
+    }
+
+    close = NWC24FClose(&file);
+    return result != NWC24_OK ? result : close;
+}
+
+// ---- writing tasks / header back to the list file ----
+
+static inline NWC24Err WriteDlTaskEntry_i(const NWC24iDlTask *task, NWC24File *file) {
+    NWC24Err result;
+    u16 id = task->id;
+    u16 max = DlHeader_i()->maxTasks;
+
+    if (max > NWC24i_DL_TASK_MAX || id >= max) {
+        result = NWC24_ERR_INVALID_VALUE;
+    } else {
+        result = NWC24FSeek(file, DL_HEADER_SIZE + id * DL_TASK_SIZE, NWC24_SEEK_BEG);
+    }
+
+    if (result < 0) {
+        return result;
+    }
+
+    memcpy(NWC24WorkP->dlTask, task, DL_TASK_SIZE);
+    result = NWC24FWrite(NWC24WorkP->dlTask, DL_TASK_SIZE, file);
+    if (result < 0) {
+        return result;
+    }
+
+    return NWC24_OK;
+}
+
+static inline NWC24Err WriteDlHeader_i(NWC24File *file) {
+    NWC24Err result = NWC24FSeek(file, 0, NWC24_SEEK_BEG);
+
+    if (result < 0) {
+        return result;
+    }
+
+    result = NWC24FWrite(DlHeader_i(), DL_HEADER_SIZE, file);
+    if (result < 0) {
+        return result;
+    }
+
+    return NWC24_OK;
+}
+
+// writes one task (and its list entry) out
+NWC24Err fn_803A50EC(NWC24iDlTask *task) {
+    NWC24File file;
+    NWC24Err result;
+    NWC24Err close;
+
+    result = NWC24FOpen(&file, DLFilePath, NWC24_OPEN_NAND_RW);
+    if (result < 0) {
+        return result;
+    }
+
+    result = WriteDlTaskEntry_i(task, &file);
+    if (result >= 0) {
+        NWC24iDlEntry *entry = DlEntry_i(task->id);
+
+        entry->app = task->appId;
+        result = NWC24_OK;
+        entry->flags = task->priority;
+        if (result >= 0) {
+            result = WriteDlHeader_i(&file);
+        }
+    }
+
+    close = NWC24FClose(&file);
+    return result != NWC24_OK ? result : close;
+}
+
+// clears a task's slot in the file and in the list header
+NWC24Err fn_803A58C8(NWC24iDlTask *task) {
+    NWC24File file;
+    NWC24Err result;
+    NWC24Err close;
+    NWC24iDlTask *empty;
+    u16 id;
+
+    result = NWC24FOpen(&file, DLFilePath, NWC24_OPEN_NAND_RW);
+    if (result < 0) {
+        return result;
+    }
+
+    empty = (NWC24iDlTask *)NWC24WorkP->dlTask;
+    id = task->id;
+    memset(empty, 0, DL_TASK_SIZE);
+    empty->type = 0xFF;
+    empty->id = id;
+    memset(&NWC24WorkP->dlHeader[sizeof(NWC24iDlEntry) * id + 0x80], 0, sizeof(NWC24iDlEntry));
+
+    result = WriteDlTaskEntry_i(empty, &file);
+    if (result >= 0) {
+        memset(&NWC24WorkP->dlHeader[sizeof(NWC24iDlEntry) * task->id + 0x80], 0, sizeof(NWC24iDlEntry));
+        result = WriteDlHeader_i(&file);
+    }
+
+    close = NWC24FClose(&file);
+    return result != NWC24_OK ? result : close;
+}
+
+// ---- looking at tasks ----
+
+// is there a task in the slot?
+static inline NWC24Err CheckDlEntryAvailable_i(u16 i) {
+    if (i >= DlHeader_i()->maxTasks || i == 0xFFFF) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    if (DlEntry_i(i)->app == 0) {
+        return NWC24_ERR_NOT_FOUND;
+    }
+
+    return NWC24_OK;
+}
+
+// steps *idx to the next used slot (or the first one)
+NWC24Err fn_803A3540(u16 *idx, BOOL first) {
+    u16 i;
+
+    if (DlHeader_i() == NULL) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    if (idx == NULL) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    if (first) {
+        *idx = 0;
+    } else {
+        (*idx)++;
+    }
+
+    if (*idx >= DlHeader_i()->maxTasks) {
+        return NWC24_ERR_DONE;
+    }
+
+    for (i = *idx; i < DlHeader_i()->maxTasks; i++) {
+        if (CheckDlEntryAvailable_i(i) >= 0) {
+            *idx = i;
+            return NWC24_OK;
+        }
+    }
+
+    return NWC24_ERR_DONE;
+}
+
+static inline NWC24Err DeleteDlTaskForced_i(NWC24iDlTask *task) {
+    NWC24Err result;
+
+    result = CheckDlTask_i(task, FALSE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = fn_803A58C8(task);
+    if (result >= 0) {
+        task->id = 0xFFFF;
+    }
+
+    return result;
+}
+
+NWC24Err NWC24DeleteDlTaskForced(NWC24DlTask *pTask) {
+    return DeleteDlTaskForced_i((NWC24iDlTask *)pTask);
+}
+
+static inline NWC24Err GetDlTask_i(NWC24iDlTask *pTask, u16 id) {
+    NWC24File file;
+    NWC24Err result;
+    NWC24Err close;
+    u16 max;
+
+    if (DlHeader_i() == NULL) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    result = CheckDlEntryAvailable_i(id);
+    if (result < 0) {
+        return result;
+    }
+
+    result = NWC24FOpen(&file, DLFilePath, NWC24_OPEN_NAND_RBUFF);
+    if (result < 0) {
+        return result;
+    }
+
+    max = DlHeader_i()->maxTasks;
+    if (max > NWC24i_DL_TASK_MAX || id >= max) {
+        result = NWC24_ERR_INVALID_VALUE;
+    } else {
+        result = NWC24FSeek(&file, DL_HEADER_SIZE + id * DL_TASK_SIZE, NWC24_SEEK_BEG);
+    }
+
+    if (result < 0) {
+        close = result;
+    } else {
+        result = NWC24FRead(pTask, DL_TASK_SIZE, &file);
+        close = NWC24_OK;
+        if (result < 0) {
+            close = result;
+        }
+    }
+
+    result = NWC24FClose(&file);
+    return close != NWC24_OK ? close : result;
+}
+
+NWC24Err NWC24GetDlTask(NWC24DlTask *pTask, u16 id) {
+    return GetDlTask_i((NWC24iDlTask *)pTask, id);
+}
+
+// the sorted walk over the task list. the state says what to sort by (last access / next time / flags),
+// which direction and where the last call ended
+typedef struct DlWalkState {
+    u32 order;
+    s32 best;
+    s32 last;
+    s32 lastIdx;
+    u32 started;
+    u32 valid;
+} DlWalkState;
+
+NWC24Err fn_803A367C(DlWalkState *state, u16 *out) {
+    typedef u32 (*KeyFn)(u16);
+    KeyFn getKey;
+    NWC24Err result;
+    BOOL desc;
+    BOOL found = FALSE;
+    u16 idx;
+    s32 key;
+
+    if (state->valid == 0) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    desc = state->order >> 31;
+    switch (state->order & 0xFFFF) {
+    case 0:
+        getKey = fn_803A5C38;
+        break;
+    case 1:
+        getKey = fn_803A5C60;
+        break;
+    case 2:
+        getKey = (KeyFn)fn_803A5C88;
+        break;
+    default:
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    if (state->started == 0) {
+        result = fn_803A3540(&idx, TRUE);
+        while (result >= 0) {
+            key = getKey(idx);
+            if (key == state->best && state->lastIdx < idx) {
+                *out = idx;
+                state->best = key;
+                state->last = key;
+                state->lastIdx = idx;
+                return NWC24_OK;
+            }
+
+            result = fn_803A3540(&idx, FALSE);
+        }
+    }
+
+    if (!(state->order & 0x80000000)) {
+        state->best = 0x7FFFFFFF;
+    } else {
+        state->best = 0x80000001;
+    }
+
+    result = fn_803A3540(&idx, TRUE);
+    while (result >= 0) {
+        key = getKey(idx);
+        if (desc ? (state->last < key) : (key < state->last)) {
+            if (desc ? (key < state->best) : (state->best < key)) {
+                found = TRUE;
+                *out = idx;
+                state->best = key;
+                state->lastIdx = idx;
+            }
+        }
+
+        result = fn_803A3540(&idx, FALSE);
+    }
+
+    if (found) {
+        state->last = state->best;
+        return NWC24_OK;
+    }
+
+    state->valid = 0;
+    return NWC24_ERR_DONE;
+}
+
+// throws the least recently used task out of the list to make space
+NWC24Err fn_803A4110(void) {
+    DlWalkState state;
+    NWC24iDlTask task;
+    u16 idx;
+    NWC24Err result;
+    NWC24Err close;
+    NWC24File file;
+    u16 max;
+
+    memset(&state, 0, sizeof(state));
+    state.best = 0x7FFFFFFF;
+    state.last = 0x80000001;
+    state.order = 0;
+    state.lastIdx = -1;
+    state.started = 1;
+    state.valid = 1;
+
+    do {
+        result = fn_803A367C(&state, &idx);
+    } while (result == NWC24_OK && idx < DlHeader_i()->privateTasks);
+
+    if (result >= 0) {
+        u16 id = idx;
+
+        if (DlHeader_i() == NULL) {
+            result = NWC24_ERR_LIB_NOT_OPENED;
+        } else {
+            result = CheckDlEntryAvailable_i(id);
+            if (result >= 0) {
+                result = NWC24FOpen(&file, DLFilePath, NWC24_OPEN_NAND_RBUFF);
+                if (result >= 0) {
+                    max = DlHeader_i()->maxTasks;
+                    if (max > NWC24i_DL_TASK_MAX || id >= max) {
+                        result = NWC24_ERR_INVALID_VALUE;
+                    } else {
+                        result = NWC24FSeek(&file, DL_HEADER_SIZE + id * DL_TASK_SIZE, NWC24_SEEK_BEG);
+                    }
+
+                    if (result < 0) {
+                        close = result;
+                    } else {
+                        result = NWC24FRead(&task, DL_TASK_SIZE, &file);
+                        close = NWC24_OK;
+                        if (result < 0) {
+                            close = result;
+                        }
+                    }
+
+                    result = NWC24FClose(&file);
+                    if (close != NWC24_OK) {
+                        result = close;
+                    }
+                }
+            }
+        }
+
+        if (result >= 0) {
+            result = CheckDlTask_i(&task, FALSE);
+            if (result == NWC24_OK) {
+                result = fn_803A58C8(&task);
+                if (result >= 0) {
+                    task.id = 0xFFFF;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    if (result == NWC24_ERR_DONE) {
+        return NWC24_ERR_FAILED;
+    }
+
+    return result;
+}
+
+// is the sub task counter pointing at a sub task that is switched on? (-39 says "no, try the next one")
+static inline NWC24Err SubTaskStatus_i(NWC24iDlTask *task, u8 counter) {
+    NWC24Err check = CheckDlTask_i(task, FALSE);
+
+    if (check == NWC24_OK) {
+        if (task->subTaskType == 0) {
+            check = -40;
+        } else if (task->subTaskMask == 0) {
+            check = NWC24_ERR_FATAL;
+        } else if (counter > 31) {
+            check = NWC24_ERR_INVALID_VALUE;
+        } else if (!((1 << counter) & task->subTaskMask)) {
+            check = -39;
+        } else {
+            check = NWC24_OK;
+        }
+    }
+
+    return check;
+}
+
+// marks a task as just used: stamps the time, clears the errors, moves on to the next sub task and saves
+static inline NWC24Err UpdateDlTask_i(NWC24iDlTask *task) {
+    NWC24Err result;
+    NWC24Err check;
+    s64 now;
+
+    result = CheckDlTask_i(task, TRUE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (task->id == 0xFFFF || task->id >= DlHeader_i()->maxTasks) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    result = NWC24iGetUniversalTime(&now);
+    if (result >= 0) {
+        s64 minutes = now;
+        u16 id;
+
+        check = CheckDlTask_i(task, FALSE);
+        if (check == NWC24_OK) {
+            id = task->id;
+            if (id == 0xFFFF) {
+                check = NWC24_ERR_FAILED;
+            } else {
+                DlEntry_i(id)->lastAccess = minutes / 60;
+                check = NWC24_OK;
+            }
+        }
+
+        result = check;
+    }
+
+    if (result < 0) {
+        return result;
+    }
+
+    if (CheckDlTask_i(task, TRUE) == NWC24_OK) {
+        task->lastError = 0;
+        task->errorCount = 0;
+    }
+
+    if (task->subTaskType == 1) {
+        while ((check = SubTaskStatus_i(task, task->subTaskCounter)) == -39) {
+            task->subTaskCounter = (task->subTaskCounter + 1) & 0x1F;
+        }
+
+        if (check < 0) {
+            return check;
+        }
+    }
+
+    return fn_803A50EC(task);
+}
+
+NWC24Err fn_803A38C0(NWC24iDlTask *task) {
+    return UpdateDlTask_i(task);
+}
+
+// takes a task for the list: gets a slot for it when it has none yet (kicking the oldest one out when the
+// list is full), then saves it
+NWC24Err fn_803A5284(NWC24iDlTask *task, u16 first, u16 last) {
+    NWC24Err result;
+    int url;
+
+    result = CheckDlTask_i(task, TRUE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (task->id >= DlHeader_i()->maxTasks && task->id != 0xFFFF) {
+        result = NWC24_ERR_INVALID_VALUE;
+    } else {
+        result = fn_80399EE0(task->url, 7, 0x100);
+        if (result >= 0) {
+            if (strncmp(task->url, "http://", 7) != 0 && strncmp(task->url, "https://", 8) != 0) {
+                result = NWC24_ERR_FORMAT;
+            } else {
+                result = NWC24_OK;
+            }
+        }
+    }
+
+    if (result < 0) {
+        return result;
+    }
+
+    for (;;) {
+        if (task->id != 0xFFFF) {
+            return UpdateDlTask_i(task);
+        }
+
+        if (task == NULL || first > last || first >= DlHeader_i()->maxTasks || last > DlHeader_i()->maxTasks) {
+            result = NWC24_ERR_INVALID_VALUE;
+        } else {
+            u16 i;
+
+            result = NWC24_ERR_FULL;
+            for (i = first; i < last; i++) {
+                if (DlEntry_i(i)->app == 0) {
+                    task->id = i;
+                    result = NWC24_OK;
+                    break;
+                }
+            }
+        }
+
+        if (result == NWC24_ERR_FULL) {
+            result = fn_803A4110();
+            if (result < 0) {
+                return result;
+            }
+        } else if (result < 0) {
+            return result;
+        }
+    }
+}
+
+// older list files only have a count for the sub tasks, this fills in the task limits of the header
+static inline void FixDlHeader_i(void) {
+    NWC24iDlHeader *hdr = DlHeader_i();
+
+    if (hdr->maxTasks == 0 && hdr->maxSubTasks != 0) {
+        NWC24File file;
+
+        hdr->maxTasks = hdr->maxSubTasks;
+        if (hdr->maxSubTasks > NWC24i_DL_SUBTASK_MAX) {
+            hdr->maxSubTasks = NWC24i_DL_SUBTASK_MAX;
+        }
+
+        if (NWC24FOpen(&file, DLFilePath, NWC24_OPEN_NAND_RW) >= 0) {
+            if (NWC24FSeek(&file, 0, NWC24_SEEK_BEG) >= 0) {
+                NWC24FWrite(DlHeader_i(), DL_HEADER_SIZE, &file);
+            }
+
+            NWC24FClose(&file);
+        }
+    }
+}
+
+static inline NWC24Err CheckDlHeaderLimits_i(NWC24iDlHeader *hdr) {
+    if (hdr->maxTasks < 1 || hdr->privateTasks < 1 || hdr->maxTasks < hdr->privateTasks) {
+        return NWC24_ERR_BROKEN;
+    }
+
+    return NWC24_OK;
+}
+
+// puts a task into the list, filling in the next update time
+NWC24Err fn_803A3D64(NWC24iDlTask *task) {
+    NWC24Err result;
+
+    FixDlHeader_i();
+    result = CheckDlHeaderLimits_i(DlHeader_i());
+    if (result < 0) {
+        return result;
+    }
+
+    result = fn_803A5284(task, DlHeader_i()->privateTasks, DlHeader_i()->maxTasks);
+    if (result < 0) {
+        return result;
+    }
+
+    {
+        s64 now = 0;
+
+        result = NWC24iGetUniversalTime(&now);
+        if (result >= 0) {
+            s64 when = now + task->interval * 60;
+
+            result = CheckDlTask_i(task, FALSE);
+            if (result == NWC24_OK) {
+                u16 id = task->id;
+
+                if (id == 0xFFFF) {
+                    result = NWC24_ERR_FAILED;
+                } else {
+                    DlEntry_i(id)->nextTime = when / 60;
+                    result = NWC24_OK;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+// reads the list header from the file
+NWC24Err fn_803A4D00(void) {
+    NWC24File file;
+    NWC24Err result;
+    NWC24Err read = NWC24_OK;
+    u32 length = 0;
+
+    result = NWC24FOpen(&file, DLFilePath, NWC24_OPEN_READ);
+    if (result < 0) {
+        return result;
+    }
+
+    result = NWC24FSeek(&file, 0, NWC24_SEEK_BEG);
+    if (result >= 0) {
+        result = NWC24FRead(NWC24WorkP->dlHeader, DL_HEADER_SIZE, &file);
+        if (result < 0) {
+            read = result;
+        }
+
+        result = read;
+    }
+
+    if (result < 0) {
+        return result;
+    }
+
+    read = NWC24FGetLength(&file, &length);
+    if (read >= 0) {
+        FixDlHeader_i();
+        read = CheckDlHeaderLimits_i(DlHeader_i());
+    }
+
+    result = NWC24FClose(&file);
+    return read != NWC24_OK ? read : result;
+}
+
+// walks the list and drops tasks that cannot be read back or that have run out of runs
+NWC24Err fn_803A49B0(NWC24iDlHeader *hdr, BOOL clear) {
+    NWC24iDlTask task;
+    u16 i;
+
+    for (i = 0; i < hdr->maxTasks; i++) {
+        if (CheckDlEntryAvailable_i(i) == NWC24_OK && clear) {
+            if (GetDlTask_i(&task, i) < 0) {
+                DeleteDlTaskForced_i(&task);
+            } else if (i >= DlHeader_i()->privateTasks && task.count == 0) {
+                DeleteDlTaskForced_i(&task);
+            }
+        }
+    }
+
+    return NWC24_OK;
+}
+
+NWC24Err NWC24iOpenDlTaskList(void) {
+    NWC24Err result;
+
+    result = fn_803A4D00();
+    if (result >= 0) {
+        NWC24iSynchronizeRtcCounter(FALSE);
+        result = fn_803A49B0(DlHeader_i(), FALSE);
+        if (result >= 0) {
+            return NWC24_OK;
+        }
+    }
+
+    return result;
+}
+
+NWC24Err NWC24iCloseDlTaskList(void) {
+    return NWC24_OK;
+}
+
+// copies the url out, optionally with a ".nn" counter on the end
+NWC24Err fn_803A4E90(NWC24iDlTask *task, char *buf, u32 size, BOOL withNumber, int number) {
+    NWC24Err result;
+    int len;
+
+    result = CheckDlTask_i(task, FALSE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    len = strlen(task->url);
+    if (len == 0) {
+        return NWC24_ERR_NOT_FOUND;
+    }
+
+    if ((u32)len < 8) {
+        return NWC24_ERR_FAILED;
+    }
+
+    if (len + (withNumber ? 3 : 0) + 1 > size) {
+        return NWC24_ERR_NOMEM;
+    }
+
+    strncpy(buf, task->url, len);
+    buf[len] = 0;
+    if (withNumber) {
+        snprintf(buf + len, size - len, ".%02d", number);
+    }
+
+    return NWC24_OK;
+}
+
+NWC24Err fn_803A3058(NWC24iDlTask *task, char *buf, u32 size) {
+    return fn_803A4E90(task, buf, size, FALSE, 0xFF);
+}
+
+// bits 0 and 1 of the optional flags exclude each other
+NWC24Err fn_803A4FCC(NWC24iDlTask *task, u8 flags) {
+    NWC24Err result;
+
+    result = CheckDlTask_i(task, TRUE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if ((flags & 1) && (flags & 2)) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    task->optFlags = flags;
+    return NWC24_OK;
+}
+
+// finds the first task of the running app and loads it
+NWC24Err fn_803A3324(NWC24iDlTask *out) {
+    NWC24Err result;
+    u16 idx;
+    u32 appId = NWC24GetAppId();
+
+    if (DlHeader_i() == NULL) {
+        result = NWC24_ERR_LIB_NOT_OPENED;
+    } else if (appId == 0) {
+        result = NWC24_ERR_INVALID_VALUE;
+    } else {
+        result = fn_803A3540(&idx, TRUE);
+        while (result >= 0) {
+            if (DlEntry_i(idx)->app == appId) {
+                result = NWC24_OK;
+                goto found;
+            }
+
+            result = fn_803A3540(&idx, FALSE);
+        }
+
+        result = NWC24_ERR_NOT_FOUND;
+    }
+
+found:
+    if (result < 0) {
+        return result;
+    }
+
+    return GetDlTask_i(out, idx);
+}
+
+static const char *WC24PubKFile = "wc24pubk.mod";
+
+// <title data dir>/<file> for the title the task belongs to
+static inline NWC24Err DlTaskCheckApp_i(const NWC24iDlTask *task) {
+    NWC24Err result = CheckDlTask_i(task, FALSE);
+
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (task->appId == 0) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    return NWC24_OK;
+}
+
+static inline NWC24Err DlTaskDataPath_i(const NWC24iDlTask *task, char *path, const char *file) {
+    NWC24Err result = DlTaskCheckApp_i(task);
+
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = DlTaskCheckApp_i(task);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    snprintf(path, 0x40, "/title/%08x/%08x/data", task->titleIdHi, task->titleIdLo);
+    return NWC24_OK;
+}
+
+// stores the 256 byte public key of the task's server
+NWC24Err fn_803A43D0(NWC24iDlTask *task, const void *key) {
+    char path[64];
+    NWC24Err result;
+    const char *file = WC24PubKFile;
+    int len;
+
+    result = CheckDlTask_i(task, TRUE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (key == NULL) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    result = DlTaskDataPath_i(task, path, file);
+    if (result >= 0) {
+        len = strlen(path);
+        snprintf(path + len, 0x40 - len, "/%s", file);
+        result = NWC24_OK;
+    }
+
+    if (result < 0) {
+        return result;
+    }
+
+    result = NANDCreate(path, 0x3D, 0);
+    if (result != 0 && result != NAND_RESULT_EXISTS) {
+        return -21;
+    }
+
+    return fn_803A5A8C(path, 0, key, 0x100, 0);
+}
+
+// stores the 16 byte hash that belongs to the public key
+NWC24Err fn_803A4684(NWC24iDlTask *task, const void *hash) {
+    char path[64];
+    NWC24Err result;
+    const char *file = WC24PubKFile;
+    int len;
+
+    result = CheckDlTask_i(task, TRUE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (hash == NULL) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    result = DlTaskDataPath_i(task, path, file);
+    if (result >= 0) {
+        len = strlen(path);
+        snprintf(path + len, 0x40 - len, "/%s", file);
+        result = NWC24_OK;
+    }
+
+    if (result < 0) {
+        return result;
+    }
+
+    if (fn_803A5B84(path, 0, NULL, 0) < 0) {
+        return -40;
+    }
+
+    fn_803A5A8C(path, 0x100, NULL, 0, 0x100);
+    return fn_803A5A8C(path, 0x200, hash, 0x10, 0);
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * more mail box bits: opening the box files, reading text back out of committed messages
+ * ------------------------------------------------------------------------------------------- */
+
+NWC24Err NWC24iOpenMBox(void) {
+    NWC24iMBCHeader *hdr;
+    NWC24File file;
+    NWC24Err result;
+    char *path = NWC24WorkP->pathWork;
+
+    Mail_memset(&NWC24WorkP->sendCtrl, 0, MBC_BLOCK_SIZE);
+    result = fn_8039C984(NWC24_MSGBOX_SEND, &hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    Mail_memset(&NWC24WorkP->recvCtrl, 0, MBC_BLOCK_SIZE);
+    result = fn_8039C984(NWC24_MSGBOX_RECV, &hdr);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = MBoxMbxPath_i(NWC24_MSGBOX_RECV, path, NWC24i_PATH_WORK_SIZE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24FOpen(&file, path, NWC24_OPEN_READ);
+    if (result == NWC24_OK) {
+        result = NWC24FClose(&file);
+    }
+
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = MBoxMbxPath_i(NWC24_MSGBOX_SEND, path, NWC24i_PATH_WORK_SIZE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    result = NWC24FOpen(&file, path, NWC24_OPEN_READ);
+    if (result == NWC24_OK) {
+        result = NWC24FClose(&file);
+    }
+
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    MBoxMount.count = 0;
+    MBoxMount.box = NWC24_MSGBOX_SEND;
+    return NWC24_OK;
+}
+
+// which box a committed message lives in
+static inline NWC24Err MsgBoxOf_i(NWC24iMsgObj *msg, NWC24MsgBoxId *id) {
+    if (msg->flags & NWC24_MSGOBJ_TO_SEND) {
+        *id = NWC24_MSGBOX_SEND;
+    } else if (msg->flags & NWC24_MSGOBJ_TO_RECV) {
+        *id = NWC24_MSGBOX_RECV;
+    } else {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    return NWC24_OK;
+}
+
+// reads the subject of a committed message back out of its file
+NWC24Err fn_8039FD68(NWC24iMsgObj *msg, char *buf, u32 size) {
+    NWC24File file;
+    NWC24MsgBoxId id;
+    NWC24Err result;
+    NWC24Err close;
+    u32 len;
+
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    if (!(msg->flags & NWC24_MSGOBJ_DELIVERING)) {
+        return NWC24_ERR_PROTECTED;
+    }
+
+    result = MsgBoxOf_i(msg, &id);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    len = msg->subject.size;
+    if (len == 0) {
+        return NWC24_ERR_NULL;
+    }
+
+    result = fn_8039B9B0(id, msg->id, &file);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (len > size - 1) {
+        len = size - 1;
+    }
+
+    NWC24FSeek(&file, msg->subject.offset, NWC24_SEEK_BEG);
+    result = NWC24FRead(buf, len, &file);
+    if (result == NWC24_OK) {
+        buf[len] = 0;
+        if (msg->subject.size > size - 1) {
+            result = NWC24_ERR_OVERFLOW;
+        }
+    }
+
+    close = NWC24iMBoxCloseMsg(&file);
+    return result != NWC24_OK ? result : close;
+}
+
+NWC24Err fn_803A001C(NWC24File *file, NWC24Data *src, u8 *out, u32 outSize, u32 *written);
+
+// reads (and decodes) attachment number idx of a committed message
+NWC24Err fn_8039FEB0(NWC24iMsgObj *msg, u32 idx, u8 *buf, u32 size) {
+    NWC24File file;
+    NWC24MsgBoxId id;
+    NWC24Err result;
+    NWC24Err close;
+    u32 got;
+
+    if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    if (!(msg->flags & NWC24_MSGOBJ_DELIVERING)) {
+        return NWC24_ERR_PROTECTED;
+    }
+
+    if (idx >= msg->numAttached) {
+        return NWC24_ERR_NOT_FOUND;
+    }
+
+    result = MsgBoxOf_i(msg, &id);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    if (msg->attached[idx].size == 0 || msg->attachedSize[idx] == 0) {
+        return NWC24_ERR_NULL;
+    }
+
+    result = fn_8039B9B0(id, msg->id, &file);
+    if (result != NWC24_OK) {
+        return result;
+    }
+
+    got = 0;
+    result = fn_803A001C(&file, &msg->attached[idx], buf, size, &got);
+    if (result == NWC24_OK && got != msg->attachedSize[idx]) {
+        result = NWC24_ERR_FORMAT;
+    }
+
+    close = NWC24iMBoxCloseMsg(&file);
+    return result != NWC24_OK ? result : close;
+}
+
+// decodes a base64 block out of the message file (up to the line that ends in "=" padding)
+NWC24Err fn_803A001C(NWC24File *file, NWC24Data *src, u8 *out, u32 outSize, u32 *written) {
+    u8 *readBuf = (u8 *)NWC24WorkP->WORK_0x400;
+    u32 off = src->offset;
+    int remaining = src->size;
+    u32 total = 0;
+    NWC24Err result = NWC24_OK;
+    BOOL done = FALSE;
+    u32 n;
+
+    while (remaining > 0 && !done) {
+        int chunk;
+        int cut;
+        int i;
+        u8 *p;
+
+        chunk = 0x400;
+        if (remaining <= 0x400) {
+            chunk = remaining;
+        }
+
+        NWC24FSeek(file, off, NWC24_SEEK_BEG);
+        result = NWC24FRead(readBuf, chunk, file);
+        if (result != NWC24_OK) {
+            break;
+        }
+
+        cut = 0;
+        p = readBuf;
+        for (i = 0; i < chunk; i++, p++) {
+            if (*p == '\r') {
+                cut = i;
+            }
+
+            if ((char)*p == '=') {
+                cut = i + 1;
+                done = TRUE;
+                result = NWC24_OK;
+                break;
+            }
+        }
+
+        if (cut == 0) {
+            break;
+        }
+
+        result = fn_8039D45C(readBuf, cut, out, outSize - total, &n);
+        if (result != NWC24_OK) {
+            break;
+        }
+
+        off += cut;
+        remaining -= cut;
+        total += n;
+        out += n;
+    }
+
+    if (result == NWC24_OK) {
+        *written = total;
+    }
+
+    return result;
+}
+
+extern u64 fn_803A2088(u64 id);
+
+// the user id has a checksum in its low bits: after the decode step the whole thing has to be a multiple
+// of the generator polynomial 0x635
+NWC24Err NWC24iCheckUserIdCrc(NWC24UserId id) {
+    u64 v = fn_803A2088(id);
+    int i;
+
+    for (i = 0; i < 43; i++) {
+        if ((v >> (53 - (i + 1))) & 1) {
+            v ^= (u64)0x635 << (42 - i);
+        }
+    }
+
+    if (v != 0) {
+        return NWC24_ERR_ID_CRC;
+    }
+
+    return NWC24_OK;
+}
