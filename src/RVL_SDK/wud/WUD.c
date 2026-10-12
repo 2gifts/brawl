@@ -303,6 +303,7 @@ static u8 WUDiSyncPrepareSearch(void) {
 }
 
 // state 17: a wiimote we've never seen, make room for it
+#pragma opt_propagation off
 static u8 WUDiSyncPrepareUnknownDevice(void) {
     WUDDevInfo* pWork;
 
@@ -330,6 +331,7 @@ static u8 WUDiSyncPrepareUnknownDevice(void) {
 
     return WUD_STATE_SYNC_TRY_CONNECT;
 }
+#pragma opt_propagation reset
 
 // state 22: copy the std list into the sc array and write it out
 static u8 WUDiSyncStoreDevInfo(void) {
@@ -1042,6 +1044,7 @@ static u8 WUDiLoadDevInfoFromSC(void) {
     BD_ADDR zero;
     int i;
     int num;
+    int num2;
     WUDDevInfo* pInfo;
 
     memset(&_scArray, 0, 0x461);
@@ -1086,10 +1089,10 @@ static u8 WUDiLoadDevInfoFromSC(void) {
     }
 
     _wcb.syncType = WUD_SYNC_TYPE_SIMPLE;
-    num = _scCmpArray.num;
+    num2 = _scCmpArray.num;
 
     for (i = 5; i >= 0; i--) {
-        if (num == 0) {
+        if (num2 == 0) {
             break;
         }
 
@@ -1118,7 +1121,7 @@ static u8 WUDiLoadDevInfoFromSC(void) {
 
                     WUDiMoveTopSmpDevInfoPtr(pInfo);
 
-                    num--;
+                    num2--;
                 }
             }
         }
