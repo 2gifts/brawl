@@ -57,9 +57,11 @@ void grHomerunLoopStadium::updateScroll(float deltaFrame) {
             getNodePosition(&m_pos[4], 0, m_node[4]);
             getNodePosition(&m_pos[5], 0, m_node[5]);
             m_state = 1;
-            // FALL-THROUGH
         case 1:
             m_state = 2;
+            break;
+        // MATCH-ONLY: the empty case 2 adds the compare the original's switch lowering emits; state 2 is updated in fixpos paths
+        case 2:
             break;
         }
     }

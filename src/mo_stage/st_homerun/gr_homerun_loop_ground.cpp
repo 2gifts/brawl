@@ -57,9 +57,11 @@ void grHomerunLoopGround::updateScroll(float deltaFrame) {
             getNodePosition(&m_posGroundWork[i], 0, m_node[i]);
         }
         m_state = 1;
-        // FALL-THROUGH
     case 1:
         m_state = 2;
+        break;
+    case 2:
+        // MATCH-ONLY: the original has an extra exit branch before the loop that only a case 2 produces
         break;
     }
 }

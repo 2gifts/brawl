@@ -835,8 +835,8 @@ void stDxPStadium::startPlayerVision() {
     }
     m_visionActive = true;
     int index = m_visionNext;
-    m_visionNext = index + 1;
     m_visionPlayer = players[index];
+    m_visionNext = index + 1;
     stDxPStadiumPlayerBytes* player = reinterpret_cast<stDxPStadiumPlayerBytes*>(&g_GameGlobal->m_modeMelee->m_playersInitData[m_visionPlayer]);
     stDxPStadiumMeleeFlags* flags = reinterpret_cast<stDxPStadiumMeleeFlags*>(reinterpret_cast<u8*>(g_GameGlobal->m_modeMelee) + 0xF);
     if (player->kind == Character_Jigglypuff && player->state == 3) {

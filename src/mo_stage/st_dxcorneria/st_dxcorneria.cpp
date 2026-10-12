@@ -441,19 +441,31 @@ void stDxCorneria::update(float deltaFrame) {
     GFoxUpdate(deltaFrame);
     PTBaseUpdate(deltaFrame);
     GFoxFallUpdate(deltaFrame);
-    Vec3f pos(0.0f, -250.0f, 0.0f);
+    // MATCH-ONLY: the zero is a local so that 0.0f - m_swayX is not folded into a negate.
+    float zero = 0.0f;
+    Vec3f pos(zero, -250.0f, zero);
     pos.m_y = -250.0f - m_fallHeight;
     pos.m_y = pos.m_y - m_swayY;
-    pos.m_x = 0.0f - m_swayX;
+    pos.m_x = zero - m_swayX;
     m_terrain->setPos(&pos);
     if (m_startCounter > 10) {
         GFoxCanonUpdate(deltaFrame);
         ArwingAttackUpdate(deltaFrame);
-        for (int i = 0; i < m_beamACount; i++) {
-            m_beamA[i].update(deltaFrame, m_arwingActive);
+        int i;
+        // MATCH-ONLY: one scope per loop keeps the beam pointer and the counter in the original registers.
+        {
+            stDxCorneriaBeam* beam = m_beamA;
+            for (i = 0; i < m_beamACount; i++) {
+                beam->update(deltaFrame, m_arwingActive);
+                beam++;
+            }
         }
-        for (int i = 0; i < m_beamGCount; i++) {
-            m_beamG[i].update(deltaFrame, m_greatFox);
+        {
+            stDxCorneriaBeam* beam = m_beamG;
+            for (i = 0; i < m_beamGCount; i++) {
+                beam->update(deltaFrame, m_greatFox);
+                beam++;
+            }
         }
         WaterSplashUpdate();
     } else {

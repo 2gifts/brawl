@@ -1075,8 +1075,8 @@ void stStadium::enableVisionScreen() {
     }
     u32 index = m_visionNext;
     m_visionActive = 1;
-    m_visionNext = index + 1;
     m_visionPlayer = players[index];
+    m_visionNext = index + 1;
     stStadiumPlayerBytes* player = reinterpret_cast<stStadiumPlayerBytes*>(&g_GameGlobal->m_modeMelee->m_playersInitData[m_visionPlayer]);
     stStadiumMeleeFlags* flags = reinterpret_cast<stStadiumMeleeFlags*>(reinterpret_cast<u8*>(g_GameGlobal->m_modeMelee) + 0xF);
     if (player->kind == Character_Jigglypuff && player->state == 3) {
