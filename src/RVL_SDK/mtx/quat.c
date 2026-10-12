@@ -5,6 +5,11 @@ extern double sqrt(double);
 extern double acos(double);
 extern double sin(double);
 
+// MATCH-ONLY: 1.0 goes into the constant pool ahead of 0.0, retail order
+void quat_pool_one(void) {
+    (1.0f);
+}
+
 void C_QUATMtx(Quaternion* quat, const Mtx mtx) {
     f32 root, trace;
     f32 inv;

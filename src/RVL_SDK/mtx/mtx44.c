@@ -30,6 +30,11 @@ void C_MTXFrustum(Mtx44 mtx, f32 t, f32 b, f32 l, f32 r, f32 n, f32 f) {
     mtx[3][3] = 0.0f;
 }
 
+// MATCH-ONLY: puts 0.5 in the constant pool ahead of the degrees to radians factor, retail order
+void mtx44_pool_half(void) {
+    (0.5f);
+}
+
 void C_MTXPerspective(Mtx44 mtx, f32 fovy, f32 aspect, f32 n, f32 f) {
     f32 rad, cot;
     f32 invrange;

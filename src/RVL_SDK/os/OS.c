@@ -483,7 +483,7 @@ static void ReportOSInfo(void) {
 }
 
 extern u64 fn_801E3844(void);
-extern void fn_802119BC(u64);
+extern s32 ESP_SetUid(u64);
 
 void OSInit(void) {
     OSBI2* bi2;
@@ -650,7 +650,7 @@ void OSInit(void) {
             if (ret == 0) {
                 playing = fn_801E3844();
                 if (playing != 0 && playing != titleId) {
-                    fn_802119BC(playing);
+                    ESP_SetUid(playing);
                 }
             }
 

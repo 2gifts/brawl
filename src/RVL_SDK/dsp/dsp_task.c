@@ -37,12 +37,13 @@ typedef enum {
     MAIL_CONTINUE = (TASK_MAIL_TO_DSP | 0x0003)
 } DSPUCode;
 
-DSPTask* __DSP_curr_task;
-DSPTask* __DSP_first_task;
-DSPTask* __DSP_last_task;
-DSPTask* __DSP_tmp_task;
-DSPTask* __DSP_rude_task;
+// built as c++ here, which lays these out in declaration order (the c build did the reverse)
 BOOL __DSP_rude_task_pending;
+DSPTask* __DSP_rude_task;
+DSPTask* __DSP_tmp_task;
+DSPTask* __DSP_last_task;
+DSPTask* __DSP_first_task;
+DSPTask* __DSP_curr_task;
 
 void __DSPHandler(s16 intr, OSContext* ctx) {
 #pragma unused(intr)

@@ -20,6 +20,11 @@ typedef struct {
 
 static ShutdownQueue ShutdownFunctionQueue;
 
+// HYPOTHESIS: no names for these two yet, one is the dol argument handed to the reboot call and the other is
+// set while shutting down into the menu
+u32 lbl_805A06E4;
+u32 lbl_805A06E0;
+
 // not named yet, they live in OSExec / OSPlayRecord / the reboot code
 extern void fn_801D9C80(void);
 extern BOOL __OSInitSTM(void);
@@ -29,8 +34,6 @@ extern void __VISetRGBModeImm(void);
 extern void __OSReboot(u32, u32);
 extern BOOL __OSInNandBoot;
 extern BOOL __OSInReboot;
-extern u32 lbl_805A06E0;
-extern u32 lbl_805A06E4;
 
 extern OSExecParams __OSRebootParams;
 

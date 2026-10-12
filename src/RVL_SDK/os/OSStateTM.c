@@ -28,6 +28,9 @@ static u8 StmImOutBuf[32] __attribute__((aligned(32)));
 static u8 StmVdInBuf[32] __attribute__((aligned(32)));
 static u8 StmVdOutBuf[32] __attribute__((aligned(32)));
 
+// used by the runtime init code (__set_debug_bba), lives with this unit's small bss
+u8 Debug_BBA;
+
 static OSStateCallback ResetCallback;
 static OSStateCallback PowerCallback;
 

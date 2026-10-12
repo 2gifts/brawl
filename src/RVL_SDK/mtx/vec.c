@@ -1,8 +1,9 @@
 // vec: vector math. add/normalize/magnitude/dot/cross are paired single asm, the half angle helper is C.
 #include "revolution/mtx.h"
 
-static const f32 c_half = 0.5f;
-static const f32 c_three = 3.0f;
+// sqrt iteration constants for the asm below, globals so they land in the pool before the C literals
+const f32 vec_half = 0.5f;
+const f32 vec_three = 3.0f;
 
 asm void PSVECAdd(register const Vec *a, register const Vec *b, register Vec *ab) {
     nofralloc
@@ -22,8 +23,8 @@ asm void PSVECNormalize(register const Vec *src, register Vec *dst) {
     psq_l f2, 0(r3), 0, 0
     psq_l f3, 0x8(r3), 1, 0
     ps_mul f5, f2, f2
-    lfs f0, c_half
-    lfs f1, c_three
+    lfs f0, vec_half
+    lfs f1, vec_three
     ps_madd f4, f3, f3, f5
     ps_sum0 f4, f4, f3, f5
     frsqrte f5, f4
@@ -41,7 +42,7 @@ asm void PSVECNormalize(register const Vec *src, register Vec *dst) {
 asm f32 PSVECMag(register const Vec *v) {
     nofralloc
     psq_l f0, 0(r3), 0, 0
-    lfs f4, c_half
+    lfs f4, vec_half
     ps_mul f0, f0, f0
     lfs f1, 0x8(r3)
     fsubs f2, f4, f4
@@ -50,7 +51,7 @@ asm f32 PSVECMag(register const Vec *v) {
     fcmpu cr0, f1, f2
     beqlr
     frsqrte f0, f1
-    lfs f3, c_three
+    lfs f3, vec_three
     fmuls f2, f0, f0
     fmuls f0, f0, f4
     fnmsubs f2, f2, f1, f3

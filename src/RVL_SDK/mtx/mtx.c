@@ -5,13 +5,15 @@ extern double sin(double);
 extern double cos(double);
 extern double tan(double);
 
-static const f32 c_one = 1.0f;
-static const f32 c_zero = 0.0f;
-static const f32 c_half = 0.5f;
-static const f32 c_three = 3.0f;
-static const f32 c_two = 2.0f;
-static const f32 c_neg_one = -1.0f;
-static const f32 c_deg2rad = 0.017453292f;
+// small float constants: declared up here, defined at the bottom so the c functions load them from memory
+// like the asm ones do and the constant pool ends up in retail order
+extern const f32 mtx_one;
+extern const f32 mtx_zero;
+extern const f32 mtx_half;
+extern const f32 mtx_three;
+extern const f32 mtx_two;
+extern const f32 mtx_neg_one;
+extern const f32 mtx_deg2rad;
 
 static f32 Unit01[2] = {0.0f, 1.0f};
 
@@ -20,8 +22,8 @@ static void __PSMTXRotAxisRadInternal(Mtx m, const Vec *axis, f32 sinA, f32 cosA
 
 asm void PSMTXIdentity(register Mtx m) {
     nofralloc
-    lfs f0, c_zero
-    lfs f1, c_one
+    lfs f0, mtx_zero
+    lfs f1, mtx_one
     psq_st f0, 0x8(r3), 0, 0
     ps_merge10 f2, f1, f0
     ps_merge01 f1, f0, f1
@@ -347,9 +349,9 @@ asm void PSMTXRotTrig(register Mtx m, register char axis, register f32 sinA, reg
     ori r0, r4, 0x20
     frsp f4, f2
     cmplwi r0, 0x78
-    lfs f0, c_zero
+    lfs f0, mtx_zero
     ps_neg f2, f5
-    lfs f1, c_one
+    lfs f1, mtx_one
     beq L_801EC68C
     cmplwi r0, 0x79
     beq L_801EC6B4
@@ -396,12 +398,12 @@ asm static void __PSMTXRotAxisRadInternal(register Mtx m, register const Vec *ax
     nofralloc
     psq_l f3, 0(r4), 0, 0
     frsp f11, f2
-    lfs f10, c_half
+    lfs f10, mtx_half
     frsp f12, f1
     ps_mul f4, f3, f3
     lfs f2, 0x8(r4)
     fadds f8, f10, f10
-    lfs f9, c_three
+    lfs f9, mtx_three
     fsubs f1, f10, f10
     ps_madd f5, f2, f2, f4
     fsubs f0, f8, f11
@@ -449,8 +451,8 @@ void PSMTXRotAxisRad(Mtx m, const Vec *axis, f32 rad) {
 
 asm void PSMTXTrans(register Mtx m, register f32 x, register f32 y, register f32 z) {
     nofralloc
-    lfs f0, c_zero
-    lfs f4, c_one
+    lfs f0, mtx_zero
+    lfs f4, mtx_one
     stfs f1, 0xc(r3)
     stfs f2, 0x1c(r3)
     psq_st f0, 0x4(r3), 0, 0
@@ -489,7 +491,7 @@ asm void PSMTXTransApply(register const Mtx src, register Mtx dst, register f32 
 
 asm void PSMTXScale(register Mtx m, register f32 x, register f32 y, register f32 z) {
     nofralloc
-    lfs f0, c_zero
+    lfs f0, mtx_zero
     stfs f1, 0(r3)
     psq_st f0, 0x4(r3), 0, 0
     psq_st f0, 0xc(r3), 0, 0
@@ -532,7 +534,7 @@ asm void PSMTXQuat(register Mtx m, register const Quaternion *q) {
     psq_l f4, 0(r4), 0, 0
     psq_l f5, 0x8(r4), 0, 0
     ps_mul f6, f4, f4
-    lfs f1, c_one
+    lfs f1, mtx_one
     ps_merge10 f9, f4, f4
     fsubs f0, f1, f1
     ps_madd f8, f5, f5, f6
@@ -604,66 +606,74 @@ void C_MTXLookAt(Mtx m, const Point3d *camPos, const Vec *camUp, const Point3d *
 void C_MTXLightFrustum(Mtx m, f32 t, f32 b, f32 l, f32 r, f32 n, f32 scaleS, f32 scaleT, f32 transS, f32 transT) {
     f32 tmp;
 
-    tmp = 1.0f / (r - l);
-    m[0][0] = ((2 * n) * tmp) * scaleS;
-    m[0][1] = 0.0f;
+    tmp = mtx_one / (r - l);
+    m[0][0] = ((mtx_two * n) * tmp) * scaleS;
+    m[0][1] = mtx_zero;
     m[0][2] = (((r + l) * tmp) * scaleS) - transS;
-    m[0][3] = 0.0f;
+    m[0][3] = mtx_zero;
 
-    tmp = 1.0f / (t - b);
-    m[1][0] = 0.0f;
-    m[1][1] = ((2 * n) * tmp) * scaleT;
+    tmp = mtx_one / (t - b);
+    m[1][0] = mtx_zero;
+    m[1][1] = ((mtx_two * n) * tmp) * scaleT;
     m[1][2] = (((t + b) * tmp) * scaleT) - transT;
-    m[1][3] = 0.0f;
+    m[1][3] = mtx_zero;
 
-    m[2][0] = 0.0f;
-    m[2][1] = 0.0f;
-    m[2][2] = -1.0f;
-    m[2][3] = 0.0f;
+    m[2][0] = mtx_zero;
+    m[2][1] = mtx_zero;
+    m[2][2] = mtx_neg_one;
+    m[2][3] = mtx_zero;
 }
 
 void C_MTXLightPerspective(Mtx m, f32 fovY, f32 aspect, f32 scaleS, f32 scaleT, f32 transS, f32 transT) {
     f32 angle;
     f32 cot;
 
-    angle = fovY * 0.5f;
-    angle = MTXDegToRad(angle);
+    angle = fovY * mtx_half;
+    angle = angle * mtx_deg2rad;
 
-    cot = 1.0f / (f32)tan(angle);
+    cot = mtx_one / (f32)tan(angle);
 
     m[0][0] = (cot / aspect) * scaleS;
-    m[0][1] = 0.0f;
+    m[0][1] = mtx_zero;
     m[0][2] = -transS;
-    m[0][3] = 0.0f;
+    m[0][3] = mtx_zero;
 
-    m[1][0] = 0.0f;
+    m[1][0] = mtx_zero;
     m[1][1] = cot * scaleT;
     m[1][2] = -transT;
-    m[1][3] = 0.0f;
+    m[1][3] = mtx_zero;
 
-    m[2][0] = 0.0f;
-    m[2][1] = 0.0f;
-    m[2][2] = -1.0f;
-    m[2][3] = 0.0f;
+    m[2][0] = mtx_zero;
+    m[2][1] = mtx_zero;
+    m[2][2] = mtx_neg_one;
+    m[2][3] = mtx_zero;
 }
 
 void C_MTXLightOrtho(Mtx m, f32 t, f32 b, f32 l, f32 r, f32 scaleS, f32 scaleT, f32 transS, f32 transT) {
     f32 tmp;
 
-    tmp = 1.0f / (r - l);
-    m[0][0] = (2.0f * tmp * scaleS);
-    m[0][1] = 0.0f;
-    m[0][2] = 0.0f;
+    tmp = mtx_one / (r - l);
+    m[0][0] = (mtx_two * tmp * scaleS);
+    m[0][1] = mtx_zero;
+    m[0][2] = mtx_zero;
     m[0][3] = ((-(r + l) * tmp) * scaleS) + transS;
 
-    tmp = 1.0f / (t - b);
-    m[1][0] = 0.0f;
-    m[1][1] = (2.0f * tmp) * scaleT;
-    m[1][2] = 0.0f;
+    tmp = mtx_one / (t - b);
+    m[1][0] = mtx_zero;
+    m[1][1] = (mtx_two * tmp) * scaleT;
+    m[1][2] = mtx_zero;
     m[1][3] = ((-(t + b) * tmp) * scaleT) + transT;
 
-    m[2][0] = 0.0f;
-    m[2][1] = 0.0f;
-    m[2][2] = 0.0f;
-    m[2][3] = 1.0f;
+    m[2][0] = mtx_zero;
+    m[2][1] = mtx_zero;
+    m[2][2] = mtx_zero;
+    m[2][3] = mtx_one;
 }
+
+const f32 mtx_one = 1.0f;
+const f32 mtx_zero = 0.0f;
+const f32 mtx_half = 0.5f;
+const f32 mtx_three = 3.0f;
+const f32 mtx_two = 2.0f;
+const f32 mtx_neg_one = -1.0f;
+const f32 mtx_deg2rad = 0.017453292f;
