@@ -583,12 +583,12 @@ exitStatus__52ftDededeStatusUniqProcessSpecialWaddledeeThrowPickupFP16soModuleAc
 __dt__52ftDededeStatusUniqProcessSpecialWaddledeeThrowPickupFv = .text:0x00011268; // type:function size:0x40
 __sinit_\ft_dedede_status_uniq_process_special_waddledee_throw_pickup_cpp = .text:0x000112A8; // type:function size:0x68
 __ct__52ftDededeStatusUniqProcessSpecialWaddledeeThrowPickupFv = .text:0x00011310; // type:function size:0x10
-fn_117_11320 = .text:0x00011320; // type:function size:0x18C
-fn_117_114AC = .text:0x000114AC; // type:function size:0x11C
-fn_117_115C8 = .text:0x000115C8; // type:function size:0xCC
+initStatus__30ftDededeStatusUniqProcessFinalFP16soModuleAccesser = .text:0x00011320; // type:function size:0x18C
+execStatus__30ftDededeStatusUniqProcessFinalFP16soModuleAccesser = .text:0x000114AC; // type:function size:0x11C
+execStop__30ftDededeStatusUniqProcessFinalFP16soModuleAccesser = .text:0x000115C8; // type:function size:0xCC
 execFixPos__30ftDededeStatusUniqProcessFinalFP16soModuleAccesser = .text:0x00011694; // type:function size:0x4
-fn_117_11698 = .text:0x00011698; // type:function size:0x13C
-fn_117_117D4 = .text:0x000117D4; // type:function size:0x350
+exitStatus__30ftDededeStatusUniqProcessFinalFP16soModuleAccesseri = .text:0x00011698; // type:function size:0x13C
+updateRecall__30ftDededeStatusUniqProcessFinalFP16soModuleAccesser = .text:0x000117D4; // type:function size:0x350
 __dt__30ftDededeStatusUniqProcessFinalFv = .text:0x00011B24; // type:function size:0x40
 __sinit_\ft_dedede_status_uniq_process_final_cpp = .text:0x00011B64; // type:function size:0x48
 __ct__30ftDededeStatusUniqProcessFinalFv = .text:0x00011BAC; // type:function size:0x10
