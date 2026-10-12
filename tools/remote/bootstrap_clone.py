@@ -137,7 +137,12 @@ NINJA = r'''
 #!/usr/bin/env python3
 import os,subprocess,sys
 a=sys.argv[1:];real='/srv/brawl-native/bin/ninja-real'
-if any(v in a for v in ('-t','-n','--version','-h','--help')):
+tool=None
+for i,v in enumerate(a):
+ if v=='-t' and i+1<len(a):tool=a[i+1]
+ elif v.startswith('-t') and len(v)>2:tool=v[2:]
+readonly_tools={'targets','deps','commands','query','compdb','compdb-targets','list','inputs','graph','browse','missingdeps','rules'}
+if tool in readonly_tools or (tool is None and any(v in a for v in ('-n','--version','-h','--help'))):
  os.execv(real,[real,*a])
 out=[];i=0
 while i<len(a):
