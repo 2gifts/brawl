@@ -146,6 +146,7 @@ int SOInit(const SOLibraryConfig *config) {
     case 2:
         rv = SO_EALREADY;
         break;
+    case 0:
     default:
         if (config == NULL || config->alloc == NULL || config->free == NULL) {
             rv = SO_EINVAL;
@@ -336,8 +337,8 @@ int SOiLeave(int unused, int rv) {
 
 int SOSocket(int af, int type, int protocol) {
     int fd;
-    int rv;
     int *args;
+    int rv;
 
     if (socketVersionRegistered == 0) {
         OSRegisterVersion(__SOSocketVersion);
@@ -551,7 +552,7 @@ int SOGetSockName(int s, SOSockAddr *addr) {
     int size;
     int rv;
     u8 *args;
-    u8 *out;
+    SOSockAddr *out;
     int fd;
 
     rv = SOiEnter(0, &fd);
@@ -565,13 +566,13 @@ int SOGetSockName(int s, SOSockAddr *addr) {
             if (args == NULL) {
                 rv = SO_ENOMEM;
             } else {
-                out = args + 0x20;
                 *(int *)args = s;
+                out = (SOSockAddr *)(args + 0x20);
                 memcpy(out, addr, addr->len);
 
                 rv = IOS_Ioctl(fd, NET_SO_GETSOCKNAME, args, 4, out, addr->len);
                 if (rv >= 0) {
-                    memcpy(addr, out, out[0]);
+                    memcpy(addr, out, out->len);
                 }
 
                 SOiFree(SO_MEM_IPC, args, size);
@@ -687,8 +688,8 @@ int SOPoll(SOPollFD fds[], unsigned nfds, s64 timeout) {
 
 int SOGetHostID(void) {
     int fd;
-    int rv = 0;
     int enter;
+    int rv = 0;
 
     enter = SOiEnter(0, &fd);
     if (enter == 0) {
@@ -1011,13 +1012,13 @@ extern int NCDGetLinkStatus(void);
 #define SO_ERR_LINK_DOWN -112
 
 SOHostEnt *SOGetHostByName(const char *name) {
-    int fd;
-    int rv;
-    SOHostEnt *result = NULL;
-    char *buf;
     SOHostEnt *ent;
-    int len;
+    char *buf;
+    int rv;
     int size;
+    int fd;
+    int len;
+    SOHostEnt *result = NULL;
 
     rv = SOiEnter(0, &fd);
     if (rv == 0) {
@@ -1076,26 +1077,24 @@ void SOFreeAddrInfo(SOAddrInfo *ai) {
 static inline int SOiMapKdError(int r, int out) {
     int rv = SO_EINVAL;
 
-    if ((u32)(r + 0x21) <= 0x21) {
-        switch (r + 0x21) {
-        case 0x21:
-            rv = 0;
-            break;
-        case 0x0B:
-        case 0x14:
-            rv = -0x30;
-            break;
-        case 0x00:
-        case 0x1F:
-            rv = out;
-            break;
-        case 0x20:
-            rv = SO_ERR_NETRM_NOTAVAIL;
-            break;
-        case 0x04:
-            rv = SO_EINPROGRESS;
-            break;
-        }
+    switch (r + 0x21) {
+    case 0x21:
+        rv = 0;
+        break;
+    case 0x0B:
+    case 0x14:
+        rv = -0x30;
+        break;
+    case 0x00:
+    case 0x1F:
+        rv = out;
+        break;
+    case 0x20:
+        rv = SO_ERR_NETRM_NOTAVAIL;
+        break;
+    case 0x04:
+        rv = SO_EINPROGRESS;
+        break;
     }
 
     return rv;
@@ -1110,14 +1109,12 @@ int SOiLeaveConfig(int unused, int rv, int flag) {
         r = NWC24iExecCmd9();
 
         switch (r) {
-        case -1:
-            rv = SO_ERR_NETRM_NOTAVAIL;
-            break;
         case -0x1D:
             rv = SO_EINPROGRESS;
             break;
         case 0:
             break;
+        case -1:
         default:
             rv = SO_ERR_NETRM_NOTAVAIL;
             break;
@@ -1215,12 +1212,6 @@ int SOiEnterConfig(int unused, int *fd, int *flag) {
             case -0x1D:
                 rv = SO_EINPROGRESS;
                 break;
-            case -2:
-                rv = SO_ENETRESET;
-                break;
-            case -0xF:
-                rv = -0x30;
-                break;
             case -28:
             case -27:
             case -26:
@@ -1234,21 +1225,14 @@ int SOiEnterConfig(int unused, int *fd, int *flag) {
             case -18:
             case -17:
             case -16:
-            case -14:
-            case -13:
-            case -12:
-            case -11:
-            case -10:
-            case -9:
-            case -8:
-            case -7:
-            case -6:
-            case -5:
-            case -4:
-            case -3:
-            case -1:
             default:
                 rv = SO_ERR_NETRM_NOTAVAIL;
+                break;
+            case -0xF:
+                rv = -0x30;
+                break;
+            case -2:
+                rv = SO_ENETRESET;
                 break;
             }
 
@@ -1388,8 +1372,8 @@ int SOInetAtoN(const char *cp, SOInAddr *inp) {
 
 // polls the stack's config error / host id every 10ms until it has an address (or the deadline passes)
 int SOiWaitConfig(u32 timeoutMs) {
-    s64 deadline = 0;
     int rv = 0;
+    s64 deadline = 0;
     int optval;
     int optlen;
 
@@ -1409,7 +1393,7 @@ int SOiWaitConfig(u32 timeoutMs) {
             break;
         }
 
-        if (optval != 0) {
+        if (r == 0 && optval != 0) {
             rv = optval;
             break;
         }
@@ -1575,16 +1559,18 @@ int SOStartupEx(u32 timeoutMs) {
 
 int SOCleanup(void) {
     int rv = 0;
-    int out = 0;
+    int out;
     int r;
     BOOL enabled = OSDisableInterrupts();
 
+    out = 0;
     switch (state) {
     case 1:
-        rv = SO_EALREADY;
-        break;
-    default:
         rv = SO_ENETRESET;
+        break;
+    case 0:
+    default:
+        rv = SO_EALREADY;
         break;
     case 2:
         if (lib.status < 0) {

@@ -12,11 +12,10 @@ static const u32 crc32Table[16] = {
 };
 
 u16 NETCalcCRC16(const u8 *data, u32 len) {
-    u32 b;
     u32 crc = 0;
 
     for (; len != 0; len--) {
-        b = *data++;
+        u8 b = *data++;
         crc = (crc >> 4) ^ crc16Table[(crc ^ b) & 0xF];
         crc = (crc >> 4) ^ crc16Table[(crc ^ (b >> 4)) & 0xF];
     }
@@ -25,11 +24,10 @@ u16 NETCalcCRC16(const u8 *data, u32 len) {
 }
 
 u32 NETCalcCRC32(const u8 *data, u32 len) {
-    u32 b;
     u32 crc = 0xFFFFFFFF;
 
     for (; len != 0; len--) {
-        b = *data++;
+        u8 b = *data++;
         crc = (crc >> 4) ^ crc32Table[(crc ^ b) & 0xF];
         crc = (crc >> 4) ^ crc32Table[(crc ^ (b >> 4)) & 0xF];
     }
