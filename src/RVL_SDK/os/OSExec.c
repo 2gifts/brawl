@@ -260,20 +260,20 @@ static void fn_801D9244(u32 result) {
 
 // reloads ios for the partition of the next title and opens that partition on the disc
 static void fn_801D924C(void) {
-    s32 err;
+    u32 viewCount;
     ESTicketView *view;
-    PartitionEntry *table;
     PartitionGroups *groups;
+    ESTicketView *views;
+    u32 memHi;
+    s32 err;
+    PartitionEntry *table;
+    u32 iosLo;
+    PartitionEntry *entry;
+    u32 memLo;
+    u32 iosHi;
+    u32 tmdSize;
     PartitionEntry *part;
     ESTitleMeta *tmd;
-    ESTicketView *views;
-    u32 iosHi;
-    u32 iosLo;
-    u32 viewCount;
-    u32 tmdSize;
-    u32 memHi;
-    u32 memLo;
-    PartitionEntry *entry;
     s32 i;
 
     err = -1;

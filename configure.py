@@ -595,7 +595,6 @@ config.libs = [
             Object(NonMatching, "gf_scene_manager_transition.cpp"),
             Object(NonMatching, "gf_video.cpp"),
             Object(NonMatching, "gf_scn_mdl_mod.cpp"),
-            Object(NonMatching, "RVL_SDK/si/SIBios.c"),
             Object(NonMatching, "RVL_SDK/vi/vi.c"),
             Object(NonMatching, "RVL_SDK/vi/vi3in1.c"),
             Object(NonMatching, "RVL_SDK/gx/GXInit.c"),
@@ -889,6 +888,7 @@ config.libs = [
         "objects": [
             Object(Matching, "RVL_SDK/base/PPCArch.c"),
             Object(Matching, "RVL_SDK/exi/EXIUart.c"),
+            Object(NonMatching, "RVL_SDK/si/SIBios.c"),
             Object(Matching, "RVL_SDK/si/SISamplingRate.c"),
             Object(Matching, "RVL_SDK/db/db.c"),
             Object(Matching, "RVL_SDK/vi/i2c.c"),
