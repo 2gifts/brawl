@@ -69,7 +69,7 @@ tHID_STATUS HID_HostGetSDPRecord(BD_ADDR addr, tSDP_DISCOVERY_DB *p_db, UINT32 d
 	hh_cb.p_sdp_db = p_db;
 	SDP_InitDiscoveryDb(p_db, db_len, 1, &uuid_list, 0, NULL);
 
-	if (SDP_ServiceSearchAttributeRequest(addr, p_db, hidh_search_callback))
+	if (SDP_ServiceSearchRequest(addr, p_db, hidh_search_callback))
 	{
 		hh_cb.sdp_cback = sdp_cback;
 		hh_cb.sdp_busy = TRUE;
@@ -227,8 +227,8 @@ static void hidh_search_callback(UINT16 sdp_result)
 		p_sdp_rec->sup_timeout = p_attr->attr_value.v.u16;
 	}
 
-	p_sdp_rec->p_sdp_layer_rec = p_rec;
-	(*hh_cb.sdp_cback)(SDP_SUCCESS, attr_mask, p_sdp_rec);
+	hh_cb.sdp_rec.p_sdp_layer_rec = p_rec;
+	(*hh_cb.sdp_cback)(SDP_SUCCESS, attr_mask, &hh_cb.sdp_rec);
 }
 
 void HID_HostInit(void)

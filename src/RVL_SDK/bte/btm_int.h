@@ -72,7 +72,7 @@
 #define BTM_PER_INQ_MIN_MAX_PERIOD	HCI_PER_INQ_MIN_MAX_PERIOD
 #define BTM_PER_INQ_MAX_MAX_PERIOD	HCI_PER_INQ_MAX_MAX_PERIOD
 
-#define BTM_EXT_RMT_NAME_TIMEOUT	40
+#define BTM_EXT_RMT_NAME_TIMEOUT	30
 
 #define BTM_CLOCK_OFFSET_VALID		0x8000
 
@@ -167,6 +167,7 @@ enum
 	BTM_SEC_STATE_ENCRYPTING		= 2,
 	BTM_SEC_STATE_GETTING_NAME		= 3,
 	BTM_SEC_STATE_AUTHORIZING		= 4,
+	BTM_SEC_STATE_DISCONNECTING		= 5,
 };
 
 enum
@@ -295,6 +296,17 @@ typedef struct
 	tHCI_STATUS			hci_status;		// size 0x01, offset 0x22
 	/* 1 byte padding */
 } tBTM_ESCO_INFO; // size 0x24
+
+enum
+{
+	SCO_ST_UNUSED,
+	SCO_ST_LISTENING,
+	SCO_ST_W4_CONN_RSP,
+	SCO_ST_CONNECTING,
+	SCO_ST_CONNECTED,
+	SCO_ST_DISCONNECTING,
+	SCO_ST_PEND_UNPARK,
+};
 
 typedef struct
 {
@@ -563,6 +575,7 @@ void btm_clr_inq_db(BD_ADDR p_bda);
 void btm_sec_init(UINT8 sec_mode);
 void btm_sco_init(void);
 UINT8 btm_num_sco_links_active(void);
+UINT8 BTM_NumScoLinks(void);
 void btm_sco_flush_sco_data(UINT16 sco_inx);
 
 // ---
@@ -640,6 +653,8 @@ void btm_discovery_timeout(void);
 
 void btm_inq_db_reset(void);
 void btm_inq_db_init(void);
+tBTM_INQ_INFO *btm_inq_db_first(void);
+tBTM_INQ_INFO *btm_inq_db_next(tBTM_INQ_INFO *p_cur);
 void btm_clr_inq_db(BD_ADDR p_bda);
 /**/
 void btm_event_filter_complete(UINT8 *p);
@@ -686,6 +701,7 @@ void btm_esco_proc_conn_chg(UINT8 status, UINT16 handle, UINT8 tx_interval,
                             UINT16 tx_pkt_len);
 BOOLEAN btm_is_sco_active(UINT16 handle);
 UINT8 btm_num_sco_links_active(void);
+UINT8 BTM_NumScoLinks(void);
 BOOLEAN btm_is_any_sco_active(void);
 BOOLEAN btm_is_sco_active_by_bdaddr(BD_ADDR remote_bda);
 

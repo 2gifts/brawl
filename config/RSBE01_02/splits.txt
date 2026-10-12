@@ -2577,10 +2577,13 @@ RVL_SDK/bte/gki_glue_unk.c:
 	.text       start:0x80230314 end:0x802305C8
 
 RVL_SDK/bte/hcisu_h2.c:
-	.text       start:0x80230C4C end:0x80231844
-	.bss        start:0x80525F60 end:0x80527FC0
+	.text       start:0x802305C8 end:0x80231844
+	.rodata     start:0x8040D680 end:0x8040D698
+	.data       start:0x8047FBF4 end:0x8047FC68
+	.bss        start:0x80525F28 end:0x80527FC0
 	.sdata      start:0x8059ED9C end:0x8059EDA8
 	.sbss       start:0x805A0D00 end:0x805A0D18
+	.sdata2     start:0x805A3A50 end:0x805A3A60
 
 RVL_SDK/bte/bte_hcisu.c:
 	.text       start:0x80231844 end:0x802318FC
@@ -2762,12 +2765,12 @@ RVL_SDK/bte/port_api.c:
 	.bss        start:0x8052D5A8 end:0x8052D9C0
 
 RVL_SDK/bte/port_rfc.c:
-	.text       start:0x8025047C end:0x80251AD0
-	.data       start:0x80483E98 end:0x804842E0
+	.text       start:0x8025047C end:0x80251878
+	.data       start:0x80483E98 end:0x804841C8
 
 RVL_SDK/bte/port_utils.c:
-	.text       start:0x80251AD0 end:0x80251E50
-	.data       start:0x804842E0 end:0x80484310
+	.text       start:0x80251878 end:0x80251E50
+	.data       start:0x804841C8 end:0x80484310
 
 RVL_SDK/bte/rfc_l2cap_if.c:
 	.text       start:0x80251E50 end:0x80252784
@@ -2795,11 +2798,11 @@ RVL_SDK/bte/rfc_utils.c:
 	.data       start:0x80484B08 end:0x80484B94
 
 RVL_SDK/bte/sdp_api.c:
-	.text       start:0x802568BC end:0x80257250
+	.text       start:0x802568BC end:0x80257724
 	.data       start:0x80484B94 end:0x80484BE8
 
 RVL_SDK/bte/sdp_db.c:
-	.text       start:0x80257250 end:0x802583F0
+	.text       start:0x80257724 end:0x802583F0
 	.data       start:0x80484BE8 end:0x80484C80
 
 RVL_SDK/bte/sdp_discovery.c:

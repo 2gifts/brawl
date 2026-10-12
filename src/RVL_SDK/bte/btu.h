@@ -130,6 +130,7 @@ void btu_hcif_send_host_rdy_for_data(void);
 void btu_hcif_cmd_timeout(void);
 
 void btu_init_core(void);
+void btu_init_cb(void);
 void BTE_Init(void);
 UINT16 BTU_AclPktSize(void);
 

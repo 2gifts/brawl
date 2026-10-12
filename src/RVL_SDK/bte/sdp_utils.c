@@ -233,9 +233,9 @@ UINT8 *sdpu_extract_uid_seq(UINT8 *p, UINT16 param_len, tSDP_UUID_SEQ *p_seq)
 	UINT8 *p_seq_end;
 	UINT8 descr, type, size;
 	UINT32 seq_len, uuid_len;
-	UINT16 u16;
+	int u16;
 	UINT32 u32;
-	int xx;
+	UINT32 xx;
 
 	p_seq->num_uids = 0;
 
@@ -286,8 +286,8 @@ UINT8 *sdpu_extract_uid_seq(UINT8 *p, UINT16 param_len, tSDP_UUID_SEQ *p_seq)
 	for (; p < p_seq_end;)
 	{
 		descr = *p++;
-		type = descr >> 3;
 		size = descr & 7;
+		type = descr >> 3;
 
 		if (type != UUID_DESC_TYPE)
 			return NULL;
@@ -326,7 +326,7 @@ UINT8 *sdpu_extract_uid_seq(UINT8 *p, UINT16 param_len, tSDP_UUID_SEQ *p_seq)
 
 		if (uuid_len == 2 || uuid_len == 4 || uuid_len == 16)
 		{
-			p_seq->uuid_entry[p_seq->num_uids].len = (UINT16)uuid_len;
+			p_seq->uuid_entry[p_seq->num_uids].len = uuid_len;
 
 			for (xx = 0; xx < (int)uuid_len; xx++)
 				p_seq->uuid_entry[p_seq->num_uids].value[xx] = *p++;
@@ -359,7 +359,8 @@ UINT8 *sdpu_extract_attr_seq(UINT8 *p, UINT16 param_len, tSDP_ATTR_SEQ *p_seq)
 
 	p_seq->num_attr = 0;
 
-	descr = *p++;
+	descr = *p;
+	p += 1;
 	type = descr >> 3;
 	size = descr & 7;
 
@@ -369,7 +370,8 @@ UINT8 *sdpu_extract_attr_seq(UINT8 *p, UINT16 param_len, tSDP_ATTR_SEQ *p_seq)
 	switch (size)
 	{
 	case SIZE_IN_NEXT_BYTE:
-		list_len = *p++;
+		list_len = *p;
+		p += 1;
 		break;
 
 	case SIZE_IN_NEXT_WORD:
@@ -393,7 +395,8 @@ UINT8 *sdpu_extract_attr_seq(UINT8 *p, UINT16 param_len, tSDP_ATTR_SEQ *p_seq)
 
 	for (; p < p_end_list;)
 	{
-		descr = *p++;
+		descr = *p;
+	p += 1;
 		type = descr >> 3;
 		size = descr & 7;
 
@@ -411,7 +414,8 @@ UINT8 *sdpu_extract_attr_seq(UINT8 *p, UINT16 param_len, tSDP_ATTR_SEQ *p_seq)
 			break;
 
 		case SIZE_IN_NEXT_BYTE:
-			attr_len = *p++;
+			attr_len = *p;
+			p += 1;
 			break;
 
 		case SIZE_IN_NEXT_WORD:

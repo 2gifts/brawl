@@ -1,6 +1,34 @@
+#include <so/status/so_status_module_impl.h>
+#include <so/so_module_accesser.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+// Skeleton: methods without bodies are stubs (not yet reconstructed).
 
-} // extern "C"
+class ftCaptainStatusUniqProcessFalconKick : public soStatusUniqProcess {
+public:
+    virtual ~ftCaptainStatusUniqProcessFalconKick() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+};
+
+class ftCaptainStatusUniqProcessFalconKickEnd : public soStatusUniqProcess {
+public:
+    virtual ~ftCaptainStatusUniqProcessFalconKickEnd() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+};
+
+void ftCaptainStatusUniqProcessFalconKick::initStatus(soModuleAccesser* moduleAccesser) {
+}
+
+void ftCaptainStatusUniqProcessFalconKick::execStatus(soModuleAccesser* moduleAccesser) {
+}
+
+void ftCaptainStatusUniqProcessFalconKickEnd::initStatus(soModuleAccesser* moduleAccesser) {
+}
+
+void ftCaptainStatusUniqProcessFalconKickEnd::execStatus(soModuleAccesser* moduleAccesser) {
+}
+
+ftCaptainStatusUniqProcessFalconKick g_ftCaptainStatusUniqProcessFalconKick;
+ftCaptainStatusUniqProcessFalconKickEnd g_ftCaptainStatusUniqProcessFalconKickEnd;
