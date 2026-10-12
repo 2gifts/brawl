@@ -1,6 +1,20 @@
+#include <ft/ft_status_uniq_process_air_lasso_hang.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+ftStatusUniqProcessAirLassoHang g_ftStatusUniqProcessAirLassoHang;
 
-} // extern "C"
+void ftStatusUniqProcessAirLassoHang::initStatus(soModuleAccesser* moduleAccesser) {
+    // HYPOTHESIS: not yet matched.
+}
+
+void ftStatusUniqProcessAirLassoHang::execStatus(soModuleAccesser* moduleAccesser) {
+    // HYPOTHESIS: not yet matched.
+}
+
+void ftStatusUniqProcessAirLassoHang::execFixPos(soModuleAccesser* moduleAccesser) {
+    // HYPOTHESIS: not yet matched.
+}
+
+void ftStatusUniqProcessAirLassoHang::exitStatus(soModuleAccesser* moduleAccesser, int) {
+    // HYPOTHESIS: not yet matched.
+}

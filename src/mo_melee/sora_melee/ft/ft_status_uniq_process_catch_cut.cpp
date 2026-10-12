@@ -1,6 +1,28 @@
+#define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+// MATCH-ONLY: the -O2,s fighter flags stop the implicit constructor inlining into the static initializer;
+// the Matching neighbours build at the default -O4,p.
+#include <ft/ft_kinetic_energy.h>
+#include <so/so_module_accesser.h>
+#include <so/so_value_accesser.h>
+#include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+class ftStatusUniqProcessCatchCut : public soStatusUniqProcess {
+public:
+    virtual ~ftStatusUniqProcessCatchCut() { }
+    virtual void initStatus(soModuleAccesser*);
+};
 
-} // extern "C"
+ftStatusUniqProcessCatchCut g_ftStatusUniqProcessCatchCut;
+
+void ftStatusUniqProcessCatchCut::initStatus(soModuleAccesser* moduleAccesser) {
+    ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
+    Vec2f speed;
+    Vec2f::copy(speed, stop.getSpeed());
+    float lr = moduleAccesser->getPostureModule().getLr();
+    float negLr = -lr;
+    // HYPOTHESIS: param 0xcc5 is the cut-throw horizontal push scale.
+    speed.m_x = speed.m_x + soValueAccesser::getConstantFloat(moduleAccesser, 0xcc5, 0) * negLr;
+    stop.m_speed.m_x = speed.m_x;
+    stop.m_speed.m_y = speed.m_y;
+}

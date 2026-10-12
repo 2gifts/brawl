@@ -1,6 +1,28 @@
+#include <ft/ft_status_uniq_process_hammer.h>
+#include <so/so_module_accesser.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+ftStatusUniqProcessHammer g_ftStatusUniqProcessHammer;
 
-} // extern "C"
+void ftStatusUniqProcessHammer::initStatus(soModuleAccesser* moduleAccesser) {
+    // HYPOTHESIS: not yet matched.
+}
+
+void ftStatusUniqProcessHammer::execStatus(soModuleAccesser* moduleAccesser) {
+    // HYPOTHESIS: not yet matched.
+}
+
+void ftStatusUniqProcessHammer::execFixPosCounter(soModuleAccesser* moduleAccesser) {
+    // HYPOTHESIS: not yet matched.
+}
+
+void ftStatusUniqProcessHammer::execFixPos(soModuleAccesser* moduleAccesser) {
+}
+
+void ftStatusUniqProcessHammer::exitStatus(soModuleAccesser* moduleAccesser, int) {
+    // HYPOTHESIS: not yet matched (calls ftUtil::isHammerStatus and the item/hammer module updates).
+}
+
+bool ftStatusUniqProcessHammer::checkDamage(soModuleAccesser* moduleAccesser, void*) {
+    return false;
+}

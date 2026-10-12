@@ -1,6 +1,16 @@
+#include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+// Appeal (taunt-style) status process: the base status process supplies the defaults.
+class ftStatusUniqProcessAppeal : public soStatusUniqProcess {
+public:
+    virtual ~ftStatusUniqProcessAppeal() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
+};
 
-} // extern "C"
+ftStatusUniqProcessAppeal g_ftStatusUniqProcessAppeal;
+
+void ftStatusUniqProcessAppeal::initStatus(soModuleAccesser* moduleAccesser) { }
+
+void ftStatusUniqProcessAppeal::exitStatus(soModuleAccesser* moduleAccesser, int) { }

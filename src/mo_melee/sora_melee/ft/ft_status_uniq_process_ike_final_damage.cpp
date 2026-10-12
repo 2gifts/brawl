@@ -1,6 +1,61 @@
+#include <so/so_module_accesser.h>
+#include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+// Local view of the stop (hit-stop) module; no header in this tree. Slots 7 and 9 are called without arguments.
+class ftStopModuleView {
+public:
+    virtual ~ftStopModuleView() { }
+    virtual void unk3();
+    virtual void unk4();
+    virtual void unk5();
+    virtual void unk6();
+    virtual void unk7();
+    virtual void unk8();
+    virtual void unk9();
+};
 
-} // extern "C"
+class ftStatusUniqProcessIkeFinalDamage : public soStatusUniqProcess {
+public:
+    virtual ~ftStatusUniqProcessIkeFinalDamage() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+    virtual void execFixPos(soModuleAccesser* moduleAccesser);
+    virtual void execFixCamera(soModuleAccesser* moduleAccesser);
+    virtual bool checkDamage(soModuleAccesser* moduleAccesser, void* unk);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
+};
+
+ftStatusUniqProcessIkeFinalDamage g_ftStatusUniqProcessIkeFinalDamage;
+
+void ftStatusUniqProcessIkeFinalDamage::initStatus(soModuleAccesser* moduleAccesser) { }
+
+void ftStatusUniqProcessIkeFinalDamage::execStatus(soModuleAccesser* moduleAccesser) { }
+
+void ftStatusUniqProcessIkeFinalDamage::execFixPos(soModuleAccesser* moduleAccesser) { }
+
+void ftStatusUniqProcessIkeFinalDamage::execFixCamera(soModuleAccesser* moduleAccesser) {
+    if (moduleAccesser->getLinkModule().chkLinkStop() == false) {
+        reinterpret_cast<ftStopModuleView*>(moduleAccesser->m_enumerationStart->m_stopModule)->unk7();
+        reinterpret_cast<ftStopModuleView*>(moduleAccesser->m_enumerationStart->m_stopModule)->unk9();
+    }
+}
+
+bool ftStatusUniqProcessIkeFinalDamage::checkDamage(soModuleAccesser* moduleAccesser, void* unk) { return true; }
+
+// HYPOTHESIS: unlinks the fighter from its link node (link slot 4) when it is linked.
+static void unlinkIkeFinalDamageNode(soModuleAccesser* moduleAccesser) {
+    if (moduleAccesser->getLinkModule().isLink(4)) {
+        moduleAccesser->getLinkModule().unlink(4);
+    }
+}
+
+void ftStatusUniqProcessIkeFinalDamage::exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind) {
+    // The 0xf8 and 0xf9 exits keep the link.
+    if (nextStatusKind < 0xfa && nextStatusKind >= 0xf8) {
+        return;
+    }
+    if (moduleAccesser->getLinkModule().isLink(4)) {
+        moduleAccesser->getLinkModule().unlink(4);
+    }
+}

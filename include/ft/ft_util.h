@@ -38,6 +38,10 @@ public:
     // Motion played while holding an item: -1 when the held item has no special wait motion. Items held by a
     // grip (only King Dedede keeps one) or by a normal/pickup/plate hold use it, except the motion sensor bomb.
     static int getItemWaitMotion(soModuleAccesser* acc);
+
+    // Cloud (pass-through platform) handling while airborne; names from the sora_melee map.
+    static void setCloudThroughCheck(soModuleAccesser* acc);
+    static bool checkCloudThroughOut(soModuleAccesser* acc);
     static int getItemSquatWaitMotion(soModuleAccesser* acc);
 
     // False while the fighter is moving faster than the common speed limit and its "free speed" flag is off.

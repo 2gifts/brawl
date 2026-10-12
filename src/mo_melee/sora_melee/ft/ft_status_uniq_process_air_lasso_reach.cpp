@@ -1,6 +1,12 @@
+#include <ft/ft_status_uniq_process_air_lasso_reach.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+ftStatusUniqProcessAirLassoReach g_ftStatusUniqProcessAirLassoReach;
 
-} // extern "C"
+void ftStatusUniqProcessAirLassoReach::initStatus(soModuleAccesser* moduleAccesser) {
+    // HYPOTHESIS: not yet matched (ground checks, posture/motion updates and the reach distance work values).
+}
+
+void ftStatusUniqProcessAirLassoReach::execFixPos(soModuleAccesser* moduleAccesser) {
+    // HYPOTHESIS: not yet matched.
+}

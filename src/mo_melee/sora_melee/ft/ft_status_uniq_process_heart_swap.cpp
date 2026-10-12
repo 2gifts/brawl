@@ -1,6 +1,70 @@
+#include <it/it_manager.h>
+#include <so/so_module_accesser.h>
+#include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+// HYPOTHESIS: four u32 values (0xff, 0, 0xff, 1) initialized in the static initializer before the status instance.
+struct ftStatusUniqProcessHeartSwapInit {
+    u32 m_0;
+    u32 m_4;
+    u32 m_8;
+    u32 m_c;
+    ftStatusUniqProcessHeartSwapInit() : m_0(0xff), m_4(0), m_8(0xff), m_c(1) { }
+};
+static ftStatusUniqProcessHeartSwapInit g_ftStatusUniqProcessHeartSwapInit;
 
-} // extern "C"
+// Local view of the motion module: the shared soMotionModule header puts getFrame/setFrame at other slots,
+// so these two calls are made through slots 8 and 9 of the real vtable.
+class ftMotionModuleView {
+public:
+    virtual ~ftMotionModuleView() { }
+    virtual void unk3();
+    virtual void unk4();
+    virtual void unk5();
+    virtual void unk6();
+    virtual void unk7();
+    virtual float getFrameView();
+    virtual void setFrameView(float frame);
+};
+
+class ftStatusUniqProcessHeartSwap : public soStatusUniqProcess {
+public:
+    virtual ~ftStatusUniqProcessHeartSwap() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+    virtual void execFixPos(soModuleAccesser* moduleAccesser);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
+};
+
+ftStatusUniqProcessHeartSwap g_ftStatusUniqProcessHeartSwap;
+
+void ftStatusUniqProcessHeartSwap::initStatus(soModuleAccesser* moduleAccesser) { }
+
+// Frame constants from module rodata (lbl_27_rodata_25F8 and lbl_27_rodata_25FC).
+static const float s_heartSwapCheckFrame = 0.0f;
+static const float s_heartSwapResetFrame = 1.0f;
+
+void ftStatusUniqProcessHeartSwap::execStatus(soModuleAccesser* moduleAccesser) {
+    if (s_heartSwapCheckFrame == reinterpret_cast<ftMotionModuleView*>(moduleAccesser->m_enumerationStart->m_motionModule)->getFrameView()) {
+        int instanceId = moduleAccesser->getWorkManageModule().getInt(0x10000030);
+        if (instanceId != 0) {
+            if (itManager::getInstance()->getItemFromInstanceId(instanceId) != 0) {
+                return;
+            }
+        }
+        reinterpret_cast<ftMotionModuleView*>(moduleAccesser->m_enumerationStart->m_motionModule)->setFrameView(s_heartSwapResetFrame);
+    }
+}
+
+void ftStatusUniqProcessHeartSwap::execFixPos(soModuleAccesser* moduleAccesser) { }
+
+void ftStatusUniqProcessHeartSwap::exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind) {
+    // HYPOTHESIS: work int 0x10000030 holds the instance id of the item that is removed on exit.
+    int instanceId = moduleAccesser->getWorkManageModule().getInt(0x10000030);
+    if (instanceId != 0) {
+        BaseItem* item = itManager::getInstance()->getItemFromInstanceId(instanceId);
+        if (item != 0) {
+            itManager::getInstance()->removeItem(item);
+        }
+    }
+}
