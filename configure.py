@@ -586,7 +586,7 @@ config.libs = [
         "cflags": cflags_common,
         "host": False,
         "objects": [
-            Object(NonMatching, "RVL_SDK/pad/Pad.c"),
+            Object(Matching, "RVL_SDK/pad/Pad.c", extra_cflags=["-lang c++"]),
             Object(Matching, "RVL_SDK/wenc/wenc.c"),
             Object(NonMatching, "RVL_SDK/wpad/WPAD.c"),
             Object(NonMatching, "RVL_SDK/bte/btm_sco.c"),
