@@ -1,6 +1,21 @@
+#include <so/so_module_accesser.h>
+#include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+class ftDiddyStatusUniqProcessSpecialPopGun : public soStatusUniqProcess {
+public:
+    virtual ~ftDiddyStatusUniqProcessSpecialPopGun() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+    virtual void execFixPos(soModuleAccesser* moduleAccesser);
+    virtual void execStop(soModuleAccesser* moduleAccesser);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
+};
 
-} // extern "C"
+void ftDiddyStatusUniqProcessSpecialPopGun::initStatus(soModuleAccesser* moduleAccesser) {}
+void ftDiddyStatusUniqProcessSpecialPopGun::execStatus(soModuleAccesser* moduleAccesser) {}
+void ftDiddyStatusUniqProcessSpecialPopGun::execFixPos(soModuleAccesser* moduleAccesser) {}
+void ftDiddyStatusUniqProcessSpecialPopGun::execStop(soModuleAccesser* moduleAccesser) {}
+void ftDiddyStatusUniqProcessSpecialPopGun::exitStatus(soModuleAccesser* moduleAccesser, int) {}
+
+ftDiddyStatusUniqProcessSpecialPopGun g_ftDiddyStatusUniqProcessSpecialPopGun;
