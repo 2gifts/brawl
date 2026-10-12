@@ -122,6 +122,28 @@ class CloneGuardTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("rejected", result.stderr)
 
+    def test_ninja_cleanup_is_guarded_and_build_jobs_are_capped(self):
+        real = self.root / "ninja-real"
+        real.write_text("#!/usr/bin/env python3\nimport json,sys\nprint(json.dumps(sys.argv[1:]))\n")
+        real.chmod(0o755)
+        client = self.root / "ninja-client.py"
+        client.write_text("import json,sys\nprint(json.dumps(sys.argv[1:]))\n")
+        wrapper = bootstrap.NINJA.replace("/srv/brawl-native/bin/ninja-real", str(real)).replace(
+            "/srv/brawl-native/tools/remote/clone_client.py", str(client)).replace(
+            "/usr/bin/python3", sys.executable)
+        path = self.root / "ninja.py"
+        path.write_text(wrapper)
+        for args in (["-t", "clean"], ["-tcleandead"], ["-t", "recompact"], ["-j99", "target"]):
+            result = subprocess.run([sys.executable, str(path), *args], env=self.env,
+                                    capture_output=True, text=True, check=True)
+            routed = json.loads(result.stdout)
+            self.assertEqual(routed[:3], ["guard", str(real), "-j2"])
+            self.assertNotIn("-j99", routed)
+        for args in (["-t", "targets"], ["-tdeps"], ["-n"], ["--version"]):
+            result = subprocess.run([sys.executable, str(path), *args], env=self.env,
+                                    capture_output=True, text=True, check=True)
+            self.assertEqual(json.loads(result.stdout), args)
+
     def test_cache_cleanup_rejects_outside_paths_and_symlinks(self):
         tree = ast.parse(bootstrap.SETUP)
         function = next(node for node in tree.body
