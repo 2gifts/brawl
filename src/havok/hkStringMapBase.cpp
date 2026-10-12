@@ -96,7 +96,7 @@ int hkStringMapBase::findKey(const char* key) const {
 #pragma dont_inline on
 hkResult hkStringMapBase::get(const char* key, unsigned long* out) const {
     int idx = findKey(key);
-    if (isValid(idx)) {
+    if (isValid(idx).m_bool) {
         *out = getValue(idx);
         return HK_SUCCESS;
     }

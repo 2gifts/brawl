@@ -122,11 +122,9 @@ const hk3AxisSweep::hkBpEndPoint* hk3AxisSweep::hkBpAxis::find(const hkBpEndPoin
 
 void hk3AxisSweep::hkBpAxis::insert(hkBpNode* node, int id, u16 minKey, u16 maxKey, u16& minIndex, u16& maxIndex) {
     int newSize = m_size + 2;
-    if ((m_capacityAndFlags & CAPACITY_MASK) < newSize) {
-        int newCap = newSize;
-        if (newSize < (m_capacityAndFlags & CAPACITY_MASK) * 2) {
-            newCap = (m_capacityAndFlags & CAPACITY_MASK) * 2;
-        }
+    int cap = getCapacity();
+    if (cap < newSize) {
+        int newCap = (newSize < cap * 2) ? cap * 2 : newSize;
         hkArrayUtil::_reserve(this, newCap, sizeof(hkBpEndPoint));
     }
     m_size = newSize;
@@ -135,8 +133,8 @@ void hk3AxisSweep::hkBpAxis::insert(hkBpNode* node, int id, u16 minKey, u16 maxK
         p[2] = *p;
         p--;
     }
-    p[2].m_value = maxKey;
     p[2].unk02 = id;
+    p[2].m_value = maxKey;
     maxIndex = (p - begin()) + 2;
     while (minKey < p->m_value) {
         p[1] = *p;

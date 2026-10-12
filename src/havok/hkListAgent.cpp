@@ -21,8 +21,7 @@
 hkListAgent* hkListAgent::createListAAgent(void* a, void* b, void* c, int d) {
     hkListAgent* agent = (hkListAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkListAgent), 0x1d);
     agent->m_memSizeAndFlags = sizeof(hkListAgent);
-    new (agent) hkListAgentVariant(b, a, c, d);
-    return agent;
+    return new (agent) hkListAgentVariant(b, a, c, d);
 }
 
 hkListAgent* hkListAgent::createListBAgent(void* a, void* b, void* c, int d) {

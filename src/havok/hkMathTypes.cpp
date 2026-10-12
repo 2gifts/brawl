@@ -13,13 +13,17 @@ float hkMathTypes::hkMath_atan2fApproximation(hkReal y, hkReal x) {
     hkReal r;
 
     if (ay <= ax) {
-        r = ay / (ax + 1.1920929e-07f);
+        // MATCH-ONLY: a per-branch epsilon temporary keeps the constant loads and fadds operand order
+        hkReal eps = 1.1920929e-07f;
+        r = ay / (ax + eps);
         hkReal p = r + r * (-0.121079f * r);
         r = p + r * (r * (-0.09352282f * r));
     } else {
-        r = ax / (ay + 1.1920929e-07f);
+        hkReal eps = 1.1920929e-07f;
+        r = ax / (ay + eps);
         hkReal p = r + r * (-0.121079f * r);
-        r = 1.5707964f - (p + r * (r * (-0.09352282f * r)));
+        p += r * (r * (-0.09352282f * r));
+        r = 1.5707964f - p;
     }
     if (x < 0.0f) {
         r = 3.1415927f - r;

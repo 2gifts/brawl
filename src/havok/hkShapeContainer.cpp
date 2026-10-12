@@ -30,7 +30,7 @@ const void* hkSingleShapeContainer::getVtablehkSingleShapeContainer() {
 
 int hkShapeContainer::getNumChildShapes() const {
     int count = 0;
-    for (int key = getFirstKey(); key != -1; key = getNextKey(key)) {
+    for (unsigned int key = getFirstKey(); key != 0xffffffff; key = getNextKey(key)) {
         count++;
     }
     return count;

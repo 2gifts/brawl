@@ -102,7 +102,7 @@ void hkAabbPhantom::deallocateInternalArrays() {
     if (m_overlappingCollidables.m_size == 0) {
         if (m_overlappingCollidables.mustDeallocate()) {
             hkThreadMemory::s_instance->deallocateChunk(m_overlappingCollidables.m_data,
-                                                        m_overlappingCollidables.getCapacity() * 4, 0x15);
+                                                        (m_overlappingCollidables.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * sizeof(hkCollidable*), 0x15);
         }
         m_overlappingCollidables.m_data = 0;
         m_overlappingCollidables.m_size = 0;

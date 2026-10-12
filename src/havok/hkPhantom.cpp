@@ -122,7 +122,7 @@ void hkPhantom::deallocateInternalArrays() {
     if (m_overlapListeners.m_size == 0) {
         if (m_overlapListeners.mustDeallocate()) {
             hkThreadMemory::s_instance->deallocateChunk(m_overlapListeners.m_data,
-                                                        m_overlapListeners.getCapacity() * 4, 0x15);
+                                                        (m_overlapListeners.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * 4, 0x15);
         }
         m_overlapListeners.m_data = 0;
         m_overlapListeners.m_size = 0;
@@ -132,7 +132,7 @@ void hkPhantom::deallocateInternalArrays() {
     if (m_phantomListeners.m_size == 0) {
         if (m_phantomListeners.mustDeallocate()) {
             hkThreadMemory::s_instance->deallocateChunk(m_phantomListeners.m_data,
-                                                        m_phantomListeners.getCapacity() * 4, 0x15);
+                                                        (m_phantomListeners.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * 4, 0x15);
         }
         m_phantomListeners.m_data = 0;
         m_phantomListeners.m_size = 0;

@@ -224,7 +224,7 @@ void ftManager::standbyFighterAdvFollow(int entryId) {
 void ftManager::standbyAllFighter() {
     int count = getEntries(this).size();
     for (int i = 0; i < count; i++) {
-        ftEntry* entry = getEntries(this).at(i);
+        ftEntry*& entry = getEntries(this).at(i);
         m_entryManager->getEntity(entry->m_entryId)->standby(1);
     }
 }
@@ -1208,11 +1208,10 @@ static inline bool isTeamBattle(const ftManager* manager) {
 
 // True when a result entry of the given character kind exists that did not finish as a winner (in team battles: not on the winning team).
 bool ftManager::isExistLoseFighterResult(int, int kind) const {
-    gmPlayerResultInfo* player;
-    int i;
     gmResultInfo* info = g_GameGlobal->m_resultInfo;
-    for (i = 0; i < 7; i++) {
-        player = &info->m_playersResultInfo[i];
+    gmPlayerResultInfo* player = &info->m_playersResultInfo[0];
+    int i;
+    for (i = 0; i < 7; i++, player++) {
         if (isTeamBattle(this) == true) {
             if (player->m_state != 3) {
                 if (*reinterpret_cast<u8*>(player) == kind) {
@@ -1336,14 +1335,16 @@ void ftManager::processUpdate() {
 
 void ftManager::startInputEvent() {
     int count = getEntries(this).size();
+    ftEntry* entry;
+    ftOwner* owner;
     for (int i = 0; i < count; i++) {
-        ftEntry* entry = getEntries(this).at(i);
+        entry = getEntries(this).at(i);
         ftInputController* controller = entry->m_input->getInput();
         u64 buttons1;
         u64 buttons0;
         buttons0 = controller->getButtons0();
         buttons1 = controller->getButtons1();
-        ftOwner* owner = entry->m_owner;
+        owner = entry->m_owner;
         owner->setController(controller->getControllerKind(), &buttons1, &buttons0);
     }
     unk6c_10 = true;
