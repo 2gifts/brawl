@@ -15,6 +15,9 @@ public:
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
 };
 
+// MATCH-ONLY: retain reset mode across the sum-speed query and vector construction, as in the native register lifetime.
+#pragma push
+#pragma opt_propagation off
 void ftDededeStatusUniqProcessSpecialSuperJump::initStatus(soModuleAccesser* moduleAccesser) {
     const float* k = s_superJumpConst;
     ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
@@ -24,8 +27,7 @@ void ftDededeStatusUniqProcessSpecialSuperJump::initStatus(soModuleAccesser* mod
     if (sumSpeed.m_x > soValueAccesser::getConstantFloat(moduleAccesser, 0xfb4, 0)) {
         sumSpeed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb4, 0);
     }
-    Vec2f speed(sumSpeed.m_x, k[0]);
-    controller.resetEnergy(mode, &speed, &Vec3f(k[0], k[0], k[0]), moduleAccesser);
+    controller.resetEnergy(mode, &Vec2f(sumSpeed.m_x, k[0]), &Vec3f(k[0], k[0], k[0]), moduleAccesser);
     controller.m_accelMul = k[1];
     controller.m_unk40 = k[0];
     controller.enable();
@@ -33,8 +35,7 @@ void ftDededeStatusUniqProcessSpecialSuperJump::initStatus(soModuleAccesser* mod
     ftKineticEnergyGravity& energy = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
     float a = k[2] * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb5, 0);
     float b = k[2] * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb6, 0);
-    Vec2f speed2(k[0], a);
-    energy.resetEnergy(0, &speed2, &Vec3f(k[0], k[0], k[0]), moduleAccesser);
+    energy.resetEnergy(0, &Vec2f(k[0], a), &Vec3f(k[0], k[0], k[0]), moduleAccesser);
     energy.m_gravity = b;
     if (moduleAccesser->getSituationModule().getKind() == 2) {
         energy.enable();
@@ -42,6 +43,7 @@ void ftDededeStatusUniqProcessSpecialSuperJump::initStatus(soModuleAccesser* mod
         energy.disable();
     }
 }
+#pragma pop
 
 void ftDededeStatusUniqProcessSpecialSuperJump::execStatus(soModuleAccesser* moduleAccesser) {
     float stickX = moduleAccesser->getControllerModule().getStickX();

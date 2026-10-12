@@ -12,9 +12,6 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
-// Verified native constants used by the ascent unit: zero, facing-left LR, and node yaw.
-static const float s_superJumpJumpConst[3] = { 0.0f, -1.0f, 180.0f };
-
 class ftDededeStatusUniqProcessSpecialSuperJumpJump : public soStatusUniqProcess {
 public:
     virtual ~ftDededeStatusUniqProcessSpecialSuperJumpJump() { }
@@ -25,24 +22,24 @@ public:
 };
 
 void ftDededeStatusUniqProcessSpecialSuperJumpJump::initStatus(soModuleAccesser* moduleAccesser) {
-    const float* k = s_superJumpJumpConst;
     float stickX = moduleAccesser->getControllerModule().getStickX();
     float horizontalSpeed = stickX * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb7, 0);
     float verticalSpeed = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb8, 0);
     if (moduleAccesser->getSituationModule().getKind() == 2) {
         verticalSpeed *= soValueAccesser::getConstantFloat(moduleAccesser, 0xfba, 0);
     }
-    verticalSpeed -= __fabsf(stickX) * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb9, 0);
+    stickX = __fabsf(stickX);
+    verticalSpeed -= stickX * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb9, 0);
 
     ftKineticEnergyGravity& vertical = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
     Vec2f verticalInitial(0.0f, verticalSpeed);
-    vertical.resetEnergy(0, &verticalInitial, &Vec3f(k[0], k[0], k[0]), moduleAccesser);
+    vertical.resetEnergy(0, &verticalInitial, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     vertical.m_gravity = -soValueAccesser::getConstantFloat(moduleAccesser, 0xfbb, 0);
     vertical.enable();
 
     ftKineticEnergyStop& horizontal = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
     Vec2f horizontalInitial(horizontalSpeed, 0.0f);
-    horizontal.resetEnergy(0x16, &horizontalInitial, &Vec3f(k[0], k[0], k[0]), moduleAccesser);
+    horizontal.resetEnergy(0x16, &horizontalInitial, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     horizontal.m_accel = Vec2f(0.0f, 0.0f);
     horizontal.m_speedTarget = Vec2f(horizontalSpeed, 0.0f);
     horizontal.m_brake = Vec2f(0.0f, 0.0f);
@@ -53,37 +50,41 @@ void ftDededeStatusUniqProcessSpecialSuperJumpJump::initStatus(soModuleAccesser*
     moduleAccesser->getWorkManageModule().onFlag(0x22000011);
     if (moduleAccesser->getPostureModule().getLr() == -1.0f) {
         Vec3f original = moduleAccesser->getModelModule().getNodeRotate(7);
+        // MATCH-ONLY: retain the returned Z load before assembling the native rotation copy.
+        float z = original.m_z;
         Vec3f rotate;
         rotate.m_x = original.m_x;
         rotate.m_y = 180.0f;
-        rotate.m_z = original.m_z;
+        rotate.m_z = z;
         moduleAccesser->getModelModule().setNodeRotate(7, &rotate);
     }
     moduleAccesser->getWorkManageModule().offFlag(0x22000015);
 }
 
 void ftDededeStatusUniqProcessSpecialSuperJumpJump::execStatus(soModuleAccesser* moduleAccesser) {
-    const float* k = s_superJumpJumpConst;
-    soWorkManageModule& work = moduleAccesser->getWorkManageModule();
-    if (work.isFlag(0x22000011)) {
-        work.addInt(1, 0x20000001);
-        if (work.getInt(0x20000001) > soValueAccesser::getConstantInt(moduleAccesser, 0x5dc4, 0)) {
-            soKineticEnergy::AttributeFlag flag(1);
-            Vec2f sumSpeed = moduleAccesser->getKineticModule().getSumSpeed(flag);
+    if (moduleAccesser->getWorkManageModule().isFlag(0x22000011)) {
+        moduleAccesser->getWorkManageModule().addInt(1, 0x20000001);
+        if (moduleAccesser->getWorkManageModule().getInt(0x20000001) > soValueAccesser::getConstantInt(moduleAccesser, 0x5dc4, 0)) {
+            Vec2f sumSpeed;
+            Vec2f::copy(sumSpeed, moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1)));
             ftKineticEnergyGravity& vertical = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-            Vec2f speed(0.0f, sumSpeed.m_y);
-            vertical.resetEnergy(0, &speed, &Vec3f(k[0], k[0], k[0]), moduleAccesser);
+            Vec2f speed;
+            speed.m_x = 0.0f;
+            speed.m_y = sumSpeed.m_y;
+            vertical.resetEnergy(0, &speed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             vertical.enable();
-            work.offFlag(0x22000011);
-            work.onFlag(0x22000015);
+            moduleAccesser->getWorkManageModule().offFlag(0x22000011);
+            moduleAccesser->getWorkManageModule().onFlag(0x22000015);
         }
     }
     if (moduleAccesser->getPostureModule().getLr() == -1.0f) {
         Vec3f original = moduleAccesser->getModelModule().getNodeRotate(7);
+        // MATCH-ONLY: retain the returned Z load before assembling the native rotation copy.
+        float z = original.m_z;
         Vec3f rotate;
         rotate.m_x = original.m_x;
         rotate.m_y = 180.0f;
-        rotate.m_z = original.m_z;
+        rotate.m_z = z;
         moduleAccesser->getModelModule().setNodeRotate(7, &rotate);
     }
 }
@@ -91,10 +92,12 @@ void ftDededeStatusUniqProcessSpecialSuperJumpJump::execStatus(soModuleAccesser*
 void ftDededeStatusUniqProcessSpecialSuperJumpJump::execStop(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getPostureModule().getLr() == -1.0f) {
         Vec3f original = moduleAccesser->getModelModule().getNodeRotate(7);
+        // MATCH-ONLY: keep the original Z load live while building the replacement rotation.
+        float z = original.m_z;
         Vec3f rotate;
         rotate.m_x = original.m_x;
         rotate.m_y = 180.0f;
-        rotate.m_z = original.m_z;
+        rotate.m_z = z;
         moduleAccesser->getModelModule().setNodeRotate(7, &rotate);
     }
 }
