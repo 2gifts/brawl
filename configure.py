@@ -587,6 +587,7 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "RVL_SDK/pad/Pad.c"),
+            Object(Matching, "RVL_SDK/wenc/wenc.c"),
             Object(NonMatching, "RVL_SDK/wpad/WPAD.c"),
             Object(NonMatching, "RVL_SDK/bte/btm_sco.c"),
             Object(NonMatching, "RVL_SDK/bte/btm_sec.c"),
@@ -630,7 +631,6 @@ config.libs = [
             Object(NonMatching, "RVL_SDK/sc/scsystem.c"),
             Object(NonMatching, "RVL_SDK/sc/scapi.c"),
             Object(NonMatching, "RVL_SDK/sc/scapi_prdinfo.c"),
-            Object(NonMatching, "RVL_SDK/wenc/wenc.c"),
             Object(NonMatching, "RVL_SDK/esp/esp.c"),
             Object(NonMatching, "RVL_SDK/kpad/KPAD.c"),
             Object(NonMatching, "RVL_SDK/usb/usb.c"),
