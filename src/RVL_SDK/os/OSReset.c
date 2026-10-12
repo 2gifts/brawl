@@ -22,8 +22,8 @@ static ShutdownQueue ShutdownFunctionQueue;
 
 // not named yet, they live in OSExec / OSPlayRecord / the reboot code
 extern void fn_801D9C80(void);
-extern void fn_801E25C0(void);
-extern void fn_801E2750(void);
+extern BOOL __OSInitSTM(void);
+extern void __OSHotReset(void);
 extern void __OSShutdownToSBY(void);
 extern void __VISetRGBModeImm(void);
 extern void __OSReboot(u32, u32);
@@ -218,12 +218,12 @@ void OSShutdownSystem(void) {
     }
 }
 
-static inline void __OSHotReset(void) {
+static inline void HotResetOrPanic(void) {
     if (lbl_805A0634 != 0 || lbl_805A06A4 != 0) {
-        fn_801E25C0();
+        __OSInitSTM();
     }
 
-    fn_801E2750();
+    __OSHotReset();
 
     OSPanic("OSReset.c", 973, "__OSHotReset(): Falied to reset system.\n");
 }
@@ -249,7 +249,7 @@ void OSRestart(u32 resetCode) {
 
     OSDisableScheduler();
     __OSShutdownDevices(1);
-    __OSHotReset();
+    HotResetOrPanic();
 }
 
 // HYPOTHESIS: shared tail of the return-to-menu variants, the arg lands in the last byte of the state flags
@@ -274,7 +274,7 @@ static void ReturnToMenuCommon(u8 menuMode) {
     __OSLaunchMenu();
     OSDisableScheduler();
     __VISetRGBModeImm();
-    __OSHotReset();
+    HotResetOrPanic();
 }
 
 void OSReturnToMenu(void) {
@@ -332,13 +332,13 @@ void __OSReturnToMenuForError(void) {
     __OSLaunchMenu();
     OSDisableScheduler();
     __VISetRGBModeImm();
-    __OSHotReset();
+    HotResetOrPanic();
 
     OSPanic("OSReset.c", 949, "__OSReturnToMenu(): Falied to boot system menu.\n");
 }
 
 void __OSHotResetForError(void) {
-    __OSHotReset();
+    HotResetOrPanic();
 }
 
 u32 OSGetResetCode(void) {
