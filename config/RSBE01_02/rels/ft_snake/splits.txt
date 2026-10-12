@@ -32,6 +32,7 @@ mo_fighter/ft_snake/ft_snake_status_uniq_process_final_entry.cpp:
 	.ctors      start:0x0000000C end:0x00000010
 	.rodata     start:0x00000068 end:0x00000078
 	.data       start:0x0000D860 end:0x0000D8D8
+	.bss        start:0x00000190 end:0x000001A0
 
 mo_fighter/ft_snake/ft_snake_status_uniq_process_final_set.cpp:
 	.text       start:0x00014B88 end:0x00014FD4
