@@ -2,7 +2,12 @@
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-// Class shapes from the module map; the method bodies are not reconstructed yet.
+// Photo-mode controller used by the Dolfin exit path (defined in sora_melee so_photo_call_back.cpp).
+class soPhotoController {
+public:
+    bool setFreezeMode();
+};
+
 class wnPikminDolfinStatusUniqProcessCommon : public soStatusUniqProcess {
 public:
     virtual ~wnPikminDolfinStatusUniqProcessCommon() { }
@@ -11,4 +16,12 @@ public:
 
 wnPikminDolfinStatusUniqProcessCommon g_wnPikminDolfinStatusUniqProcessCommon;
 
-void wnPikminDolfinStatusUniqProcessCommon::exitStatus(soModuleAccesser* moduleAccesser, int) { }
+void wnPikminDolfinStatusUniqProcessCommon::exitStatus(soModuleAccesser* moduleAccesser, int status) {
+    if (status < 4) {
+        if (status >= 1) {
+            return;
+        }
+    }
+    soPhotoController* photo = 0;
+    photo->setFreezeMode();
+}

@@ -1,5 +1,6 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <so/status/so_status_module_impl.h>
+#include <so/so_module_accesser.h>
 #include <types.h>
 
 // Class shapes from the module map; the method bodies are not reconstructed yet.
@@ -14,5 +15,7 @@ public:
 wnPikminChainStatusUniqProcessShoot g_wnPikminChainStatusUniqProcessShoot;
 
 void wnPikminChainStatusUniqProcessShoot::initStatus(soModuleAccesser* moduleAccesser) { }
-void wnPikminChainStatusUniqProcessShoot::execFixPosCounter(soModuleAccesser* moduleAccesser) { }
+void wnPikminChainStatusUniqProcessShoot::execFixPosCounter(soModuleAccesser* moduleAccesser) {
+    moduleAccesser->getWorkManageModule().incInt(0x20000000);
+}
 void wnPikminChainStatusUniqProcessShoot::execFixPos(soModuleAccesser* moduleAccesser) { }

@@ -2089,6 +2089,8 @@ config.libs = [
         "objects": [
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_status_uniq_process_entry.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_status_uniq_process_turn.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_status_uniq_process_attack.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_parthena.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/ft_pit_status_uniq_process_special_s_revolve.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/ft_pit_status_uniq_process_special_hi_fly.cpp"),

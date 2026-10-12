@@ -1,8 +1,8 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <so/status/so_status_module_impl.h>
+#include <so/so_module_accesser.h>
 #include <types.h>
 
-// Class shapes from the module map; the method bodies are not reconstructed yet.
 class wnNessPKFireStatusUniqProcessShoot : public soStatusUniqProcess {
 public:
     virtual ~wnNessPKFireStatusUniqProcessShoot() { }
@@ -12,5 +12,18 @@ public:
 
 wnNessPKFireStatusUniqProcessShoot g_wnNessPKFireStatusUniqProcessShoot;
 
-void wnNessPKFireStatusUniqProcessShoot::initStatus(soModuleAccesser* moduleAccesser) { }
-void wnNessPKFireStatusUniqProcessShoot::exitStatus(soModuleAccesser* moduleAccesser, int) { }
+void wnNessPKFireStatusUniqProcessShoot::initStatus(soModuleAccesser* moduleAccesser) {
+    moduleAccesser->getCollisionHitModule().setStatus(0, 0, 0);
+    moduleAccesser->getCollisionHitModule().setStatus(1, 3, 0);
+}
+
+void wnNessPKFireStatusUniqProcessShoot::exitStatus(soModuleAccesser* moduleAccesser, int next) {
+    soPostureModule& posture = moduleAccesser->getPostureModule();
+    soEffectModule& effect = moduleAccesser->getEffectModule();
+    posture.setRot(&Vec3f(0.0f, 0.0f, 0.0f), 0); // HYPOTHESIS: constant from lbl_101_rodata_D8
+    if (next != 1) {
+        Vec3f rot(0.0f, 0.0f, 0.0f); // HYPOTHESIS: constant from lbl_101_rodata_D8
+        Vec3f pos = posture.getPos();
+        effect.req(static_cast<EfID>(0x22), &pos, &rot, 1.0f, 0, -1); // HYPOTHESIS: scale from lbl_101_rodata_DC
+    }
+}
