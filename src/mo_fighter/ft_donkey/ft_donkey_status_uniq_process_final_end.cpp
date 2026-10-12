@@ -28,7 +28,6 @@ public:
     virtual void unk48(int, int);
 };
 
-extern "C" void fn_80076274(void* sndSystem, int soundId); // HYPOTHESIS: sound helper, name not recovered
 
 class ftDonkeyStatusUniqProcessFinalEnd : public soStatusUniqProcess {
 public:
@@ -38,7 +37,7 @@ public:
 };
 
 void ftDonkeyStatusUniqProcessFinalEnd::initStatus(soModuleAccesser* moduleAccesser) {
-    fn_80076274(g_sndSystem, 0x1b4b);
+    g_sndSystem->finalOffState(0x1b4b);
     moduleAccesser->getWorkManageModule().setInt(-1, 0x10000042);
 }
 
