@@ -2121,6 +2121,7 @@ RVL_SDK/exi/EXIBios.c:
 	.bss        start:0x804DE270 end:0x804DE330
 	.sdata      start:0x8059EA10 end:0x8059EA18
 	.sbss       start:0x805A0768 end:0x805A0770
+	.sdata2     start:0x805A3750 end:0x805A3758
 
 RVL_SDK/exi/EXIUart.c:
 	.text       start:0x801E5A88 end:0x801E5DBC
@@ -2165,7 +2166,7 @@ RVL_SDK/vi/vi3in1.c:
 RVL_SDK/mtx/mtx.c:
 	.text       start:0x801EC158 end:0x801ECD70
 	.sdata      start:0x8059EA60 end:0x8059EA68
-	.sdata2     start:0x805A3750 end:0x805A3778
+	.sdata2     start:0x805A3758 end:0x805A3778
 
 RVL_SDK/mtx/mtxvec.c:
 	.text       start:0x801ECD70 end:0x801ECDC4

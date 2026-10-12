@@ -29,6 +29,9 @@
 #define EXI_ID_IS_DOL_VIEWER 0x05070000
 
 // low memory words the sdk keeps around
+// 4 mhz clock select, handed to EXISelect by the other exi users
+const u32 __EXIFreq = 4;
+
 vs32 OS_EXI_LAST_INSERT_TABLE[3] : 0x800030C0;
 #define OS_EXI_LAST_INSERT(c) (OS_EXI_LAST_INSERT_TABLE[(c)])
 #define OS_DVD_DEVICE_CODE (*(volatile u16 *)0x800030E6)
