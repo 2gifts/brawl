@@ -42,6 +42,24 @@ mo_fighter/ft_zelda/ft_zelda_status_uniq_process_final.cpp:
 	.text       start:0x0000F104 end:0x0000FA0C
 	.ctors      start:0x00000018 end:0x0000001C
 
+mo_fighter/ft_zelda/wn_zelda_dein.cpp:
+	.text       start:0x0000FF60 end:0x00013408
+
+mo_fighter/ft_zelda/wn_zelda_dein_status_uniq_process_move.cpp:
+	.text       start:0x00013408 end:0x0001377C
+	.ctors      start:0x00000020 end:0x00000024
+
+mo_fighter/ft_zelda/wn_zelda_dein_status_uniq_process_tame.cpp:
+	.text       start:0x0001377C end:0x0001391C
+	.ctors      start:0x00000024 end:0x00000028
+
+mo_fighter/ft_zelda/wn_zelda_dein_s.cpp:
+	.text       start:0x0001391C end:0x0001576C
+
+mo_fighter/ft_zelda/wn_zelda_dein_s_status_uniq_process_bang.cpp:
+	.text       start:0x0001576C end:0x000159D0
+	.ctors      start:0x00000028 end:0x0000002C
+
 mo_fighter/ft_zelda/ft_sheik_status_uniq_process_special_s_start.cpp:
 	.text       start:0x0001DECC end:0x0001E4D0
 	.ctors      start:0x00000030 end:0x00000034
@@ -65,6 +83,32 @@ mo_fighter/ft_zelda/ft_sheik_status_uniq_process_special_hi_end.cpp:
 mo_fighter/ft_zelda/ft_sheik_status_uniq_process_special_lw.cpp:
 	.text       start:0x0001FD94 end:0x0001FFD0
 	.ctors      start:0x00000044 end:0x00000048
+
+mo_fighter/ft_zelda/wn_sheik_fusin.cpp:
+	.text       start:0x0001FFD0 end:0x00021D04
+
+mo_fighter/ft_zelda/wn_sheik_iron_wire.cpp:
+	.text       start:0x00021D04 end:0x00024494
+
+mo_fighter/ft_zelda/wn_sheik_iron_wire_status_uniq_process_had.cpp:
+	.text       start:0x00024494 end:0x00024534
+	.ctors      start:0x00000048 end:0x0000004C
+
+mo_fighter/ft_zelda/wn_sheik_iron_wire_status_uniq_process_shot.cpp:
+	.text       start:0x00024534 end:0x00024764
+	.ctors      start:0x0000004C end:0x00000050
+
+mo_fighter/ft_zelda/wn_sheik_iron_wire_status_uniq_process_shot_fall.cpp:
+	.text       start:0x00024764 end:0x00024804
+	.ctors      start:0x00000050 end:0x00000054
+
+mo_fighter/ft_zelda/wn_sheik_iron_wire_status_uniq_process_fall.cpp:
+	.text       start:0x00024804 end:0x00024BBC
+	.ctors      start:0x00000054 end:0x00000058
+
+mo_fighter/ft_zelda/wn_sheik_iron_wire_status_uniq_process_takeup.cpp:
+	.text       start:0x00024BBC end:0x00024D10
+	.ctors      start:0x00000058 end:0x0000005C
 
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x00024D10 end:0x00024DAC

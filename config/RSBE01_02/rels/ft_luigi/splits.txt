@@ -41,6 +41,13 @@ mo_fighter/ft_luigi/ft_luigi_status_special_s_wall.cpp:
 	.data       start:0x000064B8 end:0x00006580
 	.bss        start:0x000001E0 end:0x000001F0
 
+mo_fighter/ft_luigi/wn_luigi_negative_zone.cpp:
+	.text       start:0x0000D428 end:0x00010D7C
+
+mo_fighter/ft_luigi/wn_luigi_negative_zone_status_uniq_process_end.cpp:
+	.text       start:0x00010D7C end:0x00010EAC
+	.ctors      start:0x00000010 end:0x00000014
+
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x00010EAC end:0x00010F48
 	.data       start:0x00006ED8 end:0x00006EE7

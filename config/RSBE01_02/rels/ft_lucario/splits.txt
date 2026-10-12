@@ -34,6 +34,9 @@ mo_fighter/ft_lucario/ft_lucario_status_uniq_process_final.cpp:
 	.text       start:0x00010B18 end:0x0001181C
 	.ctors      start:0x00000010 end:0x00000014
 
+mo_fighter/ft_lucario/wn_lucario_qigong.cpp:
+	.text       start:0x0001185C end:0x000140AC
+
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x000140AC end:0x00014148
 	.data       start:0x00007350 end:0x0000735F

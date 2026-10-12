@@ -54,6 +54,60 @@ mo_fighter/ft_ness/ft_ness_status_uniq_process_special_lw_hold.cpp:
 	.text       start:0x00012EB4 end:0x000131FC
 	.ctors      start:0x00000024 end:0x00000028
 
+mo_fighter/ft_ness/wn_ness_pk_fire.cpp:
+	.text       start:0x000131FC end:0x00016474
+
+mo_fighter/ft_ness/wn_ness_pk_fire_status_uniq_process_shoot.cpp:
+	.text       start:0x00016474 end:0x00016654
+	.ctors      start:0x00000028 end:0x0000002C
+
+mo_fighter/ft_ness/wn_ness_pk_fire_status_uniq_process_pillar.cpp:
+	.text       start:0x00016654 end:0x000168B8
+	.ctors      start:0x0000002C end:0x00000030
+
+mo_fighter/ft_ness/wn_ness_pk_thunder.cpp:
+	.text       start:0x000168B8 end:0x0001A078
+
+mo_fighter/ft_ness/wn_ness_pk_thunder_status_uniq_process_move.cpp:
+	.text       start:0x0001A078 end:0x0001A62C
+	.ctors      start:0x00000030 end:0x00000034
+
+mo_fighter/ft_ness/wn_ness_pk_thunder_child.cpp:
+	.text       start:0x0001A62C end:0x0001C788
+
+mo_fighter/ft_ness/wn_ness_pk_thunder_child_status_uniq_process_move.cpp:
+	.text       start:0x0001C788 end:0x0001CA14
+	.ctors      start:0x00000034 end:0x00000038
+
+mo_fighter/ft_ness/wn_ness_pk_star_storm.cpp:
+	.text       start:0x0001CA14 end:0x0001EABC
+
+mo_fighter/ft_ness/wn_ness_yoyo.cpp:
+	.text       start:0x0001EABC end:0x00020CF4
+
+mo_fighter/ft_ness/wn_ness_yoyo_status_uniq_process_shot.cpp:
+	.text       start:0x00020CF4 end:0x00020E54
+	.ctors      start:0x00000038 end:0x0000003C
+
+mo_fighter/ft_ness/wn_ness_yoyo_status_uniq_process_shot_fall.cpp:
+	.text       start:0x00020E54 end:0x00021738
+	.ctors      start:0x0000003C end:0x00000040
+
+mo_fighter/ft_ness/wn_ness_yoyo_head.cpp:
+	.text       start:0x00021738 end:0x00023E40
+
+mo_fighter/ft_ness/wn_ness_yoyo_head_status_uniq_process_shot.cpp:
+	.text       start:0x00023E40 end:0x00024250
+	.ctors      start:0x00000040 end:0x00000044
+
+mo_fighter/ft_ness/wn_ness_yoyo_head_status_uniq_process_shot_fall.cpp:
+	.text       start:0x00024250 end:0x000246B4
+	.ctors      start:0x00000044 end:0x00000048
+
+mo_fighter/ft_ness/wn_ness_yoyo_head_status_uniq_process_takeup.cpp:
+	.text       start:0x000246B4 end:0x00024B28
+	.ctors      start:0x00000048 end:0x0000004C
+
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x00024B28 end:0x00024BC4
 	.data       start:0x0000C378 end:0x0000C387

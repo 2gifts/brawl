@@ -54,6 +54,30 @@ mo_fighter/ft_kirby/ft_kirby_status_uniq_process_final.cpp:
 	.text       start:0x00018020 end:0x0001C244
 	.ctors      start:0x00000028 end:0x0000002C
 
+mo_fighter/ft_kirby/wn_kirby_final_cutter.cpp:
+	.text       start:0x000217F0 end:0x0002408C
+
+mo_fighter/ft_kirby/wn_kirby_final_cutter_status_uniq_process_regular.cpp:
+	.text       start:0x0002408C end:0x00024438
+	.ctors      start:0x00000030 end:0x00000034
+
+mo_fighter/ft_kirby/wn_kirby_hammer.cpp:
+	.text       start:0x00024438 end:0x00025EC4
+
+mo_fighter/ft_kirby/wn_kirby_starmissile.cpp:
+	.text       start:0x00025EC4 end:0x00028FC8
+	.ctors      start:0x00000034 end:0x00000038
+
+mo_fighter/ft_kirby/wn_kirby_stone.cpp:
+	.text       start:0x00028FC8 end:0x0002AF4C
+
+mo_fighter/ft_kirby/wn_kirby_nabe.cpp:
+	.text       start:0x0002AF4C end:0x0002DAA4
+	.ctors      start:0x00000038 end:0x0000003C
+
+mo_fighter/ft_kirby/wn_kirby_cook_hat.cpp:
+	.text       start:0x0002DAA4 end:0x0002F8A0
+
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x0002F8A0 end:0x0002F93C
 	.data       start:0x0000EAD8 end:0x0000EAE7

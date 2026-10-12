@@ -62,6 +62,14 @@ mo_fighter/ft_diddy/ft_diddy_status_uniq_process_final.cpp:
 	.text       start:0x00011468 end:0x00013100
 	.ctors      start:0x00000030 end:0x00000034
 
+mo_fighter/ft_diddy/wn_diddy_barrel.cpp:
+	.text       start:0x00013524 end:0x0001925C
+	.ctors      start:0x00000034 end:0x00000038
+
+mo_fighter/ft_diddy/wn_diddy_explosion.cpp:
+	.text       start:0x0001925C end:0x0001B98C
+	.ctors      start:0x00000038 end:0x0000003C
+
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x0001B99C end:0x0001BA38
 	.data       start:0x0000A958 end:0x0000A967
