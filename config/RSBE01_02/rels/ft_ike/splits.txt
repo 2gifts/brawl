@@ -34,6 +34,13 @@ mo_fighter/ft_ike/ft_ike_status_uniq_process_final.cpp:
 	.text       start:0x0000EE24 end:0x0000FBC4
 	.ctors      start:0x00000010 end:0x00000014
 
+mo_fighter/ft_ike/wn_ike_sword.cpp:
+	.text       start:0x0000FBC4 end:0x00012DE4
+
+mo_fighter/ft_ike/wn_activate_desc.cpp:
+	.text       start:0x00012DE4 end:0x00013DE8
+	.ctors      start:0x00000014 end:0x00000018
+
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x00013DE8 end:0x00013E84
 	.data       start:0x000068B8 end:0x000068C7
