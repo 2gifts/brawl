@@ -1,8 +1,10 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
+#include <ft/ft_status_uniq_process_views.h>
 #include <types.h>
 
-// Class shapes from the module map; the method bodies are not reconstructed yet.
+// Capture (Taboo) status process. Forwards to the fighter's capture module (m_enumerationStart->m_captureModule).
 class ftStatusUniqProcessCaptureTaboo : public soStatusUniqProcess {
 public:
     virtual ~ftStatusUniqProcessCaptureTaboo() { }
@@ -15,6 +17,19 @@ public:
 ftStatusUniqProcessCaptureTaboo g_ftStatusUniqProcessCaptureTaboo;
 
 void ftStatusUniqProcessCaptureTaboo::initStatus(soModuleAccesser* moduleAccesser) { }
-void ftStatusUniqProcessCaptureTaboo::exitStatus(soModuleAccesser* moduleAccesser, int) { }
-void ftStatusUniqProcessCaptureTaboo::execFixPos(soModuleAccesser* moduleAccesser) { }
-bool ftStatusUniqProcessCaptureTaboo::checkDamage(soModuleAccesser* moduleAccesser, void*) { return false; }
+
+void ftStatusUniqProcessCaptureTaboo::exitStatus(soModuleAccesser* moduleAccesser, int status) {
+    if (status == 0x104) {
+        return;
+    }
+    if (status < 0x104 && status == 0x42) {
+        return;
+    }
+    reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot30(0, 0);
+}
+
+void ftStatusUniqProcessCaptureTaboo::execFixPos(soModuleAccesser* moduleAccesser) {
+    reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot44();
+}
+
+bool ftStatusUniqProcessCaptureTaboo::checkDamage(soModuleAccesser* moduleAccesser, void*) { return true; }
