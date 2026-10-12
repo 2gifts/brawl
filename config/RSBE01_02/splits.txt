@@ -1997,13 +1997,13 @@ RVL_SDK/os/OSContext.c:
 
 RVL_SDK/os/OSError.c:
 	.text       start:0x801D8600 end:0x801D8D34
-	.data       start:0x80467700 end:0x80467A1C
+	.data       start:0x80467700 end:0x80467A20
 	.bss        start:0x804DD190 end:0x804DD1D4
 	.sdata      start:0x8059E9C0 end:0x8059E9C8
 
 RVL_SDK/os/OSExec.c:
 	.text       start:0x801D8D34 end:0x801DB3C8
-	.data       start:0x80467A1C end:0x80467E40
+	.data       start:0x80467A20 end:0x80467E40
 	.bss        start:0x804DD200 end:0x804DD220
 	.sdata      start:0x8059E9C8 end:0x8059E9D8
 	.sbss       start:0x805A0698 end:0x805A06B0
