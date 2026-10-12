@@ -430,10 +430,11 @@ void rfc_send_credit(tRFC_MCB *p_mcb, UINT8 dlci, UINT8 credit)
 
 UINT8 rfc_parse_data(tRFC_MCB *p_mcb, MX_FRAME *p_frame, BT_HDR *p_buf)
 {
-	UINT8 ea, eal;
-	UINT16 length;
+	UINT8 ea;
+	UINT8 eal;
 	UINT8 *p_data = (UINT8 *)(p_buf + 1) + p_buf->offset;
-	UINT8 *p_start = (UINT8 *)(p_buf + 1) + p_buf->offset;
+	UINT8 *p_start = p_data;
+	UINT16 length;
 	UINT8 fcs;
 
 	if (p_buf->len < RFCOMM_CTRL_FRAME_LEN)

@@ -118,7 +118,7 @@ tBTM_STATUS BTM_SetPowerMode(UINT8 pm_id, BD_ADDR remote_bda, tBTM_PM_PWR_MD *p_
 {
 	UINT8 *p_features;
 	int ind;
-	UINT8 acl_ind;
+	int acl_ind;
 	tBTM_PM_MCB *p_cb = NULL;
 	tBTM_PM_MODE mode;
 	tACL_CONN *p_acl;
@@ -178,9 +178,9 @@ tBTM_STATUS BTM_SetPowerMode(UINT8 pm_id, BD_ADDR remote_bda, tBTM_PM_PWR_MD *p_
 
 tBTM_STATUS BTM_ReadPowerMode(BD_ADDR remote_bda, tBTM_PM_MODE *p_mode)
 {
-	UINT8 acl_ind;
-	tACL_CONN *p_acl;
+	int acl_ind;
 	UINT16 xx;
+	tACL_CONN *p_acl;
 
 	for (xx = 0, p_acl = btm_cb.acl_db; xx < MAX_L2CAP_LINKS; xx++, p_acl++)
 	{
@@ -204,13 +204,13 @@ void btm_pm_reset(void)
 	tBTM_PM_STATUS_CBACK *cb = NULL;
 
 	// whoever had a request pending gets told it failed
-	if (btm_cb.pm_pend_id != BTM_PM_SET_ONLY_ID && (btm_cb.pm_reg_db[btm_cb.pm_pend_id].mask & BTM_PM_REG_SET))
+	if (btm_cb.pm_pend_id != BTM_PM_SET_ONLY_ID && (btm_cb.pm_reg_db[btm_cb.pm_pend_id].mask & BTM_PM_REG_NOTIF))
 		cb = btm_cb.pm_reg_db[btm_cb.pm_pend_id].cback;
+
+	btm_cb.pm_pend_link = MAX_L2CAP_LINKS;
 
 	for (xx = 0; xx < BTM_MAX_PM_RECORDS; xx++)
 		btm_cb.pm_reg_db[xx].mask = BTM_PM_REC_NOT_USED;
-
-	btm_cb.pm_pend_link = MAX_L2CAP_LINKS;
 
 	if (cb)
 		(*cb)(btm_cb.acl_db[btm_cb.pm_pend_link].remote_addr, BTM_PM_STS_ERROR, BTM_DEV_RESET, 0);
@@ -324,10 +324,10 @@ static tBTM_PM_MODE btm_pm_get_set_mode(UINT8 pm_id, tBTM_PM_MCB *p_cb, tBTM_PM_
 
 	if (p_md == NULL)
 	{
-		if (p_mode == NULL)
+		if (p_mode != NULL)
+			*p_res = *p_mode;
+		else
 			return BTM_PM_MD_ACTIVE;
-
-		*p_res = *p_mode;
 	}
 	else if (pm_id == BTM_PM_SET_ONLY_ID)
 	{
@@ -490,32 +490,30 @@ void btm_pm_proc_mode_change(UINT8 hci_status, UINT16 hci_handle, UINT8 mode, UI
 	}
 
 	// was a role switch waiting for the link to wake up?
-	p = &btm_cb.acl_db[xx];
-
-	if (p->switch_role_state == BTM_ACL_SWKEY_STATE_MODE_CHANGE)
+	if (btm_cb.acl_db[xx].switch_role_state == BTM_ACL_SWKEY_STATE_MODE_CHANGE)
 	{
-		p_dev_rec = btm_find_dev(p->remote_addr);
+		p_dev_rec = btm_find_dev(btm_cb.acl_db[xx].remote_addr);
 
 		if (p_dev_rec && (p_dev_rec->sec_flags & BTM_SEC_ENCRYPTED))
 		{
 			// encryption has to come off before the switch
 			if (btsnd_hcic_set_conn_encrypt(hci_handle, FALSE))
 			{
-				p->switch_role_state = BTM_ACL_SWKEY_STATE_ENCRYPTION_OFF;
+				btm_cb.acl_db[xx].switch_role_state = BTM_ACL_SWKEY_STATE_ENCRYPTION_OFF;
 				return;
 			}
 		}
 		else
 		{
-			if (btsnd_hcic_switch_role(p->remote_addr, !p->link_role))
+			if (btsnd_hcic_switch_role(btm_cb.acl_db[xx].remote_addr, !btm_cb.acl_db[xx].link_role))
 			{
-				p->switch_role_state = BTM_ACL_SWKEY_STATE_IDLE;
+				btm_cb.acl_db[xx].switch_role_state = BTM_ACL_SWKEY_STATE_IDLE;
 				return;
 			}
 		}
 
 		// couldn't start it: give up and tell whoever asked
-		p->switch_role_state = BTM_ACL_SWKEY_STATE_IDLE;
+		btm_cb.acl_db[xx].switch_role_state = BTM_ACL_SWKEY_STATE_IDLE;
 
 		if (btm_cb.devcb.p_switch_role_cb)
 		{

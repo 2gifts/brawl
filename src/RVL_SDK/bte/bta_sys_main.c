@@ -34,8 +34,8 @@
 #include <gki.h>
 #include <ptim.h>
 
-// bta_dm_api.c
-extern void fn_80234A90(void);
+// bta_dm_act.c
+extern void bta_dm_immediate_disable(void);
 
 /*******************************************************************************
  * variables
@@ -130,7 +130,7 @@ void bta_sys_event(BT_HDR *p_msg)
 	if (bta_sys_cb.events_disabled)
 	{
 		if (p_msg->event == 0x101)
-			fn_80234A90();
+			bta_dm_immediate_disable();
 
 		GKI_freebuf(p_msg);
 		return;

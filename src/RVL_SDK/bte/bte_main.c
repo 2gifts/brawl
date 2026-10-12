@@ -57,7 +57,7 @@ extern BOOLEAN BTA_DmIsDeviceUp(void);
  */
 
 // set by hcisu_h2 (wud.c owns it), nonzero while the hci transport is still busy
-extern int lbl_8059ED98;
+extern int bte_hcisu_wait;
 
 // HYPOTHESIS: usb vendor/product ids of the bcm2045 in the wii, terminated by a zero entry
 tHCI_CFG bte_hcisu_cfg[2] = {{0x0a5c, 0x2101}, {0, 0}};
@@ -91,7 +91,7 @@ int BTE_LoadStack(void)
 
 	bte_hcisu_task(0);
 
-	while (lbl_8059ED98 != 0)
+	while (bte_hcisu_wait != 0)
 		GKI_delay(100);
 
 	btu_task_init();

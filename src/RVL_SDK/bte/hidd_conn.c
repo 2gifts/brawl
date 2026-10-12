@@ -87,6 +87,32 @@ void HID_DevInit(void)
 	hd_cb.trace_level = BT_TRACE_LEVEL_NONE;
 }
 
+// MATCH-ONLY: the original is not inlined into the repage timer callback, no idea why
+#pragma dont_inline on
+// pages the host: opens the control channel and waits for l2cap to report back
+tHID_STATUS hidd_conn_initiate(void)
+{
+	tHID_CONN *p_conn = &hd_cb.conn;
+
+	HIDD_TRACE(EVENT, "HID - Originate started");
+
+	p_conn->ctrl_cid = 0;
+	p_conn->intr_cid = 0;
+	p_conn->conn_flags = HID_CONN_FLAGS_IS_ORIG;
+
+	if ((p_conn->ctrl_cid = L2CA_ConnectReq(HID_PSM_CONTROL, hd_cb.host_addr)) == 0)
+	{
+		HIDD_TRACE(WARNING, "HID - Originate failed");
+
+		return HID_ERR_L2CAP_FAILED;
+	}
+
+	p_conn->conn_state = HID_CONN_STATE_CONNECTING_CTRL;
+
+	return HID_SUCCESS;
+}
+#pragma dont_inline reset
+
 // repage timer expired: try again, give up (and tell the app) after too many tries
 void hidd_proc_repage_timeout(TIMER_LIST_ENT *p_tle)
 {
@@ -112,30 +138,6 @@ void hidd_proc_repage_timeout(TIMER_LIST_ENT *p_tle)
 		(*hd_cb.callback)(HIDD_EVT_RETRYING, hd_cb.conn_tries, NULL);
 	}
 }
-
-// MATCH-ONLY: the original is not inlined into the repage timer callback, no idea why
-#pragma auto_inline off
-// pages the host: opens the control channel and waits for l2cap to report back
-tHID_STATUS hidd_conn_initiate(void)
-{
-	HIDD_TRACE(EVENT, "HID - Originate started");
-
-	hd_cb.conn.ctrl_cid = 0;
-	hd_cb.conn.intr_cid = 0;
-	hd_cb.conn.conn_flags = HID_CONN_FLAGS_IS_ORIG;
-
-	if ((hd_cb.conn.ctrl_cid = L2CA_ConnectReq(HID_PSM_CONTROL, hd_cb.host_addr)) == 0)
-	{
-		HIDD_TRACE(WARNING, "HID - Originate failed");
-
-		return HID_ERR_L2CAP_FAILED;
-	}
-
-	hd_cb.conn.conn_state = HID_CONN_STATE_CONNECTING_CTRL;
-
-	return HID_SUCCESS;
-}
-#pragma auto_inline reset
 
 // asks btm to move the link to the requested power mode. returns TRUE if nothing went wrong
 // (or there was nothing to do), FALSE after reporting a pm error to the app

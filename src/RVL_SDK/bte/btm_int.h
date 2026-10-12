@@ -653,6 +653,8 @@ void btm_discovery_timeout(void);
 
 void btm_inq_db_reset(void);
 void btm_inq_db_init(void);
+tBTM_INQ_INFO *btm_inq_db_first(void);
+tBTM_INQ_INFO *btm_inq_db_next(tBTM_INQ_INFO *p_cur);
 void btm_clr_inq_db(BD_ADDR p_bda);
 /**/
 void btm_event_filter_complete(UINT8 *p);
