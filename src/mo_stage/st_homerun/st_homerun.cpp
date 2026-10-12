@@ -441,8 +441,11 @@ void stHomerun::createObjNumber(int index) {
 
 void stHomerun::createObjBarrier(int index) {
     grHomerunBarrier* ground;
-    if (index == 37) {
+    // HYPOTHESIS: the original tests the index with a one-case switch; the compiler emits cmpwi/beq/b for it, where an if emits bne.
+    switch (index) {
+    case 37:
         ground = grHomerunBarrier::create(0x3C, "EffStgHomerunBarrier", "grHomerunBarrier");
+        break;
     }
     if (ground != NULL) {
         addGround(ground);

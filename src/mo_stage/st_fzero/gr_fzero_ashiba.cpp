@@ -118,8 +118,8 @@ void grFzeroAshiba::updateActiveIdou(float deltaFrame) {
     case 1:
         if (*m_stateWork == 1) {
             grCollisionJoint* joint = m_joint;
-            m_offsetX = 0.0f;
             m_timer = 120.0f;
+            m_offsetX = 0.0f;
             m_offsetY = 0.0f;
             m_offsetZ = 0.0f;
             if (joint != NULL) {
