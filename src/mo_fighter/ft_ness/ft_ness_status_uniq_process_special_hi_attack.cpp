@@ -28,3 +28,8 @@ void ftNessStatusUniqProcessSpecialHiAttack::execStop(soModuleAccesser* moduleAc
 void ftNessStatusUniqProcessSpecialHiAttack::execFixPosCounter(soModuleAccesser*) {}
 
 void ftNessStatusUniqProcessSpecialHiAttack::exitStatus(soModuleAccesser*, int) {}
+
+// Leaf functions shared with other fighter modules (same module-map names and bodies).
+extern "C" {
+float fn_101_129F0(float* v) { return v[0] * v[0] + v[1] * v[1]; }
+} // extern "C"

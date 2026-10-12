@@ -243,7 +243,7 @@ __ct__33soAnimCmdAddressPackArraySeparateFP31soArrayFixed<PC13acAnimCmdConv>P31s
 __ct__20soAnimCmdInterpreterFsP44soArrayVector<25acCmdInterpreterStackData,8>iifPCUc = .text:0x00009DA0; // type:function size:0x190
 getInstance__51soSingletonHolder<30soArrayNull<PC13acAnimCmdConv>>Fv = .text:0x00009F30; // type:function size:0x70
 pushRange<PC13acAnimCmdConv>__14soArrayUtilityFP26soArray<PC13acAnimCmdConv>PCPC13acAnimCmdConvl_v = .text:0x00009FA0; // type:function size:0x7C
-fn_95_A01C = .text:0x0000A01C; // type:function size:0x3C
+getEntryList__99soAnimCmdControlUnitBuilderDisguise<60soAnimCmdControlUnitBuildConfigDisguise<0,1,293,293,0,1,0,8>>Fi = .text:0x0000A01C; // type:function size:0x3C
 setupDisguiseList__99soAnimCmdControlUnitBuilderDisguise<60soAnimCmdControlUnitBuildConfigDisguise<0,1,293,293,0,1,0,8>>FiP26soAnimCmdDisguiseListEntry = .text:0x0000A058; // type:function size:0xB0
 getExtendParam__7ftYoshiFv = .text:0x0000A108; // type:function size:0x10
 fn_95_A118 = .text:0x0000A118; // type:function size:0x4
