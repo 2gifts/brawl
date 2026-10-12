@@ -289,3 +289,37 @@ python3 -m unittest discover -s tests -p 'test_decomp_*.py'
 ```
 
 </details>
+
+Build server VM clones
+---------------------
+
+`tools/remote/bootstrap_clone.py` upgrades clones of an existing Linux build VM
+from a reference server, using the SSH key on your client computer. It resets
+stale build directories by default, installs checksummed compiler/tool packages,
+updates the fork checkout and submodules, and compiles every configured comparison
+object before requiring a successful full 127-output baseline. Original binaries
+already in the VM are linked into the new worktree; game data and private keys are
+not copied from the reference server.
+
+```sh
+python3 tools/remote/bootstrap_clone.py --coordinator COORDINATOR_HOST \
+  --source-worktree /srv/brawl-native/REFERENCE_WORKTREE \
+  --clone build1=CLONE_HOST --check
+```
+
+Remove `--check` to apply; repeat `--clone NAME=HOST` for additional VMs. Each clone
+receives its own restricted SSH key for the shared board and build guard. The guard
+uses the coordinator's team flock and the validator's exclusive-create marker
+with their proper release protocols. Ninja builds are limited to two jobs and
+clones install serially. Evidence is written outside the checkout under `notes`.
+`--keep-builds` supports resuming a partially completed installation.
+
+For a newly cloned machine that inherits its host identity or static network
+configuration, run `tools/remote/clone_first_boot.sh NAME [INTERFACE]` as root at
+the VM console and reboot before connecting by SSH. Give each VM a unique MAC in
+the hypervisor; the helper configures DHCP using that MAC, with router reservations
+available for fixed addresses. Build and agent work continues as the unprivileged
+user. The SSH bootstrap pins new host keys and rejects changed known keys.
+
+Run the guard/lock/cleanup tests on Linux with:
+`python3 -m unittest discover -s tests -p test_clone_bootstrap.py`.
