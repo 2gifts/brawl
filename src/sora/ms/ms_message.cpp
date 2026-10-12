@@ -1124,11 +1124,12 @@ int Message::stripTags(const u8* src, int len, int unused, u8* dst) {
                 p += 2;
                 break;
             case 11: {
-                int len1;
+                u8 len2;
                 int n;
-                int len2;
+                u8 len1;
                 u8* lenPtr;
-                *dst++ = *(volatile u8*)p;
+                // MATCH-ONLY: the original reloads the tag byte instead of reusing the switch value
+                *dst++ = *(const u8*)&p[0];
                 lenPtr = dst;
                 len1 = p[1];
                 dst += 2;
@@ -1139,9 +1140,7 @@ int Message::stripTags(const u8* src, int len, int unused, u8* dst) {
                 memcpy(dst, tmp, n);
                 p += len1;
                 dst += n;
-                // MATCH-ONLY: temporary changes the len1/len2 register assignment
-                int n2 = stripTags(p, len2, 0xffff, tmp);
-                n = n2;
+                n = stripTags(p, len2, 0xffff, tmp);
                 lenPtr[1] = n;
                 memcpy(dst, tmp, n);
                 p += len2;

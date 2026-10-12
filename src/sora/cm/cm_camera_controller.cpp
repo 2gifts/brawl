@@ -1,4 +1,5 @@
 #include <cm/cm_camera_controller.h>
+#include <gf/gf_camera.h>
 
 extern "C" void fn_800A6BF0(gfCameraController* controller);
 extern "C" void fn_800A6B78(gfCameraController* controller);
@@ -112,3 +113,15 @@ gfCameraController* CameraController::getCameraController(Kind kind)
     }
 }
 #pragma dont_inline reset
+
+gfCamera* CameraController::getCameraInternal()
+{
+    switch (m_currentControllerKind) {
+    case Adventure:
+    case AdventureFree:
+    case FighterTarget:
+        return gfCameraManager::getManager()->getCamera(0);
+    default:
+        return gfCameraManager::getManager()->getCamera(1);
+    }
+}

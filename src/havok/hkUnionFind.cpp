@@ -7,11 +7,8 @@ static inline int* parentData(hkArrayBase* a) {
 hkUnionFind::hkUnionFind(hkArrayBase& parents, int numElements) {
     m_parents = &parents;
     if ((parents.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) < numElements) {
-        int newCapacity = numElements;
-        if (numElements < (parents.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * 2) {
-            newCapacity = (parents.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * 2;
-        }
-        hkArrayUtil::_reserve(&parents, newCapacity, 4);
+        int doubled = (parents.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * 2;
+        hkArrayUtil::_reserve(&parents, numElements < doubled ? doubled : numElements, 4);
     }
     parents.m_size = numElements;
     for (int i = 0; i < numElements; i++) {

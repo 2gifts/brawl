@@ -42,8 +42,8 @@ void grBattleField::update(float deltaFrame) {
             if (!resMdl.IsValid()) {
                 return;
             }
-            u32 matCount = resMdl.GetResMatNumEntries();
             u32 i = 0;
+            u32 matCount = resMdl.GetResMatNumEntries();
             for (; i != matCount; i++) {
                 nw4r::g3d::ResMat resMat = resMdl.GetResMat("MShadow1");
                 if (resMat.IsValid()) {
@@ -62,11 +62,13 @@ void grBattleField::update(float deltaFrame) {
             }
             float alpha;
             if (frame >= 5600.0f && frame <= 6000.0f) {
-                alpha = stBattleClamp(0.0f, 1.0f, (6000.0f - frame) / 400.0f);
+                float fadeOut = (6000.0f - frame) / 400.0f;
+                alpha = stBattleClamp(0.0f, 1.0f, fadeOut);
             } else if (frame >= 400.0f && frame <= 5600.0f) {
                 alpha = 1.0f;
             } else if (frame >= 0.0f && frame <= 400.0f) {
-                alpha = stBattleClamp(0.0f, 1.0f, frame / 400.0f);
+                float fadeIn = frame / 400.0f;
+                alpha = stBattleClamp(0.0f, 1.0f, fadeIn);
             } else {
                 alpha = 0.0f;
             }

@@ -538,13 +538,12 @@ void stHomerun::updateLimit(float deltaFrame) {
     CameraController* camera = CameraController::getInstance();
     float* range = reinterpret_cast<float*>(reinterpret_cast<u8*>(camera) + 0x148);
     float up = range[2];
-    float left = range[0];
-    m_posLimit[0].m_x = left;
+    m_posLimit[0].m_x = range[0];
     m_posLimit[0].m_y = up;
     m_posLimit[0].m_z = 0.0f;
     float down = range[3];
-    float right = range[1];
-    m_posLimit[1].m_x = right;
+    up = range[1];
+    m_posLimit[1].m_x = up;
     m_posLimit[1].m_y = down;
     m_posLimit[1].m_z = 0.0f;
 }

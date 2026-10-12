@@ -1,5 +1,7 @@
 #include <types.h>
 #include <snd/snd_system.h>
+#include <gf/gf_error_check.h>
+#include <gf/gf_heap_manager.h>
 
 extern "C" s32 fn_8007AB34(sndHeapSys* heap, SndGroupID groupId);
 extern "C" s32 fn_8007A324(sndHeapSys* heap, int heapLevel, SndGroupID groupId, s32 size);
@@ -42,10 +44,6 @@ int sndSystem::loadSoundGroup(SndGroupID sndGroupId, int heapLevel, bool isReque
     return result;
 }
 
-#include <snd/snd_system.h>
-#include <gf/gf_error_check.h>
-#include <gf/gf_heap_manager.h>
-
 bool sndSystem::setupBuffers() {
     u32 playerSize = m_archivePlayer.GetRequiredMemSize(&m_dvdSoundArchive);
     u32 managerSize = m_3DManager.GetRequiredMemSize(&m_dvdSoundArchive);
@@ -63,5 +61,24 @@ bool sndSystem::setupBuffers() {
     // HYPOTHESIS: 0x278 and 0x27C are not named in the header, so they are written at raw offsets
     *(s32*)((char*)this + 0x27C) = 0x20;
     *(void**)((char*)this + 0x278) = (char*)this + 0x294;
+    return true;
+}
+
+bool sndSystem::loadArchiveHeader() {
+    u32 headerSize;
+    void* header;
+
+    if (!m_dvdSoundArchive.Open("/sound/smashbros_sound.brsar")) {
+        gfErrorCheck::check();
+        return false;
+    }
+    // HYPOTHESIS: 0x124 is not named in the header, so it is read at a raw offset
+    headerSize = *(u32*)((char*)this + 0x124);
+    header = gfHeapManager::alloc(Heaps::Sound, headerSize);
+    *(void**)&_2D4[0x41C] = header;
+    if (!m_dvdSoundArchive.LoadHeader(header, headerSize)) {
+        gfErrorCheck::check();
+        return false;
+    }
     return true;
 }

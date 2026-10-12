@@ -25,3 +25,17 @@ MsgTagProc::MsgTagProc() {
     __construct_array(&m_data[0xC], fn_8006CE10, fn_8006CE1C, 0x10, 8);
     __construct_array(&m_data[0x90], fn_8006CE10, fn_8006CE1C, 0x10, 8);
 }
+
+u8* floatToBytes(u8* out, float f) {
+    union {
+        float value;
+        u8 bytes[4];
+    } u;
+
+    u.value = f;
+    out[0] = u.bytes[0];
+    out[1] = u.bytes[1];
+    out[2] = u.bytes[2];
+    out[3] = u.bytes[3];
+    return out;
+}
