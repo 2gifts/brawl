@@ -124,6 +124,15 @@ float ftUtil::getDamageMul(soModuleAccesser* acc) {
     return soValueAccesser::getConstantFloat(acc, 0xDAF, 0);
 }
 
+void ftUtil::setCloudThroughCheck(soModuleAccesser* acc) {
+    float limit = soValueAccesser::getConstantFloat(acc, 0xCDB, 0);
+    if ((float) fabs(acc->getKineticModule().getEnergy(4)->getSpeed().m_y) > limit) {
+        acc->getGroundModule().setCloudThrough(true, 0);
+        return;
+    }
+    acc->getGroundModule().setCloudThrough(false, 0);
+}
+
 // Statuses a Zako (Subspace Emissary enemy fighter) cannot enter: it has no tech, for example (HYPOTHESIS: the
 // individual statuses are the ones the common status table marks as unused by Zako).
 bool ftUtil::isValidStatusKindZako(soModuleAccesser*, int status) {

@@ -15,7 +15,7 @@ extern "C" float fn_803F1960(float value);
 // Elapsed system time in seconds-like units: OS time divided by the bus clock quarter.
 float hkSolverGetSystemTime() {
     OSTime now = OSGetTime();
-    OSTime tick = *(volatile u32*)0x800000F8 >> 2;
+    OSTime tick = *(u32*)0x800000F8 >> 2;
     float t = fn_803F17E0(__div2i(now, tick));
-    return fn_803F1960(t + 0.0f);
+    return fn_803F1960(t + 946728000.0f);
 }

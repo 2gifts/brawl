@@ -81,13 +81,12 @@ void hkSphereMotion::getInertiaWorld(hkMatrix3& out) const {
 // The inverse inertia is the reciprocal of the largest diagonal entry (zero when that entry is not positive).
 void hkSphereMotion::setInertiaLocal(const hkMatrix3& in) {
     const float* e = matrixElements(in);
+    float y = e[5];
+    float z;
     float largest = e[0];
-    if (largest <= e[5]) {
-        largest = e[5];
-    }
-    if (largest <= e[10]) {
-        largest = e[10];
-    }
+    z = e[10];
+    largest = largest > y ? largest : y;
+    largest = largest > z ? largest : z;
     float invInertia = 0.0f;
     if (largest > 0.0f) {
         invInertia = 1.0f / largest;

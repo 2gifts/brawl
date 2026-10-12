@@ -16,11 +16,10 @@
 void phIkTwoJointSolver::init() {}
 
 void phIkTwoJointSolver::setSolverParamData(const f32* param) {
-    f64 cosVal = cos(0.017453292f * param[0]);
-    f32 p1 = param[1];
-    m_cosAngle0 = cosVal;
-    cosVal = cos(0.017453292f * p1);
-    m_cosAngle1 = cosVal;
+    f32 cos0 = cos(0.017453292f * param[0]);
+    f32 angle1 = 0.017453292f * param[1];
+    m_cosAngle0 = cos0;
+    m_cosAngle1 = cos(angle1);
     unk38 = 1.0f;
     unk3C = 1.0f;
     m_param68[0] = param[4];

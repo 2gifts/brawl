@@ -21,10 +21,10 @@ void hkVector4::setReciprocal4(const hkVector4& a) {
     x = one / a.x;
     y = one / a.y;
     z = one / a.z;
-    if (a.w == 0.0f) {
-        w = one;
-    } else {
+    if (a.w != 0.0f) {
         w = one / a.w;
+    } else {
+        w = one;
     }
 }
 

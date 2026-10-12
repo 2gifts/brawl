@@ -77,32 +77,53 @@ int isPointerType(const hkClassMember& m) {
 
 int getLayoutAlignment(const hkClassMember& m, int type, int ptrAlign) {
     int align = -1;
-    if (type != 0x17) {
-        if (type < 0x17) {
-            if (type == 0x13) {
-                align = getLayoutAlignment(m, m.m_subtype, ptrAlign);
-            } else if (type > 0x13) {
-                align = ptrAlign;
-            } else if (type >= 0) {
-                align = m.getAlignment();
+    switch (type) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+    case 0x18:
+        align = m.getAlignment();
+        break;
+    case 0x14:
+    case 0x15:
+    case 0x16:
+    case 0x1A:
+    case 0x1B:
+    case 0x1C:
+    case 0x1D:
+        align = ptrAlign;
+        break;
+    case 0x13:
+        align = getLayoutAlignment(m, m.m_subtype, ptrAlign);
+        break;
+    case 0x19: {
+        align = 1;
+        const hkClass* k = m.getStructClass();
+        for (int i = 0; i < k->getNumMembers(); i++) {
+            const hkClassMember& sub = k->getMember(i);
+            int a = getLayoutAlignment(sub, sub.m_type, ptrAlign);
+            if (a > align) {
+                align = a;
             }
-        } else if (type == 0x19) {
-            align = 1;
-            const hkClass* k = m.getStructClass();
-            for (int i = 0; i < k->getNumMembers(); i++) {
-                const hkClassMember& sub = k->getMember(i);
-                int a = getLayoutAlignment(sub, sub.m_type, ptrAlign);
-                if (a > align) {
-                    align = a;
-                }
-            }
-        } else if (type > 0x19) {
-            if (type < 0x1E) {
-                align = ptrAlign;
-            }
-        } else {
-            align = m.getAlignment();
         }
+        break;
+    }
     }
     return align;
 }

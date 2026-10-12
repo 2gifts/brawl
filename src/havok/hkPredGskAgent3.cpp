@@ -49,9 +49,11 @@ void hkPredGskAgent3::removePoint(void* ctx, hkPredGskAgent3* agent, u16 key) {
 }
 
 void hkPredGskAgent3::commitPotential(void* ctx, hkPredGskAgent3* agent, u16 key) {
+    u8* p;
     hkGskManifold* manifold = &agent->m_manifold;
-    u8* p = (u8*)manifold;
-    for (int i = 0; i < manifold->m_countC; i++) {
+    int i;
+    p = (u8*)manifold;
+    for (i = 0; i < manifold->m_countC; i++) {
         if (*(u16*)(p + 6) == 0xFFFF) {
             *(u16*)((u8*)manifold + i * 8 + 6) = key;
             return;

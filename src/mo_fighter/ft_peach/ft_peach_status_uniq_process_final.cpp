@@ -110,10 +110,11 @@ void ftPeachStatusUniqProcessFinal::execFixPos(soModuleAccesser* accesser) {
     if (accesser->getWorkManageModule().isFlag(0x22000011) == 1) setOutAction(accesser);
 }
 
+extern "C" void fn_80076274(void* sndSystem, int soundId); // HYPOTHESIS: sound helper, name not recovered
 void ftPeachStatusUniqProcessFinal::exitStatus(soModuleAccesser* accesser, int nextStatus) {
-    if (nextStatus == 0 || nextStatus == 0xE) setOutAction(accesser);
-    else destroyInfo(accesser);
-    if (g_sndSystem != NULL) g_sndSystem->playSE(SndID(0x1B4A), -1, 0, 0, -1);
+    if (nextStatus != 0 && nextStatus != 0xE) destroyInfo(accesser);
+    else setOutAction(accesser);
+    if (g_sndSystem != NULL) fn_80076274(g_sndSystem, 0x1B4A);
 }
 
 void ftPeachStatusUniqProcessFinal::setOutAction(soModuleAccesser* accesser) {

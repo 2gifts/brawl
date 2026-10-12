@@ -6,9 +6,11 @@ extern "C" {
 
 } // extern "C"
 
-// HYPOTHESIS: the controller state block sits at offset 0x78 of ftOwnerData; the kind and four stick floats are stored there
+// HYPOTHESIS: ftOwnerData fields: a counter at 0x64 (coins), then the controller state block at 0x78 (kind and four stick floats)
 struct ftOwnerControllerState {
-    u8 unk0[0x78];
+    u8 unk0[0x64];
+    s32 unk64;
+    u8 unk68[0x10];
     s32 controllerKind;
     f32 unk7C;
     f32 unk80;
@@ -44,4 +46,16 @@ bool ftOwner::sameCheckController(int kind, u64* buttons0, u64* buttons1) {
         result = true;
     }
     return result;
+}
+
+void ftOwner::addGenerateCoin(int coins)
+{
+    if (unkA == 1) {
+        ftOwnerControllerState* data = reinterpret_cast<ftOwnerControllerState*>(m_data);
+        s32 room = 0x7FFFFFFF - data->unk64;
+        if (room < coins) {
+            coins = room;
+        }
+        data->unk64 = data->unk64 + coins;
+    }
 }
