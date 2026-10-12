@@ -917,7 +917,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/ipc/memory.c"),
             Object(NonMatching, "RVL_SDK/ipc/ipcProfile.c"),
             Object(Matching, "RVL_SDK/fs/fs.c"),
-            Object(NonMatching, "RVL_SDK/exi/EXIBios.c", extra_cflags=["-schedule off", "-lang c99"]),
+            Object(Matching, "RVL_SDK/exi/EXIBios.c", extra_cflags=["-schedule off", "-lang c99"]),
             Object(Matching, "RVL_SDK/dvd/dvd_check.c"),
             Object(Matching, "RVL_SDK/dvd/dvd_broadway.c", extra_cflags=["-lang c99"]),
             Object(Matching, "RVL_SDK/dvd/dvdFatal.c"),

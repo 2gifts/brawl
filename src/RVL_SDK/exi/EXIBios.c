@@ -58,7 +58,7 @@ typedef struct EXIData {
 extern u32 __OSGetDIConfig(void);
 extern BOOL __OSInIPL;
 
-const char *__EXIVersion = "<< RVL_SDK - EXI \trelease build: Jun 28 2007 18:29:36 (0x4199_60831) >>";
+const char *__EXIVersion = "<< RVL_SDK - EXI \trelease build: Jun  6 2007 02:56:20 (0x4199_60831) >>";
 
 static EXIData Ecb[3];
 static u32 IDSerialPort1;
@@ -645,7 +645,6 @@ s32 EXIGetID(s32 chan, u32 dev, u32 *out) {
     s32 ret;
     s32 time;
     BOOL enabled;
-    _Bool isExt;
 
     if (chan == EXI_CHAN_0 && dev == EXI_DEV_NET && IDSerialPort1 != 0) {
         *out = IDSerialPort1;
@@ -670,8 +669,7 @@ s32 EXIGetID(s32 chan, u32 dev, u32 *out) {
     }
 
     enabled = OSDisableInterrupts();
-    isExt = chan < EXI_CHAN_2 && dev == EXI_DEV_EXT;
-    ret = !EXILock(chan, dev, isExt ? UnlockedHandler : NULL);
+    ret = !EXILock(chan, dev, (chan < EXI_CHAN_2 && dev == EXI_DEV_EXT) ? UnlockedHandler : 0);
     if (ret == 0) {
         ret = !EXISelect(chan, dev, EXI_FREQ_1MHZ);
         if (ret == 0) {
