@@ -62,10 +62,6 @@ static DEV_CLASS btm_default_dev_class = {0x00, 0x1f, 0x00};
  * local function declarations
  */
 
-// HYPOTHESIS: these two live in btm_inq and haven't been named yet
-extern void fn_8023C100(UINT8 enable);
-extern void fn_8023C050(UINT8 enable);
-
 static inline void btm_dev_send_reset(void);
 static inline void btm_dev_step_buf_size(void);
 static inline void btm_dev_step_local_ver(void);
@@ -546,10 +542,10 @@ void btm_read_local_features_complete(UINT8 *p, UINT16 evt_len)
 		}
 
 		if (lf[3] & 0x40)
-			BTM_SetAfhChannelAssessment(TRUE);
+			BTM_SetInquiryMode(BTM_INQ_RESULT_WITH_RSSI);
 
-		fn_8023C100(TRUE);
-		fn_8023C050(TRUE);
+		BTM_SetPageScanType(BTM_SCAN_TYPE_INTERLACED);
+		BTM_SetInquiryScanType(BTM_SCAN_TYPE_INTERLACED);
 
 		btm_report_device_status(BTM_DEV_STATUS_UP);
 
