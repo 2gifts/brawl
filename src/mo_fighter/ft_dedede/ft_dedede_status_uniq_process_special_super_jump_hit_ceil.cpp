@@ -1,5 +1,7 @@
+#define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <ft/ft_entry.h>
 #include <ft/ft_kinetic_energy.h>
+#include <ft/ft_util.h>
 #include <so/motion/so_motion_change_param.h>
 #include <so/model/so_model_module_impl.h>
 #include <so/so_module_accesser.h>
@@ -8,9 +10,6 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
-// HYPOTHESIS: ftUtil::adjustCeil lives in the sora_melee REL (map name ftUtil__adjustCeil, fn_27_193C20); called by its
-// address symbol because ft_util.h does not declare it yet.
-extern "C" void fn_27_193C20(soModuleAccesser* moduleAccesser, bool);
 
 class ftDededeStatusUniqProcessSpecialSuperJumpHitCeil : public soStatusUniqProcess {
 public:
@@ -23,24 +22,16 @@ public:
 };
 
 void ftDededeStatusUniqProcessSpecialSuperJumpHitCeil::initStatus(soModuleAccesser* moduleAccesser) {
-    // Plain-old-data copy of soMotionChangeParam (the real type has a user constructor the target does not call)
-    struct ChangeParam {
-        int kind;
-        float frame;
-        float rate;
-        u8 unk14, unk15, unk16, unk17;
-    };
-    ChangeParam change;
-    change.kind = 0x1F9;
-    change.frame = 0.0f;
-    change.rate = 1.0f;
-    change.unk14 = 0;
-    change.unk15 = 0;
-    change.unk16 = 0;
-    change.unk17 = 0;
-    moduleAccesser->getMotionModule().changeMotionRequest(reinterpret_cast<soMotionChangeParam*>(&change));
-    moduleAccesser->getPostureModule().getLr();
-    fn_27_193C20(moduleAccesser, true);
+    soMotionChangeParam change;
+    change.m_kind = 0x1F9;
+    change.m_frame = 0.0f;
+    change.m_rate = 1.0f;
+    change._12 = 0;
+    change._13 = 0;
+    change._14 = 0;
+    change._15 = 0;
+    moduleAccesser->getMotionModule().changeMotionRequest(&change);
+    ftUtil::adjustCeil(moduleAccesser, true, moduleAccesser->getPostureModule().getLr());
     setTurnTransN(moduleAccesser);
     moduleAccesser->getKineticModule().getEnergy(0)->disable();
 }
@@ -68,7 +59,6 @@ void ftDededeStatusUniqProcessSpecialSuperJumpHitCeil::exitStatus(soModuleAccess
 }
 
 void ftDededeStatusUniqProcessSpecialSuperJumpHitCeil::setTurnTransN(soModuleAccesser* moduleAccesser) {
-    // HYPOTHESIS: posture getter assumed to be getLr.
     if (moduleAccesser->getPostureModule().getLr() == -1.0f) {
         Vec3f rotate = moduleAccesser->getModelModule().getNodeRotate(5);
         rotate.m_y = 180.0f;
