@@ -95,7 +95,8 @@ stJungle::~stJungle() {
         *jungleCameraFlags() = *jungleCameraFlags() & 0xFFFFFF;
     }
     if (m_ladderData != NULL) {
-        delete[] m_ladderData;
+        // MATCH-ONLY: the array is freed as raw bytes, so delete[] emits no element-count cookie adjustment
+        delete[] reinterpret_cast<u8*>(m_ladderData);
     }
     releaseArchive();
 }
@@ -573,9 +574,9 @@ void grJungleNB::setStateWork(u8* stateWork) {
 void stJungle::createObjS(int index) {
     grJungleS* ground;
     Vec3f* pos;
+    int collision;
     u8* state;
     u8* enable;
-    int collision;
     collision = 0;
     state = NULL;
     enable = NULL;
@@ -655,15 +656,15 @@ void stJungle::createObjWater(int index) {
     Vec3f* pos;
     u8* enable;
     switch (index) {
-    case 33:
-        ground = grJungleWater::create(0x47, "gr2_StgJungle00LV03Water", "grJungleWater03");
-        pos = &m_posGimmick[2];
-        enable = &m_enable[2];
-        break;
     case 32:
         ground = grJungleWater::create(0x46, "gr2_StgJungle00LV02Water", "grJungleWater02");
         pos = &m_posGimmick[1];
         enable = &m_enable[1];
+        break;
+    case 33:
+        ground = grJungleWater::create(0x47, "gr2_StgJungle00LV03Water", "grJungleWater03");
+        pos = &m_posGimmick[2];
+        enable = &m_enable[2];
         break;
     default:
         ground = NULL;

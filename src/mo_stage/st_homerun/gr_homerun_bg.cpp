@@ -191,10 +191,10 @@ void grHomerunBg::receiveCollMsg_Wall(grCollStatus* collStatus, grCollisionJoint
     if (m_hpBarrierWork != NULL) {
         bool isSandBag = true;
         int taskId = collStatus->m_taskId;
+        bool isBat = true;
         if (*m_taskIdSandBagWork != taskId) {
             isSandBag = false;
         }
-        bool isBat = true;
         if (*m_taskIdHomerunBatWork != taskId) {
             isBat = false;
         }

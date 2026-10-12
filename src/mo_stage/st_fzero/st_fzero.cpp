@@ -225,10 +225,13 @@ void stFzero::createObjWall(int index) {
 
 void stFzero::createObjTrainer(int index) {
     grFzeroTrainer* ground;
-    if (index == 10) {
+    switch (index) {
+    case 10:
         ground = grFzeroTrainer::create(5, "StgFzeroPTposition", "grFzeroTrainer");
-    } else {
+        break;
+    default:
         ground = NULL;
+        break;
     }
     if (ground != NULL) {
         addGround(ground);
@@ -276,10 +279,13 @@ void stFzero::createObjAttack(int index) {
 
 void stFzero::createObjWarning(int index) {
     grFzeroWarning* ground;
-    if (index == 14) {
+    switch (index) {
+    case 14:
         ground = grFzeroWarning::create(0x5f, "StgFzeroWarning", "grFzeroWarning");
-    } else {
+        break;
+    default:
         ground = NULL;
+        break;
     }
     if (ground != NULL) {
         addGround(ground);
