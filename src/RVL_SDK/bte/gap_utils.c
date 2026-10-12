@@ -37,8 +37,6 @@
 #include <gap_api.h>
 
 // not in btm_int.h yet. names follow the usual bte naming, addresses 0x8023C8BC / 0x8023C974
-extern tINQ_DB_ENT *btm_inq_db_first(void);
-extern tINQ_DB_ENT *btm_inq_db_next(tBTM_INQ_INFO *p_cur);
 
 void gap_find_addr_name_cb(tBTM_REMOTE_DEV_NAME *p);
 

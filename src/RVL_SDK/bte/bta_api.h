@@ -149,6 +149,7 @@ enum
 typedef UINT8 tBTA_DM_SEC_EVT;
 enum
 {
+	BTA_DM_ENABLE_EVT		= 0,
 	BTA_DM_DISABLE_EVT		= 1,
 	BTA_DM_PIN_REQ_EVT		= 2,
 	BTA_DM_AUTH_CMPL_EVT	= 3,
