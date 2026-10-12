@@ -9,8 +9,9 @@ void ftLucasStatusUniqProcessSpecialHiReflect::exitStatus(soModuleAccesser* a, i
     if (nextStatus != 0x10) return;
     ftLucasReflectCommonParam* param = reinterpret_cast<ftLucasReflectCommonParamData*>(
         g_ftCommonDataAccesser.getData(Fighter_Lucas))->reflect;
+    // HYPOTHESIS: the work float is written with the reflect duration itself (vtable slot 0x3c is setFloat).
     if (param->reflectDuration > 0.0f)
-        a->getWorkManageModule().onFlag(0x11000000);
+        a->getWorkManageModule().setFloat(param->reflectDuration, 0x11000000);
 }
 ftLucasStatusUniqProcessSpecialHiReflect::~ftLucasStatusUniqProcessSpecialHiReflect() {}
 ftLucasStatusUniqProcessSpecialHiReflect g_ftLucasStatusUniqProcessSpecialHiReflect;

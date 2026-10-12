@@ -55,16 +55,22 @@ void ftKirbyStatusUniqProcessSpecialNSwallow::execStatus(soModuleAccesser* modul
 }
 
 void ftKirbyStatusUniqProcessSpecialNSwallow::exitStatus(soModuleAccesser* moduleAccesser, int status) {
-    if (status == 0x11b || status == 0x121) {
+    switch (status) {
+    case 0x11b:
+    case 0x121:
         if (moduleAccesser->getLinkModule().isLinked(0) == true) {
             ftKirbySwallowLinkEvent event(0x13);
             moduleAccesser->getLinkModule().sendEventNodes(0, event, 0);
         }
-    } else if (status != 0x11a) {
+        break;
+    case 0x11a:
+        break;
+    default:
         if (moduleAccesser->getLinkModule().isLinked(0) == true) {
             reinterpret_cast<ftKirbyCatchModuleView*>(moduleAccesser->m_enumerationStart->m_catchModule)->unk0x2c(0, 1);
         }
         moduleAccesser->getCollisionHitModule().cancelXluGlobal(0);
+        break;
     }
 }
 

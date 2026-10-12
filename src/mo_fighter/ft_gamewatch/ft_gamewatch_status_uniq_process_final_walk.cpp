@@ -46,20 +46,19 @@ static ftGameWatchWalkParam* getWalkParam() {
 void ftGameWatchStatusUniqProcessFinalWalk::initStatus(soModuleAccesser* moduleAccesser) {
     ftGameWatchWalkParam* param = getWalkParam();
     float speedMul = ftUtil::getWalkSpeedMul(moduleAccesser);
-    float rate = param->m_8;
-    fn_27_1652A8(moduleAccesser, 0x1f4, rate, 0x21000004, speedMul, 0x21000005, 0);
+    fn_27_1652A8(moduleAccesser, 0x1f4, param->m_8, 0x21000004, speedMul, 0x21000005, 0);
     fn_27_164BF0(moduleAccesser, s_walkTable, 0x21000004, speedMul, 0x21000005);
     ftGameWatchStatusUniqProcessFinalSwim::initStatus(moduleAccesser);
 }
 
 void ftGameWatchStatusUniqProcessFinalWalk::execStatus(soModuleAccesser* moduleAccesser) {
+    float constant;
     ftGameWatchWalkParam* param = getWalkParam();
     float speedMul = ftUtil::getWalkSpeedMul(moduleAccesser);
     soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
-    float constant = soValueAccesser::getConstantFloat(moduleAccesser, 0xc2e, 0);
+    constant = soValueAccesser::getConstantFloat(moduleAccesser, 0xc2e, 0);
     float value = workManage.getFloat(0x21000004);
-    float fixed = speedMul;
-    fn_27_165458(moduleAccesser, 0x21000004, value, param->m_8, param->m_0, param->m_4, constant, fixed);
+    fn_27_165458(moduleAccesser, 0x21000004, value, param->m_8, param->m_0, param->m_4, constant, speedMul);
     fn_27_164E48(moduleAccesser, s_walkTable, 0x21000004, speedMul, 0x21000005);
     ftGameWatchStatusUniqProcessFinalSwim::execStatus(moduleAccesser);
 }
