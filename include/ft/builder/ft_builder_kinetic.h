@@ -91,6 +91,10 @@ public:
     virtual int getMediateNum() = 0;
 };
 
+#ifdef WN_KINETIC_GENERIC_BUILDER
+class ftKineticMediatorImpl;
+#include <wn/wn_kinetic_mediator_impl.h>
+#else
 // ---- instance pool machinery ---------------------------------------------------------------------------
 
 template <typename T, int N>
@@ -323,12 +327,25 @@ public:
     virtual int getMediateNum() { return 8; }
 };
 
+#endif
+
+#ifdef WN_KINETIC_GENERIC_BUILDER
+// The article map names include the mediator argument. Other units retain the
+// established one-argument spelling and emitted template names.
+template <typename T, typename M = ftKineticMediatorImpl>
+class soKineticModuleBuildConfig {
+public:
+    typedef T ModuleType;
+    typedef M MediatorType;
+};
+#else
 template <typename T>
 class soKineticModuleBuildConfig {
 public:
     typedef T ModuleType;
     typedef ftKineticMediatorImpl MediatorType;
 };
+#endif
 
 // Same with a fighter specific mediator (ftKineticMediatorImplT<ftXxxKineticTransactor>).
 template <typename T, typename M>

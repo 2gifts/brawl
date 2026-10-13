@@ -11,6 +11,23 @@ class soModuleAccesser;
 // soKineticEnergyNormal::init / updateEnergy (HYPOTHESIS names).
 class soKineticEnergyNormal : public soKineticEnergy {
 public:
+#ifdef WN_KINETIC_GENERIC_BUILDER
+    // Diddy's holders call the five-vector constructor as a separate function.
+    // HYPOTHESIS: the first byte flag retains its unknown source meaning.
+    soKineticEnergyNormal(const Vec2f& speed, const Vec2f& accel,
+                          const Vec2f& target, const Vec2f& brake,
+                          const Vec2f& limit, bool unk30, bool friction)
+        __attribute__((never_inline)) {
+        Vec2f::copy(m_speed, speed);
+        Vec2f::copy(m_accel, accel);
+        Vec2f::copy(m_speedTarget, target);
+        Vec2f::copy(m_brake, brake);
+        Vec2f::copy(m_speedLimit, limit);
+        m_unk30 = unk30;
+        m_considerGroundFriction = friction;
+        m_unk32 = true;
+    }
+#endif
     soKineticEnergyNormal() {
         // MATCH-ONLY: the original builds all default vectors first and then copies them member by member.
         Vec2f limit(-1.0f, -1.0f);

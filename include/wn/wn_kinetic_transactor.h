@@ -7,4 +7,11 @@ class soModuleAccesser;
 class wnKineticTransactor {
 public:
     static void changeKinetic(int kineticType, void* pools, soModuleAccesser* acc);
+#ifdef WN_KINETIC_GENERIC_BUILDER
+    template <typename E>
+    static void updateEnergy(E* energy, soModuleAccesser* acc) {
+        if (energy->isEnable() != true || energy->isSuspend()) return;
+        energy->updateEnergy(acc);
+    }
+#endif
 };

@@ -49,6 +49,7 @@ public:
     virtual float getDamageForReaction(float damage, soModuleAccesser* moduleAccesser) = 0;
     virtual bool checkNoReaction(soModuleAccesser* moduleAccesser, soDamage* damage) = 0;
     virtual int checkDownDamage(float reaction, float speed, soModuleAccesser* moduleAccesser) = 0;
+#ifndef WN_DAMAGE_ACTOR_INTERFACE
 #ifdef YK_STAGE_FULL // MATCH-ONLY: the stage RELs emit these three as plain inline functions of the base
     virtual bool isBindStatus(soModuleAccesser* moduleAccesser) { return false; }
     virtual bool isBuryStatus(soModuleAccesser* moduleAccesser) { return false; }
@@ -57,6 +58,7 @@ public:
     virtual bool isBindStatus(soModuleAccesser* moduleAccesser) = 0;
     virtual bool isBuryStatus(soModuleAccesser* moduleAccesser) = 0;
     virtual bool isSpeedDamage(soModuleAccesser* moduleAccesser) = 0;
+#endif
 #endif
 };
 static_assert(sizeof(soDamageTransactor) == 4, "Class is wrong size!");

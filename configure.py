@@ -1689,7 +1689,9 @@ config.libs = [
         "cflags": cflags_fighter,
         "host": False,
         "objects": [
+            Object(NonMatching, "mo_fighter/ft_diddy/wn_diddy_barrel_kinetic_transactor.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/wn_diddy_barrel.cpp"),
+            Object(NonMatching, "mo_fighter/ft_diddy/wn_diddy_barrel_damage_transactor_impl.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/wn_diddy_explosion.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_monkey_flip.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_monkey_flip_stick.cpp"),
