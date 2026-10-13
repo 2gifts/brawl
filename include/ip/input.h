@@ -1,7 +1,6 @@
 #pragma once
 
-// SHADOW of BrawlHeaders/ip/input.h: only adds a constructor that sets the first member (used by IpNull, include/ip/ip_null.h)
-// in the translation units that define YK_STAGE_FULL.
+// SHADOW of BrawlHeaders/ip/input.h: expose the native null-input constructor and default controller-number query.
 
 #include <mt/mt_vector.h>
 #include <StaticAssert.h>
@@ -82,7 +81,11 @@ public:
     virtual Vec2f getStickSub() const;
     virtual ipPadButton getButton() const;
     virtual ipPadTrigger getTrigger() const;
+#ifdef WN_ARTICLE_NATIVE_BUILDERS
+    virtual s32 getContNo() const { return -1; }
+#else
     virtual s32 getContNo() const;
+#endif
     virtual void setRumble(u32, u32, s32, u8);   // TODO:: Verify parameters
     virtual void stopRumble();
     virtual void removeRumble();
