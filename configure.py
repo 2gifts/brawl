@@ -6897,10 +6897,15 @@ config.libs = [
         "cflags": cflags_rel,
         "host": False,
         "objects": [
+            Object(NonMatching, "mo_stage/st_mansion/st_mansion.cpp"),
             Object(Matching, "mo_stage/st_mansion/gr_mansion.cpp"),
+            Object(NonMatching, "mo_stage/st_mansion/gr_mansion_pillar.cpp"),
+            Object(NonMatching, "mo_stage/st_mansion/gr_mansion_area.cpp"),
             Object(Matching, "mo_stage/st_mansion/gr_mansion_area_up.cpp"),
             Object(Matching, "mo_stage/st_mansion/gr_mansion_area_down.cpp"),
             Object(Matching, "mo_stage/st_mansion/gr_mansion_area_break.cpp"),
+            Object(NonMatching, "mo_stage/st_mansion/gr_mansion_front.cpp"),
+            Object(NonMatching, "mo_stage/st_mansion/gr_mansion_floor.cpp"),
         ],
     },
     {
