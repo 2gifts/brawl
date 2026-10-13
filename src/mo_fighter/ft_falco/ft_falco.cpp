@@ -1,7 +1,13 @@
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define FT_TEAM_TYPED_INTERFACE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/falco/ft_falco.h>
 #include <ft/falco/ft_falco_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
+#include <so/team/so_team.h>
+#include <so/param/so_param_customize_module_impl.h>
 
 #define FT_BC ftFalcoBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -138,3 +144,24 @@ void fn_108_B240(u8* p, u32 idx, float value) { float* floats = *(float**)(p + 0
 float fn_108_B250(u8* p, u32 idx) { float* floats = *(float**)(p + 0x14); return floats[idx]; }
 
 }
+
+#pragma dont_inline on
+soParamAccesser::~soParamAccesser() { }
+#pragma dont_inline off
+#pragma dont_inline on
+soTeam::~soTeam() { }
+#pragma dont_inline off
+#pragma dont_inline on
+soResourceIdAccesser::~soResourceIdAccesser() { }
+#pragma dont_inline off
+// Article specialization also declared by the weapon-builder header, which
+// cannot coexist with this Fighter-based builder translation unit.
+template <>
+class soParamCustomizeModuleBuilder<soParamCustomizeModuleBuildConfig<soParamCustomizeModuleImpl> > {
+    soParamCustomizeModuleImpl m_paramCustomizeModule;
+public:
+    soParamCustomizeModuleBuilder(soModuleAccesser*) { }
+    ~soParamCustomizeModuleBuilder();
+};
+soParamCustomizeModuleBuilder<soParamCustomizeModuleBuildConfig<soParamCustomizeModuleImpl> >::~soParamCustomizeModuleBuilder() { }
+soArticleMediator::~soArticleMediator() { }
