@@ -76,7 +76,7 @@ void ftDonkeyStatusUniqProcessSuperLiftCommon::exitStatus(soModuleAccesser* modu
         }
     }
     if (getItemManage(moduleAccesser)->unk40(0)) {
-        // HYPOTHESIS: constants from lbl_92_rodata_70 / lbl_92_rodata_74 (values not verified)
+        // Target constants verified from ft_donkey.o: lbl_92_rodata_70 = 90.0f; lbl_92_rodata_74 = 0.0f.
         getItemManage(moduleAccesser)->unk84(90.0f, 0.0f, 0);
     }
 }
@@ -87,7 +87,7 @@ bool ftDonkeyStatusUniqProcessSuperLiftCommon::checkDamage(soModuleAccesser* mod
         return true;
     }
     if (getItemManage(moduleAccesser)->unk40(0)) {
-        // HYPOTHESIS: constants from lbl_92_rodata_70 / lbl_92_rodata_74 (values not verified)
+        // Target constants verified from ft_donkey.o: lbl_92_rodata_70 = 90.0f; lbl_92_rodata_74 = 0.0f.
         getItemManage(moduleAccesser)->unk84(90.0f, 0.0f, 0);
     }
     return false;

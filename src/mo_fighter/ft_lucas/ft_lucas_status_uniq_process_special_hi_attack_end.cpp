@@ -4,6 +4,11 @@
 #include <so/so_module_accesser.h>
 #include <so/stageobject.h>
 
+// Native recovery tuning: facing multiplier, degrees per radian, zero, zero.
+extern float lbl_114_rodata_98[];
+extern float lbl_114_rodata_9C;
+extern float lbl_114_rodata_A0[];
+
 void ftLucasStatusUniqProcessSpecialHiAttackEnd::initStatus(soModuleAccesser* a) {
     soWorkManageModule& work = a->getWorkManageModule();
     soModelModuleImpl& model = dynamic_cast<soModelModuleImpl&>(a->getModelModule());
@@ -14,21 +19,21 @@ void ftLucasStatusUniqProcessSpecialHiAttackEnd::initStatus(soModuleAccesser* a)
 }
 
 void ftLucasStatusUniqProcessSpecialHiAttackEnd::execStatus(soModuleAccesser* a) {
+    float* constants = lbl_114_rodata_98;
     soWorkManageModule& work = a->getWorkManageModule();
-    soStatusModule& status = a->getStatusModule();
     soModelModuleImpl& model = dynamic_cast<soModelModuleImpl&>(a->getModelModule());
     float angle = work.getFloat(0x21000004);
     float step = work.getFloat(0x21000006);
-    if (angle <= 0.0f) {
-        angle += step;
-        if (angle > 0.0f) angle = 0.0f;
-    } else {
+    if (angle > constants[2]) {
         angle -= step;
-        if (angle < 0.0f) angle = 0.0f;
+        if (angle < constants[2]) angle = constants[2];
+    } else if (angle < constants[2]) {
+        angle += step;
+        if (angle > constants[2]) angle = constants[2];
     }
     work.setFloat(angle, 0x21000004);
-    if (status.getStatusKind() == 0x11e) angle = -angle;
-    model.setNodeRotateX(3, angle * 57.29578f);
+    if (a->getStatusModule().getStatusKind() == 0x11e) angle *= constants[0];
+    model.setNodeRotateX(3, constants[1] * angle);
 }
 
 void ftLucasStatusUniqProcessSpecialHiAttackEnd::exitStatus(soModuleAccesser* a, int) {

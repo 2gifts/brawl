@@ -1699,7 +1699,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_barrel_jet_charge.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_barrel_jet_jump.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_barrel_jet_damage.cpp"),
-            Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_s_cling.cpp"),
+            Object(Matching, "mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_s_cling.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_s_throw.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy_status_uniq_process_final.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy.cpp"),

@@ -6,22 +6,22 @@
 #include <so/sound/so_sound_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
 
+extern float lbl_114_rodata_B0[];
+
 void ftLucasStatusUniqProcessSpecialLwHold::initStatus(soModuleAccesser* moduleAccesser) {
-    // HYPOTHESIS: these flags configure Lucas's absorber group for PSI Magnet.
+    float* constants = lbl_114_rodata_B0;
+    // HYPOTHESIS: these flags configure the absorber group for PSI Magnet.
     moduleAccesser->getCollisionAbsorberModule().setStatus(0, 1, 0);
-
-    soWorkManageModule& work = moduleAccesser->getWorkManageModule();
-    if (work.getInt(0x20000003) < 0) {
-        Vec3f position(0.0f, 6.5f, 10.0f);
-        Vec3f rotation(0.0f, 0.0f, 0.0f);
-        u32 effect = moduleAccesser->getEffectModule().req(
-            static_cast<EfID>(0x1B000F), 2, &position, &rotation, 0.9f, nullptr, nullptr, false, 0xFFFFFFFF);
-        work.setInt(effect, 0x20000003);
+    if (moduleAccesser->getWorkManageModule().getInt(0x20000003) < 0) {
+        int effectId = moduleAccesser->getEffectModule().reqFollow(static_cast<EfID>(0x1B000F), 2,
+            &Vec3f(constants[0], constants[1], constants[2]),
+            &Vec3f(constants[0], constants[0], constants[0]),
+            constants[3], false, 0, 0, -1);
+        moduleAccesser->getWorkManageModule().setInt(effectId, 0x20000003);
     }
-
-    if (work.getInt(0x20000002) < 0) {
-        int sound = moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1450), true, 0, 0);
-        work.setInt(sound, 0x20000002);
+    if (moduleAccesser->getWorkManageModule().getInt(0x20000002) < 0) {
+        int soundHandle = moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1450), true, 0, 0);
+        moduleAccesser->getWorkManageModule().setInt(soundHandle, 0x20000002);
     }
 }
 
