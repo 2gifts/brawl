@@ -1315,10 +1315,12 @@ nw4r/ut/ut_DvdFileStream.cpp:
 
 nw4r/ut/ut_DvdLockedFileStream.cpp:
 	.text       start:0x8015D36C end:0x8015D720
+	.bss        start:0x8049ED58 end:0x8049ED70
 
 nw4r/ut/ut_LockedCache.cpp:
 	.text       start:0x8015D72C end:0x8015D8DC
 	.ctors      start:0x8040658C end:0x80406590
+	.bss        start:0x8049ED70 end:0x8049ED90
 
 nw4r/ut/ut_Font.cpp:
 	.text       start:0x8015D8DC end:0x8015D984
@@ -1336,10 +1338,12 @@ nw4r/ut/ut_ResFont.cpp:
 
 nw4r/ut/ut_CharWriter.cpp:
 	.text       start:0x8015E8F4 end:0x8016017C
+	.bss        start:0x8049ED90 end:0x8049EDB0
 
 nw4r/ut/ut_TextWriterBase.cpp:
 	.text       start:0x8016017C end:0x80162188
 	.ctors      start:0x80406590 end:0x80406594
+	.bss        start:0x8049EDB0 end:0x8049EDC8
 
 nw4r/math/math_arithmetic.cpp:
 	.text       start:0x80162188 end:0x801622C4
@@ -1369,6 +1373,7 @@ nw4r/ef/ef_effect.cpp:
 nw4r/ef/ef_effectsystem.cpp:
 	.text       start:0x80164738 end:0x80164D20
 	.ctors      start:0x80406594 end:0x80406598
+	.bss        start:0x8049EDC8 end:0x804A3E40
 
 nw4r/ef/ef_emitter.cpp:
 	.text       start:0x80164D20 end:0x80166EFC
@@ -1382,10 +1387,12 @@ nw4r/ef/ef_particle.cpp:
 nw4r/ef/ef_particlemanager.cpp:
 	.text       start:0x8016C418 end:0x8016E4E8
 	.ctors      start:0x80406598 end:0x8040659C
+	.bss        start:0x804A3E40 end:0x804A3E70
 
 nw4r/ef/ef_resource.cpp:
 	.text       start:0x8016E4E8 end:0x8016F198
 	.ctors      start:0x8040659C end:0x804065A0
+	.bss        start:0x804A3E70 end:0x804A3E90
 
 nw4r/ef/ef_util.cpp:
 	.text       start:0x8016F198 end:0x8016FB7C
@@ -1426,6 +1433,7 @@ nw4r/ef/emform/ef_cube.cpp:
 
 nw4r/ef/drawstrategy/ef_drawstrategybuilder.cpp:
 	.text       start:0x80174434 end:0x801747D8
+	.bss        start:0x804A3E90 end:0x804A4408
 
 nw4r/ef/drawstrategy/ef_drawstrategyimpl.cpp:
 	.text       start:0x801747D8 end:0x80176444
@@ -1499,6 +1507,7 @@ nw4r/lyt/lyt_arcResourceAccessor.cpp:
 
 nw4r/lyt/lyt_common.cpp:
 	.text       start:0x8018C0E8 end:0x8018CBF4
+	.bss        start:0x804A4498 end:0x804A44C0
 
 nw4r/g3d/res/g3d_rescommon.cpp:
 	.text       start:0x8018CBF4 end:0x8018CD84
@@ -1652,6 +1661,7 @@ nw4r/g3d/g3d_state.cpp:
 	.ctors      start:0x804065BC end:0x804065C0
 	.rodata     start:0x8040AA88 end:0x8040AAB8
 	.data       start:0x804661F8 end:0x80466210
+	.bss        start:0x804A44C0 end:0x804A9A80
 	.sdata2     start:0x805A3318 end:0x805A3340
 
 nw4r/g3d/g3d_draw1mat1shp.cpp:
@@ -1768,12 +1778,14 @@ nw4r/g3d/g3d_calcvtx.cpp:
 
 nw4r/snd/snd_AxManager.cpp:
 	.text       start:0x801B72E0 end:0x801B8818
+	.bss        start:0x804C1A80 end:0x804C1C80
 
 nw4r/snd/snd_AxVoice.cpp:
 	.text       start:0x801B8818 end:0x801BB188
 
 nw4r/snd/snd_AxVoiceManager.cpp:
 	.text       start:0x801BB188 end:0x801BBBC0
+	.bss        start:0x804C1C80 end:0x804C1CB8
 
 nw4r/snd/snd_AxfxImpl.cpp:
 	.text       start:0x801BBBC0 end:0x801BBD30
@@ -1793,9 +1805,11 @@ nw4r/snd/snd_BasicSound.cpp:
 
 nw4r/snd/snd_Channel.cpp:
 	.text       start:0x801BD6A0 end:0x801BE7BC
+	.bss        start:0x804C1CB8 end:0x804C1CE8
 
 nw4r/snd/snd_DisposeCallbackManager.cpp:
 	.text       start:0x801BE7BC end:0x801BEB4C
+	.bss        start:0x804C1CE8 end:0x804C1D00
 
 nw4r/snd/snd_DvdSoundArchive.cpp:
 	.text       start:0x801BEB4C end:0x801BF0FC
@@ -1844,12 +1858,14 @@ nw4r/snd/snd_RemoteSpeaker.cpp:
 
 nw4r/snd/snd_RemoteSpeakerManager.cpp:
 	.text       start:0x801C2C04 end:0x801C2E84
+	.bss        start:0x804C1D00 end:0x804C1FD8
 
 nw4r/snd/snd_SeqFile.cpp:
 	.text       start:0x801C2E84 end:0x801C2F00
 
 nw4r/snd/snd_SeqPlayer.cpp:
 	.text       start:0x801C2F00 end:0x801C427C
+	.bss        start:0x804C1FD8 end:0x804C2000
 
 nw4r/snd/snd_SeqSound.cpp:
 	.text       start:0x801C427C end:0x801C49C0
@@ -1900,9 +1916,11 @@ nw4r/snd/snd_SoundStartable.cpp:
 nw4r/snd/snd_SoundSystem.cpp:
 	.text       start:0x801CC034 end:0x801CC2E4
 	.ctors      start:0x804065C8 end:0x804065CC
+	.bss        start:0x804C2000 end:0x804D8CB0
 
 nw4r/snd/snd_SoundThread.cpp:
 	.text       start:0x801CC2E4 end:0x801CC9D8
+	.bss        start:0x804D8CB0 end:0x804D9060
 
 nw4r/snd/snd_StrmChannel.cpp:
 	.text       start:0x801CC9D8 end:0x801CCBF8
@@ -1912,6 +1930,7 @@ nw4r/snd/snd_StrmFile.cpp:
 
 nw4r/snd/snd_StrmPlayer.cpp:
 	.text       start:0x801CD1C4 end:0x801CF664
+	.bss        start:0x804D9060 end:0x804DD098
 
 nw4r/snd/snd_StrmSound.cpp:
 	.text       start:0x801CF664 end:0x801CF99C
@@ -1925,6 +1944,7 @@ nw4r/snd/snd_Task.cpp:
 
 nw4r/snd/snd_TaskManager.cpp:
 	.text       start:0x801CFA14 end:0x801D0180
+	.bss        start:0x804DD098 end:0x804DD0E0
 
 nw4r/snd/snd_TaskThread.cpp:
 	.text       start:0x801D0180 end:0x801D039C
@@ -1934,6 +1954,7 @@ nw4r/snd/snd_Voice.cpp:
 
 nw4r/snd/snd_VoiceManager.cpp:
 	.text       start:0x801D2AD0 end:0x801D3258
+	.bss        start:0x804DD0E0 end:0x804DD120
 
 nw4r/snd/snd_Util.cpp:
 	.text       start:0x801D3258 end:0x801D36BC
