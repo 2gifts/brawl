@@ -4,13 +4,14 @@
 #include <wn/weapon.h>
 #include <types.h>
 
-// HYPOTHESIS: parameter floats named by their use in the bang size and power curves.
+// The explosion phase of the article: size and damage grow over growFrames. Offsets and use agree with the published
+// Din's Fire parameter table; the names are descriptive.
 struct wnZeldaDeinSParam {
-    float unk0;
-    float unk4;
-    float unk8;
-    float unkC;
-    float unk10;
+    float growFrames;
+    float initialSizeMul;
+    float terminalSizeMul;
+    float initialDamage;
+    float damageGrowthRate;
 };
 
 // Local view of the Dein S article: only the parameter pointer at 0x1F14 is used here.
@@ -35,10 +36,10 @@ void wnZeldaDeinSStatusUniqProcessBang::execFixPosCounter(soModuleAccesser* a) {
     float size = work.getFloat(0x21000002);
     wnZeldaDeinS& article = dynamic_cast<wnZeldaDeinS&>(a->getStageObject());
     wnZeldaDeinSParam* param = article.m_param;
-    float scale = param->unk4 + (param->unk8 - param->unk4) / param->unk0 * t;
+    float scale = param->initialSizeMul + (param->terminalSizeMul - param->initialSizeMul) / param->growFrames * t;
     a->getPostureModule().setScale(scale);
     if (attack.isAttack(0, false)) {
-        int power = static_cast<int>(param->unkC + param->unk10 * t);
+        int power = static_cast<int>(param->initialDamage + param->damageGrowthRate * t);
         attack.setPower(0, power, false);
         // HYPOTHESIS: the sentinel compared against the stored size is the rodata constant lbl_104_rodata_D0.
         if (size == 0.0f) {
