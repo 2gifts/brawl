@@ -12,7 +12,7 @@ public:
 #ifdef WN_WEAPON_BUILDER
     soParamAccesser() : soNullable(false) { }
 #endif
-#ifdef WN_WEAPON_BUILDER
+#if defined(WN_WEAPON_BUILDER) || defined(FT_PARAM_ACCESSER_TYPED_DTOR)
     virtual ~soParamAccesser(); // out of line in the fighter RELs
 #else
     virtual ~soParamAccesser() { }

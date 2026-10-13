@@ -3,11 +3,7 @@
 #include <so/so_module_accesser.h>
 #include <types.h>
 
-class wnGameWatchOctopusStatusUniqProcessCommon : public soStatusUniqProcess {
-public:
-    virtual ~wnGameWatchOctopusStatusUniqProcessCommon() { }
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-};
+#include <wn/gamewatch/wn_game_watch_octopus_status_uniq_process_common.h>
 
 wnGameWatchOctopusStatusUniqProcessCommon g_wnGameWatchOctopusStatusUniqProcessCommon;
 

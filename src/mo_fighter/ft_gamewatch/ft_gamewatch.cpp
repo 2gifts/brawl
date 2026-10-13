@@ -1,8 +1,14 @@
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define FT_TEAM_TYPED_INTERFACE
 #include <so/anim/so_anim_obj.h>
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/gamewatch/ft_gamewatch.h>
 #include <ft/gamewatch/ft_gamewatch_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
+#include <so/team/so_team.h>
+#include <so/param/so_param_customize_module_impl.h>
 
 #define FT_NO_REFLECTOR_INSTANTIATION
 #define FT_BC ftGameWatchBuildConfig
@@ -167,13 +173,32 @@ void fn_107_10044(u8* self, soCollisionAttackModule* attackModule, soCollisionLo
 // Leaf functions shared with other fighter modules (same module-map names and bodies).
 extern "C" {
 void* fn_107_1F34(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_107_3944(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
+} // extern "C"
+#pragma dont_inline on
+soParamAccesser::~soParamAccesser() { }
+#pragma dont_inline off
+extern "C" {
 void* fn_107_3DC4(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_107_4158(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_107_4554(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_107_4898(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_107_48D8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_107_67C0(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
+} // extern "C"
+#pragma dont_inline on
+soTeam::~soTeam() { }
+#pragma dont_inline off
+#pragma dont_inline on
+soResourceIdAccesser::~soResourceIdAccesser() { }
+#pragma dont_inline off
+// Article specialization also declared by the weapon-builder header, which
+// cannot coexist with this Fighter-based builder translation unit.
+template <>
+class soParamCustomizeModuleBuilder<soParamCustomizeModuleBuildConfig<soParamCustomizeModuleImpl> > {
+    soParamCustomizeModuleImpl m_paramCustomizeModule;
+public:
+    soParamCustomizeModuleBuilder(soModuleAccesser*) { }
+    ~soParamCustomizeModuleBuilder();
+};
+soParamCustomizeModuleBuilder<soParamCustomizeModuleBuildConfig<soParamCustomizeModuleImpl> >::~soParamCustomizeModuleBuilder() { }
+soArticleMediator::~soArticleMediator() { }
+extern "C" {
 void* fn_107_6800(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_107_6840(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"

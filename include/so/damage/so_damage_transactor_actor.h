@@ -34,7 +34,11 @@ public:
     virtual bool isCheckGroundDamage(soModuleAccesser* moduleAccesser) = 0;
     virtual void onGroundDamageAfter(soModuleAccesser* moduleAccesser) = 0;
     virtual bool onCompositionDamageSpeed(soModuleAccesser* moduleAccesser, soDamage* damage, Vec2f* speed, int level) = 0;
+    #ifdef WN_NULL_DAMAGE_OUT_OF_LINE
+    virtual bool preProcessCheckDamage(soModuleAccesser* moduleAccesser, soDamage* damage);
+    #else
     virtual bool preProcessCheckDamage(soModuleAccesser* moduleAccesser, soDamage* damage) { return false; }
+    #endif
     virtual bool onDamage(soModuleAccesser* moduleAccesser, soDamage* damage, soDamageLog* damageLog) = 0;
     virtual void setupDamageStatusNormal(soModuleAccesser* moduleAccesser, soDamage* damage, soDamageLog* damageLog, int unk) = 0;
     virtual void setupDamageStatusTurn(soModuleAccesser* moduleAccesser, soDamage* damage, soDamageLog* damageLog) = 0;
@@ -43,7 +47,11 @@ public:
     virtual void setupDamageFlyRollStatus(float angle, float speed, soModuleAccesser* moduleAccesser, soDamageLog* damageLog) = 0;
     virtual float getReactionSub(soModuleAccesser* moduleAccesser) = 0;
     virtual float getReactionMul(soModuleAccesser* moduleAccesser) = 0;
+    #ifdef WN_NULL_DAMAGE_OUT_OF_LINE
+    virtual float getWeightReactionMul(soModuleAccesser* moduleAccesser);
+    #else
     virtual float getWeightReactionMul(soModuleAccesser* moduleAccesser) { return 1.0f; }
+    #endif
     virtual float getDamageMul(soModuleAccesser* moduleAccesser) = 0;
     virtual void checkCheer(float reaction, float angle, soModuleAccesser* moduleAccesser, soDamageLog* damageLog) = 0;
     virtual float getDamageForReaction(float damage, soModuleAccesser* moduleAccesser) = 0;
