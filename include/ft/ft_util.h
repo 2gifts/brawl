@@ -38,6 +38,8 @@ public:
     // Motion played while holding an item: -1 when the held item has no special wait motion. Items held by a
     // grip (only King Dedede keeps one) or by a normal/pickup/plate hold use it, except the motion sensor bomb.
     static int getItemWaitMotion(soModuleAccesser* acc);
+    // Multiplier used by the item-lift motion rate callback.
+    static float getItemLiftMotionRateMul(soModuleAccesser* acc);
 
     // Cloud (pass-through platform) handling while airborne; names from the sora_melee map.
     static void setCloudThroughCheck(soModuleAccesser* acc);
@@ -53,6 +55,10 @@ public:
     // Pushes the fighter out of a wall (parameters as used by fighter statuses, e.g. Sonic's side special wall end).
     // Parameter order is verified from fighter callers and the shared implementation. (Declared by the Sonic status work.)
     static void adjustWall(soModuleAccesser*, float, float, float, int);
+
+    // Ceiling correction restores the supplied facing before adjusting contact.
+    // HYPOTHESIS: formal bool/float order is inferred from callers; their register classes are verified.
+    static void adjustCeil(soModuleAccesser*, bool, float);
 
     // Global multipliers read from the common constants.
     static float getAttackReactionMul(soModuleAccesser* acc);

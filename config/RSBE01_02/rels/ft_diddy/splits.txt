@@ -15,8 +15,6 @@ mo_fighter/ft_diddy/ft_diddy.cpp:
 	.text       start:0x00000070 end:0x0000DA80
 	.ctors      start:0x00000000 end:0x00000004
 	.rodata     start:0x00000000 end:0x00000140
-	.data       start:0x00000000 end:0x0000A958
-	.bss        start:0x00000008 end:0x00000448
 
 mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_monkey_flip.cpp:
 	.text       start:0x0000DA80 end:0x0000DD7C
@@ -53,6 +51,8 @@ mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_barrel_jet_damage.cpp:
 mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_s_cling.cpp:
 	.text       start:0x00010C48 end:0x00010D50
 	.ctors      start:0x00000024 end:0x00000028
+	.data       start:0x000079C0 end:0x00007A40
+	.bss        start:0x000002E8 end:0x000002F8
 
 mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_s_throw.cpp:
 	.text       start:0x00010D50 end:0x000111D4

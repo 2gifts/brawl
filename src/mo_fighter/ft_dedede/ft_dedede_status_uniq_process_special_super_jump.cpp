@@ -15,40 +15,44 @@ public:
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
 };
 
+// MATCH-ONLY: retain reset mode across the sum-speed query and vector construction, as in the native register lifetime.
+#pragma push
+#pragma opt_propagation off
 void ftDededeStatusUniqProcessSpecialSuperJump::initStatus(soModuleAccesser* moduleAccesser) {
     const float* k = s_superJumpConst;
-    ftKineticEnergyMotion& motion = dynamic_cast<ftKineticEnergyMotion&>(*moduleAccesser->getKineticModule().getEnergy(2));
+    ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
     int mode = 0xb;
-    soKineticEnergy::AttributeFlag flag(1);
-    Vec2f sumSpeed = moduleAccesser->getKineticModule().getSumSpeed(flag);
+    Vec2f sumSpeed;
+    Vec2f::copy(sumSpeed, moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1)));
     if (sumSpeed.m_x > soValueAccesser::getConstantFloat(moduleAccesser, 0xfb4, 0)) {
         sumSpeed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb4, 0);
     }
-    Vec2f speed(sumSpeed.m_x, k[0]);
-    motion.resetEnergy(mode, &speed, &Vec3f(k[0], k[0], k[0]), moduleAccesser);
-    motion.unk3C = k[1];
-    motion.unk40 = k[0];
-    motion.enable();
+    controller.resetEnergy(mode, &Vec2f(sumSpeed.m_x, k[0]), &Vec3f(k[0], k[0], k[0]), moduleAccesser);
+    controller.m_accelMul = k[1];
+    controller.m_unk40 = k[0];
+    controller.enable();
 
-    soKineticEnergyNormal& energy = dynamic_cast<soKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(1));
+    ftKineticEnergyGravity& energy = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
     float a = k[2] * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb5, 0);
     float b = k[2] * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb6, 0);
-    Vec2f speed2(k[0], a);
-    energy.resetEnergy(0, &speed2, &Vec3f(k[0], k[0], k[0]), moduleAccesser);
-    energy.m_accel.m_x = b;
+    energy.resetEnergy(0, &Vec2f(k[0], a), &Vec3f(k[0], k[0], k[0]), moduleAccesser);
+    energy.m_gravity = b;
     if (moduleAccesser->getSituationModule().getKind() == 2) {
         energy.enable();
     } else {
         energy.disable();
     }
 }
+#pragma pop
 
 void ftDededeStatusUniqProcessSpecialSuperJump::execStatus(soModuleAccesser* moduleAccesser) {
     float stickX = moduleAccesser->getControllerModule().getStickX();
-    ftKineticEnergyMotion& motion = dynamic_cast<ftKineticEnergyMotion&>(*moduleAccesser->getKineticModule().getEnergy(2));
+    ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
     float scale = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb4, 0);
-    motion.m_speed.m_x = stickX * scale;
-    motion.m_speed.m_y = s_superJumpConst[0];
+    Vec2f speed;
+    speed.m_x = stickX * scale;
+    speed.m_y = s_superJumpConst[0];
+    controller.m_speed = speed;
     if (moduleAccesser->getSituationModule().getKind() == 2) {
         moduleAccesser->getKineticModule().getEnergy(1)->enable();
     } else {

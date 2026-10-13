@@ -1,14 +1,9 @@
+#include <ft/ft_util.h>
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <so/status/so_status_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/motion/so_motion_change_param.h>
 #include <types.h>
-
-// Local declaration of the sora_melee helper that the item-lift status calls (ft_util.h does not declare it).
-class ftUtil {
-public:
-    static void getItemLiftMotionRateMul(soModuleAccesser* moduleAccesser);
-};
 
 // HYPOTHESIS: item manage module (soModuleEnumeration::m_itemManageModule); slots not recovered
 class ftItemManageModuleStub {
@@ -72,8 +67,7 @@ void ftDonkeyStatusUniqProcessItemLift::initStatus(soModuleAccesser* moduleAcces
         param.unk16 = 0;
         param.unk17 = 0;
         moduleAccesser->getMotionModule().changeMotionRequest(reinterpret_cast<soMotionChangeParam*>(&param));
-        ftUtil::getItemLiftMotionRateMul(moduleAccesser);
-        moduleAccesser->getMotionModule().processFixPosition();
+        moduleAccesser->getMotionModule().setRate(ftUtil::getItemLiftMotionRateMul(moduleAccesser));
     }
     }
 }

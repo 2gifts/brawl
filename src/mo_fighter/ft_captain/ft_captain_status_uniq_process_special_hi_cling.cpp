@@ -18,14 +18,8 @@ static inline ftStatusCatchModuleLate* getCatchModule(soModuleAccesser* moduleAc
     return static_cast<ftStatusCatchModuleLate*>(moduleAccesser->m_enumerationStart->m_catchModule);
 }
 
-class ftCaptainStatusUniqProcessSpecialHiCling : public soStatusUniqProcess {
-public:
-    virtual ~ftCaptainStatusUniqProcessSpecialHiCling() { }
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
-    virtual bool checkDamage(soModuleAccesser* moduleAccesser, void* data);
-    virtual bool onChangeLr(soModuleAccesser* moduleAccesser, float, float);
-};
+#include <ft/captain/ft_captain_status_uniq_process_special_hi_cling.h>
+
 
 void ftCaptainStatusUniqProcessSpecialHiCling::execFixPos(soModuleAccesser* moduleAccesser) {
     getCatchModule(moduleAccesser)->unk30();

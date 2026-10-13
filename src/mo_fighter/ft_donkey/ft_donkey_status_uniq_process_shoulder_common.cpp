@@ -1,12 +1,13 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <so/status/so_status_module_impl.h>
 #include <so/so_module_accesser.h>
+#include <so/catch/so_catch_module.h>
 #include <so/so_value_accesser.h>
 #include <so/damage/so_damage_util_actor.h>
 #include <types.h>
 
 extern "C" {
-// HYPOTHESIS: rodata float constants lbl_92_rodata_88 / lbl_92_rodata_8C (values not verified)
+// Target constants verified from ft_donkey.o: lbl_92_rodata_88 = 90.0f; lbl_92_rodata_8C = 0.0f.
 }
 
 // HYPOTHESIS: link module (soModuleEnumeration::m_linkModule, +0x54); slots 0x30 and 0x54 are used
@@ -32,21 +33,6 @@ public:
     virtual void unk4C();
     virtual void unk50();
     virtual u32 unk54(int);
-};
-
-// HYPOTHESIS: catch module (soModuleEnumeration::m_catchModule, +0x3c); only slot 0x2C is used
-class ftDonkeyCatchModuleStub {
-public:
-    virtual ~ftDonkeyCatchModuleStub();
-    virtual void unk0C();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1C();
-    virtual void unk20();
-    virtual void unk24();
-    virtual void unk28();
-    virtual void unk2C(int, int);
 };
 
 // HYPOTHESIS: capture-side module (soModuleEnumeration +0x40); only slot 0x68 is used
@@ -150,7 +136,7 @@ void ftDonkeyStatusUniqProcessShoulderCommon::exitStatus(soModuleAccesser* modul
         if (nextStatus >= 0x120 && nextStatus < 0x12a) {
             return;
         }
-        reinterpret_cast<ftDonkeyCatchModuleStub*>(moduleAccesser->m_enumerationStart->m_catchModule)->unk2C(0, 0);
+        reinterpret_cast<soCatchModule*>(moduleAccesser->m_enumerationStart->m_catchModule)->catchCut(false, false);
         break;
     }
     if (value != -1) {
@@ -172,7 +158,7 @@ bool ftDonkeyStatusUniqProcessShoulderCommon::checkDamage(soModuleAccesser* modu
         return true;
     }
     if (reinterpret_cast<ftItemManageModuleStub*>(moduleAccesser->m_enumerationStart->m_itemManageModule)->unk40(0)) {
-        // HYPOTHESIS: constants from lbl_92_rodata_88 / lbl_92_rodata_8C (values not verified)
+        // Target constants verified from ft_donkey.o: lbl_92_rodata_88 = 90.0f; lbl_92_rodata_8C = 0.0f.
         reinterpret_cast<ftItemManageModuleStub*>(moduleAccesser->m_enumerationStart->m_itemManageModule)->unk84(90.0f, 0.0f, 0);
     }
     return false;
