@@ -1790,7 +1790,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_ganon/wn_ganon_beast.cpp"),
             Object(NonMatching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_hi_cling.cpp"),
             Object(NonMatching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_hi_throw.cpp"),
-            Object(NonMatching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_s.cpp"),
+            Object(Matching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_s.cpp"),
             Object(NonMatching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_ganon_kick.cpp"),
             Object(NonMatching, "mo_fighter/ft_ganon/ft_ganon.cpp"),
         ],
