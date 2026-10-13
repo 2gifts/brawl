@@ -105,7 +105,7 @@ void grPlanktonHanenbou::updateMove(float deltaFrame) {
     checkRefrect();
     m_data->m_prevX = m_data->m_x;
     m_data->m_prevY = m_data->m_y;
-    m_data->m_speedY = m_data->m_speedY - data->unk50 * deltaFrame;
+    m_data->m_speedY = m_data->m_speedY - data->hanenbouGravity * deltaFrame;
     m_data->m_x = m_data->m_x + m_data->m_speedX * deltaFrame;
     m_data->m_y = m_data->m_y + m_data->m_speedY * deltaFrame;
     m_data->m_angle = nw4r::math::Atan2FIdx(m_data->m_y - m_data->m_prevY, m_data->m_x - m_data->m_prevX) * 1.40625f;

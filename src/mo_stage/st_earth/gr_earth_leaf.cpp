@@ -235,7 +235,7 @@ void grEarthLeaf::updateReturn(float deltaFrame) {
 void grEarthLeaf::updatePellet() {
     stEarthData* data = static_cast<stEarthData*>(getStageData());
     if (data != NULL) {
-        u8 count = data->unk3C;
+        u8 count = data->maxPellets;
         for (u32 i = 0; i != count; i++) {
             u8 type = m_type;
             if (type == 0 && m_pelletData[i].m_leaf == 0) {

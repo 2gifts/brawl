@@ -430,7 +430,7 @@ void stFamicom::updateEnemy(float deltaFrame) {
                 m_enemyTimer = data->unk18 + (data->unk1C - data->unk18) * randf();
             }
         } else if (m_enemyState == 0) {
-            m_enemyTimer = data->unk14;
+            m_enemyTimer = data->enemyInitialTimer;
             m_enemyState = 1;
         }
     }
@@ -612,7 +612,7 @@ void stFamicom::makeEnemy() {
         u8 index = getEmptyIndexEnemyTbl();
         if (index != 0xFF) {
             Ground* ground;
-            if (data->unk20 <= (data->unk20 + data->unk24) * randf()) {
+            if (data->shellcreeperSpawnRate <= (data->shellcreeperSpawnRate + data->sidestepperSpawnRate) * randf()) {
                 ground = grFamicomKani::create(4, "StgFamicomKani", "grFamicomKani");
             } else {
                 ground = grFamicomKame::create(3, "StgFamicomKame", "grFamicomKame");

@@ -33,7 +33,8 @@ public:
     static IfSnakeSmashAppearTask* create(gfArchive* archive);
 };
 
-// The parameters of the stage (the stage data file). Nothing is named by the original, so the fields are the offsets.
+// The parameters of the stage (the stage data file). Nothing is named by the original; fields that match the published
+// stage parameter table (offset, type and use) carry descriptive names, the others are still offsets.
 struct stMetalgearData {
     float unk00;    // 0x00 chance of the snow of the weakest kind (the four chances are normalized)
     float unk04;    // 0x04
@@ -47,7 +48,7 @@ struct stMetalgearData {
     float unk24;
     float unk28;
     float unk2C;
-    float unk30;    // 0x30 frames the wall needs to rise again
+    float towerRespawnFrames;    // 0x30 frames the wall needs to rise again
     float unk34;    // 0x34 frames the wall stays broken
     float unk38;    // 0x38 chance of a metalgear
     float unk3C;    // 0x3C least frames until the metalgear comes

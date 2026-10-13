@@ -30,7 +30,8 @@ public:
     virtual void preload() { }
 };
 
-// The parameters of the stage (the stage data file). Nothing is named by the original, so the fields are the offsets.
+// The parameters of the stage (the stage data file). Nothing is named by the original; fields that match the published
+// stage parameter table (offset, type and use) carry descriptive names, the others are still offsets.
 struct stNorfairData {
     float unk00;    // 0x00 how much the chance of the same event twice is multiplied by
     float unk04;    // 0x04 frames left in a timed match under which no event starts
@@ -38,11 +39,11 @@ struct stNorfairData {
     float unk0C;    // 0x0C
     float unk10;    // 0x10
     float unk14;    // 0x14
-    float unk18;    // 0x18
+    float wallSpeedMax;    // 0x18
     float unk1C;    // 0x1C
     float unk20;    // 0x20
-    float unk24;    // 0x24
-    float unk28;    // 0x28
+    float wallPauseMin;    // 0x24
+    float wallPauseMax;    // 0x28
     float unk2C;    // 0x2C
     float unk30;    // 0x30
     float unk34;    // 0x34

@@ -30,7 +30,8 @@ public:
     virtual void preload() { }
 };
 
-// The parameters of the stage (the stage data file). Nothing is named by the original, so the fields are the offsets.
+// The parameters of the stage (the stage data file). Nothing is named by the original; fields that match the published
+// stage parameter table (offset, type and use) carry descriptive names, the others are still offsets.
 struct stIceData {
     float unk00;    // 0x00 warning lead distance
     float unk04;    // 0x04 frames the warning lasts
@@ -42,10 +43,10 @@ struct stIceData {
     float unk1C;
     float unk20;
     float unk24;
-    float unk28;    // 0x28 least frames until the next icicle
-    float unk2C;    // 0x2C most frames until the next icicle
-    float unk30;    // 0x30 least frames until the next icicle (after the first)
-    float unk34;    // 0x34 most frames until the next icicle (after the first)
+    float icicleInitialMin;    // 0x28 least frames until the next icicle
+    float icicleInitialMax;    // 0x2C most frames until the next icicle
+    float icicleRedoMin;    // 0x30 least frames until the next icicle (after the first)
+    float icicleRedoMax;    // 0x34 most frames until the next icicle (after the first)
     float unk38;    // 0x38 frames the icicles come
     float unk3C;
     float unk40;
@@ -54,15 +55,15 @@ struct stIceData {
     float unk4C;
     float unk50;
     float unk54;
-    float unk58;    // 0x58 least frames until the next vegetable
-    float unk5C;    // 0x5C most frames until the next vegetable
-    float unk60;    // 0x60 chance that a vegetable comes
+    float foodSpawnMin;    // 0x58 least frames until the next vegetable
+    float foodSpawnMax;    // 0x5C most frames until the next vegetable
+    float foodSpawnChance;    // 0x60 chance that a vegetable comes
     float unk64;    // 0x64 the chance is multiplied by this near a fighter
     float unk68;    // 0x68 distance of a fighter from the place of the vegetable
     float unk6C;
     float unk70;
-    float unk74;    // 0x74 least frames until the next cloud platform
-    float unk78;    // 0x78 most frames until the next cloud platform
+    float cloudPlatformSpawnMin;    // 0x74 least frames until the next cloud platform
+    float cloudPlatformSpawnMax;    // 0x78 most frames until the next cloud platform
     float unk7C;
     float unk80;    // 0x80 least frames until the next fish
     float unk84;    // 0x84 most frames until the next fish

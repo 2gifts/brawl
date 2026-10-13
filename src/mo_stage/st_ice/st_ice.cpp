@@ -549,7 +549,7 @@ void stIce::updateTurara(float deltaFrame) {
             if (state < 2) {
                 if (state == 0) {
                     float random = randf();
-                    m_turaraTimer = data->unk28 + (data->unk2C - data->unk28) * random;
+                    m_turaraTimer = data->icicleInitialMin + (data->icicleInitialMax - data->icicleInitialMin) * random;
                     m_turaraHP = data->unk38;
                     m_turaraState = 1;
                 } else if (m_turaraHP == 0.0f) {
@@ -570,7 +570,7 @@ void stIce::updateTurara(float deltaFrame) {
                         m_turaraStateWork = 8;
                     }
                     float random = randf();
-                    m_turaraTimer = data->unk30 + (data->unk34 - data->unk30) * random;
+                    m_turaraTimer = data->icicleRedoMin + (data->icicleRedoMax - data->icicleRedoMin) * random;
                 }
             } else if (state < 4 && m_turaraStateWork == 0xE) {
                 m_turaraState = 0;
@@ -600,8 +600,8 @@ void stIce::updateKumo(float deltaFrame) {
                 m_kumoState = 1;
             } else if (m_part == 1) {
                 float random = randf();
-                float high = data->unk78;
-                float low = data->unk74;
+                float high = data->cloudPlatformSpawnMax;
+                float low = data->cloudPlatformSpawnMin;
                 m_kumoState = 2;
                 m_kumoTimer = low + (high - low) * random;
             }
@@ -830,8 +830,8 @@ void stIce::updateYasai(float deltaFrame) {
                         float kind = randf() * 10.0f;
                         m_yasaiKind = (u8)(int)kind;
                         float random = randf();
-                        float high = data->unk5C;
-                        float low = data->unk58;
+                        float high = data->foodSpawnMax;
+                        float low = data->foodSpawnMin;
                         m_yasaiState = 1;
                         m_yasaiTimer = low + (high - low) * random;
                     }
@@ -872,14 +872,14 @@ void stIce::updateYasai(float deltaFrame) {
                             pos.m_z = end.m_z + dir.m_z;
                         }
                         if (g_ftManager->searchNearFighter(0.0f, data->unk68, &pos, -1, 0) == NULL) {
-                            if (randf() < data->unk60 * data->unk64) {
+                            if (randf() < data->foodSpawnChance * data->unk64) {
                                 BaseItem* item = items->createItem(Item_Stage_Yasai, m_yasaiKind, -1, NULL, 0, 0xFFFF, 0, 0xFFFF);
                                 if (item != NULL) {
                                     item->warp(&pos);
                                     m_yasaiState = 3;
                                 }
                             }
-                        } else if (randf() < data->unk60) {
+                        } else if (randf() < data->foodSpawnChance) {
                             BaseItem* item = items->createItem(Item_Stage_Yasai, m_yasaiKind, -1, NULL, 0, 0xFFFF, 0, 0xFFFF);
                             if (item != NULL) {
                                 item->warp(&pos);

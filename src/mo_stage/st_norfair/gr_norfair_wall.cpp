@@ -167,12 +167,12 @@ void grNorfairWall::updateMove(float deltaFrame) {
             if (goal < nodePos.m_x) {
                 m_speed -= data->unk14 * deltaFrame;
             }
-            if (fabs(m_speed) > data->unk18) {
+            if (fabs(m_speed) > data->wallSpeedMax) {
                 if (goal > nodePos.m_x) {
-                    m_speed = data->unk18;
+                    m_speed = data->wallSpeedMax;
                 }
                 if (goal < nodePos.m_x) {
-                    m_speed = data->unk18 * -1.0f;
+                    m_speed = data->wallSpeedMax * -1.0f;
                 }
             }
             m_pos.m_x += m_speed * deltaFrame;
@@ -204,7 +204,7 @@ void grNorfairWall::updateMove(float deltaFrame) {
                 }
                 if (stopped == true) {
                     m_state = 4;
-                    m_timer = data->unk24 + (data->unk28 - data->unk24) * randf();
+                    m_timer = data->wallPauseMin + (data->wallPauseMax - data->wallPauseMin) * randf();
                 }
             }
             if (m_soundStarted == 0) {
@@ -239,12 +239,12 @@ void grNorfairWall::updateMove(float deltaFrame) {
             if (m_pos.m_x > 0.0f) {
                 m_speed -= data->unk14 * deltaFrame;
             }
-            if (fabs(m_speed) > data->unk18) {
+            if (fabs(m_speed) > data->wallSpeedMax) {
                 if (m_pos.m_x < 0.0f) {
-                    m_speed = data->unk18;
+                    m_speed = data->wallSpeedMax;
                 }
                 if (m_pos.m_x > 0.0f) {
-                    m_speed = data->unk18 * -1.0f;
+                    m_speed = data->wallSpeedMax * -1.0f;
                 }
             }
             m_pos.m_x += m_speed * deltaFrame;

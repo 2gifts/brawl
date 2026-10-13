@@ -368,7 +368,7 @@ void grFamicomPow::pow() {
                 m_hits = 3;
             }
             if (m_hits == 3) {
-                m_timer = data->unk0C;
+                m_timer = data->powBlockRespawnFrames;
                 setVisibility(0);
                 setEnableCollisionStatus(false);
                 disableHit(0, 0);

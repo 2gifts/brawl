@@ -554,7 +554,7 @@ void stMetalgear::updateWallLeft(float deltaFrame) {
                     m_wallState[0] = 1;
                     m_wallState[1] = 1;
                 }
-                m_wallTimer[0] = data->unk30 - data->unk34;
+                m_wallTimer[0] = data->towerRespawnFrames - data->unk34;
                 int id;
                 switch (m_wallPhase[1]) {
                 case 1:
@@ -631,7 +631,7 @@ void stMetalgear::updateWallRight(float deltaFrame) {
                     m_wallState[2] = 1;
                     m_wallState[3] = 1;
                 }
-                m_wallTimer[1] = data->unk30 - data->unk34;
+                m_wallTimer[1] = data->towerRespawnFrames - data->unk34;
                 int id;
                 switch (m_wallPhase[0]) {
                 case 1:

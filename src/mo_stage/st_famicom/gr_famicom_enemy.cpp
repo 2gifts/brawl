@@ -231,14 +231,14 @@ void grFamicomEnemy::updateMove(float deltaFrame) {
     }
     switch (m_level) {
     case 2:
-        m_speed = data->unk40;
+        m_speed = data->enemySpeedMulLevel2;
         break;
     case 0:
     case 1:
         m_speed = 1.0f;
         break;
     case 3:
-        m_speed = data->unk44;
+        m_speed = data->enemySpeedMulLevel3;
         break;
     default:
         m_speed = 1.0f;
@@ -402,11 +402,11 @@ void grFamicomEnemy::updateMove(float deltaFrame) {
         }
         if (m_fallSpeed <= 0.0f) {
             m_enemyData[m_index].m_pos.m_y = m_enemyData[m_index].m_pos.m_y - m_fallSpeed * deltaFrame;
-            m_fallSpeed = m_fallSpeed + (data->unk34 * 0.75f) * deltaFrame;
+            m_fallSpeed = m_fallSpeed + (data->enemyFallSpeed * 0.75f) * deltaFrame;
         } else {
             if (landed == 1) {
                 m_enemyData[m_index].m_pos.m_y = hitPos.m_y;
-                m_fallSpeed = data->unk34;
+                m_fallSpeed = data->enemyFallSpeed;
                 if (m_enemyData[m_index].m_grounded == 1) {
                     if (m_enemyData[m_index].m_hitDir == -1.0f) {
                         if (m_enemyData[m_index].m_state == 8) {
@@ -418,7 +418,7 @@ void grFamicomEnemy::updateMove(float deltaFrame) {
                 }
                 m_moving = 1;
             }
-            m_fallSpeed = m_fallSpeed + data->unk34 * deltaFrame;
+            m_fallSpeed = m_fallSpeed + data->enemyFallSpeed * deltaFrame;
         }
         if (m_landCount > 2 && isTurn() == 1) {
             requestTurn();
@@ -579,7 +579,7 @@ void grFamicomEnemy::updateMove(float deltaFrame) {
             }
         }
         if (m_itemId == 0) {
-            m_fallSpeed = m_fallSpeed + (data->unk34 * 0.75f) * deltaFrame;
+            m_fallSpeed = m_fallSpeed + (data->enemyFallSpeed * 0.75f) * deltaFrame;
         }
         break;
     case 13:
@@ -648,7 +648,7 @@ void grFamicomEnemy::updateMove(float deltaFrame) {
             break;
         }
         m_enemyData[m_index].m_pos.m_y = m_enemyData[m_index].m_pos.m_y - m_fallSpeed;
-        m_fallSpeed = m_fallSpeed + data->unk34 * 0.75f;
+        m_fallSpeed = m_fallSpeed + data->enemyFallSpeed * 0.75f;
         Vec3f* limit = m_posLimitWork;
         Vec3f* pos = &m_enemyData[m_index].m_pos;
         if ((pos->m_x < limit[0].m_x - 10.0f || limit[1].m_x + 10.0f < pos->m_x || limit[0].m_y + 100.0f < pos->m_y ||

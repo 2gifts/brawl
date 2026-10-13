@@ -101,10 +101,10 @@ void stEarth::createObj() {
     testStageDataInit(m_fileData, 0x14, 0xDC);
     stEarthData* stageData = static_cast<stEarthData*>(m_stageData);
     if (stageData != NULL) {
-        u8 count = stageData->unk3C;
+        u8 count = stageData->maxPellets;
         m_pelletData = new (Heaps::StageInstance) stEarthPelletData[count];
         if (m_pelletData != NULL) {
-            count = stageData->unk3C;
+            count = stageData->maxPellets;
             for (u8 i = 0; i != count; i++) {
                 initPelletData(&m_pelletData[i]);
             }
@@ -287,7 +287,7 @@ void grEarthChappy::setPosGimmickWork(Vec3f* posGimmickWork) {
 
 void stEarth::createObjPellet() {
     if (m_stageData != NULL) {
-        u8 count = static_cast<stEarthData*>(m_stageData)->unk3C;
+        u8 count = static_cast<stEarthData*>(m_stageData)->maxPellets;
         for (u8 i = 0; i != count; i++) {
             createObjPelletFlower(i);
             createObjPellet1(i);
@@ -456,7 +456,7 @@ void stEarth::updateOniyon(float deltaFrame) {
                             m_timerOniyon = least + (most - least) * r;
                         } else {
                             float r = randf();
-                            m_timerOniyon = data->unk48 + (data->unk4C - data->unk48) * r;
+                            m_timerOniyon = data->oniyonIntervalMin + (data->oniyonIntervalMax - data->oniyonIntervalMin) * r;
                         }
                         m_stateOniyon = 1;
                         break;
@@ -476,7 +476,7 @@ void stEarth::updateOniyon(float deltaFrame) {
                                     leaf = 0;
                                 }
                                 int offset = 0;
-                                for (u32 count = data->unk3C; count != 0; count--) {
+                                for (u32 count = data->maxPellets; count != 0; count--) {
                                     u8 pelletLeaf = reinterpret_cast<u8*>(m_pelletData)[offset + 9];
                                     if (pelletLeaf == 1) {
                                         if (leaf == 1) {
@@ -495,7 +495,7 @@ void stEarth::updateOniyon(float deltaFrame) {
                                     offset += 0x58;
                                 }
                                 if (found) {
-                                    m_timerOniyon = (data->unk48 + (data->unk4C - data->unk48) * randf()) * 0.5f;
+                                    m_timerOniyon = (data->oniyonIntervalMin + (data->oniyonIntervalMax - data->oniyonIntervalMin) * randf()) * 0.5f;
                                 } else {
                                     m_colorOniyon = oniyon->selectColor(m_colorOniyon);
                                     m_stateOniyon = 2;
@@ -508,7 +508,7 @@ void stEarth::updateOniyon(float deltaFrame) {
                                     }
                                 }
                             } else {
-                                m_timerOniyon = (data->unk48 + (data->unk4C - data->unk48) * randf()) * 0.5f;
+                                m_timerOniyon = (data->oniyonIntervalMin + (data->oniyonIntervalMax - data->oniyonIntervalMin) * randf()) * 0.5f;
                             }
                         }
                         break;
@@ -536,8 +536,8 @@ void stEarth::updateOniyon(float deltaFrame) {
                         oniyon->setPosLeaf(pos.m_x, pos.m_y, pos.m_z);
                         if (oniyon->isLanding() == 1) {
                             float r = randf();
-                            float most = data->unk6C;
-                            float least = data->unk68;
+                            float most = data->oniyonStayMax;
+                            float least = data->oniyonStayMin;
                             m_stateOniyon = 3;
                             m_timerOniyon = least + (most - least) * r;
                         }
@@ -633,13 +633,13 @@ void stEarth::updateWeather(float deltaFrame) {
                 registScnAnim(static_cast<nw4r::g3d::ResFileData*>(m_fileData->getData(Data_Type_Scene, 0, 0xFFFE)), m_weather);
                 if (m_firstWeather == 1) {
                     float r = randf();
-                    float most = data->unkB8;
-                    float least = data->unkB4;
+                    float most = data->rainFirstMax;
+                    float least = data->rainFirstMin;
                     m_firstWeather = 0;
                     m_timerWeather = least + (most - least) * r;
                 } else {
                     float r = randf();
-                    m_timerWeather = data->unkBC + (data->unkC0 - data->unkBC) * r;
+                    m_timerWeather = data->rainIntervalMin + (data->rainIntervalMax - data->rainIntervalMin) * r;
                 }
                 grEarthStump* stump = static_cast<grEarthStump*>(getGround(3));
                 if (stump == NULL) {
@@ -667,8 +667,8 @@ void stEarth::updateWeather(float deltaFrame) {
                     m_stateWeather = 2;
                 } else {
                     float r = randf();
-                    float most = data->unkC0;
-                    float least = data->unkBC;
+                    float most = data->rainIntervalMax;
+                    float least = data->rainIntervalMin;
                     m_stateWeather = 0;
                     m_timerWeather = least + (most - least) * r;
                 }
@@ -810,21 +810,21 @@ void stEarth::updatePellet(float deltaFrame) {
         case 0:
             if (m_firstPellet == 1) {
                 float r = randf();
-                float most = data->unk04;
-                float least = data->unk00;
+                float most = data->pelletFirstMax;
+                float least = data->pelletFirstMin;
                 m_firstPellet = 0;
                 m_timerPellet = least + (most - least) * r;
             } else {
                 float r = randf();
-                m_timerPellet = data->unk08 + (data->unk0C - data->unk08) * r;
+                m_timerPellet = data->pelletIntervalMin + (data->pelletIntervalMax - data->pelletIntervalMin) * r;
             }
             m_statePellet = 1;
             break;
         case 1:
             if (m_timerPellet == 0.0f) {
-                m_timerPellet = data->unk08 + (data->unk0C - data->unk08) * randf();
-                if (!(randf() > data->unk10)) {
-                    u8 count = data->unk3C;
+                m_timerPellet = data->pelletIntervalMin + (data->pelletIntervalMax - data->pelletIntervalMin) * randf();
+                if (!(randf() > data->pelletChance)) {
+                    u8 count = data->maxPellets;
                     for (u8 i = 0; i != count; i++) {
                         bool placed = false;
                         stEarthPelletData* pellet = &m_pelletData[i];
@@ -936,9 +936,9 @@ int stEarth::selectPelletColor(int lastColor) {
         return 0;
     }
     stEarthData* data = static_cast<stEarthData*>(m_stageData);
-    float weight0 = data->unk14;
-    float weight1 = data->unk18;
-    float weight2 = data->unk1C;
+    float weight0 = data->pelletRedWeight;
+    float weight1 = data->pelletBlueWeight;
+    float weight2 = data->pelletYellowWeight;
     switch (lastColor) {
     case 1:
         weight1 = weight1 * data->unk20;
@@ -967,7 +967,7 @@ int stEarth::getCountPelletRideLeaf() {
     }
     if (m_stageData != NULL) {
         int count = 0;
-        for (u8 i = 0; i != static_cast<stEarthData*>(m_stageData)->unk3C; i++) {
+        for (u8 i = 0; i != static_cast<stEarthData*>(m_stageData)->maxPellets; i++) {
             if (m_pelletData[i].m_state == 3) {
                 switch (m_pelletData[i].m_leaf) {
                 case 0:
@@ -998,7 +998,7 @@ bool stEarth::isEnableSpacePellet(float rate) {
     }
     Vec3f pos;
     stump->getPosPellet(rate, &pos);
-    for (u8 i = 0; i != data->unk3C; i++) {
+    for (u8 i = 0; i != data->maxPellets; i++) {
         stEarthPelletData* pellet = &m_pelletData[i];
         if (pellet->m_state == 3) {
             Vec3f pelletPos = pellet->m_pos;

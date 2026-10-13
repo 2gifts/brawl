@@ -246,19 +246,19 @@ void grFamicomKame::requestMove() {
     }
     switch (m_level) {
     case 2:
-        m_speed = data->unk30 * data->unk40;
+        m_speed = data->unk30 * data->enemySpeedMulLevel2;
         break;
     case 1:
         m_speed = data->unk30;
         break;
     case 3:
-        m_speed = data->unk30 * data->unk44;
+        m_speed = data->unk30 * data->enemySpeedMulLevel3;
         break;
     default:
         m_speed = 0.0f;
         break;
     }
-    m_fallSpeed = data->unk34;
+    m_fallSpeed = data->enemyFallSpeed;
     if (randf() > 0.5f) {
         Vec3f* src = &m_posCtrlWork[0];
         Vec3f* dst = &m_enemyData[m_index].m_pos;
@@ -297,19 +297,19 @@ void grFamicomKame::requestReMove() {
     }
     switch (m_level) {
     case 2:
-        m_speed = data->unk30 * data->unk40;
+        m_speed = data->unk30 * data->enemySpeedMulLevel2;
         break;
     case 1:
         m_speed = data->unk30;
         break;
     case 3:
-        m_speed = data->unk30 * data->unk44;
+        m_speed = data->unk30 * data->enemySpeedMulLevel3;
         break;
     default:
         m_speed = 0.0f;
         break;
     }
-    m_fallSpeed = data->unk34;
+    m_fallSpeed = data->enemyFallSpeed;
     FAMICOM_LEVEL_MOTION(2, 6, 10, true)
     m_state = 4;
     m_attackTimer = 0.0f;

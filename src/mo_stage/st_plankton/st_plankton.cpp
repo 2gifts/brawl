@@ -496,7 +496,7 @@ void stPlankton::updateHanenbou(float deltaFrame) {
     case 2:
         break;
     case 0:
-        m_hanenbouWait = data->unk58;
+        m_hanenbouWait = data->hanenbouFirstDelay;
         m_hanenbouTimer = data->unk60;
         m_hanenbouState = 1;
         // fall through
@@ -522,8 +522,8 @@ void stPlankton::updateHanenbou(float deltaFrame) {
             }
         } else {
             if (m_hanenbouWait == 0.0f) {
-                makeHanenbou(data->unk4C);
-                m_hanenbouWait = data->unk58;
+                makeHanenbou(data->hanenbouInitialSpeed);
+                m_hanenbouWait = data->hanenbouFirstDelay;
             }
         }
         break;
@@ -547,7 +547,7 @@ void stPlankton::updateHanenbou(float deltaFrame) {
         stPlanktonHanenbouPattern* pattern = reinterpret_cast<stPlanktonHanenbouPattern*>(m_container->getData(m_hanenbouKind));
         m_hanenbouTimer = m_hanenbouTimer + deltaFrame;
         if ((float)pattern->m_frame[m_hanenbouStep] <= m_hanenbouTimer) {
-            makeHanenbou(data->unk4C);
+            makeHanenbou(data->hanenbouInitialSpeed);
             bool end = false;
             u8 step = m_hanenbouStep + 1;
             m_hanenbouStep = step;

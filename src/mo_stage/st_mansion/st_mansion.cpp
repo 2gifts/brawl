@@ -391,7 +391,7 @@ void stMansion::updateArea(float deltaFrame) {
                 m_stateArea[2] = 3;
                 m_stateArea[3] = 3;
                 m_scaleRate = 0.0f;
-                m_timer = data->unk00;
+                m_timer = data->respawnFrames;
                 m_phase = 2;
             }
             break;
@@ -402,7 +402,7 @@ void stMansion::updateArea(float deltaFrame) {
                 m_stateArea[1] = 4;
                 m_stateArea[2] = 4;
                 m_stateArea[3] = 4;
-                m_timer = data->unk04;
+                m_timer = data->respawnAnimFrames;
                 g_gfSceneRoot->setCurrentFrame(10.0f);
                 m_phase = 3;
             }
@@ -411,7 +411,7 @@ void stMansion::updateArea(float deltaFrame) {
             if (m_timer == 0.0f) {
                 m_phase = 0;
             } else {
-                float rate = 1.0f - m_timer / data->unk04;
+                float rate = 1.0f - m_timer / data->respawnAnimFrames;
                 if (rate < 0.0f) {
                     rate = 0.0f;
                 }

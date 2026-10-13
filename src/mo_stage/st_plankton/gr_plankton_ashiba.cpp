@@ -192,27 +192,27 @@ void grPlanktonAshiba::updateRot(float deltaFrame) {
             float target = data->unk08;
             if (angle != target) {
                 if (angle > target) {
-                    float next = angle - data->unk24;
+                    float next = angle - data->leafRestoreAngle;
                     angle = target;
                     if (next >= target) {
-                        m_rotTimer = data->unk20;
+                        m_rotTimer = data->leafRestoreFrames;
                         angle = next;
                     }
                 } else {
-                    float next = angle + data->unk24;
+                    float next = angle + data->leafRestoreAngle;
                     angle = target;
                     if (next <= target) {
-                        m_rotTimer = data->unk20;
+                        m_rotTimer = data->leafRestoreFrames;
                         angle = next;
                     }
                 }
             }
         } else {
-            if (angle < data->unk1C) {
-                angle = data->unk1C;
+            if (angle < data->leafAngleBottom) {
+                angle = data->leafAngleBottom;
             }
-            if (data->unk18 < angle) {
-                angle = data->unk18;
+            if (data->leafAngleTop < angle) {
+                angle = data->leafAngleTop;
             }
         }
         m_leaf->m_angle = angle;
@@ -444,25 +444,25 @@ void grPlanktonAshiba::onDamage(int index, soDamage* damage, soDamageAttackerInf
             float push = 0.0f;
             if (amount < data->unk0C) {
                 if (m_dir == 1) {
-                    push += data->unk14;
+                    push += data->leafDamageAngle;
                 } else {
-                    push -= data->unk14;
+                    push -= data->leafDamageAngle;
                 }
             } else if (amount >= data->unk10) {
                 if (m_dir == 1) {
-                    push += data->unk14 * 2.0f;
+                    push += data->leafDamageAngle * 2.0f;
                 } else {
-                    push -= data->unk14 * 2.0f;
+                    push -= data->leafDamageAngle * 2.0f;
                 }
             }
             m_leaf->m_angle = angle + push;
-            if (m_dir == 1 && m_leaf->m_angle > data->unk18) {
+            if (m_dir == 1 && m_leaf->m_angle > data->leafAngleTop) {
                 m_dir = 0;
             }
-            if (m_dir == 0 && m_leaf->m_angle < data->unk1C) {
+            if (m_dir == 0 && m_leaf->m_angle < data->leafAngleBottom) {
                 m_dir = 1;
             }
-            m_rotTimer = data->unk20;
+            m_rotTimer = data->leafRestoreFrames;
             m_leaf->m_hitCount = m_leaf->m_hitCount + 1;
             if (m_leaf->m_hitCount >= 15) {
                 m_leaf->m_hitCount = 14;
