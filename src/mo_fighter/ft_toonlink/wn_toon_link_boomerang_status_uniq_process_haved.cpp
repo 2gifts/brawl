@@ -8,9 +8,6 @@
 class wnToonLinkBoomerang : public Weapon {
 };
 
-// HYPOTHESIS: Weapon constraint helper with three -1 arguments, called by its sora_melee fn_27 symbol.
-extern "C" void fn_27_1DA698(wnToonLinkBoomerang* self, int a, int b, int c);
-
 class wnToonLinkBoomerangStatusUniqProcessHaved : public soStatusUniqProcess {
 public:
     virtual ~wnToonLinkBoomerangStatusUniqProcessHaved() { }
@@ -21,5 +18,5 @@ wnToonLinkBoomerangStatusUniqProcessHaved g_wnToonLinkBoomerangStatusUniqProcess
 
 void wnToonLinkBoomerangStatusUniqProcessHaved::initStatus(soModuleAccesser* a) {
     wnToonLinkBoomerang& boomerang = dynamic_cast<wnToonLinkBoomerang&>(a->getStageObject());
-    fn_27_1DA698(&boomerang, -1, -1, -1);
+    boomerang.Weapon::constraint(-1, -1, -1);
 }

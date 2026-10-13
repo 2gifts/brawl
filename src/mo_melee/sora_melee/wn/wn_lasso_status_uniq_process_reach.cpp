@@ -22,7 +22,7 @@ void wnLassoStatusUniqProcessReach::exitStatus(soModuleAccesser* moduleAccesser,
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000005)) {
         if (moduleAccesser->getWorkManageModule().getInt(0x20000001) == kind) {
             wnLassoGetLink(moduleAccesser)->unk164Int(1);
-            // TODO: the stage object cast and the Weapon constraint call (fn_27_1DA698) are not reconstructed yet.
+            // TODO: the stage object cast and the Weapon constraint call (Weapon::constraint) are not reconstructed yet.
         }
     }
 }
