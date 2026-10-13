@@ -6,6 +6,30 @@ Sections:
 	.data       type:data align:32
 	.bss        type:bss align:8
 
+mo_menu/mu_rule.cpp:
+	.text       start:0x00000000 end:0x000010E0
+	.rodata     start:0x00000000 end:0x00000038
+	.data       start:0x00000000 end:0x00000518
+
+mo_menu/mu_panel_ctrl.cpp:
+	.text       start:0x000010E0 end:0x000011C4
+	.data       start:0x00000518 end:0x000005D8
+
+mo_menu/mu_proc_menu.cpp:
+	.text       start:0x000011C4 end:0x00002030
+	.rodata     start:0x00000038 end:0x00000040
+	.data       start:0x000005D8 end:0x00000708
+
+mo_menu/mu_proc_rule1.cpp:
+	.text       start:0x00002030 end:0x00004954
+	.rodata     start:0x00000040 end:0x00000080
+	.data       start:0x00000708 end:0x00001000
+
+mo_menu/mu_proc_rule2.cpp:
+	.text       start:0x00004954 end:0x0000694C
+	.rodata     start:0x00000080 end:0x000000E0
+	.data       start:0x00001000 end:0x000016E0
+
 mo_menu/mo_menu.cpp:
 	.text       start:0x00009638 end:0x000096D4
 	.data       start:0x00001938 end:0x00001944

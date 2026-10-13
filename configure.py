@@ -6325,7 +6325,13 @@ config.libs = [
         "mw_version": config.linker_version,
         "cflags": cflags_rel,
         "host": False,
-        "objects": [],
+        "objects": [
+            Object(NonMatching, "mo_menu/mu_rule.cpp"),
+            Object(NonMatching, "mo_menu/mu_panel_ctrl.cpp"),
+            Object(NonMatching, "mo_menu/mu_proc_menu.cpp"),
+            Object(NonMatching, "mo_menu/mu_proc_rule1.cpp"),
+            Object(NonMatching, "mo_menu/mu_proc_rule2.cpp"),
+        ],
     },
     {
         "lib": "sora_menu_sel_char",
