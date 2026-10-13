@@ -24,11 +24,11 @@ void wnWarioBikeStatusUniqProcessWheelie::execStatus(soModuleAccesser* a) {
     float stick = controller.getStickY();
     float angle = work.getFloat(0x21000000) - param->unk64;
     if (stick > 0.0f) {
-        angle += param->unk60 * stick;
-        if (angle > param->unk5C) angle = param->unk5C;
+        angle += param->wheelieRotateRate * stick;
+        if (angle > param->maxWheelieAngle) angle = param->maxWheelieAngle;
     }
     work.setFloat(angle, 0x21000000);
-    if (angle >= param->unk5C) work.incInt(0x20000002);
+    if (angle >= param->maxWheelieAngle) work.incInt(0x20000002);
     else work.setInt(0, 0x20000002);
     wnWarioBikeStatusUniqProcessUtility::execStatus(a);
 }
@@ -60,7 +60,7 @@ void wnWarioBikeStatusUniqProcessWheelie::execFixPos(soModuleAccesser* a) {
     } else {
         down = false;
         if (normal.getSpeed().length() < param->unk14) {
-            if (work.getInt(0x20000002) >= param->unk70) down = true;
+            if (work.getInt(0x20000002) >= param->slowFallOffFrames) down = true;
         }
         if (down) status.changeStatusRequest(0xd, a);
     }
@@ -78,7 +78,7 @@ void wnWarioBikeStatusUniqProcessWheelie::execFixPosCounter(soModuleAccesser* a)
             work.onFlag(0x2200000a);
         }
     } else {
-        float power = param->unk30 * ((speed - threshold) / (param->unkC - threshold));
+        float power = param->damageGrowth * ((speed - threshold) / (param->groundTopSpeed - threshold));
         if (attacks.isAttack(0, 0)) attacks.setPowerMul(power);
         else if (work.isFlag(0x2200000a)) {
             attacks.set(0, 0);

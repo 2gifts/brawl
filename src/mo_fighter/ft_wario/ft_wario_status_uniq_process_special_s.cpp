@@ -41,7 +41,7 @@ void ftWarioStatusUniqProcessSpecialS::initStatus(soModuleAccesser* a) {
         status->changeStatusRequest(0x123, a);
     } else if (link->isLink(7)) {
         status->changeStatusRequest(0x122, a);
-    } else if (work->getInt(0x10000043) < param->unk18) {
+    } else if (work->getInt(0x10000043) < param->remountCooldownFrames) {
         status->changeStatusRequest(0x122, a);
     } else if (articles->isExist(0) == true) {
         status->changeStatusRequest(0x122, a);

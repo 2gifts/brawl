@@ -26,7 +26,7 @@ void ftWarioStatusUniqProcessSpecialHiJump::initStatus(soModuleAccesser* a) {
     float lrSign = (float)(lr < 0.0f ? -1 : 1);
     float stickSign = (float)(stick < 0.0f ? -1 : 1);
     float angle;
-    if (stickSign == lrSign) angle = param->unk10 * stick;
+    if (stickSign == lrSign) angle = param->jumpTiltDegrees * stick;
     else angle = 0.0f;
     float radians = 0.017453292f * angle;
     ftKineticEnergyMotion& motion = dynamic_cast<ftKineticEnergyMotion&>(*kinetic.getEnergy(0));
@@ -46,9 +46,9 @@ void ftWarioStatusUniqProcessSpecialHiJump::exitStatus(soModuleAccesser* a, int 
             ftWarioMan& wario = dynamic_cast<ftWarioMan&>(fighter);
             param = wario.getExtendParam()->specialHi;
         }
-        float speedY = param->unk18;
+        float speedY = param->endSpeedY;
         float lr = posture.getLr();
-        Vec2f speed(param->unk14 * lr, speedY);
+        Vec2f speed(param->endSpeedX * lr, speedY);
         kinetic.changeKinetic(0x32, a);
         ftKineticEnergyStop& horizontal = dynamic_cast<ftKineticEnergyStop&>(*kinetic.getEnergy(3));
         Vec3f zero(0.0f, 0.0f, 0.0f);

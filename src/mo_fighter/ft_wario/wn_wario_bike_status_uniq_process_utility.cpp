@@ -209,14 +209,14 @@ void wnWarioBikeStatusUniqProcessUtility::execFixPosCounter(soModuleAccesser* a)
     }
     if (work.isFlag(0x22000005)) {
         work.incInt(0x20000004);
-        if (speed > 0.7f * param->unkC) {
+        if (speed > 0.7f * param->groundTopSpeed) {
             if (work.getInt(0x20000004) > 10) {
                 effects.req((EfID)0xa, 0, &Vec3f(-20.0f, 0.0f, 0.0f),
                             &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, &Vec3f(0.0f, 0.0f, 0.0f),
                             &Vec3f(0.0f, 0.0f, 0.0f), false, 0);
                 work.setInt(0, 0x20000004);
             }
-        } else if (speed > 0.3f * param->unkC && work.getInt(0x20000004) > 5) {
+        } else if (speed > 0.3f * param->groundTopSpeed && work.getInt(0x20000004) > 5) {
             effects.req((EfID)0x1c, 0, &Vec3f(-10.0f, 0.0f, 0.0f),
                         &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, &Vec3f(0.0f, 0.0f, 0.0f),
                         &Vec3f(0.0f, 0.0f, 0.0f), false, 0);

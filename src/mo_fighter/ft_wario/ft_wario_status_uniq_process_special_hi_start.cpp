@@ -23,12 +23,12 @@ void ftWarioStatusUniqProcessSpecialHiStart::initStatus(soModuleAccesser* a) {
     ftKineticEnergyStop& horizontal = dynamic_cast<ftKineticEnergyStop&>(*kinetic.getEnergy(3));
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*kinetic.getEnergy(1));
     Vec2f speed = horizontal.getSpeed();
-    speed.m_x *= param->unk0;
+    speed.m_x *= param->startSpeedXMul;
     horizontal.m_speed = speed;
     speed = gravity.getSpeed();
-    speed.m_y += param->unk4;
+    speed.m_y += param->startSpeedYAdd;
     gravity.m_speedY = speed.m_y;
-    gravity.m_gravity = param->unk8;
+    gravity.m_gravity = param->startGravity;
 }
 void ftWarioStatusUniqProcessSpecialHiStart::exitStatus(soModuleAccesser* a, int next) {
     if (next == 0x12e) {
@@ -45,7 +45,7 @@ void ftWarioStatusUniqProcessSpecialHiStart::exitStatus(soModuleAccesser* a, int
         }
         float lr = posture.getLr();
         float stick = controller.getStickX();
-        if (__fabs(stick) >= param->unkC) {
+        if (__fabs(stick) >= param->stickThreshold) {
             float stickSign = (float)(stick < 0.0f ? -1 : 1);
             float lrSign = (float)(lr < 0.0f ? -1 : 1);
             if (lrSign != stickSign) posture.reverseLr();
