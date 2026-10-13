@@ -4,6 +4,7 @@
 #include <ft/ft_class_info_impl.h>
 #include <ft/ganon/ft_ganon.h>
 #include <ft/ganon/ft_ganon_extend_param_accesser.h>
+#include <ft/ganon/ft_ganon_status_uniq_process_ganon_kick.h>
 #include <ft/ft_common_data_accesser.h>
 
 #define FT_BC ftGanonBuildConfig
@@ -25,8 +26,6 @@ extern soStatusUniqProcess lbl_109_bss_174;
 extern soStatusUniqProcess lbl_109_bss_184;
 extern soStatusUniqProcess lbl_109_bss_194;
 extern soStatusUniqProcess lbl_109_bss_1A4;
-extern soStatusUniqProcess lbl_109_bss_1B4;
-extern soStatusUniqProcess lbl_109_bss_1C4;
 extern soStatusUniqProcess lbl_109_bss_1D4;
 extern soStatusUniqProcess lbl_109_bss_1E4;
 extern soStatusUniqProcess lbl_109_bss_1F4;
@@ -46,7 +45,7 @@ ftGanon::ftGanon(s32 entryId,
     soStatusUniqProcess* processes[16] = {0};
     processes[0] = &lbl_27_bss_8004;
     processes[1] = &lbl_109_bss_164;
-    processes[3] = &lbl_109_bss_1B4;
+    processes[3] = &g_ftGanonStatusUniqProcessGanonKick;
     processes[4] = &lbl_109_bss_1D4;
     processes[5] = &lbl_27_bss_8014;
     processes[6] = &lbl_109_bss_174;
@@ -55,10 +54,18 @@ ftGanon::ftGanon(s32 entryId,
     processes[9] = &lbl_109_bss_1A4;
     processes[10] = &lbl_109_bss_144;
     processes[11] = &lbl_109_bss_154;
-    processes[13] = &lbl_109_bss_1C4;
+    processes[13] = &g_ftGanonStatusUniqProcessGanonKickEnd;
     processes[14] = &lbl_109_bss_1E4;
     processes[15] = &lbl_109_bss_1F4;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 16);
+}
+
+void ftGanon::notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x115:
+        g_ftGanonStatusUniqProcessGanonKick.onHit(moduleAccesser);
+        break;
+    }
 }
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftGanon is done
@@ -101,6 +108,9 @@ struct ftGanonVirtualSlots {
 // Global read (g_soValueVariation is defined elsewhere in the module).
 extern void* g_soValueVariation;
 void* fn_109_964C() { return g_soValueVariation; }
+
+// HYPOTHESIS: extend param group 3 (ftData + 0x88) holds the Wizard's Foot parameters.
+void* fn_109_862C() { return g_ftCommonDataAccesser.getData(Fighter_Ganon)->extendParam[3]; }
 
 // Empty virtual overrides and default observers.
 void fn_109_8578() {}

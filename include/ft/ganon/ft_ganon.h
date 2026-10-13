@@ -55,5 +55,6 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    virtual void notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
 };
 static_assert(sizeof(ftGanon) == 0xC9A8, "Class is the wrong size!");

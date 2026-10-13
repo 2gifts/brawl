@@ -27,8 +27,12 @@ mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_hi_throw.cpp:
 	.ctors      start:0x00000008 end:0x0000000C
 
 mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_s.cpp:
-	.text       start:0x0000C610 end:0x0000D344
+	.text       start:0x0000C610 end:0x0000D384
 	.ctors      start:0x0000000C end:0x00000010
+
+mo_fighter/ft_ganon/ft_ganon_status_uniq_process_ganon_kick.cpp:
+	.text       start:0x0000D384 end:0x0000DA60
+	.ctors      start:0x00000010 end:0x00000014
 
 mo_fighter/ft_ganon/wn_ganon_beast.cpp:
 	.text       start:0x0000E60C end:0x00011F6C

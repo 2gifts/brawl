@@ -103,7 +103,7 @@ void ftGanonStatusUniqProcessSpecialS::exitStatus(soModuleAccesser* moduleAccess
     switch (nextStatus) {
     case 0x118: {
         // HYPOTHESIS: the ground catch scales the ground speed by the grab slide parameter.
-        soKineticEnergyNormal& energy = dynamic_cast<soKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
+        soKineticEnergyNormal& energy = dynamic_cast<ftKineticEnergyMotion&>(*moduleAccesser->getKineticModule().getEnergy(0));
         Vec2f speed;
         Vec2f::copy(speed, energy.getSpeed());
         float scale = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa5, 0);
