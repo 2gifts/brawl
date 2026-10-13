@@ -1,6 +1,66 @@
-#include <types.h>
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define FT_REL_LINK_EXTERN
+#define MT_VEC3F_CTOR_NOINLINE
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/falco/wn_falco_illusion.h>
+#include <wn/wn_activate_desc.h>
+#include <so/so_module_accesser.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+#include <wn/fox/wn_fox_illusion_util.h>
 
-} // extern "C"
+wnFalcoIllusion::wnFalcoIllusion(s32 articleId, const wnArticleBuildInfo& info, const wnFalcoIllusionData* data) :
+    wnWeaponBuilder<wnFalcoIllusionModuleAccesserBuildConfig>(
+        "FalcoIllusion", articleId, info,
+        wnModuleAccesserBuildData(37, data,
+            info.heapModule->getInstanceHeap(),
+            info.heapModule->getNWModelInstanceHeap(),
+            info.heapModule->getNWMotionInstanceHeap(),
+            static_cast<u8>(data->m_resGroupNo), -1, &m_paramAccesser,
+            0, 0, 0, 0, 0, 0, 0)),
+    m_param(data->m_param), m_paramAccesser(data->m_param) {
+    Weapon::deactivate(false);
+}
+
+void wnFalcoIllusion::activate(s32 founderTaskId, s32 unk1, s32 team, float lr, s32 unk2, s32 unk3) {
+    Vec3f pos(0.0f, 0.0f, 0.0f);
+    wnActivateDesc desc;
+    desc.founderTaskId = founderTaskId;
+    desc.resourceId = 0xFFFF;
+    desc.unk8 = 0xFFFF;
+    desc.unkC = 0xFFFF;
+    desc.unk10 = -1;
+    desc.unk14 = -1;
+    desc.unk18 = 0;
+    desc.unk1C = 0;
+#ifdef MATCHING
+    __memcpy(&desc.pos, &pos, sizeof(Vec3f));
+#else
+    desc.pos = pos;
+#endif
+    desc.lr = lr;
+    desc.team = team;
+    desc.life = 0;
+    desc.unk38 = 2;
+    desc.unk3C = 0x80;
+    desc.unk40 = 0;
+    desc.unk44 = 0x35F;
+    desc.unk48 = 0;
+    desc.flagsHigh = 1;
+    desc.flagsMidHigh = 0;
+    desc.flagsMidLow = 1;
+    desc.flagsLow = 0;
+    desc.unk4D = (desc.unk4D & ~0xC0) | 0x80;
+
+    Weapon::activate(&desc);
+    wnFoxIllusionUtil::activate(m_moduleAccesser, static_cast<u8>(unk2), unk3);
+}
+
+void wnFalcoIllusion::processUpdate() {
+    wnFoxIllusionUtil::processUpdate(m_moduleAccesser);
+    Weapon::processUpdate();
+}
+
+bool wnFalcoIllusion::notifyEventCollisionAttackCheck(u32) {
+    return false;
+}
