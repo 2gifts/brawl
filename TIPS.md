@@ -16,6 +16,8 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
 
 - **Configured names in generated native objects are our aliases, not independent class evidence:** resolve the caller receiver, constructor, vtable and RTTI before repairing destructor names. Falco Illusion's Situation builder teardown was labeled as a CollisionHit builder; its constructor and module-enumeration arguments instead prove null collision hit. A correct builder extent corroborates that finding. Seen: `wn_falco_illusion.cpp` and `ft_falco.cpp`. **HIGH**
 
+- **An empty module-builder member still occupies storage:** Fox Illusion selects the null kinetic singleton without a slot between status and general work. A local builder specialization omits that member; an empty C++ member would shift later fields by four bytes. Verify storage independently of null-module selection, and leave unwritten tail ownership as a hypothesis. Seen: `wn_fox_illusion.cpp`. **HIGH**
+
 ## 0. Check the build flags before the C++
 - If a whole class of units is off the same way (scheduling, stack frames, extra weak symbols), the compiler flags are the suspect, not the code. Fighters and `sora_enemy` build with `-O2,s`; Havok uses `-RTTI off -use_lmw_stmw on`, some units `-Cpp_exceptions on` or `-inline noauto`; some units `-RTTI off`. Flags are set per unit in `configure.py` (`extra_cflags`). Seen: `cflags_*` in `configure.py`, commit a5cc934 (ft_purin). **HIGH**
 - `-Cpp_exceptions on` makes `.extab/.extabindex` appear; `-RTTI off` removes `__RTTI__` weak data and the dynamic_cast machinery; `-use_lmw_stmw on` gives `lmw/stmw` prologues.
