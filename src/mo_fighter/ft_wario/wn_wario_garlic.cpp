@@ -1,3 +1,4 @@
+#define FT_FIGHTER_ANIMCMD_LONG
 #define MT_VEC3F_CTOR_NOINLINE
 #include <ft/ft_manager.h>
 #include <ft/wario/ft_wario.h>
