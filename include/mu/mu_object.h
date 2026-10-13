@@ -4,13 +4,23 @@
 struct MuAnimNameData {
     float m_frame;
     float unk4;
-    float unk8;
+    unsigned char m_loop;   // 0x08 HYPOTHESIS: the animation repeats
     const char* m_name;
     unsigned char m_flags;
 };
 
+// The animation of a menu object that is picked by its index in the file (setAnimIdx).
+struct MuAnimIdxData {
+    float m_frame;           // 0x00 the frame the animation starts at
+    float m_endFrame;        // 0x04 HYPOTHESIS: the last frame
+    unsigned char m_loop;    // 0x08 HYPOTHESIS
+    unsigned int m_index;    // 0x0C the number of the animation in the file
+    unsigned char m_flags;   // 0x10 which animations: 1 node, 2 visibility, 4 texture, 8 texture srt, 0x10 color
+};
+
 #include <StaticAssert.h>
 #include <gf/gf_model.h>
+#include <gf/gf_task.h>
 #include <memory.h>
 #include <nw4r/g3d/g3d_resfile.h>
 #include <nw4r/g3d/g3d_resmdl.h>
@@ -25,7 +35,10 @@ public:
     nw4r::g3d::ScnMdl* m_scnMdl;
     nw4r::g3d::ScnMdl* m_sceneModel;
     gfModelAnimation* m_modelAnim;
-    char unk2[0x44];
+    u32 m_unk18;                    // 0x18
+    MuAnimIdxData* m_animIdxData;   // 0x1C the animation that was set by setAnimIdx (cleared to force it again)
+    MuAnimNameData* m_animNameData; // 0x20 the animation that was set by setAnimName (cleared to force it again)
+    char unk2[0x38];
 
     static MuObject* create(nw4r::g3d::ResFile* modelSource, const char* modelNode, int drawPriority, nw4r::g3d::ResFile* textureSource, HeapType type);
     static MuObject* create(nw4r::g3d::ResFile* modelSource, int modelNode, nw4r::g3d::ResFile* textureSource, int animNode, HeapType type);
@@ -51,6 +64,7 @@ public:
     void changeTexSrtAnimNIf(const char* animName);
 
     void setAnimName(MuAnimNameData* data, bool force);
+    void setAnimIdx(MuAnimIdxData* data, bool force);
     nw4r::g3d::ScnMdl* getSceneModel() const { return m_sceneModel; }
     void setFrame(float frame);
     void setFrameVisible(float frame);
@@ -117,9 +131,10 @@ public:
 };
 static_assert(sizeof(MuObject) == 0x60, "Class is wrong size!");
 
-class muObjProcessTask {
+class muObjProcessTask : public gfTask {
 public:
-    char unk[0x44];
+    MuObject** m_objs;      // 0x40 the objects that the task updates
+    int m_count;            // 0x44
 
     static muObjProcessTask* create(HeapType type);
     virtual ~muObjProcessTask();
