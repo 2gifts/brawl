@@ -1,5 +1,7 @@
 // ftManager: the fighter manager. It owns the fighter entries (ftEntryManager) and resource slots (ftSlotManager) and
 // is the single entry point the rest of the game uses to start, query and affect fighters.
+// MATCH-ONLY: keeps the original local order of the checks in soEventObserver::addObserverSub (see so_event_presenter.h).
+#define SO_EVENT_OBSERVER_CHECK_ORDER
 #include <ft/ft_manager.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_external_value_accesser.h>
