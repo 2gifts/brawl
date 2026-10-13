@@ -11,12 +11,6 @@ extern const float lbl_115_rodata_138;
 extern const float lbl_115_rodata_13C;
 }
 
-wnDiddyBarrelDamageTransactorImpl g_wnDiddyBarrelDamageTransactorImpl;
-
-wnDiddyBarrelDamageTransactorImpl::wnDiddyBarrelDamageTransactorImpl() { }
-
-wnDiddyBarrelDamageTransactorImpl::~wnDiddyBarrelDamageTransactorImpl() { }
-
 int wnDiddyBarrelDamageTransactorImpl::getDamageValueParam(soModuleAccesser*) {
     // HYPOTHESIS: the formal return type is pointer-sized; the pointed-to type is unresolved.
     return (int)lbl_115_data_A800;
@@ -38,21 +32,35 @@ int wnDiddyBarrelDamageTransactorImpl::getDamageStatusKind(soModuleAccesser* mod
 }
 
 bool wnDiddyBarrelDamageTransactorImpl::isUseTurnDamage(soModuleAccesser*) { return false; }
+
 bool wnDiddyBarrelDamageTransactorImpl::isUseTurn(soModuleAccesser*) { return true; }
+
 bool wnDiddyBarrelDamageTransactorImpl::isApplyTurnDamage(soModuleAccesser*) { return true; }
+
 int wnDiddyBarrelDamageTransactorImpl::getDamageHeight(soModuleAccesser*, u8) { return 0; }
+
 float wnDiddyBarrelDamageTransactorImpl::getHitStopMul(soModuleAccesser*) { return lbl_115_rodata_13C; }
+
 bool wnDiddyBarrelDamageTransactorImpl::isSlip(soModuleAccesser*, float) { return false; }
+
 bool wnDiddyBarrelDamageTransactorImpl::isSleepStatus(soModuleAccesser*) { return false; }
+
 bool wnDiddyBarrelDamageTransactorImpl::isParalyzeDamage(soModuleAccesser*) { return false; }
+
 void wnDiddyBarrelDamageTransactorImpl::addSleepTime(soModuleAccesser*, soDamage*, soDamageLog*) { }
+
 void wnDiddyBarrelDamageTransactorImpl::onFlowerDamage(soModuleAccesser*, soDamage*) { }
+
 void wnDiddyBarrelDamageTransactorImpl::onParalyzeDamage(soModuleAccesser*, soDamage*, soDamageLog*) { }
+
 void wnDiddyBarrelDamageTransactorImpl::setFlagDownDamage3(soModuleAccesser*, bool) { }
+
 bool wnDiddyBarrelDamageTransactorImpl::isCheckGroundDamage(soModuleAccesser*) { return false; }
-void wnDiddyBarrelDamageTransactorImpl::onGroundDamageAfter(soModuleAccesser*) { }
-bool wnDiddyBarrelDamageTransactorImpl::onCompositionDamageSpeed(soModuleAccesser*, soDamage*, Vec2f*, int) { return false; }
-float wnDiddyBarrelDamageTransactorImpl::getReactionMul(soModuleAccesser*) { return lbl_115_rodata_13C; }
-float wnDiddyBarrelDamageTransactorImpl::getDamageMul(soModuleAccesser*) { return lbl_115_rodata_13C; }
-float wnDiddyBarrelDamageTransactorImpl::getReactionSub(soModuleAccesser*) { return lbl_115_rodata_138; }
+
 void wnDiddyBarrelDamageTransactorImpl::onLeaveDamageStop(soModuleAccesser*) { }
+
+void wnDiddyBarrelDamageTransactorImpl::onGroundDamageAfter(soModuleAccesser*) { }
+
+bool wnDiddyBarrelDamageTransactorImpl::onCompositionDamageSpeed(soModuleAccesser*, soDamage*, Vec2f*, int) { return false; }
+
+wnDiddyBarrelDamageTransactorImpl g_wnDiddyBarrelDamageTransactorImpl;

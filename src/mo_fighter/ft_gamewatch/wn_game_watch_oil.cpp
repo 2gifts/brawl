@@ -63,10 +63,10 @@ void wnGameWatchOil::activate(int founderTaskId, int resourceId, int team, float
     u32 mdlResId = resourceModule.getResourceIdAccesser()->getMdlResId();
     nw4r::g3d::ResFile resource(resourceModule.getFile(mdlResId, (ARCNodeType)4, 0));
     soHeapModule& heapModule = m_moduleAccesser->getHeapModule();
-    nw4r::g3d::ResMdl modelResource = m_moduleAccesser->getModelModule().getScnMdl()->m_resMdl;
+    nw4r::g3d::ResMdl modelResourceCopy = m_moduleAccesser->getModelModule().getScnMdl()->m_resMdl;
+    nw4r::g3d::ResMdl modelResource = modelResourceCopy;
     nw4r::g3d::ResFile resourceCopy = resource;
-    nw4r::g3d::ResMdl modelResourceCopy = modelResource;
-    m_animObj.create(resourceCopy, modelResourceCopy, heapModule.getNWMotionInstanceHeap(), 0);
+    m_animObj.create(resourceCopy, modelResource, heapModule.getNWMotionInstanceHeap(), 0);
     m_animObj.set(m_moduleAccesser->getModelModule().getScnMdl());
     m_animObj.setFrame(color);
 }
