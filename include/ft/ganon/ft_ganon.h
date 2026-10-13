@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ft/ft_common_data_accesser.h>
 #include <ft/ft_fighter_builder.h>
 #include <sr/sr_common.h>
 #include <types.h>
@@ -46,10 +47,13 @@ public:
 };
 
 class ftGanon : public ftFighterBuilder<ftGanonBuildConfig> {
-    u8 unkTail[0xC9A8 - sizeof(ftFighterBuilder<ftGanonBuildConfig>)];
+    u8 unkTail[0xC994 - sizeof(ftFighterBuilder<ftGanonBuildConfig>)];
+    soArrayContractibleTable<const soStatusData> m_statusDataTable;
+    ftData* m_data;
 public:
     ftGanon(s32 entryId,
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
 };
+static_assert(sizeof(ftGanon) == 0xC9A8, "Class is the wrong size!");

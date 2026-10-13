@@ -1,7 +1,10 @@
+// MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
+#define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/ganon/ft_ganon.h>
 #include <ft/ganon/ft_ganon_extend_param_accesser.h>
+#include <ft/ft_common_data_accesser.h>
 
 #define FT_BC ftGanonBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -9,6 +12,25 @@
 ftGanonExtendParamAccesser g_ftGanonExtendParamAccesser;
 
 ftClassInfoImpl<Fighter_Ganon, ftGanon> g_ftClassInfoGanon;
+
+// HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt); the two Warlock Punch
+// entries live in module 27 (sora_melee) because Kirby copies the move.
+extern "C" {
+extern soStatusUniqProcess lbl_27_bss_8004;
+extern soStatusUniqProcess lbl_27_bss_8014;
+extern soStatusUniqProcess lbl_109_bss_144;
+extern soStatusUniqProcess lbl_109_bss_154;
+extern soStatusUniqProcess lbl_109_bss_164;
+extern soStatusUniqProcess lbl_109_bss_174;
+extern soStatusUniqProcess lbl_109_bss_184;
+extern soStatusUniqProcess lbl_109_bss_194;
+extern soStatusUniqProcess lbl_109_bss_1A4;
+extern soStatusUniqProcess lbl_109_bss_1B4;
+extern soStatusUniqProcess lbl_109_bss_1C4;
+extern soStatusUniqProcess lbl_109_bss_1D4;
+extern soStatusUniqProcess lbl_109_bss_1E4;
+extern soStatusUniqProcess lbl_109_bss_1F4;
+}
 
 ftGanon::ftGanon(s32 entryId,
                  Heaps::HeapType instHeap,
@@ -18,8 +40,25 @@ ftGanon::ftGanon(s32 entryId,
                                          Fighter_Ganon,
                                          instHeap,
                                          nwModelInstHeap,
-                                         nwMotionInstHeap) {
-    // TODO
+                                         nwMotionInstHeap),
+    m_data(g_ftCommonDataAccesser.getData(Fighter_Ganon)) {
+    // Register the status processes in action order; entries 2 and 12 have no process.
+    soStatusUniqProcess* processes[16] = {0};
+    processes[0] = &lbl_27_bss_8004;
+    processes[1] = &lbl_109_bss_164;
+    processes[3] = &lbl_109_bss_1B4;
+    processes[4] = &lbl_109_bss_1D4;
+    processes[5] = &lbl_27_bss_8014;
+    processes[6] = &lbl_109_bss_174;
+    processes[7] = &lbl_109_bss_184;
+    processes[8] = &lbl_109_bss_194;
+    processes[9] = &lbl_109_bss_1A4;
+    processes[10] = &lbl_109_bss_144;
+    processes[11] = &lbl_109_bss_154;
+    processes[13] = &lbl_109_bss_1C4;
+    processes[14] = &lbl_109_bss_1E4;
+    processes[15] = &lbl_109_bss_1F4;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 16);
 }
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftGanon is done
