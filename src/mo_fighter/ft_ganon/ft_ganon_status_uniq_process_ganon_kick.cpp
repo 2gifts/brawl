@@ -1,6 +1,9 @@
+// MATCH-ONLY: the Vec3f constructor stays out of line in this unit.
+#define MT_VEC3F_CTOR_NOINLINE
 #include <ft/ft_kinetic_energy.h>
 #include <ft/ganon/ft_ganon_status_uniq_process_ganon_kick.h>
 #include <so/so_module_accesser.h>
+#include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
@@ -11,6 +14,14 @@
 // Group 4 of the fighter's extend parameters (ftData + 0x88); defined in ft_ganon.cpp.
 extern "C" void* fn_109_862C();
 
+static void setEndBrake(soModuleAccesser* moduleAccesser, int groundParamId, int commonParamId);
+
+// MATCH-ONLY: the original inlines this member here without emitting an out-of-line copy.
+inline void soKineticEnergyNormal::setBrake(Vec2f* brake) {
+    m_brake.m_x = brake->m_x;
+    m_brake.m_y = brake->m_y;
+}
+
 void ftGanonStatusUniqProcessGanonKick::initStatus(soModuleAccesser* moduleAccesser) {
 }
 
@@ -18,12 +29,58 @@ void ftGanonStatusUniqProcessGanonKick::execStatus(soModuleAccesser* moduleAcces
 }
 
 void ftGanonStatusUniqProcessGanonKickEnd::initStatus(soModuleAccesser* moduleAccesser) {
+    // HYPOTHESIS: work int 0x20000000 is 0 for the ground kick and 2 for the air kick; the end status rebuilds the
+    // stop (and, in the air, gravity) energies from the speed the kick carried.
+    int situation = moduleAccesser->getSituationModule().getKind();
+    soKineticModule& kinetic = moduleAccesser->getKineticModule();
+    int variant = moduleAccesser->getWorkManageModule().getInt(0x20000000);
+    if (variant == 0 && situation == 0) {
+        Vec2f sumSpeed;
+        Vec2f::copy(sumSpeed, kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1)));
+        soKineticEnergy* stop = kinetic.getEnergy(3);
+        stop->resetEnergy(0, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    } else if (variant == 2 && situation == 2) {
+        Vec2f sumSpeed;
+        Vec2f::copy(sumSpeed, kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1)));
+        kinetic.unableEnergyAll();
+        ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*kinetic.getEnergy(1));
+        soKineticEnergy* stop = kinetic.getEnergy(3);
+        gravity.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop->resetEnergy(9, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.enable();
+        stop->enable();
+    }
 }
 
 void ftGanonStatusUniqProcessGanonKickEnd::execStatus(soModuleAccesser* moduleAccesser) {
+    int situation = moduleAccesser->getSituationModule().getKind();
+    int variant = moduleAccesser->getWorkManageModule().getInt(0x20000000);
+    if (variant == 0 && situation == 0) {
+        setEndBrake(moduleAccesser, 0xfb8, 0xbbc);
+    } else if (variant == 2 && situation == 0) {
+        setEndBrake(moduleAccesser, 0xfb9, 0xbbc);
+    }
 }
 
 void ftGanonStatusUniqProcessGanonKickEnd::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
+    if (moduleAccesser->getSituationModule().getKind() == 0) {
+        // HYPOTHESIS: kinetic module slot 0x2C clears the speed of every energy.
+        moduleAccesser->getKineticModule().clearSpeedAll();
+    }
+}
+
+// HYPOTHESIS: horizontal brake of the stop energy; the ground variant 0x22000010 uses the move's parameter, otherwise
+// the common one.
+static void setEndBrake(soModuleAccesser* moduleAccesser, int groundParamId, int commonParamId) {
+    soWorkManageModule& work = moduleAccesser->getWorkManageModule();
+    ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
+    float brake;
+    if (work.isFlag(0x22000010)) {
+        brake = soValueAccesser::getConstantFloat(moduleAccesser, groundParamId, 0);
+    } else {
+        brake = soValueAccesser::getConstantFloat(moduleAccesser, commonParamId, 0);
+    }
+    stop.soKineticEnergyNormal::setBrake(&Vec2f(brake, 0.0f));
 }
 
 void ftGanonStatusUniqProcessGanonKick::onHit(soModuleAccesser* moduleAccesser) {
