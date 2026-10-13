@@ -39,7 +39,7 @@ public:
     // HYPOTHESIS: constructor that also registers with the given manager (seen in soControllerModuleImpl ctor).
     soAnimCmdEventObserver(s16 unitID, s16 manageID) : soEventObserver<soAnimCmdEventObserver>(unitID) { addObserver(manageID, -1); }
 
-#if defined(FT_MODULE_BUILDER) || defined(YK_STAGE_FULL)
+#if defined(FT_MODULE_BUILDER) || defined(YK_STAGE_FULL) || defined(SO_EVENT_OBSERVER_INLINE)
     virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); } // MATCH-ONLY: inline in the REL
 #else
     virtual void addObserver(short param1, s8 param2);
