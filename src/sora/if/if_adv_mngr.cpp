@@ -54,3 +54,8 @@ s32 IfAdvMngr::main() {
     }
     return result;
 }
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
+unsigned char lbl_805A0318[0x8] __attribute__((aligned(4))) = { 0 };
+unsigned char g_IfAdvMngr[0x4] __attribute__((aligned(4))) = { 0 };
+unsigned char lbl_805A0324[0x4] __attribute__((aligned(4))) = { 0 };

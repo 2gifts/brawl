@@ -20,3 +20,9 @@ unsigned char lbl_805A0C74[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A0C78[0x1] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A0C79[0x1] = { 0 };
 unsigned char lbl_805A0C7A[0x6] __attribute__((aligned(2))) = { 0 };
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
+unsigned char lbl_804F67E0[0x30] __attribute__((aligned(8))) = { 0 };
+unsigned char _wpdcb[0x10] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_804F6820[0x1000] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_804F7820[0x26c0] __attribute__((aligned(8))) = { 0 };

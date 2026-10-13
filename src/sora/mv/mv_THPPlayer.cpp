@@ -6,3 +6,6 @@ unsigned char lbl_805A01EC[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A01F0[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A01F4[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A01F8[0x8] __attribute__((aligned(4))) = { 0 };
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
+unsigned char g_thpObject[0x1b0] __attribute__((aligned(8))) = { 0 };

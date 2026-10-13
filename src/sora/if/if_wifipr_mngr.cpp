@@ -37,3 +37,7 @@ void IfWifiprMngr::main() {
     }
     fn_8000DB40(g_gfSceneRoot, 8);
 }
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
+unsigned char lbl_805A02F8[0x8] __attribute__((aligned(4))) = { 0 };
+unsigned char g_IfWifiprMngr[0x8] __attribute__((aligned(4))) = { 0 };

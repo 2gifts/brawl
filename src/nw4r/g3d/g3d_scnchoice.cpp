@@ -153,3 +153,6 @@ void ScnChoice::G3dProc(u32 task, u32 param, void* pInfo) {
 
 } // namespace g3d
 } // namespace nw4r
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
+unsigned char gpCullingFrustum__Q24nw4r3g3d[0x8] __attribute__((aligned(4))) = { 0 };
