@@ -22,21 +22,21 @@ struct ftMarthExtendParamSpecialN {
 // Dancing Blade.
 struct ftMarthExtendParamSpecialS {
     float airSpeedXRatio; // HYPOTHESIS
-    float unk4;
+    float airDecelX;      // HYPOTHESIS: horizontal air deceleration during the move
     float riseSpeedY;     // HYPOTHESIS: vertical speed on the first grounded-to-air entry
-    float unkC;
-    float unk10;
+    float gravity;        // HYPOTHESIS: air gravity for the move
+    float fallSpeedMax;   // HYPOTHESIS: air terminal velocity for the move
 };
 
 // Dolphin Slash.
 struct ftMarthExtendParamSpecialHi {
-    float controlXRatio;  // HYPOTHESIS: scale applied to the controller energy after the launch
-    float unk4;
-    float unk8;
+    float controlXRatio;  // HYPOTHESIS: scale applied to the controller energy after the launch; also handed on at exit
+    float landingLag;     // handed on at exit (see ftMarthWork::SpecialHi_ExitLandingLag)
+    float turnStickThreshold; // HYPOTHESIS: stick deflection needed to turn around during the launch window
     float stickThreshold; // HYPOTHESIS
     float angleScale;     // HYPOTHESIS: degrees of steering at full stick
     float airSpeedXRatio; // HYPOTHESIS
-    float unk18;
+    float motionSpeedMul; // written to the motion energy's speed multiplier during the launch
     float gravity;        // HYPOTHESIS: stored negated by the status
     float fallSpeedMax;   // HYPOTHESIS
 };
@@ -105,18 +105,18 @@ public:
             m_floats[i][1] = &specialN(extData)->airBrakeX;
 
             m_floats[i][2] = &specialSMutable(extData)->airSpeedXRatio;
-            m_floats[i][3] = &specialS(extData)->unk4;
+            m_floats[i][3] = &specialS(extData)->airDecelX;
             m_floats[i][4] = &specialS(extData)->riseSpeedY;
-            m_floats[i][5] = &specialS(extData)->unkC;
-            m_floats[i][6] = &specialS(extData)->unk10;
+            m_floats[i][5] = &specialS(extData)->gravity;
+            m_floats[i][6] = &specialS(extData)->fallSpeedMax;
 
             m_floats[i][7] = &specialHiMutable(extData)->controlXRatio;
-            m_floats[i][8] = &specialHi(extData)->unk4;
-            m_floats[i][9] = &specialHi(extData)->unk8;
+            m_floats[i][8] = &specialHi(extData)->landingLag;
+            m_floats[i][9] = &specialHi(extData)->turnStickThreshold;
             m_floats[i][10] = &specialHi(extData)->stickThreshold;
             m_floats[i][11] = &specialHi(extData)->angleScale;
             m_floats[i][12] = &specialHi(extData)->airSpeedXRatio;
-            m_floats[i][13] = &specialHi(extData)->unk18;
+            m_floats[i][13] = &specialHi(extData)->motionSpeedMul;
             m_floats[i][14] = &specialHi(extData)->gravity;
             m_floats[i][15] = &specialHi(extData)->fallSpeedMax;
 

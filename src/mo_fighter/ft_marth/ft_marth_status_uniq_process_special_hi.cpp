@@ -73,7 +73,8 @@ void ftMarthStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAcces
     if (moduleAccesser->getWorkManageModule().isFlag(ftMarthWork::SpecialHi_Launched)) {
         if (!moduleAccesser->getWorkManageModule().isFlag(ftMarthWork::SpecialHi_Falling)) {
             if (moduleAccesser->getMotionModule().getKind() == 0x1e9) {
-                motion.unk40 = soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_MotionUnk40, 0);
+                // HYPOTHESIS: ftKineticEnergyMotion::unk40 is a speed multiplier and unk3C a rotation angle (shared with other fighters, so not renamed).
+                motion.unk40 = soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_MotionSpeedMul, 0);
             }
             // After the first active update, falling starts the gravity/control handoff.
             if (moduleAccesser->getWorkManageModule().isFlag(ftMarthWork::SpecialHi_Updated) && sumSpeed.m_y < 0.0f) {
@@ -113,11 +114,11 @@ void ftMarthStatusUniqProcessSpecialHi::execStop(soModuleAccesser*) {}
 void ftMarthStatusUniqProcessSpecialHi::execFixPos(soModuleAccesser*) {}
 
 void ftMarthStatusUniqProcessSpecialHi::exitStatus(soModuleAccesser* moduleAccesser, int) {
-    float exitValue = soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_ExitValue, 0);
-    moduleAccesser->getWorkManageModule().setFloat(exitValue, 0x11000000);
+    float exitValue = soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_LandingLag, 0);
+    moduleAccesser->getWorkManageModule().setFloat(exitValue, ftMarthWork::SpecialHi_ExitLandingLag);
     float controlRatio = soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_ControlXRatio, 0);
-    moduleAccesser->getWorkManageModule().setFloat(controlRatio, 0x11000001);
-    moduleAccesser->getWorkManageModule().onFlag(0x12000003);
+    moduleAccesser->getWorkManageModule().setFloat(controlRatio, ftMarthWork::SpecialHi_ExitControlXRatio);
+    moduleAccesser->getWorkManageModule().onFlag(ftMarthWork::SpecialHi_ExitParamsSet);
 }
 
 bool ftMarthStatusUniqProcessSpecialHi::onChangeLr(soModuleAccesser* moduleAccesser, float, float) {

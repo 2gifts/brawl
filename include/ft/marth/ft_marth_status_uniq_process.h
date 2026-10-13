@@ -43,6 +43,8 @@ struct ftMarthWork {
         Final_WindowCount = 0x20000016,
     };
     enum Float {
+        SpecialHi_ExitLandingLag = 0x11000000,
+        SpecialHi_ExitControlXRatio = 0x11000001,
         SpecialHi_StickAngle = 0x21000004,
         SpecialLw_Power = 0x21000004,
         SpecialLw_Lr = 0x21000005,
@@ -53,6 +55,7 @@ struct ftMarthWork {
         SpecialHi_Falling = 0x22000013,
         SpecialHi_Updated = 0x22000014,
         SpecialHi_ApplyAngle = 0x22000015,
+        SpecialHi_ExitParamsSet = 0x12000003, // HYPOTHESIS: marks the two exit values above as valid for the next status
         SpecialHi_LrChanged = 0x22000016,
         SpecialLw_ShieldEnable = 0x22000011,
         SpecialLw_ShieldActive = 0x22000012,
