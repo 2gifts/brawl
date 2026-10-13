@@ -62,3 +62,6 @@ void gfApplication::mainLoop() {
     GXSetCullMode(0);
     fn_80016F8C(this);
 }
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
+unsigned char lbl_80494890[0x10] __attribute__((aligned(8))) = { 0 };

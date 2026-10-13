@@ -33,3 +33,6 @@ void gfSceneManager::changeNextScene() {
     m_nextScene = NULL;
     m_currentScene->setModule();
 }
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
+unsigned char lbl_805A0060[0x8] __attribute__((aligned(4))) = { 0 };

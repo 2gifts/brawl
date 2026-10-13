@@ -11,3 +11,10 @@ bool gmCheckExistFigure(u16 id) {
     u16 flags = *reinterpret_cast<u16*>(record + 0x842 + index * 2);
     return (flags >> 15) & 1;
 }
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
+unsigned char lbl_804977E0[0x10] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_804977F0[0x10] __attribute__((aligned(8))) = { 0 };
+// HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
+unsigned char lbl_805A00E8[0x1] __attribute__((aligned(4))) = { 0 };
+unsigned char lbl_805A00EC[0x4] __attribute__((aligned(4))) = { 0 };

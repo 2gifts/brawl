@@ -97,3 +97,11 @@ int gfFileIO::checkFileSD(gfFileIORequest* request) {
     }
     return result;
 }
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
+unsigned char lbl_8059FFD8[0x4] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_8059FFDC[0x1] __attribute__((aligned(4))) = { 0 };
+unsigned char lbl_8059FFE0[0x4] __attribute__((aligned(4))) = { 0 };
+unsigned char lbl_8059FFE4[0x4] __attribute__((aligned(4))) = { 0 };
+unsigned char lbl_8059FFE8[0x4] __attribute__((aligned(4))) = { 0 };
+unsigned char lbl_8059FFEC[0x4] __attribute__((aligned(4))) = { 0 };

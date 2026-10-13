@@ -35,3 +35,9 @@ void gfRumble::lbSetRumble(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     slotOffset = arg2 * 8;
     fn_8002C510(this, arg0, arg1, level, (slots + slotOffset)[4], *(void **) (slots + slotOffset), arg4);
 }
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
+unsigned char lbl_80495380[0x10] __attribute__((aligned(8))) = { 0 };
+// HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
+unsigned char lbl_805A0058[0x4] __attribute__((aligned(4))) = { 0 };
+unsigned char lbl_805A005C[0x4] __attribute__((aligned(4))) = { 0 };

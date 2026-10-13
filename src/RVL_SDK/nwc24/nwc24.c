@@ -7744,3 +7744,13 @@ NWC24Err NWC24iCheckUserIdCrc(NWC24UserId id) {
 
     return NWC24_OK;
 }
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
+unsigned char lbl_805372C0[0x40] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_80537300[0x40] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_80537340[0x80] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_805373C0[0x180] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_80537540[0xe0] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_80537620[0x20] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_80537640[0x20] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_80537660[0x20] __attribute__((aligned(8))) = { 0 };

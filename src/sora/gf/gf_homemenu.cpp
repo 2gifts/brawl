@@ -43,3 +43,12 @@ void gfHomeMenu::kill() {
     fn_80228138(3);
     self->unkB0.unkB0Mode = 2;
 }
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
+unsigned char lbl_804953D0[0x48] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_80495418[0xc0] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_804954D8[0x8] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_804954E0[0xf4] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_804955D4[0x1] __attribute__((aligned(4))) = { 0 };
+unsigned char lbl_804955D5[0x1] = { 0 };
+unsigned char lbl_804955D8[0x2100] __attribute__((aligned(8))) = { 0 };

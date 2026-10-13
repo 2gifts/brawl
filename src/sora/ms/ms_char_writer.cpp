@@ -134,3 +134,13 @@ void SetFontResource(ms::CharWriter* w, int id) {
         break;
     }
 }
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
+unsigned char lbl_80497EB8[0x10] __attribute__((aligned(8))) = { 0 };
+unsigned char lbl_80497EC8[0x10] __attribute__((aligned(8))) = { 0 };
+// HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
+unsigned char lbl_805A01C0[0x1] __attribute__((aligned(4))) = { 0 };
+unsigned char lbl_805A01C4[0x1] __attribute__((aligned(4))) = { 0 };
+unsigned char lbl_805A01C5[0x1] = { 0 };
+unsigned char lbl_805A01C6[0x1] __attribute__((aligned(2))) = { 0 };
+unsigned char lbl_805A01C7[0x1] = { 0 };

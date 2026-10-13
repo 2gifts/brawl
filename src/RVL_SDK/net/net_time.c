@@ -25,3 +25,7 @@ BOOL fn_8038EC6C(OSCalendarTime *out) {
     OSTicksToCalendarTime(OSGetTime(), out);
     return FALSE;
 }
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
+unsigned char lbl_805A1140[0x4] __attribute__((aligned(4))) = { 0 };
+unsigned char lbl_805A1144[0x4] __attribute__((aligned(4))) = { 0 };

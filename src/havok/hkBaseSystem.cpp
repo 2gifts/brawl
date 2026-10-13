@@ -322,3 +322,6 @@ void hkDefaultError::setEnabled(int id, hkBool enabled) {
 
 static hkSingletonInitNode hkDummySingleton_initNode(
     hkDummySingleton::create, (void**)&hkSingleton<hkDummySingleton>::s_instance);
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
+unsigned char lbl_80532368[0x10] __attribute__((aligned(8))) = { 0 };

@@ -126,3 +126,6 @@ void sndSystem::specialResume() {
         _2D4[0x44D] = 0;
     }
 }
+
+// HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
+unsigned char lbl_80497F00[0x5d00] __attribute__((aligned(8))) = { 0 };
