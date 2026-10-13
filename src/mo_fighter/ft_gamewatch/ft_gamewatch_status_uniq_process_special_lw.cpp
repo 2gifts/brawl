@@ -1,3 +1,4 @@
+#define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_kinetic_energy.h>
 #include <so/collision/so_collision_shield_module_impl.h>
@@ -26,11 +27,12 @@ void ftGamewatchStatusUniqProcessSpecialLw::initStatus(soModuleAccesser* moduleA
         if (moduleAccesser->getStatusModule().getPrevStatusKind(0) != 0x11A) {
             ftGameWatchSpecialLwGroup* group = static_cast<ftGameWatchSpecialLwGroup*>(
                 g_ftCommonDataAccesser.getData(Fighter_GameWatch)->extendParam[3]);
-            soKineticEnergyNormal& energy = dynamic_cast<soKineticEnergyNormal&>(
+            ftKineticEnergyStop& energy = dynamic_cast<ftKineticEnergyStop&>(
                 *moduleAccesser->getKineticModule().getEnergy(3));
-            Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
-            energy.m_speed.m_x = speed.m_x / group->m_0;
-            energy.m_speed.m_y = speed.m_y;
+            Vec2f speed;
+            Vec2f::copy(speed, moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1)));
+            speed.m_x = speed.m_x / group->m_0;
+            energy.m_speed = speed;
         }
     }
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000013)) {

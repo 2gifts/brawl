@@ -26,19 +26,21 @@ void ftSheikStatusUniqProcessSpecialHiEnd::initStatus(soModuleAccesser* moduleAc
         dynamic_cast<ftKineticEnergyGravity&>(*kinetic.getEnergy(1));
     ftKineticEnergyStop& stop =
         dynamic_cast<ftKineticEnergyStop&>(*kinetic.getEnergy(3));
-    Vec2f speed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1));
-    bool grounded = situation.getKind() == 0;
-
-    kinetic.changeKinetic(grounded ? 6 : 10, moduleAccesser);
-    speed.m_x *= p[10];
-    if (grounded) {
+    Vec2f speed;
+    Vec2f::copy(speed, kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1)));
+    if (situation.getKind() == 0) {
+        kinetic.changeKinetic(6, moduleAccesser);
+        speed.m_x *= p[10];
         speed.m_y = 0.0f;
+        stop.m_speed = speed;
     } else {
+        kinetic.changeKinetic(10, moduleAccesser);
+        speed.m_x *= p[10];
         speed.m_y *= p[10];
         gravity.m_speedY = speed.m_y;
         speed.m_y = 0.0f;
+        stop.m_speed = speed;
     }
-    stop.m_speed = speed;
 }
 
 void ftSheikStatusUniqProcessSpecialHiEnd::execFixPosCounter(soModuleAccesser* moduleAccesser) {
@@ -54,9 +56,12 @@ void ftSheikStatusUniqProcessSpecialHiEnd::execFixPosCounter(soModuleAccesser* m
         dynamic_cast<ftKineticEnergyStop&>(*kinetic.getEnergy(3));
 
     if (situation.getKind() != 2) return;
+    Vec2f gravitySpeed;
+    Vec2f speed;
     if (work.isFlag(0x22000011)) {
         float horizontalSpeed = soValueAccesser::getConstantFloat(moduleAccesser, 0xbd8, 0);
-        Vec2f speed(horizontalSpeed * p[8], 0.0f);
+        speed.m_x = horizontalSpeed * p[8];
+        speed.m_y = 0.0f;
         stop.m_speedLimit = speed;
         gravity.resume();
 
@@ -64,9 +69,9 @@ void ftSheikStatusUniqProcessSpecialHiEnd::execFixPosCounter(soModuleAccesser* m
     }
 
     // The target reduces the current gravity speed by one tenth on each counter tick.
-    Vec2f speed = gravity.getSpeed();
-    speed.m_y -= speed.m_y / 10.0f;
-    gravity.m_speedY = speed.m_y;
+    Vec2f::copy(gravitySpeed, gravity.getSpeed());
+    gravitySpeed.m_y -= gravitySpeed.m_y / 10.0f;
+    gravity.m_speedY = gravitySpeed.m_y;
     gravity.suspend();
 }
 

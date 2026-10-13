@@ -21,18 +21,19 @@ void ftSheikStatusUniqProcessSpecialLw::initStatus(soModuleAccesser* moduleAcces
         soKineticModule& kinetic = moduleAccesser->getKineticModule();
         // HYPOTHESIS: extendParam[3] of the Sheik data points to two float divisors (x, y).
         float* divisor = static_cast<float*>(g_ftCommonDataAccesser.getData(Fighter_Sheik)->extendParam[3]);
-        soKineticEnergyNormal& energy1 = dynamic_cast<soKineticEnergyNormal&>(*kinetic.getEnergy(1));
+        ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*kinetic.getEnergy(1));
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*kinetic.getEnergy(3));
-        Vec2f sumSpeed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(-1));
+        Vec2f sumSpeed;
+        Vec2f::copy(sumSpeed, kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(-1)));
         kinetic.clearSpeedAll();
         sumSpeed.m_x = sumSpeed.m_x / divisor[0];
-        Vec2f speed(sumSpeed.m_x, 0.0f); // HYPOTHESIS: zero constant from lbl_104_rodata_188
+        Vec2f speed(sumSpeed.m_x, 0.0f);
         Vec2f::copy(stop.m_speed, speed);
         stop.enable();
         if (situation.getKind() != 0) {
             sumSpeed.m_y = sumSpeed.m_y / divisor[1];
-            energy1.m_speed.m_y = sumSpeed.m_y;
-            energy1.enable();
+            gravity.m_speedY = sumSpeed.m_y;
+            gravity.enable();
         }
     }
 }
