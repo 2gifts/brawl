@@ -70,7 +70,9 @@ public:
         Outside_Damage_Reserved = 0x3
     };
 
-#ifdef WN_WEAPON_BUILDER
+#ifdef WN_EXPLOSION_BUILDERS
+    soKineticEnergy(bool isNull = false) : soNullable(isNull), soEnable(!isNull) { }
+#elif defined(WN_WEAPON_BUILDER)
     // MATCH-ONLY: the article RELs call this constructor out of line (weak copy in the unit).
     soKineticEnergy(bool isNull = false) __attribute__((never_inline)) : soNullable(isNull), soEnable(!isNull) { }
 #endif

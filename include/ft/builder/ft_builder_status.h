@@ -36,7 +36,11 @@ class soStatusModuleBuilder {
     soArrayContractibleTable<const soStatusData> m_statusTable;                                           // +0x0
     soGeneralWorkBuilder<typename BC::GeneralWorkBuildConfig> m_generalWorkBuilder;                       // +0x10
     soTransitionModuleBuilder<typename BC::TransitionBuildConfig> m_transitionBuilder;                    // +0xF0
+#ifdef WN_EXPLOSION_BUILDERS
+    soArraySelectHolder<1, soArrayVector<soStatusUniqProcess*, BC::StatusKindCap>, soSingletonHolder<soArrayNull<soStatusUniqProcess*> > > m_uniqProcs;
+#else
     soArraySelectHolder<1, soArrayVector<soStatusUniqProcess*, BC::StatusKindCap>, soArrayNull<soStatusUniqProcess*> > m_uniqProcs; // +0x964
+#endif
     soArrayQueueImpl<soArrayVector<s32, 1> > m_changeRequests;                                            // +0xDF4
     soStatusModuleImpl m_module;                                                                          // +0xE08
     u32 unkEB4;

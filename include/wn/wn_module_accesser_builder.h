@@ -45,8 +45,8 @@ FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 2);
 FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soAnimCmdControlUnit>, 6);
 FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soKineticEnergy*>, 8);
 
-#ifdef WN_OIL_EXTERNAL_ARRAYS
-// Oil calls these sora_melee-owned constructors and virtual methods.
+#ifdef WN_SHARED_ARRAYS_1
+// These article builders call sora_melee-owned constructors and virtual methods.
 FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 1);
 // The status pointer vector uses the no-argument constructor, not the size overload.
 template <>
@@ -81,6 +81,17 @@ public:
     ~soArraySelectHolder() { }
     soArrayVector<soStatusUniqProcess*, 1>* get() { return &m_array; }
 };
+#ifdef WN_EXPLOSION_BUILDERS
+// Explosion uses the singleton null-array type in its owning status holder.
+template <>
+class soArraySelectHolder<1, soArrayVector<soStatusUniqProcess*, 1>, soSingletonHolder<soArrayNull<soStatusUniqProcess*> > > {
+public:
+    soArrayVector<soStatusUniqProcess*, 1> m_array;
+    soArraySelectHolder() : m_array() { }
+    ~soArraySelectHolder() { }
+    soArrayVector<soStatusUniqProcess*, 1>* get() { return &m_array; }
+};
+#endif
 static_assert(sizeof(soArrayVector<soCollisionAttackPart, 1>) == 0x9C, "Oil attack part vector size");
 static_assert(sizeof(soArrayVector<soStatusUniqProcess*, 1>) == 0x10, "Oil status pointer vector size");
 #endif
@@ -152,9 +163,25 @@ FT_DOL_POLY_BEGIN(soShakeModuleSimple, 0x8);
     soShakeModuleSimple(soModuleAccesser* acc, soArray<soShakeTerm>* terms, void* shakeData);
 FT_DOL_POLY_END;
 // The weapon kinetic module (soKineticModuleImpl plus a status observer; constructed in sora_melee).
+#ifdef WN_EXPLOSION_BUILDERS
+#include <so/kinetic/so_kinetic_module_impl.h>
+class wnKineticModuleImpl : public soKineticModuleImpl, public soStatusEventObserver {
+    // HYPOTHESIS: meaning unresolved; the constructor initializes this word to -1.
+    s32 unk2C;
+public:
+    wnKineticModuleImpl(soModuleAccesser* acc, soInstanceManagerFullProperty<soKineticEnergy*>* energies, soKineticMediator* mediator);
+    ~wnKineticModuleImpl() { }
+    virtual void changeKinetic(int kineticType, soModuleAccesser* acc);
+    virtual void addSpeed(Vec3f* speed, soModuleAccesser* acc);
+    virtual void addSpeedOutside(soKineticEnergy::OutsideType, Vec3f* speed);
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* data, soModuleAccesser* acc);
+};
+static_assert(sizeof(wnKineticModuleImpl) == 0x30, "Weapon kinetic module extent");
+#else
 FT_DOL_POLY_BEGIN(wnKineticModuleImpl, 0x30);
     wnKineticModuleImpl(soModuleAccesser* acc, soInstanceManagerFullProperty<soKineticEnergy*>* energies, soKineticMediator* mediator);
 FT_DOL_POLY_END;
+#endif
 
 // Null module singletons of sora_melee (the null builders hand these to the module accesser).
 extern char lbl_27_bss_3BC[];  // collision catch

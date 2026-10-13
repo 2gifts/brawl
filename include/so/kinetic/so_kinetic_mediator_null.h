@@ -7,6 +7,10 @@
 
 class soKineticMediatorNull : public soKineticMediator {
 public:
+#ifdef WN_EXPLOSION_BUILDERS
+    // MATCH-ONLY: Explosion retains this nonvirtual destructor out of line.
+    ~soKineticMediatorNull() __attribute__((never_inline)) { }
+#endif
     virtual void changeKinetic(int, soModuleAccesser*) { }
     virtual void updateEnergy(soModuleAccesser*) { }
     virtual void updateEnergy1(soModuleAccesser*, soKineticAttributeMask) { }
