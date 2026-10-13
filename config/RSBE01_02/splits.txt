@@ -2317,6 +2317,10 @@ RVL_SDK/ax/AX.c:
 	.sdata      start:0x8059EB10 end:0x8059EB18
 	.sbss       start:0x805A0A20 end:0x805A0A28
 
+RVL_SDK/ax/DSPCode.c:
+	.data       start:0x804780E0 end:0x8047B140
+	.sdata      start:0x8059EB18 end:0x8059EB20
+
 RVL_SDK/ax/AXAlloc.c:
 	.text       start:0x801FF1FC end:0x801FF764
 	.bss        start:0x804E4850 end:0x804E4960
@@ -2336,10 +2340,6 @@ RVL_SDK/ax/AXOut.c:
 	.text       start:0x80200A18 end:0x80201264
 	.bss        start:0x804E7BE0 end:0x804E89E0
 	.sbss       start:0x805A0A98 end:0x805A0AD8
-
-RVL_SDK/ax/DSPCode.c:
-	.data       start:0x804780E0 end:0x8047B140
-	.sdata      start:0x8059EB18 end:0x8059EB20
 
 RVL_SDK/ax/AXVPB.c:
 	.text       start:0x80201EF8 end:0x80201F38
