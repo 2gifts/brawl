@@ -11,40 +11,12 @@
 #include <mu/mu_panel_ctrl.h>
 #include <mu/mu_proc_menu.h>
 #include <mu/mu_proc_rule1.h>
+#include <mu/mu_proc_item_switch.h>
 #include <mu/mu_proc_rule2.h>
+#include <mu/mu_proc_stage_switch.h>
 #include <nw4r/g3d/g3d_obj.h>
 #include <nw4r/g3d/g3d_resfile.h>
 #include <types.h>
-
-// The screen where the player picks the items that can appear.
-class muProcItemSwitch : public muProcMenu {
-public:
-    u8 m_unk66C[0x690 - 0x66C];
-
-    muProcItemSwitch(MuObject** objs, nw4r::g3d::G3dObj** mdls, void* data);
-    virtual ~muProcItemSwitch();
-    virtual void init(nw4r::g3d::ScnGroup* group, int from);
-    virtual int proc();
-    virtual void exit();
-    virtual bool selectProc(int dir);
-    virtual void playSE_CursorMove();
-};
-static_assert(sizeof(muProcItemSwitch) == 0x690, "Class is wrong size!");
-
-// The screen where the player picks the stages that can be played.
-class muProcStageSwitch : public muProcMenu {
-public:
-    u8 m_unk66C[0x768 - 0x66C];
-
-    muProcStageSwitch(MuObject** objs, nw4r::g3d::G3dObj** mdls, void* data);
-    virtual ~muProcStageSwitch();
-    virtual void init(nw4r::g3d::ScnGroup* group, int from);
-    virtual int proc();
-    virtual void exit();
-    virtual bool selectProc(int dir);
-    virtual void playSE_CursorMove();
-};
-static_assert(sizeof(muProcStageSwitch) == 0x768, "Class is wrong size!");
 
 // The task of the menu of the rules.
 class muRuleTask : public gfTask {

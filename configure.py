@@ -6331,6 +6331,8 @@ config.libs = [
             Object(NonMatching, "mo_menu/mu_proc_menu.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_rule1.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_rule2.cpp"),
+            Object(NonMatching, "mo_menu/mu_proc_item_switch.cpp"),
+            Object(NonMatching, "mo_menu/mu_proc_stage_switch.cpp"),
         ],
     },
     {
@@ -6415,7 +6417,12 @@ config.libs = [
         "mw_version": config.linker_version,
         "cflags": cflags_rel,
         "host": False,
-        "objects": [],
+        "objects": [
+            Object(NonMatching, "mo_menu/mu_tour_table.cpp"),
+            Object(NonMatching, "mo_menu/mu_tour_rule.cpp"),
+            Object(NonMatching, "mo_menu/mu_tour_entry.cpp"),
+            Object(Matching, "mo_menu/mu_tour_panel_ctrl.cpp"),
+        ],
     },
     {
         "lib": "sora_menu_watch",
