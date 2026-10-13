@@ -52,6 +52,12 @@ extern void WUDiMemFree(void *p_mem);
 extern void bte_report_state(INT8 state);
 
 /*******************************************************************************
+ * variables
+ */
+
+tGKI_CB gki_cb;
+
+/*******************************************************************************
  * functions
  */
 

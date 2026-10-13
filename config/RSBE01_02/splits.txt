@@ -2575,6 +2575,7 @@ RVL_SDK/bte/gki_time.c:
 
 RVL_SDK/bte/gki_glue_unk.c:
 	.text       start:0x80230314 end:0x802305C8
+	.bss        start:0x804FD448 end:0x80525F28
 
 RVL_SDK/bte/hcisu_h2.c:
 	.text       start:0x802305C8 end:0x80231844
