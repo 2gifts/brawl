@@ -36,25 +36,25 @@ struct stIceData {
     float unk00;    // 0x00 warning lead distance
     float unk04;    // 0x04 frames the warning lasts
     float unk08;
-    float unk0C;
-    float unk10;
+    float unk0C; // HYPOTHESIS: possibly "Ice Platform Health" (matches a stage parameter table offset)
+    float unk10; // HYPOTHESIS: possibly "Ice Platform Damage Taken Multiplier" (matches a stage parameter table offset)
     float unk14;
     float unk18;
     float unk1C;
     float unk20;
-    float unk24;
+    float unk24; // HYPOTHESIS: possibly "Ice Platform Respawn Time" (matches a stage parameter table offset)
     float icicleInitialMin;    // 0x28 least frames until the next icicle
     float icicleInitialMax;    // 0x2C most frames until the next icicle
     float icicleRedoMin;    // 0x30 least frames until the next icicle (after the first)
     float icicleRedoMax;    // 0x34 most frames until the next icicle (after the first)
     float unk38;    // 0x38 frames the icicles come
-    float unk3C;
-    float unk40;
-    float unk44;
-    float unk48;
-    float unk4C;
-    float unk50;
-    float unk54;
+    float unk3C; // HYPOTHESIS: possibly "Falling Platform Timer" (matches a stage parameter table offset)
+    float unk40; // HYPOTHESIS: possibly "Tipping Speed" (matches a stage parameter table offset)
+    float unk44; // HYPOTHESIS: possibly "Initial Tipping Speed" (matches a stage parameter table offset)
+    float unk48; // HYPOTHESIS: possibly "Turnaround Angle of Tipping Platform" (matches a stage parameter table offset)
+    float unk4C; // HYPOTHESIS: possibly "Tipping Platform Deceleration" (matches a stage parameter table offset)
+    float unk50; // HYPOTHESIS: possibly "Tipping Platform Respawn Time" (matches a stage parameter table offset)
+    float unk54; // HYPOTHESIS: possibly "Tipping Platform Return Speed" (matches a stage parameter table offset)
     float foodSpawnMin;    // 0x58 least frames until the next vegetable
     float foodSpawnMax;    // 0x5C most frames until the next vegetable
     float foodSpawnChance;    // 0x60 chance that a vegetable comes
@@ -64,29 +64,29 @@ struct stIceData {
     float unk70;
     float cloudPlatformSpawnMin;    // 0x74 least frames until the next cloud platform
     float cloudPlatformSpawnMax;    // 0x78 most frames until the next cloud platform
-    float unk7C;
+    float unk7C; // HYPOTHESIS: possibly "Speed of Cloud Platform" (matches a stage parameter table offset)
     float unk80;    // 0x80 least frames until the next fish
     float unk84;    // 0x84 most frames until the next fish
     float unk88;    // 0x88 chance that the fish comes
     float unk8C;
-    float unk90;
-    float unk94;
-    float unk98;
-    float unk9C;
-    float unkA0;
-    float unkA4;
-    float unkA8;
-    float unkAC;
-    float unkB0;
-    float unkB4;
+    float unk90; // HYPOTHESIS: possibly "Polar Bear Jump Min Timer" (matches a stage parameter table offset)
+    float unk94; // HYPOTHESIS: possibly "Polar Bear Jump Max Timer" (matches a stage parameter table offset)
+    float unk98; // HYPOTHESIS: possibly "Polar Bear Jump Chance" (matches a stage parameter table offset)
+    float unk9C; // HYPOTHESIS: possibly "Polar Bear Jump Magnitude Min" (matches a stage parameter table offset)
+    float unkA0; // HYPOTHESIS: possibly "Polar Bear Jump Magnitude Max" (matches a stage parameter table offset)
+    float unkA4; // HYPOTHESIS: possibly "Mountain Sink Acceleration" (matches a stage parameter table offset)
+    float unkA8; // HYPOTHESIS: possibly "Mountain Sink Max Speed" (matches a stage parameter table offset)
+    float unkAC; // HYPOTHESIS: possibly "Mountain Minimum Sunk Timer" (matches a stage parameter table offset)
+    float unkB0; // HYPOTHESIS: possibly "Mountain Maximum Sunk Timer" (matches a stage parameter table offset)
+    float unkB4; // HYPOTHESIS: possibly "Mountain Float Speed" (matches a stage parameter table offset)
     float unkB8;    // 0xB8 least frames until the next ice block
     float unkBC;    // 0xBC most frames until the next ice block
-    float unkC0;
-    float unkC4;
+    float unkC0; // HYPOTHESIS: possibly "Speed Of Ascent?" (matches a stage parameter table offset)
+    float unkC4; // HYPOTHESIS: possibly "Ice Floating Platform Tilt Speed" (matches a stage parameter table offset)
     float unkC8;
-    float unkCC;
+    float unkCC; // HYPOTHESIS: possibly "Ice Floating Platform Fast Speed" (matches a stage parameter table offset)
     float unkD0;
-    float unkD4;
+    float unkD4; // HYPOTHESIS: possibly "Ice Floating Platform Sinking Speed?" (matches a stage parameter table offset)
 };
 static_assert(sizeof(stIceData) == 0xD8, "Class is wrong size!");
 

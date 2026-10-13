@@ -39,11 +39,11 @@ struct stPalutenaData {
     float unk1C;
     float unk20;
     float unk24;    // 0x24 frames the platforms need to be built again (from the platform's side)
-    float unk28;
-    float unk2C;
-    float unk30;
-    float unk34;
-    float unk38;
+    float platformRespawnFrames;
+    float platformStretchFrames;
+    float unk30; // HYPOTHESIS: possibly "Chained Platform Outward Timer" (matches a stage parameter table offset)
+    float unk34; // HYPOTHESIS: possibly "Chained Platform Inward Timer" (matches a stage parameter table offset)
+    float unk38; // HYPOTHESIS: possibly "Chained Platform Move Chance" (matches a stage parameter table offset)
     float unk3C;
     float unk40;
     float unk44;
@@ -54,9 +54,9 @@ struct stPalutenaData {
     float unk58;
     float unk5C;
     float unk60;
-    float unk64;
-    float unk68;
-    float unk6C;
+    float unk64; // HYPOTHESIS: possibly "Bottom Platform Min Respawn Timer" (matches a stage parameter table offset)
+    float unk68; // HYPOTHESIS: possibly "Bottom Platform Max Respawn Timer" (matches a stage parameter table offset)
+    float unk6C; // HYPOTHESIS: possibly "Bottom Platform Right Spawn Chance" (matches a stage parameter table offset)
     float unk70;    // 0x70 speed of the clouds
     char _74[0x10];
 };

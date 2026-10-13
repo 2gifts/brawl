@@ -35,7 +35,7 @@ struct stFamicomData {
     float unk04;
     float unk08;
     float powBlockRespawnFrames;    // 0x0C frames the POW block needs to come back
-    float unk10;
+    float unk10; // HYPOTHESIS: possibly "POW Block Knockback" (matches a stage parameter table offset)
     float enemyInitialTimer;    // 0x14 frames until the first enemy
     float unk18;    // 0x18 least frames until the next enemy
     float unk1C;    // 0x1C most frames until the next enemy
@@ -43,8 +43,8 @@ struct stFamicomData {
     float sidestepperSpawnRate;    // 0x24
     u8 m_enemyMax;  // 0x28 how many enemies the stage can have at the same time
     char _29[3];
-    float unk2C;
-    float unk30;
+    float unk2C; // HYPOTHESIS: possibly "Shellcreeper Base Speed" (matches a stage parameter table offset)
+    float unk30; // HYPOTHESIS: possibly "Sidestepper Base Speed" (matches a stage parameter table offset)
     float enemyFallSpeed;    // 0x34 gravity of the enemies
     float unk38;
     float unk3C;

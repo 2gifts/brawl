@@ -1040,7 +1040,7 @@ void stPirates::updateSea(float deltaFrame) {
         if (data != NULL) {
             Vec3f sea(mtx(6)->m[0][3], mtx(6)->m[1][3], mtx(6)->m[2][3]);
             m_waterData->m_swimHeight = sea.m_y;
-            m_waterData->m_speed = data->unk00 * unk604;
+            m_waterData->m_speed = data->waterVelocity * unk604;
             grGimmickWaterData* area = m_waterData;
             area->m_areaData.m_range.m_x = (m_posLimit[1].m_x - m_posLimit[0].m_x) + 500.0f;
             float height = (sea.m_y - m_posLimit[1].m_y) + 50.0f;

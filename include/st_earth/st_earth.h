@@ -42,8 +42,8 @@ struct stEarthData {
     float pelletBlueWeight;   // 0x18 the weight of the second color
     float pelletYellowWeight;   // 0x1C the weight of the third color
     float unk20;   // 0x20 the factor of the color that was dropped last
-    float unk24;
-    float unk28;
+    float unk24; // HYPOTHESIS: possibly "Pellet Upgrade Timer (1 to 5)" (matches a stage parameter table offset)
+    float unk28; // HYPOTHESIS: possibly "Pellet Upgrade Timer (5 to 10)" (matches a stage parameter table offset)
     float unk2C;
     float unk30;
     float unk34;

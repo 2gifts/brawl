@@ -40,8 +40,8 @@ struct stMetalgearData {
     float unk04;    // 0x04
     float unk08;    // 0x08
     float unk0C;    // 0x0C
-    float unk10;
-    float unk14;
+    float unk10; // HYPOTHESIS: possibly "Upper Tower HP" (matches a stage parameter table offset)
+    float unk14; // HYPOTHESIS: possibly "Lower Tower HP" (matches a stage parameter table offset)
     float unk18;
     float unk1C;
     float unk20;

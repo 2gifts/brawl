@@ -873,7 +873,7 @@ void stPictchat::updatePict(float deltaFrame) {
         switch (m_state) {
         case 0:
             if (m_first == 1) {
-                m_timer = data->unk00;
+                m_timer = data->firstDrawingTimer;
                 g_sndSystem->playSE(static_cast<SndID>(0x1D1D), 0, 0, 0, -1);
                 m_first = 0;
             } else {

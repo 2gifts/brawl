@@ -33,10 +33,12 @@ struct ftData {
     void* extendParam[6];
 };
 
+// The fighter attribute block (an array of 4-byte entries, 0x2E4 bytes in the moveset file). modelScale lines up with the
+// attribute list's size entry, and 0x1FC..0x208 are the camera extents read by ftManager::getCameraRange.
 struct ftParam {
-    u8 unk0[0xB4];
+    u8 unk0[0xB4]; // HYPOTHESIS: possibly the walk, dash, run, jump, air-drift and gravity attributes plus weight at 0xB0
     float modelScale;
-    u8 unkB8[0x1E0];
+    u8 unkB8[0x1E0]; // HYPOTHESIS: possibly shield size at 0xC4, edge jump speed at 0xF8/0xFC, item throw strength at 0x118, landing lag at 0x13C..0x150, wall jump speed at 0x164/0x168
     float slopeAngleLimit;
 };
 

@@ -221,7 +221,7 @@ void grPalutenaAshiba::updateYakumono(float deltaFrame) {
 // While the platform is being built (the last frames of its waiting time) it grows from the floor and the dust is made.
 void grPalutenaAshiba::updatePreBuild(float deltaFrame) {
     stPalutenaData* data = static_cast<stPalutenaData*>(getStageData());
-    if (data != NULL && !(unk154 < data->unk28 - (data->unk2C + 4.0f))) {
+    if (data != NULL && !(unk154 < data->platformRespawnFrames - (data->platformStretchFrames + 4.0f))) {
         if (m_effectDone == 0) {
             u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x4F0004));
             u32 kind;
@@ -236,9 +236,9 @@ void grPalutenaAshiba::updatePreBuild(float deltaFrame) {
             g_ecMgr->setParent(effect, m_sceneModels[0], kind, 0);
             m_effectDone = 1;
         }
-        float start = data->unk28 - data->unk2C;
+        float start = data->platformRespawnFrames - data->platformStretchFrames;
         if (!(unk154 < start)) {
-            float rate = (unk154 - start) / data->unk2C;
+            float rate = (unk154 - start) / data->platformStretchFrames;
             m_offset.m_x = 0.0f;
             m_offset.m_z = 0.0f;
             m_scale.m_x = 1.0f;
@@ -286,10 +286,10 @@ void grPalutenaAshiba::updateToBuild(float deltaFrame) {
             return;
         }
         unk154 = unk154 + deltaFrame;
-        if (data->unk28 < unk154) {
-            unk154 = data->unk28;
+        if (data->platformRespawnFrames < unk154) {
+            unk154 = data->platformRespawnFrames;
         }
-        if (unk154 < data->unk28) {
+        if (unk154 < data->platformRespawnFrames) {
             return;
         }
         m_state = 0;

@@ -56,15 +56,15 @@ public:
 struct stHalberdData {
     float unk00;
     float unk04;
-    float unk08;
-    float unk0C;
+    float hazardTimerMin;
+    float hazardTimerMax;
     float unk10;
     float unk14;
     float unk18;
     float unk1C;
-    float unk20;
-    float unk24;
-    float unk28;
+    float warningSignFrames;
+    float mainPlatformTimerMin;
+    float mainPlatformTimerMax;
     float unk2C;
     float unk30;
     float unk34;
