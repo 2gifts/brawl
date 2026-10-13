@@ -1,32 +1,13 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <ft/ft_common_data_accesser.h>
+#include <ft/fighter.h>
+#include <ft/ft_owner.h>
 #include <ft/ft_entry.h>
+#include <so/article/so_generate_article_manage_module.h>
 #include <so/controller/so_controller_module_impl.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <types.h>
-
-// HYPOTHESIS: generate-article manage module (soModuleEnumeration::m_generateArticleManageModule); only the slot below is used.
-class ftGenerateArticleManageStub {
-public:
-    virtual ~ftGenerateArticleManageStub();
-    virtual void unk0C();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1C();
-    virtual void unk20();
-    virtual void unk24();
-    virtual void unk28();
-    virtual void unk2C();
-    virtual void unk30();
-    virtual void unk34();
-    virtual void unk38();
-    virtual void unk3C();
-    virtual void unk40();
-    virtual void unk44();
-    virtual void unk48(int, int);
-};
 
 class ftLinkStatusUniqProcessSpecialBoomerang : public soStatusUniqProcess {
 public:
@@ -36,29 +17,34 @@ public:
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
 };
 
-// Common parameter block read by the initial throw check. Offsets are native; field meanings are HYPOTHESIS.
+// Common parameter offsets are observed in the native reads; the descriptive field names are HYPOTHESIS.
 struct ftLinkBoomerangCommonView {
     u8 unk00[0x18];
-    float m_stickThreshold; // 0x18: the stick must stay below this magnitude
+    float m_stickThreshold; // 0x18: the stick must reach this magnitude
     int m_flickFrame;       // 0x1c
     float m_flickFrameAdd;  // 0x20
 };
 
-// The throw is only started while the stick is below the threshold and the flick input is still inside its window.
-// The boomerang launch (article cast, throw call and the flags it sets) is not reconstructed yet.
+// The throw path requires the stick magnitude to reach the common threshold while the flick count remains below its frame window.
 void ftLinkStatusUniqProcessSpecialBoomerang::initStatus(soModuleAccesser* moduleAccesser) {
-    float stickX = __fabsf(moduleAccesser->getControllerModule().getStickX());
+    double absolute = __fabs(moduleAccesser->getControllerModule().getStickX());
+    float stickX = absolute;
     ftLinkBoomerangCommonView* common = reinterpret_cast<ftLinkBoomerangCommonView*>(g_ftCommonDataAccesser.getParamCommon());
-    if (stickX >= common->m_stickThreshold) {
+    if (!(stickX >= common->m_stickThreshold)) {
         return;
     }
-    soControllerModule& controller = moduleAccesser->getControllerModule();
-    float limit = (float)common->m_flickFrame + common->m_flickFrameAdd;
-    if ((float)controller.getFlickNoResetX() >= limit) {
-        return;
-    }
-}
 
+    soControllerModule& controller = moduleAccesser->getControllerModule();
+    float limit = (float)reinterpret_cast<ftLinkBoomerangCommonView*>(g_ftCommonDataAccesser.getParamCommon())->m_flickFrame
+        + reinterpret_cast<ftLinkBoomerangCommonView*>(g_ftCommonDataAccesser.getParamCommon())->m_flickFrameAdd;
+    if (!((float)controller.getFlickNoResetX() < limit)) {
+        return;
+    }
+
+    Fighter& fighter = dynamic_cast<Fighter&>(moduleAccesser->getStageObject());
+    moduleAccesser->getWorkManageModule().onFlag(0x22000011);
+    fighter.getOwner()->addLogInt(1, 0x19, 0);
+}
 void ftLinkStatusUniqProcessSpecialBoomerang::execStatus(soModuleAccesser*) { }
 
 // The boomerang article is released on leaving the status unless the throw flag is still set.
@@ -66,8 +52,8 @@ void ftLinkStatusUniqProcessSpecialBoomerang::execStatus(soModuleAccesser*) { }
 void ftLinkStatusUniqProcessSpecialBoomerang::exitStatus(soModuleAccesser* moduleAccesser, int) {
     if (!moduleAccesser->getWorkManageModule().isFlag(0x1200003D)) {
         ftData* data = g_ftCommonDataAccesser.getData(Fighter_Link);
-        reinterpret_cast<ftGenerateArticleManageStub*>(moduleAccesser->m_enumerationStart->m_generateArticleManageModule)
-            ->unk48(*reinterpret_cast<int*>(reinterpret_cast<u8*>(data) + 0xA4), 0);
+        static_cast<soGenerateArticleManageModule*>(moduleAccesser->m_enumerationStart->m_generateArticleManageModule)
+            ->removeExist(*reinterpret_cast<int*>(reinterpret_cast<u8*>(data) + 0xA4), 0);
     }
 }
 

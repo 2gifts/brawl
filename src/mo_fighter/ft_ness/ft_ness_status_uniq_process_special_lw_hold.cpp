@@ -6,10 +6,10 @@
 #include <so/collision/so_collision_shield_module_impl.h>
 #include <types.h>
 
-// HYPOTHESIS: float constants from lbl_101_rodata_90 (x and z of the start offset, y of the offset, and scale)
+// Native effect tuning: zero, vertical offset, scale, zero.
 extern float lbl_101_rodata_90[];
 
-// Ness's PK Thunder hold (special lw hold): spawns the hold effect and the looping sound on start.
+// PSI Magnet starts a following effect and looping sound when their handles are absent.
 // HYPOTHESIS: work int 0x20000003 holds an effect handle and 0x20000002 a sound handle; both are cleared on exit.
 class ftNessStatusUniqProcessSpecialLwHold : public soStatusUniqProcess {
 public:
@@ -21,17 +21,18 @@ public:
 ftNessStatusUniqProcessSpecialLwHold g_ftNessStatusUniqProcessSpecialLwHold;
 
 void ftNessStatusUniqProcessSpecialLwHold::initStatus(soModuleAccesser* moduleAccesser) {
-    // HYPOTHESIS: the absorber status values are (0, 1, 0) for the hold
+    float* constants = lbl_101_rodata_90;
+    // HYPOTHESIS: these flags configure the absorber group for PSI Magnet.
     moduleAccesser->getCollisionAbsorberModule().setStatus(0, 1, 0);
     if (moduleAccesser->getWorkManageModule().getInt(0x20000003) < 0) {
-        Vec3f rotate(lbl_101_rodata_90[0], lbl_101_rodata_90[0], lbl_101_rodata_90[0]);
-        Vec3f position(lbl_101_rodata_90[0], lbl_101_rodata_90[1], lbl_101_rodata_90[0]);
-        int effectId = moduleAccesser->getEffectModule().req(static_cast<EfID>(0xb000c), 4, &position, &rotate,
-                                                            lbl_101_rodata_90[2], 0, 0, false, 0xffffffff);
+        int effectId = moduleAccesser->getEffectModule().reqFollow(static_cast<EfID>(0xB000C), 4,
+            &Vec3f(constants[0], constants[1], constants[0]),
+            &Vec3f(constants[0], constants[0], constants[0]),
+            constants[2], false, 0, 0, -1);
         moduleAccesser->getWorkManageModule().setInt(effectId, 0x20000003);
     }
     if (moduleAccesser->getWorkManageModule().getInt(0x20000002) < 0) {
-        int soundHandle = moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0xe7f), true, false, 0);
+        int soundHandle = moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0xE7F), true, 0, 0);
         moduleAccesser->getWorkManageModule().setInt(soundHandle, 0x20000002);
     }
 }

@@ -1,4 +1,5 @@
 #include <so/so_module_accesser.h>
+#include <so/catch/so_catch_module.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
 
@@ -27,21 +28,6 @@ public:
     virtual int unk54(int);
 };
 
-// HYPOTHESIS: catch module (soModuleEnumeration::m_catchModule); only the slots below are used.
-class ftCatchModuleStub {
-public:
-    virtual ~ftCatchModuleStub();
-    virtual void unk0C();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1C();
-    virtual void unk20();
-    virtual void unk24();
-    virtual void unk28();
-    virtual void unk2C(int, int);
-};
-
 // HYPOTHESIS: output block passed to the link module; fields at +0x14 and +0x18 are written back by the link call.
 struct ftDonkeyThrowLinkParam {
     int m_08;
@@ -63,7 +49,7 @@ public:
 
 ftDonkeyStatusUniqProcessThrowCommon g_ftDonkeyStatusUniqProcessThrowCommon;
 
-// HYPOTHESIS: constant from lbl_92_rodata_A0 (value not verified).
+// Target constant verified from ft_donkey.o: lbl_92_rodata_A0 begins with 1.0f.
 static const float s_throwCommonScale = 1.0f;
 
 void ftDonkeyStatusUniqProcessThrowCommon::initStatus(soModuleAccesser* moduleAccesser) {
@@ -87,6 +73,6 @@ void ftDonkeyStatusUniqProcessThrowCommon::initStatus(soModuleAccesser* moduleAc
 }
 
 void ftDonkeyStatusUniqProcessThrowCommon::exitStatus(soModuleAccesser* moduleAccesser, int) {
-    int zero = 0;
-    reinterpret_cast<ftCatchModuleStub*>(moduleAccesser->m_enumerationStart->m_catchModule)->unk2C(zero, zero);
+    bool zero = false;
+    reinterpret_cast<soCatchModule*>(moduleAccesser->m_enumerationStart->m_catchModule)->catchCut(zero, zero);
 }

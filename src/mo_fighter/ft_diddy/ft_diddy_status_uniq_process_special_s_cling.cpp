@@ -1,16 +1,17 @@
+#define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <so/so_module_accesser.h>
 #include <so/catch/so_catch_module.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
 
 // soCatchModuleImpl's map and these call sites identify the used virtual slots.
-// The unused 0x34 slot remains opaque so the later slots keep their native offsets.
+// The unused LR-update slot is retained so the later slots keep their native offsets.
 class ftDiddyCatchModuleView : public soCatchModule {
 public:
     // HYPOTHESIS: the forwarded accesser is unused; its formal type is unverified.
     virtual void updatePosCling(soModuleAccesser* moduleAccesser); // vtable +0x30
     // HYPOTHESIS: this unused slot has an unverified signature.
-    virtual void unk34();                                         // vtable +0x34
+    virtual void updateLRCling();                                         // vtable +0x34
     // HYPOTHESIS: clingCut's zero argument is a Boolean selector.
     virtual void clingCut(bool);                                  // vtable +0x38
     virtual bool checkDamage(soModuleAccesser* moduleAccesser, void* data); // vtable +0x3C
