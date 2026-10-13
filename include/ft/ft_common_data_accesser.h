@@ -6,29 +6,30 @@
 #include <so/so_common_data_accesser.h>
 #include <types.h>
 
+// One (action id, command list) pair; the table ends at the first negative id (see soAnimCmdControlUnitBuilderDisguise::setupDisguiseList).
 struct soAnimCmdDisguiseList {
-    s32 unk0;
-    void* unk4;
+    s32 actionId;
+    void* commandList;
 };
 
 struct ftData {
     ftMotionData* motionData;
     ftVisibilityData* visibilityData;
-    u8 unk8[0xC];
+    u8 unk8[0xC]; // HYPOTHESIS: possibly the attribute, SSE attribute and misc-section pointers (matches the moveset header order at 0x8/0xC/0x10)
     ftStatusData* statusData;
     void* uniqStatusData; // 0x18: character-specific soStatusData table, UniqueStatusCount entries
-    u8 unk1C[8];
+    u8 unk1C[8]; // HYPOTHESIS: possibly the unknown-7 table and the action interrupt table pointers (0x1C/0x20 in the moveset header order)
     void* uniqActionEntryScripts; // 0x24: per-status entry anim-cmd table that follows the common one
     void* uniqActionExitScripts; // 0x28: per-status exit anim-cmd table that follows the common one
     ftPreCheckAnimCmdData* preCheckAnimCmdData;
-    void* unk30;
-    void* unk34;
-    void* unk38;
-    void* unk3C;
-    u8 unk40[0x10];
-    soAnimCmdDisguiseList* unk50;
-    soAnimCmdDisguiseList* unk54;
-    u8 unk58[0x24];
+    void* subactionMainScripts;  // 0x30: anim-cmd threads 1 and 5 (see ftFighterBuildData::getAnimCmdData)
+    void* subactionGfxScripts;   // 0x34: threads 2 and 6
+    void* subactionSfxScripts;   // 0x38: threads 3 and 7
+    void* subactionOtherScripts; // 0x3C: threads 4 and 8
+    u8 unk40[0x10]; // HYPOTHESIS: possibly two bone-float tables and two bone-reference tables (0x40..0x4C in the moveset header order)
+    soAnimCmdDisguiseList* entryActionOverrides; // 0x50: per-action replacement entry scripts
+    soAnimCmdDisguiseList* exitActionOverrides;  // 0x54: per-action replacement exit scripts
+    u8 unk58[0x24]; // HYPOTHESIS: possibly unknown-22, bone floats 3, unknown-24, static articles, entry article, two unknowns and two flag words (0x58..0x78 in the moveset header order)
     void* extendParam[6];
 };
 
