@@ -9,6 +9,8 @@
 #include <wn/wn_kinetic_energy_gravity.h>
 #include <wn/wn_kinetic_transactor.h>
 
+extern const float lbl_115_rodata_E8;
+
 void wnDiddyBarrelKineticTransactor::addSpeed(
     void*, void*, soModuleAccesser*) {
 }
@@ -24,12 +26,12 @@ void wnDiddyBarrelKineticTransactor::addSpeedOutside(
     case soKineticEnergy::Outside_Wind: {
         soKineticEnergyWindNormal* wind =
             reinterpret_cast<soKineticEnergyWindNormal*>(poolBytes + 0xEC);
-        Vec2f delta(0.0f, 0.0f);
-        Vec2f brake(0.0f, 0.0f);
+        Vec2f delta(lbl_115_rodata_E8, lbl_115_rodata_E8);
+        Vec2f brake(lbl_115_rodata_E8, lbl_115_rodata_E8);
         delta.m_x = speed->m_x;
         delta.m_y += speed->m_y;
         brake.m_x = paramAccesser->getParamFloat(moduleAccesser, 0xFA9, 0);
-        if (delta.m_x != 0.0f || delta.m_y != 0.0f) {
+        if (lbl_115_rodata_E8 != delta.m_x || lbl_115_rodata_E8 != delta.m_y) {
             volatile u8 unkA = 0; // MATCH-ONLY: native clears this unused local byte before the pool updates.
             // HYPOTHESIS: native treats these unknown pool words as floats.
             float* unk120 = reinterpret_cast<float*>(poolBytes + 0x120);
@@ -45,7 +47,7 @@ void wnDiddyBarrelKineticTransactor::addSpeedOutside(
     }
 
     case soKineticEnergy::Outside_Attack: {
-        Vec2f speedToAdd(0.0f, 0.0f);
+        Vec2f speedToAdd(lbl_115_rodata_E8, lbl_115_rodata_E8);
         SituationKind situation = moduleAccesser->getSituationModule().getKind();
         switch (situation) {
         case Situation_Ground:
@@ -57,16 +59,16 @@ void wnDiddyBarrelKineticTransactor::addSpeedOutside(
             break;
         }
 
-        if (speedToAdd.m_x != 0.0f) {
+        if (lbl_115_rodata_E8 != speedToAdd.m_x) {
             volatile u8 unk9 = 0; // MATCH-ONLY: native clears this unused local byte before the speed query.
             soKineticEnergyNormal* normal =
                 reinterpret_cast<soKineticEnergyNormal*>(poolBytes + 0x10);
-            Vec2f combined(speed->m_x + normal->getSpeed().m_x, 0.0f);
+            Vec2f combined(speed->m_x + normal->getSpeed().m_x, lbl_115_rodata_E8);
             normal->m_speed = combined;
             normal->enable();
         }
 
-        if (speedToAdd.m_y != 0.0f) {
+        if (lbl_115_rodata_E8 != speedToAdd.m_y) {
             volatile u8 unk8 = 0; // MATCH-ONLY: native clears this unused local byte before the speed query.
             wnKineticEnergyGravity* gravity =
                 reinterpret_cast<wnKineticEnergyGravity*>(poolBytes + 0x50);
@@ -115,7 +117,7 @@ void wnDiddyBarrelKineticTransactor::changeKineticSub(
         moduleAccesser->getWorkManageModule().getParamAccesser());
     volatile u8 unk9 = 0; // MATCH-ONLY: native clears this unused local byte before the first work query.
     Vec2f initialSpeed(
-        moduleAccesser->getWorkManageModule().getFloat(0x21000004), 0.0f);
+        moduleAccesser->getWorkManageModule().getFloat(0x21000004), lbl_115_rodata_E8);
     normal->m_speed = initialSpeed;
     normal->enable();
     volatile u8 unk8 = 0; // MATCH-ONLY: native clears this unused local byte before the second work query.
