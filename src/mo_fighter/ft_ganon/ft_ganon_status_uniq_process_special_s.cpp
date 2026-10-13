@@ -1,3 +1,4 @@
+#define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <ft/fighter.h>
 #include <ft/ft_kinetic_energy.h>
 #include <so/catch/so_catch_module.h>
@@ -12,7 +13,7 @@
 #include <types.h>
 
 // HYPOTHESIS: this translation unit holds Ganondorf's special-S (Flame Choke) and air special-S status processes. The
-// bodies are reconstructed except SpecialSCatch::execFixPos; the work ids are unnamed, see the comments per use.
+// work ids are unnamed where their meaning is unresolved; see the comments per use.
 
 // HYPOTHESIS: link event the grab sends to its victim; the second payload word picks the victim's catched status.
 struct ftGanonSpecialSLinkEvent : soLinkEventArgs {
@@ -107,15 +108,7 @@ void ftGanonStatusUniqProcessSpecialS::exitStatus(soModuleAccesser* moduleAccess
         Vec2f speed;
         Vec2f::copy(speed, energy.getSpeed());
         float scale = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa5, 0);
-        {
-            Vec2f scaled;
-            scaled.m_x = speed.m_x * scale;
-            scaled.m_y = speed.m_y * scale;
-            Vec2f copy;
-            Vec2f::copy(copy, scaled);
-            energy.m_speed.m_x = copy.m_x;
-            energy.m_speed.m_y = copy.m_y;
-        }
+        energy.m_speed = speed * scale;
         break;
     }
     case 0x119:

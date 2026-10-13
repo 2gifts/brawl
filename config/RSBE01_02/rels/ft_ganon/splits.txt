@@ -14,9 +14,6 @@ global_destructor_chain.c:
 mo_fighter/ft_ganon/ft_ganon.cpp:
 	.text       start:0x00000070 end:0x0000C018
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x00000064
-	.data       start:0x00000000 end:0x00007420
-	.bss        start:0x00000008 end:0x000002E0
 
 mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_hi_cling.cpp:
 	.text       start:0x0000C2F4 end:0x0000C46C
@@ -29,6 +26,9 @@ mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_hi_throw.cpp:
 mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_s.cpp:
 	.text       start:0x0000C610 end:0x0000D384
 	.ctors      start:0x0000000C end:0x00000010
+	.rodata     start:0x00000018 end:0x00000020
+	.data       start:0x00006288 end:0x00006588
+	.bss        start:0x00000158 end:0x000001A8
 
 mo_fighter/ft_ganon/ft_ganon_status_uniq_process_ganon_kick.cpp:
 	.text       start:0x0000D384 end:0x0000DA60

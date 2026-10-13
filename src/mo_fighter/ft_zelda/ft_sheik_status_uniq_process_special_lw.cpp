@@ -28,7 +28,8 @@ void ftSheikStatusUniqProcessSpecialLw::initStatus(soModuleAccesser* moduleAcces
         kinetic.clearSpeedAll();
         sumSpeed.m_x = sumSpeed.m_x / divisor[0];
         Vec2f speed(sumSpeed.m_x, 0.0f);
-        Vec2f::copy(stop.m_speed, speed);
+        stop.m_speed.m_x = speed.m_x;
+        stop.m_speed.m_y = speed.m_y;
         stop.enable();
         if (situation.getKind() != 0) {
             sumSpeed.m_y = sumSpeed.m_y / divisor[1];
