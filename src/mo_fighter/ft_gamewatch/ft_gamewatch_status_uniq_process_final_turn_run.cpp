@@ -1,19 +1,16 @@
 #include <ft/ft_common_data_accesser.h>
+#include <ft/gamewatch/ft_gamewatch_status_uniq_process_final_swim.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
 
 extern "C" {
-// HYPOTHESIS: status-entry helper called with (this, moduleAccesser) at the end of initStatus (REL-local, unnamed)
-void fn_107_141A0(void* self, soModuleAccesser* moduleAccesser);
-// HYPOTHESIS: status-end helper called with (this, moduleAccesser) at the end of execStatus (REL-local, unnamed)
-void fn_107_14328(void* self, soModuleAccesser* moduleAccesser);
 // HYPOTHESIS: float constants from lbl_107_rodata_A0 (values not recovered; read through the symbol)
 extern float lbl_107_rodata_A0[];
 }
 
-class ftGameWatchStatusUniqProcessFinalTurnRun : public soStatusUniqProcess {
+class ftGameWatchStatusUniqProcessFinalTurnRun : public ftGameWatchStatusUniqProcessFinalSwim {
 public:
     virtual ~ftGameWatchStatusUniqProcessFinalTurnRun() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
@@ -29,7 +26,7 @@ void ftGameWatchStatusUniqProcessFinalTurnRun::initStatus(soModuleAccesser* modu
     workManage.setFloat(soValueAccesser::getConstantFloat(moduleAccesser, 0xc3b, 0), 0x21000004);
     workManage.offFlag(0x22000010);
     workManage.setInt(*reinterpret_cast<int*>(table + 0x28), 0x20000000);
-    fn_107_141A0(this, moduleAccesser);
+    ftGameWatchStatusUniqProcessFinalSwim::initStatus(moduleAccesser);
 }
 
 void ftGameWatchStatusUniqProcessFinalTurnRun::execStatus(soModuleAccesser* moduleAccesser) {}
