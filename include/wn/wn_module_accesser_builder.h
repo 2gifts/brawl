@@ -81,8 +81,8 @@ public:
     ~soArraySelectHolder() { }
     soArrayVector<soStatusUniqProcess*, 1>* get() { return &m_array; }
 };
-#ifdef WN_EXPLOSION_BUILDERS
-// Explosion uses the singleton null-array type in its owning status holder.
+#ifdef WN_ARTICLE_NATIVE_BUILDERS
+// These article builders use the singleton null-array type in their status holder.
 template <>
 class soArraySelectHolder<1, soArrayVector<soStatusUniqProcess*, 1>, soSingletonHolder<soArrayNull<soStatusUniqProcess*> > > {
 public:
@@ -163,7 +163,7 @@ FT_DOL_POLY_BEGIN(soShakeModuleSimple, 0x8);
     soShakeModuleSimple(soModuleAccesser* acc, soArray<soShakeTerm>* terms, void* shakeData);
 FT_DOL_POLY_END;
 // The weapon kinetic module (soKineticModuleImpl plus a status observer; constructed in sora_melee).
-#ifdef WN_EXPLOSION_BUILDERS
+#ifdef WN_ARTICLE_NATIVE_BUILDERS
 #include <so/kinetic/so_kinetic_module_impl.h>
 class wnKineticModuleImpl : public soKineticModuleImpl, public soStatusEventObserver {
     // HYPOTHESIS: meaning unresolved; the constructor initializes this word to -1.
