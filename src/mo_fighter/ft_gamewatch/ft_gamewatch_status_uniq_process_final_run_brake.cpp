@@ -7,19 +7,13 @@
 #include <math.h>
 #include <types.h>
 
-// HYPOTHESIS: run parameter block pointer stored at ftData+0xB8; float at +0x20 is the brake start value.
+// HYPOTHESIS: run parameter block pointer stored at ftData+0xB8; float at +0x20 initializes brake work.
 struct ftGameWatchRunBrakeParam {
     u8 unk0[0x20];
-    float m_20;
+    float unk20;
 };
 
-// HYPOTHESIS: base status class of the final statuses (its methods are defined in the FinalSwim unit).
-class ftGameWatchStatusUniqProcessFinalSwim : public soStatusUniqProcess {
-public:
-    virtual ~ftGameWatchStatusUniqProcessFinalSwim() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-};
+#include <ft/gamewatch/ft_gamewatch_status_uniq_process_final_swim.h>
 
 class ftGameWatchStatusUniqProcessFinalRunBrake : public ftGameWatchStatusUniqProcessFinalSwim {
 public:
@@ -30,14 +24,16 @@ public:
 
 ftGameWatchStatusUniqProcessFinalRunBrake g_ftGameWatchStatusUniqProcessFinalRunBrake;
 
-// HYPOTHESIS: constants from lbl_107_rodata_90 and lbl_107_rodata_94 (values not verified).
-static const float s_brakeRateHigh = 1.0f;
-static const float s_brakeRateLow = 2.0f;
+// Native rodata values select the two motion phases and advance the brake timer.
+static const float s_brakeMotionStartRate = 0.0f;
+static const float s_brakeMotionFinishRate = 1.0f;
 
 void ftGameWatchStatusUniqProcessFinalRunBrake::initStatus(soModuleAccesser* moduleAccesser) {
-    ftGameWatchRunBrakeParam* param = *reinterpret_cast<ftGameWatchRunBrakeParam**>(
-        reinterpret_cast<u8*>(g_ftCommonDataAccesser.getData(Fighter_GameWatch)) + 0xB8);
-    moduleAccesser->getWorkManageModule().setFloat(param->m_20, 0x21000006);
+    ftGameWatchRunBrakeParam* param =
+        *reinterpret_cast<ftGameWatchRunBrakeParam**>(
+            reinterpret_cast<u8*>(g_ftCommonDataAccesser.getData(Fighter_GameWatch)) + 0xB8);
+    float countdown = param->unk20;
+    moduleAccesser->getWorkManageModule().setFloat(countdown, 0x21000006);
     moduleAccesser->getWorkManageModule().offFlag(0x22000010);
     moduleAccesser->getWorkManageModule().offFlag(0x22000011);
     moduleAccesser->getWorkManageModule().onFlag(0x22000012);
@@ -46,22 +42,24 @@ void ftGameWatchStatusUniqProcessFinalRunBrake::initStatus(soModuleAccesser* mod
 
 void ftGameWatchStatusUniqProcessFinalRunBrake::execStatus(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000010) == 1) {
-        float limit = soValueAccesser::getConstantFloat(moduleAccesser, 0xC39, 0);
-        float speedX = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1)).m_x;
+        float speedLimit = soValueAccesser::getConstantFloat(moduleAccesser, 0xc39, 0);
+        float speedX = moduleAccesser->getKineticModule()
+                           .getSumSpeed(soKineticEnergy::AttributeFlag(1)).m_x;
+
         if (!moduleAccesser->getWorkManageModule().isFlag(0x22000011)) {
-            if (fabs(speedX) >= limit) {
-                moduleAccesser->getMotionModule().setRate(s_brakeRateHigh);
+            if (static_cast<float>(fabs(speedX)) >= speedLimit) {
+                moduleAccesser->getMotionModule().setRate(s_brakeMotionStartRate);
                 moduleAccesser->getWorkManageModule().onFlag(0x22000011);
             }
-        } else {
-            if (fabs(speedX) <= limit) {
-                moduleAccesser->getMotionModule().setRate(s_brakeRateLow);
-                moduleAccesser->getWorkManageModule().offFlag(0x22000010);
-            }
+        } else if (static_cast<float>(fabs(speedX)) <= speedLimit) {
+            moduleAccesser->getMotionModule().setRate(s_brakeMotionFinishRate);
+            moduleAccesser->getWorkManageModule().offFlag(0x22000010);
         }
     }
-    if (moduleAccesser->getWorkManageModule().getFloat(0x21000006) > s_brakeRateHigh) {
-        moduleAccesser->getWorkManageModule().subFloat(s_brakeRateLow, 0x21000006);
+
+    // Advance the countdown only while it is positive.
+    if (moduleAccesser->getWorkManageModule().getFloat(0x21000006) > s_brakeMotionStartRate) {
+        moduleAccesser->getWorkManageModule().subFloat(s_brakeMotionFinishRate, 0x21000006);
     }
     ftGameWatchStatusUniqProcessFinalSwim::execStatus(moduleAccesser);
 }

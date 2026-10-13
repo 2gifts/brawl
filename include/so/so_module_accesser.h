@@ -39,6 +39,7 @@
 #include <types.h>
 
 class StageObject;
+class soGenerateArticleManageModule;
 
 class soModuleEnumeration {
 public:
@@ -404,6 +405,10 @@ public:
     soEventManageModule& getEventManageModule() const
     {
         return *m_enumerationStart->m_eventManageModule;
+    }
+
+    soGenerateArticleManageModule& getGenerateArticleManageModule() const {
+        return *static_cast<soGenerateArticleManageModule*>(m_enumerationStart->m_generateArticleManageModule);
     }
 
     soEffectModule& getEffectModule() const {

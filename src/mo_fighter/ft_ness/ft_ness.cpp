@@ -1,7 +1,7 @@
 #include <math.h>
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
-#include <ft/ness/ft_ness.h>
+#include <ft/ness/ft_ness_builder.h>
 #include <ft/ness/ft_ness_extend_param_accesser.h>
 
 #define FT_NO_REFLECTOR_INSTANTIATION
@@ -27,6 +27,10 @@ ftNess::ftNess(s32 entryId,
                                          nwModelInstHeap,
                                          nwMotionInstHeap) {
     // TODO
+}
+
+void** ftNess::getExtendParam() {
+    return m_data->extendParam;
 }
 
 void ftNess::processUpdate() {

@@ -9,18 +9,12 @@
 // HYPOTHESIS: run parameter block pointer stored at ftData+0xB8; floats at +0x14, +0x18 and +0x1C.
 struct ftGameWatchRunParam {
     u8 unk0[0x14];
-    float m_14;
-    float m_18;
-    float m_1C;
+    float unk14;
+    float unk18;
+    float unk1C;
 };
 
-// HYPOTHESIS: base status class of the final statuses (its methods are defined in the FinalSwim unit).
-class ftGameWatchStatusUniqProcessFinalSwim : public soStatusUniqProcess {
-public:
-    virtual ~ftGameWatchStatusUniqProcessFinalSwim() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-};
+#include <ft/gamewatch/ft_gamewatch_status_uniq_process_final_swim.h>
 
 class ftGameWatchStatusUniqProcessFinalRun : public ftGameWatchStatusUniqProcessFinalSwim {
 public:
@@ -32,13 +26,18 @@ public:
 
 ftGameWatchStatusUniqProcessFinalRun g_ftGameWatchStatusUniqProcessFinalRun;
 
-// HYPOTHESIS: constants from lbl_107_rodata_88 and lbl_107_rodata_8C (values not verified).
-static const float s_runSpeedMax = 1.0f;
-static const float s_runThreshold = 0.5f;
+// Native movement multiplier and countdown threshold.
+static const float s_runSpeedMul = 1.0f;
+static const float s_runCountdownThreshold = 0.0f;
 
-// Shared sora_melee helpers, called by their fn_27 names (signatures inferred from the call sites).
-extern "C" void fn_27_1652A8(soModuleAccesser* moduleAccesser, int, float, u32, float, u32, int);
-extern "C" void fn_27_165458(soModuleAccesser* moduleAccesser, u32, float, float, float, float, float, float);
+// HYPOTHESIS: helper parameter names and formal source types/order; native GP/FP argument values are verified.
+// The shared walk utility initializes and updates the final movement speed.
+extern "C" void fn_27_1652A8(soModuleAccesser* moduleAccesser, int motionKind,
+                             int speedWork, int rateWork, int flags,
+                             float parameter, float speedScale);
+extern "C" void fn_27_165458(soModuleAccesser* moduleAccesser, int speedWork, float current,
+                             float target, float acceleration, float deceleration,
+                             float speedScale, float speedLimit);
 
 static ftGameWatchRunParam* getRunParam() {
     ftData* data = g_ftCommonDataAccesser.getData(Fighter_GameWatch);
@@ -47,7 +46,9 @@ static ftGameWatchRunParam* getRunParam() {
 
 void ftGameWatchStatusUniqProcessFinalRun::initStatus(soModuleAccesser* moduleAccesser) {
     ftGameWatchRunParam* param = getRunParam();
-    fn_27_1652A8(moduleAccesser, 0x1f7, param->m_1C, 0x21000005, s_runSpeedMax, 0x21000007, 0);
+    float motionSpeed = param->unk1C;
+    fn_27_1652A8(moduleAccesser, 0x1f7, 0x21000005, 0x21000007,
+                 0, motionSpeed, s_runSpeedMul);
     setMotionRate(moduleAccesser);
     ftGameWatchStatusUniqProcessFinalSwim::initStatus(moduleAccesser);
 }
@@ -55,18 +56,25 @@ void ftGameWatchStatusUniqProcessFinalRun::initStatus(soModuleAccesser* moduleAc
 void ftGameWatchStatusUniqProcessFinalRun::execStatus(soModuleAccesser* moduleAccesser) {
     ftGameWatchRunParam* param = getRunParam();
     soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
-    float constant = soValueAccesser::getConstantFloat(moduleAccesser, 0xc37, 0);
-    float value = workManage.getFloat(0x21000005);
-    fn_27_165458(moduleAccesser, 0x21000005, value, param->m_1C, param->m_14, param->m_18, constant, s_runSpeedMax);
+    float speedScale = soValueAccesser::getConstantFloat(moduleAccesser, 0xc37, 0);
+    float current = workManage.getFloat(0x21000005);
+
+    fn_27_165458(moduleAccesser, 0x21000005, current, param->unk1C,
+                 param->unk14, param->unk18, speedScale, s_runSpeedMul);
     setMotionRate(moduleAccesser);
-    if (workManage.getFloat(0x21000004) > s_runThreshold) {
-        workManage.subFloat(s_runSpeedMax, 0x21000004);
+
+    // Advance the countdown only while it is positive.
+    if (moduleAccesser->getWorkManageModule().getFloat(0x21000004) > s_runCountdownThreshold) {
+        moduleAccesser->getWorkManageModule().subFloat(s_runSpeedMul, 0x21000004);
     }
     ftGameWatchStatusUniqProcessFinalSwim::execStatus(moduleAccesser);
 }
 
 void ftGameWatchStatusUniqProcessFinalRun::setMotionRate(soModuleAccesser* moduleAccesser) {
-    float speed = fabs(moduleAccesser->getWorkManageModule().getFloat(0x21000005));
+    soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
+    float speed = workManage.getFloat(0x21000005);
+    speed = fabs(speed);
     float rate = moduleAccesser->getWorkManageModule().getFloat(0x21000007);
-    moduleAccesser->getMotionModule().setRate(speed * rate);
+    rate = speed * rate;
+    moduleAccesser->getMotionModule().setRate(rate);
 }
