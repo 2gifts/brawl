@@ -77,6 +77,7 @@ struct ftCommonData {
 };
 
 struct wnSimpleData;
+struct wnGameWatchNormalWeaponData;
 
 class ftCommonDataAccesser {
 public:
@@ -85,6 +86,8 @@ public:
     ftData* getData(ftKind kind) const;
     ftParam* getParam(ftKind kind) const;
     ftParam* getParamCommon() const;
+    // HYPOTHESIS: const qualification; native pointer ABI and getter identity are verified.
+    const wnGameWatchNormalWeaponData* getGameWatchNormalWeaponData() const;
 };
 
 extern ftCommonData g_ftCommonData;

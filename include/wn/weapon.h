@@ -38,6 +38,8 @@ public:
     Weapon(const char* name, s32 subKind, const void* data, s32 articleId, const void* kindInfo,
            soModuleAccesser* moduleAccesser, int unkA4Bits);
     void activate(wnActivateDesc* desc);
+    // Map-named helper; -1 is the sentinel for each unresolved constraint argument.
+    void constraint(int taskId, int unk1, int unk2);
     // HYPOTHESIS: relative source order of rate/index; f1/f2/r4 ABI verified.
     void setHitStop(float power, float rate, int index);
     void setGroundShapeSafePosWithAncestor();
