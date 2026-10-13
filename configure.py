@@ -1689,7 +1689,7 @@ config.libs = [
         "cflags": cflags_fighter,
         "host": False,
         "objects": [
-            Object(NonMatching, "mo_fighter/ft_diddy/wn_diddy_barrel_kinetic_transactor.cpp"),
+            Object(Matching, "mo_fighter/ft_diddy/wn_diddy_barrel_kinetic_transactor.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/wn_diddy_barrel.cpp"),
             Object(Matching, "mo_fighter/ft_diddy/wn_diddy_barrel_damage_transactor_impl.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/wn_diddy_explosion.cpp"),

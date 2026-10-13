@@ -1,4 +1,5 @@
 #define WN_WEAPON_BUILDER
+#define WN_OIL_EXTERNAL_ARRAYS
 #define WN_ARTICLE_ANIMCMD_INT
 #define FT_REL_LINK_EXTERN
 #define MT_VEC3F_CTOR_NOINLINE
@@ -49,7 +50,7 @@ void wnGameWatchOil::activate(int founderTaskId, int resourceId, int team, float
     desc.flagsMidPair = 0;
     desc.flagsBit3 = 1;
     desc.flagsLow = 0;
-    desc.unk4D = (desc.unk4D & 0x3F) | 0x40;
+    desc.unk4DHigh = 1;
     Weapon::activate(&desc);
 
     if (m_moduleAccesser->getModelModule().isRefFB())

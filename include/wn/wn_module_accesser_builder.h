@@ -45,6 +45,46 @@ FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 2);
 FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soAnimCmdControlUnit>, 6);
 FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soKineticEnergy*>, 8);
 
+#ifdef WN_OIL_EXTERNAL_ARRAYS
+// Oil calls these sora_melee-owned constructors and virtual methods.
+FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 1);
+// The status pointer vector uses the no-argument constructor, not the size overload.
+template <>
+class soArrayVector<soStatusUniqProcess*, 1> : public soArrayVectorAbstract<soStatusUniqProcess*> {
+    s32 m_topIndex : sizeof(bit_width<1>) + 1;
+    s32 m_lastIndex : sizeof(bit_width<1>) + 1;
+    s32 m_size : sizeof(bit_width<1>) + 1;
+    u32 m_isFull : 1;
+    soStatusUniqProcess* m_elements[1];
+public:
+    soArrayVector();
+    virtual s32 size() const;
+    virtual ~soArrayVector();
+    virtual s32 capacity() const;
+    virtual bool isFull() const;
+    virtual soStatusUniqProcess*& atFastAbstractSub(s32 index) const;
+    virtual soStatusUniqProcess*& getArrayValueConst(s32 index);
+    virtual s32 getTopIndex() const;
+    virtual s32 getLastIndex() const;
+    virtual void setSize(s32 size);
+    virtual void setTopIndex(s32 topIndex);
+    virtual void setLastIndex(s32 lastIndex);
+    virtual void onFull();
+    virtual void offFull();
+};
+// Its owning status holder also default-constructs the vector without a size argument.
+template <>
+class soArraySelectHolder<1, soArrayVector<soStatusUniqProcess*, 1>, soArrayNull<soStatusUniqProcess*> > {
+public:
+    soArrayVector<soStatusUniqProcess*, 1> m_array;
+    soArraySelectHolder() : m_array() { }
+    ~soArraySelectHolder() { }
+    soArrayVector<soStatusUniqProcess*, 1>* get() { return &m_array; }
+};
+static_assert(sizeof(soArrayVector<soCollisionAttackPart, 1>) == 0x9C, "Oil attack part vector size");
+static_assert(sizeof(soArrayVector<soStatusUniqProcess*, 1>) == 0x10, "Oil status pointer vector size");
+#endif
+
 // The null arrays (soArrayNull<T>) are sora_melee instances: with WN_WEAPON_BUILDER so/so_array.h declares their
 // constructor and destructor only.
 
