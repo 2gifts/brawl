@@ -4,8 +4,8 @@
 #include <so/controller/so_controller_impl.h>
 #include <types.h>
 
-// Pit's Silver Bow revolve (special S): the angle accumulates from the stick and the arm node follows it.
-// HYPOTHESIS: work floats 0x21000004 (node angle) and 0x21000005 (angle step); node 0x48 is the bow arm.
+// The revolving side-special animation accumulates rotation from its per-frame step.
+// HYPOTHESIS: work floats 0x21000004 (node angle) and 0x21000005 (angle step); node 0x48 receives the rotation.
 class ftPitStatusUniqProcessSpecialSRevolve : public soStatusUniqProcess {
 public:
     virtual ~ftPitStatusUniqProcessSpecialSRevolve() { }
@@ -33,7 +33,7 @@ void ftPitStatusUniqProcessSpecialSRevolve::execStatus(soModuleAccesser* moduleA
     }
     step -= soValueAccesser::getConstantFloat(moduleAccesser, 0xfa4, 0);
     float threshold = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa8, 0);
-    if (!(step <= threshold)) {
+    if (step <= threshold) {
         moduleAccesser->getStatusModule().changeStatusRequest(0x11c, moduleAccesser);
         return;
     }
