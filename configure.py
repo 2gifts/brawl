@@ -6330,6 +6330,8 @@ config.libs = [
             Object(NonMatching, "mo_menu/mu_proc_menu.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_rule1.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_rule2.cpp"),
+            Object(NonMatching, "mo_menu/mu_proc_item_switch.cpp"),
+            Object(NonMatching, "mo_menu/mu_proc_stage_switch.cpp"),
         ],
     },
     {
