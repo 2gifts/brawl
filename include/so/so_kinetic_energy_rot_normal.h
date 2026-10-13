@@ -23,7 +23,11 @@ public:
     virtual void mulAccel(Vec3f*);
     virtual void reflectSpeed(Vec3f*);
     virtual void reflectAccel(Vec3f*);
+#ifdef WN_EXPLOSION_BUILDERS
+    virtual ~soKineticEnergyRotNormal() { }
+#else
     virtual ~soKineticEnergyRotNormal();
+#endif
     // HYPOTHESIS: argument spelling remains unresolved for this unused empty
     // callback; its additional virtual slot is proved by the concrete table.
     virtual void projectionNormalFollow();
