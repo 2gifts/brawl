@@ -179,6 +179,9 @@ public:
 struct soCollisionShieldModuleBuildConfigNull { };
 struct soCollisionReflectorModuleBuildConfigNull { };
 struct soCollisionCatchModuleBuildConfigNull { };
+struct soGroundModuleBuildConfigNull { }; // HYPOTHESIS: source spelling of the null configuration.
+struct soCollisionHitModuleBuildConfigNull { }; // HYPOTHESIS: source spelling of the null configuration.
+struct soDamageModuleBuildConfigNull { }; // HYPOTHESIS: source spelling of the null configuration.
 struct soCatchModuleBuildConfigNull { };
 struct soCaptureModuleBuildConfigNull { };
 struct soTurnModuleBuildConfigNull { };
@@ -223,6 +226,31 @@ public:
     soCollisionCatchModuleBuilder(soModuleAccesser*, int, gfTask::Category, soEventObserverRegistrationDesc*) { }
     void* getModule() { return lbl_27_bss_3BC; }
 };
+// These shared instances are selected directly by the article enumeration.
+extern char lbl_27_bss_344[];
+extern char lbl_27_bss_398[];
+template <>
+class soGroundModuleBuilder<soGroundModuleBuildConfigNull> {
+public:
+    soGroundModuleBuilder(soModuleAccesser*, soGroundConditionChecker*) { }
+    soGroundModule* getModule() { return (soGroundModule*)lbl_27_bss_344; }
+};
+template <>
+class soCollisionHitModuleBuilder<soCollisionHitModuleBuildConfigNull> {
+public:
+    soCollisionHitModuleBuilder(soModuleAccesser*, int, gfTask::Category, soEventObserverRegistrationDesc*) { }
+    soCollisionHitModule* getModule() { return (soCollisionHitModule*)lbl_27_bss_398; }
+};
+
+// Oil's module enumeration selects the shared null damage instance.
+extern char lbl_27_bss_3DC[];
+template <>
+class soDamageModuleBuilder<soDamageModuleBuildConfigNull> {
+public:
+    soDamageModuleBuilder(soModuleAccesser*, soEventObserverRegistrationDesc*) { }
+    soDamageModule* getModule() { return (soDamageModule*)lbl_27_bss_3DC; }
+};
+
 template <>
 class soCatchModuleBuilder<soCatchModuleBuildConfigNull> {
 public:
@@ -350,6 +378,34 @@ public:
     soMotionModule* getModule() { return &m_module; }
 };
 
+// Articles with one other-animation slot still use the shared null cache.
+template <u32 DataNum, typename T, typename TransitionConfig>
+class soMotionModuleBuilder<soMotionModuleBuildConfig<DataNum, T, 0, 1, TransitionConfig,
+                                                      soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> > > {
+    soTransitionModuleBuilder<TransitionConfig> m_transitionBuilder;
+    soSingletonHolder<soArrayNull<soPartialAnim> > m_partialAnims;
+    soArrayVector<soOtherAnim, 1> m_otherAnims;
+    soSingletonHolder<soArrayNull<soTransitionTermPack> > m_termPacks;
+    soSingletonHolder<soArrayNull<u32> > m_u32s;
+    soArrayContractibleTable<soMotionDataConst> m_motionData;
+    soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> m_cache;
+    T m_module;
+public:
+    soMotionModuleBuilder(soModuleAccesser* acc, void* motionData) :
+        m_transitionBuilder(), m_otherAnims(1, 0),
+        m_motionData((const soMotionData*)motionData, DataNum),
+        m_module(acc, &m_motionData, m_transitionBuilder.getModule(),
+                 soSingletonHolder<soArrayNull<soPartialAnim> >::getInstance(), &m_otherAnims,
+                 (soArray<soTransitionTermPack>*)lbl_27_bss_9BC,
+                 soSingletonHolder<soArrayNull<u32> >::getInstance(),
+                 static_cast<soEventManager&>(acc->getEventManageModule()).getManageId(), false,
+                 (soMotionAnimObjCacheModule*)lbl_27_bss_DBC) {
+        acc->getModelModule().isNull();
+    }
+    ~soMotionModuleBuilder() { }
+    soMotionModule* getModule() { return &m_module; }
+};
+
 // Model without virtual nodes: see so/so_module_accesser_builder.h.
 
 
@@ -455,6 +511,7 @@ public:
     typedef TransitionConfig TransitionBuildConfig;
 };
 
+// The article selection constructs its module with an unassigned blend index.
 // Kinetic module of an article: the weapon kinetic module, eight energies, the given mediator.
 template <typename M>
 class soKineticModuleBuilder<soKineticModuleBuildConfigMediator<wnKineticModuleImpl, M> > {
@@ -492,6 +549,17 @@ public:
         m_effectModule(acc, this->get(), nodeData, &m_u32s, soSingletonHolder<soArrayNull<soEffectTime> >::getInstance(), emitData,
                        regDesc, commonData, -1, screenData, m_screens.get()) { }
     T* getModule() { return &m_effectModule; }
+};
+
+// The Oil article selects the shared null Glow instance in its enumeration.
+// HYPOTHESIS: the null build-config spelling is not preserved in module RTTI.
+struct soGlowModuleBuildConfigNull { };
+extern char lbl_27_bss_6E8[];
+template <>
+class soGlowModuleBuilder<soGlowModuleBuildConfigNull> {
+public:
+    soGlowModuleBuilder(soModuleAccesser*) { }
+    void* getModule() { return lbl_27_bss_6E8; }
 };
 
 // Slow / reflect / glow of an article.

@@ -62,13 +62,21 @@ mo_fighter/ft_diddy/ft_diddy_status_uniq_process_final.cpp:
 	.text       start:0x00011468 end:0x00013100
 	.ctors      start:0x00000030 end:0x00000034
 
+mo_fighter/ft_diddy/wn_diddy_barrel_kinetic_transactor.cpp:
+	.text       start:0x00013100 end:0x00013524
+
 mo_fighter/ft_diddy/wn_diddy_barrel.cpp:
 	.text       start:0x00013524 end:0x0001925C
 	.ctors      start:0x00000034 end:0x00000038
 
 mo_fighter/ft_diddy/wn_diddy_explosion.cpp:
-	.text       start:0x0001925C end:0x0001B98C
+	.text       start:0x0001925C end:0x0001B73C
+
+mo_fighter/ft_diddy/wn_diddy_barrel_damage_transactor_impl.cpp:
+	.text       start:0x0001B73C end:0x0001B99C
+	.data       start:0x0000A858 end:0x0000A958
 	.ctors      start:0x00000038 end:0x0000003C
+	.bss        start:0x00000438 end:0x00000448
 
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x0001B99C end:0x0001BA38

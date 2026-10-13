@@ -40,6 +40,7 @@
 
 class StageObject;
 class soGenerateArticleManageModule;
+class soHeapModule;
 
 class soModuleEnumeration {
 public:
@@ -278,6 +279,10 @@ public:
 
     StageObject& getStageObject() const {
         return *m_stageObject;
+    }
+
+    soHeapModule& getHeapModule() const {
+        return *static_cast<soHeapModule*>(m_enumerationStart->m_heapModule);
     }
 
     soResourceModule& getResourceModule() const {

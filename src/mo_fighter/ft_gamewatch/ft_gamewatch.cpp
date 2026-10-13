@@ -1,3 +1,4 @@
+#include <so/anim/so_anim_obj.h>
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/gamewatch/ft_gamewatch.h>
@@ -35,9 +36,6 @@ void testBuilder() {
 }
 soInsideEventManageModuleBuilder<ftGameWatchInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> g_insideBuilder;
 
-// Module 27 helpers called by onDeactivate (defined elsewhere).
-extern "C" void fn_27_1FF0C(u8* p);
-extern "C" void fn_27_1FFCC(u8* p);
 
 
 // Trivial functions of this translation unit (empty virtuals, constant returns, field accessors) under their placeholder names.
@@ -48,8 +46,8 @@ u8* fn_107_A8C4(u8* p) { return *(u8**)(p + 0x1FDB8) + 0x7C; }
 
 // ftGameWatch::onDeactivate: two sub-object teardown calls on the same member.
 void fn_107_AB10(u8* p) {
-    fn_27_1FF0C(p + 0x1FDBC);
-    fn_27_1FFCC(p + 0x1FDBC);
+    reinterpret_cast<soAnimObj*>(p + 0x1FDBC)->remove();
+    reinterpret_cast<soAnimObj*>(p + 0x1FDBC)->destroy();
 }
 
 u8 fn_107_8720(u8* p) { return *(u8*)(p + 0x4); }

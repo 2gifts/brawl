@@ -45,6 +45,11 @@ public:
     virtual void addObserver(short param1, s8 param2);
 #endif
     virtual bool isObserv(char unk1);
+#ifdef WN_ARTICLE_ANIMCMD_INT
+    // The article tables share this callback with Weapon's int-index method.
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
+#else
     virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+#endif
 };
 static_assert(sizeof(soAnimCmdEventObserver) == 12, "Class is wrong size!");
