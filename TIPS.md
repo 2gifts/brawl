@@ -272,3 +272,5 @@ Things that moved registers, roughly in the order worth trying:
 - **`extrwi r, r0, 8, 19` after `cntlzw` is `(u8)(x == 0)` for a `u8` parameter; an `int` parameter gives `srwi r, r0, 5`.** The callee's parameter type decides, not the cast at the call site. Seen: `ftManager::toChange` second parameter (Wario and Samus call it with a `u8` flag). **MED**
 - **A local ResFile/ResMdl pair that lives in registers until the call, then stack `stw` pairs just before it, is `animObj->create(ResFile(res), ResMdl(mdl), heap, 0)` with temporaries; named stack copies spill the file pointer early.** Seen: `ftWarioCommon::onActivate`. **MED**
 - **A `switch` inside the first `if` arm whose `break`s must reach the shared `return 0` takes `do { if (..) { ... switch ... break; } switch (other) ... } while (0); return false;`; a second `return false` would emit a second `li r3, 0`.** **LOW**
+
+- Check defined literal values even for previously exact shared constructors. The stage-profile `soDamage` constructor initializes fields at 0x60, 0x64 and 0x68 to 1.0f; a 0.0f reconstruction can score exact when anonymous data names are normalized.
