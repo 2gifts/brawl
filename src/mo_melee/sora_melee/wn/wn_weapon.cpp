@@ -1,3 +1,4 @@
+#define SO_EVENT_OBSERVER_MANAGE_S16
 #define MT_VEC3F_MUL_INLINE
 #define WN_ARTICLE_ANIMCMD_INT
 #define SO_ARTICLE_DTOR_INLINE
@@ -15,6 +16,9 @@
 #include <wn/wn_activate_desc.h>
 #include <wn/wn_info.h>
 #include <wn/wn_module_slots.h>
+#include <revolution/OS/OSError.h>
+#include <so/area/so_area_module_impl.h>
+#include <so/article/so_generate_article_manage_module.h>
 
 // The base class of every article: Mario's fireball, Fox's blaster bullet, a Pikmin... A Weapon is a StageObject that owns
 // a module accesser built by the article's builder, registers itself as observer of the status, attack and hit events of
@@ -188,6 +192,13 @@ void Weapon::deactivate(bool treatAsRemoved) {
     StageObject::deactivate(treatAsRemoved);
 }
 
+// HYPOTHESIS: the part of the article data block that initialize reads (names from how the modules use the pointers).
+struct wnWeaponInitData {
+    u8 unk0[0x28];
+    void* groundSetup;                 // +0x28: ground shape data handed to the ground module
+    soSet<soAreaData>* areaSet;        // +0x2C: areas added to the area module
+};
+
 void Weapon::remove() {
     deactivate(false);
 }
@@ -197,25 +208,33 @@ void Weapon::deactivateArticle() {
 }
 
 void Weapon::initialize() {
-    soModuleAccesser* acc = m_moduleAccesser;
-    if (acc->getStatusModule().isNull() == false) {
-        soStatusEventObserver::setupObserver(getEventManageId(acc));
+    if (m_moduleAccesser->getStatusModule().isNull() == false) {
+        soStatusEventObserver::addObserverSubS16(getEventManageId(m_moduleAccesser), &static_cast<soStatusEventObserver&>(*this), -1);
     }
-    if (acc->getAnimCmdModule().getInterpreterNum() > 0) {
-        soAnimCmdEventObserver::setupObserver(getEventManageId(acc));
+    if (m_moduleAccesser->getAnimCmdModule().getInterpreterNum() > 0) {
+        soAnimCmdEventObserver::addObserverSubS16(getEventManageId(m_moduleAccesser), &static_cast<soAnimCmdEventObserver&>(*this), -1);
     }
-    soLinkEventObserver::setupObserver(getEventManageId(acc));
-    if (wnDynamicCast(wnModuleAt(acc, 0x1C), g_wnRttiAttackModule, g_wnRttiNullAttackModule) == NULL) {
-        soCollisionAttackEventObserver::setupObserver(getEventManageId(acc));
+    soLinkEventObserver::addObserverSubS16(getEventManageId(m_moduleAccesser), &static_cast<soLinkEventObserver&>(*this), -1);
+    if (wnDynamicCast(wnModuleAt(m_moduleAccesser, 0x1C), g_wnRttiAttackModule, g_wnRttiNullAttackModule) == NULL) {
+        soCollisionAttackEventObserver::addObserverSubS16(getEventManageId(m_moduleAccesser), &static_cast<soCollisionAttackEventObserver&>(*this), -1);
     }
-    if (wnDynamicCast(wnModuleAt(acc, 0x20), g_wnRttiHitModule, g_wnRttiNullHitModule) == NULL) {
-        soCollisionHitEventObserver::setupObserver(getEventManageId(acc));
+    if (wnDynamicCast(wnModuleAt(m_moduleAccesser, 0x20), g_wnRttiHitModule, g_wnRttiNullHitModule) == NULL) {
+        soCollisionHitEventObserver::addObserverSubS16(getEventManageId(m_moduleAccesser), &static_cast<soCollisionHitEventObserver&>(*this), -1);
     }
-    soEventPresenter<soArticleEventObserver>::setManageId(getEventManageId(acc));
-    // HYPOTHESIS: debug output when the build data names an article animation but the ground module is a null object.
-    if (m_data == NULL) {
+    soEventPresenter<soArticleEventObserver>::setManageId(getEventManageId(m_moduleAccesser));
+    m_moduleAccesser->getCameraModule().setup();
+    if (static_cast<const wnWeaponInitData*>(m_data)->groundSetup != NULL) {
+        if (m_moduleAccesser->getGroundModule().isNull() == true) {
+            OSReport("name: %s \n", m_taskName);
+        }
+        m_moduleAccesser->getGroundModule().setup(static_cast<const wnWeaponInitData*>(m_data)->groundSetup, m_taskId, true);
+    } else if (m_moduleAccesser->getGroundModule().isNull() == false) {
+        OSReport("name: %s \n", m_taskName);
     }
-    acc->getEffectModule().setSyncVisibility(true);
+    if (static_cast<const wnWeaponInitData*>(m_data)->areaSet != NULL) {
+        m_moduleAccesser->getAreaModule().addArea(static_cast<const wnWeaponInitData*>(m_data)->areaSet);
+    }
+    m_moduleAccesser->getGenerateArticleManageModule().setAutoRecycle(true);
 }
 
 void Weapon::updatePosture(bool applyKinetic) {

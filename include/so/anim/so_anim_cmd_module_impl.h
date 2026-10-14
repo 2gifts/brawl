@@ -155,6 +155,7 @@ public:
     virtual int getAnimCmdFrame();
     virtual void getCmdAddressPack();
     virtual void setAddressPackList();
+    virtual void unk44(); // HYPOTHESIS: unnamed slot; the article initialize reads the interpreter count one slot later (0x48)
     virtual int getInterpreterNum();
 #ifdef FT_MODULE_BUILDER
     virtual ~soAnimCmdModule() { }
