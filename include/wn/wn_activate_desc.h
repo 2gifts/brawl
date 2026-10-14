@@ -8,8 +8,9 @@
 // HYPOTHESIS: original descriptor type spelling. Physical layout follows both
 // Sonic activation callers and the complete Weapon::activate consumer.
 struct wnActivateDesc {
-    int founderTaskId;
-    int resourceId, unk8, unkC;
+    u32 founderTaskId;
+    u32 resourceId;
+    int unk8, unkC;
     int unk10, unk14, unk18, unk1C;
     Vec3f pos;
     float lr;

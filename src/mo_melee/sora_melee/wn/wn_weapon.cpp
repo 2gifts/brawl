@@ -66,6 +66,18 @@ static s16 getEventManageId(soModuleAccesser* acc) {
 // Number of final-smash articles that are alive (the screen is dimmed while one exists).
 static int g_wnFinalArticleCount;
 
+// Local copy of the activation flag byte (HYPOTHESIS: the same bit grouping as the descriptor's per-bit view).
+struct wnActivateFlagBits {
+    u8 bit7 : 1;
+    u8 bit6 : 1;
+    u8 bit5 : 1;
+    u8 bit4 : 1;
+    u8 bit3 : 1;
+    u8 bit2 : 1;
+    u8 bit1 : 1;
+    u8 bit0 : 1;
+};
+
 Weapon::Weapon(const char* name, s32 subKind, const void* data, s32 articleId, const void* kindInfo,
                soModuleAccesser* moduleAccesser, int deadAreaBits) :
     StageObject(name, 12, 9, 5, 1, NULL),
@@ -96,16 +108,16 @@ void Weapon::activate(wnActivateDesc* desc) {
     unk30 = 9;
     StageObject::activate(&desc->pos, desc->lr, 0.0f, true);
     bool hasOwner = false;
-    if (m_moduleAccesser->getLinkModule().isNull() == false && desc->founderTaskId != -1 && desc->flagBit7 != 0) {
+    if (m_moduleAccesser->getLinkModule().isNull() == false && desc->founderTaskId != -1 && desc->flagBit7 == 1) {
         hasOwner = m_moduleAccesser->getLinkModule().link(3, desc->founderTaskId);
     }
     int attachKind = 2;
     if (desc->resourceId != 0xFFFF) {
         attachKind = 1;
     }
+    wnActivateFlagBits flags = *reinterpret_cast<const wnActivateFlagBits*>(&desc->flags);
     attachInstance(desc->resourceId, desc->unk8, desc->unkC, desc->unk10, desc->unk14, desc->unk18, desc->unk1C, attachKind,
-                   desc->unk38, desc->unk44, desc->flagBit5, desc->flagBit4, desc->flagBit2, desc->flagBit1, desc->unk48,
-                   desc->flagBit0, desc->unk3C);
+                   desc->unk38, desc->unk44, flags.bit5, flags.bit4, flags.bit2, flags.bit1, desc->unk48, flags.bit0, desc->unk3C);
     m_moduleAccesser->getWorkManageModule().setInt(desc->founderTaskId, Weapon_Work_Int_Activate_Founder_Id);
     m_moduleAccesser->getWorkManageModule().offFlag(Weapon_Work_Flag_No_Dead_Area_Remove);
     int teamOwner = desc->founderTaskId;
@@ -243,13 +255,13 @@ void Weapon::updatePosture(bool applyKinetic) {
     if (applyKinetic == true) {
         Vec3f speed = acc->getKineticModule().getSumSpeed3f(soKineticEnergy::AttributeFlag(0xFFF7));
         float ownerScale = acc->getPostureModule().getOwnerScale();
-        speed *= ownerScale;
+        speed = speed * ownerScale;
         Vec3fAdd(&pos, &pos, &speed);
         Vec3f rotation = acc->getKineticModule().getSumRotation(soKineticEnergy::AttributeFlag(0xFFFF));
         float slowRate = acc->getSlowModule().getRate();
-        rotation *= slowRate;
-        Vec3f current = acc->getPostureModule().getRot(0);
+        Vec3fScale(&rotation, &rotation, slowRate);
         Vec3f next;
+        const Vec3f& current = acc->getPostureModule().getRot(0);
         Vec3fAdd(&next, &current, &rotation);
         acc->getPostureModule().setRot(&next, 0);
     }
