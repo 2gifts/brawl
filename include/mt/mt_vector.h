@@ -127,6 +127,16 @@ public:
 
     void rot(Vec2f *out, float rot);
 
+    // Writes this vector scaled by c to out (the weapon articles call the out-of-line copy: opt in with MT_VEC2F_SCALE_NOINLINE).
+    void scale(float c, Vec2f* out)
+#ifdef MT_VEC2F_SCALE_NOINLINE
+        __attribute__((never_inline)) // MATCH-ONLY: retain the out-of-line weak helper.
+#endif
+    {
+        out->m_x = m_x * c;
+        out->m_y = m_y * c;
+    }
+
     static void copy(Vec2f& dest, const Vec2f& src) {
 #ifdef MATCHING
         __memcpy(&dest, &src, sizeof(Vec2f));

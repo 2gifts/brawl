@@ -225,6 +225,7 @@ public:
 WN_DOL_INSTANCE_MANAGER(soAnimCmdControlUnit, 6);
 typedef soKineticEnergy* wnKineticEnergyPtr;
 WN_DOL_INSTANCE_MANAGER(wnKineticEnergyPtr, 8);
+WN_DOL_INSTANCE_MANAGER(wnKineticEnergyPtr, 2);
 
 // sora_melee modules of the articles (constructor and destructor in sora_melee; the REL only needs size and calls).
 FT_DOL_POLY_BEGIN(soReflectModuleImpl, 0x40);
@@ -295,6 +296,54 @@ public:
         m_collisionSearch(m_module.getManageId(), B::CollisionSearchEvtId),
         m_itemManage(m_module.getManageId(), B::ItemManageEvtId),
         m_motion(m_module.getManageId(), B::MotionEvtId) { }
+    ~soInsideEventManageModuleBuilder() { }
+    soEventManageModuleImpl* getModule() { return &m_module; }
+};
+
+// Articles with a turn event unit (Ness's PK Starstorm): the units without capacity are not built at all (no manage id is asked
+// for them). HYPOTHESIS: the source spelling of the selection and of the units that are absent.
+struct wnTurnInsideEventManageModuleTypes {
+    enum {
+        hasStatus = true,
+        hasAnimCmd = true,
+        hasDamage = true,
+        hasLink = true,
+        hasSituation = true,
+        hasCollisionHit = true,
+        hasCollisionAttack = true,
+        hasModel = true,
+        hasArticle = true,
+        hasCapture = true,
+        hasCollisionShield = true,
+        hasCollisionReflector = true,
+        hasCollisionAbsorber = true,
+        hasCollisionSearch = true,
+        hasItemManage = true,
+        hasMotion = true,
+        hasGimmick = true,
+        hasTurn = true,
+        hasCollisionCatch = true,
+    };
+};
+
+template <typename B>
+class soInsideEventManageModuleBuilder<B, wnTurnInsideEventManageModuleTypes> {
+    typedef wnTurnInsideEventManageModuleTypes T;
+    soInsideEventManageModuleBuilder_MEMBER_LIST
+public:
+    soInsideEventManageModuleBuilder() :
+        m_entity(),
+        m_module(this),
+        m_status(m_module.getManageId(), B::StatusEvtId),
+        m_animCmd(m_module.getManageId(), B::AnimCmdEvtId),
+        m_damage(m_module.getManageId(), B::DamageEvtId),
+        m_link(m_module.getManageId(), B::LinkEvtId),
+        m_situation(m_module.getManageId(), B::SituationEvtId),
+        m_collisionAttack(m_module.getManageId(), B::CollisionAttackEvtId),
+        m_model(m_module.getManageId(), B::ModelEvtId),
+        m_article(m_module.getManageId(), B::ArticleEvtId),
+        m_collisionShield(m_module.getManageId(), B::CollisionShieldEvtId),
+        m_turn(m_module.getManageId(), B::TurnEvtId) { }
     ~soInsideEventManageModuleBuilder() { }
     soEventManageModuleImpl* getModule() { return &m_module; }
 };
@@ -712,6 +761,22 @@ class soKineticModuleBuilder<soKineticModuleBuildConfigMediator<wnKineticModuleI
     wnKineticModuleImpl m_module;                                  // +0x0
     soInstanceManagerFullPropertyVector<soKineticEnergy*, 8> m_manager; // +0x30
     M m_mediator;                                                  // +0xB0
+public:
+    soKineticModuleBuilder(soModuleAccesser* acc) :
+        m_module(acc, &m_manager, &m_mediator), m_manager(false), m_mediator() { }
+    soKineticModule* getModule() { return (soKineticModule*)&m_module; }
+};
+
+// Kinetic module of an article that has room for two energies only (Ness's PK Starstorm).
+// HYPOTHESIS: source spelling; the builder map name is the same as the eight-energy one.
+template <typename Impl, typename M, int Capacity>
+class wnKineticModuleBuildConfigSized { };
+
+template <typename M>
+class soKineticModuleBuilder<wnKineticModuleBuildConfigSized<wnKineticModuleImpl, M, 2> > {
+    wnKineticModuleImpl m_module;                                       // +0x0
+    soInstanceManagerFullPropertyVector<soKineticEnergy*, 2> m_manager; // +0x30
+    M m_mediator;                                                       // +0x68
 public:
     soKineticModuleBuilder(soModuleAccesser* acc) :
         m_module(acc, &m_manager, &m_mediator), m_manager(false), m_mediator() { }
