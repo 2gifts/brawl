@@ -247,6 +247,21 @@ public:
         }
         // clang-format on
     }
+    // MATCH-ONLY: paired-single scale used by the generic article code (opt in with MT_VEC3F_MUL_INLINE).
+    friend void Vec3fScale(register Vec3f* pOut, register const Vec3f* v, register float c) {
+        register f32 fr1, fr0;
+
+        // clang-format off
+        asm {
+            psq_l    fr1, Vec3f.m_x(v), 0, 0
+            psq_l    fr0, Vec3f.m_z(v), 1, 0
+            ps_muls0 fr1, fr1, c
+            ps_muls0 fr0, fr0, c
+            psq_st   fr1, Vec3f.m_x(pOut), 0, 0
+            psq_st   fr0, Vec3f.m_z(pOut), 1, 0
+        }
+        // clang-format on
+    }
 #else
     friend void Vec3fAdd(Vec3f* out, const Vec3f* lhs, const Vec3f* rhs) {
         out->m_x = lhs->m_x + rhs->m_x;
@@ -303,6 +318,13 @@ inline Vec3f Vec3f::operator+(const Vec3f& v) {
     return result;
 }
 inline Vec2f::Vec2f(const Vec3f& xyz) : m_x(xyz.m_x), m_y(xyz.m_y) { }
+#if defined(MATCHING) && defined(MT_VEC3F_MUL_INLINE)
+inline Vec3f Vec3f::operator*(const float c) {
+    Vec3f result;
+    Vec3fScale(&result, this, c);
+    return result;
+}
+#endif
 
 inline Vec3f Vec3f::operator-(const Vec3f& v) {
     Vec3f result;

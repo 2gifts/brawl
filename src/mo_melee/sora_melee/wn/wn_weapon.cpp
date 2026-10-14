@@ -1,3 +1,4 @@
+#define MT_VEC3F_MUL_INLINE
 #define SO_ARTICLE_DTOR_INLINE
 #include <wn/weapon.h>
 #include <gf/gf_task.h>
@@ -221,24 +222,19 @@ void Weapon::updatePosture(bool applyKinetic) {
     Vec3f pos = acc->getPostureModule().getPos();
     if (applyKinetic == true) {
         Vec3f speed = acc->getKineticModule().getSumSpeed3f(soKineticEnergy::AttributeFlag(0xFFF7));
-        float scale = acc->getPostureModule().getOwnerScale();
-        Vec3f scaled(speed.m_x * scale, speed.m_y * scale, speed.m_z * scale);
-        pos.m_x += scaled.m_x;
-        pos.m_y += scaled.m_y;
-        pos.m_z += scaled.m_z;
+        float ownerScale = acc->getPostureModule().getOwnerScale();
+        speed *= ownerScale;
+        Vec3fAdd(&pos, &pos, &speed);
         Vec3f rotation = acc->getKineticModule().getSumRotation(soKineticEnergy::AttributeFlag(0xFFFF));
-        float rotScale = acc->getSlowModule().getRate();
-        rotation.m_x *= rotScale;
-        rotation.m_y *= rotScale;
-        rotation.m_z *= rotScale;
+        float slowRate = acc->getSlowModule().getRate();
+        rotation *= slowRate;
         Vec3f current = acc->getPostureModule().getRot(0);
-        Vec3f next(current.m_x + rotation.m_x, current.m_y + rotation.m_y, current.m_z + rotation.m_z);
+        Vec3f next;
+        Vec3fAdd(&next, &current, &rotation);
         acc->getPostureModule().setRot(&next, 0);
     }
     Vec3f offset = acc->getKineticModule().getSumSpeed3f(soKineticEnergy::AttributeFlag(8));
-    pos.m_x += offset.m_x;
-    pos.m_y += offset.m_y;
-    pos.m_z += offset.m_z;
+    Vec3fAdd(&pos, &pos, &offset);
     acc->getPostureModule().setPos(&pos);
 }
 
@@ -422,7 +418,7 @@ void Weapon::removeConstraint() {
     m_moduleAccesser->getLinkModule().removeModelConstraint(true);
     m_moduleAccesser->getModelModule().setScale(scale);
     m_moduleAccesser->getPostureModule().setOwnerScale(ownerScale);
-    m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(0xE), false);
+    m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(2), false);
 }
 
 // Raw views of soCollisionLog bytes that the shared header leaves unnamed.
@@ -476,11 +472,12 @@ void Weapon::notifyEventCollisionAttack(float power, soCollisionLog* collisionLo
 bool Weapon::reflect() {
     float speedMul = m_moduleAccesser->getReflectModule().getSpeedMul();
     Vec3f mul(-speedMul, 1.0f, 1.0f);
-    m_moduleAccesser->getKineticModule().mulSpeed(&mul, soKineticEnergy::AttributeFlag(1));
-    m_moduleAccesser->getKineticModule().mulAccel(&mul, soKineticEnergy::AttributeFlag(1));
-    float lifeMul = m_moduleAccesser->getReflectModule().getLifeMul();
-    int initLife = m_moduleAccesser->getWorkManageModule().getInt(Weapon_Work_Int_Init_Life);
-    m_moduleAccesser->getWorkManageModule().setInt((int)((float)initLife * lifeMul), Weapon_Work_Int_Life);
+    soKineticEnergy::AttributeFlag attribute(1);
+    m_moduleAccesser->getKineticModule().mulSpeed(&mul, attribute);
+    m_moduleAccesser->getKineticModule().mulAccel(&mul, attribute);
+    m_moduleAccesser->getWorkManageModule().setInt(
+        (int)((float)m_moduleAccesser->getWorkManageModule().getInt(Weapon_Work_Int_Init_Life) * m_moduleAccesser->getReflectModule().getLifeMul()),
+        Weapon_Work_Int_Life);
     return false;
 }
 
@@ -512,7 +509,7 @@ bool Weapon::notifyEventCollisionAttackCheck(u32 flags) {
         return true;
     }
     if ((flags & 8) != 0 && m_moduleAccesser->getReflectModule().isReflect() == true) {
-        if (m_keepOnReflectLimit == false && m_moduleAccesser->getReflectModule().isCountMax() == true) {
+        if (!m_keepOnReflectLimit && m_moduleAccesser->getReflectModule().isCountMax() == true) {
             soArticle::setNotifyArticleEventRemove(m_moduleAccesser);
             if (isActive() == true) {
                 deactivate(false);
@@ -532,8 +529,10 @@ void Weapon::notifyEventCollisionHit2nd(float posX, float collisionLr, soCollisi
 }
 
 void Weapon::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* sender, int unk4) {
-    if (eventInfo->m_eventKind == 0x835) {
+    switch (eventInfo->m_eventKind) {
+    case 0x835:
         deactivate(false);
+        break;
     }
     StageObject::notifyEventLink(eventInfo, moduleAccesser, sender, unk4);
 }
@@ -569,8 +568,9 @@ void Weapon::setPosForce(Vec3f* pos) {
 }
 
 bool Weapon::isCanInhaled() {
+    soModuleAccesser* acc = m_moduleAccesser;
     bool result;
-    if (m_moduleAccesser->getLinkModule().isModelConstraint() != false) {
+    if (acc->getLinkModule().isModelConstraint() != false) {
         result = false;
     } else {
         result = wnInfo::isInhaled(m_subKind);
@@ -639,7 +639,7 @@ u32 Weapon::getFounderTaskId() {
     gfTask* task = gfTaskScheduler::getInstance()->getTaskById(gfTask::Category_Weapon, founder);
     Weapon* owner = dynamic_cast<Weapon*>(task);
     if (owner != NULL) {
-        return owner->getFounderTaskId();
+        founder = owner->getFounderTaskId();
     }
     return founder;
 }
@@ -651,12 +651,13 @@ void Weapon::setAttackPowerMulPattern(float pattern) {
 void Weapon::setGroundShapeSafePosWithAncestor() {
     if (m_moduleAccesser->getGroundModule().isNull() != true) {
         if (m_moduleAccesser->getLinkModule().isValidParentShape(3) == true) {
-            Vec2f center = m_moduleAccesser->getLinkModule().getParentShapeCenterPos(3);
+            Vec2f center;
+            Vec2f::copy(center, m_moduleAccesser->getLinkModule().getParentShapeCenterPos(3));
             m_moduleAccesser->getGroundModule().setShapeSafePos(&center, 0);
         } else {
-            int ownerTask = m_moduleAccesser->getTeamModule().getTeamOwnerId();
+            u32 ownerTask = m_moduleAccesser->getTeamModule().getTeamOwnerId();
             Vec2f center;
-            if (ownerTask != -1 && m_moduleAccesser->getLinkModule().getParentShapeCenterPosTaskId(ownerTask, &center) == true) {
+            if (ownerTask != 0xFFFFFFFF && m_moduleAccesser->getLinkModule().getParentShapeCenterPosTaskId(ownerTask, &center) == true) {
                 m_moduleAccesser->getGroundModule().setShapeSafePos(&center, 0);
             }
         }
