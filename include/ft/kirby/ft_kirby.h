@@ -85,7 +85,8 @@ typedef soModelModuleBuildConfig<8, 3, soModelModuleImplVariable> ftKirbyModelMo
 typedef ftAnimCmdModuleSubBuildConfig<448, 797> ftKirbyAnimCmdModuleSubBuildConfig;
 typedef soMotionModuleBuildConfig<797, soMotionModuleImplMultiRes, 2, 1, soTransitionModuleBuildConfig<ftMotionTransitionTypeList>, soMotionAnimObjCacheModuleBuildConfig<5, soMotionAnimObjCacheModuleImpl> > ftKirbyMotionModuleBuildConfig;
 typedef soCollisionReflectorModuleBuildConfigGroups<3, 9, 3, soCollisionShieldEventPresenterReflector, soCollisionShieldModuleImpl> ftKirbyCollisionReflectorModuleBuildConfig;
-typedef soCollisionCatchModuleBuildConfigWithSearch<soCollisionCatchModuleImpl, 0x254> ftKirbyCollisionCatchModuleBuildConfig;
+typedef soCollisionCatchModuleBuildConfig<soCollisionCatchModuleImpl> ftKirbyCollisionCatchModuleBuildConfig;
+typedef soCollisionSearchModuleBuilder<soCollisionSearchModuleBuildConfigParts<2, soCollisionSearchModuleImpl> > ftKirbyCollisionSearchModuleBuilder;
 typedef soLinkModuleBuildConfigCap<8, soLinkModuleImpl> ftKirbyLinkModuleBuildConfig;
 typedef soStatusModuleBuildConfig<448, soGeneralWorkBuildConfig<35, 18, 17>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftKirbyStatusModuleBuildConfig;
 typedef soAreaModuleBuildConfigSized<0x3E0, soAreaModuleImpl> ftKirbyAreaModuleBuildConfig;
@@ -106,6 +107,7 @@ public:
     typedef ftKirbyMotionModuleBuildConfig MotionModuleBuildConfig;
     typedef ftKirbyCollisionReflectorModuleBuildConfig CollisionReflectorModuleBuildConfig;
     typedef ftKirbyCollisionCatchModuleBuildConfig CollisionCatchModuleBuildConfig;
+    typedef ftKirbyCollisionSearchModuleBuilder CollisionSearchModuleBuilder;
     typedef ftKirbyLinkModuleBuildConfig LinkModuleBuildConfig;
     typedef ftKirbyStatusModuleBuildConfig StatusModuleBuildConfig;
     typedef ftKirbyAreaModuleBuildConfig AreaModuleBuildConfig;
@@ -114,11 +116,35 @@ public:
     typedef ftKirbyGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+// HYPOTHESIS: 16 byte records with an empty constructor (two arrays of four follow the status table).
+struct ftKirbyUnk10 {
+    u8 unk0[0x10];
+    ftKirbyUnk10() { }
+};
+
+// Kirby's copy ability state (map: ftKirbyCopyAbilityModule); constructed and used through the REL's own functions.
+struct ftKirbyCopyAbilityModuleData {
+    u8 unk0[0xB64];
+};
+
 class ftKirby : public ftFighterBuilder<ftKirbyBuildConfig> {
-    u8 unkTail[0x1C294 - sizeof(ftFighterBuilder<ftKirbyBuildConfig>)];
+    ftData* m_data;                                              // +0x1B678
+    soArrayContractibleTable<const soStatusData> m_statusTable;  // +0x1B67C
+    u8 unk1B68C;
+    u8 unk1B68D;
+    u8 unk1B68E[0x12];
+    struct Unk1B6A0 {
+        ftKirbyUnk10 first[4];
+        ftKirbyUnk10 second[4];
+    } unk1B6A0;
+    u8 unk1B720[0xC];
+    ftKirbyCopyAbilityModuleData m_copyAbility;                  // +0x1B72C
+    Heaps::HeapType m_nwModelHeap;                               // +0x1C290
 public:
     ftKirby(s32 entryId,
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
 };
+static_assert(sizeof(ftFighterBuilder<ftKirbyBuildConfig>) == 0x1B678, "Kirby data offset is wrong");
+static_assert(sizeof(ftKirby) == 0x1C294, "Kirby allocation size is wrong");

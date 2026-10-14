@@ -65,8 +65,8 @@ __ct__161soCollisionReflectorModuleBuilder<123soCollisionReflectorModuleBuildCon
 __dt__161soCollisionReflectorModuleBuilder<123soCollisionReflectorModuleBuildConfigGroups<3,9,3,40soCollisionShieldEventPresenterReflector,27soCollisionShieldModuleImpl>>Fv = .text:0x00003CE8; // type:function size:0x90
 __ct__110soCollisionCatchModuleBuilder<77soCollisionCatchModuleBuildConfigWithSearch<26soCollisionCatchModuleImpl,596>>FP16soModuleAccesseriQ26gfTask8CategoryP31soEventObserverRegistrationDesc = .text:0x00003D78; // type:function size:0x98
 __dt__96soCollisionCatchModuleBuilder<63soCollisionCatchModuleBuildConfig<26soCollisionCatchModuleImpl>>Fv = .text:0x00003E10; // type:function size:0x6C
-fn_96_3E7C = .text:0x00003E7C; // type:function size:0x9C
-fn_96_3F18 = .text:0x00003F18; // type:function size:0x78
+__ct__106soCollisionSearchModuleBuilder<72soCollisionSearchModuleBuildConfigParts<2,27soCollisionSearchModuleImpl>>FP16soModuleAccesseriQ26gfTask8Category = .text:0x00003E7C; // type:function size:0x9C
+__dt__106soCollisionSearchModuleBuilder<72soCollisionSearchModuleBuildConfigParts<2,27soCollisionSearchModuleImpl>>Fv = .text:0x00003F18; // type:function size:0x78
 __ct__73soDamageModuleBuilder<48soDamageModuleBuildConfig<19soDamageModuleActor>>FP16soModuleAccesserP31soEventObserverRegistrationDesc = .text:0x00003F90; // type:function size:0x6C
 __dt__73soDamageModuleBuilder<48soDamageModuleBuildConfig<19soDamageModuleActor>>Fv = .text:0x00003FFC; // type:function size:0x74
 __dt__71soCatchModuleBuilder<47soCatchModuleBuildConfig<1,17soCatchModuleImpl>>Fv = .text:0x00004070; // type:function size:0x5C
