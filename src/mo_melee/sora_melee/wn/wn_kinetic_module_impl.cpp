@@ -98,7 +98,8 @@ void wnKineticModuleImpl::initializeNormal(int kineticType, soModuleAccesser* ac
     soKineticEnergy* main = manager->at(0);
     soKineticEnergy* sub = manager->at(1);
     if (kineticType == 0) {
-        Vec2f speed = acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
+        Vec2f speed;
+        Vec2f::copy(speed, acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1)));
         Vec3f zero3(0.0f, 0.0f, 0.0f);
         main->resetEnergy(0, &speed, &zero3, acc);
         Vec3f zeroRot(0.0f, 0.0f, 0.0f);
@@ -114,7 +115,8 @@ void wnKineticModuleImpl::initializeStop(int kineticType, soModuleAccesser* acc)
     soKineticEnergy* main = manager->at(0);
     soKineticEnergy* sub = manager->at(1);
     if (kineticType == 0) {
-        Vec2f speed = acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
+        Vec2f speed;
+        Vec2f::copy(speed, acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1)));
         Vec3f zero3(0.0f, 0.0f, 0.0f);
         main->resetEnergy(1, &speed, &zero3, acc);
         Vec3f zeroRot(0.0f, 0.0f, 0.0f);
@@ -161,8 +163,12 @@ void wnKineticEnergyGravity::resetEnergy(int, Vec2f* speed, Vec3f*, soModuleAcce
 
 void wnKineticEnergyGravity::updateEnergy(soModuleAccesser*) {
     m_speedY += m_gravity;
-    if (m_speedY < 0.0f && m_speedLimit > 0.0f && __fabsf(m_speedLimit) < __fabsf(m_speedY)) {
-        m_speedY = soKineticUtility::limitSpeed(m_speedY, m_speedLimit);
+    if (m_speedY < 0.0f && m_speedLimit > 0.0f) {
+        double limitAbs = __fabs(m_speedLimit);
+        double speedAbs = __fabs(m_speedY);
+        if ((float)speedAbs > (float)limitAbs) {
+            m_speedY = soKineticUtility::limitSpeed(m_speedY, m_speedLimit);
+        }
     }
 }
 
@@ -172,15 +178,15 @@ static inline void reflectVec(Vec2f& out, const Vec2f& v, const Vec2f& n) {
 }
 
 void wnKineticEnergyGravity::reflectSpeed(Vec3f* normal) {
-    Vec2f n = *normal->xy();
     Vec2f v(0.0f, m_speedY);
+    Vec2f n = *normal->xy();
     reflectVec(v, v, n);
     m_speedY = v.m_y;
 }
 
 void wnKineticEnergyGravity::reflectAccel(Vec3f* normal) {
-    Vec2f n = *normal->xy();
     Vec2f v(0.0f, m_gravity);
+    Vec2f n = *normal->xy();
     reflectVec(v, v, n);
     m_gravity = v.m_y;
 }
