@@ -211,10 +211,7 @@ Vec3f wnKineticEnergyGravity::getRotation() {
 }
 
 Vec2f wnKineticEnergyGravity::getSpeed() {
-    Vec2f speed;
-    speed.m_y = m_speedY;
-    speed.m_x = 0.0f;
-    return speed;
+    return Vec2f(0.0f, m_speedY);
 }
 
 wnKineticEnergyGravity::~wnKineticEnergyGravity() {
