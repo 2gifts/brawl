@@ -1,5 +1,11 @@
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define FT_REL_LINK_EXTERN
 #define MT_VEC3F_ASSIGN_NOINLINE
 #define MT_VEC3F_CTOR_NOINLINE
+#include <wn/pikmin/wn_pikmin_chain.h>
 #include <mt/mt_vector.h>
 #include <so/link/so_link_module_impl.h>
 #include <so/posture/so_posture_module_simple.h>
@@ -10,12 +16,38 @@
 #include <so/stop/so_stop_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
-#include <wn/pikmin/wn_pikmin_chain.h>
 #include <wn/wn_activate_desc.h>
 #include <wn/wn_lasso_status_view.h>
 
 // HYPOTHESIS: a data word of the REL (the node or color the chain model is attached with).
 extern u32 lbl_113_data_BAA8;
+
+// The status unique processes of the chain: the lasso ones live in sora_melee (wn_lasso_status_uniq_process_*.cpp), the two
+// that extend them in this REL.
+extern soStatusUniqProcess g_wnPikminChainStatusUniqProcessShoot;
+extern soStatusUniqProcess g_wnLassoStatusUniqProcessRewind;
+extern soStatusUniqProcess g_wnLassoStatusUniqProcessHang;
+extern soStatusUniqProcess g_wnLassoStatusUniqProcessHangRewind;
+extern soStatusUniqProcess g_wnPikminChainStatusUniqProcessReach;
+extern soStatusUniqProcess g_wnLassoStatusUniqProcessFailure;
+
+wnPikminChain::wnPikminChain(s32 articleId, const wnArticleBuildInfo& info, const wnPikminChainData* data) :
+    wnWeaponBuilder<wnPikminChainModuleAccesserBuildConfig>(
+        "wnPikminChain", articleId, info,
+        wnModuleAccesserBuildData(0x90, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
+                                  0, 0, 0, 0, 0, 0, 0)),
+    m_param(data->m_param), m_paramAccesser(data->m_param) {
+    soStatusUniqProcess* uniqProcs[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    uniqProcs[1] = &g_wnPikminChainStatusUniqProcessShoot;
+    uniqProcs[3] = &g_wnLassoStatusUniqProcessRewind;
+    uniqProcs[5] = &g_wnLassoStatusUniqProcessHang;
+    uniqProcs[6] = &g_wnLassoStatusUniqProcessHangRewind;
+    uniqProcs[7] = &g_wnPikminChainStatusUniqProcessReach;
+    uniqProcs[8] = &g_wnLassoStatusUniqProcessFailure;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 9);
+    Weapon::deactivate(false);
+}
 
 void wnPikminChain::activate(float lr, int founderTaskId, int kind, int team, bool unk, int pikminNum) {
     Vec3f zero(0.0f, 0.0f, 0.0f);
