@@ -25,7 +25,6 @@
 // HYPOTHESIS: BaseItem members of sora_melee that have no names yet
 extern "C" int fn_27_28CCF0(BaseItem* item, u32 param);    // BaseItem::getParamInt
 extern "C" BaseItem* fn_27_2A8A00(itManager* manager, int index); // itManager::getSafeItemFromIndex
-extern "C" bool fn_27_28DC8C(BaseItem* item);               // BaseItem::isPickUp
 extern "C" Stage* lbl_27_bss_5668;
 
 // MATCH-ONLY: the members of soSet are private
@@ -923,7 +922,7 @@ bool grFamicomEnemy::isRemoveItem() {
     if (item == NULL) {
         return false;
     }
-    if (!fn_27_28DC8C(item)) {
+    if (!item->isPickUp()) {
         return false;
     }
     if (reinterpret_cast<famicomItemView*>(item)->m_box->m_holder->getCarryKind() == 2) {

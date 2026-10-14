@@ -422,6 +422,14 @@ public:
     void move(Vec3f* pos);
     void resetLr(float lr);
     void standby(bool force);
+    bool isPickUp();
+    void setPickUpAreaRequest(bool request);
+    bool isEatable();
+    void setTeam(int team);
+    bool isCanInhaled();
+    Vec3f getStartInhaledPos();
+    void setScale(float scale);
+    void updateLifeTime();
 };
 static_assert(sizeof(BaseItem) == 0x3d60, "Class is wrong size!");
 

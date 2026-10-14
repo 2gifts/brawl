@@ -494,7 +494,7 @@ bool grGWSceneFire::isRemoveItem(int itemId) {
     if (item == NULL) {
         return false;
     }
-    if (!fn_27_28DC8C(item)) {
+    if (!item->isPickUp()) {
         return false;
     }
     if (reinterpret_cast<gwItemView*>(item)->m_box->m_holder->getCarryKind() == 2) {

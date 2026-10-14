@@ -8,7 +8,6 @@
 
 // HYPOTHESIS: BaseItem members of sora_melee that have no names yet.
 extern "C" BaseItem* fn_27_2A8A00(itManager* manager, int index); // itManager::getSafeItemFromIndex
-extern "C" bool fn_27_28DC8C(BaseItem* item);                     // BaseItem::isPickUp
 
 // MATCH-ONLY: views of parts of the item and of the item manager that the grounds read (nothing names them: the holder
 // of the item (at 0x1a4 / 0x14) tells how the item is carried, 2 means it is held by a fighter; the list of the manager
