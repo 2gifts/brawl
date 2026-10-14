@@ -1,4 +1,5 @@
 #define MT_VEC3F_MUL_INLINE
+#define WN_ARTICLE_ANIMCMD_INT
 #define SO_ARTICLE_DTOR_INLINE
 #include <wn/weapon.h>
 #include <gf/gf_task.h>
