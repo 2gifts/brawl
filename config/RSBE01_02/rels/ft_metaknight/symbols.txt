@@ -57,7 +57,7 @@ fn_111_316C = .text:0x0000316C; // type:function size:0x5C
 fn_111_31C8 = .text:0x000031C8; // type:function size:0x70
 fn_111_3238 = .text:0x00003238; // type:function size:0x64
 fn_111_329C = .text:0x0000329C; // type:function size:0x60
-__dt__176soInstancePoolSub<49soInstancePoolInfo<25ftKineticEnergyController,1>,102soKineticEnergyHolder<25ftKineticEnergyController,18soTypeListNullType,28soKineticEnergyInitInfo<2,1>>>Fv = .text:0x000032FC; // type:function size:0x60
+fn_111_32FC = .text:0x000032FC; // type:function size:0x60
 fn_111_335C = .text:0x0000335C; // type:function size:0x60
 fn_111_33BC = .text:0x000033BC; // type:function size:0x630
 __dt__15soKineticEnergyFv = .text:0x000039EC; // type:function size:0x40
@@ -332,7 +332,7 @@ __dt__169soInstancePoolSub<46soInstancePoolInfo<22ftKineticEnergyGravity,1>,99so
 fn_111_9B9C = .text:0x00009B9C; // type:function size:0x70
 fn_111_9C0C = .text:0x00009C0C; // type:function size:0x60
 fn_111_9C6C = .text:0x00009C6C; // type:function size:0x60
-__dt__176soInstancePoolSub<49soInstancePoolInfo<25ftKineticEnergyController,1>,102soKineticEnergyHolder<25ftKineticEnergyController,18soTypeListNullType,28soKineticEnergyInitInfo<2,1>>>Fv = .text:0x00009CCC; // type:function size:0x60
+fn_111_9CCC = .text:0x00009CCC; // type:function size:0x60
 __dt__546soInstancePool<49soInstancePoolInfo<25ftKineticEnergyController,1>,102soKineticEnergyHolder<25ftKineticEnergyController,18soTypeListNullType,28soKineticEnergyInitInfo<2,1>>,369soLineInvertHierarchy<46soInstancePoolInfo<22ftKineticEnergyGravity,1>,99soKineticEnergyHolder<22ftKineticEnergyGravity,18soTypeListNullType,28soKineticEnergyInitInfo<1,1>>,192soLineInvertHierarchy<45soInstancePoolInfo<21ftKineticEnergyMotion,1>,98soKineticEnergyHolder<21ftKineticEnergyMotion,18soTypeListNullType,28soKineticEnergyInitInfo<0,1>>,18soInstancePoolRoot>>>Fv = .text:0x00009D2C; // type:function size:0x78
 __dt__19ftKineticEnergyStopFv = .text:0x00009DA4; // type:function size:0x60
 __dt__96soKineticEnergyHolder<19ftKineticEnergyStop,18soTypeListNullType,28soKineticEnergyInitInfo<3,1>>Fv = .text:0x00009E04; // type:function size:0x60

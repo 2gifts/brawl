@@ -40,7 +40,7 @@ __ct__242soMotionModuleBuilder<216soMotionModuleBuildConfig<484,18soMotionModule
 __dt__105soArraySelectHolder<1,30soArrayVector<11soOtherAnim,1>,47soSingletonHolder<26soArrayNull<11soOtherAnim>>>Fv = .text:0x00002C0C; // type:function size:0x5C
 fn_93_2C68 = .text:0x00002C68; // type:function size:0x38
 __dt__16soTransitionInfoFv = .text:0x00002CA0; // type:function size:0x40
-__dt__22soTransitionModuleImplFv = .text:0x00002CE0; // type:function size:0x60
+fn_93_2CE0 = .text:0x00002CE0; // type:function size:0x60
 __dt__150soLineHierarchy<49soTypeList<14soIntToType<8>,18soTypeListNullType>,11soArrayPool,65soArrayPoolRoot<46soInstanceUnitFullProperty<16soTransitionTerm>>>Fv = .text:0x00002D40; // type:function size:0x60
 __dt__112soJagArray<46soInstanceUnitFullProperty<16soTransitionTerm>,49soTypeList<14soIntToType<8>,18soTypeListNullType>>Fv = .text:0x00002DA0; // type:function size:0x5C
 __dt__111soTransitionModuleBuilder<82soTransitionModuleBuildConfig<49soTypeList<14soIntToType<8>,18soTypeListNullType>>>Fv = .text:0x00002DFC; // type:function size:0x78
@@ -164,7 +164,7 @@ __dt__15soKineticEnergyFv = .text:0x00007100; // type:function size:0x40
 fn_93_7140 = .text:0x00007140; // type:function size:0x5C
 fn_93_719C = .text:0x0000719C; // type:function size:0x8C
 __dt__90soArraySelectHolder<1,33soArrayVector<14efScreenHandle,1>,29soArrayNull<14efScreenHandle>>Fv = .text:0x00007228; // type:function size:0x5C
-__dt__22soTransitionModuleImplFv = .text:0x00007284; // type:function size:0x60
+fn_93_7284 = .text:0x00007284; // type:function size:0x60
 fn_93_72E4 = .text:0x000072E4; // type:function size:0x5C
 fn_93_7340 = .text:0x00007340; // type:function size:0x12C
 fn_93_746C = .text:0x0000746C; // type:function size:0x60
