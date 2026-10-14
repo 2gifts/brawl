@@ -38,7 +38,7 @@ void wnLassoStatusUniqProcessHang::initStatus(soModuleAccesser* moduleAccesser) 
     soPostureModule& posture = moduleAccesser->getPostureModule();
     wnLassoAltStatusView* alt = wnLassoGetAltStatus(moduleAccesser);
     workManage.onFlag(0x12000000);
-    link->unkA8Int(3);
+    link->unkA8Float(3);
     alt->unkE0Int();
     // HYPOTHESIS: the two float results feed the model view and the posture owner scale.
     float modelValue = link->unk188Float();

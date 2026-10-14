@@ -50,7 +50,7 @@ public:
     virtual void slot80();
     virtual void slot84();
     virtual int unk88Int();
-    virtual void slot8C();
+    virtual void unk8CInt(int);
     virtual void slot90();
     virtual void slot94();
     virtual void slot98();
@@ -176,7 +176,7 @@ public:
     virtual void slot9C();
     virtual void slotA0();
     virtual void slotA4();
-    virtual void unkA8Int(int);
+    virtual float unkA8Float(int);
     virtual void slotAC();
     virtual void slotB0();
     virtual void slotB4();
