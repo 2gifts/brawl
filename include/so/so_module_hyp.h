@@ -23,7 +23,7 @@ struct soPhysicsModuleHyp {
     virtual void unk28();
     virtual void unk2C();
     virtual void unk30(int);
-    virtual void unk34();
+    virtual bool unk34(int);
     virtual void unk38();
     virtual void unk3C();
     virtual void unk40();
@@ -141,6 +141,8 @@ struct soJostleModuleHyp {
 struct soComboModuleHyp {
     virtual void unk08();
     virtual void unk0C();
+    virtual void unk10();
+    virtual void unk14();
 };
 
 // HYPOTHESIS: the territory module.
@@ -156,16 +158,31 @@ struct soTerritoryModuleHyp {
 struct soTurnModuleHyp {
     virtual void unk08();
     virtual void unk0C();
+    virtual void unk10();
+    virtual void unk14();
+    virtual void unk18(bool);
 };
 
 // HYPOTHESIS: the shake module.
 struct soShakeModuleHyp {
     virtual void unk08();
     virtual void unk0C();
+    virtual void unk10();
+    virtual void unk14();
+    virtual void unk18();
+    virtual void unk1C();
+    virtual void unk20();
 };
 
 // HYPOTHESIS: the glow module.
 struct soGlowModuleHyp {
+    virtual void unk08();
+    virtual void unk0C();
+    virtual void unk10();
+};
+
+// HYPOTHESIS: the debug module.
+struct soDebugModuleHyp {
     virtual void unk08();
     virtual void unk0C();
     virtual void unk10();
@@ -185,6 +202,7 @@ inline soHyp::soTerritoryModuleHyp& getTerritoryModule(soModuleAccesser* acc) { 
 inline soHyp::soTurnModuleHyp& getTurnModule(soModuleAccesser* acc) { return *static_cast<soHyp::soTurnModuleHyp*>(acc->m_enumerationStart->m_turnModule); }
 inline soHyp::soShakeModuleHyp& getShakeModule(soModuleAccesser* acc) { return *static_cast<soHyp::soShakeModuleHyp*>(acc->m_enumerationStart->m_shakeModule); }
 inline soHyp::soGlowModuleHyp& getGlowModule(soModuleAccesser* acc) { return *static_cast<soHyp::soGlowModuleHyp*>(acc->m_enumerationStart->m_glowModule); }
+inline soHyp::soDebugModuleHyp& getDebugModule(soModuleAccesser* acc) { return *static_cast<soHyp::soDebugModuleHyp*>(acc->m_enumerationStart->m_debugModule); }
 // The jostle module is checked for being a null object through its soNullable base.
 inline bool isJostleNull(soModuleAccesser* acc) { return reinterpret_cast<soNullable*>(acc->m_enumerationStart->m_jostleModule)->isNull(); }
 // The slope module has a header but no getter on the accesser yet.

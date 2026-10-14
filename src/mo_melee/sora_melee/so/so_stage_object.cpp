@@ -516,3 +516,96 @@ bool StageObject::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAc
         }
     }
 }
+
+// The frame update. While the frame is estimated (not paused by a hit stop) every module starts its frame (begin), the
+// status runs (execStatus, or execStop while the object itself is stopped), the kinetic energies are applied and the
+// posture is moved. Afterwards the global slow motion decides how the motion frame advances: kind 0 rewinds the motion /
+// posture and plays it again at the slow rate, kind 1 just plays the motion at the rate, kind 2 turns it back.
+void StageObject::processUpdate() {
+    soModuleAccesser* acc = m_moduleAccesser;
+    bool stopped = acc->getStopModule().isStop();
+    acc->getModelModule().begin(true);
+    if (soSlow::getInstance()->isEstimate() == 1) {
+        bool skipped = acc->getSlowModule().isSkip();
+        getDebugModule(acc).unk10();
+        acc->getSlowModule().update(true);
+        acc->getControllerModule().update(getInput(), false);
+        if (!skipped) {
+            acc->getModelModule().begin(false);
+        }
+        acc->getPostureModule().begin();
+        acc->getMotionModule().begin();
+        getPhysicsModule(acc).unk28();
+        getShakeModule(acc).unk20();
+        getTurnModule(acc).unk18(true);
+        acc->getEffectModule().begin();
+        acc->getStatusModule().begin();
+        acc->getCollisionAttackModule().begin();
+        acc->getCollisionHitModule().begin();
+        acc->getCollisionShieldModule().begin();
+        acc->getCollisionReflectorModule().begin();
+        acc->getCollisionAbsorberModule().begin();
+        getCollisionCatchModule(acc).unk14();
+        acc->getCollisionSearchModule().begin();
+        acc->getItemManageModule().begin();
+        if (!skipped) {
+            acc->getColorBlendModule().update();
+        }
+        acc->getGroundModule().begin();
+        if (!stopped) {
+            getComboModule(acc).unk14();
+            if (!skipped) {
+                acc->getStatusModule().execStatus(acc);
+            }
+            acc->getMotionModule().updateFrame(1.0f);
+            if (!skipped) {
+                acc->getKineticModule().updateEnergy(acc, soKineticEnergy::AttributeFlag(0xFFFF));
+            } else {
+                acc->getKineticModule().updateEnergy(acc, soKineticEnergy::AttributeFlag(0xFFFE));
+            }
+            updatePosture(true);
+            acc->getDamageModule().update();
+        } else {
+            if (!acc->getSlowModule().isSkip()) {
+                acc->getStatusModule().execStop(acc);
+            }
+            acc->getKineticModule().updateEnergy(acc, soKineticEnergy::AttributeFlag(8));
+            updatePosture(false);
+        }
+    } else {
+        acc->getSlowModule().update(false);
+        getTurnModule(acc).unk18(false);
+        getPhysicsModule(acc).unk28();
+        acc->getKineticModule().updateEnergy(acc, soKineticEnergy::AttributeFlag(8));
+        updatePosture(false);
+    }
+    acc->getMotionModule().updateNode();
+    if (soSlow::getInstance()->isOn() == 1) {
+        switch (soSlow::getInstance()->getKind()) {
+        case 0:
+            if (!stopped) {
+                acc->getMotionModule().rewind();
+                acc->getMotionModule().updateFrame(soSlow::getInstance()->getRate());
+            }
+            acc->getPostureModule().rewind();
+            break;
+        case 1:
+            if (!stopped) {
+                acc->getMotionModule().updateFrame(soSlow::getInstance()->getRate());
+            }
+            break;
+        case 2:
+            if (!stopped) {
+                acc->getMotionModule().turnBack();
+            }
+            break;
+        }
+        acc->getPostureModule().interpolate(soSlow::getInstance()->getRate());
+    }
+    if (acc->getGroundModule().isReferenceModelNode() || getPhysicsModule(acc).unk34(1)) {
+        updateNodeSRT();
+    }
+    getPhysicsModule(acc).unk30(1);
+    acc->getGroundModule().update(soSlow::getInstance()->isAdjust() == 1);
+    acc->getGroundModule().updateGrCollisionMatrix();
+}
