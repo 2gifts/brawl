@@ -75,6 +75,9 @@ FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 285);
 // capacities keep their destructors in the REL, so declaring them here would drop those functions.
 FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 290);
 FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 291);
+FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 301);
+FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 303);
+FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 309);
 FT_DOL_ARRAY_VECTOR(soCollisionHitPart, 13);
 FT_DOL_ARRAY_VECTOR(soCollisionShieldPart, 1);
 FT_DOL_ARRAY_VECTOR(soCollisionShieldPart, 12);
