@@ -393,6 +393,35 @@ public:
     void setVanishMode(bool);
     void setRenderPriority(u8 priority); // Added locally: sora_melee 0x28E7B4 (st_heal)
     bool sendTouchMessage(int taskId, Vec3f* pos, float);
+
+    // Members implemented in mo_melee/sora_melee/it/it_item.cpp.
+    itKind getItKind();
+    u32 getItVariation();
+    itCustomizerInterface* getCustomizer();
+    int getLotCreateItKind();
+    bool isUseOuterRes();
+    bool isVanishMode();
+    float getInhaledCount();
+    void setSmashPlateFigurelized(int figurelized);
+    void requestLost();
+    void born();
+    Vec3f getPos();
+    Vec3f getRot();
+    void onUpdateAiMove(Vec2f*, Vec2f*, Vec2f*);
+    void onUpdateKinetic();
+    void onPreBound(Vec2f*, BoundMask);
+    bool onPreDamageCheck(int damageStatusKind, soDamageLog*);
+    bool isSafe();
+    int getBullet();
+    u32 shootBlanks(u32 count);
+    int getResult();
+    void setHavedLog(int index, bool haved);
+    int getTeamNo();
+    bool isSmashPlateFigurelized();
+    bool isInhaled();
+    void move(Vec3f* pos);
+    void resetLr(float lr);
+    void standby(bool force);
 };
 static_assert(sizeof(BaseItem) == 0x3d60, "Class is wrong size!");
 
@@ -403,14 +432,24 @@ public:
     virtual void onDestruct(BaseItem* item);
     virtual void onReset(BaseItem* item);
     virtual void onProcessUpdate(BaseItem* item);
+#ifdef IT_CUSTOMIZER_BOOL_HOOKS
+    // The default implementations return a value (true / false); the BrawlHeaders customizers still override them as void,
+    // so only the item.cpp unit sees the real type.
+    virtual bool onProcessFixPosition(BaseItem* item);
+#else
     virtual void onProcessFixPosition(BaseItem* item);
+#endif
     virtual void onProcessHit(BaseItem* item);
     virtual void onProcessFixCamera(BaseItem* item);
     virtual void onProcessGameProc(BaseItem* item);
     virtual void onRenderPre(BaseItem* item);
     virtual void onRenderDebug(BaseItem* item);
     virtual void onNotifyEventChangeStatus(BaseItem* item, int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+#ifdef IT_CUSTOMIZER_BOOL_HOOKS
+    virtual bool onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
+#else
     virtual void onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
+#endif
     virtual void onNotifyEventCollisionAttackCheck(BaseItem* item, int hitTaskId);
     virtual bool onNotifyEventCollisionSearch(BaseItem* item, soCollisionLog* collisionLog);
     virtual bool onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8 searchHitCollisionIndex, Vec3f* searchHitPos);

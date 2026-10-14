@@ -10155,6 +10155,9 @@ mo_melee/sora_melee/gr/gr_gimmick_catapult.cpp:
 	.text       start:0x00274650 end:0x00275344
 	.ctors      start:0x00000314 end:0x00000318
 
+mo_melee/sora_melee/it/it_item.cpp:
+	.text       start:0x0027F4D8 end:0x0029065C
+
 mo_melee/sora_melee/so/so_event_unit_work_area_soModelEventObserver_2_29065C.cpp:
 	.text       start:0x0029065C end:0x0029081C
 
