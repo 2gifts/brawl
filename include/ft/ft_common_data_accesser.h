@@ -88,6 +88,8 @@ public:
     ftParam* getParamCommon() const;
     // HYPOTHESIS: const qualification; native pointer ABI and getter identity are verified.
     const wnGameWatchNormalWeaponData* getGameWatchNormalWeaponData() const;
+    // The static data block of a weapon article: indexed by the weapon number (123, 124, ... in the module maps).
+    void* getWeaponData124(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: PK Thunder bolt (Ness and Lucas)
 };
 
 extern ftCommonData g_ftCommonData;

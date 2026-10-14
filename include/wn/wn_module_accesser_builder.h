@@ -1026,6 +1026,15 @@ struct wnArticleBuildInfo {
     soHeapModule* getHeapModule() const { return heapModule; }
 };
 
+// The descendants of an article are the articles its own article module generated (none for most articles).
+inline void wnDeactivateArticleDescendants(ftNullGenerateArticleManageModuleBuilder&) {
+    soSingletonHolder<soArticleMediatorNull>::getInstance()->deactivate();
+}
+template <class Builder>
+inline void wnDeactivateArticleDescendants(Builder& builder) {
+    builder.getMediator()->deactivate();
+}
+
 template <class BC>
 class wnWeaponBuilder : public Weapon {
 protected:
@@ -1045,7 +1054,7 @@ public:
     virtual void deactivateDescendantForce();
 #else
     virtual void deactivateDescendantForce() {
-        soSingletonHolder<soArticleMediatorNull>::getInstance()->deactivate();
+        wnDeactivateArticleDescendants(this->m_modules.m_generateArticleBuilder);
     }
 #endif
 };
