@@ -17,7 +17,7 @@ extern soStatusUniqProcess g_wnLucasPKThunderChildStatusUniqProcessMove;
 
 wnLucasPKThunderChild::wnLucasPKThunderChild(s32 articleId, const wnArticleBuildInfo& info, const wnLucasPKThunderChildData* data) :
     wnWeaponBuilder<wnLucasPKThunderChildModuleAccesserBuildConfig>(
-        "wnLucasPKThunderChild", articleId, info,
+        "LucasPKThunderChild", articleId, info,
         wnModuleAccesserBuildData(80, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
                                   info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
                                   0, 0, 0, 0, 0, 0, 0)),

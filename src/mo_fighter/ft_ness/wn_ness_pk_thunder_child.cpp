@@ -17,7 +17,7 @@ extern soStatusUniqProcess g_wnNessPKThunderChildStatusUniqProcessMove;
 
 wnNessPKThunderChild::wnNessPKThunderChild(s32 articleId, const wnArticleBuildInfo& info, const wnNessPKThunderChildData* data) :
     wnWeaponBuilder<wnNessPKThunderChildModuleAccesserBuildConfig>(
-        "wnNessPKThunderChild", articleId, info,
+        "NessPKThunderChild", articleId, info,
         wnModuleAccesserBuildData(105, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
                                   info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
                                   0, 0, 0, 0, 0, 0, 0)),
