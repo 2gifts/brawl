@@ -48,7 +48,7 @@ struct wnNessYoyoModuleAccesserBuildConfig : wnCommonBuildConfig {
     typedef soCollisionHitModuleBuildConfigNull CollisionHitModuleBuildConfig;
     typedef soDamageModuleBuildConfigNull DamageModuleBuildConfig;
     typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> LinkModuleBuildConfig;
-    typedef soPhysicsModuleBuildConfigCap<0, soPhysicsModuleImpl, 0> PhysicsModuleBuildConfig;
+    typedef soPhysicsModuleBuildConfigCapNoFlag<0, soPhysicsModuleImpl> PhysicsModuleBuildConfig;
     typedef soColorBlendModuleBuildConfig<-1, 0, soColorBlendModuleImpl> ColorBlendModuleBuildConfig;
     typedef wnStatusModuleBuildConfig<3, soGeneralWorkBuildConfig<2, 10, 1>, 3, soTransitionModuleBuildConfig<wnStatusTransitionTypeList> >
         StatusModuleBuildConfig;

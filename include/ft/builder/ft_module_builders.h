@@ -437,11 +437,18 @@ public:
 };
 
 // physics module with a different IK handle capacity (0: no handles)
-// HYPOTHESIS: the last parameter is the module's constructor flag (the original spells it as a third template argument).
-template <s32 N, typename T, s32 Flag = 1>
+template <s32 N, typename T>
 class soPhysicsModuleBuildConfigCap {
 public:
-    enum { IkCap = N, ModuleFlag = Flag };
+    enum { IkCap = N };
+    typedef T ModuleType;
+};
+
+// HYPOTHESIS: the same configuration, but the module is constructed with its last flag cleared (Ness's Yo-Yo string).
+template <s32 N, typename T>
+class soPhysicsModuleBuildConfigCapNoFlag {
+public:
+    enum { IkCap = N };
     typedef T ModuleType;
 };
 
@@ -455,13 +462,23 @@ public:
 };
 
 // no IK handles: the module takes the shared null array
-template <typename T, s32 Flag>
-class soPhysicsModuleBuilder<soPhysicsModuleBuildConfigCap<0, T, Flag> > {
+template <typename T>
+class soPhysicsModuleBuilder<soPhysicsModuleBuildConfigCap<0, T> > {
     u32 m_unk0;
     T m_physicsModule;
 public:
     soPhysicsModuleBuilder(soModuleAccesser* acc, void* ikData) :
-        m_physicsModule(acc, ikData, &getNullArray<soPhysicsIKHandle>(), Flag) { }
+        m_physicsModule(acc, ikData, &getNullArray<soPhysicsIKHandle>(), 1) { }
+    T* getModule() { return &m_physicsModule; }
+};
+
+template <typename T>
+class soPhysicsModuleBuilder<soPhysicsModuleBuildConfigCapNoFlag<0, T> > {
+    u32 m_unk0;
+    T m_physicsModule;
+public:
+    soPhysicsModuleBuilder(soModuleAccesser* acc, void* ikData) :
+        m_physicsModule(acc, ikData, &getNullArray<soPhysicsIKHandle>(), 0) { }
     T* getModule() { return &m_physicsModule; }
 };
 
