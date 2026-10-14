@@ -1,4 +1,5 @@
 #define SO_ARRAY_LIST_CTOR_FLAG
+#define SO_ARRAY_EXTERNAL_VECTOR_SIZE
 #include <wn/pikmin/wn_pikmin_pikmin_troops_manager.h>
 #include <so/so_external_value_accesser.h>
 #include <so/so_module_accesser.h>
@@ -109,17 +110,19 @@ void wnPikminPikminTroopsManager::update(const soArrayFixed<wnPikminPikminOwnerI
         return;
     }
     if (m_liberty.isEmpty() == false) {
-        wnPikminPikminEnumerator enm = m_liberty.getEnumerator();
-        while (enm.getNext() >= 0) {
-            enm.getCurrent();
-            if (enm.getCurrent()->isLiberty() == false) {
-                wnPikminPikmin* pikmin = enm.getCurrent();
-                m_troops.push(pikmin);
-                wnPikminPikminEnumerator copy = enm;
-                enm.next();
-                m_liberty.erase(copy);
-            } else {
-                enm.next();
+        {
+            wnPikminPikminEnumerator enm = m_liberty.getEnumerator();
+            while (enm.getNext() >= 0) {
+                enm.getCurrent();
+                if (enm.getCurrent()->isLiberty() == false) {
+                    wnPikminPikmin* pikmin = enm.getCurrent();
+                    m_troops.push(pikmin);
+                    wnPikminPikminEnumerator copy = enm;
+                    enm.next();
+                    m_liberty.erase(copy);
+                } else {
+                    enm.next();
+                }
             }
         }
         updateJostlePriority();
@@ -144,14 +147,17 @@ void wnPikminPikminTroopsManager::update(const soArrayFixed<wnPikminPikminOwnerI
     }
     updateJostlePriority();
     if (m_troops.isEmpty() == false) {
-        wnPikminPikminEnumerator enm = m_troops.getEnumerator();
-        while (enm.getNext() >= 0) {
-            if ((enm.getCurrent()->isActiveArticle() == 0) == true) {
-                wnPikminPikminEnumerator copy = enm;
-                enm.next();
-                m_liberty.erase(copy);
-            } else {
-                enm.next();
+        {
+            wnPikminPikminEnumerator enm = m_troops.getEnumerator();
+            while (enm.getNext() >= 0) {
+                u32 inactive = static_cast<soArticle&>(*enm.getCurrent()).isActiveArticle() == 0;
+                if (inactive == 1) {
+                    wnPikminPikminEnumerator copy = enm;
+                    enm.next();
+                    m_liberty.erase(copy);
+                } else {
+                    enm.next();
+                }
             }
         }
         int index = 0;
@@ -168,13 +174,14 @@ void wnPikminPikminTroopsManager::update(const soArrayFixed<wnPikminPikminOwnerI
 }
 
 void wnPikminPikminTroopsManager::updateHoldPikmin(const soArrayFixed<wnPikminPikminOwnerInfo>* owners) {
-    int i;
     if (m_hold.isEmpty() == false) {
+        int i = 0;
         wnPikminPikminEnumerator enm = m_hold.getEnumerator();
-        i = 0;
-        while (i < owners->size()) {
-            Vec2f* pos = reinterpret_cast<Vec2f*>(const_cast<wnPikminPikminOwnerInfo*>(&owners->at(i)));
-            static_cast<soEnumerator<wnPikminPikmin*>&>(enm).getCurrent()->setTargetPos(pos);
+        for (;;) {
+            if (owners->size() <= i) {
+                break;
+            }
+            static_cast<soEnumerator<wnPikminPikmin*>&>(enm).getCurrent()->setTargetPos(reinterpret_cast<Vec2f*>(const_cast<wnPikminPikminOwnerInfo*>(&owners->at(i))));
             if (enm.next() == false) {
                 break;
             }
@@ -186,7 +193,8 @@ void wnPikminPikminTroopsManager::updateHoldPikmin(const soArrayFixed<wnPikminPi
 const wnPikminPikminOwnerInfo& wnPikminPikminTroopsManager::getAssignOwnerInfoSimple(wnPikminPikmin* pikmin, int index, const soArrayFixed<wnPikminPikminOwnerInfo>* owners) {
     float base = pikmin->getParamFloat(4000) - 1.0f;
     float spacing = pikmin->getParamFloat(0xFA1);
-    return getAssignOwnerInfoSub((int)(base + (float)index * spacing), owners);
+    int position = (int)(base + (float)index * spacing);
+    return getAssignOwnerInfoSub(position, owners);
 }
 
 const wnPikminPikminOwnerInfo& wnPikminPikminTroopsManager::getAssignOwnerInfoSub(int index, const soArrayFixed<wnPikminPikminOwnerInfo>* owners) {
@@ -210,6 +218,7 @@ void wnPikminPikminTroopsManager::updateJostlePriority() {
     }
 }
 
+#define VEC (static_cast<soArray<wnPikminPikmin*>&>(sortable))
 void wnPikminPikminTroopsManager::sortPikmin() {
     if (m_troops.isEmpty() != true || m_liberty.isEmpty() != true) {
         soArrayVector<wnPikminPikmin*, 10> sortable(0);
@@ -239,8 +248,7 @@ void wnPikminPikminTroopsManager::sortPikmin() {
                 }
             }
         }
-        soArray<wnPikminPikmin*>& vec = sortable;
-        for (int i = 0; i < 5 && vec.isEmpty() == false; i++) {
+        for (int i = 0; i < 5 && VEC.isEmpty() == false; i++) {
             int variation = m_sortVariation - i;
             if (variation < 0) {
                 variation += 5;
@@ -248,12 +256,12 @@ void wnPikminPikminTroopsManager::sortPikmin() {
             int index = 0;
             int count = sortable.size();
             for (int j = 0; j < count; j++) {
-                if (variation == vec.at(index)->getVariation()) {
-                    m_troops.unshift(vec.at(index));
-                    if (vec.at(index)->isNeedSortRepond() == true) {
-                        vec.at(index)->changeStatus(0x19);
+                if (variation == VEC.at(index)->getVariation()) {
+                    m_troops.unshift(VEC.at(index));
+                    if (VEC.at(index)->isNeedSortRepond() == true) {
+                        VEC.at(index)->changeStatus(0x19);
                     }
-                    vec.erase(index);
+                    VEC.erase(index);
                 } else {
                     index++;
                 }
@@ -265,6 +273,7 @@ void wnPikminPikminTroopsManager::sortPikmin() {
         updateJostlePriority();
     }
 }
+#undef VEC
 
 void wnPikminPikminTroopsManager::syncLr(wnPikminPikmin* pikmin, float lr) {
     pikmin->syncLr(lr);
@@ -389,7 +398,7 @@ void wnPikminPikminTroopsManager::holdPikminForce(int taskId) {
     }
 }
 
-void wnPikminPikminTroopsManager::setVisibilityChain(u8 visible, int num, int rest) {
+void wnPikminPikminTroopsManager::setVisibilityChain(bool visible, int num, int rest) {
     if (m_hold.isEmpty() == false) {
         wnPikminPikminEnumerator enm = m_hold.getEnumerator();
         int index = 0;
@@ -439,3 +448,9 @@ void wnPikminPikminTroopsManager::setTeamAll(int team, int teamOwner, int skipFl
         } while (enm.next());
     }
 }
+
+// The pure virtual destructor needs a body; it is defined after every use so that the enumerator destructors call it
+// out of line (weak copy emitted by this unit).
+template <typename T>
+soEnumerator<T>::~soEnumerator() { }
+template soEnumerator<wnPikminPikmin*>::~soEnumerator();

@@ -290,7 +290,12 @@ public:
     virtual bool hasNext() const = 0;
     virtual bool isEnd() const = 0;
     virtual T& getCurrent() const = 0;
+#ifdef SO_ARRAY_LIST_CTOR_FLAG
+    // MATCH-ONLY: the Pikmin troops manager unit emits the enumerator base destructor and calls it out of line.
+    virtual ~soEnumerator() __attribute__((never_inline)) = 0;
+#else
     virtual ~soEnumerator() = 0;
+#endif
 };
 
 template <typename ElementTy, typename IndexTy>

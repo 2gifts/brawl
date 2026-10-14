@@ -337,7 +337,7 @@ void wnPikminPikmin::changeStatus(int statusKind) {
     }
 }
 
-void wnPikminPikmin::setVisible(u8 visible) {
+void wnPikminPikmin::setVisible(bool visible) {
     m_moduleAccesser->getVisibilityModule().setWhole(visible);
 }
 
