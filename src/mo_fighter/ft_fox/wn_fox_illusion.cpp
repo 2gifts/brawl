@@ -117,9 +117,9 @@ wnFoxIllusion::wnFoxIllusion(s32 articleId, const wnArticleBuildInfo& info, cons
     : wnWeaponBuilder<wnFoxIllusionModuleAccesserBuildConfig>(
           "FoxIllusion", articleId, info,
           wnModuleAccesserBuildData(32, data,
-              info.heapModule->getInstanceHeap(),
-              info.heapModule->getNWModelInstanceHeap(),
-              info.heapModule->getNWMotionInstanceHeap(),
+              info.getHeapModule()->getInstanceHeap(),
+              info.getHeapModule()->getNWModelInstanceHeap(),
+              info.getHeapModule()->getNWMotionInstanceHeap(),
               static_cast<u8>(data->m_resGroupNo), -1, &m_paramAccesser,
               0, 0, 0, 0, 0, 0, 0)),
       m_param(data->m_param), m_paramAccesser(data->m_param) {

@@ -18,8 +18,8 @@
 wnGameWatchOctopus::wnGameWatchOctopus(s32 articleId, const wnArticleBuildInfo& info, const wnGameWatchOctopusData* data) :
     wnWeaponBuilder<wnGameWatchOctopusModuleAccesserBuildConfig>(
         "GameWatchOctopus", articleId, info,
-        wnModuleAccesserBuildData(122, data, info.heapModule->getInstanceHeap(), Heaps::FighterTechqniq,
-                                  info.heapModule->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
+        wnModuleAccesserBuildData(122, data, info.getHeapModule()->getInstanceHeap(), Heaps::FighterTechqniq,
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
                                   0, 0, 0, 0, 0, 0, 0)),
     m_param(data->m_param), m_paramAccesser(data->m_param), m_animObj() {
     soStatusUniqProcess* uniqProc[4];
