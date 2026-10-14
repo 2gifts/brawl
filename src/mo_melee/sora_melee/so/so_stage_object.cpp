@@ -6,6 +6,8 @@
 
 // MATCH-ONLY: keeps the original local order of the checks in soEventObserver::addObserverSub (see so_event_presenter.h).
 #define SO_EVENT_OBSERVER_CHECK_ORDER
+#define FT_FIGHTER_ANIMCMD_LONG // the animation command callback takes a long, as in the original symbol
+#define MT_VEC3F_MUL_INLINE // paired-single Vec3f scale, as in the original code
 #define SO_INPUT_NULL_CTOR // IpNull is built here (StageObject::getInput), its constructor needs Input(bool)
 #include <so/stageobject.h>
 #include <so/anim/so_anim_cmd_event_presenter.h>
@@ -419,4 +421,98 @@ void StageObject::activate(float lr, float damage, Vec3f* pos, bool updateTaskId
     acc->getParamCustomizeModule().activate();
     getGlowModule(acc).unk10();
     acc->getSlowModule().activate();
+}
+
+// Moves the posture by the object's kinetic energies. Energies are grouped by attribute flags: bit 0 marks the ones that
+// are scaled by the object's own slow rate, bit 3 the ones that are applied last and never scaled.
+// HYPOTHESIS: the argument is true when the movement of this frame should honour the slow rate.
+void StageObject::updatePosture(bool honourSlow) {
+    soModuleAccesser* acc = m_moduleAccesser;
+    Vec3f pos = acc->getPostureModule().getPos();
+    Vec3f rot = acc->getPostureModule().getRot(0);
+    if (honourSlow == 1) {
+        float rate = acc->getSlowModule().getRate();
+        if (rate == 1.0f) {
+            Vec3f speed = acc->getKineticModule().getSumSpeed3f(soKineticEnergy::AttributeFlag(0xFFF7));
+            Vec3fAdd(&pos, &pos, &speed);
+            Vec3f rotSpeed = acc->getKineticModule().getSumRotation(soKineticEnergy::AttributeFlag(0xFFF7));
+            Vec3fAdd(&rot, &rot, &rotSpeed);
+        } else {
+            Vec3f scaled = acc->getKineticModule().getSumSpeed3f(soKineticEnergy::AttributeFlag(1));
+            Vec3fScale(&scaled, &scaled, rate);
+            Vec3fAdd(&pos, &pos, &scaled);
+            Vec3f fixedSpeed = acc->getKineticModule().getSumSpeed3f(soKineticEnergy::AttributeFlag(0xFFF6));
+            Vec3fAdd(&pos, &pos, &fixedSpeed);
+            scaled = acc->getKineticModule().getSumRotation(soKineticEnergy::AttributeFlag(1));
+            Vec3fScale(&scaled, &scaled, rate);
+            Vec3fAdd(&rot, &rot, &scaled);
+            Vec3f fixedRot = acc->getKineticModule().getSumRotation(soKineticEnergy::AttributeFlag(0xFFF6));
+            Vec3fAdd(&rot, &rot, &fixedRot);
+        }
+    }
+    Vec3f lastSpeed = acc->getKineticModule().getSumSpeed3f(soKineticEnergy::AttributeFlag(8));
+    Vec3fAdd(&pos, &pos, &lastSpeed);
+    acc->getPostureModule().setPos(&pos);
+    Vec3f lastRot = acc->getKineticModule().getSumRotation(soKineticEnergy::AttributeFlag(8));
+    Vec3fAdd(&rot, &rot, &lastRot);
+    acc->getPostureModule().setRot(&rot, 0);
+}
+
+// The animation commands every stage object understands (motion scripts use them to show / hide / reposition the object):
+//   Update_Node_SRT  the model's root node follows the posture again,
+//   Set_Inactive     hide the object, switch its collision, area, camera, jostle and shadow off and park it outside the
+//                    field (the situation becomes Outfield, no ground correction) with the default motion,
+//   Set_Active       show it and switch those modules back on,
+//   Set_Air          put the object in the air (Air situation, air ground correction).
+bool StageObject::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3) {
+    int group = acmd->getGroup();
+    if (!isObserv(group)) {
+        return false;
+    }
+    if (acmd->getType() <= -1 || acmd->getType() >= 5) {
+        return false;
+    }
+    {
+        {
+            switch (acmd->getType()) {
+            case AnimCmd::Type_Update_Node_SRT:
+                updateNodeSRT();
+                return true;
+            case AnimCmd::Type_Set_Inactive: {
+                m_moduleAccesser->getVisibilityModule().setWhole(0);
+                m_moduleAccesser->getCollisionHitModule().setWhole(2, 0);
+                m_moduleAccesser->getAreaModule().setWhole(0);
+                m_moduleAccesser->getCameraModule().setWhole(0);
+                m_moduleAccesser->getSituationModule().setKind(Situation_Outfield, false);
+                m_moduleAccesser->getGroundModule().setCorrect(soGroundShapeImpl::Correct_None, 0);
+                soMotionChangeParam changeParam;
+                changeParam.m_kind = -1;
+                changeParam.m_frame = 0.0f;
+                changeParam.m_rate = 1.0f;
+                changeParam._12 = 0;
+                changeParam._13 = 0;
+                changeParam._14 = 0;
+                changeParam._15 = 0;
+                m_moduleAccesser->getMotionModule().changeMotionRequest(&changeParam);
+                getJostleModule(m_moduleAccesser).unk1C(0);
+                m_moduleAccesser->getShadowModule().setActiveStatus(0);
+                return true;
+            }
+            case AnimCmd::Type_Set_Active:
+                m_moduleAccesser->getVisibilityModule().setWhole(1);
+                m_moduleAccesser->getCollisionHitModule().setWhole(0, 0);
+                m_moduleAccesser->getAreaModule().setWhole(1);
+                m_moduleAccesser->getCameraModule().setWhole(1);
+                getJostleModule(m_moduleAccesser).unk1C(1);
+                m_moduleAccesser->getShadowModule().setActiveStatus(1);
+                return true;
+            case AnimCmd::Type_Set_Air:
+                m_moduleAccesser->getSituationModule().setKind(Situation_Air, false);
+                m_moduleAccesser->getGroundModule().setCorrect(soGroundShapeImpl::Correct_Air, 0);
+                return true;
+            default:
+                return false;
+            }
+        }
+    }
 }

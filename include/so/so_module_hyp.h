@@ -129,7 +129,7 @@ struct soJostleModuleHyp {
     virtual void unk10();
     virtual void unk14();
     virtual void unk18();
-    virtual void unk1C();
+    virtual void unk1C(int);
     virtual void unk20();
     virtual void unk24();
     virtual void unk28();
