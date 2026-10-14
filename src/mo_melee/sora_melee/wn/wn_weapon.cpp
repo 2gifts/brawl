@@ -106,7 +106,7 @@ Weapon::~Weapon() {
 
 void Weapon::activate(wnActivateDesc* desc) {
     unk30 = 9;
-    StageObject::activate(&desc->pos, desc->lr, 0.0f, true);
+    StageObject::activate(desc->lr, 0.0f, &desc->pos, true);
     bool hasOwner = false;
     if (m_moduleAccesser->getLinkModule().isNull() == false && desc->founderTaskId != -1 && desc->flagBit7 == 1) {
         hasOwner = m_moduleAccesser->getLinkModule().link(3, desc->founderTaskId);
@@ -133,15 +133,17 @@ void Weapon::activate(wnActivateDesc* desc) {
         } else {
             if (desc->flagBit3 == 1) {
                 m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Reference_Parent_Scale, true);
-                m_moduleAccesser->getPostureModule().setOwnerScale(m_moduleAccesser->getLinkModule().getLinkScale());
+                float linkScale = m_moduleAccesser->getLinkModule().getLinkScale();
+                m_moduleAccesser->getPostureModule().setOwnerScale(linkScale);
                 m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Reference_Parent_Scale, false);
             }
             if (m_moduleAccesser->getGroundModule().isNull() != true) {
                 if (m_moduleAccesser->getLinkModule().isValidParentShape(3) == true) {
-                    Vec2f center = m_moduleAccesser->getLinkModule().getParentShapeCenterPos(3);
+                    Vec2f center;
+                    Vec2f::copy(center, m_moduleAccesser->getLinkModule().getParentShapeCenterPos(3));
                     m_moduleAccesser->getGroundModule().setShapeSafePos(&center, 0);
                 } else {
-                    int ownerTask = m_moduleAccesser->getTeamModule().getTeamOwnerId();
+                    u32 ownerTask = m_moduleAccesser->getTeamModule().getTeamOwnerId();
                     Vec2f center;
                     if (ownerTask != -1 && m_moduleAccesser->getLinkModule().getParentShapeCenterPosTaskId(ownerTask, &center) == true) {
                         m_moduleAccesser->getGroundModule().setShapeSafePos(&center, 0);
@@ -149,14 +151,16 @@ void Weapon::activate(wnActivateDesc* desc) {
                 }
             }
         }
-        m_moduleAccesser->getCollisionAttackModule().setPowerMul2nd(m_moduleAccesser->getLinkModule().getOwnerAttackPowerMulArticle(3));
+        float powerMul = m_moduleAccesser->getLinkModule().getOwnerAttackPowerMulArticle(3);
+        m_moduleAccesser->getCollisionAttackModule().setPowerMul2nd(powerMul);
         if (m_moduleAccesser->getLinkModule().isParentGlow(3) == true) {
             int linkIndex = 3;
             if (m_moduleAccesser->getLinkModule().link(4, teamOwner) == true) {
                 linkIndex = 4;
             }
+            wnGlowModuleIface* glowModule = static_cast<wnGlowModuleIface*>(wnModuleAt(m_moduleAccesser, 0xC8));
             int glow = m_moduleAccesser->getLinkModule().getParentWeaponGlowAttack(linkIndex);
-            static_cast<wnGlowModuleIface*>(wnModuleAt(m_moduleAccesser, 0xC8))->setAttack(desc->unk40 + glow);
+            glowModule->setAttack(desc->unk40 + glow);
             m_moduleAccesser->getLinkModule().setAttribute(linkIndex, soLinkConnection::Attribute_Reference_Parent_Power_Up, true);
             if (desc->flag4DBit7 == 1) {
                 static_cast<wnGlowModuleIface*>(wnModuleAt(m_moduleAccesser, 0xC8))->setWhole(linkIndex);
@@ -172,13 +176,14 @@ void Weapon::activate(wnActivateDesc* desc) {
             m_moduleAccesser->getEffectModule().setSyncScale(true);
         }
         if (desc->flag4DBit6 == 1 && m_moduleAccesser->getLinkModule().isParentEnableSubColor(3) == true) {
-            GXColor color = m_moduleAccesser->getLinkModule().getParentSubColor(3);
-            m_moduleAccesser->getColorBlendModule().setSubColor(color, 1);
+            m_moduleAccesser->getColorBlendModule().setSubColor(m_moduleAccesser->getLinkModule().getParentSubColor(3), 1);
         }
     }
     updateNodeSRT();
     m_inhaleCount = 0;
-    unkA4 &= 0x4F;
+    unkA4Bit7 = 0;
+    m_isInhaled = 0;
+    m_keepOnReflectLimit = 0;
     initialize();
     if (wnInfo::isFinal(m_subKind) == true) {
         g_wnFinalArticleCount++;
