@@ -465,7 +465,7 @@ void StageObject::updatePosture(bool honourSlow) {
 //   Set_Active       show it and switch those modules back on,
 //   Set_Air          put the object in the air (Air situation, air ground correction).
 bool StageObject::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3) {
-    int group = acmd->getGroup();
+    s8 group = acmd->getGroup();
     if (!isObserv(group)) {
         return false;
     }

@@ -22,9 +22,6 @@
 #include <st_earth/gr_earth_anim.h>
 #include <st_earth/gr_earth_hit.h>
 
-// BaseItem::requestLost (sora_melee, unnamed)
-extern "C" void fn_27_28ECF4(BaseItem* item);
-
 // HYPOTHESIS: two small constant objects (an 0xFF marker with an index) that the unit's headers instantiate.
 struct grEarthOniyonMarker {
     int m_a;
@@ -637,7 +634,7 @@ void grEarthOniyon::onDamage(int index, soDamage* damage, soDamageAttackerInfo* 
         }
         if (item->m_kind == Item_Stage_Pellet) {
             requestItem(item->m_variation & 0xFF);
-            fn_27_28ECF4(item);
+            item->requestLost();
             return;
         }
     }
