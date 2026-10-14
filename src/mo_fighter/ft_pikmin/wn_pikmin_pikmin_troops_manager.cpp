@@ -398,7 +398,7 @@ void wnPikminPikminTroopsManager::holdPikminForce(int taskId) {
     }
 }
 
-void wnPikminPikminTroopsManager::setVisibilityChain(bool visible, int num, int rest) {
+void wnPikminPikminTroopsManager::setVisibilityChain(u8 visible, int num, int rest) {
     if (m_hold.isEmpty() == false) {
         wnPikminPikminEnumerator enm = m_hold.getEnumerator();
         int index = 0;

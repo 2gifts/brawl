@@ -789,7 +789,7 @@ notifyEventChangeSituation__14wnPikminPikminF13SituationKind13SituationKindP16so
 getCatchKind__14wnPikminPikminFv = .text:0x0001B104; // type:function size:0x98
 changeStatus__14wnPikminPikminFi = .text:0x0001B19C; // type:function size:0x80
 fn_113_1B21C = .text:0x0001B21C; // type:function size:0x1C
-setVisible__14wnPikminPikminFb = .text:0x0001B238; // type:function size:0x1C
+setVisible__14wnPikminPikminFUc = .text:0x0001B238; // type:function size:0x1C
 linkOwner__14wnPikminPikminFii = .text:0x0001B254; // type:function size:0xB8
 setOwnerInfo__14wnPikminPikminFP23wnPikminPikminOwnerInfoP23wnPikminPikminOwnerInfo = .text:0x0001B30C; // type:function size:0xA8
 processFixPosition__14wnPikminPikminFv = .text:0x0001B3B4; // type:function size:0x1D8
@@ -1171,7 +1171,7 @@ setOwnerCondition__27wnPikminPikminTroopsManagerFP14wnPikminPikmini = .text:0x00
 updateNodeSRT__27wnPikminPikminTroopsManagerFP14wnPikminPikmin = .text:0x00025330; // type:function size:0x14
 holdPikminForce__27wnPikminPikminTroopsManagerFi = .text:0x00025344; // type:function size:0x1EC
 updateJostlePriority__27wnPikminPikminTroopsManagerFv = .text:0x00025530; // type:function size:0x9C
-setVisibilityChain__27wnPikminPikminTroopsManagerFbii = .text:0x000255CC; // type:function size:0xCC
+setVisibilityChain__27wnPikminPikminTroopsManagerFUcii = .text:0x000255CC; // type:function size:0xCC
 setTeamAll__27wnPikminPikminTroopsManagerFiii = .text:0x00025698; // type:function size:0x204
 fn_113_2589C = .text:0x0002589C; // type:function size:0xE4
 __dt__44wnPikminPikminStatusUniqProcessSpecialLwCompFv = .text:0x00025980; // type:function size:0x40
