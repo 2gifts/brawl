@@ -52,6 +52,8 @@ public:
     };
 
     soLinkEventObserver(short unitID) : soEventObserver<soLinkEventObserver>(unitID) {};
+    // HYPOTHESIS: unit id 7 is the link observer slot of a StageObject; registers with the given manager right away.
+    soLinkEventObserver(short manageId, s8 p2) : soEventObserver<soLinkEventObserver>(7) { addObserver(manageId, p2); }
 
 #if defined(FT_MODULE_BUILDER) || defined(YK_STAGE_FULL) || defined(SO_EVENT_OBSERVER_INLINE)
     virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); } // MATCH-ONLY: inline in the REL

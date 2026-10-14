@@ -47,7 +47,7 @@ public:
 	virtual int getPartSize(u32 collisionShieldGroupIndex);
 	virtual u32 getTeam();
 	virtual void checkLog();
-	virtual void check();
+	virtual bool check();
 	virtual void renderDebug();
 	virtual void clearAll();
 	virtual void clearAll(u32 collisionShieldGroupIndex);
@@ -109,7 +109,7 @@ public:
 	virtual int getPartSize(u32 collisionShieldGroupIndex);
 	virtual u32 getTeam();
 	virtual void checkLog();
-	virtual void check();
+	virtual bool check();
 	virtual void renderDebug();
 	virtual void clearAll();
 	virtual void clearAll(u32 collisionShieldGroupIndex);

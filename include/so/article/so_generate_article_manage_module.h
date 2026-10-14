@@ -15,7 +15,7 @@ class soGenerateArticleManageModule {
 public:
     virtual ~soGenerateArticleManageModule();
     virtual void activate();
-    virtual void deactivate();
+    virtual void deactivate(bool treatAsRemoved); // HYPOTHESIS: the flag says the owner counts as removed (seen in StageObject::deactivate)
     virtual soArticle* generate(int articleId, soModuleAccesser*, soLogAttackInfo*);
     virtual void have(int articleId, int, int selector, int taskId);
     virtual void shoot(int articleId, int selector, bool);
