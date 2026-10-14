@@ -78,10 +78,11 @@ void wnLucasHimohebi::activate(int founderTaskId, int kind, int team, float lr, 
     desc.unk4DHigh = 0;
     Weapon::activate(&desc);
     if (attach != 0) {
+        soResourceModule& resource = m_moduleAccesser->getResourceModule();
+        wnLassoAltStatusView* alt = wnLassoGetAltStatus(m_moduleAccesser);
         u32 nodeId = lbl_114_data_AED8;
         int noValue = 0;
-        wnLassoGetAltStatus(m_moduleAccesser)->unk18Attach(m_moduleAccesser->getResourceModule().getResourceIdAccesser()->getBinResId(), noValue, nodeId, nodeId, true, 0, noValue, -1);
-        wnLassoAltStatusView* alt;
+        alt->unk18Attach(resource.getResourceIdAccesser()->getBinResId(), noValue, nodeId, nodeId, 1, 0, noValue, -1);
         soPostureModule& posture = m_moduleAccesser->getPostureModule();
         alt = wnLassoGetAltStatus(m_moduleAccesser);
         alt->unkDCFloat(posture.getScale());
@@ -91,7 +92,7 @@ void wnLucasHimohebi::activate(int founderTaskId, int kind, int team, float lr, 
         m_moduleAccesser->getWorkManageModule().setInt(3, 0x10000006);
         m_moduleAccesser->getStatusModule().changeStatusForce(1, m_moduleAccesser);
     } else if (plain != 0) {
-        // HYPOTHESIS: the plain activation (no attached model) only runs the physics-free motion with these work values.
+        // HYPOTHESIS: without an attached model the snake moves freely with these work values.
         m_moduleAccesser->getWorkManageModule().setInt(3, 0x20000000);
         m_moduleAccesser->getWorkManageModule().setFloat(19.63f, 0x21000000);
         m_moduleAccesser->getWorkManageModule().setFloat(100.0f, 0x21000001);

@@ -437,10 +437,11 @@ public:
 };
 
 // physics module with a different IK handle capacity (0: no handles)
-template <s32 N, typename T>
+// HYPOTHESIS: the last parameter is the module's constructor flag (the original spells it as a third template argument).
+template <s32 N, typename T, s32 Flag = 1>
 class soPhysicsModuleBuildConfigCap {
 public:
-    enum { IkCap = N };
+    enum { IkCap = N, ModuleFlag = Flag };
     typedef T ModuleType;
 };
 
@@ -454,13 +455,13 @@ public:
 };
 
 // no IK handles: the module takes the shared null array
-template <typename T>
-class soPhysicsModuleBuilder<soPhysicsModuleBuildConfigCap<0, T> > {
+template <typename T, s32 Flag>
+class soPhysicsModuleBuilder<soPhysicsModuleBuildConfigCap<0, T, Flag> > {
     u32 m_unk0;
     T m_physicsModule;
 public:
     soPhysicsModuleBuilder(soModuleAccesser* acc, void* ikData) :
-        m_physicsModule(acc, ikData, &getNullArray<soPhysicsIKHandle>(), 1) { }
+        m_physicsModule(acc, ikData, &getNullArray<soPhysicsIKHandle>(), Flag) { }
     T* getModule() { return &m_physicsModule; }
 };
 
