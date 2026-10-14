@@ -2084,6 +2084,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_chain.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_chain_status_uniq_process_shoot.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_chain_status_uniq_process_reach.cpp"),
+            Object(Matching, "mo_fighter/ft_pikmin/wn_pikmin_chain_utility.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/ft_pikmin.cpp"),
         ],
     },

@@ -21,7 +21,7 @@ public:
     virtual void slot0C();
     virtual void slot10();
     virtual void slot14();
-    virtual void slot18();
+    virtual void unk18Attach(u32 archiveId, int, u32, u32, bool, int, int, int);
     virtual void slot1C();
     virtual void slot20();
     virtual void slot24();
@@ -70,7 +70,7 @@ public:
     virtual void slotD0();
     virtual int unkD4Int();
     virtual void slotD8();
-    virtual void slotDC();
+    virtual void unkDCFloat(float);
     virtual int unkE0Int();
 };
 
@@ -216,7 +216,7 @@ public:
     virtual void slot13C();
     virtual void slot140();
     virtual void slot144();
-    virtual void slot148();
+    virtual void unk148Int(int);
     virtual void slot14C();
     virtual void slot150();
     virtual void slot154();
