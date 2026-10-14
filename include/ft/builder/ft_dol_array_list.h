@@ -70,11 +70,34 @@ FT_DOL_ARRAY_VECTOR(soTransitionTermGroup, 20);
 FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 289);
 FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 288);
 FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 281);
+#ifdef SO_ARRAY_SPLIT_VECTOR_CTOR
+template <>
+soArrayVector<ftAnimCmdConvPtr, 281>::soArrayVector(s32 size);
+#endif
 FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 285);
+#ifdef SO_ARRAY_SPLIT_VECTOR_CTOR
+template <>
+soArrayVector<ftAnimCmdConvPtr, 285>::soArrayVector(s32 size);
+template <>
+soArrayVector<ftAnimCmdConvPtr, 286>::soArrayVector(s32 size);
+template <>
+soArrayVector<ftAnimCmdConvPtr, 284>::soArrayVector(s32 size);
+template <>
+soArrayVector<ftAnimCmdConvPtr, 287>::soArrayVector(s32 size);
+template <>
+soArrayVector<ftAnimCmdConvPtr, 293>::soArrayVector(s32 size);
+template <>
+soArrayVector<ftAnimCmdConvPtr, 295>::soArrayVector(s32 size);
+template <>
+soArrayVector<ftAnimCmdConvPtr, 314>::soArrayVector(s32 size);
+#endif
 // Only the capacities whose REL takes the whole class (constructor and destructors) from sora_melee; the other
 // capacities keep their destructors in the REL, so declaring them here would drop those functions.
 FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 290);
 FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 291);
+FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 301);
+FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 303);
+FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 309);
 FT_DOL_ARRAY_VECTOR(soCollisionHitPart, 13);
 FT_DOL_ARRAY_VECTOR(soCollisionShieldPart, 1);
 FT_DOL_ARRAY_VECTOR(soCollisionShieldPart, 12);
