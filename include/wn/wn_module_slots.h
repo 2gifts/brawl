@@ -69,3 +69,13 @@ public:
     virtual void changeStatus() = 0; // +0x50
 };
 
+
+// Collision catch module (+0x30): HYPOTHESIS: laid out like the attack and search modules, so slot 0x18 is clearAll.
+class wnCollisionCatchModuleIface {
+public:
+    virtual void pad8() = 0;
+    virtual void padc() = 0;
+    virtual void pad10() = 0;
+    virtual void pad14() = 0;
+    virtual void clearAll() = 0; // +0x18
+};

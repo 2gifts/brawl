@@ -549,8 +549,7 @@ void Weapon::setHitStop(float power, float minFrame, int allowSdi) {
 }
 
 void Weapon::setLogAttackInfo(soLogAttackInfo* logAttackInfo) {
-    int info0 = logAttackInfo->_0;
-    m_moduleAccesser->getWorkManageModule().setInt(info0, Weapon_Work_Int_Log_Attack_Info0);
+    m_moduleAccesser->getWorkManageModule().setInt(logAttackInfo->_0, Weapon_Work_Int_Log_Attack_Info0);
     m_moduleAccesser->getWorkManageModule().setInt(logAttackInfo->_4, Weapon_Work_Int_Log_Attack_Info1);
 }
 
@@ -584,18 +583,21 @@ bool Weapon::isInhaled() {
 }
 
 Vec3f Weapon::startInhaled() {
-    m_inhaleCount = 0;
     m_isInhaled = true;
+    m_inhaleCount = 0;
     m_inhaleStartPos = m_moduleAccesser->getPostureModule().getPos();
     soModuleAccesser* acc = m_moduleAccesser;
-    acc->getStopModule().end(1);
-    acc->getAreaModule().enableArea(0, false, 0);
+    acc->getStopModule().setSpecialStop(1);
+    acc->getAreaModule().setWhole(0);
     acc->getGroundModule().setCorrect(static_cast<soGroundShapeImpl::CorrectKind>(0), 0);
     acc->getGroundModule().setGrCollisionMode(false);
     acc->getSituationModule().setKind(Situation_Air, false);
-    acc->getKineticModule().unableEnergyAll();
+    acc->getCollisionHitModule().setWhole(3, 0);
+    acc->getCollisionAttackModule().sleep(true);
     acc->getCollisionShieldModule().clearAll();
     acc->getCollisionReflectorModule().clearAll();
+    static_cast<wnCollisionCatchModuleIface*>(wnModuleAt(acc, 0x30))->clearAll();
+    acc->getCollisionSearchModule().clearAll();
     acc->getWorkManageModule().setInt(Weapon_Work_Int_Init_Life, Weapon_Work_Int_Life);
     return m_inhaleStartPos;
 }
