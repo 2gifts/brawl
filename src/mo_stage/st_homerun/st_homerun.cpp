@@ -55,9 +55,6 @@ extern "C" void fn_27_239E58(stMelee* stage, float* out, float from, float to, f
 extern "C" void fn_27_233ACC(stTrigger* trigger, grGimmickBeltConveyorData* data);
 // stPositions::getItemPos
 extern "C" void fn_27_226CFC(stPositions* positions, int index, Vec3f* pos, Vec3f* safePos);
-// BaseItem::move / getPos
-extern "C" void fn_27_28DE90(BaseItem* item, Vec3f* pos);
-extern "C" Vec3f fn_27_290060(BaseItem* item);
 // soExternalValueAccesser::isGroundTouch
 extern "C" int fn_27_8CC2C(BaseItem* item, int kind);
 
@@ -1050,7 +1047,7 @@ void stHomerun::updateFigure(float deltaFrame) {
             BaseItem* item = items->getItemFromInstanceId(m_figureId[i]);
             if (item != NULL) {
                 Vec3f pos;
-                pos = fn_27_290060(item);
+                pos = item->getPos();
                 if (pos.m_x < m_posLimit[0].m_x - 112.5f) {
                     item->deactivate();
                     m_figureId[i] = 0;
@@ -1086,7 +1083,7 @@ void stHomerun::fixposSandBag() {
     pos.m_z = 0.0f;
     if (m_scrollRate > 0.0f) {
         pos.m_x = 2000.0f;
-        fn_27_28DE90(m_sandBag, &pos);
+        m_sandBag->move(&pos);
     }
     m_scrollPrev = m_scroll;
     m_scroll = homerunClamp(pos.m_x, 0.0f, pos.m_x);
@@ -1098,7 +1095,7 @@ void stHomerun::fixposSandBag() {
         if (m_scrollRate == 0.0f && m_sandBagX >= 2000.0f) {
             m_scroll = m_sandBagX - 2000.0f;
             pos.m_x = 2000.0f;
-            fn_27_28DE90(m_sandBag, &pos);
+            m_sandBag->move(&pos);
         }
     }
     if (m_sandBagX < 2000.0f) {
