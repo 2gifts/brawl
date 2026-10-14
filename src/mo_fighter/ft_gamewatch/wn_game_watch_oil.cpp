@@ -15,8 +15,8 @@
 wnGameWatchOil::wnGameWatchOil(s32 articleId, const wnArticleBuildInfo& info, const wnGameWatchOilData* data) :
     wnWeaponBuilder<wnGameWatchOilModuleAccesserBuildConfig>(
         "GameWatchOil", articleId, info,
-        wnModuleAccesserBuildData(121, data, info.heapModule->getInstanceHeap(), info.heapModule->getNWModelInstanceHeap(),
-                                  info.heapModule->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
+        wnModuleAccesserBuildData(121, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
                                   0, 0, 0, 0, 0, 0, 0)),
     m_param(data->m_param), m_paramAccesser(data->m_param), m_animObj() {
     Weapon::deactivate(false);

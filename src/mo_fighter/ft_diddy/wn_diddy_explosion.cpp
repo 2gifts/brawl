@@ -12,8 +12,8 @@
 wnDiddyExplosion::wnDiddyExplosion(s32 articleId, const wnArticleBuildInfo& info, const wnDiddyExplosionData* data) :
     wnWeaponBuilder<wnDiddyExplosionModuleAccesserBuildConfig>(
         "DiddyExplosion", articleId, info,
-        wnModuleAccesserBuildData(0x39, data, info.heapModule->getInstanceHeap(), Heaps::FighterTechqniq,
-                                  info.heapModule->getNWMotionInstanceHeap(), data->m_resGroupNo, -1,
+        wnModuleAccesserBuildData(0x39, data, info.getHeapModule()->getInstanceHeap(), Heaps::FighterTechqniq,
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1,
                                   &g_soParamAccesserNull, 0, 0, 0, 0, 0, 0, 0)),
     unk1F94(data->unk34) {
     soStatusUniqProcess* uniqProc = 0;

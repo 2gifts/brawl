@@ -1,5 +1,8 @@
 #define WN_WEAPON_BUILDER
-#define WN_WEAPON_ANIMCMD_LONG
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define WN_STATUS_PLAIN_NULL_ARRAY
 #define FT_REL_LINK_EXTERN
 #define MT_VEC2F_ASSIGN_NOINLINE
 #define MT_VEC3F_CTOR_NOINLINE
@@ -15,8 +18,8 @@ extern soStatusUniqProcess g_wnLucasPKFireStatusUniqProcessPillar;
 wnLucasPKFire::wnLucasPKFire(s32 articleId, const wnArticleBuildInfo& info, const wnLucasPKFireData* data) :
     wnWeaponBuilder<wnLucasPKFireModuleAccesserBuildConfig>(
         "wnLucasPKFire", articleId, info,
-        wnModuleAccesserBuildData(78, data, info.heapModule->getInstanceHeap(), info.heapModule->getNWModelInstanceHeap(),
-                                  info.heapModule->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
+        wnModuleAccesserBuildData(78, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
                                   0, 0, 0, 0, 0, 0, 0)),
     m_param(data->m_param), m_paramAccesser(data->m_param), m_energyGravity() {
     soStatusUniqProcess* uniqProcs[2];
