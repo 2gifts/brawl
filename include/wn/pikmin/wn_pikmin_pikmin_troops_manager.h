@@ -23,12 +23,12 @@ public:
     void holdPikmin(int num);
     wnPikminPikmin* getHoldPikminTop();
     soArrayList<wnPikminPikmin*, 10>* getHoldPikminList();
-    void reducePikminAll(soArrayFixed<wnPikminPikminOwnerInfo>* owners);
+    void reducePikminAll(const soArrayFixed<wnPikminPikminOwnerInfo>* owners);
     void libertyPikminAll();
-    void update(soArrayFixed<wnPikminPikminOwnerInfo>* owners);
-    void updateHoldPikmin(soArrayFixed<wnPikminPikminOwnerInfo>* owners);
-    wnPikminPikminOwnerInfo& getAssignOwnerInfoSimple(wnPikminPikmin* pikmin, int index, soArrayFixed<wnPikminPikminOwnerInfo>* owners);
-    wnPikminPikminOwnerInfo& getAssignOwnerInfoSub(int index, soArrayFixed<wnPikminPikminOwnerInfo>* owners);
+    void update(const soArrayFixed<wnPikminPikminOwnerInfo>* owners);
+    void updateHoldPikmin(const soArrayFixed<wnPikminPikminOwnerInfo>* owners);
+    const wnPikminPikminOwnerInfo& getAssignOwnerInfoSimple(wnPikminPikmin* pikmin, int index, const soArrayFixed<wnPikminPikminOwnerInfo>* owners);
+    const wnPikminPikminOwnerInfo& getAssignOwnerInfoSub(int index, const soArrayFixed<wnPikminPikminOwnerInfo>* owners);
     void syncLr(wnPikminPikmin* pikmin, float lr);
     void syncPos(wnPikminPikmin* pikmin, Vec2f* pos);
     void setTargetPos(wnPikminPikmin* pikmin, Vec2f* pos);
