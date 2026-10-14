@@ -41,7 +41,7 @@ public:
     // Map-named helper; -1 is the sentinel for each unresolved constraint argument.
     void constraint(int taskId, int unk1, int unk2);
     // HYPOTHESIS: relative source order of rate/index; f1/f2/r4 ABI verified.
-    void setHitStop(float power, float rate, int index);
+    void setHitStop(float power, int index, float rate);
     void setGroundShapeSafePosWithAncestor();
 
     struct Instance {

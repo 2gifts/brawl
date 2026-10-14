@@ -33,6 +33,11 @@ struct wnActivateDesc {
             u8 flagsMidLow : 1;
             u8 flagsLow : 3;
         };
+        // HYPOTHESIS: the Pikmin article clears the low nibble as one group.
+        struct {
+            u8 : 4;
+            u8 flagsLowNibble : 4;
+        };
     };
     union {
         u8 unk4D;

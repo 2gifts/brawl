@@ -72,7 +72,7 @@ public:
 
 #ifdef WN_ARTICLE_NATIVE_BUILDERS
     soKineticEnergy(bool isNull = false) : soNullable(isNull), soEnable(!isNull) { }
-#elif defined(WN_WEAPON_BUILDER)
+#elif defined(WN_WEAPON_BUILDER) || defined(WN_KINETIC_GENERIC_BUILDER)
     // MATCH-ONLY: the article RELs call this constructor out of line (weak copy in the unit).
     soKineticEnergy(bool isNull = false) __attribute__((never_inline)) : soNullable(isNull), soEnable(!isNull) { }
 #endif

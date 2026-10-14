@@ -40,7 +40,11 @@ public:
         return res;
     }
 
-    friend Vec2f operator-(const Vec2f& lhs, const Vec2f& rhs) {
+    friend Vec2f operator-(const Vec2f& lhs, const Vec2f& rhs)
+#ifdef MT_VEC2F_SUB_NOINLINE
+        __attribute__((never_inline)) // MATCH-ONLY: retain an evidenced out-of-line subtraction call.
+#endif
+    {
         Vec2f res;
         res.m_x = lhs.m_x - rhs.m_x;
         res.m_y = lhs.m_y - rhs.m_y;
@@ -58,10 +62,19 @@ public:
         return lhs * (1 / c);
     }
 
-    Vec2f& operator+=(const Vec2f& v) {
+    Vec2f& operator+=(const Vec2f& v)
+#ifdef MT_VEC2F_ADD_ASSIGN_DIRECT
+    { // MATCH-ONLY: the weak out-of-line copy in the Pikmin article adds the components directly.
+        m_x = m_x + v.m_x;
+        m_y = m_y + v.m_y;
+        return *this;
+    }
+#else
+    {
         *this = *this + v;
         return *this;
     }
+#endif
 
     Vec2f& operator-=(const Vec2f& v) {
         *this = *this - v;

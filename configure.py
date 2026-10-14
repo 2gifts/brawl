@@ -2067,7 +2067,8 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin.cpp"),
-            Object(NonMatching, "mo_fighter/ft_pikmin/wn_kinetic_energy_gravity.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_switch_decide_module_impl.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_general_term_decide_module_impl.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_module_accesser_build_data.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_troops_manager.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_special_lw_comp.cpp"),
