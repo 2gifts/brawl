@@ -140,3 +140,177 @@ void wnPikminPikminTroopsManager::updateJostlePriority() {
         }
     }
 }
+
+void wnPikminPikminTroopsManager::syncLr(wnPikminPikmin* pikmin, float lr) {
+    pikmin->syncLr(lr);
+}
+
+void wnPikminPikminTroopsManager::syncPos(wnPikminPikmin* pikmin, Vec2f* pos) {
+    pikmin->syncPos(pos);
+}
+
+void wnPikminPikminTroopsManager::setTargetPos(wnPikminPikmin* pikmin, Vec2f* pos) {
+    pikmin->setTargetPos(pos);
+}
+
+void wnPikminPikminTroopsManager::attachChain(wnPikminPikmin* pikmin, int unk1, int unk2, int logGroup) {
+    pikmin->attachChain(unk1, unk2, logGroup);
+}
+
+void wnPikminPikminTroopsManager::detachChain(wnPikminPikmin* pikmin, int status) {
+    pikmin->detachChain(status);
+}
+
+bool wnPikminPikminTroopsManager::isConstraint(wnPikminPikmin* pikmin, u32 taskId) {
+    return pikmin->isConstraintTarget(taskId);
+}
+
+void wnPikminPikminTroopsManager::detachConstraint(wnPikminPikmin* pikmin) {
+    pikmin->detachConstraint(false);
+}
+
+void wnPikminPikminTroopsManager::setPowerMulStatus(wnPikminPikmin* pikmin, float power) {
+    pikmin->setPowerMulStatus(power);
+}
+
+void wnPikminPikminTroopsManager::onStatusFlag(wnPikminPikmin* pikmin, u32 flag) {
+    pikmin->onStatusFlag(flag);
+}
+
+void wnPikminPikminTroopsManager::setStatusFloat(wnPikminPikmin* pikmin, float value, u32 index) {
+    pikmin->setStatusFloat(value, index);
+}
+
+void wnPikminPikminTroopsManager::onInstanceFlag(wnPikminPikmin* pikmin, u32 flag) {
+    pikmin->onInstanceFlag(flag);
+}
+
+int wnPikminPikminTroopsManager::getCatchKind(wnPikminPikmin* pikmin) {
+    return pikmin->getCatchKind();
+}
+
+bool wnPikminPikminTroopsManager::attachGround(wnPikminPikmin* pikmin) {
+    return pikmin->attachGround();
+}
+
+void wnPikminPikminTroopsManager::setOwnerCondition(wnPikminPikmin* pikmin, int condition) {
+    pikmin->setOwnerConditionCurrent(condition);
+}
+
+void wnPikminPikminTroopsManager::updateNodeSRT(wnPikminPikmin* pikmin) {
+    pikmin->updateNodeSRT();
+}
+
+bool wnPikminPikminTroopsManager::isMakeBloodAll() {
+    wnPikminPikminEnumerator enm;
+    if (m_troops.isEmpty() == false) {
+        enm = m_troops.getEnumerator();
+        do {
+            if (soExternalValueAccesser::getWorkInt(enm.getCurrent(), 0x10000008) != 2) {
+                return false;
+            }
+        } while (enm.next());
+    }
+    if (m_hold.isEmpty() == false) {
+        enm = m_hold.getEnumerator();
+        do {
+            if (soExternalValueAccesser::getWorkInt(enm.getCurrent(), 0x10000008) != 2) {
+                return false;
+            }
+        } while (enm.next());
+    }
+    if (m_liberty.isEmpty() == false) {
+        enm = m_liberty.getEnumerator();
+        do {
+            if (soExternalValueAccesser::getWorkInt(enm.getCurrent(), 0x10000008) != 2) {
+                return false;
+            }
+        } while (enm.next());
+    }
+    return true;
+}
+
+void wnPikminPikminTroopsManager::holdPikminForce(int taskId) {
+    wnPikminPikminEnumerator enm;
+    if (m_troops.isEmpty() == false) {
+        enm = m_troops.getEnumerator();
+        int index = 0;
+        while (enm.getNext() >= 0) {
+            wnPikminPikmin* pikmin = enm.getCurrent();
+            enm.next();
+            if (taskId == pikmin->m_taskId) {
+                m_hold.push(pikmin);
+                m_troops.erase(index);
+                updateJostlePriority();
+                return;
+            }
+            index++;
+        }
+    }
+    if (m_liberty.isEmpty() == false) {
+        enm = m_liberty.getEnumerator();
+        int index = 0;
+        while (enm.getNext() >= 0) {
+            wnPikminPikmin* pikmin = enm.getCurrent();
+            enm.next();
+            if (taskId == pikmin->m_taskId) {
+                m_hold.push(pikmin);
+                m_liberty.erase(index);
+                updateJostlePriority();
+                return;
+            }
+            index++;
+        }
+    }
+}
+
+void wnPikminPikminTroopsManager::setVisibilityChain(u8 visible, int num, int rest) {
+    if (m_hold.isEmpty() == false) {
+        wnPikminPikminEnumerator enm = m_hold.getEnumerator();
+        int index = 0;
+        while (enm.getNext() >= 0) {
+            wnPikminPikmin* pikmin = enm.getCurrent();
+            if (num < 0 || index < num) {
+                pikmin->setVisible(visible);
+            } else {
+                if (rest == 0) {
+                    break;
+                }
+                pikmin->setVisible(visible == 0);
+            }
+            enm.next();
+            index++;
+        }
+    }
+}
+
+void wnPikminPikminTroopsManager::setTeamAll(int team, int teamOwner, int skipFlagged) {
+    wnPikminPikminEnumerator enm;
+    if (m_troops.isEmpty() == false) {
+        enm = m_troops.getEnumerator();
+        do {
+            wnPikminPikmin* pikmin = enm.getCurrent();
+            if (skipFlagged == 0 || soExternalValueAccesser::getWorkFlag(pikmin, 0x12000006) == 0) {
+                pikmin->setTeam(team, teamOwner);
+            }
+        } while (enm.next());
+    }
+    if (m_hold.isEmpty() == false) {
+        enm = m_hold.getEnumerator();
+        do {
+            wnPikminPikmin* pikmin = enm.getCurrent();
+            if (skipFlagged == 0 || soExternalValueAccesser::getWorkFlag(pikmin, 0x12000006) == 0) {
+                pikmin->setTeam(team, teamOwner);
+            }
+        } while (enm.next());
+    }
+    if (m_liberty.isEmpty() == false) {
+        enm = m_liberty.getEnumerator();
+        do {
+            wnPikminPikmin* pikmin = enm.getCurrent();
+            if (skipFlagged == 0 || soExternalValueAccesser::getWorkFlag(pikmin, 0x12000006) == 0) {
+                pikmin->setTeam(team, teamOwner);
+            }
+        } while (enm.next());
+    }
+}

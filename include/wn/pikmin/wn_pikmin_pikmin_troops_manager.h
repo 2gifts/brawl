@@ -34,7 +34,7 @@ public:
     void setTargetPos(wnPikminPikmin* pikmin, Vec2f* pos);
     void attachChain(wnPikminPikmin* pikmin, int unk1, int unk2, int logGroup);
     void detachChain(wnPikminPikmin* pikmin, int status);
-    bool isConstraint(wnPikminPikmin* pikmin, int taskId);
+    bool isConstraint(wnPikminPikmin* pikmin, u32 taskId);
     void detachConstraint(wnPikminPikmin* pikmin);
     void setPowerMulStatus(wnPikminPikmin* pikmin, float power);
     void sortPikmin();
@@ -48,7 +48,7 @@ public:
     void updateNodeSRT(wnPikminPikmin* pikmin);
     void holdPikminForce(int taskId);
     void updateJostlePriority();
-    void setVisibilityChain(bool visible, int num, bool rest);
-    void setTeamAll(int team, int teamOwner, bool skipFlagged);
+    void setVisibilityChain(u8 visible, int num, int rest);
+    void setTeamAll(int team, int teamOwner, int skipFlagged);
 };
 static_assert(sizeof(wnPikminPikminTroopsManager) == 0x184, "Troops manager layout");
