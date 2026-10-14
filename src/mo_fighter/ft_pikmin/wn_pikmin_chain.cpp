@@ -1,4 +1,5 @@
 #define MT_VEC3F_ASSIGN_NOINLINE
+#define MT_VEC3F_CTOR_NOINLINE
 #include <mt/mt_vector.h>
 #include <so/link/so_link_module_impl.h>
 #include <so/posture/so_posture_module_simple.h>
@@ -27,7 +28,7 @@ void wnPikminChain::activate(float lr, int founderTaskId, int kind, int team, bo
     desc.unk14 = -1;
     desc.unk18 = 0;
     desc.unk1C = 0;
-    desc.pos = zero;
+    __memcpy(&desc.pos, &zero, sizeof(Vec3f));
     desc.lr = lr;
     desc.team = team;
     desc.life = 0;
@@ -45,15 +46,18 @@ void wnPikminChain::activate(float lr, int founderTaskId, int kind, int team, bo
     wnLassoGetLink(m_moduleAccesser)->unk148Int(2);
     wnLassoGetLink(m_moduleAccesser)->unk194Int(3, 8, false);
     wnLassoGetLink(m_moduleAccesser)->unk194Int(3, 8, false);
+    soResourceModule& resource = m_moduleAccesser->getResourceModule();
     wnLassoAltStatusView* alt = wnLassoGetAltStatus(m_moduleAccesser);
     u32 nodeId = lbl_113_data_BAA8;
-    alt->unk18Attach(m_moduleAccesser->getResourceModule().getResourceIdAccesser()->getArchiveId(), 0, nodeId, nodeId, true, 0, 0, -1);
+    int noValue = 0;
+    alt->unk18Attach(resource.getResourceIdAccesser()->getBinResId(), noValue, nodeId, nodeId, true, 0, noValue, -1);
     m_moduleAccesser->getStatusModule().changeStatusForce(0, m_moduleAccesser);
     m_moduleAccesser->getWorkManageModule().setFlag(unk, 0x22000000);
     m_moduleAccesser->getWorkManageModule().setInt(pikminNum, 0x10000007);
     m_moduleAccesser->getWorkManageModule().setInt(0xb, 0x10000005);
+    soPostureModule& posture = m_moduleAccesser->getPostureModule();
     alt = wnLassoGetAltStatus(m_moduleAccesser);
-    alt->unkDCFloat(m_moduleAccesser->getPostureModule().getScale());
+    alt->unkDCFloat(posture.getScale());
     wnLassoGetAltStatus(m_moduleAccesser)->unkA4Int(6);
 }
 
@@ -65,10 +69,13 @@ void wnPikminChain::onDeactivate() {
 void wnPikminChain::updateNodeSRT() {
     soModuleAccesser* acc = m_moduleAccesser;
     float scaleValue = acc->getPostureModule().getScale();
-    Vec3f scale(scaleValue, scaleValue, scaleValue);
+    Vec3f scale;
+    scale.m_z = scaleValue;
+    scale.m_y = scaleValue;
+    scale.m_x = scaleValue;
+    Vec3f rot;
     Vec3f pos;
     pos = acc->getPostureModule().getPos();
-    Vec3f rot;
     rot = acc->getPostureModule().getRot(0);
     rot.m_y += acc->getPostureModule().getRotYLr();
     acc->getModelModule().setNodeSRT(1, &scale, &rot, &pos);
@@ -79,8 +86,8 @@ void wnPikminChain::notifyEventChangeStatus(int statusKind, int prevStatusKind, 
     Weapon::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
     if (statusKind == 7) {
         // Reaching the end of the chain: remember how many Pikmin it carried.
-        int pikminNum = m_moduleAccesser->getWorkManageModule().getInt(0x10000007);
-        m_moduleAccesser->getWorkManageModule().setInt(pikminNum, 0x20000002);
+        soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+        work.setInt(work.getInt(0x10000007), 0x20000002);
     }
 }
 
@@ -89,13 +96,13 @@ void wnPikminChain::processFixCamera() {
     if (soSlow::getInstance()->isEstimate() == true && m_moduleAccesser->getStopModule().isStop() == false) {
         int status = m_moduleAccesser->getStatusModule().getStatusKind();
         if (status < 6) {
-            if (3 < status) {
+            if (status >= 4) {
                 return;
             }
             if (status < 1) {
                 return;
             }
-        } else if (7 < status) {
+        } else if (status >= 8) {
             return;
         }
         wnPikminChainUtility::updatePikminVisibility(m_moduleAccesser);
@@ -103,4 +110,5 @@ void wnPikminChain::processFixCamera() {
 }
 
 void wnPikminChain::renderDebug() {
+    StageObject::renderDebug();
 }

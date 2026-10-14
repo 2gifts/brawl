@@ -18,7 +18,7 @@ void wnPikminChainUtility::updatePikminVisibility(soModuleAccesser* moduleAccess
     int visible = wnLassoGetAltStatus(moduleAccesser)->unk88Int();
     if (visible != moduleAccesser->getWorkManageModule().getInt(0x10000008)) {
         int pikminNum = moduleAccesser->getWorkManageModule().getInt(0x10000007);
-        if (pikminNum < visible) {
+        if (visible > pikminNum) {
             visible = pikminNum;
         }
         wnPikminChainVisibleEvent event(0x83f, visible);
