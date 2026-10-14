@@ -18,9 +18,10 @@ public:
     virtual ~soMotionModuleImplMultiRes();
 };
 
-// Kirby has a soCollisionSearchModuleBuilder (2 parts, 1 group) after the collision catch builder, which has no member slot of
-// its own in soModuleAccesserBuilder. HYPOTHESIS: it is folded into the catch builder's storage here (the module accesser
-// gets the null search module either way until the slot exists).
+// Kirby has a soCollisionSearchModuleBuilder (2 parts, 1 group) right after the collision catch builder; it is an own member of
+// soModuleAccesserBuilder (see ftKirbyCollisionSearchModuleBuilder).
+// MATCH-ONLY: the REL's catch builder constructor carries the search storage size (596) in its template arguments, so the catch
+// builder keeps that spelling although the storage is not part of it.
 template <typename T, u32 SearchSize>
 class soCollisionCatchModuleBuildConfigWithSearch {
 public:
@@ -30,14 +31,12 @@ public:
 template <typename T, u32 SearchSize>
 class soCollisionCatchModuleBuilder<soCollisionCatchModuleBuildConfigWithSearch<T, SearchSize> > {
     soCollisionCatchModuleBuilder<soCollisionCatchModuleBuildConfig<T> > m_catchBuilder;
-    u8 m_searchBuilder[SearchSize];
 public:
     soCollisionCatchModuleBuilder(soModuleAccesser* acc, int taskId, gfTask::Category category, soEventObserverRegistrationDesc* regDesc) :
         m_catchBuilder(acc, taskId, category, regDesc) { }
     T* getModule() { return m_catchBuilder.getModule(); }
 };
 
-// Item manage module builder with other capacities.
 template <s32 CapA, s32 CapB, typename T>
 class soItemManageModuleBuildConfigCaps {
 public:
@@ -85,7 +84,7 @@ typedef soModelModuleBuildConfig<8, 3, soModelModuleImplVariable> ftKirbyModelMo
 typedef ftAnimCmdModuleSubBuildConfig<448, 797> ftKirbyAnimCmdModuleSubBuildConfig;
 typedef soMotionModuleBuildConfig<797, soMotionModuleImplMultiRes, 2, 1, soTransitionModuleBuildConfig<ftMotionTransitionTypeList>, soMotionAnimObjCacheModuleBuildConfig<5, soMotionAnimObjCacheModuleImpl> > ftKirbyMotionModuleBuildConfig;
 typedef soCollisionReflectorModuleBuildConfigGroups<3, 9, 3, soCollisionShieldEventPresenterReflector, soCollisionShieldModuleImpl> ftKirbyCollisionReflectorModuleBuildConfig;
-typedef soCollisionCatchModuleBuildConfig<soCollisionCatchModuleImpl> ftKirbyCollisionCatchModuleBuildConfig;
+typedef soCollisionCatchModuleBuildConfigWithSearch<soCollisionCatchModuleImpl, 0x254> ftKirbyCollisionCatchModuleBuildConfig;
 typedef soCollisionSearchModuleBuilder<soCollisionSearchModuleBuildConfigParts<2, soCollisionSearchModuleImpl> > ftKirbyCollisionSearchModuleBuilder;
 typedef soLinkModuleBuildConfigCap<8, soLinkModuleImpl> ftKirbyLinkModuleBuildConfig;
 typedef soStatusModuleBuildConfig<448, soGeneralWorkBuildConfig<35, 18, 17>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftKirbyStatusModuleBuildConfig;
