@@ -155,7 +155,7 @@ public:
     virtual int getAnimCmdFrame();
     virtual void getCmdAddressPack();
     virtual void setAddressPackList();
-    virtual void getInterpreterNum();
+    virtual int getInterpreterNum();
 #ifdef FT_MODULE_BUILDER
     virtual ~soAnimCmdModule() { }
 #else

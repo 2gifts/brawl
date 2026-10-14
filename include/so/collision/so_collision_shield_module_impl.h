@@ -35,7 +35,7 @@ public:
 	virtual u8 isFront(u32 collisionShieldGroupIndex);
 	virtual u8 isHop(u32 collisionShieldGroupIndex);
 	virtual double getHopAngle();
-	virtual void isNoHop(u32 collisionShieldGroupIndex);
+	virtual u8 isNoHop(u32 collisionShieldGroupIndex);
 	virtual void setTurn(u32, u32 collisionShieldGroupIndex);
 	virtual void setFront(u32, u32 collisionShieldGroupIndex);
 	virtual void setHop(double, u32, u32 collisionShieldGroupIndex);
@@ -97,7 +97,7 @@ public:
 	virtual u8 isFront(u32 collisionShieldGroupIndex);
 	virtual u8 isHop(u32 collisionShieldGroupIndex);
 	virtual double getHopAngle();
-	virtual void isNoHop(u32 collisionShieldGroupIndex);
+	virtual u8 isNoHop(u32 collisionShieldGroupIndex);
 	virtual void setTurn(u32, u32 collisionShieldGroupIndex);
 	virtual void setFront(u32, u32 collisionShieldGroupIndex);
 	virtual void setHop(double, u32, u32 collisionShieldGroupIndex);

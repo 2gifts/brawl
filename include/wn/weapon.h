@@ -47,10 +47,8 @@ public:
     void activate(wnActivateDesc* desc);
     // Map-named helper; -1 is the sentinel for each unresolved constraint argument.
     void constraint(int taskId, int unk1, int unk2);
-    // HYPOTHESIS: relative source order of rate/index; f1/f2/r4 ABI verified.
-    void setHitStop(float power, int allowSdi, float minFrame);
+    void setHitStop(float power, float minFrame, int allowSdi);
     void removeConstraint();
-    void constraintImpl(int ownerTaskId, int unk1, int node);
     void attachInstance(int resourceId, int unk8, int unkC, int unk10, int unk14, int unk18, int unk1C, int kind, int unk38, int unk44, bool flagBit5, bool flagBit4, bool flagBit2, bool flagBit1, int unk48, bool flagBit0, int unk3C);
     void setGroundShapeSafePosWithAncestor();
 

@@ -572,7 +572,7 @@ void wnPikminPikmin::attachChain(int unk1, int unk2, int logGroup) {
 bool wnPikminPikmin::notifyEventCollisionAttackCheck(u32 flags) {
     if (isHitStopStatus() != 0) {
         if (m_moduleAccesser->getWorkManageModule().getFloat(Work_Float_ActiveFrame) > 0.0f) {
-            setHitStop(m_moduleAccesser->getWorkManageModule().getFloat(Work_Float_ActiveFrame), 0, 1.0f);
+            setHitStop(m_moduleAccesser->getWorkManageModule().getFloat(Work_Float_ActiveFrame), 1.0f, 0);
         }
     }
     // HYPOTHESIS: bit 3 of the attack check flags asks whether the attack may be reflected.

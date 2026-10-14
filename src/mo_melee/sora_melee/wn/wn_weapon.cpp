@@ -1,5 +1,6 @@
 #include <wn/weapon.h>
 #include <gf/gf_task.h>
+#include <gf/gf_task_scheduler.h>
 #include <gm/gm_global.h>
 #include <so/ground/so_ground_util.h>
 #include <so/motion/so_motion_change_param.h>
@@ -29,9 +30,26 @@ enum {
     Weapon_Work_Flag_Keep_Model = 0x12000001,
 };
 
-// Modules of the accesser whose classes are not reconstructed yet (offsets in the module table: 0x98 target search, 0x9c
-// physics, 0xa0 slope, 0xb4 abnormal, 0xc8 glow) are reached through their vtable slots; see wn/wn_module_slots.h.
-#define WN_MODULE_AT(acc, offset) (*reinterpret_cast<void**>(reinterpret_cast<char*>((acc)->m_enumerationStart) + (offset)))
+// Frame flag words of the work module (+8 and +0xC), cleared after every status exec.
+static u32* workWord(soModuleAccesser* acc, int offset) {
+    return reinterpret_cast<u32*>(reinterpret_cast<char*>(&acc->getWorkManageModule()) + offset);
+}
+
+// Run-time type information of the module classes (unnamed objects of the unit's data) for the observer setup.
+extern "C" {
+extern char lbl_27_data_BBD0[];
+extern char lbl_27_data_3AD0[];
+extern char lbl_27_data_BA78[];
+extern char lbl_27_data_3F80[];
+void* __dynamic_cast(void* object, int offset, void* source, void* target, int flag);
+}
+#define g_wnRttiAttackModule lbl_27_data_BBD0
+#define g_wnRttiNullAttackModule lbl_27_data_3AD0
+#define g_wnRttiHitModule lbl_27_data_BA78
+#define g_wnRttiNullHitModule lbl_27_data_3F80
+static void* wnDynamicCast(void* module, void* source, void* target) {
+    return __dynamic_cast(module, 0, source, target, 0);
+}
 
 // Number of final-smash articles that are alive (the screen is dimmed while one exists).
 static int g_wnFinalArticleCount;
@@ -89,9 +107,9 @@ void Weapon::activate(wnActivateDesc* desc) {
             constraint(-1, -1, -1);
         } else {
             if (desc->flagBit3 == 1) {
-                m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Scale, true);
+                m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Reference_Parent_Scale, true);
                 m_moduleAccesser->getPostureModule().setOwnerScale(m_moduleAccesser->getLinkModule().getLinkScale());
-                m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Scale, false);
+                m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Reference_Parent_Scale, false);
             }
             if (m_moduleAccesser->getGroundModule().isNull() != true) {
                 if (m_moduleAccesser->getLinkModule().isValidParentShape(3) == true) {
@@ -113,14 +131,14 @@ void Weapon::activate(wnActivateDesc* desc) {
                 linkIndex = 4;
             }
             int glow = m_moduleAccesser->getLinkModule().getParentWeaponGlowAttack(linkIndex);
-            WN_MODULE_SLOT(void, WN_MODULE_AT(m_moduleAccesser, 0xC8), 0, 0x1C, int)(WN_MODULE_AT(m_moduleAccesser, 0xC8), desc->unk40 + glow);
-            m_moduleAccesser->getLinkModule().setAttribute(linkIndex, soLinkConnection::Attribute_Glow, true);
+            wnCall<void>(wnModuleAt(m_moduleAccesser, 0xC8), 0, 0x1C, desc->unk40 + glow);
+            m_moduleAccesser->getLinkModule().setAttribute(linkIndex, soLinkConnection::Attribute_Reference_Parent_Power_Up, true);
             if (desc->flag4DBit7 == 1) {
-                WN_MODULE_SLOT(void, WN_MODULE_AT(m_moduleAccesser, 0xC8), 0, 0x78, int)(WN_MODULE_AT(m_moduleAccesser, 0xC8), linkIndex);
+                wnCall<void>(wnModuleAt(m_moduleAccesser, 0xC8), 0, 0x78, linkIndex);
             }
         }
         if (m_moduleAccesser->getModelModule().isEnvMap() == true) {
-            m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_EnvMap, true);
+            m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(0xB), true);
             if (m_moduleAccesser->getLinkModule().isParentEnableEnvMap(3) == true) {
                 m_moduleAccesser->getModelModule().switchEnvMap(true);
             }
@@ -149,7 +167,7 @@ void Weapon::activate(wnActivateDesc* desc) {
 }
 
 void Weapon::deactivate(bool treatAsRemoved) {
-    setNotifyArticleEventEject(-1, m_moduleAccesser);
+    soArticle::setNotifyArticleEventEject(-1, m_moduleAccesser);
     onDeactivate();
     m_moduleAccesser->getStatusModule().changeStatusForce(-1, m_moduleAccesser);
     if (m_moduleAccesser->getWorkManageModule().isFlag(Weapon_Work_Flag_Keep_Model) == false) {
@@ -178,10 +196,10 @@ void Weapon::initialize() {
         soAnimCmdEventObserver::setupObserver(acc->getEventManageModule().getManageId());
     }
     soLinkEventObserver::setupObserver(acc->getEventManageModule().getManageId());
-    if (dynamic_cast<soCollisionAttackModuleNull*>(&acc->getCollisionAttackModule()) == NULL) {
+    if (wnDynamicCast(wnModuleAt(acc, 0x1C), g_wnRttiAttackModule, g_wnRttiNullAttackModule) == NULL) {
         soCollisionAttackEventObserver::setupObserver(acc->getEventManageModule().getManageId());
     }
-    if (dynamic_cast<soCollisionHitModuleNull*>(&acc->getCollisionHitModule()) == NULL) {
+    if (wnDynamicCast(wnModuleAt(acc, 0x20), g_wnRttiHitModule, g_wnRttiNullHitModule) == NULL) {
         soCollisionHitEventObserver::setupObserver(acc->getEventManageModule().getManageId());
     }
     soEventPresenter<soArticleEventObserver>::setManageId(acc->getEventManageModule().getManageId());
@@ -223,43 +241,11 @@ void Weapon::processUpdate() {
 }
 
 void Weapon::processFixPosition() {
-    soModuleAccesser* acc = m_moduleAccesser;
-    bool adjust = soSlow::getInstance()->isAdjust();
-    if (adjust == true) {
-        bool stopped = acc->getStopModule().isStop();
-        if (stopped == false) {
-            acc->getAreaModule().check();
-            acc->getItemManageModule().check();
-            WN_MODULE_SLOT(void, WN_MODULE_AT(acc, 0x98), 8, 0x28)(WN_MODULE_AT(acc, 0x98));
-        }
-        acc->getGroundModule().processFixPosition();
-        updatePosture(true);
-        bool hitStop = acc->getSlowModule().isSlow();
-        if (stopped == false) {
-            acc->getMotionModule().processFixPosition();
-        }
-        if (hitStop == false) {
-            acc->getStatusModule().processFixPosition(acc, false);
-        } else if (acc->getMotionModule().isLooped() == true) {
-            acc->getStatusModule().processFixPosition(acc, true);
-        }
-        acc->getStatusModule().checkTransition(acc);
-        if (stopped == false && hitStop == false) {
-            acc->getStatusModule().execFixPosCounter(acc);
-        }
-        acc->getWorkManageModule().m_frameFlags |= 0x79FC;
-        acc->getStatusModule().execFixPos(acc);
-        acc->getWorkManageModule().m_frameFlags = 0;
-        acc->getWorkManageModule().m_frameFlags2 = 0;
-        WN_MODULE_SLOT(void, WN_MODULE_AT(acc, 0xB4), 8, 0x1C)(WN_MODULE_AT(acc, 0xB4));
-    }
-    WN_MODULE_SLOT(void, WN_MODULE_AT(acc, 0xA0), 0, 0x18, bool)(WN_MODULE_AT(acc, 0xA0), adjust);
-    WN_MODULE_SLOT(void, WN_MODULE_AT(acc, 0x9C), 8, 0x2C)(WN_MODULE_AT(acc, 0x9C));
-    WN_MODULE_SLOT(void, WN_MODULE_AT(acc, 0x9C), 8, 0x3C)(WN_MODULE_AT(acc, 0x9C));
-    WN_MODULE_SLOT(void, WN_MODULE_AT(acc, 0x9C), 8, 0x30, int)(WN_MODULE_AT(acc, 0x9C), 0);
+    StageObject::processFixPosition();
 }
 
 void Weapon::processHit() {
+    StageObject::processHit();
 }
 
 void Weapon::processFixCamera() {
@@ -270,14 +256,14 @@ void Weapon::processFixCamera() {
             m_deadAreaMask != -1) {
             int area = soGroundUtil::checkDeadArea(&pos, 0.0f, 0.0f);
             if (area != -1 && (m_deadAreaMask & (1 << area)) == 0) {
-                setNotifyArticleEventRemove(m_moduleAccesser);
+                soArticle::setNotifyArticleEventRemove(m_moduleAccesser);
                 if (isActive() == true) {
                     deactivate(false);
                 }
             }
         }
         if (pos.m_y >= 4096.0f) {
-            setNotifyArticleEventRemove(m_moduleAccesser);
+            soArticle::setNotifyArticleEventRemove(m_moduleAccesser);
             if (isActive() == true) {
                 deactivate(false);
             }
@@ -286,21 +272,21 @@ void Weapon::processFixCamera() {
 }
 
 void Weapon::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
-    WN_MODULE_SLOT(void, WN_MODULE_AT(m_moduleAccesser, 0x9C), 8, 0x50)(WN_MODULE_AT(m_moduleAccesser, 0x9C));
+    wnCall<void>(wnModuleAt(m_moduleAccesser, 0x9C), 8, 0x50);
     updateNodeSRT();
 }
 
 bool Weapon::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3) {
-    if (isObserv(acmd->getKind()) == false) {
+    if (isObserv(acmd->getGroup()) == false) {
         return false;
     }
-    char kind = acmd->getSubKind();
+    char kind = acmd->getType();
     if (kind < 5 || kind > 10) {
         return StageObject::notifyEventAnimCmd(acmd, moduleAccesser, unk3);
     }
-    switch (acmd->getSubKind()) {
+    switch (acmd->getType()) {
     case 8:
-        setNotifyArticleEventRemove(m_moduleAccesser);
+        soArticle::setNotifyArticleEventRemove(m_moduleAccesser);
         if (isActive() == true) {
             deactivate(false);
         }
@@ -315,7 +301,7 @@ bool Weapon::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesse
         unkA4 |= 0x10;
         return true;
     case 9:
-        setNotifyArticleEventEject(-1, m_moduleAccesser);
+        soArticle::setNotifyArticleEventEject(-1, m_moduleAccesser);
         return true;
     }
     return false;
@@ -351,7 +337,7 @@ void Weapon::setVisibility(int index, u8 visibility) {
 }
 
 void Weapon::set2nd(u8 enable) {
-    WN_MODULE_SLOT(void, WN_MODULE_AT(m_moduleAccesser, 0x9C), 8, 0x4C, u8)(WN_MODULE_AT(m_moduleAccesser, 0x9C), enable);
+    wnCall<void>(wnModuleAt(m_moduleAccesser, 0x9C), 8, 0x4C, enable);
 }
 
 void Weapon::setSituationKind(SituationKind kind) {
@@ -376,24 +362,20 @@ void Weapon::unlinkOwner(int index) {
     }
 }
 
-void Weapon::have(int ownerTaskId, int node, int unk) {
-    constraintImpl(ownerTaskId, unk, node);
+void Weapon::have(int ownerTaskId, int node, int unused) {
+    constraint(ownerTaskId, node, -1);
 }
 
+// Keeps the article attached to the node of its owner that the build data names (-1 takes the value from the data).
 void Weapon::constraint(int taskId, int unk1, int unk2) {
-    constraintImpl(taskId, unk1, unk2);
-}
-
-// Keeps the article attached to the node of its owner that the build data names.
-void Weapon::constraintImpl(int ownerTaskId, int unk1, int node) {
-    if (ownerTaskId == -1) {
-        ownerTaskId = m_moduleAccesser->getWorkManageModule().getInt(Weapon_Work_Int_Activate_Founder_Id);
-        if (ownerTaskId == -1) {
+    if (taskId == -1) {
+        taskId = m_moduleAccesser->getWorkManageModule().getInt(Weapon_Work_Int_Activate_Founder_Id);
+        if (taskId == -1) {
             return;
         }
     }
     StageObject* parent = m_moduleAccesser->getLinkModule().getParent(3);
-    if (parent == NULL || ownerTaskId != static_cast<int>(parent->m_taskId)) {
+    if (parent == NULL || taskId != static_cast<int>(parent->m_taskId)) {
         return;
     }
     if (unk1 == -1) {
@@ -402,17 +384,17 @@ void Weapon::constraintImpl(int ownerTaskId, int unk1, int node) {
             return;
         }
     }
-    if (node == -1) {
-        node = reinterpret_cast<const s32*>(m_data)[1];
-        if (node == -1) {
+    if (unk2 == -1) {
+        unk2 = reinterpret_cast<const s32*>(m_data)[1];
+        if (unk2 == -1) {
             return;
         }
     }
-    m_moduleAccesser->getLinkModule().setModelConstraintPosOrt(3, node, unk1, 3, true);
-    m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Constraint, true);
-    m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Visible, true);
-    m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Scale0, true);
-    m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Team, true);
+    m_moduleAccesser->getLinkModule().setModelConstraintPosOrt(3, unk2, unk1, 3, true);
+    m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(2), true);
+    m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(8), true);
+    m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(3), true);
+    m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(0xE), true);
 }
 
 void Weapon::removeConstraint() {
@@ -421,42 +403,45 @@ void Weapon::removeConstraint() {
     m_moduleAccesser->getLinkModule().removeModelConstraint(true);
     m_moduleAccesser->getModelModule().setScale(scale);
     m_moduleAccesser->getPostureModule().setOwnerScale(ownerScale);
-    m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Constraint, false);
+    m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(0xE), false);
 }
 
+// Raw views of soCollisionLog bytes that the shared header leaves unnamed.
+#define LOG_U8(log, offset) (*(reinterpret_cast<u8*>(log) + (offset)))
+
 void Weapon::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
-    gfTask* task = gfTaskScheduler::getInstance()->getTaskById(collisionLog->m_category, collisionLog->m_taskId);
-    switch (collisionLog->m_kind) {
+    gfTask* task = gfTaskScheduler::getInstance()->getTaskById(collisionLog->m_taskCategory, collisionLog->m_taskId);
+    switch (LOG_U8(collisionLog, 0x21)) {
+    case 1:
+        break;
     case 0:
         if (task != NULL) {
-            Vec2f hitPos(0.0f, 0.0f);
-            Vec2f hitNormal(0.0f, 0.0f);
-            moduleAccesser->getCollisionAttackModule().checkRebound(power, moduleAccesser, dynamic_cast<StageObject*>(task),
-                                                                    collisionLog, &hitPos, &hitNormal);
+            float reboundX = 0.0f;
+            float reboundY = 0.0f;
+            m_moduleAccesser->getCollisionAttackModule().checkRebound(power, moduleAccesser, dynamic_cast<StageObject*>(task),
+                                                                      collisionLog, &reboundX, &reboundY);
         }
-        break;
-    case 1:
         break;
     default:
         unkA4Bit7 = 0;
         if (m_moduleAccesser->getSituationModule().getKind() == 2) {
-            soCollisionAttackData* data = m_moduleAccesser->getCollisionAttackModule().getData(collisionLog->m_partIndex, false);
-            if (data->m_unk3C >= 0) {
-                soCollisionShieldModule& shield = soExternalValueAccesser::getCollisionShieldModule(dynamic_cast<StageObject*>(task));
-                if (shield.isHop(collisionLog->m_shieldIndex) == true) {
-                    float angle = shield.getHopAngle(collisionLog->m_shieldIndex) * 0.017453292f;
-                    m_reflectDirX = cos(angle) * shield.getAttackMul(0);
-                    m_reflectDirY = sin(angle);
+            soCollisionAttackData* data = m_moduleAccesser->getCollisionAttackModule().getData(LOG_U8(collisionLog, 0x25), false);
+            if (*reinterpret_cast<s32*>(reinterpret_cast<char*>(data) + 0x3C) >= 0) {
+                soCollisionShieldModule& shield = *soExternalValueAccesser::getCollisionShieldModule(dynamic_cast<StageObject*>(task));
+                if (shield.isHop(LOG_U8(collisionLog, 0x23)) == true) {
+                    float hopAngle = shield.getHopAngle() * 0.017453292f;
+                    m_reflectDirX = cos(hopAngle) * shield.getAttackMul(0);
+                    m_reflectDirY = sin(hopAngle);
                     unkA4Bit7 = 1;
-                } else if (shield.isNoHop(collisionLog->m_shieldIndex) == false) {
-                    Vec3f center = shield.getCenterPos(collisionLog->m_shieldIndex2, collisionLog->m_shieldIndex);
+                } else if (shield.isNoHop(LOG_U8(collisionLog, 0x23)) == false) {
+                    Vec3f center = shield.getCenterPos(LOG_U8(collisionLog, 0x24), LOG_U8(collisionLog, 0x23));
                     Vec2f dir(collisionLog->m_pos.m_x - center.m_x, collisionLog->m_pos.m_y - center.m_y);
                     float length = dir.length();
                     if (length > 0.00001f) {
                         dir.m_x *= 1.0f / length;
                         dir.m_y *= 1.0f / length;
                         Vec2f speed = m_moduleAccesser->getCollisionAttackModule().getSpeed();
-                        if (angle(&dir, &speed) * 57.29578f < 135.0f) {
+                        if (dir.mtVecAngle(speed) * 57.29578f < 135.0f) {
                             m_reflectDirX = dir.m_x;
                             m_reflectDirY = dir.m_y;
                             unkA4Bit7 = 1;
@@ -509,7 +494,7 @@ bool Weapon::notifyEventCollisionAttackCheck(u32 flags) {
     }
     if ((flags & 8) != 0 && m_moduleAccesser->getReflectModule().isReflect() == true) {
         if (m_keepOnReflectLimit == false && m_moduleAccesser->getReflectModule().isCountMax() == true) {
-            setNotifyArticleEventRemove(m_moduleAccesser);
+            soArticle::setNotifyArticleEventRemove(m_moduleAccesser);
             if (isActive() == true) {
                 deactivate(false);
             }
@@ -528,7 +513,7 @@ void Weapon::notifyEventCollisionHit2nd(float posX, float collisionLr, soCollisi
 }
 
 void Weapon::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* sender, int unk4) {
-    if (eventInfo->m_kind == 0x835) {
+    if (eventInfo->m_eventKind == 0x835) {
         deactivate(false);
     }
     StageObject::notifyEventLink(eventInfo, moduleAccesser, sender, unk4);
@@ -536,19 +521,10 @@ void Weapon::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* modul
 
 // Per article kind: how the article reacts when its owner is deactivated.
 int Weapon::getOwnerDeactiveTreatType() {
-    bool inRange;
-    if (m_subKind < 0 || m_subKind > 0x99) {
-        inRange = false;
-    } else {
-        inRange = true;
-    }
-    if (!inRange) {
-        return 0;
-    }
-    return g_wnOwnerDeactiveTreatType[m_subKind];
+    return wnInfo::getOwnerDeactiveTreatType(m_subKind);
 }
 
-void Weapon::setHitStop(float power, int allowSdi, float minFrame) {
+void Weapon::setHitStop(float power, float minFrame, int allowSdi) {
     int frames = soStopModuleImpl::calcHitStopFrame(power, 0.3846154f, 5.0f, minFrame, 30.0f);
     m_moduleAccesser->getStopModule().setHitStopFrame(frames, allowSdi);
 }
@@ -640,7 +616,7 @@ int Weapon::getFounderTaskId() {
         return -1;
     }
     gfTask* task = gfTaskScheduler::getInstance()->getTaskById(gfTask::Category_Weapon, founder);
-    StageObject* owner = dynamic_cast<StageObject*>(task);
+    Weapon* owner = dynamic_cast<Weapon*>(task);
     if (owner != NULL) {
         return owner->getFounderTaskId();
     }

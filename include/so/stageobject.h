@@ -121,6 +121,7 @@ public:
     virtual void updateRoughPos();
 
     void activate(Vec3f* pos, float lr, float, bool);
+    void deactivate(bool);
 };
 static_assert(sizeof(StageObject) == 0x64, "Class is wrong size!");
 

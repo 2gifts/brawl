@@ -27,6 +27,10 @@ struct soLogAttackInfo {
 class soArticle : public soNullable, public soEventPresenter<soArticleEventObserver> {
 public:
     bool setDeactivateDescendant();
+    // Non-virtual helpers of the generic article code (sora_melee).
+    void setNotifyArticleEventRemove(soModuleAccesser* moduleAccesser);
+    void setNotifyArticleEventEject(int unk, soModuleAccesser* moduleAccesser);
+    void updateLogAttackInfo(u32 teamOwnerId);
     // TODO
     virtual ~soArticle();
     virtual void remove() = 0;
