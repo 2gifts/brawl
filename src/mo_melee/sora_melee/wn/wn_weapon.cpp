@@ -51,6 +51,11 @@ static void* wnDynamicCast(void* module, void* source, void* target) {
     return __dynamic_cast(module, 0, source, target, 0);
 }
 
+// The manage id is a virtual of the soEventManager base inside the event manage module (vtable at +8).
+static s16 getEventManageId(soModuleAccesser* acc) {
+    return static_cast<soEventManager&>(acc->getEventManageModule()).getManageId();
+}
+
 // Number of final-smash articles that are alive (the screen is dimmed while one exists).
 static int g_wnFinalArticleCount;
 
@@ -131,10 +136,10 @@ void Weapon::activate(wnActivateDesc* desc) {
                 linkIndex = 4;
             }
             int glow = m_moduleAccesser->getLinkModule().getParentWeaponGlowAttack(linkIndex);
-            wnCall<void>(wnModuleAt(m_moduleAccesser, 0xC8), 0, 0x1C, desc->unk40 + glow);
+            static_cast<wnGlowModuleIface*>(wnModuleAt(m_moduleAccesser, 0xC8))->setAttack(desc->unk40 + glow);
             m_moduleAccesser->getLinkModule().setAttribute(linkIndex, soLinkConnection::Attribute_Reference_Parent_Power_Up, true);
             if (desc->flag4DBit7 == 1) {
-                wnCall<void>(wnModuleAt(m_moduleAccesser, 0xC8), 0, 0x78, linkIndex);
+                static_cast<wnGlowModuleIface*>(wnModuleAt(m_moduleAccesser, 0xC8))->setWhole(linkIndex);
             }
         }
         if (m_moduleAccesser->getModelModule().isEnvMap() == true) {
@@ -190,19 +195,19 @@ void Weapon::deactivateArticle() {
 void Weapon::initialize() {
     soModuleAccesser* acc = m_moduleAccesser;
     if (acc->getStatusModule().isNull() == false) {
-        soStatusEventObserver::setupObserver(acc->getEventManageModule().getManageId());
+        soStatusEventObserver::setupObserver(getEventManageId(acc));
     }
     if (acc->getAnimCmdModule().getInterpreterNum() > 0) {
-        soAnimCmdEventObserver::setupObserver(acc->getEventManageModule().getManageId());
+        soAnimCmdEventObserver::setupObserver(getEventManageId(acc));
     }
-    soLinkEventObserver::setupObserver(acc->getEventManageModule().getManageId());
+    soLinkEventObserver::setupObserver(getEventManageId(acc));
     if (wnDynamicCast(wnModuleAt(acc, 0x1C), g_wnRttiAttackModule, g_wnRttiNullAttackModule) == NULL) {
-        soCollisionAttackEventObserver::setupObserver(acc->getEventManageModule().getManageId());
+        soCollisionAttackEventObserver::setupObserver(getEventManageId(acc));
     }
     if (wnDynamicCast(wnModuleAt(acc, 0x20), g_wnRttiHitModule, g_wnRttiNullHitModule) == NULL) {
-        soCollisionHitEventObserver::setupObserver(acc->getEventManageModule().getManageId());
+        soCollisionHitEventObserver::setupObserver(getEventManageId(acc));
     }
-    soEventPresenter<soArticleEventObserver>::setManageId(acc->getEventManageModule().getManageId());
+    soEventPresenter<soArticleEventObserver>::setManageId(getEventManageId(acc));
     // HYPOTHESIS: debug output when the build data names an article animation but the ground module is a null object.
     if (m_data == NULL) {
     }
@@ -252,7 +257,7 @@ void Weapon::processFixCamera() {
     StageObject::processFixCamera();
     if (soSlow::getInstance()->isAdjust() == true) {
         Vec3f pos = m_moduleAccesser->getPostureModule().getPos();
-        if (isTreadPassive() == false && m_moduleAccesser->getWorkManageModule().isFlag(Weapon_Work_Flag_No_Dead_Area_Remove) == false &&
+        if (checkTransitionStatus(0) == false && m_moduleAccesser->getWorkManageModule().isFlag(Weapon_Work_Flag_No_Dead_Area_Remove) == false &&
             m_deadAreaMask != -1) {
             int area = soGroundUtil::checkDeadArea(&pos, 0.0f, 0.0f);
             if (area != -1 && (m_deadAreaMask & (1 << area)) == 0) {
@@ -272,7 +277,7 @@ void Weapon::processFixCamera() {
 }
 
 void Weapon::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
-    wnCall<void>(wnModuleAt(m_moduleAccesser, 0x9C), 8, 0x50);
+    static_cast<wnPhysicsModuleIface*>(wnModuleAt(m_moduleAccesser, 0x9C))->changeStatus();
     updateNodeSRT();
 }
 
@@ -308,11 +313,20 @@ bool Weapon::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesse
 }
 
 void Weapon::changeMotion(int motionKind, bool restart) {
-    float frame = 0.0f;
+    float frame;
     if (restart == true) {
         frame = m_moduleAccesser->getMotionModule().getFrame();
+    } else {
+        frame = 0.0f;
     }
-    soMotionChangeParam param(motionKind, frame, 1.0f, 0, 0, restart, 0);
+    soMotionChangeParam param;
+    param.m_kind = motionKind;
+    param.m_frame = frame;
+    param.m_rate = 1.0f;
+    param._12 = 0;
+    param._13 = 0;
+    param._14 = restart;
+    param._15 = 0;
     m_moduleAccesser->getMotionModule().changeMotionRequest(&param);
 }
 
@@ -337,7 +351,7 @@ void Weapon::setVisibility(int index, u8 visibility) {
 }
 
 void Weapon::set2nd(u8 enable) {
-    wnCall<void>(wnModuleAt(m_moduleAccesser, 0x9C), 8, 0x4C, enable);
+    static_cast<wnPhysicsModuleIface*>(wnModuleAt(m_moduleAccesser, 0x9C))->set2nd(enable);
 }
 
 void Weapon::setSituationKind(SituationKind kind) {
@@ -348,8 +362,8 @@ bool Weapon::isConstraint() {
     return m_moduleAccesser->getLinkModule().isModelConstraint();
 }
 
-int Weapon::getArticleEventManageId() {
-    return m_moduleAccesser->getEventManageModule().getManageId();
+s16 Weapon::getArticleEventManageId() {
+    return getEventManageId(m_moduleAccesser);
 }
 
 void Weapon::linkOwner(int index, int taskId) {
@@ -368,29 +382,32 @@ void Weapon::have(int ownerTaskId, int node, int unused) {
 
 // Keeps the article attached to the node of its owner that the build data names (-1 takes the value from the data).
 void Weapon::constraint(int taskId, int unk1, int unk2) {
-    if (taskId == -1) {
-        taskId = m_moduleAccesser->getWorkManageModule().getInt(Weapon_Work_Int_Activate_Founder_Id);
-        if (taskId == -1) {
+    u32 task = taskId;
+    u32 nodeB = unk2;
+    u32 nodeA = unk1;
+    if (task == 0xFFFFFFFF) {
+        task = m_moduleAccesser->getWorkManageModule().getInt(Weapon_Work_Int_Activate_Founder_Id);
+        if (task == 0xFFFFFFFF) {
             return;
         }
     }
     StageObject* parent = m_moduleAccesser->getLinkModule().getParent(3);
-    if (parent == NULL || taskId != static_cast<int>(parent->m_taskId)) {
+    if (parent == NULL || task != parent->m_taskId) {
         return;
     }
-    if (unk1 == -1) {
-        unk1 = reinterpret_cast<const s32*>(m_data)[2];
-        if (unk1 == -1) {
+    if (nodeA == 0xFFFFFFFF) {
+        nodeA = reinterpret_cast<const s32*>(m_data)[2];
+        if (nodeA == 0xFFFFFFFF) {
             return;
         }
     }
-    if (unk2 == -1) {
-        unk2 = reinterpret_cast<const s32*>(m_data)[1];
-        if (unk2 == -1) {
+    if (nodeB == 0xFFFFFFFF) {
+        nodeB = reinterpret_cast<const s32*>(m_data)[1];
+        if (nodeB == 0xFFFFFFFF) {
             return;
         }
     }
-    m_moduleAccesser->getLinkModule().setModelConstraintPosOrt(3, unk2, unk1, 3, true);
+    m_moduleAccesser->getLinkModule().setModelConstraintPosOrt(3, nodeB, nodeA, 3, true);
     m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(2), true);
     m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(8), true);
     m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(3), true);
@@ -530,18 +547,15 @@ void Weapon::setHitStop(float power, float minFrame, int allowSdi) {
 }
 
 void Weapon::setLogAttackInfo(soLogAttackInfo* logAttackInfo) {
-    m_moduleAccesser->getWorkManageModule().setInt(logAttackInfo->_0, Weapon_Work_Int_Log_Attack_Info0);
+    int info0 = logAttackInfo->_0;
+    m_moduleAccesser->getWorkManageModule().setInt(info0, Weapon_Work_Int_Log_Attack_Info0);
     m_moduleAccesser->getWorkManageModule().setInt(logAttackInfo->_4, Weapon_Work_Int_Log_Attack_Info1);
 }
 
 soLogAttackInfo Weapon::getLogAttackInfo() {
     int info1 = m_moduleAccesser->getWorkManageModule().getInt(Weapon_Work_Int_Log_Attack_Info1);
     int info0 = m_moduleAccesser->getWorkManageModule().getInt(Weapon_Work_Int_Log_Attack_Info0);
-    soLogAttackInfo result;
-    result._0 = info0;
-    result._4 = info1;
-    result._8 = 0;
-    return result;
+    return soLogAttackInfo(info0, info1);
 }
 
 void Weapon::updateLogAttackInfo() {
@@ -553,10 +567,13 @@ void Weapon::setPosForce(Vec3f* pos) {
 }
 
 bool Weapon::isCanInhaled() {
-    if (m_moduleAccesser->getLinkModule().isModelConstraint() == false) {
-        return wnInfo::isInhaled(m_subKind);
+    bool result;
+    if (m_moduleAccesser->getLinkModule().isModelConstraint() != false) {
+        result = false;
+    } else {
+        result = wnInfo::isInhaled(m_subKind);
     }
-    return false;
+    return result;
 }
 
 bool Weapon::isInhaled() {
@@ -570,6 +587,7 @@ Vec3f Weapon::startInhaled() {
     soModuleAccesser* acc = m_moduleAccesser;
     acc->getStopModule().end(1);
     acc->getAreaModule().enableArea(0, false, 0);
+    acc->getGroundModule().setCorrect(static_cast<soGroundShapeImpl::CorrectKind>(0), 0);
     acc->getGroundModule().setGrCollisionMode(false);
     acc->getSituationModule().setKind(Situation_Air, false);
     acc->getKineticModule().unableEnergyAll();
@@ -580,9 +598,10 @@ Vec3f Weapon::startInhaled() {
 }
 
 void Weapon::updateInhaled() {
+    soModuleAccesser* acc = m_moduleAccesser;
     m_inhaleCount++;
-    m_moduleAccesser->getGroundModule().setGrCollisionMode(false);
-    m_moduleAccesser->getWorkManageModule().setInt(Weapon_Work_Int_Init_Life, Weapon_Work_Int_Life);
+    acc->getGroundModule().setCorrect(static_cast<soGroundShapeImpl::CorrectKind>(0), 0);
+    acc->getWorkManageModule().setInt(Weapon_Work_Int_Init_Life, Weapon_Work_Int_Life);
 }
 
 void Weapon::endInhaled() {
@@ -604,16 +623,16 @@ bool Weapon::isCanEat() {
 }
 
 float Weapon::getActiveGlobalFrame() {
-    if (isActiveArticle() == false) {
+    if (isActive() == false) {
         return -1.0f;
     }
     return m_moduleAccesser->getWorkManageModule().getFloat(Weapon_Work_Float_Active_Global_Frame);
 }
 
-int Weapon::getFounderTaskId() {
-    int founder = m_moduleAccesser->getWorkManageModule().getInt(Weapon_Work_Int_Activate_Founder_Id);
-    if (founder == -1) {
-        return -1;
+u32 Weapon::getFounderTaskId() {
+    u32 founder = m_moduleAccesser->getWorkManageModule().getInt(Weapon_Work_Int_Activate_Founder_Id);
+    if (founder == 0xFFFFFFFF) {
+        return 0xFFFFFFFF;
     }
     gfTask* task = gfTaskScheduler::getInstance()->getTaskById(gfTask::Category_Weapon, founder);
     Weapon* owner = dynamic_cast<Weapon*>(task);

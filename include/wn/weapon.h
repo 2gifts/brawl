@@ -100,9 +100,9 @@ public:
     virtual void have(int, int, int);
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual int getArticleId() { return m_articleId; }
-    virtual int getArticleEventManageId();
+    virtual s16 getArticleEventManageId();
     virtual int getTaskId() { return m_taskId; }
-    virtual int getFounderTaskId();
+    virtual u32 getFounderTaskId();
     virtual void linkOwner(int, int);
     virtual void unlinkOwner(int);
     virtual bool isActiveArticle() { return isActive(); }

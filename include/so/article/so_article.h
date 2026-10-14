@@ -21,6 +21,7 @@ struct soLogAttackInfo {
     int _4;
     int _8;
     soLogAttackInfo(); // defined out of line in ft_log_pattern_module.cpp
+    soLogAttackInfo(int a, int b) : _0(a), _4(b), _8(0) { } // value of the article work variables (Weapon::getLogAttackInfo)
     ~soLogAttackInfo() { } // non-trivial: makes array construction go through __construct_array
 };
 
@@ -35,7 +36,7 @@ public:
     virtual ~soArticle();
     virtual void remove() = 0;
     virtual int getArticleId() = 0;
-    virtual int getArticleEventManageId() = 0;
+    virtual s16 getArticleEventManageId() = 0;
     virtual int getTaskId() = 0;
     virtual void changeMotion(int motionKind, bool);
     virtual void setFrame(float frame);
@@ -55,7 +56,7 @@ public:
     virtual bool isActiveArticle() = 0;
     virtual void deactivateArticle() = 0;
     virtual int getOwnerDeactiveTreatType();
-    virtual int getFounderTaskId();
+    virtual u32 getFounderTaskId();
     virtual void have(int, int, int) = 0;
     virtual void linkOwner(int, int) = 0;
     virtual void unlinkOwner(int) = 0;
