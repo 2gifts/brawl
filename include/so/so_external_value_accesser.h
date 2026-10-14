@@ -8,6 +8,7 @@
 
 // NOTE: shadows the BrawlHeaders copy to add getConstantFloat/getKineticModule.
 class soStopModule;
+class soCollisionShieldModule;
 
 class soExternalValueAccesser {
 public:
@@ -31,6 +32,7 @@ public:
     static float getSlowRate(StageObject* stageObject);
     static soKineticModule* getKineticModule(StageObject* stageObject);
     static soCollisionAttackModule* getCollisionAttackModule(StageObject* stageObject);
+    static soCollisionShieldModule* getCollisionShieldModule(StageObject* stageObject);
     static soLinkModule* getLinkModule(StageObject* stageObject);
     static void* getGlowModule(StageObject* stageObject);
     static soStopModule* getStopModule(StageObject* stageObject);

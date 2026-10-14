@@ -21,17 +21,29 @@ struct soLogAttackInfo {
     int _4;
     int _8;
     soLogAttackInfo(); // defined out of line in ft_log_pattern_module.cpp
+    soLogAttackInfo(int a, int b) : _0(a), _4(b), _8(0) { } // value of the article work variables (Weapon::getLogAttackInfo)
     ~soLogAttackInfo() { } // non-trivial: makes array construction go through __construct_array
 };
 
 class soArticle : public soNullable, public soEventPresenter<soArticleEventObserver> {
 public:
+    // (manageId, unitId) constructor of the presenter used by the generic article base (Weapon).
+    soArticle(s16 manageId, s16 unitId) : soNullable(false), soEventPresenter<soArticleEventObserver>(manageId, unitId) { }
+    soArticle() { }
     bool setDeactivateDescendant();
+    // Non-virtual helpers of the generic article code (sora_melee).
+    void setNotifyArticleEventRemove(soModuleAccesser* moduleAccesser);
+    void setNotifyArticleEventEject(int unk, soModuleAccesser* moduleAccesser);
+    void updateLogAttackInfo(u32 teamOwnerId);
     // TODO
+#ifdef SO_ARTICLE_DTOR_INLINE
+    virtual ~soArticle() { } // MATCH-ONLY: inline in the generic article base (Weapon)
+#else
     virtual ~soArticle();
+#endif
     virtual void remove() = 0;
     virtual int getArticleId() = 0;
-    virtual int getArticleEventManageId() = 0;
+    virtual s16 getArticleEventManageId() = 0;
     virtual int getTaskId() = 0;
     virtual void changeMotion(int motionKind, bool);
     virtual void setFrame(float frame);
@@ -51,7 +63,7 @@ public:
     virtual bool isActiveArticle() = 0;
     virtual void deactivateArticle() = 0;
     virtual int getOwnerDeactiveTreatType();
-    virtual int getFounderTaskId();
+    virtual u32 getFounderTaskId();
     virtual void have(int, int, int) = 0;
     virtual void linkOwner(int, int) = 0;
     virtual void unlinkOwner(int) = 0;

@@ -6,26 +6,33 @@
 #include <so/event/so_event_presenter.h>
 #include <so/stageobject.h>
 #include <so/status/so_status_event_presenter.h>
+#include <mt/mt_vector.h>
 #include <types.h>
 
 struct wnActivateDesc; // HYPOTHESIS: original descriptor type spelling.
 
 class Weapon : public StageObject, public soStatusEventObserver, public soCollisionAttackEventObserver, public soCollisionHitEventObserver, public soArticle {
 
-    char unk9C[8];
+    float m_reflectDirX; // +0x9C: direction in which a hop reflects the speed (valid while unkA4Bit7)
+    float m_reflectDirY; // +0xA0
 protected:
     // Native article collision and sync accessors load/store this byte at A4.
     // Bit 6 is the owner status sync flag; the other bit meanings are unresolved.
     union {
         u8 unkA4;
         struct {
-            u8 unkA4Bit7 : 1;
+            u8 unkA4Bit7 : 1; // a shield of the attacker asked for a hop this frame
             u8 m_isSyncOwnerStatus : 1;
-            u8 : 6;
+            u8 m_isInhaled : 1;
+            u8 m_keepOnReflectLimit : 1;
+            s32 m_deadAreaMask : 2; // dead areas (bit mask) in which the article is not removed
+            u8 : 2;
         };
     };
 private:
-    char unkA5[0x13];
+    char unkA5[3];
+    s32 m_inhaleCount;       // +0xA8
+    Vec3f m_inhaleStartPos;  // +0xAC
     s32 m_subKind;      // +0xB8: the article kind of the build data
     const void* m_data; // +0xBC: the article data block of the build data
     s32 m_articleId;    // +0xC0
@@ -40,8 +47,9 @@ public:
     void activate(wnActivateDesc* desc);
     // Map-named helper; -1 is the sentinel for each unresolved constraint argument.
     void constraint(int taskId, int unk1, int unk2);
-    // HYPOTHESIS: relative source order of rate/index; f1/f2/r4 ABI verified.
-    void setHitStop(float power, int index, float rate);
+    void setHitStop(float power, float minFrame, int allowSdi);
+    void removeConstraint();
+    void attachInstance(int resourceId, int unk8, int unkC, int unk10, int unk14, int unk18, int unk1C, int kind, int unk38, int unk44, bool flagBit5, bool flagBit4, bool flagBit2, bool flagBit1, int unk48, bool flagBit0, int unk3C);
     void setGroundShapeSafePosWithAncestor();
 
     struct Instance {
@@ -92,9 +100,9 @@ public:
     virtual void have(int, int, int);
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual int getArticleId() { return m_articleId; }
-    virtual int getArticleEventManageId();
+    virtual s16 getArticleEventManageId();
     virtual int getTaskId() { return m_taskId; }
-    virtual int getFounderTaskId();
+    virtual u32 getFounderTaskId();
     virtual void linkOwner(int, int);
     virtual void unlinkOwner(int);
     virtual bool isActiveArticle() { return isActive(); }

@@ -2651,6 +2651,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_capture_bucyulus.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_attack_air_inherit_jump_aerial_motion.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_escape_air_inherit_jump_aerial_motion.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/wn/wn_weapon.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/wn/wn_kinetic_module_impl.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_module_accesser_build_data.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_value_accesser.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_damage_effector_impl.cpp"),

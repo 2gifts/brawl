@@ -2,17 +2,9 @@
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
+#include <wn/wn_lasso_status_uniq_process_reach.h>
 #include <wn/wn_lasso_status_view.h>
 #include <types.h>
-
-class wnLassoStatusUniqProcessReach : public soStatusUniqProcess {
-public:
-    virtual ~wnLassoStatusUniqProcessReach() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-};
 
 wnLassoStatusUniqProcessReach g_wnLassoStatusUniqProcessReach;
 

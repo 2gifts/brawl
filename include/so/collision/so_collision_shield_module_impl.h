@@ -33,9 +33,9 @@ public:
 	virtual void setStatusAll(u32, u32);
 	virtual u8 isTurn(u32 collisionShieldGroupIndex);
 	virtual u8 isFront(u32 collisionShieldGroupIndex);
-	virtual u8 isHop(u32 collisionShieldGroupIndex);
-	virtual double getHopAngle();
-	virtual void isNoHop(u32 collisionShieldGroupIndex);
+	virtual bool isHop(u32 collisionShieldGroupIndex);
+	virtual float getHopAngle(u32 collisionShieldGroupIndex);
+	virtual bool isNoHop(u32 collisionShieldGroupIndex);
 	virtual void setTurn(u32, u32 collisionShieldGroupIndex);
 	virtual void setFront(u32, u32 collisionShieldGroupIndex);
 	virtual void setHop(double, u32, u32 collisionShieldGroupIndex);
@@ -52,7 +52,7 @@ public:
 	virtual void clearAll();
 	virtual void clearAll(u32 collisionShieldGroupIndex);
 	virtual Vec3f getCenterPos(u32, u32 collisionShieldGroupIndex);
-	virtual double getLR(u32 collisionShieldGroupIndex);
+	virtual float getLR(u32 collisionShieldGroupIndex);
 	virtual u32 getGroupNum();
 	virtual double getPosX(u32 collisionShieldGroupIndex);
 	virtual void setTargetProperty(u32, u32 collisionShieldGroupIndex);
@@ -95,9 +95,9 @@ public:
 	virtual void setStatusAll(u32 status, u32 collisionShieldGroupIndex);
 	virtual u8 isTurn(u32 collisionShieldGroupIndex);
 	virtual u8 isFront(u32 collisionShieldGroupIndex);
-	virtual u8 isHop(u32 collisionShieldGroupIndex);
-	virtual double getHopAngle();
-	virtual void isNoHop(u32 collisionShieldGroupIndex);
+	virtual bool isHop(u32 collisionShieldGroupIndex);
+	virtual float getHopAngle(u32 collisionShieldGroupIndex);
+	virtual bool isNoHop(u32 collisionShieldGroupIndex);
 	virtual void setTurn(u32, u32 collisionShieldGroupIndex);
 	virtual void setFront(u32, u32 collisionShieldGroupIndex);
 	virtual void setHop(double, u32, u32 collisionShieldGroupIndex);
@@ -114,7 +114,7 @@ public:
 	virtual void clearAll();
 	virtual void clearAll(u32 collisionShieldGroupIndex);
 	virtual Vec3f getCenterPos(u32, u32 collisionShieldGroupIndex);
-	virtual double getLR(u32 collisionShieldGroupIndex);
+	virtual float getLR(u32 collisionShieldGroupIndex);
 	virtual u32 getGroupNum();
 	virtual double getPosX(u32 collisionShieldGroupIndex);
 	virtual void setTargetProperty(u32, u32 collisionShieldGroupIndex);

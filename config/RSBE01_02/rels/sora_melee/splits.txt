@@ -9644,6 +9644,12 @@ mo_melee/sora_melee/so/so_array_vector_accessors_soLogAttackInfo_10.cpp:
 mo_melee/sora_melee/so/so_array_vector_thunks_15soLogAttackInfo_10.cpp:
 	.text       start:0x001D7EC8 end:0x001D7EF0
 
+mo_melee/sora_melee/wn/wn_weapon.cpp:
+	.text       start:0x001D7EF0 end:0x001DBA64
+
+mo_melee/sora_melee/wn/wn_kinetic_module_impl.cpp:
+	.text       start:0x001DBA64 end:0x001DC5E8
+
 mo_melee/sora_melee/wn/wn_module_accesser_build_data.cpp:
 	.text       start:0x001DC5E8 end:0x001DC8D8
 	.ctors      start:0x0000025C end:0x00000260

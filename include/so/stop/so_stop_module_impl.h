@@ -25,7 +25,7 @@ public:
     virtual void update();
     virtual s32 getHitStopFrame();
     virtual s32 getHitStopRealFrame();
-    virtual void setHitStopFrame(u32 duration, bool allowSDI);
+    virtual void setHitStopFrame(u32 duration, int allowSDI);
     virtual void setHitStopFrameFix(s32);
 };
 static_assert(sizeof(soStopModule) == 0x4, "Class is wrong size!");
@@ -66,7 +66,7 @@ public:
     virtual void update();
     virtual s32 getHitStopFrame();
     virtual s32 getHitStopRealFrame() { return m_hitStopRealFrame; }
-    virtual void setHitStopFrame(u32 duration, bool allowSDI);
+    virtual void setHitStopFrame(u32 duration, int allowSDI);
     virtual void setHitStopFrameFix(s32);
 
     virtual bool isObserv(char unk1);
