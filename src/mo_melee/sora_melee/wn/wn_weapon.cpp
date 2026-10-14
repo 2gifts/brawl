@@ -287,10 +287,10 @@ void Weapon::processFixCamera() {
     StageObject::processFixCamera();
     if (soSlow::getInstance()->isAdjust() == true) {
         Vec3f pos = m_moduleAccesser->getPostureModule().getPos();
-        if (checkTransitionStatus(0) == false && m_moduleAccesser->getWorkManageModule().isFlag(Weapon_Work_Flag_No_Dead_Area_Remove) == false &&
+        if (isConstraint() == false && m_moduleAccesser->getWorkManageModule().isFlag(Weapon_Work_Flag_No_Dead_Area_Remove) == false &&
             m_deadAreaMask != -1) {
             int area = soGroundUtil::checkDeadArea(&pos, 0.0f, 0.0f);
-            if (area != -1 && (m_deadAreaMask & (1 << area)) == 0) {
+            if (area != -1 && ((1 << area) & m_deadAreaMask) == 0) {
                 soArticle::setNotifyArticleEventRemove(m_moduleAccesser);
                 if (isActive() == true) {
                     deactivate(false);
