@@ -21,6 +21,18 @@ protected:
 public:
     wnExtendParamAccesser(s32 kind) :
         m_kind(kind), m_floatBase(FloatBase), m_intBase(IntBase), m_indefiniteBase(IndefiniteBase) { }
+#ifdef WN_EXTEND_PARAM_ACCESSER_NOINLINE
+    // MATCH-ONLY: an owning unit whose derived accesser overrides the queries keeps the base ones out of line.
+    virtual float getParamFloat(soModuleAccesser*, s32 id, s32 index) __attribute__((never_inline)) {
+        return m_floats[id - m_floatBase - 1][index];
+    }
+    virtual s32 getParamInt(soModuleAccesser*, s32 id, s32 index) __attribute__((never_inline)) {
+        return m_ints[id - m_intBase - 1][index];
+    }
+    virtual void* getParamIndefinite(soModuleAccesser*, s32 id, s32) __attribute__((never_inline)) {
+        return m_indefinites[id - m_indefiniteBase - 1];
+    }
+#else
     virtual float getParamFloat(soModuleAccesser*, s32 id, s32 index) {
         return m_floats[id - m_floatBase - 1][index];
     }
@@ -30,6 +42,7 @@ public:
     virtual void* getParamIndefinite(soModuleAccesser*, s32 id, s32) {
         return m_indefinites[id - m_indefiniteBase - 1];
     }
+#endif
 };
 
 #ifdef WN_OCTOPUS_PARAM_ACCESSER_OUT_OF_LINE

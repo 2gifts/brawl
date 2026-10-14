@@ -101,7 +101,7 @@ public:
     virtual float getTransNTranslateEndFrame(void*, int kind);
     virtual Vec3f getTransNTranslate();
     virtual void updateTransMoveSpeed();
-    virtual bool isTransMove(float);
+    virtual bool isTransMove(); // HYPOTHESIS: takes no argument (the native Pikmin caller passes none)
     virtual Vec3f getTransMoveSpeed();
     virtual Vec3f get2ndTransNTranslate();
     virtual void update2ndTransMoveSpeed();
@@ -271,7 +271,7 @@ public:
     virtual float getTransNTranslateEndFrame(void*, int kind);
     virtual Vec3f getTransNTranslate();
     virtual void updateTransMoveSpeed();
-    virtual bool isTransMove(float);
+    virtual bool isTransMove(); // HYPOTHESIS: takes no argument (the native Pikmin caller passes none)
     virtual Vec3f getTransMoveSpeed();
     virtual Vec3f get2ndTransNTranslate();
     virtual void update2ndTransMoveSpeed();

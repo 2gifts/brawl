@@ -19,11 +19,15 @@ mo_fighter/ft_pikmin/ft_pikmin.cpp:
 	.bss        start:0x00000008 end:0x00000390
 
 mo_fighter/ft_pikmin/wn_pikmin_pikmin.cpp:
-	.text       start:0x00013F4C end:0x000205EC
+	.text       start:0x00013F4C end:0x00023140
 
-mo_fighter/ft_pikmin/wn_kinetic_energy_gravity.cpp:
-	.text       start:0x000205EC end:0x00023328
+mo_fighter/ft_pikmin/wn_pikmin_pikmin_switch_decide_module_impl.cpp:
+	.text       start:0x00023140 end:0x00023340
 	.ctors      start:0x0000000C end:0x00000010
+
+mo_fighter/ft_pikmin/wn_pikmin_pikmin_general_term_decide_module_impl.cpp:
+	.text       start:0x00023340 end:0x00023A7C
+	.ctors      start:0x00000010 end:0x00000014
 
 mo_fighter/ft_pikmin/wn_pikmin_pikmin_module_accesser_build_data.cpp:
 	.text       start:0x00023A7C end:0x00023F50

@@ -17,7 +17,7 @@ public:
     soKineticEnergyNormal(const Vec2f& speed, const Vec2f& accel,
                           const Vec2f& target, const Vec2f& brake,
                           const Vec2f& limit, bool unk30, bool friction)
-        __attribute__((never_inline)) {
+        __attribute__((never_inline)) : soKineticEnergy(false) {
         Vec2f::copy(m_speed, speed);
         Vec2f::copy(m_accel, accel);
         Vec2f::copy(m_speedTarget, target);
@@ -26,6 +26,19 @@ public:
         m_unk30 = unk30;
         m_considerGroundFriction = friction;
         m_unk32 = true;
+    }
+    // MATCH-ONLY: the original assignment copies the vectors as word pairs after the base assignment.
+    soKineticEnergyNormal& operator=(const soKineticEnergyNormal& other) {
+        soKineticEnergy::operator=(other);
+        Vec2f::copy(m_speed, other.m_speed);
+        Vec2f::copy(m_accel, other.m_accel);
+        Vec2f::copy(m_speedTarget, other.m_speedTarget);
+        Vec2f::copy(m_brake, other.m_brake);
+        Vec2f::copy(m_speedLimit, other.m_speedLimit);
+        m_unk30 = other.m_unk30;
+        m_considerGroundFriction = other.m_considerGroundFriction;
+        m_unk32 = other.m_unk32;
+        return *this;
     }
 #endif
     soKineticEnergyNormal() {
