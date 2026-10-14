@@ -38,12 +38,28 @@ struct wnActivateDesc {
             u8 : 4;
             u8 flagsLowNibble : 4;
         };
+        // HYPOTHESIS: the generic article activation reads every bit on its own (ownership, constraint, scale, glow...).
+        struct {
+            u8 flagBit7 : 1;
+            u8 flagBit6 : 1;
+            u8 flagBit5 : 1;
+            u8 flagBit4 : 1;
+            u8 flagBit3 : 1;
+            u8 flagBit2 : 1;
+            u8 flagBit1 : 1;
+            u8 flagBit0 : 1;
+        };
     };
     union {
         u8 unk4D;
         struct {
             u8 unk4DHigh : 2;
             u8 unk4DLow : 6;
+        };
+        struct {
+            u8 flag4DBit7 : 1;
+            u8 flag4DBit6 : 1;
+            u8 : 6;
         };
     };
     u8 unk4E[2];
