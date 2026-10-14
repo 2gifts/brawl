@@ -34,7 +34,12 @@ public:
     virtual u32 getMdlResId() const;
     virtual u32 getAnmResId() const;
     virtual u8 getResGroupNo() const;
+#ifdef WN_BUILD_DATA_INLINE_QUERIES
+    // MATCH-ONLY: in the Pikmin article unit these queries are weak inline copies.
+    virtual s32 getTeam() const { return unk10; }
+#else
     virtual s32 getTeam() const;
+#endif
     virtual soMotionData* getMotionData() const;
     virtual soShakeData* getShakeData() const;
     virtual soVisibilityData* getVisibilityData() const;
@@ -46,11 +51,19 @@ public:
     virtual s32 getAreaCategory() const;
     virtual void* getCameraRangeSet() const;
     virtual void* getCameraClipSphereSet() const;
+#ifdef WN_BUILD_DATA_INLINE_QUERIES
+    virtual void* getItemNodeData() const { return NULL; }
+    virtual soJostleData* getJostleData() const;
+    virtual Heaps::HeapType getInstanceHeap() const { return m_instanceHeap; }
+    virtual Heaps::HeapType getNWModelInstanceHeap() const { return m_nwModelInstanceHeap; }
+    virtual Heaps::HeapType getNWMotionInstanceHeap() const { return m_nwMotionInstanceHeap; }
+#else
     virtual void* getItemNodeData() const;
     virtual soJostleData* getJostleData() const;
     virtual Heaps::HeapType getInstanceHeap() const;
     virtual Heaps::HeapType getNWModelInstanceHeap() const;
     virtual Heaps::HeapType getNWMotionInstanceHeap() const;
+#endif
     virtual void* getAnimCmdData(u32 eventThread, s32 p2) const;
 };
 static_assert(sizeof(wnModuleAccesserBuildData) == 0x40, "Class is wrong size!");
