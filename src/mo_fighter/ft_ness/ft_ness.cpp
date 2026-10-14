@@ -22,6 +22,7 @@ ftClassInfoImpl<Fighter_Ness, ftNess> g_ftClassInfoNess;
 
 // HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt).
 extern "C" {
+extern soStatusUniqProcess lbl_27_bss_7CFC;
 extern soStatusUniqProcess lbl_101_bss_1DC;
 extern soStatusUniqProcess lbl_101_bss_1EC;
 extern soStatusUniqProcess lbl_101_bss_1FC;
@@ -50,12 +51,12 @@ ftNess::ftNess(s32 entryId,
 
     // Ness owns 15 character action slots; the unused ones keep the shared null process.
     soStatusUniqProcess* processes[15] = {0};
-    processes[0] = &g_soStatusUniqProcessNull;
+    processes[0] = &lbl_27_bss_7CFC;
     processes[1] = &lbl_101_bss_20C;
     processes[3] = &g_ftNessStatusUniqProcessSpecialLw;
-    processes[5] = &g_soStatusUniqProcessNull;
-    processes[6] = &g_soStatusUniqProcessNull;
-    processes[7] = &g_soStatusUniqProcessNull;
+    processes[5] = &lbl_27_bss_7CFC;
+    processes[6] = &lbl_27_bss_7CFC;
+    processes[7] = &lbl_27_bss_7CFC;
     processes[8] = &lbl_101_bss_21C;
     processes[10] = &lbl_101_bss_22C;
     processes[11] = &lbl_101_bss_23C;
