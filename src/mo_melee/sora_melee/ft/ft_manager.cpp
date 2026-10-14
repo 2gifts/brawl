@@ -1080,7 +1080,8 @@ extern float lbl_27_data_4B84;
 
 // The first argument is ignored: the log observer always registers with the static log event manager.
 void soLogEventObserver::addObserver(short, s8 param2) {
-    addObserverSub(g_soLogEventManager.m_module.getManageId(), this, param2);
+    s16 manageId = g_soLogEventManager.m_module.getManageId();
+    addObserverSub(manageId, this, param2);
 }
 
 // Switches the manager between versus (0) and adventure (1) rules.
