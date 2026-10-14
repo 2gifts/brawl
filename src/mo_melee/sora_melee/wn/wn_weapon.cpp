@@ -312,31 +312,33 @@ void Weapon::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatu
 }
 
 bool Weapon::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3) {
-    if (isObserv(acmd->getGroup()) == false) {
+    char group = acmd->getGroup();
+    if (isObserv(group) == false) {
         return false;
     }
-    char kind = acmd->getType();
-    if (kind < 5 || kind > 10) {
+    if (acmd->getType() <= 4 || acmd->getType() >= 11) {
         return StageObject::notifyEventAnimCmd(acmd, moduleAccesser, unk3);
     }
     switch (acmd->getType()) {
+    case 5:
+        deactivate(false);
+        return true;
+    case 6:
+        break;
+    case 7:
+        constraint(-1, -1, -1);
+        return true;
     case 8:
         soArticle::setNotifyArticleEventRemove(m_moduleAccesser);
         if (isActive() == true) {
             deactivate(false);
         }
         return true;
-    case 6:
-        constraint(-1, -1, -1);
-        return true;
-    case 5:
-        deactivate(false);
+    case 9:
+        soArticle::setNotifyArticleEventEject(-1, m_moduleAccesser);
         return true;
     case 10:
         unkA4 |= 0x10;
-        return true;
-    case 9:
-        soArticle::setNotifyArticleEventEject(-1, m_moduleAccesser);
         return true;
     }
     return false;
@@ -454,47 +456,55 @@ void Weapon::removeConstraint() {
 }
 
 // Raw views of soCollisionLog bytes that the shared header leaves unnamed.
+float vec2fAngle(Vec2f*, Vec2f*); // native helper in the main binary
+
 #define LOG_U8(log, offset) (*(reinterpret_cast<u8*>(log) + (offset)))
 
 void Weapon::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
-    gfTask* task = gfTaskScheduler::getInstance()->getTaskById(collisionLog->m_taskCategory, collisionLog->m_taskId);
+    gfTask* task = gfTaskScheduler::getInstance()->getTaskById(static_cast<gfTask::Category>(LOG_U8(collisionLog, 0x22)), collisionLog->m_taskId);
     switch (LOG_U8(collisionLog, 0x21)) {
-    case 1:
-        break;
-    case 0:
-        if (task != NULL) {
-            float reboundX = 0.0f;
-            float reboundY = 0.0f;
-            m_moduleAccesser->getCollisionAttackModule().checkRebound(power, moduleAccesser, dynamic_cast<StageObject*>(task),
-                                                                      collisionLog, &reboundX, &reboundY);
-        }
-        break;
-    default:
+    case 2:
         unkA4Bit7 = 0;
         if (m_moduleAccesser->getSituationModule().getKind() == 2) {
-            soCollisionAttackData* data = m_moduleAccesser->getCollisionAttackModule().getData(LOG_U8(collisionLog, 0x25), false);
-            if (*reinterpret_cast<s32*>(reinterpret_cast<char*>(data) + 0x3C) >= 0) {
+            soCollisionAttackModule& attack = m_moduleAccesser->getCollisionAttackModule();
+            soCollisionAttackData* data = attack.getData(LOG_U8(collisionLog, 0x25), false);
+            if ((*reinterpret_cast<u32*>(reinterpret_cast<char*>(data) + 0x3C) >> 31) == 0) {
                 soCollisionShieldModule& shield = *soExternalValueAccesser::getCollisionShieldModule(dynamic_cast<StageObject*>(task));
                 if (shield.isHop(LOG_U8(collisionLog, 0x23)) == true) {
-                    float hopAngle = shield.getHopAngle() * 0.017453292f;
-                    m_reflectDirX = cos(hopAngle) * shield.getAttackMul(0);
+                    float hopAngle = shield.getHopAngle(LOG_U8(collisionLog, 0x23)) * 0.017453292f;
+                    float hopCos = cos(hopAngle);
+                    m_reflectDirX = hopCos * shield.getLR(0);
                     m_reflectDirY = sin(hopAngle);
                     unkA4Bit7 = 1;
                 } else if (shield.isNoHop(LOG_U8(collisionLog, 0x23)) == false) {
                     Vec3f center = shield.getCenterPos(LOG_U8(collisionLog, 0x24), LOG_U8(collisionLog, 0x23));
-                    Vec2f dir(collisionLog->m_pos.m_x - center.m_x, collisionLog->m_pos.m_y - center.m_y);
+                    Vec3f logPos;
+                    logPos = collisionLog->m_pos;
+                    Vec2f dir(logPos.m_x - center.m_x, logPos.m_y - center.m_y);
                     float length = dir.length();
                     if (length > 0.00001f) {
                         dir.m_x *= 1.0f / length;
                         dir.m_y *= 1.0f / length;
-                        Vec2f speed = m_moduleAccesser->getCollisionAttackModule().getSpeed();
-                        if (dir.mtVecAngle(speed) * 57.29578f < 135.0f) {
+                        Vec2f speed;
+                        Vec2f::copy(speed, attack.getSpeed());
+                        if (vec2fAngle(&dir, &speed) * 57.29578f < 135.0f) {
                             m_reflectDirX = dir.m_x;
                             m_reflectDirY = dir.m_y;
                             unkA4Bit7 = 1;
                         }
                     }
                 }
+            }
+        }
+        break;
+    case 1:
+        break;
+    case 0:
+        if (task != NULL) {
+            float reboundX = 0.0f;
+            float reboundY = 0.0f;
+            if (moduleAccesser->getCollisionAttackModule().checkRebound(power, moduleAccesser, dynamic_cast<StageObject*>(task),
+                                                                        collisionLog, &reboundX, &reboundY)) {
             }
         }
         break;
@@ -507,9 +517,10 @@ bool Weapon::reflect() {
     soKineticEnergy::AttributeFlag attribute(1);
     m_moduleAccesser->getKineticModule().mulSpeed(&mul, attribute);
     m_moduleAccesser->getKineticModule().mulAccel(&mul, attribute);
-    m_moduleAccesser->getWorkManageModule().setInt(
-        (int)((float)m_moduleAccesser->getWorkManageModule().getInt(Weapon_Work_Int_Init_Life) * m_moduleAccesser->getReflectModule().getLifeMul()),
-        Weapon_Work_Int_Life);
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+    float lifeMul = m_moduleAccesser->getReflectModule().getLifeMul();
+    int initLife = work.getInt(Weapon_Work_Int_Init_Life);
+    m_moduleAccesser->getWorkManageModule().setInt((int)((float)initLife * lifeMul), Weapon_Work_Int_Life);
     return false;
 }
 
@@ -534,7 +545,7 @@ bool Weapon::notifyEventCollisionAttackCheck(u32 flags) {
         return true;
     }
     if ((flags & 4) != 0) {
-        if (unkA4Bit7) {
+        if (unkA4Bit7 == 1) {
             return hop();
         }
         deactivate(false);
