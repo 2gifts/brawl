@@ -3,6 +3,7 @@
 #include <so/so_kinetic_utility.h>
 #include <so/so_module_accesser.h>
 #include <wn/wn_kinetic_energy_gravity.h>
+#include <so/event/so_event_system.h>
 #include <wn/wn_kinetic_energy_normal.h>
 #include <wn/wn_kinetic_module_impl.h>
 #include <types.h>
@@ -17,48 +18,49 @@ wnKineticEnergyNormal::~wnKineticEnergyNormal() {
 }
 
 void wnKineticEnergyNormal::resetEnergy(int mode, Vec2f* speed, Vec3f*, soModuleAccesser*) {
-    Vec2f limit(-1.0f, -1.0f);
-    Vec2f brake(0.0f, 0.0f);
-    Vec2f target(-1.0f, -1.0f);
-    Vec2f accel(0.0f, 0.0f);
-    Vec2f::copy(m_accel, accel);
-    Vec2f::copy(m_speedTarget, target);
-    Vec2f::copy(m_brake, brake);
-    Vec2f::copy(m_speedLimit, limit);
-    m_speed = *speed;
+    float y = speed->m_y;
+    float x = speed->m_x;
+    m_accel = Vec2f(0.0f, 0.0f);
+    m_speedTarget = Vec2f(-1.0f, -1.0f);
+    m_brake = Vec2f(0.0f, 0.0f);
+    m_speedLimit = Vec2f(-1.0f, -1.0f);
+    m_speed.m_x = x;
+    m_speed.m_y = y;
     unk34 = mode;
-    if (mode == 1) {
-        Vec2f zero(0.0f, 0.0f);
-        Vec2f::copy(m_speedTarget, zero);
+    switch (mode) {
+    case 0:
+        break;
+    case 1:
+        m_speedTarget = Vec2f(0.0f, 0.0f);
+        break;
     }
 }
 
 void wnKineticEnergyNormal::updateEnergy(soModuleAccesser* acc) {
-    if (unk34 == 1) {
+    switch (unk34) {
+    case 0:
+        break;
+    case 1: {
         float speedLen = getSpeed().length();
-        if (speedLen > 0.00001f) {
-            float brakeLen = m_brake.length();
-            float rest = speedLen - brakeLen;
-            if (rest >= 0.0f) {
-                Vec2f speed = getSpeed();
-                float scale = rest / speedLen - 1.0f;
-                m_accel.m_x = speed.m_x * scale;
-                m_accel.m_y = speed.m_y * scale;
+        if (speedLen <= 0.00001f) {
+            m_accel = Vec2f(0.0f, 0.0f);
+        } else if (speedLen > 0.00001f) {
+            float rest = speedLen - m_brake.length();
+            if (rest < 0.0f) {
+                m_accel = Vec2f(0.0f, 0.0f);
             } else {
-                m_accel.m_x = 0.0f;
-                m_accel.m_y = 0.0f;
+                m_accel = getSpeed() * (rest / speedLen - 1.0f);
             }
-        } else {
-            m_accel.m_x = 0.0f;
-            m_accel.m_y = 0.0f;
         }
+        break;
+    }
     }
     soKineticEnergyNormal::updateEnergy(acc);
 }
 
 wnKineticModuleImpl::wnKineticModuleImpl(soModuleAccesser* acc, soInstanceManagerFullProperty<soKineticEnergy*>* energies, soKineticMediator* mediator) :
     soKineticModuleImpl(acc, energies, mediator),
-    soStatusEventObserver(acc->getEventManageModule().getManageId(), -1),
+    soStatusEventObserver(static_cast<soEventManager&>(acc->getEventManageModule()).getManageId(), -1),
     m_outsideGroundEnergyId(-1) {
 }
 
@@ -72,7 +74,7 @@ struct wnStatusKineticData {
 
 void wnKineticModuleImpl::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* data, soModuleAccesser* acc) {
     int kineticType = ((wnStatusKineticData*)data)->kineticType;
-    if (kineticType >= 0) {
+    if (kineticType > -1) {
         changeKinetic(kineticType, acc);
     }
 }
@@ -85,9 +87,10 @@ static const wnKineticInitFunc sKineticInit[3] = {
 };
 
 void wnKineticModuleImpl::changeKinetic(int kineticType, soModuleAccesser* acc) {
-    if (kineticType >= 0 && kineticType < 3) {
-        (this->*sKineticInit[kineticType])(kineticType, acc);
+    if (kineticType <= -1 || kineticType >= 3) {
+        return;
     }
+    (this->*sKineticInit[kineticType])(kineticType, acc);
 }
 
 void wnKineticModuleImpl::initializeNormal(int kineticType, soModuleAccesser* acc) {
@@ -97,8 +100,7 @@ void wnKineticModuleImpl::initializeNormal(int kineticType, soModuleAccesser* ac
     if (kineticType == 0) {
         Vec2f speed = acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         Vec3f zero3(0.0f, 0.0f, 0.0f);
-        Vec2f copy = speed;
-        main->resetEnergy(0, &copy, &zero3, acc);
+        main->resetEnergy(0, &speed, &zero3, acc);
         Vec3f zeroRot(0.0f, 0.0f, 0.0f);
         Vec2f zero(0.0f, 0.0f);
         sub->resetEnergy(-1, &zero, &zeroRot, acc);
@@ -114,8 +116,7 @@ void wnKineticModuleImpl::initializeStop(int kineticType, soModuleAccesser* acc)
     if (kineticType == 0) {
         Vec2f speed = acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         Vec3f zero3(0.0f, 0.0f, 0.0f);
-        Vec2f copy = speed;
-        main->resetEnergy(1, &copy, &zero3, acc);
+        main->resetEnergy(1, &speed, &zero3, acc);
         Vec3f zeroRot(0.0f, 0.0f, 0.0f);
         Vec2f zero(0.0f, 0.0f);
         sub->resetEnergy(-1, &zero, &zeroRot, acc);
@@ -142,8 +143,12 @@ void wnKineticModuleImpl::setOutsideMovementGroundEnergyId(soKineticModule* modu
 }
 
 void wnKineticModuleImpl::addSpeedOutside(soKineticEnergy::OutsideType type, Vec3f* speed) {
-    if (type == soKineticEnergy::Outside_Movement_Ground && m_outsideGroundEnergyId != -1) {
-        soKineticUtility::addSpeedOutsideMovementGround(getEnergy(m_outsideGroundEnergyId), speed, m_moduleAccesser);
+    switch (type) {
+    case soKineticEnergy::Outside_Movement_Ground:
+        if (m_outsideGroundEnergyId != -1) {
+            soKineticUtility::addSpeedOutsideMovementGround(getEnergy(m_outsideGroundEnergyId), speed, m_moduleAccesser);
+        }
+        break;
     }
 }
 
@@ -200,7 +205,10 @@ Vec3f wnKineticEnergyGravity::getRotation() {
 }
 
 Vec2f wnKineticEnergyGravity::getSpeed() {
-    return Vec2f(0.0f, m_speedY);
+    Vec2f speed;
+    speed.m_y = m_speedY;
+    speed.m_x = 0.0f;
+    return speed;
 }
 
 wnKineticEnergyGravity::~wnKineticEnergyGravity() {
