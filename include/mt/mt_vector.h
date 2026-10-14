@@ -6,12 +6,19 @@
 #include <mt/mt_common.h>
 #include <types.h>
 
+class Vec3f;
+
 class Vec2f {
 public:
     float m_x;
     float m_y;
 
     Vec2f() { }
+    inline Vec2f(const Vec3f& xyz)
+#ifdef MT_VEC2F_FROM_VEC3_CTOR_NOINLINE
+        __attribute__((never_inline)) // MATCH-ONLY: retain the native constructor call.
+#endif
+        ;
     Vec2f(float x, float y)
 #ifdef MT_VEC2F_CTOR_NOINLINE
         __attribute__((never_inline)) // MATCH-ONLY: retain a proved out-of-line constructor call.
@@ -295,6 +302,8 @@ inline Vec3f Vec3f::operator+(const Vec3f& v) {
     Vec3fAdd(&result, this, &v);
     return result;
 }
+inline Vec2f::Vec2f(const Vec3f& xyz) : m_x(xyz.m_x), m_y(xyz.m_y) { }
+
 inline Vec3f Vec3f::operator-(const Vec3f& v) {
     Vec3f result;
     Vec3fSub(&result, this, &v);
