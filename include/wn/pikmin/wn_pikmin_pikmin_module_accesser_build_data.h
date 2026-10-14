@@ -1,5 +1,6 @@
 #pragma once
 
+#include <wn/pikmin/wn_pikmin_pikmin_utility.h>
 #include <wn/wn_module_accesser_build_data.h>
 
 // Build data of the Pikmin article: the shared article build data plus one extra anim-command list.
@@ -16,13 +17,4 @@ public:
                                   paramAccesser, unk18, unk1C, unk2C, unk30, unk34, unk38, unk3C),
         m_animCmdData(reinterpret_cast<const void*>(unk10)) { }
     virtual void* getAnimCmdData(u32 eventThread, s32 p2) const;
-};
-
-class wnPikminPikminUtility {
-public:
-    static bool isOwnerConditionGround(int condition);
-    static void tryAttachGround(soModuleAccesser* moduleAccesser);
-    static float getTargetDist(soModuleAccesser* moduleAccesser, int mode);
-    static float getOwnerDist(soModuleAccesser* moduleAccesser, int mode);
-    static float getDist(Vec2f* from, Vec2f* to, int mode);
 };

@@ -3,15 +3,13 @@
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <types.h>
+#include <wn/pikmin/wn_pikmin_pikmin_utility.h>
 
-// Base and helper functions of the Pikmin follow family (ft_pikmin map: FollowCommon, wnPikminPikminUtility), called by
-// their REL symbol names until a shared declaration exists.
+// Base functions of the Pikmin follow family (ft_pikmin map: FollowCommon), called by their REL symbol names until a
+// shared declaration exists.
 extern "C" {
 void fn_113_263DC(void* self, soModuleAccesser* moduleAccesser);
 void fn_113_26470(void* self, soModuleAccesser* moduleAccesser);
-float fn_113_23CA0(soModuleAccesser* moduleAccesser, int index);
-u32 fn_113_23B54(int flag);
-void fn_113_23B84(soModuleAccesser* moduleAccesser);
 }
 
 class wnPikminPikminStatusUniqProcessAirFollow : public soStatusUniqProcess {
@@ -48,10 +46,10 @@ void wnPikminPikminStatusUniqProcessAirFollow::execFixPosCounter(soModuleAccesse
         return;
     }
     float threshold = soValueAccesser::getConstantFloat(a, 0xfa4, 0);
-    if (fn_113_23CA0(a, 3) >= threshold) {
+    if (wnPikminPikminUtility::getTargetDist(a, 3) >= threshold) {
         return;
     }
-    if (fn_113_23B54(a->getWorkManageModule().getInt(0x10000010)) == 1) {
+    if (wnPikminPikminUtility::isOwnerConditionGround(a->getWorkManageModule().getInt(0x10000010)) == 1) {
         a->getStatusModule().changeStatusRequest(10, a);
     }
 }

@@ -290,7 +290,12 @@ public:
     virtual bool hasNext() const = 0;
     virtual bool isEnd() const = 0;
     virtual T& getCurrent() const = 0;
+#ifdef SO_ARRAY_LIST_CTOR_FLAG
+    // MATCH-ONLY: the Pikmin troops manager unit emits the enumerator base destructor and calls it out of line.
+    virtual ~soEnumerator() __attribute__((never_inline)) = 0;
+#else
     virtual ~soEnumerator() = 0;
+#endif
 };
 
 template <typename ElementTy, typename IndexTy>
@@ -325,9 +330,16 @@ public:
         return m_next < 0;
     }
 
+#ifdef SO_ARRAY_LIST_CTOR_FLAG
+    // MATCH-ONLY: the Pikmin troops manager unit keeps the enumerator's current-element accessor out of line.
+    virtual ElementTy& getCurrent() const __attribute__((never_inline)) {
+        return m_units[m_next].m_element;
+    }
+#else
     virtual ElementTy& getCurrent() const {
         return m_units[m_next].m_element;
     }
+#endif
 
     virtual ~soArrayListEnumerator() { }
 };
@@ -402,6 +414,10 @@ public:
     soArrayList() : m_freeIndex(End), m_topIndex(End), m_lastIndex(End) {
         clear();
     }
+#ifdef SO_ARRAY_LIST_CTOR_FLAG
+    // MATCH-ONLY: the Pikmin troops manager calls the list constructor from sora_melee with a zero second argument.
+    soArrayList(s32 flag);
+#endif
 
     virtual bool isNull() const;
 
@@ -449,9 +465,14 @@ public:
     }
 
     // Erase the element at position enm.getNext()
+#ifdef SO_ARRAY_LIST_CTOR_FLAG
+    // MATCH-ONLY: the Pikmin troops manager calls the enumerator erase from sora_melee out of line.
+    void erase(const soArrayListEnumerator<T, IndexTy>& enm);
+#else
     void erase(const soArrayListEnumerator<T, IndexTy>& enm) {
         eraseSub(enm.getNext());
     }
+#endif
 
     soArrayListUnit<T, IndexTy>* getUnits() { return m_units; }
 };
@@ -885,6 +906,10 @@ public:
     virtual void offFull();
 
     soArrayVector() : m_topIndex(0), m_lastIndex(0), m_size(0), m_isFull(false) { }
+#ifdef SO_ARRAY_LIST_CTOR_FLAG
+    // MATCH-ONLY: the Pikmin troops manager unit calls the sora_melee constructor with a zero argument.
+    soArrayVector(int flag);
+#endif
 
     // NOTE: shadows the BrawlHeaders copy; the bitfields are set by the mem-initializer list
     // (before m_elements is constructed), as seen in soCollisionShieldPart's constructor.
