@@ -36,7 +36,7 @@ __dt__82soAnimCmdControlUnitBuilder<51soAnimCmdControlUnitBuildConfig<2,64,514,0
 __dt__81soAnimCmdControlUnitBuilder<50soAnimCmdControlUnitBuildConfig<1,2,514,0,0,1,0,8>>Fv = .text:0x00002868; // type:function size:0x8C
 fn_107_28F4 = .text:0x000028F4; // type:function size:0x98
 fn_107_298C = .text:0x0000298C; // type:function size:0x5C
-fn_107_29E8 = .text:0x000029E8; // type:function size:0x2AC
+__dt__49soModuleAccesserBuilder<22ftGameWatchBuildConfig>Fv = .text:0x000029E8; // type:function size:0x2AC
 __dt__66soGlowModuleBuilder<43soGlowModuleBuildConfig<16ftGlowModuleImpl>>Fv = .text:0x00002C94; // type:function size:0x5C
 __dt__66soSlowModuleBuilder<43soSlowModuleBuildConfig<16soSlowModuleImpl>>Fv = .text:0x00002CF0; // type:function size:0x5C
 __dt__78soAbnormalModuleBuilder<51soAbnormalModuleBuildConfig<20ftAbnormalModuleImpl>>Fv = .text:0x00002D4C; // type:function size:0x5C
@@ -184,7 +184,7 @@ __dt__75soCaptureModuleBuilder<49soCaptureModuleBuildConfig<19soCaptureModuleImp
 __dt__71soCatchModuleBuilder<47soCatchModuleBuildConfig<1,17soCatchModuleImpl>>Fv = .text:0x00007ACC; // type:function size:0x5C
 __dt__73soDamageModuleBuilder<48soDamageModuleBuildConfig<19soDamageModuleActor>>Fv = .text:0x00007B28; // type:function size:0x74
 __dt__96soCollisionCatchModuleBuilder<63soCollisionCatchModuleBuildConfig<26soCollisionCatchModuleImpl>>Fv = .text:0x00007B9C; // type:function size:0x6C
-fn_107_7C08 = .text:0x00007C08; // type:function size:0x90
+__dt__154soCollisionShieldModuleBuilder<119soCollisionShieldModuleBuildConfigGroups<4,1,1,39soCollisionShieldEventPresenterAbsorber,27soCollisionShieldModuleImpl>>Fv = .text:0x00007C08; // type:function size:0x90
 __dt__156soCollisionShieldModuleBuilder<121soCollisionShieldModuleBuildConfigGroups<3,20,2,40soCollisionShieldEventPresenterReflector,27soCollisionShieldModuleImpl>>Fv = .text:0x00007C98; // type:function size:0x90
 __dt__152soCollisionShieldModuleBuilder<117soCollisionShieldModuleBuildConfigGroups<2,1,1,37soCollisionShieldEventPresenterShield,27soCollisionShieldModuleImpl>>Fv = .text:0x00007D28; // type:function size:0x90
 __dt__104soCollisionHitModuleBuilder<73soCollisionHitModuleBuildConfig<0,20,1,24soCollisionHitModuleImpl,1023,1>>Fv = .text:0x00007DB8; // type:function size:0x84
@@ -219,7 +219,7 @@ __ct__111soCollisionAttackModuleBuilder<77soCollisionAttackModuleBuildConfig<0,5
 __ct__104soCollisionHitModuleBuilder<73soCollisionHitModuleBuildConfig<0,20,1,24soCollisionHitModuleImpl,1023,1>>FP16soModuleAccesseriUcP31soEventObserverRegistrationDesc = .text:0x00008ED8; // type:function size:0xC4
 __ct__152soCollisionShieldModuleBuilder<117soCollisionShieldModuleBuildConfigGroups<2,1,1,37soCollisionShieldEventPresenterShield,27soCollisionShieldModuleImpl>>FP16soModuleAccesseriQ26gfTask8Category = .text:0x00008F9C; // type:function size:0xD4
 __ct__159soCollisionShieldModuleBuilder<124soCollisionReflectorModuleBuildConfigGroups<3,20,2,40soCollisionShieldEventPresenterReflector,27soCollisionShieldModuleImpl>>FP16soModuleAccesseriQ26gfTask8Category = .text:0x00009070; // type:function size:0xD4
-fn_107_9144 = .text:0x00009144; // type:function size:0xD4
+__ct__154soCollisionShieldModuleBuilder<119soCollisionShieldModuleBuildConfigGroups<4,1,1,39soCollisionShieldEventPresenterAbsorber,27soCollisionShieldModuleImpl>>FP16soModuleAccesseriQ26gfTask8Category = .text:0x00009144; // type:function size:0xD4
 __ct__96soCollisionCatchModuleBuilder<63soCollisionCatchModuleBuildConfig<26soCollisionCatchModuleImpl>>FP16soModuleAccesseriQ26gfTask8CategoryP31soEventObserverRegistrationDesc = .text:0x00009218; // type:function size:0x98
 __ct__73soDamageModuleBuilder<48soDamageModuleBuildConfig<19soDamageModuleActor>>FP16soModuleAccesserP31soEventObserverRegistrationDesc = .text:0x000092B0; // type:function size:0x6C
 __ct__71soShakeModuleBuilder<47soShakeModuleBuildConfig<4,17soShakeModuleImpl>>FP16soModuleAccesserPv = .text:0x0000931C; // type:function size:0x5C
@@ -273,7 +273,7 @@ fn_107_BFB8 = .text:0x0000BFB8; // type:function size:0x4
 __dt__30ftGameWatchExtendParamAccesserFv = .text:0x0000BFBC; // type:function size:0x60
 __dt__40ftExtendParamAccesserEx<3999,24,23999,1>Fv = .text:0x0000C01C; // type:function size:0x5C
 isObserv__7FighterFc = .text:0x0000C078; // type:function size:0x1C
-fn_107_C094 = .text:0x0000C094; // type:function size:0x84
+__dt__11ftGameWatchFv = .text:0x0000C094; // type:function size:0x84
 addObserver__22soAnimCmdEventObserverFsSc = .text:0x0000C118; // type:function size:0x14
 addObserver__19soLinkEventObserverFsSc = .text:0x0000C12C; // type:function size:0x14
 fn_107_C140 = .text:0x0000C140; // type:function size:0x4

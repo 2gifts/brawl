@@ -192,7 +192,7 @@ __ct__104soCollisionHitModuleBuilder<73soCollisionHitModuleBuildConfig<0,20,1,24
 __ct__152soCollisionShieldModuleBuilder<117soCollisionShieldModuleBuildConfigGroups<2,1,1,37soCollisionShieldEventPresenterShield,27soCollisionShieldModuleImpl>>FP16soModuleAccesseriQ26gfTask8Category = .text:0x00007050; // type:function size:0xD4
 __ct__154soCollisionReflectorModuleBuilder<116soCollisionReflectorModuleBuildConfig<3,20,40soCollisionShieldEventPresenterReflector,27soCollisionShieldModuleImpl>>FP16soModuleAccesseriQ26gfTask8Category = .text:0x00007124; // type:function size:0xD4
 __ct__96soCollisionCatchModuleBuilder<63soCollisionCatchModuleBuildConfig<26soCollisionCatchModuleImpl>>FP16soModuleAccesseriQ26gfTask8CategoryP31soEventObserverRegistrationDesc = .text:0x000071F8; // type:function size:0x98
-fn_117_7290 = .text:0x00007290; // type:function size:0x9C
+__ct__99soCollisionSearchModuleBuilder<65soCollisionSearchModuleBuildConfig<27soCollisionSearchModuleImpl>>FP16soModuleAccesseriQ26gfTask8Category = .text:0x00007290; // type:function size:0x9C
 __ct__73soDamageModuleBuilder<48soDamageModuleBuildConfig<19soDamageModuleActor>>FP16soModuleAccesserP31soEventObserverRegistrationDesc = .text:0x0000732C; // type:function size:0x6C
 __ct__71soShakeModuleBuilder<47soShakeModuleBuildConfig<4,17soShakeModuleImpl>>FP16soModuleAccesserPv = .text:0x00007398; // type:function size:0x5C
 __ct__69soSoundModuleBuilder<45soSoundModuleBuildConfig<17soSoundModuleImpl>>FP16soModuleAccesserP18soSoundIdExchangerP31soEventObserverRegistrationDesc = .text:0x000073F4; // type:function size:0x90
@@ -241,7 +241,7 @@ fn_117_A13C = .text:0x0000A13C; // type:function size:0x4
 __dt__27ftDededeExtendParamAccesserFv = .text:0x0000A140; // type:function size:0x60
 __dt__41ftExtendParamAccesserEx<3999,41,23999,14>Fv = .text:0x0000A1A0; // type:function size:0x5C
 isObserv__7FighterFc = .text:0x0000A1FC; // type:function size:0x1C
-fn_117_A218 = .text:0x0000A218; // type:function size:0x74
+__dt__8ftDededeFv = .text:0x0000A218; // type:function size:0x74
 addObserver__22soAnimCmdEventObserverFsSc = .text:0x0000A28C; // type:function size:0x14
 addObserver__19soLinkEventObserverFsSc = .text:0x0000A2A0; // type:function size:0x14
 fn_117_A2B4 = .text:0x0000A2B4; // type:function size:0x4

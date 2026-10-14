@@ -34,7 +34,7 @@ __dt__81soAnimCmdControlUnitBuilder<50soAnimCmdControlUnitBuildConfig<4,2,507,0,
 __dt__82soAnimCmdControlUnitBuilder<51soAnimCmdControlUnitBuildConfig<3,64,507,0,0,1,0,8>>Fv = .text:0x0000264C; // type:function size:0x8C
 __dt__82soAnimCmdControlUnitBuilder<51soAnimCmdControlUnitBuildConfig<2,64,507,0,0,1,0,8>>Fv = .text:0x000026D8; // type:function size:0x8C
 __dt__81soAnimCmdControlUnitBuilder<50soAnimCmdControlUnitBuildConfig<1,2,507,0,0,1,0,8>>Fv = .text:0x00002764; // type:function size:0x8C
-fn_115_27F0 = .text:0x000027F0; // type:function size:0x98
+__dt__99soAnimCmdControlUnitBuilderDisguise<60soAnimCmdControlUnitBuildConfigDisguise<0,1,303,303,0,1,0,8>>Fv = .text:0x000027F0; // type:function size:0x98
 fn_115_2888 = .text:0x00002888; // type:function size:0x5C
 __dt__45soModuleAccesserBuilder<18ftDiddyBuildConfig>Fv = .text:0x000028E4; // type:function size:0x2A0
 __dt__66soGlowModuleBuilder<43soGlowModuleBuildConfig<16ftGlowModuleImpl>>Fv = .text:0x00002B84; // type:function size:0x5C

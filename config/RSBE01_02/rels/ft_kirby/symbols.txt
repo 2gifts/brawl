@@ -39,7 +39,7 @@ __dt__119soResourceModuleBuilder<92soResourceModuleBuildConfigDynamic<0,29ftKirb
 __ct__81soModelModuleBuilder<57soModelModuleBuildConfig<8,3,25soModelModuleImplVariable>>FP16soModuleAccesserfPvP31soEventObserverRegistrationDesc = .text:0x00002F40; // type:function size:0x88
 fn_96_2FC8 = .text:0x00002FC8; // type:function size:0x5C
 __dt__81soModelModuleBuilder<57soModelModuleBuildConfig<8,3,25soModelModuleImplVariable>>Fv = .text:0x00003024; // type:function size:0x78
-fn_96_309C = .text:0x0000309C; // type:function size:0x19C
+__ct__250soMotionModuleBuilder<224soMotionModuleBuildConfig<797,26soMotionModuleImplMultiRes,2,1,82soTransitionModuleBuildConfig<49soTypeList<14soIntToType<8>,18soTypeListNullType>>,73soMotionAnimObjCacheModuleBuildConfig<5,30soMotionAnimObjCacheModuleImpl>>>FP16soModuleAccesserPv = .text:0x0000309C; // type:function size:0x19C
 fn_96_3238 = .text:0x00003238; // type:function size:0x5C
 __ct__22soTransitionModuleImplFP32soArray<21soTransitionTermGroup> = .text:0x00003294; // type:function size:0x38
 __dt__16soTransitionInfoFv = .text:0x000032CC; // type:function size:0x40
