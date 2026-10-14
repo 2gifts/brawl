@@ -8,6 +8,8 @@
 #include <so/kinetic/so_kinetic_energy.h>
 #include <so/anim/so_anim_cmd_event_presenter.h>
 
+class soKineticMediator;
+
 class soKineticModule : public soNullable {
 public:
     virtual void activate();
@@ -41,11 +43,13 @@ public:
 static_assert(sizeof(soKineticModule) == 8, "Class is wrong size!");
 
 class soKineticModuleImpl : public soKineticModule, public soAnimCmdEventObserver {
+protected: // the generic article module (wnKineticModuleImpl) reads these
     soInstanceManagerFullProperty<soKineticEnergy*>* m_kineticEnergyInstanceManager;
     int m_kineticType;
     soModuleAccesser* m_moduleAccesser;
 
 public:
+    soKineticModuleImpl(soModuleAccesser* acc, soInstanceManagerFullProperty<soKineticEnergy*>* energies, soKineticMediator* mediator);
 #ifdef WN_ARTICLE_NATIVE_BUILDERS
     ~soKineticModuleImpl() { }
 #elif defined(FT_MODULE_BUILDER)
