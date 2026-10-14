@@ -25,7 +25,7 @@ protected:
             u8 m_isSyncOwnerStatus : 1;
             u8 m_isInhaled : 1;
             u8 m_keepOnReflectLimit : 1;
-            s8 m_deadAreaMask : 2; // dead areas (bit mask) in which the article is not removed
+            s32 m_deadAreaMask : 2; // dead areas (bit mask) in which the article is not removed
             u8 : 2;
         };
     };

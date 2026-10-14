@@ -1,3 +1,4 @@
+#define SO_ARTICLE_DTOR_INLINE
 #include <wn/weapon.h>
 #include <gf/gf_task.h>
 #include <gf/gf_task_scheduler.h>
@@ -64,7 +65,8 @@ Weapon::Weapon(const char* name, s32 subKind, const void* data, s32 articleId, c
     StageObject(name, 12, 9, 5, 1, NULL),
     soStatusEventObserver(-1, -1),
     soCollisionAttackEventObserver(-1, -1),
-    soCollisionHitEventObserver(-1, -1) {
+    soCollisionHitEventObserver(-1, -1),
+    soArticle(-1, 0xB) {
     const s32* const* info = reinterpret_cast<const s32* const*>(kindInfo);
     m_reflectDirX = 0.0f;
     m_reflectDirY = 0.0f;
@@ -176,7 +178,7 @@ void Weapon::deactivate(bool treatAsRemoved) {
     onDeactivate();
     m_moduleAccesser->getStatusModule().changeStatusForce(-1, m_moduleAccesser);
     if (m_moduleAccesser->getWorkManageModule().isFlag(Weapon_Work_Flag_Keep_Model) == false) {
-        m_moduleAccesser->getModelModule().deactivate();
+        m_moduleAccesser->getModelModule().destructInstance();
     }
     if (isActive() == true && wnInfo::isFinal(m_subKind) == true) {
         g_wnFinalArticleCount--;

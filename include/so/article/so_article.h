@@ -27,13 +27,20 @@ struct soLogAttackInfo {
 
 class soArticle : public soNullable, public soEventPresenter<soArticleEventObserver> {
 public:
+    // (manageId, unitId) constructor of the presenter used by the generic article base (Weapon).
+    soArticle(s16 manageId, s16 unitId) : soNullable(false), soEventPresenter<soArticleEventObserver>(manageId, unitId) { }
+    soArticle() { }
     bool setDeactivateDescendant();
     // Non-virtual helpers of the generic article code (sora_melee).
     void setNotifyArticleEventRemove(soModuleAccesser* moduleAccesser);
     void setNotifyArticleEventEject(int unk, soModuleAccesser* moduleAccesser);
     void updateLogAttackInfo(u32 teamOwnerId);
     // TODO
+#ifdef SO_ARTICLE_DTOR_INLINE
+    virtual ~soArticle() { } // MATCH-ONLY: inline in the generic article base (Weapon)
+#else
     virtual ~soArticle();
+#endif
     virtual void remove() = 0;
     virtual int getArticleId() = 0;
     virtual s16 getArticleEventManageId() = 0;
