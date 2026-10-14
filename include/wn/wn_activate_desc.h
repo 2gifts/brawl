@@ -8,8 +8,9 @@
 // HYPOTHESIS: original descriptor type spelling. Physical layout follows both
 // Sonic activation callers and the complete Weapon::activate consumer.
 struct wnActivateDesc {
-    int founderTaskId;
-    int resourceId, unk8, unkC;
+    u32 founderTaskId;
+    u32 resourceId;
+    int unk8, unkC;
     int unk10, unk14, unk18, unk1C;
     Vec3f pos;
     float lr;
@@ -33,12 +34,33 @@ struct wnActivateDesc {
             u8 flagsMidLow : 1;
             u8 flagsLow : 3;
         };
+        // HYPOTHESIS: the Pikmin article clears the low nibble as one group.
+        struct {
+            u8 : 4;
+            u8 flagsLowNibble : 4;
+        };
+        // HYPOTHESIS: the generic article activation reads every bit on its own (ownership, constraint, scale, glow...).
+        struct {
+            u8 flagBit7 : 1;
+            u8 flagBit6 : 1;
+            u8 flagBit5 : 1;
+            u8 flagBit4 : 1;
+            u8 flagBit3 : 1;
+            u8 flagBit2 : 1;
+            u8 flagBit1 : 1;
+            u8 flagBit0 : 1;
+        };
     };
     union {
         u8 unk4D;
         struct {
             u8 unk4DHigh : 2;
             u8 unk4DLow : 6;
+        };
+        struct {
+            u8 flag4DBit7 : 1;
+            u8 flag4DBit6 : 1;
+            u8 : 6;
         };
     };
     u8 unk4E[2];

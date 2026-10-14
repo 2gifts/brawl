@@ -13,10 +13,10 @@ struct stTenganParams {
     float unk2C;
     float unk30;
     float unk34;
-    float unk38;
-    float unk3C;
-    float unk40;
-    float unk44;
+    float unk38; // HYPOTHESIS: possibly "Pokemon Action Minimum Timer" (matches a stage parameter table offset)
+    float unk3C; // HYPOTHESIS: possibly "Pokemon Action Maximum Timer" (matches a stage parameter table offset)
+    float unk40; // HYPOTHESIS: possibly "Pokemon On-Stage Minimum Timer" (matches a stage parameter table offset)
+    float unk44; // HYPOTHESIS: possibly "Pokemon On-Stage Maximum Timer" (matches a stage parameter table offset)
     float legend_frame_disappear_min;
     float legend_frame_disappear_max;
     float guest_rate_guest;

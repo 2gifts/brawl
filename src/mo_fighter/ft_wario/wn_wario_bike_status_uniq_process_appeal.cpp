@@ -19,7 +19,7 @@ void wnWarioBikeStatusUniqProcessAppeal::execFixPosCounter(soModuleAccesser* a) 
             work.onFlag(0x2200000a);
         }
     } else {
-        float power = param->unk30 * ((speed - param->unk34) / (param->unkC - param->unk34));
+        float power = param->damageGrowth * ((speed - param->unk34) / (param->groundTopSpeed - param->unk34));
         if (attack.isAttack(0, false)) attack.setPowerMul(power);
         else if (work.isFlag(0x2200000a)) {
             attack.set(0, 0);
@@ -53,7 +53,7 @@ void wnWarioBikeStatusUniqProcessAppeal::execFixPos(soModuleAccesser* a) {
             float difference = fabsf(phase - groundPhase);
             if (difference > param->unk48 && !correctionActive) {
                 work.onFlag(0x22000007);
-                correctionSpeed = (difference / 90.0f) * param->unk50;
+                correctionSpeed = (difference / 90.0f) * param->landingBounceHeight;
                 changeKinetic = true;
             }
         }
@@ -62,7 +62,7 @@ void wnWarioBikeStatusUniqProcessAppeal::execFixPos(soModuleAccesser* a) {
         work.offFlag(0x22000007);
         float difference = groundPhase - targetPhase;
         if (difference > param->unk48) {
-            correctionSpeed = (difference / 90.0f) * param->unk50;
+            correctionSpeed = (difference / 90.0f) * param->landingBounceHeight;
             changeKinetic = true;
         }
     }
@@ -102,10 +102,10 @@ void wnWarioBikeStatusUniqProcessAppeal::execFixPos(soModuleAccesser* a) {
     float maximum;
     if (frontContact || rearContact) {
         minimum = param->unk14;
-        maximum = param->unkC;
+        maximum = param->groundTopSpeed;
     } else {
         minimum = param->unk20;
-        maximum = param->unk18;
+        maximum = param->airTopSpeed;
     }
     soKineticEnergyNormal& normal =
         dynamic_cast<soKineticEnergyNormal&>(*kinetic.getEnergy(0));

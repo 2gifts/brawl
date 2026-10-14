@@ -46,12 +46,12 @@ static_assert(sizeof(grGreenhillBg) == 0x1A0, "grGreenhillBg layout");
 // Per-stage parameters the Break object reads through getStageData(). Only the fields that are used are named.
 struct grGreenhillBreakParam {
     u8 unk00[0x10];
-    float unk10;        // copied to grGreenhillBreak::unk170
+    float floorHealth;        // copied to grGreenhillBreak::unk170 (the piece's hit points)
     u8 unk14[0x10];
     float m_waitMin;    // 0x24 range for the first countdown
     float m_waitMax;    // 0x28
-    float unk2C;        // 0x2C countdown while the piece is gone
-    float unk30;        // 0x30 respawn threshold
+    float floorRespawnFrames;   // 0x2C countdown while the piece is gone
+    float floorRespawnAnimFrames;        // 0x30 respawn threshold
 };
 
 class grGreenhillBreak : public grGreenhill {

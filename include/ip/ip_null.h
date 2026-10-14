@@ -16,7 +16,9 @@ public:
         ipPadTrigger trigger = { 0, 0 };
         return trigger;
     }
+#ifndef WN_ARTICLE_NATIVE_BUILDERS
     virtual s32 getContNo() const { return -1; }
+#endif
     virtual void setRumble(u32, u32, s32, u8) { }
     virtual void stopRumble() { }
     virtual void removeRumble() { }

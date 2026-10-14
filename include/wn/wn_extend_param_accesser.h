@@ -21,6 +21,18 @@ protected:
 public:
     wnExtendParamAccesser(s32 kind) :
         m_kind(kind), m_floatBase(FloatBase), m_intBase(IntBase), m_indefiniteBase(IndefiniteBase) { }
+#ifdef WN_EXTEND_PARAM_ACCESSER_NOINLINE
+    // MATCH-ONLY: an owning unit whose derived accesser overrides the queries keeps the base ones out of line.
+    virtual float getParamFloat(soModuleAccesser*, s32 id, s32 index) __attribute__((never_inline)) {
+        return m_floats[id - m_floatBase - 1][index];
+    }
+    virtual s32 getParamInt(soModuleAccesser*, s32 id, s32 index) __attribute__((never_inline)) {
+        return m_ints[id - m_intBase - 1][index];
+    }
+    virtual void* getParamIndefinite(soModuleAccesser*, s32 id, s32) __attribute__((never_inline)) {
+        return m_indefinites[id - m_indefiniteBase - 1];
+    }
+#else
     virtual float getParamFloat(soModuleAccesser*, s32 id, s32 index) {
         return m_floats[id - m_floatBase - 1][index];
     }
@@ -30,4 +42,26 @@ public:
     virtual void* getParamIndefinite(soModuleAccesser*, s32 id, s32) {
         return m_indefinites[id - m_indefiniteBase - 1];
     }
+#endif
 };
+
+#ifdef WN_OCTOPUS_PARAM_ACCESSER_OUT_OF_LINE
+// This instance's virtual queries belong to the Octopus collision unit.
+template <>
+class wnExtendParamAccesser<3999, 3, 23999, 0, 0, 0> : public soParamAccesser {
+    s32 m_kind;
+    s32 m_floatBase;
+    s32 m_intBase;
+    s32 m_indefiniteBase;
+protected:
+    const float* m_floats[4];
+    const s32* m_ints[1];
+    void* m_indefinites[1];
+public:
+    wnExtendParamAccesser(s32 kind) :
+        m_kind(kind), m_floatBase(3999), m_intBase(23999), m_indefiniteBase(0) { }
+    virtual float getParamFloat(soModuleAccesser*, s32 id, s32 index);
+    virtual s32 getParamInt(soModuleAccesser*, s32 id, s32 index);
+    virtual void* getParamIndefinite(soModuleAccesser*, s32 id, s32 index);
+};
+#endif

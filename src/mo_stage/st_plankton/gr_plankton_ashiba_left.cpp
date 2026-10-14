@@ -152,7 +152,7 @@ void grPlanktonAshibaLeft::updateRot(float deltaFrame) {
         next = rot;
         float z = rot.m_z;
         if (m_rotTimer == 0.0f) {
-            float target = data->unk2C;
+            float target = data->leftLeafInitialAngle;
             if (z != target) {
                 next.m_z = target;
                 if (z > target) {
@@ -219,12 +219,12 @@ void grPlanktonAshibaLeft::onDamage(int index, soDamage* damage, soDamageAttacke
             float push = 0.0f;
             if (amount < data->unk30) {
                 if (m_dir == 1) {
-                    push += data->unk38;
+                    push += data->leftLeafDamageAngle;
                 } else {
-                    push -= data->unk38;
+                    push -= data->leftLeafDamageAngle;
                 }
             } else if (amount >= data->unk34) {
-                push += data->unk38 * 2.0f;
+                push += data->leftLeafDamageAngle * 2.0f;
             }
             next.m_z = rot.m_z + push;
             setRot(rot.m_x, rot.m_y, next.m_z);
@@ -253,7 +253,7 @@ void grPlanktonAshibaLeft::initAshibaData() {
         Vec3f rot = getRot();
         next.m_x = rot.m_x;
         next.m_y = rot.m_y;
-        next.m_z = data->unk2C;
+        next.m_z = data->leftLeafInitialAngle;
         setRot(rot.m_x, rot.m_y, next.m_z);
     }
 }

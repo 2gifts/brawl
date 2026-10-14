@@ -22,7 +22,7 @@ void wnWarioBikeStatusUniqProcessTurnStart::initStatus(soModuleAccesser* a) {
     int count = work.getInt(0x20000000);
     wnWarioBikeTurnEvent query;
     link.sendEventParents(3, query);
-    int random = randi(param->unk7C);
+    int random = randi(param->turnFallChance);
     // Repeated turns increase the chance of the alternate turn path.
     int turnChance = count + (4 - query.unk8);
     if (turnChance + 1 > random + 1 || count + 1 >= param->unk80)

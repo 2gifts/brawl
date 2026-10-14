@@ -111,11 +111,11 @@ void grFamicomKame::setAttack() {
         offset.m_z = 0.0f;
         u32 power;
         switch (m_level) {
-        case 2:
-            power = 13;
-            break;
         case 1:
             power = 11;
+            break;
+        case 2:
+            power = 13;
             break;
         case 3:
             power = 15;
@@ -227,7 +227,7 @@ void grFamicomKame::requestDown2() {
             m_state = 0x11;
         } else if (isRemoveItem() != 0 && isTurnGround() != 0) {
             FAMICOM_LEVEL_MOTION(1, 5, 9, false)
-            setMotionFrame(165.0f, 0);
+            setMotionFrame(172.0f, 0);
             m_actionTimer = 148.0f;
             disableHit(0, 0);
             disableAttack(0);
@@ -246,19 +246,19 @@ void grFamicomKame::requestMove() {
     }
     switch (m_level) {
     case 2:
-        m_speed = data->unk30 * data->unk40;
+        m_speed = data->unk30 * data->enemySpeedMulLevel2;
         break;
     case 1:
         m_speed = data->unk30;
         break;
     case 3:
-        m_speed = data->unk30 * data->unk44;
+        m_speed = data->unk30 * data->enemySpeedMulLevel3;
         break;
     default:
         m_speed = 0.0f;
         break;
     }
-    m_fallSpeed = data->unk34;
+    m_fallSpeed = data->enemyFallSpeed;
     if (randf() > 0.5f) {
         Vec3f* src = &m_posCtrlWork[0];
         Vec3f* dst = &m_enemyData[m_index].m_pos;
@@ -297,19 +297,19 @@ void grFamicomKame::requestReMove() {
     }
     switch (m_level) {
     case 2:
-        m_speed = data->unk30 * data->unk40;
+        m_speed = data->unk30 * data->enemySpeedMulLevel2;
         break;
     case 1:
         m_speed = data->unk30;
         break;
     case 3:
-        m_speed = data->unk30 * data->unk44;
+        m_speed = data->unk30 * data->enemySpeedMulLevel3;
         break;
     default:
         m_speed = 0.0f;
         break;
     }
-    m_fallSpeed = data->unk34;
+    m_fallSpeed = data->enemyFallSpeed;
     FAMICOM_LEVEL_MOTION(2, 6, 10, true)
     m_state = 4;
     m_attackTimer = 0.0f;

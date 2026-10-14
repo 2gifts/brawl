@@ -1,3 +1,4 @@
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define SO_SLOW_GET_INSTANCE_OUT_OF_LINE
 // The constructor calls the status table's default constructor in sora_melee instead of inlining it.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
@@ -5,6 +6,7 @@
 #include <ft/ft_class_info_impl.h>
 #include <ft/ft_owner.h>
 #include <ft/robot/ft_robot.h>
+#include <ft/ft_physics_iface.h>
 #include <ft/robot/ft_robot_extend_param_accesser.h>
 #include <ft/robot/ft_robot_link_event.h>
 #include <ft/robot/ft_robot_unk8.h>
@@ -32,14 +34,6 @@ static ftRobotUnk8 s_unkTag1(0xff, 1);
 
 ftRobotExtendParamAccesser g_ftRobotExtendParamAccesser;
 ftClassInfoImpl<Fighter_Robot, ftRobot> g_ftClassInfoRobot;
-
-// The physics module's second interface is not declared yet: the constructor calls slot 0x54 of the vtable at +8
-// with the module pointer itself and a zero argument (HYPOTHESIS: resets the physics state).
-static void ftRobotPhysicsModuleCall54(void* module, int arg) {
-    typedef void (*Fn)(void*, int);
-    void** table = *reinterpret_cast<void***>(reinterpret_cast<u8*>(module) + 8);
-    reinterpret_cast<Fn>(table[0x54 / sizeof(void*)])(module, arg);
-}
 
 ftRobot::ftRobot(s32 entryId,
                  Heaps::HeapType instHeap,
@@ -70,10 +64,9 @@ ftRobot::ftRobot(s32 entryId,
     soCollisionReflectorGroupData* reflectors = *reinterpret_cast<soCollisionReflectorGroupData**>(reinterpret_cast<u8*>(m_commonData) + 0xb0);
     m_moduleAccesser->getCollisionReflectorModule().add(reflectors, 2);
     m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
-    ftRobotPhysicsModuleCall54(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0);
-    soSlopeModule* slope = static_cast<soSlopeModule*>(m_moduleAccesser->m_enumerationStart->m_slopeModule);
-    slope->setPartNode(0x5D);
-    slope->setInvalidStatus(6);
+    ftPhysicsModuleCall54(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0);
+    static_cast<soSlopeModule*>(m_moduleAccesser->m_enumerationStart->m_slopeModule)->setPartNode(0x5D);
+    static_cast<soSlopeModule*>(m_moduleAccesser->m_enumerationStart->m_slopeModule)->setInvalidStatus(6);
 }
 
 // Emit the event builder and shared resource accesser used by this REL, following

@@ -73,7 +73,7 @@ void grHalberdWarning::updateMotion(float deltaFrame) {
                     setMotion(0, 0, 1, &m_motionTimer);
                     setVisibility(1);
                     m_seSeq.playFrame(0, getMotionFrame(0));
-                    m_timer = data->unk20;
+                    m_timer = data->warningSignFrames;
                     m_state = 10;
                 }
                 break;

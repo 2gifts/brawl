@@ -2,17 +2,9 @@
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
+#include <wn/wn_lasso_status_uniq_process_reach.h>
 #include <wn/wn_lasso_status_view.h>
 #include <types.h>
-
-class wnLassoStatusUniqProcessReach : public soStatusUniqProcess {
-public:
-    virtual ~wnLassoStatusUniqProcessReach() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-};
 
 wnLassoStatusUniqProcessReach g_wnLassoStatusUniqProcessReach;
 
@@ -22,7 +14,7 @@ void wnLassoStatusUniqProcessReach::exitStatus(soModuleAccesser* moduleAccesser,
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000005)) {
         if (moduleAccesser->getWorkManageModule().getInt(0x20000001) == kind) {
             wnLassoGetLink(moduleAccesser)->unk164Int(1);
-            // TODO: the stage object cast and the Weapon constraint call (fn_27_1DA698) are not reconstructed yet.
+            // TODO: the stage object cast and the Weapon constraint call (Weapon::constraint) are not reconstructed yet.
         }
     }
 }

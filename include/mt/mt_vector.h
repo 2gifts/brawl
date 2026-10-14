@@ -6,12 +6,19 @@
 #include <mt/mt_common.h>
 #include <types.h>
 
+class Vec3f;
+
 class Vec2f {
 public:
     float m_x;
     float m_y;
 
     Vec2f() { }
+    inline Vec2f(const Vec3f& xyz)
+#ifdef MT_VEC2F_FROM_VEC3_CTOR_NOINLINE
+        __attribute__((never_inline)) // MATCH-ONLY: retain the native constructor call.
+#endif
+        ;
     Vec2f(float x, float y)
 #ifdef MT_VEC2F_CTOR_NOINLINE
         __attribute__((never_inline)) // MATCH-ONLY: retain a proved out-of-line constructor call.
@@ -40,7 +47,11 @@ public:
         return res;
     }
 
-    friend Vec2f operator-(const Vec2f& lhs, const Vec2f& rhs) {
+    friend Vec2f operator-(const Vec2f& lhs, const Vec2f& rhs)
+#ifdef MT_VEC2F_SUB_NOINLINE
+        __attribute__((never_inline)) // MATCH-ONLY: retain an evidenced out-of-line subtraction call.
+#endif
+    {
         Vec2f res;
         res.m_x = lhs.m_x - rhs.m_x;
         res.m_y = lhs.m_y - rhs.m_y;
@@ -58,10 +69,19 @@ public:
         return lhs * (1 / c);
     }
 
-    Vec2f& operator+=(const Vec2f& v) {
+    Vec2f& operator+=(const Vec2f& v)
+#ifdef MT_VEC2F_ADD_ASSIGN_DIRECT
+    { // MATCH-ONLY: the weak out-of-line copy in the Pikmin article adds the components directly.
+        m_x = m_x + v.m_x;
+        m_y = m_y + v.m_y;
+        return *this;
+    }
+#else
+    {
         *this = *this + v;
         return *this;
     }
+#endif
 
     Vec2f& operator-=(const Vec2f& v) {
         *this = *this - v;
@@ -227,6 +247,21 @@ public:
         }
         // clang-format on
     }
+    // MATCH-ONLY: paired-single scale used by the generic article code (opt in with MT_VEC3F_MUL_INLINE).
+    friend void Vec3fScale(register Vec3f* pOut, register const Vec3f* v, register float c) {
+        register f32 fr1, fr0;
+
+        // clang-format off
+        asm {
+            psq_l    fr1, Vec3f.m_x(v), 0, 0
+            psq_l    fr0, Vec3f.m_z(v), 1, 0
+            ps_muls0 fr1, fr1, c
+            ps_muls0 fr0, fr0, c
+            psq_st   fr1, Vec3f.m_x(pOut), 0, 0
+            psq_st   fr0, Vec3f.m_z(pOut), 1, 0
+        }
+        // clang-format on
+    }
 #else
     friend void Vec3fAdd(Vec3f* out, const Vec3f* lhs, const Vec3f* rhs) {
         out->m_x = lhs->m_x + rhs->m_x;
@@ -282,6 +317,15 @@ inline Vec3f Vec3f::operator+(const Vec3f& v) {
     Vec3fAdd(&result, this, &v);
     return result;
 }
+inline Vec2f::Vec2f(const Vec3f& xyz) : m_x(xyz.m_x), m_y(xyz.m_y) { }
+#if defined(MATCHING) && defined(MT_VEC3F_MUL_INLINE)
+inline Vec3f Vec3f::operator*(const float c) {
+    Vec3f result;
+    Vec3fScale(&result, this, c);
+    return result;
+}
+#endif
+
 inline Vec3f Vec3f::operator-(const Vec3f& v) {
     Vec3f result;
     Vec3fSub(&result, this, &v);

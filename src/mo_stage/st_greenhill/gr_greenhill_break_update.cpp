@@ -60,7 +60,7 @@ void grGreenhillBreak::updateBreak(float deltaFrame) {
             break;
         }
         *unk164 = 5;
-        unk170 = data->unk10;
+        unk170 = data->floorHealth;
         m_timer = data->m_waitMin + (data->m_waitMax - data->m_waitMin) * randf();
         m_state = 1;
         break;
@@ -96,12 +96,12 @@ void grGreenhillBreak::updateBreak(float deltaFrame) {
     case 2:
         if (constants[0] == m_timer) {
             setEnableCollisionStatus(false);
-            m_timer = data->unk2C;
+            m_timer = data->floorRespawnFrames;
             m_state = 3;
         }
         break;
     case 3:
-        if (m_timer <= data->unk30) {
+        if (m_timer <= data->floorRespawnAnimFrames) {
             setMotion(1, false, true, NULL);
             setEnableCollisionStatus(true);
             setAttack();

@@ -47,16 +47,16 @@ void* ftFighterBuildData::getAnimCmdData(u32 eventThread, s32 p2) const {
                 return g_ftCommonData.dataCommon->commonActionEntryScripts;
             case 1:
             case 5:
-                return m_ftData->unk30;
+                return m_ftData->subactionMainScripts;
             case 2:
             case 6:
-                return m_ftData->unk34;
+                return m_ftData->subactionGfxScripts;
             case 4:
             case 8:
-                return m_ftData->unk3C;
+                return m_ftData->subactionOtherScripts;
             case 3:
             case 7:
-                return m_ftData->unk38;
+                return m_ftData->subactionSfxScripts;
             case 10:
                 return g_ftCommonData.dataCommon->flashOverlayScripts;
             default:
@@ -72,9 +72,9 @@ Exit:
 soAnimCmdDisguiseList* ftFighterBuildData::getAnimCmdDisguiseList(bool p1, s32 actionType) const {
     if (p1 == false) {
         if (actionType == 0)
-            return m_ftData->unk50;
+            return m_ftData->entryActionOverrides;
         if (actionType == 1)
-            return m_ftData->unk54;
+            return m_ftData->exitActionOverrides;
     }
     return nullptr;
 }

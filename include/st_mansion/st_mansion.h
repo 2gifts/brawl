@@ -28,10 +28,11 @@ public:
     virtual void preload() { }
 };
 
-// The parameters of the stage (the stage data file). Nothing is named by the original, so the fields are the offsets.
+// The parameters of the stage (the stage data file). Nothing is named by the original; fields that match the published
+// stage parameter table (offset, type and use) carry descriptive names, the others are still offsets.
 struct stMansionData {
-    float unk00;    // 0x00 frames the four areas stay broken (before the break is shown)
-    float unk04;    // 0x04 frames the break takes
+    float respawnFrames;    // 0x00 frames the four areas stay broken (before the break is shown)
+    float respawnAnimFrames;    // 0x04 frames the break takes
     float unk08;
     float unk0C;
     float unk10;

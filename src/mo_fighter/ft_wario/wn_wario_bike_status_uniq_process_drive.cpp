@@ -35,7 +35,7 @@ void wnWarioBikeStatusUniqProcessDrive::execFixPosCounter(soModuleAccesser* a) {
             work.onFlag(0x2200000a);
         }
     } else {
-        float power = param->unk30 * ((speed - param->unk34) / (param->unkC - param->unk34));
+        float power = param->damageGrowth * ((speed - param->unk34) / (param->groundTopSpeed - param->unk34));
         if (attack.isAttack(0, false)) attack.setPowerMul(power);
         else if (work.isFlag(0x2200000a)) {
             attack.set(0, 0);
@@ -74,7 +74,7 @@ void wnWarioBikeStatusUniqProcessDrive::execFixPos(soModuleAccesser* a) {
             float difference = wnWarioBikeKineticTransactor::ABS(angle - groundAngle);
             if (difference > param->unk48 && !work.isFlag(0x22000007)) {
                 work.onFlag(0x22000007);
-                launchSpeed = difference / 90.0f * param->unk50;
+                launchSpeed = difference / 90.0f * param->landingBounceHeight;
                 launch = true;
             }
         }
@@ -83,7 +83,7 @@ void wnWarioBikeStatusUniqProcessDrive::execFixPos(soModuleAccesser* a) {
         work.offFlag(0x22000007);
         float difference = groundAngle - previousGroundAngle;
         if (difference > param->unk48) {
-            launchSpeed = difference / 90.0f * param->unk50;
+            launchSpeed = difference / 90.0f * param->landingBounceHeight;
             launch = true;
         }
     }
@@ -99,8 +99,8 @@ void wnWarioBikeStatusUniqProcessDrive::execFixPos(soModuleAccesser* a) {
     } else if (front || rear || touch) {
         float increase = 0.0f;
         if (rear && stickY > 0.0f) {
-            increase = param->unk60 * stickY;
-            if (increase > param->unk5C) increase = param->unk5C;
+            increase = param->wheelieRotateRate * stickY;
+            if (increase > param->maxWheelieAngle) increase = param->maxWheelieAngle;
         }
         if (increase > param->unk64) {
             status.changeStatusRequest(3, a);
@@ -141,10 +141,10 @@ void wnWarioBikeStatusUniqProcessDrive::execFixPos(soModuleAccesser* a) {
                 status.changeStatusRequest(5, a);
         }
     } else if (lr == (float)(stickX < 0.0f ? -1 : 1)) {
-        angle -= param->unk4C * wnWarioBikeKineticTransactor::ABS(stickX);
+        angle -= param->airRotationSpeed * wnWarioBikeKineticTransactor::ABS(stickX);
         if (angle < -45.0f) angle = -45.0f;
     } else if (wnWarioBikeKineticTransactor::ABS(stickX) > 0.0f) {
-        angle += param->unk4C * wnWarioBikeKineticTransactor::ABS(stickX);
+        angle += param->airRotationSpeed * wnWarioBikeKineticTransactor::ABS(stickX);
         if (angle > 45.0f) angle = 45.0f;
     }
     work.setFloat(angle, 0x21000000);
@@ -154,11 +154,11 @@ void wnWarioBikeStatusUniqProcessDrive::execFixPos(soModuleAccesser* a) {
     if (front || rear) {
         float minimum = param->unk14;
         elapsed = speed - minimum;
-        range = param->unkC - minimum;
+        range = param->groundTopSpeed - minimum;
     } else {
         float minimum = param->unk20;
         elapsed = speed - minimum;
-        range = param->unk18 - minimum;
+        range = param->airTopSpeed - minimum;
     }
     if (elapsed < 0.0f) elapsed = 0.0f;
     else if (elapsed > range) elapsed = range;

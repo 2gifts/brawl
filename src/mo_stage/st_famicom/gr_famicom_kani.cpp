@@ -112,11 +112,11 @@ void grFamicomKani::setAttack() {
         offset.m_z = 0.0f;
         u32 power;
         switch (m_level) {
-        case 2:
-            power = 15;
-            break;
         case 1:
             power = 13;
+            break;
+        case 2:
+            power = 15;
             break;
         case 3:
             power = 17;
@@ -258,7 +258,7 @@ void grFamicomKani::requestDown2() {
             m_state = 0x11;
         } else if (isRemoveItem() != 0 && isTurnGround() != 0) {
             m_angry = 0;
-            FAMICOM_LEVEL_MOTION(14, 15, 15, false)
+            FAMICOM_LEVEL_MOTION(14, 15, 15, true)
             m_actionTimer = 60.0f;
             toGround();
             m_state = 0xC;
@@ -273,19 +273,19 @@ void grFamicomKani::requestMove() {
     }
     switch (m_level) {
     case 2:
-        m_speed = data->unk30 * data->unk40;
+        m_speed = data->unk30 * data->enemySpeedMulLevel2;
         break;
     case 1:
         m_speed = data->unk30;
         break;
     case 3:
-        m_speed = data->unk30 * data->unk44;
+        m_speed = data->unk30 * data->enemySpeedMulLevel3;
         break;
     default:
         m_speed = 0.0f;
         break;
     }
-    m_fallSpeed = data->unk34;
+    m_fallSpeed = data->enemyFallSpeed;
     if (randf() > 0.5f) {
         Vec3f* src = &m_posCtrlWork[0];
         Vec3f* dst = &m_enemyData[m_index].m_pos;
@@ -324,19 +324,19 @@ void grFamicomKani::requestReMove() {
     }
     switch (m_level) {
     case 2:
-        m_speed = data->unk30 * data->unk40;
+        m_speed = data->unk30 * data->enemySpeedMulLevel2;
         break;
     case 1:
         m_speed = data->unk30;
         break;
     case 3:
-        m_speed = data->unk30 * data->unk44;
+        m_speed = data->unk30 * data->enemySpeedMulLevel3;
         break;
     default:
         m_speed = 0.0f;
         break;
     }
-    m_fallSpeed = data->unk34;
+    m_fallSpeed = data->enemyFallSpeed;
     if (m_angry == 0) {
         FAMICOM_LEVEL_MOTION(2, 6, 10, true)
     } else {

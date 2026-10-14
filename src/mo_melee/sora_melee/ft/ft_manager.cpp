@@ -1387,10 +1387,10 @@ void ftManager::startSubFighter(int entryId, float lr, Vec3f* pos) {
 struct ftParamCameraRange {
     char _0[0x1F8];
     float unk1F8; // vertical offset of the camera centre, scaled by the fighter scale
-    float unk1FC;
-    float unk200;
-    float unk204;
-    float unk208;
+    float cameraFront; // 0x1FC: extent in front of the fighter
+    float cameraBack;  // 0x200: extent behind the fighter
+    float cameraTop;   // 0x204
+    float cameraBottom; // 0x208
 };
 
 // Camera focus point and rectangle for a fighter of the given character kind standing at pos facing lr.
@@ -1403,15 +1403,15 @@ void ftManager::getCameraRange(int characterKind, float lr, float scale, Vec3f* 
     outPos->m_y = pos->m_y + offsetY;
     outPos->m_z = pos->m_z;
     if (lr == 1.0f) {
-        range[0] = param->unk200;
-        range[1] = param->unk1FC;
-        range[2] = param->unk204;
-        range[3] = param->unk208;
+        range[0] = param->cameraBack;
+        range[1] = param->cameraFront;
+        range[2] = param->cameraTop;
+        range[3] = param->cameraBottom;
     } else {
-        range[1] = -param->unk200;
-        range[0] = -param->unk1FC;
-        range[2] = param->unk204;
-        range[3] = param->unk208;
+        range[1] = -param->cameraBack;
+        range[0] = -param->cameraFront;
+        range[2] = param->cameraTop;
+        range[3] = param->cameraBottom;
     }
     range[0] *= scale;
     range[1] *= scale;

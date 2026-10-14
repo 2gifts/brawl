@@ -25,12 +25,13 @@ grPlanktonHanenbou::grPlanktonHanenbou(const char* taskName) : grPlankton(taskNa
     m_endY = 0.0f;
     m_data = NULL;
     grCalcWorldCallBack* callback = &m_calcWorldCallBack;
-    if (callback != NULL) {
-        callback->m_numNodeCallbackData = 1;
-        callback->initialize(false, Heaps::StageInstance);
-        callback->m_nodeCallbackDatas[0].m_flags |= 1;
-        callback->m_nodeCallbackDatas[0].m_flags |= 2;
+    if (callback == NULL) {
+        return;
     }
+    callback->m_numNodeCallbackData = 1;
+    callback->initialize(false, Heaps::StageInstance);
+    callback->m_nodeCallbackDatas[0].m_flags |= 1;
+    callback->m_nodeCallbackDatas[0].m_flags |= 2;
 }
 
 grPlanktonHanenbou::~grPlanktonHanenbou() {
@@ -105,7 +106,7 @@ void grPlanktonHanenbou::updateMove(float deltaFrame) {
     checkRefrect();
     m_data->m_prevX = m_data->m_x;
     m_data->m_prevY = m_data->m_y;
-    m_data->m_speedY = m_data->m_speedY - data->unk50 * deltaFrame;
+    m_data->m_speedY = m_data->m_speedY - data->hanenbouGravity * deltaFrame;
     m_data->m_x = m_data->m_x + m_data->m_speedX * deltaFrame;
     m_data->m_y = m_data->m_y + m_data->m_speedY * deltaFrame;
     m_data->m_angle = nw4r::math::Atan2FIdx(m_data->m_y - m_data->m_prevY, m_data->m_x - m_data->m_prevX) * 1.40625f;

@@ -22,26 +22,26 @@ void ftWarioStatusUniqProcessSpecialLw::initStatus(soModuleAccesser* a) {
     if (level == 2) {
         // MATCH-ONLY: this declaration order retains the native integer registers.
         int minimum;
-        int maximum = param->unk0;
+        int maximum = param->chargeSecondsMax;
         if (frames > maximum * 60) frames = maximum * 60;
-        minimum = param->unk8;
+        minimum = param->chargeSecondsLevel2;
         frames -= minimum * 60;
         float range = (float)(maximum - minimum);
         float multiplier = (float)frames;
         multiplier /= 60.0f * range;
-        multiplier = 1.0f + (param->unk10 - 1.0f) * multiplier;
+        multiplier = 1.0f + (param->powerMulLevel2 - 1.0f) * multiplier;
         attacks.setPowerMul(multiplier);
     } else if (level == 1) {
         // MATCH-ONLY: this declaration order retains the native integer registers.
         int minimum;
-        int maximum = param->unk8;
+        int maximum = param->chargeSecondsLevel2;
         if (frames > maximum * 60) frames = maximum * 60;
-        minimum = param->unk4;
+        minimum = param->chargeSecondsLevel1;
         frames -= minimum * 60;
         float range = (float)(maximum - minimum);
         float multiplier = (float)frames;
         multiplier /= 60.0f * range;
-        multiplier = 1.0f + (param->unkC - 1.0f) * multiplier;
+        multiplier = 1.0f + (param->powerMulLevel1 - 1.0f) * multiplier;
         attacks.setPowerMul(multiplier);
     } else {
         attacks.setPowerMul(1.0f);
@@ -72,18 +72,18 @@ void ftWarioStatusUniqProcessSpecialLw::execStatus(soModuleAccesser* a) {
             if (level == 2) {
                 // MATCH-ONLY: retain the native threshold declaration order.
                 int minimum;
-                int maximum = param->unk0;
+                int maximum = param->chargeSecondsMax;
                 if (frames > maximum * 60) frames = maximum * 60;
-                minimum = param->unk8;
+                minimum = param->chargeSecondsLevel2;
                 // MATCH-ONLY: second read of unk8 keeps the native register order.
-                frames -= param->unk8 * 60;
+                frames -= param->chargeSecondsLevel2 * 60;
                 if (frames < 0) frames = 0;
                 float range = (float)(maximum - minimum);
                 float elapsed = (float)frames;
                 float fraction = elapsed / (60.0f * range);
-                speedY = param->unk14 + fraction * (param->unk18 - param->unk14);
+                speedY = param->jumpSpeedYLevel2Min + fraction * (param->jumpSpeedYLevel2Max - param->jumpSpeedYLevel2Min);
             } else {
-                speedY = param->unk1C;
+                speedY = param->jumpSpeedYLevel3;
             }
             situation.setKind(Situation_Air, false);
             ground.setCorrect(soGroundShapeImpl::Correct_Air, false);

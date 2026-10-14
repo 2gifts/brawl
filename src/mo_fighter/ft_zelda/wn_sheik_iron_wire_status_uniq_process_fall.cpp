@@ -81,9 +81,6 @@ public:
     wnSheikIronWireParam* m_param;
 };
 
-// HYPOTHESIS: Weapon constraint helper with three -1 arguments, called by its sora_melee fn_27 symbol.
-extern "C" void fn_27_1DA698(void* self, int a, int b, int c);
-
 inline wnSheikIronWireAltStatusView* wnSheikIronWireGetAltStatus(soModuleAccesser* moduleAccesser) {
     return *(wnSheikIronWireAltStatusView**)((char*)moduleAccesser->m_enumerationStart + 0x9c);
 }
@@ -101,7 +98,7 @@ void wnSheikIronWireStatusUniqProcessFall::initStatus(soModuleAccesser* a) {
     wnSheikIronWire* wire = &dynamic_cast<wnSheikIronWire&>(a->getStageObject());
     wnSheikIronWireParam* param = wire->m_param;
     wnLassoGetLink(a)->unk164Int(1);
-    fn_27_1DA698(wire, -1, -1, -1);
+    wire->Weapon::constraint(-1, -1, -1);
     wnSheikIronWireAltStatusView* alt = wnSheikIronWireGetAltStatus(a);
     a->getPostureModule().getScale();
     alt->slotDC();

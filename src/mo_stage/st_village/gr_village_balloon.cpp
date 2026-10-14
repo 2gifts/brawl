@@ -146,10 +146,10 @@ void grVillageBalloon::updateMove(float deltaFrame) {
             setVisibility(0);
             disableHit(0, 0);
             if (m_first == 1) {
-                m_timer = data->unk18;
+                m_timer = data->balloonFirstSpawn;
                 m_first = 0;
             } else {
-                m_timer = data->unk1C + (data->unk20 - data->unk1C) * randf();
+                m_timer = data->balloonRespawnMin + (data->balloonRespawnMax - data->balloonRespawnMin) * randf();
             }
             m_motionRatio = data->unk28;
             m_wait = data->unk2C;

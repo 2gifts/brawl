@@ -34,7 +34,7 @@ class grGimmickWaterData;
 
 // The parameters of the stage (the stage data file). Nothing is named by the original, so the fields are the offsets.
 struct stPiratesData {
-    float unk00;    // 0x00 the strength of the water
+    float waterVelocity;    // 0x00 the strength of the water
     float unk04;
     float unk08;
     float unk0C;

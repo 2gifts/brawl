@@ -446,12 +446,12 @@ void stHalberd::updateActive(float deltaFrame) {
             } else {
                 m_frame -= 5100.0f;
                 m_motion = 3;
-                m_frameNext = data->unk24 + (data->unk28 - data->unk24) * randf();
+                m_frameNext = data->mainPlatformTimerMin + (data->mainPlatformTimerMax - data->mainPlatformTimerMin) * randf();
                 if (m_shotSide == 1) {
                     m_shotTimer = data->unk00 + (data->unk04 - data->unk00) * randf();
                     m_shotSide = 0;
                 } else {
-                    m_shotTimer = data->unk08 + (data->unk0C - data->unk08) * randf();
+                    m_shotTimer = data->hazardTimerMin + (data->hazardTimerMax - data->hazardTimerMin) * randf();
                 }
                 m_state = 4;
             }
@@ -505,7 +505,7 @@ void stHalberd::updateActive(float deltaFrame) {
                             m_shotQueue[2] = 0x15;
                         }
                         m_shotKind = m_shotQueue[0];
-                        m_shotTimer = data->unk08 + (data->unk0C - data->unk08) * randf();
+                        m_shotTimer = data->hazardTimerMin + (data->hazardTimerMax - data->hazardTimerMin) * randf();
                         halberdDisableSubject(&m_subject);
                         Rect2D range;
                         range.m_left = -25.0f;
@@ -1046,7 +1046,7 @@ void stHalberd::updateHeroHero() {
 }
 
 bool stHalberd::isEventEnd(int param1, int* eventState, int* eventDecision) {
-    if (m_state > 3) {
+    if (m_state >= 4) {
         *eventState = 6;
         *eventDecision = 3;
         return true;

@@ -30,37 +30,38 @@ public:
     virtual void preload() { }
 };
 
-// The parameters of the stage (the stage data file). Nothing is named by the original, so the fields are the offsets.
+// The parameters of the stage (the stage data file). Nothing is named by the original; fields that match the published
+// stage parameter table (offset, type and use) carry descriptive names, the others are still offsets.
 struct stEarthData {
-    float unk00;   // 0x00 frames until the first pellet is dropped (the least)
-    float unk04;   // 0x04 (the most)
-    float unk08;   // 0x08 least frames until the next pellet
-    float unk0C;   // 0x0C most frames until the next pellet
-    float unk10;   // 0x10 the chance that a pellet is dropped
-    float unk14;   // 0x14 the weight of the first color of the pellets
-    float unk18;   // 0x18 the weight of the second color
-    float unk1C;   // 0x1C the weight of the third color
+    float pelletFirstMin;   // 0x00 frames until the first pellet is dropped (the least)
+    float pelletFirstMax;   // 0x04 (the most)
+    float pelletIntervalMin;   // 0x08 least frames until the next pellet
+    float pelletIntervalMax;   // 0x0C most frames until the next pellet
+    float pelletChance;   // 0x10 the chance that a pellet is dropped
+    float pelletRedWeight;   // 0x14 the weight of the first color of the pellets
+    float pelletBlueWeight;   // 0x18 the weight of the second color
+    float pelletYellowWeight;   // 0x1C the weight of the third color
     float unk20;   // 0x20 the factor of the color that was dropped last
-    float unk24;
-    float unk28;
+    float unk24; // HYPOTHESIS: possibly "Pellet Upgrade Timer (1 to 5)" (matches a stage parameter table offset)
+    float unk28; // HYPOTHESIS: possibly "Pellet Upgrade Timer (5 to 10)" (matches a stage parameter table offset)
     float unk2C;
     float unk30;
     float unk34;
     float unk38;   // 0x38 how near to a pellet the pellet can be dropped
-    u8 unk3C;       // 0x3C how many pellets
+    u8 maxPellets;       // 0x3C how many pellets
     char _3d[3];
     float unk40;   // 0x40 frames until the first oniyon comes (the least)
     float unk44;   // 0x44 (the most)
-    float unk48;   // 0x48 least frames until the next oniyon
-    float unk4C;   // 0x4C most frames until the next oniyon
+    float oniyonIntervalMin;   // 0x48 least frames until the next oniyon
+    float oniyonIntervalMax;   // 0x4C most frames until the next oniyon
     float unk50;   // 0x50 the chance that the oniyon waits
     float unk54;   // 0x54 the weight of the first color of the oniyon
     float unk58;   // 0x58 the weight of the second color
     float unk5C;   // 0x5C the weight of the third color
     float unk60;   // 0x60 the factor of the color that was shown last
     float unk64;
-    float unk68;   // 0x68 least frames that the oniyon stays
-    float unk6C;   // 0x6C most frames that the oniyon stays
+    float oniyonStayMin;   // 0x68 least frames that the oniyon stays
+    float oniyonStayMax;   // 0x6C most frames that the oniyon stays
     float unk70;
     float unk74;
     float unk78;
@@ -78,10 +79,10 @@ struct stEarthData {
     float unkA8;
     float unkAC;
     float unkB0;
-    float unkB4;   // 0xB4 frames until the first rain (the least)
-    float unkB8;   // 0xB8 (the most)
-    float unkBC;   // 0xBC least frames of the fine weather
-    float unkC0;   // 0xC0 most frames of the fine weather
+    float rainFirstMin;   // 0xB4 frames until the first rain (the least)
+    float rainFirstMax;   // 0xB8 (the most)
+    float rainIntervalMin;   // 0xBC least frames of the fine weather
+    float rainIntervalMax;   // 0xC0 most frames of the fine weather
     float unkC4;   // 0xC4 the chance of the rain
     float unkC8;   // 0xC8 frames of the sun
     float unkCC;

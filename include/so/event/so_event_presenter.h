@@ -112,6 +112,47 @@ public:
     }
 #endif
 
+#ifdef SO_EVENT_OBSERVER_MANAGE_S16
+    // MATCH-ONLY: the generic article (Weapon) registers with the manage ID kept as the s16 the event module returned, which the
+    // original re-extends at every use; the s32 overload above extends it once.
+    void addObserverSubS16(s16 manageId, T* obsvr, s8 p3) {
+        s32 removeID;
+        soEventManager* eventManager;
+        bool check3, check4, check1, check2;
+        check4 = false;
+        check3 = false;
+        check2 = false;
+        check1 = false;
+        s32 checkID = m_manageID;
+
+        if (m_manageID >= 0 && m_unitID >= 0)
+            check1 = true;
+        if (check1 && m_sendID > -1)
+            check2 = true;
+        if (check2 && soEventSystem::getInstance()->getInstanceManager().
+                                                    isContain(checkID) == true)
+            check3 = true;
+        if (check3 && soEventSystem::getInstance()->getManager(m_manageID)->
+                                                    getObserverCapacity(m_unitID) == 1)
+            check4 = true;
+        if (check4 == true) {
+            removeID = m_manageID;
+            removeObserver(removeID);
+        }
+        if (manageId <= -1 || m_unitID <= -1 ||
+                              soEventSystem::getInstance()->getInstanceManager().
+                                                            isContain(manageId) == false)
+            return;
+        eventManager = soEventSystem::getInstance()->
+                                                      getManager(manageId);
+        if (eventManager->isNullUnit(m_unitID) != true) {
+            m_sendID = addObserverPrivate(manageId, obsvr, p3);
+            if (m_sendID > -1 && m_sendID > -1)
+                m_manageID = manageId;
+        }
+    }
+#endif
+
     void initialize(s16 param1, s8 param2) {
         addObserver(param1, param2);
     }

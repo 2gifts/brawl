@@ -28,27 +28,28 @@ public:
     virtual void preload() { }
 };
 
-// The parameters of the stage (the stage data file). Nothing is named by the original, so the fields are the offsets.
+// The parameters of the stage (the stage data file). Nothing is named by the original; fields that match the published
+// stage parameter table (offset, type and use) carry descriptive names, the others are still offsets.
 struct stFamicomData {
     float unk00;
     float unk04;
     float unk08;
-    float unk0C;    // 0x0C frames the POW block needs to come back
-    float unk10;
-    float unk14;    // 0x14 frames until the first enemy
+    float powBlockRespawnFrames;    // 0x0C frames the POW block needs to come back
+    float unk10; // HYPOTHESIS: possibly "POW Block Knockback" (matches a stage parameter table offset)
+    float enemyInitialTimer;    // 0x14 frames until the first enemy
     float unk18;    // 0x18 least frames until the next enemy
     float unk1C;    // 0x1C most frames until the next enemy
-    float unk20;    // 0x20 chance of the first kind of enemy (the second one has the rest)
-    float unk24;    // 0x24
+    float shellcreeperSpawnRate;    // 0x20 chance of the first kind of enemy (the second one has the rest)
+    float sidestepperSpawnRate;    // 0x24
     u8 m_enemyMax;  // 0x28 how many enemies the stage can have at the same time
     char _29[3];
-    float unk2C;
-    float unk30;
-    float unk34;    // 0x34 gravity of the enemies
+    float unk2C; // HYPOTHESIS: possibly "Shellcreeper Base Speed" (matches a stage parameter table offset)
+    float unk30; // HYPOTHESIS: possibly "Sidestepper Base Speed" (matches a stage parameter table offset)
+    float enemyFallSpeed;    // 0x34 gravity of the enemies
     float unk38;
     float unk3C;
-    float unk40;    // 0x40 walking speed of the enemies (the second level)
-    float unk44;    // 0x44 walking speed of the enemies (the fourth level)
+    float enemySpeedMulLevel2;    // 0x40 walking speed of the enemies (the second level)
+    float enemySpeedMulLevel3;    // 0x44 walking speed of the enemies (the fourth level)
     float unk48;    // 0x48 frames an enemy waits after it lands
     float unk4C;    // 0x4C frames until the first green ball
     float unk50;    // 0x50 least frames until the next one

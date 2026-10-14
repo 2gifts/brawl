@@ -35,7 +35,7 @@ public:
 
 // The parameters of the stage (the stage data file). Nothing is named by the original, so the fields are the offsets.
 struct stPictchatData {
-    float unk00;    // 0x00 frames until the first picture
+    float firstDrawingTimer;    // 0x00 frames until the first picture
     float unk04;    // 0x04 least frames until the next picture (after the first)
     float unk08;    // 0x08 most frames until the next picture (after the first)
     float unk0C;    // 0x0C least frames until the next picture

@@ -13,11 +13,12 @@ grDxGreensBlock::grDxGreensBlock(const char* taskName) : grDxGreens(taskName) {
     m_blockData = NULL;
     m_landed = 0;
     grCalcWorldCallBack* callback = &m_calcWorldCallBack;
-    if (callback != NULL) {
-        callback->m_numNodeCallbackData = 1;
-        callback->initialize(false, Heaps::StageInstance);
-        callback->m_nodeCallbackDatas[0].m_flags |= 1;
+    if (callback == NULL) {
+        return;
     }
+    callback->m_numNodeCallbackData = 1;
+    callback->initialize(false, Heaps::StageInstance);
+    callback->m_nodeCallbackDatas[0].m_flags |= 1;
 }
 
 grDxGreensBlock* grDxGreensBlock::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
@@ -86,7 +87,7 @@ void grDxGreensBlock::updatePos(float deltaFrame) {
     float* data = static_cast<float*>(getStageData());
     if (data != NULL) {
         m_speed += data[11] * deltaFrame;
-        if (data[10] < m_speed) {
+        if (m_speed > data[10]) {
             m_speed = data[10];
         }
         m_blockData->m_pos.m_y -= m_speed * deltaFrame;
@@ -108,7 +109,7 @@ void grDxGreensBlock::updateMotion(float deltaFrame) {
     if (modelAnim != NULL) {
         if (m_blockData->m_hard == 1) {
             float frameCount = modelAnim->getFrameCount();
-            if (frameCount <= modelAnim->getFrame()) {
+            if (modelAnim->getFrame() >= frameCount) {
                 modelAnim->setFrame(2.0f);
             }
         } else {

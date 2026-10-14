@@ -335,7 +335,7 @@ public:
     virtual void reset(Vec3f* pos, float lr, float);
     virtual void remove();
     virtual int getArticleId();
-    virtual int getArticleEventManageId();
+    virtual s16 getArticleEventManageId();
     virtual int getTaskId();
     virtual void linkOwner(int, int);
     virtual void unlinkOwner(int);

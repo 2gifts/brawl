@@ -67,7 +67,7 @@ grDonkeyJack::grDonkeyJack(const char* taskName) : grDonkey(taskName) {
     if (callback == NULL) {
         return;
     }
-    callback->m_nodeCallbackDatas[0].m_flags |= 1;
+    callback->m_nodeCallbackDatas[0].m_flags |= 0x10;
 }
 
 grDonkeyJack::~grDonkeyJack() {
@@ -300,7 +300,7 @@ void grDonkeyJack::setMotion(u32 animId, bool shouldLoop, bool force, float* fra
     modelAnim->unbindMatColAnim(sceneMdl);
     m_motion = animId;
 
-    if (animId != 0) {
+    if (animId >= 1) {
         return;
     }
 

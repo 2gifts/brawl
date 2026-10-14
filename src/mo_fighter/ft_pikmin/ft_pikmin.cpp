@@ -1,3 +1,5 @@
+#include <so/so_array.h>
+#include <so/templates/so_array_value_wnPikminPikminOwnerInfo.h>
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/ft_common_data_accesser.h>
@@ -212,21 +214,28 @@ void* fn_113_6860(u8* p) { return *(void**)(*(u8**)(p + 0xd8) + 0x70); }
 // soValueAccesser::getValueVariation
 s32 fn_113_D0AC() { return g_soValueVariation; }
 
-// wnPikminPikminTroopsManager (sub-object at this+0x1FD08) forwarders; callees are not reconstructed yet
-void fn_113_23FA4(void* troops);  // wnPikminPikminTroopsManager::addPikmin
-void fn_113_25530(void* troops);  // wnPikminPikminTroopsManager::updateJostlePriority
-void fn_113_24558(void* troops, void* other);  // wnPikminPikminTroopsManager::reducePikminAll
-void fn_113_C394(u8* p) {
-    fn_113_23FA4(p + 0x1FD08);
-    fn_113_25530(p + 0x1FD08);
+// wnPikminPikminTroopsManager is the sub-object at this+0x1FD08; the owner info array sits at this+0x1FE8C. Only the
+// members used here are declared (the full class is in wn/pikmin/wn_pikmin_pikmin_troops_manager.h, which pulls in the
+// article builder and clashes with the fighter builder instantiations of this unit).
+class wnPikminPikmin;
+class wnPikminPikminTroopsManager {
+public:
+    void addPikmin(wnPikminPikmin* pikmin);
+    void reducePikminAll(const soArrayFixed<wnPikminPikminOwnerInfo>* owners);
+    void updateJostlePriority();
+    void setTeamAll(int team, int teamOwner, int skipFlagged);
+};
+#define PIKMIN_TROOPS(p) reinterpret_cast<wnPikminPikminTroopsManager*>((p) + 0x1FD08)
+void fn_113_C394(u8* p, wnPikminPikmin* pikmin) {
+    PIKMIN_TROOPS(p)->addPikmin(pikmin);
+    PIKMIN_TROOPS(p)->updateJostlePriority();
 }
-void fn_113_C3D4(u8* p) { fn_113_24558(p + 0x1FD08, p + 0x1FE8C); }
+void fn_113_C3D4(u8* p) { PIKMIN_TROOPS(p)->reducePikminAll(reinterpret_cast<soArrayFixed<wnPikminPikminOwnerInfo>*>(p + 0x1FE8C)); }
 
-void fn_113_25698(void* troops, int team, int teamOwner, int notify);  // wnPikminPikminTroopsManager::setTeamAll
 // ftPikmin::setTeam: base Fighter::setTeam first, then the troops manager
 void fn_113_C4E0(u8* p, int team, int teamOwner) {
     reinterpret_cast<Fighter*>(p)->Fighter::setTeam(team, teamOwner);
-    fn_113_25698(p + 0x1FD08, team, teamOwner, 0);
+    PIKMIN_TROOPS(p)->setTeamAll(team, teamOwner, 0);
 }
 
 // ftPikmin overrides that forward to StageObject (direct tail calls, not virtual)

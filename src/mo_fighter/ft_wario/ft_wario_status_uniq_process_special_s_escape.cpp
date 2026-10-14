@@ -37,7 +37,7 @@ void ftWarioStatusUniqProcessSpecialSEscape::execFixPosCounter(soModuleAccesser*
         Vec3f pos;
         // MATCH-ONLY: keep the posture result as an argument temporary, as in the native frame.
         Vec3fAdd(&pos, &posture->getPos(), &nodePos);
-        Vec2f speed(param->unk10 * lr, param->unk14);
+        Vec2f speed(param->escapeSpeedX * lr, param->escapeSpeedY);
         float angle = 0.0f;
         pos.m_z = 0.0f;
         posture->setPos(&pos);

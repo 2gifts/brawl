@@ -164,7 +164,8 @@ public:
     soCollisionAttackModuleBuilder<typename BC::CollisionAttackModuleBuildConfig> m_attackModuleBuilder;   // +0x19E0
     soCollisionHitModuleBuilder<typename BC::CollisionHitModuleBuildConfig> m_hitModuleBuilder;            // +0x209C
     soCollisionShieldModuleBuilder<typename BC::CollisionShieldModuleBuildConfig> m_shieldModuleBuilder;   // +0x29F8
-    soCollisionReflectorModuleBuilder<typename BC::CollisionReflectorModuleBuildConfig> m_reflectorModuleBuilder; // +0x2DA0
+    typename ftReflectorParts<typename BC::CollisionReflectorModuleBuildConfig>::Reflector m_reflectorModuleBuilder; // +0x2DA0
+    typename ftReflectorParts<typename BC::CollisionReflectorModuleBuildConfig>::Absorber m_absorberBuilder; // empty (4 bytes) unless the fighter has an absorber
     soCollisionCatchModuleBuilder<typename BC::CollisionCatchModuleBuildConfig> m_collisionCatchModuleBuilder; // +0x380C
     typename BC::CollisionSearchModuleBuilder m_searchBuilder; // after m_collisionCatchModuleBuilder (before m_damageModuleBuilder)
     soDamageModuleBuilder<typename BC::DamageModuleBuildConfig> m_damageModuleBuilder;                     // +0x3A70
@@ -216,7 +217,7 @@ public:
             (soCollisionHitModule*)ftBuilderModule<__typeof__(m_hitModuleBuilder)>::get(&m_hitModuleBuilder),
             (soCollisionShieldModule*)m_shieldModuleBuilder.getModule(),
             (soCollisionShieldModule*)m_reflectorModuleBuilder.getModule(),
-            ftReflectorBase<typename BC::CollisionReflectorModuleBuildConfig>::getAbsorber(&m_reflectorModuleBuilder),
+            m_absorberBuilder.getModule(),
             (void*)m_collisionCatchModuleBuilder.getModule(),
             (soCollisionSearchModule*)m_searchBuilder.getModule(),
             (soDamageModule*)m_damageModuleBuilder.getModule(),
@@ -280,6 +281,7 @@ public:
         m_hitModuleBuilder(&m_moduleAccsr, owner->m_taskId, static_cast<gfTask::Category>(static_cast<u8>(owner->m_taskCategory)), FT_NULL_OBSERVER_DESC),
         m_shieldModuleBuilder(&m_moduleAccsr, owner->m_taskId, static_cast<gfTask::Category>(static_cast<u8>(owner->m_taskCategory))),
         m_reflectorModuleBuilder(&m_moduleAccsr, owner->m_taskId, static_cast<gfTask::Category>(static_cast<u8>(owner->m_taskCategory))),
+        m_absorberBuilder(&m_moduleAccsr, owner->m_taskId, static_cast<gfTask::Category>(static_cast<u8>(owner->m_taskCategory))),
         m_collisionCatchModuleBuilder(&m_moduleAccsr, owner->m_taskId, static_cast<gfTask::Category>(static_cast<u8>(owner->m_taskCategory)), FT_NULL_OBSERVER_DESC),
         m_searchBuilder(&m_moduleAccsr, owner->m_taskId, static_cast<gfTask::Category>(static_cast<u8>(owner->m_taskCategory))),
         m_damageModuleBuilder(&m_moduleAccsr, FT_NULL_OBSERVER_DESC),
@@ -337,19 +339,7 @@ public:
     ftModuleAccesserBuilder(const ftFighterBuildData& fbd, StageObject* owner) :
         soModuleAccesserBuilder<BC>(fbd, owner),
         unkTable((const soStatusData*)fbd.getFtData()->uniqStatusData, UniqueStatusCount),
-        unkAnimCmdModuleSubBuilder(&this->m_moduleAccsr, fbd) {
-        // MATCH-ONLY: the unit is named through the member (not an accessor) and every query result is held in a
-        // local first, so MWCC forms the unit address after the queries as the original does.
-        const acAnimCmdConv* const* cmds00 = (const acAnimCmdConv* const*)fbd.getAnimCmdData(0, 0);
-        soArrayUtility::pushRange<const acAnimCmdConv*>(unkAnimCmdModuleSubBuilder.m_unit0.getEntryList(0), cmds00, CommonStatusCount);
-        const acAnimCmdConv* const* cmds01 = (const acAnimCmdConv* const*)fbd.getAnimCmdData(0, 1);
-        soArrayUtility::pushRange<const acAnimCmdConv*>(unkAnimCmdModuleSubBuilder.m_unit0.getEntryList(1), cmds01, CommonStatusCount);
-        const acAnimCmdConv* const* cmds0F = (const acAnimCmdConv* const*)fbd.getFtData()->uniqActionEntryScripts;
-        soArrayUtility::pushRange<const acAnimCmdConv*>(unkAnimCmdModuleSubBuilder.m_unit0.getEntryList(0), cmds0F, UniqueStatusCount);
-        const acAnimCmdConv* const* cmds1F = (const acAnimCmdConv* const*)fbd.getFtData()->uniqActionExitScripts;
-        soArrayUtility::pushRange<const acAnimCmdConv*>(unkAnimCmdModuleSubBuilder.m_unit0.getEntryList(1), cmds1F, UniqueStatusCount);
-        unkAnimCmdModuleSubBuilder.m_unit0.setupDisguiseList(0, (soAnimCmdDisguiseListEntry*)fbd.getAnimCmdDisguiseList(false, 0));
-        unkAnimCmdModuleSubBuilder.m_unit0.setupDisguiseList(1, (soAnimCmdDisguiseListEntry*)fbd.getAnimCmdDisguiseList(false, 1));
+        unkAnimCmdModuleSubBuilder(&this->m_moduleAccsr, fbd, CommonStatusCount, UniqueStatusCount) {
         this->m_moduleAccsr.getStatusModule().connectStatusDataList(&unkTable);
         // Apply fighter-specific area dimensions before registering the areas.
         soSet<soAreaData>* areas = static_cast<soSet<soAreaData>*>(

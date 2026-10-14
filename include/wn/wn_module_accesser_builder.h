@@ -81,8 +81,8 @@ public:
     ~soArraySelectHolder() { }
     soArrayVector<soStatusUniqProcess*, 1>* get() { return &m_array; }
 };
-#ifdef WN_EXPLOSION_BUILDERS
-// Explosion uses the singleton null-array type in its owning status holder.
+#ifdef WN_ARTICLE_NATIVE_BUILDERS
+// These article builders use the singleton null-array type in their status holder.
 template <>
 class soArraySelectHolder<1, soArrayVector<soStatusUniqProcess*, 1>, soSingletonHolder<soArrayNull<soStatusUniqProcess*> > > {
 public:
@@ -94,6 +94,44 @@ public:
 #endif
 static_assert(sizeof(soArrayVector<soCollisionAttackPart, 1>) == 0x9C, "Oil attack part vector size");
 static_assert(sizeof(soArrayVector<soStatusUniqProcess*, 1>) == 0x10, "Oil status pointer vector size");
+#endif
+
+#ifdef WN_OCTOPUS_ARRAYS
+// Octopus imports these constructors and virtual methods from sora_melee.
+FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 8);
+FT_DOL_ARRAY_VECTOR(soCollisionHitPart, 4);
+template <>
+class soArrayVector<soStatusUniqProcess*, 4> : public soArrayVectorAbstract<soStatusUniqProcess*> {
+    s32 m_topIndex : sizeof(bit_width<4>) + 1;
+    s32 m_lastIndex : sizeof(bit_width<4>) + 1;
+    s32 m_size : sizeof(bit_width<4>) + 1;
+    u32 m_isFull : 1;
+    soStatusUniqProcess* m_elements[4];
+public:
+    soArrayVector();
+    virtual s32 size() const;
+    virtual ~soArrayVector();
+    virtual s32 capacity() const;
+    virtual bool isFull() const;
+    virtual soStatusUniqProcess*& atFastAbstractSub(s32 index) const;
+    virtual soStatusUniqProcess*& getArrayValueConst(s32 index);
+    virtual s32 getTopIndex() const;
+    virtual s32 getLastIndex() const;
+    virtual void setSize(s32 size);
+    virtual void setTopIndex(s32 topIndex);
+    virtual void setLastIndex(s32 lastIndex);
+    virtual void onFull();
+    virtual void offFull();
+};
+template <>
+class soArraySelectHolder<1, soArrayVector<soStatusUniqProcess*, 4>, soSingletonHolder<soArrayNull<soStatusUniqProcess*> > > {
+public:
+    soArrayVector<soStatusUniqProcess*, 4> m_array;
+    soArraySelectHolder() : m_array() { }
+    ~soArraySelectHolder() { }
+    soArrayVector<soStatusUniqProcess*, 4>* get() { return &m_array; }
+};
+static_assert(sizeof(soArrayVector<soStatusUniqProcess*, 4>) == 0x1C, "Octopus status pointer vector extent");
 #endif
 
 // The null arrays (soArrayNull<T>) are sora_melee instances: with WN_WEAPON_BUILDER so/so_array.h declares their
@@ -163,20 +201,8 @@ FT_DOL_POLY_BEGIN(soShakeModuleSimple, 0x8);
     soShakeModuleSimple(soModuleAccesser* acc, soArray<soShakeTerm>* terms, void* shakeData);
 FT_DOL_POLY_END;
 // The weapon kinetic module (soKineticModuleImpl plus a status observer; constructed in sora_melee).
-#ifdef WN_EXPLOSION_BUILDERS
-#include <so/kinetic/so_kinetic_module_impl.h>
-class wnKineticModuleImpl : public soKineticModuleImpl, public soStatusEventObserver {
-    // HYPOTHESIS: meaning unresolved; the constructor initializes this word to -1.
-    s32 unk2C;
-public:
-    wnKineticModuleImpl(soModuleAccesser* acc, soInstanceManagerFullProperty<soKineticEnergy*>* energies, soKineticMediator* mediator);
-    ~wnKineticModuleImpl() { }
-    virtual void changeKinetic(int kineticType, soModuleAccesser* acc);
-    virtual void addSpeed(Vec3f* speed, soModuleAccesser* acc);
-    virtual void addSpeedOutside(soKineticEnergy::OutsideType, Vec3f* speed);
-    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* data, soModuleAccesser* acc);
-};
-static_assert(sizeof(wnKineticModuleImpl) == 0x30, "Weapon kinetic module extent");
+#ifdef WN_ARTICLE_NATIVE_BUILDERS
+#include <wn/wn_kinetic_module_impl.h>
 #else
 FT_DOL_POLY_BEGIN(wnKineticModuleImpl, 0x30);
     wnKineticModuleImpl(soModuleAccesser* acc, soInstanceManagerFullProperty<soKineticEnergy*>* energies, soKineticMediator* mediator);
@@ -276,7 +302,6 @@ struct soCollisionAbsorberModuleBuilderNull { };
 template <>
 class soCollisionReflectorModuleBuilder<soCollisionReflectorModuleBuildConfigNull> {
     struct Empty { } m_reflector;
-    soCollisionAbsorberModuleBuilderNull m_absorber;
 public:
     soCollisionReflectorModuleBuilder(soModuleAccesser*, int, gfTask::Category) { }
     soCollisionShieldModule* getModule() { return (soCollisionShieldModule*)g_soCollisionAbsorberModuleNull; }
@@ -834,6 +859,7 @@ inline soModuleAccesserBuilder<BC>::soModuleAccesserBuilder(const wnModuleAccess
     m_hitModuleBuilder(&m_moduleAccsr, owner->m_taskId, static_cast<gfTask::Category>(static_cast<u8>(owner->m_taskCategory)), FT_NULL_OBSERVER_DESC),
     m_shieldModuleBuilder(&m_moduleAccsr, owner->m_taskId, static_cast<gfTask::Category>(static_cast<u8>(owner->m_taskCategory))),
     m_reflectorModuleBuilder(&m_moduleAccsr, owner->m_taskId, static_cast<gfTask::Category>(static_cast<u8>(owner->m_taskCategory))),
+    m_absorberBuilder(&m_moduleAccsr, owner->m_taskId, static_cast<gfTask::Category>(static_cast<u8>(owner->m_taskCategory))),
     m_collisionCatchModuleBuilder(&m_moduleAccsr, owner->m_taskId, static_cast<gfTask::Category>(static_cast<u8>(owner->m_taskCategory)), FT_NULL_OBSERVER_DESC),
     m_searchBuilder(&m_moduleAccsr, owner->m_taskId, static_cast<gfTask::Category>(static_cast<u8>(owner->m_taskCategory))),
     m_damageModuleBuilder(&m_moduleAccsr, FT_NULL_OBSERVER_DESC),
@@ -910,7 +936,11 @@ public:
         m_moduleAccesser->getKineticModule().addEnergy(&m_energyRotNormal, 1, soKineticEnergy::AttributeFlag(1), -1);
     }
     virtual ~wnWeaponBuilder() { }
+#ifdef WN_OCTOPUS_ARRAYS
+    virtual void deactivateDescendantForce();
+#else
     virtual void deactivateDescendantForce() {
         soSingletonHolder<soArticleMediatorNull>::getInstance()->deactivate();
     }
+#endif
 };

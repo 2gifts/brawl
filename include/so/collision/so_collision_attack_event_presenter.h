@@ -44,6 +44,8 @@ public:
     };
 
     soCollisionAttackEventObserver(short unitID) : soEventObserver<soCollisionAttackEventObserver>(unitID) {};
+    // (manageId, p2) constructor of the generic article base (observer unit 1)
+    soCollisionAttackEventObserver(short manageId, s8 p2) : soEventObserver<soCollisionAttackEventObserver>(0x1) { initialize(manageId, p2); }
 
 #if defined(FT_MODULE_BUILDER) || defined(YK_STAGE_FULL) || defined(SO_EVENT_OBSERVER_INLINE)
     virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); } // MATCH-ONLY: inline in the REL

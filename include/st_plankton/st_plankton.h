@@ -31,31 +31,32 @@ public:
     virtual void preload() { }
 };
 
-// The parameters of the stage (the stage data file). Nothing is named by the original, so the fields are the offsets.
+// The parameters of the stage (the stage data file). Nothing is named by the original; fields that match the published
+// stage parameter table (offset, type and use) carry descriptive names, the others are still offsets.
 struct stPlanktonData {
     float unk00;
     float unk04;    // 0x04 frames the color of a leaf stays
     float unk08;    // 0x08 the angle the leaves rest at
     float unk0C;    // 0x0C hit strength from which a leaf is pushed
     float unk10;    // 0x10 hit strength from which a leaf is pushed hard
-    float unk14;    // 0x14 how far a hit pushes a leaf
-    float unk18;    // 0x18 upper angle limit
-    float unk1C;    // 0x1C lower angle limit
-    float unk20;    // 0x20 frames between two steps of a leaf
-    float unk24;    // 0x24 angle step of a leaf
+    float leafDamageAngle;    // 0x14 how far a hit pushes a leaf
+    float leafAngleTop;    // 0x18 upper angle limit
+    float leafAngleBottom;    // 0x1C lower angle limit
+    float leafRestoreFrames;    // 0x20 frames between two steps of a leaf
+    float leafRestoreAngle;    // 0x24 angle step of a leaf
     float unk28;    // 0x28 frames the flower needs to open / close
-    float unk2C;    // 0x2C angle of the left leaf at rest
+    float leftLeafInitialAngle;    // 0x2C angle of the left leaf at rest
     float unk30;    // 0x30 hit strength from which the left leaf is pushed
     float unk34;    // 0x34 hit strength from which the left leaf is pushed hard
-    float unk38;    // 0x38 how far a hit pushes the left leaf
+    float leftLeafDamageAngle;    // 0x38 how far a hit pushes the left leaf
     float unk3C;    // 0x3C
     float unk40;    // 0x40
     float unk44;    // 0x44
     float unk48;    // 0x48
-    float unk4C;    // 0x4C how much a flying leaf is moved
-    float unk50;    // 0x50 gravity of a flying leaf
+    float hanenbouInitialSpeed;    // 0x4C how much a flying leaf is moved
+    float hanenbouGravity;    // 0x50 gravity of a flying leaf
     float unk54;    // 0x54 gravity of a leaf that bounced
-    float unk58;    // 0x58 frames before the first leaf
+    float hanenbouFirstDelay;    // 0x58 frames before the first leaf
     float unk5C;
     float unk60;    // 0x60 frames between two leaves
     float unk64;    // 0x64 chance of a leaf

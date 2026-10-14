@@ -13,11 +13,12 @@ inline grJungleNB::grJungleNB(const char* taskName) : grJungle(taskName) {
     m_stateWork = NULL;
     m_motion = 1;
     grCalcWorldCallBack* callback = &m_calcWorldCallBack;
-    if (callback != NULL) {
-        callback->m_numNodeCallbackData = 1;
-        callback->initialize(false, Heaps::StageInstance);
-        callback->m_nodeCallbackDatas->m_flags |= 8;
+    if (callback == NULL) {
+        return;
     }
+    callback->m_numNodeCallbackData = 1;
+    callback->initialize(false, Heaps::StageInstance);
+    callback->m_nodeCallbackDatas->m_flags |= 8;
 }
 
 grJungleNB* grJungleNB::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
@@ -113,7 +114,7 @@ void grJungleNB::setMotion(u32 animId, bool loop, bool force, float* frameCount)
                     modelAnim->unbindTexSrtAnim(sceneMdl);
                     modelAnim->unbindMatColAnim(sceneMdl);
                     m_motion = animId;
-                    if (animId == 0) {
+                    if (animId < 1) {
                         GR_JUNGLE_BIND_ANIMS(animId, model, modelAnim)
                         gfModelAnimation::bind(sceneMdl, modelAnim);
                         modelAnim->setFrame(0.0);

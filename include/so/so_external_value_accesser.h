@@ -8,12 +8,14 @@
 
 // NOTE: shadows the BrawlHeaders copy to add getConstantFloat/getKineticModule.
 class soStopModule;
+class soCollisionShieldModule;
 
 class soExternalValueAccesser {
 public:
     static int getTeamNo(StageObject* stageObject);
     static Vec3f getPos(StageObject* stageObject);
     static float getLr(StageObject* stageObject);
+    static float getScl(StageObject* stageObject);
     static Vec3f getPrevRoughPos(StageObject* stageObject);
     static u32 getClipOutStatus(StageObject* stageObject);
     static Vec2f* getRhombusCenterPos(StageObject* stageObject); // HYPOTHESIS: pointer to the ground rhombus centre
@@ -30,6 +32,7 @@ public:
     static float getSlowRate(StageObject* stageObject);
     static soKineticModule* getKineticModule(StageObject* stageObject);
     static soCollisionAttackModule* getCollisionAttackModule(StageObject* stageObject);
+    static soCollisionShieldModule* getCollisionShieldModule(StageObject* stageObject);
     static soLinkModule* getLinkModule(StageObject* stageObject);
     static void* getGlowModule(StageObject* stageObject);
     static soStopModule* getStopModule(StageObject* stageObject);

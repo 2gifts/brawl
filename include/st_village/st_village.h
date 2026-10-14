@@ -28,7 +28,8 @@ public:
     virtual void preload() { }
 };
 
-// The parameters of the stage (the stage data file). Nothing is named by the original, so the fields are the offsets.
+// The parameters of the stage (the stage data file). Nothing is named by the original; fields that match the published
+// stage parameter table (offset, type and use) carry descriptive names, the others are still offsets.
 struct stVillageData {
     float unk00;    // 0x00 chance of the platform that is used in the late scenes
     float unk04;    // 0x04 frames until the UFO first comes
@@ -36,9 +37,9 @@ struct stVillageData {
     float unk0C;    // 0x0C chance of the UFO
     float unk10;    // 0x10 how fast the UFO moves
     float unk14;
-    float unk18;    // 0x18 frames until the first balloon
-    float unk1C;    // 0x1C least frames until the next balloon
-    float unk20;    // 0x20 most frames until the next balloon
+    float balloonFirstSpawn;    // 0x18 frames until the first balloon
+    float balloonRespawnMin;    // 0x1C least frames until the next balloon
+    float balloonRespawnMax;    // 0x20 most frames until the next balloon
     float unk24;    // 0x24 chance of a balloon that moves backwards
     float unk28;    // 0x28 how fast a balloon moves
     float unk2C;    // 0x2C frames the balloon stays

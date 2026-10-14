@@ -63,8 +63,9 @@ void grEarthStump::updateJoint() {
 void grEarthStump::updatePellet() {
     stEarthData* data = static_cast<stEarthData*>(getStageData());
     if (data != NULL) {
-        u8 count = data->unk3C;
-        for (u32 i = 0; i != count; i++) {
+        u32 i;
+        u8 count = data->maxPellets;
+        for (i = 0; i != count; i++) {
             if (m_pelletData[i].m_leaf == 3) {
                 getPosPellet(m_pelletData[i].unk24, &m_pelletData[i].m_pos);
             }
