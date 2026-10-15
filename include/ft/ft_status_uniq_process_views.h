@@ -6,6 +6,8 @@
 // the destructor pair in the module classes), so the pad counts below land on the offsets named in the comments.
 #include <types.h>
 
+class soModuleAccesser;
+
 // Link module (so_link_module_impl.h stops before 0x164). HYPOTHESIS: slot 0x164 is unlinkSlot164(u32).
 class ftLinkModuleSlotView {
 public:
@@ -159,7 +161,7 @@ public:
     virtual void pad9();
     virtual void slot30(u32 a, u32 b);
     virtual bool slot34(int value);
-    virtual void pad100();
+    virtual bool slot38(soModuleAccesser* moduleAccesser, void* damageInfo);
     virtual void slot3c();
     virtual void pad101();
     virtual void slot44();

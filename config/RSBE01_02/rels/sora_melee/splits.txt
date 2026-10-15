@@ -5069,6 +5069,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_escape.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_thrown.cpp:
 	.text       start:0x0017A698 end:0x0017AB18
 	.ctors      start:0x00000154 end:0x00000158
+	.data       start:0x00030350 end:0x000303C0
+	.bss        start:0x00004B90 end:0x00004BA0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_item_lift.cpp:
 	.text       start:0x0017AB18 end:0x0017ADCC

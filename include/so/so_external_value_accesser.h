@@ -22,6 +22,7 @@ public:
     static SituationKind getSituationKind(StageObject* stageObject);
     static int getStatusKind(StageObject* stageObject);
     static bool isTreadPassive(StageObject* stageObject);
+    static soGroundModule* getGroundModule(StageObject* stageObject);
     static bool getWorkFlag(StageObject* stageObject, u32);
     static int getWorkInt(StageObject* stageObject, u32);
     static float getWorkFloat(StageObject* stageObject, u32);
