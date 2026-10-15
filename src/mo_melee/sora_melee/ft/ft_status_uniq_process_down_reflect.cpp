@@ -96,11 +96,12 @@ void ftStatusUniqProcessDownReflect::initNormalDamage(soModuleAccesser* moduleAc
         }
         float cooldown = soValueAccesser::getConstantFloat(moduleAccesser, 0xcd6, 0);
         moduleAccesser->getWorkManageModule().setFloat(cooldown, 0x21000008);
+        soWorkManageModule& work = moduleAccesser->getWorkManageModule();
         int side = 2;
         if (leftward == true) {
             side = 1;
         }
-        moduleAccesser->getWorkManageModule().setInt(side, 0x20000001);
+        work.setInt(side, 0x20000001);
         int xluFrames = soValueAccesser::getConstantInt(moduleAccesser, 0x5a34, 0);
         moduleAccesser->getCollisionHitModule().setXluFrameGlobal(xluFrames, 0);
         Vec2f touchPos;
