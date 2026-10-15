@@ -688,24 +688,6 @@ public:
     T* getModule() { return &m_soundModule; }
 };
 
-// Shadow of an article: the plain module with a fixed size scale.
-// HYPOTHESIS: source spelling soShadowModuleBuildConfig<Module> with the scale taken from the builder; the fighters' builder
-// passes 0.0 and owns that template name.
-template <typename T>
-class wnShadowModuleBuildConfig {
-public:
-    typedef T ModuleType;
-};
-
-template <typename T>
-class soShadowModuleBuilder<wnShadowModuleBuildConfig<T> > {
-    u8 unk0; // HYPOTHESIS: an empty selection member (the module starts one word later)
-    T m_module;
-public:
-    soShadowModuleBuilder(soModuleAccesser* acc) : m_module(acc, 10.0f, 0) { }
-    T* getModule() { return &m_module; }
-};
-
 // Visibility with the simple module.
 template <s32 N>
 class soVisibilityModuleBuilder<soVisibilityModuleBuildConfig<soVisibilityModuleSimple, N> > {

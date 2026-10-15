@@ -94,7 +94,7 @@ struct wnPikminDolfinModuleAccesserBuildConfig : wnCommonBuildConfig {
     typedef soDamageModuleBuildConfigNull DamageModuleBuildConfig;
     typedef soLinkModuleBuildConfigCap<5, soLinkModuleImpl> LinkModuleBuildConfig;
     typedef soVisibilityModuleBuildConfig<soVisibilityModuleImpl, 2> VisibilityModuleBuildConfig;
-    typedef wnShadowModuleBuildConfig<soShadowModuleImpl> ShadowModuleBuildConfig;
+    typedef soShadowModuleBuildConfig<soShadowModuleImpl> ShadowModuleBuildConfig;
     typedef soGlowModuleBuildConfigNull GlowModuleBuildConfig;
     typedef wnControllerModuleBuildConfig<soControllerModuleLinkRef, 0, 0> ControllerModuleBuildConfig;
     typedef soCameraModuleBuildConfig<soCameraModuleImpl> CameraModuleBuildConfig;
