@@ -5450,6 +5450,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_captain_final_target.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_captain_final_other.cpp:
 	.text       start:0x00190EC0 end:0x0019124C
 	.ctors      start:0x0000022C end:0x00000230
+	.rodata     start:0x00002658 end:0x00002660
+	.data       start:0x00032518 end:0x00032598
+	.bss        start:0x00004F90 end:0x00004FA0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_kirby_final_damage_fly.cpp:
 	.text       start:0x0019124C end:0x00191988
