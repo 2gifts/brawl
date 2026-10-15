@@ -1,5 +1,11 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#include <math.h>
+#include <so/effect/so_effect_module_impl.h>
+#include <so/ground/so_ground_module_impl.h>
+#include <so/posture/so_posture_module_simple.h>
+#include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
+#include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
 // Class shapes from the module map; the method bodies are not reconstructed yet.
@@ -12,5 +18,39 @@ public:
 
 ftStatusUniqProcessBuryWait g_ftStatusUniqProcessBuryWait;
 
-void ftStatusUniqProcessBuryWait::exitStatus(soModuleAccesser* moduleAccesser, int) { }
-void ftStatusUniqProcessBuryWait::execFixPosCounter(soModuleAccesser* moduleAccesser) { }
+// Leaving the buried status removes the dig-out effect and, when the fighter touches a surface, snaps it to the touched point (at
+// the ground shape's z) and re-bases the shape's safe position on its centre.
+void ftStatusUniqProcessBuryWait::exitStatus(soModuleAccesser* moduleAccesser, int) {
+    int effectHandle = moduleAccesser->getWorkManageModule().getInt(0x20000001);
+    moduleAccesser->getEffectModule().kill(effectHandle, true, true);
+    soGroundModule* ground = &moduleAccesser->getGroundModule();
+    if (ground->isTouch(8, 0)) {
+        float z = ground->getZ();
+        const Vec2f& touchPos = ground->getTouchPos(8, 0);
+        Vec3f position(touchPos.m_x, touchPos.m_y, z);
+        moduleAccesser->getPostureModule().setPos(&position);
+        Vec2f center = ground->getCenterPos(0);
+        ground->setShapeSafePos(&center, 0);
+    }
+    ground->setOffsetY(0.0f, 0);
+}
+
+// While buried against a surface the dig effect follows the touched point and is rotated to the surface normal.
+void ftStatusUniqProcessBuryWait::execFixPosCounter(soModuleAccesser* moduleAccesser) {
+    soGroundModule* ground = &moduleAccesser->getGroundModule();
+    if (ground->isTouch(8, 0)) {
+        Vec2f normal;
+        Vec2f::copy(normal, ground->getTouchNormal(8, 0));
+        float angle = (float) atan2(normal.m_x, normal.m_y);
+        Vec2f touchPos;
+        Vec2f::copy(touchPos, ground->getTouchPos(8, 0));
+        int effectHandle = moduleAccesser->getWorkManageModule().getInt(0x20000001);
+        Vec3f position;
+        position.m_x = touchPos.m_x;
+        position.m_y = touchPos.m_y;
+        position.m_z = 0.0f;
+        moduleAccesser->getEffectModule().setPos(effectHandle, &position);
+        Vec3f rotation(0.0f, 0.0f, -angle);
+        moduleAccesser->getEffectModule().setRot(effectHandle, &rotation);
+    }
+}
