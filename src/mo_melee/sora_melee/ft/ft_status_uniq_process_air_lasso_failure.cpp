@@ -5,6 +5,7 @@
 // statuses it derives straight from soStatusUniqProcess (its RTTI base array has a single entry).
 class ftStatusUniqProcessAirLassoFailure : public soStatusUniqProcess {
 public:
+    ftStatusUniqProcessAirLassoFailure() { }
     virtual ~ftStatusUniqProcessAirLassoFailure() { }
 };
 
