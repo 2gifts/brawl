@@ -5479,6 +5479,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_ike_final_damage.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_ike_final_damage_fly.cpp:
 	.text       start:0x0018EF58 end:0x0018F6C0
 	.ctors      start:0x0000021C end:0x00000220
+	.rodata     start:0x00002628 end:0x00002630
+	.data       start:0x00031EF0 end:0x00031F70
+	.bss        start:0x00004F10 end:0x00004F20
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_ike_final_damage_fall.cpp:
 	.text       start:0x0018F6C0 end:0x0018FA04

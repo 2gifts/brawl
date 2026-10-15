@@ -241,7 +241,8 @@ public:
             psq_st fr2, Vec3f.m_x(pOut), 0, 0
             psq_st fr0, Vec3f.m_z(pOut), 1, 0
 #elif defined(MT_VEC3F_SUB_DISTINCT)
-            // MATCH-ONLY: every value in its own register variable.
+            // MATCH-ONLY: every value in its own register variable (declared in ascending order, which selects
+            // the physical registers); the adventure follower and Ike final smash fly units are built this way.
             psq_l  fr0, Vec3f.m_x(lhs), 0, 0
             psq_l  fr1, Vec3f.m_x(rhs), 0, 0
             psq_l  fr2, Vec3f.m_z(lhs), 1, 0
