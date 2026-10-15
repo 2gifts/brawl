@@ -17,5 +17,5 @@ ftStatusUniqProcessCaptureCutGokulin g_ftStatusUniqProcessCaptureCutGokulin;
 void ftStatusUniqProcessCaptureCutGokulin::initStatus(soModuleAccesser* moduleAccesser) {
     moduleAccesser->getKineticModule().changeKinetic(0x49, moduleAccesser);
 }
-void ftStatusUniqProcessCaptureCutGokulin::exitStatus(soModuleAccesser* moduleAccesser, int) { }
 void ftStatusUniqProcessCaptureCutGokulin::execFixPos(soModuleAccesser* moduleAccesser) { }
+void ftStatusUniqProcessCaptureCutGokulin::exitStatus(soModuleAccesser* moduleAccesser, int) { }

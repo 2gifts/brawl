@@ -1,16 +1,10 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#include <ft/ft_status_uniq_process_escape.h>
 #include <so/motion/so_motion_module_impl.h>
 #include <so/kinetic/so_kinetic_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
-
-// Base process defined in src/mo_melee/sora_melee/ft/ft_status_uniq_process_escape.cpp. The derived
-// process calls its initStatus directly, so only the declaration is needed here.
-class ftStatusUniqProcessEscape : public soStatusUniqProcess {
-public:
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-};
 
 class ftStatusUniqProcessEscapeAirInheritJumpAerialMotion : public ftStatusUniqProcessEscape {
 public:
