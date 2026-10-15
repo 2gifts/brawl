@@ -51,6 +51,9 @@ void ftStatusUniqProcessCaptureDamageYoshi::initStatus(soModuleAccesser* moduleA
     reinterpret_cast<ftCollisionHitModuleSlotView*>(moduleAccesser->m_enumerationStart->m_collisionHitModule)->slotHit44(0, 0, 0);
     moduleAccesser->getGroundModule().setCorrect((soGroundShapeImpl::CorrectKind)0, 0);
 }
+void ftStatusUniqProcessCaptureDamageYoshi::execFixPos(soModuleAccesser* moduleAccesser) {
+    reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot44();
+}
 // HYPOTHESIS: statuses 0x108, 0x109 and 0x42 keep the capture alive (same set the neighbouring Yoshi capture
 // statuses use); any other exit hands the fighter over to the parent shape's centre and restores hit/visibility state.
 void ftStatusUniqProcessCaptureDamageYoshi::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
@@ -67,9 +70,6 @@ void ftStatusUniqProcessCaptureDamageYoshi::exitStatus(soModuleAccesser* moduleA
             (soSet<soCollisionHitData>*)soValueAccesser::getConstantIndefinite(moduleAccesser, 0xA803, 0), 0);
         moduleAccesser->getVisibilityModule().setWhole(1);
     }
-}
-void ftStatusUniqProcessCaptureDamageYoshi::execFixPos(soModuleAccesser* moduleAccesser) {
-    reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot44();
 }
 bool ftStatusUniqProcessCaptureDamageYoshi::checkDamage(soModuleAccesser* moduleAccesser, void*) {
     return reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot34(0x109);
