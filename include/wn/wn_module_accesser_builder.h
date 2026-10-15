@@ -257,6 +257,7 @@ extern char lbl_27_bss_48C[];  // camera
 extern char lbl_27_bss_170[];  // general term decide
 extern char lbl_27_bss_188[];  // switch decide
 extern char lbl_27_bss_31C[];  // motion
+extern char lbl_27_bss_D7C[];  // null transition module
 extern char lbl_27_bss_584[];  // combo
 extern char lbl_27_bss_598[];  // area
 extern char lbl_27_bss_5EC[];  // physics
@@ -527,6 +528,15 @@ class soParamCustomizeModuleBuilder<soParamCustomizeModuleBuildConfig<soParamCus
     soParamCustomizeModuleImpl m_paramCustomizeModule;
 public:
     soParamCustomizeModuleBuilder(soModuleAccesser*) { }
+};
+
+// A motion module without transitions uses the shared null transition module of sora_melee.
+struct soTransitionModuleBuildConfigNull { };
+template <>
+class soTransitionModuleBuilder<soTransitionModuleBuildConfigNull> {
+public:
+    soTransitionModuleBuilder() { }
+    soTransitionModule* getModule() { return (soTransitionModule*)lbl_27_bss_D7C; }
 };
 
 // Motion without partial / other animations or an anim obj cache: the null arrays come from singletons, the null cache
