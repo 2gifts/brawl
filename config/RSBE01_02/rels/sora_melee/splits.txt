@@ -5043,6 +5043,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_rebirth.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_catch_pull.cpp:
 	.text       start:0x00178AB8 end:0x00178C04
 	.ctors      start:0x0000012C end:0x00000130
+	.data       start:0x0002FE90 end:0x0002FF08
+	.bss        start:0x00004AF0 end:0x00004B00
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_catch_wait.cpp:
 	.text       start:0x00178C04 end:0x00178D74
@@ -5079,6 +5081,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_capture_cut.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_escape.cpp:
 	.text       start:0x0017A4EC end:0x0017A698
 	.ctors      start:0x00000150 end:0x00000154
+	.data       start:0x000302E0 end:0x00030350
+	.bss        start:0x00004B80 end:0x00004B90
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_thrown.cpp:
 	.text       start:0x0017A698 end:0x0017AB18
@@ -5108,6 +5112,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_item_swing.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_test_motion.cpp:
 	.text       start:0x0017F598 end:0x0017F608
 	.ctors      start:0x00000168 end:0x0000016C
+	.data       start:0x000305D0 end:0x00030648
+	.bss        start:0x00004BE0 end:0x00004BF0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_bury.cpp:
 	.text       start:0x0017F608 end:0x0017FF1C
@@ -5176,26 +5182,40 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_clung_diddy.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_clung_damage_diddy.cpp:
 	.text       start:0x001867D0 end:0x00186944
 	.ctors      start:0x000001AC end:0x000001B0
+	.data       start:0x00030DF0 end:0x00030E68
+	.bss        start:0x00004D10 end:0x00004D20
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_clung_thrown_diddy.cpp:
 	.text       start:0x00186944 end:0x00186A98
 	.ctors      start:0x000001B0 end:0x000001B4
+	.data       start:0x00030E68 end:0x00030EE0
+	.bss        start:0x00004D20 end:0x00004D30
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_shouldered_donkey.cpp:
 	.text       start:0x00186A98 end:0x00186F0C
 	.ctors      start:0x000001B4 end:0x000001B8
+	.rodata     start:0x000024C0 end:0x000024C8
+	.data       start:0x00030EE0 end:0x00030F58
+	.bss        start:0x00004D30 end:0x00004D40
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_shouldered_donkey_thrown.cpp:
 	.text       start:0x00186F0C end:0x0018701C
 	.ctors      start:0x000001B8 end:0x000001BC
+	.data       start:0x00030F58 end:0x00030FD8
+	.bss        start:0x00004D40 end:0x00004D50
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_clung_ganon.cpp:
 	.text       start:0x0018701C end:0x001871DC
 	.ctors      start:0x000001BC end:0x000001C0
+	.data       start:0x00030FD8 end:0x00031050
+	.bss        start:0x00004D50 end:0x00004D60
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_catched_ganon.cpp:
 	.text       start:0x001871DC end:0x001873D0
 	.ctors      start:0x000001C0 end:0x000001C4
+	.rodata     start:0x000024C8 end:0x000024D0
+	.data       start:0x00031050 end:0x000310C8
+	.bss        start:0x00004D60 end:0x00004D70
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_catched_air_ganon.cpp:
 	.text       start:0x001873D0 end:0x00187918
