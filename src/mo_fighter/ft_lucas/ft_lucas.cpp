@@ -8,6 +8,8 @@
 #include <ft/lucas/ft_lucas_transactor.h>
 #include <ft/ft_owner.h>
 #include <math.h>
+#include <mt/mt_prng.h>
+#include <cm/cm_camera_controller.h>
 #include <ft/lucas/ft_lucas_extend_param_accesser.h>
 #include <ft/lucas/ft_lucas_status_uniq_process.h>
 #include <wn/wn_article_pool.h>
@@ -194,6 +196,21 @@ void* fn_114_5B0C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 void* fn_114_5B4C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_114_5B8C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+
+// Small helpers of this unit; the native callers reach them with a call.
+#pragma dont_inline on
+extern "C" {
+#pragma scheduling 603 // MATCH-ONLY: the epilogue lwz precedes the frsp
+float fn_114_B6DC(double y, double x) { return (float)atan2(y, x); }
+#pragma scheduling reset
+float fn_114_C4CC(float x) { return __fabsf(x); }
+void fn_114_C4D4(Vec3f* p, const Vec3f* src, float z) {
+    p->m_x = src->m_x;
+    p->m_y = src->m_y;
+    p->m_z = z;
+}
+}
+#pragma dont_inline off
 
 // ---- the article holders --------------------------------------------------------------------------------------------
 // What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Lucas, copied into
@@ -519,5 +536,122 @@ bool ftLucas::activeArticle1(wnLucasPKThunder* weapon, soModuleAccesser* acc) {
     s32 taskId = founder->m_taskId;
     weapon->activate(taskId, founder->getOwner()->getTeam(), &pos, lr);
     acc->getLinkModule().link(6, weapon->m_taskId);
+    return true;
+}
+
+// PK Starstorm: the stars rain from the top of the camera area; the first one decides the side, the following ones alternate.
+// HYPOTHESIS: the camera view and the parameter block below only name the fields this function reads.
+struct ftLucasCameraView {
+    u8 unk0[0x148];
+    float left;
+    float right;
+    float top;
+    float bottom;
+    float left2;
+    float right2;
+};
+
+struct ftLucasStarStormParam {
+    float unk0;
+    float spreadTop;
+    float spreadBottom;
+    float unkC;
+    float unk10;
+    float unk14;
+    s32 centerChance;
+};
+
+extern "C" float fn_114_C4CC(float x);
+extern "C" float fn_114_B6DC(double y, double x);
+extern "C" void fn_114_C4D4(Vec3f* p, const Vec3f* src, float z);
+
+bool ftLucas::activeArticle2(wnLucasPKStarStorm* weapon, soModuleAccesser* acc) {
+    soWorkManageModule& work = acc->getWorkManageModule();
+    Fighter& founder = dynamic_cast<Fighter&>(*acc->m_stageObject);
+    const ftLucasStarStormParam* param = *reinterpret_cast<ftLucasStarStormParam**>(reinterpret_cast<u8*>(g_ftCommonDataAccesser.getData(Fighter_Lucas)) + 0x90);
+    if (work.getInt(0x10000040) == 0) {
+        if (randi(2) == 0) {
+            work.setFloat(1.0f, 0x11000017);
+        } else {
+            work.setFloat(-1.0f, 0x11000017);
+        }
+    }
+    ftLucasCameraView* camera = reinterpret_cast<ftLucasCameraView*>(CameraController::getInstance());
+    float center;
+    float spread;
+    if (randi(param->centerChance) == 0) {
+        ftLucasCameraView* camera2 = reinterpret_cast<ftLucasCameraView*>(CameraController::getInstance());
+        float side = 1.0f;
+        if (side == work.getFloat(0x11000018)) {
+            side = -1.0f;
+        }
+        work.setFloat(side, 0x11000018);
+        if (1.0f == side) {
+            spread = 0.5f * fn_114_C4CC(camera->right - camera2->right2);
+            center = camera->right + spread;
+            spread = 1.0f;
+        } else {
+            spread = 0.5f * fn_114_C4CC(camera->left - camera2->left2);
+            center = camera->left - spread;
+            spread = -1.0f;
+        }
+    } else {
+        float side = work.getFloat(0x11000017);
+        spread = 0.5f * fn_114_C4CC(camera->right - camera->left);
+        center = spread + camera->left;
+        spread = side * (spread * randf());
+        float next = 1.0f;
+        if (next == side) {
+            next = -1.0f;
+        }
+        work.setFloat(next, 0x11000017);
+    }
+    Vec2f from;
+    from.m_x = center + param->spreadTop * spread;
+    from.m_y = camera->top;
+    Vec2f to;
+    to.m_x = center + param->spreadBottom * spread;
+    to.m_y = camera->bottom;
+    Vec2f dir;
+    dir.m_x = from.m_x - to.m_x;
+    dir.m_y = from.m_y - to.m_y;
+    Vec2f dirCopy = dir;
+    Vec2f dirCopy2 = dirCopy;
+    float angle = fn_114_B6DC(-dirCopy2.m_x, dirCopy2.m_y);
+    s32 taskId = founder.m_taskId;
+    Vec3f pos;
+    fn_114_C4D4(&pos, reinterpret_cast<const Vec3f*>(&from), 0.0f);
+    weapon->activate(taskId, founder.getOwner()->getTeam(), &pos, angle);
+    // HYPOTHESIS: a StageObject virtual (vtable slot 0x234) taking a small event record: the work value 0x10000041, 0x3d, 0.
+    struct { s32 value; s32 kind; s32 unk; } event;
+    event.value = work.getInt(0x10000041);
+    event.kind = 0x3d;
+    event.unk = 0;
+    typedef void (*Slot234)(wnLucasPKStarStorm*, void*);
+    reinterpret_cast<Slot234>((*reinterpret_cast<void***>(reinterpret_cast<u8*>(weapon) + 0x3c))[0x234 / 4])(weapon, &event);
+    return false;
+}
+
+// Rope Snake: started with the resource id of the fighter; in three of the grab-hold statuses it is also linked to the fighter.
+// HYPOTHESIS: names of the two flags; the statuses 0x34, 0x36 and 0x38 are the ones that carry the link.
+bool ftLucas::activeArticle3(wnLucasHimohebi* weapon, soModuleAccesser* acc) {
+    Fighter& founder = dynamic_cast<Fighter&>(*acc->m_stageObject);
+    s32 status = acc->getStatusModule().getStatusKind();
+    s32 attach = status == 0x7f;
+    s32 linked = false;
+    if ((u32)(status - 0x34) <= 4 && ((1 << (status - 0x34)) & 0x15)) {
+        linked = true;
+    }
+    soResourceModule& resources = acc->getResourceModule();
+    s32 taskId = founder.m_taskId;
+    float lr = acc->getPostureModule().getLr();
+    s32 team = founder.getOwner()->getTeam();
+    weapon->activate(taskId, resources.getResourceIdAccesser()->getEtcResId(), team, lr, attach, linked);
+    if (linked) {
+        soLinkModule& link = acc->getLinkModule();
+        if (link.link(3, weapon->getTaskId())) {
+            link.setModelConstraintPosOrt(3, acc->getModelModule().getCorrectNodeId(0x12c), 0xb, 1, false);
+        }
+    }
     return true;
 }

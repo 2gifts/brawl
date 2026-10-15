@@ -658,10 +658,50 @@ bool ftNess::activeArticle2(wnNessPKStarStorm* weapon, soModuleAccesser* acc) {
     Vec2f dir;
     dir.m_x = from.m_x - to.m_x;
     dir.m_y = from.m_y - to.m_y;
-    float angle = fn_101_BD7C(-dir.m_x, dir.m_y);
+    Vec2f dirCopy = dir;
+    Vec2f dirCopy2 = dirCopy;
+    float angle = fn_101_BD7C(-dirCopy2.m_x, dirCopy2.m_y);
     s32 taskId = founder.m_taskId;
     Vec3f pos;
     fn_101_C2CC(&pos, reinterpret_cast<const Vec3f*>(&from), 0.0f);
     weapon->activate(taskId, founder.getOwner()->getTeam(), &pos, angle);
+    // HYPOTHESIS: a StageObject virtual (vtable slot 0x234) taking a small event record: the work value 0x10000041, 0x3d, 0.
+    struct { s32 value; s32 kind; s32 unk; } event;
+    event.value = work.getInt(0x10000041);
+    event.kind = 0x3d;
+    event.unk = 0;
+    typedef void (*Slot234)(wnNessPKStarStorm*, void*);
+    reinterpret_cast<Slot234>((*reinterpret_cast<void***>(reinterpret_cast<u8*>(weapon) + 0x3c))[0x234 / 4])(weapon, &event);
     return false;
+}
+
+// Yo-Yo: the string is started with the resource id of the fighter; it is not shown while the fighter is in status 0x2d.
+bool ftNess::activeArticle3(wnNessYoyo* weapon, soModuleAccesser* acc) {
+    Fighter& founder = dynamic_cast<Fighter&>(*acc->m_stageObject);
+    bool flag = true;
+    if (acc->getStatusModule().getStatusKind() == 0x2d) {
+        flag = false;
+    }
+    soResourceModule& resources = acc->getResourceModule();
+    s32 taskId = founder.m_taskId;
+    s32 team = founder.getOwner()->getTeam();
+    weapon->activate(taskId, resources.getResourceIdAccesser()->getEtcResId(), team, flag);
+    return true;
+}
+
+// Yo-Yo head: leaves from the hand node, facing the way of the fighter (mirrored in status 0x2d).
+bool ftNess::activeArticle4(wnNessYoyoHead* weapon, soModuleAccesser* acc) {
+    Fighter& founder = dynamic_cast<Fighter&>(*acc->m_stageObject);
+    bool flag = true;
+    Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x42, false);
+    float lr = acc->getPostureModule().getLr();
+    if (acc->getStatusModule().getStatusKind() == 0x2d) {
+        lr *= -1.0f;
+        flag = false;
+    }
+    soResourceModule& resources = acc->getResourceModule();
+    s32 taskId = founder.m_taskId;
+    s32 team = founder.getOwner()->getTeam();
+    weapon->activate(taskId, resources.getResourceIdAccesser()->getEtcResId(), team, &pos, lr, flag);
+    return true;
 }
