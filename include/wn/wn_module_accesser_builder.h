@@ -744,6 +744,25 @@ public:
     soKineticModule* getModule() { return (soKineticModule*)&m_module; }
 };
 
+// Kinetic module of an article with another energy capacity.
+// HYPOTHESIS: the source spells this soKineticModuleBuildConfigMediator with a capacity argument.
+template <typename M, int N>
+class wnKineticModuleBuildConfigCap {
+public:
+    typedef M MediatorType;
+};
+
+template <typename M, int N>
+class soKineticModuleBuilder<wnKineticModuleBuildConfigCap<M, N> > {
+    wnKineticModuleImpl m_module;                                       // +0x0
+    soInstanceManagerFullPropertyVector<soKineticEnergy*, N> m_manager; // +0x30
+    M m_mediator;
+public:
+    soKineticModuleBuilder(soModuleAccesser* acc) :
+        m_module(acc, &m_manager, &m_mediator), m_manager(false), m_mediator() { }
+    soKineticModule* getModule() { return (soKineticModule*)&m_module; }
+};
+
 // Effect of an article.
 // HYPOTHESIS: source spelling soEffectModuleBuildConfig<Continual, Screen, Time, U32, ScreenNum, Module> (map name); the
 // fighters' placeholder owns that template name.
