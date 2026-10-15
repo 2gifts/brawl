@@ -1,4 +1,11 @@
-#include <ft/ft_status_uniq_process_air_lasso.h>
+#include <so/status/so_status_module_impl.h>
 #include <types.h>
+
+// Air lasso failure: no own status methods in the REL; only the destructor is defined. Unlike the other lasso
+// statuses it derives straight from soStatusUniqProcess (its RTTI base array has a single entry).
+class ftStatusUniqProcessAirLassoFailure : public soStatusUniqProcess {
+public:
+    virtual ~ftStatusUniqProcessAirLassoFailure() { }
+};
 
 ftStatusUniqProcessAirLassoFailure g_ftStatusUniqProcessAirLassoFailure;
