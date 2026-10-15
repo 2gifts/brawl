@@ -14,7 +14,8 @@ public:
 
 extern ftStatusUniqProcessAirLasso g_ftStatusUniqProcessAirLasso;
 
-class ftStatusUniqProcessAirLassoCommon : public ftStatusUniqProcessAirLasso {
+// The RTTI of the common process lists only soStatusUniqProcess as its ancestor, so it does not derive from ftStatusUniqProcessAirLasso.
+class ftStatusUniqProcessAirLassoCommon : public soStatusUniqProcess {
 public:
     virtual ~ftStatusUniqProcessAirLassoCommon() { }
     virtual void execFixPos(soModuleAccesser* moduleAccesser);
