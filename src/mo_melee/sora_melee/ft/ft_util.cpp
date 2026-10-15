@@ -16,6 +16,7 @@
 #include <so/so_kinetic_energy_normal.h>
 #include <so/effect/so_effect_module_impl.h>
 #include <so/so_module_accesser.h>
+#include <gf/gf_task_scheduler.h>
 #include <ft/ft_common_data_accesser.h>
 #include <so/collision/so_collision_attack_part.h>
 #include <so/param/so_param_customize_module_impl.h>
@@ -263,6 +264,44 @@ float ftUtil::getReactionMul(soModuleAccesser* acc, soCollisionAttackData* attac
         mul *= calcScalingParam(mul, acc->getPostureModule().getScale(), *g_ftCommonData.dataCommon->sizeCustomizeScale[1]);
     }
     return mul;
+}
+
+// Whether the fighter currently counts as treading on (stomping) the task stored in its work int 0x10000007: it is in a
+// status that allows the tread, and the target task is a stage object that is passively treadable. Flag 0 additionally
+// requires the tread flag to be off, any other value requires it to be on and the fighter to be falling.
+bool ftUtil::checkTread(soModuleAccesser* acc, int flag) {
+    int taskId = acc->getWorkManageModule().getInt(0x10000007);
+    if (taskId != -1) {
+        int status = acc->getStatusModule().getStatusKind();
+        if (status == 0x6D
+            || g_ftCommonDataAccesser.getFtStatusData(static_cast<ftKind>(acc->m_stageObject->soGetSubKind()), status)->noTread) {
+            return false;
+        }
+        if (flag == 0) {
+            if (acc->getWorkManageModule().isFlag(0x12000005) == true) {
+                return false;
+            }
+        } else {
+            if (!acc->getWorkManageModule().isFlag(0x12000005)) {
+                return false;
+            }
+            Vec2f speed = acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
+            if (speed.m_y >= 0.0f) {
+                return false;
+            }
+        }
+        gfTask* task = gfTaskScheduler::getInstance()->getTaskById(
+            static_cast<gfTask::Category>(acc->getWorkManageModule().getInt(0x10000008)), taskId);
+        if (task != NULL) {
+            StageObject* stageObject = dynamic_cast<StageObject*>(task);
+            if (stageObject != NULL) {
+                if (soExternalValueAccesser::isTreadPassive(stageObject)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 bool ftUtil::isItemShootStatus(soModuleAccesser*, int status) {

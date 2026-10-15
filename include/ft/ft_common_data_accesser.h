@@ -82,8 +82,16 @@ struct ftCommonData {
 struct wnSimpleData;
 struct wnGameWatchNormalWeaponData;
 
+// HYPOTHESIS: leading flag word of a common fighter status's data (the bit with mask 0x8 marks statuses that cannot be trodden on).
+struct ftStatusFlagData {
+    u32 : 28;
+    u32 noTread : 1;
+    u32 : 3;
+};
+
 class ftCommonDataAccesser {
 public:
+    const ftStatusFlagData* getFtStatusData(ftKind kind, int status) const;
     wnSimpleData* getSimpleData(ftKind kind, bool* resourceGroup) const;
     u32 getFinalResId(ftKind kind) const;
     ftData* getData(ftKind kind) const;
