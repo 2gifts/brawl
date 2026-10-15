@@ -4864,10 +4864,15 @@ mo_melee/sora_melee/ft/ft_kinetic_energy_controller.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_walk.cpp:
 	.text       start:0x0016567C end:0x00165918
 	.ctors      start:0x00000098 end:0x0000009C
+	.data       start:0x0002E748 end:0x0002E7B8
+	.bss        start:0x00004878 end:0x00004888
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_walk_brake.cpp:
 	.text       start:0x00165918 end:0x00165AF0
 	.ctors      start:0x0000009C end:0x000000A0
+	.rodata     start:0x00002028 end:0x00002038
+	.data       start:0x0002E7B8 end:0x0002E830
+	.bss        start:0x00004888 end:0x00004898
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_dash.cpp:
 	.text       start:0x00165AF0 end:0x00165F08
@@ -4879,6 +4884,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_dash.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_run.cpp:
 	.text       start:0x00165F08 end:0x001664E0
 	.ctors      start:0x000000A4 end:0x000000A8
+	.rodata     start:0x00002048 end:0x00002050
+	.data       start:0x0002E8A0 end:0x0002E910
+	.bss        start:0x000048A8 end:0x000048B8
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_run_brake.cpp:
 	.text       start:0x001664E0 end:0x00166864
@@ -4890,6 +4898,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_run_brake.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_turn.cpp:
 	.text       start:0x00166864 end:0x00166C44
 	.ctors      start:0x000000AC end:0x000000B0
+	.rodata     start:0x00002058 end:0x00002060
+	.data       start:0x0002E980 end:0x0002E9F0
+	.bss        start:0x000048C8 end:0x000048D8
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_turn_run.cpp:
 	.text       start:0x00166C44 end:0x001670C0
@@ -5223,7 +5234,7 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_clung_ganon.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_catched_ganon.cpp:
 	.text       start:0x001871DC end:0x001873D0
 	.ctors      start:0x000001C0 end:0x000001C4
-	.rodata     start:0x000024C8 end:0x000024D0
+	.rodata     start:0x000024C8 end:0x000024CC
 	.data       start:0x00031050 end:0x000310C8
 	.bss        start:0x00004D60 end:0x00004D70
 
