@@ -19,7 +19,7 @@ ftStatusUniqProcessJumpSquat g_ftStatusUniqProcessJumpSquat;
 // HYPOTHESIS: the change frame is the float at lbl_27_rodata_20A8+8; its value is not verified (0.5f here).
 // The wrap-around threshold (0.0f) and step (1.0f) come from the same literal pool.
 void ftStatusUniqProcessJumpSquat::initStatus(soModuleAccesser* moduleAccesser) {
-    float frames = (float)(u32)soValueAccesser::getConstantInt(moduleAccesser, 0x59da, 0);
+    float frames = (float)soValueAccesser::getConstantInt(moduleAccesser, 0x59da, 0);
     float rate = moduleAccesser->getMotionModule().getEndFrame(0x14) / frames;
     if (rate < 0.0f) {
         rate += 1.0f;

@@ -24,10 +24,17 @@ void ftStatusUniqProcessCaptureDamage::initStatus(soModuleAccesser* moduleAccess
     *((u8*)&stop + 5) |= 0x80;
     int kind = moduleAccesser->getWorkManageModule().getInt(0x20000000);
     // Damage-state ids 0x7e..0x80 fold to 0x80, 0x81..0x83 fold to 0x83.
-    if (kind >= 0x7e && kind < 0x81) {
+    switch (kind) {
+    case 0x7E:
+    case 0x7F:
+    case 0x80:
         kind = 0x80;
-    } else if (kind >= 0x81 && kind < 0x84) {
+        break;
+    case 0x81:
+    case 0x82:
+    case 0x83:
         kind = 0x83;
+        break;
     }
     moduleAccesser->getWorkManageModule().setInt(kind, 0x20000000);
     moduleAccesser->getGroundModule().setCorrectIgnoreSlope(1, 0);

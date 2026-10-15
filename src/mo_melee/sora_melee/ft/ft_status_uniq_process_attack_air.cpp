@@ -30,10 +30,12 @@ void ftStatusUniqProcessAttackAir::execFixPos(soModuleAccesser* moduleAccesser) 
 void ftStatusUniqProcessAttackAir::exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind) {
     // HYPOTHESIS: work flag 0x2200001F gates a kinetic reset for transitions into statuses 0x16-0x18.
     if (moduleAccesser->getWorkManageModule().isFlag(0x2200001F) == 1) {
-        if (nextStatusKind < 0x19) {
-            if (nextStatusKind >= 0x16) {
-                moduleAccesser->getKineticModule().clearSpeedAll();
-            }
+        switch (nextStatusKind) {
+        case 0x16:
+        case 0x17:
+        case 0x18:
+            moduleAccesser->getKineticModule().clearSpeedAll();
+            break;
         }
     }
 }
