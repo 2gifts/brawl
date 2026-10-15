@@ -1496,6 +1496,8 @@ public:
     virtual bool isHeartSwapEnableCondition();
     void activateControllerLog(bool active); // sora_melee fn_27_12AE90
     bool isEnableWarp(); // sora_melee fn_27_13C984
+    void attachItemHoldAnim(int holdKind, u32 index); // sora_melee fn_27_13C530
+    void detachItemHoldAnim(bool detachItem); // sora_melee fn_27_13C684
 #ifdef FT_MODULE_BUILDER
     virtual void analyzeSeal(void*) { }
 #else
