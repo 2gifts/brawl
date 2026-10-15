@@ -213,6 +213,41 @@ void ftUtil::adjustCeil(soModuleAccesser* acc, bool flag, float lr) {
     }
 }
 
+// Wall counterpart of adjustCeil: shifts the fighter sideways by the rhombus half width on the wall side (plus the motion's
+// z translation scaled by the two direction factors), re-fits the ground shape and drops the fighter to the air situation
+// when it ends up with no floor under it. When flag is 1 the rhombus left-minimum flag is set too.
+// HYPOTHESIS: first float parameter is the facing direction (Lr) and the second one picks the wall side.
+void ftUtil::adjustWall(soModuleAccesser* acc, float lr, float side, float scale, int flag) {
+    acc->getPostureModule().setLr(lr);
+    acc->getPostureModule().updateRotYLr();
+    Vec3f transN = acc->getMotionModule().getTransNTranslate();
+    Vec3f pos = acc->getPostureModule().getPos();
+    clRhombus2D prevRhombus;
+    clRhombus2D rhombus;
+    acc->getGroundModule().getRhombus(&prevRhombus, &rhombus, 0);
+    float edge;
+    if (side > 0.0f) {
+        edge = rhombus.m_leftPos.m_x - rhombus.m_centerPos.m_x;
+    } else {
+        edge = rhombus.m_rightPos.m_x - rhombus.m_centerPos.m_x;
+    }
+    pos.m_x += edge + scale * (transN.m_z * side);
+    acc->getPostureModule().setPos(&pos);
+    acc->getGroundModule().setShapeFlag(soGroundShapeImpl::Shape_Rhombus_Flag_Min_D, true, 0);
+    acc->getGroundModule().update(1);
+    acc->getGroundModule().test(0);
+    pos = acc->getGroundModule().getCorrectPos(0);
+    acc->getPostureModule().setPos(&pos);
+    if (acc->getSituationModule().getKind() == Situation_Ground
+        && !acc->getGroundModule().isTouch(grCollStatus::TOUCH_MASK_DOWN, 0)) {
+        acc->getSituationModule().setKind(Situation_Air, false);
+    }
+    acc->m_stageObject->updateNodeSRT();
+    if ((u32) flag == 1) {
+        acc->getGroundModule().setShapeFlag(soGroundShapeImpl::Shape_Rhombus_Flag_Min_L, true, 0);
+    }
+}
+
 bool ftUtil::isItemShootStatus(soModuleAccesser*, int status) {
     switch (status) {
     case 0xA4:
