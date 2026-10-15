@@ -2,7 +2,7 @@
 // MATCH-ONLY: the -O2,s fighter flags stop the implicit constructor inlining into the static initializer;
 // the Matching neighbours build at the default -O4,p.
 #include <ft/ft_kinetic_energy.h>
-#include <ft/ft_status_uniq_process_capture_pulled.h>
+#include <ft/ft_status_uniq_process_capture_wait.h>
 #include <math.h>
 #include <so/link/so_link_module_impl.h>
 #include <so/so_module_accesser.h>
@@ -22,14 +22,6 @@ public:
     virtual void unk20();
     virtual void unk24();
     virtual Vec2f getCapturedOffset(int);
-};
-
-class ftStatusUniqProcessCaptureWait : public ftStatusUniqProcessCapturePulled {
-public:
-    virtual ~ftStatusUniqProcessCaptureWait() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
 };
 
 ftStatusUniqProcessCaptureWait g_ftStatusUniqProcessCaptureWait;
