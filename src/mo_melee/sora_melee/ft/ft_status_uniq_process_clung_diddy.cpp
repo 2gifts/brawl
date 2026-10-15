@@ -67,10 +67,10 @@ void ftStatusUniqProcessClungDiddy::initStatus(soModuleAccesser* moduleAccesser)
         moduleAccesser->getWorkManageModule().onFlag(0x22000010);
     }
     float base = soValueAccesser::getConstantFloat(moduleAccesser, 0xdb2, 0);
-    float strength = moduleAccesser->getDamageModule().getDamage(0);
-    strength = strength * soValueAccesser::getConstantFloat(moduleAccesser, 0xd60, 0);
-    strength = strength + soValueAccesser::getConstantFloat(moduleAccesser, 0xd5f, 0);
-    float shakeStrength = strength + base * soValueAccesser::getConstantFloat(moduleAccesser, 0xd61, 0);
+    float damage = moduleAccesser->getDamageModule().getDamage(0);
+    float strength = soValueAccesser::getConstantFloat(moduleAccesser, 0xd5f, 0) + damage * soValueAccesser::getConstantFloat(moduleAccesser, 0xd60, 0);
+    float scaledBase = base * soValueAccesser::getConstantFloat(moduleAccesser, 0xd61, 0);
+    float shakeStrength = scaledBase + strength;
     moduleAccesser->getWorkManageModule().setFloat(shakeStrength, 0x21000004);
     float airStrength = shakeStrength * soValueAccesser::getConstantFloat(moduleAccesser, 0xd62, 0);
     moduleAccesser->getWorkManageModule().setFloat(airStrength, 0x21000005);
