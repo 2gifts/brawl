@@ -65,11 +65,16 @@ void ftStatusUniqProcessCaptureWait::execStatus(soModuleAccesser* moduleAccesser
 // constant 0xCC0) or too far vertically (0xCC1).
 void ftStatusUniqProcessCaptureWait::execFixPos(soModuleAccesser* moduleAccesser) {
     dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-    Vec2f forward = reinterpret_cast<ftCaptureModuleOffsetView*>(moduleAccesser->m_enumerationStart->m_captureModule)->getCapturedOffset(0);
+    Vec2f forward;
+    Vec2f::copy(forward, reinterpret_cast<ftCaptureModuleOffsetView*>(moduleAccesser->m_enumerationStart->m_captureModule)->getCapturedOffset(0));
     soLinkModule& link = moduleAccesser->getLinkModule();
     float maxForward = soValueAccesser::getConstantFloat(moduleAccesser, 0xCC0, 0);
-    if (forward.m_x * link.getParentLr(0) > maxForward
-        || (float) fabs(forward.m_y) > soValueAccesser::getConstantFloat(moduleAccesser, 0xCC1, 0)) {
-        moduleAccesser->getStatusModule().changeStatusRequest(0x40, moduleAccesser);
+    if (!(forward.m_x * link.getParentLr(0) > maxForward)) {
+        double yWide = fabs(forward.m_y);
+        float yAbs = yWide;
+        if (!(yAbs > soValueAccesser::getConstantFloat(moduleAccesser, 0xCC1, 0))) {
+            return;
+        }
     }
+    moduleAccesser->getStatusModule().changeStatusRequest(0x40, moduleAccesser);
 }
