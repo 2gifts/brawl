@@ -115,6 +115,10 @@ ftStatusUniqProcessKirbyFinalDamageWait g_ftStatusUniqProcessKirbyFinalDamageWai
 void ftStatusUniqProcessKirbyFinalDamageWait::initStatus(soModuleAccesser* moduleAccesser) {
     reinterpret_cast<ftLinkModuleConstraintView*>(moduleAccesser->m_enumerationStart->m_linkModule)->slotLinkConstraint(5, 0, 0, 1, false);
 }
+void ftStatusUniqProcessKirbyFinalDamageWait::execStatus(soModuleAccesser* moduleAccesser) { }
+void ftStatusUniqProcessKirbyFinalDamageWait::execFixPos(soModuleAccesser* moduleAccesser) { }
+bool ftStatusUniqProcessKirbyFinalDamageWait::checkDamage(soModuleAccesser* moduleAccesser, void*) { return false; }
+
 static ftLinkModuleSlotView* linkView(soModuleAccesser* moduleAccesser) {
     return reinterpret_cast<ftLinkModuleSlotView*>(moduleAccesser->m_enumerationStart->m_linkModule);
 }
@@ -156,6 +160,3 @@ void ftStatusUniqProcessKirbyFinalDamageWait::exitStatus(soModuleAccesser* modul
     moduleAccesser->getVisibilityModule().setWhole(1);
     moduleAccesser->getEffectModule().setWhole(true);
 }
-void ftStatusUniqProcessKirbyFinalDamageWait::execStatus(soModuleAccesser* moduleAccesser) { }
-void ftStatusUniqProcessKirbyFinalDamageWait::execFixPos(soModuleAccesser* moduleAccesser) { }
-bool ftStatusUniqProcessKirbyFinalDamageWait::checkDamage(soModuleAccesser* moduleAccesser, void*) { return false; }
