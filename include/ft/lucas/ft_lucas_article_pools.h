@@ -6,11 +6,56 @@
 // HYPOTHESIS: all class names.
 
 #include <wn/wn_article_pool.h>
-#include <wn/lucas/wn_lucas_himohebi.h>
-#include <wn/lucas/wn_lucas_pk_fire.h>
+#include <wn/wn_article_build_info.h>
+#include <wn/weapon.h>
+#pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
 #include <wn/lucas/wn_lucas_pk_flash.h>
-#include <wn/lucas/wn_lucas_pk_star_storm.h>
-#include <wn/lucas/wn_lucas_pk_thunder.h>
+
+// The fighter unit only builds the articles into its pools; their definitions live in the article units (see
+// src/mo_fighter/ft_lucas/wn_lucas_*.cpp). Like R.O.B.'s pools this header declares them as opaque shells of the right size,
+// so the native-builder macros of the article units do not leak into the fighter unit.
+struct wnLucasPKFireData;
+struct wnLucasPKThunderData;
+struct wnLucasPKStarStormData;
+struct wnLucasHimohebiData;
+class Vec2f;
+class Vec3f;
+
+class wnLucasPKFire : public Weapon {
+    u8 m_unreconstructed[0x2408 - sizeof(Weapon)];
+public:
+    wnLucasPKFire(s32 articleId, const wnArticleBuildInfo& info, const wnLucasPKFireData* data);
+    virtual ~wnLucasPKFire();
+    void activate(int founderTaskId, int team, Vec3f* pos, Vec2f* speed, float lr, float rot);
+};
+static_assert(sizeof(wnLucasPKFire) == 0x2408, "PK Fire layout is wrong!");
+
+class wnLucasPKThunder : public Weapon {
+    u8 m_unreconstructed[0xDE10 - sizeof(Weapon)];
+public:
+    wnLucasPKThunder(s32 articleId, const wnArticleBuildInfo& info, const wnLucasPKThunderData* data);
+    virtual ~wnLucasPKThunder();
+    void activate(int founderTaskId, int team, Vec3f* pos, float lr);
+};
+static_assert(sizeof(wnLucasPKThunder) == 0xDE10, "PK Thunder layout is wrong!");
+
+class wnLucasPKStarStorm : public Weapon {
+    u8 m_unreconstructed[0x1C10 - sizeof(Weapon)];
+public:
+    wnLucasPKStarStorm(s32 articleId, const wnArticleBuildInfo& info, const wnLucasPKStarStormData* data);
+    virtual ~wnLucasPKStarStorm();
+    void activate(int founderTaskId, int team, Vec3f* pos, float lr);
+};
+static_assert(sizeof(wnLucasPKStarStorm) == 0x1C10, "PK Starstorm layout is wrong!");
+
+class wnLucasHimohebi : public Weapon {
+    u8 m_unreconstructed[0x2104 - sizeof(Weapon)];
+public:
+    wnLucasHimohebi(s32 articleId, const wnArticleBuildInfo& info, const wnLucasHimohebiData* data);
+    virtual ~wnLucasHimohebi();
+    void activate(int founderTaskId, int kind, int team, float lr, int attach, int plain);
+};
+static_assert(sizeof(wnLucasHimohebi) == 0x2104, "Rope Snake layout is wrong!");
 
 typedef wnArticleHierarchy<wnLucasHimohebi, 1, soInstancePoolRoot> ftLucasHimohebiPool;
 typedef wnArticleHierarchy<wnLucasPKStarStorm, 16, ftLucasHimohebiPool> ftLucasStarStormPool;

@@ -1,16 +1,6 @@
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR // MATCH-ONLY: call the shared table constructor used by this REL.
 #define FT_LUCAS_ARTICLE_POOLS
-#define WN_WEAPON_BUILDER
-#define WN_ARTICLE_NATIVE_BUILDERS
-#define WN_SHARED_ARRAYS_1
-#define WN_ARTICLE_ANIMCMD_INT
-#define WN_STATUS_PLAIN_NULL_ARRAY
-#define MT_VEC2F_ASSIGN_NOINLINE
-#define MT_VEC3F_CTOR_NOINLINE
-#define MT_VEC3F_ASSIGN_NOINLINE
-#define MT_VEC2F_CTOR_NOINLINE
-#include <wn/wn_module_accesser_builder.h>
-#include <wn/wn_article_pool.h> // before anything that pulls in it/it_gen_archive.h, which leaves dont_inline on
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_reflector_group.h>
 #include <ft/ft_class_info_impl.h>
@@ -20,6 +10,7 @@
 #include <math.h>
 #include <ft/lucas/ft_lucas_extend_param_accesser.h>
 #include <ft/lucas/ft_lucas_status_uniq_process.h>
+#include <wn/wn_article_pool.h>
 
 #define FT_NO_REFLECTOR_INSTANTIATION
 #define FT_BC ftLucasBuildConfig
@@ -214,21 +205,18 @@ struct ftLucasArticleDataTag {
     ftLucasArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
 };
 
-struct ftLucasArticleKind {
-    s32 m_kind;
-    s32 m_subKind;
-    ftLucasArticleKind() : m_kind(0), m_subKind(Fighter_Lucas) { }
+struct ftLucasArticleKind : wnArticleKindInfo {
+    ftLucasArticleKind() {
+        kind = 0;
+        subKind = Fighter_Lucas;
+    }
 };
 
-struct ftLucasArticleArgs {
-    ftLucasArticleKind owner;
-    wnArticleKindInfo kind;
-    wnArticleBuildInfo info;
-    ftLucasArticleArgs(soModuleAccesser* acc) {
-        kind.kind = owner.m_kind;
-        kind.subKind = owner.m_subKind;
-        info.kindInfo = &kind;
-        info.heapModule = static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule);
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftLucasArticleBuildInfo : wnArticleBuildInfo {
+    ftLucasArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
     }
 };
 
@@ -251,7 +239,7 @@ FT_LUCAS_TRAITS(wnLucasHimohebi, const wnLucasHimohebiData, 4, getWeaponData96)
 // Every article of the fighter is built by this constructor from the data of the fighter kind.
 template <class W>
 wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
-    m_instance(ftLucasArticleTraits<W>::ArticleId, ftLucasArticleArgs(acc).info, ftLucasArticleTraits<W>::getData()) { }
+    m_instance(ftLucasArticleTraits<W>::ArticleId, ftLucasArticleBuildInfo(ftLucasArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftLucasArticleTraits<W>::getData()) { }
 
 // ---- the articles of Lucas and their mediator ------------------------------------------------------------------------------
 
@@ -270,8 +258,12 @@ template <class Mediator>
 wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
 template <class Mediator, int N>
 wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
 template wnSelectedArticleMediator<ftLucasArticleMediator>::~wnSelectedArticleMediator();
 template wnArticleManageModuleBuilder<ftLucasArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftLucasArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
 ftLucasArticleMediator::~ftLucasArticleMediator() { }
 #pragma dont_inline off
 soArticleMediator::~soArticleMediator() { }

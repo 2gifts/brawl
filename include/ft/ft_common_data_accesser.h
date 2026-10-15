@@ -95,7 +95,13 @@ public:
     void* getWeaponData94(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Thunder bolt
     void* getWeaponData95(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Starstorm
     void* getWeaponData96(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas Rope Snake
+    void* getWeaponData121(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Ness PK Flash
+    void* getWeaponData122(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Ness PK Fire
+    void* getWeaponData123(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Ness PK Thunder
     void* getWeaponData124(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Ness PK Thunder bolt
+    void* getWeaponData125(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Ness PK Starstorm
+    void* getWeaponData126(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Ness Yo-Yo
+    void* getWeaponData127(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Ness Yo-Yo head
 };
 
 extern ftCommonData g_ftCommonData;

@@ -6,7 +6,7 @@
 // HYPOTHESIS: all names.
 
 #include <wn/weapon.h>
-#include <wn/wn_module_accesser_builder.h>
+#include <wn/wn_article_build_info.h>
 
 class wnLucasPKFlash : public Weapon {
     u8 m_unreconstructed[0x2054 - sizeof(Weapon)];

@@ -204,8 +204,13 @@ class wnArticleManageModuleBuilder {
     wnSelectedArticleMediator<Mediator> m_mediator;
     soGenerateArticleManageModuleImpl m_module;
 public:
+#ifdef WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+    // The fighter builders call this constructor (the article units splice it in): it is defined in the fighter unit.
+    wnArticleManageModuleBuilder(soModuleAccesser* acc);
+#else
     wnArticleManageModuleBuilder(soModuleAccesser* acc) :
         m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+#endif
     ~wnArticleManageModuleBuilder();
     void* getModule() { return &m_module; }
     soArticleMediator* getMediator() { return m_mediator.getMediator(); }

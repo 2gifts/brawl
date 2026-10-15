@@ -1,10 +1,16 @@
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
+#define FT_NESS_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #include <math.h>
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/ft_reflector_group.h>
 #include <ft/ness/ft_ness_builder.h>
+#include <ft/ness/ft_ness_transactor.h>
+#include <ft/ft_owner.h>
+#include <mt/mt_prng.h>
+#include <cm/cm_camera_controller.h>
 #include <ft/ness/ft_ness_extend_param_accesser.h>
 
 #define FT_NO_REFLECTOR_INSTANTIATION
@@ -147,7 +153,6 @@ u8* fn_101_D250(u8* p) { return p + 0x8; }
 int fn_101_D2E8(u8* p) { return *(int*)(p + 0x20); }
 int fn_101_D3C4(u8* p) { return *(int*)(p + 0x18); }
 int fn_101_D45C(u8* p) { return *(int*)(p + 0x10); }
-int fn_101_EE70() { return 6; }
 u8* fn_101_EE84(u8* p) { return p + 0x4A874; }
 u8* fn_101_EEA4(u8* p) { return p + 0x4A8B0; }
 u8* fn_101_EEB0(u8* p) { return p + 0x4AD68; }
@@ -188,15 +193,16 @@ Vec2f fn_101_FF38(soKineticEnergyNormal* p) { return p->soKineticEnergyNormal::g
 
 }
 
-// Small helpers of this unit (map names in parentheses).
+// Small helpers of this unit (map names in parentheses). The native callers reach them with a call.
+#pragma dont_inline on
 extern "C" {
 
 // (ftness__atan2f)
 #pragma scheduling 603 // MATCH-ONLY: the epilogue lwz precedes the frsp
 float fn_101_BD7C(double y, double x) { return (float)atan2(y, x); }
 #pragma scheduling reset
-// (ftness__ABS_f_): __fabs on double, no frsp
-double fn_101_CA34(double x) { return __fabs(x); }
+// (ftness__ABS_f_): __fabsf on float
+float fn_101_CA34(float x) { return __fabsf(x); }
 // (Vec3f____ct1): copies x and y from src, sets z
 void fn_101_C2CC(Vec3f* p, const Vec3f* src, float z) {
     p->m_x = src->m_x;
@@ -205,6 +211,7 @@ void fn_101_C2CC(Vec3f* p, const Vec3f* src, float z) {
 }
 
 }
+#pragma dont_inline off
 
 // Fighter event thunks: adjust `this` back to the Fighter base, then tail-call the Fighter method.
 extern "C" {
@@ -229,3 +236,432 @@ void* fn_101_5D14(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 void* fn_101_5D54(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_101_5D94(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Ness, copied into
+// the descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftNessArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftNessArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftNessArticleKind : wnArticleKindInfo {
+    ftNessArticleKind() {
+        kind = 0;
+        subKind = Fighter_Ness;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftNessArticleBuildInfo : wnArticleBuildInfo {
+    ftNessArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+template <class W> struct ftNessArticleTraits;
+#define FT_NESS_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftNessArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static DATA* getData() { \
+            ftNessArticleDataTag tag; \
+            return static_cast<DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Ness, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_NESS_TRAITS(wnNessPKFlash, void, 0, getWeaponData121)
+FT_NESS_TRAITS(wnNessPKFire, const wnNessPKFireData, 1, getWeaponData122)
+FT_NESS_TRAITS(wnNessPKThunder, const wnNessPKThunderData, 2, getWeaponData123)
+FT_NESS_TRAITS(wnNessPKStarStorm, const wnNessPKStarStormData, 3, getWeaponData125)
+FT_NESS_TRAITS(wnNessYoyo, const wnNessYoyoData, 4, getWeaponData126)
+FT_NESS_TRAITS(wnNessYoyoHead, const wnNessYoyoHeadData, 5, getWeaponData127)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftNessArticleTraits<W>::ArticleId, ftNessArticleBuildInfo(ftNessArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftNessArticleTraits<W>::getData()) { }
+
+// ---- the articles of Ness and their mediator ------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnNessPKFlash>::~wnArticleHolder();
+template wnArticleHolder<wnNessPKFire>::~wnArticleHolder();
+template wnArticleHolder<wnNessPKThunder>::~wnArticleHolder();
+template wnArticleHolder<wnNessPKStarStorm>::~wnArticleHolder();
+template wnArticleHolder<wnNessYoyo>::~wnArticleHolder();
+template wnArticleHolder<wnNessYoyoHead>::~wnArticleHolder();
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftNessArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftNessArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftNessArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftNessArticleMediator::~ftNessArticleMediator() { }
+#pragma dont_inline off
+soArticleMediator::~soArticleMediator() { }
+
+s32 ftNessArticleMediator::getMediateNum() { return 6; }
+void ftNessArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 PK Flash, 1 PK Fire, 2 PK Thunder, 3 PK Starstorm, 4 Yo-Yo, 5 Yo-Yo head (the rest are unused).
+
+#define FT_NESS_POOL_FLASH_BASE static_cast<wnArticlePool<wnNessPKFlash, 1, ftNessFirePool>&>(m_pools)
+#define FT_NESS_POOL_FLASH FT_NESS_POOL_FLASH_BASE.getSub()
+#define FT_NESS_POOL_FIRE_BASE static_cast<wnArticlePool<wnNessPKFire, 2, ftNessThunderPool>&>(m_pools)
+#define FT_NESS_POOL_FIRE FT_NESS_POOL_FIRE_BASE.getSub()
+#define FT_NESS_POOL_THUNDER_BASE static_cast<wnArticlePool<wnNessPKThunder, 2, ftNessStarStormPool>&>(m_pools)
+#define FT_NESS_POOL_THUNDER FT_NESS_POOL_THUNDER_BASE.getSub()
+#define FT_NESS_POOL_STAR_STORM_BASE static_cast<wnArticlePool<wnNessPKStarStorm, 16, ftNessYoyoPool>&>(m_pools)
+#define FT_NESS_POOL_STAR_STORM FT_NESS_POOL_STAR_STORM_BASE.getSub()
+#define FT_NESS_POOL_YOYO_BASE static_cast<wnArticlePool<wnNessYoyo, 1, ftNessYoyoHeadPool>&>(m_pools)
+#define FT_NESS_POOL_YOYO FT_NESS_POOL_YOYO_BASE.getSub()
+#define FT_NESS_POOL_YOYO_HEAD_BASE static_cast<wnArticlePool<wnNessYoyoHead, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_NESS_POOL_YOYO_HEAD FT_NESS_POOL_YOYO_HEAD_BASE.getSub()
+
+#define FT_NESS_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(6, value) \
+    WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) \
+    WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) \
+    WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) \
+    WN_ARTICLE_UNUSED_SLOT(16, value)
+
+template <class W> struct ftNessArticleActivator;
+template <> struct ftNessArticleActivator<wnNessPKFlash> {
+    static bool activate(wnNessPKFlash* weapon, soModuleAccesser* acc) {
+        return ftNessTransactor::getInstance()->activeArticle1(weapon, acc);
+    }
+};
+template <> struct ftNessArticleActivator<wnNessPKFire> {
+    static bool activate(wnNessPKFire* weapon, soModuleAccesser* acc) { return ftNess::activeArticle(weapon, acc); }
+};
+template <> struct ftNessArticleActivator<wnNessPKThunder> {
+    static bool activate(wnNessPKThunder* weapon, soModuleAccesser* acc) { return ftNess::activeArticle1(weapon, acc); }
+};
+template <> struct ftNessArticleActivator<wnNessPKStarStorm> {
+    static bool activate(wnNessPKStarStorm* weapon, soModuleAccesser* acc) { return ftNess::activeArticle2(weapon, acc); }
+};
+template <> struct ftNessArticleActivator<wnNessYoyo> {
+    static bool activate(wnNessYoyo* weapon, soModuleAccesser* acc) { return ftNess::activeArticle3(weapon, acc); }
+};
+template <> struct ftNessArticleActivator<wnNessYoyoHead> {
+    static bool activate(wnNessYoyoHead* weapon, soModuleAccesser* acc) { return ftNess::activeArticle4(weapon, acc); }
+};
+
+void ftNessArticleMediator::deactivate() {
+    for (s32 i = 0; i < 1; ++i) {
+        wnNessPKFlash* weapon = FT_NESS_POOL_FLASH.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 2; ++i) {
+        wnNessPKFire* weapon = FT_NESS_POOL_FIRE.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 2; ++i) {
+        wnNessPKThunder* weapon = FT_NESS_POOL_THUNDER.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 16; ++i) {
+        wnNessPKStarStorm* weapon = FT_NESS_POOL_STAR_STORM.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnNessYoyo* weapon = FT_NESS_POOL_YOYO.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnNessYoyoHead* weapon = FT_NESS_POOL_YOYO_HEAD.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftNessArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 1; }
+    case 1: { wnArticleSlotTag tag; return 2; }
+    case 2: { wnArticleSlotTag tag; return 2; }
+    case 3: { wnArticleSlotTag tag; return 16; }
+    case 4: { wnArticleSlotTag tag; return 1; }
+    case 5: { wnArticleSlotTag tag; return 1; }
+    FT_NESS_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftNessActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_NESS_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftNessActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftNessActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftNessArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_NESS_COUNT_ACTIVE(FT_NESS_POOL_FLASH, 1)
+    case 1: FT_NESS_COUNT_ACTIVE(FT_NESS_POOL_FIRE, 2)
+    case 2: FT_NESS_COUNT_ACTIVE(FT_NESS_POOL_THUNDER, 2)
+    case 3: FT_NESS_COUNT_ACTIVE(FT_NESS_POOL_STAR_STORM, 16)
+    case 4: FT_NESS_COUNT_ACTIVE(FT_NESS_POOL_YOYO, 1)
+    case 5: FT_NESS_COUNT_ACTIVE(FT_NESS_POOL_YOYO_HEAD, 1)
+    FT_NESS_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_NESS_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftNessArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_NESS_CAN_GENERATE(FT_NESS_POOL_FLASH, 1, 0)
+    case 1: FT_NESS_CAN_GENERATE(FT_NESS_POOL_FIRE, 2, 1)
+    case 2: FT_NESS_CAN_GENERATE(FT_NESS_POOL_THUNDER, 2, 2)
+    case 3: FT_NESS_CAN_GENERATE(FT_NESS_POOL_STAR_STORM, 16, 3)
+    case 4: FT_NESS_CAN_GENERATE(FT_NESS_POOL_YOYO, 1, 4)
+    case 5: FT_NESS_CAN_GENERATE(FT_NESS_POOL_YOYO_HEAD, 1, 5)
+    FT_NESS_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_NESS_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftNessArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftNessArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_NESS_GENERATE(wnNessPKFlash, FT_NESS_POOL_FLASH)
+    case 1: FT_NESS_GENERATE(wnNessPKFire, FT_NESS_POOL_FIRE)
+    case 2: FT_NESS_GENERATE(wnNessPKThunder, FT_NESS_POOL_THUNDER)
+    case 3: FT_NESS_GENERATE(wnNessPKStarStorm, FT_NESS_POOL_STAR_STORM)
+    case 4: FT_NESS_GENERATE(wnNessYoyo, FT_NESS_POOL_YOYO)
+    case 5: FT_NESS_GENERATE(wnNessYoyoHead, FT_NESS_POOL_YOYO_HEAD)
+    FT_NESS_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+// Shooting only type-checks the article; the unused slots accept anything.
+bool ftNessArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: { wnArticleSlotTag tag; return ftNessTransactor::getInstance()->shootArticle1(&dynamic_cast<wnNessPKFlash&>(*article), acc); }
+    case 1: { wnArticleSlotTag tag; (void)dynamic_cast<wnNessPKFire&>(*article); return true; }
+    case 2: { wnArticleSlotTag tag; (void)dynamic_cast<wnNessPKThunder&>(*article); return true; }
+    case 3: { wnArticleSlotTag tag; (void)dynamic_cast<wnNessPKStarStorm&>(*article); return true; }
+    case 4: { wnArticleSlotTag tag; (void)dynamic_cast<wnNessYoyo&>(*article); return true; }
+    case 5: { wnArticleSlotTag tag; (void)dynamic_cast<wnNessYoyoHead&>(*article); return true; }
+    FT_NESS_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+#pragma dont_inline on
+ftNessTransactor* ftNessTransactor::getInstance() {
+    static ftNessTransactor instance;
+    return &instance;
+}
+#pragma dont_inline off
+#pragma pool_data reset
+
+// ---- the activators of the articles ---------------------------------------------------------------------------------
+
+// PK Fire: leaves from the hand with the speed and the angle of the fighter data (one pair in the air, one on the ground).
+// HYPOTHESIS: the floats behind data+0x80 are, in order, air angle / air speed / ground angle / ground speed / hand offset.
+bool ftNess::activeArticle(wnNessPKFire* weapon, soModuleAccesser* acc) {
+    const float* params = *reinterpret_cast<float**>(reinterpret_cast<u8*>(g_ftCommonDataAccesser.getData(Fighter_Ness)) + 0x80);
+    Fighter& founder = dynamic_cast<Fighter&>(*acc->m_stageObject);
+    Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x3b, false);
+    float lr = acc->getPostureModule().getLr();
+    float scale = acc->getPostureModule().getScale();
+    pos.m_x += lr * (params[4] * scale);
+    pos.m_y += params[5] * scale;
+    pos.m_z = 0.0f;
+    float angle;
+    float speed;
+    if (acc->getSituationModule().getKind() == 0) {
+        angle = params[2];
+        speed = params[3];
+    } else {
+        angle = params[0];
+        speed = params[1];
+    }
+    float c = cos(angle);
+    Vec2f vel;
+    vel.m_x = lr * (speed * c);
+    float s = sin(angle);
+    vel.m_y = speed * s;
+    angle = 57.29578f * -angle;
+    s32 taskId = founder.m_taskId;
+    weapon->activate(taskId, founder.getOwner()->getTeam(), &pos, &vel, lr, angle);
+    return false;
+}
+
+// PK Thunder: the head leaves from the hand and is linked to the fighter.
+bool ftNess::activeArticle1(wnNessPKThunder* weapon, soModuleAccesser* acc) {
+    Fighter* founder = &dynamic_cast<Fighter&>(*acc->m_stageObject);
+    s32 taskId = founder->m_taskId;
+    Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x2a, false);
+    float lr = acc->getPostureModule().getLr();
+    weapon->activate(taskId, founder->getOwner()->getTeam(), &pos, lr);
+    acc->getLinkModule().link(6, weapon->m_taskId);
+    return true;
+}
+
+// PK Starstorm: the stars rain from the top of the camera area; the first one decides the side, the following ones alternate.
+// HYPOTHESIS: the camera view and the parameter block below only name the fields this function reads.
+struct ftNessCameraView {
+    u8 unk0[0x148];
+    float left;
+    float right;
+    float top;
+    float bottom;
+    float left2;
+    float right2;
+};
+
+struct ftNessStarStormParam {
+    float unk0;
+    float spreadTop;
+    float spreadBottom;
+    float unkC;
+    float unk10;
+    float unk14;
+    s32 centerChance;
+};
+
+extern "C" float fn_101_CA34(float x);
+extern "C" float fn_101_BD7C(double y, double x);
+extern "C" void fn_101_C2CC(Vec3f* p, const Vec3f* src, float z);
+
+bool ftNess::activeArticle2(wnNessPKStarStorm* weapon, soModuleAccesser* acc) {
+    soWorkManageModule& work = acc->getWorkManageModule();
+    Fighter& founder = dynamic_cast<Fighter&>(*acc->m_stageObject);
+    const ftNessStarStormParam* param = *reinterpret_cast<ftNessStarStormParam**>(reinterpret_cast<u8*>(g_ftCommonDataAccesser.getData(Fighter_Ness)) + 0x90);
+    if (work.getInt(0x10000040) == 0) {
+        if (randi(2) == 0) {
+            work.setFloat(1.0f, 0x11000017);
+        } else {
+            work.setFloat(-1.0f, 0x11000017);
+        }
+    }
+    ftNessCameraView* camera = reinterpret_cast<ftNessCameraView*>(CameraController::getInstance());
+    float center;
+    float spread;
+    if (randi(param->centerChance) == 0) {
+        ftNessCameraView* camera2 = reinterpret_cast<ftNessCameraView*>(CameraController::getInstance());
+        float side = 1.0f;
+        if (side == work.getFloat(0x11000018)) {
+            side = -1.0f;
+        }
+        work.setFloat(side, 0x11000018);
+        if (1.0f == side) {
+            spread = 0.5f * fn_101_CA34(camera->right - camera2->right2);
+            center = camera->right + spread;
+            spread = 1.0f;
+        } else {
+            spread = 0.5f * fn_101_CA34(camera->left - camera2->left2);
+            center = camera->left - spread;
+            spread = -1.0f;
+        }
+    } else {
+        float side = work.getFloat(0x11000017);
+        spread = 0.5f * fn_101_CA34(camera->right - camera->left);
+        center = spread + camera->left;
+        spread = side * (spread * randf());
+        float next = 1.0f;
+        if (next == side) {
+            next = -1.0f;
+        }
+        work.setFloat(next, 0x11000017);
+    }
+    Vec2f from;
+    from.m_x = center + param->spreadTop * spread;
+    from.m_y = camera->top;
+    Vec2f to;
+    to.m_x = center + param->spreadBottom * spread;
+    to.m_y = camera->bottom;
+    Vec2f dir;
+    dir.m_x = from.m_x - to.m_x;
+    dir.m_y = from.m_y - to.m_y;
+    float angle = fn_101_BD7C(-dir.m_x, dir.m_y);
+    s32 taskId = founder.m_taskId;
+    Vec3f pos;
+    fn_101_C2CC(&pos, reinterpret_cast<const Vec3f*>(&from), 0.0f);
+    weapon->activate(taskId, founder.getOwner()->getTeam(), &pos, angle);
+    return false;
+}
