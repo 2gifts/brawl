@@ -73,12 +73,9 @@ public:
     virtual Vec3f slotD4(u32 nodeId);
 };
 
-// sora_melee helper called when the capture work flag is not set (name unknown).
-extern "C" void fn_27_179BF8(void* process, soModuleAccesser* moduleAccesser);
-
 void ftStatusUniqProcessCaptureYoshi::execStatus(soModuleAccesser* moduleAccesser) {
     if (!moduleAccesser->getWorkManageModule().isFlag(0x1200003B)) {
-        fn_27_179BF8(this, moduleAccesser);
+        ftStatusUniqProcessCapturePulled::execStatus(moduleAccesser);
     }
 }
 
