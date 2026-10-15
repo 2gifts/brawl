@@ -43,8 +43,8 @@ void ftStatusUniqProcessLanding::initStatus(soModuleAccesser* moduleAccesser) {
         int motionKind = landingKind + 5;
         float lag = soValueAccesser::getConstantFloat(moduleAccesser, 0xBA1 + landingKind, 0);
         if (0.0f != lag) {
-            rate = moduleAccesser->getMotionModule().getEndFrame(motionKind) /
-                   (lag + lag * soValueAccesser::getConstantFloat(moduleAccesser, 0xCA0, 0));
+            float endFrame = moduleAccesser->getMotionModule().getEndFrame(motionKind);
+            rate = endFrame / (lag + lag * soValueAccesser::getConstantFloat(moduleAccesser, 0xCA0, 0));
         }
         soMotionChangeParam param;
         param.m_kind = motionKind;
@@ -95,7 +95,7 @@ void ftStatusUniqProcessLanding::execStatus(soModuleAccesser* moduleAccesser) {
             int landingKind = moduleAccesser->getMotionModule().getKind();
             int frames = moduleAccesser->getWorkManageModule().getInt(0x20000002);
             moduleAccesser->getWorkManageModule().setInt(frames + 1, 0x20000002);
-            if ((int) soValueAccesser::getConstantFloat(moduleAccesser, 0xB9C + landingKind, 0) <= frames + 1) {
+            if (frames + 1 >= (int) soValueAccesser::getConstantFloat(moduleAccesser, 0xB9C + landingKind, 0)) {
                 moduleAccesser->getWorkManageModule().onFlag(0x22000010);
             }
         }
