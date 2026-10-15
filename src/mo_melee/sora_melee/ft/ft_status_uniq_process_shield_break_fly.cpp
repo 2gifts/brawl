@@ -18,18 +18,26 @@ public:
 
 void ftStatusUniqProcessShieldBreakFly::initStatus(soModuleAccesser* moduleAccesser) {
     int node = moduleAccesser->getModelModule().getCorrectNodeId(0x12c);
-    // HYPOTHESIS: the four vectors are zero (lbl_27_rodata_2200 holds 0.0f).
-    Vec3f pos;
-    Vec3f rot;
-    Vec3f posRange;
-    Vec3f rotRange;
-    pos.m_x = pos.m_y = pos.m_z = 0.0f;
-    rot.m_x = rot.m_y = rot.m_z = 0.0f;
-    posRange.m_x = posRange.m_y = posRange.m_z = 0.0f;
-    rotRange.m_x = rotRange.m_y = rotRange.m_z = 0.0f;
-    // HYPOTHESIS: scale constant from lbl_27_rodata_2204 (not verified).
-    float scale = 1.0f;
-    moduleAccesser->getEffectModule().req(static_cast<EfID>(4), node, &pos, &rot, scale, &posRange, &rotRange, false, 0);
+    // HYPOTHESIS: the four vectors are zero (lbl_27_rodata_2200 holds 0.0f, lbl_27_rodata_2204 the 1.0f effect scale); they live in one block, filled in address order.
+    struct {
+        Vec3f rotRange;
+        Vec3f posRange;
+        Vec3f rot;
+        Vec3f pos;
+    } zero;
+    zero.rotRange.m_x = 0.0f;
+    zero.rotRange.m_y = 0.0f;
+    zero.rotRange.m_z = 0.0f;
+    zero.posRange.m_x = 0.0f;
+    zero.posRange.m_y = 0.0f;
+    zero.posRange.m_z = 0.0f;
+    zero.rot.m_x = 0.0f;
+    zero.rot.m_y = 0.0f;
+    zero.rot.m_z = 0.0f;
+    zero.pos.m_x = 0.0f;
+    zero.pos.m_y = 0.0f;
+    zero.pos.m_z = 0.0f;
+    moduleAccesser->getEffectModule().req(static_cast<EfID>(4), node, &zero.pos, &zero.rot, 1.0f, &zero.posRange, &zero.rotRange, false, 0);
     moduleAccesser->getControllerModule().setRumble(0x19, 0, false, -1);
 }
 
