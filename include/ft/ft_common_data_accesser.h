@@ -64,12 +64,13 @@ struct ftDataCommon {
     u8 unk2C[4];
     // HYPOTHESIS: size-customize scaling exponents read by ftUtil::getReactionMul for param customizes 0 and 1.
     float* sizeCustomizeScale[2];
-    u8 unk38[0x14];
+    u8 unk38[0x10];
     GXColor subColors;
     ftEffectCommonData* effectCommonData;
     ftEffectScreenData* effectScreenData;
     ftIkData* ikData;
 };
+static_assert(sizeof(ftDataCommon) == 0x58, "Class is wrong size!");
 
 struct ftCommonData {
     ftDataCommon* dataCommon;
