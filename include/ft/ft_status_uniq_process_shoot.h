@@ -10,7 +10,9 @@ class ftStatusUniqProcessShoot {
 public:
     // HYPOTHESIS: the two ints are the motion kinds for the ground and the air variant of the shoot status.
     static void initShoot_Common(soModuleAccesser* moduleAccesser, int groundMotionKind, int airMotionKind);
+    static void initShoot_CommonAirUpper(soModuleAccesser* moduleAccesser, int groundMotionKind, int airMotionKind);
     static void execShoot_Common(soModuleAccesser* moduleAccesser);
     // HYPOTHESIS: the int is the status kind the fighter is switching to.
     static void exitShoot_Common(soModuleAccesser* moduleAccesser, int nextStatusKind);
+    static void exitShoot_CommonAirUpper(soModuleAccesser* moduleAccesser, int nextStatusKind);
 };

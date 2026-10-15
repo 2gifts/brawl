@@ -5140,8 +5140,25 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_item_throw.cpp:
 	.bss        start:0x00004BB0 end:0x00004BC0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_item_shoot.cpp:
-	.text       start:0x0017AFD4 end:0x0017DC58
+	.text       start:0x0017AFD4 end:0x0017B634
 	.ctors      start:0x00000160 end:0x00000164
+	.data       start:0x000304A8 end:0x00030528
+	.bss        start:0x00004BC0 end:0x00004BD0
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_item_shoot_scope.cpp:
+	.text       start:0x0017B634 end:0x0017C48C
+	.rodata     start:0x00002378 end:0x00002380
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_item_shoot_lgun.cpp:
+	.text       start:0x0017C48C end:0x0017C650
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_item_shoot_fflower.cpp:
+	.text       start:0x0017C650 end:0x0017CD5C
+	.rodata     start:0x00002380 end:0x00002388
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_item_shoot_clauncher.cpp:
+	.text       start:0x0017CD5C end:0x0017DC58
+	.rodata     start:0x00002388 end:0x000023A8
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_item_swing.cpp:
 	.text       start:0x0017DC58 end:0x0017DE50
