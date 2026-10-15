@@ -10695,7 +10695,7 @@ mo_melee/sora_melee/wn/wn_link_bow.cpp:
 	.ctors      start:0x00000360 end:0x00000364
 
 mo_melee/sora_melee/wn/wn_link_bow_arrow.cpp:
-	.text       start:0x002E0F24 end:0x002E4E9C
+	.text       start:0x002E0F24 end:0x002E5024
 	.ctors      start:0x00000364 end:0x00000368
 
 mo_melee/sora_melee/wn/wn_link_bow_arrow_status_uniq_process.cpp:
@@ -10831,7 +10831,7 @@ mo_melee/sora_melee/wn/wn_samus_laser2_status_uniq_process.cpp:
 	.ctors      start:0x0000037C end:0x00000380
 
 mo_melee/sora_melee/wn/wn_samus_cshot.cpp:
-	.text       start:0x002FC784 end:0x002FFDC8
+	.text       start:0x002FC784 end:0x002FFF50
 	.ctors      start:0x00000384 end:0x00000388
 
 mo_melee/sora_melee/wn/wn_samus_cshot_status_uniq_process.cpp:
@@ -11073,7 +11073,7 @@ mo_melee/sora_melee/wn/wn_pit_bow.cpp:
 	.ctors      start:0x00000460 end:0x00000464
 
 mo_melee/sora_melee/wn/wn_pit_bow_arrow.cpp:
-	.text       start:0x0035D9F8 end:0x00360230
+	.text       start:0x0035D9F8 end:0x003603B8
 	.ctors      start:0x00000464 end:0x00000468
 
 mo_melee/sora_melee/wn/wn_pit_bow_arrow_status_uniq_process_fly.cpp:
@@ -11390,7 +11390,7 @@ mo_melee/sora_melee/wn/wn_toon_link_bow.cpp:
 	.ctors      start:0x000004F8 end:0x000004FC
 
 mo_melee/sora_melee/wn/wn_toon_link_bow_arrow.cpp:
-	.text       start:0x003A81B4 end:0x003AA1D4
+	.text       start:0x003A81B4 end:0x003AA35C
 	.ctors      start:0x000004FC end:0x00000500
 
 mo_melee/sora_melee/wn/wn_toon_link_bow_arrow_status_uniq_process.cpp:
