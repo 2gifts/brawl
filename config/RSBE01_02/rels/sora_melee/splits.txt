@@ -10910,7 +10910,7 @@ mo_melee/sora_melee/ft/ft_fox_status_uniq_process_blaster.cpp:
 	.ctors      start:0x000003BC end:0x000003C0
 
 mo_melee/sora_melee/wn/wn_fox_blaster.cpp:
-	.text       start:0x0031EEEC end:0x00322218
+	.text       start:0x0031EEEC end:0x003223A8
 	.ctors      start:0x000003C0 end:0x000003C4
 
 mo_melee/sora_melee/wn/wn_fox_blaster_bullet.cpp:
@@ -11033,11 +11033,11 @@ mo_melee/sora_melee/wn/wn_game_watch_sausage_status_uniq_process_move.cpp:
 	.ctors      start:0x00000434 end:0x00000438
 
 mo_melee/sora_melee/wn/wn_falco_blaster.cpp:
-	.text       start:0x00352878 end:0x00353EB8
+	.text       start:0x00352878 end:0x00354048
 	.ctors      start:0x00000438 end:0x0000043C
 
 mo_melee/sora_melee/wn/wn_falco_blaster_bullet.cpp:
-	.text       start:0x00354048 end:0x00355F78
+	.text       start:0x00354048 end:0x00356100
 	.ctors      start:0x0000043C end:0x00000440
 
 mo_melee/sora_melee/ft/ft_wario_status_uniq_process_special_nopen.cpp:
@@ -11409,7 +11409,7 @@ mo_melee/sora_melee/ft/ft_purin_status_uniq_process_special_n.cpp:
 	.bss        start:0x00008BF0 end:0x00008C70
 
 mo_melee/sora_melee/wn/wn_wolf_blaster.cpp:
-	.text       start:0x003C8440 end:0x003C9A80
+	.text       start:0x003C8440 end:0x003C9C10
 	.ctors      start:0x0000050C end:0x00000510
 
 mo_melee/sora_melee/wn/wn_wolf_blaster_bullet.cpp:

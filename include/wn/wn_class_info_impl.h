@@ -8,15 +8,23 @@
 #include <wn/wn_class_info.h>
 
 // HYPOTHESIS: the blaster class infos fetch their article data through g_ftCommonDataAccesser (the module
-// map names the Fox call target getWeaponData49, the Wolf one getWeaponData57, both in a 151-entry overload
-// family whose C++ signature is not recoverable), so the accessers get referenced by their unmangled names.
+// map names the call targets getWeaponData48/49/53/54/56/57, all in a 151-entry overload family whose C++
+// signature is not recoverable), so the accessers get referenced by their unmangled names.
 extern "C" void* fn_27_148414(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_14875C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148380(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_14858C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148620(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1486C8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 // The data types the dispatch below selects on; the instantiating unit includes its article header,
 // which declares the struct with this name (the layout is not needed here, only the pointer type).
 struct wnFoxBlasterBulletData;
 struct wnWolfBlasterBulletData;
+struct wnFoxBlasterData;
+struct wnFalcoBlasterData;
+struct wnFalcoBlasterBulletData;
+struct wnWolfBlasterData;
 
 // Data-type dispatch so the template below picks the right family's accesser; extend per blaster family as
 // its data class is reconstructed. HYPOTHESIS: helper name; it is inline and leaves no symbol.
@@ -26,10 +34,22 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnWolfBlasterBulletData*) {
     return fn_27_14875C(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnFoxBlasterData*) {
+    return fn_27_148380(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnFalcoBlasterData*) {
+    return fn_27_14858C(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnFalcoBlasterBulletData*) {
+    return fn_27_148620(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnWolfBlasterData*) {
+    return fn_27_1486C8(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
 
 // Class info for one article kind: registers itself in the class info table during static initialization
 // and builds the article array when the article manager asks for it.
-//   K: article kind (31 Fox Blaster, 39 Wolf Blaster)
+//   K: article kind (30/31 Fox, 35/36 Falco, 38/39 Wolf; blaster first, bullet second).
 //   T: article class, D: the data type its constructor consumes.
 // HYPOTHESIS: template spelling; the data strings prove the instantiation
 // wnClassInfoImpl<31, wnFoxBlasterBullet, wnFoxBlasterBulletData>.
