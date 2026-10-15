@@ -26,6 +26,10 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
+// MATCH-ONLY: the original pool starts with an unreferenced pair (0.3f, 0.23f) before the constants the functions load;
+// the source construct that leaves them behind is unknown, so reserve them as an exported array.
+extern const float g_ftItemShootCLauncherPoolPad[2] = { 0.3f, 0.23f };
+
 // HYPOTHESIS: inline clamp helper (fsel based).
 static inline float clampf(float value, float lo, float hi) {
     value = nw4r::math::FSelect(value - lo, value, lo);
@@ -35,10 +39,13 @@ static inline float clampf(float value, float lo, float hi) {
 void ftStatusUniqProcessItemShoot::initStatus_CLauncher(soModuleAccesser* moduleAccesser) {
     int statusKind = moduleAccesser->getStatusModule().getStatusKind();
     int prevStatusKind = moduleAccesser->getStatusModule().getPrevStatusKind(0);
-    if (moduleAccesser->m_stageObject->soGetSubKind() == 7) {
+    switch (moduleAccesser->m_stageObject->soGetSubKind()) {
+    case 7:
         moduleAccesser->getWorkManageModule().onFlag(0x22000013);
-    } else {
+        break;
+    default:
         moduleAccesser->getWorkManageModule().offFlag(0x22000013);
+        break;
     }
     if (!ftUtil::isItemShootStatus(moduleAccesser, prevStatusKind)) {
         moduleAccesser->getVisibilityModule().setDefaultAll();
@@ -96,7 +103,13 @@ void ftStatusUniqProcessItemShoot::initStatus_CLauncher(soModuleAccesser* module
             if (moduleAccesser->getMotionModule().getPartialKind(1) == -1) {
                 moduleAccesser->getMotionModule().addPartialAnimChr(1, 0x173, 0x135, 0, 0.0f, 1.0f, 0);
             }
-            if (statusKind == 0xAE) {
+            if (statusKind != 0xAE) {
+                if (bullets == 0) {
+                    ftStatusUniqProcessShoot::initShoot_CommonAirUpper(moduleAccesser, 0x177, 0x178);
+                } else {
+                    ftStatusUniqProcessShoot::initShoot_CommonAirUpper(moduleAccesser, 0x174, 0x175);
+                }
+            } else {
                 if (moduleAccesser->getMotionModule().getPartialKind(1) != -1) {
                     moduleAccesser->getMotionModule().setPartialRate(0.0f, 1);
                 } else {
@@ -104,11 +117,6 @@ void ftStatusUniqProcessItemShoot::initStatus_CLauncher(soModuleAccesser* module
                 }
                 moduleAccesser->getWorkManageModule().setInt(0, 0x2000000C);
                 break;
-            }
-            if (bullets == 0) {
-                ftStatusUniqProcessShoot::initShoot_CommonAirUpper(moduleAccesser, 0x177, 0x178);
-            } else {
-                ftStatusUniqProcessShoot::initShoot_CommonAirUpper(moduleAccesser, 0x174, 0x175);
             }
         }
         if (moduleAccesser->getWorkManageModule().isFlag(0x22000013) == true && moduleAccesser->getSituationModule().getKind() == 2) {
@@ -147,51 +155,48 @@ void ftStatusUniqProcessItemShoot::execFixPosCounter_CLauncher(soModuleAccesser*
 
 void ftStatusUniqProcessItemShoot::execFixPos_CLauncher(soModuleAccesser* moduleAccesser) {
     switch (moduleAccesser->getWorkManageModule().getInt(0x2000000C)) {
-    case 0:
+    case 0: {
+        int nextStatus;
         if (moduleAccesser->getControllerModule().getTrigger() & soController::getButtonMask(soController::Pad_Button_Attack)) {
             moduleAccesser->getWorkManageModule().setInt(1, 0x2000000C);
-            int nextStatus = moduleAccesser->getSituationModule().getKind() != 0 ? 0xAD : 0xA4;
+            nextStatus = moduleAccesser->getSituationModule().getKind() == 0 ? 0xA4 : 0xAD;
+            struct EffectVectors {
+                Vec3f pos;
+                Vec3f rot;
+                Vec3f posRange;
+                Vec3f rotRange;
+            };
+            EffectVectors airEffect;
+            EffectVectors groundEffect;
             if (moduleAccesser->getItemManageModule().getShootItemBullet(0) == 0) {
-                struct {
-                    Vec3f pos;
-                    Vec3f rot;
-                    Vec3f posRange;
-                    Vec3f rotRange;
-                } zero;
-                zero.rotRange.m_x = 0.0f;
-                zero.rotRange.m_y = 0.0f;
-                zero.rotRange.m_z = 0.0f;
-                zero.posRange.m_x = 0.0f;
-                zero.posRange.m_y = 0.0f;
-                zero.posRange.m_z = 0.0f;
-                zero.rot.m_x = 0.0f;
-                zero.rot.m_y = 0.0f;
-                zero.rot.m_z = 0.0f;
-                zero.pos.m_x = 0.0f;
-                zero.pos.m_y = 0.0f;
-                zero.pos.m_z = 0.0f;
-                moduleAccesser->getEffectModule().req(static_cast<EfID>(0x1A), 0, &zero.pos, &zero.rot, 1.0f, &zero.posRange, &zero.rotRange, false, 0);
+                groundEffect.rotRange.m_x = 0.0f;
+                groundEffect.rotRange.m_y = 0.0f;
+                groundEffect.rotRange.m_z = 0.0f;
+                groundEffect.posRange.m_x = 0.0f;
+                groundEffect.posRange.m_y = 0.0f;
+                groundEffect.posRange.m_z = 0.0f;
+                groundEffect.rot.m_x = 0.0f;
+                groundEffect.rot.m_y = 0.0f;
+                groundEffect.rot.m_z = 0.0f;
+                groundEffect.pos.m_x = 0.0f;
+                groundEffect.pos.m_y = 0.0f;
+                groundEffect.pos.m_z = 0.0f;
+                moduleAccesser->getEffectModule().req(static_cast<EfID>(0x1A), 0, &groundEffect.pos, &groundEffect.rot, 1.0f, &groundEffect.posRange, &groundEffect.rotRange, false, 0);
                 moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1F56), false, false, 0);
             } else {
-                struct {
-                    Vec3f pos;
-                    Vec3f rot;
-                    Vec3f posRange;
-                    Vec3f rotRange;
-                } zero;
-                zero.rotRange.m_x = 0.0f;
-                zero.rotRange.m_y = 0.0f;
-                zero.rotRange.m_z = 0.0f;
-                zero.posRange.m_x = 0.0f;
-                zero.posRange.m_y = 0.0f;
-                zero.posRange.m_z = 0.0f;
-                zero.rot.m_x = 0.0f;
-                zero.rot.m_y = 0.0f;
-                zero.rot.m_z = 0.0f;
-                zero.pos.m_x = 0.0f;
-                zero.pos.m_y = 0.0f;
-                zero.pos.m_z = 0.0f;
-                moduleAccesser->getEffectModule().req(static_cast<EfID>(0x21), 0, &zero.pos, &zero.rot, 1.0f, &zero.posRange, &zero.rotRange, false, 0);
+                airEffect.rotRange.m_x = 0.0f;
+                airEffect.rotRange.m_y = 0.0f;
+                airEffect.rotRange.m_z = 0.0f;
+                airEffect.posRange.m_x = 0.0f;
+                airEffect.posRange.m_y = 0.0f;
+                airEffect.posRange.m_z = 0.0f;
+                airEffect.rot.m_x = 0.0f;
+                airEffect.rot.m_y = 0.0f;
+                airEffect.rot.m_z = 0.0f;
+                airEffect.pos.m_x = 0.0f;
+                airEffect.pos.m_y = 0.0f;
+                airEffect.pos.m_z = 0.0f;
+                moduleAccesser->getEffectModule().req(static_cast<EfID>(0x21), 0, &airEffect.pos, &airEffect.rot, 1.0f, &airEffect.posRange, &airEffect.rotRange, false, 0);
             }
             moduleAccesser->getStatusModule().changeStatusForce(nextStatus, moduleAccesser);
         }
@@ -209,6 +214,7 @@ void ftStatusUniqProcessItemShoot::execFixPos_CLauncher(soModuleAccesser* module
             }
         }
         break;
+    }
     case 1:
         if (moduleAccesser->getMotionModule().isEnd() == true) {
             if (moduleAccesser->getMotionModule().getPartialKind(1) != -1) {
@@ -217,7 +223,8 @@ void ftStatusUniqProcessItemShoot::execFixPos_CLauncher(soModuleAccesser* module
                 moduleAccesser->getMotionModule().setRate(0.0f);
             }
             moduleAccesser->getWorkManageModule().setInt(0, 0x2000000C);
-            moduleAccesser->getStatusModule().changeStatusForce(moduleAccesser->getSituationModule().getKind() != 0 ? 0xAD : 0xA4, moduleAccesser);
+            int nextStatus = moduleAccesser->getSituationModule().getKind() == 0 ? 0xA4 : 0xAD;
+            moduleAccesser->getStatusModule().changeStatusForce(nextStatus, moduleAccesser);
         } else {
             if (moduleAccesser->getWorkManageModule().isFlag(0x22000013) == true && moduleAccesser->getSituationModule().getKind() == 2) {
                 ftUtil::setXAngle(moduleAccesser, moduleAccesser->getWorkManageModule().getFloat(0x21000008) - 90.0f);

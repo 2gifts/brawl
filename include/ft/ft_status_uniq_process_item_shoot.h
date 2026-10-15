@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ft/ft_status_uniq_process_shoot.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
 
@@ -7,7 +8,7 @@ class soModuleAccesser;
 
 // Shoot statuses of the held shooting items. The work int 0x20000000 holds the item kind (0xD cracker launcher,
 // 0x18 fire flower, 0x2C ray gun, 0x3D super scope) and selects the per-item routines, which live in one source file each.
-class ftStatusUniqProcessItemShoot : public soStatusUniqProcess {
+class ftStatusUniqProcessItemShoot : public ftStatusUniqProcessShoot {
 public:
     virtual ~ftStatusUniqProcessItemShoot() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
