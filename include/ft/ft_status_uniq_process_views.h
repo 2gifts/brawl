@@ -4,6 +4,7 @@
 // status units). Each class is only used through reinterpret_cast of the module pointer. A view with
 // P pad slots before a named slot places that slot at vtable index P + 2 (the leading two entries are
 // the destructor pair in the module classes), so the pad counts below land on the offsets named in the comments.
+#include <mt/mt_vector.h>
 #include <types.h>
 
 class soModuleAccesser;
@@ -19,14 +20,14 @@ public:
     virtual void pad5();
     virtual void pad6();
     virtual void pad7();
-    virtual void pad8();
-    virtual void pad9();
+    virtual void slot28(int index);
+    virtual u32 slot2c(int index);
     virtual void pad10();
     virtual void pad11();
     virtual void pad12();
     virtual void pad13();
     virtual void pad14();
-    virtual void pad15();
+    virtual void slot44(int index, void* data);
     virtual void pad16();
     virtual void pad17();
     virtual void pad18();
@@ -96,7 +97,7 @@ public:
     virtual void pad82();
     virtual void pad83();
     virtual void pad84();
-    virtual void pad85();
+    virtual void slot15c(Vec3f* first, Vec3f* second);
     virtual void pad86();
     virtual void unlinkSlot164(u32 index);
     // HYPOTHESIS: slot 0x168 reports whether the fighter is linked to a parent (gates the 0x164 unlink).

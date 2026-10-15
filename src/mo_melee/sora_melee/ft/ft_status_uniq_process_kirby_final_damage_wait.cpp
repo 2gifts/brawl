@@ -1,6 +1,12 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#include <ft/ft_status_uniq_process_views.h>
+#include <so/effect/so_effect_module_impl.h>
 #include <so/so_module_accesser.h>
+#include <so/so_value_accesser.h>
+#include <so/stageobject.h>
 #include <so/status/so_status_module_impl.h>
+#include <so/visibility/so_visibility_module_impl.h>
+#include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
 // HYPOTHESIS: slotLinkConstraint is the model-constraint setter (u32 no, int node, target, u16 flag, bool); name and arguments unverified. Link module view (local). Two destructor entries, then 74 pads, put slotLinkConstraint at vtable index 77 (0x134).
@@ -84,6 +90,15 @@ public:
     virtual void slotLinkConstraint(u32 index, int node, int targetNode, u16 flag, bool attribute);
 };
 
+// Link setup record handed to link slot 0x44 (names unverified).
+struct ftLinkSetupData {
+    int m_kind;
+    u8 m_flagA;
+    int m_taskId;
+    int m_unk;
+    u8 m_flagB;
+};
+
 // Class shapes from the module map; the method bodies are not reconstructed yet.
 class ftStatusUniqProcessKirbyFinalDamageWait : public soStatusUniqProcess {
 public:
@@ -100,7 +115,47 @@ ftStatusUniqProcessKirbyFinalDamageWait g_ftStatusUniqProcessKirbyFinalDamageWai
 void ftStatusUniqProcessKirbyFinalDamageWait::initStatus(soModuleAccesser* moduleAccesser) {
     reinterpret_cast<ftLinkModuleConstraintView*>(moduleAccesser->m_enumerationStart->m_linkModule)->slotLinkConstraint(5, 0, 0, 1, false);
 }
-void ftStatusUniqProcessKirbyFinalDamageWait::exitStatus(soModuleAccesser* moduleAccesser, int) { }
+static ftLinkModuleSlotView* linkView(soModuleAccesser* moduleAccesser) {
+    return reinterpret_cast<ftLinkModuleSlotView*>(moduleAccesser->m_enumerationStart->m_linkModule);
+}
+
+// HYPOTHESIS: leaving the final-smash damage wait detaches link slots 4 and 5 (re-registering slot 4 with this
+// fighter's task id) and, when linked to a parent, resets the link transform from constants 0xd44/0xd45.
+void ftStatusUniqProcessKirbyFinalDamageWait::exitStatus(soModuleAccesser* moduleAccesser, int) {
+    if (linkView(moduleAccesser)->slot2c(4)) {
+        ftLinkSetupData data;
+        data.m_kind = 0x33;
+        data.m_flagA = 0;
+        data.m_taskId = 0;
+        data.m_unk = 0;
+        data.m_flagB = 0;
+        data.m_taskId = moduleAccesser->m_stageObject->m_taskId;
+        linkView(moduleAccesser)->slot44(4, &data);
+        linkView(moduleAccesser)->slot28(4);
+    }
+    if (linkView(moduleAccesser)->slot2c(5)) {
+        if (linkView(moduleAccesser)->slot168() == true) {
+            float x = soValueAccesser::getConstantFloat(moduleAccesser, 0xd45, 0);
+            float y = soValueAccesser::getConstantFloat(moduleAccesser, 0xd44, 0);
+            struct {
+                Vec3f m_second;
+                Vec3f m_first;
+            } vecs;
+            vecs.m_first.m_x = y;
+            vecs.m_first.m_y = x;
+            vecs.m_first.m_z = 0.0f;
+            vecs.m_second.m_x = 0.0f;
+            vecs.m_second.m_y = 0.0f;
+            vecs.m_second.m_z = 0.0f;
+            linkView(moduleAccesser)->slot15c(&vecs.m_first, &vecs.m_second);
+            linkView(moduleAccesser)->unlinkSlot164(1);
+        }
+        linkView(moduleAccesser)->slot28(5);
+    }
+    moduleAccesser->getWorkManageModule().offFlag(0x12000001);
+    moduleAccesser->getVisibilityModule().setWhole(1);
+    moduleAccesser->getEffectModule().setWhole(true);
+}
 void ftStatusUniqProcessKirbyFinalDamageWait::execStatus(soModuleAccesser* moduleAccesser) { }
 void ftStatusUniqProcessKirbyFinalDamageWait::execFixPos(soModuleAccesser* moduleAccesser) { }
 bool ftStatusUniqProcessKirbyFinalDamageWait::checkDamage(soModuleAccesser* moduleAccesser, void*) { return false; }
