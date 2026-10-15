@@ -338,6 +338,22 @@ void ftUtil::setWaterDiveEffect(soModuleAccesser* acc, Vec3f* position) {
     }
 }
 
+float ftUtil::getItemLiftMotionRateMul(soModuleAccesser* acc) {
+    float mul = 1.0f;
+    if (acc->getParamCustomizeModule().isCustomize(0)) {
+        mul *= calcScalingParam(mul, acc->getPostureModule().getScale(), g_ftCommonData.dataCommon->sizeCustomizeScale[0][2]);
+    }
+    if (acc->getParamCustomizeModule().isCustomize(1)) {
+        mul *= calcScalingParam(mul, acc->getPostureModule().getScale(), g_ftCommonData.dataCommon->sizeCustomizeScale[1][2]);
+    }
+    if (mul < 0.5f) {
+        mul = 0.5f;
+    } else if (mul > 2.0f) {
+        mul = 2.0f;
+    }
+    return mul;
+}
+
 bool ftUtil::isItemShootStatus(soModuleAccesser*, int status) {
     switch (status) {
     case 0xA4:
