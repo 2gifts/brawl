@@ -14,4 +14,7 @@ struct ftLinkEventThrow : soLinkEventArgs {
     bool m_hasMotionBit;   // +0x1C
     ftLinkEventThrow(int eventKind, int motionKind) :
         soLinkEventArgs(eventKind), m_motionKind(motionKind), m_output0(-1), m_output1(-1), m_unk14(-1), m_output2(1.0f) { }
+    ftLinkEventThrow(int eventKind, int motionKind, bool hasMotionBit) :
+        soLinkEventArgs(eventKind), m_motionKind(motionKind), m_output0(-1), m_output1(-1), m_unk14(-1), m_output2(1.0f),
+        m_hasMotionBit(hasMotionBit) { }
 };

@@ -26,8 +26,7 @@ ftStatusUniqProcessThrow g_ftStatusUniqProcessThrow;
 void ftStatusUniqProcessThrow::initStatus(soModuleAccesser* moduleAccesser) {
     int throwIndex = moduleAccesser->getWorkManageModule().getInt(0x20000000) - 0x72;
     int motionBits = soValueAccesser::getConstantInt(moduleAccesser, 0x59F2, 0);
-    ftLinkEventThrow event(0xB, throwIndex + 0x76);
-    event.m_hasMotionBit = ((1 << throwIndex) & motionBits) != 0;
+    ftLinkEventThrow event(0xB, throwIndex + 0x76, ((1 << throwIndex) & motionBits) != 0);
     moduleAccesser->getLinkModule().sendEventNodes(0, event, 0);
     moduleAccesser->getWorkManageModule().setInt(moduleAccesser->getLinkModule().getNodeTaskId(0), 0x20000002);
     moduleAccesser->getWorkManageModule().setInt(event.m_output0, 0x20000003);
