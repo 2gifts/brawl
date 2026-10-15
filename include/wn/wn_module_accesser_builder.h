@@ -488,6 +488,10 @@ public:
 };
 template <>
 class soAreaModuleBuilder<soAreaModuleBuildConfigNull> {
+    // HYPOTHESIS: the null territory and target search builders (which use the shared null modules) follow the area builder;
+    // only their storage (one byte each) is visible in the layout.
+    u8 unkTerritory;
+    u8 unkTargetSearch;
 public:
     soAreaModuleBuilder(soModuleAccesser*, u8, soEventObserverRegistrationDesc*) { }
     void* getModule() { return lbl_27_bss_598; }
@@ -598,7 +602,7 @@ class soMotionModuleBuilder<soMotionModuleBuildConfig<DataNum, T, 0, 1, Transiti
                                                       soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> > > {
     soTransitionModuleBuilder<TransitionConfig> m_transitionBuilder;
     soSingletonHolder<soArrayNull<soPartialAnim> > m_partialAnims;
-    soArrayVector<soOtherAnim, 1> m_otherAnims;
+    soArraySelectHolder<1, soArrayVector<soOtherAnim, 1>, soSingletonHolder<soArrayNull<soOtherAnim> > > m_otherAnims;
     soSingletonHolder<soArrayNull<soTransitionTermPack> > m_termPacks;
     soSingletonHolder<soArrayNull<u32> > m_u32s;
     soArrayContractibleTable<soMotionDataConst> m_motionData;
@@ -609,7 +613,7 @@ public:
         m_transitionBuilder(), m_otherAnims(1, 0),
         m_motionData((const soMotionData*)motionData, DataNum),
         m_module(acc, &m_motionData, m_transitionBuilder.getModule(),
-                 soSingletonHolder<soArrayNull<soPartialAnim> >::getInstance(), &m_otherAnims,
+                 soSingletonHolder<soArrayNull<soPartialAnim> >::getInstance(), m_otherAnims.get(),
                  (soArray<soTransitionTermPack>*)lbl_27_bss_9BC,
                  soSingletonHolder<soArrayNull<u32> >::getInstance(),
                  static_cast<soEventManager&>(acc->getEventManageModule()).getManageId(), false,
@@ -731,24 +735,6 @@ public:
     soSoundModuleBuilder(soModuleAccesser* acc, soSoundIdExchanger* exchanger, soEventObserverRegistrationDesc* regDesc) :
         m_generator(), m_soundModule(acc, &m_generator, exchanger, true, false, regDesc) { }
     T* getModule() { return &m_soundModule; }
-};
-
-// Shadow of an article: the plain module with a fixed size scale.
-// HYPOTHESIS: source spelling soShadowModuleBuildConfig<Module> with the scale taken from the builder; the fighters' builder
-// passes 0.0 and owns that template name.
-template <typename T>
-class wnShadowModuleBuildConfig {
-public:
-    typedef T ModuleType;
-};
-
-template <typename T>
-class soShadowModuleBuilder<wnShadowModuleBuildConfig<T> > {
-    u8 unk0; // HYPOTHESIS: an empty selection member (the module starts one word later)
-    T m_module;
-public:
-    soShadowModuleBuilder(soModuleAccesser* acc) : m_module(acc, 10.0f, 0) { }
-    T* getModule() { return &m_module; }
 };
 
 // Visibility with the simple module.
