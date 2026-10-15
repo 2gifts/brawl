@@ -256,6 +256,7 @@ extern char lbl_27_bss_47C[];  // controller
 extern char lbl_27_bss_48C[];  // camera
 extern char lbl_27_bss_170[];  // general term decide
 extern char lbl_27_bss_188[];  // switch decide
+extern char lbl_27_bss_31C[];  // motion
 extern char lbl_27_bss_584[];  // combo
 extern char lbl_27_bss_598[];  // area
 extern char lbl_27_bss_5EC[];  // physics
@@ -318,6 +319,8 @@ struct soCaptureModuleBuildConfigNull { };
 struct soTurnModuleBuildConfigNull { };
 struct soControllerModuleBuildConfigNull { };
 struct soCameraModuleBuildConfigNull { };
+// Articles without animation (the motion module is the shared null one). HYPOTHESIS: source spelling of the null configuration.
+struct soMotionModuleBuildConfigNull { };
 struct soComboModuleBuildConfigNull { };
 struct soAreaModuleBuildConfigNull { };
 struct soPhysicsModuleBuildConfigNull { };
@@ -432,6 +435,13 @@ class soCameraModuleBuilder<soCameraModuleBuildConfigNull> {
 public:
     soCameraModuleBuilder(soModuleAccesser*, soSet<soCameraRange>*, soSet<soCameraClipSphere>*, soEventObserverRegistrationDesc*) { }
     soCameraModule* getModule() { return (soCameraModule*)lbl_27_bss_48C; }
+};
+template <>
+class soMotionModuleBuilder<soMotionModuleBuildConfigNull> {
+    u8 unk0[4]; // HYPOTHESIS: the null selection owns a few bytes (the next builder starts a word later)
+public:
+    soMotionModuleBuilder(soModuleAccesser*, void*) { }
+    soMotionModule* getModule() { return (soMotionModule*)lbl_27_bss_31C; }
 };
 template <>
 class soComboModuleBuilder<soComboModuleBuildConfigNull> {
