@@ -3,9 +3,26 @@
 // the Matching neighbours build at the default -O4,p.
 #include <ft/ft_kinetic_energy.h>
 #include <ft/ft_status_uniq_process_capture_pulled.h>
+#include <math.h>
+#include <so/link/so_link_module_impl.h>
 #include <so/so_module_accesser.h>
+#include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
+
+// HYPOTHESIS: capture module (soModuleEnumeration::m_captureModule, +0x40); only slot 0x28 is used here.
+class ftCaptureModuleOffsetView {
+public:
+    virtual ~ftCaptureModuleOffsetView() { }
+    virtual void unk0C();
+    virtual void unk10();
+    virtual void unk14();
+    virtual void unk18();
+    virtual void unk1C();
+    virtual void unk20();
+    virtual void unk24();
+    virtual Vec2f getCapturedOffset(int);
+};
 
 class ftStatusUniqProcessCaptureWait : public ftStatusUniqProcessCapturePulled {
 public:
@@ -23,10 +40,15 @@ void ftStatusUniqProcessCaptureWait::initStatus(soModuleAccesser* moduleAccesser
     *((u8*)&stop + 5) |= 0x80;
     int kind = moduleAccesser->getWorkManageModule().getInt(0x20000000);
     // Capture-state ids 0x7e..0x80 fold to 0x7f, 0x81..0x83 fold to 0x82.
-    if (kind >= 0x7e && kind <= 0x80) {
-        kind = 0x7f;
-    } else if (kind >= 0x81 && kind <= 0x83) {
+    switch (kind) {
+    case 0x7E:
+    case 0x80:
+        kind = 0x7F;
+        break;
+    case 0x81:
+    case 0x83:
         kind = 0x82;
+        break;
     }
     moduleAccesser->getWorkManageModule().setInt(kind, 0x20000000);
     moduleAccesser->getGroundModule().setCorrectIgnoreSlope(1, 0);
@@ -39,5 +61,15 @@ void ftStatusUniqProcessCaptureWait::execStatus(soModuleAccesser* moduleAccesser
     execStatusCommon(moduleAccesser, 0x7f, 0x82, 0x20000000);
 }
 
-// TODO: execFixPos (300 bytes) is not decoded.
-void ftStatusUniqProcessCaptureWait::execFixPos(soModuleAccesser*) {}
+// A fighter held in the wait pose of a grab drops out of it (status 0x40) when it slides too far forward of the grabber (common
+// constant 0xCC0) or too far vertically (0xCC1).
+void ftStatusUniqProcessCaptureWait::execFixPos(soModuleAccesser* moduleAccesser) {
+    dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
+    Vec2f forward = reinterpret_cast<ftCaptureModuleOffsetView*>(moduleAccesser->m_enumerationStart->m_captureModule)->getCapturedOffset(0);
+    soLinkModule& link = moduleAccesser->getLinkModule();
+    float maxForward = soValueAccesser::getConstantFloat(moduleAccesser, 0xCC0, 0);
+    if (forward.m_x * link.getParentLr(0) > maxForward
+        || (float) fabs(forward.m_y) > soValueAccesser::getConstantFloat(moduleAccesser, 0xCC1, 0)) {
+        moduleAccesser->getStatusModule().changeStatusRequest(0x40, moduleAccesser);
+    }
+}
