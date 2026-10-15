@@ -10926,7 +10926,7 @@ mo_melee/sora_melee/wn/wn_pikachu_thunder_jolt2.cpp:
 	.ctors      start:0x000003D0 end:0x000003D4
 
 mo_melee/sora_melee/wn/wn_luigi_fireball.cpp:
-	.text       start:0x00328BA8 end:0x00328CF8
+	.text       start:0x00328BA8 end:0x00328E98
 	.ctors      start:0x000003D4 end:0x000003D8
 
 mo_melee/sora_melee/ft/ft_captain_status_uniq_process_falcon_punch.cpp:
