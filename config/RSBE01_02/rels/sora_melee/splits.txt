@@ -5424,6 +5424,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_adv_follow.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_ottotto.cpp:
 	.text       start:0x0018E528 end:0x0018E800
 	.ctors      start:0x00000210 end:0x00000214
+	.rodata     start:0x000025E8 end:0x000025F8
+	.data       start:0x00031D90 end:0x00031E00
+	.bss        start:0x00004ED0 end:0x00004EE0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_heart_swap.cpp:
 	.text       start:0x0018E800 end:0x0018E9E4
