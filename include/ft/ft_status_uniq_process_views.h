@@ -99,6 +99,8 @@ public:
     virtual void pad85();
     virtual void pad86();
     virtual void unlinkSlot164(u32 index);
+    // HYPOTHESIS: slot 0x168 reports whether the fighter is linked to a parent (gates the 0x164 unlink).
+    virtual bool slot168();
 };
 
 // Item manage module. HYPOTHESIS: slot 0xA0 takes a single u32 value.

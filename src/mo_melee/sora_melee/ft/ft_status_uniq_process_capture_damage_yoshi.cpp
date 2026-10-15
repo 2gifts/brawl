@@ -76,18 +76,18 @@ bool ftStatusUniqProcessCaptureDamageYoshi::checkDamage(soModuleAccesser* module
 }
 
 // HYPOTHESIS: shared parameter table and getter, same as the Snake grenade status (names unverified).
-extern u8 lbl_27_bss_7B0C[];
+extern u8 g_ftKirbyCopyAbilityIdConverter[];
 extern "C" int fn_27_30FA2C(void* table, int kind, int id, soModuleAccesser* acc, int);
 
 float soModuleAccesser::getConstantFloatKirby(s32 id) {
-    return soValueAccesser::getConstantFloat(this, fn_27_30FA2C(lbl_27_bss_7B0C, 1, id, this, 0), 0);
+    return soValueAccesser::getConstantFloat(this, fn_27_30FA2C(g_ftKirbyCopyAbilityIdConverter, 1, id, this, 0), 0);
 }
 
 
 // HYPOTHESIS: shared parameter table and getter, same as the Snake grenade status (names unverified).
-extern u8 lbl_27_bss_7B0C[];
+extern u8 g_ftKirbyCopyAbilityIdConverter[];
 extern "C" int fn_27_30FA2C(void* table, int kind, int id, soModuleAccesser* acc, int);
 
 s32 soModuleAccesser::getConstantIntKirby(s32 id) {
-    return soValueAccesser::getConstantInt(this, fn_27_30FA2C(lbl_27_bss_7B0C, 1, id, this, 0), 0);
+    return soValueAccesser::getConstantInt(this, fn_27_30FA2C(g_ftKirbyCopyAbilityIdConverter, 1, id, this, 0), 0);
 }
