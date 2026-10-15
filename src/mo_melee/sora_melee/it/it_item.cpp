@@ -10,13 +10,19 @@
 #define MT_VEC3F_MUL_INLINE // paired-single Vec3f scale, as in the original code
 #include <it/item.h>
 #include <so/sound/so_sound_module_impl.h>
+#include <so/collision/so_collision_shield_module_impl.h>
+#include <so/collision/so_collision_search_module_impl.h>
 #include <so/collision/so_collision_hit_module_impl.h>
 #include <mt/mt_prng.h>
+#include <math.h>
+#include <so/ground/so_ground_util.h>
 #include <mt/mt_common.h>
 #include <so/area/so_area_enviroment_element_checker_impl.h>
 #include <so/so_slow.h>
 #include <cm/cm_camera_controller.h>
 #include <gf/gf_task.h>
+#include <ft/ft_util.h>
+#include <gf/gf_task_scheduler.h>
 #include <ft/ft_manager.h>
 #include <so/so_external_value_accesser.h>
 #include <nw4r/g3d/g3d_scnmdl.h>
@@ -50,6 +56,15 @@ struct ItValueAccesserHyp {
 extern char itValueAccesserGlobalStorage[];
 #define itValueAccesserGlobal (*reinterpret_cast<ItValueAccesserHyp*>(itValueAccesserGlobalStorage))
 
+// HYPOTHESIS: the item's collision catch module (0x1FDC): only the slot inhaled uses is known.
+struct soCatchModuleHyp {
+    virtual void unk08();
+    virtual void unk0C();
+    virtual void unk10();
+    virtual void unk14();
+    virtual void clearAll();
+};
+
 // HYPOTHESIS: the glow module (module enumeration +0xC8) has a getter and a setter for the glow attack at 0x18/0x1C.
 struct soGlowModuleHyp {
     virtual void unk08();
@@ -68,7 +83,7 @@ struct soItemAttackModuleHyp {
     virtual void unk14();
     virtual void unk18();
     virtual void unk1C();
-    virtual void unk20();
+    virtual void sleep(bool sleep);
     virtual void unk24();
     virtual void unk28();
     virtual void unk2C();
@@ -106,10 +121,19 @@ struct soItemAttackModuleHyp {
     virtual void setSpeed(Vec2f* speed);
     virtual void unkB0();
     virtual void setPowerMulStatus(float powerMulStatus);
-    virtual void unkB8();
+    virtual float getPowerMulStatus();
     virtual void setSpeedPowerAdd(float);
     virtual float getSpeedPowerCoef();
     virtual void setSpeedPowerMul(float);
+};
+
+// HYPOTHESIS: the link event (kind 0x3F) the item sends to its holder when it hit something: the item and its strongest
+// attack power.
+struct soLinkItemAttackEventArgs : public soLinkEventArgs {
+    BaseItem* m_item;
+    float m_power;
+    bool m_unk10;
+    inline soLinkItemAttackEventArgs(BaseItem* item, float power) : soLinkEventArgs(0x3F), m_item(item), m_power(power), m_unk10(false) { }
 };
 
 // MATCH-ONLY: stands in for soTeamModuleImpl (0x44 bytes), which is only known as an opaque builder type: the overrides
@@ -564,8 +588,7 @@ bool BaseItem::isCanInhaled() {
     if (isHaved() || !m_customizer->isSafe(this)) {
         return false;
     }
-    u32 flags = static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8);
-    return (flags & 0x1000000) == 0;
+    return !(static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x1000000);
 }
 
 Vec3f BaseItem::getStartInhaledPos() {
@@ -1509,6 +1532,461 @@ void BaseItem::updateNodeSRT() {
         v->model.setNodeRotate(0, &facing);
         v->model.setNodeRotate(node, &rot);
     }
+}
+
+// Kirby's inhale: a free item that may be inhaled is pulled to the given position; on the first call it is made
+// inert (no collision, no correction, no hit/attack boxes, air situation) and its start position is remembered.
+bool BaseItem::inhaled(float step, Vec3f* pos) {
+    ItemView* v = reinterpret_cast<ItemView*>(this);
+    int held;
+    if (moduleAccesser.getStatusModule().getStatusKind() == 2) {
+        held = 1;
+    } else {
+        held = v->link.isLink(Link::No_Have);
+    }
+    u32 canInhale;
+    if (held != 0 || !m_customizer->isSafe(this)) {
+        canInhale = 0;
+    } else {
+        canInhale = !(static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x1000000);
+    }
+    if (canInhale == 0) {
+        return false;
+    }
+    soWorkManageModuleImpl* work = &v->workManage;
+    float count = work->getFloat(Instance::Work::Float_Inhaled_Count);
+    if (count < 0.0f) {
+        m_startInhaledPos = v->posture.getPos();
+        m_moduleAccesser->getStopModule().setSpecialStop(1);
+        v->area.setWhole(0);
+        v->ground.setCorrect(static_cast<soGroundShapeImpl::CorrectKind>(0), 0);
+        v->ground.setGrCollisionMode(false);
+        embedded<soSituationModule>(this, kSituationModule).setKind(Situation_Air, false);
+        v->hit.setWhole(3, 0);
+        v->attack.sleep(true);
+        embedded<soCollisionShieldModuleImpl>(this, 0x1D6C).clearAll();
+        embedded<soCollisionShieldModuleImpl>(this, 0x20D0).clearAll();
+        embedded<soCatchModuleHyp>(this, 0x1FDC).clearAll();
+        embedded<soCollisionSearchModuleImpl>(this, 0x1AA0).clearAll();
+    } else {
+        v->ground.setCorrect(static_cast<soGroundShapeImpl::CorrectKind>(0), 0);
+    }
+    work->setFloat(count + step, Instance::Work::Float_Inhaled_Count);
+    v->posture.setPos(pos);
+    return true;
+}
+
+// Advances the scale animation one step (when the game is estimating a frame) and applies the scale to the model node.
+void BaseItem::updateScaleAnim() {
+    ItemView* v = reinterpret_cast<ItemView*>(this);
+    soWorkManageModuleImpl* work = &v->workManage;
+    v->status.getStatusKind();
+    int type = work->getInt(Instance::Work::Int_Scale_Anim_Type);
+    if (type != Scale::Anim_None) {
+        int node = work->getInt(Instance::Work::Int_Scale_Anim_Node_Index);
+        float scale = work->getFloat(Instance::Work::Float_Scale_Anim_Now);
+        u32 counter = work->getInt(Instance::Work::Int_Scale_Anim_Counter);
+        u32 limit = work->getInt(Instance::Work::Int_Scale_Anim_Counter_Limit);
+        if (limit == 0) {
+            limit = 1;
+        }
+        if (soSlow::getInstance()->isEstimate() == 1) {
+            work->setInt(counter + 1, Instance::Work::Int_Scale_Anim_Counter);
+        }
+        float low = work->getFloat(Instance::Work::Float_Scale_Anim_Min);
+        float high = work->getFloat(Instance::Work::Float_Scale_Anim_Max);
+        if (type != Scale::Anim_Interpolate) {
+            if (type < 3) {
+                if (type == Scale::Anim_Loop) {
+                    scale = static_cast<float>(cos(static_cast<float>(static_cast<int>(counter)) * 0.7f)) * 0.3f + 0.9f;
+                } else if (0 < type) {
+                    float rate = static_cast<float>(static_cast<int>(counter)) * 0.05f;
+                    if (rate < 1.0f) {
+                        rate = 1.0f - (1.0f - rate) * (1.0f - rate);
+                    }
+                    scale = rate * 0.5f + 0.5f;
+                    if (1.0f <= scale) {
+                        work->setInt(Scale::Anim_None, Instance::Work::Int_Scale_Anim_Type);
+                        work->setInt(0, Instance::Work::Int_Scale_Anim_Counter);
+                        scale = 1.0f;
+                    }
+                }
+            }
+        } else {
+            float rate = static_cast<float>(static_cast<int>(counter)) / static_cast<float>(static_cast<int>(limit));
+            scale = low * (1.0f - rate) + high * rate;
+        }
+        float base = scale;
+        if (node == 0) {
+            scale = base * v->posture.getScale();
+        }
+        Vec3f nodeScale;
+        nodeScale.m_x = nodeScale.m_y = nodeScale.m_z = scale;
+        moduleAccesser.getModelModule().setNodeScale(node, &nodeScale);
+        work->setFloat(base, Instance::Work::Float_Scale_Anim_Now);
+        if (static_cast<int>(limit) >= 0 && static_cast<int>(limit) <= static_cast<int>(counter)) {
+            work->setInt(Scale::Anim_Keep, Instance::Work::Int_Scale_Anim_Type);
+            work->setInt(0, Instance::Work::Int_Scale_Anim_Counter);
+            work->setInt(-1, Instance::Work::Int_Scale_Anim_Counter_Limit);
+        }
+    }
+}
+
+// Items that end up outside the dead area (or too high, or far away in the "Free" mode) are lost; the mode comes from the
+// item manager (the field at +0x50) and the item parameters.
+void BaseItem::processGameProc() {
+    ItemView* v = reinterpret_cast<ItemView*>(this);
+    m_customizer->onProcessGameProc(this);
+    if (soSlow::getInstance()->isEstimate() == 1 && moduleAccesser.getStatusModule().getStatusKind() != 0 &&
+        embedded<soSituationModule>(this, kSituationModule).getKind() != Situation_Outfield) {
+        soWorkManageModuleImpl* work = &v->workManage;
+        bool checked = true;
+        if (*reinterpret_cast<int*>(reinterpret_cast<u8*>(itManager::getInstance()) + 0x50) != 1 &&
+            !work->isFlag(Instance::Work::Flag_Vanish)) {
+            checked = false;
+        }
+        int deadMode;
+        if (checked && m_customizer->isSafe(this) &&
+            (deadMode = itValueAccesserGlobal.getInt(&moduleAccesser, 0x5B74, 0)) != 0 &&
+            moduleAccesser.getStatusModule().getStatusKind() != 6) {
+            Vec3f posCheck = v->posture.getPos();
+            int dead = soGroundUtil::checkDeadArea(&posCheck, 0.0f, 0.0f);
+            if (dead == 0 && deadMode != 3) {
+                dead = -1;
+            }
+            bool outside = false;
+            if (dead != -1 || v->posture.getPos().m_y > 300.0f) {
+                outside = true;
+            }
+            if (outside) {
+                int held;
+                if (moduleAccesser.getStatusModule().getStatusKind() == 2) {
+                    held = 1;
+                } else {
+                    held = v->link.isLink(Link::No_Have);
+                }
+                if (held == 0) {
+                    bool keep = false;
+                    if (deadMode == 2 && work->getInt(0x1000000A) > 0) {
+                        keep = true;
+                    }
+                    if (!keep) {
+                        v->status.changeStatusRequest(6, &moduleAccesser);
+                        return;
+                    }
+                }
+            }
+        }
+        if (*reinterpret_cast<int*>(reinterpret_cast<u8*>(itManager::getInstance()) + 0x50) == 2) {
+            Vec3f far = v->posture.getPos();
+            if (4096.0f < static_cast<float>(__fabs(far.m_x)) || 4096.0f < static_cast<float>(__fabs(far.m_y)) ||
+                4096.0f < static_cast<float>(__fabs(far.m_z))) {
+                v->status.changeStatusRequest(6, &moduleAccesser);
+            }
+        }
+    }
+}
+
+// The position pass of the item: runs the customizer, counts down the timers kept in the work values (the two animation
+// timers, the life time, the reflect counter) and decides when a reflecting item is lost.
+void BaseItem::processFixPosition() {
+    ItemView* v = reinterpret_cast<ItemView*>(this);
+    if (moduleAccesser.getStatusModule().getStatusKind() == 0) {
+        StageObject::processFixPosition();
+        return;
+    }
+    if (!m_customizer->onProcessFixPosition(this)) {
+        return;
+    }
+    soWorkManageModuleImpl* work = &v->workManage;
+    if (soSlow::getInstance()->isAdjust() == 1) {
+        v->kinetic.updateGroundFlag(&moduleAccesser, true);
+    }
+    if (soSlow::getInstance()->isEstimate() == 1) {
+        int timer = work->getInt(0x1000000B);
+        if (0 < timer) {
+            int left = timer - 1;
+            work->setInt(left, 0x1000000B);
+            if (left == 0) {
+                work->setInt(1, Instance::Work::Int_Bound_Flag);
+                v->animCmd.resetInterpreter2(0.0f, 5, &moduleAccesser, 2);
+                v->animCmd.interpretCmd1(2.0f, 5, &moduleAccesser);
+            }
+        }
+        timer = work->getInt(0x1000000C);
+        if (0 < timer) {
+            int left = timer - 1;
+            work->setInt(left, 0x1000000C);
+            if (left == 0) {
+                work->setInt(2, Instance::Work::Int_Bound_Flag);
+                v->animCmd.resetInterpreter2(0.0f, 5, &moduleAccesser, 2);
+                v->animCmd.interpretCmd1(2.0f, 5, &moduleAccesser);
+            }
+        }
+        int frames = work->getInt(0x1000001C);
+        if (0 < frames + 1) {
+            work->setInt(frames + 1, 0x1000001C);
+        }
+        if (work->isFlag(Instance::Work::Flag_Reflect_Ground)) {
+            int reflectCount = work->getInt(0x10000017);
+            reflectCount = reflectCount + 1;
+            work->setInt(reflectCount, 0x10000017);
+            if ((static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x4000) == 0) {
+                v->animCmd.resetInterpreter2(0.0f, 4, &moduleAccesser, 1);
+            }
+            if (moduleAccesser.getStatusModule().getStatusKind() == 5) {
+                u32 scaleBits = static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x10000F;
+                u32 scaled = -scaleBits >> 31;
+                if (m_kind == 0x57) {
+                    scaled = 0;
+                }
+                if (scaled != 0) {
+                    float power = v->attack.getPowerMulStatus();
+                    float mul = itValueAccesserGlobal.getFloat(&moduleAccesser, 0xD62, 0);
+                    v->attack.setPowerMulStatus(power * mul);
+                }
+                if ((static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x815D01) == 0) {
+                    int limit = itValueAccesserGlobal.getInt(&moduleAccesser, 0x59DA, 0);
+                    if (limit <= reflectCount) {
+                        v->status.changeStatusRequest(6, &moduleAccesser);
+                        return;
+                    }
+                    if (1 < reflectCount) {
+                        int chance = itValueAccesserGlobal.getInt(&moduleAccesser, 0x59DB, 0);
+                        if (randi(100) < chance) {
+                            v->status.changeStatusRequest(6, &moduleAccesser);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    StageObject::processFixPosition();
+    if (m_alive) {
+        updateScaleAnim();
+        int life;
+        if (soSlow::getInstance()->isEstimate() == 1 && (life = work->getInt(0x1000000A)) > 0) {
+            life = life - 1;
+            work->setInt(life, 0x1000000A);
+            if (moduleAccesser.getStatusModule().getStatusKind() != 2) {
+                int a = itValueAccesserGlobal.getInt(&moduleAccesser, 0x59DD, 0);
+                int b = itValueAccesserGlobal.getInt(&moduleAccesser, 0x59DC, 0);
+                int diff = life - (b - a);
+                if (life == 0) {
+                    v->hit.setWhole(0, 0);
+                    diff = 0;
+                }
+                if (diff == 0 && v->areaInstances.size() > 2) {
+                    v->area.enableArea(2, *(reinterpret_cast<u8*>(this) + kPickUpAreaRequested), -1);
+                }
+            }
+        }
+    }
+}
+
+// A search box (the item looks for targets) touched something: remember what it touched, except the hits that must be
+// ignored (the same shield / reflector hit again, or an attack that does no damage and cannot be countered).
+// HYPOTHESIS: the attack data is only read through the offsets (+0 power, +0x38 bit 5 flag).
+void BaseItem::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    u8 kind = *(reinterpret_cast<u8*>(collisionLog) + 0x21);
+    if (kind == 3) {
+        if (static_cast<u32>(m_15672) == static_cast<u32>(collisionLog->m_taskId)) {
+            return;
+        }
+    } else if (kind == 2) {
+        if (static_cast<u32>(m_15676) == static_cast<u32>(collisionLog->m_taskId)) {
+            return;
+        }
+    } else if (kind == 0) {
+        gfTask* task = gfTaskScheduler::getInstance()->getTaskById(
+            static_cast<gfTask::Category>(*(reinterpret_cast<u8*>(collisionLog) + 0x22)), collisionLog->m_taskId);
+        if (task != NULL) {
+            StageObject& attacker = dynamic_cast<StageObject&>(*task);
+            soCollisionAttackModule* attack = soExternalValueAccesser::getCollisionAttackModule(&attacker);
+            int* data = reinterpret_cast<int*>(attack->getData(collisionLog->m_collsionIndex, collisionLog->m_isAbsolute));
+            if (data[0] <= 0 && ((static_cast<u32>(data[14]) >> 5) & 1) != 0) {
+                return;
+            }
+        }
+    }
+    if (m_customizer->onNotifyEventCollisionSearch(this, collisionLog)) {
+        kind = *(reinterpret_cast<u8*>(collisionLog) + 0x21);
+        int taskId = collisionLog->m_taskId;
+        u8 index = collisionLog->m_collsionIndex;
+        float posX = collisionLog->m_pos.m_x;
+        float posY = collisionLog->m_pos.m_y;
+        float posZ = collisionLog->m_pos.m_z;
+        m_searchHitTaskId = taskId;
+        searchHitCollisionIndex = index;
+        m_searchHitPos.m_x = posX;
+        m_searchHitPos.m_y = posY;
+        m_searchHitPos.m_z = posZ;
+        m_15672 = (kind == 3) ? taskId : -1;
+        kind = *(reinterpret_cast<u8*>(collisionLog) + 0x21);
+        if (kind == 2) {
+            m_15676 = m_searchHitTaskId;
+            m_15681 = ftUtil::isCounterShield(collisionLog);
+        } else {
+            m_15676 = -1;
+            m_15681 = 0;
+        }
+    }
+}
+
+// After the search box found something: depending on what it touched (a shield, a reflector, a plain target) the item is
+// lost, knocked back or reflected. Returns true when the item reacted.
+bool BaseItem::notifyEventCollisionSearchCheck() {
+    ItemView* v = reinterpret_cast<ItemView*>(this);
+    if (static_cast<u32>(m_searchHitTaskId) == 0xFFFFFFFF) {
+        return false;
+    }
+    u32 flags = embedded<soCollisionSearchModuleImpl>(this, 0x1AA0).isInflict();
+    if ((flags & 0x10) != 0) {
+        v->status.changeStatusRequest(6, &moduleAccesser);
+        return true;
+    }
+    if (static_cast<u32>(m_15672) != 0xFFFFFFFF && (flags & 8) != 0) {
+        if (m_moduleAccesser->getReflectModule().isReflect() && onReflect()) {
+            return true;
+        }
+    } else if (static_cast<u32>(m_15676) != 0xFFFFFFFF && (flags & 4) != 0) {
+        if (m_15681 != 0 && itValueAccesserGlobal.getInt(&moduleAccesser, 0x5B73, 0) == 3 &&
+            (static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x8000) != 0) {
+            v->workManage.onFlag(0x22000005);
+            if (m_customizer->onNotifyEventCollisionSearchCheck(this, m_searchHitTaskId, searchHitCollisionIndex, &m_searchHitPos)) {
+                return true;
+            }
+        }
+        if (onShield()) {
+            return true;
+        }
+    } else {
+        v->workManage.onFlag(0x22000005);
+        if (m_customizer->onNotifyEventCollisionSearchCheck(this, m_searchHitTaskId, searchHitCollisionIndex, &m_searchHitPos)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// The item hit a reflector: it turns around, takes over the team and owner of the reflector (the same linking as when
+// it is thrown), mirrors its speed and acceleration and may have its life time scaled. Mode 2 of the item parameters
+// makes it vanish instead of flying back.
+bool BaseItem::onReflect() {
+    ItemView* v = reinterpret_cast<ItemView*>(this);
+    soWorkManageModuleImpl* work = &v->workManage;
+    int mode = itValueAccesserGlobal.getInt(&moduleAccesser, 0x5B72, 0);
+    if (mode != 0) {
+        work->offFlag(0x22000003);
+        m_moduleAccesser->getPostureModule().reverseLr();
+        m_moduleAccesser->getPostureModule().updateRotYLr();
+        int team = m_moduleAccesser->getReflectModule().getTeam();
+        int hitTeamNo = m_moduleAccesser->getTeamModule().getTeam()->getNo();
+        int teamNo = m_moduleAccesser->getTeamModule().getHitTeam()->getNo();
+        if (hitTeamNo == teamNo) {
+            m_moduleAccesser->getTeamModule().setHitTeam(team);
+        }
+        m_moduleAccesser->getTeamModule().setTeam(team, true);
+        int owner = m_moduleAccesser->getReflectModule().getTaskId();
+        v->team.setTeamOwnerId(owner);
+        linkTeamOwner(this, owner);
+        Vec3f mirror;
+        mirror.m_z = 1.0f;
+        mirror.m_x = -1.0f;
+        mirror.m_y = 1.0f;
+        m_moduleAccesser->getKineticModule().mulSpeed(&mirror, soKineticEnergy::AttributeFlag(1));
+        m_moduleAccesser->getKineticModule().mulAccel(&mirror, soKineticEnergy::AttributeFlag(1));
+        if ((static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x4000) != 0 &&
+            *reinterpret_cast<int*>(reinterpret_cast<u8*>(this) + 0x2124) < 5 &&
+            (static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0xC00) == 0) {
+            u32 baseLife = work->getInt(0x10000006);
+            int life = work->getInt(0x10000009);
+            if (0 < static_cast<int>(baseLife) && 0 < life) {
+                float lifeMul = m_moduleAccesser->getReflectModule().getLifeMul();
+                int scaled = static_cast<int>(static_cast<float>(static_cast<int>(baseLife)) * lifeMul);
+                if (scaled < 1) {
+                    scaled = 1;
+                }
+                work->setInt(scaled, 0x10000009);
+            }
+        }
+        *reinterpret_cast<int*>(reinterpret_cast<u8*>(this) + 0x2124) += 1;
+        if (mode == 2) {
+            v->status.changeStatusRequest(7, &moduleAccesser);
+            return true;
+        }
+        if (m_customizer->onReflect(this)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// After the attack boxes hit something: the hit stop of the target is shared with the holder, the item may bounce
+// (shield / reflector) or be lost, as the item parameters say. Returns true when the item reacted.
+bool BaseItem::notifyEventCollisionAttackCheck(u32 hitMask) {
+    ItemView* v = reinterpret_cast<ItemView*>(this);
+    if (static_cast<u32>(m_attackHitTaskId) == 0xFFFFFFFF) {
+        return false;
+    }
+    soWorkManageModuleImpl* work = &v->workManage;
+    if (m_strongestAttackPower != 0.0f) {
+        int hitMode = itValueAccesserGlobal.getInt(&moduleAccesser, 0x5B75, 0);
+        if (hitMode != 0 && 0 < m_hitStopFrames) {
+            m_moduleAccesser->getStopModule().setHitStopFrame(m_hitStopFrames, 0);
+            if (hitMode == 2) {
+                int held;
+                if (moduleAccesser.getStatusModule().getStatusKind() == 2) {
+                    held = 1;
+                } else {
+                    held = v->link.isLink(Link::No_Have);
+                }
+                if (held != 0) {
+                    v->link.setParentHitStopFrame(Link::No_Have, m_hitStopFrames, 0);
+                    soLinkItemAttackEventArgs args(this, m_strongestAttackPower);
+                    v->link.sendEventParents(Link::No_Have, args);
+                }
+            }
+        }
+        if ((hitMask & 2) != 0) {
+            work->onFlag(0x22000003);
+            if (moduleAccesser.getStatusModule().getStatusKind() == 5 &&
+                (static_cast<u32>(itValueAccesserGlobal.getInt(&moduleAccesser, 0x5B6C, 0)) & 0x10) != 0) {
+                v->kinetic.characterBound(&moduleAccesser, false);
+            }
+        }
+    }
+    m_customizer->onNotifyEventCollisionAttackCheck(this, m_attackHitTaskId);
+    if (moduleAccesser.getStatusModule().getStatusKind() == 2 || moduleAccesser.getStatusModule().getStatusKind() == 7) {
+        return false;
+    }
+    {
+        if ((hitMask & 0x10) != 0) {
+            v->status.changeStatusRequest(6, &moduleAccesser);
+            return true;
+        }
+        if ((hitMask & 4) != 0) {
+            if (onShield()) {
+                return true;
+            }
+        } else if ((hitMask & 1) != 0) {
+            if (moduleAccesser.getStatusModule().getStatusKind() == 5 ||
+                (static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x4000) != 0) {
+                if (onShield()) {
+                    return true;
+                }
+                u32 flags = static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8);
+                if ((flags & 0x10000F) != 0) {
+                    v->kinetic.characterBound(&moduleAccesser, false);
+                }
+            }
+        } else if ((hitMask & 8) != 0 && m_moduleAccesser->getReflectModule().isReflect() == 1 && onReflect()) {
+            return true;
+        }
+        return false;
+    }
+    return false;
 }
 
 void BaseItem::setModelScale(float scale) {
