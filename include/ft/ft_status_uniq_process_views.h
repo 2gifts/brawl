@@ -16,7 +16,8 @@ public:
     virtual void pad1();
     virtual void pad2();
     virtual void pad3();
-    virtual void pad4();
+    // HYPOTHESIS: slot 0x18 stores a value (a work/task id) for the link index.
+    virtual void slot18(int index, int value);
     virtual void pad5();
     virtual void pad6();
     virtual void pad7();
@@ -53,7 +54,8 @@ public:
     virtual void pad38();
     virtual int slotA4(int index);
     virtual float slotA8(int index);
-    virtual void pad41();
+    // HYPOTHESIS: slot 0xAC returns the link offset (a Vec2f) for the link index.
+    virtual Vec2f slotAC(int index);
     virtual void pad42();
     virtual void pad43();
     virtual void pad44();
@@ -88,7 +90,8 @@ public:
     virtual void pad72();
     virtual void pad73();
     virtual void pad74();
-    virtual void pad75();
+    // HYPOTHESIS: slot 0x134 takes the link index, two zero arguments and two flags (used when a link is dissolved).
+    virtual void slot134(int index, int a, int b, bool c, bool d);
     virtual void pad76();
     virtual void pad77();
     virtual void pad78();
