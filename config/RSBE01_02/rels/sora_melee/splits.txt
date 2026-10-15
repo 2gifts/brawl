@@ -5375,6 +5375,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_rewind.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_reach.cpp:
 	.text       start:0x0018AA38 end:0x0018AE70
 	.ctors      start:0x000001EC end:0x000001F0
+	.rodata     start:0x00002530 end:0x00002538
+	.data       start:0x00031748 end:0x000317C8
+	.bss        start:0x00004E30 end:0x00004E40
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_failure.cpp:
 	.text       start:0x0018AE70 end:0x0018AED8
