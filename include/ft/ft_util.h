@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mt/mt_vector.h>
 #include <types.h>
 
 class soModuleAccesser;
@@ -64,6 +65,26 @@ public:
     // Ceiling correction restores the supplied facing before adjusting contact.
     // HYPOTHESIS: formal bool/float order is inferred from callers; their register classes are verified.
     static void adjustCeil(soModuleAccesser*, bool, float);
+
+    // Rotates the model node 0x12E around the X axis.
+    static void setXAngle(soModuleAccesser* acc, float angle);
+    static float setDamageFlyRollAngle(soModuleAccesser* acc);
+    static float setAngleWallNormal(soModuleAccesser* acc, float lr);
+    static bool isBodyUp(soModuleAccesser* acc);
+
+    // Controller rumble. The strength grows with the damage taken / the attack power dealt.
+    static void setDamageRumble(soModuleAccesser* acc, float damage);
+    static void setAttackRumble(soModuleAccesser* acc, float power);
+
+    // Main stick deflection past a threshold, rescaled to 0..1: out->m_x is the rate and out->m_y the direction
+    // (1 or -1; both 0 inside the threshold). HYPOTHESIS: the layout of the result.
+    static void getStickXRate(soModuleAccesser* acc, float threshold, Vec2f* out);
+    static void getStickYRate(soModuleAccesser* acc, float threshold, Vec2f* out);
+
+    static void setShieldSetoffSpeed(soModuleAccesser* acc, float power, float lr);
+
+    // Scales a value by a factor and exponent (see the definition). Negative exponents invert the scaling.
+    static float calcScalingParam(float value, float factor, float exponent);
 
     // Global multipliers read from the common constants.
     static float getAttackReactionMul(soModuleAccesser* acc);

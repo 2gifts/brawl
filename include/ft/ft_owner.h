@@ -51,6 +51,8 @@ public:
     void setStartLr(float lr);
     void setTeam(int team);
     s32 getTeam();
+    // Adventure mode (Subspace Emissary) unit kind of the owner; 1 is the main unit. HYPOTHESIS: the meaning of the values.
+    int getAdventureUnitKind();
     u8 getFighterColor();
     void setPointTeam(int pointTeam);
     int setDeadCount(int deadCount);
