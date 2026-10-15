@@ -10851,11 +10851,11 @@ mo_melee/sora_melee/ft/ft_yoshi_status_uniq_process_special_nswallow.cpp:
 	.ctors      start:0x00000394 end:0x00000398
 
 mo_melee/sora_melee/wn/wn_yoshi_tamago.cpp:
-	.text       start:0x00307E00 end:0x0030B9F0
+	.text       start:0x00307E00 end:0x0030BB88
 	.ctors      start:0x00000398 end:0x0000039C
 
 mo_melee/sora_melee/wn/wn_kirby_pikmin.cpp:
-	.text       start:0x0030BB88 end:0x0030F638
+	.text       start:0x0030BB88 end:0x0030F7D0
 	.ctors      start:0x0000039C end:0x000003A0
 
 mo_melee/sora_melee/ft/ft_kirby_copy_ability_id_converter.cpp:
@@ -10938,7 +10938,7 @@ mo_melee/sora_melee/ft/ft_ness_status_uniq_process_special_n.cpp:
 	.ctors      start:0x000003DC end:0x000003E0
 
 mo_melee/sora_melee/wn/wn_ness_pkflash.cpp:
-	.text       start:0x0032A2BC end:0x0032DB78
+	.text       start:0x0032A2BC end:0x0032DD00
 	.ctors      start:0x000003E0 end:0x000003E4
 
 mo_melee/sora_melee/wn/wn_ness_pkflash_status_uniq_process_move.cpp:
@@ -11085,7 +11085,7 @@ mo_melee/sora_melee/ft/ft_lucas_status_uniq_process_special_n.cpp:
 	.ctors      start:0x0000046C end:0x00000470
 
 mo_melee/sora_melee/wn/wn_lucas_pkflash.cpp:
-	.text       start:0x00361F48 end:0x003639E0
+	.text       start:0x00361F48 end:0x00363B68
 	.ctors      start:0x00000470 end:0x00000474
 
 mo_melee/sora_melee/wn/wn_lucas_pkflash_status_uniq_process_move.cpp:
@@ -11324,7 +11324,7 @@ mo_melee/sora_melee/ft/ft_dedede_status_uniq_process_special_nswallow.cpp:
 	.ctors      start:0x000004C0 end:0x000004C4
 
 mo_melee/sora_melee/wn/wn_dedede_starmissile.cpp:
-	.text       start:0x00398108 end:0x0039A03C
+	.text       start:0x00398108 end:0x0039A1D4
 	.ctors      start:0x000004C4 end:0x000004C8
 
 mo_melee/sora_melee/wn/wn_dedede_starmissile_status_uniq_process.cpp:

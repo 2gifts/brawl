@@ -8,7 +8,7 @@
 #include <wn/wn_class_info.h>
 
 // HYPOTHESIS: the blaster class infos fetch their article data through g_ftCommonDataAccesser (the module
-// map names the call targets getWeaponData13/48/49/53/54/56/57/101/109/144, all in a 151-entry overload family whose C++
+// map names the call targets getWeaponData6/13/48/49/53/54/56/57/66/74/91/101/109/121/144, all in a 151-entry overload family whose C++
 // signature is not recoverable), so the accessers get referenced by their unmangled names.
 extern "C" void* fn_27_148414(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_14875C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
@@ -20,6 +20,11 @@ extern "C" void* fn_27_147E6C(const ftCommonDataAccesser* accesser, s32 subKind,
 extern "C" void* fn_27_1492F8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1490FC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_149A64(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148AB0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_147C88(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_14959C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148E54(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148910(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 // The data types the dispatch below selects on; the instantiating unit includes its article header,
 // which declares the struct with this name (the layout is not needed here, only the pointer type).
@@ -33,6 +38,11 @@ struct wnLinkBowArrowData;
 struct wnSamusCShotData;
 struct wnPitBowArrowData;
 struct wnToonLinkBowArrowData;
+struct wnYoshiTamagoData;
+struct wnKirbyPikminData;
+struct wnNessPKFlashData;
+struct wnLucasPKFlashData;
+struct wnDededeStarmissileData;
 
 // Data-type dispatch so the template below picks the right family's accesser; extend per blaster family as
 // its data class is reconstructed. HYPOTHESIS: helper name; it is inline and leaves no symbol.
@@ -66,11 +76,26 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnToonLinkBowArrowData*) {
     return fn_27_149A64(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnYoshiTamagoData*) {
+    return fn_27_148AB0(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnKirbyPikminData*) {
+    return fn_27_147C88(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnNessPKFlashData*) {
+    return fn_27_14959C(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnLucasPKFlashData*) {
+    return fn_27_148E54(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnDededeStarmissileData*) {
+    return fn_27_148910(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
 
 // Class info for one article kind: registers itself in the class info table during static initialization
 // and builds the article array when the article manager asks for it.
 //   K: article kind (30/31 Fox, 35/36 Falco, 38/39 Wolf; blaster first, bullet second; plus 5 Link,
-//      83 Samus, 91 Pit, 140 Toon Link one-shot articles).
+//      83 Samus, 91 Pit, 140 Toon Link one-shot articles, 53/60/77/98/102/117/150 single-kind articles).
 //   T: article class, D: the data type its constructor consumes.
 // HYPOTHESIS: template spelling; the data strings prove the instantiation
 // wnClassInfoImpl<31, wnFoxBlasterBullet, wnFoxBlasterBulletData>.
