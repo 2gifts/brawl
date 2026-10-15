@@ -4903,6 +4903,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_damage_fall.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_fly.cpp:
 	.text       start:0x00167D60 end:0x00167EF4
 	.ctors      start:0x000000BC end:0x000000C0
+	.data       start:0x0002EB48 end:0x0002EBB8
+	.bss        start:0x00004908 end:0x00004918
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_glide.cpp:
 	.text       start:0x00167EF4 end:0x00168AA8
@@ -4942,6 +4944,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_guard_func.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_guard_on.cpp:
 	.text       start:0x0016A660 end:0x0016A838
 	.ctors      start:0x000000E0 end:0x000000E4
+	.data       start:0x0002EF30 end:0x0002EFA0
+	.bss        start:0x00004998 end:0x000049B0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_guard.cpp:
 	.text       start:0x0016A838 end:0x0016A904
@@ -4977,6 +4981,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_damage_fly.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_damage_fly_roll.cpp:
 	.text       start:0x0016D8A8 end:0x0016DA84
 	.ctors      start:0x000000F8 end:0x000000FC
+	.rodata     start:0x000021C8 end:0x000021D0
+	.data       start:0x0002F238 end:0x0002F2D0
+	.bss        start:0x00004A10 end:0x00004A20
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_damage_fly_reflect.cpp:
 	.text       start:0x0016DA84 end:0x0016E1F4
@@ -4985,6 +4992,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_damage_fly_reflect.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_down.cpp:
 	.text       start:0x0016E1F4 end:0x0016E314
 	.ctors      start:0x00000100 end:0x00000104
+	.data       start:0x0002F368 end:0x0002F3D8
+	.bss        start:0x00004A30 end:0x00004A40
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_down_damage.cpp:
 	.text       start:0x0016E314 end:0x0016E5A0
@@ -4997,6 +5006,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_down_reflect.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_down_spot.cpp:
 	.text       start:0x0016EA10 end:0x0016EB78
 	.ctors      start:0x0000010C end:0x00000110
+	.data       start:0x0002F500 end:0x0002F578
+	.bss        start:0x00004A60 end:0x00004A70
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_shield_break_fly.cpp:
 	.text       start:0x0016EB78 end:0x0016ECC8
