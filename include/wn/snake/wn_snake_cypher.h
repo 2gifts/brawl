@@ -6,6 +6,8 @@
 #include <wn/wn_weapon_builder.h>
 
 WN_STATUS_PROC_VECTOR_DEFAULT_CTOR(4);
+// The hit part vector is built by the sora_melee constructor.
+FT_DOL_ARRAY_VECTOR(soCollisionHitPart, 1);
 
 // The parameter block of the article (reached through the data block at +0x34).
 // HYPOTHESIS: meaning of the fields.

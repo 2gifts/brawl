@@ -86,7 +86,6 @@ FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soKineticEnergy*>, 8);
 #ifdef WN_SHARED_ARRAYS_1
 // These article builders call sora_melee-owned constructors and virtual methods.
 FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 1);
-FT_DOL_ARRAY_VECTOR(soCollisionHitPart, 1);
 // The status pointer vector uses the no-argument constructor, not the size overload.
 template <>
 class soArrayVector<soStatusUniqProcess*, 1> : public soArrayVectorAbstract<soStatusUniqProcess*> {
