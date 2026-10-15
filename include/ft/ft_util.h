@@ -51,6 +51,9 @@ public:
     // Whether the fighter is treading on (stomping) the task in its work int; flag 0 is the ground variant.
     static bool checkTread(soModuleAccesser* acc, int flag);
 
+    // Water entry splash (effect, sound and rumble) at the given position.
+    static void setWaterDiveEffect(soModuleAccesser* acc, Vec3f* position);
+
     // Cloud (pass-through platform) handling while airborne; names from the sora_melee map.
     static void setCloudThroughCheck(soModuleAccesser* acc);
     // Touch mask of the fighter's ground shape plus position/normal of the first touched surface.

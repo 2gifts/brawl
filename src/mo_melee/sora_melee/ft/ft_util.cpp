@@ -304,6 +304,40 @@ bool ftUtil::checkTread(soModuleAccesser* acc, int flag) {
     return false;
 }
 
+// Splash when the fighter dives into water at the given position: the water effect, a sound and a rumble picked by the
+// common int constant 0x59E8 (the splash size class).
+// HYPOTHESIS: effect 0x4E / sound IDs 0xBA-0xBC / rumble IDs identities; the second constant read (0x59EA) is unused.
+void ftUtil::setWaterDiveEffect(soModuleAccesser* acc, Vec3f* position) {
+    Vec3f rotation(0.0f, 0.0f, 0.0f);
+    soEffectModule& effect = acc->getEffectModule();
+    effect.req(static_cast<EfID>(0x4E), position, &rotation, soValueAccesser::getConstantFloat(acc, 0xBE9, 0), 0, -1);
+    int size = soValueAccesser::getConstantInt(acc, 0x59E8, 0);
+    switch (size) {
+    case 0:
+        acc->getSoundModule().playSE(static_cast<SndID>(0xBA), false, false, 0);
+        break;
+    case 1:
+        acc->getSoundModule().playSE(static_cast<SndID>(0xBB), false, false, 0);
+        break;
+    case 2:
+        acc->getSoundModule().playSE(static_cast<SndID>(0xBC), false, false, 0);
+        break;
+    }
+    soValueAccesser::getConstantInt(acc, 0x59EA, 0);
+    switch (size) {
+    case 0:
+    case 1:
+        acc->getControllerModule().setRumble(0x17, 0, false, -1);
+        break;
+    case 2:
+        acc->getControllerModule().setRumble(4, 0, false, -1);
+        break;
+    case 3:
+        acc->getControllerModule().setRumble(0xE, 0, false, -1);
+        break;
+    }
+}
+
 bool ftUtil::isItemShootStatus(soModuleAccesser*, int status) {
     switch (status) {
     case 0xA4:
