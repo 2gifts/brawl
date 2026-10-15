@@ -26,11 +26,9 @@ void ftStatusUniqProcessBuryWait::exitStatus(soModuleAccesser* moduleAccesser, i
     soGroundModule* ground = &moduleAccesser->getGroundModule();
     if (ground->isTouch(8, 0)) {
         float z = ground->getZ();
-        const Vec2f& touchPos = ground->getTouchPos(8, 0);
-        Vec3f position(touchPos.m_x, touchPos.m_y, z);
+        Vec3f position(ground->getTouchPos(8, 0), z);
         moduleAccesser->getPostureModule().setPos(&position);
-        Vec2f center = ground->getCenterPos(0);
-        ground->setShapeSafePos(&center, 0);
+        ground->setShapeSafePos(&ground->getCenterPos(0), 0);
     }
     ground->setOffsetY(0.0f, 0);
 }
