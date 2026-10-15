@@ -146,6 +146,24 @@ void ftUtil::setIceExitEffect(soModuleAccesser* acc) {
                      1.5f * (scale / 8.5f), false, 0, 0, -1);
 }
 
+// If the fighter is inside a cloud platform it is passing up through, puffs the cloud effect at the entry point, slows the
+// fighter by the common constant 0xCDC and plays the cloud sound; returns whether the pass-through happened.
+// HYPOTHESIS: effect 0x4F0003 / sound 0x1CE1 identities.
+bool ftUtil::checkCloudThroughOut(soModuleAccesser* acc) {
+    Vec2f entry;
+    if (acc->getGroundModule().isCloudThrough(0) == true && acc->getGroundModule().isCloudThroughOut(&entry, 0) == true) {
+        Vec3f rotation(0.0f, 0.0f, 0.0f);
+        Vec3f position(entry.m_x, entry.m_y, 0.0f);
+        acc->getEffectModule().req(static_cast<EfID>(0x4F0003), &position, &rotation, 1.0f, 0, -1);
+        float slow = soValueAccesser::getConstantFloat(acc, 0xCDC, 0);
+        Vec3f factor(slow, slow, 0.0f);
+        acc->getKineticModule().getEnergy(4)->mulSpeed(&factor);
+        acc->getSoundModule().playSE(static_cast<SndID>(0x1CE1), false, false, 0);
+        return true;
+    }
+    return false;
+}
+
 bool ftUtil::isItemShootStatus(soModuleAccesser*, int status) {
     switch (status) {
     case 0xA4:
