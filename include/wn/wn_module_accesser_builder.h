@@ -42,7 +42,9 @@ FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soTransitionTerm>, 4);
 FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 2);
 FT_DOL_ARRAY_VECTOR(soCollisionHitPart, 2);
 FT_DOL_ARRAY_VECTOR(soLinkConnection, 5);
+#ifndef WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR
 FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 2);
+#endif
 FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soAnimCmdControlUnit>, 6);
 FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soKineticEnergy*>, 8);
 
