@@ -137,13 +137,12 @@ void ftStatusUniqProcessClungDiddy::execFixPos(soModuleAccesser* moduleAccesser)
     }
 }
 
+bool ftStatusUniqProcessClungDiddy::checkDamage(soModuleAccesser* moduleAccesser, void* hit) {
+    return false;
+}
+
 void ftStatusUniqProcessClungDiddy::exitStatus(soModuleAccesser* moduleAccesser, int status) {
     if (status != 0xd7) {
         reinterpret_cast<ftCaptureModuleView*>(moduleAccesser->m_enumerationStart->m_captureModule)->unk30(0, 0);
     }
 }
-
-bool ftStatusUniqProcessClungDiddy::checkDamage(soModuleAccesser* moduleAccesser, void* hit) {
-    return false;
-}
-
