@@ -9990,6 +9990,8 @@ mo_melee/sora_melee/so/so_instance_manager_thunks_Vector_soModelEventObserver_1.
 mo_melee/sora_melee/wn/wn_class_info.cpp:
 	.text       start:0x001E82E8 end:0x001E8550
 	.ctors      start:0x00000298 end:0x0000029C
+	.data       start:0x00047B98 end:0x00047BF8
+	.bss        start:0x00005278 end:0x000054F8
 
 mo_melee/sora_melee/so/so_array_list_members_ptr_BaseItem_64_part1.cpp:
 	.text       start:0x0021BE00 end:0x0021BE10
@@ -10905,7 +10907,7 @@ mo_melee/sora_melee/wn/wn_fox_blaster.cpp:
 	.ctors      start:0x000003C0 end:0x000003C4
 
 mo_melee/sora_melee/wn/wn_fox_blaster_bullet.cpp:
-	.text       start:0x003223A8 end:0x003244C4
+	.text       start:0x003223A8 end:0x0032448C
 	.ctors      start:0x000003C4 end:0x000003C8
 
 mo_melee/sora_melee/wn/wn_pikachu_thunder_jolt.cpp:
