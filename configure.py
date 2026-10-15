@@ -2550,7 +2550,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_sound_id_exchanger_impl.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_walk.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_walk_brake.cpp"),
-            Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_dash.cpp"),
+            Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_dash.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_run.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_run_brake.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_turn.cpp"),
