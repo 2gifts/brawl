@@ -5107,6 +5107,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_throw.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_throw_kirby.cpp:
 	.text       start:0x00179128 end:0x001795AC
 	.ctors      start:0x0000013C end:0x00000140
+	.rodata     start:0x00002338 end:0x00002348
+	.data       start:0x00030068 end:0x000300E0
+	.bss        start:0x00004B30 end:0x00004B40
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_pulled.cpp:
 	.text       start:0x001795AC end:0x00179F14
