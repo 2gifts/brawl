@@ -5197,6 +5197,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_bury.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_bury_wait.cpp:
 	.text       start:0x0017FF1C end:0x0018026C
 	.ctors      start:0x00000170 end:0x00000174
+	.rodata     start:0x00002418 end:0x00002420
+	.data       start:0x000306D0 end:0x00030740
+	.bss        start:0x00004C00 end:0x00004C10
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_bury_jump.cpp:
 	.text       start:0x0018026C end:0x00180448
@@ -5382,6 +5385,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_failure.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_pit_fall.cpp:
 	.text       start:0x0018B1B8 end:0x0018B520
 	.ctors      start:0x000001F8 end:0x000001FC
+	.rodata     start:0x00002540 end:0x00002578
+	.data       start:0x00031880 end:0x00031908
+	.bss        start:0x00004E60 end:0x00004E70
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_kinoko.cpp:
 	.text       start:0x0018B520 end:0x0018C2FC
