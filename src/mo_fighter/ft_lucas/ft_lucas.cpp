@@ -7,6 +7,8 @@
 #include <ft/lucas/ft_lucas.h>
 #include <ft/lucas/ft_lucas_transactor.h>
 #include <ft/ft_owner.h>
+#include <so/so_external_value_accesser.h>
+#include <so/so_value_accesser.h>
 #include <math.h>
 #include <mt/mt_prng.h>
 #include <cm/cm_camera_controller.h>
@@ -741,4 +743,84 @@ bool ftLucas::notifyEventCollisionAbsorberCheck() {
         }
     }
     return false;
+}
+
+// The link events of the Rope Snake and its neighbours. HYPOTHESIS: the event layout (kind, handled flag, a vector or words at
+// +8) follows how the handlers read it.
+struct ftLucasLinkEventView {
+    int kind;
+    u8 handled;
+    u8 pad[3];
+    Vec3f value;
+};
+
+void ftLucas::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    ftLucasLinkEventView* event = reinterpret_cast<ftLucasLinkEventView*>(eventInfo);
+    if (stageObj->soGetKind() == 2) {
+        switch (stageObj->soGetSubKind()) {
+        case 0x52:
+            switch (event->kind) {
+            case 0x838:
+                if (m_moduleAccesser->getLinkModule().isLinked(0)) {
+                    StageObject* node = m_moduleAccesser->getLinkModule().getNode(0);
+                    if (node != NULL) {
+                        event->value = soExternalValueAccesser::getPos(node);
+                        event->handled = 1;
+                    }
+                }
+                break;
+            case 0x839:
+                moduleAccesser->getStatusModule().changeStatusRequest(0x39, moduleAccesser);
+                break;
+            case 0x83b: {
+                int* constant = static_cast<int*>(soValueAccesser::getConstantIndefinite(moduleAccesser, 0xa80e, 0));
+                moduleAccesser->getWorkManageModule().setInt(*constant, 0x20000001);
+                moduleAccesser->getStatusModule().changeStatusRequest(0x81, moduleAccesser);
+                if (moduleAccesser->getGenerateArticleManageModule().isExist(4) == 1) {
+                    soLinkModule& link = moduleAccesser->getLinkModule();
+                    if (link.link(3, moduleAccesser->getGenerateArticleManageModule().getArticle(4)->getTaskId()) == 1) {
+                        link.setModelConstraintPosOrt(3, moduleAccesser->getModelModule().getCorrectNodeId(0x12e), *reinterpret_cast<int*>(&event->value.m_x), 5, false);
+                    }
+                }
+                break;
+            }
+            case 0x83c:
+                if (moduleAccesser->getGroundModule().isStCliff(0) != 0) {
+                    moduleAccesser->getStatusModule().changeStatusRequest(0x75, moduleAccesser);
+                } else {
+                    moduleAccesser->getStatusModule().changeStatusRequest(0x7b, moduleAccesser);
+                }
+                break;
+            case 0x83e:
+                moduleAccesser->getStatusModule().changeStatusRequest(0x83, moduleAccesser);
+                break;
+            case 0x83a:
+                *reinterpret_cast<int*>(&event->value.m_x) = moduleAccesser->getModelModule().getCorrectNodeId(0x12e);
+                event->handled = 1;
+                break;
+            }
+            break;
+        case 0x4d:
+            switch (event->kind) {
+            case 0x838:
+                if (moduleAccesser->getStatusModule().getStatusKind() == 0x117) {
+                    moduleAccesser->getStatusModule().changeStatusRequest(0x119, moduleAccesser);
+                }
+                break;
+            }
+            return;
+        case 0x4f:
+            switch (event->kind) {
+            case 0x838:
+                if (moduleAccesser->getLinkModule().isLink(6)) {
+                    moduleAccesser->getLinkModule().unlink(6);
+                }
+                break;
+            }
+            return;
+        default:
+            break;
+        }
+    }
+    Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
 }

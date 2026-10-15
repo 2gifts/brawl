@@ -73,6 +73,7 @@ public:
     virtual void onStart(int param);
     virtual void toDead(Dead::Reason deadReason);
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
     virtual void notifyEventCollisionReflector(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser, float power, float posX, float posY);
     virtual bool notifyEventCollisionReflectorCheck();
     virtual bool notifyEventCollisionAbsorberCheck();

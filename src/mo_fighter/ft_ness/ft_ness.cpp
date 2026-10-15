@@ -778,3 +778,75 @@ bool ftNess::notifyEventCollisionAbsorberCheck() {
     }
     return false;
 }
+
+void ftNess::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+    if (statusKind == 0x116) {
+        int value = getOwner()->getLog().m_logDataAccesser.getInt(0xc, 0);
+        moduleAccesser->getWorkManageModule().setInt(value, 0x10000041);
+    }
+}
+
+// The link events of the Yo-Yo head and its neighbours. HYPOTHESIS: the event layout (kind, handled flag, a vector or two words
+// at +8) follows how the handlers read it.
+struct ftNessLinkEventView {
+    int kind;
+    u8 handled;
+    u8 pad[3];
+    Vec3f value;
+};
+
+// HYPOTHESIS: the ground module hands the touch normal back as a plain pair of floats (two registers), not as a Vec2f.
+struct ftNessPlainVec2 {
+    float x;
+    float y;
+};
+
+static ftNessPlainVec2 ftNessGetTouchNormal(soGroundModule& ground, int touchMask, u32 index) {
+    typedef ftNessPlainVec2 (*TouchNormalFn)(void* self, int touchMask, u32 index);
+    void** vtable = *reinterpret_cast<void***>(reinterpret_cast<u8*>(&ground) + 8);
+    return reinterpret_cast<TouchNormalFn>(vtable[0xec / 4])(&ground, touchMask, index);
+}
+
+void ftNess::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    ftNessLinkEventView* event = reinterpret_cast<ftNessLinkEventView*>(eventInfo);
+    if (stageObj->soGetKind() == 2) {
+        switch (stageObj->soGetSubKind()) {
+        case 0x6c:
+            switch (event->kind) {
+            case 0x83f:
+                moduleAccesser->getStopModule().setHitStopFrame(*reinterpret_cast<u32*>(&event->value.m_x), *reinterpret_cast<u8*>(&event->value.m_y));
+                break;
+            case 0x840:
+                if (moduleAccesser->getGroundModule().isTouch((grCollStatus::TouchMask)8, 0)) {
+                    ftNessPlainVec2 normal = ftNessGetTouchNormal(moduleAccesser->getGroundModule(), 8, 0);
+                    Vec3f value;
+                    fn_101_C2CC(&value, reinterpret_cast<const Vec3f*>(&normal), 0.0f);
+                    event->value = value;
+                    event->handled = 1;
+                }
+                break;
+            }
+            return;
+        case 0x66:
+            switch (event->kind) {
+            case 0x838:
+                if (moduleAccesser->getStatusModule().getStatusKind() == 0x117) {
+                    moduleAccesser->getStatusModule().changeStatusRequest(0x119, moduleAccesser);
+                }
+                break;
+            }
+            return;
+        case 0x68:
+            switch (event->kind) {
+            case 0x838:
+                if (moduleAccesser->getLinkModule().isLink(6)) {
+                    moduleAccesser->getLinkModule().unlink(6);
+                }
+                break;
+            }
+            return;
+        }
+    }
+    Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
