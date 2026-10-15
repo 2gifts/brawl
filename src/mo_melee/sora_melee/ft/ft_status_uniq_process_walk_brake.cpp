@@ -26,7 +26,7 @@ void ftStatusUniqProcessWalkBrake::initStatus(soModuleAccesser* moduleAccesser) 
 }
 
 void ftStatusUniqProcessWalkBrake::execStatus(soModuleAccesser* moduleAccesser) {
-    const float threshold = 0.0f; // HYPOTHESIS: pool constant lbl_27_rodata_2028+0
+    float threshold = 0.0f; // HYPOTHESIS: pool constant lbl_27_rodata_2028+0
     float speedX = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1)).m_x;
     if (!moduleAccesser->getWorkManageModule().isFlag(WalkBrake_Flag_RateSet)) {
         if ((float)__fabs(speedX) > threshold) {
@@ -34,7 +34,7 @@ void ftStatusUniqProcessWalkBrake::execStatus(soModuleAccesser* moduleAccesser) 
             moduleAccesser->getWorkManageModule().onFlag(WalkBrake_Flag_RateSet);
         }
     } else {
-        if ((float)__fabs(speedX) > threshold) {
+        if ((float)__fabs(speedX) <= threshold) {
             moduleAccesser->getMotionModule().setRate(0.5f);
         }
     }
