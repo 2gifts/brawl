@@ -39,6 +39,7 @@ extern "C" void* fn_27_148264(const ftCommonDataAccesser* accesser, s32 subKind,
 extern "C" void* fn_27_1482C0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1494D0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_149B70(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148F64(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 // The data types the dispatch below selects on; the instantiating unit includes its article header,
 // which declares the struct with this name (the layout is not needed here, only the pointer type).
@@ -71,6 +72,7 @@ struct wnPokeFushigisouSeedData;
 struct wnPokeZenigameWaterData;
 struct wnLucarioAuraBallData;
 struct wnDummyFighterData;
+struct wnPeachKinopioData;
 
 // Data-type dispatch so the template below picks the right family's accesser; extend per blaster family as
 // its data class is reconstructed. HYPOTHESIS: helper name; it is inline and leaves no symbol.
@@ -173,10 +175,14 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
     return fn_27_149B70(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
 
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnPeachKinopioData*) {
+    return fn_27_148F64(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+
 // Class info for one article kind: registers itself in the class info table during static initialization
 // and builds the article array when the article manager asks for it.
 //   K: article kind (30/31 Fox, 35/36 Falco, 38/39 Wolf; blaster first, bullet second; plus 5 Link,
-//      83 Samus, 91 Pit, 140 Toon Link one-shot articles, 53/60/68/77/98/102/117/150 single-kind articles, 54 Diddy popgun, 149 Luigi fireball, 10 Pikachu thunder jolt 2, 64 Zerosuit paralyzer bullet, 69 Sheik held needle, 74/95 Pokemon seed and water gun, 99 Lucario aura ball, 109 Popo ice shot, 152 dummy fighter).
+//      83 Samus, 91 Pit, 140 Toon Link one-shot articles, 53/60/68/77/98/102/117/150 single-kind articles, 54 Diddy popgun, 149 Luigi fireball, 10 Pikachu thunder jolt 2, 64 Zerosuit paralyzer bullet, 69 Sheik held needle, 74/95 Pokemon seed and water gun, 99 Lucario aura ball, 109 Popo ice shot, 152 dummy fighter, 93 Peach Kinopio.
 //   T: article class, D: the data type its constructor consumes.
 // HYPOTHESIS: template spelling; the data strings prove the instantiation
 // wnClassInfoImpl<31, wnFoxBlasterBullet, wnFoxBlasterBulletData>.

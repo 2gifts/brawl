@@ -10966,7 +10966,7 @@ mo_melee/sora_melee/wn/wn_koopa_breath.cpp:
 	.ctors      start:0x000003F0 end:0x000003F4
 
 mo_melee/sora_melee/wn/wn_peach_kinopio.cpp:
-	.text       start:0x00332B74 end:0x0033725C
+	.text       start:0x00332B74 end:0x003373B0
 	.ctors      start:0x000003F4 end:0x000003F8
 
 mo_melee/sora_melee/ft/ft_zelda_status_uniq_process_special_n.cpp:
