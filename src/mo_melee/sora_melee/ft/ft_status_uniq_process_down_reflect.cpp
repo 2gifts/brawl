@@ -116,8 +116,10 @@ void ftStatusUniqProcessDownReflect::initNormalDamage(soModuleAccesser* moduleAc
             effectRot.m_x = 0.0f;
             effectRot.m_y = 0.0f;
             effectRot.m_z = angle;
-            effectPos.m_x = touchPos.m_x;
-            effectPos.m_y = touchPos.m_y;
+            float posY = touchPos.m_y;
+            float posX = touchPos.m_x;
+            effectPos.m_x = posX;
+            effectPos.m_y = posY;
             effectPos.m_z = 0.0f;
             moduleAccesser->getEffectModule().req(static_cast<EfID>(9), &effectPos, &effectRot, 1.0f, 0, -1);
             cameraPos.m_x = touchPos.m_x;

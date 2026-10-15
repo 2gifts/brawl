@@ -127,9 +127,21 @@ void ftStatusUniqProcessDamageFlyReflect::initNormalDamage(soModuleAccesser* mod
             Vec2f touchPos;
             Vec2f touchNormal;
             if (ftUtil::getAirGroundTouchInfo(moduleAccesser, &touchPos, &touchNormal)) {
+                Vec3f effectPos;
+                Vec3f effectRot;
                 Vec3f cameraPos;
-                float angle = atan2(-touchNormal.m_x, touchNormal.m_y);
-                moduleAccesser->getEffectModule().req(static_cast<EfID>(9), &Vec3f(touchPos.m_x, touchPos.m_y, 0.0f), &Vec3f(0.0f, 0.0f, angle), 1.0f, 0, -1);
+                float normalX = touchNormal.m_x;
+                float normalY = touchNormal.m_y;
+                float angle = atan2(-normalX, normalY);
+                effectRot.m_x = 0.0f;
+                effectRot.m_y = 0.0f;
+                effectRot.m_z = angle;
+                float posY = touchPos.m_y;
+                float posX = touchPos.m_x;
+                effectPos.m_x = posX;
+                effectPos.m_y = posY;
+                effectPos.m_z = 0.0f;
+                moduleAccesser->getEffectModule().req(static_cast<EfID>(9), &effectPos, &effectRot, 1.0f, 0, -1);
                 cameraPos.m_x = touchPos.m_x;
                 cameraPos.m_y = touchPos.m_y;
                 cameraPos.m_z = 0.0f;
@@ -161,9 +173,21 @@ void ftStatusUniqProcessDamageFlyReflect::initNormalDamage(soModuleAccesser* mod
             Vec2f touchPos;
             Vec2f touchNormal;
             if (ftUtil::getAirGroundTouchInfo(moduleAccesser, &touchPos, &touchNormal)) {
+                Vec3f effectPos;
+                Vec3f effectRot;
                 Vec3f cameraPos;
-                float angle = atan2(-touchNormal.m_x, touchNormal.m_y);
-                moduleAccesser->getEffectModule().req(static_cast<EfID>(9), &Vec3f(touchPos.m_x, touchPos.m_y, 0.0f), &Vec3f(0.0f, 0.0f, angle), 1.0f, 0, -1);
+                float normalX = touchNormal.m_x;
+                float normalY = touchNormal.m_y;
+                float angle = atan2(-normalX, normalY);
+                effectRot.m_x = 0.0f;
+                effectRot.m_y = 0.0f;
+                effectRot.m_z = angle;
+                float posY = touchPos.m_y;
+                float posX = touchPos.m_x;
+                effectPos.m_x = posX;
+                effectPos.m_y = posY;
+                effectPos.m_z = 0.0f;
+                moduleAccesser->getEffectModule().req(static_cast<EfID>(9), &effectPos, &effectRot, 1.0f, 0, -1);
                 cameraPos.m_x = touchPos.m_x;
                 cameraPos.m_y = touchPos.m_y;
                 cameraPos.m_z = 0.0f;
