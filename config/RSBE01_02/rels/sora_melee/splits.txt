@@ -4906,6 +4906,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_turn.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_turn_run.cpp:
 	.text       start:0x00166C44 end:0x001670C0
 	.ctors      start:0x000000B0 end:0x000000B4
+	.rodata     start:0x00002060 end:0x0000206C
+	.data       start:0x0002E9F0 end:0x0002EA60
+	.bss        start:0x000048D8 end:0x000048E8
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_fall.cpp:
 	.text       start:0x001670C0 end:0x001677E0
