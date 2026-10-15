@@ -42,7 +42,9 @@ FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soTransitionTerm>, 4);
 FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 2);
 FT_DOL_ARRAY_VECTOR(soCollisionHitPart, 2);
 FT_DOL_ARRAY_VECTOR(soLinkConnection, 5);
+#ifndef WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR
 FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 2);
+#endif
 FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soAnimCmdControlUnit>, 6);
 FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soKineticEnergy*>, 8);
 
@@ -255,6 +257,8 @@ extern char lbl_27_bss_47C[];  // controller
 extern char lbl_27_bss_48C[];  // camera
 extern char lbl_27_bss_170[];  // general term decide
 extern char lbl_27_bss_188[];  // switch decide
+extern char lbl_27_bss_31C[];  // motion
+extern char lbl_27_bss_D7C[];  // null transition module
 extern char lbl_27_bss_584[];  // combo
 extern char lbl_27_bss_598[];  // area
 extern char lbl_27_bss_5EC[];  // physics
@@ -365,6 +369,8 @@ struct soCaptureModuleBuildConfigNull { };
 struct soTurnModuleBuildConfigNull { };
 struct soControllerModuleBuildConfigNull { };
 struct soCameraModuleBuildConfigNull { };
+// Articles without animation (the motion module is the shared null one). HYPOTHESIS: source spelling of the null configuration.
+struct soMotionModuleBuildConfigNull { };
 struct soComboModuleBuildConfigNull { };
 struct soAreaModuleBuildConfigNull { };
 struct soPhysicsModuleBuildConfigNull { };
@@ -481,6 +487,13 @@ public:
     soCameraModule* getModule() { return (soCameraModule*)lbl_27_bss_48C; }
 };
 template <>
+class soMotionModuleBuilder<soMotionModuleBuildConfigNull> {
+    u8 unk0[4]; // HYPOTHESIS: the null selection owns a few bytes (the next builder starts a word later)
+public:
+    soMotionModuleBuilder(soModuleAccesser*, void*) { }
+    soMotionModule* getModule() { return (soMotionModule*)lbl_27_bss_31C; }
+};
+template <>
 class soComboModuleBuilder<soComboModuleBuildConfigNull> {
 public:
     soComboModuleBuilder(soModuleAccesser*) { }
@@ -564,6 +577,15 @@ class soParamCustomizeModuleBuilder<soParamCustomizeModuleBuildConfig<soParamCus
     soParamCustomizeModuleImpl m_paramCustomizeModule;
 public:
     soParamCustomizeModuleBuilder(soModuleAccesser*) { }
+};
+
+// A motion module without transitions uses the shared null transition module of sora_melee.
+struct soTransitionModuleBuildConfigNull { };
+template <>
+class soTransitionModuleBuilder<soTransitionModuleBuildConfigNull> {
+public:
+    soTransitionModuleBuilder() { }
+    soTransitionModule* getModule() { return (soTransitionModule*)lbl_27_bss_D7C; }
 };
 
 // Motion without partial / other animations or an anim obj cache: the null arrays come from singletons, the null cache

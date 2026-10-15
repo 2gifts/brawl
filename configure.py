@@ -2057,6 +2057,7 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "mo_fighter/ft_pikachu/wn_pikachu_vortex.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikachu/wn_pikachu_vortex_status_uniq_process.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikachu/ft_pikachu.cpp"),
         ],
     },
