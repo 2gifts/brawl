@@ -22,7 +22,8 @@ void ftStatusUniqProcessCatchCut::initStatus(soModuleAccesser* moduleAccesser) {
     float lr = moduleAccesser->getPostureModule().getLr();
     float negLr = -lr;
     // HYPOTHESIS: param 0xcc5 is the cut-throw horizontal push scale.
-    speed.m_x = speed.m_x + soValueAccesser::getConstantFloat(moduleAccesser, 0xcc5, 0) * negLr;
+    float scale = soValueAccesser::getConstantFloat(moduleAccesser, 0xcc5, 0);
+    speed.m_x = speed.m_x + scale * negLr;
     stop.m_speed.m_x = speed.m_x;
     stop.m_speed.m_y = speed.m_y;
 }

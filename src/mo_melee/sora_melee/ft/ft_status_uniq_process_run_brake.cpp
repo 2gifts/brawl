@@ -42,7 +42,8 @@ void ftStatusUniqProcessRunBrake::initStatus(soModuleAccesser* moduleAccesser) {
 void ftStatusUniqProcessRunBrake::execStatus(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getWorkManageModule().isFlag(RunBrake_Flag_Brake) == true) {
         float threshold = soValueAccesser::getConstantFloat(moduleAccesser, 0xc39, 0);
-        threshold = soValueAccesser::getConstantFloat(moduleAccesser, 0xbc0, 0) * threshold;
+        float scale = soValueAccesser::getConstantFloat(moduleAccesser, 0xbc0, 0);
+        threshold = scale * threshold;
         float speedX = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1)).m_x;
         if (!moduleAccesser->getWorkManageModule().isFlag(RunBrake_Flag_RateSet)) {
             if ((float)__fabs(speedX) > threshold) {
