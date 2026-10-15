@@ -4,6 +4,7 @@
 
 #include <wn/wn_weapon_builder.h>
 #include <wn/wn_extend_param_accesser.h>
+#include <wn/kirby/wn_kirby_final_cutter_status.h>
 
 // The parameter block of the article (3 floats and 1 int).
 // HYPOTHESIS: meaning of the parameters.

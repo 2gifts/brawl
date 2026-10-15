@@ -18,10 +18,6 @@
 #include <so/so_value_accesser.h>
 #include <math.h>
 
-// The status unique process of the cutter (wn_kirby_final_cutter_status_uniq_process_regular.cpp).
-class wnKirbyFinalCutterStatusUniqProcessRegular;
-extern wnKirbyFinalCutterStatusUniqProcessRegular g_wnKirbyFinalCutterStatusUniqProcessRegular;
-
 wnKirbyFinalCutter::wnKirbyFinalCutter(s32 articleId, const wnArticleBuildInfo& info, const wnKirbyFinalCutterData* data) :
     wnWeaponBuilder<wnKirbyFinalCutterModuleAccesserBuildConfig>(
         "wnKirbyFinalCutter", articleId, info,
@@ -29,7 +25,7 @@ wnKirbyFinalCutter::wnKirbyFinalCutter(s32 articleId, const wnArticleBuildInfo& 
                                   info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
                                   0, 0, 0, 0, 0, 0, 0)),
     m_param(data->m_param), m_paramAccesser(data->m_param) {
-    soStatusUniqProcess* procs[1] = { reinterpret_cast<soStatusUniqProcess*>(&g_wnKirbyFinalCutterStatusUniqProcessRegular) };
+    soStatusUniqProcess* procs[1] = { &g_wnKirbyFinalCutterStatusUniqProcessRegular };
     m_moduleAccesser->getStatusModule().addRangeUniqProc(procs, 1);
     Weapon::deactivate(false);
 }
