@@ -65,11 +65,14 @@ public:
 class wnClassInfo : private soNull, public soNullable {
 public:
     wnClassInfo(bool isNull = false);
-    // Declared only, defined elsewhere in the module: a weak copy emitted here wins the
-    // linker's weak dedup against the named copy in the module, appends its 0x40 to this
-    // unit's .text and shifts every address behind it. The reference-only form reproduces
-    // the original object; it also parks this class's vtable/RTTI in the key function's unit.
+#ifdef WN_CLASS_INFO_BASE_DTOR
+    // Registration view (only wn_class_info.cpp defines the macro): the class declares its destructor, so
+    // the static initializer of g_wnClassInfoNull registers the full __dt chain and MWCC flips the sinit
+    // register allocation to the native one. The article units use the plain view: with a user-declared
+    // base destructor, MWCC makes the wnClassInfoImpl destructors call it, 0xC past the native bodies.
+    // Layout and vtable are identical under both views.
     ~wnClassInfo();
+#endif
 
     virtual void createArray(s32 count, s32 heapType, s32 articleId, const wnArticleBuildInfo& info,
                              wnArticleList* list) const = 0;

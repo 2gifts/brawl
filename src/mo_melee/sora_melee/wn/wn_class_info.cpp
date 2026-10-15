@@ -1,3 +1,4 @@
+#define WN_CLASS_INFO_BASE_DTOR
 #include <wn/wn_class_info.h>
 
 #include <types.h>

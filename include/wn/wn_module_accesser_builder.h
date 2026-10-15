@@ -30,6 +30,7 @@
 #include <so/article/so_article_mediator_null.h>
 #include <so/sound/so_sound_3d_generator_accesser_impl.h>
 #include <so/stop/so_stop_module_impl.h>
+#include <wn/wn_article_build_info.h>
 #include <wn/wn_module_accesser_build_data.h>
 
 ////////////////////////////////////////
@@ -910,16 +911,6 @@ public:
     ~wnModuleAccesserBuilder() { }
 };
 
-// The kind/sub kind pair that identifies an article (the first word of its construction info).
-// HYPOTHESIS: source spelling of the construction info.
-struct wnArticleKindInfo {
-    s32 kind;
-    s32 subKind;
-};
-struct wnArticleBuildInfo {
-    const wnArticleKindInfo* kindInfo;
-    soHeapModule* heapModule;
-};
 
 template <class BC>
 class wnWeaponBuilder : public Weapon {
