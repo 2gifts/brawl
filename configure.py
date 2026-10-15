@@ -2590,7 +2590,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_capture_cut.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_escape.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_thrown.cpp"),
-            Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_item_lift.cpp"),
+            Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_item_lift.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_item_throw.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_item_shoot.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_item_swing.cpp"),
