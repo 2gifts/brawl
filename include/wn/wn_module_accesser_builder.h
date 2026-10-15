@@ -374,6 +374,8 @@ struct soItemManageModuleBuildConfigNull { };
 struct soColorBlendModuleBuildConfigNull { };
 struct soJostleModuleBuildConfigNull { };
 struct soAbnormalModuleBuildConfigNull { };
+struct soSituationModuleBuildConfigNull { }; // HYPOTHESIS: source spelling of the null configuration.
+struct soVisibilityModuleBuildConfigNull { }; // HYPOTHESIS: source spelling of the null configuration.
 
 template <>
 class soCollisionShieldModuleBuilder<soCollisionShieldModuleBuildConfigNull> {
@@ -525,6 +527,21 @@ class soJostleModuleBuilder<soJostleModuleBuildConfigNull> {
 public:
     soJostleModuleBuilder(soModuleAccesser*, void*) { }
     void* getModule() { return lbl_27_bss_654; }
+};
+extern char lbl_27_bss_35C[]; // situation
+extern char lbl_27_bss_46C[]; // visibility
+template <>
+class soSituationModuleBuilder<soSituationModuleBuildConfigNull> {
+public:
+    soSituationModuleBuilder(s16, soModuleAccesser*, soEventObserverRegistrationDesc*) { }
+    soSituationModule* getModule() { return (soSituationModule*)lbl_27_bss_35C; }
+};
+template <>
+class soVisibilityModuleBuilder<soVisibilityModuleBuildConfigNull> {
+    u8 unk0[4]; // HYPOTHESIS: the null selection owns a few bytes (the next builder starts a word later)
+public:
+    soVisibilityModuleBuilder(soModuleAccesser*, soVisibilityData*) { }
+    soVisibilityModule* getModule() { return (soVisibilityModule*)lbl_27_bss_46C; }
 };
 template <>
 class soAbnormalModuleBuilder<soAbnormalModuleBuildConfigNull> {
