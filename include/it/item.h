@@ -104,6 +104,7 @@ public:
         enum No {
             No_Have = 0x3,
             No_Target = 0x4,
+            No_Touch = 0x5, // HYPOTHESIS: the link sendTouchMessage uses
             No_TeamOwner = 0x6,
             No_CreateOwner = 0x7,
         };
@@ -384,9 +385,11 @@ public:
     float getParam(itValueAccesser::ParamFloat param);
     int getParam(itValueAccesser::ParamInt param);
     float getParamFloat(u32 param);
+    int getParamInt(u32 param);
     bool isHaved();
     int getTeamOwnerTaskId();
     void setTeamOwnerTaskId(int taskId);
+    void setTeamOwnerTaskId(BaseItem* other);
 
     void setSafePos(Vec2f* pos);
     void warp(Vec3f* pos);
@@ -428,6 +431,26 @@ public:
     void setTeam(int team);
     bool isCanInhaled();
     Vec3f getStartInhaledPos();
+    bool isSteal();
+    void setModelScale(float scale);
+    // HYPOTHESIS: names/signatures from the map and the call sites; the first two may be virtual in the original.
+    int enumFighter(StageObject** out, u32 flags);
+    void reqLostEffect();
+    // HYPOTHESIS: read off the call sites in appear; the speed argument is a plain 2D speed.
+    void appear1(float rate, Vec3f* speed);
+    void setupThrowAttack(float lr, float powerMulStatus, Vec3f* direction);
+    bool onShield();
+    // HYPOTHESIS: parameter meaning read off the call to setModelConstraintPosOrt.
+    void setTarget(int taskId);
+    bool setModelConstraint(int taskId, int targetNode, int node);
+    float getAttackPower(int index);
+    int getTrait();
+    BaseItem* getCreaterItem();
+    float getLinkOwnerScale();
+    Vec3f getHavedParentSafePos();
+    void updateOwnerScale(BaseItem* owner);
+    void setScaleAnimation(float scaleMax, float scaleMin, int nodeIndex, int counterLimit);
+    void requestAnimEvent(u32 frame);
     void setScale(float scale);
     void updateLifeTime();
 };
