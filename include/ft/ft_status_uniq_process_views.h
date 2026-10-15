@@ -65,7 +65,8 @@ public:
     virtual void pad50();
     virtual void pad51();
     virtual void pad52();
-    virtual void pad53();
+    // HYPOTHESIS: slot 0xDC returns a Vec2f for the link index (the parent's position offset).
+    virtual Vec2f slotDC(int index);
     virtual void pad54();
     virtual void pad55();
     virtual void pad56();
@@ -166,7 +167,8 @@ public:
     virtual bool slot34(int value);
     virtual bool slot38(soModuleAccesser* moduleAccesser, void* damageInfo);
     virtual void slot3c();
-    virtual void pad101();
+    // HYPOTHESIS: slot 0x40 reports whether the capture is already active (slot 0x3c starts it).
+    virtual bool slot40();
     virtual void slot44();
     virtual void pad102();
     virtual void slot4c(u32 value);

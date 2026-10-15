@@ -2648,7 +2648,7 @@ config.libs = [
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_captain_final_other.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_kirby_final_damage_fly.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_kirby_final_damage_wait.cpp"),
-            Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_capture_wait_yoshi.cpp"),
+            Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_capture_wait_yoshi.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_capture_damage_yoshi.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_kirby_param_getters.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_capture_gokulin.cpp"),
