@@ -70,6 +70,12 @@ public:
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
     void** getExtendParam();
+    virtual void onStart(int param);
+    virtual void toDead(Dead::Reason deadReason);
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionReflector(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser, float power, float posX, float posY);
+    virtual bool notifyEventCollisionReflectorCheck();
+    virtual bool notifyEventCollisionAbsorberCheck();
     // The hooks the article mediator calls to start an article of the pool (they return false when the article is not
     // handed out). HYPOTHESIS: names follow the module map.
     static bool activeArticle(wnLucasPKFire* weapon, soModuleAccesser* acc);

@@ -655,3 +655,90 @@ bool ftLucas::activeArticle3(wnLucasHimohebi* weapon, soModuleAccesser* acc) {
     }
     return true;
 }
+
+// ---- fighter events ---------------------------------------------------------------------------------------------------
+// HYPOTHESIS: work variables (names from how the statuses use them): flag 0x1200003d, floats 0x11000015 and 0x11000016, int
+// 0x10000040 belong to the PK Starstorm bookkeeping; they are reset when the fighter starts and when it dies.
+
+void ftLucas::onStart(int param) {
+    Fighter::onStart(param);
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+    work.offFlag(0x1200003d);
+    work.setFloat(0.0f, 0x11000015);
+    work.setFloat(0.0f, 0x11000016);
+    work.setInt(0, 0x10000040);
+}
+
+void ftLucas::toDead(Dead::Reason deadReason) {
+    Fighter::toDead(deadReason);
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+    work.offFlag(0x1200003d);
+    work.setFloat(0.0f, 0x11000015);
+    work.setFloat(0.0f, 0x11000016);
+    work.setInt(0, 0x10000040);
+}
+
+// The Rope Snake is removed when the grab statuses (0x34-0x38, 0x10c) end.
+void ftLucas::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+    if (prevStatusKind == 0x34 || prevStatusKind == 0x36 || prevStatusKind == 0x38) {
+        if (statusKind != 0x35 && statusKind != 0x37) {
+            m_moduleAccesser->getGenerateArticleManageModule().removeExist(4, 0);
+        }
+    } else if (prevStatusKind == 0x35 || prevStatusKind == 0x37 || prevStatusKind == 0x10c) {
+        m_moduleAccesser->getGenerateArticleManageModule().removeExist(4, 0);
+    }
+    if (statusKind == 0x116) {
+        int value = getOwner()->getLog().m_logDataAccesser.getInt(0xc, 0);
+        moduleAccesser->getWorkManageModule().setInt(value, 0x10000041);
+    }
+}
+
+// The reflector (PK Flash counter?) keeps two flags for the frame: the hit was too weak for it (unk48CC4[0]) or it stopped it
+// (unk48CC4[1]). HYPOTHESIS: names of both flags.
+void ftLucas::notifyEventCollisionReflector(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser, float power, float posX, float posY) {
+    if ((s32)groupIndex == 2) {
+        if (power >= m_moduleAccesser->getCollisionReflectorModule().getAttackLimit(groupIndex)) {
+            unk48CC4[1] = 1;
+            return;
+        }
+        unk48CC4[0] = 1;
+    }
+    Fighter::notifyEventCollisionReflector(attackModule, collisionLog, groupIndex, moduleAccesser, power, posX, posY);
+}
+
+bool ftLucas::notifyEventCollisionReflectorCheck() {
+    if (unk48CC4[0] == 1) {
+        return true;
+    }
+    if (unk48CC4[1] == 1) {
+        m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
+    }
+    return Fighter::notifyEventCollisionReflectorCheck();
+}
+
+// The absorbed hit heals: the amount and the side were stored by the absorber handler.
+bool ftLucas::notifyEventCollisionAbsorberCheck() {
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+    float amount = work.getFloat(0x11000013);
+    float side = work.getFloat(0x11000014);
+    work.setFloat(0.0f, 0x11000013);
+    work.setFloat(0.0f, 0x11000014);
+    if (amount > 0.0f) {
+        soPostureModule& posture = m_moduleAccesser->getPostureModule();
+        soStatusModule& status = m_moduleAccesser->getStatusModule();
+        soMotionModule& motion = m_moduleAccesser->getMotionModule();
+        soDamageModule& damage = m_moduleAccesser->getDamageModule();
+        float current = damage.getDamage(0);
+        if (current - amount < 0.0f) {
+            amount = amount + (current - amount);
+        }
+        damage.addDamage(-amount, 0);
+        posture.setLr(side);
+        float* table = *reinterpret_cast<float**>(reinterpret_cast<u8*>(m_commonData) + 0x88);
+        if (!(status.getStatusKind() == 0x120 && motion.getFrame() <= table[2])) {
+            status.changeStatusRequest(0x120, m_moduleAccesser);
+        }
+    }
+    return false;
+}
