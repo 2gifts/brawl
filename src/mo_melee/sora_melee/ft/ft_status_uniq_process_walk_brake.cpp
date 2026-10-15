@@ -20,22 +20,21 @@ ftStatusUniqProcessWalkBrake g_ftStatusUniqProcessWalkBrake;
 // HYPOTHESIS: work flag 0x22000011 is the brake "rate applied" flag; its name is unknown.
 enum { WalkBrake_Flag_RateSet = 0x22000011 };
 
-// HYPOTHESIS: the rate constants come from lbl_27_rodata_2028 (threshold, rate on the first turn, rate later); values not verified.
 void ftStatusUniqProcessWalkBrake::initStatus(soModuleAccesser* moduleAccesser) {
     moduleAccesser->getCameraModule().setRun(0);
 }
 
 void ftStatusUniqProcessWalkBrake::execStatus(soModuleAccesser* moduleAccesser) {
-    float threshold = 0.0f; // HYPOTHESIS: pool constant lbl_27_rodata_2028+0
+    float threshold = 0.001f;
     float speedX = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1)).m_x;
     if (!moduleAccesser->getWorkManageModule().isFlag(WalkBrake_Flag_RateSet)) {
         if ((float)__fabs(speedX) > threshold) {
-            moduleAccesser->getMotionModule().setRate(1.0f);
+            moduleAccesser->getMotionModule().setRate(0.0f);
             moduleAccesser->getWorkManageModule().onFlag(WalkBrake_Flag_RateSet);
         }
     } else {
         if ((float)__fabs(speedX) <= threshold) {
-            moduleAccesser->getMotionModule().setRate(0.5f);
+            moduleAccesser->getMotionModule().setRate(1.0f);
         }
     }
 }
