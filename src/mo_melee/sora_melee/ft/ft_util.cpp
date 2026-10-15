@@ -16,6 +16,9 @@
 #include <so/so_kinetic_energy_normal.h>
 #include <so/effect/so_effect_module_impl.h>
 #include <so/so_module_accesser.h>
+#include <ft/ft_common_data_accesser.h>
+#include <so/collision/so_collision_attack_part.h>
+#include <so/param/so_param_customize_module_impl.h>
 #include <so/motion/so_motion_module_impl.h>
 #include <so/stageobject.h>
 #include <so/model/so_model_module_simple.h>
@@ -246,6 +249,20 @@ void ftUtil::adjustWall(soModuleAccesser* acc, float lr, float side, float scale
     if ((u32) flag == 1) {
         acc->getGroundModule().setShapeFlag(soGroundShapeImpl::Shape_Rhombus_Flag_Min_L, true, 0);
     }
+}
+
+float ftUtil::getReactionMul(soModuleAccesser* acc, soCollisionAttackData* attackData) {
+    float mul = soValueAccesser::getConstantFloat(acc, 0xDB1, 0);
+    if (mul != 1.0f && attackData->m_reactionFix != 0) {
+        mul = 1.0f + (mul - 1.0f) * soValueAccesser::getConstantFloat(acc, 0xCCB, 0);
+    }
+    if (acc->getParamCustomizeModule().isCustomize(0)) {
+        mul *= calcScalingParam(mul, acc->getPostureModule().getScale(), *g_ftCommonData.dataCommon->sizeCustomizeScale[0]);
+    }
+    if (acc->getParamCustomizeModule().isCustomize(1)) {
+        mul *= calcScalingParam(mul, acc->getPostureModule().getScale(), *g_ftCommonData.dataCommon->sizeCustomizeScale[1]);
+    }
+    return mul;
 }
 
 bool ftUtil::isItemShootStatus(soModuleAccesser*, int status) {

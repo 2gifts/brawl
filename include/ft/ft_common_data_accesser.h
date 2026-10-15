@@ -61,7 +61,10 @@ struct ftDataCommon {
     ftShakeData* shakeData;
     u8 unk20[0x8];
     ftJostleData* jostleData;
-    u8 unk2C[0x1C];
+    u8 unk2C[4];
+    // HYPOTHESIS: size-customize scaling exponents read by ftUtil::getReactionMul for param customizes 0 and 1.
+    float* sizeCustomizeScale[2];
+    u8 unk38[0x14];
     GXColor subColors;
     ftEffectCommonData* effectCommonData;
     ftEffectScreenData* effectScreenData;

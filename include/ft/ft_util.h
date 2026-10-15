@@ -8,6 +8,7 @@ class soModuleAccesser;
 // Helpers shared by every fighter: status-ID classification and the common parameter multipliers.
 // Status IDs are the common fighter action IDs (see the BrawlRE "Actions" list).
 class soCollisionLog;
+struct soCollisionAttackData;
 
 class ftUtil {
 public:
@@ -94,6 +95,9 @@ public:
 
     // Global multipliers read from the common constants.
     static float getAttackReactionMul(soModuleAccesser* acc);
+    // Knockback multiplier for an attack against this fighter: the common constant 0xDB1, damped for fixed-knockback attacks and
+    // scaled by the size customizes (param customizes 0 and 1).
+    static float getReactionMul(soModuleAccesser* acc, soCollisionAttackData* attackData);
     static float getAttackPowerMul(soModuleAccesser* acc);
     static float getDamageMul(soModuleAccesser* acc);
 };
