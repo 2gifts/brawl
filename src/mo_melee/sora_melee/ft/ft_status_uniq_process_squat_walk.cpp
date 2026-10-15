@@ -94,7 +94,8 @@ void ftStatusUniqProcessSquatWalk::initStatus(soModuleAccesser* moduleAccesser) 
     if ((float)__fabs(travel.m_z) < 0.5f) {
         travel.m_z = 20.0f;
     }
-    moduleAccesser->getWorkManageModule().setFloat((float)__fabs(limit / (travel.m_z / endFrame)), 0x21000005);
+    double rateWide = fabs(limit / (travel.m_z / endFrame));
+    moduleAccesser->getWorkManageModule().setFloat(rateWide, 0x21000005);
 }
 // HYPOTHESIS: steps the walk rate (work float 0x21000004, in units of the per-fighter limit) towards the stick rate with the
 // accelerations in constants 0xbb9/0xbba/0xbbc, then sets the motion rate from the result (work float 0x21000005).
