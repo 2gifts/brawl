@@ -10839,7 +10839,7 @@ mo_melee/sora_melee/wn/wn_samus_cshot_status_uniq_process.cpp:
 	.ctors      start:0x00000388 end:0x0000038C
 
 mo_melee/sora_melee/wn/wn_szerosuit_paralyzer.cpp:
-	.text       start:0x00300B3C end:0x003040BC
+	.text       start:0x00300B3C end:0x0030424C
 	.ctors      start:0x0000038C end:0x00000390
 
 mo_melee/sora_melee/wn/wn_szerosuit_paralyzer_bullet.cpp:
@@ -10978,7 +10978,7 @@ mo_melee/sora_melee/ft/ft_sheik_status_uniq_process_special_nshoot.cpp:
 	.ctors      start:0x00000404 end:0x00000408
 
 mo_melee/sora_melee/wn/wn_sheik_needle.cpp:
-	.text       start:0x0033D1C4 end:0x003413A8
+	.text       start:0x0033D1C4 end:0x00341538
 	.ctors      start:0x00000408 end:0x0000040C
 
 mo_melee/sora_melee/wn/wn_sheik_needle_status_uniq_process_move.cpp:
@@ -11025,7 +11025,7 @@ mo_melee/sora_melee/ft/ft_marth_status_uniq_process_special_n_end.cpp:
 	.bss        start:0x00007F48 end:0x00007F58
 
 mo_melee/sora_melee/wn/wn_game_watch_sausage.cpp:
-	.text       start:0x0034E94C end:0x00351EBC
+	.text       start:0x0034E94C end:0x0035204C
 	.ctors      start:0x00000430 end:0x00000434
 
 mo_melee/sora_melee/wn/wn_game_watch_sausage_status_uniq_process_move.cpp:
