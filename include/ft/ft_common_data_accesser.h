@@ -89,7 +89,13 @@ public:
     // HYPOTHESIS: const qualification; native pointer ABI and getter identity are verified.
     const wnGameWatchNormalWeaponData* getGameWatchNormalWeaponData() const;
     // The static data block of a weapon article: indexed by the weapon number (123, 124, ... in the module maps).
-    void* getWeaponData124(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: PK Thunder bolt (Ness and Lucas)
+    void* getWeaponData91(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Flash
+    void* getWeaponData92(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Fire
+    void* getWeaponData93(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Thunder
+    void* getWeaponData94(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Thunder bolt
+    void* getWeaponData95(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Starstorm
+    void* getWeaponData96(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas Rope Snake
+    void* getWeaponData124(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Ness PK Thunder bolt
 };
 
 extern ftCommonData g_ftCommonData;

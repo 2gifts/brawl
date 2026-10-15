@@ -69,7 +69,7 @@ struct wnLucasPKThunderChildArgs {
     }
     const wnLucasPKThunderChildData* getData(soModuleAccesser* acc) {
         ftKind kind = *reinterpret_cast<ftKind*>(reinterpret_cast<u8*>(&dynamic_cast<Fighter&>(*acc->m_stageObject)) + 0xC8);
-        return static_cast<const wnLucasPKThunderChildData*>(g_ftCommonDataAccesser.getWeaponData124(kind, &tag.m_resourceGroup));
+        return static_cast<const wnLucasPKThunderChildData*>(g_ftCommonDataAccesser.getWeaponData94(kind, &tag.m_resourceGroup));
     }
 };
 

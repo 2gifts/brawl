@@ -1,8 +1,23 @@
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR // MATCH-ONLY: call the shared table constructor used by this REL.
+#define FT_LUCAS_ARTICLE_POOLS
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define WN_STATUS_PLAIN_NULL_ARRAY
+#define MT_VEC2F_ASSIGN_NOINLINE
+#define MT_VEC3F_CTOR_NOINLINE
+#define MT_VEC3F_ASSIGN_NOINLINE
+#define MT_VEC2F_CTOR_NOINLINE
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/wn_article_pool.h> // before anything that pulls in it/it_gen_archive.h, which leaves dont_inline on
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_reflector_group.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/lucas/ft_lucas.h>
+#include <ft/lucas/ft_lucas_transactor.h>
+#include <ft/ft_owner.h>
+#include <math.h>
 #include <ft/lucas/ft_lucas_extend_param_accesser.h>
 #include <ft/lucas/ft_lucas_status_uniq_process.h>
 
@@ -125,7 +140,6 @@ u8* fn_114_CC8C(u8* p) { return p + 0x8; }
 int fn_114_CD24(u8* p) { return *(int*)(p + 0x20); }
 int fn_114_CE00(u8* p) { return *(int*)(p + 0x18); }
 int fn_114_CE98(u8* p) { return *(int*)(p + 0x10); }
-int fn_114_E6E8() { return 5; }
 u8* fn_114_E6FC(u8* p) { return p + 0x48714; }
 u8* fn_114_E71C(u8* p) { return p + 0x48750; }
 u8* fn_114_E728(u8* p) { return p + 0x48C08; }
@@ -189,3 +203,329 @@ void* fn_114_5B0C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 void* fn_114_5B4C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_114_5B8C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Lucas, copied into
+// the descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftLucasArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftLucasArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftLucasArticleKind {
+    s32 m_kind;
+    s32 m_subKind;
+    ftLucasArticleKind() : m_kind(0), m_subKind(Fighter_Lucas) { }
+};
+
+struct ftLucasArticleArgs {
+    ftLucasArticleKind owner;
+    wnArticleKindInfo kind;
+    wnArticleBuildInfo info;
+    ftLucasArticleArgs(soModuleAccesser* acc) {
+        kind.kind = owner.m_kind;
+        kind.subKind = owner.m_subKind;
+        info.kindInfo = &kind;
+        info.heapModule = static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule);
+    }
+};
+
+template <class W> struct ftLucasArticleTraits;
+#define FT_LUCAS_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftLucasArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static DATA* getData() { \
+            ftLucasArticleDataTag tag; \
+            return static_cast<DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Lucas, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_LUCAS_TRAITS(wnLucasPKFlash, void, 0, getWeaponData91)
+FT_LUCAS_TRAITS(wnLucasPKFire, const wnLucasPKFireData, 1, getWeaponData92)
+FT_LUCAS_TRAITS(wnLucasPKThunder, const wnLucasPKThunderData, 2, getWeaponData93)
+FT_LUCAS_TRAITS(wnLucasPKStarStorm, const wnLucasPKStarStormData, 3, getWeaponData95)
+FT_LUCAS_TRAITS(wnLucasHimohebi, const wnLucasHimohebiData, 4, getWeaponData96)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftLucasArticleTraits<W>::ArticleId, ftLucasArticleArgs(acc).info, ftLucasArticleTraits<W>::getData()) { }
+
+// ---- the articles of Lucas and their mediator ------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnLucasPKFlash>::~wnArticleHolder();
+template wnArticleHolder<wnLucasPKFire>::~wnArticleHolder();
+template wnArticleHolder<wnLucasPKThunder>::~wnArticleHolder();
+template wnArticleHolder<wnLucasPKStarStorm>::~wnArticleHolder();
+template wnArticleHolder<wnLucasHimohebi>::~wnArticleHolder();
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template wnSelectedArticleMediator<ftLucasArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftLucasArticleMediator, 5>::~wnArticleManageModuleBuilder();
+ftLucasArticleMediator::~ftLucasArticleMediator() { }
+#pragma dont_inline off
+soArticleMediator::~soArticleMediator() { }
+
+s32 ftLucasArticleMediator::getMediateNum() { return 5; }
+void ftLucasArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 PK Flash, 1 PK Fire, 2 PK Thunder, 3 PK Starstorm, 4 Rope Snake (the rest are unused).
+
+#define FT_LUCAS_POOL_FLASH_BASE static_cast<wnArticlePool<wnLucasPKFlash, 1, ftLucasFirePool>&>(m_pools)
+#define FT_LUCAS_POOL_FLASH FT_LUCAS_POOL_FLASH_BASE.getSub()
+#define FT_LUCAS_POOL_FIRE_BASE static_cast<wnArticlePool<wnLucasPKFire, 2, ftLucasThunderPool>&>(m_pools)
+#define FT_LUCAS_POOL_FIRE FT_LUCAS_POOL_FIRE_BASE.getSub()
+#define FT_LUCAS_POOL_THUNDER_BASE static_cast<wnArticlePool<wnLucasPKThunder, 2, ftLucasStarStormPool>&>(m_pools)
+#define FT_LUCAS_POOL_THUNDER FT_LUCAS_POOL_THUNDER_BASE.getSub()
+#define FT_LUCAS_POOL_STAR_STORM_BASE static_cast<wnArticlePool<wnLucasPKStarStorm, 16, ftLucasHimohebiPool>&>(m_pools)
+#define FT_LUCAS_POOL_STAR_STORM FT_LUCAS_POOL_STAR_STORM_BASE.getSub()
+#define FT_LUCAS_POOL_HIMOHEBI_BASE static_cast<wnArticlePool<wnLucasHimohebi, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_LUCAS_POOL_HIMOHEBI FT_LUCAS_POOL_HIMOHEBI_BASE.getSub()
+
+#define FT_LUCAS_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) \
+    WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) \
+    WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) \
+    WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) \
+    WN_ARTICLE_UNUSED_SLOT(16, value)
+
+template <class W> struct ftLucasArticleActivator;
+template <> struct ftLucasArticleActivator<wnLucasPKFlash> {
+    static bool activate(wnLucasPKFlash* weapon, soModuleAccesser* acc) {
+        return ftLucasTransactor::getInstance()->activeArticle1(weapon, acc);
+    }
+};
+template <> struct ftLucasArticleActivator<wnLucasPKFire> {
+    static bool activate(wnLucasPKFire* weapon, soModuleAccesser* acc) { return ftLucas::activeArticle(weapon, acc); }
+};
+template <> struct ftLucasArticleActivator<wnLucasPKThunder> {
+    static bool activate(wnLucasPKThunder* weapon, soModuleAccesser* acc) { return ftLucas::activeArticle1(weapon, acc); }
+};
+template <> struct ftLucasArticleActivator<wnLucasPKStarStorm> {
+    static bool activate(wnLucasPKStarStorm* weapon, soModuleAccesser* acc) { return ftLucas::activeArticle2(weapon, acc); }
+};
+template <> struct ftLucasArticleActivator<wnLucasHimohebi> {
+    static bool activate(wnLucasHimohebi* weapon, soModuleAccesser* acc) { return ftLucas::activeArticle3(weapon, acc); }
+};
+
+void ftLucasArticleMediator::deactivate() {
+    for (s32 i = 0; i < 1; ++i) {
+        wnLucasPKFlash* weapon = FT_LUCAS_POOL_FLASH.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 2; ++i) {
+        wnLucasPKFire* weapon = FT_LUCAS_POOL_FIRE.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 2; ++i) {
+        wnLucasPKThunder* weapon = FT_LUCAS_POOL_THUNDER.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 16; ++i) {
+        wnLucasPKStarStorm* weapon = FT_LUCAS_POOL_STAR_STORM.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnLucasHimohebi* weapon = FT_LUCAS_POOL_HIMOHEBI.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftLucasArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 1; }
+    case 1: { wnArticleSlotTag tag; return 2; }
+    case 2: { wnArticleSlotTag tag; return 2; }
+    case 3: { wnArticleSlotTag tag; return 16; }
+    case 4: { wnArticleSlotTag tag; return 1; }
+    FT_LUCAS_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftLucasActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_LUCAS_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftLucasActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftLucasActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftLucasArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_LUCAS_COUNT_ACTIVE(FT_LUCAS_POOL_FLASH, 1)
+    case 1: FT_LUCAS_COUNT_ACTIVE(FT_LUCAS_POOL_FIRE, 2)
+    case 2: FT_LUCAS_COUNT_ACTIVE(FT_LUCAS_POOL_THUNDER, 2)
+    case 3: FT_LUCAS_COUNT_ACTIVE(FT_LUCAS_POOL_STAR_STORM, 16)
+    case 4: FT_LUCAS_COUNT_ACTIVE(FT_LUCAS_POOL_HIMOHEBI, 1)
+    FT_LUCAS_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_LUCAS_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftLucasArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_LUCAS_CAN_GENERATE(FT_LUCAS_POOL_FLASH, 1, 0)
+    case 1: FT_LUCAS_CAN_GENERATE(FT_LUCAS_POOL_FIRE, 2, 1)
+    case 2: FT_LUCAS_CAN_GENERATE(FT_LUCAS_POOL_THUNDER, 2, 2)
+    case 3: FT_LUCAS_CAN_GENERATE(FT_LUCAS_POOL_STAR_STORM, 16, 3)
+    case 4: FT_LUCAS_CAN_GENERATE(FT_LUCAS_POOL_HIMOHEBI, 1, 4)
+    FT_LUCAS_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_LUCAS_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftLucasArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftLucasArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_LUCAS_GENERATE(wnLucasPKFlash, FT_LUCAS_POOL_FLASH)
+    case 1: FT_LUCAS_GENERATE(wnLucasPKFire, FT_LUCAS_POOL_FIRE)
+    case 2: FT_LUCAS_GENERATE(wnLucasPKThunder, FT_LUCAS_POOL_THUNDER)
+    case 3: FT_LUCAS_GENERATE(wnLucasPKStarStorm, FT_LUCAS_POOL_STAR_STORM)
+    case 4: FT_LUCAS_GENERATE(wnLucasHimohebi, FT_LUCAS_POOL_HIMOHEBI)
+    FT_LUCAS_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+// Shooting only type-checks the article; the unused slots accept anything.
+bool ftLucasArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: { wnArticleSlotTag tag; return ftLucasTransactor::getInstance()->shootArticle1(&dynamic_cast<wnLucasPKFlash&>(*article), acc); }
+    case 1: { wnArticleSlotTag tag; (void)dynamic_cast<wnLucasPKFire&>(*article); return true; }
+    case 2: { wnArticleSlotTag tag; (void)dynamic_cast<wnLucasPKThunder&>(*article); return true; }
+    case 3: { wnArticleSlotTag tag; (void)dynamic_cast<wnLucasPKStarStorm&>(*article); return true; }
+    case 4: { wnArticleSlotTag tag; (void)dynamic_cast<wnLucasHimohebi&>(*article); return true; }
+    FT_LUCAS_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+#pragma dont_inline on
+ftLucasTransactor* ftLucasTransactor::getInstance() {
+    static ftLucasTransactor instance;
+    return &instance;
+}
+#pragma dont_inline off
+#pragma pool_data reset
+
+// ---- the activators of the articles ---------------------------------------------------------------------------------
+
+// PK Fire: leaves from the hand with the speed and the angle of the fighter data (one pair in the air, one on the ground).
+// HYPOTHESIS: the floats behind data+0x80 are, in order, air angle / air speed / ground angle / ground speed / hand offset.
+bool ftLucas::activeArticle(wnLucasPKFire* weapon, soModuleAccesser* acc) {
+    const float* params = *reinterpret_cast<float**>(reinterpret_cast<u8*>(g_ftCommonDataAccesser.getData(Fighter_Lucas)) + 0x80);
+    Fighter& founder = dynamic_cast<Fighter&>(*acc->m_stageObject);
+    Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x39, false);
+    float lr = acc->getPostureModule().getLr();
+    float scale = acc->getPostureModule().getScale();
+    pos.m_x += lr * (params[4] * scale);
+    pos.m_y += params[5] * scale;
+    pos.m_z = 0.0f;
+    float angle;
+    float speed;
+    if (acc->getSituationModule().getKind() == 0) {
+        angle = params[2];
+        speed = params[3];
+    } else {
+        angle = params[0];
+        speed = params[1];
+    }
+    float c = cos(angle);
+    Vec2f vel;
+    vel.m_x = lr * (speed * c);
+    float s = sin(angle);
+    vel.m_y = speed * s;
+    angle = 57.29578f * -angle;
+    s32 taskId = founder.m_taskId;
+    weapon->activate(taskId, founder.getOwner()->getTeam(), &pos, &vel, lr, angle);
+    return false;
+}
+
+// PK Thunder: the head leaves from the hand and is linked to the fighter.
+bool ftLucas::activeArticle1(wnLucasPKThunder* weapon, soModuleAccesser* acc) {
+    Fighter* founder = &dynamic_cast<Fighter&>(*acc->m_stageObject);
+    Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x27, false);
+    float lr = acc->getPostureModule().getLr();
+    s32 taskId = founder->m_taskId;
+    weapon->activate(taskId, founder->getOwner()->getTeam(), &pos, lr);
+    acc->getLinkModule().link(6, weapon->m_taskId);
+    return true;
+}

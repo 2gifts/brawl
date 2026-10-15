@@ -46,9 +46,8 @@ public:
     // HYPOTHESIS: source name of the native newest-first predicate traversal.
     template <class Predicate>
     W* find(Predicate& predicate) {
-        W* candidate = m_holder.getInstance();
-        if (predicate(&static_cast<soArticle&>(*candidate)) == true) {
-            return candidate;
+        if (predicate(&static_cast<soArticle&>(*m_holder.getInstance())) == true) {
+            return m_holder.getInstance();
         }
         return m_next.find(predicate);
     }
