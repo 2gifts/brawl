@@ -13,4 +13,7 @@ struct wnArticleKindInfo {
 struct wnArticleBuildInfo {
     const wnArticleKindInfo* kindInfo;
     soHeapModule* heapModule;
+    // HYPOTHESIS: the constructors read the heap module through this accessor (its inlined result is reused across the three
+    // heap queries of the build data instead of being reloaded).
+    soHeapModule* getHeapModule() const { return heapModule; }
 };

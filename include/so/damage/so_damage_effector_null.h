@@ -55,3 +55,14 @@ public:
     virtual void reqTipEffect(soModuleAccesser*, soCollisionLog*) { }
     #endif
 };
+
+// Opt-in (WN_DAMAGE_EFFECTOR_NULL_EXTERN): the shared instance (a sora_melee object) that some article
+// builders pass to their damage module. Other units instantiate the generic holder and emit their own copy.
+#ifdef WN_DAMAGE_EFFECTOR_NULL_EXTERN
+extern soDamageEffectorNull g_soDamageEffectorNull;
+template <typename T> class soSingletonHolder;
+template <> class soSingletonHolder<soDamageEffectorNull> {
+public:
+    static soDamageEffectorNull* getInstance() { return &g_soDamageEffectorNull; }
+};
+#endif

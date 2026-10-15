@@ -140,8 +140,8 @@ void wnWeaponBuilder<wnDiddyBarrelModuleAccesserBuildConfig>::deactivateDescenda
 wnDiddyBarrel::wnDiddyBarrel(s32 articleId, const wnArticleBuildInfo& info, const wnDiddyBarrelData* data) :
     wnWeaponBuilder<wnDiddyBarrelModuleAccesserBuildConfig>(
         "DiddyBarrel", articleId, info,
-        wnModuleAccesserBuildData(0x37, data, info.heapModule->getInstanceHeap(),
-                                  info.heapModule->getNWModelInstanceHeap(), info.heapModule->getNWMotionInstanceHeap(),
+        wnModuleAccesserBuildData(0x37, data, info.getHeapModule()->getInstanceHeap(),
+                                  info.getHeapModule()->getNWModelInstanceHeap(), info.getHeapModule()->getNWMotionInstanceHeap(),
                                   data->m_resGroupNo, -1, &m_paramAccesser, 0, 0, 0, 0, 0, 0, 0)),
     m_data(data), m_param(data->m_param), m_paramAccesser(data->m_param) {
     soStatusUniqProcess* uniqProcs[3];

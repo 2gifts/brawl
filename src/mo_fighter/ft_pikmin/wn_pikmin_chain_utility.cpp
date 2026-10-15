@@ -3,7 +3,7 @@
 #include <so/so_module_accesser.h>
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
-#include <wn/pikmin/wn_pikmin_chain.h>
+#include <wn/pikmin/wn_pikmin_chain_utility.h>
 #include <wn/wn_lasso_status_view.h>
 
 class wnPikminChainVisibleEvent : public soLinkEventArgs {

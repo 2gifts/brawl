@@ -104,6 +104,7 @@ public:
         enum No {
             No_Have = 0x3,
             No_Target = 0x4,
+            No_Touch = 0x5, // HYPOTHESIS: the link sendTouchMessage uses
             No_TeamOwner = 0x6,
             No_CreateOwner = 0x7,
         };
@@ -384,15 +385,78 @@ public:
     float getParam(itValueAccesser::ParamFloat param);
     int getParam(itValueAccesser::ParamInt param);
     float getParamFloat(u32 param);
+    int getParamInt(u32 param);
     bool isHaved();
     int getTeamOwnerTaskId();
     void setTeamOwnerTaskId(int taskId);
+    void setTeamOwnerTaskId(BaseItem* other);
 
     void setSafePos(Vec2f* pos);
     void warp(Vec3f* pos);
     void setVanishMode(bool);
     void setRenderPriority(u8 priority); // Added locally: sora_melee 0x28E7B4 (st_heal)
     bool sendTouchMessage(int taskId, Vec3f* pos, float);
+
+    // Members implemented in mo_melee/sora_melee/it/it_item.cpp.
+    itKind getItKind();
+    u32 getItVariation();
+    itCustomizerInterface* getCustomizer();
+    int getLotCreateItKind();
+    bool isUseOuterRes();
+    bool isVanishMode();
+    float getInhaledCount();
+    void setSmashPlateFigurelized(int figurelized);
+    void requestLost();
+    void born();
+    Vec3f getPos();
+    Vec3f getRot();
+    void onUpdateAiMove(Vec2f*, Vec2f*, Vec2f*);
+    void onUpdateKinetic();
+    void onPreBound(Vec2f*, BoundMask);
+    bool onPreDamageCheck(int damageStatusKind, soDamageLog*);
+    bool isSafe();
+    int getBullet();
+    u32 shootBlanks(u32 count);
+    int getResult();
+    void setHavedLog(int index, bool haved);
+    int getTeamNo();
+    bool isSmashPlateFigurelized();
+    bool isInhaled();
+    void move(Vec3f* pos);
+    void resetLr(float lr);
+    void standby(bool force);
+    bool isPickUp();
+    void setPickUpAreaRequest(bool request);
+    bool isEatable();
+    void setTeam(int team);
+    bool isCanInhaled();
+    Vec3f getStartInhaledPos();
+    bool isSteal();
+    void setModelScale(float scale);
+    // HYPOTHESIS: names/signatures from the map and the call sites; the first two may be virtual in the original.
+    int enumFighter(StageObject** out, u32 flags);
+    void updateScaleAnim();
+    // HYPOTHESIS: parameters read off the call sites in inhaled (a frame step and the position to suck the item to).
+    bool inhaled(float step, Vec3f* pos);
+    void reqLostEffect();
+    // HYPOTHESIS: read off the call sites in appear; the speed argument is a plain 2D speed.
+    void appear1(float rate, Vec3f* speed);
+    void setupThrowAttack(float lr, float powerMulStatus, Vec3f* direction);
+    bool onShield();
+    bool onReflect();
+    // HYPOTHESIS: parameter meaning read off the call to setModelConstraintPosOrt.
+    void setTarget(int taskId);
+    bool setModelConstraint(int taskId, int targetNode, int node);
+    float getAttackPower(int index);
+    int getTrait();
+    BaseItem* getCreaterItem();
+    float getLinkOwnerScale();
+    Vec3f getHavedParentSafePos();
+    void updateOwnerScale(BaseItem* owner);
+    void setScaleAnimation(float scaleMax, float scaleMin, int nodeIndex, int counterLimit);
+    void requestAnimEvent(u32 frame);
+    void setScale(float scale);
+    void updateLifeTime();
 };
 static_assert(sizeof(BaseItem) == 0x3d60, "Class is wrong size!");
 
@@ -403,14 +467,24 @@ public:
     virtual void onDestruct(BaseItem* item);
     virtual void onReset(BaseItem* item);
     virtual void onProcessUpdate(BaseItem* item);
+#ifdef IT_CUSTOMIZER_BOOL_HOOKS
+    // The default implementations return a value (true / false); the BrawlHeaders customizers still override them as void,
+    // so only the item.cpp unit sees the real type.
+    virtual bool onProcessFixPosition(BaseItem* item);
+#else
     virtual void onProcessFixPosition(BaseItem* item);
+#endif
     virtual void onProcessHit(BaseItem* item);
     virtual void onProcessFixCamera(BaseItem* item);
     virtual void onProcessGameProc(BaseItem* item);
     virtual void onRenderPre(BaseItem* item);
     virtual void onRenderDebug(BaseItem* item);
     virtual void onNotifyEventChangeStatus(BaseItem* item, int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+#ifdef IT_CUSTOMIZER_BOOL_HOOKS
+    virtual bool onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
+#else
     virtual void onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
+#endif
     virtual void onNotifyEventCollisionAttackCheck(BaseItem* item, int hitTaskId);
     virtual bool onNotifyEventCollisionSearch(BaseItem* item, soCollisionLog* collisionLog);
     virtual bool onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8 searchHitCollisionIndex, Vec3f* searchHitPos);
