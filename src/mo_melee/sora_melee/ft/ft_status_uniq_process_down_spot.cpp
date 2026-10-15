@@ -1,4 +1,5 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#include <ft/ft_status_uniq_process_down.h>
 #include <so/motion/so_motion_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
@@ -27,7 +28,7 @@ public:
     virtual float getFloatSlot3c(u32 index);
 };
 
-class ftStatusUniqProcessDownSpot : public soStatusUniqProcess {
+class ftStatusUniqProcessDownSpot : public ftStatusUniqProcessDown {
 public:
     ftStatusUniqProcessDownSpot() { }
     virtual ~ftStatusUniqProcessDownSpot() { }

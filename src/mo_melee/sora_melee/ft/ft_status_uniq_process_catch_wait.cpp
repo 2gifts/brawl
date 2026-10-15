@@ -1,5 +1,6 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <ft/fighter.h>
+#include <ft/ft_status_uniq_process_catch_pull_impl.h>
 #include <so/catch/so_catch_module.h>
 #include <so/controller/so_controller_module_impl.h>
 #include <so/link/so_link_module_impl.h>
@@ -10,7 +11,7 @@
 #include <types.h>
 
 // HYPOTHESIS: class shape from the donkey catch-wait TU (exitStatus override, base catch-wait class).
-class ftStatusUniqProcessCatchWait : public soStatusUniqProcess {
+class ftStatusUniqProcessCatchWait : public ftStatusUniqProcessCatchPull {
 public:
     ftStatusUniqProcessCatchWait() { }
     virtual ~ftStatusUniqProcessCatchWait() { }

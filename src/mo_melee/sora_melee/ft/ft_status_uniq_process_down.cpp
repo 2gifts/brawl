@@ -1,18 +1,9 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#include <ft/ft_status_uniq_process_down.h>
 #include <ft/ft_util.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
-
-// HYPOTHESIS: class shape from the shared Down status (kind 0x4A). Empty execStatus and exitStatus overrides (map names).
-class ftStatusUniqProcessDown : public soStatusUniqProcess {
-public:
-    ftStatusUniqProcessDown() { }
-    virtual ~ftStatusUniqProcessDown() { }
-    virtual void initStatus(soModuleAccesser*);
-    virtual void execStatus(soModuleAccesser*);
-    virtual void exitStatus(soModuleAccesser*, int);
-};
 
 void ftStatusUniqProcessDown::initStatus(soModuleAccesser* moduleAccesser) {
     int kind;
