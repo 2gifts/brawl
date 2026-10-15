@@ -5275,6 +5275,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_koopa_dived.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso.cpp:
 	.text       start:0x0018A0BC end:0x0018A1EC
 	.ctors      start:0x000001E0 end:0x000001E4
+	.data       start:0x00031580 end:0x000315F0
+	.bss        start:0x00004E00 end:0x00004E10
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_hang.cpp:
 	.text       start:0x0018A1EC end:0x0018A6E4
@@ -5291,6 +5293,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_reach.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_failure.cpp:
 	.text       start:0x0018AE70 end:0x0018AED8
 	.ctors      start:0x000001F0 end:0x000001F4
+	.data       start:0x000317C8 end:0x00031840
+	.bss        start:0x00004E40 end:0x00004E50
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_pit_fall.cpp:
 	.text       start:0x0018B1B8 end:0x0018B520
@@ -5345,6 +5349,8 @@ mo_melee/sora_melee/so/so_event_unit_wrapper_soItemManageEventObserver_18D844.cp
 mo_melee/sora_melee/ft/ft_status_uniq_process_appeal.cpp:
 	.text       start:0x0018D8FC end:0x0018D96C
 	.ctors      start:0x00000204 end:0x00000208
+	.data       start:0x00031C38 end:0x00031CA8
+	.bss        start:0x00004EA0 end:0x00004EB0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_win.cpp:
 	.text       start:0x0018D96C end:0x0018DF54
@@ -5409,14 +5415,20 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_capture_gokulin.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_cut_gokulin.cpp:
 	.text       start:0x00192528 end:0x001925B8
 	.ctors      start:0x00000244 end:0x00000248
+	.data       start:0x00032808 end:0x00032888
+	.bss        start:0x00004FF0 end:0x00005000
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_taboo.cpp:
 	.text       start:0x001925B8 end:0x0019267C
 	.ctors      start:0x00000248 end:0x0000024C
+	.data       start:0x00032888 end:0x00032900
+	.bss        start:0x00005000 end:0x00005010
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_bucyulus.cpp:
 	.text       start:0x0019267C end:0x00192724
 	.ctors      start:0x0000024C end:0x00000250
+	.data       start:0x00032900 end:0x00032978
+	.bss        start:0x00005010 end:0x00005020
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_attack_air_inherit_jump_aerial_motion.cpp:
 	.text       start:0x00192724 end:0x00192AF8
@@ -5425,6 +5437,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_attack_air_inherit_jump_aerial_mot
 mo_melee/sora_melee/ft/ft_status_uniq_process_escape_air_inherit_jump_aerial_motion.cpp:
 	.text       start:0x00192AF8 end:0x00192D4C
 	.ctors      start:0x00000254 end:0x00000258
+	.rodata     start:0x000026A0 end:0x000026A8
+	.data       start:0x00032A08 end:0x00032A98
+	.bss        start:0x00005030 end:0x00005040
 
 mo_melee/sora_melee/ft/ft_fighter_build_data.cpp:
 	.text       start:0x00192D4C end:0x00193378

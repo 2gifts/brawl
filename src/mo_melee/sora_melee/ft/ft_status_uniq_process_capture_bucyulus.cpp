@@ -17,6 +17,8 @@ ftStatusUniqProcessCaptureBucyulus g_ftStatusUniqProcessCaptureBucyulus;
 
 void ftStatusUniqProcessCaptureBucyulus::initStatus(soModuleAccesser* moduleAccesser) { }
 
+bool ftStatusUniqProcessCaptureBucyulus::checkDamage(soModuleAccesser* moduleAccesser, void*) { return true; }
+
 void ftStatusUniqProcessCaptureBucyulus::exitStatus(soModuleAccesser* moduleAccesser, int status) {
     if (status == 0x105) {
         return;
@@ -26,5 +28,3 @@ void ftStatusUniqProcessCaptureBucyulus::exitStatus(soModuleAccesser* moduleAcce
     }
     reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot30(0, 0);
 }
-
-bool ftStatusUniqProcessCaptureBucyulus::checkDamage(soModuleAccesser* moduleAccesser, void*) { return true; }
