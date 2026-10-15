@@ -5246,7 +5246,7 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_catched_air_ganon.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_yoshi.cpp:
 	.text       start:0x00187918 end:0x00187BB8
 	.ctors      start:0x000001C8 end:0x000001CC
-	.rodata     start:0x000024D0 end:0x000024D8
+	.rodata     start:0x000024D0 end:0x000024D4
 	.data       start:0x000312A0 end:0x00031320
 	.bss        start:0x00004DA0 end:0x00004DB0
 
