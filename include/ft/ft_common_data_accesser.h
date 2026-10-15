@@ -42,8 +42,10 @@ struct ftParam {
     float slopeAngleLimit;
 };
 
+// HYPOTHESIS: per-fighter extra parameters; unk3C points at floats used by the squat walk (status 0x13 / 0x14 speed limits).
 struct ftParamEtc {
-
+    u8 unk00[0x3C];
+    float* unk3C;
 };
 
 struct ftKindData {
@@ -97,6 +99,7 @@ public:
     u32 getFinalResId(ftKind kind) const;
     ftData* getData(ftKind kind) const;
     ftParam* getParam(ftKind kind) const;
+    ftParamEtc* getParamEtc(ftKind kind) const;
     ftParam* getParamCommon() const;
     // HYPOTHESIS: const qualification; native pointer ABI and getter identity are verified.
     const wnGameWatchNormalWeaponData* getGameWatchNormalWeaponData() const;
