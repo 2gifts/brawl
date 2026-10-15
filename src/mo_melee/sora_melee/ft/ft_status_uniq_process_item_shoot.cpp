@@ -387,12 +387,139 @@ void ftStatusUniqProcessItemShoot::execFixPosCounter_FFlower(soModuleAccesser* m
     }
 }
 
+
+// The three scope transitions below switch the aim motion (partial animation when one is playing) to the variant for
+// charged / empty weapon: toRapid starts the rapid charge (state 1), toHoldFire the held shot (state 3), toEnd the wind-down (state 4).
+void ftStatusUniqProcessItemShoot::toHoldFire_SScope(soModuleAccesser* moduleAccesser) {
+    int bullets = moduleAccesser->getItemManageModule().getShootItemBullet(0);
+    if (moduleAccesser->getMotionModule().getPartialKind(1) != -1) {
+        moduleAccesser->getMotionModule().addPartialAnimChr(1, bullets == 0 ? 0x16D : 0x165, 0x135, 0, 0.0f, 1.0f, 0);
+    } else {
+        soMotionChangeParam param;
+        param.m_kind = bullets == 0 ? 0x171 : 0x169;
+        param.m_frame = 0.0f;
+        param.m_rate = 1.0f;
+        param._12 = 0;
+        param._13 = 0;
+        param._14 = 0;
+        param._15 = 0;
+        moduleAccesser->getMotionModule().changeMotionRequest(&param);
+    }
+    moduleAccesser->getSoundModule().stopSE(0x1F93, 0);
+    if (bullets == 0) {
+        moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1F9D), false, false, 0);
+    }
+    moduleAccesser->getWorkManageModule().setInt(3, 0x2000000C);
+    if (bullets > 0) {
+        dynamic_cast<Fighter&>(*moduleAccesser->m_stageObject).getOwner()->addLogInt(1, 0x1D, 0);
+    }
+    ftLogTransactor::resetLogActionInfo(2, 0x66, 0, dynamic_cast<Fighter&>(*moduleAccesser->m_stageObject).getOwner(), moduleAccesser);
+}
+
+void ftStatusUniqProcessItemShoot::toRapid_SScope(soModuleAccesser* moduleAccesser) {
+    int bullets = moduleAccesser->getItemManageModule().getShootItemBullet(0);
+    if (moduleAccesser->getMotionModule().getPartialKind(1) != -1) {
+        moduleAccesser->getMotionModule().addPartialAnimChr(1, bullets == 0 ? 0x16C : 0x164, 0x135, 0, 0.0f, 1.0f, 0);
+    } else {
+        soMotionChangeParam param;
+        param.m_kind = bullets == 0 ? 0x170 : 0x168;
+        param.m_frame = 0.0f;
+        param.m_rate = 1.0f;
+        param._12 = 0;
+        param._13 = 0;
+        param._14 = 0;
+        param._15 = 0;
+        moduleAccesser->getMotionModule().changeMotionRequest(&param);
+    }
+    if (bullets == 0) {
+        moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1F9D), false, false, 0);
+    }
+    moduleAccesser->getWorkManageModule().setInt(1, 0x2000000C);
+    ftLogTransactor::resetLogActionInfo(2, 0x65, 1, dynamic_cast<Fighter&>(*moduleAccesser->m_stageObject).getOwner(), moduleAccesser);
+}
+
+void ftStatusUniqProcessItemShoot::toEnd_SScope(soModuleAccesser* moduleAccesser) {
+    int bullets = moduleAccesser->getItemManageModule().getShootItemBullet(0);
+    if (moduleAccesser->getMotionModule().getPartialKind(1) != -1) {
+        moduleAccesser->getMotionModule().addPartialAnimChr(1, bullets == 0 ? 0x16E : 0x166, 0x135, 0, 0.0f, 1.0f, 0);
+    } else {
+        soMotionChangeParam param;
+        param.m_kind = bullets == 0 ? 0x172 : 0x16A;
+        param.m_frame = 0.0f;
+        param.m_rate = 1.0f;
+        param._12 = 0;
+        param._13 = 0;
+        param._14 = 0;
+        param._15 = 0;
+        moduleAccesser->getMotionModule().changeMotionRequest(&param);
+    }
+    moduleAccesser->getWorkManageModule().setInt(4, 0x2000000C);
+    moduleAccesser->getWorkManageModule().onFlag(0x22000012);
+}
+
+void ftStatusUniqProcessItemShoot::execFixPosCounter_SScope(soModuleAccesser* moduleAccesser) {
+    switch (moduleAccesser->getWorkManageModule().getInt(0x2000000C)) {
+    case 0: {
+        moduleAccesser->getWorkManageModule().incInt(0x2000000E);
+        bool motionEnd;
+        if (moduleAccesser->getMotionModule().getPartialKind(1) != -1) {
+            motionEnd = moduleAccesser->getMotionModule().isEndPartial(1);
+        } else {
+            motionEnd = moduleAccesser->getMotionModule().isEnd();
+        }
+        if (motionEnd == true) {
+            if (moduleAccesser->getWorkManageModule().isFlag(0x22000013)) {
+                toRapid_SScope(moduleAccesser);
+                if ((int)moduleAccesser->getItemManageModule().getShootItemBullet(0) > 0) {
+                    dynamic_cast<Fighter&>(*moduleAccesser->m_stageObject).getOwner()->addLogInt(1, 0x1D, 0);
+                }
+            } else {
+                moduleAccesser->getWorkManageModule().setInt(2, 0x2000000C);
+                moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1F93), false, false, 0);
+                ftLogTransactor::resetLogActionInfo(2, 0x66, 1, dynamic_cast<Fighter&>(*moduleAccesser->m_stageObject).getOwner(), moduleAccesser);
+            }
+        }
+        break;
+    }
+    case 1: {
+        bool motionEnd;
+        if (moduleAccesser->getMotionModule().getPartialKind(1) != -1) {
+            motionEnd = moduleAccesser->getMotionModule().isEndPartial(1);
+        } else {
+            motionEnd = moduleAccesser->getMotionModule().isEnd();
+        }
+        if (motionEnd == true) {
+            int remaining = moduleAccesser->getWorkManageModule().getInt(0x2000000D);
+            moduleAccesser->getWorkManageModule().setInt(remaining - 1, 0x2000000D);
+            if (remaining - 1 <= 0) {
+                toEnd_SScope(moduleAccesser);
+            } else {
+                if (moduleAccesser->getMotionModule().getPartialKind(1) != -1) {
+                    moduleAccesser->getMotionModule().setPartialFrameSyncAnimCmd(0.0f, 1);
+                } else {
+                    moduleAccesser->getMotionModule().setFrameSyncAnimCmd(0.0f);
+                }
+                if (moduleAccesser->getItemManageModule().getShootItemBullet(0) == 0) {
+                    moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1F9D), false, false, 0);
+                }
+            }
+        }
+        break;
+    }
+    case 2: {
+        moduleAccesser->getWorkManageModule().incInt(0x2000000E);
+        int elapsed = moduleAccesser->getWorkManageModule().getInt(0x2000000E);
+        if (!(moduleAccesser->getControllerModule().getButton() & soController::getButtonMask(soController::Pad_Button_Attack)) ||
+            elapsed >= soValueAccesser::getConstantInt(moduleAccesser, 0x5A5F, 0)) {
+            toHoldFire_SScope(moduleAccesser);
+        }
+        break;
+    }
+    }
+}
+
 // TODO: remaining bodies not decoded yet.
-void ftStatusUniqProcessItemShoot::execFixPosCounter_SScope(soModuleAccesser*) { }
 void ftStatusUniqProcessItemShoot::execFixPos_SScope(soModuleAccesser*) { }
-void ftStatusUniqProcessItemShoot::toHoldFire_SScope(soModuleAccesser*) { }
-void ftStatusUniqProcessItemShoot::toRapid_SScope(soModuleAccesser*) { }
-void ftStatusUniqProcessItemShoot::toEnd_SScope(soModuleAccesser*) { }
 void ftStatusUniqProcessItemShoot::execFixPos_FFlower(soModuleAccesser*) { }
 void ftStatusUniqProcessItemShoot::initStatus_CLauncher(soModuleAccesser*) { }
 void ftStatusUniqProcessItemShoot::execStatus_CLauncher(soModuleAccesser*) { }
