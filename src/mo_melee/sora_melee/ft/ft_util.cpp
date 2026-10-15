@@ -164,6 +164,28 @@ bool ftUtil::checkCloudThroughOut(soModuleAccesser* acc) {
     return false;
 }
 
+// Returns the mask of surfaces the fighter touches (bit 3, bit 0, bit 1 and bit 2 are checked in that order) and writes the
+// touch position and normal of the first one present.
+u32 ftUtil::getAirGroundTouchInfo(soModuleAccesser* acc, Vec2f* pos, Vec2f* normal) {
+    u32 flag = acc->getGroundModule().getTouchFlag(0);
+    if (flag != 0) {
+        if (flag & 8) {
+            *pos = acc->getGroundModule().getTouchPos(8, 0);
+            *normal = acc->getGroundModule().getTouchNormal(8, 0);
+        } else if (flag & 1) {
+            *pos = acc->getGroundModule().getTouchPos(1, 0);
+            *normal = acc->getGroundModule().getTouchNormal(1, 0);
+        } else if (flag & 2) {
+            *pos = acc->getGroundModule().getTouchPos(2, 0);
+            *normal = acc->getGroundModule().getTouchNormal(2, 0);
+        } else if (flag & 4) {
+            *pos = acc->getGroundModule().getTouchPos(4, 0);
+            *normal = acc->getGroundModule().getTouchNormal(4, 0);
+        }
+    }
+    return flag;
+}
+
 bool ftUtil::isItemShootStatus(soModuleAccesser*, int status) {
     switch (status) {
     case 0xA4:

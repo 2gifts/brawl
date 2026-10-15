@@ -49,6 +49,8 @@ public:
 
     // Cloud (pass-through platform) handling while airborne; names from the sora_melee map.
     static void setCloudThroughCheck(soModuleAccesser* acc);
+    // Touch mask of the fighter's ground shape plus position/normal of the first touched surface.
+    static u32 getAirGroundTouchInfo(soModuleAccesser* acc, Vec2f* pos, Vec2f* normal);
     static bool checkCloudThroughOut(soModuleAccesser* acc);
     static int getItemSquatWaitMotion(soModuleAccesser* acc);
 
