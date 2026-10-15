@@ -72,6 +72,10 @@ public:
     static float setAngleWallNormal(soModuleAccesser* acc, float lr);
     static bool isBodyUp(soModuleAccesser* acc);
 
+    // Ice block effect of a frozen fighter; the work int index receives the effect handle.
+    static void setIceEffect(soModuleAccesser* acc, u32 workIndex);
+    static void setIceExitEffect(soModuleAccesser* acc);
+
     // Controller rumble. The strength grows with the damage taken / the attack power dealt.
     static void setDamageRumble(soModuleAccesser* acc, float damage);
     static void setAttackRumble(soModuleAccesser* acc, float power);

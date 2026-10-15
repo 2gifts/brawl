@@ -14,6 +14,7 @@
 #include <so/kinetic/so_kinetic_module_impl.h>
 #include <so/controller/so_controller_module_impl.h>
 #include <so/so_kinetic_energy_normal.h>
+#include <so/effect/so_effect_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/model/so_model_module_simple.h>
 #include <so/so_value_accesser.h>
@@ -117,6 +118,32 @@ float ftUtil::calcAdventureMulValue(soModuleAccesser* acc, u32 nearDistanceId, u
         }
     }
     return 1.0f;
+}
+
+// Spawns the ice block effect following the fighter (frozen by an ice attack) and keeps the effect handle in the given work
+// int. The scale follows the common constant 0xC26.
+// HYPOTHESIS: effect IDs 0x3E (ice) / 0x3C (ice break) and the meaning of the constants.
+void ftUtil::setIceEffect(soModuleAccesser* acc, u32 workIndex) {
+    float scale = soValueAccesser::getConstantFloat(acc, 0xC26, 0);
+    Vec3f rotation(0.0f, 0.0f, 0.0f);
+    float z = soValueAccesser::getConstantFloat(acc, 0xC25, 0);
+    float y = soValueAccesser::getConstantFloat(acc, 0xC24, 0);
+    Vec3f position(0.0f, y, z);
+    soEffectModule& effect = acc->getEffectModule();
+    u32 handle = effect.reqFollow(static_cast<EfID>(0x3E), soValueAccesser::getConstantInt(acc, 0x59E6, 0), &position, &rotation,
+                                  scale / 8.5f, false, 0, 0, -1);
+    acc->getWorkManageModule().setInt(handle, workIndex);
+}
+
+void ftUtil::setIceExitEffect(soModuleAccesser* acc) {
+    float scale = soValueAccesser::getConstantFloat(acc, 0xC26, 0);
+    Vec3f rotation(0.0f, 0.0f, 0.0f);
+    float z = soValueAccesser::getConstantFloat(acc, 0xC25, 0);
+    float y = soValueAccesser::getConstantFloat(acc, 0xC24, 0);
+    Vec3f position(0.0f, y, z);
+    soEffectModule& effect = acc->getEffectModule();
+    effect.reqFollow(static_cast<EfID>(0x3C), soValueAccesser::getConstantInt(acc, 0x59E6, 0), &position, &rotation,
+                     1.5f * (scale / 8.5f), false, 0, 0, -1);
 }
 
 bool ftUtil::isItemShootStatus(soModuleAccesser*, int status) {
