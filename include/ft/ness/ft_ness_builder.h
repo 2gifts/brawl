@@ -78,11 +78,13 @@ public:
             Heaps::HeapType nwMotionInstHeap);
 
     virtual void processUpdate();
+    virtual void processFixPosition();
     void** getExtendParam();
     virtual void onStart(int param);
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
     virtual void toDead(Dead::Reason deadReason);
+    virtual void notifyEventCollisionAbsorber(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser, float power, float posX, float posY);
     virtual void notifyEventCollisionReflector(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser, float power, float posX, float posY);
     virtual bool notifyEventCollisionReflectorCheck();
     virtual bool notifyEventCollisionAbsorberCheck();

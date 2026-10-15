@@ -206,6 +206,14 @@ extern "C" {
 float fn_114_B6DC(double y, double x) { return (float)atan2(y, x); }
 #pragma scheduling reset
 float fn_114_C4CC(float x) { return __fabsf(x); }
+// (Vec3f____ct) copy constructor, out of line in the original
+Vec3f* fn_114_B6C0(Vec3f* p, const Vec3f* src) {
+    p->m_x = src->m_x;
+    p->m_y = src->m_y;
+    p->m_z = src->m_z;
+    return p;
+}
+
 void fn_114_C4D4(Vec3f* p, const Vec3f* src, float z) {
     p->m_x = src->m_x;
     p->m_y = src->m_y;
@@ -823,4 +831,55 @@ void ftLucas::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* modu
         }
     }
     Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+
+// PSI Magnet: a hit that lands in the absorber is turned into healing (stored in the work module for the absorber check) and
+// the effect of the hit flows towards the fighter. HYPOTHESIS: the log position is the hit position; the table behind
+// the common data +0x88 holds the heal scale (+0x14) and its cap (+0x18).
+extern "C" Vec3f* fn_114_B6C0(Vec3f* p, const Vec3f* src);
+
+void ftLucas::notifyEventCollisionAbsorber(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser, float power, float posX, float posY) {
+    if (groupIndex == 0) {
+        soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+        soPostureModule& posture = m_moduleAccesser->getPostureModule();
+        float* table = *reinterpret_cast<float**>(reinterpret_cast<u8*>(m_commonData) + 0x88);
+        float amount = power * table[5];
+        if (amount > table[6]) {
+            amount = table[6];
+        }
+        work.addFloat(amount, 0x11000013);
+        Vec3f pos = posture.getPos();
+        // HYPOTHESIS: the original reuses the last float parameter for the side (the base call below receives it).
+        if (pos.m_x > collisionLog->m_pos.m_x) {
+            posY = -1.0f;
+        } else {
+            posY = 1.0f;
+        }
+        work.setFloat(posY, 0x11000014);
+        Vec3f node = moduleAccesser->getModelModule().getNodeGlobalOffsetFromTop(0x22);
+        if (posY != posture.getLr()) {
+            node.m_x = node.m_x * -1.0f;
+        }
+        Vec3fAdd(&pos, &pos, &node);
+        Vec3f delta;
+        Vec3f rot;
+        Vec3f hitCopy;
+        Vec3f effectPos;
+        Vec3fSub(&delta, &pos, fn_114_B6C0(&hitCopy, &collisionLog->m_pos));
+        float angle = fn_114_B6DC(delta.m_y, delta.m_x);
+        rot.m_x = 0.0f;
+        rot.m_y = 0.0f;
+        rot.m_z = angle;
+        float lengthSq = delta.m_z * delta.m_z + (delta.m_x * delta.m_x + delta.m_y * delta.m_y);
+        float length;
+        if ((float)fabs(lengthSq) <= 1.17549435e-38f) {
+            length = 0.0f;
+        } else {
+            length = lengthSq * rsqrtf(lengthSq);
+        }
+        float scale = length / 10.0f;
+        soEffectModule& effect = moduleAccesser->getEffectModule();
+        effect.req((EfID)0x7a, fn_114_B6C0(&effectPos, &collisionLog->m_pos), &rot, scale, 0, -1);
+    }
+    Fighter::notifyEventCollisionAbsorber(attackModule, collisionLog, groupIndex, moduleAccesser, power, posX, posY);
 }

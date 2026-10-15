@@ -11,6 +11,7 @@
 #include <ft/ft_owner.h>
 #include <wn/wn_lasso_status_view.h>
 #include <mt/mt_prng.h>
+#include <so/so_slow.h>
 #include <cm/cm_camera_controller.h>
 #include <ft/ness/ft_ness_extend_param_accesser.h>
 
@@ -204,6 +205,13 @@ float fn_101_BD7C(double y, double x) { return (float)atan2(y, x); }
 #pragma scheduling reset
 // (ftness__ABS_f_): __fabsf on float
 float fn_101_CA34(float x) { return __fabsf(x); }
+// (Vec3f____ct) copy constructor, out of line in the original
+Vec3f* fn_101_BD60(Vec3f* p, const Vec3f* src) {
+    p->m_x = src->m_x;
+    p->m_y = src->m_y;
+    p->m_z = src->m_z;
+    return p;
+}
 // (Vec3f____ct1): copies x and y from src, sets z
 void fn_101_C2CC(Vec3f* p, const Vec3f* src, float z) {
     p->m_x = src->m_x;
@@ -751,6 +759,94 @@ bool ftNess::notifyEventCollisionReflectorCheck() {
         m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
     }
     return Fighter::notifyEventCollisionReflectorCheck();
+}
+
+// HYPOTHESIS: a timed effect that spawns article 3 repeatedly: the work floats 0x11000015/0x11000016 are its interval and
+// timer, the work int 0x10000040 counts the spawns, and the flag 0x1200003d keeps it running until the data table (+0x90)
+// limit is reached.
+void ftNess::processFixPosition() {
+    if (soSlow::getInstance()->isAdjust() == true) {
+        soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+        if (work.isFlag(0x1200003d)) {
+            soGenerateArticleManageModule& articles = m_moduleAccesser->getGenerateArticleManageModule();
+            float* table = *reinterpret_cast<float**>(reinterpret_cast<u8*>(m_data) + 0x90);
+            float interval = work.getFloat(0x11000015);
+            float timer = work.getFloat(0x11000016);
+            int count = work.getInt(0x10000040);
+            if ((float)count < table[5]) {
+                timer += 1.0f;
+                if (timer >= interval) {
+                    articles.generate(3, 0, 0);
+                    timer = 0.0f;
+                    interval -= table[4];
+                    if (interval < 1.0f) {
+                        interval = 1.0f;
+                    }
+                    count++;
+                }
+                work.setFloat(interval, 0x11000015);
+                work.setFloat(timer, 0x11000016);
+                work.setInt(count, 0x10000040);
+            } else {
+                work.offFlag(0x1200003d);
+                work.setFloat(0.0f, 0x11000015);
+                work.setFloat(0.0f, 0x11000016);
+                work.setInt(0, 0x10000040);
+            }
+        }
+    }
+    Fighter::processFixPosition();
+}
+
+// PSI Magnet (shared with Lucas): a hit that lands in the absorber is turned into healing (stored in the work module for the absorber check) and
+// the effect of the hit flows towards the fighter. HYPOTHESIS: the log position is the hit position; the table behind
+// the the instance data +0x88 holds the heal scale (+0x14) and its cap (+0x18).
+extern "C" Vec3f* fn_101_BD60(Vec3f* p, const Vec3f* src);
+
+void ftNess::notifyEventCollisionAbsorber(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser, float power, float posX, float posY) {
+    if (groupIndex == 0) {
+        soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+        soPostureModule& posture = m_moduleAccesser->getPostureModule();
+        float* table = *reinterpret_cast<float**>(reinterpret_cast<u8*>(m_data) + 0x88);
+        float amount = power * table[5];
+        if (amount > table[6]) {
+            amount = table[6];
+        }
+        work.addFloat(amount, 0x11000013);
+        Vec3f pos = posture.getPos();
+        // HYPOTHESIS: the original reuses the last float parameter for the side (the base call below receives it).
+        if (pos.m_x > collisionLog->m_pos.m_x) {
+            posY = -1.0f;
+        } else {
+            posY = 1.0f;
+        }
+        work.setFloat(posY, 0x11000014);
+        Vec3f node = moduleAccesser->getModelModule().getNodeGlobalOffsetFromTop(0x25);
+        if (posY != posture.getLr()) {
+            node.m_x = node.m_x * -1.0f;
+        }
+        Vec3fAdd(&pos, &pos, &node);
+        Vec3f delta;
+        Vec3f rot;
+        Vec3f hitCopy;
+        Vec3f effectPos;
+        Vec3fSub(&delta, &pos, fn_101_BD60(&hitCopy, &collisionLog->m_pos));
+        float angle = fn_101_BD7C(delta.m_y, delta.m_x);
+        rot.m_x = 0.0f;
+        rot.m_y = 0.0f;
+        rot.m_z = angle;
+        float lengthSq = delta.m_z * delta.m_z + (delta.m_x * delta.m_x + delta.m_y * delta.m_y);
+        float length;
+        if ((float)fabs(lengthSq) <= 1.17549435e-38f) {
+            length = 0.0f;
+        } else {
+            length = lengthSq * rsqrtf(lengthSq);
+        }
+        float scale = length / 10.0f;
+        soEffectModule& effect = moduleAccesser->getEffectModule();
+        effect.req((EfID)0x7a, fn_101_BD60(&effectPos, &collisionLog->m_pos), &rot, scale, 0, -1);
+    }
+    Fighter::notifyEventCollisionAbsorber(attackModule, collisionLog, groupIndex, moduleAccesser, power, posX, posY);
 }
 
 // The absorbed hit heals: the amount and the side were stored by the absorber handler.
