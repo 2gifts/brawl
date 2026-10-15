@@ -51,7 +51,7 @@ void ftStatusUniqProcessRunBrake::execStatus(soModuleAccesser* moduleAccesser) {
                 moduleAccesser->getWorkManageModule().onFlag(RunBrake_Flag_RateSet);
             }
         } else {
-            if ((float)__fabs(speedX) > threshold) {
+            if ((float)__fabs(speedX) <= threshold) {
                 moduleAccesser->getMotionModule().setRate(s_runBrakeRate);
                 moduleAccesser->getWorkManageModule().offFlag(RunBrake_Flag_Brake);
             }

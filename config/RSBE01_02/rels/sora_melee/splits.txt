@@ -4883,6 +4883,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_run.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_run_brake.cpp:
 	.text       start:0x001664E0 end:0x00166864
 	.ctors      start:0x000000A8 end:0x000000AC
+	.rodata     start:0x00002050 end:0x00002058
+	.data       start:0x0002E910 end:0x0002E980
+	.bss        start:0x000048B8 end:0x000048C8
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_turn.cpp:
 	.text       start:0x00166864 end:0x00166C44
@@ -4916,6 +4919,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_glide.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_jump_squat.cpp:
 	.text       start:0x00168AA8 end:0x00168C04
 	.ctors      start:0x000000C4 end:0x000000C8
+	.rodata     start:0x000020A8 end:0x000020C0
+	.data       start:0x0002EC28 end:0x0002ECA0
+	.bss        start:0x00004928 end:0x00004938
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_squat.cpp:
 	.text       start:0x00168C04 end:0x0016901C
@@ -4932,6 +4938,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_smash_attack.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_attack_air.cpp:
 	.text       start:0x00169900 end:0x00169A04
 	.ctors      start:0x000000D4 end:0x000000D8
+	.data       start:0x0002EE00 end:0x0002EE78
+	.bss        start:0x00004968 end:0x00004978
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_landing.cpp:
 	.text       start:0x00169A04 end:0x00169FA0
@@ -5046,6 +5054,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_catch_pull.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_catch_wait.cpp:
 	.text       start:0x00178C04 end:0x00178D74
 	.ctors      start:0x00000130 end:0x00000134
+	.data       start:0x0002FF08 end:0x0002FF88
+	.bss        start:0x00004B00 end:0x00004B10
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_catch_cut.cpp:
 	.text       start:0x00178D74 end:0x00178EC0
@@ -5097,6 +5107,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_item_lift.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_item_throw.cpp:
 	.text       start:0x0017ADCC end:0x0017AFD4
 	.ctors      start:0x0000015C end:0x00000160
+	.rodata     start:0x00002370 end:0x00002378
+	.data       start:0x00030430 end:0x000304A8
+	.bss        start:0x00004BB0 end:0x00004BC0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_item_shoot.cpp:
 	.text       start:0x0017AFD4 end:0x0017DC58
@@ -5243,6 +5256,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_hammer.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_koopa_dived.cpp:
 	.text       start:0x00189EF8 end:0x0018A0BC
 	.ctors      start:0x000001DC end:0x000001E0
+	.rodata     start:0x00002520 end:0x00002528
+	.data       start:0x00031508 end:0x00031580
+	.bss        start:0x00004DF0 end:0x00004E00
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso.cpp:
 	.text       start:0x0018A0BC end:0x0018A1EC
