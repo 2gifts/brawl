@@ -1,3 +1,4 @@
+#define MT_VEC3F_SUB_DISTINCT // MATCH-ONLY: subtraction register form of the original
 #define MT_VEC3F_MUL_INLINE // paired-single Vec3f scale, as in the original code
 #include <ft/fighter.h>
 #include <ft/ft_external_value_accesser.h>
@@ -54,11 +55,13 @@ void ftStatusUniqProcessAdvFollow::execFixPos(soModuleAccesser* moduleAccesser) 
                 return;
             }
             pos = pos + diff * speed;
-            float nextSpeed = moduleAccesser->getWorkManageModule().getFloat(0x21000004) + 0.008f;
+            float nextSpeed = moduleAccesser->getWorkManageModule().getFloat(0x21000004);
+            nextSpeed += 0.008f;
             moduleAccesser->getWorkManageModule().setFloat(nextSpeed, 0x21000004);
             moduleAccesser->getPostureModule().setPos(&pos);
+            soEffectModule& effect = moduleAccesser->getEffectModule();
             int effectHandle = moduleAccesser->getWorkManageModule().getInt(0x20000000);
-            moduleAccesser->getEffectModule().setPos(effectHandle, &pos);
+            effect.setPos(effectHandle, &pos);
         } else {
             moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x21000004);
         }

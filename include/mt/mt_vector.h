@@ -222,6 +222,8 @@ public:
                      register const Vec3f* rhs) {
 #ifdef MT_VEC3F_SUB_AIR_LASSO
         register f32 fr0, fr1, fr2;
+#elif defined(MT_VEC3F_SUB_DISTINCT)
+        register f32 fr0, fr1, fr2, fr3, fr4, fr5;
 #else
         register f32 fr3, fr2, fr1, fr0;
 #endif
@@ -238,6 +240,16 @@ public:
             ps_sub fr0, fr0, fr1
             psq_st fr2, Vec3f.m_x(pOut), 0, 0
             psq_st fr0, Vec3f.m_z(pOut), 1, 0
+#elif defined(MT_VEC3F_SUB_DISTINCT)
+            // MATCH-ONLY: every value in its own register variable.
+            psq_l  fr0, Vec3f.m_x(lhs), 0, 0
+            psq_l  fr1, Vec3f.m_x(rhs), 0, 0
+            psq_l  fr2, Vec3f.m_z(lhs), 1, 0
+            psq_l  fr3, Vec3f.m_z(rhs), 1, 0
+            ps_sub fr4, fr0, fr1
+            ps_sub fr5, fr2, fr3
+            psq_st fr4, Vec3f.m_x(pOut), 0, 0
+            psq_st fr5, Vec3f.m_z(pOut), 1, 0
 #elif defined(MT_VEC3F_BIKE_UTILITY_OPERATORS)
             // MATCH-ONLY: retain the same native register order for subtraction.
             psq_l  fr3, Vec3f.m_x(lhs), 0, 0
