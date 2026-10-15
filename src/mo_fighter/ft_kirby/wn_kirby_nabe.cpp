@@ -5,7 +5,6 @@
 #define FT_REL_LINK_EXTERN
 #define MT_VEC3F_CTOR_NOINLINE
 #define MT_VEC3F_ASSIGN_NOINLINE
-#define MT_VEC2F_ASSIGN_NOINLINE
 #define MT_VEC2F_PLAIN_BASE
 #include <wn/wn_module_accesser_builder.h>
 #include <wn/kirby/wn_kirby_nabe.h>
@@ -16,8 +15,32 @@
 #include <so/status/so_status_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
 
-// HYPOTHESIS: the status unique process shared by all statuses of the pot (not yet named).
-extern "C" soStatusUniqProcess lbl_96_bss_12EC;
+#include <so/link/so_link_module_impl.h>
+#include <so/model/so_model_module_simple.h>
+#include <so/posture/so_posture_module_simple.h>
+#include <so/kinetic/so_kinetic_module_impl.h>
+#include <wn/wn_kinetic_energy_normal.h>
+#include <math.h>
+
+// The status unique process shared by all statuses of the pot.
+class wnKirbyNabeStatusUniqProcess : public soStatusUniqProcess {
+public:
+    virtual ~wnKirbyNabeStatusUniqProcess() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStop(soModuleAccesser* moduleAccesser);
+    virtual void execFixPos(soModuleAccesser* moduleAccesser);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
+    void setModelTurn(soModuleAccesser* moduleAccesser);
+    void checkAttachGround(soModuleAccesser* moduleAccesser);
+};
+
+wnKirbyNabeStatusUniqProcess g_wnKirbyNabeStatusUniqProcess;
+
+// HYPOTHESIS: the event the pot sends to its parent when it lands.
+struct wnKirbyNabeLinkEvent : soLinkEventArgs {
+    explicit wnKirbyNabeLinkEvent(int eventKind) : soLinkEventArgs(eventKind) { }
+};
 
 wnKirbyNabe::wnKirbyNabe(s32 articleId, const wnArticleBuildInfo& info, const wnKirbyNabeData* data) :
     wnWeaponBuilder<wnKirbyNabeModuleAccesserBuildConfig>(
@@ -25,8 +48,8 @@ wnKirbyNabe::wnKirbyNabe(s32 articleId, const wnArticleBuildInfo& info, const wn
         wnModuleAccesserBuildData(0x91, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
                                   info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &g_soParamAccesserNull,
                                   0, 0, 0, 0, 0, 0, 0)) {
-    soStatusUniqProcess* procs[6] = { &lbl_96_bss_12EC, &lbl_96_bss_12EC, &lbl_96_bss_12EC, &lbl_96_bss_12EC, &lbl_96_bss_12EC,
-                                      &lbl_96_bss_12EC };
+    soStatusUniqProcess* procs[6] = { &g_wnKirbyNabeStatusUniqProcess, &g_wnKirbyNabeStatusUniqProcess, &g_wnKirbyNabeStatusUniqProcess,
+                                      &g_wnKirbyNabeStatusUniqProcess, &g_wnKirbyNabeStatusUniqProcess, &g_wnKirbyNabeStatusUniqProcess };
     m_moduleAccesser->getStatusModule().addRangeUniqProc(procs, 6);
     Weapon::deactivate(false);
 }
@@ -93,4 +116,126 @@ void wnKirbyNabe::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* 
         break;
     }
     Weapon::notifyEventLink(eventInfo, moduleAccesser, linkedObject, unk4);
+}
+
+void wnKirbyNabeStatusUniqProcess::initStatus(soModuleAccesser* moduleAccesser) {
+    wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0:
+        moduleAccesser->getWorkManageModule().onFlag(0x22000000);
+        break;
+    case 1:
+        energy.disable();
+        setModelTurn(moduleAccesser);
+        break;
+    case 2:
+    case 3:
+    case 4:
+        setModelTurn(moduleAccesser);
+        break;
+    }
+}
+
+void wnKirbyNabeStatusUniqProcess::execStatus(soModuleAccesser* moduleAccesser) {
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0:
+        if (moduleAccesser->getWorkManageModule().isFlag(0x22000000)) {
+            wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
+            float parentScale = moduleAccesser->getLinkModule().getParentScale(1);
+            float limit = moduleAccesser->getWorkManageModule().getFloat(0x21000000);
+            parentScale *= moduleAccesser->getWorkManageModule().getFloat(0x21000001);
+            u32 node = 0;
+            Vec3f parentPos = moduleAccesser->getLinkModule().getParentModelNodeGlobalPosition(1u, node, false);
+            Vec3f pos = moduleAccesser->getPostureModule().getPos();
+            if (__fabsf(parentPos.m_x - pos.m_x) < parentScale) {
+                float speed = parentScale - __fabsf(parentPos.m_x - pos.m_x);
+                if (limit > speed) {
+                    limit = speed;
+                }
+                Vec2f velocity(limit, 0.0f);
+                energy.m_speed = velocity;
+                energy.enable();
+            } else {
+                moduleAccesser->getWorkManageModule().offFlag(0x22000000);
+                moduleAccesser->getWorkManageModule().onFlag(0x22000002);
+                energy.disable();
+            }
+        }
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        setModelTurn(moduleAccesser);
+        break;
+    }
+}
+
+void wnKirbyNabeStatusUniqProcess::execStop(soModuleAccesser* moduleAccesser) {
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        setModelTurn(moduleAccesser);
+        break;
+    }
+}
+
+void wnKirbyNabeStatusUniqProcess::execFixPos(soModuleAccesser* moduleAccesser) {
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0:
+        if (moduleAccesser->getPostureModule().getLr() == -1.0f) {
+            moduleAccesser->getModelModule().setNodeRotateY(1, 90.0f);
+        }
+        if (moduleAccesser->getWorkManageModule().isFlag(0x22000000)) {
+            if (moduleAccesser->getGroundModule().isTouch(static_cast<grCollStatus::TouchMask>(4), 0)) {
+                moduleAccesser->getWorkManageModule().offFlag(0x22000000);
+                wnKirbyNabeLinkEvent event(0x455);
+                moduleAccesser->getLinkModule().sendEventParents(1, event);
+                dynamic_cast<wnKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0)).disable();
+                moduleAccesser->getWorkManageModule().onFlag(0x22000002);
+            }
+        }
+        if (moduleAccesser->getWorkManageModule().isFlag(0x22000002)) {
+            checkAttachGround(moduleAccesser);
+            moduleAccesser->getWorkManageModule().offFlag(0x22000002);
+            moduleAccesser->getWorkManageModule().onFlag(0x22000003);
+        }
+        break;
+    }
+}
+
+void wnKirbyNabeStatusUniqProcess::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
+    switch (nextStatus) {
+    case 1:
+        if (!moduleAccesser->getWorkManageModule().isFlag(0x22000003)) {
+            checkAttachGround(moduleAccesser);
+        }
+        break;
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+        break;
+    default:
+        if (moduleAccesser->getLinkModule().isLinked(6)) {
+            wnKirbyNabeLinkEvent event(0x456);
+            moduleAccesser->getLinkModule().sendEventNodes(6, event, 0);
+        }
+        break;
+    }
+}
+
+void wnKirbyNabeStatusUniqProcess::setModelTurn(soModuleAccesser* moduleAccesser) {
+    Vec3f rot = moduleAccesser->getModelModule().getNodeRotate(1);
+    rot.m_y = moduleAccesser->getPostureModule().getLr() == 1.0f ? -90.0f : 90.0f;
+    moduleAccesser->getModelModule().setNodeRotate(1, &rot);
+}
+
+void wnKirbyNabeStatusUniqProcess::checkAttachGround(soModuleAccesser* moduleAccesser) {
+    if (moduleAccesser->getSituationModule().getKind() == Situation_Air && moduleAccesser->getGroundModule().attachGround(0) == true) {
+        moduleAccesser->getSituationModule().setKind(Situation_Ground, false);
+        moduleAccesser->getGroundModule().setCorrect(soGroundShapeImpl::Correct_Ground, 0);
+    }
 }
