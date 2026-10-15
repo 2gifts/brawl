@@ -9,6 +9,7 @@
 #include <ft/ness/ft_ness_builder.h>
 #include <ft/ness/ft_ness_transactor.h>
 #include <ft/ft_owner.h>
+#include <wn/wn_lasso_status_view.h>
 #include <mt/mt_prng.h>
 #include <cm/cm_camera_controller.h>
 #include <ft/ness/ft_ness_extend_param_accesser.h>
@@ -704,4 +705,76 @@ bool ftNess::activeArticle4(wnNessYoyoHead* weapon, soModuleAccesser* acc) {
     s32 team = founder.getOwner()->getTeam();
     weapon->activate(taskId, resources.getResourceIdAccesser()->getEtcResId(), team, &pos, lr, flag);
     return true;
+}
+
+// ---- fighter events ---------------------------------------------------------------------------------------------------
+// HYPOTHESIS: work variables (names from how the statuses use them): flag 0x1200003d, floats 0x11000015 and 0x11000016, int
+// 0x10000040 belong to the PK Starstorm bookkeeping; they are reset when the fighter starts and when it dies.
+
+void ftNess::onStart(int param) {
+    Fighter::onStart(param);
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+    work.offFlag(0x1200003d);
+    work.setFloat(0.0f, 0x11000015);
+    work.setFloat(0.0f, 0x11000016);
+    work.setInt(0, 0x10000040);
+    wnLassoGetAltStatus(m_moduleAccesser)->slot94();
+}
+
+void ftNess::toDead(Dead::Reason deadReason) {
+    Fighter::toDead(deadReason);
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+    work.offFlag(0x1200003d);
+    work.setFloat(0.0f, 0x11000015);
+    work.setFloat(0.0f, 0x11000016);
+    work.setInt(0, 0x10000040);
+}
+
+// The reflector keeps two flags for the frame: the hit was too weak for it (unk4AE24) or it stopped it (unk4AE25).
+// HYPOTHESIS: names of both flags.
+void ftNess::notifyEventCollisionReflector(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser, float power, float posX, float posY) {
+    if ((s32)groupIndex == 2) {
+        if (power >= m_moduleAccesser->getCollisionReflectorModule().getAttackLimit(groupIndex)) {
+            unk4AE25 = 1;
+            return;
+        }
+        unk4AE24 = 1;
+    }
+    Fighter::notifyEventCollisionReflector(attackModule, collisionLog, groupIndex, moduleAccesser, power, posX, posY);
+}
+
+bool ftNess::notifyEventCollisionReflectorCheck() {
+    if (unk4AE24 == 1) {
+        return true;
+    }
+    if (unk4AE25 == 1) {
+        m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
+    }
+    return Fighter::notifyEventCollisionReflectorCheck();
+}
+
+// The absorbed hit heals: the amount and the side were stored by the absorber handler.
+bool ftNess::notifyEventCollisionAbsorberCheck() {
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+    float amount = work.getFloat(0x11000013);
+    float side = work.getFloat(0x11000014);
+    work.setFloat(0.0f, 0x11000013);
+    work.setFloat(0.0f, 0x11000014);
+    if (amount > 0.0f) {
+        soPostureModule& posture = m_moduleAccesser->getPostureModule();
+        soStatusModule& status = m_moduleAccesser->getStatusModule();
+        soMotionModule& motion = m_moduleAccesser->getMotionModule();
+        soDamageModule& damage = m_moduleAccesser->getDamageModule();
+        float current = damage.getDamage(0);
+        if (current - amount < 0.0f) {
+            amount = amount + (current - amount);
+        }
+        damage.addDamage(-amount, 0);
+        posture.setLr(side);
+        float* table = *reinterpret_cast<float**>(reinterpret_cast<u8*>(m_data) + 0x88);
+        if (!(status.getStatusKind() == 0x11f && motion.getFrame() <= table[2])) {
+            status.changeStatusRequest(0x11f, m_moduleAccesser);
+        }
+    }
+    return false;
 }
