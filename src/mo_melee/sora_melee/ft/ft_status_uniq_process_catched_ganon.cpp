@@ -189,6 +189,10 @@ void ftStatusUniqProcessCatchedGanon::initStatus(soModuleAccesser* moduleAccesse
 void ftStatusUniqProcessCatchedGanon::execStatus(soModuleAccesser* moduleAccesser) {
 }
 
+bool ftStatusUniqProcessCatchedGanon::checkDamage(soModuleAccesser* moduleAccesser, void* hit) {
+    return true;
+}
+
 void ftStatusUniqProcessCatchedGanon::exitStatus(soModuleAccesser* moduleAccesser, int status) {
     switch (status) {
     case 0x42:
@@ -200,8 +204,4 @@ void ftStatusUniqProcessCatchedGanon::exitStatus(soModuleAccesser* moduleAccesse
         reinterpret_cast<ftCaptureModuleView*>(moduleAccesser->m_enumerationStart->m_captureModule)->unk30(0, 0);
         break;
     }
-}
-
-bool ftStatusUniqProcessCatchedGanon::checkDamage(soModuleAccesser* moduleAccesser, void* hit) {
-    return true;
 }

@@ -184,13 +184,13 @@ void ftStatusUniqProcessClungGanon::initStatus(soModuleAccesser* moduleAccesser)
     motion->setKindOffset(flag);
 }
 
+bool ftStatusUniqProcessClungGanon::checkDamage(soModuleAccesser* moduleAccesser, void* hit) {
+    return reinterpret_cast<ftCaptureModuleView*>(moduleAccesser->m_enumerationStart->m_captureModule)->unk38(moduleAccesser, hit);
+}
+
 void ftStatusUniqProcessClungGanon::exitStatus(soModuleAccesser* moduleAccesser, int status) {
     if (status != 0x42) {
         reinterpret_cast<ftCaptureModuleView*>(moduleAccesser->m_enumerationStart->m_captureModule)->unk54(1);
         reinterpret_cast<ftCaptureModuleView*>(moduleAccesser->m_enumerationStart->m_captureModule)->unk4C(0);
     }
-}
-
-bool ftStatusUniqProcessClungGanon::checkDamage(soModuleAccesser* moduleAccesser, void* hit) {
-    return reinterpret_cast<ftCaptureModuleView*>(moduleAccesser->m_enumerationStart->m_captureModule)->unk38(moduleAccesser, hit);
 }

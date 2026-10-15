@@ -64,10 +64,6 @@ void ftStatusUniqProcessRun::initStatus(soModuleAccesser* moduleAccesser) {
     moduleAccesser->getCameraModule().setRun(0);
 }
 
-void ftStatusUniqProcessRun::exitStatus(soModuleAccesser* moduleAccesser, int) {
-    moduleAccesser->getCameraModule().exitRun(0);
-}
-
 void ftStatusUniqProcessRun::execStatus(soModuleAccesser* moduleAccesser) {
     float current = moduleAccesser->getWorkManageModule().getFloat(0x21000005);
     fn_27_165458(moduleAccesser, 0x21000005, current, soValueAccesser::getConstantFloat(moduleAccesser, 0xBC0, 0),
@@ -99,4 +95,8 @@ bool ftStatusUniqProcessRun::onChangeLr(soModuleAccesser* moduleAccesser, float,
     float speed = moduleAccesser->getWorkManageModule().getFloat(0x21000005);
     moduleAccesser->getWorkManageModule().setFloat(-speed, 0x21000005);
     return false;
+}
+
+void ftStatusUniqProcessRun::exitStatus(soModuleAccesser* moduleAccesser, int) {
+    moduleAccesser->getCameraModule().exitRun(0);
 }
