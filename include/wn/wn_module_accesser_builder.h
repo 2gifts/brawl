@@ -439,6 +439,10 @@ public:
 };
 template <>
 class soAreaModuleBuilder<soAreaModuleBuildConfigNull> {
+    // HYPOTHESIS: the null territory and target search builders (which use the shared null modules) follow the area builder;
+    // only their storage (one byte each) is visible in the layout.
+    u8 unkTerritory;
+    u8 unkTargetSearch;
 public:
     soAreaModuleBuilder(soModuleAccesser*, u8, soEventObserverRegistrationDesc*) { }
     void* getModule() { return lbl_27_bss_598; }
@@ -549,7 +553,7 @@ class soMotionModuleBuilder<soMotionModuleBuildConfig<DataNum, T, 0, 1, Transiti
                                                       soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> > > {
     soTransitionModuleBuilder<TransitionConfig> m_transitionBuilder;
     soSingletonHolder<soArrayNull<soPartialAnim> > m_partialAnims;
-    soArrayVector<soOtherAnim, 1> m_otherAnims;
+    soArraySelectHolder<1, soArrayVector<soOtherAnim, 1>, soSingletonHolder<soArrayNull<soOtherAnim> > > m_otherAnims;
     soSingletonHolder<soArrayNull<soTransitionTermPack> > m_termPacks;
     soSingletonHolder<soArrayNull<u32> > m_u32s;
     soArrayContractibleTable<soMotionDataConst> m_motionData;
@@ -560,7 +564,7 @@ public:
         m_transitionBuilder(), m_otherAnims(1, 0),
         m_motionData((const soMotionData*)motionData, DataNum),
         m_module(acc, &m_motionData, m_transitionBuilder.getModule(),
-                 soSingletonHolder<soArrayNull<soPartialAnim> >::getInstance(), &m_otherAnims,
+                 soSingletonHolder<soArrayNull<soPartialAnim> >::getInstance(), m_otherAnims.get(),
                  (soArray<soTransitionTermPack>*)lbl_27_bss_9BC,
                  soSingletonHolder<soArrayNull<u32> >::getInstance(),
                  static_cast<soEventManager&>(acc->getEventManageModule()).getManageId(), false,
