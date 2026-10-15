@@ -258,6 +258,7 @@ void ftStatusUniqProcessKinoko::execStatus(soModuleAccesser* moduleAccesser) {
 }
 
 void ftStatusUniqProcessKinoko::exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind) {
+    StageObject* stageObject;
     int kind = moduleAccesser->getWorkManageModule().getInt(0x10000023);
     int stage = moduleAccesser->getWorkManageModule().getInt(0x10000024);
     if (nextStatusKind != 0xf2 && nextStatusKind != 0xf3) {
@@ -270,21 +271,21 @@ void ftStatusUniqProcessKinoko::exitStatus(soModuleAccesser* moduleAccesser, int
     switch (kind) {
     case 3:
         {
-            StageObject* stageObject = moduleAccesser->m_stageObject;
+            stageObject = moduleAccesser->m_stageObject;
             float target = moduleAccesser->getWorkManageModule().getFloat(0x1100000a);
             fn_27_137EA4(&dynamic_cast<Fighter&>(*stageObject), 1, stage, 3, -1, target);
         }
         break;
     case 5:
         {
-            StageObject* stageObject = moduleAccesser->m_stageObject;
+            stageObject = moduleAccesser->m_stageObject;
             float target = moduleAccesser->getWorkManageModule().getFloat(0x1100000a);
             fn_27_137EA4(&dynamic_cast<Fighter&>(*stageObject), 1, stage, 5, -1, target);
         }
         break;
     default:
         {
-            StageObject* stageObject = moduleAccesser->m_stageObject;
+            stageObject = moduleAccesser->m_stageObject;
             float target = moduleAccesser->getWorkManageModule().getFloat(0x1100000a);
             fn_27_137EA4(&dynamic_cast<Fighter&>(*stageObject), 0, 0, kind, -1, target);
         }

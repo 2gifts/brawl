@@ -2633,7 +2633,7 @@ config.libs = [
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_reach.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_failure.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_pit_fall.cpp"),
-            Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_kinoko.cpp"),
+            Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_kinoko.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_entry.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_appeal.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_win.cpp"),
