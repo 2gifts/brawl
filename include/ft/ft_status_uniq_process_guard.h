@@ -14,7 +14,8 @@ public:
     virtual ~ftStatusUniqProcessGuardFunc() { }
     virtual void updateShield(soModuleAccesser* moduleAccesser);
     virtual void setShieldScale(soModuleAccesser* moduleAccesser);
-    virtual void checkHitStopDelay(soModuleAccesser* moduleAccesser);
+    // HYPOTHESIS: the bool is the end-of-hitstop flag passed from leaveStop.
+    virtual void checkHitStopDelay(soModuleAccesser* moduleAccesser, bool isHitStopEnd);
     virtual void checkHitStopDelayFlick(soModuleAccesser* moduleAccesser);
 };
 

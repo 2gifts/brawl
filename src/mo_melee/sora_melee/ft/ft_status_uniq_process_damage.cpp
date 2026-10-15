@@ -117,7 +117,8 @@ void ftStatusUniqProcessDamage::initStatus(soModuleAccesser* moduleAccesser) {
     case 0x5a: {
         float rumble;
         float base = (float)soValueAccesser::getConstantInt(moduleAccesser, 0x5a86, 0);
-        rumble = soValueAccesser::getConstantFloat(moduleAccesser, 0xc80, 0) + base;
+        float c80 = soValueAccesser::getConstantFloat(moduleAccesser, 0xc80, 0);
+        rumble = c80 + base;
         rumble -= moduleAccesser->getDamageModule().getDamage(0);
         float c81 = soValueAccesser::getConstantFloat(moduleAccesser, 0xc81, 0);
         if (c81 < c81) {
