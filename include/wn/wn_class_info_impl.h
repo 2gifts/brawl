@@ -8,7 +8,7 @@
 #include <wn/wn_class_info.h>
 
 // HYPOTHESIS: the blaster class infos fetch their article data through g_ftCommonDataAccesser (the module
-// map names the call targets getWeaponData6/13/48/49/53/54/56/57/66/68/74/81/85/89/91/101/109/121/135/144, all in a 151-entry overload family whose C++
+// map names the call targets getWeaponData6/13/48/49/53/54/56/57/66/68/74/81/85/89/91/101/109/121/135/144 family, plus 31/39/41/51/52/82/86/105/119/150 for the units below, all in a 151-entry overload family whose C++
 // signature is not recoverable), so the accessers get referenced by their unmangled names.
 extern "C" void* fn_27_148414(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_14875C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
@@ -30,6 +30,15 @@ extern "C" void* fn_27_148E54(const ftCommonDataAccesser* accesser, s32 subKind,
 extern "C" void* fn_27_148910(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1489B8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148DA4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148BD0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148524(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1480CC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148CE8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1491DC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148264(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1482C0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1494D0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_149B70(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 // The data types the dispatch below selects on; the instantiating unit includes its article header,
 // which declares the struct with this name (the layout is not needed here, only the pointer type).
@@ -53,6 +62,15 @@ struct wnLucasPKFlashData;
 struct wnDededeStarmissileData;
 struct wnDiddyGunData;
 struct wnMarioFireballData;
+struct wnSZerosuitParalyzerBulletData;
+struct wnFoxLandMasterShellData;
+struct wnPikachuThunderJolt2Data;
+struct wnSheikNeedleHaveData;
+struct wnPopoIceShotData;
+struct wnPokeFushigisouSeedData;
+struct wnPokeZenigameWaterData;
+struct wnLucarioAuraBallData;
+struct wnDummyFighterData;
 
 // Data-type dispatch so the template below picks the right family's accesser; extend per blaster family as
 // its data class is reconstructed. HYPOTHESIS: helper name; it is inline and leaves no symbol.
@@ -119,10 +137,46 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
     return fn_27_148DA4(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
 
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnSZerosuitParalyzerBulletData*) {
+    return fn_27_148BD0(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnFoxLandMasterShellData*) {
+    return fn_27_148524(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnPikachuThunderJolt2Data*) {
+    return fn_27_1480CC(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnSheikNeedleHaveData*) {
+    return fn_27_148CE8(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnPopoIceShotData*) {
+    return fn_27_1491DC(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnPokeFushigisouSeedData*) {
+    return fn_27_148264(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnPokeZenigameWaterData*) {
+    return fn_27_1482C0(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnLucarioAuraBallData*) {
+    return fn_27_1494D0(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnDummyFighterData*) {
+    return fn_27_149B70(&g_ftCommonDataAccesser, subKind, resourceGroup);
+}
+
 // Class info for one article kind: registers itself in the class info table during static initialization
 // and builds the article array when the article manager asks for it.
 //   K: article kind (30/31 Fox, 35/36 Falco, 38/39 Wolf; blaster first, bullet second; plus 5 Link,
-//      83 Samus, 91 Pit, 140 Toon Link one-shot articles, 53/60/68/77/98/102/117/150 single-kind articles, 54 Diddy popgun, 149 Luigi fireball).
+//      83 Samus, 91 Pit, 140 Toon Link one-shot articles, 53/60/68/77/98/102/117/150 single-kind articles, 54 Diddy popgun, 149 Luigi fireball, 10 Pikachu thunder jolt 2, 64 Zerosuit paralyzer bullet, 69 Sheik held needle, 74/95 Pokemon seed and water gun, 99 Lucario aura ball, 109 Popo ice shot, 152 dummy fighter).
 //   T: article class, D: the data type its constructor consumes.
 // HYPOTHESIS: template spelling; the data strings prove the instantiation
 // wnClassInfoImpl<31, wnFoxBlasterBullet, wnFoxBlasterBulletData>.
