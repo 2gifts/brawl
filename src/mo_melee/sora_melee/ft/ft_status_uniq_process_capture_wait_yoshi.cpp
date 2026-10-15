@@ -25,10 +25,10 @@ public:
 
 ftStatusUniqProcessCaptureWaitYoshi g_ftStatusUniqProcessCaptureWaitYoshi;
 
-// HYPOTHESIS: being held by the Yoshi egg-lay gives the fighter a single hurtbox on the node 0x12e (sized by the inverse
-// of its scale), hides the model, starts the capture, and rumbles when coming from status 0x107.
+// HYPOTHESIS: being held by the Yoshi egg-lay gives the fighter a single hurtbox on the node 0x12e (radius 3 divided by its
+// scale), hides the model, starts the capture, and rumbles when coming from status 0x107.
 void ftStatusUniqProcessCaptureWaitYoshi::initStatus(soModuleAccesser* moduleAccesser) {
-    float one = 1.0f;
+    float three = 3.0f;
     soCollisionHitData hitData;
     hitData.m_startOffsetPos.m_x = 0.0f;
     hitData.m_startOffsetPos.m_y = 0.0f;
@@ -36,7 +36,7 @@ void ftStatusUniqProcessCaptureWaitYoshi::initStatus(soModuleAccesser* moduleAcc
     hitData.m_endOffsetPos.m_x = 0.0f;
     hitData.m_endOffsetPos.m_y = 0.0f;
     hitData.m_endOffsetPos.m_z = 0.0f;
-    hitData.m_size = one / moduleAccesser->getPostureModule().getScale();
+    hitData.m_size = three / moduleAccesser->getPostureModule().getScale();
     hitData.m_nodeIndex = moduleAccesser->getModelModule().getCorrectNodeId(0x12E);
     hitData.m_part = static_cast<soCollision::Part>(0);
     hitData.m_height = soCollisionHitData::Height_Low;
