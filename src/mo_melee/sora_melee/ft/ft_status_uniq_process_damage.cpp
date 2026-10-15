@@ -240,8 +240,9 @@ void ftStatusUniqProcessDamage::execStatus(soModuleAccesser* moduleAccesser) {
                 float stickY = moduleAccesser->getControllerModule().getStickY();
                 float threshold = soValueAccesser::getConstantFloat(moduleAccesser, 0xc65, 0);
                 float ySq = stickY * stickY;
-                    float xSq = stickX * stickX;
-                    if (xSq + ySq >= threshold * threshold) {
+                float xSq = stickX * stickX;
+                float thresholdSq = threshold * threshold;
+                if (xSq + ySq >= thresholdSq) {
                     applyDriftInput(moduleAccesser, damageLog, 0xc67, stickX, stickY);
                 }
             }
@@ -330,8 +331,9 @@ void ftStatusUniqProcessDamage::leaveStop(soModuleAccesser* moduleAccesser, int 
                 float stickY = moduleAccesser->getControllerModule().getStickY();
                 float threshold = soValueAccesser::getConstantFloat(moduleAccesser, 0xc65, 0);
                 float ySq = stickY * stickY;
-                    float xSq = stickX * stickX;
-                    if (xSq + ySq >= threshold * threshold) {
+                float xSq = stickX * stickX;
+                float thresholdSq = threshold * threshold;
+                if (xSq + ySq >= thresholdSq) {
                     applyDriftInput(moduleAccesser, damageLog, 0xc67, stickX, stickY);
                 }
             }
