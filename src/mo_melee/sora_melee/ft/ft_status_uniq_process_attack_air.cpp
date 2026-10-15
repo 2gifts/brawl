@@ -1,20 +1,12 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 
 #include <ft/fighter.h>
+#include <ft/ft_status_uniq_process_attack_air.h>
 #include <ft/ft_util.h>
 #include <so/kinetic/so_kinetic_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
-
-class ftStatusUniqProcessAttackAir : public soStatusUniqProcess {
-public:
-    virtual ~ftStatusUniqProcessAttackAir() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-};
 
 void ftStatusUniqProcessAttackAir::initStatus(soModuleAccesser* moduleAccesser) {
 }

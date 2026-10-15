@@ -56,6 +56,10 @@ void ftStatusUniqProcessCaptureWaitYoshi::initStatus(soModuleAccesser* moduleAcc
     moduleAccesser->getSituationModule().setKind(static_cast<SituationKind>(2), false);
 }
 
+void ftStatusUniqProcessCaptureWaitYoshi::execFixPos(soModuleAccesser* moduleAccesser) {
+    reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot44();
+}
+
 // Leaving the hold (except into 0x108, 0x109 or 0x42) puts the ground shape's safe position at the link offset, releases the
 // capture, clears work flag 0x1200003b, restores the hurtbox set and shows the model again.
 void ftStatusUniqProcessCaptureWaitYoshi::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
@@ -80,9 +84,6 @@ void ftStatusUniqProcessCaptureWaitYoshi::exitStatus(soModuleAccesser* moduleAcc
     moduleAccesser->getVisibilityModule().setWhole(1);
 }
 
-void ftStatusUniqProcessCaptureWaitYoshi::execFixPos(soModuleAccesser* moduleAccesser) {
-    reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot44();
-}
 bool ftStatusUniqProcessCaptureWaitYoshi::checkDamage(soModuleAccesser* moduleAccesser, void*) {
     return reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot34(0x109);
 }

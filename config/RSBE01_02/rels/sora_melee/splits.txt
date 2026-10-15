@@ -5539,6 +5539,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_capture_bucyulus.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_attack_air_inherit_jump_aerial_motion.cpp:
 	.text       start:0x00192724 end:0x00192AF8
 	.ctors      start:0x00000250 end:0x00000254
+	.rodata     start:0x00002698 end:0x000026A0
+	.data       start:0x00032978 end:0x00032A08
+	.bss        start:0x00005020 end:0x00005030
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_escape_air_inherit_jump_aerial_motion.cpp:
 	.text       start:0x00192AF8 end:0x00192D4C
