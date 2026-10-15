@@ -16,6 +16,8 @@
 #include <so/so_kinetic_energy_normal.h>
 #include <so/effect/so_effect_module_impl.h>
 #include <so/so_module_accesser.h>
+#include <so/motion/so_motion_module_impl.h>
+#include <so/stageobject.h>
 #include <so/model/so_model_module_simple.h>
 #include <so/so_value_accesser.h>
 
@@ -184,6 +186,31 @@ u32 ftUtil::getAirGroundTouchInfo(soModuleAccesser* acc, Vec2f* pos, Vec2f* norm
         }
     }
     return flag;
+}
+
+// Moves a fighter that grabbed a ceiling so its shape hangs below the ceiling line (the rhombus height is added to its
+// y position), then re-fits the ground shape with the new position. When flag is 1 the rhombus left-minimum flag is set too.
+// HYPOTHESIS: the third parameter is the facing direction (Lr) the fighter takes in the ceiling status.
+void ftUtil::adjustCeil(soModuleAccesser* acc, bool flag, float lr) {
+    acc->getPostureModule().setLr(lr);
+    acc->getPostureModule().updateRotYLr();
+    Vec3f transN = acc->getMotionModule().getTransNTranslate();
+    Vec3f pos = acc->getPostureModule().getPos();
+    clRhombus2D prevRhombus;
+    clRhombus2D rhombus;
+    acc->getGroundModule().getRhombus(&prevRhombus, &rhombus, 0);
+    float height = rhombus.m_upPos.m_y - rhombus.m_downPos.m_y;
+    pos.m_y += height + transN.m_y;
+    acc->getPostureModule().setPos(&pos);
+    acc->getGroundModule().setShapeFlag(soGroundShapeImpl::Shape_Rhombus_Flag_Min_U, true, 0);
+    acc->getGroundModule().update(1);
+    acc->getGroundModule().test(0);
+    pos = acc->getGroundModule().getCorrectPos(0);
+    acc->getPostureModule().setPos(&pos);
+    acc->m_stageObject->updateNodeSRT();
+    if (flag == true) {
+        acc->getGroundModule().setShapeFlag(soGroundShapeImpl::Shape_Rhombus_Flag_Min_L, true, 0);
+    }
 }
 
 bool ftUtil::isItemShootStatus(soModuleAccesser*, int status) {
