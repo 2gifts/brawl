@@ -86,6 +86,7 @@ FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soKineticEnergy*>, 8);
 #ifdef WN_SHARED_ARRAYS_1
 // These article builders call sora_melee-owned constructors and virtual methods.
 FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 1);
+FT_DOL_ARRAY_VECTOR(soCollisionHitPart, 1);
 // The status pointer vector uses the no-argument constructor, not the size overload.
 template <>
 class soArrayVector<soStatusUniqProcess*, 1> : public soArrayVectorAbstract<soStatusUniqProcess*> {
@@ -1058,8 +1059,9 @@ protected:
     wnKineticEnergyNormal m_energyNormal;       // the main movement energy (index 0)
     soKineticEnergyRotNormal m_energyRotNormal; // the rotation energy (index 1)
 public:
-    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd) :
-        Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), true),
+    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd,
+                    bool weaponFlag = true) :
+        Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), weaponFlag),
         m_modules(bd, this), m_energyNormal(), m_energyRotNormal() {
         Weapon::initialize();
         m_moduleAccesser->getKineticModule().addEnergy(&m_energyNormal, 0, soKineticEnergy::AttributeFlag(1), -1);

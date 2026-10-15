@@ -9,6 +9,25 @@
 class StageObject;
 class soModuleAccesser;
 
+#ifdef FT_MODULE_BUILDER
+// MATCH-ONLY: the constructor, destructor and initialize of this base are out-of-line functions in sora_melee (the
+// fighter and article RELs call them), so the class is specialized with them declared only.
+class soDamageEventObserver;
+template <>
+class soEventObserver<soDamageEventObserver> {
+public:
+    virtual void addObserver(s16 param1, s8 param2) { }
+    s16 m_manageID;
+    s16 m_unitID;
+    s16 m_sendID;
+    s32 getObserverId() const { return m_sendID; }
+    soEventObserver(s16 unitID); // sora_melee
+    ~soEventObserver();
+    void addObserverSub(s32 manageId, soDamageEventObserver* obsvr, s8 p3); // sora_melee
+    void initialize(s16 param1, s8 param2); // sora_melee
+};
+#endif
+
 class soDamageEventObserver : public soEventObserver<soDamageEventObserver> {
 public:
     soDamageEventObserver() : soEventObserver<soDamageEventObserver>(0x6) {};
