@@ -5247,6 +5247,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_drink.cpp:
 	.text       start:0x0018446C end:0x00184668
 	.ctors      start:0x00000194 end:0x00000198
+	.data       start:0x00030B18 end:0x00030B90
+	.bss        start:0x00004C90 end:0x00004CA0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_capture.cpp:
 	.text       start:0x00184668 end:0x00184F78

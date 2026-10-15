@@ -45,7 +45,7 @@ void ftStatusUniqProcessSwallowedDrink::execFixPos(soModuleAccesser* moduleAcces
 void ftStatusUniqProcessSwallowedDrink::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
     switch (nextStatus) {
     case 0xd2:
-        break;
+        return;
     default:
         reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot30(1, 0);
         moduleAccesser->getCollisionHitModule().cancelXluGlobal(0);

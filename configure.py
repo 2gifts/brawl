@@ -2609,7 +2609,7 @@ config.libs = [
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_bitten_wario_end.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_clung_captain.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed.cpp"),
-            Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_drink.cpp"),
+            Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_drink.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_capture.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_thrown.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_thrown_star.cpp"),
