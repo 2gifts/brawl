@@ -8,10 +8,20 @@
 
 class Vec3f;
 
+#ifdef MT_VEC2F_PLAIN_BASE
+// MATCH-ONLY: the owning unit copies whole vectors with the aggregate word copy of a plain base.
+struct Vec2fPlainBase {
+    float m_x;
+    float m_y;
+};
+class Vec2f : public Vec2fPlainBase {
+public:
+#else
 class Vec2f {
 public:
     float m_x;
     float m_y;
+#endif
 
     Vec2f() { }
     inline Vec2f(const Vec3f& xyz)
@@ -25,6 +35,8 @@ public:
 #endif
 #ifdef MT_VEC2F_CTOR_OUT_OF_LINE
         ; // MATCH-ONLY: an owning unit supplies the weak constructor in native order.
+#elif defined(MT_VEC2F_PLAIN_BASE)
+    { m_x = x; m_y = y; }
 #else
         : m_x(x), m_y(y) { }
 #endif
@@ -317,7 +329,11 @@ inline Vec3f Vec3f::operator+(const Vec3f& v) {
     Vec3fAdd(&result, this, &v);
     return result;
 }
+#ifdef MT_VEC2F_PLAIN_BASE
+inline Vec2f::Vec2f(const Vec3f& xyz) { m_x = xyz.m_x; m_y = xyz.m_y; }
+#else
 inline Vec2f::Vec2f(const Vec3f& xyz) : m_x(xyz.m_x), m_y(xyz.m_y) { }
+#endif
 #if defined(MATCHING) && defined(MT_VEC3F_MUL_INLINE)
 inline Vec3f Vec3f::operator*(const float c) {
     Vec3f result;
@@ -326,7 +342,11 @@ inline Vec3f Vec3f::operator*(const float c) {
 }
 #endif
 
-inline Vec3f Vec3f::operator-(const Vec3f& v) {
+inline Vec3f Vec3f::operator-(const Vec3f& v)
+#ifdef MT_VEC3F_SUB_NOINLINE
+    __attribute__((never_inline)) // MATCH-ONLY: retain the module's shared out-of-line subtraction.
+#endif
+{
     Vec3f result;
     Vec3fSub(&result, this, &v);
     return result;
