@@ -72,8 +72,19 @@ public:
     virtual void notifyDrawDone();
 
     bool isCompItemKindArchive(itKind kind, u32 variation, bool);
+    bool isCompItemKindArchivePreloadAll();
+    float getPerBase(itGenParam* param, ItemSwitch* itemSwitch);
+    bool isCompItemGenArchive(itGenSheetKind sheet);
+    bool isPassedProcessUpdate();
+    bool isCompFigureTexPreloadAll();
+    void startSuddenDeath();
+    void initializeSmashBallFlags();
+    void initializeDragoonFlags(int unk, bool isSuddenDeath);
+    bool isExclusiveManaphy(bool checkPokemonList);
+    BaseItem* getItemFromAreaId(int areaId);
+    bool isCompItemKindArchiveFromGenArchive(itGenSheetKind sheet);
     itArchive* preloadItemKindArchive(itKind kind, u32 variation, itArchive::Type archiveType, bool);
-    itGenSheetKind getRandBasicItemSheet(itGenId genKind = Item_Gen_Basic); // custom parameter
+    itGenSheetKind getRandBasicItemSheet();
     ItemKind getLotOneItemKind(itGenSheetKind* sheetKind, itGenId genKind, ItemSwitch* itemSwitch = NULL, bool unk = false);
     BaseItem* createItem(Vec3f* safePos, Vec3f* pos, float lr, itKind kind, u32 variation = 0, int createOwnerTaskId = -1,
                          soResourceModule* resourceModule = NULL, u8 groupNo = 0, int brresId = 0xffff,
@@ -98,6 +109,38 @@ public:
 
     bool isExclusiveSpecialItem(int unk1, bool unk2);
     bool isItemSwitch(int itemKind); // is the item enabled in the item switch
+
+    // Added locally (sora_melee 0x2A0D38 ... 0x2AB4D4): per-kind tables and small accessors.
+    void setItemGenLevel(itGenParam::Level level);
+    void preStartSettingSmashBallDropFrame(int frame1, int frame2);
+    const char* getItemKindName(int kind);
+    void setLotRate(int kind, float rate);
+    float getLotRate(int kind);
+    u8 isUseItemModel(int kind);
+    int getItemGroup(int kind);
+    int getItemVariationNum(int kind);
+    BaseItem* getItemFromIndex(u32 index);
+    bool isWeaponItem(int kind);
+
+    BaseItem* getSafeItemFromIndex(u32 index);
+    BaseItem* getItemFromKind(int kind);
+    int getGenItemNum();
+    int getItemShotNum();
+    void removeItemAll();
+    BaseItem* findLowPriorityItemInstance();
+
+    int getItemKindArchiveId(int kind);
+    void setExistDragoonParts(int part, int exist);
+    int createManaphyHeart(Vec3f* pos, int createOwnerTaskId, int targetTaskId);
+
+    int getPriorityItemInstance(BaseItem* item);
+
+    void removeItemSub(BaseItem* item, int immediate, int returnToPool);
+
+    float getLotValue(float base, int kind);
+
+    ItemKind getLotKirbyNormalItemKind();
+    ItemKind getLotKirbyTabemonoItemKind();
 
     static itManager* getInstance();
 };
