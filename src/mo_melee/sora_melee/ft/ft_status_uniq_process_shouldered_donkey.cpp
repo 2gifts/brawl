@@ -282,9 +282,8 @@ void ftStatusUniqProcessShoulderedDonkey::initStatus(soModuleAccesser* moduleAcc
         float c = soValueAccesser::getConstantFloat(moduleAccesser, 0xd4a, 0);
         void* damage = moduleAccesser->m_enumerationStart->m_damageModule;
         float damageValue = reinterpret_cast<ftDamageSecondaryView*>(damage)->unk50(0);
-        const float scale = 0.0f;
         reinterpret_cast<ftControllerModuleView*>(moduleAccesser->m_enumerationStart->m_controllerModule)
-            ->unkC8(0, -1, 0, 0, a + b * damageValue, scale, c);
+            ->unkC8(0, -1, 0, 0, a + b * damageValue, 0.0f, c);
         reinterpret_cast<ftCaptureModuleView*>(moduleAccesser->m_enumerationStart->m_captureModule)->unk3C();
         reinterpret_cast<ftLinkModuleView*>(moduleAccesser->m_enumerationStart->m_linkModule)->unk194(0, 3, 0);
     } else {
@@ -315,9 +314,8 @@ void ftStatusUniqProcessShoulderedDonkey::execFixPosCounter(soModuleAccesser* mo
         } else {
             c = soValueAccesser::getConstantFloat(moduleAccesser, 0xd4b, 0);
         }
-        const float scale = 1.0f;
         reinterpret_cast<ftControllerModuleView*>(moduleAccesser->m_enumerationStart->m_controllerModule)
-            ->unkC8(0, -1, 0, 0, x, scale, c);
+            ->unkC8(0, -1, 0, 0, x, 1.0f, c);
     }
 }
 

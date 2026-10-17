@@ -1,9 +1,13 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 // MATCH-ONLY: the -O2,s fighter flags stop the implicit constructor inlining into the static initializer;
 // the Matching neighbours build at the default -O4,p.
+#include <ft/ft_util.h>
 #include <so/item/so_item_manage_module_impl.h>
+#include <so/motion/so_motion_module_impl.h>
 #include <so/so_module_accesser.h>
+#include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
+#include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
 class ftStatusUniqProcessItemLift : public soStatusUniqProcess {
@@ -16,22 +20,60 @@ public:
 
 ftStatusUniqProcessItemLift g_ftStatusUniqProcessItemLift;
 
-// TODO: initStatus (status 0x97 entry: builds a 4-field info record and calls the motion module) is not decoded.
-void ftStatusUniqProcessItemLift::initStatus(soModuleAccesser*) {}
+// Status 0x97 (item lift start): starts the lift motion (HYPOTHESIS: motion kind 0xFB) at the item lift motion rate.
+void ftStatusUniqProcessItemLift::initStatus(soModuleAccesser* moduleAccesser) {
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x97: {
+        soMotionChangeParam changeParam;
+        changeParam.m_kind = 0xFB;
+        changeParam.m_frame = 0.0f;
+        changeParam.m_rate = 1.0f;
+        changeParam._12 = 0;
+        changeParam._13 = 0;
+        changeParam._14 = 0;
+        changeParam._15 = 0;
+        moduleAccesser->getMotionModule().changeMotionRequest(&changeParam);
+        moduleAccesser->getMotionModule().setRate(ftUtil::getItemLiftMotionRateMul(moduleAccesser));
+        break;
+    }
+    }
+}
 
-// TODO: execStatus (status 0x9A: clamps a float from fn_27_194390 and calls the motion module) is not decoded.
-void ftStatusUniqProcessItemLift::execStatus(soModuleAccesser*) {}
+// Status 0x9A (item lift): the stick tilt (against the common threshold 0xD77) scales the lift motion rate; a neutral stick
+// plays it at full speed and the tilt never slows it below 0.1.
+void ftStatusUniqProcessItemLift::execStatus(soModuleAccesser* moduleAccesser) {
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x9A: {
+        Vec2f rate;
+        ftUtil::getStickXRate(moduleAccesser, soValueAccesser::getConstantFloat(moduleAccesser, 0xD77, 0), &rate);
+        float x = rate.m_x;
+        if (x <= 0.0f) {
+            rate.m_x = 1.0f;
+        }
+        if (rate.m_x < 0.1f) {
+            rate.m_x = 0.1f;
+            x = 0.1f;
+        }
+        moduleAccesser->getWorkManageModule().setFloat(x, 0x21000004);
+        moduleAccesser->getMotionModule().setRate(rate.m_x * ftUtil::getItemLiftMotionRateMul(moduleAccesser));
+        break;
+    }
+    }
+}
 
 void ftStatusUniqProcessItemLift::exitStatus(soModuleAccesser* moduleAccesser, int kind) {
-    if (kind == 0x9d) {
-        return;
+    switch (kind) {
+    case 0x97:
+    case 0x98:
+    case 0x99:
+    case 0x9A:
+    case 0x9D:
+        break;
+    default:
+        if (moduleAccesser->getItemManageModule().isHaveItem(0)) {
+            // HYPOTHESIS: the drop arguments are lbl_27_rodata_236C (90.0f) and lbl_27_rodata_2360 (0.0f).
+            moduleAccesser->getItemManageModule().dropItem(90.0f, 0.0f, 0);
+        }
+        break;
     }
-    if (kind >= 0x97 && kind < 0x9b) {
-        return;
-    }
-    if (!moduleAccesser->getItemManageModule().isHaveItem(0)) {
-        return;
-    }
-    // HYPOTHESIS: the drop-velocity constants are lbl_27_rodata_236C / lbl_27_rodata_2360 (values not read).
-    moduleAccesser->getItemManageModule().dropItem(0.0f, 0.0f, 0);
 }

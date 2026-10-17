@@ -164,11 +164,10 @@ public:
 ftStatusUniqProcessCatchedGanon g_ftStatusUniqProcessCatchedGanon;
 
 void ftStatusUniqProcessCatchedGanon::initStatus(soModuleAccesser* moduleAccesser) {
-    const float scale = -1.0f;
     const soModuleEnumeration* modules = moduleAccesser->m_enumerationStart;
     void* posture = modules->m_postureModule;
     float linkValue = reinterpret_cast<ftLinkModuleView*>(modules->m_linkModule)->unkA8(0);
-    reinterpret_cast<ftPostureModuleView*>(posture)->unk30(scale * linkValue);
+    reinterpret_cast<ftPostureModuleView*>(posture)->unk30(-1.0f * linkValue);
     reinterpret_cast<ftPostureModuleView*>(moduleAccesser->m_enumerationStart->m_postureModule)->unk54();
 
     StageObject* stage = moduleAccesser->m_stageObject;
@@ -190,6 +189,10 @@ void ftStatusUniqProcessCatchedGanon::initStatus(soModuleAccesser* moduleAccesse
 void ftStatusUniqProcessCatchedGanon::execStatus(soModuleAccesser* moduleAccesser) {
 }
 
+bool ftStatusUniqProcessCatchedGanon::checkDamage(soModuleAccesser* moduleAccesser, void* hit) {
+    return true;
+}
+
 void ftStatusUniqProcessCatchedGanon::exitStatus(soModuleAccesser* moduleAccesser, int status) {
     switch (status) {
     case 0x42:
@@ -201,8 +204,4 @@ void ftStatusUniqProcessCatchedGanon::exitStatus(soModuleAccesser* moduleAccesse
         reinterpret_cast<ftCaptureModuleView*>(moduleAccesser->m_enumerationStart->m_captureModule)->unk30(0, 0);
         break;
     }
-}
-
-bool ftStatusUniqProcessCatchedGanon::checkDamage(soModuleAccesser* moduleAccesser, void* hit) {
-    return true;
 }

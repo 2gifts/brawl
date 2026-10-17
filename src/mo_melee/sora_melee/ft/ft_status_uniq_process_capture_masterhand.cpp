@@ -1,4 +1,5 @@
 #include <ft/fighter.h>
+#include <ft/ft_status_uniq_process_views.h>
 #include <so/controller/so_controller_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
@@ -43,8 +44,8 @@ static const float s_captureClatterY = 0.0f;
 
 void ftStatusUniqProcessCaptureMasterhand::initStatus(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getStatusModule().getStatusKind() == Fighter::Status::Capture_Masterhand) {
-        moduleAccesser->getControllerModule().startClatter(s_captureClatterX, s_captureClatterY, s_captureClatterY,
-                                                           0, -1, 0, false);
+        reinterpret_cast<ftControllerClatterView*>(moduleAccesser->m_enumerationStart->m_controllerModule)
+            ->startClatter(s_captureClatterX, s_captureClatterY, s_captureClatterY, 0, -1, 0, false);
     }
 }
 

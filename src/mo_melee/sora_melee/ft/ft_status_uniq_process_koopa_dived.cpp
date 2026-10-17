@@ -13,8 +13,10 @@ void ftStatusUniqProcessKoopaDived::initStatus(soModuleAccesser* moduleAccesser)
     soMotionModule& motion = moduleAccesser->getMotionModule();
     int dived = 0;
     motion.setShareAnimObjKind(0x1cb);
-    if (soValueAccesser::getConstantInt(moduleAccesser, 0x5a98, 0) == 1) {
+    switch (soValueAccesser::getConstantInt(moduleAccesser, 0x5a98, 0)) {
+    case 1:
         dived = 1;
+        break;
     }
     motion.setKindOffset(dived);
 

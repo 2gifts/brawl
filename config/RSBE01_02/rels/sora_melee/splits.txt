@@ -4864,42 +4864,70 @@ mo_melee/sora_melee/ft/ft_kinetic_energy_controller.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_walk.cpp:
 	.text       start:0x0016567C end:0x00165918
 	.ctors      start:0x00000098 end:0x0000009C
+	.rodata     start:0x00002018 end:0x00002028
+	.data       start:0x0002E748 end:0x0002E7B8
+	.bss        start:0x00004878 end:0x00004888
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_walk_brake.cpp:
 	.text       start:0x00165918 end:0x00165AF0
 	.ctors      start:0x0000009C end:0x000000A0
+	.rodata     start:0x00002028 end:0x00002034
+	.data       start:0x0002E7B8 end:0x0002E830
+	.bss        start:0x00004888 end:0x00004898
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_dash.cpp:
 	.text       start:0x00165AF0 end:0x00165F08
 	.ctors      start:0x000000A0 end:0x000000A4
+	.rodata     start:0x00002038 end:0x00002044
+	.data       start:0x0002E830 end:0x0002E8A0
+	.bss        start:0x00004898 end:0x000048A8
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_run.cpp:
 	.text       start:0x00165F08 end:0x001664E0
 	.ctors      start:0x000000A4 end:0x000000A8
+	.rodata     start:0x00002048 end:0x00002050
+	.data       start:0x0002E8A0 end:0x0002E910
+	.bss        start:0x000048A8 end:0x000048B8
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_run_brake.cpp:
 	.text       start:0x001664E0 end:0x00166864
 	.ctors      start:0x000000A8 end:0x000000AC
+	.rodata     start:0x00002050 end:0x00002058
+	.data       start:0x0002E910 end:0x0002E980
+	.bss        start:0x000048B8 end:0x000048C8
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_turn.cpp:
 	.text       start:0x00166864 end:0x00166C44
 	.ctors      start:0x000000AC end:0x000000B0
+	.rodata     start:0x00002058 end:0x00002060
+	.data       start:0x0002E980 end:0x0002E9F0
+	.bss        start:0x000048C8 end:0x000048D8
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_turn_run.cpp:
 	.text       start:0x00166C44 end:0x001670C0
 	.ctors      start:0x000000B0 end:0x000000B4
+	.rodata     start:0x00002060 end:0x0000206C
+	.data       start:0x0002E9F0 end:0x0002EA60
+	.bss        start:0x000048D8 end:0x000048E8
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_fall.cpp:
 	.text       start:0x001670C0 end:0x001677E0
 	.ctors      start:0x000000B4 end:0x000000B8
+	.rodata     start:0x00002070 end:0x00002078
+	.data       start:0x0002EA60 end:0x0002EAD0
+	.bss        start:0x000048E8 end:0x000048F8
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_damage_fall.cpp:
 	.text       start:0x001677E0 end:0x00167D60
 	.ctors      start:0x000000B8 end:0x000000BC
+	.data       start:0x0002EAD0 end:0x0002EB48
+	.bss        start:0x000048F8 end:0x00004908
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_fly.cpp:
 	.text       start:0x00167D60 end:0x00167EF4
 	.ctors      start:0x000000BC end:0x000000C0
+	.data       start:0x0002EB48 end:0x0002EBB8
+	.bss        start:0x00004908 end:0x00004918
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_glide.cpp:
 	.text       start:0x00167EF4 end:0x00168AA8
@@ -4911,22 +4939,32 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_glide.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_jump_squat.cpp:
 	.text       start:0x00168AA8 end:0x00168C04
 	.ctors      start:0x000000C4 end:0x000000C8
+	.rodata     start:0x000020A8 end:0x000020C0
+	.data       start:0x0002EC28 end:0x0002ECA0
+	.bss        start:0x00004928 end:0x00004938
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_squat.cpp:
-	.text       start:0x00168C04 end:0x0016901C
+	.text       start:0x00168C04 end:0x00168E78
 	.ctors      start:0x000000C8 end:0x000000CC
+	.data       start:0x0002ECA0 end:0x0002ED10
+	.bss        start:0x00004938 end:0x00004948
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_squat_walk.cpp:
-	.text       start:0x0016901C end:0x00169554
+	.text       start:0x00168E78 end:0x00169554
 	.ctors      start:0x000000CC end:0x000000D0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_smash_attack.cpp:
 	.text       start:0x00169554 end:0x00169900
 	.ctors      start:0x000000D0 end:0x000000D4
+	.rodata     start:0x000020D8 end:0x000020E0
+	.data       start:0x0002ED88 end:0x0002EE00
+	.bss        start:0x00004958 end:0x00004968
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_attack_air.cpp:
 	.text       start:0x00169900 end:0x00169A04
 	.ctors      start:0x000000D4 end:0x000000D8
+	.data       start:0x0002EE00 end:0x0002EE78
+	.bss        start:0x00004968 end:0x00004978
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_landing.cpp:
 	.text       start:0x00169A04 end:0x00169FA0
@@ -4939,6 +4977,8 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_guard_func.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_guard_on.cpp:
 	.text       start:0x0016A660 end:0x0016A838
 	.ctors      start:0x000000E0 end:0x000000E4
+	.data       start:0x0002EF30 end:0x0002EFA0
+	.bss        start:0x00004998 end:0x000049B0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_guard.cpp:
 	.text       start:0x0016A838 end:0x0016A904
@@ -4963,6 +5003,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_damage.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_damage_air.cpp:
 	.text       start:0x0016C75C end:0x0016C924
 	.ctors      start:0x000000F0 end:0x000000F4
+	.rodata     start:0x00002160 end:0x00002198
+	.data       start:0x0002F118 end:0x0002F1A8
+	.bss        start:0x000049F0 end:0x00004A00
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_damage_fly.cpp:
 	.text       start:0x0016C924 end:0x0016D8A8
@@ -4974,6 +5017,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_damage_fly.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_damage_fly_roll.cpp:
 	.text       start:0x0016D8A8 end:0x0016DA84
 	.ctors      start:0x000000F8 end:0x000000FC
+	.rodata     start:0x000021C8 end:0x000021D0
+	.data       start:0x0002F238 end:0x0002F2D0
+	.bss        start:0x00004A10 end:0x00004A20
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_damage_fly_reflect.cpp:
 	.text       start:0x0016DA84 end:0x0016E1F4
@@ -4982,10 +5028,15 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_damage_fly_reflect.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_down.cpp:
 	.text       start:0x0016E1F4 end:0x0016E314
 	.ctors      start:0x00000100 end:0x00000104
+	.data       start:0x0002F368 end:0x0002F3D8
+	.bss        start:0x00004A30 end:0x00004A40
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_down_damage.cpp:
 	.text       start:0x0016E314 end:0x0016E5A0
 	.ctors      start:0x00000104 end:0x00000108
+	.rodata     start:0x000021E8 end:0x000021F0
+	.data       start:0x0002F3D8 end:0x0002F468
+	.bss        start:0x00004A40 end:0x00004A50
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_down_reflect.cpp:
 	.text       start:0x0016E5A0 end:0x0016EA10
@@ -4994,10 +5045,15 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_down_reflect.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_down_spot.cpp:
 	.text       start:0x0016EA10 end:0x0016EB78
 	.ctors      start:0x0000010C end:0x00000110
+	.data       start:0x0002F500 end:0x0002F578
+	.bss        start:0x00004A60 end:0x00004A70
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_shield_break_fly.cpp:
 	.text       start:0x0016EB78 end:0x0016ECC8
 	.ctors      start:0x00000110 end:0x00000114
+	.rodata     start:0x00002200 end:0x00002208
+	.data       start:0x0002F578 end:0x0002F5F0
+	.bss        start:0x00004A70 end:0x00004A80
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_passive.cpp:
 	.text       start:0x0016ECC8 end:0x0016FC24
@@ -5029,14 +5085,20 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_rebirth.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_catch_pull.cpp:
 	.text       start:0x00178AB8 end:0x00178C04
 	.ctors      start:0x0000012C end:0x00000130
+	.data       start:0x0002FE90 end:0x0002FF08
+	.bss        start:0x00004AF0 end:0x00004B00
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_catch_wait.cpp:
 	.text       start:0x00178C04 end:0x00178D74
 	.ctors      start:0x00000130 end:0x00000134
+	.data       start:0x0002FF08 end:0x0002FF88
+	.bss        start:0x00004B00 end:0x00004B10
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_catch_cut.cpp:
 	.text       start:0x00178D74 end:0x00178EC0
 	.ctors      start:0x00000134 end:0x00000138
+	.data       start:0x0002FF88 end:0x0002FFF8
+	.bss        start:0x00004B10 end:0x00004B20
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_throw.cpp:
 	.text       start:0x00178EC0 end:0x00179128
@@ -5045,6 +5107,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_throw.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_throw_kirby.cpp:
 	.text       start:0x00179128 end:0x001795AC
 	.ctors      start:0x0000013C end:0x00000140
+	.rodata     start:0x00002338 end:0x00002348
+	.data       start:0x00030068 end:0x000300E0
+	.bss        start:0x00004B30 end:0x00004B40
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_pulled.cpp:
 	.text       start:0x001795AC end:0x00179F14
@@ -5053,42 +5118,80 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_capture_pulled.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_wait.cpp:
 	.text       start:0x00179F14 end:0x0017A208
 	.ctors      start:0x00000144 end:0x00000148
+	.data       start:0x00030160 end:0x000301E0
+	.bss        start:0x00004B50 end:0x00004B60
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_damage.cpp:
 	.text       start:0x0017A208 end:0x0017A374
 	.ctors      start:0x00000148 end:0x0000014C
+	.data       start:0x000301E0 end:0x00030268
+	.bss        start:0x00004B60 end:0x00004B70
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_cut.cpp:
 	.text       start:0x0017A374 end:0x0017A4EC
 	.ctors      start:0x0000014C end:0x00000150
+	.data       start:0x00030268 end:0x000302E0
+	.bss        start:0x00004B70 end:0x00004B80
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_escape.cpp:
 	.text       start:0x0017A4EC end:0x0017A698
 	.ctors      start:0x00000150 end:0x00000154
+	.data       start:0x000302E0 end:0x00030350
+	.bss        start:0x00004B80 end:0x00004B90
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_thrown.cpp:
 	.text       start:0x0017A698 end:0x0017AB18
 	.ctors      start:0x00000154 end:0x00000158
+	.data       start:0x00030350 end:0x000303C0
+	.bss        start:0x00004B90 end:0x00004BA0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_item_lift.cpp:
 	.text       start:0x0017AB18 end:0x0017ADCC
 	.ctors      start:0x00000158 end:0x0000015C
+	.rodata     start:0x00002360 end:0x00002370
+	.data       start:0x000303C0 end:0x00030430
+	.bss        start:0x00004BA0 end:0x00004BB0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_item_throw.cpp:
 	.text       start:0x0017ADCC end:0x0017AFD4
 	.ctors      start:0x0000015C end:0x00000160
+	.rodata     start:0x00002370 end:0x00002378
+	.data       start:0x00030430 end:0x000304A8
+	.bss        start:0x00004BB0 end:0x00004BC0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_item_shoot.cpp:
-	.text       start:0x0017AFD4 end:0x0017DC58
+	.text       start:0x0017AFD4 end:0x0017B634
 	.ctors      start:0x00000160 end:0x00000164
+	.data       start:0x000304A8 end:0x00030558
+	.bss        start:0x00004BC0 end:0x00004BD0
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_item_shoot_scope.cpp:
+	.text       start:0x0017B634 end:0x0017C48C
+	.rodata     start:0x00002378 end:0x00002380
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_item_shoot_lgun.cpp:
+	.text       start:0x0017C48C end:0x0017C650
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_item_shoot_fflower.cpp:
+	.text       start:0x0017C650 end:0x0017CD5C
+	.rodata     start:0x00002380 end:0x00002388
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_item_shoot_clauncher.cpp:
+	.text       start:0x0017CD5C end:0x0017DC58
+	.rodata     start:0x00002388 end:0x000023A8
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_item_swing.cpp:
 	.text       start:0x0017DC58 end:0x0017DE50
 	.ctors      start:0x00000164 end:0x00000168
+	.rodata     start:0x000023A8 end:0x000023B0
+	.data       start:0x00030558 end:0x000305D0
+	.bss        start:0x00004BD0 end:0x00004BE0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_test_motion.cpp:
 	.text       start:0x0017F598 end:0x0017F608
 	.ctors      start:0x00000168 end:0x0000016C
+	.data       start:0x000305D0 end:0x00030648
+	.bss        start:0x00004BE0 end:0x00004BF0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_bury.cpp:
 	.text       start:0x0017F608 end:0x0017FF1C
@@ -5097,10 +5200,16 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_bury.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_bury_wait.cpp:
 	.text       start:0x0017FF1C end:0x0018026C
 	.ctors      start:0x00000170 end:0x00000174
+	.rodata     start:0x00002418 end:0x00002420
+	.data       start:0x000306D0 end:0x00030740
+	.bss        start:0x00004C00 end:0x00004C10
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_bury_jump.cpp:
 	.text       start:0x0018026C end:0x00180448
 	.ctors      start:0x00000174 end:0x00000178
+	.rodata     start:0x00002420 end:0x00002428
+	.data       start:0x00030740 end:0x000307B0
+	.bss        start:0x00004C10 end:0x00004C20
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_ice.cpp:
 	.text       start:0x00180448 end:0x00181120
@@ -5113,18 +5222,29 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_swim.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_bitten_wario_start.cpp:
 	.text       start:0x001822D8 end:0x00182920
 	.ctors      start:0x00000180 end:0x00000184
+	.rodata     start:0x00002458 end:0x00002460
+	.data       start:0x000308C0 end:0x00030938
+	.bss        start:0x00004C40 end:0x00004C50
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_bitten_wario.cpp:
 	.text       start:0x00182920 end:0x00183140
 	.ctors      start:0x00000184 end:0x00000188
+	.rodata     start:0x00002460 end:0x00002468
+	.data       start:0x00030938 end:0x000309B0
+	.bss        start:0x00004C50 end:0x00004C60
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_bitten_wario_end.cpp:
 	.text       start:0x00183140 end:0x00183634
 	.ctors      start:0x00000188 end:0x0000018C
+	.rodata     start:0x00002468 end:0x00002470
+	.data       start:0x000309B0 end:0x00030A28
+	.bss        start:0x00004C60 end:0x00004C70
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_clung_captain.cpp:
 	.text       start:0x00183634 end:0x001837F4
 	.ctors      start:0x0000018C end:0x00000190
+	.data       start:0x00030A28 end:0x00030AA0
+	.bss        start:0x00004C70 end:0x00004C80
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed.cpp:
 	.text       start:0x001837F4 end:0x0018446C
@@ -5133,10 +5253,15 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_drink.cpp:
 	.text       start:0x0018446C end:0x00184668
 	.ctors      start:0x00000194 end:0x00000198
+	.data       start:0x00030B18 end:0x00030B90
+	.bss        start:0x00004C90 end:0x00004CA0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_capture.cpp:
 	.text       start:0x00184668 end:0x00184F78
 	.ctors      start:0x00000198 end:0x0000019C
+	.rodata     start:0x00002490 end:0x000024A0
+	.data       start:0x00030B90 end:0x00030C08
+	.bss        start:0x00004CA0 end:0x00004CB0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_thrown.cpp:
 	.text       start:0x00184F78 end:0x0018553C
@@ -5145,6 +5270,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_thrown.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_thrown_star.cpp:
 	.text       start:0x0018553C end:0x00185BA8
 	.ctors      start:0x000001A0 end:0x000001A4
+	.rodata     start:0x000024A8 end:0x000024B0
+	.data       start:0x00030C80 end:0x00030D00
+	.bss        start:0x00004CD0 end:0x00004CF0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_cancel.cpp:
 	.text       start:0x00185BA8 end:0x00186020
@@ -5153,30 +5281,47 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_swallowed_cancel.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_clung_diddy.cpp:
 	.text       start:0x00186020 end:0x001867D0
 	.ctors      start:0x000001A8 end:0x000001AC
+	.rodata     start:0x000024B8 end:0x000024C0
+	.data       start:0x00030D78 end:0x00030DF0
+	.bss        start:0x00004D00 end:0x00004D10
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_clung_damage_diddy.cpp:
 	.text       start:0x001867D0 end:0x00186944
 	.ctors      start:0x000001AC end:0x000001B0
+	.data       start:0x00030DF0 end:0x00030E68
+	.bss        start:0x00004D10 end:0x00004D20
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_clung_thrown_diddy.cpp:
 	.text       start:0x00186944 end:0x00186A98
 	.ctors      start:0x000001B0 end:0x000001B4
+	.data       start:0x00030E68 end:0x00030EE0
+	.bss        start:0x00004D20 end:0x00004D30
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_shouldered_donkey.cpp:
 	.text       start:0x00186A98 end:0x00186F0C
 	.ctors      start:0x000001B4 end:0x000001B8
+	.rodata     start:0x000024C0 end:0x000024C8
+	.data       start:0x00030EE0 end:0x00030F58
+	.bss        start:0x00004D30 end:0x00004D40
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_shouldered_donkey_thrown.cpp:
 	.text       start:0x00186F0C end:0x0018701C
 	.ctors      start:0x000001B8 end:0x000001BC
+	.data       start:0x00030F58 end:0x00030FD8
+	.bss        start:0x00004D40 end:0x00004D50
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_clung_ganon.cpp:
 	.text       start:0x0018701C end:0x001871DC
 	.ctors      start:0x000001BC end:0x000001C0
+	.data       start:0x00030FD8 end:0x00031050
+	.bss        start:0x00004D50 end:0x00004D60
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_catched_ganon.cpp:
 	.text       start:0x001871DC end:0x001873D0
 	.ctors      start:0x000001C0 end:0x000001C4
+	.rodata     start:0x000024C8 end:0x000024CC
+	.data       start:0x00031050 end:0x000310C8
+	.bss        start:0x00004D60 end:0x00004D70
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_catched_air_ganon.cpp:
 	.text       start:0x001873D0 end:0x00187918
@@ -5185,6 +5330,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_catched_air_ganon.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_yoshi.cpp:
 	.text       start:0x00187918 end:0x00187BB8
 	.ctors      start:0x000001C8 end:0x000001CC
+	.rodata     start:0x000024D0 end:0x000024D4
+	.data       start:0x000312A0 end:0x00031320
+	.bss        start:0x00004DA0 end:0x00004DB0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_yoshi_egg.cpp:
 	.text       start:0x00187BB8 end:0x00188A28
@@ -5195,6 +5343,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_yoshi_egg.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_dragoon.cpp:
 	.text       start:0x00188A28 end:0x00188BD0
 	.ctors      start:0x000001D0 end:0x000001D4
+	.rodata     start:0x000024E8 end:0x000024EC
+	.data       start:0x00031390 end:0x00031400
+	.bss        start:0x00004DC0 end:0x00004DD0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_link_final.cpp:
 	.text       start:0x00188BD0 end:0x00189368
@@ -5207,10 +5358,15 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_hammer.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_koopa_dived.cpp:
 	.text       start:0x00189EF8 end:0x0018A0BC
 	.ctors      start:0x000001DC end:0x000001E0
+	.rodata     start:0x00002520 end:0x00002528
+	.data       start:0x00031508 end:0x00031580
+	.bss        start:0x00004DF0 end:0x00004E00
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso.cpp:
 	.text       start:0x0018A0BC end:0x0018A1EC
 	.ctors      start:0x000001E0 end:0x000001E4
+	.data       start:0x00031580 end:0x000315F0
+	.bss        start:0x00004E00 end:0x00004E10
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_hang.cpp:
 	.text       start:0x0018A1EC end:0x0018A6E4
@@ -5219,22 +5375,35 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_hang.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_rewind.cpp:
 	.text       start:0x0018A6E4 end:0x0018AA38
 	.ctors      start:0x000001E8 end:0x000001EC
+	.data       start:0x000316B8 end:0x00031748
+	.bss        start:0x00004E20 end:0x00004E30
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_reach.cpp:
 	.text       start:0x0018AA38 end:0x0018AE70
 	.ctors      start:0x000001EC end:0x000001F0
+	.rodata     start:0x00002530 end:0x00002538
+	.data       start:0x00031748 end:0x000317C8
+	.bss        start:0x00004E30 end:0x00004E40
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_failure.cpp:
 	.text       start:0x0018AE70 end:0x0018AED8
 	.ctors      start:0x000001F0 end:0x000001F4
+	.data       start:0x000317C8 end:0x00031840
+	.bss        start:0x00004E40 end:0x00004E50
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_pit_fall.cpp:
 	.text       start:0x0018B1B8 end:0x0018B520
 	.ctors      start:0x000001F8 end:0x000001FC
+	.rodata     start:0x00002540 end:0x00002578
+	.data       start:0x00031880 end:0x00031908
+	.bss        start:0x00004E60 end:0x00004E70
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_kinoko.cpp:
 	.text       start:0x0018B520 end:0x0018C2FC
 	.ctors      start:0x000001FC end:0x00000200
+	.rodata     start:0x00002578 end:0x00002588
+	.data       start:0x00031908 end:0x00031978
+	.bss        start:0x00004E70 end:0x00004E90
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_entry.cpp:
 	.text       start:0x0018C2FC end:0x0018CF74
@@ -5281,6 +5450,8 @@ mo_melee/sora_melee/so/so_event_unit_wrapper_soItemManageEventObserver_18D844.cp
 mo_melee/sora_melee/ft/ft_status_uniq_process_appeal.cpp:
 	.text       start:0x0018D8FC end:0x0018D96C
 	.ctors      start:0x00000204 end:0x00000208
+	.data       start:0x00031C38 end:0x00031CA8
+	.bss        start:0x00004EA0 end:0x00004EB0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_win.cpp:
 	.text       start:0x0018D96C end:0x0018DF54
@@ -5289,30 +5460,51 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_win.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_adv_follow.cpp:
 	.text       start:0x0018DF54 end:0x0018E528
 	.ctors      start:0x0000020C end:0x00000210
+	.rodata     start:0x000025D8 end:0x000025E8
+	.data       start:0x00031D18 end:0x00031D90
+	.bss        start:0x00004EC0 end:0x00004ED0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_ottotto.cpp:
 	.text       start:0x0018E528 end:0x0018E800
 	.ctors      start:0x00000210 end:0x00000214
+	.rodata     start:0x000025E8 end:0x000025F8
+	.data       start:0x00031D90 end:0x00031E00
+	.bss        start:0x00004ED0 end:0x00004EE0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_heart_swap.cpp:
 	.text       start:0x0018E800 end:0x0018E9E4
 	.ctors      start:0x00000214 end:0x00000218
+	.rodata     start:0x000025F8 end:0x00002600
+	.data       start:0x00031E00 end:0x00031E78
+	.bss        start:0x00004EE0 end:0x00004F00
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_ike_final_damage.cpp:
 	.text       start:0x0018E9E4 end:0x0018EF58
 	.ctors      start:0x00000218 end:0x0000021C
+	.rodata     start:0x00002600 end:0x00002628
+	.data       start:0x00031E78 end:0x00031EF0
+	.bss        start:0x00004F00 end:0x00004F10
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_ike_final_damage_fly.cpp:
 	.text       start:0x0018EF58 end:0x0018F6C0
 	.ctors      start:0x0000021C end:0x00000220
+	.rodata     start:0x00002628 end:0x00002630
+	.data       start:0x00031EF0 end:0x00031F70
+	.bss        start:0x00004F10 end:0x00004F20
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_ike_final_damage_fall.cpp:
 	.text       start:0x0018F6C0 end:0x0018FA04
 	.ctors      start:0x00000220 end:0x00000224
+	.rodata     start:0x00002630 end:0x00002638
+	.data       start:0x00031F70 end:0x00031FF0
+	.bss        start:0x00004F20 end:0x00004F30
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_masterhand.cpp:
 	.text       start:0x0018FA04 end:0x0018FB48
 	.ctors      start:0x00000224 end:0x00000228
+	.rodata     start:0x00002638 end:0x00002640
+	.data       start:0x00031FF0 end:0x00032070
+	.bss        start:0x00004F30 end:0x00004F40
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_captain_final_target.cpp:
 	.text       start:0x0018FB48 end:0x00190EC0
@@ -5321,6 +5513,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_captain_final_target.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_captain_final_other.cpp:
 	.text       start:0x00190EC0 end:0x0019124C
 	.ctors      start:0x0000022C end:0x00000230
+	.rodata     start:0x00002658 end:0x00002660
+	.data       start:0x00032518 end:0x00032598
+	.bss        start:0x00004F90 end:0x00004FA0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_kirby_final_damage_fly.cpp:
 	.text       start:0x0019124C end:0x00191988
@@ -5329,38 +5524,64 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_kirby_final_damage_fly.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_kirby_final_damage_wait.cpp:
 	.text       start:0x00191988 end:0x00191C24
 	.ctors      start:0x00000234 end:0x00000238
+	.rodata     start:0x00002678 end:0x0000267C
+	.data       start:0x00032618 end:0x00032698
+	.bss        start:0x00004FB0 end:0x00004FC0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_wait_yoshi.cpp:
 	.text       start:0x00191C24 end:0x00192008
 	.ctors      start:0x00000238 end:0x0000023C
+	.rodata     start:0x00002680 end:0x00002688
+	.data       start:0x00032698 end:0x00032710
+	.bss        start:0x00004FC0 end:0x00004FD0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_damage_yoshi.cpp:
-	.text       start:0x00192008 end:0x00192320
+	.text       start:0x00192008 end:0x00192278
 	.ctors      start:0x0000023C end:0x00000240
+	.data       start:0x00032710 end:0x00032790
+	.bss        start:0x00004FD0 end:0x00004FE0
+
+mo_melee/sora_melee/ft/ft_kirby_param_getters.cpp:
+	.text       start:0x00192278 end:0x00192320
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_gokulin.cpp:
 	.text       start:0x00192320 end:0x00192528
 	.ctors      start:0x00000240 end:0x00000244
+	.rodata     start:0x00002688 end:0x00002698
+	.data       start:0x00032790 end:0x00032808
+	.bss        start:0x00004FE0 end:0x00004FF0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_cut_gokulin.cpp:
 	.text       start:0x00192528 end:0x001925B8
 	.ctors      start:0x00000244 end:0x00000248
+	.data       start:0x00032808 end:0x00032888
+	.bss        start:0x00004FF0 end:0x00005000
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_taboo.cpp:
 	.text       start:0x001925B8 end:0x0019267C
 	.ctors      start:0x00000248 end:0x0000024C
+	.data       start:0x00032888 end:0x00032900
+	.bss        start:0x00005000 end:0x00005010
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_capture_bucyulus.cpp:
 	.text       start:0x0019267C end:0x00192724
 	.ctors      start:0x0000024C end:0x00000250
+	.data       start:0x00032900 end:0x00032978
+	.bss        start:0x00005010 end:0x00005020
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_attack_air_inherit_jump_aerial_motion.cpp:
 	.text       start:0x00192724 end:0x00192AF8
 	.ctors      start:0x00000250 end:0x00000254
+	.rodata     start:0x00002698 end:0x000026A0
+	.data       start:0x00032978 end:0x00032A08
+	.bss        start:0x00005020 end:0x00005030
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_escape_air_inherit_jump_aerial_motion.cpp:
 	.text       start:0x00192AF8 end:0x00192D4C
 	.ctors      start:0x00000254 end:0x00000258
+	.rodata     start:0x000026A0 end:0x000026A8
+	.data       start:0x00032A08 end:0x00032A98
+	.bss        start:0x00005030 end:0x00005040
 
 mo_melee/sora_melee/ft/ft_fighter_build_data.cpp:
 	.text       start:0x00192D4C end:0x00193378

@@ -15,19 +15,23 @@ public:
 // HYPOTHESIS: lbl_27_rodata_21E8 is 0.0f (the initial and threshold value of the work float 0x21000009).
 // HYPOTHESIS: lbl_27_rodata_21EC is the per-frame decrement applied to that work float.
 void ftStatusUniqProcessDownDamage::initStatus(soModuleAccesser* moduleAccesser) {
-    int prevKind = moduleAccesser->getStatusModule().getPrevStatusKind(0);
-    if (prevKind != 0x4d && prevKind != 0x4a && prevKind != 0x54) {
+    switch (moduleAccesser->getStatusModule().getPrevStatusKind(0)) {
+    case 0x4D:
+    case 0x4A:
+    case 0x54:
+        break;
+    default:
         moduleAccesser->getWorkManageModule().offFlag(0x22000019);
-        moduleAccesser->getWorkManageModule().offFlag(0x2200001b);
-        float zero = 0.0f;
-        moduleAccesser->getWorkManageModule().setFloat(zero, 0x21000009);
+        moduleAccesser->getWorkManageModule().offFlag(0x2200001B);
+        moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x21000009);
+        break;
     }
     ftStatusUniqProcessDamage::initNormalDamageCommon(moduleAccesser);
-    if (moduleAccesser->getSituationModule().getKind() != 0) {
-        moduleAccesser->getKineticModule().changeKinetic(0x1f, moduleAccesser);
-        moduleAccesser->getWorkManageModule().onFlag(0x2200001c);
-    } else {
+    if (moduleAccesser->getSituationModule().getKind() == 0) {
         moduleAccesser->getKineticModule().changeKinetic(0x1e, moduleAccesser);
+    } else {
+        moduleAccesser->getKineticModule().changeKinetic(0x1f, moduleAccesser);
+        moduleAccesser->getWorkManageModule().onFlag(0x2200001C);
     }
 }
 
@@ -35,7 +39,8 @@ void ftStatusUniqProcessDownDamage::execStatus(soModuleAccesser* moduleAccesser)
     ftStatusUniqProcessDamage::execNormalDamageCommon(moduleAccesser);
     float timer = moduleAccesser->getWorkManageModule().getFloat(0x21000009);
     if (timer > 0.0f) {
-        moduleAccesser->getWorkManageModule().setFloat(timer - 1.0f, 0x21000009);
+        float next = timer - 1.0f;
+        moduleAccesser->getWorkManageModule().setFloat(next, 0x21000009);
     }
 }
 

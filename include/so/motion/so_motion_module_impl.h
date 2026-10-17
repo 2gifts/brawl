@@ -98,7 +98,7 @@ public:
     virtual float getOtherAnimEndFrame(int);
     virtual bool isEndOtherAnim(int);
     virtual bool isLoopedOtherAnim(int);
-    virtual float getTransNTranslateEndFrame(void*, int kind);
+    virtual Vec3f getTransNTranslateEndFrame(int kind); // MATCH-ONLY: the SDK declares (void*, int) with a float result; the binary returns the Vec3f through the hidden pointer
     virtual Vec3f getTransNTranslate();
     virtual void updateTransMoveSpeed();
     virtual bool isTransMove(); // HYPOTHESIS: takes no argument (the native Pikmin caller passes none)
@@ -268,7 +268,7 @@ public:
     virtual float getOtherAnimEndFrame(int);
     virtual bool isEndOtherAnim(int);
     virtual bool isLoopedOtherAnim(int);
-    virtual float getTransNTranslateEndFrame(void*, int kind);
+    virtual Vec3f getTransNTranslateEndFrame(int kind); // MATCH-ONLY: the SDK declares (void*, int) with a float result; the binary returns the Vec3f through the hidden pointer
     virtual Vec3f getTransNTranslate();
     virtual void updateTransMoveSpeed();
     virtual bool isTransMove(); // HYPOTHESIS: takes no argument (the native Pikmin caller passes none)

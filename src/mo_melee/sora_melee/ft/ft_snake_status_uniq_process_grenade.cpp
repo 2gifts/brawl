@@ -1,3 +1,4 @@
+#include <ft/ft_status_uniq_process_shoot.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
@@ -13,7 +14,6 @@ ftSnakeStatusUniqProcessGrenade g_ftSnakeStatusUniqProcessGrenade;
 // HYPOTHESIS: shared grenade parameter table and its getter (no declarations in the shared headers).
 extern u8 lbl_27_bss_7B0C[];
 extern "C" int fn_27_30FA2C(void* table, int kind, int id, soModuleAccesser* acc, int);
-extern "C" void fn_27_17DE50(soModuleAccesser* acc, int a, int b);
 
 void ftSnakeStatusUniqProcessGrenade::initStatus(soModuleAccesser* acc) {
     int v;
@@ -41,5 +41,5 @@ void ftSnakeStatusUniqProcessGrenade::initStatus(soModuleAccesser* acc) {
     acc->getWorkManageModule().setInt(v, 0x2000000b);
     int a = fn_27_30FA2C(lbl_27_bss_7B0C, 3, 0x1dc, acc, 0);
     int b = fn_27_30FA2C(lbl_27_bss_7B0C, 3, 0x1e2, acc, 0);
-    fn_27_17DE50(acc, a, b);
+    ftStatusUniqProcessShoot::initShoot_Common(acc, a, b);
 }

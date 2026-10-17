@@ -1,19 +1,10 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <ft/fighter.h>
+#include <ft/ft_status_uniq_process_catch_pull_impl.h>
 #include <so/catch/so_catch_module.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
-
-// HYPOTHESIS: ft_status_uniq_process_catch_pull.h declares only initStatus and checkDamage, so the
-// full override set (including exitStatus) is declared here for this translation unit.
-class ftStatusUniqProcessCatchPull : public soStatusUniqProcess {
-public:
-    virtual void initStatus(soModuleAccesser*);
-    virtual void exitStatus(soModuleAccesser*, int);
-    // Original CatchPull vtable imports this override, rather than the generic false callback.
-    virtual bool checkDamage(soModuleAccesser*, void*);
-};
 
 // HYPOTHESIS: catch module slots after catchCut (0x2c) are not in so_catch_module.h; the checkDamage slot is 0x3c.
 class ftCatchModuleCatchPullView : public soCatchModule {
