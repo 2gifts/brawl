@@ -33,8 +33,14 @@ typedef soLinkModuleBuildConfigCap<7, soLinkModuleImpl> ftWolfLinkModuleBuildCon
 typedef soCollisionHitModuleBuildConfig<soCollision::Category_Fighter, 12, 1, soCollisionHitModuleImpl, 0x3ff, true> ftWolfCollisionHitModuleBuildConfig;
 typedef soStatusModuleBuildConfig<288, soGeneralWorkBuildConfig<18, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftWolfStatusModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnWolf article pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_WOLF_ARTICLE_POOLS
+#include <ft/wolf/ft_wolf_article_pools.h>
+typedef ftWolfArticleManageModuleBuilder ftWolfGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x14CDC, Fighter_Wolf> ftWolfGenerateArticleManageModuleBuilder;
+#endif
 
 class ftWolfBuildConfig : public ftCommonBuildConfig {
 public:
@@ -67,33 +73,46 @@ struct ftWolfData : ftData {
 };
 static_assert(sizeof(ftWolfData) == 0x9c, "Reflector turn data offset is wrong!");
 
+class wnWolfBlaster;
+class wnWolfIllusion;
+class wnFoxLandMaster;
+
+// The constructor's 0x1CCDC allocation fixes the size; the tail is the status table, the common data pointer, the two
+// reflector flags and the trail of the last positions (the Phantasm afterimage).
 class ftWolf : public ftFighterBuilder<ftWolfBuildConfig> {
-    u8 unkTail[0x1cc84 - sizeof(ftFighterBuilder<ftWolfBuildConfig>)];
 public:
-    // HYPOTHESIS: field grouping follows copies; field meanings remain unknown.
+    // One sample of the afterimage trail: the position and a rotation of the fighter. HYPOTHESIS: names.
     class PostureInfo {
     public:
-        struct { u32 unk0, unk4; } unk0;
-        u32 unk8;
-        float unkc;
+        Vec3f m_pos;
+        float m_rotX;
     };
-    ftWolfData* m_commonData;
 private:
-    // Set by reflector collision callbacks and consumed by the reflector check.
-    u8 unk1cc88;
-    u8 unk1cc89;
-    u8 unk1cc8a[2];
-    // Points to the embedded soArrayVector<PostureInfo, 4> at +0x1cc90.
-    soArray<PostureInfo>* m_postureHistory;
-    u8 unk1cc90[0x1ccdc - 0x1cc90];
+    soArrayContractibleTable<const soStatusData> m_statusTable; // +0x1CC74
+public:
+    ftWolfData* m_commonData; // +0x1CC84
+    // Set by the reflector collision callbacks for one frame: the hit was too weak (unk1CC88) or was stopped (unk1CC89).
+    u8 unk1CC88;
+    u8 unk1CC89;
+private:
+    soArrayQueueImpl<soArrayVector<PostureInfo, 4> > m_postureTrail; // +0x1CC8C
 public:
     ftWolf(s32 entryId,
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
     virtual ~ftWolf();
-    virtual void onStart(int startKind);
     virtual void processUpdate();
+    virtual void onStart(int startKind);
+    virtual void processFixPosition();
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
+    virtual void notifyEventCollisionReflector(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser, float power, float posX, float posY);
+    virtual bool notifyEventCollisionReflectorCheck();
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnWolfBlaster* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnWolfIllusion* weapon, soModuleAccesser* acc);
+    static bool activeArticle2(wnFoxLandMaster* weapon, soModuleAccesser* acc);
 };
+static_assert(sizeof(ftFighterBuilder<ftWolfBuildConfig>) == 0x1CC74, "Wolf status table offset is wrong");
 static_assert(sizeof(ftWolf) == 0x1ccdc, "Wolf allocation size is wrong!");
 static_assert(sizeof(ftWolf::PostureInfo) == 16, "Posture info is the wrong size!");

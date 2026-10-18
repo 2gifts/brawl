@@ -3,6 +3,8 @@
 #include <ft/ft_fighter_builder.h>
 #include <sr/sr_common.h>
 #include <types.h>
+#include <so/turn/so_turn_module.h>
+#include <ft/ft_common_data_accesser.h>
 
 ////////////////////////////////////////
 // Fox Build Configuration
@@ -24,8 +26,14 @@ typedef soLinkModuleBuildConfigCap<7, soLinkModuleImpl> ftFoxLinkModuleBuildConf
 typedef soCollisionHitModuleBuildConfig<soCollision::Category_Fighter, 13, 1, soCollisionHitModuleImpl, 0x3ff, true> ftFoxCollisionHitModuleBuildConfig;
 typedef soStatusModuleBuildConfig<288, soGeneralWorkBuildConfig<18, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftFoxStatusModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnFoxIllusion pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_FOX_ARTICLE_POOLS
+#include <ft/fox/ft_fox_article_pools.h>
+typedef ftFoxArticleManageModuleBuilder ftFoxGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x14CD0, Fighter_Fox> ftFoxGenerateArticleManageModuleBuilder;
+#endif
 
 class ftFoxBuildConfig : public ftCommonBuildConfig {
 public:
@@ -44,11 +52,53 @@ public:
     typedef ftFoxGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnFoxBlaster;
+class wnFoxIllusion;
+class wnFoxLandMaster;
+// Only the behavior-accessed tail is recovered (the turn record of the reflector).
+// HYPOTHESIS: the record grouping extends ftData, as for Wolf.
+struct ftFoxData : ftData {
+    u8 unk58[0x94 - sizeof(ftData)];
+    soTurnData reflectorTurnData;
+};
+static_assert(sizeof(ftFoxData) == 0x9c, "Reflector turn data offset is wrong!");
+
+// The constructor's 0x1CD98 allocation fixes the size; the tail is the common data pointer, the status table, the two
+// reflector flags and the trail of the last positions (the Phantasm afterimage).
 class ftFox : public ftFighterBuilder<ftFoxBuildConfig> {
-    u8 unkTail[0x1CD98 - sizeof(ftFighterBuilder<ftFoxBuildConfig>)];
+public:
+    // One sample of the afterimage trail: the position and a rotation of the fighter. HYPOTHESIS: names.
+    class PostureInfo {
+    public:
+        Vec3f m_pos;
+        float m_rotX;
+    };
+public:
+    ftFoxData* m_commonData; // +0x1CD30
+private:
+    soArrayContractibleTable<const soStatusData> m_statusTable; // +0x1CD34
+public:
+    // Set by the reflector collision callbacks for one frame: the hit was too weak (unk1CD44) or was stopped (unk1CD45).
+    u8 unk1CD44;
+    u8 unk1CD45;
+private:
+    soArrayQueueImpl<soArrayVector<PostureInfo, 4> > m_postureTrail; // +0x1CD48
 public:
     ftFox(s32 entryId,
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    virtual ~ftFox();
+    virtual void processUpdate();
+    virtual void onStart(int param);
+    virtual void processFixPosition();
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
+    virtual void notifyEventCollisionReflector(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser, float power, float posX, float posY);
+    virtual bool notifyEventCollisionReflectorCheck();
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnFoxBlaster* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnFoxIllusion* weapon, soModuleAccesser* acc);
+    static bool activeArticle2(wnFoxLandMaster* weapon, soModuleAccesser* acc);
 };
+static_assert(sizeof(ftFighterBuilder<ftFoxBuildConfig>) == 0x1CD30, "Fox status table offset is wrong");
+static_assert(sizeof(ftFox) == 0x1CD98, "Fox allocation size is wrong!");
