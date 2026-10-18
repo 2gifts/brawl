@@ -22,6 +22,7 @@ public:
     virtual void notifyEventLink(soLinkEventArgs*, soModuleAccesser*, StageObject*, int);
     virtual void notifyEventCollisionAttackFighter(soCollisionLog*, soModuleAccesser*);
     virtual void notifyEventChangeSituation(SituationKind, SituationKind, soModuleAccesser*);
+    static bool activeArticle1(wnYoshiTamago* article, soModuleAccesser* acc);
     static bool activeArticle(wnYoshiStar* article, soModuleAccesser* acc);
     static bool activeArticle(wnYoshiTamago* article, soModuleAccesser* acc);
     static bool activeArticle(wnYoshiFireBreath* article, soModuleAccesser* acc);

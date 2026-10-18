@@ -15,6 +15,10 @@ public:
     // The body lives in the module blob; declared so the class info's createArray can construct articles.
     wnYoshiTamago(s32 articleId, const wnArticleBuildInfo& info, const wnYoshiTamagoData* data);
     virtual ~wnYoshiTamago();
+    // captureNode is the captured fighter's corrected model node, or -1 when
+    // this egg is being spawned for Egg Throw rather than around a victim.
+    void activate(int founderTaskId, int resourceId, int team, const Vec3f* position,
+                  int captureNode, float lr);
     void shoot(const Vec3f* position, const Vec2f* speed, float spinFactor);
 };
 static_assert(sizeof(wnYoshiTamago) == 0x1FF8, "Yoshi egg article extent");

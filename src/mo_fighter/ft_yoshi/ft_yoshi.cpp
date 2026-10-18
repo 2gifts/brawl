@@ -16,6 +16,7 @@
 #include <wn/yoshi/wn_yoshi_tamago.h>
 #include <ft/yoshi/ft_yoshi_article_calls.h>
 #include <ft/yoshi/ft_yoshi_final_param.h>
+#include <ft/yoshi/ft_yoshi_transactor.h>
 #include <mt/mt_matrix.h>
 #include <math.h>
 
@@ -115,6 +116,17 @@ void ftYoshi::notifyEventChangeSituation(SituationKind kind, SituationKind previ
         m_moduleAccesser->getWorkManageModule().setInt(jumpCount, 0x10000001);
     }
 }
+
+// MATCH-ONLY: native addresses the local static's guard, object, and
+// destructor registration separately, as in R.O.B.'s transactor singleton.
+#pragma pool_data off
+bool ftYoshi::activeArticle1(wnYoshiTamago* article, soModuleAccesser* acc) {
+    static ftYoshiTransactor transactor;
+    u32 resourceId = acc->getResourceModule().getResourceIdAccesser()->getEtcResId();
+    return transactor.activeArticle1(article, acc, resourceId);
+}
+
+#pragma pool_data reset
 
 bool ftYoshi::activeArticle(wnYoshiStar* article, soModuleAccesser* acc) {
     ftYoshiSpecialLwParam* param = static_cast<ftYoshiSpecialLwParam*>(

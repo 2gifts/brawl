@@ -11083,7 +11083,7 @@ mo_melee/sora_melee/wn/wn_szerosuit_paralyzer_bullet.cpp:
 	.ctors      start:0x00000390 end:0x00000394
 
 mo_melee/sora_melee/ft/ft_yoshi_status_uniq_process_special_nswallow.cpp:
-	.text       start:0x00307B54 end:0x00307E00
+	.text       start:0x003076D8 end:0x00307E00
 	.ctors      start:0x00000394 end:0x00000398
 
 mo_melee/sora_melee/wn/wn_yoshi_tamago.cpp:

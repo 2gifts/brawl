@@ -74,6 +74,7 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    static bool activeArticle1(wnYoshiTamago* article, soModuleAccesser* acc);
     static bool activeArticle(wnYoshiStar* article, soModuleAccesser* acc);
     static bool activeArticle(wnYoshiTamago* article, soModuleAccesser* acc);
     static bool activeArticle(wnYoshiFireBreath* article, soModuleAccesser* acc);
