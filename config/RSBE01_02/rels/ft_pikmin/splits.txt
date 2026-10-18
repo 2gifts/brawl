@@ -84,7 +84,7 @@ mo_fighter/ft_pikmin/wn_pikmin_dolfin.cpp:
 mo_fighter/ft_pikmin/wn_pikmin_dolfin_status_uniq_process_common.cpp:
 	.text       start:0x0002AA3C end:0x0002AAF0
 	.ctors      start:0x00000038 end:0x0000003C
-	.data       start:0x0000BA28 end:0x0000BAA4
+	.data       start:0x0000BA28 end:0x0000BAA8
 	.bss        start:0x000002F0 end:0x00000300
 
 mo_fighter/ft_pikmin/wn_pikmin_chain.cpp:

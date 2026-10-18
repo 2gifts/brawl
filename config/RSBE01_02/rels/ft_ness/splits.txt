@@ -27,14 +27,14 @@ mo_fighter/ft_ness/ft_ness_status_uniq_process_attack_hi4.cpp:
 mo_fighter/ft_ness/ft_ness_status_uniq_process_attack_s4.cpp:
 	.text       start:0x0001151C end:0x000116AC
 	.ctors      start:0x0000000C end:0x00000010
-	.data       start:0x00008A40 end:0x00008ABC
+	.data       start:0x00008A40 end:0x00008AC0
 	.bss        start:0x000001F0 end:0x00000200
 
 mo_fighter/ft_ness/ft_ness_status_uniq_process_special_s.cpp:
 	.text       start:0x000116AC end:0x000117B8
 	.ctors      start:0x00000010 end:0x00000014
 	.rodata     start:0x00000028 end:0x00000030
-	.data       start:0x00008AC0 end:0x00008B34
+	.data       start:0x00008AC0 end:0x00008B38
 	.bss        start:0x00000200 end:0x00000210
 
 mo_fighter/ft_ness/ft_ness_status_uniq_process_special_hi.cpp:
@@ -49,7 +49,7 @@ mo_fighter/ft_ness/ft_ness_status_uniq_process_special_hi_reflect.cpp:
 	.text       start:0x00012B9C end:0x00012CA8
 	.ctors      start:0x0000001C end:0x00000020
 	.rodata     start:0x00000088 end:0x00000090
-	.data       start:0x00008C70 end:0x00008CEC
+	.data       start:0x00008C70 end:0x00008CF0
 	.bss        start:0x00000230 end:0x00000240
 
 mo_fighter/ft_ness/ft_ness_status_uniq_process_special_lw.cpp:

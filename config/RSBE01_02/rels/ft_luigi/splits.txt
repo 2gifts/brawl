@@ -51,7 +51,7 @@ mo_fighter/ft_luigi/wn_luigi_negative_zone_status_uniq_process_end.cpp:
 	.text       start:0x00010D7C end:0x00010EAC
 	.ctors      start:0x00000010 end:0x00000014
 	.rodata     start:0x00000068 end:0x00000070
-	.data       start:0x00006E58 end:0x00006ED4
+	.data       start:0x00006E58 end:0x00006ED8
 	.bss        start:0x000002B0 end:0x000002C0
 
 mo_fighter/mo_fighter.cpp:

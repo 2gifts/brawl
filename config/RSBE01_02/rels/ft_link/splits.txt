@@ -32,7 +32,7 @@ mo_fighter/ft_link/ft_link_status_uniq_process_special_boomerang.cpp:
 	.text       start:0x0000F4BC end:0x0000F74C
 	.ctors      start:0x0000000C end:0x00000010
 	.rodata     start:0x00000050 end:0x00000060
-	.data       start:0x000081D0 end:0x0000824C
+	.data       start:0x000081D0 end:0x00008250
 	.bss        start:0x00000160 end:0x00000170
 
 mo_fighter/ft_link/ft_link_status_uniq_process_special_bomb.cpp:
@@ -55,14 +55,14 @@ mo_fighter/ft_link/wn_link_boomerang.cpp:
 mo_fighter/ft_link/wn_link_boomerang_status_uniq_process_haved.cpp:
 	.text       start:0x00014B34 end:0x00014C1C
 	.ctors      start:0x0000001C end:0x00000020
-	.data       start:0x00008EE8 end:0x00008F64
+	.data       start:0x00008EE8 end:0x00008F68
 	.bss        start:0x00000268 end:0x00000278
 
 mo_fighter/ft_link/wn_link_boomerang_status_uniq_process_turn.cpp:
 	.text       start:0x00014C1C end:0x00015354
 	.ctors      start:0x00000020 end:0x00000024
 	.rodata     start:0x000000A0 end:0x000000B8
-	.data       start:0x00008F68 end:0x00008FE4
+	.data       start:0x00008F68 end:0x00008FE8
 	.bss        start:0x00000278 end:0x00000288
 
 mo_fighter/ft_link/wn_link_hookshot.cpp:
