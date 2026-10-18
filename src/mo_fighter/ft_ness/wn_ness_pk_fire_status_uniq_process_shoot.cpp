@@ -20,10 +20,11 @@ void wnNessPKFireStatusUniqProcessShoot::initStatus(soModuleAccesser* moduleAcce
 void wnNessPKFireStatusUniqProcessShoot::exitStatus(soModuleAccesser* moduleAccesser, int next) {
     soPostureModule& posture = moduleAccesser->getPostureModule();
     soEffectModule& effect = moduleAccesser->getEffectModule();
-    posture.setRot(&Vec3f(0.0f, 0.0f, 0.0f), 0); // HYPOTHESIS: constant from lbl_101_rodata_D8
+    Vec3f zeroRot(0.0f, 0.0f, 0.0f);
+    posture.setRot(&zeroRot, 0);
     if (next != 1) {
-        Vec3f rot(0.0f, 0.0f, 0.0f); // HYPOTHESIS: constant from lbl_101_rodata_D8
+        Vec3f* rot = &Vec3f(0.0f, 0.0f, 0.0f);
         Vec3f pos = posture.getPos();
-        effect.req(static_cast<EfID>(0x22), &pos, &rot, 1.0f, 0, -1); // HYPOTHESIS: scale from lbl_101_rodata_DC
+        effect.req(static_cast<EfID>(0x22), &pos, rot, 1.0f, 0, -1);
     }
 }
