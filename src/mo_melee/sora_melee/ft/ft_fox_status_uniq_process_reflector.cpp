@@ -4,6 +4,7 @@
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
+#include <ft/wolf/ft_wolf_status_uniq_process_reflector.h>
 #include <so/turn/so_turn_module.h>
 #include <types.h>
 
@@ -14,15 +15,6 @@ void ftKineticEnergyDisableAndClear(int index, soModuleAccesser* moduleAccesser)
 // the turn is checked. The work int 0x20000002 counts the frames the aerial shine holds the fighter.
 // HYPOTHESIS: names of the statuses and of the work value; the class shape is taken from
 // include/ft/wolf/ft_wolf_status_uniq_process_reflector.h.
-class ftFoxStatusUniqProcessReflector : public soStatusUniqProcess {
-public:
-    virtual ~ftFoxStatusUniqProcessReflector();
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-    virtual void setTurn(soModuleAccesser* moduleAccesser);
-};
-
 void ftFoxStatusUniqProcessReflector::initStatus(soModuleAccesser* moduleAccesser) {
     switch (moduleAccesser->getStatusModule().getStatusKind()) {
     case 0x115: {

@@ -5,6 +5,7 @@
 #include <so/so_value_accesser.h>
 #include <so/stageobject.h>
 #include <so/status/so_status_module_impl.h>
+#include <ft/fox/ft_fox_status_uniq_process.h>
 #include <types.h>
 
 // Local view of the article manage module (void* in the shared enumeration). Slot 0x48 takes two ints.
@@ -54,14 +55,6 @@ static inline int ftFoxFinalStatus(soModuleAccesser* moduleAccesser, int status)
     }
     return result;
 }
-
-class ftFoxStatusUniqProcessFinal : public soStatusUniqProcess {
-public:
-    virtual ~ftFoxStatusUniqProcessFinal() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-};
 
 ftFoxStatusUniqProcessFinal g_ftFoxStatusUniqProcessFinal;
 

@@ -7,6 +7,7 @@
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
+#include <ft/fox/ft_fox_status_uniq_process.h>
 #include <types.h>
 
 void ftKineticEnergyDisableAndClear(int index, soModuleAccesser* moduleAccesser);
@@ -16,16 +17,6 @@ float vec2fAngle(Vec2f*, Vec2f*);
 // landing slide on the ground. The flight angle (radians, 0 = to the right) is kept in the work float 0x21000004 and is
 // also shown as the rotation of the model around X.
 // HYPOTHESIS: names of the statuses and of the work values.
-class ftFoxStatusUniqProcessFire : public soStatusUniqProcess {
-public:
-    virtual ~ftFoxStatusUniqProcessFire() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-    virtual void execStop(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-};
-
 ftFoxStatusUniqProcessFire g_ftFoxStatusUniqProcessFire;
 
 static const float FIRE_PI_HALF = 1.57079637f;

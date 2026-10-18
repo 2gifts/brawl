@@ -882,6 +882,9 @@ void soArrayVectorAbstract<T>::substitution(s32 subIndex, s32 targetIndex) {
 
 template <class T, s32 C>
 class soArrayVector : public soArrayVectorAbstract<T> {
+public:
+    typedef T value_type;
+private:
     s32 m_topIndex : sizeof(bit_width<C>) + 1;
     s32 m_lastIndex : sizeof(bit_width<C>) + 1;
     s32 m_size : sizeof(bit_width<C>) + 1;

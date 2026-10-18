@@ -4,6 +4,7 @@
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
+#include <ft/fox/ft_fox_status_uniq_process.h>
 #include <types.h>
 
 void ftKineticEnergyDisableAndClear(int index, soModuleAccesser* moduleAccesser);
@@ -11,15 +12,6 @@ void ftKineticEnergyDisableAndClear(int index, soModuleAccesser* moduleAccesser)
 // Fox's side special (Fox Illusion). The work int 0x20000000 holds the phase set by the animation (0: launch, 1: dash,
 // 2: recovery), 0x20000001 the phase the kinetic energies were last set up for, 0x20000002 a countdown.
 // HYPOTHESIS: names of the phases and of the work values.
-class ftFoxStatusUniqProcessIllusion : public soStatusUniqProcess {
-public:
-    virtual ~ftFoxStatusUniqProcessIllusion() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-    void stepChanged(soModuleAccesser* moduleAccesser);
-};
-
 ftFoxStatusUniqProcessIllusion g_ftFoxStatusUniqProcessIllusion;
 
 void ftFoxStatusUniqProcessIllusion::initStatus(soModuleAccesser* moduleAccesser) { }
