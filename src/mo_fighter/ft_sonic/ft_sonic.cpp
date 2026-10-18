@@ -475,6 +475,17 @@ bool ftSonicArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
     }
 }
 
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+#pragma dont_inline on
+ftSonicTransactor* ftSonicTransactor::getInstance() {
+    static ftSonicTransactor instance;
+    return &instance;
+}
+#pragma dont_inline off
+#pragma pool_data reset
+
 // FIXME: Test code present only to emit the shared builder functions; delete once ftSonic is done
 void testBuilder() {
     soInsideEventManageModuleBuilder<ftSonicInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> insideBuilder;

@@ -9,6 +9,7 @@ class soCollisionLog;
 // HYPOTHESIS: the slot names; the layout follows ftTransactor (include/ft/ft_transactor.h), slot 10 takes the collision log.
 class ftSonicTransactor {
 public:
+    ftSonicTransactor();
     virtual ~ftSonicTransactor();
     virtual void init(soModuleAccesser* moduleAccesser);
     virtual void exit(soModuleAccesser* moduleAccesser);

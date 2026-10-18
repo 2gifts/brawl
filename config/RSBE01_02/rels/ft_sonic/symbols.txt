@@ -215,7 +215,7 @@ getEntryList__99soAnimCmdControlUnitBuilderDisguise<60soAnimCmdControlUnitBuildC
 setupDisguiseList__99soAnimCmdControlUnitBuilderDisguise<60soAnimCmdControlUnitBuildConfigDisguise<0,1,295,295,0,1,0,8>>FiP26soAnimCmdDisguiseListEntry = .text:0x00008BB4; // type:function size:0xB0
 onStart__7ftSonicFi = .text:0x00008C64; // type:function size:0xFC
 processCollision__7ftSonicFv = .text:0x00008D60; // type:function size:0x6C
-fn_123_8DCC = .text:0x00008DCC; // type:function size:0x70
+getInstance__17ftSonicTransactorFv = .text:0x00008DCC; // type:function size:0x70
 processUpdate__7ftSonicFv = .text:0x00008E3C; // type:function size:0xB0
 notifyEventChangeStatus__7ftSonicFiiP12soStatusDataP16soModuleAccesser = .text:0x00008EEC; // type:function size:0x210
 fn_123_90FC = .text:0x000090FC; // type:function size:0x14
