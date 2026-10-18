@@ -1,3 +1,13 @@
+#define WN_PARAM_ACCESSER_INLINE_DTOR
+#define SO_NULLABLE_INLINE_CTOR
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR
+#define WN_STATUS_PLAIN_NULL_ARRAY
+#define WN_ARTICLE_ANIMCMD_INT
+#define FT_REL_LINK_EXTERN
+#include <wn/wn_module_accesser_builder.h>
 #include <wn/yoshi/wn_yoshi_tamago.h>
 #include <wn/wn_class_info_impl.h>
 #include <wn/wn_activate_desc.h>
@@ -10,6 +20,16 @@
 
 // Registers the Yoshi egg article class (kind 60) in the class info table during static initialization.
 wnClassInfoImpl<60, wnYoshiTamago, wnYoshiTamagoData> g_wnYoshiTamagoClassInfo;
+
+wnYoshiTamago::wnYoshiTamago(s32 articleId, const wnArticleBuildInfo& info, const wnYoshiTamagoData* data) :
+    wnWeaponBuilder<wnYoshiTamagoModuleAccesserBuildConfig>(
+        "YoshiTamago", articleId, info,
+        wnModuleAccesserBuildData(60, data, info.getHeapModule()->getInstanceHeap(),
+            info.getHeapModule()->getNWModelInstanceHeap(), info.getHeapModule()->getNWMotionInstanceHeap(),
+            static_cast<u8>(data->m_resGroupNo), -1, &m_paramAccesser, 0, 0, 0, 0, 0, 0, 0)),
+    m_param(data->m_param), m_paramAccesser(data->m_param) {
+    Weapon::deactivate(false);
+}
 
 // Shells use a model constraint on the captured fighter. A free egg instead
 // starts at Yoshi's mouth and is given its trajectory by shoot().

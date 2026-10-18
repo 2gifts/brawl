@@ -2724,7 +2724,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_szerosuit_paralyzer.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_szerosuit_paralyzer_bullet.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_yoshi_status_uniq_process_special_nswallow.cpp"),
-            Object(NonMatching, "mo_melee/sora_melee/wn/wn_yoshi_tamago.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/wn/wn_yoshi_tamago.cpp", cflags=cflags_rel + ["-DFT_MODULE_BUILDER"]),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_kirby_pikmin.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_kirby_copy_ability_id_converter.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_fox_status_uniq_process_illusion.cpp"),

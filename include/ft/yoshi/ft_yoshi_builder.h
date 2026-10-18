@@ -49,8 +49,8 @@ public:
     typedef ftYoshiKineticModuleBuildConfig KineticModuleBuildConfig;
     typedef ftYoshiGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
-// The constructor allocates 0x222B0 bytes. The parameter getter establishes
-// m_data at 0x22284; the remaining tail fields are not recovered yet.
+// The native constructor owns a status-data table, common fighter data, and
+// the egg-shield animation after the shared fighter builder.
 struct ftData;
 class wnYoshiStar;
 class wnYoshiTamago;
@@ -59,7 +59,7 @@ class wnYoshiFireCannon;
 class soModuleAccesser;
 
 class ftYoshi : public ftFighterBuilder<ftYoshiBuildConfig> {
-    u8 unkTail[0x22284 - sizeof(ftFighterBuilder<ftYoshiBuildConfig>)];
+    soArrayContractibleTable<const soStatusData> m_statusDataTable; // +0x22274
     ftData* m_data; // Instance parameter data, proved by getExtendParam.
     soAnimObj m_guardColorAnim; // +0x22288: egg-shield material animation.
 public:
