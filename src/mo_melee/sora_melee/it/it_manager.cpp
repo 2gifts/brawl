@@ -2052,10 +2052,21 @@ void itManager::removeItemAllTempArchive() {
 }
 
 // Calls the unnamed Stage virtual at vtable offset 0x1A8 (HYPOTHESIS: a stage-wide yes/no query used to block item spawns).
+// The vtable is the one at +0x3C; the call passes the Stage pointer itself.
 static inline bool stageBlocksSpecialItem(Stage* stage) {
-    typedef int (*StageQueryFn)(void*);
-    void* sub = (u8*)stage + 0x3C;
-    return (*(StageQueryFn**)sub)[0x1A8 / 4](sub) != 0;
+    typedef bool (*StageQueryFn)(void*);
+    return (*(StageQueryFn**)((u8*)stage + 0x3C))[0x1A8 / 4](stage);
+}
+
+// The archive of this kind that has variation 0 (an inline loop of isExclusiveSpecialItem).
+static inline itArchive* findBaseArchive(itManager* manager, int kind) {
+    for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(manager->m_itArchiveArrayList).size(); i++) {
+        itArchive* cur = static_cast<const soArrayList<itArchive*, 128>&>(manager->m_itArchiveArrayList).at(i);
+        if (cur != NULL && kind == cur->m_itKind && cur->m_itVariation == 0) {
+            return cur;
+        }
+    }
+    return NULL;
 }
 
 // Whether a special item (Assist Trophy 0xA1, Smash Ball 0x37, Dragoon 0x14, ...) must not spawn right now because
@@ -2076,15 +2087,7 @@ bool itManager::isExclusiveSpecialItem(int kind, bool unk) {
             if (archiveIdOf(this, 0xA1) >= 0) {
                 archiveKind = -3;
             }
-            itArchive* found = NULL;
-            for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).size(); i++) {
-                itArchive* cur = static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).at(i);
-                if (cur != NULL && archiveKind == cur->m_itKind && cur->m_itVariation == 0) {
-                    found = cur;
-                    break;
-                }
-            }
-            if (found == NULL) {
+            if (findBaseArchive(this, archiveKind) == NULL) {
                 goto checkTechnique;
             }
         }
@@ -2098,7 +2101,10 @@ checkTechnique:
         blocked = true;
     }
     u32 flags = itManagerField<u32>(this, 0x1494);
-    u8 count = (flags & 2) != 0;
+    int count = 0;
+    if ((flags & 2) != 0) {
+        count = 1;
+    }
     if ((flags & 4) != 0) {
         count++;
     }
@@ -2116,7 +2122,7 @@ checkTechnique:
         } else {
             blocked = true;
         }
-    } else if (count > 2 || (flags & 0x10) != 0) {
+    } else if (count >= 3 || (flags & 0x10) != 0) {
         blocked = true;
     }
     return blocked;
