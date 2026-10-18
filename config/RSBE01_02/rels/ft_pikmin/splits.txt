@@ -74,6 +74,9 @@ mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_air_follow.cpp:
 mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_water_follow.cpp:
 	.text       start:0x00026DE0 end:0x000270CC
 	.ctors      start:0x00000034 end:0x00000038
+	.rodata     start:0x00000130 end:0x00000140
+	.data       start:0x0000B2A8 end:0x0000B330
+	.bss        start:0x00000270 end:0x00000280
 
 mo_fighter/ft_pikmin/wn_pikmin_dolfin.cpp:
 	.text       start:0x000270CC end:0x0002AA3C
@@ -81,6 +84,8 @@ mo_fighter/ft_pikmin/wn_pikmin_dolfin.cpp:
 mo_fighter/ft_pikmin/wn_pikmin_dolfin_status_uniq_process_common.cpp:
 	.text       start:0x0002AA3C end:0x0002AAF0
 	.ctors      start:0x00000038 end:0x0000003C
+	.data       start:0x0000BA28 end:0x0000BAA4
+	.bss        start:0x000002F0 end:0x00000300
 
 mo_fighter/ft_pikmin/wn_pikmin_chain.cpp:
 	.text       start:0x0002AAF0 end:0x0002D664

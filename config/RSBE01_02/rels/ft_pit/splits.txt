@@ -33,6 +33,9 @@ mo_fighter/ft_pit/ft_pit_status_uniq_process_special_hi_fly.cpp:
 mo_fighter/ft_pit/ft_pit_status_uniq_process_special_lw_hold.cpp:
 	.text       start:0x0000E274 end:0x0000E4D4
 	.ctors      start:0x0000000C end:0x00000010
+	.rodata     start:0x00000020 end:0x00000028
+	.data       start:0x00006A4C end:0x00006AC4
+	.bss        start:0x000001C0 end:0x000001D0
 
 mo_fighter/ft_pit/wn_pit_ikarus.cpp:
 	.text       start:0x0000E4D4 end:0x00012C04

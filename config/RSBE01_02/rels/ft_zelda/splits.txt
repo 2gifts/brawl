@@ -110,6 +110,9 @@ mo_fighter/ft_zelda/wn_sheik_iron_wire_status_uniq_process_had.cpp:
 mo_fighter/ft_zelda/wn_sheik_iron_wire_status_uniq_process_shot.cpp:
 	.text       start:0x00024534 end:0x00024764
 	.ctors      start:0x0000004C end:0x00000050
+	.rodata     start:0x000001B0 end:0x000001B8
+	.data       start:0x0000D180 end:0x0000D1FC
+	.bss        start:0x00000618 end:0x00000628
 
 mo_fighter/ft_zelda/wn_sheik_iron_wire_status_uniq_process_shot_fall.cpp:
 	.text       start:0x00024764 end:0x00024804
@@ -124,6 +127,8 @@ mo_fighter/ft_zelda/wn_sheik_iron_wire_status_uniq_process_fall.cpp:
 mo_fighter/ft_zelda/wn_sheik_iron_wire_status_uniq_process_takeup.cpp:
 	.text       start:0x00024BBC end:0x00024D10
 	.ctors      start:0x00000058 end:0x0000005C
+	.data       start:0x0000D300 end:0x0000D37C
+	.bss        start:0x00000648 end:0x00000658
 
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x00024D10 end:0x00024DAC
