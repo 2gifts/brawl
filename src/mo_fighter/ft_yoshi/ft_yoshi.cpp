@@ -13,6 +13,15 @@
 #include <ft/yoshi/ft_yoshi_special_s_utility.h>
 #include <so/catch/so_catch_module.h>
 #include <wn/yoshi/wn_yoshi_star.h>
+#include <wn/yoshi/wn_yoshi_tamago.h>
+#include <ft/yoshi/ft_yoshi_article_calls.h>
+#include <ft/yoshi/ft_yoshi_final_param.h>
+#include <mt/mt_matrix.h>
+#include <math.h>
+
+namespace ftyoshi { template <class T> T ABS(T); }
+// Existing rotate-only matrix transform; unlike mulPos, it omits translation.
+extern "C" void fn_8003E3BC(const Matrix*, const Vec3f*, Vec3f*);
 
 #define FT_BC ftYoshiBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -121,6 +130,84 @@ bool ftYoshi::activeArticle(wnYoshiStar* article, soModuleAccesser* acc) {
     int founderTaskId = acc->getStageObject().m_taskId;
     article->activate(founderTaskId, fighter.getOwner()->getTeam(), &position, direction);
     return true;
+}
+
+bool ftYoshi::activeArticle(wnYoshiTamago* article, soModuleAccesser* acc) {
+    ftYoshiSpecialHiParam* param = static_cast<ftYoshiSpecialHiParam*>(
+        g_ftCommonDataAccesser.getData(Fighter_Yoshi)->extendParam[1]);
+    soWorkManageModule& work = acc->getWorkManageModule();
+    soControllerModule& input = acc->getControllerModule();
+    float scale = acc->getPostureModule().getScale();
+    float lr = acc->getPostureModule().getLr();
+    Vec3f position = acc->getPostureModule().getPos();
+    position.m_x += lr * (param->throwOffsetX * scale);
+    position.m_y += param->throwOffsetY * scale;
+
+    // Horizontal input tilts the arc away from its default angle. Keep the
+    // ordered comparisons, including their behavior for non-finite input.
+    float stick = input.getStickX();
+    float angle = ftyoshi::ABS(stick) / param->throwStickFull;
+    if (angle > 1.0f) angle = 1.0f;
+    angle *= param->throwStickAngle;
+    if (angle < param->throwAngleDeadzone) angle = 0.0f;
+    angle *= stick < 0.0f ? -1.0f : 1.0f;
+    if (lr == 1.0f) angle = param->throwBaseAngle - angle;
+    else angle = (3.1415927f - param->throwBaseAngle) - angle;
+
+    // HYPOTHESIS: this animation-command work value is throw strength/hold
+    // time. The egg consumes the last argument as a spin factor, not life.
+    float strength = work.getInt(0x20000000);
+    Vec2f speed;
+    speed.m_x = (param->throwSpeed + strength * param->throwStrengthSpeed) * static_cast<float>(cos(angle));
+    speed.m_y = (param->throwSpeed + strength * param->throwStrengthSpeed) * static_cast<float>(sin(angle));
+    float spin = param->throwSpin + strength * param->throwStrengthSpin;
+    article->shoot(&position, &speed, spin);
+    return false;
+}
+
+bool ftYoshi::activeArticle(wnYoshiFireBreath* article, soModuleAccesser* acc) {
+    // MATCH-ONLY: declare the saved ID before the other persistent locals.
+    int founderTaskId;
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    ftYoshiFinalParam* param = static_cast<ftYoshiFinalParam*>(
+        g_ftCommonDataAccesser.getData(Fighter_Yoshi)->extendParam[3]);
+    float lr = acc->getPostureModule().getLr();
+    Vec3f position;
+    Vec3f mouthOffset(0.0f, param->unk44, param->unk40);
+    Matrix mouthMatrix(true);
+    acc->getModelModule().getNodeGlobalMtx(0x26, &mouthMatrix, false);
+    fn_8003E3BC(&mouthMatrix, &mouthOffset, &position);
+    Vec3f mouthPosition = acc->getModelModule().getNodeGlobalPosition(0x26, false);
+    Vec3fAdd(&position, &position, &mouthPosition);
+    soWorkManageModule& work = acc->getWorkManageModule();
+    float angle = work.getFloat(0x21000008);
+    founderTaskId = fighter.m_taskId;
+    lr = acc->getPostureModule().getLr();
+    article->activate(founderTaskId, fighter.getOwner()->getTeam(), &position, lr, angle);
+
+    // Successive flames sweep around a center angle. Reverse the next step
+    // after reaching either edge, retaining the native overshoot for this shot.
+    float step = work.getFloat(0x21000009);
+    angle += param->unk3C * step;
+    if (ftyoshi::ABS(param->unk34 - angle) >= param->unk38) step = -step;
+    work.setFloat(angle, 0x21000008);
+    work.setFloat(step, 0x21000009);
+    return false;
+}
+
+bool ftYoshi::activeArticle(wnYoshiFireCannon* article, soModuleAccesser* acc) {
+    // MATCH-ONLY: declare the saved ID before the other persistent locals.
+    int founderTaskId;
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    ftYoshiFinalParam* param = static_cast<ftYoshiFinalParam*>(
+        g_ftCommonDataAccesser.getData(Fighter_Yoshi)->extendParam[3]);
+    float lr = acc->getPostureModule().getLr();
+    Vec3f position = acc->getModelModule().getNodeGlobalPosition(0x26, false);
+    position.m_x += param->unk50 * lr;
+    position.m_y += param->unk54;
+    founderTaskId = fighter.m_taskId;
+    article->activate(founderTaskId, 0xFFFF, fighter.getOwner()->getTeam(), &position, lr, param->unk4C);
+    return false;
 }
 
 // Guard statuses create this animation once and remove it on exit. The work

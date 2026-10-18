@@ -15,5 +15,6 @@ public:
     // The body lives in the module blob; declared so the class info's createArray can construct articles.
     wnYoshiTamago(s32 articleId, const wnArticleBuildInfo& info, const wnYoshiTamagoData* data);
     virtual ~wnYoshiTamago();
+    void shoot(const Vec3f* position, const Vec2f* speed, float spinFactor);
 };
 static_assert(sizeof(wnYoshiTamago) == 0x1FF8, "Yoshi egg article extent");

@@ -5,6 +5,9 @@
 // getExtendParam establishes the instance-data pointer at 0x22284.
 struct ftData;
 class wnYoshiStar;
+class wnYoshiTamago;
+class wnYoshiFireBreath;
+class wnYoshiFireCannon;
 class soModuleAccesser;
 
 class ftYoshi : public Fighter {
@@ -20,6 +23,9 @@ public:
     virtual void notifyEventCollisionAttackFighter(soCollisionLog*, soModuleAccesser*);
     virtual void notifyEventChangeSituation(SituationKind, SituationKind, soModuleAccesser*);
     static bool activeArticle(wnYoshiStar* article, soModuleAccesser* acc);
+    static bool activeArticle(wnYoshiTamago* article, soModuleAccesser* acc);
+    static bool activeArticle(wnYoshiFireBreath* article, soModuleAccesser* acc);
+    static bool activeArticle(wnYoshiFireCannon* article, soModuleAccesser* acc);
     void createGuardColorAnim();
     void deleteGuardColorAnim();
     void updateGuardColorAnim();

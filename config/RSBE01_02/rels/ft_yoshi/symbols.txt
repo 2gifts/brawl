@@ -254,12 +254,12 @@ notifyEventCollisionAttackFighter__7ftYoshiFP14soCollisionLogP16soModuleAccesser
 notifyEventChangeSituation__7ftYoshiF13SituationKind13SituationKindP16soModuleAccesser = .text:0x0000A3C4; // type:function size:0xCC
 activeArticle__7ftYoshiFP11wnYoshiStarP16soModuleAccesser = .text:0x0000A490; // type:function size:0x13C
 fn_95_A5CC = .text:0x0000A5CC; // type:function size:0xB0
-fn_95_A67C = .text:0x0000A67C; // type:function size:0x238
+activeArticle__7ftYoshiFP13wnYoshiTamagoP16soModuleAccesser = .text:0x0000A67C; // type:function size:0x238
 ABS<f>__7ftyoshiFf_f = .text:0x0000A8B4; // type:function size:0x8
 fn_95_A8BC = .text:0x0000A8BC; // type:function size:0xB8
-fn_95_A974 = .text:0x0000A974; // type:function size:0x240
+activeArticle__7ftYoshiFP17wnYoshiFireBreathP16soModuleAccesser = .text:0x0000A974; // type:function size:0x240
 __ct__5Vec3fFfff = .text:0x0000ABB4; // type:function size:0x10
-fn_95_ABC4 = .text:0x0000ABC4; // type:function size:0x128
+activeArticle__7ftYoshiFP17wnYoshiFireCannonP16soModuleAccesser = .text:0x0000ABC4; // type:function size:0x128
 createGuardColorAnim__7ftYoshiFv = .text:0x0000ACEC; // type:function size:0x150
 deleteGuardColorAnim__7ftYoshiFv = .text:0x0000AE3C; // type:function size:0x90
 updateGuardColorAnim__7ftYoshiFv = .text:0x0000AECC; // type:function size:0xCC
