@@ -30,6 +30,13 @@ mo_adv_stage/gr_adventure_static.cpp:
 	.data       start:0x0000B568 end:0x0000B9C8
 	.bss        start:0x000018F8 end:0x00001A28
 
+mo_adv_stage/gr_adventure_savepoint.cpp:
+	.text       start:0x0003BF90 end:0x0003C590
+	.ctors      start:0x00000080 end:0x00000084
+	.rodata     start:0x00000838 end:0x00000848
+	.data       start:0x00015968 end:0x00015E58
+	.bss        start:0x00002768 end:0x00002898
+
 mo_adv_stage/gr_adventure_final.cpp:
 	.text       start:0x0003D6E4 end:0x0003DA24
 	.rodata     start:0x000008E8 end:0x000008F4
