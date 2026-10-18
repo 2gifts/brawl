@@ -2137,9 +2137,7 @@ checkTechnique:
         count = itManagerField<u8>(this, 0x101D);
     }
     if (kind == 0x14) {
-        if ((flags & 0x10) != 0) {
-            blocked = true;
-        } else if (count >= 2 && g_Stage != NULL && stageBlocksSpecialItem(g_Stage)) {
+        if ((flags & 0x10) != 0 || (count >= 2 && g_Stage != NULL && stageBlocksSpecialItem(g_Stage))) {
             blocked = true;
         } else if (count < 2) {
             blocked = false;
