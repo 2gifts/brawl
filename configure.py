@@ -1768,7 +1768,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_gamewatch/wn_game_watch_normal_weapon.cpp"),
             Object(NonMatching, "mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_s.cpp"),
             Object(NonMatching, "mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_hi_start.cpp"),
-            Object(Matching, "mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_hi_fall.cpp"),
+            Object(NonMatching, "mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_hi_fall.cpp"),
             Object(Matching, "mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_lw.cpp"),
             Object(Matching, "mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_lw_catch.cpp"),
             Object(Matching, "mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_lw_shoot.cpp"),
