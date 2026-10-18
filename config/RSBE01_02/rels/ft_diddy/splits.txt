@@ -23,6 +23,8 @@ mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_monkey_flip.cpp:
 mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_monkey_flip_stick.cpp:
 	.text       start:0x0000DD7C end:0x0000DE24
 	.ctors      start:0x00000008 end:0x0000000C
+	.data       start:0x000075C8 end:0x00007650
+	.bss        start:0x00000258 end:0x00000268
 
 mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_pop_gun.cpp:
 	.text       start:0x0000DE24 end:0x0000E724

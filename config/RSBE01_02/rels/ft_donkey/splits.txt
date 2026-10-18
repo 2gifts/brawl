@@ -14,7 +14,7 @@ global_destructor_chain.c:
 mo_fighter/ft_donkey/ft_donkey.cpp:
 	.text       start:0x00000070 end:0x0000CBC4
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x000000D0
+	.rodata     start:0x00000000 end:0x00000060
 
 mo_fighter/ft_donkey/ft_donkey_status_uniq_process_special_s.cpp:
 	.text       start:0x0000CBC4 end:0x0000CFC0
@@ -47,6 +47,9 @@ mo_fighter/ft_donkey/ft_donkey_status_uniq_process_final_end.cpp:
 mo_fighter/ft_donkey/ft_donkey_status_uniq_process_item_lift.cpp:
 	.text       start:0x0000F404 end:0x0000F5FC
 	.ctors      start:0x0000001C end:0x00000020
+	.rodata     start:0x00000060 end:0x00000070
+	.data       start:0x000066E8 end:0x00006760
+	.bss        start:0x00000218 end:0x00000228
 
 mo_fighter/ft_donkey/ft_donkey_status_uniq_process_catch_wait.cpp:
 	.text       start:0x0000F5FC end:0x0000F700
@@ -67,6 +70,8 @@ mo_fighter/ft_donkey/ft_donkey_status_uniq_process_shoulder_common.cpp:
 mo_fighter/ft_donkey/ft_donkey_status_uniq_process_shoulder_start.cpp:
 	.text       start:0x0000FDCC end:0x0000FF1C
 	.ctors      start:0x00000030 end:0x00000034
+	.data       start:0x000069E0 end:0x00006A68
+	.bss        start:0x00000268 end:0x00000278
 
 mo_fighter/ft_donkey/ft_donkey_status_uniq_process_shoulder_walk.cpp:
 	.text       start:0x0000FF1C end:0x00010140
@@ -75,9 +80,13 @@ mo_fighter/ft_donkey/ft_donkey_status_uniq_process_shoulder_walk.cpp:
 mo_fighter/ft_donkey/ft_donkey_status_uniq_process_throw_common.cpp:
 	.text       start:0x00010140 end:0x00010324
 	.ctors      start:0x00000038 end:0x0000003C
+	.rodata     start:0x000000A0 end:0x000000A8
+	.data       start:0x00006AF0 end:0x00006B70
+	.bss        start:0x00000288 end:0x00000298
 
 mo_fighter/ft_donkey/wn_donkey_barrel_conga.cpp:
 	.text       start:0x00010324 end:0x00012DE0
+	.rodata     start:0x000000A8 end:0x000000D0
 
 mo_fighter/ft_donkey/wn_donkey_sound_effect.cpp:
 	.text       start:0x00012DE0 end:0x000154E4

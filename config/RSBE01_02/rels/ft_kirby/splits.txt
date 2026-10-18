@@ -14,9 +14,9 @@ global_destructor_chain.c:
 mo_fighter/ft_kirby/ft_kirby.cpp:
 	.text       start:0x00000070 end:0x000136CC
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x000005D0
-	.data       start:0x00000000 end:0x0000EAD8
-	.bss        start:0x00000008 end:0x00001344
+	.rodata     start:0x00000000 end:0x00000080
+	.data       start:0x00000000 end:0x0000B710
+	.bss        start:0x00000008 end:0x00000CC0
 
 mo_fighter/ft_kirby/ft_kirby_status_uniq_process_final_cutter.cpp:
 	.text       start:0x000136CC end:0x00013EF0
@@ -37,10 +37,16 @@ mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n_drink_item.cpp:
 mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n_spit.cpp:
 	.text       start:0x000168C8 end:0x00016BE0
 	.ctors      start:0x00000018 end:0x0000001C
+	.rodata     start:0x00000080 end:0x00000088
+	.data       start:0x0000B710 end:0x0000B790
+	.bss        start:0x00000CC0 end:0x00000CD0
 
 mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n_eat.cpp:
 	.text       start:0x00016BE0 end:0x00017830
 	.ctors      start:0x0000001C end:0x00000020
+	.rodata     start:0x00000088 end:0x000005D0
+	.data       start:0x0000B790 end:0x0000EAD8
+	.bss        start:0x00000CD0 end:0x00001344
 
 mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n_swallow.cpp:
 	.text       start:0x00017830 end:0x00017B10

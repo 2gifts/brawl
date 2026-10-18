@@ -26,6 +26,9 @@ mo_fighter/ft_luigi/ft_luigi_kinetic_transactor.cpp:
 mo_fighter/ft_luigi/ft_luigi_status_uniq_process_special_lw.cpp:
 	.text       start:0x0000CA80 end:0x0000CE18
 	.ctors      start:0x00000004 end:0x00000008
+	.rodata     start:0x00000028 end:0x00000030
+	.data       start:0x000063A8 end:0x00006420
+	.bss        start:0x000001C0 end:0x000001D0
 
 mo_fighter/ft_luigi/ft_luigi_status_special_s_ram.cpp:
 	.text       start:0x0000CE18 end:0x0000D184
@@ -47,6 +50,9 @@ mo_fighter/ft_luigi/wn_luigi_negative_zone.cpp:
 mo_fighter/ft_luigi/wn_luigi_negative_zone_status_uniq_process_end.cpp:
 	.text       start:0x00010D7C end:0x00010EAC
 	.ctors      start:0x00000010 end:0x00000014
+	.rodata     start:0x00000068 end:0x00000070
+	.data       start:0x00006E58 end:0x00006ED8
+	.bss        start:0x000002B0 end:0x000002C0
 
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x00010EAC end:0x00010F48

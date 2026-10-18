@@ -14,7 +14,7 @@ global_destructor_chain.c:
 mo_fighter/ft_gamewatch/ft_gamewatch.cpp:
 	.text       start:0x00000070 end:0x000100FC
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x00000188
+	.rodata     start:0x00000000 end:0x00000090
 
 mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_s.cpp:
 	.text       start:0x00011AE0 end:0x00011E94
@@ -27,6 +27,8 @@ mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_hi_start.cpp:
 mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_hi_fall.cpp:
 	.text       start:0x000121B8 end:0x00012340
 	.ctors      start:0x0000000C end:0x00000010
+	.data       start:0x00008F88 end:0x00009008
+	.bss        start:0x00000170 end:0x00000180
 
 mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_lw.cpp:
 	.text       start:0x00012340 end:0x00012618
@@ -37,10 +39,14 @@ mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_lw.cpp:
 mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_lw_catch.cpp:
 	.text       start:0x00012618 end:0x00012724
 	.ctors      start:0x00000014 end:0x00000018
+	.data       start:0x00009088 end:0x00009108
+	.bss        start:0x00000190 end:0x000001A0
 
 mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_special_lw_shoot.cpp:
 	.text       start:0x00012724 end:0x00012908
 	.ctors      start:0x00000018 end:0x0000001C
+	.data       start:0x00009108 end:0x00009188
+	.bss        start:0x000001A0 end:0x000001B0
 
 mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_start.cpp:
 	.text       start:0x00012908 end:0x00012B2C
@@ -53,6 +59,8 @@ mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_walk.cpp:
 mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_dash.cpp:
 	.text       start:0x00012DA8 end:0x00012F38
 	.ctors      start:0x00000024 end:0x00000028
+	.data       start:0x00009328 end:0x000093B0
+	.bss        start:0x000001D0 end:0x000001E0
 
 mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_run.cpp:
 	.text       start:0x00012F38 end:0x00013214
@@ -61,6 +69,9 @@ mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_run.cpp:
 mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_run_brake.cpp:
 	.text       start:0x00013214 end:0x00013564
 	.ctors      start:0x0000002C end:0x00000030
+	.rodata     start:0x00000090 end:0x00000098
+	.data       start:0x00009438 end:0x000094C0
+	.bss        start:0x000001F0 end:0x00000200
 
 mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_turn.cpp:
 	.text       start:0x00013564 end:0x00013974
@@ -73,9 +84,13 @@ mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_turn_run.cpp:
 mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_landing.cpp:
 	.text       start:0x00013C9C end:0x00013FB4
 	.ctors      start:0x00000038 end:0x0000003C
+	.rodata     start:0x000000B0 end:0x000000C0
+	.data       start:0x000095D0 end:0x00009650
+	.bss        start:0x00000220 end:0x00000230
 
 mo_fighter/ft_gamewatch/wn_game_watch_rescue.cpp:
 	.text       start:0x000145EC end:0x00016BB4
+	.rodata     start:0x000000C0 end:0x00000188
 
 mo_fighter/ft_gamewatch/wn_game_watch_parachute.cpp:
 	.text       start:0x00016BB4 end:0x00018C7C

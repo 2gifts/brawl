@@ -15,12 +15,14 @@ mo_fighter/ft_poke/ft_poke_lizardon.cpp:
 	.text       start:0x00000070 end:0x0000DD40
 	.ctors      start:0x00000000 end:0x00000004
 	.rodata     start:0x00000000 end:0x000000D4
-	.data       start:0x00000000 end:0x0000C638
-	.bss        start:0x00000008 end:0x0000068C
+	.data       start:0x00000000 end:0x00006EB0
+	.bss        start:0x00000008 end:0x00000160
 
 mo_fighter/ft_poke/ft_pokelizardon_status_uniq_process_crush_rock.cpp:
 	.text       start:0x0000DD40 end:0x0000DF88
 	.ctors      start:0x00000004 end:0x00000008
+	.data       start:0x00006EB0 end:0x00006F30
+	.bss        start:0x00000160 end:0x00000170
 
 mo_fighter/ft_poke/wn_poke_lizardon_rock.cpp:
 	.text       start:0x0000DF88 end:0x00011768
@@ -31,10 +33,14 @@ mo_fighter/ft_poke/wn_poke_lizardon_rock_stone.cpp:
 mo_fighter/ft_poke/wn_poke_lizardon_rock_status_uniq_process_crushed.cpp:
 	.text       start:0x00013BA8 end:0x00013DCC
 	.ctors      start:0x00000008 end:0x0000000C
+	.data       start:0x00007CB0 end:0x00007D30
+	.bss        start:0x000002D8 end:0x000002E8
 
 mo_fighter/ft_poke/ft_pokezenigame_status_uniq_process_special_s.cpp:
 	.text       start:0x0001AFE0 end:0x0001B63C
 	.ctors      start:0x00000010 end:0x00000014
+	.data       start:0x00007D30 end:0x0000C638
+	.bss        start:0x000002E8 end:0x0000068C
 
 mo_fighter/ft_poke/wn_poke_fushigisou_leaf_cutter.cpp:
 	.text       start:0x000216E8 end:0x00023BA4

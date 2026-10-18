@@ -14,9 +14,9 @@ global_destructor_chain.c:
 mo_fighter/ft_samus/ft_samus.cpp:
 	.text       start:0x00000070 end:0x0000EE1C
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x000000C0
-	.data       start:0x00000000 end:0x0000D760
-	.bss        start:0x00000008 end:0x00000488
+	.rodata     start:0x00000000 end:0x00000070
+	.data       start:0x00000000 end:0x0000C6D8
+	.bss        start:0x00000008 end:0x00000320
 
 mo_fighter/ft_samus/ft_samus_status_uniq_process_special_s.cpp:
 	.text       start:0x00010954 end:0x00011170
@@ -37,17 +37,25 @@ mo_fighter/ft_samus/ft_szerosuit_status_uniq_process_special_lw_step.cpp:
 mo_fighter/ft_samus/ft_szerosuit_status_uniq_process_special_lw_flip.cpp:
 	.text       start:0x0001A428 end:0x0001A674
 	.ctors      start:0x00000020 end:0x00000024
+	.rodata     start:0x00000070 end:0x00000078
+	.data       start:0x0000C6D8 end:0x0000C758
+	.bss        start:0x00000320 end:0x00000330
 
 mo_fighter/ft_samus/ft_szerosuit_status_uniq_process_special_lw_kick.cpp:
 	.text       start:0x0001A674 end:0x0001A960
 	.ctors      start:0x00000024 end:0x00000028
+	.rodata     start:0x00000078 end:0x000000C0
 
 mo_fighter/ft_samus/ft_szerosuit_status_uniq_process_final_samus.cpp:
 	.text       start:0x0001A960 end:0x0001AB4C
 	.ctors      start:0x00000028 end:0x0000002C
+	.data       start:0x0000C7D8 end:0x0000C858
+	.bss        start:0x00000340 end:0x00000350
 
 mo_fighter/ft_samus/wn_s_zerosuit_whip.cpp:
 	.text       start:0x0001AB4C end:0x0001DDF8
+	.data       start:0x0000C858 end:0x0000D760
+	.bss        start:0x00000350 end:0x00000488
 
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x0002041C end:0x000204B8

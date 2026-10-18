@@ -14,7 +14,7 @@ global_destructor_chain.c:
 mo_fighter/ft_ness/ft_ness.cpp:
 	.text       start:0x00000070 end:0x00011034
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x000001A0
+	.rodata     start:0x00000000 end:0x00000028
 
 mo_fighter/ft_ness/ft_ness_status_uniq_process_attack_hi4_start.cpp:
 	.text       start:0x00011034 end:0x000113E4
@@ -27,10 +27,15 @@ mo_fighter/ft_ness/ft_ness_status_uniq_process_attack_hi4.cpp:
 mo_fighter/ft_ness/ft_ness_status_uniq_process_attack_s4.cpp:
 	.text       start:0x0001151C end:0x000116AC
 	.ctors      start:0x0000000C end:0x00000010
+	.data       start:0x00008A40 end:0x00008AC0
+	.bss        start:0x000001F0 end:0x00000200
 
 mo_fighter/ft_ness/ft_ness_status_uniq_process_special_s.cpp:
 	.text       start:0x000116AC end:0x000117B8
 	.ctors      start:0x00000010 end:0x00000014
+	.rodata     start:0x00000028 end:0x00000030
+	.data       start:0x00008AC0 end:0x00008B38
+	.bss        start:0x00000200 end:0x00000210
 
 mo_fighter/ft_ness/ft_ness_status_uniq_process_special_hi.cpp:
 	.text       start:0x000117B8 end:0x00011D78
@@ -43,6 +48,9 @@ mo_fighter/ft_ness/ft_ness_status_uniq_process_special_hi_attack.cpp:
 mo_fighter/ft_ness/ft_ness_status_uniq_process_special_hi_reflect.cpp:
 	.text       start:0x00012B9C end:0x00012CA8
 	.ctors      start:0x0000001C end:0x00000020
+	.rodata     start:0x00000088 end:0x00000090
+	.data       start:0x00008C70 end:0x00008CF0
+	.bss        start:0x00000230 end:0x00000240
 
 mo_fighter/ft_ness/ft_ness_status_uniq_process_special_lw.cpp:
 	.text       start:0x00012CA8 end:0x00012EB4
@@ -64,6 +72,9 @@ mo_fighter/ft_ness/wn_ness_pk_fire_status_uniq_process_shoot.cpp:
 mo_fighter/ft_ness/wn_ness_pk_fire_status_uniq_process_pillar.cpp:
 	.text       start:0x00016654 end:0x000168B8
 	.ctors      start:0x0000002C end:0x00000030
+	.rodata     start:0x000000C0 end:0x000000D0
+	.data       start:0x000099A0 end:0x00009A18
+	.bss        start:0x00000348 end:0x00000358
 
 mo_fighter/ft_ness/wn_ness_pk_thunder.cpp:
 	.text       start:0x000168B8 end:0x0001A078
@@ -78,9 +89,13 @@ mo_fighter/ft_ness/wn_ness_pk_thunder_child.cpp:
 mo_fighter/ft_ness/wn_ness_pk_thunder_child_status_uniq_process_move.cpp:
 	.text       start:0x0001C788 end:0x0001CA14
 	.ctors      start:0x00000034 end:0x00000038
+	.rodata     start:0x00000128 end:0x00000130
+	.data       start:0x0000AFA8 end:0x0000B028
+	.bss        start:0x00000430 end:0x00000440
 
 mo_fighter/ft_ness/wn_ness_pk_star_storm.cpp:
 	.text       start:0x0001CA14 end:0x0001EABC
+	.rodata     start:0x00000130 end:0x000001A0
 
 mo_fighter/ft_ness/wn_ness_yoyo.cpp:
 	.text       start:0x0001EABC end:0x00020CF4

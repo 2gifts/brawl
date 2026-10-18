@@ -14,13 +14,15 @@ global_destructor_chain.c:
 mo_fighter/ft_link/ft_link.cpp:
 	.text       start:0x00000070 end:0x0000E9BC
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x000000C8
-	.data       start:0x00000000 end:0x00009AC0
-	.bss        start:0x00000008 end:0x000002E4
+	.rodata     start:0x00000000 end:0x00000050
+	.data       start:0x00000000 end:0x000080B8
+	.bss        start:0x00000008 end:0x00000140
 
 mo_fighter/ft_link/ft_link_status_uniq_process_special_r_slash.cpp:
 	.text       start:0x0000F26C end:0x0000F348
 	.ctors      start:0x00000004 end:0x00000008
+	.data       start:0x000080B8 end:0x00008134
+	.bss        start:0x00000140 end:0x00000150
 
 mo_fighter/ft_link/ft_link_status_uniq_process_special_r_slash_end.cpp:
 	.text       start:0x0000F348 end:0x0000F4BC
@@ -29,6 +31,9 @@ mo_fighter/ft_link/ft_link_status_uniq_process_special_r_slash_end.cpp:
 mo_fighter/ft_link/ft_link_status_uniq_process_special_boomerang.cpp:
 	.text       start:0x0000F4BC end:0x0000F74C
 	.ctors      start:0x0000000C end:0x00000010
+	.rodata     start:0x00000050 end:0x00000060
+	.data       start:0x000081D0 end:0x00008250
+	.bss        start:0x00000160 end:0x00000170
 
 mo_fighter/ft_link/ft_link_status_uniq_process_special_bomb.cpp:
 	.text       start:0x0000F74C end:0x0000F998
@@ -41,6 +46,8 @@ mo_fighter/ft_link/ft_link_status_uniq_process_final.cpp:
 mo_fighter/ft_link/ft_link_status_uniq_process_wait.cpp:
 	.text       start:0x00010F5C end:0x00011084
 	.ctors      start:0x00000018 end:0x0000001C
+	.data       start:0x00008560 end:0x000085D0
+	.bss        start:0x000001B0 end:0x000001C0
 
 mo_fighter/ft_link/wn_link_boomerang.cpp:
 	.text       start:0x00011084 end:0x00014B34
@@ -48,13 +55,21 @@ mo_fighter/ft_link/wn_link_boomerang.cpp:
 mo_fighter/ft_link/wn_link_boomerang_status_uniq_process_haved.cpp:
 	.text       start:0x00014B34 end:0x00014C1C
 	.ctors      start:0x0000001C end:0x00000020
+	.data       start:0x00008EE8 end:0x00008F68
+	.bss        start:0x00000268 end:0x00000278
 
 mo_fighter/ft_link/wn_link_boomerang_status_uniq_process_turn.cpp:
 	.text       start:0x00014C1C end:0x00015354
 	.ctors      start:0x00000020 end:0x00000024
+	.rodata     start:0x000000A0 end:0x000000B8
+	.data       start:0x00008F68 end:0x00008FE8
+	.bss        start:0x00000278 end:0x00000288
 
 mo_fighter/ft_link/wn_link_hookshot.cpp:
 	.text       start:0x00015354 end:0x00018638
+	.rodata     start:0x000000B8 end:0x000000C8
+	.data       start:0x00008FE8 end:0x00009AC0
+	.bss        start:0x00000288 end:0x000002E4
 
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x00018638 end:0x000186D4
