@@ -2074,9 +2074,7 @@ static inline int specialArchiveId(itManager* manager) {
 // Calls the unnamed Stage virtual at vtable offset 0x1A8 (HYPOTHESIS: a stage-wide yes/no query used to block item spawns).
 // The vtable is the one at +0x3C; the call passes the Stage pointer itself.
 static inline bool stageBlocksSpecialItem(Stage* stage) {
-    typedef bool (*StageQueryFn)(void*);
-    StageQueryFn* vtable = *(StageQueryFn**)((u8*)stage + 0x3C);
-    return vtable[0x1A8 / 4](stage);
+    return ((bool (*)(void*))(*(void***)((u8*)stage + 0x3C))[0x1A8 / 4])(stage);
 }
 
 // The archive of this kind that has variation 0 (an inline loop of isExclusiveSpecialItem).
