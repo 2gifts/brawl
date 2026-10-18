@@ -3,6 +3,8 @@
 // Builder view of ftWario for ft_wario.cpp only. The status units include ft_wario.h, whose Fighter-based
 // declaration keeps the same layout; their status-process headers cannot coexist with the builder headers.
 #include <ft/ft_fighter_builder.h>
+#include <ft/wario/ft_wario_param.h>
+#include <so/anim/so_anim_obj.h>
 #include <sr/sr_common.h>
 #include <types.h>
 
@@ -58,13 +60,30 @@ public:
     typedef ftWarioGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
-// The constructor's 0xD324 allocation fixes the size; the members past the builder are not recovered yet.
+// The last fields drive the shared Waft gauge and parameter lookups. The
+// preceding builder tail remains opaque. Native allocation fixes the extent.
 class ftWario : public ftFighterBuilder<ftWarioBuildConfig> {
-    u8 unkTail[0xD324 - sizeof(ftFighterBuilder<ftWarioBuildConfig>)];
+    u8 unkTail[0xD2F8 - sizeof(ftFighterBuilder<ftWarioBuildConfig>)];
+    ftData* m_data; // +0xD2F8
+    soAnimObj m_waftAnim; // +0xD2FC
 public:
     ftWario(s32 entryId,
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    ftWarioExtendParam* getExtendParam();
+    virtual void onActivate();
+    virtual void onDeactivate();
+    virtual void onStart(int startKind);
+    virtual void toDead(Dead::Reason reason);
+    virtual void notifyEventLink(soLinkEventArgs*, soModuleAccesser*, StageObject*, int);
+    virtual void notifyEventChangeStatus(int, int, soStatusData*, soModuleAccesser*);
+    virtual bool notifyEventAnimCmd(acAnimCmd*, soModuleAccesser*, s32);
+    virtual void notifyEventCollisionSearch(soCollisionLog*, soModuleAccesser*);
+    virtual void change(void*, int);
+    virtual void setupChangeSucceedWork(void*);
+    virtual void changeSucceedCore(void*, int);
+    virtual void processUpdate();
+    static bool activeArticle(class wnWarioGarlic*, soModuleAccesser*);
 };
 static_assert(sizeof(ftWario) == 0xD324, "Wario allocation size is wrong!");

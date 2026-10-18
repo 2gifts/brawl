@@ -2770,6 +2770,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_wario_status_uniq_process_special_neat.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_wario_status_uniq_process_special_neat_start.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_wario_common.cpp"),
+            Object(Matching, "mo_melee/sora_melee/ft/ft_wario_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_metaknight_status_uniq_process_special_nspin.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_pit_bow.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_pit_bow_arrow.cpp"),

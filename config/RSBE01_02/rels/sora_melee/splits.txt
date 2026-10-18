@@ -11283,6 +11283,10 @@ mo_melee/sora_melee/wn/wn_falco_blaster_bullet.cpp:
 	.text       start:0x00354048 end:0x00356100
 	.ctors      start:0x0000043C end:0x00000440
 
+mo_melee/sora_melee/ft/ft_wario_transactor.cpp:
+	.text       start:0x00356820 end:0x00356A14
+	.data       start:0x0008F260 end:0x0008F2D8
+
 mo_melee/sora_melee/ft/ft_wario_status_uniq_process_special_nopen.cpp:
 	.text       start:0x00356A14 end:0x00357080
 	.ctors      start:0x00000444 end:0x00000448

@@ -2,6 +2,12 @@
 #include <ft/ft_class_info_impl.h>
 #include <ft/wario/ft_wario_builder.h>
 #include <ft/wario/ft_wario_extend_param_accesser.h>
+#include <ft/wario/ft_wario_common.h>
+#include <ft/wario/ft_wario_transactor.h>
+#include <ft/ft_common_data_accesser.h>
+#include <ft/ft_owner.h>
+#include <wn/wario/wn_wario_garlic.h>
+#include <ac/ac_anim_cmd_impl.h>
 
 #define FT_BC ftWarioBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -18,8 +24,98 @@ ftWario::ftWario(s32 entryId,
                                          Fighter_Wario,
                                          instHeap,
                                          nwModelInstHeap,
-                                         nwMotionInstHeap) {
-    // TODO
+                                         nwMotionInstHeap),
+    m_data(g_ftCommonDataAccesser.getData(Fighter_Wario)) {
+    // TODO: restore character-specific status-process registration.
+}
+
+// The common implementation keeps Waft charge, bike links and transformation
+// state consistent between normal Wario and Wario-Man.
+ftWarioExtendParam* ftWario::getExtendParam() {
+    return reinterpret_cast<ftWarioExtendParam*>(&m_data->extendParam[0]);
+}
+
+void ftWario::onActivate() {
+    ftWarioExtendParam* param = reinterpret_cast<ftWarioExtendParam*>(&m_data->extendParam[0]);
+    g_ftWarioCommon.onActivate(m_moduleAccesser, &m_waftAnim, param->bikeRider->remountCooldownFrames);
+}
+
+void ftWario::onDeactivate() {
+    g_ftWarioCommon.onDeactivate(m_moduleAccesser, &m_waftAnim);
+}
+
+void ftWario::onStart(int startKind) {
+    Fighter::onStart(startKind);
+    g_ftWarioCommon.onStart(m_moduleAccesser, startKind);
+}
+
+void ftWario::toDead(Dead::Reason reason) {
+    g_ftWarioCommon.toDead(m_moduleAccesser, reason);
+    Fighter::toDead(reason);
+}
+
+void ftWario::notifyEventLink(soLinkEventArgs* event, soModuleAccesser* acc, StageObject* sender, int selector) {
+    if (!g_ftWarioCommon.notifyEventLink(static_cast<ftWarioLinkEventArgs*>(event), acc, sender, selector))
+        Fighter::notifyEventLink(event, acc, sender, selector);
+}
+
+void ftWario::notifyEventChangeStatus(int status, int previous, soStatusData* data, soModuleAccesser* acc) {
+    Fighter::notifyEventChangeStatus(status, previous, data, acc);
+    g_ftWarioCommon.notifyEventChangeStatus(status, previous, data, acc);
+}
+
+bool ftWario::notifyEventAnimCmd(acAnimCmd* command, soModuleAccesser* acc, s32 index) {
+    if (!isObserv(command->getGroup())) return false;
+    switch (command->getType()) {
+    case 5:
+        g_ftWarioCommon.toChange(acc, m_entryId, 1, 1);
+        return true;
+    default:
+        return Fighter::notifyEventAnimCmd(command, acc, index);
+    }
+}
+
+// MATCH-ONLY: native addresses the guard, singleton and destructor registration
+// separately, as in the other fighter transactor callbacks.
+#pragma pool_data off
+void ftWario::notifyEventCollisionSearch(soCollisionLog* log, soModuleAccesser* acc) {
+    static ftWarioTransactor transactor;
+    static_cast<ftKirbyCopyAbilityProcess&>(transactor).notifyEventCollisionSearch(log, acc);
+    Fighter::notifyEventCollisionSearch(log, acc);
+}
+#pragma pool_data reset
+
+// Restore the saved fighter state when returning from Wario-Man. The native
+// virtual calls preserve overrides of both the start and restoration hooks.
+void ftWario::change(void* work, int startKind) {
+    onStart(startKind);
+    changeSucceedCore(work, 0x130);
+}
+
+void ftWario::setupChangeSucceedWork(void* work) {
+    Fighter::setupChangeSucceedWork(work);
+    g_ftWarioCommon.setupChangeSucceedWork(m_moduleAccesser, work);
+}
+
+void ftWario::changeSucceedCore(void* work, int kind) {
+    Fighter::changeSucceedCore(work, kind);
+    g_ftWarioCommon.changeSucceedCore(m_moduleAccesser, work, kind);
+}
+
+void ftWario::processUpdate() {
+    Fighter::processUpdate();
+    ftWarioExtendParam* param = reinterpret_cast<ftWarioExtendParam*>(&m_data->extendParam[0]);
+    g_ftWarioCommon.processUpdate(param->specialLw, m_moduleAccesser, &m_waftAnim);
+}
+
+bool ftWario::activeArticle(wnWarioGarlic* article, soModuleAccesser* acc) {
+    int founderTaskId;
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resource = acc->getResourceModule();
+    founderTaskId = fighter.m_taskId;
+    article->activate(founderTaskId, resource.getResourceIdAccesser()->getEtcResId(),
+                      fighter.getOwner()->getTeam());
+    return true;
 }
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftWario is done
