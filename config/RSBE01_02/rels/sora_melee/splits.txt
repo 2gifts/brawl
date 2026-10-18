@@ -5073,6 +5073,9 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_cliff_catch_move.cpp:
 mo_melee/sora_melee/ft/ft_status_uniq_process_tread.cpp:
 	.text       start:0x00170DC4 end:0x00171414
 	.ctors      start:0x00000120 end:0x00000124
+	.rodata     start:0x00002248 end:0x00002250
+	.data       start:0x0002F788 end:0x0002F7F8
+	.bss        start:0x00004AB0 end:0x00004AC0
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_dead.cpp:
 	.text       start:0x00171414 end:0x001733F8

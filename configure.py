@@ -2577,7 +2577,7 @@ config.libs = [
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_shield_break_fly.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_passive.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_cliff_catch_move.cpp"),
-            Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_tread.cpp"),
+            Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_tread.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_dead.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_rebirth.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_catch_pull.cpp"),
