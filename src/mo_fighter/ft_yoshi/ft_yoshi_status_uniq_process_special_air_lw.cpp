@@ -1,19 +1,9 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <ft/yoshi/ft_yoshi_status_uniq_process.h>
 #include <ft/ft_common_data_accesser.h>
+#include <ft/yoshi/ft_yoshi_special_lw_param.h>
 #include <ft/ft_kinetic_energy.h>
 #include <so/so_module_accesser.h>
-
-// Local partial layout: the original load verifies a parameter pointer at 0x84.
-// HYPOTHESIS: this fighter-specific pointer selects down-special
-// fall parameters. Its first float supplies the gravity energy's vertical speed.
-struct ftYoshiSpecialLwParam {
-    float speedY;
-};
-struct ftYoshiData {
-    u8 unk0[0x84];
-    ftYoshiSpecialLwParam* specialLwParam;
-};
 
 void ftYoshiStatusUniqProcessSpecialAirLw::execStatus(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
@@ -21,7 +11,7 @@ void ftYoshiStatusUniqProcessSpecialAirLw::execStatus(soModuleAccesser* moduleAc
     // Allow cliff checks during the downward phase of the move.
     moduleAccesser->getGroundModule().setCliffCheck(soGroundShapeImpl::Cliff_Check_On_Drop, 0);
     ftYoshiSpecialLwParam* param =
-        reinterpret_cast<ftYoshiData*>(g_ftCommonDataAccesser.getData(Fighter_Yoshi))->specialLwParam;
+        static_cast<ftYoshiSpecialLwParam*>(g_ftCommonDataAccesser.getData(Fighter_Yoshi)->extendParam[2]);
     // HYPOTHESIS: this animation flag begins the downward attack phase.
     if (work.isFlag(0x22000011)) {
         kinetic.changeKinetic(0, moduleAccesser);

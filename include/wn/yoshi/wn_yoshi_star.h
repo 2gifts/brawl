@@ -4,7 +4,13 @@
 
 struct wnYoshiStarModuleAccesserBuildConfig;
 struct wnYoshiStarParam {
-    float unk0, unk4, unk8, unkC, unk10;
+    // Activation multiplies the horizontal components by the spawn facing,
+    // negates gravity, and preserves the energy's existing horizontal limit.
+    float horizontalSpeed;
+    float horizontalAcceleration;
+    float verticalSpeed;
+    float verticalSpeedLimit;
+    float gravity;
 };
 static_assert(sizeof(wnYoshiStarParam) == 0x14, "Star float parameter record");
 

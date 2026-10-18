@@ -1,4 +1,5 @@
 #pragma once
+#include <so/anim/so_anim_obj.h>
 
 // Builder view of ftYoshi for ft_yoshi.cpp only. The status units include ft_yoshi.h, whose Fighter-based
 // declaration keeps the same layout; their status-process headers cannot coexist with the builder headers.
@@ -51,17 +52,26 @@ public:
 // The constructor allocates 0x222B0 bytes. The parameter getter establishes
 // m_data at 0x22284; the remaining tail fields are not recovered yet.
 struct ftData;
+class wnYoshiStar;
+class soModuleAccesser;
 
 class ftYoshi : public ftFighterBuilder<ftYoshiBuildConfig> {
     u8 unkTail[0x22284 - sizeof(ftFighterBuilder<ftYoshiBuildConfig>)];
     ftData* m_data; // Instance parameter data, proved by getExtendParam.
-    u8 unk22288[0x28];
+    soAnimObj m_guardColorAnim; // +0x22288: egg-shield material animation.
 public:
     void** getExtendParam();
+    virtual void onDeactivate();
+    virtual void onStart(int kind);
+    virtual void processUpdate();
+    virtual void notifyEventLink(soLinkEventArgs*, soModuleAccesser*, StageObject*, int);
+    virtual void notifyEventCollisionAttackFighter(soCollisionLog*, soModuleAccesser*);
+    virtual void notifyEventChangeSituation(SituationKind, SituationKind, soModuleAccesser*);
     ftYoshi(s32 entryId,
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    static bool activeArticle(wnYoshiStar* article, soModuleAccesser* acc);
     void createGuardColorAnim();
     void deleteGuardColorAnim();
     void updateGuardColorAnim();

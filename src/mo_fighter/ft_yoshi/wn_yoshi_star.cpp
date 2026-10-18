@@ -35,20 +35,22 @@ void wnYoshiStar::activate(int founderTaskId, int team, Vec3f* pos, float lr) {
     desc.flagsMidHigh = 0;
     desc.flagsMidLow = 1;
     desc.flagsLow = 0;
+    // The consumer reads only the upper two bits of the second flag byte.
     desc.unk4DHigh = 0;
     Weapon::activate(&desc);
     m_moduleAccesser->getStatusModule().changeStatusForce(0, m_moduleAccesser);
     wnKineticEnergyNormal& normal = dynamic_cast<wnKineticEnergyNormal&>(
         *m_moduleAccesser->getKineticModule().getEnergy(0));
+    // Preserve the default horizontal limit while applying the spawn tunings.
     Vec2f speed;
     Vec2f accel;
     Vec2f limit;
     Vec2f::copy(limit, normal.m_speedLimit);
-    speed.m_x = m_param->unk0 * lr;
-    speed.m_y = m_param->unk8;
-    accel.m_x = m_param->unk4 * lr;
-    accel.m_y = -m_param->unk10;
-    limit.m_y = m_param->unkC;
+    speed.m_x = m_param->horizontalSpeed * lr;
+    speed.m_y = m_param->verticalSpeed;
+    accel.m_x = m_param->horizontalAcceleration * lr;
+    accel.m_y = -m_param->gravity;
+    limit.m_y = m_param->verticalSpeedLimit;
     normal.m_speed = speed;
     normal.m_accel = accel;
     normal.m_speedTarget = limit;
@@ -58,18 +60,21 @@ void wnYoshiStar::activate(int founderTaskId, int team, Vec3f* pos, float lr) {
 bool wnYoshiStar::notifyEventCollisionAttackCheck(u32 flags) {
     if (flags & 0x13) return true;
     if (flags & 4) {
-        if ((((u32)unkA4 >> 7) & 1) == 1) return hop();
+        // MATCH-ONLY: express the high-bit test as the native extracted bit value.
+        if (((static_cast<u32>(unkA4) >> 7) & 1) == 1) return hop();
         return true;
     }
+    // Reflection changes both facing and attack ownership before the inherited
+    // projectile response. Keep the reflector queries in their native order.
     if ((flags & 8) && m_moduleAccesser->getReflectModule().isReflect() == true) {
         m_moduleAccesser->getPostureModule().reverseLr();
         m_moduleAccesser->getPostureModule().updateRotYLr();
         int team = m_moduleAccesser->getReflectModule().getTeam();
         m_moduleAccesser->getTeamModule().setTeam(team, true);
         m_moduleAccesser->getTeamModule().setHitTeam(team);
-        soReflectModule& reflectModule = m_moduleAccesser->getReflectModule();
+        soReflectModule& reflector = m_moduleAccesser->getReflectModule();
         soTeamModule& teamModule = m_moduleAccesser->getTeamModule();
-        teamModule.setTeamOwnerId(reflectModule.getTaskId());
+        teamModule.setTeamOwnerId(reflector.getTaskId());
         return reflect();
     }
     return false;
