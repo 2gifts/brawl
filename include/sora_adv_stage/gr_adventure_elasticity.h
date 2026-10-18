@@ -17,7 +17,7 @@ struct grAdventureElasticityData {
     int m_soundId;              // 0x18, played while a fighter stands on it
     u8 unk1C[4];
     int m_soundId2;             // 0x20, played while it springs back
-    u8 m_isAnyPlayer;           // 0x24, 0: only player 1 triggers it
+    u8 m_isPlayerOneOnly;           // 0x24, nonzero: only player 1 triggers it
     u8 unk25[3];
     stTriggerData m_trigger;    // 0x28
 };

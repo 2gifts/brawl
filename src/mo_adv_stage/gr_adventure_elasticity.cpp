@@ -85,7 +85,7 @@ void grAdventureElasticity::receiveCollMsg_Landing(grCollStatus* collStatus, grC
     if (isCollisionStatusOwnerTask__6GroundFP12grCollStatusPi(this, collStatus, reinterpret_cast<int*>(&sOwnerFlags))) {
         gfTask* task = gfTask::getTask(collStatus->m_taskId);
         s8 playerNo = advGetPlayerNumber(task->m_taskId);
-        if (playerNo == 0 || m_data->m_isAnyPlayer == 0) {
+        if (playerNo == 0 || m_data->m_isPlayerOneOnly == 0) {
             if (m_isLanding == 0) {
                 if (isFirstContact) {
                     float speed = mtSqrtf(m_data->m_bounceSpeed * m_data->m_bounceSpeed - m_offsetY * (m_data->m_gravity * m_offsetY));
