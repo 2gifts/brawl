@@ -12,4 +12,7 @@ public:
     virtual void activate();
     virtual void set(const soTurnData* data, bool changeLr, bool isExtern, float lr);
     virtual void end();
+    virtual void unk18();
+    // HYPOTHESIS: the reflector status asks whether a turn is already running before it starts another one.
+    virtual bool isTurning();
 };

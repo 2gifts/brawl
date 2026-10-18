@@ -2729,6 +2729,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_kirby_copy_ability_id_converter.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_fox_status_uniq_process_illusion.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_fox_status_uniq_process_fire.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_fox_status_uniq_process_reflector.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_fox_status_uniq_process_final.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_fox_land_master.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_fox_land_master_status_uniq_process_common.cpp"),

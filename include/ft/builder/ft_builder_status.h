@@ -29,6 +29,12 @@ public:
         soArray<s32>* array = &m_vector;
         array->capacity();
     }
+    // The default-built queue (Falco's trail of positions).
+    soArrayQueueImpl() : m_array(&m_vector), m_vector() {
+        soArray<typename V::value_type>* array = &m_vector;
+        array->capacity();
+    }
+    V* getArray() { return m_array; }
 };
 
 template <typename BC>
