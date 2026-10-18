@@ -2051,6 +2051,21 @@ void itManager::removeItemAllTempArchive() {
     itManagerField<u8>(this, 0x14AC) = 0;
 }
 
+// archiveIdOf(manager, 0xA1) with a single shared return for the kind (the shape isExclusiveSpecialItem inlines).
+static inline int specialArchiveId(itManager* manager) {
+    int kind = 0xA1;
+    if (itManagerField<u8>(manager, 0x14A0) != 0) {
+        if (lbl_27_data_71EB8[kind] == 0) {
+            return -1;
+        }
+        int group = manager->getItemGroup(kind);
+        if (group < 6 ? group == 1 : group < 8) {
+            return kind;
+        }
+    }
+    return -1;
+}
+
 // Calls the unnamed Stage virtual at vtable offset 0x1A8 (HYPOTHESIS: a stage-wide yes/no query used to block item spawns).
 // The vtable is the one at +0x3C; the call passes the Stage pointer itself.
 static inline bool stageBlocksSpecialItem(Stage* stage) {
@@ -2085,19 +2100,7 @@ bool itManager::isExclusiveSpecialItem(int kind, bool unk) {
                 goto checkTechnique;
             }
             int archiveKind = 0xA1;
-            int archiveId = -1;
-            if (itManagerField<u8>(this, 0x14A0) != 0) {
-                if (lbl_27_data_71EB8[0xA1] != 0) {
-                    int group = getItemGroup(0xA1);
-                    if (group < 6) {
-                        if (group == 1) {
-                            archiveId = 0xA1;
-                        }
-                    } else if (group < 8) {
-                        archiveId = 0xA1;
-                    }
-                }
-            }
+            int archiveId = specialArchiveId(this);
             if (archiveId >= 0) {
                 archiveKind = -3;
             }
