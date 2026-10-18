@@ -1,3 +1,8 @@
+// MATCH-ONLY: the custom kinetic helper calls the shared vector constructor.
+#define MT_VEC3F_CTOR_NOINLINE
+#define FT_NOINLINE_SEARCH_BUILDER
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_SHARED_STATUS_TABLE_CTOR
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/wario/ft_wario_builder.h>
@@ -8,6 +13,7 @@
 #include <ft/ft_owner.h>
 #include <wn/wario/wn_wario_garlic.h>
 #include <ac/ac_anim_cmd_impl.h>
+#include <so/so_kinetic_utility.h>
 
 #define FT_BC ftWarioBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -16,6 +22,34 @@ ftWarioExtendParamAccesser g_ftWarioExtendParamAccesser;
 
 ftClassInfoImpl<Fighter_Wario, ftWario> g_ftClassInfoWario;
 
+// Wario extends the common fighter data with an area set and model settings
+// used by the second six-color costume group. Calls through the real area and
+// model interfaces establish both the record offsets and the argument types.
+struct ftWarioData : ftData {
+    soSet<soAreaData> additionalAreas; // +0x94
+    u32** costumeNodeConvertData; // +0x9C
+    int costumeShadowNode; // +0xA0
+};
+static_assert(sizeof(ftWarioData) == 0xA4, "Wario data prefix");
+
+// Only the primary status-process view is needed for registration, as in the
+// other fighters. Concrete implementations remain in their status units.
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialNOpen;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialS;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialHiStart;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialLw;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialNBite;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialNBiteEnd;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialNEatStart;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialNEat;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialSStart;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialSDrive;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialSWheelie;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialSCommon;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialSEscape;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialSDown;
+extern soStatusUniqProcess g_ftWarioStatusUniqProcessSpecialHiJump;
+
 ftWario::ftWario(s32 entryId,
                  Heaps::HeapType instHeap,
                  Heaps::HeapType nwModelInstHeap,
@@ -23,17 +57,59 @@ ftWario::ftWario(s32 entryId,
     ftFighterBuilder<ftWarioBuildConfig>(entryId,
                                          Fighter_Wario,
                                          instHeap,
-                                         nwModelInstHeap,
+                                         instHeap, // Wario uses the instance heap for models too.
                                          nwMotionInstHeap),
-    m_data(g_ftCommonDataAccesser.getData(Fighter_Wario)) {
-    // TODO: restore character-specific status-process registration.
+    m_data(static_cast<ftWarioData*>(g_ftCommonDataAccesser.getData(Fighter_Wario))) {
+    // Chomp's open, bite and eating phases share handlers where their behavior
+    // agrees. Null entries install no character-specific process.
+    soStatusUniqProcess* processes[30] = {0};
+    processes[0] = &g_ftWarioStatusUniqProcessSpecialNOpen;
+    processes[1] = &g_ftWarioStatusUniqProcessSpecialS;
+    processes[2] = &g_ftWarioStatusUniqProcessSpecialHiStart;
+    processes[3] = &g_ftWarioStatusUniqProcessSpecialLw;
+    processes[5] = &g_ftWarioStatusUniqProcessSpecialNOpen;
+    processes[7] = &g_ftWarioStatusUniqProcessSpecialNBite;
+    processes[8] = &g_ftWarioStatusUniqProcessSpecialNBite;
+    processes[9] = &g_ftWarioStatusUniqProcessSpecialNBiteEnd;
+    processes[10] = &g_ftWarioStatusUniqProcessSpecialNEatStart;
+    processes[11] = &g_ftWarioStatusUniqProcessSpecialNEat;
+    processes[12] = &g_ftWarioStatusUniqProcessSpecialNEat;
+    processes[13] = &g_ftWarioStatusUniqProcessSpecialNEat;
+    processes[14] = &g_ftWarioStatusUniqProcessSpecialNEat;
+
+    // Mounting, riding, wheelies, dismounting and the shared bike states.
+    processes[15] = &g_ftWarioStatusUniqProcessSpecialSStart;
+    processes[17] = &g_ftWarioStatusUniqProcessSpecialSStart;
+    processes[18] = &g_ftWarioStatusUniqProcessSpecialSDrive;
+    processes[19] = &g_ftWarioStatusUniqProcessSpecialSWheelie;
+    processes[20] = &g_ftWarioStatusUniqProcessSpecialSCommon;
+    processes[21] = &g_ftWarioStatusUniqProcessSpecialSCommon;
+    processes[22] = &g_ftWarioStatusUniqProcessSpecialSCommon;
+    processes[23] = &g_ftWarioStatusUniqProcessSpecialSCommon;
+    processes[24] = &g_ftWarioStatusUniqProcessSpecialSCommon;
+    processes[25] = &g_ftWarioStatusUniqProcessSpecialSEscape;
+    processes[26] = &g_ftWarioStatusUniqProcessSpecialSDown;
+    processes[27] = &g_ftWarioStatusUniqProcessSpecialSCommon;
+    processes[28] = &g_ftWarioStatusUniqProcessSpecialHiJump;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 30);
+
+    m_moduleAccesser->getAreaModule().addArea(&m_data->additionalAreas);
+    // HYPOTHESIS: colors 6..11 are the classic-costume group. Their distinct
+    // node conversion and shadow anchor are explicit in the native setup.
+    if (getOwner()->getFighterColor() >= 6 && getOwner()->getFighterColor() <= 11) {
+        m_moduleAccesser->getModelModule().setNodeConvertData(m_data->costumeNodeConvertData);
+        m_moduleAccesser->getModelModule().setShadowNode(m_data->costumeShadowNode);
+    }
 }
 
 // The common implementation keeps Waft charge, bike links and transformation
 // state consistent between normal Wario and Wario-Man.
+// MATCH-ONLY: the kinetic setup uses the shared getter call boundary.
+#pragma dont_inline on
 ftWarioExtendParam* ftWario::getExtendParam() {
     return reinterpret_cast<ftWarioExtendParam*>(&m_data->extendParam[0]);
 }
+#pragma dont_inline reset
 
 void ftWario::onActivate() {
     ftWarioExtendParam* param = reinterpret_cast<ftWarioExtendParam*>(&m_data->extendParam[0]);
@@ -619,3 +695,60 @@ u8* fn_110_C444(u8* p, int x) { return x == 0 ? p + 0xC : 0; }
 u8* fn_110_C52C(u8* p, int x) { return x == 0 ? p + 0xC : 0; }
 u8* fn_110_C614(u8* p, int x) { return x == 0 ? p + 0xC : 0; }
 } // extern "C"
+
+
+// Standard modes use the common fighter dispatcher. Every custom request runs
+// preprocessing; only the five recognized modes re-enable outside energy.
+// MATCH-ONLY: preserve the shared preprocessing flag and the native stores
+// left by the otherwise empty custom-mode handlers.
+#pragma push
+#pragma opt_propagation off
+void ftWarioKineticTransactor::changeKinetic(int mode, void* pools, soModuleAccesser* acc) {
+    if (mode <= 0x63) {
+        ftKineticTransactor::changeKinetic(mode, pools, acc);
+        return;
+    }
+    Vec2f speed;
+    soModuleAccesser* processAccesser = acc;
+    bool process = true;
+    Vec2f::copy(speed, ftKineticTransactHelper::preHelpProcess(processAccesser, process, process));
+    switch (mode) {
+    case 0x64: {
+        bool result = false;
+        changeKineticSub(&result, pools, &speed, acc);
+        break;
+    }
+    case 0x65: { volatile bool result = false; break; }
+    case 0x66: { volatile bool result = false; break; }
+    case 0x67: { volatile bool result = false; break; }
+    case 0x68: { volatile bool result = false; break; }
+    default:
+        return;
+    }
+    ftKineticTransactor::enableOutsideEnergy(acc);
+}
+#pragma pop
+
+// Mode 0x64 preserves vertical velocity in Gravity and horizontal velocity in
+// Stop, enables Damage, and installs Wario's own gravity tuning. The gameplay
+// name of this mode is unresolved; its selection may come from motion scripts.
+void ftWarioKineticTransactor::changeKineticSub(bool*, void*, Vec2f* speed, soModuleAccesser* acc) {
+    Vec2f initialSpeed;
+    Vec2f::copy(initialSpeed, *speed);
+    Vec2f gravitySpeed;
+    float verticalSpeed = initialSpeed.m_y;
+    gravitySpeed.m_x = 0.0f;
+    gravitySpeed.m_y = verticalSpeed;
+    soKineticUtility::resetEnableEnergy(1, acc, 0, &gravitySpeed, &Vec3f(0.0f, 0.0f, 0.0f));
+    Vec2f stopSpeed;
+    stopSpeed.m_x = initialSpeed.m_x;
+    stopSpeed.m_y = 0.0f;
+    soKineticUtility::resetEnableEnergy(3, acc, 6, &stopSpeed, &Vec3f(0.0f, 0.0f, 0.0f));
+    acc->getKineticModule().getEnergy(4)->enable();
+    ftWario& fighter = dynamic_cast<ftWario&>(acc->getStageObject());
+    ftWarioBikeRiderParam* param = fighter.getExtendParam()->bikeRider;
+    ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(
+        *acc->getKineticModule().getEnergy(1));
+    gravity.m_gravity = -param->gravity;
+    gravity.unk1C = param->unk4;
+}

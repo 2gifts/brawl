@@ -41,6 +41,9 @@ FT_DOL_ARRAY_VECTOR(soCameraSubject, 1);
 FT_DOL_ARRAY_VECTOR(soAreaWind, 1);
 FT_DOL_ARRAY_VECTOR(soAreaContactLog, 16);
 FT_DOL_ARRAY_VECTOR(soAreaInstance, 9);
+// HYPOTHESIS: the imported constructor retains the shared size signature.
+// Wario supplies zero; the native callee initializes empty without reading it.
+FT_DOL_ARRAY_VECTOR(soAreaInstance, 10);
 FT_DOL_ARRAY_VECTOR(soAreaInstance, 3);
 FT_DOL_ARRAY_VECTOR(soAreaInstance, 1);
 FT_DOL_ARRAY_VECTOR(soAreaContactLog, 7);
@@ -96,6 +99,8 @@ template <>
 soArrayVector<ftAnimCmdConvPtr, 295>::soArrayVector(s32 size);
 template <>
 soArrayVector<ftAnimCmdConvPtr, 314>::soArrayVector(s32 size);
+template <>
+soArrayVector<ftAnimCmdConvPtr, 305>::soArrayVector(s32 size);
 #endif
 // Only the capacities whose REL takes the whole class (constructor and destructors) from sora_melee; the other
 // capacities keep their destructors in the REL, so declaring them here would drop those functions.

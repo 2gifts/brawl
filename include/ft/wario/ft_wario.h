@@ -2,13 +2,14 @@
 #include <ft/fighter.h>
 #include <so/anim/so_anim_obj.h>
 #include <ft/wario/ft_wario_param.h>
-struct ftData;
+struct ftWarioData;
 
 // Fighter-side views for status and shared behavior units. The main fighter
 // exposes its parameter data and Waft animation after opaque builder storage.
 class ftWario : public Fighter {
-    u8 unkTail[0xD2F8 - sizeof(Fighter)];
-    ftData* m_data; // +0xD2F8, proved by getExtendParam and Waft/bike parameter reads.
+    u8 unkTail[0xD2E8 - sizeof(Fighter)];
+    soArrayContractibleTable<const soStatusData> m_statusDataTable; // +0xD2E8
+    ftWarioData* m_data; // +0xD2F8, proved by getExtendParam and Waft/bike parameter reads.
     soAnimObj m_waftAnim; // +0xD2FC: charge gauge material animation.
 public:
     ftWarioExtendParam* getExtendParam();
