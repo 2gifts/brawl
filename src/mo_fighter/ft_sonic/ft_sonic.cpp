@@ -1,4 +1,6 @@
 #define MT_VEC2F_FROM_VEC3_CTOR_NOINLINE
+#define MT_VEC2F_ASSIGN_NOINLINE
+#define MT_VEC2F_PLAIN_BASE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/sonic/ft_sonic.h>
@@ -15,6 +17,7 @@
 #include <wn/sonic/wn_sonic_super_sonic.h>
 #include <gf/gf_task_scheduler.h>
 #include <math.h>
+#include <so/so_kinetic_energy_normal.h>
 
 #define FT_BC ftSonicBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -148,6 +151,45 @@ void ftSonic::notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, so
             }
         }
     }
+}
+
+bool ftSonic::notifyEventCollisionAttackCheck(u32 flags) {
+    Fighter::notifyEventCollisionAttackCheck(flags);
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x11e && m_moduleAccesser->getWorkManageModule().isFlag(0x22000011)) {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x22000011);
+        m_moduleAccesser->getWorkManageModule().subInt(soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc9, 0), 0x20000003);
+        m_moduleAccesser->getWorkManageModule().subFloat(soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfca, 0), 0x21000005);
+        if (m_moduleAccesser->getWorkManageModule().getFloat(0x21000005) < 0.0f) {
+            m_moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x21000005);
+        }
+        m_moduleAccesser->getWorkManageModule().subFloat(soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfca, 0), 0x21000004);
+        if (m_moduleAccesser->getWorkManageModule().getFloat(0x21000004) < 0.0f) {
+            m_moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x21000004);
+        }
+        soKineticEnergyNormal* energy;
+        if (m_moduleAccesser->getSituationModule().getKind() == 0) {
+            energy = dynamic_cast<soKineticEnergyNormal*>(m_moduleAccesser->getKineticModule().getEnergy(3));
+        } else {
+            energy = dynamic_cast<soKineticEnergyNormal*>(m_moduleAccesser->getKineticModule().getEnergy(2));
+        }
+        if (energy == NULL) {
+            return false;
+        }
+        Vec2f speed = energy->getSpeed();
+        double wideX = fabs(speed.m_x);
+        float absX = wideX;
+        if (absX <= soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfca, 0)) {
+            speed.m_x = 0.0f;
+        } else {
+            soModuleAccesser* acc = m_moduleAccesser;
+            float sign = speed.m_x < 0.0f ? -1 : 1;
+            float step = soValueAccesser::getConstantFloat(acc, 0xfca, 0);
+            step *= sign;
+            speed.m_x -= step;
+        }
+        energy->m_speed = speed;
+    }
+    return false;
 }
 
 void ftSonic::notifyEventOnDamage(soDamage* damage, bool unk, soModuleAccesser* moduleAccesser) {
