@@ -92,9 +92,9 @@ void ftFalco::processFixPosition() {
         sample.m_pos = pos;
         sample.m_rotX = m_moduleAccesser->getPostureModule().getRot(0).m_x;
         if (m_postureTrail.getArray()->isFull() == true) {
-            m_postureTrail.getArray()->shift();
+            m_postureTrail.getArray()->pop();
         }
-        m_postureTrail.getArray()->push(sample);
+        m_postureTrail.getArray()->unshift(sample);
     }
 }
 
@@ -109,6 +109,11 @@ struct ftFalcoLinkEventView {
     float rotX;
 };
 
+// The part of the event that the rumble case copies (the base arguments and the strength class).
+struct ftFalcoLinkEventRumble : soLinkEventArgs {
+    u32 value;
+};
+
 void ftFalco::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
     ftFalcoLinkEventView* event = reinterpret_cast<ftFalcoLinkEventView*>(eventInfo);
     // Events of the Landmaster (an article of subkind 0x21): its start, its end and the hits it takes.
@@ -120,9 +125,13 @@ void ftFalco::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* modu
         case 0x839:
         case 0x3c: {
             int status = moduleAccesser->getStatusModule().getStatusKind();
-            if (status == 0x116 || status == 0x11a || status == 0x11b) {
+            switch (status) {
+            case 0x116:
+            case 0x11a:
+            case 0x11b:
                 moduleAccesser->getStatusModule().changeStatusRequest(0x11c, moduleAccesser);
                 moduleAccesser->getLinkModule().unlink(6);
+                break;
             }
             if (event->kind == 0x3c) {
                 endFinal(true, true, false);
@@ -132,8 +141,11 @@ void ftFalco::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* modu
         }
         case 0x83a: {
             moduleAccesser->getControllerModule().stopRumble(true);
-            ftFalcoLinkEventView copy = *event;
+            ftFalcoLinkEventRumble copy = *reinterpret_cast<ftFalcoLinkEventRumble*>(event);
             switch (copy.value) {
+            case 0:
+            case 9:
+                break;
             case 1:
                 moduleAccesser->getControllerModule().setRumble(2, 0, true, -1);
                 break;
@@ -154,11 +166,14 @@ void ftFalco::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* modu
         }
         }
     }
-    if (event->kind == 0x455) {
+    switch (event->kind) {
+    case 0x455:
         event->pos = m_postureTrail.getArray()->at(event->value).m_pos;
         event->rotX = m_postureTrail.getArray()->at(event->value).m_rotX;
-    } else {
+        break;
+    default:
         Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+        break;
     }
 }
 
@@ -178,9 +193,7 @@ bool ftFalco::notifyEventCollisionReflectorCheck() {
     if (unk1D090 == 1) {
         // The hit was too weak for the reflector: the shine keeps a flash on the fighter.
         soEffectModule& effect = m_moduleAccesser->getEffectModule();
-        Vec3f rot(0.0f, 0.0f, 0.0f);
-        Vec3f pos(0.0f, 0.0f, 0.0f);
-        effect.reqFollow(static_cast<EfID>(0x14000C), 0x12, &pos, &rot, 1.0f, false, 0, 0, -1);
+        effect.reqFollow(static_cast<EfID>(0x14000C), 0x12, &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, false, 0, 0, -1);
         return true;
     }
     if (unk1D091 == 1) {
@@ -493,16 +506,17 @@ bool ftFalco::activeArticle1(wnFalcoIllusion* weapon, soModuleAccesser* acc) {
 
 // The Landmaster of the Final Smash: it starts at the fighter and takes it along (link 6).
 bool ftFalco::activeArticle2(wnFoxLandMaster* weapon, soModuleAccesser* acc) {
-    soPostureModule& posture = acc->getPostureModule();
+    soTeamModule& teamModule = acc->getTeamModule();
     soResourceModule& resources = acc->getResourceModule();
+    soPostureModule& posture = acc->getPostureModule();
     int founderTaskId = acc->getStageObject().m_taskId;
     float scale = soValueAccesser::getConstantFloat(acc, 0xdb2, 0);
     float lr = posture.getLr();
     Vec3f pos = posture.getPos();
-    int team = acc->getTeamModule().getTeam()->getNo();
+    int team = teamModule.getTeam()->getNo();
     int resourceId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
     weapon->activate(founderTaskId, resourceId, team, &pos, lr, scale, 0x1f);
-    acc->getLinkModule().link(6, weapon->getTaskId());
+    acc->getLinkModule().link(6, weapon->m_taskId);
     return true;
 }
 
