@@ -2283,6 +2283,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_yoshi/wn_yoshi_fire_cannon.cpp"),
             Object(NonMatching, "mo_fighter/ft_yoshi/ft_yoshi.cpp"),
             Object(NonMatching, "mo_fighter/ft_yoshi/wn_yoshi_star.cpp"),
+            Object(NonMatching, "mo_fighter/ft_yoshi/wn_yoshi_wing.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_special_s_utility.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_special_s_start.cpp"),
             Object(Matching, "mo_fighter/ft_yoshi/ft_yoshi_status_uniq_process_special_s_loop.cpp"),

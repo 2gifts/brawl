@@ -16,6 +16,7 @@
 #include <so/catch/so_catch_module.h>
 #include <wn/yoshi/wn_yoshi_star.h>
 #include <wn/yoshi/wn_yoshi_tamago.h>
+#include <wn/yoshi/wn_yoshi_wing.h>
 #include <ft/yoshi/ft_yoshi_article_calls.h>
 #include <ft/yoshi/ft_yoshi_final_param.h>
 #include <ft/yoshi/ft_yoshi_transactor.h>
@@ -233,6 +234,16 @@ bool ftYoshi::activeArticle(wnYoshiTamago* article, soModuleAccesser* acc) {
     float spin = param->throwSpin + strength * param->throwStrengthSpin;
     article->shoot(&position, &speed, spin);
     return false;
+}
+
+bool ftYoshi::activeArticle(wnYoshiWing* article, soModuleAccesser* acc) {
+    int founderTaskId;
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resource = acc->getResourceModule();
+    founderTaskId = fighter.m_taskId;
+    article->activate(founderTaskId, resource.getResourceIdAccesser()->getMdlResId(),
+                      fighter.getOwner()->getTeam());
+    return true;
 }
 
 bool ftYoshi::activeArticle(wnYoshiFireBreath* article, soModuleAccesser* acc) {
