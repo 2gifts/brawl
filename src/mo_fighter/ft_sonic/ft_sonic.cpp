@@ -4,6 +4,10 @@
 #include <ft/sonic/ft_sonic_extend_param_accesser.h>
 #include <ft/sonic/ft_sonic_transactor.h>
 #include <ft/ft_owner.h>
+#include <so/article/so_article.h>
+#include <so/article/so_generate_article_manage_module.h>
+#include <so/link/so_link_module_impl.h>
+#include <so/work/so_work_manage_module_impl.h>
 #include <ft/ft_physics_iface.h>
 #include <so/so_value_accesser.h>
 #include <wn/sonic/wn_sonic_gimmick_jump.h>
@@ -65,6 +69,28 @@ void ftSonic::analyzeSeal(void* seal) {
         float amount = *reinterpret_cast<float*>(&record[1]);
         int frames = (int)(amount * 0.5f);
         reinterpret_cast<ftSonicGlowView*>(m_moduleAccesser->m_enumerationStart->m_glowModule)->setGlow(0x117, frames);
+    }
+}
+
+// Status 0x114 (HYPOTHESIS: the loop de loop / spring exit) puts the fighter at the offset of the fighter data from the
+// posture; status 0x116 spawns the article of slot 1 (the Sonic spring) and links it to the fighter.
+void ftSonic::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+    if (statusKind == 0x114) {
+        Vec2f pos(moduleAccesser->getPostureModule().getPos());
+        float* params = *reinterpret_cast<float**>(*reinterpret_cast<u8**>(reinterpret_cast<u8*>(m_commonData) + 0x94) + 0x34);
+        int side = moduleAccesser->getPostureModule().getLr() < 0.0f ? -1 : 1;
+        pos.m_x += params[1] * (float)side;
+        pos.m_y += params[2] * moduleAccesser->getPostureModule().getScale();
+        moduleAccesser->getWorkManageModule().setFloat(pos.m_x, 0x21000004);
+        moduleAccesser->getWorkManageModule().setFloat(pos.m_y, 0x21000005);
+    } else if (statusKind == 0x116) {
+        m_moduleAccesser->getGenerateArticleManageModule().removeExist(1, 0);
+        soArticle* article = m_moduleAccesser->getGenerateArticleManageModule().generate(1, false, false);
+        soLinkModule& link = m_moduleAccesser->getLinkModule();
+        if (link.link(6, article->getTaskId())) {
+            m_moduleAccesser->getGenerateArticleManageModule().entry(article);
+        }
     }
 }
 
