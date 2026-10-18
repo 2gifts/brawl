@@ -30,9 +30,11 @@ public:
     virtual void set(u32 index, u32 groupIndex, soCollisionAttackData* attackData);
     virtual void set(u32 index, u32 groupIndex);
     virtual void setAbsolute(u32 index, u32 groupIndex, soCollisionAttackAbsoluteData* attackData);
-    virtual void hitAbsolute(u32 index, Vec3f* nodeGlobalPos, void*, short, u8);
-    virtual void hitAbsolute(u32 index, int nodeId, void*, short, u8);
-    virtual void hitAbsolute(u32 index, const char* nodeName, void*, short, u8);
+    // Target selectors are passed as full-width integers; the hit record
+    // stores group/no in narrower fields inside the implementation.
+    virtual void hitAbsolute(u32 index, Vec3f* nodeGlobalPos, int targetTaskId, int targetGroup, int targetNo);
+    virtual void hitAbsolute(u32 index, int nodeId, int targetTaskId, int targetGroup, int targetNo);
+    virtual void hitAbsolute(u32 index, const char* nodeName, int targetTaskId, int targetGroup, int targetNo);
     virtual void setWhole(u32 index, bool);
     virtual bool isAttack(u32 index, bool);
     virtual bool isInvalidInvincible(u32 index, bool);
@@ -130,9 +132,9 @@ public:
     virtual void set(u32 index, u32 groupIndex, soCollisionAttackData* attackData);
     virtual void set(u32 index, u32 groupIndex);
     virtual void setAbsolute(u32 index, u32 groupIndex, soCollisionAttackAbsoluteData* attackData);
-    virtual void hitAbsolute(u32 index, Vec3f* nodeGlobalPos, void*, short, u8);
-    virtual void hitAbsolute(u32 index, int nodeId, void*, short, u8);
-    virtual void hitAbsolute(u32 index, const char* nodeName, void*, short, u8);
+    virtual void hitAbsolute(u32 index, Vec3f* nodeGlobalPos, int targetTaskId, int targetGroup, int targetNo);
+    virtual void hitAbsolute(u32 index, int nodeId, int targetTaskId, int targetGroup, int targetNo);
+    virtual void hitAbsolute(u32 index, const char* nodeName, int targetTaskId, int targetGroup, int targetNo);
     virtual void setWhole(u32 index, bool);
     virtual bool isAttack(u32 index, bool);
     virtual bool isInvalidInvincible(u32 index, bool);

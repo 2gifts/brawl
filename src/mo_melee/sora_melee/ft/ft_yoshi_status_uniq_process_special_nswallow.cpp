@@ -3,8 +3,88 @@
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
+#include <ft/yoshi/ft_yoshi_transactor.h>
+#include <ft/ft_resource_id_accesser_impl.h>
+#include <wn/yoshi/wn_yoshi_tamago.h>
+#include <so/team/so_team.h>
+#include <so/article/so_generate_article_manage_module.h>
+#include <so/collision/so_collision_attack_module_impl.h>
+#include <so/link/so_link_module_impl.h>
+#include <so/model/so_model_module_impl.h>
+#include <so/work/so_work_manage_module_impl.h>
+#include <so/stageobject.h>
 
-// Class shapes from the module map; the method bodies are not reconstructed yet.
+// The converter entry point is shared with the existing Snake/Kirby callers.
+// It maps Yoshi's original status ID to Kirby's current copied status ID.
+extern u8 lbl_27_bss_7B0C[];
+extern "C" int fn_27_30FA2C(void*, int, int, soModuleAccesser*, int);
+
+struct ftYoshiCaptureNodeEvent : soLinkEventArgs {
+    int captureNode;
+    ftYoshiCaptureNodeEvent() : soLinkEventArgs(0x1f), captureNode(-1) { }
+};
+
+ftYoshiTransactor::ftYoshiTransactor() { }
+ftYoshiTransactor::~ftYoshiTransactor() { }
+
+bool ftYoshiTransactor::activeArticle(soArticle* article, soModuleAccesser* acc) {
+    Vec3f position;
+    switch (article->getArticleId()) {
+    case 13: {
+        wnYoshiTamago* weapon = dynamic_cast<wnYoshiTamago*>(article);
+        ftResourceIdAccesserImpl& resources = dynamic_cast<ftResourceIdAccesserImpl&>(
+            *acc->getResourceModule().getResourceIdAccesser());
+        u32 resourceId = resources.getKirbyResId(4);
+        int captureNode = -1;
+        int captureStatus = fn_27_30FA2C(lbl_27_bss_7B0C, 0, 0x118, acc, 0);
+        int founderTaskId;
+        position.m_x = 0.0f;
+        position.m_y = 0.0f;
+        position.m_z = 0.0f;
+        if (acc->getStatusModule().getStatusKind() == captureStatus) {
+            founderTaskId = acc->getLinkModule().getNodeTaskId(0);
+            ftYoshiCaptureNodeEvent event;
+            acc->getLinkModule().sendEventNodes(0, event, 0);
+            captureNode = event.captureNode;
+        } else {
+            int node = acc->getModelModule().getCorrectNodeId(0x131);
+            position = acc->getModelModule().getNodeGlobalPosition(node, false);
+            founderTaskId = acc->getStageObject().m_taskId;
+        }
+        soTeamModule& team = acc->getTeamModule();
+        float lr = acc->getPostureModule().getLr();
+        int teamNo = team.getTeam()->getNo();
+        weapon->activate(founderTaskId, resourceId, teamNo, &position, captureNode, lr);
+        return true;
+    }
+    default:
+        return false;
+    }
+}
+
+bool ftYoshiTransactor::activeArticle1(wnYoshiTamago* weapon, soModuleAccesser* acc, u32 resourceId) {
+    int founderTaskId;
+    int captureNode = -1;
+    int captureStatus = fn_27_30FA2C(lbl_27_bss_7B0C, 0, 0x118, acc, 0);
+    Vec3f position(0.0f, 0.0f, 0.0f);
+    if (acc->getStatusModule().getStatusKind() == captureStatus) {
+        founderTaskId = acc->getLinkModule().getNodeTaskId(0);
+        ftYoshiCaptureNodeEvent event;
+        acc->getLinkModule().sendEventNodes(0, event, 0);
+        captureNode = event.captureNode;
+    } else {
+        int node = acc->getModelModule().getCorrectNodeId(0x131);
+        position = acc->getModelModule().getNodeGlobalPosition(node, false);
+        founderTaskId = acc->getStageObject().m_taskId;
+    }
+    soTeamModule& team = acc->getTeamModule();
+    float lr = acc->getPostureModule().getLr();
+    int teamNo = team.getTeam()->getNo();
+    weapon->activate(founderTaskId, resourceId, teamNo, &position, captureNode, lr);
+    return true;
+}
+
+// Egg Lay capture status, shared with Kirby's copied ability.
 class ftYoshiStatusUniqProcessSpecialNSwallow : public soStatusUniqProcess {
 public:
     virtual ~ftYoshiStatusUniqProcessSpecialNSwallow() { }
@@ -34,7 +114,54 @@ void ftYoshiStatusUniqProcessSpecialNSwallow::exitStatus(soModuleAccesser* modul
     }
     static_cast<soCatchModule*>(moduleAccesser->m_enumerationStart->m_catchModule)->catchCut(false, false);
 }
-void ftYoshiStatusUniqProcessSpecialNSwallow::execFixPosCounter(soModuleAccesser* moduleAccesser) { }
+// Fighter::notifyEventLink handles 0x1d by hiding the captured fighter and
+// disabling its hit/ground collision. Event 0x1e selects its egg-capture status
+// and returns the hit group and hit number used by the absolute attack.
+struct ftYoshiSwallowCaptureEvent : soLinkEventArgs {
+    ftYoshiSwallowCaptureEvent() : soLinkEventArgs(0x1d) { }
+};
+struct ftYoshiSwallowHitEvent : soLinkEventArgs {
+    int unk8;
+    int targetGroup;
+    int targetNo;
+    int unk14;
+    float unk18;
+    bool unk1c;
+    ftYoshiSwallowHitEvent() : soLinkEventArgs(0x1e), unk8(-1),
+        targetGroup(-1), targetNo(-1), unk14(-1), unk18(-1.0f), unk1c(true) { }
+};
+static_assert(sizeof(ftYoshiSwallowHitEvent) == 0x20, "Egg Lay event layout is wrong!");
+
+void ftYoshiStatusUniqProcessSpecialNSwallow::execFixPosCounter(soModuleAccesser* moduleAccesser) {
+    soGenerateArticleManageModule* articles;
+    soCollisionAttackModule* attack;
+    soWorkManageModule* work = moduleAccesser->m_enumerationStart->m_workManageModule;
+    articles = static_cast<soGenerateArticleManageModule*>(
+        moduleAccesser->m_enumerationStart->m_generateArticleManageModule);
+    attack = moduleAccesser->m_enumerationStart->m_collisionAttackModule;
+    soLinkModule* link = moduleAccesser->m_enumerationStart->m_linkModule;
+    if (work->isFlag(0x22000012)) {
+        ftYoshiSwallowCaptureEvent event;
+        link->sendEventNodes(0, event, 0);
+        work->offFlag(0x22000012);
+    }
+    if (work->isFlag(0x22000013)) {
+        int kind = moduleAccesser->getStageObject().soGetSubKind();
+        int articleId = 0;
+        if (kind == 4) {
+            articleId = 1;
+        } else if (kind == 5) {
+            articleId = 13;
+        }
+        articles->generate(articleId, NULL, NULL);
+        int targetTaskId = link->getNodeTaskId(0);
+        ftYoshiSwallowHitEvent event;
+        link->sendEventNodes(0, event, 0);
+        int node = moduleAccesser->m_enumerationStart->m_modelModule->getCorrectNodeId(0x12c);
+        attack->hitAbsolute(0, node, targetTaskId, event.targetGroup, event.targetNo);
+        work->offFlag(0x22000013);
+    }
+}
 bool ftYoshiStatusUniqProcessSpecialNSwallow::checkDamage(soModuleAccesser* moduleAccesser, void* data) {
     return static_cast<ftYoshiCatchModuleView*>(moduleAccesser->m_enumerationStart->m_catchModule)->unk3C(moduleAccesser, data);
 }
