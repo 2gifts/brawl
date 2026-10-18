@@ -3,8 +3,10 @@
 #include <wn/wn_weapon_builder.h>
 #include <so/so_gimmick_event_presenter.h>
 #include <ft/ft_kinetic_energy.h>
+#include <wn/wn_article_build_info.h>
 
 struct wnSonicGimmickJumpModuleAccesserBuildConfig;
+struct wnSonicGimmickJumpData;
 
 // Original RTTI gives this builder only Weapon as a base. The constructor
 // places the spring's observer immediately after the embedded modules.
@@ -22,6 +24,8 @@ class wnSonicGimmickJump : public wnWeaponBuilder<wnSonicGimmickJumpModuleAccess
     u8 unk2168[0x54]; // HYPOTHESIS: embedded parameter accesser, detailed fields unresolved.
     soKineticEnergyGroundMovement m_groundMovement;
 public:
+    // Built by the article pool of the fighter (the constructor lives in the article unit).
+    wnSonicGimmickJump(s32 articleId, const wnArticleBuildInfo& info, const wnSonicGimmickJumpData* data);
     virtual ~wnSonicGimmickJump();
     virtual void onDeactivate();
     virtual void notifyEventChangeStatus(int, int, soStatusData*, soModuleAccesser*);

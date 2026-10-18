@@ -117,6 +117,8 @@ public:
     void* getWeaponData125(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Ness PK Starstorm
     void* getWeaponData126(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Ness Yo-Yo
     void* getWeaponData127(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Ness Yo-Yo head
+    void* getWeaponData129(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Sonic spring (gimmick jump)
+    void* getWeaponData130(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Super Sonic
 };
 
 extern ftCommonData g_ftCommonData;
