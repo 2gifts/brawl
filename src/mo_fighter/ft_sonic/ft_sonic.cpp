@@ -17,6 +17,7 @@
 #include <wn/sonic/wn_sonic_super_sonic.h>
 #include <gf/gf_task_scheduler.h>
 #include <math.h>
+#include <ft/ft_resource_id_accesser_impl.h>
 #include <so/so_kinetic_energy_normal.h>
 
 #define FT_BC ftSonicBuildConfig
@@ -190,6 +191,38 @@ bool ftSonic::notifyEventCollisionAttackCheck(u32 flags) {
         energy->m_speed = speed;
     }
     return false;
+}
+
+bool ftSonic::activeArticle(wnSonicGimmickJump* weapon, soModuleAccesser* acc) {
+    // MATCH-ONLY: declare the saved ID before the other persistent locals.
+    int founderTaskId;
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    Vec2f pos(acc->getPostureModule().getPos());
+    bool flag = true;
+    if (!acc->getWorkManageModule().isFlag(0x22000010)) {
+        flag = false;
+    }
+    soResourceModule& resourceModule = acc->getResourceModule();
+    founderTaskId = acc->getStageObject().m_taskId;
+    float lr = acc->getPostureModule().getLr();
+    weapon->activate(founderTaskId, resourceModule.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam(), &pos, lr, flag);
+    return true;
+}
+
+bool ftSonic::activeArticle1(wnSonicSuperSonic* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    Vec2f pos(acc->getPostureModule().getPos());
+    soSituationModule& situation = acc->getSituationModule();
+    soPostureModule& posture = acc->getPostureModule();
+    soResourceModule& resourceModule = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    wnSonicSuperSonicEffectList* effects = static_cast<wnSonicSuperSonicEffectList*>(soValueAccesser::getConstantIndefinite(acc, 0xA802, 0));
+    SituationKind kind = static_cast<SituationKind>(situation.getKind());
+    float lr = posture.getLr();
+    int team = fighter.getOwner()->getTeam();
+    int resourceId = dynamic_cast<ftResourceIdAccesserImpl&>(*resourceModule.getResourceIdAccesser()).getFinalResId();
+    weapon->activate(founderTaskId, resourceId, team, &pos, lr, kind, effects);
+    return true;
 }
 
 void ftSonic::notifyEventOnDamage(soDamage* damage, bool unk, soModuleAccesser* moduleAccesser) {
