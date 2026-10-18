@@ -3,15 +3,14 @@
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-// HYPOTHESIS: four u32 values (0xff, 0, 0xff, 1) initialized in the static initializer before the status instance.
-struct ftStatusUniqProcessHeartSwapInit {
+// HYPOTHESIS: two (value, flag) pairs initialized in the static initializer before the status instance.
+struct ftStatusUniqProcessHeartSwapPair {
     u32 m_0;
     u32 m_4;
-    u32 m_8;
-    u32 m_c;
-    ftStatusUniqProcessHeartSwapInit() : m_0(0xff), m_4(0), m_8(0xff), m_c(1) { }
+    ftStatusUniqProcessHeartSwapPair(u32 first, u32 second) : m_0(first), m_4(second) { }
 };
-static ftStatusUniqProcessHeartSwapInit g_ftStatusUniqProcessHeartSwapInit;
+static ftStatusUniqProcessHeartSwapPair g_ftStatusUniqProcessHeartSwapPairA(0xff, 0);
+static ftStatusUniqProcessHeartSwapPair g_ftStatusUniqProcessHeartSwapPairB(0xff, 1);
 
 // Local view of the motion module: the shared soMotionModule header puts getFrame/setFrame at other slots,
 // so these two calls are made through slots 8 and 9 of the real vtable.
@@ -48,11 +47,12 @@ void ftStatusUniqProcessHeartSwap::execStatus(soModuleAccesser* moduleAccesser) 
     if (s_heartSwapCheckFrame == reinterpret_cast<ftMotionModuleView*>(moduleAccesser->m_enumerationStart->m_motionModule)->getFrameView()) {
         int instanceId = moduleAccesser->getWorkManageModule().getInt(0x10000030);
         if (instanceId != 0) {
-            if (itManager::getInstance()->getItemFromInstanceId(instanceId) != 0) {
-                return;
+            if (itManager::getInstance()->getItemFromInstanceId(instanceId) == 0) {
+                reinterpret_cast<ftMotionModuleView*>(moduleAccesser->m_enumerationStart->m_motionModule)->setFrameView(s_heartSwapResetFrame);
             }
+        } else {
+            reinterpret_cast<ftMotionModuleView*>(moduleAccesser->m_enumerationStart->m_motionModule)->setFrameView(s_heartSwapResetFrame);
         }
-        reinterpret_cast<ftMotionModuleView*>(moduleAccesser->m_enumerationStart->m_motionModule)->setFrameView(s_heartSwapResetFrame);
     }
 }
 

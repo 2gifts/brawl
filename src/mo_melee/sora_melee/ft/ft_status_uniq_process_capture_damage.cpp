@@ -2,14 +2,14 @@
 // MATCH-ONLY: the -O2,s fighter flags stop the implicit constructor inlining into the static initializer;
 // the Matching neighbours build at the default -O4,p.
 #include <ft/ft_kinetic_energy.h>
-#include <ft/ft_status_uniq_process_capture_pulled.h>
+#include <ft/ft_status_uniq_process_capture_wait.h>
 #include <so/ground/so_ground_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
 
-class ftStatusUniqProcessCaptureDamage : public ftStatusUniqProcessCapturePulled {
+class ftStatusUniqProcessCaptureDamage : public ftStatusUniqProcessCaptureWait {
 public:
     virtual ~ftStatusUniqProcessCaptureDamage() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
@@ -24,10 +24,17 @@ void ftStatusUniqProcessCaptureDamage::initStatus(soModuleAccesser* moduleAccess
     *((u8*)&stop + 5) |= 0x80;
     int kind = moduleAccesser->getWorkManageModule().getInt(0x20000000);
     // Damage-state ids 0x7e..0x80 fold to 0x80, 0x81..0x83 fold to 0x83.
-    if (kind >= 0x7e && kind < 0x81) {
+    switch (kind) {
+    case 0x7E:
+    case 0x7F:
+    case 0x80:
         kind = 0x80;
-    } else if (kind >= 0x81 && kind < 0x84) {
+        break;
+    case 0x81:
+    case 0x82:
+    case 0x83:
         kind = 0x83;
+        break;
     }
     moduleAccesser->getWorkManageModule().setInt(kind, 0x20000000);
     moduleAccesser->getGroundModule().setCorrectIgnoreSlope(1, 0);

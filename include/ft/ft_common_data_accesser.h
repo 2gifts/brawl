@@ -42,8 +42,10 @@ struct ftParam {
     float slopeAngleLimit;
 };
 
+// HYPOTHESIS: per-fighter extra parameters; unk3C points at floats used by the squat walk (status 0x13 / 0x14 speed limits).
 struct ftParamEtc {
-
+    u8 unk00[0x3C];
+    float* unk3C;
 };
 
 struct ftKindData {
@@ -61,12 +63,16 @@ struct ftDataCommon {
     ftShakeData* shakeData;
     u8 unk20[0x8];
     ftJostleData* jostleData;
-    u8 unk2C[0x1C];
+    u8 unk2C[4];
+    // HYPOTHESIS: size-customize scaling exponents read by ftUtil::getReactionMul for param customizes 0 and 1.
+    float* sizeCustomizeScale[2];
+    u8 unk38[0x10];
     GXColor subColors;
     ftEffectCommonData* effectCommonData;
     ftEffectScreenData* effectScreenData;
     ftIkData* ikData;
 };
+static_assert(sizeof(ftDataCommon) == 0x58, "Class is wrong size!");
 
 struct ftCommonData {
     ftDataCommon* dataCommon;
@@ -79,12 +85,21 @@ struct ftCommonData {
 struct wnSimpleData;
 struct wnGameWatchNormalWeaponData;
 
+// HYPOTHESIS: leading flag word of a common fighter status's data (the bit with mask 0x8 marks statuses that cannot be trodden on).
+struct ftStatusFlagData {
+    u32 : 28;
+    u32 noTread : 1;
+    u32 : 3;
+};
+
 class ftCommonDataAccesser {
 public:
+    const ftStatusFlagData* getFtStatusData(ftKind kind, int status) const;
     wnSimpleData* getSimpleData(ftKind kind, bool* resourceGroup) const;
     u32 getFinalResId(ftKind kind) const;
     ftData* getData(ftKind kind) const;
     ftParam* getParam(ftKind kind) const;
+    ftParamEtc* getParamEtc(ftKind kind) const;
     ftParam* getParamCommon() const;
     // HYPOTHESIS: const qualification; native pointer ABI and getter identity are verified.
     const wnGameWatchNormalWeaponData* getGameWatchNormalWeaponData() const;

@@ -801,16 +801,17 @@ public:
     soKineticModule* getModule() { return (soKineticModule*)&m_module; }
 };
 
-// Kinetic module of an article that has room for two energies only (Ness's PK Starstorm).
+// Kinetic module of an article with another energy capacity (two for Ness's/Lucas's PK Starstorm, twelve for
+// Kirby's Nabe).
 // HYPOTHESIS: source spelling; the builder map name is the same as the eight-energy one.
 template <typename Impl, typename M, int Capacity>
 class wnKineticModuleBuildConfigSized { };
 
-template <typename M>
-class soKineticModuleBuilder<wnKineticModuleBuildConfigSized<wnKineticModuleImpl, M, 2> > {
-    wnKineticModuleImpl m_module;                                       // +0x0
-    soInstanceManagerFullPropertyVector<soKineticEnergy*, 2> m_manager; // +0x30
-    M m_mediator;                                                       // +0x68
+template <typename M, int Capacity>
+class soKineticModuleBuilder<wnKineticModuleBuildConfigSized<wnKineticModuleImpl, M, Capacity> > {
+    wnKineticModuleImpl m_module;                                              // +0x0
+    soInstanceManagerFullPropertyVector<soKineticEnergy*, Capacity> m_manager; // +0x30
+    M m_mediator;
 public:
     soKineticModuleBuilder(soModuleAccesser* acc) :
         m_module(acc, &m_manager, &m_mediator), m_manager(false), m_mediator() { }
@@ -1129,8 +1130,9 @@ protected:
     wnKineticEnergyNormal m_energyNormal;       // the main movement energy (index 0)
     soKineticEnergyRotNormal m_energyRotNormal; // the rotation energy (index 1)
 public:
-    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd) :
-        Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), true),
+    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd,
+                    bool weaponFlag = true) :
+        Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), weaponFlag),
         m_modules(this, bd), m_energyNormal(), m_energyRotNormal() {
         Weapon::initialize();
         m_moduleAccesser->getKineticModule().addEnergy(&m_energyNormal, 0, soKineticEnergy::AttributeFlag(1), -1);

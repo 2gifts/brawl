@@ -242,11 +242,38 @@ public:
 
     friend void Vec3fSub(register Vec3f* pOut, register const Vec3f* lhs,
                      register const Vec3f* rhs) {
+#ifdef MT_VEC3F_SUB_AIR_LASSO
+        register f32 fr0, fr1, fr2;
+#elif defined(MT_VEC3F_SUB_DISTINCT)
+        register f32 fr0, fr1, fr2, fr3, fr4, fr5;
+#else
         register f32 fr3, fr2, fr1, fr0;
+#endif
 
         // clang-format off
         asm {
-#ifdef MT_VEC3F_BIKE_UTILITY_OPERATORS
+#if defined(MT_VEC3F_SUB_AIR_LASSO)
+            // MATCH-ONLY: xy half first, the z half reuses the load registers.
+            psq_l  fr0, Vec3f.m_x(lhs), 0, 0
+            psq_l  fr1, Vec3f.m_x(rhs), 0, 0
+            ps_sub fr2, fr0, fr1
+            psq_l  fr0, Vec3f.m_z(lhs), 1, 0
+            psq_l  fr1, Vec3f.m_z(rhs), 1, 0
+            ps_sub fr0, fr0, fr1
+            psq_st fr2, Vec3f.m_x(pOut), 0, 0
+            psq_st fr0, Vec3f.m_z(pOut), 1, 0
+#elif defined(MT_VEC3F_SUB_DISTINCT)
+            // MATCH-ONLY: every value in its own register variable (declared in ascending order, which selects
+            // the physical registers); the adventure follower and Ike final smash fly units are built this way.
+            psq_l  fr0, Vec3f.m_x(lhs), 0, 0
+            psq_l  fr1, Vec3f.m_x(rhs), 0, 0
+            psq_l  fr2, Vec3f.m_z(lhs), 1, 0
+            psq_l  fr3, Vec3f.m_z(rhs), 1, 0
+            ps_sub fr4, fr0, fr1
+            ps_sub fr5, fr2, fr3
+            psq_st fr4, Vec3f.m_x(pOut), 0, 0
+            psq_st fr5, Vec3f.m_z(pOut), 1, 0
+#elif defined(MT_VEC3F_BIKE_UTILITY_OPERATORS)
             // MATCH-ONLY: retain the same native register order for subtraction.
             psq_l  fr3, Vec3f.m_x(lhs), 0, 0
             psq_l  fr1, Vec3f.m_x(rhs), 0, 0
@@ -266,6 +293,25 @@ public:
             psq_st fr0, Vec3f.m_x(pOut), 0, 0
             psq_st fr1, Vec3f.m_z(pOut), 1, 0
 #endif
+        }
+        // clang-format on
+    }
+    // MATCH-ONLY: second subtraction form seen at the air lasso call sites (opt in with MT_VEC3F_SUB_AIR_LASSO for the
+    // operator form); the register variables are declared in the order that reproduces the allocation.
+    friend void Vec3fSubLhsFirst(register Vec3f* pOut, register const Vec3f* lhs,
+                     register const Vec3f* rhs) {
+        register f32 frB, frE, frD, frC, frA;
+
+        // clang-format off
+        asm {
+            psq_l  frA, Vec3f.m_x(lhs), 0, 0
+            psq_l  frB, Vec3f.m_x(rhs), 0, 0
+            psq_l  frC, Vec3f.m_z(lhs), 1, 0
+            psq_l  frD, Vec3f.m_z(rhs), 1, 0
+            ps_sub frB, frA, frB
+            ps_sub frE, frC, frD
+            psq_st frB, Vec3f.m_x(pOut), 0, 0
+            psq_st frE, Vec3f.m_z(pOut), 1, 0
         }
         // clang-format on
     }

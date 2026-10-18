@@ -18,6 +18,10 @@ ftStatusUniqProcessCaptureTaboo g_ftStatusUniqProcessCaptureTaboo;
 
 void ftStatusUniqProcessCaptureTaboo::initStatus(soModuleAccesser* moduleAccesser) { }
 
+void ftStatusUniqProcessCaptureTaboo::execFixPos(soModuleAccesser* moduleAccesser) {
+    reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot44();
+}
+
 void ftStatusUniqProcessCaptureTaboo::exitStatus(soModuleAccesser* moduleAccesser, int status) {
     if (status == 0x104) {
         return;
@@ -26,10 +30,6 @@ void ftStatusUniqProcessCaptureTaboo::exitStatus(soModuleAccesser* moduleAccesse
         return;
     }
     reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot30(0, 0);
-}
-
-void ftStatusUniqProcessCaptureTaboo::execFixPos(soModuleAccesser* moduleAccesser) {
-    reinterpret_cast<ftCaptureModuleSlotView*>(moduleAccesser->m_enumerationStart->m_captureModule)->slot44();
 }
 
 bool ftStatusUniqProcessCaptureTaboo::checkDamage(soModuleAccesser* moduleAccesser, void*) { return true; }

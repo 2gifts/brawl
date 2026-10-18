@@ -1,20 +1,12 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 
 #include <ft/fighter.h>
+#include <ft/ft_status_uniq_process_attack_air.h>
 #include <ft/ft_util.h>
 #include <so/kinetic/so_kinetic_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
-
-class ftStatusUniqProcessAttackAir : public soStatusUniqProcess {
-public:
-    virtual ~ftStatusUniqProcessAttackAir() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-};
 
 void ftStatusUniqProcessAttackAir::initStatus(soModuleAccesser* moduleAccesser) {
 }
@@ -30,10 +22,12 @@ void ftStatusUniqProcessAttackAir::execFixPos(soModuleAccesser* moduleAccesser) 
 void ftStatusUniqProcessAttackAir::exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind) {
     // HYPOTHESIS: work flag 0x2200001F gates a kinetic reset for transitions into statuses 0x16-0x18.
     if (moduleAccesser->getWorkManageModule().isFlag(0x2200001F) == 1) {
-        if (nextStatusKind < 0x19) {
-            if (nextStatusKind >= 0x16) {
-                moduleAccesser->getKineticModule().clearSpeedAll();
-            }
+        switch (nextStatusKind) {
+        case 0x16:
+        case 0x17:
+        case 0x18:
+            moduleAccesser->getKineticModule().clearSpeedAll();
+            break;
         }
     }
 }

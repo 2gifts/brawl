@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mt/mt_vector.h>
 #include <types.h>
 
 class soModuleAccesser;
@@ -7,6 +8,7 @@ class soModuleAccesser;
 // Helpers shared by every fighter: status-ID classification and the common parameter multipliers.
 // Status IDs are the common fighter action IDs (see the BrawlRE "Actions" list).
 class soCollisionLog;
+struct soCollisionAttackData;
 
 class ftUtil {
 public:
@@ -46,8 +48,16 @@ public:
     // Multiplier used by the item-lift motion rate callback.
     static float getItemLiftMotionRateMul(soModuleAccesser* acc);
 
+    // Whether the fighter is treading on (stomping) the task in its work int; flag 0 is the ground variant.
+    static bool checkTread(soModuleAccesser* acc, int flag);
+
+    // Water entry splash (effect, sound and rumble) at the given position.
+    static void setWaterDiveEffect(soModuleAccesser* acc, Vec3f* position);
+
     // Cloud (pass-through platform) handling while airborne; names from the sora_melee map.
     static void setCloudThroughCheck(soModuleAccesser* acc);
+    // Touch mask of the fighter's ground shape plus position/normal of the first touched surface.
+    static u32 getAirGroundTouchInfo(soModuleAccesser* acc, Vec2f* pos, Vec2f* normal);
     static bool checkCloudThroughOut(soModuleAccesser* acc);
     static int getItemSquatWaitMotion(soModuleAccesser* acc);
 
@@ -65,8 +75,35 @@ public:
     // HYPOTHESIS: formal bool/float order is inferred from callers; their register classes are verified.
     static void adjustCeil(soModuleAccesser*, bool, float);
 
+    // Rotates the model node 0x12E around the X axis.
+    static void setXAngle(soModuleAccesser* acc, float angle);
+    static float setDamageFlyRollAngle(soModuleAccesser* acc);
+    static float setAngleWallNormal(soModuleAccesser* acc, float lr);
+    static bool isBodyUp(soModuleAccesser* acc);
+
+    // Ice block effect of a frozen fighter; the work int index receives the effect handle.
+    static void setIceEffect(soModuleAccesser* acc, u32 workIndex);
+    static void setIceExitEffect(soModuleAccesser* acc);
+
+    // Controller rumble. The strength grows with the damage taken / the attack power dealt.
+    static void setDamageRumble(soModuleAccesser* acc, float damage);
+    static void setAttackRumble(soModuleAccesser* acc, float power);
+
+    // Main stick deflection past a threshold, rescaled to 0..1: out->m_x is the rate and out->m_y the direction
+    // (1 or -1; both 0 inside the threshold). HYPOTHESIS: the layout of the result.
+    static void getStickXRate(soModuleAccesser* acc, float threshold, Vec2f* out);
+    static void getStickYRate(soModuleAccesser* acc, float threshold, Vec2f* out);
+
+    static void setShieldSetoffSpeed(soModuleAccesser* acc, float power, float lr);
+
+    // Scales a value by a factor and exponent (see the definition). Negative exponents invert the scaling.
+    static float calcScalingParam(float value, float factor, float exponent);
+
     // Global multipliers read from the common constants.
     static float getAttackReactionMul(soModuleAccesser* acc);
+    // Knockback multiplier for an attack against this fighter: the common constant 0xDB1, damped for fixed-knockback attacks and
+    // scaled by the size customizes (param customizes 0 and 1).
+    static float getReactionMul(soModuleAccesser* acc, soCollisionAttackData* attackData);
     static float getAttackPowerMul(soModuleAccesser* acc);
     static float getDamageMul(soModuleAccesser* acc);
 };

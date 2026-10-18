@@ -38,7 +38,7 @@ void ftStatusUniqProcessItemThrow::exitStatus(soModuleAccesser* moduleAccesser, 
     }
     if (moduleAccesser->getItemManageModule().getHaveItemSize(0) == 1 ||
         moduleAccesser->getItemManageModule().getHaveItemKind(0) == 0xd) {
-        // HYPOTHESIS: the two drop-velocity constants are lbl_27_rodata_2370 / lbl_27_rodata_2374 (values not read).
-        moduleAccesser->getItemManageModule().dropItem(0.0f, 0.0f, 0);
+        // HYPOTHESIS: the drop arguments are lbl_27_rodata_2370 (90.0f) and lbl_27_rodata_2374 (0.0f).
+        moduleAccesser->getItemManageModule().dropItem(90.0f, 0.0f, 0);
     }
 }

@@ -26,9 +26,9 @@ enum {
     Turn_Flag_Init = 0x22000012,
 };
 
-// HYPOTHESIS: constants from the turn literal pool; values not verified.
-static const float s_turnRateStart = 1.0f;   // lbl_27_rodata_2058
-static const float s_turnRateStep = 0.5f;    // lbl_27_rodata_205C
+// Turn countdown: set to zero for a dash turn, otherwise counts down by one per frame while positive.
+static const float s_turnRateStart = 0.0f;
+static const float s_turnRateStep = 1.0f;
 
 void ftStatusUniqProcessTurn::initStatus(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getStatusModule().getStatusKind() == 7) {
@@ -40,8 +40,7 @@ void ftStatusUniqProcessTurn::initStatus(soModuleAccesser* moduleAccesser) {
         moduleAccesser->getWorkManageModule().offFlag(Turn_Flag_Brake);
     }
     moduleAccesser->getWorkManageModule().offFlag(Turn_Flag_Init);
-    float postureValue = reinterpret_cast<ftStatusPostureView&>(moduleAccesser->getPostureModule()).unk2c();
-    moduleAccesser->getWorkManageModule().setFloat(postureValue, Turn_Float_Speed);
+    moduleAccesser->getWorkManageModule().setFloat(reinterpret_cast<ftStatusPostureView&>(moduleAccesser->getPostureModule()).unk2c(), Turn_Float_Speed);
     reinterpret_cast<ftStatusPostureView&>(moduleAccesser->getPostureModule()).unk34();
     moduleAccesser->getCameraModule().setRun(0);
 }
@@ -57,9 +56,7 @@ void ftStatusUniqProcessTurn::execStatus(soModuleAccesser* moduleAccesser) {
     }
     float threshold = soValueAccesser::getConstantFloat(moduleAccesser, 0xc32, 0);
     int limit = soValueAccesser::getConstantInt(moduleAccesser, 0x59f7, 0);
-    float negSpeed = -moduleAccesser->getWorkManageModule().getFloat(Turn_Float_Speed);
-    float stick = moduleAccesser->getControllerModule().getStickX();
-    if (stick * negSpeed < threshold) {
+    if (moduleAccesser->getControllerModule().getStickX() * -moduleAccesser->getWorkManageModule().getFloat(Turn_Float_Speed) >= threshold) {
         if ((u8)moduleAccesser->getControllerModule().getFlickX() < limit) {
             moduleAccesser->getWorkManageModule().onFlag(Turn_Flag_Brake);
         }

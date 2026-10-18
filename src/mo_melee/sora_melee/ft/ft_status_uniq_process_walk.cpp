@@ -39,18 +39,16 @@ void ftStatusUniqProcessWalk::initStatus(soModuleAccesser* moduleAccesser) {
 
 void ftStatusUniqProcessWalk::execStatus(soModuleAccesser* moduleAccesser) {
     float speedMul = ftUtil::getWalkSpeedMul(moduleAccesser);
-    float c2e = soValueAccesser::getConstantFloat(moduleAccesser, 0xc2e, 0);
-    float cba = soValueAccesser::getConstantFloat(moduleAccesser, 0xbba, 0);
-    float cb9 = soValueAccesser::getConstantFloat(moduleAccesser, 0xbb9, 0);
-    float cbb = soValueAccesser::getConstantFloat(moduleAccesser, 0xbbb, 0);
-    float current = moduleAccesser->getWorkManageModule().getFloat(0x21000004);
-    fn_27_165458(moduleAccesser, 0x21000004, current, cbb, cb9, cba, c2e, speedMul);
+    fn_27_165458(moduleAccesser, 0x21000004, moduleAccesser->getWorkManageModule().getFloat(0x21000004),
+                 soValueAccesser::getConstantFloat(moduleAccesser, 0xbbb, 0), soValueAccesser::getConstantFloat(moduleAccesser, 0xbb9, 0),
+                 soValueAccesser::getConstantFloat(moduleAccesser, 0xbba, 0), soValueAccesser::getConstantFloat(moduleAccesser, 0xc2e, 0),
+                 speedMul);
     fn_27_164E48(moduleAccesser, s_walkTable, 0x21000004, 0x21000005, speedMul);
 }
 
 bool ftStatusUniqProcessWalk::onChangeLr(soModuleAccesser* moduleAccesser, float, float) {
-    float speed = moduleAccesser->getWorkManageModule().getFloat(0x21000004);
-    moduleAccesser->getWorkManageModule().setFloat(-speed, 0x21000004);
+    soWorkManageModule& work = moduleAccesser->getWorkManageModule();
+    work.setFloat(-work.getFloat(0x21000004), 0x21000004);
     return false;
 }
 
