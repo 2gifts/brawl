@@ -2456,6 +2456,9 @@ config.libs = [
         "cflags": cflags_rel,
         "host": False,
         "objects": [
+            Object(NonMatching, "mo_adv_stage/gr_adventure_background.cpp"),
+            Object(NonMatching, "mo_adv_stage/gr_adventure_punch_slider.cpp"),
+            Object(NonMatching, "mo_adv_stage/gr_adventure_static.cpp"),
             Object(Matching, "mo_adv_stage/gr_adventure_final.cpp"),
             Object(Matching, "mo_adv_stage/mo_adv_stage.cpp"),
         ],
