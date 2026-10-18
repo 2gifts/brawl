@@ -3,6 +3,7 @@
 #include <it/it_manager.h>
 #include <gf/gf_task_scheduler.h>
 #include <ft/ft_manager.h>
+#include <st/stage.h>
 #include <gm/gm_global.h>
 #include <mt/mt_prng.h>
 #include <gm/gm_global_mode_melee.h>
@@ -89,7 +90,7 @@ extern itManager* g_ftItemEnabled;
 
 } // extern "C"
 
-bool itManager::isExclusiveSpecialItem(int unk1, bool unk2) {
+bool itManager::isItemSwitch(int unk1) {
     if ((u32)unk1 >= NUM_IT_KINDS) {
         fn_803F86E4(__files + 0xA0, lbl_27_data_7908C);
         fn_803FC984();
@@ -2049,4 +2050,131 @@ void itManager::removeItemAllTempArchive() {
     m_itemArrayList.clear();
     removeItemArchive(0);
     itManagerField<u8>(this, 0x14AC) = 0;
+}
+
+// Calls the unnamed Stage virtual at vtable offset 0x1A8 (HYPOTHESIS: a stage-wide yes/no query used to block item spawns).
+static inline bool stageBlocksSpecialItem(Stage* stage) {
+    typedef int (*StageQueryFn)(void*);
+    void* sub = (u8*)stage + 0x3C;
+    return (*(StageQueryFn**)sub)[0x1A8 / 4](sub) != 0;
+}
+
+// Whether a special item (Assist Trophy 0xA1, Smash Ball 0x37, Dragoon 0x14, ...) must not spawn right now because
+// another exclusive one is active or pending: Heart Swap / technique practice, the queued Assist Trophy preload, the
+// Dragoon / Smash Ball bookkeeping bits (0x1494) and the per-kind counts.
+bool itManager::isExclusiveSpecialItem(int kind, bool unk) {
+    bool blocked = false;
+    int techniqueActive = itManagerField<u8>(this, 0x1040);
+    if (techniqueActive > 0) {
+        blocked = true;
+    }
+    if (kind != 0xA1) {
+        if (itManagerField<int>(this, 0x10BC) != 0xA1) {
+            if (itManagerField<int>(this, 0x10BC) != -1) {
+                goto checkTechnique;
+            }
+            int archiveKind = 0xA1;
+            if (archiveIdOf(this, 0xA1) >= 0) {
+                archiveKind = -3;
+            }
+            itArchive* found = NULL;
+            for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).size(); i++) {
+                itArchive* cur = static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).at(i);
+                if (cur != NULL && archiveKind == cur->m_itKind && cur->m_itVariation == 0) {
+                    found = cur;
+                    break;
+                }
+            }
+            if (found == NULL) {
+                goto checkTechnique;
+            }
+        }
+        blocked = true;
+    }
+checkTechnique:
+    if (g_ftManager->isProcessTechnique() == 1) {
+        blocked = true;
+    }
+    if ((kind == 0xA1 || kind == 0x37) && g_Stage != NULL && stageBlocksSpecialItem(g_Stage)) {
+        blocked = true;
+    }
+    u32 flags = itManagerField<u32>(this, 0x1494);
+    u8 count = (flags & 2) != 0;
+    if ((flags & 4) != 0) {
+        count++;
+    }
+    if ((flags & 8) != 0) {
+        count++;
+    }
+    if (count < itManagerField<u8>(this, 0x101D)) {
+        count = itManagerField<u8>(this, 0x101D);
+    }
+    if (kind == 0x14) {
+        if ((flags & 0x10) == 0 && (count < 2 || g_Stage == NULL || !stageBlocksSpecialItem(g_Stage))) {
+            if (count < 2) {
+                blocked = false;
+            }
+        } else {
+            blocked = true;
+        }
+    } else if (count > 2 || (flags & 0x10) != 0) {
+        blocked = true;
+    }
+    return blocked;
+}
+
+// Queues an Assist Trophy kind for preloading. Only one is kept at a time (0x10BC): the previous one's archive must be
+// complete first, and when a different kind is requested the live Assist items and loaded Assist archives are dropped
+// before the new archive is loaded.
+bool itManager::preloadAssist(itKind kind) {
+    if ((u32)(itManagerField<int>(this, 0x4C) - 3) <= 1) {
+        return false;
+    }
+    if (itManagerField<int>(this, 0x4C) == 7) {
+        return false;
+    }
+    if (getItemGroup(kind) != 2) {
+        return false;
+    }
+    if (itManagerField<int>(this, 0x10BC) != -1 && !isCompItemKindArchive((itKind)itManagerField<int>(this, 0x10BC), 0, true)) {
+        return false;
+    }
+    if (kind == 0xA1 && isExclusiveSpecialItem(kind, true)) {
+        return false;
+    }
+    if (itManagerField<int>(this, 0x10C0) > 0) {
+        for (int i = 0; i < m_itemArrayList.size(); i++) {
+            BaseItem*& item = m_itemArrayList.at(i);
+            if (item != NULL) {
+                int itemKind = item->m_kind;
+                if (getItemGroup(itemKind) == 2 || itemKind == 0) {
+                    m_itemArrayList.erase(i);
+                    removeItemSub(item, 0, 1);
+                    i--;
+                }
+            }
+        }
+    }
+    bool flagged = false;
+    for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
+        itArchive*& archive = m_itArchiveArrayList.at(i);
+        if (archive != NULL) {
+            if (getItemGroup(archive->m_itKind) == 2) {
+                archive->m_4 = 1;
+                flagged = true;
+            }
+        }
+    }
+    itManagerField<int>(this, 0x10BC) = -1;
+    if (flagged) {
+        if (!(itManagerField<int>(this, 0x10C4) > 0)) {
+            itManagerField<int>(this, 0x10C4) = 0x10;
+        }
+        return false;
+    }
+    if (preloadItemKindArchive(kind, 5000, (itArchive::Type)1, true) == NULL) {
+        return false;
+    }
+    itManagerField<int>(this, 0x10BC) = kind;
+    return true;
 }

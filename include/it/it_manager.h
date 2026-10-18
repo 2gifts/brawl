@@ -129,10 +129,10 @@ public:
     void removeItem(BaseItem*);
     // Removes all items with this creation-owner task ID; -1 leaves them alone.
     void removeItem1(int createOwnerTaskId);
-    bool preloadAssist(itKind, int variation = 0); // custom parameter
+    bool preloadAssist(itKind kind);
 
 
-    bool isExclusiveSpecialItem(int unk1, bool unk2);
+    bool isExclusiveSpecialItem(int kind, bool unk);
     bool isItemSwitch(int itemKind); // is the item enabled in the item switch
 
     // Added locally (sora_melee 0x2A0D38 ... 0x2AB4D4): per-kind tables and small accessors.
