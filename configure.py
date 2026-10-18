@@ -2460,6 +2460,8 @@ config.libs = [
             Object(NonMatching, "mo_adv_stage/gr_adventure_punch_slider.cpp"),
             Object(NonMatching, "mo_adv_stage/gr_adventure_static.cpp"),
             Object(NonMatching, "mo_adv_stage/gr_adventure_savepoint.cpp"),
+            Object(NonMatching, "mo_adv_stage/gr_adventure_rebirth_pos.cpp"),
+            Object(NonMatching, "mo_adv_stage/gr_adventure_notify_gimmick_trigger_status.cpp"),
             Object(NonMatching, "mo_adv_stage/gr_adventure_elasticity.cpp"),
             Object(NonMatching, "mo_adv_stage/gr_adventure_tikuwa.cpp"),
             Object(NonMatching, "mo_adv_stage/gr_adventure_warpzone.cpp"),
