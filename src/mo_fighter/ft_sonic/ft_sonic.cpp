@@ -1,3 +1,4 @@
+#define MT_VEC2F_FROM_VEC3_CTOR_NOINLINE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/sonic/ft_sonic.h>
