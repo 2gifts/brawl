@@ -3,6 +3,26 @@
 #include <ft/yoshi/ft_yoshi_builder.h>
 #include <ft/yoshi/ft_yoshi_extend_param_accesser.h>
 #include <ft/ft_common_data_accesser.h>
+#include <so/so_module_accesser.h>
+#include <so/so_heap_module.h>
+#include <so/so_value_accesser.h>
+#include <so/article/so_generate_article_manage_module.h>
+#include <ft/ft_owner.h>
+#include <ft/yoshi/ft_yoshi_special_lw_param.h>
+#include <ft/yoshi/ft_yoshi_special_hi_param.h>
+#include <ft/yoshi/ft_yoshi_special_s_utility.h>
+#include <so/catch/so_catch_module.h>
+#include <wn/yoshi/wn_yoshi_star.h>
+#include <wn/yoshi/wn_yoshi_tamago.h>
+#include <ft/yoshi/ft_yoshi_article_calls.h>
+#include <ft/yoshi/ft_yoshi_final_param.h>
+#include <ft/yoshi/ft_yoshi_transactor.h>
+#include <mt/mt_matrix.h>
+#include <math.h>
+
+namespace ftyoshi { template <class T> T ABS(T); }
+// Existing rotate-only matrix transform; unlike mulPos, it omits translation.
+extern "C" void fn_8003E3BC(const Matrix*, const Vec3f*, Vec3f*);
 
 #define FT_BC ftYoshiBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -24,6 +44,225 @@ ftYoshi::ftYoshi(s32 entryId,
 }
 
 void** ftYoshi::getExtendParam() { return m_data->extendParam; }
+
+void ftYoshi::onDeactivate() {
+    deleteGuardColorAnim();
+}
+
+void ftYoshi::onStart(int kind) {
+    Fighter::onStart(kind);
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+    work.setInt(0, 0x10000040);
+    ftYoshiSpecialHiParam* param = static_cast<ftYoshiSpecialHiParam*>(m_data->extendParam[1]);
+    work.setFloat(param->fallSpeedMax, 0x11000013);
+}
+
+void ftYoshi::processUpdate() {
+    Fighter::processUpdate();
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+    // The airborne Egg Throw boost loses strength across repeated uses. Touching
+    // ground replenishes both the use counter and the stored boost value.
+    if (work.getInt(0x10000040) != 0 &&
+        m_moduleAccesser->getSituationModule().getKind() == Situation_Ground) {
+        work.setInt(0, 0x10000040);
+        ftYoshiSpecialHiParam* param = static_cast<ftYoshiSpecialHiParam*>(m_data->extendParam[1]);
+        work.setFloat(param->fallSpeedMax, 0x11000013);
+    }
+}
+
+// HYPOTHESIS: original link-event type and field spelling. The Yoshi event-8 receiver
+// establishes the inherited acknowledgment byte and node at +8.
+struct ftYoshiCaptureLinkEvent : soLinkEventArgs {
+    int captureNode;
+};
+
+void ftYoshi::notifyEventLink(soLinkEventArgs* event, soModuleAccesser* acc,
+                            StageObject* sender, int selector) {
+    soStatusModule& status = acc->getStatusModule();
+    soModelModule& model = acc->getModelModule();
+    switch (event->m_eventKind) {
+    case 8:
+        if (status.getStatusKind() == 0x112) {
+            ftYoshiCaptureLinkEvent& capture = static_cast<ftYoshiCaptureLinkEvent&>(*event);
+            capture.captureNode = model.getCorrectNodeId(0x12C);
+            capture._0x4 = true;
+            soCatchModule& catchModule = *static_cast<soCatchModule*>(acc->m_enumerationStart->m_catchModule);
+            catchModule.setCatch(-1);
+            // HYPOTHESIS: 0x117 transfers Egg Lay's captured target to the egg state.
+            status.changeStatusRequest(0x117, acc);
+            break;
+        }
+        // Other capture states retain the common fighter link response.
+    default:
+        Fighter::notifyEventLink(event, acc, sender, selector);
+        break;
+    }
+}
+
+void ftYoshi::notifyEventCollisionAttackFighter(soCollisionLog*, soModuleAccesser* acc) {
+    int status = acc->getStatusModule().getStatusKind();
+    if (status == 0x113 || static_cast<unsigned>(status - 0x119) <= 3)
+        ftYoshiStatusUniqProcessSpecialSUtility::procHit(acc);
+}
+
+void ftYoshi::notifyEventChangeSituation(SituationKind kind, SituationKind previous,
+                                       soModuleAccesser* acc) {
+    int jumpCount = m_moduleAccesser->getWorkManageModule().getInt(0x10000001);
+    Fighter::notifyEventChangeSituation(kind, previous, acc);
+    if (acc->getStatusModule().getStatusKind() == Fighter::Status::Jump_Aerial) {
+        // Native performs this lookup before restoring the saved jump count;
+        // its return value is unused. Keep the call's observable side effects.
+        soValueAccesser::getConstantInt(acc, 0x59DB, 0);
+        m_moduleAccesser->getWorkManageModule().setInt(jumpCount, 0x10000001);
+    }
+}
+
+// MATCH-ONLY: native addresses the local static's guard, object, and
+// destructor registration separately, as in R.O.B.'s transactor singleton.
+#pragma pool_data off
+bool ftYoshi::activeArticle1(wnYoshiTamago* article, soModuleAccesser* acc) {
+    static ftYoshiTransactor transactor;
+    u32 resourceId = acc->getResourceModule().getResourceIdAccesser()->getEtcResId();
+    return transactor.activeArticle1(article, acc, resourceId);
+}
+
+#pragma pool_data reset
+
+bool ftYoshi::activeArticle(wnYoshiStar* article, soModuleAccesser* acc) {
+    ftYoshiSpecialLwParam* param = static_cast<ftYoshiSpecialLwParam*>(
+        g_ftCommonDataAccesser.getData(Fighter_Yoshi)->extendParam[2]);
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    Vec3f position = acc->getModelModule().getNodeGlobalPosition(1, false);
+    soGenerateArticleManageModule& articles = *static_cast<soGenerateArticleManageModule*>(
+        acc->m_enumerationStart->m_generateArticleManageModule);
+    // The second landing star travels away from the opposite side of Yoshi.
+    float direction = articles.isExist(0) ? -1.0f : 1.0f;
+    position.m_x += param->starOffsetX * direction;
+    position.m_y += param->starOffsetY;
+    int founderTaskId = acc->getStageObject().m_taskId;
+    article->activate(founderTaskId, fighter.getOwner()->getTeam(), &position, direction);
+    return true;
+}
+
+bool ftYoshi::activeArticle(wnYoshiTamago* article, soModuleAccesser* acc) {
+    ftYoshiSpecialHiParam* param = static_cast<ftYoshiSpecialHiParam*>(
+        g_ftCommonDataAccesser.getData(Fighter_Yoshi)->extendParam[1]);
+    soWorkManageModule& work = acc->getWorkManageModule();
+    soControllerModule& input = acc->getControllerModule();
+    float scale = acc->getPostureModule().getScale();
+    float lr = acc->getPostureModule().getLr();
+    Vec3f position = acc->getPostureModule().getPos();
+    position.m_x += lr * (param->throwOffsetX * scale);
+    position.m_y += param->throwOffsetY * scale;
+
+    // Horizontal input tilts the arc away from its default angle. Keep the
+    // ordered comparisons, including their behavior for non-finite input.
+    float stick = input.getStickX();
+    float angle = ftyoshi::ABS(stick) / param->throwStickFull;
+    if (angle > 1.0f) angle = 1.0f;
+    angle *= param->throwStickAngle;
+    if (angle < param->throwAngleDeadzone) angle = 0.0f;
+    angle *= stick < 0.0f ? -1.0f : 1.0f;
+    if (lr == 1.0f) angle = param->throwBaseAngle - angle;
+    else angle = (3.1415927f - param->throwBaseAngle) - angle;
+
+    // HYPOTHESIS: this animation-command work value is throw strength/hold
+    // time. The egg consumes the last argument as a spin factor, not life.
+    float strength = work.getInt(0x20000000);
+    Vec2f speed;
+    speed.m_x = (param->throwSpeed + strength * param->throwStrengthSpeed) * static_cast<float>(cos(angle));
+    speed.m_y = (param->throwSpeed + strength * param->throwStrengthSpeed) * static_cast<float>(sin(angle));
+    float spin = param->throwSpin + strength * param->throwStrengthSpin;
+    article->shoot(&position, &speed, spin);
+    return false;
+}
+
+bool ftYoshi::activeArticle(wnYoshiFireBreath* article, soModuleAccesser* acc) {
+    // MATCH-ONLY: declare the saved ID before the other persistent locals.
+    int founderTaskId;
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    ftYoshiFinalParam* param = static_cast<ftYoshiFinalParam*>(
+        g_ftCommonDataAccesser.getData(Fighter_Yoshi)->extendParam[3]);
+    float lr = acc->getPostureModule().getLr();
+    Vec3f position;
+    Vec3f mouthOffset(0.0f, param->unk44, param->unk40);
+    Matrix mouthMatrix(true);
+    acc->getModelModule().getNodeGlobalMtx(0x26, &mouthMatrix, false);
+    fn_8003E3BC(&mouthMatrix, &mouthOffset, &position);
+    Vec3f mouthPosition = acc->getModelModule().getNodeGlobalPosition(0x26, false);
+    Vec3fAdd(&position, &position, &mouthPosition);
+    soWorkManageModule& work = acc->getWorkManageModule();
+    float angle = work.getFloat(0x21000008);
+    founderTaskId = fighter.m_taskId;
+    lr = acc->getPostureModule().getLr();
+    article->activate(founderTaskId, fighter.getOwner()->getTeam(), &position, lr, angle);
+
+    // Successive flames sweep around a center angle. Reverse the next step
+    // after reaching either edge, retaining the native overshoot for this shot.
+    float step = work.getFloat(0x21000009);
+    angle += param->unk3C * step;
+    if (ftyoshi::ABS(param->unk34 - angle) >= param->unk38) step = -step;
+    work.setFloat(angle, 0x21000008);
+    work.setFloat(step, 0x21000009);
+    return false;
+}
+
+bool ftYoshi::activeArticle(wnYoshiFireCannon* article, soModuleAccesser* acc) {
+    // MATCH-ONLY: declare the saved ID before the other persistent locals.
+    int founderTaskId;
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    ftYoshiFinalParam* param = static_cast<ftYoshiFinalParam*>(
+        g_ftCommonDataAccesser.getData(Fighter_Yoshi)->extendParam[3]);
+    float lr = acc->getPostureModule().getLr();
+    Vec3f position = acc->getModelModule().getNodeGlobalPosition(0x26, false);
+    position.m_x += param->unk50 * lr;
+    position.m_y += param->unk54;
+    founderTaskId = fighter.m_taskId;
+    article->activate(founderTaskId, 0xFFFF, fighter.getOwner()->getTeam(), &position, lr, param->unk4C);
+    return false;
+}
+
+// Guard statuses create this animation once and remove it on exit. The work
+// flag is kept separate from the bundle's own resource-ownership flags.
+void ftYoshi::createGuardColorAnim() {
+    soModuleAccesser* acc = m_moduleAccesser;
+    if (!acc->getWorkManageModule().isFlag(0x1200003D)) {
+        soResourceModule& resource = acc->getResourceModule();
+        nw4r::g3d::ResFile animation(resource.getFile(
+            resource.getResourceIdAccesser()->getMdlResId(), Data_Type_Anim, 0));
+        const soModuleEnumeration& modules = *acc->m_enumerationStart;
+        soHeapModule& heap = *static_cast<soHeapModule*>(modules.m_heapModule);
+        nw4r::g3d::ResMdl model = modules.m_modelModule->getScnMdl()->m_resMdl;
+        nw4r::g3d::ResMdl modelCopy(model);
+        nw4r::g3d::ResFile animationCopy(animation);
+        m_guardColorAnim.create(animationCopy, modelCopy, heap.getNWMotionInstanceHeap(), NULL);
+        m_guardColorAnim.set(acc->getModelModule().getScnMdl());
+        acc->getWorkManageModule().onFlag(0x1200003D);
+    }
+}
+
+void ftYoshi::deleteGuardColorAnim() {
+    soModuleAccesser* acc = m_moduleAccesser;
+    if (acc->getWorkManageModule().isFlag(0x1200003D)) {
+        m_guardColorAnim.remove();
+        m_guardColorAnim.destroy();
+        acc->getWorkManageModule().offFlag(0x1200003D);
+    }
+}
+
+void ftYoshi::updateGuardColorAnim() {
+    soModuleAccesser* acc = m_moduleAccesser;
+    if (acc->getWorkManageModule().isFlag(0x1200003D)) {
+        soWorkManageModule& work = acc->getWorkManageModule();
+        // HYPOTHESIS: constant 0xCA1 is the reference shield strength. Native
+        // code maps the depleted fraction to a 0..100 animation frame without
+        // clamping; preserve values outside that range as well.
+        float referenceStrength = soValueAccesser::getConstantFloat(acc, 0xCA1, 0);
+        float shieldStrength = work.getFloat(0x11000003);
+        float frame = 100.0f * (1.0f - shieldStrength / referenceStrength);
+        m_guardColorAnim.setFrame(frame);
+    }
+}
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftYoshi is done
 void testBuilder() {
@@ -136,7 +375,7 @@ int fn_95_B860(u8* p) { return *(int*)(p + 0x18); }
 int fn_95_B8F8(u8* p) { return *(int*)(p + 0x10); }
 
 // Virtual pointer blocks and methods on the ftYoshi fighter.
-void fn_95_A118(ftYoshi* self) { self->deleteGuardColorAnim(); }
+
 
 // Virtual destructor wrappers without a base destructor call: delete the object when flags > 0.
 void* fn_95_1EE4(void* p, s16 flags) {
