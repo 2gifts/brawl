@@ -447,8 +447,8 @@ void Message::printMsgBuf(FontData::FONT_RESOURCE fontId) {
                 float scaleX = 1.0f;
                 float scaleY = scaleX;
                 float zOff = 0.0f;
-                if ((u8)_76[0] != 0) {
-                    scaleX = m_scale;
+                if (m_isDrawScaled) {
+                    scaleX = m_drawScale;
                     zOff = 0.01f;
                     scaleY = -scaleX;
                 }
@@ -729,8 +729,8 @@ void msScnObjCallback::ExecCallback_DRAW_XLU(nw4r::g3d::ScnObj::Timing pass, nw4
     if (pass == 4) {
         GXSetZMode(1, (GXCompare)m_zUpdate, m_zCompare);
         Message* msg = m_msg;
-        msg->_76[0] = 1;
-        msg->m_scale = m_scale;
+        msg->m_isDrawScaled = true;
+        msg->m_drawScale = m_scale;
         msg->changeMsgBuf(m_idx);
         Mtx mtx;
         ((nw4r::g3d::ScnMdlSimple*)m_scnMdl)->GetScnMtxPos((nw4r::math::MTX34*)mtx, nw4r::g3d::ScnObj::MTX_VIEW, m_nodeId);
@@ -738,7 +738,7 @@ void msScnObjCallback::ExecCallback_DRAW_XLU(nw4r::g3d::ScnObj::Timing pass, nw4
         GXSetCurrentMtx(0);
         msg->printMsgBuf((FontData::FONT_RESOURCE)9);
         G3DState_Invalidate(0x7ff);
-        msg->_76[0] = 0;
+        msg->m_isDrawScaled = false;
     }
 }
 
