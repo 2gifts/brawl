@@ -3,8 +3,9 @@
 #include <types.h>
 
 class soModuleAccesser;
+class soCollisionLog;
 
-// Primary base of ftYoshiTransactor, verified by its RTTI base list and the
+// Primary base of the Yoshi and Wario transactors, verified by their RTTI and the
 // default functions in its vtable. Only the hooks used here are reconstructed;
 // HYPOTHESIS: argument types on the unused unk slots retain the old interface
 // view until their callers are audited. Do not call those slots through this view.
@@ -20,7 +21,7 @@ public:
     virtual void unk7(soModuleAccesser* moduleAccesser);
     virtual void unk8(soModuleAccesser* moduleAccesser);
     virtual bool unk9(soModuleAccesser* moduleAccesser);
-    virtual void unk10(soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionSearch(soCollisionLog* log, soModuleAccesser* moduleAccesser);
     virtual bool unk11(soModuleAccesser* moduleAccesser);
     virtual bool activeArticle(class soArticle* article, soModuleAccesser* moduleAccesser);
     virtual bool unk13(soModuleAccesser* moduleAccesser);
