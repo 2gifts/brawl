@@ -149,7 +149,7 @@ void ftDededeStatusUniqProcessFinal::updateRecall(soModuleAccesser* moduleAccess
     }
     moduleAccesser->getWorkManageModule().setInt(variant, 0x20000006);
 
-    soArticle* article = articleManager.generate(4, NULL, NULL);
+    soArticle* article = articleManager.generate(4, false, false);
     if (!article->isNull()) {
         articleManager.entry(article);
     }

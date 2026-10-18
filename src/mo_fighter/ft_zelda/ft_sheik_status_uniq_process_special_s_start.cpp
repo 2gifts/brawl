@@ -17,7 +17,7 @@ public:
     virtual void reserved();
     virtual void activate();
     virtual void deactivate();
-    virtual soArticle* generate(int articleId, soModuleAccesser* moduleAccesser, void* logAttackInfo);
+    virtual soArticle* generate(int articleId, bool, bool);
     virtual void have(int articleId, int, int selector, int taskId);
     virtual void shoot(int articleId, int selector, bool);
     virtual void changeMotion(int articleId, int motionKind, bool);
@@ -68,8 +68,7 @@ void ftSheikStatusUniqProcessSpecialSStart::exitStatus(soModuleAccesser* moduleA
     ftSheikArticleManageView* articles = reinterpret_cast<ftSheikArticleManageView*>(moduleAccesser->m_enumerationStart->m_generateArticleManageModule);
     if (nextStatus == 0x80) {
         if (!articles->isExist(2)) {
-            void* zero = 0; // HYPOTHESIS: null generate arguments
-            soArticle* article = articles->generate(2, reinterpret_cast<soModuleAccesser*>(zero), zero);
+            soArticle* article = articles->generate(2, false, false);
             if (!reinterpret_cast<ftSheikArticleView*>(article)->query()) {
                 articles->entry(article);
             }

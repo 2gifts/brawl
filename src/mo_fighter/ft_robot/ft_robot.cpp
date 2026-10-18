@@ -474,7 +474,7 @@ void ftRobot::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStat
             break;
         default:
             if (articles.isGeneratable(3)) {
-                soArticle* beam = articles.generate(3, NULL, NULL);
+                soArticle* beam = articles.generate(3, false, false);
                 if (!beam->isNull()) {
                     articles.entry(beam);
                 }
@@ -714,7 +714,7 @@ void ftRobot::updateFinal(soModuleAccesser* acc) {
         }
     }
     if (acc->getWorkManageModule().isFlag(0x12000044)) {
-        soArticle* beam = articles.generate(3, NULL, NULL);
+        soArticle* beam = articles.generate(3, false, false);
         if (!beam->isNull()) {
             articles.entry(beam);
         }

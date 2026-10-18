@@ -153,7 +153,7 @@ void ftYoshiStatusUniqProcessSpecialNSwallow::execFixPosCounter(soModuleAccesser
         } else if (kind == 5) {
             articleId = 13;
         }
-        articles->generate(articleId, NULL, NULL);
+        articles->generate(articleId, false, false);
         int targetTaskId = link->getNodeTaskId(0);
         ftYoshiSwallowHitEvent event;
         link->sendEventNodes(0, event, 0);

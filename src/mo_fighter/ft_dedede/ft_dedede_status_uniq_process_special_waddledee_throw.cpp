@@ -69,7 +69,7 @@ void ftDededeStatusUniqProcessSpecialWaddledeeThrow::initStatus(soModuleAccesser
         float weight1 = soValueAccesser::getConstantFloat(moduleAccesser, 0xFB0, 0);
         float weight2 = weightScale + soValueAccesser::getConstantFloat(moduleAccesser, 0xFB1, 0);
         float weight3 = soValueAccesser::getConstantFloat(moduleAccesser, 0xFB2, 0);
-        bool includeFourthOutcome = itManager::getInstance()->isExclusiveSpecialItem(9, false);
+        bool includeFourthOutcome = itManager::getInstance()->isItemSwitch(9);
 
         int selectedOutcome;
         if (includeFourthOutcome) {

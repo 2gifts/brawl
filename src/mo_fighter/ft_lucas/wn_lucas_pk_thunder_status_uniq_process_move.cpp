@@ -82,7 +82,7 @@ void wnLucasPKThunderStatusUniqProcessMove::execFixPosCounter(soModuleAccesser* 
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     s32 frame = work.getInt(0x20000000);
     if (articles.getActiveNum(0) < 6 && frame % 2 == 0) {
-        soArticle* bolt = articles.generate(0, 0, 0);
+        soArticle* bolt = articles.generate(0, false, false);
         if (bolt->isNull() == false) {
             articles.entry(bolt);
         }

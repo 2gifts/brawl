@@ -25,11 +25,11 @@ void ftNessStatusUniqProcessAttackHi4Start::initStatus(soModuleAccesser* moduleA
     if (status == 0x30 || status == 0x2d) {
         soLinkModule& link = moduleAccesser->getLinkModule();
         soGenerateArticleManageModule& articles = moduleAccesser->getGenerateArticleManageModule();
-        soArticle* article5 = articles.generate(5, nullptr, nullptr);
+        soArticle* article5 = articles.generate(5, false, false);
         if (article5->isNull() == false) {
             articles.entry(article5);
         }
-        soArticle* article4 = articles.generate(4, nullptr, nullptr);
+        soArticle* article4 = articles.generate(4, false, false);
         if (article4->isNull() == false) {
             articles.entry(article4);
         }

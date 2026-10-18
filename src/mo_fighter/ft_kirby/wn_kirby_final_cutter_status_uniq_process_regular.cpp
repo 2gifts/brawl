@@ -44,7 +44,9 @@ void wnKirbyFinalCutterStatusUniqProcessRegular::execMapCorrection(soModuleAcces
     angle = oldAngle;
     if (situation.getKind() == Situation_Ground && ground.isTouch(static_cast<grCollStatus::TouchMask>(8), 0)) {
         Vec2f normal = ground.getTouchNormal(8, 0);
-        angle = atan2(normal.m_x, normal.m_y);
+        float ny = normal.m_y;
+        float nx = normal.m_x;
+        angle = atan2(nx, ny);
         angle *= posture.getLr();
     }
     if (angle != oldAngle) {

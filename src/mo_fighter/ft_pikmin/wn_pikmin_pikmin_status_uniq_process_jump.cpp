@@ -16,7 +16,7 @@ wnPikminPikminStatusUniqProcessJump g_wnPikminPikminStatusUniqProcessJump;
 void wnPikminPikminStatusUniqProcessJump::execFixPos(soModuleAccesser* a) {
     float threshold = soValueAccesser::getConstantFloat(a, 0xfa4, 0);
     float dist = wnPikminPikminUtility::getTargetDist(a, 3);
-    if (dist >= threshold) {
+    if (!(dist >= threshold)) {
         if (wnPikminPikminUtility::isOwnerConditionGround(a->getWorkManageModule().getInt(0x1000000f)) == 1) {
             wnPikminPikminUtility::tryAttachGround(a);
         } else {

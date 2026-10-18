@@ -34,7 +34,7 @@ void ftToonLinkStatusUniqProcessSpecialBomb::execFixPos(soModuleAccesser* module
     bool alreadyCreated = work.isFlag(0x22000012);
     if (canCreate && !alreadyCreated) {
         if (articles->isGeneratable(6)) {
-            soArticle* article = articles->generate(6, NULL, NULL);
+            soArticle* article = articles->generate(6, false, false);
             if (!article->isNull()) {
                 BaseItem& item = dynamic_cast<BaseItem&>(*article);
                 articles->entry(article);

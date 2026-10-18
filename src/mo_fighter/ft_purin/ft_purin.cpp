@@ -190,7 +190,7 @@ void ftPurin::onStart(int kind) {
             *static_cast<soGenerateArticleManageModule*>(m_moduleAccesser->m_enumerationStart->m_generateArticleManageModule);
         articles.removeExist(0, 0);
         soArticle* article = static_cast<soGenerateArticleManageModule*>(
-            m_moduleAccesser->m_enumerationStart->m_generateArticleManageModule)->generate(0, NULL, NULL);
+            m_moduleAccesser->m_enumerationStart->m_generateArticleManageModule)->generate(0, false, false);
         if (!article->isNull()) {
             static_cast<soGenerateArticleManageModule*>(
                 m_moduleAccesser->m_enumerationStart->m_generateArticleManageModule)->entry(article);
