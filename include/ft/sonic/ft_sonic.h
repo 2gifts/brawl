@@ -135,13 +135,35 @@ public:
     typedef ftSonicGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
-// The constructor's 0xD5D8 allocation fixes the size; the members past the builder are not recovered yet.
+class wnSonicGimmickJump;
+class wnSonicSuperSonic;
+struct ftData;
+
+// The constructor's 0xD5D8 allocation fixes the size; the tail is the status table and the common data pointer (as for Lucas).
 class ftSonic : public ftFighterBuilder<ftSonicBuildConfig> {
-    u8 unkTail[0xD5D8 - sizeof(ftFighterBuilder<ftSonicBuildConfig>)];
+    soArrayContractibleTable<const soStatusData> m_statusTable; // +0xD5C4
+    ftData* m_commonData; // +0xD5D4
 public:
     ftSonic(s32 entryId,
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    virtual void onStart(int param);
+    virtual void processCollision();
+    virtual void processUpdate();
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual bool notifyEventCollisionAttackCheck(u32 flags);
+    virtual void notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
+    virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
+    virtual void analyzeSeal(void* seal);
+    virtual void notifyEventOnDamage(soDamage* damage, bool unk, soModuleAccesser* moduleAccesser);
+    virtual void onSetMetal(bool metal);
+    virtual void notifyEventChangeMotion(int motionKind, int prevMotionKind, void* motionData, soModuleAccesser* moduleAccesser);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnSonicGimmickJump* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnSonicSuperSonic* weapon, soModuleAccesser* acc);
 };
+static_assert(sizeof(ftFighterBuilder<ftSonicBuildConfig>) == 0xD5C4, "Sonic status table offset is wrong");
 static_assert(sizeof(ftSonic) == 0xD5D8, "Sonic allocation size is wrong!");
