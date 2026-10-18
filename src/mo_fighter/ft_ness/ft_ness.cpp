@@ -776,7 +776,7 @@ void ftNess::processFixPosition() {
             if ((float)count < table[5]) {
                 timer += 1.0f;
                 if (timer >= interval) {
-                    articles.generate(3, 0, 0);
+                    articles.generate(3, false, false);
                     timer = 0.0f;
                     interval -= table[4];
                     if (interval < 1.0f) {

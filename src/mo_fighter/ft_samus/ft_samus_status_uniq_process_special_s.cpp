@@ -40,7 +40,7 @@ void ftSamusStatusUniqProcessSpecialS::execFixPos(soModuleAccesser* moduleAccess
     soGenerateArticleManageModule& articles =
         *static_cast<soGenerateArticleManageModule*>(moduleAccesser->m_enumerationStart->m_generateArticleManageModule);
     if (articles.isGeneratable(articleId)) {
-        soArticle* article = articles.generate(articleId, 0, 0);
+        soArticle* article = articles.generate(articleId, false, false);
         if (!reinterpret_cast<ftSamusArticleNullView*>(article)->isNull()) {
             articles.entry(article);
             articles.shoot(articleId, 0, true);
