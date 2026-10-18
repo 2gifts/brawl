@@ -2071,10 +2071,42 @@ static inline int specialArchiveId(itManager* manager) {
     return -1;
 }
 
-// Calls the unnamed Stage virtual at vtable offset 0x1A8 (HYPOTHESIS: a stage-wide yes/no query used to block item spawns).
-// The vtable is the one at +0x3C; the call passes the Stage pointer itself.
+// HYPOTHESIS: view of the Stage object that is only used to call the unnamed virtual at vtable offset 0x1A8 (a
+// stage-wide yes/no query used to block item spawns). The vtable pointer sits at +0x3C, so the pointer is not adjusted.
+struct itStageQueryPad {
+    u8 unk0[0x3C];
+};
+// 13 groups of 8 placeholder virtuals pad the vtable up to slot 0x1A8.
+#define IT_STAGE_QUERY_UNKNOWN_8(p) \
+    virtual void unk##p##0(); \
+    virtual void unk##p##1(); \
+    virtual void unk##p##2(); \
+    virtual void unk##p##3(); \
+    virtual void unk##p##4(); \
+    virtual void unk##p##5(); \
+    virtual void unk##p##6(); \
+    virtual void unk##p##7();
+struct itStageQuery : public itStageQueryPad {
+    IT_STAGE_QUERY_UNKNOWN_8(A)
+    IT_STAGE_QUERY_UNKNOWN_8(B)
+    IT_STAGE_QUERY_UNKNOWN_8(C)
+    IT_STAGE_QUERY_UNKNOWN_8(D)
+    IT_STAGE_QUERY_UNKNOWN_8(E)
+    IT_STAGE_QUERY_UNKNOWN_8(F)
+    IT_STAGE_QUERY_UNKNOWN_8(G)
+    IT_STAGE_QUERY_UNKNOWN_8(H)
+    IT_STAGE_QUERY_UNKNOWN_8(I)
+    IT_STAGE_QUERY_UNKNOWN_8(J)
+    IT_STAGE_QUERY_UNKNOWN_8(K)
+    IT_STAGE_QUERY_UNKNOWN_8(L)
+    IT_STAGE_QUERY_UNKNOWN_8(M)
+    virtual bool blocksSpecialItem();
+};
+
+#undef IT_STAGE_QUERY_UNKNOWN_8
+
 static inline bool stageBlocksSpecialItem(Stage* stage) {
-    return ((bool (*)(void*))(*(void***)((u8*)stage + 0x3C))[0x1A8 / 4])(stage);
+    return ((itStageQuery*)stage)->blocksSpecialItem();
 }
 
 // The archive of this kind that has variation 0 (an inline loop of isExclusiveSpecialItem).
