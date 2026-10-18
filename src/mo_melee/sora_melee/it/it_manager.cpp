@@ -2055,7 +2055,8 @@ void itManager::removeItemAllTempArchive() {
 // The vtable is the one at +0x3C; the call passes the Stage pointer itself.
 static inline bool stageBlocksSpecialItem(Stage* stage) {
     typedef bool (*StageQueryFn)(void*);
-    return (*(StageQueryFn**)((u8*)stage + 0x3C))[0x1A8 / 4](stage);
+    StageQueryFn* vtable = *(StageQueryFn**)((u8*)stage + 0x3C);
+    return vtable[0x1A8 / 4](stage);
 }
 
 // The archive of this kind that has variation 0 (an inline loop of isExclusiveSpecialItem).
@@ -2084,7 +2085,20 @@ bool itManager::isExclusiveSpecialItem(int kind, bool unk) {
                 goto checkTechnique;
             }
             int archiveKind = 0xA1;
-            if (archiveIdOf(this, 0xA1) >= 0) {
+            int archiveId = -1;
+            if (itManagerField<u8>(this, 0x14A0) != 0) {
+                if (lbl_27_data_71EB8[0xA1] != 0) {
+                    int group = getItemGroup(0xA1);
+                    if (group < 6) {
+                        if (group == 1) {
+                            archiveId = 0xA1;
+                        }
+                    } else if (group < 8) {
+                        archiveId = 0xA1;
+                    }
+                }
+            }
+            if (archiveId >= 0) {
                 archiveKind = -3;
             }
             if (findBaseArchive(this, archiveKind) == NULL) {
@@ -2111,16 +2125,16 @@ checkTechnique:
     if ((flags & 8) != 0) {
         count++;
     }
-    if (count < itManagerField<u8>(this, 0x101D)) {
+    if (itManagerField<u8>(this, 0x101D) > count) {
         count = itManagerField<u8>(this, 0x101D);
     }
     if (kind == 0x14) {
-        if ((flags & 0x10) == 0 && (count < 2 || g_Stage == NULL || !stageBlocksSpecialItem(g_Stage))) {
-            if (count < 2) {
-                blocked = false;
-            }
-        } else {
+        if ((flags & 0x10) != 0) {
             blocked = true;
+        } else if (count >= 2 && g_Stage != NULL && stageBlocksSpecialItem(g_Stage)) {
+            blocked = true;
+        } else if (count < 2) {
+            blocked = false;
         }
     } else if (count >= 3 || (flags & 0x10) != 0) {
         blocked = true;
