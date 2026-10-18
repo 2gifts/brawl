@@ -2622,7 +2622,7 @@ config.libs = [
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_shouldered_donkey_thrown.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_clung_ganon.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_catched_ganon.cpp"),
-            Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_catched_air_ganon.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_catched_air_ganon.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_capture_yoshi.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_status_uniq_process_dragoon.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_link_final.cpp"),

@@ -32638,6 +32638,7 @@ __vt__34ftStatusUniqProcessCatchedAirGanon = .data:0x000311C8; // type:object si
 lbl_27_data_31208 = .data:0x00031208; // type:object size:0x23 data:string
 lbl_27_data_3122C = .data:0x0003122C; // type:object size:0xC
 __RTTI__34ftStatusUniqProcessCatchedAirGanon = .data:0x00031238; // type:object size:0x8 scope:weak
+lbl_27_data_31240 = .data:0x00031240; // type:object size:0x60
 __vt__31ftStatusUniqProcessCaptureYoshi = .data:0x000312A0; // type:object size:0x40
 lbl_27_data_312E0 = .data:0x000312E0; // type:object size:0x20 data:string
 lbl_27_data_31300 = .data:0x00031300; // type:object size:0x18
