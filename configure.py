@@ -2044,7 +2044,7 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "mo_fighter/ft_peach/wn_peach_kassar.cpp"),
-            Object(NonMatching, "mo_fighter/ft_peach/ft_peach_status_uniq_process_attack_s4_start.cpp"),
+            Object(Matching, "mo_fighter/ft_peach/ft_peach_status_uniq_process_attack_s4_start.cpp"),
             Object(NonMatching, "mo_fighter/ft_peach/ft_peach.cpp"),
             Object(NonMatching, "mo_fighter/ft_peach/ft_peach_status_uniq_process_final.cpp"),
             Object(NonMatching, "mo_fighter/ft_peach/if_peach_final_task.cpp"),

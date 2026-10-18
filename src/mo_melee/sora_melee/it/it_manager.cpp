@@ -2051,11 +2051,73 @@ void itManager::removeItemAllTempArchive() {
     itManagerField<u8>(this, 0x14AC) = 0;
 }
 
-// Calls the unnamed Stage virtual at vtable offset 0x1A8 (HYPOTHESIS: a stage-wide yes/no query used to block item spawns).
+// archiveIdOf(manager, 0xA1) with a single shared return for the kind (the shape isExclusiveSpecialItem inlines).
+static inline int specialArchiveId(itManager* manager) {
+    int kind = 0xA1;
+    if (itManagerField<u8>(manager, 0x14A0) != 0) {
+        if (lbl_27_data_71EB8[kind] == 0) {
+            return -1;
+        }
+        int group = manager->getItemGroup(kind);
+        if (group < 6) {
+            if (group == 1) {
+                goto found;
+            }
+        } else if (group < 8) {
+        found:
+            return kind;
+        }
+    }
+    return -1;
+}
+
+// HYPOTHESIS: view of the Stage object that is only used to call the unnamed virtual at vtable offset 0x1A8 (a
+// stage-wide yes/no query used to block item spawns). The vtable pointer sits at +0x3C, so the pointer is not adjusted.
+struct itStageQueryPad {
+    u8 unk0[0x3C];
+};
+// 13 groups of 8 placeholder virtuals pad the vtable up to slot 0x1A8.
+#define IT_STAGE_QUERY_UNKNOWN_8(p) \
+    virtual void unk##p##0(); \
+    virtual void unk##p##1(); \
+    virtual void unk##p##2(); \
+    virtual void unk##p##3(); \
+    virtual void unk##p##4(); \
+    virtual void unk##p##5(); \
+    virtual void unk##p##6(); \
+    virtual void unk##p##7();
+struct itStageQuery : public itStageQueryPad {
+    IT_STAGE_QUERY_UNKNOWN_8(A)
+    IT_STAGE_QUERY_UNKNOWN_8(B)
+    IT_STAGE_QUERY_UNKNOWN_8(C)
+    IT_STAGE_QUERY_UNKNOWN_8(D)
+    IT_STAGE_QUERY_UNKNOWN_8(E)
+    IT_STAGE_QUERY_UNKNOWN_8(F)
+    IT_STAGE_QUERY_UNKNOWN_8(G)
+    IT_STAGE_QUERY_UNKNOWN_8(H)
+    IT_STAGE_QUERY_UNKNOWN_8(I)
+    IT_STAGE_QUERY_UNKNOWN_8(J)
+    IT_STAGE_QUERY_UNKNOWN_8(K)
+    IT_STAGE_QUERY_UNKNOWN_8(L)
+    IT_STAGE_QUERY_UNKNOWN_8(M)
+    virtual bool blocksSpecialItem();
+};
+
+#undef IT_STAGE_QUERY_UNKNOWN_8
+
 static inline bool stageBlocksSpecialItem(Stage* stage) {
-    typedef int (*StageQueryFn)(void*);
-    void* sub = (u8*)stage + 0x3C;
-    return (*(StageQueryFn**)sub)[0x1A8 / 4](sub) != 0;
+    return ((itStageQuery*)stage)->blocksSpecialItem();
+}
+
+// The archive of this kind that has variation 0 (an inline loop of isExclusiveSpecialItem).
+static inline itArchive* findBaseArchive(itManager* manager, int kind) {
+    for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(manager->m_itArchiveArrayList).size(); i++) {
+        itArchive* cur = static_cast<const soArrayList<itArchive*, 128>&>(manager->m_itArchiveArrayList).at(i);
+        if (cur != NULL && kind == cur->m_itKind && cur->m_itVariation == 0) {
+            return cur;
+        }
+    }
+    return NULL;
 }
 
 // Whether a special item (Assist Trophy 0xA1, Smash Ball 0x37, Dragoon 0x14, ...) must not spawn right now because
@@ -2073,18 +2135,11 @@ bool itManager::isExclusiveSpecialItem(int kind, bool unk) {
                 goto checkTechnique;
             }
             int archiveKind = 0xA1;
-            if (archiveIdOf(this, 0xA1) >= 0) {
+            int archiveId = specialArchiveId(this);
+            if (archiveId >= 0) {
                 archiveKind = -3;
             }
-            itArchive* found = NULL;
-            for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).size(); i++) {
-                itArchive* cur = static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).at(i);
-                if (cur != NULL && archiveKind == cur->m_itKind && cur->m_itVariation == 0) {
-                    found = cur;
-                    break;
-                }
-            }
-            if (found == NULL) {
+            if (findBaseArchive(this, archiveKind) == NULL) {
                 goto checkTechnique;
             }
         }
@@ -2098,25 +2153,26 @@ checkTechnique:
         blocked = true;
     }
     u32 flags = itManagerField<u32>(this, 0x1494);
-    u8 count = (flags & 2) != 0;
+    int count = 0;
+    if ((flags & 2) != 0) {
+        count = 1;
+    }
     if ((flags & 4) != 0) {
         count++;
     }
     if ((flags & 8) != 0) {
         count++;
     }
-    if (count < itManagerField<u8>(this, 0x101D)) {
+    if (itManagerField<u8>(this, 0x101D) > count) {
         count = itManagerField<u8>(this, 0x101D);
     }
     if (kind == 0x14) {
-        if ((flags & 0x10) == 0 && (count < 2 || g_Stage == NULL || !stageBlocksSpecialItem(g_Stage))) {
-            if (count < 2) {
-                blocked = false;
-            }
-        } else {
+        if ((flags & 0x10) != 0 || (count >= 2 && g_Stage != NULL && stageBlocksSpecialItem(g_Stage))) {
             blocked = true;
+        } else if (count < 2) {
+            blocked = false;
         }
-    } else if (count > 2 || (flags & 0x10) != 0) {
+    } else if (count >= 3 || (flags & 0x10) != 0) {
         blocked = true;
     }
     return blocked;
