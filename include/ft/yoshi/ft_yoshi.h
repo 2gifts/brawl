@@ -11,7 +11,8 @@ class wnYoshiFireCannon;
 class soModuleAccesser;
 
 class ftYoshi : public Fighter {
-    u8 unkTail[0x22284 - sizeof(Fighter)];
+    u8 unkTail[0x22274 - sizeof(Fighter)];
+    soArrayContractibleTable<const soStatusData> m_statusDataTable; // +0x22274
     ftData* m_data; // Instance parameter data, proved by getExtendParam.
     soAnimObj m_guardColorAnim; // +0x22288: egg-shield material animation.
 public:

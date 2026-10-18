@@ -163,8 +163,8 @@ class soArrayContractibleTable<const soStatusData> : public soArrayContractible<
     const soStatusData* m_elements;
     s32 m_size;
 public:
-#if defined(FT_MARTH_RUNTIME_HELPERS) || defined(FT_ROBOT_SHARED_STATUS_TABLE_CTOR)
-    soArrayContractibleTable(); // Marth and R.O.B. call the shared default constructor.
+#if defined(FT_MARTH_RUNTIME_HELPERS) || defined(FT_ROBOT_SHARED_STATUS_TABLE_CTOR) || defined(FT_SHARED_STATUS_TABLE_CTOR)
+    soArrayContractibleTable(); // These fighter units call the shared default constructor.
 #else
     soArrayContractibleTable() : m_elements(nullptr), m_size(0) { }
 #endif

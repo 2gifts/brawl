@@ -1,3 +1,5 @@
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_SHARED_STATUS_TABLE_CTOR
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/yoshi/ft_yoshi_builder.h>
@@ -31,6 +33,28 @@ ftYoshiExtendParamAccesser g_ftYoshiExtendParamAccesser;
 
 ftClassInfoImpl<Fighter_Yoshi, ftYoshi> g_ftClassInfoYoshi;
 
+// Registration only uses the globals through their primary soStatusUniqProcess base,
+// as with Ness and Lucas. Their concrete classes live in the status units.
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessSpecialSStart;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessSpecialHi;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessSpecialLw;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessFinalStart;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessSpecialNSwallow;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessSpecialSLoop;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessSpecialSEnd;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessSpecialSTurn;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessSpecialAirSJump;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessSpecialAirLw;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessFinalCommon;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessGuardOn;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessGuard;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessGuardDamage;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessEscapeFB;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessJumpAerial;
+extern soStatusUniqProcess g_ftStatusUniqProcessAttackAirInheritJumpAerialMotion;
+extern soStatusUniqProcess g_ftStatusUniqProcessEscapeAirInheritJumpAerialMotion;
+extern soStatusUniqProcess g_ftYoshiStatusUniqProcessCatchPull;
+
 ftYoshi::ftYoshi(s32 entryId,
                  Heaps::HeapType instHeap,
                  Heaps::HeapType nwModelInstHeap,
@@ -39,8 +63,42 @@ ftYoshi::ftYoshi(s32 entryId,
                                          Fighter_Yoshi,
                                          instHeap,
                                          nwModelInstHeap,
-                                         nwMotionInstHeap) {
-    // TODO
+                                         nwMotionInstHeap),
+    m_data(g_ftCommonDataAccesser.getData(Fighter_Yoshi)) {
+    // Null slots install no character-specific process. Other entries install
+    // the special moves and Super Dragon phases in action order.
+    soStatusUniqProcess* processes[19] = {0};
+    processes[1] = &g_ftYoshiStatusUniqProcessSpecialSStart;
+    processes[2] = &g_ftYoshiStatusUniqProcessSpecialHi;
+    processes[3] = &g_ftYoshiStatusUniqProcessSpecialLw;
+    processes[4] = &g_ftYoshiStatusUniqProcessFinalStart;
+    processes[5] = &g_ftYoshiStatusUniqProcessSpecialNSwallow;
+    processes[6] = &g_ftYoshiStatusUniqProcessSpecialNSwallow;
+    processes[7] = &g_ftYoshiStatusUniqProcessSpecialSLoop;
+    processes[8] = &g_ftYoshiStatusUniqProcessSpecialSEnd;
+    processes[9] = &g_ftYoshiStatusUniqProcessSpecialSTurn;
+    processes[10] = &g_ftYoshiStatusUniqProcessSpecialAirSJump;
+    processes[11] = &g_ftYoshiStatusUniqProcessSpecialAirLw;
+    processes[12] = &g_ftYoshiStatusUniqProcessSpecialAirLw;
+    processes[14] = &g_ftYoshiStatusUniqProcessFinalCommon;
+    processes[15] = &g_ftYoshiStatusUniqProcessFinalCommon;
+    processes[16] = &g_ftYoshiStatusUniqProcessFinalCommon;
+    processes[17] = &g_ftYoshiStatusUniqProcessFinalCommon;
+    processes[18] = &g_ftYoshiStatusUniqProcessFinalCommon;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 19);
+
+    // Yoshi's egg shield, aerial jump and tongue capture override common
+    // fighter statuses as well as the dedicated special-move action range.
+    m_moduleAccesser->getStatusModule().setUniqProc(Fighter::Status::Guard_On, &g_ftYoshiStatusUniqProcessGuardOn);
+    m_moduleAccesser->getStatusModule().setUniqProc(Fighter::Status::Guard, &g_ftYoshiStatusUniqProcessGuard);
+    m_moduleAccesser->getStatusModule().setUniqProc(Fighter::Status::Guard_Damage, &g_ftYoshiStatusUniqProcessGuardDamage);
+    m_moduleAccesser->getStatusModule().setUniqProc(Fighter::Status::Escape_F, &g_ftYoshiStatusUniqProcessEscapeFB);
+    m_moduleAccesser->getStatusModule().setUniqProc(Fighter::Status::Escape_B, &g_ftYoshiStatusUniqProcessEscapeFB);
+    m_moduleAccesser->getStatusModule().setUniqProc(Fighter::Status::Jump_Aerial, &g_ftYoshiStatusUniqProcessJumpAerial);
+    m_moduleAccesser->getStatusModule().setUniqProc(Fighter::Status::Attack_Air, &g_ftStatusUniqProcessAttackAirInheritJumpAerialMotion);
+    m_moduleAccesser->getStatusModule().setUniqProc(Fighter::Status::Escape_Air, &g_ftStatusUniqProcessEscapeAirInheritJumpAerialMotion);
+    m_moduleAccesser->getStatusModule().setUniqProc(Fighter::Status::Catch_Pull, &g_ftYoshiStatusUniqProcessCatchPull);
+    m_moduleAccesser->getStatusModule().setUniqProc(Fighter::Status::Catch_Dash_Pull, &g_ftYoshiStatusUniqProcessCatchPull);
 }
 
 void** ftYoshi::getExtendParam() { return m_data->extendParam; }
