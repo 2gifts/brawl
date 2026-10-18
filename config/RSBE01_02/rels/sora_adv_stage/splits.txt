@@ -30,6 +30,23 @@ mo_adv_stage/gr_adventure_static.cpp:
 	.data       start:0x0000B568 end:0x0000B9C8
 	.bss        start:0x000018F8 end:0x00001A28
 
+mo_adv_stage/gr_adventure_elasticity.cpp:
+	.text       start:0x000371BC end:0x0003776C
+	.rodata     start:0x00000728 end:0x00000730
+	.data       start:0x00011D90 end:0x00011F68
+
+mo_adv_stage/gr_adventure_tikuwa.cpp:
+	.text       start:0x0003776C end:0x00037DBC
+	.rodata     start:0x00000730 end:0x00000748
+	.data       start:0x00011F68 end:0x00012110
+
+mo_adv_stage/gr_adventure_warpzone.cpp:
+	.text       start:0x00037DBC end:0x00038488
+	.ctors      start:0x00000070 end:0x00000074
+	.rodata     start:0x00000748 end:0x0000075C
+	.data       start:0x00012110 end:0x00012650
+	.bss        start:0x000023C8 end:0x000024F8
+
 mo_adv_stage/gr_adventure_savepoint.cpp:
 	.text       start:0x0003BF90 end:0x0003C590
 	.ctors      start:0x00000080 end:0x00000084
