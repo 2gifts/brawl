@@ -91,6 +91,7 @@ public:
     int getItemKindArchiveRefBrresItKind(int kind, bool unk);
     u8 getItemKindArchiveGroup(int kind, u8 group);
     void finish();
+    int checkCreatableItem(int kind, u32 variation, bool force);
     void removeItemAllTempArchive();
     int removeRequestTrainingItem(int kind);
     // the item resource file that holds a common animation set (the mushroom size animations use it)
