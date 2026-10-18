@@ -21,6 +21,8 @@ mo_fighter/ft_iceclimber/ft_iceclimber.cpp:
 mo_fighter/ft_iceclimber/ft_popo_status_uniq_process_cliff.cpp:
 	.text       start:0x00012FD8 end:0x000130CC
 	.ctors      start:0x00000004 end:0x00000008
+	.data       start:0x00007F10 end:0x00007F90
+	.bss        start:0x00000270 end:0x00000280
 
 mo_fighter/ft_iceclimber/ft_popo_status_uniq_process_special_s.cpp:
 	.text       start:0x000130CC end:0x00013730
@@ -61,6 +63,9 @@ mo_fighter/ft_iceclimber/ft_popo_status_uniq_process_entry.cpp:
 mo_fighter/ft_iceclimber/ft_popo_status_uniq_process_rebirth.cpp:
 	.text       start:0x00015E98 end:0x00016184
 	.ctors      start:0x0000002C end:0x00000030
+	.rodata     start:0x00000080 end:0x00000088
+	.data       start:0x00008470 end:0x000084F4
+	.bss        start:0x00000310 end:0x00000320
 
 mo_fighter/ft_iceclimber/wn_popo_blizzard.cpp:
 	.text       start:0x00016184 end:0x0001882C
