@@ -1,3 +1,9 @@
+// MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
+#define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_SONIC_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_NOINLINE_SEARCH_BUILDER
 #define MT_VEC2F_FROM_VEC3_CTOR_NOINLINE
 #define MT_VEC2F_ASSIGN_NOINLINE
 #define MT_VEC2F_PLAIN_BASE
@@ -7,6 +13,11 @@
 #include <ft/sonic/ft_sonic_extend_param_accesser.h>
 #include <ft/sonic/ft_sonic_transactor.h>
 #include <ft/ft_owner.h>
+#include <ft/ft_common_data_accesser.h>
+#include <ft/sonic/ft_sonic_status_uniq_process_final_end.h>
+#include <ft/sonic/ft_sonic_status_uniq_process_special_lw_hold.h>
+#include <ft/sonic/ft_sonic_status_uniq_process_special_s_dash.h>
+#include <ft/sonic/ft_sonic_status_uniq_process_special_s_wall_end.h>
 #include <so/article/so_article.h>
 #include <so/article/so_generate_article_manage_module.h>
 #include <so/link/so_link_module_impl.h>
@@ -35,8 +46,17 @@ ftSonic::ftSonic(s32 entryId,
                                          Fighter_Sonic,
                                          instHeap,
                                          nwModelInstHeap,
-                                         nwMotionInstHeap) {
-    // TODO
+                                         nwMotionInstHeap),
+    m_commonData(g_ftCommonDataAccesser.getData(Fighter_Sonic)) {
+    // Sonic overrides four of the 21 consecutive character action slots.
+    soStatusUniqProcess* processes[21] = {0};
+    processes[12] = &g_ftSonicStatusUniqProcessSpecialSDash;
+    processes[15] = &g_ftSonicStatusUniqProcessSpecialSWallEnd;
+    processes[18] = &g_ftSonicStatusUniqProcessSpecialLwHold;
+    processes[20] = &g_ftSonicStatusUniqProcessFinalEnd;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 21);
+    // HYPOTHESIS: selects the physics preset used by Sonic's movement.
+    ftPhysicsModuleCall6C(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0x32);
 }
 
 // ---- fighter events ---------------------------------------------------------------------------------------------------
@@ -238,6 +258,234 @@ void ftSonic::notifyEventChangeMotion(int motionKind, int prevMotionKind, void* 
     }
 }
 
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Sonic, copied into
+// the descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftSonicArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftSonicArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftSonicArticleKind : wnArticleKindInfo {
+    ftSonicArticleKind() {
+        kind = 0;
+        subKind = Fighter_Sonic;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftSonicArticleBuildInfo : wnArticleBuildInfo {
+    ftSonicArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+template <class W> struct ftSonicArticleTraits;
+#define FT_SONIC_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftSonicArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftSonicArticleDataTag tag; \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Sonic, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_SONIC_TRAITS(wnSonicGimmickJump, wnSonicGimmickJumpData, 0, getWeaponData129)
+FT_SONIC_TRAITS(wnSonicSuperSonic, wnSonicSuperSonicData, 1, getWeaponData130)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftSonicArticleTraits<W>::ArticleId, ftSonicArticleBuildInfo(ftSonicArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftSonicArticleTraits<W>::getData()) { }
+
+// ---- the articles of Sonic and their mediator ---------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnSonicGimmickJump>::~wnArticleHolder();
+template wnArticleHolder<wnSonicSuperSonic>::~wnArticleHolder();
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftSonicArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftSonicArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftSonicArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftSonicArticleMediator::~ftSonicArticleMediator() { }
+#pragma dont_inline off
+soArticleMediator::~soArticleMediator() { }
+
+s32 ftSonicArticleMediator::getMediateNum() { return 2; }
+void ftSonicArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -----------------------------------------------------------------------------------------------
+// Slots: 0 spring, 1 Super Sonic (the rest are unused).
+
+#define FT_SONIC_POOL_GIMMICK_JUMP_BASE static_cast<wnArticlePool<wnSonicGimmickJump, 1, ftSonicSuperSonicPool>&>(m_pools)
+#define FT_SONIC_POOL_GIMMICK_JUMP FT_SONIC_POOL_GIMMICK_JUMP_BASE.getSub()
+#define FT_SONIC_POOL_SUPER_SONIC_BASE static_cast<wnArticlePool<wnSonicSuperSonic, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_SONIC_POOL_SUPER_SONIC FT_SONIC_POOL_SUPER_SONIC_BASE.getSub()
+
+#define FT_SONIC_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(2, value) WN_ARTICLE_UNUSED_SLOT(3, value) \
+    WN_ARTICLE_UNUSED_SLOT(4, value) WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) \
+    WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) \
+    WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) \
+    WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) \
+    WN_ARTICLE_UNUSED_SLOT(16, value)
+
+template <class W> struct ftSonicArticleActivator;
+template <> struct ftSonicArticleActivator<wnSonicGimmickJump> {
+    static bool activate(wnSonicGimmickJump* weapon, soModuleAccesser* acc) { return ftSonic::activeArticle(weapon, acc); }
+};
+template <> struct ftSonicArticleActivator<wnSonicSuperSonic> {
+    static bool activate(wnSonicSuperSonic* weapon, soModuleAccesser* acc) { return ftSonic::activeArticle1(weapon, acc); }
+};
+
+void ftSonicArticleMediator::deactivate() {
+    for (s32 i = 0; i < 1; ++i) {
+        wnSonicGimmickJump* weapon = FT_SONIC_POOL_GIMMICK_JUMP.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnSonicSuperSonic* weapon = FT_SONIC_POOL_SUPER_SONIC.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftSonicArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 1; }
+    case 1: { wnArticleSlotTag tag; return 1; }
+    FT_SONIC_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftSonicActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_SONIC_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftSonicActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftSonicActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftSonicArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_SONIC_COUNT_ACTIVE(FT_SONIC_POOL_GIMMICK_JUMP, 1)
+    case 1: FT_SONIC_COUNT_ACTIVE(FT_SONIC_POOL_SUPER_SONIC, 1)
+    FT_SONIC_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_SONIC_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftSonicArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_SONIC_CAN_GENERATE(FT_SONIC_POOL_GIMMICK_JUMP, 1, 0)
+    case 1: FT_SONIC_CAN_GENERATE(FT_SONIC_POOL_SUPER_SONIC, 1, 1)
+    FT_SONIC_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_SONIC_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftSonicArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftSonicArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_SONIC_GENERATE(wnSonicGimmickJump, FT_SONIC_POOL_GIMMICK_JUMP)
+    case 1: FT_SONIC_GENERATE(wnSonicSuperSonic, FT_SONIC_POOL_SUPER_SONIC)
+    FT_SONIC_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+// Shooting only type-checks the article (the spring is launched); the unused slots accept anything.
+bool ftSonicArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: { wnArticleSlotTag tag; dynamic_cast<wnSonicGimmickJump&>(*article).shoot(); return true; }
+    case 1: { wnArticleSlotTag tag; (void)dynamic_cast<wnSonicSuperSonic&>(*article); return true; }
+    FT_SONIC_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+#pragma dont_inline on
+ftSonicTransactor* ftSonicTransactor::getInstance() {
+    static ftSonicTransactor instance;
+    return &instance;
+}
+#pragma dont_inline off
+#pragma pool_data reset
+
 // FIXME: Test code present only to emit the shared builder functions; delete once ftSonic is done
 void testBuilder() {
     soInsideEventManageModuleBuilder<ftSonicInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> insideBuilder;
@@ -250,9 +498,9 @@ soInsideEventManageModuleBuilder<ftSonicInsideEventManageModuleBuildConfig, ftIn
 extern "C" {
 
 // Targets owned by other units of this module (tail-call thunks).
-void fn_123_5094(u8* p);
-void fn_123_B2B8(u8* p);
-void fn_123_3264(u8* p);
+void __dt__17soArticleMediatorFv(u8* p);
+void shoot__22ftSonicArticleMediatorFP16soModuleAccesserP9soArticle(u8* p);
+void __dt__22ftSonicArticleMediatorFv(u8* p);
 void fn_123_18D8(u8* p);
 void __dt__7ftSonicFv(u8* p);
 bool fn_123_9F48(u8* p, s32 unk1);
@@ -302,8 +550,6 @@ void* fn_123_A2DC(u8* p) { return p + 0x48; }
 void* fn_123_A2E4(u8* p) { return p + 0x34; }
 void* fn_123_A2EC(u8* p) { return p + 0x20; }
 void* fn_123_A2F4(u8* p) { return p + 0x8; }
-void fn_123_B550(u8* p, u8 value) { *(u8*)(p + 0x4f40) = value; }
-s32 fn_123_B548(u8* p) { return 2; }
 
 // Sub-object and collision-state helpers.
 void fn_123_C3CC(u8* p) { *(u8*)(p + 0x31) = 0; }
@@ -331,9 +577,9 @@ void fn_123_A570(soGeneralWorkSimple* p, s32 value, u32 index) { p->soGeneralWor
 s32 fn_123_A580(const soGeneralWorkSimple* p, u32 index) { return p->soGeneralWorkSimple::getIntWork(index); }
 
 // Fighter notifyEvent thunks: subtract the sub-object offset, then tail-call the Fighter method.
-void fn_123_EF30(u8* p) { return fn_123_5094(p - 0x4); }
-void fn_123_EF38(u8* p) { return fn_123_B2B8(p - 0x4); }
-void fn_123_EF40(u8* p) { return fn_123_3264(p - 0x4); }
+void fn_123_EF30(u8* p) { return __dt__17soArticleMediatorFv(p - 0x4); }
+void fn_123_EF38(u8* p) { return shoot__22ftSonicArticleMediatorFP16soModuleAccesserP9soArticle(p - 0x4); }
+void fn_123_EF40(u8* p) { return __dt__22ftSonicArticleMediatorFv(p - 0x4); }
 void fn_123_EF48(u8* p) { return fn_123_18D8(p - 0x40); }
 void fn_123_EF50(u8* p, soLinkEventArgs* a0, soModuleAccesser* a1, StageObject* a2, int a3) { return ((Fighter*)(p - 0x54))->Fighter::notifyEventLink(a0, a1, a2, a3); }
 void fn_123_EF58(u8* p, int a0, int a1, soStatusData* a2, soModuleAccesser* a3) { return ((Fighter*)(p - 0x64))->Fighter::notifyEventChangeStatus(a0, a1, a2, a3); }
@@ -410,8 +656,6 @@ void fn_123_A050() {}
 void* fn_123_B558(u8* p) { return p + 0xD028; }
 void* fn_123_B578(u8* p) { return p + 0xD064; }
 void* fn_123_B584(u8* p) { return p + 0xD51C; }
-void* fn_123_B5D4(u8* p, s32 index) { if (index == 0) return p + 0xC; return 0; }
-void* fn_123_B5EC(u8* p, s32 index) { if (index == 0) return p + 0xC; return 0; }
 void* fn_123_D08C(u8* p, s32 index) { if (index == 0) return p + 0xC; return 0; }
 void* fn_123_D488(u8* p, s32 index) { if (index == 0) return p + 0xC; return 0; }
 void* fn_123_D884(u8* p, s32 index) { if (index == 0) return p + 0xC; return 0; }
@@ -465,7 +709,6 @@ struct ftSonicVirtualSlots {
 };
 
 void fn_123_B564(u8* p) { return ((ftSonicVirtualSlots*)(p + 0xD028))->slot2(); }
-void fn_123_B5C4(u8* p) { return ((ftSonicVirtualSlots*)p)->slot20(); }
 bool fn_123_B590(u8* p) { return ((ftSonicVirtualSlots*)p)->slot3() == 0; }
 void fn_123_9BC0() {}
 void fn_123_9E88() {}

@@ -2,8 +2,10 @@
 
 #include <wn/wn_weapon_builder.h>
 #include <mt/mt_vector.h>
+#include <wn/wn_article_build_info.h>
 
 struct wnSonicSuperSonicModuleAccesserBuildConfig;
+struct wnSonicSuperSonicData;
 
 // Original RTTI identifies Weapon as the builder's sole base. The constructor
 // installs its modules within this object; their detailed fields remain opaque.
@@ -34,6 +36,8 @@ class wnSonicSuperSonic : public wnWeaponBuilder<wnSonicSuperSonicModuleAccesser
     u32 unk2CD4;
     u8 unk2CD8[0x58];
 public:
+    // Built by the article pool of the fighter (the constructor lives in the article unit).
+    wnSonicSuperSonic(s32 articleId, const wnArticleBuildInfo& info, const wnSonicSuperSonicData* data);
     virtual ~wnSonicSuperSonic();
     // HYPOTHESIS: relative source ordering of lr; f1 and integer registers
     // follow the original caller independently of this ordering.

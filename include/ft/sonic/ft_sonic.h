@@ -114,8 +114,14 @@ public:
 // HYPOTHESIS: this fighter has its own kinetic transactor (changeKinetic is in a later translation unit)
 typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKineticMediatorImplT<ftSonicKineticTransactor> > ftSonicKineticModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnSonicGimmickJump pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_SONIC_ARTICLE_POOLS
+#include <ft/sonic/ft_sonic_article_pools.h>
+typedef ftSonicArticleManageModuleBuilder ftSonicGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x4FFC, Fighter_Sonic> ftSonicGenerateArticleManageModuleBuilder;
+#endif
 
 class ftSonicBuildConfig : public ftCommonBuildConfig {
 public:
