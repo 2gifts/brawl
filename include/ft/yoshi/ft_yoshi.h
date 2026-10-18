@@ -6,6 +6,7 @@
 struct ftData;
 class wnYoshiStar;
 class wnYoshiTamago;
+class wnYoshiWing;
 class wnYoshiFireBreath;
 class wnYoshiFireCannon;
 class soModuleAccesser;
@@ -26,6 +27,7 @@ public:
     static bool activeArticle1(wnYoshiTamago* article, soModuleAccesser* acc);
     static bool activeArticle(wnYoshiStar* article, soModuleAccesser* acc);
     static bool activeArticle(wnYoshiTamago* article, soModuleAccesser* acc);
+    static bool activeArticle(wnYoshiWing* article, soModuleAccesser* acc);
     static bool activeArticle(wnYoshiFireBreath* article, soModuleAccesser* acc);
     static bool activeArticle(wnYoshiFireCannon* article, soModuleAccesser* acc);
     void createGuardColorAnim();
