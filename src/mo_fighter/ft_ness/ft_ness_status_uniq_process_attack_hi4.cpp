@@ -1,4 +1,5 @@
 #include <ft/ft_entry.h>
+#include <ft/ft_status_uniq_process_smash_attack.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/link/so_link_event_presenter.h>
@@ -6,11 +7,7 @@
 #include <so/link/so_link_module_impl.h>
 #include <types.h>
 
-// HYPOTHESIS: the shared smash attack initStatus (sora_melee REL, map name ftStatusUniqProcessSmashAttack__initStatus,
-// fn_27_169554) is called non-virtually by the derived class; called by address symbol (not declared in the headers).
-extern "C" void fn_27_169554(void* self, soModuleAccesser* moduleAccesser);
-
-class ftNessStatusUniqProcessAttackHi4 : public soStatusUniqProcess {
+class ftNessStatusUniqProcessAttackHi4 : public ftStatusUniqProcessSmashAttack {
 public:
     virtual ~ftNessStatusUniqProcessAttackHi4() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
@@ -22,7 +19,7 @@ struct ftNessAttackHi4LinkEvent : public soLinkEventArgs {
 };
 
 void ftNessStatusUniqProcessAttackHi4::initStatus(soModuleAccesser* moduleAccesser) {
-    fn_27_169554(this, moduleAccesser);
+    ftStatusUniqProcessSmashAttack::initStatus(moduleAccesser);
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000003)) {
         float value = moduleAccesser->getCollisionAttackModule().getPowerMulStatus();
         ftNessAttackHi4LinkEvent event(0x456, value);
