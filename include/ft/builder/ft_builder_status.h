@@ -34,6 +34,12 @@ public:
         soArray<typename V::value_type>* array = &m_vector;
         array->capacity();
     }
+    // The queue of a given capacity filled with copies of one element (Fox's trail of positions).
+    template <class E>
+    soArrayQueueImpl(s32 size, const E& initial) : m_array(&m_vector), m_vector(size, initial, 0) {
+        soArray<E>* array = &m_vector;
+        array->capacity();
+    }
     V* getArray() { return m_array; }
 };
 
