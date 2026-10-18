@@ -2059,7 +2059,12 @@ static inline int specialArchiveId(itManager* manager) {
             return -1;
         }
         int group = manager->getItemGroup(kind);
-        if (group < 6 ? group == 1 : group < 8) {
+        if (group < 6) {
+            if (group == 1) {
+                goto found;
+            }
+        } else if (group < 8) {
+        found:
             return kind;
         }
     }
