@@ -13,10 +13,13 @@ public:
 void ftToonLinkStatusUniqProcessSpecialRSlashEnd::initStatus(soModuleAccesser* moduleAccesser) {
     int chargeFrames = moduleAccesser->getWorkManageModule().getInt(0x20000000);
     int maxFrames = soValueAccesser::getConstantInt(moduleAccesser, 0x5dc0, 0);
-    float powerScale = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa4, 0) - 1.0f;
+    float value = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa4, 0);
+    float diff;
+    float base = 1.0f;
+    diff = value - base;
     float ratio = (float)chargeFrames / (float)maxFrames;
-    float scaled = ratio * powerScale;
-    moduleAccesser->getCollisionAttackModule().setPowerMulStatus(1.0f + scaled);
+    float result = base + ratio * diff;
+    moduleAccesser->getCollisionAttackModule().setPowerMulStatus(result);
 }
 
 void ftToonLinkStatusUniqProcessSpecialRSlashEnd::execStatus(soModuleAccesser*) {}

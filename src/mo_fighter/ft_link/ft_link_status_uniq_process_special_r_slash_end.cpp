@@ -18,9 +18,11 @@ void ftLinkStatusUniqProcessSpecialRSlashEnd::initStatus(soModuleAccesser* modul
     int limit = soValueAccesser::getConstantInt(moduleAccesser, 0x5dc0, 0);
     float value = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa4, 0);
     // HYPOTHESIS: base constant from lbl_93_rodata_40 (guess 1.0f)
+    float diff;
     float base = 1.0f;
-    float diff = value - base;
-    float result = base + (float(count) / float(limit)) * diff;
+    diff = value - base;
+    float ratio = float(count) / float(limit);
+    float result = base + ratio * diff;
     moduleAccesser->getCollisionAttackModule().setPowerMulStatus(result);
 }
 

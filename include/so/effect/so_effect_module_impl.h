@@ -45,7 +45,7 @@ public:
     virtual void remove(int);
     virtual void removeAll(u32);
     virtual void kill(int, bool, bool);
-    virtual void killKind(bool, bool, int);
+    virtual void killKind(int effectKind, bool, bool);
     virtual void killAll(u32, bool, bool);
     virtual int reqAfterImage(int nodeID1, int nodeID2, int, short, Vec3f*, Vec3f*, u32, EfID effectId, int, Vec3f* pos, Vec3f*, float scale, u8, u8, float);
     virtual bool removeAfterImage(int, int);
@@ -112,7 +112,7 @@ public:
     virtual void remove(int);
     virtual void removeAll(u32);
     virtual void kill(int, bool, bool);
-    virtual void killKind(bool, bool, int);
+    virtual void killKind(int effectKind, bool, bool);
     virtual void killAll(u32, bool, bool);
     virtual int reqAfterImage(int nodeID1, int nodeID2, int, short, Vec3f*, Vec3f*, u32, EfID effectId, int, Vec3f* pos, Vec3f*, float scale, u8, u8, float);
     virtual bool removeAfterImage(int, int);

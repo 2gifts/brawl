@@ -1,7 +1,24 @@
+#define MT_VEC2F_FROM_VEC3_CTOR_NOINLINE
+#define MT_VEC2F_ASSIGN_NOINLINE
+#define MT_VEC2F_PLAIN_BASE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/sonic/ft_sonic.h>
 #include <ft/sonic/ft_sonic_extend_param_accesser.h>
+#include <ft/sonic/ft_sonic_transactor.h>
+#include <ft/ft_owner.h>
+#include <so/article/so_article.h>
+#include <so/article/so_generate_article_manage_module.h>
+#include <so/link/so_link_module_impl.h>
+#include <so/work/so_work_manage_module_impl.h>
+#include <ft/ft_physics_iface.h>
+#include <so/so_value_accesser.h>
+#include <wn/sonic/wn_sonic_gimmick_jump.h>
+#include <wn/sonic/wn_sonic_super_sonic.h>
+#include <gf/gf_task_scheduler.h>
+#include <math.h>
+#include <ft/ft_resource_id_accesser_impl.h>
+#include <so/so_kinetic_energy_normal.h>
 
 #define FT_BC ftSonicBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -22,6 +39,205 @@ ftSonic::ftSonic(s32 entryId,
     // TODO
 }
 
+// ---- fighter events ---------------------------------------------------------------------------------------------------
+// HYPOTHESIS: work flag 0x1200003d/0x1200003e are the spin dash bookkeeping flags (one follows the Spycloak), 0x22000011 is
+// raised by an attack in the spin dash status (0x11e) and consumed by the attack check.
+
+void ftSonic::onStart(int param) {
+    Fighter::onStart(param);
+    m_moduleAccesser->getCollisionHitModule().setStatusNodeDefault(0x13, 3, 0);
+    m_moduleAccesser->getCollisionHitModule().resetStatusAll(0);
+    ftPhysicsModuleCall94(m_moduleAccesser->m_enumerationStart->m_physicsModule);
+    if (getOwner()->getSpycloak()) {
+        m_moduleAccesser->getWorkManageModule().onFlag(0x1200003e);
+    } else {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003e);
+    }
+}
+
+void ftSonic::processCollision() {
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x112) {
+        ftSonicTransactor::getInstance()->processCollision(m_moduleAccesser);
+    }
+    StageObject::processCollision();
+}
+
+void ftSonic::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventCollisionSearch(collisionLog, moduleAccesser);
+    ftSonicTransactor::getInstance()->notifyEventCollisionSearch(collisionLog, moduleAccesser);
+}
+
+void ftSonic::analyzeSeal(void* seal) {
+    // HYPOTHESIS: the seal record starts with its kind; kind 0x41 carries a float that is halved into the glow time.
+    s32* record = reinterpret_cast<s32*>(seal);
+    if (record[0] == 0x41) {
+        float amount = *reinterpret_cast<float*>(&record[1]);
+        int frames = (int)(amount * 0.5f);
+        reinterpret_cast<ftSonicGlowView*>(m_moduleAccesser->m_enumerationStart->m_glowModule)->setGlow(0x117, frames);
+    }
+}
+
+// Status 0x114 (HYPOTHESIS: the loop de loop / spring exit) puts the fighter at the offset of the fighter data from the
+// posture; status 0x116 spawns the article of slot 1 (the Sonic spring) and links it to the fighter.
+void ftSonic::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+    if (statusKind == 0x114) {
+        Vec2f pos(moduleAccesser->getPostureModule().getPos());
+        float* params = *reinterpret_cast<float**>(*reinterpret_cast<u8**>(reinterpret_cast<u8*>(m_commonData) + 0x94) + 0x34);
+        int side = moduleAccesser->getPostureModule().getLr() < 0.0f ? -1 : 1;
+        pos.m_x += params[1] * (float)side;
+        pos.m_y += params[2] * moduleAccesser->getPostureModule().getScale();
+        moduleAccesser->getWorkManageModule().setFloat(pos.m_x, 0x21000004);
+        moduleAccesser->getWorkManageModule().setFloat(pos.m_y, 0x21000005);
+    } else if (statusKind == 0x116) {
+        m_moduleAccesser->getGenerateArticleManageModule().removeExist(1, 0);
+        soArticle* article = m_moduleAccesser->getGenerateArticleManageModule().generate(1, false, false);
+        soLinkModule& link = m_moduleAccesser->getLinkModule();
+        if (link.link(6, article->getTaskId())) {
+            m_moduleAccesser->getGenerateArticleManageModule().entry(article);
+        }
+    }
+}
+
+void ftSonic::processUpdate() {
+    Fighter::processUpdate();
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x116 && m_moduleAccesser->getLinkModule().isModelConstraint() == true) {
+        soLinkModule& link = m_moduleAccesser->getLinkModule();
+        soPostureModule& posture = m_moduleAccesser->getPostureModule();
+        Vec3f pos = link.getModelConstraintTargetNodePosition();
+        posture.setPos(&pos);
+    }
+}
+
+void ftSonic::onSetMetal(bool metal) {
+    if (metal == true) {
+        soEffectModule& effect = m_moduleAccesser->getEffectModule();
+        int kind = soValueAccesser::getValueInt(m_moduleAccesser, 0x10000036, 0) + 0x30000a;
+        effect.killKind(kind, true, true);
+    }
+}
+
+void ftSonic::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    switch (eventInfo->m_eventKind) {
+    case 0x455:
+        m_moduleAccesser->getStatusModule().changeStatusRequest(0x126, m_moduleAccesser);
+        break;
+    case 6:
+        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+        break;
+    }
+    Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+
+void ftSonic::notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser) {
+    int saved = m_moduleAccesser->getWorkManageModule().getInt(0x10000001);
+    Fighter::notifyEventChangeSituation(kind, prevKind, moduleAccesser);
+    int statusKind = m_moduleAccesser->getStatusModule().getStatusKind();
+    if (statusKind == 0x122 || (statusKind >= 0x11d && statusKind < 0x121) || (statusKind >= 0x124 && statusKind < 0x126)) {
+        m_moduleAccesser->getWorkManageModule().setInt(saved, 0x10000001);
+    }
+    if (kind == 3) {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+    }
+}
+
+void ftSonic::notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    if (collisionLog != NULL) {
+        gfTask* task = gfTaskScheduler::getInstance()->getTask(*reinterpret_cast<u32*>(reinterpret_cast<u8*>(collisionLog) + 0xc));
+        StageObject* stageObj = dynamic_cast<StageObject*>(task);
+        if (stageObj != NULL) {
+            if (stageObj->soGetKind() == 3) {
+            } else if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x11e) {
+                m_moduleAccesser->getWorkManageModule().onFlag(0x22000011);
+            }
+        }
+    }
+}
+
+bool ftSonic::notifyEventCollisionAttackCheck(u32 flags) {
+    Fighter::notifyEventCollisionAttackCheck(flags);
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x11e && m_moduleAccesser->getWorkManageModule().isFlag(0x22000011)) {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x22000011);
+        m_moduleAccesser->getWorkManageModule().subInt(soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc9, 0), 0x20000003);
+        m_moduleAccesser->getWorkManageModule().subFloat(soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfca, 0), 0x21000005);
+        if (m_moduleAccesser->getWorkManageModule().getFloat(0x21000005) < 0.0f) {
+            m_moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x21000005);
+        }
+        m_moduleAccesser->getWorkManageModule().subFloat(soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfca, 0), 0x21000004);
+        if (m_moduleAccesser->getWorkManageModule().getFloat(0x21000004) < 0.0f) {
+            m_moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x21000004);
+        }
+        soKineticEnergyNormal* energy;
+        if (m_moduleAccesser->getSituationModule().getKind() == 0) {
+            energy = dynamic_cast<soKineticEnergyNormal*>(m_moduleAccesser->getKineticModule().getEnergy(3));
+        } else {
+            energy = dynamic_cast<soKineticEnergyNormal*>(m_moduleAccesser->getKineticModule().getEnergy(2));
+        }
+        if (energy == NULL) {
+            return false;
+        }
+        Vec2f speed = energy->getSpeed();
+        double wideX = fabs(speed.m_x);
+        float absX = wideX;
+        if (absX <= soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfca, 0)) {
+            speed.m_x = 0.0f;
+        } else {
+            soModuleAccesser* acc = m_moduleAccesser;
+            float sign = speed.m_x < 0.0f ? -1 : 1;
+            float step = soValueAccesser::getConstantFloat(acc, 0xfca, 0);
+            step *= sign;
+            speed.m_x -= step;
+        }
+        energy->m_speed = speed;
+    }
+    return false;
+}
+
+bool ftSonic::activeArticle(wnSonicGimmickJump* weapon, soModuleAccesser* acc) {
+    // MATCH-ONLY: declare the saved ID before the other persistent locals.
+    int founderTaskId;
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    Vec2f pos(acc->getPostureModule().getPos());
+    bool flag = true;
+    if (!acc->getWorkManageModule().isFlag(0x22000010)) {
+        flag = false;
+    }
+    soResourceModule& resourceModule = acc->getResourceModule();
+    founderTaskId = acc->getStageObject().m_taskId;
+    float lr = acc->getPostureModule().getLr();
+    weapon->activate(founderTaskId, resourceModule.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam(), &pos, lr, flag);
+    return true;
+}
+
+bool ftSonic::activeArticle1(wnSonicSuperSonic* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    Vec2f pos(acc->getPostureModule().getPos());
+    soSituationModule& situation = acc->getSituationModule();
+    soPostureModule& posture = acc->getPostureModule();
+    soResourceModule& resourceModule = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    wnSonicSuperSonicEffectList* effects = static_cast<wnSonicSuperSonicEffectList*>(soValueAccesser::getConstantIndefinite(acc, 0xA802, 0));
+    SituationKind kind = static_cast<SituationKind>(situation.getKind());
+    float lr = posture.getLr();
+    int team = fighter.getOwner()->getTeam();
+    int resourceId = dynamic_cast<ftResourceIdAccesserImpl&>(*resourceModule.getResourceIdAccesser()).getFinalResId();
+    weapon->activate(founderTaskId, resourceId, team, &pos, lr, kind, effects);
+    return true;
+}
+
+void ftSonic::notifyEventOnDamage(soDamage* damage, bool unk, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventOnDamage(damage, unk, moduleAccesser);
+    if (unk == true) {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+    }
+}
+
+void ftSonic::notifyEventChangeMotion(int motionKind, int prevMotionKind, void* motionData, soModuleAccesser* moduleAccesser) {
+    if ((u32)(motionKind - 0x14e) <= 1) {
+        reinterpret_cast<ftSonicVisibilityView*>(m_moduleAccesser->m_enumerationStart->m_visibilityModule)->notifyEventChangeMotion(motionKind, prevMotionKind, motionData, moduleAccesser);
+    }
+}
+
 // FIXME: Test code present only to emit the shared builder functions; delete once ftSonic is done
 void testBuilder() {
     soInsideEventManageModuleBuilder<ftSonicInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> insideBuilder;
@@ -38,14 +254,14 @@ void fn_123_5094(u8* p);
 void fn_123_B2B8(u8* p);
 void fn_123_3264(u8* p);
 void fn_123_18D8(u8* p);
-void fn_123_9F64(u8* p);
+void __dt__7ftSonicFv(u8* p);
 bool fn_123_9F48(u8* p, s32 unk1);
-void fn_123_9888(u8* p);
-void fn_123_8EEC(u8* p);
-void fn_123_9944(u8* p);
-void fn_123_91E4(u8* p);
-void fn_123_9588(u8* p);
-void fn_123_9AC4(u8* p);
+void notifyEventLink__7ftSonicFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti(u8* p);
+void notifyEventChangeStatus__7ftSonicFiiP12soStatusDataP16soModuleAccesser(u8* p);
+void notifyEventChangeSituation__7ftSonicF13SituationKind13SituationKindP16soModuleAccesser(u8* p);
+void notifyEventCollisionAttackCheck__7ftSonicFUl(u8* p);
+void notifyEventCollisionSearch__7ftSonicFP14soCollisionLogP16soModuleAccesser(u8* p);
+void notifyEventOnDamage__7ftSonicFP8soDamagebP16soModuleAccesser(u8* p);
 
 // Fighter (ftEntryEventObserver / Fighter) empty virtuals.
 void fn_123_A184() {}
@@ -125,13 +341,13 @@ void fn_123_EF60(u8* p, SituationKind a0, SituationKind a1, soModuleAccesser* a2
 bool fn_123_EF68(u8* p, u32 a0) { return ((Fighter*)(p - 0x7C))->Fighter::notifyEventCollisionAttackCheck(a0); }
 void fn_123_EF70(u8* p, soCollisionLog* a0, soModuleAccesser* a1) { return ((Fighter*)(p - 0xB8))->Fighter::notifyEventCollisionSearch(a0, a1); }
 void fn_123_EF78(u8* p, soDamage* a0, bool a1, soModuleAccesser* a2) { return ((Fighter*)(p - 0xE8))->Fighter::notifyEventOnDamage(a0, a1, a2); }
-void fn_123_EF80(u8* p) { return fn_123_9F64(p - 0x40); }
+void fn_123_EF80(u8* p) { return __dt__7ftSonicFv(p - 0x40); }
 bool fn_123_EF88(u8* p, acAnimCmd* a0, soModuleAccesser* a1, int a2) { return ((Fighter*)(p - 0x48))->Fighter::notifyEventAnimCmd(a0, a1, a2); }
 bool fn_123_EF90(u8* p, s32 unk1) { return fn_123_9F48(p - 0x48, unk1); }
-void fn_123_EF98(u8* p) { return fn_123_9888(p - 0x54); }
-void fn_123_EFA0(u8* p) { return fn_123_8EEC(p - 0x64); }
-void fn_123_EFA8(u8* p) { return fn_123_9944(p - 0x70); }
-void fn_123_EFB0(u8* p) { return fn_123_91E4(p - 0x7C); }
+void fn_123_EF98(u8* p) { return notifyEventLink__7ftSonicFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti(p - 0x54); }
+void fn_123_EFA0(u8* p) { return notifyEventChangeStatus__7ftSonicFiiP12soStatusDataP16soModuleAccesser(p - 0x64); }
+void fn_123_EFA8(u8* p) { return notifyEventChangeSituation__7ftSonicF13SituationKind13SituationKindP16soModuleAccesser(p - 0x70); }
+void fn_123_EFB0(u8* p) { return notifyEventCollisionAttackCheck__7ftSonicFUl(p - 0x7C); }
 void fn_123_EFB8(u8* p, float a0, soCollisionLog* a1, soModuleAccesser* a2) { return ((Fighter*)(p - 0x7C))->Fighter::notifyEventCollisionAttack(a0, a1, a2); }
 void fn_123_EFC0(u8* p, int a0, soModuleAccesser* a1) { return ((Fighter*)(p - 0x88))->Fighter::notifyEventChangeCollisionHit(a0, a1); }
 bool fn_123_EFC8(u8* p) { return ((Fighter*)(p - 0x94))->Fighter::notifyEventCollisionShieldCheck(); }
@@ -143,7 +359,7 @@ void fn_123_EFF0(u8* p, soCollisionAttackModule* a0, soCollisionLog* a1, u32 a2,
 bool fn_123_EFF8(u8* p) { return ((Fighter*)(p - 0xAC))->Fighter::notifyEventCollisionAbsorberCheck(); }
 void fn_123_F000(u8* p, soCollisionAttackModule* a0, soCollisionLog* a1, u32 a2, soModuleAccesser* a3, float a4, float a5, float a6) { return ((Fighter*)(p - 0xAC))->Fighter::notifyEventCollisionAbsorber(a0, a1, a2, a3, a4, a5, a6); }
 bool fn_123_F008(u8* p) { return ((Fighter*)(p - 0xB8))->Fighter::notifyEventCollisionSearchCheck(); }
-void fn_123_F010(u8* p) { return fn_123_9588(p - 0xB8); }
+void fn_123_F010(u8* p) { return notifyEventCollisionSearch__7ftSonicFP14soCollisionLogP16soModuleAccesser(p - 0xB8); }
 bool fn_123_F018(u8* p, soModuleAccesser* a0, int a1, int a2, int a3) { return ((Fighter*)(p - 0xC4))->Fighter::notifyEventCaptureStatus(a0, a1, a2, a3); }
 void fn_123_F020(u8* p, BaseItem* a0, int a1, bool a2, u8 a3) { return ((Fighter*)(p - 0xD0))->Fighter::notifyVisibilityItem(a0, a1, a2, a3); }
 void fn_123_F028(u8* p, BaseItem* a0, u32 a1, bool a2) { return ((Fighter*)(p - 0xD0))->Fighter::notifyEjectAttachItem(a0, a1, a2); }
@@ -155,10 +371,10 @@ void fn_123_F050(u8* p, BaseItem* a0, u32 a1, int* a2) { return ((Fighter*)(p - 
 void fn_123_F058(u8* p, BaseItem* a0, u32 a1, u32 a2, bool a3, bool a4) { return ((Fighter*)(p - 0xD0))->Fighter::notifyAttachItem(a0, a1, a2, a3, a4); }
 void fn_123_F060(u8* p, itParam::SizeKind a0, BaseItem* a1, u32 a2, u32 a3, bool a4) { return ((Fighter*)(p - 0xD0))->Fighter::notifyHaveItem(a0, a1, a2, a3, a4); }
 bool fn_123_F068(u8* p, BaseItem* a0, bool* a1) { return ((Fighter*)(p - 0xD0))->Fighter::notifyHaveItemPreCheck(a0, a1); }
-void fn_123_9B94(u8* p, s32 kind);
-void fn_123_F070(u8* p, s32 kind) { return fn_123_9B94(p - 0xDC, kind); }
+void notifyEventChangeMotion__7ftSonicFiiPvP16soModuleAccesser(u8* p, s32 kind);
+void fn_123_F070(u8* p, s32 kind) { return notifyEventChangeMotion__7ftSonicFiiPvP16soModuleAccesser(p - 0xDC, kind); }
 void fn_123_F078(u8* p, soDamage* a0, soModuleAccesser* a1) { return ((Fighter*)(p - 0xE8))->Fighter::notifyEventAddDamage(a0, a1); }
-void fn_123_F080(u8* p) { return fn_123_9AC4(p - 0xE8); }
+void fn_123_F080(u8* p) { return notifyEventOnDamage__7ftSonicFP8soDamagebP16soModuleAccesser(p - 0xE8); }
 void fn_123_F088(u8* p, float a0, int a1) { return ((Fighter*)(p - 0xF4))->Fighter::notifyEventPikminFinalAttack(a0, a1); }
 void fn_123_F090(u8* p) { return ((Fighter*)(p - 0xF4))->Fighter::notifyEventChangeAdvUnit(); }
 void fn_123_F098(u8* p) { return ((Fighter*)(p - 0xF4))->Fighter::notifyEventBeat(); }

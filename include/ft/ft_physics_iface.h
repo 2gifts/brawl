@@ -38,6 +38,16 @@ struct ftPhysicsIface : ftPhysicsIfacePad {
     virtual void slot23();
     virtual void slot24();
     virtual void slot25(int arg);
+    virtual void slot26();
+    virtual void slot27();
+    virtual void slot28();
+    virtual void slot29();
+    virtual void slot30();
+    virtual void slot31();
+    virtual void slot32();
+    virtual void slot33();
+    virtual void slot34();
+    virtual void slot35();
 };
 
 static inline void ftPhysicsModuleCall54(void* module, int arg) {
@@ -47,4 +57,9 @@ static inline void ftPhysicsModuleCall54(void* module, int arg) {
 // Same interface, slot 0x6c (HYPOTHESIS: selects a physics preset by number).
 static inline void ftPhysicsModuleCall6C(void* module, int arg) {
     static_cast<ftPhysicsIface*>(module)->slot25(arg);
+}
+
+// Same interface, slot 0x94 (HYPOTHESIS: resets the physics state when a fighter starts; Sonic's onStart).
+static inline void ftPhysicsModuleCall94(void* module) {
+    static_cast<ftPhysicsIface*>(module)->slot35();
 }
