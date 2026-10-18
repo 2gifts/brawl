@@ -1,3 +1,7 @@
+// MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
+#define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_NOINLINE_SEARCH_BUILDER
 #define MT_VEC2F_FROM_VEC3_CTOR_NOINLINE
 #define MT_VEC2F_ASSIGN_NOINLINE
 #define MT_VEC2F_PLAIN_BASE
@@ -7,6 +11,11 @@
 #include <ft/sonic/ft_sonic_extend_param_accesser.h>
 #include <ft/sonic/ft_sonic_transactor.h>
 #include <ft/ft_owner.h>
+#include <ft/ft_common_data_accesser.h>
+#include <ft/sonic/ft_sonic_status_uniq_process_final_end.h>
+#include <ft/sonic/ft_sonic_status_uniq_process_special_lw_hold.h>
+#include <ft/sonic/ft_sonic_status_uniq_process_special_s_dash.h>
+#include <ft/sonic/ft_sonic_status_uniq_process_special_s_wall_end.h>
 #include <so/article/so_article.h>
 #include <so/article/so_generate_article_manage_module.h>
 #include <so/link/so_link_module_impl.h>
@@ -35,8 +44,17 @@ ftSonic::ftSonic(s32 entryId,
                                          Fighter_Sonic,
                                          instHeap,
                                          nwModelInstHeap,
-                                         nwMotionInstHeap) {
-    // TODO
+                                         nwMotionInstHeap),
+    m_commonData(g_ftCommonDataAccesser.getData(Fighter_Sonic)) {
+    // Sonic overrides four of the 21 consecutive character action slots.
+    soStatusUniqProcess* processes[21] = {0};
+    processes[12] = &g_ftSonicStatusUniqProcessSpecialSDash;
+    processes[15] = &g_ftSonicStatusUniqProcessSpecialSWallEnd;
+    processes[18] = &g_ftSonicStatusUniqProcessSpecialLwHold;
+    processes[20] = &g_ftSonicStatusUniqProcessFinalEnd;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 21);
+    // HYPOTHESIS: selects the physics preset used by Sonic's movement.
+    ftPhysicsModuleCall6C(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0x32);
 }
 
 // ---- fighter events ---------------------------------------------------------------------------------------------------
