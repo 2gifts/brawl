@@ -61,7 +61,7 @@ public:
     virtual bool isEnableAttackAttribute(u32 unk1, u32 unk2);
 
     void clearAttackerInfo();
-    int getPlayerNumber(int* unk1);
+    s8 getPlayerNumber(int* unk1); // returns the sign-extended player number (-1 when the task is no fighter)
     int getPlayerNumber(grCollStatus* collStatus);
     bool isSubFighter(int* unk1);
     void setAreaShape(int unk1, float* unk2, float* unk3);
