@@ -1,7 +1,11 @@
+#include <string.h>
 #include <types.h>
 #include <it/it_manager.h>
 #include <gf/gf_task_scheduler.h>
 #include <ft/ft_manager.h>
+#include <gm/gm_global.h>
+#include <mt/mt_prng.h>
+#include <gm/gm_global_mode_melee.h>
 #include <so/situation/so_situation_module_impl.h>
 #include <so/area/so_area_module_impl.h>
 
@@ -21,6 +25,30 @@ int fn_27_2B23F8(itArchive* archive);
 // itFigureManager (0x2C1674, unnamed): whether all figure textures finished preloading
 bool fn_27_2C1674(void* figureManager);
 
+// itArchive::isRemovable (0x2B24C4, unnamed): whether the archive may be freed now (nothing uses it, load finished)
+int fn_27_2B24C4(itArchive* archive);
+
+// gm (main module): whether a Dragoon is already in play / mark that one has been used (unnamed)
+int fn_800526E4();
+void fn_80052694();
+
+// itArchive::procWait (0x2B2358, unnamed): per-frame wait processing of a loading archive
+void fn_27_2B2358(itArchive* archive);
+// itFigureManager::onProcessFixPosition (0x2C197C, unnamed): whether the figure textures are done with this pass
+bool fn_27_2C197C(void* figureManager);
+
+// itFigureManager::removeFigureTexAll (0x2C1890, unnamed)
+void fn_27_2C1890(void* figureManager);
+
+// gmCheckGlobalItemSwitch (main, unnamed): whether the item may appear in the match
+bool fn_8005136C(int itemKind);
+// itFigureManager::preloadFigureTex (0x2C0FBC, unnamed)
+void fn_27_2C0FBC(void* figureManager, int unk1, int unk2);
+extern char lbl_27_data_79068[];
+
+// itArchive::getResFileFromId (0x2B26E8, unnamed): the resource file data of an archive entry
+nw4r::g3d::ResFile fn_27_2B26E8(itArchive* archive, int fileKind, int index, int fileId);
+
 // itManager::findLowPriorityItemInstance (0x2A8054, unnamed): an item that may be recycled when the pool is full
 // itManager::removeItemAfter (0x2A7114, unnamed): bookkeeping after an item left (kind counters, lottery state)
 void fn_27_2A7114(itManager* self, int kind, int variation, int lotKind, int lotCreateKind);
@@ -33,7 +61,12 @@ extern int lbl_27_rodata_50D8[];
 extern int lbl_27_data_71BF0[];
 // the four item kinds a basic-gen lottery pulls in when the "all items" flag (0x14A0) is clear
 extern u32 lbl_27_data_737A0[];
+// per kind: the kind whose Brres this kind borrows (-1 none), may chain
+extern int lbl_27_rodata_4B48[];
+// per kind: archive group index (char)
+extern u8 lbl_27_rodata_4A90[];
 // the two generator sheets that are never picked as the random basic sheet (stage kind, level)
+extern itItemStartupArchive lbl_27_bss_6A38;
 extern itGenSheetKind lbl_27_bss_6490;
 extern itGenSheetKind lbl_27_bss_6498;
 extern u8 lbl_27_data_71F6C[];
@@ -164,6 +197,19 @@ struct ItemSlot258 : ItemSlotPad {
 
 template <class T> static inline T& itManagerField(itManager* manager, int offset) {
     return *reinterpret_cast<T*>(reinterpret_cast<char*>(manager) + offset);
+}
+
+// Kinds that share another kind's lottery group map to that group's kind (-3 and out-of-range kinds map to themselves).
+static inline int lotGroupKindOf(int kind) {
+    int group;
+    if (kind == -3) {
+        group = kind;
+    } else if (kind < 0 || kind >= NUM_IT_KINDS) {
+        group = kind;
+    } else {
+        group = lbl_27_rodata_50D8[kind];
+    }
+    return group;
 }
 
 BaseItem* itManager::createItemInstance(itCreate* create) {
@@ -438,9 +484,10 @@ int itManager::getItemKindArchiveId(int kind) {
         int group = getItemGroup(kind);
         if (group < 6) {
             if (group == 1) {
-                return kind;
+                goto returnKind;
             }
         } else if (group < 8) {
+        returnKind:
             return kind;
         }
     }
@@ -565,11 +612,10 @@ struct gfTaskSchedulerView {
 // Takes an item out of play. Items normally go back to the pool for reuse (returnToPool) unless the match is in a phase
 // where they are destroyed; immediate skips the bookkeeping and exits the task right away.
 void itManager::removeItemSub(BaseItem* item, int immediate, int returnToPool) {
-    BaseItem* removed;
+    BaseItem* removed = item;
     if (item == NULL) {
         return;
     }
-    removed = item;
     int kind = item->m_kind;
     int variation = item->m_variation;
     int group;
@@ -1023,4 +1069,890 @@ float itManager::getPerBase(itGenParam* param, ItemSwitch* itemSwitch) {
         total += getLotValue(entry->m_rate, kind);
     }
     return total;
+}
+
+// The lottery value of one kind in the random sheet's basic-item parameter (0 when the kind is not listed or is
+// switched off).
+float itManager::getRandBasicItemValue(int kind, ItemSwitch* itemSwitch) {
+    itGenSheetKind sheet = getRandBasicItemSheet();
+    itGenSheetKind target = sheet;
+    itGenArchive* archive = findGenArchive(m_genArchiveArrayList, target);
+    itGenParam* param;
+    if (archive == NULL) {
+        param = NULL;
+    } else {
+        int level = m_genLevel;
+        if (itManagerField<int>(this, 0x50) != 2) {
+            level = 0;
+        }
+        param = archive->getGenParam(10000, level);
+        if (param == NULL) {
+            param = archive->getGenParam(10000, 0);
+            if (param == NULL) {
+                param = NULL;
+            }
+        }
+    }
+    if (param != NULL) {
+        u32 count = param->m_numEntries;
+        u32 off = 0;
+        for (u32 i = 0; i < count; i++, off += 0x10) {
+            itGenParam::Entry* entry = (itGenParam::Entry*)((u8*)param->m_entries + off);
+            int entryKind = entry->m_kind;
+            if (entryKind == -1) {
+                return 0.0f;
+            }
+            if (entryKind == 0x7D1) {
+                entryKind = 0x40;
+            }
+            if (entryKind == kind) {
+                bool valid = false;
+                if (entryKind >= 0 && entryKind < NUM_IT_KINDS) {
+                    valid = true;
+                }
+                if (valid) {
+                    if ((u32)entryKind >= NUM_IT_KINDS) {
+                        fn_803F86E4(__files + 0xA0, lbl_27_data_7908C);
+                        fn_803FC984();
+                    }
+                    if ((((u32*)itemSwitch)[(u32)entryKind >> 5] & (1 << (entryKind & 31))) == 0) {
+                        continue;
+                    }
+                }
+                return getLotValue(entry->m_rate, entryKind);
+            }
+        }
+    }
+    return 0.0f;
+}
+
+// The variation the random sheet's basic-item parameter lists for a kind (0 when the kind is not listed).
+int itManager::getRandBasicItemVariation(int kind) {
+    itGenSheetKind sheet = getRandBasicItemSheet();
+    itGenSheetKind target = sheet;
+    itGenArchive* archive = findGenArchive(m_genArchiveArrayList, target);
+    itGenParam* param;
+    if (archive == NULL) {
+        param = NULL;
+    } else {
+        int level = m_genLevel;
+        if (itManagerField<int>(this, 0x50) != 2) {
+            level = 0;
+        }
+        param = archive->getGenParam(10000, level);
+        if (param == NULL) {
+            param = archive->getGenParam(10000, 0);
+            if (param == NULL) {
+                param = NULL;
+            }
+        }
+    }
+    if (param != NULL) {
+        u32 off = 0;
+        for (u32 remaining = param->m_numEntries; remaining > 0; remaining--) {
+            int entryKind = *(int*)((u8*)param->m_entries + off);
+            if (entryKind == -1) {
+                return 0;
+            }
+            if (entryKind == 0x7D1) {
+                entryKind = 0x40;
+            }
+            if (entryKind == kind) {
+                return *(int*)((u8*)param->m_entries + off + 4);
+            }
+            off += 0x10;
+        }
+    }
+    return 0;
+}
+
+// Whether no loaded item archive or generator archive of the given type is left (true once the type is fully removed).
+bool itManager::isRemovedItemArchive(int archiveType) {
+    for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
+        itArchive*& archive = m_itArchiveArrayList.at(i);
+        if (archive != NULL && archiveType == archive->m_type) {
+            return false;
+        }
+    }
+    for (int i = 0; i < m_genArchiveArrayList.size(); i++) {
+        itGenArchive*& archive = m_genArchiveArrayList.at(i);
+        if (archive != NULL && archiveType == archive->m_itArchiveType) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Removes the most recently created live item that matches the filters (kind -1, variation 0, owner task -1 and
+// generator id -1 mean "any"); returns whether one was removed.
+bool itManager::removeItemOld(int kind, int variation, u32 createOwnerTaskId, u32 genId) {
+    BaseItem* target = NULL;
+    int i;
+    for (i = 0; i < m_itemArrayList.size(); i++) {
+        BaseItem*& item = m_itemArrayList.at(i);
+        if (item != NULL && (kind == item->m_kind || kind == -1) && (variation == 0 || variation == (int)item->m_variation) &&
+            (createOwnerTaskId == 0xFFFFFFFF || createOwnerTaskId == item->m_createOwnerTaskId) &&
+            (genId == 0xFFFFFFFF || genId == item->m_genId) &&
+            (target == NULL || (u32)target->m_instanceId < (u32)item->m_instanceId)) {
+            target = item;
+        }
+    }
+    if (target == NULL) {
+        return false;
+    }
+    if (target != NULL) {
+        for (i = 0; i < m_itemArrayList.size(); i++) {
+            if (m_itemArrayList.at(i) == target) {
+                m_itemArrayList.erase(i);
+                removeItemSub(target, 0, 1);
+                break;
+            }
+        }
+    }
+    return true;
+}
+
+// Frees every item archive and generator archive of the given type; archives still in use are only flagged for
+// removal. Archives of other types lose their "checked" marks, and the preload-complete cache is cleared.
+void itManager::removeItemArchive(int archiveType) {
+    for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
+        itArchive*& archive = m_itArchiveArrayList.at(i);
+        if (archive != NULL && archiveType == archive->m_type) {
+            if (fn_27_2B24C4(archive)) {
+                delete archive;
+                m_itArchiveArrayList.erase(i);
+                i--;
+            } else {
+                archive->m_4 = 1;
+            }
+        }
+    }
+    for (int i = 0; i < m_genArchiveArrayList.size(); i++) {
+        itGenArchive*& archive = m_genArchiveArrayList.at(i);
+        if (archive != NULL) {
+            if (archiveType != archive->m_itArchiveType) {
+                archive->m_17 = 0;
+                archive->m_itemArchivesChecked = 0;
+            } else {
+                if (archive->isRemovable()) {
+                    delete archive;
+                    m_genArchiveArrayList.erase(i);
+                    i--;
+                } else {
+                    archive->m_16 = 1;
+                }
+            }
+        }
+    }
+    itManagerField<u8>(this, 0x14AC) = 0;
+}
+
+// Starts loading the generator archive for a stage sheet (unless the manager is in a state that skips it) and returns
+// it; an archive that is already queued is returned as is unless it has been flagged for removal.
+itGenArchive* itManager::preloadItemGenArchive(itGenSheetKind sheet, int unk) {
+    itGenArchive* archive;
+    if ((u32)(itManagerField<int>(this, 0x4C) - 3) <= 1) {
+        archive = NULL;
+    } else {
+        itGenSheetKind target = sheet;
+        archive = findGenArchive(m_genArchiveArrayList, target);
+        if (archive == NULL) {
+            itGenArchive* created = new itGenArchive(sheet, getGenArchiveLoadPathFromStepID(sheet), unk);
+            if (created == NULL) {
+                archive = NULL;
+            } else {
+                archive = created;
+                m_genArchiveArrayList.push(archive);
+            }
+        } else if (archive->m_16 != 0) {
+            archive = NULL;
+        }
+    }
+    return archive;
+}
+
+// getItemKindArchiveId as a file-local inline (the original inlines it into its callers)
+static inline int archiveIdOf(itManager* manager, int kind) {
+    if (itManagerField<u8>(manager, 0x14A0) != 0) {
+        if (kind == -3) {
+            return -1;
+        }
+        u8 usesArchive;
+        if (kind < 0 || kind >= NUM_IT_KINDS) {
+            usesArchive = 0;
+        } else {
+            usesArchive = lbl_27_data_71EB8[kind];
+        }
+        if (usesArchive == 0) {
+            return -1;
+        }
+        int group = manager->getItemGroup(kind);
+        if (group < 6) {
+            if (group == 1) {
+                return kind;
+            }
+        } else if (group < 8) {
+            return kind;
+        }
+    }
+    return -1;
+}
+
+// The loaded item archive for a kind and variation (NULL if none): kinds that share another kind's archive are looked
+// up under the shared id (-3), and the variation is zeroed for kinds that do not have variation archives.
+itArchive* itManager::getItemKindArchive(int kind, int variation) {
+    bool valid = false;
+    if (kind > -1 && kind < NUM_IT_KINDS) {
+        valid = true;
+    }
+    if (!valid) {
+        variation = 0;
+    } else if (variation == 5000) {
+        variation = 5000;
+    } else {
+        variation = variation & ~(lbl_27_rodata_47C8[kind] >> 31);
+    }
+    if (archiveIdOf(this, kind) >= 0) {
+        kind = -3;
+    }
+    for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).size(); i++) {
+        itArchive* archive = static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).at(i);
+        if (archive != NULL && kind == archive->m_itKind && variation == (int)archive->m_itVariation) {
+            return archive;
+        }
+    }
+    return NULL;
+}
+
+
+// Queues a Pokemon kind for preloading (Pokeball pool): at most 5 stay queued; when the queue is full the oldest
+// one is dropped, together with its live items and loaded archives, and the preload is retried later.
+bool itManager::preloadPokemon(int kind) {
+    int queued = kind;
+    int state = itManagerField<int>(this, 0x4C);
+    if ((u32)(state - 3) <= 1) {
+        return false;
+    }
+    if (state == 7) {
+        return false;
+    }
+    if (getItemGroup(kind) != 3) {
+        return false;
+    }
+    if (m_pokemonInfoArrayList.size() < 5) {
+        int capacity = m_pokemonInfoArrayList.capacity();
+        if (m_pokemonInfoArrayList.size() < capacity) {
+            goto preload;
+        }
+    }
+    {
+        int oldest = *(int*)&m_pokemonInfoArrayList.at(0);
+        if (itManagerField<int>(this, 0x1160) > 0) {
+            if (itManagerField<int>(this, 0x1160) > 0) {
+                itManagerField<int>(this, 0x1160)--;
+            }
+        }
+        m_pokemonInfoArrayList.erase(0);
+        for (int i = 0; i < m_itemArrayList.size(); i++) {
+            BaseItem*& item = m_itemArrayList.at(i);
+            if (item != NULL) {
+                int itemKind = item->m_kind;
+                if (oldest == lotGroupKindOf(itemKind) || itemKind == 0x2A) {
+                    m_itemArrayList.erase(i);
+                    removeItemSub(item, 0, 1);
+                    i--;
+                }
+            }
+        }
+        bool flagged = false;
+        for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
+            itArchive*& archive = m_itArchiveArrayList.at(i);
+            if (archive != NULL) {
+                if (oldest == lotGroupKindOf(archive->m_itKind)) {
+                    archive->m_4 = 1;
+                    flagged = true;
+                }
+            }
+        }
+        if (flagged) {
+            if (!(m_preloadPokemonTimer > 0)) {
+                m_preloadPokemonTimer = 16;
+            }
+            return false;
+        }
+    }
+preload:
+    itArchive* archive = preloadItemKindArchive((itKind)queued, 5000, (itArchive::Type)1, true);
+    if (archive == NULL) {
+        return false;
+    }
+    m_pokemonInfoArrayList.push(*(ItemInfo*)&queued);
+    return true;
+}
+
+// Follows the chain of "borrows another kind's Brres" links to its end (the original unrolls the recursion).
+int itManager::getItemKindArchiveRefBrresItKind(int kind, bool unk) {
+    if (kind == -3) {
+        return kind;
+    }
+    if (kind < 0 || kind >= NUM_IT_KINDS) {
+        return kind;
+    }
+    int ref = lbl_27_rodata_4B48[kind];
+    if (ref == -1) {
+        return kind;
+    }
+    return getItemKindArchiveRefBrresItKind(ref, false);
+}
+
+// The archive group of a kind. A handful of kinds with variation archives (Smash Ball style crates and barrels) add
+// the caller's group to the table value; every other kind first resolves its borrowed-Brres chain.
+u8 itManager::getItemKindArchiveGroup(int kind, u8 group) {
+    bool valid = false;
+    if (kind > -1 && kind < NUM_IT_KINDS) {
+        valid = true;
+    }
+    if (!valid) {
+        return 0;
+    }
+    int variationSign;
+    if (kind < 0) {
+        variationSign = 0;
+    } else {
+        int mask = lbl_27_rodata_47C8[kind] >> 31;
+        variationSign = (mask ^ lbl_27_rodata_47C8[kind]) - mask;
+    }
+    if (variationSign < 1 || (kind != 0xF && kind != 7 && kind != 3 && kind != 10 && kind != 0x14 && kind != 0x8F)) {
+        getItemKindArchiveRefBrresItKind(kind, false);
+        return lbl_27_rodata_4A90[kind];
+    }
+    return lbl_27_rodata_4A90[kind] + group;
+}
+
+// HYPOTHESIS: the byte at +9 of the melee init data packs the game rule (time / stock / coin) in its top 3 bits.
+struct gmGameRuleByte {
+    u8 rule : 3;
+    u8 rest : 5;
+};
+
+// Arms the Smash Ball timers at the start of a match (HYPOTHESIS: 0x148C/0x1490 are the first-drop and re-drop frame
+// counts, derived from the item parameter floats at 0x64/0x70 when still unset; 0x1488 is the latest drop frame, a
+// fraction (param 0x68) of the match length).
+void itManager::initializeSmashBallFlags() {
+    if (itManagerField<int>(this, 0x148C) < 0) {
+        float seconds = itManagerField<float>(this, 0x64);
+        itManagerField<int>(this, 0x148C) = (int)(60.0f * seconds);
+    }
+    if (itManagerField<int>(this, 0x1490) < 0) {
+        float seconds = itManagerField<float>(this, 0x70);
+        itManagerField<int>(this, 0x1490) = (int)(60.0f * seconds);
+    }
+    itManagerField<int>(this, 0x1480) = itManagerField<int>(this, 0x148C);
+    gmGlobalModeMelee* melee = g_GameGlobal->m_modeMelee;
+    if (melee != NULL) {
+        u32 timeLimit = melee->m_meleeInitData.m_timeLimitFrames;
+        switch (((gmGameRuleByte*)((u8*)melee + 9))->rule) {
+        case 1:
+        case 2:
+            timeLimit = 0x1C20;
+            break;
+        }
+        u32 matchFrames = (u32)(itManagerField<float>(this, 0x6C) * 60.0f * 60.0f);
+        if (timeLimit == 0 || timeLimit > matchFrames) {
+            timeLimit = matchFrames;
+        }
+        float ratio = itManagerField<float>(this, 0x68);
+        itManagerField<float>(this, 0x1484) = 0.0f;
+        u32 latest = (u32)((float)timeLimit * ratio);
+        itManagerField<u32>(this, 0x1488) = latest;
+        if (latest <= itManagerField<u32>(this, 0x1480)) {
+            itManagerField<u32>(this, 0x1488) = 0;
+        }
+    }
+}
+
+// Decides whether the Dragoon (the machine from Kirby Air Ride) shows up this match and when. HYPOTHESIS: 0x1494 bit 0
+// = a Dragoon is scheduled, 0x1498 = the frame it arrives, 0x149C = forced; the chance comes from the item parameter
+// floats (0x74 time rule, 0x78 coin rule, 0x7C stock rule), scaled by the basic-item lottery value of kind 0x14.
+void itManager::initializeDragoonFlags(int forced, bool disabled) {
+    gmGlobalModeMelee* melee = g_GameGlobal->m_modeMelee;
+    if (melee != NULL) {
+        itManagerField<u32>(this, 0x1498) = 0;
+        itManagerField<u32>(this, 0x1494) = 0;
+        itManagerField<u8>(this, 0x149C) = 0;
+        if (itManagerField<int>(this, 0x50) != 4 && !disabled && (forced != 0 || fn_800526E4() == 0)) {
+            float rate = itManagerField<float>(this, 0x74);
+            int rule = ((gmGameRuleByte*)((u8*)melee + 9))->rule;
+            u32 frames = melee->m_meleeInitData.m_timeLimitFrames;
+            switch (rule) {
+            case 1: {
+                rate = itManagerField<float>(this, 0x7C);
+                frames = *(int*)((u8*)melee + 0x24) * (itManagerField<int>(this, 0xAC) * 60);
+                u32 minFrames = itManagerField<int>(this, 0xB0) * 60;
+                if (frames < minFrames) {
+                    frames = minFrames;
+                }
+                break;
+            }
+            case 2:
+                rate = itManagerField<float>(this, 0x78);
+                break;
+            }
+            if (forced != 0) {
+                frames = frames / 3;
+                itManagerField<u8>(this, 0x149C) = 1;
+            }
+            u32 maxFrames = itManagerField<int>(this, 0xB4) * 3600;
+            if (frames == 0 || frames > maxFrames) {
+                frames = maxFrames;
+            }
+            float base = 0.1f;
+            if (itManagerField<u8>(this, 0x149E) != 0) {
+                base = getRandBasicItemValue(0x14, reinterpret_cast<ItemSwitch*>(&itManagerField<u32>(this, 0x119C)));
+            }
+            float chance = base * rate;
+            if (forced != 0 || randf() < chance) {
+                itManagerField<u32>(this, 0x1498) = frames;
+                itManagerField<u32>(this, 0x1494) |= 1;
+                fn_80052694();
+            }
+        }
+    }
+}
+
+// Per-frame fix-position pass. After setup (state > 2) it drops the items queued for removal, counts the archives still
+// flagged for removal and retires the removable generator archives; state 3 (unloading) moves on to 4 once nothing is
+// left, state 4 returns to 2 (idle). Loading archives get their wait processing run.
+void itManager::processFixPosition() {
+    u32 state = itManagerField<u32>(this, 0x4C);
+    itManagerField<u8>(this, 0x14B5) = 1;
+    if (state > 2) {
+        for (int i = 0; i < m_itemArrayList2.size(); i++) {
+            BaseItem*& item = m_itemArrayList2.at(i);
+            if (item != NULL) {
+                m_itemArrayList2.erase(i);
+                removeItemSub(item, 0, 0);
+                i--;
+            }
+        }
+        int pendingArchives = 0;
+        for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
+            itArchive*& archive = m_itArchiveArrayList.at(i);
+            if (archive != NULL && archive->m_4 != 0) {
+                pendingArchives++;
+            }
+        }
+        int pendingGenArchives = 0;
+        for (int i = 0; i < m_genArchiveArrayList.size(); i++) {
+            itGenArchive*& archive = m_genArchiveArrayList.at(i);
+            if (archive != NULL && archive->m_16 != 0) {
+                if (archive->isRemovable()) {
+                    delete archive;
+                    m_genArchiveArrayList.erase(i);
+                    i--;
+                } else {
+                    pendingGenArchives++;
+                }
+            }
+        }
+        bool allClear = false;
+        if (!(pendingArchives > 0) && !(pendingGenArchives > 0)) {
+            allClear = true;
+        }
+        if (m_figureManager != NULL && !fn_27_2C197C(m_figureManager)) {
+            allClear = false;
+        }
+        if (itManagerField<int>(this, 0x4C) == 3) {
+            if (allClear) {
+                itManagerField<int>(this, 0x4C) = 4;
+            }
+        } else if (itManagerField<int>(this, 0x4C) == 4) {
+            itManagerField<int>(this, 0x4C) = 2;
+        }
+        for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
+            itArchive*& archive = m_itArchiveArrayList.at(i);
+            if (archive != NULL) {
+                fn_27_2B2358(archive);
+            }
+        }
+    }
+}
+
+// Ends a match: removes every live item and recycled item instance, drops the Assist Trophy / Pokemon queues and the
+// figure textures, and resets the item-spawn bookkeeping (Smash Ball / Dragoon timers, lot rates, item switch).
+void itManager::finish() {
+    for (int i = 0; i < m_itemArrayList2.size(); i++) {
+        BaseItem*& item = m_itemArrayList2.at(i);
+        if (item != NULL) {
+            m_itemArrayList2.erase(i);
+            removeItemSub(item, 0, 0);
+            i--;
+        }
+    }
+    for (int i = 0; i < m_itemArrayList.size(); i++) {
+        BaseItem*& item = m_itemArrayList.at(i);
+        if (item != NULL) {
+            m_itemArrayList.erase(i);
+            removeItemSub(item, 0, 1);
+            i--;
+        }
+    }
+    m_itemArrayList.clear();
+    for (int i = 0; i < m_itemArrayList3.size(); i++) {
+        BaseItem*& item = m_itemArrayList3.at(i);
+        if (item != NULL) {
+            m_itemArrayList3.erase(i);
+            removeItemSub(item, 1, 0);
+            i--;
+        }
+    }
+    m_itemArrayList3.clear();
+    itManagerField<u8>(this, 0xFF4) = 0;
+    removeItemArchive(1);
+    m_numAssists = 0;
+    itManagerField<int>(this, 0x10BC) = -1;
+    m_preloadAssistTimer = 0;
+    m_nextPokemonIndex = 0;
+    m_numPokemon = 0;
+    m_numPokeballs = 0;
+    m_pokemonInfoArrayList.clear();
+    m_preloadPokemonTimer = 0;
+    if (m_figureManager != NULL) {
+        fn_27_2C1890(m_figureManager);
+    }
+    itManagerField<int>(this, 0x4C) = 3;
+    m_frameCount = 0;
+    m_numItems = 0;
+    itManagerField<int>(this, 0xFF0) = 0;
+    itManagerField<int>(this, 0x147C) = 0;
+    itManagerField<int>(this, 0x1480) = -1;
+    itManagerField<float>(this, 0x1484) = 0.0f;
+    itManagerField<int>(this, 0x1488) = 0;
+    itManagerField<int>(this, 0x148C) = -1;
+    itManagerField<int>(this, 0x1490) = -1;
+    itManagerField<int>(this, 0x1494) = 0;
+    itManagerField<int>(this, 0x1498) = 0;
+    itManagerField<u8>(this, 0x149C) = 0;
+    itManagerField<int>(this, 0x50) = 0;
+    itManagerField<int>(this, 0x54) = 0xFF;
+    itManagerField<u8>(this, 0xBC) = 1;
+    memset(m_itemLotRates, 0, sizeof(m_itemLotRates));
+    memset(&itManagerField<u8>(this, 0xFF8), 0, 0x10);
+    memset(&itManagerField<u8>(this, 0x1009), 0, 0xB2);
+    itManagerField<u8>(this, 0x1008) = 0;
+}
+
+// HYPOTHESIS: the figure manager keeps a list at +8 (capacity through virtual slot 0x3C) and the number of figure
+// textures to preload at +0x310.
+static inline int figureListCapacity(void* figureManager) {
+    return reinterpret_cast<soArrayList<int, 4>*>((u8*)figureManager + 8)->capacity();
+}
+
+// Starts a match of the given mode: opens the item switch from the global item settings, and sets how many figure
+// textures to preload and the spawn bookkeeping for the mode (HYPOTHESIS: 0xFF0 = preload frame budget).
+void itManager::start(int mode) {
+    itManagerField<int>(this, 0x4C) = 5;
+    itManagerField<int>(this, 0x50) = mode;
+    itManagerField<u8>(this, 0xBC) = 0;
+    gmGlobalModeMelee* melee = g_GameGlobal->m_modeMelee;
+    u32 stageKind;
+    if (melee != NULL) {
+        stageKind = *(u16*)((u8*)melee + 0x1A);
+    } else {
+        stageKind = 0xFF;
+    }
+    itManagerField<u32>(this, 0x54) = stageKind;
+    u32 i = 0;
+    itManagerField<u32>(this, 0x119C) = lbl_27_data_7419C;
+    itManagerField<u32>(this, 0x11A0) = lbl_27_data_7419C;
+    itManagerField<u32>(this, 0x11A4) = lbl_27_data_7419C;
+    itManagerField<u32>(this, 0x11A8) = lbl_27_data_7419C;
+    itManagerField<u32>(this, 0x11AC) = lbl_27_data_7419C;
+    itManagerField<u32>(this, 0x11B0) = lbl_27_data_7419C;
+    do {
+        bool allowed = fn_8005136C(i);
+        if (i >= NUM_IT_KINDS) {
+            fn_803F86E4(__files + 0xA0, lbl_27_data_79068);
+            fn_803FC984();
+        }
+        u32 bit = 1 << (i & 31);
+        u32* word = (u32*)((u8*)this + (i >> 5) * 4);
+        if (allowed) {
+            word[0x119C / 4] |= bit;
+        } else {
+            word[0x119C / 4] &= ~bit;
+        }
+        i++;
+    } while ((int)i < NUM_IT_KINDS);
+    itManagerField<int>(this, 0x147C) = 0;
+    itManagerField<u8>(this, 0x1008) = 0;
+    switch (mode) {
+    case 3: {
+        void* figureManager = m_figureManager;
+        itManagerField<int>(this, 0xFF0) = 0x2D;
+        *(int*)((u8*)figureManager + 0x310) = 6;
+        if (figureListCapacity(figureManager) < 6) {
+            *(int*)((u8*)figureManager + 0x310) = figureListCapacity(figureManager);
+        }
+        m_genLevel = (itGenParam::Level)2;
+        fn_27_2C0FBC(m_figureManager, -16, 1);
+        break;
+    }
+    case 2: {
+        void* figureManager = m_figureManager;
+        itManagerField<u8>(this, 0x1008) = 1;
+        itManagerField<int>(this, 0xFF0) = 0x28;
+        *(int*)((u8*)figureManager + 0x310) = 6;
+        if (figureListCapacity(figureManager) < 6) {
+            *(int*)((u8*)figureManager + 0x310) = figureListCapacity(figureManager);
+        }
+        break;
+    }
+    case 4: {
+        void* figureManager = m_figureManager;
+        itManagerField<int>(this, 0xFF0) = 10;
+        *(int*)((u8*)figureManager + 0x310) = 0;
+        if (figureListCapacity(figureManager) < 0) {
+            *(int*)((u8*)figureManager + 0x310) = figureListCapacity(figureManager);
+        }
+        break;
+    }
+    default: {
+        void* figureManager = m_figureManager;
+        itManagerField<int>(this, 0xFF0) = 0x28;
+        *(int*)((u8*)figureManager + 0x310) = 6;
+        if (figureListCapacity(figureManager) < 6) {
+            *(int*)((u8*)figureManager + 0x310) = figureListCapacity(figureManager);
+        }
+        m_genLevel = (itGenParam::Level)2;
+        break;
+    }
+    }
+}
+
+// Remembers the startup archive description (HYPOTHESIS: seven words; the figure manager constructor reads two of them).
+void itManager::setStartupArchive(itItemStartupArchive* archive) {
+    lbl_27_bss_6A38 = *archive;
+}
+
+// Starts loading every item archive that the generator sheet's parameters reference (Assist Trophies and Pokemon are
+// skipped, they have their own queues). Returns false while the sheet archive itself is still loading.
+bool itManager::preloadItemKindArchiveFromGenArchive(itGenSheetKind sheet, int archiveType) {
+    itGenSheetKind target = sheet;
+    itGenArchive* archive = findGenArchive(m_genArchiveArrayList, target);
+    if (archive == NULL) {
+        return false;
+    }
+    if (!archive->isComp()) {
+        return false;
+    }
+    if (archive->m_17 != 0) {
+        return true;
+    }
+    for (u32 level = 0; level < 5; level++) {
+        u32 numParams = archive->getGenParamNum(level);
+        for (u32 p = 0; p < numParams; p++) {
+            itGenParam* param = archive->getGenParamFromIndex(p, level);
+            if (param == NULL) {
+                continue;
+            }
+            if ((u32)param->m_id == (u32)Item_Gen_Basic && itManagerField<u8>(this, 0x14A0) == 0) {
+                continue;
+            }
+            u32 e = 0;
+            u32 off = 0;
+            for (; e < param->m_numEntries; off += 0x10, e++) {
+                itGenParam::Entry* entry = (itGenParam::Entry*)((u8*)param->m_entries + off);
+                int kind = entry->m_kind;
+                if (kind == -1) {
+                    break;
+                }
+                switch (kind) {
+                case 0x7D1:
+                    kind = 0x40;
+                    break;
+                case 0x7D2:
+                case 0x7D3:
+                    if (itManagerField<u8>(this, 0x14A0) != 0) {
+                        preloadItemKindArchive((itKind)0x3E, 5000, (itArchive::Type)0, true);
+                    } else {
+                        for (u32 j = 0; j < 4; j++) {
+                            preloadItemKindArchive((itKind)lbl_27_data_737A0[j], 5000, (itArchive::Type)archiveType, true);
+                        }
+                    }
+                    continue;
+                case 0x7D4:
+                case 0x7D5:
+                    continue;
+                }
+                if (getItemGroup(kind) != 2) {
+                    if (getItemGroup(kind) != 3) {
+                        if (kind == 0x46) {
+                            u32 variation = entry->m_variation;
+                            if (variation != 5000) {
+                                preloadItemKindArchive((itKind)0x46, variation, (itArchive::Type)archiveType, true);
+                            }
+                        } else {
+                            preloadItemKindArchive((itKind)kind, 5000, (itArchive::Type)archiveType, true);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    archive->m_17 = 1;
+    return true;
+}
+
+// The resource file data of the common (kind 0x26) item archive for the given set (0 or 1); NULL while it is missing
+// or flagged for removal.
+nw4r::g3d::ResFile itManager::getResFileData(int set) {
+    if (set >= 2 || set < 0) {
+        return nw4r::g3d::ResFile((void*)NULL);
+    }
+    int kind = 0x26;
+    if (archiveIdOf(this, 0x26) >= 0) {
+        kind = -3;
+    }
+    itArchive* archive = NULL;
+    for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).size(); i++) {
+        itArchive* cur = static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).at(i);
+        if (cur != NULL && kind == cur->m_itKind && cur->m_itVariation == 0) {
+            archive = cur;
+            break;
+        }
+    }
+    if (archive == NULL || archive->m_4 != 0) {
+        return nw4r::g3d::ResFile((void*)NULL);
+    }
+    return fn_27_2B26E8(archive, 4, set == 1, 0x28);
+}
+
+// Removes every live item of the given kind; returns how many were removed.
+static inline int removeItemsOfKind(itManager* manager, int kind) {
+    int removed = 0;
+    for (int i = 0; i < manager->m_itemArrayList.size(); i++) {
+        BaseItem*& item = manager->m_itemArrayList.at(i);
+        if (item != NULL && item->m_kind == kind) {
+            manager->m_itemArrayList.erase(i);
+            manager->removeItemSub(item, 0, 1);
+            i--;
+            removed++;
+        }
+    }
+    return removed;
+}
+
+// Training mode asks to spawn an item: makes room for it first (kinds 0x14 / 0x37 and the Assist Trophy preload replace
+// each other). Returns 0 if the request must wait (something was removed or is still unloading), 1 if the item can be
+// created without further checks, 2 if it can be created and the normal creatable-item check passed.
+int itManager::removeRequestTrainingItem(int kind) {
+    if ((u32)(itManagerField<int>(this, 0x4C) - 3) <= 1) {
+        return 1;
+    }
+    if (itManagerField<int>(this, 0x4C) == 7) {
+        return 1;
+    }
+    bool removedAny = false;
+    bool paired = false;
+    switch (kind) {
+    case 0x37:
+        paired = true;
+        if (removeItemsOfKind(this, 0x14) > 0) {
+            removedAny = true;
+        }
+        break;
+    case 0x14:
+        paired = true;
+        if (removeItemsOfKind(this, 0x37) > 0) {
+            removedAny = true;
+        }
+        break;
+    case 0:
+        if (itManagerField<int>(this, 0x10BC) == 0xA1) {
+            removedAny = removeItemsOfKind(this, 0x37) > 0;
+            if (removeItemsOfKind(this, 0x14) > 0) {
+                removedAny = true;
+            }
+        }
+        break;
+    }
+    if (!paired) {
+        if (itManagerField<int>(this, 0x10BC) == -1) {
+            if (itManagerField<int>(this, 0x10C4) < 0) {
+                itManagerField<int>(this, 0x10C4) = 0x10;
+            }
+            removedAny = true;
+        }
+        goto finish;
+    }
+    if (itManagerField<int>(this, 0x10BC) == 0xA1) {
+        if (itManagerField<int>(this, 0x10C0) > 0) {
+            for (int i = 0; i < m_itemArrayList.size(); i++) {
+                BaseItem*& item = m_itemArrayList.at(i);
+                if (item != NULL) {
+                    int itemKind = item->m_kind;
+                    if (getItemGroup(itemKind) == 2 || itemKind == 0) {
+                        m_itemArrayList.erase(i);
+                        removeItemSub(item, 0, 1);
+                        i--;
+                    }
+                }
+            }
+        }
+        bool erased = false;
+        bool stillUnloading = false;
+        for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
+            itArchive*& archive = m_itArchiveArrayList.at(i);
+            if (archive != NULL) {
+                if (getItemGroup(archive->m_itKind) == 2) {
+                    if (!fn_27_2B24C4(archive)) {
+                        stillUnloading = true;
+                        archive->m_4 = 1;
+                    } else {
+                        m_itArchiveArrayList.erase(i);
+                        delete archive;
+                        erased = true;
+                        i--;
+                    }
+                }
+            }
+        }
+        if (erased || stillUnloading) {
+            itManagerField<int>(this, 0x10BC) = -1;
+            itManagerField<int>(this, 0x10C4) = -1;
+            if (stillUnloading) {
+                return 0;
+            }
+        }
+    }
+    if (itManagerField<int>(this, 0x10BC) != -1) {
+        goto finish;
+    }
+    {
+        int archiveKind = 0xA1;
+        if (archiveIdOf(this, 0xA1) >= 0) {
+            archiveKind = -3;
+        }
+        itArchive* found = NULL;
+        for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).size(); i++) {
+            itArchive* cur = static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).at(i);
+            if (cur != NULL && archiveKind == cur->m_itKind && cur->m_itVariation == 0) {
+                found = cur;
+                break;
+            }
+        }
+        if (found != NULL) {
+            return 0;
+        }
+    }
+finish:
+    if (removedAny) {
+        return 0;
+    }
+    int result = 1;
+    if (fn_27_2A5EE0(this, kind, 0, true) != 0) {
+        result = 2;
+    }
+    return result;
 }
