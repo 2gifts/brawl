@@ -17,7 +17,6 @@ extern "C" {
 
 // itManager::checkCreatableItem (0x2A5EE0, unnamed): whether the item kind may be created right now (match state, free
 // instance slots, per-kind limits)
-int fn_27_2A5EE0(itManager* self, int kind, u32 variation, bool unk);
 
 // itArchive::isComp (0x2B23F8, unnamed): whether the archive finished loading
 int fn_27_2B23F8(itArchive* archive);
@@ -166,7 +165,7 @@ itManager* itManager::getInstance() {
 }
 
 bool itManager::isCreatableItem(itKind kind, int variation) {
-    return fn_27_2A5EE0(this, kind, variation, false) != 0;
+    return checkCreatableItem(kind, variation, false) != 0;
 }
 
 u32 itManager::getItemNum(itKind kind) {
@@ -1954,7 +1953,7 @@ finish:
         return 0;
     }
     int result = 1;
-    if (fn_27_2A5EE0(this, kind, 0, true) != 0) {
+    if (checkCreatableItem(kind, 0, true) != 0) {
         result = 2;
     }
     return result;
@@ -2177,4 +2176,195 @@ bool itManager::preloadAssist(itKind kind) {
     }
     itManagerField<int>(this, 0x10BC) = kind;
     return true;
+}
+
+// Whether an item of this kind may be created right now (0 = no, 1 = yes, 2 = yes but over the Dragoon's quota window).
+// Checks the match state, free item slots, the per-kind live counts / special-item limits and, for Assist Trophies and
+// Pokemon, that their preloaded archives are ready.
+int itManager::checkCreatableItem(int kind, u32 variation, bool force) {
+    int result = 1;
+    if (itManagerField<int>(this, 0x4C) != 6) {
+        return 0;
+    }
+    if (itManagerField<u8>(this, 0xBC) != 0) {
+        return 0;
+    }
+    bool valid = false;
+    if (kind > -1 && kind < NUM_IT_KINDS) {
+        valid = true;
+    }
+    if (!valid) {
+        return 0;
+    }
+    int group;
+    if (kind == -3) {
+        group = 1;
+    } else if (kind < 0 || kind >= NUM_IT_KINDS) {
+        group = -1;
+    } else {
+        group = lbl_27_data_71BF0[kind];
+    }
+    if (itManagerField<u8>(this, 0x14A2) != 0 && m_itemArrayList3.size() < 1 && findLowPriorityItemInstance() == NULL) {
+        return 0;
+    }
+    if (m_itemArrayList.capacity() <= m_itemArrayList.size()) {
+        return 0;
+    }
+    switch (kind) {
+    case 0x22:
+        if (m_itemNums[0x22] > 2 || (m_itemNums[0x44] + m_itemNums[0x2F] > 4 && m_itemNums[0x22] != 0)) {
+            return 0;
+        }
+        break;
+    case 0:
+        if (itManagerField<int>(this, 0x10C0) > 0 || m_itemNums[0] != 0) {
+            return 0;
+        }
+        if (itManagerField<int>(this, 0x10BC) == -1 || !isCompItemKindArchive((itKind)itManagerField<int>(this, 0x10BC), 0, true)) {
+            return 0;
+        }
+        break;
+    case 0x14: {
+        u32 flags = itManagerField<u32>(this, 0x1494);
+        u32 count = (flags & 2) != 0;
+        if ((flags & 4) != 0) {
+            count++;
+        }
+        if ((flags & 8) != 0) {
+            count++;
+        }
+        if (count < m_itemNums[0x14]) {
+            count = m_itemNums[0x14];
+        }
+        if (count > 2) {
+            return 0;
+        }
+        if (!force) {
+            bool allowed = false;
+            if ((flags & 1) != 0) {
+                int inWindow = 0;
+                int pastWindow = 0;
+                u32 deadline = itManagerField<u32>(this, 0x1498);
+                u32 frame = m_frameCount;
+                float* windows = &itManagerField<float>(this, 0x80);
+                for (int i = 0; i < 3; i++) {
+                    float lo = windows[i * 2];
+                    float hi = windows[i * 2 + 1];
+                    if ((float)deadline * lo <= (float)frame && (float)frame <= (float)deadline * hi) {
+                        inWindow++;
+                    }
+                    if ((float)deadline * hi < (float)frame) {
+                        pastWindow++;
+                    }
+                }
+                allowed = (int)count < pastWindow;
+                if (allowed) {
+                    result = 2;
+                }
+                if ((int)count < inWindow) {
+                    allowed = true;
+                }
+            }
+            if (!allowed) {
+                return 0;
+            }
+        }
+        if (isExclusiveSpecialItem(0x14, true)) {
+            return 0;
+        }
+        break;
+    }
+    case 0x37:
+    case 0xA1:
+        if (!force && (itManagerField<int>(this, 0x1480) < 0 || itManagerField<int>(this, 0x1480) > 0)) {
+            return 0;
+        }
+        if (isExclusiveSpecialItem(kind, true)) {
+            return 0;
+        }
+        break;
+    case 0x2A: {
+        int ready = 0;
+        for (int i = 0; i < m_pokemonInfoArrayList.size(); i++) {
+            int queued = *(int*)&static_cast<const soArrayList<ItemInfo, 12>&>(m_pokemonInfoArrayList).at(i);
+            if (isCompItemKindArchive((itKind)queued, 0, true)) {
+                ready++;
+            }
+        }
+        if (ready < 1) {
+            return 0;
+        }
+        if (m_numPokemon + m_numPokeballs > 2) {
+            return 0;
+        }
+        break;
+    }
+    case 0x44:
+        if (m_itemNums[0x44] > 7) {
+            return 0;
+        }
+        break;
+    case 6:
+    case 10:
+    case 12:
+    case 0x12:
+    case 0x13:
+    case 0x1C:
+    case 0x2B:
+    case 0x36:
+    case 0x3C:
+    case 0x43:
+        if (m_itemNums[0x2B] + m_itemNums[0xC] + m_itemNums[10] + m_itemNums[0x12] + m_itemNums[0x13] + m_itemNums[0x36] +
+                m_itemNums[6] + m_itemNums[0x52] + m_itemNums[0x51] + m_itemNums[0x1C] + m_itemNums[0x3C] + m_itemNums[0x43] > 4) {
+            return 0;
+        }
+        break;
+    }
+    if (group == 2) {
+        int shared = kind;
+        if (kind != -3 && kind >= 0 && kind < NUM_IT_KINDS) {
+            shared = lbl_27_rodata_50D8[kind];
+        }
+        if (itManagerField<int>(this, 0x10BC) != shared) {
+            return 0;
+        }
+        if (!force && kind == shared && itManagerField<int>(this, 0x10C0) > 0) {
+            return 0;
+        }
+        if ((u32)(kind - 0x9F) < 3) {
+            bool inRange = false;
+            if (kind > -1 && kind < NUM_IT_KINDS) {
+                inRange = true;
+            }
+            u8 live;
+            if (inRange) {
+                live = m_itemNums[kind];
+            } else {
+                live = 0;
+            }
+            if (live != 0) {
+                return 0;
+            }
+        }
+    } else if (group == 3) {
+        int shared = kind;
+        if (kind != -3 && kind >= 0 && kind < NUM_IT_KINDS) {
+            shared = lbl_27_rodata_50D8[kind];
+        }
+        bool found = false;
+        for (int i = 0; i < m_pokemonInfoArrayList.size(); i++) {
+            int queued = *(int*)&m_pokemonInfoArrayList.at(i);
+            if (shared == queued && isCompItemKindArchive((itKind)queued, 0, true)) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return 0;
+        }
+    }
+    if (m_itemArrayList.size() < m_itemArrayList.capacity()) {
+        return isCompItemKindArchive((itKind)kind, variation, true) ? result : 0;
+    }
+    return 0;
 }
