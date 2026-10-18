@@ -1,8 +1,7 @@
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
+#include <mt/mt_prng.h>
 #include <types.h>
-
-int randi(int);
 
 class ftPeachStatusUniqProcessAttackS4Start : public soStatusUniqProcess {
 public:
