@@ -1,3 +1,4 @@
+#define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <ft/ft_status_uniq_process_catched_air_ganon.h>
 #include <ft/ft_status_uniq_process_views.h>
 #include <so/motion/so_motion_module_impl.h>
