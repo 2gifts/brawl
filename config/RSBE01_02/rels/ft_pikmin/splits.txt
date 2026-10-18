@@ -14,9 +14,9 @@ global_destructor_chain.c:
 mo_fighter/ft_pikmin/ft_pikmin.cpp:
 	.text       start:0x00000070 end:0x000100F0
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x000001B4
-	.data       start:0x00000000 end:0x0000C1D0
-	.bss        start:0x00000008 end:0x00000390
+	.rodata     start:0x00000000 end:0x00000120
+	.data       start:0x00000000 end:0x0000AF80
+	.bss        start:0x00000008 end:0x00000218
 
 mo_fighter/ft_pikmin/wn_pikmin_pikmin.cpp:
 	.text       start:0x00013F4C end:0x00023140
@@ -80,6 +80,7 @@ mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_water_follow.cpp:
 
 mo_fighter/ft_pikmin/wn_pikmin_dolfin.cpp:
 	.text       start:0x000270CC end:0x0002AA3C
+	.rodata     start:0x00000140 end:0x000001B4
 
 mo_fighter/ft_pikmin/wn_pikmin_dolfin_status_uniq_process_common.cpp:
 	.text       start:0x0002AA3C end:0x0002AAF0
@@ -89,6 +90,8 @@ mo_fighter/ft_pikmin/wn_pikmin_dolfin_status_uniq_process_common.cpp:
 
 mo_fighter/ft_pikmin/wn_pikmin_chain.cpp:
 	.text       start:0x0002AAF0 end:0x0002D664
+	.data       start:0x0000BAA8 end:0x0000C1D0
+	.bss        start:0x00000300 end:0x00000390
 
 mo_fighter/ft_pikmin/wn_pikmin_chain_status_uniq_process_shoot.cpp:
 	.text       start:0x0002D664 end:0x0002DB84

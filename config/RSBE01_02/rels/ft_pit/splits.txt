@@ -14,9 +14,9 @@ global_destructor_chain.c:
 mo_fighter/ft_pit/ft_pit.cpp:
 	.text       start:0x00000070 end:0x0000DDE0
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x000000B4
-	.data       start:0x00000000 end:0x00009D78
-	.bss        start:0x00000008 end:0x00000314
+	.rodata     start:0x00000000 end:0x00000020
+	.data       start:0x00000000 end:0x00006938
+	.bss        start:0x00000008 end:0x000001A0
 
 mo_fighter/ft_pit/ft_pit_status_uniq_process_special_s_revolve.cpp:
 	.text       start:0x0000DDE0 end:0x0000E148
@@ -39,6 +39,9 @@ mo_fighter/ft_pit/ft_pit_status_uniq_process_special_lw_hold.cpp:
 
 mo_fighter/ft_pit/wn_pit_ikarus.cpp:
 	.text       start:0x0000E4D4 end:0x00012C04
+	.rodata     start:0x00000028 end:0x000000B4
+	.data       start:0x00006AC8 end:0x00009D78
+	.bss        start:0x000001D0 end:0x00000314
 
 mo_fighter/ft_pit/wn_pit_ikarus_status_uniq_process_entry.cpp:
 	.text       start:0x00012C04 end:0x00012FC4

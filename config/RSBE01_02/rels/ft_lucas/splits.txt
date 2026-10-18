@@ -14,7 +14,7 @@ global_destructor_chain.c:
 mo_fighter/ft_lucas/ft_lucas.cpp:
 	.text       start:0x00000070 end:0x00010894
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x00000180
+	.rodata     start:0x00000000 end:0x00000030
 
 mo_fighter/ft_lucas/ft_lucas_status_uniq_process_attack_s4.cpp:
 	.text       start:0x00010894 end:0x00010A64
@@ -95,6 +95,7 @@ mo_fighter/ft_lucas/wn_lucas_pk_thunder_child_status_uniq_process_move.cpp:
 
 mo_fighter/ft_lucas/wn_lucas_pk_star_storm.cpp:
 	.text       start:0x0001C5F0 end:0x0001E698
+	.rodata     start:0x00000150 end:0x00000180
 
 mo_fighter/ft_lucas/wn_lucas_himohebi.cpp:
 	.text       start:0x0001E698 end:0x00020D3C

@@ -14,9 +14,9 @@ global_destructor_chain.c:
 mo_fighter/ft_toonlink/ft_toonlink.cpp:
 	.text       start:0x00000070 end:0x0000E9B8
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x000000C8
-	.data       start:0x00000000 end:0x00009BF0
-	.bss        start:0x00000008 end:0x000002E4
+	.rodata     start:0x00000000 end:0x00000050
+	.data       start:0x00000000 end:0x000081B8
+	.bss        start:0x00000008 end:0x00000140
 
 mo_fighter/ft_toonlink/ft_toonlink_status_uniq_process_special_r_slash.cpp:
 	.text       start:0x0000F224 end:0x0000F300
@@ -67,6 +67,9 @@ mo_fighter/ft_toonlink/wn_toon_link_boomerang_status_uniq_process_turn.cpp:
 
 mo_fighter/ft_toonlink/wn_toon_link_hook_shot.cpp:
 	.text       start:0x000153A0 end:0x00018684
+	.rodata     start:0x000000B8 end:0x000000C8
+	.data       start:0x00009108 end:0x00009BF0
+	.bss        start:0x00000288 end:0x000002E4
 
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x00018684 end:0x00018720

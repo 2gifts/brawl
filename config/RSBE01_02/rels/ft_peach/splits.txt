@@ -15,8 +15,8 @@ mo_fighter/ft_peach/ft_peach.cpp:
 	.text       start:0x00000070 end:0x0000D2C4
 	.ctors      start:0x00000000 end:0x00000004
 	.rodata     start:0x00000000 end:0x0000004C
-	.data       start:0x00000000 end:0x00007158
-	.bss        start:0x00000008 end:0x000002A0
+	.data       start:0x00000000 end:0x000062C0
+	.bss        start:0x00000008 end:0x000001B8
 
 mo_fighter/ft_peach/ft_peach_status_uniq_process_attack_s4_start.cpp:
 	.text       start:0x0000D2C4 end:0x0000D41C
@@ -27,6 +27,8 @@ mo_fighter/ft_peach/ft_peach_status_uniq_process_attack_s4_start.cpp:
 mo_fighter/ft_peach/ft_peach_status_uniq_process_final.cpp:
 	.text       start:0x0000FE40 end:0x0001088C
 	.ctors      start:0x00000008 end:0x00000010
+	.data       start:0x0000633C end:0x00007158
+	.bss        start:0x000001C8 end:0x000002A0
 
 mo_fighter/ft_peach/if_peach_final_task.cpp:
 	.text       start:0x0001088C end:0x00010FA0
