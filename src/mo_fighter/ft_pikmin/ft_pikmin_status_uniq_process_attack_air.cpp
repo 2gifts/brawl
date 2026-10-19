@@ -6,6 +6,7 @@
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/fighter.h>
 #include <ft/pikmin/ft_pikmin.h>
+#include <ft/pikmin/ft_pikmin_status_uniq_process.h>
 #include <ft/pikmin/ft_pikmin_utility.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
@@ -15,17 +16,6 @@
 // depends on the motion of the attack) and is let go again when the flag 0x22000011 is set or the status ends.
 // HYPOTHESIS: the work flags (0x22000010 take the Pikmin, 0x22000011 release it), the motion numbers 0x64..0x66 (the five aerials'
 // attack motions) and the Pikmin motions/statuses 0x1e..0x21, 0xe and 8.
-class ftPikminStatusUniqProcessAttackAir : public soStatusUniqProcess {
-    wnPikminPikminTroopsManager* m_troops;
-public:
-    virtual ~ftPikminStatusUniqProcessAttackAir() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
-    void updateHoldPikmin(soModuleAccesser* moduleAccesser);
-    void detachAttackAirPikmin(soModuleAccesser* moduleAccesser);
-};
-
 void ftPikminStatusUniqProcessAttackAir::initStatus(soModuleAccesser*) { }
 
 void ftPikminStatusUniqProcessAttackAir::execFixPos(soModuleAccesser* moduleAccesser) {

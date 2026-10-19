@@ -6,6 +6,7 @@
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/fighter.h>
 #include <ft/pikmin/ft_pikmin.h>
+#include <ft/pikmin/ft_pikmin_status_uniq_process.h>
 #include <ft/pikmin/ft_pikmin_utility.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
@@ -15,15 +16,6 @@
 // Olimar's grab (the catch statuses 0x38 forward, 0x39..): the first Pikmin of the line is taken into the hand (Pikmin status 0x20)
 // and turned to his facing (turned around while the status 0x38 runs); without a Pikmin the work flag 0x22000010 is raised.
 // HYPOTHESIS: the status numbers and the constants 0xfaa/0xfab (the offset of the held Pikmin from the node).
-class ftPikminStatusUniqProcessCatch : public soStatusUniqProcess {
-    wnPikminPikminTroopsManager* m_troops;
-public:
-    virtual ~ftPikminStatusUniqProcessCatch() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
-    void updateHoldPikmin(soModuleAccesser* moduleAccesser);
-};
-
 void ftPikminStatusUniqProcessCatch::initStatus(soModuleAccesser* moduleAccesser) {
     m_troops->holdPikmin(1);
     if (m_troops->getHoldPikminNum() > 0) {

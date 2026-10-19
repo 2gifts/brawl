@@ -6,6 +6,7 @@
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/fighter.h>
 #include <ft/pikmin/ft_pikmin.h>
+#include <ft/pikmin/ft_pikmin_status_uniq_process.h>
 #include <ft/pikmin/ft_pikmin_utility.h>
 #include <so/article/so_generate_article_manage_module.h>
 #include <so/collision/so_collision_manager.h>
@@ -21,16 +22,6 @@ soArrayVector<Vec2f, 10>::soArrayVector(s32 size) : m_topIndex(0), m_lastIndex(0
 // article, gives it a collision log group (kept in the work int 0x10000042) and ties every hold Pikmin to it (link nodes 7 and up);
 // the flags 0x22000013/0x22000014 raise the chain and let the Pikmin go.
 // HYPOTHESIS: the flag meanings, the Pikmin statuses 0x2f/8/0xa and the article id 2 (the chain).
-class ftPikminStatusUniqProcessSpecialHi : public soStatusUniqProcess {
-    wnPikminPikminTroopsManager* m_troops;
-public:
-    virtual ~ftPikminStatusUniqProcessSpecialHi() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
-    void updateHoldPikmin(soModuleAccesser* moduleAccesser);
-};
-
 void ftPikminStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAccesser) {
     moduleAccesser->getWorkManageModule().setInt(-1, 0x10000042);
     wnPikminPikminTroopsManager* troops = m_troops;

@@ -47,6 +47,9 @@ ftPikminExtendParamAccesser g_ftPikminExtendParamAccesser;
 
 ftClassInfoImpl<Fighter_Pikmin, ftPikmin> g_ftClassInfoPikmin;
 
+// MATCH-ONLY: the native constructor and destructor call the member constructors, the accessors and the status process
+// destructors out of line.
+#pragma dont_inline on
 ftPikmin::ftPikmin(s32 entryId,
                  Heaps::HeapType instHeap,
                  Heaps::HeapType nwModelInstHeap,
@@ -55,9 +58,45 @@ ftPikmin::ftPikmin(s32 entryId,
                                          Fighter_Pikmin,
                                          instHeap,
                                          nwModelInstHeap,
-                                         nwMotionInstHeap) {
-    // TODO
+                                         nwMotionInstHeap),
+    m_commonData(g_ftCommonDataAccesser.getData(Fighter_Pikmin)),
+    m_troops(),
+    m_owners(0),
+    m_specialS(&m_troops),
+    m_attackAir(&m_troops),
+    m_attackS4Start(&m_troops),
+    m_attackS4Hold(&m_troops),
+    m_attackS4(&m_troops),
+    m_attackHi4Start(&m_troops),
+    m_attackHi4Hold(&m_troops),
+    m_attackHi4(&m_troops),
+    m_specialHi(&m_troops),
+    m_catch(&m_troops),
+    m_catchWait(&m_troops) {
+    // The status processes of the fighter's own moves: the throws and smashes, the aerials, the grab; the side and up special are
+    // the processes at the special move status range.
+    getModuleAccesser()->getStatusModule().setUniqProc(0x3c, ftPikminStatusUniqProcessThrow::getInstance());
+    getModuleAccesser()->getStatusModule().setUniqProc(0x2a, &m_attackS4Start);
+    getModuleAccesser()->getStatusModule().setUniqProc(0x2b, &m_attackS4Hold);
+    getModuleAccesser()->getStatusModule().setUniqProc(0x2c, &m_attackS4);
+    getModuleAccesser()->getStatusModule().setUniqProc(0x30, &m_attackHi4Start);
+    getModuleAccesser()->getStatusModule().setUniqProc(0x31, &m_attackHi4Hold);
+    getModuleAccesser()->getStatusModule().setUniqProc(0x32, &m_attackHi4);
+    getModuleAccesser()->getStatusModule().setUniqProc(0x2f, ftPikminStatusUniqProcessSmashAttack::getInstance());
+    getModuleAccesser()->getStatusModule().setUniqProc(0x33, &m_attackAir);
+    getModuleAccesser()->getStatusModule().setUniqProc(0x34, &m_catch);
+    getModuleAccesser()->getStatusModule().setUniqProc(0x36, &m_catch);
+    getModuleAccesser()->getStatusModule().setUniqProc(0x38, &m_catch);
+    getModuleAccesser()->getStatusModule().setUniqProc(0x39, &m_catchWait);
+    getModuleAccesser()->getStatusModule().setUniqProc(0x3a, &m_catchWait);
+    soStatusUniqProcess* special[10] = {0};
+    special[1] = &m_specialS;
+    special[2] = &m_specialHi;
+    getModuleAccesser()->getStatusModule().addRangeUniqProc(special, 10);
 }
+
+ftPikmin::~ftPikmin() { }
+#pragma dont_inline off
 
 // The activation of the articles lives in the fighter's article helpers (still unnamed).
 
@@ -876,35 +915,28 @@ static inline Vec2f addVec2f(Vec2f& a, Vec2f& b) {
 }
 
 // Stand-ins for the status-process classes (at the offsets given) that update their own hold Pikmin.
-extern "C" void updateHoldPikmin__34ftPikminStatusUniqProcessAttackAirFP16soModuleAccesser(void* statusProcess, soModuleAccesser* acc);
-extern "C" void updateHoldPikmin__33ftPikminStatusUniqProcessSpecialSFP16soModuleAccesser(void* statusProcess, soModuleAccesser* acc);
-extern "C" void updateHoldPikmin__33ftPikminStatusUniqProcessAttackS4FP16soModuleAccesser(void* statusProcess, soModuleAccesser* acc);
-extern "C" void updateHoldPikmin__34ftPikminStatusUniqProcessAttackHi4FP16soModuleAccesser(void* statusProcess, soModuleAccesser* acc);
-extern "C" void updateHoldPikmin__34ftPikminStatusUniqProcessSpecialHiFP16soModuleAccesser(void* statusProcess, soModuleAccesser* acc);
-extern "C" void updateHoldPikmin__30ftPikminStatusUniqProcessCatchFP16soModuleAccesser(void* statusProcess, soModuleAccesser* acc);
 
 // Olimar's statuses that carry Pikmin in hand hand the update to their status-process class (members at 0x200D8..0x20128);
 // the plain hold statuses 0x2d..0x2f place the hold Pikmin themselves: the two spots they take are the hand node moved by the
 // constant offset (turned by the facing and the scale) and the same node moved the other way.
 // HYPOTHESIS: status numbers, the meaning of the two spots and of the constants 0xfa8/0xfa9.
 void ftPikmin::updateHoldPikmin() {
-    u8* self = reinterpret_cast<u8*>(this);
     switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
     case 0x33:
-        updateHoldPikmin__34ftPikminStatusUniqProcessAttackAirFP16soModuleAccesser(self + 0x200E0, m_moduleAccesser);
+        m_attackAir.updateHoldPikmin(m_moduleAccesser);
         break;
     case 0x113:
-        updateHoldPikmin__33ftPikminStatusUniqProcessSpecialSFP16soModuleAccesser(self + 0x200D8, m_moduleAccesser);
+        m_specialS.updateHoldPikmin(m_moduleAccesser);
         break;
     case 0x2a:
     case 0x2b:
     case 0x2c:
-        updateHoldPikmin__33ftPikminStatusUniqProcessAttackS4FP16soModuleAccesser(self + 0x200F8, m_moduleAccesser);
+        m_attackS4.updateHoldPikmin(m_moduleAccesser);
         break;
     case 0x30:
     case 0x31:
     case 0x32:
-        updateHoldPikmin__34ftPikminStatusUniqProcessAttackHi4FP16soModuleAccesser(self + 0x20110, m_moduleAccesser);
+        m_attackHi4.updateHoldPikmin(m_moduleAccesser);
         break;
     case 0x2d:
     case 0x2e:
@@ -929,12 +961,12 @@ void ftPikmin::updateHoldPikmin() {
         }
         break;
     case 0x114:
-        updateHoldPikmin__34ftPikminStatusUniqProcessSpecialHiFP16soModuleAccesser(self + 0x20118, m_moduleAccesser);
+        m_specialHi.updateHoldPikmin(m_moduleAccesser);
         break;
     case 0x34:
     case 0x36:
     case 0x38:
-        updateHoldPikmin__30ftPikminStatusUniqProcessCatchFP16soModuleAccesser(self + 0x20120, m_moduleAccesser);
+        m_catch.updateHoldPikmin(m_moduleAccesser);
         break;
     }
 }

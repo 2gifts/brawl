@@ -7,43 +7,16 @@
 #include <ft/fighter.h>
 #include <ft/ft_status_uniq_process_smash_attack.h>
 #include <ft/pikmin/ft_pikmin.h>
+#include <ft/pikmin/ft_pikmin_status_uniq_process.h>
 #include <ft/pikmin/ft_pikmin_utility.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
 
-extern ftStatusUniqProcessSmashAttack g_ftPikminStatusUniqProcessSmashAttack;
-
 // Olimar's forward smash (the Pikmin of the hand stands in front of him while the charge runs): the start takes the first Pikmin
 // into the hand (Pikmin status 0xf) and keeps it turned to his facing, the hold and the release share the smash attack handling
 // of the common process (g_ftPikminStatusUniqProcessSmashAttack moves the Pikmin when the flag is raised).
 // HYPOTHESIS: the status numbers 0x2b and 0x2c (the smash start and hold) and the Pikmin statuses.
-class ftPikminStatusUniqProcessAttackS4Start : public soStatusUniqProcess {
-    wnPikminPikminTroopsManager* m_troops;
-public:
-    virtual ~ftPikminStatusUniqProcessAttackS4Start() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
-};
-
-class ftPikminStatusUniqProcessAttackS4Hold : public ftStatusUniqProcessSmashAttack {
-    wnPikminPikminTroopsManager* m_troops;
-public:
-    virtual ~ftPikminStatusUniqProcessAttackS4Hold() { }
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
-};
-
-class ftPikminStatusUniqProcessAttackS4 : public ftStatusUniqProcessSmashAttack {
-    wnPikminPikminTroopsManager* m_troops;
-public:
-    virtual ~ftPikminStatusUniqProcessAttackS4() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
-    void updateHoldPikmin(soModuleAccesser* moduleAccesser);
-};
-
 void ftPikminStatusUniqProcessAttackS4Start::initStatus(soModuleAccesser* moduleAccesser) {
     m_troops->holdPikmin(1);
     if (m_troops->getHoldPikminNum() > 0) {

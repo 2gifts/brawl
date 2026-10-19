@@ -48,6 +48,7 @@ public:
     };
 
     soModuleAccesser* m_moduleAccesser;
+    soModuleAccesser* getModuleAccesser() const { return m_moduleAccesser; }
     StageObject(const char* name, int unk1, int unk2, int unk3, bool unk4, soModuleAccesser* moduleAccesser);
     virtual void processAnim();
     virtual void processUpdate();
