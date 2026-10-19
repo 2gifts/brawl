@@ -24,8 +24,14 @@ typedef soCollisionReflectorModuleBuildConfigGroups<3, 12, 3, soCollisionShieldE
 typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> ftLuigiLinkModuleBuildConfig;
 typedef soStatusModuleBuildConfig<285, soGeneralWorkBuildConfig<18, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftLuigiStatusModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnLuigiNegativeZone pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_LUIGI_ARTICLE_POOLS
+#include <ft/luigi/ft_luigi_article_pools.h>
+typedef ftLuigiArticleManageModuleBuilder ftLuigiGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x6000, Fighter_Luigi> ftLuigiGenerateArticleManageModuleBuilder;
+#endif
 
 class ftLuigiBuildConfig : public ftCommonBuildConfig {
 public:
@@ -43,6 +49,9 @@ public:
     typedef ftLuigiGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnLuigiFireball;
+class wnLuigiNegativeZone;
+
 class ftLuigi : public ftFighterBuilder<ftLuigiBuildConfig> {
     u8 unkTail[0xE1F4 - sizeof(ftFighterBuilder<ftLuigiBuildConfig>)];
     // HYPOTHESIS: status table at 0xE1F4 (destroyed before the base in the target destructor); contents unidentified.
@@ -56,4 +65,9 @@ public:
     virtual ~ftLuigi();
     virtual void onStart(int startKind);
     virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnLuigiFireball* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnLuigiNegativeZone* weapon, soModuleAccesser* acc);
 };

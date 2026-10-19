@@ -1,4 +1,8 @@
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_LUIGI_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define FT_TEAM_TYPED_INTERFACE
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
 #include <ft/builder/ft_dol_array_list.h>
@@ -9,6 +13,12 @@
 #undef FT_KINETIC_MEDIATOR_TRANSACTOR
 #include <ft/luigi/ft_luigi_extend_param_accesser.h>
 #include <ft/luigi/ft_luigi_status_special_s.h>
+#include <ft/luigi/ft_luigi_transactor.h>
+#include <ft/ft_owner.h>
+#include <ac/ac_anim_cmd_impl.h>
+#include <so/link/so_link_event_presenter.h>
+#include <ft/ft_resource_id_accesser_impl.h>
+#include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
 
 #define FT_BC ftLuigiBuildConfig
@@ -64,6 +74,294 @@ void ftLuigi::notifyEventChangeSituation(SituationKind kind, SituationKind prevK
     // HYPOTHESIS: a SituationKind of 2 keeps the flag set.
     if (kind != 2) {
         m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+    }
+}
+
+
+// ---- the fighter-level hooks ----------------------------------------------------------------------------------------
+
+// The Negative Zone (the article of subkind 0x74) tells the fighter with link event 0x3c that its Final Smash ended.
+void ftLuigi::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    switch (stageObj->soGetSubKind()) {
+    case 0x74:
+        switch (eventInfo->m_eventKind) {
+        case 0x3c:
+            endFinal(true, true, false);
+            return;
+        }
+        break;
+    }
+    Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+
+// The animation command ')' shows the visibility record 1 (HYPOTHESIS: the fireball hand).
+bool ftLuigi::notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* acc, s32 index) {
+    bool result;
+    s8 group = cmd->getGroup();
+    if (!isObserv(group)) {
+        result = false;
+    } else {
+        switch (cmd->getType()) {
+        case ')':
+            acc->getVisibilityModule().set(1, 1);
+            result = true;
+            break;
+        default:
+            result = Fighter::notifyEventAnimCmd(cmd, acc, index);
+            break;
+        }
+    }
+    return result;
+}
+
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Luigi, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftLuigiArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftLuigiArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftLuigiArticleKind : wnArticleKindInfo {
+    ftLuigiArticleKind() {
+        kind = 0;
+        subKind = Fighter_Luigi;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftLuigiArticleBuildInfo : wnArticleBuildInfo {
+    ftLuigiArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_148DA4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148E3C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftLuigiArticleTraits;
+#define FT_LUIGI_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftLuigiArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftLuigiArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Luigi, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_LUIGI_TRAITS(wnLuigiFireball, wnMarioFireballData, 0, fn_27_148DA4)
+FT_LUIGI_TRAITS(wnLuigiNegativeZone, wnLuigiNegativeZoneData, 1, fn_27_148E3C)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftLuigiArticleTraits<W>::ArticleId, ftLuigiArticleBuildInfo(ftLuigiArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftLuigiArticleTraits<W>::getData()) { }
+
+// ---- the articles of Luigi and their mediator -----------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnLuigiFireball>::~wnArticleHolder();
+template wnArticleHolder<wnLuigiNegativeZone>::~wnArticleHolder();
+template wnArticleHolder<wnLuigiFireball>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftLuigiArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftLuigiArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftLuigiArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftLuigiArticleMediator::~ftLuigiArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftLuigiArticleMediator::getMediateNum() { return 2; }
+void ftLuigiArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 fireball, 1 Negative Zone (the rest are unused).
+
+#define FT_LUIGI_POOL_FIREBALL_BASE static_cast<wnArticlePool<wnLuigiFireball, 2, ftLuigiNegativeZonePool>&>(m_pools)
+#define FT_LUIGI_POOL_FIREBALL FT_LUIGI_POOL_FIREBALL_BASE.getSub()
+#define FT_LUIGI_POOL_NEGATIVE_ZONE_BASE static_cast<wnArticlePool<wnLuigiNegativeZone, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_LUIGI_POOL_NEGATIVE_ZONE FT_LUIGI_POOL_NEGATIVE_ZONE_BASE.getSub()
+
+#define FT_LUIGI_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(2, value) WN_ARTICLE_UNUSED_SLOT(3, value) WN_ARTICLE_UNUSED_SLOT(4, value) \
+    WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) WN_ARTICLE_UNUSED_SLOT(7, value) \
+    WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) WN_ARTICLE_UNUSED_SLOT(10, value) \
+    WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) WN_ARTICLE_UNUSED_SLOT(13, value) \
+    WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) WN_ARTICLE_UNUSED_SLOT(16, value)
+
+// The fireball starts through the transactor with the effect resource of the fighter (the kind 0x1a selects the variant).
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+bool ftLuigi::activeArticle(wnLuigiFireball* weapon, soModuleAccesser* acc) {
+    static ftLuigiTransactor instance;
+    ftLuigiTransactor* transactor = &instance;
+    u32 etcResId = acc->getResourceModule().getResourceIdAccesser()->getEtcResId();
+    return transactor->activeArticle1(weapon, acc, etcResId, 0x1a);
+}
+#pragma pool_data reset
+
+// The Negative Zone starts at the stage object of the fighter with its team and the facing.
+bool ftLuigi::activeArticle1(wnLuigiNegativeZone* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    float lr = acc->getPostureModule().getLr();
+    int team = fighter.getOwner()->getTeam();
+    int resourceId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
+    weapon->activate(founderTaskId, resourceId, team, lr);
+    return true;
+}
+
+void ftLuigiArticleMediator::deactivate() {
+    for (s32 i = 0; i < 2; ++i) {
+        wnLuigiFireball* weapon = FT_LUIGI_POOL_FIREBALL.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnLuigiNegativeZone* weapon = FT_LUIGI_POOL_NEGATIVE_ZONE.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftLuigiArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 2; }
+    case 1: { wnArticleSlotTag tag; return 1; }
+    FT_LUIGI_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftLuigiActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_LUIGI_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftLuigiActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftLuigiActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftLuigiArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_LUIGI_COUNT_ACTIVE(FT_LUIGI_POOL_FIREBALL, 2)
+    case 1: FT_LUIGI_COUNT_ACTIVE(FT_LUIGI_POOL_NEGATIVE_ZONE, 1)
+    FT_LUIGI_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_LUIGI_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftLuigiArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_LUIGI_CAN_GENERATE(FT_LUIGI_POOL_FIREBALL, 2, 0)
+    case 1: FT_LUIGI_CAN_GENERATE(FT_LUIGI_POOL_NEGATIVE_ZONE, 1, 1)
+    FT_LUIGI_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftLuigiArticleActivator;
+template <> struct ftLuigiArticleActivator<wnLuigiFireball> {
+    static bool activate(wnLuigiFireball* weapon, soModuleAccesser* acc) { return ftLuigi::activeArticle(weapon, acc); }
+};
+template <> struct ftLuigiArticleActivator<wnLuigiNegativeZone> {
+    static bool activate(wnLuigiNegativeZone* weapon, soModuleAccesser* acc) { return ftLuigi::activeArticle1(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_LUIGI_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftLuigiArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftLuigiArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_LUIGI_GENERATE(wnLuigiFireball, FT_LUIGI_POOL_FIREBALL)
+    case 1: FT_LUIGI_GENERATE(wnLuigiNegativeZone, FT_LUIGI_POOL_NEGATIVE_ZONE)
+    FT_LUIGI_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+// Shooting the fireball only type-checks it; the Negative Zone flies off from the position of the fighter.
+bool ftLuigiArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: { wnArticleSlotTag tag; (void)dynamic_cast<wnLuigiFireball&>(*article); return true; }
+    case 1: {
+        wnArticleSlotTag tag;
+        wnLuigiNegativeZone& zone = dynamic_cast<wnLuigiNegativeZone&>(*article);
+        Vec3f pos = acc->getPostureModule().getPos();
+        zone.toFly(&pos);
+        return true;
+    }
+    FT_LUIGI_UNUSED_SLOTS(true)
+    default: return false;
     }
 }
 
