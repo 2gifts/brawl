@@ -122,7 +122,7 @@ void StageObject::notifyArticleEventRemove(int unk1, int* unk2) {
     m_moduleAccesser->getGenerateArticleManageModule().removeExistTaskId(article->m_taskId);
 }
 
-void StageObject::notifyArticleEventEject(int unk1, int unk2, int* unk3, int* unk4) {
+void StageObject::notifyArticleEventEject(int unk1, int unk2, int* unk3) {
     StageObject* article = *reinterpret_cast<StageObject**>(reinterpret_cast<u8*>(unk3) + 8);
     m_moduleAccesser->getGenerateArticleManageModule().eject(article->m_taskId);
 }

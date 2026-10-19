@@ -117,7 +117,7 @@ public:
     virtual void notifyEventLink(soLinkEventArgs *eventInfo, soModuleAccesser* moduleAccesser, StageObject*, int unk4);
 
     virtual void notifyArticleEventRemove(int unk1, int* unk2);
-    virtual void notifyArticleEventEject(int unk1, int unk2, int* unk3, int* unk4);
+    virtual void notifyArticleEventEject(int unk1, int unk2, int* unk3);
     virtual void updateRoughPos();
 
     void activate(float lr, float, Vec3f* pos, bool);

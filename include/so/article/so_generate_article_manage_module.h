@@ -16,11 +16,9 @@ public:
     virtual ~soGenerateArticleManageModule();
     virtual void activate();
     virtual void deactivate(bool treatAsRemoved); // HYPOTHESIS: the flag says the owner counts as removed (seen in StageObject::deactivate)
-    // HYPOTHESIS: the third argument is typed void* (soLogAttackInfo*): callers that pass the same zero for both optional
-    // arguments get a register copy (mr) for the second one only with an identical pointer type.
-    // HYPOTHESIS: the two trailing arguments are boolean flags (not pointers): callers pass the same zero twice and the
-    // second one is a register copy, which only a narrow parameter type reproduces.
-    virtual soArticle* generate(int articleId, bool, bool);
+    // HYPOTHESIS: the second argument is a pointer (the log attack info, null by default) and the third a flag: with that
+    // typing the callers get the native register copies (the flag reuses the article id zero, never the pointer zero).
+    virtual soArticle* generate(int articleId, void* logAttackInfo, bool);
     virtual void have(int articleId, int, int selector, int taskId);
     virtual void shoot(int articleId, int selector, bool);
     virtual void changeMotion(int articleId, int motionKind, bool);

@@ -1,3 +1,8 @@
+#define MT_VEC2F_PLAIN_BASE
+#define FT_PIKMIN_OWNER_INFO_DTOR
+#define MT_VEC2F_FROM_VEC3_CTOR_NOINLINE
+#define MT_VEC2F_SUB_NOINLINE
+#define MT_VEC2F_LENGTH_SQ_OUT_OF_LINE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_PIKMIN_ARTICLE_POOLS
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
@@ -8,6 +13,16 @@
 #include <ft/ft_class_info_impl.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/fighter.h>
+#include <ft/ft_owner.h>
+#include <so/so_slow.h>
+#include <ft/ft_manager.h>
+#include <cm/cm_camera_controller.h>
+#include <st/stage.h>
+#include <so/so_external_value_accesser.h>
+#include <so/article/so_article.h>
+#include <so/article/so_generate_article_manage_module.h>
+#include <so/work/so_work_manage_module_impl.h>
+#include <so/ground/so_ground_util.h>
 #include <so/stageobject.h>
 #include <ft/pikmin/ft_pikmin.h>
 #include <ft/pikmin/ft_pikmin_extend_param_accesser.h>
@@ -287,6 +302,640 @@ bool ftPikminArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
 }
 
 
+// ---- the fighter overrides ------------------------------------------------------------------------------------------
+// Work 0x10000040 / 0x10000041 are reset to -1 when Olimar becomes active.
+// HYPOTHESIS: meaning of the works.
+void ftPikmin::onActivate() {
+    m_moduleAccesser->getWorkManageModule().setInt(-1, 0x10000041);
+    m_moduleAccesser->getWorkManageModule().setInt(-1, 0x10000040);
+}
+
+// The line of Pikmin is dropped and, unless the owner wears the spycloak, the common effect 0x1a000e (HYPOTHESIS: the start
+// glow) follows the model, tinted by the costume.
+void ftPikmin::onStart(int startKind) {
+    m_moduleAccesser->getGenerateArticleManageModule().deactivate(true);
+    m_troops.reset();
+    Fighter::onStart(startKind);
+    if (g_ftManager->getOwner(m_moduleAccesser->getWorkManageModule().getInt(0x10000000))->getSpycloak() == false) {
+        int variation = soValueAccesser::getValueInt(m_moduleAccesser, 0x10000036, 0);
+        if (variation == 12) {
+            variation = 0;
+        }
+        m_moduleAccesser->getEffectModule().reqFollow(static_cast<EfID>(0x1a000e), 0x1e, &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, true, 0x10, variation, -1);
+    }
+}
+
+// On the start kinds 1 to 3 the three Pikmin of the first article slot are generated and entered at once.
+void ftPikmin::postStart(int startKind) {
+    switch (startKind) {
+    case 0:
+        break;
+    case 1:
+    case 2:
+    case 3:
+        for (int i = 0; i < 3; i++) {
+            soArticle* article = m_moduleAccesser->getGenerateArticleManageModule().generate(0, false, false);
+            if (article->isNull() == false) {
+                m_moduleAccesser->getGenerateArticleManageModule().entry(article);
+            }
+        }
+        break;
+    }
+}
+
+void ftPikmin::processUpdate() {
+    bool update = false;
+    if (soSlow::getInstance()->isEstimate() == true) {
+        if (m_moduleAccesser->getStopModule().isStop() == 0 && m_moduleAccesser->getSlowModule().isSkip() == 0) {
+            update = true;
+        }
+    }
+    if (update == true) {
+        updatePikmin();
+        // HYPOTHESIS: the flag 0x22000010 asks to sort the line again while the status 0x115 runs.
+        if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x115 &&
+            m_moduleAccesser->getWorkManageModule().isFlag(0x22000010) == true) {
+            m_troops.sortPikmin();
+            m_moduleAccesser->getWorkManageModule().offFlag(0x22000010);
+        }
+    }
+    Fighter::processUpdate();
+    if (update == true) {
+        updateHoldPikmin();
+    }
+}
+
+// While the status 0x119 holds the flag 0x12000001, falling into the dead area clears it.
+void ftPikmin::processFixCamera() {
+    Fighter::processFixCamera();
+    if (soSlow::getInstance()->isAdjust() != 0) {
+        if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x119 &&
+            m_moduleAccesser->getWorkManageModule().isFlag(0x12000001) == true) {
+            Vec3f pos = m_moduleAccesser->getModelModule().getNodeGlobalPosition(m_moduleAccesser->getModelModule().getCorrectNodeId(0x12d), false);
+            if (soGroundUtil::checkDeadArea(&pos, 0.0f, 0.0f) == -1) {
+                m_moduleAccesser->getWorkManageModule().offFlag(0x12000001);
+            }
+        }
+    }
+}
+
+// A Pikmin article (slot 0) that leaves the pool leaves the line too.
+void ftPikmin::notifyArticleEventEject(int unk1, int unk2, int* unk3) {
+    if (unk1 == 0) {
+        int taskId = reinterpret_cast<soModuleAccesser*>(unk3)->m_stageObject->m_taskId;
+        m_troops.erasePikmin(taskId);
+        m_troops.updateJostlePriority();
+    }
+    StageObject::notifyArticleEventEject(unk1, unk2, unk3);
+}
+
+void ftPikmin::notifyArticleEventRemove(int unk1, int* unk2) {
+    if (unk1 == 0) {
+        int taskId = reinterpret_cast<soModuleAccesser*>(unk2)->m_stageObject->m_taskId;
+        m_troops.erasePikmin(taskId);
+        m_troops.updateJostlePriority();
+    }
+    StageObject::notifyArticleEventRemove(unk1, unk2);
+}
+
+// The capture statuses 0x39, 0x3a and 0x3c do not take part in the common handling.
+// HYPOTHESIS: the status numbers.
+bool ftPikmin::notifyEventCaptureStatus(soModuleAccesser* moduleAccesser, int taskId, int unk2, int unk3) {
+    bool result;
+    switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x39:
+    case 0x3a:
+    case 0x3c:
+        result = false;
+        break;
+    default:
+        result = Fighter::notifyEventCaptureStatus(moduleAccesser, taskId, unk2, unk3);
+        break;
+    }
+    return result;
+}
+
+void ftPikmin::notifyEventOnDamage(soDamage* damage, bool unk2, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventOnDamage(damage, unk2, moduleAccesser);
+    if (damage->m_reaction >= soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfad, 0)) {
+        m_moduleAccesser->getWorkManageModule().onFlag(0x22000018);
+    }
+}
+
+// The animation command ')' shows the visibility record 1 (HYPOTHESIS: the Pikmin on the back).
+bool ftPikmin::notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* acc, s32 index) {
+    bool result;
+    s8 group = cmd->getGroup();
+    if (!isObserv(group)) {
+        result = false;
+    } else {
+        switch (cmd->getType()) {
+        case ')':
+            acc->getVisibilityModule().set(1, 1);
+            result = true;
+            break;
+        default:
+            result = Fighter::notifyEventAnimCmd(cmd, acc, index);
+            break;
+        }
+    }
+    return result;
+}
+
+// HYPOTHESIS: the camera controller keeps a one-bit flag (set while Olimar runs the Final Smash) in the byte at 0x44.
+#define FT_PIKMIN_CAMERA_FLAG_BYTE (*(reinterpret_cast<s8*>(CameraController::getInstance()) + 0x44))
+
+// Stand-ins for the helpers of the fighter that sit behind the unit split (still unnamed).
+extern "C" int fn_113_100F0(soModuleAccesser* acc, float speed); // HYPOTHESIS: the owner condition for the speed of the line
+extern "C" bool fn_113_10E18(int statusKind);                    // HYPOTHESIS: the status keeps the Pikmin hidden around Olimar
+extern "C" void fn_113_1094C(soModuleAccesser* acc);
+
+// The Pikmin of the hold list stand hidden at Olimar's position while he runs a status that shows none of them: the owner info
+// takes the condition, every hold Pikmin in the waiting status 0x33 follows and is set to `status` (0 means: back to the
+// ground if it can attach there, else status 0xa).
+// HYPOTHESIS: names of the statuses and of the argument.
+void ftPikmin::reduceHideWaitPikmin(int status) {
+    refreshOwnerInfoPos();
+    const soArrayList<wnPikminPikmin*, 10>* hold = m_troops.getHoldPikminList();
+    int num = hold->size();
+    if (num > 0) {
+        Vec3f position = m_moduleAccesser->getPostureModule().getPos();
+        Vec2f pos(position);
+        int condition = fn_113_100F0(m_moduleAccesser, 0.0f);
+        getOwners().at(0).unkc.bits.condition = condition;
+        float lr = m_moduleAccesser->getPostureModule().getLr();
+        for (int i = 0; i < num; i++) {
+            wnPikminPikmin* pikmin = hold->at(i);
+            if (soExternalValueAccesser::getStatusKind(pikmin) == 0x33) {
+                m_troops.syncPos(pikmin, &pos);
+                m_troops.syncLr(pikmin, lr);
+                m_troops.updateNodeSRT(pikmin);
+                m_troops.setTargetPos(pikmin, &pos);
+                m_troops.setOwnerCondition(pikmin, condition);
+                m_troops.onInstanceFlag(pikmin, 0x12000004);
+                if (status == 0) {
+                    if (m_troops.attachGround(pikmin) == true) {
+                        pikmin->changeStatus(status);
+                    } else {
+                        pikmin->changeStatus(0xa);
+                    }
+                } else {
+                    pikmin->changeStatus(status);
+                }
+            }
+        }
+        m_troops.reducePikminAll(&getOwners());
+    }
+}
+
+// Olimar's status decides what happens to the Pikmin: entering the hold statuses (0x2d, 0x3a, 0x80) hands them the matching
+// Pikmin status, leaving a status that showed them (the second switch) lets them fall back into the line.
+// HYPOTHESIS: all status numbers and the Pikmin status numbers 0xa, 0x12, 0x25, 0x2f, 0x30.
+void ftPikmin::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+    switch (statusKind) {
+    case 0x2d: {
+        m_troops.holdPikmin(2);
+        if (m_troops.getHoldPikminNum() > 0) {
+            const soArrayList<wnPikminPikmin*, 10>* hold = m_troops.getHoldPikminList();
+            hold->at(0)->changeStatus(0x12);
+            soPostureModule& posture = m_moduleAccesser->getPostureModule();
+            wnPikminPikmin* const& first = hold->at(0);
+            m_troops.syncLr(first, posture.getLr());
+            if (hold->size() > 1) {
+                hold->at(1)->changeStatus(0x12);
+                soPostureModule& posture2 = m_moduleAccesser->getPostureModule();
+                wnPikminPikmin* const& second = hold->at(1);
+                m_troops.syncLr(second, -posture2.getLr());
+            }
+        }
+        break;
+    }
+    case 0xbd:
+        m_troops.reset();
+        break;
+    case 0x3a:
+        if (m_troops.getHoldPikminNum() > 0) {
+            m_troops.getHoldPikminTop()->changeStatus(0x25);
+        }
+        break;
+    case 0x116: {
+        m_moduleAccesser->getGenerateArticleManageModule().removeExist(1, 0);
+        soArticle* article = m_moduleAccesser->getGenerateArticleManageModule().generate(1, 0, 0);
+        if (m_moduleAccesser->getLinkModule().link(6, article->getTaskId()) == false) {
+            return;
+        }
+        m_moduleAccesser->getGenerateArticleManageModule().entry(article);
+        FT_PIKMIN_CAMERA_FLAG_BYTE |= 1;
+        break;
+    }
+    case 0x118: {
+        m_moduleAccesser->getEffectModule().setSyncScale(false);
+        m_moduleAccesser->getEffectModule().req2D(static_cast<EfID>(0xf70001), &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, 0);
+        m_moduleAccesser->getEffectModule().setSyncScale(true);
+        Stage* stage = g_Stage;
+        if (stage == NULL) {
+            return;
+        }
+        Vec3f center(0.0f, 0.0f, 0.0f);
+        stage->getKirifudaPos(&center, 2);
+        m_moduleAccesser->getCameraModule().setWhole(true);
+        Vec3f focus = center;
+        Vec3f focusRest = center;
+        Vec3f focusAgain = center;
+        m_moduleAccesser->getCameraModule().updateForce(0, &focusAgain, &focusRest);
+        m_moduleAccesser->getCameraModule().setEnableUpdatePos(false, -1);
+        break;
+    }
+    case 0x80: {
+        const soArrayList<wnPikminPikmin*, 10>* hold = m_troops.getHoldPikminList();
+        if (hold->size() > 0) {
+            for (int i = 0; i < hold->size(); i++) {
+                hold->at(i)->changeStatus(0x2f);
+            }
+            m_troops.setVisibilityChain(1, -1, 0);
+        }
+        break;
+    }
+    case 0x7a:
+        refreshOwnerInfoPos();
+        break;
+    }
+    switch (prevStatusKind) {
+    case 0x2d:
+    case 0x2e:
+        if (statusKind != 0x2e && statusKind != 0x2f) {
+            if (m_troops.getHoldPikminNum() > 0) {
+                const soArrayList<wnPikminPikmin*, 10>* hold = m_troops.getHoldPikminList();
+                for (int i = 0; i < hold->size(); i++) {
+                    hold->at(i)->changeStatus(0xa);
+                }
+                m_troops.reducePikminAll(&getOwners());
+            }
+        }
+        break;
+    case 0x39:
+    case 0x3a:
+        if (m_troops.getHoldPikminNum() > 0) {
+            if (statusKind == 0x3b) {
+                m_troops.reducePikminAll(&getOwners());
+            } else if (statusKind != 0x3c && statusKind != 0x3a && statusKind != 0x39) {
+                if (soExternalValueAccesser::getStatusKind(m_troops.getHoldPikminTop()) != 0x24) {
+                    m_troops.getHoldPikminTop()->changeStatus(0xa);
+                }
+                m_troops.reducePikminAll(&getOwners());
+            }
+        }
+        break;
+    case 0x3c:
+        m_troops.reducePikminAll(&getOwners());
+        break;
+    case 0x80:
+        if (statusKind == 0x81) {
+            const soArrayList<wnPikminPikmin*, 10>* hold = m_troops.getHoldPikminList();
+            for (int i = 0; i < hold->size(); i++) {
+                wnPikminPikmin* pikmin = hold->at(i);
+                int pikminStatus = soExternalValueAccesser::getStatusKind(pikmin);
+                if (pikminStatus == 0x2e || pikminStatus == 0x2f) {
+                    pikmin->changeStatus(0x30);
+                }
+            }
+        } else if (fn_113_10E18(statusKind) == false) {
+            reduceHideWaitPikmin(8);
+        }
+        fn_113_1094C(moduleAccesser);
+        break;
+    case 0x76:
+    case 0x77:
+    case 0x78:
+    case 0x95:
+        if (fn_113_10E18(statusKind) == false) {
+            reduceHideWaitPikmin(0);
+        }
+        break;
+    case 0x75:
+        if (statusKind != 0x76 && statusKind != 0x77 && statusKind != 0x78 && statusKind != 0x79) {
+            if (fn_113_10E18(statusKind) == false) {
+                reduceHideWaitPikmin(8);
+            }
+        }
+        if (statusKind == 0xe) {
+            refreshOwnerInfoPos();
+        }
+        break;
+    case 0x79:
+        if (fn_113_10E18(statusKind) == false) {
+            reduceHideWaitPikmin(8);
+        }
+        break;
+    case 0x94:
+        if (statusKind != 0x95) {
+            if (fn_113_10E18(statusKind) == false) {
+                reduceHideWaitPikmin(8);
+            }
+        }
+        break;
+    case 0xc0:
+    case 0xc2:
+        if (fn_113_10E18(statusKind) == false) {
+            reduceHideWaitPikmin(8);
+        }
+        break;
+    case 0x82:
+        if (fn_113_10E18(statusKind) == false) {
+            reduceHideWaitPikmin(8);
+        }
+        break;
+    case 0x81:
+        if (statusKind != 0x82) {
+            if (fn_113_10E18(statusKind) == false) {
+                reduceHideWaitPikmin(8);
+            }
+        }
+        break;
+    case 0x116:
+    case 0x117:
+        if (statusKind >= 0x119 || statusKind < 0x117) {
+            FT_PIKMIN_CAMERA_FLAG_BYTE &= ~1;
+        }
+        break;
+    case 0x118:
+        m_moduleAccesser->getEffectModule().killKind(0xf70001, true, true);
+        FT_PIKMIN_CAMERA_FLAG_BYTE &= ~1;
+        break;
+    }
+}
+
+// The link events of the Pikmin articles and of the other objects Olimar is linked to.
+// HYPOTHESIS: all event and status numbers; the sender kind 2 / sub kind 0x90 is the Pikmin article, 0x43 the Pikmin Final Smash
+// object.
+struct ftPikminLinkArgs : soLinkEventArgs {
+    int unk8;
+};
+
+void ftPikmin::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    int status = m_moduleAccesser->getStatusModule().getStatusKind();
+    switch (eventInfo->m_eventKind) {
+    case 0x455:
+        if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x34 || m_moduleAccesser->getStatusModule().getStatusKind() == 0x36 ||
+            m_moduleAccesser->getStatusModule().getStatusKind() == 0x38) {
+            m_moduleAccesser->getStatusModule().changeStatusRequest(0x39, m_moduleAccesser);
+        }
+        break;
+    case 0x456:
+        if (status == 0x34 || status == 0x38 || status == 0x36) {
+            moduleAccesser->getWorkManageModule().onFlag(0x22000010);
+            moduleAccesser->getWorkManageModule().onFlag(0x22000011);
+        } else if (status == 0x39) {
+            if (m_moduleAccesser->getSituationModule().getKind() == 0) {
+                m_moduleAccesser->getStatusModule().changeStatusRequest(0, m_moduleAccesser);
+            } else {
+                m_moduleAccesser->getStatusModule().changeStatusRequest(0xe, m_moduleAccesser);
+            }
+        }
+        break;
+    case 0x457:
+        if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x34 || m_moduleAccesser->getStatusModule().getStatusKind() == 0x36 ||
+            m_moduleAccesser->getStatusModule().getStatusKind() == 0x38 || m_moduleAccesser->getStatusModule().getStatusKind() == 0x39 ||
+            m_moduleAccesser->getStatusModule().getStatusKind() == 0x3a) {
+            if (m_troops.getHoldPikminNum() > 0) {
+                if (m_troops.getHoldPikminTop()->m_taskId != stageObj->m_taskId) {
+                    break;
+                }
+            }
+            moduleAccesser->getWorkManageModule().onFlag(0x22000011);
+            m_moduleAccesser->getStatusModule().changeStatusRequest(0x3b, m_moduleAccesser);
+        }
+        break;
+    case 0x458:
+        m_moduleAccesser->getStatusModule().changeStatusRequest(0x118, m_moduleAccesser);
+        break;
+    case 0x459:
+        m_moduleAccesser->getStatusModule().changeStatusRequest(0x119, m_moduleAccesser);
+        break;
+    case 0x45a:
+        m_moduleAccesser->getStatusModule().changeStatusRequest(0x11a, m_moduleAccesser);
+        break;
+    case 0x45b:
+        if (m_moduleAccesser->getGenerateArticleManageModule().getNum(0) >= 6 && m_troops.isMakeBloodAll() == true) {
+            m_outsideEventPresenter.notifyEventPikminMakeBloomAll();
+        }
+        break;
+    case 0x45c:
+        if (stageObj->soGetKind() == 2 && stageObj->soGetSubKind() == 0x43) {
+            m_troops.holdPikminForce(stageObj->m_taskId);
+        }
+        break;
+    }
+    if (stageObj->soGetKind() == 2 && stageObj->soGetSubKind() == 0x90) {
+        switch (eventInfo->m_eventKind) {
+        case 0x83b:
+            if (stageObj->soGetKind() == 2 && stageObj->soGetSubKind() == 0x90) {
+                int* value = static_cast<int*>(soValueAccesser::getConstantIndefinite(moduleAccesser, 0xA80E, 0));
+                moduleAccesser->getWorkManageModule().setInt(*value, 0x20000001);
+                moduleAccesser->getStatusModule().changeStatusRequest(0x81, moduleAccesser);
+                if (moduleAccesser->getGenerateArticleManageModule().isExist(2) == true) {
+                    if (moduleAccesser->getLinkModule().link(3, moduleAccesser->getGenerateArticleManageModule().getArticle(2)->getTaskId()) == true) {
+                        moduleAccesser->getLinkModule().setModelConstraintPosOrt(3, moduleAccesser->getModelModule().getCorrectNodeId(0x12e), static_cast<ftPikminLinkArgs*>(eventInfo)->unk8, 5, false);
+                    }
+                }
+            }
+            break;
+        case 0x83c:
+            if (stageObj->soGetKind() == 2 && stageObj->soGetSubKind() == 0x90) {
+                moduleAccesser->getGenerateArticleManageModule().removeExist(2, 0);
+                if (moduleAccesser->getGroundModule().isStCliff(0) != 0) {
+                    moduleAccesser->getStatusModule().changeStatusRequest(0x75, moduleAccesser);
+                    Vec3f position = m_moduleAccesser->getPostureModule().getPos();
+                    Vec2f pos(position);
+                    const soArrayList<wnPikminPikmin*, 10>* hold = m_troops.getHoldPikminList();
+                    for (int i = 0; i < hold->size(); i++) {
+                        wnPikminPikmin* pikmin = hold->at(i);
+                        m_troops.syncPos(pikmin, &pos);
+                        m_troops.updateNodeSRT(pikmin);
+                        pikmin->changeStatus(0x33);
+                    }
+                } else {
+                    moduleAccesser->getStatusModule().changeStatusRequest(0x7b, moduleAccesser);
+                    const soArrayList<wnPikminPikmin*, 10>* hold = m_troops.getHoldPikminList();
+                    for (int i = 0; i < hold->size(); i++) {
+                        hold->at(i)->changeStatus(8);
+                    }
+                    m_troops.reducePikminAll(&getOwners());
+                }
+                fn_113_1094C(m_moduleAccesser);
+            }
+            break;
+        case 0x83d: {
+            const soArrayList<wnPikminPikmin*, 10>* hold = m_troops.getHoldPikminList();
+            for (int i = 0; i < hold->size(); i++) {
+                int pikminStatus = soExternalValueAccesser::getStatusKind(hold->at(i));
+                if (pikminStatus == 0x2e || pikminStatus == 0x2f) {
+                    hold->at(i)->changeStatus(0x30);
+                }
+            }
+            break;
+        }
+        case 0x83e:
+            moduleAccesser->getStatusModule().changeStatusRequest(0x83, moduleAccesser);
+            return;
+        case 0x83f:
+            m_troops.setVisibilityChain(1, static_cast<ftPikminLinkArgs*>(eventInfo)->unk8, 1);
+            break;
+        }
+    } else if (stageObj->soGetKind() == 2 && stageObj->soGetSubKind() == 0x43) {
+        switch (eventInfo->m_eventKind) {
+        case 0x45b:
+            if (m_moduleAccesser->getGenerateArticleManageModule().getNum(0) >= 6 && m_troops.isMakeBloodAll() == true) {
+                m_outsideEventPresenter.notifyEventPikminMakeBloomAll();
+            }
+            break;
+        case 2:
+            m_troops.erasePikmin(stageObj->m_taskId);
+            m_troops.updateJostlePriority();
+            break;
+        }
+    }
+    Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+
+// Stand-ins for the helpers behind the unit split.
+extern "C" void fn_113_BF8C(Vec2f* a, Vec2f* b, Vec2f* out); // Vec2f::add, out of line in this unit
+extern "C" void fn_113_10A34(u8* option, soModuleAccesser* acc); // HYPOTHESIS: getPikminOwnerOptionInfo
+
+// Every frame Olimar leaves a new owner info behind him: his position, the way he faces, the condition for the speed he moves
+// with and an option byte. The older infos drift with the movement of the frame (the Pikmin of the line walk to them), the
+// oldest one drops out when the array is full.
+// HYPOTHESIS: names of the kinetic energy and attribute numbers.
+void ftPikmin::updatePikmin() {
+    if (getOwnersVector().isFull() == true) {
+        getOwnersVector().pop();
+    }
+    Vec2f speed = m_moduleAccesser->getKineticModule().getEnergy(6)->getSpeed();
+    Vec2f shift = m_moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(7));
+    if (speed.lengthSq() != 0.0f) {
+        fn_113_BF8C(&shift, &(speed - m_moduleAccesser->getGroundModule().getDownMovementSpeed(0)), &shift);
+    }
+    int condition = fn_113_100F0(m_moduleAccesser, shift.length());
+    u8 option = 0;
+    fn_113_10A34(&option, m_moduleAccesser);
+    float lr = m_moduleAccesser->getPostureModule().getLr();
+    Vec2f pos(m_moduleAccesser->getPostureModule().getPos());
+    wnPikminPikminOwnerInfo info;
+    info.unk0.words[0] = reinterpret_cast<u32*>(&pos)[0];
+    info.unk0.words[1] = reinterpret_cast<u32*>(&pos)[1];
+    info.unk8 = lr;
+    info.unkc.bits.condition = condition;
+    info.unkc.bytes.unkd = option;
+    getOwnersVector().unshift(info);
+    if (speed.lengthSq() != 0.0f) {
+        int num = getOwnersVector().size();
+        for (int i = 1; i < num; i++) {
+            fn_113_BF8C(reinterpret_cast<Vec2f*>(&getOwnersVector().at(i)), &speed, reinterpret_cast<Vec2f*>(&getOwnersVector().at(i)));
+        }
+    }
+    m_troops.update(&getOwners());
+}
+
+// Olimar's position is the target of every owner info.
+void ftPikmin::refreshOwnerInfoPos() {
+    int num = getOwners().size();
+    Vec3f position = m_moduleAccesser->getPostureModule().getPos();
+    Vec2f pos(position);
+    for (int i = 0; i < num; i++) {
+        Vec2f* owner = reinterpret_cast<Vec2f*>(&getOwners().at(i));
+        owner->m_x = pos.m_x;
+        owner->m_y = pos.m_y;
+    }
+}
+
+// MATCH-ONLY: the original calls the constructor and destructor of the local Vec2f array out of line (they live in the REL).
+FT_DOL_ARRAY_VECTOR(Vec2f, 10);
+
+// MATCH-ONLY: the REL carries the out-of-line helper (the declaration is never_inline, see MT_VEC2F_LENGTH_SQ_OUT_OF_LINE).
+float Vec2f::lengthSq() {
+    float xSq = m_x * m_x;
+    float ySq = m_y * m_y;
+    return xSq + ySq;
+}
+
+// MATCH-ONLY: Vec2f::Vec2f(float, float) is a function of the REL that this unit calls; the class keeps it inline (the kinetic
+// energy helpers of the unit need the inline one), so the out-of-line copy is spelled as a function of its own.
+extern "C" void __ct__5Vec2fFff(Vec2f* self, float x, float y) {
+    self->m_x = x;
+    self->m_y = y;
+}
+
+static inline Vec2f addVec2f(Vec2f& a, Vec2f& b) {
+    Vec2f sum;
+    fn_113_BF8C(&a, &b, &sum);
+    return sum;
+}
+
+// Stand-ins for the status-process classes (at the offsets given) that update their own hold Pikmin.
+extern "C" void fn_113_12874(void* statusProcess, soModuleAccesser* acc);
+extern "C" void fn_113_11B28(void* statusProcess, soModuleAccesser* acc);
+extern "C" void fn_113_12C9C(void* statusProcess, soModuleAccesser* acc);
+extern "C" void fn_113_130F0(void* statusProcess, soModuleAccesser* acc);
+extern "C" void fn_113_1386C(void* statusProcess, soModuleAccesser* acc);
+extern "C" void fn_113_13C7C(void* statusProcess, soModuleAccesser* acc);
+
+// Olimar's statuses that carry Pikmin in hand hand the update to their status-process class (members at 0x200D8..0x20128);
+// the plain hold statuses 0x2d..0x2f place the hold Pikmin themselves: the two spots they take are the hand node moved by the
+// constant offset (turned by the facing and the scale) and the same node moved the other way.
+// HYPOTHESIS: status numbers, the meaning of the two spots and of the constants 0xfa8/0xfa9.
+void ftPikmin::updateHoldPikmin() {
+    u8* self = reinterpret_cast<u8*>(this);
+    switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x33:
+        fn_113_12874(self + 0x200E0, m_moduleAccesser);
+        break;
+    case 0x113:
+        fn_113_11B28(self + 0x200D8, m_moduleAccesser);
+        break;
+    case 0x2a:
+    case 0x2b:
+    case 0x2c:
+        fn_113_12C9C(self + 0x200F8, m_moduleAccesser);
+        break;
+    case 0x30:
+    case 0x31:
+    case 0x32:
+        fn_113_130F0(self + 0x20110, m_moduleAccesser);
+        break;
+    case 0x2d:
+    case 0x2e:
+    case 0x2f:
+        if (m_troops.getHoldPikminNum() > 0) {
+            soArrayVector<Vec2f, 10> spots(0);
+            Vec2f handPos(m_moduleAccesser->getModelModule().getNodeGlobalPosition(0, false));
+            Vec2f handPosAgain(m_moduleAccesser->getModelModule().getNodeGlobalPosition(0, false));
+            soModuleAccesser* acc = m_moduleAccesser;
+            float offsetY = soValueAccesser::getConstantFloat(acc, 0xfa9, 0);
+            Vec2f offset;
+            __ct__5Vec2fFff(&offset, soValueAccesser::getConstantFloat(acc, 0xfa8, 0), offsetY);
+            float scale = m_moduleAccesser->getPostureModule().getScale();
+            offset.m_x *= scale;
+            offset.m_y *= scale;
+            if (m_moduleAccesser->getPostureModule().getLr() < 0.0f) {
+                offset.m_x = -offset.m_x;
+            }
+            spots.push(addVec2f(handPos, offset));
+            spots.push(handPos - offset);
+            m_troops.updateHoldPikmin(reinterpret_cast<const soArrayFixed<wnPikminPikminOwnerInfo>*>(&spots));
+        }
+        break;
+    case 0x114:
+        fn_113_1386C(self + 0x20118, m_moduleAccesser);
+        break;
+    case 0x34:
+    case 0x36:
+    case 0x38:
+        fn_113_13C7C(self + 0x20120, m_moduleAccesser);
+        break;
+    }
+}
+
 // FIXME: Test code present only to emit the shared builder functions; delete once ftPikmin is done
 void testBuilder() {
     soInsideEventManageModuleBuilder<ftPikminInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> insideBuilder;
@@ -464,17 +1113,7 @@ void* fn_113_6860(u8* p) { return *(void**)(*(u8**)(p + 0xd8) + 0x70); }
 // soValueAccesser::getValueVariation
 s32 fn_113_D0AC() { return g_soValueVariation; }
 
-// wnPikminPikminTroopsManager is the sub-object at this+0x1FD08; the owner info array sits at this+0x1FE8C. Only the
-// members used here are declared (the full class is in wn/pikmin/wn_pikmin_pikmin_troops_manager.h, which pulls in the
-// article builder and clashes with the fighter builder instantiations of this unit).
-class wnPikminPikmin;
-class wnPikminPikminTroopsManager {
-public:
-    void addPikmin(wnPikminPikmin* pikmin);
-    void reducePikminAll(const soArrayFixed<wnPikminPikminOwnerInfo>* owners);
-    void updateJostlePriority();
-    void setTeamAll(int team, int teamOwner, int skipFlagged);
-};
+// The troops manager is the sub-object at this+0x1FD08; the owner info array sits at this+0x1FE8C.
 #define PIKMIN_TROOPS(p) reinterpret_cast<wnPikminPikminTroopsManager*>((p) + 0x1FD08)
 void fn_113_C394(u8* p, wnPikminPikmin* pikmin) {
     PIKMIN_TROOPS(p)->addPikmin(pikmin);
@@ -598,34 +1237,16 @@ void fn_113_4770(u8* p, int a1, int a2, int a3);
 void fn_113_DD20(u8* p, int a1, int a2, int a3);
 void fn_113_1EB4(u8* p, int a1, int a2, int a3);
 void fn_113_C6B4(u8* p, int a1, int a2, int a3);
-void fn_113_C3E8(u8* p, int a1, int a2, int a3);
-void fn_113_AE80(u8* p, int a1, int a2, int a3);
-void fn_113_A42C(u8* p, int a1, int a2, int a3);
-void fn_113_BC14(u8* p, int a1, int a2, int a3);
-void fn_113_C318(u8* p, int a1, int a2, int a3);
 void fn_113_FF80(u8* p, int a1, int a2, int a3) { fn_113_4770(p - 0x4, a1, a2, a3); }
 void fn_113_FF88(u8* p, int a1, int a2, int a3) { fn_113_DD20(p - 0x4, a1, a2, a3); }
 void fn_113_FF90(u8* p, int a1, int a2, int a3) { fn_113_1EB4(p - 0x4, a1, a2, a3); }
 void fn_113_FFC8(u8* p, int a1, int a2, int a3) { fn_113_C6B4(p - 0x40, a1, a2, a3); }
-void fn_113_FFD0(u8* p, int a1, int a2, int a3) { fn_113_C3E8(p - 0x48, a1, a2, a3); }
-void fn_113_FFE0(u8* p, int a1, int a2, int a3) { fn_113_AE80(p - 0x54, a1, a2, a3); }
-void fn_113_FFE8(u8* p, int a1, int a2, int a3) { fn_113_A42C(p - 0x64, a1, a2, a3); }
-void fn_113_10060(u8* p, int a1, int a2, int a3) { fn_113_BC14(p - 0xC4, a1, a2, a3); }
-void fn_113_100C0(u8* p, int a1, int a2, int a3) { fn_113_C318(p - 0xE8, a1, a2, a3); }
 
 // Vec2f helpers (stored as two floats)
-void fn_113_B7F0(float* dst, float* src) {
-    dst[0] = src[0];
-    dst[1] = src[1];
-}
-void fn_113_C30C(float* dst, float x, float y) {
-    dst[0] = x;
-    dst[1] = y;
-}
-float fn_113_BF74(float* v) { return v[0] * v[0] + v[1] * v[1]; }
-void fn_113_BF8C(float* a, float* b, float* out) {
-    out[0] = a[0] + b[0];
-    out[1] = a[1] + b[1];
+
+void fn_113_BF8C(Vec2f* a, Vec2f* b, Vec2f* out) {
+    out->m_x = a->m_x + b->m_x;
+    out->m_y = a->m_y + b->m_y;
 }
 
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ft/ft_fighter_builder.h>
+#include <wn/pikmin/wn_pikmin_pikmin_troops_manager.h>
 #include <sr/sr_common.h>
 #include <types.h>
 
@@ -55,11 +56,39 @@ class wnPikminPikmin;
 class wnPikminDolfin;
 class wnPikminChain;
 
+class soDamage;
+class soArticle;
+class soCollisionLog;
+
+// The line of Pikmin that follow Olimar is kept by the troops manager sub-object; the owner info array (the positions the
+// Pikmin of the line walk to) sits behind it.
 class ftPikmin : public ftFighterBuilder<ftPikminBuildConfig> {
-    u8 unkTail[0x20130 - sizeof(ftFighterBuilder<ftPikminBuildConfig>)];
+    u32 unk1FD04;
+    wnPikminPikminTroopsManager m_troops; // 0x1FD08
+    // HYPOTHESIS: the original member is a soArrayVector of owner infos; the storage stays opaque until the constructor is reconstructed.
+    u8 m_ownersStorage[0x2A4]; // 0x1FE8C
 public:
     ftPikmin(s32 entryId,
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    soArrayVectorAbstract<wnPikminPikminOwnerInfo>& getOwnersVector() { return *reinterpret_cast<soArrayVectorAbstract<wnPikminPikminOwnerInfo>*>(m_ownersStorage); }
+    soArrayFixed<wnPikminPikminOwnerInfo>& getOwners() { return *reinterpret_cast<soArrayFixed<wnPikminPikminOwnerInfo>*>(m_ownersStorage); }
+    virtual void onActivate();
+    virtual void onStart(int startKind);
+    virtual void postStart(int startKind);
+    virtual void processUpdate();
+    virtual void processFixCamera();
+    virtual void notifyArticleEventEject(int unk1, int unk2, int* unk3);
+    virtual void notifyArticleEventRemove(int unk1, int* unk2);
+    virtual bool notifyEventCaptureStatus(soModuleAccesser* moduleAccesser, int taskId, int unk2, int unk3);
+    virtual void notifyEventOnDamage(soDamage* damage, bool unk2, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    void refreshOwnerInfoPos();
+    void updatePikmin();
+    void updateHoldPikmin();
+    void reduceHideWaitPikmin(int status);
 };
+static_assert(sizeof(ftPikmin) == 0x20130, "ftPikmin size mismatch");

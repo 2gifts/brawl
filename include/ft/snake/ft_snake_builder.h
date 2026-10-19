@@ -86,7 +86,7 @@ public:
     virtual void updateNodeSRT();
     virtual void processFixCamera();
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
-    virtual void notifyArticleEventEject(int unk1, int unk2, int* unk3, int* unk4);
+    virtual void notifyArticleEventEject(int unk1, int unk2, int* unk3);
     virtual void notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual void photoMoved();
     virtual void photoExit();

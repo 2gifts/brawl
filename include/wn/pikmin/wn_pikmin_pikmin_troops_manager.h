@@ -1,7 +1,11 @@
 #pragma once
 
 #include <so/so_array.h>
-#include <wn/pikmin/wn_pikmin_pikmin.h>
+#include <so/templates/so_array_value_wnPikminPikminOwnerInfo.h>
+#include <mt/mt_vector.h>
+
+// Only pointers to the article are held, so the fighter unit (which cannot see the article builder) can use the manager.
+class wnPikminPikmin;
 
 // The group of Pikmin that follow one Olimar (the sub-object ftPikmin keeps at +0x1FD08). It holds three lists: the
 // Pikmin in the line behind the fighter, the Pikmin held in hand and the Pikmin that were set free.
