@@ -365,6 +365,15 @@ void ftSnake::photoExit() {
     }
 }
 
+// The land mine starts with the power multiplier of the fighter.
+bool ftSnake::activeArticle(wnSnakeMine* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam(), acc->getCollisionAttackModule().getPowerMulStatus());
+    return true;
+}
+
 // The trench mortar shell starts at the stage object of the fighter with its team and facing.
 bool ftSnake::activeArticle1(wnSnakeTrenchMortar* weapon, soModuleAccesser* acc) {
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());

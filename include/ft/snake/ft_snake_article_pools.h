@@ -39,6 +39,7 @@ class wnSnakeMine : public Weapon {
 public:
     wnSnakeMine(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeMineData* data);
     virtual ~wnSnakeMine();
+    void activate(int founderTaskId, int etcResourceId, int team, float powerMul);
     void shoot(const Vec3f& position);
 };
 static_assert(sizeof(wnSnakeMine) == 0x2884, "wnSnakeMine layout is wrong!");
