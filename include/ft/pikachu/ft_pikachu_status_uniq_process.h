@@ -22,6 +22,15 @@ struct ftPikachuWork {
     enum Flag {
         QuickAttack_Ended = 0x12000003,
     };
+    // Thunder. HYPOTHESIS: names follow the use.
+    enum ThunderInt {
+        Thunder_Situation = 0x20000002,       // situation kind the hit status last reacted to (-1 before the first update)
+        Thunder_CloudHit = 0x20000003,
+        Thunder_CloudPointer = 0x10000043,    // the cloud article, stored as an int
+    };
+    enum ThunderFlag {
+        Thunder_CloudLogged = 0x22000012,     // the cloud holds a reference to the attack log of Pikachu
+    };
     // Skull Bash. HYPOTHESIS: names follow the use.
     enum SkullBashInt {
         SkullBash_Frames = 0x20000000,        // charge frames, kept while the move is released
@@ -44,6 +53,7 @@ struct ftPikachuStatus {
         QuickAttack_Unk116 = 0x116,
         QuickAttack_Unk117 = 0x117,
         QuickAttack_Unk118 = 0x118,
+        Thunder_Unk11D = 0x11d,
     };
 };
 
@@ -130,6 +140,24 @@ public:
     virtual void execStatus(soModuleAccesser* moduleAccesser);
 };
 
+// Thunder: the bolt that is called down (Thunder) and the status entered when the cloud's bolt hits Pikachu (ThunderHit).
+class ftPikachuStatusUniqProcessSpecialThunder : public soStatusUniqProcess {
+public:
+    virtual ~ftPikachuStatusUniqProcessSpecialThunder() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execFixPosCounter(soModuleAccesser* moduleAccesser);
+};
+
+class ftPikachuStatusUniqProcessSpecialThunderHit : public soStatusUniqProcess {
+public:
+    virtual ~ftPikachuStatusUniqProcessSpecialThunderHit() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+    static void notifyReflect(soModuleAccesser* moduleAccesser);
+    static void unref_log_group(soModuleAccesser* moduleAccesser);
+};
+
 extern ftPikachuStatusUniqProcessSpecialQuickAttackStart g_ftPikachuStatusUniqProcessSpecialQuickAttackStart;
 extern ftPikachuStatusUniqProcessSpecialQuickAttackWarp g_ftPikachuStatusUniqProcessSpecialQuickAttackWarp;
 extern ftPikachuStatusUniqProcessSpecialQuickAttackEnd g_ftPikachuStatusUniqProcessSpecialQuickAttackEnd;
@@ -138,3 +166,5 @@ extern ftPikachuStatusUniqProcessSpecialSkullBashHold g_ftPikachuStatusUniqProce
 extern ftPikachuStatusUniqProcessSpecialSkullBashWeak g_ftPikachuStatusUniqProcessSpecialSkullBashWeak;
 extern ftPikachuStatusUniqProcessSpecialSkullBashAttack g_ftPikachuStatusUniqProcessSpecialSkullBashAttack;
 extern ftPikachuStatusUniqProcessSpecialSkullBashEnd g_ftPikachuStatusUniqProcessSpecialSkullBashEnd;
+extern ftPikachuStatusUniqProcessSpecialThunder g_ftPikachuStatusUniqProcessSpecialThunder;
+extern ftPikachuStatusUniqProcessSpecialThunderHit g_ftPikachuStatusUniqProcessSpecialThunderHit;

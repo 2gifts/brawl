@@ -84,6 +84,9 @@ public:
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
     void** getExtendParam();
+    // The cloud article of Thunder is kept in a work int of the fighter (HYPOTHESIS: names follow the module map).
+    static wnPikachuCloud* get_cloud_pointer(soModuleAccesser* acc);
+    static void rec_cloud_pointer1(soModuleAccesser* acc, wnPikachuCloud* cloud);
     // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnPikachuThunderJolt* weapon, soModuleAccesser* acc);
     static bool activeArticle1(wnPikachuCloud* weapon, soModuleAccesser* acc);

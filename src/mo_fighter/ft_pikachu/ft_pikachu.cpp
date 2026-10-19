@@ -446,6 +446,14 @@ int fn_98_98B8(u8* p) { return fn_98_11B40(*(void**)(p + 0x60)); }
 
 void** ftPikachu::getExtendParam() { return m_data->extendParam; }
 
+wnPikachuCloud* ftPikachu::get_cloud_pointer(soModuleAccesser* acc) {
+    return reinterpret_cast<wnPikachuCloud*>(acc->getWorkManageModule().getInt(0x10000043));
+}
+
+void ftPikachu::rec_cloud_pointer1(soModuleAccesser* acc, wnPikachuCloud* cloud) {
+    acc->getWorkManageModule().setInt(reinterpret_cast<int>(cloud), 0x10000043);
+}
+
 // soInstancePoolSub::getInstanceAt for the wnPikachu* instance holders: instance slots by index, null past the last one.
 void* fn_98_B62C(u8* p, int index) {
     if (index == 2) return p + 0x3FA4;
