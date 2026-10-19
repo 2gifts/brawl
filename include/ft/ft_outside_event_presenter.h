@@ -19,6 +19,7 @@ public:
     inline ftOutsideEventPresenter(s16 manageId, int entryId);
     virtual ~ftOutsideEventPresenter() { }
 
+    void notifyEventPikminMakeBloomAll();
     void notifyOutsideEventKnockout();
     void notifyOutsideEventOnInput();
     void notifyOutsideEventSuicide(int entryId);

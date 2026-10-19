@@ -82,10 +82,12 @@ public:
     virtual void notifyArticleEventRemove(int unk1, int* unk2);
     virtual bool notifyEventCaptureStatus(soModuleAccesser* moduleAccesser, int taskId, int unk2, int unk3);
     virtual void notifyEventOnDamage(soDamage* damage, bool unk2, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
     void refreshOwnerInfoPos();
     void updatePikmin();
     void updateHoldPikmin();
-    void reduceHideWaitPikmin();
+    void reduceHideWaitPikmin(int status);
 };
 static_assert(sizeof(ftPikmin) == 0x20130, "ftPikmin size mismatch");
