@@ -876,12 +876,12 @@ static inline Vec2f addVec2f(Vec2f& a, Vec2f& b) {
 }
 
 // Stand-ins for the status-process classes (at the offsets given) that update their own hold Pikmin.
-extern "C" void fn_113_12874(void* statusProcess, soModuleAccesser* acc);
-extern "C" void fn_113_11B28(void* statusProcess, soModuleAccesser* acc);
-extern "C" void fn_113_12C9C(void* statusProcess, soModuleAccesser* acc);
-extern "C" void fn_113_130F0(void* statusProcess, soModuleAccesser* acc);
-extern "C" void fn_113_1386C(void* statusProcess, soModuleAccesser* acc);
-extern "C" void fn_113_13C7C(void* statusProcess, soModuleAccesser* acc);
+extern "C" void updateHoldPikmin__34ftPikminStatusUniqProcessAttackAirFP16soModuleAccesser(void* statusProcess, soModuleAccesser* acc);
+extern "C" void updateHoldPikmin__33ftPikminStatusUniqProcessSpecialSFP16soModuleAccesser(void* statusProcess, soModuleAccesser* acc);
+extern "C" void updateHoldPikmin__33ftPikminStatusUniqProcessAttackS4FP16soModuleAccesser(void* statusProcess, soModuleAccesser* acc);
+extern "C" void updateHoldPikmin__34ftPikminStatusUniqProcessAttackHi4FP16soModuleAccesser(void* statusProcess, soModuleAccesser* acc);
+extern "C" void updateHoldPikmin__34ftPikminStatusUniqProcessSpecialHiFP16soModuleAccesser(void* statusProcess, soModuleAccesser* acc);
+extern "C" void updateHoldPikmin__30ftPikminStatusUniqProcessCatchFP16soModuleAccesser(void* statusProcess, soModuleAccesser* acc);
 
 // Olimar's statuses that carry Pikmin in hand hand the update to their status-process class (members at 0x200D8..0x20128);
 // the plain hold statuses 0x2d..0x2f place the hold Pikmin themselves: the two spots they take are the hand node moved by the
@@ -891,20 +891,20 @@ void ftPikmin::updateHoldPikmin() {
     u8* self = reinterpret_cast<u8*>(this);
     switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
     case 0x33:
-        fn_113_12874(self + 0x200E0, m_moduleAccesser);
+        updateHoldPikmin__34ftPikminStatusUniqProcessAttackAirFP16soModuleAccesser(self + 0x200E0, m_moduleAccesser);
         break;
     case 0x113:
-        fn_113_11B28(self + 0x200D8, m_moduleAccesser);
+        updateHoldPikmin__33ftPikminStatusUniqProcessSpecialSFP16soModuleAccesser(self + 0x200D8, m_moduleAccesser);
         break;
     case 0x2a:
     case 0x2b:
     case 0x2c:
-        fn_113_12C9C(self + 0x200F8, m_moduleAccesser);
+        updateHoldPikmin__33ftPikminStatusUniqProcessAttackS4FP16soModuleAccesser(self + 0x200F8, m_moduleAccesser);
         break;
     case 0x30:
     case 0x31:
     case 0x32:
-        fn_113_130F0(self + 0x20110, m_moduleAccesser);
+        updateHoldPikmin__34ftPikminStatusUniqProcessAttackHi4FP16soModuleAccesser(self + 0x20110, m_moduleAccesser);
         break;
     case 0x2d:
     case 0x2e:
@@ -929,12 +929,12 @@ void ftPikmin::updateHoldPikmin() {
         }
         break;
     case 0x114:
-        fn_113_1386C(self + 0x20118, m_moduleAccesser);
+        updateHoldPikmin__34ftPikminStatusUniqProcessSpecialHiFP16soModuleAccesser(self + 0x20118, m_moduleAccesser);
         break;
     case 0x34:
     case 0x36:
     case 0x38:
-        fn_113_13C7C(self + 0x20120, m_moduleAccesser);
+        updateHoldPikmin__30ftPikminStatusUniqProcessCatchFP16soModuleAccesser(self + 0x20120, m_moduleAccesser);
         break;
     }
 }

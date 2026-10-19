@@ -22,6 +22,7 @@ public:
     virtual ~wnPikminPikmin();
     void activate(float lr, float unk2, float unk3, int unk18, Vec3f* pos, int founderTaskId, int resourceId, int team,
                   int initStatus, bool unk10, int unk11);
+    void onStatusFlag(u32 flag);
 };
 static_assert(sizeof(wnPikminPikmin) == 0x3344, "wnPikminPikmin layout is wrong!");
 

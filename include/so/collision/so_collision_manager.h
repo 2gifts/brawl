@@ -10,6 +10,7 @@ public:
     soCollisionManager();
     // HYPOTHESIS: the lazy singleton getter is emitted in the REL that uses it (the fighters keep log groups).
     static soCollisionManager* getInstance();
+    int allocateLogGroup();
     void freeLogGroup(int logGroup);
     void leaveFreeRefLogGroup(int logGroup);
     char _0[0x1508];
