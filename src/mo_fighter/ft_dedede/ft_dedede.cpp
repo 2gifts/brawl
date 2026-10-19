@@ -2,10 +2,16 @@
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_NOINLINE_SEARCH_BUILDER
+#define FT_DEDEDE_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/dedede/ft_dedede.h>
 #include <ft/dedede/ft_dedede_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
+#include <ft/dedede/ft_dedede_transactor.h>
 #include <ft/ft_kinetic_energy_controller.h>
 #include <so/so_value_accesser.h>
 
@@ -88,6 +94,327 @@ ftDedede::ftDedede(s32 entryId,
     // HYPOTHESIS: the common data record points at the fighter's area definitions (+0xb8).
     m_moduleAccesser->getAreaModule().addArea(*reinterpret_cast<soSet<soAreaData>**>(reinterpret_cast<u8*>(m_data) + 0xb8));
 }
+
+// The Jet Hammer starts with the model resource of the fighter and the facing.
+bool ftDedede::activeArticle1(wnDededeJethammer* weapon, soModuleAccesser* acc) {
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    float lr = acc->getPostureModule().getLr();
+    int modelResId = resources.getResourceIdAccesser()->getMdlResId();
+    weapon->activate(founderTaskId, modelResId, lr);
+    return true;
+}
+
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+#pragma dont_inline on
+ftDededeTransactor* ftDededeTransactor::getInstance() {
+    static ftDededeTransactor instance;
+    return &instance;
+}
+#pragma dont_inline off
+#pragma pool_data reset
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Dedede, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftDededeArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftDededeArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftDededeArticleKind : wnArticleKindInfo {
+    ftDededeArticleKind() {
+        kind = 0;
+        subKind = Fighter_Dedede;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftDededeArticleBuildInfo : wnArticleBuildInfo {
+    ftDededeArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_1488D4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1488E8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148910(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1488FC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1489A4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftDededeArticleTraits;
+#define FT_DEDEDE_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftDededeArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftDededeArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Dedede, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_DEDEDE_TRAITS(wnDededeStar, wnDededeStarData, 0, fn_27_1488D4)
+FT_DEDEDE_TRAITS(wnDededeJethammer, wnDededeJethammerData, 1, fn_27_1488E8)
+FT_DEDEDE_TRAITS(wnDededeStarmissile, wnDededeStarmissileData, 2, fn_27_148910)
+FT_DEDEDE_TRAITS(wnDededeWaddledooBeam, wnDededeWaddledooBeamData, 3, fn_27_1488FC)
+FT_DEDEDE_TRAITS(wnDededeFollower, wnDededeFollowerData, 4, fn_27_1489A4)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftDededeArticleTraits<W>::ArticleId, ftDededeArticleBuildInfo(ftDededeArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftDededeArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnDededeStar>::~wnArticleHolder();
+template wnArticleHolder<wnDededeJethammer>::~wnArticleHolder();
+template wnArticleHolder<wnDededeStarmissile>::~wnArticleHolder();
+template wnArticleHolder<wnDededeWaddledooBeam>::~wnArticleHolder();
+template wnArticleHolder<wnDededeFollower>::~wnArticleHolder();
+template wnArticleHolder<wnDededeStar>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnDededeWaddledooBeam>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnDededeFollower>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftDededeArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftDededeArticleMediator, 25>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftDededeArticleMediator, 25>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftDededeArticleMediator::~ftDededeArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftDededeArticleMediator::getMediateNum() { return 5; }
+void ftDededeArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Star, 1 Jethammer, 2 Starmissile, 3 WaddledooBeam, 4 Follower (the rest are unused).
+
+#define FT_DEDEDE_POOL_STAR_BASE static_cast<wnArticlePool<wnDededeStar, 2, ftDededeJethammerPool>&>(m_pools)
+#define FT_DEDEDE_POOL_STAR FT_DEDEDE_POOL_STAR_BASE.getSub()
+#define FT_DEDEDE_POOL_JETHAMMER_BASE static_cast<wnArticlePool<wnDededeJethammer, 1, ftDededeStarmissilePool>&>(m_pools)
+#define FT_DEDEDE_POOL_JETHAMMER FT_DEDEDE_POOL_JETHAMMER_BASE.getSub()
+#define FT_DEDEDE_POOL_STARMISSILE_BASE static_cast<wnArticlePool<wnDededeStarmissile, 1, ftDededeWaddledooBeamPool>&>(m_pools)
+#define FT_DEDEDE_POOL_STARMISSILE FT_DEDEDE_POOL_STARMISSILE_BASE.getSub()
+#define FT_DEDEDE_POOL_WADDLEDOOBEAM_BASE static_cast<wnArticlePool<wnDededeWaddledooBeam, 4, ftDededeFollowerPool>&>(m_pools)
+#define FT_DEDEDE_POOL_WADDLEDOOBEAM FT_DEDEDE_POOL_WADDLEDOOBEAM_BASE.getSub()
+#define FT_DEDEDE_POOL_FOLLOWER_BASE static_cast<wnArticlePool<wnDededeFollower, 19, soInstancePoolRoot>&>(m_pools)
+#define FT_DEDEDE_POOL_FOLLOWER FT_DEDEDE_POOL_FOLLOWER_BASE.getSub()
+
+#define FT_DEDEDE_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) WN_ARTICLE_UNUSED_SLOT(7, value) \
+    WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) WN_ARTICLE_UNUSED_SLOT(10, value) \
+    WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) WN_ARTICLE_UNUSED_SLOT(13, value) \
+    WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftDededeArticleMediator::deactivate() {
+    for (s32 i = 0; i < 2; ++i) {
+        wnDededeStar* weapon = FT_DEDEDE_POOL_STAR.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnDededeJethammer* weapon = FT_DEDEDE_POOL_JETHAMMER.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnDededeStarmissile* weapon = FT_DEDEDE_POOL_STARMISSILE.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 4; ++i) {
+        wnDededeWaddledooBeam* weapon = FT_DEDEDE_POOL_WADDLEDOOBEAM.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 19; ++i) {
+        wnDededeFollower* weapon = FT_DEDEDE_POOL_FOLLOWER.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftDededeArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 2; }
+    case 1: { wnArticleSlotTag tag; return 1; }
+    case 2: { wnArticleSlotTag tag; return 1; }
+    case 3: { wnArticleSlotTag tag; return 4; }
+    case 4: { wnArticleSlotTag tag; return 19; }
+    FT_DEDEDE_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftDededeActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_DEDEDE_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftDededeActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftDededeActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftDededeArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_DEDEDE_COUNT_ACTIVE(FT_DEDEDE_POOL_STAR, 2)
+    case 1: FT_DEDEDE_COUNT_ACTIVE(FT_DEDEDE_POOL_JETHAMMER, 1)
+    case 2: FT_DEDEDE_COUNT_ACTIVE(FT_DEDEDE_POOL_STARMISSILE, 1)
+    case 3: FT_DEDEDE_COUNT_ACTIVE(FT_DEDEDE_POOL_WADDLEDOOBEAM, 4)
+    case 4: FT_DEDEDE_COUNT_ACTIVE(FT_DEDEDE_POOL_FOLLOWER, 19)
+    FT_DEDEDE_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_DEDEDE_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftDededeArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_DEDEDE_CAN_GENERATE(FT_DEDEDE_POOL_STAR, 2, 0)
+    case 1: FT_DEDEDE_CAN_GENERATE(FT_DEDEDE_POOL_JETHAMMER, 1, 1)
+    case 2: FT_DEDEDE_CAN_GENERATE(FT_DEDEDE_POOL_STARMISSILE, 1, 2)
+    case 3: FT_DEDEDE_CAN_GENERATE(FT_DEDEDE_POOL_WADDLEDOOBEAM, 4, 3)
+    case 4: FT_DEDEDE_CAN_GENERATE(FT_DEDEDE_POOL_FOLLOWER, 19, 4)
+    FT_DEDEDE_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftDededeArticleActivator;
+template <> struct ftDededeArticleActivator<wnDededeStar> {
+    static bool activate(wnDededeStar* weapon, soModuleAccesser* acc) { return ftDedede::activeArticle(weapon, acc); }
+};
+template <> struct ftDededeArticleActivator<wnDededeJethammer> {
+    static bool activate(wnDededeJethammer* weapon, soModuleAccesser* acc) { return ftDedede::activeArticle1(weapon, acc); }
+};
+template <> struct ftDededeArticleActivator<wnDededeStarmissile> {
+    static bool activate(wnDededeStarmissile* weapon, soModuleAccesser* acc) {
+        u32 etcResId = acc->getResourceModule().getResourceIdAccesser()->getEtcResId();
+        return ftDededeTransactor::getInstance()->activeArticle(weapon, acc, etcResId);
+    }
+};
+template <> struct ftDededeArticleActivator<wnDededeWaddledooBeam> {
+    static bool activate(wnDededeWaddledooBeam* weapon, soModuleAccesser* acc) { return ftDedede::activeArticle3(weapon, acc); }
+};
+template <> struct ftDededeArticleActivator<wnDededeFollower> {
+    static bool activate(wnDededeFollower* weapon, soModuleAccesser* acc) { return ftDedede::activeArticle2(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_DEDEDE_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftDededeArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftDededeArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_DEDEDE_GENERATE(wnDededeStar, FT_DEDEDE_POOL_STAR)
+    case 1: FT_DEDEDE_GENERATE(wnDededeJethammer, FT_DEDEDE_POOL_JETHAMMER)
+    case 2: FT_DEDEDE_GENERATE(wnDededeStarmissile, FT_DEDEDE_POOL_STARMISSILE)
+    case 3: FT_DEDEDE_GENERATE(wnDededeWaddledooBeam, FT_DEDEDE_POOL_WADDLEDOOBEAM)
+    case 4: FT_DEDEDE_GENERATE(wnDededeFollower, FT_DEDEDE_POOL_FOLLOWER)
+    FT_DEDEDE_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftDededeArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnDededeStar&>(*article);
+        return true;
+    }
+    case 1: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnDededeJethammer&>(*article);
+        return false;
+    }
+    case 2: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnDededeStarmissile&>(*article);
+        return true;
+    }
+    case 3: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnDededeWaddledooBeam&>(*article);
+        return true;
+    }
+    case 4: {
+        wnArticleSlotTag tag;
+        return ftDedede::shootArticle(&dynamic_cast<wnDededeFollower&>(*article), acc);
+    }
+    FT_DEDEDE_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftDedede is done
 void testBuilder() {

@@ -1,11 +1,18 @@
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
 #define FT_FIGHTER_ANIMCMD_LONG // MATCH-ONLY: Fighter::notifyEventAnimCmd(long) overrides the StageObject slot (as in ft_marth.cpp)
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_POPO_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_manager.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/iceclimber/ft_iceclimber.h>
 #include <ft/iceclimber/ft_iceclimber_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
+#include <ft/iceclimber/ft_iceclimber_transactor.h>
 
 #define FT_BC ftPopoBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -56,6 +63,317 @@ ftPopo::ftPopo(s32 entryId,
     m_moduleAccesser->getStatusModule().setUniqProc(0x10E, &lbl_105_bss_30C);
     m_moduleAccesser->getStatusModule().setUniqProc(0xBE, &lbl_105_bss_31C);
 }
+
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+#pragma dont_inline on
+ftPopoTransactor* ftPopoTransactor::getInstance() {
+    static ftPopoTransactor instance;
+    return &instance;
+}
+#pragma dont_inline off
+#pragma pool_data reset
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Popo, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftPopoArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftPopoArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftPopoArticleKind : wnArticleKindInfo {
+    ftPopoArticleKind() {
+        kind = 0;
+        subKind = Fighter_Popo;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftPopoArticleBuildInfo : wnArticleBuildInfo {
+    ftPopoArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_1491C4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1491DC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_14925C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_149274(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_14928C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftPopoArticleTraits;
+#define FT_POPO_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftPopoArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftPopoArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Popo, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_POPO_TRAITS(wnPopoBlizzard, wnPopoBlizzardData, 0, fn_27_1491C4)
+FT_POPO_TRAITS(wnPopoIceShot, wnPopoIceShotData, 1, fn_27_1491DC)
+FT_POPO_TRAITS(wnPopoIceBerg, wnPopoIceBergData, 2, fn_27_14925C)
+FT_POPO_TRAITS(wnPopoRubber, wnPopoRubberData, 3, fn_27_149274)
+FT_POPO_TRAITS(wnPopoIceBergWind, wnPopoIceBergWindData, 4, fn_27_14928C)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftPopoArticleTraits<W>::ArticleId, ftPopoArticleBuildInfo(ftPopoArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftPopoArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnPopoBlizzard>::~wnArticleHolder();
+template wnArticleHolder<wnPopoIceShot>::~wnArticleHolder();
+template wnArticleHolder<wnPopoIceBerg>::~wnArticleHolder();
+template wnArticleHolder<wnPopoRubber>::~wnArticleHolder();
+template wnArticleHolder<wnPopoIceBergWind>::~wnArticleHolder();
+template wnArticleHolder<wnPopoBlizzard>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnPopoIceShot>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftPopoArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftPopoArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftPopoArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftPopoArticleMediator::~ftPopoArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftPopoArticleMediator::getMediateNum() { return 5; }
+void ftPopoArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Blizzard, 1 IceShot, 2 IceBerg, 3 Rubber, 4 IceBergWind (the rest are unused).
+
+#define FT_POPO_POOL_BLIZZARD_BASE static_cast<wnArticlePool<wnPopoBlizzard, 3, ftPopoIceShotPool>&>(m_pools)
+#define FT_POPO_POOL_BLIZZARD FT_POPO_POOL_BLIZZARD_BASE.getSub()
+#define FT_POPO_POOL_ICESHOT_BASE static_cast<wnArticlePool<wnPopoIceShot, 5, ftPopoIceBergPool>&>(m_pools)
+#define FT_POPO_POOL_ICESHOT FT_POPO_POOL_ICESHOT_BASE.getSub()
+#define FT_POPO_POOL_ICEBERG_BASE static_cast<wnArticlePool<wnPopoIceBerg, 1, ftPopoRubberPool>&>(m_pools)
+#define FT_POPO_POOL_ICEBERG FT_POPO_POOL_ICEBERG_BASE.getSub()
+#define FT_POPO_POOL_RUBBER_BASE static_cast<wnArticlePool<wnPopoRubber, 1, ftPopoIceBergWindPool>&>(m_pools)
+#define FT_POPO_POOL_RUBBER FT_POPO_POOL_RUBBER_BASE.getSub()
+#define FT_POPO_POOL_ICEBERGWIND_BASE static_cast<wnArticlePool<wnPopoIceBergWind, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_POPO_POOL_ICEBERGWIND FT_POPO_POOL_ICEBERGWIND_BASE.getSub()
+
+#define FT_POPO_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) WN_ARTICLE_UNUSED_SLOT(7, value) \
+    WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) WN_ARTICLE_UNUSED_SLOT(10, value) \
+    WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) WN_ARTICLE_UNUSED_SLOT(13, value) \
+    WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftPopoArticleMediator::deactivate() {
+    for (s32 i = 0; i < 3; ++i) {
+        wnPopoBlizzard* weapon = FT_POPO_POOL_BLIZZARD.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 5; ++i) {
+        wnPopoIceShot* weapon = FT_POPO_POOL_ICESHOT.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnPopoIceBerg* weapon = FT_POPO_POOL_ICEBERG.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnPopoRubber* weapon = FT_POPO_POOL_RUBBER.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnPopoIceBergWind* weapon = FT_POPO_POOL_ICEBERGWIND.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftPopoArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 3; }
+    case 1: { wnArticleSlotTag tag; return 5; }
+    case 2: { wnArticleSlotTag tag; return 1; }
+    case 3: { wnArticleSlotTag tag; return 1; }
+    case 4: { wnArticleSlotTag tag; return 1; }
+    FT_POPO_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftPopoActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_POPO_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftPopoActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftPopoActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftPopoArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_POPO_COUNT_ACTIVE(FT_POPO_POOL_BLIZZARD, 3)
+    case 1: FT_POPO_COUNT_ACTIVE(FT_POPO_POOL_ICESHOT, 5)
+    case 2: FT_POPO_COUNT_ACTIVE(FT_POPO_POOL_ICEBERG, 1)
+    case 3: FT_POPO_COUNT_ACTIVE(FT_POPO_POOL_RUBBER, 1)
+    case 4: FT_POPO_COUNT_ACTIVE(FT_POPO_POOL_ICEBERGWIND, 1)
+    FT_POPO_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_POPO_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftPopoArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_POPO_CAN_GENERATE(FT_POPO_POOL_BLIZZARD, 3, 0)
+    case 1: FT_POPO_CAN_GENERATE(FT_POPO_POOL_ICESHOT, 5, 1)
+    case 2: FT_POPO_CAN_GENERATE(FT_POPO_POOL_ICEBERG, 1, 2)
+    case 3: FT_POPO_CAN_GENERATE(FT_POPO_POOL_RUBBER, 1, 3)
+    case 4: FT_POPO_CAN_GENERATE(FT_POPO_POOL_ICEBERGWIND, 1, 4)
+    FT_POPO_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftPopoArticleActivator;
+template <> struct ftPopoArticleActivator<wnPopoBlizzard> {
+    static bool activate(wnPopoBlizzard* weapon, soModuleAccesser* acc) { return ftPopo::activeArticle(weapon, acc); }
+};
+template <> struct ftPopoArticleActivator<wnPopoIceShot> {
+    static bool activate(wnPopoIceShot* weapon, soModuleAccesser* acc) {
+        u32 etcResId = acc->getResourceModule().getResourceIdAccesser()->getEtcResId();
+        return ftPopoTransactor::getInstance()->activeArticle1(weapon, acc, etcResId);
+    }
+};
+template <> struct ftPopoArticleActivator<wnPopoIceBerg> {
+    static bool activate(wnPopoIceBerg* weapon, soModuleAccesser* acc) { return ftPopo::activeArticle1(weapon, acc); }
+};
+template <> struct ftPopoArticleActivator<wnPopoRubber> {
+    static bool activate(wnPopoRubber* weapon, soModuleAccesser* acc) { return ftPopo::activeArticle2(weapon, acc); }
+};
+template <> struct ftPopoArticleActivator<wnPopoIceBergWind> {
+    static bool activate(wnPopoIceBergWind* weapon, soModuleAccesser* acc) { return wnPopoIceBerg::activeArticle(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_POPO_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftPopoArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftPopoArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_POPO_GENERATE(wnPopoBlizzard, FT_POPO_POOL_BLIZZARD)
+    case 1: FT_POPO_GENERATE(wnPopoIceShot, FT_POPO_POOL_ICESHOT)
+    case 2: FT_POPO_GENERATE(wnPopoIceBerg, FT_POPO_POOL_ICEBERG)
+    case 3: FT_POPO_GENERATE(wnPopoRubber, FT_POPO_POOL_RUBBER)
+    case 4: FT_POPO_GENERATE(wnPopoIceBergWind, FT_POPO_POOL_ICEBERGWIND)
+    FT_POPO_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftPopoArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnPopoBlizzard&>(*article);
+        return true;
+    }
+    case 1: {
+        wnArticleSlotTag tag;
+        dynamic_cast<wnPopoIceShot&>(*article).shoot();
+        return false;
+    }
+    case 2: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnPopoIceBerg&>(*article);
+        return true;
+    }
+    case 3: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnPopoRubber&>(*article);
+        return true;
+    }
+    case 4: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnPopoIceBergWind&>(*article);
+        return true;
+    }
+    FT_POPO_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftPopo is done
 void testBuilder() {

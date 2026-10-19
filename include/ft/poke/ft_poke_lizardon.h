@@ -23,8 +23,14 @@ typedef soCollisionShieldModuleBuildConfigGroups<2, 1, 1, soCollisionShieldEvent
 typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> ftPokeLizardonLinkModuleBuildConfig;
 typedef soStatusModuleBuildConfig<281, soGeneralWorkBuildConfig<18, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftPokeLizardonStatusModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_POKELIZARDON_ARTICLE_POOLS
+#include <ft/poke/ft_poke_lizardon_article_pools.h>
+typedef ftPokeLizardonArticleManageModuleBuilder ftPokeLizardonGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0xFDF0, Fighter_PokeLizardon> ftPokeLizardonGenerateArticleManageModuleBuilder;
+#endif
 
 class ftPokeLizardonBuildConfig : public ftCommonBuildConfig {
 public:
@@ -55,6 +61,10 @@ public:
     ftPokemonEventManageModule(s32 entryId, soModuleAccesser* moduleAccesser, ftPokemonStaminaModule* stamina);
 };
 
+class wnPokeLizardonBreath;
+class wnPokeLizardonRock;
+class wnPokeLizardonRockStone;
+
 class ftPokeLizardon : public ftFighterBuilder<ftPokeLizardonBuildConfig> {
     soArrayContractibleTable<const soStatusData> m_statusTable; // +0x17F90
     ftData* m_data;                                             // +0x17FA0
@@ -67,4 +77,6 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnPokeLizardonRock* weapon, soModuleAccesser* acc);
 };

@@ -1,10 +1,16 @@
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_POKELIZARDON_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/poke/ft_poke_lizardon.h>
 #include <ft/poke/ft_poke_lizardon_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
+#include <ft/poke/ft_poke_lizardon_transactor.h>
 
 #define FT_BC ftPokeLizardonBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -57,6 +63,271 @@ ftPokeLizardon::ftPokeLizardon(s32 entryId,
     damage.unkB4 = 0x11;
     damage.unkB8 = scaleB;
 }
+
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+#pragma dont_inline on
+ftPokeLizardonTransactor* ftPokeLizardonTransactor::getInstance() {
+    static ftPokeLizardonTransactor instance;
+    return &instance;
+}
+#pragma dont_inline off
+#pragma pool_data reset
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind PokeLizardon, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftPokeLizardonArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftPokeLizardonArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftPokeLizardonArticleKind : wnArticleKindInfo {
+    ftPokeLizardonArticleKind() {
+        kind = 0;
+        subKind = Fighter_PokeLizardon;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftPokeLizardonArticleBuildInfo : wnArticleBuildInfo {
+    ftPokeLizardonArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_148198(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148228(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_14823C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftPokeLizardonArticleTraits;
+#define FT_POKELIZARDON_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftPokeLizardonArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftPokeLizardonArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_PokeLizardon, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_POKELIZARDON_TRAITS(wnPokeLizardonBreath, wnPokeLizardonBreathData, 0, fn_27_148198)
+FT_POKELIZARDON_TRAITS(wnPokeLizardonRock, wnPokeLizardonRockData, 1, fn_27_148228)
+FT_POKELIZARDON_TRAITS(wnPokeLizardonRockStone, wnPokeLizardonRockStoneData, 2, fn_27_14823C)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftPokeLizardonArticleTraits<W>::ArticleId, ftPokeLizardonArticleBuildInfo(ftPokeLizardonArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftPokeLizardonArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnPokeLizardonBreath>::~wnArticleHolder();
+template wnArticleHolder<wnPokeLizardonRock>::~wnArticleHolder();
+template wnArticleHolder<wnPokeLizardonRockStone>::~wnArticleHolder();
+template wnArticleHolder<wnPokeLizardonBreath>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnPokeLizardonRock>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnPokeLizardonRockStone>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftPokeLizardonArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftPokeLizardonArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftPokeLizardonArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftPokeLizardonArticleMediator::~ftPokeLizardonArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftPokeLizardonArticleMediator::getMediateNum() { return 3; }
+void ftPokeLizardonArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Breath, 1 Rock, 2 RockStone (the rest are unused).
+
+#define FT_POKELIZARDON_POOL_BREATH_BASE static_cast<wnArticlePool<wnPokeLizardonBreath, 5, ftPokeLizardonRockPool>&>(m_pools)
+#define FT_POKELIZARDON_POOL_BREATH FT_POKELIZARDON_POOL_BREATH_BASE.getSub()
+#define FT_POKELIZARDON_POOL_ROCK_BASE static_cast<wnArticlePool<wnPokeLizardonRock, 2, ftPokeLizardonRockStonePool>&>(m_pools)
+#define FT_POKELIZARDON_POOL_ROCK FT_POKELIZARDON_POOL_ROCK_BASE.getSub()
+#define FT_POKELIZARDON_POOL_ROCKSTONE_BASE static_cast<wnArticlePool<wnPokeLizardonRockStone, 4, soInstancePoolRoot>&>(m_pools)
+#define FT_POKELIZARDON_POOL_ROCKSTONE FT_POKELIZARDON_POOL_ROCKSTONE_BASE.getSub()
+
+#define FT_POKELIZARDON_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(3, value) WN_ARTICLE_UNUSED_SLOT(4, value) WN_ARTICLE_UNUSED_SLOT(5, value) \
+    WN_ARTICLE_UNUSED_SLOT(6, value) WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) \
+    WN_ARTICLE_UNUSED_SLOT(9, value) WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) \
+    WN_ARTICLE_UNUSED_SLOT(12, value) WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) \
+    WN_ARTICLE_UNUSED_SLOT(15, value) WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftPokeLizardonArticleMediator::deactivate() {
+    for (s32 i = 0; i < 5; ++i) {
+        wnPokeLizardonBreath* weapon = FT_POKELIZARDON_POOL_BREATH.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 2; ++i) {
+        wnPokeLizardonRock* weapon = FT_POKELIZARDON_POOL_ROCK.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 4; ++i) {
+        wnPokeLizardonRockStone* weapon = FT_POKELIZARDON_POOL_ROCKSTONE.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftPokeLizardonArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 5; }
+    case 1: { wnArticleSlotTag tag; return 2; }
+    case 2: { wnArticleSlotTag tag; return 4; }
+    FT_POKELIZARDON_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftPokeLizardonActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_POKELIZARDON_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftPokeLizardonActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftPokeLizardonActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftPokeLizardonArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_POKELIZARDON_COUNT_ACTIVE(FT_POKELIZARDON_POOL_BREATH, 5)
+    case 1: FT_POKELIZARDON_COUNT_ACTIVE(FT_POKELIZARDON_POOL_ROCK, 2)
+    case 2: FT_POKELIZARDON_COUNT_ACTIVE(FT_POKELIZARDON_POOL_ROCKSTONE, 4)
+    FT_POKELIZARDON_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_POKELIZARDON_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftPokeLizardonArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_POKELIZARDON_CAN_GENERATE(FT_POKELIZARDON_POOL_BREATH, 5, 0)
+    case 1: FT_POKELIZARDON_CAN_GENERATE(FT_POKELIZARDON_POOL_ROCK, 2, 1)
+    case 2: FT_POKELIZARDON_CAN_GENERATE(FT_POKELIZARDON_POOL_ROCKSTONE, 4, 2)
+    FT_POKELIZARDON_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftPokeLizardonArticleActivator;
+template <> struct ftPokeLizardonArticleActivator<wnPokeLizardonBreath> {
+    static bool activate(wnPokeLizardonBreath* weapon, soModuleAccesser* acc) { return ftPokeLizardonTransactor::getInstance()->activeArticle1(weapon, acc); }
+};
+template <> struct ftPokeLizardonArticleActivator<wnPokeLizardonRock> {
+    static bool activate(wnPokeLizardonRock* weapon, soModuleAccesser* acc) { return ftPokeLizardon::activeArticle(weapon, acc); }
+};
+template <> struct ftPokeLizardonArticleActivator<wnPokeLizardonRockStone> {
+    static bool activate(wnPokeLizardonRockStone* weapon, soModuleAccesser* acc) { return wnPokeLizardonRock::activeArticle(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_POKELIZARDON_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftPokeLizardonArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftPokeLizardonArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_POKELIZARDON_GENERATE(wnPokeLizardonBreath, FT_POKELIZARDON_POOL_BREATH)
+    case 1: FT_POKELIZARDON_GENERATE(wnPokeLizardonRock, FT_POKELIZARDON_POOL_ROCK)
+    case 2: FT_POKELIZARDON_GENERATE(wnPokeLizardonRockStone, FT_POKELIZARDON_POOL_ROCKSTONE)
+    FT_POKELIZARDON_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftPokeLizardonArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnPokeLizardonBreath&>(*article);
+        return true;
+    }
+    case 1: {
+        wnArticleSlotTag tag;
+        wnPokeLizardonRock& rock = dynamic_cast<wnPokeLizardonRock&>(*article);
+        rock.shoot(acc->getWorkManageModule().isFlag(0x22000013));
+        return false;
+    }
+    case 2: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnPokeLizardonRockStone&>(*article);
+        return true;
+    }
+    FT_POKELIZARDON_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftPokeLizardon is done
 void testBuilder() {

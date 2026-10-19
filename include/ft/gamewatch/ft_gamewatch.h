@@ -32,8 +32,14 @@ typedef soStatusModuleBuildConfig<313, soGeneralWorkBuildConfig<18, 14, 2>, 274,
 FT_KINETIC_TRANSACTOR(ftGameWatchKineticTransactor);
 typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKineticMediatorImplT<ftGameWatchKineticTransactor, ftKineticTransactor> > ftGameWatchKineticModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_GAMEWATCH_ARTICLE_POOLS
+#include <ft/gamewatch/ft_gamewatch_article_pools.h>
+typedef ftGameWatchArticleManageModuleBuilder ftGameWatchGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x1771C, Fighter_GameWatch> ftGameWatchGenerateArticleManageModuleBuilder;
+#endif
 
 class ftGameWatchBuildConfig : public ftCommonBuildConfig {
 public:
@@ -52,6 +58,14 @@ public:
     typedef ftGameWatchGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnGameWatchSausage;
+class wnGameWatchRescue;
+class wnGameWatchParachute;
+class wnGameWatchPanel;
+class wnGameWatchOil;
+class wnGameWatchOctopus;
+class wnGameWatchNormalWeapon;
+
 class ftGameWatch : public ftFighterBuilder<ftGameWatchBuildConfig> {
     soArrayContractibleTable<const soStatusData> m_statusDataTable; // 0x1FDA8, 0x10 bytes
     ftData* m_data;
@@ -61,5 +75,13 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnGameWatchSausage* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnGameWatchRescue* weapon, soModuleAccesser* acc);
+    static bool activeArticle2(wnGameWatchParachute* weapon, soModuleAccesser* acc);
+    static bool activeArticle3(wnGameWatchPanel* weapon, soModuleAccesser* acc);
+    static bool activeArticle4(wnGameWatchOil* weapon, soModuleAccesser* acc);
+    static bool activeArticle5(wnGameWatchOctopus* weapon, soModuleAccesser* acc);
+    static bool activeArticle6(wnGameWatchNormalWeapon* weapon, soModuleAccesser* acc);
 };
 static_assert(sizeof(ftGameWatch) == 0x1FDE4, "Class is the wrong size!");
