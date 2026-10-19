@@ -9,6 +9,7 @@ class soModuleAccesser;
 class ftKirbyCopyAbilityIdConverter {
 public:
     // HYPOTHESIS: argument meanings.
+    int convOrigToCorrectId(int unk, int statusKind, soModuleAccesser* moduleAccesser, bool unk2);
     int convCorrectToOrigId(int unk, int statusKind, soModuleAccesser* moduleAccesser, bool unk2);
 };
 extern ftKirbyCopyAbilityIdConverter g_ftKirbyCopyAbilityIdConverter;

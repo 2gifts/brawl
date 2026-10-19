@@ -132,6 +132,7 @@ struct soLinkTouchItemEventArgs : public soLinkEventArgs {
     float m_0x18;
     bool m_0x1C;
 
+    inline soLinkTouchItemEventArgs(int eventKind, BaseItem* item, Vec3f& pos, float arg3, bool arg4) : soLinkEventArgs(eventKind), m_item(item), m_pos(pos), m_0x18(arg3), m_0x1C(arg4) {}
     inline soLinkTouchItemEventArgs(BaseItem* item, Vec3f& pos, float arg3, bool arg4) : soLinkEventArgs(StageObject::Link::Event_Touch_Item), m_item(item), m_pos(pos), m_0x18(arg3), m_0x1C(arg4) {}
 };
 static_assert(sizeof(soLinkTouchItemEventArgs) == 0x20, "Class is wrong size!");

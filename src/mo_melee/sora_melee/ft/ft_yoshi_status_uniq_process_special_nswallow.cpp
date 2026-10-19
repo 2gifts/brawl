@@ -1,3 +1,4 @@
+#include <ft/kirby/ft_kirby_copy_ability_id_converter.h>
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <so/catch/so_catch_module.h>
 #include <so/so_module_accesser.h>
@@ -14,10 +15,7 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <so/stageobject.h>
 
-// The converter entry point is shared with the existing Snake/Kirby callers.
-// It maps Yoshi's original status ID to Kirby's current copied status ID.
-extern u8 lbl_27_bss_7B0C[];
-extern "C" int fn_27_30FA2C(void*, int, int, soModuleAccesser*, int);
+// Translate Yoshi's original status ID to Kirby's current copied status ID.
 
 struct ftYoshiCaptureNodeEvent : soLinkEventArgs {
     int captureNode;
@@ -36,7 +34,7 @@ bool ftYoshiTransactor::activeArticle(soArticle* article, soModuleAccesser* acc)
             *acc->getResourceModule().getResourceIdAccesser());
         u32 resourceId = resources.getKirbyResId(4);
         int captureNode = -1;
-        int captureStatus = fn_27_30FA2C(lbl_27_bss_7B0C, 0, 0x118, acc, 0);
+        int captureStatus = g_ftKirbyCopyAbilityIdConverter.convOrigToCorrectId(0, 0x118, acc, 0);
         int founderTaskId;
         position.m_x = 0.0f;
         position.m_y = 0.0f;
@@ -65,7 +63,7 @@ bool ftYoshiTransactor::activeArticle(soArticle* article, soModuleAccesser* acc)
 bool ftYoshiTransactor::activeArticle1(wnYoshiTamago* weapon, soModuleAccesser* acc, u32 resourceId) {
     int founderTaskId;
     int captureNode = -1;
-    int captureStatus = fn_27_30FA2C(lbl_27_bss_7B0C, 0, 0x118, acc, 0);
+    int captureStatus = g_ftKirbyCopyAbilityIdConverter.convOrigToCorrectId(0, 0x118, acc, 0);
     Vec3f position(0.0f, 0.0f, 0.0f);
     if (acc->getStatusModule().getStatusKind() == captureStatus) {
         founderTaskId = acc->getLinkModule().getNodeTaskId(0);

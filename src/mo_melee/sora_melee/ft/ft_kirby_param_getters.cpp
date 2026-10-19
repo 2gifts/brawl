@@ -1,16 +1,13 @@
+#include <ft/kirby/ft_kirby_copy_ability_id_converter.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <types.h>
 
-// HYPOTHESIS: shared parameter table and getters used by many fighter statuses (names unverified); the object holds
-// only these two functions (the neighbouring CaptureDamageYoshi status emits its destructor and static initializer first).
-extern u8 g_ftKirbyCopyAbilityIdConverter[];
-extern "C" int fn_27_30FA2C(void* table, int kind, int id, soModuleAccesser* acc, int);
-
+// Fighter constants use converter category 1 to select Kirby's copied-ability values.
 float soModuleAccesser::getConstantFloatKirby(s32 id) {
-    return soValueAccesser::getConstantFloat(this, fn_27_30FA2C(g_ftKirbyCopyAbilityIdConverter, 1, id, this, 0), 0);
+    return soValueAccesser::getConstantFloat(this, g_ftKirbyCopyAbilityIdConverter.convOrigToCorrectId(1, id, this, 0), 0);
 }
 
 s32 soModuleAccesser::getConstantIntKirby(s32 id) {
-    return soValueAccesser::getConstantInt(this, fn_27_30FA2C(g_ftKirbyCopyAbilityIdConverter, 1, id, this, 0), 0);
+    return soValueAccesser::getConstantInt(this, g_ftKirbyCopyAbilityIdConverter.convOrigToCorrectId(1, id, this, 0), 0);
 }
