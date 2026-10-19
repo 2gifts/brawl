@@ -8,10 +8,25 @@
 #include <ft/ft_manager.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/szerosuit/ft_szerosuit.h>
+#include <ft/szerosuit/ft_szerosuit_extend_param_accesser.h>
+#include <it/it_gen_archive.h>
 #include <so/so_value_accesser.h>
+#include <it/it_manager.h>
+#include <so/collision/so_collision_manager.h>
+#include <so/so_external_value_accesser.h>
+#include <mt/mt_prng.h>
+#include <ft/samus/ft_samus_status_uniq_process.h>
 
 #define FT_BC ftSZerosuitBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
+
+ftSZerosuitExtendParamAccesser g_ftSZerosuitExtendParamAccesser;
+
+// HYPOTHESIS: item generation sheets of the fighter kind (level 0 and 1) that the TU keeps as records.
+itGenSheetKind g_ftSZerosuitGenSheetKind0(static_cast<Stages::srStageKind>(0xff), 0);
+itGenSheetKind g_ftSZerosuitGenSheetKind1(static_cast<Stages::srStageKind>(0xff), 1);
+
+ftClassInfoImpl<Fighter_SZeroSuit, ftSZerosuit> g_ftClassInfoSZerosuit;
 
 extern soStatusUniqProcess g_ftSZerosuitStatusUniqProcessSpecialLw;
 extern soStatusUniqProcess g_ftSZerosuitStatusUniqProcessSpecialLwKick;
@@ -245,10 +260,10 @@ bool ftSZerosuitArticleMediator::isGeneratable(soModuleAccesser* acc, s32 articl
 
 template <class W> struct ftSZerosuitArticleActivator;
 template <> struct ftSZerosuitArticleActivator<wnSZerosuitParalyzer> {
-    static bool activate(wnSZerosuitParalyzer* weapon, soModuleAccesser* acc) { return ftSZerosuitTransactor::getInstance()->activeArticle1(weapon, acc); }
+    static bool activate(wnSZerosuitParalyzer* weapon, soModuleAccesser* acc) { return soSingletonHolder<ftSZerosuitTransactor>::getInstance()->activeArticle1(weapon, acc); }
 };
 template <> struct ftSZerosuitArticleActivator<wnSZerosuitParalyzerBullet> {
-    static bool activate(wnSZerosuitParalyzerBullet* weapon, soModuleAccesser* acc) { return ftSZerosuitTransactor::getInstance()->activeArticle2(weapon, acc); }
+    static bool activate(wnSZerosuitParalyzerBullet* weapon, soModuleAccesser* acc) { return soSingletonHolder<ftSZerosuitTransactor>::getInstance()->activeArticle2(weapon, acc); }
 };
 template <> struct ftSZerosuitArticleActivator<wnSZerosuitWhip> {
     static bool activate(wnSZerosuitWhip* weapon, soModuleAccesser* acc) { return ftSZerosuit::activeArticle(weapon, acc); }
@@ -312,4 +327,231 @@ bool ftSZerosuitArticleMediator::shoot(soModuleAccesser* acc, soArticle* article
     FT_SZEROSUIT_UNUSED_SLOTS(true)
     default: return false;
     }
+}
+
+// ---- the fighter -----------------------------------------------------------------------------------------------------
+// HYPOTHESIS: work variable 0x10000041 holds the task id of the paralyzer article.
+void ftSZerosuit::onActivate() {
+    m_moduleAccesser->getWorkManageModule().setInt(-1, 0x10000041);
+}
+
+void ftSZerosuit::onDeactivate() {
+    itManager::getInstance()->removeItem1(m_taskId);
+}
+
+// The paralyzer is generated once and entered; its task id is forgotten again.
+void ftSZerosuit::onStart(int startKind) {
+    Fighter::onStart(startKind);
+    soGenerateArticleManageModule& articles = m_moduleAccesser->getGenerateArticleManageModule();
+    if (!articles.isExist(0)) {
+        soArticle* article = articles.generate(0, 0, false);
+        if (!reinterpret_cast<ftSamusArticleNullView*>(article)->isNull()) {
+            articles.entry(article);
+        }
+    }
+    m_moduleAccesser->getWorkManageModule().setInt(-1, 0x10000041);
+}
+
+// HYPOTHESIS: the status kinds name the moves that keep or lose the whip (article 2) and the paralyzer (article 0).
+void ftSZerosuit::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+    soGenerateArticleManageModule& articles = m_moduleAccesser->getGenerateArticleManageModule();
+    if (prevStatusKind == 0x2c || prevStatusKind == 0x32 || prevStatusKind == 0x33 || prevStatusKind == 0x35 || prevStatusKind == 0x37 ||
+        prevStatusKind == 0x3c || prevStatusKind == 0x10c || prevStatusKind == 0x10f) {
+        articles.removeExist(2, 0);
+    } else if (static_cast<u32>(prevStatusKind - 0x113) <= 1) {
+        if (statusKind != 0x81 && statusKind != 0x80) {
+            articles.removeExist(2, 0);
+        }
+    } else if (prevStatusKind == 0x34 || prevStatusKind == 0x36 || prevStatusKind == 0x38) {
+        if (statusKind != 0x35 && statusKind != 0x37) {
+            articles.removeExist(2, 0);
+        }
+    }
+    if (articles.isExist(0)) {
+        if (statusKind == 0xbd) {
+            articles.remove(0, 0);
+        } else {
+            if (statusKind != 0x81 && statusKind != 0x80 && statusKind != 0x82 && statusKind != 0x83 &&
+                statusKind != 0x35 && statusKind != 0x37) {
+                articles.changeMotion(0, -1, false);
+            }
+            articles.changeStatus(0, 0, 0);
+        }
+    }
+}
+
+bool ftSZerosuit::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3) {
+    s8 group = acmd->getGroup();
+    if (!isObserv(group)) {
+        return false;
+    }
+    switch (acmd->getType()) {
+    case 5:
+        // HYPOTHESIS: command 5 switches to the other fighter of a Samus pair (the transformation).
+        if (static_cast<u8>(g_ftManager->getFighterCount(m_entryId)) > 1) {
+            int fighterNo = g_ftManager->getFighterNo(m_entryId, m_taskId);
+            g_ftManager->toChange(m_entryId, (u8)(static_cast<u8>(fighterNo) == 0), 1, 0);
+        }
+        return true;
+    }
+    return Fighter::notifyEventAnimCmd(acmd, moduleAccesser, unk3);
+}
+
+// The events of the link with the paralyzer (a stage object of subkind 0x41) tell the fighter what the article needs.
+// HYPOTHESIS: the event payload sits behind the two header words: a flag word at +4, the value or position at +8.
+struct ftSZerosuitLinkEventView {
+    int kind;
+    bool done;
+    int value;
+};
+
+void ftSZerosuit::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    ftSZerosuitLinkEventView* event = reinterpret_cast<ftSZerosuitLinkEventView*>(eventInfo);
+    switch (stageObj->soGetSubKind()) {
+    case 0x41:
+        switch (event->kind) {
+        case 0x838:
+            if (m_moduleAccesser->getLinkModule().isLinked(0)) {
+                StageObject* node = m_moduleAccesser->getLinkModule().getNode(0);
+                if (node != NULL) {
+                    Vec3f pos = soExternalValueAccesser::getPos(node);
+                    *reinterpret_cast<Vec3f*>(&event->value) = pos;
+                    event->done = true;
+                }
+            }
+            break;
+        case 0x839:
+            moduleAccesser->getStatusModule().changeStatusRequest(0x39, moduleAccesser);
+            break;
+        case 0x83a:
+            event->value = moduleAccesser->getModelModule().getCorrectNodeId(0x12e);
+            event->done = true;
+            break;
+        case 0x83b:
+            moduleAccesser->getWorkManageModule().setInt(*static_cast<int*>(soValueAccesser::getConstantIndefinite(moduleAccesser, 0xA80E, 0)), 0x20000001);
+            moduleAccesser->getStatusModule().changeStatusRequest(0x81, moduleAccesser);
+            moduleAccesser->getGenerateArticleManageModule().changeMotion(0, 0xf, false);
+            if (moduleAccesser->getGenerateArticleManageModule().isExist(2) == true) {
+                soLinkModule& link = moduleAccesser->getLinkModule();
+                if (link.link(3, moduleAccesser->getGenerateArticleManageModule().getArticle(2)->getTaskId()) == true) {
+                    soLinkModule& linkAgain = moduleAccesser->getLinkModule();
+                    linkAgain.setModelConstraintPosOrt(3, moduleAccesser->getModelModule().getCorrectNodeId(0x12e), event->value, 5, false);
+                }
+            }
+            break;
+        case 0x83c:
+            if (moduleAccesser->getGroundModule().isStCliff(0)) {
+                moduleAccesser->getStatusModule().changeStatusRequest(0x75, moduleAccesser);
+            } else {
+                moduleAccesser->getStatusModule().changeStatusRequest(0x7b, moduleAccesser);
+            }
+            break;
+        case 0x83e:
+            moduleAccesser->getStatusModule().changeStatusRequest(0x83, moduleAccesser);
+            break;
+        case 0:
+        case 2:
+        case 4: {
+            int logGroup = moduleAccesser->getWorkManageModule().getInt(0x10000041);
+            if (logGroup != -1) {
+                moduleAccesser->getCollisionAttackModule().unRefLogGroup(0);
+                soCollisionManager::getInstance()->leaveFreeRefLogGroup(logGroup);
+                soCollisionManager::getInstance()->freeLogGroup(logGroup);
+                moduleAccesser->getWorkManageModule().setInt(-1, 0x10000041);
+            }
+            break;
+        }
+        }
+        break;
+    }
+    Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+// MATCH-ONLY: the REL carries its own copy of the lazy singleton getter.
+soCollisionManager* soCollisionManager::getInstance() {
+    if (g_soCollisionManager == NULL) {
+        g_soCollisionManager = new (Heaps::System) soCollisionManager;
+    }
+    return g_soCollisionManager;
+}
+
+void ftSZerosuit::notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeSituation(kind, prevKind, moduleAccesser);
+    if (kind != 2) {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+    }
+}
+
+// The fighter that takes over (the transformation partner) is started with the work of this one.
+void ftSZerosuit::change(void* work, int mode) {
+    reinterpret_cast<void (*)(ftSZerosuit*, int)>((*reinterpret_cast<void***>(reinterpret_cast<u8*>(this) + 0x3c))[0x29c / 4])(this, mode);
+    Fighter::changeSucceedCore(work, 0x120);
+}
+
+
+// ---- the whip and the armor ------------------------------------------------------------------------------------------
+// The whip starts at the hip node with the facing direction, the attack state and a fresh collision log group.
+// HYPOTHESIS: status kinds 0x113 and 0x114 are the first whip attacks, and 0x34/0x36/0x38 the tilts that link the whip to the model.
+bool ftSZerosuit::activeArticle(wnSZerosuitWhip* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x36, false);
+    float lr = acc->getPostureModule().getLr();
+    int statusKind = acc->getStatusModule().getStatusKind();
+    int isSpecial = 1;
+    if (statusKind != 0x113 && statusKind != 0x114) {
+        isSpecial = 0;
+    }
+    int isTilt = 0;
+    if (static_cast<u32>(statusKind - 0x34) <= 4 && ((1 << (statusKind - 0x34)) & 0x15)) {
+        isTilt = 1;
+    }
+    int logGroup = soCollisionManager::getInstance()->allocateLogGroup();
+    acc->getWorkManageModule().setInt(logGroup, 0x10000041);
+    if (logGroup != -1) {
+        acc->getCollisionAttackModule().refLogGroup(0, logGroup);
+    }
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    int team = fighter.getOwner()->getTeam();
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), team, lr, &pos, isSpecial, isTilt, logGroup);
+    soLinkModule& link = acc->getLinkModule();
+    if (isTilt) {
+        if (link.link(3, weapon->getTaskId())) {
+            link.setModelConstraintPosOrt(3, acc->getModelModule().getCorrectNodeId(0x12c), 0xa, 0x11, false);
+        }
+    } else {
+        if (link.link(6, weapon->getTaskId())) {
+            link.setAttribute(6, static_cast<soLinkConnection::Attribute>(0), true);
+        }
+    }
+    return true;
+}
+
+// One of the armor pieces flies off: the work counter picks the piece and its parameters.
+bool ftSZerosuit::activeArticle1(wnSZerosuitArmor* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    ftData* data = g_ftCommonDataAccesser.getData(Fighter_SZeroSuit);
+    Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x36, false);
+    acc->getPostureModule().getLr();
+    int index = acc->getWorkManageModule().getInt(0x10000040);
+    u32* entry = reinterpret_cast<u32*>(*reinterpret_cast<u8**>(reinterpret_cast<u8*>(data) + 0xa4) + index * 16);
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    int team = fighter.getOwner()->getTeam();
+    int mdlResIndex = resources.getResourceIdAccesser()->getMdlResIndex();
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), index, mdlResIndex, entry[0], entry[1], team);
+    return true;
+}
+
+// The piece is thrown with a speed between the two limits of the kind and the next piece is selected.
+bool ftSZerosuit::shootArticle(wnSZerosuitArmor* weapon, soModuleAccesser* acc) {
+    int index = acc->getWorkManageModule().getInt(0x10000040);
+    ftData* data = g_ftCommonDataAccesser.getData(Fighter_SZeroSuit);
+    u8* entry = *reinterpret_cast<u8**>(reinterpret_cast<u8*>(data) + 0xa4) + index * 16;
+    const float* range = static_cast<const float*>(data->extendParam[3]);
+    float lr = acc->getPostureModule().getLr();
+    float speed = range[0] + (range[1] - range[0]) * randf();
+    weapon->shoot(*reinterpret_cast<int*>(entry + 4), speed, *reinterpret_cast<float*>(entry + 8), lr);
+    acc->getWorkManageModule().setInt(index + 1, 0x10000040);
+    return false;
 }

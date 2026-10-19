@@ -58,8 +58,10 @@ class wnSZerosuitArmor;
 
 // The activators of the paralyzer and its bullet live in the transactor of sora_melee (a singleton).
 class ftSZerosuitTransactor {
+    u32 m_unk4;
 public:
-    static ftSZerosuitTransactor* getInstance();
+    ftSZerosuitTransactor();
+    virtual ~ftSZerosuitTransactor();
     bool activeArticle(wnSZerosuitWhip* weapon, soModuleAccesser* acc);
     bool activeArticle1(wnSZerosuitParalyzer* weapon, soModuleAccesser* acc);
     bool activeArticle2(wnSZerosuitParalyzerBullet* weapon, soModuleAccesser* acc);
@@ -73,6 +75,17 @@ public:
                 Heaps::HeapType instHeap,
                 Heaps::HeapType nwModelInstHeap,
                 Heaps::HeapType nwMotionInstHeap);
+    virtual ~ftSZerosuit() { }
+    virtual void onActivate();
+    virtual void onDeactivate();
+    virtual void onStart(int startKind);
+    virtual u32 getChangeSucceedOption() { return 0x7fbb; }
+    virtual void setupChangeSucceedWork(void* work);
+    virtual void change(void* work, int mode);
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
     // The hooks the article mediator calls to start/shoot an article of the pool (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnSZerosuitWhip* weapon, soModuleAccesser* acc);
     static bool activeArticle1(wnSZerosuitArmor* weapon, soModuleAccesser* acc);
