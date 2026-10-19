@@ -1,10 +1,19 @@
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_DIDDY_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define FT_TEAM_TYPED_INTERFACE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/diddy/ft_diddy.h>
 #include <ft/ft_physics_iface.h>
 #include <ft/diddy/ft_diddy_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
+#include <ft/diddy/ft_diddy_transactor.h>
+#include <ft/ft_owner.h>
 
 #define FT_BC ftDiddyBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -122,6 +131,304 @@ void ftDiddy::notifyEventOnDamage(soDamage* damage, bool isDamage, soModuleAcces
     }
     Fighter::notifyEventOnDamage(damage, isDamage, moduleAccesser);
 }
+
+// The popgun starts through the transactor of the fighter with the effect resource of the fighter.
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+bool ftDiddy::activeArticle(wnDiddyGun* weapon, soModuleAccesser* acc) {
+    static ftDiddyTransactor instance;
+    return instance.activeArticle(weapon, acc, acc->getResourceModule().getResourceIdAccesser()->getEtcResId());
+}
+#pragma pool_data reset
+
+// The explosion starts at the origin of the fighter moved by the offsets of the parameters (the second one follows the facing).
+bool ftDiddy::activeArticle3(wnDiddyExplosion* weapon, soModuleAccesser* acc) {
+    Vec3f offset;
+    offset.m_x = 0.0f;
+    offset.m_y = soValueAccesser::getConstantFloat(acc, 0xfd4, 0);
+    float lr = acc->getPostureModule().getLr();
+    offset.m_z = soValueAccesser::getConstantFloat(acc, 0xfd3, 0) * lr;
+    Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0, &offset, true, false);
+    int founderTaskId = acc->getStageObject().m_taskId;
+    weapon->activate(founderTaskId, acc->getTeamModule().getTeam()->getNo(), &pos, 0.0f);
+    return true;
+}
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Diddy, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftDiddyArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftDiddyArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftDiddyArticleKind : wnArticleKindInfo {
+    ftDiddyArticleKind() {
+        kind = 0;
+        subKind = Fighter_Diddy;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftDiddyArticleBuildInfo : wnArticleBuildInfo {
+    ftDiddyArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_1489B8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148A4C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148A60(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148A74(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftDiddyArticleTraits;
+#define FT_DIDDY_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftDiddyArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftDiddyArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Diddy, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_DIDDY_TRAITS(wnDiddyGun, wnDiddyGunData, 0, fn_27_1489B8)
+FT_DIDDY_TRAITS(wnDiddyBarrel, wnDiddyBarrelData, 1, fn_27_148A4C)
+FT_DIDDY_TRAITS(wnDiddyPeanuts, wnDiddyPeanutsData, 2, fn_27_148A60)
+FT_DIDDY_TRAITS(wnDiddyExplosion, wnDiddyExplosionData, 3, fn_27_148A74)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftDiddyArticleTraits<W>::ArticleId, ftDiddyArticleBuildInfo(ftDiddyArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftDiddyArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnDiddyGun>::~wnArticleHolder();
+template wnArticleHolder<wnDiddyBarrel>::~wnArticleHolder();
+template wnArticleHolder<wnDiddyPeanuts>::~wnArticleHolder();
+template wnArticleHolder<wnDiddyExplosion>::~wnArticleHolder();
+template wnArticleHolder<wnDiddyGun>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnDiddyBarrel>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnDiddyPeanuts>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftDiddyArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftDiddyArticleMediator, 15>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftDiddyArticleMediator, 15>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftDiddyArticleMediator::~ftDiddyArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftDiddyArticleMediator::getMediateNum() { return 4; }
+void ftDiddyArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Gun, 1 Barrel, 2 Peanuts, 3 Explosion (the rest are unused).
+
+#define FT_DIDDY_POOL_GUN_BASE static_cast<wnArticlePool<wnDiddyGun, 2, ftDiddyBarrelPool>&>(m_pools)
+#define FT_DIDDY_POOL_GUN FT_DIDDY_POOL_GUN_BASE.getSub()
+#define FT_DIDDY_POOL_BARREL_BASE static_cast<wnArticlePool<wnDiddyBarrel, 2, ftDiddyPeanutsPool>&>(m_pools)
+#define FT_DIDDY_POOL_BARREL FT_DIDDY_POOL_BARREL_BASE.getSub()
+#define FT_DIDDY_POOL_PEANUTS_BASE static_cast<wnArticlePool<wnDiddyPeanuts, 10, ftDiddyExplosionPool>&>(m_pools)
+#define FT_DIDDY_POOL_PEANUTS FT_DIDDY_POOL_PEANUTS_BASE.getSub()
+#define FT_DIDDY_POOL_EXPLOSION_BASE static_cast<wnArticlePool<wnDiddyExplosion, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_DIDDY_POOL_EXPLOSION FT_DIDDY_POOL_EXPLOSION_BASE.getSub()
+
+#define FT_DIDDY_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(4, value) WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) \
+    WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) \
+    WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) \
+    WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) \
+    WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftDiddyArticleMediator::deactivate() {
+    for (s32 i = 0; i < 2; ++i) {
+        wnDiddyGun* weapon = FT_DIDDY_POOL_GUN.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 2; ++i) {
+        wnDiddyBarrel* weapon = FT_DIDDY_POOL_BARREL.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 10; ++i) {
+        wnDiddyPeanuts* weapon = FT_DIDDY_POOL_PEANUTS.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnDiddyExplosion* weapon = FT_DIDDY_POOL_EXPLOSION.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftDiddyArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 2; }
+    case 1: { wnArticleSlotTag tag; return 2; }
+    case 2: { wnArticleSlotTag tag; return 10; }
+    case 3: { wnArticleSlotTag tag; return 1; }
+    FT_DIDDY_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftDiddyActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_DIDDY_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftDiddyActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftDiddyActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftDiddyArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_DIDDY_COUNT_ACTIVE(FT_DIDDY_POOL_GUN, 2)
+    case 1: FT_DIDDY_COUNT_ACTIVE(FT_DIDDY_POOL_BARREL, 2)
+    case 2: FT_DIDDY_COUNT_ACTIVE(FT_DIDDY_POOL_PEANUTS, 10)
+    case 3: FT_DIDDY_COUNT_ACTIVE(FT_DIDDY_POOL_EXPLOSION, 1)
+    FT_DIDDY_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_DIDDY_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftDiddyArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_DIDDY_CAN_GENERATE(FT_DIDDY_POOL_GUN, 2, 0)
+    case 1: FT_DIDDY_CAN_GENERATE(FT_DIDDY_POOL_BARREL, 2, 1)
+    case 2: FT_DIDDY_CAN_GENERATE(FT_DIDDY_POOL_PEANUTS, 10, 2)
+    case 3: FT_DIDDY_CAN_GENERATE(FT_DIDDY_POOL_EXPLOSION, 1, 3)
+    FT_DIDDY_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftDiddyArticleActivator;
+template <> struct ftDiddyArticleActivator<wnDiddyGun> {
+    static bool activate(wnDiddyGun* weapon, soModuleAccesser* acc) { return ftDiddy::activeArticle(weapon, acc); }
+};
+template <> struct ftDiddyArticleActivator<wnDiddyBarrel> {
+    static bool activate(wnDiddyBarrel* weapon, soModuleAccesser* acc) { return ftDiddy::activeArticle1(weapon, acc); }
+};
+template <> struct ftDiddyArticleActivator<wnDiddyPeanuts> {
+    static bool activate(wnDiddyPeanuts* weapon, soModuleAccesser* acc) { return ftDiddy::activeArticle2(weapon, acc); }
+};
+template <> struct ftDiddyArticleActivator<wnDiddyExplosion> {
+    static bool activate(wnDiddyExplosion* weapon, soModuleAccesser* acc) { return ftDiddy::activeArticle3(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_DIDDY_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftDiddyArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftDiddyArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_DIDDY_GENERATE(wnDiddyGun, FT_DIDDY_POOL_GUN)
+    case 1: FT_DIDDY_GENERATE(wnDiddyBarrel, FT_DIDDY_POOL_BARREL)
+    case 2: FT_DIDDY_GENERATE(wnDiddyPeanuts, FT_DIDDY_POOL_PEANUTS)
+    case 3: FT_DIDDY_GENERATE(wnDiddyExplosion, FT_DIDDY_POOL_EXPLOSION)
+    FT_DIDDY_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftDiddyArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnDiddyGun&>(*article);
+        return true;
+    }
+    case 1: {
+        wnArticleSlotTag tag;
+        return ftDiddy::shootArticle(&dynamic_cast<wnDiddyBarrel&>(*article), acc);
+    }
+    case 2: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnDiddyPeanuts&>(*article);
+        return true;
+    }
+    case 3: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnDiddyExplosion&>(*article);
+        return true;
+    }
+    FT_DIDDY_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftDiddy is done
 void testBuilder() {

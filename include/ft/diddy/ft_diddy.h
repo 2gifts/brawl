@@ -51,8 +51,14 @@ typedef soCollisionShieldModuleBuildConfigGroups<2, 1, 1, soCollisionShieldEvent
 typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> ftDiddyLinkModuleBuildConfig;
 typedef soStatusModuleBuildConfig<303, soGeneralWorkBuildConfig<18, 15, 29>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftDiddyStatusModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_DIDDY_ARTICLE_POOLS
+#include <ft/diddy/ft_diddy_article_pools.h>
+typedef ftDiddyArticleManageModuleBuilder ftDiddyGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x1E400, Fighter_Diddy> ftDiddyGenerateArticleManageModuleBuilder;
+#endif
 
 class ftDiddyBuildConfig : public ftCommonBuildConfig {
 public:
@@ -70,6 +76,11 @@ public:
     typedef ftDiddyGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnDiddyGun;
+class wnDiddyBarrel;
+class wnDiddyPeanuts;
+class wnDiddyExplosion;
+
 class ftDiddy : public ftFighterBuilder<ftDiddyBuildConfig> {
     u8 unkTail[0x26870 - sizeof(ftFighterBuilder<ftDiddyBuildConfig>)];
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
@@ -79,6 +90,12 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnDiddyGun* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnDiddyBarrel* weapon, soModuleAccesser* acc);
+    static bool activeArticle2(wnDiddyPeanuts* weapon, soModuleAccesser* acc);
+    static bool activeArticle3(wnDiddyExplosion* weapon, soModuleAccesser* acc);
+    static bool shootArticle(wnDiddyBarrel* weapon, soModuleAccesser* acc);
     virtual ~ftDiddy();
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual void notifyEventOnDamage(soDamage* damage, bool isDamage, soModuleAccesser* moduleAccesser);
