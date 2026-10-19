@@ -91,6 +91,7 @@ public:
     virtual void photoMoved();
     virtual void photoExit();
     bool ckeckChangeEarCloseStatus(Vec3f& position);
+    static void syncFinalCursorRate(Vec2f* cursor, soModuleAccesser* accesser);
     // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnSnakeMine* weapon, soModuleAccesser* acc);
     static bool activeArticle1(wnSnakeTrenchMortar* weapon, soModuleAccesser* acc);

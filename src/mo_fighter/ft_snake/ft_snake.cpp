@@ -234,6 +234,26 @@ void ftSnake::processFixCamera() {
     Fighter::processFixCamera();
 }
 
+// The Final Smash sight: the horizontal cursor value turns into the aim (0x21000005) and the sideways shift (0x21000004) of the
+// model, each side with its own constants (0xFAC-0xFB0).
+// HYPOTHESIS: the work float meanings.
+void ftSnake::syncFinalCursorRate(Vec2f* cursor, soModuleAccesser* accesser) {
+    if (cursor->m_x < 0.0f) {
+        soWorkManageModule& aimWork = accesser->getWorkManageModule();
+        aimWork.setFloat(-cursor->m_x * soValueAccesser::getConstantFloat(accesser, 0xFB0, 0), 0x21000005);
+        soWorkManageModule& shiftWork = accesser->getWorkManageModule();
+        shiftWork.setFloat(cursor->m_x * soValueAccesser::getConstantFloat(accesser, 0xFAD, 0), 0x21000004);
+    } else if (cursor->m_x > 0.0f) {
+        soWorkManageModule& aimWork = accesser->getWorkManageModule();
+        aimWork.setFloat(-cursor->m_x * soValueAccesser::getConstantFloat(accesser, 0xFAF, 0), 0x21000005);
+        soWorkManageModule& shiftWork = accesser->getWorkManageModule();
+        shiftWork.setFloat(cursor->m_x * soValueAccesser::getConstantFloat(accesser, 0xFAC, 0), 0x21000004);
+    } else {
+        accesser->getWorkManageModule().setFloat(0.0f, 0x21000005);
+        accesser->getWorkManageModule().setFloat(0.0f, 0x21000004);
+    }
+}
+
 // The event the fighter sends to the C4 when its detonator status is left.
 // HYPOTHESIS: 0x839 asks the C4 to detonate.
 struct ftSnakeC4Event : public soLinkEventArgs {
