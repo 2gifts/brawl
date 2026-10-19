@@ -1,5 +1,5 @@
 // Havok translation unit hk3AxisSweep.o (main.dol 0x8030880C-0x80312F7C).
-// Not yet decompiled. Functions in address order (method names from the Havok TU map; classes still to be identified):
+// Partially recovered. Original function inventory (map names need independent verification):
 //   0x8030880C   136  beginOverlap   [map: hk3AxisSweep__beginOverlap]
 //   0x80308894   136  endOverlap   [map: hk3AxisSweep__endOverlap]
 //   0x8030891C   220  beginOverlapCheckMarker   [map: hk3AxisSweep__beginOverlapCheckMarker]
@@ -71,12 +71,12 @@ static int findCheckMarkerEntry(const hkArray<u16>& list, u16 value) {
     return -1;
 }
 
-void hk3AxisSweep::beginOverlapCheckMarker(const hkBpNode* a, u32 value, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
+void hk3AxisSweep::beginOverlapCheckMarker(hkBpCheckMarker* markers, const hkBpNode* a, u32 value, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
     if (((u32)b->m_handle & 1) == 0) {
         beginOverlap(a, b, pairs);
     } else {
         u16 key = (u16)value;
-        hkBpCheckMarker* marker = (hkBpCheckMarker*)((u8*)this + ((u32)b->m_handle & ~1));
+        hkBpCheckMarker* marker = (hkBpCheckMarker*)((u8*)markers + ((u32)b->m_handle & ~1));
         hkArray<u16>& list = marker->m_list;
         if (list.m_size == (list.m_capacityAndFlags & 0x3FFFFFFF)) {
             hkArrayUtil::_reserveMore(&list, sizeof(u16));
@@ -85,11 +85,11 @@ void hk3AxisSweep::beginOverlapCheckMarker(const hkBpNode* a, u32 value, const h
     }
 }
 
-void hk3AxisSweep::endOverlapCheckMarker(const hkBpNode* a, u32 value, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
+void hk3AxisSweep::endOverlapCheckMarker(hkBpCheckMarker* markers, const hkBpNode* a, u32 value, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
     if (((u32)b->m_handle & 1) == 0) {
         endOverlap(a, b, pairs);
     } else {
-        hkBpCheckMarker* marker = (hkBpCheckMarker*)((u8*)this + ((u32)b->m_handle & ~1));
+        hkBpCheckMarker* marker = (hkBpCheckMarker*)((u8*)markers + ((u32)b->m_handle & ~1));
         int index = findCheckMarkerEntry(marker->m_list, (u16)value);
         marker->m_list.m_size--;
         ((u16*)marker->m_list.m_data)[index] = ((u16*)marker->m_list.m_data)[marker->m_list.m_size];
@@ -133,7 +133,7 @@ void hk3AxisSweep::hkBpAxis::insert(hkBpNode* node, int id, u16 minKey, u16 maxK
         p[2] = *p;
         p--;
     }
-    p[2].unk02 = id;
+    p[2].m_nodeId = id;
     p[2].m_value = maxKey;
     maxIndex = (p - begin()) + 2;
     while (minKey < p->m_value) {
@@ -141,7 +141,7 @@ void hk3AxisSweep::hkBpAxis::insert(hkBpNode* node, int id, u16 minKey, u16 maxK
         p--;
     }
     p[1].m_value = minKey;
-    p[1].unk02 = id;
+    p[1].m_nodeId = id;
     minIndex = (p - begin()) + 1;
 }
 
@@ -154,14 +154,14 @@ void hk3AxisSweep::getAabb(const hkBroadPhaseHandle* handle, hkAabb& aabb) const
 }
 
 int hk3AxisSweep::getAabbCacheSize() const {
-    return (m_numNodes - unkA0) * 2 * sizeof(hkBpAxis) + 0x24;
+    return (m_numNodes - m_numMarkers) * 2 * sizeof(hkBpAxis) + 0x24;
 }
 
 void hk3AxisSweep::getAllAabbs(hkArray<hkAabb>& aabbs) const {
-    if (aabbs.getCapacity() < m_numNodes - unkA0) {
-        hkArrayUtil::_reserve(&aabbs, m_numNodes - unkA0, sizeof(hkAabb));
+    if (aabbs.getCapacity() < m_numNodes - m_numMarkers) {
+        hkArrayUtil::_reserve(&aabbs, m_numNodes - m_numMarkers, sizeof(hkAabb));
     }
-    aabbs.m_size = m_numNodes - unkA0;
+    aabbs.m_size = m_numNodes - m_numMarkers;
     int out = 0;
     for (int i = 0; i < m_numNodes; i++) {
         const hkBpNode* node = &m_nodes[i];
@@ -190,3 +190,145 @@ void hk3AxisSweep::getAabbFromNode(const hkBpNode* node, hkAabb& aabb) const {
     aabb.m_max.w = 0.0f - unk4C;
 }
 #pragma dont_inline reset
+
+// Removing the minimum shifts the endpoints between min and max by one;
+// the remainder shifts by two once both endpoints have been removed.
+void hk3AxisSweep::hkBpAxis::remove(int minIndex, int maxIndex) {
+    hkBpEndPoint* cursor = begin() + minIndex;
+    hkBpEndPoint* beforeMax = begin() + maxIndex - 1;
+    for (; cursor < beforeMax; ++cursor) {
+        *cursor = cursor[1];
+    }
+    m_size -= 2;
+    hkBpEndPoint* end = begin() + m_size;
+    for (; cursor < end; ++cursor) {
+        *cursor = cursor[2];
+    }
+}
+
+void hk3AxisSweep::updateNodesAfterInsert(hkBpNode* nodes, int count, const hkBpNode& inserted) {
+    // Compare against positions before insertion: min shifted by one, max by two.
+    // Snapshot first: inserted can refer to an entry in the same node array.
+    u16 xMin = inserted.m_index[4] - 1;
+    u16 yMin = inserted.m_index[0] - 1;
+    u16 zMin = inserted.m_index[1] - 1;
+    u16 xMax = inserted.m_index[5] - 2;
+    u16 yMax = inserted.m_index[2] - 2;
+    u16 zMax = inserted.m_index[3] - 2;
+    hkBpNode* end = nodes + count;
+    for (; nodes < end; ++nodes) {
+        nodes->m_index[4] += (u16)((nodes->m_index[4] > xMin) + (nodes->m_index[4] > xMax));
+        nodes->m_index[0] += (u16)((nodes->m_index[0] > yMin) + (nodes->m_index[0] > yMax));
+        nodes->m_index[5] += (u16)((nodes->m_index[5] > xMin) + (nodes->m_index[5] > xMax));
+        nodes->m_index[2] += (u16)((nodes->m_index[2] > yMin) + (nodes->m_index[2] > yMax));
+        nodes->m_index[1] += (u16)((nodes->m_index[1] > zMin) + (nodes->m_index[1] > zMax));
+        nodes->m_index[3] += (u16)((nodes->m_index[3] > zMin) + (nodes->m_index[3] > zMax));
+    }
+}
+
+void hk3AxisSweep::updateNodesAfterDelete(hkBpNode* nodes, int count, const hkBpNode& removed) {
+    u16 xMin = removed.m_index[4];
+    u16 yMin = removed.m_index[0];
+    u16 zMin = removed.m_index[1];
+    u16 xMax = removed.m_index[5];
+    u16 yMax = removed.m_index[2];
+    u16 zMax = removed.m_index[3];
+    hkBpNode* end = nodes + count;
+    for (; nodes != end; ++nodes) {
+        nodes->m_index[4] -= (u16)((nodes->m_index[4] > xMin) + (nodes->m_index[4] > xMax));
+        nodes->m_index[5] -= (u16)((nodes->m_index[5] > xMin) + (nodes->m_index[5] > xMax));
+        nodes->m_index[0] -= (u16)((nodes->m_index[0] > yMin) + (nodes->m_index[0] > yMax));
+        nodes->m_index[2] -= (u16)((nodes->m_index[2] > yMin) + (nodes->m_index[2] > yMax));
+        nodes->m_index[1] -= (u16)((nodes->m_index[1] > zMin) + (nodes->m_index[1] > zMax));
+        nodes->m_index[3] -= (u16)((nodes->m_index[3] > zMin) + (nodes->m_index[3] > zMax));
+    }
+}
+
+// Build candidates on X before testing their Y/Z intervals. Crossing either
+// endpoint toggles a node's bit; a minimum inside our interval adds that node.
+void hk3AxisSweep::setBitsBasedOnXInterval(int count, int minKey, const hkBpNode& node,
+                                         u32 id, u32* bits) {
+    int minIndex = node.m_index[4];
+    int maxIndex = node.m_index[5];
+    // The native implementation clears whole 128-bit vectors, including padding.
+    hkVector4 zero;
+    zero.setZero4();
+    hkVector4* clear = (hkVector4*)bits;
+    int vectors = (count >> 7) + 1;
+    for (int i = 0; i < vectors; ++i) {
+        clear[i] = zero;
+    }
+    const hkBpEndPoint* cursor = m_axes[0].begin() + 1;
+    if (m_numMarkers != 0 && (minKey >>= 16 - m_markerBits) > 0) {
+        const hkBpCheckMarker& marker = m_markers[minKey - 1];
+        int markerId = marker.m_nodeId;
+        bits[markerId >> 5] ^= 1u << (markerId & 31);
+        const u16* entry = marker.m_list.begin();
+        for (int i = marker.m_list.m_size - 1; i >= 0; --i, ++entry) {
+            int otherId = *entry;
+            if (otherId != id) bits[otherId >> 5] ^= 1u << (otherId & 31);
+        }
+        const hkBpNode& markerNode = m_nodes[marker.m_nodeId];
+        cursor = m_axes[0].begin() + (markerNode.m_index[4] + 1);
+        const hkBpEndPoint* end = m_axes[0].begin() + markerNode.m_index[5];
+        for (; cursor < end; ++cursor) {
+            if ((cursor->m_value & 1) == 0) {
+                int otherId = cursor->m_nodeId;
+                bits[otherId >> 5] &= ~(1u << (otherId & 31));
+            }
+        }
+        cursor = m_axes[0].begin() + (markerNode.m_index[4] + 1);
+    }
+    const hkBpEndPoint* min = m_axes[0].begin() + minIndex;
+    for (; cursor < min; ++cursor) {
+        int otherId = cursor->m_nodeId;
+        bits[otherId >> 5] ^= 1u << (otherId & 31);
+    }
+    ++cursor;
+    const hkBpEndPoint* max = m_axes[0].begin() + maxIndex;
+    for (; cursor < max; ++cursor) {
+        if ((cursor->m_value & 1) == 0) {
+            int otherId = cursor->m_nodeId;
+            bits[otherId >> 5] ^= 1u << (otherId & 31);
+        }
+    }
+}
+
+void hk3AxisSweep::reQuerySingleObject(const hkBroadPhaseHandle* handle,
+                                      hkArray<hkBroadPhaseHandlePair>& pairs) {
+    int count = m_numNodes;
+    u32* bits = (u32*)hkThreadMemory::s_instance->allocateStack(((count >> 5) + 8) * sizeof(u32));
+    const hkBpNode* query = &m_nodes[handle->m_id];
+    setBitsBasedOnXInterval(count, m_axes[0].begin()[query->m_index[4]].m_value,
+                           *query, (u16)handle->m_id, bits);
+    hkBroadPhaseHandlePair pair;
+    pair.m_a = (hkTypedBroadPhaseHandle*)handle;
+    const u32* end = bits + (m_numNodes >> 5) + 1;
+    const hkBpNode* block = m_nodes;
+    for (const u32* word = bits; word < end; ++word, block += 32) {
+        u32 candidates = *word;
+        const hkBpNode* candidate = block;
+        while (candidates != 0) {
+            if ((candidates & 0xFF) == 0) {
+                candidates >>= 8;
+                candidate += 8;
+                continue;
+            }
+            if (candidates & 1) {
+                // Two packed 16-bit comparisons reject disjoint Y/Z intervals.
+                u32 candidateMin = candidate->m_minYZ;
+                u32 candidateMax = candidate->m_maxYZ;
+                u32 queryMin = query->m_minYZ;
+                u32 queryMax = query->m_maxYZ;
+                if ((((candidateMax - queryMin) | (queryMax - candidateMin)) & 0x80008000u) == 0 &&
+                    ((u32)candidate->m_handle & 1) == 0) {
+                    pair.m_b = candidate->m_handle;
+                    pairs.pushBack(pair);
+                }
+            }
+            candidates >>= 1;
+            ++candidate;
+        }
+    }
+    hkThreadMemory::s_instance->deallocateStack(bits);
+}
