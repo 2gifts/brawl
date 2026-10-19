@@ -1,11 +1,14 @@
 #pragma once
 
+#include <ai/ai_cl_block.h>
 #include <ai/ai_mgr.h>
 #include <mt/mt_vector.h>
 #include <types.h>
 
 // One CPU character's view of the match (position, speed, floor, transition flags); 0x1C4 bytes, one per aiChrIdx.
 // HYPOTHESIS: only the offsets used so far are named, the rest is still unknown.
+class aiEnemy;
+
 class aiStat {
 public:
     aiChrIdx m_chrIdx;       // 0x00: -1 = unused
@@ -16,7 +19,7 @@ public:
     char unk5[3];
     int m_unk8;              // 0x08
     char unkC[0x40];
-    int m_input;             // 0x4C: the aiInput driving this character (0 for humans)
+    aiInput* m_input;        // 0x4C: the aiInput driving this character (0 for humans)
     u32 m_flags;             // 0x50
     u32 m_transition;        // 0x54: transition bits (chk_transition)
     u32 m_chrStat;           // 0x58: character state bits (chk_chr_stat)
@@ -35,7 +38,7 @@ public:
     int m_unkB0;
     int m_unkB4;
     int m_unkB8;
-    struct aiFloorInfo* m_floor; // 0xBC
+    AiClBlock* m_floor;      // 0xBC
     u8 m_unkC0;              // 0xC0
     char unkC1[3];
     float m_unkC4;
@@ -65,8 +68,10 @@ public:
     bool chk_stat_fpass();
     bool chk_stat_ffall();
     float get_lr_tgt(aiChrIdx* target);
-    void init(int chrIdx, int chrKind, int input, u8 unk);
-    void change(int chrIdx, int chrKind, int input, u8 unk);
+    void init(int chrIdx, int chrKind, aiInput* input, int unk);
+    void change(int chrIdx, int chrKind, aiInput* input, int unk);
+    void update_enemy(aiEnemy* enemy, aiChrIdx* chrIdx);
+    void set_floor_info(int unk);
     void get_tgt_vector(float scale, Vec3f* out, aiChrIdx* target);
     float get_range(float scale, aiChrIdx* target);
     float get_distance(float scale, aiChrIdx* target);
@@ -80,14 +85,4 @@ public:
 };
 static_assert(sizeof(aiStat) == 0x1C4, "Class is wrong size!");
 
-// A floor segment the AI can stand on (HYPOTHESIS layout: +0x40 flag word).
-struct aiFloorInfo {
-    char unk0[0x18];
-    Vec2f m_edgeL;  // 0x18
-    Vec2f m_edgeR;  // 0x20
-    char unk28[0x18];
-    u32 m_flags;
-};
-
-bool chk_fl_danger(aiFloorInfo* floor, int team);
 float calc_arraive_f(float dist, float vel, float acc);

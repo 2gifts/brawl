@@ -10,6 +10,10 @@
 
 class aiInput;
 class aiStat;
+struct AiClBlock;
+class aiWeaponMgr;
+class aiEnemyMgr;
+class IpHuman;
 
 // One row of the AI "refer" parameter table (0x36 rows of 0x20 bytes).
 // Field names follow the aiParam getters that read them.
@@ -51,11 +55,30 @@ public:
     virtual void notifyEventChangeStart(int entryId, int playerNo, int activeInstanceIndex, ftKind);
     virtual void notifyEventChangeEnd(int entryId, int playerNo, int activeInstanceIndex, ftKind);
 
+    static void setEnable(int enable);
+    void CrearWork();
+    void setCpuType(int player, int type);
+    void setCpuRank(int player, s8 rank);
+    void regist_ai_child(int player, aiInput* input, int chrKind);
+    static void setEnablePlayer(int player, int enable, int unk);
+    void removeTgtRefer(int player, int unk);
+
+    void* searchAtkData(int ftKind, u32 id);
+
+    AiClBlock* get_top_block(int team);
+    AiClBlock* get_right_block(int team);
+    AiClBlock* get_center_block(int team);
+    bool chkUnderFloor(float slope, Vec2f* pos);
+    AiClBlock* search_blk1(u32* key);
+
     static bool isReady();
     static bool isReadyUpdate();
     static bool isSmallMap();
     static char* getMadeinAiData(bool force);
     static aiStat* get_aiStat(aiChrIdx* idx);
+    aiStat* get_aiStatFinal();
+    void removePlayer(aiChrIdx* idx);
+    static void setAdventureMd(u32 md);
 
     int getCpuType(int player);
     int getCpuRank(int player);

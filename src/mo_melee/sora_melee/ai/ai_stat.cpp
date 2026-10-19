@@ -1,3 +1,4 @@
+#include <ai/ai_enemy.h>
 #include <ai/ai_param.h>
 #include <ai/ai_stat.h>
 #include <math.h>
@@ -68,11 +69,11 @@ bool aiStat::chk_stat_ffall() {
     return false;
 }
 
-void aiStat::change(int chrIdx, int chrKind, int input, u8 unk) {
-    if (chrIdx < 0 || chrKind == -1 || input == 0) {
+void aiStat::change(int chrIdx, int chrKind, aiInput* input, int unk) {
+    if (chrIdx < 0 || chrKind == -1 || input == NULL) {
         m_chrIdx.m_idx = -1;
         m_chrKind = -1;
-        m_input = 0;
+        m_input = NULL;
     } else {
         m_chrIdx.m_idx = chrIdx;
         m_chrKind = chrKind;
@@ -112,7 +113,7 @@ float aiStat::get_lr_tgt(aiChrIdx* target) {
 }
 
 Vec2f aiStat::getNearFloorEdge() {
-    aiFloorInfo* floor = m_floor;
+    AiClBlock* floor = m_floor;
     if (m_pos.m_x < 0.5f * (floor->m_edgeL.m_x + floor->m_edgeR.m_x)) {
         return floor->m_edgeL;
     }
@@ -165,12 +166,12 @@ float calc_arraive_f(float dist, float vel, float acc) {
     return (r - 0.5f) + t;
 }
 
-void aiStat::init(int chrIdx, int chrKind, int input, u8 unk) {
+void aiStat::init(int chrIdx, int chrKind, aiInput* input, int unk) {
     gfMemFill(this, 0, sizeof(aiStat));
-    if (chrIdx < 0 || chrKind == -1 || input == 0) {
+    if (chrIdx < 0 || chrKind == -1 || input == NULL) {
         m_chrIdx.m_idx = -1;
         m_chrKind = -1;
-        m_input = 0;
+        m_input = NULL;
     } else {
         m_chrIdx.m_idx = chrIdx;
         m_chrKind = chrKind;
@@ -205,7 +206,7 @@ void aiStat::init(int chrIdx, int chrKind, int input, u8 unk) {
     m_unkA8 = 0;
     m_unkB8 = 0;
     m_unkB4 = 0;
-    m_floor = (aiFloorInfo*)((u8*)g_aiMgr + 0xAC);
+    m_floor = (AiClBlock*)((u8*)g_aiMgr + 0xAC);
     m_unkC4 = 0.0f;
     m_unkCC = -1;
     m_team = -1;
@@ -294,7 +295,7 @@ float aiStat::get_distance(float scale, aiChrIdx* target) {
 }
 
 float aiStat::get_range_floor(float scale, Vec3f* pos) {
-    aiFloorInfo* floor = m_floor;
+    AiClBlock* floor = m_floor;
     Vec2f edgeL = floor->m_edgeL;
     Vec2f edgeR = floor->m_edgeR;
     float sign = 1.0f;
@@ -333,10 +334,10 @@ float aiStat::get_range_floor(float scale, Vec3f* pos) {
 }
 
 bool aiStat::chkDangerZoneAway() {
-    aiFloorInfo* floor = m_floor;
+    AiClBlock* floor = m_floor;
     if (m_unkC0 == 0) {
         bool danger = false;
-        if ((floor->m_flags & 0x1000) != 0 || chk_fl_danger(floor, m_team)) {
+        if ((floor->m_flags & 0x1000) != 0 || floor->chk_fl_danger(m_team)) {
             danger = true;
         }
         if (danger) {
@@ -344,9 +345,29 @@ bool aiStat::chkDangerZoneAway() {
         }
     }
     if (chk_stat_gr_free() || chk_stat_air_free()) {
-        if (chk_fl_danger(m_floor, m_team) && aiMgr::chkDangerZone((Vec2f*)&m_center, m_team, 0)) {
+        if (m_floor->chk_fl_danger(m_team) && aiMgr::chkDangerZone((Vec2f*)&m_center, m_team, 0)) {
             return true;
         }
     }
     return false;
+}
+
+void aiStat::update_enemy(aiEnemy* enemy, aiChrIdx* chrIdx) {
+    init(-1, -1, NULL, 0);
+    m_chrIdx = *chrIdx;
+    m_flags = 0x80000004;
+    if ((enemy->m_flags & 2) == 0) {
+        m_flags |= 1;
+    }
+    m_unkB4 = enemy->m_status;
+    m_center.m_x = enemy->m_pos.m_x;
+    m_center.m_y = enemy->m_pos.m_y;
+    m_center.m_z = enemy->m_pos.m_z;
+    m_pos.m_x = m_center.m_x;
+    m_pos.m_y = m_center.m_y;
+    m_pos.m_z = m_center.m_z;
+    m_speed.m_x = enemy->m_move.m_x;
+    m_speed.m_y = enemy->m_move.m_y;
+    m_lr = enemy->m_lr;
+    set_floor_info(0);
 }
