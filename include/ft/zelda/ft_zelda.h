@@ -30,8 +30,14 @@ typedef soCollisionSearchModuleBuilder<soCollisionSearchModuleBuildConfig<soColl
 FT_KINETIC_TRANSACTOR(ftZeldaKineticTransactor);
 typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKineticMediatorImplT<ftZeldaKineticTransactor, ftKineticTransactor> > ftZeldaKineticModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_ZELDA_ARTICLE_POOLS
+#include <ft/zelda/ft_zelda_article_pools.h>
+typedef ftZeldaArticleManageModuleBuilder ftZeldaGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0xFF40, Fighter_Zelda> ftZeldaGenerateArticleManageModuleBuilder;
+#endif
 
 class ftZeldaBuildConfig : public ftCommonBuildConfig {
 public:
@@ -52,6 +58,10 @@ public:
     typedef ftZeldaGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnZeldaDein;
+class wnZeldaLightingBow;
+class wnZeldaLightingBowArrow;
+
 class ftZelda : public ftFighterBuilder<ftZeldaBuildConfig> {
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
     ftData* m_data;
@@ -63,4 +73,8 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnZeldaDein* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnZeldaLightingBow* weapon, soModuleAccesser* acc);
+    static bool activeArticle2(wnZeldaLightingBowArrow* weapon, soModuleAccesser* acc);
 };

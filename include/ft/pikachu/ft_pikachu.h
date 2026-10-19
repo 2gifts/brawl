@@ -27,8 +27,14 @@ typedef soStatusModuleBuildConfig<288, soGeneralWorkBuildConfig<18, 14, 2>, 274,
 FT_KINETIC_TRANSACTOR(ftPikachuKineticTransactor);
 typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKineticMediatorImplT<ftPikachuKineticTransactor> > ftPikachuKineticModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_PIKACHU_ARTICLE_POOLS
+#include <ft/pikachu/ft_pikachu_article_pools.h>
+typedef ftPikachuArticleManageModuleBuilder ftPikachuGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x22AE8, Fighter_Pikachu> ftPikachuGenerateArticleManageModuleBuilder;
+#endif
 
 class ftPikachuBuildConfig : public ftCommonBuildConfig {
 public:
@@ -46,6 +52,10 @@ public:
     typedef ftPikachuGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnPikachuThunderJolt;
+class wnPikachuCloud;
+class wnPikachuVortex;
+
 class ftPikachu : public ftFighterBuilder<ftPikachuBuildConfig> {
     u8 unkTail[0x2AE34 - sizeof(ftFighterBuilder<ftPikachuBuildConfig>)];
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
@@ -55,4 +65,9 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnPikachuThunderJolt* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnPikachuCloud* weapon, soModuleAccesser* acc);
+    static bool activeArticle2(wnPikachuVortex* weapon, soModuleAccesser* acc);
+    static bool activeArticle3(wnPikachuThunder* weapon, soModuleAccesser* acc);
 };
