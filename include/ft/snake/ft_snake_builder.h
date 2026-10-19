@@ -83,8 +83,13 @@ public:
     virtual void notifyEventOnDamage(soDamage* damage, bool flag, soModuleAccesser* moduleAccesser);
     virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
     virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
+    virtual void updateNodeSRT();
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+    virtual void notifyArticleEventEject(int unk1, int unk2, int* unk3, int* unk4);
+    virtual void notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual void photoMoved();
     virtual void photoExit();
+    bool ckeckChangeEarCloseStatus(Vec3f& position);
     // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnSnakeMine* weapon, soModuleAccesser* acc);
     static bool activeArticle1(wnSnakeTrenchMortar* weapon, soModuleAccesser* acc);

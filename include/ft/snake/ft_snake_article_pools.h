@@ -102,6 +102,7 @@ public:
     wnSnakeNikita(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeNikitaData* data);
     virtual ~wnSnakeNikita();
     void activate(int founderTaskId, int etcResourceId, int team, float lr);
+    void forceFallMissile();
 };
 static_assert(sizeof(wnSnakeNikita) == 0x67C4, "wnSnakeNikita layout is wrong!");
 
