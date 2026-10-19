@@ -448,12 +448,12 @@ forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTrans
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__47soInstancePoolSubNull<22ftKineticEnergyGravity>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000E000; // type:function size:0x8
 updateEnergy<21ftKineticEnergyMotion>__19ftKineticTransactorFP21ftKineticEnergyMotionP16soModuleAccesser_v = .text:0x0000E008; // type:function size:0x34
 notifyEventChangeMotion__21soMotionEventObserverFiiPvP16soModuleAccesser = .text:0x0000E03C; // type:function size:0x4 scope:weak
-getInstanceAt__163soInstancePoolSub<43soInstancePoolInfo = .text:0x0000E040; // type:function size:0x18
+fn_108_E040 = .text:0x0000E040; // type:function size:0x18
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyMotion,1>,98soKineticEnergyHolder<21ftKineticEnergyMotion,18soTypeListNullType,28soKineticEnergyInitInfo<0,1>>>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000E058; // type:function size:0x90
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__46soInstancePoolSubNull<21ftKineticEnergyMotion>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000E0E8; // type:function size:0x8
 updateEnergy<21ftKineticEnergyDamage>__19ftKineticTransactorFP21ftKineticEnergyDamageP16soModuleAccesser_v = .text:0x0000E0F0; // type:function size:0x34
 notifyEventExitFighter__20ftEntryEventObserverFii = .text:0x0000E124; // type:function size:0x4 scope:weak
-getInstanceAt__167soInstancePoolSub<45soInstancePoolInfo = .text:0x0000E128; // type:function size:0x18
+fn_108_E128 = .text:0x0000E128; // type:function size:0x18
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyDamage,1>,98soKineticEnergyHolder<21ftKineticEnergyDamage,18soTypeListNullType,28soKineticEnergyInitInfo<4,2>>>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000E140; // type:function size:0x90
 getMdlResIndex__20soResourceIdAccesserFv = .text:0x0000E1D0; // type:function size:0x8
 updateEnergy<21soKineticEnergyJostle>__19ftKineticTransactorFP21soKineticEnergyJostleP16soModuleAccesser_v = .text:0x0000E1D8; // type:function size:0x34

@@ -458,12 +458,12 @@ forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTrans
 getMdlResIndex__20soResourceIdAccesserFv = .text:0x0000E194; // type:function size:0x8
 updateEnergy<21ftKineticEnergyMotion>__19ftKineticTransactorFP21ftKineticEnergyMotionP16soModuleAccesser_v = .text:0x0000E19C; // type:function size:0x34
 notifyEventChangeMotion__21soMotionEventObserverFiiPvP16soModuleAccesser = .text:0x0000E1D0; // type:function size:0x4 scope:weak
-getInstanceAt__163soInstancePoolSub<43soInstancePoolInfo = .text:0x0000E1D4; // type:function size:0x18
+fn_97_E1D4 = .text:0x0000E1D4; // type:function size:0x18
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyMotion,1>,98soKineticEnergyHolder<21ftKineticEnergyMotion,18soTypeListNullType,28soKineticEnergyInitInfo<0,1>>>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000E1EC; // type:function size:0x90
 getTexResIndex__20soResourceIdAccesserFv = .text:0x0000E27C; // type:function size:0x8
 updateEnergy<21ftKineticEnergyDamage>__19ftKineticTransactorFP21ftKineticEnergyDamageP16soModuleAccesser_v = .text:0x0000E284; // type:function size:0x34
 notifyEventExitFighter__20ftEntryEventObserverFii = .text:0x0000E2B8; // type:function size:0x4 scope:weak
-getInstanceAt__167soInstancePoolSub<45soInstancePoolInfo = .text:0x0000E2BC; // type:function size:0x18
+fn_97_E2BC = .text:0x0000E2BC; // type:function size:0x18
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyDamage,1>,98soKineticEnergyHolder<21ftKineticEnergyDamage,18soTypeListNullType,28soKineticEnergyInitInfo<4,2>>>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000E2D4; // type:function size:0x90
 isNull__48soEventUnitImpl<29soCollisionCatchEventObserver>CFv = .text:0x0000E364; // type:function size:0x8
 updateEnergy<21soKineticEnergyJostle>__19ftKineticTransactorFP21soKineticEnergyJostleP16soModuleAccesser_v = .text:0x0000E36C; // type:function size:0x34

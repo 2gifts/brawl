@@ -394,7 +394,7 @@ getInstanceAt__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyMotion
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyMotion,1>,98soKineticEnergyHolder<21ftKineticEnergyMotion,18soTypeListNullType,28soKineticEnergyInitInfo<0,1>>>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000B43C; // type:function size:0x90
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__46soInstancePoolSubNull<21ftKineticEnergyMotion>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000B4CC; // type:function size:0x8
 updateEnergy<21ftKineticEnergyDamage>__19ftKineticTransactorFP21ftKineticEnergyDamageP16soModuleAccesser_v = .text:0x0000B4D4; // type:function size:0x38
-getInstanceAt__167soInstancePoolSub<45soInstancePoolInfo = .text:0x0000B50C; // type:function size:0x18
+fn_99_B50C = .text:0x0000B50C; // type:function size:0x18
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyDamage,1>,98soKineticEnergyHolder<21ftKineticEnergyDamage,18soTypeListNullType,28soKineticEnergyInitInfo<4,2>>>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000B524; // type:function size:0x90
 getMdlResIndex__20soResourceIdAccesserFv = .text:0x0000B5B4; // type:function size:0x8
 updateEnergy<21soKineticEnergyJostle>__19ftKineticTransactorFP21soKineticEnergyJostleP16soModuleAccesser_v = .text:0x0000B5BC; // type:function size:0x38
@@ -469,7 +469,7 @@ changeKineticSub5__24ftLuigiKineticTransactorFPbPvP5Vec2fP16soModuleAccesser = .
 __ct__5Vec3fFfff = .text:0x0000C610; // type:function size:0x10 scope:weak
 changeKineticSub6__24ftLuigiKineticTransactorFPbPvP5Vec2fP16soModuleAccesser = .text:0x0000C620; // type:function size:0x180
 changeKineticSub7__24ftLuigiKineticTransactorFPbPvP5Vec2fP16soModuleAccesser = .text:0x0000C7A0; // type:function size:0xB0
-updateEnergy<21ftKineticEnergyMotion>__19ftKineticTransactorFP21ftKineticEnergyMotionP16soModuleAccesser_v = .text:0x0000C850; // type:function size:0xC4
+updateEnergy__24ftLuigiKineticTransactorFP21ftKineticEnergyMotionP16soModuleAccesser = .text:0x0000C850; // type:function size:0xC4
 updateEnergy<25ftKineticEnergyController>__19ftKineticTransactorFP25ftKineticEnergyControllerP16soModuleAccesser_v = .text:0x0000C914; // type:function size:0x16C
 initStatus__33ftLuigiStatusUniqProcessSpecialLwFP16soModuleAccesser = .text:0x0000CA80; // type:function size:0x4
 execStatus__33ftLuigiStatusUniqProcessSpecialLwFP16soModuleAccesser = .text:0x0000CA84; // type:function size:0x2C0

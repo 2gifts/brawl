@@ -390,7 +390,7 @@ getInstanceAt__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyMotion
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyMotion,1>,98soKineticEnergyHolder<21ftKineticEnergyMotion,18soTypeListNullType,28soKineticEnergyInitInfo<0,1>>>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000B8A4; // type:function size:0x90
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__46soInstancePoolSubNull<21ftKineticEnergyMotion>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000B934; // type:function size:0x8
 updateEnergy<21ftKineticEnergyDamage>__19ftKineticTransactorFP21ftKineticEnergyDamageP16soModuleAccesser_v = .text:0x0000B93C; // type:function size:0x1EC
-getInstanceAt__167soInstancePoolSub<45soInstancePoolInfo = .text:0x0000BB28; // type:function size:0x18
+fn_111_BB28 = .text:0x0000BB28; // type:function size:0x18
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyDamage,1>,98soKineticEnergyHolder<21ftKineticEnergyDamage,18soTypeListNullType,28soKineticEnergyInitInfo<4,2>>>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000BB40; // type:function size:0x90
 getMdlResIndex__20soResourceIdAccesserFv = .text:0x0000BBD0; // type:function size:0x8
 updateEnergy<25soKineticEnergyWindNormal>__19ftKineticTransactorFP25soKineticEnergyWindNormalP16soModuleAccesser_v = .text:0x0000BBD8; // type:function size:0x1EC
