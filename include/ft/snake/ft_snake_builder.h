@@ -3,6 +3,7 @@
 // Builder view of ftSnake for ft_snake.cpp only. The status units include ft_snake.h, whose Fighter-based
 // declaration keeps the same layout; their status-process headers cannot coexist with the builder headers.
 #include <ft/ft_fighter_builder.h>
+#include <so/so_photo_call_back.h>
 #include <sr/sr_common.h>
 #include <types.h>
 
@@ -53,7 +54,6 @@ public:
     typedef ftSnakeGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
-// The constructor's 0x2D040 allocation fixes the size; the members past the builder are not recovered yet.
 class wnSnakeMine;
 class wnSnakeTrenchMortar;
 class wnSnakeRpg7;
@@ -68,13 +68,23 @@ class wnSnakeRgb6Clip;
 class wnSnakeRgb6Bullet;
 class soArticle;
 
-class ftSnake : public ftFighterBuilder<ftSnakeBuildConfig> {
-    u8 unkTail[0x2D040 - sizeof(ftFighterBuilder<ftSnakeBuildConfig>)];
+class ftSnake : public ftFighterBuilder<ftSnakeBuildConfig>, public soPhotoCallBack {
+    soArrayContractibleTable<const soStatusData> m_statusDataTable;
+    ftData* m_data;
 public:
     ftSnake(s32 entryId,
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    virtual void onActivate();
+    virtual void onStart(int startKind);
+    virtual void onEndFinal();
+    virtual void playEatSE();
+    virtual void notifyEventOnDamage(soDamage* damage, bool flag, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
+    virtual void photoMoved();
+    virtual void photoExit();
     // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnSnakeMine* weapon, soModuleAccesser* acc);
     static bool activeArticle1(wnSnakeTrenchMortar* weapon, soModuleAccesser* acc);
