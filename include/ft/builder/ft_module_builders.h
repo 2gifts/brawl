@@ -490,6 +490,7 @@ public:
 template <typename T>
 class soItemManageModuleBuildConfig {
 public:
+    enum { ItemCapacity = 3, ExtraCapacity = 4 };
     typedef T ModuleType;
 };
 
@@ -497,12 +498,12 @@ extern char g_soItemManageNullA[];
 extern char g_soItemManageNullB[];
 
 template <typename BC>
-class soItemManageModuleBuilder : public soArraySelectHolder<1, soArrayVector<soItemInfo, 3>, soArrayNull<soItemInfo> > {
-    soArraySelectHolder<1, soArrayVector<soItemInfo, 4>, soArrayNull<soItemInfo> > m_items2;
+class soItemManageModuleBuilder : public soArraySelectHolder<1, soArrayVector<soItemInfo, BC::ItemCapacity>, soArrayNull<soItemInfo> > {
+    soArraySelectHolder<1, soArrayVector<soItemInfo, BC::ExtraCapacity>, soArrayNull<soItemInfo> > m_items2;
     typename BC::ModuleType m_itemModule;
 public:
     soItemManageModuleBuilder(soModuleAccesser* acc, void* itemNodeData) :
-        soArraySelectHolder<1, soArrayVector<soItemInfo, 3>, soArrayNull<soItemInfo> >(3, 0), m_items2(), m_itemModule(acc, this->get(), m_items2.get(), itemNodeData, g_soItemManageNullA, g_soItemManageNullB) { }
+        soArraySelectHolder<1, soArrayVector<soItemInfo, BC::ItemCapacity>, soArrayNull<soItemInfo> >(BC::ItemCapacity, 0), m_items2(), m_itemModule(acc, this->get(), m_items2.get(), itemNodeData, g_soItemManageNullA, g_soItemManageNullB) { }
     typename BC::ModuleType* getModule() { return &m_itemModule; }
 };
 

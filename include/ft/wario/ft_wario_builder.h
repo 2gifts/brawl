@@ -9,12 +9,14 @@
 #include <types.h>
 
 class soModuleAccesser;
+struct ftWarioData;
 
 // Wario dispatches his own kinetic modes (changeKinetic/changeKineticSub close this translation unit) but updates
 // energies through the shared fighter transactor.
 class ftWarioKineticTransactor {
 public:
     static void changeKinetic(int mode, void* pools, soModuleAccesser* acc);
+    static void changeKineticSub(bool*, void* pools, Vec2f* speed, soModuleAccesser* acc);
 };
 
 ////////////////////////////////////////
@@ -42,6 +44,14 @@ typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKinetic
 // HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnWarioBike pools), not reconstructed yet
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x4BC8, Fighter_Wario> ftWarioGenerateArticleManageModuleBuilder;
 
+// HYPOTHESIS: Chomp uses the four additional primary item slots.
+// Native builder construction selects seven primary slots and four auxiliary
+// slots; the remaining fields and module interface are shared.
+class ftWarioItemManageModuleBuildConfig : public soItemManageModuleBuildConfig<soItemManageModuleImpl> {
+public:
+    enum { ItemCapacity = 7 };
+};
+
 class ftWarioBuildConfig : public ftCommonBuildConfig {
 public:
     typedef ftWarioInsideEventManageModuleBuildConfig InsideEventManageModuleBuildConfig;
@@ -58,13 +68,15 @@ public:
     typedef ftWarioCollisionSearchModuleBuilder CollisionSearchModuleBuilder;
     typedef ftWarioKineticModuleBuildConfig KineticModuleBuildConfig;
     typedef ftWarioGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
+    typedef soAreaModuleBuildConfigInstances<10, ftAreaModuleImpl> AreaModuleBuildConfig;
+    typedef ftWarioItemManageModuleBuildConfig ItemManageModuleBuildConfig;
 };
 
-// The last fields drive the shared Waft gauge and parameter lookups. The
-// preceding builder tail remains opaque. Native allocation fixes the extent.
+// The owned status table, data pointer and gauge animation follow the builder.
+static_assert(sizeof(ftFighterBuilder<ftWarioBuildConfig>) == 0xD2E8, "Wario builder extent");
 class ftWario : public ftFighterBuilder<ftWarioBuildConfig> {
-    u8 unkTail[0xD2F8 - sizeof(ftFighterBuilder<ftWarioBuildConfig>)];
-    ftData* m_data; // +0xD2F8
+    soArrayContractibleTable<const soStatusData> m_statusDataTable; // +0xD2E8
+    ftWarioData* m_data; // +0xD2F8
     soAnimObj m_waftAnim; // +0xD2FC
 public:
     ftWario(s32 entryId,

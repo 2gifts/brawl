@@ -68,6 +68,28 @@ public:
     void* getModule() { return &m_module; }
 };
 
+// Area module builder with another number of area instances (same code as soAreaModuleBuilder).
+template <s32 NumInstances, typename T>
+class soAreaModuleBuildConfigInstances {
+public:
+    typedef T ModuleType;
+};
+
+template <s32 NumInstances, typename T>
+class soAreaModuleBuilder<soAreaModuleBuildConfigInstances<NumInstances, T> > : public soArraySelectHolder<1, soArrayVector<soAreaWind, 1>, soArrayNull<soAreaWind> > {
+    T m_module;
+    soAreaEnviromentElementCheckerImpl m_checker;
+    soArrayVector<soAreaContactLog, 16> m_contactLogs;
+    soArrayVector<soAreaInstance, NumInstances> m_instances;
+    u32 m_pad;
+public:
+    soAreaModuleBuilder(soModuleAccesser* acc, u8 areaCategory, soEventObserverRegistrationDesc* regDesc) :
+        soArraySelectHolder<1, soArrayVector<soAreaWind, 1>, soArrayNull<soAreaWind> >(1, 0),
+        m_module(acc, areaCategory, &m_instances, &m_contactLogs, &m_checker, this->get(), regDesc, 8),
+        m_checker(), m_contactLogs(0), m_instances(0) { }
+    void* getModule() { return &m_module; }
+};
+
 // Area module builder without the wind array holder: the module takes the shared null wind array (fn_126_6904 in ft_zako,
 // 0x290 bytes with 3 instances). The first word is not initialized by the constructor.
 template <s32 NumInstances, typename T>

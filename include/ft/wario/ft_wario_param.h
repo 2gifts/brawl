@@ -5,7 +5,8 @@
 // Named fields: the bike dismount speed and the frames before a new bike can be summoned (offsets and sizes match the
 // published Wario bike parameter table; use in special_s / special_s_escape agrees).
 struct ftWarioBikeRiderParam {
-    u8 unk0[8];
+    float gravity; // Custom kinetic mode 0x64 applies its negative as gravity.
+    float unk4;    // Copied to the gravity energy's clamp field at +0x1C.
     float unk8;  // HYPOTHESIS: a damage reaction threshold (compared with the damage reaction in checkDamage)
     float unkC;  // HYPOTHESIS: a damage reaction threshold (compared with the damage reaction in checkDamage)
     float escapeSpeedX;
