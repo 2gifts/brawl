@@ -10,6 +10,7 @@
 #include <ft/ft_class_info_impl.h>
 #include <ft/samus/ft_samus.h>
 #include <ft/samus/ft_samus_extend_param_accesser.h>
+#include <ft/ft_owner.h>
 #include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
 
@@ -109,6 +110,48 @@ void fn_94_9134(ftSamus* self) {
     self->Fighter::onDeadEnd();
 }
 
+}
+
+// The bomb starts with the effect resource and the team of the fighter.
+bool ftSamus::activeArticle1(wnSamusBomb* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam());
+    return true;
+}
+
+bool ftSamus::activeArticle2(wnSamusMissile* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam());
+    return true;
+}
+
+bool ftSamus::activeArticle3(wnSamusSuperMissile* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam());
+    return true;
+}
+
+bool ftSamus::activeArticle4(wnSamusLaser* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam());
+    return true;
+}
+
+bool ftSamus::activeArticle5(wnSamusLaser2* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    float unkFloat = acc->getWorkManageModule().getFloat(0x21000004);
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam(), unkFloat);
+    return true;
 }
 
 // ---- the article holders --------------------------------------------------------------------------------------------
