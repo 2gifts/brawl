@@ -2,12 +2,20 @@
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_NOINLINE_SEARCH_BUILDER
+#define FT_ZELDA_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define FT_TEAM_TYPED_INTERFACE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_reflector_group.h>
 #include <ft/ft_physics_iface.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/zelda/ft_zelda.h>
 #include <ft/zelda/ft_zelda_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <ft/ft_owner.h>
+#include <ft/ft_resource_id_accesser_impl.h>
+#include <so/so_value_accesser.h>
 
 #define FT_BC ftZeldaBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -60,6 +68,323 @@ ftZelda::ftZelda(s32 entryId,
     m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
     ftPhysicsModuleCall6C(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0x4B);
 }
+
+// HYPOTHESIS: the record at +0x80 of the common data holds the offsets (in the facing direction and up) of the fireball from
+// the node of the head.
+struct ftZeldaDeinOffset {
+    u8 unk0[0xC];
+    float m_x;
+    float m_y;
+};
+
+// Din's Fire starts at the head node of the fighter, moved by the offset of the data record.
+bool ftZelda::activeArticle(wnZeldaDein* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soModelModule& model = acc->getModelModule();
+    Vec3f pos = model.getNodeGlobalPosition(model.getNodeId("HeadN"), false);
+    const ftZeldaDeinOffset* offset = *reinterpret_cast<const ftZeldaDeinOffset* const*>(reinterpret_cast<const u8*>(g_ftCommonDataAccesser.getData(Fighter_Zelda)) + 0x80);
+    pos.m_x += offset->m_x * acc->getPostureModule().getLr();
+    pos.m_y += offset->m_y;
+    pos.m_z = 0.0f;
+    int founderTaskId = acc->getStageObject().m_taskId;
+    weapon->activate(founderTaskId, fighter.getOwner()->getTeam(), &pos, acc->getPostureModule().getLr());
+    return true;
+}
+
+// The light bow of the Final Smash starts at the stage object of the fighter with its team.
+bool ftZelda::activeArticle1(wnZeldaLightingBow* weapon, soModuleAccesser* acc) {
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    int team = acc->getTeamModule().getTeam()->getNo();
+    int resourceId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
+    weapon->activate(founderTaskId, resourceId, team, 0x45);
+    return true;
+}
+
+// The light arrow of the Final Smash starts the same way.
+bool ftZelda::activeArticle2(wnZeldaLightingBowArrow* weapon, soModuleAccesser* acc) {
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    int team = acc->getTeamModule().getTeam()->getNo();
+    int resourceId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
+    weapon->activate(founderTaskId, resourceId, team, 0x63);
+    return true;
+}
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Zelda, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftZeldaArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftZeldaArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftZeldaArticleKind : wnArticleKindInfo {
+    ftZeldaArticleKind() {
+        kind = 0;
+        subKind = Fighter_Zelda;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftZeldaArticleBuildInfo : wnArticleBuildInfo {
+    ftZeldaArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_148330(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148344(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148358(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_14836C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftZeldaArticleTraits;
+#define FT_ZELDA_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftZeldaArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftZeldaArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Zelda, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_ZELDA_TRAITS(wnZeldaDein, wnZeldaDeinData, 0, fn_27_148330)
+FT_ZELDA_TRAITS(wnZeldaDeinS, wnZeldaDeinSData, 1, fn_27_148344)
+FT_ZELDA_TRAITS(wnZeldaLightingBow, wnZeldaLightingBowData, 2, fn_27_148358)
+FT_ZELDA_TRAITS(wnZeldaLightingBowArrow, wnZeldaLightingBowArrowData, 3, fn_27_14836C)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftZeldaArticleTraits<W>::ArticleId, ftZeldaArticleBuildInfo(ftZeldaArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftZeldaArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnZeldaDein>::~wnArticleHolder();
+template wnArticleHolder<wnZeldaDeinS>::~wnArticleHolder();
+template wnArticleHolder<wnZeldaLightingBow>::~wnArticleHolder();
+template wnArticleHolder<wnZeldaLightingBowArrow>::~wnArticleHolder();
+template wnArticleHolder<wnZeldaDein>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnZeldaDeinS>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftZeldaArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftZeldaArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftZeldaArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftZeldaArticleMediator::~ftZeldaArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftZeldaArticleMediator::getMediateNum() { return 4; }
+void ftZeldaArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Dein, 1 DeinS, 2 LightingBow, 3 LightingBowArrow (the rest are unused).
+
+#define FT_ZELDA_POOL_DEIN_BASE static_cast<wnArticlePool<wnZeldaDein, 3, ftZeldaDeinSPool>&>(m_pools)
+#define FT_ZELDA_POOL_DEIN FT_ZELDA_POOL_DEIN_BASE.getSub()
+#define FT_ZELDA_POOL_DEINS_BASE static_cast<wnArticlePool<wnZeldaDeinS, 3, ftZeldaLightingBowPool>&>(m_pools)
+#define FT_ZELDA_POOL_DEINS FT_ZELDA_POOL_DEINS_BASE.getSub()
+#define FT_ZELDA_POOL_LIGHTINGBOW_BASE static_cast<wnArticlePool<wnZeldaLightingBow, 1, ftZeldaLightingBowArrowPool>&>(m_pools)
+#define FT_ZELDA_POOL_LIGHTINGBOW FT_ZELDA_POOL_LIGHTINGBOW_BASE.getSub()
+#define FT_ZELDA_POOL_LIGHTINGBOWARROW_BASE static_cast<wnArticlePool<wnZeldaLightingBowArrow, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_ZELDA_POOL_LIGHTINGBOWARROW FT_ZELDA_POOL_LIGHTINGBOWARROW_BASE.getSub()
+
+#define FT_ZELDA_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(4, value) WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) \
+    WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) \
+    WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) \
+    WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) \
+    WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftZeldaArticleMediator::deactivate() {
+    for (s32 i = 0; i < 3; ++i) {
+        wnZeldaDein* weapon = FT_ZELDA_POOL_DEIN.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 3; ++i) {
+        wnZeldaDeinS* weapon = FT_ZELDA_POOL_DEINS.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnZeldaLightingBow* weapon = FT_ZELDA_POOL_LIGHTINGBOW.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnZeldaLightingBowArrow* weapon = FT_ZELDA_POOL_LIGHTINGBOWARROW.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftZeldaArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 3; }
+    case 1: { wnArticleSlotTag tag; return 3; }
+    case 2: { wnArticleSlotTag tag; return 1; }
+    case 3: { wnArticleSlotTag tag; return 1; }
+    FT_ZELDA_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftZeldaActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_ZELDA_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftZeldaActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftZeldaActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftZeldaArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_ZELDA_COUNT_ACTIVE(FT_ZELDA_POOL_DEIN, 3)
+    case 1: FT_ZELDA_COUNT_ACTIVE(FT_ZELDA_POOL_DEINS, 3)
+    case 2: FT_ZELDA_COUNT_ACTIVE(FT_ZELDA_POOL_LIGHTINGBOW, 1)
+    case 3: FT_ZELDA_COUNT_ACTIVE(FT_ZELDA_POOL_LIGHTINGBOWARROW, 1)
+    FT_ZELDA_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_ZELDA_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftZeldaArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_ZELDA_CAN_GENERATE(FT_ZELDA_POOL_DEIN, 3, 0)
+    case 1: FT_ZELDA_CAN_GENERATE(FT_ZELDA_POOL_DEINS, 3, 1)
+    case 2: FT_ZELDA_CAN_GENERATE(FT_ZELDA_POOL_LIGHTINGBOW, 1, 2)
+    case 3: FT_ZELDA_CAN_GENERATE(FT_ZELDA_POOL_LIGHTINGBOWARROW, 1, 3)
+    FT_ZELDA_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftZeldaArticleActivator;
+template <> struct ftZeldaArticleActivator<wnZeldaDein> {
+    static bool activate(wnZeldaDein* weapon, soModuleAccesser* acc) { return ftZelda::activeArticle(weapon, acc); }
+};
+template <> struct ftZeldaArticleActivator<wnZeldaDeinS> {
+    static bool activate(wnZeldaDeinS* weapon, soModuleAccesser* acc) { return weapon->activeArticle(acc); }
+};
+template <> struct ftZeldaArticleActivator<wnZeldaLightingBow> {
+    static bool activate(wnZeldaLightingBow* weapon, soModuleAccesser* acc) { return ftZelda::activeArticle1(weapon, acc); }
+};
+template <> struct ftZeldaArticleActivator<wnZeldaLightingBowArrow> {
+    static bool activate(wnZeldaLightingBowArrow* weapon, soModuleAccesser* acc) { return ftZelda::activeArticle2(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_ZELDA_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftZeldaArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftZeldaArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_ZELDA_GENERATE(wnZeldaDein, FT_ZELDA_POOL_DEIN)
+    case 1: FT_ZELDA_GENERATE(wnZeldaDeinS, FT_ZELDA_POOL_DEINS)
+    case 2: FT_ZELDA_GENERATE(wnZeldaLightingBow, FT_ZELDA_POOL_LIGHTINGBOW)
+    case 3: FT_ZELDA_GENERATE(wnZeldaLightingBowArrow, FT_ZELDA_POOL_LIGHTINGBOWARROW)
+    FT_ZELDA_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftZeldaArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnZeldaDein&>(*article);
+        return true;
+    }
+    case 1: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnZeldaDeinS&>(*article);
+        return true;
+    }
+    case 2: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnZeldaLightingBow&>(*article);
+        return true;
+    }
+    case 3: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnZeldaLightingBowArrow&>(*article);
+        return true;
+    }
+    FT_ZELDA_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftZelda is done
 void testBuilder() {
