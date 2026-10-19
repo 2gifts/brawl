@@ -26,8 +26,14 @@ typedef soStatusModuleBuildConfig<284, soGeneralWorkBuildConfig<19, 14, 2>, 274,
 FT_KINETIC_TRANSACTOR(ftPikminKineticTransactor);
 typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKineticMediatorImplT<ftPikminKineticTransactor, ftKineticTransactor> > ftPikminKineticModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_PIKMIN_ARTICLE_POOLS
+#include <ft/pikmin/ft_pikmin_article_pools.h>
+typedef ftPikminArticleManageModuleBuilder ftPikminGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x17878, Fighter_Pikmin> ftPikminGenerateArticleManageModuleBuilder;
+#endif
 
 class ftPikminBuildConfig : public ftCommonBuildConfig {
 public:
@@ -44,6 +50,10 @@ public:
     typedef ftPikminKineticModuleBuildConfig KineticModuleBuildConfig;
     typedef ftPikminGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
+
+class wnPikminPikmin;
+class wnPikminDolfin;
+class wnPikminChain;
 
 class ftPikmin : public ftFighterBuilder<ftPikminBuildConfig> {
     u8 unkTail[0x20130 - sizeof(ftFighterBuilder<ftPikminBuildConfig>)];
