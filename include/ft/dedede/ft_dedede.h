@@ -52,8 +52,14 @@ typedef soLinkModuleBuildConfigCap<7, soLinkModuleImpl> ftDededeLinkModuleBuildC
 typedef soStatusModuleBuildConfig<314, soGeneralWorkBuildConfig<18, 14, 11>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftDededeStatusModuleBuildConfig;
 typedef soCollisionSearchModuleBuilder<soCollisionSearchModuleBuildConfig<soCollisionSearchModuleImpl> > ftDededeCollisionSearchModuleBuilder;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_DEDEDE_ARTICLE_POOLS
+#include <ft/dedede/ft_dedede_article_pools.h>
+typedef ftDededeArticleManageModuleBuilder ftDededeGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x3F000, Fighter_Dedede> ftDededeGenerateArticleManageModuleBuilder;
+#endif
 
 class ftDededeBuildConfig : public ftCommonBuildConfig {
 public:
@@ -73,6 +79,11 @@ public:
     typedef ftDededeGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnDededeStar;
+class wnDededeJethammer;
+class wnDededeFollower;
+class wnDededeWaddledooBeam;
+
 class ftDedede : public ftFighterBuilder<ftDededeBuildConfig> {
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
     ftData* m_data;
@@ -81,4 +92,10 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnDededeStar* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnDededeJethammer* weapon, soModuleAccesser* acc);
+    static bool activeArticle2(wnDededeFollower* weapon, soModuleAccesser* acc);
+    static bool activeArticle3(wnDededeWaddledooBeam* weapon, soModuleAccesser* acc);
+    static bool shootArticle(wnDededeFollower* weapon, soModuleAccesser* acc);
 };
