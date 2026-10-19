@@ -62,7 +62,8 @@ public:
     virtual void checkLog();
     virtual u32 getGroupNum();
     virtual bool isReactionFrame();
-    virtual short getReactionFrame();
+    // The stored s16 frame is returned sign-extended; native callers consume a full int.
+    virtual int getReactionFrame();
     virtual void setReactionFrame(short reactionFrame);
     virtual void setPosX(float posX, u32 collisionGroupIndex);
     virtual float getPosX(u32 collisionGroupIndex);
@@ -129,7 +130,7 @@ public:
     virtual void checkLog();
     virtual u32 getGroupNum();
     virtual bool isReactionFrame();
-    virtual short getReactionFrame();
+    virtual int getReactionFrame();
     virtual void setReactionFrame(short reactionFrame);
     virtual void setPosX(float posX, u32 collisionGroupIndex);
     virtual float getPosX(u32 collisionGroupIndex);

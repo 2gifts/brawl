@@ -90,7 +90,7 @@ void soCollisionHitModuleImpl::setReactionFrame(short reactionFrame) {
     m_reactionFrame = reactionFrame;
 }
 
-short soCollisionHitModuleImpl::getReactionFrame() {
+int soCollisionHitModuleImpl::getReactionFrame() {
     return m_reactionFrame;
 }
 
