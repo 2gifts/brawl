@@ -22,8 +22,14 @@ typedef soMotionModuleBuildConfig<500, soMotionModuleImpl, 2, 1, soTransitionMod
 typedef soStatusModuleBuildConfig<295, soGeneralWorkBuildConfig<18, 19, 8>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftIkeStatusModuleBuildConfig;
 typedef soCollisionSearchModuleBuilder<soCollisionSearchModuleBuildConfigParts<2, soCollisionSearchModuleImpl> > ftIkeCollisionSearchModuleBuilder;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the sword pool). Only the fighter unit builds the real pool; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_IKE_ARTICLE_POOLS
+#include <ft/ike/ft_ike_article_pools.h>
+typedef ftIkeArticleManageModuleBuilder ftIkeGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x2384, Fighter_Ike> ftIkeGenerateArticleManageModuleBuilder;
+#endif
 
 class ftIkeBuildConfig : public ftCommonBuildConfig {
 public:
@@ -39,6 +45,8 @@ public:
     typedef ftIkeGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnIkeSword;
+
 class ftIke : public ftFighterBuilder<ftIkeBuildConfig> {
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
     ftData* m_data;
@@ -47,4 +55,8 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    virtual void onStart(int startKind);
+    // The hooks the article mediator calls to start and to throw the sword (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnIkeSword* weapon, soModuleAccesser* acc);
+    static bool shootArticle(wnIkeSword* weapon, soModuleAccesser* acc);
 };

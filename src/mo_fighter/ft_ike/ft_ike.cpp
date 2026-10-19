@@ -2,10 +2,16 @@
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_NOINLINE_SEARCH_BUILDER
+#define FT_IKE_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define FT_TEAM_TYPED_INTERFACE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/ike/ft_ike.h>
 #include <ft/ike/ft_ike_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
 
 #define FT_BC ftIkeBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -78,6 +84,232 @@ ftIke::ftIke(s32 entryId,
     group.m_shieldDataSet = soSet<soCollisionShieldData>(&shape, 1);
     m_moduleAccesser->getCollisionShieldModule().add(&group, 1);
 }
+
+// ---- the fighter overrides ------------------------------------------------------------------------------------------
+// Work 0x10000040 is cleared on every start (HYPOTHESIS: the state of the sword throw).
+void ftIke::onStart(int startKind) {
+    Fighter::onStart(startKind);
+    m_moduleAccesser->getWorkManageModule().setInt(0, 0x10000040);
+}
+
+// The sword starts at the node "SwordN" of the fighter with the facing, the situation and the pending-change flag.
+bool ftIke::activeArticle(wnIkeSword* weapon, soModuleAccesser* acc) {
+    soWorkManageModule& work = acc->getWorkManageModule();
+    soSituationModule& situation = acc->getSituationModule();
+    soPostureModule& posture = acc->getPostureModule();
+    soModelModule& model = acc->getModelModule();
+    Vec3f pos = model.getNodeGlobalPosition(model.getNodeId("SwordN"), false);
+    soTeamModule& teamModule = acc->getTeamModule();
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getMdlResId(), teamModule.getTeam()->getNo(), &pos, posture.getLr(), situation.getKind(), work.isFlag(0x1200003d), false);
+    acc->getWorkManageModule().offFlag(0x1200003d);
+    return true;
+}
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Ike, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftIkeArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftIkeArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftIkeArticleKind : wnArticleKindInfo {
+    ftIkeArticleKind() {
+        kind = 0;
+        subKind = Fighter_Ike;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftIkeArticleBuildInfo : wnArticleBuildInfo {
+    ftIkeArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_148A88(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftIkeArticleTraits;
+#define FT_IKE_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftIkeArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftIkeArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Ike, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_IKE_TRAITS(wnIkeSword, wnIkeSwordData, 0, fn_27_148A88)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftIkeArticleTraits<W>::ArticleId, ftIkeArticleBuildInfo(ftIkeArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftIkeArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnIkeSword>::~wnArticleHolder();
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftIkeArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftIkeArticleMediator, 1>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftIkeArticleMediator, 1>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftIkeArticleMediator::~ftIkeArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftIkeArticleMediator::getMediateNum() { return 1; }
+void ftIkeArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Sword (the rest are unused).
+
+#define FT_IKE_POOL_SWORD_BASE static_cast<wnArticlePool<wnIkeSword, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_IKE_POOL_SWORD FT_IKE_POOL_SWORD_BASE.getSub()
+
+#define FT_IKE_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(1, value) WN_ARTICLE_UNUSED_SLOT(2, value) WN_ARTICLE_UNUSED_SLOT(3, value) \
+    WN_ARTICLE_UNUSED_SLOT(4, value) WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) \
+    WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) \
+    WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) \
+    WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) \
+    WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftIkeArticleMediator::deactivate() {
+    for (s32 i = 0; i < 1; ++i) {
+        wnIkeSword* weapon = FT_IKE_POOL_SWORD.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftIkeArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 1; }
+    FT_IKE_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftIkeActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_IKE_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftIkeActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftIkeActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftIkeArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_IKE_COUNT_ACTIVE(FT_IKE_POOL_SWORD, 1)
+    FT_IKE_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_IKE_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftIkeArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_IKE_CAN_GENERATE(FT_IKE_POOL_SWORD, 1, 0)
+    FT_IKE_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftIkeArticleActivator;
+template <> struct ftIkeArticleActivator<wnIkeSword> {
+    static bool activate(wnIkeSword* weapon, soModuleAccesser* acc) { return ftIke::activeArticle(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_IKE_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftIkeArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftIkeArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_IKE_GENERATE(wnIkeSword, FT_IKE_POOL_SWORD)
+    FT_IKE_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftIkeArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: {
+        wnArticleSlotTag tag;
+        return ftIke::shootArticle(&dynamic_cast<wnIkeSword&>(*article), acc);
+    }
+    FT_IKE_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftIke is done
 void testBuilder() {
