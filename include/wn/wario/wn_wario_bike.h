@@ -56,6 +56,7 @@ public:
 // The parameter accessor10054 indexes this storage through offset98.
 class wnWarioBike : public wnWeaponBuilder<wnWarioBikeModuleAccesserBuildConfig> {
 public:
+    void activate(int founderTaskId, int riderTaskId, int resourceId, int team, Vec3f* position, float lr);
     virtual void processUpdate();
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
     virtual void notifyEventCollisionAttack(float power, soCollisionLog*, soModuleAccesser*);
