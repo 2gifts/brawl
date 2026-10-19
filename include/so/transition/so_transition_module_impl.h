@@ -62,6 +62,14 @@ public:
     int m_unitId;
     u32 _unk08;
 #ifdef FT_MODULE_BUILDER
+    // MATCH-ONLY: the native out-of-line constructor (ft_builder_noinline.h) keeps a zeroed temporary on the stack before the
+    // field stores.
+    soTransitionInfo(bool nativeInit) {
+        volatile u32 initialReturnWord = 0;
+        m_groupId = -1;
+        m_unitId = -1;
+        _unk08 = 0;
+    }
     soTransitionInfo() {
 #if defined(FT_MARTH_RUNTIME_HELPERS) || defined(WN_TRANSITION_CTOR_INLINE)
         // MATCH-ONLY: retain the native zeroed temporary before the field stores (Marth, and the articles that expand the

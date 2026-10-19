@@ -13,7 +13,7 @@
 #ifndef FT_NOINLINE_SKIP_SHARED_DEFS // units that were compiled next to the one holding these definitions skip them
 // MATCH-ONLY: the REL calls the module constructor out of line (it must be compiled outside of the dont_inline region)
 soTransitionModuleImpl::soTransitionModuleImpl(soArray<soTransitionTermGroup>* groups) :
-    m_transitionTermGroupArray(groups), m_groupID(0), m_transitionInfo() { }
+    m_transitionTermGroupArray(groups), m_groupID(0), m_transitionInfo(true) { }
 
 // MATCH-ONLY: the original REL emits the vtables of these observers (their addObserver is a REL function); the code that
 // needs them is not reconstructed yet, so keep them alive with a dummy user.

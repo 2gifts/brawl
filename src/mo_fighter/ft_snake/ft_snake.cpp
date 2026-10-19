@@ -15,6 +15,10 @@
 #include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
 #include <mt/mt_prng.h>
+#include <gf/gf_task_scheduler.h>
+#include <gf/gf_camera.h>
+#include <mt/mt_matrix.h>
+#include <math.h>
 
 #define FT_BC ftSnakeBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -77,8 +81,9 @@ void ftSnake::onStart(int startKind) {
 
 // The Final Smash gave the model its own scale; the end puts the scale back from the work float.
 void ftSnake::onEndFinal() {
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
     soPostureModule& posture = m_moduleAccesser->getPostureModule();
-    posture.setScale(m_moduleAccesser->getWorkManageModule().getFloat(0x1100000b));
+    posture.setScale(work.getFloat(0x1100000b));
 }
 
 void ftSnake::notifyEventOnDamage(soDamage* damage, bool flag, soModuleAccesser* moduleAccesser) {
@@ -146,6 +151,181 @@ void ftSnake::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* modu
         break;
     }
     Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+
+// While the Final Smash grenade launcher is raised (statuses 0x130-0x132) the model gets its node SRT from the posture, the
+// head node (10) turns with the aim and moves with the work floats.
+// HYPOTHESIS: the statuses and the meaning of node 10.
+void ftSnake::updateNodeSRT() {
+    switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x130:
+    case 0x131:
+    case 0x132: {
+        soModuleAccesser* acc = m_moduleAccesser;
+        float size = acc->getPostureModule().getScale();
+        Vec3f scale;
+        scale.m_z = size;
+        scale.m_y = size;
+        scale.m_x = size;
+        Vec3f rotation;
+        Vec3f position;
+        position = acc->getPostureModule().getPos();
+        rotation = acc->getPostureModule().getRot(0);
+        acc->getModelModule().setNodeSRT(0, &scale, &rotation, &position);
+        float aim = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFAE, 0);
+        Vec3f headRot;
+        headRot.m_x = 0.0f;
+        headRot.m_y = aim;
+        headRot.m_z = 0.0f;
+        headRot.m_y += m_moduleAccesser->getWorkManageModule().getFloat(0x21000005);
+        acc->getModelModule().setNodeRotate(10, &headRot);
+        Vec3f headPos;
+        headPos.m_x = m_moduleAccesser->getWorkManageModule().getFloat(0x21000004);
+        headPos.m_y = 0.0f;
+        headPos.m_z = 0.0f;
+        acc->getModelModule().setNodeTranslate(10, &headPos);
+        break;
+    }
+    default:
+        StageObject::updateNodeSRT();
+        break;
+    }
+}
+
+extern float lbl_27_rodata_EF8; // Shared 30-degree reference camera angle (see ft_snake_status_uniq_process_final_common.cpp).
+extern float lbl_27_rodata_EFC;
+
+// While the grenade launcher is raised the fighter follows the camera: he stands at the offset of the constants in front of
+// the main camera and turns with it.
+// HYPOTHESIS: the offset constants (0xFA9-0xFAB) and the field at 0xE4 of the camera (a screen ratio).
+void ftSnake::processFixCamera() {
+    switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x130:
+    case 0x131:
+    case 0x132:
+        if (gfCameraManager::getManager() != NULL) {
+            if (gfCameraManager::getManager() != NULL) {
+                gfCamera* camera = reinterpret_cast<gfCamera*>(gfCameraManager::getManager());
+                if (camera != NULL) {
+                    Matrix cameraMtx = *reinterpret_cast<Matrix*>(camera);
+                    Matrix inverse(true);
+                    cameraMtx.inverse(&inverse);
+                    soModuleAccesser* acc = m_moduleAccesser;
+                    Vec3f position;
+                    Vec3f offset(soValueAccesser::getConstantFloat(acc, 0xFA9, 0), soValueAccesser::getConstantFloat(acc, 0xFAA, 0),
+                                 soValueAccesser::getConstantFloat(acc, 0xFAB, 0));
+                    float reference = static_cast<float>(tan(0.017453292f * lbl_27_rodata_EF8));
+                    float tangent = static_cast<float>(tan(camera->unkD0));
+                    float correction = tangent <= 0.0f ? 1.0f : reference / tangent;
+                    offset.m_z *= correction;
+                    float divisor = lbl_27_rodata_EFC;
+                    offset.m_x *= *reinterpret_cast<float*>(reinterpret_cast<u8*>(camera) + 0xE4) / divisor;
+                    inverse.mulPos(&offset, &position);
+                    Vec3f rotation;
+                    inverse.getRotate(&rotation);
+                    m_moduleAccesser->getPostureModule().setPos(&position);
+                    m_moduleAccesser->getPostureModule().setRot(&Vec3f(57.29578f * rotation.m_x, 57.29578f * rotation.m_y, 57.29578f * rotation.m_z), 0);
+                    updateNodeSRT();
+                }
+            }
+        }
+        break;
+    }
+    Fighter::processFixCamera();
+}
+
+// The Final Smash sight: the horizontal cursor value turns into the aim (0x21000005) and the sideways shift (0x21000004) of the
+// model, each side with its own constants (0xFAC-0xFB0).
+// HYPOTHESIS: the work float meanings.
+void ftSnake::syncFinalCursorRate(Vec2f* cursor, soModuleAccesser* accesser) {
+    if (cursor->m_x < 0.0f) {
+        soWorkManageModule& aimWork = accesser->getWorkManageModule();
+        aimWork.setFloat(-cursor->m_x * soValueAccesser::getConstantFloat(accesser, 0xFB0, 0), 0x21000005);
+        soWorkManageModule& shiftWork = accesser->getWorkManageModule();
+        shiftWork.setFloat(cursor->m_x * soValueAccesser::getConstantFloat(accesser, 0xFAD, 0), 0x21000004);
+    } else if (cursor->m_x > 0.0f) {
+        soWorkManageModule& aimWork = accesser->getWorkManageModule();
+        aimWork.setFloat(-cursor->m_x * soValueAccesser::getConstantFloat(accesser, 0xFAF, 0), 0x21000005);
+        soWorkManageModule& shiftWork = accesser->getWorkManageModule();
+        shiftWork.setFloat(cursor->m_x * soValueAccesser::getConstantFloat(accesser, 0xFAC, 0), 0x21000004);
+    } else {
+        accesser->getWorkManageModule().setFloat(0.0f, 0x21000005);
+        accesser->getWorkManageModule().setFloat(0.0f, 0x21000004);
+    }
+}
+
+// The event the fighter sends to the C4 when its detonator status is left.
+// HYPOTHESIS: 0x839 asks the C4 to detonate.
+struct ftSnakeC4Event : public soLinkEventArgs {
+    ftSnakeC4Event() : soLinkEventArgs(0x839) { }
+};
+
+void ftSnake::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+    if (statusKind == 0x32) {
+        wnSnakeTrenchMortar* mortar = dynamic_cast<wnSnakeTrenchMortar*>(moduleAccesser->getGenerateArticleManageModule().getArticle(1));
+        if (mortar != NULL) {
+            // HYPOTHESIS: the last word of the trench mortar holds the charge taken from the work float.
+            *reinterpret_cast<float*>(reinterpret_cast<u8*>(mortar) + 0x7CE4) = moduleAccesser->getWorkManageModule().getFloat(0x21000000);
+        }
+    } else if (statusKind == 0x121) {
+        wnSnakeNikita* nikita = dynamic_cast<wnSnakeNikita*>(moduleAccesser->getGenerateArticleManageModule().getArticle(6));
+        if (nikita != NULL) {
+            nikita->forceFallMissile();
+        }
+    }
+    if (prevStatusKind == 0x12f && m_moduleAccesser->getGenerateArticleManageModule().isExist(4)) {
+        soArticle* c4 = m_moduleAccesser->getGenerateArticleManageModule().getArticle(4);
+        if (c4 != NULL && c4->isConstraint() == true) {
+            ftSnakeC4Event event;
+            m_moduleAccesser->getLinkModule().sendEventNodes(3, c4->getTaskId(), event);
+        }
+    }
+}
+
+// Whether the point is within reach of the fighter (the group 1 float of the extend parameters) while he is waiting or
+// has just been pushed out of the Final Smash cursor status.
+// HYPOTHESIS: the name (from the module map) says the point is the ear of the camera; the semantics are unconfirmed.
+bool ftSnake::ckeckChangeEarCloseStatus(Vec3f& position) {
+    if (m_moduleAccesser->getStatusModule().getStatusKind() != 0 && m_moduleAccesser->getStatusModule().getStatusKind() != 0x12e) {
+        return false;
+    }
+    Vec3f toPoint = position - m_moduleAccesser->getPostureModule().getPos();
+    float lengthSq = toPoint.m_z * toPoint.m_z + (toPoint.m_x * toPoint.m_x + toPoint.m_y * toPoint.m_y);
+    float length;
+    if ((float)fabs(lengthSq) <= 1.17549435e-38f) {
+        length = 0.0f;
+    } else {
+        length = lengthSq * rsqrtf(lengthSq);
+    }
+    if (length > *reinterpret_cast<const float*>(static_cast<const u8*>(m_data->extendParam[0]) + 0x20)) {
+        return false;
+    }
+    return true;
+}
+
+// HYPOTHESIS: unk3 is the module accesser of the ejected article (its object sits at offset 8, as in the base version).
+void ftSnake::notifyArticleEventEject(int unk1, int unk2, int* unk3, int* unk4) {
+    if (unk1 == 0xd && unk2 == 1) {
+        soModuleAccesser* articleAccesser = reinterpret_cast<soModuleAccesser*>(unk3);
+        Vec3f pos = articleAccesser->getPostureModule().getPos();
+        if (ckeckChangeEarCloseStatus(pos) == true) {
+            m_moduleAccesser->getStatusModule().changeStatusRequest(0x12e, m_moduleAccesser);
+        }
+    }
+    StageObject::notifyArticleEventEject(unk1, unk2, unk3, unk4);
+}
+
+// Hitting something with the Final Smash grenade launcher flags the hit unless the target is of kind 2 or 3.
+// HYPOTHESIS: the flag (0x22000010) marks that something other than a fighter or an item was hit.
+void ftSnake::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventCollisionSearch(collisionLog, moduleAccesser);
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x11a && collisionLog != NULL) {
+        StageObject* object = dynamic_cast<StageObject*>(gfTaskScheduler::getInstance()->getTask(collisionLog->m_taskId));
+        if (object != NULL && object->soGetKind() != 2 && object->soGetKind() != 3) {
+            m_moduleAccesser->getWorkManageModule().onFlag(0x22000010);
+        }
+    }
 }
 
 // One entry of the table of the eating sounds in the common data of the fighter (the table ends with the id -1).
