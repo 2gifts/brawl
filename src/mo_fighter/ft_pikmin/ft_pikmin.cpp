@@ -859,7 +859,12 @@ float Vec2f::lengthSq() {
     return xSq + ySq;
 }
 
-extern "C" void __ct__5Vec2fFff(Vec2f* self, float x, float y); // Vec2f::Vec2f(float, float), out of line in the REL
+// MATCH-ONLY: Vec2f::Vec2f(float, float) is a function of the REL that this unit calls; the class keeps it inline (the kinetic
+// energy helpers of the unit need the inline one), so the out-of-line copy is spelled as a function of its own.
+extern "C" void __ct__5Vec2fFff(Vec2f* self, float x, float y) {
+    self->m_x = x;
+    self->m_y = y;
+}
 
 static inline Vec2f addVec2f(Vec2f& a, Vec2f& b) {
     Vec2f sum;
