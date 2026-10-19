@@ -2091,6 +2091,8 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_pikmin/ft_pikmin_status_uniq_process_throw.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/ft_pikmin_status_uniq_process_smash_attack.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/ft_pikmin_status_uniq_process_special_s.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikmin/ft_pikmin_kinetic_transactor.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikmin/ft_pikmin_status_uniq_process_attack_air.cpp"),
         ],
     },
     {

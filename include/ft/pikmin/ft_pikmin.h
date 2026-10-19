@@ -24,7 +24,21 @@ typedef soLinkModuleBuildConfigCap<13, soLinkModuleImpl> ftPikminLinkModuleBuild
 typedef soStatusModuleBuildConfig<284, soGeneralWorkBuildConfig<19, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftPikminStatusModuleBuildConfig;
 
 // HYPOTHESIS: this fighter has its own kinetic transactor (changeKinetic; updateEnergy stays in ftKineticTransactor)
-FT_KINETIC_TRANSACTOR(ftPikminKineticTransactor);
+class ftPikminKineticTransactor : public ftKineticTransactor {
+public:
+    static void changeKinetic(int mode, void* pools, soModuleAccesser* acc);
+    static void changeKineticSub(bool* result, void* pools, Vec2f* speed, soModuleAccesser* acc);
+    template <typename E>
+    static void updateEnergy(E* energy, soModuleAccesser* acc) {
+        if (energy->isEnable() != true) {
+            return;
+        }
+        if (energy->isSuspend()) {
+            return;
+        }
+        return energy->updateEnergy(acc);
+    }
+};
 typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKineticMediatorImplT<ftPikminKineticTransactor, ftKineticTransactor> > ftPikminKineticModuleBuildConfig;
 
 // HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
