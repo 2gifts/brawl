@@ -49,6 +49,7 @@ class wnSnakeTrenchMortar : public Weapon {
 public:
     wnSnakeTrenchMortar(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeTrenchMortarData* data);
     virtual ~wnSnakeTrenchMortar();
+    void activate(int etcResourceId, int team, float lr, int founderTaskId);
 };
 static_assert(sizeof(wnSnakeTrenchMortar) == 0x7CE8, "wnSnakeTrenchMortar layout is wrong!");
 
@@ -58,6 +59,7 @@ class wnSnakeRpg7 : public Weapon {
 public:
     wnSnakeRpg7(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeRpg7Data* data);
     virtual ~wnSnakeRpg7();
+    void activate(int founderTaskId, int etcResourceId);
 };
 static_assert(sizeof(wnSnakeRpg7) == 0x16B0, "wnSnakeRpg7 layout is wrong!");
 
@@ -67,6 +69,8 @@ class wnSnakeCypher : public Weapon {
 public:
     wnSnakeCypher(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeCypherData* data);
     virtual ~wnSnakeCypher();
+    void activate(int etcResourceId, int team, int founderTaskId);
+        void shoot(const float* speedX);
 };
 static_assert(sizeof(wnSnakeCypher) == 0x2220, "wnSnakeCypher layout is wrong!");
 
@@ -76,6 +80,7 @@ class wnSnakeC4 : public Weapon {
 public:
     wnSnakeC4(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeC4Data* data);
     virtual ~wnSnakeC4();
+    void activate(int founderTaskId, int etcResourceId, int team, float lr);
     void shoot();
 };
 static_assert(sizeof(wnSnakeC4) == 0x2430, "wnSnakeC4 layout is wrong!");
@@ -86,6 +91,7 @@ class wnSnakeC4Switch : public Weapon {
 public:
     wnSnakeC4Switch(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeC4SwitchData* data);
     virtual ~wnSnakeC4Switch();
+    void activate(int founderTaskId, int etcResourceId, int team);
 };
 static_assert(sizeof(wnSnakeC4Switch) == 0x1364, "wnSnakeC4Switch layout is wrong!");
 
@@ -95,6 +101,7 @@ class wnSnakeNikita : public Weapon {
 public:
     wnSnakeNikita(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeNikitaData* data);
     virtual ~wnSnakeNikita();
+    void activate(int founderTaskId, int etcResourceId, int team, float lr);
 };
 static_assert(sizeof(wnSnakeNikita) == 0x67C4, "wnSnakeNikita layout is wrong!");
 
@@ -104,6 +111,7 @@ class wnSnakeLadder : public Weapon {
 public:
     wnSnakeLadder(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeLadderData* data);
     virtual ~wnSnakeLadder();
+    void activate(int founderTaskId, int finalResourceId);
 };
 static_assert(sizeof(wnSnakeLadder) == 0x1F28, "wnSnakeLadder layout is wrong!");
 
@@ -113,6 +121,7 @@ class wnSnakeRgb6 : public Weapon {
 public:
     wnSnakeRgb6(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeRgb6Data* data);
     virtual ~wnSnakeRgb6();
+    void activate(int founderTaskId, int finalResourceId, int team);
 };
 static_assert(sizeof(wnSnakeRgb6) == 0x1F58, "wnSnakeRgb6 layout is wrong!");
 
@@ -122,6 +131,7 @@ class wnSnakeRgb6Sight : public Weapon {
 public:
     wnSnakeRgb6Sight(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeRgb6SightData* data);
     virtual ~wnSnakeRgb6Sight();
+    void activate(int founderTaskId, int finalResourceId, int team);
 };
 static_assert(sizeof(wnSnakeRgb6Sight) == 0x1FC4, "wnSnakeRgb6Sight layout is wrong!");
 
@@ -131,6 +141,7 @@ class wnSnakeRgb6Clip : public Weapon {
 public:
     wnSnakeRgb6Clip(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeRgb6ClipData* data);
     virtual ~wnSnakeRgb6Clip();
+    void activate(int founderTaskId, int finalResourceId);
 };
 static_assert(sizeof(wnSnakeRgb6Clip) == 0x1F44, "wnSnakeRgb6Clip layout is wrong!");
 

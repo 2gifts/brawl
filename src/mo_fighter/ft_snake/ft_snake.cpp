@@ -6,6 +6,9 @@
 #include <ft/ft_class_info_impl.h>
 #include <ft/snake/ft_snake_builder.h>
 #include <ft/snake/ft_snake_extend_param_accesser.h>
+#include <ft/ft_owner.h>
+#include <ft/ft_resource_id_accesser_impl.h>
+#include <so/team/so_team.h>
 #include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
 
@@ -26,6 +29,117 @@ ftSnake::ftSnake(s32 entryId,
                                          nwModelInstHeap,
                                          nwMotionInstHeap) {
     // TODO
+}
+
+// The trench mortar shell starts at the stage object of the fighter with its team and facing.
+bool ftSnake::activeArticle1(wnSnakeTrenchMortar* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    int founderTaskId = acc->getStageObject().m_taskId;
+    soResourceModule& resources = acc->getResourceModule();
+    float lr = acc->getPostureModule().getLr();
+    int team = fighter.getOwner()->getTeam();
+    int etcResId = resources.getResourceIdAccesser()->getEtcResId();
+    weapon->activate(etcResId, team, lr, founderTaskId);
+    return true;
+}
+
+// The rocket starts with the effect resource of the fighter.
+bool ftSnake::activeArticle2(wnSnakeRpg7* weapon, soModuleAccesser* acc) {
+    int founderTaskId = acc->getStageObject().m_taskId;
+    int etcResId = acc->getResourceModule().getResourceIdAccesser()->getEtcResId();
+    weapon->activate(founderTaskId, etcResId);
+    return true;
+}
+
+// The Cypher starts with the team of the fighter.
+bool ftSnake::activeArticle3(wnSnakeCypher* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    int founderTaskId = acc->getStageObject().m_taskId;
+    soResourceModule& resources = acc->getResourceModule();
+    int team = fighter.getOwner()->getTeam();
+    int etcResId = resources.getResourceIdAccesser()->getEtcResId();
+    weapon->activate(etcResId, team, founderTaskId);
+    return true;
+}
+
+// The Cypher is shot with the speed of the fighter.
+bool ftSnake::shootArticle(wnSnakeCypher* weapon, soModuleAccesser* acc) {
+    const Vec2f& speed = acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
+    weapon->shoot(&speed.m_x);
+    return true;
+}
+
+// The C4 starts with the team and facing of the fighter.
+bool ftSnake::activeArticle4(wnSnakeC4* weapon, soModuleAccesser* acc) {
+    soTeamModule& teamModule = acc->getTeamModule();
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    float lr = acc->getPostureModule().getLr();
+    int team = teamModule.getTeam()->getNo();
+    int etcResId = resources.getResourceIdAccesser()->getEtcResId();
+    weapon->activate(founderTaskId, etcResId, team, lr);
+    return true;
+}
+
+// The C4 detonator starts with the team of the fighter.
+bool ftSnake::activeArticle5(wnSnakeC4Switch* weapon, soModuleAccesser* acc) {
+    soTeamModule& teamModule = acc->getTeamModule();
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    int team = teamModule.getTeam()->getNo();
+    int etcResId = resources.getResourceIdAccesser()->getEtcResId();
+    weapon->activate(founderTaskId, etcResId, team);
+    return true;
+}
+
+// The Nikita missile starts with the team and facing of the fighter.
+bool ftSnake::activeArticle6(wnSnakeNikita* weapon, soModuleAccesser* acc) {
+    soTeamModule& teamModule = acc->getTeamModule();
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    float lr = acc->getPostureModule().getLr();
+    int team = teamModule.getTeam()->getNo();
+    int etcResId = resources.getResourceIdAccesser()->getEtcResId();
+    weapon->activate(founderTaskId, etcResId, team, lr);
+    return true;
+}
+
+// The ladder starts with the Final Smash resource of the fighter.
+bool ftSnake::activeArticle7(wnSnakeLadder* weapon, soModuleAccesser* acc) {
+    int founderTaskId = acc->getStageObject().m_taskId;
+    soResourceModule& resources = acc->getResourceModule();
+    int finalResId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
+    weapon->activate(founderTaskId, finalResId);
+    return true;
+}
+
+// The grenade launcher parts start with the Final Smash resource and the team of the fighter.
+bool ftSnake::activeArticle8(wnSnakeRgb6* weapon, soModuleAccesser* acc) {
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    soTeamModule& teamModule = acc->getTeamModule();
+    int team = teamModule.getTeam()->getNo();
+    int finalResId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
+    weapon->activate(founderTaskId, finalResId, team);
+    return true;
+}
+
+bool ftSnake::activeArticle9(wnSnakeRgb6Sight* weapon, soModuleAccesser* acc) {
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    soTeamModule& teamModule = acc->getTeamModule();
+    int team = teamModule.getTeam()->getNo();
+    int finalResId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
+    weapon->activate(founderTaskId, finalResId, team);
+    return true;
+}
+
+bool ftSnake::activeArticle10(wnSnakeRgb6Clip* weapon, soModuleAccesser* acc) {
+    int founderTaskId = acc->getStageObject().m_taskId;
+    soResourceModule& resources = acc->getResourceModule();
+    int finalResId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
+    weapon->activate(founderTaskId, finalResId);
+    return true;
 }
 
 // ---- the article holders --------------------------------------------------------------------------------------------
