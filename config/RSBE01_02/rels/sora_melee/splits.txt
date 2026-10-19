@@ -10233,11 +10233,20 @@ mo_melee/sora_melee/wn/wn_class_info.cpp:
 	.data       start:0x00047B98 end:0x00047BF8
 	.bss        start:0x00005278 end:0x000054F8
 
+mo_melee/sora_melee/ai/ai_mgr.cpp:
+	.text       start:0x001E8590 end:0x001F329C
+
+mo_melee/sora_melee/ai/ai_stat.cpp:
+	.text       start:0x00206D94 end:0x0020C56C
+
 mo_melee/sora_melee/so/so_array_list_members_ptr_BaseItem_64_part1.cpp:
 	.text       start:0x0021BE00 end:0x0021BE10
 
 mo_melee/sora_melee/so/so_array_list_members_Ul_32_part1.cpp:
 	.text       start:0x0021CB30 end:0x0021CD58
+
+mo_melee/sora_melee/ai/ai_param.cpp:
+	.text       start:0x0021CD58 end:0x00220150
 
 mo_melee/sora_melee/st/st_result.cpp:
 	.text       start:0x0022B544 end:0x0022C2D0
