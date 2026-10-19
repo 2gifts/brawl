@@ -3,10 +3,16 @@
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_NOINLINE_SEARCH_BUILDER
 #define FT_MARTH_PHOTO_CALLBACK_NOINLINE // MATCH-ONLY: out-of-line photo base teardown and +0x186F0 photo thunks (shared shadow macro)
+#define FT_PEACH_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/peach/ft_peach.h>
 #include <ft/peach/ft_peach_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
+#include <ft/peach/ft_peach_transactor.h>
 #include <ft/peach/ft_peach_status_uniq_process_final.h>
 #include <gf/gf_task_scheduler.h>
 #include <mt/mt_prng.h>
@@ -97,6 +103,363 @@ void ftPeach::photoExit() {
         m_moduleAccesser->getEffectModule().setVisible(effectId, true);
     }
 }
+
+void** ftPeach::getExtendParam() {
+    return m_data->extendParam;
+}
+
+// The Toad's help of the transactor runs while the fighter is in status 0x112.
+void ftPeach::processUpdate() {
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x112) {
+        ftPeachTransactor::getInstance()->updateStatus112(m_moduleAccesser);
+    }
+    Fighter::processUpdate();
+}
+
+// Leaving status 0x11b resets the two work floats from the constants and raises a flag.
+// HYPOTHESIS: the status and the meaning of the work values.
+void ftPeach::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+    if (prevStatusKind == 0x11b) {
+        soWorkManageModule& work1 = m_moduleAccesser->getWorkManageModule();
+        work1.setFloat(soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFBC, 0), 0x11000000);
+        soWorkManageModule& work2 = m_moduleAccesser->getWorkManageModule();
+        work2.setFloat(soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFBB, 0), 0x11000001);
+        m_moduleAccesser->getWorkManageModule().onFlag(0x12000003);
+    }
+}
+
+void ftPeach::notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser) {
+    if (kind != 2 && kind != 1) {
+        moduleAccesser->getWorkManageModule().offFlag(0x1200003E);
+    }
+    ftPeachTransactor::getInstance()->notifyEventChangeSituation(kind, prevKind, moduleAccesser);
+    Fighter::notifyEventChangeSituation(kind, prevKind, moduleAccesser);
+}
+
+void ftPeach::notifyEventCollisionShield(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser) {
+    if (collisionLog != NULL) {
+        ftPeachTransactor::getInstance()->notifyEventCollisionShield(attackModule, power, collisionLog, groupIndex, posX, posY, moduleAccesser);
+    }
+    Fighter::notifyEventCollisionShield(attackModule, power, collisionLog, groupIndex, posX, posY, moduleAccesser);
+}
+
+bool ftPeach::notifyEventCollisionShieldCheck() {
+    if (ftPeachTransactor::getInstance()->notifyEventCollisionShieldCheck(m_moduleAccesser) == true) {
+        return true;
+    }
+    return Fighter::notifyEventCollisionShieldCheck();
+}
+
+// The parasol (status 0x116) places two nodes of the model.
+// HYPOTHESIS: node 0x69 is the parasol node.
+void ftPeach::updateNodeSRT() {
+    StageObject::updateNodeSRT();
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x116) {
+        soPostureModule& posture = m_moduleAccesser->getPostureModule();
+        soModelModule& model = m_moduleAccesser->getModelModule();
+        Vec3f rotation = posture.getRot(1);
+        model.setNodeRotate(0x69, &rotation);
+        soModuleAccesser* acc = m_moduleAccesser;
+        soModelModule& translateModel = acc->getModelModule();
+        translateModel.setNodeTranslate(0x69, &Vec3f(soValueAccesser::getConstantFloat(acc, 0xFC0, 0), soValueAccesser::getConstantFloat(acc, 0xFC1, 0), soValueAccesser::getConstantFloat(acc, 0xFC2, 0)));
+    }
+}
+
+// HYPOTHESIS: the bytes of the collision log at 0x21-0x24 are its hit kind, category and two flags.
+#define FT_PEACH_LOG_KIND(log) (reinterpret_cast<const u8*>(log)[0x21])
+#define FT_PEACH_LOG_CATEGORY(log) (reinterpret_cast<const u8*>(log)[0x22])
+#define FT_PEACH_LOG_FLAG1(log) (reinterpret_cast<const u8*>(log)[0x23])
+#define FT_PEACH_LOG_FLAG2(log) (reinterpret_cast<const u8*>(log)[0x24])
+
+void ftPeach::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventCollisionSearch(collisionLog, m_moduleAccesser);
+    if (collisionLog != NULL && m_moduleAccesser->getStatusModule().getStatusKind() == 0x117) {
+        if (FT_PEACH_LOG_KIND(collisionLog) == 2 && FT_PEACH_LOG_FLAG1(collisionLog) == 0 && FT_PEACH_LOG_CATEGORY(collisionLog) == 0xA && FT_PEACH_LOG_FLAG2(collisionLog) == 0) {
+            return;
+        }
+        m_moduleAccesser->getWorkManageModule().onFlag(0x22000011);
+    }
+}
+
+bool ftPeach::notifyEventCollisionSearchCheck() {
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x117 && m_moduleAccesser->getWorkManageModule().isFlag(0x22000011) == true) {
+        m_moduleAccesser->getStatusModule().changeStatusRequest(0x118, m_moduleAccesser);
+        return true;
+    }
+    return Fighter::notifyEventCollisionSearchCheck();
+}
+
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+#pragma dont_inline on
+ftPeachTransactor* ftPeachTransactor::getInstance() {
+    static ftPeachTransactor instance;
+    return &instance;
+}
+#pragma dont_inline off
+#pragma pool_data reset
+
+// Kassar starts with the effect and texture resources of the fighter and with his team.
+bool ftPeach::activeArticle(wnPeachKassar* weapon, soModuleAccesser* acc) {
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), resources.getResourceIdAccesser()->getTexResId(), acc->getTeamModule().getTeam()->getNo());
+    return true;
+}
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Peach, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftPeachArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftPeachArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftPeachArticleKind : wnArticleKindInfo {
+    ftPeachArticleKind() {
+        kind = 0;
+        subKind = Fighter_Peach;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftPeachArticleBuildInfo : wnArticleBuildInfo {
+    ftPeachArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_148F4C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148F64(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftPeachArticleTraits;
+#define FT_PEACH_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftPeachArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftPeachArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Peach, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_PEACH_TRAITS(wnPeachKassar, wnPeachKassarData, 0, fn_27_148F4C)
+FT_PEACH_TRAITS(wnPeachKinopio, wnPeachKinopioData, 1, fn_27_148F64)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftPeachArticleTraits<W>::ArticleId, ftPeachArticleBuildInfo(ftPeachArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftPeachArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnPeachKassar>::~wnArticleHolder();
+template wnArticleHolder<wnPeachKinopio>::~wnArticleHolder();
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftPeachArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftPeachArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftPeachArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftPeachArticleMediator::~ftPeachArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftPeachArticleMediator::getMediateNum() { return 3; }
+void ftPeachArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Kassar, 1 Kinopio (the rest are unused).
+
+#define FT_PEACH_POOL_KASSAR_BASE static_cast<wnArticlePool<wnPeachKassar, 1, ftPeachKinopioPool>&>(m_pools)
+#define FT_PEACH_POOL_KASSAR FT_PEACH_POOL_KASSAR_BASE.getSub()
+#define FT_PEACH_POOL_KINOPIO_BASE static_cast<wnArticlePool<wnPeachKinopio, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_PEACH_POOL_KINOPIO FT_PEACH_POOL_KINOPIO_BASE.getSub()
+
+#define FT_PEACH_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(3, value) WN_ARTICLE_UNUSED_SLOT(4, value) WN_ARTICLE_UNUSED_SLOT(5, value) \
+    WN_ARTICLE_UNUSED_SLOT(6, value) WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) \
+    WN_ARTICLE_UNUSED_SLOT(9, value) WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) \
+    WN_ARTICLE_UNUSED_SLOT(12, value) WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) \
+    WN_ARTICLE_UNUSED_SLOT(15, value) WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftPeachArticleMediator::deactivate() {
+    for (s32 i = 0; i < 1; ++i) {
+        wnPeachKassar* weapon = FT_PEACH_POOL_KASSAR.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnPeachKinopio* weapon = FT_PEACH_POOL_KINOPIO.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftPeachArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 1; }
+    case 1: { wnArticleSlotTag tag; return 1; }
+    WN_ARTICLE_UNUSED_SLOT(2, 1)
+    FT_PEACH_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftPeachActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_PEACH_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftPeachActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftPeachActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftPeachArticleMediator::getActiveNum(soModuleAccesser* acc, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_PEACH_COUNT_ACTIVE(FT_PEACH_POOL_KASSAR, 1)
+    case 1: FT_PEACH_COUNT_ACTIVE(FT_PEACH_POOL_KINOPIO, 1)
+    case 2: { wnArticleSlotTag tag; return 0; }
+    FT_PEACH_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_PEACH_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftPeachArticleMediator::isGeneratable(soModuleAccesser* acc, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_PEACH_CAN_GENERATE(FT_PEACH_POOL_KASSAR, 1, 0)
+    case 1: FT_PEACH_CAN_GENERATE(FT_PEACH_POOL_KINOPIO, 1, 1)
+    case 2: { wnArticleSlotTag tag; return true; }
+    FT_PEACH_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftPeachArticleActivator;
+template <> struct ftPeachArticleActivator<wnPeachKassar> {
+    static bool activate(wnPeachKassar* weapon, soModuleAccesser* acc) { return ftPeach::activeArticle(weapon, acc); }
+};
+template <> struct ftPeachArticleActivator<wnPeachKinopio> {
+    static bool activate(wnPeachKinopio* weapon, soModuleAccesser* acc) {
+        soResourceModule& resources = acc->getResourceModule();
+        u32 etcResId = resources.getResourceIdAccesser()->getEtcResId();
+        return ftPeachTransactor::getInstance()->activeArticle1(weapon, acc, etcResId);
+    }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_PEACH_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftPeachArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftPeachArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_PEACH_GENERATE(wnPeachKassar, FT_PEACH_POOL_KASSAR)
+    case 1: FT_PEACH_GENERATE(wnPeachKinopio, FT_PEACH_POOL_KINOPIO)
+    case 2: {
+        wnArticleSlotTag tag;
+        BaseItem* item = soArticleMediatorHelper::createItem(0x56, 2, acc->getStageObject().m_taskId);
+        if (item == NULL) {
+            return wnGetNullArticle();
+        }
+        acc->getItemManageModule().haveItem(item, 0, false, true);
+        return wnGetNullArticle();
+    }
+    FT_PEACH_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftPeachArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: { wnArticleSlotTag tag; (void)dynamic_cast<wnPeachKassar&>(*article); return true; }
+    case 1: { wnArticleSlotTag tag; (void)dynamic_cast<wnPeachKinopio&>(*article); return true; }
+    case 2: {
+        wnArticleSlotTag tag;
+        return true;
+    }
+    WN_ARTICLE_UNUSED_SLOT(3, true)
+    WN_ARTICLE_UNUSED_SLOT(4, true)
+    WN_ARTICLE_UNUSED_SLOT(5, true)
+    WN_ARTICLE_UNUSED_SLOT(6, true)
+    WN_ARTICLE_UNUSED_SLOT(7, true)
+    WN_ARTICLE_UNUSED_SLOT(8, true)
+    WN_ARTICLE_UNUSED_SLOT(9, true)
+    WN_ARTICLE_UNUSED_SLOT(10, true)
+    WN_ARTICLE_UNUSED_SLOT(11, true)
+    WN_ARTICLE_UNUSED_SLOT(12, true)
+    WN_ARTICLE_UNUSED_SLOT(13, true)
+    WN_ARTICLE_UNUSED_SLOT(14, true)
+    WN_ARTICLE_UNUSED_SLOT(15, true)
+    WN_ARTICLE_UNUSED_SLOT(16, true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftPeach is done
 void testBuilder() {
