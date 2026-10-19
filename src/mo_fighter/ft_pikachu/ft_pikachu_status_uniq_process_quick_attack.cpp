@@ -31,7 +31,6 @@ static inline soControllerModule& fighterController(soModuleAccesser* moduleAcce
 
 // Quick Attack can be turned into the follow-up (status 0x117) when the stick points away from the warp direction.
 static inline bool isStickTurned(soModuleAccesser* moduleAccesser, soWorkManageModule& work, ftPikachuExtendParamQuickAttack* param) {
-    bool turned;
     if (work.getInt(ftPikachuWork::QuickAttack_Count) < 2) {
         soControllerModule& controller = fighterController(moduleAccesser);
         Vec2f stick(controller.getStickX(), controller.getStickY());
@@ -41,14 +40,12 @@ static inline bool isStickTurned(soModuleAccesser* moduleAccesser, soWorkManageM
             Vec2f direction;
             direction.m_x = directionX;
             direction.m_y = directionY;
-            turned = vec2fAngle(&direction, &stick) > 0.017453292f * (float)param->unk4C;
-        } else {
-            turned = false;
+            if (vec2fAngle(&direction, &stick) > 0.017453292f * (float)param->unk4C) {
+                return true;
+            }
         }
-    } else {
-        turned = false;
     }
-    return turned;
+    return false;
 }
 
 void ftPikachuStatusUniqProcessSpecialQuickAttackStart::initStatus(soModuleAccesser* moduleAccesser) {
