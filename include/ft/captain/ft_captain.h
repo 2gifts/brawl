@@ -23,8 +23,14 @@ typedef soCollisionShieldModuleBuildConfigGroups<2, 1, 1, soCollisionShieldEvent
 typedef soLinkModuleBuildConfigCap<12, soLinkModuleImpl> ftCaptainLinkModuleBuildConfig;
 typedef soStatusModuleBuildConfig<290, soGeneralWorkBuildConfig<18, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftCaptainStatusModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnCaptainBlueFalcon pool), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnCaptainBlueFalcon / wnCaptainFinalBg pools). Only the fighter unit builds
+// the real pools; the other units of the REL see an opaque block of the same size.
+#ifdef FT_CAPTAIN_ARTICLE_POOLS
+#include <ft/captain/ft_captain_article_pools.h>
+typedef ftCaptainArticleManageModuleBuilder ftCaptainGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x4118, Fighter_Captain> ftCaptainGenerateArticleManageModuleBuilder;
+#endif
 
 class ftCaptainBuildConfig : public ftCommonBuildConfig {
 public:
@@ -42,6 +48,9 @@ public:
     typedef ftCaptainGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnCaptainBlueFalcon;
+class wnCaptainFinalBg;
+
 class ftCaptain : public ftFighterBuilder<ftCaptainBuildConfig> {
     u8 unkTail[0xC5B4 - sizeof(ftFighterBuilder<ftCaptainBuildConfig>)];
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
@@ -52,5 +61,12 @@ public:
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
     virtual ~ftCaptain();
+    virtual void processUpdate();
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual bool notifyEventCollisionAttackCheck(u32 flags);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnCaptainBlueFalcon* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnCaptainFinalBg* weapon, soModuleAccesser* acc);
 };
 static_assert(sizeof(ftCaptain) == 0xC5C8, "Class is the wrong size!");

@@ -24,8 +24,14 @@ typedef soCollisionShieldModuleBuildConfigGroups<2, 1, 1, soCollisionShieldEvent
 typedef soLinkModuleBuildConfigCap<12, soLinkModuleImpl> ftMetaknightLinkModuleBuildConfig;
 typedef soStatusModuleBuildConfig<290, soGeneralWorkBuildConfig<28, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftMetaknightStatusModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnMetaknightMantle pool), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnMetaknightMantle pool). Only the fighter unit builds the real pool; the
+// other units of the REL see an opaque block of the same size.
+#ifdef FT_METAKNIGHT_ARTICLE_POOLS
+#include <ft/metaknight/ft_metaknight_article_pools.h>
+typedef ftMetaknightArticleManageModuleBuilder ftMetaknightGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x2178, Fighter_MetaKnight> ftMetaknightGenerateArticleManageModuleBuilder;
+#endif
 
 class ftMetaknightBuildConfig : public ftCommonBuildConfig {
 public:
@@ -43,6 +49,8 @@ public:
     typedef ftMetaknightGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnMetaknightMantle;
+
 class ftMetaknight : public ftFighterBuilder<ftMetaknightBuildConfig> {
     u8 unkTail[0xA5FC - sizeof(ftFighterBuilder<ftMetaknightBuildConfig>)];
     soArrayContractibleTable<const soStatusData> m_statusDataTable; // +0xA5FC
@@ -53,5 +61,10 @@ public:
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
     virtual ~ftMetaknight();
+    virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+    virtual bool notifyEventCollisionAttackCheck(u32 flags);
+    // The hook the article mediator calls to start the article of the pool (HYPOTHESIS: the name follows the module map).
+    static bool activeArticle(wnMetaknightMantle* weapon, soModuleAccesser* acc);
 };
 static_assert(sizeof(ftMetaknight) == 0xA610, "Class is the wrong size!");
