@@ -19,31 +19,31 @@ void ftWarioStatusUniqProcessSpecialNEatStart::initStatus(soModuleAccesser* modu
     soItemManageModule& items = moduleAccesser->getItemManageModule();
 
     // Scan the four item slots (3..6) for a held item and collect its size and trait flags.
-    // HYPOTHESIS: the flags select which eat result (0x11d..0x120) is stored below.
-    bool sizeSmall = false;
-    bool traitFlag2000 = false;
-    bool traitFlag8000 = false;
+    // Bombs take priority over heavy items, then food, then the default eat state.
+    bool heavy = false;
+    bool food = false;
+    bool bomb = false;
     for (int index = 3; index < 7; index++) {
         if (items.isHaveItem(index)) {
             soItemInfo info;
             items.getHaveItemInfo(&info, index);
-            if (items.getHaveItemSize(index) == 1) {
-                sizeSmall = true;
+            if (items.getHaveItemSize(index) == itParam::Size_Heavy) {
+                heavy = true;
             }
-            if (info.m_trait.m_mask & 0x8000) {
-                traitFlag8000 = true;
+            if (info.m_trait.m_mask & itParam::TRAIT_MASK_BOMB) {
+                bomb = true;
             }
-            if (info.m_trait.m_mask & 0x2000) {
-                traitFlag2000 = true;
+            if (info.m_trait.m_mask & itParam::TRAIT_MASK_FOOD) {
+                food = true;
             }
         }
     }
 
-    if (traitFlag8000) {
+    if (bomb) {
         work.setInt(0x11e, 0x20000005);
-    } else if (sizeSmall) {
+    } else if (heavy) {
         work.setInt(0x11f, 0x20000005);
-    } else if (traitFlag2000) {
+    } else if (food) {
         work.setInt(0x11d, 0x20000005);
     } else {
         work.setInt(0x120, 0x20000005);
@@ -52,9 +52,7 @@ void ftWarioStatusUniqProcessSpecialNEatStart::initStatus(soModuleAccesser* modu
 
 void ftWarioStatusUniqProcessSpecialNEatStart::execFixPosCounter(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
-    // HYPOTHESIS: the item manage object is downcast from the module interface to its implementation.
-    soItemManageModuleImpl* implItems = dynamic_cast<soItemManageModuleImpl*>(moduleAccesser->m_enumerationStart->m_itemManageModule);
-    soItemManageModule* items = implItems;
+    soItemManageModuleImpl* items = &dynamic_cast<soItemManageModuleImpl&>(moduleAccesser->getItemManageModule());
     if (work.isFlag(0x22000012)) {
         for (int index = 3; index < 7; index++) {
             if (items->isHaveItem(index)) {

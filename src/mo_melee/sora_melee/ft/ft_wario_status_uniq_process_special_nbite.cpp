@@ -1,6 +1,6 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <ft/kirby/ft_kirby_copy_ability_id_converter.h>
-#include <so/controller/so_controller_impl.h>
+#include <so/controller/so_controller_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/catch/so_catch_module.h>
 #include <so/motion/so_motion_module_impl.h>
@@ -9,28 +9,18 @@
 #include <so/so_value_accesser.h>
 #include <types.h>
 
-// Catch module view. The accesser holds it as a void*; slot offsets are native (setCatch at 0x1c,
-// catchCut at 0x2c). The remaining slots are placeholders; the last one (0x3c) takes the damage check.
-class ftWarioCatchModuleView {
+// The shared catch prefix is verified through slot 0x2C. Damage checks use
+// the later native slot at 0x3C; the intervening operations remain unnamed.
+class ftWarioCatchModuleView : public soCatchModule {
 public:
-    virtual ~ftWarioCatchModuleView() { }
-    virtual void unk0x0c() { }
-    virtual void unk0x10() { }
-    virtual void unk0x14() { }
-    virtual void unk0x18() { }
-    virtual void setCatch(int taskId);
-    virtual void unk0x20() { }
-    virtual void unk0x24() { }
-    virtual void unk0x28() { }
-    virtual void catchCut(bool, bool);
-    virtual void unk0x30() { }
-    virtual void unk0x34() { }
-    virtual void unk0x38() { }
+    virtual void unk30();
+    virtual void unk34();
+    virtual void unk38();
     virtual bool checkCatchDamage(soModuleAccesser*, void*);
 };
 
-// Controller module view: getButton sits at native slot 0xa0 (40 slots after the dtor), which the
-// shared soControllerModule declaration does not reach.
+// Controller module view: the native button-mask query is at 0xA0. The
+// current shared module declaration places getButton at 0xAC.
 class ftWarioControllerView {
 public:
     virtual ~ftWarioControllerView() { }
@@ -98,6 +88,7 @@ void ftWarioStatusUniqProcessSpecialNBite::execStatus(soModuleAccesser* moduleAc
         return;
     }
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
+    soMotionModule& motion = moduleAccesser->getMotionModule();
     ftWarioControllerView& controller = reinterpret_cast<ftWarioControllerView&>(moduleAccesser->getControllerModule());
     int frames = work.getInt(0x20000004) - 1;
     bool pressed = false;
@@ -107,25 +98,24 @@ void ftWarioStatusUniqProcessSpecialNBite::execStatus(soModuleAccesser* moduleAc
     }
     if (pressed) {
         frames = (int)moduleAccesser->getConstantFloatKirby(0xfa3);
-        moduleAccesser->getMotionModule().setRate(moduleAccesser->getConstantFloatKirby(0xfa2));
+        motion.setRate(moduleAccesser->getConstantFloatKirby(0xfa2));
     }
     if (frames <= 0) {
-        // HYPOTHESIS: constant from lbl_27_rodata_79A0 (value unverified).
-        moduleAccesser->getMotionModule().setRate(0.0f);
+        // Return to normal motion speed when the accelerated-bite timer ends.
+        motion.setRate(1.0f);
     }
     work.setInt(frames, 0x20000004);
 }
 
 void ftWarioStatusUniqProcessSpecialNBite::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
     int origKind = g_ftKirbyCopyAbilityIdConverter.convCorrectToOrigId(0, nextStatus, moduleAccesser, true);
-    if (origKind < 0x11a) {
-        if (origKind == 0x3b) {
-            return;
-        }
-    } else if (origKind < 0x11c) {
-        return;
+    switch (origKind) {
+    case 0x3B: case 0x11A: case 0x11B:
+        break;
+    default:
+        static_cast<soCatchModule*>(moduleAccesser->m_enumerationStart->m_catchModule)->catchCut(false, false);
+        break;
     }
-    reinterpret_cast<ftWarioCatchModuleView*>(moduleAccesser->m_enumerationStart->m_catchModule)->catchCut(false, false);
 }
 
 bool ftWarioStatusUniqProcessSpecialNBite::checkDamage(soModuleAccesser* moduleAccesser, void* damage) {
