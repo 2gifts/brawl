@@ -1,3 +1,7 @@
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_PIKMIN_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
 #include <so/so_array.h>
 #include <so/templates/so_array_value_wnPikminPikminOwnerInfo.h>
 #include <ft/builder/ft_dol_array_list.h>
@@ -7,6 +11,8 @@
 #include <so/stageobject.h>
 #include <ft/pikmin/ft_pikmin.h>
 #include <ft/pikmin/ft_pikmin_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
 #include <so/sound/so_sound_module_impl.h>
 
 // HYPOTHESIS: soValueAccesser's variation value is a plain global here (no header declaration yet)
@@ -36,6 +42,250 @@ ftPikmin::ftPikmin(s32 entryId,
                                          nwMotionInstHeap) {
     // TODO
 }
+
+// The activation of the articles lives in the fighter's article helpers (still unnamed).
+extern "C" bool fn_113_10428(wnPikminPikmin* weapon, soModuleAccesser* acc);
+extern "C" bool fn_113_10734(wnPikminDolfin* weapon, soModuleAccesser* acc);
+extern "C" bool fn_113_10828(wnPikminChain* weapon, soModuleAccesser* acc);
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Pikmin, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftPikminArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftPikminArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftPikminArticleKind : wnArticleKindInfo {
+    ftPikminArticleKind() {
+        kind = 0;
+        subKind = Fighter_Pikmin;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftPikminArticleBuildInfo : wnArticleBuildInfo {
+    ftPikminArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_148B80(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148B94(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148BA8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftPikminArticleTraits;
+#define FT_PIKMIN_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftPikminArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftPikminArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Pikmin, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_PIKMIN_TRAITS(wnPikminPikmin, wnPikminPikminData, 0, fn_27_148B80)
+FT_PIKMIN_TRAITS(wnPikminDolfin, wnPikminDolfinData, 1, fn_27_148B94)
+FT_PIKMIN_TRAITS(wnPikminChain, wnPikminChainData, 2, fn_27_148BA8)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftPikminArticleTraits<W>::ArticleId, ftPikminArticleBuildInfo(ftPikminArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftPikminArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnPikminPikmin>::~wnArticleHolder();
+template wnArticleHolder<wnPikminDolfin>::~wnArticleHolder();
+template wnArticleHolder<wnPikminChain>::~wnArticleHolder();
+template wnArticleHolder<wnPikminPikmin>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftPikminArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftPikminArticleMediator, 10>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftPikminArticleMediator, 10>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftPikminArticleMediator::~ftPikminArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftPikminArticleMediator::getMediateNum() { return 3; }
+void ftPikminArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Pikmin, 1 Dolfin, 2 Chain (the rest are unused).
+
+#define FT_PIKMIN_POOL_PIKMIN_BASE static_cast<wnArticlePool<wnPikminPikmin, 6, ftPikminDolfinPool>&>(m_pools)
+#define FT_PIKMIN_POOL_PIKMIN FT_PIKMIN_POOL_PIKMIN_BASE.getSub()
+#define FT_PIKMIN_POOL_DOLFIN_BASE static_cast<wnArticlePool<wnPikminDolfin, 1, ftPikminChainPool>&>(m_pools)
+#define FT_PIKMIN_POOL_DOLFIN FT_PIKMIN_POOL_DOLFIN_BASE.getSub()
+#define FT_PIKMIN_POOL_CHAIN_BASE static_cast<wnArticlePool<wnPikminChain, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_PIKMIN_POOL_CHAIN FT_PIKMIN_POOL_CHAIN_BASE.getSub()
+
+#define FT_PIKMIN_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(3, value) WN_ARTICLE_UNUSED_SLOT(4, value) WN_ARTICLE_UNUSED_SLOT(5, value) \
+    WN_ARTICLE_UNUSED_SLOT(6, value) WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) \
+    WN_ARTICLE_UNUSED_SLOT(9, value) WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) \
+    WN_ARTICLE_UNUSED_SLOT(12, value) WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) \
+    WN_ARTICLE_UNUSED_SLOT(15, value) WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftPikminArticleMediator::deactivate() {
+    for (s32 i = 0; i < 6; ++i) {
+        wnPikminPikmin* weapon = FT_PIKMIN_POOL_PIKMIN.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnPikminDolfin* weapon = FT_PIKMIN_POOL_DOLFIN.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnPikminChain* weapon = FT_PIKMIN_POOL_CHAIN.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftPikminArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 6; }
+    case 1: { wnArticleSlotTag tag; return 1; }
+    case 2: { wnArticleSlotTag tag; return 1; }
+    FT_PIKMIN_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftPikminActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_PIKMIN_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftPikminActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftPikminActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftPikminArticleMediator::getActiveNum(soModuleAccesser* acc, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_PIKMIN_COUNT_ACTIVE(FT_PIKMIN_POOL_PIKMIN, 6)
+    case 1: FT_PIKMIN_COUNT_ACTIVE(FT_PIKMIN_POOL_DOLFIN, 1)
+    case 2: FT_PIKMIN_COUNT_ACTIVE(FT_PIKMIN_POOL_CHAIN, 1)
+    FT_PIKMIN_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_PIKMIN_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftPikminArticleMediator::isGeneratable(soModuleAccesser* acc, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_PIKMIN_CAN_GENERATE(FT_PIKMIN_POOL_PIKMIN, 6, 0)
+    case 1: FT_PIKMIN_CAN_GENERATE(FT_PIKMIN_POOL_DOLFIN, 1, 1)
+    case 2: FT_PIKMIN_CAN_GENERATE(FT_PIKMIN_POOL_CHAIN, 1, 2)
+    FT_PIKMIN_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftPikminArticleActivator;
+template <> struct ftPikminArticleActivator<wnPikminPikmin> {
+    static bool activate(wnPikminPikmin* weapon, soModuleAccesser* acc) { return fn_113_10428(weapon, acc); }
+};
+template <> struct ftPikminArticleActivator<wnPikminDolfin> {
+    static bool activate(wnPikminDolfin* weapon, soModuleAccesser* acc) { return fn_113_10734(weapon, acc); }
+};
+template <> struct ftPikminArticleActivator<wnPikminChain> {
+    static bool activate(wnPikminChain* weapon, soModuleAccesser* acc) { return fn_113_10828(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_PIKMIN_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftPikminArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftPikminArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_PIKMIN_GENERATE(wnPikminPikmin, FT_PIKMIN_POOL_PIKMIN)
+    case 1: FT_PIKMIN_GENERATE(wnPikminDolfin, FT_PIKMIN_POOL_DOLFIN)
+    case 2: FT_PIKMIN_GENERATE(wnPikminChain, FT_PIKMIN_POOL_CHAIN)
+    FT_PIKMIN_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftPikminArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: { wnArticleSlotTag tag; (void)dynamic_cast<wnPikminPikmin&>(*article); return true; }
+    case 1: { wnArticleSlotTag tag; (void)dynamic_cast<wnPikminDolfin&>(*article); return true; }
+    case 2: { wnArticleSlotTag tag; (void)dynamic_cast<wnPikminChain&>(*article); return true; }
+    FT_PIKMIN_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftPikmin is done
 void testBuilder() {
