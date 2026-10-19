@@ -444,8 +444,7 @@ extern "C" int fn_98_11B40(void* p);
 int fn_98_98B0(u8* p) { return fn_98_11344(*(void**)(p + 0x60)); }
 int fn_98_98B8(u8* p) { return fn_98_11B40(*(void**)(p + 0x60)); }
 
-// ftPikachu::getExtendParam: the extend-param block pointer stored at the end of the fighter, offset 0x7C.
-void* fn_98_9530(u8* p) { return *(u8**)(p + 0x2AE44) + 0x7C; }
+void** ftPikachu::getExtendParam() { return m_data->extendParam; }
 
 // soInstancePoolSub::getInstanceAt for the wnPikachu* instance holders: instance slots by index, null past the last one.
 void* fn_98_B62C(u8* p, int index) {

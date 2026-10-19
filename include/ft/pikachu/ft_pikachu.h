@@ -83,6 +83,7 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    void** getExtendParam();
     // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnPikachuThunderJolt* weapon, soModuleAccesser* acc);
     static bool activeArticle1(wnPikachuCloud* weapon, soModuleAccesser* acc);

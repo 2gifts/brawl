@@ -100,10 +100,19 @@ public:
         return *this;
     }
 
-    Vec2f& operator*=(const float c) {
+    Vec2f& operator*=(const float c)
+#ifdef MT_VEC2F_MUL_ASSIGN_DIRECT
+    { // MATCH-ONLY: Pikachu's Quick Attack scales the components directly in the out-of-line copy.
+        m_x = m_x * c;
+        m_y = m_y * c;
+        return *this;
+    }
+#else
+    {
         *this = *this * c;
         return *this;
     }
+#endif
 
     // HYPOTHESIS: native calls pass vector addresses; original reference qualifiers are unresolved.
     float mtVecAngle(Vec2f& other);
@@ -199,6 +208,16 @@ public:
         m_y = orig.m_y;
         m_z = orig.m_z;
         return *this;
+    }
+
+    void set(float x, float y, float z)
+#ifdef MT_VEC3F_SET_NOINLINE
+        __attribute__((never_inline)) // MATCH-ONLY: retain the out-of-line copy of Pikachu's Quick Attack.
+#endif
+    {
+        m_x = x;
+        m_y = y;
+        m_z = z;
     }
 
     Vec2f* xy() const {
