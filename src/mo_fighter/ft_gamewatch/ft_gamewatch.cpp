@@ -3,12 +3,19 @@
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #define FT_TEAM_TYPED_INTERFACE
+#define FT_GAMEWATCH_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
 #include <so/anim/so_anim_obj.h>
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_physics_iface.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/gamewatch/ft_gamewatch.h>
 #include <ft/gamewatch/ft_gamewatch_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
+#include <ft/gamewatch/ft_gamewatch_transactor.h>
+#include <ft/ft_owner.h>
 #include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
 #include <so/team/so_team.h>
@@ -126,6 +133,442 @@ ftGameWatch::ftGameWatch(s32 entryId,
     absorber.setStatus(0, 0, 0);
     ftTurnModuleCall30(m_moduleAccesser->m_enumerationStart->m_turnModule, 1);
 }
+
+// The sausage starts through the transactor with the model resource of the fighter.
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+bool ftGameWatch::activeArticle(wnGameWatchSausage* weapon, soModuleAccesser* acc) {
+    static ftGameWatchTransactor instance;
+    u32 mdlResId = acc->getResourceModule().getResourceIdAccesser()->getMdlResId();
+    return instance.activeArticle(weapon, acc, mdlResId);
+}
+#pragma pool_data reset
+
+// The rescue article starts at the position of the fighter with its team and color.
+bool ftGameWatch::activeArticle1(wnGameWatchRescue* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    Vec3f position = acc->getPostureModule().getPos();
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    float color = fighter.getOwner()->getFighterColor();
+    int team = fighter.getOwner()->getTeam();
+    int resourceId = resources.getResourceIdAccesser()->getMdlResId();
+    weapon->activate(founderTaskId, resourceId, team, position, color);
+    return true;
+}
+
+// The parachute starts with the team and color of the fighter.
+bool ftGameWatch::activeArticle2(wnGameWatchParachute* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    float color = fighter.getOwner()->getFighterColor();
+    int team = fighter.getOwner()->getTeam();
+    int resourceId = resources.getResourceIdAccesser()->getMdlResId();
+    weapon->activate(founderTaskId, resourceId, team, color);
+    return true;
+}
+
+// The panel starts with the facing, the selector kept in the work of the fighter and its color.
+bool ftGameWatch::activeArticle3(wnGameWatchPanel* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soWorkManageModule& work = acc->getWorkManageModule();
+    soPostureModule& posture = acc->getPostureModule();
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    float color = fighter.getOwner()->getFighterColor();
+    int selector = work.getInt(0x10000043);
+    float lr = posture.getLr();
+    int team = fighter.getOwner()->getTeam();
+    int resourceId = resources.getResourceIdAccesser()->getMdlResId();
+    weapon->activate(founderTaskId, resourceId, team, lr, selector, color);
+    return true;
+}
+
+// The oil starts with the team and color of the fighter.
+bool ftGameWatch::activeArticle4(wnGameWatchOil* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    float color = fighter.getOwner()->getFighterColor();
+    int team = fighter.getOwner()->getTeam();
+    int resourceId = resources.getResourceIdAccesser()->getMdlResId();
+    weapon->activate(founderTaskId, resourceId, team, color);
+    return true;
+}
+
+// The octopus starts at the position of the fighter with its facing, a constant and its color.
+bool ftGameWatch::activeArticle5(wnGameWatchOctopus* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soPostureModule& posture = acc->getPostureModule();
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    float color = fighter.getOwner()->getFighterColor();
+    float unkConstant = soValueAccesser::getConstantFloat(acc, 0xdb2, 0);
+    float lr = posture.getLr();
+    Vec3f position = posture.getPos();
+    int team = fighter.getOwner()->getTeam();
+    int resourceId = resources.getResourceIdAccesser()->getMdlResId();
+    weapon->activate(founderTaskId, resourceId, team, position, lr, unkConstant, color);
+    return true;
+}
+
+// The side special weapon starts with the selector kept in the work of the fighter and its color.
+bool ftGameWatch::activeArticle6(wnGameWatchNormalWeapon* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soWorkManageModule& work = acc->getWorkManageModule();
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    float color = fighter.getOwner()->getFighterColor();
+    int selector = work.getInt(0x10000045);
+    int team = fighter.getOwner()->getTeam();
+    int resourceId = resources.getResourceIdAccesser()->getMdlResId();
+    weapon->activate(founderTaskId, resourceId, team, selector, color);
+    return true;
+}
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind GameWatch, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftGameWatchArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftGameWatchArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftGameWatchArticleKind : wnArticleKindInfo {
+    ftGameWatchArticleKind() {
+        kind = 0;
+        subKind = Fighter_GameWatch;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftGameWatchArticleBuildInfo : wnArticleBuildInfo {
+    ftGameWatchArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_149844(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1498D8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1498EC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_149900(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_149914(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_149928(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_149950(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftGameWatchArticleTraits;
+#define FT_GAMEWATCH_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftGameWatchArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftGameWatchArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_GameWatch, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_GAMEWATCH_TRAITS(wnGameWatchSausage, wnGameWatchSausageData, 0, fn_27_149844)
+FT_GAMEWATCH_TRAITS(wnGameWatchRescue, wnGameWatchRescueData, 1, fn_27_1498D8)
+FT_GAMEWATCH_TRAITS(wnGameWatchParachute, wnGameWatchParachuteData, 2, fn_27_1498EC)
+FT_GAMEWATCH_TRAITS(wnGameWatchPanel, wnGameWatchPanelData, 3, fn_27_149900)
+FT_GAMEWATCH_TRAITS(wnGameWatchOil, wnGameWatchOilData, 4, fn_27_149914)
+FT_GAMEWATCH_TRAITS(wnGameWatchOctopus, wnGameWatchOctopusData, 5, fn_27_149928)
+FT_GAMEWATCH_TRAITS(wnGameWatchNormalWeapon, wnGameWatchNormalWeaponData, 6, fn_27_149950)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftGameWatchArticleTraits<W>::ArticleId, ftGameWatchArticleBuildInfo(ftGameWatchArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftGameWatchArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnGameWatchSausage>::~wnArticleHolder();
+template wnArticleHolder<wnGameWatchRescue>::~wnArticleHolder();
+template wnArticleHolder<wnGameWatchParachute>::~wnArticleHolder();
+template wnArticleHolder<wnGameWatchPanel>::~wnArticleHolder();
+template wnArticleHolder<wnGameWatchOil>::~wnArticleHolder();
+template wnArticleHolder<wnGameWatchOctopus>::~wnArticleHolder();
+template wnArticleHolder<wnGameWatchNormalWeapon>::~wnArticleHolder();
+template wnArticleHolder<wnGameWatchSausage>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftGameWatchArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftGameWatchArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftGameWatchArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftGameWatchArticleMediator::~ftGameWatchArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftGameWatchArticleMediator::getMediateNum() { return 7; }
+void ftGameWatchArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Sausage, 1 Rescue, 2 Parachute, 3 Panel, 4 Oil, 5 Octopus, 6 NormalWeapon (the rest are unused).
+
+#define FT_GAMEWATCH_POOL_SAUSAGE_BASE static_cast<wnArticlePool<wnGameWatchSausage, 5, ftGameWatchRescuePool>&>(m_pools)
+#define FT_GAMEWATCH_POOL_SAUSAGE FT_GAMEWATCH_POOL_SAUSAGE_BASE.getSub()
+#define FT_GAMEWATCH_POOL_RESCUE_BASE static_cast<wnArticlePool<wnGameWatchRescue, 1, ftGameWatchParachutePool>&>(m_pools)
+#define FT_GAMEWATCH_POOL_RESCUE FT_GAMEWATCH_POOL_RESCUE_BASE.getSub()
+#define FT_GAMEWATCH_POOL_PARACHUTE_BASE static_cast<wnArticlePool<wnGameWatchParachute, 1, ftGameWatchPanelPool>&>(m_pools)
+#define FT_GAMEWATCH_POOL_PARACHUTE FT_GAMEWATCH_POOL_PARACHUTE_BASE.getSub()
+#define FT_GAMEWATCH_POOL_PANEL_BASE static_cast<wnArticlePool<wnGameWatchPanel, 1, ftGameWatchOilPool>&>(m_pools)
+#define FT_GAMEWATCH_POOL_PANEL FT_GAMEWATCH_POOL_PANEL_BASE.getSub()
+#define FT_GAMEWATCH_POOL_OIL_BASE static_cast<wnArticlePool<wnGameWatchOil, 1, ftGameWatchOctopusPool>&>(m_pools)
+#define FT_GAMEWATCH_POOL_OIL FT_GAMEWATCH_POOL_OIL_BASE.getSub()
+#define FT_GAMEWATCH_POOL_OCTOPUS_BASE static_cast<wnArticlePool<wnGameWatchOctopus, 1, ftGameWatchNormalWeaponPool>&>(m_pools)
+#define FT_GAMEWATCH_POOL_OCTOPUS FT_GAMEWATCH_POOL_OCTOPUS_BASE.getSub()
+#define FT_GAMEWATCH_POOL_NORMALWEAPON_BASE static_cast<wnArticlePool<wnGameWatchNormalWeapon, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_GAMEWATCH_POOL_NORMALWEAPON FT_GAMEWATCH_POOL_NORMALWEAPON_BASE.getSub()
+
+#define FT_GAMEWATCH_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) \
+    WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) \
+    WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) \
+    WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftGameWatchArticleMediator::deactivate() {
+    for (s32 i = 0; i < 5; ++i) {
+        wnGameWatchSausage* weapon = FT_GAMEWATCH_POOL_SAUSAGE.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnGameWatchRescue* weapon = FT_GAMEWATCH_POOL_RESCUE.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnGameWatchParachute* weapon = FT_GAMEWATCH_POOL_PARACHUTE.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnGameWatchPanel* weapon = FT_GAMEWATCH_POOL_PANEL.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnGameWatchOil* weapon = FT_GAMEWATCH_POOL_OIL.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnGameWatchOctopus* weapon = FT_GAMEWATCH_POOL_OCTOPUS.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnGameWatchNormalWeapon* weapon = FT_GAMEWATCH_POOL_NORMALWEAPON.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftGameWatchArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 5; }
+    case 1: { wnArticleSlotTag tag; return 1; }
+    case 2: { wnArticleSlotTag tag; return 1; }
+    case 3: { wnArticleSlotTag tag; return 1; }
+    case 4: { wnArticleSlotTag tag; return 1; }
+    case 5: { wnArticleSlotTag tag; return 1; }
+    case 6: { wnArticleSlotTag tag; return 1; }
+    FT_GAMEWATCH_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftGameWatchActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_GAMEWATCH_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftGameWatchActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftGameWatchActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftGameWatchArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_GAMEWATCH_COUNT_ACTIVE(FT_GAMEWATCH_POOL_SAUSAGE, 5)
+    case 1: FT_GAMEWATCH_COUNT_ACTIVE(FT_GAMEWATCH_POOL_RESCUE, 1)
+    case 2: FT_GAMEWATCH_COUNT_ACTIVE(FT_GAMEWATCH_POOL_PARACHUTE, 1)
+    case 3: FT_GAMEWATCH_COUNT_ACTIVE(FT_GAMEWATCH_POOL_PANEL, 1)
+    case 4: FT_GAMEWATCH_COUNT_ACTIVE(FT_GAMEWATCH_POOL_OIL, 1)
+    case 5: FT_GAMEWATCH_COUNT_ACTIVE(FT_GAMEWATCH_POOL_OCTOPUS, 1)
+    case 6: FT_GAMEWATCH_COUNT_ACTIVE(FT_GAMEWATCH_POOL_NORMALWEAPON, 1)
+    FT_GAMEWATCH_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_GAMEWATCH_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftGameWatchArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_GAMEWATCH_CAN_GENERATE(FT_GAMEWATCH_POOL_SAUSAGE, 5, 0)
+    case 1: FT_GAMEWATCH_CAN_GENERATE(FT_GAMEWATCH_POOL_RESCUE, 1, 1)
+    case 2: FT_GAMEWATCH_CAN_GENERATE(FT_GAMEWATCH_POOL_PARACHUTE, 1, 2)
+    case 3: FT_GAMEWATCH_CAN_GENERATE(FT_GAMEWATCH_POOL_PANEL, 1, 3)
+    case 4: FT_GAMEWATCH_CAN_GENERATE(FT_GAMEWATCH_POOL_OIL, 1, 4)
+    case 5: FT_GAMEWATCH_CAN_GENERATE(FT_GAMEWATCH_POOL_OCTOPUS, 1, 5)
+    case 6: FT_GAMEWATCH_CAN_GENERATE(FT_GAMEWATCH_POOL_NORMALWEAPON, 1, 6)
+    FT_GAMEWATCH_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftGameWatchArticleActivator;
+template <> struct ftGameWatchArticleActivator<wnGameWatchSausage> {
+    static bool activate(wnGameWatchSausage* weapon, soModuleAccesser* acc) { return ftGameWatch::activeArticle(weapon, acc); }
+};
+template <> struct ftGameWatchArticleActivator<wnGameWatchRescue> {
+    static bool activate(wnGameWatchRescue* weapon, soModuleAccesser* acc) { return ftGameWatch::activeArticle1(weapon, acc); }
+};
+template <> struct ftGameWatchArticleActivator<wnGameWatchParachute> {
+    static bool activate(wnGameWatchParachute* weapon, soModuleAccesser* acc) { return ftGameWatch::activeArticle2(weapon, acc); }
+};
+template <> struct ftGameWatchArticleActivator<wnGameWatchPanel> {
+    static bool activate(wnGameWatchPanel* weapon, soModuleAccesser* acc) { return ftGameWatch::activeArticle3(weapon, acc); }
+};
+template <> struct ftGameWatchArticleActivator<wnGameWatchOil> {
+    static bool activate(wnGameWatchOil* weapon, soModuleAccesser* acc) { return ftGameWatch::activeArticle4(weapon, acc); }
+};
+template <> struct ftGameWatchArticleActivator<wnGameWatchOctopus> {
+    static bool activate(wnGameWatchOctopus* weapon, soModuleAccesser* acc) { return ftGameWatch::activeArticle5(weapon, acc); }
+};
+template <> struct ftGameWatchArticleActivator<wnGameWatchNormalWeapon> {
+    static bool activate(wnGameWatchNormalWeapon* weapon, soModuleAccesser* acc) { return ftGameWatch::activeArticle6(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_GAMEWATCH_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftGameWatchArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftGameWatchArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_GAMEWATCH_GENERATE(wnGameWatchSausage, FT_GAMEWATCH_POOL_SAUSAGE)
+    case 1: FT_GAMEWATCH_GENERATE(wnGameWatchRescue, FT_GAMEWATCH_POOL_RESCUE)
+    case 2: FT_GAMEWATCH_GENERATE(wnGameWatchParachute, FT_GAMEWATCH_POOL_PARACHUTE)
+    case 3: FT_GAMEWATCH_GENERATE(wnGameWatchPanel, FT_GAMEWATCH_POOL_PANEL)
+    case 4: FT_GAMEWATCH_GENERATE(wnGameWatchOil, FT_GAMEWATCH_POOL_OIL)
+    case 5: FT_GAMEWATCH_GENERATE(wnGameWatchOctopus, FT_GAMEWATCH_POOL_OCTOPUS)
+    case 6: FT_GAMEWATCH_GENERATE(wnGameWatchNormalWeapon, FT_GAMEWATCH_POOL_NORMALWEAPON)
+    FT_GAMEWATCH_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftGameWatchArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnGameWatchSausage&>(*article);
+        return true;
+    }
+    case 1: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnGameWatchRescue&>(*article);
+        return true;
+    }
+    case 2: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnGameWatchParachute&>(*article);
+        return true;
+    }
+    case 3: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnGameWatchPanel&>(*article);
+        return true;
+    }
+    case 4: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnGameWatchOil&>(*article);
+        return true;
+    }
+    case 5: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnGameWatchOctopus&>(*article);
+        return true;
+    }
+    case 6: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnGameWatchNormalWeapon&>(*article);
+        return true;
+    }
+    FT_GAMEWATCH_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftGameWatch is done
 void testBuilder() {
