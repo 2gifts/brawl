@@ -95,9 +95,7 @@ bool ftZelda::activeArticle(wnZeldaDein* weapon, soModuleAccesser* acc) {
 bool ftZelda::activeArticle1(wnZeldaLightingBow* weapon, soModuleAccesser* acc) {
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = acc->getStageObject().m_taskId;
-    int team = acc->getTeamModule().getTeam()->getNo();
-    int resourceId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
-    weapon->activate(founderTaskId, resourceId, team, 0x45);
+    weapon->activate(founderTaskId, dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId(), acc->getTeamModule().getTeam()->getNo(), 0x45);
     return true;
 }
 
@@ -105,9 +103,7 @@ bool ftZelda::activeArticle1(wnZeldaLightingBow* weapon, soModuleAccesser* acc) 
 bool ftZelda::activeArticle2(wnZeldaLightingBowArrow* weapon, soModuleAccesser* acc) {
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = acc->getStageObject().m_taskId;
-    int team = acc->getTeamModule().getTeam()->getNo();
-    int resourceId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
-    weapon->activate(founderTaskId, resourceId, team, 0x63);
+    weapon->activate(founderTaskId, dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId(), acc->getTeamModule().getTeam()->getNo(), 0x63);
     return true;
 }
 

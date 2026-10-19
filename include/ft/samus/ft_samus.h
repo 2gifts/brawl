@@ -23,8 +23,14 @@ typedef soCollisionShieldModuleBuildConfigGroups<2, 1, 1, soCollisionShieldEvent
 typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> ftSamusLinkModuleBuildConfig;
 typedef soStatusModuleBuildConfig<301, soGeneralWorkBuildConfig<18, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftSamusStatusModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnSamusCShot pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_SAMUS_ARTICLE_POOLS
+#include <ft/samus/ft_samus_article_pools.h>
+typedef ftSamusArticleManageModuleBuilder ftSamusGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x1D7D4, Fighter_Samus> ftSamusGenerateArticleManageModuleBuilder;
+#endif
 
 class ftSamusBuildConfig : public ftCommonBuildConfig {
 public:
@@ -41,6 +47,15 @@ public:
     typedef ftSamusGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnSamusCShot;
+class wnSamusBomb;
+class wnSamusMissile;
+class wnSamusLaser;
+class wnSamusLaser2;
+class wnSamusGun;
+class wnSamusSuperMissile;
+class wnSamusGBeam;
+
 class ftSamus : public ftFighterBuilder<ftSamusBuildConfig> {
     u8 unkTail[0x25BF8 - sizeof(ftFighterBuilder<ftSamusBuildConfig>)];
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
@@ -50,4 +65,19 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnSamusCShot* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnSamusBomb* weapon, soModuleAccesser* acc);
+    static bool activeArticle2(wnSamusMissile* weapon, soModuleAccesser* acc);
+    static bool activeArticle3(wnSamusSuperMissile* weapon, soModuleAccesser* acc);
+    static bool activeArticle4(wnSamusLaser* weapon, soModuleAccesser* acc);
+    static bool activeArticle5(wnSamusLaser2* weapon, soModuleAccesser* acc);
+    static bool activeArticle6(wnSamusGun* weapon, soModuleAccesser* acc);
+    static bool activeArticle7(wnSamusGBeam* weapon, soModuleAccesser* acc);
+    static bool shootArticle(wnSamusCShot* weapon, soModuleAccesser* acc);
+    static bool shootArticle1(wnSamusBomb* weapon, soModuleAccesser* acc);
+    static bool shootArticle2(wnSamusMissile* weapon, soModuleAccesser* acc);
+    static bool shootArticle3(wnSamusSuperMissile* weapon, soModuleAccesser* acc);
+    static bool shootArticle4(wnSamusLaser* weapon, soModuleAccesser* acc);
+    static bool shootArticle5(wnSamusLaser2* weapon, soModuleAccesser* acc);
 };

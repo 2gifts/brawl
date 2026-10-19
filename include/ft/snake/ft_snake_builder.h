@@ -27,8 +27,14 @@ typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> ftSnakeLinkModuleBuildCo
 typedef soStatusModuleBuildConfig<309, soGeneralWorkBuildConfig<18, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftSnakeStatusModuleBuildConfig;
 typedef soCollisionSearchModuleBuilder<soCollisionSearchModuleBuildConfig<soCollisionSearchModuleImpl> > ftSnakeCollisionSearchModuleBuilder;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnSnake weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_SNAKE_ARTICLE_POOLS
+#include <ft/snake/ft_snake_article_pools.h>
+typedef ftSnakeArticleManageModuleBuilder ftSnakeGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x249E4, Fighter_Snake> ftSnakeGenerateArticleManageModuleBuilder;
+#endif
 
 class ftSnakeBuildConfig : public ftCommonBuildConfig {
 public:
@@ -48,6 +54,20 @@ public:
 };
 
 // The constructor's 0x2D040 allocation fixes the size; the members past the builder are not recovered yet.
+class wnSnakeMine;
+class wnSnakeTrenchMortar;
+class wnSnakeRpg7;
+class wnSnakeCypher;
+class wnSnakeC4;
+class wnSnakeC4Switch;
+class wnSnakeNikita;
+class wnSnakeLadder;
+class wnSnakeRgb6;
+class wnSnakeRgb6Sight;
+class wnSnakeRgb6Clip;
+class wnSnakeRgb6Bullet;
+class soArticle;
+
 class ftSnake : public ftFighterBuilder<ftSnakeBuildConfig> {
     u8 unkTail[0x2D040 - sizeof(ftFighterBuilder<ftSnakeBuildConfig>)];
 public:
@@ -55,5 +75,22 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnSnakeMine* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnSnakeTrenchMortar* weapon, soModuleAccesser* acc);
+    static bool activeArticle2(wnSnakeRpg7* weapon, soModuleAccesser* acc);
+    static bool activeArticle3(wnSnakeCypher* weapon, soModuleAccesser* acc);
+    static bool activeArticle4(wnSnakeC4* weapon, soModuleAccesser* acc);
+    static bool activeArticle5(wnSnakeC4Switch* weapon, soModuleAccesser* acc);
+    static bool activeArticle6(wnSnakeNikita* weapon, soModuleAccesser* acc);
+    static bool activeArticle7(wnSnakeLadder* weapon, soModuleAccesser* acc);
+    static bool activeArticle8(wnSnakeRgb6* weapon, soModuleAccesser* acc);
+    static bool activeArticle9(wnSnakeRgb6Sight* weapon, soModuleAccesser* acc);
+    static bool activeArticle10(wnSnakeRgb6Clip* weapon, soModuleAccesser* acc);
+    static bool activeArticle11(wnSnakeRgb6Bullet* weapon, soModuleAccesser* acc);
+    static bool activeArticle12(wnSimple* weapon, soModuleAccesser* acc);
+    static bool shootArticle(wnSnakeCypher* weapon, soModuleAccesser* acc);
+    static bool shootItem(soArticle* article, bool* flag, soModuleAccesser* acc);
+    static bool shootItem1(soArticle* article, bool* flag, soModuleAccesser* acc);
 };
 static_assert(sizeof(ftSnake) == 0x2D040, "Snake allocation size is wrong!");

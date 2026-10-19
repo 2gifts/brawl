@@ -286,22 +286,16 @@ bool ftMario::activeArticle1(wnMarioMantle* weapon, soModuleAccesser* acc) {
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = acc->getStageObject().m_taskId;
-    int situationKind = acc->getSituationModule().getKind();
-    int team = fighter.getOwner()->getTeam();
-    int etcResId = resources.getResourceIdAccesser()->getEtcResId();
-    weapon->activate(founderTaskId, etcResId, team, situationKind);
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam(), acc->getSituationModule().getKind());
     return true;
 }
 
 // The Pump starts with the model resource of the fighter.
 bool ftMario::activeArticle2(wnMarioPump* weapon, soModuleAccesser* acc) {
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
-    soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = acc->getStageObject().m_taskId;
-    int etcResId = resources.getResourceIdAccesser()->getEtcResId();
-    int team = fighter.getOwner()->getTeam();
-    int modelResId = resources.getResourceIdAccesser()->getMdlResId();
-    weapon->activate(founderTaskId, modelResId, team, etcResId);
+    soResourceModule& resources = acc->getResourceModule();
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getMdlResId(), fighter.getOwner()->getTeam(), resources.getResourceIdAccesser()->getEtcResId());
     return true;
 }
 
@@ -310,10 +304,7 @@ bool ftMario::activeArticle3(wnMarioHugeFlame* weapon, soModuleAccesser* acc) {
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = acc->getStageObject().m_taskId;
-    float lr = acc->getPostureModule().getLr();
-    int team = fighter.getOwner()->getTeam();
-    int resourceId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
-    weapon->activate(founderTaskId, resourceId, team, lr);
+    weapon->activate(founderTaskId, dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId(), fighter.getOwner()->getTeam(), acc->getPostureModule().getLr());
     return true;
 }
 

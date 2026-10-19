@@ -221,10 +221,7 @@ bool ftLuigi::activeArticle1(wnLuigiNegativeZone* weapon, soModuleAccesser* acc)
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = acc->getStageObject().m_taskId;
-    float lr = acc->getPostureModule().getLr();
-    int team = fighter.getOwner()->getTeam();
-    int resourceId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
-    weapon->activate(founderTaskId, resourceId, team, lr);
+    weapon->activate(founderTaskId, dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId(), fighter.getOwner()->getTeam(), acc->getPostureModule().getLr());
     return true;
 }
 
