@@ -28,8 +28,14 @@ typedef soStatusModuleBuildConfig<289, soGeneralWorkBuildConfig<18, 14, 2>, 274,
 FT_KINETIC_TRANSACTOR(ftPitKineticTransactor);
 typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKineticMediatorImplT<ftPitKineticTransactor> > ftPitKineticModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (bow, arrow and Final Smash pools). Only the fighter unit builds the real
+// pools; the other units of the REL see an opaque block of the same size.
+#ifdef FT_PIT_ARTICLE_POOLS
+#include <ft/pit/ft_pit_article_pools.h>
+typedef ftPitArticleManageModuleBuilder ftPitGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x2163C, Fighter_Pit> ftPitGenerateArticleManageModuleBuilder;
+#endif
 
 class ftPitBuildConfig : public ftCommonBuildConfig {
 public:
@@ -48,6 +54,9 @@ public:
     typedef ftPitGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnPitBow;
+class wnPitParthena;
+
 class ftPit : public ftFighterBuilder<ftPitBuildConfig> {
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
     ftData* m_data;
@@ -59,4 +68,7 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnPitBow* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnPitParthena* weapon, soModuleAccesser* acc);
 };

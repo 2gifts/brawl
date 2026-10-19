@@ -1,11 +1,19 @@
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_PIT_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define FT_TEAM_TYPED_INTERFACE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_reflector_group.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/pit/ft_pit.h>
 #include <ft/pit/ft_pit_extend_param_accesser.h>
+#include <ft/pit/ft_pit_transactor.h>
+#include <ft/ft_owner.h>
+#include <ft/ft_resource_id_accesser_impl.h>
+#include <so/article/so_article_mediator.h>
 
 #define FT_BC ftPitBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -52,6 +60,288 @@ ftPit::ftPit(s32 entryId,
     m_moduleAccesser->getCollisionReflectorModule().add(reinterpret_cast<soCollisionReflectorGroupData*>(&group), 2);
     m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
 }
+
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+#pragma dont_inline on
+ftPitTransactor* ftPitTransactor::getInstance() {
+    static ftPitTransactor instance;
+    return &instance;
+}
+#pragma dont_inline off
+#pragma pool_data reset
+
+// The bow starts through the transactor with the model and texture resource of the fighter.
+bool ftPit::activeArticle(wnPitBow* weapon, soModuleAccesser* acc) {
+    soResourceModule& resources = acc->getResourceModule();
+    return ftPitTransactor::getInstance()->activeArticle(weapon, acc, resources.getResourceIdAccesser()->getMdlResId(), resources.getResourceIdAccesser()->getTexResId(), true, false);
+}
+
+// The army of the Final Smash starts at the stage object of the fighter with its team and the scale.
+bool ftPit::activeArticle1(wnPitParthena* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    float scale = acc->getPostureModule().getScale();
+    int team = fighter.getOwner()->getTeam();
+    int resourceId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
+    weapon->activate(founderTaskId, resourceId, team, scale);
+    return true;
+}
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Pit, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftPitArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftPitArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftPitArticleKind : wnArticleKindInfo {
+    ftPitArticleKind() {
+        kind = 0;
+        subKind = Fighter_Pit;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftPitArticleBuildInfo : wnArticleBuildInfo {
+    ftPitArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_149064(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1490FC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1491AC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftPitArticleTraits;
+#define FT_PIT_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftPitArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftPitArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Pit, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_PIT_TRAITS(wnPitBow, wnPitBowData, 0, fn_27_149064)
+FT_PIT_TRAITS(wnPitBowArrow, wnPitBowArrowData, 1, fn_27_1490FC)
+FT_PIT_TRAITS(wnPitParthena, wnPitParthenaData, 2, fn_27_1491AC)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftPitArticleTraits<W>::ArticleId, ftPitArticleBuildInfo(ftPitArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftPitArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnPitBow>::~wnArticleHolder();
+template wnArticleHolder<wnPitBowArrow>::~wnArticleHolder();
+template wnArticleHolder<wnPitParthena>::~wnArticleHolder();
+template wnArticleHolder<wnPitBowArrow>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftPitArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftPitArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftPitArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftPitArticleMediator::~ftPitArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftPitArticleMediator::getMediateNum() { return 3; }
+void ftPitArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Bow, 1 BowArrow, 2 Parthena (the rest are unused).
+
+#define FT_PIT_POOL_BOW_BASE static_cast<wnArticlePool<wnPitBow, 1, ftPitBowArrowPool>&>(m_pools)
+#define FT_PIT_POOL_BOW FT_PIT_POOL_BOW_BASE.getSub()
+#define FT_PIT_POOL_BOWARROW_BASE static_cast<wnArticlePool<wnPitBowArrow, 4, ftPitParthenaPool>&>(m_pools)
+#define FT_PIT_POOL_BOWARROW FT_PIT_POOL_BOWARROW_BASE.getSub()
+#define FT_PIT_POOL_PARTHENA_BASE static_cast<wnArticlePool<wnPitParthena, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_PIT_POOL_PARTHENA FT_PIT_POOL_PARTHENA_BASE.getSub()
+
+#define FT_PIT_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(3, value) WN_ARTICLE_UNUSED_SLOT(4, value) WN_ARTICLE_UNUSED_SLOT(5, value) \
+    WN_ARTICLE_UNUSED_SLOT(6, value) WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) \
+    WN_ARTICLE_UNUSED_SLOT(9, value) WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) \
+    WN_ARTICLE_UNUSED_SLOT(12, value) WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) \
+    WN_ARTICLE_UNUSED_SLOT(15, value) WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftPitArticleMediator::deactivate() {
+    for (s32 i = 0; i < 1; ++i) {
+        wnPitBow* weapon = FT_PIT_POOL_BOW.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 4; ++i) {
+        wnPitBowArrow* weapon = FT_PIT_POOL_BOWARROW.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnPitParthena* weapon = FT_PIT_POOL_PARTHENA.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftPitArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 1; }
+    case 1: { wnArticleSlotTag tag; return 4; }
+    case 2: { wnArticleSlotTag tag; return 1; }
+    FT_PIT_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftPitActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_PIT_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftPitActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftPitActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftPitArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_PIT_COUNT_ACTIVE(FT_PIT_POOL_BOW, 1)
+    case 1: FT_PIT_COUNT_ACTIVE(FT_PIT_POOL_BOWARROW, 4)
+    case 2: FT_PIT_COUNT_ACTIVE(FT_PIT_POOL_PARTHENA, 1)
+    FT_PIT_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_PIT_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftPitArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_PIT_CAN_GENERATE(FT_PIT_POOL_BOW, 1, 0)
+    case 1: FT_PIT_CAN_GENERATE(FT_PIT_POOL_BOWARROW, 4, 1)
+    case 2: FT_PIT_CAN_GENERATE(FT_PIT_POOL_PARTHENA, 1, 2)
+    FT_PIT_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftPitArticleActivator;
+template <> struct ftPitArticleActivator<wnPitBow> {
+    static bool activate(wnPitBow* weapon, soModuleAccesser* acc) { return ftPit::activeArticle(weapon, acc); }
+};
+template <> struct ftPitArticleActivator<wnPitBowArrow> {
+    static bool activate(wnPitBowArrow* weapon, soModuleAccesser* acc) {
+        u32 etcResId = acc->getResourceModule().getResourceIdAccesser()->getEtcResId();
+        return ftPitTransactor::getInstance()->activeArticle1(weapon, acc, etcResId);
+    }
+};
+template <> struct ftPitArticleActivator<wnPitParthena> {
+    static bool activate(wnPitParthena* weapon, soModuleAccesser* acc) { return ftPit::activeArticle1(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_PIT_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftPitArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftPitArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_PIT_GENERATE(wnPitBow, FT_PIT_POOL_BOW)
+    case 1: FT_PIT_GENERATE(wnPitBowArrow, FT_PIT_POOL_BOWARROW)
+    case 2: FT_PIT_GENERATE(wnPitParthena, FT_PIT_POOL_PARTHENA)
+    FT_PIT_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftPitArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnPitBow&>(*article);
+        return true;
+    }
+    case 1: {
+        wnArticleSlotTag tag;
+        return ftPitTransactor::getInstance()->shootArticle(&dynamic_cast<wnPitBowArrow&>(*article), acc);
+    }
+    case 2: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnPitParthena&>(*article);
+        return true;
+    }
+    FT_PIT_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftPit is done
 void testBuilder() {
