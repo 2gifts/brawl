@@ -1,7 +1,13 @@
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_SNAKE_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/snake/ft_snake_builder.h>
 #include <ft/snake/ft_snake_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
 
 #define FT_BC ftSnakeBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -21,6 +27,535 @@ ftSnake::ftSnake(s32 entryId,
                                          nwMotionInstHeap) {
     // TODO
 }
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Snake, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftSnakeArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftSnakeArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftSnakeArticleKind : wnArticleKindInfo {
+    ftSnakeArticleKind() {
+        kind = 0;
+        subKind = Fighter_Snake;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftSnakeArticleBuildInfo : wnArticleBuildInfo {
+    ftSnakeArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_147F38(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_147F4C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_147F74(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_147F88(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_147F9C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_147FB0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_147FC4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_147FEC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148000(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148014(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148028(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_14803C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftSnakeArticleTraits;
+#define FT_SNAKE_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftSnakeArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftSnakeArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Snake, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_SNAKE_TRAITS(wnSnakeMine, wnSnakeMineData, 0, fn_27_147F38)
+FT_SNAKE_TRAITS(wnSnakeTrenchMortar, wnSnakeTrenchMortarData, 1, fn_27_147F4C)
+FT_SNAKE_TRAITS(wnSnakeRpg7, wnSnakeRpg7Data, 2, fn_27_147F74)
+FT_SNAKE_TRAITS(wnSnakeCypher, wnSnakeCypherData, 3, fn_27_147F88)
+FT_SNAKE_TRAITS(wnSnakeC4, wnSnakeC4Data, 4, fn_27_147F9C)
+FT_SNAKE_TRAITS(wnSnakeC4Switch, wnSnakeC4SwitchData, 5, fn_27_147FB0)
+FT_SNAKE_TRAITS(wnSnakeNikita, wnSnakeNikitaData, 6, fn_27_147FC4)
+FT_SNAKE_TRAITS(wnSnakeLadder, wnSnakeLadderData, 7, fn_27_147FEC)
+FT_SNAKE_TRAITS(wnSnakeRgb6, wnSnakeRgb6Data, 8, fn_27_148000)
+FT_SNAKE_TRAITS(wnSnakeRgb6Sight, wnSnakeRgb6SightData, 9, fn_27_148014)
+FT_SNAKE_TRAITS(wnSnakeRgb6Clip, wnSnakeRgb6ClipData, 10, fn_27_148028)
+FT_SNAKE_TRAITS(wnSnakeRgb6Bullet, wnSnakeRgb6BulletData, 11, fn_27_14803C)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftSnakeArticleTraits<W>::ArticleId, ftSnakeArticleBuildInfo(ftSnakeArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftSnakeArticleTraits<W>::getData()) { }
+
+
+// The two simple articles (the shared generic article) are built from the simple data of the fighter kind.
+struct ftSnakeSimpleBuildInfo : wnSimpleConstructionInfo {
+    ftSnakeSimpleBuildInfo(wnSimpleKindInfo kindArg, void* heap) : wnSimpleConstructionInfo(kindArg, heap) { }
+};
+static wnSimpleData* ftSnakeSimpleData() {
+    ftSnakeArticleDataTag tag;
+    return g_ftCommonDataAccesser.getSimpleData(Fighter_Snake, &tag.m_resourceGroup);
+}
+template <>
+wnArticleHolder<wnSimple>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(12, ftSnakeSimpleBuildInfo(wnSimpleKindInfo(Fighter_Snake), acc->m_enumerationStart->m_heapModule), ftSnakeSimpleData(), false) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnSnakeMine>::~wnArticleHolder();
+template wnArticleHolder<wnSnakeTrenchMortar>::~wnArticleHolder();
+template wnArticleHolder<wnSnakeRpg7>::~wnArticleHolder();
+template wnArticleHolder<wnSnakeCypher>::~wnArticleHolder();
+template wnArticleHolder<wnSnakeC4>::~wnArticleHolder();
+template wnArticleHolder<wnSnakeC4Switch>::~wnArticleHolder();
+template wnArticleHolder<wnSnakeNikita>::~wnArticleHolder();
+template wnArticleHolder<wnSnakeLadder>::~wnArticleHolder();
+template wnArticleHolder<wnSnakeRgb6>::~wnArticleHolder();
+template wnArticleHolder<wnSnakeRgb6Sight>::~wnArticleHolder();
+template wnArticleHolder<wnSnakeRgb6Clip>::~wnArticleHolder();
+template wnArticleHolder<wnSnakeRgb6Bullet>::~wnArticleHolder();
+template wnArticleHolder<wnSimple>::~wnArticleHolder();
+template wnArticleHolder<wnSimple>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftSnakeArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftSnakeArticleMediator, 7>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftSnakeArticleMediator, 7>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftSnakeArticleMediator::~ftSnakeArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftSnakeArticleMediator::getMediateNum() { return 15; }
+void ftSnakeArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Mine, 1 TrenchMortar, 2 Rpg7, 3 Cypher, 4 C4, 5 C4Switch, 6 Nikita, 7 Ladder, 8 Rgb6, 9 Rgb6Sight, 10 Rgb6Clip, 11 Rgb6Bullet, 12 Simple (the rest are unused).
+
+#define FT_SNAKE_POOL_MINE_BASE static_cast<wnArticlePool<wnSnakeMine, 1, ftSnakeTrenchMortarPool>&>(m_pools)
+#define FT_SNAKE_POOL_MINE FT_SNAKE_POOL_MINE_BASE.getSub()
+#define FT_SNAKE_POOL_TRENCHMORTAR_BASE static_cast<wnArticlePool<wnSnakeTrenchMortar, 1, ftSnakeRpg7Pool>&>(m_pools)
+#define FT_SNAKE_POOL_TRENCHMORTAR FT_SNAKE_POOL_TRENCHMORTAR_BASE.getSub()
+#define FT_SNAKE_POOL_RPG7_BASE static_cast<wnArticlePool<wnSnakeRpg7, 1, ftSnakeCypherPool>&>(m_pools)
+#define FT_SNAKE_POOL_RPG7 FT_SNAKE_POOL_RPG7_BASE.getSub()
+#define FT_SNAKE_POOL_CYPHER_BASE static_cast<wnArticlePool<wnSnakeCypher, 1, ftSnakeC4Pool>&>(m_pools)
+#define FT_SNAKE_POOL_CYPHER FT_SNAKE_POOL_CYPHER_BASE.getSub()
+#define FT_SNAKE_POOL_C4_BASE static_cast<wnArticlePool<wnSnakeC4, 1, ftSnakeC4SwitchPool>&>(m_pools)
+#define FT_SNAKE_POOL_C4 FT_SNAKE_POOL_C4_BASE.getSub()
+#define FT_SNAKE_POOL_C4SWITCH_BASE static_cast<wnArticlePool<wnSnakeC4Switch, 1, ftSnakeNikitaPool>&>(m_pools)
+#define FT_SNAKE_POOL_C4SWITCH FT_SNAKE_POOL_C4SWITCH_BASE.getSub()
+#define FT_SNAKE_POOL_NIKITA_BASE static_cast<wnArticlePool<wnSnakeNikita, 1, ftSnakeLadderPool>&>(m_pools)
+#define FT_SNAKE_POOL_NIKITA FT_SNAKE_POOL_NIKITA_BASE.getSub()
+#define FT_SNAKE_POOL_LADDER_BASE static_cast<wnArticlePool<wnSnakeLadder, 1, ftSnakeRgb6Pool>&>(m_pools)
+#define FT_SNAKE_POOL_LADDER FT_SNAKE_POOL_LADDER_BASE.getSub()
+#define FT_SNAKE_POOL_RGB6_BASE static_cast<wnArticlePool<wnSnakeRgb6, 1, ftSnakeRgb6SightPool>&>(m_pools)
+#define FT_SNAKE_POOL_RGB6 FT_SNAKE_POOL_RGB6_BASE.getSub()
+#define FT_SNAKE_POOL_RGB6SIGHT_BASE static_cast<wnArticlePool<wnSnakeRgb6Sight, 1, ftSnakeRgb6ClipPool>&>(m_pools)
+#define FT_SNAKE_POOL_RGB6SIGHT FT_SNAKE_POOL_RGB6SIGHT_BASE.getSub()
+#define FT_SNAKE_POOL_RGB6CLIP_BASE static_cast<wnArticlePool<wnSnakeRgb6Clip, 1, ftSnakeRgb6BulletPool>&>(m_pools)
+#define FT_SNAKE_POOL_RGB6CLIP FT_SNAKE_POOL_RGB6CLIP_BASE.getSub()
+#define FT_SNAKE_POOL_RGB6BULLET_BASE static_cast<wnArticlePool<wnSnakeRgb6Bullet, 1, ftSnakeSimplePool>&>(m_pools)
+#define FT_SNAKE_POOL_RGB6BULLET FT_SNAKE_POOL_RGB6BULLET_BASE.getSub()
+#define FT_SNAKE_POOL_SIMPLE_BASE static_cast<wnArticlePool<wnSimple, 2, soInstancePoolRoot>&>(m_pools)
+#define FT_SNAKE_POOL_SIMPLE FT_SNAKE_POOL_SIMPLE_BASE.getSub()
+
+#define FT_SNAKE_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(15, value) WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftSnakeArticleMediator::deactivate() {
+    for (s32 i = 0; i < 1; ++i) {
+        wnSnakeMine* weapon = FT_SNAKE_POOL_MINE.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnSnakeTrenchMortar* weapon = FT_SNAKE_POOL_TRENCHMORTAR.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnSnakeRpg7* weapon = FT_SNAKE_POOL_RPG7.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnSnakeCypher* weapon = FT_SNAKE_POOL_CYPHER.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnSnakeC4* weapon = FT_SNAKE_POOL_C4.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnSnakeC4Switch* weapon = FT_SNAKE_POOL_C4SWITCH.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnSnakeNikita* weapon = FT_SNAKE_POOL_NIKITA.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnSnakeLadder* weapon = FT_SNAKE_POOL_LADDER.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnSnakeRgb6* weapon = FT_SNAKE_POOL_RGB6.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnSnakeRgb6Sight* weapon = FT_SNAKE_POOL_RGB6SIGHT.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnSnakeRgb6Clip* weapon = FT_SNAKE_POOL_RGB6CLIP.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnSnakeRgb6Bullet* weapon = FT_SNAKE_POOL_RGB6BULLET.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 2; ++i) {
+        wnSimple* weapon = FT_SNAKE_POOL_SIMPLE.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftSnakeArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 1; }
+    case 1: { wnArticleSlotTag tag; return 1; }
+    case 2: { wnArticleSlotTag tag; return 1; }
+    case 3: { wnArticleSlotTag tag; return 1; }
+    case 4: { wnArticleSlotTag tag; return 1; }
+    case 5: { wnArticleSlotTag tag; return 1; }
+    case 6: { wnArticleSlotTag tag; return 1; }
+    case 7: { wnArticleSlotTag tag; return 1; }
+    case 8: { wnArticleSlotTag tag; return 1; }
+    case 9: { wnArticleSlotTag tag; return 1; }
+    case 10: { wnArticleSlotTag tag; return 1; }
+    case 11: { wnArticleSlotTag tag; return 1; }
+    case 12: { wnArticleSlotTag tag; return 2; }
+    WN_ARTICLE_UNUSED_SLOT(13, 0)
+    WN_ARTICLE_UNUSED_SLOT(14, 0)
+    FT_SNAKE_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftSnakeActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_SNAKE_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftSnakeActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftSnakeActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftSnakeArticleMediator::getActiveNum(soModuleAccesser* acc, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_MINE, 1)
+    case 1: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_TRENCHMORTAR, 1)
+    case 2: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_RPG7, 1)
+    case 3: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_CYPHER, 1)
+    case 4: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_C4, 1)
+    case 5: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_C4SWITCH, 1)
+    case 6: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_NIKITA, 1)
+    case 7: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_LADDER, 1)
+    case 8: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_RGB6, 1)
+    case 9: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_RGB6SIGHT, 1)
+    case 10: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_RGB6CLIP, 1)
+    case 11: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_RGB6BULLET, 1)
+    case 12: FT_SNAKE_COUNT_ACTIVE(FT_SNAKE_POOL_SIMPLE, 2)
+    case 13: { wnArticleSlotTag tag; return 2 - acc->getGenerateArticleManageModule().getNum(13); }
+    case 14: { wnArticleSlotTag tag; return 1 - acc->getGenerateArticleManageModule().getNum(14); }
+    FT_SNAKE_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_SNAKE_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftSnakeArticleMediator::isGeneratable(soModuleAccesser* acc, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_MINE, 1, 0)
+    case 1: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_TRENCHMORTAR, 1, 1)
+    case 2: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_RPG7, 1, 2)
+    case 3: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_CYPHER, 1, 3)
+    case 4: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_C4, 1, 4)
+    case 5: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_C4SWITCH, 1, 5)
+    case 6: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_NIKITA, 1, 6)
+    case 7: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_LADDER, 1, 7)
+    case 8: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_RGB6, 1, 8)
+    case 9: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_RGB6SIGHT, 1, 9)
+    case 10: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_RGB6CLIP, 1, 10)
+    case 11: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_RGB6BULLET, 1, 11)
+    case 12: FT_SNAKE_CAN_GENERATE(FT_SNAKE_POOL_SIMPLE, 2, 12)
+    case 13: { wnArticleSlotTag tag; return acc->getGenerateArticleManageModule().getNum(13) < 2; }
+    case 14: { wnArticleSlotTag tag; return acc->getGenerateArticleManageModule().getNum(14) < 1; }
+    FT_SNAKE_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftSnakeArticleActivator;
+template <> struct ftSnakeArticleActivator<wnSnakeMine> {
+    static bool activate(wnSnakeMine* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle(weapon, acc); }
+};
+template <> struct ftSnakeArticleActivator<wnSnakeTrenchMortar> {
+    static bool activate(wnSnakeTrenchMortar* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle1(weapon, acc); }
+};
+template <> struct ftSnakeArticleActivator<wnSnakeRpg7> {
+    static bool activate(wnSnakeRpg7* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle2(weapon, acc); }
+};
+template <> struct ftSnakeArticleActivator<wnSnakeCypher> {
+    static bool activate(wnSnakeCypher* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle3(weapon, acc); }
+};
+template <> struct ftSnakeArticleActivator<wnSnakeC4> {
+    static bool activate(wnSnakeC4* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle4(weapon, acc); }
+};
+template <> struct ftSnakeArticleActivator<wnSnakeC4Switch> {
+    static bool activate(wnSnakeC4Switch* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle5(weapon, acc); }
+};
+template <> struct ftSnakeArticleActivator<wnSnakeNikita> {
+    static bool activate(wnSnakeNikita* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle6(weapon, acc); }
+};
+template <> struct ftSnakeArticleActivator<wnSnakeLadder> {
+    static bool activate(wnSnakeLadder* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle7(weapon, acc); }
+};
+template <> struct ftSnakeArticleActivator<wnSnakeRgb6> {
+    static bool activate(wnSnakeRgb6* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle8(weapon, acc); }
+};
+template <> struct ftSnakeArticleActivator<wnSnakeRgb6Sight> {
+    static bool activate(wnSnakeRgb6Sight* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle9(weapon, acc); }
+};
+template <> struct ftSnakeArticleActivator<wnSnakeRgb6Clip> {
+    static bool activate(wnSnakeRgb6Clip* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle10(weapon, acc); }
+};
+template <> struct ftSnakeArticleActivator<wnSnakeRgb6Bullet> {
+    static bool activate(wnSnakeRgb6Bullet* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle11(weapon, acc); }
+};
+template <> struct ftSnakeArticleActivator<wnSimple> {
+    static bool activate(wnSimple* weapon, soModuleAccesser* acc) { return ftSnake::activeArticle12(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_SNAKE_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftSnakeArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftSnakeArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_SNAKE_GENERATE(wnSnakeMine, FT_SNAKE_POOL_MINE)
+    case 1: FT_SNAKE_GENERATE(wnSnakeTrenchMortar, FT_SNAKE_POOL_TRENCHMORTAR)
+    case 2: FT_SNAKE_GENERATE(wnSnakeRpg7, FT_SNAKE_POOL_RPG7)
+    case 3: FT_SNAKE_GENERATE(wnSnakeCypher, FT_SNAKE_POOL_CYPHER)
+    case 4: FT_SNAKE_GENERATE(wnSnakeC4, FT_SNAKE_POOL_C4)
+    case 5: FT_SNAKE_GENERATE(wnSnakeC4Switch, FT_SNAKE_POOL_C4SWITCH)
+    case 6: FT_SNAKE_GENERATE(wnSnakeNikita, FT_SNAKE_POOL_NIKITA)
+    case 7: FT_SNAKE_GENERATE(wnSnakeLadder, FT_SNAKE_POOL_LADDER)
+    case 8: FT_SNAKE_GENERATE(wnSnakeRgb6, FT_SNAKE_POOL_RGB6)
+    case 9: FT_SNAKE_GENERATE(wnSnakeRgb6Sight, FT_SNAKE_POOL_RGB6SIGHT)
+    case 10: FT_SNAKE_GENERATE(wnSnakeRgb6Clip, FT_SNAKE_POOL_RGB6CLIP)
+    case 11: FT_SNAKE_GENERATE(wnSnakeRgb6Bullet, FT_SNAKE_POOL_RGB6BULLET)
+    case 12: FT_SNAKE_GENERATE(wnSimple, FT_SNAKE_POOL_SIMPLE)
+    case 13: {
+        wnArticleSlotTag tag;
+        if (acc->getGenerateArticleManageModule().getNum(13) >= 2) {
+            return wnGetNullArticle();
+        }
+        BaseItem* item = soArticleMediatorHelper::createItem(0x59, 13, acc->getStageObject().m_taskId);
+        if (item == NULL) {
+            return wnGetNullArticle();
+        }
+        return soArticleMediatorHelper::castArticle(item);
+    }
+    case 14: {
+        wnArticleSlotTag tag;
+        if (acc->getGenerateArticleManageModule().getNum(14) >= 1) {
+            return wnGetNullArticle();
+        }
+        BaseItem* item = soArticleMediatorHelper::createItem(0x53, 14, acc->getStageObject().m_taskId);
+        if (item == NULL) {
+            return wnGetNullArticle();
+        }
+        return soArticleMediatorHelper::castArticle(item);
+    }
+    FT_SNAKE_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftSnakeArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: {
+        wnArticleSlotTag tag;
+        wnSnakeMine& mine = dynamic_cast<wnSnakeMine&>(*article);
+        mine.shoot(acc->getPostureModule().getPos());
+        return true;
+    }
+    case 1: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnSnakeTrenchMortar&>(*article);
+        return true;
+    }
+    case 2: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnSnakeRpg7&>(*article);
+        return true;
+    }
+    case 3: {
+        wnArticleSlotTag tag;
+        return ftSnake::shootArticle(&dynamic_cast<wnSnakeCypher&>(*article), acc);
+    }
+    case 4: {
+        wnArticleSlotTag tag;
+        dynamic_cast<wnSnakeC4&>(*article).shoot();
+        return true;
+    }
+    case 5: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnSnakeC4Switch&>(*article);
+        return true;
+    }
+    case 6: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnSnakeNikita&>(*article);
+        return true;
+    }
+    case 7: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnSnakeLadder&>(*article);
+        return true;
+    }
+    case 8: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnSnakeRgb6&>(*article);
+        return true;
+    }
+    case 9: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnSnakeRgb6Sight&>(*article);
+        return true;
+    }
+    case 10: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnSnakeRgb6Clip&>(*article);
+        return true;
+    }
+    case 11: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnSnakeRgb6Bullet&>(*article);
+        return true;
+    }
+    case 12: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnSimple&>(*article);
+        return true;
+    }
+    case 13: {
+        volatile u8 itemMarker = 0; // MATCH-ONLY: the native case keeps one more marker byte than the article cases
+        wnArticleSlotTag tag;
+        bool flag = false;
+        return ftSnake::shootItem(article, &flag, acc);
+    }
+    case 14: {
+        volatile u8 itemMarker = 0; // MATCH-ONLY: the native case keeps one more marker byte than the article cases
+        wnArticleSlotTag tag;
+        bool flag = false;
+        return ftSnake::shootItem1(article, &flag, acc);
+    }
+    WN_ARTICLE_UNUSED_SLOT(15, true)
+    WN_ARTICLE_UNUSED_SLOT(16, true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftSnake is done
 void testBuilder() {
