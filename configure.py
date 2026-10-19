@@ -2059,6 +2059,11 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_pikachu/wn_pikachu_vortex.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikachu/wn_pikachu_vortex_status_uniq_process.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikachu/ft_pikachu.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikachu/ft_pikachu_kinetic_transactor.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikachu/ft_pikachu_status_uniq_process_quick_attack.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikachu/ft_pikachu_status_uniq_process_skull_bash.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikachu/ft_pikachu_status_uniq_process_thunder.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikachu/ft_pikachu_status_uniq_process_vortex.cpp"),
         ],
     },
     {
