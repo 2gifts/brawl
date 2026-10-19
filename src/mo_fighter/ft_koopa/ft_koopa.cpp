@@ -1,9 +1,17 @@
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_KOOPA_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define FT_TEAM_TYPED_INTERFACE
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/koopa/ft_koopa.h>
 #include <ft/koopa/ft_koopa_extend_param_accesser.h>
+#include <ft/koopa/ft_koopa_transactor.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
 
 #define FT_BC ftKoopaBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -51,6 +59,232 @@ ftKoopa::ftKoopa(s32 entryId,
     processes[15] = &lbl_102_bss_2AC;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 17);
 }
+
+// ---- the fighter overrides ------------------------------------------------------------------------------------------
+// HYPOTHESIS: the works 0x10000040 / 0x11000013 / 0x11000014 hold the state of the breath (its charge and two parameters of
+// the fighter), reset on every start together with the pending-change flags 0x1200003d / 0x1200003e.
+void ftKoopa::onStart(int startKind) {
+    m_moduleAccesser->getWorkManageModule().setInt(-1, 0x10000040);
+    float first = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfa6, 0);
+    m_moduleAccesser->getWorkManageModule().setFloat(first, 0x11000014);
+    float second = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfa8, 0);
+    m_moduleAccesser->getWorkManageModule().setFloat(second, 0x11000013);
+    m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+    m_moduleAccesser->getWorkManageModule().offFlag(0x1200003e);
+    Fighter::onStart(startKind);
+}
+
+// The breath starts through the transactor of the fighter.
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+bool ftKoopa::activeArticle(wnKoopaBreath* weapon, soModuleAccesser* acc) {
+    static ftKoopaTransactor instance;
+    return instance.activeArticle(weapon, acc);
+}
+#pragma pool_data reset
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Koopa, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftKoopaArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftKoopaArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftKoopaArticleKind : wnArticleKindInfo {
+    ftKoopaArticleKind() {
+        kind = 0;
+        subKind = Fighter_Koopa;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftKoopaArticleBuildInfo : wnArticleBuildInfo {
+    ftKoopaArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_1496F0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftKoopaArticleTraits;
+#define FT_KOOPA_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftKoopaArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftKoopaArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Koopa, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_KOOPA_TRAITS(wnKoopaBreath, wnKoopaBreathData, 0, fn_27_1496F0)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftKoopaArticleTraits<W>::ArticleId, ftKoopaArticleBuildInfo(ftKoopaArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftKoopaArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnKoopaBreath>::~wnArticleHolder();
+template wnArticleHolder<wnKoopaBreath>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftKoopaArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftKoopaArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftKoopaArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftKoopaArticleMediator::~ftKoopaArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftKoopaArticleMediator::getMediateNum() { return 1; }
+void ftKoopaArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Breath (the rest are unused).
+
+#define FT_KOOPA_POOL_BREATH_BASE static_cast<wnArticlePool<wnKoopaBreath, 6, soInstancePoolRoot>&>(m_pools)
+#define FT_KOOPA_POOL_BREATH FT_KOOPA_POOL_BREATH_BASE.getSub()
+
+#define FT_KOOPA_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(1, value) WN_ARTICLE_UNUSED_SLOT(2, value) WN_ARTICLE_UNUSED_SLOT(3, value) \
+    WN_ARTICLE_UNUSED_SLOT(4, value) WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) \
+    WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) \
+    WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) \
+    WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) \
+    WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftKoopaArticleMediator::deactivate() {
+    for (s32 i = 0; i < 6; ++i) {
+        wnKoopaBreath* weapon = FT_KOOPA_POOL_BREATH.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftKoopaArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 6; }
+    FT_KOOPA_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftKoopaActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_KOOPA_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftKoopaActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftKoopaActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftKoopaArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_KOOPA_COUNT_ACTIVE(FT_KOOPA_POOL_BREATH, 6)
+    FT_KOOPA_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_KOOPA_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftKoopaArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_KOOPA_CAN_GENERATE(FT_KOOPA_POOL_BREATH, 6, 0)
+    FT_KOOPA_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftKoopaArticleActivator;
+template <> struct ftKoopaArticleActivator<wnKoopaBreath> {
+    static bool activate(wnKoopaBreath* weapon, soModuleAccesser* acc) { return ftKoopa::activeArticle(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_KOOPA_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftKoopaArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftKoopaArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_KOOPA_GENERATE(wnKoopaBreath, FT_KOOPA_POOL_BREATH)
+    FT_KOOPA_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftKoopaArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: { wnArticleSlotTag tag; (void)dynamic_cast<wnKoopaBreath&>(*article); return true; }
+    FT_KOOPA_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftKoopa is done
 void testBuilder() {
