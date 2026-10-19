@@ -14,16 +14,13 @@
 #include <so/so_slow.h>
 #include <so/so_value_accesser.h>
 #include <so/stageobject.h>
+#include <wn/wario/wn_wario_bike.h>
 #include <types.h>
 
 // HYPOTHESIS: the part of ftChangeSucceedWork the dummy fighter activation needs (only this call is recovered).
 struct ftChangeSucceedWork {
     void activateDummyFighter(Vec3f* pos, Vec2f* speed, float* unk1, float* unk2, int flags, float scale, float lr);
 };
-
-// HYPOTHESIS: wnWarioBike::activate of the ft_wario module, the bike is created next to the rider; the arguments are
-// the rider's facing, the bike, the owner's task id, the bike's parameter, the model's resource and the team.
-extern "C" void fn_110_11C60(float lr, StageObject* bike, int ownerTaskId, int param, int resource, int team, Vec3f* pos);
 
 // HYPOTHESIS: two (0xFF, flag) pairs that the unit's static initializer fills (nothing in this unit reads them).
 struct ftWarioCommonPair {
@@ -42,7 +39,7 @@ enum {
     Work_Int_WaftCharge = 0x10000041,
     Work_Int_WaftLevel = 0x10000042,
     Work_Int_BikeFrames = 0x10000043,
-    Work_Int_BikeParam = 0x10000044,
+    Work_Int_BikeRiderTaskId = 0x10000044,
     Work_Flag_WaftFull = 0x1200003F,
     Work_Flag_Unk40 = 0x12000040,
     Work_Flag_Unk41 = 0x12000041,
@@ -263,7 +260,7 @@ bool ftWarioCommon::notifyEventLink(ftWarioLinkEventArgs* args, soModuleAccesser
 
 // The bike is created next to the rider and links to it (link 6).
 bool ftWarioCommon::activeArticle(StageObject* bike, soModuleAccesser* acc) {
-    int bikeParam = acc->getWorkManageModule().getInt(Work_Int_BikeParam);
+    int riderTaskId = acc->getWorkManageModule().getInt(Work_Int_BikeRiderTaskId);
     soPostureModule& posture = acc->getPostureModule();
     soTeamModule& team = acc->getTeamModule();
     soResourceModule& resource = acc->getResourceModule();
@@ -272,7 +269,7 @@ bool ftWarioCommon::activeArticle(StageObject* bike, soModuleAccesser* acc) {
     Vec3f pos = posture.getPos();
     int teamNo = team.getTeam()->getNo();
     u32 etcResId = resource.getResourceIdAccesser()->getEtcResId();
-    fn_110_11C60(lr, bike, ownerTaskId, bikeParam, etcResId, teamNo, &pos);
+    static_cast<wnWarioBike*>(bike)->activate(ownerTaskId, riderTaskId, etcResId, teamNo, &pos, lr);
     acc->getLinkModule().link(6, bike->m_taskId);
     return true;
 }

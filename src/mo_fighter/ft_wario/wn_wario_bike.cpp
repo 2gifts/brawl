@@ -1,11 +1,17 @@
+// MATCH-ONLY: retain native vector assignment calls and aggregate word copies.
+#define MT_VEC2F_PLAIN_BASE
+#define MT_VEC2F_ASSIGN_NOINLINE
 #include <wn/wario/wn_wario_bike_kinetic_transactor.h>
 #include <wn/wario/wn_wario_bike.h>
 #include <so/stop/so_stop_module_impl.h>
 #include <ft/ft_entry.h>
+#include <it/item.h>
 #include <gf/gf_task_scheduler.h>
 #include <so/damage/so_damage_util_actor.h>
 #include <so/so_external_value_accesser.h>
 #include <wn/wn_kinetic_transactor.h>
+#include <wn/wn_activate_desc.h>
+#include <wn/wario/wn_wario_bike_link_event.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 
@@ -261,146 +267,139 @@ bool wnWarioBike::notifyEventCollisionAttackCheck(u32 flags) {
     return false;
 }
 
+// Rider events govern release, throws, and the transfer of the bike's speed.
 void wnWarioBike::notifyEventLink(soLinkEventArgs* eventInfo,
                                   soModuleAccesser* accesser,
                                   StageObject* other, int unk4) {
+    soWorkManageModule& work = accesser->getWorkManageModule();
+    soKineticModule& kinetic = accesser->getKineticModule();
+    soPostureModule& posture = accesser->getPostureModule();
+    soStatusModule& status = accesser->getStatusModule();
     soLinkModule& link = accesser->getLinkModule();
-    bool bikeParent = false;
-    if (other->getCategory() == gfTask::Category_Fighter) {
-        int kind = other->soGetSubKind();
-        if (kind == Fighter_Wario || kind == Fighter_WarioMan) {
-            bikeParent = link.isLink(3) && link.getParentTaskId(3) == other->getId();
-            if (bikeParent) {
-                switch (eventInfo->m_eventKind) {
-                case 0:
-                    accesser->getWorkManageModule().onFlag(0x2200000B);
-                    break;
-                case 60:
-                    link.setModelConstraintAttribute(3, false);
-                    if (link.isModelConstraint()) {
-                        link.removeModelConstraint(true);
-                        accesser->getStatusModule().changeStatusRequest(13, accesser);
-                    }
-                    break;
-                case 1109: {
-                    soKineticEnergyNormal* normal =
-                        dynamic_cast<soKineticEnergyNormal*>(
-                            accesser->getKineticModule().getEnergy(0));
-                    wnKineticEnergyGravity* gravity =
-                        dynamic_cast<wnKineticEnergyGravity*>(
-                            accesser->getKineticModule().getEnergy(1));
-                    u8* eventBytes = reinterpret_cast<u8*>(eventInfo);
-                    Vec2f normalSpeed(
-                        *reinterpret_cast<float*>(eventBytes + 8), 0.0f);
-                    Vec2f::copy(normal->m_speed, normalSpeed);
-                    gravity->m_speedY = *reinterpret_cast<float*>(eventBytes + 0xC);
-
-                    Vec3f parentPosition =
-                        link.getParentModelNodeGlobalPosition(3, static_cast<u32>(0), false);
-                    accesser->getPostureModule().setPos(&parentPosition);
-                    accesser->getPostureModule().setLr(link.getParentLr(3));
-                    accesser->getPostureModule().updateRotYLr();
+    if (other->m_taskCategory == gfTask::Category_Fighter &&
+        (other->soGetSubKind() == Fighter_Wario || other->soGetSubKind() == Fighter_WarioMan) &&
+        link.isLink(3)) {
+        u32 parentTaskId;
+        u32 taskId = other->m_taskId;
+        parentTaskId = link.getParentTaskId(3);
+        if (parentTaskId == taskId) {
+            switch (eventInfo->m_eventKind) {
+            case 1109: {
+                soKineticEnergyNormal& normal = dynamic_cast<soKineticEnergyNormal&>(*kinetic.getEnergy(0));
+                wnKineticEnergyGravity& gravity = dynamic_cast<wnKineticEnergyGravity&>(*kinetic.getEnergy(1));
+                const Vec2f& speed = static_cast<ftWarioBikeSpeedEvent*>(eventInfo)->speed;
+                normal.m_speed = Vec2f(speed.m_x, 0.0f);
+                gravity.m_speedY = speed.m_y;
+                Vec3f parentPosition = link.getParentModelNodeGlobalPosition(3, static_cast<u32>(0), false);
+                posture.setPos(&parentPosition);
+                posture.setLr(link.getParentLr(3));
+                posture.updateRotYLr();
+                link.removeModelConstraint(true);
+                link.setModelConstraintAttribute(3, true);
+                link.setAttribute(3, static_cast<soLinkConnection::Attribute>(3), false);
+                gfTaskScheduler::getInstance()->changeTaskPriorityRequest(m_taskId, 5);
+                accesser->getWorkManageModule().onFlag(0x12000002);
+                work.onFlag(0x22000000);
+                status.changeStatusRequest(2, accesser);
+                return;
+            }
+            case 1110:
+                status.changeStatusRequest(9, accesser);
+                return;
+            case 1111:
+                static_cast<ftWarioBikeSpeedEvent*>(eventInfo)->speed =
+                    kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1));
+                if (accesser->getSituationModule().getKind() == Situation_Ground)
+                    status.changeStatusRequest(10, accesser);
+                else
+                    status.changeStatusRequest(13, accesser);
+                return;
+            case 1112:
+                static_cast<ftWarioBikeSpeedEvent*>(eventInfo)->speed =
+                    kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1));
+                return;
+            case 1114: {
+                if (link.isModelConstraint()) link.removeModelConstraint(true);
+                soKineticModule& releaseKinetic = accesser->getKineticModule();
+                soKineticEnergyNormal& normal = dynamic_cast<soKineticEnergyNormal&>(*releaseKinetic.getEnergy(0));
+                // HYPOTHESIS: this parameter is the multiplier for the release velocity.
+                Vec2f speed = static_cast<ftWarioBikeSpeedEvent*>(eventInfo)->speed * m_param->unk90;
+                normal.m_speed = speed;
+                normal.enable();
+                accesser->getKineticModule().unableEnergy(1);
+                status.changeStatusRequest(13, accesser);
+                return;
+            }
+            case 1113:
+                status.changeStatusRequest(11, accesser);
+                return;
+            case 1115:
+                status.changeStatusRequest(14, accesser);
+                return;
+            case 60:
+                link.setModelConstraintAttribute(3, false);
+                if (link.isModelConstraint()) {
                     link.removeModelConstraint(true);
-                    link.setModelConstraintAttribute(3, true);
-                    link.setAttribute(
-                        3, static_cast<soLinkConnection::Attribute>(3), false);
-
-                    gfTaskScheduler::getInstance()->changeTaskPriorityRequest(
-                        m_taskId, 5);
-                    accesser->getWorkManageModule().onFlag(0x12000002);
-                    accesser->getWorkManageModule().onFlag(0x22000000);
-                    accesser->getStatusModule().changeStatusRequest(2, accesser);
-                    break;
+                    status.changeStatusRequest(13, accesser);
                 }
-                case 1110:
-                    accesser->getStatusModule().changeStatusRequest(9, accesser);
-                    break;
-                case 1111: {
-                    Vec2f speed = accesser->getKineticModule().getSumSpeed(
-                        soKineticEnergy::AttributeFlag(1));
-                    Vec2f::copy(*reinterpret_cast<Vec2f*>(reinterpret_cast<u8*>(eventInfo) + 8), speed);
-                    if (accesser->getSituationModule().isSituationChanged())
-                        accesser->getStatusModule().changeStatusRequest(13, accesser);
-                    else
-                        accesser->getStatusModule().changeStatusRequest(10, accesser);
-                    break;
-                }
-                case 1112: {
-                    Vec2f speed = accesser->getKineticModule().getSumSpeed(
-                        soKineticEnergy::AttributeFlag(1));
-                    Vec2f::copy(*reinterpret_cast<Vec2f*>(reinterpret_cast<u8*>(eventInfo) + 8), speed);
-                    break;
-                }
-                case 1113:
-                    accesser->getStatusModule().changeStatusRequest(11, accesser);
-                    break;
-                case 1114: {
-                    if (link.isModelConstraint())
-                        link.removeModelConstraint(true);
-
-                    soKineticEnergyNormal* normal =
-                        dynamic_cast<soKineticEnergyNormal*>(
-                            accesser->getKineticModule().getEnergy(0));
-                    float scale = m_param->unk90;
-                    Vec2f speed;
-                    speed.m_x = *reinterpret_cast<float*>(
-                        reinterpret_cast<u8*>(eventInfo) + 8) * scale;
-                    speed.m_y = *reinterpret_cast<float*>(
-                        reinterpret_cast<u8*>(eventInfo) + 0xC) * scale;
-                    Vec2f::copy(normal->m_speed, speed);
-                    // HYPOTHESIS: native sets the high bit of energy byte +5;
-                    // the corresponding base-class state has no named field.
-                    reinterpret_cast<u8*>(normal)[5] |= 0x80;
-                    accesser->getKineticModule().getEnergy(1);
-                    accesser->getStatusModule().changeStatusRequest(13, accesser);
-                    break;
-                }
-                case 1115:
-                    accesser->getStatusModule().changeStatusRequest(14, accesser);
-                    break;
-                default:
-                    break;
-                }
+                break;
+            case 0:
+                work.onFlag(0x2200000B);
+                break;
+            }
+            goto baseEvent;
+        }
+    }
+    if (link.isLink(5)) {
+        u32 parentTaskId;
+        u32 taskId = other->m_taskId;
+        parentTaskId = link.getParentTaskId(5);
+        if (parentTaskId == taskId) {
+            switch (eventInfo->m_eventKind) {
+            case 0:
+                work.onFlag(0x2200000B);
+                break;
+            }
+            goto baseEvent;
+        }
+    }
+    switch (eventInfo->m_eventKind) {
+    case StageObject::Link::Event_Touch_Item:
+        if (link.isLinked(6)) {
+            StageObject* item = static_cast<soLinkTouchItemEventArgs*>(eventInfo)->m_item;
+            switch (item->soGetSubKind()) {
+            case 5:
+            case 15:
+                accesser->getLinkModule().sendEventParents(3, *eventInfo);
+                break;
             }
         }
+        break;
     }
-
-    // The secondary path handles events attached through link index 5.
-    if (!bikeParent && link.isLink(5) && link.getParentTaskId(5) == other->getId()) {
-        if (eventInfo->m_eventKind == 0) {
-            accesser->getWorkManageModule().onFlag(0x2200000B);
-        } else if (eventInfo->m_eventKind == StageObject::Link::Event_Touch_Item &&
-                   link.isLinked(6)) {
-            StageObject* linked = *reinterpret_cast<StageObject**>(
-                reinterpret_cast<u8*>(eventInfo) + 8);
-            int linkedKind = linked->soGetSubKind();
-            if (linkedKind == 5 || linkedKind == 15)
-                link.sendEventParents(3, *eventInfo);
-        }
-    }
-
+baseEvent:
     Weapon::notifyEventLink(eventInfo, accesser, other, unk4);
 }
 
 void wnWarioBike::notifyEventCollisionAttack(float power, soCollisionLog* log,
                                              soModuleAccesser* accesser) {
     gfTask* task = gfTaskScheduler::getInstance()->getTaskById(
-        log->m_taskCategory, log->m_taskId);
+        static_cast<gfTask::Category>(reinterpret_cast<const u8*>(log)[0x22]), log->m_taskId);
     soCollisionAttackData* attackData = accesser->getCollisionAttackModule().getData(
         log->m_damageIndex, log->m_isAbsolute);
+    float one = 1.0f;
     int frames = soDamageUtilActor::calcHitStopFrame(
-        power, 1.0, 1.0, accesser, attackData, 0);
+        power, one, one, accesser, attackData, 0);
 
     // Native only substitutes the target reaction frame for the log's
     // reaction-frame case; the task is looked up from the collision log.
     if (*(u8*)((u8*)log + 0x21) == 1 && task != nullptr) {
-        StageObject* target = dynamic_cast<StageObject*>(task);
+        StageObject& target = dynamic_cast<StageObject&>(*task);
         soCollisionHitModule* hit =
-            soExternalValueAccesser::getCollisionHitModule(target);
+            soExternalValueAccesser::getCollisionHitModule(&target);
         if (hit->isReactionFrame()) frames = hit->getReactionFrame();
     }
 
-    soWorkManageModule& work = accesser->getWorkManageModule();
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
     int pending = work.getInt(0x10000007);
     if (pending < frames) pending = frames;
     work.setInt(pending, 0x10000007);
@@ -414,3 +413,52 @@ int fn_110_12900(u8* p) { return *(int*)(p + 0xC0); }
 int fn_110_12908(u8* p) { return *(int*)(p + 0x28); }
 int fn_110_12A84(u8* p) { return *(int*)(p + 0xb8); }
 } // extern "C"
+
+// Link 5 identifies the rider selected by side-special entry. When a bike item
+// is reclaimed, this can be its previous rider rather than its new founder.
+void wnWarioBike::activate(int founderTaskId, int riderTaskId, int resourceId,
+                           int team, Vec3f* position, float lr) {
+    soLinkModule* link;
+    wnActivateDesc desc;
+    desc.founderTaskId = founderTaskId;
+    desc.resourceId = resourceId;
+    desc.unk8 = resourceId;
+    desc.unkC = resourceId;
+    desc.unk10 = -1;
+    desc.unk14 = -1;
+    desc.unk18 = 0;
+    desc.unk1C = 0;
+    __memcpy(&desc.pos, position, sizeof(Vec3f));
+    desc.lr = lr;
+    desc.team = team;
+    desc.life = 0;
+    desc.unk38 = 2;
+    desc.unk3C = 0x80;
+    desc.unk40 = 0;
+    desc.unk48 = 0;
+    desc.flagsHighPair = 3;
+    desc.flagsMidPair = 0;
+    desc.flagsBit3 = 1;
+    desc.flagsLow = 0;
+    desc.unk4DHigh = 0;
+    desc.flag4DBit7 = true;
+    desc.unk44 = 0x50;
+    Weapon::activate(&desc);
+
+    link = &m_moduleAccesser->getLinkModule();
+    link->setAttribute(3, static_cast<soLinkConnection::Attribute>(3), false);
+    link->setAttribute(3, soLinkConnection::Attribute_Reference_Parent_Unknown_4, true);
+    link->setAttribute(3, soLinkConnection::Attribute_Reference_Parent_Stop, true);
+    link->setAttribute(3, soLinkConnection::Attribute_Reference_Parent_Shake, true);
+    link->setAttribute(3, static_cast<soLinkConnection::Attribute>(15), true);
+    m_moduleAccesser->getWorkManageModule().onFlag(0x12000000);
+    m_moduleAccesser->getWorkManageModule().setInt(resourceId, 0x10000006);
+    m_moduleAccesser->getWorkManageModule().setInt(*static_cast<const int*>(m_data) + 1, 0x10000005);
+    m_moduleAccesser->getKineticModule().unableEnergyAll();
+
+    ftWarioBikeTaskEvent event(0x45C, m_taskId);
+    link->link(5, riderTaskId);
+    link->sendEventParents(5, event);
+    m_moduleAccesser->getDamageModule().setNoReactionModePerfect(true);
+    m_moduleAccesser->getGroundModule().setEventToGround(true, 0);
+}

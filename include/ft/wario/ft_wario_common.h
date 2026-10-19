@@ -23,7 +23,7 @@ struct ftWarioLinkEventArgs : public soLinkEventArgs {
 class ftWarioCommon {
 public:
     // LA-Basic: 0x40 a countdown, 0x41 the Waft charge in frames, 0x42 its level (0..3), 0x43 the frames since the bike was
-    // ridden (starts at the remount cooldown), 0x44 the bike's parameter; LA-Flag: 0x3f the gauge is full, 0x40/0x41 see below
+    // ridden (starts at the remount cooldown), 0x44 the selected rider's task ID; LA-Flag: 0x3f the gauge is full, 0x40/0x41 see below
     ftWarioCommon() { }
     ~ftWarioCommon() { }
 
