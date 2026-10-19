@@ -87,7 +87,7 @@ __dt__84soWorkManageModuleBuilder<55soWorkManageModuleBuildConfig<22soWorkManage
 __dt__86soVisibilityModuleBuilder<57soVisibilityModuleBuildConfig<22soVisibilityModuleImpl,2>>Fv = .text:0x00004114; // type:function size:0x5C
 fn_103_4170 = .text:0x00004170; // type:function size:0x6C
 fn_103_41DC = .text:0x000041DC; // type:function size:0x60
-__dt__33wnArticleHolder<14wnPeachKinopio>Fv = .text:0x0000423C; // type:function size:0x60 scope:weak
+fn_103_423C = .text:0x0000423C; // type:function size:0x60 scope:weak
 fn_103_429C = .text:0x0000429C; // type:function size:0x5C
 fn_103_42F8 = .text:0x000042F8; // type:function size:0x84
 fn_103_437C = .text:0x0000437C; // type:function size:0x8C
