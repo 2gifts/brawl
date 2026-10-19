@@ -57,23 +57,28 @@ void ftPikachuStatusUniqProcessSpecialSkullBashHold::initStatus(soModuleAccesser
     }
 }
 
+// MATCH-ONLY: the fighter units are built without inlining of the nw4r FSelect asm helper.
+static inline float clampf(register float value, register float low, register float high) {
+    register float difference;
+    register float bounded;
+    register float result;
+    difference = value - low;
+    asm { fsel bounded, difference, value, low }
+    difference = bounded - high;
+    asm { fsel result, difference, high, bounded }
+    return result;
+}
+
 void ftPikachuStatusUniqProcessSpecialSkullBashWeak::initStatus(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     int longest = (int)soValueAccesser::getConstantFloat(moduleAccesser, 0xfa6, 0);
     int frames = work.getInt(ftPikachuWork::SkullBash_Frames);
     int damage = soValueAccesser::getConstantInt(moduleAccesser, 0x5dc1, 0);
-    register float ratio = (float)frames / (float)longest;
-    register float one = 1.0f;
-    register float zero = 0.0f;
-    register float fromLow = ratio - zero;
-    register float lowBounded;
-    // MATCH-ONLY: the fighter units are built without inlining of the nw4r FSelect asm helper.
-    asm { fsel lowBounded, fromLow, ratio, zero }
-    register float fromHigh = lowBounded - one;
-    register float clamped;
-    asm { fsel clamped, fromHigh, one, lowBounded }
-    work.setFloat(clamped, ftPikachuWork::SkullBash_ChargeRatio);
-    work.setInt((int)((float)damage * clamped), ftPikachuWork::SkullBash_ReleaseDamage);
+    float ratio = (float)frames / (float)longest;
+    ratio = clampf(ratio, 0.0f, 1.0f);
+    work.setFloat(ratio, ftPikachuWork::SkullBash_ChargeRatio);
+    int released = (int)((float)damage * ratio);
+    work.setInt(released, ftPikachuWork::SkullBash_ReleaseDamage);
 }
 
 void ftPikachuStatusUniqProcessSpecialSkullBashAttack::initStatus(soModuleAccesser* moduleAccesser) {

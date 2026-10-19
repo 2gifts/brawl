@@ -25,22 +25,8 @@ int soValueAccesser::getValueVariation() { return g_soValueVariation; }
 #define FT_BC ftPikachuBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
-// HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt).
 extern "C" {
 extern soStatusUniqProcess lbl_27_bss_7C64;
-extern soStatusUniqProcess lbl_98_bss_25C;
-extern soStatusUniqProcess lbl_98_bss_22C;
-extern soStatusUniqProcess lbl_98_bss_2AC;
-extern soStatusUniqProcess lbl_98_bss_2CC;
-extern soStatusUniqProcess lbl_98_bss_23C;
-extern soStatusUniqProcess lbl_98_bss_24C;
-extern soStatusUniqProcess lbl_98_bss_26C;
-extern soStatusUniqProcess lbl_98_bss_27C;
-extern soStatusUniqProcess lbl_98_bss_28C;
-extern soStatusUniqProcess lbl_98_bss_29C;
-extern soStatusUniqProcess lbl_98_bss_2BC;
-extern soStatusUniqProcess lbl_98_bss_2DC;
-extern soStatusUniqProcess lbl_98_bss_2EC;
 }
 
 ftPikachuExtendParamAccesser g_ftPikachuExtendParamAccesser;
@@ -60,19 +46,19 @@ ftPikachu::ftPikachu(s32 entryId,
     // Register the status processes in action order.
     soStatusUniqProcess* processes[14];
     processes[0] = &lbl_27_bss_7C64;
-    processes[1] = &lbl_98_bss_25C;
-    processes[2] = &lbl_98_bss_22C;
-    processes[3] = &lbl_98_bss_2AC;
-    processes[4] = &lbl_98_bss_2CC;
-    processes[5] = &lbl_98_bss_23C;
-    processes[6] = &lbl_98_bss_24C;
-    processes[7] = &lbl_98_bss_26C;
-    processes[8] = &lbl_98_bss_27C;
-    processes[9] = &lbl_98_bss_28C;
-    processes[10] = &lbl_98_bss_29C;
-    processes[11] = &lbl_98_bss_2BC;
-    processes[12] = &lbl_98_bss_2DC;
-    processes[13] = &lbl_98_bss_2EC;
+    processes[1] = &g_ftPikachuStatusUniqProcessSpecialSkullBash;
+    processes[2] = &g_ftPikachuStatusUniqProcessSpecialQuickAttackStart;
+    processes[3] = &g_ftPikachuStatusUniqProcessSpecialThunder;
+    processes[4] = &g_ftPikachuStatusUniqProcessSpecialVortexStart;
+    processes[5] = &g_ftPikachuStatusUniqProcessSpecialQuickAttackWarp;
+    processes[6] = &g_ftPikachuStatusUniqProcessSpecialQuickAttackEnd;
+    processes[7] = &g_ftPikachuStatusUniqProcessSpecialSkullBashHold;
+    processes[8] = &g_ftPikachuStatusUniqProcessSpecialSkullBashWeak;
+    processes[9] = &g_ftPikachuStatusUniqProcessSpecialSkullBashAttack;
+    processes[10] = &g_ftPikachuStatusUniqProcessSpecialSkullBashEnd;
+    processes[11] = &g_ftPikachuStatusUniqProcessSpecialThunderHit;
+    processes[12] = &g_ftPikachuStatusUniqProcessSpecialVortexAttack;
+    processes[13] = &g_ftPikachuStatusUniqProcessSpecialVortexEnd;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 14);
 }
 
