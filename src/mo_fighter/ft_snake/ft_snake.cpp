@@ -1,3 +1,6 @@
+// MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
+#define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
+#define FT_NOINLINE_SEARCH_BUILDER
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_SNAKE_ARTICLE_POOLS
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
@@ -11,9 +14,17 @@
 #include <so/team/so_team.h>
 #include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
+#include <mt/mt_prng.h>
 
 #define FT_BC ftSnakeBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
+
+extern soStatusUniqProcess g_ftSnakeStatusUniqProcessCypherHang;
+extern soStatusUniqProcess g_ftSnakeStatusUniqProcessNikitaOperation;
+extern soStatusUniqProcess g_ftSnakeStatusUniqProcessGrenade;
+extern soStatusUniqProcess g_ftSnakeStatusUniqProcessFinalEntry;
+extern soStatusUniqProcess g_ftSnakeStatusUniqProcessFinalSet;
+extern soStatusUniqProcess g_ftSnakeStatusUniqProcessFinalEnd;
 
 ftSnakeExtendParamAccesser g_ftSnakeExtendParamAccesser;
 
@@ -27,8 +38,27 @@ ftSnake::ftSnake(s32 entryId,
                                          Fighter_Snake,
                                          instHeap,
                                          nwModelInstHeap,
-                                         nwMotionInstHeap) {
-    // TODO
+                                         nwMotionInstHeap),
+    m_data(g_ftCommonDataAccesser.getData(Fighter_Snake)) {
+    // Register the status processes in action order; entries without a process stay empty.
+    soStatusUniqProcess* processes[33] = {0};
+    processes[5] = &g_ftSnakeStatusUniqProcessCypherHang;
+    processes[13] = &g_ftSnakeStatusUniqProcessNikitaOperation;
+    processes[16] = &g_ftSnakeStatusUniqProcessGrenade;
+    processes[17] = &g_ftSnakeStatusUniqProcessGrenade;
+    processes[18] = &g_ftSnakeStatusUniqProcessGrenade;
+    processes[19] = &g_ftSnakeStatusUniqProcessGrenade;
+    processes[20] = &g_ftSnakeStatusUniqProcessGrenade;
+    processes[21] = &g_ftSnakeStatusUniqProcessGrenade;
+    processes[22] = &g_ftSnakeStatusUniqProcessGrenade;
+    processes[23] = &g_ftSnakeStatusUniqProcessGrenade;
+    processes[24] = &g_ftSnakeStatusUniqProcessGrenade;
+    processes[25] = &g_ftSnakeStatusUniqProcessGrenade;
+    processes[26] = &g_ftSnakeStatusUniqProcessGrenade;
+    processes[30] = &g_ftSnakeStatusUniqProcessFinalEntry;
+    processes[31] = &g_ftSnakeStatusUniqProcessFinalSet;
+    processes[32] = &g_ftSnakeStatusUniqProcessFinalEnd;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 33);
 }
 
 // ---- the fighter overrides ------------------------------------------------------------------------------------------
@@ -116,6 +146,43 @@ void ftSnake::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* modu
         break;
     }
     Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+
+// One entry of the table of the eating sounds in the common data of the fighter (the table ends with the id -1).
+// HYPOTHESIS: the weights add up to one; the entry whose running sum reaches the random number is played.
+struct ftSnakeEatSoundEntry {
+    u32 m_soundId;
+    float m_weight;
+};
+
+void ftSnake::playEatSE() {
+    int i = 0;
+    float roll = randf();
+    float sum = 0.0f;
+    ftSnakeEatSoundEntry* table;
+    u32 id;
+    for (; (table = static_cast<ftSnakeEatSoundEntry*>(m_data->extendParam[4]), id = table[i].m_soundId) != 0xFFFFFFFF; i++) {
+        sum += table[i].m_weight;
+        if (roll <= sum) {
+            m_moduleAccesser->getSoundModule().playSE(static_cast<SndID>(id), true, false, 0);
+            break;
+        }
+    }
+}
+
+// The camera photo hides the sight of the grenade launcher while the picture is taken and shows it again afterwards.
+void ftSnake::photoMoved() {
+    m_moduleAccesser->getVisibilityModule().setWhole(0);
+    if (m_moduleAccesser->getGenerateArticleManageModule().isExist(9)) {
+        m_moduleAccesser->getGenerateArticleManageModule().setVisibilityWhole(9, 0, 0);
+    }
+}
+
+void ftSnake::photoExit() {
+    m_moduleAccesser->getVisibilityModule().setWhole(1);
+    if (m_moduleAccesser->getGenerateArticleManageModule().isExist(9)) {
+        m_moduleAccesser->getGenerateArticleManageModule().setVisibilityWhole(9, 1, 0);
+    }
 }
 
 // The trench mortar shell starts at the stage object of the fighter with its team and facing.
