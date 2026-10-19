@@ -151,10 +151,7 @@ bool ftGameWatch::activeArticle1(wnGameWatchRescue* weapon, soModuleAccesser* ac
     Vec3f position = acc->getPostureModule().getPos();
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = fighter.m_taskId;
-    float color = fighter.getOwner()->getFighterColor();
-    int team = fighter.getOwner()->getTeam();
-    int resourceId = resources.getResourceIdAccesser()->getMdlResId();
-    weapon->activate(founderTaskId, resourceId, team, position, color);
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getMdlResId(), fighter.getOwner()->getTeam(), position, fighter.getOwner()->getFighterColor());
     return true;
 }
 
@@ -163,10 +160,7 @@ bool ftGameWatch::activeArticle2(wnGameWatchParachute* weapon, soModuleAccesser*
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = fighter.m_taskId;
-    float color = fighter.getOwner()->getFighterColor();
-    int team = fighter.getOwner()->getTeam();
-    int resourceId = resources.getResourceIdAccesser()->getMdlResId();
-    weapon->activate(founderTaskId, resourceId, team, color);
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getMdlResId(), fighter.getOwner()->getTeam(), fighter.getOwner()->getFighterColor());
     return true;
 }
 
@@ -177,12 +171,7 @@ bool ftGameWatch::activeArticle3(wnGameWatchPanel* weapon, soModuleAccesser* acc
     soPostureModule& posture = acc->getPostureModule();
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = fighter.m_taskId;
-    float color = fighter.getOwner()->getFighterColor();
-    int selector = work.getInt(0x10000043);
-    float lr = posture.getLr();
-    int team = fighter.getOwner()->getTeam();
-    int resourceId = resources.getResourceIdAccesser()->getMdlResId();
-    weapon->activate(founderTaskId, resourceId, team, lr, selector, color);
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getMdlResId(), fighter.getOwner()->getTeam(), posture.getLr(), work.getInt(0x10000043), fighter.getOwner()->getFighterColor());
     return true;
 }
 
@@ -191,10 +180,7 @@ bool ftGameWatch::activeArticle4(wnGameWatchOil* weapon, soModuleAccesser* acc) 
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = fighter.m_taskId;
-    float color = fighter.getOwner()->getFighterColor();
-    int team = fighter.getOwner()->getTeam();
-    int resourceId = resources.getResourceIdAccesser()->getMdlResId();
-    weapon->activate(founderTaskId, resourceId, team, color);
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getMdlResId(), fighter.getOwner()->getTeam(), fighter.getOwner()->getFighterColor());
     return true;
 }
 
@@ -204,13 +190,7 @@ bool ftGameWatch::activeArticle5(wnGameWatchOctopus* weapon, soModuleAccesser* a
     soPostureModule& posture = acc->getPostureModule();
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = fighter.m_taskId;
-    float color = fighter.getOwner()->getFighterColor();
-    float unkConstant = soValueAccesser::getConstantFloat(acc, 0xdb2, 0);
-    float lr = posture.getLr();
-    Vec3f position = posture.getPos();
-    int team = fighter.getOwner()->getTeam();
-    int resourceId = resources.getResourceIdAccesser()->getMdlResId();
-    weapon->activate(founderTaskId, resourceId, team, position, lr, unkConstant, color);
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getMdlResId(), fighter.getOwner()->getTeam(), posture.getPos(), posture.getLr(), soValueAccesser::getConstantFloat(acc, 0xdb2, 0), fighter.getOwner()->getFighterColor());
     return true;
 }
 
@@ -220,11 +200,7 @@ bool ftGameWatch::activeArticle6(wnGameWatchNormalWeapon* weapon, soModuleAccess
     soWorkManageModule& work = acc->getWorkManageModule();
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = fighter.m_taskId;
-    float color = fighter.getOwner()->getFighterColor();
-    int selector = work.getInt(0x10000045);
-    int team = fighter.getOwner()->getTeam();
-    int resourceId = resources.getResourceIdAccesser()->getMdlResId();
-    weapon->activate(founderTaskId, resourceId, team, selector, color);
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getMdlResId(), fighter.getOwner()->getTeam(), work.getInt(0x10000045), fighter.getOwner()->getFighterColor());
     return true;
 }
 

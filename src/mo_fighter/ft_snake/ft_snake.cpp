@@ -37,9 +37,7 @@ bool ftSnake::activeArticle1(wnSnakeTrenchMortar* weapon, soModuleAccesser* acc)
     int founderTaskId = acc->getStageObject().m_taskId;
     soResourceModule& resources = acc->getResourceModule();
     float lr = acc->getPostureModule().getLr();
-    int team = fighter.getOwner()->getTeam();
-    int etcResId = resources.getResourceIdAccesser()->getEtcResId();
-    weapon->activate(etcResId, team, lr, founderTaskId);
+    weapon->activate(resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam(), lr, founderTaskId);
     return true;
 }
 
@@ -54,11 +52,8 @@ bool ftSnake::activeArticle2(wnSnakeRpg7* weapon, soModuleAccesser* acc) {
 // The Cypher starts with the team of the fighter.
 bool ftSnake::activeArticle3(wnSnakeCypher* weapon, soModuleAccesser* acc) {
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
-    int founderTaskId = acc->getStageObject().m_taskId;
     soResourceModule& resources = acc->getResourceModule();
-    int team = fighter.getOwner()->getTeam();
-    int etcResId = resources.getResourceIdAccesser()->getEtcResId();
-    weapon->activate(etcResId, team, founderTaskId);
+    weapon->activate(resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam(), acc->getStageObject().m_taskId);
     return true;
 }
 
@@ -83,12 +78,9 @@ bool ftSnake::activeArticle4(wnSnakeC4* weapon, soModuleAccesser* acc) {
 
 // The C4 detonator starts with the team of the fighter.
 bool ftSnake::activeArticle5(wnSnakeC4Switch* weapon, soModuleAccesser* acc) {
-    soTeamModule& teamModule = acc->getTeamModule();
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = acc->getStageObject().m_taskId;
-    int team = teamModule.getTeam()->getNo();
-    int etcResId = resources.getResourceIdAccesser()->getEtcResId();
-    weapon->activate(founderTaskId, etcResId, team);
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), acc->getTeamModule().getTeam()->getNo());
     return true;
 }
 
@@ -117,20 +109,14 @@ bool ftSnake::activeArticle7(wnSnakeLadder* weapon, soModuleAccesser* acc) {
 bool ftSnake::activeArticle8(wnSnakeRgb6* weapon, soModuleAccesser* acc) {
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = acc->getStageObject().m_taskId;
-    soTeamModule& teamModule = acc->getTeamModule();
-    int team = teamModule.getTeam()->getNo();
-    int finalResId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
-    weapon->activate(founderTaskId, finalResId, team);
+    weapon->activate(founderTaskId, dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId(), acc->getTeamModule().getTeam()->getNo());
     return true;
 }
 
 bool ftSnake::activeArticle9(wnSnakeRgb6Sight* weapon, soModuleAccesser* acc) {
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = acc->getStageObject().m_taskId;
-    soTeamModule& teamModule = acc->getTeamModule();
-    int team = teamModule.getTeam()->getNo();
-    int finalResId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
-    weapon->activate(founderTaskId, finalResId, team);
+    weapon->activate(founderTaskId, dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId(), acc->getTeamModule().getTeam()->getNo());
     return true;
 }
 
