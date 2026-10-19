@@ -7,6 +7,9 @@
 #define FT_TEAM_TYPED_INTERFACE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
+#include <ft/fighter.h>
+#include <ft/ft_owner.h>
+#include <ft/ft_resource_id_accesser_impl.h>
 #include <ft/pikachu/ft_pikachu.h>
 #include <ft/pikachu/ft_pikachu_status_uniq_process.h>
 #include <ft/pikachu/ft_pikachu_extend_param_accesser.h>
@@ -429,7 +432,59 @@ void fn_98_B5A4(u8* p, u8 flag) { *(u8*)(p + 0x22A2C) = flag; }
 void ftPikachu::notify_thunder_reflect() { ftPikachuStatusUniqProcessSpecialThunderHit::notifyReflect(m_moduleAccesser); }
 void ftPikachu::adjust_camera_subject(soCameraModule* source) { ftPikachuStatusUniqProcessSpecialVortexAttack::adjust_camera_subject(m_moduleAccesser, source); }
 
+void ftPikachu::onActivate() {
+    m_moduleAccesser->getWorkManageModule().setInt(0, 0x10000042);
+}
+
+void ftPikachu::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+    if (prevStatusKind == 0x2c) {
+        moduleAccesser->getEffectModule().killAll(2, true, true);
+    }
+}
+
+void ftPikachu::notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x11b:
+        ftPikachuStatusUniqProcessSpecialSkullBashAttack::stop(moduleAccesser);
+        break;
+    }
+}
+
 void** ftPikachu::getExtendParam() { return m_data->extendParam; }
+
+void* ftPikachu::getThunderParam() {
+    return g_ftCommonDataAccesser.getData(Fighter_Pikachu)->extendParam[3];
+}
+
+// The cloud of Thunder starts at the fighter and is remembered in the fighter's work area.
+bool ftPikachu::activeArticle1(wnPikachuCloud* weapon, soModuleAccesser* acc) {
+    ftPikachu& pikachu = dynamic_cast<ftPikachu&>(acc->getStageObject());
+    s32 founderTaskId = pikachu.m_taskId;
+    int team = pikachu.getOwner()->getTeam();
+    Vec3f position = acc->getPostureModule().getPos();
+    int etcResId = acc->getResourceModule().getResourceIdAccesser()->getEtcResId();
+    weapon->activate(founderTaskId, team, &position, etcResId, &pikachu);
+    pikachu.rec_cloud_pointer(weapon);
+    return false;
+}
+
+// The Final Smash vortex: the fighter's work area keeps the article's task, the vortex starts at the fighter.
+bool ftPikachu::activeArticle2(wnPikachuVortex* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    acc->getWorkManageModule().setInt(weapon->m_taskId, 0x20000003);
+    s32 founderTaskId = fighter.m_taskId;
+    int finalResId = dynamic_cast<ftResourceIdAccesserImpl&>(*acc->getResourceModule().getResourceIdAccesser()).getFinalResId();
+    int team = fighter.getOwner()->getTeam();
+    Vec3f position;
+    position = acc->getPostureModule().getPos();
+    weapon->activate(founderTaskId, finalResId, team, &Vec3f(position));
+    return true;
+}
+
+void ftPikachu::rec_cloud_pointer(wnPikachuCloud* cloud) {
+    m_moduleAccesser->getWorkManageModule().setInt(reinterpret_cast<int>(cloud), 0x10000043);
+}
 
 wnPikachuCloud* ftPikachu::get_cloud_pointer(soModuleAccesser* acc) {
     return reinterpret_cast<wnPikachuCloud*>(acc->getWorkManageModule().getInt(0x10000043));

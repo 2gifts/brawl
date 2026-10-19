@@ -1,3 +1,7 @@
+// MATCH-ONLY: the inline atan2f of the math header needs scheduling on (the original has its epilogue lwz before the frsp).
+#pragma scheduling on
+#include <math.h>
+#pragma scheduling reset
 #define MT_VEC2F_PLAIN_BASE
 #define MT_VEC3F_SET_NOINLINE
 #define MT_VEC2F_MUL_ASSIGN_DIRECT
