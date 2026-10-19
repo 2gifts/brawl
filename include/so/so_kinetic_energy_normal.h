@@ -95,6 +95,7 @@ public:
     virtual void init();
 
     void setBrake(Vec2f* brake);
+    void setStableSpeed(Vec2f* speed); // HYPOTHESIS: sets the target speed (m_speedTarget); weak in the fighter RELs
     void setSpeed(Vec2f* speed);
 
     Vec2f m_speed;        // +0x08
