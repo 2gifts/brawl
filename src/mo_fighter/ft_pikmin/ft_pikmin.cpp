@@ -1,3 +1,9 @@
+#define MT_VEC2F_PLAIN_BASE
+#define FT_PIKMIN_OWNER_INFO_DTOR
+#define MT_VEC2F_FROM_VEC3_CTOR_NOINLINE
+#define MT_VEC2F_CTOR_NOINLINE
+#define MT_VEC2F_SUB_NOINLINE
+#define MT_VEC2F_LENGTH_SQ_OUT_OF_LINE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_PIKMIN_ARTICLE_POOLS
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
@@ -297,8 +303,6 @@ bool ftPikminArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
 }
 
 
-extern "C" void fn_113_B7F0(Vec2f* dst, const Vec3f* src);
-
 // ---- the fighter overrides ------------------------------------------------------------------------------------------
 // Work 0x10000040 / 0x10000041 are reset to -1 when Olimar becomes active.
 // HYPOTHESIS: meaning of the works.
@@ -457,8 +461,7 @@ void ftPikmin::reduceHideWaitPikmin(int status) {
     int num = hold->size();
     if (num > 0) {
         Vec3f position = m_moduleAccesser->getPostureModule().getPos();
-        Vec2f pos;
-        fn_113_B7F0(&pos, &position);
+        Vec2f pos(position);
         int condition = fn_113_100F0(m_moduleAccesser, 0.0f);
         getOwners().at(0).unkc.bits.condition = condition;
         float lr = m_moduleAccesser->getPostureModule().getLr();
@@ -745,8 +748,7 @@ void ftPikmin::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* mod
                 if (moduleAccesser->getGroundModule().isStCliff(0) != 0) {
                     moduleAccesser->getStatusModule().changeStatusRequest(0x75, moduleAccesser);
                     Vec3f position = m_moduleAccesser->getPostureModule().getPos();
-                    Vec2f pos;
-                    fn_113_B7F0(&pos, &position);
+                    Vec2f pos(position);
                     const soArrayList<wnPikminPikmin*, 10>* hold = m_troops.getHoldPikminList();
                     for (int i = 0; i < hold->size(); i++) {
                         wnPikminPikmin* pikmin = hold->at(i);
@@ -798,12 +800,49 @@ void ftPikmin::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* mod
     Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
 }
 
+// Stand-ins for the helpers behind the unit split.
+extern "C" void fn_113_BF8C(Vec2f* a, Vec2f* b, Vec2f* out); // Vec2f::add, out of line in this unit
+extern "C" void fn_113_10A34(u8* option, soModuleAccesser* acc); // HYPOTHESIS: getPikminOwnerOptionInfo
+
+// Every frame Olimar leaves a new owner info behind him: his position, the way he faces, the condition for the speed he moves
+// with and an option byte. The older infos drift with the movement of the frame (the Pikmin of the line walk to them), the
+// oldest one drops out when the array is full.
+// HYPOTHESIS: names of the kinetic energy and attribute numbers.
+void ftPikmin::updatePikmin() {
+    if (getOwnersVector().isFull() == true) {
+        getOwnersVector().pop();
+    }
+    Vec2f speed = m_moduleAccesser->getKineticModule().getEnergy(6)->getSpeed();
+    Vec2f shift = m_moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(7));
+    if (speed.lengthSq() != 0.0f) {
+        fn_113_BF8C(&shift, &(speed - m_moduleAccesser->getGroundModule().getDownMovementSpeed(0)), &shift);
+    }
+    int condition = fn_113_100F0(m_moduleAccesser, shift.length());
+    u8 option = 0;
+    fn_113_10A34(&option, m_moduleAccesser);
+    float lr = m_moduleAccesser->getPostureModule().getLr();
+    Vec2f pos(m_moduleAccesser->getPostureModule().getPos());
+    wnPikminPikminOwnerInfo info;
+    info.unk0.words[0] = reinterpret_cast<u32*>(&pos)[0];
+    info.unk0.words[1] = reinterpret_cast<u32*>(&pos)[1];
+    info.unk8 = lr;
+    info.unkc.bits.condition = condition;
+    info.unkc.bytes.unkd = option;
+    getOwnersVector().unshift(info);
+    if (speed.lengthSq() != 0.0f) {
+        int num = getOwnersVector().size();
+        for (int i = 1; i < num; i++) {
+            fn_113_BF8C(reinterpret_cast<Vec2f*>(&getOwnersVector().at(i)), &speed, reinterpret_cast<Vec2f*>(&getOwnersVector().at(i)));
+        }
+    }
+    m_troops.update(&getOwners());
+}
+
 // Olimar's position is the target of every owner info.
 void ftPikmin::refreshOwnerInfoPos() {
     int num = getOwners().size();
     Vec3f position = m_moduleAccesser->getPostureModule().getPos();
-    Vec2f pos;
-    fn_113_B7F0(&pos, &position);
+    Vec2f pos(position);
     for (int i = 0; i < num; i++) {
         Vec2f* owner = reinterpret_cast<Vec2f*>(&getOwners().at(i));
         owner->m_x = pos.m_x;
@@ -1118,20 +1157,10 @@ void fn_113_FF90(u8* p, int a1, int a2, int a3) { fn_113_1EB4(p - 0x4, a1, a2, a
 void fn_113_FFC8(u8* p, int a1, int a2, int a3) { fn_113_C6B4(p - 0x40, a1, a2, a3); }
 
 // Vec2f helpers (stored as two floats)
-#pragma dont_inline on
-void fn_113_B7F0(Vec2f* dst, const Vec3f* src) { // Vec2f::Vec2f(const Vec3f&), out of line in this unit
-    dst->m_x = src->m_x;
-    dst->m_y = src->m_y;
-}
-#pragma dont_inline off
-void fn_113_C30C(float* dst, float x, float y) {
-    dst[0] = x;
-    dst[1] = y;
-}
-float fn_113_BF74(float* v) { return v[0] * v[0] + v[1] * v[1]; }
-void fn_113_BF8C(float* a, float* b, float* out) {
-    out[0] = a[0] + b[0];
-    out[1] = a[1] + b[1];
+
+void fn_113_BF8C(Vec2f* a, Vec2f* b, Vec2f* out) {
+    out->m_x = a->m_x + b->m_x;
+    out->m_y = a->m_y + b->m_y;
 }
 
 }

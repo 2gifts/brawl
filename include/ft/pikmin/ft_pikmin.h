@@ -72,6 +72,7 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    soArrayVectorAbstract<wnPikminPikminOwnerInfo>& getOwnersVector() { return *reinterpret_cast<soArrayVectorAbstract<wnPikminPikminOwnerInfo>*>(m_ownersStorage); }
     soArrayFixed<wnPikminPikminOwnerInfo>& getOwners() { return *reinterpret_cast<soArrayFixed<wnPikminPikminOwnerInfo>*>(m_ownersStorage); }
     virtual void onActivate();
     virtual void onStart(int startKind);
