@@ -32,8 +32,14 @@ typedef soCollisionSearchModuleBuilder<soCollisionSearchModuleBuildConfig<soColl
 FT_KINETIC_TRANSACTOR(ftPeachKineticTransactor);
 typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKineticMediatorImplT<ftPeachKineticTransactor> > ftPeachKineticModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_PEACH_ARTICLE_POOLS
+#include <ft/peach/ft_peach_article_pools.h>
+typedef ftPeachArticleManageModuleBuilder ftPeachGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0xFEBC, Fighter_Peach> ftPeachGenerateArticleManageModuleBuilder;
+#endif
 
 class ftPeachBuildConfig : public ftCommonBuildConfig {
 public:
@@ -53,6 +59,9 @@ public:
     typedef ftPeachGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnPeachKassar;
+class soArticle;
+
 class ftPeach : public ftFighterBuilder<ftPeachBuildConfig>, public soPhotoCallBack {
     // The photo callback starts at +0x186F0 in the native fighter.
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
@@ -62,12 +71,23 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnPeachKassar* weapon, soModuleAccesser* acc);
     virtual ~ftPeach();
     void endFinalRequest();
     virtual void onEndFinal();
     virtual void onDeactivate();
     virtual void photoMoved();
     virtual void photoExit();
+    void** getExtendParam();
+    virtual void processUpdate();
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionShield(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser);
+    virtual bool notifyEventCollisionShieldCheck();
+    virtual void updateNodeSRT();
+    virtual void notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual bool notifyEventCollisionSearchCheck();
 };
 static_assert(sizeof(ftFighterBuilder<ftPeachBuildConfig>) == 0x186F0, "ftPeach photo callback offset mismatch");
 static_assert(sizeof(ftPeach) == 0x18710, "ftPeach size mismatch");
