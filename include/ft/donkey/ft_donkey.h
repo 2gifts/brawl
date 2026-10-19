@@ -23,8 +23,14 @@ typedef soCollisionShieldModuleBuildConfigGroups<2, 1, 1, soCollisionShieldEvent
 typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> ftDonkeyLinkModuleBuildConfig;
 typedef soStatusModuleBuildConfig<309, soGeneralWorkBuildConfig<18, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftDonkeyStatusModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (barrel conga and sound effect pools). Only the fighter unit builds the real
+// pools; the other units of the REL see an opaque block of the same size.
+#ifdef FT_DONKEY_ARTICLE_POOLS
+#include <ft/donkey/ft_donkey_article_pools.h>
+typedef ftDonkeyArticleManageModuleBuilder ftDonkeyGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0xA0B0, Fighter_Donkey> ftDonkeyGenerateArticleManageModuleBuilder;
+#endif
 
 class ftDonkeyBuildConfig : public ftCommonBuildConfig {
 public:
@@ -41,6 +47,9 @@ public:
     typedef ftDonkeyGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnDonkeyBarrelConga;
+class wnDonkeySoundEffect;
+
 class ftDonkey : public ftFighterBuilder<ftDonkeyBuildConfig> {
     u8 unkTail[0x12588 - sizeof(ftFighterBuilder<ftDonkeyBuildConfig>)];
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
@@ -50,4 +59,9 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    virtual void onStart(int startKind);
+    virtual bool notifyEventCaptureStatus(soModuleAccesser* moduleAccesser, int taskId, int, int);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnDonkeyBarrelConga* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnDonkeySoundEffect* weapon, soModuleAccesser* acc);
 };
