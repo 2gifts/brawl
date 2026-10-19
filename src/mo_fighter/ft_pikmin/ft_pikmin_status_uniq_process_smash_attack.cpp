@@ -7,6 +7,7 @@
 #include <ft/fighter.h>
 #include <ft/ft_status_uniq_process_smash_attack.h>
 #include <ft/pikmin/ft_pikmin.h>
+#include <ft/pikmin/ft_pikmin_status_uniq_process.h>
 #include <ft/pikmin/ft_pikmin_utility.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
@@ -16,14 +17,6 @@
 // the smash, are handed the matching Pikmin status when it is released (the throw of the status 0x2c turns it to his facing) and
 // go back into the line when the status ends.
 // HYPOTHESIS: the statuses (0x2c, 0x2f, 0x32 are the smash release statuses) and the Pikmin status numbers 0x10, 0x13, 0x1c, 0xa.
-class ftPikminStatusUniqProcessSmashAttack : public soStatusUniqProcess {
-public:
-    virtual ~ftPikminStatusUniqProcessSmashAttack() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
-};
-
 void ftPikminStatusUniqProcessSmashAttack::initStatus(soModuleAccesser* moduleAccesser) {
     static_cast<soStatusUniqProcess*>(&g_ftStatusUniqProcessSmashAttack)->initStatus(moduleAccesser);
     ftPikmin* pikmin = dynamic_cast<ftPikmin*>(&moduleAccesser->getStageObject());

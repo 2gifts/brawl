@@ -8,6 +8,7 @@
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/fighter.h>
 #include <ft/pikmin/ft_pikmin.h>
+#include <ft/pikmin/ft_pikmin_status_uniq_process.h>
 #include <ft/pikmin/ft_pikmin_utility.h>
 #include <so/so_external_value_accesser.h>
 #include <so/so_module_accesser.h>
@@ -19,17 +20,6 @@
 // by the troops manager the status process is given), places it at the hand node while the status runs (Pikmin status 0x15, turned
 // by the slope under him) and lets the hold Pikmin go when the status ends.
 // HYPOTHESIS: the status numbers and what the constants 0xfa2/0xfa3 describe (the offset of the held Pikmin from the node).
-class ftPikminStatusUniqProcessSpecialS : public soStatusUniqProcess {
-    wnPikminPikminTroopsManager* m_troops;
-public:
-    virtual ~ftPikminStatusUniqProcessSpecialS() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
-    void updateHoldPikmin(soModuleAccesser* moduleAccesser);
-};
-
 void ftPikminStatusUniqProcessSpecialS::initStatus(soModuleAccesser* moduleAccesser) {
     moduleAccesser->getPostureModule().setStickLR(0.0f);
     moduleAccesser->getPostureModule().updateRotYLr();

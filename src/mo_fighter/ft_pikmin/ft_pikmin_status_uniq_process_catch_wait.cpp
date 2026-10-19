@@ -8,6 +8,7 @@
 #include <ft/fighter.h>
 #include <ft/ft_status_uniq_process_catch_pull_impl.h>
 #include <ft/pikmin/ft_pikmin.h>
+#include <ft/pikmin/ft_pikmin_status_uniq_process.h>
 #include <ft/pikmin/ft_pikmin_utility.h>
 #include <so/link/so_link_module_impl.h>
 #include <so/so_module_accesser.h>
@@ -15,14 +16,6 @@
 #include <so/work/so_work_manage_module_impl.h>
 
 // The common catch wait process (ft_status_uniq_process_catch_wait.cpp in sora_melee) as its derived classes see it.
-class ftStatusUniqProcessCatchWait : public ftStatusUniqProcessCatchPull {
-public:
-    ftStatusUniqProcessCatchWait() { }
-    virtual ~ftStatusUniqProcessCatchWait() { }
-    virtual void initStatus(soModuleAccesser*);
-    virtual void exitStatus(soModuleAccesser*, int);
-};
-
 struct ftPikminCatchWaitLinkArgs : soLinkEventArgs {
     ftPikminCatchWaitLinkArgs(int eventKind) : soLinkEventArgs(eventKind) { }
 };
@@ -30,14 +23,6 @@ struct ftPikminCatchWaitLinkArgs : soLinkEventArgs {
 // Olimar holds an enemy: the Pikmin in his hand is told when the grab hits (work flag 0x22000010 for the catch kind 1), and the link
 // event 0x457 is sent to it when the status leaves the catch statuses (0x39..0x3c and 0xf1 keep it).
 // HYPOTHESIS: the catch kind meaning and the event number.
-class ftPikminStatusUniqProcessCatchWait : public ftStatusUniqProcessCatchWait {
-    wnPikminPikminTroopsManager* m_troops;
-public:
-    virtual ~ftPikminStatusUniqProcessCatchWait() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
-};
-
 void ftPikminStatusUniqProcessCatchWait::initStatus(soModuleAccesser* moduleAccesser) {
     if (m_troops->getHoldPikminNum() > 0) {
         wnPikminPikminTroopsManager* troops = m_troops;

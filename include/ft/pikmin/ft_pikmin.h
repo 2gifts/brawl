@@ -1,7 +1,9 @@
 #pragma once
 
 #include <ft/ft_fighter_builder.h>
+#include <ft/builder/ft_dol_instances.h>
 #include <wn/pikmin/wn_pikmin_pikmin_troops_manager.h>
+#include <ft/pikmin/ft_pikmin_status_uniq_process.h>
 #include <sr/sr_common.h>
 #include <types.h>
 
@@ -69,6 +71,10 @@ public:
 class wnPikminPikmin;
 class wnPikminDolfin;
 class wnPikminChain;
+struct ftData;
+
+// The owner info array is a sora_melee instance (the fighter calls its constructor and destructor).
+FT_DOL_ARRAY_VECTOR(wnPikminPikminOwnerInfo, 36);
 
 class soDamage;
 class soArticle;
@@ -77,17 +83,30 @@ class soCollisionLog;
 // The line of Pikmin that follow Olimar is kept by the troops manager sub-object; the owner info array (the positions the
 // Pikmin of the line walk to) sits behind it.
 class ftPikmin : public ftFighterBuilder<ftPikminBuildConfig> {
-    u32 unk1FD04;
+    ftData* m_commonData; // 0x1FD04
     wnPikminPikminTroopsManager m_troops; // 0x1FD08
     // HYPOTHESIS: the original member is a soArrayVector of owner infos; the storage stays opaque until the constructor is reconstructed.
-    u8 m_ownersStorage[0x2A4]; // 0x1FE8C
+    soArrayVector<wnPikminPikminOwnerInfo, 36> m_owners; // 0x1FE8C
+    // The status processes that are members of the fighter (they get the troops manager of the fighter).
+    ftPikminStatusUniqProcessSpecialS m_specialS;                // 0x200D8
+    ftPikminStatusUniqProcessAttackAir m_attackAir;              // 0x200E0
+    ftPikminStatusUniqProcessAttackS4Start m_attackS4Start;      // 0x200E8
+    ftPikminStatusUniqProcessAttackS4Hold m_attackS4Hold;        // 0x200F0
+    ftPikminStatusUniqProcessAttackS4 m_attackS4;                // 0x200F8
+    ftPikminStatusUniqProcessAttackHi4Start m_attackHi4Start;    // 0x20100
+    ftPikminStatusUniqProcessAttackHi4Hold m_attackHi4Hold;      // 0x20108
+    ftPikminStatusUniqProcessAttackHi4 m_attackHi4;              // 0x20110
+    ftPikminStatusUniqProcessSpecialHi m_specialHi;              // 0x20118
+    ftPikminStatusUniqProcessCatch m_catch;                      // 0x20120
+    ftPikminStatusUniqProcessCatchWait m_catchWait;              // 0x20128
 public:
     ftPikmin(s32 entryId,
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
-    soArrayVectorAbstract<wnPikminPikminOwnerInfo>& getOwnersVector() { return *reinterpret_cast<soArrayVectorAbstract<wnPikminPikminOwnerInfo>*>(m_ownersStorage); }
-    soArrayFixed<wnPikminPikminOwnerInfo>& getOwners() { return *reinterpret_cast<soArrayFixed<wnPikminPikminOwnerInfo>*>(m_ownersStorage); }
+    soArrayVectorAbstract<wnPikminPikminOwnerInfo>& getOwnersVector() { return m_owners; }
+    soArrayFixed<wnPikminPikminOwnerInfo>& getOwners() { return m_owners; }
+    virtual ~ftPikmin();
     virtual void onActivate();
     virtual void onStart(int startKind);
     virtual void postStart(int startKind);
