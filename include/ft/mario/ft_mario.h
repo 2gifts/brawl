@@ -24,8 +24,14 @@ typedef soCollisionReflectorModuleBuildConfigGroups<3, 12, 3, soCollisionShieldE
 typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> ftMarioLinkModuleBuildConfig;
 typedef soStatusModuleBuildConfig<281, soGeneralWorkBuildConfig<18, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftMarioStatusModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnMarioFireball/HugeFlame/Pump/Mantle pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_MARIO_ARTICLE_POOLS
+#include <ft/mario/ft_mario_article_pools.h>
+typedef ftMarioArticleManageModuleBuilder ftMarioGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x25AA8, Fighter_Mario> ftMarioGenerateArticleManageModuleBuilder;
+#endif
 
 class ftMarioBuildConfig : public ftCommonBuildConfig {
 public:
@@ -43,6 +49,11 @@ public:
     typedef ftMarioGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnMarioFireball;
+class wnMarioMantle;
+class wnMarioPump;
+class wnMarioHugeFlame;
+
 class ftMario : public ftFighterBuilder<ftMarioBuildConfig> {
     ftData* m_data;
     u8 unk2DBD4;
@@ -52,6 +63,19 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    virtual void onStart(int startKind);
+    virtual void onDeadEnd();
+    virtual void processUpdate();
+    virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
+    virtual void notifyEventCollisionReflector(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser, float power, float posX, float posY);
+    virtual bool notifyEventCollisionReflectorCheck();
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnMarioFireball* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnMarioMantle* weapon, soModuleAccesser* acc);
+    static bool activeArticle2(wnMarioPump* weapon, soModuleAccesser* acc);
+    static bool activeArticle3(wnMarioHugeFlame* weapon, soModuleAccesser* acc);
 };
 
 // Dr. Mario: same class, created through its own class info
