@@ -9,6 +9,7 @@
 #include <so/work/so_general_work_simple.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/samus/ft_samus.h>
+#include <ft/samus/ft_samus_status_uniq_process.h>
 #include <ft/samus/ft_samus_extend_param_accesser.h>
 #include <ft/ft_owner.h>
 #include <so/article/so_article_mediator.h>
@@ -20,16 +21,11 @@
 // HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt); the repeated ones are the null placeholders of the
 // unused status ranges.
 extern "C" {
-extern soStatusUniqProcess lbl_94_bss_1FC;
-extern soStatusUniqProcess lbl_94_bss_1CC;
-extern soStatusUniqProcess lbl_94_bss_20C;
 extern soStatusUniqProcess lbl_27_bss_75C4;
 extern soStatusUniqProcess lbl_27_bss_75E4;
 extern soStatusUniqProcess lbl_27_bss_75F4;
 extern soStatusUniqProcess lbl_27_bss_75D4;
 extern soStatusUniqProcess lbl_27_bss_7604;
-extern soStatusUniqProcess lbl_94_bss_1DC;
-extern soStatusUniqProcess lbl_94_bss_1EC;
 }
 
 ftSamusExtendParamAccesser g_ftSamusExtendParamAccesser;
@@ -48,28 +44,28 @@ ftSamus::ftSamus(s32 entryId,
     m_data(g_ftCommonDataAccesser.getData(Fighter_Samus)) {
     // Register the status processes in action order.
     soStatusUniqProcess* processes[27] = {0};
-    processes[1] = &lbl_94_bss_1FC;
-    processes[2] = &lbl_94_bss_1CC;
-    processes[4] = &lbl_94_bss_20C;
+    processes[1] = &g_ftSamusStatusUniqProcessSpecialS;
+    processes[2] = &g_ftSamusStatusUniqProcessSpecialHi;
+    processes[4] = &g_ftSamusStatusUniqProcessFinal;
     processes[5] = &lbl_27_bss_75C4;
     processes[6] = &lbl_27_bss_75E4;
     processes[8] = &lbl_27_bss_75F4;
     processes[9] = &lbl_27_bss_75D4;
     processes[10] = &lbl_27_bss_7604;
-    processes[11] = &lbl_94_bss_1DC;
-    processes[12] = &lbl_94_bss_1EC;
-    processes[14] = &lbl_94_bss_1DC;
-    processes[15] = &lbl_94_bss_1EC;
-    processes[16] = &lbl_94_bss_1FC;
-    processes[17] = &lbl_94_bss_1FC;
-    processes[18] = &lbl_94_bss_1FC;
-    processes[19] = &lbl_94_bss_1FC;
-    processes[21] = &lbl_94_bss_20C;
-    processes[22] = &lbl_94_bss_20C;
-    processes[23] = &lbl_94_bss_20C;
-    processes[24] = &lbl_94_bss_20C;
-    processes[25] = &lbl_94_bss_20C;
-    processes[26] = &lbl_94_bss_20C;
+    processes[11] = &g_ftSamusStatusUniqProcessSpecialGroundLw;
+    processes[12] = &g_ftSamusStatusUniqProcessSpecialAirLw;
+    processes[14] = &g_ftSamusStatusUniqProcessSpecialGroundLw;
+    processes[15] = &g_ftSamusStatusUniqProcessSpecialAirLw;
+    processes[16] = &g_ftSamusStatusUniqProcessSpecialS;
+    processes[17] = &g_ftSamusStatusUniqProcessSpecialS;
+    processes[18] = &g_ftSamusStatusUniqProcessSpecialS;
+    processes[19] = &g_ftSamusStatusUniqProcessSpecialS;
+    processes[21] = &g_ftSamusStatusUniqProcessFinal;
+    processes[22] = &g_ftSamusStatusUniqProcessFinal;
+    processes[23] = &g_ftSamusStatusUniqProcessFinal;
+    processes[24] = &g_ftSamusStatusUniqProcessFinal;
+    processes[25] = &g_ftSamusStatusUniqProcessFinal;
+    processes[26] = &g_ftSamusStatusUniqProcessFinal;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 27);
 }
 
