@@ -16,6 +16,9 @@
 #include <so/so_value_accesser.h>
 #include <mt/mt_prng.h>
 #include <gf/gf_task_scheduler.h>
+#include <gf/gf_camera.h>
+#include <mt/mt_matrix.h>
+#include <math.h>
 
 #define FT_BC ftSnakeBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -187,6 +190,48 @@ void ftSnake::updateNodeSRT() {
         StageObject::updateNodeSRT();
         break;
     }
+}
+
+extern float lbl_27_rodata_EF8; // Shared 30-degree reference camera angle (see ft_snake_status_uniq_process_final_common.cpp).
+extern float lbl_27_rodata_EFC;
+
+// While the grenade launcher is raised the fighter follows the camera: he stands at the offset of the constants in front of
+// the main camera and turns with it.
+// HYPOTHESIS: the offset constants (0xFA9-0xFAB) and the field at 0xE4 of the camera (a screen ratio).
+void ftSnake::processFixCamera() {
+    switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x130:
+    case 0x131:
+    case 0x132:
+        if (gfCameraManager::getManager() != NULL) {
+            if (gfCameraManager::getManager() != NULL) {
+                gfCamera* camera = reinterpret_cast<gfCamera*>(gfCameraManager::getManager());
+                if (camera != NULL) {
+                    Matrix cameraMtx = *reinterpret_cast<Matrix*>(camera);
+                    Matrix inverse(true);
+                    cameraMtx.inverse(&inverse);
+                    soModuleAccesser* acc = m_moduleAccesser;
+                    Vec3f position;
+                    Vec3f offset(soValueAccesser::getConstantFloat(acc, 0xFA9, 0), soValueAccesser::getConstantFloat(acc, 0xFAA, 0),
+                                 soValueAccesser::getConstantFloat(acc, 0xFAB, 0));
+                    float reference = static_cast<float>(tan(0.017453292f * lbl_27_rodata_EF8));
+                    float tangent = static_cast<float>(tan(camera->unkD0));
+                    float correction = tangent <= 0.0f ? 1.0f : reference / tangent;
+                    offset.m_z *= correction;
+                    float divisor = lbl_27_rodata_EFC;
+                    offset.m_x *= *reinterpret_cast<float*>(reinterpret_cast<u8*>(camera) + 0xE4) / divisor;
+                    inverse.mulPos(&offset, &position);
+                    Vec3f rotation;
+                    inverse.getRotate(&rotation);
+                    m_moduleAccesser->getPostureModule().setPos(&position);
+                    m_moduleAccesser->getPostureModule().setRot(&Vec3f(57.29578f * rotation.m_x, 57.29578f * rotation.m_y, 57.29578f * rotation.m_z), 0);
+                    updateNodeSRT();
+                }
+            }
+        }
+        break;
+    }
+    Fighter::processFixCamera();
 }
 
 // The event the fighter sends to the C4 when its detonator status is left.
