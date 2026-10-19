@@ -1,9 +1,17 @@
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_PIKACHU_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define FT_TEAM_TYPED_INTERFACE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/pikachu/ft_pikachu.h>
 #include <ft/pikachu/ft_pikachu_extend_param_accesser.h>
+#include <so/article/so_article_mediator.h>
+#include <ft/pikachu/ft_pikachu_transactor.h>
+#include <so/so_value_accesser.h>
 #include <so/so_value_accesser.h>
 #include <ft/ft_common_data_accesser.h>
 
@@ -66,6 +74,292 @@ ftPikachu::ftPikachu(s32 entryId,
     processes[13] = &lbl_98_bss_2EC;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 14);
 }
+
+// The Thunder Jolt starts through the transactor of the fighter with the effect resource of the fighter.
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+bool ftPikachu::activeArticle(wnPikachuThunderJolt* weapon, soModuleAccesser* acc) {
+    static ftPikachuTransactor instance;
+    return instance.activeArticle(weapon, acc, acc->getResourceModule().getResourceIdAccesser()->getEtcResId());
+}
+#pragma pool_data reset
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Pikachu, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftPikachuArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftPikachuArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftPikachuArticleKind : wnArticleKindInfo {
+    ftPikachuArticleKind() {
+        kind = 0;
+        subKind = Fighter_Pikachu;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftPikachuArticleBuildInfo : wnArticleBuildInfo {
+    ftPikachuArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_148050(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148170(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148184(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_1480CC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftPikachuArticleTraits;
+#define FT_PIKACHU_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftPikachuArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftPikachuArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Pikachu, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_PIKACHU_TRAITS(wnPikachuThunderJolt, wnPikachuThunderJoltData, 0, fn_27_148050)
+FT_PIKACHU_TRAITS(wnPikachuCloud, wnPikachuCloudData, 1, fn_27_148170)
+FT_PIKACHU_TRAITS(wnPikachuVortex, wnPikachuVortexData, 2, fn_27_148184)
+FT_PIKACHU_TRAITS(wnPikachuThunder, wnPikachuThunderData, 3, fn_27_1480CC)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftPikachuArticleTraits<W>::ArticleId, ftPikachuArticleBuildInfo(ftPikachuArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftPikachuArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnPikachuThunderJolt>::~wnArticleHolder();
+template wnArticleHolder<wnPikachuCloud>::~wnArticleHolder();
+template wnArticleHolder<wnPikachuVortex>::~wnArticleHolder();
+template wnArticleHolder<wnPikachuThunder>::~wnArticleHolder();
+template wnArticleHolder<wnPikachuThunderJolt>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnPikachuCloud>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnPikachuThunder>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftPikachuArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftPikachuArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftPikachuArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftPikachuArticleMediator::~ftPikachuArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftPikachuArticleMediator::getMediateNum() { return 4; }
+void ftPikachuArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 ThunderJolt, 1 Cloud, 2 Vortex, 3 Thunder (the rest are unused).
+
+#define FT_PIKACHU_POOL_THUNDERJOLT_BASE static_cast<wnArticlePool<wnPikachuThunderJolt, 3, ftPikachuCloudPool>&>(m_pools)
+#define FT_PIKACHU_POOL_THUNDERJOLT FT_PIKACHU_POOL_THUNDERJOLT_BASE.getSub()
+#define FT_PIKACHU_POOL_CLOUD_BASE static_cast<wnArticlePool<wnPikachuCloud, 2, ftPikachuVortexPool>&>(m_pools)
+#define FT_PIKACHU_POOL_CLOUD FT_PIKACHU_POOL_CLOUD_BASE.getSub()
+#define FT_PIKACHU_POOL_VORTEX_BASE static_cast<wnArticlePool<wnPikachuVortex, 1, ftPikachuThunderPool>&>(m_pools)
+#define FT_PIKACHU_POOL_VORTEX FT_PIKACHU_POOL_VORTEX_BASE.getSub()
+#define FT_PIKACHU_POOL_THUNDER_BASE static_cast<wnArticlePool<wnPikachuThunder, 3, soInstancePoolRoot>&>(m_pools)
+#define FT_PIKACHU_POOL_THUNDER FT_PIKACHU_POOL_THUNDER_BASE.getSub()
+
+#define FT_PIKACHU_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(4, value) WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) \
+    WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) \
+    WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) \
+    WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) \
+    WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftPikachuArticleMediator::deactivate() {
+    for (s32 i = 0; i < 3; ++i) {
+        wnPikachuThunderJolt* weapon = FT_PIKACHU_POOL_THUNDERJOLT.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 2; ++i) {
+        wnPikachuCloud* weapon = FT_PIKACHU_POOL_CLOUD.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnPikachuVortex* weapon = FT_PIKACHU_POOL_VORTEX.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 3; ++i) {
+        wnPikachuThunder* weapon = FT_PIKACHU_POOL_THUNDER.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftPikachuArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 3; }
+    case 1: { wnArticleSlotTag tag; return 2; }
+    case 2: { wnArticleSlotTag tag; return 1; }
+    case 3: { wnArticleSlotTag tag; return 3; }
+    FT_PIKACHU_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftPikachuActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_PIKACHU_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftPikachuActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftPikachuActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftPikachuArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_PIKACHU_COUNT_ACTIVE(FT_PIKACHU_POOL_THUNDERJOLT, 3)
+    case 1: FT_PIKACHU_COUNT_ACTIVE(FT_PIKACHU_POOL_CLOUD, 2)
+    case 2: FT_PIKACHU_COUNT_ACTIVE(FT_PIKACHU_POOL_VORTEX, 1)
+    case 3: FT_PIKACHU_COUNT_ACTIVE(FT_PIKACHU_POOL_THUNDER, 3)
+    FT_PIKACHU_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_PIKACHU_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftPikachuArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_PIKACHU_CAN_GENERATE(FT_PIKACHU_POOL_THUNDERJOLT, 3, 0)
+    case 1: FT_PIKACHU_CAN_GENERATE(FT_PIKACHU_POOL_CLOUD, 2, 1)
+    case 2: FT_PIKACHU_CAN_GENERATE(FT_PIKACHU_POOL_VORTEX, 1, 2)
+    case 3: FT_PIKACHU_CAN_GENERATE(FT_PIKACHU_POOL_THUNDER, 3, 3)
+    FT_PIKACHU_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftPikachuArticleActivator;
+template <> struct ftPikachuArticleActivator<wnPikachuThunderJolt> {
+    static bool activate(wnPikachuThunderJolt* weapon, soModuleAccesser* acc) { return ftPikachu::activeArticle(weapon, acc); }
+};
+template <> struct ftPikachuArticleActivator<wnPikachuCloud> {
+    static bool activate(wnPikachuCloud* weapon, soModuleAccesser* acc) { return ftPikachu::activeArticle1(weapon, acc); }
+};
+template <> struct ftPikachuArticleActivator<wnPikachuVortex> {
+    static bool activate(wnPikachuVortex* weapon, soModuleAccesser* acc) { return ftPikachu::activeArticle2(weapon, acc); }
+};
+template <> struct ftPikachuArticleActivator<wnPikachuThunder> {
+    static bool activate(wnPikachuThunder* weapon, soModuleAccesser* acc) { return weapon->activeArticle(acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_PIKACHU_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftPikachuArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftPikachuArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_PIKACHU_GENERATE(wnPikachuThunderJolt, FT_PIKACHU_POOL_THUNDERJOLT)
+    case 1: FT_PIKACHU_GENERATE(wnPikachuCloud, FT_PIKACHU_POOL_CLOUD)
+    case 2: FT_PIKACHU_GENERATE(wnPikachuVortex, FT_PIKACHU_POOL_VORTEX)
+    case 3: FT_PIKACHU_GENERATE(wnPikachuThunder, FT_PIKACHU_POOL_THUNDER)
+    FT_PIKACHU_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftPikachuArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnPikachuThunderJolt&>(*article);
+        return true;
+    }
+    case 1: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnPikachuCloud&>(*article);
+        return true;
+    }
+    case 2: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnPikachuVortex&>(*article);
+        return true;
+    }
+    case 3: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnPikachuThunder&>(*article);
+        return true;
+    }
+    FT_PIKACHU_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftPikachu is done
 void testBuilder() {
