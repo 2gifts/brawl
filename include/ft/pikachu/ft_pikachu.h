@@ -24,7 +24,24 @@ typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> ftPikachuLinkModuleBuild
 typedef soStatusModuleBuildConfig<288, soGeneralWorkBuildConfig<18, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftPikachuStatusModuleBuildConfig;
 
 // HYPOTHESIS: this fighter has its own kinetic transactor (updateEnergy and changeKinetic)
-FT_KINETIC_TRANSACTOR(ftPikachuKineticTransactor);
+class ftPikachuKineticTransactor : public ftKineticTransactor {
+public:
+    static void changeKinetic(int mode, void* pools, soModuleAccesser* acc);
+    // The Quick Attack aiming mode (0x64): the controller energy only accelerates with the stick (see updateEnergySub).
+    static void changeKineticSub(bool* result, void* pools, soModuleAccesser* acc);
+    // HYPOTHESIS: sets the speed of the energy from the regulated stick position.
+    static void updateEnergySub(soKineticEnergyNormal* energy, void* unused, soModuleAccesser* acc);
+    template <typename E>
+    static void updateEnergy(E* energy, soModuleAccesser* acc) {
+        if (energy->isEnable() != true) {
+            return;
+        }
+        if (energy->isSuspend()) {
+            return;
+        }
+        return energy->updateEnergy(acc);
+    }
+};
 typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKineticMediatorImplT<ftPikachuKineticTransactor> > ftPikachuKineticModuleBuildConfig;
 
 // HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
@@ -55,6 +72,7 @@ public:
 class wnPikachuThunderJolt;
 class wnPikachuCloud;
 class wnPikachuVortex;
+class wnPikachuThunder;
 
 class ftPikachu : public ftFighterBuilder<ftPikachuBuildConfig> {
     u8 unkTail[0x2AE34 - sizeof(ftFighterBuilder<ftPikachuBuildConfig>)];
