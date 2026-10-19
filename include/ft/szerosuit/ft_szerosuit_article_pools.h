@@ -21,6 +21,8 @@ class wnSZerosuitWhip : public Weapon {
 public:
     wnSZerosuitWhip(s32 articleId, const wnArticleBuildInfo& info, const wnSZerosuitWhipData* data);
     virtual ~wnSZerosuitWhip();
+    // HYPOTHESIS: the whip is attached to the fighter at the node 0x36 with the owner's team and the attack's log group.
+    void activate(int founderTaskId, u32 etcResId, int team, float lr, Vec3f* pos, int isSpecial, int isAerial, int logGroup);
 };
 static_assert(sizeof(wnSZerosuitWhip) == 0x1D50, "wnSZerosuitWhip layout is wrong!");
 
@@ -30,6 +32,8 @@ class wnSZerosuitArmor : public Weapon {
 public:
     wnSZerosuitArmor(s32 articleId, const wnArticleBuildInfo& info, const wnSZerosuitArmorData* data);
     virtual ~wnSZerosuitArmor();
+    void activate(int founderTaskId, u32 etcResId, int index, int mdlResIndex, u32 param0, u32 param1, int team);
+    void shoot(int param, float speed, float lr, float rate);
 };
 static_assert(sizeof(wnSZerosuitArmor) == 0x15D4, "wnSZerosuitArmor layout is wrong!");
 
@@ -40,7 +44,7 @@ typedef wnArticleHierarchy<wnSZerosuitParalyzer, 1, ftSZerosuitBulletPool> ftSZe
 
 class ftSZerosuitArticleMediator : public soArticleMediator {
     ftSZerosuitParalyzerPool m_pools;
-    u8 m_autoRecycle;
+    volatile u8 m_autoRecycle; // MATCH-ONLY: keeps the store behind the (partly inlined) pool constructors
 public:
     ftSZerosuitArticleMediator(soModuleAccesser* acc) : soArticleMediator(acc), m_pools(acc), m_autoRecycle(false) { }
     virtual ~ftSZerosuitArticleMediator();
