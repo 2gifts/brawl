@@ -305,7 +305,7 @@ bool ftSnake::ckeckChangeEarCloseStatus(Vec3f& position) {
 }
 
 // HYPOTHESIS: unk3 is the module accesser of the ejected article (its object sits at offset 8, as in the base version).
-void ftSnake::notifyArticleEventEject(int unk1, int unk2, int* unk3, int* unk4) {
+void ftSnake::notifyArticleEventEject(int unk1, int unk2, int* unk3) {
     if (unk1 == 0xd && unk2 == 1) {
         soModuleAccesser* articleAccesser = reinterpret_cast<soModuleAccesser*>(unk3);
         Vec3f pos = articleAccesser->getPostureModule().getPos();
@@ -313,7 +313,7 @@ void ftSnake::notifyArticleEventEject(int unk1, int unk2, int* unk3, int* unk4) 
             m_moduleAccesser->getStatusModule().changeStatusRequest(0x12e, m_moduleAccesser);
         }
     }
-    StageObject::notifyArticleEventEject(unk1, unk2, unk3, unk4);
+    StageObject::notifyArticleEventEject(unk1, unk2, unk3);
 }
 
 // Hitting something with the Final Smash grenade launcher flags the hit unless the target is of kind 2 or 3.

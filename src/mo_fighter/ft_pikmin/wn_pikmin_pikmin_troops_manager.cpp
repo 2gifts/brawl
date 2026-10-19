@@ -1,5 +1,6 @@
 #define SO_ARRAY_LIST_CTOR_FLAG
 #define SO_ARRAY_EXTERNAL_VECTOR_SIZE
+#include <wn/pikmin/wn_pikmin_pikmin.h>
 #include <wn/pikmin/wn_pikmin_pikmin_troops_manager.h>
 #include <so/so_external_value_accesser.h>
 #include <so/so_module_accesser.h>
