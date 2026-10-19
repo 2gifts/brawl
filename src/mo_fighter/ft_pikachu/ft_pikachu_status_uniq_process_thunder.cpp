@@ -68,15 +68,15 @@ void ftPikachuStatusUniqProcessSpecialThunderHit::execStatus(soModuleAccesser* m
     }
 }
 
-void ftPikachuStatusUniqProcessSpecialThunderHit::exitStatus(soModuleAccesser* moduleAccesser, int) {
-    unref_log_group(moduleAccesser);
-}
-
 void ftPikachuStatusUniqProcessSpecialThunderHit::notifyReflect(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getStatusModule().getStatusKind() == ftPikachuStatus::Thunder_Unk11D) {
         unref_log_group(moduleAccesser);
         ftPikachu::rec_cloud_pointer1(moduleAccesser, 0);
     }
+}
+
+void ftPikachuStatusUniqProcessSpecialThunderHit::exitStatus(soModuleAccesser* moduleAccesser, int) {
+    unref_log_group(moduleAccesser);
 }
 
 void ftPikachuStatusUniqProcessSpecialThunderHit::unref_log_group(soModuleAccesser* moduleAccesser) {
