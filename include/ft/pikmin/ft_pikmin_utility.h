@@ -3,6 +3,7 @@
 #include <types.h>
 
 class soModuleAccesser;
+class StageObject;
 class wnPikminPikmin;
 class wnPikminDolfin;
 class wnPikminChain;
@@ -19,6 +20,6 @@ public:
     static bool activeArticle2(wnPikminChain* article, soModuleAccesser* moduleAccesser);
     static void unRefLogGroup(soModuleAccesser* moduleAccesser);
     static void getPikminOwnerOptionInfo(u8* option, soModuleAccesser* moduleAccesser);
-    static void reducePikminAllHelper(soModuleAccesser* moduleAccesser);
+    static void reducePikminAllHelper(StageObject* stageObject);
     static bool isHideOrderOwnerCondition(int statusKind);
 };
