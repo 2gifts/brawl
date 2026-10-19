@@ -35,7 +35,7 @@ __dt__83soAnimCmdControlUnitBuilder<52soAnimCmdControlUnitBuildConfig<7,128,482,
 __dt__82soAnimCmdControlUnitBuilder<51soAnimCmdControlUnitBuildConfig<8,32,482,0,0,1,0,8>>Fv = .text:0x00002628; // type:function size:0x8C
 __dt__82soAnimCmdControlUnitBuilder<51soAnimCmdControlUnitBuildConfig<10,16,41,0,0,1,0,8>>Fv = .text:0x000026B4; // type:function size:0x8C
 __dt__99soAnimCmdControlUnitBuilderDisguise<60soAnimCmdControlUnitBuildConfigDisguise<0,1,285,285,0,1,0,8>>Fv = .text:0x00002740; // type:function size:0x98
-fn_99_27D8 = .text:0x000027D8; // type:function size:0x5C
+__dt__115soArraySelectHolder<1,36soArrayVector<PC13acAni = .text:0x000027D8; // type:function size:0x5C
 __dt__45soModuleAccesserBuilder<18ftLuigiBuildConfig>Fv = .text:0x00002834; // type:function size:0x2A0
 __dt__66soGlowModuleBuilder<43soGlowModuleBuildConfig<16ftGlowModuleImpl>>Fv = .text:0x00002AD4; // type:function size:0x5C
 __dt__66soSlowModuleBuilder<43soSlowModuleBuildConfig<16soSlowModuleImpl>>Fv = .text:0x00002B30; // type:function size:0x5C
@@ -331,7 +331,7 @@ __dt__25soKineticEnergyWindNormalFv = .text:0x00009CF4; // type:function size:0x
 __dt__102soKineticEnergyHolder<25soKineticEnergyWindNormal,18soTypeListNullType,28soKineticEnergyInitInfo<5,4>>Fv = .text:0x00009D54; // type:function size:0x60
 __dt__176soInstancePoolSub<49soInstancePoolInfo<25soKineticEnergyWindNormal,1>,102soKineticEnergyHolder<25soKineticEnergyWindNormal,18soTypeListNullType,28soKineticEnergyInitInfo<5,4>>>Fv = .text:0x00009DB4; // type:function size:0x60
 fn_99_9E14 = .text:0x00009E14; // type:function size:0x60
-fn_99_9E74 = .text:0x00009E74; // type:function size:0x64
+__dt__185soInstancePool<45soInstancePoolInfo<21ftKinetic = .text:0x00009E74; // type:function size:0x64
 __dt__22ftKineticEnergyGravityFv = .text:0x00009ED8; // type:function size:0x5C
 __dt__99soKineticEnergyHolder<22ftKineticEnergyGravity,18soTypeListNullType,28soKineticEnergyInitInfo<1,1>>Fv = .text:0x00009F34; // type:function size:0x60
 __dt__169soInstancePoolSub<46soInstancePoolInfo<22ftKineticEnergyGravity,1>,99soKineticEnergyHolder<22ftKineticEnergyGravity,18soTypeListNullType,28soKineticEnergyInitInfo<1,1>>>Fv = .text:0x00009F94; // type:function size:0x60
@@ -394,7 +394,7 @@ getInstanceAt__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyMotion
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyMotion,1>,98soKineticEnergyHolder<21ftKineticEnergyMotion,18soTypeListNullType,28soKineticEnergyInitInfo<0,1>>>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000B43C; // type:function size:0x90
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__46soInstancePoolSubNull<21ftKineticEnergyMotion>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000B4CC; // type:function size:0x8
 updateEnergy<21ftKineticEnergyDamage>__19ftKineticTransactorFP21ftKineticEnergyDamageP16soModuleAccesser_v = .text:0x0000B4D4; // type:function size:0x38
-fn_99_B50C = .text:0x0000B50C; // type:function size:0x18
+getInstanceAt__167soInstancePoolSub<45soInstancePoolInfo = .text:0x0000B50C; // type:function size:0x18
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__167soInstancePoolSub<45soInstancePoolInfo<21ftKineticEnergyDamage,1>,98soKineticEnergyHolder<21ftKineticEnergyDamage,18soTypeListNullType,28soKineticEnergyInitInfo<4,2>>>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000B524; // type:function size:0x90
 getMdlResIndex__20soResourceIdAccesserFv = .text:0x0000B5B4; // type:function size:0x8
 updateEnergy<21soKineticEnergyJostle>__19ftKineticTransactorFP21soKineticEnergyJostleP16soModuleAccesser_v = .text:0x0000B5BC; // type:function size:0x38
