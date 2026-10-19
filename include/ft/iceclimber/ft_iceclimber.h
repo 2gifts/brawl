@@ -28,8 +28,14 @@ typedef soStatusModuleBuildConfig<289, soGeneralWorkBuildConfig<18, 14, 2>, 274,
 FT_KINETIC_TRANSACTOR(ftPopoKineticTransactor);
 typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKineticMediatorImplT<ftPopoKineticTransactor> > ftPopoKineticModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the article pools). Only the fighter unit builds the real pools; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_POPO_ARTICLE_POOLS
+#include <ft/iceclimber/ft_iceclimber_article_pools.h>
+typedef ftPopoArticleManageModuleBuilder ftPopoGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x17ACC, Fighter_Popo> ftPopoGenerateArticleManageModuleBuilder;
+#endif
 
 class ftPopoBuildConfig : public ftCommonBuildConfig {
 public:
@@ -48,6 +54,12 @@ public:
     typedef ftPopoGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnPopoBlizzard;
+class wnPopoIceShot;
+class wnPopoIceBerg;
+class wnPopoRubber;
+class wnPopoIceBergWind;
+
 class ftPopo : public ftFighterBuilder<ftPopoBuildConfig> {
     u8 unkTail[0x1FE38 - sizeof(ftFighterBuilder<ftPopoBuildConfig>)];
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
@@ -59,4 +71,8 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
+    static bool activeArticle(wnPopoBlizzard* weapon, soModuleAccesser* acc);
+    static bool activeArticle1(wnPopoIceBerg* weapon, soModuleAccesser* acc);
+    static bool activeArticle2(wnPopoRubber* weapon, soModuleAccesser* acc);
 };
