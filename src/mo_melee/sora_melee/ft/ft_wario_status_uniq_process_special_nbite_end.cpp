@@ -4,23 +4,8 @@
 #include <so/link/so_link_event_presenter.h>
 #include <so/link/so_link_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
+#include <so/catch/so_catch_module.h>
 #include <types.h>
-
-// Catch module view. The accesser holds it as a void*; the catch vtable is only partly declared
-// in so/catch/so_catch_module.h, so slots are padded to their native offsets (catchCut at 0x2c).
-class ftWarioCatchModuleView {
-public:
-    virtual ~ftWarioCatchModuleView() { }
-    virtual void unk0x04() { }
-    virtual void unk0x08() { }
-    virtual void unk0x0c() { }
-    virtual void unk0x10() { }
-    virtual void unk0x14() { }
-    virtual void unk0x18() { }
-    virtual void unk0x1c() { }
-    virtual void unk0x20() { }
-    virtual void catchCut(bool, bool);
-};
 
 // Link event passed to the linked articles. The last four fields are read back after the send.
 struct ftWarioBiteEndLinkEvent : public soLinkEventArgs {
@@ -59,8 +44,8 @@ void ftWarioStatusUniqProcessSpecialNBiteEnd::initStatus(soModuleAccesser* modul
 
 void ftWarioStatusUniqProcessSpecialNBiteEnd::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
     if (nextStatus == 0x116) {
-        reinterpret_cast<ftWarioCatchModuleView*>(moduleAccesser->m_enumerationStart->m_catchModule)->catchCut(false, true);
+        static_cast<soCatchModule*>(moduleAccesser->m_enumerationStart->m_catchModule)->catchCut(false, true);
     } else {
-        reinterpret_cast<ftWarioCatchModuleView*>(moduleAccesser->m_enumerationStart->m_catchModule)->catchCut(false, false);
+        static_cast<soCatchModule*>(moduleAccesser->m_enumerationStart->m_catchModule)->catchCut(false, false);
     }
 }
