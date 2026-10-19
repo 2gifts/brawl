@@ -429,8 +429,8 @@ forEachHolderModuleAccesser<61soKineticUpdateEnergyHolderHelper<24ftGanonKinetic
 forEachHolderModuleAccesser<61soKineticUpdateEnergyHolderHelper<24ftGanonKineticTransactor>>__46soInstancePoolSubNull<21soKineticEnergyJostle>F61soKineticUpdateEnergyHolderHelper<24ftGanonKineticTransactor>P16soModuleAccesser_i = .text:0x0000BFA0; // type:function size:0x8
 __ct__56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>FRC56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor> = .text:0x0000BFA8; // type:function size:0xC
 fn_109_BFB4 = .text:0x0000BFB4; // type:function size:0x64
-fn_109_C018 = .text:0x0000C018; // type:function size:0x48
-fn_109_C060 = .text:0x0000C060; // type:function size:0x58
+__ct__26ftGanonExtendParamAccesserFv = .text:0x0000C018; // type:function size:0x48
+__ct__28ftClassInfoImpl<20,7ftGanon>Fv = .text:0x0000C060; // type:function size:0x58
 fn_109_C0B8 = .text:0x0000C0B8; // type:function size:0x84
 fn_109_C13C = .text:0x0000C13C; // type:function size:0x68
 @4@__dt__11soEventUnitFv = .text:0x0000C1A4; // type:function size:0x8

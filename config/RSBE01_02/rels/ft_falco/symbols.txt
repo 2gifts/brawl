@@ -190,7 +190,7 @@ __dt__83soArraySelectHolder<1,19soArrayVector<Ul,5>,36soSingletonHolder<15soArra
 __dt__124soSelectInstanceHolder<39soArrayVector<20soTransitionTermPack,1>,56soSingletonHolder<35soArrayNull<20soTransitionTermPack>>>Fv = .text:0x00007B2C; // type:function size:0x5C
 __dt__109soArraySelectHolder<1,32soArrayVector<13soPartialAnim,2>,49soSingletonHolder<28soArrayNull<13soPartialAnim>>>Fv = .text:0x00007B88; // type:function size:0x5C
 fn_108_7BE4 = .text:0x00007BE4; // type:function size:0x78
-fn_108_7C5C = .text:0x00007C5C; // type:function size:0x5C
+__dt__98soArraySelectHolder<1,37soArrayVector<18soModelV = .text:0x00007C5C; // type:function size:0x5C
 __dt__114soResourceModuleBuilder<87soResourceModuleBuildConfigDynamic<0,24ftResourceIdAccesserImpl,20soResourceModuleImpl>>Fv = .text:0x00007CB8; // type:function size:0x78
 __dt__96soParamCustomizeModuleBuilder<63soParamCustomizeModuleBuildConfig<26ftParamCustomizeModuleImpl>>Fv = .text:0x00007D30; // type:function size:0x5C
 __dt__180soInsideEventManageModuleBuilder<110soInsideEventManageModuleBuildConfig<32,40,4,4,4,4,4,4,5,4,4,4,4,4,1,1,0,2,1,30ftInsideEventManageModuleTypes>,30ftInsideEventManageModuleTypes>Fv = .text:0x00007D8C; // type:function size:0x144
@@ -473,8 +473,8 @@ forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTrans
 isNull__38soEventUnitImpl<19soTurnEventObserver>CFv = .text:0x0000E488; // type:function size:0x8
 __ct__56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>FRC56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor> = .text:0x0000E490; // type:function size:0xC
 fn_108_E49C = .text:0x0000E49C; // type:function size:0x64
-fn_108_E500 = .text:0x0000E500; // type:function size:0x48
-fn_108_E548 = .text:0x0000E548; // type:function size:0x58
+__ct__26ftFalcoExtendParamAccesserFv = .text:0x0000E500; // type:function size:0x48
+__ct__28ftClassInfoImpl<19,7ftFalco>Fv = .text:0x0000E548; // type:function size:0x58
 fn_108_E5A0 = .text:0x0000E5A0; // type:function size:0x84
 fn_108_E624 = .text:0x0000E624; // type:function size:0x68
 @4@__dt__17soArticleMediatorFv = .text:0x0000E68C; // type:function size:0x8

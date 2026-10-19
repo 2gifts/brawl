@@ -191,7 +191,7 @@ __dt__83soArraySelectHolder<1,19soArrayVector<Ul,5>,36soSingletonHolder<15soArra
 __dt__124soSelectInstanceHolder<39soArrayVector<20soTransitionTermPack,1>,56soSingletonHolder<35soArrayNull<20soTransitionTermPack>>>Fv = .text:0x00007B84; // type:function size:0x5C
 __dt__109soArraySelectHolder<1,32soArrayVector<13soPartialAnim,2>,49soSingletonHolder<28soArrayNull<13soPartialAnim>>>Fv = .text:0x00007BE0; // type:function size:0x5C
 __dt__74soModelModuleBuilder<50soModelModuleBuildConfig<10,3,17soModelModuleImpl>>Fv = .text:0x00007C3C; // type:function size:0x78
-fn_125_7CB4 = .text:0x00007CB4; // type:function size:0x5C
+__dt__98soArraySelectHolder<1,37soArrayVector<18soModelV = .text:0x00007CB4; // type:function size:0x5C
 __dt__114soResourceModuleBuilder<87soResourceModuleBuildConfigDynamic<0,24ftResourceIdAccesserImpl,20soResourceModuleImpl>>Fv = .text:0x00007D10; // type:function size:0x78
 __dt__96soParamCustomizeModuleBuilder<63soParamCustomizeModuleBuildConfig<26ftParamCustomizeModuleImpl>>Fv = .text:0x00007D88; // type:function size:0x5C
 __dt__180soInsideEventManageModuleBuilder<110soInsideEventManageModuleBuildConfig<32,40,4,4,4,4,4,4,5,4,4,4,4,4,1,1,0,2,1,30ftInsideEventManageModuleTypes>,30ftInsideEventManageModuleTypes>Fv = .text:0x00007DE4; // type:function size:0x144
@@ -476,10 +476,10 @@ forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTrans
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__46soInstancePoolSubNull<21soKineticEnergyJostle>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000E534; // type:function size:0x8
 __ct__56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>FRC56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor> = .text:0x0000E53C; // type:function size:0xC
 fn_125_E548 = .text:0x0000E548; // type:function size:0x80
-fn_125_E5C8 = .text:0x0000E5C8; // type:function size:0x48
+__ct__25ftWolfExtendParamAccesserFv = .text:0x0000E5C8; // type:function size:0x48
 __ct__27ftClassInfoImpl<44,6ftWolf>Fv = .text:0x0000E610; // type:function size:0x58
 __dt__27ftClassInfoImpl<44,6ftWolf>Fv = .text:0x0000E668; // type:function size:0x84
-fn_125_E6EC = .text:0x0000E6EC; // type:function size:0x10
+__ct__36ftWolfStatusUniqProcessReflectorImplFv = .text:0x0000E6EC; // type:function size:0x10
 __dt__52soInstanceUnitFullProperty<P21soStatusEventObserver>Fv = .text:0x0000E6FC; // type:function size:0x40 scope:weak
 setTurn__36ftWolfStatusUniqProcessReflectorImplFP16soModuleAccesser = .text:0x0000E73C; // type:function size:0x98
 fn_125_E7D4 = .text:0x0000E7D4; // type:function size:0x68

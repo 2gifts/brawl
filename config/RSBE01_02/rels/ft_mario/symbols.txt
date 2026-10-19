@@ -468,12 +468,12 @@ forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTrans
 isNull__38soEventUnitImpl<19soTurnEventObserver>CFv = .text:0x0000DAB0; // type:function size:0x8
 __ct__56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>FRC56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor> = .text:0x0000DAB8; // type:function size:0xC
 fn_91_DAC4 = .text:0x0000DAC4; // type:function size:0x9C
-fn_91_DB60 = .text:0x0000DB60; // type:function size:0x48
+__ct__26ftMarioExtendParamAccesserFv = .text:0x0000DB60; // type:function size:0x48
 fn_91_DBA8 = .text:0x0000DBA8; // type:function size:0x44
-fn_91_DBEC = .text:0x0000DBEC; // type:function size:0x48
-fn_91_DC34 = .text:0x0000DC34; // type:function size:0x58
+__ct__27ftMarioDExtendParamAccesserFv = .text:0x0000DBEC; // type:function size:0x48
+__ct__27ftClassInfoImpl<0,7ftMario>Fv = .text:0x0000DC34; // type:function size:0x58
 fn_91_DC8C = .text:0x0000DC8C; // type:function size:0x84
-fn_91_DD10 = .text:0x0000DD10; // type:function size:0x58
+__ct__29ftClassInfoImpl<54,8ftMarioD>Fv = .text:0x0000DD10; // type:function size:0x58
 fn_91_DD68 = .text:0x0000DD68; // type:function size:0x84
 fn_91_DDEC = .text:0x0000DDEC; // type:function size:0x104
 fn_91_DEF0 = .text:0x0000DEF0; // type:function size:0x68

@@ -472,8 +472,8 @@ forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTrans
 forEachHolderModuleAccesser<56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>>__46soInstancePoolSubNull<21soKineticEnergyJostle>F56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>P16soModuleAccesser_i = .text:0x0000DC40; // type:function size:0x8
 __ct__56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>FRC56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor> = .text:0x0000DC48; // type:function size:0xC
 fn_104_DC54 = .text:0x0000DC54; // type:function size:0x64
-fn_104_DCB8 = .text:0x0000DCB8; // type:function size:0x48
-fn_104_DD00 = .text:0x0000DD00; // type:function size:0x58
+__ct__26ftZeldaExtendParamAccesserFv = .text:0x0000DCB8; // type:function size:0x48
+__ct__28ftClassInfoImpl<13,7ftZelda>Fv = .text:0x0000DD00; // type:function size:0x58
 fn_104_DD58 = .text:0x0000DD58; // type:function size:0x84
 fn_104_DDDC = .text:0x0000DDDC; // type:function size:0x68
 @4@__dt__21soGeneralWorkAbstractFv = .text:0x0000DE44; // type:function size:0x8

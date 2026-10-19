@@ -472,8 +472,8 @@ forEachHolderModuleAccesser<64soKineticUpdateEnergyHolderHelper<27ftToonLinkKine
 forEachHolderModuleAccesser<64soKineticUpdateEnergyHolderHelper<27ftToonLinkKineticTransactor>>__46soInstancePoolSubNull<21soKineticEnergyJostle>F64soKineticUpdateEnergyHolderHelper<27ftToonLinkKineticTransactor>P16soModuleAccesser_i = .text:0x0000E940; // type:function size:0x8
 __ct__56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor>FRC56soKineticUpdateEnergyHolderHelper<19ftKineticTransactor> = .text:0x0000E948; // type:function size:0xC
 fn_121_E954 = .text:0x0000E954; // type:function size:0x64
-fn_121_E9B8 = .text:0x0000E9B8; // type:function size:0x48
-fn_121_EA00 = .text:0x0000EA00; // type:function size:0x58
+__ct__29ftToonLinkExtendParamAccesserFv = .text:0x0000E9B8; // type:function size:0x48
+__ct__32ftClassInfoImpl<41,10ftToonLink>Fv = .text:0x0000EA00; // type:function size:0x58
 fn_121_EA58 = .text:0x0000EA58; // type:function size:0x84
 fn_121_EADC = .text:0x0000EADC; // type:function size:0x68
 @4@__dt__26soArrayVectorCalcInterfaceFv = .text:0x0000EB44; // type:function size:0x8
