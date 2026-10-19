@@ -31,6 +31,93 @@ ftSnake::ftSnake(s32 entryId,
     // TODO
 }
 
+// ---- the fighter overrides ------------------------------------------------------------------------------------------
+// Work flag 0x1200003d is cleared on start, on damage, on landing and whenever a special move that can leave a pending
+// change ends. HYPOTHESIS: it marks a special move in progress (the same flag is cleared at the start of Mario's fighter).
+void ftSnake::onActivate() {
+    m_moduleAccesser->getWorkManageModule().setInt(0, 0x10000040);
+}
+
+void ftSnake::onStart(int startKind) {
+    m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+    Fighter::onStart(startKind);
+    // HYPOTHESIS: the work 0x10000033 holds the grenade count of the fighter.
+    m_moduleAccesser->getWorkManageModule().setInt(6, 0x10000033);
+}
+
+// The Final Smash gave the model its own scale; the end puts the scale back from the work float.
+void ftSnake::onEndFinal() {
+    soPostureModule& posture = m_moduleAccesser->getPostureModule();
+    posture.setScale(m_moduleAccesser->getWorkManageModule().getFloat(0x1100000b));
+}
+
+void ftSnake::notifyEventOnDamage(soDamage* damage, bool flag, soModuleAccesser* moduleAccesser) {
+    if (flag == true) {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+    }
+    Fighter::notifyEventOnDamage(damage, flag, moduleAccesser);
+}
+
+// Landing (and starting a fall off an edge) ends the special moves that held the flag.
+// HYPOTHESIS: the statuses are the ground special moves of Snake.
+void ftSnake::notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeSituation(kind, prevKind, moduleAccesser);
+    if (kind == 0) {
+        switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+        case 0x112:
+        case 0x113:
+        case 0x115:
+        case 0x119:
+        case 0x11a:
+        case 0x11c:
+        case 0x11d:
+        case 0x11e:
+        case 0x11f:
+        case 0x120:
+        case 0x121:
+        case 0x12a:
+        case 0x12b:
+        case 0x12d:
+        case 0x12f:
+            m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+            break;
+        }
+    } else if (kind == 3) {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+    }
+}
+
+void ftSnake::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    switch (eventInfo->m_eventKind) {
+    case 0x455:
+        switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+        case 0x117:
+            m_moduleAccesser->getStatusModule().changeStatusRequest(0x118, m_moduleAccesser);
+            break;
+        }
+        m_moduleAccesser->getGenerateArticleManageModule().remove(3, 0);
+        break;
+    case 0x456:
+        if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x11f) {
+            m_moduleAccesser->getWorkManageModule().setFlag(true, 0x22000010);
+        } else if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x113) {
+            m_moduleAccesser->getWorkManageModule().setFlag(true, 0x22000010);
+        }
+        break;
+    case 0x457:
+        if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x11f) {
+            m_moduleAccesser->getWorkManageModule().setFlag(true, 0x22000011);
+        } else if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x113) {
+            m_moduleAccesser->getWorkManageModule().setFlag(true, 0x22000011);
+        }
+        break;
+    case 6:
+        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+        break;
+    }
+    Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+
 // The trench mortar shell starts at the stage object of the fighter with its team and facing.
 bool ftSnake::activeArticle1(wnSnakeTrenchMortar* weapon, soModuleAccesser* acc) {
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());

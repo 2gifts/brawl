@@ -75,6 +75,12 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    virtual void onActivate();
+    virtual void onStart(int startKind);
+    virtual void onEndFinal();
+    virtual void notifyEventOnDamage(soDamage* damage, bool flag, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
     // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnSnakeMine* weapon, soModuleAccesser* acc);
     static bool activeArticle1(wnSnakeTrenchMortar* weapon, soModuleAccesser* acc);
