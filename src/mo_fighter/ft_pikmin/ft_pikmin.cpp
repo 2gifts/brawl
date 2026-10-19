@@ -1,7 +1,6 @@
 #define MT_VEC2F_PLAIN_BASE
 #define FT_PIKMIN_OWNER_INFO_DTOR
 #define MT_VEC2F_FROM_VEC3_CTOR_NOINLINE
-#define MT_VEC2F_CTOR_NOINLINE
 #define MT_VEC2F_SUB_NOINLINE
 #define MT_VEC2F_LENGTH_SQ_OUT_OF_LINE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
@@ -847,6 +846,88 @@ void ftPikmin::refreshOwnerInfoPos() {
         Vec2f* owner = reinterpret_cast<Vec2f*>(&getOwners().at(i));
         owner->m_x = pos.m_x;
         owner->m_y = pos.m_y;
+    }
+}
+
+// MATCH-ONLY: the original calls the constructor and destructor of the local Vec2f array out of line (they live in the REL).
+FT_DOL_ARRAY_VECTOR(Vec2f, 10);
+
+// MATCH-ONLY: the REL carries the out-of-line helper (the declaration is never_inline, see MT_VEC2F_LENGTH_SQ_OUT_OF_LINE).
+float Vec2f::lengthSq() {
+    float xSq = m_x * m_x;
+    float ySq = m_y * m_y;
+    return xSq + ySq;
+}
+
+extern "C" void __ct__5Vec2fFff(Vec2f* self, float x, float y); // Vec2f::Vec2f(float, float), out of line in the REL
+
+static inline Vec2f addVec2f(Vec2f& a, Vec2f& b) {
+    Vec2f sum;
+    fn_113_BF8C(&a, &b, &sum);
+    return sum;
+}
+
+// Stand-ins for the status-process classes (at the offsets given) that update their own hold Pikmin.
+extern "C" void fn_113_12874(void* statusProcess, soModuleAccesser* acc);
+extern "C" void fn_113_11B28(void* statusProcess, soModuleAccesser* acc);
+extern "C" void fn_113_12C9C(void* statusProcess, soModuleAccesser* acc);
+extern "C" void fn_113_130F0(void* statusProcess, soModuleAccesser* acc);
+extern "C" void fn_113_1386C(void* statusProcess, soModuleAccesser* acc);
+extern "C" void fn_113_13C7C(void* statusProcess, soModuleAccesser* acc);
+
+// Olimar's statuses that carry Pikmin in hand hand the update to their status-process class (members at 0x200D8..0x20128);
+// the plain hold statuses 0x2d..0x2f place the hold Pikmin themselves: the two spots they take are the hand node moved by the
+// constant offset (turned by the facing and the scale) and the same node moved the other way.
+// HYPOTHESIS: status numbers, the meaning of the two spots and of the constants 0xfa8/0xfa9.
+void ftPikmin::updateHoldPikmin() {
+    u8* self = reinterpret_cast<u8*>(this);
+    switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x33:
+        fn_113_12874(self + 0x200E0, m_moduleAccesser);
+        break;
+    case 0x113:
+        fn_113_11B28(self + 0x200D8, m_moduleAccesser);
+        break;
+    case 0x2a:
+    case 0x2b:
+    case 0x2c:
+        fn_113_12C9C(self + 0x200F8, m_moduleAccesser);
+        break;
+    case 0x30:
+    case 0x31:
+    case 0x32:
+        fn_113_130F0(self + 0x20110, m_moduleAccesser);
+        break;
+    case 0x2d:
+    case 0x2e:
+    case 0x2f:
+        if (m_troops.getHoldPikminNum() > 0) {
+            soArrayVector<Vec2f, 10> spots(0);
+            Vec2f handPos(m_moduleAccesser->getModelModule().getNodeGlobalPosition(0, false));
+            Vec2f handPosAgain(m_moduleAccesser->getModelModule().getNodeGlobalPosition(0, false));
+            soModuleAccesser* acc = m_moduleAccesser;
+            float offsetY = soValueAccesser::getConstantFloat(acc, 0xfa9, 0);
+            Vec2f offset;
+            __ct__5Vec2fFff(&offset, soValueAccesser::getConstantFloat(acc, 0xfa8, 0), offsetY);
+            float scale = m_moduleAccesser->getPostureModule().getScale();
+            offset.m_x *= scale;
+            offset.m_y *= scale;
+            if (m_moduleAccesser->getPostureModule().getLr() < 0.0f) {
+                offset.m_x = -offset.m_x;
+            }
+            spots.push(addVec2f(handPos, offset));
+            spots.push(handPos - offset);
+            m_troops.updateHoldPikmin(reinterpret_cast<const soArrayFixed<wnPikminPikminOwnerInfo>*>(&spots));
+        }
+        break;
+    case 0x114:
+        fn_113_1386C(self + 0x20118, m_moduleAccesser);
+        break;
+    case 0x34:
+    case 0x36:
+    case 0x38:
+        fn_113_13C7C(self + 0x20120, m_moduleAccesser);
+        break;
     }
 }
 
