@@ -8,6 +8,10 @@
 class soCollisionManager {
 public:
     soCollisionManager();
+    // HYPOTHESIS: the lazy singleton getter is emitted in the REL that uses it (the fighters keep log groups).
+    static soCollisionManager* getInstance();
+    void freeLogGroup(int logGroup);
+    void leaveFreeRefLogGroup(int logGroup);
     char _0[0x1508];
 };
 static_assert(sizeof(soCollisionManager) == 0x1508, "Class is wrong size!");

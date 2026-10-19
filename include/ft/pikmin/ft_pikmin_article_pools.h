@@ -20,6 +20,8 @@ class wnPikminPikmin : public Weapon {
 public:
     wnPikminPikmin(s32 articleId, const wnArticleBuildInfo& info, const wnPikminPikminData* data);
     virtual ~wnPikminPikmin();
+    void activate(float lr, float unk2, float unk3, int unk18, Vec3f* pos, int founderTaskId, int resourceId, int team,
+                  int initStatus, bool unk10, int unk11);
 };
 static_assert(sizeof(wnPikminPikmin) == 0x3344, "wnPikminPikmin layout is wrong!");
 
@@ -29,6 +31,7 @@ class wnPikminDolfin : public Weapon {
 public:
     wnPikminDolfin(s32 articleId, const wnArticleBuildInfo& info, const wnPikminDolfinData* data);
     virtual ~wnPikminDolfin();
+    void activate(int founderTaskId, int kind, int team, Vec3f* pos);
 };
 static_assert(sizeof(wnPikminDolfin) == 0x2428, "wnPikminDolfin layout is wrong!");
 
@@ -38,6 +41,7 @@ class wnPikminChain : public Weapon {
 public:
     wnPikminChain(s32 articleId, const wnArticleBuildInfo& info, const wnPikminChainData* data);
     virtual ~wnPikminChain();
+    void activate(float lr, int founderTaskId, int kind, int team, bool unk, int pikminNum);
 };
 static_assert(sizeof(wnPikminChain) == 0x1F40, "wnPikminChain layout is wrong!");
 

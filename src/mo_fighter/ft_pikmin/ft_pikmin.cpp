@@ -25,6 +25,7 @@
 #include <so/ground/so_ground_util.h>
 #include <so/stageobject.h>
 #include <ft/pikmin/ft_pikmin.h>
+#include <ft/pikmin/ft_pikmin_utility.h>
 #include <ft/pikmin/ft_pikmin_extend_param_accesser.h>
 #include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
@@ -59,9 +60,6 @@ ftPikmin::ftPikmin(s32 entryId,
 }
 
 // The activation of the articles lives in the fighter's article helpers (still unnamed).
-extern "C" bool fn_113_10428(wnPikminPikmin* weapon, soModuleAccesser* acc);
-extern "C" bool fn_113_10734(wnPikminDolfin* weapon, soModuleAccesser* acc);
-extern "C" bool fn_113_10828(wnPikminChain* weapon, soModuleAccesser* acc);
 
 // ---- the article holders --------------------------------------------------------------------------------------------
 // What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Pikmin, copied into the
@@ -252,13 +250,13 @@ bool ftPikminArticleMediator::isGeneratable(soModuleAccesser* acc, s32 articleId
 
 template <class W> struct ftPikminArticleActivator;
 template <> struct ftPikminArticleActivator<wnPikminPikmin> {
-    static bool activate(wnPikminPikmin* weapon, soModuleAccesser* acc) { return fn_113_10428(weapon, acc); }
+    static bool activate(wnPikminPikmin* weapon, soModuleAccesser* acc) { return ftPikminUtility::activeArticle(weapon, acc); }
 };
 template <> struct ftPikminArticleActivator<wnPikminDolfin> {
-    static bool activate(wnPikminDolfin* weapon, soModuleAccesser* acc) { return fn_113_10734(weapon, acc); }
+    static bool activate(wnPikminDolfin* weapon, soModuleAccesser* acc) { return ftPikminUtility::activeArticle1(weapon, acc); }
 };
 template <> struct ftPikminArticleActivator<wnPikminChain> {
-    static bool activate(wnPikminChain* weapon, soModuleAccesser* acc) { return fn_113_10828(weapon, acc); }
+    static bool activate(wnPikminChain* weapon, soModuleAccesser* acc) { return ftPikminUtility::activeArticle2(weapon, acc); }
 };
 
 // Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
@@ -445,11 +443,6 @@ bool ftPikmin::notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* acc, s32 ind
 // HYPOTHESIS: the camera controller keeps a one-bit flag (set while Olimar runs the Final Smash) in the byte at 0x44.
 #define FT_PIKMIN_CAMERA_FLAG_BYTE (*(reinterpret_cast<s8*>(CameraController::getInstance()) + 0x44))
 
-// Stand-ins for the helpers of the fighter that sit behind the unit split (still unnamed).
-extern "C" int fn_113_100F0(soModuleAccesser* acc, float speed); // HYPOTHESIS: the owner condition for the speed of the line
-extern "C" bool fn_113_10E18(int statusKind);                    // HYPOTHESIS: the status keeps the Pikmin hidden around Olimar
-extern "C" void fn_113_1094C(soModuleAccesser* acc);
-
 // The Pikmin of the hold list stand hidden at Olimar's position while he runs a status that shows none of them: the owner info
 // takes the condition, every hold Pikmin in the waiting status 0x33 follows and is set to `status` (0 means: back to the
 // ground if it can attach there, else status 0xa).
@@ -461,7 +454,7 @@ void ftPikmin::reduceHideWaitPikmin(int status) {
     if (num > 0) {
         Vec3f position = m_moduleAccesser->getPostureModule().getPos();
         Vec2f pos(position);
-        int condition = fn_113_100F0(m_moduleAccesser, 0.0f);
+        int condition = ftPikminUtility::getPikminOwnerCondition(m_moduleAccesser, 0.0f);
         getOwners().at(0).unkc.bits.condition = condition;
         float lr = m_moduleAccesser->getPostureModule().getLr();
         for (int i = 0; i < num; i++) {
@@ -600,22 +593,22 @@ void ftPikmin::notifyEventChangeStatus(int statusKind, int prevStatusKind, soSta
                     pikmin->changeStatus(0x30);
                 }
             }
-        } else if (fn_113_10E18(statusKind) == false) {
+        } else if (ftPikminUtility::isHideOrderOwnerCondition(statusKind) == false) {
             reduceHideWaitPikmin(8);
         }
-        fn_113_1094C(moduleAccesser);
+        ftPikminUtility::unRefLogGroup(moduleAccesser);
         break;
     case 0x76:
     case 0x77:
     case 0x78:
     case 0x95:
-        if (fn_113_10E18(statusKind) == false) {
+        if (ftPikminUtility::isHideOrderOwnerCondition(statusKind) == false) {
             reduceHideWaitPikmin(0);
         }
         break;
     case 0x75:
         if (statusKind != 0x76 && statusKind != 0x77 && statusKind != 0x78 && statusKind != 0x79) {
-            if (fn_113_10E18(statusKind) == false) {
+            if (ftPikminUtility::isHideOrderOwnerCondition(statusKind) == false) {
                 reduceHideWaitPikmin(8);
             }
         }
@@ -624,31 +617,31 @@ void ftPikmin::notifyEventChangeStatus(int statusKind, int prevStatusKind, soSta
         }
         break;
     case 0x79:
-        if (fn_113_10E18(statusKind) == false) {
+        if (ftPikminUtility::isHideOrderOwnerCondition(statusKind) == false) {
             reduceHideWaitPikmin(8);
         }
         break;
     case 0x94:
         if (statusKind != 0x95) {
-            if (fn_113_10E18(statusKind) == false) {
+            if (ftPikminUtility::isHideOrderOwnerCondition(statusKind) == false) {
                 reduceHideWaitPikmin(8);
             }
         }
         break;
     case 0xc0:
     case 0xc2:
-        if (fn_113_10E18(statusKind) == false) {
+        if (ftPikminUtility::isHideOrderOwnerCondition(statusKind) == false) {
             reduceHideWaitPikmin(8);
         }
         break;
     case 0x82:
-        if (fn_113_10E18(statusKind) == false) {
+        if (ftPikminUtility::isHideOrderOwnerCondition(statusKind) == false) {
             reduceHideWaitPikmin(8);
         }
         break;
     case 0x81:
         if (statusKind != 0x82) {
-            if (fn_113_10E18(statusKind) == false) {
+            if (ftPikminUtility::isHideOrderOwnerCondition(statusKind) == false) {
                 reduceHideWaitPikmin(8);
             }
         }
@@ -763,7 +756,7 @@ void ftPikmin::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* mod
                     }
                     m_troops.reducePikminAll(&getOwners());
                 }
-                fn_113_1094C(m_moduleAccesser);
+                ftPikminUtility::unRefLogGroup(m_moduleAccesser);
             }
             break;
         case 0x83d: {
@@ -801,7 +794,6 @@ void ftPikmin::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* mod
 
 // Stand-ins for the helpers behind the unit split.
 extern "C" void fn_113_BF8C(Vec2f* a, Vec2f* b, Vec2f* out); // Vec2f::add, out of line in this unit
-extern "C" void fn_113_10A34(u8* option, soModuleAccesser* acc); // HYPOTHESIS: getPikminOwnerOptionInfo
 
 // Every frame Olimar leaves a new owner info behind him: his position, the way he faces, the condition for the speed he moves
 // with and an option byte. The older infos drift with the movement of the frame (the Pikmin of the line walk to them), the
@@ -816,9 +808,9 @@ void ftPikmin::updatePikmin() {
     if (speed.lengthSq() != 0.0f) {
         fn_113_BF8C(&shift, &(speed - m_moduleAccesser->getGroundModule().getDownMovementSpeed(0)), &shift);
     }
-    int condition = fn_113_100F0(m_moduleAccesser, shift.length());
+    int condition = ftPikminUtility::getPikminOwnerCondition(m_moduleAccesser, shift.length());
     u8 option = 0;
-    fn_113_10A34(&option, m_moduleAccesser);
+    ftPikminUtility::getPikminOwnerOptionInfo(&option, m_moduleAccesser);
     float lr = m_moduleAccesser->getPostureModule().getLr();
     Vec2f pos(m_moduleAccesser->getPostureModule().getPos());
     wnPikminPikminOwnerInfo info;
@@ -835,6 +827,17 @@ void ftPikmin::updatePikmin() {
         }
     }
     m_troops.update(&getOwners());
+}
+
+// A new Pikmin joins the line behind Olimar.
+void ftPikmin::addPikmin(wnPikminPikmin* pikmin) {
+    m_troops.addPikmin(pikmin);
+    m_troops.updateJostlePriority();
+}
+
+// The Pikmin of the line stand at the owner infos again.
+void ftPikmin::reducePikminAll() {
+    m_troops.reducePikminAll(&getOwners());
 }
 
 // Olimar's position is the target of every owner info.
@@ -1115,11 +1118,6 @@ s32 fn_113_D0AC() { return g_soValueVariation; }
 
 // The troops manager is the sub-object at this+0x1FD08; the owner info array sits at this+0x1FE8C.
 #define PIKMIN_TROOPS(p) reinterpret_cast<wnPikminPikminTroopsManager*>((p) + 0x1FD08)
-void fn_113_C394(u8* p, wnPikminPikmin* pikmin) {
-    PIKMIN_TROOPS(p)->addPikmin(pikmin);
-    PIKMIN_TROOPS(p)->updateJostlePriority();
-}
-void fn_113_C3D4(u8* p) { PIKMIN_TROOPS(p)->reducePikminAll(reinterpret_cast<soArrayFixed<wnPikminPikminOwnerInfo>*>(p + 0x1FE8C)); }
 
 // ftPikmin::setTeam: base Fighter::setTeam first, then the troops manager
 void fn_113_C4E0(u8* p, int team, int teamOwner) {
