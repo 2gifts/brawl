@@ -2718,6 +2718,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/gr/gr_gimmick_spring.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/gr/gr_adventure_motion_ground.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/gr/gr_gimmick_catapult.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ai/ai_mgr.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ai/ai_stat.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/it/it_manager.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/it/it_gen_archive.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/it/it_switch_decide_module_impl.cpp"),
@@ -6288,7 +6290,9 @@ config.libs = [
         "mw_version": config.linker_version,
         "cflags": cflags_rel,
         "host": False,
-        "objects": [],
+        "objects": [
+            Object(NonMatching, "mo_menu/mu_stage_edit_ui.cpp"),
+        ],
     },
     {
         "lib": "sora_menu_event",
