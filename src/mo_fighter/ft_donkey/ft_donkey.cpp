@@ -1,9 +1,18 @@
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_DONKEY_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define FT_TEAM_TYPED_INTERFACE
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/donkey/ft_donkey.h>
 #include <ft/donkey/ft_donkey_extend_param_accesser.h>
+#include <ft/ft_owner.h>
+#include <ft/ft_resource_id_accesser_impl.h>
+#include <so/article/so_article_mediator.h>
+#include <so/so_value_accesser.h>
 
 #define FT_BC ftDonkeyBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -79,6 +88,273 @@ ftDonkey::ftDonkey(s32 entryId,
     m_moduleAccesser->getStatusModule().setUniqProc(0x39, &lbl_92_bss_234);
     m_moduleAccesser->getStatusModule().setUniqProc(0x3A, &lbl_92_bss_234);
 }
+
+// ---- the fighter overrides ------------------------------------------------------------------------------------------
+// HYPOTHESIS: the works 0x10000040 / 0x10000041 / 0x10000042 hold the state of the barrel conga (the effect of the drum and
+// the pending-change flag 0x1200003d); the common effect 0x1a is the drum.
+void ftDonkey::onStart(int startKind) {
+    if (startKind == 8) {
+        if (m_moduleAccesser->getWorkManageModule().isFlag(0x1200003d)) {
+            int effectHandle = m_moduleAccesser->getWorkManageModule().getInt(0x10000041);
+            m_moduleAccesser->getEffectModule().remove(effectHandle);
+        }
+    }
+    m_moduleAccesser->getWorkManageModule().setInt(0, 0x10000040);
+    m_moduleAccesser->getWorkManageModule().setInt(0, 0x10000041);
+    m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+    m_moduleAccesser->getEffectModule().removeCommon(0x1a);
+    m_moduleAccesser->getWorkManageModule().setInt(-1, 0x10000042);
+    Fighter::onStart(startKind);
+}
+
+// While the fighter is held by an opponent in the statuses 0x120..0x129 the grab is released.
+bool ftDonkey::notifyEventCaptureStatus(soModuleAccesser* moduleAccesser, int taskId, int unk2, int unk3) {
+    int status = moduleAccesser->getStatusModule().getStatusKind();
+    if (status >= 0x120 && status <= 0x129) {
+        moduleAccesser->getStatusModule().changeStatusRequest(-1, moduleAccesser);
+    }
+    return Fighter::notifyEventCaptureStatus(moduleAccesser, taskId, unk2, unk3);
+}
+
+// The conga barrel of the Final Smash starts at the stage object of the fighter with its team.
+bool ftDonkey::activeArticle(wnDonkeyBarrelConga* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam());
+    return true;
+}
+
+// The drum sound article starts at the node 5 of the fighter, shaped by the four float works 0x21000005..8.
+bool ftDonkey::activeArticle1(wnDonkeySoundEffect* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    Vec3f pos = acc->getModelModule().getNodeGlobalPosition(5, false);
+    pos.m_z = 0.0f;
+    int founderTaskId = fighter.m_taskId;
+    soWorkManageModule& work = acc->getWorkManageModule();
+    weapon->activate(founderTaskId, fighter.getOwner()->getTeam(), &pos, work.getFloat(0x21000005), work.getFloat(0x21000006), work.getFloat(0x21000007), work.getFloat(0x21000008), work.isFlag(0x22000011));
+    return false;
+}
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Donkey, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftDonkeyArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftDonkeyArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftDonkeyArticleKind : wnArticleKindInfo {
+    ftDonkeyArticleKind() {
+        kind = 0;
+        subKind = Fighter_Donkey;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftDonkeyArticleBuildInfo : wnArticleBuildInfo {
+    ftDonkeyArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_14981C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_149830(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftDonkeyArticleTraits;
+#define FT_DONKEY_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftDonkeyArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftDonkeyArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Donkey, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_DONKEY_TRAITS(wnDonkeyBarrelConga, wnDonkeyBarrelCongaData, 0, fn_27_14981C)
+FT_DONKEY_TRAITS(wnDonkeySoundEffect, wnDonkeySoundEffectData, 1, fn_27_149830)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftDonkeyArticleTraits<W>::ArticleId, ftDonkeyArticleBuildInfo(ftDonkeyArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftDonkeyArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnDonkeyBarrelConga>::~wnArticleHolder();
+template wnArticleHolder<wnDonkeySoundEffect>::~wnArticleHolder();
+template wnArticleHolder<wnDonkeySoundEffect>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftDonkeyArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftDonkeyArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftDonkeyArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftDonkeyArticleMediator::~ftDonkeyArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftDonkeyArticleMediator::getMediateNum() { return 2; }
+void ftDonkeyArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 BarrelConga, 1 SoundEffect (the rest are unused).
+
+#define FT_DONKEY_POOL_BARRELCONGA_BASE static_cast<wnArticlePool<wnDonkeyBarrelConga, 1, ftDonkeySoundEffectPool>&>(m_pools)
+#define FT_DONKEY_POOL_BARRELCONGA FT_DONKEY_POOL_BARRELCONGA_BASE.getSub()
+#define FT_DONKEY_POOL_SOUNDEFFECT_BASE static_cast<wnArticlePool<wnDonkeySoundEffect, 4, soInstancePoolRoot>&>(m_pools)
+#define FT_DONKEY_POOL_SOUNDEFFECT FT_DONKEY_POOL_SOUNDEFFECT_BASE.getSub()
+
+#define FT_DONKEY_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(2, value) WN_ARTICLE_UNUSED_SLOT(3, value) WN_ARTICLE_UNUSED_SLOT(4, value) \
+    WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) WN_ARTICLE_UNUSED_SLOT(7, value) \
+    WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) WN_ARTICLE_UNUSED_SLOT(10, value) \
+    WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) WN_ARTICLE_UNUSED_SLOT(13, value) \
+    WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftDonkeyArticleMediator::deactivate() {
+    for (s32 i = 0; i < 1; ++i) {
+        wnDonkeyBarrelConga* weapon = FT_DONKEY_POOL_BARRELCONGA.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 4; ++i) {
+        wnDonkeySoundEffect* weapon = FT_DONKEY_POOL_SOUNDEFFECT.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftDonkeyArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 1; }
+    case 1: { wnArticleSlotTag tag; return 4; }
+    FT_DONKEY_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftDonkeyActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_DONKEY_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftDonkeyActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftDonkeyActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftDonkeyArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_DONKEY_COUNT_ACTIVE(FT_DONKEY_POOL_BARRELCONGA, 1)
+    case 1: FT_DONKEY_COUNT_ACTIVE(FT_DONKEY_POOL_SOUNDEFFECT, 4)
+    FT_DONKEY_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_DONKEY_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftDonkeyArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_DONKEY_CAN_GENERATE(FT_DONKEY_POOL_BARRELCONGA, 1, 0)
+    case 1: FT_DONKEY_CAN_GENERATE(FT_DONKEY_POOL_SOUNDEFFECT, 4, 1)
+    FT_DONKEY_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftDonkeyArticleActivator;
+template <> struct ftDonkeyArticleActivator<wnDonkeyBarrelConga> {
+    static bool activate(wnDonkeyBarrelConga* weapon, soModuleAccesser* acc) { return ftDonkey::activeArticle(weapon, acc); }
+};
+template <> struct ftDonkeyArticleActivator<wnDonkeySoundEffect> {
+    static bool activate(wnDonkeySoundEffect* weapon, soModuleAccesser* acc) { return ftDonkey::activeArticle1(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_DONKEY_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftDonkeyArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftDonkeyArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_DONKEY_GENERATE(wnDonkeyBarrelConga, FT_DONKEY_POOL_BARRELCONGA)
+    case 1: FT_DONKEY_GENERATE(wnDonkeySoundEffect, FT_DONKEY_POOL_SOUNDEFFECT)
+    FT_DONKEY_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftDonkeyArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: { wnArticleSlotTag tag; (void)dynamic_cast<wnDonkeyBarrelConga&>(*article); return true; }
+    case 1: { wnArticleSlotTag tag; (void)dynamic_cast<wnDonkeySoundEffect&>(*article); return true; }
+    FT_DONKEY_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftDonkey is done
 void testBuilder() {

@@ -23,8 +23,14 @@ typedef soCollisionShieldModuleBuildConfigGroups<2, 1, 1, soCollisionShieldEvent
 typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> ftKoopaLinkModuleBuildConfig;
 typedef soStatusModuleBuildConfig<291, soGeneralWorkBuildConfig<18, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftKoopaStatusModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (the breath pool). Only the fighter unit builds the real pool; the other
+// units of the REL see an opaque block of the same size.
+#ifdef FT_KOOPA_ARTICLE_POOLS
+#include <ft/koopa/ft_koopa_article_pools.h>
+typedef ftKoopaArticleManageModuleBuilder ftKoopaGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0xBDFC, Fighter_Koopa> ftKoopaGenerateArticleManageModuleBuilder;
+#endif
 
 class ftKoopaBuildConfig : public ftCommonBuildConfig {
 public:
@@ -41,6 +47,8 @@ public:
     typedef ftKoopaGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnKoopaBreath;
+
 class ftKoopa : public ftFighterBuilder<ftKoopaBuildConfig> {
     u8 unkTail[0x1416C - sizeof(ftFighterBuilder<ftKoopaBuildConfig>)];
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
@@ -50,4 +58,7 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    virtual void onStart(int startKind);
+    // The hook the article mediator calls to start an article of the pool (HYPOTHESIS: the name follows the module map).
+    static bool activeArticle(wnKoopaBreath* weapon, soModuleAccesser* acc);
 };

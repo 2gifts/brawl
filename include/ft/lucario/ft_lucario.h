@@ -34,8 +34,14 @@ typedef soMotionModuleBuildConfig<491, soMotionModuleImpl, 2, 1, soTransitionMod
 typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> ftLucarioLinkModuleBuildConfig;
 typedef soStatusModuleBuildConfig<293, soGeneralWorkBuildConfig<18, 14, 2>, 274, 71, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftLucarioStatusModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (weapon pools), not reconstructed yet
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder (aura ball and Aura Sphere pools). Only the fighter unit builds the real
+// pools; the other units of the REL see an opaque block of the same size.
+#ifdef FT_LUCARIO_ARTICLE_POOLS
+#include <ft/lucario/ft_lucario_article_pools.h>
+typedef ftLucarioArticleManageModuleBuilder ftLucarioGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x801C, Fighter_Lucario> ftLucarioGenerateArticleManageModuleBuilder;
+#endif
 
 class ftLucarioBuildConfig : public ftCommonBuildConfig {
 public:
@@ -51,6 +57,8 @@ public:
     typedef ftLucarioGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnLucarioQigong;
+
 class ftLucario : public ftFighterBuilder<ftLucarioBuildConfig> {
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
     ftData* m_data;
@@ -59,4 +67,6 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    // The hook the article mediator calls to start the Aura Sphere (HYPOTHESIS: the name follows the module map).
+    static bool activeArticle(wnLucarioQigong* weapon, soModuleAccesser* acc);
 };

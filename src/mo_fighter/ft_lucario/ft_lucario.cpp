@@ -1,12 +1,18 @@
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_LUCARIO_ARTICLE_POOLS
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define FT_TEAM_TYPED_INTERFACE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_physics_iface.h>
 #include <so/so_value_accesser.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/lucario/ft_lucario.h>
 #include <ft/lucario/ft_lucario_extend_param_accesser.h>
+#include <ft/lucario/ft_lucario_transactor.h>
+#include <so/article/so_article_mediator.h>
 
 #define FT_BC ftLucarioBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -69,6 +75,246 @@ ftLucario::ftLucario(s32 entryId,
     m_moduleAccesser->getCollisionShieldModule().add(*reinterpret_cast<soCollisionShieldGroupData**>(reinterpret_cast<u8*>(m_data) + 0x9c), 1);
     ftPhysicsModuleCall6C(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0x13);
 }
+
+// MATCH-ONLY: the native singleton addresses its guard, instance and destructor registration separately rather than
+// pooling them into one BSS base.
+#pragma pool_data off
+#pragma dont_inline on
+ftLucarioTransactor* ftLucarioTransactor::getInstance() {
+    static ftLucarioTransactor instance;
+    return &instance;
+}
+#pragma dont_inline off
+#pragma pool_data reset
+
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Lucario, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftLucarioArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftLucarioArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftLucarioArticleKind : wnArticleKindInfo {
+    ftLucarioArticleKind() {
+        kind = 0;
+        subKind = Fighter_Lucario;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftLucarioArticleBuildInfo : wnArticleBuildInfo {
+    ftLucarioArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_1494D0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_149588(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftLucarioArticleTraits;
+#define FT_LUCARIO_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftLucarioArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftLucarioArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Lucario, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_LUCARIO_TRAITS(wnLucarioAuraBall, wnLucarioAuraBallData, 0, fn_27_1494D0)
+FT_LUCARIO_TRAITS(wnLucarioQigong, wnLucarioQigongData, 1, fn_27_149588)
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class W>
+wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(ftLucarioArticleTraits<W>::ArticleId, ftLucarioArticleBuildInfo(ftLucarioArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftLucarioArticleTraits<W>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these destructors out of line.
+#pragma dont_inline on
+template <class W>
+wnArticleHolder<W>::~wnArticleHolder() { }
+template <class W, int N>
+wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template wnArticleHolder<wnLucarioAuraBall>::~wnArticleHolder();
+template wnArticleHolder<wnLucarioQigong>::~wnArticleHolder();
+template wnArticleHolder<wnLucarioAuraBall>::wnArticleHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftLucarioArticleMediator>::~wnSelectedArticleMediator();
+template wnArticleManageModuleBuilder<ftLucarioArticleMediator, 5>::~wnArticleManageModuleBuilder();
+template wnArticleManageModuleBuilder<ftLucarioArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+ftLucarioArticleMediator::~ftLucarioArticleMediator() { }
+#pragma dont_inline off
+
+s32 ftLucarioArticleMediator::getMediateNum() { return 2; }
+void ftLucarioArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 AuraBall, 1 Qigong (the rest are unused).
+
+#define FT_LUCARIO_POOL_AURABALL_BASE static_cast<wnArticlePool<wnLucarioAuraBall, 3, ftLucarioQigongPool>&>(m_pools)
+#define FT_LUCARIO_POOL_AURABALL FT_LUCARIO_POOL_AURABALL_BASE.getSub()
+#define FT_LUCARIO_POOL_QIGONG_BASE static_cast<wnArticlePool<wnLucarioQigong, 1, soInstancePoolRoot>&>(m_pools)
+#define FT_LUCARIO_POOL_QIGONG FT_LUCARIO_POOL_QIGONG_BASE.getSub()
+
+#define FT_LUCARIO_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(2, value) WN_ARTICLE_UNUSED_SLOT(3, value) WN_ARTICLE_UNUSED_SLOT(4, value) \
+    WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) WN_ARTICLE_UNUSED_SLOT(7, value) \
+    WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) WN_ARTICLE_UNUSED_SLOT(10, value) \
+    WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) WN_ARTICLE_UNUSED_SLOT(13, value) \
+    WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) WN_ARTICLE_UNUSED_SLOT(16, value)
+
+void ftLucarioArticleMediator::deactivate() {
+    for (s32 i = 0; i < 3; ++i) {
+        wnLucarioAuraBall* weapon = FT_LUCARIO_POOL_AURABALL.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnLucarioQigong* weapon = FT_LUCARIO_POOL_QIGONG.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+s32 ftLucarioArticleMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: { wnArticleSlotTag tag; return 3; }
+    case 1: { wnArticleSlotTag tag; return 1; }
+    FT_LUCARIO_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// The counter is a plain aggregate here; the original counts with a functor whose methods MWCC inlines.
+struct ftLucarioActiveCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
+
+#define FT_LUCARIO_COUNT_ACTIVE(POOL, N) \
+    { \
+        wnArticleSlotTag tag; \
+        ftLucarioActiveCounter counter; \
+        counter.m_isActive = wnArticleIsActive; \
+        counter.m_activeNum = 0; \
+        counter.m_inactiveNum = 0; \
+        for (s32 i = 0; i < N; ++i) { \
+            ftLucarioActiveCounter* c = &counter; \
+            if (c->m_isActive(&static_cast<soArticle&>(*POOL.getInstanceAt(i))) == true) { \
+                ++c->m_activeNum; \
+            } else { \
+                ++c->m_inactiveNum; \
+            } \
+        } \
+        return counter.m_activeNum; \
+    }
+
+s32 ftLucarioArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_LUCARIO_COUNT_ACTIVE(FT_LUCARIO_POOL_AURABALL, 3)
+    case 1: FT_LUCARIO_COUNT_ACTIVE(FT_LUCARIO_POOL_QIGONG, 1)
+    FT_LUCARIO_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+// Generatable while any article of the slot is inactive.
+#define FT_LUCARIO_CAN_GENERATE(POOL, N, ID) \
+    { \
+        wnArticleSlotTag tag; \
+        bool allActive; \
+        s32 i; \
+        for (i = 0; i < N; ++i) { \
+            if (static_cast<soArticle&>(*POOL.getInstanceAt(i)).isActiveArticle() == false) { \
+                allActive = false; \
+                goto done_##ID; \
+            } \
+        } \
+        allActive = true; \
+    done_##ID: \
+        return allActive == false; \
+    }
+
+bool ftLucarioArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: FT_LUCARIO_CAN_GENERATE(FT_LUCARIO_POOL_AURABALL, 3, 0)
+    case 1: FT_LUCARIO_CAN_GENERATE(FT_LUCARIO_POOL_QIGONG, 1, 1)
+    FT_LUCARIO_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+template <class W> struct ftLucarioArticleActivator;
+template <> struct ftLucarioArticleActivator<wnLucarioAuraBall> {
+    static bool activate(wnLucarioAuraBall* weapon, soModuleAccesser* acc) { return ftLucarioTransactor::getInstance()->activeArticle1(weapon, acc); }
+};
+template <> struct ftLucarioArticleActivator<wnLucarioQigong> {
+    static bool activate(wnLucarioQigong* weapon, soModuleAccesser* acc) { return ftLucario::activeArticle(weapon, acc); }
+};
+
+// Hands out the first inactive article (newest first), else deactivates the oldest active one and reuses it.
+#define FT_LUCARIO_GENERATE(W, POOL) \
+    { \
+        wnArticleSlotTag tag; \
+        soArticleDeactivateChecker checker; \
+        volatile u8 findTag = 0; /* MATCH-ONLY: the native traversal keeps a one-byte marker */ \
+        W* weapon = POOL##_BASE.find(checker); \
+        if (weapon == NULL) { \
+            weapon = static_cast<W*>(checker.getCandidate()); \
+            if (weapon == NULL) { \
+                return wnGetNullArticle(); \
+            } \
+            weapon->deactivateArticle(); \
+        } \
+        if (ftLucarioArticleActivator<W>::activate(weapon, acc) == true) { \
+            return &static_cast<soArticle&>(*weapon); \
+        } \
+        return wnGetNullArticle(); \
+    }
+
+soArticle* ftLucarioArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: FT_LUCARIO_GENERATE(wnLucarioAuraBall, FT_LUCARIO_POOL_AURABALL)
+    case 1: FT_LUCARIO_GENERATE(wnLucarioQigong, FT_LUCARIO_POOL_QIGONG)
+    FT_LUCARIO_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+bool ftLucarioArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: {
+        wnArticleSlotTag tag;
+        ftLucarioTransactor* transactor = ftLucarioTransactor::getInstance();
+        wnLucarioAuraBall* ball = dynamic_cast<wnLucarioAuraBall*>(article);
+        return transactor->shootArticle(ball, acc);
+    }
+    case 1: {
+        wnArticleSlotTag tag;
+        (void)dynamic_cast<wnLucarioQigong&>(*article);
+        return false;
+    }
+    FT_LUCARIO_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
 
 // FIXME: Test code present only to emit the shared builder functions; delete once ftLucario is done
 void testBuilder() {
