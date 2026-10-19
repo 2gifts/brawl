@@ -22,6 +22,20 @@ struct ftPikachuWork {
     enum Flag {
         QuickAttack_Ended = 0x12000003,
     };
+    // Skull Bash. HYPOTHESIS: names follow the use.
+    enum SkullBashInt {
+        SkullBash_Frames = 0x20000000,        // charge frames, kept while the move is released
+        SkullBash_ReleaseDamage = 0x20000001,
+    };
+    enum SkullBashFloat {
+        SkullBash_ChargeRatio = 0x21000004,   // charge frames / the longest charge, limited to 0..1
+    };
+    enum SkullBashFlag {
+        SkullBash_Charging = 0x22000010,
+        SkullBash_Airborne = 0x22000012,
+        SkullBash_PowerSet = 0x22000013,
+        SkullBash_Stopped = 0x22000014,
+    };
 };
 
 // Status kinds of Pikachu's specials that are only known by number. HYPOTHESIS: names are placeholders.
@@ -82,6 +96,45 @@ public:
     virtual void execStatus(soModuleAccesser* moduleAccesser);
 };
 
+// Skull Bash: start (SkullBash), charge (Hold), the flash of the shortest charge (Weak), the dash (Attack) and the end.
+class ftPikachuStatusUniqProcessSpecialSkullBash : public soStatusUniqProcess {
+public:
+    virtual ~ftPikachuStatusUniqProcessSpecialSkullBash() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+};
+
+class ftPikachuStatusUniqProcessSpecialSkullBashHold : public soStatusUniqProcess {
+public:
+    virtual ~ftPikachuStatusUniqProcessSpecialSkullBashHold() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+};
+
+class ftPikachuStatusUniqProcessSpecialSkullBashWeak : public soStatusUniqProcess {
+public:
+    virtual ~ftPikachuStatusUniqProcessSpecialSkullBashWeak() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+};
+
+class ftPikachuStatusUniqProcessSpecialSkullBashAttack : public soStatusUniqProcess {
+public:
+    virtual ~ftPikachuStatusUniqProcessSpecialSkullBashAttack() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+    static void stop(soModuleAccesser* moduleAccesser);
+};
+
+class ftPikachuStatusUniqProcessSpecialSkullBashEnd : public soStatusUniqProcess {
+public:
+    virtual ~ftPikachuStatusUniqProcessSpecialSkullBashEnd() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+};
+
 extern ftPikachuStatusUniqProcessSpecialQuickAttackStart g_ftPikachuStatusUniqProcessSpecialQuickAttackStart;
 extern ftPikachuStatusUniqProcessSpecialQuickAttackWarp g_ftPikachuStatusUniqProcessSpecialQuickAttackWarp;
 extern ftPikachuStatusUniqProcessSpecialQuickAttackEnd g_ftPikachuStatusUniqProcessSpecialQuickAttackEnd;
+extern ftPikachuStatusUniqProcessSpecialSkullBash g_ftPikachuStatusUniqProcessSpecialSkullBash;
+extern ftPikachuStatusUniqProcessSpecialSkullBashHold g_ftPikachuStatusUniqProcessSpecialSkullBashHold;
+extern ftPikachuStatusUniqProcessSpecialSkullBashWeak g_ftPikachuStatusUniqProcessSpecialSkullBashWeak;
+extern ftPikachuStatusUniqProcessSpecialSkullBashAttack g_ftPikachuStatusUniqProcessSpecialSkullBashAttack;
+extern ftPikachuStatusUniqProcessSpecialSkullBashEnd g_ftPikachuStatusUniqProcessSpecialSkullBashEnd;
