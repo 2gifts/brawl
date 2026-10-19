@@ -8,6 +8,7 @@
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/pikachu/ft_pikachu.h>
+#include <ft/pikachu/ft_pikachu_status_uniq_process.h>
 #include <ft/pikachu/ft_pikachu_extend_param_accesser.h>
 #include <so/article/so_article_mediator.h>
 #include <ft/pikachu/ft_pikachu_transactor.h>
@@ -439,10 +440,8 @@ int fn_98_E200() { return 0x0; }
 void fn_98_B5A4(u8* p, u8 flag) { *(u8*)(p + 0x22A2C) = flag; }
 
 // ftPikachu::notify_thunder_reflect / adjust_camera_subject: forward this+0x60 to the thunder-hit process handlers.
-extern "C" int fn_98_11344(void* p);
-extern "C" int fn_98_11B40(void* p);
-int fn_98_98B0(u8* p) { return fn_98_11344(*(void**)(p + 0x60)); }
-int fn_98_98B8(u8* p) { return fn_98_11B40(*(void**)(p + 0x60)); }
+void ftPikachu::notify_thunder_reflect() { ftPikachuStatusUniqProcessSpecialThunderHit::notifyReflect(m_moduleAccesser); }
+void ftPikachu::adjust_camera_subject(soCameraModule* source) { ftPikachuStatusUniqProcessSpecialVortexAttack::adjust_camera_subject(m_moduleAccesser, source); }
 
 void** ftPikachu::getExtendParam() { return m_data->extendParam; }
 

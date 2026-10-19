@@ -50,7 +50,7 @@ public:
     cmStageParamFixed m_stageCameraParamFixed; // 0x110
     Rect2D m_stageCameraRange; // 0x128
     Rect2D m_stageDeadRange; // 0x138
-    char _328[16]; // 0x148
+    Rect2D m_stageCameraBounds; // 0x148 (HYPOTHESIS: left/right/up/down of the stage camera limit)
     float unk158;
     float unk15C;
     float unk160;

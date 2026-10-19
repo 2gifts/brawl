@@ -69,6 +69,7 @@ public:
     typedef ftPikachuGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class soCameraModule;
 class wnPikachuThunderJolt;
 class wnPikachuCloud;
 class wnPikachuVortex;
@@ -85,6 +86,8 @@ public:
             Heaps::HeapType nwMotionInstHeap);
     void** getExtendParam();
     // The cloud article of Thunder is kept in a work int of the fighter (HYPOTHESIS: names follow the module map).
+    void notify_thunder_reflect();
+    void adjust_camera_subject(soCameraModule* source);
     static wnPikachuCloud* get_cloud_pointer(soModuleAccesser* acc);
     static void rec_cloud_pointer1(soModuleAccesser* acc, wnPikachuCloud* cloud);
     // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).

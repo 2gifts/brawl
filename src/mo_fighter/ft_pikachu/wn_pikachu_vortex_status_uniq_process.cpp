@@ -17,9 +17,10 @@ void wnPikachuVortexSetEffectLook(soModuleAccesser* moduleAccesser, int look);
 
 extern "C" {
 // HYPOTHESIS: clamps the value into the range.
-float fn_98_11B2C(float value, float min, float max);
+float clampf(float value, float min, float max);
 // HYPOTHESIS: points the camera module of the vortex at the given fighter.
-void fn_98_98B8(Fighter* fighter, soCameraModule* cameraModule);
+// ftPikachu::adjust_camera_subject (this unit cannot include ft_pikachu.h: it conflicts with the weapon builders).
+extern "C" void adjust_camera_subject__9ftPikachuFP14soCameraModule(Fighter* fighter, soCameraModule* cameraModule);
 }
 
 // The attack power of the vortex follows the parameters of the Final Smash.
@@ -54,8 +55,8 @@ inline void wnPikachuVortexFollowOwner(soModuleAccesser* moduleAccesser) {
     if (ownerPosition.m_y < position.m_y) {
         speed.m_y -= acceleration;
     }
-    speed.m_x = fn_98_11B2C(speed.m_x, -maxSpeed, maxSpeed);
-    speed.m_y = fn_98_11B2C(speed.m_y, -maxSpeed, maxSpeed);
+    speed.m_x = clampf(speed.m_x, -maxSpeed, maxSpeed);
+    speed.m_y = clampf(speed.m_y, -maxSpeed, maxSpeed);
     workManage.setFloat(speed.m_x, 0x11000001);
     workManage.setFloat(speed.m_y, 0x11000002);
     wnKineticEnergyNormal* energy = dynamic_cast<wnKineticEnergyNormal*>(moduleAccesser->getKineticModule().getEnergy(0));
@@ -98,7 +99,7 @@ inline void wnPikachuVortexUpdateOwnerCameraSubject(soModuleAccesser* moduleAcce
     StageObject* owner = moduleAccesser->getLinkModule().getParent(3);
     if (owner) {
         Fighter* fighter = dynamic_cast<Fighter*>(owner);
-        fn_98_98B8(fighter, &moduleAccesser->getCameraModule());
+        adjust_camera_subject__9ftPikachuFP14soCameraModule(fighter, &moduleAccesser->getCameraModule());
     }
 }
 

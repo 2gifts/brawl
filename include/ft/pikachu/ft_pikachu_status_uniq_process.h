@@ -4,6 +4,7 @@
 #include <types.h>
 
 class soModuleAccesser;
+class soCameraModule;
 
 // Work variable ids used by the status processes of Pikachu. HYPOTHESIS: names follow how each id is read and written.
 struct ftPikachuWork {
@@ -21,6 +22,20 @@ struct ftPikachuWork {
     };
     enum Flag {
         QuickAttack_Ended = 0x12000003,
+    };
+    // Volt Tackle (the Final Smash vortex). HYPOTHESIS: names follow the use.
+    enum VortexInt {
+        Vortex_Frames = 0x20000001,
+        Vortex_Cooldown = 0x20000002,
+        Vortex_FounderTask = 0x20000003,
+    };
+    enum VortexFloat {
+        Vortex_Scale = 0x21000004,
+    };
+    enum VortexFlag {
+        Vortex_FounderActive = 0x12000004,   // read from the founder through soExternalValueAccesser
+        Vortex_Linked = 0x22000011,
+        Vortex_Free = 0x22000012,
     };
     // Thunder. HYPOTHESIS: names follow the use.
     enum ThunderInt {
@@ -158,6 +173,30 @@ public:
     static void unref_log_group(soModuleAccesser* moduleAccesser);
 };
 
+// Volt Tackle (Final Smash): the vortex article takes over (Start), the attack follows the stick (Attack) and ends (End).
+class ftPikachuStatusUniqProcessSpecialVortexStart : public soStatusUniqProcess {
+public:
+    virtual ~ftPikachuStatusUniqProcessSpecialVortexStart() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+};
+
+class ftPikachuStatusUniqProcessSpecialVortexAttack : public soStatusUniqProcess {
+public:
+    virtual ~ftPikachuStatusUniqProcessSpecialVortexAttack() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+    virtual void execMapCorrection(soModuleAccesser* moduleAccesser);
+    virtual void execFixPos(soModuleAccesser* moduleAccesser);
+    static void adjust_camera_subject(soModuleAccesser* moduleAccesser, soCameraModule* source);
+};
+
+class ftPikachuStatusUniqProcessSpecialVortexEnd : public soStatusUniqProcess {
+public:
+    virtual ~ftPikachuStatusUniqProcessSpecialVortexEnd() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+};
+
 extern ftPikachuStatusUniqProcessSpecialQuickAttackStart g_ftPikachuStatusUniqProcessSpecialQuickAttackStart;
 extern ftPikachuStatusUniqProcessSpecialQuickAttackWarp g_ftPikachuStatusUniqProcessSpecialQuickAttackWarp;
 extern ftPikachuStatusUniqProcessSpecialQuickAttackEnd g_ftPikachuStatusUniqProcessSpecialQuickAttackEnd;
@@ -168,3 +207,6 @@ extern ftPikachuStatusUniqProcessSpecialSkullBashAttack g_ftPikachuStatusUniqPro
 extern ftPikachuStatusUniqProcessSpecialSkullBashEnd g_ftPikachuStatusUniqProcessSpecialSkullBashEnd;
 extern ftPikachuStatusUniqProcessSpecialThunder g_ftPikachuStatusUniqProcessSpecialThunder;
 extern ftPikachuStatusUniqProcessSpecialThunderHit g_ftPikachuStatusUniqProcessSpecialThunderHit;
+extern ftPikachuStatusUniqProcessSpecialVortexStart g_ftPikachuStatusUniqProcessSpecialVortexStart;
+extern ftPikachuStatusUniqProcessSpecialVortexAttack g_ftPikachuStatusUniqProcessSpecialVortexAttack;
+extern ftPikachuStatusUniqProcessSpecialVortexEnd g_ftPikachuStatusUniqProcessSpecialVortexEnd;
