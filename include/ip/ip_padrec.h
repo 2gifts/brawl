@@ -99,6 +99,7 @@ public:
 
 private:
     // HYPOTHESIS: source-level names for repeated inline packet/seek operations.
+    static inline u8 countPads(u8 flags);
     static inline int packetSize(u8 flags);
     inline bool advancePacket();
     inline void seekFrame(int frame, const ipReplayChunk& chunk);
