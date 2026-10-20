@@ -123,7 +123,7 @@ bool ipKeyRecorder::startRec(u32 chunk) {
     m_commandCount = 0;
     m_applicationTick = g_gfApplication->unk100;
     m_phase = 0;
-    seekFrame(0);
+    seekFrame(0, m_buffer->chunks[m_chunk]);
     m_mode = Recording;
     m_pauseStatus = 0;
     m_suppressFileSync = 0;
@@ -139,7 +139,7 @@ bool ipKeyRecorder::endRec() {
 bool ipKeyRecorder::startPlay(int chunk) {
     if (m_buffer->chunks[chunk].frames == 0) return false;
     m_chunk = chunk;
-    seekFrame(0);
+    seekFrame(0, m_buffer->chunks[chunk]);
     m_mode = Playing;
     m_pauseStatus = 0;
     m_suppressFileSync = 0;
@@ -188,28 +188,39 @@ int ipKeyRecorder::getCurrentFrameNo() {
 // Ordinary commands retain order, with space for seven per packet.
 bool ipKeyRecorder::setSyncCommand(u32 command, int value) {
     if (m_mode != Recording) return true;
-    if (command == 3) { m_pauseStatus = value == 0 ? 0 : 1; return true; }
+    if (command == 3) {
+        if (value == 0) m_pauseStatus = 0;
+        else m_pauseStatus = 1;
+        return true;
+    }
     if (command == 4) {
         if (value == 0) { m_pauseStatus = 0; m_suppressFileSync = 0; }
         else { m_pauseStatus = 1; m_suppressFileSync = 1; }
         return true;
     }
     if (m_suppressFileSync == 1 && command == 0) return true;
-    if (m_commandCount >= 7) return false;
-    m_commands[m_commandCount].command = command;
-    m_commands[m_commandCount].value = value;
-    ++m_commandCount;
-    switch (command) {
-    case 1: m_padMask = value; break;
-    case 5: m_pauseStatus = value == 0 ? 0 : 2; break;
+    if (m_commandCount < 7) {
+        m_commands[m_commandCount].command = command;
+        m_commands[m_commandCount].value = value;
+        ++m_commandCount;
+        switch (command) {
+        case 1: m_padMask = value; break;
+        case 5:
+            if (value == 0) m_pauseStatus = 0;
+            else m_pauseStatus = 2;
+            break;
+        }
+        return true;
     }
-    return true;
+    return false;
 }
 
 bool ipKeyRecorder::record() {
     if (m_mode != Recording) return false;
-    u32 flags = m_padMask | ((m_commandCount & 7) << 4) | m_phase;
-    int size = packetSize(flags);
+    u32 flags = m_padMask | ((m_commandCount & 7) << 4);
+    flags |= m_phase;
+    u32 size = packetSize(flags);
+    u8 i;
     u8* cursor = m_cursor;
     if (cursor + size > m_end) {
         m_overflow = true;
@@ -217,7 +228,7 @@ bool ipKeyRecorder::record() {
         return false;
     }
     *cursor++ = flags;
-    for (u8 i = 0; i < 4; ++i) {
+    for (i = 0; i < 4; ++i) {
         if (m_padMask & (1u << i)) { memcpy(cursor, &m_pads[i], 4); cursor += 4; }
     }
     if (m_commandCount != 0) {
@@ -229,7 +240,7 @@ bool ipKeyRecorder::record() {
     m_commandCount = 0;
     if (m_applicationTick != g_gfApplication->unk100) {
         m_applicationTick = g_gfApplication->unk100;
-        m_phase = m_phase == 0 ? 0x80 : 0;
+        m_phase = m_phase != 0 ? 0 : 0x80;
     }
     ipReplayHeader* header = m_buffer;
     ++header->chunks[m_chunk].frames;
@@ -248,37 +259,46 @@ bool ipKeyRecorder::play(u8** packet, int* groupFrames, int* phaseFrames) {
         *packet = NULL; *groupFrames = 0; *phaseFrames = 0;
         return false;
     }
+    u8 padCount = 0;
+    u32 commandCount;
     u8* current = m_cursor;
     u8 phase = *current & 0x80;
-    u32 commandCount = (*current >> 4) & 7;
-    u8 padCount = 0;
+    commandCount = (*current >> 4) & 7;
     for (u8 i = 0; i < 4; ++i) if (*current & (1u << i)) ++padCount;
+    int group = 1;
+    u8 j;
     const u8* command = current + 1 + padCount * 4;
-    for (u8 i = 0; i < commandCount; ++i, command += 4) {
+    for (u8 i = 0; i < commandCount; ++i) {
         u16 value;
+        u8 kind;
         // Packets are byte streams: a command halfword can be unaligned.
         __memcpy(&value, command + 2, sizeof(value));
-        u8 kind = *command;
-        for (u8 j = 0; j < 8; ++j) {
+        kind = *command;
+        for (j = 0; j < 8; ++j) {
             CallBack* callback = m_callbacks[j];
             if (callback != NULL && callback->process(kind, value)) break;
         }
+        command += 4;
     }
     *packet = current;
     advancePacket();
+    u16 total;
+    u8* lookahead;
     u16 frame = ++m_frame;
-    u16 total = m_buffer->chunks[m_chunk].frames;
-    int group = 1;
-    if (frame < total) {
-        u8* lookahead = m_cursor;
-        while ((*lookahead & 0x80) == phase) {
+    total = m_buffer->chunks[m_chunk].frames;
+    if (total <= frame) endPlay();
+    else {
+        lookahead = m_cursor;
+        for (;;) {
+            u8 flags = *lookahead;
+            if (phase != (flags & 0x80)) break;
             ++frame; ++group;
             if (total <= frame) break;
-            int size = packetSize(*lookahead);
+            int size = packetSize(flags);
             if (lookahead + size > m_end) break;
             lookahead += size;
         }
-    } else endPlay();
+    }
     if (m_phase != phase) { m_phase = phase; *phaseFrames = group; }
     *groupFrames = group;
     return true;
@@ -298,9 +318,8 @@ bool ipKeyRecorder::extractPadStatus(ipPadStatus* pads, const u8* packet) {
 void ipKeyRecorder::clearOnamae(ipReplayHeader* data) {
     if (data->magic == g_replayMagic[0]) {
         for (int i = 0; i < MAX_PLAYERS; ++i) {
-            gmPlayerInitData& player = data->baseInfo.m_playersInitData[i];
-            memset(player.m_name, 0, 12);
-            player.m_nameIndex = 0x78;
+            memset(data->baseInfo.m_playersInitData[i].m_name, 0, 12);
+            data->baseInfo.m_playersInitData[i].m_nameIndex = 0x78;
         }
     }
 }
@@ -316,4 +335,29 @@ bool ipKeyRecorder::isSafeData(const ipReplayHeader* data, u32 size) {
     if ((data->stageOffset != 0 && data->stageSize == 0) ||
         (data->stageOffset == 0 && data->stageSize != 0)) return false;
     return true;
+}
+
+// HYPOTHESIS: private packet/seek implementation shared by recorder operations.
+inline int ipKeyRecorder::packetSize(u8 flags) {
+    u8 pads = 0;
+    for (u8 i = 0; i < 4; ++i) if (flags & (1u << i)) ++pads;
+    int size = 1 + pads * 4;
+    size += ((flags >> 4) & 7) * 4;
+    return size;
+}
+inline bool ipKeyRecorder::advancePacket() {
+    int size = packetSize(*m_cursor);
+    if (m_cursor + size > m_end) return false;
+    m_cursor += size;
+    return true;
+}
+inline void ipKeyRecorder::seekFrame(int frame, const ipReplayChunk& chunk) {
+    u8* start = (u8*)m_buffer + chunk.offset;
+    m_frame = 0;
+    m_cursor = start;
+    u16 count = chunk.frames;
+    for (int i = 0; i < frame; ++i) {
+        if (!advancePacket() || count <= i) break;
+        ++m_frame;
+    }
 }
