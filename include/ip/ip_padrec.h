@@ -99,26 +99,9 @@ public:
 
 private:
     // HYPOTHESIS: source-level names for repeated inline packet/seek operations.
-    static inline int packetSize(u8 flags) {
-        u8 pads = 0;
-        for (u8 i = 0; i < 4; ++i) if (flags & (1u << i)) ++pads;
-        return 1 + pads * 4 + ((flags >> 4) & 7) * 4;
-    }
-    inline bool advancePacket() {
-        int size = packetSize(*m_cursor);
-        if (m_cursor + size > m_end) return false;
-        m_cursor += size;
-        return true;
-    }
-    inline void seekFrame(int frame) {
-        m_frame = 0;
-        m_cursor = (u8*)m_buffer + m_buffer->chunks[m_chunk].offset;
-        u16 count = m_buffer->chunks[m_chunk].frames;
-        for (int i = 0; i < frame; ++i) {
-            if (!advancePacket() || i >= count) break;
-            ++m_frame;
-        }
-    }
+    static inline int packetSize(u8 flags);
+    inline bool advancePacket();
+    inline void seekFrame(int frame, const ipReplayChunk& chunk);
 };
 static_assert(sizeof(ipReplayChunk) == 12, "Replay chunk header size");
 static_assert(sizeof(ipReplayHeader) == 0x388, "Replay header size");
