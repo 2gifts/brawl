@@ -147,6 +147,9 @@ public:
     bool unk6f_04 : 1;
     bool unk6f_02 : 1;
     bool unk6f_01 : 1;
+    // Inline accessors (the REL tests these flags through the normalizing bool conversion).
+    bool isStamina() const { return m_isStamina; }
+    bool isGameSet() const { return m_isGameSet; }
     int m_finalStatus;
     int m_finalEntryId;
     int m_noDiscretionFinalCount;
@@ -236,7 +239,7 @@ public:
     void lostCoin(int entryId, int amount, bool unk);
     void generateCoin(int entryId, int amount);
     void toChange(int entryId, int unk1, int unk2, int unk3);
-    void toChangeAppear(int entryId, float unk1, int unk2, int unk3);
+    void toChangeAppear(int entryId, float lr, Vec3f* pos, int changePose); // HYPOTHESIS: parameter meanings
     void setContNo(int entryId, int contNo);
     void removeDragoon(int entryId, int index);
     void removeDragoonAll(int entryId);
