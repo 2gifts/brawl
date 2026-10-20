@@ -8,6 +8,9 @@
 // Native signature storage; the second word is outside the compared magic.
 extern u32 g_replayMagic[2];
 
+// HYPOTHESIS: source-level name for the byte-stream halfword reader.
+static inline u16 readReplayCommandValue(const u8* command);
+
 ipKeyRecorder::ipKeyRecorder(Heaps::HeapType heap, u32 capacity) {
     m_capacity = capacity;
     m_buffer = (ipReplayHeader*)gfHeapManager::alloc(heap, capacity);
@@ -117,8 +120,9 @@ bool ipKeyRecorder::startRec(u32 chunk) {
     header->chunkCount = chunk + 1;
     m_chunk = chunk;
     m_padMask = 0;
+    const gmGlobalModeMelee* mode = g_GameGlobal->m_modeMelee;
     for (int i = 0; i < 4; ++i) {
-        if (g_GameGlobal->m_modeMelee->m_playersInitData[i].m_state == 0) m_padMask |= 1u << i;
+        if (mode->m_playersInitData[i].m_state == 0) m_padMask |= 1u << i;
     }
     m_commandCount = 0;
     m_applicationTick = g_gfApplication->unk100;
@@ -259,20 +263,21 @@ bool ipKeyRecorder::play(u8** packet, int* groupFrames, int* phaseFrames) {
         *packet = NULL; *groupFrames = 0; *phaseFrames = 0;
         return false;
     }
-    u8 padCount = 0;
+    u32 flags;
+    u8 padCount;
     u32 commandCount;
     u8* current = m_cursor;
-    u8 phase = *current & 0x80;
-    commandCount = (*current >> 4) & 7;
-    for (u8 i = 0; i < 4; ++i) if (*current & (1u << i)) ++padCount;
+    flags = *current;
+    u8 phase = flags & 0x80;
+    commandCount = (flags >> 4) & 7;
+    padCount = countPads(flags);
     int group = 1;
+    u16 value;
+    u8 kind;
     u8 j;
     const u8* command = current + 1 + padCount * 4;
     for (u8 i = 0; i < commandCount; ++i) {
-        u16 value;
-        u8 kind;
-        // Packets are byte streams: a command halfword can be unaligned.
-        __memcpy(&value, command + 2, sizeof(value));
+        value = readReplayCommandValue(command);
         kind = *command;
         for (j = 0; j < 8; ++j) {
             CallBack* callback = m_callbacks[j];
@@ -284,7 +289,8 @@ bool ipKeyRecorder::play(u8** packet, int* groupFrames, int* phaseFrames) {
     advancePacket();
     u16 total;
     u8* lookahead;
-    u16 frame = ++m_frame;
+    u16 frame = m_frame + 1;
+    m_frame = frame;
     total = m_buffer->chunks[m_chunk].frames;
     if (total <= frame) endPlay();
     else {
@@ -338,10 +344,13 @@ bool ipKeyRecorder::isSafeData(const ipReplayHeader* data, u32 size) {
 }
 
 // HYPOTHESIS: private packet/seek implementation shared by recorder operations.
+inline u8 ipKeyRecorder::countPads(u8 flags) {
+    u8 count = 0;
+    for (u8 i = 0; i < 4; ++i) if (flags & (1u << i)) ++count;
+    return count;
+}
 inline int ipKeyRecorder::packetSize(u8 flags) {
-    u8 pads = 0;
-    for (u8 i = 0; i < 4; ++i) if (flags & (1u << i)) ++pads;
-    int size = 1 + pads * 4;
+    int size = 1 + countPads(flags) * 4;
     size += ((flags >> 4) & 7) * 4;
     return size;
 }
@@ -360,4 +369,11 @@ inline void ipKeyRecorder::seekFrame(int frame, const ipReplayChunk& chunk) {
         if (!advancePacket() || count <= i) break;
         ++m_frame;
     }
+}
+
+static inline u16 readReplayCommandValue(const u8* command) {
+    u16 value;
+    // Packets are byte streams: the command halfword can be unaligned.
+    __memcpy(&value, command + 2, sizeof(value));
+    return value;
 }
