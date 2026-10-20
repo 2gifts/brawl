@@ -171,9 +171,8 @@ void ftPikachuStatusUniqProcessSpecialQuickAttackWarp::initStatus(soModuleAccess
     motionModule.changeMotionRequest(&motion);
 }
 
-void ftPikachuStatusUniqProcessSpecialQuickAttackWarp::execFixPos(soModuleAccesser* moduleAccesser) {
-    ftPikachu& pikachu = dynamic_cast<ftPikachu&>(moduleAccesser->getStageObject());
-    ftPikachuExtendParamQuickAttack* param = static_cast<ftPikachuExtendParamQuickAttack*>(pikachu.getExtendParam()[2]);
+// Tilts the model's torso node towards the surface normal (grounded) or the flight direction (airborne) and scales it.
+static inline void alignModelToMotion(soModuleAccesser* moduleAccesser) {
     ftPikachu& pikachu2 = dynamic_cast<ftPikachu&>(moduleAccesser->getStageObject());
     ftPikachuExtendParamQuickAttack* param2 = static_cast<ftPikachuExtendParamQuickAttack*>(pikachu2.getExtendParam()[2]);
     soSituationModule& situation = moduleAccesser->getSituationModule();
@@ -184,18 +183,27 @@ void ftPikachuStatusUniqProcessSpecialQuickAttackWarp::execFixPos(soModuleAccess
     if (situation.getKind() == 0) {
         Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(0xff, 0);
         float lr = moduleAccesser->getPostureModule().getLr();
-        rotation.m_x = 57.29578f * atan2f(normal.m_x, normal.m_y) * lr;
+        float angle = 57.29578f * atan2f(normal.m_x, normal.m_y);
+        rotation.m_x = angle * lr;
         rotation.m_x += 57.29578f * param2->unk0C;
         scale.set(param2->unk10, param2->unk14, param2->unk18);
     } else {
         Vec2f speed = kinetic.getSumSpeed(soKineticEnergy::ATTRIBUTE_MASK_MAIN);
-        rotation.m_x = 57.29578f * atan2f((float)fabs(speed.m_x), speed.m_y);
+        // MATCH-ONLY: the double |x| temporary (assigned inside the call) keeps fabs in f0 and the frsp result in the argument register.
+        double wide;
+        rotation.m_x = 57.29578f * atan2f((float)(wide = fabs(speed.m_x)), speed.m_y);
         rotation.m_x += 57.29578f * param2->unk1C - 90.0f;
         scale.set(param2->unk20, param2->unk24, param2->unk28);
     }
     model.setNodeRotate(3, &rotation);
     model.setNodeScale(3, &scale);
-    moduleAccesser->getMotionModule().setRate(1.0f);
+}
+
+void ftPikachuStatusUniqProcessSpecialQuickAttackWarp::execFixPos(soModuleAccesser* moduleAccesser) {
+    ftPikachu& pikachu = dynamic_cast<ftPikachu&>(moduleAccesser->getStageObject());
+    ftPikachuExtendParamQuickAttack* param = static_cast<ftPikachuExtendParamQuickAttack*>(pikachu.getExtendParam()[2]);
+    alignModelToMotion(moduleAccesser);
+    moduleAccesser->getMotionModule().updateFrame(1.0f);
     soGroundModule& ground = moduleAccesser->getGroundModule();
     soStatusModule& status = moduleAccesser->getStatusModule();
     Vec2f speedCopy = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::ATTRIBUTE_MASK_MAIN);
@@ -265,6 +273,7 @@ void ftPikachuStatusUniqProcessSpecialQuickAttackEnd::execStatus(soModuleAccesse
             moduleAccesser->getKineticModule().changeKinetic(6, moduleAccesser);
         }
     } else if (state <= 0) {
+        // HYPOTHESIS: the original leaves the state at 0 here (no store of 1 in the native code); something else advances it.
         soKineticModule& kinetic = moduleAccesser->getKineticModule();
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*kinetic.getEnergy(1));
         Vec2f speed;
@@ -275,18 +284,11 @@ void ftPikachuStatusUniqProcessSpecialQuickAttackEnd::execStatus(soModuleAccesse
         gravity.enable();
         ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*kinetic.getEnergy(2));
         float brake = soValueAccesser::getConstantFloat(moduleAccesser, 0xbd6, 0);
-        Vec2f brakeVec;
-        brakeVec.m_x = brake;
-        brakeVec.m_y = brake;
-        controller.m_brake = brakeVec;
+        controller.m_brake = Vec2f(brake, brake);
         controller.enable();
-        newState = 1;
     } else {
         if (state == 1) {
-            ftPikachu& pikachu2 = dynamic_cast<ftPikachu&>(moduleAccesser->getStageObject());
-            ftPikachuExtendParamQuickAttack* param2 = static_cast<ftPikachuExtendParamQuickAttack*>(pikachu2.getExtendParam()[2]);
-            soWorkManageModule& work = moduleAccesser->getWorkManageModule();
-            bool leave = isStickTurned(moduleAccesser, work, param2);
+            bool leave = isStickTurned(moduleAccesser, moduleAccesser->getWorkManageModule(), static_cast<ftPikachuExtendParamQuickAttack*>(dynamic_cast<ftPikachu&>(moduleAccesser->getStageObject()).getExtendParam()[2]));
             if (leave) {
                 moduleAccesser->getStatusModule().changeStatusRequest(0x117, moduleAccesser);
                 return;
@@ -298,7 +300,8 @@ void ftPikachuStatusUniqProcessSpecialQuickAttackEnd::execStatus(soModuleAccesse
         gravity.m_gravity = -soValueAccesser::getConstantFloat(moduleAccesser, 0xbcf, 0);
         gravity.enable();
         ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*kinetic.getEnergy(2));
-        controller.m_speedLimit = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xbd5, 0) * param->unk40, 0.0f);
+        float limit = soValueAccesser::getConstantFloat(moduleAccesser, 0xbd5, 0);
+        controller.m_speedLimit = Vec2f(limit * param->unk40, 0.0f);
         controller.enable();
     }
     if (newState != state) {
