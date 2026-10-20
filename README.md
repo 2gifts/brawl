@@ -70,12 +70,6 @@ Building
   git clone https://github.com/doldecomp/brawl.git
   ```
 
-- Update and Initialize submodules:
-
-  ```sh
-  git submodule update --init --recursive
-  ```
-
 - Copy your game's disc image to `orig/RSBE01_02` (or the appropriate version).
   - Supported formats: ISO (GCM), RVZ, WIA, WBFS, CISO, NFS, GCZ, TGC
   - After the initial build, the disc image can be deleted to save space.
@@ -297,7 +291,7 @@ Build server VM clones
 `tools/remote/bootstrap_clone.py` upgrades clones of an existing Linux build VM
 from a reference server, using the SSH key on your client computer. It resets
 stale build directories by default, installs checksummed compiler/tool packages,
-updates the fork checkout and submodules, and compiles every configured comparison
+updates the fork checkout, and compiles every configured comparison
 object before requiring a successful full 127-output baseline. Original binaries
 already in the VM are linked into the new worktree; game data and private keys are
 not copied from the reference server.
