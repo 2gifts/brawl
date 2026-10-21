@@ -168,11 +168,11 @@ void grDxBigBlueAshibaTrainer::updateActive(float deltaFrame) {
                 return;
             }
             if (randf() < 0.5f) {
-                m_flyDataWork->m_pos.m_x = m_posLimitWork[3] * 0.5f;
-                m_dir = 0;
-            } else {
                 m_flyDataWork->m_pos.m_x = m_posLimitWork[0] * 0.5f;
                 m_dir = 1;
+            } else {
+                m_flyDataWork->m_pos.m_x = m_posLimitWork[3] * 0.5f;
+                m_dir = 0;
             }
             m_state = 2;
         case 2:

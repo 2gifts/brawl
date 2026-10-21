@@ -725,10 +725,10 @@ void stPictchat::createObjSpring() {
 }
 
 void stPictchat::createObjSpring1(int index) {
-    grPictchatSpring* ground = NULL;
+    grPictchatSpring* ground;
     Vec3f* pos;
-    u8* flgWork;
     u8 pictID;
+    u8* flgWork;
     switch (index) {
     case 0x25:
         ground = grPictchatSpring::create(3, "nodeIndex", "grPictchatSpringL");

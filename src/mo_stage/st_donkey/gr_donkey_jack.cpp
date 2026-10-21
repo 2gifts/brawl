@@ -232,9 +232,9 @@ void grDonkeyJack::setAttackDown() {
         soCollisionAttackData attack(1.0f);
         Vec3f offset;
         getNodePosition(&offset, 0, m_nodeIndex);
-        offset.m_z = -offset.m_z;
         offset.m_x = 0.0f;
         offset.m_y = 8.0f;
+        offset.m_z = -offset.m_z;
 
         setAttackGimmickDetails(&attack, 10.0f, 1.0f, 1.0f, 1.0f,
             20, &offset, 20, 42, 0, 90, m_nodeIndex,
