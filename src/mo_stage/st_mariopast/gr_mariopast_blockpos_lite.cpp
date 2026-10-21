@@ -813,40 +813,59 @@ void stMarioPastBlockDt::countDrawNum(int count, stMarioPastBlockDt* blocks, int
     s16 index = 0;
     for (; count > 0; count--, blocks++) {
         if ((blocks->m_zone & 3) == 1) {
+            bool draw;
             u8 state = blocks->m_state;
             u8 kind = blocks->m_kind;
-            bool draw;
+            u8 blockCount = blocks->m_count;
             if (state == 6) {
                 draw = false;
             } else if (kind == 3) {
-                if (state < 4) {
-                    if (state < 2 || blocks->m_count != 0) {
-                        draw = false;
-                    } else {
-                        draw = true;
-                    }
-                } else if (state > 5) {
-                    draw = false;
-                } else {
+                switch (state) {
+                case 4:
+                case 5:
                     draw = true;
+                    break;
+                case 2:
+                case 3:
+                    if (blockCount == 0) {
+                        draw = true;
+                        break;
+                    }
+                default:
+                    draw = false;
+                    break;
                 }
             } else {
                 draw = true;
             }
             if (draw) {
                 bool isNormal;
-                if (kind == 1) {
-                    if (state < 6 && state > 1 && blocks->m_count == 0) {
-                        isNormal = false;
-                    } else {
+                switch (kind) {
+                case 0:
+                    isNormal = true;
+                    break;
+                case 1:
+                    switch (state) {
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        if (blockCount == 0) {
+                            isNormal = false;
+                            break;
+                        }
+                    default:
                         isNormal = true;
+                        break;
                     }
-                } else if (kind == 0) {
-                    isNormal = true;
-                } else if (kind < 4) {
+                    break;
+                case 2:
+                case 3:
                     isNormal = false;
-                } else {
+                    break;
+                default:
                     isNormal = true;
+                    break;
                 }
                 if (isNormal) {
                     *normalOrder++ = index;
