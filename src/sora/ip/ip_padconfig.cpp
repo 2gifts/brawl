@@ -18,8 +18,9 @@ namespace {
     };
     // Profile action 4 means attack + shield (grab), rather than bit 4.
     inline u16 mappedButton(u8 action) {
-        u16 mask = 1u << action;
-        if (action == 4) mask = Attack | Guard;
+        u16 mask = 0;
+        if (action == 4) mask |= Attack | Guard;
+        else mask |= 1u << action;
         return mask;
     }
 }
@@ -62,12 +63,14 @@ void ipPadConfig::reset() {
 
 // C-stick edge history is retained separately from the main stick. Attack and
 // special act on a fresh tilt, then become jump while held; smash must return
-// almost to center before it can fire again.
+// almost to center before it can fire again. A fresh attack/special tilt needs
+// the full eight-bit history to equal one, not just its newest two samples.
 void ipPadConfig::setupPadSubstick(ipPadStatus* out, const gfPadStatus* in, int action, ipSubstickState* state) {
     int x = (s8)in->m_subStickX;
     int y = (s8)in->m_subStickY;
-    u8 motionHistory = state->motionHistory << 1;
-    u8 history = state->history << 1;
+    Vec2f stick(x, y);
+    int motionHistory = (u8)(state->motionHistory << 1);
+    int history = (u8)(state->history << 1);
     int lengthSquared = x * x + y * y;
     if (lengthSquared > 2500) {
         history |= 1;
@@ -86,8 +89,8 @@ void ipPadConfig::setupPadSubstick(ipPadStatus* out, const gfPadStatus* in, int 
             if (edge) {
                 out->m_button |= Attack;
                 overrideStick = true;
-                x = 0.32f * direction.m_x;
-                y = 0.32f * direction.m_y;
+                stick.m_x = 0.32f * direction.m_x;
+                stick.m_y = 0.32f * direction.m_y;
                 break;
             }
             // A held attack C-stick follows the same path as special.
@@ -116,8 +119,8 @@ void ipPadConfig::setupPadSubstick(ipPadStatus* out, const gfPadStatus* in, int 
             break;
         }
         if (overrideStick) {
-            out->m_stickX = x;
-            out->m_stickY = y;
+            out->m_stickX = stick.m_x;
+            out->m_stickY = stick.m_y;
         }
     }
     state->history = history;
@@ -144,7 +147,7 @@ void ipPadConfig::setupPadStatusGc(ipPadStatus* out, const gfPadStatus* in, cons
         if (in->m_buttonsCurrentFrame2.bits & 2) out->m_button |= AppealRight;
         if ((in->m_buttonsCurrentFrame2.bits & 1) || (in->m_buttonsCurrentFrame2.bits & 2)) out->m_button |= AppealSide;
     }
-    if ((s8)config->flags < 0) out->m_button |= FlickJump;
+    if (((config->flags >> 7) & 1) != 0) out->m_button |= FlickJump;
     if (in->m_buttonsCurrentFrame2.bits & 0x200) out->m_button |= DirLeft;
     if (in->m_buttonsCurrentFrame2.bits & 0x800) out->m_button |= DirUp;
     if (in->m_buttonsCurrentFrame2.bits & 0x400) out->m_button |= DirRight;
@@ -157,11 +160,14 @@ void ipPadConfig::setupPadStatusGc(ipPadStatus* out, const gfPadStatus* in, cons
 // A release in either of the two preceding samples followed by a held sample
 // within the recent history identifies a new flick (not a continuously held key).
 bool ipPadConfig::check_key_flip(int history) {
+    bool flipped;
+    bool released;
+    int i;
     int start = 8;
-    bool flipped = false;
-    bool released = false;
+    flipped = false;
+    released = false;
     if (history > 1) {
-        for (int i = 1; i < 3; ++i) {
+        for (i = 1; i < 3; ++i) {
             if (((history >> i) & 1) == 0) { start = i; released = true; break; }
         }
         if (released) {
@@ -183,12 +189,16 @@ void ipPadConfig::setupPadStatusWiiClassic(ipPadStatus* out, const gfPadStatus* 
     if (in->m_buttonsCurrentFrame2.bits & 0x20) out->m_button |= mappedButton(config->r);
     if (in->m_buttonsCurrentFrame2.bits & 0x4000) out->m_button |= mappedButton(config->zl);
     if (in->m_buttonsCurrentFrame2.bits & 0x8000) out->m_button |= mappedButton(config->zr);
-    if (in->m_buttonsCurrentFrame2.bits & 8) out->m_button |= mappedButton(config->up) | DirUp;
+    if (in->m_buttonsCurrentFrame2.bits & 8) {
+        out->m_button |= mappedButton(config->up);
+        out->m_button |= DirUp;
+    }
     if ((in->m_buttonsCurrentFrame2.bits & 1) || (in->m_buttonsCurrentFrame2.bits & 2)) out->m_button |= mappedButton(config->side);
     if (in->m_buttonsCurrentFrame2.bits & 4) out->m_button |= mappedButton(config->down);
+    bool flickJump = ((config->flags >> 7) & 1) != 0;
     out->m_stickX = in->m_stickX;
     out->m_stickY = in->m_stickY;
-    if ((s8)config->flags < 0) out->m_button |= FlickJump;
+    if (flickJump) out->m_button |= FlickJump;
     if (in->m_buttonsCurrentFrame2.bits & 1) out->m_button |= DirLeft;
     if (in->m_buttonsCurrentFrame2.bits & 2) out->m_button |= DirRight;
     if (config->side == 11) {
@@ -241,7 +251,7 @@ void ipPadConfig::setupPadStatusWiiFreeStyle(ipPadStatus* out, const gfPadStatus
     }
     out->m_stickX = in->m_stickX;
     out->m_stickY = in->m_stickY;
-    if ((config->flags & 0x80) && in->_0x24 > 0.125f) {
+    if ((((config->flags >> 7) & 1) != 0) && in->_0x24 > 0.125f) {
         float vertical = in->_0x1c + in->_0x28;
         if (in->_0x24 > 0.15f && fabsf(in->_0x18) > 1.05f) {
             motion = true;
@@ -263,7 +273,7 @@ void ipPadConfig::setupPadStatusWiiFreeStyle(ipPadStatus* out, const gfPadStatus
         out->m_stickX = direction.m_x * 81.0f;
         out->m_stickY = direction.m_y * 81.0f;
     }
-    if (config->flags & 0x40) out->m_button |= FlickJump;
+    if (((config->flags >> 6) & 1) != 0) out->m_button |= FlickJump;
     if (config->side == 11) {
         if (in->m_buttonsCurrentFrame2.bits & 1) out->m_button |= AppealLeft;
         if (in->m_buttonsCurrentFrame2.bits & 2) out->m_button |= AppealRight;
