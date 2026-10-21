@@ -236,16 +236,21 @@ muIntroTask::~muIntroTask() {
 
 // The script of the sounds: the voice of the fighters and the jingles in between, with how long each takes.
 void muIntroTask::makeSoundScript() {
+    // MATCH-ONLY: the loop counter is declared up front to fix the register allocation
+    int i;
     if (getMiniNo() < 0) {
         addSound(0x203E, 0x3C);
         int num;
         if (m_mode == 1) {
             addSound(0x203C, 0x1E);
             num = 1;
+        // MATCH-ONLY: getPlayerNum() written out so the mode load is shared with the test above
+        } else if (m_mode >= 2) {
+            num = -1;
         } else {
-            num = getPlayerNum();
+            num = m_playerNum;
         }
-        for (int i = 0; i < num; i++) {
+        for (i = 0; i < num; i++) {
             if (i > 0) {
                 if (i < num - 1) {
                     addSound(-1, 10);
