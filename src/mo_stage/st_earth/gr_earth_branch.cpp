@@ -163,12 +163,11 @@ void grEarthBranch::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
-            grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-            data[0].m_offsetPos = m_pos[2];
-            data[1].m_offsetPos = m_pos[3];
-            data[2].m_offsetPos = m_pos[4];
-            data[3].m_offsetPos = m_pos[1];
-            data[4].m_offsetPos = m_pos[0];
+            calcWorldCallBack->m_nodeCallbackDatas[0].m_offsetPos = m_pos[2];
+            calcWorldCallBack->m_nodeCallbackDatas[1].m_offsetPos = m_pos[3];
+            calcWorldCallBack->m_nodeCallbackDatas[2].m_offsetPos = m_pos[4];
+            calcWorldCallBack->m_nodeCallbackDatas[3].m_offsetPos = m_pos[1];
+            calcWorldCallBack->m_nodeCallbackDatas[4].m_offsetPos = m_pos[0];
         }
     }
 }

@@ -373,8 +373,8 @@ void grNorfairWall::setAttackRight() {
         offset.m_y = -50.0f;
         offset.m_z = 0.0f;
         setAttackDetails(1, &offset);
-        offset.m_y = 0.0f;
         offset.m_x = 90.0f;
+        offset.m_y = 0.0f;
         offset.m_z = 0.0f;
         setAttackDetails(2, &offset);
         offset.m_x = 90.0f;

@@ -209,13 +209,6 @@ void grHalberdDome::updateMotion(float deltaFrame) {
             m_motionTimer = 0.0f;
         }
         switch (m_state) {
-        case 2:
-            if (*m_stateWork == 2) {
-                setMotion(0, 0, 1, &m_motionTimer);
-                setMotionFrame(*m_frameWork, 0);
-                m_state = 3;
-            }
-            break;
         case 0:
             setMotion(1, 0, 1, NULL);
             getNodeIndex(&m_node[0], 0, "ptPosition01Dome");
@@ -224,11 +217,18 @@ void grHalberdDome::updateMotion(float deltaFrame) {
             getNodeIndex(&m_node[3], 0, "ptPosition04Dome");
             m_state = 2;
             break;
+        case 2:
+            if (*m_stateWork == 2) {
+                setMotion(0, 0, 1, &m_motionTimer);
+                setMotionFrame(*m_frameWork, 0);
+                m_state = 3;
+            }
+            break;
         case 3: {
             Vec3f pos(0.0f, 0.0f, 0.0f);
             m_snd.setPos(&pos);
             m_seSeq.playFrame(0, getMotionFrame(0));
-            if (m_motionTimer <= getMotionFrame(0)) {
+            if (getMotionFrame(0) >= m_motionTimer) {
                 m_state = 4;
             }
             break;
