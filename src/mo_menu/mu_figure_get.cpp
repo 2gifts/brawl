@@ -1,3 +1,4 @@
+#include <gf/gf_camera.h>
 #include <gf/gf_3d_scene.h>
 #include <gf/gf_heap_manager.h>
 #include <gf/gf_pad_status.h>
@@ -36,8 +37,6 @@ extern "C" void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(void* self, vo
 // gfCamera::setNwCamera(camera)
 extern "C" void* GetCamera__Q34nw4r3g3d7ScnRootFi(void* scnRoot, int index);
 extern "C" u8* getManager__15gfCameraManagerFv();
-extern "C" void fn_80019718(void* camera, void** nwCamera);
-extern "C" void fn_80018EC4(void* camera, void** nwCamera);
 
 // One model of the demo: the name, the slots of the task it fills (start, end), and the draw priority.
 struct muFigureGetModel {
@@ -348,9 +347,9 @@ void muFigureGetTask::mainStepDataSetInit(muFigureGetTask* task) {
     u8* cameraManager = getManager__15gfCameraManagerFv();
     void* scnRoot = *reinterpret_cast<void**>(reinterpret_cast<u8*>(g_gfSceneRoot) + 0x44);
     void* camera = GetCamera__Q34nw4r3g3d7ScnRootFi(scnRoot, 0);
-    fn_80019718(cameraManager + 0x604, &camera);
+    reinterpret_cast<gfCamera*>(cameraManager + 0x604)->setFromNwCameraAllParam(reinterpret_cast<nw4r::g3d::Camera*>(&camera));
     camera = GetCamera__Q34nw4r3g3d7ScnRootFi(scnRoot, 0);
-    fn_80018EC4(cameraManager + 0x604, &camera);
+    reinterpret_cast<gfCamera*>(cameraManager + 0x604)->setNwCamera(reinterpret_cast<nw4r::g3d::Camera*>(&camera));
 }
 
 // The trophy comes down on its stand; a sound plays on three frames of the animation.

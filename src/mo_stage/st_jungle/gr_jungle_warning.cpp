@@ -126,7 +126,7 @@ void grJungleWarning::updateCallBack(float deltaFrame) {
             if (manager != NULL) {
                 grJungleCameraView* view = &reinterpret_cast<grJungleCameraBytes*>(manager)->m_view;
                 if (view != NULL) {
-                    fn_80019E88(manager, &dir, 0.5f * view->m_width, 0.5f * view->m_height);
+                    manager->getCamera(0)->getScreenPosition2WorldVector(&dir, 0.5f * view->m_width, 0.5f * view->m_height);
                     struct {
                         Vec3f origin;
                         Vec3f direction;

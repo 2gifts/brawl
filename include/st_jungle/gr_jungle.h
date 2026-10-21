@@ -32,7 +32,6 @@
 
 // sora_melee / main functions that have no names yet.
 // gfCamera::getScreenPosition2WorldVector (main, unnamed): the vector from the camera through a place of the screen
-extern "C" void fn_80019E88(void* camera, Vec3f* out, float x, float y);
 // Vec3f::normalize1 (main, unnamed): the unit vector (and its length) of a vector
 extern "C" void fn_8003DEE0(Vec3f* out, Vec3f* in);
 // clLine3D::checkIntersectXYPlane (main, unnamed): where the line (from the origin and the direction) meets the plane z = 0

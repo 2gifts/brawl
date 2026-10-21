@@ -32,11 +32,9 @@
 // ----- things of main.dol that have no name yet (the address is the one of main.dol) -----
 
 // gfCamera::init(): the default values of a camera
-extern "C" void fn_80018610(void* camera);
 // gfCamera::calc(): updates the camera from its settings
 extern "C" void fn_80018778(void* camera);
 // gfCamera::getScreenPosition2WorldVector(): the vector from the camera through a place of the screen
-extern "C" void fn_80019E88(void* camera, Vec3f* out, float x, float y);
 // GameGlobal::getCharaAppFlag() / getAssistAppFlag(): bit sets of the fighters / assist trophies that appeared
 extern "C" u32* fn_8004E580(GameGlobal* global);
 extern "C" u32* fn_8004E5A0(GameGlobal* global);
@@ -326,7 +324,7 @@ void SoraCharacterRoll::TargetCursor::update(float deltaFrame, gfPadStatus& pad)
     m_screenPos.y += stick.y;
     nw4r::math::VEC2Maximize(&m_screenPos, &m_screenPos, &m_screenMin);
     nw4r::math::VEC2Minimize(&m_screenPos, &m_screenPos, &m_screenMax);
-    fn_80019E88(gfCameraManager::getManager(), &m_dir, m_screenPos.x, m_screenPos.y);
+    gfCameraManager::getManager()->getCamera(0)->getScreenPosition2WorldVector(&m_dir, m_screenPos.x, m_screenPos.y);
 
     // Shooting: a button that is pressed shoots when the cursor has rested for a moment; a button that is held down shoots
     // again after a while.
@@ -444,7 +442,7 @@ void SoraCharacterRoll::TargetCursor::update(float deltaFrame, gfPadStatus& pad)
                     screenX = 50.0f + m_screenMax.x;
                 }
                 Vec3f source;
-                fn_80019E88(gfCameraManager::getManager(), &source, screenX, 10.0f + m_screenMax.y);
+                gfCameraManager::getManager()->getCamera(0)->getScreenPosition2WorldVector(&source, screenX, 10.0f + m_screenMax.y);
                 source.m_x = pos->m_x + source.m_x * 2.0f;
                 source.m_y = pos->m_y + source.m_y * 2.0f;
                 source.m_z = pos->m_z + source.m_z * 2.0f;
@@ -1469,7 +1467,7 @@ SoraCharacterRoll::HitCheckLine::HitCheckLine(const gfCamera* camera, const nw4r
     }
     const u8* cam = reinterpret_cast<const u8*>(camera);
     m_origin = *reinterpret_cast<const Vec3f*>(cam + 0x6C);
-    fn_80019E88(const_cast<gfCamera*>(camera), &m_dir, screenPos.x, screenPos.y);
+    const_cast<gfCamera*>(camera)->getScreenPosition2WorldVector(&m_dir, screenPos.x, screenPos.y);
     PSVECNormalize(reinterpret_cast<const Vec*>(&m_dir), reinterpret_cast<Vec*>(&m_dir));
     m_screenPos = screenPos;
     m_end.m_x = m_origin.m_x + m_dir.m_x * length;
@@ -1574,7 +1572,7 @@ void SoraCharacterRoll::StRollTexObj::setupGX() {
 // A 2D camera over the whole screen (640 x 480) that the names are printed with.
 static void crollSetup2DCamera(gfCamera* camera) {
     u8* cam = reinterpret_cast<u8*>(camera);
-    fn_80018610(camera);
+    camera->init();
     *reinterpret_cast<int*>(cam + 0x100) = 0;
     *reinterpret_cast<float*>(cam + 0x114) = 0.0f;
     *reinterpret_cast<float*>(cam + 0x118) = 0.0f;

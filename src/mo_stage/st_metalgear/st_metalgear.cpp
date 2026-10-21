@@ -735,7 +735,9 @@ void stMetalgear::renderOpa() {
         info.tp = nw4r::g3d::Camera::POSTURE_AIM;
         Vec3f target;
         target = m_posGimmick[2];
-        info.cameraTarget = target;
+        info.cameraTarget.x = target.m_x;
+        info.cameraTarget.y = target.m_y;
+        info.cameraTarget.z = target.m_z;
         info.cameraTwist = 0.0f;
         nw4r::g3d::Camera camera = (*reinterpret_cast<nw4r::g3d::ScnRoot**>(reinterpret_cast<u8*>(g_gfSceneRoot) + 0x40))->GetCamera(1);
         camera.SetPosture(info);
