@@ -287,13 +287,12 @@ void grPalutenaAshiba::updateToBuild(float deltaFrame) {
             return;
         }
         unk154 = unk154 + deltaFrame;
-        if (data->platformRespawnFrames < unk154) {
+        if (unk154 > data->platformRespawnFrames) {
             unk154 = data->platformRespawnFrames;
         }
-        if (unk154 < data->platformRespawnFrames) {
-            return;
+        if (unk154 >= data->platformRespawnFrames) {
+            m_state = 0;
         }
-        m_state = 0;
         break;
     }
 }

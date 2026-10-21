@@ -332,8 +332,9 @@ hkResult hkBinaryPackfileReader::loadFileHeader(hkStreamReader* reader, void* bu
         hkPackfileData* d = m_data;
         d->m_memory.pushBack(buffer);
     }
-    hkPackfileHeader magic;
-    if (reader->read(buffer, 0x40) == 0x40) {
+    // MATCH-ONLY: unsigned constant makes the read count compare unsigned (cmplwi)
+    if (reader->read(buffer, 0x40) == 0x40u) {
+        hkPackfileHeader magic;
         hkPackfileHeader* h = (hkPackfileHeader*)buffer;
         if (h->m_magic[0] == magic.m_magic[0] && h->m_magic[1] == magic.m_magic[1]) {
             m_header = h;
