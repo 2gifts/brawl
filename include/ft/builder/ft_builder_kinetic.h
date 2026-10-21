@@ -91,16 +91,10 @@ public:
     virtual int getMediateNum() = 0;
 };
 
-#ifdef WN_KINETIC_GENERIC_BUILDER
-class ftKineticMediatorImpl;
-#include <wn/wn_kinetic_mediator_impl.h>
-#else
 // ---- instance pool machinery ---------------------------------------------------------------------------
-
-template <typename T, int N>
-struct soInstancePoolInfo {
-    typedef T Type;
-};
+// soLineInvertHierarchy<TypeList, soInstancePool, soInstancePoolRoot, Next, Index>: one soInstancePool per type list
+// entry, the first entry innermost. Each pool owns a soInstancePoolSub with the holder of its instance. The template
+// arguments follow the RTTI type strings of the modules.
 
 template <int Index, int Attribute>
 struct soKineticEnergyInitInfo {
@@ -122,6 +116,59 @@ public:
     E* getEnergy() { return &m_energy; }
 };
 
+template <typename E, int N, template <typename, typename, typename> class Holder, typename Init>
+struct soInstancePoolInfo {
+    typedef E Type;
+    enum { Count = N };
+    // HYPOTHESIS: how a sub pool names the pool of the first N - 1 instances and the holder of an instance.
+    typedef soInstancePoolInfo<E, N - 1, Holder, Init> PrevInfo;
+    template <typename Next>
+    struct HolderOf {
+        typedef Holder<E, Next, Init> Type;
+    };
+};
+
+template <typename List, int N> struct wnKineticListAt;
+template <typename H, typename T> struct wnKineticListAt<soTypeList<H, T>, 0> { typedef H Type; };
+template <typename H, typename T, int N>
+struct wnKineticListAt<soTypeList<H, T>, N> { typedef typename wnKineticListAt<T, N - 1>::Type Type; };
+template <typename List, int N> struct wnKineticListPrefix;
+template <typename H, typename T> struct wnKineticListPrefix<soTypeList<H, T>, 1> {
+    typedef soTypeList<H, soTypeListNullType> Type;
+};
+template <typename H, typename T, int N> struct wnKineticListPrefix<soTypeList<H, T>, N> {
+    typedef soTypeList<H, typename wnKineticListPrefix<T, N - 1>::Type> Type;
+};
+
+template <typename List, template <typename, typename, typename, int> class Unit,
+          typename Root, typename Next = soTypeListNullType,
+          int Index = soTypeListLength<List>::value - 1>
+class soLineInvertHierarchy : public Unit<typename wnKineticListAt<List, Index>::Type,
+    soLineInvertHierarchy<typename wnKineticListPrefix<List, Index>::Type, Unit, Root, Next, Index - 1>, Next, Index> {
+    typedef Unit<typename wnKineticListAt<List, Index>::Type,
+        soLineInvertHierarchy<typename wnKineticListPrefix<List, Index>::Type, Unit, Root, Next, Index - 1>, Next, Index> Base;
+public:
+    soLineInvertHierarchy(soModuleAccesser* acc) : Base(acc) { }
+    ~soLineInvertHierarchy() { }
+};
+
+template <typename H, template <typename, typename, typename, int> class Unit, typename Root, typename Next>
+class soLineInvertHierarchy<soTypeList<H, soTypeListNullType>, Unit, Root, Next, 0> : public Unit<H, Root, Next, 0> {
+    typedef Unit<H, Root, Next, 0> Base;
+public:
+    soLineInvertHierarchy(soModuleAccesser* acc) : Base(acc) { }
+#ifdef FT_MARTH_RUNTIME_HELPERS
+    ~soLineInvertHierarchy() __attribute__((never_inline)) { } // MATCH-ONLY: Marth first-level teardown.
+#else
+    ~soLineInvertHierarchy() { }
+#endif
+};
+
+#ifdef WN_KINETIC_GENERIC_BUILDER
+class ftKineticMediatorImpl;
+#include <wn/wn_kinetic_mediator_impl.h>
+#else
+
 template <typename E>
 class soInstancePoolSubNull {
 public:
@@ -131,8 +178,27 @@ public:
     }
 };
 
-template <typename Info, typename Holder>
+// A sub pool of N instances owns the sub pool of the first N - 1 instances followed by the holder of the last one.
+template <typename Info, typename Next>
 class soInstancePoolSub {
+public:
+    virtual ~soInstancePoolSub() { }
+private:
+    soInstancePoolSub<typename Info::PrevInfo, Next> m_next;
+    typename Info::template HolderOf<Next>::Type m_holder;
+public:
+    soInstancePoolSub(soModuleAccesser* acc) : m_next(acc), m_holder(acc) { }
+    typename Info::Type* getInstanceAt(int index) {
+        if (index == Info::Count - 1) {
+            return m_holder.getEnergy();
+        }
+        return m_next.getInstanceAt(index);
+    }
+};
+
+template <typename E, template <typename, typename, typename> class H, typename Init, typename Next>
+class soInstancePoolSub<soInstancePoolInfo<E, 1, H, Init>, Next> {
+    typedef H<E, Next, Init> Holder;
 public:
 #ifdef FT_MARTH_RUNTIME_HELPERS
     // MATCH-ONLY: Marth retains the subpool teardown as a separate call.
@@ -141,11 +207,11 @@ public:
     virtual ~soInstancePoolSub() { }
 #endif
 private:
-    soInstancePoolSubNull<typename Info::Type> m_next;
+    soInstancePoolSubNull<E> m_next;
     Holder m_holder;
 public:
     soInstancePoolSub(soModuleAccesser* acc) : m_holder(acc) { }
-    typename Info::Type* getInstanceAt(int index) {
+    E* getInstanceAt(int index) {
         if (index == 0) {
             return m_holder.getEnergy();
         }
@@ -153,7 +219,7 @@ public:
     }
     template <typename Helper>
     int forEachHolderModuleAccesser(Helper helper, soModuleAccesser* acc) {
-        typename Info::Type* energy = m_holder.getEnergy();
+        E* energy = m_holder.getEnergy();
         if ((helper.m_flag.m_mask & Holder::Attribute) && energy->isEnable() == true && !energy->isSuspend()) {
             Helper::TransactorType::updateEnergy(energy, acc);
         }
@@ -171,8 +237,8 @@ public:
     int forEachHolderModuleAccesser(const Helper&, soModuleAccesser*) { return 0; }
 };
 
-template <typename Info, typename Holder, typename Base>
-class soInstancePool : public Base {
+template <typename Info, typename Parent, typename Next, int Index>
+class soInstancePool : public Parent {
 #ifdef FT_MARTH_RUNTIME_HELPERS
 public:
     // HYPOTHESIS: Marth's empty root is non-polymorphic; this pool owns its vptr.
@@ -180,51 +246,51 @@ public:
     virtual ~soInstancePool() { }
 private:
 #endif
-    soInstancePoolSub<Info, Holder> m_sub;
+    soInstancePoolSub<Info, Next> m_sub;
 public:
-    soInstancePool(soModuleAccesser* acc) : Base(acc), m_sub(acc) { }
-    soInstancePoolSub<Info, Holder>& getSub() { return m_sub; }
+    soInstancePool(soModuleAccesser* acc) : Parent(acc), m_sub(acc) { }
+    soInstancePoolSub<Info, Next>& getSub() { return m_sub; }
     template <typename Helper>
     int forEachHolderModuleAccesser(const Helper& helper, soModuleAccesser* acc) {
         m_sub.forEachHolderModuleAccesser(helper, acc);
-        return Base::forEachHolderModuleAccesser(helper, acc);
+        return Parent::forEachHolderModuleAccesser(helper, acc);
     }
-
-};
-
-template <typename Info, typename Holder, typename Base>
-class soLineInvertHierarchy : public soInstancePool<Info, Holder, Base> {
-public:
-    soLineInvertHierarchy(soModuleAccesser* acc) : soInstancePool<Info, Holder, Base>(acc) { }
-    ~soLineInvertHierarchy() { }
-};
-
-// hierarchy of a one element type list (first level, based on the pool root)
-template <typename Info, typename Holder>
-class soLineInvertHierarchy<Info, Holder, soInstancePoolRoot> : public soInstancePool<Info, Holder, soInstancePoolRoot> {
-public:
-    soLineInvertHierarchy(soModuleAccesser* acc) : soInstancePool<Info, Holder, soInstancePoolRoot>(acc) { }
-#ifdef FT_MARTH_RUNTIME_HELPERS
-    ~soLineInvertHierarchy() __attribute__((never_inline)) { } // MATCH-ONLY: Marth first-level teardown.
-#else
-    ~soLineInvertHierarchy() { }
-#endif
 };
 
 // ---- the energies of a fighter (index, attribute: the ids passed to soKineticModule::addEnergy) ---------------
 
-#define FT_KINETIC_POOL(Name, Energy, Index, Attr, Base)                                                                    typedef soInstancePoolInfo<Energy, 1> Name##Info;                                                                       typedef soKineticEnergyHolder<Energy, soTypeListNullType, soKineticEnergyInitInfo<Index, Attr> > Name##Holder;          typedef soInstancePool<Name##Info, Name##Holder, Base> Name##Pool;                                                      typedef soLineInvertHierarchy<Name##Info, Name##Holder, Base> Name
+#define FT_KINETIC_INFO(Name, Energy, Index, Attr) \
+    typedef soInstancePoolInfo<Energy, 1, soKineticEnergyHolder, soKineticEnergyInitInfo<Index, Attr> > Name##Info
+
+FT_KINETIC_INFO(ftKineticPoolMotion, ftKineticEnergyMotion, 0, 1);
+FT_KINETIC_INFO(ftKineticPoolGravity, ftKineticEnergyGravity, 1, 1);
+FT_KINETIC_INFO(ftKineticPoolController, ftKineticEnergyController, 2, 1);
+FT_KINETIC_INFO(ftKineticPoolStop, ftKineticEnergyStop, 3, 1);
+FT_KINETIC_INFO(ftKineticPoolDamage, ftKineticEnergyDamage, 4, 2);
+FT_KINETIC_INFO(ftKineticPoolWind, soKineticEnergyWindNormal, 5, 4);
+FT_KINETIC_INFO(ftKineticPoolGround, soKineticEnergyGroundMovement, 6, 8);
+FT_KINETIC_INFO(ftKineticPoolJostle, soKineticEnergyJostle, 7, 4);
+
+typedef soTypeList<ftKineticPoolMotionInfo, soTypeList<ftKineticPoolGravityInfo, soTypeList<ftKineticPoolControllerInfo,
+    soTypeList<ftKineticPoolStopInfo, soTypeList<ftKineticPoolDamageInfo, soTypeList<ftKineticPoolWindInfo,
+    soTypeList<ftKineticPoolGroundInfo, soTypeList<ftKineticPoolJostleInfo, soTypeListNullType> > > > > > > > ftKineticEnergyList;
+
+// Level Index of the hierarchy (Name) and the pool it derives from (Name##Pool).
+#define FT_KINETIC_POOL(Name, Index, Parent) \
+    typedef soInstancePool<Name##Info, Parent, soTypeListNullType, Index> Name##Pool; \
+    typedef soLineInvertHierarchy<wnKineticListPrefix<ftKineticEnergyList, Index + 1>::Type, soInstancePool, \
+                                  soInstancePoolRoot> Name
 
 typedef soInstancePoolRoot ftKineticPoolRoot;
 
-FT_KINETIC_POOL(ftKineticPoolMotion, ftKineticEnergyMotion, 0, 1, ftKineticPoolRoot);
-FT_KINETIC_POOL(ftKineticPoolGravity, ftKineticEnergyGravity, 1, 1, ftKineticPoolMotion);
-FT_KINETIC_POOL(ftKineticPoolController, ftKineticEnergyController, 2, 1, ftKineticPoolGravity);
-FT_KINETIC_POOL(ftKineticPoolStop, ftKineticEnergyStop, 3, 1, ftKineticPoolController);
-FT_KINETIC_POOL(ftKineticPoolDamage, ftKineticEnergyDamage, 4, 2, ftKineticPoolStop);
-FT_KINETIC_POOL(ftKineticPoolWind, soKineticEnergyWindNormal, 5, 4, ftKineticPoolDamage);
-FT_KINETIC_POOL(ftKineticPoolGround, soKineticEnergyGroundMovement, 6, 8, ftKineticPoolWind);
-FT_KINETIC_POOL(ftKineticPoolJostle, soKineticEnergyJostle, 7, 4, ftKineticPoolGround);
+FT_KINETIC_POOL(ftKineticPoolMotion, 0, ftKineticPoolRoot);
+FT_KINETIC_POOL(ftKineticPoolGravity, 1, ftKineticPoolMotion);
+FT_KINETIC_POOL(ftKineticPoolController, 2, ftKineticPoolGravity);
+FT_KINETIC_POOL(ftKineticPoolStop, 3, ftKineticPoolController);
+FT_KINETIC_POOL(ftKineticPoolDamage, 4, ftKineticPoolStop);
+FT_KINETIC_POOL(ftKineticPoolWind, 5, ftKineticPoolDamage);
+FT_KINETIC_POOL(ftKineticPoolGround, 6, ftKineticPoolWind);
+FT_KINETIC_POOL(ftKineticPoolJostle, 7, ftKineticPoolGround);
 
 #define FT_KINETIC_EACH_POOL(M) M(Jostle) M(Ground) M(Wind) M(Damage) M(Stop) M(Controller) M(Gravity) M(Motion)
 #define FT_KINETIC_SUB(L) static_cast<ftKineticPool##L##Pool&>(m_pools).getSub()

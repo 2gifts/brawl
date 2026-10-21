@@ -19,6 +19,25 @@ struct wnArticleSlotTag {
     ~wnArticleSlotTag() { }
 };
 
+// The kind info of the article pools of a stage object. HYPOTHESIS: Category 0 is the fighters and Kind the fighter kind
+// (Yoshi 4, Kirby 5, Dedede 32 in the type strings).
+template <int Category, int Kind>
+struct soKindInfoGeneric { };
+
+// The holder of one article in soInstancePoolSub<soInstancePoolInfo<T, 1, wnInstanceHolder, soIntToType<Id> >, KindInfo>
+// (the article counterpart of soKineticEnergyHolder): the vtable of the holder followed by the article.
+template <class T, class KindInfo, class Id>
+class wnInstanceHolder {
+public:
+    virtual ~wnInstanceHolder() { }
+private:
+    T m_instance;
+public:
+    wnInstanceHolder(soModuleAccesser* acc);
+    // HYPOTHESIS: the sub pool reaches the instances of all holders through the same accessor.
+    T* getEnergy() { return &m_instance; }
+};
+
 // One article instance, preceded by the vtable of the holder.
 template <class W>
 class wnArticleHolder : public soInstancePoolRoot {

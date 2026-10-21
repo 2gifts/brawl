@@ -10,23 +10,22 @@ class soModuleAccesser;
 // with a vertical gravity energy at index 1. These pool types follow the
 // concrete template names in the ft_wario map and the mediator's getInstanceAt
 // callsites.
-typedef soInstancePoolInfo<soKineticEnergyNormal, 1> wnWarioBikeNormal0Info;
-typedef soKineticEnergyHolder<soKineticEnergyNormal, soTypeListNullType,
-                              soKineticEnergyInitInfo<0, 1> > wnWarioBikeNormal0Holder;
-typedef soLineInvertHierarchy<wnWarioBikeNormal0Info, wnWarioBikeNormal0Holder,
-                              soInstancePoolRoot> wnWarioBikeNormal0Pool;
+typedef soInstancePoolInfo<soKineticEnergyNormal, 1, soKineticEnergyHolder,
+                           soKineticEnergyInitInfo<0, 1> > wnWarioBikeNormal0Info;
+typedef soInstancePoolInfo<wnKineticEnergyGravity, 1, soKineticEnergyHolder,
+                           soKineticEnergyInitInfo<1, 1> > wnWarioBikeGravityInfo;
+typedef soInstancePoolInfo<soKineticEnergyNormal, 1, soKineticEnergyHolder,
+                           soKineticEnergyInitInfo<2, 1> > wnWarioBikeNormal2Info;
 
-typedef soInstancePoolInfo<wnKineticEnergyGravity, 1> wnWarioBikeGravityInfo;
-typedef soKineticEnergyHolder<wnKineticEnergyGravity, soTypeListNullType,
-                              soKineticEnergyInitInfo<1, 1> > wnWarioBikeGravityHolder;
-typedef soLineInvertHierarchy<wnWarioBikeGravityInfo, wnWarioBikeGravityHolder,
-                              wnWarioBikeNormal0Pool> wnWarioBikeGravityPool;
-
-typedef soInstancePoolInfo<soKineticEnergyNormal, 1> wnWarioBikeNormal2Info;
-typedef soKineticEnergyHolder<soKineticEnergyNormal, soTypeListNullType,
-                              soKineticEnergyInitInfo<2, 1> > wnWarioBikeNormal2Holder;
-typedef soLineInvertHierarchy<wnWarioBikeNormal2Info, wnWarioBikeNormal2Holder,
-                              wnWarioBikeGravityPool> wnWarioBikeKineticPools;
+typedef soLineInvertHierarchy<soTypeList<wnWarioBikeNormal0Info, soTypeListNullType>,
+                              soInstancePool, soInstancePoolRoot> wnWarioBikeNormal0Pool;
+typedef soLineInvertHierarchy<soTypeList<wnWarioBikeNormal0Info,
+                              soTypeList<wnWarioBikeGravityInfo, soTypeListNullType> >,
+                              soInstancePool, soInstancePoolRoot> wnWarioBikeGravityPool;
+typedef soLineInvertHierarchy<soTypeList<wnWarioBikeNormal0Info,
+                              soTypeList<wnWarioBikeGravityInfo,
+                              soTypeList<wnWarioBikeNormal2Info, soTypeListNullType> > >,
+                              soInstancePool, soInstancePoolRoot> wnWarioBikeKineticPools;
 
 // HYPOTHESIS: the map-derived transactor owns the custom bike selector policy;
 // its exact runtime configuration is supplied by the Wario bike mediator.
