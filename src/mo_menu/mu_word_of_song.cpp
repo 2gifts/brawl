@@ -142,17 +142,17 @@ void muWordOfSongTask::createDataRequest() {
 }
 
 bool muWordOfSongTask::isLoading() {
-    bool loading;
     if (!m_handleScene.isReady()) {
-        loading = true;
-    } else if (!m_handleFade.isReady()) {
-        loading = true;
-    } else if (!m_handleWord.isReady()) {
-        loading = true;
-    } else {
-        loading = !m_handleParam.isReady();
+        return true;
     }
-    return loading;
+    if (!m_handleFade.isReady()) {
+        return true;
+    }
+    // MATCH-ONLY: explicit == false keeps the original branch layout for this check
+    if (m_handleWord.isReady() == false) {
+        return true;
+    }
+    return !m_handleParam.isReady();
 }
 
 // Makes the models of the words, and the entries with their timing, when the files are read.

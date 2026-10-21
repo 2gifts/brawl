@@ -871,9 +871,12 @@ bool grFamicomEnemy::isAppear() {
     if (data == NULL) {
         result = false;
     } else {
-        for (u8 i = 0; i != data->m_enemyMax; i++) {
+        stFamicomEnemyData* other;
+        u8 i;
+        u8 enemyMax = data->m_enemyMax;
+        for (i = 0; i != enemyMax; i++) {
             if (i != m_index) {
-                stFamicomEnemyData* other = &m_enemyData[i];
+                other = &m_enemyData[i];
                 if (other->m_state == 5) {
                     if (m_enemyData[m_index].m_dir == 1) {
                         if (other->m_dir == 1) {

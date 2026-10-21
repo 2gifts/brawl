@@ -190,19 +190,22 @@ void grGWFireSpring::updateCallBack(float deltaFrame) {
 
 // The top of the spring is its place plus a little (8 scaled units) when the spring is out; it is nowhere when it is folded.
 void grGWFireSpring::getTopNode(Vec3f* pos) {
-    if (*m_eventWork == 1) {
+    switch (*m_eventWork) {
+    case 1:
         pos->m_x = 0.0f;
         pos->m_y = 0.0f;
         pos->m_z = 0.0f;
         return;
-    }
-    if (*m_eventWork == 0) {
+    case 0: {
         Vec3f* top = m_posWork;
         pos->m_x = top->m_x;
         float y = top->m_y;
+        // MATCH-ONLY: the original stores the base y before it adds the offset
         pos->m_y = y;
         pos->m_z = top->m_z;
         pos->m_y = y + m_scale.m_y * 0.9f * 8.0f;
+        break;
+    }
     }
 }
 

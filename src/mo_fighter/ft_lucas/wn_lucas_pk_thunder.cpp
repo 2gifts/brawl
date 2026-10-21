@@ -176,7 +176,8 @@ bool wnLucasPKThunder::activeArticle(wnLucasPKThunderChild* weapon, soModuleAcce
     s32 ownerTaskId;
     s32 linkTaskId;
     if (count >= 1) {
-        linkTaskId = articles.getArticleFromNo(0, count - 1)->getTaskId();
+        soArticle* prevArticle = articles.getArticleFromNo(0, count - 1);
+        linkTaskId = prevArticle->getTaskId();
     } else {
         linkTaskId = acc->m_stageObject->m_taskId;
     }

@@ -114,8 +114,8 @@ void grNorfairMagma::updateAI(float deltaFrame) {
         getNodePosition(&nodePosA, 0, m_nodeColl[8]);
         getNodePosition(&nodePosB, 0, m_nodeColl[9]);
         limitA.m_x = m_posLimitWork[0].m_x;
-        limitB.m_x = m_posLimitWork[1].m_x;
         limitA.m_y = (nodePosA.m_y + nodePosB.m_y) * 0.5f + 40.0f;
+        limitB.m_x = m_posLimitWork[1].m_x;
         limitB.m_y = m_posLimitWork[1].m_y;
         if (limitA.m_y > 40.0f) {
             limitA.m_y = 40.0f;
