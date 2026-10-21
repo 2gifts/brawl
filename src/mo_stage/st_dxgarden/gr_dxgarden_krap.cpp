@@ -150,14 +150,13 @@ void grDxGardenKrap::updateYakumono(float deltaFrame) {
 
 // The spray effect follows the mouth while the attack is on.
 void grDxGardenKrap::updateEffect(float deltaFrame) {
+    Vec3f pos;
     if (m_attackSet == 1) {
         if (m_effectOn == 0) {
-            Vec3f pos;
             getNodePosition(&pos, 0, "MouseN");
             m_effectHandle = g_ecMgr->setEffect(ef_ptc_stg_dx_garden_wani, &pos);
             m_effectOn = 1;
         } else {
-            Vec3f pos;
             getNodePosition(&pos, 0, "MouseN");
             g_ecMgr->setPos(m_effectHandle, &pos);
         }

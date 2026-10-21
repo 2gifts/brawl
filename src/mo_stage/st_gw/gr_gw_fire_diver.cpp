@@ -149,15 +149,17 @@ void grGWFireDiver::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
-            if (m_posWork != NULL) {
-                grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-                data->m_pos.m_x = m_posWork[2].m_x;
-                data->m_pos.m_y = m_posWork[2].m_y;
-                data->m_pos.m_z = m_posWork[2].m_z;
+            grNodeCallbackData* data;
+            Vec3f* posWork = m_posWork;
+            if (posWork != NULL) {
+                data = calcWorldCallBack->m_nodeCallbackDatas;
+                data->m_pos.m_x = posWork[2].m_x;
+                data->m_pos.m_y = posWork[2].m_y;
+                data->m_pos.m_z = posWork[2].m_z;
             }
             Vec3f scale;
             gwVec3Scale(&scale, &m_scale, 0.9f);
-            grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
+            data = calcWorldCallBack->m_nodeCallbackDatas;
             data->m_scale.m_x = scale.m_x;
             data->m_scale.m_y = scale.m_y;
             data->m_scale.m_z = scale.m_z;
