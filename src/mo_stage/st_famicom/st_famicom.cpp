@@ -64,7 +64,8 @@ stFamicom::stFamicom() : stMelee("stFamicom", Stages::Famicom) {
         m_yukaToss[i].m_x = 0.0f;
         m_yukaToss[i].m_y = 0.0f;
         m_yukaToss[i].m_z = 0.0f;
-        m_yukaToss[i].m_value = 0.0f;
+        // MATCH-ONLY: the original stores an integer 0 here (m_value holds a task id, see grFamicomYuka), the header types it float
+        *reinterpret_cast<s32*>(&m_yukaToss[i].m_value) = 0;
         m_yukaToss[i].m_state = 0xD;
     }
     m_triggerYuka[0] = NULL;

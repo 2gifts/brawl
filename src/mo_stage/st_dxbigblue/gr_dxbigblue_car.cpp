@@ -152,12 +152,14 @@ void grDxBigBlueCar::updateActive(float deltaFrame) {
 void grDxBigBlueCar::updateActiveIn(float deltaFrame) {
     stDxBigBlueData* data = static_cast<stDxBigBlueData*>(getStageData());
     if (data != NULL) {
-        bool arrived = false;
         stDxBigBlueCarData* car = &m_carDataWork[m_tblWork[m_index]];
+        bool arrived = false;
         CameraController* camera = CameraController::getInstance();
         Rect2D* range = reinterpret_cast<Rect2D*>(reinterpret_cast<u8*>(camera) + 0x148);
-        Vec3f lo(range->m_left, range->m_up, 0.0f);
-        Vec3f hi(range->m_right, range->m_down, 0.0f);
+        Vec3f limit[2] = {
+            Vec3f(range->m_left, range->m_up, 0.0f),
+            Vec3f(range->m_right, range->m_down, 0.0f)
+        };
         if (0.0f == m_timer) {
             arrived = true;
         } else if (car->unk38 == 1) {
@@ -170,7 +172,7 @@ void grDxBigBlueCar::updateActiveIn(float deltaFrame) {
             if (next == 30) {
                 next = 0;
             }
-            if (isActive(next) == 1 && !(car->unk04 < lo.m_x)) {
+            if (isActive(next) == 1 && !(car->unk04 < limit[0].m_x)) {
                 if (m_carDataWork[m_tblWork[next]].unk04 - car->unk04 < data->unk20) {
                     arrived = true;
                 }
@@ -185,7 +187,7 @@ void grDxBigBlueCar::updateActiveIn(float deltaFrame) {
             if (m_index != 0) {
                 prev = m_index - 1;
             }
-            if (isActive(prev) == 1 && !(car->unk04 > hi.m_x)) {
+            if (isActive(prev) == 1 && !(car->unk04 > limit[1].m_x)) {
                 if (car->unk04 - m_carDataWork[m_tblWork[prev]].unk04 < data->unk20) {
                     arrived = true;
                 }

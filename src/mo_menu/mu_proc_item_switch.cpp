@@ -70,9 +70,7 @@ void muProcItemSwitch::init(nw4r::g3d::ScnGroup* group, int from) {
     m_cursor = 0;
     m_frequency = getMenuData()[0];
     u8* data = getMenuData();
-    u32 maskLo = *reinterpret_cast<u32*>(data + 0xC);
-    u32 maskHi = *reinterpret_cast<u32*>(data + 0x8);
-    m_mask = (u64(maskHi) << 32) | maskLo;
+    m_mask = *reinterpret_cast<u64*>(data + 0x8);
     m_row = 0;
     m_col = m_frequency + 3;
     group->Insert(group->sceneItemsCount, reinterpret_cast<nw4r::g3d::ScnObj*>(m_mdls[4]));
