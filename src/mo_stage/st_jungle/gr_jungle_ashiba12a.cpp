@@ -58,18 +58,14 @@ void grJungleAshiba12A::updateMove(float deltaFrame) {
                 m_state = 6;
             }
             break;
-        case 6: {
-            float move = m_move.m_y + data->unk2C * deltaFrame;
-            m_move.m_y = move;
-            float top = m_posWork[0].m_y;
-            float bottom = m_posWork[1].m_y;
-            if (bottom < top + move) {
+        case 6:
+            m_move.m_y += data->unk2C * deltaFrame;
+            if (m_posWork[0].m_y + m_move.m_y > m_posWork[1].m_y) {
+                m_move.m_y = m_posWork[1].m_y - m_posWork[0].m_y;
                 m_timer = 15.0f;
-                m_move.m_y = bottom - top;
                 m_state = 7;
             }
             break;
-        }
         case 7:
             if (m_timer <= 4.0f) {
                 g_ecMgr->setDrawPrio(1);

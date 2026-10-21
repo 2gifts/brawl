@@ -122,10 +122,11 @@ int muProcItemSwitch::proc() {
         }
         if (pad & mask) {
             m_objs[30]->setAnimIdx(&sFrequencyAnims[1], false);
-            u64 reserved;
-            ((u32*)&reserved)[0] = 0xE0000;
-            ((u32*)&reserved)[1] = 0;
-            u64 mask64 = m_mask | reserved;
+            // MATCH-ONLY: the three reserved item bits (49-51) are built in a stack u64 through its high word
+            u64 reserved = 0;
+            ((u32*)&reserved)[0] |= 0xE0000;
+            u64 mask64 = m_mask;
+            mask64 |= reserved;
             u8 frequency = m_frequency;
             u8* data = getMenuData();
             data[0] = frequency;

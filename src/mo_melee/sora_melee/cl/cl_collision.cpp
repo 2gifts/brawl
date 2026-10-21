@@ -445,6 +445,17 @@ bool clUtil::chkRough1(float* a, float* b, float* c, float* d, float* radius) {
     return true;
 }
 
+extern float lbl_27_rodata_14;
+extern float lbl_27_rodata_1C;
+
+float Vec3f::length() {
+    float lengthSquared = (m_z * m_z) + ((m_x * m_x) + (m_y * m_y));
+    if (static_cast<float>(fabs(lengthSquared)) <= lbl_27_rodata_1C) {
+        return lbl_27_rodata_14;
+    }
+    return lengthSquared * rsqrtf(lengthSquared);
+}
+
 // Vec3f::length() inlined (the original inlines it here)
 static inline float clLength(const Vec3f& v) {
     float lengthSq = v.m_z * v.m_z + v.m_x * v.m_x + v.m_y * v.m_y;
