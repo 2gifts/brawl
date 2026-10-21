@@ -5,27 +5,10 @@
 
 #include <mt/mt_vector.h>
 #include <types.h>
+#include <nw4r/g3d/g3d_camera.h>
 
 namespace nw4r {
 namespace g3d {
-
-class Camera {
-public:
-    enum PostureType { POSTURE_LOOKAT, POSTURE_ROTATE, POSTURE_AIM };
-
-    struct PostureInfo {
-        PostureType tp;       // 0x00
-        Vec3f cameraUp;       // 0x04
-        Vec3f cameraTarget;   // 0x10
-        Vec3f cameraRotate;   // 0x1C
-        float cameraTwist;    // 0x28
-    };
-
-    void SetPosture(const PostureInfo& info);
-
-private:
-    void* m_data;
-};
 
 class ScnRoot {
 public:

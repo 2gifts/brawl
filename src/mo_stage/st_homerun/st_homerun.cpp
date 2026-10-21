@@ -32,7 +32,6 @@
 
 // Unnamed helpers of other modules the stage calls directly (the names are the ones of the sora maps).
 // gfCamera::init
-extern "C" void fn_80018610(gfCameraManager* manager);
 // gmlib::gmLotFigure: picks the figure that is thrown into the stadium
 extern "C" u32 fn_800516F0();
 // CameraController::setStageParamPaused
@@ -172,7 +171,7 @@ stHomerun::stHomerun() : stMelee("stHomerun", Stages::HomeRunContest) {
 stHomerun::~stHomerun() {
     gfCameraManager* cameraManager = gfCameraManager::getManager();
     if (cameraManager != NULL) {
-        fn_80018610(cameraManager);
+        cameraManager->getCamera(0)->init();
     }
     if (m_beltData != NULL) {
         delete m_beltData;
