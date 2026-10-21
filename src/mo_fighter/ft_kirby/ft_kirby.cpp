@@ -916,14 +916,14 @@ void ftKirby::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* modu
 
 // The holders and sub pools of the article pools (soKindInfoGeneric<0, 5>); the mediator destroys them out of line.
 #pragma dont_inline on
-template class wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<6> >;
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<6> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<6> >, soKindInfoGeneric<0, 5> >;
-template class wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<7> >;
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<7> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<7> >, soKindInfoGeneric<0, 5> >;
-template class wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<8> >;
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<8> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<8> >, soKindInfoGeneric<0, 5> >;
-template class wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<9> >;
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<9> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<9> >, soKindInfoGeneric<0, 5> >;
-template class wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<10> >;
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<10> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<10> >, soKindInfoGeneric<0, 5> >;
 #pragma dont_inline off

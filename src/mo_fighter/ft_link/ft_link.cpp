@@ -15,6 +15,7 @@
 #include <ft/ft_util.h>
 #include <ft/ft_resource_id_accesser_impl.h>
 #include <so/article/so_generate_article_manage_module.h>
+#include <wn/wn_article_pool.h>
 
 #define FT_BC ftLinkBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -778,3 +779,15 @@ void fn_93_CBD0(u8* p) { return ((ftLinkVirtualSlots*)(p + 0x19DAC))->slot2(); }
 extern "C" {
 void* fn_93_1AD8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+
+// The holders and sub pools of the article pools (soKindInfoGeneric<0, 2>); the mediator destroys them out of line.
+#pragma dont_inline on
+template wnInstanceHolder<wnLinkBoomerang, soKindInfoGeneric<0, 2>, soIntToType<2> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnLinkBoomerang, 1, wnInstanceHolder, soIntToType<2> >, soKindInfoGeneric<0, 2> >;
+template wnInstanceHolder<wnLinkHookshot, soKindInfoGeneric<0, 2>, soIntToType<3> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnLinkHookshot, 1, wnInstanceHolder, soIntToType<3> >, soKindInfoGeneric<0, 2> >;
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 2>, soIntToType<4> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<4> >, soKindInfoGeneric<0, 2> >;
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 2>, soIntToType<5> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<5> >, soKindInfoGeneric<0, 2> >;
+#pragma dont_inline off

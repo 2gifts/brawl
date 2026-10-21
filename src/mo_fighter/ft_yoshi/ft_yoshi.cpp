@@ -657,14 +657,14 @@ u8* fn_95_ECB8(u8* p, int x) { return x == 0 ? p + 0xC : 0; }
 
 // The holders and sub pools of the article pools (soKindInfoGeneric<0, 4>); the mediator destroys them out of line.
 #pragma dont_inline on
-template class wnInstanceHolder<wnYoshiStar, soKindInfoGeneric<0, 4>, soIntToType<0> >;
+template wnInstanceHolder<wnYoshiStar, soKindInfoGeneric<0, 4>, soIntToType<0> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnYoshiStar, 1, wnInstanceHolder, soIntToType<0> >, soKindInfoGeneric<0, 4> >;
 template class soInstancePoolSub<soInstancePoolInfo<wnYoshiStar, 2, wnInstanceHolder, soIntToType<0> >, soKindInfoGeneric<0, 4> >;
-template class wnInstanceHolder<wnYoshiTamago, soKindInfoGeneric<0, 4>, soIntToType<1> >;
+template wnInstanceHolder<wnYoshiTamago, soKindInfoGeneric<0, 4>, soIntToType<1> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnYoshiTamago, 1, wnInstanceHolder, soIntToType<1> >, soKindInfoGeneric<0, 4> >;
 template class soInstancePoolSub<soInstancePoolInfo<wnYoshiTamago, 2, wnInstanceHolder, soIntToType<1> >, soKindInfoGeneric<0, 4> >;
 template class soInstancePoolSub<soInstancePoolInfo<wnYoshiTamago, 3, wnInstanceHolder, soIntToType<1> >, soKindInfoGeneric<0, 4> >;
 template class soInstancePoolSub<soInstancePoolInfo<wnYoshiTamago, 4, wnInstanceHolder, soIntToType<1> >, soKindInfoGeneric<0, 4> >;
-template class wnInstanceHolder<wnYoshiWing, soKindInfoGeneric<0, 4>, soIntToType<2> >;
+template wnInstanceHolder<wnYoshiWing, soKindInfoGeneric<0, 4>, soIntToType<2> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnYoshiWing, 1, wnInstanceHolder, soIntToType<2> >, soKindInfoGeneric<0, 4> >;
 #pragma dont_inline off

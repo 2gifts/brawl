@@ -6,6 +6,8 @@
 #include <ft/ganon/ft_ganon_extend_param_accesser.h>
 #include <ft/ganon/ft_ganon_status_uniq_process_ganon_kick.h>
 #include <ft/ft_common_data_accesser.h>
+#include <wn/wn_article_pool.h>
+#include <wn/wn_simple.h>
 
 #define FT_BC ftGanonBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -347,3 +349,9 @@ void* fn_109_4AA4(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 void* fn_109_5AF4(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 
 }
+
+// The holders and sub pools of the article pools (soKindInfoGeneric<0, 20>); the mediator destroys them out of line.
+#pragma dont_inline on
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 20>, soIntToType<1> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<1> >, soKindInfoGeneric<0, 20> >;
+#pragma dont_inline off
