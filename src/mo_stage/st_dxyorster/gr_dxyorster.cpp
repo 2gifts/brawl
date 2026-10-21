@@ -93,15 +93,36 @@ void grDxYorsterBg::updateArea(float deltaFrame) {
         unset = 1;
     }
     if (unset != 1) {
-        Rect2D area;
         int fighterIds[9];
+        Rect2D area;
+        Vec3f pos;
         memset(fighterIds, 0, sizeof(fighterIds));
-        dxYorsterMakeArea(&area, m_posGimmickWork[3], 10.0f, 10.0f, 20.0f);
+        {
+            float offsetY = 10.0f;
+            float width = 10.0f;
+            float height = 20.0f;
+            pos = m_posGimmickWork[3];
+            float centerY = pos.m_y - offsetY;
+            area.m_left = pos.m_x - 0.5f * width;
+            area.m_right = pos.m_x + 0.5f * width;
+            area.m_up = centerY + 0.5f * height;
+            area.m_down = centerY - 0.5f * height;
+        }
         if (bgEnumIncludeEntryId(g_ftManager, &area, fighterIds, 0, 1) > 0) {
             m_timerL = 5.0f;
         }
         memset(fighterIds, 0, sizeof(fighterIds));
-        dxYorsterMakeArea(&area, m_posGimmickWork[5], 10.0f, 10.0f, 20.0f);
+        {
+            float offsetY = 10.0f;
+            float width = 10.0f;
+            float height = 20.0f;
+            pos = m_posGimmickWork[5];
+            float centerY = pos.m_y - offsetY;
+            area.m_left = pos.m_x - 0.5f * width;
+            area.m_right = pos.m_x + 0.5f * width;
+            area.m_up = centerY + 0.5f * height;
+            area.m_down = centerY - 0.5f * height;
+        }
         if (bgEnumIncludeEntryId(g_ftManager, &area, fighterIds, 0, 1) > 0) {
             m_timerR = 5.0f;
         }
