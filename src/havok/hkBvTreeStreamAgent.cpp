@@ -142,8 +142,7 @@ hkBvTreeStreamAgent::hkBvTreeStreamAgent(void* unused0, void* unused1, const int
 hkBvTreeStreamAgent* hkBvTreeStreamAgent::createBvTreeShapeAgent(void* a, void* b, const int* c, int d) {
     hkBvTreeStreamAgent* agent = (hkBvTreeStreamAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkBvTreeStreamAgent), 0x1d);
     agent->m_memSizeAndFlags = sizeof(hkBvTreeStreamAgent);
-    new (agent) hkBvTreeStreamAgentVariant(b, a, c, d);
-    return agent;
+    return new (agent) hkBvTreeStreamAgentVariant(b, a, c, d);
 }
 
 hkBvTreeStreamAgent* hkBvTreeStreamAgent::createShapeBvAgent(void* a, void* b, const int* c, int d) {

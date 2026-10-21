@@ -263,12 +263,14 @@ int muAdvDifficultyTask::mainStepLoadMain(muAdvDifficultyTask* task) {
 }
 
 void muAdvDifficultyTask::mainStepAppearInit(muAdvDifficultyTask* task) {
-    MuObject* object = task->m_objects[0];
-    object->m_modelAnim->m_anmObjChrRes->SetUpdateRate(1.0f);
-    object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
-    object = task->m_objects[1];
-    object->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
-    object->setFrameNode(static_cast<float>(task->m_difficulty));
+    {
+        MuObject* object = task->m_objects[0];
+        object->m_modelAnim->m_anmObjChrRes->SetUpdateRate(1.0f);
+        object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+    }
+    MuObject* cursor = task->m_objects[1];
+    cursor->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+    cursor->setFrameNode(static_cast<float>(task->m_difficulty));
 }
 
 int muAdvDifficultyTask::mainStepAppearMain(muAdvDifficultyTask* task) {

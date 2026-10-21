@@ -988,9 +988,7 @@ void grPictchatPict013::updateCallBack(float deltaFrame) {
                 data->m_pos.m_x = pos->m_x;
                 data->m_pos.m_y = pos->m_y;
                 data->m_pos.m_z = pos->m_z;
-                data->m_rot.m_x = m_rot.m_x;
-                data->m_rot.m_y = m_rot.m_y;
-                data->m_rot.m_z = m_rot.m_z;
+                calcWorldCallBack->m_nodeCallbackDatas[0].m_rot = m_rot;
             }
         }
     }

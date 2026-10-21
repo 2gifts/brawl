@@ -138,18 +138,17 @@ void grPlanktonBg::clearList(grPlanktonList* list, int id) {
 // Forgets the fighters whose counter is "count" (zero: the counter ran down).
 void grPlanktonBg::clearList1(float count, grPlanktonList* list) {
     if (list != NULL) {
+        grPlanktonListNode* node;
         u8 index = 0;
         u8 size = list->GetSize();
         while (index != size) {
-            grPlanktonListNode* node = getListNode1(list, index);
+            node = getListNode1(list, index);
             if (node == NULL) {
                 break;
             }
             if (node->m_count == count) {
                 list->Erase(node);
-                if (node != NULL) {
-                    delete node;
-                }
+                delete node;
                 index = 0;
                 size = list->GetSize();
             } else {
@@ -161,13 +160,10 @@ void grPlanktonBg::clearList1(float count, grPlanktonList* list) {
 
 void grPlanktonBg::clearListAll(grPlanktonList* list) {
     if (list != NULL) {
-        u32 size = list->GetSize();
-        for (u32 i = 0; i != size; i++) {
-            grPlanktonListNode* node = &*list->GetBeginIter();
-            list->Erase(node);
-            if (node != NULL) {
-                delete node;
-            }
+        for (u32 i = 0, count = list->GetSize(); i != count; i++) {
+            grPlanktonListNode* node = &list->GetFront();
+            list->Erase(list->GetBeginIter());
+            delete node;
         }
     }
 }

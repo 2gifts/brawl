@@ -106,14 +106,16 @@ void grEarthSun::requestToFine() {
 
 void grEarthSun::requestToRain() {
     int state = m_state;
-    if (9 < state) {
-        if (state < 0xD) {
-            m_request = 1;
-        }
-        return;
-    }
-    if (state < 2 && 0 <= state) {
+    switch (state) {
+    case 0:
+    case 1:
         m_state = 0xD;
+        break;
+    case 0xA:
+    case 0xB:
+    case 0xC:
+        m_request = 1;
+        break;
     }
 }
 

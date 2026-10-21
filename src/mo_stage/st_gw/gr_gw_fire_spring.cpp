@@ -209,20 +209,15 @@ void grGWFireSpring::getTopNode(Vec3f* pos) {
 // A fighter jumps on the spring: the spring shoots and plays its sound at the place of the spring.
 void grGWFireSpring::onGimmickEvent(soGimmickEventArgs* eventInfo, int* taskId) {
     Gimmick::EventKind kind = eventInfo->m_kind;
-    if (kind == Gimmick::Event_Exit) {
+    if (kind == Gimmick::Event_Exit || kind <= 0x16 || kind >= 0x1A) {
         return;
     }
-    if (kind < Gimmick::Spring_Event_On) {
-        return;
+    switch (kind) {
+    case Gimmick::Spring_Event_On:
+        getTopNode(&static_cast<soGimmickSpringEventArgs*>(eventInfo)->m_topPos);
+        fn_27_2704CC(this);
+        m_snd.playSE(static_cast<SndID>(0x1C91), 0, 0, -1);
+        m_snd.setPos(m_posWork);
+        break;
     }
-    if (kind > Gimmick::Spring_Event_Pos) {
-        return;
-    }
-    if (kind != Gimmick::Spring_Event_On) {
-        return;
-    }
-    getTopNode(&static_cast<soGimmickSpringEventArgs*>(eventInfo)->m_topPos);
-    fn_27_2704CC(this);
-    m_snd.playSE(static_cast<SndID>(0x1C91), 0, 0, -1);
-    m_snd.setPos(m_posWork);
 }
