@@ -35,11 +35,10 @@
 stClassInfoImpl<Stages::Tengan, stTengan> stTengan::bss_loc_14;
 
 stTengan::stTengan() : stMelee("stTengan", Stages::Tengan) {
-    
-//    void* m_shrineStageData;
-    m_substage = 0;
-    m_slow = -1;
+    // MATCH-ONLY: the original stores 0xff as an unsigned byte; the header declares m_slow as char.
+    *reinterpret_cast<u8*>(&m_slow) = 0xff;
     unk1d8 = 0.0;
+    m_substage = 0;
     unk1dc = 0.0;
     m_rollTargetDegrees = 0.0;
     m_rollDegrees = 0.0;
@@ -50,6 +49,53 @@ stTengan::stTengan() : stMelee("stTengan", Stages::Tengan) {
     m_reverseDirection = 0.0;
     m_reverseSpeed = 0.0;
     unk200 = 0.0;
+    unk210 = -1;
+    unk214 = 0;
+    m_lastCresseliaEvent = -1;
+    posDialga.m_x = 0.0;
+    posDialga.m_y = 0.0;
+    posDialga.m_z = 0.0;
+    unke40 = 0.0;
+    unke44 = 0.0;
+    unke48 = 0.0;
+    unke4c = 0;
+    unke50 = 0;
+    m_legendEventActive = 0;
+    unke55 = 0;
+    unke58 = 0.0;
+    unke5c = 0.0;
+    unke60 = 0;
+    m_rebuildTimer = 0.0;
+    m_stateFloor[0] = 0;
+    m_stateFloor[1] = 0;
+    m_stateFloor[2] = 0;
+    unke6b = 0;
+    memset(posAshibaWork, 0, sizeof(posAshibaWork));
+    m_laserSoundHandle = -1;
+    m_dropSoundHandle = -1;
+    unkea4 = 0.0;
+    unkea8 = 0;
+    unkeac = 0;
+    unkeb0 = -1;
+    m_randomCallEffectHandle = 0;
+    unkeb8 = 0;
+    unkeb9 = 0;
+    unkeba = 0;
+    unkebc = 0.0;
+    unkec0 = 0.0;
+    unkec4 = 0.0;
+    unkec8 = 0;
+    unkecc = 0.0;
+    unked0 = 0.0;
+    unked4 = 0.0;
+    unked8 = 0.0;
+    m_boomerangEffectHandle = 0;
+    m_auraSoundHandle = -1;
+    m_boomerangSoundHandle = -1;
+    m_pendingLegendSound = snd_se_invalid;
+    m_legendSoundDelayFrames = 0.0;
+    m_boomerangMotion = 0;
+    *reinterpret_cast<u8*>(&m_slow) = 0xff;
 }
 
 stTengan* stTengan::create() {

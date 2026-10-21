@@ -109,18 +109,6 @@ void grHalberdLaser::updateMotion(float deltaFrame) {
         m_timer2 = 0.0f;
     }
     switch (m_state) {
-    case 8: {
-        Vec3f offset(0.0f, 0.0f, 0.0f);
-        cmReqQuake(cmQuake::Amplitude_S, &offset);
-        break;
-    }
-    case 7:
-        if (*m_stateWork == 10) {
-            setMotion(1, 0, 1, &m_timer2);
-            m_state = 8;
-            m_length = m_timer2;
-        }
-        break;
     case 0:
         setMotion(3, 0, 1, NULL);
         setVisibility(0);
@@ -133,14 +121,28 @@ void grHalberdLaser::updateMotion(float deltaFrame) {
             m_state = 7;
         }
         break;
+    case 7:
+        if (*m_stateWork == 10) {
+            setMotion(1, 0, 1, &m_timer2);
+            m_state = 8;
+            m_length = m_timer2;
+        }
+        break;
+    case 8: {
+        Vec3f offset(0.0f, 0.0f, 0.0f);
+        cmReqQuake(cmQuake::Amplitude_M, &offset);
+        break;
+    }
     }
     if (m_timer2 == 0.0f) {
-        u8 motion = m_motion;
-        if (motion == 2) {
+        switch (m_motion) {
+        case 2:
             setMotion(0, 1, 1, NULL);
-        } else if (motion < 2 && motion != 0) {
+            break;
+        case 1:
             *m_stateWork = 0xB;
             m_state = 0;
+            break;
         }
     }
 }

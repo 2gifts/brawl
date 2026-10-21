@@ -89,8 +89,8 @@ void grNorfairWall::updateAI(float deltaFrame) {
     switch (m_type) {
     case 0:
         zoneA.m_x = m_posLimitWork[0].m_x;
-        zoneB.m_x = nodePos.m_x + 50.0f;
         zoneA.m_y = m_posLimitWork[0].m_y;
+        zoneB.m_x = nodePos.m_x + 50.0f;
         zoneB.m_y = m_posLimitWork[1].m_y;
         if (zoneB.m_x > 40.0f) {
             zoneB.m_x = 40.0f;
