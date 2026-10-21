@@ -66,7 +66,8 @@ public:
     u8 unk5D;
     SyncCommand m_commands[7]; // 5E, two-byte aligned
     u8 m_commandCount;
-    u8 unk7B[5];
+    u8 unk7B;
+    s32 m_randomSeed; // Captured by ipSwitch after recording the preceding frame.
 
     ipKeyRecorder(Heaps::HeapType heap, u32 capacity);
     void clear(u8 value);
@@ -114,3 +115,4 @@ static_assert(offsetof(ipKeyRecorder, m_commandCount) == 0x7A, "Recorder command
 static_assert(offsetof(ipReplayHeader, chunks) == 0x340, "Replay chunk table offset");
 static_assert(offsetof(ipReplayHeader, initialProcessCount) == 0x370, "Replay initial process offset");
 static_assert(offsetof(ipKeyRecorder, m_buffer) == 0x24, "Recorder buffer offset");
+static_assert(offsetof(ipKeyRecorder, m_randomSeed) == 0x7C, "Recorder random seed offset");
