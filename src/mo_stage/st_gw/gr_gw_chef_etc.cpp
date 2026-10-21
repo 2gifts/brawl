@@ -56,11 +56,8 @@ grGWChefEtc::grGWChefEtc(const char* taskName) : grGW(taskName) {
     memset(m_nodeMeal, 0, sizeof(m_nodeMeal));
     memset(m_nodeChef, 0, sizeof(m_nodeChef));
     memset(m_meal, 0, sizeof(m_meal));
-    m_timerChef = 0.0f;
-    m_hpChef = 0.0f;
-    m_posChef = 0;
-    m_stateChef = 0;
-    m_attackOnChef = 0;
+    // MATCH-ONLY: clears the chef timer, hp and the three place bytes in one memset, as the original does
+    memset(&m_timerChef, 0, 0xc);
     m_posLimitWork = NULL;
     m_posEnd.m_x = 0.0f;
     m_posEnd.m_y = 0.0f;

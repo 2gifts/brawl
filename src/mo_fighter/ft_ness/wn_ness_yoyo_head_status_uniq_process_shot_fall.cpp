@@ -62,8 +62,8 @@ void wnNessYoyoHeadStatusUniqProcessShotFall::execStatus(soModuleAccesser* modul
         moduleAccesser->getPostureModule().setPos(&nodePos);
     }
     float range = param->unk8 - param->unk4;
-    float elapsed = moduleAccesser->getMotionModule().getFrame();
-    float value = param->unk8 - range * (elapsed / 60.0f);
+    float value = range * (moduleAccesser->getMotionModule().getFrame() / 60.0f);
+    value = param->unk8 - value;
     work.addFloat(value, 0x21000001);
     work.setFloat(value, 0x21000002);
     model->unk70FloatInt(work.getFloat(0x21000001), 2);

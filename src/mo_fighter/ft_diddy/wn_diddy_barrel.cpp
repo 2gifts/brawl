@@ -137,6 +137,22 @@ void wnWeaponBuilder<wnDiddyBarrelModuleAccesserBuildConfig>::deactivateDescenda
     soSingletonHolder<soArticleMediatorNull>::getInstance()->deactivate();
 }
 
+template <>
+void wnKineticTransactor::updateEnergy<soKineticEnergyGroundMovement>(
+    soKineticEnergyGroundMovement* energy, soModuleAccesser* acc) {
+    if (energy->isEnable() != true) return;
+    if (energy->isSuspend()) return;
+    energy->updateEnergy(acc);
+}
+
+
+template <>
+void wnKineticTransactor::updateEnergy<soKineticEnergyWindNormal>(soKineticEnergyWindNormal* energy, soModuleAccesser* acc) {
+    if (energy->isEnable() != true) return;
+    if (energy->isSuspend()) return;
+    energy->updateEnergy(acc);
+}
+
 wnDiddyBarrel::wnDiddyBarrel(s32 articleId, const wnArticleBuildInfo& info, const wnDiddyBarrelData* data) :
     wnWeaponBuilder<wnDiddyBarrelModuleAccesserBuildConfig>(
         "DiddyBarrel", articleId, info,
@@ -204,7 +220,7 @@ bool wnDiddyBarrel::notifyEventCollisionAttackCheck(u32 flags) {
 }
 
 bool wnDiddyBarrel::isCanEat() {
-    return m_moduleAccesser->getStatusModule().getStatusKind() == 2;
+    return m_moduleAccesser->getStatusModule().getStatusKind() != 2;
 }
 
 void wnDiddyBarrel::activate(int founderTaskId, int unk1, int team, Vec3f* pos, Vec2f* speed, bool unk5,
