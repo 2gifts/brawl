@@ -36,6 +36,7 @@ grPlanktonAshibaLeft::grPlanktonAshibaLeft(const char* taskName) : grPlankton(ta
     m_hitSet = NULL;
     m_dataGroup = NULL;
     m_data = NULL;
+    m_nodeTop = 0;
     makeCalcuCallback(1, Heaps::StageInstance);
     setCalcuCallbackRoot(0x20);
 }

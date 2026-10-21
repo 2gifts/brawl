@@ -74,6 +74,8 @@ void wnRobotGyro::notifyEventLink(soLinkEventArgs* event, soModuleAccesser* acc,
     Weapon::notifyEventLink(event, acc, parent, index);
 }
 
+wnRobotGyroHolder::~wnRobotGyroHolder() { }
+
 void wnRobotGyroHolder::activate(s32 founderTaskId, u32 resourceId, s32 team,
                                  float lr, const Vec3f& position, SituationKind situation) {
     wnActivateDesc desc;
@@ -133,6 +135,8 @@ void wnRobotGyroHolder::notifyEventLink(soLinkEventArgs* event, soModuleAccesser
     }
     Weapon::notifyEventLink(event, acc, parent, index);
 }
+
+wnRobotFinalBeam::~wnRobotFinalBeam() { }
 
 void wnRobotFinalBeam::activate(s32 founderTaskId, u32 resourceId, s32 team,
                                 const Vec3f* position, float lr, s32 count, s32 selection) {

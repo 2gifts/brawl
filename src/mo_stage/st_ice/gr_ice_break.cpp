@@ -178,6 +178,7 @@ void grIceBreak::updateCallBack(float deltaFrame) {
         if (scnMdl != NULL) {
             if (scnMdl->m_calcWorldCallBack == NULL) {
                 calcWorldCallBack->m_index = 0;
+                calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex = m_nodeIndex;
                 scnMdl->m_calcWorldCallBack = calcWorldCallBack;
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
@@ -187,9 +188,13 @@ void grIceBreak::updateCallBack(float deltaFrame) {
                 fn_8003F074(m_shake.m_x, m_shake.m_y, m_shake.m_z, &matrix);
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix = matrix;
                 Vec3f pos;
-                pos.m_x = matrix.m[0][3];
-                pos.m_y = matrix.m[1][3];
-                pos.m_z = matrix.m[2][3];
+                // MATCH-ONLY: the position components are read into temporaries in z, y, x order and stored in y, x, z order
+                float z = matrix.m[2][3];
+                float y = matrix.m[1][3];
+                float x = matrix.m[0][3];
+                pos.m_y = y;
+                pos.m_x = x;
+                pos.m_z = z;
                 m_snd.setPos(&pos);
             }
         }

@@ -50,12 +50,13 @@ public:
 };
 
 void ftSheikStatusUniqProcessSpecialSStart::initStatus(soModuleAccesser* moduleAccesser) {
+    soSituationModule& situation = moduleAccesser->getSituationModule();
     soKineticModule& kinetic = moduleAccesser->getKineticModule();
-    if (moduleAccesser->getSituationModule().getKind() == 0) {
+    if (situation.getKind() == 0) {
         kinetic.changeKinetic(0xf, moduleAccesser);
     } else {
         kinetic.changeKinetic(0x64, moduleAccesser);
-        soKineticEnergyNormal& energy1 = dynamic_cast<soKineticEnergyNormal&>(*kinetic.getEnergy(1));
+        ftKineticEnergyGravity& energy1 = dynamic_cast<ftKineticEnergyGravity&>(*kinetic.getEnergy(1));
         energy1.disable();
     }
 }

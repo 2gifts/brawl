@@ -39,8 +39,7 @@ static const PeachFinalModelData s_peachFinalModelData[] = {
 
 IfPeachFinalTask::IfPeachFinalTask(void* resourceData, u32 fighterTaskId)
     : gfTask("IfPeachFinal", Category_Info, 14, 6, true), m_resource(resourceData), unk44(-1),
-      m_group(NULL), m_model(NULL), m_soundHandle(-1), m_fighterTaskId(fighterTaskId),
-      m_actionActive(false), m_registered(false), unk5a() {}
+      m_soundHandle(-1), m_fighterTaskId(fighterTaskId), m_actionActive(false), m_registered(false) {}
 
 IfPeachFinalTask* IfPeachFinalTask::create(void* resourceData, s32 heap, u32 fighterTaskId, bool initialize) {
     IfPeachFinalTask* task = new (Heaps::HeapType(heap)) IfPeachFinalTask(resourceData, fighterTaskId);
