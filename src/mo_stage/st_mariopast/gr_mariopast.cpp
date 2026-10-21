@@ -145,39 +145,14 @@ void grMarioPastBg::updateCallBack(float deltaFrame) {
     if (calcWorldCallBack != NULL) {
         nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[0];
         if (scnMdl != NULL) {
-            if (m_stage == 1) {
+            switch (m_stage) {
+            case 0: {
                 if (calcWorldCallBack->m_nodeCallbackDatas == NULL) {
-                    calcWorldCallBack->m_numNodeCallbackData = 2;
-                    calcWorldCallBack->initialize(false, Heaps::StageInstance);
-                    calcWorldCallBack->m_nodeCallbackDatas[0].m_flags |= 1;
-                    calcWorldCallBack->m_nodeCallbackDatas[1].m_flags |= 1;
-                }
-                if (scnMdl->m_calcWorldCallBack == NULL) {
-                    calcWorldCallBack->m_index = 0;
-                    getNodeIndex(reinterpret_cast<u32*>(&calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex), 0, "AshibaA");
-                    getNodeIndex(reinterpret_cast<u32*>(&calcWorldCallBack->m_nodeCallbackDatas[1].m_nodeIndex), 0, "AshibaB");
-                    scnMdl->m_calcWorldCallBack = calcWorldCallBack;
-                    scnMdl->EnableScnMdlCallbackTiming(1);
-                    scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
-                }
-                grNodeCallbackData* data;
-                Vec3f* src = m_posGimmick;
-                data = calcWorldCallBack->m_nodeCallbackDatas;
-                data->m_pos.m_x = src->m_x;
-                data->m_pos.m_y = src->m_y;
-                data->m_pos.m_z = src->m_z;
-                src = m_posGimmick;
-                data = calcWorldCallBack->m_nodeCallbackDatas;
-                data[1].m_pos.m_x = src[1].m_x;
-                data[1].m_pos.m_y = src[1].m_y;
-                data[1].m_pos.m_z = src[1].m_z;
-            } else if (m_stage == 0) {
-                if (calcWorldCallBack->m_nodeCallbackDatas == NULL) {
-                    calcWorldCallBack->m_numNodeCallbackData = 3;
-                    calcWorldCallBack->initialize(false, Heaps::StageInstance);
-                    calcWorldCallBack->m_nodeCallbackDatas[0].m_flags |= 1;
-                    calcWorldCallBack->m_nodeCallbackDatas[1].m_flags |= 1;
-                    calcWorldCallBack->m_nodeCallbackDatas[2].m_flags |= 1;
+                    // MATCH-ONLY: redundant null check that sends the original branch to the function end
+                    if (calcWorldCallBack == NULL) {
+                        return;
+                    }
+                    calcWorldCallBack->setup(3, 1);
                 }
                 if (scnMdl->m_calcWorldCallBack == NULL) {
                     calcWorldCallBack->m_index = 0;
@@ -188,9 +163,8 @@ void grMarioPastBg::updateCallBack(float deltaFrame) {
                     scnMdl->EnableScnMdlCallbackTiming(1);
                     scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
                 }
-                grNodeCallbackData* data;
+                grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
                 Vec3f* src = m_posGimmick;
-                data = calcWorldCallBack->m_nodeCallbackDatas;
                 data->m_pos.m_x = src->m_x;
                 data->m_pos.m_y = src->m_y;
                 data->m_pos.m_z = src->m_z;
@@ -204,6 +178,36 @@ void grMarioPastBg::updateCallBack(float deltaFrame) {
                 data[2].m_pos.m_x = src[2].m_x;
                 data[2].m_pos.m_y = src[2].m_y;
                 data[2].m_pos.m_z = src[2].m_z;
+                break;
+            }
+            case 1: {
+                if (calcWorldCallBack->m_nodeCallbackDatas == NULL) {
+                    // MATCH-ONLY: redundant null check that sends the original branch to the function end
+                    if (calcWorldCallBack == NULL) {
+                        return;
+                    }
+                    calcWorldCallBack->setup(2, 1);
+                }
+                if (scnMdl->m_calcWorldCallBack == NULL) {
+                    calcWorldCallBack->m_index = 0;
+                    getNodeIndex(reinterpret_cast<u32*>(&calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex), 0, "AshibaA");
+                    getNodeIndex(reinterpret_cast<u32*>(&calcWorldCallBack->m_nodeCallbackDatas[1].m_nodeIndex), 0, "AshibaB");
+                    scnMdl->m_calcWorldCallBack = calcWorldCallBack;
+                    scnMdl->EnableScnMdlCallbackTiming(1);
+                    scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
+                }
+                grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
+                Vec3f* src = m_posGimmick;
+                data->m_pos.m_x = src->m_x;
+                data->m_pos.m_y = src->m_y;
+                data->m_pos.m_z = src->m_z;
+                src = m_posGimmick;
+                data = calcWorldCallBack->m_nodeCallbackDatas;
+                data[1].m_pos.m_x = src[1].m_x;
+                data[1].m_pos.m_y = src[1].m_y;
+                data[1].m_pos.m_z = src[1].m_z;
+                break;
+            }
             }
         }
     }
