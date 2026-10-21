@@ -555,12 +555,15 @@ void stFamicom::updateYuka(float deltaFrame) {
     m_triggerYuka[1]->setAreaSleep(true);
     m_triggerYuka[2]->setAreaSleep(true);
     m_triggerYuka[3]->setAreaSleep(true);
-    u8 count = 0;
-    u32 index = 0;
+    u32 index;
+    u8 count;
+    count = 0;
+    index = 0;
     do {
         stFamicomYukaToss* toss = &m_yukaToss[index & 0xFF];
         if (toss->m_state == 0) {
-            m_pressureYuka[count]->unk3C = toss->m_value;
+            // HYPOTHESIS: m_value holds a 32-bit integer that is copied as a word; the header types it as float.
+            *(u32*)&m_pressureYuka[count]->unk3C = *(u32*)&toss->m_value;
             stFamicomPressureData* pressure = m_pressureYuka[count];
             pressure->unk18 = toss->m_x;
             pressure->unk1C = toss->m_y;

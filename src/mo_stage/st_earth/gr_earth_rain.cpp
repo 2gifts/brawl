@@ -50,12 +50,10 @@ void grEarthRain::updateWeather(float deltaFrame) {
         m_state = 0xE;
         break;
     case 0xE:
-        if (*m_weatherWork == 1 || *m_weatherWork == 2) {
-            if (m_frameCount == 0.0f) {
-                setMotion(1, true, false, &m_frameCount);
-            }
-        } else {
+        if (*m_weatherWork != 1 && *m_weatherWork != 2) {
             m_state = 0xA;
+        } else if (m_frameCount == 0.0f) {
+            setMotion(1, true, false, &m_frameCount);
         }
         break;
     }

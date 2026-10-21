@@ -1388,9 +1388,13 @@ void grDxCorneriaBeam::onInflict(soCollisionLog* collisionLog, u32 flags, float 
         if (flags & 8) {
             int oldTeam = yakumono->getTeam();
             yakumono->setTeam(collisionLog->m_teamNo);
+            // MATCH-ONLY: a separate reload of the new team after setTeam fixes the load schedule
+            s8 newTeam = collisionLog->m_teamNo;
             m_reflected = true;
-            m_scale = m_scale * -1.0f;
-            OSReport("Beam Reflect Old Team = %d New Team = %d\n", oldTeam, collisionLog->m_teamNo);
+            float scale = m_scale;
+            scale *= -1.0f;
+            m_scale = scale;
+            OSReport("change team no %d->%d forward:%1.1f\n", oldTeam, newTeam, scale);
         } else if (m_reflectable) {
             m_hit = true;
         }

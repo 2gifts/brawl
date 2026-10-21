@@ -137,22 +137,24 @@ void grPalutenaAshibaE01::updateLanding(float deltaFrame) {
     if (m_landTimer < 0.0f) {
         m_landTimer = 0.0f;
     }
-    grNodeCallbackData* data = m_calcWorldCallBack.m_nodeCallbackDatas;
     switch (m_landState) {
+    case 0:
+        break;
     case 1: {
         m_landTime = m_landTime + deltaFrame;
-        float rate = m_landTime * 0.125f;
+        float rate = m_landTime / 8.0f;
         if (rate < 0.0f) {
             rate = 0.0f;
         }
-        if (1.0f < rate) {
+        if (rate > 1.0f) {
             rate = 1.0f;
         }
         if (rate == 1.0f) {
             m_landState = 2;
             m_landTime = 0.0f;
         }
-        data->m_offsetPos.m_y = nw4r::math::SinFIdx(NW4R_MATH_IDX_TO_FIDX(nw4r::math::U16ToF32((u16)(int)(rate * 16384.0f)))) * -3.0f;
+        float sine = nw4r::math::SinFIdx(NW4R_MATH_IDX_TO_FIDX(nw4r::math::U16ToF32((u16)(int)(rate * 16384.0f))));
+        m_calcWorldCallBack.m_nodeCallbackDatas->m_offsetPos.m_y = sine * -3.0f;
         break;
     }
     case 2: {
@@ -161,21 +163,22 @@ void grPalutenaAshibaE01::updateLanding(float deltaFrame) {
         if (rate < 0.0f) {
             rate = 0.0f;
         }
-        if (1.0f < rate) {
+        if (rate > 1.0f) {
             rate = 1.0f;
         }
         if (rate == 1.0f) {
             m_landState = 0;
             m_landTime = 0.0f;
         }
-        data->m_offsetPos.m_y = -0.5f - (1.0f - nw4r::math::SinFIdx(NW4R_MATH_IDX_TO_FIDX(nw4r::math::U16ToF32((u16)(int)(rate * 16384.0f))))) * 2.5f;
+        float sine = nw4r::math::SinFIdx(NW4R_MATH_IDX_TO_FIDX(nw4r::math::U16ToF32((u16)(int)(rate * 16384.0f))));
+        m_calcWorldCallBack.m_nodeCallbackDatas->m_offsetPos.m_y = -0.5f - (1.0f - sine) * 2.5f;
         break;
     }
     }
     if (m_landTimer == 0.0f) {
-        data->m_offsetPos.m_y = data->m_offsetPos.m_y + deltaFrame * 0.05f;
-        if (0.0f < data->m_offsetPos.m_y) {
-            data->m_offsetPos.m_y = 0.0f;
+        m_calcWorldCallBack.m_nodeCallbackDatas->m_offsetPos.m_y = m_calcWorldCallBack.m_nodeCallbackDatas->m_offsetPos.m_y + deltaFrame * 0.05f;
+        if (m_calcWorldCallBack.m_nodeCallbackDatas->m_offsetPos.m_y > 0.0f) {
+            m_calcWorldCallBack.m_nodeCallbackDatas->m_offsetPos.m_y = 0.0f;
         }
     }
 }

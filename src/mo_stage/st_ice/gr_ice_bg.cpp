@@ -36,21 +36,28 @@ void grIceBg::processAnim() {
 void grIceBg::update(float deltaFrame) {
     grGimmick::update(deltaFrame);
     if (m_isUpdate) {
-        u8 state = *m_stateWork;
-        if (state == 3) {
+        int state = *m_stateWork;
+        switch (state) {
+        case 1:
             if (m_isEnableCollisionStatus == 1) {
                 setEnableCollisionStatus(0);
             }
-        } else if (state < 3) {
-            if (state == 1) {
-                if (m_isEnableCollisionStatus == 1) {
-                    setEnableCollisionStatus(0);
-                }
-            } else if (state != 0 && m_isEnableCollisionStatus == 0) {
+            break;
+        case 2:
+            if (m_isEnableCollisionStatus == 0) {
                 setEnableCollisionStatus(1);
             }
-        } else if (state < 5 && m_isEnableCollisionStatus == 1) {
-            setEnableCollisionStatus(0);
+            break;
+        case 3:
+            if (m_isEnableCollisionStatus == 1) {
+                setEnableCollisionStatus(0);
+            }
+            break;
+        case 4:
+            if (m_isEnableCollisionStatus == 1) {
+                setEnableCollisionStatus(0);
+            }
+            break;
         }
     }
 }

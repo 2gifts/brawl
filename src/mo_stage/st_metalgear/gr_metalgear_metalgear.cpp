@@ -567,10 +567,10 @@ bool grMetalgearGekko::isWall() {
     if (m_rot.m_y == 0.0f) {
         m_isWall = true;
     }
-    if (m_rot.m_y < 0.0f && -15.0f < m_rot.m_y) {
+    if (m_rot.m_y < 0.0f && m_rot.m_y > -15.0f) {
         m_isWall = true;
     }
-    if (0.0f < m_rot.m_y && m_rot.m_y < 15.0f) {
+    if (m_rot.m_y > 0.0f && m_rot.m_y < 15.0f) {
         m_isWall = true;
     }
     if (m_isWall == false) {

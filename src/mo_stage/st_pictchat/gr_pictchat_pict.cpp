@@ -599,10 +599,13 @@ void grPictchatPict008::processAnim() {
     m_hasUpdatedG3dCalcWorld = false;
     Ground::processAnim();
     if (m_isUpdate && m_posSpringWork != NULL) {
-        if (m_type == 1) {
-            getNodePosition(m_posSpringWork, 0, "P008springLine8");
-        } else if (m_type == 0) {
+        switch (m_type) {
+        case 0:
             getNodePosition(m_posSpringWork, 0, "P008springLine1");
+            break;
+        case 1:
+            getNodePosition(m_posSpringWork, 0, "P008springLine8");
+            break;
         }
     }
 }
@@ -1029,9 +1032,7 @@ void grPictchatPict013::elase() {
         m_seHandle = -1;
     }
     m_snd.playSE(static_cast<SndID>(0x1D26), 0, 0, -1);
-    if (m_yakumono != NULL) {
-        clearAttackAll();
-    }
+    grPictchatPict::clearAttackAll();
     (*m_pictCountWork)--;
     if (m_dangerZone != -1) {
         g_aiMgr->delDangerZone(m_dangerZone);
