@@ -49,7 +49,6 @@ void grHalberdEnkei::updateMotion(float deltaFrame) {
     case 0:
         setMotion(2, 0, 1, NULL);
         m_state = 2;
-        // fall through
     case 2:
         if (*m_stateWork == 2) {
             setMotion(0, 0, 1, &m_motionTimer);
@@ -57,15 +56,22 @@ void grHalberdEnkei::updateMotion(float deltaFrame) {
             m_state = 3;
         }
         break;
+    case 3:
+        break;
     }
-    if (m_motion == 1) {
+    switch (m_motion) {
+    case 0:
+        if (getMotionFrame(0) >= m_motionTimer) {
+            setMotion(1, 1, 1, NULL);
+            m_hasSrt = 1;
+        }
+        break;
+    case 1:
         if (*m_stateWork == 2) {
             setMotion(0, 0, 1, &m_motionTimer);
             setMotionFrame(*m_frameWork, 0);
         }
-    } else if (m_motion == 0 && getMotionFrame(0) >= m_motionTimer) {
-        setMotion(1, 1, 1, NULL);
-        m_hasSrt = 1;
+        break;
     }
 }
 

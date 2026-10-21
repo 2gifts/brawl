@@ -600,7 +600,9 @@ u8 stFamicom::getCountEnemy() {
         return 0;
     }
     u8 count = 0;
-    for (u8 i = 0; i != data->m_enemyMax; i++) {
+    u8 i = 0;
+    u8 max = data->m_enemyMax;
+    for (; i != max; i++) {
         if (m_enemyData[i].m_state != 0xD) {
             count++;
         }
@@ -633,10 +635,11 @@ void stFamicom::makeEnemy() {
         u8 index = getEmptyIndexEnemyTbl();
         if (index != 0xFF) {
             Ground* ground;
-            if (data->shellcreeperSpawnRate <= (data->shellcreeperSpawnRate + data->sidestepperSpawnRate) * randf()) {
-                ground = grFamicomKani::create(4, "StgFamicomKani", "grFamicomKani");
-            } else {
+            float totalSpawnRate = data->shellcreeperSpawnRate + data->sidestepperSpawnRate;
+            if (totalSpawnRate * randf() < data->shellcreeperSpawnRate) {
                 ground = grFamicomKame::create(3, "StgFamicomKame", "grFamicomKame");
+            } else {
+                ground = grFamicomKani::create(4, "StgFamicomKani", "grFamicomKani");
             }
             if (ground != NULL) {
                 grFamicomEnemy* enemy = static_cast<grFamicomEnemy*>(ground);

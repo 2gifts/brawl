@@ -172,17 +172,13 @@ grPlanktonListNode* grPlanktonBg::getListNode(grPlanktonList* list, int id) {
     }
     u32 size = list->GetSize();
     grPlanktonList::Iterator it = list->GetBeginIter();
-    while (true) {
-        if (size == 0) {
-            return NULL;
+    for (u32 i = 0; i != size; i++, ++it) {
+        // MATCH-ONLY: the original compares the ids unsigned (cmplw)
+        if ((u32)id == it->m_id) {
+            return &*it;
         }
-        if (id == (&*it)->m_id) {
-            break;
-        }
-        ++it;
-        size--;
     }
-    return &*it;
+    return NULL;
 }
 
 grPlanktonListNode* grPlanktonBg::getListNode1(grPlanktonList* list, u8 index) {
