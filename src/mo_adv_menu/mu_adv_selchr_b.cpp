@@ -439,29 +439,14 @@ int muAdvSelchrBTask::getNotNumberingPos() {
             }
         }
     }
-    int result = -1;
-    if ((used & 0x001) == 0) {
-        result = 0;
-    } else if ((used & 0x002) == 0) {
-        result = 1;
-    } else if ((used & 0x004) == 0) {
-        result = 2;
-    } else if ((used & 0x008) == 0) {
-        result = 3;
-    } else if ((used & 0x010) == 0) {
-        result = 4;
-    } else if ((used & 0x020) == 0) {
-        result = 5;
-    } else if ((used & 0x040) == 0) {
-        result = 6;
-    } else if ((used & 0x080) == 0) {
-        result = 7;
-    } else if ((used & 0x100) == 0) {
-        result = 8;
-    } else if ((used & 0x200) == 0) {
-        result = 9;
+    int bit = 1;
+    for (int i = 0; i < 10; i++) {
+        if ((used & bit) == 0) {
+            return i;
+        }
+        bit <<= 1;
     }
-    return result;
+    return -1;
 }
 
 // Moves the cursor of the player, picks the character that the cursor is on and takes the last pick back.

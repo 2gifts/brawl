@@ -188,16 +188,12 @@ grPlanktonListNode* grPlanktonBg::getListNode1(grPlanktonList* list, u8 index) {
     u32 size = list->GetSize();
     grPlanktonList::Iterator it = list->GetBeginIter();
     u8 i = 0;
-    while (true) {
-        if (size == 0) {
-            return NULL;
-        }
+    for (u32 j = 0; j != size; j++) {
         if (i == index) {
-            break;
+            return &*it;
         }
         ++it;
         i++;
-        size--;
     }
-    return &*it;
+    return NULL;
 }

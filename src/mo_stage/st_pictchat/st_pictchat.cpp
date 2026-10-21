@@ -582,10 +582,15 @@ void stPictchat::createObjAttack(int index) {
         ground->setPictIDWork(&m_pictID);
         ground->setPictID(pictID);
         ground->setStateWork(stateWork);
-        if (index < 0x2D) {
-            if (index >= 0x27) {
-                ground->setIndex(attackIndex);
-            }
+        switch (index) {
+        case 0x27:
+        case 0x28:
+        case 0x29:
+        case 0x2A:
+        case 0x2B:
+        case 0x2C:
+            ground->setIndex(attackIndex);
+            break;
         }
     }
 }

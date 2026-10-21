@@ -28,7 +28,8 @@ grPalutenaChain* grPalutenaChain::create(int mdlIndex, const char* tgtNodeName, 
 grPalutenaChain::grPalutenaChain(const char* taskName) : grPalutena(taskName) {
     m_pos = NULL;
     m_node = NULL;
-    m_pos = new (Heaps::StageInstance) Vec3f[23];
+    // HYPOTHESIS: the links are allocated as nw4r VEC3, whose empty constructor the original passes to __construct_new_array.
+    m_pos = reinterpret_cast<Vec3f*>(new (Heaps::StageInstance) nw4r::math::VEC3[23]);
     m_rot = new (Heaps::StageInstance) float[23];
     m_node = new (Heaps::StageInstance) u32[23];
     memset(m_pos, 0, sizeof(Vec3f) * 23);

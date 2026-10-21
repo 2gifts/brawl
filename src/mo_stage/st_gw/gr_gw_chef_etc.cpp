@@ -630,53 +630,50 @@ void grGWChefEtc::setAttackMeal(u32 index) {
 
 // The chef goes to a place next to the one he is at (the places are in a row); the pan and the hit are moved with him.
 void grGWChefEtc::selectPosChef() {
-    u32 pos = m_posChef;
-    setNodeVisibility(false, 0, m_nodeChef[pos][0], true, false);
-    setNodeVisibility(false, 0, m_nodeChef[pos][1], true, false);
-    setNodeVisibility(false, 0, m_nodeChef[pos][2], true, false);
+    // MATCH-ONLY: the original indexes the nodes as one flat list (like m_nodeMeal); [pos][i] folds to mulli
+    u32 node = m_posChef * 3;
+    setNodeVisibility(false, 0, m_nodeChef[0][node + 0], true, false);
+    setNodeVisibility(false, 0, m_nodeChef[0][node + 1], true, false);
+    setNodeVisibility(false, 0, m_nodeChef[0][node + 2], true, false);
     disableHit(m_posChef, 0);
     float r = randf();
     switch (m_posChef) {
     case 0:
-        if (r >= 0.5f) {
-            m_posChef = 1;
-        } else {
+        if (r < 0.5f) {
             m_posChef = 0;
+        } else {
+            m_posChef = 1;
         }
         break;
     case 1:
-        if (r >= 1.0f / 3.0f) {
-            if (r >= 2.0f / 3.0f) {
-                m_posChef = 2;
-            } else {
-                m_posChef = 1;
-            }
-        } else {
+        if (r < 1.0f / 3.0f) {
             m_posChef = 0;
-        }
-        break;
-    case 2:
-        if (r >= 1.0f / 3.0f) {
-            if (r >= 2.0f / 3.0f) {
-                m_posChef = 3;
-            } else {
-                m_posChef = 2;
-            }
-        } else {
+        } else if (r < 2.0f / 3.0f) {
             m_posChef = 1;
-        }
-        break;
-    case 3:
-        if (r >= 0.5f) {
-            m_posChef = 3;
         } else {
             m_posChef = 2;
         }
         break;
+    case 2:
+        if (r < 1.0f / 3.0f) {
+            m_posChef = 1;
+        } else if (r < 2.0f / 3.0f) {
+            m_posChef = 2;
+        } else {
+            m_posChef = 3;
+        }
+        break;
+    case 3:
+        if (r < 0.5f) {
+            m_posChef = 2;
+        } else {
+            m_posChef = 3;
+        }
+        break;
     }
-    pos = m_posChef;
-    setNodeVisibility(true, 0, m_nodeChef[pos][0], true, false);
-    setNodeVisibility(true, 0, m_nodeChef[pos][1], true, false);
+    node = m_posChef * 3;
+    setNodeVisibility(true, 0, m_nodeChef[0][node + 0], true, false);
+    setNodeVisibility(true, 0, m_nodeChef[0][node + 1], true, false);
     if (m_played == 1) {
         enableHit(m_posChef, 0);
     }

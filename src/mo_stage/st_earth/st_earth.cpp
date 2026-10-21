@@ -735,9 +735,10 @@ void stEarth::updateWeather(float deltaFrame) {
 
 // The chappy: it waits (0, 1), comes in (2), stays (3) and goes out (4).
 void stEarth::updateChappy(float deltaFrame) {
+    stEarthData* data;
     grEarthChappy* chappy = static_cast<grEarthChappy*>(getGround(0xE));
     if (chappy != NULL && getGround(3) != NULL) {
-        stEarthData* data = static_cast<stEarthData*>(m_stageData);
+        data = static_cast<stEarthData*>(m_stageData);
         if (data != NULL) {
             m_timerChappy = m_timerChappy - deltaFrame;
             if (m_timerChappy < 0.0f) {
@@ -746,14 +747,10 @@ void stEarth::updateChappy(float deltaFrame) {
             switch (m_stateChappy) {
             case 0:
                 if (m_firstChappy == 1) {
-                    float r = randf();
-                    float most = data->unk8C;
-                    float least = data->unk88;
+                    m_timerChappy = data->unk88 + (data->unk8C - data->unk88) * randf();
                     m_firstChappy = 0;
-                    m_timerChappy = least + (most - least) * r;
                 } else {
-                    float r = randf();
-                    m_timerChappy = data->unk90 + (data->unk94 - data->unk90) * r;
+                    m_timerChappy = data->unk90 + (data->unk94 - data->unk90) * randf();
                 }
                 m_stateChappy = 1;
                 break;

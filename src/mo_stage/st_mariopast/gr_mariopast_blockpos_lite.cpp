@@ -882,43 +882,74 @@ void stMarioPastBlockDt::countDrawNum(int count, stMarioPastBlockDt* blocks, int
     *dark = darkNum;
 }
 
+extern "C" void GXInitTexObjWrapMode(GXTexObj* obj, GXTexWrapMode wrapS, GXTexWrapMode wrapT);
+
 // Draws the blocks of the model in two passes (the normal blocks and the other ones, each with its half of the texture).
 void grMarioPastBlockPosLite::drawProcBlocks() {
     static const char* const sTexNames[2][2] = { { "MH_block_01_A", "MH_hatena_01_A" }, { "M2H_block_01_A", "M2H_hatena_01_A" } };
-    u32 stage = m_stage;
+    // MATCH-ONLY: the original tests this before reading the members and before every texture setup
+    if (this == NULL) {
+        return;
+    }
+    const char* name;
+    u8 stage = m_stage;
     stMarioPastBlockDt* blocks = m_blocks;
-    if (m_num != 0 && blocks != NULL) {
-        int normalNum;
-        int darkNum;
-        u16 normalOrder[263];
-        u16 darkOrder[263];
-        stMarioPastBlockDt::countDrawNum(m_num, blocks, &normalNum, &darkNum, normalOrder, darkOrder);
-        for (int pass = 0; pass < 2; pass++) {
-            int num = pass == 0 ? normalNum : darkNum;
-            if (num > 0) {
-                const char* name = NULL;
-                if (stage < 2) {
-                    name = sTexNames[stage][pass];
-                }
-                bool hasTex = false;
-                if (m_resFile.ptr() != NULL && m_resFile.HasResTex()) {
-                    hasTex = true;
-                }
-                if (hasTex) {
-                    gfDrawSetVtxPosColorTexPrimEnvironment();
-                    nw4r::g3d::ResTex tex = m_resFile.GetResTex(name);
-                    GXTexObj texObj;
-                    fn_8001AA88(&texObj, &tex);
-                    fn_801F2C58(&texObj, 0, 0);
-                    GXLoadTexObj(&texObj, GX_TEXMAP0);
-                } else {
-                    gfDrawSetVtxPosColorPrimEnvironment();
-                }
-                GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
-                GXSetVtxAttrFmt(GX_VTXFMT1, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
-                GXSetZMode(1, GX_LEQUAL, 1);
-                stMarioPastBlockDt::drawBlocks(num, blocks, pass == 0 ? normalOrder : darkOrder, pass);
+    if (m_num == 0 || blocks == NULL) {
+        return;
+    }
+    int normalNum;
+    int darkNum;
+    u16 normalOrder[262];
+    u16 darkOrder[14];
+    stMarioPastBlockDt::countDrawNum(m_num, blocks, &normalNum, &darkNum, normalOrder, darkOrder);
+    if (normalNum > 0) {
+        name = stage >= 2 ? NULL : sTexNames[stage][0];
+        if (this != NULL) {
+            bool hasTex;
+            if (m_resFile.ptr() != NULL && m_resFile.HasResTex()) {
+                hasTex = true;
+            } else {
+                hasTex = false;
             }
+            if (!hasTex) {
+                gfDrawSetVtxPosColorPrimEnvironment();
+            } else {
+                gfDrawSetVtxPosColorTexPrimEnvironment();
+                nw4r::g3d::ResTex tex = m_resFile.GetResTex(name);
+                GXTexObj texObj;
+                fn_8001AA88(&texObj, &tex);
+                GXInitTexObjWrapMode(&texObj, GX_CLAMP, GX_CLAMP);
+                GXLoadTexObj(&texObj, GX_TEXMAP0);
+            }
+            GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+            GXSetVtxAttrFmt(GX_VTXFMT1, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+            GXSetZMode(1, GX_LEQUAL, 1);
         }
+        stMarioPastBlockDt::drawBlocks(normalNum, blocks, normalOrder, 0);
+    }
+    if (darkNum > 0) {
+        name = stage >= 2 ? NULL : sTexNames[stage][1];
+        if (this != NULL) {
+            bool hasTex;
+            if (m_resFile.ptr() != NULL && m_resFile.HasResTex()) {
+                hasTex = true;
+            } else {
+                hasTex = false;
+            }
+            if (!hasTex) {
+                gfDrawSetVtxPosColorPrimEnvironment();
+            } else {
+                gfDrawSetVtxPosColorTexPrimEnvironment();
+                nw4r::g3d::ResTex tex = m_resFile.GetResTex(name);
+                GXTexObj texObj;
+                fn_8001AA88(&texObj, &tex);
+                GXInitTexObjWrapMode(&texObj, GX_CLAMP, GX_CLAMP);
+                GXLoadTexObj(&texObj, GX_TEXMAP0);
+            }
+            GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+            GXSetVtxAttrFmt(GX_VTXFMT1, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+            GXSetZMode(1, GX_LEQUAL, 1);
+        }
+        stMarioPastBlockDt::drawBlocks(darkNum, blocks, darkOrder, 1);
     }
 }
