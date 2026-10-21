@@ -23,6 +23,66 @@ namespace {
         else mask |= 1u << action;
         return mask;
     }
+
+    // A direction released in any of the preceding three samples can qualify
+    // a fresh attack/special press for full-strength directional input.
+    inline bool hasRecentRelease(int history) {
+        bool released = false;
+        for (int i = 1; i < 4; ++i) {
+            if (((history >> i) & 1) == 0) released = true;
+        }
+        return released;
+    }
+
+    inline void copyConfig(ipGcButtonConfig& dst, const ipGcButtonConfig& src) {
+        dst.l = src.l;
+        dst.r = src.r;
+        dst.z = src.z;
+        dst.up = src.up;
+        dst.side = src.side;
+        dst.down = src.down;
+        dst.a = src.a;
+        dst.b = src.b;
+        dst.substick = src.substick;
+        dst.y = src.y;
+        dst.x = src.x;
+        dst.flags = src.flags;
+    }
+    inline void copyConfig(ipWiiButtonConfig& dst, const ipWiiButtonConfig& src) {
+        dst.core.one = src.core.one;
+        dst.core.two = src.core.two;
+        dst.core.oneTwo = src.core.oneTwo;
+        dst.core.a = src.core.a;
+        dst.core.b = src.core.b;
+        dst.core.ab = src.core.ab;
+        dst.core.up = src.core.up;
+        dst.core.extra = src.core.extra;
+        dst.nunchuk.c = src.nunchuk.c;
+        dst.nunchuk.z = src.nunchuk.z;
+        dst.nunchuk.cz = src.nunchuk.cz;
+        dst.nunchuk.a = src.nunchuk.a;
+        dst.nunchuk.b = src.nunchuk.b;
+        dst.nunchuk.ab = src.nunchuk.ab;
+        dst.nunchuk.extra = src.nunchuk.extra;
+        dst.nunchuk.motion = src.nunchuk.motion;
+        dst.nunchuk.up = src.nunchuk.up;
+        dst.nunchuk.side = src.nunchuk.side;
+        dst.nunchuk.down = src.nunchuk.down;
+        dst.nunchuk.flags = src.nunchuk.flags;
+        dst.classic.l = src.classic.l;
+        dst.classic.r = src.classic.r;
+        dst.classic.zl = src.classic.zl;
+        dst.classic.zr = src.classic.zr;
+        dst.classic.up = src.classic.up;
+        dst.classic.side = src.classic.side;
+        dst.classic.down = src.classic.down;
+        dst.classic.a = src.classic.a;
+        dst.classic.b = src.classic.b;
+        dst.classic.substick = src.classic.substick;
+        dst.classic.x = src.classic.x;
+        dst.classic.y = src.classic.y;
+        dst.classic.flags = src.classic.flags;
+    }
 }
 
 ipPadConfig* ipPadConfig::getInstance() {
@@ -33,8 +93,8 @@ ipPadConfig* ipPadConfig::getInstance() {
 void ipPadConfig::reset() {
     ipButtonConfig defaults;
     buttonConfigInit(&defaults);
-    for (u32 i = 0; i < 4; ++i) m_gc[i] = defaults.gc;
-    for (u32 i = 0; i < 4; ++i) m_wii[i] = defaults.wii;
+    for (u32 i = 0; i < 4; ++i) copyConfig(m_gc[i], defaults.gc);
+    for (u32 i = 0; i < 4; ++i) copyConfig(m_wii[i], defaults.wii);
     for (u32 i = 0; i < 4; ++i) m_playerPads[i] = i;
     for (u32 i = 0; i < 8; ++i) {
         ipCorePadState& s = m_coreState[i];
@@ -68,10 +128,15 @@ void ipPadConfig::reset() {
 void ipPadConfig::setupPadSubstick(ipPadStatus* out, const gfPadStatus* in, int action, ipSubstickState* state) {
     int x = (s8)in->m_subStickX;
     int y = (s8)in->m_subStickY;
+    // MATCH-ONLY: retain the native pre-threshold float initialization;
+    // the raw integer axes remain the output for a fresh special tilt.
     Vec2f stick(x, y);
-    int motionHistory = (u8)(state->motionHistory << 1);
-    int history = (u8)(state->history << 1);
-    int lengthSquared = x * x + y * y;
+    int lengthSquared;
+    int motionHistory;
+    int history;
+    motionHistory = (u8)(state->motionHistory << 1);
+    history = (u8)(state->history << 1);
+    lengthSquared = x * x + y * y;
     if (lengthSquared > 2500) {
         history |= 1;
         bool overrideStick = false;
@@ -89,8 +154,8 @@ void ipPadConfig::setupPadSubstick(ipPadStatus* out, const gfPadStatus* in, int 
             if (edge) {
                 out->m_button |= Attack;
                 overrideStick = true;
-                stick.m_x = 0.32f * direction.m_x;
-                stick.m_y = 0.32f * direction.m_y;
+                x = 0.32f * direction.m_x;
+                y = 0.32f * direction.m_y;
                 break;
             }
             // A held attack C-stick follows the same path as special.
@@ -119,13 +184,13 @@ void ipPadConfig::setupPadSubstick(ipPadStatus* out, const gfPadStatus* in, int 
             break;
         }
         if (overrideStick) {
-            out->m_stickX = stick.m_x;
-            out->m_stickY = stick.m_y;
+            out->m_stickX = x;
+            out->m_stickY = y;
         }
     }
     state->history = history;
     state->motionHistory = motionHistory;
-    if (action == 5 && lengthSquared < 20) state->smashFrames = 0;
+    if ((u32)action == 5 && lengthSquared < 20) state->smashFrames = 0;
 }
 
 void ipPadConfig::setupPadStatusGc(ipPadStatus* out, const gfPadStatus* in, const ipGcButtonConfig* config, ipSubstickState* state) {
@@ -228,7 +293,8 @@ void ipPadConfig::setupPadStatusWiiFreeStyle(ipPadStatus* out, const gfPadStatus
         if (in->m_buttonsCurrentFrame2.bits & 0x20000) out->m_button |= mappedButton(config->z);
     }
     if ((in->m_buttonsCurrentFrame2.bits & 0x100) && (in->m_buttonsCurrentFrame2.bits & 0x200)) {
-        out->m_button |= mappedButton(config->ab) | StockShare;
+        out->m_button |= mappedButton(config->ab);
+        out->m_button |= StockShare;
     } else {
         if (in->m_buttonsCurrentFrame2.bits & 0x100) out->m_button |= mappedButton(config->a);
         if (in->m_buttonsCurrentFrame2.bits & 0x200) out->m_button |= mappedButton(config->b);
@@ -242,7 +308,8 @@ void ipPadConfig::setupPadStatusWiiFreeStyle(ipPadStatus* out, const gfPadStatus
     if ((in->m_buttonsCurrentFrame2.bits & 1) || (in->m_buttonsCurrentFrame2.bits & 2)) {
         if (config->side == 7) {
             motion = true;
-            direction.m_x = (in->m_buttonsCurrentFrame2.bits & 2) ? 1.0f : -1.0f;
+            if (in->m_buttonsCurrentFrame2.bits & 2) direction.m_x = 1.0f;
+            else direction.m_x = -1.0f;
         } else out->m_button |= mappedButton(config->side);
     }
     if (in->m_buttonsCurrentFrame2.bits & 4) {
@@ -251,15 +318,21 @@ void ipPadConfig::setupPadStatusWiiFreeStyle(ipPadStatus* out, const gfPadStatus
     }
     out->m_stickX = in->m_stickX;
     out->m_stickY = in->m_stickY;
-    if ((((config->flags >> 7) & 1) != 0) && in->_0x24 > 0.125f) {
-        float vertical = in->_0x1c + in->_0x28;
-        if (in->_0x24 > 0.15f && fabsf(in->_0x18) > 1.05f) {
-            motion = true;
-            direction.m_x = in->_0x18 >= 0.0f ? 1.0f : -1.0f;
-        }
-        if (in->_0x24 > 0.125f && fabsf(vertical) > 0.95f) {
-            motion = true;
-            direction.m_y = vertical >= 0.0f ? -1.0f : 1.0f;
+    if (((config->flags >> 7) & 1) != 0) {
+        float strength = in->_0x24;
+        if (strength > 0.125f) {
+            float vertical = in->_0x1c + in->_0x28;
+            float horizontal = in->_0x18;
+            if (strength > 0.15f && float(__fabs(horizontal)) > 1.05f) {
+                motion = true;
+                if (horizontal < 0.0f) direction.m_x = -1.0f;
+                else direction.m_x = 1.0f;
+            }
+            if (strength > 0.125f && float(__fabs(vertical)) > 0.95f) {
+                motion = true;
+                if (vertical < 0.0f) direction.m_y = 1.0f;
+                else direction.m_y = -1.0f;
+            }
         }
     }
     bool edge = false;
@@ -299,7 +372,8 @@ void ipPadConfig::setupPadStatusWiiCore(ipPadStatus* out, const gfPadStatus* in,
         if (in->m_buttonsCurrentFrame2.bits & 0x20000) out->m_button |= mappedButton(config->two);
     }
     if ((in->m_buttonsCurrentFrame2.bits & 0x200000) && (in->m_buttonsCurrentFrame2.bits & 0x400000)) {
-        out->m_button |= mappedButton(config->ab) | StockShare;
+        out->m_button |= mappedButton(config->ab);
+        out->m_button |= StockShare;
     } else {
         if (in->m_buttonsCurrentFrame2.bits & 0x200000) out->m_button |= mappedButton(config->a);
         if (in->m_buttonsCurrentFrame2.bits & 0x400000) out->m_button |= mappedButton(config->b);
@@ -323,11 +397,16 @@ void ipPadConfig::setupPadStatusWiiCore(ipPadStatus* out, const gfPadStatus* in,
     }
     out->m_stickX = 0;
     out->m_stickY = 0;
+    int leftHistory, rightHistory, upHistory, downHistory;
     bool horizontal = false, vertical = false;
-    u32 leftHistory = state->leftHistory << 1;
-    u32 rightHistory = state->rightHistory << 1;
-    u32 upHistory = state->upHistory << 1;
-    u32 downHistory = state->downHistory << 1;
+    leftHistory = state->leftHistory;
+    rightHistory = state->rightHistory;
+    upHistory = state->upHistory;
+    downHistory = state->downHistory;
+    leftHistory <<= 1;
+    rightHistory <<= 1;
+    upHistory <<= 1;
+    downHistory <<= 1;
     if (in->m_buttonsCurrentFrame2.bits & 2) {
         if (state->stickX < 0) state->stickX = 0;
         if (g_GameGlobal->isJustGameFrame()) state->stickX = state->stickX + ((30.0f - slowRate) + 1.0f);
@@ -349,15 +428,13 @@ void ipPadConfig::setupPadStatusWiiCore(ipPadStatus* out, const gfPadStatus* in,
         s16 value = state->stickY;
         downHistory |= 1;
         vertical = true;
-        if (value < 0) {
-            if (value < -52) {
-                if (state->downFrames > slowRate * 8.0f) value -= 2;
-            } else value -= 31;
-        } else value = -22;
+        if (value >= 0) value = -22;
+        else if (value > -53) value -= 31;
+        else if (state->downFrames > slowRate * 8.0f) value -= 2;
         state->stickY = value;
         if (out->m_button & Guard) state->stickY = -81;
     }
-    if (!vertical && !(in->m_buttonsCurrentFrame2.bits & 4) && state->downFrames != 0 && state->downFrames <= slowRate * 8.0f) {
+    if (!vertical && !(in->m_buttonsCurrentFrame2.bits & 4) && state->downFrames >= 1u && state->downFrames <= slowRate * 8.0f) {
         state->stickY = -81;
         vertical = true;
         state->downHold = 5;
@@ -372,8 +449,17 @@ void ipPadConfig::setupPadStatusWiiCore(ipPadStatus* out, const gfPadStatus* in,
     state->rightHistory = rightHistory;
     state->upHistory = upHistory;
     state->downHistory = downHistory;
-    state->attackHistory = (state->attackHistory << 1) | ((out->m_button & Attack) != 0);
-    state->specialHistory = (state->specialHistory << 1) | ((out->m_button & Special) != 0);
+    bool freshAction = false;
+    int held = 0;
+    if (out->m_button & Attack) held = 1;
+    int attackHistory = (state->attackHistory << 1) | held;
+    state->attackHistory = attackHistory;
+    if ((attackHistory & 3) == 1) freshAction = true;
+    held = 0;
+    if (out->m_button & Special) held = 1;
+    int specialHistory = (state->specialHistory << 1) | held;
+    state->specialHistory = specialHistory;
+    if ((specialHistory & 3) == 1) freshAction = true;
     if (horizontal) {
         if ((in->m_buttonsCurrentFrame2.bits & 2) && check_key_flip(rightHistory)) state->stickX = 81;
         if ((in->m_buttonsCurrentFrame2.bits & 1) && check_key_flip(leftHistory)) state->stickX = -81;
@@ -383,21 +469,21 @@ void ipPadConfig::setupPadStatusWiiCore(ipPadStatus* out, const gfPadStatus* in,
         if ((in->m_buttonsCurrentFrame2.bits & 4) && check_key_flip(downHistory)) state->stickY = -81;
     }
     if (!horizontal && state->stickX != 0) {
-        if (state->stickX < 1) {
-            state->stickX += 20;
-            if (state->stickX > 0) state->stickX = 0;
-        } else {
+        if (state->stickX > 0) {
             state->stickX -= 20;
             if (state->stickX < 0) state->stickX = 0;
+        } else {
+            state->stickX += 20;
+            if (state->stickX > 0) state->stickX = 0;
         }
     }
     if (!vertical && state->stickY != 0) {
-        if (state->stickY < 1) {
-            state->stickY += 40;
-            if (state->stickY > 0) state->stickY = 0;
-        } else {
+        if (state->stickY > 0) {
             state->stickY -= 20;
             if (state->stickY < 0) state->stickY = 0;
+        } else {
+            state->stickY += 40;
+            if (state->stickY > 0) state->stickY = 0;
         }
     }
     if (state->stickX > 81) state->stickX = 81;
@@ -406,29 +492,42 @@ void ipPadConfig::setupPadStatusWiiCore(ipPadStatus* out, const gfPadStatus* in,
     if (state->stickY < -81) state->stickY = -81;
     out->m_stickX = state->stickX;
     out->m_stickY = state->stickY;
-    if ((state->specialHistory & 3) == 1 || (state->attackHistory & 3) == 1) {
+    if (freshAction) {
         if (horizontal) {
-            if ((in->m_buttonsCurrentFrame2.bits & 2) && (rightHistory & 14) != 14) smash = true;
-            if ((in->m_buttonsCurrentFrame2.bits & 1) && (leftHistory & 14) != 14) smash = true;
+            if ((in->m_buttonsCurrentFrame2.bits & 2) && hasRecentRelease(rightHistory)) smash = true;
+            if ((in->m_buttonsCurrentFrame2.bits & 1) && hasRecentRelease(leftHistory)) smash = true;
         }
-        if ((in->m_buttonsCurrentFrame2.bits & 8) && (upHistory & 14) != 14) {
+        if ((in->m_buttonsCurrentFrame2.bits & 8) && hasRecentRelease(upHistory)) {
             smash = true;
             state->stickY = 81;
         }
-        if ((in->m_buttonsCurrentFrame2.bits & 4) && (downHistory & 14) != 14) smash = true;
+        if ((in->m_buttonsCurrentFrame2.bits & 4) && hasRecentRelease(downHistory)) smash = true;
     }
     if (smash) {
         if (out->m_button & Attack) out->m_button |= Smash;
-        if (horizontal) out->m_stickX = state->stickX > 0 ? 81 : -81;
-        if (vertical) out->m_stickY = state->stickY > 0 ? 81 : -81;
+        if (horizontal) {
+            if (state->stickX > 0) out->m_stickX = 81;
+            else out->m_stickX = -81;
+        }
+        if (vertical) {
+            if (state->stickY > 0) out->m_stickY = 81;
+            else out->m_stickY = -81;
+        }
     }
 }
 
+// MATCH-ONLY: preserve the original scalar profile-copy schedule.
+#pragma scheduling off
 void ipPadConfig::setButtonConfig(int player, u32 pad, const ipButtonConfig* config) {
     m_playerPads[player] = pad;
-    if (pad < 4) m_gc[pad] = config->gc;
-    else if (pad < 8) m_wii[pad - 4] = config->wii;
+    if (pad < 4) copyConfig(m_gc[pad], config->gc);
+    else if (pad < 8) {
+        pad -= 4;
+        copyConfig(m_wii[pad], config->wii);
+    }
 }
+
+#pragma scheduling reset
 
 void ipPadConfig::getPadInput(int player, const gfPadStatus* in, ipPadStatus* out) {
     u32 pad = m_playerPads[player];
