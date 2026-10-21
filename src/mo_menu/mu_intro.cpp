@@ -299,7 +299,8 @@ void muIntroTask::loadCharModel() {
     char anim[0x20];
     char vis[0x20];
     m_handles[1].readRequest("/menu/intro/enter/chrcmn.brres", Heaps::MenuResource, 0, 0);
-    if (m_mode == 1) {
+    // MATCH-ONLY: reading the mode through a const view lets the inlined getters reuse the load.
+    if (static_cast<const muIntroTask*>(this)->m_mode == 1) {
         getEnemyResFileName(path, anim, vis, m_players[0].m_charKind, getPlayerType(0));
         m_handles[2].readRequest(path, Heaps::MenuInstance, 0, 0);
     } else {
