@@ -79,3 +79,35 @@ gfFileIORequest* gfFileIOManager::allocRequest() {
     }
     return result;
 }
+
+// MATCH-ONLY: the header leaves offset 0x16 inside an unnamed char array, so this view exposes the halfword that is cleared.
+struct gfFileIOManagerSyncView {
+    char pad0[0x16];
+    u16 unk16;
+};
+
+void gfFileIOManager::setSyncMode(bool enable) {
+    gfFileIOManagerSyncView* self = (gfFileIOManagerSyncView*) this;
+    unk98 = enable;
+    self->unk16 = 0;
+    if (!unk98) {
+        OSLockMutex(&((gfFileIORequestQueueView*) m_queue1)->mutex);
+        u16 count1 = ((gfFileIORequestQueueView*) m_queue1)->list->unk2;
+        for (u32 i = 0; i < count1; i++) {
+            gfFileIORequest* req = ((gfFileIORequestQueueView*) m_queue1)->list->m_elements[i];
+            if (req->m_kind == gfFileIORequest::Read) {
+                req->unk17_b1 = 0;
+            }
+        }
+        OSUnlockMutex(&((gfFileIORequestQueueView*) m_queue1)->mutex);
+        OSLockMutex(&((gfFileIORequestQueueView*) m_queue2)->mutex);
+        u16 count2 = ((gfFileIORequestQueueView*) m_queue2)->list->unk2;
+        for (u32 j = 0; j < count2; j++) {
+            gfFileIORequest* req = ((gfFileIORequestQueueView*) m_queue2)->list->m_elements[j];
+            if (req->m_kind == gfFileIORequest::Read) {
+                req->unk17_b1 = 0;
+            }
+        }
+        OSUnlockMutex(&((gfFileIORequestQueueView*) m_queue2)->mutex);
+    }
+}

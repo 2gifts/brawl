@@ -210,7 +210,10 @@ void hkSweptTransformUtil::setCentreOfRotationLocal(const hkVector4& newCenter, 
     hkSweptTransform& st = ms.m_sweptTransform;
 
     hkVector4 diff;
-    diff.setSub4(newCenter, st.m_centerOfMassLocal);
+    diff.x = newCenter.x - st.m_centerOfMassLocal.x;
+    diff.y = newCenter.y - st.m_centerOfMassLocal.y;
+    diff.z = newCenter.z - st.m_centerOfMassLocal.z;
+    diff.w = newCenter.w - st.m_centerOfMassLocal.w;
     st.m_centerOfMassLocal = newCenter;
 
     hkVector4 shift;

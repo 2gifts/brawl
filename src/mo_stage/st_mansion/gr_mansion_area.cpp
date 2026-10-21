@@ -57,13 +57,14 @@ void grMansionArea::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = m_nodeIndex;
             }
+            float scale;
             float rate;
             if (unk16C == 1) {
                 rate = 1.0f - *unk164;
             } else {
                 rate = *unk164;
             }
-            float scale = unk168;
+            scale = unk168;
             grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
             float clamped = mansionClamp(rate, 0.001f, 1.0f);
             data->m_scale.m_x = scale;
