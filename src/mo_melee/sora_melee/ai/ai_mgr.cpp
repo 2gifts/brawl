@@ -7,6 +7,9 @@
 #include <ai/ai_param.h>
 #include <ft/ft_manager.h>
 #include <gf/gf_memory_util.h>
+#include <gm/gm_lib.h>
+#include <st/stage.h>
+#include <st_madein/st_madein.h>
 #include <types.h>
 
 // The CPU player AI manager (aiMgr) and its helpers. HYPOTHESIS: field names are unknown, so members are read through
@@ -38,6 +41,18 @@ bool aiMgr::isReady() {
 
 bool aiMgr::isReadyUpdate() {
     return lbl_27_data_47BF8 >= 0;
+}
+
+char* aiMgr::getMadeinAiData(bool includePreparation) {
+    if (aiMgrField<int>(g_aiMgr, 0x370) == Stages::Madein && g_Stage != NULL) {
+        stMadeinAiData* data = static_cast<stMadeinAiData*>(g_Stage->getMadeinAiData());
+        // The stage sets +1 while the microgame is running; +0 exposes its
+        // preparation phase only to callers that request it.
+        if (data != NULL && (data->m_unk1 != 0 || (includePreparation && data->m_active != 0))) {
+            return reinterpret_cast<char*>(data);
+        }
+    }
+    return NULL;
 }
 
 bool aiMgr::isSmallMap() {

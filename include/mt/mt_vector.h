@@ -263,7 +263,9 @@ public:
 
     friend void Vec3fSub(register Vec3f* pOut, register const Vec3f* lhs,
                      register const Vec3f* rhs) {
-#ifdef MT_VEC3F_SUB_AIR_LASSO
+#if defined(MT_VEC3F_SUB_COMPACT)
+        register f32 fr1, fr0, fr2;
+#elif defined(MT_VEC3F_SUB_AIR_LASSO)
         register f32 fr0, fr1, fr2;
 #elif defined(MT_VEC3F_SUB_DISTINCT)
         register f32 fr0, fr1, fr2, fr3, fr4, fr5;
@@ -273,7 +275,18 @@ public:
 
         // clang-format off
         asm {
-#if defined(MT_VEC3F_SUB_AIR_LASSO)
+#if defined(MT_VEC3F_SUB_COMPACT)
+            // MATCH-ONLY: the AI target-distance loop reuses the xy load
+            // register for rhs.z, keeping the subtraction within three FPRs.
+            psq_l  fr0, Vec3f.m_x(lhs), 0, 0
+            psq_l  fr1, Vec3f.m_x(rhs), 0, 0
+            psq_l  fr2, Vec3f.m_z(lhs), 1, 0
+            ps_sub fr1, fr0, fr1
+            psq_l  fr0, Vec3f.m_z(rhs), 1, 0
+            ps_sub fr2, fr2, fr0
+            psq_st fr1, Vec3f.m_x(pOut), 0, 0
+            psq_st fr2, Vec3f.m_z(pOut), 1, 0
+#elif defined(MT_VEC3F_SUB_AIR_LASSO)
             // MATCH-ONLY: xy half first, the z half reuses the load registers.
             psq_l  fr0, Vec3f.m_x(lhs), 0, 0
             psq_l  fr1, Vec3f.m_x(rhs), 0, 0
