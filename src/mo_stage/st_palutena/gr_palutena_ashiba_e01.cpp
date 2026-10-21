@@ -65,26 +65,13 @@ void grPalutenaAshibaE01::update(float deltaFrame) {
 
 // The platform waits (state 1), then flies in from one side of the picture to the other (state 2) and starts again.
 void grPalutenaAshibaE01::updateMove(float deltaFrame) {
+    float* range;
     grGimmickMovement::updateMove(deltaFrame);
     stPalutenaData* stageData = static_cast<stPalutenaData*>(getStageData());
     if (stageData != NULL) {
         grGimmickMovementData* data = static_cast<grGimmickMovementData*>(getGimmickData());
         if (data != NULL) {
             switch (m_state) {
-            case 2: {
-                CameraController* camera = CameraController::getInstance();
-                float* left = &camera->unk158;
-                if (left != NULL) {
-                    if (m_dir == 1) {
-                        data->m_start.m_x = camera->unk15C + 50.0f;
-                        data->m_goal.m_x = *left - 50.0f;
-                    } else {
-                        data->m_start.m_x = *left - 50.0f;
-                        data->m_goal.m_x = camera->unk15C + 50.0f;
-                    }
-                }
-                break;
-            }
             case 0:
                 getPosNode(&data->m_start, m_unk1, m_nodeIndex);
                 getPosNode(&data->m_goal, m_unk1, m_nodeIndex);
@@ -97,18 +84,18 @@ void grPalutenaAshibaE01::updateMove(float deltaFrame) {
             case 1:
                 if (m_timer == 0.0f) {
                     CameraController* camera = CameraController::getInstance();
-                    float* left = &camera->unk158;
-                    if (left != NULL) {
-                        if (stageData->unk6C < randf()) {
-                            data->m_start.m_x = *left - 50.0f;
-                            data->m_goal.m_x = camera->unk15C + 50.0f;
-                            m_dir = 0;
-                        } else {
-                            data->m_start.m_x = camera->unk15C + 50.0f;
-                            data->m_goal.m_x = *left - 50.0f;
+                    range = &camera->unk158;
+                    if (range != NULL) {
+                        if (randf() <= stageData->unk6C) {
+                            data->m_start.m_x = range[1] + 50.0f;
+                            data->m_goal.m_x = range[0] - 50.0f;
                             m_dir = 1;
+                        } else {
+                            data->m_start.m_x = range[0] - 50.0f;
+                            data->m_goal.m_x = range[1] + 50.0f;
+                            m_dir = 0;
                         }
-                        if (m_isVisible != 1) {
+                        if (!m_isVisible) {
                             setVisibility(1);
                         }
                         if (!m_isEnableCollisionStatus) {
@@ -127,6 +114,20 @@ void grPalutenaAshibaE01::updateMove(float deltaFrame) {
                 setEnableCollisionStatus(false);
                 m_state = 1;
                 break;
+            case 2: {
+                CameraController* camera = CameraController::getInstance();
+                range = &camera->unk158;
+                if (range != NULL) {
+                    if (m_dir == 1) {
+                        data->m_start.m_x = range[1] + 50.0f;
+                        data->m_goal.m_x = range[0] - 50.0f;
+                    } else {
+                        data->m_start.m_x = range[0] - 50.0f;
+                        data->m_goal.m_x = range[1] + 50.0f;
+                    }
+                }
+                break;
+            }
             }
         }
     }

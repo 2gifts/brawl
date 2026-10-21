@@ -71,9 +71,21 @@ void muWordOfSongTask::processDefault() {
     }
     if (m_state == 2 || m_state == 3) {
         for (int i = 0; i < m_count; i++) {
-            int start = m_entries[i].m_start;
-            if (isBetween(start, m_entries[i].m_end, m_frame) == true) {
-                if (isBetween(start, start + m_entries[i].m_fadeIn, m_frame) == true) {
+            // MATCH-ONLY: written out instead of isBetween, so the end of the range is read after the start test.
+            bool isShown;
+            if (m_entries[i].m_start <= m_frame && m_frame <= m_entries[i].m_end) {
+                isShown = true;
+            } else {
+                isShown = false;
+            }
+            if (isShown == true) {
+                bool isFadingIn;
+                if (m_entries[i].m_start <= m_frame && m_frame <= m_entries[i].m_start + m_entries[i].m_fadeIn) {
+                    isFadingIn = true;
+                } else {
+                    isFadingIn = false;
+                }
+                if (isFadingIn == true) {
                     setAlpha(i, clampAlpha(m_entries[i].m_fadeInStep + m_entries[i].m_alpha));
                 }
                 if (isBetween(m_entries[i].m_end - m_entries[i].m_fadeOut, m_entries[i].m_end, m_frame) == true) {
