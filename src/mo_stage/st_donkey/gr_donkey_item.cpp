@@ -46,15 +46,6 @@ void grDonkeyItem::update(float deltaFrame) {
     }
 }
 
-// MATCH-ONLY: the rectangle of the area is built from a centre and a size inside a helper (the halving is not folded).
-static inline void itemMakeArea(Rect2D* area, Vec3f pos, float offsetY, float width, float height) {
-    float centerY = pos.m_y - offsetY;
-    area->m_left = pos.m_x - 0.5f * width;
-    area->m_right = pos.m_x + 0.5f * width;
-    area->m_up = centerY + 0.5f * height;
-    area->m_down = centerY - 0.5f * height;
-}
-
 // While the item is on offer (state 8) a fighter in the small area around it takes it (3 becomes 4 in the state byte).
 void grDonkeyItem::updateArea() {
     switch (m_state) {
@@ -62,7 +53,15 @@ void grDonkeyItem::updateArea() {
         Rect2D area;
         int fighterIds[9];
         memset(fighterIds, 0, sizeof(fighterIds));
-        itemMakeArea(&area, *m_posWork, -7.5f, 10.0f, 10.0f);
+        Vec3f& pos = *m_posWork;
+        float centerY = pos.m_y + 7.5f;
+        float centerX = pos.m_x;
+        float width = 10.0f;
+        float height = 10.0f;
+        area.m_left = centerX - 0.5f * width;
+        area.m_right = centerX + 0.5f * width;
+        area.m_up = centerY + 0.5f * height;
+        area.m_down = centerY - 0.5f * height;
         if (itemEnumIncludeEntryId(g_ftManager, &area, fighterIds, 0, 1) > 0 && *m_stateWork == 3) {
             *m_stateWork = 4;
         }

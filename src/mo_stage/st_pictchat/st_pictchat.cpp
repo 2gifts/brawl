@@ -72,9 +72,7 @@ stPictchat::~stPictchat() {
         delete m_windData;
     }
     for (u8 i = 0; i < 27; i++) {
-        if (m_tblPict[i] != NULL) {
-            delete m_tblPict[i];
-        }
+        delete m_tblPict[i];
         m_tblPict[i] = NULL;
     }
     releaseArchive();

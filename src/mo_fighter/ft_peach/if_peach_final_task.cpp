@@ -67,16 +67,15 @@ void IfPeachFinalTask::initWork() {
 }
 
 void IfPeachFinalTask::createModel(nw4r::g3d::ResFile* resource, s32 heap, bool priorityOffset) {
-    for (int dataIndex = 0; dataIndex < 1; ++dataIndex) {
-        const PeachFinalModelData& data = s_peachFinalModelData[dataIndex];
-        int modelCount = 1;
-        if (data.firstIndex < data.endIndex) modelCount = data.endIndex - data.firstIndex;
-        for (int modelIndex = 0; modelIndex < modelCount; ++modelIndex) {
-            const int slot = data.firstIndex + modelIndex;
-            MuObject* model = MuObject::create(resource, data.name,
-                data.nodeIndex + (priorityOffset ? 1 : 0), NULL, Heaps::HeapType(heap));
-            (&m_model)[slot] = model;
-            model->m_modelAnim->setUpdateRate(0.0f);
+    int dataIndex;
+    int modelIndex;
+    const PeachFinalModelData* data = s_peachFinalModelData;
+    for (dataIndex = 0; dataIndex < 1; dataIndex++, data++) {
+        int modelCount = data->firstIndex < data->endIndex ? data->endIndex - data->firstIndex : 1;
+        for (modelIndex = 0; modelIndex < modelCount; ++modelIndex) {
+            (&m_model)[data->firstIndex + modelIndex] = MuObject::create(resource, data->name,
+                data->nodeIndex + priorityOffset, NULL, Heaps::HeapType(heap));
+            (&m_model)[data->firstIndex + modelIndex]->m_modelAnim->setUpdateRate(0.0f);
         }
     }
 }

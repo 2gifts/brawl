@@ -23,8 +23,8 @@ struct ftNessLinkEventYoyo : public soLinkEventArgs {
 void ftNessStatusUniqProcessAttackHi4Start::initStatus(soModuleAccesser* moduleAccesser) {
     int status = moduleAccesser->getStatusModule().getStatusKind();
     if (status == 0x30 || status == 0x2d) {
-        soLinkModule& link = moduleAccesser->getLinkModule();
         soGenerateArticleManageModule& articles = moduleAccesser->getGenerateArticleManageModule();
+        soLinkModule& link = moduleAccesser->getLinkModule();
         soArticle* article5 = articles.generate(5, false, false);
         if (article5->isNull() == false) {
             articles.entry(article5);

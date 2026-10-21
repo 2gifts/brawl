@@ -128,9 +128,7 @@ void grPlanktonBg::clearList(grPlanktonList* list, int id) {
         grPlanktonListNode* node = getListNode(list, id);
         if (node != NULL) {
             list->Erase(node);
-            if (node != NULL) {
-                delete node;
-            }
+            delete node;
         }
     }
 }

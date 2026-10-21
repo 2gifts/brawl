@@ -535,8 +535,9 @@ void stFamicom::updatePow(float deltaFrame) {
         m_triggerPow->setAreaSleep(false);
         stFamicomData* data = static_cast<stFamicomData*>(m_stageData);
         if (data != NULL) {
+            u8 i;
             u8 count = data->m_enemyMax;
-            for (u8 i = 0; i != count; i++) {
+            for (i = 0; i != count; i++) {
                 stFamicomEnemyData* enemy = &m_enemyData[i];
                 if (enemy->m_grounded == 1) {
                     enemy->m_state = 8;

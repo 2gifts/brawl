@@ -109,11 +109,12 @@ grGWChefEtc* grGWChefEtc::create(int mdlIndex, const char* tgtNodeName, const ch
 
 grGWChefEtc::~grGWChefEtc() {
     if (m_hitData != NULL) {
-        delete[] m_hitData;
+        // MATCH-ONLY: the hit array is allocated as raw bytes, so its delete[] has no element cookie
+        delete[] reinterpret_cast<u8*>(m_hitData);
     }
     m_hitData = NULL;
     if (m_hitSimple != NULL) {
-        delete[] m_hitSimple;
+        delete[] reinterpret_cast<u8*>(m_hitSimple);
     }
     m_hitSimple = NULL;
     if (m_hitSet != NULL) {

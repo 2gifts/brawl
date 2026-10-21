@@ -50,8 +50,8 @@ grHalberdHero2Dan::grHalberdHero2Dan(const char* taskName) : grHalberd(taskName)
     callback->initialize(false, Heaps::StageInstance);
     callback->m_nodeCallbackDatas[0].m_flags |= 1;
     m_subject.clear();
-    m_seId = -1;
     m_subject.m_state = 1;
+    m_seId = -1;
     m_dangerZone = -1;
 }
 

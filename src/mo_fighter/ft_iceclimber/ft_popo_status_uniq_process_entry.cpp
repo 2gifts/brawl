@@ -38,9 +38,7 @@ void ftPopoStatusUniqProcessEntry::initStatus(soModuleAccesser* moduleAccesser) 
     } else {
         if (moduleAccesser->getLinkModule().isLink(6) == true) {
             moduleAccesser->getGroundModule().setShapeKind(soGroundShapeImpl::ShapeKind(1), 0);
-            float rhombusUp = 2.0f;
-            float rhombusDown = 0.0f;
-            moduleAccesser->getGroundModule().modifyRhombus(rhombusUp, rhombusDown, rhombusUp, 0);
+            moduleAccesser->getGroundModule().modifyRhombus(2.0f, 0.0f, 2.0f, 0);
             moduleAccesser->getLinkModule().setModelConstraintPosOrt(6, 0, 0, 3, true);
         }
     }

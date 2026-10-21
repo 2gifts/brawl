@@ -66,7 +66,8 @@ grPalutenaChain::~grPalutenaChain() {
 bool grPalutenaChain::setNode() {
     bool result = grGimmick::setNode();
     for (u32 i = 0; i < 23; i++) {
-        char name[280];
+        // HYPOTHESIS: a 256-byte buffer gives the original 0x120 stack frame.
+        char name[256];
         strcpy(name, "");
         sprintf(name, "k%02d", i + 1);
         getNodeIndex(&m_node[i], 0, name);
