@@ -14,9 +14,42 @@ global_destructor_chain.c:
 mo_fighter/ft_pikachu/ft_pikachu.cpp:
 	.text       start:0x00000070 end:0x0000E554
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x000000E0
-	.data       start:0x00000000 end:0x000099C8
-	.bss        start:0x00000008 end:0x00000488
+	.rodata     start:0x00000000 end:0x00000010
+	.data       start:0x00000000 end:0x000073C0
+	.bss        start:0x00000008 end:0x00000220
+
+mo_fighter/ft_pikachu/ft_pikachu_kinetic_transactor.cpp:
+	.text       start:0x0000E554 end:0x0000E8D0
+	.rodata     start:0x00000010 end:0x00000020
+	.data       start:0x000073C0 end:0x00007410
+
+mo_fighter/ft_pikachu/ft_pikachu_status_uniq_process_quick_attack.cpp:
+	.text       start:0x0000E8D0 end:0x00010114
+	.ctors      start:0x00000004 end:0x00000008
+	.rodata     start:0x00000020 end:0x00000068
+	.data       start:0x00007410 end:0x000076C0
+	.bss        start:0x00000220 end:0x00000250
+
+mo_fighter/ft_pikachu/ft_pikachu_status_uniq_process_skull_bash.cpp:
+	.text       start:0x00010114 end:0x00011040
+	.ctors      start:0x00000008 end:0x0000000C
+	.rodata     start:0x00000068 end:0x00000080
+	.data       start:0x000076C0 end:0x00007958
+	.bss        start:0x00000250 end:0x000002A0
+
+mo_fighter/ft_pikachu/ft_pikachu_status_uniq_process_thunder.cpp:
+	.text       start:0x00011040 end:0x0001154C
+	.ctors      start:0x0000000C end:0x00000010
+	.rodata     start:0x00000080 end:0x00000088
+	.data       start:0x00007958 end:0x00007A58
+	.bss        start:0x000002A0 end:0x000002C0
+
+mo_fighter/ft_pikachu/ft_pikachu_status_uniq_process_vortex.cpp:
+	.text       start:0x0001154C end:0x00011DF8
+	.ctors      start:0x00000010 end:0x00000014
+	.rodata     start:0x00000088 end:0x000000A0
+	.data       start:0x00007A58 end:0x00007BE0
+	.bss        start:0x000002C0 end:0x000002F0
 
 mo_fighter/ft_pikachu/wn_pikachu_vortex.cpp:
 	.text       start:0x000192F8 end:0x0001BBC8

@@ -8,6 +8,7 @@
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/pikachu/ft_pikachu.h>
+#include <ft/pikachu/ft_pikachu_status_uniq_process.h>
 #include <ft/pikachu/ft_pikachu_extend_param_accesser.h>
 #include <so/article/so_article_mediator.h>
 #include <ft/pikachu/ft_pikachu_transactor.h>
@@ -24,22 +25,8 @@ int soValueAccesser::getValueVariation() { return g_soValueVariation; }
 #define FT_BC ftPikachuBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
-// HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt).
 extern "C" {
 extern soStatusUniqProcess lbl_27_bss_7C64;
-extern soStatusUniqProcess lbl_98_bss_25C;
-extern soStatusUniqProcess lbl_98_bss_22C;
-extern soStatusUniqProcess lbl_98_bss_2AC;
-extern soStatusUniqProcess lbl_98_bss_2CC;
-extern soStatusUniqProcess lbl_98_bss_23C;
-extern soStatusUniqProcess lbl_98_bss_24C;
-extern soStatusUniqProcess lbl_98_bss_26C;
-extern soStatusUniqProcess lbl_98_bss_27C;
-extern soStatusUniqProcess lbl_98_bss_28C;
-extern soStatusUniqProcess lbl_98_bss_29C;
-extern soStatusUniqProcess lbl_98_bss_2BC;
-extern soStatusUniqProcess lbl_98_bss_2DC;
-extern soStatusUniqProcess lbl_98_bss_2EC;
 }
 
 ftPikachuExtendParamAccesser g_ftPikachuExtendParamAccesser;
@@ -59,19 +46,19 @@ ftPikachu::ftPikachu(s32 entryId,
     // Register the status processes in action order.
     soStatusUniqProcess* processes[14];
     processes[0] = &lbl_27_bss_7C64;
-    processes[1] = &lbl_98_bss_25C;
-    processes[2] = &lbl_98_bss_22C;
-    processes[3] = &lbl_98_bss_2AC;
-    processes[4] = &lbl_98_bss_2CC;
-    processes[5] = &lbl_98_bss_23C;
-    processes[6] = &lbl_98_bss_24C;
-    processes[7] = &lbl_98_bss_26C;
-    processes[8] = &lbl_98_bss_27C;
-    processes[9] = &lbl_98_bss_28C;
-    processes[10] = &lbl_98_bss_29C;
-    processes[11] = &lbl_98_bss_2BC;
-    processes[12] = &lbl_98_bss_2DC;
-    processes[13] = &lbl_98_bss_2EC;
+    processes[1] = &g_ftPikachuStatusUniqProcessSpecialSkullBash;
+    processes[2] = &g_ftPikachuStatusUniqProcessSpecialQuickAttackStart;
+    processes[3] = &g_ftPikachuStatusUniqProcessSpecialThunder;
+    processes[4] = &g_ftPikachuStatusUniqProcessSpecialVortexStart;
+    processes[5] = &g_ftPikachuStatusUniqProcessSpecialQuickAttackWarp;
+    processes[6] = &g_ftPikachuStatusUniqProcessSpecialQuickAttackEnd;
+    processes[7] = &g_ftPikachuStatusUniqProcessSpecialSkullBashHold;
+    processes[8] = &g_ftPikachuStatusUniqProcessSpecialSkullBashWeak;
+    processes[9] = &g_ftPikachuStatusUniqProcessSpecialSkullBashAttack;
+    processes[10] = &g_ftPikachuStatusUniqProcessSpecialSkullBashEnd;
+    processes[11] = &g_ftPikachuStatusUniqProcessSpecialThunderHit;
+    processes[12] = &g_ftPikachuStatusUniqProcessSpecialVortexAttack;
+    processes[13] = &g_ftPikachuStatusUniqProcessSpecialVortexEnd;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 14);
 }
 
@@ -439,13 +426,18 @@ int fn_98_E200() { return 0x0; }
 void fn_98_B5A4(u8* p, u8 flag) { *(u8*)(p + 0x22A2C) = flag; }
 
 // ftPikachu::notify_thunder_reflect / adjust_camera_subject: forward this+0x60 to the thunder-hit process handlers.
-extern "C" int fn_98_11344(void* p);
-extern "C" int fn_98_11B40(void* p);
-int fn_98_98B0(u8* p) { return fn_98_11344(*(void**)(p + 0x60)); }
-int fn_98_98B8(u8* p) { return fn_98_11B40(*(void**)(p + 0x60)); }
+void ftPikachu::notify_thunder_reflect() { ftPikachuStatusUniqProcessSpecialThunderHit::notifyReflect(m_moduleAccesser); }
+void ftPikachu::adjust_camera_subject(soCameraModule* source) { ftPikachuStatusUniqProcessSpecialVortexAttack::adjust_camera_subject(m_moduleAccesser, source); }
 
-// ftPikachu::getExtendParam: the extend-param block pointer stored at the end of the fighter, offset 0x7C.
-void* fn_98_9530(u8* p) { return *(u8**)(p + 0x2AE44) + 0x7C; }
+void** ftPikachu::getExtendParam() { return m_data->extendParam; }
+
+wnPikachuCloud* ftPikachu::get_cloud_pointer(soModuleAccesser* acc) {
+    return reinterpret_cast<wnPikachuCloud*>(acc->getWorkManageModule().getInt(0x10000043));
+}
+
+void ftPikachu::rec_cloud_pointer1(soModuleAccesser* acc, wnPikachuCloud* cloud) {
+    acc->getWorkManageModule().setInt(reinterpret_cast<int>(cloud), 0x10000043);
+}
 
 // soInstancePoolSub::getInstanceAt for the wnPikachu* instance holders: instance slots by index, null past the last one.
 void* fn_98_B62C(u8* p, int index) {
