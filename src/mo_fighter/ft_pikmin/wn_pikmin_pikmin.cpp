@@ -416,9 +416,8 @@ bool wnPikminPikmin::isEnableHold() {
     Vec2f diff;
     Vec2f::copy(diff, getTargetDiffVec());
     int normal = mtIsNormal(diff.m_x) && mtIsNormal(diff.m_y);
-    bool enable = false;
-    bool isNormal = normal == 1;
-    if (isNormal) {
+    bool enable = normal == 1;
+    if (enable) {
         PIKMIN_PARAM_FLOAT(limit, 0xFAD);
         enable = diff.length() <= limit;
     }

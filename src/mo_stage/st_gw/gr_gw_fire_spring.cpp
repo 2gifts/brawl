@@ -127,30 +127,35 @@ void grGWFireSpring::updateScaleBase(float deltaFrame) {
 // The spring is turned on while its scene plays; when the event of the scene turns on it is folded away (hidden, no area), when
 // it turns off the spring comes back (shown, with its area).
 void grGWFireSpring::updateActive(float deltaFrame) {
-    switch (m_state) {
+    // MATCH-ONLY: the state is a byte in the original, the header declares it as an 8-bit bitfield
+    u8* state = &reinterpret_cast<u8*>(this)[0x158];
+    switch (*state) {
     case 0:
         setVisibility(0);
         m_startFlag = 1;
         m_eventLast = 1;
-        m_state = static_cast<State>(1);
+        *state = 1;
         break;
     case 1:
         if (*m_sceneIdWork == m_sceneId) {
-            m_state = static_cast<State>(2);
+            *state = 2;
         }
         break;
     case 2:
         if (*m_sceneIdWork != m_sceneId) {
-            m_state = static_cast<State>(0);
+            *state = 0;
         } else {
             u8 event = *m_eventWork;
             if (m_eventLast != event) {
-                if (event == 1) {
+                switch (event) {
+                case 1:
                     setVisibility(0);
                     m_startFlag = 1;
-                } else if (event == 0) {
+                    break;
+                case 0:
                     setVisibility(1);
                     enableArea();
+                    break;
                 }
             }
             m_eventLast = *m_eventWork;
@@ -190,39 +195,37 @@ void grGWFireSpring::updateCallBack(float deltaFrame) {
 
 // The top of the spring is its place plus a little (8 scaled units) when the spring is out; it is nowhere when it is folded.
 void grGWFireSpring::getTopNode(Vec3f* pos) {
-    if (*m_eventWork == 1) {
+    switch (*m_eventWork) {
+    case 1:
         pos->m_x = 0.0f;
         pos->m_y = 0.0f;
         pos->m_z = 0.0f;
         return;
-    }
-    if (*m_eventWork == 0) {
+    case 0: {
         Vec3f* top = m_posWork;
         pos->m_x = top->m_x;
         float y = top->m_y;
+        // MATCH-ONLY: the original stores the base y before it adds the offset
         pos->m_y = y;
         pos->m_z = top->m_z;
         pos->m_y = y + m_scale.m_y * 0.9f * 8.0f;
+        break;
+    }
     }
 }
 
 // A fighter jumps on the spring: the spring shoots and plays its sound at the place of the spring.
 void grGWFireSpring::onGimmickEvent(soGimmickEventArgs* eventInfo, int* taskId) {
     Gimmick::EventKind kind = eventInfo->m_kind;
-    if (kind == Gimmick::Event_Exit) {
+    if (kind == Gimmick::Event_Exit || kind <= 0x16 || kind >= 0x1A) {
         return;
     }
-    if (kind < Gimmick::Spring_Event_On) {
-        return;
+    switch (kind) {
+    case Gimmick::Spring_Event_On:
+        getTopNode(&static_cast<soGimmickSpringEventArgs*>(eventInfo)->m_topPos);
+        fn_27_2704CC(this);
+        m_snd.playSE(static_cast<SndID>(0x1C91), 0, 0, -1);
+        m_snd.setPos(m_posWork);
+        break;
     }
-    if (kind > Gimmick::Spring_Event_Pos) {
-        return;
-    }
-    if (kind != Gimmick::Spring_Event_On) {
-        return;
-    }
-    getTopNode(&static_cast<soGimmickSpringEventArgs*>(eventInfo)->m_topPos);
-    fn_27_2704CC(this);
-    m_snd.playSE(static_cast<SndID>(0x1C91), 0, 0, -1);
-    m_snd.setPos(m_posWork);
 }

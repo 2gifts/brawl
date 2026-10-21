@@ -56,11 +56,8 @@ grGWChefEtc::grGWChefEtc(const char* taskName) : grGW(taskName) {
     memset(m_nodeMeal, 0, sizeof(m_nodeMeal));
     memset(m_nodeChef, 0, sizeof(m_nodeChef));
     memset(m_meal, 0, sizeof(m_meal));
-    m_timerChef = 0.0f;
-    m_hpChef = 0.0f;
-    m_posChef = 0;
-    m_stateChef = 0;
-    m_attackOnChef = 0;
+    // MATCH-ONLY: clears the chef timer, hp and the three place bytes in one memset, as the original does
+    memset(&m_timerChef, 0, 0xc);
     m_posLimitWork = NULL;
     m_posEnd.m_x = 0.0f;
     m_posEnd.m_y = 0.0f;
@@ -112,11 +109,12 @@ grGWChefEtc* grGWChefEtc::create(int mdlIndex, const char* tgtNodeName, const ch
 
 grGWChefEtc::~grGWChefEtc() {
     if (m_hitData != NULL) {
-        delete[] m_hitData;
+        // MATCH-ONLY: the hit array is allocated as raw bytes, so its delete[] has no element cookie
+        delete[] reinterpret_cast<u8*>(m_hitData);
     }
     m_hitData = NULL;
     if (m_hitSimple != NULL) {
-        delete[] m_hitSimple;
+        delete[] reinterpret_cast<u8*>(m_hitSimple);
     }
     m_hitSimple = NULL;
     if (m_hitSet != NULL) {
@@ -537,10 +535,12 @@ void grGWChefEtc::updateCallBack(float deltaFrame) {
                 data[1].m_rot.m_x = m_rot.m_x;
                 data[1].m_rot.m_y = m_rot.m_y;
                 data[1].m_rot.m_z = m_rot.m_z;
+                Vec3f flyScale;
+                gwVec3Scale(&flyScale, &m_scale, 0.9f);
                 data = calcWorldCallBack->m_nodeCallbackDatas;
-                data[1].m_scale.m_x = m_scale.m_x * 0.9f;
-                data[1].m_scale.m_y = m_scale.m_y * 0.9f;
-                data[1].m_scale.m_z = m_scale.m_z * 0.9f;
+                data[1].m_scale.m_x = flyScale.m_x;
+                data[1].m_scale.m_y = flyScale.m_y;
+                data[1].m_scale.m_z = flyScale.m_z;
                 m_flying = 0;
             }
         }
@@ -603,8 +603,10 @@ void grGWChefEtc::setAttackChef(u32 index) {
     offset.m_x = 0.0f;
     offset.m_y = 0.0f;
     offset.m_z = 0.0f;
-    setAttackGimmickDetails(&attack, 10.0f, 1.0f, 1.0f, 1.0f, 0, &offset, 90, 70, 100, 70, m_nodeChef[m_posChef][2], 0x3FF, 7,
-                            false, 15, soCollisionAttackData::Attribute_Normal, soCollisionAttackData::Sound_Level_Small,
+    // MATCH-ONLY: a [pos][2] subscript folds the +2 into the load displacement; a flat index keeps it in the index
+    u32 nodeIndex = m_posChef * 3 + 2;
+    setAttackGimmickDetails(&attack, 10.0f, 1.0f, 1.0f, 1.0f, 0, &offset, 90, 70, 100, 70, (&m_nodeChef[0][0])[nodeIndex],
+                            0x3FF, 7, false, 15, soCollisionAttackData::Attribute_Normal, soCollisionAttackData::Sound_Level_Small,
                             soCollisionAttackData::Sound_Attribute_None, false, false, false, true, false, false, 0, 60, false,
                             false, false, soCollisionAttackData::Lr_Check_Pos, false, false, false, false, false,
                             soCollisionAttackData::Region_None, true);

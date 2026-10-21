@@ -25,6 +25,7 @@ void hkTransform::get4x4ColumnMajor(hkReal* m) const {
     m[12] = m_translation.x;
     m[13] = m_translation.y;
     m[14] = m_translation.z;
+    m[15] = 0.0f; // MATCH-ONLY: the original stores a zero to m[15] before the final value
     m[15] = 1.0f;
 }
 
@@ -32,6 +33,8 @@ void hkTransform::set4x4ColumnMajor(const hkReal* m) {
     m_rotation.m_col0.x = m[0];
     m_rotation.m_col0.y = m[1];
     m_rotation.m_col0.z = m[2];
+    // MATCH-ONLY: the original clears translation.w before the rotation rows; the final 1.0f store overwrites it.
+    m_translation.w = 0.0f;
     m_rotation.m_col0.w = 0.0f;
     m_rotation.m_col1.x = m[4];
     m_rotation.m_col1.y = m[5];

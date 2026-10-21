@@ -82,24 +82,25 @@ void ftLuigiKineticTransactor::changeKineticSub2(bool*, void*, Vec2f* speed, soM
     ftKineticTransactor::changeKineticImpl(10);
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(
         *moduleAccesser->getKineticModule().getEnergy(3));
-    ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(
-        *moduleAccesser->getKineticModule().getEnergy(1));
 
     float stopSpeed;
     float gravitySpeed;
-    if (moduleAccesser->getWorkManageModule().isFlag(0x22000012)) {
+    if (moduleAccesser->getWorkManageModule().isFlag(0x22000012) == true) {
         stopSpeed = soValueAccesser::getConstantFloat(moduleAccesser, 0xFB9, 0);
         gravitySpeed = soValueAccesser::getConstantFloat(moduleAccesser, 0xFBA, 0);
     } else {
-        int count = moduleAccesser->getWorkManageModule().getInt(0x20000000);
-        stopSpeed = count * soValueAccesser::getConstantFloat(moduleAccesser, 0xFB1, 0) +
+        stopSpeed = moduleAccesser->getWorkManageModule().getInt(0x20000000) *
+                        soValueAccesser::getConstantFloat(moduleAccesser, 0xFB1, 0) +
                     soValueAccesser::getConstantFloat(moduleAccesser, 0xFB0, 0);
-        gravitySpeed = count * soValueAccesser::getConstantFloat(moduleAccesser, 0xFB3, 0) +
+        gravitySpeed = moduleAccesser->getWorkManageModule().getInt(0x20000000) *
+                           soValueAccesser::getConstantFloat(moduleAccesser, 0xFB3, 0) +
                        soValueAccesser::getConstantFloat(moduleAccesser, 0xFB2, 0);
     }
 
     stop.m_speed = Vec2f(stopSpeed * moduleAccesser->getPostureModule().getLr(), 0.0f);
     stop.m_brake = Vec2f(0.0f, 0.0f);
+    ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(
+        *moduleAccesser->getKineticModule().getEnergy(1));
     gravity.m_speedY = gravitySpeed;
     gravity.m_gravity = -soValueAccesser::getConstantFloat(moduleAccesser, 0xFB4, 0);
     gravity.m_fallSpeedMax = soValueAccesser::getConstantFloat(moduleAccesser, 0xFB5, 0);

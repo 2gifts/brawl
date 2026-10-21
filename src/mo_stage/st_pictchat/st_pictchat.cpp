@@ -72,9 +72,7 @@ stPictchat::~stPictchat() {
         delete m_windData;
     }
     for (u8 i = 0; i < 27; i++) {
-        if (m_tblPict[i] != NULL) {
-            delete m_tblPict[i];
-        }
+        delete m_tblPict[i];
         m_tblPict[i] = NULL;
     }
     releaseArchive();
@@ -727,10 +725,10 @@ void stPictchat::createObjSpring() {
 }
 
 void stPictchat::createObjSpring1(int index) {
-    grPictchatSpring* ground = NULL;
+    grPictchatSpring* ground;
     Vec3f* pos;
-    u8* flgWork;
     u8 pictID;
+    u8* flgWork;
     switch (index) {
     case 0x25:
         ground = grPictchatSpring::create(3, "nodeIndex", "grPictchatSpringL");

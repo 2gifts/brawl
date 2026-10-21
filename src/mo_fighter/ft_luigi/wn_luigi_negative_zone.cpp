@@ -86,7 +86,8 @@ void wnLuigiNegativeZone::updateNodeSRT() {
     float scaleValue = m_moduleAccesser->getWorkManageModule().getFloat(0x11000001);
     Vec3f scale;
     scale.m_x = scale.m_y = scale.m_z = scaleValue;
-    if (scaleValue > 0.0f) {
+    // MATCH-ONLY: the double round trip reproduces the native frsp that rounds the scale before the compare.
+    if ((float)(double)scaleValue > 0.0f) {
         m_moduleAccesser->getModelModule().setNodeScale(1, &scale);
     }
 }

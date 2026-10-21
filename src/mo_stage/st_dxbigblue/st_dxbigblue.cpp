@@ -367,6 +367,8 @@ void stDxBigBlue::createObjCourse(int index) {
 
 // The cars: the places are shuffled and every place gets its car.
 void stDxBigBlue::createObjCar() {
+    // MATCH-ONLY: the final loop's counter is declared first so it takes the register freed by n
+    u8 index;
     for (u8 i = 0; i < 30; i++) {
         m_carTbl[i] = i;
     }
@@ -378,8 +380,8 @@ void stDxBigBlue::createObjCar() {
         m_carTbl[i] = m_carTbl[other];
         m_carTbl[other] = tmp;
     }
-    for (u8 i = 0; i < 30; i++) {
-        createObjCar1(i);
+    for (index = 0; index < 30; index++) {
+        createObjCar1(index);
     }
 }
 

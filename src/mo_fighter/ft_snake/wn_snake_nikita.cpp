@@ -202,10 +202,10 @@ bool wnSnakeNikitaMissile::notifyEventCollisionSearchCheck() {
 }
 
 bool wnSnakeNikitaMissile::notifyEventCollisionAttackCheck(u32 flags) {
-    // HYPOTHESIS: native rlwinm tests the two low-order mask bits (0x6).
-    if ((flags & 0x6) == 0) {
-        Weapon::notifyEventCollisionAttackCheck(flags);
+    if (flags & 0x6) {
+        return false;
     }
+    Weapon::notifyEventCollisionAttackCheck(flags);
     return false;
 }
 

@@ -730,10 +730,11 @@ int muAdvSelchrBTask::stepSelectMain(muAdvSelchrBTask* task) {
 
 // Stores the result and shows the frame of the result.
 void muAdvSelchrBTask::stepResultInit(muAdvSelchrBTask* task) {
+    const char* name = "MenAdvChrB0000_TopN__1";
     task->storeResult();
     MuObject* object = task->m_objects[1];
-    object->changeNodeAnimN("MenAdvChrB0000_TopN__1");
-    object->changeClrAnimN("MenAdvChrB0000_TopN__1");
+    object->changeNodeAnimN(name);
+    object->changeClrAnimN(name);
     object->m_modelAnim->m_anmObjChrRes->SetUpdateRate(1.0f);
     object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
     task->m_timer = 0;

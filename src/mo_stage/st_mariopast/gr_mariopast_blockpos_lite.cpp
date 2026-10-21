@@ -69,7 +69,7 @@ static inline u8* mpItemFrequencyByte() {
     return reinterpret_cast<u8*>(&g_GameGlobal->m_modeMelee->m_meleeInitData) + 0xE;
 }
 
-grMarioPastBlockPosLite::grMarioPastBlockPosLite(const char* taskName) : grYakumono(taskName) {
+grMarioPastBlockPosLite::grMarioPastBlockPosLite(const char* taskName) : grYakumono(taskName), m_mtx(true) {
     m_scnProc = NULL;
     m_stage = 0;
     m_group = 0;
@@ -155,11 +155,12 @@ void grMarioPastBlockPosLite::startup(gfArchive* data, u32 unk1, gfSceneRoot::La
     if (m_scnProc != NULL) {
         m_scnProc->SetUserData(this);
         g_gfSceneRoot->add(static_cast<gfSceneRoot::LayerType>(0), reinterpret_cast<nw4r::g3d::ScnMdl*>(m_scnProc));
+        grCalcWorldCallBack* callback = &m_calcWorldCallBack;
         nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[0];
         if (scnMdl != NULL) {
-            scnMdl->m_calcWorldCallBack = &m_calcWorldCallBack;
+            scnMdl->m_calcWorldCallBack = callback;
             scnMdl->EnableScnMdlCallbackTiming(1);
-            scnMdl->m_nodeIndex = m_calcWorldCallBack.m_nodeCallbackDatas[0].m_nodeIndex;
+            scnMdl->m_nodeIndex = callback->m_nodeCallbackDatas[0].m_nodeIndex;
         }
     }
 }
@@ -188,18 +189,20 @@ void grMarioPastBlockPosLite::update(float deltaFrame) {
 void grMarioPastBlockPosLite::initCollisionJoint() {
     u32 num = m_num;
     stMarioPastBlockDt* block = m_blocks;
-    mariopastJointView* joint = reinterpret_cast<mariopastJointView*>(m_joints);
-    if (num != 0 && block != NULL && joint != NULL) {
-        for (u32 i = 0; i < num; i++) {
-            joint->m_flags56 |= 0x80;
-            *reinterpret_cast<Matrix**>(reinterpret_cast<u8*>(joint) + 0x5C) = &m_mtx;
-            joint->m_flags54 = (joint->m_flags54 & 0x2F) | 8;
-            *reinterpret_cast<Ground**>(reinterpret_cast<u8*>(joint) + 0x58) = this;
-            if (block->m_kind == 3) {
-                setHatenaHideBlockCollision(i, 1);
-            }
-            joint = reinterpret_cast<mariopastJointView*>(reinterpret_cast<u8*>(joint) + 0x60);
-            block++;
+    grCollisionJoint* joint = m_joints;
+    if (num == 0 || block == NULL || joint == NULL) {
+        return;
+    }
+    for (u32 i = 0; i < num; i++, joint++, block++) {
+        joint->m_0x56_7 = true;
+        joint->m_0x54_7 = false;
+        joint->m_matrix = &m_mtx;
+        joint->m_0x54_4 = joint->m_0x54_7;
+        joint->m_0x54_6 = joint->m_0x54_4;
+        joint->m_0x54_3 = true;
+        joint->m_ground = this;
+        if (block->m_kind == 3) {
+            setHatenaHideBlockCollision(i, 1);
         }
     }
 }
@@ -810,40 +813,59 @@ void stMarioPastBlockDt::countDrawNum(int count, stMarioPastBlockDt* blocks, int
     s16 index = 0;
     for (; count > 0; count--, blocks++) {
         if ((blocks->m_zone & 3) == 1) {
+            bool draw;
             u8 state = blocks->m_state;
             u8 kind = blocks->m_kind;
-            bool draw;
+            u8 blockCount = blocks->m_count;
             if (state == 6) {
                 draw = false;
             } else if (kind == 3) {
-                if (state < 4) {
-                    if (state < 2 || blocks->m_count != 0) {
-                        draw = false;
-                    } else {
-                        draw = true;
-                    }
-                } else if (state > 5) {
-                    draw = false;
-                } else {
+                switch (state) {
+                case 4:
+                case 5:
                     draw = true;
+                    break;
+                case 2:
+                case 3:
+                    if (blockCount == 0) {
+                        draw = true;
+                        break;
+                    }
+                default:
+                    draw = false;
+                    break;
                 }
             } else {
                 draw = true;
             }
             if (draw) {
                 bool isNormal;
-                if (kind == 1) {
-                    if (state < 6 && state > 1 && blocks->m_count == 0) {
-                        isNormal = false;
-                    } else {
+                switch (kind) {
+                case 0:
+                    isNormal = true;
+                    break;
+                case 1:
+                    switch (state) {
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        if (blockCount == 0) {
+                            isNormal = false;
+                            break;
+                        }
+                    default:
                         isNormal = true;
+                        break;
                     }
-                } else if (kind == 0) {
-                    isNormal = true;
-                } else if (kind < 4) {
+                    break;
+                case 2:
+                case 3:
                     isNormal = false;
-                } else {
+                    break;
+                default:
                     isNormal = true;
+                    break;
                 }
                 if (isNormal) {
                     *normalOrder++ = index;

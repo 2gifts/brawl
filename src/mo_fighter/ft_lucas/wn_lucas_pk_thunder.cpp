@@ -176,7 +176,8 @@ bool wnLucasPKThunder::activeArticle(wnLucasPKThunderChild* weapon, soModuleAcce
     s32 ownerTaskId;
     s32 linkTaskId;
     if (count >= 1) {
-        linkTaskId = articles.getArticleFromNo(0, count - 1)->getTaskId();
+        soArticle* prevArticle = articles.getArticleFromNo(0, count - 1);
+        linkTaskId = prevArticle->getTaskId();
     } else {
         linkTaskId = acc->m_stageObject->m_taskId;
     }
@@ -234,16 +235,17 @@ void wnLucasPKThunder::activate(int founderTaskId, int team, Vec3f* pos, float l
     desc.flagsHigh = 1;
     desc.flagsMidHigh = 0;
     desc.flagsMidLow = 1;
-    desc.unk4DHigh = 0;
     desc.flagsLow = 0;
+    desc.unk4DHigh = 0;
     Weapon::activate(&desc);
     m_moduleAccesser->getStatusModule().changeStatusForce(0, m_moduleAccesser);
     m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(4), true);
     m_moduleAccesser->getWorkManageModule().setFloat(m_param->m_startAngleMul * 0.017453292f, 0x21000000);
     wnKineticEnergyNormal& normal = dynamic_cast<wnKineticEnergyNormal&>(*m_moduleAccesser->getKineticModule().getEnergy(0));
+    float paramSpeed = m_param->m_speed;
     Vec2f speed;
     speed.m_x = 0.0f;
-    speed.m_y = m_param->m_speed;
+    speed.m_y = paramSpeed;
     normal.m_speed = speed;
     Vec2f accel;
     accel.m_x = 0.0f;

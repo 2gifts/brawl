@@ -599,10 +599,13 @@ void grPictchatPict008::processAnim() {
     m_hasUpdatedG3dCalcWorld = false;
     Ground::processAnim();
     if (m_isUpdate && m_posSpringWork != NULL) {
-        if (m_type == 1) {
-            getNodePosition(m_posSpringWork, 0, "P008springLine8");
-        } else if (m_type == 0) {
+        switch (m_type) {
+        case 0:
             getNodePosition(m_posSpringWork, 0, "P008springLine1");
+            break;
+        case 1:
+            getNodePosition(m_posSpringWork, 0, "P008springLine8");
+            break;
         }
     }
 }
@@ -936,13 +939,15 @@ void grPictchatPict013::updatePictLoop(float deltaFrame) {
         m_state = 4;
     } else {
         m_posBombWork->m_x += m_speedX;
-        u8 motion = m_motion;
-        if (motion == 2) {
-            if (!(getMotionFrame(0) < m_frameCount)) {
+        switch (m_motion) {
+        case 1:
+            m_frame = getMotionFrame(0);
+            break;
+        case 2:
+            if (getMotionFrame(0) >= m_frameCount) {
                 setVisibility(0);
             }
-        } else if (motion < 2 && motion != 0) {
-            m_frame = getMotionFrame(0);
+            break;
         }
         m_snd.setPos(m_posBombWork);
     }
@@ -988,9 +993,7 @@ void grPictchatPict013::updateCallBack(float deltaFrame) {
                 data->m_pos.m_x = pos->m_x;
                 data->m_pos.m_y = pos->m_y;
                 data->m_pos.m_z = pos->m_z;
-                data->m_rot.m_x = m_rot.m_x;
-                data->m_rot.m_y = m_rot.m_y;
-                data->m_rot.m_z = m_rot.m_z;
+                calcWorldCallBack->m_nodeCallbackDatas[0].m_rot = m_rot;
             }
         }
     }
@@ -1029,9 +1032,7 @@ void grPictchatPict013::elase() {
         m_seHandle = -1;
     }
     m_snd.playSE(static_cast<SndID>(0x1D26), 0, 0, -1);
-    if (m_yakumono != NULL) {
-        clearAttackAll();
-    }
+    grPictchatPict::clearAttackAll();
     (*m_pictCountWork)--;
     if (m_dangerZone != -1) {
         g_aiMgr->delDangerZone(m_dangerZone);

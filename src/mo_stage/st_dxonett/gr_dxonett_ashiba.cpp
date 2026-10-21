@@ -142,7 +142,7 @@ void grDxOnettAshiba::receiveCollMsg_Landing(grCollStatus* collStatus, grCollisi
             m_landed = 1;
             m_speed = -1.5f;
         }
-        m_landCount++;
         m_push += -2.0f;
+        m_landCount++;
     }
 }

@@ -73,3 +73,33 @@ void grCollision::getSegment(clSegment2D* outSegment, grCollisionLine* line) {
     outSegment->m_p1Pos.m_x = p1->m_x;
     outSegment->m_p1Pos.m_y = p1->m_y;
 }
+
+// HYPOTHESIS: each vertex owns a 16-byte pair, current position first and previous position second
+struct grCollVtxPair {
+    Vec2f pos;
+    Vec2f prev;
+};
+
+void grCollision::copyVtxToPrev() {
+    for (u16 i = 0; i < (u16)m_vtxLen; i++) {
+        grCollVtxPair* pair = &((grCollVtxPair*)m_vtxPositions)[i];
+        pair->prev.m_x = pair->pos.m_x;
+        pair->prev.m_y = pair->pos.m_y;
+    }
+}
+
+extern "C" void fn_80111E84(grCollisionLineWork* work, const Vec2f& pos, Vec2f* tmp, Vec2f* out);
+extern f32 lbl_805A2918;
+
+void grCollision::calcLineVector(const u32& lineId, const Vec2f& pos, Vec2f* out) {
+    grCollisionLineWork work;
+    Vec2f tmp;
+    u32 lineIdCopy = lineId;
+    if (getLineWork(&lineIdCopy, &work)) {
+        fn_80111E84(&work, pos, &tmp, out);
+        return;
+    }
+    f32 fallback = lbl_805A2918;
+    out->m_x = fallback;
+    out->m_y = fallback;
+}

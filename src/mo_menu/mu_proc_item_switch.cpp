@@ -122,10 +122,11 @@ int muProcItemSwitch::proc() {
         }
         if (pad & mask) {
             m_objs[30]->setAnimIdx(&sFrequencyAnims[1], false);
-            u64 reserved;
-            ((u32*)&reserved)[0] = 0xE0000;
-            ((u32*)&reserved)[1] = 0;
-            u64 mask64 = m_mask | reserved;
+            // MATCH-ONLY: the three reserved item bits (49-51) are built in a stack u64 through its high word
+            u64 reserved = 0;
+            ((u32*)&reserved)[0] |= 0xE0000;
+            u64 mask64 = m_mask;
+            mask64 |= reserved;
             u8 frequency = m_frequency;
             u8* data = getMenuData();
             data[0] = frequency;
@@ -275,7 +276,21 @@ bool muProcItemSwitch::selectProc(int dir) {
 }
 
 void muProcItemSwitch::printHelp() {
-    u32 index = getIndex();
+    // HYPOTHESIS: the original getIndex has this if/else shape; calling the header getIndex() compiles 4 bytes short
+    u32 index;
+    if (m_row == 0) {
+        index = 0;
+    } else if (m_row == 1) {
+        if (m_col == 0) {
+            index = 1;
+        } else {
+            index = m_col;
+        }
+    } else {
+        u32 row = m_row - 1;
+        u32 base = row * 7;
+        index = base + m_col;
+    }
     int itemInfo[ItemCount] = {
         0x92, 0x87, 0x87, 0x88, 0x8E, 0x91, 0x8C, 0x8C, 0x8C, 0x8F, 0x8D, 0x8D, 0x8D, 0x8D, 0x8D, 0x8D, 0x8D, 0x8D, 0x8D, 0x8B, 0x8B, 0x8B, 0x8B, 0x8B, 0x8B, 0x8B, 0x8A, 0x8A, 0x8A, 0x8A, 0x89, 0x89, 0x89, 0x89, 0x89, 0x89, 0x89, 0x89, 0x89, 0x89, 0x89, 0x89, 0x89, 0x89, 0x89, 0x89, 0x89, 0x90, 0x90
     };

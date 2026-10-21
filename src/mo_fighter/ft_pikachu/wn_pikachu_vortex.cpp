@@ -107,7 +107,7 @@ void wnPikachuVortex::onDeactivate() {
 // The vortex follows the position of its parent, but the model keeps the depth of the ground.
 void wnPikachuVortex::updateNodeSRT() {
     soModuleAccesser* accesser = m_moduleAccesser;
-    soPostureModule* posture = &accesser->getPostureModule();
+    soPostureModule* const posture = &accesser->getPostureModule();
     Vec3f position = posture->getPos();
     Vec3f rotation = posture->getRot(0);
     float scale = posture->getScale();

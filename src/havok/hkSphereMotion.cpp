@@ -99,13 +99,11 @@ void hkSphereMotion::setInertiaLocal(const hkMatrix3& in) {
 // The inverse inertia is the smallest diagonal entry.
 void hkSphereMotion::setInertiaInvLocal(const hkMatrix3& in) {
     const float* e = matrixElements(in);
+    float diagY = e[5];
+    float diagZ = e[10];
     float smallest = e[0];
-    if (smallest >= e[5]) {
-        smallest = e[5];
-    }
-    if (smallest >= e[10]) {
-        smallest = e[10];
-    }
+    smallest = smallest < diagY ? smallest : diagY;
+    smallest = smallest < diagZ ? smallest : diagZ;
     m_inertiaAndMassInv.x = smallest;
     m_inertiaAndMassInv.y = smallest;
     m_inertiaAndMassInv.z = smallest;

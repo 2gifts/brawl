@@ -138,8 +138,9 @@ void grPlanktonHamon::updateActive(float deltaFrame) {
             setVisibility(1);
         }
         if (getMotionFrame(0) >= m_wait) {
-            m_hamon->m_x = 0.0f;
-            m_hamon->m_y = 0.0f;
+            stPlanktonHamon* hamon = m_hamon;
+            hamon->m_x = 0.0f;
+            hamon->m_y = 0.0f;
             m_hamon->m_state = 3;
             m_hamon->m_kind = 0;
             setVisibility(0);

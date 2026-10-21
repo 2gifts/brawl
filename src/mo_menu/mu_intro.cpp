@@ -236,16 +236,21 @@ muIntroTask::~muIntroTask() {
 
 // The script of the sounds: the voice of the fighters and the jingles in between, with how long each takes.
 void muIntroTask::makeSoundScript() {
+    // MATCH-ONLY: the loop counter is declared up front to fix the register allocation
+    int i;
     if (getMiniNo() < 0) {
         addSound(0x203E, 0x3C);
         int num;
         if (m_mode == 1) {
             addSound(0x203C, 0x1E);
             num = 1;
+        // MATCH-ONLY: getPlayerNum() written out so the mode load is shared with the test above
+        } else if (m_mode >= 2) {
+            num = -1;
         } else {
-            num = getPlayerNum();
+            num = m_playerNum;
         }
-        for (int i = 0; i < num; i++) {
+        for (i = 0; i < num; i++) {
             if (i > 0) {
                 if (i < num - 1) {
                     addSound(-1, 10);
@@ -299,7 +304,8 @@ void muIntroTask::loadCharModel() {
     char anim[0x20];
     char vis[0x20];
     m_handles[1].readRequest("/menu/intro/enter/chrcmn.brres", Heaps::MenuResource, 0, 0);
-    if (m_mode == 1) {
+    // MATCH-ONLY: reading the mode through a const view lets the inlined getters reuse the load.
+    if (static_cast<const muIntroTask*>(this)->m_mode == 1) {
         getEnemyResFileName(path, anim, vis, m_players[0].m_charKind, getPlayerType(0));
         m_handles[2].readRequest(path, Heaps::MenuInstance, 0, 0);
     } else {

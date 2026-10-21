@@ -97,34 +97,23 @@ void grEarthBranch::updateActive(float deltaFrame) {
     }
     int center = 2;
     float best = 0.0f;
-    if (__fabsf(getPosY(0)) > best) {
-        center = 0;
-        best = __fabsf(getPosY(0));
-    }
-    if (__fabsf(getPosY(1)) > best) {
-        center = 1;
-        best = __fabsf(getPosY(1));
-    }
-    if (__fabsf(getPosY(2)) > best) {
-        center = 2;
-        best = __fabsf(getPosY(2));
-    }
-    if (__fabsf(getPosY(3)) > best) {
-        center = 3;
-        best = __fabsf(getPosY(3));
-    }
-    if (__fabsf(getPosY(4)) > best) {
-        center = 4;
-        best = __fabsf(getPosY(4));
+    for (u8 i = 0; i < 5; i++) {
+        if (__fabsf(getPosY(i)) > best) {
+            center = i;
+            best = __fabsf(getPosY(i));
+        }
     }
     switch (m_state) {
+    // HYPOTHESIS: state 1 is a waiting state that does nothing here; an empty case is what the original switch needs
+    case 1:
+        break;
     case 2:
         m_swing = m_swing * (1.0f - deltaFrame * 0.25f);
         updateCalcPos(deltaFrame);
         m_swing = m_swing + m_swingSpeed * deltaFrame;
-        if (0.0f < m_pos[center].m_y) {
+        if (m_pos[center].m_y > 0.0f) {
             m_state = 3;
-            m_swingSpeed = m_swingSpeed * 0.85f;
+            m_swingSpeed *= 0.85f;
         }
         break;
     case 3:
@@ -133,7 +122,7 @@ void grEarthBranch::updateActive(float deltaFrame) {
         m_swing = m_swing - m_swingSpeed * deltaFrame;
         if (m_pos[center].m_y < 0.0f) {
             m_state = 2;
-            m_swingSpeed = m_swingSpeed * 0.85f;
+            m_swingSpeed *= 0.85f;
         }
         break;
     }
@@ -163,12 +152,11 @@ void grEarthBranch::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
-            grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-            data[0].m_offsetPos = m_pos[2];
-            data[1].m_offsetPos = m_pos[3];
-            data[2].m_offsetPos = m_pos[4];
-            data[3].m_offsetPos = m_pos[1];
-            data[4].m_offsetPos = m_pos[0];
+            calcWorldCallBack->m_nodeCallbackDatas[0].m_offsetPos = m_pos[2];
+            calcWorldCallBack->m_nodeCallbackDatas[1].m_offsetPos = m_pos[3];
+            calcWorldCallBack->m_nodeCallbackDatas[2].m_offsetPos = m_pos[4];
+            calcWorldCallBack->m_nodeCallbackDatas[3].m_offsetPos = m_pos[1];
+            calcWorldCallBack->m_nodeCallbackDatas[4].m_offsetPos = m_pos[0];
         }
     }
 }

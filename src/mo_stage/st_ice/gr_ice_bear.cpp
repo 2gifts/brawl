@@ -340,6 +340,7 @@ void grIceBear::updateCallBack(float deltaFrame) {
         if (scnMdl != NULL) {
             if (scnMdl->m_calcWorldCallBack == NULL) {
                 calcWorldCallBack->m_index = 0;
+                calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex = m_nodeIndex;
                 scnMdl->m_calcWorldCallBack = calcWorldCallBack;
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;

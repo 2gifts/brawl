@@ -29,8 +29,8 @@ extern "C" bool fn_8005136C(int kind);
 // HYPOTHESIS: lets the item fall with the given speed (sora_melee, unnamed); the direction is passed in f1
 
 grVillageBalloon::grVillageBalloon(const char* taskName) : grVillageGuestPathMove(taskName) {
-    m_itemId = 0;
     m_balloonMotion = 4;
+    m_itemId = 0;
     m_posBalloon.m_x = 0.0f;
     m_posBalloon.m_y = 0.0f;
     m_posBalloon.m_z = 0.0f;

@@ -363,27 +363,30 @@ void grDxBigBlueCar::updateCallBack(float deltaFrame) {
                 DXBIGBLUE_BIND_CALLBACK(calcWorldCallBack, scnMdl)
                 stDxBigBlueData* data = static_cast<stDxBigBlueData*>(getStageData());
                 if (data != NULL) {
-                    float sink = unk168;
                     stDxBigBlueCarData* car = &m_carDataWork[m_tblWork[m_index]];
-                    Vec3f pos(car->unk04, car->unk08, car->unk0C);
-                    if (sink > data->unk4C) {
+                    Vec3f pos;
+                    pos.m_x = car->unk04;
+                    pos.m_y = car->unk08;
+                    pos.m_z = car->unk0C;
+                    if (unk168 > data->unk4C) {
                         pos.m_y = car->unk08 - data->unk4C;
                     } else {
-                        pos.m_y = car->unk08 - sink;
+                        pos.m_y = car->unk08 - unk168;
                     }
                     grNodeCallbackData* node = &calcWorldCallBack->m_nodeCallbackDatas[0];
                     node->m_pos = pos;
                     node = &calcWorldCallBack->m_nodeCallbackDatas[0];
                     Vec3f rot;
-                    float turn = car->unk24 - node->m_rot.m_z;
-                    float rate;
                     rot = node->m_rot;
+                    float turn = car->unk24 - rot.m_z;
+                    float rate;
                     if (car->unk30 == 1) {
                         rate = data->unk54;
                     } else {
                         rate = data->unk50;
                     }
-                    rot.m_z = rot.m_z + turn * (rate * deltaFrame);
+                    rate *= deltaFrame;
+                    rot.m_z = rot.m_z + turn * rate;
                     node->m_rot = rot;
                 }
             }

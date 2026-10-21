@@ -46,15 +46,6 @@ void grDonkeyItem::update(float deltaFrame) {
     }
 }
 
-// MATCH-ONLY: the rectangle of the area is built from a centre and a size inside a helper (the halving is not folded).
-static inline void itemMakeArea(Rect2D* area, Vec3f pos, float offsetY, float width, float height) {
-    float centerY = pos.m_y - offsetY;
-    area->m_left = pos.m_x - 0.5f * width;
-    area->m_right = pos.m_x + 0.5f * width;
-    area->m_up = centerY + 0.5f * height;
-    area->m_down = centerY - 0.5f * height;
-}
-
 // While the item is on offer (state 8) a fighter in the small area around it takes it (3 becomes 4 in the state byte).
 void grDonkeyItem::updateArea() {
     switch (m_state) {
@@ -62,7 +53,15 @@ void grDonkeyItem::updateArea() {
         Rect2D area;
         int fighterIds[9];
         memset(fighterIds, 0, sizeof(fighterIds));
-        itemMakeArea(&area, *m_posWork, -7.5f, 10.0f, 10.0f);
+        Vec3f& pos = *m_posWork;
+        float centerY = pos.m_y + 7.5f;
+        float centerX = pos.m_x;
+        float width = 10.0f;
+        float height = 10.0f;
+        area.m_left = centerX - 0.5f * width;
+        area.m_right = centerX + 0.5f * width;
+        area.m_up = centerY + 0.5f * height;
+        area.m_down = centerY - 0.5f * height;
         if (itemEnumIncludeEntryId(g_ftManager, &area, fighterIds, 0, 1) > 0 && *m_stateWork == 3) {
             *m_stateWork = 4;
         }
@@ -178,8 +177,9 @@ void grDonkeyItemScore::updateActive(float deltaFrame) {
             setVisibility(0);
             m_state = 1;
             break;
-        case 1:
-            if (*m_stateWork >= 4 && *m_stateWork <= 5) {
+        case 1: {
+            u8 offset = *m_stateWork + 0xFC; // MATCH-ONLY: the 4..5 range check is an unsigned byte offset from the state (-4 as 0xFC)
+            if (offset <= 1) {
                 setVisibility(1);
                 m_snd.playSE(SndID(0x1B89), 0, 0, -1);
                 m_snd.setPos(m_posWork);
@@ -187,6 +187,7 @@ void grDonkeyItemScore::updateActive(float deltaFrame) {
                 m_timer = 60.0f;
             }
             break;
+        }
         case 8:
             if (m_timer == 0.0f) {
                 *m_stateWork = 6;

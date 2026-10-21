@@ -35,24 +35,23 @@ grIceWarning::~grIceWarning() {
 
 // The sign is shown while the stage says so (the state 5) and plays its sound.
 void grIceWarning::update(float deltaFrame) {
-    if (m_state != 1) {
-        if (m_state != 0) {
-            if (m_state != 7) {
-                return;
-            }
-            m_seSeq.playFrame(0, getMotionFrame(0));
-            if (*m_stateWork == 5) {
-                return;
-            }
-            m_state = 0;
-            return;
-        }
+    switch (m_state) {
+    case 0:
         setVisibility(0);
         m_state = 1;
-    }
-    if (*m_stateWork == 5) {
-        setVisibility(1);
-        m_seSeq.playFrame(0, getMotionFrame(0), 0.0f);
-        m_state = 7;
+    case 1:
+        if (*m_stateWork == 5) {
+            setVisibility(1);
+            m_seSeq.playFrame(0, getMotionFrame(0), 0.0f);
+            m_state = 7;
+        }
+        break;
+    case 7:
+        m_seSeq.playFrame(0, getMotionFrame(0));
+        if (*m_stateWork == 5) {
+            return;
+        }
+        m_state = 0;
+        break;
     }
 }

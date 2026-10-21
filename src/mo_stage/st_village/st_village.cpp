@@ -644,7 +644,7 @@ void stVillage::updateUFO(float deltaFrame) {
     switch (m_area) {
     case 0:
     case 1:
-        break;
+        return;
     default: {
         stVillageData* data = static_cast<stVillageData*>(m_stageData);
         if (data != NULL) {
@@ -675,7 +675,6 @@ void stVillage::updateUFO(float deltaFrame) {
                 break;
             }
         }
-        break;
     }
     }
 }

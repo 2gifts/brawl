@@ -88,8 +88,7 @@ void grDxYorsterBlock::updateCallBack(float deltaFrame) {
                 scnMdl->m_nodeIndex = callback->m_nodeCallbackDatas[0].m_nodeIndex;
             }
             if (m_pos != NULL) {
-                grNodeCallbackData* data = callback->m_nodeCallbackDatas;
-                data->m_pos = *m_pos;
+                (callback->m_nodeCallbackDatas)->m_pos = *m_pos;
             }
         }
     }

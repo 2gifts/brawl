@@ -69,9 +69,12 @@ void hkInertiaTensorComputer::shiftInertiaToCom(hkVector4& shift, hkReal mass, h
     m[0] -= mass * (shift.y * shift.y + shift.z * shift.z);
     m[5] -= mass * (shift.z * shift.z + shift.x * shift.x);
     m[10] -= mass * (shift.x * shift.x + shift.y * shift.y);
-    m[4] = m[1] += mass * shift.x * shift.y;
-    m[9] = m[6] += mass * shift.y * shift.z;
-    m[8] = m[2] += mass * shift.z * shift.x;
+    float massX = mass * shift.x;
+    m[4] = m[1] += massX * shift.y;
+    float massY = mass * shift.y;
+    m[9] = m[6] += massY * shift.z;
+    float massZ = mass * shift.z;
+    m[2] = m[8] += massZ * shift.x;
 }
 
 // same thing the other way round: signs flip
@@ -80,9 +83,12 @@ void hkInertiaTensorComputer::shiftInertiaFromCom(hkVector4& shift, hkReal mass,
     m[0] += mass * (shift.y * shift.y + shift.z * shift.z);
     m[5] += mass * (shift.z * shift.z + shift.x * shift.x);
     m[10] += mass * (shift.x * shift.x + shift.y * shift.y);
-    m[4] = m[1] -= mass * shift.x * shift.y;
-    m[9] = m[6] -= mass * shift.y * shift.z;
-    m[8] = m[2] -= mass * shift.z * shift.x;
+    float massX = mass * shift.x;
+    m[4] = m[1] -= massX * shift.y;
+    float massY = mass * shift.y;
+    m[9] = m[6] -= massY * shift.z;
+    float massZ = mass * shift.z;
+    m[2] = m[8] -= massZ * shift.x;
 }
 
 hkResult hkInertiaTensorComputer::combineMassProperties(const hkArray<hkMassElement>& elements, hkMassProperties& result) {

@@ -36,6 +36,7 @@ grPlanktonAshibaLeft::grPlanktonAshibaLeft(const char* taskName) : grPlankton(ta
     m_hitSet = NULL;
     m_dataGroup = NULL;
     m_data = NULL;
+    m_nodeTop = 0;
     makeCalcuCallback(1, Heaps::StageInstance);
     setCalcuCallbackRoot(0x20);
 }
@@ -214,8 +215,8 @@ void grPlanktonAshibaLeft::onDamage(int index, soDamage* damage, soDamageAttacke
         fn_27_26399C(m_yakumono);
         if (amount != 0.0f) {
             Vec3f next;
-            Vec3f rot = getRot();
-            next = rot;
+            next = getRot();
+            next = next;
             float push = 0.0f;
             if (amount < data->unk30) {
                 if (m_dir == 1) {
@@ -226,8 +227,8 @@ void grPlanktonAshibaLeft::onDamage(int index, soDamage* damage, soDamageAttacke
             } else if (amount >= data->unk34) {
                 push += data->leftLeafDamageAngle * 2.0f;
             }
-            next.m_z = rot.m_z + push;
-            setRot(rot.m_x, rot.m_y, next.m_z);
+            next.m_z = next.m_z + push;
+            setRot(next.m_x, next.m_y, next.m_z);
             if (next.m_z < data->unk40) {
                 m_dir = 1;
             }

@@ -301,12 +301,12 @@ void muProcMenu::setSelectAnim(int item, bool selected) {
         for (int i = 0; i < m_itemCount; i++) {
             if (i == m_cursor) {
                 m_objs[m_objBase + i]->setAnimIdx(&m_anims[3], true);
-                MuObject* object = m_objs[m_objBase + i];
+                object = m_objs[m_objBase + i];
                 object->m_scnMdl->SetPriorityDrawOpa(priority);
                 object->m_scnMdl->SetPriorityDrawXlu(priority);
             } else {
                 m_objs[m_objBase + i]->setFrame(9.0f);
-                MuObject* object = m_objs[m_objBase + i];
+                object = m_objs[m_objBase + i];
                 object->m_scnMdl->SetPriorityDrawOpa(priority - 1);
                 object->m_scnMdl->SetPriorityDrawXlu(priority - 1);
             }

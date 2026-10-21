@@ -168,9 +168,8 @@ void grHalberdEnkei::setMotionFrame(float frame, u32 animIndex) {
 
 float grHalberdEnkei::getMotionFrame(u32 animIndex) {
     gfModelAnimation* modelAnim = m_modelAnims[animIndex];
-    float frame = 0.0f;
-    if (modelAnim != NULL) {
-        frame = modelAnim->m_anmObjChrRes->GetFrame();
+    if (modelAnim == NULL) {
+        return 0.0f;
     }
-    return frame;
+    return modelAnim->m_anmObjChrRes->GetFrame();
 }

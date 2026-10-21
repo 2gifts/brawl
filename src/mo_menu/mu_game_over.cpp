@@ -143,11 +143,12 @@ void muGameOverTask::createObjResFile(const muGameOverModel* models, int count, 
 
 // The four texts: the points, the coins, the cost and the extra line.
 void muGameOverTask::initMsg(void* msgData) {
+    MuObject* object;
     MuMsg* msg = create__5MuMsgFUlQ25Heaps8HeapTypeUl(3, Heaps::MenuInstance, Heaps::MenuResource);
     m_msg = msg;
     msg->setMsgData(msgData);
     msg->allocMsgBuf(0x100, 4);
-    MuObject* object = m_object;
+    object = m_object;
     msg->attachScnMdlSimple(0, object->m_sceneModel, 0, 0.0625f);
     msg->setFontType(0, 1);
     msg->setFontColor(0, 0xFF, 0x76, 0x76, 0xFF);
@@ -295,7 +296,8 @@ void muGameOverTask::mainStepContinueInit(muGameOverTask* task) {
     task->m_coinsAfter = task->m_coins - task->m_cost;
     int coinDiff = task->m_coinsAfter - task->m_coins;
     task->m_coinStep = coinDiff / 0x78;
-    if (task->m_coinStep == 0) {
+    // MATCH-ONLY: the original tests m_coinStep twice before the sign check (two bne to the same join); one test leaves out an instruction.
+    if (task->m_coinStep == 0 && task->m_coinStep == 0) {
         if (coinDiff > 0) {
             task->m_coinStep = 1;
         } else {

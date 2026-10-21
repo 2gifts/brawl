@@ -215,9 +215,9 @@ muTitleSunsetTask::muTitleSunsetTask()
 }
 
 muTitleSunsetTask::~muTitleSunsetTask() {
-    GXColor color = sBackColor;
     // HYPOTHESIS: the scene has four clear colors, and the title screen changed them
     u8* scene = *reinterpret_cast<u8**>(reinterpret_cast<u8*>(g_gfSceneRoot) + 0x40);
+    GXColor color = {0xFF, 0xFF, 0xFF, 0xFF};
     fn_8000E708(g_gfSceneRoot);
     GXColor* colors = *reinterpret_cast<GXColor**>(scene + 0x2880);
     colors[0] = color;
@@ -604,7 +604,8 @@ void muTitleSunsetTask::createEnableUseCharaList(int* list) {
         } else {
             int kind = exchangeMuCharKindToGmCharacterKind__6muMenuFiii(i);
             // HYPOTHESIS: the adventure data has a set of the characters that were seen
-            if (reinterpret_cast<AdvDataSeen*>(g_GameGlobal->m_advData)->m_seen.test(kind) == true) {
+            AdvDataSeen* advData = reinterpret_cast<AdvDataSeen*>(g_GameGlobal->m_advData);
+            if (advData->m_seen.test(kind) == true) {
                 list[m_charCount] = i;
                 m_charCount++;
             }

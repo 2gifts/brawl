@@ -256,7 +256,9 @@ void muTourEntryTask::setNextGame(int round, int match, int roundKind, int nextC
         memcpy(&m_nextFighters[i], &nextFighters[i], sizeof(muTourFighter));
         m_loaded[6 + i] = false;
         char name[64];
-        sprintf(name, "/menu/common/char_bust_tex/MenSelchrFaceB%03d.brres", getStockIconBase(m_nextFighters[i].m_character));
+        int number = muMenu::exchangeGmCharacterKind2Something(muMenu::exchangeMuSelchkind2MuStockchkind(m_nextFighters[i].m_character));
+        // HYPOTHESIS: the frame number (icon * 10 + 1) is a float, and the file number is that frame minus 1.0f
+        sprintf(name, "/menu/common/char_bust_tex/MenSelchrFaceB%03d.brres", (u32)((float)(number * 10 + 1) - 1.0f));
         m_files[6 + i].readRequest(name, Heaps::MenuResource, 0, 0);
     }
     for (u32 i = m_nextCount; i < 4; i++) {

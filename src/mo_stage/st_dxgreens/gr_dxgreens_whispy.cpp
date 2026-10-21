@@ -376,9 +376,10 @@ void grDxGreensWhispy::setMotion(u32 animId, bool shouldLoop, bool force, float*
 
 // Tells which side has more fighters (a tie is decided by chance): the wind blows towards them.
 bool grDxGreensWhispy::isWindToLeft() {
-    u32 right = 0;
+    u8 i;
     u32 left = 0;
-    for (u32 i = 0; i < 4; i++) {
+    u32 right = 0;
+    for (i = 0; i < 4; i++) {
         Vec3f pos;
         if (stMelee::getPlayerPosition(i, &pos) == 1) {
             if (pos.m_x > 0.0f) {

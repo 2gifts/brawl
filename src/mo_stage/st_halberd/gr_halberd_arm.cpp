@@ -60,7 +60,10 @@ void grHalberdArm::update(float deltaFrame) {
 // Only the hand hurts: its attack is on while the shot of the stage is the grab (6).
 void grHalberdArm::updateYakumono(float deltaFrame) {
     if (m_yakumonoMade == 1) {
-        Vec3f pos(m_mtxWork->m[0][3], m_mtxWork->m[1][3], m_mtxWork->m[2][3]);
+        float z = m_mtxWork->m[2][3];
+        float y = m_mtxWork->m[1][3];
+        float x = m_mtxWork->m[0][3];
+        Vec3f pos(x, y, z);
         setPos(&pos);
         if (*m_stateAttackWork == 6) {
             if (m_type == 2) {

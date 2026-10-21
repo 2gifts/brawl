@@ -203,9 +203,8 @@ void stDxGarden::createObjSwimArea() {
         if (m_waterData != NULL) {
             memset(m_waterData, 0, sizeof(grGimmickWaterData));
             m_waterData->m_swimHeight = data[0];
-            grGimmickWaterData* water = m_waterData;
-            water->m_canDrown = true;
-            water->m_speed = data[1];
+            m_waterData->m_canDrown = true;
+            m_waterData->m_speed = data[1];
             grGimmickWaterData* area = m_waterData;
             area->m_areaData.m_offsetPos.m_x = 0.0f;
             area->m_areaData.m_offsetPos.m_y = data[0] - 25.0f;

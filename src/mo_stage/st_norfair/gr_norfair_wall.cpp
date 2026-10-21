@@ -89,8 +89,8 @@ void grNorfairWall::updateAI(float deltaFrame) {
     switch (m_type) {
     case 0:
         zoneA.m_x = m_posLimitWork[0].m_x;
-        zoneB.m_x = nodePos.m_x + 50.0f;
         zoneA.m_y = m_posLimitWork[0].m_y;
+        zoneB.m_x = nodePos.m_x + 50.0f;
         zoneB.m_y = m_posLimitWork[1].m_y;
         if (zoneB.m_x > 40.0f) {
             zoneB.m_x = 40.0f;
@@ -346,8 +346,10 @@ void grNorfairWall::setAttackLeft() {
         offset.m_y = -50.0f;
         offset.m_z = 0.0f;
         setAttackDetails(1, &offset);
+        // MATCH-ONLY: named -90 constant is loaded before the zero constant to keep the f0/f1 register assignment
+        float x = -90.0f;
         offset.m_y = 0.0f;
-        offset.m_x = -90.0f;
+        offset.m_x = x;
         offset.m_z = 0.0f;
         setAttackDetails(2, &offset);
         offset.m_x = -90.0f;
@@ -373,8 +375,8 @@ void grNorfairWall::setAttackRight() {
         offset.m_y = -50.0f;
         offset.m_z = 0.0f;
         setAttackDetails(1, &offset);
-        offset.m_y = 0.0f;
         offset.m_x = 90.0f;
+        offset.m_y = 0.0f;
         offset.m_z = 0.0f;
         setAttackDetails(2, &offset);
         offset.m_x = 90.0f;

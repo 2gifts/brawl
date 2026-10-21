@@ -192,11 +192,13 @@ void grFamicomEnemy::updateYakumono(float deltaFrame) {
         setHit();
         if (m_yakumono != NULL) {
             m_hasHit = 1;
+            nw4r::g3d::ResMdl model;
             nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[0];
             if (scnMdl != NULL) {
-                nw4r::g3d::ResMdl model = scnMdl->m_resMdl;
+                model = scnMdl->m_resMdl;
                 if (model.IsValid()) {
-                    nw4r::g3d::ResNode node = model.GetResNode(m_nodeIndex);
+                    u32 nodeIndex = m_nodeIndex;
+                    nw4r::g3d::ResNode node = model.GetResNode(nodeIndex);
                     if (node.IsValid()) {
                         m_scale.m_x = node.ref().m_scale.m_x;
                         m_scale.m_y = node.ref().m_scale.m_y;
@@ -871,9 +873,12 @@ bool grFamicomEnemy::isAppear() {
     if (data == NULL) {
         result = false;
     } else {
-        for (u8 i = 0; i != data->m_enemyMax; i++) {
+        stFamicomEnemyData* other;
+        u8 i;
+        u8 enemyMax = data->m_enemyMax;
+        for (i = 0; i != enemyMax; i++) {
             if (i != m_index) {
-                stFamicomEnemyData* other = &m_enemyData[i];
+                other = &m_enemyData[i];
                 if (other->m_state == 5) {
                     if (m_enemyData[m_index].m_dir == 1) {
                         if (other->m_dir == 1) {

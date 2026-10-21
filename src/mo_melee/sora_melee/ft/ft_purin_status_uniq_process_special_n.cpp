@@ -1313,12 +1313,12 @@ void ftPurinStatusUniqProcessSpecialNTurn::execStatus(soModuleAccesser* acc) {
 void ftPurinStatusUniqProcessSpecialNTurn::execFixPosCounter(soModuleAccesser* acc) {
     if (acc->getSituationModule().getKind() == Situation_Ground) {
         acc->getWorkManageModule().decInt(0x20000004);
-        if (acc->getWorkManageModule().getInt(0x20000004) < 1) {
-            Vec2f normal = acc->getGroundModule().getTouchNormal(grCollStatus::TOUCH_MASK_DOWN, 0);
-            float slopeAngle = atan2(-normal.m_x, normal.m_y);
+        if (acc->getWorkManageModule().getInt(0x20000004) <= 0) {
+            Vec2f normal;
+            Vec2f::copy(normal, acc->getGroundModule().getTouchNormal(grCollStatus::TOUCH_MASK_DOWN, 0));
+            float slopeAngle = atan2f(-normal.m_x, normal.m_y);
             float direction = acc->getPostureModule().getLr();
-            Vec3f rotation(0.0f, direction == 1.0f ? -1.5707964f : 1.5707964f, slopeAngle);
-            acc->getEffectModule().req(static_cast<EfID>(10), &acc->getPostureModule().getPos(), &rotation, 1.0f, 0, -1);
+            acc->getEffectModule().req(static_cast<EfID>(10), &acc->getPostureModule().getPos(), &Vec3f(0.0f, direction == 1.0f ? -1.5707964f : 1.5707964f, slopeAngle), 1.0f, 0, -1);
             acc->getWorkManageModule().setInt(acc->getConstantIntKirby(0x5dc2), 0x20000004);
         }
     }
@@ -1331,7 +1331,8 @@ void ftPurinStatusUniqProcessSpecialNTurn::execFixPos(soModuleAccesser* acc) {
         // Resume rolling after horizontal speed reverses far enough.
         if (initial > 0.0f) {
             if (current < 0.0f) {
-                if (__fabsf(initial * acc->getConstantFloatKirby(0xfc3)) <= __fabsf(current)) {
+                float speed = __fabsf(current);
+                if (speed >= __fabsf(initial * acc->getConstantFloatKirby(0xfc3))) {
                     if (acc->getStageObject().soGetSubKind() == 5) {
                         acc->getWorkManageModule().setInt(0x189, 0x20000009);
                         acc->getStatusModule().changeStatusRequest(0x187, acc);
@@ -1342,7 +1343,8 @@ void ftPurinStatusUniqProcessSpecialNTurn::execFixPos(soModuleAccesser* acc) {
                 }
             }
         } else if (current > 0.0f) {
-            if (__fabsf(initial * acc->getConstantFloatKirby(0xfc3)) <= __fabsf(current)) {
+            float speed = __fabsf(current);
+            if (speed >= __fabsf(initial * acc->getConstantFloatKirby(0xfc3))) {
                 if (acc->getStageObject().soGetSubKind() == 5) {
                     acc->getWorkManageModule().setInt(0x189, 0x20000009);
                     acc->getStatusModule().changeStatusRequest(0x187, acc);

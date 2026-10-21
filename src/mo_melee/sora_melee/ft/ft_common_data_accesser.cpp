@@ -37,6 +37,41 @@ void* ftRobotArticleDataAccesser::getBeamData(ftKind kind, bool* resourceGroup) 
     }
 }
 
+void* ftCommonDataAccesser::getWeaponData91(ftKind kind, bool* resourceGroup) const
+{
+    switch (kind) {
+    case 26:
+        return lbl_27_bss_3210[26].data->extendParam[7];
+    case 5: {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, 26);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<ftRobotBeamArticle*>(address)->unk10;
+    }
+    default:
+        return NULL;
+    }
+}
+
+
+// HYPOTHESIS: ftData continues past extendParam; the pointer read for kind 5 sits at 0x10C
+struct ftDataExtended {
+    u8 unk0[0x10C];
+    void* unk10C;
+};
+
+void* ftCommonDataAccesser::getParamSamusChargeShot(ftKind kind) const
+{
+    switch (kind) {
+    case Fighter_Samus:
+        return lbl_27_bss_3210[Fighter_Samus].data->extendParam[0];
+    case 5:
+        return reinterpret_cast<ftDataExtended*>(lbl_27_bss_3210[5].data)->unk10C;
+    default:
+    case 4:
+        return NULL;
+    }
+}
+
 
 extern "C" s32 fn_27_1454C0();
 // HYPOTHESIS: 12-byte ftKindData entries (kind * 0xC), params pointer at +4

@@ -133,8 +133,11 @@ void grPlanktonHanenbou::updateCallBack(float deltaFrame) {
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
             grNodeCallbackData* nodeData = &calcWorldCallBack->m_nodeCallbackDatas[0];
-            nodeData->m_pos.m_x = m_data->m_x;
-            nodeData->m_pos.m_y = m_data->m_y;
+            stPlanktonHanenbou* data = m_data;
+            // MATCH-ONLY: the y load is hoisted above the x store to get the original schedule
+            float y = data->m_y;
+            nodeData->m_pos.m_x = data->m_x;
+            nodeData->m_pos.m_y = y;
             nodeData->m_pos.m_z = 0.0f;
             calcWorldCallBack->m_nodeCallbackDatas[0].m_rot.m_z = m_data->m_angle;
             if (m_flip == 1) {

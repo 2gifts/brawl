@@ -1494,11 +1494,20 @@ bool stEdit::createLadderBlock(stEditBlock* block, u32 flags, int mdlIndex, Vec3
     grGimmickLadderData* data =
         static_cast<grGimmickLadderData*>(gfHeapManager::alloc(Heaps::StageResource, 0x5C, 0x20));
     if (data != NULL) {
-        float length = (float)((flags >> 16) & 0x1F) * 20.0f - 20.0f;
-        Vec2f areaPos(0.0f, -length * 0.5f);
-        Vec2f areaRange(20.0f, length);
-        data->initialize(0, 0, (flags >> 21) & 1, (flags >> 22) & 1, "LadderBlock", &areaPos, &areaRange);
-        data->m_motionPathData.m_mdlIndex = 0xFF;
+        memset(data, 0, 0x5C);
+        float length = 20.0f * (float)((flags >> 16) & 0x1F);
+        length -= 20.0f;
+        data->m_mdlIndex = 0;
+        data->m_49 = 0;
+        data->m_restrictUpExit = (flags >> 21) & 1;
+        data->m_51 = (flags >> 22) & 1;
+        // MATCH-ONLY: the motion path model index is stored as an unsigned byte (0xFF, not -1)
+        reinterpret_cast<u8*>(data)[6] = 0xFF;
+        data->m_areaData.m_offsetPos.m_x = 0.0f;
+        data->m_areaData.m_offsetPos.m_y = 0.5f * -length;
+        data->m_areaData.m_range.m_x = 20.0f;
+        data->m_areaData.m_range.m_y = length;
+        strcpy(data->m_nodeName, "LadderBlock");
         stEditLadderView* view = reinterpret_cast<stEditLadderView*>(ladder);
         view->m_offset = Vec3f(0.0f, -length, 0.0f);
         ladder->setGimmickData(data);
@@ -1514,11 +1523,15 @@ bool stEdit::createLadderBlock(stEditBlock* block, u32 flags, int mdlIndex, Vec3
 }
 
 bool stEdit::createSpringBlock(stEditBlock* block, u32 flags, int mdlIndex, Vec3f* pos, Vec3f* scale) {
-    grGimmickEditSpring* spring = new (Heaps::StageInstance) grGimmickEditSpring("stEdit_grGimmickSpring");
+    // MATCH-ONLY: name local and const spring pin the register assignment
+    const char* name = "stEdit_grGimmickSpring";
+    grGimmickEditSpring* const spring = new (Heaps::StageInstance) grGimmickEditSpring(name);
+    if (spring != NULL) {
+        spring->setMdlIndex((short)mdlIndex);
+    }
     if (spring == NULL) {
         return false;
     }
-    spring->setMdlIndex((short)mdlIndex);
     addGround(spring);
     grGimmickSpringData* data =
         static_cast<grGimmickSpringData*>(gfHeapManager::alloc(Heaps::StageResource, 0x50, 0x20));
@@ -1527,21 +1540,21 @@ bool stEdit::createSpringBlock(stEditBlock* block, u32 flags, int mdlIndex, Vec3
         u32 desc = block->m_desc;
         u32 width = (desc >> 21) & 7;
         data->m_bounce = (float)((desc >> 3) & 3) * 0.6f + 3.5f;
-        *reinterpret_cast<int*>(reinterpret_cast<u8*>(data) + 0x40) = -1;
+        *reinterpret_cast<u32*>(reinterpret_cast<u8*>(data) + 0x40) = 0xFFFFFFFF;
         *reinterpret_cast<int*>(reinterpret_cast<u8*>(data) + 0x44) = 0x1D9A;
         float scaleX;
-        if (width == 0) {
-            scaleX = 1.0f;
-        } else {
+        if (width != 0) {
             scaleX = 1.0f / (float)width;
+        } else {
+            scaleX = 1.0f;
         }
         data->m_mdlIndex = 2;
-        data->m_motionPathData.m_mdlIndex = 0xFF;
-        float span = (1.0f / scaleX) * 2.0f;
+        // MATCH-ONLY: u8 store keeps the constant 0xFF instead of folding to -1
+        *reinterpret_cast<u8*>(&data->m_motionPathData.m_mdlIndex) = 0xFF;
         data->m_areaData.m_offsetPos.m_x = 0.0f;
-        data->m_areaData.m_offsetPos.m_y = (span - 3.0f) * scaleX;
+        data->m_areaData.m_offsetPos.m_y = (-3.0f + 2.0f * (1.0f / scaleX)) * scaleX;
         data->m_areaData.m_range.m_x = 14.0f;
-        data->m_areaData.m_range.m_y = ((2.0f - span) + 11.0f) * scaleX;
+        data->m_areaData.m_range.m_y = ((2.0f - 2.0f * (1.0f / scaleX)) + 11.0f) * scaleX;
         spring->setGimmickData(data);
     }
     spring->startup(m_fileData, 0, gfSceneRoot::Layer_Ground);
