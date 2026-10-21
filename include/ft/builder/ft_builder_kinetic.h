@@ -249,6 +249,9 @@ private:
     soInstancePoolSub<Info, Next> m_sub;
 public:
     soInstancePool(soModuleAccesser* acc) : Parent(acc), m_sub(acc) { }
+#ifndef FT_MARTH_RUNTIME_HELPERS
+    ~soInstancePool() { }
+#endif
     soInstancePoolSub<Info, Next>& getSub() { return m_sub; }
     template <typename Helper>
     int forEachHolderModuleAccesser(const Helper& helper, soModuleAccesser* acc) {

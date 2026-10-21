@@ -790,4 +790,5 @@ template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 2>, soIntToType<4> >::~
 template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<4> >, soKindInfoGeneric<0, 2> >;
 template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 2>, soIntToType<5> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<5> >, soKindInfoGeneric<0, 2> >;
+template class soInstancePool<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<5> >, soInstancePoolRoot, soKindInfoGeneric<0, 2>, 5>;
 #pragma dont_inline off

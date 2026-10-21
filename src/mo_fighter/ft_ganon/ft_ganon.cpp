@@ -354,4 +354,5 @@ void* fn_109_5AF4(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 #pragma dont_inline on
 template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 20>, soIntToType<1> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<1> >, soKindInfoGeneric<0, 20> >;
+template class soInstancePool<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<1> >, soInstancePoolRoot, soKindInfoGeneric<0, 20>, 1>;
 #pragma dont_inline off

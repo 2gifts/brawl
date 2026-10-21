@@ -462,3 +462,19 @@ void wnWarioBike::activate(int founderTaskId, int riderTaskId, int resourceId,
     m_moduleAccesser->getDamageModule().setNoReactionModePerfect(true);
     m_moduleAccesser->getGroundModule().setEventToGround(true, 0);
 }
+
+// The energy pools of the bike's kinetic mediator, innermost first; their destructors call each other out of line.
+#pragma dont_inline on
+template class soKineticEnergyHolder<soKineticEnergyNormal, soTypeListNullType, soKineticEnergyInitInfo<0, 1> >;
+template class soInstancePoolSub<wnWarioBikeNormal0Info, soTypeListNullType>;
+template class soInstancePool<wnWarioBikeNormal0Info, soInstancePoolRoot, soTypeListNullType, 0>;
+template class soLineInvertHierarchy<soTypeList<wnWarioBikeNormal0Info, soTypeListNullType>, soInstancePool, soInstancePoolRoot>;
+template class soKineticEnergyHolder<wnKineticEnergyGravity, soTypeListNullType, soKineticEnergyInitInfo<1, 1> >;
+template class soInstancePoolSub<wnWarioBikeGravityInfo, soTypeListNullType>;
+template class soInstancePool<wnWarioBikeGravityInfo, soLineInvertHierarchy<soTypeList<wnWarioBikeNormal0Info, soTypeListNullType>, soInstancePool, soInstancePoolRoot>, soTypeListNullType, 1>;
+template class soLineInvertHierarchy<soTypeList<wnWarioBikeNormal0Info, soTypeList<wnWarioBikeGravityInfo, soTypeListNullType> >, soInstancePool, soInstancePoolRoot>;
+template class soKineticEnergyHolder<soKineticEnergyNormal, soTypeListNullType, soKineticEnergyInitInfo<2, 1> >;
+template class soInstancePoolSub<wnWarioBikeNormal2Info, soTypeListNullType>;
+template class soInstancePool<wnWarioBikeNormal2Info, soLineInvertHierarchy<soTypeList<wnWarioBikeNormal0Info, soTypeList<wnWarioBikeGravityInfo, soTypeListNullType> >, soInstancePool, soInstancePoolRoot>, soTypeListNullType, 2>;
+template class soLineInvertHierarchy<soTypeList<wnWarioBikeNormal0Info, soTypeList<wnWarioBikeGravityInfo, soTypeList<wnWarioBikeNormal2Info, soTypeListNullType> > >, soInstancePool, soInstancePoolRoot>;
+#pragma dont_inline off
