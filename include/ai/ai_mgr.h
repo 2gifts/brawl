@@ -74,7 +74,7 @@ public:
     static bool isReady();
     static bool isReadyUpdate();
     static bool isSmallMap();
-    static char* getMadeinAiData(bool force);
+    static char* getMadeinAiData(bool includePreparation);
     static aiStat* get_aiStat(aiChrIdx* idx);
     aiStat* get_aiStatFinal();
     void removePlayer(aiChrIdx* idx);
