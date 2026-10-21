@@ -87,23 +87,25 @@ void grIceFish::onGimmickEvent(soGimmickEventArgs* eventInfo, int* taskId) {
 // and 40, the tail hits from 40 to 80.
 void grIceFish::updateYakumono(float deltaFrame) {
     if (m_started == 1) {
-        if (m_state == 7) {
-            if (24.0f < getMotionFrame(0)) {
-                if (getMotionFrame(0) < 40.0f || 80.0f < getMotionFrame(0)) {
-                    if (m_attackSet == 1) {
-                        disableAttack(0);
-                    }
-                    m_attackSet = 0;
-                    if (m_trigger != NULL) {
-                        m_trigger->setAreaSleep(true);
-                    }
-                } else {
-                    setAttackTail();
+        switch (m_state) {
+        case 7:
+            if (getMotionFrame(0) <= 24.0f) {
+                if (m_trigger != NULL) {
+                    m_trigger->setAreaSleep(false);
                 }
-            } else if (m_trigger != NULL) {
-                m_trigger->setAreaSleep(false);
+            } else if (getMotionFrame(0) >= 40.0f && getMotionFrame(0) <= 80.0f) {
+                setAttackTail();
+            } else {
+                if (m_attackSet == 1) {
+                    disableAttack(0);
+                }
+                m_attackSet = 0;
+                if (m_trigger != NULL) {
+                    m_trigger->setAreaSleep(true);
+                }
             }
-        } else {
+            break;
+        default:
             if (m_attackSet == 1) {
                 disableAttack(0);
             }
@@ -111,6 +113,7 @@ void grIceFish::updateYakumono(float deltaFrame) {
             if (m_trigger != NULL) {
                 m_trigger->setAreaSleep(true);
             }
+            break;
         }
         if (m_eatState == 1) {
             presentPosEvent();

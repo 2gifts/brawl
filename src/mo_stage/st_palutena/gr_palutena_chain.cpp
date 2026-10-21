@@ -200,18 +200,17 @@ void grPalutenaChain::updateCallBack(float deltaFrame) {
                 for (int i = 0; i < 23; i++) {
                     calcWorldCallBack->m_nodeCallbackDatas[i].m_nodeIndex = m_node[i];
                 }
-                scnMdl->m_calcWorldCallBack = calcWorldCallBack;
+                scnMdl->m_calcWorldCallBack = &m_calcWorldCallBack;
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
             for (int i = 0; i < 23; i++) {
+                calcWorldCallBack->m_nodeCallbackDatas[i].m_pos = m_pos[i];
+                float rot = m_rot[i];
                 grNodeCallbackData* data = &calcWorldCallBack->m_nodeCallbackDatas[i];
-                data->m_pos.m_x = m_pos[i].m_x;
-                data->m_pos.m_y = m_pos[i].m_y;
-                data->m_pos.m_z = m_pos[i].m_z;
                 data->m_rot.m_x = 0.0f;
                 data->m_rot.m_y = 0.0f;
-                data->m_rot.m_z = m_rot[i];
+                data->m_rot.m_z = rot;
             }
         }
     }

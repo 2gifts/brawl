@@ -83,8 +83,8 @@ void grDonkeyItem::updateActive(float deltaFrame) {
         switch (m_state) {
         case 0:
             setVisibility(0);
-            m_state = 1;
             m_timer = data[23] + (data[24] - data[23]) * randf();
+            m_state = 1;
             break;
         case 1:
             if (m_timer == 0.0f) {
@@ -94,15 +94,15 @@ void grDonkeyItem::updateActive(float deltaFrame) {
             }
             break;
         case 8:
-            if (*m_stateWork >= 4 && *m_stateWork <= 5) {
+            if (*m_stateWork == 4 || *m_stateWork == 5) {
                 setVisibility(0);
                 m_state = 9;
             }
             break;
         case 9:
             if (*m_stateWork == 6) {
-                m_state = 1;
                 m_timer = data[25] + (data[26] - data[25]) * randf();
+                m_state = 1;
             }
             break;
         }

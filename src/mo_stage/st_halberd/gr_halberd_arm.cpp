@@ -84,30 +84,35 @@ void grHalberdArm::updateYakumono(float deltaFrame) {
 // Plays the animation of the hand (only the hand has one) with the sounds of the arm.
 void grHalberdArm::updateActive(float deltaFrame) {
     if (m_type == 2) {
-        u8 state = m_state;
-        if (state == 2) {
+        switch (m_state) {
+        case 0:
+            setMotion(0, 1, 1, &m_motionTimer);
+            m_state = 1;
+        case 1:
+            if (*m_stateWork == 0x12) {
+                m_snd.playSE(snd_se_stage_Halberd_Arm_start, 0, 0, -1);
+                m_state = 2;
+            }
+            break;
+        case 2:
             if (*m_stateWork == 0x13) {
                 setMotion(1, 0, 1, &m_motionTimer);
                 m_snd.playSE(snd_se_stage_Halberd_Arm_stop, 0, 0, -1);
                 m_state = 0xD;
             }
-        } else if (state < 2) {
-            if (state == 0) {
-                setMotion(0, 1, 1, &m_motionTimer);
-                m_state = 1;
+            break;
+        case 0xD:
+            if (*m_stateWork == 0x14) {
+                setMotion(2, 0, 1, &m_motionTimer);
+                m_snd.playSE(snd_se_stage_Halberd_Arm_attack, 0, 0, -1);
+                m_state = 0xE;
             }
-            if (*m_stateWork == 0x12) {
-                m_snd.playSE(snd_se_stage_Halberd_Arm_start, 0, 0, -1);
-                m_state = 2;
-            }
-        } else if (state == 0xE) {
+            break;
+        case 0xE:
             if (*m_stateWork == 0x15) {
                 m_state = 0;
             }
-        } else if (state < 0xE && state > 0xC && *m_stateWork == 0x14) {
-            setMotion(2, 0, 1, &m_motionTimer);
-            m_snd.playSE(snd_se_stage_Halberd_Arm_attack, 0, 0, -1);
-            m_state = 0xE;
+            break;
         }
     }
 }

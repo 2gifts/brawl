@@ -75,22 +75,22 @@ void grDxOnettAshiba::updateLanding(float deltaFrame) {
     }
     float diff = m_push - m_offsetY;
     m_target = m_push;
-    float ratio = __fabsf(diff) / 7.0f;
-    float base = 0.02f + m_speed;
-    float speed;
+    float speed = 0.02f + m_speed;
+    float ratio = nw4r::math::FAbs(diff) / 7.0f;
     if (diff < 0.0f) {
-        speed = base - ratio * 0.5f;
+        speed -= ratio * 0.5f;
     } else {
-        speed = base + ratio * 0.5f;
+        speed += ratio * 0.5f;
     }
-    speed = (speed - 0.02f) * 0.95f;
+    speed -= 0.02f;
+    speed *= 0.95f;
     if (speed > 2.0f) {
         speed = 2.0f;
     } else if (speed < -2.0f) {
         speed = -2.0f;
     }
 
-    if (__fabsf(m_offsetY) - m_target < 0.2f && __fabsf(speed) < 0.2f) {
+    if (nw4r::math::FAbs(m_offsetY) - m_target < 0.2f && nw4r::math::FAbs(speed) < 0.2f) {
         m_offsetY = m_target;
         m_speed = 0.0f;
     } else {

@@ -194,9 +194,10 @@ void grPlanktonAshibaLeft::updateCallback(u32 index) {
             }
             Vec3f rot;
             rot = getRot();
-            m_calcWorldCallBack.m_nodeCallbackDatas[0].m_offsetRot.m_x = rot.m_x;
-            m_calcWorldCallBack.m_nodeCallbackDatas[0].m_offsetRot.m_y = rot.m_y;
-            m_calcWorldCallBack.m_nodeCallbackDatas[0].m_offsetRot.m_z = rot.m_z;
+            grNodeCallbackData* data = m_calcWorldCallBack.m_nodeCallbackDatas;
+            data->m_offsetRot.m_x = rot.m_x;
+            data->m_offsetRot.m_y = rot.m_y;
+            data->m_offsetRot.m_z = rot.m_z;
         }
     }
 }

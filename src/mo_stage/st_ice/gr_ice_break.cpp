@@ -126,22 +126,21 @@ void grIceBreak::updateYakumono(float deltaFrame) {
 // The floor blinks while it builds up (in the last second).
 void grIceBreak::updatePreBuild(float deltaFrame) {
     if (m_hp == 0.0f) {
-        if (m_timer <= 60.0f) {
-            float timer = m_preBuild - deltaFrame;
-            m_preBuild = timer;
-            if (timer < 0.0f) {
+        if (m_timer > 60.0f) {
+            m_preBuild = 4.0f;
+        } else {
+            m_preBuild = m_preBuild - deltaFrame;
+            if (m_preBuild < 0.0f) {
                 m_preBuild = 0.0f;
             }
-            if (m_preBuild <= 2.0f) {
-                setVisibility(0);
-            } else {
+            if (m_preBuild > 2.0f) {
                 setVisibility(1);
+            } else {
+                setVisibility(0);
             }
             if (m_preBuild == 0.0f) {
                 m_preBuild = 4.0f;
             }
-        } else {
-            m_preBuild = 4.0f;
         }
     }
 }
