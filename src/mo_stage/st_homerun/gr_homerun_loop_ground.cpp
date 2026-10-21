@@ -106,29 +106,21 @@ void grHomerunLoopGround::fixposScroll() {
 }
 
 void grHomerunLoopGround::fixposCallBack() {
+    u8 i;
     grCalcWorldCallBack* calcWorldCallBack = &m_calcWorldCallBack;
     if (calcWorldCallBack != NULL) {
         nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[0];
         if (scnMdl != NULL) {
             if (scnMdl->m_calcWorldCallBack == NULL) {
                 calcWorldCallBack->m_index = 0;
-                calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex = m_node[0];
-                calcWorldCallBack->m_nodeCallbackDatas[1].m_nodeIndex = m_node[1];
-                calcWorldCallBack->m_nodeCallbackDatas[2].m_nodeIndex = m_node[2];
-                calcWorldCallBack->m_nodeCallbackDatas[3].m_nodeIndex = m_node[3];
-                calcWorldCallBack->m_nodeCallbackDatas[4].m_nodeIndex = m_node[4];
-                calcWorldCallBack->m_nodeCallbackDatas[5].m_nodeIndex = m_node[5];
-                calcWorldCallBack->m_nodeCallbackDatas[6].m_nodeIndex = m_node[6];
-                calcWorldCallBack->m_nodeCallbackDatas[7].m_nodeIndex = m_node[7];
-                calcWorldCallBack->m_nodeCallbackDatas[8].m_nodeIndex = m_node[8];
-                calcWorldCallBack->m_nodeCallbackDatas[9].m_nodeIndex = m_node[9];
-                calcWorldCallBack->m_nodeCallbackDatas[10].m_nodeIndex = m_node[10];
-                calcWorldCallBack->m_nodeCallbackDatas[11].m_nodeIndex = m_node[11];
+                for (i = 0; i < 12; i++) {
+                    calcWorldCallBack->m_nodeCallbackDatas[i].m_nodeIndex = m_node[i];
+                }
                 scnMdl->m_calcWorldCallBack = calcWorldCallBack;
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
-            for (u8 i = 0; i < 12; i++) {
+            for (i = 0; i < 12; i++) {
                 calcWorldCallBack->m_nodeCallbackDatas[i].m_pos = m_posGroundWork[i];
             }
         }
