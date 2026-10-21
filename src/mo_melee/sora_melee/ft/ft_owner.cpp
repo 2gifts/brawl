@@ -24,6 +24,29 @@ struct ftOwnerButtonsFloats {
     f32 unk4;
 };
 
+struct ftOwnerRemainState {
+    u8 unk0[0x70];
+    u8 unk70;
+    u8 unk71;
+    u8 unk72;
+};
+
+u8 ftOwner::getRemainPokemonCount() const {
+    ftOwnerRemainState* state = reinterpret_cast<ftOwnerRemainState*>(m_data);
+    u8 count = 0;
+
+    if (state->unk70 == 0) {
+        count = 1;
+    }
+    if (state->unk71 == 0) {
+        count += 1;
+    }
+    if (state->unk72 == 0) {
+        return (u8)(count + 1);
+    }
+    return count;
+}
+
 bool ftOwner::sameCheckController(int kind, u64* buttons0, u64* buttons1) {
     bool result = false;
     ftOwnerButtonsFloats* stick0 = reinterpret_cast<ftOwnerButtonsFloats*>(buttons0);

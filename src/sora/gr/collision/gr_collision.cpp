@@ -87,3 +87,19 @@ void grCollision::copyVtxToPrev() {
         pair->prev.m_y = pair->pos.m_y;
     }
 }
+
+extern "C" void fn_80111E84(grCollisionLineWork* work, const Vec2f& pos, Vec2f* tmp, Vec2f* out);
+extern f32 lbl_805A2918;
+
+void grCollision::calcLineVector(const u32& lineId, const Vec2f& pos, Vec2f* out) {
+    grCollisionLineWork work;
+    Vec2f tmp;
+    u32 lineIdCopy = lineId;
+    if (getLineWork(&lineIdCopy, &work)) {
+        fn_80111E84(&work, pos, &tmp, out);
+        return;
+    }
+    f32 fallback = lbl_805A2918;
+    out->m_x = fallback;
+    out->m_y = fallback;
+}

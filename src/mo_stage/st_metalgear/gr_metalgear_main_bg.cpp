@@ -131,23 +131,29 @@ void grMetalgearMainBg::updateBreak(float deltaFrame) {
     }
 }
 
+// HYPOTHESIS: the flag byte is signed, so the clear keeps the wide mask
+struct metalgearSignedLineView {
+    u8 _pad[0x10];
+    s8 m_flags;
+};
+
 // The collisions of the walls stand while the walls do.
 void grMetalgearMainBg::updateColl(float deltaFrame) {
     grCollisionJoint* joint = m_jointLeft;
     if (joint != NULL) {
-        if (m_stateWallWork[1] == 6) {
-            metalgearLineView* line = reinterpret_cast<metalgearLineView*>(joint->getLine(0));
-            line->m_flags = line->m_flags & ~1;
-        } else {
-            metalgearLineView* line = reinterpret_cast<metalgearLineView*>(joint->getLine(0));
+        if (m_stateWallWork[1] != 6) {
+            metalgearSignedLineView* line = reinterpret_cast<metalgearSignedLineView*>(joint->getLine(0));
             line->m_flags = line->m_flags | 1;
+        } else {
+            metalgearSignedLineView* line = reinterpret_cast<metalgearSignedLineView*>(joint->getLine(0));
+            line->m_flags = line->m_flags & ~1;
         }
-        if (m_stateWallWork[3] == 6) {
-            metalgearLineView* line = reinterpret_cast<metalgearLineView*>(m_jointRight->getLine(0));
-            line->m_flags = line->m_flags & ~1;
-        } else {
-            metalgearLineView* line = reinterpret_cast<metalgearLineView*>(m_jointRight->getLine(0));
+        if (m_stateWallWork[3] != 6) {
+            metalgearSignedLineView* line = reinterpret_cast<metalgearSignedLineView*>(m_jointRight->getLine(0));
             line->m_flags = line->m_flags | 1;
+        } else {
+            metalgearSignedLineView* line = reinterpret_cast<metalgearSignedLineView*>(m_jointRight->getLine(0));
+            line->m_flags = line->m_flags & ~1;
         }
     }
 }

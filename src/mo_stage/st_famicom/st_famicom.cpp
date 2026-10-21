@@ -401,8 +401,9 @@ void stFamicom::createObjEnemy() {
     if (data != NULL) {
         m_enemyData = new (Heaps::StageResource) stFamicomEnemyData[data->m_enemyMax];
         if (m_enemyData != NULL) {
+            u8 i;
             u8 count = data->m_enemyMax;
-            for (u8 i = 0; i != count; i++) {
+            for (i = 0; i != count; i++) {
                 initEnemyData(&m_enemyData[i]);
             }
         }

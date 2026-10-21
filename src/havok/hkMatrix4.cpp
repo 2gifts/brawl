@@ -66,10 +66,10 @@ void hkMatrix4::set(const hkTransform& t) {
     m_col0 = t.m_rotation.m_col0;
     m_col1 = t.m_rotation.m_col1;
     m_col2 = t.m_rotation.m_col2;
+    m_col3 = t.m_translation;
     m_col0.w = 0.0f;
     m_col1.w = 0.0f;
     m_col2.w = 0.0f;
 
-    m_col3 = t.m_translation;
     m_col3.w = 1.0f;
 }

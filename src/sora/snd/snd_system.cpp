@@ -44,6 +44,16 @@ int sndSystem::loadSoundGroup(SndGroupID sndGroupId, int heapLevel, bool isReque
     return result;
 }
 
+int sndSystem::getBGMId() {
+    if ((u8)_2D4[0x41B] == 0) {
+        return -1;
+    }
+    if (*(s32*)&_2D4[0x40C] == 0) {
+        *(s32*)&_2D4[0x410] = -1;
+    }
+    return *(s32*)&_2D4[0x410];
+}
+
 bool sndSystem::setupBuffers() {
     u32 playerSize = m_archivePlayer.GetRequiredMemSize(&m_dvdSoundArchive);
     u32 managerSize = m_3DManager.GetRequiredMemSize(&m_dvdSoundArchive);

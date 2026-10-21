@@ -155,11 +155,12 @@ void grMarioPastBlockPosLite::startup(gfArchive* data, u32 unk1, gfSceneRoot::La
     if (m_scnProc != NULL) {
         m_scnProc->SetUserData(this);
         g_gfSceneRoot->add(static_cast<gfSceneRoot::LayerType>(0), reinterpret_cast<nw4r::g3d::ScnMdl*>(m_scnProc));
+        grCalcWorldCallBack* callback = &m_calcWorldCallBack;
         nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[0];
         if (scnMdl != NULL) {
-            scnMdl->m_calcWorldCallBack = &m_calcWorldCallBack;
+            scnMdl->m_calcWorldCallBack = callback;
             scnMdl->EnableScnMdlCallbackTiming(1);
-            scnMdl->m_nodeIndex = m_calcWorldCallBack.m_nodeCallbackDatas[0].m_nodeIndex;
+            scnMdl->m_nodeIndex = callback->m_nodeCallbackDatas[0].m_nodeIndex;
         }
     }
 }

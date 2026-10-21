@@ -68,17 +68,19 @@ void grIceFish::update(float deltaFrame) {
 
 // The area of the mouth sees the fighters (the events 0x27: a fighter is in the mouth, 0x33: the area is gone).
 void grIceFish::onGimmickEvent(soGimmickEventArgs* eventInfo, int* taskId) {
-    switch (eventInfo->m_kind) {
-    case Gimmick::Event_Exit:
+    Gimmick::EventKind kind = eventInfo->m_kind;
+    if (kind == Gimmick::Event_Exit) {
         m_eatState = 0;
         return;
-    case Gimmick::Chappy_Event_In:
-        m_eatState = 1;
-        m_snd.playSE(static_cast<SndID>(0x1C89), 0, 0, -1);
-        return;
-    default:
+    }
+    if (kind <= 0x26 || kind >= 0x29) {
         return;
     }
+    if (kind != Gimmick::Chappy_Event_In) {
+        return;
+    }
+    m_eatState = 1;
+    m_snd.playSE(static_cast<SndID>(0x1C89), 0, 0, -1);
 }
 
 // The tail attacks and the mouth eats only while the fish is in the air: the area of the mouth is on between the frames 24

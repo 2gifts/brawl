@@ -32,15 +32,18 @@ void grMansionFront::update(float deltaFrame) {
 void grMansionFront::updateArea(float deltaFrame) {
     int ids[9];
     memset(ids, 0, 0x24);
-    float halfHeight = (unk158[0].m_y - unk158[1].m_y) * 0.5f;
+    float top = unk158[0].m_y;
+    float bottom = unk158[1].m_y;
+    // MATCH-ONLY: the half height reuses top's register; a separate halfHeight local swaps f4 and f5
+    top = (top - bottom) * 0.5f;
     float halfWidth = (unk158[1].m_x - unk158[0].m_x) * 0.5f;
-    float centerY = unk158[1].m_y + halfHeight;
+    float centerY = bottom + top;
     float centerX = 0.0f;
     Rect2D area;
     area.m_left = centerX - halfWidth;
     area.m_right = centerX + halfWidth;
-    area.m_up = centerY + halfHeight;
-    area.m_down = centerY - halfHeight;
+    area.m_up = centerY + top;
+    area.m_down = centerY - top;
     int num = enumIncludeEntryId__9ftManagerCFi(g_ftManager, &area, ids, NULL, 1);
     if (num > 0) {
         unk164 = 5.0f;
