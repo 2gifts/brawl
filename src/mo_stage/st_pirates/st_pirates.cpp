@@ -871,10 +871,10 @@ void stPirates::updateEventSelect(float deltaFrame) {
                     break;
                 }
                 float total = chanceFine + chanceCloud + chanceRain + chanceTornado;
-                chanceFine = chanceFine / total;
-                chanceCloud = chanceCloud / total;
-                chanceRain = chanceRain / total;
-                chanceTornado = chanceTornado / total;
+                chanceFine /= total;
+                chanceCloud /= total;
+                chanceRain /= total;
+                chanceTornado /= total;
                 float rnd = randf();
                 if (rnd < chanceTornado) {
                     unk55D = 12;
@@ -1039,7 +1039,10 @@ void stPirates::updateSea(float deltaFrame) {
     if (m_waterTrigger != NULL && m_waterData != NULL) {
         stPiratesData* data = static_cast<stPiratesData*>(m_stageData);
         if (data != NULL) {
-            Vec3f sea(mtx(6)->m[0][3], mtx(6)->m[1][3], mtx(6)->m[2][3]);
+            float seaZ = mtx(6)->m[2][3];
+            float seaY = mtx(6)->m[1][3];
+            float seaX = mtx(6)->m[0][3];
+            Vec3f sea(seaX, seaY, seaZ);
             m_waterData->m_swimHeight = sea.m_y;
             m_waterData->m_speed = data->waterVelocity * unk604;
             grGimmickWaterData* area = m_waterData;

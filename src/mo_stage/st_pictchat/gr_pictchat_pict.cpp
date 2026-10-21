@@ -939,13 +939,15 @@ void grPictchatPict013::updatePictLoop(float deltaFrame) {
         m_state = 4;
     } else {
         m_posBombWork->m_x += m_speedX;
-        u8 motion = m_motion;
-        if (motion == 2) {
-            if (!(getMotionFrame(0) < m_frameCount)) {
+        switch (m_motion) {
+        case 1:
+            m_frame = getMotionFrame(0);
+            break;
+        case 2:
+            if (getMotionFrame(0) >= m_frameCount) {
                 setVisibility(0);
             }
-        } else if (motion < 2 && motion != 0) {
-            m_frame = getMotionFrame(0);
+            break;
         }
         m_snd.setPos(m_posBombWork);
     }

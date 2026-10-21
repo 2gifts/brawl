@@ -95,7 +95,8 @@ void ftStatusUniqProcessLanding::execStatus(soModuleAccesser* moduleAccesser) {
             int landingKind = moduleAccesser->getMotionModule().getKind();
             int frames = moduleAccesser->getWorkManageModule().getInt(0x20000002);
             moduleAccesser->getWorkManageModule().setInt(frames + 1, 0x20000002);
-            if (frames + 1 >= (int) soValueAccesser::getConstantFloat(moduleAccesser, 0xB9C + landingKind, 0)) {
+            float limit = soValueAccesser::getConstantFloat(moduleAccesser, 0xB9C + landingKind, 0);
+            if (frames + 1 >= (int) limit) {
                 moduleAccesser->getWorkManageModule().onFlag(0x22000010);
             }
         }
