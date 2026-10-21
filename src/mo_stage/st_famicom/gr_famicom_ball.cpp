@@ -189,8 +189,10 @@ void grFamicomBall::updateCallBack(float deltaFrame) {
                     return;
                 }
                 grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
+                // MATCH-ONLY: a named y load puts the zero constant in f0 as the original does
+                float y = pos.m_y;
                 data->m_offsetPos.m_x = 0.0f;
-                data->m_offsetPos.m_y = pos.m_y;
+                data->m_offsetPos.m_y = y;
                 data->m_offsetPos.m_z = 0.0f;
             }
         }

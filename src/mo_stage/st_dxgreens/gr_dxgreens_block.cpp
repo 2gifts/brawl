@@ -57,14 +57,14 @@ void grDxGreensBlock::updateActive(float deltaFrame) {
         m_speed = 0.0f;
         break;
     case 1: {
-        u8 blockState = m_blockData->m_state;
-        if (blockState != 1) {
-            if (blockState != 0) {
-                return;
-            }
+        s32 blockState = m_blockData->m_state;
+        switch (blockState) {
+        case 0:
             m_blockData->m_pos.m_y = m_posLimit->m_y;
+        case 1:
+            m_state = 2;
+            break;
         }
-        m_state = 2;
         break;
     }
     case 2:
