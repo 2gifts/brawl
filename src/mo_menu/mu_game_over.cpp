@@ -143,11 +143,12 @@ void muGameOverTask::createObjResFile(const muGameOverModel* models, int count, 
 
 // The four texts: the points, the coins, the cost and the extra line.
 void muGameOverTask::initMsg(void* msgData) {
+    MuObject* object;
     MuMsg* msg = create__5MuMsgFUlQ25Heaps8HeapTypeUl(3, Heaps::MenuInstance, Heaps::MenuResource);
     m_msg = msg;
     msg->setMsgData(msgData);
     msg->allocMsgBuf(0x100, 4);
-    MuObject* object = m_object;
+    object = m_object;
     msg->attachScnMdlSimple(0, object->m_sceneModel, 0, 0.0625f);
     msg->setFontType(0, 1);
     msg->setFontColor(0, 0xFF, 0x76, 0x76, 0xFF);

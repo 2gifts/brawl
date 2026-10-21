@@ -1018,30 +1018,31 @@ void gfPadSystem::merge(gfPadStatus* src, int numPads, u32 mask, gfPadStatus* de
             released |= src->m_buttonsReleasedThisFrame.bits;
             held |= src->m_buttonsHeld.bits;
             repeat |= src->m_buttonsPressedThisFrame2.bits;
+            u8 lTmp, rTmp, tmp36, tmp37;
             u8 a1 = src->m_stickX;
-            if (absS8(stickX) < absS8(a1)) {
+            if (absS8(stickX) < absS8(src->m_stickX)) {
                 stickX = a1;
             }
             u8 a2 = src->m_stickY;
-            if (absS8(stickY) < absS8(a2)) {
+            if (absS8(stickY) < absS8(src->m_stickY)) {
                 stickY = a2;
             }
             u8 a3 = src->m_subStickX;
-            if (absS8(subX) < absS8(a3)) {
+            if (absS8(subX) < absS8(src->m_subStickX)) {
                 subX = a3;
             }
             u8 a4 = src->m_subStickY;
-            if (absS8(subY) < absS8(a4)) {
+            if (absS8(subY) < absS8(src->m_subStickY)) {
                 subY = a4;
             }
-            u8 t = src->m_lTriggerAnalog;
-            lTrig = lTrig > t ? lTrig : t;
-            t = src->m_rTriggerAnalog;
-            rTrig = rTrig > t ? rTrig : t;
-            t = src->_0x36;
-            b36 = b36 > t ? b36 : t;
-            t = src->_0x37;
-            b37 = b37 > t ? b37 : t;
+            lTmp = src->m_lTriggerAnalog;
+            lTrig = lTrig > lTmp ? lTrig : lTmp;
+            rTmp = src->m_rTriggerAnalog;
+            rTrig = rTrig > rTmp ? rTrig : rTmp;
+            tmp36 = src->_0x36;
+            b36 = b36 > tmp36 ? b36 : tmp36;
+            tmp37 = src->_0x37;
+            b37 = b37 > tmp37 ? b37 : tmp37;
             count++;
         }
     }

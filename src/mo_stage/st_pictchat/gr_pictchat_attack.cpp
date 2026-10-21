@@ -129,44 +129,44 @@ void grPictchatAttack007::setAttack() {
         switch (m_index) {
         case 0:
             vector = 0;
-            offset.m_y = 0.0f;
             offset.m_x = 20.0f;
+            offset.m_y = 0.0f;
             offset.m_z = 0.0f;
             break;
         case 1:
             vector = 0;
-            offset.m_y = 0.0f;
             offset.m_x = 20.0f;
+            offset.m_y = 0.0f;
             offset.m_z = 0.0f;
             break;
         case 2:
             vector = 0;
-            offset.m_y = 0.0f;
             offset.m_x = 20.0f;
+            offset.m_y = 0.0f;
             offset.m_z = 0.0f;
             break;
         case 3:
             vector = 180;
-            offset.m_y = 0.0f;
             offset.m_x = -20.0f;
+            offset.m_y = 0.0f;
             offset.m_z = 0.0f;
             break;
         case 4:
             vector = 180;
-            offset.m_y = 0.0f;
             offset.m_x = -20.0f;
+            offset.m_y = 0.0f;
             offset.m_z = 0.0f;
             break;
         case 5:
             vector = 180;
-            offset.m_y = 0.0f;
             offset.m_x = -20.0f;
+            offset.m_y = 0.0f;
             offset.m_z = 0.0f;
             break;
         default:
             vector = 0;
-            offset.m_y = 0.0f;
             offset.m_x = 0.0f;
+            offset.m_y = 0.0f;
             offset.m_z = 0.0f;
             break;
         }
