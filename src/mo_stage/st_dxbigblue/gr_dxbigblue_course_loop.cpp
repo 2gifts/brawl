@@ -106,7 +106,8 @@ void grDxBigBlueCourseLoop::updateMove(float deltaFrame) {
         if (m_timer < 0.0f) {
             m_timer = 0.0f;
         }
-        if (m_state == 2) {
+        switch (m_state) {
+        case 2:
             if (*m_courseIDTopWork == m_courseID) {
                 Vec3f center;
                 getNodePosition(&center, 0, "LoopCenterN");
@@ -126,9 +127,9 @@ void grDxBigBlueCourseLoop::updateMove(float deltaFrame) {
                         }
                     }
                 }
-                if (0.0f <= center.m_x || m_rotWork->m_z == 360.0f) {
-                    m_timer = 1500.0f;
+                if (!(center.m_x < 0.0f) || m_rotWork->m_z == 360.0f) {
                     m_pos.m_x -= data->unk6C * deltaFrame;
+                    m_timer = 1500.0f;
                 }
                 unk194 = m_rotWork->m_z / 180.0f;
                 if (unk194 < 0.0f) {
@@ -140,16 +141,17 @@ void grDxBigBlueCourseLoop::updateMove(float deltaFrame) {
             } else {
                 m_pos.m_x -= data->unk6C * deltaFrame;
             }
-            if (m_rotWork->m_z >= 210.0f) {
-                dxbigblueJointDisable(m_jointStart);
-            } else {
+            if (m_rotWork->m_z < 210.0f) {
                 dxbigblueJointEnable(m_jointStart);
-            }
-            if (m_rotWork->m_z <= 140.0f) {
-                dxbigblueJointDisable(m_jointEnd);
             } else {
-                dxbigblueJointEnable(m_jointEnd);
+                dxbigblueJointDisable(m_jointStart);
             }
+            if (m_rotWork->m_z > 140.0f) {
+                dxbigblueJointEnable(m_jointEnd);
+            } else {
+                dxbigblueJointDisable(m_jointEnd);
+            }
+            break;
         }
     }
 }

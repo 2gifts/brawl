@@ -1331,7 +1331,8 @@ void ftPurinStatusUniqProcessSpecialNTurn::execFixPos(soModuleAccesser* acc) {
         // Resume rolling after horizontal speed reverses far enough.
         if (initial > 0.0f) {
             if (current < 0.0f) {
-                if (__fabsf(initial * acc->getConstantFloatKirby(0xfc3)) <= __fabsf(current)) {
+                float speed = __fabsf(current);
+                if (speed >= __fabsf(initial * acc->getConstantFloatKirby(0xfc3))) {
                     if (acc->getStageObject().soGetSubKind() == 5) {
                         acc->getWorkManageModule().setInt(0x189, 0x20000009);
                         acc->getStatusModule().changeStatusRequest(0x187, acc);
@@ -1342,7 +1343,8 @@ void ftPurinStatusUniqProcessSpecialNTurn::execFixPos(soModuleAccesser* acc) {
                 }
             }
         } else if (current > 0.0f) {
-            if (__fabsf(initial * acc->getConstantFloatKirby(0xfc3)) <= __fabsf(current)) {
+            float speed = __fabsf(current);
+            if (speed >= __fabsf(initial * acc->getConstantFloatKirby(0xfc3))) {
                 if (acc->getStageObject().soGetSubKind() == 5) {
                     acc->getWorkManageModule().setInt(0x189, 0x20000009);
                     acc->getStatusModule().changeStatusRequest(0x187, acc);
