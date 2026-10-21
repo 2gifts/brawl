@@ -31,12 +31,13 @@ grJungleWarning::grJungleWarning(const char* taskName) : grJungle(taskName), m_s
     m_motion = 1;
     m_frameLast = 0.0f;
     grCalcWorldCallBack* callback = &m_calcWorldCallBack;
-    if (callback != NULL) {
-        callback->m_numNodeCallbackData = 1;
-        callback->initialize(false, Heaps::StageInstance);
-        callback->m_nodeCallbackDatas[0].m_flags |= 1;
+    // MATCH-ONLY: the callback is the member itself and is never null; the early return gives the original branch layout.
+    if (callback == NULL) {
+        return;
     }
-    // The sound of the sign: one sequence of one sound from the start.
+    callback->m_numNodeCallbackData = 1;
+    callback->initialize(false, Heaps::StageInstance);
+    callback->m_nodeCallbackDatas[0].m_flags |= 1;
     m_seSeqId = static_cast<SndID>(0x1EEE);
     m_seSeqData.id = static_cast<SndID>(0x1EEE);
     m_seSeqData.unk4 = 0.0f;

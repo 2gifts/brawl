@@ -604,7 +604,8 @@ void muTitleSunsetTask::createEnableUseCharaList(int* list) {
         } else {
             int kind = exchangeMuCharKindToGmCharacterKind__6muMenuFiii(i);
             // HYPOTHESIS: the adventure data has a set of the characters that were seen
-            if (reinterpret_cast<AdvDataSeen*>(g_GameGlobal->m_advData)->m_seen.test(kind) == true) {
+            AdvDataSeen* advData = reinterpret_cast<AdvDataSeen*>(g_GameGlobal->m_advData);
+            if (advData->m_seen.test(kind) == true) {
                 list[m_charCount] = i;
                 m_charCount++;
             }

@@ -127,30 +127,35 @@ void grGWFireSpring::updateScaleBase(float deltaFrame) {
 // The spring is turned on while its scene plays; when the event of the scene turns on it is folded away (hidden, no area), when
 // it turns off the spring comes back (shown, with its area).
 void grGWFireSpring::updateActive(float deltaFrame) {
-    switch (m_state) {
+    // MATCH-ONLY: the state is a byte in the original, the header declares it as an 8-bit bitfield
+    u8* state = &reinterpret_cast<u8*>(this)[0x158];
+    switch (*state) {
     case 0:
         setVisibility(0);
         m_startFlag = 1;
         m_eventLast = 1;
-        m_state = static_cast<State>(1);
+        *state = 1;
         break;
     case 1:
         if (*m_sceneIdWork == m_sceneId) {
-            m_state = static_cast<State>(2);
+            *state = 2;
         }
         break;
     case 2:
         if (*m_sceneIdWork != m_sceneId) {
-            m_state = static_cast<State>(0);
+            *state = 0;
         } else {
             u8 event = *m_eventWork;
             if (m_eventLast != event) {
-                if (event == 1) {
+                switch (event) {
+                case 1:
                     setVisibility(0);
                     m_startFlag = 1;
-                } else if (event == 0) {
+                    break;
+                case 0:
                     setVisibility(1);
                     enableArea();
+                    break;
                 }
             }
             m_eventLast = *m_eventWork;
