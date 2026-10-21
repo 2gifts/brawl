@@ -102,6 +102,14 @@ public:
     virtual ~wnArticleHierarchy() { }
 };
 
+template <class W, int N>
+class wnArticleHierarchy<W, N, soInstancePoolRoot> : public wnArticlePool<W, N, soInstancePoolRoot> {
+public:
+    wnArticleHierarchy(soModuleAccesser* acc) : wnArticlePool<W, N, soInstancePoolRoot>(acc) { }
+    // MATCH-ONLY: the second level calls the first-level teardown out of line.
+    virtual ~wnArticleHierarchy() __attribute__((never_inline)) { }
+};
+
 // Dispatch over the 17 article slots of a mediator: slots without an article answer with the neutral value. R.O.B. spells
 // the unused cases out one by one; this macro is the same list.
 #define WN_ARTICLE_UNUSED_SLOT(n, value) \
