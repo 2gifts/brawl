@@ -60,37 +60,42 @@ void grGWFireManhore::updateVisible(float deltaFrame) {
             }
             break;
         case 3:
-            if (*m_sceneIdWork == m_sceneId) {
+            if (*m_sceneIdWork != m_sceneId) {
+                if (m_type == *m_typeWork) {
+                    setMotion(0, false, false, &m_frameCount);
+                    if (m_motionRatio < 0.0f) {
+                        m_motionRatio *= -1.0f;
+                    }
+                    m_state = 4;
+                } else {
+                    *m_stepWork = 0xFF;
+                    m_state = 0;
+                }
+            } else {
                 bool burns;
-                if (*m_eventWork == 1) {
+                switch (*m_eventWork) {
+                case 1:
                     if (m_type == *m_typeWork) {
                         burns = true;
                     } else {
                         burns = false;
                     }
-                } else {
+                    break;
+                case 0:
+                default:
                     burns = false;
+                    break;
                 }
-                if (!m_isVisible && !burns) {
-                } else if (m_isVisible && !burns) {
+                if (m_isVisible == true && burns == false) {
                     setVisibility(0);
-                } else if (!m_isVisible && burns) {
+                } else if (m_isVisible == false && burns == true) {
                     setVisibility(1);
                 }
-                if (burns && *m_stepWork != m_stepLast) {
+                if (burns == true && *m_stepWork != m_stepLast) {
                     m_snd.playSE(static_cast<SndID>(0x1C90), 0, 0, -1);
                     m_snd.setPos(&m_posWork[*m_stepWork]);
                 }
                 m_stepLast = *m_stepWork;
-            } else if (m_type == *m_typeWork) {
-                setMotion(0, false, false, &m_frameCount);
-                if (m_motionRatio < 0.0f) {
-                    m_motionRatio *= -1.0f;
-                }
-                m_state = 4;
-            } else {
-                *m_stepWork = 0xFF;
-                m_state = 0;
             }
             break;
         case 4:

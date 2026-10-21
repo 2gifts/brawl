@@ -78,10 +78,10 @@ void grHalberdWarning::updateMotion(float deltaFrame) {
                 }
                 break;
             case 10:
-                if (m_isVisible >= 0) {
+                if (!m_isVisible) {
                     setVisibility(1);
                 }
-                if (m_motionTimer <= getMotionFrame(0)) {
+                if (getMotionFrame(0) >= m_motionTimer) {
                     setMotion(1, 1, 1, &m_motionTimer);
                     m_state = 11;
                     m_lastFrame = 0.0f;
@@ -96,7 +96,7 @@ void grHalberdWarning::updateMotion(float deltaFrame) {
                 m_lastFrame = getMotionFrame(0);
                 break;
             case 12:
-                if (m_motionTimer <= getMotionFrame(0)) {
+                if (getMotionFrame(0) >= m_motionTimer) {
                     *m_stateWork = 0x15;
                     m_state = 0;
                 }
