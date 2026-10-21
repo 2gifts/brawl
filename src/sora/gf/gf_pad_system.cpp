@@ -127,9 +127,6 @@ extern Network g_Network;
 
 // Unnamed SDK functions (PAD / WPAD / KPAD) and Brawl helpers
 extern "C" {
-void* fn_8002C78C(gfRumble*);
-void* fn_8002BAB0(void*);
-void fn_8002BB1C(gfRumble*, gfPadSystem*, int);
 void fn_801E74C8(int);
 void fn_80215E68();
 void fn_80218D64();
@@ -422,12 +419,8 @@ gfPadSystem::gfPadSystem() {
 
 void gfPadSystem::createRumbleSystem() {
     if (m_gfRumble == nullptr) {
-        void* mem = operator new(0x100, Heaps::SystemFW);
-        if (mem) {
-            mem = fn_8002BAB0(mem);
-        }
-        m_gfRumble = (gfRumble*)mem;
-        fn_8002BB1C(m_gfRumble, this, 3);
+        m_gfRumble = new (Heaps::SystemFW) gfRumble;
+        m_gfRumble->Init(this, 3);
     }
 }
 
@@ -804,7 +797,7 @@ void gfPadSystem::updateSystem() {
 
 void gfPadSystem::updateGame() {
     if (m_gfRumble) {
-        fn_8002C78C(m_gfRumble);
+        m_gfRumble->HSD_PadRumbleInterpret();
     }
     gfPadStatus blank;
     padInit(&blank);
