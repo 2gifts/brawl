@@ -118,18 +118,25 @@ void grHalberdWarning::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
-            if (m_mtxWork != NULL) {
-                Matrix mtx;
-                if (*m_stateWork == 1) {
-                    mtx = m_mtxWork[2];
-                } else {
-                    if (*m_stateWork != 0) {
-                        return;
-                    }
-                    mtx = m_mtxWork[3];
+            Matrix* mtxWork = m_mtxWork;
+            if (mtxWork != NULL) {
+                Matrix mtx(true);
+                switch (*m_stateWork) {
+                case 1:
+                    mtx = mtxWork[2];
+                    break;
+                case 0:
+                    mtx = mtxWork[3];
+                    break;
+                default:
+                    return;
                 }
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix = mtx;
-                Vec3f pos(mtx.m[0][3], mtx.m[1][3], mtx.m[2][3]);
+                // MATCH-ONLY: the components are read z, y, x to get the float registers of the original
+                float z = mtx.m[2][3];
+                float y = mtx.m[1][3];
+                float x = mtx.m[0][3];
+                Vec3f pos(x, y, z);
                 m_snd.setPos(&pos);
             }
         }

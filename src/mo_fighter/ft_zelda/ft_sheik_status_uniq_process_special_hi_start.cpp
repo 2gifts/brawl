@@ -31,8 +31,7 @@ void ftSheikStatusUniqProcessSpecialHiStart::initStatus(soModuleAccesser* module
 
     ftKineticEnergyStop& stop =
         dynamic_cast<ftKineticEnergyStop&>(*kinetic.getEnergy(3));
-    Vec2f stopSpeed(speed.m_x, 0.0f);
-    stop.m_speed = stopSpeed;
+    stop.m_speed = Vec2f(speed.m_x, 0.0f);
     stop.enable();
 }
 

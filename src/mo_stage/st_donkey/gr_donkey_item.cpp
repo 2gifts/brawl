@@ -178,8 +178,9 @@ void grDonkeyItemScore::updateActive(float deltaFrame) {
             setVisibility(0);
             m_state = 1;
             break;
-        case 1:
-            if (*m_stateWork >= 4 && *m_stateWork <= 5) {
+        case 1: {
+            u8 offset = *m_stateWork + 0xFC; // MATCH-ONLY: the 4..5 range check is an unsigned byte offset from the state (-4 as 0xFC)
+            if (offset <= 1) {
                 setVisibility(1);
                 m_snd.playSE(SndID(0x1B89), 0, 0, -1);
                 m_snd.setPos(m_posWork);
@@ -187,6 +188,7 @@ void grDonkeyItemScore::updateActive(float deltaFrame) {
                 m_timer = 60.0f;
             }
             break;
+        }
         case 8:
             if (m_timer == 0.0f) {
                 *m_stateWork = 6;

@@ -603,8 +603,10 @@ void grGWChefEtc::setAttackChef(u32 index) {
     offset.m_x = 0.0f;
     offset.m_y = 0.0f;
     offset.m_z = 0.0f;
-    setAttackGimmickDetails(&attack, 10.0f, 1.0f, 1.0f, 1.0f, 0, &offset, 90, 70, 100, 70, m_nodeChef[m_posChef][2], 0x3FF, 7,
-                            false, 15, soCollisionAttackData::Attribute_Normal, soCollisionAttackData::Sound_Level_Small,
+    // MATCH-ONLY: a [pos][2] subscript folds the +2 into the load displacement; a flat index keeps it in the index
+    u32 nodeIndex = m_posChef * 3 + 2;
+    setAttackGimmickDetails(&attack, 10.0f, 1.0f, 1.0f, 1.0f, 0, &offset, 90, 70, 100, 70, (&m_nodeChef[0][0])[nodeIndex],
+                            0x3FF, 7, false, 15, soCollisionAttackData::Attribute_Normal, soCollisionAttackData::Sound_Level_Small,
                             soCollisionAttackData::Sound_Attribute_None, false, false, false, true, false, false, 0, 60, false,
                             false, false, soCollisionAttackData::Lr_Check_Pos, false, false, false, false, false,
                             soCollisionAttackData::Region_None, true);
