@@ -1494,11 +1494,20 @@ bool stEdit::createLadderBlock(stEditBlock* block, u32 flags, int mdlIndex, Vec3
     grGimmickLadderData* data =
         static_cast<grGimmickLadderData*>(gfHeapManager::alloc(Heaps::StageResource, 0x5C, 0x20));
     if (data != NULL) {
-        float length = (float)((flags >> 16) & 0x1F) * 20.0f - 20.0f;
-        Vec2f areaPos(0.0f, -length * 0.5f);
-        Vec2f areaRange(20.0f, length);
-        data->initialize(0, 0, (flags >> 21) & 1, (flags >> 22) & 1, "LadderBlock", &areaPos, &areaRange);
-        data->m_motionPathData.m_mdlIndex = 0xFF;
+        memset(data, 0, 0x5C);
+        float length = 20.0f * (float)((flags >> 16) & 0x1F);
+        length -= 20.0f;
+        data->m_mdlIndex = 0;
+        data->m_49 = 0;
+        data->m_restrictUpExit = (flags >> 21) & 1;
+        data->m_51 = (flags >> 22) & 1;
+        // MATCH-ONLY: the motion path model index is stored as an unsigned byte (0xFF, not -1)
+        reinterpret_cast<u8*>(data)[6] = 0xFF;
+        data->m_areaData.m_offsetPos.m_x = 0.0f;
+        data->m_areaData.m_offsetPos.m_y = 0.5f * -length;
+        data->m_areaData.m_range.m_x = 20.0f;
+        data->m_areaData.m_range.m_y = length;
+        strcpy(data->m_nodeName, "LadderBlock");
         stEditLadderView* view = reinterpret_cast<stEditLadderView*>(ladder);
         view->m_offset = Vec3f(0.0f, -length, 0.0f);
         ladder->setGimmickData(data);

@@ -41,12 +41,17 @@ void grDonkeyLadder::update(float deltaFrame) {
 void grDonkeyLadder::updateYakumono(float deltaFrame) {
     if (m_posWork != NULL) {
         if (m_triggerMade == 1) {
+            Vec3f pos;
+            // HYPOTHESIS: the track end is passed to setPos directly; the local copy only reproduces the original stores
+            pos = *m_posWork;
+            pos.m_z = 0.0f;
             setPos(m_posWork);
         } else {
             m_ladderData = static_cast<grGimmickLadderData*>(getGimmickData());
             if (m_ladderData != NULL) {
-                m_areaData.m_shapeType = static_cast<soAreaInstance::ShapeType>(0);
-                m_areaData.m_group = gfArea::Stage_Group_Gimmick_Ladder;
+                // MATCH-ONLY: the shape type and the group of the area are set as two bytes
+                reinterpret_cast<u8*>(&m_areaData)[0] = 0;
+                reinterpret_cast<u8*>(&m_areaData)[1] = gfArea::Stage_Group_Gimmick_Ladder;
                 m_areaData.m_0x4 = 0;
                 m_areaData.m_0x8 = 0;
                 m_areaData.m_shapeFlag.m_mask = 0;
@@ -55,7 +60,7 @@ void grDonkeyLadder::updateYakumono(float deltaFrame) {
                 m_areaData.m_offsetPos.m_y = m_ladderData->m_areaData.m_offsetPos.m_y;
                 m_areaData.m_range.m_x = m_ladderData->m_areaData.m_range.m_x;
                 m_areaData.m_range.m_y = m_ladderData->m_areaData.m_range.m_y;
-                setAreaGimmick(&m_areaData, &m_areaDataSet, &m_ykData, false);
+                grYakumono::setAreaGimmick(&m_areaData, &m_areaDataSet, &m_ykData, false);
                 if (m_yakumono != NULL) {
                     stTrigger* trigger = g_stTriggerMng->createTrigger(Gimmick::Area_Ladder, -1);
                     if (trigger != NULL) {
