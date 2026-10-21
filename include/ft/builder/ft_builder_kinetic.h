@@ -157,11 +157,8 @@ class soLineInvertHierarchy<soTypeList<H, soTypeListNullType>, Unit, Root, Next,
     typedef Unit<H, Root, Next, 0> Base;
 public:
     soLineInvertHierarchy(soModuleAccesser* acc) : Base(acc) { }
-#ifdef FT_MARTH_RUNTIME_HELPERS
-    ~soLineInvertHierarchy() __attribute__((never_inline)) { } // MATCH-ONLY: Marth first-level teardown.
-#else
-    ~soLineInvertHierarchy() { }
-#endif
+    // MATCH-ONLY: the second level calls the first-level teardown out of line.
+    ~soLineInvertHierarchy() __attribute__((never_inline)) { }
 };
 
 #ifdef WN_KINETIC_GENERIC_BUILDER
