@@ -46,20 +46,23 @@ void grPalutenaAshibaD01::updateLanding(float deltaFrame) {
         m_landTimer = 0.0f;
     }
     switch (m_landState) {
+    case 0:
+        break;
     case 1: {
         m_landTime = m_landTime + deltaFrame;
-        float rate = m_landTime * 0.125f;
+        float rate = m_landTime / 8.0f;
         if (rate < 0.0f) {
             rate = 0.0f;
         }
-        if (1.0f < rate) {
+        if (rate > 1.0f) {
             rate = 1.0f;
         }
         if (rate == 1.0f) {
             m_landState = 2;
             m_landTime = 0.0f;
         }
-        m_landing.m_y = nw4r::math::SinFIdx(NW4R_MATH_IDX_TO_FIDX(nw4r::math::U16ToF32((u16)(int)(rate * 16384.0f)))) * -3.0f;
+        float sine = nw4r::math::SinFIdx(NW4R_MATH_IDX_TO_FIDX(nw4r::math::U16ToF32((u16)(int)(rate * 16384.0f))));
+        m_landing.m_y = sine * -3.0f;
         break;
     }
     case 2: {
@@ -68,7 +71,7 @@ void grPalutenaAshibaD01::updateLanding(float deltaFrame) {
         if (rate < 0.0f) {
             rate = 0.0f;
         }
-        if (1.0f < rate) {
+        if (rate > 1.0f) {
             rate = 1.0f;
         }
         if (rate == 1.0f) {
@@ -81,7 +84,7 @@ void grPalutenaAshibaD01::updateLanding(float deltaFrame) {
     }
     if (m_landTimer == 0.0f) {
         m_landing.m_y = m_landing.m_y + deltaFrame * 0.025f;
-        if (0.0f < m_landing.m_y) {
+        if (m_landing.m_y > 0.0f) {
             m_landing.m_y = 0.0f;
         }
     }

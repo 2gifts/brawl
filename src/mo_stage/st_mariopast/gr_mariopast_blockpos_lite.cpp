@@ -69,7 +69,7 @@ static inline u8* mpItemFrequencyByte() {
     return reinterpret_cast<u8*>(&g_GameGlobal->m_modeMelee->m_meleeInitData) + 0xE;
 }
 
-grMarioPastBlockPosLite::grMarioPastBlockPosLite(const char* taskName) : grYakumono(taskName) {
+grMarioPastBlockPosLite::grMarioPastBlockPosLite(const char* taskName) : grYakumono(taskName), m_mtx(true) {
     m_scnProc = NULL;
     m_stage = 0;
     m_group = 0;
@@ -189,18 +189,20 @@ void grMarioPastBlockPosLite::update(float deltaFrame) {
 void grMarioPastBlockPosLite::initCollisionJoint() {
     u32 num = m_num;
     stMarioPastBlockDt* block = m_blocks;
-    mariopastJointView* joint = reinterpret_cast<mariopastJointView*>(m_joints);
-    if (num != 0 && block != NULL && joint != NULL) {
-        for (u32 i = 0; i < num; i++) {
-            joint->m_flags56 |= 0x80;
-            *reinterpret_cast<Matrix**>(reinterpret_cast<u8*>(joint) + 0x5C) = &m_mtx;
-            joint->m_flags54 = (joint->m_flags54 & 0x2F) | 8;
-            *reinterpret_cast<Ground**>(reinterpret_cast<u8*>(joint) + 0x58) = this;
-            if (block->m_kind == 3) {
-                setHatenaHideBlockCollision(i, 1);
-            }
-            joint = reinterpret_cast<mariopastJointView*>(reinterpret_cast<u8*>(joint) + 0x60);
-            block++;
+    grCollisionJoint* joint = m_joints;
+    if (num == 0 || block == NULL || joint == NULL) {
+        return;
+    }
+    for (u32 i = 0; i < num; i++, joint++, block++) {
+        joint->m_0x56_7 = true;
+        joint->m_0x54_7 = false;
+        joint->m_matrix = &m_mtx;
+        joint->m_0x54_4 = joint->m_0x54_7;
+        joint->m_0x54_6 = joint->m_0x54_4;
+        joint->m_0x54_3 = true;
+        joint->m_ground = this;
+        if (block->m_kind == 3) {
+            setHatenaHideBlockCollision(i, 1);
         }
     }
 }

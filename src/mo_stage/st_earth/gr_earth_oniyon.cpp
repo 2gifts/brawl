@@ -500,42 +500,13 @@ void grEarthOniyon::requestTakeOff() {
 
 // The kind of the items that the oniyon makes depends on its color and on the kind of the pellet that hit it (0 - 8).
 void grEarthOniyon::requestItem(int kind) {
-    if (m_state != 0x13) {
+    int state = m_state;
+    if (state != 0x13) {
         return;
     }
-    u8 color = m_color;
     m_itemStep = 0;
-    if (color == 1) {
-        switch (kind) {
-        case 0:
-            m_itemKind = 1;
-            break;
-        case 1:
-            m_itemKind = 2;
-            break;
-        case 2:
-            m_itemKind = 1;
-            break;
-        case 3:
-            m_itemKind = 2;
-            break;
-        case 4:
-            m_itemKind = 3;
-            break;
-        case 5:
-            m_itemKind = 2;
-            break;
-        case 6:
-            m_itemKind = 3;
-            break;
-        case 7:
-            m_itemKind = 4;
-            break;
-        case 8:
-            m_itemKind = 3;
-            break;
-        }
-    } else if (color == 0) {
+    switch (m_color) {
+    case 0:
         switch (kind) {
         case 0:
             m_itemKind = 2;
@@ -565,7 +536,39 @@ void grEarthOniyon::requestItem(int kind) {
             m_itemKind = 3;
             break;
         }
-    } else if (color < 3) {
+        break;
+    case 1:
+        switch (kind) {
+        case 0:
+            m_itemKind = 1;
+            break;
+        case 1:
+            m_itemKind = 2;
+            break;
+        case 2:
+            m_itemKind = 1;
+            break;
+        case 3:
+            m_itemKind = 2;
+            break;
+        case 4:
+            m_itemKind = 3;
+            break;
+        case 5:
+            m_itemKind = 2;
+            break;
+        case 6:
+            m_itemKind = 3;
+            break;
+        case 7:
+            m_itemKind = 4;
+            break;
+        case 8:
+            m_itemKind = 3;
+            break;
+        }
+        break;
+    case 2:
         switch (kind) {
         case 0:
             m_itemKind = 1;
@@ -595,11 +598,9 @@ void grEarthOniyon::requestItem(int kind) {
             m_itemKind = 4;
             break;
         }
+        break;
     }
-    if (m_itemKind == 0) {
-        return;
-    }
-    if (4 < m_itemKind) {
+    if (m_itemKind == 0 || m_itemKind >= 5) {
         return;
     }
     m_state = 0x16;

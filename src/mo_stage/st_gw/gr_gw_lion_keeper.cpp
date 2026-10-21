@@ -201,11 +201,11 @@ void grGWLionKeeper::setAttack() {
         soCollisionAttackData attack(1.0f);
         u32 node;
         switch (m_type) {
-        case 5:
-            node = getNodeIndex(0, "_KEEPER_RIGHT_HIT");
-            break;
         case 4:
             node = getNodeIndex(0, "_KEEPER_LEFT_HIT");
+            break;
+        case 5:
+            node = getNodeIndex(0, "_KEEPER_RIGHT_HIT");
             break;
         default:
             return;
@@ -216,7 +216,7 @@ void grGWLionKeeper::setAttack() {
         offset.m_z = 0.0f;
         setAttackGimmickDetails(&attack, 10.0f, 1.0f, 1.0f, 1.0f, 12, &offset, 0, 60, 0, 60, node, 0x3FF, 7, false, 15,
                                 soCollisionAttackData::Attribute_Normal, soCollisionAttackData::Sound_Level_Small,
-                                soCollisionAttackData::Sound_Attribute_Punch, false, false, false, true, false, false, 0, 60,
+                                soCollisionAttackData::Sound_Attribute_None, false, false, false, true, false, false, 0, 60,
                                 false, false, false, soCollisionAttackData::Lr_Check_Forward, false, false, false, false,
                                 false, soCollisionAttackData::Region_None, true);
         switch (m_type) {
