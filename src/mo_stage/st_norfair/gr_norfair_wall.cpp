@@ -346,8 +346,10 @@ void grNorfairWall::setAttackLeft() {
         offset.m_y = -50.0f;
         offset.m_z = 0.0f;
         setAttackDetails(1, &offset);
+        // MATCH-ONLY: named -90 constant is loaded before the zero constant to keep the f0/f1 register assignment
+        float x = -90.0f;
         offset.m_y = 0.0f;
-        offset.m_x = -90.0f;
+        offset.m_x = x;
         offset.m_z = 0.0f;
         setAttackDetails(2, &offset);
         offset.m_x = -90.0f;

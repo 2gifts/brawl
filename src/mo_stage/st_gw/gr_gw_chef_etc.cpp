@@ -535,10 +535,12 @@ void grGWChefEtc::updateCallBack(float deltaFrame) {
                 data[1].m_rot.m_x = m_rot.m_x;
                 data[1].m_rot.m_y = m_rot.m_y;
                 data[1].m_rot.m_z = m_rot.m_z;
+                Vec3f flyScale;
+                gwVec3Scale(&flyScale, &m_scale, 0.9f);
                 data = calcWorldCallBack->m_nodeCallbackDatas;
-                data[1].m_scale.m_x = m_scale.m_x * 0.9f;
-                data[1].m_scale.m_y = m_scale.m_y * 0.9f;
-                data[1].m_scale.m_z = m_scale.m_z * 0.9f;
+                data[1].m_scale.m_x = flyScale.m_x;
+                data[1].m_scale.m_y = flyScale.m_y;
+                data[1].m_scale.m_z = flyScale.m_z;
                 m_flying = 0;
             }
         }
