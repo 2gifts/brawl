@@ -295,7 +295,8 @@ void muGameOverTask::mainStepContinueInit(muGameOverTask* task) {
     task->m_coinsAfter = task->m_coins - task->m_cost;
     int coinDiff = task->m_coinsAfter - task->m_coins;
     task->m_coinStep = coinDiff / 0x78;
-    if (task->m_coinStep == 0) {
+    // MATCH-ONLY: the original tests m_coinStep twice before the sign check (two bne to the same join); one test leaves out an instruction.
+    if (task->m_coinStep == 0 && task->m_coinStep == 0) {
         if (coinDiff > 0) {
             task->m_coinStep = 1;
         } else {

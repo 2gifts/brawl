@@ -197,19 +197,9 @@ void hkWorldOperationQueue::queueOperation(const hkWorldOperation::BaseOperation
 }
 
 hkBool hkWorldOperation::BiggestOperation::islandLess(const BiggestOperation& a, const BiggestOperation& b) {
-    bool result = false;
     u16 keyA = *(u16*)((char*)a.m_entityA->m_simulationIsland + 0x20); // HYPOTHESIS: island key at +0x20
     u16 keyB = *(u16*)((char*)b.m_entityA->m_simulationIsland + 0x20);
-    if (keyA < keyB) {
-        result = true;
-    } else if (keyA == keyB) {
-        u16 tieA = *(u16*)((char*)a.m_entityB->m_simulationIsland + 0x20);
-        u16 tieB = *(u16*)((char*)b.m_entityB->m_simulationIsland + 0x20);
-        if (tieA < tieB) {
-            result = true;
-        }
-    }
-    return hkBool(result);
+    return hkBool(keyA < keyB || (keyA == keyB && *(u16*)((char*)a.m_entityB->m_simulationIsland + 0x20) < *(u16*)((char*)b.m_entityB->m_simulationIsland + 0x20)));
 }
 
 // the executor pokes at a few classes nobody has laid out yet (constraint instances, actions, the simulation).

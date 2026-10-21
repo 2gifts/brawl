@@ -17,3 +17,12 @@ bool itGenArchive::isComp() {
     }
     return fn_80045DC0(soArchiveDb::getManager(2), archiveId, 0) != 0;
 }
+
+bool itGenArchive::isFailed()
+{
+    u32 archiveId = m_archiveId;
+    if (archiveId == 0xFFFF) {
+        return true;
+    }
+    return fn_80045DC0(soArchiveDb::getManager(2), archiveId, 0) == 2;
+}

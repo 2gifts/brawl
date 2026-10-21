@@ -25,8 +25,7 @@ ftStatusUniqProcessThrow g_ftStatusUniqProcessThrow;
 // the event's outputs in the work variables, and gives the thrower the invincibility frames of the throw.
 void ftStatusUniqProcessThrow::initStatus(soModuleAccesser* moduleAccesser) {
     int throwIndex = moduleAccesser->getWorkManageModule().getInt(0x20000000) - 0x72;
-    int motionBits = soValueAccesser::getConstantInt(moduleAccesser, 0x59F2, 0);
-    ftLinkEventThrow event(0xB, throwIndex + 0x76, ((1 << throwIndex) & motionBits) != 0);
+    ftLinkEventThrow event(0xB, throwIndex + 0x76, ((1 << throwIndex) & soValueAccesser::getConstantInt(moduleAccesser, 0x59F2, 0)) != 0);
     moduleAccesser->getLinkModule().sendEventNodes(0, event, 0);
     moduleAccesser->getWorkManageModule().setInt(moduleAccesser->getLinkModule().getNodeTaskId(0), 0x20000002);
     moduleAccesser->getWorkManageModule().setInt(event.m_output0, 0x20000003);
