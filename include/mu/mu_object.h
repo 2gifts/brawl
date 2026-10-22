@@ -96,6 +96,7 @@ public:
 
     // Vec3f getGlobalPostiion(int resNode); //Ambiguous with below?
     Vec3f getGlobalPosition(int resNode);
+    Vec3f getGlobalPosition(const char* nodeName);
     Vec3f getGlobalPosition();
 
     void getAnimScale(Vec3f* scl, const char* name);
@@ -123,6 +124,8 @@ public:
     // i have my doubts. so i'm leaving this comment. it could very well be bool
     // if so, i mean we can just change it back. :smile: 
     // - vish (10/9/26)
+    // HYPOTHESIS: the frame count of the node animation, converted as a signed value by IfPlayer.
+    int getNodeAnimLength();
     int isNodeAnimFinished();
     int isVisAnimFinished();
     int isClrAnimFinished();
