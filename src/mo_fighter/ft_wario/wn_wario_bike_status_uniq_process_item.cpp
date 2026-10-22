@@ -23,12 +23,10 @@ void wnWarioBikeStatusUniqProcessItem::initStatus(soModuleAccesser* a) {
     bool grounded = a->getGroundModule().isTouch((grCollStatus::TouchMask)8, 0);
     if (!grounded) spawnPosition.m_y += 0.1f;
     soResourceModule* resource = &a->getResourceModule();
-    int brresId = work.getInt(0x10000006);
-    u8 groupNo = (u8)work.getInt(0x10000005);
-    int ownerTaskId = link.getParentTaskId(3);
     BaseItem* bike = itManager::getInstance()->createItem(
         &spawnPosition, &spawnPosition, facing, Item_Wario_Bike, 0,
-        ownerTaskId, resource, groupNo, brresId, 0, 0xffff);
+        link.getParentTaskId(3), resource, work.getInt(0x10000005), work.getInt(0x10000006),
+        0, 0xffff);
     if (bike) {
         bike->setOwnerScale(a->getPostureModule().getScale());
         Vec3f speed(kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1)), 0.0f);
@@ -46,7 +44,7 @@ void wnWarioBikeStatusUniqProcessItem::initStatus(soModuleAccesser* a) {
         bike->resetRotation(&rotation);
         bike->updateNodeSRT();
         bike->addSpeed(&speed, true);
-        // The native call reads this work value but discards the returned float.
+        // HYPOTHESIS: the original reads this work value and discards the result.
         work.getFloat(0x11000001);
         bike->resetDamage();
         ftWarioBikeTaskEvent event(0x45C, bike->m_taskId);

@@ -122,13 +122,13 @@ void grFamicomBall::updateMove(float deltaFrame) {
                 finished = true;
             }
         } else {
-            if (getMotionFrame(0) <= m_prevFrame) {
-                m_prevFrame = getMotionFrame(0);
-            } else {
+            if (getMotionFrame(0) > m_prevFrame) {
                 finished = true;
+            } else {
+                m_prevFrame = getMotionFrame(0);
             }
         }
-        if (finished) {
+        if (finished == true) {
             if (m_seHandle != -1) {
                 m_snd.stopSE(m_seHandle, 0);
             }
@@ -145,11 +145,11 @@ void grFamicomBall::updateMove(float deltaFrame) {
         Vec3f pos;
         getNodePosition(&pos, 0, m_nodeBall);
         m_posX = pos.m_x;
-        if (m_posX == m_posXPrev) {
+        if (m_posX != m_posXPrev) {
+            setAttack();
+        } else {
             disableAttack(0);
             m_attackSet = 0;
-        } else {
-            setAttack();
         }
         m_posXPrev = m_posX;
         break;

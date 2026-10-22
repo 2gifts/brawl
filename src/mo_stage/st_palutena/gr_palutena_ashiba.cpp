@@ -209,13 +209,14 @@ void grPalutenaAshiba::updateYakumono(float deltaFrame) {
             }
         }
         m_hpPrev = *m_hpWork;
-    } else if (m_level != 0) {
-        m_hasYakumono = 1;
     } else {
-        setHit();
-        if (m_yakumono != NULL) {
-            m_hasYakumono = 1;
+        if (m_level == 0) {
+            setHit();
+            if (m_yakumono == NULL) {
+                return;
+            }
         }
+        m_hasYakumono = 1;
     }
 }
 

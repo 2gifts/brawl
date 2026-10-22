@@ -79,13 +79,17 @@ void grGWStep::updateVisible(float deltaFrame) {
                     } else {
                         m_frameLast = getMotionFrame(0);
                     }
-                    if (*m_eventWork == 1) {
+                    switch (*m_eventWork) {
+                    case 1: {
                         u8* table = reinterpret_cast<u8*>(m_tblStep->getData(*m_ctrlStepWork));
                         if (table != NULL && table[m_id] == 1) {
                             setVisibility(1);
                         }
-                    } else if (*m_eventWork == 0) {
+                        break;
+                    }
+                    case 0:
                         setVisibility(0);
+                        break;
                     }
                 }
                 break;

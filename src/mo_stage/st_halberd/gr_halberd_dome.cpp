@@ -168,7 +168,8 @@ void grHalberdDome::updateCollision(float deltaFrame) {
                     CameraController* camera = CameraController::getInstance();
                     Rect2D range = *reinterpret_cast<Rect2D*>(reinterpret_cast<u8*>(camera) + 0x148);
                     CameraController::getInstance()->setCameraRange(&range);
-                    *reinterpret_cast<float*>(reinterpret_cast<u8*>(CameraController::getInstance()) + 0x18C) = 0.0f;
+                    camera = CameraController::getInstance();
+                    *reinterpret_cast<float*>(reinterpret_cast<u8*>(camera) + 0x18C) = 0.0f;
                 } else {
                     float lift = 0.0f;
                     Vec3f gate;
@@ -177,11 +178,11 @@ void grHalberdDome::updateCollision(float deltaFrame) {
                     Rect2D range = *reinterpret_cast<Rect2D*>(reinterpret_cast<u8*>(camera) + 0x148);
                     if (range.m_down < gate.m_y) {
                         range.m_down = gate.m_y;
-                        camera = CameraController::getInstance();
-                        if (&camera->m_stageCameraParam != NULL) {
+                        cmStageParam* param = &CameraController::getInstance()->m_stageCameraParam;
+                        if (param != NULL) {
                             float cosine = nw4r::math::CosFIdx(10.666667f);
                             float sine = nw4r::math::SinFIdx(10.666667f);
-                            range.m_down = range.m_down - camera->m_stageCameraParam.m_verticalRotationFactor * (sine / cosine) * 0.5f;
+                            range.m_down = range.m_down - param->m_verticalRotationFactor * (sine / cosine) * 0.5f;
                         }
                         lift = gate.m_y - range.m_down;
                     }

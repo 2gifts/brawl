@@ -157,20 +157,25 @@ void grHalberdStage::updateMotion(float deltaFrame) {
         }
         break;
     }
-    if (m_motion == 1) {
-        if (m_effect == 0 && getMotionFrame(0) >= 4800.0f) {
-            u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x3F0002));
-            g_ecMgr->setParent(effect, m_sceneModels[0], "StgHalberdStage", 0);
-            m_effect++;
+    switch (m_motion) {
+    case 1:
+        switch (m_effect) {
+        case 0:
+            if (!(getMotionFrame(0) < 4800.0f)) {
+                u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x3F0002));
+                g_ecMgr->setParent(effect, m_sceneModels[0], "StgHalberdStage", 0);
+                m_effect++;
+            }
+            break;
         }
         if (m_joint != NULL) {
             if (getMotionFrame(0) >= 5050.0f) {
                 grHalberdJointDisable(m_joint);
             }
-            if (getMotionFrame(0) < 4900.0f) {
-                m_joint->m_0x52 = 0;
-            } else {
+            if (getMotionFrame(0) >= 4900.0f) {
                 m_joint->m_0x52 = 0x6000;
+            } else {
+                m_joint->m_0x52 = 0;
             }
         }
         m_seSeq.playFrame(0, getMotionFrame(0));
@@ -183,7 +188,8 @@ void grHalberdStage::updateMotion(float deltaFrame) {
             }
             m_seSeq.playFrame(1, getMotionFrame(0), 0.0f);
         }
-    } else if (m_motion == 0) {
+        break;
+    case 0:
         m_seSeq.playFrame(1, getMotionFrame(0));
         if (*m_stateWork == 2) {
             setMotion(1, 0, 1, &m_motionTimer);
@@ -191,6 +197,7 @@ void grHalberdStage::updateMotion(float deltaFrame) {
             m_effect = 0;
             m_seSeq.playFrame(0, getMotionFrame(0), 1121.0f);
         }
+        break;
     }
 }
 

@@ -40,9 +40,9 @@ void wnNessPKThunderStatusUniqProcessMove::execStatus(soModuleAccesser* moduleAc
     if (fn_101_CA34(stick.m_x) > param->m_aimTolerance || fn_101_CA34(stick.m_y) > param->m_aimTolerance) {
         stick.normalize();
         heading.normalize();
-        float dot = heading.m_z * stick.m_z + heading.m_x * stick.m_x + heading.m_y * stick.m_y;
+        float dot = heading.m_z * stick.m_z + (heading.m_x * stick.m_x + heading.m_y * stick.m_y);
         float diff;
-        if (1.0f <= dot || dot <= -1.0f) {
+        if (dot >= 1.0f || dot <= -1.0f) {
             diff = 0.0f;
         } else {
             diff = (float)acos(dot);
@@ -51,16 +51,16 @@ void wnNessPKThunderStatusUniqProcessMove::execStatus(soModuleAccesser* moduleAc
         cross.m_x = heading.m_y * stick.m_z - heading.m_z * stick.m_y;
         cross.m_y = heading.m_z * stick.m_x - heading.m_x * stick.m_z;
         cross.m_z = heading.m_x * stick.m_y - heading.m_y * stick.m_x;
-        if (diff < 0.7853982f) {
-            if (cross.m_z <= 0.0f) {
-                angle = angle - diff / (45.0f / param->m_turnRate);
+        if (diff >= 0.7853982f) {
+            if (cross.m_z > 0.0f) {
+                angle += 0.017453292f * param->m_turnRate;
             } else {
-                angle = angle + diff / (45.0f / param->m_turnRate);
+                angle -= 0.017453292f * param->m_turnRate;
             }
-        } else if (cross.m_z <= 0.0f) {
-            angle = angle - param->m_turnRate * 0.017453292f;
+        } else if (cross.m_z > 0.0f) {
+            angle += diff / (45.0f / param->m_turnRate);
         } else {
-            angle = angle + param->m_turnRate * 0.017453292f;
+            angle -= diff / (45.0f / param->m_turnRate);
         }
     }
     while (angle < -6.2831855f) {
@@ -69,10 +69,10 @@ void wnNessPKThunderStatusUniqProcessMove::execStatus(soModuleAccesser* moduleAc
     while (angle > 6.2831855f) {
         angle -= 6.2831855f;
     }
-    Vec2f speed;
-    speed.m_x = param->m_speed * (float)cos(angle);
-    speed.m_y = param->m_speed * (float)sin(angle);
-    dynamic_cast<wnKineticEnergyNormal&>(*kinetic.getEnergy(0)).m_speed = speed;
+    heading.m_x = param->m_speed * (float)cos(angle);
+    heading.m_y = param->m_speed * (float)sin(angle);
+    wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*kinetic.getEnergy(0));
+    energy.m_speed = Vec2f(heading.m_x, heading.m_y);
     work.setFloat(angle, 0x21000000);
 }
 

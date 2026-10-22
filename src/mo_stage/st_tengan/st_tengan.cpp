@@ -1119,108 +1119,226 @@ bool stTengan::eventSonicWaveCallUpdate(float deltaFrame) {
 }
 
 void stTengan::setEventDialga(float deltaFrame) {
-    (void)deltaFrame;
     stTenganParams* params = static_cast<stTenganParams*>(m_stageData);
-    if (params == NULL) return;
-    const float scale = 100.0f;
-    float weights[5] = {params->event_d_rate_rot_screen, params->event_d_rate_quake,
-        params->event_d_rate_laser_y + params->event_d_rate_laser_x,
-        params->event_d_rate_slow, params->event_d_rate_aura};
-    float total = params->event_d_rate_rot_screen * scale + params->event_d_rate_quake * scale +
-        params->event_d_rate_laser_y * scale + params->event_d_rate_laser_x * scale +
-        params->event_d_rate_slow * scale + params->event_d_rate_aura * scale;
-    int choice = randi(static_cast<int>(total) + 1);
-    int selected = 0, cumulative = 0;
-    while (selected < 5) {
-        cumulative += static_cast<int>(weights[selected] * scale);
-        if (cumulative >= choice) break;
-        ++selected;
+    if (params == NULL) {
+        return;
     }
+    float weightScale = 100.0f;
+    int event = 0;
+    int choice = randi(static_cast<int>(params->event_d_rate_rot_screen * weightScale +
+                                       params->event_d_rate_quake * weightScale +
+                                       params->event_d_rate_laser_y * weightScale +
+                                       params->event_d_rate_laser_x * weightScale +
+                                       params->event_d_rate_slow * weightScale +
+                                       params->event_d_rate_aura * weightScale) + 1);
+    int cumulative = 0;
+    bool selected = false;
+    do {
+        switch (event) {
+            case 0:
+                cumulative += static_cast<int>(params->event_d_rate_rot_screen * weightScale);
+                break;
+            case 1:
+                cumulative += static_cast<int>(params->event_d_rate_quake * weightScale);
+                break;
+            case 2:
+                cumulative += static_cast<int>(weightScale * (params->event_d_rate_laser_y +
+                                                              params->event_d_rate_laser_x));
+                break;
+            case 3:
+                cumulative += static_cast<int>(params->event_d_rate_slow * weightScale);
+                break;
+            case 4:
+                cumulative += static_cast<int>(params->event_d_rate_aura * weightScale);
+                break;
+            case 5:
+                cumulative = choice;
+                break;
+        }
+        if (cumulative >= choice) {
+            selected = true;
+        }
+        if (cumulative < choice) {
+            ++event;
+        }
+    } while (selected != true);
     bool started = false;
-    if (selected != m_lastCresseliaEvent) {
-        switch (selected) {
-        case 0: started = eventCameraRoll.start(); break;
-        case 1: {
-            int broken = (m_stateFloor[0] == 1) + (m_stateFloor[1] == 1) + (m_stateFloor[2] == 1);
-            if (!eventDropStage.isEvent() && !eventRebuildStage.isEvent() && broken < 3) {
+    if (m_lastCresseliaEvent != event) {
+        switch (event) {
+            default:
+                started = eventCameraRoll.start();
+                break;
+            case 1:
+                if (!eventRebuildStage.isEvent() && !eventDropStage.isEvent()) {
+                    unke6b = 0;
+                    for (int i = 0; i < 3; i++) {
+                        if (m_stateFloor[i] == 1) {
+                            unke6b++;
+                        }
+                    }
+                    // MATCH-ONLY: the int cast gives the signed compare (cmpwi) the original uses.
+                    if (static_cast<int>(unke6b) != 3) {
+                        started = eventQuake.start();
+                        eventDropStage.start();
+                    }
+                }
+                break;
+            case 2:
                 started = eventQuake.start();
-                eventDropStage.start();
-            }
-            break;
-        }
-        case 2:
-            started = eventQuake.start();
-            if (started) {
-                if (!eventLaser.start()) { eventQuake.end(); started = false; }
-                else unkea8 = 1;
-            }
-            break;
-        case 3: started = eventSlow.start(); break;
-        case 4: started = eventAura.start(); break;
+                if (started == true) {
+                    started = eventLaser.start();
+                    if (!started) {
+                        eventQuake.end();
+                    } else {
+                        unkea8 = 1;
+                    }
+                }
+                break;
+            case 3:
+                started = eventSlow.start();
+                break;
+            case 4:
+                if (!eventRebuildStage.isEvent() && !eventDropStage.isEvent()) {
+                    unke6b = 0;
+                    for (int i = 0; i < 3; i++) {
+                        if (m_stateFloor[i] == 1) {
+                            unke6b++;
+                        }
+                    }
+                    // MATCH-ONLY: the int cast gives the signed compare (cmpwi) the original uses.
+                    if (static_cast<int>(unke6b) != 3) {
+                        started = eventAura.start();
+                    }
+                }
+                break;
+            case 5:
+                started = false;
+                break;
         }
     }
-    if (!started) return;
-    m_lastCresseliaEvent = selected; m_legendEventActive = 1;
-    static_cast<grMadein*>(getGround(3))->setMotion(1);
-    static_cast<grMadein*>(getGround(3))->startEntity();
-    event2.end(); event2.start();
-    m_pendingLegendSound = snd_se_stage_Tengan_03; m_legendSoundDelayFrames = 45.0f;
-    u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x0104004C));
-    g_ecMgr->setParent(effect, getGround(3)->m_sceneModels[0], "StgTenganDialga_jaw", false);
+    if (started == true) {
+        m_lastCresseliaEvent = event;
+        m_legendEventActive = 1;
+        static_cast<grMadein*>(getGround(3))->setMotion(1);
+        static_cast<grMadein*>(getGround(3))->startEntity();
+        event2.end();
+        event2.start();
+        m_pendingLegendSound = snd_se_stage_Tengan_03;
+        m_legendSoundDelayFrames = 45.0f;
+        u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x0104004C));
+        g_ecMgr->setParent(effect, getGround(3)->m_sceneModels[0], "StgTenganDialga_jaw", false);
+    }
 }
 
 void stTengan::setEventValkia(float deltaFrame) {
-    (void)deltaFrame;
     stTenganParams* params = static_cast<stTenganParams*>(m_stageData);
-    if (params == NULL) return;
-    const float scale = 100.0f;
-    float weights[6] = {params->event_p_rate_rot_screen, params->event_p_rate_quake,
-        params->event_p_rate_laser_y + params->event_p_rate_laser_x,
-        params->event_p_rate_gravity_half, params->event_p_rate_reverse_y,
-        params->event_p_rate_reverse_x};
-    float total = params->event_p_rate_rot_screen * scale + params->event_p_rate_quake * scale +
-        params->event_p_rate_laser_y * scale + params->event_p_rate_laser_x * scale +
-        params->event_p_rate_gravity_half * scale + params->event_p_rate_reverse_y * scale +
-        params->event_p_rate_reverse_x * scale;
-    int choice = randi(static_cast<int>(total) + 1);
-    int selected = 0, cumulative = 0;
-    while (selected < 6) {
-        cumulative += static_cast<int>(weights[selected] * scale);
-        if (cumulative >= choice) break;
-        ++selected;
+    if (params == NULL) {
+        return;
     }
-    bool started = false;
-    if (selected != m_lastCresseliaEvent) {
+    float scale = 100.0f;
+    int selected = 0;
+    int choice = randi(static_cast<int>(params->event_p_rate_rot_screen * scale + params->event_p_rate_quake * scale +
+                                        params->event_p_rate_laser_y * scale + params->event_p_rate_laser_x * scale +
+                                        params->event_p_rate_gravity_half * scale +
+                                        params->event_p_rate_reverse_y * scale +
+                                        params->event_p_rate_reverse_x * scale) +
+                       1);
+    int cumulative = 0;
+    bool result = false;
+    do {
         switch (selected) {
-        case 0: started = eventCameraRoll.start(); break;
-        case 1: {
-            int broken = (m_stateFloor[0] == 1) + (m_stateFloor[1] == 1) + (m_stateFloor[2] == 1);
-            if (!eventDropStage.isEvent() && !eventRebuildStage.isEvent() && broken < 3) {
-                started = eventQuake.start();
-                if (started) eventDropStage.start();
-            }
+        case 0:
+            cumulative += static_cast<int>(params->event_p_rate_rot_screen * scale);
+            break;
+        case 1:
+            cumulative += static_cast<int>(params->event_p_rate_quake * scale);
+            break;
+        case 2:
+            cumulative += static_cast<int>(scale * (params->event_p_rate_laser_y + params->event_p_rate_laser_x));
+            break;
+        case 3:
+            cumulative += static_cast<int>(params->event_p_rate_gravity_half * scale);
+            break;
+        case 4:
+            cumulative += static_cast<int>(params->event_p_rate_reverse_y * scale);
+            break;
+        case 5:
+            cumulative += static_cast<int>(params->event_p_rate_reverse_x * scale);
+            break;
+        case 6:
+            cumulative = choice;
             break;
         }
-        case 2:
-            started = eventQuake.start();
-            if (started) {
-                if (!eventLaser.start()) { eventQuake.end(); started = false; }
-                else unkea8 = 1;
+        if (cumulative >= choice) {
+            result = true;
+        }
+        if (cumulative < choice) {
+            selected++;
+        }
+    } while (result != true);
+    result = false;
+    if (m_lastCresseliaEvent != selected) {
+        switch (selected) {
+        case 0:
+        default:
+            result = eventCameraRoll.start();
+            break;
+        case 1:
+            if (!eventRebuildStage.isEvent() && !eventDropStage.isEvent()) {
+                unke6b = 0;
+                for (int i = 0; i < 3; i++) {
+                    if (m_stateFloor[i] == 1) {
+                        unke6b++;
+                    }
+                }
+                // MATCH-ONLY: the original compares the count as a signed int (cmpwi)
+                if (static_cast<s32>(unke6b) != 3) {
+                    result = eventQuake.start();
+                    if (result == true) {
+                        eventDropStage.start();
+                    } else {
+                        eventQuake.end();
+                    }
+                }
             }
             break;
-        case 3: started = eventGravityHalf.start(); break;
-        case 4: started = eventUpDownReverse.start(); break;
-        case 5: started = eventLeftRightReverse.start(); break;
+        case 2:
+            result = eventQuake.start();
+            if (result == true) {
+                result = eventLaser.start();
+                if (!result) {
+                    eventQuake.end();
+                } else {
+                    unkea8 = 1;
+                }
+            }
+            break;
+        case 3:
+            result = eventGravityHalf.start();
+            break;
+        case 4:
+            result = eventUpDownReverse.start();
+            break;
+        case 5:
+            result = eventLeftRightReverse.start();
+            break;
+        case 6:
+            result = false;
+            break;
         }
     }
-    if (!started) return;
-    m_lastCresseliaEvent = selected; m_legendEventActive = 1;
-    static_cast<grMadein*>(getGround(18))->setMotion(1);
-    static_cast<grMadein*>(getGround(18))->startEntity();
-    event2.end(); event2.start();
-    m_pendingLegendSound = snd_se_stage_Tengan_05; m_legendSoundDelayFrames = 60.0f;
-    u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x0104004C));
-    g_ecMgr->setParent(effect, getGround(18)->m_sceneModels[0], "StgTenganPalkia_Jaw", false);
+    if (result == true) {
+        m_lastCresseliaEvent = selected;
+        m_legendEventActive = 1;
+        static_cast<grMadein*>(getGround(18))->setMotion(1);
+        static_cast<grMadein*>(getGround(18))->startEntity();
+        event2.end();
+        event2.start();
+        m_pendingLegendSound = snd_se_stage_Tengan_05;
+        m_legendSoundDelayFrames = 60.0f;
+        u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x0104004C));
+        g_ecMgr->setParent(effect, getGround(18)->m_sceneModels[0], "StgTenganPalkia_Jaw", false);
+    }
 }
 
 void stTengan::setEventCrecelia() {

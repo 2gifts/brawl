@@ -265,6 +265,8 @@ void grHalberdBg::updateMotion(float deltaFrame) {
         m_motionTimer = 0.0f;
     }
     switch (m_state) {
+    case 3:
+        break;
     case 0:
         setMotion(2, 0, 1, NULL);
         getNodeIndex(&m_nodeTrainer[0], 0, "ptPosition01HB");
@@ -272,7 +274,6 @@ void grHalberdBg::updateMotion(float deltaFrame) {
         getNodeIndex(&m_nodeTrainer[2], 0, "ptPosition03HB");
         getNodeIndex(&m_nodeTrainer[3], 0, "ptPosition04HB");
         m_state = 2;
-        // fall through
     case 2:
         if (*m_stateWork == 2) {
             setMotion(0, 0, 1, &m_motionTimer);
@@ -283,20 +284,19 @@ void grHalberdBg::updateMotion(float deltaFrame) {
     }
     Vec3f pos(0.0f, 0.0f, 0.0f);
     m_snd.setPos(&pos);
-    if (m_motion == 1) {
-        m_seSeq.playFrame(1, getMotionFrame(0));
-        if (*m_stateWork == 2) {
-            setMotion(0, 0, 1, &m_motionTimer);
-            setMotionFrame(*m_frameWork, 0);
-            m_seSeq.playFrame(0, getMotionFrame(0), 1121.0f);
-        }
-    } else if (m_motion == 0) {
-        if (m_effect == 0 && getMotionFrame(0) >= 600.0f) {
+    switch (m_motion) {
+    case 0:
+        switch (m_effect) {
+        case 0:
+            if (getMotionFrame(0) < 600.0f) {
+                break;
+            }
             g_ecMgr->setDrawPrio(1);
             u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x3F0001));
             g_ecMgr->setDrawPrio(-1);
             g_ecMgr->setParent(effect, m_sceneModels[0], "chikeiHal", 0);
             m_effect++;
+            break;
         }
         m_seSeq.playFrame(0, getMotionFrame(0));
         if (*m_stateWork == 4) {
@@ -304,6 +304,15 @@ void grHalberdBg::updateMotion(float deltaFrame) {
             setMotionFrame(*m_frameWork, 0);
             m_seSeq.playFrame(1, getMotionFrame(0), 0.0f);
         }
+        break;
+    case 1:
+        m_seSeq.playFrame(1, getMotionFrame(0));
+        if (*m_stateWork == 2) {
+            setMotion(0, 0, 1, &m_motionTimer);
+            setMotionFrame(*m_frameWork, 0);
+            m_seSeq.playFrame(0, getMotionFrame(0), 1121.0f);
+        }
+        break;
     }
 }
 

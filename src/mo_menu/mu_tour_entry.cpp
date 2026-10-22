@@ -169,20 +169,22 @@ muTourEntryTask::~muTourEntryTask() {
 // Starts to read the files of the screen: the texts, the models, and the pictures of the fighters (the ones of the
 // next match are read as well when there is a next match).
 void muTourEntryTask::loadResource() {
+    char name[64];
     m_files[0].readRequest("/menu/msg/tour_entry.msbin", Heaps::MenuResource, 0, 0);
     m_files[1].readRequest("/menu/tournament/TourGame.brres", Heaps::MenuResource, 0, 0);
     for (u32 i = 0; i < (u32)m_count; i++) {
-        char name[64];
-        sprintf(name, "/menu/common/char_bust_tex/MenSelchrFaceB%03d.brres", getStockIconBase(m_fighters[i].m_character));
+        // HYPOTHESIS: the "+ 1 - 1.0f" round trip through float is likely a frame-index helper (base + 1) minus 1.0f inlined by the original.
+        int number = muMenu::exchangeGmCharacterKind2Something(muMenu::exchangeMuSelchkind2MuStockchkind(m_fighters[i].m_character));
+        sprintf(name, "/menu/common/char_bust_tex/MenSelchrFaceB%03d.brres", (u32)(number * 10 + 1 - 1.0f));
         m_files[2 + i].readRequest(name, Heaps::MenuResource, 0, 0);
     }
     for (u32 i = m_count; i < 4; i++) {
         m_loaded[2 + i] = true;
     }
-    if (m_hasNext) {
+    if (m_hasNext == true) {
         for (u32 i = 0; i < (u32)m_nextCount; i++) {
-            char name[64];
-            sprintf(name, "/menu/common/char_bust_tex/MenSelchrFaceB%03d.brres", getStockIconBase(m_nextFighters[i].m_character));
+            int number = muMenu::exchangeGmCharacterKind2Something(muMenu::exchangeMuSelchkind2MuStockchkind(m_nextFighters[i].m_character));
+            sprintf(name, "/menu/common/char_bust_tex/MenSelchrFaceB%03d.brres", (u32)(number * 10 + 1 - 1.0f));
             m_files[6 + i].readRequest(name, Heaps::MenuResource, 0, 0);
         }
         for (u32 i = m_nextCount; i < 4; i++) {

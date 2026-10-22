@@ -101,23 +101,20 @@ void stEarth::createObj() {
     testStageDataInit(m_fileData, 0x14, 0xDC);
     stEarthData* stageData = static_cast<stEarthData*>(m_stageData);
     if (stageData != NULL) {
-        u8 count = stageData->maxPellets;
-        m_pelletData = new (Heaps::StageInstance) stEarthPelletData[count];
+        m_pelletData = new (Heaps::StageInstance) stEarthPelletData[stageData->maxPellets];
         if (m_pelletData != NULL) {
-            count = stageData->maxPellets;
-            for (u8 i = 0; i != count; i++) {
+            for (u8 i = 0, count = stageData->maxPellets; i != count; i++) {
                 initPelletData(&m_pelletData[i]);
             }
             Ground* ground = grEarthMainBg::create(4, "", "grEarthMainBg");
             addGround(ground);
             ground = grEarthSun::create(8, "", "grEarthSun");
             addGround(ground);
-            u32 groundNum = getGroundNum();
-            for (u32 i = 0; i != groundNum; i++) {
-                Ground* each = getGround(i);
-                if (each != NULL) {
-                    each->startup(m_fileData, 0, gfSceneRoot::Layer_Ground);
-                    each->setStageData(m_stageData);
+            for (u32 i = 0, groundNum = getGroundNum(); i != groundNum; i++) {
+                ground = getGround(i);
+                if (ground != NULL) {
+                    ground->startup(m_fileData, 0, gfSceneRoot::Layer_Ground);
+                    ground->setStageData(m_stageData);
                 }
             }
             createObjOniyon(2);

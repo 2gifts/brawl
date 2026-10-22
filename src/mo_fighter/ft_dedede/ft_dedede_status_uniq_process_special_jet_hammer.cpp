@@ -117,9 +117,7 @@ void ftDededeStatusUniqProcessSpecialJetHammer::execStatus(soModuleAccesser* mod
         }
 
         soDamageModule& damage = moduleAccesser->getDamageModule();
-        // Advance the counters and damage tick only below the configured cap.
-        float damageLimit = static_cast<float>(soValueAccesser::getConstantInt(moduleAccesser, 0x5DC8, 0));
-        if (damage.getDamage(0) < damageLimit) {
+        if (damage.getDamage(0) < static_cast<float>(soValueAccesser::getConstantInt(moduleAccesser, 0x5DC8, 0))) {
             moduleAccesser->getWorkManageModule().addInt(1, 0x20000003);
             soWorkManageModule& periodWork = moduleAccesser->getWorkManageModule();
             int damagePeriod = soValueAccesser::getConstantInt(moduleAccesser, 0x5DC7, 0);

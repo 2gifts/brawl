@@ -243,10 +243,12 @@ grMarioPastBgLocator::~grMarioPastBgLocator() {
 void grMarioPastBgLocator::processAnim() {
     Ground::processAnim();
     if (m_posGimmick != NULL) {
-        if (m_stage != 1) {
-            if (m_stage == 0) {
-                getNodePosition(&m_posGimmick[2], 0, m_node[0]);
-            }
+        switch (m_stage) {
+        case 0:
+            getNodePosition(&m_posGimmick[2], 0, m_node[0]);
+            break;
+        case 1:
+            break;
         }
         getNodePosition(&m_posGimmick[3], 0, m_node[1]);
         getNodePosition(&m_posGimmick[4], 0, m_node[2]);
@@ -254,60 +256,55 @@ void grMarioPastBgLocator::processAnim() {
         getNodePosition(&m_posGimmick[6], 0, m_node[4]);
         getNodePosition(&m_posGimmick[11], 0, m_node[5]);
         float frame = *m_frameLocator;
-        if (m_stage == 1) {
-            if (frame < 0.0f || frame >= 1560.0f) {
-                if (frame >= 1560.0f && frame <= 6090.0f) {
-                    Vec3f* pos = m_posGimmick;
-                    pos[0].m_x = pos[4].m_x;
-                    pos[0].m_y = pos[4].m_y;
-                    pos[0].m_z = pos[4].m_z;
-                }
-            } else {
+        switch (m_stage) {
+        case 0:
+            if (frame >= 0.0f && frame < 4700.0f) {
                 Vec3f* pos = m_posGimmick;
                 pos[0].m_x = pos[3].m_x;
                 pos[0].m_y = pos[3].m_y;
                 pos[0].m_z = pos[3].m_z;
+            } else if (frame >= 4700.0f && frame <= 7200.0f) {
+                Vec3f* pos = m_posGimmick;
+                pos[0].m_x = pos[4].m_x;
+                pos[0].m_y = pos[4].m_y;
+                pos[0].m_z = pos[4].m_z;
             }
-            if (frame < 0.0f || frame >= 4570.0f) {
-                if (frame >= 4570.0f && frame <= 6090.0f) {
-                    Vec3f* pos = m_posGimmick;
-                    pos[1].m_x = pos[6].m_x;
-                    pos[1].m_y = pos[6].m_y;
-                    pos[1].m_z = pos[6].m_z;
-                }
-            } else {
+            if (frame >= 0.0f && frame < 970.0f) {
                 Vec3f* pos = m_posGimmick;
                 pos[1].m_x = pos[5].m_x;
                 pos[1].m_y = pos[5].m_y;
                 pos[1].m_z = pos[5].m_z;
+            } else if (frame >= 970.0f && frame <= 7200.0f) {
+                Vec3f* pos = m_posGimmick;
+                pos[1].m_x = pos[6].m_x;
+                pos[1].m_y = pos[6].m_y;
+                pos[1].m_z = pos[6].m_z;
             }
-        } else if (m_stage == 0) {
-            if (frame < 0.0f || frame >= 4700.0f) {
-                if (frame >= 4700.0f && frame <= 7200.0f) {
-                    Vec3f* pos = m_posGimmick;
-                    pos[0].m_x = pos[4].m_x;
-                    pos[0].m_y = pos[4].m_y;
-                    pos[0].m_z = pos[4].m_z;
-                }
-            } else {
+            break;
+        case 1:
+            if (frame >= 0.0f && frame < 1560.0f) {
                 Vec3f* pos = m_posGimmick;
                 pos[0].m_x = pos[3].m_x;
                 pos[0].m_y = pos[3].m_y;
                 pos[0].m_z = pos[3].m_z;
+            } else if (frame >= 1560.0f && frame <= 6090.0f) {
+                Vec3f* pos = m_posGimmick;
+                pos[0].m_x = pos[4].m_x;
+                pos[0].m_y = pos[4].m_y;
+                pos[0].m_z = pos[4].m_z;
             }
-            if (frame < 0.0f || frame >= 970.0f) {
-                if (frame >= 970.0f && frame <= 7200.0f) {
-                    Vec3f* pos = m_posGimmick;
-                    pos[1].m_x = pos[6].m_x;
-                    pos[1].m_y = pos[6].m_y;
-                    pos[1].m_z = pos[6].m_z;
-                }
-            } else {
+            if (frame >= 0.0f && frame < 4570.0f) {
                 Vec3f* pos = m_posGimmick;
                 pos[1].m_x = pos[5].m_x;
                 pos[1].m_y = pos[5].m_y;
                 pos[1].m_z = pos[5].m_z;
+            } else if (frame >= 4570.0f && frame <= 6090.0f) {
+                Vec3f* pos = m_posGimmick;
+                pos[1].m_x = pos[6].m_x;
+                pos[1].m_y = pos[6].m_y;
+                pos[1].m_z = pos[6].m_z;
             }
+            break;
         }
     }
 }

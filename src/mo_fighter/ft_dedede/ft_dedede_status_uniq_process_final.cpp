@@ -112,10 +112,8 @@ void ftDededeStatusUniqProcessFinal::updateRecall(soModuleAccesser* moduleAccess
         return;
     }
 
-    const soModuleEnumeration* enumeration = moduleAccesser->m_enumerationStart;
-    soGenerateArticleManageModule& articleManager =
-        *static_cast<soGenerateArticleManageModule*>(enumeration->m_generateArticleManageModule);
-    int recallCount = enumeration->m_workManageModule->getInt(0x10000042);
+    soGenerateArticleManageModule& articleManager = moduleAccesser->getGenerateArticleManageModule();
+    int recallCount = moduleAccesser->getWorkManageModule().getInt(0x10000042);
     if (!articleManager.isGeneratable(4)) {
         return;
     }

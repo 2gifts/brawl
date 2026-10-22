@@ -85,15 +85,15 @@ void grPiratesRain::updateActive(float deltaFrame) {
             }
             break;
         case 4:
-            if (*m_eventWork == 6 || getMotionFrame(0) >= unk168) {
-                unk168 = getMotionFrame(0);
-            } else {
+            if (*m_eventWork != 6 && getMotionFrame(0) < unk168) {
                 setMotion(2, false, true, &unk16C);
                 if (unk178 != -1) {
                     m_sndGenerator.stopSE(unk178, (int)unk16C);
                 }
                 unk178 = -1;
                 m_state = 10;
+            } else {
+                unk168 = getMotionFrame(0);
             }
             break;
         case 10:

@@ -852,55 +852,55 @@ void stDxBigBlue::updateCarAddInit(float deltaFrame) {
     m_carTop = (u8)(randf() * 30.0f);
     u8 start = dxbigblueClampU8(m_carTop, 0, 29);
     m_carTop = start;
-    u32 place0 = start;
-    if (place0 >= 0x1E) {
-        place0 -= 0x1E;
+    u32 place = start;
+    if (place >= 0x1E) {
+        place -= 0x1E;
     }
-    stDxBigBlueCarData* car = &m_carData[m_carTbl[place0]];
+    stDxBigBlueCarData* car = &m_carData[m_carTbl[place]];
     car->m_state = 5;
     car->unk38 = 1;
     car->unk04 = m_posLimit[0].m_x - data->unk68;
     car->unk08 = m_posBg.m_y;
     car->unk0C = 0.0f;
     m_seCar[0].m_seHandle = m_seCar[0].m_sound.playSE(static_cast<SndID>(0x1DC9), 0, 0, -1);
-    m_seCar[0].m_carPlace = place0;
-    u32 place1 = m_carTop + 1;
-    if (place1 >= 0x1E) {
-        place1 -= 0x1E;
+    m_seCar[0].m_carPlace = place;
+    place = m_carTop + 1;
+    if (place >= 0x1E) {
+        place -= 0x1E;
     }
-    car = &m_carData[m_carTbl[place1]];
+    car = &m_carData[m_carTbl[place]];
     car->m_state = 5;
     car->unk38 = 1;
     car->unk04 = m_posLimit[0].m_x - data->unk68;
     car->unk08 = m_posBg.m_y;
     car->unk0C = 0.0f;
     m_seCar[1].m_seHandle = m_seCar[1].m_sound.playSE(static_cast<SndID>(0x1DCA), 0, 0, -1);
-    m_seCar[1].m_carPlace = place1;
-    u32 place2 = m_carTop + 2;
-    if (place2 >= 0x1E) {
-        place2 -= 0x1E;
+    m_seCar[1].m_carPlace = place;
+    place = m_carTop + 2;
+    if (place >= 0x1E) {
+        place -= 0x1E;
     }
-    car = &m_carData[m_carTbl[place2]];
+    car = &m_carData[m_carTbl[place]];
     car->m_state = 5;
     car->unk38 = 0;
     car->unk04 = m_posLimit[1].m_x + data->unk68;
     car->unk08 = m_posBg.m_y;
     car->unk0C = 0.0f;
     m_seCar[2].m_seHandle = m_seCar[2].m_sound.playSE(static_cast<SndID>(0x1DCB), 0, 0, -1);
-    m_seCar[2].m_carPlace = place2;
-    u32 place3 = m_carTop + 3;
-    if (place3 >= 0x1E) {
-        place3 -= 0x1E;
+    m_seCar[2].m_carPlace = place;
+    place = m_carTop + 3;
+    if (place >= 0x1E) {
+        place -= 0x1E;
     }
-    car = &m_carData[m_carTbl[place3]];
+    car = &m_carData[m_carTbl[place]];
     car->m_state = 5;
     car->unk38 = 0;
     car->unk04 = m_posLimit[1].m_x + data->unk68;
     car->unk08 = m_posBg.m_y;
     car->unk0C = 0.0f;
     m_seCar[3].m_seHandle = m_seCar[3].m_sound.playSE(static_cast<SndID>(0x1DCC), 0, 0, -1);
-    m_seCar[3].m_carPlace = place3;
-    m_carBottom = place3;
+    m_seCar[3].m_carPlace = place;
+    m_carBottom = place;
     m_carNum = 4;
     for (u32 i = 0, num = data->unk18; i != num; i++) {
         u32 p = m_carTop + i;
@@ -908,14 +908,15 @@ void stDxBigBlue::updateCarAddInit(float deltaFrame) {
             p -= 0x1E;
         }
         stDxBigBlueCarData* c = &m_carData[m_carTbl[p]];
-        c->unk04 = -0.5f * data->unk1C;
+        c->unk04 = 0.5f * -data->unk1C;
         c->unk04 = c->unk04 + data->unk1C * ((float)(i + 1) / (float)(num + 1));
         c->unk0C = 0.0f;
         Vec3f hit;
         Vec3f normal;
-        if (carRayCheck(&hit, &normal, m_carTbl[p]) && normal.m_y > 0.0f) {
-            c->unk08 = hit.m_y + data->unk2C;
+        if (!carRayCheck(&hit, &normal, m_carTbl[p]) || normal.m_y <= 0.0f) {
+            continue;
         }
+        c->unk08 = hit.m_y + data->unk2C;
     }
 }
 

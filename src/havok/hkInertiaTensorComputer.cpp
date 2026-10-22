@@ -56,10 +56,15 @@ static inline const hkTransform& transformOf(const hkMassElement& e) { return *r
 hkMassProperties::hkMassProperties() {
     m_volume = 0.0f;
     m_mass = 0.0f;
-    m_centerOfMass.setZero4();
-    for (int i = 0; i < 12; i++) {
-        m_inertiaTensor.v[i] = 0.0f;
-    }
+    // HYPOTHESIS: Havok's setZero4 is a chained x = y = z = w = 0 (stores w first); the header's set() order gives x first
+    m_centerOfMass.x = m_centerOfMass.y = m_centerOfMass.z = m_centerOfMass.w = 0.0f;
+    // HYPOTHESIS: the inlined hkMatrix3::setZero, copying a zero vector into each column
+    hkVector4 zero;
+    zero.x = zero.y = zero.z = zero.w = 0.0f;
+    hkVector4* cols = reinterpret_cast<hkVector4*>(m_inertiaTensor.v);
+    cols[0] = zero;
+    cols[1] = zero;
+    cols[2] = zero;
 }
 
 // inertia(r, c) is elements[c * 4 + r]. moving the tensor onto the center of mass takes away mass * (shift^2 terms) on the

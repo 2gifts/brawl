@@ -16,63 +16,69 @@ void ftLucasStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* a) {
     g_ftCommonDataAccesser.getData(Fighter_Lucas);
     work.setInt(1, 0x20000003);
 }
+extern "C" float fn_114_C4CC(float x);
 void ftLucasStatusUniqProcessSpecialHi::execFixPosCounter(soModuleAccesser* a) {
     soWorkManageModule& work = a->getWorkManageModule();
+    soSituationModule& situation = a->getSituationModule();
+    soPostureModule& posture = a->getPostureModule();
+    soStatusModule& status = a->getStatusModule();
+    soGroundModule& ground = a->getGroundModule();
     soLinkModule& link = a->getLinkModule();
-    if (!link.isLinked(6)) return;
+    if (!link.isLink(6)) return;
 
     ftData* lucasData = g_ftCommonDataAccesser.getData(Fighter_Lucas);
     const u8* lucasParamGroup3 = static_cast<const u8*>(lucasData->extendParam[2]);
-    float angleAllowance = *reinterpret_cast<const float*>(lucasParamGroup3 + 0x24);
-
-    soPostureModule& posture = a->getPostureModule();
-    soSituationModule& situation = a->getSituationModule();
-    soGroundModule& ground = a->getGroundModule();
-
+    bool inAimWindow = false;
     int phase = work.getInt(0x20000003);
     work.getInt(0x20000004);
     float scale = posture.getScale();
     Vec3f fighterPos = posture.getPos();
     u32 parentNode = 0;
     Vec3f targetPos = link.getParentModelNodeGlobalPosition(6, parentNode, false);
-    // The native path also queries the alternate parent model position; its
-    // returned vector is not used by the observed transition logic.
     link.getParentModelNodeGlobalPosition(6, parentNode, true);
+    fighterPos.m_y += 5.0f * scale;
+    if (fn_114_C4CC(fighterPos.m_x - targetPos.m_x) < 8.333333f * scale &&
+        fn_114_C4CC(fighterPos.m_y - targetPos.m_y) < 12.333333f * scale) {
+        inAimWindow = true;
+    }
 
-    float dx = fighterPos.m_x - targetPos.m_x;
-    float dy = fighterPos.m_y + scale * 5.0f - targetPos.m_y;
-    bool inAimWindow = fabsf(dx) < scale * 8.333333f &&
-                       fabsf(dy) < scale * 12.333333f;
-
-    if (phase == 1 && !inAimWindow) {
-        phase = 0;
-    } else if (phase == 0 && inAimWindow) {
-        phase = 2;
-        posture.setLr(dx < 0.0f ? -1.0f : 1.0f);
-        work.setFloat(dy < 0.0f ? -1.0f : 1.0f, 0x21000005);
-        work.setFloat(atan2f(dy, dx), 0x21000004);
-        work.onFlag(0x22000011);
-
-        if (situation.getKind() == Situation_Ground) {
-            Vec2f groundNormal = ground.getTouchNormal(
-                static_cast<grCollStatus::TouchMask>(8), 0);
-            Vec2f aimDirection(dx, dy);
-            groundNormal.normalize();
-            aimDirection.normalize();
-            float angle = vec2fAngle(&groundNormal, &aimDirection);
-            if (angle < 1.5707964f) work.offFlag(0x22000011);
-
-            // HYPOTHESIS: Lucas extend-param group 3 +0x24 is the
-            // per-move angular allowance; native adds 90 degrees.
-            if (angle <= (angleAllowance + 90.0f) * 0.017453292f) {
-                a->getStatusModule().changeStatusRequest(0x11c, a);
-            } else {
-                a->getStatusModule().changeStatusRequest(0x4a, a);
-            }
-        } else {
+    switch (phase) {
+    case 0:
+        if (inAimWindow) {
+            phase = 2;
+            // MATCH-ONLY: declaring the normal first places aim below it in the native frame.
+            Vec2f groundNormal;
+            Vec2f aim;
+            aim.m_x = fighterPos.m_x - targetPos.m_x;
+            aim.m_y = fighterPos.m_y - targetPos.m_y;
+            float lr = aim.m_x >= 0.0f ? 1.0f : -1.0f;
+            float vertical = aim.m_y >= 0.0f ? 1.0f : -1.0f;
+            float angle = atan2f(aim.m_y, aim.m_x * lr);
+            posture.setLr(lr);
+            work.setFloat(vertical, 0x21000005);
+            work.setFloat(angle, 0x21000004);
             work.offFlag(0x22000011);
-            a->getStatusModule().changeStatusRequest(0x11c, a);
+            if (situation.getKind() == Situation_Ground) {
+                groundNormal = ground.getTouchNormal(static_cast<grCollStatus::TouchMask>(8), 0);
+                groundNormal.normalize();
+                aim.normalize();
+                float groundAngle = vec2fAngle(&groundNormal, &aim);
+                if (groundAngle < 1.5707964f) work.onFlag(0x22000011);
+                // HYPOTHESIS: Lucas extend-param group 3 +0x24 is the per-move angular allowance.
+                if (groundAngle > 0.017453292f * (90.0f + *reinterpret_cast<const float*>(lucasParamGroup3 + 0x24))) {
+                    status.changeStatusRequest(0x4a, a);
+                } else {
+                    status.changeStatusRequest(0x11c, a);
+                }
+            } else {
+                work.onFlag(0x22000011);
+                status.changeStatusRequest(0x11c, a);
+            }
         }
+        break;
+    case 1:
+        if (!inAimWindow) phase = 0;
+        break;
     }
 
     work.setInt(phase, 0x20000003);
