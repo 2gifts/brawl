@@ -3,28 +3,45 @@
 #include <mt/mt_vector.h>
 #include <types.h>
 
+struct AiClBlock;
+
 // A weapon/item/gimmick the CPU AI tracks as a thing to dodge or pick up.
 // Partial layout verified through the search filters and tracking updates.
 class aiWeapon {
 public:
     u32 m_objId;       // 0x00: object id
     int m_kind;        // 0x04: weapon (wn) or item (it) kind, depending on m_type
-    u16 m_flags;       // 0x08: 1 = active, 4 = m_floorBlk is valid
+    u16 m_flags;       // 0x08: 1 = active, 2 = predict from per-frame motion, 4 = floor query cached
     s8 m_type;         // 0x0A: 0 = weapon, 1/4/5 = item
-    u8 unkB;
-    int m_floorBlk;    // 0x0C: floor block under the object
-    char unk10[0x18];
+    s8 m_sampleFrames; // 0x0B: countdown to the next 16-frame position sample
+    AiClBlock* m_floorBlk; // 0x0C: cached floor segment; pickup/chase callers dereference it
+    Vec3f m_oldSamplePos; // 0x10: previous completed position sample
+    Vec3f m_samplePos;    // 0x1C: latest completed position sample
     Vec3f m_pos;       // 0x28
-    char unk34[0x20];
+    Vec3f m_velocity;     // 0x34: position change during the last update
+    Vec3f m_acceleration; // 0x40: change in per-frame velocity
+    float m_speed;       // 0x4C: length of m_velocity
+    float m_radius;      // 0x50: extent used by the prediction queries
     s8 m_team;        // 0x54: search() can exclude this team
     s8 m_ownerPlayer; // 0x55: player number resolved through the founder task
-    char unk56[0xE];
+    char unk56[2];
+    u32 m_updates;        // 0x58: updates since this record was allocated
+    char unk5C[8];
 
     aiWeapon() {
         m_flags = 0;
     }
     int getWnKind();
     int getItKind();
+    // HYPOTHESIS: source parameter order/types; register use and the registry
+    // caller establish type, position, extent, team and incoming flag bits.
+    void update(int type, Vec3f* pos, float radius, s8 team, u16 flags);
+    // Returns predicted frames until contact, or -1. The core mutates its
+    // position argument; the public entry point makes a private copy first.
+    int predict(Vec3f* pos, float radius, int frames);
+    // MATCH-ONLY: the public wrapper calls the native core out of line.
+    int predict_core(Vec3f* pos, float radius, int frames) __attribute__((never_inline));
+    AiClBlock* getFloorBlk();
 };
 static_assert(sizeof(aiWeapon) == 0x64, "Class is wrong size!");
 
