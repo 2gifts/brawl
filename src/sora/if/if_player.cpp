@@ -1,3 +1,4 @@
+#include <gf/gf_loupe.h>
 #include <if/if_player.h>
 #include <math.h>
 #include <mu/mu_object.h>
@@ -40,9 +41,6 @@ extern "C" void fn_800E1AFC(IfPlayer* player, u32 count, int arg);
 extern "C" void fn_800E48F4(IfPlayer* player, int index);
 // HYPOTHESIS: map names msTexObj::freeTexObj
 extern "C" void fn_8007291C(void* texObj);
-// HYPOTHESIS: map names gfLoupe::setEnable, setTextureRef
-extern "C" void fn_8002577C(u8 loupeId, bool enable);
-extern "C" void fn_800257B0(u8 loupeId, void* texture);
 
 struct IfPlayerStockFaceFunc {
     void (*m_init)(int index, IfPlayer* player);
@@ -287,8 +285,8 @@ void IfPlayer::setLoupeVisible(bool visible) {
     } else {
         texture = NULL;
     }
-    fn_8002577C(m_loupeId, texture != NULL);
-    fn_800257B0(m_loupeId, texture);
+    gfLoupe::setEnable(m_loupeId, texture != NULL);
+    gfLoupe::setTextureRef(m_loupeId, texture);
     m_isLoupeVisible = visible;
 }
 
