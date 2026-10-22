@@ -1,4 +1,4 @@
-// Local shadow of BrawlHeaders: adds clSegment2D::checkIntersect2 (main.dol 0x80040F74).
+// Local shadow of BrawlHeaders: adds clSegment2D::checkIntersect2 (main.dol 0x80040F74) and clTriangle2D.
 #pragma once
 
 #include <StaticAssert.h>
@@ -31,6 +31,12 @@ public:
     clAABBox2D m_aabBox;
 
     void move(const Vec2f& displacement);
+};
+
+// HYPOTHESIS: three vertices, from the gfAreaTriangle copies and offsets.
+class clTriangle2D {
+public:
+    Vec2f m_vertices[3];
 };
 
 class clSegment2D {
