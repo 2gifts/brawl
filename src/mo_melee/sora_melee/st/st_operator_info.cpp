@@ -14,7 +14,7 @@ extern u8 lbl_27_bss_59D8;
 }
 
 // HYPOTHESIS: IfPlayer state read by the operator (offsets from the operator code only). IfMngr maps
-// a player index to its IfPlayer slot through the bytes at 0x68 (_0x64 in the local IfMngr header).
+// a player index to its IfPlayer slot through the bytes at 0x68 (unk68 in the local IfMngr header).
 struct IfPlayerOperatorView {
     char _0[0x2b0];
     u32 m_2b0;
@@ -115,7 +115,7 @@ void stOperatorInfo::unlockPlayer() {
 }
 
 void stOperatorInfo::setPlayerCursorClear(u8 index) {
-    IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->_0x64[index])];
+    IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[index])];
     if (reinterpret_cast<IfPlayerOperatorView*>(player)->m_354) {
         fn_800E5174(player, 0);
     }
@@ -127,7 +127,7 @@ void stOperatorInfo::setPlayerCursorStatus(u8 idx, u8 status) {
     // MATCH-ONLY: the index is widened before the float table store.
     int index = idx;
     if (status == 0 && status != m_playersCursorStatus[index] && m_playersNameCursorStatus[index] == 0) {
-        IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->_0x64[index])];
+        IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[index])];
         if (reinterpret_cast<IfPlayerOperatorView*>(player)->m_354) {
             fn_800E5174(player, 0);
         }
@@ -140,7 +140,7 @@ void stOperatorInfo::setPlayerNameCursorStatus(u8 idx, u8 status) {
     // MATCH-ONLY: the index is widened before the float table store.
     int index = idx;
     if (status == 0 && status != m_playersNameCursorStatus[index] && m_playersCursorStatus[index] == 0) {
-        IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->_0x64[index])];
+        IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[index])];
         if (reinterpret_cast<IfPlayerOperatorView*>(player)->m_354) {
             fn_800E5174(player, 0);
         }
@@ -151,7 +151,7 @@ void stOperatorInfo::setPlayerNameCursorStatus(u8 idx, u8 status) {
 
 void stOperatorInfo::setPlayerLoupeStatus(u8 index, u8 status) {
     if (status == 0 && status != m_playersLoupeStatus[index]) {
-        IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->_0x64[index])];
+        IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[index])];
         if (reinterpret_cast<IfPlayerOperatorView*>(player)->m_350) {
             fn_800E4D28(player, 0);
         }
@@ -172,11 +172,11 @@ void stOperatorInfo::clearPlayerCursor() {
         for (int i = 0; i < MAX_PLAYERS; i++) {
             if (g_ftManager->getEntryId(i) != -1) {
                 u8 playerId = m_condition->m_playersInitData[i].m_playerId;
-                IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->_0x64[playerId])];
+                IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[playerId])];
                 if (reinterpret_cast<IfPlayerOperatorView*>(player)->m_350) {
                     fn_800E4D28(player, 0);
                 }
-                player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->_0x64[playerId])];
+                player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[playerId])];
                 if (reinterpret_cast<IfPlayerOperatorView*>(player)->m_2b0) {
                     reinterpret_cast<IfPlayerOperatorView*>(player)->m_2b0 = 0;
                 }
