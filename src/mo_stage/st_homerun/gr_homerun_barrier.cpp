@@ -111,17 +111,22 @@ void grHomerunBarrier::updateState(float deltaFrame) {
         }
         break;
     }
-    if (*m_stateWork == 4) {
+    switch (*m_stateWork) {
+    case 4:
         setMotion(2, false, true, &m_motionTimer);
         setVisibility(1);
         g_sndSystem->playSE(snd_se_Homerun_barrier_crash, 0, 0, 0, -1);
+        // MATCH-ONLY: declaring the model before the effect handle gives the handle r28 and the model r29
+        nw4r::g3d::ScnMdl* scnMdl;
         u32 effect = g_ecMgr->setEffect(ef_ptc_stg_homerun_crash);
-        nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[0];
-        g_ecMgr->setParent(effect, scnMdl, getTgtNode(), false);
+        scnMdl = m_sceneModels[0];
+        ecMgr* effectMgr = g_ecMgr;
+        effectMgr->setParent(effect, scnMdl, getTgtNode(), false);
         m_barrierState = *m_stateWork;
         m_nextState = 5;
         *m_stateWork = 5;
         m_state = 7;
+        break;
     }
 }
 

@@ -114,13 +114,14 @@ void grFamicomBg::update(float deltaFrame) {
 
 // Finds out, for each of the four floors, whether fighters stand on it (and for how long), and on which side of the stage
 // most of them are (the green balls roll towards them).
-#define FAMICOM_BG_AREA(index, centerY)                                                                              \
+#define FAMICOM_BG_AREA(index, posY)                                                                                 \
     memset(entryIds, 0, sizeof(entryIds));                                                                           \
     memset(positions, 0, sizeof(positions));                                                                         \
     result = false;                                                                                                  \
+    centerY = posY;                                                                                                  \
     area.m_left = centerX - width * 0.5f;                                                                            \
     area.m_right = centerX + width * 0.5f;                                                                           \
-    area.m_up = height * 0.5f + centerY;                                                                             \
+    area.m_up = centerY + height * 0.5f;                                                                             \
     area.m_down = centerY - height * 0.5f;                                                                           \
     count = enumIncludeEntryId__9ftManagerCFi(g_ftManager, &area, entryIds, positions, 1);                           \
     if (0 < count) {                                                                                                 \
@@ -168,8 +169,9 @@ void grFamicomBg::updateArea(float deltaFrame) {
     }
     if (*m_stateAreaWork == 0) {
         float centerX = 0.0f;
-        float height = 25.0f;
         float width = m_posLimitWork[1].m_x - m_posLimitWork[0].m_x;
+        float height = 25.0f;
+        float centerY;
         bool result;
         Rect2D area;
         int entryIds[9];

@@ -105,8 +105,13 @@ void grGWFireDiver::updateActive(float deltaFrame) {
                 }
                 m_state = 4;
             } else {
-                if (m_type == *m_typeWork) {
-                    if (m_timer == 0.0f && (m_type == 15 || m_type == 12)) {
+                if (m_type != *m_typeWork) {
+                    setVisibility(0);
+                    m_state = 2;
+                } else if (m_timer == 0.0f) {
+                    switch (m_type) {
+                    case 12:
+                    case 15:
                         setNodeVisibility(false, 0, m_nodeHand[m_handIndex], true, false);
                         if (m_handIndex == 0) {
                             m_handDir = 0;
@@ -114,17 +119,18 @@ void grGWFireDiver::updateActive(float deltaFrame) {
                         if (m_handIndex == 2) {
                             m_handDir = 1;
                         }
-                        if (m_handDir == 1) {
-                            m_handIndex--;
-                        } else if (m_handDir == 0) {
+                        switch (m_handDir) {
+                        case 0:
                             m_handIndex++;
+                            break;
+                        case 1:
+                            m_handIndex--;
+                            break;
                         }
                         setNodeVisibility(true, 0, m_nodeHand[m_handIndex], true, false);
                         m_timer = 10.0f;
+                        break;
                     }
-                } else {
-                    setVisibility(0);
-                    m_state = 2;
                 }
             }
             break;

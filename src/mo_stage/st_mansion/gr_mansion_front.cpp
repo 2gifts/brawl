@@ -102,6 +102,8 @@ void grMansionFront::updateDestroy(float deltaFrame) {
                     unk16C = getMotionFrame(0);
                 }
                 break;
+            case 2:
+                break;
             }
         } else {
             if (unk168 == 1) {
@@ -122,6 +124,8 @@ void grMansionFront::updateDestroy(float deltaFrame) {
                     unk16C = unk170;
                     unk169++;
                 }
+                break;
+            case 2:
                 break;
             }
         }

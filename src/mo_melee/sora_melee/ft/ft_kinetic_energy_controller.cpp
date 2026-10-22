@@ -13,9 +13,9 @@ void ftKineticEnergyController::updateEnergy(soModuleAccesser* moduleAccesser) {
     float stickX = moduleAccesser->getControllerModule().getStickX();
     float stickY = moduleAccesser->getControllerModule().getStickY();
     float accelX = 0.0f;
+    float accelY = m_accel.m_y;
     float addX = 0.0f;
     float addY = 0.0f;
-    float accelY = m_accel.m_y;
     bool scaleTargetByStick = true;
     if (moduleAccesser->getWorkManageModule().getInt(0x10000038) > 0) {
         stickX = 0.0f;
@@ -36,24 +36,17 @@ void ftKineticEnergyController::updateEnergy(soModuleAccesser* moduleAccesser) {
     case 17:
     case 18:
         accelX = stickX * m_accelMul;
-        if (stickX > 0.0f) {
-            addX = addX;
-        } else {
-            addX = -addX;
-        }
-        accelX = accelX + addX;
+        addX = stickX > 0.0f ? addX : -addX;
+        accelX += addX;
         break;
     case 5: {
         float lr = moduleAccesser->getPostureModule().getLr();
         if (stickX * lr > 0.0f) {
             accelX = stickX * m_accelMul;
-            if (stickX > 0.0f) {
-                addX = addX;
-            } else {
-                addX = -addX;
-            }
-            accelX = accelX + addX;
+            addX = stickX > 0.0f ? addX : -addX;
+            accelX += addX;
         } else {
+            accelX = 0.0f;
             m_speedTarget = Vec2f(0.0f, 0.0f);
         }
         break;
@@ -65,36 +58,26 @@ void ftKineticEnergyController::updateEnergy(soModuleAccesser* moduleAccesser) {
             float lr = moduleAccesser->getPostureModule().getLr();
             if (stickX * lr > 0.0f) {
                 accelX = stickX * m_accelMul;
-                if (stickX > 0.0f) {
-                    addX = addX;
-                } else {
-                    addX = -addX;
-                }
-                accelX = accelX + addX;
+                addX = stickX > 0.0f ? addX : -addX;
+                accelX += addX;
                 float mul = moduleAccesser->getWorkManageModule().getFloat(0x21000004);
-                accelX = accelX * mul;
+                accelX *= mul;
                 m_speedTarget = Vec2f(savedTarget.m_x * mul, savedTarget.m_y);
             }
         }
         break;
-    case 15:
+    case 15: {
         accelX = stickX * m_accelMul;
-        if (stickX > 0.0f) {
-            addX = addX;
-        } else {
-            addX = -addX;
-        }
-        accelX = accelX + addX;
-        m_speedTarget = Vec2f((float)fabs(stickX * soValueAccesser::getConstantFloat(moduleAccesser, 0xc14, 0)), -1.0f);
+        addX = stickX > 0.0f ? addX : -addX;
+        accelX += addX;
+        double speedX = fabs(stickX * soValueAccesser::getConstantFloat(moduleAccesser, 0xc14, 0));
+        m_speedTarget = Vec2f((float)speedX, -1.0f);
         break;
+    }
     case 16: {
         accelX = stickX * m_accelMul;
-        if (stickX > 0.0f) {
-            addX = addX;
-        } else {
-            addX = -addX;
-        }
-        accelX = accelX + addX;
+        addX = stickX > 0.0f ? addX : -addX;
+        accelX += addX;
         float a = soValueAccesser::getConstantFloat(moduleAccesser, 0xd1f, 0);
         float b = soValueAccesser::getConstantFloat(moduleAccesser, 0xc14, 0);
         m_speedTarget = Vec2f((float)fabs(stickX * (b * a)), -1.0f);
@@ -103,32 +86,20 @@ void ftKineticEnergyController::updateEnergy(soModuleAccesser* moduleAccesser) {
     case 3:
         if (moduleAccesser->getWorkManageModule().getInt(0x20000002) == 0) {
             accelX = stickX * m_accelMul;
-            if (stickX > 0.0f) {
-                addX = addX;
-            } else {
-                addX = -addX;
-            }
-            accelX = accelX + addX;
+            addX = stickX > 0.0f ? addX : -addX;
+            accelX += addX;
         }
         break;
     case 10:
         accelX = stickX * m_accelMul;
-        if (stickX > 0.0f) {
-            addX = addX;
-        } else {
-            addX = -addX;
-        }
-        accelX = accelX + addX;
-        accelX = accelX * soValueAccesser::getConstantFloat(moduleAccesser, 0xbe0, 0);
+        addX = stickX > 0.0f ? addX : -addX;
+        accelX += addX;
+        accelX *= soValueAccesser::getConstantFloat(moduleAccesser, 0xbe0, 0);
         break;
     case 8:
         accelX = stickX * m_accelMul;
-        if (stickX > 0.0f) {
-            addX = addX;
-        } else {
-            addX = -addX;
-        }
-        accelX = accelX + addX;
+        addX = stickX > 0.0f ? addX : -addX;
+        accelX += addX;
         if (!(accelX * m_unk38 < 0.0f)) {
             accelX = 0.0f;
             m_speedTarget = Vec2f(0.0f, 0.0f);
@@ -138,23 +109,16 @@ void ftKineticEnergyController::updateEnergy(soModuleAccesser* moduleAccesser) {
     case 11:
     case 12:
         accelX = stickX * m_accelMul;
-        if (stickX > 0.0f) {
-            addX = addX;
-        } else {
-            addX = -addX;
-        }
-        accelX = accelX + addX;
+        addX = stickX > 0.0f ? addX : -addX;
+        accelX += addX;
         accelY = stickY * m_unk44;
-        if (stickY > 0.0f) {
-            addY = addY;
-        } else {
-            addY = -addY;
-        }
-        accelY = accelY + addY;
+        addY = stickY > 0.0f ? addY : -addY;
+        accelY += addY;
         {
             Vec2f t;
             Vec2f::copy(t, m_speedTarget);
-            t.m_y = (float)fabs(stickY) * t.m_y;
+            double absY = fabs(stickY);
+            t.m_y = (float)absY * m_speedTarget.m_y;
             m_speedTarget = t;
         }
         break;
@@ -164,7 +128,8 @@ void ftKineticEnergyController::updateEnergy(soModuleAccesser* moduleAccesser) {
     }
     m_accel = Vec2f(accelX, accelY);
     if (scaleTargetByStick) {
-        m_speedTarget = Vec2f(m_speedTarget.m_x * (float)fabs(stickX), m_speedTarget.m_y);
+        double absX = fabs(stickX);
+        m_speedTarget = Vec2f((float)absX * m_speedTarget.m_x, m_speedTarget.m_y);
     }
     soKineticEnergyNormal::updateEnergy(moduleAccesser);
     m_speedTarget.m_x = savedTarget.m_x;

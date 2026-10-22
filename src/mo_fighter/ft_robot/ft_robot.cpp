@@ -685,10 +685,8 @@ ftRobotTransactor* ftRobotTransactor::getInstance() {
 // article is started once the opening animation raises flag 0x12000044, then the volleys follow until the timer
 // (int 0x10000042) runs out.
 void ftRobot::updateFinal(soModuleAccesser* acc) {
-    const soModuleEnumeration* modules = acc->m_enumerationStart;
-    soGenerateArticleManageModule& articles = *static_cast<soGenerateArticleManageModule*>(modules->m_generateArticleManageModule);
-    soDamageModule& damage = *modules->m_damageModule;
-    damage.setReactionMul(soValueAccesser::getConstantFloat(acc, 0xfd4, 0));
+    soGenerateArticleManageModule& articles = acc->getGenerateArticleManageModule();
+    acc->getDamageModule().setReactionMul(soValueAccesser::getConstantFloat(acc, 0xfd4, 0));
     acc->getCollisionHitModule().setWhole(2, 0);
     if (acc->getWorkManageModule().isFlag(0x12000043) && acc->getWorkManageModule().getInt(0x10000042) > 0) {
         acc->getWorkManageModule().subInt(1, 0x10000042);

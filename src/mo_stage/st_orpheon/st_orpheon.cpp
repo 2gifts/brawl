@@ -566,13 +566,15 @@ void stOrpheon::update(float deltaFrame) {
     static_cast<grMadein*>(getGround(3))->setRot(&rot);
     static_cast<grMadein*>(getGround(4))->setRot(&rot);
     static_cast<grMadein*>(getGround(5))->setRot(&rot);
-    rot.m_z = m_spinAngle + m_queenRoll;
-    rot.m_x = 0.0f;
-    rot.m_y = 0.0f;
+    rot.set(0.0f, 0.0f, m_spinAngle + m_queenRoll);
     static_cast<grMadein*>(getGround(2))->setRot(&rot);
 
     Vec3f spline[4];
     Vec3f pos;
+    Vec2f trap2AMin;
+    Vec2f trap2AMax;
+    Vec2f trap2BMin;
+    Vec2f trap2BMax;
     getGround(1)->getNodePosition(&spline[0], 0, "PQueenPositionA");
     getGround(1)->getNodePosition(&spline[2], 0, "PQueenPositionB");
     spline[1] = spline[0];
@@ -594,19 +596,15 @@ void stOrpheon::update(float deltaFrame) {
     mtBezierCurve(m_trap2APathT, spline, &pos);
     static_cast<grMadein*>(getGround(4))->setPos(&pos);
     if (m_trap2APathT >= 0.3f) {
-        Vec2f min;
-        Vec2f max;
-        Vec2f lo;
-        Vec2f hi;
-        lo.m_x = -50.0f;
-        lo.m_y = -5.0f;
-        min.m_x = pos.m_x + lo.m_x;
-        min.m_y = pos.m_y + lo.m_y;
-        hi.m_x = 50.0f;
-        hi.m_y = 5.0f;
-        max.m_x = pos.m_x + hi.m_x;
-        max.m_y = pos.m_y + hi.m_y;
-        g_aiMgr->setDangerZone(&min, &max, -1, false, false);
+        float x = pos.m_x;
+        float y = pos.m_y;
+        Vec2f lo(-50.0f, -5.0f);
+        trap2AMin.m_x = x + lo.m_x;
+        trap2AMin.m_y = y + lo.m_y;
+        Vec2f hi(50.0f, 5.0f);
+        trap2AMax.m_x = x + hi.m_x;
+        trap2AMax.m_y = y + hi.m_y;
+        g_aiMgr->setDangerZone(&trap2AMin, &trap2AMax, -1, false, false);
     }
 
     getGround(0)->getNodePosition(&spline[0], 0, "C_TRAP_MOVE_02_02_PositionLeft");
@@ -616,19 +614,15 @@ void stOrpheon::update(float deltaFrame) {
     mtBezierCurve(m_trap2BPathT, spline, &pos);
     static_cast<grMadein*>(getGround(5))->setPos(&pos);
     if (m_trap2BPathT < 0.8f) {
-        Vec2f min;
-        Vec2f max;
-        Vec2f lo;
-        Vec2f hi;
-        lo.m_x = -50.0f;
-        lo.m_y = -5.0f;
-        min.m_x = pos.m_x + lo.m_x;
-        min.m_y = pos.m_y + lo.m_y;
-        hi.m_x = 50.0f;
-        hi.m_y = 5.0f;
-        max.m_x = pos.m_x + hi.m_x;
-        max.m_y = pos.m_y + hi.m_y;
-        g_aiMgr->setDangerZone(&min, &max, -1, false, false);
+        float x = pos.m_x;
+        float y = pos.m_y;
+        Vec2f lo(-50.0f, -5.0f);
+        trap2BMin.m_x = x + lo.m_x;
+        trap2BMin.m_y = y + lo.m_y;
+        Vec2f hi(50.0f, 5.0f);
+        trap2BMax.m_x = x + hi.m_x;
+        trap2BMax.m_y = y + hi.m_y;
+        g_aiMgr->setDangerZone(&trap2BMin, &trap2BMax, -1, false, false);
     }
 }
 

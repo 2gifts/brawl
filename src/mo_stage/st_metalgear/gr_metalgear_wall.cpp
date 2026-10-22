@@ -194,9 +194,9 @@ void grMetalgearWall::updateBreak(float deltaFrame) {
         enableHit(0, 0);
         *m_stateWork = 6;
         m_state = 1;
-        return;
+        break;
     case 1:
-        if (*m_stateWork < 2) {
+        if (*m_stateWork <= 1) {
             setEnableCollisionStatus(false);
             disableHit(0, 0);
             Vec3f offset(0.0f, 0.0f, 0.0f);
@@ -204,12 +204,6 @@ void grMetalgearWall::updateBreak(float deltaFrame) {
             int sndId = -1;
             float pan;
             switch (m_type) {
-            case 2:
-                if (*m_stateWork == 0) {
-                    sndId = snd_se_stage_Metalgear_01;
-                }
-                pan = 0.75f;
-                break;
             case 0:
                 if (*m_stateWork == 0) {
                     sndId = snd_se_stage_Metalgear_01;
@@ -224,6 +218,12 @@ void grMetalgearWall::updateBreak(float deltaFrame) {
                     sndId = snd_se_stage_Metalgear_wall_all;
                 }
                 pan = -0.75f;
+                break;
+            case 2:
+                if (*m_stateWork == 0) {
+                    sndId = snd_se_stage_Metalgear_01;
+                }
+                pan = 0.75f;
                 break;
             case 3:
                 if (*m_stateWork == 0) {
@@ -240,10 +240,6 @@ void grMetalgearWall::updateBreak(float deltaFrame) {
             }
             u32 handle;
             switch (m_type) {
-            case 2:
-                handle = g_ecMgr->setEffect(ef_ptc_stg_metalgear_tower_rtcrash);
-                g_ecMgr->setParent(handle, m_sceneModels[0], "StgMetalgear_R_TOP", false);
-                break;
             case 0:
                 handle = g_ecMgr->setEffect(ef_ptc_stg_metalgear_tower_ltcrash);
                 g_ecMgr->setParent(handle, m_sceneModels[0], "StgMetalgear_L_TOP", false);
@@ -252,15 +248,17 @@ void grMetalgearWall::updateBreak(float deltaFrame) {
                 handle = g_ecMgr->setEffect(ef_ptc_stg_metalgear_tower_lbcrash);
                 g_ecMgr->setParent(handle, m_sceneModels[0], "StgMetalgear_L_UNDER", false);
                 break;
+            case 2:
+                handle = g_ecMgr->setEffect(ef_ptc_stg_metalgear_tower_rtcrash);
+                g_ecMgr->setParent(handle, m_sceneModels[0], "StgMetalgear_R_TOP", false);
+                break;
             case 3:
                 handle = g_ecMgr->setEffect(ef_ptc_stg_metalgear_tower_rbcrash);
                 g_ecMgr->setParent(handle, m_sceneModels[0], "StgMetalgear_R_UNDER", false);
                 break;
             }
             m_state = 2;
-            return;
-        }
-        {
+        } else {
             float base;
             switch (m_type) {
             case 2:
@@ -273,71 +271,72 @@ void grMetalgearWall::updateBreak(float deltaFrame) {
                 break;
             }
             float frame;
-            if (base * data->unk28 <= m_life) {
-                if (base * data->unk24 <= m_life) {
-                    frame = 0.0f;
-                } else {
-                    frame = 1.0f;
-                }
-            } else {
+            if (m_life < base * data->unk28) {
                 frame = 2.0f;
+            } else if (m_life < base * data->unk24) {
+                frame = 1.0f;
+            } else {
+                frame = 0.0f;
             }
             setMotionFrame(frame, 0);
             if (m_motionFrame != frame) {
-                if (m_type < 2) {
+                switch (m_type) {
+                case 0:
+                case 1:
                     fn_27_224DB8(snd_se_stage_Metalgear_wall_clack, -0.75f);
-                } else if (m_type < 4) {
+                    break;
+                case 2:
+                case 3:
                     fn_27_224DB8(snd_se_stage_Metalgear_wall_clack, 0.75f);
+                    break;
                 }
             }
             m_motionFrame = frame;
         }
-        return;
-    case 2: {
-        if (getMotionFrame(0) <= 150.0f) {
-            Vec3f offset(0.0f, 0.0f, 0.0f);
-            cmReqQuake(cmQuake::Amplitude_M, &offset);
-        } else {
+        break;
+    case 2:
+        if (getMotionFrame(0) > 150.0f) {
             setVisibility(0);
             setMotionFrame(150.0f, 0);
+        } else {
+            Vec3f offset(0.0f, 0.0f, 0.0f);
+            cmReqQuake(cmQuake::Amplitude_M, &offset);
         }
-        if (*m_stateWork != 2) {
-            return;
+        if (*m_stateWork == 2) {
+            m_state = 4;
         }
-        m_state = 4;
-        return;
-    }
+        break;
     case 3:
-        return;
-    case 4: {
+        break;
+    case 4:
         if (getMotionFrame(0) > 150.0f) {
             setVisibility(0);
             setMotionFrame(150.0f, 0);
         }
-        if (*m_stateWork != 3) {
-            return;
+        if (*m_stateWork == 3) {
+            switch (m_type) {
+            case 0:
+            case 1:
+                fn_27_224DB8(snd_se_stage_Metalgear_02, -0.75f);
+                break;
+            case 2:
+            case 3:
+                fn_27_224DB8(snd_se_stage_Metalgear_02, 0.75f);
+                break;
+            }
+            setVisibility(1);
+            Vec3f offset(0.0f, 0.0f, 0.0f);
+            cmReqQuake(cmQuake::Amplitude_S, &offset);
+            m_state = 5;
         }
-        if (m_type < 2) {
-            fn_27_224DB8(snd_se_stage_Metalgear_02, -0.75f);
-        } else if (m_type < 4) {
-            fn_27_224DB8(snd_se_stage_Metalgear_02, 0.75f);
-        }
-        setVisibility(1);
-        Vec3f offset(0.0f, 0.0f, 0.0f);
-        cmReqQuake(cmQuake::Amplitude_S, &offset);
-        m_state = 5;
-        return;
-    }
+        break;
     case 5:
         if (getMotionFrame(0) >= m_frameCount) {
             m_state = 0;
-            return;
+        } else if (!m_isEnableCollisionStatus) {
+            setEnableCollisionStatus(true);
         }
-        if (m_isEnableCollisionStatus) {
-            return;
-        }
-        setEnableCollisionStatus(true);
-        return;
+        break;
     }
 }
 

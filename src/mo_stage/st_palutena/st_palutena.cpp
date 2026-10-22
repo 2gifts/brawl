@@ -138,46 +138,6 @@ void stPalutena::createObjAshiba(int index) {
         type = 0;
         level = 0;
         break;
-    case 3:
-        ground = grPalutenaAshiba::create(1, "SCALE_A02", "grPalutenaAshibaA02");
-        type = 1;
-        level = 0;
-        break;
-    case 4:
-        ground = grPalutenaAshiba::create(3, "SCALE_B01", "grPalutenaAshibaB01");
-        type = 2;
-        level = 0;
-        break;
-    case 5:
-        ground = grPalutenaAshiba::create(4, "SCALE_B02", "grPalutenaAshibaB02");
-        type = 3;
-        level = 0;
-        break;
-    case 6:
-        ground = grPalutenaAshiba::create(6, "SCALE_C01", "grPalutenaAshibaC01");
-        type = 4;
-        level = 0;
-        break;
-    case 7:
-        ground = grPalutenaAshiba::create(7, "SCALE_C02", "grPalutenaAshibaC02");
-        type = 5;
-        level = 0;
-        break;
-    case 8:
-        ground = grPalutenaAshiba::create(8, "SCALE_C03", "grPalutenaAshibaC03");
-        type = 6;
-        level = 0;
-        break;
-    case 9:
-        ground = grPalutenaAshiba::create(9, "SCALE_C04", "grPalutenaAshibaC04");
-        type = 7;
-        level = 0;
-        break;
-    case 10:
-        ground = grPalutenaAshibaD01::create(11, "SCALE_D01", "grPalutenaAshibaD01");
-        type = 8;
-        level = 0;
-        break;
     case 16:
         ground = grPalutenaAshiba::create(60, "SCALE_A01", "grPalutenaAshibaA01_02");
         type = 0;
@@ -187,6 +147,11 @@ void stPalutena::createObjAshiba(int index) {
         ground = grPalutenaAshiba::create(70, "SCALE_A01", "grPalutenaAshibaA01_03");
         type = 0;
         level = 2;
+        break;
+    case 3:
+        ground = grPalutenaAshiba::create(1, "SCALE_A02", "grPalutenaAshibaA02");
+        type = 1;
+        level = 0;
         break;
     case 18:
         ground = grPalutenaAshiba::create(61, "SCALE_A02", "grPalutenaAshibaA02_02");
@@ -198,6 +163,11 @@ void stPalutena::createObjAshiba(int index) {
         type = 1;
         level = 2;
         break;
+    case 4:
+        ground = grPalutenaAshiba::create(3, "SCALE_B01", "grPalutenaAshibaB01");
+        type = 2;
+        level = 0;
+        break;
     case 20:
         ground = grPalutenaAshiba::create(62, "SCALE_B01", "grPalutenaAshibaB01_02");
         type = 2;
@@ -207,6 +177,11 @@ void stPalutena::createObjAshiba(int index) {
         ground = grPalutenaAshiba::create(72, "SCALE_B01", "grPalutenaAshibaB01_03");
         type = 2;
         level = 2;
+        break;
+    case 5:
+        ground = grPalutenaAshiba::create(4, "SCALE_B02", "grPalutenaAshibaB02");
+        type = 3;
+        level = 0;
         break;
     case 22:
         ground = grPalutenaAshiba::create(63, "SCALE_B02", "grPalutenaAshibaB02_02");
@@ -218,6 +193,11 @@ void stPalutena::createObjAshiba(int index) {
         type = 3;
         level = 2;
         break;
+    case 6:
+        ground = grPalutenaAshiba::create(6, "SCALE_C01", "grPalutenaAshibaC01");
+        type = 4;
+        level = 0;
+        break;
     case 24:
         ground = grPalutenaAshiba::create(64, "SCALE_C01", "grPalutenaAshibaC01_02");
         type = 4;
@@ -227,6 +207,11 @@ void stPalutena::createObjAshiba(int index) {
         ground = grPalutenaAshiba::create(74, "SCALE_C01", "grPalutenaAshibaC01_03");
         type = 4;
         level = 2;
+        break;
+    case 7:
+        ground = grPalutenaAshiba::create(7, "SCALE_C02", "grPalutenaAshibaC02");
+        type = 5;
+        level = 0;
         break;
     case 26:
         ground = grPalutenaAshiba::create(65, "SCALE_C02", "grPalutenaAshibaC02_02");
@@ -238,6 +223,11 @@ void stPalutena::createObjAshiba(int index) {
         type = 5;
         level = 2;
         break;
+    case 8:
+        ground = grPalutenaAshiba::create(8, "SCALE_C03", "grPalutenaAshibaC03");
+        type = 6;
+        level = 0;
+        break;
     case 28:
         ground = grPalutenaAshiba::create(66, "SCALE_C03", "grPalutenaAshibaC03_02");
         type = 6;
@@ -248,6 +238,11 @@ void stPalutena::createObjAshiba(int index) {
         type = 6;
         level = 2;
         break;
+    case 9:
+        ground = grPalutenaAshiba::create(9, "SCALE_C04", "grPalutenaAshibaC04");
+        type = 7;
+        level = 0;
+        break;
     case 30:
         ground = grPalutenaAshiba::create(67, "SCALE_C04", "grPalutenaAshibaC04_02");
         type = 7;
@@ -257,6 +252,11 @@ void stPalutena::createObjAshiba(int index) {
         ground = grPalutenaAshiba::create(77, "SCALE_C04", "grPalutenaAshibaC04_03");
         type = 7;
         level = 2;
+        break;
+    case 10:
+        ground = grPalutenaAshibaD01::create(11, "SCALE_D01", "grPalutenaAshibaD01");
+        type = 8;
+        level = 0;
         break;
     case 32:
         ground = grPalutenaAshibaD01::create(68, "SCALE_D01", "grPalutenaAshibaD01_02");
