@@ -34,24 +34,26 @@ void wnWarioBikeStatusUniqProcessAppeal::execFixPos(soModuleAccesser* a) {
     soSituationModule& situation = a->getSituationModule();
     soGroundModule& ground = a->getGroundModule();
     soKineticModule& kinetic = a->getKineticModule();
-    soPostureModule& posture = a->getPostureModule();
+    soMotionModule& motion = a->getMotionModule();
     wnWarioBikeParam* param = dynamic_cast<wnWarioBike&>(a->getStageObject()).m_param;
 
     bool frontContact = work.isFlag(0x22000004);
     bool rearContact = work.isFlag(0x22000005);
     bool groundContact = work.isFlag(0x22000006);
-    bool supportTransition = work.isFlag(0x22000002);
-    bool correctionActive = work.isFlag(0x22000007);
     float phase = work.getFloat(0x21000000);
     float groundPhase = work.getFloat(0x21000002);
     float targetPhase = work.getFloat(0x21000003);
+    soKineticEnergyNormal& normal =
+        dynamic_cast<soKineticEnergyNormal&>(*kinetic.getEnergy(0));
+    wnKineticEnergyGravity& gravity =
+        dynamic_cast<wnKineticEnergyGravity&>(*kinetic.getEnergy(1));
     bool changeKinetic = false;
     float correctionSpeed = 0.0f;
 
-    if (supportTransition) {
+    if (work.isFlag(0x22000002)) {
         if (frontContact || rearContact) {
-            float difference = fabsf(phase - groundPhase);
-            if (difference > param->unk48 && !correctionActive) {
+            float difference = __fabsf(phase - groundPhase);
+            if (difference > param->unk48 && !work.isFlag(0x22000007)) {
                 work.onFlag(0x22000007);
                 correctionSpeed = (difference / 90.0f) * param->landingBounceHeight;
                 changeKinetic = true;
@@ -68,8 +70,6 @@ void wnWarioBikeStatusUniqProcessAppeal::execFixPos(soModuleAccesser* a) {
     }
 
     if (changeKinetic) {
-        wnKineticEnergyGravity& gravity =
-            dynamic_cast<wnKineticEnergyGravity&>(*kinetic.getEnergy(1));
         gravity.m_speedY = correctionSpeed;
         gravity.enable();
         kinetic.changeKinetic(33, a);
@@ -79,44 +79,47 @@ void wnWarioBikeStatusUniqProcessAppeal::execFixPos(soModuleAccesser* a) {
         work.offFlag(0x22000005);
         work.offFlag(0x22000006);
     } else if (frontContact || rearContact || groundContact) {
-        float phaseStep = param->unk64;
         if (groundContact) {
             if (phase > groundPhase) {
-                phase -= phaseStep;
+                phase -= param->unk64;
                 if (phase < groundPhase) phase = groundPhase;
             } else if (phase < groundPhase) {
-                phase += phaseStep;
+                phase += param->unk64;
                 if (phase > groundPhase) phase = groundPhase;
             }
-        } else if (rearContact && !frontContact) {
-            phase -= phaseStep;
-            if (phase < -45.0f) phase = -45.0f;
-        } else if (frontContact && !rearContact) {
-            phase += phaseStep;
-            if (phase > 45.0f) phase = 45.0f;
+        } else if (!frontContact && rearContact) {
+            phase -= param->unk64;
+            if (groundContact) {
+                if (phase < groundPhase) phase = groundPhase;
+            } else if (phase < -45.0f) {
+                phase = -45.0f;
+            }
+        } else if (!rearContact && frontContact) {
+            phase += param->unk64;
+            if (groundContact) {
+                if (phase > groundPhase) phase = groundPhase;
+            } else if (phase > 45.0f) {
+                phase = 45.0f;
+            }
         }
     }
     work.setFloat(phase, 0x21000000);
 
-    float minimum;
-    float maximum;
-    if (frontContact || rearContact) {
-        minimum = param->unk14;
-        maximum = param->groundTopSpeed;
-    } else {
-        minimum = param->unk20;
-        maximum = param->airTopSpeed;
-    }
-    soKineticEnergyNormal& normal =
-        dynamic_cast<soKineticEnergyNormal&>(*kinetic.getEnergy(0));
     float speed = normal.getSpeed().length();
-    float range = maximum - minimum;
-    float position = speed - minimum;
+    float position;
+    float range;
+    if (frontContact || rearContact) {
+        position = speed - param->unk14;
+        range = param->groundTopSpeed - param->unk14;
+    } else {
+        position = speed - param->unk20;
+        range = param->airTopSpeed - param->unk20;
+    }
     if (position < 0.0f) position = 0.0f;
     else if (position > range) position = range;
     float blend = position / range;
-    float lr = param->unk44 + blend * (param->unk40 - param->unk44);
-    posture.setLr(lr);
+    float rate = param->unk44 + blend * (param->unk40 - param->unk44);
+    motion.setRate(rate);
 }
 
 wnWarioBikeStatusUniqProcessAppeal g_wnWarioBikeStatusUniqProcessAppeal;

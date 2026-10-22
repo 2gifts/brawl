@@ -829,13 +829,12 @@ u32 Message::utf16to8(char* dst, const wchar_t* src) {
     return count;
 }
 
-char* Message::fullToHalf(char* dst, const char* s) {
-    const u8* src = (const u8*)s;
-    char* d = dst;
-    for (;;) {
+char* Message::fullToHalf(char* dst, const char* src) {
+    char* start = dst;
+    do {
         u8 c = *src++;
         if (c == 0xe2) {
-            u16 code = src[1] + (src[0] << 8);
+            u16 code = (u8)src[1] + ((u8)src[0] << 8);
             src += 2;
             switch (code) {
             case 0x8098:
@@ -846,7 +845,7 @@ char* Message::fullToHalf(char* dst, const char* s) {
                 break;
             }
         } else if (c == 0xef) {
-            u16 code = src[1] + (src[0] << 8);
+            u16 code = (u8)src[1] + ((u8)src[0] << 8);
             src += 2;
             switch (code) {
             case 0xbc90:
@@ -1040,11 +1039,10 @@ char* Message::fullToHalf(char* dst, const char* s) {
                 break;
             }
         }
-        *d++ = c;
-        if (*src == 0) break;
-    }
-    *d = 0;
-    return dst;
+        *dst++ = c;
+    } while (*src != 0);
+    *dst = 0;
+    return start;
 }
 
 int Message::halfToFull(char* dst, const char* src) {

@@ -97,51 +97,41 @@ void grMetalgearSearch::updateActive(float deltaFrame) {
     switch (m_state) {
     case 0: {
         if (m_first == 1) {
-            float r = randf();
+            m_timer = data->unk74 + (data->unk78 - data->unk74) * randf();
             m_first = 0;
-            m_timer = data->unk74 + (data->unk78 - data->unk74) * r;
         } else {
             m_timer = data->unk7C + (data->unk80 - data->unk7C) * randf();
         }
         float sine;
         float cosine;
-        nw4r::math::SinCosFIdx(&sine, &cosine, 0.00390625f * (float)(s16)(int)(randf() * 65535.0f));
+        nw4r::math::SinCosFIdx(&sine, &cosine, 0.00390625f * nw4r::math::U16ToF32((u16)(65535.0f * randf())));
         m_move.m_x = cosine * data->unk8C;
-        float speed = data->unk8C;
+        m_move.m_y = sine * data->unk8C;
         m_move.m_z = 0.0f;
-        m_move.m_y = sine * speed;
         *m_stateWork = 6;
         m_state = 1;
         break;
     }
     case 1:
         if (m_timer == 0.0f) {
-            float r = randf();
+            m_timer = data->unk98 + (data->unk9C - data->unk98) * randf();
             m_state = 8;
-            m_timer = data->unk98 + (data->unk9C - data->unk98) * r;
         }
         break;
     case 8:
         if (m_timer == 0.0f) {
-            float r = randf();
+            m_timer = data->unk98 + (data->unk9C - data->unk98) * randf();
             m_state = 9;
-            m_timer = data->unk98 + (data->unk9C - data->unk98) * r;
         } else {
             u32 rootNode = 0;
             getNodePosition(&m_posGimmickWork[3], 0, rootNode);
-            Vec3f* pos = m_posGimmickWork;
-            float moveY = m_move.m_y;
-            float moveZ = m_move.m_z;
-            pos[3].m_x = pos[3].m_x + m_move.m_x;
-            pos[3].m_y = pos[3].m_y + moveY;
-            pos[3].m_z = pos[3].m_z + moveZ;
+            Vec3fAdd(&m_posGimmickWork[3], &m_posGimmickWork[3], &m_move);
         }
         break;
     case 9:
         if (m_timer == 0.0f) {
-            float r = randf();
+            m_timer = data->unk98 + (data->unk9C - data->unk98) * randf();
             m_state = 8;
-            m_timer = data->unk98 + (data->unk9C - data->unk98) * r;
         } else if (*m_stateWork == 4) {
             m_timer = 30.0f;
             m_snd.playSE(snd_se_stage_Metalgear_03, 0, 0, -1);
@@ -150,29 +140,20 @@ void grMetalgearSearch::updateActive(float deltaFrame) {
         } else {
             u32 rootNode = 0;
             getNodePosition(&m_posGimmickWork[3], 0, rootNode);
-            Vec3f* pos = m_posGimmickWork;
-            float moveY = m_move.m_y;
-            float moveZ = m_move.m_z;
-            pos[3].m_x = pos[3].m_x + m_move.m_x;
-            pos[3].m_y = pos[3].m_y + moveY;
-            pos[3].m_z = pos[3].m_z + moveZ;
+            Vec3fAdd(&m_posGimmickWork[3], &m_posGimmickWork[3], &m_move);
         }
         break;
     case 10: {
         Vec3f pos;
         if (*m_stateExclamationWork != 4 && getPlayerPosition(*m_tgtWork, &pos, 1) == 1) {
             *m_stateExclamationWork = 4;
-            pos.m_y = pos.m_y + 5.0f;
-            Vec3f* work = m_posGimmickWork;
-            work[10].m_x = pos.m_x;
-            work[10].m_y = pos.m_y;
-            work[10].m_z = pos.m_z;
+            pos.m_y += 5.0f;
+            m_posGimmickWork[10] = pos;
         }
         if (m_timer == 0.0f) {
             m_seHandle = g_sndSystem->playSE(snd_se_stage_Metalgear_04, 0, 30, 0, -1);
-            float r = randf();
+            m_timer = data->unk90 + (data->unk94 - data->unk90) * randf();
             m_state = 11;
-            m_timer = data->unk90 + (data->unk94 - data->unk90) * r;
         }
         break;
     }
@@ -181,7 +162,7 @@ void grMetalgearSearch::updateActive(float deltaFrame) {
             m_timer = 90.0f;
             *m_stateExclamationWork = 6;
             if (m_seHandle != -1) {
-                fn_80075F1C(g_sndSystem, m_seHandle, 15);
+                g_sndSystem->stopSE(m_seHandle, 15);
             }
             m_state = 12;
         } else if (getPlayerPosition(*m_tgtWork, &m_posGimmickWork[3], 0) != 1) {
@@ -189,7 +170,7 @@ void grMetalgearSearch::updateActive(float deltaFrame) {
             *m_stateWork = 5;
             *m_stateExclamationWork = 6;
             if (m_seHandle != -1) {
-                fn_80075F1C(g_sndSystem, m_seHandle, 30);
+                g_sndSystem->stopSE(m_seHandle, 30);
             }
             m_state = 12;
         }

@@ -150,10 +150,7 @@ void ftYoshiStatusUniqProcessSpecialSTurn::execFixPosCounter(soModuleAccesser* a
             float yaw = speed.m_x < 0.0f ? -1.5707964f : 1.5707964f;
             float normalY = normal.m_y;
             float slope = atan2(-normal.m_x, normalY);
-            Vec3f rotation(0.0f, yaw, slope);
-            soEffectModule& effect = acc->getEffectModule();
-            Vec3f position = posture.getPos();
-            effect.req(static_cast<EfID>(10), &position, &rotation, 1.0f, 0, -1);
+            acc->getEffectModule().req(static_cast<EfID>(10), &posture.getPos(), &Vec3f(0.0f, yaw, slope), 1.0f, 0, -1);
         }
         work.setInt(counter + 1, 0x20000004);
     }

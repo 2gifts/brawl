@@ -63,14 +63,13 @@ void grMarioPastBg::update(float deltaFrame) {
             getNodeIndex(&m_node[5], 0, "ca");
             m_state = 1;
         }
-            // fall through
         case 1:
             if (m_torchEffect == 1) {
-                if (getMotionFrame(0) <= 3600.0f) {
-                    setNodeVisibility(false, 0, m_node[0], true, false);
-                } else {
+                if (getMotionFrame(0) > 3600.0f) {
                     setNodeVisibility(true, 0, m_node[0], true, false);
                     m_torchEffect = 0;
+                } else {
+                    setNodeVisibility(false, 0, m_node[0], true, false);
                 }
             }
             break;
@@ -78,21 +77,6 @@ void grMarioPastBg::update(float deltaFrame) {
         break;
     case 1:
         switch (m_state) {
-        case 1: {
-            snd3DGenerator* snd = m_snd;
-            int* sndId = m_sndId;
-            for (int i = 0; i < 6; i++) {
-                if (*sndId == -1) {
-                    *sndId = snd->playSE(SndID(0x1B77), 0, 0, -1);
-                }
-                Vec3f pos;
-                getNodePosition(&pos, 0, m_node[i + 6]);
-                snd->setPos(&pos);
-                snd++;
-                sndId++;
-            }
-            break;
-        }
         case 0: {
             g_ecMgr->setDrawPrio(1);
             u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x360002));
@@ -121,21 +105,33 @@ void grMarioPastBg::update(float deltaFrame) {
             m_state = 1;
             break;
         }
+        case 1:
+            for (int i = 0; i < 6; i++) {
+                if (m_sndId[i] == -1) {
+                    m_sndId[i] = m_snd[i].playSE(SndID(0x1B77), 0, 0, -1);
+                }
+                Vec3f pos;
+                getNodePosition(&pos, 0, m_node[i + 6]);
+                m_snd[i].setPos(&pos);
+            }
+            break;
         }
         break;
     }
     updateCallBack(deltaFrame);
     updateG3dProcCalcWorld();
     m_hasUpdatedG3dCalcWorld = false;
-    Vec3f* posGimmick = m_posGimmick;
-    if (posGimmick != NULL) {
-        if (m_stage == 1) {
-            getNodePosition(&posGimmick[7], 0, m_node[1]);
+    if (m_posGimmick != NULL) {
+        switch (m_stage) {
+        case 0:
+            getNodePosition(&m_posGimmick[12], 0, m_node[5]);
+            break;
+        case 1:
+            getNodePosition(&m_posGimmick[7], 0, m_node[1]);
             getNodePosition(&m_posGimmick[8], 0, m_node[2]);
             getNodePosition(&m_posGimmick[9], 0, m_node[3]);
             getNodePosition(&m_posGimmick[10], 0, m_node[4]);
-        } else if (m_stage == 0) {
-            getNodePosition(&posGimmick[12], 0, m_node[5]);
+            break;
         }
     }
 }

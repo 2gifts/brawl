@@ -62,10 +62,10 @@ void grDolpicAshiba::updateActive(float deltaFrame) {
             case 0:
                 setMotion(0, 1, 1, &m_animFrames);
                 setMotionFrame(m_animFrames, 0);
-                if (m_motionRatio > 0.0f) {
-                    m_motionRatio = m_motionRatio * -1.0f;
-                }
                 m_lastFrame = m_animFrames;
+                if (m_motionRatio > 0.0f) {
+                    m_motionRatio *= -1.0f;
+                }
                 m_timer = data->m_fadeTime;
                 m_state = 1;
                 break;
@@ -101,10 +101,7 @@ void grDolpicAshiba::updateActive(float deltaFrame) {
             }
             {
                 float sine = nw4r::math::SinIdx((u16)(int)(16384.0f * m_rate));
-                float depth = data->m_sinkDepth;
-                m_offsetPos.m_x = 0.0f;
-                m_offsetPos.m_z = 0.0f;
-                m_offsetPos.m_y = -depth + depth * sine;
+                m_offsetPos.set(0.0f, -data->m_sinkDepth + data->m_sinkDepth * sine, 0.0f);
                 if (m_type == 2) {
                     *m_rateWork = sine;
                 }
@@ -128,7 +125,7 @@ void grDolpicAshiba::updateActive(float deltaFrame) {
             case 0:
                 setMotion(0, 0, 1, &m_animFrames);
                 if (m_motionRatio < 0.0f) {
-                    m_motionRatio = m_motionRatio * -1.0f;
+                    m_motionRatio *= -1.0f;
                 }
                 m_timer = data->m_fadeTime;
                 m_state = 1;
@@ -161,10 +158,7 @@ void grDolpicAshiba::updateActive(float deltaFrame) {
             }
             {
                 float sine = nw4r::math::SinIdx((u16)(int)(16384.0f * m_rate));
-                float depth = data->m_sinkDepth;
-                m_offsetPos.m_x = 0.0f;
-                m_offsetPos.m_z = 0.0f;
-                m_offsetPos.m_y = -depth * sine;
+                m_offsetPos.set(0.0f, -data->m_sinkDepth * sine, 0.0f);
                 if (m_type == 2) {
                     *m_rateWork = 1.0f - sine;
                 }
@@ -179,10 +173,13 @@ void grDolpicAshiba::updateActive(float deltaFrame) {
                 if (m_collision != NULL) {
                     m_collision->setDisable();
                 }
-                m_state = 1;
-                m_offsetPos.m_x = 0.0f;
-                m_offsetPos.m_y = -data->m_sinkDepth;
-                m_offsetPos.m_z = 0.0f;
+                {
+                    float depth = -data->m_sinkDepth;
+                    m_state = 1;
+                    m_offsetPos.m_x = 0.0f;
+                    m_offsetPos.m_y = depth;
+                    m_offsetPos.m_z = 0.0f;
+                }
                 break;
             case 1:
                 break;

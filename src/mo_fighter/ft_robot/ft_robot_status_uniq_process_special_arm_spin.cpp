@@ -38,6 +38,10 @@ inline float absValueInline(float value) { return __fabsf(value); }
 //   flag  0x22000014  the spin's launch speed still has to be applied / energies have to be set up again
 
 void ftRobotStatusUniqProcessSpecialArmSpin::initStatus(soModuleAccesser* moduleAccesser) {
+    // MATCH-ONLY: the stick and flick-window floats are declared up front so they share the first saved FPR with speedX.
+    float stickX;
+    float flickBase;
+    float window;
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
     Vec2f sumSpeed;
@@ -46,13 +50,13 @@ void ftRobotStatusUniqProcessSpecialArmSpin::initStatus(soModuleAccesser* module
     float speedY = sumSpeed.m_y;
     switch (moduleAccesser->getStatusModule().getStatusKind()) {
     case 0x113: {
-        // Pushing the stick forward hard and fast enough starts the stronger spin.
-        float stick = (float)fabs(moduleAccesser->getControllerModule().getStickX());
-        if (stick >= getCommonParamView()->stickThreshold) {
+        double stickMagnitude = fabs(moduleAccesser->getControllerModule().getStickX());
+        stickX = stickMagnitude;
+        if (stickX >= getCommonParamView()->stickThreshold) {
             soControllerModule& controller = moduleAccesser->getControllerModule();
-            float flickBase = getCommonParamView()->flickMargin;
+            flickBase = getCommonParamView()->flickMargin;
             float flickAdd = (float)getCommonParamView()->flickFrames;
-            float window = flickAdd + flickBase;
+            window = flickAdd + flickBase;
             if ((float)controller.getFlickNoResetX() < window) {
                 moduleAccesser->getWorkManageModule().onFlag(0x22000012);
             }
