@@ -104,25 +104,18 @@ extern "C" void fn_80105558(IfMinigameTraining* training);
 extern "C" void fn_80108E5C(IfAdvBoss* boss);
 extern "C" void fn_800F0F84(void* photo);
 extern "C" int fn_800FBFDC(void* menu);
-// HYPOTHESIS: map names IfPlayer::portriteRenderMainFastInit, loupeRenderPreInit, portriteRenderMainFast, loupeRenderPre
+// HYPOTHESIS: map names IfPlayer::portriteRenderMainFastInit, portriteRenderMainFast
 extern "C" void fn_800E2964(void* work, int* count, int numPlayers);
-extern "C" void fn_800E3378();
 extern "C" void fn_800E2B00(IfPlayer* player, void* work, int count);
-extern "C" void fn_800E3384(IfPlayer* player);
+// HYPOTHESIS: map names IfPlayer::receiveShareStock, addDragoonParts
+extern "C" void fn_800E1D78(IfPlayer* player, Vec3f* pos);
+extern "C" void fn_800E4758(IfPlayer* player, u32 part);
 // HYPOTHESIS: map names IfPhoto::startPause
 extern "C" void fn_800F00D4(void* photo, int arg1, int arg2, int playerNo, bool arg4);
 // HYPOTHESIS: map names IfWifiIntrMenu::endMenu
 extern "C" void fn_800FBF90(void* menu);
 // HYPOTHESIS: map names muNoticeWndTask::dispSubMsg
 extern "C" void fn_800BF928(muNoticeWndTask* wnd, const char* text);
-// HYPOTHESIS: map names IfPlayer::giveShareStock, receiveShareStock
-extern "C" bool fn_800E1E28(IfPlayer* player, void* stock);
-extern "C" void fn_800E1D78(IfPlayer* player, void* stock);
-// HYPOTHESIS: map names IfPlayer::addDragoonParts, deleteDragoonParts, setDragoonPartsComplete, resetDragoonParts
-extern "C" void fn_800E4758(IfPlayer* player, int part);
-extern "C" void fn_800E485C(IfPlayer* player, int part);
-extern "C" void fn_800E4BA4(IfPlayer* player, int arg);
-extern "C" void fn_800E4CA4(IfPlayer* player);
 // HYPOTHESIS: map names IfMinigameHomerun::dispStart
 extern "C" void fn_800FF0BC(IfMinigameHomerun* homerun, int arg1, int arg2);
 // HYPOTHESIS: map names IfCenter::dispKumiteKills
@@ -326,11 +319,11 @@ void IfMngr::setDlgDWCErrorCode(int code) {
 }
 
 bool IfMngr::sharePlayerStock(int giver, int receiver) {
-    u8 stock[4];
-    if (!fn_800E1E28(m_ifPlayers[giver], stock)) {
+    Vec3f stock;
+    if (!m_ifPlayers[giver]->giveShareStock(&stock)) {
         return false;
     }
-    fn_800E1D78(m_ifPlayers[receiver], stock);
+    fn_800E1D78(m_ifPlayers[receiver], &stock);
     return true;
 }
 
@@ -339,15 +332,15 @@ void IfMngr::addPlayerDragoonParts(int playerNo, int part) {
 }
 
 void IfMngr::deletePlayerDragoonParts(int playerNo, int part) {
-    fn_800E485C(m_ifPlayers[playerNo], part);
+    m_ifPlayers[playerNo]->deleteDragoonParts(part);
 }
 
 void IfMngr::setPlayerDragoonPartsComplete(int playerNo, int arg2) {
-    fn_800E4BA4(m_ifPlayers[playerNo], arg2);
+    m_ifPlayers[playerNo]->setDragoonPartsComplete(arg2);
 }
 
 void IfMngr::resetPlayerDragoonParts(int playerNo) {
-    fn_800E4CA4(m_ifPlayers[playerNo]);
+    m_ifPlayers[playerNo]->resetDragoonParts();
 }
 
 void IfMngr::dispHomerunStart(int arg1, int arg2) {
@@ -496,12 +489,12 @@ void ifTask::renderPre() {
     int count;
     u8 work[0x78];
     fn_800E2964(work, &count, MAX_PLAYERS);
-    fn_800E3378();
+    IfPlayer::loupeRenderPreInit();
     for (i = 0; i < MAX_PLAYERS; i++) {
         IfPlayer* player = mngr->m_ifPlayers[i];
         if (player != NULL && reinterpret_cast<IfPlayerFlags*>(player)->unk5) {
             fn_800E2B00(player, work, count);
-            fn_800E3384(mngr->m_ifPlayers[i]);
+            mngr->m_ifPlayers[i]->loupeRenderPre();
         }
     }
 }
