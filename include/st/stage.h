@@ -107,8 +107,14 @@ public:
 };
 static_assert(sizeof(stParam) == 260, "Class is wrong size!");
 
+// HYPOTHESIS: the field meanings, from how stOperatorDefeatBoss uses them; unkC is copied but never read there.
 struct stDestroyBossParamCommon {
-    char _[0x18];
+    u32 m_freezeFrame;
+    u32 m_slowFrame;
+    float m_slowRate;
+    u32 unkC;
+    u32 m_lostFrame;
+    u32 m_fadeFrame;
 };
 static_assert(sizeof(stDestroyBossParamCommon) == 0x18, "Class is wrong size!");
 
@@ -189,7 +195,14 @@ public:
     // 154
     u32 unk194;
     // 158
-    char _spacer7[0x8];
+    char _spacer7[0x1];
+    // HYPOTHESIS: flags read by the boss-defeat sequence (stOperatorDefeatBoss), meanings unknown.
+    bool unk199;
+    bool unk19A;
+    bool unk19B;
+    bool unk19C;
+    bool unk19D;
+    char _spacer8[0x2];
     // TOTAL_SIZE == 0x160
 
     void testStageParamInit(gfArchive* archive, int fileIndex);
@@ -338,7 +351,13 @@ public:
     virtual stDestroyBossParamCommon getDestroyBossParamCommon(u32, int enemyCreateId = -1, int enemyMessageKind = -1);
 #endif
     virtual void stAdventureEventGetItem(int entryId, itKind kind, int itVariation, int genParamId, int instanceId);
+#ifdef ST_STAGE_OUT_EFFECT_INIT_FLAG
+    // HYPOTHESIS: callers pass a flag (stOperatorDefeatBoss, grAdventureWarpZone) that Stage's own body ignores; its
+    // symbol is named without parameters, so only units that call it with the flag opt in to this view.
+    virtual void setStageOutEffectInit(int flag);
+#else
     virtual void setStageOutEffectInit();                          // TODO
+#endif
     virtual void setStageInEffectInit();                           // TODO
     virtual int helperStarWarp() { return 0; }
     virtual int initializeFighterAttackRatio() { return 0; }
