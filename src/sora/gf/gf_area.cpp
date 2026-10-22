@@ -1,16 +1,11 @@
 // MATCH-ONLY: this unit copies whole vectors with the aggregate word copy.
 #define MT_VEC2F_PLAIN_BASE
 #include <gf/gf_area.h>
+#include <gf/gf_area_manager.h>
 #include <mt/mt_coll2d.h>
 #include <types.h>
 
-class gfAreaManager;
-
-// HYPOTHESIS: unnamed gfAreaManager and mt_coll2d entry points (map: gfAreaManager::registArea/removeArea,
-// clAABBox2D/clCircle2D/clTriangle2D checkIntersect/checkInclude/getAABBox/draw); parameter types from register use.
-extern gfAreaManager* lbl_8059FF90;
-extern "C" void fn_80012470(gfAreaManager* manager, gfArea* area);
-extern "C" void fn_80012504(gfAreaManager* manager, gfArea* area);
+// HYPOTHESIS: unnamed mt_coll2d entry points (map: clAABBox2D/clCircle2D/clTriangle2D checkIntersect/checkInclude/getAABBox/draw); parameter types from register use.
 extern "C" bool fn_80041D64(const clAABBox2D* box, const clAABBox2D* other);
 extern "C" bool fn_80041DCC(const clAABBox2D* box, const clCircle2D* circle);
 extern "C" bool fn_800418D0(const clAABBox2D* box, const Vec2f* pos);
@@ -52,14 +47,14 @@ gfArea::~gfArea() {
 
 void gfArea::regist() {
     if (!m_isRegist) {
-        fn_80012470(lbl_8059FF90, this);
+        lbl_8059FF90->registArea(this);
         m_isRegist = true;
     }
 }
 
 void gfArea::unRegist() {
     if (m_isRegist == true) {
-        fn_80012504(lbl_8059FF90, this);
+        lbl_8059FF90->removeArea(this);
         m_isRegist = false;
     }
 }
