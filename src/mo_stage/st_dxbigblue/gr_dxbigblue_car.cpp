@@ -68,8 +68,8 @@ void grDxBigBlueCar::updateActive(float deltaFrame) {
         case 0:
             setVisibility(0);
             setEnableCollisionStatus(false);
-            unk164 = 0;
             m_speed = 0.0f;
+            unk164 = 0;
             unk168 = 0.0f;
             m_state = 1;
         case 1:

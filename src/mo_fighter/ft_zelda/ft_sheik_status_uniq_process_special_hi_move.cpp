@@ -51,7 +51,8 @@ void ftSheikStatusUniqProcessSpecialHiMove::initStatus(soModuleAccesser* moduleA
         if (magnitude < params[5]) {
             useFreshDirection = 1;
         } else {
-            Vec2f normal = ground.getTouchNormal(8, 0);
+            Vec2f normal;
+            Vec2f::copy(normal, ground.getTouchNormal(8, 0));
             if (stick.mtVecAngle(normal) < 1.57079632679f) {
                 useFreshDirection = 1;
             } else if (ground.isPassableGround(0)) {

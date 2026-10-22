@@ -1,4 +1,5 @@
 #include <havok/hkMatrix3.h>
+#include <havok/hkVector4.h>
 
 #include <math.h>
 
@@ -109,69 +110,34 @@ void hkMatrix3::setTranspose(const hkMatrix3& other) {
 
 void hkMatrix3::setMul(const hkMatrix3& lhs, const hkMatrix3& rhs) {
     const float* a = lhs.elements;
+    // HYPOTHESIS: lhs is copied to an aligned local first so the product stays correct when this aliases lhs.
+    hkVector4 columns[3];
+    columns[0].x = a[0];
+    columns[0].y = a[1];
+    columns[0].z = a[2];
+    columns[0].w = a[3];
+    columns[1].x = a[4];
+    columns[1].y = a[5];
+    columns[1].z = a[6];
+    columns[1].w = a[7];
+    columns[2].x = a[8];
+    columns[2].y = a[9];
+    columns[2].z = a[10];
+    columns[2].w = a[11];
+
     const float* b = rhs.elements;
     float* out = elements;
-
-    const float a0 = a[0];
-    const float a1 = a[1];
-    const float a2 = a[2];
-    const float a4 = a[4];
-    const float a5 = a[5];
-    const float a6 = a[6];
-    const float a8 = a[8];
-    const float a9 = a[9];
-    const float a10 = a[10];
-
-    const float b0 = b[0];
-    const float b1 = b[1];
-    const float b2 = b[2];
-    const float b4 = b[4];
-    const float b5 = b[5];
-    const float b6 = b[6];
-    const float b8 = b[8];
-    const float b9 = b[9];
-    const float b10 = b[10];
-
-    float sum0 = b1 * a4;
-    sum0 = b0 * a0 + sum0;
-    const float r0 = b2 * a8 + sum0;
-    float sum1 = b1 * a5;
-    sum1 = b0 * a1 + sum1;
-    const float r1 = b2 * a9 + sum1;
-    float sum2 = b1 * a6;
-    sum2 = b0 * a2 + sum2;
-    const float r2 = b2 * a10 + sum2;
-    float sum4 = b5 * a4;
-    sum4 = b4 * a0 + sum4;
-    const float r4 = b6 * a8 + sum4;
-    float sum5 = b5 * a5;
-    sum5 = b4 * a1 + sum5;
-    const float r5 = b6 * a9 + sum5;
-    float sum6 = b5 * a6;
-    sum6 = b4 * a2 + sum6;
-    const float r6 = b6 * a10 + sum6;
-    float sum8 = b9 * a4;
-    sum8 = b8 * a0 + sum8;
-    const float r8 = b10 * a8 + sum8;
-    float sum9 = b9 * a5;
-    sum9 = b8 * a1 + sum9;
-    const float r9 = b10 * a9 + sum9;
-    float sum10 = b9 * a6;
-    sum10 = b8 * a2 + sum10;
-    const float r10 = b10 * a10 + sum10;
-
-    out[0] = r0;
-    out[1] = r1;
-    out[2] = r2;
-    out[3] = 0.0f;
-    out[4] = r4;
-    out[5] = r5;
-    out[6] = r6;
-    out[7] = 0.0f;
-    out[8] = r8;
-    out[9] = r9;
-    out[10] = r10;
-    out[11] = 0.0f;
+    for (int i = 0; i < 3; i++) {
+        const float v0 = b[0];
+        const float v1 = b[1];
+        const float v2 = b[2];
+        out[0] = v0 * columns[0].x + v1 * columns[1].x + v2 * columns[2].x;
+        out[1] = v0 * columns[0].y + v1 * columns[1].y + v2 * columns[2].y;
+        out[2] = v0 * columns[0].z + v1 * columns[1].z + v2 * columns[2].z;
+        out[3] = 0.0f;
+        b += 4;
+        out += 4;
+    }
 }
 
 void hkMatrix3::setMul(float scalar, const hkMatrix3& other) {

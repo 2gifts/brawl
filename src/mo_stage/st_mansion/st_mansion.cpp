@@ -249,26 +249,26 @@ void stMansion::createObjArea(int index) {
         ground->setType(type);
         ground->setTypeLR(typeLR);
         ground->setScaleRateFlg(scaleRateFlg);
-        if (index != 6) {
-            u32 node;
-            switch (index) {
-            case 4:
-                ground->getNodeIndex(&node, 0, "pillarLU");
-                ground->setPillarNode(node);
-                break;
-            case 5:
-                ground->getNodeIndex(&node, 0, "pillarLD");
-                ground->setPillarNode(node);
-                break;
-            case 7:
-                ground->getNodeIndex(&node, 0, "pillarRU");
-                ground->setPillarNode(node);
-                break;
-            case 8:
-                ground->getNodeIndex(&node, 0, "pillarRD");
-                ground->setPillarNode(node);
-                break;
-            }
+        u32 node;
+        switch (index) {
+        case 4:
+            ground->getNodeIndex(&node, 0, "pillarLU");
+            ground->setPillarNode(node);
+            break;
+        case 5:
+            ground->getNodeIndex(&node, 0, "pillarLD");
+            ground->setPillarNode(node);
+            break;
+        case 6:
+            break;
+        case 7:
+            ground->getNodeIndex(&node, 0, "pillarRU");
+            ground->setPillarNode(node);
+            break;
+        case 8:
+            ground->getNodeIndex(&node, 0, "pillarRD");
+            ground->setPillarNode(node);
+            break;
         }
     }
 }

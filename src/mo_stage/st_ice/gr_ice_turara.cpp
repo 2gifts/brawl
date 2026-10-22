@@ -150,51 +150,53 @@ void grIceTurara::updateActive(float deltaFrame) {
     if (timer < 0.0f) {
         m_hitTimer = 0.0f;
     }
-    u8 state = m_state;
-    if (state == 7) {
-        u8 stage = *m_stateWork;
-        if (stage == 0xB) {
-            m_fallSpeed = 0.0f;
-            disableHit(0, 0);
-            if (m_type == 2) {
-                setAttack();
-                m_snd.playSE(static_cast<SndID>(0x1C8A), 0, 0, -1);
-            }
-            m_state = 0x13;
-        } else if (stage == 0xE) {
-            m_state = 0;
-        } else if (ICE_TURARA_IS_MINE(stage)) {
-            setVisibility(1);
-            enableHit(0, 0);
-        } else {
-            setVisibility(0);
-            disableHit(0, 0);
-        }
-    } else if (state < 7) {
-        if (state == 1) {
-            u8 stage = *m_stateWork;
-            if (stage != 0xE) {
-                if (ICE_TURARA_IS_MINE(stage)) {
-                    setVisibility(1);
-                    enableHit(0, 0);
-                }
-                m_state = 7;
-            }
-        } else if (state == 0) {
+    switch (m_state) {
+        case 0:
             setVisibility(0);
             disableHit(0, 0);
             disableAttack(0);
             m_attackSet = 0;
             m_state = 1;
-        }
-    } else if (state == 0x13 && m_pos.m_y < m_posLimitWork[1].m_y) {
-        *m_stateWork = 0xE;
-        setVisibility(0);
-        if (m_type == 2) {
-            disableAttack(0);
-            m_attackSet = 0;
-        }
-        m_state = 0;
+            break;
+        case 1:
+            if (*m_stateWork != 0xE) {
+                if (ICE_TURARA_IS_MINE(*m_stateWork)) {
+                    setVisibility(1);
+                    enableHit(0, 0);
+                }
+                m_state = 7;
+            }
+            break;
+        case 7:
+            if (*m_stateWork == 0xB) {
+                m_fallSpeed = 0.0f;
+                disableHit(0, 0);
+                if (m_type == 2) {
+                    setAttack();
+                    m_snd.playSE(static_cast<SndID>(0x1C8A), 0, 0, -1);
+                }
+                m_state = 0x13;
+            } else if (*m_stateWork == 0xE) {
+                m_state = 0;
+            } else if (ICE_TURARA_IS_MINE(*m_stateWork)) {
+                setVisibility(1);
+                enableHit(0, 0);
+            } else {
+                setVisibility(0);
+                disableHit(0, 0);
+            }
+            break;
+        case 0x13:
+            if (m_pos.m_y < m_posLimitWork[1].m_y) {
+                *m_stateWork = 0xE;
+                setVisibility(0);
+                if (m_type == 2) {
+                    disableAttack(0);
+                    m_attackSet = 0;
+                }
+                m_state = 0;
+            }
+            break;
     }
 }
 

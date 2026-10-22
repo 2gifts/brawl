@@ -34,7 +34,7 @@ void CameraController::changeInput(Kind cameraControllerKind)
             gfCamera& camera = manager->m_cameras[0];
             Vec3f zero(0.0f, 0.0f, 0.0f);
             camera.m_0x9C = zero;
-            *(Vec3f*)&camera._0xA8[12] = zero;
+            camera.m_rotationOffset = zero;
         }
     }
     if (flag && (cameraControllerKind == AI || cameraControllerKind == Demo)) {

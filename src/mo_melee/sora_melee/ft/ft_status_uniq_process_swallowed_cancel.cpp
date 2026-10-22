@@ -288,31 +288,17 @@ void ftStatusUniqProcessSwallowedCancel::initStatus(soModuleAccesser* moduleAcce
     // HYPOTHESIS: angle and radius come from the constants 0xd5d and 0xd5c (scaled by the link value)
     float angle = soValueAccesser::getConstantFloat(moduleAccesser, 0xd5d, 0);
     float radius = soValueAccesser::getConstantFloat(moduleAccesser, 0xd5c, 0);
-    float speedX = -linkValue * (radius * (float)cos(angle));
-    float speedY = radius * (float)sin(angle);
-    Vec2f speed;
-    speed.m_x = speedX;
-    speed.m_y = 0.0f;
-    Vec3f rot;
-    rot.m_x = 0.0f;
-    rot.m_y = 0.0f;
-    rot.m_z = 0.0f;
-    soKineticEnergy* energy = moduleAccesser->getKineticModule().getEnergy(3);
-    ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*energy);
-    stop.resetEnergy(6, &speed, &rot, moduleAccesser);
-    ((u8*)&stop)[5] |= 0x80;
+    // MATCH-ONLY: a Vec3f (z unused) reproduces the original 0xc-byte stack slot for the launch speed
+    Vec3f speed;
+    speed.m_x = -linkValue * (radius * cosf(angle));
+    speed.m_y = radius * sinf(angle);
+    ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
+    stop.resetEnergy(6, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    stop.enable();
 
-    soKineticEnergy* gravityBase = moduleAccesser->getKineticModule().getEnergy(1);
-    ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*gravityBase);
-    Vec2f gravitySpeed;
-    gravitySpeed.m_x = 0.0f;
-    gravitySpeed.m_y = speedY;
-    Vec3f gravityRot;
-    gravityRot.m_x = 0.0f;
-    gravityRot.m_y = 0.0f;
-    gravityRot.m_z = 0.0f;
-    gravity.resetEnergy(0, &gravitySpeed, &gravityRot, moduleAccesser);
-    ((u8*)&gravity)[5] |= 0x80;
+    ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
+    gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    gravity.enable();
 
     float a = soValueAccesser::getConstantFloat(moduleAccesser, 0xd5e, 0);
     float b = soValueAccesser::getConstantFloat(moduleAccesser, 0xd55, 0);

@@ -110,14 +110,16 @@ void ftStatusUniqProcessDownReflect::initNormalDamage(soModuleAccesser* moduleAc
             Vec3f effectPos;
             Vec3f effectRot;
             Vec3f cameraPos;
+            float posX;
+            float posY;
             float normalX = touchNormal.m_x;
             float normalY = touchNormal.m_y;
             float angle = atan2(-normalX, normalY);
             effectRot.m_x = 0.0f;
             effectRot.m_y = 0.0f;
             effectRot.m_z = angle;
-            float posY = touchPos.m_y;
-            float posX = touchPos.m_x;
+            posY = touchPos.m_y;
+            posX = touchPos.m_x;
             effectPos.m_x = posX;
             effectPos.m_y = posY;
             effectPos.m_z = 0.0f;

@@ -183,40 +183,40 @@ void grDxGreensBlockPos::updatePos(float deltaFrame) {
 }
 
 bool grDxGreensBlockPos::setNode() {
-    bool result = grGimmick::setNode();
-    if (result) {
-        m_node[0] = getNodeIndex(0, "BlockN3");
-        m_node[1] = getNodeIndex(0, "BlockN4");
-        m_node[2] = getNodeIndex(0, "BlockN9");
-        m_node[3] = getNodeIndex(0, "BlockN10");
-        m_node[4] = getNodeIndex(0, "BlockN15");
-        m_node[5] = getNodeIndex(0, "BlockN2");
-        m_node[6] = getNodeIndex(0, "BlockN5");
-        m_node[7] = getNodeIndex(0, "BlockN8");
-        m_node[8] = getNodeIndex(0, "BlockN11");
-        m_node[9] = getNodeIndex(0, "BlockN14");
-        m_node[10] = getNodeIndex(0, "BlockN1");
-        m_node[11] = getNodeIndex(0, "BlockN6");
-        m_node[12] = getNodeIndex(0, "BlockN7");
-        m_node[13] = getNodeIndex(0, "BlockN12");
-        m_node[14] = getNodeIndex(0, "BlockN13");
-        m_node[15] = getNodeIndex(0, "BlockN28");
-        m_node[16] = getNodeIndex(0, "BlockN27");
-        m_node[17] = getNodeIndex(0, "BlockN22");
-        m_node[18] = getNodeIndex(0, "BlockN21");
-        m_node[19] = getNodeIndex(0, "BlockN16");
-        m_node[20] = getNodeIndex(0, "BlockN29");
-        m_node[21] = getNodeIndex(0, "BlockN26");
-        m_node[22] = getNodeIndex(0, "BlockN23");
-        m_node[23] = getNodeIndex(0, "BlockN20");
-        m_node[24] = getNodeIndex(0, "BlockN17");
-        m_node[25] = getNodeIndex(0, "BlockN30");
-        m_node[26] = getNodeIndex(0, "BlockN25");
-        m_node[27] = getNodeIndex(0, "BlockN24");
-        m_node[28] = getNodeIndex(0, "BlockN19");
-        m_node[29] = getNodeIndex(0, "BlockN18");
+    if (!grGimmick::setNode()) {
+        return false;
     }
-    return result;
+    m_node[0] = getNodeIndex(0, "BlockN3");
+    m_node[1] = getNodeIndex(0, "BlockN4");
+    m_node[2] = getNodeIndex(0, "BlockN9");
+    m_node[3] = getNodeIndex(0, "BlockN10");
+    m_node[4] = getNodeIndex(0, "BlockN15");
+    m_node[5] = getNodeIndex(0, "BlockN2");
+    m_node[6] = getNodeIndex(0, "BlockN5");
+    m_node[7] = getNodeIndex(0, "BlockN8");
+    m_node[8] = getNodeIndex(0, "BlockN11");
+    m_node[9] = getNodeIndex(0, "BlockN14");
+    m_node[10] = getNodeIndex(0, "BlockN1");
+    m_node[11] = getNodeIndex(0, "BlockN6");
+    m_node[12] = getNodeIndex(0, "BlockN7");
+    m_node[13] = getNodeIndex(0, "BlockN12");
+    m_node[14] = getNodeIndex(0, "BlockN13");
+    m_node[15] = getNodeIndex(0, "BlockN28");
+    m_node[16] = getNodeIndex(0, "BlockN27");
+    m_node[17] = getNodeIndex(0, "BlockN22");
+    m_node[18] = getNodeIndex(0, "BlockN21");
+    m_node[19] = getNodeIndex(0, "BlockN16");
+    m_node[20] = getNodeIndex(0, "BlockN29");
+    m_node[21] = getNodeIndex(0, "BlockN26");
+    m_node[22] = getNodeIndex(0, "BlockN23");
+    m_node[23] = getNodeIndex(0, "BlockN20");
+    m_node[24] = getNodeIndex(0, "BlockN17");
+    m_node[25] = getNodeIndex(0, "BlockN30");
+    m_node[26] = getNodeIndex(0, "BlockN25");
+    m_node[27] = getNodeIndex(0, "BlockN24");
+    m_node[28] = getNodeIndex(0, "BlockN19");
+    m_node[29] = getNodeIndex(0, "BlockN18");
+    return true;
 }
 
 // Builds the hit objects: the first one has a hit sphere on every block node (and the damage module that tells which one

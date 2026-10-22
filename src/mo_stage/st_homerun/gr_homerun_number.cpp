@@ -67,7 +67,7 @@ void grHomerunNumber::updateNumber(float deltaFrame) {
         m_lastScore = *m_scoreWork;
         hideAll();
         char digit[8];
-        char text[16];
+        char text[64];
         strcpy(digit, "");
         itoa(*m_scoreWork, text, 10);
         u32 length = strlen(text);
@@ -76,7 +76,7 @@ void grHomerunNumber::updateNumber(float deltaFrame) {
             if (length < 1) {
                 show(0);
             } else {
-                strncpy(digit, text + length - 1, 1);
+                strncpy(digit, &text[length - 1], 1);
                 show(atoi(digit));
             }
             break;
@@ -84,7 +84,7 @@ void grHomerunNumber::updateNumber(float deltaFrame) {
             if (length < 2) {
                 show(0);
             } else {
-                strncpy(digit, text + length - 2, 1);
+                strncpy(digit, &text[length - 2], 1);
                 show(atoi(digit));
             }
             break;
@@ -92,7 +92,7 @@ void grHomerunNumber::updateNumber(float deltaFrame) {
             if (length < 3) {
                 show(0);
             } else {
-                strncpy(digit, text + length - 3, 1);
+                strncpy(digit, &text[length - 3], 1);
                 show(atoi(digit));
             }
             break;
@@ -100,7 +100,7 @@ void grHomerunNumber::updateNumber(float deltaFrame) {
             if (length < 4) {
                 show(0);
             } else {
-                strncpy(digit, text + length - 4, 1);
+                strncpy(digit, &text[length - 4], 1);
                 show(atoi(digit));
             }
             break;

@@ -59,65 +59,73 @@ void grPlanktonHanenbou::updateMove(float deltaFrame) {
     if (m_timer < 0.0f) {
         m_timer = 0.0f;
     }
-    u8 state = m_state;
-    if (state != 2) {
-        if (state > 1) {
-            if (state > 3) {
-                return;
-            }
-            m_data->m_prevX = m_data->m_x;
-            m_data->m_prevY = m_data->m_y;
-            m_data->m_speedY = m_data->m_speedY - data->unk54;
-            m_data->m_x = m_data->m_x + m_data->m_speedX * deltaFrame;
-            m_data->m_y = m_data->m_y + m_data->m_speedY * deltaFrame;
-            m_data->m_angle = m_data->m_angle + deltaFrame;
-            if (m_endY < m_data->m_y) {
-                return;
-            }
+    switch (m_state) {
+    case 0:
+        setVisibility(0);
+        m_flip = 0;
+        m_bounce = 0;
+        m_startY = 0.0f;
+        m_endY = 0.0f;
+        m_state = 1;
+    case 1:
+        if (m_data->m_state != 0) {
+            break;
+        }
+        m_startY = m_data->m_y;
+        if (m_posLimit != NULL) {
+            m_endY = m_posLimit[1].m_y - 5.0f;
+        } else {
+            m_endY = m_startY - 45.0f;
+        }
+        // MATCH-ONLY: a local pointer keeps m_data in one register across the prev-position copy
+        {
+            stPlanktonHanenbou* hanenbou = m_data;
+            hanenbou->m_prevX = hanenbou->m_x;
+            hanenbou->m_prevY = hanenbou->m_y;
+        }
+        m_state = 2;
+    case 2:
+        if (!m_isVisible) {
+            setVisibility(1);
+        }
+        checkRefrect();
+        {
+            stPlanktonHanenbou* hanenbou = m_data;
+            hanenbou->m_prevX = hanenbou->m_x;
+            hanenbou->m_prevY = hanenbou->m_y;
+        }
+        m_data->m_speedY = m_data->m_speedY - data->hanenbouGravity * deltaFrame;
+        m_data->m_x = m_data->m_x + m_data->m_speedX * deltaFrame;
+        m_data->m_y = m_data->m_y + m_data->m_speedY * deltaFrame;
+        float dx = m_data->m_x - m_data->m_prevX;
+        float dy = m_data->m_y - m_data->m_prevY;
+        m_data->m_angle = nw4r::math::Atan2FIdx(dy, dx) * 1.40625f;
+        if (m_data->m_speedX < 0.0f) {
+            m_data->m_angle += 180.0f;
+        }
+        if (m_data->m_y <= m_startY) {
+            m_data->m_speedX *= 0.2f;
+            m_data->m_speedY = 0.0005f;
+            m_data->m_state = 1;
+            m_state = 3;
+        }
+        break;
+    case 3:
+        {
+            stPlanktonHanenbou* hanenbou = m_data;
+            hanenbou->m_prevX = hanenbou->m_x;
+            hanenbou->m_prevY = hanenbou->m_y;
+        }
+        m_data->m_speedY = m_data->m_speedY - data->unk54;
+        m_data->m_x = m_data->m_x + m_data->m_speedX * deltaFrame;
+        m_data->m_y = m_data->m_y + m_data->m_speedY * deltaFrame;
+        m_data->m_angle = m_data->m_angle + deltaFrame;
+        if (m_data->m_y <= m_endY) {
             m_data->m_state = 3;
             setVisibility(0);
             m_state = 0;
-            return;
         }
-        if (state == 0) {
-            setVisibility(0);
-            m_flip = 0;
-            m_bounce = 0;
-            m_startY = 0.0f;
-            m_endY = 0.0f;
-            m_state = 1;
-        }
-        if (m_data->m_state != 0) {
-            return;
-        }
-        m_startY = m_data->m_y;
-        if (m_posLimit == NULL) {
-            m_endY = m_startY - 45.0f;
-        } else {
-            m_endY = m_posLimit[1].m_y - 5.0f;
-        }
-        m_data->m_prevX = m_data->m_x;
-        m_data->m_prevY = m_data->m_y;
-        m_state = 2;
-    }
-    if (!m_isVisible) {
-        setVisibility(1);
-    }
-    checkRefrect();
-    m_data->m_prevX = m_data->m_x;
-    m_data->m_prevY = m_data->m_y;
-    m_data->m_speedY = m_data->m_speedY - data->hanenbouGravity * deltaFrame;
-    m_data->m_x = m_data->m_x + m_data->m_speedX * deltaFrame;
-    m_data->m_y = m_data->m_y + m_data->m_speedY * deltaFrame;
-    m_data->m_angle = nw4r::math::Atan2FIdx(m_data->m_y - m_data->m_prevY, m_data->m_x - m_data->m_prevX) * 1.40625f;
-    if (m_data->m_speedX < 0.0f) {
-        m_data->m_angle = m_data->m_angle + 180.0f;
-    }
-    if (m_data->m_y <= m_startY) {
-        m_data->m_speedX = m_data->m_speedX * 0.2f;
-        m_data->m_speedY = 0.0005f;
-        m_data->m_state = 1;
-        m_state = 3;
+        break;
     }
 }
 

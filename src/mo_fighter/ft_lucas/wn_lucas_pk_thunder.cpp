@@ -151,7 +151,7 @@ soArticle* wnLucasPKThunderMediator::generate(s32 articleId, soModuleAccesser* a
             weapon->deactivateArticle();
         }
         if (wnLucasPKThunder::activeArticle(weapon, acc) == true) {
-            return static_cast<soArticle*>(weapon);
+            return &static_cast<soArticle&>(*weapon);
         }
         return wnGetNullArticle();
     }

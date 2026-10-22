@@ -1351,8 +1351,8 @@ void wnPikminPikminKineticTransactor::changeKinetic(int mode, void* pools, soMod
     }
     case 0x22: {
         wnPikminPikminKineticTransactor empty = {};
-        wnPikminPikminKineticTransactor empty2 = {};
-        empty2.changeKineticSub1(pools, acc);
+        // MATCH-ONLY: native zeroes a second transactor at the bottom of the frame before the store-then-address call.
+        (wnPikminPikminKineticTransactor() = empty).changeKineticSub1(pools, acc);
         break;
     }
     case 0x23: {
@@ -1473,9 +1473,10 @@ void wnPikminPikminKineticTransactor::changeKinetic(int mode, void* pools, soMod
     default:
         return;
     }
-    volatile u8 unkA = 0; // MATCH-ONLY: native clears this unused local byte before the first enable.
+    // MATCH-ONLY: native clears an unused one-byte local before each enable.
+    wnPikminPikminKineticTransactor unkA = {};
     reinterpret_cast<soKineticEnergy*>(poolBytes + 0x118)->enable();
-    volatile u8 unkB = 0; // MATCH-ONLY: native clears this unused local byte before the second enable.
+    wnPikminPikminKineticTransactor unkB = {};
     reinterpret_cast<soKineticEnergy*>(poolBytes + 0xF8)->enable();
 }
 

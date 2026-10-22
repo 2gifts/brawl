@@ -37,18 +37,16 @@ void ftPurinStatusUniqProcessFinal::execStatus(soModuleAccesser* acc) {
         if (acc->getWorkManageModule().isFlag(0x22000011)) {
             acc->getWorkManageModule().addFloat(1.0f, 0x21000004);
             if (acc->getWorkManageModule().isFlag(0x22000012)) {
-                soMotionModule& motion = acc->getMotionModule();
-                float frame = motion.getFrame();
-                float remaining = motion.getEndFrame(0x1ec) - frame;
+                soMotionModule* motion = acc->m_enumerationStart->m_motionModule;
+                float frame = motion->getFrame();
+                float remaining = motion->getEndFrame(0x1ec) - frame;
                 float rate = remaining / soValueAccesser::getConstantFloat(acc, 0xfce, 0);
                 acc->getMotionModule().setRate(rate);
                 acc->getWorkManageModule().setFloat(rate, 0x21000006);
                 acc->getWorkManageModule().offFlag(0x22000012);
             }
         }
-        soWorkManageModule& work = acc->getWorkManageModule();
-        float duration = soValueAccesser::getConstantFloat(acc, 0xfce, 0);
-        float progress = work.getFloat(0x21000004) / duration;
+        float progress = acc->getWorkManageModule().getFloat(0x21000004) / soValueAccesser::getConstantFloat(acc, 0xfce, 0);
         float maximumScale = soValueAccesser::getConstantFloat(acc, 0xfcd, 0);
         float scale = 1.0f + progress * (maximumScale - 1.0f);
         acc->getPostureModule().setOwnerScale(scale);
@@ -63,14 +61,10 @@ void ftPurinStatusUniqProcessFinal::execStatus(soModuleAccesser* acc) {
         }
         break;
     case 0x11f: {
-        soWorkManageModule& work = acc->getWorkManageModule();
-        float duration = soValueAccesser::getConstantFloat(acc, 0xfd0, 0);
-        if (work.getFloat(0x21000004) < duration) {
+        if (acc->getWorkManageModule().getFloat(0x21000004) < soValueAccesser::getConstantFloat(acc, 0xfd0, 0)) {
             acc->getWorkManageModule().addFloat(1.0f, 0x21000004);
         }
-        soWorkManageModule& scaleWork = acc->getWorkManageModule();
-        duration = soValueAccesser::getConstantFloat(acc, 0xfd0, 0);
-        float progress = scaleWork.getFloat(0x21000004) / duration;
+        float progress = acc->getWorkManageModule().getFloat(0x21000004) / soValueAccesser::getConstantFloat(acc, 0xfd0, 0);
         float maximumScale = soValueAccesser::getConstantFloat(acc, 0xfcd, 0);
         float scale = maximumScale + progress * (1.0f - maximumScale);
         acc->getPostureModule().setOwnerScale(scale);

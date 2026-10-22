@@ -87,10 +87,17 @@ static inline void rotateInverseDir(hkVector4& out, const hkRotation& r, const h
 
 // this = a * b. the 3 rotation columns and the translation of b all get rotated by a, then a's translation is added on
 void hkTransform::setMul(const hkTransform& a, const hkTransform& b) {
-    const hkVector4* in = &b.m_rotation.m_col0;
-    hkVector4* out = &m_rotation.m_col0;
+    hkRotation r = a.m_rotation;
     for (int i = 0; i < 4; i++) {
-        rotateDir(out[i], a.m_rotation, in[i]);
+        hkReal* out = &m_rotation.m_col0.x + i * 4;
+        const hkReal* in = &b.m_rotation.m_col0.x + i * 4;
+        hkReal x = in[0];
+        hkReal y = in[1];
+        hkReal z = in[2];
+        out[0] = x * r.m_col0.x + y * r.m_col1.x + z * r.m_col2.x;
+        out[1] = x * r.m_col0.y + y * r.m_col1.y + z * r.m_col2.y;
+        out[2] = x * r.m_col0.z + y * r.m_col1.z + z * r.m_col2.z;
+        out[3] = 0.0f;
     }
     m_translation.add4(a.m_translation);
 }

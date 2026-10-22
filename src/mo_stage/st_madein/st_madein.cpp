@@ -908,7 +908,8 @@ void stMadein::updateStage(float deltaFrame) {
                 m_event6.m_posSpline[0].m_y = 0.0f;
                 m_event6.m_posSpline[0].m_z = 0.0f;
                 float posRnd = 1200.0f * randf();
-                float posZ = 600.0f + (600.0f - posRnd);
+                float posOfs = 600.0f - posRnd;
+                float posZ = 600.0f + posOfs;
                 m_event6.m_posSpline[3].m_x = 0.0f;
                 m_event6.m_posSpline[3].m_y = -400.0f;
                 m_event6.m_posSpline[3].m_z = posZ;
@@ -957,7 +958,8 @@ void stMadein::updateStage(float deltaFrame) {
                 m_event7.m_posSpline[0].m_y = 0.0f;
                 m_event7.m_posSpline[0].m_z = 0.0f;
                 float posRnd = 1200.0f * randf();
-                float posZ = 600.0f + (600.0f - posRnd);
+                float posOfs = 600.0f - posRnd;
+                float posZ = 600.0f + posOfs;
                 m_event7.m_posSpline[3].m_x = 0.0f;
                 m_event7.m_posSpline[3].m_y = -400.0f;
                 m_event7.m_posSpline[3].m_z = posZ;
