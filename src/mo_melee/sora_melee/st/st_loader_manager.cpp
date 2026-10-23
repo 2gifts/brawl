@@ -1,6 +1,24 @@
+#include <gf/gf_task_scheduler.h>
+#include <st/loader/st_loader_manager.h>
+#include <st/loader/st_loader_sand_bag.h>
 #include <types.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+// HYPOTHESIS: stLoaderManager::sqSetupSyncDo (map); it stays a stand-in until its sequence data is recovered.
+extern "C" bool fn_27_23A580(stLoaderManager* manager);
 
-} // extern "C"
+static stLoaderSandBagMarker sMarkerA(0xFF, 0);
+static stLoaderSandBagMarker sMarkerB(0xFF, 1);
+
+void stLoaderManager::sqSetupRequest(const u32* request) {
+    *m_request = *request;
+    m_isSetupDone = false;
+    m_isRequested = true;
+}
+
+bool stLoaderManager::sqSetupSync(bool wait) {
+    bool isDone;
+    while (!(isDone = fn_27_23A580(this)) && wait) {
+        gfTaskScheduler::getInstance()->updateStatus();
+    }
+    return isDone;
+}
