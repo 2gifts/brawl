@@ -157,8 +157,13 @@ class soLineInvertHierarchy<soTypeList<H, soTypeListNullType>, Unit, Root, Next,
     typedef Unit<H, Root, Next, 0> Base;
 public:
     soLineInvertHierarchy(soModuleAccesser* acc) : Base(acc) { }
+#ifdef FT_POOL_ROOT_NONPOLYMORPHIC
+    // With the non-polymorphic root the second level calls this out of line on its own (Mario: no hack needed).
+    ~soLineInvertHierarchy() { }
+#else
     // MATCH-ONLY: the second level calls the first-level teardown out of line.
     ~soLineInvertHierarchy() __attribute__((never_inline)) { }
+#endif
 };
 
 #ifdef WN_KINETIC_GENERIC_BUILDER
@@ -224,10 +229,17 @@ public:
     }
 };
 
+// FT_POOL_ROOT_NONPOLYMORPHIC (opt-in per unit, Marth's model implies it): the empty root has no virtual destructor and
+// no vptr; the first soInstancePool level introduces the vptr. Evidence: the fighter modules carry
+// __RTTI__18soInstancePoolRoot but no __vt__18soInstancePoolRoot, while the first pool level has its own vtable
+// (__vt__163soInstancePool<..., 18soInstancePoolRoot, 18soTypeListNullType, 0>) and the second level destroys the first
+// level's sub pool directly (addi r3, r3, 4 before the sub pool destructor). With the root polymorphic MWCC keeps the first
+// level's teardown out of line in the second level instead. Opt-in only: switching every fighter at once lost exact
+// functions elsewhere (TIPS.md), so each unit is checked on its own.
 class soInstancePoolRoot {
 public:
     soInstancePoolRoot(soModuleAccesser* acc) { }
-#ifndef FT_MARTH_RUNTIME_HELPERS
+#if !defined(FT_MARTH_RUNTIME_HELPERS) && !defined(FT_POOL_ROOT_NONPOLYMORPHIC)
     virtual ~soInstancePoolRoot() { }
 #endif
     template <typename Helper>
@@ -236,9 +248,9 @@ public:
 
 template <typename Info, typename Parent, typename Next, int Index>
 class soInstancePool : public Parent {
-#ifdef FT_MARTH_RUNTIME_HELPERS
+#if defined(FT_MARTH_RUNTIME_HELPERS) || defined(FT_POOL_ROOT_NONPOLYMORPHIC)
 public:
-    // HYPOTHESIS: Marth's empty root is non-polymorphic; this pool owns its vptr.
+    // The empty root is non-polymorphic (see soInstancePoolRoot); this pool owns its vptr.
     // Declare this before m_sub so MWCC reserves the pool's vptr first.
     virtual ~soInstancePool() { }
 private:
@@ -246,7 +258,7 @@ private:
     soInstancePoolSub<Info, Next> m_sub;
 public:
     soInstancePool(soModuleAccesser* acc) : Parent(acc), m_sub(acc) { }
-#ifndef FT_MARTH_RUNTIME_HELPERS
+#if !defined(FT_MARTH_RUNTIME_HELPERS) && !defined(FT_POOL_ROOT_NONPOLYMORPHIC)
     ~soInstancePool() { }
 #endif
     soInstancePoolSub<Info, Next>& getSub() { return m_sub; }
