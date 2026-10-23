@@ -1,6 +1,9 @@
 // The Enemy unit builds the StageObject virtuals that the SDK defines inline (getInput, isActive, ...) as weak copies,
 // like the yakumono stage units: the vtables reference them.
 #define YK_STAGE_FULL
+// YK_STAGE_FULL gives StageObject the long notifyEventAnimCmd slot; Weapon must override that same slot, or its own
+// declaration adds one and every later Weapon virtual (deactivateArticle ...) is called one slot too far.
+#define WN_WEAPON_ANIMCMD_LONG
 #include <em/prim/em_prim.h>
 #include <so/so_external_value_accesser.h>
 #include <so/so_value_accesser.h>
