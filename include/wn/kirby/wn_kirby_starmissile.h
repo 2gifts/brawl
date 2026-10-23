@@ -4,6 +4,8 @@
 
 #include <wn/wn_weapon_builder.h>
 #include <wn/wn_kinetic_energy_gravity.h>
+#include <so/link/so_link_event_presenter.h>
+#include <so/status/so_status_module_impl.h>
 
 // The parameter block of the article.
 // HYPOTHESIS: meaning of the parameters.
@@ -26,6 +28,7 @@ struct wnKirbyStarmissileParam {
     float unk3C;
     float unk40;
     float unk44;
+    s32 unk48;
 };
 
 // The static data block of the article (read by its wnModuleAccesserBuildData).
@@ -65,8 +68,29 @@ public:
     virtual void onDeactivate() { }
     virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObject, int unk4);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
-    const wnKirbyStarmissileData* getData();
+    // MATCH-ONLY: the status process was its own original object (wn_kirby_starmissile_status_uniq_process.o) and calls
+    // this out of line.
+    const wnKirbyStarmissileData* getData() __attribute__((never_inline));
     // HYPOTHESIS: parameter names beyond the position, facing and mode. Mode 0 flies straight, mode 1 along an angle, mode 2 is
     // the stationary star.
     void activate(int founderTaskId, int resourceId, int team, const Vec3f* position, float lr, float unk, int unk2, int mode);
+};
+
+// HYPOTHESIS: the link event (kind 0x1A) the missile sends through link 0 when it bounces off a surface (m_lr is the
+// bounce direction) and when its status ends.
+struct soLinkEventStarShot : soLinkEventArgs {
+    soLinkEventStarShot(int eventKind) : soLinkEventArgs(eventKind), m_lr(0.0f), unk10(false) { }
+    float m_lr;
+    u8 unkC[4];
+    bool unk10;
+};
+
+class wnKirbyStarmissileStatusUniqProcess : public soStatusUniqProcess {
+public:
+    virtual ~wnKirbyStarmissileStatusUniqProcess() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStop(soModuleAccesser* moduleAccesser);
+    virtual void execFixPos(soModuleAccesser* moduleAccesser);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
 };
