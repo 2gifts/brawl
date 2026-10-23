@@ -2,6 +2,7 @@
 #include <gf/gf_task.h>
 #include <if/if_center.h>
 #include <if/if_minigame_homerun.h>
+#include <if/if_minigame_training.h>
 #include <if/if_mngr.h>
 #include <ip/ip_switch.h>
 #include <ms/ms_message.h>
@@ -27,24 +28,6 @@ public:
 struct IfPhoto {
     u8 unk0[0x70];
     int unk70;
-};
-
-struct IfMinigameTraining {
-    u8 unk0[0x18];
-    int unk18;
-    u8 unk1C[0x4];
-    int unk20;
-    int unk24;
-    int unk28;
-    u8 unk2C[0x4];
-    u8 unk30;
-    u8 unk31[0xAF];
-    int unkE0;
-    int unkE4;
-    int unkE8;
-    u8 unkEC[0x204];
-    int unk2F0;
-    bool unk2F4;
 };
 
 struct IfAdvBoss {
@@ -94,8 +77,7 @@ extern "C" void fn_800DBD3C(IfMngr* mngr);
 extern "C" void fn_800DE360(void* center);
 extern "C" void fn_800E244C(IfPlayer* player);
 extern "C" void fn_800E4ED0(IfPlayer** players, int count);
-// HYPOTHESIS: map names IfMinigameTraining::main, IfAdvBoss::main, IfPhoto::main, IfWifiIntrMenu::main
-extern "C" void fn_80105558(IfMinigameTraining* training);
+// HYPOTHESIS: map names IfAdvBoss::main, IfPhoto::main, IfWifiIntrMenu::main
 extern "C" void fn_80108E5C(IfAdvBoss* boss);
 extern "C" void fn_800F0F84(void* photo);
 extern "C" int fn_800FBFDC(void* menu);
@@ -113,11 +95,6 @@ extern "C" void fn_800FBF90(void* menu);
 extern "C" void fn_800BF928(muNoticeWndTask* wnd, const char* text);
 // HYPOTHESIS: map names IfCenter::dispKumiteKills
 extern "C" void fn_800DF4AC(void* center, int kills);
-// HYPOTHESIS: map names IfMinigameTraining::closeMenu, printStatusDamage, printStatusCombo, printStatusTotalDamage
-extern "C" void fn_801054D8(IfMinigameTraining* training);
-extern "C" void fn_80105240(IfMinigameTraining* training);
-extern "C" void fn_80105274(IfMinigameTraining* training);
-extern "C" void fn_801052A8(IfMinigameTraining* training);
 // HYPOTHESIS: map names IfAdvBoss::eraseBoss
 extern "C" void fn_80109540(IfAdvBoss* boss);
 // HYPOTHESIS: map names nteFileDataReplay::__ct, setData
@@ -221,7 +198,7 @@ void IfMngr::main() {
         static_cast<IfMinigameHomerun*>(m_ifMinigameHomerun)->main();
     }
     if (m_ifMinigameTraining != NULL) {
-        fn_80105558(static_cast<IfMinigameTraining*>(m_ifMinigameTraining));
+        static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->main();
     }
     if (m_ifAdvBoss != NULL) {
         fn_80108E5C(static_cast<IfAdvBoss*>(m_ifAdvBoss));
@@ -353,54 +330,54 @@ void IfMngr::dispKumiteKills(int kills) {
 }
 
 void IfMngr::closeTrainingMenu() {
-    fn_801054D8(static_cast<IfMinigameTraining*>(m_ifMinigameTraining));
+    static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->closeMenu();
 }
 
 int IfMngr::getTrainingSpeed() {
-    return static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->unk18;
+    return static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->m_speed;
 }
 
 int IfMngr::getTrainingGenerateItemKind() {
-    return static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->unk2F0;
+    return static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->m_generateItemKind;
 }
 
 int IfMngr::getTrainingNumCP() {
-    return static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->unk20;
+    return static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->m_numCP;
 }
 
 int IfMngr::getTrainingCPAI() {
-    return static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->unk24;
+    return static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->m_cpAI;
 }
 
 int IfMngr::getTrainingCPDamage() {
-    return static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->unk28;
+    return static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->m_cpDamage;
 }
 
 bool IfMngr::isTrainingQuit() {
-    return static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->unk2F4;
+    return static_cast<IfMinigameTraining*>(m_ifMinigameTraining)->m_quit;
 }
 
 void IfMngr::setTrainingStatusDamage(int damage) {
     IfMinigameTraining* training = static_cast<IfMinigameTraining*>(m_ifMinigameTraining);
-    training->unkE0 = damage;
-    if (training->unk30) {
-        fn_80105240(training);
+    training->m_damage = damage;
+    if (training->m_statusVisible) {
+        training->printStatusDamage(damage);
     }
 }
 
 void IfMngr::setTrainingStatusCombo(int combo) {
     IfMinigameTraining* training = static_cast<IfMinigameTraining*>(m_ifMinigameTraining);
-    training->unkE4 = combo;
-    if (training->unk30) {
-        fn_80105274(training);
+    training->m_combo = combo;
+    if (training->m_statusVisible) {
+        training->printStatusCombo(combo);
     }
 }
 
 void IfMngr::setTrainingStatusTotalDamage(int damage) {
     IfMinigameTraining* training = static_cast<IfMinigameTraining*>(m_ifMinigameTraining);
-    training->unkE8 = damage;
-    if (training->unk30) {
-        fn_801052A8(training);
+    training->m_totalDamage = damage;
+    if (training->m_statusVisible) {
+        training->printStatusTotalDamage(damage);
     }
 }
 
