@@ -1,6 +1,7 @@
 #include <gf/gf_resource_loader.h>
 #include <gf/gf_task.h>
 #include <if/if_center.h>
+#include <if/if_minigame_homerun.h>
 #include <if/if_mngr.h>
 #include <ip/ip_switch.h>
 #include <ms/ms_message.h>
@@ -26,11 +27,6 @@ public:
 struct IfPhoto {
     u8 unk0[0x70];
     int unk70;
-};
-
-struct IfMinigameHomerun {
-    u8 unk0[0x115];
-    u8 unk115;
 };
 
 struct IfMinigameTraining {
@@ -98,8 +94,7 @@ extern "C" void fn_800DBD3C(IfMngr* mngr);
 extern "C" void fn_800DE360(void* center);
 extern "C" void fn_800E244C(IfPlayer* player);
 extern "C" void fn_800E4ED0(IfPlayer** players, int count);
-// HYPOTHESIS: map names IfMinigameHomerun::main, IfMinigameTraining::main, IfAdvBoss::main, IfPhoto::main, IfWifiIntrMenu::main
-extern "C" void fn_800FEFF4(IfMinigameHomerun* homerun);
+// HYPOTHESIS: map names IfMinigameTraining::main, IfAdvBoss::main, IfPhoto::main, IfWifiIntrMenu::main
 extern "C" void fn_80105558(IfMinigameTraining* training);
 extern "C" void fn_80108E5C(IfAdvBoss* boss);
 extern "C" void fn_800F0F84(void* photo);
@@ -116,8 +111,6 @@ extern "C" void fn_800F00D4(void* photo, int arg1, int arg2, int playerNo, bool 
 extern "C" void fn_800FBF90(void* menu);
 // HYPOTHESIS: map names muNoticeWndTask::dispSubMsg
 extern "C" void fn_800BF928(muNoticeWndTask* wnd, const char* text);
-// HYPOTHESIS: map names IfMinigameHomerun::dispStart
-extern "C" void fn_800FF0BC(IfMinigameHomerun* homerun, int arg1, int arg2);
 // HYPOTHESIS: map names IfCenter::dispKumiteKills
 extern "C" void fn_800DF4AC(void* center, int kills);
 // HYPOTHESIS: map names IfMinigameTraining::closeMenu, printStatusDamage, printStatusCombo, printStatusTotalDamage
@@ -225,7 +218,7 @@ void IfMngr::main() {
         fn_800E4ED0(m_ifPlayers, MAX_PLAYERS);
     }
     if (m_ifMinigameHomerun != NULL) {
-        fn_800FEFF4(static_cast<IfMinigameHomerun*>(m_ifMinigameHomerun));
+        static_cast<IfMinigameHomerun*>(m_ifMinigameHomerun)->main();
     }
     if (m_ifMinigameTraining != NULL) {
         fn_80105558(static_cast<IfMinigameTraining*>(m_ifMinigameTraining));
@@ -344,7 +337,7 @@ void IfMngr::resetPlayerDragoonParts(int playerNo) {
 }
 
 void IfMngr::dispHomerunStart(int arg1, int arg2) {
-    fn_800FF0BC(static_cast<IfMinigameHomerun*>(m_ifMinigameHomerun), arg1, arg2);
+    static_cast<IfMinigameHomerun*>(m_ifMinigameHomerun)->dispStart(arg1, arg2);
 }
 
 bool IfMngr::isFinishedHomerunStartAnim() {
