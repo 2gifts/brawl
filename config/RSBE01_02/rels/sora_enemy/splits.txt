@@ -222,6 +222,10 @@ mo_enemy/sora_enemy/spar/em_spar_param_accesser.cpp:
 	.data       start:0x000103B0 end:0x00010438
 	.bss        start:0x000005B0 end:0x000005C8
 
+mo_enemy/sora_enemy/hammerbros/em_hammerbros.cpp:
+	.text       start:0x0004B130 end:0x0004C6B8
+	.data       start:0x00010438 end:0x00011100
+
 mo_enemy/sora_enemy/hammerbros/em_hammerbros_param_accesser.cpp:
 	.text       start:0x0004C6B8 end:0x0004C934
 	.ctors      start:0x0000009C end:0x000000A0
