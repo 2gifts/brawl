@@ -269,6 +269,10 @@ public:
         register f32 fr0, fr1, fr2;
 #elif defined(MT_VEC3F_SUB_DISTINCT)
         register f32 fr0, fr1, fr2, fr3, fr4, fr5;
+#elif defined(MT_VEC3F_SUB_ASCENDING)
+        // MATCH-ONLY: Finale's sweep uses the existing four-register subtract
+        // with ascending register allocation; arithmetic and default are unchanged.
+        register f32 fr0, fr1, fr2, fr3;
 #else
         register f32 fr3, fr2, fr1, fr0;
 #endif
