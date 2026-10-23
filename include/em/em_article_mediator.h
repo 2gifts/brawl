@@ -54,11 +54,12 @@ struct soInstancePoolInfo {
     };
 };
 
-// The base of every pool level: only the virtual destructor.
+// The base of every pool level. It is not polymorphic: the first pool level above it introduces the vptr (the root has
+// no vtable or destructor of its own in the enemy units, only an RTTI record). With a virtual destructor here MWCC
+// splits the hierarchy teardown differently (the last level no longer inlines its pool destructor).
 class soInstancePoolRoot {
 public:
     soInstancePoolRoot(soModuleAccesser* acc) { }
-    virtual ~soInstancePoolRoot() { }
 };
 
 // Sub pool N owns sub pool N-1 followed by one holder: the newest instance sits at the highest address and the instances
@@ -131,9 +132,6 @@ public:
     virtual ~soLineHierarchy() { }
 };
 
-// TODO(nonmatching): inlining split of the destructors only (same destruction sequence). In the target the last level's
-// destructor inlines the pool destructor below it and the pool above calls this one out of line; MWCC does the reverse
-// here (Primid: 92% / 93% for the two destructors). The target also has no vtable for this level.
 template <class H, template <class, class, class, int> class Unit, class Root, class KindInfo, int Depth>
 class soLineHierarchy<soTypeList<H, soTypeListNullType>, Unit, Root, KindInfo, Depth>
     : public Unit<H, Root, KindInfo, Depth> {
