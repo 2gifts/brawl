@@ -44,6 +44,13 @@ public:
         return m_dataPtr->data;
     }
 
+    u32 getValueIndexData() const {
+        if (m_isNull == 1) {
+            return 0;
+        }
+        return m_dataPtr->data;
+    }
+
     // HYPOTHESIS: bool argument accessor (conversion happens in the non-null branch).
     bool getBoolData() const {
         if (m_isNull == 1) {
