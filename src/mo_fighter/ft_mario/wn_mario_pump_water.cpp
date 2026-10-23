@@ -19,6 +19,12 @@ FT_DOL_ARRAY_VECTOR(soModelNodeSetUp, 1);
 #include <so/status/so_status_module_impl.h>
 #include <wn/wn_kinetic_energy_normal.h>
 #include <mt/mt_prng.h>
+// This article inlines the work-storage constructor; the fighter owns its weak copy.
+inline soGeneralWorkSimple::soGeneralWorkSimple(s32* ints, u32 numInts, float* floats, u32 numFloats,
+                                                u32* flags, u32 numFlags) :
+    soGeneralWorkAbstract(false), m_intWorks(ints), m_intWorkSize(numInts), m_floatWorks(floats),
+    m_floatWorkSize(numFloats), m_flagWorks(flags), m_flagWorkSize(numFlags) { }
+
 extern soStatusUniqProcess g_wnMarioPumpWaterStatusUniqProcessRegular;
 
 wnMarioPumpWater::wnMarioPumpWater(s32 articleId, const wnArticleBuildInfo& info, const wnMarioPumpWaterData* data) :

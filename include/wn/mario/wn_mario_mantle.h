@@ -26,6 +26,24 @@ public:
     typedef soGlowModuleBuildConfigNull GlowModuleBuildConfig;
 };
 
+// The cape follows Mario without its own movement energies. Keep the selection
+// specific to this config so the fighter can own other article types as well.
+template <>
+class wnWeaponBuilder<wnMarioMantleModuleAccesserBuildConfig> : public Weapon {
+protected:
+    wnModuleAccesserBuilder<wnMarioMantleModuleAccesserBuildConfig> m_modules;
+    // HYPOTHESIS: trailing alignment of the animation-command storage, as in the no-common-energies builder.
+    u32 m_modulesPad;
+public:
+    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd,
+                    bool weaponFlag = true) :
+        Weapon(name, bd.m_kind, bd.m_data, articleId, &info, m_modules.getModuleAccesser(), weaponFlag), m_modules(this, bd) {
+        Weapon::initialize();
+    }
+    virtual ~wnWeaponBuilder() { }
+    virtual void deactivateDescendantForce() { wnDeactivateArticleDescendants(m_modules.m_generateArticleBuilder); }
+};
+
 class wnMarioMantle : public wnWeaponBuilder<wnMarioMantleModuleAccesserBuildConfig> {
 public:
     wnMarioMantle(s32 articleId, const wnArticleBuildInfo& info, const wnMarioMantleData* data);
