@@ -4,6 +4,7 @@
 #include <types.h>
 
 struct AiClBlock;
+class StageObject;
 
 // A weapon/item/gimmick the CPU AI tracks as a thing to dodge or pick up.
 // Partial layout verified through the search filters and tracking updates.
@@ -24,9 +25,11 @@ public:
     float m_radius;      // 0x50: extent used by the prediction queries
     s8 m_team;        // 0x54: search() can exclude this team
     s8 m_ownerPlayer; // 0x55: player number resolved through the founder task
-    char unk56[2];
+    s8 m_aiPriority;  // 0x56: Specialized_Param_Int_AI_Pri (1 for non-pickups)
+    u8 unk57;
     u32 m_updates;        // 0x58: updates since this record was allocated
-    char unk5C[8];
+    int m_constraintParentId; // 0x5C: link index 3's parent task, or -1
+    u32 m_itemTrait;  // 0x60: Work_Param_Int_Trait, zero for non-items
 
     aiWeapon() {
         m_flags = 0;
@@ -63,11 +66,21 @@ public:
     int m_enumCount;         // 0x190C
     int m_enumCursor;        // 0x1910
     int m_count;             // 0x1914: number of active weapons
-    char unk1918[8];
+    int m_previousCount;    // 0x1918: active count at the start of this refresh
+    // Set when update_core finds an eligible pickup with positive AI priority.
+    bool m_hasPickupItem;   // 0x191C
+    char unk191D[3];
 
     aiWeaponMgr();
     ~aiWeaponMgr();
     void reset();
+    void update();
+    // MATCH-ONLY: preserve the native out-of-line classifier call boundary.
+    void update_core(StageObject* object, s8 type, int kind, u8* stale,
+                     u32 objId, int constraintParentId) __attribute__((never_inline));
+    void update_core2(Vec3f* pos, float radius, s8 team, s8 ownerPlayer,
+                      s8 type, s8 aiPriority, int kind, u8* stale, u32 objId,
+                      u32 flags, int constraintParentId, u32 itemFlags);
     // Each search replaces the pending result bitset and resets enumeration.
     // mode == 0 excludes types 4/5 and the selected team; nonzero mode selects
     // type 4 with flag 8. The gameplay name of that filter is not yet known.
