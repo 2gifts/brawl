@@ -15,11 +15,8 @@ void fn_80106A5C(IfAdvMngr* mngr, gfArchive* archive);
 bool fn_80106E40(IfAdvMngr* mngr);
 void fn_80106A64(IfAdvMngr* mngr, void* res1, void* res2, void* res3, void* res4);
 void fn_80106D10(IfAdvMngr* mngr);
-void fn_801077D0(IfAdvMngr* mngr, int count);
 void fn_80106E48(IfAdvMngr* mngr);
 void fn_8010C38C(void* unk);
-void fn_801071E4(IfAdvMngr* mngr);
-void fn_80107040(IfAdvMngr* mngr);
 void fn_1_3C68(scResourceLoader* loader, int heap, const char* path, gfArchive* archive, int size);
 bool fn_1_3E50(scResourceLoader* loader);
 void fn_27_23B44C(stLoader* loader, void** res1, void** res2, void** res3, void** res4);
@@ -139,18 +136,18 @@ void stLoaderInfoAdventure::entryEntity() {
         }
     }
     if (g_IfAdvMngr != NULL) {
-        fn_801077D0(g_IfAdvMngr, count);
+        g_IfAdvMngr->setNumPlayer(count);
         fn_80106E48(g_IfAdvMngr);
         if (getAdvMode(advData) == 2) {
             fn_8010C38C(reinterpret_cast<stLoaderInfoAdventureIfView*>(g_IfAdvMngr)->unk104);
         }
         reinterpret_cast<stLoaderInfoAdventureIfView*>(g_IfAdvMngr)->unk48_7 = false;
-        fn_801071E4(g_IfAdvMngr);
+        g_IfAdvMngr->startMelee();
     }
 }
 
 void stLoaderInfoAdventure::removeEntity() {
     if (g_IfAdvMngr != NULL) {
-        fn_80107040(g_IfAdvMngr);
+        g_IfAdvMngr->destroyModel();
     }
 }
