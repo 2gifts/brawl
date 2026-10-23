@@ -1,3 +1,4 @@
+#define WN_WEAPON_BUILDER // The fighter owns complete article types.
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
@@ -18,6 +19,8 @@
 #include <so/article/so_article_mediator.h>
 #include <so/article/so_generate_article_manage_module.h>
 
+// The fighter owns the shared out-of-line kinetic teardown.
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftMarioBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
@@ -29,6 +32,13 @@ template soArrayVector<s32, 8>::~soArrayVector();
 #endif
 #pragma dont_inline off
 soStatusModuleImpl::~soStatusModuleImpl() { }
+
+// Shared base teardown is owned by this fighter unit. Keep calls out of line
+// while allowing each empty base to collapse inside its own destructor.
+#pragma dont_inline on
+soParamAccesser::~soParamAccesser() { }
+#pragma dont_inline off
+soArticleMediator::~soArticleMediator() { }
 
 // ftManager::setParamPattern selects the shared parameter-table variation.
 extern int g_soValueVariation;

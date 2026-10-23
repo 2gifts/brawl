@@ -604,6 +604,19 @@ public:
     soPostureModule* getModule() { return (soPostureModule*)lbl_27_bss_330; }
 };
 
+// No interpolation entries are owned when the simple posture module follows its owner.
+template <>
+class soPostureModuleBuilder<soPostureModuleBuildConfig<0, soPostureModuleSimple> > {
+    soSingletonHolder<soArrayNull<soInterpolation<Vec3f> > > m_interpolations;
+    soPostureModuleSimple m_module;
+public:
+    soPostureModuleBuilder(soModuleAccesser* acc, soEventObserverRegistrationDesc* desc) :
+        m_module(acc, soSingletonHolder<soArrayNull<soInterpolation<Vec3f> > >::getInstance(), desc) {
+        getModule()->initRot();
+    }
+    soPostureModule* getModule() { return &m_module; }
+};
+
 struct soCollisionAttackModuleBuildConfigNull { };
 template <>
 class soCollisionAttackModuleBuilder<soCollisionAttackModuleBuildConfigNull> {
@@ -839,6 +852,40 @@ class soVisibilityModuleBuilder<soVisibilityModuleBuildConfig<soVisibilityModule
 public:
     soVisibilityModuleBuilder(soModuleAccesser* acc, soVisibilityData* data) : m_module(acc, data, N) { }
     soVisibilityModuleSimple* getModule() { return &m_module; }
+};
+
+// A status without its own work bank uses the shared empty work instance.
+// Native Mario water construction passes g_soGeneralWork to the status module.
+// HYPOTHESIS: original build-config spelling follows the preserved destructor map.
+#include <so/work/so_general_work.h>
+struct soGeneralWorkBuildConfigNull { };
+template <>
+class soGeneralWorkBuilder<soGeneralWorkBuildConfigNull> {
+public:
+    soGeneralWorkBuilder() { }
+    soGeneralWorkAbstract* getModule() { return &g_soGeneralWork; }
+};
+
+// Articles such as Mario's cape have no animation-command or status module.
+// HYPOTHESIS: source config spellings; native module enumeration establishes the null instances.
+struct soAnimCmdModuleBuildConfigNull { };
+extern char lbl_27_bss_4D0[];
+template <>
+class soAnimCmdModuleBuilder<soAnimCmdModuleBuildConfigNull> {
+    // HYPOTHESIS: the null selection retains a word of storage. Mario's cape's
+    // work-bank and effect construction establish this extent, but not its contents.
+    u32 unk0;
+public:
+    soAnimCmdModuleBuilder(s16) { }
+    soAnimCmdModule* getModule() { return (soAnimCmdModule*)lbl_27_bss_4D0; }
+};
+struct soStatusModuleBuildConfigNull { };
+extern char lbl_27_bss_4E8[];
+template <>
+class soStatusModuleBuilder<soStatusModuleBuildConfigNull> {
+public:
+    soStatusModuleBuilder(soModuleAccesser*, const soStatusData*, void*) { }
+    soStatusModule* getModule() { return (soStatusModule*)lbl_27_bss_4E8; }
 };
 
 // Status of an article.
