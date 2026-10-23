@@ -90,7 +90,16 @@ class soInstanceManagerFullProperty : public soInstanceManager<T>,
                                       public soInstanceManagerAttributePolicy<T> {
 public:
     // UBFIX: There should have been a virtual dtor in the base class
+#ifdef SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
+    // Opt-in per unit: most fighter modules tear this base down with a call from the
+    // soInstanceManagerFullPropertyVector destructors (0x70 bytes) and carry the 0x40-byte copy; a few (Marth, Purin,
+    // Ike, Dedede, Diddy, R.O.B., zako) inline it (0x60 bytes), so the default stays inline.
+    // MATCH-ONLY: never_inline reproduces the original's out-of-line call; an out-of-class definition or
+    // #pragma dont_inline around the caller does not keep it out of line.
+    ~soInstanceManagerFullProperty() __attribute__((never_inline)) { }
+#else
     ~soInstanceManagerFullProperty() { }
+#endif
     virtual s32 add(T& p1, s32 p2) {
         return add(p1, p2, soAttributeFlag(), -1);
     }

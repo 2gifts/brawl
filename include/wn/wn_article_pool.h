@@ -41,24 +41,30 @@ public:
 template <class T, class KindInfo, class Id>
 wnInstanceHolder<T, KindInfo, Id>::~wnInstanceHolder() { }
 
-// One article instance, preceded by the vtable of the holder.
+// One article instance, preceded by the vtable of the holder. The destructors of the holder and of the sub pools are
+// declared before their members: when the root is non-polymorphic (FT_POOL_ROOT_NONPOLYMORPHIC) MWCC places the vptr
+// where the first virtual function is declared, and it has to come first.
 template <class W>
 class wnArticleHolder : public soInstancePoolRoot {
+public:
+    virtual ~wnArticleHolder();
+private:
     W m_instance;
 public:
     wnArticleHolder(soModuleAccesser* acc);
-    virtual ~wnArticleHolder();
     W* getInstance() { return &m_instance; }
 };
 
 // Each sub pool owns its predecessor followed by one holder; the instances are indexed from the oldest.
 template <class W, int N>
 class wnArticleSubPool : public soInstancePoolRoot {
+public:
+    virtual ~wnArticleSubPool();
+private:
     wnArticleSubPool<W, N - 1> m_next;
     wnArticleHolder<W> m_holder;
 public:
     wnArticleSubPool(soModuleAccesser* acc) : soInstancePoolRoot(acc), m_next(acc), m_holder(acc) { }
-    virtual ~wnArticleSubPool();
     W* getInstanceAt(s32 index) {
         if (index == N - 1) {
             return m_holder.getInstance();
@@ -87,6 +93,12 @@ public:
 
 template <class W, int N, class Base>
 class wnArticlePool : public Base {
+#ifdef FT_POOL_ROOT_NONPOLYMORPHIC
+public:
+    // The root is non-polymorphic (ft/builder/ft_builder_kinetic.h); the first pool owns its vptr, declared before m_sub.
+    virtual ~wnArticlePool() { }
+private:
+#endif
     wnArticleSubPool<W, N> m_sub;
 public:
     wnArticlePool(soModuleAccesser* acc) : Base(acc), m_sub(acc) { }
@@ -106,8 +118,13 @@ template <class W, int N>
 class wnArticleHierarchy<W, N, soInstancePoolRoot> : public wnArticlePool<W, N, soInstancePoolRoot> {
 public:
     wnArticleHierarchy(soModuleAccesser* acc) : wnArticlePool<W, N, soInstancePoolRoot>(acc) { }
+#ifdef FT_POOL_ROOT_NONPOLYMORPHIC
+    // With the non-polymorphic root the second level calls this out of line on its own (Mario: no hack needed).
+    virtual ~wnArticleHierarchy() { }
+#else
     // MATCH-ONLY: the second level calls the first-level teardown out of line.
     virtual ~wnArticleHierarchy() __attribute__((never_inline)) { }
+#endif
 };
 
 // Dispatch over the 17 article slots of a mediator: slots without an article answer with the neutral value. R.O.B. spells
