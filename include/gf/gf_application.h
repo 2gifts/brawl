@@ -21,11 +21,15 @@ public:
     gfKeepFrameBuffer unkD0;
     u8 unkD1[0x13];
     int m_e4;
-    u8 unkE8[0x10];
+    u8 unkE8[0x5];
+    u8 unkED; // 0xED HYPOTHESIS: bit 0x2 requests a frame-buffer capture (IfSnapSaveTask)
+    u8 unkEE[0xA];
     u16 m_frameRate;
     u8 unkFA[6];
     u32 unk100; // replay recording observes changes in this application counter
-    u8 unk104[0x10];
+    u8 unk104[0x8];
+    void* unk10C; // 0x10C HYPOTHESIS: the capture destination (IfSnapSaveTask)
+    u8 unk110[0x4];
     gfCallBackList m_114;
     u8 unk118[0x4];
     vcBootParam m_bootParam;
