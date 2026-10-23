@@ -4,6 +4,7 @@
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_MARIO_ARTICLE_POOLS
 #define FT_POOL_ROOT_NONPOLYMORPHIC // the pool root has no vptr (see ft/builder/ft_builder_kinetic.h)
+#define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE // the instance manager base teardown is a call (so/so_instance_manager.h)
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #define FT_TEAM_TYPED_INTERFACE

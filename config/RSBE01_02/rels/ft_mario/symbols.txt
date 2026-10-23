@@ -84,7 +84,7 @@ fn_91_3F3C = .text:0x00003F3C; // type:function size:0x74
 __ct__78soAnimCmdModuleBuilder<52soAnimCmdModuleBuildConfig<11,19soAnimCmdModuleImpl>>Fs = .text:0x00003FB0; // type:function size:0x44
 __dt__19soAnimCmdModuleImplFv = .text:0x00003FF4; // type:function size:0x6C
 __dt__62soInstanceManagerFullPropertyVector<20soAnimCmdControlUnit,11>Fv = .text:0x00004060; // type:function size:0x70
-__dt__38soArrayContractible<PC13acAnimCmdConv>Fv = .text:0x000040D0; // type:function size:0x40
+__dt__53soInstanceManagerFullProperty<20soAnimCmdControlUnit>Fv = .text:0x000040D0; // type:function size:0x40
 __dt__78soAnimCmdModuleBuilder<52soAnimCmdModuleBuildConfig<11,19soAnimCmdModuleImpl>>Fv = .text:0x00004110; // type:function size:0x6C
 __ct__794soStatusModuleBuilder<768soStatusModuleBuildConfig<281,33soGeneralWorkBuildConfig<18,14,2>,274,71,691soTransitionModuleBuildConfig<657soTypeList<15soIntToType<25>,624soTypeList<14soIntToType<6>,592soTypeList<14soIntToType<2>,560soTypeList<14soIntToType<1>,528soTypeList<15soIntToType<17>,495soTypeList<14soIntToType<3>,463soTypeList<14soIntToType<1>,431soTypeList<14soIntToType<2>,399soTypeList<14soIntToType<8>,367soTypeList<14soIntToType<2>,335soTypeList<14soIntToType<1>,303soTypeList<14soIntToType<6>,271soTypeList<14soIntToType<3>,239soTypeList<14soIntToType<1>,207soTypeList<14soIntToType<1>,175soTypeList<14soIntToType<2>,143soTypeList<14soIntToType<3>,111soTypeList<14soIntToType<2>,80soTypeList<14soIntToType<6>,49soTypeList<14soIntToType<1>,18soTypeListNullType>>>>>>>>>>>>>>>>>>>>>>>FP16soModuleAccesserPC12soStatusDataPv = .text:0x0000417C; // type:function size:0x388
 __dt__38soArrayQueueImpl<18soArrayVector<l,1>>Fv = .text:0x00004504; // type:function size:0x60
@@ -122,7 +122,7 @@ __ct__82soKineticModuleBuilder<56soKineticModuleBuildConfig<26soKineticModuleGen
 __dt__26soKineticModuleGenericImplFv = .text:0x000056F4; // type:function size:0x6C
 __dt__19soKineticModuleImplFv = .text:0x00005760; // type:function size:0x60
 __dt__58soInstanceManagerFullPropertyVector<P15soKineticEnergy,12>Fv = .text:0x000057C0; // type:function size:0x70
-__dt__18soInstancePoolRootFv = .text:0x00005830; // type:function size:0x40
+__dt__49soInstanceManagerFullProperty<P15soKineticEnergy>Fv = .text:0x00005830; // type:function size:0x40
 __dt__82soKineticModuleBuilder<56soKineticModuleBuildConfig<26soKineticModuleGenericImpl>>Fv = .text:0x00005870; // type:function size:0x78
 __ct__57soGeneralWorkBuilder<33soGeneralWorkBuildConfig<77,32,3>>Fv = .text:0x000058E8; // type:function size:0x60
 __dt__57soGeneralWorkBuilder<33soGeneralWorkBuildConfig<77,32,3>>Fv = .text:0x00005948; // type:function size:0x60
