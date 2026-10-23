@@ -3,6 +3,23 @@
 #define MT_VEC3F_SUB_COMPACT
 #define MT_VEC3F_MUL_INLINE
 #include <ai/ai_weapon.h>
+#include <ai/ai_mgr.h>
+#include <ai/ai_stat.h>
+#include <cm/cm_camera_controller.h>
+#include <gf/gf_camera.h>
+#include <gf/gf_task_scheduler.h>
+#include <it/it_manager.h>
+#include <it/it_create.h>
+#include <so/so_external_value_accesser.h>
+#include <so/link/so_link_module_impl.h>
+#include <wn/weapon.h>
+#include <ft/fighter.h>
+#include <ft/ft_manager.h>
+#include <so/so_module_hyp.h>
+#include <so/team/so_team.h>
+#include <so/collision/so_collision_attack_module_impl.h>
+#include <so/collision/so_collision_search_module_impl.h>
+#include <so/work/so_work_manage_module_impl.h>
 #include <gf/gf_memory_util.h>
 #include <math.h>
 #include <mt/mt_common.h>
@@ -34,6 +51,345 @@ aiWeaponMgr::~aiWeaponMgr() { }
 
 void aiWeaponMgr::reset() {
     gfMemFill(this, 0, sizeof(aiWeaponMgr));
+}
+
+// Keep the previous records pending until all live sources have been scanned.
+// Newly freed slots are therefore available on the next refresh, not this one.
+void aiWeaponMgr::update() {
+    gfTaskScheduler* scheduler = gfTaskScheduler::getInstance();
+    m_hasPickupItem = false;
+    m_previousCount = m_count;
+    u8 stale[64];
+    if (m_count > 0) {
+        aiWeapon* weapon = m_weapons;
+        for (int i = 0; i < 64; i++, weapon++) {
+            stale[i] = weapon->m_flags & 1;
+        }
+    }
+    for (u32 i = 0;; i++) {
+        gfTask* task = scheduler->getTask(gfTask::Category_Weapon, i);
+        if (task == NULL) break;
+        if (!task->isAlive()) continue;
+        Weapon* weapon = dynamic_cast<Weapon*>(task);
+        StageObject* object = dynamic_cast<StageObject*>(task);
+        if (weapon == NULL || object == NULL) continue;
+        int kind = weapon->getSubKind();
+        // HYPOTHESIS: the excluded article kinds' gameplay names are not yet verified.
+        if (kind == 0x69 || kind == 0x50) continue;
+        soModuleAccesser* accesser = soExternalValueAccesser::getModuleAccesser(object);
+        int parent = -1;
+        if (accesser->getLinkModule().isModelConstraint()) {
+            parent = accesser->getLinkModule().getParentTaskId(3);
+        }
+        update_core(object, 0, kind, stale, task->m_taskId, parent);
+    }
+    for (u32 i = 0; i < itManager::getInstance()->m_itemArrayList.size(); i++) {
+        BaseItem* item = itManager::getInstance()->getSafeItemFromIndex(i);
+        int parent = -1;
+        if (item == NULL) continue;
+        if (item->isConstraint(false)) {
+            // Gooey Bombs remain relevant after being attached to another object.
+            if (item->m_kind != Item_GooeyBomb) continue;
+            soModuleAccesser* accesser = soExternalValueAccesser::getModuleAccesser(item);
+            if (accesser->getLinkModule().isModelConstraint()) {
+                parent = accesser->getLinkModule().getParentTaskId(3);
+            }
+        }
+        update_core(item, 1, item->m_kind, stale, item->m_taskId, parent);
+    }
+    for (u32 i = 0;; i++) {
+        gfTask* task = scheduler->getTask(gfTask::Category_Ground, i);
+        if (task == NULL) break;
+        if (!task->isAlive()) continue;
+        StageObject* object = dynamic_cast<StageObject*>(task);
+        if (object != NULL) {
+            update_core(object, 2, 0, stale, task->m_taskId, -1);
+        }
+    }
+    for (u32 i = 0; i < 14; i++) {
+        aiChrIdx idx;
+        idx.m_idx = i;
+        aiStat* stat = aiMgr::get_aiStat(&idx);
+        // The native flags select fighter states that also participate as threats.
+        if ((stat->m_flags & 0x80000000) != 0 && (stat->m_flags & 0x10) != 0) {
+            aiChrIdx playerIdx;
+            playerIdx.m_idx = i;
+            s8 player = aiChrIdx::GetPlayerNo(&playerIdx);
+            update_core2(&stat->m_center, 10.0f, s8(stat->m_team), player,
+                         3, 1, stat->m_chrKind, stale, stat->m_unkE0, 0x38, -1, 0);
+        }
+    }
+    if (m_previousCount > 0) {
+        aiWeapon* weapon = m_weapons;
+        for (int i = 0; i < 64; i++, weapon++) {
+            if (stale[i] != 0) {
+                weapon->m_flags = 0;
+                m_count--;
+            }
+        }
+    }
+    if (m_count > 0) {
+        aiWeapon* weapon = m_weapons;
+        for (u32 i = 0; i < 64; i++, weapon++) {
+            if ((weapon->m_flags & 1) != 0 && (weapon->m_flags & 8) == 0) {
+                gfCamera* camera = CameraController::getInstance()->getCameraInternal();
+                if (camera != NULL) {
+                    gfCamera::ClipSphere sphere;
+                    float clipRadius = 30.0f + weapon->m_radius;
+                    sphere.center = Vec3f(weapon->m_pos.m_x, weapon->m_pos.m_y, 0.0f);
+                    sphere.radius = clipRadius;
+                    if (!camera->isClipIn(&sphere)) continue;
+                }
+                // Visibility admits a previously unmarked record; it does not
+                // remove a mark already supplied by the classifier/update.
+                weapon->m_flags |= 8;
+            }
+        }
+    }
+}
+
+// Classify active collision volumes first; selected articles/items remain useful
+// to the AI even while they have no attack, grab, or search volume.
+void aiWeaponMgr::update_core(StageObject* object, s8 type, int kind, u8* stale,
+                              u32 objId, int constraintParentId) {
+    soModuleAccesser* accesser = soExternalValueAccesser::getModuleAccesser(object);
+    float radius = 10.0f;
+    s8 aiPriority = 1;
+    u32 flags = 0x10;
+    if (type == 0) {
+        switch (kind) {
+        case 0x5F: case 0x48: return;
+        }
+    }
+    soCollisionAttackModule& attack = accesser->getCollisionAttackModule();
+    soHyp::soCollisionCatchModuleHyp& catchModule = getCollisionCatchModule(accesser);
+    soCollisionSearchModule& search = accesser->getCollisionSearchModule();
+    Vec3f pos;
+    if (attack.isAttack(0, false)) {
+        pos = attack.getCenterPos(0, false);
+        radius = attack.getSize(0) + 4.0f;
+        soCollisionAttackData* data = attack.getData(0, false);
+        if (data != NULL) {
+            flags = (data->m_isAbsorbable ? 0x40 : 0) |
+                    (data->m_isReflectable ? 0x20 : 0) |
+                    (data->m_isShieldable ? 0x10 : 0);
+        }
+        if (type == 1 && kind == Item_Unira) radius += 15.0f;
+    } else if (catchModule.isCatch(0)) {
+        pos = catchModule.getCenterPos(0);
+        radius = catchModule.getSize(0) + 4.0f;
+    } else if (search.isSearch(0)) {
+        pos = soExternalValueAccesser::getPrevRoughPos(object);
+        radius = search.getSize(0) + 4.0f;
+        if (type == 1) {
+            switch (kind) {
+            case Item_MotionSensorBomb: case Item_Bumper: radius += 15.0f; break;
+            }
+        } else if (type == 0 && kind == 0x16) {
+            radius += 15.0f;
+        }
+    } else {
+        bool hasPosition = false;
+        // HYPOTHESIS: gameplay names for the numeric weapon-kind exceptions
+        // remain unverified. Item kinds use the existing itKind declarations.
+        switch (type) {
+        case 0:
+            switch (kind) {
+            case 0x54: radius = 2.0f; break;
+            case 0x4D: case 0x66: radius = 17.544f; break;
+            case 0x29: case 0x2A: radius = 0.0f; break;
+            case 0x18: radius = 17.0f; break;
+            case 0x16: radius = 30.0f; break;
+            case 0x1D: radius = 8.0f; break;
+            case 0x8A: {
+                radius = 20.0f;
+                hasPosition = true;
+                pos.m_x = soExternalValueAccesser::getWorkFloat(object, 0x11000001);
+                pos.m_y = soExternalValueAccesser::getWorkFloat(object, 0x11000002);
+                int depth = soExternalValueAccesser::getWorkInt(object, 0x10000005);
+                if (depth <= 0) pos.m_z = 0.0f;
+                else pos.m_z = radius * float(depth);
+                break;
+            }
+            default: return;
+            }
+            break;
+        case 1:
+            switch (kind) {
+            case Item_Link_Bomb: case Item_ToonLink_Bomb: radius = 8.0f; break;
+            case Item_Snake_Grenade: case Item_Assist_GrayFox: case Item_Assist_SamuraiGoroh: case Item_Assist_Saki: case Item_Assist_Starfy:
+                radius = 15.0f;
+                break;
+            case Item_Pokemon_Gardevoir: radius = 160.0f; type = 5; break;
+            default: {
+                BaseItem* item = dynamic_cast<BaseItem*>(object);
+                bool eligible = false;
+                if (item != NULL) {
+                    u32 trait = item->getParam(itValueAccesser::Work_Param_Int_Trait);
+                    switch (kind) {
+                    case Item_DekuNut:
+                        if (item->getParamInt(0x1000000B) > 180 ||
+                            item->getParamInt(0x1000000B) < 0) eligible = true;
+                        break;
+                    case Item_BobOmb:
+                        if (item->getParamInt(0x1000000B) > 240 ||
+                            item->getParamInt(0x1000000B) < 0) eligible = true;
+                        break;
+                    default:
+                        if (trait & 0x211) {
+                            eligible = true;
+                        } else if (item->isPickUp()) {
+                            if (trait & 0x60) eligible = true;
+                            else if (trait & 2) {
+                                if (item->getBullet() > 0) eligible = true;
+                            } else if (trait & (4 | 0x100000)) eligible = true;
+                            else if (trait & 8) eligible = true;
+                        }
+                        break;
+                    }
+                    if (eligible) {
+                        aiPriority = item->getParam(itValueAccesser::Specialized_Param_Int_AI_Pri);
+                        if (aiPriority <= 0) return;
+                        type = 4;
+                        radius = item->getParam(itValueAccesser::Specialized_Param_Float_Pickup_Range_Size_H);
+                        float width = item->getParam(itValueAccesser::Specialized_Param_Float_Pickup_Range_Size_W);
+                        m_hasPickupItem = true;
+                        radius = 0.5f * (width + radius);
+                    } else {
+                        switch (kind) {
+                        case Item_MotionSensorBomb: radius = 15.0f; eligible = true; break;
+                        case Item_GooeyBomb: radius = 10.0f; eligible = true; break;
+                        }
+                    }
+                }
+                if (!eligible) return;
+                break;
+            }
+            }
+            break;
+        default: return;
+        }
+        if (!hasPosition) pos = soExternalValueAccesser::getPrevRoughPos(object);
+    }
+    if (__fpclassifyf(pos.m_x) <= 2 && object != NULL) return;
+    if (type != 4) flags |= 8;
+    if (type == 2) {
+        char* madein = aiMgr::getMadeinAiData(false);
+        if (madein != NULL) {
+            if (madein[2] == 3) return;
+            flags &= ~0x10;
+        }
+    }
+    s8 team = accesser->getTeamModule().getTeam()->getNo();
+    s8 ownerPlayer = -1;
+    gfTaskScheduler* scheduler = gfTaskScheduler::getInstance();
+    u32 founderId = accesser->getWorkManageModule().getInt(0x10000000);
+    gfTask* founder = scheduler->getTaskById(gfTask::Category_Fighter, founderId);
+    if (founder == NULL) {
+        int remaining = 3;
+        do {
+            StageObject* parent = dynamic_cast<StageObject*>(
+                scheduler->getTaskById(gfTask::Category_Weapon, founderId));
+            if (parent == NULL) {
+                founder = NULL;
+                break;
+            }
+            soModuleAccesser* parentAccesser = soExternalValueAccesser::getModuleAccesser(parent);
+            founderId = parentAccesser->getWorkManageModule().getInt(0x10000000);
+            founder = scheduler->getTaskById(gfTask::Category_Fighter, founderId);
+            if (founder != NULL) break;
+        } while (--remaining > 0);
+    }
+    if (founder != NULL && founder->isAlive()) {
+        Fighter* fighter = dynamic_cast<Fighter*>(founder);
+        if (fighter != NULL) ownerPlayer = g_ftManager->getPlayerNo(fighter->m_entryId);
+    }
+    switch (type) {
+    case 0:
+        if (kind == 0x16) team = -1;
+        break;
+    case 1:
+        switch (kind) {
+        case Item_Link_Bomb: case Item_Snake_Grenade:
+        case Item_ToonLink_Bomb: case Item_MotionSensorBomb: team = -1; break;
+        }
+        break;
+    }
+    u32 itemFlags = 0;
+    switch (type) {
+    case 1: case 4: case 5: {
+        BaseItem* item = dynamic_cast<BaseItem*>(object);
+        if (item != NULL) itemFlags = item->getParam(itValueAccesser::Work_Param_Int_Trait);
+        break;
+    }
+    }
+    update_core2(&pos, radius, team, ownerPlayer, type, aiPriority, kind,
+                 stale, objId, flags, constraintParentId, itemFlags);
+}
+
+// Reuse only a previously occupied, still-pending record with this object ID.
+// Otherwise allocate an inactive slot and seed both samples at the spawn point.
+void aiWeaponMgr::update_core2(Vec3f* pos, float radius, s8 team, s8 ownerPlayer,
+                               s8 type, s8 aiPriority, int kind, u8* stale, u32 objId,
+                               u32 flags, int constraintParentId, u32 itemFlags) {
+    aiWeapon* weapon = m_weapons;
+    int index = 0;
+    if (m_previousCount > 0) {
+        for (; index < 64; index++, weapon++) {
+            if (stale[index] && weapon->m_objId == objId) break;
+        }
+    }
+    if (m_previousCount <= 0 || index >= 64) {
+        weapon = m_weapons;
+        for (index = 0; index < 64; index++, weapon++) {
+            if ((weapon->m_flags & 1) == 0) break;
+        }
+        if (index >= 64) return;
+        weapon->m_objId = objId;
+        weapon->m_flags = flags | 1;
+        weapon->m_type = type;
+        weapon->m_kind = kind;
+        weapon->m_oldSamplePos = weapon->m_samplePos = weapon->m_pos = *pos;
+        weapon->m_velocity = weapon->m_acceleration = Vec3f(0.0f, 0.0f, 0.0f);
+        weapon->m_speed = 0.0f;
+        weapon->m_team = team;
+        weapon->m_updates = 0;
+        weapon->m_sampleFrames = 16;
+        weapon->m_radius = radius;
+        weapon->m_ownerPlayer = ownerPlayer;
+        weapon->m_floorBlk = NULL;
+        m_count++;
+    } else {
+        CameraController* camera = CameraController::getInstance();
+        Vec3f delta = *pos - weapon->m_pos;
+        // Stop refreshing an object beyond the camera limit while it travels
+        // farther out. Leaving it pending lets update() retire it this frame.
+        if (pos->m_x + radius < camera->unk158) {
+            if (delta.m_x < 0.0f) return;
+        } else if (pos->m_x - radius > camera->unk15C && delta.m_x > 0.0f) {
+            return;
+        }
+        if (pos->m_y + radius < camera->unk164) {
+            if (delta.m_y < 0.0f) return;
+        } else if (pos->m_y - radius > camera->unk160 && delta.m_y > 0.0f) {
+            return;
+        }
+        if (type == 0) {
+            // HYPOTHESIS: identities of these article kinds remain unresolved.
+            // Preserve the near-stationary kind-0x29 expansion and kind-0x2A override.
+            if (kind == 0x2A) {
+                radius = 29.26f;
+            } else if (kind == 0x29 && radius < 0.01f &&
+                       delta.m_z * delta.m_z + (delta.m_x * delta.m_x + delta.m_y * delta.m_y) < 0.1f) {
+                radius = 29.26f;
+            }
+        }
+        weapon->update(type, pos, radius, team, flags);
+        stale[index] = 0;
+    }
+    weapon->m_constraintParentId = constraintParentId;
+    weapon->m_itemTrait = itemFlags;
+    weapon->m_aiPriority = aiPriority;
 }
 
 // Refresh a CPU's remembered weapons by object ID, keeping each mark's delay

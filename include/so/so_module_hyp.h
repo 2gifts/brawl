@@ -110,11 +110,12 @@ struct soCollisionCatchModuleHyp {
     virtual void unk18();
     virtual void unk1C();
     virtual void unk20();
-    virtual void unk24();
-    virtual void unk28();
+    // Slots verified through the concrete constructor and native vtable.
+    virtual bool isCatch(u32 partIndex);
+    virtual float getSize(u32 partIndex);
     virtual void unk2C();
     virtual void unk30();
-    virtual void unk34();
+    virtual Vec3f getCenterPos(u32 partIndex);
     virtual void unk38();
     virtual void unk3C(float, float, float);
     virtual void unk40();
