@@ -18,11 +18,13 @@
 #include <so/reflect/so_reflect_module.h>
 #include <so/team/so_team_module.h>
 #include <so/ground/so_ground_module_impl.h>
+#include <so/model/so_model_module_impl.h>
+#include <so/link/so_link_module_impl.h>
+#include <so/collision/so_collision_attack_module_impl.h>
 #include <wn/wn_kinetic_energy_normal.h>
 #include <math.h>
 
-// HYPOTHESIS: the status unique process shared by both statuses of the missile (not yet named).
-extern "C" soStatusUniqProcess lbl_96_bss_122C;
+wnKirbyStarmissileStatusUniqProcess g_wnKirbyStarmissileStatusUniqProcess;
 
 wnKirbyStarmissile::wnKirbyStarmissile(s32 articleId, const wnArticleBuildInfo& info, const wnKirbyStarmissileData* data) :
     wnWeaponBuilder<wnKirbyStarmissileModuleAccesserBuildConfig>(
@@ -32,8 +34,8 @@ wnKirbyStarmissile::wnKirbyStarmissile(s32 articleId, const wnArticleBuildInfo& 
                                   0, 0, 0, 0, 0, 0, 0)),
     m_param(data->m_param), m_energyGravity(0.0f, -m_param->unk30, -m_param->unk34) {
     soStatusUniqProcess* uniqProcs[2];
-    uniqProcs[0] = &lbl_96_bss_122C;
-    uniqProcs[1] = &lbl_96_bss_122C;
+    uniqProcs[0] = &g_wnKirbyStarmissileStatusUniqProcess;
+    uniqProcs[1] = &g_wnKirbyStarmissileStatusUniqProcess;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 2);
     m_moduleAccesser->getKineticModule().addEnergy(&m_energyGravity, 2, soKineticEnergy::AttributeFlag(1), -1);
     m_moduleAccesser->getKineticModule().unableEnergy(2);
@@ -161,4 +163,99 @@ bool wnKirbyStarmissile::notifyEventCollisionAttackCheck(u32 flags) {
         }
     }
     return false;
+}
+
+void wnKirbyStarmissileStatusUniqProcess::initStatus(soModuleAccesser* moduleAccesser) {
+    wnKineticEnergyGravity& gravity = dynamic_cast<wnKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(2));
+    wnKirbyStarmissile& missile = dynamic_cast<wnKirbyStarmissile&>(moduleAccesser->getStageObject());
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0:
+        gravity.m_speedY = 0.0f;
+        gravity.disable();
+        break;
+    case 1:
+        moduleAccesser->getWorkManageModule().setInt(missile.getData()->m_param->unk48, 0x20000002);
+        gravity.m_speedY = missile.getData()->m_param->unk2C;
+        gravity.enable();
+        break;
+    }
+}
+
+void wnKirbyStarmissileStatusUniqProcess::execStatus(soModuleAccesser* moduleAccesser) {
+    wnKirbyStarmissile& missile = dynamic_cast<wnKirbyStarmissile&>(moduleAccesser->getStageObject());
+    if (moduleAccesser->getWorkManageModule().getInt(0x20000001) == 2) {
+        Vec3f rot = moduleAccesser->getModelModule().getNodeRotate(1);
+        float angle = moduleAccesser->getWorkManageModule().getFloat(0x21000002);
+        angle += missile.getData()->m_param->unk24;
+        if (angle > 360.0f) {
+            angle -= 360.0f;
+        }
+        rot.m_x = angle;
+        moduleAccesser->getModelModule().setNodeRotate(1, &rot);
+        moduleAccesser->getWorkManageModule().setFloat(angle, 0x21000002);
+    } else {
+        wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
+        Vec2f speed = energy.getSpeed();
+        float brake = moduleAccesser->getWorkManageModule().getFloat(0x21000000);
+        moduleAccesser->getPostureModule().getLr();
+        float length = speed.length();
+        if (length > brake) {
+            float remain = length - brake;
+            speed.m_x = speed.m_x * remain / length;
+            speed.m_y = speed.m_y * remain / length;
+        } else {
+            speed.m_x = 0.0f;
+        }
+        energy.m_speed = speed;
+        Vec3f rot = moduleAccesser->getModelModule().getNodeRotate(1);
+        float angle = moduleAccesser->getWorkManageModule().getFloat(0x21000002);
+        angle += missile.getData()->m_param->unk14;
+        if (angle > 360.0f) {
+            angle -= 360.0f;
+        }
+        rot.m_x = angle;
+        moduleAccesser->getModelModule().setNodeRotate(1, &rot);
+        moduleAccesser->getWorkManageModule().setFloat(angle, 0x21000002);
+    }
+}
+
+void wnKirbyStarmissileStatusUniqProcess::execStop(soModuleAccesser* moduleAccesser) {
+    Vec3f rot = moduleAccesser->getModelModule().getNodeRotate(1);
+    rot.m_x = moduleAccesser->getWorkManageModule().getFloat(0x21000002);
+    moduleAccesser->getModelModule().setNodeRotate(1, &rot);
+}
+
+void wnKirbyStarmissileStatusUniqProcess::execFixPos(soModuleAccesser* moduleAccesser) {
+    if (moduleAccesser->getWorkManageModule().getInt(0x20000001) != 2) {
+        int power = moduleAccesser->getWorkManageModule().getInt(0x20000000);
+        for (int i = 0; i < (int)moduleAccesser->getCollisionAttackModule().getPartSize(); i++) {
+            if (moduleAccesser->getCollisionAttackModule().isAttack(i, false)) {
+                moduleAccesser->getCollisionAttackModule().setPower(i, power, false);
+            }
+        }
+    }
+    if (moduleAccesser->getGroundModule().isTouch(static_cast<grCollStatus::TouchMask>(0xf7), 0)) {
+        Vec2f prevSpeed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
+        Vec2f speed = prevSpeed;
+        Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(0xff, 0);
+        if (normal.length()) {
+            float dot = normal.m_x * speed.m_x + normal.m_y * speed.m_y;
+            speed = speed - normal * 2.0f * dot;
+            wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
+            energy.m_speed = speed;
+            if (prevSpeed.m_x * speed.m_x + prevSpeed.m_y * speed.m_y < 0.0f) {
+                soLinkEventStarShot event(0x1a);
+                event.m_lr = normal.m_x < 0.0f ? -1 : 1;
+                moduleAccesser->getLinkModule().sendEventNodes(0, event, 0);
+            }
+        }
+    }
+}
+
+void wnKirbyStarmissileStatusUniqProcess::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
+    if (!moduleAccesser->getWorkManageModule().isFlag(0x22000000)) {
+        soLinkEventStarShot event(0x1a);
+        moduleAccesser->getLinkModule().sendEventNodes(0, event, 0);
+        moduleAccesser->getWorkManageModule().onFlag(0x22000000);
+    }
 }
