@@ -2828,7 +2828,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_dedede_starmissile.cpp", cflags=cflags_rel + ["-DFT_MODULE_BUILDER"]),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_dedede_starmissile_status_uniq_process.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_lucario_status_uniq_process_special_n.cpp"),
-            Object(NonMatching, "mo_melee/sora_melee/wn/wn_lucario_aura_ball.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/wn/wn_lucario_aura_ball.cpp", cflags=cflags_rel + ["-DFT_MODULE_BUILDER"]),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_ike_status_uniq_process_special_nstart.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_ike_status_uniq_process_special_nloop.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_ike_status_uniq_process_special_nend.cpp"),
