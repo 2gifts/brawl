@@ -21,6 +21,8 @@
 #include <ft/ft_outside_event_presenter.h>
 #include <so/damage/so_damage.h>
 #include <ft/ft_owner.h>
+#include <wn/wn_article_pool.h>
+#include <wn/wn_simple.h>
 
 #define FT_NOINLINE_SEARCH_BUILDER
 #define FT_BC ftKirbyBuildConfig
@@ -911,3 +913,18 @@ void ftKirby::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* modu
     }
     Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObject, unk4);
 }
+
+// The holders and sub pools of the article pools (soKindInfoGeneric<0, 5>); the mediator destroys them out of line.
+#pragma dont_inline on
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<6> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<6> >, soKindInfoGeneric<0, 5> >;
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<7> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<7> >, soKindInfoGeneric<0, 5> >;
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<8> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<8> >, soKindInfoGeneric<0, 5> >;
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<9> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<9> >, soKindInfoGeneric<0, 5> >;
+template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<10> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<10> >, soKindInfoGeneric<0, 5> >;
+template class soInstancePool<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<10> >, soInstancePoolRoot, soKindInfoGeneric<0, 5>, 10>;
+#pragma dont_inline off

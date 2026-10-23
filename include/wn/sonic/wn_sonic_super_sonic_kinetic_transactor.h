@@ -9,19 +9,16 @@ class soModuleAccesser;
 // HYPOTHESIS: these local aliases model the mapped pool type list as the existing
 // canonical instance-pool hierarchy; ft_sonic confirms normal at +0x10 and gravity at +0x50.
 // The energy indices and attribute masks are mapped as normal <0,1>, gravity <1,1>.
-typedef soInstancePoolInfo<soKineticEnergyNormal, 1> wnSonicSuperSonicNormalEnergyInfo;
-typedef soKineticEnergyHolder<soKineticEnergyNormal, soTypeListNullType,
-                              soKineticEnergyInitInfo<0, 1> > wnSonicSuperSonicNormalEnergyHolder;
-typedef soLineInvertHierarchy<wnSonicSuperSonicNormalEnergyInfo,
-                              wnSonicSuperSonicNormalEnergyHolder,
-                              soInstancePoolRoot> wnSonicSuperSonicNormalEnergyPool;
+typedef soInstancePoolInfo<soKineticEnergyNormal, 1, soKineticEnergyHolder,
+                           soKineticEnergyInitInfo<0, 1> > wnSonicSuperSonicNormalEnergyInfo;
+typedef soInstancePoolInfo<wnKineticEnergyGravity, 1, soKineticEnergyHolder,
+                           soKineticEnergyInitInfo<1, 1> > wnSonicSuperSonicGravityEnergyInfo;
 
-typedef soInstancePoolInfo<wnKineticEnergyGravity, 1> wnSonicSuperSonicGravityEnergyInfo;
-typedef soKineticEnergyHolder<wnKineticEnergyGravity, soTypeListNullType,
-                              soKineticEnergyInitInfo<1, 1> > wnSonicSuperSonicGravityEnergyHolder;
-typedef soLineInvertHierarchy<wnSonicSuperSonicGravityEnergyInfo,
-                              wnSonicSuperSonicGravityEnergyHolder,
-                              wnSonicSuperSonicNormalEnergyPool> wnSonicSuperSonicKineticPools;
+typedef soLineInvertHierarchy<soTypeList<wnSonicSuperSonicNormalEnergyInfo, soTypeListNullType>,
+                              soInstancePool, soInstancePoolRoot> wnSonicSuperSonicNormalEnergyPool;
+typedef soLineInvertHierarchy<soTypeList<wnSonicSuperSonicNormalEnergyInfo,
+                              soTypeList<wnSonicSuperSonicGravityEnergyInfo, soTypeListNullType> >,
+                              soInstancePool, soInstancePoolRoot> wnSonicSuperSonicKineticPools;
 
 class wnSonicSuperSonicKineticTransactor {
 public:

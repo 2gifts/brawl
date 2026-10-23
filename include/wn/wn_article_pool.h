@@ -19,6 +19,28 @@ struct wnArticleSlotTag {
     ~wnArticleSlotTag() { }
 };
 
+// The kind info of the article pools of a stage object. HYPOTHESIS: Category 0 is a fighter and Kind its fighter kind
+// (Yoshi 4, Kirby 5, Dedede 32 in the type strings), category 2 an article and Kind its article kind.
+template <int Category, int Kind>
+struct soKindInfoGeneric { };
+
+// The holder of one article in soInstancePoolSub<soInstancePoolInfo<T, 1, wnInstanceHolder, soIntToType<Id> >, KindInfo>
+// (the article counterpart of soKineticEnergyHolder): the vtable of the holder followed by the article.
+template <class T, class KindInfo, class Id>
+class wnInstanceHolder {
+public:
+    virtual ~wnInstanceHolder();
+private:
+    T m_instance;
+public:
+    wnInstanceHolder(soModuleAccesser* acc);
+    // HYPOTHESIS: the sub pool reaches the instances of all holders through the same accessor.
+    T* getEnergy() { return &m_instance; }
+};
+
+template <class T, class KindInfo, class Id>
+wnInstanceHolder<T, KindInfo, Id>::~wnInstanceHolder() { }
+
 // One article instance, preceded by the vtable of the holder.
 template <class W>
 class wnArticleHolder : public soInstancePoolRoot {
@@ -78,6 +100,14 @@ class wnArticleHierarchy : public wnArticlePool<W, N, Base> {
 public:
     wnArticleHierarchy(soModuleAccesser* acc) : wnArticlePool<W, N, Base>(acc) { }
     virtual ~wnArticleHierarchy() { }
+};
+
+template <class W, int N>
+class wnArticleHierarchy<W, N, soInstancePoolRoot> : public wnArticlePool<W, N, soInstancePoolRoot> {
+public:
+    wnArticleHierarchy(soModuleAccesser* acc) : wnArticlePool<W, N, soInstancePoolRoot>(acc) { }
+    // MATCH-ONLY: the second level calls the first-level teardown out of line.
+    virtual ~wnArticleHierarchy() __attribute__((never_inline)) { }
 };
 
 // Dispatch over the 17 article slots of a mediator: slots without an article answer with the neutral value. R.O.B. spells

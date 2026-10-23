@@ -14,6 +14,7 @@
 #include <wn/wario/wn_wario_garlic.h>
 #include <ac/ac_anim_cmd_impl.h>
 #include <so/so_kinetic_utility.h>
+#include <wn/wn_article_pool.h>
 
 #define FT_BC ftWarioBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -752,3 +753,10 @@ void ftWarioKineticTransactor::changeKineticSub(bool*, void*, Vec2f* speed, soMo
     gravity.m_gravity = -param->gravity;
     gravity.unk1C = param->unk4;
 }
+
+// The holders and sub pools of the article pools (soKindInfoGeneric<0, 21>); the mediator destroys them out of line.
+#pragma dont_inline on
+template wnInstanceHolder<wnWarioGarlic, soKindInfoGeneric<0, 21>, soIntToType<1> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnWarioGarlic, 1, wnInstanceHolder, soIntToType<1> >, soKindInfoGeneric<0, 21> >;
+template class soInstancePool<soInstancePoolInfo<wnWarioGarlic, 1, wnInstanceHolder, soIntToType<1> >, soInstancePoolRoot, soKindInfoGeneric<0, 21>, 1>;
+#pragma dont_inline off

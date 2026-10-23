@@ -1,34 +1,13 @@
 #pragma once
 
-// Article-specific kinetic hierarchy. The opt-in keeps existing fighter template
-// spellings and layouts unchanged while describing the article's native pools.
+// Article-specific parts of the kinetic hierarchy: the pool members, the non-polymorphic root and the generic mediator.
+// The template shapes (soInstancePoolInfo, soLineInvertHierarchy) are shared with the fighters (ft_builder_kinetic.h).
 #ifndef WN_KINETIC_GENERIC_BUILDER
 #error wn_kinetic_mediator_impl.h requires the article generic kinetic policy
 #endif
 #include <ft/builder/ft_builder_kinetic.h>
 #include <wn/wn_kinetic_energy_gravity.h>
 #include <wn/wn_kinetic_transactor.h>
-
-template <int Index, int Attribute>
-struct soKineticEnergyInitInfo {
-    enum { EnergyIndex = Index, EnergyAttribute = Attribute };
-};
-
-template <typename E, typename Next, typename InitInfo>
-class soKineticEnergyHolder {
-public:
-    enum { Attribute = InitInfo::EnergyAttribute };
-    virtual ~soKineticEnergyHolder() { }
-private:
-    E m_energy;
-public:
-    soKineticEnergyHolder(soModuleAccesser* acc) : m_energy() {
-        acc->getKineticModule().addEnergy(&m_energy, InitInfo::EnergyIndex,
-            soKineticEnergy::AttributeFlag(InitInfo::EnergyAttribute), -1);
-        m_energy.disable();
-    }
-    E* getEnergy() { return &m_energy; }
-};
 
 // MATCH-ONLY: the Diddy barrel builds its normal energies with the out-of-line five-vector constructor; units that define
 // WN_KINETIC_NORMAL_HOLDER_DEFAULT expand the constructor inline (tagged overload) instead.
@@ -56,13 +35,6 @@ public:
     soKineticEnergyNormal* getEnergy() { return &m_energy; }
 };
 
-template <typename E, int N, template <typename, typename, typename> class Holder, typename Init>
-struct soInstancePoolInfo {
-    typedef E Type;
-    typedef Holder<E, soTypeListNullType, Init> HolderType;
-    enum { Count = N, Attribute = Init::EnergyAttribute };
-};
-
 template <typename Info>
 class soInstancePoolSubNull {
 public:
@@ -72,11 +44,12 @@ public:
 
 template <typename Info, typename Next>
 class soInstancePoolSub {
+    typedef typename Info::template HolderOf<Next>::Type Holder;
 public:
     virtual ~soInstancePoolSub() { }
 private:
     soInstancePoolSubNull<Info> m_next;
-    typename Info::HolderType m_holder;
+    Holder m_holder;
 public:
     soInstancePoolSub(soModuleAccesser* acc) : m_holder(acc) { }
     // MATCH-ONLY: native mediator loops call this per-energy lookup separately.
@@ -88,7 +61,7 @@ public:
     int forEachHolderModuleAccesser(Helper helper, soModuleAccesser* acc)
         __attribute__((never_inline)) {
         typename Info::Type* energy = m_holder.getEnergy();
-        if ((helper.m_flag.m_mask & Info::Attribute) &&
+        if ((helper.m_flag.m_mask & Holder::Attribute) &&
             energy->isEnable() == true && !energy->isSuspend())
             Helper::TransactorType::updateEnergy(energy, acc);
         return m_next.forEachHolderModuleAccesser(helper, acc);
@@ -129,38 +102,6 @@ public:
         m_sub.forEachHolderModuleAccesser(helper, acc);
         Parent::updateEnergy1(helper, acc);
     }
-};
-
-template <typename List, int N> struct wnKineticListAt;
-template <typename H, typename T> struct wnKineticListAt<soTypeList<H, T>, 0> { typedef H Type; };
-template <typename H, typename T, int N>
-struct wnKineticListAt<soTypeList<H, T>, N> { typedef typename wnKineticListAt<T, N - 1>::Type Type; };
-template <typename List, int N> struct wnKineticListPrefix;
-template <typename H, typename T> struct wnKineticListPrefix<soTypeList<H, T>, 1> {
-    typedef soTypeList<H, soTypeListNullType> Type;
-};
-template <typename H, typename T, int N> struct wnKineticListPrefix<soTypeList<H, T>, N> {
-    typedef soTypeList<H, typename wnKineticListPrefix<T, N - 1>::Type> Type;
-};
-
-template <typename List, template <typename, typename, typename, int> class Unit,
-          typename Root, typename Next = soTypeListNullType,
-          int Index = soTypeListLength<List>::value - 1>
-class soLineInvertHierarchy : public Unit<typename wnKineticListAt<List, Index>::Type,
-    soLineInvertHierarchy<typename wnKineticListPrefix<List, Index>::Type, Unit, Root, Next, Index - 1>, Next, Index> {
-    typedef Unit<typename wnKineticListAt<List, Index>::Type,
-        soLineInvertHierarchy<typename wnKineticListPrefix<List, Index>::Type, Unit, Root, Next, Index - 1>, Next, Index> Base;
-public:
-    soLineInvertHierarchy(soModuleAccesser* acc) : Base(acc) { }
-    ~soLineInvertHierarchy() { }
-};
-
-template <typename H, template <typename, typename, typename, int> class Unit, typename Root, typename Next>
-class soLineInvertHierarchy<soTypeList<H, soTypeListNullType>, Unit, Root, Next, 0> : public Unit<H, Root, Next, 0> {
-    typedef Unit<H, Root, Next, 0> Base;
-public:
-    soLineInvertHierarchy(soModuleAccesser* acc) : Base(acc) { }
-    ~soLineInvertHierarchy() { }
 };
 
 template <typename Change, typename Update, typename Speed, typename Helper>

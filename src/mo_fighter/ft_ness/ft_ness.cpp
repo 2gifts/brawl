@@ -946,3 +946,8 @@ void ftNess::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* modul
     }
     Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
 }
+
+// The holders and sub pools of the article pools (soKindInfoGeneric<0, 10>); the mediator destroys them out of line.
+#pragma dont_inline on
+template wnInstanceHolder<wnNessPKFire, soKindInfoGeneric<0, 10>, soIntToType<1> >::~wnInstanceHolder();
+#pragma dont_inline off
