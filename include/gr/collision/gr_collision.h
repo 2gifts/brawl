@@ -13,7 +13,7 @@ class Stage;
 class grCollision {
 public:
     // 0
-    short m_index;
+    u16 m_index;
     // 2
     short m_vtxLen;
     // 4
@@ -35,7 +35,7 @@ public:
     // 44
     bool m_isEnabled : 1; // verified: bit 0x80 of byte 0x2C, set by setEnable and cleared by setDisable
     bool : 1;
-    bool : 1;
+    bool m_disablePending : 1; // HYPOTHESIS: bit 0x20 of byte 0x2C; set by setDisable during a task pass, applied by grCollisionManager::processFixPosition
     bool : 1;
     bool : 1;
     bool m_noUpdate : 1; // HYPOTHESIS: bit 0x04 of byte 0x2C; while set the module does not refresh the collision

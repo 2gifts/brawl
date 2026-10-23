@@ -88,7 +88,8 @@ public:
     // 100
     grCollStatusEventReceiver* m_receiver;
     // 104
-    char _spacer4[6];
+    grCollision* m_unk104; // HYPOTHESIS: collision updated before the status test (grCollisionManager::processPreMapCorrection)
+    char _spacer4[2];
     // 110
     char m_targetLineCategory;
     // 111
@@ -144,7 +145,10 @@ public:
     bool m_touchDownLeft : 1;
 
     // 118
-    char _spacer6[10];
+    char _spacer6[6];
+    // 124
+    u32 m_unk124 : 8; // HYPOTHESIS: update pass, 0 before and 1 during map correction (grCollisionManager)
+    u32 : 24;
     // 128
     grCollision* m_collision;
     // 132
