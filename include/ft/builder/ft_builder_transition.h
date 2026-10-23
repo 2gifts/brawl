@@ -9,28 +9,7 @@
 #include <so/transition/so_transition_module_impl.h>
 #include <types.h>
 
-template <class H, class T>
-struct soTypeList {
-    typedef H Head;
-    typedef T Tail;
-};
-struct soTypeListNullType { };
-
-template <int N>
-struct soIntToType {
-    enum { value = N };
-};
-
-template <class TL>
-struct soTypeListLength;
-template <>
-struct soTypeListLength<soTypeListNullType> {
-    enum { value = 0 };
-};
-template <class H, class T>
-struct soTypeListLength<soTypeList<H, T> > {
-    enum { value = 1 + soTypeListLength<T>::value };
-};
+#include <so/so_type_list.h>
 
 template <class T>
 class soArrayPoolRoot {
