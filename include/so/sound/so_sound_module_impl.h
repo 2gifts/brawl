@@ -1,5 +1,6 @@
 // SHADOW of BrawlHeaders/so/sound/so_sound_module_impl.h: identical except for the FT_MODULE_BUILDER-guarded declarations
 // (constructors/destructors of sora_melee classes that fighter module builders call). Built only for fighter RELs.
+// Also: the soSoundIdExchanger step/landing parameter lists and inline destructor, verified by ftSoundIdExchangerImpl.
 #pragma once
 
 #include <StaticAssert.h>
@@ -17,10 +18,12 @@ class soModuleAccesser;
 
 class soSoundIdExchanger : public soNullable {
 public:
-    virtual ~soSoundIdExchanger();
+    // HYPOTHESIS: inline in the original (the map has no soSoundIdExchanger destructor and the derived ones call none).
+    virtual ~soSoundIdExchanger() { }
     virtual SndID getId(SndID sndID, soModuleAccesser* moduleAccesser);
-    virtual int getStepId(int);    // TODO: Verify
-    virtual int getLandingId(int); // TODO: Verify
+    // HYPOTHESIS: the module accesser parameter is taken from the ftSoundIdExchangerImpl overrides.
+    virtual int getStepId(int stepId, soModuleAccesser* moduleAccesser);
+    virtual int getLandingId(int landingId, soModuleAccesser* moduleAccesser);
 };
 static_assert(sizeof(soSoundIdExchanger) == 8, "Class is wrong size!");
 
@@ -28,8 +31,8 @@ class soSoundIdExchangerNull : public soSoundIdExchanger {
 public:
     virtual ~soSoundIdExchangerNull();
     virtual SndID getId(SndID sndID, soModuleAccesser* moduleAccesser);
-    virtual int getStepId(int);
-    virtual int getLandingId(int);
+    virtual int getStepId(int stepId, soModuleAccesser* moduleAccesser);
+    virtual int getLandingId(int landingId, soModuleAccesser* moduleAccesser);
 };
 
 extern soSoundIdExchangerNull g_soSoundIdExchangerNull;
