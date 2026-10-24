@@ -138,6 +138,11 @@ mo_enemy/sora_enemy/bucyulus/em_bucyulus_param_accesser.cpp:
 	.data       start:0x0000AA88 end:0x0000AB08
 	.bss        start:0x000003D0 end:0x000003E8
 
+mo_enemy/sora_enemy/botron/em_botron.cpp:
+	.text       start:0x0003CA40 end:0x0003DC08
+	.rodata     start:0x00000F00 end:0x00000F08
+	.data       start:0x0000AB08 end:0x0000B3C8
+
 mo_enemy/sora_enemy/botron/em_botron_param_accesser.cpp:
 	.text       start:0x0003DC08 end:0x0003DEF8
 	.ctors      start:0x00000064 end:0x00000068
@@ -215,6 +220,11 @@ mo_enemy/sora_enemy/teckin/em_teckin_param_accesser.cpp:
 	.data       start:0x0000FA88 end:0x0000FAE8
 	.bss        start:0x00000598 end:0x000005B0
 
+mo_enemy/sora_enemy/spar/em_spar.cpp:
+	.text       start:0x00049C24 end:0x0004AE58
+	.rodata     start:0x00001068 end:0x00001070
+	.data       start:0x0000FAE8 end:0x000103B0
+
 mo_enemy/sora_enemy/spar/em_spar_param_accesser.cpp:
 	.text       start:0x0004AE58 end:0x0004B130
 	.ctors      start:0x00000098 end:0x0000009C
@@ -232,6 +242,15 @@ mo_enemy/sora_enemy/hammerbros/em_hammerbros_param_accesser.cpp:
 	.rodata     start:0x00001078 end:0x00001080
 	.data       start:0x00011100 end:0x00011180
 	.bss        start:0x000005C8 end:0x000005E0
+
+mo_enemy/sora_enemy/hammerbros/wnem_proc_hammerbros.cpp:
+	.text       start:0x0004C934 end:0x0004CA90
+	.rodata     start:0x00001080 end:0x00001088
+
+mo_enemy/sora_enemy/kokkon/em_kokkon.cpp:
+	.text       start:0x0004CA90 end:0x0004DE00
+	.rodata     start:0x00001088 end:0x00001090
+	.data       start:0x00011180 end:0x00011B70
 
 mo_enemy/sora_enemy/kokkon/em_kokkon_param_accesser.cpp:
 	.text       start:0x0004DE00 end:0x0004E0A4
