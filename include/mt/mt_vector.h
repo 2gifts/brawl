@@ -140,10 +140,29 @@ public:
         return lengthSquared * rsqrtf(lengthSquared);
     }
 
+    // Writes this - v to out.
+    void sub(const Vec2f* v, Vec2f* out)
+#ifdef MT_VEC2F_DISTANCE_NOINLINE
+        __attribute__((never_inline))
+#endif
+    {
+        out->m_x = m_x - v->m_x;
+        out->m_y = m_y - v->m_y;
+    }
+
+#ifdef MT_VEC2F_DISTANCE_NOINLINE
+    // MATCH-ONLY: the Enemy unit calls its weak out-of-line copy, which subtracts through sub.
+    float distance(Vec2f* v) __attribute__((never_inline)) {
+        Vec2f disp;
+        sub(v, &disp);
+        return disp.length();
+    }
+#else
     float distance(Vec2f* v) {
         Vec2f disp = *this - *v;
         return disp.length();
     }
+#endif
 
     void normalize();
     void normalize(Vec2f* input);
@@ -408,6 +427,17 @@ public:
     Vec3f& operator*=(const float c) {
         *this = *this * c;
         return *this;
+    }
+
+    // Scales this vector by c in place.
+    void scale(float c)
+#ifdef MT_VEC3F_SCALE_NOINLINE
+        __attribute__((never_inline)) // MATCH-ONLY: the Enemy unit calls its weak out-of-line copy.
+#endif
+    {
+        m_x = m_x * c;
+        m_y = m_y * c;
+        m_z = m_z * c;
     }
 
     float lengthSq();

@@ -194,6 +194,10 @@ public:
                        soGeneralWorkSimple* statusWork, soTransitionModule* transition, void* changeRequests, void* preCheckData,
                        int unk1, int unk2);
     virtual ~emStatusModuleImpl();
+    // HYPOTHESIS: the update priority of the AI against the status (Enemy::processGameProc raises it to (-350, -250)
+    // around the status transition check of a dead area hit, then puts it back).
+    void setAIUpdatePri(int, int);
+    void initAIUpdatePri();
 };
 static_assert(sizeof(emStatusModuleImpl) == 0xB4, "Class is wrong size!");
 
@@ -214,6 +218,8 @@ class emDamageModuleImpl {
 public:
     emDamageModuleImpl(soModuleAccesser* acc, soArray<soDamage>* damages);
     virtual ~emDamageModuleImpl();
+    // The position the damage of the enemy is taken at (Enemy::getDamageOffsetFromNode).
+    Vec3f getDamagePos();
 };
 static_assert(sizeof(emDamageModuleImpl) == 0xE0, "Class is wrong size!");
 
@@ -239,5 +245,7 @@ public:
     virtual ~emKineticModuleImpl();
     // HYPOTHESIS: the argument is an energy index (-1: all energies), as in soKineticModule::updateEnergy.
     void updateEnergyPre(int index);
+    // HYPOTHESIS: the counterpart run after the posture update (Enemy::updatePosture passes -1).
+    void updateEnergyPost(int index);
 };
 static_assert(sizeof(emKineticModuleImpl) == 0xBD4, "Class is wrong size!");

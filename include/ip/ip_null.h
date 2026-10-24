@@ -16,7 +16,8 @@ public:
         ipPadTrigger trigger = { 0, 0 };
         return trigger;
     }
-#ifndef WN_ARTICLE_NATIVE_BUILDERS
+// (Some units' originals inherit Input's copy: their IpNull vtable points at Input::getContNo.)
+#if !defined(WN_ARTICLE_NATIVE_BUILDERS) && !defined(IP_NULL_INPUT_CONT_NO)
     virtual s32 getContNo() const { return -1; }
 #endif
     virtual void setRumble(u32, u32, s32, u8) { }

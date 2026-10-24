@@ -81,7 +81,7 @@ public:
     virtual Vec2f getStickSub() const;
     virtual ipPadButton getButton() const;
     virtual ipPadTrigger getTrigger() const;
-#ifdef WN_ARTICLE_NATIVE_BUILDERS
+#if defined(WN_ARTICLE_NATIVE_BUILDERS) || defined(IP_NULL_INPUT_CONT_NO)
     virtual s32 getContNo() const { return -1; }
 #else
     virtual s32 getContNo() const;

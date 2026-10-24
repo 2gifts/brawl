@@ -6,6 +6,11 @@
 // MATCH-ONLY: the unit calls its weak out-of-line copies of Vec3f(float, float, float), operator- and operator+=.
 #define MT_VEC3F_CTOR_NOINLINE
 #define MT_VEC3F_OPERATORS_NOINLINE
+// MATCH-ONLY: and its weak copies of Vec2f::distance (subtracting through Vec2f::sub) and Vec3f::scale.
+#define MT_VEC2F_DISTANCE_NOINLINE
+#define MT_VEC3F_SCALE_NOINLINE
+// MATCH-ONLY: the unit copies whole Vec2f values (returned speeds, differences) with word copies.
+#define MT_VEC2F_PLAIN_BASE
 // The Enemy constructor builds every module of the enemy itself, like the fighter module builders: the module classes of
 // sora_melee have their full layout and their constructors are called (not expanded) under these macros.
 #define FT_MODULE_BUILDER
@@ -19,7 +24,15 @@
 #define SO_INSTANCE_MANAGER_FIXED_DTOR_OUT_OF_LINE
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
 #define SO_ARRAY_LIST_DTOR_EXTERN
+// The contractible table destructors (anim cmd argument lists, the status / motion / anim cmd tables) are sora_melee's.
+#define SO_ARRAY_CONTRACTIBLE_TABLE_DTOR_EXTERN
 #define WN_TRANSITION_CTOR_INLINE
+// The original emits no weak copies of the Stage mode queries it calls.
+#define ST_STAGE_BOSS_MODE_DECL_ONLY
+// Its IpNull vtable points at Input::getContNo, and soArrayFixed leaves isNull to the derived arrays (a null slot in
+// the vtable of soArrayFixed<soAnimCmdAddressPackConv>).
+#define IP_NULL_INPUT_CONT_NO
+#define SO_ARRAY_FIXED_PURE_IS_NULL
 #include <em/enemy.h>
 #include <em/em_info.h>
 #include <em/em_manager.h>
@@ -30,6 +43,7 @@
 #include <gf/gf_task.h>
 #include <gf/gf_task_scheduler.h>
 #include <it/it_manager.h>
+#include <mt/mt_matrix.h>
 #include <mt/mt_prng.h>
 #include <so/capture/so_capture_module.h>
 #include <so/catch/so_catch_module.h>
@@ -38,6 +52,8 @@
 #include <so/so_module_hyp.h>
 #include <so/so_slow.h>
 #include <so/so_value_accesser.h>
+#include <so/ground/so_ground_util.h>
+#include <st/stage.h>
 #include <st/st_trigger.h>
 #include <string.h>
 #include <wn/wn_em_simple.h>
@@ -78,6 +94,9 @@ void fn_27_2330C4(u32 id, int kind);
 // HYPOTHESIS: the number of enemies the trigger creates, whether its index-th one can be created, and the creation of
 // that one from the description (returns its create id).
 u32 fn_27_2331C4(stTriggerMng* manager, int triggerId);
+// mt_matrix (DOL): sets a matrix to a rotation by Euler angles (radians), and rotates a matrix by them.
+void fn_8003ECA0(Matrix* mtx, float x, float y, float z);
+void fn_8003EA50(Matrix* mtx, const Vec3f* angles);
 bool fn_27_233208(stTriggerMng* manager, int triggerId, u32 index);
 int fn_27_233264(stTriggerMng* manager, int triggerId, void* desc, int index);
 }
@@ -93,8 +112,12 @@ static const u32 ValueInt_CenterNodeId = 0x59e6;
 // HYPOTHESIS: roles from the code that writes them.
 static const u32 WorkFlag_InvalidParent = 0x12000000;   // the parent marks itself invalid for its children
 static const u32 WorkFlag_Bullet = 0x12000001;          // Enemy::isBullet; the attack check stops and quakes the camera
+static const u32 WorkFlag_Front = 0x12000003;           // the enemy faces the camera (getEmLrRot)
 static const u32 WorkFlag_AttackChecked = 0x12000005;   // set by the attack check, cleared on status change
 static const u32 WorkFlag_SearchHitWeapon = 0x1200000e; // the search collision found a weapon
+static const u32 WorkFlag_ChildrenDead = 0x12000011;    // Enemy::isChildrenDead
+// HYPOTHESIS: whether the enemy kind starts facing the camera (resetFrontFlag).
+static const u32 ValueInt_FrontDefault = 0x59e7;
 static const u32 WorkInt_StatusDataKind = 0x10000004;   // emStatusData::m_unkC of the current status
 // The instance id of the item the enemy holds / communicates with (cleared by emShootItem, removed by anim cmd 28).
 static const u32 WorkInt_CommunicationItemId = 0x1000000f;
@@ -179,6 +202,38 @@ static inline emCatchModuleView& getCatchModule(const soModuleAccesser& acc) {
 static inline soCaptureModule& getCaptureModule(const soModuleAccesser& acc) {
     return *static_cast<soCaptureModule*>(acc.m_enumerationStart->m_captureModule);
 }
+
+// The glow module (void* in the enumeration); only the slots Enemy::resetGlowParam calls.
+// HYPOTHESIS: setGlowAttack as in it_item.cpp's view; the defense and the three values from what the enemy passes.
+class emGlowModuleView {
+public:
+    virtual void unk08();
+    virtual void unk0C();
+    virtual void unk10();
+    virtual void unk14();
+    virtual int getGlowAttack();
+    virtual void setGlowAttack(int attack); // 0x1C
+    virtual void unk20();
+    virtual void unk24();
+    virtual void setGlowDefense(int defense); // 0x28
+    virtual void setGlowParam(float, float, float); // 0x2C
+};
+static inline emGlowModuleView& getGlowModule(const soModuleAccesser& acc) {
+    return *static_cast<emGlowModuleView*>(acc.m_enumerationStart->m_glowModule);
+}
+
+// HYPOTHESIS: the arguments of the link events the enemy handles. Event 0xB (Enemy::sendEventThrow) carries a
+// parameter and returns two results, which the enemy's own handler clears.
+struct emLinkEventArgs : public soLinkEventArgs {
+    int m_param;
+    int m_result0;
+    int m_result1;
+    int unk14;
+    float unk18;
+    bool unk1C;
+    emLinkEventArgs(int eventKind, int param) :
+        soLinkEventArgs(eventKind), m_param(param), m_result0(-1), m_result1(-1), unk14(-1), unk18(1.0f), unk1C(true) { }
+};
 
 // HYPOTHESIS: the status data of an enemy status; the top four bits of its word 0xC go to a work int on every status
 // change.
@@ -549,6 +604,101 @@ void Enemy::init() {
     }
 }
 
+// The level scale of the enemy (the strength table of its parameters by level and difficulty), written to
+// ValueFloat_LevelScale; 0 outside levels 1-5 and difficulties 0-14. The boss battle modes have their own tables.
+// TODO(nonmatching): 96.61%, (a) non-semantic: same calls, constants and table; we fold the level's -1 into the load
+// offset (lfs -0x3c) where the original subtracts and indexes with lfsx.
+float Enemy::initStrength() {
+    soWorkManageModule& work = moduleAccesser.getWorkManageModule();
+    float strength = 0.0f;
+    work.setFloat(strength, ValueFloat_LevelScale);
+    if (m_level >= 1 && m_level <= 5 && m_difficulty <= 14) {
+        const float (*table)[15];
+        if (g_Stage->isBossBattleMode() == true) {
+            table = static_cast<const float (*)[15]>(soValueAccesser::getConstantIndefinite(&moduleAccesser, 0xa81e, 0));
+        } else if (g_Stage->isSimpleBossBattleMode() == true) {
+            table = static_cast<const float (*)[15]>(soValueAccesser::getConstantIndefinite(&moduleAccesser, 0xa81f, 0));
+        } else {
+            table = static_cast<const float (*)[15]>(soValueAccesser::getConstantIndefinite(&moduleAccesser, 0xa7fa, 0));
+        }
+        strength = table[m_level - 1][m_difficulty];
+        work.setFloat(strength, ValueFloat_LevelScale);
+    }
+    return strength;
+}
+
+// Changes the level (1-5) and recomputes the strength and the glow; returns the new level scale (0 for a bad level).
+float Enemy::resetLevel(int level) {
+    if ((u32)level < 1 || (u32)level > 5) {
+        return 0.0f;
+    }
+    m_level = level;
+    float strength = initStrength();
+    resetGlowParam();
+    return strength;
+}
+
+// The attack, defense and score of the enemy are scaled values of its constants (em/em_scaled_value.h).
+float Enemy::getAttackValue() {
+    float scale = soValueAccesser::getValueFloat(&moduleAccesser, ValueFloat_LevelScale, 0);
+    const emScaledValue* value =
+        static_cast<const emScaledValue*>(soValueAccesser::getConstantIndefinite(&moduleAccesser, 0xa814, 0));
+    float result = value->m_base;
+    float rate = value->m_rate;
+    if (0.0f != rate) {
+        result += rate * scale;
+    }
+    return result;
+}
+
+float Enemy::getDefenseValue() {
+    float scale = soValueAccesser::getValueFloat(&moduleAccesser, ValueFloat_LevelScale, 0);
+    const emScaledValue* value =
+        static_cast<const emScaledValue*>(soValueAccesser::getConstantIndefinite(&moduleAccesser, 0xa815, 0));
+    float result = value->m_base;
+    float rate = value->m_rate;
+    if (0.0f != rate) {
+        result += rate * scale;
+    }
+    return result;
+}
+
+float Enemy::getScore() {
+    float scale = soValueAccesser::getValueFloat(&moduleAccesser, ValueFloat_LevelScale, 0);
+    const emScaledValue* value =
+        static_cast<const emScaledValue*>(soValueAccesser::getConstantIndefinite(&moduleAccesser, 0xa816, 0));
+    float result = value->m_base;
+    float rate = value->m_rate;
+    if (0.0f != rate) {
+        result += rate * scale;
+    }
+    return result;
+}
+
+// The strength works: 0x11000001 the current strength, 0x11000003 the strength the enemy started with, 0x1100000E the
+// strength of the previous frame (processHit).
+float Enemy::getRestHPRate() {
+    soWorkManageModule& work = moduleAccesser.getWorkManageModule();
+    float strength = work.getFloat(0x11000001);
+    return 100.0f * strength / work.getFloat(0x11000003);
+}
+
+float Enemy::getHPDiffFromPrevHP() {
+    soWorkManageModule& work = moduleAccesser.getWorkManageModule();
+    float strength = work.getFloat(0x11000001);
+    return strength - work.getFloat(0x1100000e);
+}
+
+// The front flag (the enemy faces the camera) starts as the enemy kind's parameter says.
+void Enemy::resetFrontFlag() {
+    soWorkManageModule& work = moduleAccesser.getWorkManageModule();
+    if (static_cast<bool>(soValueAccesser::getValueInt(&moduleAccesser, ValueInt_FrontDefault, 0)) == true) {
+        work.onFlag(WorkFlag_Front);
+    } else {
+        work.offFlag(WorkFlag_Front);
+    }
+}
+
 s32 Enemy::getNameMsgId() {
     return moduleAccesser.getWorkManageModule().getInt(0x10000016);
 }
@@ -568,6 +718,38 @@ int Enemy::getExtendBrresResourceID() {
         return 0xFFFF;
     }
     return m_preloadArchive->extendBrresResourceId;
+}
+
+// The glow of the enemy: its attack and defense, and the three glow values of its parameters.
+void Enemy::resetGlowParam() {
+    int attack = getAttackValue();
+    int defense = getDefenseValue();
+    float glow0 = soValueAccesser::getValueFloat(&moduleAccesser, 0xbcc, 0);
+    float glow1 = soValueAccesser::getValueFloat(&moduleAccesser, 0xbcd, 0);
+    float glow2 = soValueAccesser::getValueFloat(&moduleAccesser, 0xbce, 0);
+    getGlowModule(moduleAccesser).setGlowAttack(attack);
+    getGlowModule(moduleAccesser).setGlowDefense(defense);
+    getGlowModule(moduleAccesser).setGlowParam(glow0, glow1, glow2);
+}
+
+// The camera follows the enemy when the enemy kind has camera parameters and turns them on: with the kind's priorities,
+// as a whole, and through its first camera subject only.
+void Enemy::initCameraSubject() {
+    soCameraModule& camera = m_moduleAccesser->getCameraModule();
+    if (soValueAccesser::getConstantIndefinite(&moduleAccesser, 0xa811, 0) != NULL &&
+        soValueAccesser::getValueInt(&moduleAccesser, 0x59fb, 0) == 1) {
+        camera.setPri(soValueAccesser::getValueInt(&moduleAccesser, 0x59f8, 0), -1);
+        camera.setAdvPri(soValueAccesser::getValueInt(&moduleAccesser, 0x59f7, 0), -1);
+        camera.setWhole(true);
+        int subjectNum = camera.getSubjectsSize();
+        for (int i = 0; i < subjectNum; i++) {
+            if (i == 0) {
+                camera.setEnableCamera(true, i);
+            } else {
+                camera.setEnableCamera(false, i);
+            }
+        }
+    }
 }
 
 // TODO(nonmatching): 98.98%, (a) non-semantic: same calls, arguments and constants; the original copies the 4th
@@ -810,6 +992,82 @@ void Enemy::deactivate() {
     unkD8 = false;
 }
 
+// A list of node ids among the enemy kind's constants.
+struct emNodeIdList {
+    const u32* m_ids;
+    int m_num;
+};
+
+// Node 0 (the top node) can always be set; the others only if the enemy kind lists them.
+bool Enemy::isSetableNode(int nodeId) {
+    if (nodeId == 0) {
+        return true;
+    }
+    const emNodeIdList* nodes =
+        static_cast<const emNodeIdList*>(soValueAccesser::getConstantIndefinite(&moduleAccesser, 0xa800, 0));
+    if (nodes != NULL) {
+        for (int i = 0; i < nodes->m_num; i++) {
+            if (nodeId == nodes->m_ids[i]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// Puts a node back to the rotation of the model's resource file (the top node turns to the enemy's facing); a node id
+// past the enemy kind's nodes resets all of them.
+void Enemy::initRot(u32 nodeId) {
+    int nodeNum = emInfo::getInstance()->getNodeNum(m_enemyKind);
+    soModelModule& model = moduleAccesser.getModelModule();
+    soPostureModule& posture = moduleAccesser.getPostureModule();
+    if ((int)nodeId >= nodeNum) {
+        for (int i = 0; i < nodeNum; i++) {
+            initRot(i);
+        }
+    } else if (isSetableNode(nodeId) == true) {
+        Vec3f rot = model.getResFileNodeRotation(nodeId);
+        if (nodeId == 0) {
+            posture.setRot(&rot, 0);
+            rot = getEmTopNRot(posture.getRotYLr(), moduleAccesser.getWorkManageModule().isFlag(WorkFlag_Front));
+            model.setNodeRotate(0, &rot);
+        } else {
+            model.setNodeRotate(nodeId, &rot);
+            posture.setRot(&rot, nodeId);
+        }
+    }
+}
+
+// After the posture update, the kinetic energies finish the frame, and an enemy that would pass its goal this frame
+// stops on it (an axis without a goal is 35791).
+// TODO(nonmatching): 99.68%, (a) non-semantic: register allocation of the two fabs results only.
+void Enemy::updatePosture(bool update) {
+    Vec3f prevPos = moduleAccesser.getPostureModule().getPos();
+    StageObject::updatePosture(update);
+    if (update == true) {
+        dynamic_cast<emKineticModuleImpl&>(*moduleAccesser.m_enumerationStart->m_kineticModule).updateEnergyPost(-1);
+    }
+    Vec3f pos = moduleAccesser.getPostureModule().getPos();
+    if (35791.0f != m_goalPos.m_x) {
+        Vec2f speed = moduleAccesser.getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(-1));
+        float distance = fabs(m_goalPos.m_x - prevPos.m_x);
+        float step = fabs(speed.m_x);
+        if (0.1f + step >= distance) {
+            pos.m_x = m_goalPos.m_x;
+            moduleAccesser.getPostureModule().setPos(&pos);
+        }
+    }
+    if (35791.0f != m_goalPos.m_y) {
+        Vec2f speed = moduleAccesser.getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(-1));
+        float distance = fabs(m_goalPos.m_y - prevPos.m_y);
+        float step = fabs(speed.m_y);
+        if (0.1f + step >= distance) {
+            pos.m_y = m_goalPos.m_y;
+            moduleAccesser.getPostureModule().setPos(&pos);
+        }
+    }
+}
+
 // (The goal is assigned from a Vec2f temporary: the compiler builds it in the frame, forwards its value to the member
 // stores with a rounding, and no longer inlines the function into activate and anim cmd 22.)
 void Enemy::resetGoalPos() {
@@ -839,6 +1097,138 @@ float Enemy::getGoalPosY() {
     return m_goalPos.m_y;
 }
 
+void Enemy::setPostureFromParam(void* postureParam, bool initPos) {
+    const emPostureParam* param = static_cast<const emPostureParam*>(postureParam);
+    soPostureModule& posture = moduleAccesser.getPostureModule();
+    Vec3f pos = posture.getPos();
+    pos.m_x = param->m_x;
+    pos.m_y = param->m_y;
+    if (initPos == true) {
+        posture.initPos(&pos);
+    } else {
+        posture.setPos(&pos);
+    }
+    posture.setLr(param->m_lr);
+}
+
+bool Enemy::isLrWithPostureParam(void* postureParam) {
+    return static_cast<const emPostureParam*>(postureParam)->m_lr == moduleAccesser.getPostureModule().getLr();
+}
+
+int Enemy::getNearPostureParamFromPosition(void** postureParams, u32 num, Vec2f* pos) {
+    int nearest = -1;
+    float nearestDistance = 3.4028235e+38f;
+    for (u32 i = 0; i < num; i++) {
+        const emPostureParam* param = static_cast<const emPostureParam*>(postureParams[i]);
+        if (param != NULL) {
+            Vec2f paramPos(param->m_x, param->m_y);
+            float distance = pos->distance(&paramPos);
+            if (distance < nearestDistance) {
+                nearest = i;
+                nearestDistance = distance;
+            }
+        }
+    }
+    return nearest;
+}
+
+int Enemy::getFarPostureParamFromPosition(void** postureParams, u32 num, Vec2f* pos) {
+    int farthest = -1;
+    float farthestDistance = 0.0f;
+    for (u32 i = 0; i < num; i++) {
+        const emPostureParam* param = static_cast<const emPostureParam*>(postureParams[i]);
+        if (param != NULL) {
+            Vec2f paramPos(param->m_x, param->m_y);
+            float distance = pos->distance(&paramPos);
+            if (distance > farthestDistance) {
+                farthest = i;
+                farthestDistance = distance;
+            }
+        }
+    }
+    return farthest;
+}
+
+// The effect of the enemy leaving the stage (anim cmd 19) at its center node, turned like a dead effect and sized by
+// the stage (bigger for an effect the effect module marks so).
+// HYPOTHESIS: the first argument is unused; the original reads the constant 0xBE5 and drops it.
+void Enemy::reqEffectAreaOut(int, int effectId) {
+    soModelModule& model = moduleAccesser.getModelModule();
+    Vec3f pos = model.getNodeGlobalPosition(soValueAccesser::getValueInt(&moduleAccesser, ValueInt_CenterNodeId, 0), false);
+    soValueAccesser::getConstantFloat(&moduleAccesser, 0xbe5, 0);
+    bool large = false;
+    float rotZ = moduleAccesser.getEffectModule().getDeadEffectRotZ(&pos, &large);
+    float scale = g_Stage->getEnemyDeadEffectSizeRate();
+    if (large == true) {
+        scale *= soValueAccesser::getConstantFloat(&moduleAccesser, 0xbe6, 0);
+    }
+    Vec3f rot;
+    rot.m_x = 0.0f;
+    rot.m_y = 0.0f;
+    rot.m_z = 3.1415927f * rotZ;
+    moduleAccesser.getEffectModule().req(static_cast<EfID>(effectId), &pos, &rot, scale, 0, -1);
+}
+
+// An enemy can be removed automatically unless it is in situation 5, flagged 0x12000004 or 0x12000002, or held by a
+// model constraint.
+bool Enemy::isCanAutoRemove() {
+    if (moduleAccesser.getSituationModule().getKind() == 5) {
+        return false;
+    }
+    if (moduleAccesser.getWorkManageModule().isFlag(0x12000004) == true) {
+        return false;
+    }
+    if (moduleAccesser.getWorkManageModule().isFlag(0x12000002) == true) {
+        return false;
+    }
+    return moduleAccesser.getLinkModule().isModelConstraint() != true;
+}
+
+// The item lists of the item manager, read through their soArray interface.
+static inline soArray<BaseItem*>& getItemList(itManager* manager) {
+    return manager->m_itemArrayList;
+}
+static inline soArray<BaseItem*>& getItemList3(itManager* manager) {
+    return manager->m_itemArrayList3;
+}
+
+// An item can be created while items are allowed and fewer items than the enemy kind's maximum exist.
+// HYPOTHESIS: the original reads the item count and the shot item count once without using them.
+bool Enemy::isCanCreateItem() {
+    if (getItemList3(itManager::getInstance()).size() <= 0) {
+        return false;
+    }
+    int maxNum = soValueAccesser::getValueInt(&moduleAccesser, 0x59e3, 0);
+    getItemList(itManager::getInstance()).size();
+    itManager::getInstance()->getItemShotNum();
+    return getItemList(itManager::getInstance()).size() < maxNum;
+}
+
+// While flagged 0x12000010 (a capture just ended: notifyEventLink 0xA), the enemy hits whatever its center node touches
+// with an absolute attack from its parameters.
+void Enemy::processFixPositionPreAnimCmd() {
+    if (moduleAccesser.getWorkManageModule().isFlag(0x12000010) == true) {
+        soCollisionAttackAbsoluteData attack;
+        attack.m_slipChance = 1.0f;
+        attack.m_hitStopFrame = 1.0f;
+        attack.m_hitStopDelay = 1.0f;
+        attack.unk20_17 = 0;
+        attack.m_power = 0;
+        attack.m_vector = soValueAccesser::getValueInt(&moduleAccesser, 0x59f6, 0);
+        attack.m_reactionEffect = 0;
+        attack.m_reactionFix = 0;
+        attack.m_reactionAdd = soValueAccesser::getValueInt(&moduleAccesser, 0x59f5, 0);
+        attack.unk20_0 = 0;
+        attack.unk20_7 = 1;
+        attack.unk20_12 = 4;
+        attack.unk20_15 = 1;
+        attack.unk20_16 = 1;
+        int centerNode = soValueAccesser::getValueInt(&moduleAccesser, ValueInt_CenterNodeId, 0);
+        moduleAccesser.getCollisionAttackModule().setAbsolute(0, 0, &attack);
+        moduleAccesser.getCollisionAttackModule().hitAbsolute(0, centerNode, m_taskId, 0, 0);
+    }
+}
+
 // While the slow motion adjusts, the attack maxima of the frame are cleared and the float work 0x11000001 is carried over
 // to 0x1100000E.
 void Enemy::processHit() {
@@ -848,6 +1238,131 @@ void Enemy::processHit() {
         m_hitStopFrame = 0;
         soWorkManageModule& work = moduleAccesser.getWorkManageModule();
         work.setFloat(work.getFloat(0x11000001), 0x1100000e);
+    }
+}
+
+// While the slow motion adjusts: an enemy whose center node is in a dead area while flagged 0x12000004 (and not yet
+// 0x12000002) is flagged as dead there, keeps the dead area kind, and checks its status transitions at once.
+void Enemy::processGameProc() {
+    if (soSlow::getInstance()->isAdjust() == true) {
+        soModelModule& model = moduleAccesser.getModelModule();
+        Vec3f center = model.getNodeGlobalPosition(soValueAccesser::getValueInt(&moduleAccesser, ValueInt_CenterNodeId, 0), false);
+        soGroundUtil::DeadAreaCheckResult deadArea = soGroundUtil::checkDeadArea(&center, 0.0f, 0.0f);
+        if (deadArea != soGroundUtil::Dead_Area_Check_Result_None &&
+            moduleAccesser.getWorkManageModule().isFlag(0x12000004) == true &&
+            moduleAccesser.getWorkManageModule().isFlag(0x12000002) == false) {
+            moduleAccesser.getWorkManageModule().onFlag(0x22000008);
+            moduleAccesser.getWorkManageModule().onFlag(0x12000002);
+            moduleAccesser.getWorkManageModule().setInt(deadArea, 0x1000000e);
+            emStatusModuleImpl& status = dynamic_cast<emStatusModuleImpl&>(*moduleAccesser.m_enumerationStart->m_statusModule);
+            status.setAIUpdatePri(-350, -250);
+            status.checkTransition(&moduleAccesser);
+            status.initAIUpdatePri();
+        }
+    }
+}
+
+// While the slow motion adjusts, the one-frame flags are cleared (the attack check ones only while the enemy is not
+// stopped, together with the AI's attack area target).
+void Enemy::processFixPosition() {
+    soWorkManageModule& work = moduleAccesser.getWorkManageModule();
+    StageObject::processFixPosition();
+    if (soSlow::getInstance()->isAdjust() == true) {
+        if (moduleAccesser.getStopModule().isStop() == false) {
+            work.offFlag(WorkFlag_AttackChecked);
+            m_aiModule.initAttackAreaTarget();
+            work.offFlag(WorkFlag_SearchHitWeapon);
+        }
+        work.offFlag(0x12000009);
+        work.offFlag(0x1200000d);
+        work.offFlag(0x12000012);
+        work.offFlag(0x12000013);
+        work.offFlag(0x22000007);
+        work.offFlag(0x22000006);
+        work.offFlag(0x22000005);
+    }
+}
+
+// The top node's rotation about y for the facing rotYLr: the turn angle (work 0x11000006, or the parameter before the
+// enemy is activated) away from the camera, toward it for a front enemy.
+// TODO(nonmatching): 99.85%, (a) non-semantic: one register of the fabs of the turn parameter.
+Vec3f Enemy::getEmLrRot(float rotYLr, int front) {
+    Vec3f rot(0.0f, 0.0f, 0.0f);
+    float turn;
+    if (unkD8 == false) {
+        turn = (float)fabs(soValueAccesser::getValueFloat(&moduleAccesser, 0xbe9, 0));
+    } else {
+        turn = moduleAccesser.getWorkManageModule().getFloat(0x11000006);
+    }
+    if (front == 0) {
+        rot.m_y = rotYLr;
+        if (rotYLr > 0.0f) {
+            turn *= -1.0f;
+        }
+        rot.m_y += turn;
+    } else {
+        if (rotYLr < 0.0f) {
+            turn *= -1.0f;
+        }
+        rot.m_y += turn;
+    }
+    return rot;
+}
+
+// The top node's rotation: the posture's rotation turned by getEmLrRot, in degrees.
+// TODO(nonmatching): 99.75%, (a) non-semantic: the frame slots of the four vector temporaries differ.
+Vec3f Enemy::getEmTopNRot(float rotYLr, int front) {
+    soPostureModule& posture = moduleAccesser.getPostureModule();
+    Vec3f lrRot = getEmLrRot(rotYLr, front);
+    Vec3f rot;
+    rot = posture.getRot(0);
+    rot.scale(0.017453294f);
+    Matrix rotation(true);
+    fn_8003ECA0(&rotation, rot.m_x, rot.m_y, rot.m_z);
+    Vec3f lrRotRad;
+    lrRotRad = lrRot;
+    lrRotRad.scale(0.017453294f);
+    fn_8003EA50(&rotation, &lrRotRad);
+    Vec3f angles;
+    rotation.getRotate(&angles);
+    Vec3f result = angles;
+    result.scale(57.295776f);
+    return result;
+}
+
+// Writes the posture of a node to the model: for the top node the rotation of getEmTopNRot, the scale and the position,
+// for the others their rotation.
+bool Enemy::updateNodeSRT(int nodeId) {
+    if (isSetableNode(nodeId) == false) {
+        return false;
+    }
+    soPostureModule& posture = moduleAccesser.getPostureModule();
+    soModelModule& model = moduleAccesser.getModelModule();
+    Vec3f scale;
+    Vec3f rot;
+    if (nodeId == 0) {
+        if (unkD8 == true) {
+            rot = getEmTopNRot(posture.getRotYLr(), moduleAccesser.getWorkManageModule().isFlag(WorkFlag_Front));
+        } else {
+            rot = getEmTopNRot(posture.getRotYLr(), soValueAccesser::getValueInt(&moduleAccesser, ValueInt_FrontDefault, 0) != 0);
+        }
+        model.setNodeRotate(0, &rot);
+        scale.m_x = scale.m_y = scale.m_z = posture.getScale();
+        model.setNodeScale(0, &scale);
+        Vec3f pos;
+        pos = posture.getPos();
+        model.setNodeTranslate(0, &pos);
+    } else {
+        rot = posture.getRot(nodeId);
+        model.setNodeRotate(nodeId, &rot);
+    }
+    return true;
+}
+
+void Enemy::updateNodeSRT() {
+    int nodeNum = emInfo::getInstance()->getNodeNum(m_enemyKind);
+    for (int i = 0; i < nodeNum; i++) {
+        updateNodeSRT(i);
     }
 }
 
@@ -957,6 +1472,84 @@ float Enemy::getValueRndFloat(const emScaledValue* range, soModuleAccesser* modu
 
 bool Enemy::isBullet() {
     return moduleAccesser.getWorkManageModule().isFlag(WorkFlag_Bullet);
+}
+
+// to - from, through Vec2f::sub.
+static inline Vec2f difference(Vec2f* to, Vec2f* from) {
+    Vec2f diff;
+    to->sub(from, &diff);
+    return diff;
+}
+
+// The angle (in degrees) of the direction from one point to another.
+float Enemy::getAtan2fAngle(Vec2f* from, Vec2f* to) {
+    Vec2f diff = difference(to, from);
+    float x = diff.m_x;
+    float y = diff.m_y;
+    return 57.29578f * (float)atan2(y, x);
+}
+
+// The offset of the damage position from a node (zero for a node id past the enemy kind's nodes).
+// TODO(nonmatching): 95.63%, (a) non-semantic: the original loads the model module before the address of the node
+// position temporary.
+Vec3f Enemy::getDamageOffsetFromNode(int nodeId) {
+    if (nodeId >= emInfo::getInstance()->getNodeNum(m_enemyKind)) {
+        return Vec3f(0.0f, 0.0f, 0.0f);
+    }
+    Vec3f damagePos = m_damageModule.getDamagePos();
+    Vec3f nodePos = moduleAccesser.getModelModule().getNodeGlobalPosition(nodeId, false);
+    Vec3f offset = damagePos - nodePos;
+    return offset;
+}
+
+bool Enemy::onChildDeathFlag(int parentCreateId, int childCreateId) {
+    if (emManager::getInstance()->isChild(parentCreateId, childCreateId) == true) {
+        Enemy* child = emManager::getInstance()->getEnemyPtrFromId(childCreateId);
+        if (child == NULL) {
+            return true;
+        }
+        if (child->moduleAccesser.getWorkManageModule().isFlag(WorkFlag_InvalidParent) == true) {
+            return true;
+        }
+        child->moduleAccesser.getWorkManageModule().onFlag(0x22000003);
+        child->moduleAccesser.getWorkManageModule().onFlag(WorkFlag_InvalidParent);
+    }
+    return true;
+}
+
+bool Enemy::onChildCheckDead(int parentCreateId, int childCreateId) {
+    if (emManager::getInstance()->isChild(parentCreateId, childCreateId) == true) {
+        Enemy* child = emManager::getInstance()->getEnemyPtrFromId(childCreateId);
+        if (child == NULL) {
+            return true;
+        }
+        Enemy* parent = emManager::getInstance()->getEnemyPtrFromId(parentCreateId);
+        if (parent == NULL) {
+            return true;
+        }
+        if (child->moduleAccesser.getWorkManageModule().isFlag(WorkFlag_InvalidParent) == false) {
+            parent->m_moduleAccesser->getWorkManageModule().offFlag(WorkFlag_ChildrenDead);
+        }
+    }
+    return true;
+}
+
+// Whether every child of the enemy is dead: the flag stays set unless onChildCheckDead finds a living child.
+bool Enemy::isChildrenDead() {
+    m_moduleAccesser->getWorkManageModule().onFlag(WorkFlag_ChildrenDead);
+    emManager::getInstance()->doFuncOtherEnemy(m_createId, onChildCheckDead);
+    return m_moduleAccesser->getWorkManageModule().isFlag(WorkFlag_ChildrenDead);
+}
+
+// Sends link event 0xB (the end of a capture, see notifyEventLink) to the enemy's link nodes and writes the task id of
+// the first node and the two results of the event to the work ints workIdTaskId, workIdResult0 and workIdResult1.
+// HYPOTHESIS: names; param is handed to the event as is.
+void Enemy::sendEventThrow(u32 workIdTaskId, u32 workIdResult0, u32 workIdResult1, int param) {
+    emLinkEventArgs args(0xb, param);
+    m_moduleAccesser->getLinkModule().sendEventNodes(0, args, 0);
+    m_moduleAccesser->getWorkManageModule().setInt(m_moduleAccesser->getLinkModule().getNodeTaskId(0), workIdTaskId);
+    m_moduleAccesser->getWorkManageModule().setInt(args.m_result0, workIdResult0);
+    m_moduleAccesser->getWorkManageModule().setInt(args.m_result1, workIdResult1);
 }
 
 bool Enemy::isObserv(char unk1) {
@@ -1108,7 +1701,7 @@ bool Enemy::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser
         soArrayContractibleTable<const acCmdArgConv> args = acmd->getArgList();
         void* postureParam;
         READ_ADDRESS_ARG(args, 0, moduleAccesser, postureParam)
-        setPostureFromParam(postureParam, 1);
+        setPostureFromParam(postureParam, true);
         return true;
     }
     case 31:
@@ -1993,13 +2586,6 @@ bool Enemy::notifyEventCaptureStatus(soModuleAccesser* acc, int taskId, int, int
     return false;
 }
 
-// HYPOTHESIS: the arguments of the link events the enemy handles; event 0xb clears two words of its arguments.
-struct emLinkEventArgs : public soLinkEventArgs {
-    u8 unk8[0x4];
-    int unkC;
-    int unk10;
-};
-
 // HYPOTHESIS: the link event kinds below, from what the handler does: 0 / 0x3D an item holding the enemy (removed while
 // it is model-constrained); 0x3D also releases the constraint; 0xA the capture is cut; 0xB the capture ends.
 void Enemy::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* acc, StageObject* sender, int unk4) {
@@ -2036,8 +2622,8 @@ void Enemy::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* acc, S
         break;
     }
     case 0xb:
-        static_cast<emLinkEventArgs*>(eventInfo)->unkC = 0;
-        static_cast<emLinkEventArgs*>(eventInfo)->unk10 = 0;
+        static_cast<emLinkEventArgs*>(eventInfo)->m_result0 = 0;
+        static_cast<emLinkEventArgs*>(eventInfo)->m_result1 = 0;
         getCaptureModule(moduleAccesser).unk3C();
         dynamic_cast<emGroundModuleImpl&>(moduleAccesser.getGroundModule()).setCorrect(soGroundShapeImpl::CorrectKind(0), 0);
         break;

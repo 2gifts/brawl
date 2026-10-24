@@ -83,6 +83,14 @@ struct emAIEntry {
     ~emAIEntry();
 };
 
+// A posture of the enemy kept in its parameters (anim cmd 30, Enemy::setPostureFromParam): a position and a facing.
+// HYPOTHESIS: name; the layout comes from setPostureFromParam (x, y, lr) and isLrWithPostureParam (lr).
+struct emPostureParam {
+    float m_x;
+    float m_y;
+    float m_lr;
+};
+
 class Enemy : public StageObject, public soStatusEventObserver, public soCollisionAttackEventObserver, public soCollisionSearchEventObserver, public soCaptureEventObserver, public soCollisionAbsorberEventObserver, public soCollisionReflectorEventObserver {
 protected:
     EnemyKind m_enemyKind;                 // 0xAC, emCreate +0x4
@@ -292,7 +300,13 @@ public:
     EnemyKind getEnemyKind() const { return m_enemyKind; }
     float initStrength();
     // HYPOTHESIS: parameter type.
-    void resetLevel(int level);
+    float resetLevel(int level);
+    // The attack and defense of the enemy's glow (scaled values of its parameters, em/em_scaled_value.h).
+    float getAttackValue();
+    float getDefenseValue();
+    // The rest of the enemy's strength in percent of its maximum, and its loss since the previous frame.
+    float getRestHPRate();
+    float getHPDiffFromPrevHP();
     void resetFrontFlag();
     s32 getNameMsgId();
     nw4r::g3d::ResFileData* getFaceTexPtr(u32 p1);
@@ -310,8 +324,13 @@ public:
     bool isArriveGoalPos();
     float getGoalPosX();
     float getGoalPosY();
-    // HYPOTHESIS: parameter types (a posture parameter block; anim cmd 30 passes 1).
-    void setPostureFromParam(void* postureParam, int);
+    // Moves the enemy to a posture parameter (an emPostureParam): with initPos it is placed there (anim cmd 30),
+    // otherwise it moves there.
+    void setPostureFromParam(void* postureParam, bool initPos);
+    bool isLrWithPostureParam(void* postureParam);
+    // The index of the posture parameter (of num, NULL entries skipped) nearest to / farthest from pos, -1 for none.
+    int getNearPostureParamFromPosition(void** postureParams, u32 num, Vec2f* pos);
+    int getFarPostureParamFromPosition(void** postureParams, u32 num, Vec2f* pos);
     // HYPOTHESIS: parameter types (anim cmd 19 passes two ints).
     void reqEffectAreaOut(int, int);
     bool isCanAutoRemove();
@@ -325,11 +344,20 @@ public:
     static int getValueInt(const emScaledValue* value, soModuleAccesser* moduleAccesser);
     static float getValueFloat(const emScaledValue* value, soModuleAccesser* moduleAccesser);
     static float getValueRndFloat(const emScaledValue* range, soModuleAccesser* moduleAccesser);
+    // The rotation of the top node for the facing rotYLr (front: the enemy faces the camera; anim cmd 23 / initRot).
+    // HYPOTHESIS: names of the parameters.
+    Vec3f getEmLrRot(float rotYLr, int front);
+    Vec3f getEmTopNRot(float rotYLr, int front);
+    // Writes the posture of one node to the model (false: the node cannot be set).
+    bool updateNodeSRT(int nodeId);
     bool isBullet();
     static float getAtan2fAngle(Vec2f* from, Vec2f* to);
     Vec3f getDamageOffsetFromNode(int nodeId);
-    // Flags the death of a child (anim cmd 1 hands it to emManager::doFuncOtherEnemy).
-    static void onChildDeathFlag(Enemy* child);
+    // emManager::doFuncOtherEnemy callbacks over the children of an enemy: flags the death of the parent in each child
+    // (anim cmd 1), and clears the parent's "children dead" flag for a living child (isChildrenDead).
+    static bool onChildDeathFlag(int parentCreateId, int childCreateId);
+    static bool onChildCheckDead(int parentCreateId, int childCreateId);
+    bool isChildrenDead();
     // HYPOTHESIS: parameter types (anim cmd 40: three value indices and an int).
     void sendEventThrow(u32, u32, u32, int);
     // The frame counters of the enemy (index 0-3; others are ignored, getFrameCounter returns 0).
