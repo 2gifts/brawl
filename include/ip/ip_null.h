@@ -11,7 +11,11 @@ public:
     virtual void update() { }
     virtual Vec2f getStickMain() const { return Vec2f(0.0f, 0.0f); }
     virtual Vec2f getStickSub() const { return Vec2f(0.0f, 0.0f); }
+#ifdef IP_INPUT_BUTTON_RAW
+    virtual ipPadButton::Mask getButton() const { return 0; }
+#else
     virtual ipPadButton getButton() const { return ipPadButton(0); }
+#endif
     virtual ipPadTrigger getTrigger() const {
         ipPadTrigger trigger = { 0, 0 };
         return trigger;

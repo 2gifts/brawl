@@ -15,6 +15,11 @@
 #define WN_SHARED_ARRAYS_1
 #define WN_MARIO_FIREBALL_CTOR_OUTLINE
 #include <wn/wn_module_accesser_builder.h>
+// Instantiate F.L.U.D.D.'s shared script teardown before its first article use.
+#pragma push
+#pragma dont_inline on
+template soAnimCmdControlUnitBuilder<soAnimCmdControlUnitBuildConfig<0, 1, 3, 0, 0, 0, 0, 8> >::~soAnimCmdControlUnitBuilder();
+#pragma pop
 FT_DOL_ARRAY_VECTOR(soModelNodeSetUp, 1);
 #include <wn/mario/wn_mario_pump.h>
 #include <wn/mario/wn_mario_mantle.h>

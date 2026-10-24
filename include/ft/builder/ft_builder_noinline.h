@@ -43,7 +43,14 @@ ftTeam::~ftTeam() { }
 #pragma dont_inline on
 ftTeamIndirect::~ftTeamIndirect() { }
 #endif
+#ifdef FT_SOUND_GENERATOR_DTOR_NOINLINE
+// Retain this destructor's call while inlining its empty sound-accesser base.
+#pragma dont_inline off
+#endif
 ftSound3dGeneratorAccesserImpl::~ftSound3dGeneratorAccesserImpl() { } // MATCH-ONLY: out of line in the REL
+#ifdef FT_SOUND_GENERATOR_DTOR_NOINLINE
+#pragma dont_inline on
+#endif
 soTransitionInfo::~soTransitionInfo() { } // MATCH-ONLY: out of line in the REL
 soNullable::soNullable(bool isNull) { m_isNull = isNull; } // MATCH-ONLY: out of line in the REL
 soKineticEnergy::~soKineticEnergy() { } // MATCH-ONLY: out of line in the REL

@@ -1,3 +1,5 @@
+#define FT_SOUND_GENERATOR_DTOR_NOINLINE
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR
 #define WN_WEAPON_BUILDER // The fighter owns complete article types.
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
@@ -41,6 +43,7 @@ soStatusModuleImpl::~soStatusModuleImpl() { }
 soParamAccesser::~soParamAccesser() { }
 #pragma dont_inline off
 soArticleMediator::~soArticleMediator() { }
+ftKineticEnergyController::~ftKineticEnergyController() { }
 
 // ftManager::setParamPattern selects the shared parameter-table variation.
 extern int g_soValueVariation;
@@ -200,9 +203,9 @@ struct ftMarioArticleKind : wnArticleKindInfo {
     }
 };
 
-// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+// Keep the temporary kind record alive through the enclosing article construction.
 struct ftMarioArticleBuildInfo : wnArticleBuildInfo {
-    ftMarioArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+    ftMarioArticleBuildInfo(const wnArticleKindInfo& kindArg, soHeapModule* heap) {
         kindInfo = &kindArg;
         heapModule = heap;
     }
