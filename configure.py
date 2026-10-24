@@ -2518,6 +2518,7 @@ config.libs = [
             Object(Matching, "mo_enemy/sora_enemy/deathpod/em_deathpod_param_accesser.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/dekakuribo/em_dekakuribo_param_accesser.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/bucyulus/em_bucyulus_param_accesser.cpp"),
+            Object(NonMatching, "mo_enemy/sora_enemy/botron/em_botron.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/botron/em_botron_param_accesser.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/gyraan/em_gyraan_param_accesser.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/mite/em_mite_param_accesser.cpp"),

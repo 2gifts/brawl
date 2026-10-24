@@ -138,6 +138,11 @@ mo_enemy/sora_enemy/bucyulus/em_bucyulus_param_accesser.cpp:
 	.data       start:0x0000AA88 end:0x0000AB08
 	.bss        start:0x000003D0 end:0x000003E8
 
+mo_enemy/sora_enemy/botron/em_botron.cpp:
+	.text       start:0x0003CA40 end:0x0003DC08
+	.rodata     start:0x00000F00 end:0x00000F08
+	.data       start:0x0000AB08 end:0x0000B3C8
+
 mo_enemy/sora_enemy/botron/em_botron_param_accesser.cpp:
 	.text       start:0x0003DC08 end:0x0003DEF8
 	.ctors      start:0x00000064 end:0x00000068
