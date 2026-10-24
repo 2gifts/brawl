@@ -4,6 +4,7 @@
 // work block the helpers fill, and the helpers themselves. They live in the Enemy unit, which is not reconstructed yet,
 // so the helpers keep their address names.
 
+#include <em/em_scaled_value.h>
 #include <mt/mt_vector.h>
 #include <so/so_module_accesser.h>
 #include <types.h>
@@ -24,13 +25,6 @@ struct emShotParam {
     float m_flySpeedY;     // 0x5C, HYPOTHESIS: the Hammer Bro's hammer takes it as its vertical speed
     u8 unk60[0x14];
     s32 m_lifeConstantId;  // 0x74, an indefinite constant id; only ids above ConstantId_CommonLast name one
-};
-
-// A constant that grows with the enemy's value float ValueFloat_LevelScale: m_base + m_rate * that value (fn_41_6A68
-// skips the product when m_rate is 0).
-struct emScaledValue {
-    float m_base;
-    float m_rate;
 };
 
 // The indefinite constant block named by emShotParam::m_lifeConstantId.
@@ -62,6 +56,34 @@ struct emShotWork {
 };
 extern emShotWork lbl_41_bss_504;
 
+// The launch description of an enemy weapon, at +0x4 of the shot work; Enemy::shoot / addParts reset it before they
+// generate the article (the reset is a weak copy of the Enemy unit).
+// HYPOTHESIS: field roles; unk4 is overwritten with the third argument of Enemy::shoot.
+// TODO(layout): embed it in emShotWork (whose unk4..m_constantParam overlap it) and move the shot users onto its fields.
+struct emWeaponParamWork {
+    bool unk0;
+    bool unk1;
+    bool unk2;
+    int unk4;
+    float unk8[7];
+    int unk24;
+    void* m_addressPack; // 0x28, the enemy's last anim cmd address pack
+    void reset() {
+        unk0 = false;
+        unk1 = false;
+        unk2 = true;
+        unk24 = 0;
+        unk4 = -1;
+        unk8[2] = unk8[1] = unk8[0] = 0.0f;
+        unk8[4] = unk8[3] = 0.0f;
+        unk8[6] = unk8[5] = 0.0f;
+        m_addressPack = NULL;
+    }
+};
+inline emWeaponParamWork* getWeaponParamWork() {
+    return reinterpret_cast<emWeaponParamWork*>(&lbl_41_bss_504.unk4);
+}
+
 // HYPOTHESIS: the work int holds the parameter id of the shot being fired (it is handed straight to fn_41_473DC).
 static const int WorkInt_ShotParamId = 0x10000007;
 // HYPOTHESIS: an optional constant id of the shot (Botron).
@@ -69,9 +91,8 @@ static const int WorkInt_ShotConstantId = 0x10000001;
 // HYPOTHESIS: the x and y of the point an aimed shot flies at (Spar, Kokkon).
 static const int WorkFloat_ShotTargetX = 0x1100000a;
 static const int WorkFloat_ShotTargetY = 0x1100000b;
-// HYPOTHESIS: a value of the enemy that scales its constants, such as its level; the scaled shot lifetimes grow with it,
-// and the Primid hands it to its plain shot as the life argument of the wnemSimple activation.
-static const int ValueFloat_LevelScale = 0x1100000c;
+// ValueFloat_LevelScale (em/em_scaled_value.h): the scaled shot lifetimes grow with it, and the Primid hands it to its
+// plain shot as the life argument of the wnemSimple activation.
 // The last constant id that names no indefinite constant block: only larger ids are read with getConstantIndefinite.
 // The activators compare with > (signed); >= 44000 compiles to a different compare.
 static const s32 ConstantId_CommonLast = 43999;
@@ -92,6 +113,4 @@ void fn_41_47E80(Vec3f* pos, bool flag, wnemSimple* article, emShotParam* param,
 // wnemSimple's activation.
 void fn_41_3091C(wnemSimple* article, emShotWork* work, int founderTaskId, int ownerId, int, bool flag, Vec3f* pos,
                  int team, float lr, float speed, int, u32 life, s16);
-// The value of a scaled constant for this enemy: m_base + m_rate * ValueFloat_LevelScale.
-float fn_41_6A68(const emScaledValue* value, soModuleAccesser* acc);
 }

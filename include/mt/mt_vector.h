@@ -227,7 +227,11 @@ public:
     }
 
     Vec3f operator+(const Vec3f& v);
-    Vec3f operator-(const Vec3f& v);
+    Vec3f operator-(const Vec3f& v)
+#ifdef MT_VEC3F_OPERATORS_NOINLINE
+        __attribute__((never_inline)) // MATCH-ONLY: the Enemy unit calls its weak out-of-line copy.
+#endif
+        ;
 
 #ifdef MATCHING
     // MATCH-ONLY: paired-single form preserves the verified inline vector add.
@@ -387,7 +391,11 @@ public:
         return *this * (1 / c);
     }
 
-    Vec3f& operator+=(const Vec3f& v) {
+    Vec3f& operator+=(const Vec3f& v)
+#ifdef MT_VEC3F_OPERATORS_NOINLINE
+        __attribute__((never_inline)) // MATCH-ONLY: the Enemy unit calls its weak out-of-line copy.
+#endif
+    {
         *this = *this + v;
         return *this;
     }

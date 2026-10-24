@@ -24,6 +24,7 @@
 #include <so/article/so_article.h>
 #include <so/collision/so_collision_hit_module_impl.h>
 #include <so/ground/so_ground_module_impl.h>
+#include <so/kinetic/so_kinetic_module_impl.h>
 #include <so/link/so_link_module_impl.h>
 #include <so/model/so_model_module_impl.h>
 #include <so/status/so_status_module_impl.h>
@@ -153,6 +154,8 @@ public:
     // HYPOTHESIS: groundData is the enemy's ground parameter block (a soValueAccesser constant).
     emGroundModuleImpl(soModuleAccesser* acc, soArray<soGroundShapeImpl>* shapes, void* groundData);
     virtual ~emGroundModuleImpl();
+    // HYPOTHESIS: on lets the ground shape follow the model's nodes (anim cmd 39, enemies with a ground parameter block).
+    void updateVtxFromNode(bool on);
 };
 static_assert(sizeof(emGroundModuleImpl) == 0x8C, "Class is wrong size!");
 
@@ -163,6 +166,9 @@ class emLinkModuleImpl : public soLinkModuleImpl {
 public:
     emLinkModuleImpl(soModuleAccesser* acc, soArray<soLinkConnection>* connections);
     virtual ~emLinkModuleImpl();
+    void initConstraintOffsetMtx();
+    // HYPOTHESIS: the node the constraint offset is taken from (Enemy::notifyEventCaptureStatus passes the capture node).
+    void setConstraintOffsetMtx(int node);
 };
 static_assert(sizeof(emLinkModuleImpl) == 0x84, "Class is wrong size!");
 #else
@@ -226,10 +232,12 @@ struct emKineticEnergyParamDesc {
     emKineticEnergyParamDesc(void* params, int num) : m_params(params), m_num(num) { }
 };
 
-class emKineticModuleImpl {
-    u8 unk4[0xBD4 - 4];
+class emKineticModuleImpl : public soKineticModule {
+    u8 unk[0xBD4 - sizeof(soKineticModule)];
 public:
     emKineticModuleImpl(soModuleAccesser* acc, const emKineticEnergyParamDesc& energies);
     virtual ~emKineticModuleImpl();
+    // HYPOTHESIS: the argument is an energy index (-1: all energies), as in soKineticModule::updateEnergy.
+    void updateEnergyPre(int index);
 };
 static_assert(sizeof(emKineticModuleImpl) == 0xBD4, "Class is wrong size!");

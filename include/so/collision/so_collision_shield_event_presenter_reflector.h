@@ -14,7 +14,12 @@ class soCollisionReflectorEventObserver : public soEventObserver<soCollisionRefl
 public:
     soCollisionReflectorEventObserver() : soEventObserver<soCollisionReflectorEventObserver>(0xf) {};
     soCollisionReflectorEventObserver(short unitID) : soEventObserver<soCollisionReflectorEventObserver>(unitID) {};
+#ifdef EM_ENEMY_BUILDER
+    // The Enemy constructor expands it.
+    soCollisionReflectorEventObserver(short manageId, s8 p2) : soEventObserver<soCollisionReflectorEventObserver>(0xf) { initialize(manageId, p2); }
+#else
     soCollisionReflectorEventObserver(short, s8);
+#endif
 
 #ifdef FT_MODULE_BUILDER
     virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); } // MATCH-ONLY: inline in the REL

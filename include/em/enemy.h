@@ -22,6 +22,8 @@
 #include <em/em_area_module_impl.h>
 #include <em/em_archive.h>
 #include <em/em_create.h>
+#include <em/em_scaled_value.h>
+#include <gf/gf_gameframe_counter.h>
 #include <em/resource/em_resource_module_impl.h>
 #include <em/stop/em_stop_module_impl.h>
 #include <gr/gr_gimmick_motion_path.h>
@@ -61,6 +63,8 @@
 #include <so/work/so_work_manage_module_impl.h>
 
 class soArticleMediator;
+class wnemSimple;
+class wnemSwHolder;
 class soReflectModule;
 class emTargetSearchUnit;
 
@@ -82,17 +86,22 @@ struct emAIEntry {
 class Enemy : public StageObject, public soStatusEventObserver, public soCollisionAttackEventObserver, public soCollisionSearchEventObserver, public soCaptureEventObserver, public soCollisionAbsorberEventObserver, public soCollisionReflectorEventObserver {
 protected:
     EnemyKind m_enemyKind;                 // 0xAC, emCreate +0x4
-    // HYPOTHESIS: an id of the creator (first constructor argument); the trigger manager is notified with it on remove (4)
-    // and on destruction (3).
-    u32 m_triggerNotifyId;                 // 0xB0
+    // The create id of the enemy in emManager (first constructor argument): the manager removes the enemy by it, the
+    // children keep it as their parent's id, and the trigger manager is notified with it on remove (4) and on
+    // destruction (3).
+    u32 m_createId;                        // 0xB0
     int m_connectedTriggerId;              // 0xB4, emCreate +0x38
     u32 m_difficulty;                      // 0xB8, emCreate +0x0
     u32 m_level;                           // 0xBC, emCreate +0x20
-    u8 unkC0[0x8];                         // 0xC0, not set by the constructor
+    // The largest attack power and hit stop frame of the frame (notifyEventCollisionAttack keeps the maxima,
+    // notifyEventCollisionAttackCheck applies them); not set by the constructor, cleared by processHit.
+    float m_maxAttackPower;                // 0xC0
+    int m_hitStopFrame;                    // 0xC4
     grGimmickMotionPath* m_motionPath;     // 0xC8, emCreate +0x44
     int unkCC;                             // 0xCC, -1
-    float unkD0;                           // 0xD0
-    float unkD4;                           // 0xD4
+    // The position the enemy moves to (resetGoalPos / isArriveGoalPos); 35791 when there is none.
+    float m_goalPosX;                      // 0xD0
+    float m_goalPosY;                      // 0xD4
     bool unkD8;                            // 0xD8
     soModuleAccesser moduleAccesser;       // 0xDC
 
@@ -247,15 +256,11 @@ protected:
     soArrayVector<soArticle*, 10> m_articles;                          // 0x51C4
     soArrayVector<soArticleEventObserver, 10> m_articleEventObservers; // 0x51F8
     soGenerateArticleManageModuleImpl m_generateArticleManageModule;   // 0x52A4
-    // HYPOTHESIS: four entries of an id (-1 when empty) and two words, cleared by the constructor.
-    struct Unk52E0 {
-        int m_id;
-        int unk4;
-        int unk8;
-        Unk52E0() : m_id(-1), unk4(0), unk8(0) { }
-    } unk52E0[4];                                                      // 0x52E0
+    // The frame counters of the enemy (resetFrameCounter and co., anim cmds 4, 16 and 17).
+    gfGameFrameCounter m_frameCounters[4];                             // 0x52E0
 
 public:
+
     // The storage of the modules whose capacity depends on the enemy is owned by the derived class: the posture
     // interpolations, the area instances and their work, the target search units, the AI entries, the article mediator, the
     // camera subjects and the reflect module.
@@ -286,13 +291,79 @@ public:
 
     emAIModuleImpl& getAIModule() { return m_aiModule; }
     EnemyKind getEnemyKind() const { return m_enemyKind; }
-    Vec3f getCenterPos();
+    float initStrength();
+    // HYPOTHESIS: parameter type.
+    void resetLevel(int level);
+    void resetFrontFlag();
     s32 getNameMsgId();
     nw4r::g3d::ResFileData* getFaceTexPtr(u32 p1);
     nw4r::g3d::ResFileData* getFaceTexPtr();
     int getExtendBrresResourceID();
+    void resetGlowParam();
+    void initCameraSubject();
+    // Releases a capture / catch of the enemy and puts its center node back where it was held.
+    void adjustConstraintAfterCapture(Vec3f* capturePos);
+    void cutCapture();
+    void cutCatch();
+    // Resets the rotation of one node, or of the whole posture for the node count of the enemy kind.
+    void initRot(u32 nodeId);
+#ifdef EM_ENEMY_BUILDER
+    // MATCH-ONLY: the Enemy unit's callers (activate, anim cmd 22) call it out of line.
+    void resetGoalPos() __attribute__((never_inline));
+#else
+    void resetGoalPos();
+#endif
+    bool isArriveGoalPos();
+    float getGoalPosX();
+    float getGoalPosY();
+    // HYPOTHESIS: parameter types (a posture parameter block; anim cmd 30 passes 1).
+    void setPostureFromParam(void* postureParam, int);
+    // HYPOTHESIS: parameter types (anim cmd 19 passes two ints).
+    void reqEffectAreaOut(int, int);
     bool isCanAutoRemove();
     bool isCanCreateItem();
+    // The parameter values that grow with the enemy's level (em/em_scaled_value.h), written to the work or read. The
+    // random variants take two values in a row, the lower and the upper bound.
+    void setValueInt(const emScaledValue* value, u32 workId);
+    void setValueFloat(const emScaledValue* value, u32 workId);
+    void setValueRndInt(const emScaledValue* range, u32 workId);
+    void setValueRndFloat(const emScaledValue* range, u32 workId);
+    static int getValueInt(const emScaledValue* value, soModuleAccesser* moduleAccesser);
+    static float getValueFloat(const emScaledValue* value, soModuleAccesser* moduleAccesser);
+    static float getValueRndFloat(const emScaledValue* range, soModuleAccesser* moduleAccesser);
+    bool isBullet();
+    static float getAtan2fAngle(Vec2f* from, Vec2f* to);
+    Vec3f getDamageOffsetFromNode(int nodeId);
+    // Flags the death of a child (anim cmd 1 hands it to emManager::doFuncOtherEnemy).
+    static void onChildDeathFlag(Enemy* child);
+    // HYPOTHESIS: parameter types (anim cmd 40: three value indices and an int).
+    void sendEventThrow(u32, u32, u32, int);
+    // The frame counters of the enemy (index 0-3; others are ignored, getFrameCounter returns 0).
+    void resetFrameCounter(int index);
+    void pauseFrameCounter(int index);
+    void resumeFrameCounter(int index);
+    u32 getFrameCounter(int index);
+    Vec3f getCenterPos();
+    grGimmickMotionPath* getMotionPathPtr();
+    // The resource id of a weapon of the enemy kind (0xFFFF for none, or without an archive).
+    int getSimpleWeaponResourceID(u32 id);
+    // The shared article activators of the enemy units (a wnemSwHolder / a wnemSimple shot). Always return false.
+    static bool activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser);
+    static bool activeArticle1(wnemSimple* article, soModuleAccesser* moduleAccesser);
+    // Creating the enemies of a trigger (stTriggerMng) from this enemy, and copying works between parent and child.
+    bool canCreateEnemyFromTriggerId(int triggerId, int index);
+    void ceateEnemyFromTriggerIdSub(int triggerId, void* desc, u32* syncWorkIds, int syncWorkNum, int index);
+    void ceateEnemyFromTriggerId(int triggerId, int nodeId, Vec3f offset, float lr, int statusKind, u8 unk,
+                                 u32* syncWorkIds, int syncWorkNum, int index);
+    void syncEnemyWork(Enemy* from, Enemy* to, u32* workIds, int workNum);
+    bool isInvalidParentEnemy();
+    int getParentEnemyTaskId();
+    void syncEnemyWorkWithParent(u32* workIds, int workNum);
+    int getParentEnemyStatusKind();
+    float getParentEnemyStrength();
+    bool canCreateEnemyFromEnemyKindAndNum(EnemyKind kind, u32 maxNum, float rate);
+    int getCommunicationItemPortData();
+    int getCommunicationItemSituationKind();
 
     virtual void processUpdate();
     virtual void processFixPosition();
@@ -333,10 +404,12 @@ public:
     virtual bool notifyEventCollisionReflectorCheck();
     virtual bool notifyEventCaptureStatus(soModuleAccesser* moduleAccesser, int taskId, int, int);
     virtual bool emCreateFigure(int variation);
-    virtual bool emShootItem(itKind, int variation, void*, float);
+    // Anim cmd 26 passes two floats (default 0 and 1).
+    virtual bool emShootItem(itKind, int variation, void* param, float, float);
     virtual bool emItemInformationReturnEnemy(int instanceId);
     virtual bool shoot(int, int, int); // TODO: Verify parameters
-    virtual bool addParts(int, int);
+    // Anim cmd 15 passes (int, the parts' value index, 0).
+    virtual bool addParts(int, u32 partsId, int);
 
     template<typename T>
     static Enemy* createInstance(u32 p1, emCreate* create) {

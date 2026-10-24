@@ -10,6 +10,7 @@ class soModuleAccesser;
 class soCaptureEventObserver : public soEventObserver<soCaptureEventObserver> {
 public:
     soCaptureEventObserver(short unitID) : soEventObserver<soCaptureEventObserver>(unitID) {};
+    soCaptureEventObserver(short manageId, s8 p2) : soEventObserver<soCaptureEventObserver>(0xd) { initialize(manageId, p2); }
 
 #ifdef FT_MODULE_BUILDER
     virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); } // MATCH-ONLY: inline in the REL

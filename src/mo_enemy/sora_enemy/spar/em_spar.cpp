@@ -31,7 +31,7 @@ bool emSpar::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccess
     if (param->m_lifeConstantId > ConstantId_CommonLast) {
         emShotLifeConstant* lifeConstant = static_cast<emShotLifeConstant*>(
             soValueAccesser::getConstantIndefinite(moduleAccesser, param->m_lifeConstantId, 0));
-        param->m_life = fn_41_6A68(&lifeConstant->m_life, moduleAccesser);
+        param->m_life = Enemy::getValueFloat(&lifeConstant->m_life, moduleAccesser);
     }
     Vec3f pos = fn_41_47470(param, moduleAccesser);
     emShotFlag flag;

@@ -9,6 +9,10 @@
 template <class T>
 class soInstanceManagerFixed : public soNullable {
 public:
+#ifdef EM_ENEMY_BUILDER
+    // The Enemy constructor expands the managers it builds; their base calls soNullable(false) of sora_melee.
+    soInstanceManagerFixed() : soNullable(false) { }
+#endif
     virtual T& at(s32 index) = 0;
     virtual T& atIndex(s32 index) = 0;
     virtual s32 getId(s32 index) = 0;

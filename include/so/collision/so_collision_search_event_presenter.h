@@ -12,7 +12,12 @@ class soCollisionSearchEventObserver : public soEventObserver<soCollisionSearchE
 public:
     soCollisionSearchEventObserver() : soEventObserver<soCollisionSearchEventObserver>(0x11) {};
     soCollisionSearchEventObserver(short unitID) : soEventObserver<soCollisionSearchEventObserver>(unitID) {};
+#ifdef EM_ENEMY_BUILDER
+    // The Enemy constructor expands it.
+    soCollisionSearchEventObserver(short manageId, s8 p2) : soEventObserver<soCollisionSearchEventObserver>(0x11) { initialize(manageId, p2); }
+#else
     soCollisionSearchEventObserver(short, s8);
+#endif
 
 #ifdef FT_MODULE_BUILDER
     virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); } // MATCH-ONLY: inline in the REL

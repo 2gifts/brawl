@@ -19,14 +19,20 @@ public:
     s16 m_unitID;
     s16 m_sendID;
     s32 getObserverId() const { return m_sendID; }
+#ifdef EM_ENEMY_BUILDER
+    // MATCH-ONLY: the Enemy unit calls the sora_melee copies of the constructor and of initialize.
+    soEventObserver(s16 unitID);
+    void initialize(s16 param1, s8 param2);
+#else
     soEventObserver(s16 unitID) {
         m_manageID = -1;
         m_unitID = unitID;
         m_sendID = -1;
     }
+    void initialize(s16 param1, s8 param2) { addObserver(param1, param2); }
+#endif
     ~soEventObserver();
     void addObserverSub(s32 manageId, soStatusEventObserver* obsvr, s8 p3); // sora_melee
-    void initialize(s16 param1, s8 param2) { addObserver(param1, param2); }
 };
 #endif
 

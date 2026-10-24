@@ -18,7 +18,15 @@ struct emAIInfo {
 // TODO size assertion
 
 class emAIModuleImpl : public soAnimCmdEventObserver, public soCollisionAttackEventObserver {
-    u8 unk18[0x64 - 0x18];
+    // (The members start at 0x16: MWCC places them in the tail padding of the second observer base.)
+    u8 unk16[0x34 - 0x16];
+
+public:
+    // HYPOTHESIS: the AI is stopped while the enemy is inactive (Enemy::deactivate sets it, Enemy::activate clears it).
+    bool m_isInactive;     // 0x34
+
+private:
+    u8 unk35[0x64 - 0x35];
 
 public:
     // HYPOTHESIS: aiData is the enemy's AI parameter block (a soValueAccesser constant); 6 and 7 are passed by every enemy.
@@ -26,5 +34,8 @@ public:
     virtual ~emAIModuleImpl();
 
     emAIInfo* getCurrentAIInfo();
+    void createUnitAll();
+    void reset();
+    void initAttackAreaTarget();
 };
 static_assert(sizeof(emAIModuleImpl) == 0x64, "Class is wrong size!");

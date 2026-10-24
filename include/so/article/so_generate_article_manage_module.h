@@ -45,6 +45,13 @@ public:
     virtual void setDynamicArticleMediator(soArticleMediator*);
     virtual void setAutoRecycle(bool);
 };
+// The null module of sora_melee: an enemy without articles has it in its module accesser (Enemy::shoot / addParts test
+// for it with a dynamic_cast).
+class soGenerateArticleManageModuleNull : public soGenerateArticleManageModule {
+public:
+    virtual ~soGenerateArticleManageModuleNull();
+};
+
 static_assert(sizeof(soGenerateArticleManageModule) == 4, "Article interface layout is wrong!");
 // Primary base verified by implementation RTTI at offset zero. Existing R.O.B.
 // construction ABI retained; secondary observers and fields remain opaque.

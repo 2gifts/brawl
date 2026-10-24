@@ -20,6 +20,8 @@ protected:
     char _428[1808];
 
 public:
+    // The item's own module accesser (Enemy::getCommunicationItemSituationKind reads its modules directly).
+    soModuleAccesser& getEmbeddedModuleAccesser() { return moduleAccesser; }
     void appear(Vec3f* position, int mode, float speed);
     struct Status {
         enum Kind {

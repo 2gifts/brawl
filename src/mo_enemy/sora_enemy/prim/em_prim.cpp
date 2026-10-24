@@ -15,8 +15,6 @@
 // The shared shot helpers of the enemy activators are declared in em/em_shot.h.
 
 extern "C" {
-// Enemy: an id the shot is linked to (0xFFFF without one).
-int fn_41_3BE4(Enemy* enemy);
 // emAIModuleImpl: notifies the AI of an event.
 void fn_41_28F74(emAIModuleImpl* ai, int, int);
 }
@@ -62,7 +60,7 @@ bool emPrim::activeArticle1(wnemSimple* article, soModuleAccesser* moduleAccesse
     fn_41_47544(&flag, param);
     fn_41_47A2C(param, moduleAccesser, true);
     if (param->m_shotKind == 4) {
-        int ownerId = fn_41_3BE4(&enemy);
+        int ownerId = enemy.getExtendBrresResourceID();
         StageObject* owner = moduleAccesser->m_stageObject;
         soPostureModule& posture = moduleAccesser->getPostureModule();
         int founderTaskId = owner->m_taskId;

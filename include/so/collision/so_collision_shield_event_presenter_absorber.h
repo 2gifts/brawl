@@ -13,6 +13,9 @@ class soCollisionSearchModule;
 class soCollisionAbsorberEventObserver : public soEventObserver<soCollisionAbsorberEventObserver> {
 public:
     soCollisionAbsorberEventObserver(short unitID) : soEventObserver<soCollisionAbsorberEventObserver>(unitID) {};
+    soCollisionAbsorberEventObserver(short manageId, s8 p2) : soEventObserver<soCollisionAbsorberEventObserver>(0x10) {
+        initialize(manageId, p2);
+    }
 
 #ifdef FT_MODULE_BUILDER
     virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); } // MATCH-ONLY: inline in the REL

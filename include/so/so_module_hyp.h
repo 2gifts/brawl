@@ -146,13 +146,28 @@ struct soComboModuleHyp {
     virtual void unk14();
 };
 
-// HYPOTHESIS: the territory module.
+// The territory rectangle of a territory module. HYPOTHESIS: the order of the sides; Enemy::init widens the first two by
+// the width parameter (minus, plus) and the last two by the height parameter (plus, minus).
+struct soTerritoryRect {
+    float m_left;
+    float m_right;
+    float m_top;
+    float m_bottom;
+};
+
+// HYPOTHESIS: the territory module. getRect / setRect: sora_enemy map names (soTerritoryModuleImpl, vtable 0x2C / 0x30).
 struct soTerritoryModuleHyp {
     virtual void unk08();
     virtual void unk0C();
     virtual void unk10();
     virtual void unk14();
     virtual void unk18();
+    virtual void unk1C();
+    virtual void unk20();
+    virtual void unk24();
+    virtual void unk28();
+    virtual soTerritoryRect* getRect();
+    virtual void setRect(soTerritoryRect* rect);
 };
 
 // HYPOTHESIS: the turn module.

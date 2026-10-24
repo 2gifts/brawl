@@ -33,5 +33,7 @@ public:
     static bool isExistTarget(soModuleAccesser* acc, u32 p2);
 
     bool checkArea(soModuleAccesser* acc, u32 p2, u32 p3);
+    void createAreaDataSet();
+    void createAreaInstance();
 };
 static_assert(sizeof(emAreaModuleImpl) == 0x5D8, "Class is wrong size!");

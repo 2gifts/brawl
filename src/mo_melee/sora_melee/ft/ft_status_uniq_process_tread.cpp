@@ -103,7 +103,7 @@ void ftStatusUniqProcessTread::exitStatus(soModuleAccesser* moduleAccesser, int)
 void ftStatusUniqProcessTread::removeConstraint(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getLinkModule().isLink(3) == 1) {
         if (moduleAccesser->getLinkModule().isModelConstraint() == 1) {
-            moduleAccesser->getLinkModule().adjustModelConstraintPosture(reinterpret_cast<Matrix*>(&Vec3f(0.0f, 0.0f, 0.0f)), &Vec3f(0.0f, 0.0f, 0.0f));
+            moduleAccesser->getLinkModule().adjustModelConstraintPosture(&Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
             moduleAccesser->getLinkModule().removeModelConstraint(true);
             Vec3f pos = moduleAccesser->getPostureModule().getPos();
             pos.m_z = 0.0f;

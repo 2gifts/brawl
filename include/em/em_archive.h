@@ -14,5 +14,8 @@ public:
     int weaponResourceId;
     int faceTexBrresResourceId;
     int extendBrresResourceId;
+
+    // HYPOTHESIS: the id selects a weapon of the archive; the copy in the Enemy unit returns weaponResourceId.
+    int getWeaponResourceID(u32 id);
 };
 static_assert(sizeof(emArchive) == 24, "Class is wrong size!");

@@ -136,7 +136,9 @@ public:
     virtual void setModelConstraintNode(int) = 0;
     virtual void setModelConstraintTargetNode(int) = 0;
     virtual u32 getModelConstraintNo() = 0;
-    virtual void adjustModelConstraintPosture(Matrix*, Vec3f*) = 0;
+    // The callers (Enemy::notifyEventLink, ftStatusUniqProcessTread) pass two Vec3f.
+    // HYPOTHESIS: a rotation and a position.
+    virtual void adjustModelConstraintPosture(Vec3f* rot, Vec3f* pos) = 0;
     virtual void adjustModelConstraintPosture(u16, Matrix*, Vec3f*) = 0;
     virtual void removeModelConstraint(bool) = 0;
     virtual bool isModelConstraint() = 0;
@@ -259,7 +261,7 @@ public:
     virtual void setModelConstraintNode(int);
     virtual void setModelConstraintTargetNode(int);
     virtual u32 getModelConstraintNo();
-    virtual void adjustModelConstraintPosture(Matrix*, Vec3f*);
+    virtual void adjustModelConstraintPosture(Vec3f* rot, Vec3f* pos);
     virtual void adjustModelConstraintPosture(u16, Matrix*, Vec3f*);
     virtual void removeModelConstraint(bool);
     virtual bool isModelConstraint();
