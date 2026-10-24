@@ -3,6 +3,7 @@
 
 class ftMarioStatusUniqProcessSpecialN : public soStatusUniqProcess {
 public:
+    ftMarioStatusUniqProcessSpecialN() { }
     virtual ~ftMarioStatusUniqProcessSpecialN() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
     virtual void execStatus(soModuleAccesser* moduleAccesser);

@@ -1965,7 +1965,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_mario/wn_mario_pump_water_status_uniq_process_regular.cpp"),
             Object(NonMatching, "mo_fighter/ft_mario/wn_mario_huge_flame.cpp"),
             Object(NonMatching, "mo_fighter/ft_mario/wn_mario_huge_flame_status_uniq_process_regular.cpp"),
-            Object(NonMatching, "mo_fighter/ft_mario/ft_mario_status_uniq_process_special_n.cpp"),
+            Object(Matching, "mo_fighter/ft_mario/ft_mario_status_uniq_process_special_n.cpp"),
             Object(Matching, "mo_fighter/ft_mario/ft_mario_status_uniq_process_special_lw_shoot.cpp"),
             Object(NonMatching, "mo_fighter/ft_mario/ft_mario_status_uniq_process_special_s.cpp"),
             Object(NonMatching, "mo_fighter/ft_mario/ft_mario.cpp"),
