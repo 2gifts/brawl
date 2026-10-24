@@ -6,8 +6,10 @@
 #include <types.h>
 
 class soGeneralWorkSimple : public soGeneralWorkAbstract {
+    // (clearWorkAll: Marth's copy and the Enemy's (SO_GENERAL_WORK_CLEAR_RELOADS_SIZE) load each size twice and take the
+    // minimum; the other fighters' copies load it once.)
     void clearInts() {
-#ifdef FT_MARTH_RUNTIME_HELPERS
+#if defined(FT_MARTH_RUNTIME_HELPERS) || defined(SO_GENERAL_WORK_CLEAR_RELOADS_SIZE)
         u32 intWorkSize = m_intWorkSize;
         // MATCH-ONLY: retain the original second size load before taking the minimum.
         u32 currentSize = *(volatile u32*)&m_intWorkSize;
@@ -22,7 +24,7 @@ class soGeneralWorkSimple : public soGeneralWorkAbstract {
     }
 
     void clearFloats() {
-#ifdef FT_MARTH_RUNTIME_HELPERS
+#if defined(FT_MARTH_RUNTIME_HELPERS) || defined(SO_GENERAL_WORK_CLEAR_RELOADS_SIZE)
         u32 floatWorkSize = m_floatWorkSize;
         // MATCH-ONLY: retain the original second size load before taking the minimum.
         u32 currentSize = *(volatile u32*)&m_floatWorkSize;
@@ -37,7 +39,7 @@ class soGeneralWorkSimple : public soGeneralWorkAbstract {
     }
 
     void clearFlags() {
-#ifdef FT_MARTH_RUNTIME_HELPERS
+#if defined(FT_MARTH_RUNTIME_HELPERS) || defined(SO_GENERAL_WORK_CLEAR_RELOADS_SIZE)
         u32 flagWorkSize = m_flagWorkSize;
         // MATCH-ONLY: retain the original second size load before taking the minimum.
         u32 currentSize = *(volatile u32*)&m_flagWorkSize;
@@ -59,7 +61,16 @@ public:
     u32 m_flagWorkSize;
 
     soGeneralWorkSimple() { }
+#ifdef SO_BUILDER_HELPERS_WEAK
+    // MATCH-ONLY: the Enemy unit calls its own weak copy of the work-area constructor (the fighter RELs define it in
+    // ft_builder_noinline.h); the copy brings the class's vtable and every accessor with it.
+    soGeneralWorkSimple(s32* ints, u32 numInts, float* floats, u32 numFloats, u32* flags, u32 numFlags)
+        __attribute__((never_inline))
+        : soGeneralWorkAbstract(false), m_intWorks(ints), m_intWorkSize(numInts), m_floatWorks(floats),
+          m_floatWorkSize(numFloats), m_flagWorks(flags), m_flagWorkSize(numFlags) { }
+#else
     soGeneralWorkSimple(s32* ints, u32 numInts, float* floats, u32 numFloats, u32* flags, u32 numFlags);
+#endif
 
     virtual s32 getIntWork(u32 index) const {
         return m_intWorks[index];

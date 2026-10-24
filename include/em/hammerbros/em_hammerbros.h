@@ -44,19 +44,13 @@ public:
 };
 static_assert(sizeof(emHammerbros) == 0x5ea4, "Class is wrong size!");
 
-extern "C" {
-// The shared wnemSwHolder activation of the enemy units (code of the Enemy unit, not reconstructed yet): reads the shot
-// description of the shot being fired and launches the article from the enemy. Always returns false.
-// HYPOTHESIS: identical to the Primid's activeArticle without its boomerang branch.
-bool fn_41_AD60(wnemSwHolder* article, soModuleAccesser* moduleAccesser);
-}
-
-// The Hammer Bro has no activator of its own: the shared one runs and the mediator hands out the null article (the
-// original ignores the result of the call, so the activation result is a constant false here).
+// The Hammer Bro has no activator of its own: the shared one of the Enemy unit (Enemy::activeArticle) runs and the
+// mediator hands out the null article (the original ignores the result of the call, so the activation result is a
+// constant false here).
 template <>
 struct soArticleMediatorActivator<emHammerbros, 0> {
     static bool activate(wnemSwHolder* article, soModuleAccesser* acc) {
-        fn_41_AD60(article, acc);
+        Enemy::activeArticle(article, acc);
         return false;
     }
 };

@@ -148,7 +148,9 @@ public:
     virtual void interpretCmd1(float frame, int group, soModuleAccesser* moduleAccesser);
     virtual void resetInterpreter1();
     virtual void resetInterpreter2(float frame, int group, soModuleAccesser* moduleAccesser, u32 unk);
-    virtual void resetInterpreter3();
+    // HYPOTHESIS: parameters from Enemy::activate, which hands group 0 the anim cmd table of its parameters (constant
+    // 0xA810), runs it once with interpretCmd1 and resets the group with NULL.
+    virtual void resetInterpreter3(int group, void* animCmdTable, soModuleAccesser* moduleAccesser);
     virtual void resetInterpreter4();
     virtual void isInterpreterAnimCmd();
     virtual void skipNextMotionGroup();

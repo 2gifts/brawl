@@ -66,6 +66,14 @@ public:
         return m_dataPtr->data / 60000.0f;
     }
 
+    // The text of a string argument (a node name, for the enemies' anim cmds).
+    const char* getStringData() const {
+        if (m_isNull == 1) {
+            return 0;
+        }
+        return (const char*)m_dataPtr->data;
+    }
+
     void* getAddressData() {
         if (m_isNull == 1) {
             return 0;

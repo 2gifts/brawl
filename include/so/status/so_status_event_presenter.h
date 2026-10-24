@@ -19,14 +19,20 @@ public:
     s16 m_unitID;
     s16 m_sendID;
     s32 getObserverId() const { return m_sendID; }
+#ifdef EM_ENEMY_BUILDER
+    // MATCH-ONLY: the Enemy unit calls the sora_melee copies of the constructor and of initialize.
+    soEventObserver(s16 unitID);
+    void initialize(s16 param1, s8 param2);
+#else
     soEventObserver(s16 unitID) {
         m_manageID = -1;
         m_unitID = unitID;
         m_sendID = -1;
     }
+    void initialize(s16 param1, s8 param2) { addObserver(param1, param2); }
+#endif
     ~soEventObserver();
     void addObserverSub(s32 manageId, soStatusEventObserver* obsvr, s8 p3); // sora_melee
-    void initialize(s16 param1, s8 param2) { addObserver(param1, param2); }
 };
 #endif
 
@@ -42,6 +48,10 @@ public:
 #else
     virtual void addObserver(short param1, s8 param2);
 #endif
+#ifdef SO_EVENT_OBSERVER_DEFAULTS_INLINE
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) { } // Opt-in per unit (the Enemy): see so_capture_event_presenter.h
+#else
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+#endif
 };
 static_assert(sizeof(soStatusEventObserver) == 12, "Class is wrong size!");

@@ -336,8 +336,14 @@ public:
     virtual void saveMotionSubRatio(int unk1);               // TODO
     virtual void restoreMotionSubRatio(int unk1);            // TODO
     virtual bool isCameraLocked() { return true; }
+#ifdef ST_STAGE_BOSS_MODE_DECL_ONLY
+    // A unit that only calls these through the vtable sees no body (the Enemy unit's original emits no weak copies).
+    virtual bool isBossBattleMode();
+    virtual bool isSimpleBossBattleMode();
+#else
     virtual bool isBossBattleMode() { return false; }
     virtual bool isSimpleBossBattleMode() { return false; }
+#endif
     virtual bool isAppear();             // TODO
     virtual bool isStartAppearTimming();  // TODO
     virtual void* getMadeinAiData();      // TODO

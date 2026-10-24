@@ -30,7 +30,9 @@ template <class T>
 class soArrayFixed : public soNullableInterface {
 public:
 
+#ifndef SO_ARRAY_FIXED_PURE_IS_NULL
     virtual bool isNull() const { return false; }
+#endif
     virtual T& at(s32 index) = 0;
     virtual const T& at(s32 index) const = 0;
     virtual s32 size() const = 0;
@@ -93,6 +95,9 @@ public:
 #ifdef SO_ARRAY_CONTRACTIBLE_DTORS_NOINLINE
     // MATCH-ONLY: preserve the native out-of-line teardown chain in the owning unit.
     virtual ~soArrayContractibleTable() __attribute__((never_inline)) { }
+#elif defined(SO_ARRAY_CONTRACTIBLE_TABLE_DTOR_EXTERN)
+    // A unit whose original calls sora_melee's copies and emits none of its own.
+    virtual ~soArrayContractibleTable();
 #else
     virtual ~soArrayContractibleTable() { }
 #endif
@@ -427,7 +432,12 @@ public:
 
     virtual s32 size() const;
 
+#ifdef SO_ARRAY_LIST_DTOR_EXTERN
+    // MATCH-ONLY: the Enemy unit calls the list destructor of sora_melee (no weak copy).
+    virtual ~soArrayList();
+#else
     virtual ~soArrayList() { }
+#endif
 
     // Erase the element in the first position
     virtual void shift();

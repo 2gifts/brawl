@@ -80,7 +80,11 @@ public:
         m_unitId = -1;
         _unk08 = 0;
     }
+#ifdef SO_BUILDER_HELPERS_WEAK
+    ~soTransitionInfo() __attribute__((never_inline)) { } // MATCH-ONLY: a weak copy of the Enemy unit
+#else
     ~soTransitionInfo(); // MATCH-ONLY: out of line in the fighter RELs (ft_builder_noinline.h)
+#endif
 #endif
 };
 static_assert(sizeof(soTransitionInfo) == 0xC, "Class is wrong size!");
@@ -211,7 +215,13 @@ public:
     virtual void addGeneralTermLastTerm(int groupID, soGeneralTerm* term);
     virtual void clearTransitionTermAll(int groupID);
     virtual int notifyEventAnimCmd(int commandType, soArrayContractibleTable<acCmdArgConv> commandArgList, u8* option, soModuleAccesser* accesser);
+#ifdef SO_TRANSITION_LAST_INFO_INLINE
+    // Opt-in per unit (the Enemy): the vtable of its soTransitionModuleEntity points at a weak copy of this accessor,
+    // so the original header defined it inline (sora_melee's so_transition_module_impl.cpp defines it out of line).
+    virtual soTransitionInfo* getLastTransitionInfo() { return &m_transitionInfo; }
+#else
     virtual soTransitionInfo* getLastTransitionInfo();
+#endif
 #ifdef FT_MODULE_BUILDER
     virtual ~soTransitionModuleImpl() { }
 #else

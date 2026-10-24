@@ -140,10 +140,29 @@ public:
         return lengthSquared * rsqrtf(lengthSquared);
     }
 
+    // Writes this - v to out.
+    void sub(const Vec2f* v, Vec2f* out)
+#ifdef MT_VEC2F_DISTANCE_NOINLINE
+        __attribute__((never_inline))
+#endif
+    {
+        out->m_x = m_x - v->m_x;
+        out->m_y = m_y - v->m_y;
+    }
+
+#ifdef MT_VEC2F_DISTANCE_NOINLINE
+    // MATCH-ONLY: the Enemy unit calls its weak out-of-line copy, which subtracts through sub.
+    float distance(Vec2f* v) __attribute__((never_inline)) {
+        Vec2f disp;
+        sub(v, &disp);
+        return disp.length();
+    }
+#else
     float distance(Vec2f* v) {
         Vec2f disp = *this - *v;
         return disp.length();
     }
+#endif
 
     void normalize();
     void normalize(Vec2f* input);
@@ -227,7 +246,11 @@ public:
     }
 
     Vec3f operator+(const Vec3f& v);
-    Vec3f operator-(const Vec3f& v);
+    Vec3f operator-(const Vec3f& v)
+#ifdef MT_VEC3F_OPERATORS_NOINLINE
+        __attribute__((never_inline)) // MATCH-ONLY: the Enemy unit calls its weak out-of-line copy.
+#endif
+        ;
 
 #ifdef MATCHING
     // MATCH-ONLY: paired-single form preserves the verified inline vector add.
@@ -237,8 +260,8 @@ public:
 
         // clang-format off
         asm {
-#ifdef MT_VEC3F_BIKE_UTILITY_OPERATORS
-            // MATCH-ONLY: the native bike Utility operators use this register order.
+#if defined(MT_VEC3F_BIKE_UTILITY_OPERATORS) || defined(MT_VEC3F_ADD_NATIVE_ORDER)
+            // MATCH-ONLY: the native bike Utility operators (and the Enemy unit's weak operator+=) use this register order.
             psq_l  fr3, Vec3f.m_x(lhs), 0, 0
             psq_l  fr1, Vec3f.m_x(rhs), 0, 0
             psq_l  fr2, Vec3f.m_z(lhs), 1, 0
@@ -387,10 +410,19 @@ public:
         return *this * (1 / c);
     }
 
-    Vec3f& operator+=(const Vec3f& v) {
+    Vec3f& operator+=(const Vec3f& v)
+#ifdef MT_VEC3F_OPERATORS_NOINLINE
+        __attribute__((never_inline)) // MATCH-ONLY: the Enemy unit calls its weak out-of-line copy, which adds in place.
+    {
+        Vec3fAdd(this, this, &v);
+        return *this;
+    }
+#else
+    {
         *this = *this + v;
         return *this;
     }
+#endif
 
     Vec3f& operator-=(const Vec3f& v) {
         *this = *this - v;
@@ -400,6 +432,17 @@ public:
     Vec3f& operator*=(const float c) {
         *this = *this * c;
         return *this;
+    }
+
+    // Scales this vector by c in place.
+    void scale(float c)
+#ifdef MT_VEC3F_SCALE_NOINLINE
+        __attribute__((never_inline)) // MATCH-ONLY: the Enemy unit calls its weak out-of-line copy.
+#endif
+    {
+        m_x = m_x * c;
+        m_y = m_y * c;
+        m_z = m_z * c;
     }
 
     float lengthSq();
