@@ -48,6 +48,10 @@ public:
     emManager(u32 enemyEntryNum, Entry* enemyEntries, u32 archiveEntryNum, Entry* archiveEntries, u8 primidFaceType);
     virtual ~emManager();       // vptr at 0x1C
 
+    // Hands out the next create id of an enemy / of a preloaded archive.
+    u32 issueEnemyCreateId() { return m_nextEnemyCreateId++; }
+    u32 issueArchiveCreateId() { return m_nextArchiveCreateId++; }
+
     static void create(u32 enemyEntryNum, u32 archiveEntryNum, u8 primidFaceType);
     static void remove();
     static emManager* getInstance();

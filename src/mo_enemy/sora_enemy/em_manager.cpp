@@ -134,7 +134,7 @@ int emManager::createEnemy(emCreate* create) {
     if (entry == NULL) {
         return -3;
     }
-    createId = m_nextEnemyCreateId++;
+    createId = issueEnemyCreateId();
     Enemy* enemy = Enemy::create(createId, create);
     if (enemy == NULL) {
         return -4;
@@ -328,12 +328,8 @@ void emManager::Entry::entryPreloadArchive(emArchive* archive, EnemyKind kind, u
 
 // Registers the archives of one enemy kind and loads its sound group. Returns the archive's create id, or -2 (invalid
 // kind), -1 (kind already preloaded), -3 (no free entry), -4 (allocation or sound group load failed).
-// TODO(nonmatching): 99.25%, (a): `this` and createId swap r30/r31 (the archive shares this's register); calls,
-// arguments, constants and branches agree. Declaration orders of the locals did not change it.
 int emManager::preloadArchive(gfArchive* param, gfArchive* brres, gfArchive* enmCommon, gfArchive* primFaceBrres,
                               EnemyKind enemyKind, bool isSoundRequest) {
-    // MATCH-ONLY: declared up front (as in createEnemy); gets the entry its register.
-    u32 createId;
     if (emInfo::getInstance()->isInvalidKind(enemyKind) == true) {
         return -2;
     }
@@ -348,7 +344,7 @@ int emManager::preloadArchive(gfArchive* param, gfArchive* brres, gfArchive* enm
     if (entry == NULL) {
         return -3;
     }
-    createId = m_nextArchiveCreateId++;
+    u32 createId = issueArchiveCreateId();
     emArchive* archive = new (Heaps::EnemyInstance) emArchive(param, brres, enmCommon, primFaceBrres, enemyKind);
     if (archive == NULL) {
         return -4;
