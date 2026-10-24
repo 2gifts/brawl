@@ -2497,6 +2497,7 @@ config.libs = [
         "cflags": cflags_sora_enemy,
         "host": False,
         "objects": [
+            Object(NonMatching, "mo_enemy/sora_enemy/enemy.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/em_info.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/em_create.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/resource/em_resource_module_impl.cpp"),
