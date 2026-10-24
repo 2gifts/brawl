@@ -12,6 +12,13 @@
 #define FT_REL_LINK_EXTERN
 #define EM_ENEMY_BUILDER
 #define SO_ARRAY_LIST_CTOR_FLAG
+// MATCH-ONLY: the unit's destructor chain is not inlined: soTeamImpl calls soTeam's destructor, the anim cmd control unit
+// manager calls soInstanceManagerFullProperty's, which calls soInstanceManagerFixed's (each a weak copy of this unit), and
+// the control unit list's destructor is the one of sora_melee. (Mario's unit shows the same for the FullProperty one.)
+#define SO_TEAM_DTOR_OUT_OF_LINE
+#define SO_INSTANCE_MANAGER_FIXED_DTOR_OUT_OF_LINE
+#define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
+#define SO_ARRAY_LIST_DTOR_EXTERN
 #define WN_TRANSITION_CTOR_INLINE
 #include <em/enemy.h>
 #include <em/em_info.h>
@@ -234,8 +241,7 @@ Enemy::Enemy(u32 p1, emCreate* create, soArray<soInterpolation<Vec3f> >* interpo
     m_level(create->m_level),
     m_motionPath(create->m_motionPath),
     unkCC(-1),
-    m_goalPosX(35791.0f),
-    m_goalPosY(35791.0f),
+    m_goalPos(35791.0f, 35791.0f),
     unkD8(false),
     moduleAccesser(this, &m_resourceModule, &m_modelModule, &m_motionModule, &m_postureModule, &m_groundModule,
                    &m_situationModule, &m_teamModule, &m_collisionAttackModule, &m_collisionHitModule,
@@ -804,34 +810,33 @@ void Enemy::deactivate() {
     unkD8 = false;
 }
 
-// TODO(nonmatching): 47.30%, (a) non-semantic: same stores of 35791 to both members; the original first builds a
-// two-float temporary in its frame and rounds the value (frsp) before the stores. (Its callers in this unit call it
-// out of line; see the declaration.)
+// (The goal is assigned from a Vec2f temporary: the compiler builds it in the frame, forwards its value to the member
+// stores with a rounding, and no longer inlines the function into activate and anim cmd 22.)
 void Enemy::resetGoalPos() {
-    m_goalPosX = 35791.0f;
-    m_goalPosY = 35791.0f;
+    m_goalPos = Vec2f(35791.0f, 35791.0f);
 }
 
 // The enemy has arrived when it is within 0.1 of the goal on each axis that has a goal.
-// TODO(nonmatching): 99.24%, (a) non-semantic: the original loads the goal before the position (the operands of the
-// subtraction swap registers); same calls, constants and branches.
+// TODO(nonmatching): 99.24%, (a) non-semantic: same calls, constants and branches (masked diff: 0 lines); the original
+// loads the goal before the returned position, we load the position first (the operand that holds the call is evaluated
+// first; a named local for the position keeps the order but hoists the 0.1f literal).
 bool Enemy::isArriveGoalPos() {
     bool arrived = true;
-    if (35791.0f != m_goalPosX && 0.1f < (float)fabs(m_goalPosX - moduleAccesser.getPostureModule().getPos().m_x)) {
+    if (35791.0f != m_goalPos.m_x && 0.1f < (float)fabs(m_goalPos.m_x - moduleAccesser.getPostureModule().getPos().m_x)) {
         arrived = false;
     }
-    if (35791.0f != m_goalPosY && 0.1f < (float)fabs(m_goalPosY - moduleAccesser.getPostureModule().getPos().m_y)) {
+    if (35791.0f != m_goalPos.m_y && 0.1f < (float)fabs(m_goalPos.m_y - moduleAccesser.getPostureModule().getPos().m_y)) {
         arrived = false;
     }
     return arrived;
 }
 
 float Enemy::getGoalPosX() {
-    return m_goalPosX;
+    return m_goalPos.m_x;
 }
 
 float Enemy::getGoalPosY() {
-    return m_goalPosY;
+    return m_goalPos.m_y;
 }
 
 // While the slow motion adjusts, the attack maxima of the frame are cleared and the float work 0x11000001 is carried over
@@ -1000,8 +1005,10 @@ static inline acCmdArg getCmdArg(const soArrayFixed<const acCmdArgConv>& args, s
 // The anim cmds of the enemies (group 'e'); the other groups go to StageObject. The command ids come from the jump table
 // of the switch; their names describe what each case does. A command with the wrong number of arguments is ignored.
 // HYPOTHESIS: all command names.
-// TODO(nonmatching): 99.9994%, (a) non-semantic: the code is identical; the only difference is the name of the
-// unit's literal pool (lbl_41_rodata_0 in the original, an anonymous pool here).
+// TODO(nonmatching): 99.9994%, (a) non-semantic: the code is identical (masked diff: the calls, arguments, constants
+// and branches agree); the differences are the name of the unit's literal pool (lbl_41_rodata_0 in the original, an
+// anonymous pool here) and the offset of the four -1 value-index defaults in it (0x4c there, 0x3c here: the pool still
+// lacks the literals of the functions that are not written yet, 60000.0f and the int-to-float constant).
 bool Enemy::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3) {
     if (acmd->getGroup() != 'e') {
         return StageObject::notifyEventAnimCmd(acmd, moduleAccesser, unk3);
@@ -1378,9 +1385,9 @@ bool Enemy::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser
         float value;
         READ_FLOAT_ARG(args, 0, moduleAccesser, value)
         if (type == 20) {
-            m_goalPosX = value;
+            m_goalPos.m_x = value;
         } else if (type == 21) {
-            m_goalPosY = value;
+            m_goalPos.m_y = value;
         }
         return true;
     }

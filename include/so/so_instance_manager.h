@@ -13,6 +13,11 @@ public:
     // The Enemy constructor expands the managers it builds; their base calls soNullable(false) of sora_melee.
     soInstanceManagerFixed() : soNullable(false) { }
 #endif
+#ifdef SO_INSTANCE_MANAGER_FIXED_DTOR_OUT_OF_LINE
+    // Opt-in per unit (the Enemy): soInstanceManagerFullProperty's destructor calls this one (a 0x40-byte weak copy).
+    // MATCH-ONLY: never_inline reproduces the original's out-of-line call.
+    ~soInstanceManagerFixed() __attribute__((never_inline)) { }
+#endif
     virtual T& at(s32 index) = 0;
     virtual T& atIndex(s32 index) = 0;
     virtual s32 getId(s32 index) = 0;

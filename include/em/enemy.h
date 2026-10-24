@@ -99,9 +99,8 @@ protected:
     int m_hitStopFrame;                    // 0xC4
     grGimmickMotionPath* m_motionPath;     // 0xC8, emCreate +0x44
     int unkCC;                             // 0xCC, -1
-    // The position the enemy moves to (resetGoalPos / isArriveGoalPos); 35791 when there is none.
-    float m_goalPosX;                      // 0xD0
-    float m_goalPosY;                      // 0xD4
+    // The position the enemy moves to (resetGoalPos / isArriveGoalPos); 35791 on an axis without a goal.
+    Vec2f m_goalPos;                       // 0xD0
     bool unkD8;                            // 0xD8
     soModuleAccesser moduleAccesser;       // 0xDC
 
@@ -307,12 +306,7 @@ public:
     void cutCatch();
     // Resets the rotation of one node, or of the whole posture for the node count of the enemy kind.
     void initRot(u32 nodeId);
-#ifdef EM_ENEMY_BUILDER
-    // MATCH-ONLY: the Enemy unit's callers (activate, anim cmd 22) call it out of line.
-    void resetGoalPos() __attribute__((never_inline));
-#else
     void resetGoalPos();
-#endif
     bool isArriveGoalPos();
     float getGoalPosX();
     float getGoalPosY();

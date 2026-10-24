@@ -427,7 +427,12 @@ public:
 
     virtual s32 size() const;
 
+#ifdef SO_ARRAY_LIST_DTOR_EXTERN
+    // MATCH-ONLY: the Enemy unit calls the list destructor of sora_melee (no weak copy).
+    virtual ~soArrayList();
+#else
     virtual ~soArrayList() { }
+#endif
 
     // Erase the element in the first position
     virtual void shift();
