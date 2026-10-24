@@ -11,6 +11,7 @@
 // approach it at a bounded angular speed. Hitstop keeps the stored angle.
 class wnMarioPumpStatusUniqProcessShoot : public soStatusUniqProcess {
 public:
+    wnMarioPumpStatusUniqProcessShoot() { }
     virtual ~wnMarioPumpStatusUniqProcessShoot() { }
     virtual void execStatus(soModuleAccesser* moduleAccesser);
     virtual void execStop(soModuleAccesser* moduleAccesser);

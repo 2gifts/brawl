@@ -15,6 +15,7 @@
 // against the ground and spawning a ground-attached flame effect on contact.
 class wnMarioHugeFlameStatusUniqProcessRegular : public soStatusUniqProcess {
 public:
+    wnMarioHugeFlameStatusUniqProcessRegular() { }
     virtual ~wnMarioHugeFlameStatusUniqProcessRegular() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
     virtual void execFixPos(soModuleAccesser* moduleAccesser);
