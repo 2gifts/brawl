@@ -4,6 +4,7 @@
 
 #include <StaticAssert.h>
 #include <em/em_article_mediator.h>
+#include <em/em_module_arrays.h>
 #include <em/em_target_search_unit.h>
 #include <em/enemy.h>
 #include <ft/builder/ft_dol_instances.h>
@@ -14,7 +15,6 @@
 // The arrays below are classes of sora_melee: the Primid only calls their constructors and destructors.
 FT_DOL_ARRAY_VECTOR(soInterpolation<Vec3f>, 44);
 FT_DOL_ARRAY_VECTOR(soAreaInstance, 17);
-FT_DOL_ARRAY_VECTOR(soCameraSubject, 1);
 
 class emPrim;
 

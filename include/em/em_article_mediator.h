@@ -348,20 +348,42 @@ bool soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::shoot(soModuleAcc
     }
 }
 
+// deactivate() of a mediator with Num pools: the pools in article id order, stopping at the first instance that cannot
+// be deactivated.
+// HYPOTHESIS: the original walks the whole type list; written out for the one- and two-pool mediators of the enemies.
+template <class Mediator, int Num>
+struct soArticleMediatorDeactivator;
+
+template <class Mediator>
+struct soArticleMediatorDeactivator<Mediator, 1> {
+    static void deactivate(Mediator& mediator) {
+        for (s32 i = 0; i < soInstancePoolLevel<typename Mediator::PoolHierarchy, 0>::Type::num; ++i) {
+            if (!static_cast<soArticle&>(*mediator.template getPool<0>().getInstanceAt(i)).setDeactivateDescendant()) {
+                return;
+            }
+        }
+    }
+};
+
+template <class Mediator>
+struct soArticleMediatorDeactivator<Mediator, 2> {
+    static void deactivate(Mediator& mediator) {
+        for (s32 i = 0; i < soInstancePoolLevel<typename Mediator::PoolHierarchy, 0>::Type::num; ++i) {
+            if (!static_cast<soArticle&>(*mediator.template getPool<0>().getInstanceAt(i)).setDeactivateDescendant()) {
+                return;
+            }
+        }
+        for (s32 i = 0; i < soInstancePoolLevel<typename Mediator::PoolHierarchy, 1>::Type::num; ++i) {
+            if (!static_cast<soArticle&>(*mediator.template getPool<1>().getInstanceAt(i)).setDeactivateDescendant()) {
+                return;
+            }
+        }
+    }
+};
+
 template <class PoolTL, class AssignTL, class KindInfo, class Extra>
 void soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::deactivate() {
-    // Pools in article id order; stops at the first instance that cannot be deactivated.
-    // HYPOTHESIS: the original walks the whole type list; written out for the two-pool mediators of the enemies.
-    for (s32 i = 0; i < SO_ARTICLE_MEDIATOR_SLOT(0)::num; ++i) {
-        if (!static_cast<soArticle&>(*getPool<0>().getInstanceAt(i)).setDeactivateDescendant()) {
-            return;
-        }
-    }
-    for (s32 i = 0; i < SO_ARTICLE_MEDIATOR_SLOT(1)::num; ++i) {
-        if (!static_cast<soArticle&>(*getPool<1>().getInstanceAt(i)).setDeactivateDescendant()) {
-            return;
-        }
-    }
+    soArticleMediatorDeactivator<soArticleMediatorImpl, mediateNum>::deactivate(*this);
 }
 
 // One weapon instance of an enemy, constructed with the kind of the mediator, the article id of its pool and the event

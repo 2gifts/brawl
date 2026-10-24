@@ -2531,6 +2531,7 @@ config.libs = [
             Object(Matching, "mo_enemy/sora_enemy/shelly/em_shelly_param_accesser.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/teckin/em_teckin_param_accesser.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/spar/em_spar_param_accesser.cpp"),
+            Object(NonMatching, "mo_enemy/sora_enemy/hammerbros/em_hammerbros.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/hammerbros/em_hammerbros_param_accesser.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/kokkon/em_kokkon_param_accesser.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/bombhead/em_bombhead_param_accesser.cpp"),
