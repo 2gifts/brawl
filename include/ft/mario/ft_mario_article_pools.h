@@ -19,6 +19,7 @@
 #pragma push
 #pragma dont_inline on
 template soAnimCmdControlUnitBuilder<soAnimCmdControlUnitBuildConfig<0, 1, 3, 0, 0, 0, 0, 8> >::~soAnimCmdControlUnitBuilder();
+template soInsideEventManageModuleBuilder<soInsideEventManageModuleBuildConfig<16, 32, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 1, 1, 0, 0, 0, wnInsideEventManageModuleTypes>, wnInsideEventManageModuleTypes>::~soInsideEventManageModuleBuilder();
 #pragma pop
 FT_DOL_ARRAY_VECTOR(soModelNodeSetUp, 1);
 #include <wn/mario/wn_mario_pump.h>

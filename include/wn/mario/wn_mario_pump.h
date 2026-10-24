@@ -32,7 +32,7 @@ class wnMarioPumpMediator : public soArticleMediator {
     u8 m_autoRecycle;
 public:
     wnMarioPumpMediator(soModuleAccesser* acc) : soArticleMediator(acc), m_pools(acc), m_autoRecycle(false) { }
-    virtual ~wnMarioPumpMediator();
+    virtual ~wnMarioPumpMediator() { }
     virtual soArticle* generate(s32 articleId, soModuleAccesser* acc);
     virtual bool shoot(soModuleAccesser* acc, soArticle* article);
     virtual s32 getMediateNum();

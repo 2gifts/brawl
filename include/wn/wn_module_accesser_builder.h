@@ -86,6 +86,13 @@ FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soKineticEnergy*>, 8);
 
 // Same, for the vector whose sora_melee constructor is called with a second, unused argument (the caller loads 0 into r4
 // before the call; the constructor ignores it): the status vector of the Jet Hammer.
+// MATCH-ONLY: selected fighter-owned article teardowns retain this holder call.
+#ifdef WN_STATUS_PROC_ARG_HOLDER_DTOR_NOINLINE
+#define WN_STATUS_PROC_ARG_HOLDER_DTOR_ATTR __attribute__((never_inline))
+#else
+#define WN_STATUS_PROC_ARG_HOLDER_DTOR_ATTR
+#endif
+
 #define WN_STATUS_PROC_VECTOR_ARG_CTOR(N)                                                                              \
     template <>                                                                                                            \
     class soArrayVector<soStatusUniqProcess*, N> : public soArrayVectorAbstract<soStatusUniqProcess*> {                    \
@@ -115,7 +122,7 @@ FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soKineticEnergy*>, 8);
     public:                                                                                                                \
         soArrayVector<soStatusUniqProcess*, N> m_array;                                                                    \
         soArraySelectHolder() : m_array(0) { }                                                                              \
-        ~soArraySelectHolder() { }                                                                                         \
+        ~soArraySelectHolder() WN_STATUS_PROC_ARG_HOLDER_DTOR_ATTR { }                                                                                         \
         soArrayVector<soStatusUniqProcess*, N>* get() { return &m_array; }                                                 \
     }
 
