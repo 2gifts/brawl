@@ -260,8 +260,8 @@ public:
 
         // clang-format off
         asm {
-#ifdef MT_VEC3F_BIKE_UTILITY_OPERATORS
-            // MATCH-ONLY: the native bike Utility operators use this register order.
+#if defined(MT_VEC3F_BIKE_UTILITY_OPERATORS) || defined(MT_VEC3F_ADD_NATIVE_ORDER)
+            // MATCH-ONLY: the native bike Utility operators (and the Enemy unit's weak operator+=) use this register order.
             psq_l  fr3, Vec3f.m_x(lhs), 0, 0
             psq_l  fr1, Vec3f.m_x(rhs), 0, 0
             psq_l  fr2, Vec3f.m_z(lhs), 1, 0
@@ -412,12 +412,17 @@ public:
 
     Vec3f& operator+=(const Vec3f& v)
 #ifdef MT_VEC3F_OPERATORS_NOINLINE
-        __attribute__((never_inline)) // MATCH-ONLY: the Enemy unit calls its weak out-of-line copy.
-#endif
+        __attribute__((never_inline)) // MATCH-ONLY: the Enemy unit calls its weak out-of-line copy, which adds in place.
+    {
+        Vec3fAdd(this, this, &v);
+        return *this;
+    }
+#else
     {
         *this = *this + v;
         return *this;
     }
+#endif
 
     Vec3f& operator-=(const Vec3f& v) {
         *this = *this - v;

@@ -45,7 +45,11 @@ class soSound3dGeneratorAccesserImpl : public soSound3dGeneratorAccesser {
 
 public:
     soSound3dGeneratorAccesserImpl();
+#ifdef SO_BUILDER_HELPERS_WEAK
+    virtual ~soSound3dGeneratorAccesserImpl() __attribute__((never_inline)) { } // MATCH-ONLY: a weak copy of the Enemy unit
+#else
     virtual ~soSound3dGeneratorAccesserImpl();
+#endif
     virtual void activate(Vec3f* pos);
     virtual void deactivate();
     virtual GeneratorInstance* getInstance(int);

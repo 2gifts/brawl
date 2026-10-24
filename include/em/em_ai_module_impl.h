@@ -32,6 +32,8 @@ public:
     // HYPOTHESIS: aiData is the enemy's AI parameter block (a soValueAccesser constant); 6 and 7 are passed by every enemy.
     emAIModuleImpl(soModuleAccesser* acc, emAIEntry* entries, void* aiData, int entryNum, int p5, int p6);
     virtual ~emAIModuleImpl();
+    // The module observes the attack events of its enemy (the base declares the handler pure).
+    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
 
     emAIInfo* getCurrentAIInfo();
     void createUnitAll();

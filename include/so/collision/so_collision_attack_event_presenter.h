@@ -52,7 +52,14 @@ public:
 #else
     virtual void addObserver(short param1, s8 param2);
 #endif
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);;
+#ifdef SO_EVENT_OBSERVER_DEFAULTS_INLINE
+    // Opt-in per unit (the Enemy): its observer vtable has a null slot for the handler and a weak copy of the default
+    // check, so the original header declared the one pure and defined the other inline.
+    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) = 0;
+    virtual bool notifyEventCollisionAttackCheck(u32 flags) { return false; }
+#else
+    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
+#endif
 };
 static_assert(sizeof(soCollisionAttackEventObserver) == 12, "Class is wrong size!");

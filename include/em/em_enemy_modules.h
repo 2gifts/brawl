@@ -78,10 +78,13 @@ public:
 };
 
 // The anim cmd control units of the enemy (one per interpreter). The constructor is expanded in the Enemy constructor
-// (its list is a class of sora_melee), the destructor is a weak copy of the Enemy unit.
-template <>
-class soInstanceManagerFullPropertyUniqImpl<soAnimCmdControlUnit, 11> : public soInstanceManagerFullProperty<soAnimCmdControlUnit> {
-    soArrayList<soInstanceUnitFullProperty<soAnimCmdControlUnit>, 11> m_arrayList; // 0x10
+// (its list is a class of sora_melee), the destructor is a weak copy of the Enemy unit, the methods are sora_melee's.
+// A partial specialization (on the capacity) rather than a full one: the unit emits the vtable of a class template whose
+// methods are only declared, with the thunks of the policy bases, as the original does; a plain class with out-of-line
+// virtuals would leave the vtable to the unit that defines them.
+template <u32 C>
+class soInstanceManagerFullPropertyUniqImpl<soAnimCmdControlUnit, C> : public soInstanceManagerFullProperty<soAnimCmdControlUnit> {
+    soArrayList<soInstanceUnitFullProperty<soAnimCmdControlUnit>, C> m_arrayList; // 0x10
 public:
 #ifdef SO_ARRAY_LIST_CTOR_FLAG
     // The Enemy unit (which defines the flag) expands it; the list constructor is the one of sora_melee.

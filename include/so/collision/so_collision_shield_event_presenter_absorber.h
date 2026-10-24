@@ -22,7 +22,14 @@ public:
 #else
     virtual void addObserver(short param1, s8 param2);
 #endif
+#ifdef SO_EVENT_OBSERVER_DEFAULTS_INLINE
+    // Opt-in per unit (the Enemy): a null vtable slot for the handler, a weak copy of the default check (see
+    // so_capture_event_presenter.h).
+    virtual void notifyEventCollisionAbsorber(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float, soModuleAccesser* moduleAccesser) = 0;
+    virtual bool notifyEventCollisionAbsorberCheck() { return false; }
+#else
     virtual void notifyEventCollisionAbsorber(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventCollisionAbsorberCheck();
+#endif
 };
 static_assert(sizeof(soCollisionAbsorberEventObserver) == 12, "Class is wrong size!");

@@ -6,6 +6,9 @@
 // MATCH-ONLY: the unit calls its weak out-of-line copies of Vec3f(float, float, float), operator- and operator+=.
 #define MT_VEC3F_CTOR_NOINLINE
 #define MT_VEC3F_OPERATORS_NOINLINE
+// MATCH-ONLY: both copies write their paired-single results over the right-hand operand's registers.
+#define MT_VEC3F_ADD_NATIVE_ORDER
+#define MT_VEC3F_SUB_NATIVE_ORDER
 // MATCH-ONLY: and its weak copies of Vec2f::distance (subtracting through Vec2f::sub) and Vec3f::scale.
 #define MT_VEC2F_DISTANCE_NOINLINE
 #define MT_VEC3F_SCALE_NOINLINE
@@ -33,6 +36,17 @@
 // the vtable of soArrayFixed<soAnimCmdAddressPackConv>).
 #define IP_NULL_INPUT_CONT_NO
 #define SO_ARRAY_FIXED_PURE_IS_NULL
+// MATCH-ONLY: the helpers the fighter RELs define out of line (ft_builder_noinline.h and each fighter's .cpp) are weak
+// copies of this unit: soNullable(bool), soGeneralWorkSimple's work-area constructor (with it the whole soGeneralWorkSimple /
+// soGeneralWorkAbstract vtable family) and the destructors of soGeneralWorkAbstract, soTransitionInfo, soResourceIdAccesser
+// and soSound3dGeneratorAccesserImpl.
+#define SO_BUILDER_HELPERS_WEAK
+#define SO_GENERAL_WORK_CLEAR_RELOADS_SIZE
+// The vtables of the observer bases and of the status transition module point at this unit's copies of the default
+// handlers (soCaptureEventObserver::notifyEventCaptureStatus, the collision *Check defaults,
+// soStatusEventObserver::notifyEventChangeStatus) and of soTransitionModuleImpl::getLastTransitionInfo.
+#define SO_EVENT_OBSERVER_DEFAULTS_INLINE
+#define SO_TRANSITION_LAST_INFO_INLINE
 #include <em/enemy.h>
 #include <em/em_info.h>
 #include <em/em_manager.h>
@@ -62,6 +76,11 @@
 // HYPOTHESIS: the loupe number the enemy's model is constructed with (Enemy::activate); the first object of the unit's
 // .data.
 static u8 s_modelLoupeNo = 0xff;
+
+// HYPOTHESIS: the item generation sheets of no stage (0xff) at levels 0 and 1; the same pair is built by the stage loader
+// (st_loader_stage.cpp) and the fighter units that create items. Nothing in this unit reads them.
+static itGenSheetKind s_genSheetKindLevel0(Stages::srStageKind(0xff), 0);
+static itGenSheetKind s_genSheetKindLevel1(Stages::srStageKind(0xff), 1);
 
 // Null objects of sora_melee the Enemy constructor hands to the modules it does not build.
 // HYPOTHESIS: the roles are those of the soModuleAccesser / module constructor parameter they are passed as.

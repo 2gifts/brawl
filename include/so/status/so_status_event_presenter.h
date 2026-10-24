@@ -48,6 +48,10 @@ public:
 #else
     virtual void addObserver(short param1, s8 param2);
 #endif
+#ifdef SO_EVENT_OBSERVER_DEFAULTS_INLINE
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) { } // Opt-in per unit (the Enemy): see so_capture_event_presenter.h
+#else
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+#endif
 };
 static_assert(sizeof(soStatusEventObserver) == 12, "Class is wrong size!");

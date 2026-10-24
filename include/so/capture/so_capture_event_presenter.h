@@ -17,6 +17,12 @@ public:
 #else
     virtual void addObserver(short param1, s8 param2);
 #endif
+#ifdef SO_EVENT_OBSERVER_DEFAULTS_INLINE
+    // Opt-in per unit (the Enemy): its observer vtables point at weak copies of the default handlers, so the original
+    // header defined them inline.
+    virtual bool notifyEventCaptureStatus(soModuleAccesser* moduleAccesser, int taskId, int, int) { return false; }
+#else
     virtual bool notifyEventCaptureStatus(soModuleAccesser* moduleAccesser, int taskId, int, int);
+#endif
 };
 static_assert(sizeof(soCaptureEventObserver) == 12, "Class is wrong size!");
