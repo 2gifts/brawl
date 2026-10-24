@@ -208,6 +208,8 @@ public:
         soAnimCmdControlUnit unit = { &m_interpreter, &m_pack };
         acc->getAnimCmdModule().registInterpreter(unit, attr);
     }
+    // MATCH-ONLY: MWCC needs an explicit definition for selected weak instantiations.
+    ~soAnimCmdControlUnitBuilder() { }
 };
 
 // Unit 9: no command table / address pack of its own (uses the null pack), a deeper interpreter stack.

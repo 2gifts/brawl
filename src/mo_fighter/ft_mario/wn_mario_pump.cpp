@@ -1,3 +1,4 @@
+#define FT_POOL_ROOT_NONPOLYMORPHIC
 // MATCH-ONLY: native references the module data and singleton guards separately.
 #pragma pool_data off
 #define WN_WEAPON_BUILDER
@@ -68,7 +69,6 @@ template <class M, int N> wnArticleManageModuleBuilder<M, N>::~wnArticleManageMo
 template wnSelectedArticleMediator<wnMarioPumpMediator>::~wnSelectedArticleMediator();
 template wnArticleManageModuleBuilder<wnMarioPumpMediator, 1>::~wnArticleManageModuleBuilder();
 template wnMarioPumpWater* wnArticleSubPool<wnMarioPumpWater, 12>::getInstanceAt(s32);
-wnMarioPumpMediator::~wnMarioPumpMediator() { }
 #pragma dont_inline off
 
 wnMarioPump::wnMarioPump(s32 articleId, const wnArticleBuildInfo& info, const wnMarioPumpData* data) :

@@ -12,6 +12,7 @@
 // Keep the water-shot model pointed along its current velocity.
 class wnMarioPumpWaterStatusUniqProcessRegular : public soStatusUniqProcess {
 public:
+    wnMarioPumpWaterStatusUniqProcessRegular() { }
     virtual ~wnMarioPumpWaterStatusUniqProcessRegular() { }
     virtual void execFixPos(soModuleAccesser* moduleAccesser);
 };

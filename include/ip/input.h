@@ -79,7 +79,12 @@ public:
     virtual void update();
     virtual Vec2f getStickMain() const;
     virtual Vec2f getStickSub() const;
+#ifdef IP_INPUT_BUTTON_RAW
+    // HYPOTHESIS: original wrapper spelling; preserve the native one-word mask result.
+    virtual ipPadButton::Mask getButton() const;
+#else
     virtual ipPadButton getButton() const;
+#endif
     virtual ipPadTrigger getTrigger() const;
 #if defined(WN_ARTICLE_NATIVE_BUILDERS) || defined(IP_NULL_INPUT_CONT_NO)
     virtual s32 getContNo() const { return -1; }

@@ -27,6 +27,9 @@ inline soGeneralWorkSimple::soGeneralWorkSimple(s32* ints, u32 numInts, float* f
 
 extern soStatusUniqProcess g_wnMarioPumpWaterStatusUniqProcessRegular;
 
+// HYPOTHESIS: original type/use of the separate leading constant, before the pooled floats.
+extern const float lbl_91_rodata_58 = 3.0f;
+
 wnMarioPumpWater::wnMarioPumpWater(s32 articleId, const wnArticleBuildInfo& info, const wnMarioPumpWaterData* data) :
     wnWeaponBuilder<wnMarioPumpWaterModuleAccesserBuildConfig>(
         "MarioPumpWater", articleId, info,

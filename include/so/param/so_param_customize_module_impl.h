@@ -8,7 +8,7 @@
 class soParamCustomizeModule : soNullable {
 public:
     soParamCustomizeModule() : soNullable(false) { }
-#ifdef WN_WEAPON_BUILDER
+#if defined(WN_WEAPON_BUILDER) && !defined(WN_PARAM_CUSTOMIZE_INLINE_DTOR)
     // MATCH-ONLY: not inlined into the derived destructor (weak copy in the article units).
     virtual ~soParamCustomizeModule() __attribute__((never_inline)) { }
 #else

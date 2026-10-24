@@ -1,3 +1,7 @@
+#define WN_STATUS_PROC_ARG_HOLDER_DTOR_NOINLINE
+#define FT_SOUND_GENERATOR_DTOR_NOINLINE
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR
+#define WN_KINETIC_MEDIATOR_INLINE_DTOR
 #define WN_WEAPON_BUILDER // The fighter owns complete article types.
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
 #define FT_ROBOT_SHARED_STATUS_TABLE_CTOR
@@ -8,7 +12,46 @@
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #define FT_TEAM_TYPED_INTERFACE
+#include <so/event/so_event_system.h>
+class soStatusEventObserver;
+class soAnimCmdEventObserver;
+// These article observer lists call their shared sora_melee destructors.
+class soLinkEventObserver;
+class soArticleEventObserver;
+template <> class soEventUnitWithWorkArea<soStatusEventObserver, 16> : public soEventUnitImpl<soStatusEventObserver> {
+    soInstanceManagerFullPropertyVector<soStatusEventObserver*, 16> m_observerList;
+public:
+    soEventUnitWithWorkArea(s16 managerId, s16 eventId) : soEventUnitImpl<soStatusEventObserver>(managerId, eventId) { }
+    virtual ~soEventUnitWithWorkArea();
+    virtual u32 getObserverNum() const { return m_observerList.size(); }
+};
+template <> class soEventUnitWithWorkArea<soAnimCmdEventObserver, 32> : public soEventUnitImpl<soAnimCmdEventObserver> {
+    soInstanceManagerFullPropertyVector<soAnimCmdEventObserver*, 32> m_observerList;
+public:
+    soEventUnitWithWorkArea(s16 managerId, s16 eventId) : soEventUnitImpl<soAnimCmdEventObserver>(managerId, eventId) { }
+    virtual ~soEventUnitWithWorkArea();
+    virtual u32 getObserverNum() const { return m_observerList.size(); }
+};
+template <> class soEventUnitWithWorkArea<soLinkEventObserver, 2> : public soEventUnitImpl<soLinkEventObserver> {
+    soInstanceManagerFullPropertyVector<soLinkEventObserver*, 2> m_observerList;
+public:
+    soEventUnitWithWorkArea(s16 managerId, s16 eventId) : soEventUnitImpl<soLinkEventObserver>(managerId, eventId) { }
+    virtual ~soEventUnitWithWorkArea();
+    virtual u32 getObserverNum() const { return m_observerList.size(); }
+};
+template <> class soEventUnitWithWorkArea<soArticleEventObserver, 2> : public soEventUnitImpl<soArticleEventObserver> {
+    soInstanceManagerFullPropertyVector<soArticleEventObserver*, 2> m_observerList;
+public:
+    soEventUnitWithWorkArea(s16 managerId, s16 eventId) : soEventUnitImpl<soArticleEventObserver>(managerId, eventId) { }
+    virtual ~soEventUnitWithWorkArea();
+    virtual u32 getObserverNum() const { return m_observerList.size(); }
+};
 #include <ft/builder/ft_dol_array_list.h>
+// The disguise command vector uses sora_melee's shared teardown.
+template <> soArrayVector<ftAnimCmdConvPtr, 281>::~soArrayVector();
+#include <so/sound/so_sound_3d_generator_accesser_impl.h>
+// This accesser has no owned sound resources to release in its destructor.
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
 #include <ft/ft_reflector_group.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/mario/ft_mario.h>
@@ -41,6 +84,8 @@ soStatusModuleImpl::~soStatusModuleImpl() { }
 soParamAccesser::~soParamAccesser() { }
 #pragma dont_inline off
 soArticleMediator::~soArticleMediator() { }
+inline soControllerModuleLinkRef::~soControllerModuleLinkRef() { }
+ftKineticEnergyController::~ftKineticEnergyController() { }
 
 // ftManager::setParamPattern selects the shared parameter-table variation.
 extern int g_soValueVariation;
@@ -200,9 +245,9 @@ struct ftMarioArticleKind : wnArticleKindInfo {
     }
 };
 
-// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+// Keep the temporary kind record alive through the enclosing article construction.
 struct ftMarioArticleBuildInfo : wnArticleBuildInfo {
-    ftMarioArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+    ftMarioArticleBuildInfo(const wnArticleKindInfo& kindArg, soHeapModule* heap) {
         kindInfo = &kindArg;
         heapModule = heap;
     }
@@ -306,8 +351,8 @@ bool ftMario::activeArticle1(wnMarioMantle* weapon, soModuleAccesser* acc) {
 // The Pump starts with the model resource of the fighter.
 bool ftMario::activeArticle2(wnMarioPump* weapon, soModuleAccesser* acc) {
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
-    int founderTaskId = acc->getStageObject().m_taskId;
     soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
     weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getMdlResId(), fighter.getOwner()->getTeam(), resources.getResourceIdAccesser()->getEtcResId());
     return true;
 }
@@ -491,7 +536,6 @@ void testBuilder() {
     soInsideEventManageModuleBuilder<ftMarioInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> insideBuilder;
     soResourceIdAccesserImpl idAccImpl(0, 1, 2);
 }
-soInsideEventManageModuleBuilder<ftMarioInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> g_insideBuilder;
 
 // Empty virtual overrides of this module (ftEntryEventObserver / Fighter no-ops), under their map addresses.
 extern "C" {

@@ -1,5 +1,8 @@
+// MATCH-ONLY: retain the native one-word null-input result.
+#define IP_INPUT_BUTTON_RAW
 #define WN_WEAPON_BUILDER
 #define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_ARTICLE_ANIMCMD_INT
 #define WN_SHARED_ARRAYS_1
 #define WN_TRANSITION_CTOR_INLINE
 #define WN_WEAPON_NO_COMMON_ENERGIES
