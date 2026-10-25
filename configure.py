@@ -1348,7 +1348,7 @@ config.libs = [
             Object(NonMatching, "sora/snd/snd_3d_generator.cpp"),
             Object(NonMatching, "sora/snd/snd_load_thread.cpp"),
             Object(NonMatching, "sora/snd/snd_doubutsugo_task.cpp"),
-            Object(NonMatching, "sora/mv/mv_THPDraw.cpp"),
+            Object(Matching, "sora/mv/mv_THPDraw.cpp"),
             Object(NonMatching, "sora/mv/mv_THPPlayer.cpp"),
             Object(NonMatching, "sora/mv/mv_THPVideoDecode.cpp"),
             Object(NonMatching, "sora/mv/mv_movie_player.cpp"),
