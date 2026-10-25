@@ -73,6 +73,10 @@ public:
     virtual void saveEnv(ContextType* pCtx);
     virtual void restoreEnv(ContextType* pCtx);
 
+    // Number of UTF-8 characters in the first len bytes of str (stops at a NUL).
+    // HYPOTHESIS: parameter types; the map names it a member of this class.
+    static int strlenUtf8(const char* str, int len);
+
     // HYPOTHESIS: the flag byte is a u8 (the caller passes an unsigned byte of the tag string).
     bool pushFontTag(ContextType* pCtx, u8 flags);
     bool popFontTag(ContextType* pCtx);

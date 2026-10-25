@@ -82,7 +82,11 @@ struct MsgBuf {
 };
 
 u8* floatToBytes(u8* out, float f);
-int MsgParseChar(const u8* p, int* kind, u8* out, int flag);
+// Walks the message command stream from p. With kind == NULL it skips the control commands and counts the
+// printable characters until the end of the string or an unknown command. With kind it stops after the first
+// line feed (kind 2) or printable character (kind 1, its UTF-8 bytes copied to out, "...." copied whole).
+// Returns the number of bytes consumed; count receives the number of printable characters when given.
+int MsgParseChar(const u8* p, int* kind, u8* out, int* count);
 int strncmp_(const char* a, const char* b, unsigned long n);
 void SetFontResource(ms::CharWriter* w, int id);
 void ScnObj_EnableCallbackTiming(nw4r::g3d::ScnObj* obj, u32 timing);
