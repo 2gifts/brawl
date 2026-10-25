@@ -134,8 +134,7 @@ bool wnMarioPump::activeArticle(wnMarioPumpWater* water, soModuleAccesser* acc) 
     Vec3f offset;
     offset.m_z = 0.0f;
     offset.m_x = 0.0f;
-    float spread = randf() - 0.5f;
-    offset.m_y = 2.0f * (soValueAccesser::getConstantFloat(acc, 4004, 0) * spread);
+    offset.m_y = 2.0f * (soValueAccesser::getConstantFloat(acc, 4004, 0) * (randf() - 0.5f));
     Vec3f position = acc->getModelModule().getNodeGlobalPosition(7, &offset, false, false);
     position.m_z = acc->getGroundModule().getZ();
     Matrix matrix(true);

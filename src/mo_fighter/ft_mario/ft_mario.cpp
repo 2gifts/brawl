@@ -576,7 +576,6 @@ void fn_91_A578() {}
 extern "C" {
 
 u8 fn_91_22B4(u8* p) { return *(u8*)(p + 0x4); }
-u8 fn_91_A0AC(u8* p) { return *(u8*)(p + 0x44); }
 int fn_91_A528(u8* p) { return *(int*)(p + 0x110); }
 bool fn_91_9D0C(void* self, s8 kind) { return kind == 0xc; }
 
