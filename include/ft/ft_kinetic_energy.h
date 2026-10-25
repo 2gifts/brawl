@@ -52,23 +52,34 @@ public:
 
 class ftKineticEnergyGravity : public soKineticEnergy {
 public:
-#ifdef FT_MODULE_BUILDER
     ftKineticEnergyGravity(); // sora_melee
-#endif
-#ifdef FT_MODULE_BUILDER
     virtual ~ftKineticEnergyGravity() { }
-#endif
-    u8 unk8[4];
+    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser*);
+    virtual void clearSpeed();
+    virtual void updateEnergy(soModuleAccesser*);
+    virtual void mulSpeed(Vec3f*);
+    virtual void mulAccel(Vec3f*);
+    virtual void reflectSpeed(Vec3f*);
+    virtual void reflectAccel(Vec3f*);
+    virtual void clearRotSpeed();
+    virtual Vec3f getRotation();
+    virtual Vec2f getSpeed();
+
+    s32 m_resetType;
     // Verified by ftKineticEnergyGravity::getSpeed: vertical speed at 0xC.
     float m_speedY;
     float m_gravity;
     float m_fallSpeedMax;
     // Yoshi kinetic mode 0x68 writes this offset as a scalar float.
     float unk18;
-    // HYPOTHESIS: updateEnergy uses this float for its speed-limit clamp.
+    // Vertical speed limit used when m_limitMode selects the current direction.
     float unk1C;
-    u8 m_unk20[8];
+    // Reset snapshots the owner's gravity multiplier; update applies it to speed and acceleration.
+    float m_gravityMul;
+    // -1 disables the limit; 0 limits falling, 1 rising, 2 both directions.
+    s32 m_limitMode;
 };
+static_assert(sizeof(ftKineticEnergyGravity) == 0x28, "Gravity energy extent");
 
 // HYPOTHESIS: the real layouts are unknown, only the sizes are (from the soKineticMediatorImpl pool layout).
 class soKineticEnergyWindNormal : public soKineticEnergyNormal {
