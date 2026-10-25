@@ -1287,7 +1287,7 @@ config.libs = [
             Object(NonMatching, "sora/mt/mt_vector.cpp"),
             Object(NonMatching, "sora/mt/mt_spline.cpp"),
             Object(NonMatching, "sora/mt/mt_coll2d.cpp"),
-            Object(NonMatching, "sora/ut/ut_bit_array.cpp"),
+            Object(Matching, "sora/ut/ut_bit_array.cpp"),
             Object(NonMatching, "sora/ut/ut_archive_manager.cpp"),
             Object(NonMatching, "sora/ip/ip_padconfig.cpp"),
             Object(NonMatching, "sora/ip/ip_switch.cpp"),
