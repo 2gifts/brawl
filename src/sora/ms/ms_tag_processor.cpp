@@ -1,32 +1,17 @@
 #include <ms/ms_tag_processor.h>
+#include <ms/ms_text_writer_base.h>
 #include <sora/ms_message.h>
 #include <string.h>
 #include <types.h>
 
-extern "C" void __destroy_arr(void*, void (*)(void*), u32, u32);
-extern "C" void fn_8006CE1C(void*);
-// HYPOTHESIS: fn_8006E7F0 tears down a sub-object at this, with a delete-flag argument passed as 0.
-extern "C" void fn_8006E7F0(void*, s32);
+msTagProcessor::msTagProcessor() { }
 
-MsgTagProc::~MsgTagProc() {
-    __destroy_arr(&m_data[0x90], fn_8006CE1C, 0x10, 8);
-    __destroy_arr(&m_data[0xC], fn_8006CE1C, 0x10, 8);
-    fn_8006E7F0(this, 0);
-}
+// A fresh stack entry is opaque white.
+msTagProcessor::tagStack::tagStack() : m_color(0xFFFFFFFF) { }
 
+msTagProcessor::tagStack::~tagStack() { }
 
-extern "C" void __construct_array(void*, void (*)(void*), void (*)(void*), u32, u32);
-extern "C" void fn_8006CE10(void*);
-extern "C" void fn_8006CE1C(void*);
-extern "C" void fn_8006E7E0();
-extern "C" u8 lbl_80454360[];
-
-MsgTagProc::MsgTagProc() {
-    fn_8006E7E0();
-    *reinterpret_cast<void**>(m_data) = lbl_80454360;
-    __construct_array(&m_data[0xC], fn_8006CE10, fn_8006CE1C, 0x10, 8);
-    __construct_array(&m_data[0x90], fn_8006CE10, fn_8006CE1C, 0x10, 8);
-}
+msTagProcessor::~msTagProcessor() { }
 
 bool msTagProcessor::pushFontTag(ContextType* pCtx, u8 flags) {
     if (m_stackCount >= 8) {
@@ -91,18 +76,15 @@ u8* floatToBytes(u8* out, float f) {
     return out;
 }
 
-void msTagProcessor::saveEnv() {
+void msTagProcessor::saveEnv(ContextType* pCtx) {
     m_savedStackCount = m_stackCount;
     memcpy(m_savedStack, m_stack, m_stackCount * sizeof(tagStack));
 }
 
-void msTagProcessor::restoreEnv() {
+void msTagProcessor::restoreEnv(ContextType* pCtx) {
     m_stackCount = m_savedStackCount;
     memcpy(m_stack, m_savedStack, m_stackCount * sizeof(tagStack));
 }
-
-extern "C" f32 fn_80070C78(const ms::TextWriterBase<char>*);
-extern "C" int fn_80070D64(const ms::TextWriterBase<char>*);
 
 namespace ms {
 
@@ -110,7 +92,7 @@ template <typename T>
 void TagProcessorBase<T>::ProcessTab(ContextType* pCtx) {
     TextWriterBase<T>& rWriter = *pCtx->writer;
 
-    int tabWidth = fn_80070D64(&rWriter);
+    int tabWidth = rWriter.GetTabWidth();
     if (tabWidth <= 0) {
         return;
     }
@@ -130,7 +112,7 @@ void TagProcessorBase<T>::ProcessLinefeed(ContextType* pCtx) {
     TextWriterBase<T>& rWriter = *pCtx->writer;
 
     f32 x = pCtx->x;
-    f32 y = rWriter.GetCursorY() + fn_80070C78(&rWriter);
+    f32 y = rWriter.GetCursorY() + rWriter.GetLineHeight();
 
     rWriter.SetCursor(x, y);
 }
@@ -151,13 +133,21 @@ typename TagProcessorBase<T>::Operation TagProcessorBase<T>::Process(u16 ch, Con
 }
 
 template <typename T>
-void TagProcessorBase<T>::saveEnv() {}
+TagProcessorBase<T>::TagProcessorBase() { }
 
 template <typename T>
-void TagProcessorBase<T>::restoreEnv() {}
+TagProcessorBase<T>::~TagProcessorBase() { }
 
+template <typename T>
+void TagProcessorBase<T>::saveEnv(ContextType* pCtx) {}
+
+template <typename T>
+void TagProcessorBase<T>::restoreEnv(ContextType* pCtx) {}
+
+template TagProcessorBase<char>::TagProcessorBase();
+template TagProcessorBase<char>::~TagProcessorBase();
 template TagProcessorBase<char>::Operation TagProcessorBase<char>::Process(u16, ContextType*);
-template void TagProcessorBase<char>::saveEnv();
-template void TagProcessorBase<char>::restoreEnv();
+template void TagProcessorBase<char>::saveEnv(ContextType*);
+template void TagProcessorBase<char>::restoreEnv(ContextType*);
 
 } // namespace ms
