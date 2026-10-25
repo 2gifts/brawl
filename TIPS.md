@@ -174,6 +174,30 @@ Things that moved registers, roughly in the order worth trying:
 - **mwld's weak dedup physically removes the loser's bytes, from data sections as well as from text:** the extra weak `isNull`, `__vt__10soNullable`, `__RTTI__10soNullable` and type-info strings in `wn_class_info.o` vanished at link time and the 0x60 of `.data` left in the claim landed at the original addresses. Extra weak metadata the compiler emits for inline virtuals is therefore harmless when the canonical copy is earlier in link order -- judge by the final hashes, not by the object listings. Seen: `src/mo_melee/sora_melee/wn/wn_class_info.cpp`. **MED**
 - **Identical REL section bytes can still import a vtable from the wrong fighter:** compare relocation target modules as well as offsets. An unnamed local `soArticleMediator` table let Mario Finale resolve its base table to Fox's named copy. Identify the original local table through its constructor and RTTI, then name that verified weak copy. **HIGH**
 
+## Classify a stuck function before fighting it
+
+Adapted from the skills in [lemiur/Game-Decompilation-Skill-For-Claude](https://github.com/lemiur/Game-Decompilation-Skill-For-Claude/tree/main/.claude/skills) (x86/MSVC projects; only the method carries over to MWCC). Work the classes in this order and do not call a wall class N while class N-1 still differs:
+
+1. **Referent:** instruction bytes match once relocations are masked, but the relocation targets differ. Fix the symbol, class or global identity, not the code shape.
+2. **Inline / call set:** the multiset of out-of-line callees, or their order, differs. The caller's body is usually incomplete (the inliner budget follows statement mass), an inline boundary is wrong, or a tail with a call was duplicated or merged. Finish the caller before touching the callee.
+3. **Control flow:** block, branch or return counts differ. This is a source construct: separate returns, `goto` to one exit, `||`/`&&` collapsing, `while` versus `do/while`.
+4. **Register / schedule:** same calls and same skeleton, only registers, spills or instruction order differ. Check types and widths, value lifetimes and helper boundaries first; only then run the permuter.
+
+- **A trick that matches is a pointer to the real source, not an answer.** A dummy local that fixes allocation usually means a missing helper or two variables merged into one; `volatile` means a wrong type or an aliasing pointer; an empty block means a macro; a same-type cast means a wrongly declared type. Follow it to the source that explains it before marking the function matched. Keep forms that only force bytes tagged `// MATCH-ONLY:`.
+- **Lifetimes before "register noise":** map each stack slot to a real value (an aggregate home, a scalar spill, a reused argument slot, a hidden return buffer), then trace it from creation to last use. Passing a returned aggregate directly, naming a copy and binding a const reference give the temporary different lifetimes, and two expansions of one inline helper can get separate homes. By-value arguments are evaluated before the helper body; references can defer the load to each use.
+- **A missing out-of-line copy does not disprove an inline helper:** trivial accessors always expand and leave no copy. When the inline budget says call sites are missing, adopt the repeated accessor spelling at every site, not one.
+- **Mine history before inventing a spelling:** `git log -S'<function>' -- src include` finds earlier bodies; for a function that used to be exact, recover that revision first.
+- **Count honestly:** a byte-exact function whose source needs offset casts, a dummy local, `volatile` or an empty block is exact but not finished. List those apart as work to clean up rather than as closed.
+
+## Native port notes (for later)
+
+Same source. These apply when the decomp is built for PC:
+
+- Do not emulate the hardware. Write the platform layer in game terms (meshes, textures, audio streams, input actions), not GX FIFO packets, DSP commands or EFB copies.
+- Split on-disk structs (32-bit offsets and big-endian fields) from runtime structs (native pointers) and write explicit loaders; `void*` is 8 bytes on a 64-bit host and shifts every later field if a file buffer is cast in place.
+- Keep gameplay arithmetic bit-exact (integer and `f32` operations in the original order); convert to wider types only at the rendering boundary.
+- Build the 64-bit target with `-Wall -Wextra -Wconversion` and run AddressSanitizer and UndefinedBehaviorSanitizer to find pointer truncation and alignment faults.
+
 ## 8. Process
 - **Unused reference helpers can be discarded at link time:** do not force them inline just to make the source object contain only native functions. NW4R geometry emitted `PLANE::Set`, `IntersectionAABB` and a literal-order helper, but none survived in the linked ELF; the five native functions and their data passed all 127 hashes. Inlining the helpers and dropping the literal helper changed register allocation in `AABB::Set` despite preserving its algorithm. Verify natural unit ownership and linked output rather than inventing splits to hide extra functions. Seen: `src/nw4r/math/math_geometry.cpp`. **HIGH**
 - **A new shadow header does not trigger rebuilds.** Ninja only knows the old BrawlHeaders path from each object's recorded dependencies, so objects that include the shadowed header keep their stale contents and fail later (for example `dtk rel make` reports "Failed to find symbol"). After adding a shadow, delete the objects that `ninja -t deps` lists as depending on the old BrawlHeaders file, then rebuild. A full build must also exit 0: the hash check alone can pass against stale outputs. Seen: `include/nw4r/g3d/g3d_resfile.h`. **HIGH**
