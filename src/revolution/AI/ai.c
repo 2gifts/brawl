@@ -3,7 +3,7 @@
 #include <revolution/OS.h>
 
 const char* __AIVersion =
-    "<< RVL_SDK - AI \trelease build: Nov 30 2006 03:26:11 (0x4199_60831) >>";
+    "<< RVL_SDK - AI \trelease build: May  8 2007 12:54:34 (0x4199_60831) >>";
 
 static AIDMACallback __AID_Callback;
 
@@ -143,6 +143,7 @@ void __AIDHandler(s16 intr, OSContext* ctx) {
     OSSetCurrentContext(ctx);
 }
 
+#ifdef __MWERKS__
 static asm void __AICallbackStackSwitch(register AIDMACallback callback) {
     // clang-format off
 
@@ -169,6 +170,9 @@ static asm void __AICallbackStackSwitch(register AIDMACallback callback) {
 
     // clang-format on
 }
+#else
+static void __AICallbackStackSwitch(AIDMACallback callback) {}
+#endif
 
 static void __AI_SRC_INIT(void) {
     s64 start = 0;
