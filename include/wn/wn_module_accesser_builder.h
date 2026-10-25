@@ -307,7 +307,7 @@ extern char lbl_27_bss_598[];  // area
 extern char lbl_27_bss_5EC[];  // physics
 extern char lbl_27_bss_604[];  // slope
 extern char lbl_27_bss_614[];  // shadow
-extern char lbl_27_bss_628[];  // item manage
+extern char g_soItemManageModuleNull[];  // item manage
 extern char lbl_27_bss_640[];  // color blend
 extern char lbl_27_bss_654[];  // jostle
 extern char lbl_27_bss_66C[];  // abnormal
@@ -575,7 +575,7 @@ template <>
 class soItemManageModuleBuilder<soItemManageModuleBuildConfigNull> {
 public:
     soItemManageModuleBuilder(soModuleAccesser*, void*) { }
-    soItemManageModule* getModule() { return (soItemManageModule*)lbl_27_bss_628; }
+    soItemManageModule* getModule() { return (soItemManageModule*)g_soItemManageModuleNull; }
 };
 template <>
 class soColorBlendModuleBuilder<soColorBlendModuleBuildConfigNull> {
