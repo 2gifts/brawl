@@ -2333,9 +2333,9 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "mo_fighter/ft_zako/ft_zako_boy.cpp"),
-            Object(NonMatching, "mo_fighter/ft_zako/ft_zako_girl.cpp"),
-            Object(NonMatching, "mo_fighter/ft_zako/ft_zako_child.cpp"),
-            Object(NonMatching, "mo_fighter/ft_zako/ft_zako_ball.cpp"),
+            Object(Matching, "mo_fighter/ft_zako/ft_zako_girl.cpp"),
+            Object(Matching, "mo_fighter/ft_zako/ft_zako_child.cpp"),
+            Object(Matching, "mo_fighter/ft_zako/ft_zako_ball.cpp"),
         ],
     },
     {
