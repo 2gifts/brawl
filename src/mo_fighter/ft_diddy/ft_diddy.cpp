@@ -1,3 +1,4 @@
+#define FT_SOUND_GENERATOR_DTOR_NOINLINE
 #define MT_VEC3F_CTOR_NOINLINE
 #define MT_VEC3F_ASSIGN_NOINLINE
 // MATCH-ONLY: the status table default constructor is a call into the shared sora_melee code, as in Captain.
