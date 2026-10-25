@@ -19,19 +19,7 @@ namespace nw4r {
     } // namespace g3d
 } // namespace nw4r
 
-struct FontData {
-    enum FONT_RESOURCE {
-        FONT_SYSTEM = 0,
-        FONT_NORMAL = 1,
-        FONT_HIRAGANA = 2,
-        FONT_ENDING = 3,
-        FONT_MELEE = 4,
-        FONT_RESETSAN = 5,
-        FONT_FOX = 6,
-        FONT_ALERT = 7,
-        FONT_NORMAL2 = 8,
-    };
-};
+#include <ms/ms_resfont.h>
 
 class Message;
 

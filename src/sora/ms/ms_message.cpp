@@ -9,8 +9,6 @@
 #include <string.h>
 #include <types.h>
 
-extern int lbl_805A0174;
-extern int lbl_805A0178;
 
 static void drawCallbackProjection();
 
@@ -355,9 +353,9 @@ u8 Message::isEndDelayPrint() {
 
 void Message::init(bool raw, int fontId) {
     if (fontId == 9) {
-        if (lbl_805A0178 != 0) {
+        if (g_Normal12FontBuf != NULL) {
             SetFontResource(this, 8);
-        } else if (lbl_805A0174 != 0) {
+        } else if (g_NormalFontBuf != NULL) {
             SetFontResource(this, 1);
         } else {
             SetFontResource(this, 2);
