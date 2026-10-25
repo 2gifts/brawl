@@ -6,6 +6,8 @@ on:
 
 jobs:
   build:
+    # The image and the original game files only exist for doldecomp/brawl; forks (builds run on our server) skip this.
+    if: github.repository == 'doldecomp/brawl'
     container: ghcr.io/doldecomp/brawl-build:main
 
     runs-on: ubuntu-latest
