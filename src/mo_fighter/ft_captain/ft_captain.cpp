@@ -17,6 +17,14 @@
 #define FT_BC ftCaptainBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
+// Status teardown destroys its owned change-request queue before observers.
+#pragma dont_inline on
+#ifndef FT_REL_LINK_EXTERN // with FT_REL_LINK_EXTERN the queue destructor is the sora_melee function (ft_dol_instances.h)
+template soArrayVector<s32, 8>::~soArrayVector();
+#endif
+#pragma dont_inline off
+soStatusModuleImpl::~soStatusModuleImpl() { }
+
 ftCaptainExtendParamAccesser g_ftCaptainExtendParamAccesser;
 
 ftClassInfoImpl<Fighter_Captain, ftCaptain> g_ftClassInfoCaptain;

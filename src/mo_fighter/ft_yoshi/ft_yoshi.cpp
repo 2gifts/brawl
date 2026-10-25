@@ -31,6 +31,14 @@ extern "C" void fn_8003E3BC(const Matrix*, const Vec3f*, Vec3f*);
 #define FT_BC ftYoshiBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
+// Status teardown destroys its owned change-request queue before observers.
+#pragma dont_inline on
+#ifndef FT_REL_LINK_EXTERN // with FT_REL_LINK_EXTERN the queue destructor is the sora_melee function (ft_dol_instances.h)
+template soArrayVector<s32, 8>::~soArrayVector();
+#endif
+#pragma dont_inline off
+soStatusModuleImpl::~soStatusModuleImpl() { }
+
 ftYoshiExtendParamAccesser g_ftYoshiExtendParamAccesser;
 
 ftClassInfoImpl<Fighter_Yoshi, ftYoshi> g_ftClassInfoYoshi;
