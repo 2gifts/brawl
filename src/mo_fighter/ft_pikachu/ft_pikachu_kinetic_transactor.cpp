@@ -9,7 +9,7 @@
 #include <math.h>
 
 // Quick Attack's stick helper: dead zone and full-tilt thresholds (two constants) map the stick onto 0..1 keeping the sign.
-static float regulate(register float value, float low, float high);
+float regulate(register float value, float low, float high);
 
 // Pikachu's own kinetic mode: 0x64 is the Quick Attack aim, 0x65..0x68 only switch the outside energy on.
 void ftPikachuKineticTransactor::changeKinetic(int mode, void* pools, soModuleAccesser* acc) {
@@ -78,17 +78,20 @@ void ftPikachuKineticTransactor::updateEnergySub(soKineticEnergyNormal* energy, 
     energy->m_speedLimit = speed;
 }
 
-static float regulate(register float value, float low, float high) {
+float regulate(register float value, float low, float high) {
     float sign;
     if (value >= 0.0f) {
         sign = 1.0f;
     } else {
         sign = -1.0f;
-        value = (float)fabs(value);
+        double wide = fabs(value);
+        value = wide;
     }
     value = (value - low) / (high - low);
-    register float zero = 0.0f;
-    register float one = 1.0f;
+    register float zero;
+    register float one;
+    one = 1.0f;
+    zero = 0.0f;
     register float lowBounded;
     register float t;
     t = value - zero;
