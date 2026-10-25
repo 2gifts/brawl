@@ -1,3 +1,5 @@
+#define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
+#define FT_TEAM_TYPED_INTERFACE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_SHARED_STATUS_TABLE_CTOR
 #include <ft/builder/ft_dol_array_list.h>
