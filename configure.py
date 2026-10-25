@@ -2161,7 +2161,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_robot/ft_robot.cpp"),
             Object(NonMatching, "mo_fighter/ft_robot/ft_robot_articles.cpp"),
             Object(NonMatching, "mo_fighter/ft_robot/ft_robot_status_uniq_process_special_arm_spin.cpp"),
-            Object(NonMatching, "mo_fighter/ft_robot/ft_robot_status_uniq_process_special_burner.cpp"),
+            Object(Matching, "mo_fighter/ft_robot/ft_robot_status_uniq_process_special_burner.cpp"),
             Object(Matching, "mo_fighter/ft_robot/ft_robot_status_uniq_process_special_burner_attack.cpp"),
             Object(NonMatching, "mo_fighter/ft_robot/ft_robot_status_uniq_process_special_burner_start.cpp"),
             Object(NonMatching, "mo_fighter/ft_robot/ft_robot_status_uniq_process_special_gyro.cpp"),
@@ -2332,9 +2332,9 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "mo_fighter/ft_zako/ft_zako_boy.cpp"),
-            Object(Matching, "mo_fighter/ft_zako/ft_zako_girl.cpp"),
-            Object(Matching, "mo_fighter/ft_zako/ft_zako_child.cpp"),
-            Object(Matching, "mo_fighter/ft_zako/ft_zako_ball.cpp"),
+            Object(NonMatching, "mo_fighter/ft_zako/ft_zako_girl.cpp"),
+            Object(NonMatching, "mo_fighter/ft_zako/ft_zako_child.cpp"),
+            Object(NonMatching, "mo_fighter/ft_zako/ft_zako_ball.cpp"),
         ],
     },
     {
