@@ -10,6 +10,7 @@
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
 
 class Vec3f;
+class ftPikachu;
 class soCollisionAttackModule;
 struct wnPikachuThunderJoltData;
 struct wnPikachuCloudData;
@@ -32,6 +33,7 @@ public:
     wnPikachuCloud(s32 articleId, const wnArticleBuildInfo& info, const wnPikachuCloudData* data);
     virtual ~wnPikachuCloud();
     // Called by the Thunder status processes (names from the module map, signatures are HYPOTHESES).
+    void activate(int founderTaskId, int team, const Vec3f* position, int etcResId, ftPikachu* owner);
     bool thunder_hitcheck(Vec3f* position);
     void deactive_thunder(int thunder);
     void ref_log_group(soCollisionAttackModule* attack);
@@ -46,6 +48,7 @@ class wnPikachuVortex : public Weapon {
 public:
     wnPikachuVortex(s32 articleId, const wnArticleBuildInfo& info, const wnPikachuVortexData* data);
     virtual ~wnPikachuVortex();
+    void activate(int founderTaskId, int finalResId, int team, const Vec3f* position);
 };
 static_assert(sizeof(wnPikachuVortex) == 0x1FC8, "wnPikachuVortex layout is wrong!");
 

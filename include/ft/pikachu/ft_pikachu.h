@@ -84,7 +84,12 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    virtual void onActivate();
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     void** getExtendParam();
+    static void* getThunderParam();
+    void rec_cloud_pointer(wnPikachuCloud* cloud);
     // The cloud article of Thunder is kept in a work int of the fighter (HYPOTHESIS: names follow the module map).
     void notify_thunder_reflect();
     void adjust_camera_subject(soCameraModule* source);
