@@ -42,11 +42,6 @@ extern "C" u32* fn_8004E5A0(GameGlobal* global);
 extern "C" void fn_80051440(int coins);
 // efScreen::cancelFill(frames, handle)
 extern "C" void fn_8005E3C8(efScreen* screen, float frames, u8* handle);
-// msTexObj: a texture object that is copied from the frame buffer (ctor, dtor, copy from the frame buffer, free)
-extern "C" void fn_8007266C(void* texObj);
-extern "C" void fn_800726A8(void* texObj, int flags);
-extern "C" void fn_8007270C(void* texObj, float x, float y, float width, float height, int format, int texFormat, int mipmap);
-extern "C" void fn_8007291C(void* texObj);
 // nw4r::g3d::ResFile::GetResPltt(), ResTex::GetTexObjParam(), ResTex::GetTexObjCIParam()
 extern "C" void* fn_8018D310(const nw4r::g3d::ResFile* resFile, const char* name);
 extern "C" void fn_80192A44(const nw4r::g3d::ResTex* tex, void** data, u16* width, u16* height, int* format, float* minLod,
