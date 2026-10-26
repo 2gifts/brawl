@@ -18,14 +18,29 @@ struct soCollisionAttackAbsoluteData {
     float m_slipChance;
     float m_hitStopFrame;
     float m_hitStopDelay;
-    // The flags of the absolute attack; only the fields Enemy::processFixPositionPreAnimCmd writes are split out.
-    u32 unk20_0 : 7;
-    u32 unk20_7 : 5;
-    u32 unk20_12 : 3;
-    u32 unk20_15 : 1;
-    u32 unk20_16 : 1;
-    u32 unk20_17 : 6;
-    u32 : 9;
+    union {
+        // The flags of the absolute attack; only the fields Enemy::processFixPositionPreAnimCmd writes are split out.
+        struct {
+            u32 unk20_0 : 7;
+            u32 unk20_7 : 5;
+            u32 unk20_12 : 3;
+            u32 unk20_15 : 1;
+            u32 unk20_16 : 1;
+            u32 unk20_17 : 6;
+            u32 : 9;
+        };
+        // HYPOTHESIS: names of the soCollisionAttackData flags that the Metaknight Final statuses copy into these bits.
+        struct {
+            u32 m_attribute : 5;
+            u32 m_soundLevel : 2;
+            u32 m_soundAttribute : 5;
+            u32 m_lrCheck : 3;
+            u32 m_noHitStop : 1;
+            u32 m_noEffect : 1;
+            u32 : 6;
+            u32 : 9;
+        };
+    };
 };
 
 struct soCollisionAttackData {
