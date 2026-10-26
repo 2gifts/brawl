@@ -276,9 +276,7 @@ WN_DOL_INSTANCE_MANAGER(wnKineticEnergyPtr, 2);
 FT_DOL_POLY_BEGIN(soReflectModuleImpl, 0x40);
     soReflectModuleImpl(soModuleAccesser* acc, int kind);
 FT_DOL_POLY_END;
-FT_DOL_POLY_BEGIN(soGlowModuleSimple, 0x1C);
-    soGlowModuleSimple(soModuleAccesser* acc);
-FT_DOL_POLY_END;
+#include <so/glow/so_glow_module_simple.h>
 FT_DOL_POLY_BEGIN(soShakeModuleSimple, 0x8);
     soShakeModuleSimple(soModuleAccesser* acc, soArray<soShakeTerm>* terms, void* shakeData);
 FT_DOL_POLY_END;
