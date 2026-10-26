@@ -25,6 +25,7 @@ private:
 
 public:
     float getVisibilityScale() const; // map name ftOwner::getVisibilityScale
+    float getGravity(); // owner gravity multiplier used by ftKineticEnergyGravity::resetEnergy
     bool isNoVoice() const; // map name ftOwner::isNoVoice
     // Pokemon Trainer bookkeeping (map names ftOwner::...Pokemon...); one lost flag per Pokemon.
     bool getPokemonChange() const;

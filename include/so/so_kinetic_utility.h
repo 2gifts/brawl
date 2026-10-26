@@ -10,6 +10,7 @@ class soKineticEnergy;
 class soKineticUtility {
 public:
     static float brakeSpeedSub(float speed, float accel, float target, float brake);
+    static float brakeSpeed(float speed, float accel, float target, float brake);
     static Vec2f brakeSpeed(Vec2f* speed, Vec2f* accel, Vec2f* target, Vec2f* brake);
     static Vec2f limitSpeed(Vec2f* speed, Vec2f* limit);
     static float limitSpeed(float speed, float limit); // HYPOTHESIS: parameter meanings
