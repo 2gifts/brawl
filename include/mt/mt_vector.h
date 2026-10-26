@@ -122,6 +122,10 @@ public:
     float lengthSq()
 #ifdef MT_VEC2F_LENGTH_SQ_OUT_OF_LINE
         __attribute__((never_inline)); // MATCH-ONLY: retain the owning Vanish unit's helper calls.
+#elif defined(MT_VEC2F_LENGTH_SQ_SINGLE_EXPR)
+    { // MATCH-ONLY: the item kinetic energy units square both components in place (one expression).
+        return m_x * m_x + m_y * m_y;
+    }
 #else
     {
         float xSq = m_x * m_x;
