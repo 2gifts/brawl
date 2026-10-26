@@ -203,6 +203,10 @@ struct soDebugModuleHyp {
     virtual void unk08();
     virtual void unk0C();
     virtual void unk10();
+    virtual void unk14();
+    virtual void unk18();
+    // HYPOTHESIS: the visibility modules recompute their visibility only while this is set.
+    virtual bool unk1C();
 };
 
 }  // namespace soHyp
