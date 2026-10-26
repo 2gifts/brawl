@@ -256,12 +256,17 @@ public:
     // MATCH-ONLY: paired-single form preserves the verified inline vector add.
     friend void Vec3fAdd(register Vec3f* pOut, register const Vec3f* lhs,
                      register const Vec3f* rhs) {
+#ifdef MT_VEC3F_ADD_RHS_RESULT_XY_FIRST
+        // MATCH-ONLY: retain the native independent XY/Z input lifetimes.
+        register f32 fr2, fr3, fr1, fr0;
+#else
         register f32 fr3, fr2, fr1, fr0;
+#endif
 
         // clang-format off
         asm {
-#if defined(MT_VEC3F_BIKE_UTILITY_OPERATORS) || defined(MT_VEC3F_ADD_NATIVE_ORDER)
-            // MATCH-ONLY: the native bike Utility operators (and the Enemy unit's weak operator+=) use this register order.
+#if defined(MT_VEC3F_BIKE_UTILITY_OPERATORS) || defined(MT_VEC3F_ADD_NATIVE_ORDER) || defined(MT_VEC3F_ADD_RHS_RESULT_XY_FIRST)
+            // MATCH-ONLY: these native callers reuse the right operand registers for the result.
             psq_l  fr3, Vec3f.m_x(lhs), 0, 0
             psq_l  fr1, Vec3f.m_x(rhs), 0, 0
             psq_l  fr2, Vec3f.m_z(lhs), 1, 0
@@ -378,6 +383,20 @@ public:
     }
     // MATCH-ONLY: paired-single scale used by the generic article code (opt in with MT_VEC3F_MUL_INLINE).
     friend void Vec3fScale(register Vec3f* pOut, register const Vec3f* v, register float c) {
+#ifdef MT_VEC3F_SCALE_SPLIT_RESULT
+        // MATCH-ONLY: loaded Z and its product have distinct native lifetimes.
+        register f32 frOut, frZ, frXY;
+        // clang-format off
+        asm {
+            psq_l    frXY, Vec3f.m_x(v), 0, 0
+            psq_l    frZ, Vec3f.m_z(v), 1, 0
+            ps_muls0 frXY, frXY, c
+            ps_muls0 frOut, frZ, c
+            psq_st   frXY, Vec3f.m_x(pOut), 0, 0
+            psq_st   frOut, Vec3f.m_z(pOut), 1, 0
+        }
+        // clang-format on
+#else
         register f32 fr1, fr0;
 
         // clang-format off
@@ -390,7 +409,9 @@ public:
             psq_st   fr0, Vec3f.m_z(pOut), 1, 0
         }
         // clang-format on
+#endif
     }
+
 #else
     friend void Vec3fAdd(Vec3f* out, const Vec3f* lhs, const Vec3f* rhs) {
         out->m_x = lhs->m_x + rhs->m_x;
