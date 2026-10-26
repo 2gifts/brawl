@@ -13,7 +13,10 @@ public:
     // HYPOTHESIS: the stages switch these on and off (1 while the subject is out of the camera's reach).
     u32 m_state : 3;
     u32 m_stateB : 3;
-    u32 _8_rest : 26;
+    u32 _8_6 : 3;
+    // HYPOTHESIS: the player number that getSubjectByPlayerNo and the camera controllers compare.
+    u32 m_playerNo : 3;
+    u32 _8_rest : 20;
     char _12[4];
     Vec3f m_pos;
     char _28[16];
