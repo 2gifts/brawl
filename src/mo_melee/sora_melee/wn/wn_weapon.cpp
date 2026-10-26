@@ -525,7 +525,8 @@ bool Weapon::reflect() {
     soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
     float lifeMul = m_moduleAccesser->getReflectModule().getLifeMul();
     int initLife = work.getInt(Weapon_Work_Int_Init_Life);
-    m_moduleAccesser->getWorkManageModule().setInt((int)((float)initLife * lifeMul), Weapon_Work_Int_Life);
+    int life = (float)initLife * lifeMul;
+    m_moduleAccesser->getWorkManageModule().setInt(life, Weapon_Work_Int_Life);
     return false;
 }
 
