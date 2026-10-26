@@ -1358,6 +1358,7 @@ config.libs = [
             Object(NonMatching, "sora/cm/cm_quake.cpp"),
             Object(NonMatching, "sora/cm/cm_subject.cpp"),
             Object(NonMatching, "sora/cm/cm_controller_ai.cpp"),
+            Object(NonMatching, "sora/cm/cm_controller_ai_param.cpp"),
             Object(NonMatching, "sora/cm/cm_controller_fighter_target.cpp"),
             Object(NonMatching, "sora/cm/cm_controller_adventure.cpp"),
             Object(NonMatching, "sora/cm/cm_controller_animation.cpp"),
