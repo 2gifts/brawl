@@ -10,6 +10,7 @@
 class soStopModule;
 class soItemManageModule;
 class soCollisionShieldModule;
+class soCameraModule;
 
 class soExternalValueAccesser {
 public:
@@ -32,6 +33,7 @@ public:
     static soModuleAccesser* getModuleAccesser(StageObject* stageObject);
     static soCollisionHitModule* getCollisionHitModule(StageObject* stageObject);
     static soControllerModule* getControllerModule(StageObject* stageObject);
+    static soCameraModule* getCameraModule(StageObject* stageObject);
     static u32 getTeamOwnerId(StageObject* stageObject);
     static float getConstantFloat(StageObject* stageObject, u32 paramId);
     static float getSlowRate(StageObject* stageObject);
