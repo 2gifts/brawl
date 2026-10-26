@@ -1,3 +1,4 @@
+#define SO_BUILD_DATA_SLOPE_LIMIT_EXTERNAL
 // MATCH-ONLY: retain the native one-word null-input result.
 #define IP_INPUT_BUTTON_RAW
 #define WN_WEAPON_BUILDER
