@@ -81,7 +81,7 @@ int ph2ndaryController::get2ndaryLastNode(u32* nodes, nw4r::g3d::ResMdl resMdl) 
     int count = 0;
     if (unk0D) {
         for (int i = m_lines.getSize() - 1; i >= 0; i--) {
-            if (m_lines[i]->m_arrayCount == 0) {
+            if (m_lines[i]->m_array.m_size == 0) {
                 *nodes++ = m_lines[i]->m_id;
                 count++;
             }
@@ -90,7 +90,7 @@ int ph2ndaryController::get2ndaryLastNode(u32* nodes, nw4r::g3d::ResMdl resMdl) 
         out = nodes;
         for (int i = m_lines.getSize() - 1; i >= 0; i--) {
             ph2ndaryLine* line = m_lines[i];
-            if (line->m_arrayCount == 0) {
+            if (line->m_array.m_size == 0) {
                 nw4r::g3d::ResNode node = resMdl.GetResNode(line->m_nodeName);
                 *out++ = node.IsValid() ? node.ptr()->m_nodeIndex : 0;
                 count++;
