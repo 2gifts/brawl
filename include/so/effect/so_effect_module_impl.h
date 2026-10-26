@@ -1,5 +1,6 @@
 // SHADOW of BrawlHeaders/so/effect/so_effect_module_impl.h: identical except for the FT_MODULE_BUILDER-guarded declarations
 // (constructors/destructors of sora_melee classes that fighter module builders call). Built only for fighter RELs.
+// Also: soEffectModule's destructor is inline (ykEffectModuleImpl's destructor does not call it).
 #pragma once
 #ifdef FT_MODULE_BUILDER
 struct soEffectContinual;
@@ -23,7 +24,7 @@ class soModuleAccesser;
 
 class soEffectModule : public soNullable {
 public:
-    virtual ~soEffectModule();
+    virtual ~soEffectModule() { }
     virtual void activate();
     virtual void deactivate();
     virtual void begin();

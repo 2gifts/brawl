@@ -2729,6 +2729,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/st/st_operator_info_adventure.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_operator_defeat_boss.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_event_rule_grow_up.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/yk/yk_effect_module_impl.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/yk/yk_value_accesser.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/gr/gr_gimmick_spring.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/gr/gr_adventure_motion_ground.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/gr/gr_gimmick_catapult.cpp"),
