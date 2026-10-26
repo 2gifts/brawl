@@ -2742,6 +2742,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/it/it_manager.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/it/it_gen_archive.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/it/it_switch_decide_module_impl.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/it/it_kinetic_energy.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/it/it_kinetic_energy_stop.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/it/it_value_accesser.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_mario_status_uniq_process_special_hi.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_mario_fireball.cpp", cflags=cflags_rel + ["-DFT_MODULE_BUILDER"]),
