@@ -253,6 +253,14 @@ sora/gf/gf_shutdown_manager.cpp:
 	.ctors      start:0x804064FC end:0x80406500
 	.bss        start:0x80495390 end:0x804953A0
 
+sora/gf/gf_sys_recorder2.cpp:
+	.text       start:0x80030548 end:0x80033160
+	.ctors      start:0x80406500 end:0x80406504
+	.data       start:0x80422F70 end:0x80423120
+	.bss        start:0x804953A0 end:0x804953B0
+	.sdata      start:0x8059C670 end:0x8059C690
+	.sbss       start:0x805A0078 end:0x805A0080
+
 sora/gf/gf_slow_manager.cpp:
 	.text       start:0x80033160 end:0x800334E4
 	.bss        start:0x804953B0 end:0x804953D0
