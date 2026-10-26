@@ -10444,6 +10444,17 @@ mo_melee/sora_melee/so/so_array_vector_accessors_soAreaContactLog_8.cpp:
 mo_melee/sora_melee/so/so_array_vector_thunks_16soAreaContactLog_8.cpp:
 	.text       start:0x00268AB0 end:0x00268AD8
 
+mo_melee/sora_melee/yk/yk_effect_module_impl.cpp:
+	.text       start:0x0026F2D8 end:0x0026F508
+	.rodata     start:0x000043E0 end:0x000043E8
+	.data       start:0x00057180 end:0x00057288
+
+mo_melee/sora_melee/yk/yk_value_accesser.cpp:
+	.text       start:0x0026F508 end:0x0026F604
+	.ctors      start:0x00000308 end:0x0000030C
+	.data       start:0x00057288 end:0x000572E0
+	.bss        start:0x00006000 end:0x00006018
+
 mo_melee/sora_melee/gr/gr_gimmick_spring.cpp:
 	.text       start:0x0026FC6C end:0x00270838
 	.ctors      start:0x0000030C end:0x00000310
