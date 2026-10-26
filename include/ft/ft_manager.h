@@ -54,6 +54,8 @@ class ftOutsideEventObserver : public soEventObserver<ftOutsideEventObserver> {
 public:
     ftOutsideEventObserver() : soEventObserver<ftOutsideEventObserver>(0) { initialize(-1, -1); }
     ftOutsideEventObserver(short unitID) : soEventObserver<ftOutsideEventObserver>(unitID) {};
+    // HYPOTHESIS: registers with the given manager on construction (mlFtEvent passes -1, 0).
+    ftOutsideEventObserver(s16 manageId, s8 param2) : soEventObserver<ftOutsideEventObserver>(0) { initialize(manageId, param2); }
 
     virtual void addObserver(short param1, s8 param2);
     // TODO: Verify params
