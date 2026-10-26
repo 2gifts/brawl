@@ -10448,6 +10448,54 @@ mo_melee/sora_melee/gr/gr_gimmick_spring.cpp:
 	.text       start:0x0026FC6C end:0x00270838
 	.ctors      start:0x0000030C end:0x00000310
 
+mo_melee/sora_melee/gr/gr_gimmick_area_common.cpp:
+	.text       start:0x00270838 end:0x002709D8
+	.data       start:0x00057A20 end:0x00057C28
+
+mo_melee/sora_melee/gr/gr_visible_production_fade.cpp:
+	.text       start:0x002709D8 end:0x00270EF4
+	.rodata     start:0x00004448 end:0x00004450
+	.data       start:0x00057C28 end:0x00057D18
+
+mo_melee/sora_melee/gr/gr_visible_production_effect.cpp:
+	.text       start:0x00270EF4 end:0x00271170
+	.rodata     start:0x00004450 end:0x00004460
+	.data       start:0x00057D18 end:0x00057DA8
+
+mo_melee/sora_melee/gr/gr_visible_production_sound_effect.cpp:
+	.text       start:0x00271170 end:0x002714A4
+	.rodata     start:0x00004460 end:0x00004470
+	.data       start:0x00057DA8 end:0x00057EE8
+
+mo_melee/sora_melee/gr/gr_visible_production_materiaal_motion.cpp:
+	.text       start:0x002714A4 end:0x00271748
+	.rodata     start:0x00004470 end:0x00004480
+	.data       start:0x00057EE8 end:0x00057F70
+
+mo_melee/sora_melee/gr/gr_hit_circle_observer.cpp:
+	.text       start:0x00271748 end:0x00271BF0
+	.data       start:0x00057F70 end:0x00058030
+
+mo_melee/sora_melee/gr/gr_hit_circle_observer_group.cpp:
+	.text       start:0x00271BF0 end:0x00271FFC
+	.rodata     start:0x00004480 end:0x00004488
+
+mo_melee/sora_melee/gr/gr_hit_circle_observer_team.cpp:
+	.text       start:0x00271FFC end:0x00272420
+	.rodata     start:0x00004488 end:0x00004490
+	.data       start:0x00058030 end:0x00058060
+
+mo_melee/sora_melee/gr/gr_hit_circle_subject.cpp:
+	.text       start:0x00272420 end:0x002725CC
+	.rodata     start:0x00004490 end:0x00004498
+	.data       start:0x00058060 end:0x000580C0
+	.bss        start:0x00006148 end:0x00006150
+
+mo_melee/sora_melee/gr/gr_adventure_move_ground.cpp:
+	.text       start:0x002725CC end:0x00272CF0
+	.rodata     start:0x00004498 end:0x000044C8
+	.data       start:0x000580C0 end:0x00058380
+
 mo_melee/sora_melee/gr/gr_adventure_motion_ground.cpp:
 	.text       start:0x00272CF0 end:0x00274078
 	.ctors      start:0x00000310 end:0x00000314
