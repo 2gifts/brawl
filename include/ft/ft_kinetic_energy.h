@@ -9,20 +9,26 @@
 // Only the members that the REL code touches directly are modelled; the rest of the
 // classes live in sora_melee.
 
+// Converts animation translation into planar fighter velocity.
 class ftKineticEnergyMotion : public soKineticEnergyNormal {
 public:
-#ifdef FT_MODULE_BUILDER
     ftKineticEnergyMotion(); // sora_melee
-#endif
-#ifdef FT_MODULE_BUILDER
+#ifdef FT_KINETIC_MOTION_IMPLEMENTATION
+    virtual ~ftKineticEnergyMotion();
+#elif defined(FT_MODULE_BUILDER)
     virtual ~ftKineticEnergyMotion() { }
 #endif
+    virtual void resetEnergy(int mode, Vec2f* speed, Vec3f*, soModuleAccesser*);
+    virtual void updateEnergy(soModuleAccesser*);
+
     int m_motionMode; // +0x34
-    u32 unk38;
-    float unk3C;
-    float unk40;
-    u8 unk44[0xc];
+    float m_facing; // +0x38; reset snapshots facing, selected modes read it live.
+    float m_rotation; // +0x3C; radians, also written by launch status processes.
+    float m_speedMul; // +0x40; scales all three animation-translation components.
+    Vec2f m_prevMotionSpeed; // +0x44; used to apply changes in animation velocity.
+    bool m_hasPrevMotionSpeed; // +0x4C
 };
+static_assert(sizeof(ftKineticEnergyMotion) == 0x50, "Motion energy extent");
 
 // MATCH-ONLY: declaration order keeps shared controller RTTI before motion RTTI.
 #include <ft/ft_kinetic_energy_controller.h>
