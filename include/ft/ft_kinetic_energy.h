@@ -27,18 +27,24 @@ public:
 // MATCH-ONLY: declaration order keeps shared controller RTTI before motion RTTI.
 #include <ft/ft_kinetic_energy_controller.h>
 
+// Fighter braking modes share the normal energy's speed, brake and limit vectors.
 class ftKineticEnergyStop : public soKineticEnergyNormal {
 public:
-#ifdef FT_MODULE_BUILDER
     ftKineticEnergyStop(); // sora_melee
-#endif
-#ifdef FT_MODULE_BUILDER
+#ifdef FT_KINETIC_STOP_IMPLEMENTATION
+    virtual ~ftKineticEnergyStop();
+#elif defined(FT_MODULE_BUILDER)
     virtual ~ftKineticEnergyStop() { }
 #endif
-    void setBrake(Vec2f* v) { m_brakeX = v->m_x; m_brakeY = v->m_y; }
-    float m_brakeX;
-    float m_brakeY;
+    virtual void resetEnergy(int type, Vec2f* speed, Vec3f*, soModuleAccesser*);
+    virtual void updateEnergy(soModuleAccesser*);
+
+    s32 m_resetType; // +0x34; constructor/reset use -1 as the inactive mode.
+    // HYPOTHESIS: caller-facing meanings of these delayed speed-scale flags.
+    bool unk38;
+    bool unk39;
 };
+static_assert(sizeof(ftKineticEnergyStop) == 0x3C, "Stopping energy extent");
 
 class ftKineticEnergyDamage : public ftKineticEnergyStop {
 public:
