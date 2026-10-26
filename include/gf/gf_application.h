@@ -31,7 +31,7 @@ public:
     void* unk10C; // 0x10C HYPOTHESIS: the capture destination (IfSnapSaveTask)
     u8 unk110[0x4];
     gfCallBackList m_114;
-    u8 unk118[0x4];
+    gfCallBackList unk118;
     vcBootParam m_bootParam;
 
     gfApplication();
