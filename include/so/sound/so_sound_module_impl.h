@@ -68,7 +68,7 @@ public:
     virtual bool getPlayHitSEFlag();
     virtual void playHitSE(float, void*);
     virtual void playDamageSE(u32 index1, u32 index2);
-    virtual void setSEVol(float, int, int);
+    virtual void setSEVol(int handle, float volume, int); // HYPOTHESIS: order from the argument evaluation in Ike Quick Draw.
     virtual float getSEVol(int);
     virtual void setSEPitch(float);
     virtual void setSEPitch(u32, double);
@@ -120,7 +120,7 @@ public:
     virtual bool getPlayHitSEFlag();
     virtual void playHitSE(float, void*);
     virtual void playDamageSE(u32 index1, u32 index2);
-    virtual void setSEVol(float, int, int);
+    virtual void setSEVol(int handle, float volume, int); // HYPOTHESIS: order from the argument evaluation in Ike Quick Draw.
     virtual float getSEVol(int);
     virtual void setSEPitch(float);
     virtual void setSEPitch(u32, double);
