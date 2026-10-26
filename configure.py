@@ -2583,6 +2583,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_common_data_accesser.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_value_accesser.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_area_module_impl.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_combo_module_impl.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_controller_module_impl.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_damage_effector_impl.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_damage_transactor_impl.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_switch_decide_module_impl.cpp"),

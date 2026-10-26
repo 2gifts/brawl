@@ -4865,6 +4865,14 @@ mo_melee/sora_melee/so/so_array_base_soArrayVectorAbstract_Q216ftAreaModuleImpl1
 mo_melee/sora_melee/so/so_array_vector_thunks_l_32.cpp:
 	.text       start:0x0014FBB0 end:0x0014FBD8
 
+mo_melee/sora_melee/ft/ft_combo_module_impl.cpp:
+	.text       start:0x0014FBD8 end:0x00150320
+	.data       start:0x0002D598 end:0x0002D630
+
+mo_melee/sora_melee/ft/ft_controller_module_impl.cpp:
+	.text       start:0x00150320 end:0x00151140
+	.data       start:0x0002D630 end:0x0002D7E8
+
 mo_melee/sora_melee/ft/ft_damage_effector_impl.cpp:
 	.text       start:0x00151140 end:0x00151770
 	.ctors      start:0x00000080 end:0x00000084
