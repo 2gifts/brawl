@@ -1,3 +1,4 @@
+#define MT_VEC2F_LENGTH_SQ_SINGLE_EXPR
 #define MT_VEC2F_MUL_ASSIGN_DIRECT // MATCH-ONLY: native compound scaling updates components directly.
 #define MT_VEC2F_PLAIN_BASE // MATCH-ONLY: returned vectors copy as word pairs, assignments as floats.
 #define FT_KINETIC_STOP_IMPLEMENTATION
@@ -5,6 +6,18 @@
 #include <so/so_kinetic_utility.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
+
+// Cancel movement into the wall that faces the current horizontal velocity.
+// HYPOTHESIS: original inline helper name; the two update branches share this block.
+static inline void cancelSpeedIntoWall(soKineticEnergyNormal* energy, soModuleAccesser* acc) {
+    int touch = acc->getGroundModule().getTouchFlag(0);
+    Vec2f current = energy->getSpeed();
+    if (current.m_x > 0.0f) {
+        if (touch & 4) energy->m_speed = Vec2f(0.0f, 0.0f);
+    } else {
+        if (touch & 2) energy->m_speed = Vec2f(0.0f, 0.0f);
+    }
+}
 
 ftKineticEnergyStop::ftKineticEnergyStop() :
     soKineticEnergyNormal(Vec2f(0.0f, 0.0f), Vec2f(0.0f, 0.0f),
@@ -153,13 +166,7 @@ void ftKineticEnergyStop::updateEnergy(soModuleAccesser* acc) {
                     m_brake = Vec2f(baseBrake * mul, 0.0f);
                     m_accel = Vec2f(0.0f, 0.0f);
                     m_speedLimit = Vec2f(soValueAccesser::getConstantFloat(acc, 0x7DB, 0), 0.0f);
-                    int touch = acc->getGroundModule().getTouchFlag(0);
-                    Vec2f current = getSpeed();
-                    if (current.m_x > 0.0f) {
-                        if (touch & 4) m_speed = Vec2f(0.0f, 0.0f);
-                    } else {
-                        if (touch & 2) m_speed = Vec2f(0.0f, 0.0f);
-                    }
+                    cancelSpeedIntoWall(this, acc);
                     useNormalBrake = true;
                 } else {
                     brake = soValueAccesser::getConstantFloat(acc, 0xCDE, 0);
@@ -170,7 +177,8 @@ void ftKineticEnergyStop::updateEnergy(soModuleAccesser* acc) {
             case 3:
                 if (acc->getSituationModule().getKind() == 0) {
                     float mul = soValueAccesser::getConstantFloat(acc, 0xCDD, 0);
-                    m_brake = Vec2f(soValueAccesser::getConstantFloat(acc, 0xBBC, 0) * mul, 0.0f);
+                    float baseBrake = soValueAccesser::getConstantFloat(acc, 0xBBC, 0);
+                    m_brake = Vec2f(baseBrake * mul, 0.0f);
                     m_accel = Vec2f(0.0f, 0.0f);
                     m_speedLimit = Vec2f(soValueAccesser::getConstantFloat(acc, 0x7DB, 0), 0.0f);
                     useNormalBrake = true;
@@ -184,16 +192,11 @@ void ftKineticEnergyStop::updateEnergy(soModuleAccesser* acc) {
             case 21:
                 if (acc->getSituationModule().getKind() == 0) {
                     float mul = soValueAccesser::getConstantFloat(acc, 0xCB7, 0);
-                    m_brake = Vec2f(soValueAccesser::getConstantFloat(acc, 0xBBC, 0) * mul, 0.0f);
+                    float baseBrake = soValueAccesser::getConstantFloat(acc, 0xBBC, 0);
+                    m_brake = Vec2f(baseBrake * mul, 0.0f);
                     m_accel = Vec2f(0.0f, 0.0f);
                     m_speedLimit = Vec2f(soValueAccesser::getConstantFloat(acc, 0x7DB, 0), 0.0f);
-                    int touch = acc->getGroundModule().getTouchFlag(0);
-                    Vec2f current = getSpeed();
-                    if (current.m_x > 0.0f) {
-                        if (touch & 4) m_speed = Vec2f(0.0f, 0.0f);
-                    } else {
-                        if (touch & 2) m_speed = Vec2f(0.0f, 0.0f);
-                    }
+                    cancelSpeedIntoWall(this, acc);
                     useNormalBrake = true;
                 } else {
                     float airBrake = soValueAccesser::getConstantFloat(acc, 0xCB6, 0);
@@ -211,8 +214,8 @@ void ftKineticEnergyStop::updateEnergy(soModuleAccesser* acc) {
                 if (remainingSpeed < 0.0f) {
                     if (m_resetType == 10) {
                         Vec2f accel = getSpeed();
-                        accel *= -1.0f;
                         Vec2f target = m_speedTarget;
+                        accel *= -1.0f;
                         // Independent tests are intentional: crossing zero changes the second test.
                         if (accel.m_x > 0.0f) accel.m_x -= target.m_x;
                         if (accel.m_x < 0.0f) accel.m_x += target.m_x;
@@ -232,7 +235,8 @@ void ftKineticEnergyStop::updateEnergy(soModuleAccesser* acc) {
         break;
     }
     case 7: {
-        float speedX = __fabs(getSpeed().m_x);
+        double absoluteSpeedX = __fabs(getSpeed().m_x);
+        float speedX = absoluteSpeedX;
         if (speedX > soValueAccesser::getConstantFloat(acc, 0xBD5, 0)) {
             m_brake = Vec2f(soValueAccesser::getConstantFloat(acc, 0xC47, 0), 0.0f);
         } else {
@@ -247,7 +251,7 @@ void ftKineticEnergyStop::updateEnergy(soModuleAccesser* acc) {
             acc->getMotionModule().updateTransMoveSpeed();
             motionSpeed = acc->getMotionModule().getTransMoveSpeed();
             motionSpeed.m_x = motionSpeed.m_z * acc->getPostureModule().getLr();
-            m_accel = Vec2f(motionSpeed) - getSpeed();
+            m_accel = Vec2f(motionSpeed.m_x, motionSpeed.m_y) - getSpeed();
             m_brake = Vec2f(0.0f, 0.0f);
         }
         break;
@@ -258,14 +262,14 @@ void ftKineticEnergyStop::updateEnergy(soModuleAccesser* acc) {
             acc->getMotionModule().updateTransMoveSpeed();
             motionSpeed = acc->getMotionModule().getTransMoveSpeed();
             motionSpeed.m_x = motionSpeed.m_z * acc->getPostureModule().getLr();
-            m_accel = Vec2f(motionSpeed) - getSpeed();
+            m_accel = Vec2f(motionSpeed.m_x, motionSpeed.m_y) - getSpeed();
             m_brake = Vec2f(0.0f, 0.0f);
         } else {
             int frame = soValueAccesser::getConstantInt(acc, 0x5A5D, 0);
             if (acc->getMotionModule().getFrame() > frame) {
-                float mul = soValueAccesser::getConstantFloat(acc, 0xD74, 0);
-                float brake = soValueAccesser::getConstantFloat(acc, 0xBBC, 0) * mul;
-                m_brake = Vec2f(soValueAccesser::getConstantFloat(acc, 0xD75, 0) * brake, 0.0f);
+                m_brake = Vec2f(soValueAccesser::getConstantFloat(acc, 0xD75, 0) *
+                    (soValueAccesser::getConstantFloat(acc, 0xBBC, 0) *
+                     soValueAccesser::getConstantFloat(acc, 0xD74, 0)), 0.0f);
             }
         }
         break;
