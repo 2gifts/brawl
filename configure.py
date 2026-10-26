@@ -5136,6 +5136,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_info.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_kinetic_energy_controller.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_kinetic_energy_gravity.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_kinetic_energy_stop.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_marth_status_uniq_process_special_n_start.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_marth_status_uniq_process_special_n_loop.cpp"),
             Object(Matching, "mo_melee/sora_melee/ft/ft_marth_status_uniq_process_special_n_end.cpp"),
