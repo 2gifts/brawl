@@ -10306,6 +10306,20 @@ mo_melee/sora_melee/so/so_array_list_members_Ul_32_part1.cpp:
 mo_melee/sora_melee/ai/ai_param.cpp:
 	.text       start:0x0021CD58 end:0x00220150
 
+mo_melee/sora_melee/st/st_positions.cpp:
+	.text       start:0x00225910 end:0x00227BEC
+	.rodata     start:0x000034C0 end:0x000036F0
+	.data       start:0x0004A430 end:0x0004A728
+
+mo_melee/sora_melee/st/st_shadow.cpp:
+	.text       start:0x002283F0 end:0x0022A914
+	.rodata     start:0x00003708 end:0x00003748
+	.data       start:0x0004A730 end:0x0004A818
+
+mo_melee/sora_melee/st/st_area_manager.cpp:
+	.text       start:0x0022A914 end:0x0022B544
+	.data       start:0x0004A818 end:0x0004A8B0
+
 mo_melee/sora_melee/st/st_result.cpp:
 	.text       start:0x0022B544 end:0x0022C2D0
 	.ctors      start:0x000002A4 end:0x000002A8
