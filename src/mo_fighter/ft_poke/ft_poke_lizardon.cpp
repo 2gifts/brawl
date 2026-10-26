@@ -14,6 +14,8 @@
 #include <ft/ft_owner.h>
 #include <so/so_slow.h>
 
+#include <so/glow/so_glow_module_simple.h>
+
 #define FT_BC ftPokeLizardonBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
@@ -627,7 +629,7 @@ void* fn_116_45E8(void* p, s16 flags);
 void* fn_116_4E4C(void* p, s16 flags);
 void* fn_116_4EB8(void* p, s16 flags);
 void* fn_116_3408(void* p, s16 flags);
-void* fn_27_C31CC(void* p, s16 flags);
+
 void* fn_27_63EBC(void* p, s16 flags);
 void* fn_27_5C674(void* p, s16 flags);
 void* fn_27_6880C(void* p, s16 flags);
@@ -716,7 +718,7 @@ void* fn_116_6B20(void* p, s16 flags) {
 }
 void* fn_116_394C(void* p, s16 flags) {
     if (p != 0) {
-        fn_27_C31CC(p, -1);
+        static_cast<soGlowModuleSimple*>(p)->soGlowModuleSimple::~soGlowModuleSimple();
         if (flags > 0) { ::operator delete(p); }
     }
     return p;

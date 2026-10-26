@@ -17,6 +17,8 @@
 #include <so/so_value_accesser.h>
 #include <ft/iceclimber/ft_iceclimber_transactor.h>
 
+#include <so/glow/so_glow_module_simple.h>
+
 #define FT_BC ftPopoBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
@@ -554,7 +556,6 @@ bool fn_105_12EB0(u8* p, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, long
 
 // Sub-object destructor wrappers: destroy one base sub-object (flag -1 or 0), then delete when flags > 0.
 extern "C" {
-void* fn_27_C31CC(void* p, s16 flags);
 void* fn_27_63EBC(void* p, s16 flags);
 void* fn_27_5C674(void* p, s16 flags);
 void* fn_27_5AE44(void* p, s16 flags);
@@ -574,7 +575,7 @@ void* fn_105_3220(void* p, s32 flags) { if (p != 0) { fn_105_327C(p, -1); if ((s
 void* fn_105_32EC(void* p, s32 flags) { if (p != 0) { fn_105_3348(p, 0); if ((s16)flags > 0) { ::operator delete(p); } } return p; } // soLineHierarchy dt
 void* fn_105_3430(void* p, s16 flags) { if (p != 0) { fn_105_3490((u8*)p + 0x4, -1); if ((s16)flags > 0) { ::operator delete(p); } } return p; } // wnInstanceHolder dt
 void* fn_105_36B4(void* p, s32 flags) { if (p != 0) { __dt__15soKineticEnergyFv(p, 0); if ((s16)flags > 0) { ::operator delete(p); } } return p; } // soKineticEnergyRotNormal dt
-void* fn_105_3A24(void* p, s32 flags) { if (p != 0) { fn_27_C31CC(p, -1); if ((s16)flags > 0) { ::operator delete(p); } } return p; } // soGlowModuleBuilder dt
+void* fn_105_3A24(void* p, s32 flags) { if (p != 0) { static_cast<soGlowModuleSimple*>(p)->soGlowModuleSimple::~soGlowModuleSimple(); if ((s16)flags > 0) { ::operator delete(p); } } return p; } // soGlowModuleBuilder dt
 void* fn_105_3A80(void* p, s32 flags) { if (p != 0) { fn_27_63EBC(p, -1); if ((s16)flags > 0) { ::operator delete(p); } } return p; } // soReflectModuleBuilder dt
 void* fn_105_3ADC(void* p, s32 flags) { if (p != 0) { fn_27_5C674(p, -1); if ((s16)flags > 0) { ::operator delete(p); } } return p; } // soSlowModuleBuilder dt
 void* fn_105_3BC4(void* p, s32 flags) { if (p != 0) { __dt__19soGeneralWorkSimpleFv((u8*)p + 0x38, -1); if ((s16)flags > 0) { ::operator delete(p); } } return p; } // soGeneralWorkBuilder dt

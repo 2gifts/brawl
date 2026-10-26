@@ -23,6 +23,8 @@
 #include <mt/mt_matrix.h>
 #include <math.h>
 
+#include <so/glow/so_glow_module_simple.h>
+
 #define FT_BC ftSnakeBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
@@ -1221,7 +1223,7 @@ void* fn_122_12BB4(void* p, s16 flags);
 void* fn_122_3320(void* p, s16 flags);
 void* fn_27_D3B50(void* p, s16 flags);
 void* fn_27_64874(void* p, s16 flags);
-void* fn_27_C31CC(void* p, s16 flags);
+
 void* fn_27_63EBC(void* p, s16 flags);
 void* fn_27_5C674(void* p, s16 flags);
 void* fn_27_5AE44(void* p, s16 flags);
@@ -1292,7 +1294,7 @@ void* fn_122_3958(void* p, s16 flags) {
 }
 void* fn_122_3BC4(void* p, s16 flags) {
     if (p != 0) {
-        fn_27_C31CC(p, -1);
+        static_cast<soGlowModuleSimple*>(p)->soGlowModuleSimple::~soGlowModuleSimple();
         if (flags > 0) {
             ::operator delete(p);
         }
