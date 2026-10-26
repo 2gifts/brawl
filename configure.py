@@ -2479,6 +2479,12 @@ config.libs = [
         "cflags": cflags_rel,
         "host": False,
         "objects": [
+            Object(NonMatching, "mo_adv_stage/st_adventure_info_basis.cpp"),
+            Object(NonMatching, "mo_adv_stage/st_adventure_info_contact.cpp"),
+            Object(NonMatching, "mo_adv_stage/st_adventure_info_emboss.cpp"),
+            Object(NonMatching, "mo_adv_stage/st_adventure_info_emcorps.cpp"),
+            Object(NonMatching, "mo_adv_stage/st_adventure_info_emzako.cpp"),
+            Object(NonMatching, "mo_adv_stage/st_adventure_info_mediation.cpp"),
             Object(NonMatching, "mo_adv_stage/gr_adventure_background.cpp"),
             Object(NonMatching, "mo_adv_stage/gr_adventure_punch_slider.cpp"),
             Object(NonMatching, "mo_adv_stage/gr_adventure_static.cpp"),

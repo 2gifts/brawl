@@ -11,6 +11,30 @@ global_destructor_chain.c:
 	.dtors      start:0x00000000 end:0x00000008
 	.bss        start:0x00000000 end:0x00000004
 
+mo_adv_stage/st_adventure_info_basis.cpp:
+	.text       start:0x000155A0 end:0x000156DC
+
+mo_adv_stage/st_adventure_info_contact.cpp:
+	.text       start:0x000156DC end:0x00015DA0
+	.rodata     start:0x00000220 end:0x00000230
+
+mo_adv_stage/st_adventure_info_emboss.cpp:
+	.text       start:0x00015DA0 end:0x000168A0
+	.data       start:0x00003528 end:0x000035E8
+
+mo_adv_stage/st_adventure_info_emcorps.cpp:
+	.text       start:0x000168A0 end:0x0001693C
+	.data       start:0x000035E8 end:0x00003630
+
+mo_adv_stage/st_adventure_info_emzako.cpp:
+	.text       start:0x0001693C end:0x00016DD8
+	.data       start:0x00003630 end:0x000036A0
+
+mo_adv_stage/st_adventure_info_mediation.cpp:
+	.text       start:0x00016DD8 end:0x00017478
+	.data       start:0x000036A0 end:0x00003750
+	.bss        start:0x000007C0 end:0x000007C8
+
 mo_adv_stage/gr_adventure_background.cpp:
 	.text       start:0x00019740 end:0x0001A240
 	.ctors      start:0x00000020 end:0x00000024
