@@ -284,6 +284,33 @@ mo_melee/sora_melee/so/controller/so_controller_impl.cpp:
 	.rodata     start:0x00000750 end:0x000007B8
 	.data       start:0x00006050 end:0x00006168
 
+mo_melee/sora_melee/so/visibility/so_visibility_module_simple.cpp:
+	.text       start:0x0005AD88 end:0x0005B248
+	.data       start:0x00006168 end:0x00006248
+
+mo_melee/sora_melee/so/visibility/so_visibility_module_impl.cpp:
+	.text       start:0x0005B248 end:0x0005BC74
+	.data       start:0x00006248 end:0x00006300
+
+mo_melee/sora_melee/so/so_world.cpp:
+	.text       start:0x0005BC74 end:0x0005BCD0
+	.rodata     start:0x000007C0 end:0x000007C8
+
+mo_melee/sora_melee/so/so_slow.cpp:
+	.text       start:0x0005BCD0 end:0x0005BED0
+	.rodata     start:0x000007C8 end:0x000007D8
+	.data       start:0x00006300 end:0x00006388
+
+mo_melee/sora_melee/so/slow/so_slow_module_impl.cpp:
+	.text       start:0x0005BED0 end:0x0005C600
+	.rodata     start:0x000007D8 end:0x000007E8
+	.data       start:0x00006388 end:0x000064A0
+
+mo_melee/sora_melee/so/slow/so_slow_module_simple.cpp:
+	.text       start:0x0005C600 end:0x0005C7AC
+	.rodata     start:0x000007E8 end:0x000007F0
+	.data       start:0x000064A0 end:0x00006550
+
 mo_melee/sora_melee/so/damage/so_damage_module_impl.cpp:
 	.text       start:0x0005C7AC end:0x000605AC
 	.rodata     start:0x000007F0 end:0x00000868
