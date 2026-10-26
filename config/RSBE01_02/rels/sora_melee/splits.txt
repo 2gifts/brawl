@@ -10364,6 +10364,52 @@ mo_melee/sora_melee/st/st_loader_local_adventure.cpp:
 	.text       start:0x00241B14 end:0x00241E30
 	.ctors      start:0x000002D0 end:0x000002D4
 
+mo_melee/sora_melee/st/st_operator_rule.cpp:
+	.text       start:0x00247D98 end:0x00248C90
+	.rodata     start:0x00004008 end:0x00004028
+	.data       start:0x0004EDD8 end:0x0004F050
+
+mo_melee/sora_melee/st/st_operator_rule_time.cpp:
+	.text       start:0x0024DFA4 end:0x0024E71C
+	.rodata     start:0x00004058 end:0x00004070
+	.data       start:0x0004F488 end:0x0004F570
+
+mo_melee/sora_melee/st/st_operator_rule_homerun.cpp:
+	.text       start:0x0024E71C end:0x0024F644
+	.rodata     start:0x00004070 end:0x00004090
+	.data       start:0x0004F570 end:0x0004F680
+
+mo_melee/sora_melee/st/st_operator_rule_stage_end_request.cpp:
+	.text       start:0x0024F644 end:0x0024F820
+	.data       start:0x0004F680 end:0x0004F778
+
+mo_melee/sora_melee/st/st_operator_rule_edit_protocol.cpp:
+	.text       start:0x0024F820 end:0x00250DB8
+	.rodata     start:0x00004090 end:0x000040C8
+	.data       start:0x0004F778 end:0x0004F920
+
+mo_melee/sora_melee/st/st_operator_rule_vsresult.cpp:
+	.text       start:0x00250DB8 end:0x00250F50
+	.data       start:0x0004F920 end:0x0004FA10
+
+mo_melee/sora_melee/st/st_operator_rule_adventure.cpp:
+	.text       start:0x00250F50 end:0x002525C0
+	.rodata     start:0x000040C8 end:0x000040E0
+	.data       start:0x0004FA10 end:0x0004FB38
+
+mo_melee/sora_melee/st/st_operator_rule_targetbreak.cpp:
+	.text       start:0x002525C0 end:0x002530D4
+	.rodata     start:0x000040E0 end:0x00004100
+	.data       start:0x0004FB38 end:0x0004FE60
+
+mo_melee/sora_melee/st/st_operator_rule_kumite.cpp:
+	.text       start:0x002530D4 end:0x002544C8
+	.rodata     start:0x00004100 end:0x00004108
+	.data       start:0x0004FE60 end:0x00052AC0
+
+mo_melee/sora_melee/st/st_operator_nocontest.cpp:
+	.text       start:0x002544C8 end:0x002544DC
+
 mo_melee/sora_melee/st/st_operator_debug_intrusion.cpp:
 	.text       start:0x002544DC end:0x0025458C
 	.ctors      start:0x000002E0 end:0x000002E4
