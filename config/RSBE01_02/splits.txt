@@ -697,6 +697,11 @@ sora/cm/cm_controller_ai.cpp:
 	.sbss       start:0x805A0288 end:0x805A0290
 	.sdata2     start:0x805A1E80 end:0x805A1F18
 
+sora/cm/cm_controller_ai_param.cpp:
+	.text       start:0x800A2CE0 end:0x800A3764
+	.data       start:0x80454D88 end:0x80454DA0
+	.sdata2     start:0x805A1F18 end:0x805A1F60
+
 sora/cm/cm_controller_fighter_target.cpp:
 	.text       start:0x800A3764 end:0x800A3F70
 	.data       start:0x80454DA0 end:0x80454DD8
