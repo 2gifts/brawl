@@ -1,3 +1,4 @@
+#define SO_BUILD_DATA_SLOPE_LIMIT_EXTERNAL
 // MATCH-ONLY: retain the native one-word null-input result.
 #define IP_INPUT_BUTTON_RAW
 #define WN_WEAPON_BUILDER
@@ -57,11 +58,16 @@ void wnMarioMantle::activate(int founderTaskId, int resourceId, int team, int si
     desc.unk40 = 0;
     desc.unk44 = 0x35F;
     desc.unk48 = 0;
-    desc.flagsHighPair = 3;
-    desc.flagsMidPair = 0;
-    desc.flagsBit3 = 1;
-    desc.flagsLow = 0;
-    desc.unk4DHigh = 0;
+    desc.flagBit7 = true;
+    desc.flagBit6 = true;
+    desc.flagBit5 = false;
+    desc.flagBit4 = false;
+    desc.flagBit3 = true;
+    desc.flagBit2 = false;
+    desc.flagBit1 = false;
+    desc.flagBit0 = false;
+    desc.flag4DBit7 = false;
+    desc.flag4DBit6 = false;
     Weapon::activate(&desc);
     soMotionChangeParam motion;
     motion.m_kind = situationKind != 0 ? 1 : 0;

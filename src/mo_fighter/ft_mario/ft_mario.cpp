@@ -591,36 +591,6 @@ void* fn_91_A644(ftVirtualNodeMatrixPoolImpl* p) { return p->ftVirtualNodeMatrix
 void* fn_91_A64C(ftVirtualNodeMatrixPoolImpl* p) { return p->ftVirtualNodeMatrixPoolImpl::getHitMatrix(); }
 }
 
-// soGeneralWorkSimple work-area methods, in map order (flags, floats, ints).
-extern "C" {
-u32 fn_91_A6EC(soGeneralWorkSimple* p) { return p->soGeneralWorkSimple::getFlagWorkSize(); }
-bool fn_91_A768(const soGeneralWorkSimple* p, u32 mask, u32 idx) { return p->soGeneralWorkSimple::isFlag(mask, idx); }
-void fn_91_A784(soGeneralWorkSimple* p, u32 mask, u32 idx) { p->soGeneralWorkSimple::offFlag(mask, idx); }
-void fn_91_A79C(soGeneralWorkSimple* p, u32 idx) { p->soGeneralWorkSimple::clearFlag(idx); }
-void fn_91_A7B0(soGeneralWorkSimple* p, u32 mask, u32 idx) { p->soGeneralWorkSimple::onFlag(mask, idx); }
-u32 fn_91_A7C8(soGeneralWorkSimple* p) { return p->soGeneralWorkSimple::getFloatWorkSize(); }
-// MATCH-ONLY: divFloatWork is too large for MWCC to inline here (it emits a tail call to a weak copy that the target
-// does not have), so its body is written out.
-void fn_91_A7D0(soGeneralWorkSimple* p, float v, u32 idx) {
-    if (v == 0.0f) {
-        return;
-    }
-    p->m_floatWorks[idx] /= v;
-}
-void fn_91_A7F8(soGeneralWorkSimple* p, float v, u32 idx) { p->soGeneralWorkSimple::mulFloatWork(v, idx); }
-void fn_91_A810(soGeneralWorkSimple* p, float v, u32 idx) { p->soGeneralWorkSimple::subFloatWork(v, idx); }
-void fn_91_A828(soGeneralWorkSimple* p, float v, u32 idx) { p->soGeneralWorkSimple::addFloatWork(v, idx); }
-void fn_91_A840(soGeneralWorkSimple* p, float v, u32 idx) { p->soGeneralWorkSimple::setFloatWork(v, idx); }
-float fn_91_A850(const soGeneralWorkSimple* p, u32 idx) { return p->soGeneralWorkSimple::getFloatWork(idx); }
-void fn_91_A868(soGeneralWorkSimple* p, u32 idx) { p->soGeneralWorkSimple::decIntWork(idx); }
-void fn_91_A880(soGeneralWorkSimple* p, u32 idx) { p->soGeneralWorkSimple::incIntWork(idx); }
-void fn_91_A898(soGeneralWorkSimple* p, s32 v, u32 idx) { p->soGeneralWorkSimple::divIntWork(v, idx); }
-void fn_91_A8B8(soGeneralWorkSimple* p, s32 v, u32 idx) { p->soGeneralWorkSimple::mulIntWork(v, idx); }
-void fn_91_A8D0(soGeneralWorkSimple* p, s32 v, u32 idx) { p->soGeneralWorkSimple::subIntWork(v, idx); }
-void fn_91_A8E8(soGeneralWorkSimple* p, s32 v, u32 idx) { p->soGeneralWorkSimple::addIntWork(v, idx); }
-void fn_91_A900(soGeneralWorkSimple* p, s32 v, u32 idx) { p->soGeneralWorkSimple::setIntWork(v, idx); }
-}
-
 // Kinetic energy and builder members emitted in this unit.
 extern "C" {
 void fn_91_CD00(soKineticEnergyNormal* p) { p->soKineticEnergyNormal::offConsiderGroundFriction(); }
