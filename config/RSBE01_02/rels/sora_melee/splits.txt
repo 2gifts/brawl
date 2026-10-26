@@ -1392,6 +1392,21 @@ mo_melee/sora_melee/so/so_array_vector_thunks_21soDisposeInstanceTerm_255.cpp:
 mo_melee/sora_melee/so/so_array_base_soArrayVectorAbstract_21soDisposeInstanceTerm_B144C.cpp:
 	.text       start:0x000B144C end:0x000B1454
 
+mo_melee/sora_melee/so/camera/so_camera_subject.cpp:
+	.text       start:0x000B15E8 end:0x000B215C
+	.rodata     start:0x00000DB0 end:0x00000DC0
+	.data       start:0x00016D08 end:0x00016D40
+
+mo_melee/sora_melee/so/camera/so_camera_module_impl.cpp:
+	.text       start:0x000B215C end:0x000B4698
+	.rodata     start:0x00000DC0 end:0x00000DE8
+	.data       start:0x00016D40 end:0x00016EB8
+
+mo_melee/sora_melee/so/camera/so_camera_module_simple.cpp:
+	.text       start:0x000B4698 end:0x000B5048
+	.rodata     start:0x00000DE8 end:0x00000E00
+	.data       start:0x00016EB8 end:0x00017020
+
 mo_melee/sora_melee/so/team/so_team_module_impl.cpp:
 	.text       start:0x000B5048 end:0x000B62E4
 	.data       start:0x00017020 end:0x000171D4
