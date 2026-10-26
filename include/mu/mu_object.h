@@ -29,7 +29,8 @@ struct MuAnimIdxData {
 class MuObject {
 
 public:
-    char unk[0x4];
+    u32 m_flag : 1; // HYPOTHESIS: set while the object keeps its own node visibility (MenuRoot skips it)
+    u32 m_rest : 31;
     nw4r::g3d::ResFile m_resFile;
     nw4r::g3d::ResMdl m_resMdl;
     nw4r::g3d::ScnMdl* m_scnMdl;
