@@ -14,10 +14,6 @@
 // subject arrays are declared in em/em_module_arrays.h.)
 FT_DOL_ARRAY_VECTOR(soInterpolation<Vec3f>, 25);
 
-// HYPOTHESIS: the shared soArticleMediatorNull instance of sora_melee (0x18 bytes of its bss): an enemy without
-// articles of its own hands the Enemy constructor this null mediator.
-extern char lbl_27_bss_1F0[];
-
 class emFalconflyer : public Enemy {
     soArrayVector<soInterpolation<Vec3f>, 25> m_interpolations; // 0x5310, posture module
     soArrayVector<soAreaInstance, 7> m_areaInstances;           // 0x57CC, area module

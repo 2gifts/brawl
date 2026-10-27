@@ -63,11 +63,11 @@ void wnemBotronProc::IronTouchGround(wnemSimple* wn, soModuleAccesser* acc) {
     wn->unk2214 = false;
     if (isFirstFrame) {
         wnemCommonProc::Report("call wnemBotronProc::IronTouchGround  \n");
-        // HYPOTHESIS: 0x2200/0x2204 and 0x21F8/0x21FC are the ball's speed and acceleration.
-        wn->unk2200 = 0.0f;
-        wn->unk2204 = -0.04f;
-        wn->unk21F8 = 0.0f;
-        wn->unk21FC = 0.2f;
+        // HYPOTHESIS: the ball rises at 0.2 and is pulled back down by 0.04.
+        wn->m_accel.m_x = 0.0f;
+        wn->m_accel.m_y = -0.04f;
+        wn->m_speed.m_x = 0.0f;
+        wn->m_speed.m_y = 0.2f;
         acc->getCollisionAttackModule().clearAll();
         wn->unk21B8 = false;
         wn->unk21BB = false;
@@ -97,9 +97,9 @@ void wnemBotronProc::IronTouchGround(wnemSimple* wn, soModuleAccesser* acc) {
     }
     // After a few frames on the ground the ball stops.
     if (wn->getFrameCounter(1) >= 4 && acc->getGroundModule().isTouch(grCollStatus::TouchMask(0xff), 0)) {
-        wn->unk2204 = 0.0f;
-        wn->unk2200 = 0.0f;
-        wn->unk21FC = 0.0f;
-        wn->unk21F8 = 0.0f;
+        wn->m_accel.m_y = 0.0f;
+        wn->m_accel.m_x = 0.0f;
+        wn->m_speed.m_y = 0.0f;
+        wn->m_speed.m_x = 0.0f;
     }
 }

@@ -21,16 +21,6 @@
 // emWeaponUtil::activeSimpleWeaponHolder. Everything else in this unit is the module storage and the template instances
 // of em/em_article_mediator.h.
 
-extern "C" {
-// Map name emWeaponManager::findWeapon (the weapon manager unit is not reconstructed yet): the managed wnemSimple of the
-// given owner task. HYPOTHESIS: the two other arguments (0xffff and 0) are wildcards of the search.
-wnemSimple* fn_41_2C198(emWeaponManager* manager, int ownerTaskId, u32, u32);
-// Map name wnemSwHolder::active: launches the article from the given position.
-// HYPOTHESIS: parameter roles, from what the Porky passes (compare fn_41_3091C, wnemSimple's activation).
-void fn_41_2D2A0(wnemSwHolder* article, Vec3f* pos, int team, float lr, int, int founderTaskId, int resourceId,
-                 emShotWork* work, float speed, bool flag, u32 life);
-}
-
 // HYPOTHESIS: the Porky statuses during which its weapon drags the model node along (no status names are known).
 static const int Porky_Status_WeaponHold0 = 0x20;
 static const int Porky_Status_WeaponHold1 = 0x25;
@@ -42,15 +32,6 @@ static const u32 Porky_Node_WeaponTranslate = 0x22;
 static const u32 Porky_Node_WeaponBase = 0x21;
 // HYPOTHESIS: the shot node from which a random-angle shot flies to the left.
 static const u32 Porky_ShotNodeMirrored = 13;
-
-// TODO(shared-patch): emShotParam's word at 0x4 (the weapon id the resource id is looked up with) and wnemSimple's word
-// at 0x2210 (its kind) are not declared in the shared headers yet ($B/E6/shared_patch.diff); read them here until then.
-static inline u32 getShotWeaponId(const emShotParam* param) {
-    return *reinterpret_cast<const u32*>(&param->unk0[4]);
-}
-static inline u32 getWeaponKind(const wnemSimple* weapon) {
-    return *reinterpret_cast<const u32*>(&weapon->unk2208[8]);
-}
 
 // ---- construction ---------------------------------------------------------------------------------------------------
 
@@ -110,9 +91,9 @@ bool emPorky::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAcces
     owner = moduleAccesser->m_stageObject;
     founderTaskId = owner->m_taskId;
     u32 life = soValueAccesser::getValueFloat(moduleAccesser, ValueFloat_LevelScale, 0);
-    fn_41_2D2A0(article, &pos, soExternalValueAccesser::getTeamNo(owner), lr, -1, founderTaskId,
-                enemy.getSimpleWeaponResourceID(getShotWeaponId(param)), &lbl_41_bss_504, param->m_speed, flag.m_value,
-                life);
+    article->active(&pos, soExternalValueAccesser::getTeamNo(owner), lr, -1, founderTaskId,
+                    enemy.getSimpleWeaponResourceID(param->m_weaponId), &lbl_41_bss_504, param->m_speed, flag.m_value,
+                    life);
     return false;
 }
 
@@ -128,9 +109,9 @@ void emPorky::updateNodeSRT() {
         emWeaponManager* manager;
         int taskId = moduleAccesser.getStageObject().m_taskId;
         manager = emWeaponManager::getInstance();
-        wnemSimple* weapon = fn_41_2C198(manager, taskId, 0xffff, 0);
+        wnemSimple* weapon = manager->findWeapon(taskId, 0xffff, 0);
         if (weapon != NULL) {
-            u32 kind = getWeaponKind(weapon);
+            u32 kind = weapon->m_weaponKind;
             // One of the two held kinds (an unsigned range check; the two-sided compare gives two branches).
             if (kind - Porky_WeaponKindHeld0 <= Porky_WeaponKindHeld1 - Porky_WeaponKindHeld0) {
                 Vec3f basePos(0.0f, 0.0f, 0.0f);

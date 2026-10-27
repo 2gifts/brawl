@@ -11,10 +11,6 @@
 #include <so/link/so_link_event_presenter.h>
 #include <types.h>
 
-// HYPOTHESIS: the shared soArticleMediatorNull instance of sora_melee (0x18 bytes of its bss): an enemy without
-// articles of its own hands the Enemy constructor this null mediator.
-extern char lbl_27_bss_1F0[];
-
 extern "C" {
 // stTriggerMng (sora_melee st_trigger), address name. HYPOTHESIS: notifies the trigger manager that the enemy with this
 // create id (own task id) was trodden on by the task sender (its task id and category).

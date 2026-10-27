@@ -72,12 +72,17 @@ public:
         return res;
     }
 
-    friend Vec2f operator*(const Vec2f& lhs, const float c) {
+    friend Vec2f operator*(const Vec2f& lhs, const float c)
+#ifdef MT_VEC2F_MUL_OUT_OF_LINE
+        ; // MATCH-ONLY: the owning unit calls the weak copy another unit of the REL carries.
+#else
+    {
         Vec2f res;
         res.m_x = lhs.m_x * c;
         res.m_y = lhs.m_y * c;
         return res;
     }
+#endif
 
     friend Vec2f operator/(const Vec2f& lhs, float c) {
         return lhs * (1 / c);
@@ -134,7 +139,11 @@ public:
     }
 #endif
 
-    float length() {
+    float length()
+#ifdef MT_VEC2F_LENGTH_OUT_OF_LINE
+        ; // MATCH-ONLY: the owning unit calls the weak copy another unit of the REL carries.
+#else
+    {
         float lengthSquared = this->lengthSq();
         // MATCH-ONLY: retain the original fabs double temporary and frsp at
         // conversion. The ordered <= comparison also preserves NaN behavior.
@@ -143,6 +152,7 @@ public:
         if (magnitude <= 1.17549435e-38f) return 0.0f;
         return lengthSquared * rsqrtf(lengthSquared);
     }
+#endif
 
     // Writes this - v to out.
     void sub(const Vec2f* v, Vec2f* out)

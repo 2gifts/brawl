@@ -11,10 +11,6 @@
 #include <so/link/so_link_event_presenter.h>
 #include <types.h>
 
-// HYPOTHESIS: the shared soArticleMediatorNull instance of sora_melee (0x18 bytes of its bss): an enemy without
-// articles of its own hands the Enemy constructor this null mediator.
-extern char lbl_27_bss_1F0[];
-
 // The event the Bucyulus sends to the fighter it holds when it enters status 0xC (link event 0x35).
 // HYPOTHESIS: m_param carries parameters 0xFA6 and 0xFA7 of the Bucyulus with 1 in between (a scale or speed of the
 // held fighter); the receiver is not decompiled.

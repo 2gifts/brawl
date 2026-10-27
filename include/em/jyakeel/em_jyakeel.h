@@ -12,10 +12,6 @@
 // (soArrayVector<soInterpolation<Vec3f>, 9> and <soAreaInstance, 7> are classes of sora_melee shared with other
 // enemies: em/em_module_arrays.h declares them.)
 
-// HYPOTHESIS: the shared null article mediator of sora_melee (0x18 bytes of bss), which the enemies without articles
-// of their own hand to the Enemy constructor.
-extern char lbl_27_bss_1F0[];
-
 class emJyakeel : public Enemy {
     soArrayVector<soInterpolation<Vec3f>, 9> m_interpolations; // 0x5310, posture module
     soArrayVector<soAreaInstance, 7> m_areaInstances;          // 0x54CC, area module

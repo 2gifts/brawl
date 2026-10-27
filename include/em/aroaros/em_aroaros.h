@@ -10,10 +10,6 @@
 #include <ft/builder/ft_dol_instances.h>
 #include <types.h>
 
-// HYPOTHESIS: the shared soArticleMediatorNull instance of sora_melee (0x18 bytes of its bss): an enemy without
-// articles of its own hands the Enemy constructor this null mediator.
-extern char lbl_27_bss_1F0[];
-
 // The parameter block of an item the Auroros or the Paratroopa creates (anim cmd 26 hands its address to emShootItem):
 // the same layout as the Popperam's emPopperamItemShootParam, of which these two read only the node and the offset.
 // HYPOTHESIS: one shared block of anim cmd 26 (it could replace both declarations).

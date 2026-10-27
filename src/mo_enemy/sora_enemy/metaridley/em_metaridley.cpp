@@ -34,10 +34,8 @@ static const int HitStatus_Intangible = 2;
 void emMetaridley::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData,
                                            soModuleAccesser* moduleAccesser) {
     Enemy::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
-    // HYPOTHESIS: Stage's byte at 0x19F is a flag of the stage the boss fights on (stage.h has no name for it yet). After
-    // every status change, while it is set, the whole body of Meta Ridley stays intangible.
-    // MATCH-ONLY: the u8 cast gives the original's unsigned compare of the char spacer (see shared_patch.diff).
-    if ((u8)g_Stage->_spacer8[1] == 1) {
+    // After every status change, while Stage's flag at 0x19F is set, the whole body of Meta Ridley stays intangible.
+    if (g_Stage->unk19F == 1) {
         moduleAccesser->getCollisionHitModule().setWhole(HitStatus_Intangible, 0);
     }
 }
