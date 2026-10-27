@@ -695,3 +695,7 @@ Same source. These apply when the decomp is built for PC:
 
 - **Identical duplicated behavior can reveal an inlined helper through its temporary lifetimes:** factoring the shared wall-contact cancellation block into one inline helper reproduced both copies' native vector stack slots. Keep the helper's behavior meaningful and verify the virtual calls; the original private name is still a hypothesis. Seen: `ftKineticEnergyStop::updateEnergy`. **HIGH**
 - **Preserve a product's grouping and expression lifetime when matching saved floating-point registers:** the stopping update's final brake calculation matched as `a() * (b() * c())`; naming the intermediate product allocated a different saved register. Keep the verified call order and multiplication grouping, without reassociating floating-point arithmetic. The item unit's `MT_VEC2F_LENGTH_SQ_SINGLE_EXPR` policy also applies to this fighter unit. Seen: `ft_kinetic_energy_stop.cpp`. **MED**
+
+## Shared wind energy
+
+- **Whole-vector snapshots can need aggregate copies even when scalar values agree:** wind's speed snapshot and subtraction-result snapshot gained the native word-copy lifetimes with `Vec2f::copy`. The scoped `MT_VEC2F_PLAIN_BASE` policy retained those copies with ordinary value locals; `MT_VEC2F_LENGTH_SQ_SINGLE_EXPR` also restored the final length check's register choices. Two extra current-velocity reloads after the magnitude comparison remain unresolved, so these policies alone do not make the update exact. Seen: `so_kinetic_energy_wind_normal.cpp` (98.72%). **MED**

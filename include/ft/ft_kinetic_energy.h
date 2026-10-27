@@ -93,17 +93,22 @@ public:
 };
 static_assert(sizeof(ftKineticEnergyGravity) == 0x28, "Gravity energy extent");
 
-// HYPOTHESIS: the real layouts are unknown, only the sizes are (from the soKineticMediatorImpl pool layout).
 class soKineticEnergyWindNormal : public soKineticEnergyNormal {
 public:
-#ifdef FT_MODULE_BUILDER
-    soKineticEnergyWindNormal(); // sora_melee
-#endif
-#ifdef FT_MODULE_BUILDER
+    soKineticEnergyWindNormal();
+#ifdef SO_KINETIC_WIND_IMPLEMENTATION
+    virtual ~soKineticEnergyWindNormal();
+#elif defined(FT_MODULE_BUILDER)
     virtual ~soKineticEnergyWindNormal() { }
 #endif
-    u8 m_unk34[0xc];
+    virtual void updateEnergy(soModuleAccesser*);
+    virtual void init();
+
+    Vec2f m_windSpeed; // 0x34, accumulated external wind, consumed each update.
+    // HYPOTHESIS: original name. The stronger-wind blend retains this fraction of the old velocity.
+    float m_responseRetention; // 0x3C
 };
+static_assert(sizeof(soKineticEnergyWindNormal) == 0x40, "Wind energy extent");
 
 class soKineticEnergyGroundMovement : public soKineticEnergy {
 public:
