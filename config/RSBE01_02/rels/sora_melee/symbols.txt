@@ -8474,8 +8474,8 @@ size__69soArrayVector<50soInstanceUnitFullProperty<20soAnimCmdControlUnit>,7>CFv
 setSize__69soArrayVector<50soInstanceUnitFullProperty<20soAnimCmdControlUnit>,7>Fl = .text:0x000D2D10; // type:function size:0x10 scope:weak
 fn_27_D2D20 = .text:0x000D2D20; // type:function size:0x14
 fn_27_D2D34 = .text:0x000D2D34; // type:function size:0x40
-fn_27_D2D74 = .text:0x000D2D74; // type:function size:0x140
-fn_27_D2EB4 = .text:0x000D2EB4; // type:function size:0x68
+__ct__26soArrayVector<8emAIInfo,2>FlRC8emAIInfol = .text:0x000D2D74; // type:function size:0x140
+__dt__26soArrayVector<8emAIInfo,2>Fv = .text:0x000D2EB4; // type:function size:0x68
 getTopIndex__26soArrayVector<8emAIInfo,2>CFv = .text:0x000D2F1C; // type:function size:0xC scope:weak
 setTopIndex__26soArrayVector<8emAIInfo,2>Fl = .text:0x000D2F28; // type:function size:0x10 scope:weak
 getLastIndex__26soArrayVector<8emAIInfo,2>CFv = .text:0x000D2F38; // type:function size:0x10 scope:weak
