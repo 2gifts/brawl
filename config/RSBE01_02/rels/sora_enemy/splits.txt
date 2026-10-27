@@ -381,12 +381,20 @@ mo_enemy/sora_enemy/robobeam/em_robobeam_param_accesser.cpp:
 	.data       start:0x00014B08 end:0x00014B88
 	.bss        start:0x000006B0 end:0x000006C8
 
+mo_enemy/sora_enemy/robodistance/em_robodistance.cpp:
+	.text       start:0x0005416C end:0x00055080
+	.data       start:0x00014B88 end:0x00015340
+
 mo_enemy/sora_enemy/robodistance/em_robodistance_param_accesser.cpp:
 	.text       start:0x00055080 end:0x000552CC
 	.ctors      start:0x000000C8 end:0x000000CC
 	.rodata     start:0x000010E8 end:0x000010F0
 	.data       start:0x00015340 end:0x000153A8
 	.bss        start:0x000006C8 end:0x000006E0
+
+mo_enemy/sora_enemy/robohoming/em_robohoming.cpp:
+	.text       start:0x000552CC end:0x000565B0
+	.data       start:0x000153A8 end:0x00015DA0
 
 mo_enemy/sora_enemy/robohoming/em_robohoming_param_accesser.cpp:
 	.text       start:0x000565B0 end:0x000567FC
