@@ -15,6 +15,7 @@
 #include <so/effect/so_effect_module_impl.h>
 #include <so/area/so_area_module_impl.h>
 #include <so/ground/so_ground_module_impl.h>
+#include <so/jostle/so_jostle_module.h>
 #include <so/model/so_model_module_impl.h>
 #include <so/motion/so_motion_module_impl.h>
 #include <so/posture/so_posture_module_impl.h>
@@ -301,6 +302,10 @@ public:
     soPostureModule& getPostureModule() const
     {
         return *m_enumerationStart->m_postureModule;
+    }
+
+    soJostleModule& getJostleModule() const {
+        return *static_cast<soJostleModule*>(m_enumerationStart->m_jostleModule);
     }
 
     soGroundModule& getGroundModule() const
