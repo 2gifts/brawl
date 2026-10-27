@@ -312,6 +312,10 @@ mo_enemy/sora_enemy/kokkon/em_kokkon_param_accesser.cpp:
 	.data       start:0x00011B70 end:0x00011BF8
 	.bss        start:0x000005E0 end:0x000005F8
 
+mo_enemy/sora_enemy/bombhead/em_bombhead.cpp:
+	.text       start:0x0004E0A4 end:0x0004F538
+	.data       start:0x00011BF8 end:0x000127F8
+
 mo_enemy/sora_enemy/bombhead/em_bombhead_param_accesser.cpp:
 	.text       start:0x0004F538 end:0x0004F7DC
 	.ctors      start:0x000000A4 end:0x000000A8
@@ -354,12 +358,21 @@ mo_enemy/sora_enemy/jdus/em_jdus_param_accesser.cpp:
 	.data       start:0x00013620 end:0x000136A8
 	.bss        start:0x00000680 end:0x00000698
 
+mo_enemy/sora_enemy/ghamgha/em_ghamgha.cpp:
+	.text       start:0x00051734 end:0x00052A70
+	.rodata     start:0x000010D0 end:0x000010D8
+	.data       start:0x000136A8 end:0x00014098
+
 mo_enemy/sora_enemy/ghamgha/em_ghamgha_param_accesser.cpp:
 	.text       start:0x00052A70 end:0x00052CF0
 	.ctors      start:0x000000C0 end:0x000000C4
 	.rodata     start:0x000010D8 end:0x000010E0
 	.data       start:0x00014098 end:0x00014118
 	.bss        start:0x00000698 end:0x000006B0
+
+mo_enemy/sora_enemy/robobeam/em_robobeam.cpp:
+	.text       start:0x00052CF0 end:0x00053F00
+	.data       start:0x00014118 end:0x00014B08
 
 mo_enemy/sora_enemy/robobeam/em_robobeam_param_accesser.cpp:
 	.text       start:0x00053F00 end:0x0005416C
