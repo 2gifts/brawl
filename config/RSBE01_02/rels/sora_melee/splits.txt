@@ -1167,6 +1167,10 @@ mo_melee/sora_melee/so/so_array_vector_thunks_PP15soKineticEnergy_24.cpp:
 mo_melee/sora_melee/so/so_array_base_soArrayVectorAbstract_PP15soKineticEnergy_894BC.cpp:
 	.text       start:0x000894BC end:0x000894C4
 
+mo_melee/sora_melee/so/so_kinetic_utility.cpp:
+	.text       start:0x000895B4 end:0x0008A098
+	.rodata     start:0x00000B90 end:0x00000BA8
+
 mo_melee/sora_melee/so/so_kinetic_energy_normal.cpp:
 	.text       start:0x0008A098 end:0x0008A674
 	.rodata     start:0x00000BA8 end:0x00000BB8

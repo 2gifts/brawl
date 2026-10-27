@@ -470,7 +470,17 @@ public:
         m_z = m_z * c;
     }
 
-    float lengthSq();
+    float lengthSq()
+#ifdef MT_VEC3F_LENGTH_SQ_INLINE
+    { // MATCH-ONLY: this unit expands the verified Z + (X + Y) grouping inline.
+        float xSq = m_x * m_x;
+        float ySq = m_y * m_y;
+        float zSq = m_z * m_z;
+        return zSq + (xSq + ySq);
+    }
+#else
+    ;
+#endif
     float length();
     float distance(Vec3f* v) {
         Vec3f disp = *this - *v;
