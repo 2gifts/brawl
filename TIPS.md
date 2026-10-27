@@ -115,6 +115,11 @@ Things that moved registers, roughly in the order worth trying:
 1. **Reorder local declarations** (declaration order sets virtual register order). Fixed `hkArrayUtil::_reduce`. **HIGH**
    A receiver pointer declared before an owner-ID snapshot can also keep that snapshot loaded before a singleton lookup. R.O.B.'s item cleanup matches with a predeclared `itManager*`, then the task-ID read, then `getInstance()` and `removeItem1(taskId)`; the chained receiver expression deferred the read. Seen: `src/mo_fighter/ft_robot/ft_robot.cpp`. **MED**
 2. **Reference temporaries**, the decomp-permuter's output style: `__typeof__(expr)& tmp0 = expr;`. Fixed several Havok functions. **HIGH**
+   An argument the original reads *before* the receiver's inline module chain is a **converting** reference temporary:
+   `const int& id = item->m_taskId;` (a u32 member, an int parameter) is materialized at its declaration, while a plain
+   local, a cast, `gfTask::getTaskId()`, an inline helper or a comma expression is forwarded into the call and read after
+   the receiver. A reference of the same type (`const u32&`) is forwarded too: the conversion is what makes the temporary.
+   Seen: `emAroaros::emShootItem`, `emPatapata::emShootItem` (`src/mo_enemy/sora_enemy/{aroaros,patapata}`). **HIGH**
 3. **Remove or collapse a temporary** into its single use. **HIGH**
 4. **Declare real temporaries before assigning them** in the observed evaluation order (`float y, x;` before computing sin and cos); do not add values that are never used. **MED**
 5. **Add a zero or constant temporary** (`float zero = 0.0f;`) to keep a load order. **MED**
@@ -202,6 +207,9 @@ Same source. These apply when the decomp is built for PC:
 - Build the 64-bit target with `-Wall -Wextra -Wconversion` and run AddressSanitizer and UndefinedBehaviorSanitizer to find pointer truncation and alignment faults.
 
 ## 8. Process
+- **A 100% function can still hold a wrong float literal:** objdiff masks the literal's relocation, so `+= 1.0f` scored
+  exact against a pool holding 2.0f. Only the test link's `.rodata` compare caught it; compare each unit's `.rodata`
+  before flipping it. Seen: `emPatapata::emShootItem` (the shell is created two units above the node). **MED**
 - **Unused reference helpers can be discarded at link time:** do not force them inline just to make the source object contain only native functions. NW4R geometry emitted `PLANE::Set`, `IntersectionAABB` and a literal-order helper, but none survived in the linked ELF; the five native functions and their data passed all 127 hashes. Inlining the helpers and dropping the literal helper changed register allocation in `AABB::Set` despite preserving its algorithm. Verify natural unit ownership and linked output rather than inventing splits to hide extra functions. Seen: `src/nw4r/math/math_geometry.cpp`. **HIGH**
 - **A new shadow header does not trigger rebuilds.** Ninja only knows the old BrawlHeaders path from each object's recorded dependencies, so objects that include the shadowed header keep their stale contents and fail later (for example `dtk rel make` reports "Failed to find symbol"). After adding a shadow, delete the objects that `ninja -t deps` lists as depending on the old BrawlHeaders file, then rebuild. A full build must also exit 0: the hash check alone can pass against stale outputs. Seen: `include/nw4r/g3d/g3d_resfile.h`. **HIGH**
 - **Ported library code scores 0% although the code is right:** the target still calls the function `fn_XXXXXXXX` (or a data object `lbl_XXXXXXXX`), so name-based pairing fails. Pair target and our functions by size and position, and our relocations against the target's at identical offsets, then rename in `symbols.txt` only when the code is identical and no game source still uses the old `fn_` name. The nw4r port (PR 81) gained about 1000 exact functions from renames alone. **HIGH**

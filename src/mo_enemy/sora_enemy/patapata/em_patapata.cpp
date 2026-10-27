@@ -58,10 +58,9 @@ emPatapata::emPatapata(u32 p1, emCreate* create) :
 
 emPatapata::~emPatapata() { }
 
-// TODO(nonmatching): 99.7%, (a) non-semantic: the item's instance id and task id are loaded before the work / link module
-// where the original loads them after (instruction order only; every call, argument and constant agrees, masked diff).
-// Creates the shell one unit above a node of the model, with the enemy's facing and its current speed, and constrains
-// the enemy to it; nothing happens while the enemy still communicates with an item.
+// Creates the shell two units above a node of the model (the unit's literal pool holds 2.0f, not the Auroros's 1.0f),
+// with the enemy's facing and its current speed, and constrains the enemy to it; nothing happens while the enemy still
+// communicates with an item.
 bool emPatapata::emShootItem(itKind kind, int variation, void* param, float lr, float) {
     int communicationItemId = moduleAccesser.getWorkManageModule().getInt(WorkInt_CommunicationItemId);
     if (itManager::getInstance()->getItemFromInstanceId(communicationItemId) != NULL) {
@@ -86,7 +85,7 @@ bool emPatapata::emShootItem(itKind kind, int variation, void* param, float lr, 
         // The same bug as the Popperam's: the offset's address goes to the (node, bool) overload and is never applied.
         Vec3f nodePos = model.getNodeGlobalPosition(shootParam->m_nodeId, &offset);
         pos = nodePos;
-        pos.m_y += 1.0f;
+        pos.m_y += 2.0f;
         // The shell starts with the enemy's speed.
         // MATCH-ONLY: the sum speed's height is read into a local first (the original loads y before x).
         Vec2f sumSpeed = moduleAccesser.getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(-1));
@@ -100,13 +99,17 @@ bool emPatapata::emShootItem(itKind kind, int variation, void* param, float lr, 
         item->resetLr(lr);
         item->updateNodeSRT();
         item->addSpeed(&speed, true);
-        moduleAccesser.getWorkManageModule().setInt(item->m_instanceId, WorkInt_CommunicationItemId);
+        // MATCH-ONLY: the ids bound to const references of the other integer type are converting temporaries that MWCC
+        // evaluates before the work / link module; a plain local, a cast or an inline accessor is forwarded into the
+        // call, after it. The same shape as the Auroros's link (where the instance id is passed directly).
+        const u32& itemInstanceId = item->m_instanceId;
+        moduleAccesser.getWorkManageModule().setInt(itemInstanceId, WorkInt_CommunicationItemId);
         m_moduleAccesser->getLinkModule().removeModelConstraint(true);
         if (m_moduleAccesser->getLinkModule().isLink(LinkNo_Item) == true) {
             m_moduleAccesser->getLinkModule().unlink(LinkNo_Item);
         }
-        // TODO(nonmatching): the original loads the item's task id after the unlink block, before the link module.
-        if (m_moduleAccesser->getLinkModule().link(LinkNo_Item, item->m_taskId) == true) {
+        const int& itemTaskId = item->m_taskId;
+        if (m_moduleAccesser->getLinkModule().link(LinkNo_Item, itemTaskId) == true) {
             m_moduleAccesser->getLinkModule().setModelConstraintPosOrt(LinkNo_Item, 0, 0, 1, true);
         }
     } else {

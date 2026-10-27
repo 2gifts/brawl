@@ -38,9 +38,6 @@ emAroaros::emAroaros(u32 p1, emCreate* create) :
 
 emAroaros::~emAroaros() { }
 
-// TODO(nonmatching): 98.2%, (a) non-semantic: only the item's task id is loaded after the link module where the original
-// loads it first (instruction order; a named local, a named module reference, gfTask::getTaskId and an inline member
-// helper all come out the same) (masked diff; every call, argument and constant agrees).
 // Creates the item one unit above a node of the model, with the facing lr, and constrains the enemy to it. The
 // parameter block is anim cmd 26's (only the node and the offset are read here).
 bool emAroaros::emShootItem(itKind kind, int variation, void* param, float lr, float) {
@@ -62,10 +59,9 @@ bool emAroaros::emShootItem(itKind kind, int variation, void* param, float lr, f
         // The same bug as the Popperam's: the offset's address goes to the (node, bool) overload and is never applied.
         Vec3f nodePos = model.getNodeGlobalPosition(shootParam->m_nodeId, &offset);
         pos.m_x = nodePos.m_x;
-        // MATCH-ONLY: the height goes through a double (the original rounds it, frsp, before the add).
-        double y = nodePos.m_y;
+        pos.m_y = nodePos.m_y;
         pos.m_z = nodePos.m_z;
-        pos.m_y = (float)y + 1.0f;
+        pos.m_y += 1.0f;
         item->warp(&pos);
         item->resetLr(lr);
         item->updateNodeSRT();
@@ -74,7 +70,10 @@ bool emAroaros::emShootItem(itKind kind, int variation, void* param, float lr, f
         if (m_moduleAccesser->getLinkModule().isLink(LinkNo_Item) == true) {
             m_moduleAccesser->getLinkModule().unlink(LinkNo_Item);
         }
-        if (m_moduleAccesser->getLinkModule().link(LinkNo_Item, item->m_taskId) == true) {
+        // MATCH-ONLY: the task id (u32) bound to a const int reference is a converting temporary that MWCC evaluates
+        // before the link module; a plain local, a cast or an inline accessor is forwarded into the call, after it.
+        const int& itemTaskId = item->m_taskId;
+        if (m_moduleAccesser->getLinkModule().link(LinkNo_Item, itemTaskId) == true) {
             m_moduleAccesser->getLinkModule().setModelConstraintPosOrt(LinkNo_Item, 0, 0, 1, true);
         }
     } else {
