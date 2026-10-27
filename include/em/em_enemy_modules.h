@@ -151,16 +151,7 @@ static_assert(sizeof(soGlowModuleImpl) == 0x24, "Class is wrong size!");
 
 // ---- enemy modules (code in later sora_enemy units) ---------------------------------------------------------------------
 
-class emGroundModuleImpl : public soGroundModuleImpl {
-    u8 unk58[0x8C - 0x58];
-public:
-    // HYPOTHESIS: groundData is the enemy's ground parameter block (a soValueAccesser constant).
-    emGroundModuleImpl(soModuleAccesser* acc, soArray<soGroundShapeImpl>* shapes, void* groundData);
-    virtual ~emGroundModuleImpl();
-    // HYPOTHESIS: on lets the ground shape follow the model's nodes (anim cmd 39, enemies with a ground parameter block).
-    void updateVtxFromNode(bool on);
-};
-static_assert(sizeof(emGroundModuleImpl) == 0x8C, "Class is wrong size!");
+#include <em/ground/em_ground_module_impl.h>
 
 // soLinkModuleImpl has its full layout only under FT_MODULE_BUILDER (see em/enemy.h).
 #ifdef FT_MODULE_BUILDER
@@ -178,31 +169,9 @@ static_assert(sizeof(emLinkModuleImpl) == 0x84, "Class is wrong size!");
 class emLinkModuleImpl;
 #endif
 
-class emCollisionHitModuleImpl : public soCollisionHitModuleImpl {
-    u8 unk68[0x70 - 0x68];
-public:
-    // HYPOTHESIS: hitData and hitGroupData are the enemy's hit parameter blocks (soValueAccesser constants).
-    emCollisionHitModuleImpl(soModuleAccesser* acc, int taskId, u8 category, soArray<soCollisionHitPart>* parts,
-                             soArray<soCollisionGroup>* groups, soArray<soCollisionHitGroup>* hitGroups, void* hitGroupData,
-                             void* hitData);
-    virtual ~emCollisionHitModuleImpl();
-};
-static_assert(sizeof(emCollisionHitModuleImpl) == 0x70, "Class is wrong size!");
+#include <em/collision/em_collision_hit_module_impl.h>
 
-class emStatusModuleImpl : public soStatusModuleImpl {
-    u8 unkAC[0xB4 - 0xAC];
-public:
-    // HYPOTHESIS: the three trailing values mirror soStatusModuleImpl's preCheck data, status kind count and flag.
-    emStatusModuleImpl(soModuleAccesser* acc, soArrayContractibleTable<const soStatusData>* statusTable, void* uniqProcs,
-                       soGeneralWorkSimple* statusWork, soTransitionModule* transition, void* changeRequests, void* preCheckData,
-                       int unk1, int unk2);
-    virtual ~emStatusModuleImpl();
-    // HYPOTHESIS: the update priority of the AI against the status (Enemy::processGameProc raises it to (-350, -250)
-    // around the status transition check of a dead area hit, then puts it back).
-    void setAIUpdatePri(int, int);
-    void initAIUpdatePri();
-};
-static_assert(sizeof(emStatusModuleImpl) == 0xB4, "Class is wrong size!");
+#include <em/status/em_status_module_impl.h>
 
 // The enemy territory module (soModuleAccesser slot territoryModule).
 class emTerritoryModuleImpl {
@@ -226,13 +195,7 @@ public:
 };
 static_assert(sizeof(emDamageModuleImpl) == 0xE0, "Class is wrong size!");
 
-class emTurnModuleImpl {
-    u8 unk4[0x4C - 4];
-public:
-    emTurnModuleImpl(soModuleAccesser* acc);
-    virtual ~emTurnModuleImpl();
-};
-static_assert(sizeof(emTurnModuleImpl) == 0x4C, "Class is wrong size!");
+#include <em/turn/em_turn_module_impl.h>
 
 // The kinetic energy parameters of an enemy kind (emInfo::getKineticEnergyParamAryPtrGetId / getKineticEnergyNum).
 struct emKineticEnergyParamDesc {
@@ -241,14 +204,27 @@ struct emKineticEnergyParamDesc {
     emKineticEnergyParamDesc(void* params, int num) : m_params(params), m_num(num) { }
 };
 
+// One kinetic energy of an enemy (module map names; the class is in a later sora_enemy unit).
+class emKineticEnergy {
+public:
+    bool isInvalidEnergy();
+    void reverseLr();
+};
+
 class emKineticModuleImpl : public soKineticModule {
     u8 unk[0xBD4 - sizeof(soKineticModule)];
 public:
+    // Module map names (used by emTurnModuleImpl).
+    emKineticEnergy* getEmEnergy(int index);
+    bool isEnergyEnd(int index);
+    void updateEnergyAsId(int index);
     emKineticModuleImpl(soModuleAccesser* acc, const emKineticEnergyParamDesc& energies);
     virtual ~emKineticModuleImpl();
     // HYPOTHESIS: the argument is an energy index (-1: all energies), as in soKineticModule::updateEnergy.
     void updateEnergyPre(int index);
     // HYPOTHESIS: the counterpart run after the posture update (Enemy::updatePosture passes -1).
     void updateEnergyPost(int index);
+    // Map name; the Galfire hands it the trace's ground movement speed while its ground module traces a line.
+    void addSpeedToGroundMovement(const Vec2f* speed);
 };
 static_assert(sizeof(emKineticModuleImpl) == 0xBD4, "Class is wrong size!");

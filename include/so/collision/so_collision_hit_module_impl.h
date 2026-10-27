@@ -12,6 +12,7 @@
 #include <so/so_null.h>
 #include <types.h>
 
+struct soCollisionAttackData;
 class soModuleAccesser;
 
 class soCollisionHitModule : public soNullable {
@@ -50,7 +51,7 @@ public:
     virtual int getGlobal(u32 collisionHitGroupIndex);
     virtual int getStatus(u32 collisionHitPartIndex, u32 collisionHitGroupIndex);
     virtual int getTotalStatus(u32 collisionHitGroupIndex);
-    virtual float getDurabilityMulFromAttackData();
+    virtual float getDurabilityMulFromAttackData(soCollisionAttackData* attackData, u32 partId);
     virtual int getPartSize(u32 collisionHitGroupIndex);
     virtual u32 getPartHeight(u32 collisionHitPartIndex, u32 collisionHitGroupIndex);
     virtual void setNoTeam(bool);
@@ -118,7 +119,7 @@ public:
     virtual int getGlobal(u32 collisionHitGroupIndex);
     virtual int getStatus(u32 collisionHitPartIndex, u32 collisionHitGroupIndex);
     virtual int getTotalStatus(u32 collisionHitGroupIndex);
-    virtual float getDurabilityMulFromAttackData();
+    virtual float getDurabilityMulFromAttackData(soCollisionAttackData* attackData, u32 partId);
     virtual int getPartSize(u32 collisionHitGroupIndex);
     virtual u32 getPartHeight(u32 collisionHitPartIndex, u32 collisionHitGroupIndex);
     virtual void setNoTeam(bool);
