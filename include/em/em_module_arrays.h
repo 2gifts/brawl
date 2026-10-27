@@ -9,6 +9,8 @@
 #include <so/camera/so_camera_subject.h>
 
 FT_DOL_ARRAY_VECTOR(soCameraSubject, 1);
+// Hammer Bro, Robobeam.
+FT_DOL_ARRAY_VECTOR(soAreaInstance, 8);
 // Kokkon, Popperam.
 FT_DOL_ARRAY_VECTOR(soAreaInstance, 9);
 // Spar, Deathpod.

@@ -13,7 +13,6 @@
 
 // The arrays below are classes of sora_melee: the Hammer Bro only calls their constructors and destructors.
 FT_DOL_ARRAY_VECTOR(soInterpolation<Vec3f>, 32);
-FT_DOL_ARRAY_VECTOR(soAreaInstance, 8);
 
 class emHammerbros;
 
