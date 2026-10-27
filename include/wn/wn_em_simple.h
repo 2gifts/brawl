@@ -5,6 +5,7 @@
 
 #include <StaticAssert.h>
 #include <em/em_shot.h>
+#include <mt/mt_vector.h>
 #include <ft/builder/ft_dol_instances.h>
 #include <so/so_array.h>
 #include <so/event/so_event_presenter.h>
@@ -43,14 +44,15 @@ public:
     s32 unk21E8;
     s32 unk21EC;
     u8 unk21F0[0x8];
-    float unk21F8;
-    float unk21FC;
-    float unk2200;
-    float unk2204;
-    u8 unk2208[0xC];
+    Vec2f m_speed;         // 0x21F8, HYPOTHESIS: the article's speed
+    Vec2f m_accel;         // 0x2200, HYPOTHESIS: the article's acceleration
+    u8 unk2208[0x8];
+    u32 m_weaponKind;      // 0x2210, HYPOTHESIS: the weapon kind (emPorky::updateNodeSRT tests 0x2c / 0x2d)
     bool unk2214;
     bool unk2215;
-    u8 unk2216[0x2];
+    u8 unk2216;
+    // The arm event (Petey Piranha's notifyEventLink) runs its status transition check only when it is set.
+    bool unk2217;
     bool unk2218;
     u8 unk2219[0x1B];
     s32* unk2234;

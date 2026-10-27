@@ -8,13 +8,9 @@
 #include <em/arman/em_arman.h>
 #include <em/em_shot.h>
 
-// MATCH-ONLY: MWCC emits the weak copies of the two pools' getInstanceAt in the order their first reference is parsed;
-// every user in em/em_article_mediator.h names the wnemSimple pool (article id 0) first, but the original emits the
-// wnemSwHolder pool's copy first. This unused (never emitted) function names it earlier, so the calls of isGeneratable,
-// getActiveNum and deactivate resolve to the right copies (the two copies' order is all the test link differed in).
-static inline wnemSwHolder* emArmanSwHolderAt(emArmanArticleMediator& mediator, s32 index) {
-    return mediator.getPool<1>().getInstanceAt(index);
-}
+// MATCH-ONLY: names the wnemSwHolder pool's getInstanceAt first, so its weak copy comes out before the wnemSimple
+// pool's as in the original (see SO_ARTICLE_MEDIATOR_POOL_1_FIRST in em/em_article_mediator.h).
+SO_ARTICLE_MEDIATOR_POOL_1_FIRST(emArmanArticleMediator)
 
 // The Arman (Armank): an Enemy with one wnemSimple article (its arm, whose processes are wnemArmanProc in
 // wnem_proc_arman.cpp) and six wnemSwHolder shots. Besides its destructor the class overrides notifyEventLink, through

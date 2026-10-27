@@ -202,7 +202,9 @@ public:
     bool unk19B;
     bool unk19C;
     bool unk19D;
-    char _spacer8[0x2];
+    char _spacer8[0x1];
+    // HYPOTHESIS: a flag of the stage the boss fight runs on; Meta Ridley's body stays intangible while it is 1.
+    u8 unk19F;
     // TOTAL_SIZE == 0x160
 
     void testStageParamInit(gfArchive* archive, int fileIndex);

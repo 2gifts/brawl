@@ -2,6 +2,9 @@
 #define MT_VEC3F_SUB_NOINLINE
 // MATCH-ONLY: Vec2f copies are the aggregate word copies of a plain base, assignments the scalar float copies.
 #define MT_VEC2F_PLAIN_BASE
+// MATCH-ONLY: Vec2f::length and Vec2f's operator* stay calls to the weak copies the enemy kinetic module unit carries.
+#define MT_VEC2F_LENGTH_OUT_OF_LINE
+#define MT_VEC2F_MUL_OUT_OF_LINE
 #include <em/em_shot.h>
 #include <em/prim/wnem_proc_prim.h>
 #include <em/wnem/wnem_proc_common.h>
@@ -19,13 +22,9 @@
 // and turning back when it hits something or slows down, then homes in on the Primid that threw it (Turn), which takes
 // it back when it comes close; Erase removes it. A boomerang that belongs to a team only drops to the ground.
 
-// The Vec2f helpers the procs call are weak copies in the enemy kinetic module unit, which keeps their address names.
+// atan2f(y, x), a weak copy in the enemy kinetic module unit, which keeps its address name (map name
+// emKineticModuleImpl::atan2f).
 extern "C" {
-// Vec2f::length (map name).
-float fn_41_10830(const Vec2f& v);
-// Vec2f operator*(const Vec2f&, float) (map name Vec2f::operator*).
-Vec2f fn_41_108CC(const Vec2f& v, float c);
-// atan2f(y, x), a weak copy (map name emKineticModuleImpl::atan2f).
 float fn_41_15FB0(float y, float x);
 }
 
@@ -61,16 +60,11 @@ struct wnemPrimBoomerangParam {
     float m_bounceAngle;   // 0x20, Fly turns back when it hits a wall at more than 90 degrees plus this (degrees)
 };
 
-// HYPOTHESIS: 0x21F8/0x21FC are the boomerang's speed, 0x2200/0x2204 its acceleration.
-static inline Vec2f* getSpeed(wnemSimple* wn) {
-    return reinterpret_cast<Vec2f*>(&wn->unk21F8);
-}
-
 // Sets the boomerang's speed. The float parameters matter: the original stores both components straight from the
 // registers that computed them (each through an frsp), as an inlined two-float setter does.
 static inline void setSpeed(wnemSimple* wn, float x, float y) {
-    wn->unk21F8 = x;
-    wn->unk21FC = y;
+    wn->m_speed.m_x = x;
+    wn->m_speed.m_y = y;
 }
 
 void wnemPrimProc::BoomerangHave(wnemSimple* wn, soModuleAccesser* acc) {
@@ -83,7 +77,7 @@ void wnemPrimProc::BoomerangHave(wnemSimple* wn, soModuleAccesser* acc) {
     }
 }
 
-// TODO(nonmatching): 97.97%, (a): with registers masked, the calls, arguments, constants and branches agree. What is left
+// TODO(nonmatching): 98.75%, (a): with registers masked, the calls, arguments, constants and branches agree. What is left
 // is the saved-register assignment (the original keeps the string base in r31, wn in r29, the parameters in r30 and
 // the literal base in r28), where the speed's address is computed (twice before the vec2fAngle call, once around the
 // reflection), and the stack slot of the acceleration's return temporary (0x10 here, 0x28 in the original).
@@ -102,7 +96,7 @@ void wnemPrimProc::BoomerangFly(wnemSimple* wn, soModuleAccesser* acc) {
     }
     if (acc->getTeamModule().getTeam()->getNo() != TeamNo_None) {
         wn->setProcFnc_TouchGround(Proc_BoomerangErase);
-        wn->unk2200 = wn->unk2204 = 0.0f;
+        wn->m_accel.m_x = wn->m_accel.m_y = 0.0f;
         return;
     }
     float bounceAngle = 0.017453292f * param->m_bounceAngle;
@@ -112,43 +106,43 @@ void wnemPrimProc::BoomerangFly(wnemSimple* wn, soModuleAccesser* acc) {
         if (acc->getPostureModule().getLr() == 1.0f) {
             if (acc->getGroundModule().isTouch(grCollStatus::TouchMask(4), 0) == true) {
                 normal = acc->getGroundModule().getTouchNormal(4, 0);
-                if (vec2fAngle(&normal, getSpeed(wn)) >= 1.5707964f + bounceAngle) {
+                if (vec2fAngle(&normal, &wn->m_speed) >= 1.5707964f + bounceAngle) {
                     wn->changeProcFnc(Proc_BoomerangTurn, 1);
-                    wn->unk21F8 = wn->unk21FC = 0.0f;
+                    wn->m_speed.m_x = wn->m_speed.m_y = 0.0f;
                     return;
                 }
             }
         } else {
             if (acc->getGroundModule().isTouch(grCollStatus::TouchMask(2), 0) == true) {
                 normal = acc->getGroundModule().getTouchNormal(2, 0);
-                if (vec2fAngle(&normal, getSpeed(wn)) >= 1.5707964f + bounceAngle) {
+                if (vec2fAngle(&normal, &wn->m_speed) >= 1.5707964f + bounceAngle) {
                     wn->changeProcFnc(Proc_BoomerangTurn, 1);
-                    wn->unk21F8 = wn->unk21FC = 0.0f;
+                    wn->m_speed.m_x = wn->m_speed.m_y = 0.0f;
                     return;
                 }
             }
         }
         // Otherwise it bounces off the ground: the speed is reflected about the touch normal.
         normal = acc->getGroundModule().getTouchNormal(0xff, 0);
-        float dot = normal.m_x * wn->unk21F8 + normal.m_y * wn->unk21FC;
-        *getSpeed(wn) = *getSpeed(wn) - fn_41_108CC(fn_41_108CC(normal, 2.0f), dot);
+        float dot = normal.m_x * wn->m_speed.m_x + normal.m_y * wn->m_speed.m_y;
+        wn->m_speed = wn->m_speed - normal * 2.0f * dot;
         emShotParam* shotParam = wn->m_shotWork.m_param;
-        float speed = fn_41_10830(*getSpeed(wn));
+        float speed = wn->m_speed.length();
         if (speed > 0.00001f) {
-            Vec2f accel = fn_41_108CC(*getSpeed(wn), shotParam->m_accel / speed);
-            wn->unk2200 = accel.m_x;
-            wn->unk2204 = accel.m_y;
+            Vec2f accel = wn->m_speed * (shotParam->m_accel / speed);
+            wn->m_accel.m_x = accel.m_x;
+            wn->m_accel.m_y = accel.m_y;
         }
     }
     // Hitting something sends it back.
     if (wn->unk2215) {
-        wn->unk21F8 = wn->unk21FC = 0.0f;
+        wn->m_speed.m_x = wn->m_speed.m_y = 0.0f;
         wn->unk2215 = false;
         wnemCommonProc::Report("wnemPrimProc::BoomerangFly : isInfliction true \n");
         wn->changeProcFnc(Proc_BoomerangTurn, 1);
     }
     // So does slowing down.
-    if (fn_41_10830(*getSpeed(wn)) <= param->m_minFlySpeed) {
+    if (wn->m_speed.length() <= param->m_minFlySpeed) {
         wn->changeProcFnc(Proc_BoomerangTurn, 1);
         wnemCommonProc::Report("wnemPrimProc::BoomerangFly : FlySpeedMin true \n");
     }
@@ -165,7 +159,7 @@ void wnemPrimProc::BoomerangTurn(wnemSimple* wn, soModuleAccesser* acc) {
     }
     if (acc->getTeamModule().getTeam()->getNo() != TeamNo_None) {
         wn->setProcFnc_TouchGround(Proc_BoomerangErase);
-        wn->unk2200 = wn->unk2204 = 0.0f;
+        wn->m_accel.m_x = wn->m_accel.m_y = 0.0f;
         return;
     }
     bool isFirstFrame = wn->unk2214;
@@ -174,8 +168,8 @@ void wnemPrimProc::BoomerangTurn(wnemSimple* wn, soModuleAccesser* acc) {
         wnemCommonProc::Report("wnemPrimProc::BoomerangTurn : ---- OnEnter --------- \n");
         wn->setProcFnc_LifeZero(Proc_BoomerangErase);
         wn->executeAnimCmd(1u);
-        wn->unk2200 = 0.0f;
-        wn->unk2204 = 0.0f;
+        wn->m_accel.m_x = 0.0f;
+        wn->m_accel.m_y = 0.0f;
         // It starts back toward its owner.
         if (acc->getLinkModule().isLink(LinkNo_Owner) == true) {
             Vec3f ownerPos = acc->getLinkModule().getParentModelNodeGlobalPosition(LinkNo_Owner, param->m_ownerNodeId, false);
@@ -186,7 +180,7 @@ void wnemPrimProc::BoomerangTurn(wnemSimple* wn, soModuleAccesser* acc) {
             setSpeed(wn, toOwner.m_x, toOwner.m_y);
         }
     }
-    float angle = fn_41_15FB0(wn->unk21FC, wn->unk21F8);
+    float angle = fn_41_15FB0(wn->m_speed.m_y, wn->m_speed.m_x);
     float catchDistance = param->m_catchDistance;
     float turnSpeed = 0.017453292f * param->m_turnSpeed;
     float homingFrame = param->m_homingFrame;
@@ -232,12 +226,12 @@ void wnemPrimProc::BoomerangTurn(wnemSimple* wn, soModuleAccesser* acc) {
         }
         angle += turn;
     }
-    float speed = -1.0f * shotParam->m_accel + fn_41_10830(*getSpeed(wn));
+    float speed = -1.0f * shotParam->m_accel + wn->m_speed.length();
     if (speed > param->m_maxTurnSpeed) {
         speed = param->m_maxTurnSpeed;
     }
-    wn->unk21F8 = speed * static_cast<float>(cos(angle));
-    wn->unk21FC = speed * static_cast<float>(sin(angle));
+    wn->m_speed.m_x = speed * static_cast<float>(cos(angle));
+    wn->m_speed.m_y = speed * static_cast<float>(sin(angle));
 }
 
 void wnemPrimProc::BoomerangErase(wnemSimple* wn, soModuleAccesser* acc) {
@@ -251,7 +245,7 @@ void wnemPrimProc::BoomerangErase(wnemSimple* wn, soModuleAccesser* acc) {
         wn->unk21B9 = false;
         acc->getCollisionAttackModule().clearAll();
         wn->executeAnimCmd(2u);
-        wn->unk21F8 = wn->unk21FC = wn->unk2200 = wn->unk2204 = 0.0f;
+        wn->m_speed.m_x = wn->m_speed.m_y = wn->m_accel.m_x = wn->m_accel.m_y = 0.0f;
         wn->setVisibilityWhole(0);
     }
     // Every frame of the proc, it is taken off the field.

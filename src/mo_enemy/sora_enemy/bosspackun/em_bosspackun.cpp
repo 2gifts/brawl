@@ -18,8 +18,6 @@
 // em/em_article_mediator.h.
 
 extern "C" {
-// Map name emWeaponManager::RegisterManageWeapon (owned by the weapon manager unit, which still keeps the address name).
-void fn_41_2C448(emWeaponManager* manager, wnemSimple* article);
 // sora_melee helpers of the trigger manager. The first two forward the task id to the stage when it is of kind 0x3D;
 // the third hands the enemy's create id and a value to every trigger of the manager.
 // HYPOTHESIS: the first two hand the article to the Subspace stage (one per arm), the third fires the boss's trigger.
@@ -65,8 +63,7 @@ bool emBosspackun::activeArticle(wnemSimple* article, soModuleAccesser* moduleAc
         emScaledValue* value = static_cast<emScaledValue*>(
             soValueAccesser::getConstantIndefinite(moduleAccesser, param->m_lifeConstantId, 0));
         lbl_41_bss_504.m_constantParam = value;
-        // TODO(layout): emShotParam's first word (em/em_shot.h names no field there yet).
-        *reinterpret_cast<s32*>(param->unk0) = Enemy::getValueInt(value, moduleAccesser);
+        param->m_constantValue = Enemy::getValueInt(value, moduleAccesser);
     }
     Vec3f pos = fn_41_47470(param, moduleAccesser);
     emShotFlag flag;
@@ -76,12 +73,12 @@ bool emBosspackun::activeArticle(wnemSimple* article, soModuleAccesser* moduleAc
     s32 constantId = param->m_lifeConstantId;
     if (constantId == ConstantId_ArmShot0) {
         if (g_stTriggerMng != NULL) {
-            fn_41_2C448(emWeaponManager::getInstance(), article);
+            emWeaponManager::getInstance()->RegisterManageWeapon(article);
             fn_27_23317C(g_stTriggerMng, article->m_taskId);
         }
     } else if (constantId == ConstantId_ArmShot1) {
         if (g_stTriggerMng != NULL) {
-            fn_41_2C448(emWeaponManager::getInstance(), article);
+            emWeaponManager::getInstance()->RegisterManageWeapon(article);
             fn_27_2331A0(g_stTriggerMng, article->m_taskId);
         }
     }
@@ -101,8 +98,7 @@ void emBosspackun::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser*
     case LinkEvent_Arm:
     case LinkEvent_ArmDead: {
         wnemSimple& article = dynamic_cast<wnemSimple&>(*sender);
-        // TODO(layout): wnemSimple's byte 0x2217 (wn/wn_em_simple.h has it inside unk2216).
-        if (article.unk2216[1] == true) {
+        if (article.unk2217 == true) {
             bool wasFlagged = m_moduleAccesser->getWorkManageModule().isFlag(WorkFlag_TransitionCheck);
             m_moduleAccesser->getWorkManageModule().onFlag(WorkFlag_TransitionCheck);
             bool changed;

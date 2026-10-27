@@ -13,10 +13,6 @@
 // arrays are declared in em/em_module_arrays.h.)
 FT_DOL_ARRAY_VECTOR(soAreaWind, 3);
 
-// HYPOTHESIS: the shared soArticleMediatorNull instance of sora_melee (0x18 bytes of its bss): the Boobas generates no
-// articles, so it hands the Enemy constructor this null mediator instead of a mediator of its own.
-extern char lbl_27_bss_1F0[];
-
 class emBoobas : public Enemy {
     soArrayVector<soInterpolation<Vec3f>, 26> m_interpolations; // 0x5310, posture module
     soArrayVector<soAreaInstance, 13> m_areaInstances;          // 0x57FC, area module

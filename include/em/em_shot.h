@@ -16,7 +16,9 @@ class wnemSwHolder;
 // HYPOTHESIS: field roles from the enemy activators that read them; the description comes from the enemy's constant
 // parameters.
 struct emShotParam {
-    u8 unk0[0x8];
+    // HYPOTHESIS: Petey Piranha overwrites it with the scaled int of the shot's indefinite constant (m_lifeConstantId).
+    s32 m_constantValue;   // 0x0
+    u32 m_weaponId;        // 0x4, the weapon whose resource id Enemy::getSimpleWeaponResourceID looks up (Porky)
     s32 m_type;            // 0x8, 2 selects the second launch position and the flag of fn_41_47544
     u32 m_shotKind;        // 0xC, Primid: 1/2 boomerang shots, 4 a plain wnemSimple shot; Spar: 0/2 aimed shots
     u32 m_life;            // 0x10, overwritten from a scaled constant when m_lifeConstantId names one
