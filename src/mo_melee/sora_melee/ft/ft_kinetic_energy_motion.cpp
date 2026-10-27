@@ -10,12 +10,22 @@
 
 // HYPOTHESIS: original inline helper name. Both rotating modes use this transform.
 static inline void rotateMotionSpeed(Vec2f& speed, const float& angle) {
+    // MATCH-ONLY: retain the native X-before-Y snapshot in the shared transform.
+    float y;
     float x = speed.m_x;
-    float y = speed.m_y;
+    y = speed.m_y;
     float cosine = cosf(angle);
     float sine = sinf(angle);
     speed.m_x = x * cosine - y * sine;
     speed.m_y = x * sine + y * cosine;
+}
+
+// HYPOTHESIS: original inline helper name. Cancels the remaining velocity when translation ends.
+static inline Vec2f negateMotionSpeed(const Vec2f& speed) {
+    Vec2f result;
+    result.m_x = -speed.m_x;
+    result.m_y = -speed.m_y;
+    return result;
 }
 
 ftKineticEnergyMotion::ftKineticEnergyMotion() :
@@ -97,11 +107,11 @@ void ftKineticEnergyMotion::updateEnergy(soModuleAccesser* acc) {
         }
         Vec2f desired;
         if (facing != 0.0f) {
+            desired.m_y = translation.m_y;
             desired.m_x = translation.m_z * facing;
-            desired.m_y = translation.m_y;
         } else {
-            desired.m_x = translation.m_z;
             desired.m_y = translation.m_y;
+            desired.m_x = translation.m_z;
         }
         switch (m_motionMode) {
         case 2:
@@ -141,10 +151,6 @@ void ftKineticEnergyMotion::updateEnergy(soModuleAccesser* acc) {
             rotateMotionSpeed(desired, m_rotation);
             m_unk32 = false;
             break;
-        case 6:
-            desired.m_x = 0.0f;
-            m_unk32 = false;
-            break;
         case 7: {
             float stick = acc->getControllerModule().getStickX();
             float deadZone = acc->getWorkManageModule().getFloat(0x21000005);
@@ -168,6 +174,11 @@ void ftKineticEnergyMotion::updateEnergy(soModuleAccesser* acc) {
             m_unk32 = false;
             break;
         }
+        // MATCH-ONLY: keep this independent mode after the steering block.
+        case 6:
+            desired.m_x = 0.0f;
+            m_unk32 = false;
+            break;
         case 9:
         case 10:
         case 11: {
@@ -175,13 +186,16 @@ void ftKineticEnergyMotion::updateEnergy(soModuleAccesser* acc) {
             Vec3f cliff = acc->getGroundModule().getCliffPos(0);
             Vec3f offset = acc->getMotionModule().getTransNTranslate();
             Vec3f current = acc->getPostureModule().getPos();
-            Vec3f target(cliff.m_x + offset.m_z * acc->getPostureModule().getLr(),
-                cliff.m_y + offset.m_y, current.m_z);
-            desired.m_y = target.m_y - current.m_y;
+            float targetY = cliff.m_y + offset.m_y;
+            float targetZ = current.m_z;
+            Vec3f target(cliff.m_x + offset.m_z * acc->getPostureModule().getLr(), targetY, targetZ);
             desired.m_x = target.m_x - current.m_x;
+            desired.m_y = target.m_y - current.m_y;
             if (m_motionMode == 9) {
                 int frames = acc->getWorkManageModule().getInt(0x20000000);
-                desired *= 1.0f / (frames + 1);
+                float remaining = frames + 1;
+                float scale = 1.0f / remaining;
+                desired *= scale;
             }
             break;
         }
@@ -212,20 +226,23 @@ void ftKineticEnergyMotion::updateEnergy(soModuleAccesser* acc) {
                 base.m_y + offset.m_y, 0.0f);
             desired.m_x = 0.0f;
             desired.m_y = target.m_y - stored.m_y;
-            acc->getWorkManageModule().setFloat(desired.m_y, 0x21000009);
+            // Advance the stored position by this frame's animation correction.
+            acc->getWorkManageModule().addFloat(desired.m_y, 0x21000009);
             break;
         }
         }
         nextMotionSpeed = desired;
-        Vec2f targetSpeed(-1.0f, -1.0f);
         Vec2f accel;
+        Vec2f targetSpeed(-1.0f, -1.0f);
         if (groundTracking == true) {
             if (m_hasPrevMotionSpeed == false) {
                 accel = desired - getSpeed();
                 m_hasPrevMotionSpeed = true;
-            } else if (desired.m_x == 0.0f && m_prevMotionSpeed.m_x == 0.0f) {
-                accel = Vec2f(0.0f, 0.0f);
-                targetSpeed = Vec2f(0.0f, 0.0f);
+            } else if (nextMotionSpeed.m_x == 0.0f && m_prevMotionSpeed.m_x == 0.0f) {
+                accel.m_y = 0.0f;
+                accel.m_x = 0.0f;
+                targetSpeed.m_y = 0.0f;
+                targetSpeed.m_x = 0.0f;
             } else {
                 accel = desired - m_prevMotionSpeed;
             }
@@ -247,8 +264,7 @@ void ftKineticEnergyMotion::updateEnergy(soModuleAccesser* acc) {
             m_accel = Vec2f(0.0f, 0.0f);
             break;
         case 12: {
-            Vec2f current = getSpeed();
-            m_accel = Vec2f(-current.m_x, -current.m_y);
+            m_accel = negateMotionSpeed(getSpeed());
             break;
         }
         }
