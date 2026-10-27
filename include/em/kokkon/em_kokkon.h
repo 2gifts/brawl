@@ -13,7 +13,6 @@
 
 // The arrays below are classes of sora_melee: the Kokkon only calls their constructors and destructors.
 FT_DOL_ARRAY_VECTOR(soInterpolation<Vec3f>, 28);
-FT_DOL_ARRAY_VECTOR(soAreaInstance, 9);
 
 class emKokkon;
 

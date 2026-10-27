@@ -21,7 +21,10 @@ struct emShotParam {
     u32 m_shotKind;        // 0xC, Primid: 1/2 boomerang shots, 4 a plain wnemSimple shot; Spar: 0/2 aimed shots
     u32 m_life;            // 0x10, overwritten from a scaled constant when m_lifeConstantId names one
     float m_speed;         // 0x14
-    u8 unk18[0x44];
+    u8 unk18[0x20];
+    emScaledValue m_speedRange[2]; // 0x38, Popperam: the bounds of the random launch speed
+    emScaledValue m_angleRange[2]; // 0x48, Popperam: the bounds of the random launch angle, in degrees
+    float m_accel;                 // 0x58, Popperam: a second magnitude along the launch direction (an acceleration)
     float m_flySpeedY;     // 0x5C, HYPOTHESIS: the Hammer Bro's hammer takes it as its vertical speed
     u8 unk60[0x14];
     s32 m_lifeConstantId;  // 0x74, an indefinite constant id; only ids above ConstantId_CommonLast name one
@@ -50,7 +53,12 @@ struct emShotWork {
     void* m_unk8;          // handed to fn_41_4768C by the boomerang Primid
     u8 unkC[0x4];
     float m_randomAngle;   // 0x10, Botron: a random angle in [0, 90) degrees
-    u8 unk14[0x14];
+    u8 unk14[0x4];
+    // 0x18, Popperam: the launch velocity and acceleration of the shot, the x components already facing the enemy.
+    float m_speedX;
+    float m_speedY;
+    float m_accelX;
+    float m_accelY;
     void* m_constantParam; // 0x28, Botron: an indefinite constant of the shot
     u8 unk2C[0x8];
 };

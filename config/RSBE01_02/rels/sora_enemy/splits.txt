@@ -94,6 +94,13 @@ mo_enemy/sora_enemy/killer/em_killer_param_accesser.cpp:
 	.data       start:0x000084B8 end:0x00008518
 	.bss        start:0x000002F0 end:0x00000308
 
+mo_enemy/sora_enemy/popperam/em_popperam.cpp:
+	.text       start:0x000376F4 end:0x00038C68
+	.ctors      start:0x0000003C end:0x00000040
+	.rodata     start:0x00000EA8 end:0x00000EB0
+	.data       start:0x00008518 end:0x00008F18
+	.bss        start:0x00000308 end:0x00000318
+
 mo_enemy/sora_enemy/popperam/em_popperam_param_accesser.cpp:
 	.text       start:0x00038C68 end:0x00038F7C
 	.ctors      start:0x00000040 end:0x00000044
@@ -128,6 +135,10 @@ mo_enemy/sora_enemy/cymal/em_cymal_param_accesser.cpp:
 	.rodata     start:0x00000ED8 end:0x00000EE0
 	.data       start:0x00009A18 end:0x00009A78
 	.bss        start:0x00000388 end:0x000003A0
+
+mo_enemy/sora_enemy/deathpod/em_deathpod.cpp:
+	.text       start:0x0003A618 end:0x0003B9C8
+	.data       start:0x00009A78 end:0x0000A4E0
 
 mo_enemy/sora_enemy/deathpod/em_deathpod_param_accesser.cpp:
 	.text       start:0x0003B9C8 end:0x0003BC58

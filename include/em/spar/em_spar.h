@@ -13,7 +13,6 @@
 
 // The arrays below are classes of sora_melee: the Spar only calls their constructors and destructors.
 FT_DOL_ARRAY_VECTOR(soInterpolation<Vec3f>, 39);
-FT_DOL_ARRAY_VECTOR(soAreaInstance, 10);
 
 class emSpar;
 

@@ -2302,8 +2302,6 @@ grGimmickMotionPath* Enemy::getMotionPathPtr() {
 // HYPOTHESIS: the model scale the enemy's figure is created with.
 static const u32 ValueFloat_FigureScale = 0xbf3;
 
-// TODO(nonmatching): 95.20%, (a) non-semantic: same calls and arguments; the original loads the owner task id into a
-// saved register before itManager::getInstance, ours loads it after (into the argument register).
 // Drops the trophy (figure) of the enemy at its center: the first call only preloads the figure archive.
 bool Enemy::emCreateFigure(int variation) {
     if (itManager::getInstance()->isCompItemKindArchive(Item_Figure, 0, true) == false) {
@@ -2312,8 +2310,12 @@ bool Enemy::emCreateFigure(int variation) {
     }
     Vec3f pos = moduleAccesser.getModelModule().getNodeGlobalPosition(
         soValueAccesser::getValueInt(&moduleAccesser, ValueInt_CenterNodeId, 0), false);
-    BaseItem* figure = itManager::getInstance()->createItem(&pos, 1.0f, Item_Figure, variation,
-                                                            moduleAccesser.getStageObject().m_taskId);
+    // MATCH-ONLY: the receiver declared before the owner task id keeps the id read before the singleton lookup (TIPS.md,
+    // section 6, item 1).
+    itManager* items;
+    int ownerTaskId = moduleAccesser.getStageObject().m_taskId;
+    items = itManager::getInstance();
+    BaseItem* figure = items->createItem(&pos, 1.0f, Item_Figure, variation, ownerTaskId);
     if (figure == NULL) {
         return false;
     }
