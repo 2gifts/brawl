@@ -32,14 +32,15 @@ public:
     void create(emAIUnitParam* param);
     void reset();
     void resetFlag();
-    void setFlag(u8 flag);
-    u8 getFlag();
+    void setFlag(int flag);
+    int getFlag(); // (callers test the whole register: the byte is returned as an int)
     // Runs the decide anim cmds of the unit for area areaIndex; true: the unit is taken.
     bool execAnimCmdDecide(soModuleAccesser* acc, int animCmdGroup, int areaIndex);
     void execAnimCmdExec(soModuleAccesser* acc, int animCmdGroup);
     int getPriorty();
     int getStatusKind();
-    static bool isTargetKind(u32 mask, int area);
+    // MATCH-ONLY: never_inline, isTargetKind1 tail-calls it in the original.
+    static bool isTargetKind(u32 mask, int area) __attribute__((never_inline));
     bool isTargetKind1(int area);
     bool isSetInfo();
 };

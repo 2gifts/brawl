@@ -91,9 +91,12 @@ FT_DOL_POLY_BEGIN(ftStopModuleImpl, 0x24);
     ftStopModuleImpl(soModuleAccesser* acc);
 FT_DOL_POLY_END;
 
+// so/turn/so_turn_module_impl.h has the full class (the enemy turn unit includes it first).
+#ifndef SO_TURN_MODULE_IMPL_DEFINED
 FT_DOL_POLY_BEGIN(soTurnModuleImpl, 0x38);
     soTurnModuleImpl(soModuleAccesser* acc);
 FT_DOL_POLY_END;
+#endif
 
 FT_DOL_POLY_BEGIN(soShakeModuleImpl, 0x1C);
     soShakeModuleImpl(soModuleAccesser* acc, soArray<soShakeTerm>* terms, void* shakeData);

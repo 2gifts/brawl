@@ -39,8 +39,9 @@ public:
     s32 getUnitId() const { return m_unitID; }
     s32 getManageId() const { return m_manageID; }
 
-#ifdef EM_ENEMY_BUILDER
-    // MATCH-ONLY: the Enemy unit calls the sora_melee copies of the constructor and of initialize.
+#if defined(EM_ENEMY_BUILDER) || defined(SO_EVENT_OBSERVER_CTOR_EXTERN)
+    // MATCH-ONLY: the Enemy unit calls the sora_melee copies of the constructor and of initialize (as does the enemy AI
+    // unit, which opts in with SO_EVENT_OBSERVER_CTOR_EXTERN).
     soEventObserver(s16 unitID);
 #else
     soEventObserver(s16 unitID) {
@@ -163,7 +164,7 @@ public:
     }
 #endif
 
-#ifdef EM_ENEMY_BUILDER
+#if defined(EM_ENEMY_BUILDER) || defined(SO_EVENT_OBSERVER_CTOR_EXTERN)
     void initialize(s16 param1, s8 param2);
 #else
     void initialize(s16 param1, s8 param2) {

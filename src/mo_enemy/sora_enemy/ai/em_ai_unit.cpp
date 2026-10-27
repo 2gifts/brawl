@@ -28,14 +28,17 @@ void emAIUnit::resetFlag() {
     m_flag = m_param->m_initFlag;
 }
 
-void emAIUnit::setFlag(u8 flag) {
+void emAIUnit::setFlag(int flag) {
     m_flag = flag;
 }
 
-u8 emAIUnit::getFlag() {
+int emAIUnit::getFlag() {
     return m_flag;
 }
 
+// TODO(nonmatching): 94.61%, (a) non-semantic: the only masked difference is where the 1.0f frame of
+// soAnimCmdModule::interpretCmd1 is loaded: the original loads it after the integer arguments, as if the frame were the
+// last parameter; so/anim/so_anim_cmd_module_impl.h declares it first (its callers in other units would need changing).
 bool emAIUnit::execAnimCmdDecide(soModuleAccesser* acc, int animCmdGroup, int areaIndex) {
     soAnimCmdModule& animCmd = acc->getAnimCmdModule();
     if (m_param->m_decideAnimCmd == NULL) {
@@ -52,6 +55,7 @@ bool emAIUnit::execAnimCmdDecide(soModuleAccesser* acc, int animCmdGroup, int ar
     return false;
 }
 
+// TODO(nonmatching): 90.47%, (a) non-semantic: the same interpretCmd1 frame load order as execAnimCmdDecide.
 void emAIUnit::execAnimCmdExec(soModuleAccesser* acc, int animCmdGroup) {
     soAnimCmdModule& animCmd = acc->getAnimCmdModule();
     if (m_param->m_execAnimCmd == NULL) {

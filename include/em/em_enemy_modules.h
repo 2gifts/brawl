@@ -204,9 +204,20 @@ struct emKineticEnergyParamDesc {
     emKineticEnergyParamDesc(void* params, int num) : m_params(params), m_num(num) { }
 };
 
+// One kinetic energy of an enemy (module map names; the class is in a later sora_enemy unit).
+class emKineticEnergy {
+public:
+    bool isInvalidEnergy();
+    void reverseLr();
+};
+
 class emKineticModuleImpl : public soKineticModule {
     u8 unk[0xBD4 - sizeof(soKineticModule)];
 public:
+    // Module map names (used by emTurnModuleImpl).
+    emKineticEnergy* getEmEnergy(int index);
+    bool isEnergyEnd(int index);
+    void updateEnergyAsId(int index);
     emKineticModuleImpl(soModuleAccesser* acc, const emKineticEnergyParamDesc& energies);
     virtual ~emKineticModuleImpl();
     // HYPOTHESIS: the argument is an energy index (-1: all energies), as in soKineticModule::updateEnergy.

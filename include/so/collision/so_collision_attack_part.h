@@ -249,7 +249,12 @@ struct soCollisionAttackData {
             soCollision::SituationMask m_targetSituation : 3;            // up to 0x7
             bool m_targetLr : 1;                          // up to 0x1 // unused in vBrawl?
             soCollision::PartMask m_targetPart : 4;                 // up to 0xf
+#ifdef SO_COLLISION_ATTACK_DATA_WORD_FIELDS
+            // MATCH-ONLY (opt-in, the enemy hit module): read unsigned from the word, as that unit's original does.
+            u32 m_attribute : 5;
+#else
             Attribute m_attribute : 5;     // up to 0x1f
+#endif
             SoundLevel m_soundLevel : 2; // up to 0x3
             SoundAttribute m_soundAttribute : 5;   // up to 0x1f
             SetOffKind m_setOffKind : 2; // up to 0x3
@@ -260,7 +265,11 @@ struct soCollisionAttackData {
             unsigned int m_subShield : 9; // up to 0x1ff added shield damage
             unsigned int field_0x34_9 : 10;     // ~up to 0x3ff
             unsigned int m_serialHitFrame : 16;    // up to 0xffff detectionRate
+#ifdef SO_COLLISION_ATTACK_DATA_WORD_FIELDS
+            u32 m_isDirect : 1;
+#else
             bool m_isDirect : 1;
+#endif
             bool m_isInvalidInvincible : 1;   // ignore invincibility
             bool m_isInvalidXlu : 1; // ignore intangibility
             LrCheck m_lrCheck : 3; // up to 0x7

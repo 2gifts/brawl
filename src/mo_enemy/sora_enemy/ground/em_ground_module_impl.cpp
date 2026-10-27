@@ -16,16 +16,11 @@ extern char lbl_27_bss_2AC[];
 
 static const u32 WorkFlag_Front = 0x12000003; // the enemy faces the camera (see Enemy::getEmTopNRot)
 
-// TODO(nonmatching): 80.63%, (a) non-semantic: the tracer is built by sora_melee's out-of-line soGroundTracerImpl
-// constructor (fn_27_311F8); so/ground/so_ground_tracer_impl.h declares none, so the implicit one is expanded here
-// (the vtable and isNull stores instead of the call). The destructor already calls the sora_melee one (fn_27_31270, an
-// unnamed symbol there, so the relocation names differ until both are named in sora_melee's symbols.txt).
 // HYPOTHESIS: the last parameter of the soGroundModuleImpl constructor is the ground tracer (the shared header calls it
 // a soEventObserverRegistrationDesc*); the module keeps it as m_groundTracer.
 emGroundModuleImpl::emGroundModuleImpl(soModuleAccesser* acc, soArray<soGroundShapeImpl>* shapes, void* groundData)
-    : soGroundModuleImpl(acc, shapes, EM_DEFAULT_GROUND_CONDITION_CHECKER,reinterpret_cast<soEventObserverRegistrationDesc*>(&m_tracer)) {
-    m_vtxNodeData = static_cast<emGroundVtxNodeData*>(groundData);
-}
+    : soGroundModuleImpl(acc, shapes, EM_DEFAULT_GROUND_CONDITION_CHECKER,reinterpret_cast<soEventObserverRegistrationDesc*>(&m_tracer)),
+      m_vtxNodeData(static_cast<emGroundVtxNodeData*>(groundData)) { }
 
 emGroundModuleImpl::~emGroundModuleImpl() { }
 
@@ -47,7 +42,8 @@ void emGroundModuleImpl::updateVtxFromNodeSub(u32 nodeId, u32 vtxIndex, bool ini
 }
 
 // TODO(nonmatching): 97.37%, (a) non-semantic: in the second loop the original computes the entry offset (i * 8) before
-// loading the table pointer; the instructions are the same, one is scheduled earlier.
+// loading the table pointer; the instructions are the same, one is scheduled earlier. (Tried: pointer arithmetic,
+// an entry pointer, index-first subscripting; none moves it.)
 void emGroundModuleImpl::updateVtxFromNode(bool init) {
     emGroundVtxNodeData* data = m_vtxNodeData;
     if (data == NULL) {

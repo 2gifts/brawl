@@ -77,7 +77,8 @@ public:
     void createUnitAll();
     void reset();
     void resetFlag(int unitIndex);
-    void setFlag(u8 flag, int unitIndex);
+    // (int flags: the original passes the value on to emAIUnit::setFlag without narrowing it.)
+    void setFlag(int flag, int unitIndex);
     // Runs the AI units whose priority lies in [priMin, priMax]; true when one of them requested a status.
     // HYPOTHESIS: the meaning of the bounds (emStatusModuleImpl::checkTransition passes its priority window).
     bool update(int priMin, int priMax);

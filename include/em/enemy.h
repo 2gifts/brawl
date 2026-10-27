@@ -298,6 +298,7 @@ public:
 
     emAIModuleImpl& getAIModule() { return m_aiModule; }
     EnemyKind getEnemyKind() const { return m_enemyKind; }
+    u32 getCreateId() const { return m_createId; }
     float initStrength();
     // HYPOTHESIS: parameter type.
     float resetLevel(int level);

@@ -31,6 +31,11 @@ public:
     static bool isTargetFoundDir(soModuleAccesser* acc, s32 p2, s32 p3);
     static Vec3f getTargetPos(soModuleAccesser* acc, u32 p2, bool p3);
     static bool isExistTarget(soModuleAccesser* acc, u32 p2);
+    // Module map names; the area index is the AI's target kind (used by emAIModuleImpl).
+    static bool isInvalidAreaTarget(u32 area);
+    static bool isFighterTargetKind(u32 area);
+    static float getTargetRealDistance(soModuleAccesser* acc, u32 area);
+    static void setTargetFoundInfo(soModuleAccesser* acc, u32 area);
 
     bool checkArea(soModuleAccesser* acc, u32 p2, u32 p3);
     void createAreaDataSet();

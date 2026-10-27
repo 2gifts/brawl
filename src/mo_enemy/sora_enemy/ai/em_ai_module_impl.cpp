@@ -1,5 +1,11 @@
 // The history array of the module has the sora_melee constructor / destructor (see em/em_ai_module_impl.h).
 #define EM_AI_MODULE_IMPL_BUILDER
+// MATCH-ONLY: like the Enemy unit, the observer bases are built by the sora_melee copies of the event observer
+// constructor and of soEventObserver::initialize (EM_ENEMY_BUILDER would also do it, but it conflicts with
+// ft/ft_manager.h).
+#define SO_EVENT_OBSERVER_CTOR_EXTERN
+// MATCH-ONLY: notifyEventCollisionAttack reads the task category of the log as a byte.
+#define SO_COLLISION_LOG_CATEGORY_BYTE
 // The anim cmd argument list destructor is the one of sora_melee.
 #define SO_ARRAY_CONTRACTIBLE_TABLE_DTOR_EXTERN
 // (ft/ft_manager.h specializes soInstanceUnit<soEventUnit*>, so it comes before the event system headers.)
@@ -19,15 +25,10 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
-// TODO(shared header): statics of emAreaModuleImpl (module map names) that em/em_area_module_impl.h does not declare
-// and whose symbols are not named yet; called through their addresses until both are (see the report).
-extern "C" bool fn_41_23314(u32 area);                              // emAreaModuleImpl::isFighterTargetKind
-extern "C" bool fn_41_23164(u32 area);                              // emAreaModuleImpl::isInvalidAreaTarget
-extern "C" void fn_41_26430(soModuleAccesser* acc, u32 area);       // emAreaModuleImpl::setTargetFoundInfo
-extern "C" float fn_41_24570(soModuleAccesser* acc, u32 area);      // emAreaModuleImpl::getTargetRealDistance
 
 // TODO(shared header): the target search module (soModuleAccesser::m_targetSearchModule) has no declared interface; only
-// the slot this unit calls is known. HYPOTHESIS: it tells whether target search unit id sees area.
+// the slot this unit calls is known (+0x20 of soTargetSearchModuleImpl's vtable, sora_melee fn_27_A9D08, unnamed).
+// HYPOTHESIS: it tells whether target search unit id sees area.
 class soTargetSearchModule {
 public:
     virtual void unk08();
@@ -53,12 +54,6 @@ static emAIInfo s_nullAIInfo;
 // The argument at index (a virtual call through the array interface, as in the Enemy unit).
 static inline acCmdArg getCmdArg(const soArrayFixed<const acCmdArgConv>& args, s32 index) {
     return acCmdArg(&args.at(index));
-}
-
-// TODO(shared header): Enemy::m_createId (0xB0) is private and em/enemy.h has no getter yet (patch in the report); this
-// reads the member at its offset until the getter exists.
-static inline u32 getEnemyCreateId(Enemy& enemy) {
-    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(&enemy) + 0xB0);
 }
 
 static inline s16 getEventManageId(soModuleAccesser* acc) {
@@ -116,7 +111,7 @@ void emAIModuleImpl::resetFlag(int unitIndex) {
     }
 }
 
-void emAIModuleImpl::setFlag(u8 flag, int unitIndex) {
+void emAIModuleImpl::setFlag(int flag, int unitIndex) {
     if (isInvalid(unitIndex) == true) {
         return;
     }
@@ -129,18 +124,20 @@ void emAIModuleImpl::setFlag(u8 flag, int unitIndex) {
     }
 }
 
-// The weight of area i for the random choice of update: its rate, scaled for the area kept from the last update.
-static inline float getAreaRate(const float* rates, int keepArea, int i, float keepMul) {
-    float rate = rates[i];
-    if (keepArea == i) {
-        rate *= keepMul;
-        if (rate < 0.0f) {
-            rate = 1.0f;
-        }
+// An AI info that is empty or whose area target is gone (not remembered in the history).
+static inline bool isInvalidAIInfo(soModuleAccesser* acc, const emAIInfo& info) {
+    if (info.m_unitIndex == -2) {
+        return true;
     }
-    return rate;
+    if (info.unk4 == -1) {
+        return true;
+    }
+    return emAreaModuleImpl::isExistTarget(acc, info.unk4) == false;
 }
 
+// TODO(nonmatching): 99.32%, (a) non-semantic: the masked diff is empty except the base of the float constant pool the
+// function addresses through one register (lbl_41_rodata_D98 in the original, the unit's anonymous .rodata here): a
+// relocation name only, the bytes are the same.
 bool emAIModuleImpl::update(int priMin, int priMax) {
     if (m_isInactive == true) {
         return false;
@@ -161,16 +158,30 @@ bool emAIModuleImpl::update(int priMin, int priMax) {
     int total = 0;
     float keepMul = soValueAccesser::getValueFloat(m_moduleAccesser, ValueFloat_AIKeepAreaRateMul, 0);
     for (int i = 0; i < 8; i++) {
-        if (fn_41_23314(i) && emAreaModuleImpl::isExistTarget(m_moduleAccesser, i)) {
-            total = total + getAreaRate(areaRates, m_keepArea, i, keepMul);
+        if (emAreaModuleImpl::isFighterTargetKind(i) && emAreaModuleImpl::isExistTarget(m_moduleAccesser, i)) {
+            float rate = areaRates[i];
+            if (m_keepArea == i) {
+                rate *= keepMul;
+                if (rate < 0.0f) {
+                    rate = 1.0f;
+                }
+            }
+            total = total + rate;
         }
     }
     if (total > 0) {
         int rnd = randi(total);
         int sum = 0;
         for (int i = 0; i < 8; i++) {
-            if (fn_41_23314(i) && emAreaModuleImpl::isExistTarget(m_moduleAccesser, i)) {
-                sum = sum + getAreaRate(areaRates, m_keepArea, i, keepMul);
+            if (emAreaModuleImpl::isFighterTargetKind(i) && emAreaModuleImpl::isExistTarget(m_moduleAccesser, i)) {
+                float rate = areaRates[i];
+                if (m_keepArea == i) {
+                    rate *= keepMul;
+                    if (rate < 0.0f) {
+                        rate = 1.0f;
+                    }
+                }
+                sum = sum + rate;
                 if (rnd < sum) {
                     pickedArea = i;
                     break;
@@ -195,7 +206,7 @@ bool emAIModuleImpl::update(int priMin, int priMax) {
         }
         for (int area = 0; area < 8; area++) {
             bool isPicked = false;
-            if (!unit->isTargetKind1(8) && pickedArea != -1 && fn_41_23314(area) == true) {
+            if (!unit->isTargetKind1(8) && pickedArea != -1 && emAreaModuleImpl::isFighterTargetKind(area) == true) {
                 if (pickedArea != area) {
                     continue;
                 }
@@ -206,7 +217,10 @@ bool emAIModuleImpl::update(int priMin, int priMax) {
                 continue;
             }
             if (!unit->isTargetKind1(area)) {
-                if (!unit->isTargetKind1(8) || area != m_currentInfo.unk4) {
+                if (!unit->isTargetKind1(8)) {
+                    continue;
+                }
+                if (area != m_currentInfo.unk4) {
                     continue;
                 }
             } else if (!emAreaModuleImpl::isExistTarget(m_moduleAccesser, area)) {
@@ -268,7 +282,7 @@ bool emAIModuleImpl::update(int priMin, int priMax) {
         int total = 0;
         for (int i = 0; i < candidateNum; i++) {
             int area = candidates[i];
-            if (fn_41_23164(area) == true) {
+            if (emAreaModuleImpl::isInvalidAreaTarget(area) == true) {
                 continue;
             }
             total = total + areaRates[area];
@@ -277,7 +291,7 @@ bool emAIModuleImpl::update(int priMin, int priMax) {
         int sum = 0;
         for (int i = 0; i < candidateNum; i++) {
             int area = candidates[i];
-            if (fn_41_23164(area) == true) {
+            if (emAreaModuleImpl::isInvalidAreaTarget(area) == true) {
                 continue;
             }
             sum = sum + areaRates[area];
@@ -287,7 +301,7 @@ bool emAIModuleImpl::update(int priMin, int priMax) {
             }
         }
     }
-    if (fn_41_23164(info.unk4) == true) {
+    if (emAreaModuleImpl::isInvalidAreaTarget(info.unk4) == true) {
         return false;
     }
     info.m_unitIndex = areaUnits[info.unk4];
@@ -296,44 +310,28 @@ bool emAIModuleImpl::update(int priMin, int priMax) {
     }
 
     // Remember the previous info, unless it is empty, gone or the same as the last remembered one.
-    bool noPrev;
-    if (m_currentInfo.m_unitIndex == -2) {
-        noPrev = true;
-    } else if (m_currentInfo.unk4 == -1) {
-        noPrev = true;
-    } else {
-        noPrev = emAreaModuleImpl::isExistTarget(m_moduleAccesser, m_currentInfo.unk4) == false;
-    }
-    if (!noPrev) {
-        soArray<emAIInfo>* history = m_history.getArray();
-        if (history->size() <= 0) {
-            if (history->isFull() == true) {
-                history->pop();
-            }
-            history->unshift(m_currentInfo);
+    if (!isInvalidAIInfo(m_moduleAccesser, m_currentInfo)) {
+        if (m_history.getArray()->size() <= 0) {
+            m_history.unshift(m_currentInfo);
         } else {
-            emAIInfo& last = history->at(0);
+            emAIInfo& last = m_history.getArray()->at(0);
             bool same;
             if (m_currentInfo.m_unitIndex != last.m_unitIndex) {
                 same = false;
             } else {
-                same = last.unk4 == m_currentInfo.unk4;
+                same = m_currentInfo.unk4 == last.unk4;
             }
             if (!same) {
-                if (history->isFull() == true) {
-                    history->pop();
-                }
-                history->unshift(m_currentInfo);
+                m_history.unshift(m_currentInfo);
             }
         }
     }
 
     emAIUnit& unit = m_units[info.m_unitIndex];
     if (unit.isSetInfo() == true) {
-        m_currentInfo.m_unitIndex = info.m_unitIndex;
-        m_currentInfo.unk4 = info.unk4;
+        m_currentInfo = info;
         if (emAreaModuleImpl::isExistTarget(m_moduleAccesser, info.unk4) == true) {
-            fn_41_26430(m_moduleAccesser, info.unk4);
+            emAreaModuleImpl::setTargetFoundInfo(m_moduleAccesser, info.unk4);
         }
     }
     m_units[info.m_unitIndex].execAnimCmdExec(m_moduleAccesser, m_animCmdGroup);
@@ -356,6 +354,9 @@ emAIInfo* emAIModuleImpl::getPrevAIInfo(u32 index) {
     return &m_history.getArray()->at(index);
 }
 
+// TODO(nonmatching): 98.04%, (a) non-semantic: the only masked difference is where the 1.0f frame of
+// soAnimCmdModule::interpretCmd1 is loaded (after the integer arguments in the original): the shared header declares
+// the frame as the first parameter, the original evaluates it last (as in emAIUnit::execAnimCmdDecide).
 // Picks one of num choices at random by their weights, among those whose anim cmds allow it; -1: none.
 int emAIModuleImpl::switchRnd(emAIRndEntry* entries, u32 num) {
     int picked = -1;
@@ -402,7 +403,8 @@ int emAIModuleImpl::switchRnd(emAIRndEntry* entries, u32 num) {
             animCmd.resetInterpreter3(m_rndAnimCmdGroup, NULL, m_moduleAccesser);
         }
         // The anim cmds may change the weight.
-        rates[i] = m_moduleAccesser->getWorkManageModule().getFloat(WorkFloat_AIRndRate);
+        float newRate = m_moduleAccesser->getWorkManageModule().getFloat(WorkFloat_AIRndRate);
+        rates[i] = newRate;
         if (isAllowed && !(rates[i] <= 0.0f)) {
             allowed[allowedNum++] = i;
             total += rates[i];
@@ -456,7 +458,7 @@ int emAIModuleImpl::getNearestAreaTargetInTargetSearch(int targetSearchId, u32 a
         if (!targetSearch->isTargetArea(targetSearchId, area)) {
             continue;
         }
-        float dist = fn_41_24570(m_moduleAccesser, area);
+        float dist = emAreaModuleImpl::getTargetRealDistance(m_moduleAccesser, area);
         if (nearestDist > dist) {
             nearest = area;
             nearestDist = dist;
@@ -496,7 +498,7 @@ bool emAIModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* modul
             return true;
         }
         soArrayContractibleTable<const acCmdArgConv> args = acmd->getArgList();
-        u8 flag;
+        int flag;
         if (type == 0) {
             flag = true;
         } else if (type == 1) {
@@ -546,13 +548,17 @@ bool emAIModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* modul
             return true;
         }
         u32 workId = getCmdArg(args, 2).getValueIndexData();
-        moduleAccesser->getWorkManageModule().setInt(getNearestAreaTargetInTargetSearch(targetSearchId, areaMask), workId);
+        int nearest = getNearestAreaTargetInTargetSearch(targetSearchId, areaMask);
+        moduleAccesser->getWorkManageModule().setInt(nearest, workId);
         return true;
     }
     }
     return false;
 }
 
+// TODO(nonmatching): 99.17%, (a) non-semantic: the masked diff is one extra conditional branch in the original's
+// switch tree (a `blt` to the same exit for categories 7..9 after the Category_Fighter compare); the cases, their
+// bodies and the order of the tests are the same. Tried return / default variants.
 // Records what the enemy's attack hit (see m_attackAreaTarget).
 void emAIModuleImpl::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
     if (collisionLog == NULL) {
@@ -562,7 +568,7 @@ void emAIModuleImpl::notifyEventCollisionAttack(float power, soCollisionLog* col
     if (taskId == -1) {
         return;
     }
-    gfTask* task = gfTaskScheduler::getInstance()->getTaskById(collisionLog->m_taskCategory, taskId);
+    gfTask* task = gfTaskScheduler::getInstance()->getTaskById(static_cast<gfTask::Category>(collisionLog->m_taskCategory), taskId);
     if (task == NULL) {
         return;
     }
@@ -571,13 +577,17 @@ void emAIModuleImpl::notifyEventCollisionAttack(float power, soCollisionLog* col
         break;
     case gfTask::Category_Fighter: {
         Fighter& fighter = dynamic_cast<Fighter&>(*task);
-        if (fighter.m_entryId == g_ftManager->getEntryId(0)) {
+        int entryId = fighter.m_entryId;
+        if (entryId == g_ftManager->getEntryId(0)) {
             if (g_ftManager->getFighter(fighter.m_entryId, -1) == task) {
                 m_attackAreaTarget |= 1;
             } else {
                 m_attackAreaTarget |= 2;
             }
-        } else if (fighter.m_entryId == g_ftManager->getEntryId(1)) {
+            break;
+        }
+        entryId = fighter.m_entryId;
+        if (entryId == g_ftManager->getEntryId(1)) {
             if (g_ftManager->getFighter(fighter.m_entryId, -1) == task) {
                 m_attackAreaTarget |= 4;
             } else {
@@ -587,10 +597,10 @@ void emAIModuleImpl::notifyEventCollisionAttack(float power, soCollisionLog* col
         break;
     }
     case gfTask::Category_Enemy: {
-        u32 createId = getEnemyCreateId(dynamic_cast<Enemy&>(moduleAccesser->getStageObject()));
+        u32 createId = dynamic_cast<Enemy&>(moduleAccesser->getStageObject()).getCreateId();
         // HYPOTHESIS: the parent create id is looked up and not used (the original discards the result).
         emManager::getInstance()->getEnemyParentCreateId(createId);
-        if (createId == getEnemyCreateId(dynamic_cast<Enemy&>(*task))) {
+        if (createId == dynamic_cast<Enemy&>(*task).getCreateId()) {
             m_attackAreaTarget |= 0x10;
         } else {
             m_attackAreaTarget |= 0x20;

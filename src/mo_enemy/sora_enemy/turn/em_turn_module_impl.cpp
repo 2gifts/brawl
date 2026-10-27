@@ -1,17 +1,15 @@
 // The full soTurnModuleImpl layout (see em/turn/em_turn_module_impl.h).
 #define EM_TURN_MODULE_IMPL_FULL
+#define SO_TURN_MODULE_IMPL_FULL
 // The anim cmd argument list destructor is the one of sora_melee.
 #define SO_ARRAY_CONTRACTIBLE_TABLE_DTOR_EXTERN
 // MATCH-ONLY: like the Enemy unit, the constructor calls the sora_melee copies of the event observer constructor and
 // of soEventObserver::initialize.
 #define EM_ENEMY_BUILDER
-#include <em/turn/em_turn_module_impl.h>
-// MATCH-ONLY: ft/builder/ft_dol_types.h (included by em/enemy.h) defines an opaque soTurnModuleImpl for the units that
-// only embed the module; it is renamed away here, where the full class above is in scope.
-// TODO(shared header): a guard in ft_dol_types.h (like its SO_CONTROLLER_CLATTER_DEFINED one) would replace this.
-#define soTurnModuleImpl soTurnModuleImpl_FtDolOpaque
+// (First: the full soTurnModuleImpl must come before the opaque one of ft/builder/ft_dol_types.h, which it disables.)
+#include <so/turn/so_turn_module_impl.h>
 #include <em/enemy.h>
-#undef soTurnModuleImpl
+#include <em/turn/em_turn_module_impl.h>
 #include <ac/ac_anim_cmd_impl.h>
 #include <so/event/so_event_manage_module_impl.h>
 #include <so/event/so_event_system.h>
@@ -68,23 +66,22 @@ void emTurnModuleImpl::updateSubReverseLr(emKineticModuleImpl* kinetic, soPostur
         if (i == 0) {
             continue;
         }
-#ifdef EM_KINETIC_ENERGY_ACCESS
         emKineticEnergy* energy = kinetic->getEmEnergy(i);
         if (energy->isInvalidEnergy() == 0) {
             energy->reverseLr();
         }
-#endif
     }
 }
 
 void emTurnModuleImpl::update(bool active) {
-    if (!isTurn() || !active) {
+    if (isTurn() == false) {
+        return;
+    }
+    if (active == false) {
         return;
     }
     emKineticModuleImpl& kinetic = dynamic_cast<emKineticModuleImpl&>(m_moduleAccesser->getKineticModule());
-#ifdef EM_KINETIC_ENERGY_ACCESS
     kinetic.updateEnergyAsId(m_energyId);
-#endif
     kinetic.updateEnergyPost(m_energyId);
     soPostureModule& posture = m_moduleAccesser->getPostureModule();
     Enemy& enemy = dynamic_cast<Enemy&>(m_moduleAccesser->getStageObject());
@@ -100,10 +97,7 @@ void emTurnModuleImpl::update(bool active) {
         }
     }
     m_rotY = rot.m_y;
-#ifdef EM_KINETIC_ENERGY_ACCESS
-    if (kinetic.isEnergyEnd(m_energyId) == true)
-#endif
-    {
+    if (kinetic.isEnergyEnd(m_energyId) == true) {
         posture.updateRotYLr();
         if (m_changeLr == true && !m_lrReversed) {
             updateSubReverseLr(&kinetic, &posture);
