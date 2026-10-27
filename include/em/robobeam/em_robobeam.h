@@ -13,8 +13,8 @@
 #include <wn/wn_em_sw_holder.h>
 
 // The arrays below are classes of sora_melee: the Robobeam only calls their constructors and destructors.
-// (soArrayVector<soAreaInstance, 8> is shared with the Hammer Bro: em/em_module_arrays.h declares it.)
-FT_DOL_ARRAY_VECTOR(soInterpolation<Vec3f>, 54);
+// (soArrayVector<soInterpolation<Vec3f>, 54> and <soAreaInstance, 8> are shared with other enemies: em/em_module_arrays.h
+// declares them.)
 
 class emRobobeam;
 
@@ -34,7 +34,7 @@ class emRobobeam : public Enemy {
     // HYPOTHESIS: one 0x20-byte work entry per area instance, as for the Primid and the Hammer Bro.
     u8 m_areaWork[0x100];                                        // 0x5E68
     emTargetSearchUnit m_targetSearchUnits[1];                   // 0x5F68
-    emAIEntry m_aiEntries[23];                                   // 0x5F80, AI module
+    emAIUnit m_aiUnits[23];                                      // 0x5F80, AI module
     soArrayVector<soCameraSubject, 1> m_cameraSubjects;          // 0x6038, camera module
     emRobobeamArticleMediator m_articleMediator;                 // 0x6088, generate-article-manage module
 

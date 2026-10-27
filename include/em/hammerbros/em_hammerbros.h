@@ -33,7 +33,7 @@ class emHammerbros : public Enemy {
     // HYPOTHESIS: one 0x20-byte work entry per area instance, as for the Primid (8 instances, 0x100 bytes).
     u8 m_areaWork[0x100];                                        // 0x5A48
     emTargetSearchUnit m_targetSearchUnits[2];                   // 0x5B48
-    emAIEntry m_aiEntries[29];                                   // 0x5B78, AI module
+    emAIUnit m_aiUnits[29];                                      // 0x5B78, AI module
     soArrayVector<soCameraSubject, 1> m_cameraSubjects;          // 0x5C60, camera module
     emHammerbrosArticleMediator m_articleMediator;               // 0x5CB0, generate-article-manage module
 

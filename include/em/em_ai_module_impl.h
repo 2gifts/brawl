@@ -18,7 +18,6 @@
 #include <types.h>
 
 class soModuleAccesser;
-struct emAIEntry;
 
 // The AI unit the module last took and the area it took it for (-2 / -1: none).
 // NOTE: unk4 keeps the name the param accesser units (duon, porky) read it by.
@@ -63,9 +62,8 @@ public:
     soArrayQueueImpl<soArrayVector<emAIInfo, 2> > m_history;  // 0x3C the previous AI infos
     emAIInfo m_currentInfo;                                   // 0x5C
 
-    // NOTE: entries are the AI units (the parameter is declared with the emAIEntry name of em/enemy.h; see em_ai_unit.h).
     // HYPOTHESIS: aiData is the enemy's AI parameter block (a soValueAccesser constant); 6 and 7 are passed by every enemy.
-    emAIModuleImpl(soModuleAccesser* acc, emAIEntry* entries, void* aiData, int entryNum, int p5, int p6);
+    emAIModuleImpl(soModuleAccesser* acc, emAIUnit* entries, void* aiData, int entryNum, int p5, int p6);
     ~emAIModuleImpl();
     virtual bool isObserv(char group);
     virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);

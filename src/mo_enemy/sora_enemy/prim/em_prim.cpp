@@ -4,6 +4,8 @@
 // YK_STAGE_FULL gives StageObject the long notifyEventAnimCmd slot; Weapon must override that same slot, or its own
 // declaration adds one and every later Weapon virtual (deactivateArticle ...) is called one slot too far.
 #define WN_WEAPON_ANIMCMD_LONG
+// Its IpNull vtable points at Input::getContNo, as the Enemy unit's does.
+#define IP_NULL_INPUT_CONT_NO
 #include <em/prim/em_prim.h>
 #include <em/em_shot.h>
 #include <so/so_external_value_accesser.h>
@@ -14,15 +16,10 @@
 
 // The shared shot helpers of the enemy activators are declared in em/em_shot.h.
 
-extern "C" {
-// emAIModuleImpl: notifies the AI of an event.
-void fn_41_28F74(emAIModuleImpl* ai, int, int);
-}
-
 // ---- construction ---------------------------------------------------------------------------------------------------
 
 emPrim::emPrim(u32 p1, emCreate* create) :
-    Enemy(p1, create, &m_interpolations, &m_areaInstances, m_areaWork, m_targetSearchUnits, m_aiEntries,
+    Enemy(p1, create, &m_interpolations, &m_areaInstances, m_areaWork, m_targetSearchUnits, m_aiUnits,
           &m_articleMediator, lbl_27_bss_A5C, &m_cameraSubjects, reinterpret_cast<soReflectModule*>(g_soReflectModuleNull)),
     m_interpolations(44, 0),
     m_areaInstances(17, 0),
@@ -42,7 +39,7 @@ bool emPrim::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccess
     if (enemy.getEnemyKind() == Enemy_Prim_Boomerang) {
         if (param->m_shotKind == 1 || param->m_shotKind == 2) {
             lbl_41_bss_504.m_unk6 = false;
-            fn_41_4768C(lbl_41_bss_504.m_unk8, param, moduleAccesser, false, 0);
+            emWeaponUtil::calcWeaponRotation(lbl_41_bss_504.m_nodeId, param, moduleAccesser, false, 0);
         }
     }
     fn_41_47A2C(param, moduleAccesser, true);
@@ -79,9 +76,9 @@ bool emPrim::activeArticle1(wnemSimple* article, soModuleAccesser* moduleAccesse
 void emPrim::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* sender, int unk4) {
     if (m_enemyKind == Enemy_Prim_Boomerang) {
         switch (eventInfo->m_eventKind) {
-        // HYPOTHESIS: the boomerang came back to the thrower; the AI is told (event 0x4D) and the event consumed.
+        // HYPOTHESIS: the boomerang came back to the thrower; AI unit 0x4D gets flag 1 and the event is consumed.
         case 0x13fe:
-            fn_41_28F74(&m_aiModule, 1, 0x4d);
+            m_aiModule.setFlag(1, 0x4d);
             eventInfo->_0x4 = true;
             break;
         }

@@ -1,3 +1,5 @@
+// soAnimCmdModule::interpretCmd1 takes the frame last (see so/anim/so_anim_cmd_module_impl.h).
+#define SO_ANIM_CMD_INTERPRET_CMD1_FRAME_LAST
 #include <em/ai/em_ai_unit.h>
 #include <so/anim/so_anim_cmd_module_impl.h>
 #include <so/so_module_accesser.h>
@@ -36,9 +38,6 @@ int emAIUnit::getFlag() {
     return m_flag;
 }
 
-// TODO(nonmatching): 94.61%, (a) non-semantic: the only masked difference is where the 1.0f frame of
-// soAnimCmdModule::interpretCmd1 is loaded: the original loads it after the integer arguments, as if the frame were the
-// last parameter; so/anim/so_anim_cmd_module_impl.h declares it first (its callers in other units would need changing).
 bool emAIUnit::execAnimCmdDecide(soModuleAccesser* acc, int animCmdGroup, int areaIndex) {
     soAnimCmdModule& animCmd = acc->getAnimCmdModule();
     if (m_param->m_decideAnimCmd == NULL) {
@@ -47,7 +46,7 @@ bool emAIUnit::execAnimCmdDecide(soModuleAccesser* acc, int animCmdGroup, int ar
     acc->getWorkManageModule().offFlag(WorkFlag_AIDecided);
     acc->getWorkManageModule().setInt(areaIndex, WorkInt_AIArea);
     animCmd.resetInterpreter3(animCmdGroup, m_param->m_decideAnimCmd, acc);
-    animCmd.interpretCmd1(1.0f, animCmdGroup, acc);
+    animCmd.interpretCmd1(animCmdGroup, acc, 1.0f);
     if (acc->getWorkManageModule().isFlag(WorkFlag_AIDecided) == true) {
         return true;
     }
@@ -55,14 +54,13 @@ bool emAIUnit::execAnimCmdDecide(soModuleAccesser* acc, int animCmdGroup, int ar
     return false;
 }
 
-// TODO(nonmatching): 90.47%, (a) non-semantic: the same interpretCmd1 frame load order as execAnimCmdDecide.
 void emAIUnit::execAnimCmdExec(soModuleAccesser* acc, int animCmdGroup) {
     soAnimCmdModule& animCmd = acc->getAnimCmdModule();
     if (m_param->m_execAnimCmd == NULL) {
         return;
     }
     animCmd.resetInterpreter3(animCmdGroup, m_param->m_execAnimCmd, acc);
-    animCmd.interpretCmd1(1.0f, animCmdGroup, acc);
+    animCmd.interpretCmd1(animCmdGroup, acc, 1.0f);
     animCmd.resetInterpreter3(animCmdGroup, NULL, acc);
 }
 

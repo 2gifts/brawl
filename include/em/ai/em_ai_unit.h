@@ -2,9 +2,8 @@
 
 // One AI unit of an enemy (mo_enemy/sora_enemy/ai/em_ai_unit.cpp): an action the AI module can pick, described by a
 // parameter block of the enemy kind. The Enemy constructor builds emInfo::getAINum of them and hands them to
-// emAIModuleImpl.
-// NOTE: em/enemy.h declares the same 8-byte object as emAIEntry (a hypothesized name, which the mangled names of the
-// Enemy and emAIModuleImpl constructors in symbols.txt carry); the module map calls the class emAIUnit.
+// emAIModuleImpl. Each enemy class keeps its units in an array the constructor builds with __construct_array and
+// emAIUnit's constructor and destructor (the module map's names for 0x2A470 and 0x2A480).
 
 #include <StaticAssert.h>
 #include <types.h>

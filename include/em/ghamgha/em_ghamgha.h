@@ -33,7 +33,7 @@ class emGhamgha : public Enemy {
     // HYPOTHESIS: one 0x20-byte work entry per area instance, as for the Primid and the Hammer Bro.
     u8 m_areaWork[0xE0];                                         // 0x58A4
     emTargetSearchUnit m_targetSearchUnits[1];                   // 0x5984
-    emAIEntry m_aiEntries[15];                                   // 0x599C, AI module
+    emAIUnit m_aiUnits[15];                                      // 0x599C, AI module
     soArrayVector<soCameraSubject, 1> m_cameraSubjects;          // 0x5A14, camera module
     emGhamghaArticleMediator m_articleMediator;                  // 0x5A64, generate-article-manage module
 

@@ -10,20 +10,13 @@
 // activator of its articles, which aims each shot from one of two launch modes chosen by the shot work. Everything else
 // in this unit is the module storage and the template instances of em/em_article_mediator.h.
 
-// The shared shot helpers of the enemy activators are declared in em/em_shot.h; this one is used only here so far.
-extern "C" {
-// HYPOTHESIS: aims the shot from the given model node (its first argument is handed to a node position query of the
-// model module); the last argument selects how the direction is derived.
-void fn_41_477EC(u32 nodeId, emShotParam* param, soModuleAccesser* acc, bool, int mode);
-}
-
-// HYPOTHESIS: the node id the shot work holds when the shot comes from the Deathpod's second launch point.
+// HYPOTHESIS: the model node of the Deathpod's second launch point (the shoot anim cmd names it in the shot work).
 static const u32 Deathpod_ShotNodeAlt = 11;
 
 // ---- construction ---------------------------------------------------------------------------------------------------
 
 emDeathpod::emDeathpod(u32 p1, emCreate* create) :
-    Enemy(p1, create, &m_interpolations, &m_areaInstances, m_areaWork, m_targetSearchUnits, m_aiEntries,
+    Enemy(p1, create, &m_interpolations, &m_areaInstances, m_areaWork, m_targetSearchUnits, m_aiUnits,
           &m_articleMediator, lbl_27_bss_A5C, &m_cameraSubjects, reinterpret_cast<soReflectModule*>(g_soReflectModuleNull)),
     m_interpolations(16, 0),
     m_areaInstances(10, 0),
@@ -37,12 +30,12 @@ emDeathpod::~emDeathpod() { }
 bool emDeathpod::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
     emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
     Vec3f pos = fn_41_47470(param, moduleAccesser);
-    // emShotWork::m_unk8 is typed as a pointer in em/em_shot.h; the Deathpod reads it as a node id.
-    u32 nodeId = reinterpret_cast<u32>(lbl_41_bss_504.m_unk8);
+    // The shot flies along a model vector of its node: the one selected by 3 from the second launch point, by 2 otherwise.
+    u32 nodeId = lbl_41_bss_504.m_nodeId;
     if (nodeId == Deathpod_ShotNodeAlt) {
-        fn_41_477EC(nodeId, param, moduleAccesser, true, 3);
+        emWeaponUtil::calcWeaponForwordVector(nodeId, param, moduleAccesser, true, 3);
     } else {
-        fn_41_477EC(nodeId, param, moduleAccesser, true, 2);
+        emWeaponUtil::calcWeaponForwordVector(nodeId, param, moduleAccesser, true, 2);
     }
     fn_41_47D8C(&pos, false, article, param, moduleAccesser);
     return false;

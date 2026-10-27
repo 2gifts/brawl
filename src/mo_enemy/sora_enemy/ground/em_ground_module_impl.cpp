@@ -41,9 +41,6 @@ void emGroundModuleImpl::updateVtxFromNodeSub(u32 nodeId, u32 vtxIndex, bool ini
     }
 }
 
-// TODO(nonmatching): 97.37%, (a) non-semantic: in the second loop the original computes the entry offset (i * 8) before
-// loading the table pointer; the instructions are the same, one is scheduled earlier. (Tried: pointer arithmetic,
-// an entry pointer, index-first subscripting; none moves it.)
 void emGroundModuleImpl::updateVtxFromNode(bool init) {
     emGroundVtxNodeData* data = m_vtxNodeData;
     if (data == NULL) {
@@ -54,13 +51,11 @@ void emGroundModuleImpl::updateVtxFromNode(bool init) {
     if (m_moduleAccesser->getWorkManageModule().isFlag(WorkFlag_Front) != true && rotYLr == -90.0f) {
         // Turned away: pair each vertex with the node of the mirrored entry.
         for (u32 i = 0; i < num; i++) {
-            updateVtxFromNodeSub(m_vtxNodeData->m_entries[num - 1 - i].m_nodeId, m_vtxNodeData->m_entries[i].m_vtxIndex,
-                                 init);
+            updateVtxFromNodeSub(getVtxNode(num - 1 - i).m_nodeId, getVtxNode(i).m_vtxIndex, init);
         }
     } else {
         for (u32 i = 0; i < num; i++) {
-            emGroundVtxNode& entry = m_vtxNodeData->m_entries[i];
-            updateVtxFromNodeSub(entry.m_nodeId, entry.m_vtxIndex, init);
+            updateVtxFromNodeSub(getVtxNode(i).m_nodeId, getVtxNode(i).m_vtxIndex, init);
         }
     }
 }

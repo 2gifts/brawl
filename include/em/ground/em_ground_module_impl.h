@@ -43,5 +43,11 @@ public:
     // the camera turned away (rotation -90 without the front flag), the node of the mirrored entry is used.
     void updateVtxFromNode(bool init);
     void updateVtxFromNodeSub(u32 nodeId, u32 vtxIndex, bool init);
+
+    // The vertex / node entry at index. (updateVtxFromNode reads an entry's node id and vertex index through two calls
+    // of this accessor: the original computes the entry offset before loading the table, as two inline expansions do.)
+    const emGroundVtxNode& getVtxNode(u32 index) const {
+        return m_vtxNodeData->m_entries[index];
+    }
 };
 static_assert(sizeof(emGroundModuleImpl) == 0x8C, "Class is wrong size!");

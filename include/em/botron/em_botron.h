@@ -33,7 +33,7 @@ class emBotron : public Enemy {
     // HYPOTHESIS: one 0x20-byte work entry per area instance, as for the Primid and the Hammer Bro.
     u8 m_areaWork[0x160];                                        // 0x58D4
     emTargetSearchUnit m_targetSearchUnits[4];                   // 0x5A34
-    emAIEntry m_aiEntries[20];                                   // 0x5A94, AI module
+    emAIUnit m_aiUnits[20];                                      // 0x5A94, AI module
     soArrayVector<soCameraSubject, 1> m_cameraSubjects;          // 0x5B34, camera module
     emBotronArticleMediator m_articleMediator;                   // 0x5B84, generate-article-manage module
 

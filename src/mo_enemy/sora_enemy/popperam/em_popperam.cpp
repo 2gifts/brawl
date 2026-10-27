@@ -26,7 +26,7 @@ static const u32 WorkInt_CommunicationItemId = 0x1000000f;
 // ---- construction ---------------------------------------------------------------------------------------------------
 
 emPopperam::emPopperam(u32 p1, emCreate* create) :
-    Enemy(p1, create, &m_interpolations, &m_areaInstances, m_areaWork, m_targetSearchUnits, m_aiEntries,
+    Enemy(p1, create, &m_interpolations, &m_areaInstances, m_areaWork, m_targetSearchUnits, m_aiUnits,
           &m_articleMediator, lbl_27_bss_A5C, &m_cameraSubjects, reinterpret_cast<soReflectModule*>(g_soReflectModuleNull)),
     m_interpolations(23, 0),
     m_areaInstances(9, 0),
@@ -85,8 +85,11 @@ bool emPopperam::emShootItem(itKind kind, int variation, void* param, float, flo
         offset.m_x = shootParam->m_offset.m_x;
         offset.m_y = shootParam->m_offset.m_y;
         offset.m_z = shootParam->m_offset.m_z;
-        // HYPOTHESIS: the original passes the offset's address where the overload takes a bool (always true), so the
-        // node position is taken without the offset.
+        // A bug in the game: the original passes the offset's address to the (node, bool) overload, so the pointer becomes
+        // the flag (always true) and the offset is never applied. The call goes through slot 0x98, which every fighter
+        // calls with (node, false/true) and the map names getNodeGlobalPosition(u32, bool); the offset overload is slot
+        // 0x9C (u32, const Vec3f*, bool, bool), taking the address as is. The target turns &offset into 0/1 before the
+        // call (subic/subfe), which only a pointer-to-bool conversion emits.
         Vec3f nodePos = model.getNodeGlobalPosition(shootParam->m_nodeId, &offset);
         pos.m_x = nodePos.m_x;
         pos.m_y = nodePos.m_y;
@@ -101,9 +104,9 @@ bool emPopperam::emShootItem(itKind kind, int variation, void* param, float, flo
         item->addSpeed(&speed, true);
         moduleAccesser.getWorkManageModule().setInt(item->m_instanceId, WorkInt_CommunicationItemId);
     } else {
-        // "Item creation x x x failed! x x x x"
+        // "Item creation x x x failed! x x x"
         OSReport("\x83\x41\x83\x43\x83\x65\x83\x80\x8D\xEC\x90\xAC\x81\x40\x81\x7E\x81\x7E\x81\x7E\x20\x8E\xB8\x94\x73\x81"
-                 "\x49\x20\x81\x7E\x81\x7E\x81\x7E\x81\x7E\n");
+                 "\x49\x20\x81\x7E\x81\x7E\x81\x7E\n");
         return false;
     }
     return true;

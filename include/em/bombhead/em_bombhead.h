@@ -38,7 +38,7 @@ class emBombhead : public Enemy {
     // HYPOTHESIS: one 0x20-byte work entry per area instance, as for the Primid and the Hammer Bro.
     u8 m_areaWork[0x120];                                        // 0x59DC
     emTargetSearchUnit m_targetSearchUnits[3];                   // 0x5AFC
-    emAIEntry m_aiEntries[25];                                   // 0x5B44, AI module
+    emAIUnit m_aiUnits[25];                                      // 0x5B44, AI module
     soArrayVector<soCameraSubject, 1> m_cameraSubjects;          // 0x5C0C, camera module
     emBombheadArticleMediator m_articleMediator;                 // 0x5C5C, generate-article-manage module
 

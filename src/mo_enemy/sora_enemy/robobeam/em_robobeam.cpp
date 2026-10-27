@@ -3,6 +3,8 @@
 #define YK_STAGE_FULL
 // YK_STAGE_FULL gives StageObject the long notifyEventAnimCmd slot; Weapon must override that same slot (see em_prim.cpp).
 #define WN_WEAPON_ANIMCMD_LONG
+// Its IpNull vtable points at Input::getContNo, as the Enemy unit's does.
+#define IP_NULL_INPUT_CONT_NO
 #include <em/robobeam/em_robobeam.h>
 
 // The Robobeam: an Enemy with five wnemSwHolder articles. The class overrides only its destructor, and its articles use
@@ -11,7 +13,7 @@
 // HYPOTHESIS: the beam is fired by the shared Enemy code from the Robobeam's parameters and AI data.
 
 emRobobeam::emRobobeam(u32 p1, emCreate* create) :
-    Enemy(p1, create, &m_interpolations, &m_areaInstances, m_areaWork, m_targetSearchUnits, m_aiEntries,
+    Enemy(p1, create, &m_interpolations, &m_areaInstances, m_areaWork, m_targetSearchUnits, m_aiUnits,
           &m_articleMediator, lbl_27_bss_A5C, &m_cameraSubjects, reinterpret_cast<soReflectModule*>(g_soReflectModuleNull)),
     m_interpolations(54, 0),
     m_areaInstances(8, 0),

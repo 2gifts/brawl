@@ -62,8 +62,10 @@ public:
         m_manageID = -1;
     }
 
-#ifdef FT_MODULE_BUILDER
-    ~soEventObserver(); // MATCH-ONLY: the fighter RELs call the sora_melee instance
+#if defined(FT_MODULE_BUILDER) || defined(SO_EVENT_OBSERVER_DTOR_EXTERN)
+    // MATCH-ONLY: the fighter RELs (and the enemy turn module unit, SO_EVENT_OBSERVER_DTOR_EXTERN) call the sora_melee
+    // instance; an inline body would also emit weak copies of the template's vtable and addObserver.
+    ~soEventObserver();
 #else
     ~soEventObserver() {
         removeObserver(m_manageID);

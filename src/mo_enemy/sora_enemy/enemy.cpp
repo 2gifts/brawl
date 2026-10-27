@@ -3,6 +3,8 @@
 #define YK_STAGE_FULL
 // YK_STAGE_FULL gives StageObject the long notifyEventAnimCmd slot; Weapon must override that same slot (see em_prim.cpp).
 #define WN_WEAPON_ANIMCMD_LONG
+// soAnimCmdModule::interpretCmd1 takes the frame last (see so/anim/so_anim_cmd_module_impl.h).
+#define SO_ANIM_CMD_INTERPRET_CMD1_FRAME_LAST
 // MATCH-ONLY: the unit calls its weak out-of-line copies of Vec3f(float, float, float), operator- and operator+=.
 #define MT_VEC3F_CTOR_NOINLINE
 #define MT_VEC3F_OPERATORS_NOINLINE
@@ -299,7 +301,7 @@ void Enemy::remove(Enemy* enemy) {
 // the resource and slope module arguments, the frame slots of the attribute temporaries and one register in
 // selectCameraSubjects.
 Enemy::Enemy(u32 p1, emCreate* create, soArray<soInterpolation<Vec3f> >* interpolations, soArray<soAreaInstance>* areaInstances,
-             void* areaWork, emTargetSearchUnit* targetSearchUnits, emAIEntry* aiEntries, soArticleMediator* articleMediator,
+             void* areaWork, emTargetSearchUnit* targetSearchUnits, emAIUnit* aiEntries, soArticleMediator* articleMediator,
              void* wind, soArray<soCameraSubject>* cameraSubjects, soReflectModule* reflectModule) :
     StageObject("", 2, 7, 4, true, NULL),
     soStatusEventObserver(-1, -1),
@@ -933,7 +935,7 @@ void Enemy::activate(Vec3f* spawnPos, float lr, float unk, int statusKind) {
     void* animCmdTable = soValueAccesser::getConstantIndefinite(&moduleAccesser, 0xa810, 0);
     if (animCmdTable != NULL) {
         animCmd.resetInterpreter3(0, animCmdTable, &moduleAccesser);
-        animCmd.interpretCmd1(1.0f, 0, &moduleAccesser);
+        animCmd.interpretCmd1(0, &moduleAccesser, 1.0f);
         animCmd.resetInterpreter3(0, NULL, &moduleAccesser);
     }
     moduleAccesser.getStatusModule().changeStatusForce(statusKind, &moduleAccesser);

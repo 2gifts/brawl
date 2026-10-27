@@ -6,6 +6,10 @@
 // MATCH-ONLY: like the Enemy unit, the constructor calls the sora_melee copies of the event observer constructor and
 // of soEventObserver::initialize.
 #define EM_ENEMY_BUILDER
+// MATCH-ONLY: the soAnimCmdEventObserver destructor (a weak copy elsewhere in sora_enemy) calls the sora_melee
+// instance of the observer template's destructor; an inline template destructor would also emit weak copies of the
+// template's vtable and addObserver, which the original unit does not have.
+#define SO_EVENT_OBSERVER_DTOR_EXTERN
 // (First: the full soTurnModuleImpl must come before the opaque one of ft/builder/ft_dol_types.h, which it disables.)
 #include <so/turn/so_turn_module_impl.h>
 #include <em/enemy.h>

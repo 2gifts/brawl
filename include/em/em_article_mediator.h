@@ -395,7 +395,11 @@ extern const wnemDummy_Param lbl_41_data_3E50;
 template <class W, class KindInfo, class Id>
 class emWeaponInstanceHolder {
 public:
-    emWeaponInstanceHolder(soModuleAccesser* acc);
+    emWeaponInstanceHolder(soModuleAccesser* acc) :
+        m_instance(Id::value, static_cast<soEventManager&>(acc->getEventManageModule()).getManageId(),
+                   soArticleConstructInfo(soArticleKindInfo(KindInfo::category, KindInfo::kind),
+                                          acc->m_enumerationStart->m_heapModule),
+                   &lbl_41_data_3E50) { }
     virtual ~emWeaponInstanceHolder() { }
     W* getInstance() { return &m_instance; }
 
@@ -403,9 +407,3 @@ private:
     W m_instance;
 };
 
-template <class W, class KindInfo, class Id>
-emWeaponInstanceHolder<W, KindInfo, Id>::emWeaponInstanceHolder(soModuleAccesser* acc) :
-    m_instance(Id::value, static_cast<soEventManager&>(acc->getEventManageModule()).getManageId(),
-               soArticleConstructInfo(soArticleKindInfo(KindInfo::category, KindInfo::kind),
-                                      acc->m_enumerationStart->m_heapModule),
-               &lbl_41_data_3E50) { }

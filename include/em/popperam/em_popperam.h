@@ -44,7 +44,7 @@ class emPopperam : public Enemy {
     // HYPOTHESIS: one 0x20-byte work entry per area instance, as for the Primid and the Hammer Bro.
     u8 m_areaWork[0x120];                                        // 0x58BC
     emTargetSearchUnit m_targetSearchUnits[3];                   // 0x59DC
-    emAIEntry m_aiEntries[26];                                   // 0x5A24, AI module
+    emAIUnit m_aiUnits[26];                                      // 0x5A24, AI module
     soArrayVector<soCameraSubject, 1> m_cameraSubjects;          // 0x5AF4, camera module
     emPopperamArticleMediator m_articleMediator;                 // 0x5B44, generate-article-manage module
 

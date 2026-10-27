@@ -8,6 +8,8 @@
 #define SO_COLLISION_LOG_CATEGORY_BYTE
 // The anim cmd argument list destructor is the one of sora_melee.
 #define SO_ARRAY_CONTRACTIBLE_TABLE_DTOR_EXTERN
+// soAnimCmdModule::interpretCmd1 takes the frame last (see so/anim/so_anim_cmd_module_impl.h).
+#define SO_ANIM_CMD_INTERPRET_CMD1_FRAME_LAST
 // (ft/ft_manager.h specializes soInstanceUnit<soEventUnit*>, so it comes before the event system headers.)
 #include <ft/ft_manager.h>
 #include <em/enemy.h>
@@ -60,10 +62,10 @@ static inline s16 getEventManageId(soModuleAccesser* acc) {
     return static_cast<soEventManager&>(acc->getEventManageModule()).getManageId();
 }
 
-emAIModuleImpl::emAIModuleImpl(soModuleAccesser* acc, emAIEntry* entries, void* aiData, int entryNum, int p5, int p6)
+emAIModuleImpl::emAIModuleImpl(soModuleAccesser* acc, emAIUnit* entries, void* aiData, int entryNum, int p5, int p6)
     : soAnimCmdEventObserver(getEventManageId(acc), static_cast<s8>(-1)),
       soCollisionAttackEventObserver(getEventManageId(acc), static_cast<s8>(-1)), m_moduleAccesser(acc),
-      m_units(reinterpret_cast<emAIUnit*>(entries)), m_unitParams(static_cast<emAIUnitParam**>(aiData)),
+      m_units(entries), m_unitParams(static_cast<emAIUnitParam**>(aiData)),
       m_unitNum(entryNum), m_animCmdGroup(p5), m_rndAnimCmdGroup(p6), m_attackAreaTarget(0), m_isInactive(false),
       m_keepArea(-1), m_history(2, emAIInfo()) { }
 
@@ -135,9 +137,6 @@ static inline bool isInvalidAIInfo(soModuleAccesser* acc, const emAIInfo& info) 
     return emAreaModuleImpl::isExistTarget(acc, info.unk4) == false;
 }
 
-// TODO(nonmatching): 99.32%, (a) non-semantic: the masked diff is empty except the base of the float constant pool the
-// function addresses through one register (lbl_41_rodata_D98 in the original, the unit's anonymous .rodata here): a
-// relocation name only, the bytes are the same.
 bool emAIModuleImpl::update(int priMin, int priMax) {
     if (m_isInactive == true) {
         return false;
@@ -212,8 +211,8 @@ bool emAIModuleImpl::update(int priMin, int priMax) {
                 }
                 isPicked = true;
             }
-            int other = areaUnits[area];
-            if (!isInvalid(other) && priority >= m_units[other].getPriorty()) {
+            // (areaUnits[area] is subscripted twice: a named local gets a register of its own after the flags.)
+            if (!isInvalid(areaUnits[area]) && priority >= m_units[areaUnits[area]].getPriorty()) {
                 continue;
             }
             if (!unit->isTargetKind1(area)) {
@@ -249,11 +248,10 @@ bool emAIModuleImpl::update(int priMin, int priMax) {
     // Among the areas with a unit, keep those whose unit has the lowest priority value.
     float minPriority = 3.4028235e38f;
     for (int area = 0; area < 8; area++) {
-        int u = areaUnits[area];
-        if (isInvalid(u) == true) {
+        if (isInvalid(areaUnits[area]) == true) {
             continue;
         }
-        float priority = m_units[u].getPriorty();
+        float priority = m_units[areaUnits[area]].getPriorty();
         if (priority < minPriority) {
             minPriority = priority;
         }
@@ -264,11 +262,10 @@ bool emAIModuleImpl::update(int priMin, int priMax) {
         candidates[i] = -1;
     }
     for (int area = 0; area < 8; area++) {
-        int u = areaUnits[area];
-        if (isInvalid(u) == true) {
+        if (isInvalid(areaUnits[area]) == true) {
             continue;
         }
-        float priority = m_units[u].getPriorty();
+        float priority = m_units[areaUnits[area]].getPriorty();
         if (priority <= minPriority) {
             candidates[candidateNum++] = area;
         }
@@ -354,9 +351,6 @@ emAIInfo* emAIModuleImpl::getPrevAIInfo(u32 index) {
     return &m_history.getArray()->at(index);
 }
 
-// TODO(nonmatching): 98.04%, (a) non-semantic: the only masked difference is where the 1.0f frame of
-// soAnimCmdModule::interpretCmd1 is loaded (after the integer arguments in the original): the shared header declares
-// the frame as the first parameter, the original evaluates it last (as in emAIUnit::execAnimCmdDecide).
 // Picks one of num choices at random by their weights, among those whose anim cmds allow it; -1: none.
 int emAIModuleImpl::switchRnd(emAIRndEntry* entries, u32 num) {
     int picked = -1;
@@ -396,7 +390,7 @@ int emAIModuleImpl::switchRnd(emAIRndEntry* entries, u32 num) {
             soAnimCmdModule& animCmd = m_moduleAccesser->getAnimCmdModule();
             m_moduleAccesser->getWorkManageModule().offFlag(WorkFlag_AIDecided);
             animCmd.resetInterpreter3(m_rndAnimCmdGroup, entry->m_animCmd, m_moduleAccesser);
-            animCmd.interpretCmd1(1.0f, m_rndAnimCmdGroup, m_moduleAccesser);
+            animCmd.interpretCmd1(m_rndAnimCmdGroup, m_moduleAccesser, 1.0f);
             if (m_moduleAccesser->getWorkManageModule().isFlag(WorkFlag_AIDecided) == true) {
                 isAllowed = true;
             }
@@ -556,9 +550,6 @@ bool emAIModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* modul
     return false;
 }
 
-// TODO(nonmatching): 99.17%, (a) non-semantic: the masked diff is one extra conditional branch in the original's
-// switch tree (a `blt` to the same exit for categories 7..9 after the Category_Fighter compare); the cases, their
-// bodies and the order of the tests are the same. Tried return / default variants.
 // Records what the enemy's attack hit (see m_attackAreaTarget).
 void emAIModuleImpl::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
     if (collisionLog == NULL) {
@@ -574,6 +565,10 @@ void emAIModuleImpl::notifyEventCollisionAttack(float power, soCollisionLog* col
     }
     switch (task->m_taskCategory) {
     case gfTask::Category_Ground:
+    case gfTask::Category_Item:
+    case gfTask::Category_Weapon:
+        // Hitting the stage, an item or a weapon is not a target. (Item and Weapon are the adjacent values the
+        // original's compare tree folds into its extra range branch; a `default:` does not emit it.)
         break;
     case gfTask::Category_Fighter: {
         Fighter& fighter = dynamic_cast<Fighter&>(*task);

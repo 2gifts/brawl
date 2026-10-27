@@ -21,7 +21,9 @@ struct emShotParam {
     u32 m_shotKind;        // 0xC, Primid: 1/2 boomerang shots, 4 a plain wnemSimple shot; Spar: 0/2 aimed shots
     u32 m_life;            // 0x10, overwritten from a scaled constant when m_lifeConstantId names one
     float m_speed;         // 0x14
-    u8 unk18[0x20];
+    u8 unk18[0x4];
+    u32 m_nodeId;          // 0x1C, the model node the shot starts from unless the anim cmd names one (emShotWork::m_nodeId)
+    u8 unk20[0x18];
     emScaledValue m_speedRange[2]; // 0x38, Popperam: the bounds of the random launch speed
     emScaledValue m_angleRange[2]; // 0x48, Popperam: the bounds of the random launch angle, in degrees
     float m_accel;                 // 0x58, Popperam: a second magnitude along the launch direction (an acceleration)
@@ -48,9 +50,12 @@ struct emShotFlag {
 struct emShotWork {
     emShotParam* m_param;
     u8 unk4[0x2];
-    bool m_unk6;           // cleared by the boomerang Primid before fn_41_4768C
+    bool m_unk6;           // cleared by the boomerang Primid before emWeaponUtil::calcWeaponRotation
     u8 unk7;
-    void* m_unk8;          // handed to fn_41_4768C by the boomerang Primid
+    // 0x8, the model node of the shot: the optional third argument of the shoot anim cmd (Enemy::shoot stores it, as
+    // emWeaponParamWork::unk4 below; -1 when absent), replaced by emShotParam::m_nodeId when it is -1 (fn_41_473DC).
+    // The aiming helpers (emWeaponUtil::calcWeaponRotation, calcWeaponForwordVector) query the model module with it.
+    u32 m_nodeId;
     u8 unkC[0x4];
     float m_randomAngle;   // 0x10, Botron: a random angle in [0, 90) degrees
     u8 unk14[0x4];
@@ -111,13 +116,31 @@ emShotParam* fn_41_473DC(soModuleAccesser* acc, int paramId);
 // The launch position of the shot.
 Vec3f fn_41_47470(emShotParam* param, soModuleAccesser* acc);
 void fn_41_47544(emShotFlag* flag, emShotParam* param);
-void fn_41_4768C(void* target, emShotParam* param, soModuleAccesser* acc, bool, int);
 void fn_41_47A2C(emShotParam* param, soModuleAccesser* acc, bool);
 // Aims the shot from the launch position at the target point (a normalized direction in the xy plane).
 void fn_41_47C64(emShotParam* param, soModuleAccesser* acc, Vec3f* from, Vec3f* to, int);
 // Launches a wnemSwHolder / wnemSimple article from the launch position.
 void fn_41_47D8C(Vec3f* pos, bool flag, wnemSwHolder* article, emShotParam* param, soModuleAccesser* acc);
 void fn_41_47E80(Vec3f* pos, bool flag, wnemSimple* article, emShotParam* param, soModuleAccesser* acc);
+}
+
+// The weapon helpers of the Enemy unit carry map names emWeaponUtil::... (getSimpleWeaponData = fn_41_473DC,
+// setWeaponStartPosition_Basic = fn_41_47470, setWeaponConstraint_Basic = fn_41_47544,
+// calcWeaponStartVector_Basic = fn_41_47A2C, calcWeaponStartVector_AimingTarget1 = fn_41_47C64,
+// activeSimpleWeaponHolder = fn_41_47D8C, activeSimpleWeapon = fn_41_47E80). Those still declared above keep their
+// address names until their callers in the other enemy units move to the real names together.
+namespace emWeaponUtil {
+// Stores the orientation of the given model node in emShotWork's 0xC..0x17: with the bool, the direction of the model
+// vector the int selects through the node's global matrix; without it, the node's global rotation.
+void calcWeaponRotation(u32 nodeId, emShotParam* param, soModuleAccesser* acc, bool useNodeMatrix, int modelVector);
+// The launch velocity and acceleration of the shot (emShotWork::m_speedX..m_accelY) along the forward vector of the
+// given model node: with the bool, its global matrix turned by the model vector the int selects (fn_41_47564, map name
+// emWeaponUtil::getModelVector); without it, the node's global rotation. The speed is a random value from
+// emShotParam::m_speedRange, the acceleration emShotParam::m_accel. HYPOTHESIS: the parameter roles.
+void calcWeaponForwordVector(u32 nodeId, emShotParam* param, soModuleAccesser* acc, bool useNodeMatrix, int modelVector);
+}
+
+extern "C" {
 // wnemSimple's activation.
 void fn_41_3091C(wnemSimple* article, emShotWork* work, int founderTaskId, int ownerId, int, bool flag, Vec3f* pos,
                  int team, float lr, float speed, int, u32 life, s16);

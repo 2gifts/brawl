@@ -32,7 +32,7 @@ class emDeathpod : public Enemy {
     // HYPOTHESIS: one 0x20-byte work entry per area instance, as for the Primid and the Hammer Bro.
     u8 m_areaWork[0x140];                                        // 0x5790
     emTargetSearchUnit m_targetSearchUnits[2];                   // 0x58D0
-    emAIEntry m_aiEntries[15];                                   // 0x5900, AI module
+    emAIUnit m_aiUnits[15];                                      // 0x5900, AI module
     soArrayVector<soCameraSubject, 1> m_cameraSubjects;          // 0x5978, camera module
     emDeathpodArticleMediator m_articleMediator;                 // 0x59C8, generate-article-manage module
 

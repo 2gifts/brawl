@@ -32,7 +32,7 @@ class emKokkon : public Enemy {
     // HYPOTHESIS: one 0x20-byte work entry per area instance, as for the Primid and the Hammer Bro.
     u8 m_areaWork[0x120];                                        // 0x59AC
     emTargetSearchUnit m_targetSearchUnits[2];                   // 0x5ACC
-    emAIEntry m_aiEntries[18];                                   // 0x5AFC, AI module
+    emAIUnit m_aiUnits[18];                                      // 0x5AFC, AI module
     soArrayVector<soCameraSubject, 1> m_cameraSubjects;          // 0x5B8C, camera module
     emKokkonArticleMediator m_articleMediator;                   // 0x5BDC, generate-article-manage module
 

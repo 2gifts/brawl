@@ -144,8 +144,16 @@ public:
     virtual void registInterpreter(const soAnimCmdControlUnit& unit, const soAttributeFlag& attr);
     virtual void interpretCmd();
     virtual void interpretCmdAdjust();
+#ifdef SO_ANIM_CMD_INTERPRET_CMD1_FRAME_LAST
+    // The frame is the last parameter: every unscheduled caller (the sora_enemy REL: Enemy::activate, the AI module and
+    // the AI units) loads the group and the accesser before the frame constant, with the frame's address register
+    // after the integer argument registers. The argument registers (r4, r5, f1) are the same either way, so the
+    // scheduled DOL callers (BaseItem) match with both orders. Opt-in until those callers are checked too.
+    virtual void interpretCmd1(int group, soModuleAccesser* moduleAccesser, float frame);
+#else
     // HYPOTHESIS: parameters read off BaseItem::requestAnimEvent (a frame count, the command group and the accesser).
     virtual void interpretCmd1(float frame, int group, soModuleAccesser* moduleAccesser);
+#endif
     virtual void resetInterpreter1();
     virtual void resetInterpreter2(float frame, int group, soModuleAccesser* moduleAccesser, u32 unk);
     // HYPOTHESIS: parameters from Enemy::activate, which hands group 0 the anim cmd table of its parameters (constant
