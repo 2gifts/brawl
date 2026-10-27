@@ -180,7 +180,7 @@ struct soArticleMediatorActivator;
 bool wnArticleIsActive(soArticle* article);
 
 // Counts the instances the predicate accepts and rejects. MWCC inlines its operator() where a unit calls it once or
-// twice and keeps it out of line for the Cataguard's three pools, as the original does (fn_41_43B8C).
+// twice and keeps it out of line for the Cataguard's three pools, as the original does (0x43B8C).
 // HYPOTHESIS: the name; the original shape is a template functor over the predicate type.
 template <class Fn>
 struct soEachCounter {

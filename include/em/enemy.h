@@ -73,6 +73,9 @@ class emTargetSearchUnit;
 extern char g_soReflectModuleNull[];
 // HYPOTHESIS: a null area object (0x10 bytes of sora_melee bss) for the enemy area module.
 extern char lbl_27_bss_A5C[];
+// HYPOTHESIS: the shared null article mediator of sora_melee (0x18 bytes of bss), which the enemies without articles of
+// their own hand to the Enemy constructor.
+extern char lbl_27_bss_1F0[];
 
 
 // A posture of the enemy kept in its parameters (anim cmd 30, Enemy::setPostureFromParam): a position and a facing.

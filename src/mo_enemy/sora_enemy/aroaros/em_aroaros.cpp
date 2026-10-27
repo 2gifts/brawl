@@ -38,8 +38,9 @@ emAroaros::emAroaros(u32 p1, emCreate* create) :
 
 emAroaros::~emAroaros() { }
 
-// TODO(nonmatching): 89.4% unpatched, (a) non-semantic: only the item's task id is loaded before the link module where
-// the original has it after the unlink block (masked diff; every call, argument and constant agrees).
+// TODO(nonmatching): 98.2%, (a) non-semantic: only the item's task id is loaded after the link module where the original
+// loads it first (instruction order; a named local, a named module reference, gfTask::getTaskId and an inline member
+// helper all come out the same) (masked diff; every call, argument and constant agrees).
 // Creates the item one unit above a node of the model, with the facing lr, and constrains the enemy to it. The
 // parameter block is anim cmd 26's (only the node and the offset are read here).
 bool emAroaros::emShootItem(itKind kind, int variation, void* param, float lr, float) {
@@ -99,13 +100,8 @@ bool emAroaros::emItemInformationReturnEnemy(int instanceId) {
     Vec2f speed;
     speed.m_x = item->getParamFloat(0x16);
     speed.m_y = item->getParamFloat(0x17);
-#if EM_KINETIC_MODULE_IMPL_INTERFACE
     float facing = moduleAccesser.getPostureModule().getLr();
     float angle = emKineticModuleImpl::getKineticAngleFromSpeed(speed, facing);
     moduleAccesser.getWorkManageModule().setFloat(angle, WorkFloat_KineticAngle);
-#else
-    // TODO(nonmatching): needs emKineticModuleImpl::getKineticAngleFromSpeed declared (shared patch, $B/E2).
-    moduleAccesser.getWorkManageModule().setFloat(speed.m_x * moduleAccesser.getPostureModule().getLr(), WorkFloat_KineticAngle);
-#endif
     return true;
 }

@@ -13,7 +13,8 @@ class wnemDamageTransactorImpl : public soDamageTransactorActor {
 public:
     // MATCH-ONLY: the static initializer calls an out-of-line (weak) copy of the constructor.
     wnemDamageTransactorImpl() __attribute__((never_inline)) { }
-    virtual ~wnemDamageTransactorImpl();
+    // Inline: its weak copy follows the actor's inline members, as in the original.
+    virtual ~wnemDamageTransactorImpl() { }
     // HYPOTHESIS: the native return register is pointer-sized; here it is always 0 (no damage value table).
     virtual int getDamageValueParam(soModuleAccesser* moduleAccesser);
     virtual bool onDamageChangeStatusRequest(int statusKind, soModuleAccesser* moduleAccesser, soDamageLog* damageLog);
@@ -34,9 +35,10 @@ public:
     virtual bool onCompositionDamageSpeed(soModuleAccesser* moduleAccesser, soDamage* damage, Vec2f* speed, int level);
     virtual bool onDamage(soModuleAccesser* moduleAccesser, soDamage* damage, soDamageLog* damageLog);
     virtual void setupDamageStatusNormal(soModuleAccesser* moduleAccesser, soDamage* damage, soDamageLog* damageLog, int unk);
-    // HYPOTHESIS: the map attributes this weak copy (returns true) to soDamageTransactorActor, whose declaration here
-    // has no isSpeedDamage of its own; it is declared on the weapon class.
-    virtual bool isSpeedDamage(soModuleAccesser* moduleAccesser);
+#ifndef SO_DAMAGE_TRANSACTOR_ACTOR_INLINE_TAIL
+    // Without the inline actor tail (so/damage/so_damage_transactor_actor.h) the weak copy is declared here.
+    virtual bool isSpeedDamage(soModuleAccesser* moduleAccesser) { return true; }
+#endif
     // The article damage actors' damage-stop callback (see wn/wn_damage_transactor_actor.h); nothing to do here.
     virtual void onLeaveDamageStop(soModuleAccesser* moduleAccesser);
 };

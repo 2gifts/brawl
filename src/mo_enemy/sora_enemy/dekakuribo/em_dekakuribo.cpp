@@ -34,19 +34,12 @@ void emDekakuribo::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser*
         tread->m_handled = false;
         tread->m_node = -1;
         tread->m_pos.m_z = soValueAccesser::getValueFloat(&moduleAccesser, 0xfa2, 0);
-#if EM_DAMAGE_MODULE_IMPL_INTERFACE
         emDamageModuleImpl& damageModule = dynamic_cast<emDamageModuleImpl&>(*moduleAccesser.m_enumerationStart->m_damageModule);
-#endif
         if (g_stTriggerMng != NULL) {
             fn_27_23313C(m_createId, sender->m_taskId, m_taskId, sender->m_taskCategory);
         }
         float damage = soValueAccesser::getValueFloat(&moduleAccesser, 0xfa4, 0);
-#if EM_DAMAGE_MODULE_IMPL_INTERFACE
         if (damageModule.addDamageHp(&damage, 0) == true) {
-#else
-        // TODO(nonmatching): needs emDamageModuleImpl's soDamageModule base and addDamageHp (shared patch, $B/E2).
-        if (damage < 0.0f) {
-#endif
             m_moduleAccesser->getStatusModule().changeStatusRequest(7, m_moduleAccesser);
         } else if (m_moduleAccesser->getSituationModule().getKind() == 0) {
             m_moduleAccesser->getStatusModule().changeStatusRequest(0xe, m_moduleAccesser);

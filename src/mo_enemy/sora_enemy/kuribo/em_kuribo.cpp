@@ -39,12 +39,7 @@ void emKuribo::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* acc
             fn_27_23313C(m_createId, sender->m_taskId, m_taskId, sender->m_taskCategory);
         }
         float damage = moduleAccesser.getWorkManageModule().getFloat(WorkFloat_Strength);
-#if EM_DAMAGE_MODULE_IMPL_INTERFACE
         dynamic_cast<emDamageModuleImpl&>(*moduleAccesser.m_enumerationStart->m_damageModule).addDamageHp(&damage, 0);
-#else
-        // TODO(nonmatching): needs emDamageModuleImpl's soDamageModule base and addDamageHp (shared patch, $B/E2).
-        (void)damage;
-#endif
         m_moduleAccesser->getStatusModule().changeStatusRequest(0xf, m_moduleAccesser);
         return;
     }

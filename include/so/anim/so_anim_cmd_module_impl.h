@@ -155,7 +155,14 @@ public:
     virtual void interpretCmd1(float frame, int group, soModuleAccesser* moduleAccesser);
 #endif
     virtual void resetInterpreter1();
+#ifdef SO_ANIM_CMD_RESET_INTERPRETER2_FRAME_LAST
+    // The frame is the last parameter here too: the Paratroopa's tread handler (sora_enemy) loads it after the integer
+    // arguments. Opt-in for the enemy units, like interpretCmd1's order above.
+#define SO_ANIM_CMD_RESET_INTERPRETER2_FRAME_LAST_DECLARED 1
+    virtual void resetInterpreter2(int group, soModuleAccesser* moduleAccesser, u32 unk, float frame);
+#else
     virtual void resetInterpreter2(float frame, int group, soModuleAccesser* moduleAccesser, u32 unk);
+#endif
     // HYPOTHESIS: parameters from Enemy::activate, which hands group 0 the anim cmd table of its parameters (constant
     // 0xA810), runs it once with interpretCmd1 and resets the group with NULL.
     virtual void resetInterpreter3(int group, void* animCmdTable, soModuleAccesser* moduleAccesser);

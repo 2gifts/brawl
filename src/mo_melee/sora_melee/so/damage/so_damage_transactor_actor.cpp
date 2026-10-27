@@ -234,7 +234,7 @@ void soDamageTransactorActor::setupDamageStatusNormal(soModuleAccesser* moduleAc
     if (statusKind == 4) {
         statusKind = soDamageUtilActor::getDamageFlyStatus(moduleAccesser, damage->m_damage, angle);
     }
-    int hitStopFrame = soDamageUtilActor::getDamageHitStopFrame(moduleAccesser, damage, false, 1.0f);
+    int hitStopFrame = soDamageUtilActor::getDamageHitStopFrame(moduleAccesser, damage, 1.0f, false);
     float hitStopMul = getHitStopMul(moduleAccesser);
     if (1.0f != hitStopMul) {
         hitStopFrame = (int)((float)hitStopFrame * hitStopMul);
@@ -418,7 +418,7 @@ void soDamageTransactorActor::setupDamageStatusNoReaction(soModuleAccesser* modu
     float frameMul = soValueAccesser::getConstantFloat(moduleAccesser, 2002, 0);
     int level = soDamageUtilActor::getDamageLevel(moduleAccesser, damage->m_reaction * frameMul);
     moduleAccesser->getDamageModule().getEffector()->reqUniqEffect(moduleAccesser, level, &damage->m_attackData);
-    int hitStopFrame = soDamageUtilActor::getDamageHitStopFrame(moduleAccesser, damage, true, 1.0f);
+    int hitStopFrame = soDamageUtilActor::getDamageHitStopFrame(moduleAccesser, damage, 1.0f, true);
     if (hitStopFrame > 0) {
         moduleAccesser->getStopModule().setHitStopFrame(hitStopFrame, true);
     }
