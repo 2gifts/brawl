@@ -74,9 +74,9 @@ struct emWeaponParamWork {
         unk2 = true;
         unk24 = 0;
         unk4 = -1;
-        unk8[2] = unk8[1] = unk8[0] = 0.0f;
-        unk8[4] = unk8[3] = 0.0f;
-        unk8[6] = unk8[5] = 0.0f;
+        unk8[0] = unk8[1] = unk8[2] = 0.0f;
+        unk8[3] = unk8[4] = 0.0f;
+        unk8[5] = unk8[6] = 0.0f;
         m_addressPack = NULL;
     }
 };
