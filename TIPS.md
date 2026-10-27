@@ -699,3 +699,8 @@ Same source. These apply when the decomp is built for PC:
 ## Shared wind energy
 
 - **Whole-vector snapshots can need aggregate copies even when scalar values agree:** wind's speed snapshot and subtraction-result snapshot gained the native word-copy lifetimes with `Vec2f::copy`. The scoped `MT_VEC2F_PLAIN_BASE` policy retained those copies with ordinary value locals; `MT_VEC2F_LENGTH_SQ_SINGLE_EXPR` also restored the final length check's register choices. Two extra current-velocity reloads after the magnitude comparison remain unresolved, so these policies alone do not make the update exact. Seen: `so_kinetic_energy_wind_normal.cpp` (98.72%). **MED**
+
+## Shared kinetic utilities
+
+- **The two ground projections return different velocity representations:** `projectionNormalFollow` returns world XY along the floor tangent; `projectionGroundSpeed` projects that velocity, then stores its signed magnitude in X with Y zero for a ground-energy reset. Braking returns an acceleration after correction, and negative targets disable that correction. Seen: `so_kinetic_utility.cpp`. **HIGH**
+- **Distinct return paths and zero/prediction lifetimes can matter in a small scalar helper:** retaining a return inside the active-braking branch and another outside it reproduced both native epilogues. Initializing the prediction to zero, using it in the guard, then replacing it with speed plus acceleration inside the branch reproduced the remaining floating-point registers. Scheduling, IPA and inline-option probes did not resolve this unit's vector-wrapper entry differences; no flag changes were retained. Seen: `soKineticUtility::brakeSpeedSub` (exact). **MED**
