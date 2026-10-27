@@ -135,22 +135,8 @@ FT_DOL_POLY_BEGIN(ftComboModuleImpl, 0x30);
     ftComboModuleImpl(soModuleAccesser* acc);
 FT_DOL_POLY_END;
 
-// The jostle module interface (vtable of soJostleModuleImpl at sora_melee data 0x17AA8; the soNull / soNullable bases put
-// the vtable pointer at +8). The names of the setters are not known: each one stores its argument in the byte of the
-// module at the offset its name gives.
-#include <StaticAssert.h>
-#include <so/so_null.h>
-class soJostleModule : public soNull, public soNullable {
-public:
-    virtual ~soJostleModule();
-    virtual void unk10();
-    virtual void setByte47(u8 value);
-    virtual void setByte46(int value);
-    virtual void setByte48(bool value);
-    virtual void setByte4B(u8 value);
-    virtual void setByte4A(bool value);
-};
-
+// The verified jostle interface is shared with kinetic energy.
+#include <so/jostle/so_jostle_module.h>
 class soJostleModuleImpl : public soJostleModule {
     u8 m_opaque[0x4C - sizeof(soJostleModule)];
 public:

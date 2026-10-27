@@ -107,26 +107,60 @@ public:
 
 class soKineticEnergyGroundMovement : public soKineticEnergy {
 public:
-#ifdef FT_MODULE_BUILDER
-    soKineticEnergyGroundMovement(); // sora_melee
-#endif
-#ifdef FT_MODULE_BUILDER
+    soKineticEnergyGroundMovement();
+#ifdef SO_KINETIC_CONTACT_IMPLEMENTATION
+    virtual ~soKineticEnergyGroundMovement();
+#elif defined(FT_MODULE_BUILDER)
     virtual ~soKineticEnergyGroundMovement() { }
 #endif
-    void enableRot(Vec2f* normal); // sora_melee; angle from the ground normal.
-    u8 m_unk08[0x28];
+    virtual void updateEnergy(soModuleAccesser*);
+    virtual Vec2f getSpeed();
+    virtual Vec3f getRotation();
+    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser*);
+    virtual void clearSpeed();
+    virtual void clearRotSpeed();
+    virtual void mulSpeed(Vec3f*);
+    virtual void mulAccel(Vec3f*);
+    virtual void reflectSpeed(Vec3f*);
+    virtual void reflectAccel(Vec3f*);
+    void enableRot(Vec2f* normal);
+
+    // HYPOTHESIS: names of the per-frame external movement inputs, cleared after update.
+    Vec2f m_outsideSpeed; // 0x08
+    Vec2f m_speed; // 0x10
+    float m_brake; // 0x18
+    float m_brakeThreshold; // 0x1C
+    float m_outsideRotation; // 0x20
+    float m_rotation; // 0x24, degrees this frame
+    float m_prevGroundAngle; // 0x28, radians
+    bool m_brakeEnabled; // 0x2C
+    bool m_rotationEnabled; // 0x2D
 };
+static_assert(sizeof(soKineticEnergyGroundMovement) == 0x30, "Ground movement energy extent");
 
 class soKineticEnergyJostle : public soKineticEnergy {
 public:
-#ifdef FT_MODULE_BUILDER
-    soKineticEnergyJostle(); // sora_melee
-#endif
-#ifdef FT_MODULE_BUILDER
+    soKineticEnergyJostle();
+#ifdef SO_KINETIC_CONTACT_IMPLEMENTATION
+    virtual ~soKineticEnergyJostle();
+#elif defined(FT_MODULE_BUILDER)
     virtual ~soKineticEnergyJostle() { }
 #endif
-    u8 m_unk08[0xc];
+    virtual void updateEnergy(soModuleAccesser*);
+    virtual Vec2f getSpeed();
+    virtual Vec3f getSpeed3f();
+    virtual Vec3f getRotation();
+    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser*);
+    virtual void clearSpeed();
+    virtual void clearRotSpeed();
+    virtual void mulSpeed(Vec3f*);
+    virtual void mulAccel(Vec3f*);
+    virtual void reflectSpeed(Vec3f*);
+    virtual void reflectAccel(Vec3f*);
+
+    Vec3f m_speed; // 0x08: planar push plus correction to the jostle module's depth.
 };
+static_assert(sizeof(soKineticEnergyJostle) == 0x14, "Jostle energy extent");
 
 #include <so/so_module_accesser.h>
 
