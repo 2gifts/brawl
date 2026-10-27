@@ -150,3 +150,16 @@ inline Vec2f soKineticEnergyNormal::getSpeed() {
     return m_speed;
 }
 #endif
+
+#if defined(SO_KINETIC_WIND_IMPLEMENTATION) && !defined(FT_MODULE_BUILDER)
+// This unit expands the normal-energy reset inline, as the fighter headers do.
+inline void soKineticEnergyNormal::init() {
+    Vec2f zero(0.0f, 0.0f);
+    m_speed = m_accel = m_brake = zero;
+    Vec2f negOne(-1.0f, -1.0f);
+    m_speedTarget = m_speedLimit = negOne;
+    m_considerGroundFriction = false;
+    m_unk30 = false;
+    m_unk32 = true;
+}
+#endif

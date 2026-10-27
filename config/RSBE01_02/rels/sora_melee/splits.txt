@@ -1443,6 +1443,11 @@ mo_melee/sora_melee/so/so_kinetic_energy_ground_movement.cpp:
 	.rodata     start:0x00000E28 end:0x00000E40
 	.data       start:0x000173C0 end:0x00017408
 
+mo_melee/sora_melee/so/so_kinetic_energy_wind_normal.cpp:
+	.text       start:0x000B7634 end:0x000B7B54
+	.rodata     start:0x00000E40 end:0x00000E58
+	.data       start:0x00017408 end:0x00017450
+
 mo_melee/sora_melee/so/so_kinetic_energy_jostle.cpp:
 	.text       start:0x000B7B54 end:0x000B7E20
 	.rodata     start:0x00000E58 end:0x00000E60

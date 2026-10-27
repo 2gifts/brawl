@@ -5227,6 +5227,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/so/transition/so_transition_module_impl.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/so_kinetic_energy_normal.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/so_kinetic_energy_ground_movement.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/so/so_kinetic_energy_wind_normal.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/so_kinetic_energy_jostle.cpp"),
             Object(Matching, "mo_melee/sora_melee/so/so_general_work.cpp"),
             Object(Matching, "mo_melee/sora_melee/so/so_general_work_abstract.cpp"),
