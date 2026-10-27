@@ -115,7 +115,7 @@ void wnFoxLandMaster::notifyEventCollisionHit(float power, soCollisionAttackData
 void wnFoxLandMaster::notifyEventOnDamage(soDamage* damage, bool isReaction, soModuleAccesser* moduleAccesser) {
     soStopModule& stop = moduleAccesser->getStopModule();
     if (damage->m_reaction > 0.0f && !stop.isStop()) {
-        int frame = soDamageUtilActor::getDamageHitStopFrame(moduleAccesser, damage, isReaction, 1.0f) >> 1;
+        int frame = soDamageUtilActor::getDamageHitStopFrame(moduleAccesser, damage, 1.0f, isReaction) >> 1;
         if (frame > 0) {
             moduleAccesser->getStopModule().setHitStopFrame(frame, 1);
             Vec2f offset(0.0f, 1.0f);

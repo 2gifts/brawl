@@ -185,9 +185,23 @@ public:
 };
 static_assert(sizeof(emTerritoryModuleImpl) == 0x50, "Class is wrong size!");
 
-class emDamageModuleImpl {
-    u8 unk4[0xE0 - 4];
+// The enemy damage module. Its RTTI lists soDamageModuleImpl at 0 (and so soDamageModule), the damage effector at 0xAC
+// and an anim cmd observer at 0xB8; only the soDamageModule base is declared, which the enemy classes' casts
+// (dynamic_cast<emDamageModuleImpl&>(*m_damageModule)) need.
+// HYPOTHESIS: the full base list of soDamageModuleImpl, soDamageEffectorImpl and soAnimCmdEventObserver (not modelled).
+#include <so/damage/so_damage_module_impl.h>
+// Lets an enemy unit tell that the damage module's interface below is declared.
+#define EM_DAMAGE_MODULE_IMPL_INTERFACE 1
+class emKineticModuleImpl;
+class emDamageModuleImpl : public soDamageModule {
+    u8 unkC[0xE0 - sizeof(soDamageModule)];
 public:
+    // Module map names (the Goomba family's tread handlers). HYPOTHESIS: addDamageHp subtracts *damage from the
+    // strength and returns true when that defeated the enemy.
+    bool addDamageHp(float* damage, int p2);
+    // HYPOTHESIS: the last parameter is a bool (the Paratroopa's call reuses the register of its first 0, as for a bool).
+    void setupDamageStatusNormalSubDamageKinetic(emKineticModuleImpl* kinetic, soPostureModule* posture, float p3, float lr,
+                                                 Vec2f* speed, int p6, int p7, bool p8);
     emDamageModuleImpl(soModuleAccesser* acc, soArray<soDamage>* damages);
     virtual ~emDamageModuleImpl();
     // The position the damage of the enemy is taken at (Enemy::getDamageOffsetFromNode).
@@ -211,9 +225,13 @@ public:
     void reverseLr();
 };
 
-class emKineticModuleImpl : public soKineticModule {
-    u8 unk[0xBD4 - sizeof(soKineticModule)];
+// The original's RTTI base table lists soKineticModuleImpl (with soKineticModule, soNullable and the anim cmd observer).
+class emKineticModuleImpl : public soKineticModuleImpl {
+    u8 unk[0xBD4 - sizeof(soKineticModuleImpl)];
 public:
+    // Module map name (the Auroros' return from its item). HYPOTHESIS: the angle of a speed vector for the facing lr.
+#define EM_KINETIC_MODULE_IMPL_INTERFACE 1
+    static float getKineticAngleFromSpeed(Vec2f speed, float lr);
     // Module map names (used by emTurnModuleImpl).
     emKineticEnergy* getEmEnergy(int index);
     bool isEnergyEnd(int index);

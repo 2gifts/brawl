@@ -1,10 +1,12 @@
 // The weapon-builder view of soDamageEffector: its destructor stays out of line (the REL's weak copy that ours calls).
 #define WN_WEAPON_BUILDER
-// The sora_enemy calls of interpretCmd1 pass the frame last (see so/anim/so_anim_cmd_module_impl.h); resetInterpreter2
-// and the accesser-first effector slots need shared-header patches ($B/E2/shared_patch_animcmd.diff, $B/E3/shared_patch.diff).
+// The sora_enemy calls of interpretCmd1 and resetInterpreter2 pass the frame last (see so/anim/so_anim_cmd_module_impl.h),
+// and this effector takes the accesser first in reqCommonEffect and reqQuake (see so/damage/so_damage_effector_impl.h).
 #define SO_ANIM_CMD_INTERPRET_CMD1_FRAME_LAST
 #define SO_ANIM_CMD_RESET_INTERPRETER2_FRAME_LAST
 #define SO_DAMAGE_EFFECTOR_ACCESSER_FIRST
+// Keeps soNull out of the type information's base lists, as in the original.
+#define SO_DAMAGE_EFFECTOR_PRIVATE_NULL_BASE
 #include <wn/wn_em_damage_effector_impl.h>
 #include <ft/ft_common_data_accesser.h>
 #include <so/anim/so_anim_cmd_module_impl.h>

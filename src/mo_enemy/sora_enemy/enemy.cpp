@@ -38,6 +38,9 @@
 // the vtable of soArrayFixed<soAnimCmdAddressPackConv>).
 #define IP_NULL_INPUT_CONT_NO
 #define SO_ARRAY_FIXED_PURE_IS_NULL
+// MATCH-ONLY: IpNull::getButton returns the one-word mask (li r3, 0; blr), as in Mario's Mantle; the ipPadButton struct
+// return keeps a dead stack store at -O2,s.
+#define IP_INPUT_BUTTON_RAW
 // MATCH-ONLY: the helpers the fighter RELs define out of line (ft_builder_noinline.h and each fighter's .cpp) are weak
 // copies of this unit: soNullable(bool), soGeneralWorkSimple's work-area constructor (with it the whole soGeneralWorkSimple /
 // soGeneralWorkAbstract vtable family) and the destructors of soGeneralWorkAbstract, soTransitionInfo, soResourceIdAccesser
@@ -49,6 +52,10 @@
 // soStatusEventObserver::notifyEventChangeStatus) and of soTransitionModuleImpl::getLastTransitionInfo.
 #define SO_EVENT_OBSERVER_DEFAULTS_INLINE
 #define SO_TRANSITION_LAST_INFO_INLINE
+// The unit emits weak copies of the empty attribute-flag destructors (soAttributeFlag, soKineticEnergy::AttributeFlag)
+// that no original object of the game defines. Trivial destructors remove them but cost three exact functions (the
+// temporaries then take other frame slots), so the original's flags did have destructors; the copies are unreferenced
+// and the linker drops them.
 #include <em/enemy.h>
 #include <em/em_info.h>
 #include <em/em_manager.h>
@@ -198,14 +205,6 @@ static inline void registInterpreter(soAnimCmdModule& animCmd, soAnimCmdInterpre
     unit.m_animCmdAddressPackArraySeparate = pack;
     animCmd.registInterpreter(unit, attribute);
 }
-
-// The resource ids of the enemy kind's preloaded archives, read through accessors: as call arguments the original
-// evaluates them before the other (trivial) arguments, which a plain member read does not do.
-// TODO: these belong to emArchive (include/em/em_archive.h) as getParamResourceId() etc.
-static inline u32 paramResourceIdOf(const emArchive* archive) { return archive->paramResourceId; }
-static inline u32 enmCommonResourceIdOf(const emArchive* archive) { return archive->enmCommonResourceId; }
-static inline u32 brresResourceIdOf(const emArchive* archive) { return archive->brresResourceId; }
-static inline u32 faceTexBrresResourceIdOf(const emArchive* archive) { return archive->faceTexBrresResourceId; }
 
 // The task category of the enemy's own task (gfTask has no inline accessor for its bit-field).
 static inline gfTask::Category getTaskCategory(const gfTask* task) {
@@ -375,7 +374,7 @@ Enemy::Enemy(u32 p1, emCreate* create, soArray<soInterpolation<Vec3f> >* interpo
     m_preloadArchive(emManager::getInstance()->getPreloadArchivePtrFromKind(m_enemyKind)),
     m_resourceIdAccesser(m_preloadArchive->brresResourceId, m_preloadArchive->brresResourceId,
                          m_preloadArchive->brresResourceId),
-    m_resourceModule(paramResourceIdOf(m_preloadArchive), &m_resourceIdAccesser, enmCommonResourceIdOf(m_preloadArchive),
+    m_resourceModule(m_preloadArchive->getParamResourceId(), &m_resourceIdAccesser, m_preloadArchive->getEnmCommonResourceId(),
                      create),
     m_statusWork(m_statusIntWorks, 7, m_statusFloatWorks, 1, m_statusFlagWorks, 9),
     m_generalWork(m_intWorks, 27, m_floatWorks, 16, m_flagWorks, 20),
@@ -740,7 +739,7 @@ s32 Enemy::getNameMsgId() {
 }
 
 nw4r::g3d::ResFileData* Enemy::getFaceTexPtr(u32 p1) {
-    return m_resourceModule.getInfoTexFile(faceTexBrresResourceIdOf(m_preloadArchive), p1);
+    return m_resourceModule.getInfoTexFile(m_preloadArchive->getFaceTexBrresResourceId(), p1);
 }
 
 nw4r::g3d::ResFileData* Enemy::getFaceTexPtr() {
@@ -921,12 +920,12 @@ void Enemy::activate(Vec3f* spawnPos, float lr, float unk, int statusKind) {
     }
 
     // The ground collision of the enemy kind's model, when it has one.
-    if (moduleAccesser.getResourceModule().getBinFile(brresResourceIdOf(m_preloadArchive), 0, -1) != NULL) {
+    if (moduleAccesser.getResourceModule().getBinFile(m_preloadArchive->getBrresResourceId(), 0, -1) != NULL) {
         emGroundModuleImpl& ground = dynamic_cast<emGroundModuleImpl&>(moduleAccesser.getGroundModule());
         if (soValueAccesser::getConstantIndefinite(&moduleAccesser, 0xa813, 0) == NULL) {
-            ground.constructGrCollision(brresResourceIdOf(m_preloadArchive), 0, Heaps::EnemyInstance, false, true, false);
+            ground.constructGrCollision(m_preloadArchive->getBrresResourceId(), 0, Heaps::EnemyInstance, false, true, false);
         } else {
-            ground.constructGrCollision(brresResourceIdOf(m_preloadArchive), 0, Heaps::EnemyInstance, true, true, false);
+            ground.constructGrCollision(m_preloadArchive->getBrresResourceId(), 0, Heaps::EnemyInstance, true, true, false);
             ground.updateVtxFromNode(true);
         }
         ground.setGrCollisionMode(true);

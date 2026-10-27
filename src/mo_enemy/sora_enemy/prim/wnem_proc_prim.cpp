@@ -66,6 +66,13 @@ static inline Vec2f* getSpeed(wnemSimple* wn) {
     return reinterpret_cast<Vec2f*>(&wn->unk21F8);
 }
 
+// Sets the boomerang's speed. The float parameters matter: the original stores both components straight from the
+// registers that computed them (each through an frsp), as an inlined two-float setter does.
+static inline void setSpeed(wnemSimple* wn, float x, float y) {
+    wn->unk21F8 = x;
+    wn->unk21FC = y;
+}
+
 void wnemPrimProc::BoomerangHave(wnemSimple* wn, soModuleAccesser* acc) {
     bool isFirstFrame = wn->unk2214;
     wn->unk2214 = false;
@@ -76,8 +83,10 @@ void wnemPrimProc::BoomerangHave(wnemSimple* wn, soModuleAccesser* acc) {
     }
 }
 
-// TODO(nonmatching): 97.2%, (a)/(b) not yet classified: the saved-register assignment differs (wn, the string base,
-// the literal base and the parameters), and Vec2f::operator= is called out of line where the original inlines it.
+// TODO(nonmatching): 97.97%, (a): with registers masked, the calls, arguments, constants and branches agree. What is left
+// is the saved-register assignment (the original keeps the string base in r31, wn in r29, the parameters in r30 and
+// the literal base in r28), where the speed's address is computed (twice before the vec2fAngle call, once around the
+// reflection), and the stack slot of the acceleration's return temporary (0x10 here, 0x28 in the original).
 void wnemPrimProc::BoomerangFly(wnemSimple* wn, soModuleAccesser* acc) {
     bool isFirstFrame = wn->unk2214;
     wn->unk2214 = false;
@@ -145,10 +154,10 @@ void wnemPrimProc::BoomerangFly(wnemSimple* wn, soModuleAccesser* acc) {
     }
 }
 
-// TODO(nonmatching): 98.7%, (a)/(b) not yet classified: Vec2f::operator= is called out of line (the original stores both
-// scaled components straight from registers), the stack frame is 0x8 larger, and .rodata has 0.01 before 1.17549435e-38
-// (the original pools the weak Vec2f::length copy's literal first).
 void wnemPrimProc::BoomerangTurn(wnemSimple* wn, soModuleAccesser* acc) {
+    // MATCH-ONLY: the original .rodata has the literal of the TU's weak Vec2f::length copy before 0.01; MWCC pools
+    // literals by first use, so mention it first.
+    (void)1.17549435e-38f;
     emShotParam* shotParam = wn->m_shotWork.m_param;
     wnemPrimBoomerangParam* param = NULL;
     if (wn->unk2234 != NULL) {
@@ -174,7 +183,7 @@ void wnemPrimProc::BoomerangTurn(wnemSimple* wn, soModuleAccesser* acc) {
             toOwner.m_x *= 0.01f;
             toOwner.m_y *= 0.01f;
             toOwner.m_z *= 0.01f;
-            *getSpeed(wn) = Vec2f(toOwner.m_x, toOwner.m_y);
+            setSpeed(wn, toOwner.m_x, toOwner.m_y);
         }
     }
     float angle = fn_41_15FB0(wn->unk21FC, wn->unk21F8);
@@ -187,7 +196,7 @@ void wnemPrimProc::BoomerangTurn(wnemSimple* wn, soModuleAccesser* acc) {
         Vec3f toOwner = ownerPos - acc->getPostureModule().getPos();
         // Close enough, the owner takes it back.
         if (wn->getFrameCounter(1) >= param->m_catchFrame) {
-            float lengthSq = toOwner.m_y * toOwner.m_y + (toOwner.m_x * toOwner.m_x + toOwner.m_z * toOwner.m_z);
+            float lengthSq = toOwner.m_z * toOwner.m_z + (toOwner.m_x * toOwner.m_x + toOwner.m_y * toOwner.m_y);
             float length;
             if (static_cast<float>(__fabs(lengthSq)) <= 1.17549435e-38f) {
                 length = 0.0f;
@@ -231,7 +240,6 @@ void wnemPrimProc::BoomerangTurn(wnemSimple* wn, soModuleAccesser* acc) {
     wn->unk21FC = speed * static_cast<float>(sin(angle));
 }
 
-// TODO(nonmatching): 99.9%, (a) relocations and one branch distance only (the epilogue block sits elsewhere).
 void wnemPrimProc::BoomerangErase(wnemSimple* wn, soModuleAccesser* acc) {
     bool isFirstFrame = wn->unk2214;
     wn->unk2214 = false;
@@ -245,7 +253,8 @@ void wnemPrimProc::BoomerangErase(wnemSimple* wn, soModuleAccesser* acc) {
         wn->executeAnimCmd(2u);
         wn->unk21F8 = wn->unk21FC = wn->unk2200 = wn->unk2204 = 0.0f;
         wn->setVisibilityWhole(0);
-        acc->getCollisionAttackModule().clearAll();
-        wn->RequestDeactive();
     }
+    // Every frame of the proc, it is taken off the field.
+    acc->getCollisionAttackModule().clearAll();
+    wn->RequestDeactive();
 }

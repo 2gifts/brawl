@@ -7,6 +7,9 @@
 #define SO_ANIM_CMD_INTERPRET_CMD1_FRAME_LAST
 // Proposed opt-in (shared patch /private/tmp/claude-501/-Users-marino-gitdir-brawl-brawl--claude-worktrees-decomp-repo-review-parallelize-ba54dc/5099eb6b-1ae2-4d9d-a38d-fb4068230a82/scratchpad/batch2/E2): resetInterpreter2 takes the frame last too.
 #define SO_ANIM_CMD_RESET_INTERPRETER2_FRAME_LAST
+// MATCH-ONLY: the Paratroopa copies the returned sum speed with the aggregate word copy of Vec2f's plain base (see
+// mt/mt_vector.h).
+#define MT_VEC2F_PLAIN_BASE
 #include <em/patapata/em_patapata.h>
 #include <it/it_manager.h>
 #include <it/item.h>
@@ -55,9 +58,8 @@ emPatapata::emPatapata(u32 p1, emCreate* create) :
 
 emPatapata::~emPatapata() { }
 
-// TODO(nonmatching): (a) non-semantic, with the shared patches: the sum speed is copied word by word into a second
-// Vec2f in the original (float copies and an frsp here), and the item's instance and task ids are loaded before the
-// work / link module where the original has them after; every call, argument and constant agrees (masked diff).
+// TODO(nonmatching): 99.7%, (a) non-semantic: the item's instance id and task id are loaded before the work / link module
+// where the original loads them after (instruction order only; every call, argument and constant agrees, masked diff).
 // Creates the shell one unit above a node of the model, with the enemy's facing and its current speed, and constrains
 // the enemy to it; nothing happens while the enemy still communicates with an item.
 bool emPatapata::emShootItem(itKind kind, int variation, void* param, float lr, float) {
@@ -86,10 +88,12 @@ bool emPatapata::emShootItem(itKind kind, int variation, void* param, float lr, 
         pos = nodePos;
         pos.m_y += 1.0f;
         // The shell starts with the enemy's speed.
+        // MATCH-ONLY: the sum speed's height is read into a local first (the original loads y before x).
         Vec2f sumSpeed = moduleAccesser.getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(-1));
+        float sumSpeedY = sumSpeed.m_y;
         Vec3f sumSpeed3;
         sumSpeed3.m_x = sumSpeed.m_x;
-        sumSpeed3.m_y = sumSpeed.m_y;
+        sumSpeed3.m_y = sumSpeedY;
         sumSpeed3.m_z = 0.0f;
         speed = sumSpeed3;
         item->warp(&pos);
@@ -159,26 +163,15 @@ void emPatapata::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* a
         if (moduleAccesser.getWorkManageModule().isFlag(WorkFlag_TreadDefeats)) {
             damage = moduleAccesser.getWorkManageModule().getFloat(WorkFloat_Strength);
         }
-#if EM_DAMAGE_MODULE_IMPL_INTERFACE
         emDamageModuleImpl& damageModule = dynamic_cast<emDamageModuleImpl&>(*moduleAccesser.m_enumerationStart->m_damageModule);
         damageModule.addDamageHp(&damage, 0);
-#else
-        // TODO(nonmatching): needs emDamageModuleImpl's soDamageModule base and its methods (shared patch, $B/E2).
-        (void)damage;
-#endif
-#if SO_ANIM_CMD_RESET_INTERPRETER2_FRAME_LAST_DECLARED
         moduleAccesser.getAnimCmdModule().resetInterpreter2(5, &moduleAccesser, 0, 0.0f);
-#else
-        // TODO(nonmatching): the original loads the frame after the integer arguments (frame-last declaration, shared
-        // patch /private/tmp/claude-501/-Users-marino-gitdir-brawl-brawl--claude-worktrees-decomp-repo-review-parallelize-ba54dc/5099eb6b-1ae2-4d9d-a38d-fb4068230a82/scratchpad/batch2/E2).
-        moduleAccesser.getAnimCmdModule().resetInterpreter2(0.0f, 5, &moduleAccesser, 0);
-#endif
-#if EM_DAMAGE_MODULE_IMPL_INTERFACE
+        // MATCH-ONLY: the posture declared before the kinetic module gets the original's register.
+        soPostureModule* posture;
         emKineticModuleImpl& kinetic = dynamic_cast<emKineticModuleImpl&>(*moduleAccesser.m_enumerationStart->m_kineticModule);
-        soPostureModule* posture = moduleAccesser.m_enumerationStart->m_postureModule;
+        posture = moduleAccesser.m_enumerationStart->m_postureModule;
         Vec2f noSpeed(0.0f, 0.0f);
         damageModule.setupDamageStatusNormalSubDamageKinetic(&kinetic, posture, 0.0f, posture->getLr(), &noSpeed, 0, 0, false);
-#endif
         if (moduleAccesser.getWorkManageModule().isFlag(WorkFlag_TreadDefeats) == false) {
             if (m_moduleAccesser->getSituationModule().getKind() == Situation_Ground) {
                 m_moduleAccesser->getStatusModule().changeStatusRequest(0xe, m_moduleAccesser);

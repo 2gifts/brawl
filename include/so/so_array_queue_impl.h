@@ -18,9 +18,21 @@ public:
     soArrayQueue(soArray<T>* array) : m_array(array) { }
     soArray<T>* getArray() { return m_array; }
     // Pushes element at the front, dropping the last element when the array is full.
+#ifdef SO_ARRAY_QUEUE_UNSHIFT_IN_CLASS
+    // Opt-in (the enemy AI module): defined in the class, the weak copy comes right after its first user, as in the
+    // original; an out-of-class template member is emitted at the end of the unit.
+    void unshift(const T& element) {
+        if (m_array->isFull() == true) {
+            m_array->pop();
+        }
+        m_array->unshift(element);
+    }
+#else
     void unshift(const T& element);
+#endif
 };
 
+#ifndef SO_ARRAY_QUEUE_UNSHIFT_IN_CLASS
 template <typename T>
 void soArrayQueue<T>::unshift(const T& element) {
     if (m_array->isFull() == true) {
@@ -28,6 +40,7 @@ void soArrayQueue<T>::unshift(const T& element) {
     }
     m_array->unshift(element);
 }
+#endif
 
 // The element type of an array class (also for the explicit soArrayVector specializations, which have no value_type).
 template <typename V>

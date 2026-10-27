@@ -1,3 +1,5 @@
+// soDamageTransactorActor's constant members are inline here, as in the original (their weak copies sit in this unit).
+#define SO_DAMAGE_TRANSACTOR_ACTOR_INLINE_TAIL
 #include <wn/wn_em_damage_transactor_impl.h>
 #include <so/damage/so_damage_effector_impl.h>
 #include <so/damage/so_damage_module_impl.h>
@@ -17,16 +19,13 @@ bool wnemDamageTransactorImpl::onDamage(soModuleAccesser* moduleAccesser, soDama
 }
 
 // The weapon's damage setup only plays the effects of the hit: the uniq effect, and the shake when it has a reaction.
-// TODO(nonmatching): 96.9%, (a) only the scratch register of the 1.0f address differs: the original loads the float
-// before the bool argument, which suggests getDamageHitStopFrame takes the factor before the flag (its mangled name in
-// symbols.txt is our guess); calls, arguments, constants and branches agree.
 void wnemDamageTransactorImpl::setupDamageStatusNormal(soModuleAccesser* moduleAccesser, soDamage* damage, soDamageLog* damageLog, int unk) {
     // MATCH-ONLY: declared ahead, which gives the frame the register of `this` once the status kind call is done.
     int hitStopFrame;
     int situationKind = moduleAccesser->getSituationModule().getKind();
     getDamageStatusKind(moduleAccesser);
     moduleAccesser->getDamageModule().getEffector()->reqUniqEffect(moduleAccesser, 0, &damage->m_attackData);
-    hitStopFrame = soDamageUtilActor::getDamageHitStopFrame(moduleAccesser, damage, false, 1.0f);
+    hitStopFrame = soDamageUtilActor::getDamageHitStopFrame(moduleAccesser, damage, 1.0f, false);
     if (damage->m_reaction > 0.0f) {
         // HYPOTHESIS: the shake ignores the ground normal (it is passed uninitialized).
         Vec2f groundNormal;
@@ -67,30 +66,5 @@ void wnemDamageTransactorImpl::onLeaveDamageStop(soModuleAccesser* moduleAccesse
 void wnemDamageTransactorImpl::onGroundDamageAfter(soModuleAccesser* moduleAccesser) { }
 
 bool wnemDamageTransactorImpl::onCompositionDamageSpeed(soModuleAccesser* moduleAccesser, soDamage* damage, Vec2f* speed, int level) { return false; }
-
-// MATCH-ONLY: the original emits weak copies of these soDamageTransactorActor members here (inline in its header);
-// our so/damage/so_damage_transactor_actor.h declares them out of line, so this unit defines its copies (same bodies
-// as sora_melee's so_damage_transactor_actor.cpp), in the original's order.
-bool soDamageTransactorActor::checkNoReaction(soModuleAccesser* moduleAccesser, soDamage* damage) { return true; }
-
-float soDamageTransactorActor::getDamageForReaction(float damage, soModuleAccesser* moduleAccesser) { return damage; }
-
-float soDamageTransactorActor::getHitStopMul(soModuleAccesser* moduleAccesser) { return 1.0f; }
-
-void soDamageTransactorActor::checkCheer(float reaction, float angle, soModuleAccesser* moduleAccesser, soDamageLog* damageLog) { }
-
-float soDamageTransactorActor::getDamageMul(soModuleAccesser* moduleAccesser) { return 1.0f; }
-
-float soDamageTransactorActor::getReactionMul(soModuleAccesser* moduleAccesser) { return 1.0f; }
-
-float soDamageTransactorActor::getReactionSub(soModuleAccesser* moduleAccesser) { return 0.0f; }
-
-bool wnemDamageTransactorImpl::isSpeedDamage(soModuleAccesser* moduleAccesser) { return true; }
-
-bool soDamageTransactorActor::isBuryStatus(soModuleAccesser* moduleAccesser) { return false; }
-
-bool soDamageTransactorActor::isBindStatus(soModuleAccesser* moduleAccesser) { return false; }
-
-wnemDamageTransactorImpl::~wnemDamageTransactorImpl() { }
 
 wnemDamageTransactorImpl g_wnemDamageTransactorImpl;

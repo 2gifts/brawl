@@ -17,7 +17,9 @@ inline bool wnArticleIsActive(soArticle* article) { return article->isActiveArti
 // MATCH-ONLY: names the wnemSwHolder pool's getInstanceAt first, so its weak copy comes out before the wnemSimple
 // pool's as in the original (see SO_ARTICLE_MEDIATOR_POOL_1_FIRST in em/em_article_mediator.h).
 // TODO(link): the original also has wnArticleIsActive before the two getInstanceAt copies; ours emits it after them
-// (naming it first in an unused function does not move it), so the unit is exact but not linked yet.
+// (naming it first in an unused function does not move it), so the unit is exact but not linked yet. Declaring the
+// soArticleMediatorSlot primary template before the mediator class moves wnArticleIsActive to the front, but then
+// the copies come out in pool order whatever this probe names first (see em/em_article_mediator.h).
 SO_ARTICLE_MEDIATOR_POOL_1_FIRST(emSiralamosArticleMediator)
 
 // The Sir Alamos: an Enemy with two wnemSimple shots and two wnemSwHolder articles. The class overrides only its

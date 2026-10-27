@@ -8,8 +8,6 @@
 // the soAnimCmdEventObserver and soCollisionAttackEventObserver base destructors and vtables the unit does not have).
 #define SO_EVENT_OBSERVER_DTOR_EXTERN
 // The weak soArrayQueue<emAIInfo>::unshift sits right after update (its first user): the in-class definition.
-// TODO(integration): so/so_array_queue_impl.h does not read this opt-in yet (proposed patch); until then the unit
-// stays NonMatching.
 #define SO_ARRAY_QUEUE_UNSHIFT_IN_CLASS
 // MATCH-ONLY: notifyEventCollisionAttack reads the task category of the log as a byte.
 #define SO_COLLISION_LOG_CATEGORY_BYTE
