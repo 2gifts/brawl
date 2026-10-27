@@ -8,6 +8,10 @@
 #include <em/bombhead/em_bombhead.h>
 #include <em/em_shot.h>
 
+// MATCH-ONLY: names the wnemSwHolder pool's getInstanceAt first, so its weak copy comes out before the wnemSimple
+// pool's as in the original (see SO_ARTICLE_MEDIATOR_POOL_1_FIRST in em/em_article_mediator.h).
+SO_ARTICLE_MEDIATOR_POOL_1_FIRST(emBombheadArticleMediator)
+
 // The Bombhead (Bombed): an Enemy with one wnemSimple and one wnemSwHolder article. The class overrides only its
 // destructor; its own code is the two activators of its articles. Everything else in this unit is the module storage
 // and the template instances of em/em_article_mediator.h (with one instance per pool, the instance holders'

@@ -11,8 +11,8 @@
 #include <types.h>
 #include <wn/wn_em_sw_holder.h>
 
-// The arrays below are classes of sora_melee: the Kokkon only calls their constructors and destructors.
-FT_DOL_ARRAY_VECTOR(soInterpolation<Vec3f>, 28);
+// The Kokkon only calls the constructors and destructors of its arrays, classes of sora_melee that
+// em/em_module_arrays.h declares because other enemies share them.
 
 class emKokkon;
 

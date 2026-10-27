@@ -47,8 +47,13 @@ bool emPrim::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccess
     return false;
 }
 
-// TODO(nonmatching): 98.4%, register allocation only (the target keeps the module accesser in r29 and reuses it for
-// the life value; ours keeps it in r30). Calls, arguments, constants and branches agree.
+// TODO(nonmatching): 98.4%, (d) register allocation only: the same 97 instructions, calls, constants, branches and
+// value lifetimes; only the coloring order differs (the original colors the owner above the module accesser and the
+// posture module below it, ours colors the accesser second and the branch locals in declaration order). Hoisting
+// the branch locals, a pointer instead of the reference, a switch, an early return, named float arguments and an
+// inline helper for the plain-shot branch (six parameter orders) all keep the original's order out of reach.
+// The branch is the body of emWeaponUtil::activeSimpleWeapon (fn_41_47E80) with getExtendBrresResourceID in place
+// of getSimpleWeaponResourceID; that function colors its locals in the same order the original does here.
 bool emPrim::activeArticle1(wnemSimple* article, soModuleAccesser* moduleAccesser) {
     emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
     Enemy& enemy = dynamic_cast<Enemy&>(*moduleAccesser->m_stageObject);

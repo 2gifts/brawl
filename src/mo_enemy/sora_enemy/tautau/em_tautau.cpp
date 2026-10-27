@@ -4,3 +4,16 @@
 // YK_STAGE_FULL gives StageObject the long notifyEventAnimCmd slot; Weapon must override that same slot (see em_prim.cpp).
 #define WN_WEAPON_ANIMCMD_LONG
 #include <em/tautau/em_tautau.h>
+
+// The Tautau: an Enemy with no articles and no overrides of its own besides its destructor, so this unit only holds
+// the module storage the Enemy constructor is handed (as for the Roada).
+
+emTautau::emTautau(u32 p1, emCreate* create) :
+    Enemy(p1, create, &m_interpolations, &m_areaInstances, m_areaWork, m_targetSearchUnits, m_aiUnits,
+          reinterpret_cast<soArticleMediator*>(lbl_27_bss_1F0), lbl_27_bss_A5C, &m_cameraSubjects,
+          reinterpret_cast<soReflectModule*>(g_soReflectModuleNull)),
+    m_interpolations(32, 0),
+    m_areaInstances(11, 0),
+    m_cameraSubjects(1, 0) { }
+
+emTautau::~emTautau() { }

@@ -224,5 +224,7 @@ public:
     void updateEnergyPre(int index);
     // HYPOTHESIS: the counterpart run after the posture update (Enemy::updatePosture passes -1).
     void updateEnergyPost(int index);
+    // Map name; the Galfire hands it the trace's ground movement speed while its ground module traces a line.
+    void addSpeedToGroundMovement(const Vec2f* speed);
 };
 static_assert(sizeof(emKineticModuleImpl) == 0xBD4, "Class is wrong size!");
