@@ -117,7 +117,7 @@ void ftIkeStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAccesse
             if (motion.getSpeed().m_y > 0.0f) {
                 speedMul = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb2, 0);
             }
-            motion.unk40 = speedMul;
+            motion.m_speedMul = speedMul;
         }
         if (moduleAccesser->getWorkManageModule().isFlag(0x22000012)) {
             ftIke& ike = dynamic_cast<ftIke&>(moduleAccesser->getStageObject());
