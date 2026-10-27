@@ -56,6 +56,36 @@ mo_enemy/sora_enemy/em_target_search_unit.cpp:
 	.rodata     start:0x00000D88 end:0x00000D98
 	.data       start:0x000036B0 end:0x00003710
 
+mo_enemy/sora_enemy/ai/em_ai_module_impl.cpp:
+	.text       start:0x00028B30 end:0x0002A470
+	.ctors      start:0x00000018 end:0x0000001C
+	.rodata     start:0x00000D98 end:0x00000DB8
+	.data       start:0x00003710 end:0x00003780
+	.bss        start:0x000001B0 end:0x000001C8
+
+mo_enemy/sora_enemy/ai/em_ai_unit.cpp:
+	.text       start:0x0002A470 end:0x0002A724
+	.rodata     start:0x00000DB8 end:0x00000DC0
+
+mo_enemy/sora_enemy/turn/em_turn_module_impl.cpp:
+	.text       start:0x0002A724 end:0x0002B058
+	.rodata     start:0x00000DC0 end:0x00000DC8
+	.data       start:0x00003780 end:0x000038D8
+
+mo_enemy/sora_enemy/status/em_status_module_impl.cpp:
+	.text       start:0x0002B058 end:0x0002B43C
+	.data       start:0x000038D8 end:0x000039C0
+
+mo_enemy/sora_enemy/ground/em_ground_module_impl.cpp:
+	.text       start:0x0002B43C end:0x0002B8FC
+	.rodata     start:0x00000DC8 end:0x00000DD0
+	.data       start:0x000039C0 end:0x00003C70
+
+mo_enemy/sora_enemy/collision/em_collision_hit_module_impl.cpp:
+	.text       start:0x0002B8FC end:0x0002BE04
+	.rodata     start:0x00000DD0 end:0x00000DF8
+	.data       start:0x00003C70 end:0x00003D88
+
 mo_enemy/sora_enemy/wnem/wn_em_resource_module_impl.cpp:
 	.text       start:0x0002CF98 end:0x0002D038
 	.data       start:0x00003EA8 end:0x00003F20
