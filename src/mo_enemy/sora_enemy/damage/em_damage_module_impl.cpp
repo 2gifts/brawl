@@ -26,6 +26,8 @@
 #define MT_VEC2F_PLAIN_BASE
 // MATCH-ONLY: reqCommonEffect overwrites the attribute of its attack data copy with an int (u32 bitfield view).
 #define SO_COLLISION_ATTACK_DATA_WORD_FIELDS
+// The attack data's bitfields are plain members (reqCommonEffect copies their words one by one).
+#define SO_COLLISION_ATTACK_DATA_PLAIN_BITFIELDS
 // MATCH-ONLY: the effector base keeps its destructor out of line (the soDamageEffectorImpl destructor calls a weak copy of
 // it), as the article units' effector does (see so/damage/so_damage_effector_impl.h).
 #define SO_DAMAGE_EFFECTOR_OUTLINE_DTOR
@@ -98,26 +100,6 @@ void fn_27_23313C(u32 createId, u32 attackerTaskId, u32 taskId, u8 attackerCateg
 // HYPOTHESIS: tells whether a task id is a held item (an itManager member).
 bool fn_27_2AC210(itManager* manager, u32 taskId);
 }
-
-// Map name emKineticModuleImpl::getCommonEnergyParamPtr (kinetic unit, unnamed there for now): the parameters of one of
-// the enemy's kinetic energies (0x40 bytes each).
-// HYPOTHESIS: field names; the energies of a damage hit are driven through them.
-struct emKineticEnergyCommonParam {
-    float unk0;
-    float m_speed;      // 0x04
-    float unk8;
-    float m_accelX;     // 0x0C
-    float unk10;
-    float m_accelY;     // 0x14
-    float unk18;
-    float m_target;     // 0x1C
-    float unk20;
-    float m_angle;      // 0x24
-    float m_rotSpeed;   // 0x28
-};
-extern "C" emKineticEnergyCommonParam* fn_41_159AC(emKineticModuleImpl* kinetic, int energyId);
-// Map name emKineticEnergy::loopReverseEnergyParam (kinetic unit): reverses the direction of an energy.
-extern "C" void fn_41_1AE94(emKineticEnergyCommonParam* param);
 
 // The kinetic energies of the enemy that a hit drives (HYPOTHESIS: roles from the code that sets them).
 static const int KineticEnergy_DamageAir = 2;
@@ -355,31 +337,30 @@ int emDamageModuleImpl::getQuakeKind(int level, float frameReaction, bool launch
     return kind;
 }
 
-// TODO(nonmatching): 85.2%, (b) the prologue saves r4 before f1 and the base call sets r4 before f1, i.e. the original
-// declares storeDamage(soDamage* damage, float addedDamage) (shared soDamageModuleImpl header and sora_melee symbol).
-void emDamageModuleImpl::storeDamage(float addedDamage, soDamage* damage) {
+// Scales the damage a hit adds by the enemy's damage multiplier.
+void emDamageModuleImpl::storeDamage(soDamage* damage, float addedDamage) {
     addedDamage *= soValueAccesser::getValueFloat(m_moduleAccesser, 0xbfa, 0);
-    soDamageModuleImpl::storeDamage(addedDamage, damage);
+    soDamageModuleImpl::storeDamage(damage, addedDamage);
 }
 
 // Spins the enemy as it flies off: the rotation energy pair (energyA, energyB) turns with the direction lr.
 void emDamageModuleImpl::setupDamageStatusNormalSubRotDamage(emKineticModuleImpl* kinetic, float lr, float rotSpeed,
                                                              int energyA, int energyB) {
-    emKineticEnergyCommonParam* rot = fn_41_159AC(kinetic, energyA);
-    emKineticEnergyCommonParam* limit = fn_41_159AC(kinetic, energyB);
+    emKineticEnergyParam* rot = kinetic->getCommonEnergyParamPtr(energyA);
+    emKineticEnergyParam* limit = kinetic->getCommonEnergyParamPtr(energyB);
     if (-1.0f == lr) {
         rotSpeed *= -1.0f;
     }
-    rot->m_speed = rotSpeed;
-    rot->m_target = rotSpeed;
+    rot->m_speed.m_base = rotSpeed;
+    rot->m_maxSpeed.m_base = rotSpeed;
     if (1.0f == lr) {
-        limit->m_accelX = soValueAccesser::getValueFloat(m_moduleAccesser, 0xbca, 0);
-        limit->m_accelY = 0.0f;
-        limit->m_target = soValueAccesser::getValueFloat(m_moduleAccesser, 0xbc9, 0);
+        limit->m_accel.m_base = soValueAccesser::getValueFloat(m_moduleAccesser, 0xbca, 0);
+        limit->m_minSpeed.m_base = 0.0f;
+        limit->m_maxSpeed.m_base = soValueAccesser::getValueFloat(m_moduleAccesser, 0xbc9, 0);
     } else {
-        limit->m_accelX = -1.0f * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbca, 0);
-        limit->m_accelY = -1.0f * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbc9, 0);
-        limit->m_target = 0.0f;
+        limit->m_accel.m_base = -1.0f * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbca, 0);
+        limit->m_minSpeed.m_base = -1.0f * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbc9, 0);
+        limit->m_maxSpeed.m_base = 0.0f;
     }
 }
 
@@ -389,19 +370,19 @@ float emDamageModuleImpl::setupDamageStatusNormalSubDamageKinetic(emKineticModul
                                                                   float speed, Vec2f* dir, bool isKnockout, int attackVector,
                                                                   float lr, bool spin) {
     float angle = 0.0f;
-    emKineticEnergyCommonParam* energy;
+    emKineticEnergyParam* energy;
     if (isKnockout == true) {
-        energy = fn_41_159AC(kinetic, KineticEnergy_DamageGround);
+        energy = kinetic->getCommonEnergyParamPtr(KineticEnergy_DamageGround);
     } else {
-        energy = fn_41_159AC(kinetic, KineticEnergy_DamageAir);
+        energy = kinetic->getCommonEnergyParamPtr(KineticEnergy_DamageAir);
     }
-    energy->m_speed = speed;
-    energy->m_target = speed;
+    energy->m_speed.m_base = speed;
+    energy->m_maxSpeed.m_base = speed;
     float postureLr = posture->getLr();
-    angle = emKineticModuleImpl::getKineticAngleFromSpeed(*dir, postureLr);
+    angle = emKineticModuleImpl::getKineticAngleFromSpeed(postureLr, *dir);
     energy->m_angle = angle;
     if (isKnockout == true) {
-        emKineticEnergyCommonParam* limit = fn_41_159AC(kinetic, KineticEnergy_DamageSpeedLimit);
+        emKineticEnergyParam* limit = kinetic->getCommonEnergyParamPtr(KineticEnergy_DamageSpeedLimit);
         float limitSpeed = speed * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbc2, 0);
         if (limitSpeed < soValueAccesser::getValueFloat(m_moduleAccesser, 0xbc3, 0)) {
             limitSpeed = soValueAccesser::getValueFloat(m_moduleAccesser, 0xbc3, 0);
@@ -410,14 +391,14 @@ float emDamageModuleImpl::setupDamageStatusNormalSubDamageKinetic(emKineticModul
             limitSpeed = soValueAccesser::getValueFloat(m_moduleAccesser, 0xbc4, 0);
         }
         limitSpeed *= soValueAccesser::getValueFloat(m_moduleAccesser, 0xbed, 0);
-        limit->m_speed = limitSpeed;
+        limit->m_speed.m_base = limitSpeed;
     }
     if (spin == true) {
-        fn_41_159AC(kinetic, 0xa);
-        fn_41_159AC(kinetic, 0xc);
-        fn_41_159AC(kinetic, 0xb);
-        fn_41_159AC(kinetic, 0xd);
-        float rotSpeed = energy->m_speed * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbc8, 0);
+        kinetic->getCommonEnergyParamPtr(0xa);
+        kinetic->getCommonEnergyParamPtr(0xc);
+        kinetic->getCommonEnergyParamPtr(0xb);
+        kinetic->getCommonEnergyParamPtr(0xd);
+        float rotSpeed = energy->m_speed.m_base * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbc8, 0);
         float rotLr = lr;
         setupDamageStatusNormalSubRotDamage(kinetic, lr, rotSpeed, 0xc, 0xd);
         if (energy->m_angle <= 180.0f && attackVector != soCollisionAttackData::Vec_None) {
@@ -431,9 +412,14 @@ float emDamageModuleImpl::setupDamageStatusNormalSubDamageKinetic(emKineticModul
     return angle;
 }
 
+// The mirror image of a vector about a unit normal: v - 2 (n . v) n.
+// HYPOTHESIS: an inline helper of the original (name unknown); its temporaries take the original's stack slots, which
+// the same expression written in the caller does not.
+static inline void reflectVec2(Vec2f* out, Vec2f* v, Vec2f* normal) {
+    *out = *v - (*normal * 2.0f) * dotProduct(normal, v);
+}
+
 // Bounces the speed off the wall the enemy is touching: it is reflected with the restitution of parameter 0xbf0.
-// TODO(nonmatching): 98.9%, (b) getTouchCount answers a full word in the original (no clrlwi; shared
-// soGroundModule header), and (a) the stack slots of the vector temporaries in the reflection come out in another order.
 void emDamageModuleImpl::setupDamageStatusNormalSubReflect(soGroundModule* ground, Vec2f* speed) {
     Vec2f wall = ground->getTouchNormal(0xff, 0);
     if (wall.length() == 0.0f) {
@@ -449,7 +435,7 @@ void emDamageModuleImpl::setupDamageStatusNormalSubReflect(soGroundModule* groun
     if (ground->getTouchCount(0) > 1) {
         reflected = wall * speed->length();
     } else {
-        reflected = *speed - (wall * 2.0f) * dotProduct(&wall, speed);
+        reflectVec2(&reflected, speed, &wall);
     }
     *speed = reflected * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbf0, 0);
 }
@@ -457,8 +443,10 @@ void emDamageModuleImpl::setupDamageStatusNormalSubReflect(soGroundModule* groun
 // The normal hit reaction: from the hit it works out the stun frames, the damage level and the launch speed and angle,
 // launches the enemy and writes the result to the work (which the AI and the damage statuses read). A defeated enemy that
 // a fighter hits becomes a projectile (flag WorkFlag_Bullet) of the fighter's team.
-// TODO(nonmatching): 98.7%, (b) getTouchCount answers a full word and the flinchless bit is read as a word in the
-// original (shared headers), and (a) the float registers of the reaction values are allocated in another order.
+// TODO(nonmatching): 99.1%, (a) only the float registers differ: the original gives frameReaction f31, speedLr f30,
+// reaction f29, and its reaction clamp writes the result into reaction's register (ours into minReaction's, then a
+// copy). Tried without effect: declaration order and position of the floats, a ternary, temporaries in the clamp,
+// inline helpers for the minimum and the clamp, and speedLr as a repeated expression.
 void emDamageModuleImpl::setupDamageStatusNormal(soDamage* damage, bool isCaptured) {
     dynamic_cast<emStopModuleImpl&>(m_moduleAccesser->getStopModule());
     emKineticModuleImpl& kinetic = dynamic_cast<emKineticModuleImpl&>(m_moduleAccesser->getKineticModule());
@@ -597,9 +585,9 @@ void emDamageModuleImpl::setupDamageStatusNormal(soDamage* damage, bool isCaptur
         }
         work.onFlag(WorkFlag_Bullet);
         work.setFloat(-1.0f, WorkFloat_BulletPower);
-        emKineticEnergyCommonParam* limit = fn_41_159AC(&kinetic, KineticEnergy_DamageSpeedLimit);
+        emKineticEnergyParam* limit = kinetic.getCommonEnergyParamPtr(KineticEnergy_DamageSpeedLimit);
         if (launchAngle > 90.0f && launchAngle < 270.0f) {
-            fn_41_1AE94(limit);
+            emKineticEnergy::loopReverseEnergyParam(limit);
         }
     }
     work.onFlag(WorkFlag_DamagedNormal);
@@ -631,7 +619,7 @@ void emDamageModuleImpl::setupDamageStatusNormal(soDamage* damage, bool isCaptur
 // opposite one, and `outFrames` receives the number of frames that takes.
 void emDamageModuleImpl::setupDamageStatusTurnRotEnergy(Enemy* enemy, emKineticModuleImpl* kinetic,
                                                         soPostureModule* posture, int front, int frames, int* outFrames) {
-    emKineticEnergyCommonParam* energy = fn_41_159AC(kinetic, KineticEnergy_TurnRot);
+    emKineticEnergyParam* energy = kinetic->getCommonEnergyParamPtr(KineticEnergy_TurnRot);
     if (energy != NULL) {
         Vec3f from = enemy->getEmTopNRot(posture->getRotYLr(), front);
         Vec3f to = enemy->getEmTopNRot(-posture->getRotYLr(), front);
@@ -641,15 +629,13 @@ void emDamageModuleImpl::setupDamageStatusTurnRotEnergy(Enemy* enemy, emKineticM
             perFrame = turn / (float)frames;
             *outFrames = (int)(float)ceil(turn / perFrame);
         }
-        energy->m_rotSpeed = turn;
-        energy->m_speed = perFrame;
-        energy->m_target = perFrame;
+        energy->m_amount = turn;
+        energy->m_speed.m_base = perFrame;
+        energy->m_maxSpeed.m_base = perFrame;
     }
 }
 
 // The turn hit (an attack of attribute Turn): the enemy is pushed away and turns around.
-// TODO(nonmatching): 99.2%, (b) the call of getKineticAngleFromSpeed sets f1 before r3: its true order is
-// (float lr, Vec2f speed) (kinetic unit's symbol and callers).
 void emDamageModuleImpl::setupDamageStatusTurn(soDamage* damage) {
     emKineticModuleImpl& kinetic = dynamic_cast<emKineticModuleImpl&>(m_moduleAccesser->getKineticModule());
     soPostureModule& posture = m_moduleAccesser->getPostureModule();
@@ -676,11 +662,11 @@ void emDamageModuleImpl::setupDamageStatusTurn(soDamage* damage) {
     speed = speed * speedMul;
     int turnFrames = soValueAccesser::getValueInt(m_moduleAccesser, ValueInt_TurnFrame, 0);
     int rotFrames = turnFrames;
-    emKineticEnergyCommonParam* turn = fn_41_159AC(&kinetic, KineticEnergy_Turn);
+    emKineticEnergyParam* turn = kinetic.getCommonEnergyParamPtr(KineticEnergy_Turn);
     if (turn != NULL) {
-        turn->m_speed = speedMul;
-        turn->m_target = speedMul;
-        turn->m_angle = emKineticModuleImpl::getKineticAngleFromSpeed(speed, lr);
+        turn->m_speed.m_base = speedMul;
+        turn->m_maxSpeed.m_base = speedMul;
+        turn->m_angle = emKineticModuleImpl::getKineticAngleFromSpeed(lr, speed);
     }
     setupDamageStatusTurnRotEnergy(&enemy, &kinetic, &posture, front, turnFrames, &rotFrames);
     float launchSpeed = damage->m_reaction * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbb8, 0);
@@ -934,8 +920,6 @@ bool emDamageModuleImpl::onDamage(u32 damageIndex) {
 }
 
 // The common damage effect of the hit, unless the hit was a reaction-less one.
-// TODO(nonmatching): 96.9%, (b) the original copies the attack data's four bitfield words one by one (plain
-// bitfield members), our union of bitfield structs is block-copied in pairs (shared soCollisionAttackData header).
 void emDamageModuleImpl::reqCommonEffect(soModuleAccesser* moduleAccesser, float power, float reaction, float lr,
                                          soCollisionAttackData* attackData, soCollisionLog* collisionLog) {
     m_moduleAccesser->getWorkManageModule().isFlag(WorkFlag_Figurized);
@@ -1036,8 +1020,9 @@ void emDamageModuleImpl::notifyEventCollisionHit(float power, soCollisionAttackD
 }
 
 // TODO(nonmatching): 92.7%, (b) the prologue saves r4, r5, r6, f1, f2, r7, r8: the original declares
-// notifyEventCollisionHit2nd(soCollisionAttackModule*, soCollisionLog*, u32, float, float, soModuleAccesser*, bool)
-// (shared soCollisionHitEventObserver header and sora_melee symbols).
+// notifyEventCollisionHit2nd(soCollisionAttackModule*, soCollisionLog*, u32, float, float, soModuleAccesser*, bool).
+// With that order in the observer, soDamageModuleImpl and here, the code is byte-identical (only the mangled names
+// change: the observer's, soDamageModuleImpl's and Weapon's symbols in sora_melee and the fighter RELs).
 void emDamageModuleImpl::notifyEventCollisionHit2nd(float posX, float collisionLr, soCollisionAttackModule* attackModule,
                                                     soCollisionLog* collisionLog, u32 groupIndex,
                                                     soModuleAccesser* moduleAccesser, bool unk) {

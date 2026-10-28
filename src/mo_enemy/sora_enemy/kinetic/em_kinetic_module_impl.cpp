@@ -1,6 +1,17 @@
+// MATCH-ONLY: the weak copy of MSL's atan2f wrapper keeps its scheduled return sequence (as in
+// wn_wario_bike_status_uniq_process_utility.cpp).
+#pragma push
+#pragma scheduling 603
+#include <internal/math_double.h>
+#pragma pop
 // The kinetic module of the enemies (emKineticModuleImpl, em/kinetic/em_kinetic_module_impl.h): eight enemy kinetic
 // energies driven by the anim cmds of group 'f', on top of soKineticModuleImpl of sora_melee.
 #define EM_KINETIC_MODULE_IMPL_FULL
+// The module calls sora_melee's two-argument soKineticModuleImpl constructor.
+#define SO_KINETIC_MODULE_IMPL_CTOR_2
+// MATCH-ONLY: the jostle and ground movement energies' destructors call soKineticEnergy's out of line (a weak copy of
+// this unit).
+#define SO_KINETIC_ENERGY_DTOR_NEVER_INLINE
 // soKineticModuleImpl's notifyEventAnimCmd (int) overrides the anim cmd observer's slot, as in the original.
 #define WN_ARTICLE_ANIMCMD_INT
 // MATCH-ONLY: the soAnimCmdEventObserver destructor is the one of sora_melee (see em_turn_module_impl.cpp).
@@ -39,9 +50,10 @@ extern "C" void rotVec2f(Vec2f* self, float angle, Vec2f* out);
 extern "C" {
 void fn_8003E3BC(const Matrix*, const Vec3f*, Vec3f*); // HYPOTHESIS: the matrix-vector product (map: unnamed)
 float fn_8003DF9C(const Vec3f*, const Vec3f*);         // HYPOTHESIS: the angle between two vectors (map: unnamed)
-// Map: Vec2f::dotProduct (the weak copy of the damage module unit).
-float fn_41_108AC(const Vec2f* a, const Vec2f* b);
 }
+
+// Vec2f::dotProduct (map name): a weak copy of the damage module unit, which emits it first.
+float dotProduct(Vec2f* a, Vec2f* b);
 
 // The value accesser's constant block of the 14 common energy parameter sets of every enemy.
 static const u32 ConstantIndefinite_CommonEnergyParams = 43001;
@@ -49,17 +61,9 @@ static const u32 ConstantIndefinite_CommonEnergyParams = 43001;
 static const u32 ValueFloat_EnergyReflectRate = 0xbf0;
 static const u32 ValueFloat_ReflectNumAdd = 0xbc5;
 
-// Map: Vec2f::reflection: the reflection of this vector on the line of normal.
-// TODO(nonmatching): 87.64%, (a) the inlined Vec2f subtract / scale temporaries take a larger frame (0x50 vs 0x40) and extra copies.
-inline void vec2fReflection(const Vec2f* self, const Vec2f* normal, Vec2f* out) {
-    Vec2f twiceNormal = *normal * 2.0f;
-    Vec2f along = twiceNormal * fn_41_108AC(self, normal);
-    Vec2f result;
-    result.m_x = normal->m_x - along.m_x;
-    result.m_y = normal->m_y - along.m_y;
-    Vec2f copy = result;
-    out->m_x = copy.m_x;
-    out->m_y = copy.m_y;
+// Map: Vec2f::reflection: vec reflected on the line of normal (out = vec - 2 (normal . vec) normal).
+inline void vec2fReflection(const Vec2f* normal, const Vec2f* vec, Vec2f* out) {
+    *out = *vec - (*normal * 2.0f) * dotProduct(const_cast<Vec2f*>(normal), const_cast<Vec2f*>(vec));
 }
 
 // Map: Vec2f::operator==.
@@ -71,9 +75,8 @@ inline bool vec2fEqual(const Vec2f* a, const Vec2f* b) {
     return equal;
 }
 
-// TODO(nonmatching): 99.36%, (b) the 1-argument soKineticModuleImpl constructor emits an extra `li r6,0` the original's call does not.
 emKineticModuleImpl::emKineticModuleImpl(soModuleAccesser* acc, const emKineticEnergyParamDesc& energies)
-    : soKineticModuleImpl(acc, &m_energyManager, NULL), m_accesser(acc), m_params(NULL), m_paramNum(0),
+    : soKineticModuleImpl(acc, &m_energyManager), m_accesser(acc), m_params(NULL), m_paramNum(0),
       m_reflectAngle(-1.0f) {
     for (int i = 0; i < EnergyNum; i++) {
         addEnergy(&m_energies[i], i, soKineticEnergy::AttributeFlag(soKineticEnergy::ATTRIBUTE_MASK_MAIN), -1);
@@ -145,7 +148,7 @@ bool emKineticModuleImpl::IsInvalidEnergyId(int index) {
     return index == -1;
 }
 
-float emKineticModuleImpl::getKineticAngleFromSpeed(Vec2f speed, float lr) {
+float emKineticModuleImpl::getKineticAngleFromSpeed(float lr, Vec2f speed) {
     Vec2f front(lr, 0.0f);
     front.normalize();
     speed.normalize();
@@ -156,7 +159,6 @@ float emKineticModuleImpl::getKineticAngleFromSpeed(Vec2f speed, float lr) {
     return 360.0f - 57.29578f * angle;
 }
 
-// TODO(nonmatching): 99.35%, (b) the soGroundModule getTouchCount/isTouch signature in the ground module header (u32 vs u8, an extra clrlwi on the result).
 Vec2f emKineticModuleImpl::getTraSpeedLevelGround(soModuleAccesser* moduleAccesser, const Vec2f* speed, int touchMask) {
     Vec2f result = *speed;
     soGroundModule& ground = moduleAccesser->getGroundModule();
@@ -170,7 +172,7 @@ Vec2f emKineticModuleImpl::getTraSpeedLevelGround(soModuleAccesser* moduleAccess
     tangent.m_x = normal3.m_y * axis.m_z - normal3.m_z * axis.m_y;
     tangent.m_y = normal3.m_z * axis.m_x - normal3.m_x * axis.m_z;
     tangent.m_z = normal3.m_x * axis.m_y - normal3.m_y * axis.m_x;
-    if (fn_41_108AC(&Vec2f(tangent.m_x, tangent.m_y), &result) >= 0.0f) {
+    if (dotProduct(&Vec2f(tangent.m_x, tangent.m_y), &result) >= 0.0f) {
         rotVec2f(&normal, -1.5707964f, &normal);
     } else {
         rotVec2f(&normal, 1.5707964f, &normal);
@@ -182,7 +184,6 @@ Vec2f emKineticModuleImpl::getTraSpeedLevelGround(soModuleAccesser* moduleAccess
     return result;
 }
 
-// TODO(nonmatching): 98.89%, (b) the soGroundModule getTouchCount/isTouch signature in the ground module header (u32 vs u8, an extra clrlwi on the result).
 Vec2f emKineticModuleImpl::getTraSpeedVerticalGround(soModuleAccesser* moduleAccesser, const Vec2f* speed, int touchMask) {
     Vec2f result = *speed;
     soGroundModule& ground = moduleAccesser->getGroundModule();
@@ -195,7 +196,6 @@ Vec2f emKineticModuleImpl::getTraSpeedVerticalGround(soModuleAccesser* moduleAcc
     return result;
 }
 
-// TODO(nonmatching): 99.06%, (b) the soGroundModule getTouchCount/isTouch signature in the ground module header (u32 vs u8, an extra clrlwi on the result).
 float emKineticModuleImpl::getSpeedAngleWithTouchGround(soModuleAccesser* moduleAccesser, const Vec2f* speed, int touchMask) {
     float angle = 0.0f;
     soGroundModule& ground = moduleAccesser->getGroundModule();
@@ -204,13 +204,12 @@ float emKineticModuleImpl::getSpeedAngleWithTouchGround(soModuleAccesser* module
     }
     Vec2f normal = ground.getTouchNormal(touchMask, 0);
     angle = 57.29578f * vec2fAngle(&normal, const_cast<Vec2f*>(speed));
-    if (fn_41_108AC(&Vec2f(normal.m_x, normal.m_y), speed) >= 0.0f) {
+    if (dotProduct(&Vec2f(normal.m_x, normal.m_y), const_cast<Vec2f*>(speed)) >= 0.0f) {
         return 90.0f - angle;
     }
     return angle - 90.0f;
 }
 
-// TODO(nonmatching): 99.36%, (b) the soGroundModule getTouchCount/isTouch signature in the ground module header (u32 vs u8, an extra clrlwi on the result).
 int emKineticModuleImpl::getRotSpeedDirForAxisAdjustWithTouchGround(soModuleAccesser* moduleAccesser, const Vec2f* speed,
                                                                     int touchMask) {
     if (0.0f == const_cast<Vec2f*>(speed)->length()) {
@@ -356,7 +355,6 @@ void emKineticModuleImpl::endEnergy(int index) {
 }
 
 // Whether the sum of the reflecting energies' speeds runs into the ground the enemy touches.
-// TODO(nonmatching): 98.96%, (b) the soGroundModule getTouchCount/isTouch signature in the ground module header (u32 vs u8, an extra clrlwi on the result).
 bool emKineticModuleImpl::isEnergyReflect() {
     soGroundModule& ground = m_accesser->getGroundModule();
     Vec2f speed(0.0f, 0.0f);
@@ -388,7 +386,7 @@ bool emKineticModuleImpl::isEnergyReflect() {
     direction.normalize();
     Vec2f normalDirection = normal;
     normalDirection.normalize();
-    if (fn_41_108AC(&direction, &normalDirection) >= -0.08f) {
+    if (dotProduct(&direction, &normalDirection) >= -0.08f) {
         return false;
     }
     if (ground.getTouchCount(0) > 1) {
@@ -402,7 +400,6 @@ bool emKineticModuleImpl::isEnergyReflect() {
     return true;
 }
 
-// TODO(nonmatching): 93.67%, (b) the soGroundModule getTouchCount/isTouch signature in the ground module header (u32 vs u8, an extra clrlwi on the result); the extra clrlwi also shifts the register allocation (r26-r31 are rotated).
 void emKineticModuleImpl::reflectEnergy(int index, int paramId, bool alongNormal, int nodeId) {
     soGroundModule& ground = m_accesser->getGroundModule();
     if (ground.getTouchCount(0) == 0) {
@@ -443,23 +440,16 @@ void emKineticModuleImpl::reflectEnergy(int index, int paramId, bool alongNormal
     direction.normalize();
     Vec2f normalDirection = normal;
     normalDirection.normalize();
-    if (fn_41_108AC(&direction, &normalDirection) >= -0.08f) {
+    if (dotProduct(&direction, &normalDirection) >= -0.08f) {
         return;
     }
     if (isEnergyEnd(index) == false) {
         return;
     }
     emKineticEnergyParam* param = getEnergyParamPtr(paramId);
-    switch (param->m_kind) {
-    case 0:
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
-    case 13:
-        break;
-    default:
+    // The kinds a reflection restarts: 0 and 8-13 (tested one by one).
+    if (param->m_kind != 0 && param->m_kind != 8 && param->m_kind != 9 && param->m_kind != 10 && param->m_kind != 11 &&
+        param->m_kind != 12 && param->m_kind != 13) {
         return;
     }
     if (param->m_speed.m_base != emKineticValue_None && param->m_speed.m_base != emKineticValue_CurrentX &&
@@ -474,7 +464,8 @@ void emKineticModuleImpl::reflectEnergy(int index, int paramId, bool alongNormal
     m_reflectAngle = 57.29578f * vec2fAngle(&normal, &reflected);
     float angle = param->m_angle;
     if (angle == emKineticValue_CurrentX) {
-        angle = getKineticAngleFromSpeed(reflected, m_accesser->getPostureModule().getLr());
+        float lr = m_accesser->getPostureModule().getLr();
+        angle = getKineticAngleFromSpeed(lr, reflected);
     }
     for (int i = 0; i < EnergyNum; i++) {
         emKineticEnergy* energy = getEmEnergy(i);
@@ -501,7 +492,8 @@ void emKineticModuleImpl::reflectEnergy(int index, int paramId, bool alongNormal
     startEnergy(index, paramId, param, NULL, false, angle, nodeId, -1.0f, 0.0f);
 }
 
-// TODO(nonmatching): 88.27%, (a) the energy-kind range test compiles to a different compare chain (branch structure), plus the ground header clrlwi.
+// TODO(nonmatching): 99.55%, (a) register allocation only: the component and |y| sit in f2/f1/f3 in ours, f1/f0/f3 in the
+// original (the evaluation order and the double temporaries already match).
 void emKineticModuleImpl::reverseEnergy(int index, int paramId, int nodeId, int mode) {
     Vec2f speed(0.0f, 0.0f);
     Vec2f reversed(0.0f, 0.0f);
@@ -526,16 +518,9 @@ void emKineticModuleImpl::reverseEnergy(int index, int paramId, int nodeId, int 
         return;
     }
     emKineticEnergyParam* param = getEnergyParamPtr(paramId);
-    switch (param->m_kind) {
-    case 0:
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
-    case 13:
-        break;
-    default:
+    // The kinds a reflection restarts: 0 and 8-13 (tested one by one).
+    if (param->m_kind != 0 && param->m_kind != 8 && param->m_kind != 9 && param->m_kind != 10 && param->m_kind != 11 &&
+        param->m_kind != 12 && param->m_kind != 13) {
         return;
     }
     if (param->m_speed.m_base != emKineticValue_None && param->m_speed.m_base != emKineticValue_CurrentX &&
@@ -545,16 +530,20 @@ void emKineticModuleImpl::reverseEnergy(int index, int paramId, int nodeId, int 
     if (mode == 0) {
         reversed = speed * -1.0f;
     } else {
+        // Mode 1 turns back only the larger component.
         reversed = speed;
-        if ((float)__fabs(speed.m_x) >= (float)__fabs(speed.m_y)) {
-            reversed.m_x = speed.m_x * -1.0f;
+        float absY = __fabs(reversed.m_y);
+        float absX = __fabs(reversed.m_x);
+        if (absX >= absY) {
+            reversed.m_x *= -1.0f;
         } else {
-            reversed.m_y = speed.m_y * -1.0f;
+            reversed.m_y *= -1.0f;
         }
     }
     float angle = param->m_angle;
     if (angle == emKineticValue_CurrentX) {
-        angle = getKineticAngleFromSpeed(reversed, m_accesser->getPostureModule().getLr());
+        float lr = m_accesser->getPostureModule().getLr();
+        angle = getKineticAngleFromSpeed(lr, reversed);
     }
     for (int i = 0; i < EnergyNum; i++) {
         emKineticEnergy* energy = getEmEnergy(i);
@@ -588,7 +577,6 @@ float emKineticModuleImpl::getReflectNumAddValue() {
     return value * ((90.0f - angle) / 90.0f);
 }
 
-// TODO(nonmatching): 99.54%, (b) the soGroundModule getTouchCount/isTouch signature in the ground module header (u32 vs u8, an extra clrlwi on the result).
 bool emKineticModuleImpl::isEnergyProject(int index) {
     soGroundModule& ground = m_accesser->getGroundModule();
     Vec2f speed(0.0f, 0.0f);
@@ -620,14 +608,13 @@ bool emKineticModuleImpl::isEnergyProject(int index) {
     if (0.0f == speed.length()) {
         return false;
     }
-    if (fn_41_108AC(&speed, &normal) >= 0.0f) {
+    if (dotProduct(&speed, &normal) >= 0.0f) {
         return false;
     }
     projected = soKineticUtility::projectionNormalFollow(&speed, &normal);
     return !vec2fEqual(&speed, &projected);
 }
 
-// TODO(nonmatching): 92.54%, (b) the soGroundModule getTouchCount/isTouch signature in the ground module header (u32 vs u8, an extra clrlwi on the result), which also shifts register allocation.
 void emKineticModuleImpl::projectEnergy(int index, int paramId, int energyIndex, int nodeId) {
     soGroundModule& ground = m_accesser->getGroundModule();
     if (ground.getTouchCount(0) == 0) {
@@ -667,23 +654,16 @@ void emKineticModuleImpl::projectEnergy(int index, int paramId, int energyIndex,
     if (0.0f == speed.length()) {
         return;
     }
-    if (fn_41_108AC(&speed, &normal) >= 0.0f) {
+    if (dotProduct(&speed, &normal) >= 0.0f) {
         return;
     }
     if (isEnergyEnd(index) == false) {
         return;
     }
     emKineticEnergyParam* param = getEnergyParamPtr(paramId);
-    switch (param->m_kind) {
-    case 0:
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
-    case 13:
-        break;
-    default:
+    // The kinds a reflection restarts: 0 and 8-13 (tested one by one).
+    if (param->m_kind != 0 && param->m_kind != 8 && param->m_kind != 9 && param->m_kind != 10 && param->m_kind != 11 &&
+        param->m_kind != 12 && param->m_kind != 13) {
         return;
     }
     if (param->m_speed.m_base != emKineticValue_None && param->m_speed.m_base != emKineticValue_CurrentX &&
@@ -693,14 +673,14 @@ void emKineticModuleImpl::projectEnergy(int index, int paramId, int energyIndex,
     projected = soKineticUtility::projectionNormalFollow(&speed, &normal);
     float angle = param->m_angle;
     if (angle == emKineticValue_CurrentX) {
-        angle = getKineticAngleFromSpeed(projected, m_accesser->getPostureModule().getLr());
+        float lr = m_accesser->getPostureModule().getLr();
+        angle = getKineticAngleFromSpeed(lr, projected);
     }
     clearEnergy(index);
     getEmEnergy(index)->initProjectEnergy(&projected, angle);
     startEnergy(index, paramId, param, NULL, false, angle, nodeId, -1.0f, 0.0f);
 }
 
-// TODO(nonmatching): 87.71%, (b) the soGroundModule getTouchCount/isTouch signature in the ground module header (u32 vs u8, an extra clrlwi on the result), which also shifts register allocation.
 void emKineticModuleImpl::compTransEnergy(int index, int paramId, int nodeId) {
     Vec2f speed(0.0f, 0.0f);
     for (int i = 0; i < EnergyNum; i++) {
@@ -718,16 +698,9 @@ void emKineticModuleImpl::compTransEnergy(int index, int paramId, int nodeId) {
         return;
     }
     emKineticEnergyParam* param = getEnergyParamPtr(paramId);
-    switch (param->m_kind) {
-    case 0:
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
-    case 13:
-        break;
-    default:
+    // The kinds a reflection restarts: 0 and 8-13 (tested one by one).
+    if (param->m_kind != 0 && param->m_kind != 8 && param->m_kind != 9 && param->m_kind != 10 && param->m_kind != 11 &&
+        param->m_kind != 12 && param->m_kind != 13) {
         return;
     }
     if (param->m_speed.m_base != emKineticValue_None && param->m_speed.m_base != emKineticValue_CurrentX &&
@@ -736,7 +709,8 @@ void emKineticModuleImpl::compTransEnergy(int index, int paramId, int nodeId) {
     }
     float angle = param->m_angle;
     if (angle == emKineticValue_CurrentX) {
-        angle = getKineticAngleFromSpeed(speed, m_accesser->getPostureModule().getLr());
+        float lr = m_accesser->getPostureModule().getLr();
+        angle = getKineticAngleFromSpeed(lr, speed);
     }
     clearEnergy(index);
     getEmEnergy(index)->initCompTransEnergy(&speed, angle);
@@ -944,7 +918,7 @@ int emKineticModuleImpl::getLrFromTransSpeed(int index) {
     if (speed.length() <= 0.0f) {
         return -1;
     }
-    float dot = fn_41_108AC(&speed, &right);
+    float dot = dotProduct(&speed, &right);
     if (dot > 0.0f) {
         return 2;
     }
@@ -961,7 +935,7 @@ int emKineticModuleImpl::getUdFromTransSpeed(int index) {
     if (speed.length() <= 0.0f) {
         return -1;
     }
-    float dot = fn_41_108AC(&speed, &up);
+    float dot = dotProduct(&speed, &up);
     if (dot > 0.0f) {
         return 0;
     }
@@ -1069,7 +1043,6 @@ static inline acCmdArg getCmdArg(const soArrayFixed<const acCmdArgConv>& args, s
 
 // The anim cmds of group 'f' (32 types): start, stop, resume, end, clear, copy, reflect, project the energies and set
 // their parameters. Every type checks its argument count first and returns true when it does not fit.
-// TODO(nonmatching): 98.84%, (a) the stack offsets of the locals differ by 0x10; the logic is believed right.
 bool emKineticModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3) {
     if (acmd->getGroup() != 'f') {
         return soKineticModuleImpl::notifyEventAnimCmd(acmd, moduleAccesser, unk3);
@@ -1229,7 +1202,8 @@ bool emKineticModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* 
         int index = EM_KINETIC_CMD_ARG(0).getIntData();
         int sourceIndex = EM_KINETIC_CMD_ARG(1).getIntData();
         if (sourceIndex != -1) {
-            getEmEnergy(index)->copyEnergy(getEmEnergy(sourceIndex));
+            emKineticEnergy* destination = getEmEnergy(index);
+            destination->copyEnergy(getEmEnergy(sourceIndex));
         }
         return true;
     }
@@ -1315,12 +1289,9 @@ bool emKineticModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* 
         int index = EM_KINETIC_CMD_ARG(0).getIntData();
         float speed;
         EM_KINETIC_CMD_ARG_FLOAT(speed, 1)
-        switch (type) {
-        case 24:
-            break;
-        case 25:
+        if (type == 24) {
+        } else if (type == 25) {
             speed += getEnergyMinSpeed(index);
-            break;
         }
         if (index != -1) {
             getEmEnergy(index)->setMinSpeed(m_accesser, speed);
@@ -1337,12 +1308,9 @@ bool emKineticModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* 
         int index = EM_KINETIC_CMD_ARG(0).getIntData();
         float speed;
         EM_KINETIC_CMD_ARG_FLOAT(speed, 1)
-        switch (type) {
-        case 26:
-            break;
-        case 27:
+        if (type == 26) {
+        } else if (type == 27) {
             speed += getEnergyMaxSpeed(index);
-            break;
         }
         if (index != -1) {
             getEmEnergy(index)->setMaxSpeed(m_accesser, speed);
@@ -1359,12 +1327,9 @@ bool emKineticModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* 
         int index = EM_KINETIC_CMD_ARG(0).getIntData();
         float amount;
         EM_KINETIC_CMD_ARG_FLOAT(amount, 1)
-        switch (type) {
-        case 22:
-            break;
-        case 23:
+        if (type == 22) {
+        } else if (type == 23) {
             amount += getEnergyAmount(index);
-            break;
         }
         if (index != -1) {
             getEmEnergy(index)->setAmount(amount);
@@ -1381,12 +1346,9 @@ bool emKineticModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* 
         int index = EM_KINETIC_CMD_ARG(0).getIntData();
         float angle;
         EM_KINETIC_CMD_ARG_FLOAT(angle, 1)
-        switch (type) {
-        case 12:
-            break;
-        case 20:
+        if (type == 12) {
+        } else if (type == 20) {
             angle += getEnergyAngle(index);
-            break;
         }
         setEnergyAngle(index, angle);
         return true;
@@ -1401,12 +1363,9 @@ bool emKineticModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* 
         int index = EM_KINETIC_CMD_ARG(0).getIntData();
         float length;
         EM_KINETIC_CMD_ARG_FLOAT(length, 1)
-        switch (type) {
-        case 17:
-            break;
-        case 21:
+        if (type == 17) {
+        } else if (type == 21) {
             length += getEnergyLength(index);
-            break;
         }
         setEnergyLength(index, length);
         return true;
@@ -1494,7 +1453,8 @@ bool emKineticModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* 
             return true;
         }
         u32 workId = EM_KINETIC_CMD_ARG(3).getValueIndexData();
-        m_accesser->getWorkManageModule().setFloat(getKineticAngleFromSpeed(speed, lr), workId);
+        float angle = getKineticAngleFromSpeed(lr, speed);
+        m_accesser->getWorkManageModule().setFloat(angle, workId);
         return true;
     }
     case 30:
@@ -1520,8 +1480,10 @@ bool emKineticModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* 
         if (nodeId == -1) {
             return true;
         }
-        Vec3f speed = getSumSpeed3f(soKineticEnergy::AttributeFlag(soKineticEnergy::ATTRIBUTE_MASK_ALL));
-        emKineticEnergy::adjustWorldRotZFromSpeed(moduleAccesser, &moduleAccesser->getPostureModule(), &speed, nodeId);
+        Vec3f sum = getSumSpeed3f(soKineticEnergy::AttributeFlag(soKineticEnergy::ATTRIBUTE_MASK_ALL));
+        soPostureModule* posture = &moduleAccesser->getPostureModule();
+        Vec3f speed = sum;
+        emKineticEnergy::adjustWorldRotZFromSpeed(moduleAccesser, posture, &speed, nodeId);
         return true;
     }
     }

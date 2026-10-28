@@ -1,6 +1,10 @@
 // One kinetic energy of an enemy (emKineticEnergy, em/kinetic/em_kinetic_module_impl.h): a translation, rotation or
 // follow energy started from a parameter set (emKineticEnergyParam) by the kinetic module's anim cmds.
 #define EM_KINETIC_MODULE_IMPL_FULL
+// MATCH-ONLY: emKineticEnergy's destructor calls soKineticEnergy's out of line (the module unit's weak copy).
+#define SO_KINETIC_ENERGY_DTOR_NEVER_INLINE
+// soKineticEnergy's on/offConsiderGroundFriction and getSpeed3f are inline: this unit emits their weak copies.
+#define SO_KINETIC_ENERGY_INLINE_VIRTUALS
 // MATCH-ONLY: the unit calls the out-of-line copies of Vec2f::length and Vec2f::operator= (its own weak copy), and of
 // the Vec3f constructor, assignment, subtraction and scale.
 #define MT_VEC2F_LENGTH_OUT_OF_LINE
@@ -77,10 +81,13 @@ static inline Vec3f toDegrees(const Vec3f& radians) {
 }
 
 // Map: nw4r::math::VEC2::operator!= (a weak copy of the unit; the original Vec2f derives from VEC2).
-// TODO(nonmatching): 83.33%, (a) branch polarity of the second compare (bne vs beq) in the inline copy.
+// MATCH-ONLY: the weak copy keeps the 603 instruction schedule (as MSL's atan2f wrapper in the module unit).
+#pragma push
+#pragma scheduling 603
 inline bool vec2fNotEqual(const Vec2f* a, const Vec2f* b) {
     return a->m_x != b->m_x || a->m_y != b->m_y;
 }
+#pragma pop
 
 // The kind tests are macros: the original expands them as plain compare chains (an inline function returning bool
 // gives a flag temporary, and MWCC does not inline the longer ones).
@@ -108,7 +115,6 @@ emKineticEnergy::emKineticEnergy() : m_paramIdHistory(2, (s32)-1) {
     clearEnergy();
 }
 
-// TODO(nonmatching): 85.71%, (b) the soKineticEnergy destructor is inlined here (soArrayQueueImpl dtor call, different flag constant) where the original calls it out of line.
 emKineticEnergy::~emKineticEnergy() { }
 
 bool emKineticEnergy::isInvalidEnergyType(int kind) {
@@ -167,12 +173,12 @@ float emKineticEnergy::startEnergySubAngleAxis(int kind, float angle, int nodeId
 }
 
 // A min / max speed: taken from the current speed for the Current* values, then grown with the level unless off.
-// TODO(nonmatching): 99.68%, (a) fabs result lands in f0 then frsp to f1 in the original (register choice only).
 float emKineticEnergy::startEnergySubLimit(float limit, float rate, float current, float levelScale) {
     if (limit == emKineticValue_Current) {
         limit = current;
     } else if (limit == emKineticValue_CurrentAbs) {
-        limit = __fabs(current);
+        double wide = __fabs(current);
+        limit = wide;
     } else if (limit == emKineticValue_CurrentNegAbs) {
         limit = -(float)__fabs(current);
     }
@@ -188,8 +194,10 @@ float emKineticEnergy::startEnergySubLimit(float limit, float rate, float curren
     return limit + rate * levelScale;
 }
 
-// TODO(nonmatching): 86.01%, (a) branch structure differs in the long parameter setup; the logic is believed right.
-void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, int paramId, float lr, int nodeId,
+// TODO(nonmatching): 94.47%, (a) the two start-angle chains share their identical blocks in the original (MWCC tail
+// merge in the other direction), the 0.0f start angle is reloaded there, plus one discarded group compare and two
+// scheduling slots; the logic is believed right.
+void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, s32 paramId, float lr, int nodeId,
                                   const emKineticEnergyParam* param, grGimmickMotionPath* motionPath,
                                   bool fromPathStart, float angle, float reflectRate, float pathMotFrame,
                                   float worldRotZ, bool restart, bool reversed) {
@@ -237,7 +245,8 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, int paramId,
     }
     // HYPOTHESIS: unused tests of the kind (the original calls getEnergyTypeToGroup and discards the results).
     getEnergyTypeToGroup(m_param.m_kind);
-    (void)EM_IS_ROLL_KIND(m_param.m_kind);
+    if (EM_IS_ROLL_KIND(m_param.m_kind)) {
+    }
     m_isStop = false;
     m_loopCount = 0;
     float speed = 0.0f;
@@ -247,7 +256,7 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, int paramId,
         (int)m_param.m_speed.m_base == emKineticValue_CurrentY) {
         // The speed of the previous energy of the same group.
         if (isInvalidEnergyType(prevParam.m_kind) != true &&
-            getEnergyTypeToGroup(prevParam.m_kind) == getEnergyTypeToGroup(m_param.m_kind)) {
+            getEnergyTypeToGroup(m_param.m_kind) == getEnergyTypeToGroup(prevParam.m_kind)) {
             if (EM_IS_PLAIN_TRANS_KIND(prevParam.m_kind) && EM_IS_MOTION_KIND(m_param.m_kind)) {
                 // (no speed)
             } else if (EM_IS_MOTION_KIND(prevParam.m_kind) && EM_IS_PLAIN_TRANS_KIND(m_param.m_kind)) {
@@ -269,15 +278,13 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, int paramId,
             }
         }
     } else if ((int)m_param.m_speed.m_base == emKineticValue_Random) {
-        float maxSpeed = m_param.m_maxSpeed.m_base;
-        float minSpeed = m_param.m_minSpeed.m_base;
-        if (maxSpeed >= minSpeed) {
-            if (maxSpeed == minSpeed) {
-                speed = maxSpeed;
-            } else {
-                float range = 1.17549435e-38f + (maxSpeed - minSpeed);
-                speed = m_param.m_minSpeed.m_base + range * randf();
-            }
+        if (m_param.m_maxSpeed.m_base < m_param.m_minSpeed.m_base) {
+            // (no speed)
+        } else if (m_param.m_maxSpeed.m_base == m_param.m_minSpeed.m_base) {
+            speed = m_param.m_maxSpeed.m_base;
+        } else {
+            float range = 1.17549435e-38f + (m_param.m_maxSpeed.m_base - m_param.m_minSpeed.m_base);
+            speed = m_param.m_minSpeed.m_base + range * randf();
         }
     } else {
         speed = m_param.m_speed.m_base;
@@ -314,43 +321,63 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, int paramId,
         }
         emKineticModuleImpl* kinetic = &dynamic_cast<emKineticModuleImpl&>(moduleAccesser->getKineticModule());
         startAngle = kinetic->getEnergyAngle(m_baseEnergyId);
-    } else {
-        float paramAngle = m_param.m_angle;
-        float value = paramAngle;
-        if ((int)paramAngle == emKineticValue_None) {
-            value = angle;
-        }
-        if ((int)value == emKineticValue_Down) {
+    } else if ((int)m_param.m_angle == emKineticValue_None) {
+        // The parameter set leaves the start angle to the caller.
+        if ((int)angle == emKineticValue_Down) {
             startAngle = emKineticValue_Down;
-        } else if ((int)value == emKineticValue_GroundAngle) {
+        } else if ((int)angle == emKineticValue_GroundAngle) {
             startAngle = 0.0f;
             m_isGroundAngle = true;
-        } else if ((int)value == emKineticValue_CurrentX) {
+        } else if ((int)angle == emKineticValue_CurrentX) {
             if (getEnergyTypeToGroup(m_param.m_kind) == Group_Rot) {
                 keepRot = true;
             } else if (isInvalidEnergyType(prevParam.m_kind) == true) {
                 startAngle = 0.0f;
-            } else if (getEnergyTypeToGroup(prevParam.m_kind) == getEnergyTypeToGroup(m_param.m_kind)) {
+            } else if (getEnergyTypeToGroup(m_param.m_kind) == getEnergyTypeToGroup(prevParam.m_kind)) {
                 startAngle = getRealAngle(moduleAccesser, m_angle, m_nodeId);
             }
-        } else if ((int)value == emKineticValue_CurrentY) {
+        } else if ((int)angle == emKineticValue_CurrentY) {
             if (getEnergyTypeToGroup(m_param.m_kind) != Group_Rot) {
                 return;
             }
             keepRot = true;
-        } else if ((int)value == emKineticValue_AngleAxis5 || (int)value == emKineticValue_AngleAxis4 ||
-                   (int)value == emKineticValue_AngleAxis3 || (int)value == emKineticValue_AngleAxis2 ||
-                   (int)value == emKineticValue_AngleAxis1 || (int)value == emKineticValue_AngleAxis0) {
-            startAngle = startEnergySubAngleAxis(m_param.m_kind, value, m_nodeId);
-        } else if ((int)paramAngle == emKineticValue_None) {
-            if ((int)angle == emKineticValue_None) {
+        } else if ((int)angle == emKineticValue_AngleAxis5 || (int)angle == emKineticValue_AngleAxis4 ||
+                   (int)angle == emKineticValue_AngleAxis3 || (int)angle == emKineticValue_AngleAxis2 ||
+                   (int)angle == emKineticValue_AngleAxis1 || (int)angle == emKineticValue_AngleAxis0) {
+            startAngle = startEnergySubAngleAxis(m_param.m_kind, angle, m_nodeId);
+        } else if ((int)angle == emKineticValue_None) {
+            return;
+        } else {
+            startAngle = angle;
+        }
+    } else {
+        // The parameter set's own start angle.
+        if ((int)m_param.m_angle == emKineticValue_Down) {
+            startAngle = emKineticValue_Down;
+        } else if ((int)m_param.m_angle == emKineticValue_AngleAxis5 || (int)m_param.m_angle == emKineticValue_AngleAxis4 ||
+                   (int)m_param.m_angle == emKineticValue_AngleAxis3 || (int)m_param.m_angle == emKineticValue_AngleAxis2 ||
+                   (int)m_param.m_angle == emKineticValue_AngleAxis1 || (int)m_param.m_angle == emKineticValue_AngleAxis0) {
+            startAngle = startEnergySubAngleAxis(m_param.m_kind, m_param.m_angle, m_nodeId);
+        } else if ((int)m_param.m_angle == emKineticValue_CurrentX) {
+            if (getEnergyTypeToGroup(m_param.m_kind) == Group_Rot) {
+                keepRot = true;
+            } else if (isInvalidEnergyType(prevParam.m_kind) == true) {
+                startAngle = 0.0f;
+            } else if (getEnergyTypeToGroup(m_param.m_kind) == getEnergyTypeToGroup(prevParam.m_kind)) {
+                startAngle = getRealAngle(moduleAccesser, m_angle, m_nodeId);
+            }
+        } else if ((int)m_param.m_angle == emKineticValue_CurrentY) {
+            if (getEnergyTypeToGroup(m_param.m_kind) != Group_Rot) {
                 return;
             }
-            startAngle = angle;
+            keepRot = true;
+        } else if ((int)m_param.m_angle == emKineticValue_GroundAngle) {
+            startAngle = 0.0f;
+            m_isGroundAngle = true;
         } else if (angle < emKineticValue_GroundAngle) {
             startAngle = angle;
         } else {
-            startAngle = paramAngle;
+            startAngle = m_param.m_angle;
         }
     }
     float rate;
@@ -400,13 +427,9 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, int paramId,
     if (getEnergyTypeToGroup(m_param.m_kind) == Group_Rot && keepRot == 0) {
         Vec3f rot(0.0f, 0.0f, 0.0f);
         float realAngle = getRealAngle(moduleAccesser, m_angle, m_nodeId);
-        switch (m_param.m_kind) {
-        case 2:
-        case 3:
-        case 4:
+        if (m_param.m_kind == 2 || m_param.m_kind == 3 || m_param.m_kind == 4) {
             posture->setRot(&rot, m_nodeId);
-            break;
-        default:
+        } else {
             return;
         }
         Vec3f rotSpeed = getRotSpeed(moduleAccesser, m_param.m_kind, realAngle, m_nodeId, true);
@@ -529,7 +552,6 @@ bool emKineticEnergy::isReflectEnergy(soModuleAccesser* moduleAccesser) {
 }
 
 // Scales the energy by its reflect rate before a reflection; true when the module can clear it afterwards.
-// TODO(nonmatching): 97.47%, (a) instruction scheduling: the `addi r3,r29,0xb4` argument setup sits one slot earlier in ours.
 bool emKineticEnergy::reflectEnergyPre(soModuleAccesser* moduleAccesser, bool scaleSpeed) {
     if (isInvalidEnergy() == true) {
         return true;
@@ -537,7 +559,8 @@ bool emKineticEnergy::reflectEnergyPre(soModuleAccesser* moduleAccesser, bool sc
     m_length = m_length * m_reflectRate;
     if (getEnergyTypeToGroup(m_param.m_kind) == Group_Trans) {
         if (scaleSpeed == true && 0.0f != m_speed.length()) {
-            m_speed.scale(m_reflectRate, &m_speed);
+            float rate = m_reflectRate;
+            m_speed.scale(rate, &m_speed);
         }
         return true;
     }
@@ -554,7 +577,6 @@ bool emKineticEnergy::reflectEnergyPre(soModuleAccesser* moduleAccesser, bool sc
 }
 
 // After a reflection to speed: a rotation turns around when the new speed goes against it.
-// TODO(nonmatching): 98.43%, (a) instruction scheduling: the `addi r3,r1,8` argument setup sits one slot earlier in ours.
 bool emKineticEnergy::reflectEnergyPost(soModuleAccesser* moduleAccesser, Vec2f* speed) {
     if (isInvalidEnergy() == true) {
         return true;
@@ -564,7 +586,7 @@ bool emKineticEnergy::reflectEnergyPost(soModuleAccesser* moduleAccesser, Vec2f*
     }
     if (getEnergyTypeToGroup(m_param.m_kind) == Group_Rot) {
         if (m_param.m_kind == 2) {
-            float angle = emKineticModuleImpl::getKineticAngleFromSpeed(*speed, 1.0f);
+            float angle = emKineticModuleImpl::getKineticAngleFromSpeed(1.0f, *speed);
             // The facing of the new speed.
             float lr;
             if (angle > 90.0f && angle < 270.0f) {
@@ -830,7 +852,7 @@ inline float vec3fLength(const Vec3f* v) __attribute__((never_inline)) {
     return lengthSq * rsqrtf(lengthSq);
 }
 
-// TODO(nonmatching): 99.55%, (a) the clamp tests compare in a different order and f1/f2 are swapped (register allocation and branch order).
+// TODO(nonmatching): 99.77%, (a) register allocation only: the angle and |diff| sit in f2/f3 in ours, f3/f2 in the original.
 void emKineticEnergy::updateEnergySpeedSubPathMotWorldRotZ(soModuleAccesser* moduleAccesser, soPostureModule* posture,
                                                          Vec3f move, float maxRot, float baseRot) {
     if (vec3fLength(&move) <= 0.00001f) {
@@ -839,11 +861,13 @@ void emKineticEnergy::updateEnergySpeedSubPathMotWorldRotZ(soModuleAccesser* mod
     // (The angle of the move from the Y axis.)
     float angle = -1.0f * (57.29578f * atan2f(move.m_x, move.m_y));
     float diff = angle - m_worldRotZ;
-    if ((float)__fabs(diff) >= 180.0f) {
+    double wideDiff = __fabs(diff);
+    float absDiff = wideDiff;
+    if (absDiff >= 180.0f) {
         if (m_worldRotZ <= 0.0f) {
-            m_worldRotZ = m_worldRotZ + 360.0f;
+            m_worldRotZ += 360.0f;
         } else if (m_worldRotZ >= 0.0f) {
-            m_worldRotZ = m_worldRotZ - 360.0f;
+            m_worldRotZ -= 360.0f;
         }
         diff = angle - m_worldRotZ;
     }
@@ -854,8 +878,8 @@ void emKineticEnergy::updateEnergySpeedSubPathMotWorldRotZ(soModuleAccesser* mod
         diff = -(float)__fabs(maxRot);
     }
     Vec3f rotSpeed = getRotSpeed(moduleAccesser, 2, diff + baseRot, m_nodeId, false);
-    Vec3f rot = posture->getRot(m_nodeId);
     Vec3f newRot;
+    Vec3f rot = posture->getRot(m_nodeId);
     vec3fAdd(&rot, &rotSpeed, &newRot);
     posture->setRot(&newRot, m_nodeId);
     m_worldRotZ += diff;
@@ -999,7 +1023,7 @@ void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool a
             Vec2f groundSpeed = emKineticModuleImpl::getTraSpeedLevelGround(moduleAccesser, &m_speed, 8);
             if (vec2fNotEqual(&m_speed, &groundSpeed)) {
                 m_speed = groundSpeed;
-                m_angle = emKineticModuleImpl::getKineticAngleFromSpeed(m_speed, m_lr);
+                m_angle = emKineticModuleImpl::getKineticAngleFromSpeed(m_lr, m_speed);
             }
         } else {
             float angle = getRealAngle(moduleAccesser, m_angle, m_nodeId);
@@ -1012,7 +1036,7 @@ void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool a
             Vec2f groundSpeed = emKineticModuleImpl::getTraSpeedVerticalGround(moduleAccesser, &m_speed, 0xff);
             if (vec2fNotEqual(&m_speed, &groundSpeed)) {
                 m_speed = groundSpeed;
-                m_angle = emKineticModuleImpl::getKineticAngleFromSpeed(m_speed, m_lr);
+                m_angle = emKineticModuleImpl::getKineticAngleFromSpeed(m_lr, m_speed);
             }
         } else {
             float angle = getRealAngle(moduleAccesser, m_angle, m_nodeId);
@@ -1241,7 +1265,6 @@ void emKineticEnergy::updateEnergyPost(soModuleAccesser* moduleAccesser) {
 }
 
 // The motion kinds drive the motion's rate with the energy's length.
-// TODO(nonmatching): 92.02%, (a) the motion-kind range tests compile to a different compare/branch order (0x14 first vs 0xe first).
 void emKineticEnergy::updateEnergyPre(soModuleAccesser* moduleAccesser) {
     if (isInvalidEnergy() == true) {
         return;
@@ -1256,6 +1279,9 @@ void emKineticEnergy::updateEnergyPre(soModuleAccesser* moduleAccesser) {
         return;
     }
     switch (m_param.m_kind) {
+    // MATCH-ONLY: an explicit no-op case for kind 0 (the plain translation) gives the original's compare tree.
+    case 0:
+        break;
     case 1:
     case 23:
     case 24:
@@ -1466,7 +1492,7 @@ float emKineticEnergy::getRealAngle(soModuleAccesser* moduleAccesser, float angl
         if (0.0f == dir.length()) {
             return 0.0f;
         }
-        return emKineticModuleImpl::getKineticAngleFromSpeed(dir, posture.getRotYLr());
+        return emKineticModuleImpl::getKineticAngleFromSpeed(posture.getRotYLr(), dir);
     }
     return angle;
 }
@@ -1614,7 +1640,7 @@ void emKineticEnergy::adjustWorldRotZFromSpeed(soModuleAccesser* moduleAccesser,
     if (vec3fLength(speed) <= 0.00001f) {
         return;
     }
-    float angle = emKineticModuleImpl::getKineticAngleFromSpeed(Vec2f(speed->m_x, speed->m_y), posture->getRotYLr());
+    float angle = emKineticModuleImpl::getKineticAngleFromSpeed(posture->getRotYLr(), Vec2f(speed->m_x, speed->m_y));
     angle *= (-90.0f == posture->getRotYLr()) ? -1.0f : 1.0f;
     Enemy* enemy = &dynamic_cast<Enemy&>(moduleAccesser->getStageObject());
     enemy->initRot(nodeId);

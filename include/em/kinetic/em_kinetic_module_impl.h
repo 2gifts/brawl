@@ -77,7 +77,9 @@ struct emKineticEnergyParam {
     emScaledValue m_minSpeed;    // 0x14
     emScaledValue m_maxSpeed;    // 0x1C
     float m_angle;               // 0x24 degrees, or an emKineticEnergyParamValue
-    float m_amount;              // 0x28 the distance the energy moves before it ends (emKineticValue_None: no end)
+    // 0x28 the distance the energy moves before it ends (emKineticValue_None: no end). HYPOTHESIS: for the rotation
+    // kinds the amount of rotation instead (the damage module stores a rotation speed here).
+    float m_amount;
     bool m_amountIsFrames;       // 0x2C the amount is a frame count (startEnergy turns it into a distance)
     int m_endMode;               // 0x30 emKineticEnergy::EndMode: what the energy does when it ends
     int m_loopNum;               // 0x34 how many times a looping energy restarts (-1: no limit)
@@ -186,7 +188,8 @@ public:
     static float startEnergySubAngleAxis(int kind, float angle, int nodeId);
     static float startEnergySubLimit(float limit, float rate, float current, float levelScale);
     // restart: the energy restarts itself after it ended (updateEnergy); reversed: and runs backwards.
-    void startEnergy(soModuleAccesser* moduleAccesser, int paramId, float lr, int nodeId,
+    // The parameter set id is an s32: the original passes its address to the history queue's unshift.
+    void startEnergy(soModuleAccesser* moduleAccesser, s32 paramId, float lr, int nodeId,
                      const emKineticEnergyParam* param, grGimmickMotionPath* motionPath, bool fromPathStart,
                      float angle, float reflectRate, float pathMotFrame, float worldRotZ, bool restart, bool reversed);
     void stopEnergy(soModuleAccesser* moduleAccesser);
@@ -308,9 +311,8 @@ public:
     emKineticEnergyParam* getCommonEnergyParamPtr(int paramId);
     static bool IsInvalidEnergyId(int index);
     // The angle (degrees, 0-360) of a speed vector for the facing lr.
-    static float getKineticAngleFromSpeed(Vec2f speed, float lr);
-    // The touch mask is an int: the original passes it to both soGroundModule::isTouch and getTouchNormal without a
-    // clrlwi (see SO_GROUND_IS_TOUCH_INT_MASK in the shared patch).
+    static float getKineticAngleFromSpeed(float lr, Vec2f speed);
+    // The touch mask is a word, as soGroundModule::isTouch and getTouchNormal take it (no clrlwi in the original).
     // The speed turned along (level) or against (vertical) the normal of the ground the enemy touches.
     static Vec2f getTraSpeedLevelGround(soModuleAccesser* moduleAccesser, const Vec2f* speed, int touchMask);
     static Vec2f getTraSpeedVerticalGround(soModuleAccesser* moduleAccesser, const Vec2f* speed, int touchMask);

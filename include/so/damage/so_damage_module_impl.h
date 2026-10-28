@@ -29,7 +29,7 @@ public:
     virtual void initDamage(float damage);
     virtual void initInfo();
     virtual void setInfo();
-    virtual void storeDamage(float addedDamage, soDamage* damage);
+    virtual void storeDamage(soDamage* damage, float addedDamage);
     virtual bool check(bool);
     virtual float getDamageLr(float, float, void*, void*, int, int);
     virtual bool setForceDamage(StageObject* stageObject, Vec3f* pos, u32 collisionIndex, u32 damageIndex, bool getAbsolute, bool initInfo);
@@ -103,7 +103,7 @@ public:
     virtual void initDamage(float damage);
     virtual void initInfo();
     virtual void setInfo();
-    virtual void storeDamage(float addedDamage, soDamage* damage);
+    virtual void storeDamage(soDamage* damage, float addedDamage);
     virtual bool check(bool);
     virtual float getDamageLr(float, float, void*, void*, int, int);
     virtual bool setForceDamage(StageObject* stageObject, Vec3f* pos, u32 collisionIndex, u32 damageIndex, bool getAbsolute, bool initInfo);

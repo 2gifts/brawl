@@ -240,7 +240,7 @@ bool soDamageModuleImpl::check(bool damageChecked) {
         soDamage* damage = &m_damageArray->at(i);
         float damageAdd = damage->m_damageAdd;
         if (m_isDamageLock == 0) {
-            storeDamage(damageAdd, damage);
+            storeDamage(damage, damageAdd);
         }
         if (damageAdd > 0.0f || damage->m_reaction > 0.0f || damage->m_isFlinchFlag == 1) {
             if (damageChecked == 0) {
@@ -263,7 +263,7 @@ bool soDamageModuleImpl::check(bool damageChecked) {
             }
         }
         if (0.0f != damage->m_damageAdd_) {
-            storeDamage(damage->m_damageAdd_, damage);
+            storeDamage(damage, damage->m_damageAdd_);
             soInstanceManagerFullProperty<soDamageEventObserver*>* observerList = soEventPresenter<soDamageEventObserver>::getObserverList();
             int count = observerList->size();
             for (int j = 0; j < count; j++) {
@@ -518,7 +518,7 @@ bool soDamageModuleImpl::onDamage(u32 damageIndex) {
     return result;
 }
 
-void soDamageModuleImpl::storeDamage(float addedDamage, soDamage* damage) {
+void soDamageModuleImpl::storeDamage(soDamage* damage, float addedDamage) {
     float newDamage = damage->m_damage + addedDamage;
     if (newDamage > 999.0f) {
         newDamage = 999.0f;

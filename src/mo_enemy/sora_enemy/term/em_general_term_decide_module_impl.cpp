@@ -30,10 +30,6 @@ acCmdArg fn_27_778CC(soGeneralTerm* term, int index);
 // Rotates the vector by the rotation part of the matrix (main binary).
 void fn_8003E3BC(const Matrix* mtx, const Vec3f* in, Vec3f* out);
 
-// emAreaModuleImpl::isTargetAngleFromAxis / isTargetFoundAngleFromAxis, still by address: with the real (useLr, limit)
-// signature the original's argument setup order (limit register first) is not reproduced.
-bool fn_41_2536C(soModuleAccesser* acc, int p2, Vec2f range, Vec2f axis, float p5, bool p6);
-bool fn_41_25B54(soModuleAccesser* acc, int p2, Vec2f range, Vec2f axis, float p5, bool p6);
 }
 
 // The general terms of the enemies. HYPOTHESIS: names, from the functions the terms call; the numbers are the ones the
@@ -396,10 +392,12 @@ bool emGeneralTermDisideModuleImpl::checkEstablishSub(int termId, soGeneralTerm*
         bool p6 = arg5.getBoolData();
         if (termId == 10024 || termId == 10025 || termId == 10026 || termId == 10027 || termId == 10028 ||
             termId == 10029 || IN_RANGE(termId, 10036, 10041)) {
-            return fn_41_2536C(moduleAccesser, p2, range, Vec2f(axis.m_x, axis.m_y), p5, p6);
+            return emAreaModuleImpl::isTargetAngleFromAxis(moduleAccesser, p2, range, Vec2f(axis.m_x, axis.m_y), p5,
+                                                           p6);
         } else if (termId == 10030 || termId == 10031 || termId == 10032 || termId == 10033 || termId == 10034 ||
                    termId == 10035 || IN_RANGE(termId, 10042, 10047)) {
-            return fn_41_25B54(moduleAccesser, p2, range, Vec2f(axis.m_x, axis.m_y), p5, p6);
+            return emAreaModuleImpl::isTargetFoundAngleFromAxis(moduleAccesser, p2, range, Vec2f(axis.m_x, axis.m_y),
+                                                                p5, p6);
         }
         return false;
     }

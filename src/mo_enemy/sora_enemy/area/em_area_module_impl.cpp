@@ -87,9 +87,9 @@ static inline Enemy& getEnemy(soModuleAccesser* acc) {
 
 extern char g_soTeamModuleNullArg[];
 
-// TODO(nonmatching): 99.78%, (a) the code is exact but for the order of the two m_areas stores (the original writes the
-// size before the elements) and two callee names: the soAreaModuleImpl constructor is still fn_27_A34D4 in sora_melee,
-// and sora_melee names the contact log vector constructor "...Fv" though the original passes it the size 0 (Fl).
+// TODO(nonmatching): 99.78%, (a) the order of the two m_areas stores (the original writes the size before the
+// elements); the implicit soSet copy writes its members in declaration order, and a named soSet local, a soSet
+// constructor that assigns the size first and moving the targetRanges store do not change it.
 emAreaModuleImpl::emAreaModuleImpl(soModuleAccesser* acc, int areaNum, void* areaParams, void* targetRanges,
                                    soArray<soAreaInstance>* instances, void* areaWork, void* wind)
     : soAreaModuleImpl(acc, soAreaData::Category_Enemy, instances, &m_contactLogs, &m_envChecker,
@@ -578,10 +578,6 @@ static inline float dotVec2f(const Vec2f& a, const Vec2f& b) {
 
 // The angle (in frames of a rotation motion of frameNum frames) from the direction dir to the target at pos + offset,
 // as seen from the center of this enemy; -1 when there is nothing to measure, 0 when rotSign is neither 1 nor -1.
-// TODO(nonmatching): 98.10%, (a) the 2D center: the original loads its y before its x (as an inlined Vec2f(x, y)
-// constructor would); Vec2f(const Vec3f&), member stores and the out-of-line constructor all load x first, and an inline
-// (x, y) helper stays out of line once more than one function uses it (see getTargetAxisSideSub). Same in
-// getTargetSideSub, getTargetRotSpeedDirForAxisAdjustSub and getTargetAngleFromAxisSub.
 float emAreaModuleImpl::getTargetAngleToMotionFrameSub(soModuleAccesser* acc, Vec3f* pos, Vec2f offset, Vec2f dir,
                                                        float rotSign, float frameNum) {
     if (dir.length() == 0.0f) {
@@ -592,7 +588,16 @@ float emAreaModuleImpl::getTargetAngleToMotionFrameSub(soModuleAccesser* acc, Ve
     }
     Vec3f center(0.0f, 0.0f, 0.0f);
     center = emExternalValueAccesser::getCenterPos(&getEnemy(acc));
-    Vec2f self(center);
+    // MATCH-ONLY: the 2D center is read y first (as the right-to-left arguments of an inlined Vec2f(x, y) constructor
+    // would be); Vec2f(const Vec3f&) and member stores read x first, and an inline (x, y) helper stays out of line once
+    // more than one function calls it. Same in getTargetSideSub, getTargetRotSpeedDirForAxisAdjustSub and
+    // getTargetAngleFromAxisSub.
+    float x, y;
+    y = center.m_y;
+    x = center.m_x;
+    Vec2f self;
+    self.m_x = x;
+    self.m_y = y;
     Vec2f target(pos->m_x + offset.m_x, pos->m_y + offset.m_y);
     Vec2f diff = target - self;
     if (diff.length() == 0.0f) {
@@ -603,7 +608,7 @@ float emAreaModuleImpl::getTargetAngleToMotionFrameSub(soModuleAccesser* acc, Ve
     float angle = dirAngle - diffAngle;
     if (1.0f != rotSign) {
         if (-1.0f == rotSign) {
-            angle = angle * -1.0f;
+            angle *= -1.0f;
         } else {
             return 0.0f;
         }
@@ -730,7 +735,6 @@ bool emAreaModuleImpl::isTargetDir(soModuleAccesser* acc, u32 area, s32 kind) {
 
 // The side of the cone in front of this enemy (getTargetSide's two side lines) the position is on: 0 inside both
 // halves, 1 outside both, 2 and 3 between them; 6 without ranges or in no case.
-// TODO(nonmatching): 98.34%, (a) the y-before-x load of the 2D center (see getTargetAngleToMotionFrameSub).
 s32 emAreaModuleImpl::getTargetSideSub(soModuleAccesser* acc, Vec3f* pos) {
     emAreaModuleImpl& areaModule = getAreaModule(acc);
     if (areaModule.m_targetRanges == NULL) {
@@ -738,9 +742,13 @@ s32 emAreaModuleImpl::getTargetSideSub(soModuleAccesser* acc, Vec3f* pos) {
     }
     Vec3f center(0.0f, 0.0f, 0.0f);
     center = emExternalValueAccesser::getCenterPos(&getEnemy(acc));
+    // MATCH-ONLY: y read first (see getTargetAngleToMotionFrameSub).
+    float x, y;
+    y = center.m_y;
+    x = center.m_x;
     Vec2f origin;
-    origin.m_x = center.m_x;
-    origin.m_y = center.m_y;
+    origin.m_x = x;
+    origin.m_y = y;
     clRay2D ray0(origin, areaModule.m_sideLine0);
     clLine2DParam side0(ray0, false);
     float dist0 = side0.distance(Vec2f(pos->m_x, pos->m_y));
@@ -855,7 +863,6 @@ s32 emAreaModuleImpl::getTargetAxisSide(soModuleAccesser* acc, u32 area, Vec2f o
 
 // Which way the axis has to turn to point at the target at pos + offset: 0 and 1 the two directions, 2 already
 // pointing at it, 3 without an axis.
-// TODO(nonmatching): 97.91%, (a) the y-before-x load of the 2D center (see getTargetAngleToMotionFrameSub).
 s32 emAreaModuleImpl::getTargetRotSpeedDirForAxisAdjustSub(soModuleAccesser* acc, Vec3f* pos, Vec2f offset, Vec2f axis) {
     getAreaModule(acc);
     if (axis.length() == 0.0f) {
@@ -863,7 +870,13 @@ s32 emAreaModuleImpl::getTargetRotSpeedDirForAxisAdjustSub(soModuleAccesser* acc
     }
     Vec3f center(0.0f, 0.0f, 0.0f);
     center = emExternalValueAccesser::getCenterPos(&getEnemy(acc));
-    Vec2f self(center);
+    // MATCH-ONLY: y read first (see getTargetAngleToMotionFrameSub).
+    float x, y;
+    y = center.m_y;
+    x = center.m_x;
+    Vec2f self;
+    self.m_x = x;
+    self.m_y = y;
     Vec2f target(pos->m_x + offset.m_x, pos->m_y + offset.m_y);
     Vec2f diff = target - self;
     float axisAngle = RadToDeg * fn_41_15FB0(axis.m_y, axis.m_x);
@@ -871,19 +884,17 @@ s32 emAreaModuleImpl::getTargetRotSpeedDirForAxisAdjustSub(soModuleAccesser* acc
     float turn = diffAngle - axisAngle;
     // MATCH-ONLY: the complementary else-ifs keep the original branches (see getTargetDirSub).
     if (turn > 0.0f) {
-        float absTurn = fabs(turn);
-        if (absTurn <= 180.0f) {
+        if ((float)fabs(turn) <= 180.0f) {
             return 0;
-        } else if (absTurn > 180.0f) {
+        } else if ((float)fabs(turn) > 180.0f) {
             return 1;
         }
         return 1;
     }
     if (turn < 0.0f) {
-        float absTurn = fabs(turn);
-        if (absTurn <= 180.0f) {
+        if ((float)fabs(turn) <= 180.0f) {
             return 1;
-        } else if (absTurn > 180.0f) {
+        } else if ((float)fabs(turn) > 180.0f) {
             return 0;
         }
         return 0;
@@ -903,7 +914,6 @@ s32 emAreaModuleImpl::getTargetRotSpeedDirForAxisAdjust(soModuleAccesser* acc, u
 }
 
 // The angle in degrees between the axis and the direction to the target at pos + offset; 3 without an axis.
-// TODO(nonmatching): 97.21%, (a) the y-before-x load of the 2D center (see getTargetAngleToMotionFrameSub).
 float emAreaModuleImpl::getTargetAngleFromAxisSub(soModuleAccesser* acc, Vec3f* pos, Vec2f offset, Vec2f axis) {
     getAreaModule(acc);
     if (axis.length() == 0.0f) {
@@ -911,7 +921,13 @@ float emAreaModuleImpl::getTargetAngleFromAxisSub(soModuleAccesser* acc, Vec3f* 
     }
     Vec3f center(0.0f, 0.0f, 0.0f);
     center = emExternalValueAccesser::getCenterPos(&getEnemy(acc));
-    Vec2f self(center);
+    // MATCH-ONLY: y read first (see getTargetAngleToMotionFrameSub).
+    float x, y;
+    y = center.m_y;
+    x = center.m_x;
+    Vec2f self;
+    self.m_x = x;
+    self.m_y = y;
     Vec2f target(pos->m_x + offset.m_x, pos->m_y + offset.m_y);
     Vec2f diff = target - self;
     return RadToDeg * vec2fAngle(&axis, &diff);
@@ -927,9 +943,14 @@ float emAreaModuleImpl::getTargetAngleFromAxis(soModuleAccesser* acc, u32 area, 
     return getTargetAngleFromAxisSub(acc, &pos, offset, axis);
 }
 
-bool emAreaModuleImpl::isTargetAngleFromAxis(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis, u32 useLr,
-                                             float limit) {
-    return (float)fabs(getTargetAngleFromAxis(acc, area, offset, axis, useLr)) <= (float)fabs(limit);
+// Whether the angle of getTargetAngleFromAxis is within +/- limit. The code is exact; symbols.txt still calls it (and
+// isTargetFoundAngleFromAxis) fn_41_2536C / fn_41_25B54 because the general term unit calls them by those names.
+bool emAreaModuleImpl::isTargetAngleFromAxis(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis, float limit,
+                                             u32 useLr) {
+    float angle = getTargetAngleFromAxis(acc, area, offset, axis, useLr);
+    float absLimit = fabs(limit);
+    float absAngle = fabs(angle);
+    return absAngle <= absLimit;
 }
 
 // Keeps the position of a target (area index, or TargetAll for every existing target) as its found position.
@@ -1027,20 +1048,21 @@ float emAreaModuleImpl::getTargetFoundAngleFromAxis(soModuleAccesser* acc, u32 a
     return getTargetAngleFromAxisSub(acc, &pos, offset, axis);
 }
 
-bool emAreaModuleImpl::isTargetFoundAngleFromAxis(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis, u32 useLr,
-                                                  float limit) {
-    return (float)fabs(getTargetFoundAngleFromAxis(acc, area, offset, axis, useLr)) <= (float)fabs(limit);
+bool emAreaModuleImpl::isTargetFoundAngleFromAxis(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis,
+                                                  float limit, u32 useLr) {
+    float angle = getTargetFoundAngleFromAxis(acc, area, offset, axis, useLr);
+    float absLimit = fabs(limit);
+    float absAngle = fabs(angle);
+    return absAngle <= absLimit;
 }
 
 // The angle of the kinetic speed that moves self toward target; 0 when they are at the same place.
-// TODO(nonmatching): 94.44%, (a) two instructions swapped: the original sets the lr argument (fmr f1) before the
-// address of the speed copy; if/else, a ternary and a result local give the same or worse.
 float emAreaModuleImpl::getTargetFoundKineticAngleSub(float lr, Vec3f self, Vec3f target) {
     Vec2f speed(target.m_x - self.m_x, target.m_y - self.m_y);
     if (speed.length() == 0.0f) {
         return 0.0f;
     }
-    return emKineticModuleImpl::getKineticAngleFromSpeed(speed, lr);
+    return emKineticModuleImpl::getKineticAngleFromSpeed(lr, speed);
 }
 
 // TODO(nonmatching): 99.90%, (a) stack slots: the original puts the getCenterPos temporary below the two by-value

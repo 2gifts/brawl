@@ -693,6 +693,12 @@ Same source. These apply when the decomp is built for PC:
 - **nw4r `FSelect` never inlines at `-O2,s`:** use inline `asm fsel` as the fighter units do (the damage module's angle helper). **MED**
 - **A float `return a <= b` folded into `mfcr`/`cntlzw` gets its branches back with the complementary test:** `if (a <= b) return 0; else if (a > b) return 1;`. Seen: the area module's `getTargetDirSub` / `getTargetRotSpeedDirForAxisAdjustSub` (compare the open Pikmin entry in the article-pool section). **MED**
 - **`ninja build/RSBE01_02/sora_enemy/sora_enemy.rel` does not rebuild NonMatching units' objects;** `unitdiff`/objdiff then read a stale `.o`. Build the object explicitly before scoring. **MED**
+- **MWCC writes a unit's RTTI and vtables to `.data` in reverse creation order:** a plain cast creates its RTTI at parse time, casts and statics inside inline functions at the end of the unit, key-function vtables last. A type-name string sitting unaligned right after a function's string literal marks the RTTI created last. Seen: the enemy damage module. **HIGH**
+- **An `int` parameter passed to a `const s32&` callee is copied to a temporary first;** if the original spills the parameter itself at entry and passes its address, the parameter has the reference's type (`s32`). That fixed `emKineticEnergy::startEnergy`'s frame and registers. **MED**
+- **`(void)` on a `||` / `&&` expression materialises the result with `cntlzw`; an empty `if (expr) {}` keeps the original's branch chain.** A two-case inner `switch` (`case A: break; case B: ...`) becomes a compare tree where the original was `if (t == A) {} else if (t == B)`. Seen: kinetic module. **MED**
+- **Weak copies of MSL / nw4r inline wrappers (`atan2f`, `VEC2`'s `operator!=`) match only under `#pragma scheduling 603`.** Seen: kinetic module. **MED**
+- **A `static inline` (x, y) setter is inlined while it has one caller and goes out of line once a second function uses it** (`always_inline` and the `inline_max_*` pragmas did not help). `float x, y; y = v.m_y; x = v.m_x;` plus member stores reproduces the right-to-left loads instead. Seen: four functions of the enemy area module. **MED**
+- **Placement new on member storage adds a null check (`addic.` / `beq`); holding the real class as a member avoids it.** Seen: `soAreaModuleBuildConfigWeapon` in `ft_builder_misc.h`. **MED**
 
 ## ft_pikachu status and transactor units (follow-up findings)
 

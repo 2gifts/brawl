@@ -144,7 +144,8 @@ public:
     static s32 getTargetRotSpeedDirForAxisAdjust(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis, u32 useLr);
     static float getTargetAngleFromAxisSub(soModuleAccesser* acc, Vec3f* pos, Vec2f offset, Vec2f axis);
     static float getTargetAngleFromAxis(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis, u32 useLr);
-    static bool isTargetAngleFromAxis(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis, u32 useLr, float limit);
+    // limit before useLr: the general term unit's call sets the limit register first, which only this order gives.
+    static bool isTargetAngleFromAxis(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis, float limit, u32 useLr);
     static float getTargetKineticAngle(soModuleAccesser* acc, u32 area, Vec2f offset, u32 useLr);
 
     static void setTargetFoundPos(soModuleAccesser* acc, s32 area);
@@ -159,8 +160,8 @@ public:
     static s32 getTargetFoundRotSpeedDirForAxisAdjust(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis,
                                                       u32 useLr);
     static float getTargetFoundAngleFromAxis(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis, u32 useLr);
-    static bool isTargetFoundAngleFromAxis(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis, u32 useLr,
-                                           float limit);
+    static bool isTargetFoundAngleFromAxis(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis, float limit,
+                                           u32 useLr);
     static float getTargetFoundKineticAngleSub(float lr, Vec3f self, Vec3f target);
     static float getTargetFoundKineticAngle(soModuleAccesser* acc, u32 area, Vec2f offset, u32 useLr);
     static void setTargetFoundStatusKind(soModuleAccesser* acc, s32 area);

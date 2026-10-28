@@ -43,7 +43,7 @@ public:
 
     virtual void activate(float damage);
     virtual void deactivate();
-    virtual void storeDamage(float addedDamage, soDamage* damage);
+    virtual void storeDamage(soDamage* damage, float addedDamage);
     virtual bool isCaptureCut(void* p);
     virtual bool onDamage(u32 damageIndex);
     virtual float getReactionMul(soCollisionAttackData* attackData, u32 damageIndex, int hitIndex);
