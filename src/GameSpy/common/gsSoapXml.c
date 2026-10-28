@@ -1,6 +1,7 @@
 #include <types.h>
 #include <string.h>
 #include <GameSpy/common/gsXML.h>
+#include <GameSpy/ghttp/ghttpConnection.h>
 
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own. HYPOTHESIS: this unit spans

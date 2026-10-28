@@ -21,6 +21,18 @@ int SOSend(int s, const void* buf, int len, int flags);
 int SOSendTo(int s, const void* buf, int len, int flags, const void* to);
 int SOShutdown(int s, int how);
 
+u16 SONtoHs(u16 netshort);
+u16 SOHtoNs(u16 hostshort);
+u32 SOHtoNl(u32 hostlong);
+
+// The Wii socket address (SOSockAddrIn): length, family, port, address.
+typedef struct gs_sockaddr_in {
+    u8 sin_len;      // 0x0
+    u8 sin_family;   // 0x1
+    u16 sin_port;    // 0x2
+    u32 sin_addr;    // 0x4
+} gs_sockaddr_in;
+
 // the last SO error of the wrappers
 extern int lbl_805A1044;
 
@@ -63,6 +75,7 @@ typedef struct GSIThreadID {
 int socket(int domain, int type, int protocol);
 int closesocket(int s);
 int fn_8035C2D8(int s, int how);                 // shutdown
+void fn_8035D720(void);                          // SocketStartUp
 void fn_8035D724(void);                          // SocketShutDown
 int listen(int s, int backlog);
 int recv(int s, char* buf, int len, int flags);

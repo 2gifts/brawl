@@ -53,15 +53,6 @@ __static_assert(sizeof(GSSoapTask) == 0x34, "GSSoapTask");
 // "</SOAP-ENV:Body></SOAP-ENV:Envelope>"
 extern char lbl_8048E9C0[0x25];
 
-// ghttp
-int fn_8037EAFC(const char* URL, const char* headers, char* buffer, int bufferSize, void* post, int throttle, int blocking,
-                void* progressCallback, void* completedCallback, void* param);  // ghttpGetEx
-void fn_8037EEE8(int request);            // ghttpRequestThink
-void fn_8037EF20(int request);            // ghttpCancelRequest
-void* fn_8037EFE8(void);                  // ghttpNewPost
-void fn_8037EFEC(void* post, int autoFree);  // ghttpPostSetAutoFree
-void fn_8037F074(void* post, GSXmlStreamWriter writer);  // ghttpPostAddXml
-
 GSSoapTask* fn_803621B8(const char* URL, const char* service, GSXmlStreamWriter request, GSSoapCallbackFunc callback, void* userData);  // gsiExecuteSoap
 int fn_803622B0(int request, int result, char* buffer, int bufferLen, void* param);  // gsiSoapTaskHttpCompletedCallback
 int fn_80362348(void* taskData);        // gsiSoapTaskThink

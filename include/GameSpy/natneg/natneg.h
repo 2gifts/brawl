@@ -6,18 +6,11 @@
 // SDK names are noted next to the placeholders.
 #include <types.h>
 #include <GameSpy/common/darray.h>
+#include <GameSpy/common/gsPlatform.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// The Wii socket address (SOSockAddrIn): length, family, port, address.
-typedef struct gs_sockaddr_in {
-    u8 sin_len;      // 0x0
-    u8 sin_family;   // 0x1
-    u16 sin_port;    // 0x2
-    u32 sin_addr;    // 0x4
-} gs_sockaddr_in;
 
 typedef struct gs_hostent {
     char* h_name;        // 0x0
@@ -99,9 +92,6 @@ typedef void (*NatDetectionResultsFunc)(int success, NAT nat);
 // the list of active negotiators
 extern DArray lbl_805A10F0;
 
-u16 SONtoHs(u16 netshort);
-u16 SOHtoNs(u16 hostshort);
-u32 SOHtoNl(u32 hostlong);
 gs_hostent* fn_8035CF8C(void);        // getlocalhost
 int fn_8035D140(u32* addr);           // IsPrivateIP
 
