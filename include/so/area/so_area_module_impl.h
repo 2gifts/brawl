@@ -97,7 +97,7 @@ static_assert(sizeof(soAreaData) == 0x20, "Class is wrong size!");
 // HYPOTHESIS: names, from the enemy area module's checks (checkArea), which hand m_areaId to
 // ftManager::getEntryIdFromAreaId and compare m_area with the index of their own area.
 struct soAreaContactLog {
-    u32 m_area;     // 0x00 index of this module's area that was touched (getAreaContactCount / getAreaContactLog match it)
+    int m_area;     // 0x00 index of this module's area that was touched (getAreaContactCount / getAreaContactLog match it)
     int m_areaId;   // 0x04 gfArea id of the other area
     int unk8;
     u8 m_category;  // 0x0C soAreaData::Category of the owner of the other area
