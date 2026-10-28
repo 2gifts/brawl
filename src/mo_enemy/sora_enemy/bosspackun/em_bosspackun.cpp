@@ -58,18 +58,19 @@ emBosspackun::~emBosspackun() { }
 // ---- the activator --------------------------------------------------------------------------------------------------
 
 bool emBosspackun::activeArticle(wnemSimple* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
     if (param->m_lifeConstantId > ConstantId_CommonLast) {
         emScaledValue* value = static_cast<emScaledValue*>(
             soValueAccesser::getConstantIndefinite(moduleAccesser, param->m_lifeConstantId, 0));
         lbl_41_bss_504.m_constantParam = value;
         param->m_constantValue = Enemy::getValueInt(value, moduleAccesser);
     }
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
-    fn_41_47A2C(param, moduleAccesser, true);
-    fn_41_47E80(&pos, flag.m_value, article, param, moduleAccesser);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
+    emWeaponUtil::calcWeaponStartVector_Basic(param, moduleAccesser, true);
+    emWeaponUtil::activeSimpleWeapon(&pos, flag.m_value, article, param, moduleAccesser);
     s32 constantId = param->m_lifeConstantId;
     if (constantId == ConstantId_ArmShot0) {
         if (g_stTriggerMng != NULL) {

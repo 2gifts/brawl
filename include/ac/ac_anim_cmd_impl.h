@@ -14,7 +14,12 @@ struct acCmdArgConv {
 
 class acCmdArg {
     const acCmdArgConv* m_dataPtr;
+#ifdef AC_CMD_ARG_NULL_IS_BOOL
+    // MATCH-ONLY: a unit whose original keeps the flag in a register compares it without a mask (a bool, not a byte).
+    bool m_isNull;
+#else
     u8 m_isNull;
+#endif
 public:
     acCmdArg() : m_dataPtr(0), m_isNull(false) { }
     // HYPOTHESIS: constructor from a data pointer (seen in inlined soTransitionModuleImpl/soControllerModuleImpl::notifyEventAnimCmd).

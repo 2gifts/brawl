@@ -70,11 +70,21 @@ public:
     void draw(GXColor color, float width, bool zEnable) const;
 };
 
+// The base of clRay2D: the map names the weak constructor that the enemy area module calls to build a ray
+// clLine2DBase::__ct.
 // HYPOTHESIS: start position and direction vector, from getSegment and getAABBox.
-class clRay2D {
+class clLine2DBase {
 public:
     Vec2f m_pos;
     Vec2f m_vec;
+
+    // MATCH-ONLY: never_inline, the area module calls the weak copy out of line from the inlined clRay2D constructor.
+    clLine2DBase(const Vec2f& pos, const Vec2f& vec) __attribute__((never_inline)) : m_pos(pos), m_vec(vec) { }
+};
+
+class clRay2D : public clLine2DBase {
+public:
+    clRay2D(const Vec2f& pos, const Vec2f& vec) : clLine2DBase(pos, vec) { }
 
     // HYPOTHESIS: true when the ray crosses the segment; parameter types from register use.
     bool checkIntersect(const clSegment2D& segment) const;
@@ -98,4 +108,6 @@ public:
 
     // HYPOTHESIS: flip selects the normal on the other side of the ray.
     clLine2DParam(const clRay2D& ray, bool flip);
+    // The signed distance of a point to the line.
+    float distance(const Vec2f& point) const { return m_normal.m_x * point.m_x + m_normal.m_y * point.m_y + m_distance; }
 };

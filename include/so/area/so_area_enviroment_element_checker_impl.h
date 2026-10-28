@@ -30,7 +30,7 @@ static_assert(sizeof(soAreaEnviromentElementChecker) == 0xC, "Class is wrong siz
 class soAreaEnviromentElementCheckerImpl : public soAreaEnviromentElementChecker, public soEnable {
     char _0xd[15];
 public:
-#ifdef FT_MODULE_BUILDER
+#if defined(FT_MODULE_BUILDER) || defined(SO_AREA_ENV_CHECKER_CTOR)
     soAreaEnviromentElementCheckerImpl(); // constructor lives in sora_melee
 #endif
     virtual ~soAreaEnviromentElementCheckerImpl();

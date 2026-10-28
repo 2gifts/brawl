@@ -27,6 +27,9 @@ public:
     int unk4;        // 0x4 the area index
     emAIInfo() : m_unitIndex(-2), unk4(-1) { }
     ~emAIInfo() { }
+    // Module map name (emGeneralTermDisideModuleImpl's range): true when there is no unit or area, or the area has no
+    // target any more.
+    bool isInvalid(soModuleAccesser* acc);
 };
 static_assert(sizeof(emAIInfo) == 8, "Class is wrong size!");
 

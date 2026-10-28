@@ -2413,22 +2413,24 @@ bool Enemy::addParts(int articleId, u32 shotParamId, int) {
 // The shared article activators of the enemies: read the description of the shot being fired, compute its launch
 // position and flag, and launch the article from the enemy. Both always return false.
 bool Enemy::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
-    fn_41_47A2C(param, moduleAccesser, true);
-    fn_41_47D8C(&pos, flag.m_value, article, param, moduleAccesser);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
+    emWeaponUtil::calcWeaponStartVector_Basic(param, moduleAccesser, true);
+    emWeaponUtil::activeSimpleWeaponHolder(&pos, flag.m_value, article, param, moduleAccesser);
     return false;
 }
 
 bool Enemy::activeArticle1(wnemSimple* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
-    fn_41_47A2C(param, moduleAccesser, true);
-    fn_41_47E80(&pos, flag.m_value, article, param, moduleAccesser);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
+    emWeaponUtil::calcWeaponStartVector_Basic(param, moduleAccesser, true);
+    emWeaponUtil::activeSimpleWeapon(&pos, flag.m_value, article, param, moduleAccesser);
     return false;
 }
 

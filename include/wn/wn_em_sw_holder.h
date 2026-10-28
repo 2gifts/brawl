@@ -32,8 +32,10 @@ public:
     virtual bool isSyncOwnerStatus();
     virtual void setSyncOwnerStatus(bool);
     // Launches the article from the given position.
-    // HYPOTHESIS: parameter roles, from what the Porky passes (compare fn_41_3091C, wnemSimple's activation).
-    void active(Vec3f* pos, int team, float lr, int, int founderTaskId, int resourceId, emShotWork* work, float speed,
+    // HYPOTHESIS: parameter roles, from what the Porky passes (compare fn_41_3091C, wnemSimple's activation). The facing
+    // comes before the team, as in wnemSimple's activation: emWeaponUtil::activeSimpleWeaponHolder evaluates the team
+    // before the facing (right to left).
+    void active(Vec3f* pos, float lr, int team, int, int founderTaskId, int resourceId, emShotWork* work, float speed,
                 bool flag, u32 life);
 };
 static_assert(sizeof(wnemSwHolder) == 0x28, "Class is wrong size!");

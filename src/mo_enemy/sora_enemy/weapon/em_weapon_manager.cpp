@@ -1,6 +1,7 @@
 // SearchNearestFighterPosition's inline Vec2f::length squares both components in one expression (as the item and
 // fighter kinetic energy units do); the two-statement form swaps its float registers.
 #define MT_VEC2F_LENGTH_SQ_SINGLE_EXPR
+#include <em/em_area_module_impl.h>
 #include <em/em_weapon_manager.h>
 #include <ft/ft_external_value_accesser.h>
 #include <memory.h>
@@ -25,11 +26,6 @@ inline u32 wnemSimple::getOwnerID() {
 
 inline void wnemSimple::setDeactivate(bool x) {
     deactivate(x);
-}
-
-extern "C" {
-// emAreaModuleImpl::getTargetFighterPtr (map name): the fighter of a player slot, NULL when the slot is empty.
-Fighter* fn_41_237A8(int slot);
 }
 
 // HYPOTHESIS: the name (the instance pointer of the unit's .bss; getInstance only returns it).
@@ -66,7 +62,7 @@ void emWeaponManager::activateObject(wnemSimple* wnem, float lr, float speed, in
                                      emShotWork* work, int p7, Vec3f* pos, int team, int p10, bool flag, int life,
                                      s16 p13) {
     if (work != NULL) {
-        fn_41_3091C(wnem, work, founderTaskId, ownerId, p7, flag, pos, team, lr, speed, p10, life, p13);
+        fn_41_3091C(wnem, work, founderTaskId, ownerId, p7, flag, pos, lr, team, speed, p10, life, p13);
     }
 }
 
@@ -211,7 +207,7 @@ Fighter* emWeaponManager::SearchNearestFighterPosition(const Vec2f* pos, float m
     Fighter* nearest = NULL;
     Vec2f target;
     for (int i = 0; i < slotCount; i++) {
-        Fighter* fighter = fn_41_237A8(slots[i]);
+        Fighter* fighter = emAreaModuleImpl::getTargetFighterPtr(slots[i]);
         if (fighter != NULL) {
             Vec3f hip = ftExternalValueAccesser::getHipPos(fighter);
             Vec2f fighterPos = hip;

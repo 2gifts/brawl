@@ -30,20 +30,21 @@ emKokkon::~emKokkon() { }
 // ---- the activator --------------------------------------------------------------------------------------------------
 
 bool emKokkon::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
     if (param->m_lifeConstantId > ConstantId_CommonLast) {
         emShotLifeConstant* lifeConstant = static_cast<emShotLifeConstant*>(
             soValueAccesser::getConstantIndefinite(moduleAccesser, param->m_lifeConstantId, 0));
         param->m_life = Enemy::getValueFloat(&lifeConstant->m_life, moduleAccesser);
     }
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
     Vec3f target;
     target.m_x = moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotTargetX);
     target.m_y = moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotTargetY);
     target.m_z = 0.0f;
-    fn_41_47C64(param, moduleAccesser, &pos, &target, 0);
-    fn_41_47D8C(&pos, flag.m_value, article, param, moduleAccesser);
+    emWeaponUtil::calcWeaponStartVector_AimingTarget1(param, moduleAccesser, &pos, &target, 0);
+    emWeaponUtil::activeSimpleWeaponHolder(&pos, flag.m_value, article, param, moduleAccesser);
     return false;
 }

@@ -51,10 +51,11 @@ emPorky::~emPorky() { }
 // right otherwise), kind 2 is aimed at the AI's target point, the others take the basic launch vector. The activator
 // then clears the weapon node's translation and launches the article itself, facing the enemy (or the throw side).
 bool emPorky::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
     float lr = moduleAccesser->getPostureModule().getLr();
     if (param->m_shotKind == 0) {
         if (lbl_41_bss_504.m_nodeId == Porky_ShotNodeMirrored) {
@@ -77,9 +78,9 @@ bool emPorky::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAcces
         target.m_x = moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotTargetX);
         target.m_y = moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotTargetY);
         target.m_z = 0.0f;
-        fn_41_47C64(param, moduleAccesser, &pos, &target, 0);
+        emWeaponUtil::calcWeaponStartVector_AimingTarget1(param, moduleAccesser, &pos, &target, 0);
     } else {
-        fn_41_47A2C(param, moduleAccesser, true);
+        emWeaponUtil::calcWeaponStartVector_Basic(param, moduleAccesser, true);
     }
     Vec3f zero(0.0f, 0.0f, 0.0f);
     moduleAccesser->getModelModule().setNodeTranslate(Porky_Node_WeaponTranslate, &zero);
@@ -91,7 +92,7 @@ bool emPorky::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAcces
     owner = moduleAccesser->m_stageObject;
     founderTaskId = owner->m_taskId;
     u32 life = soValueAccesser::getValueFloat(moduleAccesser, ValueFloat_LevelScale, 0);
-    article->active(&pos, soExternalValueAccesser::getTeamNo(owner), lr, -1, founderTaskId,
+    article->active(&pos, lr, soExternalValueAccesser::getTeamNo(owner), -1, founderTaskId,
                     enemy.getSimpleWeaponResourceID(param->m_weaponId), &lbl_41_bss_504, param->m_speed, flag.m_value,
                     life);
     return false;

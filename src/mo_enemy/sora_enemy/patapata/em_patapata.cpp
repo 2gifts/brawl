@@ -174,7 +174,7 @@ void emPatapata::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* a
         emKineticModuleImpl& kinetic = dynamic_cast<emKineticModuleImpl&>(*moduleAccesser.m_enumerationStart->m_kineticModule);
         posture = moduleAccesser.m_enumerationStart->m_postureModule;
         Vec2f noSpeed(0.0f, 0.0f);
-        damageModule.setupDamageStatusNormalSubDamageKinetic(&kinetic, posture, 0.0f, posture->getLr(), &noSpeed, 0, 0, false);
+        damageModule.setupDamageStatusNormalSubDamageKinetic(&kinetic, posture, 0.0f, &noSpeed, false, 0, posture->getLr(), false);
         if (moduleAccesser.getWorkManageModule().isFlag(WorkFlag_TreadDefeats) == false) {
             if (m_moduleAccesser->getSituationModule().getKind() == Situation_Ground) {
                 m_moduleAccesser->getStatusModule().changeStatusRequest(0xe, m_moduleAccesser);

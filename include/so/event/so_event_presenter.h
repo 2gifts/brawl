@@ -75,7 +75,7 @@ public:
     // doldecomp/brawl #152: the team module registers itself by reference.
     void addObserverSub(s32 manageId, T& obsvr, s8 p3) { addObserverSub(manageId, &obsvr, p3); }
 
-#ifdef FT_MODULE_BUILDER
+#if defined(FT_MODULE_BUILDER) || defined(SO_EVENT_OBSERVER_ADD_SUB_EXTERN)
     void addObserverSub(s32 manageId, T* obsvr, s8 p3); // MATCH-ONLY: a call into sora_melee in the fighter RELs
 #else
     void addObserverSub(s32 manageId, T* obsvr, s8 p3) {
