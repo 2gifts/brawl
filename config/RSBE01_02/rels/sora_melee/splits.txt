@@ -1221,6 +1221,28 @@ mo_melee/sora_melee/so/so_array_vector_abstract_independent_soInstanceUnit_soEve
 mo_melee/sora_melee/so/so_array_vector_thunks_33soInstanceUnit_P14soEventManager_500.cpp:
 	.text       start:0x00092EE0 end:0x00092F08
 
+mo_melee/sora_melee/so/article/so_generate_article_manage_module_impl.cpp:
+	.text       start:0x00092F10 end:0x0009747C
+	.rodata     start:0x00000C40 end:0x00000C58
+	.data       start:0x000142A8 end:0x00014490
+
+mo_melee/sora_melee/so/effect/so_effect_module_impl.cpp:
+	.text       start:0x0009747C end:0x0009FA44
+	.rodata     start:0x00000C58 end:0x00000CA8
+	.data       start:0x00014490 end:0x00015028
+	.bss        start:0x00002B70 end:0x00002B78
+
+mo_melee/sora_melee/so/effect/so_effect_continual.cpp:
+	.text       start:0x0009FA44 end:0x0009FB70
+	.rodata     start:0x00000CA8 end:0x00000CB0
+
+mo_melee/sora_melee/so/effect/so_effect_time.cpp:
+	.text       start:0x0009FB70 end:0x0009FC8C
+
+mo_melee/sora_melee/so/effect/so_effect_screen.cpp:
+	.text       start:0x0009FC8C end:0x000A068C
+	.rodata     start:0x00000CB0 end:0x00000CC0
+
 mo_melee/sora_melee/so/so_array_vector_destructor_efScreenHandle_1.cpp:
 	.text       start:0x000A0C34 end:0x000A0C74
 
