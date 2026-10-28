@@ -129,7 +129,8 @@ public:
     virtual void setModelConstraintPosOrt(u32 modelConstraintNo, int modelConstraintNode, const char *modelConstraintTargetNode, u16 modelConstraintFlag, bool
                                           modelConstraintAttribute) = 0;
     virtual void setModelConstraintAttribute(u32 index, bool) = 0;
-    virtual ModelConstraintFlag getModelConstraintFlag() = 0;
+    // (The flag mask is returned as a halfword in r3, not as the union.)
+    virtual u16 getModelConstraintFlag() = 0;
     virtual void setModelConstraintFlag(u16) = 0;
     virtual void offModelConstraintFlag(u16) = 0;
     virtual int getModelConstraintNode() = 0;
@@ -254,7 +255,7 @@ public:
     virtual void setModelConstraintPosOrt(u32 modelConstraintNo, int modelConstraintNode, const char *modelConstraintTargetNode, u16 modelConstraintFlag, bool
                                           modelConstraintAttribute);
     virtual void setModelConstraintAttribute(u32 index, bool);
-    virtual ModelConstraintFlag getModelConstraintFlag();
+    virtual u16 getModelConstraintFlag();
     virtual void setModelConstraintFlag(u16);
     virtual void offModelConstraintFlag(u16);
     virtual int getModelConstraintNode();
@@ -295,4 +296,28 @@ public:
 #ifdef FT_MODULE_BUILDER
     char m_unkPad[0x3C]; // HYPOTHESIS: members of soLinkModuleImpl that are not reconstructed yet (sizeof is 0x50)
 #endif
+#if defined(SO_LINK_MODULE_IMPL_FULL) && !defined(FT_MODULE_BUILDER)
+    soLinkModuleImpl(soModuleAccesser* moduleAccesser, soArray<soLinkConnection>* connections);
+#endif
+#ifdef SO_LINK_MODULE_IMPL_FULL
+    // The layout of the sora_melee link units (verified against the constructor and the accessors).
+    StageObject* getOwner();
+    void onUnlink(int id);
+
+    utList m_nodes;                           // 0x14: the child ends linked to this module
+    utList m_parents;                         // 0x20: the parent ends this module is linked to
+    utListNode m_serverNode;                  // 0x2C: this module's entry in the connection server
+    soLinkModuleImpl* m_serverNodeOwner;      // 0x34
+    int m_modelConstraintNo;                  // 0x38
+    ModelConstraintFlag m_modelConstraintFlag; // 0x3C
+    bool m_isModelConstraintMutual;           // 0x3E
+    int m_anmFileTransactorLinkNo;            // 0x40
+    soModuleAccesser* m_moduleAccesser;       // 0x44
+    soArray<soLinkConnection>* m_connections; // 0x48
+    int m_modelConstraintNode;                // 0x4C
+    int m_modelConstraintTargetNode;          // 0x50
+#endif
 };
+#ifdef SO_LINK_MODULE_IMPL_FULL
+static_assert(sizeof(soLinkModuleImpl) == 0x54, "Class is wrong size!");
+#endif

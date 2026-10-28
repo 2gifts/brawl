@@ -25,7 +25,7 @@ class soTurnModuleImpl : public soTurnModule, public soAnimCmdEventObserver, pub
 public:
     soModuleAccesser* m_moduleAccesser; // 0x1C
     const soTurnData* m_turnData;       // 0x20
-    u8 unk24[4];                        // 0x24
+    u32 unk24;                          // 0x24 (cleared by set)
     float m_lr;                         // 0x28 (getRYLr: 90 * lr + rotY)
     float m_rotY;                       // 0x2C
     float unk30;                        // 0x30 (cleared with m_rotY when the turn ends)
