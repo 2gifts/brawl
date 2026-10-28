@@ -1,8 +1,10 @@
 #include <types.h>
 #include <FAT/fat_vf.h>
+#include <revolution/OS/OSTime.h>
+#include <revolution/OS/OSThread.h>
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
-unsigned char lbl_80563798[0x1a8] __attribute__((aligned(8))) = { 0 };
+VFNandFuncs lbl_80563798[26] = { 0 };
 
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
@@ -71,5 +73,85 @@ s32 fn_803CAC0C(PDM_DISK* p_disk, PDM_DISK_INFO* p_disk_info) {
     p_disk_info->bytes_per_sector = 0x200;
     p_disk_info->media_attr = 0;
     p_disk_info->format_param = NULL;
+    return 0;
+}
+
+s32 fn_803C8210(const char* path) {
+    s32 count = lbl_805A1228;
+    s32 result = 0;
+
+    while (count-- > 0) {
+        result = NANDDelete(path);
+        if (result != -3 && result != -2) {
+            return result;
+        }
+        OSSleepTicks(OS_MSEC_TO_TICKS((s64)lbl_805A122C));
+    }
+    return result;
+}
+
+s32 VFi_NandPrivateDelete(const char* path) {
+    s32 count = lbl_805A1228;
+    s32 result = 0;
+
+    while (count-- > 0) {
+        result = NANDPrivateDelete(path);
+        if (result != -3 && result != -2) {
+            return result;
+        }
+        OSSleepTicks(OS_MSEC_TO_TICKS((s64)lbl_805A122C));
+    }
+    return result;
+}
+
+s32 VFi_NandClose(NANDFileInfo* info) {
+    s32 count = lbl_805A1228;
+    s32 result = 0;
+
+    while (count-- > 0) {
+        result = NANDClose(info);
+        if (result != -3 && result != -2) {
+            return result;
+        }
+        OSSleepTicks(OS_MSEC_TO_TICKS((s64)lbl_805A122C));
+    }
+    return result;
+}
+
+s32 VFi_NandGetLength(NANDFileInfo* info, u32* length) {
+    s32 count = lbl_805A1228;
+    s32 result = 0;
+
+    while (count-- > 0) {
+        result = NANDGetLength(info, length);
+        if (result != -3 && result != -2) {
+            return result;
+        }
+        OSSleepTicks(OS_MSEC_TO_TICKS((s64)lbl_805A122C));
+    }
+    return result;
+}
+
+void VFi_NandSetNANDFuncNormal(u32 i_handleIdx) {
+    if (i_handleIdx < 26) {
+        lbl_80563798[i_handleIdx].create = fn_803C8090;
+        lbl_80563798[i_handleIdx].open = fn_803C8420;
+        lbl_80563798[i_handleIdx].createDir = fn_803C8660;
+        lbl_80563798[i_handleIdx].remove = fn_803C8210;
+    }
+}
+
+void VFi_NandSetNANDFuncEx(u32 i_handleIdx) {
+    if (i_handleIdx < 26) {
+        lbl_80563798[i_handleIdx].create = VFi_NandPrivateCreate;
+        lbl_80563798[i_handleIdx].open = VFi_NandPrivateOpen;
+        lbl_80563798[i_handleIdx].createDir = VFi_NandPrivateCreateDir;
+        lbl_80563798[i_handleIdx].remove = VFi_NandPrivateDelete;
+    }
+}
+
+s32 fn_803CACB4(PDM_DISK_TBL* p_disk_tbl, u32 ui_ext) {
+    p_disk_tbl->ui_ext = ui_ext;
+    p_disk_tbl->p_func = &lbl_8041AC68;
     return 0;
 }

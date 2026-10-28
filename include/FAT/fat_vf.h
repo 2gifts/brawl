@@ -183,6 +183,30 @@ s8* VF_path2handleidx(s32* o_handle_idx_p, const s8* i_path_p);
 s32 fn_803C63FC(void* unk0, s8* path, u32 unk2);
 s32 fn_803C64EC(void* unk0, s32 handle_idx, s8* path, u32 unk3);
 void fn_803C68D8(void);
+// Per-drive NAND access functions (normal or private namespace).
+typedef struct VFNandFuncs {
+    s32 (*create)(const char* path, u8 perm, u8 attr);
+    s32 (*open)(const char* path, struct NANDFileInfo* info, u8 accType);
+    s32 (*createDir)(const char* path, u8 perm, u8 attr);
+    s32 (*remove)(const char* path);
+} VFNandFuncs;
+FAT_VF_CHECK_LAYOUT(sizeof(VFNandFuncs) == 0x10);
+extern VFNandFuncs lbl_80563798[26];
+
+// NAND retry policy: number of attempts and the delay between them (ms)
+extern s32 lbl_805A1228;
+extern s32 lbl_805A122C;
+extern struct PDM_FUNCTBL lbl_8041AC68;  // nanddrv function table
+s32 fn_803CACB4(PDM_DISK_TBL* p_disk_tbl, u32 ui_ext);  // VFi_nanddrv_init_drv_tbl
+
+s32 fn_803C8090(const char* path, u8 perm, u8 attr);                    // VFi_NandCreate
+s32 VFi_NandPrivateCreate(const char* path, u8 perm, u8 attr);
+s32 fn_803C8210(const char* path);                                      // VFi_NandDelete
+s32 VFi_NandPrivateDelete(const char* path);
+s32 fn_803C8420(const char* path, struct NANDFileInfo* info, u8 accType);  // VFi_NandOpen
+s32 VFi_NandPrivateOpen(const char* path, struct NANDFileInfo* info, u8 accType);
+s32 fn_803C8660(const char* path, u8 perm, u8 attr);                    // VFi_NandCreateDir
+s32 VFi_NandPrivateCreateDir(const char* path, u8 perm, u8 attr);
 s32 fn_803CACCC(u32 num_blocks, u8* buf, u32 block, u32 bps, u32* p_num_success, struct PDM_DISK* p_disk);  // nanddrv_physical_read
 s32 fn_803CAA94(struct PDM_DISK* p_disk, const u8* p_buf, u32 block, u32 num_blocks, u32* p_num_success);  // nanddrv_pwrite
 s32 fn_803CABD4(struct PDM_DISK* p_disk);  // nanddrv_unmount
