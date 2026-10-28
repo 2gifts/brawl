@@ -33,6 +33,9 @@ typedef struct gs_sockaddr_in {
     u32 sin_addr;    // 0x4
 } gs_sockaddr_in;
 
+// MSL's strcasecmp; this build's MSL headers do not declare it.
+int strcasecmp(const char* s1, const char* s2);
+
 // the last SO error of the wrappers
 extern int lbl_805A1044;
 
