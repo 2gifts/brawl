@@ -49,3 +49,22 @@ void GameGlobal::updateGameFrame() {
         state->unk14++;
     }
 }
+
+// Function bodies below are taken from https://github.com/jj-link/brawl.
+
+extern "C" u8 fn_8004EAC8(u8** arg0) {
+    return **arg0;
+}
+
+extern "C" int fn_8004EAEC() {
+    return 0xC660;
+}
+
+extern "C" void fn_8004F258(int* a, unsigned b, unsigned c) {
+    unsigned flag = 0;
+    if (b > c || (unsigned)*a > c - b) {
+        flag = 1;
+    }
+    c = flag ? c : *a + b;
+    *a = (int)c;
+}
