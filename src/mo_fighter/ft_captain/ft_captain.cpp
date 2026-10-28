@@ -171,8 +171,9 @@ bool ftCaptain::activeArticle(wnCaptainBlueFalcon* weapon, soModuleAccesser* acc
 
 // The background of the Final Smash starts with the team of the fighter.
 bool ftCaptain::activeArticle1(wnCaptainFinalBg* weapon, soModuleAccesser* acc) {
+    int founderTaskId;
     ftResourceIdAccesserImpl& ids = dynamic_cast<ftResourceIdAccesserImpl&>(*acc->getResourceModule().getResourceIdAccesser());
-    int founderTaskId = acc->getStageObject().m_taskId;
+    founderTaskId = acc->getStageObject().m_taskId;
     weapon->activate(founderTaskId, ids.getFinalResId(), acc->getTeamModule().getTeam()->getNo());
     return true;
 }
