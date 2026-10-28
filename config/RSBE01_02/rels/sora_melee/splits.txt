@@ -153,6 +153,25 @@ mo_melee/sora_melee/so/ground/so_ground_shape_operator_cliff.cpp:
 mo_melee/sora_melee/so/ground/so_ground_util.cpp:
 	.text       start:0x00030EC8 end:0x000311F8
 
+mo_melee/sora_melee/so/ground/so_ground_tracer_impl.cpp:
+	.text       start:0x000311F8 end:0x0003513C
+	.rodata     start:0x00000450 end:0x00000478
+	.data       start:0x000031B8 end:0x00003260
+
+mo_melee/sora_melee/so/situation/so_situation_module_impl.cpp:
+	.text       start:0x0003513C end:0x00035C3C
+	.data       start:0x00003260 end:0x000033F8
+
+mo_melee/sora_melee/so/collision/so_collision_attack_part.cpp:
+	.text       start:0x00038550 end:0x00039590
+	.rodata     start:0x00000490 end:0x00000498
+	.data       start:0x00003418 end:0x00003680
+
+mo_melee/sora_melee/so/collision/so_collision_attack_module_impl.cpp:
+	.text       start:0x00039590 end:0x0004148C
+	.rodata     start:0x00000498 end:0x000004B8
+	.data       start:0x00003680 end:0x00003AD8
+
 mo_melee/sora_melee/so/so_vtable_dt_vec_8clTarget_6_41988.cpp:
 	.text       start:0x00041988 end:0x000419F0
 
