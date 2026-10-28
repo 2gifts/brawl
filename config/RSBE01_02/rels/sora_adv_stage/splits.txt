@@ -65,6 +65,65 @@ mo_adv_stage/gr_adventure_notify_gimmick_trigger_status.cpp:
 	.data       start:0x0000BB90 end:0x0000BE30
 	.bss        start:0x00001A28 end:0x00001B58
 
+mo_adv_stage/gr_adventure_mine.cpp:
+	.text       start:0x0002E914 end:0x0002ED9C
+	.rodata     start:0x00000550 end:0x00000568
+	.data       start:0x0000BE30 end:0x0000C0C0
+
+mo_adv_stage/gr_adventure_mine_manager.cpp:
+	.text       start:0x0002ED9C end:0x0003116C
+	.ctors      start:0x00000054 end:0x00000058
+	.rodata     start:0x00000568 end:0x000005C8
+	.data       start:0x0000C0C0 end:0x0000E388
+	.bss        start:0x00001B58 end:0x00001C98
+
+mo_adv_stage/gr_adventure_shutter.cpp:
+	.text       start:0x0003116C end:0x00031D40
+	.ctors      start:0x00000058 end:0x0000005C
+	.rodata     start:0x000005C8 end:0x000005F8
+	.data       start:0x0000E388 end:0x0000E980
+	.bss        start:0x00001C98 end:0x00001DC8
+
+mo_adv_stage/gr_adventure_move_attack_trigger_once.cpp:
+	.text       start:0x00031D40 end:0x00032308
+	.ctors      start:0x0000005C end:0x00000060
+	.rodata     start:0x000005F8 end:0x00000628
+	.data       start:0x0000E980 end:0x0000EF28
+	.bss        start:0x00001DC8 end:0x00001EF8
+
+mo_adv_stage/gr_adventure_attack_switch_once.cpp:
+	.text       start:0x00032308 end:0x00032798
+	.rodata     start:0x00000628 end:0x00000630
+	.data       start:0x0000EF28 end:0x0000F168
+
+mo_adv_stage/gr_adventure_ringlift.cpp:
+	.text       start:0x00032798 end:0x000334A8
+	.ctors      start:0x00000060 end:0x00000064
+	.rodata     start:0x00000630 end:0x00000690
+	.data       start:0x0000F168 end:0x0000F738
+	.bss        start:0x00001EF8 end:0x00002028
+
+mo_adv_stage/gr_adventure_motion_ground_attach.cpp:
+	.text       start:0x000334A8 end:0x00033B84
+	.ctors      start:0x00000064 end:0x00000068
+	.rodata     start:0x00000690 end:0x000006A0
+	.data       start:0x0000F738 end:0x0000FC88
+	.bss        start:0x00002028 end:0x00002158
+
+mo_adv_stage/gr_adventure_elevator.cpp:
+	.text       start:0x00033B84 end:0x00035ACC
+	.ctors      start:0x00000068 end:0x0000006C
+	.rodata     start:0x000006A0 end:0x000006C0
+	.data       start:0x0000FC88 end:0x000101B8
+	.bss        start:0x00002158 end:0x00002288
+
+mo_adv_stage/gr_adventure_enemy_creator.cpp:
+	.text       start:0x00035ACC end:0x000371BC
+	.ctors      start:0x0000006C end:0x00000070
+	.rodata     start:0x000006C0 end:0x00000728
+	.data       start:0x000101B8 end:0x00011D90
+	.bss        start:0x00002288 end:0x000023C8
+
 mo_adv_stage/gr_adventure_elasticity.cpp:
 	.text       start:0x000371BC end:0x0003776C
 	.rodata     start:0x00000728 end:0x00000730
