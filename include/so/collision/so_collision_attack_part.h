@@ -250,7 +250,7 @@ struct soCollisionAttackData {
             bool m_targetLr : 1;                          // up to 0x1 // unused in vBrawl?
             soCollision::PartMask m_targetPart : 4;                 // up to 0xf
 #ifdef SO_COLLISION_ATTACK_DATA_WORD_FIELDS
-            // MATCH-ONLY (opt-in, the enemy hit module): read unsigned from the word, as that unit's original does.
+            // MATCH-ONLY (opt-in, the enemy hit and attack module units): read unsigned from the word, as those units' originals do.
             u32 m_attribute : 5;
 #else
             Attribute m_attribute : 5;     // up to 0x1f
@@ -270,8 +270,13 @@ struct soCollisionAttackData {
 #else
             bool m_isDirect : 1;
 #endif
+#ifdef SO_COLLISION_ATTACK_DATA_WORD_FIELDS
+            u32 m_isInvalidInvincible : 1;
+            u32 m_isInvalidXlu : 1;
+#else
             bool m_isInvalidInvincible : 1;   // ignore invincibility
             bool m_isInvalidXlu : 1; // ignore intangibility
+#endif
             LrCheck m_lrCheck : 3; // up to 0x7
             bool m_isCatch : 1;  // only affect grabbed opponent
             bool m_noTeam : 1;    // friendly fire
@@ -400,6 +405,8 @@ struct soCollisionAttackAbsolute {
 };
 
 class soCollisionAttackPart {
+    friend class soCollisionAttackModuleImpl;
+
     enum Status {
         Status_Inactive = 0x0,
         Status_Set = 0x1,
@@ -424,5 +431,8 @@ public:
 #endif
     soCollisionAttackPart(soCollision::Category, bool);
     ~soCollisionAttackPart();
+    void reset();
+    void resetStatus();
+    void setTargetCategory(soCollision::CategoryMask categoryMask);
 };
 static_assert(sizeof(soCollisionAttackPart) == 0x90, "Class is wrong size!");
