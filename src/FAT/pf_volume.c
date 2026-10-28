@@ -3,7 +3,6 @@
 
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own.
-#pragma auto_inline off
 
 int fn_803D72C0(PF2_VOLUME* p_vol, u32* p_result) {
     int err;

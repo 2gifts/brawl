@@ -13,6 +13,7 @@ unsigned char lbl_805A1134[0x4] __attribute__((aligned(4))) = { 0 };
 // one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
 // several original source files, so its functions are not auto-inlined into one
 // another; helpers the original inlined are marked inline.
+// Checked: without this pragma 1 function in this unit stop matching.
 #pragma auto_inline off
 
 u8 fn_80387608(u8 *arg0, u32 arg1, u8 *arg2, u32 arg3, u8 *arg4, u32 *arg5) {

@@ -21,6 +21,7 @@ unsigned char lbl_805A1090[0x4] __attribute__((aligned(4))) = { 0 };
 // one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
 // several original source files, so its functions are not auto-inlined into one
 // another; helpers the original inlined are marked inline.
+// Checked: without this pragma 10 functions in this unit stop matching.
 #pragma auto_inline off
 
 GHTTPRequest fn_8037ED14(const char* URL, GHIPost* post, GHTTPBool blocking, ghttpCompletedCallback completedCallback, void* param) {

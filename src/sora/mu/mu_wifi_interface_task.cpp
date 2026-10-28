@@ -62,11 +62,7 @@ void muWifiInterfaceTask::connect(bool arg0) {
 void netReport(const char* fmt, ...) {
 }
 
-// Function bodies below are taken from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are taken from https://github.com/jj-link/brawl.
 
 extern "C" s32 fn_800C9A4C(u32 arg0) {
     if ((arg0 >= 0x4E86U && arg0 <= 0x4E8DU) || (arg0 >= 0x4E8FU && arg0 <= 0x5207U)) {

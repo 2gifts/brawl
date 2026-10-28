@@ -4,7 +4,6 @@
 
 // Function bodies below are derived from https://github.com/jj-link/brawl and follow
 // the RSA reference implementation that the GameSpy SDK ships as md5c.c.
-#pragma auto_inline off
 
 // MD5 padding (0x80 followed by zeros)
 extern u8 lbl_8048E7B8[64];

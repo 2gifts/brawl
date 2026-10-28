@@ -5,11 +5,7 @@ unsigned char lbl_804ECE00[0x240] __attribute__((aligned(8))) = { 0 };
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
 unsigned char lbl_805A0B98[0x8] __attribute__((aligned(4))) = { 0 };
 
-// Function bodies below are taken from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are taken from https://github.com/jj-link/brawl.
 
 int fn_8020A53C(int);
 

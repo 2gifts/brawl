@@ -7,6 +7,7 @@
 // one was matched in a translation unit of its own, and follow the GameSpy SDK's
 // darray.c and hashtable.c. HYPOTHESIS: this unit holds both files; inside
 // darray.c ArrayNth is inlined, while hashtable.c calls it.
+// Checked: without this pragma 9 functions in this unit stop matching.
 #pragma auto_inline off
 
 static inline void* ArrayNthInline(DArray array, int n) {

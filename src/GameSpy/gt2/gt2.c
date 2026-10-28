@@ -12,6 +12,7 @@ unsigned char lbl_805A1050[0x8] __attribute__((aligned(4))) = { 0 };
 // one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
 // several original source files, so its functions are not auto-inlined into one
 // another; helpers the original inlined are marked inline.
+// Checked: without this pragma 9 functions in this unit stop matching.
 #pragma auto_inline off
 
 int fn_80377DDC(int a1, int a2, int a3, int a4, int a5, int a6);

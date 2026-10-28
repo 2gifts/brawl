@@ -10,11 +10,7 @@ unsigned char lbl_805A1148[0x8] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A1150[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A1154[0x4] __attribute__((aligned(4))) = { 0 };
 
-// Function bodies below are taken from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are taken from https://github.com/jj-link/brawl.
 
 void fn_80390A58(OSMessageQueue* queue) {
     OSSendMessage(queue, 0, 0);

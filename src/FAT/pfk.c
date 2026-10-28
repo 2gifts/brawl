@@ -14,7 +14,6 @@ extern char lbl_8049318C[0x33];
 
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own.
-#pragma auto_inline off
 
 int fn_803EC27C(u32* context) {
     OSThread* thread;

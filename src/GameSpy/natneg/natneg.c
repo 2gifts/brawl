@@ -35,7 +35,6 @@ extern int lbl_8059FB78;
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own; they follow the GameSpy SDK's
 // natneg.c and natify.c.
-#pragma auto_inline off
 
 u32 fn_8038563C(void) {
     int i;

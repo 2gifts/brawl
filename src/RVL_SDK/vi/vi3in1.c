@@ -9,11 +9,7 @@ unsigned char lbl_805A0860[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A0864[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A0868[0x8] __attribute__((aligned(4))) = { 0 };
 
-// Function bodies below are taken from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are taken from https://github.com/jj-link/brawl.
 
 void WaitMicroTime(int);
 void __VISendI2CData(int, unsigned char *, int);

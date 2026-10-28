@@ -1,11 +1,7 @@
 #include <types.h>
 #include <FAT/pf2.h>
 
-// Function bodies below are derived from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are derived from https://github.com/jj-link/brawl.
 
 u32 fn_803E1414(PF_FFD* p_ffd, u32 index, u32 may_allocate, u32* p_cluster) {
     u32 err = fn_803E12B4(p_ffd, index, may_allocate ? 1 : 0, 0, p_cluster);

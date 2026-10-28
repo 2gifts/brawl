@@ -44,11 +44,7 @@ bool AnmObj::TestAnmFlag(AnmFlag flag) const {
 } // namespace g3d
 } // namespace nw4r
 
-// Function bodies below are taken from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are taken from https://github.com/jj-link/brawl.
 
 extern "C" float fn_8019D9E4(float a, float b, float c) {
     return c;

@@ -6,7 +6,6 @@ u32 lbl_805A1260 = 0;
 
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own.
-#pragma auto_inline off
 
 void PF_enterCritical(void* unk) {
     PF_CRITICAL* critical = unk;

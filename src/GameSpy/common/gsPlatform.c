@@ -14,11 +14,7 @@ unsigned char lbl_805A103C[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A1040[0x4] __attribute__((aligned(4))) = { 0 };
 int lbl_805A1044 = 0;
 
-// Function bodies below are derived from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are derived from https://github.com/jj-link/brawl.
 
 extern int SOInetAtoN(int a, int* b);
 

@@ -8,6 +8,7 @@ char lbl_80536500[SAKE_MAX_URL_LENGTH] = { 0 };
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own; they follow the GameSpy SDK's
 // sakeMain.c and sakeRequest.c.
+// Checked: without this pragma 2 functions in this unit stop matching.
 #pragma auto_inline off
 
 int fn_8038D394(SAKE* sakePtr) {

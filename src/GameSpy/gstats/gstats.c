@@ -18,7 +18,6 @@ unsigned char lbl_805A10C8[0x8] __attribute__((aligned(4))) = { 0 };
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own; they follow the GameSpy SDK's
 // gstats.c.
-#pragma auto_inline off
 
 int fn_80383698(void) {
     return lbl_8059FAF0 != -1;

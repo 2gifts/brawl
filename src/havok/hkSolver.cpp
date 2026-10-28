@@ -322,11 +322,7 @@ void hkSolver::applyAngularImpulse(hkReal impulse, hkVector8* jac, hkVelocityAcc
     *sum += impulse;
 }
 
-// Function bodies below are taken from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are taken from https://github.com/jj-link/brawl.
 
 extern "C" int fn_80296ED8(int arg0, int arg1) {
     return arg0 + arg1;

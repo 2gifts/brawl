@@ -13,7 +13,6 @@ unsigned char lbl_805A1058[0x8] __attribute__((aligned(4))) = { 0 };
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own; they follow the GameSpy SDK's
 // qr2.c.
-#pragma auto_inline off
 
 void fn_80378E24(qr2_t qrec, qr2_callback_t nncallback) {
     if (qrec == NULL) {

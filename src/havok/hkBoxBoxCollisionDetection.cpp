@@ -65,11 +65,7 @@ hkBool hkBoxBoxManifold::isComplete() const {
     return m_complete;
 }
 
-// Function bodies below are taken from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are taken from https://github.com/jj-link/brawl.
 
 extern "C" void fn_80305AD4(unsigned char* r3, unsigned char* r4) {
     *r3 = *r4;

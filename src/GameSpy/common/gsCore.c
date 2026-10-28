@@ -8,7 +8,6 @@ GSCoreMgr lbl_805348E0 = { 0 };
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own; they follow the GameSpy SDK's
 // gsCore.c.
-#pragma auto_inline off
 
 void fn_8035E380(void) {
     fn_8035D254(&lbl_805348E0.mQueueCrit);

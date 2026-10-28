@@ -6,11 +6,7 @@
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
 VFNandFuncs lbl_80563798[26] = { 0 };
 
-// Function bodies below are derived from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are derived from https://github.com/jj-link/brawl.
 
 void fn_803C9168(int, int, int, int, int);
 

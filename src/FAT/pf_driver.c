@@ -5,11 +5,7 @@
 unsigned char lbl_805639C0[0xa30] __attribute__((aligned(8))) = { 0 };
 unsigned char lbl_805643F0[0xd0] __attribute__((aligned(8))) = { 0 };
 
-// Function bodies below are derived from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are derived from https://github.com/jj-link/brawl.
 
 extern void fn_803D8E00(void *self, int mode);
 

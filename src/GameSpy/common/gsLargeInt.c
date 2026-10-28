@@ -5,11 +5,7 @@
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
 unsigned char lbl_805349A8[0x98] __attribute__((aligned(8))) = { 0 };
 
-// Function bodies below are derived from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are derived from https://github.com/jj-link/brawl.
 
 u32 fn_8035EC44(s32 *arg0, s32 *arg1, u32 *arg2)
 {

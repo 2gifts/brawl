@@ -13,11 +13,7 @@ unsigned char lbl_805A1244[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A1248[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A124C[0x4] __attribute__((aligned(4))) = { 0 };
 
-// Function bodies below are taken from https://github.com/jj-link/brawl, where each
-// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
-// several original source files, so its functions are not auto-inlined into one
-// another; helpers the original inlined are marked inline.
-#pragma auto_inline off
+// Function bodies below are taken from https://github.com/jj-link/brawl.
 
 void fn_803CB99C(int a, int b, int c, int d, int e, int f);
 

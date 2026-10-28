@@ -27,6 +27,7 @@ VFTimeStampCallback lbl_805A1224 = NULL;
 // one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
 // several original source files, so its functions are not auto-inlined into one
 // another; helpers the original inlined are marked inline.
+// Checked: without this pragma 53 functions in this unit stop matching.
 #pragma auto_inline off
 
 // ---------------------------------------------------------------- pf_clib
