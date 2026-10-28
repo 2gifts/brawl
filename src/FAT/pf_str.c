@@ -35,6 +35,10 @@ const s8* VFiPFSTR_GetStrPos(PF_STR* p_str, u32 target) {
 
 // Function bodies below are derived from https://github.com/jj-link/brawl.
 
+u16 fn_803D68B8(PF_STR* p_str) {
+    return p_str->p_tail - p_str->p_head;
+}
+
 s32 PFSTR_InitStr(PF_STR* p_str, const char* s, u32 code_mode) {
     if (code_mode == 1) {
         p_str->p_head = (const s8*)s;

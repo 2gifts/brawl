@@ -47,6 +47,8 @@ int PFAPI_convertReturnValue(int err);
 s32 PFSTR_InitStr(PF_STR* p_str, const char* s, u32 code_mode);
 int fn_803EB5D8(PF2_DIR* dir);                               // pf_closedir
 int fn_803EB5FC(void);                                       // pf_errnum
+int fn_803EBE4C(void);                                       // FAErrnum
+u16 fn_803D68B8(PF_STR* p_str);                              // PFSTR_StrLen
 int fn_803EB620(PF2_FILE* file);                             // pf_fclose
 u32 fn_803EB6E0(void* buf, u32 size, u32 count, PF2_FILE* file);  // pf_fread
 int fn_803EB708(PF2_FILE* file, s32 offset, s32 origin);     // pf_fseek

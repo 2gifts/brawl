@@ -44,6 +44,18 @@ int FAClosedir(FAHandle* handle) {
     return 0;
 }
 
+int fn_803EBE4C(void) {
+    int err = fn_803EB5FC();
+
+    if (err == 5) {
+        return 5;
+    }
+    if (err == 0) {
+        return 0;
+    }
+    return err;
+}
+
 int FAFclose(FAHandle* handle) {
     int err = fn_803EB620(handle);
 
