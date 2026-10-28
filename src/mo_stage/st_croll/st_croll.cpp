@@ -1249,12 +1249,12 @@ static void crollDrawPicture(const SoraCharacterRoll::CharacterPanel* picture, u
 // Draws the name of a panel at depth z: three layers, a dark shadow, a halo around it and the name in `color`.
 static void crollDrawText(SoraCharacterRoll::NamePanel* text, float z, u32 color) {
     SoraCharacterRoll::StRollTexObj& tex = text->m_tex;
-    if (tex.m_hasTex != 0) {
+    if (tex.m_buffer != NULL) {
         GXLoadTexObj(&tex.m_texObj, GX_TEXMAP0);
         if (color == 0) {
             color = text->m_color;
         }
-        if (tex.m_hasTex != 0) {
+        if (tex.m_buffer != NULL) {
             u32 vertexColor = 0xFFFFFFFF;
             float left = 0.0f - static_cast<float>(tex.m_width >> 1);
             float top = static_cast<float>(tex.m_height >> 1) + 0.0f;
@@ -1634,7 +1634,7 @@ SoraCharacterRoll::NamePanel::NamePanel() {
 }
 
 SoraCharacterRoll::NamePanel::~NamePanel() {
-    if (m_tex.m_hasTex != 0) {
+    if (m_tex.m_buffer != NULL) {
         m_tex.freeTexObj();
     }
 }
@@ -1665,7 +1665,7 @@ void SoraCharacterRoll::NamePanel::setup(NamePanelGen& gen, const char* name, in
         Message::drawBoxLine(0xFF, 0, 0, rect[0], rect[1], rect[2], rect[3], 0.0f);
         writer->changeMsgBuf(-1);
         writer->printMsgBuf(static_cast<FontData::FONT_RESOURCE>(9));
-        m_tex.copyTexObjFromEFB(rect[0], rect[1], rect[2], rect[3], 5, 0x2B, 0);
+        m_tex.copyTexObjFromEFB(rect[0], rect[1], rect[2], rect[3], GX_TF_RGB5A3, Heaps::MenuResource, false);
     }
     m_kind = kind;
     m_width = m_tex.m_width;
@@ -1958,11 +1958,12 @@ static int getCRollFighter_SelectNum(int fighterId, int** family) {
 
 // 1 when the id is not in the list yet.
 static int check_same_id(int id, int count, int* ids) {
-    if (count > 0 && ids != NULL) {
-        for (; count != 0; count--, ids++) {
-            if (id == *ids) {
-                return 0;
-            }
+    if (count <= 0 || ids == NULL) {
+        return 1;
+    }
+    for (int i = 0; i < count; i++) {
+        if (id == ids[i]) {
+            return 0;
         }
     }
     return 1;
