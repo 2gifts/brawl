@@ -81,9 +81,24 @@ int fn_803EA198(s8 drv_char);                                // PFVOL_format
 int fn_803EA788(s8 drv_char);                                // PFVOL_detach
 int fn_803EAE34(s8 drv_char, int* result);                   // PFVOL_mount
 void fn_803EBBD8(void);                                      // PFSYS_initializeSYS
-void fn_803EC27C(u32* context);                              // get the current context
+// pfk: the kernel shim over RVL OS threads and semaphores; a semaphore
+// resource is the address of its OSSemaphore.
+typedef struct PFK_SEMAPHORE_INFO {
+    u32 initial;               // 0x0
+    u32 max;                   // 0x4
+    struct OSSemaphore* sem;   // 0x8
+} PFK_SEMAPHORE_INFO;
+
+int fn_803EC27C(u32* context);                               // get the current context (thread)
+s32 fn_803EC2F8(PFK_SEMAPHORE_INFO* info);                   // create a semaphore
+int fn_803EC394(s32 resource);                               // delete a semaphore
 int fn_803EC3D4(s32 resource);                               // lock
 int fn_803EC418(s32 resource);                               // unlock
+
+// PrFile2 file-lock bookkeeping (pf_system): the number of file locks in use
+extern u32 lbl_805A1260;
+void fn_803EBB4C(void);                                      // PFSYS_initFileLock
+int fn_803EBB58(PF_FILE* p_file);                            // PFSYS_finalizeFileLock
 
 // pf_driver
 int fn_803D79B0(PF2_VOLUME* p_vol);                          // PFDRV_mount
