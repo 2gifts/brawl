@@ -651,6 +651,15 @@ public:
     soStopModuleBuilder(soModuleAccesser*) { }
     soStopModule* getModule() { return (soStopModule*)lbl_27_bss_414; }
 };
+// The shared null sound module of the articles that own none (Ivysaur's vine).
+extern u8 lbl_27_bss_444[];
+struct soSoundModuleBuildConfigNull { };
+template <>
+class soSoundModuleBuilder<soSoundModuleBuildConfigNull> {
+public:
+    soSoundModuleBuilder(soModuleAccesser*, soSoundIdExchanger*, soEventObserverRegistrationDesc*) { }
+    soSoundModule* getModule() { return (soSoundModule*)lbl_27_bss_444; }
+};
 template <>
 class soAbnormalModuleBuilder<soAbnormalModuleBuildConfigNull> {
 public:
