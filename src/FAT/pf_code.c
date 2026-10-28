@@ -1,6 +1,7 @@
 #include <types.h>
+#include <FAT/pf2.h>
 
-// Function bodies below are taken from https://github.com/jj-link/brawl, where each
+// Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
 // several original source files, so its functions are not auto-inlined into one
 // another; helpers the original inlined are marked inline.
@@ -20,4 +21,22 @@ s32 fn_803EB304(s32 arg0, s32 arg1)
     default:
         return 0;
     }
+}
+
+s16 fn_803EB2D0(const s8* buf) {
+    u16 uc;
+    short oem_width;
+    short uni_width;
+
+    fn_803D65A4(fn_803EAEAC(buf, &uc), &oem_width, &uni_width);
+    return oem_width;
+}
+
+s16 fn_803EB380(const u16* buf) {
+    s8 oem[4];
+    short oem_width;
+    short uni_width;
+
+    fn_803D65A4(fn_803EB068(buf, oem), &oem_width, &uni_width);
+    return uni_width;
 }

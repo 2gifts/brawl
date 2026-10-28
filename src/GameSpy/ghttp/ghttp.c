@@ -834,7 +834,7 @@ void fn_80380E00(GHIConnection* connection) {
             return;
         }
         if (connection->throttle) {
-            fn_8035CD7C(connection->socket, lbl_8059FA50);
+            SetReceiveBufferSize(connection->socket, lbl_8059FA50);
         }
         memset(&address, 0, sizeof(address));
         address.sin_family = 2;

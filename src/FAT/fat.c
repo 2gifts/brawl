@@ -1486,8 +1486,7 @@ s32 VFiPFPATH_cmpNameUni(const u16* p_name, PF_STR* sPattern) {
 }
 
 s32 VFiPFPATH_cmpTailSFN(const s8* sfn_name, const s8* pattern) {
-    u32 diff = fn_803A98A8((u8*)sfn_name, (u8*)pattern);
-    return (-diff | diff) >> 31;
+    return fn_803A98A8((u8*)sfn_name, (u8*)pattern) != 0;
 }
 
 void VFiPFPATH_InitTokenOfPath(PF_STR* p_str, s8* path, u32 code_mode) {
@@ -1789,7 +1788,10 @@ s32 VFiPFAPI_convertError(s32 err) {
 }
 
 s32 VFiPFAPI_convertReturnValue(s32 err) {
-    return (-err | err) >> 31;
+    if (err != 0) {
+        return -1;
+    }
+    return 0;
 }
 
 void* VFiPFAPI_convertReturnValue2NULL(s32 err, void* p_stream) {

@@ -183,6 +183,10 @@ s8* VF_path2handleidx(s32* o_handle_idx_p, const s8* i_path_p);
 s32 fn_803C63FC(void* unk0, s8* path, u32 unk2);
 s32 fn_803C64EC(void* unk0, s32 handle_idx, s8* path, u32 unk3);
 void fn_803C68D8(void);
+s32 fn_803CACCC(u32 num_blocks, u8* buf, u32 block, u32 bps, u32* p_num_success, struct PDM_DISK* p_disk);  // nanddrv_physical_read
+s32 fn_803CAA94(struct PDM_DISK* p_disk, const u8* p_buf, u32 block, u32 num_blocks, u32* p_num_success);  // nanddrv_pwrite
+s32 fn_803CABD4(struct PDM_DISK* p_disk);  // nanddrv_unmount
+s32 fn_803CAC0C(struct PDM_DISK* p_disk, struct PDM_DISK_INFO* p_disk_info);  // nanddrv_get_disk_info
 s32 dCommon_FlushFromVol(struct PF_VOLUME* p_vol, int i_setLastDeviceError);
 
 #ifdef __cplusplus

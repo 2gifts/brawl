@@ -192,7 +192,7 @@ u32 fn_8035C620(const char* name);                         // inet_addr
 int fn_8035D364(const char* hostname, void** handle);      // gsiStartResolvingHostname
 int fn_8035C384(int s, const void* addr, int len);         // connect
 int fn_8035CD04(int s, int blocking);                      // SetSockBlocking
-void fn_8035CD7C(int s, int size);                         // SetReceiveBufferSize
+void SetReceiveBufferSize(int s, int size);                         // SetReceiveBufferSize
 
 // MSL stdio stand-ins of this build
 int fn_803F524C(void* buffer, int size, int count, void* file);  // fread

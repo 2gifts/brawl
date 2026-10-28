@@ -1,6 +1,7 @@
 #include <types.h>
+#include <FAT/pf2.h>
 
-// Function bodies below are taken from https://github.com/jj-link/brawl, where each
+// Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
 // several original source files, so its functions are not auto-inlined into one
 // another; helpers the original inlined are marked inline.
@@ -18,8 +19,24 @@ u8 PFENT_getcurrentDateTimeForEnt(s16 *arg0, s16 *arg1) {
     return (u8)time[3];
 }
 
-int fn_803DE800(void*, void*, void*, void*, int, int);
 
-int PFENT_ITER_GetEntryOfPath(void* iter, void* entry, void* vol, void* str, int unk) {
-    return fn_803DE800(iter, entry, vol, str, 0, unk);
+int PFENT_ITER_GetEntryOfPath(PF2_ENT_ITER* iter, PF2_DIR_ENT* entry, PF2_VOLUME* vol, PF2_STR* str, u32 no_look_last_token) {
+    return fn_803DE800(iter, entry, vol, str, 0, no_look_last_token);
+}
+
+int fn_803DD64C(PF_FFD* p_ffd, PF2_DIR_ENT* p_ent, u32 index, PF2_STR* pattern, u8 attr_required, u8 attr_unwanted) {
+    u32 lpos;
+    u32 ppos;
+
+    return fn_803DD390(p_ffd, p_ent, index, pattern, attr_required, attr_unwanted, &lpos, &ppos);
+}
+
+int fn_803DD944(PF2_DIR_ENT* p_ent, u8 num_entries, PF_FFD* p_ffd, u32* p_next_chain, PF2_STR* p_filename) {
+    u32 pos;
+
+    return fn_803DD674(p_ent, num_entries, p_ffd, p_next_chain, p_filename, &pos);
+}
+
+int fn_803DF754(PF2_ENT_ITER* iter, PF2_DIR_ENT* ent, PF2_VOLUME* vol, PF2_STR* path) {
+    return fn_803DE800(iter, ent, vol, path, 1, 1);
 }
