@@ -1,1 +1,23 @@
 #include <types.h>
+
+// Function bodies below are taken from https://github.com/jj-link/brawl, where each
+// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
+// several original source files, so its functions are not auto-inlined into one
+// another; helpers the original inlined are marked inline.
+#pragma auto_inline off
+
+s32 fn_803EB304(s32 arg0, s32 arg1)
+{
+    u8 c = arg0;
+
+    switch (arg1) {
+    case 1:
+        return (c >= 0x81U && c <= 0x9FU) ||
+               (c >= 0xE0U && c <= 0xFCU);
+    case 2:
+        return (c >= 0x40U && c <= 0x7EU) ||
+               (c >= 0x80U && c <= 0xFCU);
+    default:
+        return 0;
+    }
+}
