@@ -1,5 +1,6 @@
 #include <nw4r/g3d.h>
 #include <nw4r/math.h>
+#include <types.h>
 
 namespace nw4r {
 namespace g3d {
@@ -42,3 +43,13 @@ bool AnmObj::TestAnmFlag(AnmFlag flag) const {
 
 } // namespace g3d
 } // namespace nw4r
+
+// Function bodies below are taken from https://github.com/jj-link/brawl, where each
+// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
+// several original source files, so its functions are not auto-inlined into one
+// another; helpers the original inlined are marked inline.
+#pragma auto_inline off
+
+extern "C" float fn_8019D9E4(float a, float b, float c) {
+    return c;
+}

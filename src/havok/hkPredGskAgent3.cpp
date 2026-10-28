@@ -19,6 +19,7 @@
 
 #include <havok/hkPredGskAgent3.h>
 #include <havok/hkGskManifoldUtil.h>
+#include <types.h>
 
 
 void* hkPredGskAgent3::cleanup(hkGskManifold* dst, hkPredGskAgent3* agent, void* arg) {
@@ -80,4 +81,14 @@ u32 hkGskManifold::getTotalSizeInBytes() const {
     u8 b = m_countB;
     u8 c = m_countC;
     return ((a + b) << 1) + (c << 3) + 4;
+}
+
+// Function bodies below are taken from https://github.com/jj-link/brawl, where each
+// one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
+// several original source files, so its functions are not auto-inlined into one
+// another; helpers the original inlined are marked inline.
+#pragma auto_inline off
+
+extern "C" int fn_8030099C(int arg0, int arg1) {
+    return arg0 + arg1;
 }
