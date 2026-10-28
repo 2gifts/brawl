@@ -155,16 +155,7 @@ static_assert(sizeof(soGlowModuleImpl) == 0x24, "Class is wrong size!");
 
 // soLinkModuleImpl has its full layout only under FT_MODULE_BUILDER (see em/enemy.h).
 #ifdef FT_MODULE_BUILDER
-class emLinkModuleImpl : public soLinkModuleImpl {
-    u8 unk50[0x84 - 0x50];
-public:
-    emLinkModuleImpl(soModuleAccesser* acc, soArray<soLinkConnection>* connections);
-    virtual ~emLinkModuleImpl();
-    void initConstraintOffsetMtx();
-    // HYPOTHESIS: the node the constraint offset is taken from (Enemy::notifyEventCaptureStatus passes the capture node).
-    void setConstraintOffsetMtx(int node);
-};
-static_assert(sizeof(emLinkModuleImpl) == 0x84, "Class is wrong size!");
+#include <em/link/em_link_module_impl.h>
 #else
 class emLinkModuleImpl;
 #endif
@@ -173,17 +164,7 @@ class emLinkModuleImpl;
 
 #include <em/status/em_status_module_impl.h>
 
-// The enemy territory module (soModuleAccesser slot territoryModule).
-class emTerritoryModuleImpl {
-    u8 unk4[0x50 - 4];
-public:
-    // HYPOTHESIS: territoryData is a soValueAccesser constant, createTerritory points into the emCreate (+0x28); the five ints
-    // are the indices of the territory kinds.
-    emTerritoryModuleImpl(soModuleAccesser* acc, void* territoryData, void* createTerritory, int p4, int p5, int p6, int p7,
-                          int p8);
-    virtual ~emTerritoryModuleImpl();
-};
-static_assert(sizeof(emTerritoryModuleImpl) == 0x50, "Class is wrong size!");
+#include <em/territory/em_territory_module_impl.h>
 
 // The enemy damage module. Its RTTI lists soDamageModuleImpl at 0 (and so soDamageModule), the damage effector at 0xAC
 // and an anim cmd observer at 0xB8; only the soDamageModule base is declared, which the enemy classes' casts
@@ -244,5 +225,16 @@ public:
     void updateEnergyPost(int index);
     // Map name; the Galfire hands it the trace's ground movement speed while its ground module traces a line.
     void addSpeedToGroundMovement(const Vec2f* speed);
+    // Map names; the value accesser (em_value_accesser.cpp) reads them for its variable float ids. The index selects
+    // one of the enemy's kinetic energies. HYPOTHESIS: parameter types.
+    float getReflectNumAddValue();
+    static float getSpeedAngleWithTouchGround(soModuleAccesser* moduleAccesser, const Vec2f* speed, int touchMask);
+    float getEnergyAngle(int index);
+    float getEnergyLength(int index);
+    float getEnergyRotSpeedLength(int index);
+    float getEnergyLr(int index);
+    float getEnergyAmount(int index);
+    float getEnergyMinSpeed(int index);
+    float getEnergyMaxSpeed(int index);
 };
 static_assert(sizeof(emKineticModuleImpl) == 0xBD4, "Class is wrong size!");

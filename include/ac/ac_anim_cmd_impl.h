@@ -95,6 +95,8 @@ struct acCmdArgList {
 
     acCmdArgList() : argList() { }
     acCmdArgList(const acCmdArgConv* p1, s32 p2) : argList(p1, p2) { }
+    // soAnimCmdArgList's constructor (a weak copy in the sora_enemy link module) wraps the table it is given.
+    acCmdArgList(const soArrayContractibleTable<const acCmdArgConv>& list) : argList(list) { }
 
     acCmdArgList& operator=(const acCmdArgList& other) {
         if (this == &other) return *this;

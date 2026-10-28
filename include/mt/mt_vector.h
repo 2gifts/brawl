@@ -24,6 +24,11 @@ public:
 #endif
 
     Vec2f() { }
+    // The map names it Vec2f::set; the one unit that uses it (wnem_proc_common.cpp) calls the weak copy out of line.
+    void set(float x, float y) __attribute__((never_inline)) {
+        m_x = x;
+        m_y = y;
+    }
     inline Vec2f(const Vec3f& xyz)
 #ifdef MT_VEC2F_FROM_VEC3_CTOR_NOINLINE
         __attribute__((never_inline)) // MATCH-ONLY: retain the native constructor call.
@@ -258,6 +263,10 @@ public:
     Vec2f* xy() const {
         return (Vec2f*)this;
     }
+
+    // True when all three components are finite numbers (the map's name); defined by the unit that uses it
+    // (wnem_proc_common.cpp), which calls it out of line.
+    bool testNormal() __attribute__((never_inline));
 
     Vec3f operator+(const Vec3f& v);
     Vec3f operator-(const Vec3f& v)

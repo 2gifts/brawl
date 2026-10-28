@@ -80,12 +80,17 @@ public:
     // HYPOTHESIS: explicit copy constructor (with the same null-elements -> size 0 fixup as the
     // (T*, s32) constructor); seen inlined at the start of soTransitionModuleImpl::notifyEventAnimCmd
     // and in soGeneralTerm::getArgList.
+#ifdef SO_ARRAY_CONTRACTIBLE_TABLE_COPY_EXTERN
+    // A unit whose original calls sora_melee's copy constructor (the sora_enemy link module's anim cmd argument list).
+    soArrayContractibleTable(const soArrayContractibleTable& other);
+#else
     soArrayContractibleTable(const soArrayContractibleTable& other)
         : soConnectable<soArrayContractibleTable<T> >(other), m_elements(other.m_elements), m_size(other.m_size) {
         if (!other.m_elements) {
             m_size = 0;
         }
     }
+#endif
     soArrayContractibleTable(T* elmnts, s32 size) : m_elements(elmnts), m_size(size) {
         if (!elmnts) {
             this->m_size = 0;

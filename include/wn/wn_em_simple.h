@@ -25,7 +25,7 @@ class wnemSimple_ModuleAccesserBuildConfig {
 
 class utWeaponObjectBase : public utListNode {
     virtual ~utWeaponObjectBase();
-    virtual void setDeactivate(int unk);
+    virtual void setDeactivate(bool deactivate);
 };
 static_assert(sizeof(utWeaponObjectBase) == 12, "Class is wrong size!");
 
@@ -37,7 +37,11 @@ public:
     bool unk21B9;
     u8 unk21BA[0x1];
     bool unk21BB;
-    u8 unk21BC[0x18];
+    u8 unk21BC[0x10];
+    // 0x21CC, the article's link id: the Cataguard's Report string names EM_CATAGUARD_LINK_ID_WPN_PARTS_LANCE (3),
+    // Petey Piranha's arms send it with every event, and the weapon manager's searches filter on it.
+    s32 m_linkId;
+    u8 unk21D0[0x4];
     float unk21D4;
     float unk21D8;
     u8 unk21DC[0xC];
@@ -54,7 +58,9 @@ public:
     // The arm event (Petey Piranha's notifyEventLink) runs its status transition check only when it is set.
     bool unk2217;
     bool unk2218;
-    u8 unk2219[0x1B];
+    u8 unk2219;
+    bool m_isManaged; // 0x221A
+    u8 unk221B[0x19];
     s32* unk2234;
     // Built by the constructor; the weapon procs read them as their int and float parameters.
     soArrayVector<s32, 2> m_intParams;     // 0x2238
@@ -62,6 +68,8 @@ public:
     u8 unk226C[0x108];
 
     wnemSimple();
+    u32 getOwnerID();
+    virtual void setDeactivate(bool x);
     // HYPOTHESIS: parameter types. Called by emWeaponInstanceHolder<wnemSimple, ...> with the article id of the pool, the
     // event manager id of the owner, the kind/heap construction info and the shared parameter block.
     wnemSimple(s32 articleId, s16 manageId, const struct soArticleConstructInfo& info, const class wnemDummy_Param* param);

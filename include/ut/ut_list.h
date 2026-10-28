@@ -34,6 +34,9 @@ public:
     /// If node is not present, return -1, else return its position in the list
     s32 isExistNode(utListNode* node) const;
 
+    void init();
+    u32 getLength() const { return m_length; }
+
     inline void clear() {
         m_head = nullptr;
         m_tail = nullptr;
