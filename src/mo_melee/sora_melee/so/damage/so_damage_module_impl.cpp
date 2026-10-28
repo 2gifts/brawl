@@ -664,7 +664,7 @@ void soDamageModuleImpl::notifyEventChangeStatus(int statusKind, int prevStatusK
     m_noReactionModule.resetModeStatus();
 }
 
-void soDamageModuleImpl::notifyEventCollisionHit2nd(float posX, float collisionLr, soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser, bool unk) {
+void soDamageModuleImpl::notifyEventCollisionHit2nd(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog, u32 groupIndex, float posX, float collisionLr, soModuleAccesser* moduleAccesser, bool unk) {
     u8 damageIndex;
     u8 collisionIndex = collisionLog->m_collsionIndex;
     soCollisionAttackData* attackData = attackModule->getData(collisionIndex, collisionLog->m_isAbsolute);

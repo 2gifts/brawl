@@ -2519,7 +2519,7 @@ config.libs = [
             Object(Matching, "mo_enemy/sora_enemy/em_create.cpp"),
             Object(NonMatching, "mo_enemy/sora_enemy/damage/em_damage_module_impl.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/term/em_general_term_decide_module_impl.cpp"),
-            Object(NonMatching, "mo_enemy/sora_enemy/kinetic/em_kinetic_module_impl.cpp"),
+            Object(Matching, "mo_enemy/sora_enemy/kinetic/em_kinetic_module_impl.cpp"),
             Object(NonMatching, "mo_enemy/sora_enemy/kinetic/em_kinetic_energy.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/resource/em_resource_module_impl.cpp"),
             Object(Matching, "mo_enemy/sora_enemy/switch/em_switch_decide_module_impl.cpp"),

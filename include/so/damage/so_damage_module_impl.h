@@ -19,7 +19,14 @@
 class StageObject;
 class soModuleAccesser;
 
+// SO_DAMAGE_MODULE_PRIVATE_NULL_BASE (opt-in): the original type information of soDamageModule lists only soNullable
+// (the sora_enemy damage unit's copy); a private soNull keeps the layout and leaves it out of the base list, as for the
+// effector (SO_DAMAGE_EFFECTOR_PRIVATE_NULL_BASE).
+#ifdef SO_DAMAGE_MODULE_PRIVATE_NULL_BASE
+class soDamageModule : private soNull, public soNullable {
+#else
 class soDamageModule : public soNull, public soNullable {
+#endif
 public:
     virtual ~soDamageModule();
     virtual void activate(float damage);
@@ -160,7 +167,7 @@ public:
     virtual bool isObserv(char unk1);
     virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
     virtual void notifyEventCollisionHit(float power, soCollisionAttackData*, u32 index, int, soModuleAccesser* moduleAccesser, soCollisionLog*);
-    virtual void notifyEventCollisionHit2nd(float posX, float collisionLr, soCollisionAttackModule*, soCollisionLog*, u32 groupIndex, soModuleAccesser* moduleAccesser, bool);
+    virtual void notifyEventCollisionHit2nd(soCollisionAttackModule*, soCollisionLog*, u32 groupIndex, float posX, float collisionLr, soModuleAccesser* moduleAccesser, bool);
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
 };
 static_assert(sizeof(soDamageModuleImpl) == 172, "Class is wrong size!");

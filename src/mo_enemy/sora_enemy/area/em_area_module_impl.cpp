@@ -90,6 +90,7 @@ extern char g_soTeamModuleNullArg[];
 // TODO(nonmatching): 99.78%, (a) the order of the two m_areas stores (the original writes the size before the
 // elements); the implicit soSet copy writes its members in declaration order, and a named soSet local, a soSet
 // constructor that assigns the size first and moving the targetRanges store do not change it.
+// A ~1000-compile permuter run found nothing either.
 emAreaModuleImpl::emAreaModuleImpl(soModuleAccesser* acc, int areaNum, void* areaParams, void* targetRanges,
                                    soArray<soAreaInstance>* instances, void* areaWork, void* wind)
     : soAreaModuleImpl(acc, soAreaData::Category_Enemy, instances, &m_contactLogs, &m_envChecker,
@@ -449,8 +450,6 @@ Vec3f emAreaModuleImpl::getTargetPos(soModuleAccesser* acc, u32 area, bool cente
     return pos;
 }
 
-// TODO(nonmatching): 98.44%, (a) one instruction: the original keeps a dead "cmpwi area, 6" before the final
-// "return -1" (the camera case returning the same -1); every spelling of that case tried folds the compare away.
 s32 emAreaModuleImpl::getTargetStatusKind(soModuleAccesser* acc, u32 area) {
     s32 statusKind = -1;
     if (area <= 3) {
@@ -479,7 +478,8 @@ s32 emAreaModuleImpl::getTargetStatusKind(soModuleAccesser* acc, u32 area) {
         return statusKind;
     }
     if ((s32)area == TargetCamera) {
-        return statusKind;
+        // MATCH-ONLY: the camera case (also -1) keeps the original's compare only through the narrowing cast (found by the permuter).
+        return (s8)statusKind;
     }
     return -1;
 }
@@ -640,8 +640,8 @@ float emAreaModuleImpl::getTargetAngleToMotionFrame(soModuleAccesser* acc, u32 a
 }
 
 // The distance class (0-2: the first range the target is inside, 3: farther, or no ranges) of a position.
-// TODO(nonmatching): 99.17%, (a) r30/r31 swapped between the area module and the loop counter; declaration order,
-// a pointer instead of the reference, a while loop and named temporaries do not change it.
+// MATCH-ONLY: the guarded while loop (found by the permuter) is the form that allocates the area module and the
+// counter the way the original does; the plain for / while loops swap r30 and r31.
 s32 emAreaModuleImpl::getTargetDistanceSub(soModuleAccesser* acc, Vec3f* pos) {
     emAreaModuleImpl& areaModule = getAreaModule(acc);
     if (areaModule.m_targetRanges == NULL) {
@@ -649,9 +649,13 @@ s32 emAreaModuleImpl::getTargetDistanceSub(soModuleAccesser* acc, Vec3f* pos) {
     }
     Vec3f center(0.0f, 0.0f, 0.0f);
     center = emExternalValueAccesser::getCenterPos(&getEnemy(acc));
-    for (s32 i = 0; i < 3; i++) {
-        if (center.distance(pos) <= areaModule.m_targetRanges[i]) {
-            return i;
+    s32 i = 0;
+    if (i < 3) {
+        while (i < 3) {
+            if (center.distance(pos) <= areaModule.m_targetRanges[i]) {
+                return i;
+            }
+            i++;
         }
     }
     return 3;
@@ -1067,7 +1071,8 @@ float emAreaModuleImpl::getTargetFoundKineticAngleSub(float lr, Vec3f self, Vec3
 
 // TODO(nonmatching): 99.90%, (a) stack slots: the original puts the getCenterPos temporary below the two by-value
 // copies of the arguments (ours above them); calling getLr inside the argument list, an inner block and an inline
-// helper for the center do not move it. Same in getTargetKineticAngle.
+// helper for the center do not move it; passing the getCenterPos result straight into the call or declaring the center
+// at its first use is worse (72-92%), and an 840-compile permuter run found nothing. Same in getTargetKineticAngle.
 float emAreaModuleImpl::getTargetFoundKineticAngle(soModuleAccesser* acc, u32 area, Vec2f offset, u32 useLr) {
     Vec3f pos = getTargetFoundPos(acc, area, true);
     float lr = 1.0f;

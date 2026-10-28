@@ -9,6 +9,8 @@
 // (see so/damage/so_damage_effector_impl.h).
 #define SO_DAMAGE_EFFECTOR_ACCESSER_FIRST
 #define SO_DAMAGE_EFFECTOR_PRIVATE_NULL_BASE
+// Likewise soDamageModule's base list has no soNull (see so/damage/so_damage_module_impl.h).
+#define SO_DAMAGE_MODULE_PRIVATE_NULL_BASE
 // The effector slots that soDamageEffectorImpl leaves empty are inline here (see wn/wn_damage_effector_impl.h).
 #define EM_DAMAGE_EFFECTOR_IMPL_INLINE_SLOTS
 // The sora_enemy calls of interpretCmd1 and resetInterpreter2 pass the frame last (see so/anim/so_anim_cmd_module_impl.h).
@@ -17,9 +19,10 @@
 // The null damage transactor has no bind, bury and speed damage slots (see so/damage/so_damage_transactor_null.h).
 #define WN_DAMAGE_ACTOR_INTERFACE
 #define WN_OCTOPUS_ARRAYS
-// The anim cmd handler of soDamageModuleImpl takes an int index; the observer base must take the same one for the override
-// to replace it (the original has a single handler per observer, with thunks in the observer vtables).
-#define WN_ARTICLE_ANIMCMD_INT
+// The anim cmd observer's isObserv and notifyEventAnimCmd are pure and its addObserver inline: the unit emits the
+// observer's weak vtable (0 in those slots), as the original does. The handler takes the int index of soDamageModuleImpl's
+// (see so/anim/so_anim_cmd_event_presenter.h).
+#define SO_ANIM_CMD_EVENT_OBSERVER_PURE
 // MATCH-ONLY: updateDamageAttackInfo and the hit handlers read the task category of the collision log as a byte.
 #define SO_COLLISION_LOG_CATEGORY_BYTE
 // MATCH-ONLY: the vector copies (the wall normal, the attack speed) are aggregate word copies of a plain base.
@@ -447,6 +450,7 @@ void emDamageModuleImpl::setupDamageStatusNormalSubReflect(soGroundModule* groun
 // reaction f29, and its reaction clamp writes the result into reaction's register (ours into minReaction's, then a
 // copy). Tried without effect: declaration order and position of the floats, a ternary, temporaries in the clamp,
 // inline helpers for the minimum and the clamp, and speedLr as a repeated expression.
+// The permuter (0.1 compiles/s on this 2.6 kB function, 56 in 15 minutes) only found a no-gain operand swap.
 void emDamageModuleImpl::setupDamageStatusNormal(soDamage* damage, bool isCaptured) {
     dynamic_cast<emStopModuleImpl&>(m_moduleAccesser->getStopModule());
     emKineticModuleImpl& kinetic = dynamic_cast<emKineticModuleImpl&>(m_moduleAccesser->getKineticModule());
@@ -1019,20 +1023,16 @@ void emDamageModuleImpl::notifyEventCollisionHit(float power, soCollisionAttackD
     }
 }
 
-// TODO(nonmatching): 92.7%, (b) the prologue saves r4, r5, r6, f1, f2, r7, r8: the original declares
-// notifyEventCollisionHit2nd(soCollisionAttackModule*, soCollisionLog*, u32, float, float, soModuleAccesser*, bool).
-// With that order in the observer, soDamageModuleImpl and here, the code is byte-identical (only the mangled names
-// change: the observer's, soDamageModuleImpl's and Weapon's symbols in sora_melee and the fighter RELs).
-void emDamageModuleImpl::notifyEventCollisionHit2nd(float posX, float collisionLr, soCollisionAttackModule* attackModule,
-                                                    soCollisionLog* collisionLog, u32 groupIndex,
+void emDamageModuleImpl::notifyEventCollisionHit2nd(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog,
+                                                    u32 groupIndex, float posX, float collisionLr,
                                                     soModuleAccesser* moduleAccesser, bool unk) {
     if (unk != true && (u8)collisionLog->_41 == 1) {
-        soDamageModuleImpl::notifyEventCollisionHit2nd(posX, collisionLr, attackModule, collisionLog, groupIndex, moduleAccesser, unk);
+        soDamageModuleImpl::notifyEventCollisionHit2nd(attackModule, collisionLog, groupIndex, posX, collisionLr, moduleAccesser, unk);
         return;
     }
     Enemy& enemy = dynamic_cast<Enemy&>(*moduleAccesser->m_stageObject);
     u32 enemyTaskId = enemy.m_taskId;
-    soDamageModuleImpl::notifyEventCollisionHit2nd(posX, collisionLr, attackModule, collisionLog, groupIndex, moduleAccesser, unk);
+    soDamageModuleImpl::notifyEventCollisionHit2nd(attackModule, collisionLog, groupIndex, posX, collisionLr, moduleAccesser, unk);
     if (unk == false && g_stTriggerMng != NULL && collisionLog->m_taskId != enemyTaskId) {
         fn_27_23313C(enemy.getCreateId(), collisionLog->m_taskId, enemyTaskId, collisionLog->m_taskCategory);
     }

@@ -41,6 +41,10 @@
 #include <so/so_value_accesser.h>
 #include <types.h>
 
+// MATCH-ONLY: the original emits the weak soInstanceManagerFixed::isEmpty of the energy pool before the full property
+// manager's add / atIndexFast.
+template bool soInstanceManagerFixed<soKineticEnergy*>::isEmpty() const;
+
 float vec2fAngle(Vec2f* a, Vec2f* b);
 
 // MATCH-ONLY: the original callers of Vec2f::rot evaluate the angle before the output vector (the native declaration
@@ -50,6 +54,13 @@ extern "C" void rotVec2f(Vec2f* self, float angle, Vec2f* out);
 extern "C" {
 void fn_8003E3BC(const Matrix*, const Vec3f*, Vec3f*); // HYPOTHESIS: the matrix-vector product (map: unnamed)
 float fn_8003DF9C(const Vec3f*, const Vec3f*);         // HYPOTHESIS: the angle between two vectors (map: unnamed)
+}
+
+// HYPOTHESIS: reverseEnergy calls MSL's fabs, which the SDK's math.h provides as an inline function (double fabs(double)
+// over the __fabs intrinsic); this project's math.h makes fabs a macro, which drops the by-value parameter copy that
+// gives the original's register allocation (the copied speed components are colored before the absolute values).
+static inline double fabsInline(double x) {
+    return __fabs(x);
 }
 
 // Vec2f::dotProduct (map name): a weak copy of the damage module unit, which emits it first.
@@ -492,8 +503,6 @@ void emKineticModuleImpl::reflectEnergy(int index, int paramId, bool alongNormal
     startEnergy(index, paramId, param, NULL, false, angle, nodeId, -1.0f, 0.0f);
 }
 
-// TODO(nonmatching): 99.55%, (a) register allocation only: the component and |y| sit in f2/f1/f3 in ours, f1/f0/f3 in the
-// original (the evaluation order and the double temporaries already match).
 void emKineticModuleImpl::reverseEnergy(int index, int paramId, int nodeId, int mode) {
     Vec2f speed(0.0f, 0.0f);
     Vec2f reversed(0.0f, 0.0f);
@@ -532,8 +541,8 @@ void emKineticModuleImpl::reverseEnergy(int index, int paramId, int nodeId, int 
     } else {
         // Mode 1 turns back only the larger component.
         reversed = speed;
-        float absY = __fabs(reversed.m_y);
-        float absX = __fabs(reversed.m_x);
+        float absY = fabsInline(reversed.m_y);
+        float absX = fabsInline(reversed.m_x);
         if (absX >= absY) {
             reversed.m_x *= -1.0f;
         } else {

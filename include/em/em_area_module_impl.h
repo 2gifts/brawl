@@ -83,7 +83,7 @@ public:
     virtual ~emAreaModuleImpl();
     virtual void activate(int ownerId);
     virtual bool isObserv(char group);
-    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, soAnimCmdEventS32 unk3);
 
     // The area data sets and area instances of the enemy (Enemy::init).
     void createAreaDataSet();

@@ -51,8 +51,8 @@ public:
     virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
     virtual void notifyEventCollisionHit(float power, soCollisionAttackData* attackData, u32 index, int hitPart,
                                          soModuleAccesser* moduleAccesser, soCollisionLog* collisionLog);
-    virtual void notifyEventCollisionHit2nd(float posX, float collisionLr, soCollisionAttackModule* attackModule,
-                                            soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser,
+    virtual void notifyEventCollisionHit2nd(soCollisionAttackModule* attackModule, soCollisionLog* collisionLog,
+                                            u32 groupIndex, float posX, float collisionLr, soModuleAccesser* moduleAccesser,
                                             bool unk);
     // The effector slots of the second base.
 #if SO_DAMAGE_EFFECTOR_ACCESSER_FIRST_DECLARED

@@ -373,9 +373,10 @@ public:
     // Whether the axis of the node points within limit degrees of up.
     static bool isOverTurn(soModuleAccesser* moduleAccesser, int nodeId, float limit, int axis);
 #ifdef EM_KINETIC_MODULE_IMPL_FULL
-    virtual void changeKinetic(int kineticType, soModuleAccesser* moduleAccesser) { }
+    // (Declared in the order that puts the weak copies out as changeKinetic, addSpeedOutside, addSpeed.)
     virtual void addSpeed(Vec3f* speed, soModuleAccesser* moduleAccesser) { }
     virtual void addSpeedOutside(soKineticEnergy::OutsideType type, Vec3f* speed) { }
+    virtual void changeKinetic(int kineticType, soModuleAccesser* moduleAccesser) { }
     virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
     virtual bool isObserv(char group);
 #endif

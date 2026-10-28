@@ -73,6 +73,11 @@ static inline void setRotDegrees(Matrix* mtx, const Vec3f& degrees) {
     fn_8003ECA0(mtx, radians.m_x, radians.m_y, radians.m_z);
 }
 
+// A rotation matrix from Euler angles in radians.
+static inline void setRotRadians(Matrix* mtx, const Vec3f& radians) {
+    fn_8003ECA0(mtx, radians.m_x, radians.m_y, radians.m_z);
+}
+
 // Radians to degrees.
 static inline Vec3f toDegrees(const Vec3f& radians) {
     Vec3f degrees = radians;
@@ -194,9 +199,9 @@ float emKineticEnergy::startEnergySubLimit(float limit, float rate, float curren
     return limit + rate * levelScale;
 }
 
-// TODO(nonmatching): 94.47%, (a) the two start-angle chains share their identical blocks in the original (MWCC tail
-// merge in the other direction), the 0.0f start angle is reloaded there, plus one discarded group compare and two
-// scheduling slots; the logic is believed right.
+// TODO(nonmatching): 99.02%, (a) the discarded `EM_IS_ROLL_KIND` test keeps a dead `cmpwi` in the original (4 bytes; an empty
+// if, a bool and a set-flag body all drop it), (b) one callee-saved float register fewer in the original (frame 0x1b0 vs
+// 0x1c0), (c) two scheduling slots. The shared start-angle handlers need the MATCH-ONLY gotos below.
 void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, s32 paramId, float lr, int nodeId,
                                   const emKineticEnergyParam* param, grGimmickMotionPath* motionPath,
                                   bool fromPathStart, float angle, float reflectRate, float pathMotFrame,
@@ -323,24 +328,16 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, s32 paramId,
         startAngle = kinetic->getEnergyAngle(m_baseEnergyId);
     } else if ((int)m_param.m_angle == emKineticValue_None) {
         // The parameter set leaves the start angle to the caller.
+        // MATCH-ONLY: the original shares the handlers of the special angles between the caller's angle and the
+        // parameter set's own (the gotos jump into the second chain).
         if ((int)angle == emKineticValue_Down) {
-            startAngle = emKineticValue_Down;
+            goto startAngleDown;
         } else if ((int)angle == emKineticValue_GroundAngle) {
-            startAngle = 0.0f;
-            m_isGroundAngle = true;
+            goto startAngleGround;
         } else if ((int)angle == emKineticValue_CurrentX) {
-            if (getEnergyTypeToGroup(m_param.m_kind) == Group_Rot) {
-                keepRot = true;
-            } else if (isInvalidEnergyType(prevParam.m_kind) == true) {
-                startAngle = 0.0f;
-            } else if (getEnergyTypeToGroup(m_param.m_kind) == getEnergyTypeToGroup(prevParam.m_kind)) {
-                startAngle = getRealAngle(moduleAccesser, m_angle, m_nodeId);
-            }
+            goto startAngleCurrentX;
         } else if ((int)angle == emKineticValue_CurrentY) {
-            if (getEnergyTypeToGroup(m_param.m_kind) != Group_Rot) {
-                return;
-            }
-            keepRot = true;
+            goto startAngleCurrentY;
         } else if ((int)angle == emKineticValue_AngleAxis5 || (int)angle == emKineticValue_AngleAxis4 ||
                    (int)angle == emKineticValue_AngleAxis3 || (int)angle == emKineticValue_AngleAxis2 ||
                    (int)angle == emKineticValue_AngleAxis1 || (int)angle == emKineticValue_AngleAxis0) {
@@ -353,25 +350,29 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, s32 paramId,
     } else {
         // The parameter set's own start angle.
         if ((int)m_param.m_angle == emKineticValue_Down) {
+        startAngleDown:
             startAngle = emKineticValue_Down;
         } else if ((int)m_param.m_angle == emKineticValue_AngleAxis5 || (int)m_param.m_angle == emKineticValue_AngleAxis4 ||
                    (int)m_param.m_angle == emKineticValue_AngleAxis3 || (int)m_param.m_angle == emKineticValue_AngleAxis2 ||
                    (int)m_param.m_angle == emKineticValue_AngleAxis1 || (int)m_param.m_angle == emKineticValue_AngleAxis0) {
             startAngle = startEnergySubAngleAxis(m_param.m_kind, m_param.m_angle, m_nodeId);
         } else if ((int)m_param.m_angle == emKineticValue_CurrentX) {
+        startAngleCurrentX:
             if (getEnergyTypeToGroup(m_param.m_kind) == Group_Rot) {
-                keepRot = true;
+                goto startAngleCurrentY;
             } else if (isInvalidEnergyType(prevParam.m_kind) == true) {
                 startAngle = 0.0f;
             } else if (getEnergyTypeToGroup(m_param.m_kind) == getEnergyTypeToGroup(prevParam.m_kind)) {
                 startAngle = getRealAngle(moduleAccesser, m_angle, m_nodeId);
             }
         } else if ((int)m_param.m_angle == emKineticValue_CurrentY) {
+        startAngleCurrentY:
             if (getEnergyTypeToGroup(m_param.m_kind) != Group_Rot) {
                 return;
             }
             keepRot = true;
         } else if ((int)m_param.m_angle == emKineticValue_GroundAngle) {
+        startAngleGround:
             startAngle = 0.0f;
             m_isGroundAngle = true;
         } else if (angle < emKineticValue_GroundAngle) {
@@ -761,7 +762,6 @@ void emKineticEnergy::clearEnergyParam(emKineticEnergyParam* param) {
     param->m_rollRadius = -1.0f;
 }
 
-// TODO(nonmatching): 97.62%, (a) the -1 constant is held in r31 in ours but loaded into r0 at its use in the original.
 void emKineticEnergy::clearEnergy() {
     clearEnergyParam(&m_param);
     m_isStop = false;
@@ -791,7 +791,8 @@ void emKineticEnergy::clearEnergy() {
     m_rotSpeed = Vec3f(0.0f, 0.0f, 0.0f);
     disable();
     for (u32 i = 0; i < 2; i++) {
-        m_paramIdHistory.getArray()->at(i) = -1;
+        s32& id = m_paramIdHistory.getArray()->at(i);
+        id = -1;
     }
 }
 
@@ -852,9 +853,9 @@ inline float vec3fLength(const Vec3f* v) __attribute__((never_inline)) {
     return lengthSq * rsqrtf(lengthSq);
 }
 
-// TODO(nonmatching): 99.77%, (a) register allocation only: the angle and |diff| sit in f2/f3 in ours, f3/f2 in the original.
 void emKineticEnergy::updateEnergySpeedSubPathMotWorldRotZ(soModuleAccesser* moduleAccesser, soPostureModule* posture,
                                                          Vec3f move, float maxRot, float baseRot) {
+    float absDiff;
     if (vec3fLength(&move) <= 0.00001f) {
         return;
     }
@@ -862,7 +863,7 @@ void emKineticEnergy::updateEnergySpeedSubPathMotWorldRotZ(soModuleAccesser* mod
     float angle = -1.0f * (57.29578f * atan2f(move.m_x, move.m_y));
     float diff = angle - m_worldRotZ;
     double wideDiff = __fabs(diff);
-    float absDiff = wideDiff;
+    absDiff = wideDiff;
     if (absDiff >= 180.0f) {
         if (m_worldRotZ <= 0.0f) {
             m_worldRotZ += 360.0f;
@@ -1381,7 +1382,9 @@ float emKineticEnergy::getRotSpeedLength(soModuleAccesser* moduleAccesser) {
     return m_length;
 }
 
-// TODO(nonmatching): 96.87%, (a) local stack-slot order differs; the logic is believed right.
+// TODO(nonmatching): 99.02%, (a) only the stack slots of the temporaries differ: the original lays the by-value copies of
+// the setRotDegrees inlines out in call order between the other temporaries, ours puts them last (taking the vector by
+// value instead gives inline copies where the original calls Vec3f::operator=; the permuter found nothing).
 Vec3f emKineticEnergy::getRotSpeed(soModuleAccesser* moduleAccesser, int kind, float length, int nodeId, bool useLr) {
     Vec3f result(0.0f, 0.0f, 0.0f);
     soPostureModule& posture = moduleAccesser->getPostureModule();
@@ -1409,7 +1412,7 @@ Vec3f emKineticEnergy::getRotSpeed(soModuleAccesser* moduleAccesser, int kind, f
         setRotDegrees(&nodeMtx, nodeRot);
         prevRot = nodeRot;
         prevRot.scale(0.017453294f);
-        setRotDegrees(&rotMtx, Vec3f(0.0f, 0.0f, 0.0f));
+        setRotRadians(&rotMtx, Vec3f(0.0f, 0.0f, 0.0f));
         if (kind == 2) {
             if (useLr == true) {
                 fn_8003EBF4(&rotMtx, 0.017453292f * (length * (90.0f == posture.getRotYLr() ? -1.0f : 1.0f)));

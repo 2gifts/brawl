@@ -38,12 +38,16 @@ public:
     virtual void end();
     virtual void update(bool active);
     virtual bool isObserv(char group);
-    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, soAnimCmdEventS32 unk3);
 
     // Starts a turn driven by kinetic energy energyId (anim cmd 'l' 0 / 1).
     void start(int energyId, u32 rotNodeId, bool changeLr, float lr);
     // Reverses the facing and every valid kinetic energy except the first one.
     void updateSubReverseLr(emKineticModuleImpl* kinetic, soPostureModule* posture);
+#elif defined(SO_ANIM_CMD_EVENT_OBSERVER_PURE)
+    // The observer's slots are pure in such a unit (so/anim/so_anim_cmd_event_presenter.h): the overrides.
+    virtual bool isObserv(char group);
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, soAnimCmdEventS32 unk3);
 #endif
 };
 static_assert(sizeof(emTurnModuleImpl) == 0x4C, "Class is wrong size!");

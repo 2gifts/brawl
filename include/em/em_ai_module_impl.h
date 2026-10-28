@@ -69,7 +69,7 @@ public:
     emAIModuleImpl(soModuleAccesser* acc, emAIUnit* entries, void* aiData, int entryNum, int p5, int p6);
     ~emAIModuleImpl();
     virtual bool isObserv(char group);
-    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, soAnimCmdEventS32 unk3);
     // The module observes the attack events of its enemy (the base declares the handler pure).
     virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
