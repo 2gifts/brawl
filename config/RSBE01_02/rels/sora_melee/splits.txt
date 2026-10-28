@@ -153,6 +153,25 @@ mo_melee/sora_melee/so/ground/so_ground_shape_operator_cliff.cpp:
 mo_melee/sora_melee/so/ground/so_ground_util.cpp:
 	.text       start:0x00030EC8 end:0x000311F8
 
+mo_melee/sora_melee/so/ground/so_ground_tracer_impl.cpp:
+	.text       start:0x000311F8 end:0x0003513C
+	.rodata     start:0x00000450 end:0x00000478
+	.data       start:0x000031B8 end:0x00003260
+
+mo_melee/sora_melee/so/situation/so_situation_module_impl.cpp:
+	.text       start:0x0003513C end:0x00035C3C
+	.data       start:0x00003260 end:0x000033F8
+
+mo_melee/sora_melee/so/collision/so_collision_attack_part.cpp:
+	.text       start:0x00038550 end:0x00039590
+	.rodata     start:0x00000490 end:0x00000498
+	.data       start:0x00003418 end:0x00003680
+
+mo_melee/sora_melee/so/collision/so_collision_attack_module_impl.cpp:
+	.text       start:0x00039590 end:0x0004148C
+	.rodata     start:0x00000498 end:0x000004B8
+	.data       start:0x00003680 end:0x00003AD8
+
 mo_melee/sora_melee/so/so_vtable_dt_vec_8clTarget_6_41988.cpp:
 	.text       start:0x00041988 end:0x000419F0
 
@@ -328,6 +347,31 @@ mo_melee/sora_melee/so/so_heap_module_impl.cpp:
 mo_melee/sora_melee/so/so_module_accesser.cpp:
 	.text       start:0x0006821C end:0x000687F8
 	.data       start:0x00007898 end:0x000078D0
+
+mo_melee/sora_melee/so/shake/so_shake_module_simple.cpp:
+	.text       start:0x000687F8 end:0x00068888
+	.data       start:0x000078D0 end:0x00007940
+
+mo_melee/sora_melee/so/shake/so_shake_module_impl.cpp:
+	.text       start:0x00068888 end:0x000693F4
+	.rodata     start:0x00000928 end:0x00000930
+	.data       start:0x00007940 end:0x000079C8
+
+mo_melee/sora_melee/so/turn/so_turn_module_impl.cpp:
+	.text       start:0x000693F4 end:0x0006A244
+	.rodata     start:0x00000930 end:0x00000940
+	.data       start:0x000079C8 end:0x00007B40
+
+mo_melee/sora_melee/so/link/so_link_module_impl.cpp:
+	.text       start:0x0006A244 end:0x0006F30C
+	.rodata     start:0x00000940 end:0x00000968
+	.data       start:0x00007B40 end:0x00007FF8
+
+mo_melee/sora_melee/so/link/so_link_connection_server.cpp:
+	.text       start:0x0006F30C end:0x0006F850
+	.ctors      start:0x00000014 end:0x00000018
+	.data       start:0x00007FF8 end:0x00008028
+	.bss        start:0x00000100 end:0x00000120
 
 mo_melee/sora_melee/so/so_resource_module_impl.cpp:
 	.text       start:0x0006F850 end:0x0006FCF4
@@ -1221,6 +1265,28 @@ mo_melee/sora_melee/so/so_array_vector_abstract_independent_soInstanceUnit_soEve
 mo_melee/sora_melee/so/so_array_vector_thunks_33soInstanceUnit_P14soEventManager_500.cpp:
 	.text       start:0x00092EE0 end:0x00092F08
 
+mo_melee/sora_melee/so/article/so_generate_article_manage_module_impl.cpp:
+	.text       start:0x00092F10 end:0x0009747C
+	.rodata     start:0x00000C40 end:0x00000C58
+	.data       start:0x000142A8 end:0x00014490
+
+mo_melee/sora_melee/so/effect/so_effect_module_impl.cpp:
+	.text       start:0x0009747C end:0x0009FA44
+	.rodata     start:0x00000C58 end:0x00000CA8
+	.data       start:0x00014490 end:0x00015028
+	.bss        start:0x00002B70 end:0x00002B78
+
+mo_melee/sora_melee/so/effect/so_effect_continual.cpp:
+	.text       start:0x0009FA44 end:0x0009FB70
+	.rodata     start:0x00000CA8 end:0x00000CB0
+
+mo_melee/sora_melee/so/effect/so_effect_time.cpp:
+	.text       start:0x0009FB70 end:0x0009FC8C
+
+mo_melee/sora_melee/so/effect/so_effect_screen.cpp:
+	.text       start:0x0009FC8C end:0x000A068C
+	.rodata     start:0x00000CB0 end:0x00000CC0
+
 mo_melee/sora_melee/so/so_array_vector_destructor_efScreenHandle_1.cpp:
 	.text       start:0x000A0C34 end:0x000A0C74
 
@@ -1260,6 +1326,36 @@ mo_melee/sora_melee/so/anim/so_anim_cmd_interpreter_effect.cpp:
 
 mo_melee/sora_melee/so/so_work_manage_module_impl.cpp:
 	.text       start:0x000A1DA4 end:0x000A34D4
+
+mo_melee/sora_melee/so/area/so_area_module_impl.cpp:
+	.text       start:0x000A34D4 end:0x000A6948
+	.rodata     start:0x00000CE8 end:0x00000D18
+	.data       start:0x000155E0 end:0x00015780
+
+mo_melee/sora_melee/so/area/so_area_instance.cpp:
+	.text       start:0x000A6948 end:0x000A78C0
+	.rodata     start:0x00000D18 end:0x00000D28
+	.data       start:0x00015780 end:0x00015808
+
+mo_melee/sora_melee/so/area/so_area_enviroment_element_checker_impl.cpp:
+	.text       start:0x000A78C0 end:0x000A7CAC
+	.rodata     start:0x00000D28 end:0x00000D30
+	.data       start:0x00015808 end:0x00015898
+
+mo_melee/sora_melee/so/territory/so_territory_module_impl.cpp:
+	.text       start:0x000A7CAC end:0x000A9058
+	.rodata     start:0x00000D30 end:0x00000D40
+	.data       start:0x00015898 end:0x00015938
+
+mo_melee/sora_melee/so/so_target_search_unit.cpp:
+	.text       start:0x000A9058 end:0x000A9804
+	.rodata     start:0x00000D40 end:0x00000D60
+	.data       start:0x00015938 end:0x00015970
+
+mo_melee/sora_melee/so/so_target_search_module_impl.cpp:
+	.text       start:0x000A9804 end:0x000AA42C
+	.rodata     start:0x00000D60 end:0x00000D70
+	.data       start:0x00015970 end:0x00015A30
 
 mo_melee/sora_melee/so/so_array_vector_destructor_soGimmickEventObserver_12.cpp:
 	.text       start:0x000AA8E8 end:0x000AA928

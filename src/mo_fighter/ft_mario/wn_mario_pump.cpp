@@ -216,6 +216,8 @@ soArticle* wnMarioPumpMediator::generate(s32 articleId, soModuleAccesser* acc) {
     case 0: {
         wnArticleSlotTag tag;
         soArticleDeactivateChecker checker;
+        // MATCH-ONLY: retain the native predicate-search marker.
+        volatile u8 findTag = 0;
         wnMarioPumpWater* water = m_pools.find(checker);
         if (!water) {
             water = static_cast<wnMarioPumpWater*>(checker.getCandidate());

@@ -1,7 +1,7 @@
 // The weak copies of soAreaModuleImpl::getEnviromentElementChecker and setLogOverThrough are this unit's.
 #define SO_AREA_MODULE_INLINE_ACCESSORS
 // The constructor of soAreaEnviromentElementCheckerImpl is a function of sora_melee.
-#define SO_AREA_ENV_CHECKER_CTOR
+#define SO_AREA_ENVIROMENT_ELEMENT_CHECKER_IMPL_CT
 // MATCH-ONLY: only the situation observer's addObserver is a weak copy of this unit (the others are sora_melee's).
 #define SO_SITUATION_OBSERVER_INLINE
 #define SO_EVENT_OBSERVER_ADD_SUB_EXTERN
@@ -50,9 +50,6 @@ inline float Vec3f::length() {
 
 // Stand-ins for functions of sora_melee that the headers do not declare (module map: unnamed).
 extern "C" {
-// soAreaModuleImpl: the number of contact logs, and the contact log of an index.
-int fn_27_A4950(soAreaModuleImpl* area);
-soAreaContactLog* fn_27_A4964(soAreaModuleImpl* area, int index);
 // HYPOTHESIS: ftStatus predicates of a fighter status kind (the downed-and-waiting statuses, and holding a smash).
 bool fn_27_14D530(int statusKind);
 bool fn_27_14D550(int statusKind);
@@ -263,12 +260,12 @@ void emAreaModuleImpl::activate(int ownerId) {
 // HYPOTHESIS: the meaning of the kinds: 0-3 the fighters (the player's fighter and its sub fighter, player 1 then
 // player 2), 4 this enemy, 5 its parent, 6 and 7 anything.
 bool emAreaModuleImpl::checkArea(soModuleAccesser* acc, u32 area, u32 kind) {
-    int logNum = fn_27_A4950(this);
+    int logNum = getContactLogCount();
     if (logNum <= 0) {
         return false;
     }
     for (int i = 0; i < logNum; i++) {
-        soAreaContactLog* log = fn_27_A4964(this, i);
+        soAreaContactLog* log = getContactLog(i);
         if (area != log->m_area) {
             continue;
         }
@@ -1371,7 +1368,7 @@ bool emAreaModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* mod
 // Whether the water area (a group 13 area of this module) with the id is touching it (the general term decide module
 // asks it).
 bool emAreaModuleImpl::checkWaterArea(u32 areaId) {
-    int logNum = fn_27_A4950(this);
+    int logNum = getContactLogCount();
     if (logNum <= 0) {
         return false;
     }
@@ -1381,7 +1378,7 @@ bool emAreaModuleImpl::checkWaterArea(u32 areaId) {
         return false;
     }
     for (int i = 0; i < logNum; i++) {
-        if (areaId == fn_27_A4964(this, i)->m_area) {
+        if (areaId == getContactLog(i)->m_area) {
             return true;
         }
     }

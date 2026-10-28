@@ -18,6 +18,8 @@ class utList {
     utListNode* m_tail;
     u32 m_length;
     friend class utArchiveManager;
+    friend class soLinkModuleImpl;
+    friend class soLinkConnectionServer;
 public:
     /// Make node the new tail of the linked list
     void addTail(utListNode* node);
