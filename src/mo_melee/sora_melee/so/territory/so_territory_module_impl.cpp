@@ -1,3 +1,5 @@
+// The sora_melee unit has its own out-of-line accessors (see the header).
+#define SO_TERRITORY_MODULE_IMPL_OUT_OF_LINE
 #include <so/territory/so_territory_module_impl.h>
 #include <types.h>
 

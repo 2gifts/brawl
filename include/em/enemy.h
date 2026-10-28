@@ -262,6 +262,9 @@ protected:
     gfGameFrameCounter m_frameCounters[4];                             // 0x52E0
 
 public:
+    // The value accesser (em_value_accesser.cpp) reads these for its constant ids.
+    int getConnectedTriggerId() const { return m_connectedTriggerId; }
+    u32 getLevel() const { return m_level; }
 
     // The storage of the modules whose capacity depends on the enemy is owned by the derived class: the posture
     // interpolations, the area instances and their work, the target search units, the AI units (emInfo::getAINum of

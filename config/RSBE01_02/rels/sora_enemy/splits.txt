@@ -39,6 +39,13 @@ mo_enemy/sora_enemy/resource/em_resource_module_impl.cpp:
 	.text       start:0x0001F57C end:0x0001F82C
 	.data       start:0x00002C18 end:0x00002CF8
 
+mo_enemy/sora_enemy/em_value_accesser.cpp:
+	.text       start:0x00021424 end:0x00022C88
+	.ctors      start:0x00000014 end:0x00000018
+	.rodata     start:0x00000D40 end:0x00000D50
+	.data       start:0x00002DB0 end:0x00003190
+	.bss        start:0x000000A0 end:0x000000B8
+
 mo_enemy/sora_enemy/stop/em_stop_module_impl.cpp:
 	.text       start:0x00022C88 end:0x00022D94
 	.data       start:0x00003190 end:0x00003200
@@ -47,6 +54,14 @@ mo_enemy/sora_enemy/em_extend_param_accesser.cpp:
 	.text       start:0x00022D94 end:0x00022EE8
 	.data       start:0x00003200 end:0x00003280
 	.bss        start:0x000000B8 end:0x000001B0
+
+mo_enemy/sora_enemy/territory/em_territory_module_impl.cpp:
+	.text       start:0x00027780 end:0x000279B8
+	.data       start:0x000033B0 end:0x000034C8
+
+mo_enemy/sora_enemy/link/em_link_module_impl.cpp:
+	.text       start:0x000279B8 end:0x000285A8
+	.data       start:0x000034C8 end:0x000036B0
 
 mo_enemy/sora_enemy/em_external_value_accesser.cpp:
 	.text       start:0x000285A8 end:0x0002893C
@@ -85,6 +100,16 @@ mo_enemy/sora_enemy/collision/em_collision_hit_module_impl.cpp:
 	.text       start:0x0002B8FC end:0x0002BE04
 	.rodata     start:0x00000DD0 end:0x00000DF8
 	.data       start:0x00003C70 end:0x00003D88
+
+mo_enemy/sora_enemy/weapon/em_weapon_manager.cpp:
+	.text       start:0x0002BE04 end:0x0002CA6C
+	.rodata     start:0x00000DF8 end:0x00000E18
+	.data       start:0x00003D88 end:0x00003E20
+	.bss        start:0x000001C8 end:0x000001D0
+
+mo_enemy/sora_enemy/weapon/em_weapon_register.cpp:
+	.text       start:0x0002CA6C end:0x0002CF98
+	.data       start:0x00003E20 end:0x00003E38
 
 mo_enemy/sora_enemy/wnem/wn_em_resource_module_impl.cpp:
 	.text       start:0x0002CF98 end:0x0002D038
@@ -316,6 +341,43 @@ mo_enemy/sora_enemy/cataguard/em_cataguard_param_accesser.cpp:
 	.rodata     start:0x00000F70 end:0x00000F78
 	.data       start:0x0000E438 end:0x0000E4D8
 	.bss        start:0x00000458 end:0x00000470
+
+mo_enemy/sora_enemy/wnem/wnem_proc_common.cpp:
+	.text       start:0x00043F68 end:0x00044B80
+	.ctors      start:0x0000007C end:0x00000080
+	.rodata     start:0x00000F78 end:0x00000FA0
+	.data       start:0x0000E4D8 end:0x0000E628
+	.bss        start:0x00000470 end:0x00000488
+
+mo_enemy/sora_enemy/cataguard/wnem_proc_cataguard.cpp:
+	.text       start:0x00044B80 end:0x00045388
+	.rodata     start:0x00000FA0 end:0x00000FB8
+	.data       start:0x0000E628 end:0x0000E778
+
+mo_enemy/sora_enemy/wnem/wnem_proc_robo.cpp:
+	.text       start:0x00045388 end:0x00045918
+	.rodata     start:0x00000FB8 end:0x00000FC0
+	.data       start:0x0000E778 end:0x0000E8B0
+
+mo_enemy/sora_enemy/bosspackun/wnem_proc_bosspackun.cpp:
+	.text       start:0x00045918 end:0x00045CD4
+	.rodata     start:0x00000FC0 end:0x00000FD8
+	.data       start:0x0000E8B0 end:0x0000E8D8
+
+mo_enemy/sora_enemy/duon/wnem_proc_duon.cpp:
+	.text       start:0x00045CD4 end:0x00046850
+	.rodata     start:0x00000FD8 end:0x00000FE0
+	.data       start:0x0000E8D8 end:0x0000EA90
+
+mo_enemy/sora_enemy/porky/wnem_proc_porky.cpp:
+	.text       start:0x00046850 end:0x000470B0
+	.rodata     start:0x00000FE0 end:0x00001010
+	.data       start:0x0000EA90 end:0x0000EBB8
+
+mo_enemy/sora_enemy/bombhead/wnem_proc_bombhead.cpp:
+	.text       start:0x000470B0 end:0x000473DC
+	.rodata     start:0x00001010 end:0x00001018
+	.data       start:0x0000EBB8 end:0x0000ECC8
 
 mo_enemy/sora_enemy/gyraan/wnem_proc_gyraan.cpp:
 	.text       start:0x00047FB4 end:0x0004833C
@@ -727,6 +789,11 @@ mo_enemy/sora_enemy/crazyhand/em_crazyhand_param_accesser.cpp:
 	.rodata     start:0x000011C8 end:0x000011D0
 	.data       start:0x0001FD68 end:0x0001FE48
 	.bss        start:0x00000848 end:0x00000860
+
+mo_enemy/sora_enemy/crazyhand/wnem_proc_crazyhand.cpp:
+	.text       start:0x0006B5F4 end:0x0006B760
+	.rodata     start:0x000011D0 end:0x000011D4
+	.data       start:0x0001FE48 end:0x0001FE78
 
 mo_enemy/mo_enemy.cpp:
 	.text       start:0x0006B760 end:0x0006B7FC

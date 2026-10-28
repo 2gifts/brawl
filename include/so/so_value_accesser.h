@@ -168,7 +168,13 @@ public:
     soValueAccesser(int variation);
     int m_variation;
 
+#ifdef SO_VALUE_ACCESSER_EXTEND_PARAM_TAKES_ACCESSER
+    // Opt-in (the enemy's value accesser): the enemy override reads the module accesser it is handed (r4).
+    // HYPOTHESIS: every accesser's slot takes it; the other overrides do not read it, so they keep the old declaration.
+    virtual soParamAccesser* getExtendParamAccesser(soModuleAccesser* moduleAccesser);
+#else
     virtual soParamAccesser* getExtendParamAccesser();
+#endif
     virtual ~soValueAccesser();
     virtual float getVariableFloatCore(soModuleAccesser* moduleAccesser, u32, u32 = 0);
     virtual int getVariableIntCore(soModuleAccesser* moduleAccesser, u32, u32 = 0);
