@@ -350,12 +350,18 @@ bool ftMario::activeArticle1(wnMarioMantle* weapon, soModuleAccesser* acc) {
 }
 
 // The Pump starts with the model resource of the fighter.
-bool ftMario::activeArticle2(wnMarioPump* weapon, soModuleAccesser* acc) {
+// HYPOTHESIS: original helper spelling.
+// MATCH-ONLY: the inline helper retains the native callback's argument lifetimes.
+static inline bool activatePump(wnMarioPump* weapon, soModuleAccesser* acc) {
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = acc->getStageObject().m_taskId;
     weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getMdlResId(), fighter.getOwner()->getTeam(), resources.getResourceIdAccesser()->getEtcResId());
     return true;
+}
+
+bool ftMario::activeArticle2(wnMarioPump* weapon, soModuleAccesser* acc) {
+    return activatePump(weapon, acc);
 }
 
 // The Final Smash flame starts at the stage object of the fighter with its team and the facing.
