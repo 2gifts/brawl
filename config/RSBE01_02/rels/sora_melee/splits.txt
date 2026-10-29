@@ -223,6 +223,31 @@ mo_melee/sora_melee/so/so_collision_shield_part.cpp:
 	.text       start:0x00046588 end:0x00046A74
 	.rodata     start:0x000004C8 end:0x000004E0
 
+mo_melee/sora_melee/so/collision/so_collision_shield_group.cpp:
+	.text       start:0x00046A74 end:0x00047220
+	.rodata     start:0x000004E0 end:0x000004E8
+
+mo_melee/sora_melee/so/collision/so_collision_shield_event_presenter_shield.cpp:
+	.text       start:0x00047220 end:0x00047B00
+	.data       start:0x00003F88 end:0x000040C8
+
+mo_melee/sora_melee/so/collision/so_collision_shield_event_presenter_reflector.cpp:
+	.text       start:0x00047B00 end:0x0004839C
+	.data       start:0x000040C8 end:0x000041D8
+
+mo_melee/sora_melee/so/collision/so_collision_shield_event_presenter_absorber.cpp:
+	.text       start:0x0004839C end:0x00048A1C
+	.data       start:0x000041D8 end:0x000042E8
+
+mo_melee/sora_melee/so/collision/so_collision_shield_module_impl.cpp:
+	.text       start:0x00048A1C end:0x0004AC40
+	.rodata     start:0x000004E8 end:0x000004F8
+	.data       start:0x000042E8 end:0x00004510
+
+mo_melee/sora_melee/so/collision/so_collision_catch_part.cpp:
+	.text       start:0x0004AC40 end:0x0004B184
+	.rodata     start:0x000004F8 end:0x00000508
+
 mo_melee/sora_melee/so/so_array_vector_accessors_soCollisionGroup_1.cpp:
 	.text       start:0x0004CB08 end:0x0004CBD0
 
