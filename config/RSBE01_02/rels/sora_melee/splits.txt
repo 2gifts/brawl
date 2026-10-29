@@ -353,6 +353,32 @@ mo_melee/sora_melee/so/so_array_vector_thunks_50soInstanceUnitFullProperty_P19so
 mo_melee/sora_melee/so/so_instance_manager_thunks_Vector_soTeamEventObserver_255.cpp:
 	.text       start:0x0005585C end:0x00055874
 
+mo_melee/sora_melee/so/collision/so_collision_util.cpp:
+	.text       start:0x00055874 end:0x00055F2C
+	.rodata     start:0x00000550 end:0x00000558
+
+mo_melee/sora_melee/so/collision/so_collision_log_group_share_module.cpp:
+	.text       start:0x00055F2C end:0x000561E0
+	.data       start:0x000057E8 end:0x00005820
+
+mo_melee/sora_melee/so/sound/so_sound_module_impl.cpp:
+	.text       start:0x000561E0 end:0x00057C88
+	.rodata     start:0x00000558 end:0x00000730
+	.data       start:0x00005820 end:0x00005B48
+
+mo_melee/sora_melee/so/sound/so_sound_manager.cpp:
+	.text       start:0x00057C88 end:0x00057EC4
+	.ctors      start:0x00000010 end:0x00000014
+	.data       start:0x00005B48 end:0x00005B98
+	.bss        start:0x000000C0 end:0x000000E8
+
+mo_melee/sora_melee/so/sound/so_sound_3d_generator_accesser_impl.cpp:
+	.text       start:0x00057EC4 end:0x00058120
+	.data       start:0x00005B98 end:0x00005C10
+
+mo_melee/sora_melee/so/sound/so_sound_util.cpp:
+	.text       start:0x00058120 end:0x00058264
+
 mo_melee/sora_melee/so/controller/so_controller_module_impl.cpp:
 	.text       start:0x00058264 end:0x000598CC
 	.rodata     start:0x00000730 end:0x00000748

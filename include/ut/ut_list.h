@@ -20,6 +20,7 @@ class utList {
     friend class utArchiveManager;
     friend class soLinkModuleImpl;
     friend class soLinkConnectionServer;
+    friend class soSoundManager;
 public:
     /// Make node the new tail of the linked list
     void addTail(utListNode* node);

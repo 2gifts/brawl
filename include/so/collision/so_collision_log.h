@@ -28,7 +28,7 @@ public:
     char _38;
     bool m_isAbsolute;
     char _40;
-    char _41;
+    bool _41; // HYPOTHESIS: a flag (soSoundModuleImpl tests it against true)
     char _42;
     char _43[1];
 

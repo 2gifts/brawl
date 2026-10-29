@@ -255,8 +255,14 @@ struct soCollisionAttackData {
 #else
             Attribute m_attribute : 5;     // up to 0x1f
 #endif
+#ifdef SO_COLLISION_ATTACK_DATA_SOUND_WORD_FIELDS
+            // MATCH-ONLY (opt-in, the so sound module unit): read unsigned from the word, as that unit's original does.
+            u32 m_soundLevel : 2;
+            u32 m_soundAttribute : 5;
+#else
             SoundLevel m_soundLevel : 2; // up to 0x3
             SoundAttribute m_soundAttribute : 5;   // up to 0x1f
+#endif
             SetOffKind m_setOffKind : 2; // up to 0x3
             bool m_noScale : 1;
             bool m_isShieldable : 1;
