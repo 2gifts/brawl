@@ -46,6 +46,6 @@ public:
     virtual int get(u32);
 
     virtual bool isObserv(char unk1);
-    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, soAnimCmdEventS32 unk3);
 };
 static_assert(sizeof(soVisibilityModuleSimple) == 0x14, "Class is wrong size!");

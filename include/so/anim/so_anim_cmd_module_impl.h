@@ -215,6 +215,11 @@ public:
 private:
 #endif
 public:
+#ifdef SO_ANIM_CMD_EVENT_OBSERVER_PURE
+    // The observer's slots are pure in such a unit (so/anim/so_anim_cmd_event_presenter.h): the overrides.
+    virtual bool isObserv(char group);
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, soAnimCmdEventS32 unk3);
+#endif
     soInstanceManagerFullPropertyVector<soAnimCmdControlUnit, soAnimCmdControlUnitKind::Count>* m_animCmdThreads; // 0x20
 };
 static_assert(sizeof(soAnimCmdModuleImpl) == 0x24, "Class is the wrong size!");

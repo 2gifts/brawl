@@ -196,6 +196,9 @@ struct soCollisionAttackData {
     float m_slipChance;       // trip chance
     float m_hitStopFrame;  // hitstop multiplier
     float m_hitStopDelay;  // sdi multiplier
+// Opt-in (the enemy damage unit): the bitfields are plain members, without the union and its unnamed twin. A copy of the
+// attack data then moves the four bitfield words one by one, as emDamageModuleImpl::reqCommonEffect's original does.
+#ifndef SO_COLLISION_ATTACK_DATA_PLAIN_BITFIELDS
     union {
         struct {
             unsigned int : 9;    // up to 0x1ff
@@ -244,6 +247,7 @@ struct soCollisionAttackData {
         };
 
         struct {
+#endif
             unsigned int m_nodeIndex : 9;                     // up to 0x1ff
             soCollision::CategoryMask m_targetCategory : 10;            // up to 0x3ff;
             soCollision::SituationMask m_targetSituation : 3;            // up to 0x7
@@ -288,13 +292,19 @@ struct soCollisionAttackData {
             bool m_noTeam : 1;    // friendly fire
             bool m_noHitStop : 1;    // no hitlag
             bool m_noEffect : 1; // disable gfx on hit
+#ifdef SO_COLLISION_ATTACK_DATA_WORD_FIELDS
+            u32 m_noTransaction : 1; // flinchless (the enemy damage unit reads it from the word)
+#else
             bool m_noTransaction : 1; // flinchless
+#endif
             Region m_region : 5; // up to 0x1f;
             soCollision::ShapeType m_shapeType : 1;
             bool m_isDeath100 : 1; // custom
             unsigned int field_0x3c_2 : 30; // ~up to 0x3fffffff
+#ifndef SO_COLLISION_ATTACK_DATA_PLAIN_BITFIELDS
         };
     };
+#endif
 
     // MATCH-ONLY: same default initialization, with the 1.0f value supplied
     // from the caller's original constant pool.

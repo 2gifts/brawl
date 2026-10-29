@@ -86,6 +86,10 @@ public:
     virtual void setDynamicArticleMediator(soArticleMediator* mediator);
     virtual void setAutoRecycle(bool);
     virtual bool isObserv(char unk1);
+#ifdef SO_ANIM_CMD_EVENT_OBSERVER_PURE
+    // The observer's slots are pure in such a unit (so/anim/so_anim_cmd_event_presenter.h): the override.
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, soAnimCmdEventS32 unk3);
+#endif
     virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObject, int unk4);
 };
 static_assert(sizeof(soGenerateArticleManageModuleImpl) == 0x3c, "Article module layout is wrong!");

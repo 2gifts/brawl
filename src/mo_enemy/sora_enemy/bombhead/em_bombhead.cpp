@@ -17,13 +17,7 @@ SO_ARTICLE_MEDIATOR_POOL_1_FIRST(emBombheadArticleMediator)
 // and the template instances of em/em_article_mediator.h (with one instance per pool, the instance holders'
 // constructors are inlined into the Bombhead's).
 
-// The shared shot helpers of the enemy activators are declared in em/em_shot.h; this one is used only here so far.
-extern "C" {
-// Sets the launch velocity and acceleration of the shot in the shot work from a random speed of its description and
-// the given angle (degrees); the x components are scaled by the facing of the enemy when the flag is set (the same
-// computation as the Popperam's inline one, see popperam/em_popperam.cpp).
-void fn_41_47B4C(emShotParam* param, soModuleAccesser* acc, bool faceLr, float angle);
-}
+// The shared shot helpers of the enemy activators are declared in em/em_shot.h.
 
 // HYPOTHESIS: the launch angle (degrees) of the wnemSwHolder shot, left in the work floats by the Bombhead's AI or
 // status code.
@@ -45,21 +39,24 @@ emBombhead::~emBombhead() { }
 
 // The wnemSwHolder shot is thrown at the angle the shot work float holds.
 bool emBombhead::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
-    fn_41_47B4C(param, moduleAccesser, true, moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotAngle));
-    fn_41_47D8C(&pos, flag.m_value, article, param, moduleAccesser);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
+    emWeaponUtil::calcWeaponStartVector_AimingTarget(param, moduleAccesser, true,
+            moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotAngle));
+    emWeaponUtil::activeSimpleWeaponHolder(&pos, flag.m_value, article, param, moduleAccesser);
     return false;
 }
 
 bool emBombhead::activeArticle1(wnemSimple* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
-    fn_41_47A2C(param, moduleAccesser, true);
-    fn_41_47E80(&pos, flag.m_value, article, param, moduleAccesser);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
+    emWeaponUtil::calcWeaponStartVector_Basic(param, moduleAccesser, true);
+    emWeaponUtil::activeSimpleWeapon(&pos, flag.m_value, article, param, moduleAccesser);
     return false;
 }

@@ -100,7 +100,7 @@ bool emAroaros::emItemInformationReturnEnemy(int instanceId) {
     speed.m_x = item->getParamFloat(0x16);
     speed.m_y = item->getParamFloat(0x17);
     float facing = moduleAccesser.getPostureModule().getLr();
-    float angle = emKineticModuleImpl::getKineticAngleFromSpeed(speed, facing);
+    float angle = emKineticModuleImpl::getKineticAngleFromSpeed(facing, speed);
     moduleAccesser.getWorkManageModule().setFloat(angle, WorkFloat_KineticAngle);
     return true;
 }

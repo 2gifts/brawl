@@ -1,5 +1,6 @@
 #define SO_LINK_MODULE_IMPL_FULL
 #include <so/link/so_link_module_impl.h>
+#include <so/item/so_item_manage_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/stageobject.h>
 #include <types.h>

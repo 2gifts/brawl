@@ -427,7 +427,7 @@ void soDamageTransactorActor::setupDamageStatusNoReaction(soModuleAccesser* modu
 void soDamageTransactorActor::setupDamageFlyRollStatus(float angle, float speed, soModuleAccesser* moduleAccesser, soDamageLog* damageLog) {
     Vec2f vec(speed, 0.0f);
     Vec2f rotated;
-    vec.rot(&rotated, angle * 0.017453292f);
+    vec.rot(angle * 0.017453292f, &rotated);
     float reaction = speed / soValueAccesser::getConstantFloat(moduleAccesser, 2010, 0);
     float frame = reaction * soValueAccesser::getConstantFloat(moduleAccesser, 2002, 0);
     damageLog->m_reaction = reaction;

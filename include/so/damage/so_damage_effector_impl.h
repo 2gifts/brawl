@@ -28,10 +28,12 @@ class soDamageEffector : private soNull, public soNullable {
 class soDamageEffector : public soNull, public soNullable {
 #endif
 public:
-#ifdef WN_WEAPON_BUILDER
+// SO_DAMAGE_EFFECTOR_OUTLINE_DTOR (opt-in): the same constructor and out-of-line destructor as the weapon builder's, for
+// a unit that is no weapon builder (the sora_enemy damage module, which embeds an effector).
+#if defined(WN_WEAPON_BUILDER) || defined(SO_DAMAGE_EFFECTOR_OUTLINE_DTOR)
     soDamageEffector() : soNullable(false) { }
 #endif
-#ifdef WN_WEAPON_BUILDER
+#if defined(WN_WEAPON_BUILDER) || defined(SO_DAMAGE_EFFECTOR_OUTLINE_DTOR)
     // MATCH-ONLY: not inlined into the derived destructor (weak copy in the article units).
     virtual ~soDamageEffector() __attribute__((never_inline)) { }
 #else

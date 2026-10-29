@@ -31,14 +31,15 @@ emBotron::~emBotron() { }
 // ---- the activator --------------------------------------------------------------------------------------------------
 
 bool emBotron::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
-    lbl_41_bss_504.m_randomAngle = 90.0f * randf();
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
+    lbl_41_bss_504.m_rotation.m_y = 90.0f * randf();
     s32 constantId = moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotConstantId);
     if (constantId > ConstantId_CommonLast) {
         lbl_41_bss_504.m_constantParam = soValueAccesser::getConstantIndefinite(moduleAccesser, constantId, 0);
     }
-    fn_41_47A2C(param, moduleAccesser, true);
-    fn_41_47D8C(&pos, false, article, param, moduleAccesser);
+    emWeaponUtil::calcWeaponStartVector_Basic(param, moduleAccesser, true);
+    emWeaponUtil::activeSimpleWeaponHolder(&pos, false, article, param, moduleAccesser);
     return false;
 }

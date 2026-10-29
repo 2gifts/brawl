@@ -30,16 +30,17 @@ emRayquaza::~emRayquaza() { }
 // ---- the activator --------------------------------------------------------------------------------------------------
 
 bool emRayquaza::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
     // HYPOTHESIS: shot kinds 0 and 3 are the shots that appear at the target point (the AI's aim), not at the mouth.
     if (param->m_shotKind == 0 || param->m_shotKind == 3) {
         pos.m_x = moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotTargetX);
         pos.m_y = moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotTargetY);
     }
-    fn_41_47A2C(param, moduleAccesser, true);
-    fn_41_47D8C(&pos, flag.m_value, article, param, moduleAccesser);
+    emWeaponUtil::calcWeaponStartVector_Basic(param, moduleAccesser, true);
+    emWeaponUtil::activeSimpleWeaponHolder(&pos, flag.m_value, article, param, moduleAccesser);
     return false;
 }

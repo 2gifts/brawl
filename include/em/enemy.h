@@ -17,6 +17,7 @@
 
 // ft_dol_array_list.h must come before any header that instantiates one of its arrays.
 #include <em/em_enemy_modules.h>
+#include <it/it_create.h> // itKind (emShootItem)
 #include <StaticAssert.h>
 #include <em/ai/em_ai_unit.h>
 #include <em/em_ai_module_impl.h>

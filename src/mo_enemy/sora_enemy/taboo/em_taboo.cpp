@@ -46,10 +46,11 @@ emTaboo::~emTaboo() { }
 // ---- the activator --------------------------------------------------------------------------------------------------
 
 bool emTaboo::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
     if (param->m_shotKind == 3) {
         if (!moduleAccesser->getWorkManageModule().isFlag(WorkFlag_ShotNoOffset)) {
             pos.m_x = moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotTargetX);
@@ -78,8 +79,8 @@ bool emTaboo::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAcces
         moduleAccesser->getWorkManageModule().setFloat(pos.m_x, WorkFloat_ShotTargetX);
         moduleAccesser->getWorkManageModule().setFloat(pos.m_y, WorkFloat_ShotTargetY);
     }
-    fn_41_47A2C(param, moduleAccesser, true);
-    fn_41_47D8C(&pos, flag.m_value, article, param, moduleAccesser);
+    emWeaponUtil::calcWeaponStartVector_Basic(param, moduleAccesser, true);
+    emWeaponUtil::activeSimpleWeaponHolder(&pos, flag.m_value, article, param, moduleAccesser);
     return false;
 }
 

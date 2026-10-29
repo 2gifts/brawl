@@ -20,13 +20,7 @@
 // an out-of-class getInstanceAt puts the functor first but orders the copies by class completion (0, 1, 2), the same
 // list that lays out the pools' RTTI and vtables in .data, so it cannot be reordered without moving .data.
 
-// The shared shot helpers of the enemy activators are declared in em/em_shot.h; this one is used only here and by the
-// Bombhead so far (em_bombhead.cpp).
-extern "C" {
-// Sets the launch velocity and acceleration of the shot in the shot work from a random speed of its description and
-// the given angle (degrees); the x components are scaled by the facing of the enemy when the flag is set.
-void fn_41_47B4C(emShotParam* param, soModuleAccesser* acc, bool faceLr, float angle);
-}
+// The shared shot helpers of the enemy activators are declared in em/em_shot.h.
 
 // HYPOTHESIS: the launch angle (degrees) of a thrown shot, left in the work floats by the AI or status code (the
 // Bombhead reads the same float).
@@ -48,17 +42,19 @@ emCataguard::~emCataguard() { }
 
 // HYPOTHESIS: shot kind 4 is the thrown shot; the others fly from the launch position along the shot description.
 bool emCataguard::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
     if (param->m_shotKind == 4) {
-        fn_41_47B4C(param, moduleAccesser, true, moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotAngle));
+        emWeaponUtil::calcWeaponStartVector_AimingTarget(param, moduleAccesser, true,
+                moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotAngle));
     } else {
         // The launch position is computed a second time and dropped.
-        fn_41_47470(param, moduleAccesser);
+        emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     }
-    fn_41_47D8C(&pos, flag.m_value, article, param, moduleAccesser);
+    emWeaponUtil::activeSimpleWeaponHolder(&pos, flag.m_value, article, param, moduleAccesser);
     if (param->m_shotKind == 4) {
         return true;
     }

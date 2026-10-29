@@ -16,6 +16,12 @@ class soSet {
 public:
     soSet() { }
     soSet(T* elements, u32 size) : m_elements(elements), m_size(size) { }
+    // MATCH-ONLY: writes the size before the elements, as emAreaModuleImpl's constructor does (a copy of a soSet
+    // temporary writes the elements first).
+    void set(T* elements, u32 size) {
+        m_size = size;
+        m_elements = elements;
+    }
 
     T* elements() {
         return m_elements;

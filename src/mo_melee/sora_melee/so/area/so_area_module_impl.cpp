@@ -90,7 +90,7 @@ u32 soAreaModuleImpl::getAreaContactCount(int areaId) {
     u32 count = 0;
     int num = m_areaContactLogArray->size();
     for (int i = 0; i < num; i++) {
-        if (areaId == m_areaContactLogArray->at(i).m_areaId) {
+        if (areaId == m_areaContactLogArray->at(i).m_area) {
             count++;
         }
     }
@@ -104,7 +104,7 @@ soAreaContactLog* soAreaModuleImpl::getAreaContactLog(int areaId, int index) {
     int count = 0;
     int num = m_areaContactLogArray->size();
     for (int i = 0; i < num; i++) {
-        if (areaId == m_areaContactLogArray->at(i).m_areaId) {
+        if (areaId == m_areaContactLogArray->at(i).m_area) {
             if (count == index) {
                 return &m_areaContactLogArray->at(i);
             }

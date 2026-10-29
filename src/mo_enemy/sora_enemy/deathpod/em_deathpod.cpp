@@ -28,8 +28,9 @@ emDeathpod::~emDeathpod() { }
 // ---- the activator --------------------------------------------------------------------------------------------------
 
 bool emDeathpod::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     // The shot flies along a model vector of its node: the one selected by 3 from the second launch point, by 2 otherwise.
     u32 nodeId = lbl_41_bss_504.m_nodeId;
     if (nodeId == Deathpod_ShotNodeAlt) {
@@ -37,6 +38,6 @@ bool emDeathpod::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAc
     } else {
         emWeaponUtil::calcWeaponForwordVector(nodeId, param, moduleAccesser, true, 2);
     }
-    fn_41_47D8C(&pos, false, article, param, moduleAccesser);
+    emWeaponUtil::activeSimpleWeaponHolder(&pos, false, article, param, moduleAccesser);
     return false;
 }

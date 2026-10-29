@@ -39,14 +39,6 @@ extern "C" {
 void fn_41_31B34(wnemSimple* wn);
 }
 
-// MATCH-ONLY: every original caller of Vec2f::rot (here, the Yoshi and Wario fighter articles, two more sora_enemy
-// units) evaluates the angle before the output vector, so the native declaration likely takes the angle first,
-// rot(float, Vec2f*); the ABI is the same (r3 this, r4 out, f1 angle). mt/mt_vector.h declares rot(Vec2f*, float),
-// so this unit calls the same symbol through a declaration in native argument order, as
-// ft_wario_status_uniq_process_special_s_escape.cpp does.
-#define rotVec2f rot__5Vec2fFP5Vec2ff
-extern "C" void rotVec2f(Vec2f* self, float angle, Vec2f* out);
-
 // The lance's parameters (wnemSimple::unk2234). HYPOTHESIS: roles from the reads below.
 struct wnemCataguardLanceParam {
     float m_fallRotX;   // 0x0, added to the lance's tilt when it starts to fall
@@ -187,9 +179,9 @@ void wnemCataguardProc::HelmBullet(wnemSimple* wn, soModuleAccesser* acc) {
         dir.m_x *= speed;
         dir.m_y *= speed;
         if (wn->m_linkId == 1) {
-            rotVec2f(&dir, 0.017453292f * -angle, &dir);
+            dir.rot(0.017453292f * -angle, &dir);
         } else if (wn->m_linkId == 2) {
-            rotVec2f(&dir, 0.017453292f * angle, &dir);
+            dir.rot(0.017453292f * angle, &dir);
         }
         s32* bounceCount = &wn->m_intParams.at(0);
         *bounceCount = 0;

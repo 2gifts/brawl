@@ -27,6 +27,9 @@ public:
     int unk4;        // 0x4 the area index
     emAIInfo() : m_unitIndex(-2), unk4(-1) { }
     ~emAIInfo() { }
+    // Module map name (emGeneralTermDisideModuleImpl's range): true when there is no unit or area, or the area has no
+    // target any more.
+    bool isInvalid(soModuleAccesser* acc);
 };
 static_assert(sizeof(emAIInfo) == 8, "Class is wrong size!");
 
@@ -66,7 +69,7 @@ public:
     emAIModuleImpl(soModuleAccesser* acc, emAIUnit* entries, void* aiData, int entryNum, int p5, int p6);
     ~emAIModuleImpl();
     virtual bool isObserv(char group);
-    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, soAnimCmdEventS32 unk3);
     // The module observes the attack events of its enemy (the base declares the handler pure).
     virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);

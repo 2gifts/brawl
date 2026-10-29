@@ -40,8 +40,9 @@ emPopperam::~emPopperam() { }
 // The activator throws the shot at a random speed and angle (degrees) of its description, with an acceleration of
 // the shot's m_accel along the same direction, and leaves both vectors in the shot work for the launch.
 bool emPopperam::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     // The direction of the shot (cos, sin) in the xy plane.
     Vec3f dir;
     mtSinCosf(0.017453292f * Enemy::getValueRndFloat(param->m_angleRange, moduleAccesser), &dir.m_y, &dir.m_x);
@@ -55,7 +56,7 @@ bool emPopperam::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAc
     lbl_41_bss_504.m_speedX *= lr;
     lbl_41_bss_504.m_accelX *= lr;
     // Unlike the shared activator, the flag of the shot description is not read (always false).
-    fn_41_47D8C(&pos, false, article, param, moduleAccesser);
+    emWeaponUtil::activeSimpleWeaponHolder(&pos, false, article, param, moduleAccesser);
     return false;
 }
 

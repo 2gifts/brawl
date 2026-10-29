@@ -87,7 +87,7 @@ public:
     virtual void mulAccel(Vec3f* accel);
     virtual void reflectSpeed(Vec3f* speed);
     virtual void reflectAccel(Vec3f* accel);
-#ifdef WN_WEAPON_BUILDER // inline in the article RELs (weak copies)
+#if defined(WN_WEAPON_BUILDER) || defined(SO_KINETIC_ENERGY_INLINE_VIRTUALS) // inline in the article / enemy RELs (weak copies)
     virtual void onConsiderGroundFriction() { }
     virtual void offConsiderGroundFriction() { }
 #else
@@ -96,13 +96,16 @@ public:
 #endif
 #ifdef FT_MODULE_BUILDER
     virtual ~soKineticEnergy(); // MATCH-ONLY: out of line in the fighter RELs (ft_builder_noinline.h)
+#elif defined(SO_KINETIC_ENERGY_DTOR_NEVER_INLINE)
+    // MATCH-ONLY: the enemy kinetic units call this destructor out of line (a weak copy of the module unit).
+    virtual ~soKineticEnergy() __attribute__((never_inline)) { }
 #else
     virtual ~soKineticEnergy() { }
 #endif
 };
 static_assert(sizeof(soKineticEnergy) == 8, "Class is wrong size!");
 
-#ifdef FT_MODULE_BUILDER
+#if defined(FT_MODULE_BUILDER) || defined(SO_KINETIC_ENERGY_INLINE_VIRTUALS)
 // The default 3D view preserves planar speed and supplies zero depth speed.
 inline Vec3f soKineticEnergy::getSpeed3f() {
     return Vec3f(getSpeed(), 0.0f);

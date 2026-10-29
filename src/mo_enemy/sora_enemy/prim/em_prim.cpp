@@ -11,6 +11,10 @@
 #include <so/so_external_value_accesser.h>
 #include <so/so_value_accesser.h>
 
+// MATCH-ONLY: names the wnemSwHolder pool's getInstanceAt first, so its weak copy comes out before the wnemSimple
+// pool's as in the original (see SO_ARTICLE_MEDIATOR_POOL_1_FIRST in em/em_article_mediator.h).
+SO_ARTICLE_MEDIATOR_POOL_1_FIRST(emPrimArticleMediator)
+
 // The Primid: an Enemy with two wnemSimple shots and six wnemSwHolder articles. The variants (metal, big, boomerang,
 // fire, super scope, sword) share this class; only the boomerang Primid does extra work in the code below.
 
@@ -31,47 +35,46 @@ emPrim::~emPrim() { }
 // ---- the activators -------------------------------------------------------------------------------------------------
 
 bool emPrim::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
     Enemy& enemy = dynamic_cast<Enemy&>(*moduleAccesser->m_stageObject);
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
     if (enemy.getEnemyKind() == Enemy_Prim_Boomerang) {
         if (param->m_shotKind == 1 || param->m_shotKind == 2) {
             lbl_41_bss_504.m_unk6 = false;
             emWeaponUtil::calcWeaponRotation(lbl_41_bss_504.m_nodeId, param, moduleAccesser, false, 0);
         }
     }
-    fn_41_47A2C(param, moduleAccesser, true);
-    fn_41_47D8C(&pos, flag.m_value, article, param, moduleAccesser);
+    emWeaponUtil::calcWeaponStartVector_Basic(param, moduleAccesser, true);
+    emWeaponUtil::activeSimpleWeaponHolder(&pos, flag.m_value, article, param, moduleAccesser);
     return false;
 }
 
-// TODO(nonmatching): 98.4%, (d) register allocation only: the same 97 instructions, calls, constants, branches and
-// value lifetimes; only the coloring order differs (the original colors the owner above the module accesser and the
-// posture module below it, ours colors the accesser second and the branch locals in declaration order). Hoisting
-// the branch locals, a pointer instead of the reference, a switch, an early return, named float arguments and an
-// inline helper for the plain-shot branch (six parameter orders) all keep the original's order out of reach.
-// The branch is the body of emWeaponUtil::activeSimpleWeapon (fn_41_47E80) with getExtendBrresResourceID in place
-// of getSimpleWeaponResourceID; that function colors its locals in the same order the original does here.
+// Fires the shot: the plain shot (kind 4) is launched as emWeaponUtil::activeSimpleWeapon launches it, with the
+// extended resource of the Primid in place of the weapon's resource id.
 bool emPrim::activeArticle1(wnemSimple* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    // MATCH-ONLY: the task id declared ahead of everything else gives the original's register order (as in
+    // emWeaponUtil::activeSimpleWeapon, whose launch the plain shot repeats with the extended resource).
+    int founderTaskId;
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
     Enemy& enemy = dynamic_cast<Enemy&>(*moduleAccesser->m_stageObject);
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
-    fn_41_47A2C(param, moduleAccesser, true);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
+    emWeaponUtil::calcWeaponStartVector_Basic(param, moduleAccesser, true);
     if (param->m_shotKind == 4) {
         int ownerId = enemy.getExtendBrresResourceID();
         StageObject* owner = moduleAccesser->m_stageObject;
         soPostureModule& posture = moduleAccesser->getPostureModule();
-        int founderTaskId = owner->m_taskId;
-        u32 life = soValueAccesser::getValueFloat(moduleAccesser, ValueFloat_LevelScale, 0);
-        int team = soExternalValueAccesser::getTeamNo(owner);
-        fn_41_3091C(article, &lbl_41_bss_504, founderTaskId, ownerId, 0, flag.m_value, &pos, team, posture.getLr(),
-                    param->m_speed, -1, life, -1);
+        founderTaskId = owner->m_taskId;
+        fn_41_3091C(article, &lbl_41_bss_504, founderTaskId, ownerId, 0, flag.m_value, &pos, posture.getLr(),
+                    soExternalValueAccesser::getTeamNo(owner), param->m_speed, -1,
+                    soValueAccesser::getValueFloat(moduleAccesser, ValueFloat_LevelScale, 0), -1);
     } else {
-        fn_41_47E80(&pos, flag.m_value, article, param, moduleAccesser);
+        emWeaponUtil::activeSimpleWeapon(&pos, flag.m_value, article, param, moduleAccesser);
     }
     return false;
 }

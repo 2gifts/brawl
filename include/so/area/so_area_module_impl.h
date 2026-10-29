@@ -1,4 +1,7 @@
 // Local BrawlHeaders shadow: soAreaModuleImpl log flag and contact-log accessors recovered from so_area_module_impl.o (sora_melee)
+// Also what the enemy area module (mo_enemy/sora_enemy/area/em_area_module_impl.cpp) shows of the class: the
+// constructor (out of line in sora_melee), the byte fields of soAreaData, the fields of soAreaContactLog, and the two
+// accessors that are inline there (opt-in: SO_AREA_MODULE_INLINE_ACCESSORS).
 #pragma once
 
 #include <StaticAssert.h>
@@ -16,6 +19,7 @@
 #include <types.h>
 
 class soModuleAccesser;
+class soEventObserverRegistrationDesc;
 
 struct soAreaData {
     typedef u16 ShapeMask;
@@ -39,8 +43,9 @@ struct soAreaData {
         Category_Weapon = 0x4,
     };
 
-    soAreaInstance::ShapeType m_shapeType : 8;
-    gfArea::Group m_group : 8;
+    // Plain bytes: the enemy area module reads and writes them with lbz / stb (an enum bit field takes a word access).
+    u8 m_shapeType; // soAreaInstance::ShapeType
+    u8 m_group;     // gfArea::Group
 
     union ShapeFlag {
         ShapeMask m_mask;
@@ -88,9 +93,19 @@ struct soAreaData {
 };
 static_assert(sizeof(soAreaData) == 0x20, "Class is wrong size!");
 
+// One contact of an area of the module with an area of another object.
+// HYPOTHESIS: names, from the enemy area module's checks (checkArea), which hand m_areaId to
+// ftManager::getEntryIdFromAreaId and compare m_area with the index of their own area.
 struct soAreaContactLog {
-    int m_areaId; // HYPOTHESIS: getAreaContactCount counts the logs whose first word is the given area id
-    char _0x4[0x14];
+    int m_area;     // 0x00 index of this module's area that was touched (getAreaContactCount / getAreaContactLog match it)
+    int m_areaId;   // 0x04 gfArea id of the other area
+    int unk8;
+    u8 m_category;  // 0x0C soAreaData::Category of the owner of the other area
+    u8 unkD;
+    u8 unkE;
+    u8 unkF;
+    int unk10;
+    int unk14;
 };
 static_assert(sizeof(soAreaContactLog) == 0x18, "Class is wrong size!");
 
@@ -151,6 +166,10 @@ class soAreaModuleImpl : public soAreaModule, public gfAreaEventReciver, public 
     soModuleAccesser* m_moduleAccesser;
 
 public:
+    // Out of line in sora_melee (fn_27_A34D4).
+    soAreaModuleImpl(soModuleAccesser* acc, u8 category, soArray<soAreaInstance>* instances,
+                     soArray<soAreaContactLog>* contactLogs, soAreaEnviromentElementChecker* checker,
+                     soArray<soAreaWind>* winds, soEventObserverRegistrationDesc* regDesc, int unk8);
     virtual ~soAreaModuleImpl();
     virtual void activate(int ownerId);
     virtual void deactivate();
@@ -178,22 +197,27 @@ public:
     virtual int getAreaIndexFromId(int);
     virtual u32 getAreaContactCount(int);
     virtual soAreaContactLog* getAreaContactLog(int areaId, int index);
+#ifdef SO_AREA_MODULE_INLINE_ACCESSORS
+    // Inline in the original (the enemy area module carries weak copies); opt-in, as other units that see them would
+    // emit copies of their own.
+    virtual soAreaEnviromentElementChecker* getEnviromentElementChecker() { return m_enviromentElementChecker; }
+    virtual void setLogOverThrough(bool logOverThrough) { m_logOverThrough = logOverThrough; }
+#else
     virtual soAreaEnviromentElementChecker* getEnviromentElementChecker();
     virtual void setLogOverThrough(bool);
+#endif
     virtual void eraseWind(int);
     virtual void createWind(u32, u32, stMovementData*);
 
     virtual void reciveEvent(gfArea*, gfArea*);
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
-    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, soAnimCmdEventS32 unk3);
     virtual bool isObserv(char unk1);
     virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
 
     // HYPOTHESIS: parameter and return types from the callee's register use.
     s32 getContactLogCount();
     soAreaContactLog* getContactLog(s32 index);
-
-
 };
 static_assert(sizeof(soAreaModuleImpl) == 0x4c, "Class is wrong size!");
 

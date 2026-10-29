@@ -9,6 +9,7 @@
 #include <ft/builder/ft_dol_instances.h>
 #include <so/so_array.h>
 #include <so/event/so_event_presenter.h>
+#include <so/damage/so_damage_event_presenter.h>
 #include <types.h>
 #include <ut/ut_list.h>
 #include <wn/wn_weapon_builder.h>
@@ -32,7 +33,7 @@ static_assert(sizeof(utWeaponObjectBase) == 12, "Class is wrong size!");
 class wnemSimple : public utWeaponObjectBase, public wnWeaponBuilder<wnemSimple_ModuleAccesserBuildConfig>, public soDamageEventObserver, public soCollisionSearchEventObserver {
 public:
     // The shot work block the activation (fn_41_3091C) copies from the firing enemy.
-    emShotWork m_shotWork; // 0x2184
+    wnemSimple_Data m_shotWork; // 0x2184
     bool unk21B8;
     bool unk21B9;
     u8 unk21BA[0x1];

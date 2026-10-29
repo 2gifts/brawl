@@ -186,7 +186,7 @@ public:
     void normalize();
     void normalize(Vec2f* input);
 
-    void rot(Vec2f *out, float rot);
+    void rot(float angle, Vec2f* out);
 
     // Writes this vector scaled by c to out (the weapon articles call the out-of-line copy: opt in with MT_VEC2F_SCALE_NOINLINE).
     void scale(float c, Vec2f* out)

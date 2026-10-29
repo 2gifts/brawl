@@ -219,7 +219,7 @@ float emValueAccesser::getVariableFloatCore(soModuleAccesser* moduleAccesser, u3
         soKineticModule& kinetic = moduleAccesser->getKineticModule();
         Vec2f speed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(-1));
         float lr = moduleAccesser->getPostureModule().getLr();
-        return emKineticModuleImpl::getKineticAngleFromSpeed(speed, lr);
+        return emKineticModuleImpl::getKineticAngleFromSpeed(lr, speed);
     }
     case Var_Float_Kinetic_Speed_Angle_With_Touch_Ground: {
         soKineticModule& kinetic = moduleAccesser->getKineticModule();

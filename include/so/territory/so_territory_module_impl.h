@@ -72,6 +72,6 @@ public:
     // Fills the area data set of the area index (the four floats are its rectangle sides).
     virtual void createAreaDataSet(int area, float left, float right, float top, float bottom);
     virtual bool isObserv(char group);
-    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, soAnimCmdEventS32 unk3);
 };
 static_assert(sizeof(soTerritoryModuleImpl) == 0x50, "Class is wrong size!");

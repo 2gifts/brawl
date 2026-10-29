@@ -49,12 +49,13 @@ emDuon::~emDuon() { }
 // AI's target point from the aimed node. Unlike the shared activator, the flag of the shot description is not passed
 // on (always false).
 bool emDuon::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccesser) {
-    emShotParam* param = fn_41_473DC(moduleAccesser, moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
-    Vec3f pos = fn_41_47470(param, moduleAccesser);
+    emShotParam* param = emWeaponUtil::getSimpleWeaponData(moduleAccesser,
+            moduleAccesser->getWorkManageModule().getInt(WorkInt_ShotParamId));
+    Vec3f pos = emWeaponUtil::setWeaponStartPosition_Basic(param, moduleAccesser);
     emShotFlag flag;
-    fn_41_47544(&flag, param);
+    emWeaponUtil::setWeaponConstraint_Basic(&flag, param);
     if (param->m_shotKind == 2 || param->m_shotKind == 4) {
-        fn_41_47A2C(param, moduleAccesser, true);
+        emWeaponUtil::calcWeaponStartVector_Basic(param, moduleAccesser, true);
     } else {
         u32 nodeId = lbl_41_bss_504.m_nodeId;
         if (nodeId == Duon_ShotNodeA0 || nodeId == Duon_ShotNodeA1 || nodeId == Duon_ShotNodeA2 ||
@@ -72,9 +73,9 @@ bool emDuon::activeArticle(wnemSwHolder* article, soModuleAccesser* moduleAccess
             target.m_x = moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotTargetX);
             target.m_y = moduleAccesser->getWorkManageModule().getFloat(WorkFloat_ShotTargetY);
             target.m_z = 0.0f;
-            fn_41_47C64(param, moduleAccesser, &pos, &target, 0);
+            emWeaponUtil::calcWeaponStartVector_AimingTarget1(param, moduleAccesser, &pos, &target, 0);
         }
     }
-    fn_41_47D8C(&pos, false, article, param, moduleAccesser);
+    emWeaponUtil::activeSimpleWeaponHolder(&pos, false, article, param, moduleAccesser);
     return false;
 }

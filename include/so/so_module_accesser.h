@@ -33,11 +33,14 @@
 #include <so/link/so_link_module_impl.h>
 #include <so/visibility/so_visibility_module_impl.h>
 #include <so/capture/so_capture_module_impl.h>
-#include <so/item/so_item_manage_module_impl.h>
 #include <so/turn/so_turn_module_impl.h>
 #include <so/stop/so_stop_module_impl.h>
 #include <so/so_activate.h>
 #include <types.h>
+
+// The item manage module (and its event observer) is complete only after the enemy modules in the original (the
+// sora_enemy damage unit's type information order); a unit that calls it includes so/item/so_item_manage_module_impl.h.
+class soItemManageModule;
 
 class StageObject;
 class soGenerateArticleManageModule;
