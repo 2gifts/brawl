@@ -485,6 +485,4 @@ struct grGimmickMotionPathInfo {
     grGimmick::SimpleEffectData* m_0x1c;
     grGimmick::SimpleEffectData* m_0x20;
 
-    inline grGimmickMotionPathInfo(gfArchive* archive, grGimmickMotionPathData* motionPathData, bool isRotate, bool isTranslate) : m_archive(archive), m_motionPathData(motionPathData), m_isRotate(isRotate), m_isTranslate(isTranslate), m_0xc(NULL), m_0x10(NULL), m_0x14(NULL), m_0x18(NULL), m_0x1c(NULL), m_0x20(NULL) {}
-    inline grGimmickMotionPathInfo(gfArchive* archive, grGimmickMotionPathData* motionPathData, u32 flags) : m_archive(archive), m_motionPathData(motionPathData), m_flags(flags), m_0xc(NULL), m_0x10(NULL), m_0x14(NULL), m_0x18(NULL), m_0x1c(NULL), m_0x20(NULL) {}
 };
