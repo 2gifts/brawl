@@ -8,8 +8,6 @@
 extern "C" void fn_80041884(const clCircle2D* a, const clCircle2D* b, clCircle2D* out, float rate);
 // HYPOTHESIS: grCollision::getSegment (gr_collision.o) fills the segment of a line.
 extern "C" void fn_80111968(grCollision* collision, void* out, grCollisionLine* line, int unk);
-// HYPOTHESIS: grCollisionTest::updateTouchLine (gr_collision_test.o) records the touched side.
-extern "C" void fn_80125250(grCollisionTest* test, int touch, grCollisionLineWork* lineWork, float rate);
 extern "C" int fn_80132468(grCollisionTestCircle* test, const clCircle2D* start, const clCircle2D* end, void* segment, float* rate);
 
 grCollisionTestCircle::grCollisionTestCircle(grCollStatus* status) : grCollisionTest(status) {
@@ -77,27 +75,27 @@ int grCollisionTestCircle::testCollisionNotMove(grCollisionLineWork* lineWork) {
         m_unk8 = rate;
         if (__fabs(normal.m_y) < 0.00001f) {
             if (normal.m_x < 0.0f) {
-                fn_80125250(this, 2, lineWork, rate);
+                updateTouchLine(2, lineWork, rate);
             } else {
-                fn_80125250(this, 1, lineWork, rate);
+                updateTouchLine(1, lineWork, rate);
             }
         } else if (__fabs(normal.m_x) < 0.00001f) {
             if (normal.m_y < 0.0f) {
-                fn_80125250(this, 0, lineWork, rate);
+                updateTouchLine(0, lineWork, rate);
             } else {
-                fn_80125250(this, 3, lineWork, rate);
+                updateTouchLine(3, lineWork, rate);
             }
         } else if (__fabs(normal.m_y / normal.m_x) < 1.0f) {
             if (normal.m_x > 0.0f) {
-                fn_80125250(this, 1, lineWork, rate);
+                updateTouchLine(1, lineWork, rate);
             } else {
-                fn_80125250(this, 2, lineWork, rate);
+                updateTouchLine(2, lineWork, rate);
             }
         } else {
             if (normal.m_y > 0.0f) {
-                fn_80125250(this, 3, lineWork, rate);
+                updateTouchLine(3, lineWork, rate);
             } else {
-                fn_80125250(this, 0, lineWork, rate);
+                updateTouchLine(0, lineWork, rate);
             }
         }
     }

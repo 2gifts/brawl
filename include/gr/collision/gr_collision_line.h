@@ -92,8 +92,7 @@ struct grCollisionLine {
         struct
         {
             // 12
-            u8 : 1;
-            u8 : 1;
+            short : 16;
 
             // 14
             bool : 1;
@@ -116,8 +115,7 @@ struct grCollisionLine {
         struct
         {
             // 12
-            u8 : 1;
-            u8 : 1;
+            short : 16;
 
             // 14
             bool : 1;
@@ -129,7 +127,7 @@ struct grCollisionLine {
             bool : 1;
             bool : 1;
             bool : 1; // for Bucculus
-            CategoryMask m_targetCategory : 3;
+            u16 m_targetCategory : 3; // CategoryMask bits (u16 so that the access is a halfword load)
             bool : 1;
             bool : 1;
             bool : 1;
