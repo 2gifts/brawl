@@ -10581,6 +10581,26 @@ mo_melee/sora_melee/st/st_operator_debug_intrusion.cpp:
 	.text       start:0x002544DC end:0x0025458C
 	.ctors      start:0x000002E0 end:0x000002E4
 
+mo_melee/sora_melee/st/st_operator_debug_reset_fighter.cpp:
+	.text       start:0x0025458C end:0x00254598
+
+mo_melee/sora_melee/st/st_operator_debug_stage_pause.cpp:
+	.text       start:0x00254598 end:0x002545A4
+
+mo_melee/sora_melee/st/st_operator_end_production.cpp:
+	.text       start:0x002545A4 end:0x00254A74
+	.rodata     start:0x00004118 end:0x00004140
+	.data       start:0x00052AC0 end:0x00052B78
+
+mo_melee/sora_melee/st/st_operator_network.cpp:
+	.text       start:0x00254A74 end:0x00255420
+	.data       start:0x00052B78 end:0x00052E38
+	.bss        start:0x000059C0 end:0x000059C8
+
+mo_melee/sora_melee/st/st_operator_controller.cpp:
+	.text       start:0x00255420 end:0x00255808
+	.data       start:0x00052E38 end:0x00052F90
+
 mo_melee/sora_melee/st/st_operator_info.cpp:
 	.text       start:0x00255808 end:0x00256A08
 	.ctors      start:0x000002E4 end:0x000002E8

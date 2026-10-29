@@ -1,5 +1,5 @@
 #pragma once
-// Local BrawlHeaders shadow: input-product callback, local packet size API and
+// Local BrawlHeaders shadow: input-product, stop and exit callbacks, local packet size API and
 // the AID/user-id accessors used by the online menu task.
 
 #include <StaticAssert.h>
@@ -17,9 +17,21 @@ public:
     static void ntSetConsumedDataCallback(ntConsumedDataCallback_t cb) {
         NtConsumedDataCallback = cb;
     }
+    // HYPOTHESIS: the parameter lists come from the nt_sync call sites of the stored pointers;
+    // the storage names follow NtConsumedDataCallback.
+    typedef void (*ntStopCallback_t)(u16, u8);
+    static void ntSetStopCallback(ntStopCallback_t cb) {
+        NtStopCallback = cb;
+    }
+    typedef void (*ntExitCallback_t)(u8, u16, u8);
+    static void ntSetExitCallback(ntExitCallback_t cb) {
+        NtExitCallback = cb;
+    }
 private:
     static ntPutProductDataCallback_t NtPutProductDataCallback;
     static ntConsumedDataCallback_t NtConsumedDataCallback;
+    static ntStopCallback_t NtStopCallback;
+    static ntExitCallback_t NtExitCallback;
 };
 // TODO size
 
