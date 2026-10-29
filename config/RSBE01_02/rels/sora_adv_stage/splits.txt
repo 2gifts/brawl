@@ -48,6 +48,20 @@ mo_adv_stage/gr_adventure_punch_slider.cpp:
 	.data       start:0x00004168 end:0x000046B0
 	.bss        start:0x00000A28 end:0x00000B58
 
+mo_adv_stage/gr_adventure_barrel_cannon.cpp:
+	.text       start:0x0001A610 end:0x0001C014
+	.ctors      start:0x00000028 end:0x0000002C
+	.rodata     start:0x00000280 end:0x000002D0
+	.data       start:0x000046B0 end:0x00004BF0
+	.bss        start:0x00000B58 end:0x00000C88
+
+mo_adv_stage/gr_adventure_block_pos_sympathetic.cpp:
+	.text       start:0x000220F8 end:0x00022E24
+	.ctors      start:0x0000002C end:0x00000030
+	.rodata     start:0x00000300 end:0x00000310
+	.data       start:0x00005CD0 end:0x000061D0
+	.bss        start:0x00000CB8 end:0x00000DE8
+
 mo_adv_stage/gr_gimmick_block.cpp:
 	.text       start:0x00022E24 end:0x00023690
 	.rodata     start:0x00000310 end:0x00000338
@@ -64,6 +78,27 @@ mo_adv_stage/gr_adventure_attack_switch.cpp:
 	.data       start:0x00006540 end:0x00006D68
 	.bss        start:0x00000DE8 end:0x00000DF8
 
+mo_adv_stage/gr_adventure_door.cpp:
+	.text       start:0x00024C94 end:0x00025ACC
+	.ctors      start:0x00000030 end:0x00000034
+	.rodata     start:0x00000380 end:0x000003B8
+	.data       start:0x00006D68 end:0x000072E8
+	.bss        start:0x00000DF8 end:0x00000F28
+
+mo_adv_stage/gr_adventure_motion_punch_slider.cpp:
+	.text       start:0x00025ACC end:0x00026104
+	.ctors      start:0x00000034 end:0x00000038
+	.rodata     start:0x000003B8 end:0x000003E0
+	.data       start:0x000072E8 end:0x00007858
+	.bss        start:0x00000F28 end:0x00001058
+
+mo_adv_stage/gr_adventure_move4_ground.cpp:
+	.text       start:0x00026104 end:0x00026FB0
+	.ctors      start:0x00000038 end:0x0000003C
+	.rodata     start:0x000003E0 end:0x000003F8
+	.data       start:0x00007858 end:0x00007DF8
+	.bss        start:0x00001058 end:0x00001188
+
 mo_adv_stage/gr_adventure_break_floor.cpp:
 	.text       start:0x00026FB0 end:0x00027748
 	.rodata     start:0x000003F8 end:0x00000408
@@ -75,12 +110,38 @@ mo_adv_stage/gr_adventure_move_attack_ground.cpp:
 	.data       start:0x00007FB0 end:0x000088E8
 	.bss        start:0x00001188 end:0x00001408
 
+mo_adv_stage/gr_adventure_move_circle_attack_ground.cpp:
+	.text       start:0x0002992C end:0x0002A13C
+	.ctors      start:0x0000003C end:0x00000040
+	.rodata     start:0x00000430 end:0x00000438
+	.data       start:0x000088E8 end:0x00008E58
+	.bss        start:0x00001408 end:0x00001538
+
+mo_adv_stage/gr_adventure_fallingrock.cpp:
+	.text       start:0x0002A13C end:0x0002A4E8
+	.rodata     start:0x00000438 end:0x00000448
+	.data       start:0x00008E58 end:0x00009080
+
 mo_adv_stage/gr_adventure_motion_attack_ground.cpp:
 	.text       start:0x0002A4E8 end:0x0002AF48
 	.ctors      start:0x00000040 end:0x00000044
 	.rodata     start:0x00000448 end:0x00000468
 	.data       start:0x00009080 end:0x00009540
 	.bss        start:0x00001538 end:0x00001680
+
+mo_adv_stage/gr_adventure_firepillar.cpp:
+	.text       start:0x0002AF48 end:0x0002C63C
+	.ctors      start:0x00000044 end:0x00000048
+	.rodata     start:0x00000468 end:0x000004F0
+	.data       start:0x00009540 end:0x0000AFE8
+	.bss        start:0x00001680 end:0x000017C8
+
+mo_adv_stage/gr_adventure_truck.cpp:
+	.text       start:0x0002C63C end:0x0002DE24
+	.ctors      start:0x00000048 end:0x0000004C
+	.rodata     start:0x000004F0 end:0x00000538
+	.data       start:0x0000AFE8 end:0x0000B568
+	.bss        start:0x000017C8 end:0x000018F8
 
 mo_adv_stage/gr_adventure_static.cpp:
 	.text       start:0x0002DE24 end:0x0002E29C

@@ -382,7 +382,9 @@ public:
         u32 m_transparencySettings;
     };
     // A8
-    char _spacer8[20];
+    char _spacer8[16];
+    // B8
+    float unkF8; // HYPOTHESIS: set to 100.0 by the grAdventureMove4Ground constructor
     // BC
     grVisibleProduction* m_visibleProductions[4];
     // CC
