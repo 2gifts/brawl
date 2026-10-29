@@ -194,26 +194,28 @@ public:
 };
 
 // The angle between two vectors (acos of the clamped normalized dot product): map name vec2fAngle, a DOL function that
-// the original inlines here.
+// the original inlines here. Written as Sheik's matched Vec2f::mtVecAngle (ft_sheik_status_uniq_process_special_hi_move.cpp):
+// the named length squares, the early returns and the explicit float conversion of acos together give the inlined copy the
+// float temporaries that put setupDamageStatusNormal's speedLr in f30 (any one or two of the three leave it in f27).
 static inline float getVec2Angle(Vec2f* a, Vec2f* b) {
-    float angle;
-    float lengthProduct = a->lengthSq() * b->lengthSq();
-    if (0.0f == lengthProduct) {
-        angle = 0.0f;
-    } else {
-        float dot = dotProduct(a, b);
-        register float c = dot * rsqrtf(lengthProduct);
-        register float upper = 1.0f;
-        register float lower = -1.0f;
-        register float difference = c - lower;
-        register float clamped;
-        // MATCH-ONLY: the sora_enemy units are built without inlining of the nw4r FSelect asm helper (as the fighters).
-        asm { fsel clamped, difference, c, lower }
-        difference = clamped - upper;
-        asm { fsel clamped, difference, upper, clamped }
-        angle = acos(clamped);
+    float bLengthSq = b->lengthSq();
+    float aLengthSq = a->lengthSq();
+    float product = aLengthSq * bLengthSq;
+    if (product == 0.0f) {
+        return 0.0f;
     }
-    return angle;
+    float dot = dotProduct(a, b);
+    register float cosine = dot * rsqrtf(product);
+    register float upper = 1.0f;
+    register float lower = -1.0f;
+    register float fromLower = cosine - lower;
+    register float lowerBounded;
+    // MATCH-ONLY: the sora_enemy units are built without inlining of the nw4r FSelect asm helper (as the fighters).
+    asm { fsel lowerBounded, fromLower, cosine, lower }
+    register float fromUpper = lowerBounded - upper;
+    register float clamped;
+    asm { fsel clamped, fromUpper, upper, lowerBounded }
+    return (float)acos(clamped);
 }
 
 // MATCH-ONLY: the original reads the attack data bitfields as whole words (lwz) with unsigned extraction.
@@ -468,15 +470,10 @@ void emDamageModuleImpl::setupDamageStatusNormalSubReflect(soGroundModule* groun
 // The normal hit reaction: from the hit it works out the stun frames, the damage level and the launch speed and angle,
 // launches the enemy and writes the result to the work (which the AI and the damage statuses read). A defeated enemy that
 // a fighter hits becomes a projectile (flag WorkFlag_Bullet) of the fighter's team.
-// TODO(nonmatching): 99.35%, (a) only the float registers differ: the original gives frameReaction f31, speedLr f30,
-// reaction f29, baseReaction f28, minReaction f27; ours puts speedLr last (f27) and shifts reaction, baseReaction and
-// minReaction up one. Declaring frameReaction and speedLr first fixed frameReaction's register and the `over`
-// temporary fixed the clamp (the original writes the else result straight into reaction's register). speedLr rises
-// to f30, with everything else exact, whenever the function holds two more float loads of vector members (for
-// example `reflected.m_x = speed.m_x; reflected.m_y = speed.m_y;` in place of the copy-initialization, or two dead
-// member copies anywhere after angle), but every such form changes bytes elsewhere; the original's two loads are
-// not identified. Tried without effect: floorf/cosf/sinf/acosf, by-value and reference inline helpers, hoisting the
-// other locals, `register`, expression forms of the minimum. Two 10-minute permuter runs found nothing better.
+// Register notes: frameReaction and speedLr are declared first (f31, f30); the `over` temporary writes the clamp's else
+// result straight into reaction's register; `captureBase` as a named local reads parameter 0xbff before the 0xc00
+// product; and speedLr keeps f30 only with the getVec2Angle form above (its float temporaries raise speedLr's
+// interference count over the allocator's threshold; two extra float loads anywhere in speedLr's range do the same).
 void emDamageModuleImpl::setupDamageStatusNormal(soDamage* damage, bool isCaptured) {
     // Declared first: the stun frames and the launch direction are the floats the original keeps in f31 and f30
     // (declaring them where they are computed hands f31 to reaction).
@@ -546,8 +543,9 @@ void emDamageModuleImpl::setupDamageStatusNormal(soDamage* damage, bool isCaptur
         }
     }
     if (isCaptured == true) {
-        reaction = soValueAccesser::getValueFloat(m_moduleAccesser, 0xbff, 0) +
-                   reaction * soValueAccesser::getValueFloat(m_moduleAccesser, 0xc00, 0);
+        float captureBase = soValueAccesser::getValueFloat(m_moduleAccesser, 0xbff, 0);
+        reaction *= soValueAccesser::getValueFloat(m_moduleAccesser, 0xc00, 0);
+        reaction = captureBase + reaction;
     }
     frameReaction = reaction * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbd4, 0);
     if (isKnockout == false) {
