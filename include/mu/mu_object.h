@@ -26,6 +26,8 @@ struct MuAnimIdxData {
 #include <nw4r/g3d/g3d_resmdl.h>
 #include <nw4r/g3d/g3d_scnobj.h>
 
+struct _GXTexObj;
+
 class MuObject {
 
 public:
@@ -82,6 +84,7 @@ public:
     // HYPOTHESIS: the first argument is the name of the material
     void changeMaterialTex(const char* matName, int texNode, nw4r::g3d::ResFile* textureSource);
     void changeMaterialTex(u32 matNode, const char* textureName, nw4r::g3d::ResFile* textureSource = nullptr);
+    void changeMaterialTex(const char* matName, _GXTexObj* texture);
     // void anmPlayPolicyOneTime(float, float, float);
 
     void getNode(int objNode);
