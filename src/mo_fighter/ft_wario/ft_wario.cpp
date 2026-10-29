@@ -1,3 +1,4 @@
+#define SO_GENERAL_WORK_BOUNDED_CLEAR
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
 // MATCH-ONLY: the custom kinetic helper calls the shared vector constructor.
 #define MT_VEC3F_CTOR_NOINLINE
