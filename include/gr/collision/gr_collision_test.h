@@ -186,7 +186,7 @@ public:
     virtual int testStaticCorrectionLast(grCollisionLineWork* lineWork) = 0;  // +0x28
     virtual void testStaticCorrectionSetup() = 0;                        // +0x2C (called by initialCorrection)
     virtual void updateIgnoreLine() = 0;                                 // +0x30 (called by lastCorrection)
-    virtual int testCollisionNotMoveSlatingLine(grCollisionLineWork* lineWork, void* unk) = 0; // +0x34 HYPOTHESIS: parameters
+    virtual int testCollisionNotMoveSlatingLine(grCollisionLineWork* lineWork, float* rate) = 0; // +0x34 HYPOTHESIS: parameters
 
     // ---- cluster A: 0x801173C0 - 0x8011A944 (gr_collision_body.cpp)
     void getAABBox(clAABBox2D* out) __attribute__((never_inline));          // HYPOTHESIS: out = swept box (union of m_unk2bc and m_unk2c4 boxes, grown by 1)
