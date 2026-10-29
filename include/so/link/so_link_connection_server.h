@@ -39,12 +39,22 @@ public:
         Attribute_Reference_Parent_Stop = 0x0,
         Attribute_Reference_Parent_Shake = 0x1,
         Attribute_Reference_Parent_Scale = 0x2,
-
-        Attribute_Reference_Parent_Unknown_4 = 0x4,
+        // HYPOTHESIS: 0x3, 0x5, 0x8, 0xB, 0xC, 0xE, 0xF and 0x10 are named after the only soLinkModuleImpl query that
+        // tests each (getLinkColorBlend, getLinkSlopeRotation, getConstraintModelScale, sendEnvMapNodes,
+        // adjustLinkGroundCollision, getLinkLightSet, isNodeGroundCrush, setNodeScalePowerMul).
+        Attribute_Reference_Parent_Color_Blend = 0x3,
+        Attribute_Reference_Parent_Unknown_4 = 0x4, // tested by getLinkController
+        Attribute_Reference_Parent_Slope = 0x5,
 
         Attribute_Reference_Parent_Visibility = 0x7,
+        Attribute_Reference_Parent_Model_Scale = 0x8,
 
         Attribute_Reference_Parent_Power_Up = 0xA, // glow
+        Attribute_Reference_Parent_Env_Map = 0xB,
+        Attribute_Reference_Parent_Ground_Collision = 0xC,
+        Attribute_Reference_Parent_Light_Set = 0xE,
+        Attribute_Reference_Parent_Ground_Crush = 0xF,
+        Attribute_Reference_Parent_Scale_Power_Mul = 0x10,
     };
 
     void reset();
@@ -104,12 +114,22 @@ public:
         Attribute_Reference_Parent_Stop = 0x0,
         Attribute_Reference_Parent_Shake = 0x1,
         Attribute_Reference_Parent_Scale = 0x2,
-
-        Attribute_Reference_Parent_Unknown_4 = 0x4,
+        // HYPOTHESIS: 0x3, 0x5, 0x8, 0xB, 0xC, 0xE, 0xF and 0x10 are named after the only soLinkModuleImpl query that
+        // tests each (getLinkColorBlend, getLinkSlopeRotation, getConstraintModelScale, sendEnvMapNodes,
+        // adjustLinkGroundCollision, getLinkLightSet, isNodeGroundCrush, setNodeScalePowerMul).
+        Attribute_Reference_Parent_Color_Blend = 0x3,
+        Attribute_Reference_Parent_Unknown_4 = 0x4, // tested by getLinkController
+        Attribute_Reference_Parent_Slope = 0x5,
 
         Attribute_Reference_Parent_Visibility = 0x7,
+        Attribute_Reference_Parent_Model_Scale = 0x8,
 
         Attribute_Reference_Parent_Power_Up = 0xA, // glow
+        Attribute_Reference_Parent_Env_Map = 0xB,
+        Attribute_Reference_Parent_Ground_Collision = 0xC,
+        Attribute_Reference_Parent_Light_Set = 0xE,
+        Attribute_Reference_Parent_Ground_Crush = 0xF,
+        Attribute_Reference_Parent_Scale_Power_Mul = 0x10,
     };
 };
 static_assert(0x34 == sizeof(soLinkConnection), "Class is wrong size!");
