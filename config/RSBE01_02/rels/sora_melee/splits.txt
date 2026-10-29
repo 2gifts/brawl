@@ -128,6 +128,29 @@ mo_melee/sora_melee/so/anim/so_anim_chr.cpp:
 	.text       start:0x0001F2D0 end:0x0001F980
 	.rodata     start:0x00000360 end:0x00000370
 
+mo_melee/sora_melee/so/anim/so_anim_obj.cpp:
+	.text       start:0x0001F980 end:0x00020EBC
+	.rodata     start:0x00000370 end:0x00000380
+
+mo_melee/sora_melee/so/motion/so_motion_data_accesser.cpp:
+	.text       start:0x00020EBC end:0x000212D4
+	.rodata     start:0x00000380 end:0x00000388
+	.data       start:0x00002360 end:0x000024C0
+
+mo_melee/sora_melee/so/motion/so_motion_anim_obj_cache_module_impl.cpp:
+	.text       start:0x000212D4 end:0x00023364
+	.data       start:0x000024C0 end:0x00002550
+
+mo_melee/sora_melee/so/posture/so_posture_module_impl.cpp:
+	.text       start:0x00023364 end:0x0002520C
+	.rodata     start:0x00000388 end:0x000003B0
+	.data       start:0x00002550 end:0x00002708
+
+mo_melee/sora_melee/so/posture/so_posture_module_simple.cpp:
+	.text       start:0x0002520C end:0x0002556C
+	.rodata     start:0x000003B0 end:0x000003C0
+	.data       start:0x00002708 end:0x000027A0
+
 mo_melee/sora_melee/so/ground/so_ground_module_impl.cpp:
 	.text       start:0x0002556C end:0x0002E818
 
