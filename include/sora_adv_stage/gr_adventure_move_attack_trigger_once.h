@@ -3,18 +3,8 @@
 #include <StaticAssert.h>
 #include <gr/gr_gimmick.h>
 #include <gr/gr_gimmick_motion_path.h>
-#include <sora_adv_stage/gr_adventure_move_ground.h>
+#include <sora_adv_stage/gr_adventure_move_attack_ground.h>
 #include <types.h>
-
-// HYPOTHESIS: The moving attack-ground base (sora_adv_stage gr_adventure_move_attack_ground.o, not decompiled yet): only the
-// gimmick record pointer that the derived gimmick reads is declared.
-class grAdventureMoveAttackGround : public grAdventureMoveGround {
-protected:
-    u8 unk154[4];
-    void* m_moveAttackData; // 0x158
-    u8 unk15C[0xC];
-};
-static_assert(sizeof(grAdventureMoveAttackGround) == 0x168, "Class is wrong size!");
 
 // HYPOTHESIS: The type name is from the sora_adv_stage map (createGimmickFunc<34grGimmickMoveAttackTriggerOnceData, ...>); only
 // the attack that frowStart sets is described.
