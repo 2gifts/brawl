@@ -2809,6 +2809,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/st/st_result.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_edit.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_trigger.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/st/st_trigger_observe.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/st/st_trigger_actor_common.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_loader_manager.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_loader_sand_bag.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_loader_stage.cpp"),
