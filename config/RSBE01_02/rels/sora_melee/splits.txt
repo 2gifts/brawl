@@ -31,6 +31,23 @@ mo_melee/sora_melee/so/model/so_model_module_impl_variable.cpp:
 	.text       start:0x0000F288 end:0x0000FED0
 	.data       start:0x00000A98 end:0x00000C78
 
+mo_melee/sora_melee/so/model/so_model_calc_world_callback.cpp:
+	.text       start:0x0000FED0 end:0x0000FFF8
+	.data       start:0x00000C78 end:0x00000CF0
+
+mo_melee/sora_melee/so/model/so_model_scn_obj_callback.cpp:
+	.text       start:0x0000FFF8 end:0x000100D8
+	.data       start:0x00000CF0 end:0x00000D68
+
+mo_melee/sora_melee/so/model/so_model_scene_root_event.cpp:
+	.text       start:0x000100D8 end:0x00010158
+	.data       start:0x00000D68 end:0x00000DE8
+
+mo_melee/sora_melee/so/physics/so_physics_module_impl.cpp:
+	.text       start:0x00010158 end:0x00013700
+	.rodata     start:0x00000320 end:0x00000340
+	.data       start:0x00000DE8 end:0x00001190
+
 mo_melee/sora_melee/so/so_array_base_soArrayFixed_20soAnimCmdAddressPack_1B5E0.cpp:
 	.text       start:0x0001B5E0 end:0x0001B614
 

@@ -48,7 +48,8 @@ public:
     u8 unk20;                         // 0x20, latched from a global flag by setLastVelocity
     u8 unk21[0x30 - 0x21];            // 0x21
     int unk30;                        // 0x30, last line index
-    u8 unk34[0x40 - 0x34];            // 0x34
+    u8 unk34[0x3C - 0x34];            // 0x34
+    f32 m_gravity;                    // 0x3C, set by soPhysicsModuleImpl::set2ndGravity
     u8 m_active;                      // 0x40, weapon type (set to 1 by the owner)
     u8 unk41;                         // 0x41
     u8 unk42;                         // 0x42
@@ -65,7 +66,9 @@ public:
     u8 unk5B;                         // 0x5B
     u8 m_winding;                     // 0x5C, cleared by resetWinding
     u8 unk5D;                         // 0x5D
-    u8 unk5E[0x68 - 0x5E];            // 0x5E
+    u8 unk5E[0x65 - 0x5E];            // 0x5E
+    u8 m_waver;                       // 0x65, set by soPhysicsModuleImpl::set2ndBothWaver
+    u8 unk66[0x68 - 0x66];            // 0x66
     Mtx m_vectorMtx1;                 // 0x68, set by set2Vector
     Mtx m_vectorMtx2;                 // 0x98, set by set2Vector
     u8 m_sleep;                       // 0xC8
@@ -80,7 +83,7 @@ public:
     u8 unkE9;                         // 0xE9
     u8 unkEA[0xEC - 0xEA];            // 0xEA
     u32 m_flags;                      // 0xEC
-    u8 unkF0[0xF4 - 0xF0];            // 0xF0
+    f32 m_weaponScale;                // 0xF0, set by soPhysicsModuleImpl::set2ndWeaponScale
 };
 static_assert(sizeof(ph2ndaryController) == 0xF4, "ph2ndaryController size");
 
