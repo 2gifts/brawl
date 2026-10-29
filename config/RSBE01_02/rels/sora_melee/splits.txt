@@ -5385,6 +5385,57 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_rebirth.cpp:
 	.text       start:0x001733F8 end:0x0017437C
 	.ctors      start:0x00000128 end:0x0000012C
 
+mo_melee/sora_melee/ft/ft_status_uniq_process_gimmick.cpp:
+	.text       start:0x0017437C end:0x00174F14
+	.data       start:0x0002F8E0 end:0x0002F9F8
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_gimmick_barrel.cpp:
+	.text       start:0x00174F14 end:0x00175F10
+	.rodata     start:0x000022A0 end:0x000022B8
+	.data       start:0x0002F9F8 end:0x0002FAA0
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_gimmick_door.cpp:
+	.text       start:0x00175F10 end:0x001768EC
+	.rodata     start:0x000022B8 end:0x000022E8
+	.data       start:0x0002FAA0 end:0x0002FB48
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_gimmick_catapult.cpp:
+	.text       start:0x001768EC end:0x00176C68
+	.rodata     start:0x000022E8 end:0x000022F0
+	.data       start:0x0002FB48 end:0x0002FBF0
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_gimmick_ladder.cpp:
+	.text       start:0x00176C68 end:0x0017754C
+	.rodata     start:0x000022F0 end:0x00002308
+	.data       start:0x0002FBF0 end:0x0002FC98
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_gimmick_ladder_loop.cpp:
+	.text       start:0x0017754C end:0x00177B2C
+	.rodata     start:0x00002308 end:0x00002320
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_gimmick_ladder_catch.cpp:
+	.text       start:0x00177B2C end:0x00177BB0
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_gimmick_ladder_catch_bottom.cpp:
+	.text       start:0x00177BB0 end:0x00177CE8
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_gimmick_ladder_end.cpp:
+	.text       start:0x00177CE8 end:0x00178034
+	.rodata     start:0x00002320 end:0x00002328
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_gimmick_spring.cpp:
+	.text       start:0x00178034 end:0x0017835C
+	.data       start:0x0002FC98 end:0x0002FD40
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_gimmick_truck.cpp:
+	.text       start:0x0017835C end:0x001788E4
+	.rodata     start:0x00002328 end:0x00002330
+	.data       start:0x0002FD40 end:0x0002FDE8
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_gimmick_eaten.cpp:
+	.text       start:0x001788E4 end:0x00178AB8
+	.data       start:0x0002FDE8 end:0x0002FE90
+
 mo_melee/sora_melee/ft/ft_status_uniq_process_catch_pull.cpp:
 	.text       start:0x00178AB8 end:0x00178C04
 	.ctors      start:0x0000012C end:0x00000130
