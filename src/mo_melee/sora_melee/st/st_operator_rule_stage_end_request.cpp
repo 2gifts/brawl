@@ -1,12 +1,8 @@
 #include <if/if_center.h>
 #include <if/if_mngr.h>
+#include <st/operator/st_operator_bgm.h>
 #include <st/operator/st_operator_rule_stage_end_request.h>
 #include <types.h>
-
-extern "C" {
-// stOperatorBgm::requestStop (sora_melee 0x242418)
-void fn_27_242418(void* bgm);
-}
 
 stOperatorRuleStageEndRequest::stOperatorRuleStageEndRequest() {
     m_state = 0;
@@ -23,7 +19,7 @@ void stOperatorRuleStageEndRequest::processBegin() {
                     static_cast<IfCenter*>(g_IfMngr->m_ifCenter)->setCenterState(7);
                 }
                 if (m_operatorBgm != NULL) {
-                    fn_27_242418(m_operatorBgm);
+                    static_cast<stOperatorBgm*>(m_operatorBgm)->requestStop();
                 }
                 m_state = 2;
             }
