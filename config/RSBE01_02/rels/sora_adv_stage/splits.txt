@@ -48,6 +48,40 @@ mo_adv_stage/gr_adventure_punch_slider.cpp:
 	.data       start:0x00004168 end:0x000046B0
 	.bss        start:0x00000A28 end:0x00000B58
 
+mo_adv_stage/gr_gimmick_block.cpp:
+	.text       start:0x00022E24 end:0x00023690
+	.rodata     start:0x00000310 end:0x00000338
+	.data       start:0x000061D0 end:0x00006390
+
+mo_adv_stage/gr_gimmick_block_sympathetic.cpp:
+	.text       start:0x00023690 end:0x00023D40
+	.rodata     start:0x00000338 end:0x00000350
+	.data       start:0x00006390 end:0x00006540
+
+mo_adv_stage/gr_adventure_attack_switch.cpp:
+	.text       start:0x00023D40 end:0x00024C94
+	.rodata     start:0x00000350 end:0x00000380
+	.data       start:0x00006540 end:0x00006D68
+	.bss        start:0x00000DE8 end:0x00000DF8
+
+mo_adv_stage/gr_adventure_break_floor.cpp:
+	.text       start:0x00026FB0 end:0x00027748
+	.rodata     start:0x000003F8 end:0x00000408
+	.data       start:0x00007DF8 end:0x00007FB0
+
+mo_adv_stage/gr_adventure_move_attack_ground.cpp:
+	.text       start:0x00027748 end:0x0002992C
+	.rodata     start:0x00000408 end:0x00000430
+	.data       start:0x00007FB0 end:0x000088E8
+	.bss        start:0x00001188 end:0x00001408
+
+mo_adv_stage/gr_adventure_motion_attack_ground.cpp:
+	.text       start:0x0002A4E8 end:0x0002AF48
+	.ctors      start:0x00000040 end:0x00000044
+	.rodata     start:0x00000448 end:0x00000468
+	.data       start:0x00009080 end:0x00009540
+	.bss        start:0x00001538 end:0x00001680
+
 mo_adv_stage/gr_adventure_static.cpp:
 	.text       start:0x0002DE24 end:0x0002E29C
 	.ctors      start:0x0000004C end:0x00000050

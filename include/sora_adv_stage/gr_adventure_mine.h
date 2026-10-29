@@ -2,15 +2,8 @@
 
 #include <StaticAssert.h>
 #include <gr/gr_gimmick.h>
+#include <sora_adv_stage/gr_gimmick_block.h>
 #include <types.h>
-
-// HYPOTHESIS: The breakable-block base of the mine (sora_adv_stage gr_gimmick_block.o, not decompiled yet): only its size is
-// known.
-class grGimmickBlock : public grGimmick {
-protected:
-    u8 unk14C[0x10];
-};
-static_assert(sizeof(grGimmickBlock) == 0x15C, "Class is wrong size!");
 
 // HYPOTHESIS: The type name is from the sora_adv_stage map (createGimmickFunc<17grGimmickMineData, ...>); its layout is not
 // described yet.
