@@ -10590,6 +10590,16 @@ mo_melee/sora_melee/st/st_trigger.cpp:
 	.text       start:0x002334B8 end:0x00234AF0
 	.ctors      start:0x000002AC end:0x000002B0
 
+mo_melee/sora_melee/st/st_trigger_observe.cpp:
+	.text       start:0x00234AF0 end:0x0023714C
+	.rodata     start:0x000038F0 end:0x00003920
+	.data       start:0x0004C218 end:0x0004C498
+
+mo_melee/sora_melee/st/st_trigger_actor_common.cpp:
+	.text       start:0x0023714C end:0x00237C00
+	.rodata     start:0x00003920 end:0x00003928
+	.data       start:0x0004C498 end:0x0004C748
+
 mo_melee/sora_melee/st/st_common_gimmick.cpp:
 	.text       start:0x00237C00 end:0x002381FC
 	.data       start:0x0004C748 end:0x0004C96C
