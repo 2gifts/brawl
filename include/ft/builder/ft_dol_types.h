@@ -114,9 +114,11 @@ FT_DOL_POLY_BEGIN(ftControllerModuleImpl, 0x16C);
     ftControllerModuleImpl(soModuleAccesser* acc, s16 unitId, soArray<soControllerImpl>* controllers, soArray<soControllerClatter>* clatters);
 FT_DOL_POLY_END;
 
+#ifndef SO_PHYSICS_MODULE_IMPL_DEFINED
 FT_DOL_POLY_BEGIN(soPhysicsModuleImpl, 0x48);
     soPhysicsModuleImpl(soModuleAccesser* acc, void* ikData, soArray<soPhysicsIKHandle>* handles, int n);
 FT_DOL_POLY_END;
+#endif
 
 FT_DOL_POLY_BEGIN(soCollisionShieldEventPresenterShield, 0x10);
     soCollisionShieldEventPresenterShield(soModuleAccesser* acc);
