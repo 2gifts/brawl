@@ -6,18 +6,7 @@
 #include <StaticAssert.h>
 #include <so/so_instance_unit.h>
 
-class soEventUnit;
-// MATCH-ONLY: the array of event unit records (the event manager entity) is built with out-of-line record
-// constructors/destructors in the original (a call to __construct_array), and the pointer is left untouched.
-template <>
-class soInstanceUnit<soEventUnit*> {
-public:
-    soEventUnit* m_element;
-    int m_id;
-
-    soInstanceUnit();
-    ~soInstanceUnit();
-};
+#include <ft/ft_event_unit_instance.h>
 
 #include <ft/fighter.h>
 #include <ft/ft_owner.h>

@@ -11,6 +11,9 @@
 // vtable in sora_melee through the three out-of-line slots).
 class soDamageEffectorImpl : public soDamageEffector {
 public:
+    // An explicit default constructor: a unit that constructs the effector inline (the sora_enemy damage module) then
+    // emits the weak destructor of soDamageEffector before this class's, as the original does.
+    soDamageEffectorImpl() { }
     virtual ~soDamageEffectorImpl() { }
 #ifdef EM_DAMAGE_EFFECTOR_IMPL_INLINE_SLOTS
     virtual void reqShake(soModuleAccesser* moduleAccesser, int situation, Vec2f* normal, soCollisionAttackData* attackData, int hitStopFrame) { }

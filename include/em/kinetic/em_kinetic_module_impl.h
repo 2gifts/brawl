@@ -88,6 +88,11 @@ struct emKineticEnergyParam {
     float m_rollRadius;          // 0x3C HYPOTHESIS: the radius a translation turns its node with, as if it rolled
                                  //      (<= 0: no rolling)
 
+#ifdef EM_KINETIC_ENERGY_PARAM_ASSIGN_LATE
+    // MATCH-ONLY: the energy unit defines the assignment after startEnergy (see em_kinetic_energy.cpp), which emits its
+    // out-of-line copy after the vector helpers startEnergy calls, as the original does.
+    emKineticEnergyParam& operator=(const emKineticEnergyParam& other);
+#else
     emKineticEnergyParam& operator=(const emKineticEnergyParam& other) {
         m_kind = other.m_kind;
         m_speed.m_base = other.m_speed.m_base;
@@ -107,6 +112,7 @@ struct emKineticEnergyParam {
         m_rollRadius = other.m_rollRadius;
         return *this;
     }
+#endif
 };
 static_assert(sizeof(emKineticEnergyParam) == 0x40, "Class is wrong size!");
 

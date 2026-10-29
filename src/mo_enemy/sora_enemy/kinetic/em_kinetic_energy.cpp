@@ -1,6 +1,9 @@
 // One kinetic energy of an enemy (emKineticEnergy, em/kinetic/em_kinetic_module_impl.h): a translation, rotation or
 // follow energy started from a parameter set (emKineticEnergyParam) by the kinetic module's anim cmds.
 #define EM_KINETIC_MODULE_IMPL_FULL
+// MATCH-ONLY: emKineticEnergyParam's assignment is defined below, after startEnergy: the original emits its weak copy
+// after Vec2f::operator= and Vec3f::add, which startEnergy calls; an inline defined before the function comes first.
+#define EM_KINETIC_ENERGY_PARAM_ASSIGN_LATE
 // MATCH-ONLY: emKineticEnergy's destructor calls soKineticEnergy's out of line (the module unit's weak copy).
 #define SO_KINETIC_ENERGY_DTOR_NEVER_INLINE
 // soKineticEnergy's on/offConsiderGroundFriction and getSpeed3f are inline: this unit emits their weak copies.
@@ -64,18 +67,39 @@ inline void vec3fMulAssign(Vec3f* v, float c) __attribute__((never_inline)) {
     Vec3fScale(v, v, c);
 }
 
-// HYPOTHESIS: inline conversions of the original (the stack slots of their temporaries come after the named locals).
-// A rotation matrix from Euler angles in degrees.
-static inline void setRotDegrees(Matrix* mtx, const Vec3f& degrees) {
-    Vec3f radians;
-    radians = degrees;
-    radians.scale(0.017453294f);
-    fn_8003ECA0(mtx, radians.m_x, radians.m_y, radians.m_z);
+// a + b as a value, through the out-of-line add: the sum is a temporary of the caller's statement, laid out in call
+// order (a named local for it would be laid out before the temporaries).
+static inline Vec3f vec3fSum(const Vec3f& a, const Vec3f& b) {
+    Vec3f sum;
+    vec3fAdd(&a, &b, &sum);
+    return sum;
 }
 
+// v += b through the out-of-line add (b's temporary is laid out in call order).
+static inline void vec3fAddTo(Vec3f* v, const Vec3f& b) {
+    vec3fAdd(v, &b, v);
+}
+
+// HYPOTHESIS: the original calls MSL's inline double fabs(double); this project's math.h makes fabs a macro over the
+// __fabs intrinsic, which drops the by-value parameter copy (see emKineticModuleImpl::reverseEnergy).
+static inline double fabsInline(double x) {
+    return __fabs(x);
+}
+
+// HYPOTHESIS: inline conversions of the original.
 // A rotation matrix from Euler angles in radians.
 static inline void setRotRadians(Matrix* mtx, const Vec3f& radians) {
     fn_8003ECA0(mtx, radians.m_x, radians.m_y, radians.m_z);
+}
+
+// Degrees to radians. Called in the caller's own statement, `setRotRadians(&mtx, toRadians(degrees))`: the returned
+// vector is then a temporary of the caller, laid out in call order; wrapped in another inline function (or as a named
+// local) it would be laid out after the caller's temporaries.
+static inline Vec3f toRadians(const Vec3f& degrees) {
+    Vec3f radians;
+    radians = degrees;
+    radians.scale(0.017453294f);
+    return radians;
 }
 
 // Radians to degrees.
@@ -199,9 +223,7 @@ float emKineticEnergy::startEnergySubLimit(float limit, float rate, float curren
     return limit + rate * levelScale;
 }
 
-// TODO(nonmatching): 99.02%, (a) the discarded `EM_IS_ROLL_KIND` test keeps a dead `cmpwi` in the original (4 bytes; an empty
-// if, a bool and a set-flag body all drop it), (b) one callee-saved float register fewer in the original (frame 0x1b0 vs
-// 0x1c0), (c) two scheduling slots. The shared start-angle handlers need the MATCH-ONLY gotos below.
+// The shared start-angle handlers need the MATCH-ONLY gotos below.
 void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, s32 paramId, float lr, int nodeId,
                                   const emKineticEnergyParam* param, grGimmickMotionPath* motionPath,
                                   bool fromPathStart, float angle, float reflectRate, float pathMotFrame,
@@ -250,11 +272,15 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, s32 paramId,
     }
     // HYPOTHESIS: unused tests of the kind (the original calls getEnergyTypeToGroup and discards the results).
     getEnergyTypeToGroup(m_param.m_kind);
+    float speed;
     if (EM_IS_ROLL_KIND(m_param.m_kind)) {
+        // MATCH-ONLY: the roll test's body is a store the following one makes dead; its compare survives in the
+        // original while the branch does not (an empty body or a never-read local drops the compare as well).
+        speed = 0.0f;
     }
     m_isStop = false;
     m_loopCount = 0;
-    float speed = 0.0f;
+    speed = 0.0f;
     m_moved = speed;
     m_baseEnergyId = -1;
     if ((int)m_param.m_speed.m_base == emKineticValue_None || (int)m_param.m_speed.m_base == emKineticValue_CurrentX ||
@@ -383,10 +409,11 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, s32 paramId,
     }
     float rate;
     if (getEnergyTypeToGroup(m_param.m_kind) == Group_Follow) {
-        rate = m_param.m_reflectRate;
-        if ((int)rate != emKineticValue_Random) {
+        // (The test precedes the assignment: as the last statement of the block it would branch the other way.)
+        if ((int)m_param.m_reflectRate != emKineticValue_Random) {
             return;
         }
+        rate = m_param.m_reflectRate;
     } else if ((int)m_param.m_reflectRate == emKineticValue_None) {
         if ((int)reflectRate == emKineticValue_None) {
             return;
@@ -414,7 +441,8 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, s32 paramId,
             return;
         }
         for (float frame = distance; frame < frames; frame += 1.0f) {
-            length = limitTransSpeedLengthMin(limitTransSpeedLengthMax(length + accel, m_param.m_maxSpeed.m_base),
+            length += accel;
+            length = limitTransSpeedLengthMin(limitTransSpeedLengthMax(length, m_param.m_maxSpeed.m_base),
                                               m_param.m_minSpeed.m_base);
             distance += length;
         }
@@ -433,8 +461,7 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, s32 paramId,
         } else {
             return;
         }
-        Vec3f rotSpeed = getRotSpeed(moduleAccesser, m_param.m_kind, realAngle, m_nodeId, true);
-        vec3fAdd(&rot, &rotSpeed, &rot);
+        vec3fAddTo(&rot, getRotSpeed(moduleAccesser, m_param.m_kind, realAngle, m_nodeId, true));
         posture->setRot(&rot, m_nodeId);
     }
     if (restart == 0 && EM_IS_PATH_MOTION_KIND(m_param.m_kind)) {
@@ -446,25 +473,24 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, s32 paramId,
             m_pathMotFrame = pathMotFrame;
         }
         m_worldRotZ = worldRotZ;
-        Vec3f scale;
+        float scale; // getTRS stores one float (include/gr/gr_gimmick_motion_path.h)
         m_motionPath->setFrame(m_pathMotFrame);
         m_motionPath->getTRS(&m_pathPos, &m_pathRot, &scale);
         if (fromPathStart == true) {
             float offsetY = soValueAccesser::getValueFloat(moduleAccesser, ValueFloat_PathMotOffsetY, 0);
             float offsetX = soValueAccesser::getValueFloat(moduleAccesser, ValueFloat_PathMotOffsetX, 0);
             Vec3f offset(offsetX, offsetY, 0.0f);
-            Vec3f pos = posture->getPos();
-            Vec3f newPos;
-            vec3fAdd(&pos, &offset, &newPos);
-            posture->setPos(&newPos);
+            // (The sum is a temporary of this statement, as in the original; MWCC takes its address.)
+            posture->setPos(&vec3fSum(posture->getPos(), offset));
             if (m_param.m_kind == Kind_PathMotionRot) {
-                float length = limitTransSpeedLengthMin(
-                    limitTransSpeedLengthMax(m_startLength + m_param.m_accel.m_base, m_param.m_maxSpeed.m_base),
-                    m_param.m_minSpeed.m_base);
+                float length = m_startLength + m_param.m_accel.m_base;
+                length = limitTransSpeedLengthMin(limitTransSpeedLengthMax(length, m_param.m_maxSpeed.m_base),
+                                                  m_param.m_minSpeed.m_base);
                 Vec3f nextPos;
                 Vec3f nextRot;
-                Vec3f nextScale;
-                m_motionPath->setFrame(m_pathMotFrame + length);
+                float nextScale;
+                float nextFrame = m_pathMotFrame + length;
+                m_motionPath->setFrame(nextFrame);
                 m_motionPath->getTRS(&nextPos, &nextRot, &nextScale);
                 Vec3f move = nextPos - m_pathPos;
                 float lrRot = 180.0f * (1.0f == m_lr ? 0.0f : 0.0f);
@@ -481,6 +507,27 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, s32 paramId,
     if (restart == 0) {
         updateEnergySpeed(moduleAccesser, false);
     }
+}
+
+// The energy parameter set's assignment (see the MATCH-ONLY note at the top: defined after startEnergy on purpose).
+inline emKineticEnergyParam& emKineticEnergyParam::operator=(const emKineticEnergyParam& other) {
+    m_kind = other.m_kind;
+    m_speed.m_base = other.m_speed.m_base;
+    m_speed.m_rate = other.m_speed.m_rate;
+    m_accel.m_base = other.m_accel.m_base;
+    m_accel.m_rate = other.m_accel.m_rate;
+    m_minSpeed.m_base = other.m_minSpeed.m_base;
+    m_minSpeed.m_rate = other.m_minSpeed.m_rate;
+    m_maxSpeed.m_base = other.m_maxSpeed.m_base;
+    m_maxSpeed.m_rate = other.m_maxSpeed.m_rate;
+    m_angle = other.m_angle;
+    m_amount = other.m_amount;
+    m_amountIsFrames = other.m_amountIsFrames;
+    m_endMode = other.m_endMode;
+    m_loopNum = other.m_loopNum;
+    m_reflectRate = other.m_reflectRate;
+    m_rollRadius = other.m_rollRadius;
+    return *this;
 }
 
 void emKineticEnergy::stopEnergy(soModuleAccesser* moduleAccesser) {
@@ -886,7 +933,6 @@ void emKineticEnergy::updateEnergySpeedSubPathMotWorldRotZ(soModuleAccesser* mod
     m_worldRotZ += diff;
 }
 
-// TODO(nonmatching): 97.75%, (a) local stack-slot order differs; the logic is believed right.
 void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool apply) {
     soPostureModule* posture = &moduleAccesser->getPostureModule();
     if (apply == true) {
@@ -910,16 +956,14 @@ void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool a
     case 22: {
         Vec3f pos;
         Vec3f rot;
-        Vec3f scale;
+        float scale;
         m_motionPath->setFrame(m_pathMotFrame);
         m_motionPath->getTRS(&pos, &rot, &scale);
         float offsetY = soValueAccesser::getValueFloat(moduleAccesser, ValueFloat_PathMotOffsetY, 0);
         float offsetX = soValueAccesser::getValueFloat(moduleAccesser, ValueFloat_PathMotOffsetX, 0);
         Vec3f offset(offsetX, offsetY, 0.0f);
-        Vec3f target;
-        vec3fAdd(&pos, &offset, &target);
-        Vec3f move = target - posture->getPos();
-        m_speed = Vec2f(move);
+        Vec3f move = vec3fSum(pos, offset) - posture->getPos();
+        m_speed = Vec2f(move.m_x, move.m_y);
         if (apply == true) {
             if (m_param.m_kind == Kind_PathMotionRot) {
                 Vec3f pathMove = pos - m_pathPos;
@@ -958,14 +1002,13 @@ void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool a
             // Moves the posture directly, in the frame of the enemy's top node.
             if (apply == true) {
                 Enemy* enemy = &dynamic_cast<Enemy&>(moduleAccesser->getStageObject());
-                int front = moduleAccesser->getWorkManageModule().isFlag(WorkFlag_Front);
-                Vec3f topRot = enemy->getEmTopNRot(posture->getRotYLr(), front);
+                Vec3f topRot = enemy->getEmTopNRot(posture->getRotYLr(),
+                                                   moduleAccesser->getWorkManageModule().isFlag(WorkFlag_Front));
                 Matrix mtx;
-                setRotDegrees(&mtx, topRot);
+                setRotRadians(&mtx, toRadians(topRot));
                 fn_8003E3BC(&mtx, &trans, &trans);
                 vec3fMulAssign(&trans, moduleAccesser->getSlowModule().getRate());
-                Vec3f pos = posture->getPos();
-                vec3fAdd(&trans, &pos, &trans);
+                vec3fAddTo(&trans, posture->getPos());
                 posture->setPos(&trans);
                 m_speed = Vec2f(0.0f, 0.0f);
             }
@@ -973,11 +1016,11 @@ void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool a
             if (moduleAccesser->getWorkManageModule().isFlag(WorkFlag_Front) == false) {
                 trans.m_x = trans.m_z * m_lr;
             } else {
-                trans.m_x = m_lr * (float)__fabs(trans.m_x);
+                trans.m_x = m_lr * (float)fabsInline(trans.m_x);
             }
             float angle = getRealAngle(moduleAccesser, m_transAngle, m_nodeId);
-            Vec2f move(trans.m_x, trans.m_y);
-            rotVec2f(&move, 0.017453292f * (angle * m_lr), &speed);
+            // (The rotated vector is a temporary of this statement, as in the original; MWCC takes its address.)
+            rotVec2f(&Vec2f(trans.m_x, trans.m_y), 0.017453292f * (angle * m_lr), &speed);
             m_speed = speed;
         }
         break;
@@ -991,8 +1034,7 @@ void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool a
         m_rotSpeed = getRotSpeed(moduleAccesser, m_param.m_kind, m_length, m_nodeId, true);
         if (apply == true) {
             vec3fMulAssign(&m_rotSpeed, moduleAccesser->getSlowModule().getRate());
-            Vec3f rot = posture->getRot(m_nodeId);
-            vec3fAdd(&m_rotSpeed, &rot, &m_rotSpeed);
+            vec3fAddTo(&m_rotSpeed, posture->getRot(m_nodeId));
             posture->setRot(&m_rotSpeed, m_nodeId);
             m_rotSpeed = Vec3f(0.0f, 0.0f, 0.0f);
         }
@@ -1048,8 +1090,8 @@ void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool a
     if (EM_IS_ROLL_KIND(m_param.m_kind) &&
         m_param.m_rollRadius > 0.0f && m_nodeId >= 0) {
         // Roll the node by the distance covered.
-        float circumference = 3.1415927f * (2.0f * m_param.m_rollRadius);
-        float rotLength = 360.0f * (m_length / circumference);
+        float rotLength = 3.1415927f * (2.0f * m_param.m_rollRadius); // the circumference of the roll,
+        rotLength = 360.0f * (m_length / rotLength);                   // then the turn covering the distance
         int kind;
         switch (m_param.m_kind) {
         case 8:
@@ -1079,9 +1121,11 @@ void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool a
         default:
             return;
         }
-        if (kind >= 2 && kind <= 4) {
+        if ((u32)(kind - 2) <= 2) {
+            // (The original fetches the posture module again here, before lr's initial value.)
+            soPostureModule& rollPosture = moduleAccesser->getPostureModule();
             float lr = 1.0f;
-            if (posture->getRotYLr() != 90.0f) {
+            if (rollPosture.getRotYLr() != 90.0f) {
                 lr = -1.0f;
             }
             if (m_lr != lr) {
@@ -1090,8 +1134,7 @@ void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool a
         }
         m_rotSpeed = getRotSpeed(moduleAccesser, kind, rotLength, m_nodeId, true);
         if (apply == true) {
-            Vec3f rot = posture->getRot(m_nodeId);
-            vec3fAdd(&m_rotSpeed, &rot, &m_rotSpeed);
+            vec3fAddTo(&m_rotSpeed, posture->getRot(m_nodeId));
             posture->setRot(&m_rotSpeed, m_nodeId);
             m_rotSpeed = Vec3f(0.0f, 0.0f, 0.0f);
         }
@@ -1382,9 +1425,6 @@ float emKineticEnergy::getRotSpeedLength(soModuleAccesser* moduleAccesser) {
     return m_length;
 }
 
-// TODO(nonmatching): 99.02%, (a) only the stack slots of the temporaries differ: the original lays the by-value copies of
-// the setRotDegrees inlines out in call order between the other temporaries, ours puts them last (taking the vector by
-// value instead gives inline copies where the original calls Vec3f::operator=; the permuter found nothing).
 Vec3f emKineticEnergy::getRotSpeed(soModuleAccesser* moduleAccesser, int kind, float length, int nodeId, bool useLr) {
     Vec3f result(0.0f, 0.0f, 0.0f);
     soPostureModule& posture = moduleAccesser->getPostureModule();
@@ -1392,8 +1432,8 @@ Vec3f emKineticEnergy::getRotSpeed(soModuleAccesser* moduleAccesser, int kind, f
     Vec3f nodeRot = posture.getRot(nodeId);
     if ((u32)(kind - 2) <= 2) {
         // Around an axis of the enemy's frame (kinds 2-4).
-        int front = moduleAccesser->getWorkManageModule().isFlag(WorkFlag_Front);
-        Vec3f topRot = enemy->getEmTopNRot(posture.getRotYLr(), front);
+        Vec3f topRot =
+            enemy->getEmTopNRot(posture.getRotYLr(), moduleAccesser->getWorkManageModule().isFlag(WorkFlag_Front));
         Vec3f prevRot;
         Vec3f newRot;
         Matrix topMtx(true);
@@ -1404,12 +1444,12 @@ Vec3f emKineticEnergy::getRotSpeed(soModuleAccesser* moduleAccesser, int kind, f
         Matrix topInverse(true);
         Matrix work3(true);
         if (nodeId == 0) {
-            front = moduleAccesser->getWorkManageModule().isFlag(WorkFlag_Front);
-            topRot = enemy->getEmLrRot(posture.getRotYLr(), front);
+            topRot =
+                enemy->getEmLrRot(posture.getRotYLr(), moduleAccesser->getWorkManageModule().isFlag(WorkFlag_Front));
         }
-        setRotDegrees(&topMtx, topRot);
+        setRotRadians(&topMtx, toRadians(topRot));
         topMtx.inverse(&topInverse);
-        setRotDegrees(&nodeMtx, nodeRot);
+        setRotRadians(&nodeMtx, toRadians(nodeRot));
         prevRot = nodeRot;
         prevRot.scale(0.017453294f);
         setRotRadians(&rotMtx, Vec3f(0.0f, 0.0f, 0.0f));
@@ -1443,7 +1483,7 @@ Vec3f emKineticEnergy::getRotSpeed(soModuleAccesser* moduleAccesser, int kind, f
         Vec3f prevRot;
         Vec3f newRot;
         Matrix nodeMtx(true);
-        setRotDegrees(&nodeMtx, nodeRot);
+        setRotRadians(&nodeMtx, toRadians(nodeRot));
         nodeMtx.getRotate(&prevRot);
         if (kind == 5) {
             fn_8003EA9C(&nodeMtx, 0.017453292f * length);

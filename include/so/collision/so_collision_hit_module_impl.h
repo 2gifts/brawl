@@ -7,13 +7,17 @@
 #include <so/so_array.h>
 #include <so/event/so_event_presenter.h>
 #include <so/status/so_status_event_presenter.h>
-#include <so/collision/so_collision_hit_event_presenter.h>
 #include <so/anim/so_anim_cmd_event_presenter.h>
 #include <so/so_null.h>
 #include <types.h>
 
 struct soCollisionAttackData;
 class soModuleAccesser;
+// The hit event observer is complete after this module in the original (the type information order of the sora_enemy
+// damage unit); a unit that needs it includes so/collision/so_collision_hit_event_presenter.h.
+class soCollisionHitEventObserver;
+class soCollisionAttackModule;
+class soCollisionLog;
 
 class soCollisionHitModule : public soNullable {
 public:

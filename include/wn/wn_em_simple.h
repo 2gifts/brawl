@@ -9,6 +9,7 @@
 #include <ft/builder/ft_dol_instances.h>
 #include <so/so_array.h>
 #include <so/event/so_event_presenter.h>
+#include <so/damage/so_damage_event_presenter.h>
 #include <types.h>
 #include <ut/ut_list.h>
 #include <wn/wn_weapon_builder.h>

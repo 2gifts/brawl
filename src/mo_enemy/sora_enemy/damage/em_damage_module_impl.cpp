@@ -37,6 +37,29 @@
 // MATCH-ONLY: the registration of an observer base (addObserverSub) is the sora_melee instance of the template member, a
 // call and not an expansion (see so/event/so_event_presenter.h).
 #define SO_EVENT_OBSERVER_ADD_SUB_EXTERN
+// The includes reproduce the original's class definition order, which MWCC's type information order in .data reverses
+// (the linked unit keeps: Fighter and its ftEntry, item manage and damage observers; emStopModuleImpl; emDamageModuleImpl;
+// soDamageEffectorImpl; emCollisionHitModuleImpl; BaseItem; soDamageModuleImpl; soDamageEffector; the null transactor;
+// soDamageTransactor; soDamageModule; the gimmick and turn observers; soStopModule(Impl); the hit and shield observers;
+// soCollisionHitModule(Impl); the motion observer; the anim cmd observer's vtable).
+// With that order and the weak destructors after the constructor (soDamageEffector's before soDamageEffectorImpl's, see
+// wn/wn_damage_effector_impl.h) a test link of the unit differs from the original only in setupDamageStatusNormal's bytes.
+#include <ft/ft_event_unit_instance.h> // (ft/ft_manager.h specializes soInstanceUnit<soEventUnit*>, so it comes before the event system headers.)
+#include <so/anim/so_anim_cmd_event_presenter.h>
+#include <so/motion/so_motion_event_presenter.h>
+#include <so/collision/so_collision_hit_module_impl.h>
+#include <so/collision/so_collision_shield_event_presenter_shield.h>
+#include <so/collision/so_collision_hit_event_presenter.h>
+#include <so/stop/so_stop_module_impl.h>
+#include <so/turn/so_turn_event_presenter.h>
+#include <so/event/so_gimmick_event_presenter.h>
+#include <so/damage/so_damage_module_impl.h>
+#include <it/item.h>
+#include <em/collision/em_collision_hit_module_impl.h>
+#include <wn/wn_damage_effector_impl.h>
+#include <em/damage/em_damage_module_impl.h>
+#include <em/stop/em_stop_module_impl.h>
+#include <ft/fighter.h>
 #include <StaticAssert.h>
 #include <mt/mt_vector.h>
 #include <so/so_null.h>
@@ -47,7 +70,6 @@
 #include <gf/gf_task.h>
 #include <so/event/so_event_system.h>
 #include <so/event/so_event_presenter.h>
-// (ft/ft_manager.h specializes soInstanceUnit<soEventUnit*>, so it comes before the event system headers.)
 #include <ft/ft_manager.h>
 #include <em/enemy.h>
 #include <em/damage/em_damage_module_impl.h>
@@ -446,12 +468,20 @@ void emDamageModuleImpl::setupDamageStatusNormalSubReflect(soGroundModule* groun
 // The normal hit reaction: from the hit it works out the stun frames, the damage level and the launch speed and angle,
 // launches the enemy and writes the result to the work (which the AI and the damage statuses read). A defeated enemy that
 // a fighter hits becomes a projectile (flag WorkFlag_Bullet) of the fighter's team.
-// TODO(nonmatching): 99.1%, (a) only the float registers differ: the original gives frameReaction f31, speedLr f30,
-// reaction f29, and its reaction clamp writes the result into reaction's register (ours into minReaction's, then a
-// copy). Tried without effect: declaration order and position of the floats, a ternary, temporaries in the clamp,
-// inline helpers for the minimum and the clamp, and speedLr as a repeated expression.
-// The permuter (0.1 compiles/s on this 2.6 kB function, 56 in 15 minutes) only found a no-gain operand swap.
+// TODO(nonmatching): 99.35%, (a) only the float registers differ: the original gives frameReaction f31, speedLr f30,
+// reaction f29, baseReaction f28, minReaction f27; ours puts speedLr last (f27) and shifts reaction, baseReaction and
+// minReaction up one. Declaring frameReaction and speedLr first fixed frameReaction's register and the `over`
+// temporary fixed the clamp (the original writes the else result straight into reaction's register). speedLr rises
+// to f30, with everything else exact, whenever the function holds two more float loads of vector members (for
+// example `reflected.m_x = speed.m_x; reflected.m_y = speed.m_y;` in place of the copy-initialization, or two dead
+// member copies anywhere after angle), but every such form changes bytes elsewhere; the original's two loads are
+// not identified. Tried without effect: floorf/cosf/sinf/acosf, by-value and reference inline helpers, hoisting the
+// other locals, `register`, expression forms of the minimum. Two 10-minute permuter runs found nothing better.
 void emDamageModuleImpl::setupDamageStatusNormal(soDamage* damage, bool isCaptured) {
+    // Declared first: the stun frames and the launch direction are the floats the original keeps in f31 and f30
+    // (declaring them where they are computed hands f31 to reaction).
+    float frameReaction;
+    float speedLr;
     dynamic_cast<emStopModuleImpl&>(m_moduleAccesser->getStopModule());
     emKineticModuleImpl& kinetic = dynamic_cast<emKineticModuleImpl&>(m_moduleAccesser->getKineticModule());
     soPostureModule& posture = m_moduleAccesser->getPostureModule();
@@ -500,7 +530,8 @@ void emDamageModuleImpl::setupDamageStatusNormal(soDamage* damage, bool isCaptur
     if (reaction < minReaction) {
         reaction = minReaction;
     } else {
-        reaction = minReaction + (reaction - minReaction) * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbfc, 0);
+        float over = (reaction - minReaction) * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbfc, 0);
+        reaction = minReaction + over;
     }
     if (isFlinchless == true) {
         reaction *= soValueAccesser::getValueFloat(m_moduleAccesser, 0xbcb, 0);
@@ -515,11 +546,10 @@ void emDamageModuleImpl::setupDamageStatusNormal(soDamage* damage, bool isCaptur
         }
     }
     if (isCaptured == true) {
-        float captureBase = soValueAccesser::getValueFloat(m_moduleAccesser, 0xbff, 0);
-        reaction *= soValueAccesser::getValueFloat(m_moduleAccesser, 0xc00, 0);
-        reaction = captureBase + reaction;
+        reaction = soValueAccesser::getValueFloat(m_moduleAccesser, 0xbff, 0) +
+                   reaction * soValueAccesser::getValueFloat(m_moduleAccesser, 0xc00, 0);
     }
-    float frameReaction = reaction * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbd4, 0);
+    frameReaction = reaction * soValueAccesser::getValueFloat(m_moduleAccesser, 0xbd4, 0);
     if (isKnockout == false) {
         frameReaction *= soValueAccesser::getValueFloat(m_moduleAccesser, 0xbb9, 0);
         if (isDefeated == true) {
@@ -534,7 +564,7 @@ void emDamageModuleImpl::setupDamageStatusNormal(soDamage* damage, bool isCaptur
     float angle = getDamageAngle(reaction, attackVector, situation, isKnockout, isFlinchless, damage->m_speed, damage->m_lr);
     int meteorFrame = 0;
     checkDamageMeteor(attackVector, &meteorFrame);
-    float speedLr = -1.0f * damage->m_lr;
+    speedLr = -1.0f * damage->m_lr;
     reaction *= soValueAccesser::getValueFloat(m_moduleAccesser, 0xbd3, 0);
     if (isKnockout == false) {
         reaction *= soValueAccesser::getValueFloat(m_moduleAccesser, 0xbbb, 0);

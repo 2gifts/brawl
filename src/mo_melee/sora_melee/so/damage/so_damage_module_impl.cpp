@@ -1,4 +1,5 @@
 #include <so/damage/so_damage_module_impl.h>
+#include <so/damage/so_damage_event_presenter.h>
 #include <so/so_module_accesser.h>
 #include <gf/gf_task_scheduler.h>
 #include <so/so_external_value_accesser.h>

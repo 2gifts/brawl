@@ -57,8 +57,8 @@ bool fn_27_14D550(int statusKind);
 // The area contact of ftManager takes the index of the instance as a second output, which the one-parameter declaration
 // of BrawlHeaders lacks (the symbol is the same).
 extern "C" int getEntryIdFromAreaId__9ftManagerCFi(const ftManager* manager, int areaId, int* instanceIndex);
-// HYPOTHESIS: the angle of a vector in radians (atan2) of the REL, which the enemy units call for their aim.
-extern "C" float fn_41_15FB0(float y, float x);
+// MSL's atan2f, called through its out-of-line weak copy (shared with the kinetic module unit).
+extern "C" float atan2f(float y, float x);
 float vec2fAngle(Vec2f* a, Vec2f* b);
 
 // MATCH-ONLY: Vec2f::rot called in the native argument order (angle before the output vector; r3 this, r4 out, f1 angle),
@@ -85,19 +85,22 @@ static inline Enemy& getEnemy(soModuleAccesser* acc) {
     return dynamic_cast<Enemy&>(acc->getStageObject());
 }
 
+// The center of the enemy that asks, written into the caller's vector. The assignment happens inside the inline
+// helper so that the getCenterPos temporary is numbered after the by-value argument copies of the callers below
+// (MWCC lays out expression temporaries in creation order; an assignment in the caller puts it above them).
+static inline void getSelfCenterPos(soModuleAccesser* acc, Vec3f& center) {
+    center = emExternalValueAccesser::getCenterPos(&getEnemy(acc));
+}
+
 extern char g_soTeamModuleNullArg[];
 
-// TODO(nonmatching): 99.78%, (a) the order of the two m_areas stores (the original writes the size before the
-// elements); the implicit soSet copy writes its members in declaration order, and a named soSet local, a soSet
-// constructor that assigns the size first and moving the targetRanges store do not change it.
-// A ~1000-compile permuter run found nothing either.
 emAreaModuleImpl::emAreaModuleImpl(soModuleAccesser* acc, int areaNum, void* areaParams, void* targetRanges,
                                    soArray<soAreaInstance>* instances, void* areaWork, void* wind)
     : soAreaModuleImpl(acc, soAreaData::Category_Enemy, instances, &m_contactLogs, &m_envChecker,
                        static_cast<soArray<soAreaWind>*>(wind),
                        reinterpret_cast<soEventObserverRegistrationDesc*>(g_soTeamModuleNullArg), -1),
       m_moduleAccesser(acc), m_areaParams(static_cast<emAreaParam*>(areaParams)), m_contactLogs(0), m_envChecker() {
-    m_areas = soSet<soAreaData>(static_cast<soAreaData*>(areaWork), areaNum);
+    m_areas.set(static_cast<soAreaData*>(areaWork), areaNum);
     m_targetRanges = static_cast<float*>(targetRanges);
 }
 
@@ -603,8 +606,8 @@ float emAreaModuleImpl::getTargetAngleToMotionFrameSub(soModuleAccesser* acc, Ve
     if (diff.length() == 0.0f) {
         return -1.0f;
     }
-    float dirAngle = RadToDeg * fn_41_15FB0(dir.m_y, dir.m_x);
-    float diffAngle = RadToDeg * fn_41_15FB0(diff.m_y, diff.m_x);
+    float dirAngle = RadToDeg * atan2f(dir.m_y, dir.m_x);
+    float diffAngle = RadToDeg * atan2f(diff.m_y, diff.m_x);
     float angle = dirAngle - diffAngle;
     if (1.0f != rotSign) {
         if (-1.0f == rotSign) {
@@ -883,8 +886,8 @@ s32 emAreaModuleImpl::getTargetRotSpeedDirForAxisAdjustSub(soModuleAccesser* acc
     self.m_y = y;
     Vec2f target(pos->m_x + offset.m_x, pos->m_y + offset.m_y);
     Vec2f diff = target - self;
-    float axisAngle = RadToDeg * fn_41_15FB0(axis.m_y, axis.m_x);
-    float diffAngle = RadToDeg * fn_41_15FB0(diff.m_y, diff.m_x);
+    float axisAngle = RadToDeg * atan2f(axis.m_y, axis.m_x);
+    float diffAngle = RadToDeg * atan2f(diff.m_y, diff.m_x);
     float turn = diffAngle - axisAngle;
     // MATCH-ONLY: the complementary else-ifs keep the original branches (see getTargetDirSub).
     if (turn > 0.0f) {
@@ -1069,10 +1072,6 @@ float emAreaModuleImpl::getTargetFoundKineticAngleSub(float lr, Vec3f self, Vec3
     return emKineticModuleImpl::getKineticAngleFromSpeed(lr, speed);
 }
 
-// TODO(nonmatching): 99.90%, (a) stack slots: the original puts the getCenterPos temporary below the two by-value
-// copies of the arguments (ours above them); calling getLr inside the argument list, an inner block and an inline
-// helper for the center do not move it; passing the getCenterPos result straight into the call or declaring the center
-// at its first use is worse (72-92%), and an 840-compile permuter run found nothing. Same in getTargetKineticAngle.
 float emAreaModuleImpl::getTargetFoundKineticAngle(soModuleAccesser* acc, u32 area, Vec2f offset, u32 useLr) {
     Vec3f pos = getTargetFoundPos(acc, area, true);
     float lr = 1.0f;
@@ -1083,12 +1082,11 @@ float emAreaModuleImpl::getTargetFoundKineticAngle(soModuleAccesser* acc, u32 ar
     pos.m_x += offset.m_x;
     pos.m_y += offset.m_y;
     Vec3f self(0.0f, 0.0f, 0.0f);
-    self = emExternalValueAccesser::getCenterPos(&getEnemy(acc));
+    getSelfCenterPos(acc, self);
     float selfLr = acc->getPostureModule().getLr();
     return getTargetFoundKineticAngleSub(selfLr, self, pos);
 }
 
-// TODO(nonmatching): 99.90%, (a) the stack slots of getTargetFoundKineticAngle.
 float emAreaModuleImpl::getTargetKineticAngle(soModuleAccesser* acc, u32 area, Vec2f offset, u32 useLr) {
     Vec3f pos = getTargetPos(acc, area, true);
     float lr = 1.0f;
@@ -1099,7 +1097,7 @@ float emAreaModuleImpl::getTargetKineticAngle(soModuleAccesser* acc, u32 area, V
     pos.m_x += offset.m_x;
     pos.m_y += offset.m_y;
     Vec3f self(0.0f, 0.0f, 0.0f);
-    self = emExternalValueAccesser::getCenterPos(&getEnemy(acc));
+    getSelfCenterPos(acc, self);
     float selfLr = acc->getPostureModule().getLr();
     return getTargetFoundKineticAngleSub(selfLr, self, pos);
 }
