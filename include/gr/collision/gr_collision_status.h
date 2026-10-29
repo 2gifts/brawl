@@ -56,7 +56,7 @@ public:
     int m_unkB : 8;
 
     u32 m_unkC : 8;
-    u32 m_cliffSide : 8; // HYPOTHESIS: 0 = left, 1 = right, 2 = both (cliff check side picked by the shape operators)
+    int m_cliffSide : 8; // signed field (grCollisionTest::stopEdgeCorrect compares it with 0 / 1) (cluster B); HYPOTHESIS: 0 = left, 1 = right, 2 = both (cliff check side picked by the shape operators)
     // 14
     union {
         struct {
@@ -69,7 +69,9 @@ public:
     // 16
     int m_taskId;
     // 20
-    char _spacer2a[32];
+    char _spacer2a[8];
+    Vec2f m_unk1C; // role: reference point the cliff candidates are measured from (grCollisionTest::updateCliffInfo, testCliffCheck) (cluster C)
+    char _spacer2c[16];
     // 52
     Vec2f m_cliffPos;
     char _spacer2b[24];
@@ -89,11 +91,12 @@ public:
     grCollStatusEventReceiver* m_receiver;
     // 104
     grCollision* m_unk104; // HYPOTHESIS: collision updated before the status test (grCollisionManager::processPreMapCorrection)
-    char _spacer4[2];
+    int m_unk6C : 8; // role: 1 = run the attached/air tests in grCollisionTest::test; testRightWallMain etc. skip when 1 (cluster C)
+    u8 m_unk6D : 8; // (a byte bitfield: grCollisionTest::testAttached assigns it with lbz/rlwimi/stb) role: bit n set = touch id n is attached (the wall tests check bits 2, 1, 0) (cluster C)
     // 110
     char m_targetLineCategory;
     // 111
-    char _spacer5[1];
+    u8 m_unk6F; // role: break-object event mask, bit 7 up / 6 down / 5 left / 4 right (grCollisionTest::testAir -> notifyEventBreakObject) (cluster B)
     // 112
     bool m_attackPointBreak0 : 1;
     bool m_attackPointBreak1 : 1;
@@ -135,14 +138,19 @@ public:
 
     // 117
 
-    bool m_touchDown : 1;
-    bool m_touchUp : 1;
-    bool m_touchLeft : 1;
-    bool m_touchRight : 1;
-    bool m_touchUpRight : 1;
-    bool m_touchUpLeft : 1;
-    bool m_touchDownRight : 1;
-    bool m_touchDownLeft : 1;
+    union {
+        struct {
+            bool m_touchDown : 1;
+            bool m_touchUp : 1;
+            bool m_touchLeft : 1;
+            bool m_touchRight : 1;
+            bool m_touchUpRight : 1;
+            bool m_touchUpLeft : 1;
+            bool m_touchDownRight : 1;
+            bool m_touchDownLeft : 1;
+        };
+        u8 m_touchBits : 8; // all eight touch flags at once (grCollisionTest::test clears them with one read-modify-write) (cluster A)
+    };
 
     // 118
     char _spacer6[6];
@@ -156,11 +164,12 @@ public:
     // 140
     Vec2f m_touchLineSpeed;
     // 148
-    char _spacer7[32];
+    Vec2f m_unk94; // role: the up shape corner (getTopPos) stored by grCollisionTest::testTopMain (cluster C)
+    Vec2f m_unk9C; // role: the left shape corner (getLeftPos) stored by testLeftWallMain (cluster C)
+    Vec2f m_unkA4; // role: the right shape corner (getRightPos) stored by testRightWallMain (cluster C)
+    Vec2f m_unkAC; // role: the down shape corner (getDownPos) stored by testGround (cluster B, per layout notes)
     // 180
-    Vec2f m_180[3];
-    // 204
-    char _spacer8[8];
+    Vec2f m_180[4]; // role: the normals of the corner touch edges (test() writes them for upLeft, upRight, downLeft, downRight); 0xCC..0xD3 were _spacer8 (cluster A)
     // 212
     grCollisionLineWork m_collLineWorkArray[19];
     // 516
