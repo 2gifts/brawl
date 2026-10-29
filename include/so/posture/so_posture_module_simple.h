@@ -13,9 +13,6 @@ struct soEventObserverRegistrationDesc;
 
 class soPostureModule : public soNullable {
 public:
-    // The offset of a point flipped for the facing lr, turned by rot (radians) and scaled by scl (map name; the enemy
-    // area module has the weak copy).
-    static Vec2f adjustPosOffset(Vec2f offset, float lr, float scl, float rot);
     virtual ~soPostureModule();
     virtual void init(Vec3f* pos, float lr);
     virtual void initPos(Vec3f* pos);
@@ -50,6 +47,10 @@ public:
     virtual void setSyncConstraintNode(int);
     virtual void fixConstraintNodePosture(int, void*);
     virtual void fixRot();
+
+    // The offset of a point flipped for the facing lr, turned by rot (radians) and scaled by scl (map name; the enemy
+    // area module has the weak copy).
+    static Vec2f adjustPosOffset(Vec2f offset, float lr, float scl, float rot);
 };
 
 class soPostureModuleSimple : public soPostureModule {
