@@ -182,7 +182,7 @@ public:
     bool isExistEntry() const;
     int enumEntryId(int entryId) const;
     int enumIncludeEntryId(int entryId) const;
-    int getEntryIdFromAreaId(int areaId) const;
+    int getEntryIdFromAreaId(int areaId, int* instanceIndex) const;
     bool isEnableDiscretionFinal() const;
     void start();
     void quitGame();

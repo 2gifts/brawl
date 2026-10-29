@@ -54,17 +54,9 @@ extern "C" {
 bool fn_27_14D530(int statusKind);
 bool fn_27_14D550(int statusKind);
 }
-// The area contact of ftManager takes the index of the instance as a second output, which the one-parameter declaration
-// of BrawlHeaders lacks (the symbol is the same).
-extern "C" int getEntryIdFromAreaId__9ftManagerCFi(const ftManager* manager, int areaId, int* instanceIndex);
 // MSL's atan2f, called through its out-of-line weak copy (shared with the kinetic module unit).
 extern "C" float atan2f(float y, float x);
 float vec2fAngle(Vec2f* a, Vec2f* b);
-
-// MATCH-ONLY: Vec2f::rot called in the native argument order (angle before the output vector; r3 this, r4 out, f1 angle),
-// as the Cataguard weapon unit does (mt/mt_vector.h declares rot(Vec2f*, float)).
-#define rotVec2f rot__5Vec2fFP5Vec2ff
-extern "C" void rotVec2f(Vec2f* self, float angle, Vec2f* out);
 
 // The argument types of acCmdArg::getArgType that the area anim cmds accept besides plain values.
 static const s32 CmdArgType_ValueIndex = 5;
@@ -114,8 +106,8 @@ void emAreaModuleImpl::setSideLineVec() {
         Vec2f side;
         side.m_x = 1.0f;
         side.m_y = 0.0f;
-        rotVec2f(&side, 0.017453292f * halfAngle, &m_sideLine0);
-        rotVec2f(&side, 0.017453292f * -halfAngle, &m_sideLine1);
+        side.rot(0.017453292f * halfAngle, &m_sideLine0);
+        side.rot(0.017453292f * -halfAngle, &m_sideLine1);
     }
 }
 
@@ -278,7 +270,7 @@ bool emAreaModuleImpl::checkArea(soModuleAccesser* acc, u32 area, u32 kind) {
                 continue;
             }
             int instanceIndex = 0;
-            int entryId = getEntryIdFromAreaId__9ftManagerCFi(g_ftManager, log->m_areaId, &instanceIndex);
+            int entryId = g_ftManager->getEntryIdFromAreaId(log->m_areaId, &instanceIndex);
             if (entryId == -1) {
                 continue;
             }
@@ -625,7 +617,7 @@ float emAreaModuleImpl::getTargetAngleToMotionFrameSub(soModuleAccesser* acc, Ve
 // The offset of a target flipped for the facing lr, turned by rot (radians) and scaled by scl (a weak copy).
 inline Vec2f soPostureModule::adjustPosOffset(Vec2f offset, float lr, float scl, float rot) {
     offset.m_x = offset.m_x * lr;
-    rotVec2f(&offset, rot, &offset);
+    offset.rot(rot, &offset);
     offset.m_x = offset.m_x * scl;
     offset.m_y = offset.m_y * scl;
     return offset;

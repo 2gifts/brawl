@@ -65,7 +65,7 @@ public:
     // Starts a pooled article: lr and speed, the founder and owner ids, the shot work block and the position (see
     // fn_41_3091C, wnemSimple's activation). Does nothing without a work block.
     virtual void activateObject(wnemSimple* wnem, float lr, float speed, int founderTaskId, int ownerId,
-                                emShotWork* work, int p7, Vec3f* pos, int team, int p10, bool flag, int life, s16 p13);
+                                wnemSimple_Data* work, int p7, Vec3f* pos, int team, int p10, bool flag, int life, s16 p13);
     virtual void deactivateObject(wnemSimple* wnem);
     virtual void resetProcFncList();
     virtual void resetManageWeaponList();

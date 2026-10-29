@@ -47,10 +47,6 @@ template bool soInstanceManagerFixed<soKineticEnergy*>::isEmpty() const;
 
 float vec2fAngle(Vec2f* a, Vec2f* b);
 
-// MATCH-ONLY: the original callers of Vec2f::rot evaluate the angle before the output vector (the native declaration
-// likely takes the angle first); this unit calls the same symbol in that order, as wnem_proc_cataguard.cpp does.
-#define rotVec2f rot__5Vec2fFP5Vec2ff
-extern "C" void rotVec2f(Vec2f* self, float angle, Vec2f* out);
 extern "C" {
 void fn_8003E3BC(const Matrix*, const Vec3f*, Vec3f*); // HYPOTHESIS: the matrix-vector product (map: unnamed)
 float fn_8003DF9C(const Vec3f*, const Vec3f*);         // HYPOTHESIS: the angle between two vectors (map: unnamed)
@@ -184,9 +180,9 @@ Vec2f emKineticModuleImpl::getTraSpeedLevelGround(soModuleAccesser* moduleAccess
     tangent.m_y = normal3.m_z * axis.m_x - normal3.m_x * axis.m_z;
     tangent.m_z = normal3.m_x * axis.m_y - normal3.m_y * axis.m_x;
     if (dotProduct(&Vec2f(tangent.m_x, tangent.m_y), &result) >= 0.0f) {
-        rotVec2f(&normal, -1.5707964f, &normal);
+        normal.rot(-1.5707964f, &normal);
     } else {
-        rotVec2f(&normal, 1.5707964f, &normal);
+        normal.rot(1.5707964f, &normal);
     }
     // MATCH-ONLY: the literal of the inline Vec2f::length (the original pools it here, at the first call, although
     // the call is out of line).

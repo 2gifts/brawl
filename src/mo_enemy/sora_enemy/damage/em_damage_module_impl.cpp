@@ -43,7 +43,7 @@
 // soDamageTransactor; soDamageModule; the gimmick and turn observers; soStopModule(Impl); the hit and shield observers;
 // soCollisionHitModule(Impl); the motion observer; the anim cmd observer's vtable).
 // With that order and the weak destructors after the constructor (soDamageEffector's before soDamageEffectorImpl's, see
-// wn/wn_damage_effector_impl.h) a test link of the unit differs from the original only in setupDamageStatusNormal's bytes.
+// wn/wn_damage_effector_impl.h) the unit's .data and weak copies come out as in the original.
 #include <ft/ft_event_unit_instance.h> // (ft/ft_manager.h specializes soInstanceUnit<soEventUnit*>, so it comes before the event system headers.)
 #include <so/anim/so_anim_cmd_event_presenter.h>
 #include <so/motion/so_motion_event_presenter.h>

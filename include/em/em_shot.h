@@ -23,7 +23,7 @@ struct emShotParam {
     u32 m_life;            // 0x10, overwritten from a scaled constant when m_lifeConstantId names one
     float m_speed;         // 0x14
     u8 unk18[0x4];
-    u32 m_nodeId;          // 0x1C, the model node the shot starts from unless the anim cmd names one (emShotWork::m_nodeId)
+    u32 m_nodeId;          // 0x1C, the model node the shot starts from unless the anim cmd names one (wnemSimple_Data::m_nodeId)
     u8 unk20[0x18];
     emScaledValue m_speedRange[2]; // 0x38, Popperam: the bounds of the random launch speed
     emScaledValue m_angleRange[2]; // 0x48, Popperam: the bounds of the random launch angle, in degrees
@@ -53,7 +53,7 @@ struct emShotFlag {
 
 // The work block of the shot helpers (0x34 bytes of the Enemy unit's bss).
 // HYPOTHESIS: field roles from the activators' writes.
-struct emShotWork {
+struct wnemSimple_Data {
     emShotParam* m_param;
     u8 unk4[0x2];
     bool m_unk6;           // cleared by the boomerang Primid before emWeaponUtil::calcWeaponRotation
@@ -72,16 +72,17 @@ struct emShotWork {
     float m_accelY;
     void* m_constantParam; // 0x28, Botron: an indefinite constant of the shot
     u8 unk2C[0x8];
-    // The inline constructor the unit's static initializer runs (map name wnemSimple_Data constructor): it only sets
-    // the description pointer.
-    emShotWork(emShotParam* param) : m_param(param) { }
+    // The inline constructor the unit's static initializer runs (the module map's wnemSimple_Data::__ct, weak, at
+    // 0x47FAC): it only sets the description pointer. wnemSimple's constructors build their m_shotWork member with the
+    // default constructor (fn_41_2D9B4), which clears it.
+    wnemSimple_Data(emShotParam* param) : m_param(param) { }
 };
-extern emShotWork lbl_41_bss_504;
+extern wnemSimple_Data lbl_41_bss_504;
 
 // The launch description of an enemy weapon, at +0x4 of the shot work; Enemy::shoot / addParts reset it before they
 // generate the article (the reset is a weak copy of the Enemy unit).
 // HYPOTHESIS: field roles; unk4 is overwritten with the third argument of Enemy::shoot.
-// TODO(layout): embed it in emShotWork (whose unk4..m_constantParam overlap it) and move the shot users onto its fields.
+// TODO(layout): embed it in wnemSimple_Data (whose unk4..m_constantParam overlap it) and move the shot users onto its fields.
 struct emWeaponParamWork {
     bool unk0;
     bool unk1;
@@ -127,10 +128,10 @@ emShotParam* getSimpleWeaponData(soModuleAccesser* acc, int paramId);
 Vec3f setWeaponStartPosition_Basic(emShotParam* param, soModuleAccesser* acc);
 // Sets the flag from the shot description.
 void setWeaponConstraint_Basic(emShotFlag* flag, emShotParam* param);
-// Stores the orientation of the given model node in emShotWork's 0xC..0x17: with the bool, the direction of the model
+// Stores the orientation of the given model node in wnemSimple_Data's 0xC..0x17: with the bool, the direction of the model
 // vector the int selects through the node's global matrix; without it, the node's global rotation.
 void calcWeaponRotation(u32 nodeId, emShotParam* param, soModuleAccesser* acc, bool useNodeMatrix, int modelVector);
-// The launch velocity and acceleration of the shot (emShotWork::m_speedX..m_accelY) along the forward vector of the
+// The launch velocity and acceleration of the shot (wnemSimple_Data::m_speedX..m_accelY) along the forward vector of the
 // given model node: with the bool, its global matrix turned by the model vector the int selects (getModelVector);
 // without it, the node's global rotation. The speed is a random value from emShotParam::m_speedRange, the
 // acceleration emShotParam::m_accel. HYPOTHESIS: the parameter roles.
@@ -150,6 +151,6 @@ void activeSimpleWeapon(Vec3f* pos, bool flag, wnemSimple* article, emShotParam*
 extern "C" {
 // wnemSimple's activation (map name wnemSimple::activate). The facing comes before the team: the floats travel in their
 // own registers, so only the order in which the callers evaluate their arguments (right to left) shows it.
-void fn_41_3091C(wnemSimple* article, emShotWork* work, int founderTaskId, int ownerId, int, bool flag, Vec3f* pos,
+void fn_41_3091C(wnemSimple* article, wnemSimple_Data* work, int founderTaskId, int ownerId, int, bool flag, Vec3f* pos,
                  float lr, int team, float speed, int, u32 life, s16);
 }

@@ -30,11 +30,6 @@
 
 float randf();
 
-// MATCH-ONLY: the original callers of Vec2f::rot evaluate the angle before the output vector (the native declaration
-// likely takes the angle first); this unit calls the same symbol in that order, as wnem_proc_cataguard.cpp does.
-#define rotVec2f rot__5Vec2fFP5Vec2ff
-extern "C" void rotVec2f(Vec2f* self, float angle, Vec2f* out);
-
 extern "C" {
 // HYPOTHESIS: Matrix rotations of the DOL (map: unnamed): around X, around Z, and from Euler angles.
 void fn_8003EBF4(Matrix* mtx, float angle);
@@ -1020,7 +1015,7 @@ void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool a
             }
             float angle = getRealAngle(moduleAccesser, m_transAngle, m_nodeId);
             // (The rotated vector is a temporary of this statement, as in the original; MWCC takes its address.)
-            rotVec2f(&Vec2f(trans.m_x, trans.m_y), 0.017453292f * (angle * m_lr), &speed);
+            Vec2f(trans.m_x, trans.m_y).rot(0.017453292f * (angle * m_lr), &speed);
             m_speed = speed;
         }
         break;
@@ -1381,7 +1376,7 @@ Vec3f emKineticEnergy::getRotation() {
 Vec2f emKineticEnergy::getTransSpeed(float length, float angle, float lr) {
     Vec2f base(length * lr, 0.0f);
     Vec2f speed(0.0f, 0.0f);
-    rotVec2f(&base, 0.017453292f * (angle * lr), &speed);
+    base.rot(0.017453292f * (angle * lr), &speed);
     return speed;
 }
 

@@ -24,7 +24,7 @@
 // The default shot description (the work block points at it until getSimpleWeaponData replaces it) and the work block
 // of the shot being fired. The block's constructor is the unit's static initializer.
 emShotParam lbl_41_bss_488;
-emShotWork lbl_41_bss_504(&lbl_41_bss_488);
+wnemSimple_Data lbl_41_bss_504(&lbl_41_bss_488);
 
 // sora_melee: the Matrix * Vec3f product of the SDK (the matrix, the vector and the result).
 extern "C" void fn_8003E3BC(const Matrix* mtx, const Vec3f* src, Vec3f* dst);

@@ -11,7 +11,7 @@
 
 struct soArticleConstructInfo;
 class wnemDummy_Param;
-struct emShotWork;
+struct wnemSimple_Data;
 
 class wnemSwHolder : public soArticle {
     u8 m_unreconstructed[0x28 - sizeof(soArticle)];
@@ -35,7 +35,7 @@ public:
     // HYPOTHESIS: parameter roles, from what the Porky passes (compare fn_41_3091C, wnemSimple's activation). The facing
     // comes before the team, as in wnemSimple's activation: emWeaponUtil::activeSimpleWeaponHolder evaluates the team
     // before the facing (right to left).
-    void active(Vec3f* pos, float lr, int team, int, int founderTaskId, int resourceId, emShotWork* work, float speed,
+    void active(Vec3f* pos, float lr, int team, int, int founderTaskId, int resourceId, wnemSimple_Data* work, float speed,
                 bool flag, u32 life);
 };
 static_assert(sizeof(wnemSwHolder) == 0x28, "Class is wrong size!");

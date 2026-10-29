@@ -77,7 +77,7 @@ Vec3f soKineticUtility::limitSpeed(Vec3f* speed, Vec3f* limit) {
 Vec2f soKineticUtility::projectionNormalFollow(Vec2f* speed, Vec2f* normal) {
     if (speed->lengthSq() == 0.0f || normal->lengthSq() == 0.0f) return *speed;
     Vec2f rotated = *normal;
-    rotated.rot(&rotated, 1.5707964f);
+    rotated.rot(1.5707964f, &rotated);
     Vec2f tangent = rotated;
     tangent.normalize();
     float along = speed->m_x * tangent.m_x + speed->m_y * tangent.m_y;

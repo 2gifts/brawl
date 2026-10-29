@@ -59,7 +59,7 @@ emWeaponManager::emWeaponManager() : m_procFncs(70, 0), m_managedWeapons(10, 0) 
 emWeaponManager::~emWeaponManager() { }
 
 void emWeaponManager::activateObject(wnemSimple* wnem, float lr, float speed, int founderTaskId, int ownerId,
-                                     emShotWork* work, int p7, Vec3f* pos, int team, int p10, bool flag, int life,
+                                     wnemSimple_Data* work, int p7, Vec3f* pos, int team, int p10, bool flag, int life,
                                      s16 p13) {
     if (work != NULL) {
         fn_41_3091C(wnem, work, founderTaskId, ownerId, p7, flag, pos, lr, team, speed, p10, life, p13);
