@@ -4,9 +4,9 @@
 extern void DWC_Printf(u32 level, const char* format, ...);
 extern BOOL DWCi_IsError(void);
 extern void DWC_Free(int kind, void* allocation, int size);
-extern void fn_8037EA50(void);
-extern void fn_8037EAA0(void);
-extern void fn_8037EEDC(void);
+extern void ghttpStartup(void);
+extern void ghttpCleanup(void);
+extern void ghttpThink(void);
 extern const char lbl_80489310[];
 extern const char lbl_80489320[];
 extern DWCGHTTPParamEntry* lbl_805A0F68;
@@ -14,7 +14,7 @@ extern s32 lbl_805A0F6C;
 
 BOOL DWC_InitGHTTP(void) {
     DWC_Printf(4, lbl_80489310);
-    fn_8037EA50();
+    ghttpStartup();
     ++lbl_805A0F6C;
     return 1;
 }
@@ -22,7 +22,7 @@ BOOL DWC_InitGHTTP(void) {
 BOOL DWC_ShutdownGHTTP(void) {
     DWC_Printf(4, lbl_80489320);
     if (lbl_805A0F6C > 0) {
-        fn_8037EAA0();
+        ghttpCleanup();
         --lbl_805A0F6C;
         if (lbl_805A0F6C == 0) {
             DWCGHTTPParamEntry* entry = lbl_805A0F68;
@@ -40,7 +40,7 @@ BOOL DWC_ShutdownGHTTP(void) {
 
 BOOL DWC_ProcessGHTTP(void) {
     BOOL error = DWCi_IsError();
-    if (!error) fn_8037EEDC();
+    if (!error) ghttpThink();
     return error == 0;
 }
 
@@ -70,15 +70,15 @@ void DWCi_RemoveDWCGHTTPParamEntry(DWCGHTTPParamEntry* entry) {
 
 extern void* DWC_Alloc(int kind, u32 size);
 extern void DWCi_SetError(s32 error, s32 code);
-extern void* fn_8037EFE8(void);
-extern s32 fn_8037ED14(const char* url, void* post, BOOL blocking,
+extern void* ghttpNewPost(void);
+extern s32 ghttpPostA(const char* url, void* post, BOOL blocking,
                       BOOL (*completed)(s32, s32, void*, u32, DWCGHTTPParamEntry*), DWCGHTTPParamEntry* entry);
-extern s32 fn_8037EAFC(const char* url, const char* headers, void* buffer, s32 bufferSize,
+extern s32 ghttpGetExA(const char* url, const char* headers, void* buffer, s32 bufferSize,
                       void* post, BOOL throttle, BOOL blocking,
                       void (*progress)(s32, s32, const char*, u32, u32, u32, DWCGHTTPParamEntry*),
                       BOOL (*completed)(s32, s32, void*, u32, DWCGHTTPParamEntry*), DWCGHTTPParamEntry* entry);
-extern void fn_8037EFB0(s32 request, s32 time);
-extern void fn_8037EF20(s32 request);
+extern void ghttpSetMaxRecvTime(s32 request, s32 time);
+extern void ghttpCancelRequest(s32 request);
 extern const char lbl_80489334[];
 extern const char lbl_80489358[];
 extern const char lbl_8059F070[];
@@ -117,7 +117,7 @@ BOOL GHTTPCompletedCallback(s32 request, s32 result, void* buffer, u32 length, D
 
 void DWC_GHTTPNewPost(void** post) {
     DWC_Printf(4, lbl_8048936C);
-    *post = fn_8037EFE8();
+    *post = ghttpNewPost();
     if (post == NULL) {
         DWCi_HandleGHTTPError(-6);
         DWC_Printf(4, lbl_80489380);
@@ -150,14 +150,14 @@ s32 DWC_PostGHTTPData(const char* url, void** post, DWCCompletedCallback complet
         completed(NULL, 0, -6, parameter);
         return -6;
     }
-    request = fn_8037ED14(url, *post, 0, GHTTPCompletedCallback, entry);
+    request = ghttpPostA(url, *post, 0, GHTTPCompletedCallback, entry);
     if (request < 0) {
         DWCi_HandleGHTTPError(request);
         completed(NULL, 0, request, parameter);
         DWCi_RemoveDWCGHTTPParamEntry(entry);
     }
     entry->request = request;
-    fn_8037EFB0(request, 1);
+    ghttpSetMaxRecvTime(request, 1);
     return request;
 }
 
@@ -186,7 +186,7 @@ s32 DWC_GetGHTTPDataEx(const char* url, s32 bufferSize, BOOL bufferClear,
         }
         entry->buffer = buffer;
     }
-    request = fn_8037EAFC(url, NULL, buffer, bufferSize, NULL, 0, 0,
+    request = ghttpGetExA(url, NULL, buffer, bufferSize, NULL, 0, 0,
                           progress == NULL ? NULL : GHTTPProgressCallback,
                           GHTTPCompletedCallback, entry);
     if (request < 0) {
@@ -196,13 +196,13 @@ s32 DWC_GetGHTTPDataEx(const char* url, s32 bufferSize, BOOL bufferClear,
         DWCi_RemoveDWCGHTTPParamEntry(entry);
     }
     entry->request = request;
-    fn_8037EFB0(request, 1);
+    ghttpSetMaxRecvTime(request, 1);
     return request;
 }
 
 void DWC_CancelGHTTPRequest(s32 request) {
     DWCGHTTPParamEntry* entry;
-    fn_8037EF20(request);
+    ghttpCancelRequest(request);
     for (entry = lbl_805A0F68; entry != NULL && entry->request != request; entry = entry->next) { }
     if (entry != NULL) {
         if (entry->buffer != NULL) DWC_Free(6, entry->buffer, 0);

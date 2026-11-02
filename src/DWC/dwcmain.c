@@ -125,41 +125,41 @@ void DWC_InitFriendsMatch(u32 unused0, void* userData, u32 product, u32 unused3,
 }
 
 extern const char lbl_80489E70[];
-extern void fn_803791BC(void* qr2);
-extern void fn_803895D0(void* browser);
+extern void qr2_shutdown(void* qr2);
+extern void ServerBrowserFree(void* browser);
 extern void fn_8033C0D4(void);
-extern void fn_80383470(void);
-extern s32 fn_80367CB0(void* connection, s32 event, void (*callback)(void*, void*, void*), void* parameter);
-extern s32 fn_80367C74(void* connection);
-extern void fn_80367C54(void* connection);
+extern void CloseStatsConnection(void);
+extern s32 gpSetCallback(void* connection, s32 event, void (*callback)(void*, void*, void*), void* parameter);
+extern s32 gpProcess(void* connection);
+extern void gpDestroy(void* connection);
 extern void DWCi_ShutdownLogin(void);
 extern void DWCi_ShutdownFriend(void);
 extern void fn_803424AC(void);
 extern void fn_8034EB74(void);
-extern void fn_80374880(void* socket);
+extern void gt2CloseSocket(void* socket);
 extern void DWC_Free(int kind, void* allocation, int size);
 
 void DWC_ShutdownFriendsMatch(void) {
     DWC_Printf(4, lbl_80489E70, lbl_805A0F88);
     if (lbl_805A0F88 == NULL) return;
     if (lbl_805A0F88->match.qr2 != NULL) {
-        fn_803791BC(lbl_805A0F88->match.qr2);
+        qr2_shutdown(lbl_805A0F88->match.qr2);
         lbl_805A0F88->match.qr2 = NULL;
     }
     lbl_805A0F88->match.unknown2C = 0;
     if (lbl_805A0F88->match.serverBrowser != NULL) {
-        fn_803895D0(lbl_805A0F88->match.serverBrowser);
+        ServerBrowserFree(lbl_805A0F88->match.serverBrowser);
         lbl_805A0F88->match.serverBrowser = NULL;
     }
     fn_8033C0D4();
-    fn_80383470();
+    CloseStatsConnection();
     if (lbl_805A0F88->connection != NULL) {
-        fn_80367CB0(&lbl_805A0F88->connection, 0, NULL, NULL);
-        fn_80367CB0(&lbl_805A0F88->connection, 3, NULL, NULL);
-        fn_80367CB0(&lbl_805A0F88->connection, 1, NULL, NULL);
-        fn_80367CB0(&lbl_805A0F88->connection, 2, NULL, NULL);
-        fn_80367C74(&lbl_805A0F88->connection);
-        fn_80367C54(&lbl_805A0F88->connection);
+        gpSetCallback(&lbl_805A0F88->connection, 0, NULL, NULL);
+        gpSetCallback(&lbl_805A0F88->connection, 3, NULL, NULL);
+        gpSetCallback(&lbl_805A0F88->connection, 1, NULL, NULL);
+        gpSetCallback(&lbl_805A0F88->connection, 2, NULL, NULL);
+        gpProcess(&lbl_805A0F88->connection);
+        gpDestroy(&lbl_805A0F88->connection);
         lbl_805A0F88->connection = NULL;
     }
     DWCi_ShutdownLogin();
@@ -167,7 +167,7 @@ void DWC_ShutdownFriendsMatch(void) {
     fn_803424AC();
     fn_8034EB74();
     if (lbl_805A0F88->socket != NULL) {
-        fn_80374880(lbl_805A0F88->socket);
+        gt2CloseSocket(lbl_805A0F88->socket);
         lbl_805A0F88->socket = NULL;
     }
     DWC_Free(4, lbl_805A0F88, 0);
@@ -181,7 +181,7 @@ extern void fn_8033DD60(BOOL active);
 extern void fn_8034E790(void);
 extern s32 fn_8035E1A8(void);
 extern void DWCi_StopLogin(s32 error, s32 code);
-extern s32 fn_80367C28(void* connection, u32 product, u32 nameSpace, u32 partner);
+extern s32 gpInitialize(void* connection, u32 product, u32 nameSpace, u32 partner);
 extern s32 fn_8033AEEC(s32 result);
 extern BOOL DWCi_LoginAsync(void);
 extern const char lbl_80489EAC[];
@@ -200,17 +200,17 @@ void DWC_ProcessFriendsMatch(void) {
         switch (result) {
         case 1:
             DWC_Printf(0x10, lbl_80489EAC);
-            result = fn_80367C28(&lbl_805A0F88->connection, *(u32*)(lbl_805A0F88->login + 8), 0x10, 0xB);
+            result = gpInitialize(&lbl_805A0F88->connection, *(u32*)(lbl_805A0F88->login + 8), 0x10, 0xB);
             if (fn_8033AEEC(result) != 0) return;
-            result = fn_80367CB0(&lbl_805A0F88->connection, 0, fn_8033B45C, NULL);
+            result = gpSetCallback(&lbl_805A0F88->connection, 0, fn_8033B45C, NULL);
             if (fn_8033AEEC(result) != 0) return;
-            result = fn_80367CB0(&lbl_805A0F88->connection, 3, fn_8033B8CC, NULL);
+            result = gpSetCallback(&lbl_805A0F88->connection, 3, fn_8033B8CC, NULL);
             if (fn_8033AEEC(result) != 0) return;
-            result = fn_80367CB0(&lbl_805A0F88->connection, 7, DWCi_GPRecvBuddyAuthCallback, NULL);
+            result = gpSetCallback(&lbl_805A0F88->connection, 7, DWCi_GPRecvBuddyAuthCallback, NULL);
             if (fn_8033AEEC(result) != 0) return;
-            result = fn_80367CB0(&lbl_805A0F88->connection, 1, DWCi_GPRecvBuddyRequestCallback, NULL);
+            result = gpSetCallback(&lbl_805A0F88->connection, 1, DWCi_GPRecvBuddyRequestCallback, NULL);
             if (fn_8033AEEC(result) != 0) return;
-            result = fn_80367CB0(&lbl_805A0F88->connection, 2, DWCi_GPRecvBuddyStatusCallback, NULL);
+            result = gpSetCallback(&lbl_805A0F88->connection, 2, DWCi_GPRecvBuddyStatusCallback, NULL);
             if (fn_8033AEEC(result) != 0) return;
             lbl_805A0F88->previousPhase = lbl_805A0F88->phase;
             lbl_805A0F88->phase = 2;
@@ -245,7 +245,7 @@ void DWC_ProcessFriendsMatch(void) {
     }
     if (lbl_805A0F88->match.unknown2C == 1) {
         if (lbl_805A0F88->match.qr2 != NULL) {
-            fn_803791BC(lbl_805A0F88->match.qr2);
+            qr2_shutdown(lbl_805A0F88->match.qr2);
             lbl_805A0F88->match.qr2 = NULL;
         }
         lbl_805A0F88->match.unknown2C = 0;
@@ -254,8 +254,8 @@ void DWC_ProcessFriendsMatch(void) {
 
 // Function bodies below are taken from https://github.com/jj-link/brawl.
 
-extern u8 *fn_80374C28(void *);
+extern u8 *gt2GetConnectionData(void *);
 
 u8 fn_8033AC84(void *p) {
-    return fn_80374C28(p)[1];
+    return gt2GetConnectionData(p)[1];
 }

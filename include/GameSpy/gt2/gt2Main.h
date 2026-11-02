@@ -125,57 +125,57 @@ __static_assert(sizeof(GTI2OutgoingBufferMessage) == 0x14, "GTI2OutgoingBufferMe
 // the two magic bytes at the start of every GT2 message
 extern u8 lbl_8059F980[2];
 
-GTBool fn_80373780(GTI2Buffer* buffer, int size);                                    // gti2AllocateBuffer
-int fn_803737D8(GTI2Buffer* buffer);                                                 // gti2GetBufferFreeSpace
-void fn_803737E8(GTI2Buffer* buffer, GTByte b);                                      // gti2BufferWriteByte
-void fn_80373800(GTI2Buffer* buffer, u16 s);                                         // gti2BufferWriteUShort
-void fn_8037382C(GTI2Buffer* buffer, const GTByte* data, int len);                   // gti2BufferWriteData
-void fn_803738B8(GTI2Buffer* buffer, int start, int shortenBy);                      // gti2BufferShorten
-GTBool fn_80373924(GTI2Socket* socket);                                              // gti2SocketErrorCallback
-GTBool fn_80373AA0(GTI2Connection* connection, GT2Result result, GTByte* message, int len); // gti2ConnectedCallback
-GTBool fn_80373C54(GTI2Connection* connection, int reason);                          // gti2ClosedCallback
-GTBool fn_80373D10(GTI2Connection* connection, int latency);                         // gti2PingCallback
-GTBool fn_80373DCC(GTI2Connection* connection, int filterID, const GTByte* message, int len, GTBool reliable); // gti2SendFilterCallback
-GTBool fn_80373ED4(GTI2Connection* connection, int filterID, GTByte* message, int len, GTBool reliable);       // gti2ReceiveFilterCallback
-GTBool fn_80373FDC(GTI2Socket* socket, GTI2Connection* connection, u32 ip, u16 port, GTBool reset, const GTByte* message, int len, GTBool send); // gti2DumpCallback
-GT2Result fn_803741A4(GTI2Socket* socket, GTI2Connection** connection, u32 ip, u16 port);  // gti2NewOutgoingConnection
-GT2Result fn_803741F8(GTI2Socket* socket, GTI2Connection** connection, u32 ip, u16 port);  // gti2NewIncomingConnection
-GTBool fn_80374488(GTI2Connection* connection, gsi_time now);                        // gti2CheckTimeout
-GTBool fn_80374584(GTI2Connection* connection, gsi_time now);                        // gti2ConnectionThink
-void fn_803746D0(GTI2Connection* connection, GTBool hard);                           // gti2CloseConnection
-void fn_80374778(GTI2Connection* connection);                                        // gti2ConnectionCleanup
-void fn_803747D4(GTI2Connection* connection);                                        // gti2FreeSocketConnection
-void fn_80374880(GTI2Socket* socket);                                                // gti2CloseSocket
-void fn_803748C4(GTI2Socket* socket);                                                // gti2Think
-int fn_80374AC4(GTI2Connection* connection, const GTByte* message, int len, GTBool reliable); // gti2Send
-void fn_80374BC8(void* elem, void* clientData);                                      // gti2CloseConnectionsMap
-void fn_80374BD4(GTI2Socket* socket);                                                // gti2CloseAllConnectionsHard
-int fn_80374BF0(GTI2Connection* connection);                                         // incoming buffer free space
-int fn_80374C00(GTI2Connection* connection);                                         // outgoing buffer free space
+GTBool gti2AllocateBuffer(GTI2Buffer* buffer, int size);                                    // gti2AllocateBuffer
+int gti2GetBufferFreeSpace(GTI2Buffer* buffer);                                                 // gti2GetBufferFreeSpace
+void gti2BufferWriteByte(GTI2Buffer* buffer, GTByte b);                                      // gti2BufferWriteByte
+void gti2BufferWriteUShort(GTI2Buffer* buffer, u16 s);                                         // gti2BufferWriteUShort
+void gti2BufferWriteData(GTI2Buffer* buffer, const GTByte* data, int len);                   // gti2BufferWriteData
+void gti2BufferShorten(GTI2Buffer* buffer, int start, int shortenBy);                      // gti2BufferShorten
+GTBool gti2SocketErrorCallback(GTI2Socket* socket);                                              // gti2SocketErrorCallback
+GTBool gti2ConnectedCallback(GTI2Connection* connection, GT2Result result, GTByte* message, int len); // gti2ConnectedCallback
+GTBool gti2ClosedCallback(GTI2Connection* connection, int reason);                          // gti2ClosedCallback
+GTBool gti2PingCallback(GTI2Connection* connection, int latency);                         // gti2PingCallback
+GTBool gti2SendFilterCallback(GTI2Connection* connection, int filterID, const GTByte* message, int len, GTBool reliable); // gti2SendFilterCallback
+GTBool gti2ReceiveFilterCallback(GTI2Connection* connection, int filterID, GTByte* message, int len, GTBool reliable);       // gti2ReceiveFilterCallback
+GTBool gti2DumpCallback(GTI2Socket* socket, GTI2Connection* connection, u32 ip, u16 port, GTBool reset, const GTByte* message, int len, GTBool send); // gti2DumpCallback
+GT2Result gti2NewOutgoingConnection(GTI2Socket* socket, GTI2Connection** connection, u32 ip, u16 port);  // gti2NewOutgoingConnection
+GT2Result gti2NewIncomingConnection(GTI2Socket* socket, GTI2Connection** connection, u32 ip, u16 port);  // gti2NewIncomingConnection
+GTBool gti2CheckTimeout(GTI2Connection* connection, gsi_time now);                        // gti2CheckTimeout
+GTBool gti2ConnectionThink(GTI2Connection* connection, gsi_time now);                        // gti2ConnectionThink
+void gti2CloseConnection(GTI2Connection* connection, GTBool hard);                           // gti2CloseConnection
+void gti2ConnectionClosed(GTI2Connection* connection);                                        // gti2ConnectionCleanup
+void gti2ConnectionCleanup(GTI2Connection* connection);                                        // gti2FreeSocketConnection
+void gt2CloseSocket(GTI2Socket* socket);                                                // gti2CloseSocket
+void gt2Think(GTI2Socket* socket);                                                // gti2Think
+int gt2Send(GTI2Connection* connection, const GTByte* message, int len, GTBool reliable); // gti2Send
+void gti2CloseAllConnectionsHardMap(void* elem, void* clientData);                                      // gti2CloseConnectionsMap
+void gt2CloseAllConnectionsHard(GTI2Socket* socket);                                                // gti2CloseAllConnectionsHard
+int gt2GetIncomingBufferFreeSpace(GTI2Connection* connection);                                         // incoming buffer free space
+int gt2GetOutgoingBufferFreeSpace(GTI2Connection* connection);                                         // outgoing buffer free space
 GTBool fn_80376DF4(GTI2Socket* socket);                                              // gti2ReceiveMessages
-GTBool fn_80376AAC(GTI2Socket* socket, u32 ip, u16 port);                            // gti2HandleConnectionReset
-GTBool fn_80377028(GTI2Connection* connection, int type, int size, GTBool* closed);  // gti2BeginReliableMessage
-GTBool fn_80377568(GTI2Connection* connection, const GTByte* message, int len);      // gti2SendReliableMessage
-void fn_8037765C(GTI2Connection* connection);                                        // gti2SendClosing
-GTBool fn_80377724(GTI2Connection* connection);                                      // gti2SendKeepAlive
-GTBool fn_80377918(GTI2Connection* connection);                                      // gti2SendAck
-GTBool fn_803779DC(GTI2Connection* connection, u16 serialNumber, u16 lastSerialNumber); // gti2SendNack
-GTBool fn_80377AD0(GTI2Connection* connection);                                      // gti2SendClosed
-GTBool fn_80377B88(GTI2Connection* connection, GTI2OutgoingBufferMessage* message);  // gti2ResendMessage
-GTBool fn_8037442C(GTI2Connection* connection, const GTByte* message, int len);      // gti2ConnectionSendData
-GTBool fn_80377C44(GTI2Connection* connection, const GTByte* message, int len, GTBool reliable); // gti2InternalSend
-int fn_80377D34(const void* elem, int numBuckets);                                   // gti2ConnectionHash
-int fn_80377D54(const void* elem1, const void* elem2);                               // gti2ConnectionCompare
-GTI2Connection* fn_80377D90(GTI2Socket* socket, u32 ip, u16 port);                   // gti2SocketFindConnection
-void fn_80378018(GTI2Socket* socket);                                                // gti2FreeSocket
-GT2Result fn_80378084(GTI2Socket* socket, GTI2Connection** connection, u32 ip, u16 port); // gti2NewSocketConnection
-void fn_803782F8(GTI2Connection* connection);                                        // gti2FreeClosedConnection
-GTBool fn_803783C4(GTI2Socket* socket, u32 ip, u16 port, const GTByte* message, int len); // gti2SocketSend
-int fn_803785E0(void* elem, void* clientData);                                       // gti2ConnectionsThinkMap
-GTBool fn_803786FC(GTI2Socket* socket);                                              // gti2SocketConnectionsThink
-void fn_80378748(GTI2Socket* socket);                                                // gti2FreeClosedConnections
-void fn_80378838(GTI2Socket* socket);                                                // gti2CloseSocketSafe
-void fn_80378B50(const GTByte** message, int* len);                                  // gti2MessageCheck
+GTBool gti2HandleConnectionReset(GTI2Socket* socket, u32 ip, u16 port);                            // gti2HandleConnectionReset
+GTBool gti2BeginReliableMessage(GTI2Connection* connection, int type, int size, GTBool* closed);  // gti2BeginReliableMessage
+GTBool gti2SendReject(GTI2Connection* connection, const GTByte* message, int len);      // gti2SendReliableMessage
+void gti2SendClose(GTI2Connection* connection);                                        // gti2SendClosing
+GTBool gti2SendKeepAlive(GTI2Connection* connection);                                      // gti2SendKeepAlive
+GTBool gti2SendAck(GTI2Connection* connection);                                      // gti2SendAck
+GTBool gti2SendNack(GTI2Connection* connection, u16 serialNumber, u16 lastSerialNumber); // gti2SendNack
+GTBool gti2SendClosed(GTI2Connection* connection);                                      // gti2SendClosed
+GTBool gti2ResendMessage(GTI2Connection* connection, GTI2OutgoingBufferMessage* message);  // gti2ResendMessage
+GTBool gti2ConnectionSendData(GTI2Connection* connection, const GTByte* message, int len);      // gti2ConnectionSendData
+GTBool gti2Send(GTI2Connection* connection, const GTByte* message, int len, GTBool reliable); // gti2InternalSend
+int gti2ConnectionHash(const void* elem, int numBuckets);                                   // gti2ConnectionHash
+int gti2ConnectionCompare(const void* elem1, const void* elem2);                               // gti2ConnectionCompare
+GTI2Connection* gti2SocketFindConnection(GTI2Socket* socket, u32 ip, u16 port);                   // gti2SocketFindConnection
+void gti2CloseSocket(GTI2Socket* socket);                                                // gti2FreeSocket
+GT2Result gti2NewSocketConnection(GTI2Socket* socket, GTI2Connection** connection, u32 ip, u16 port); // gti2NewSocketConnection
+void gti2FreeSocketConnection(GTI2Connection* connection);                                        // gti2FreeClosedConnection
+GTBool gti2SocketSend(GTI2Socket* socket, u32 ip, u16 port, const GTByte* message, int len); // gti2SocketSend
+int gti2SocketConnectionsThinkMap(void* elem, void* clientData);                                       // gti2ConnectionsThinkMap
+GTBool gti2SocketConnectionsThink(GTI2Socket* socket);                                              // gti2SocketConnectionsThink
+void gti2FreeClosedConnections(GTI2Socket* socket);                                                // gti2FreeClosedConnections
+void gti2SocketError(GTI2Socket* socket);                                                // gti2CloseSocketSafe
+void gti2MessageCheck(const GTByte** message, int* len);                                  // gti2MessageCheck
 
 #ifdef __cplusplus
 }

@@ -4380,10 +4380,13 @@ SBS/sbs_client.c:
 	.bss        start:0x80534618 end:0x80534638
 	.sdata2     start:0x805A4978 end:0x805A4980
 
-GameSpy/common/darray.c:
-	.text       start:0x8035A460 end:0x8035B34C
+GameSpy/darray.c:
+	.text       start:0x8035A460 end:0x8035AEB4
 
-GameSpy/common/md5c.c:
+GameSpy/hashtable.c:
+	.text       start:0x8035AEB4 end:0x8035B34C
+
+GameSpy/md5c.c:
 	.text       start:0x8035B34C end:0x8035C26C
 	.data       start:0x8048E7B8 end:0x8048E7F8
 	.sdata      start:0x8059F588 end:0x8059F590
@@ -4406,27 +4409,122 @@ GameSpy/common/gsCore.c:
 	.text       start:0x8035E380 end:0x8035EA70
 	.bss        start:0x805348E0 end:0x805349A8
 
+GameSpy/common/gsCrypt.c:
+	.text       start:0x8035EA70 end:0x8035EB8C
+
 GameSpy/common/gsLargeInt.c:
-	.text       start:0x8035EA70 end:0x803621B8
-	.rodata     start:0x80415D40 end:0x80415D50
+	.text       start:0x8035EB8C end:0x8036133C
 	.bss        start:0x805349A8 end:0x80534A40
+
+GameSpy/common/gsRC4.c:
+	.text       start:0x8036133C end:0x8036180C
+
+GameSpy/common/gsSHA1.c:
+	.text       start:0x8036180C end:0x803621B8
+	.rodata     start:0x80415D40 end:0x80415D50
 
 GameSpy/common/gsSoapXml.c:
 	.text       start:0x803621B8 end:0x80367C28
 	.data       start:0x8048E898 end:0x8048EA30
 	.sdata      start:0x8059F5A8 end:0x8059F600
 
-GameSpy/gp/gp.c:
-	.text       start:0x80367C28 end:0x803733BC
-	.data       start:0x8048EA30 end:0x8048FBB8
-	.sdata      start:0x8059F600 end:0x8059F980
+GameSpy/GP/gp.c:
+	.text       start:0x80367C28 end:0x803689DC
+	.data       start:0x8048EA30 end:0x8048EC60
+	.sdata      start:0x8059F600 end:0x8059F610
+
+GameSpy/GP/gpi.c:
+	.text       start:0x803689DC end:0x803691D8
+	.data       start:0x8048EC60 end:0x8048ECD8
+	.sdata      start:0x8059F610 end:0x8059F640
+
+GameSpy/GP/gpiBuddy.c:
+	.text       start:0x803691D8 end:0x8036A1A4
+	.data       start:0x8048ECD8 end:0x8048ED80
+	.sdata      start:0x8059F640 end:0x8059F698
+
+GameSpy/GP/gpiBuffer.c:
+	.text       start:0x8036A1A4 end:0x8036AAF0
+	.data       start:0x8048ED80 end:0x8048EDE8
+	.sdata      start:0x8059F698 end:0x8059F6B8
+
+GameSpy/GP/gpiCallback.c:
+	.text       start:0x8036AAF0 end:0x8036AFA8
+	.data       start:0x8048EDE8 end:0x8048EDF8
+
+GameSpy/GP/gpiConnect.c:
+	.text       start:0x8036AFA8 end:0x8036C554
+	.data       start:0x8048EDF8 end:0x8048F1C0
+	.sdata      start:0x8059F6B8 end:0x8059F748
+
+GameSpy/GP/gpiInfo.c:
+	.text       start:0x8036C554 end:0x8036E9EC
+	.data       start:0x8048F1C0 end:0x8048F518
+	.sdata      start:0x8059F748 end:0x8059F800
 	.sdata2     start:0x805A4990 end:0x805A4998
 
-GameSpy/gt2/gt2.c:
-	.text       start:0x803733BC end:0x80378BB4
+GameSpy/GP/gpiOperation.c:
+	.text       start:0x8036E9EC end:0x8036F06C
+	.data       start:0x8048F518 end:0x8048F528
+
+GameSpy/GP/gpiPeer.c:
+	.text       start:0x8036F06C end:0x803703DC
+	.data       start:0x8048F528 end:0x8048F648
+	.sdata      start:0x8059F800 end:0x8059F868
+
+GameSpy/GP/gpiProfile.c:
+	.text       start:0x803703DC end:0x80370B9C
+	.data       start:0x8048F648 end:0x8048F800
+	.sdata      start:0x8059F868 end:0x8059F878
+
+GameSpy/GP/gpiSearch.c:
+	.text       start:0x80370B9C end:0x80372BC4
+	.data       start:0x8048F800 end:0x8048FAF8
+	.sdata      start:0x8059F878 end:0x8059F950
+
+GameSpy/GP/gpiTransfer.c:
+	.text       start:0x80372BC4 end:0x80372CAC
+	.data       start:0x8048FAF8 end:0x8048FB20
+	.sdata      start:0x8059F950 end:0x8059F960
+
+GameSpy/GP/gpiUnique.c:
+	.text       start:0x80372CAC end:0x80372DD8
+	.data       start:0x8048FB20 end:0x8048FB60
+	.sdata      start:0x8059F960 end:0x8059F968
+
+GameSpy/GP/gpiUtility.c:
+	.text       start:0x80372DD8 end:0x803733BC
+	.data       start:0x8048FB60 end:0x8048FBB8
+	.sdata      start:0x8059F968 end:0x8059F980
+
+GameSpy/gt2/gt2Auth.c:
+	.text       start:0x803733BC end:0x80373780
 	.data       start:0x8048FBB8 end:0x8048FBE0
-	.bss        start:0x80534A40 end:0x80535A80
-	.sdata      start:0x8059F980 end:0x8059F9A8
+
+GameSpy/gt2/gt2Buffer.c:
+	.text       start:0x80373780 end:0x80373924
+
+GameSpy/gt2/gt2Callback.c:
+	.text       start:0x80373924 end:0x803741A4
+
+GameSpy/gt2/gt2Connection.c:
+	.text       start:0x803741A4 end:0x80374878
+
+GameSpy/gt2/gt2Main.c:
+	.text       start:0x80374878 end:0x80374C30
+
+GameSpy/gt2/gt2Message.c:
+	.text       start:0x80374C30 end:0x80377D34
+	.bss        start:0x80534A40 end:0x80535A40
+	.sdata      start:0x8059F980 end:0x8059F990
+
+GameSpy/gt2/gt2Socket.c:
+	.text       start:0x80377D34 end:0x803788C8
+
+GameSpy/gt2/gt2Utility.c:
+	.text       start:0x803788C8 end:0x80378BB4
+	.bss        start:0x80535A40 end:0x80535A80
+	.sdata      start:0x8059F990 end:0x8059F9A8
 	.sbss       start:0x805A1050 end:0x805A1058
 
 GameSpy/qr2/qr2.c:
@@ -4440,35 +4538,93 @@ GameSpy/qr2/qr2.c:
 GameSpy/qr2/qr2regkeys.c:
 	.text       start:0x8037B354 end:0x8037B37C
 
-GameSpy/ghttp/ghttp.c:
-	.text       start:0x8037B37C end:0x803822D8
-	.rodata     start:0x80415D50 end:0x80415D80
-	.data       start:0x804905E8 end:0x804909A0
-	.sdata      start:0x8059FA40 end:0x8059FAF0
-	.sbss       start:0x805A1060 end:0x805A1098
+GameSpy/ghttp/ghttpBuffer.c:
+	.text       start:0x8037B37C end:0x8037BD4C
+	.sdata      start:0x8059FA40 end:0x8059FA58
+
+GameSpy/ghttp/ghttpCallbacks.c:
+	.text       start:0x8037BD4C end:0x8037BE6C
+
+GameSpy/ghttp/ghttpCommon.c:
+	.text       start:0x8037BE6C end:0x8037C2DC
+
+GameSpy/ghttp/ghttpConnection.c:
+	.text       start:0x8037C2DC end:0x8037CA28
+	.data       start:0x804905E8 end:0x804905F8
+
+GameSpy/ghttp/ghttpEncryption.c:
+	.text       start:0x8037CA28 end:0x8037E7F4
+	.rodata     start:0x80415D50 end:0x80415D70
+	.data       start:0x804905F8 end:0x80490670
+	.sdata      start:0x8059FA58 end:0x8059FA78
+
+GameSpy/ghttp/ghttpMain.c:
+	.text       start:0x8037E7F4 end:0x8037F078
+	.data       start:0x80490670 end:0x80490690
+
+GameSpy/ghttp/ghttpPost.c:
+	.text       start:0x8037F078 end:0x803809F4
+	.data       start:0x80490690 end:0x804908D0
+	.sdata      start:0x8059FA78 end:0x8059FA98
 	.sdata2     start:0x805A49A0 end:0x805A49A8
 
+GameSpy/ghttp/ghttpProcess.c:
+	.text       start:0x803809F4 end:0x803822D8
+	.rodata     start:0x80415D70 end:0x80415D80
+	.data       start:0x804908D0 end:0x804909A0
+	.sdata      start:0x8059FA98 end:0x8059FAF0
+
+GameSpy/gstats/gbucket.c:
+	.text       start:0x803822D8 end:0x80383470
+	.sbss       start:0x805A1098 end:0x805A10B0
+	.sdata2     start:0x805A49A8 end:0x805A49B0
+
 GameSpy/gstats/gstats.c:
-	.text       start:0x803822D8 end:0x80385558
+	.text       start:0x80383470 end:0x80385558
 	.data       start:0x804909A0 end:0x80490BF8
 	.bss        start:0x80535DE0 end:0x80535FE0
 	.sdata      start:0x8059FAF0 end:0x8059FB58
-	.sbss       start:0x805A1098 end:0x805A10D0
-	.sdata2     start:0x805A49A8 end:0x805A49B0
+	.sbss       start:0x805A10B0 end:0x805A10D0
+
+GameSpy/natneg/NATify.c:
+	.text       start:0x80385558 end:0x80385CC4
+	.bss        start:0x80535FE0 end:0x80536220
+	.sdata      start:0x8059FB58 end:0x8059FB70
+	.sbss       start:0x805A10D0 end:0x805A10F0
 
 GameSpy/natneg/natneg.c:
-	.text       start:0x80385558 end:0x80387608
+	.text       start:0x80385CC4 end:0x80387608
 	.data       start:0x80490BF8 end:0x80490D18
-	.bss        start:0x80535FE0 end:0x80536500
-	.sdata      start:0x8059FB58 end:0x8059FB82
-	.sbss       start:0x805A10D0 end:0x805A1120
+	.bss        start:0x80536220 end:0x80536500
+	.sdata      start:0x8059FB70 end:0x8059FB82
+	.sbss       start:0x805A10F0 end:0x805A1120
 
-GameSpy/serverbrowsing/sb.c:
-	.text       start:0x80387608 end:0x8038D394
-	.data       start:0x80490D18 end:0x80490DA0
-	.sdata      start:0x8059FB88 end:0x8059FBD8
-	.sbss       start:0x805A1120 end:0x805A1138
-	.sdata2     start:0x805A49B0 end:0x805A49C8
+GameSpy/serverbrowsing/sb_crypt.c:
+	.text       start:0x80387608 end:0x80387A3C
+
+GameSpy/serverbrowsing/sb_queryengine.c:
+	.text       start:0x80387A3C end:0x80388508
+	.data       start:0x80490D18 end:0x80490D40
+	.sdata      start:0x8059FB88 end:0x8059FB90
+
+GameSpy/serverbrowsing/sb_server.c:
+	.text       start:0x80388508 end:0x803891B8
+	.data       start:0x80490D40 end:0x80490D50
+	.sdata      start:0x8059FB90 end:0x8059FBC0
+	.sbss       start:0x805A1120 end:0x805A1130
+	.sdata2     start:0x805A49B0 end:0x805A49B8
+
+GameSpy/serverbrowsing/sb_serverbrowsing.c:
+	.text       start:0x803891B8 end:0x803899CC
+	.data       start:0x80490D50 end:0x80490D80
+	.sdata      start:0x8059FBC0 end:0x8059FBC8
+
+GameSpy/serverbrowsing/sb_serverlist.c:
+	.text       start:0x803899CC end:0x8038D394
+	.data       start:0x80490D80 end:0x80490DA0
+	.sdata      start:0x8059FBC8 end:0x8059FBD8
+	.sbss       start:0x805A1130 end:0x805A1138
+	.sdata2     start:0x805A49B8 end:0x805A49C8
 
 GameSpy/sake/sake.c:
 	.text       start:0x8038D394 end:0x8038E3F0

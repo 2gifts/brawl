@@ -20,7 +20,7 @@ int fn_8038D394(SAKE* sakePtr) {
     if (fn_8035E848() != 0) {
         return 2;
     }
-    sake = fn_8035DFE8(sizeof(SAKEInternal));
+    sake = gsimalloc(sizeof(SAKEInternal));
     if (sake == NULL) {
         return 3;
     }

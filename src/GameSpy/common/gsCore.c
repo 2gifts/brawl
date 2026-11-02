@@ -31,7 +31,7 @@ void fn_8035E390(void) {
             fn_8035D774(100);
         }
         memset(aCore->mTaskArray, 0, sizeof(aCore->mTaskArray));
-        fn_8037EA50();
+        ghttpStartup();
         aCore->mIsInitialized = 1;
         return;
     }
@@ -69,7 +69,7 @@ void fn_8035E87C(GSTask* task, u32 timeoutMs) {
     task->mIsStarted = 1;
     task->mIsRunning = 1;
     task->mTimeout = timeoutMs;
-    task->mStartTime = fn_8035D728();
+    task->mStartTime = current_time();
     if (task->mExecuteFunc) {
         task->mExecuteFunc(task->mTaskData);
     }
@@ -87,7 +87,7 @@ void fn_8035E87C(GSTask* task, u32 timeoutMs) {
 GSTask* fn_8035EA18(void) {
     GSTask* aTask;
 
-    aTask = fn_8035DFE8(sizeof(GSTask));
+    aTask = gsimalloc(sizeof(GSTask));
     if (aTask == NULL) {
         return NULL;
     }

@@ -33,10 +33,10 @@ typedef struct SHA1Context {
 
 __static_assert(sizeof(SHA1Context) == 0x68, "SHA1Context");
 
-int fn_8035EB8C(gsLargeInt_t* lint, l_word length);  // gsiLargeIntResize
-int fn_803612EC(gsLargeInt_t* lint);                 // gsLargeIntReverseBytes
-int fn_80361878(SHA1Context* context, u8 Message_Digest[20]);  // SHA1Result
-void fn_80362090(SHA1Context* context);              // SHA1PadMessage
+int gsiLargeIntResize(gsLargeInt_t* lint, l_word length);  // gsiLargeIntResize
+int gsLargeIntReverseBytes(gsLargeInt_t* lint);                 // gsLargeIntReverseBytes
+int SHA1Result(SHA1Context* context, u8 Message_Digest[20]);  // SHA1Result
+void SHA1PadMessage(SHA1Context* context);              // SHA1PadMessage
 
 #ifdef __cplusplus
 }

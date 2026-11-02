@@ -200,74 +200,74 @@ int fseek(void* file, long offset, int origin);
 void rewind(void* file);
 
 // md5 and rc4
-void fn_80361680(void* rc4, const u8* src, u8* dst, int len);  // RC4Encrypt
+void RC4Encrypt(void* rc4, const u8* src, u8* dst, int len);  // RC4Encrypt
 
-GHTTPBool fn_8037B37C(GHIBuffer* buffer, int sizeIncrement);                                          // ghiResizeBuffer
-GHTTPBool fn_8037B3FC(GHIConnection* connection, GHIBuffer* buffer, int initialSize, int sizeIncrement); // ghiInitBuffer
-GHTTPBool fn_8037B4F8(GHIConnection* connection, GHIBuffer* buffer, char* userBuffer, int userBufferLen); // ghiInitFixedBuffer
-GHTTPBool fn_8037B644(GHIBuffer* buffer, const char* data, int dataLen);                              // ghiAppendDataToBuffer
-GHTTPBool fn_8037B7B4(GHIBuffer* buffer, const char* data, int dataLen);                              // ghiEncodeDataIntoBuffer
-GHTTPBool fn_8037B98C(GHIBuffer* buffer, const char* name, const char* value);                        // ghiAppendHeaderToBuffer
-GHTTPBool fn_8037BB6C(GHIBuffer* buffer, int i);                                                     // ghiAppendIntToBuffer
-void fn_8037BBB8(GHIBuffer* buffer);                                                                 // ghiResetBuffer
-GHTTPBool fn_8037BBDC(GHIConnection* connection);                                                    // ghiSendBufferedData
-GHTTPBool fn_8037BCD0(GHIBuffer* buffer, char* data, int len);                                       // ghiReadDataFromBuffer
-void fn_8037BD4C(GHIConnection* connection);                                                         // ghiCallCompletedCallback
-void fn_8037BDD4(GHIConnection* connection, const char* buffer, GHTTPByteCount bufferLen);            // ghiCallProgressCallback
-void fn_8037BE0C(GHIConnection* connection);                                                         // ghiCallPostCallback
-void fn_8037BE6C(void);                                                                              // ghiCreateLock
-void fn_8037BE74(void);                                                                              // ghiLock
-void fn_8037BE78(void);                                                                              // ghiUnlock
-GHTTPBool fn_8037BE7C(GHIConnection* connection);                                                    // ghiDecryptReceivedData
-int fn_8037C104(GHIConnection* connection, const char* buffer, int len);                             // ghiTrySendThenBuffer
-int fn_8037C1C0(GHIConnection* connection, const char* buffer, int len);                             // ghiSendPostData
-GHIConnection* fn_8037C3E8(void);                                                                    // ghiNewConnection
-GHTTPBool fn_8037C5AC(GHIConnection* connection);                                                    // ghiFreeConnection
-GHIConnection* fn_8037C720(GHTTPRequest request);                                                    // ghiRequestToConnection
-void fn_8037C790(GHTTPBool (*callback)(GHIConnection*));                                             // ghiEnumConnections
-void fn_8037C81C(GHIConnection* connection);                                                         // ghiRedirectConnection
-GHTTPBool fn_8037CA28(GHTTPRequest request, GHTTPEncryptionEngine engine);                           // ghttpSetRequestEncryptionEngine
-int fn_8037D0D8(GHIConnection* connection, GHIEncryptor* encryptor);                                 // ghiEncryptorSslInitFunc
-int fn_8037D2AC(GHIConnection* connection, GHIEncryptor* encryptor);                                 // ghiEncryptorSslCleanupFunc
-int fn_8037D304(GHIConnection* connection, GHIEncryptor* encryptor, const char* plainText, int plainTextLength,
+GHTTPBool ghiResizeBuffer(GHIBuffer* buffer, int sizeIncrement);                                          // ghiResizeBuffer
+GHTTPBool ghiInitBuffer(GHIConnection* connection, GHIBuffer* buffer, int initialSize, int sizeIncrement); // ghiInitBuffer
+GHTTPBool ghiInitFixedBuffer(GHIConnection* connection, GHIBuffer* buffer, char* userBuffer, int userBufferLen); // ghiInitFixedBuffer
+GHTTPBool ghiAppendDataToBuffer(GHIBuffer* buffer, const char* data, int dataLen);                              // ghiAppendDataToBuffer
+GHTTPBool ghiEncryptDataToBuffer(GHIBuffer* buffer, const char* data, int dataLen);                              // ghiEncodeDataIntoBuffer
+GHTTPBool ghiAppendHeaderToBuffer(GHIBuffer* buffer, const char* name, const char* value);                        // ghiAppendHeaderToBuffer
+GHTTPBool ghiAppendIntToBuffer(GHIBuffer* buffer, int i);                                                     // ghiAppendIntToBuffer
+void ghiResetBuffer(GHIBuffer* buffer);                                                                 // ghiResetBuffer
+GHTTPBool ghiSendBufferedData(GHIConnection* connection);                                                    // ghiSendBufferedData
+GHTTPBool ghiReadDataFromBufferFixed(GHIBuffer* buffer, char* data, int len);                                       // ghiReadDataFromBuffer
+void ghiCallCompletedCallback(GHIConnection* connection);                                                         // ghiCallCompletedCallback
+void ghiCallProgressCallback(GHIConnection* connection, const char* buffer, GHTTPByteCount bufferLen);            // ghiCallProgressCallback
+void ghiCallPostCallback(GHIConnection* connection);                                                         // ghiCallPostCallback
+void ghiCreateLock(void);                                                                              // ghiCreateLock
+void ghiLock(void);                                                                              // ghiLock
+void ghiUnlock(void);                                                                              // ghiUnlock
+GHTTPBool ghiDecryptReceivedData(GHIConnection* connection);                                                    // ghiDecryptReceivedData
+int ghiDoSend(GHIConnection* connection, const char* buffer, int len);                             // ghiTrySendThenBuffer
+int ghiTrySendThenBuffer(GHIConnection* connection, const char* buffer, int len);                             // ghiSendPostData
+GHIConnection* ghiNewConnection(void);                                                                    // ghiNewConnection
+GHTTPBool ghiFreeConnection(GHIConnection* connection);                                                    // ghiFreeConnection
+GHIConnection* ghiRequestToConnection(GHTTPRequest request);                                                    // ghiRequestToConnection
+void ghiEnumConnections(GHTTPBool (*callback)(GHIConnection*));                                             // ghiEnumConnections
+void ghiRedirectConnection(GHIConnection* connection);                                                         // ghiRedirectConnection
+GHTTPBool ghttpSetRequestEncryptionEngine(GHTTPRequest request, GHTTPEncryptionEngine engine);                           // ghttpSetRequestEncryptionEngine
+int ghiEncryptorSslInitFunc(GHIConnection* connection, GHIEncryptor* encryptor);                                 // ghiEncryptorSslInitFunc
+int ghiEncryptorSslCleanupFunc(GHIConnection* connection, GHIEncryptor* encryptor);                                 // ghiEncryptorSslCleanupFunc
+int ghiEncryptorSslEncryptFunc(GHIConnection* connection, GHIEncryptor* encryptor, const char* plainText, int plainTextLength,
                 char* encryptedBuffer, int* encryptedLength);                                        // ghiEncryptorSslEncryptFunc
-int fn_8037D520(GHIConnection* connection, GHIEncryptor* encryptor, const char* encryptedData, int* encryptedLength,
+int ghiEncryptorSslDecryptFunc(GHIConnection* connection, GHIEncryptor* encryptor, const char* encryptedData, int* encryptedLength,
                 char* decryptedBuffer, int* decryptedLength);                                        // ghiEncryptorSslDecryptFunc
-void fn_8037E7F4(GHIConnection* connection);                                                         // ghiHandleComplete
-GHTTPBool fn_8037E8B4(GHIConnection* connection);                                                    // ghiProcessConnection
-void fn_8037EA50(void);                                                                              // ghttpStartup
-GHTTPRequest fn_8037EAFC(const char* URL, const char* headers, char* buffer, int bufferSize, GHIPost* post, GHTTPBool throttle,
+void ghiHandleStatus(GHIConnection* connection);                                                         // ghiHandleComplete
+GHTTPBool ghiProcessConnection(GHIConnection* connection);                                                    // ghiProcessConnection
+void ghttpStartup(void);                                                                              // ghttpStartup
+GHTTPRequest ghttpGetExA(const char* URL, const char* headers, char* buffer, int bufferSize, GHIPost* post, GHTTPBool throttle,
                          GHTTPBool blocking, ghttpProgressCallback progressCallback, ghttpCompletedCallback completedCallback, void* param);  // ghttpGetEx
-GHTTPRequest fn_8037ED14(const char* URL, GHIPost* post, GHTTPBool blocking, ghttpCompletedCallback completedCallback, void* param);  // ghttpPost
-GHTTPRequest fn_8037ED38(const char* URL, const char* headers, GHIPost* post, GHTTPBool throttle, GHTTPBool blocking,
+GHTTPRequest ghttpPostA(const char* URL, GHIPost* post, GHTTPBool blocking, ghttpCompletedCallback completedCallback, void* param);  // ghttpPost
+GHTTPRequest ghttpPostExA(const char* URL, const char* headers, GHIPost* post, GHTTPBool throttle, GHTTPBool blocking,
                          ghttpProgressCallback progressCallback, ghttpCompletedCallback completedCallback, void* param);  // ghttpPostEx
-void fn_8037EEDC(void);                                                                              // ghttpThink
-GHTTPBool fn_8037EEE8(GHTTPRequest request);                                                         // ghttpRequestThink
-void fn_8037EF20(GHTTPRequest request);                                                              // ghttpCancelRequest
-void fn_8037EFB0(GHTTPRequest request, int value);                                                   // sets connection unk184
-GHIPost* fn_8037EFE8(void);                                                                          // ghttpNewPost
-void fn_8037EFEC(void* post, GHTTPBool autoFree);                                                    // ghttpPostSetAutoFree
-void fn_8037EFFC(GHIPost* post);                                                                     // ghttpFreePost
-void fn_8037F074(void* post, GSXmlStreamWriter xml);                                                 // ghttpPostAddXml
-void fn_8037F078(void* elem);                                                                        // ghiFreePostData
-GHIPost* fn_8037F11C(void);                                                                          // ghiNewPost
-void fn_8037F1A4(GHIPost* post, GHTTPBool autoFree);                                                 // ghiPostSetAutoFree
-void fn_8037F1B4(GHIPost* post);                                                                     // ghiFreePost
-GHTTPBool fn_8037F7D8(GHIPostDataState* state);                                                      // ghiPostDataStateInit
-GHTTPBool fn_8037F894(GHIConnection* connection);                                                    // ghiPostInitState
-int fn_8037FA44(GHIConnection* connection);                                                          // ghiPostCleanupState
-int fn_8037FE60(GHIPostDataState* state, GHIConnection* connection);                                 // ghiPostFileDiskStateDoPosting
-int fn_803807A8(GHIConnection* connection);                                                          // ghiPostDoPosting
-GHTTPBool fn_803809F4(GHIConnection* connection);                                                    // ghiParseURL
-void fn_80380BA0(GHIConnection* connection);                                                         // ghiDoSocketInit
-void fn_80380C5C(GHIConnection* connection);                                                         // ghiDoHostLookup
-void fn_80380D60(GHIConnection* connection);                                                         // ghiDoLookupPending
-void fn_80380E00(GHIConnection* connection);                                                         // ghiDoConnecting
-void fn_80381010(GHIConnection* connection);                                                         // ghiDoSecuringSession
-void fn_80381148(GHIConnection* connection);                                                         // ghiDoSendingRequest
-void fn_8038141C(GHIConnection* connection);                                                         // ghiDoPosting
-void fn_80381514(GHIConnection* connection);                                                         // ghiDoWaiting
-void fn_803816E4(GHIConnection* connection);                                                         // ghiDoReceivingStatus
+void ghttpThink(void);                                                                              // ghttpThink
+GHTTPBool ghttpRequestThink(GHTTPRequest request);                                                         // ghttpRequestThink
+void ghttpCancelRequest(GHTTPRequest request);                                                              // ghttpCancelRequest
+void ghttpSetMaxRecvTime(GHTTPRequest request, int value);                                                   // sets connection unk184
+GHIPost* ghttpNewPost(void);                                                                          // ghttpNewPost
+void ghttpPostSetAutoFree(void* post, GHTTPBool autoFree);                                                    // ghttpPostSetAutoFree
+void ghttpFreePost(GHIPost* post);                                                                     // ghttpFreePost
+void ghttpPostAddXml(void* post, GSXmlStreamWriter xml);                                                 // ghttpPostAddXml
+void ghiPostDataFree(void* elem);                                                                        // ghiFreePostData
+GHIPost* ghiNewPost(void);                                                                          // ghiNewPost
+void ghiIsPostAutoFree(GHIPost* post, GHTTPBool autoFree);                                                 // ghiPostSetAutoFree
+void ghiFreePost(GHIPost* post);                                                                     // ghiFreePost
+GHTTPBool ghiPostStateInit(GHIPostDataState* state);                                                      // ghiPostDataStateInit
+GHTTPBool ghiPostInitState(GHIConnection* connection);                                                    // ghiPostInitState
+int ghiPostCleanupState(GHIConnection* connection);                                                          // ghiPostCleanupState
+int ghiPostFileDiskStateDoPosting(GHIPostDataState* state, GHIConnection* connection);                                 // ghiPostFileDiskStateDoPosting
+int ghiPostDoPosting(GHIConnection* connection);                                                          // ghiPostDoPosting
+GHTTPBool ghiParseURL(GHIConnection* connection);                                                    // ghiParseURL
+void ghiDoSocketInit(GHIConnection* connection);                                                         // ghiDoSocketInit
+void ghiDoHostLookup(GHIConnection* connection);                                                         // ghiDoHostLookup
+void ghiDoLookupPending(GHIConnection* connection);                                                         // ghiDoLookupPending
+void ghiDoConnecting(GHIConnection* connection);                                                         // ghiDoConnecting
+void ghiDoSecuringSession(GHIConnection* connection);                                                         // ghiDoSecuringSession
+void ghiDoSendingRequest(GHIConnection* connection);                                                         // ghiDoSendingRequest
+void ghiDoPosting(GHIConnection* connection);                                                         // ghiDoPosting
+void ghiDoWaiting(GHIConnection* connection);                                                         // ghiDoWaiting
+void ghiDoReceivingStatus(GHIConnection* connection);                                                         // ghiDoReceivingStatus
 void fn_80381BB8(GHIConnection* connection);                                                         // ghiDoReceivingHeaders
 void fn_8038215C(GHIConnection* connection);                                                         // ghiDoReceivingFile
 
