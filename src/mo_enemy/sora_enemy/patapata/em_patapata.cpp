@@ -75,7 +75,7 @@ bool emPatapata::emShootItem(itKind kind, int variation, void* param, float lr, 
         Vec3f offset;
         Vec3f speed;
         soModelModule& model = moduleAccesser.getModelModule();
-        // MATCH-ONLY: the offset is copied member by member (the original copies floats).
+        // MATCH-ONLY: the offset is copied member by member (the original copies floats; `offset = m_offset` scores lower).
         offset.m_x = shootParam->m_offset.m_x;
         offset.m_y = shootParam->m_offset.m_y;
         offset.m_z = shootParam->m_offset.m_z;
@@ -84,14 +84,8 @@ bool emPatapata::emShootItem(itKind kind, int variation, void* param, float lr, 
         pos = nodePos;
         pos.m_y += 2.0f;
         // The shell starts with the enemy's speed.
-        // MATCH-ONLY: the sum speed's height is read into a local first (the original loads y before x).
         Vec2f sumSpeed = moduleAccesser.getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(-1));
-        float sumSpeedY = sumSpeed.m_y;
-        Vec3f sumSpeed3;
-        sumSpeed3.m_x = sumSpeed.m_x;
-        sumSpeed3.m_y = sumSpeedY;
-        sumSpeed3.m_z = 0.0f;
-        speed = sumSpeed3;
+        speed = Vec3f(sumSpeed.m_x, sumSpeed.m_y, 0.0f);
         item->warp(&pos);
         item->resetLr(lr);
         item->updateNodeSRT();
