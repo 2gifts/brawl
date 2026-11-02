@@ -194,11 +194,10 @@ int fn_8035C384(int s, const void* addr, int len);         // connect
 int fn_8035CD04(int s, int blocking);                      // SetSockBlocking
 void SetReceiveBufferSize(int s, int size);                         // SetReceiveBufferSize
 
-// MSL stdio stand-ins of this build
-int fn_803F524C(void* buffer, int size, int count, void* file);  // fread
-int fn_803F5CE0(void* file);                                  // ftell
-int fn_803F5EA8(void* file, long offset, int origin);         // fseek
-void fn_803F5EAC(void* file);                                 // rewind
+// MSL stdio of this build (ftell comes from <stdio.h>)
+int fread(void* buffer, int size, int count, void* file);
+int fseek(void* file, long offset, int origin);
+void rewind(void* file);
 
 // md5 and rc4
 void fn_80361680(void* rc4, const u8* src, u8* dst, int len);  // RC4Encrypt

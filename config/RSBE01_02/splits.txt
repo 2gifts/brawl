@@ -4541,6 +4541,8 @@ FAT/sd_host.c:
 	.sbss       start:0x805A1230 end:0x805A1250
 
 RVL_SDK/rfl/rfl_manager_unk.c:
+	extab       start:0x8000926C end:0x80009274
+	extabindex  start:0x8000C13C end:0x8000C148
 	.text       start:0x803CD270 end:0x803CD484
 	.data       start:0x80492F50 end:0x80492F60
 
@@ -4676,60 +4678,139 @@ Runtime.PPCEABI.H/GCN_mem_alloc.c:
 	.rodata     start:0x8041F478 end:0x8041F4E8
 
 MSL_C/alloc.c:
-	.text       start:0x803F3198 end:0x803F3240
+	extab       start:0x80009574 end:0x8000958C
+	extabindex  start:0x8000C574 end:0x8000C598
+	.text       start:0x803F3048 end:0x803F355C
+	.rodata     start:0x8041F4E8 end:0x8041F500
+	.bss        start:0x80599BF0 end:0x80599C28
+	.sbss       start:0x805A12D8 end:0x805A12E0
+
+MSL_C/errno.c:
+	.sbss       start:0x805A12E0 end:0x805A12E8
+
+MSL_C/ansi_files.c:
+	extab       start:0x8000958C end:0x800095A4
+	extabindex  start:0x8000C598 end:0x8000C5BC
+	.text       start:0x803F355C end:0x803F36F0
+	.data       start:0x80493E60 end:0x80493FA0
+	.bss        start:0x80599C28 end:0x80599F28
 
 MSL_C/ansi_fp.c:
-	.text       start:0x803F3A54 end:0x803F3B40
+	extab       start:0x800095A4 end:0x800095DC
+	extabindex  start:0x8000C5BC end:0x8000C610
+	.text       start:0x803F36F0 end:0x803F5060
+	.rodata     start:0x8041F500 end:0x8041F5E0
+	.data       start:0x80493FA0 end:0x80494108
+	.sdata2     start:0x805A4B68 end:0x805A4BA0
 
-MSL_C/ansi_fp_part2.c:
-	.text       start:0x803F3EAC end:0x803F4090
+MSL_C/ctype.c:
+	.rodata     start:0x8041F5E0 end:0x8041F9E0
+
+MSL_C/locale.c:
+	.rodata     start:0x8041F9E0 end:0x8041FAE8
+	.data       start:0x80494108 end:0x80494300
+	.sdata2     start:0x805A4BA0 end:0x805A4BB8
 
 MSL_C/arith.c:
 	.text       start:0x803F5060 end:0x803F5070
 
 MSL_C/buffer_io.c:
-	.text       start:0x803F5070 end:0x803F5098
+	extab       start:0x800095DC end:0x800095EC
+	extabindex  start:0x8000C610 end:0x8000C628
+	.text       start:0x803F5070 end:0x803F524C
+
+MSL_C/direct_io.c:
+	extab       start:0x800095EC end:0x800095FC
+	extabindex  start:0x8000C628 end:0x8000C640
+	.text       start:0x803F524C end:0x803F5898
 
 MSL_C/file_io.c:
-	.text       start:0x803F5A88 end:0x803F5B48
+	extab       start:0x800095FC end:0x80009614
+	extabindex  start:0x8000C640 end:0x8000C664
+	.text       start:0x803F5898 end:0x803F5C38
 
 MSL_C/FILE_POS.c:
-	.text       start:0x803F5C38 end:0x803F5CE4
-
-MSL_C/FILE_POS_part2.c:
-	.text       start:0x803F5EA8 end:0x803F5EAC
+	extab       start:0x80009614 end:0x80009624
+	extabindex  start:0x8000C664 end:0x8000C67C
+	.text       start:0x803F5C38 end:0x803F5EF4
 
 MSL_C/mbstring.c:
-	.text       start:0x803F5EF4 end:0x803F5F74
+	extab       start:0x80009624 end:0x8000962C
+	extabindex  start:0x8000C67C end:0x8000C688
+	.text       start:0x803F5EF4 end:0x803F602C
 
 MSL_C/mem.c:
-	.text       start:0x803F60F8 end:0x803F619C
+	extab       start:0x8000962C end:0x80009634
+	extabindex  start:0x8000C688 end:0x8000C694
+	.text       start:0x803F602C end:0x803F619C
 
 MSL_C/mem_funcs.c:
 	.text       start:0x803F619C end:0x803F646C
+
+MSL_C/math_api.c:
+	extab       start:0x80009634 end:0x8000964C
+	extabindex  start:0x8000C694 end:0x8000C6B8
+	.text       start:0x803F646C end:0x803F6568
 
 MSL_C/misc_io.c:
 	.text       start:0x803F6568 end:0x803F6578
 
 MSL_C/printf.c:
-	.text       start:0x803F6B74 end:0x803F6D9C
-	.data       start:0x80494424 end:0x804944A8
+	extab       start:0x8000964C end:0x800096BC
+	extabindex  start:0x8000C6B8 end:0x8000C760
+	.text       start:0x803F6578 end:0x803F8ACC
+	.rodata     start:0x8041FAE8 end:0x8041FB18
+	.data       start:0x80494300 end:0x80494550
+	.sdata      start:0x8059FF50 end:0x8059FF58
+	.sdata2     start:0x805A4BB8 end:0x805A4BC0
 
-MSL_C/printf_part2.c:
-	.text       start:0x803F7404 end:0x803F752C
+MSL_C/qsort.c:
+	extab       start:0x800096BC end:0x800096C4
+	extabindex  start:0x8000C760 end:0x8000C76C
+	.text       start:0x803F8ACC end:0x803F8C3C
 
 MSL_C/rand.c:
 	.text       start:0x803F8C3C end:0x803F8C64
-	.sdata      start:0x8059FF50 end:0x8059FF60
+	.sdata      start:0x8059FF58 end:0x8059FF60
 
 MSL_C/scanf.c:
-	.text       start:0x803FA078 end:0x803FA108
+	extab       start:0x800096C4 end:0x800096DC
+	extabindex  start:0x8000C76C end:0x8000C790
+	.text       start:0x803F8C64 end:0x803FA1D0
+	.rodata     start:0x8041FB18 end:0x8041FB40
+	.data       start:0x80494550 end:0x80494670
+
+MSL_C/signal.c:
+	extab       start:0x800096DC end:0x800096E4
+	extabindex  start:0x8000C790 end:0x8000C79C
+	.text       start:0x803FA1D0 end:0x803FA280
+	.bss        start:0x80599F28 end:0x80599F48
 
 MSL_C/string.c:
-	.text       start:0x803FA280 end:0x803FA5D0
+	extab       start:0x800096E4 end:0x800096F4
+	extabindex  start:0x8000C79C end:0x8000C7B4
+	.text       start:0x803FA280 end:0x803FA804
+	.sdata      start:0x8059FF60 end:0x8059FF68
+	.sdata2     start:0x805A4BC0 end:0x805A4BC8
 
-MSL_C/string_part2.c:
-	.text       start:0x803FA798 end:0x803FA804
+MSL_C/float.c:
+	.sdata      start:0x8059FF68 end:0x8059FF78
+
+MSL_C/strtold.c:
+	extab       start:0x800096F4 end:0x80009704
+	extabindex  start:0x8000C7B4 end:0x8000C7CC
+	.text       start:0x803FA804 end:0x803FBC7C
+	.rodata     start:0x8041FB40 end:0x8041FB50
+	.sdata2     start:0x805A4BC8 end:0x805A4C00
+
+MSL_C/wctype.c:
+	.rodata     start:0x8041FB50 end:0x80420150
+
+MSL_C/strtoul.c:
+	extab       start:0x80009704 end:0x8000972C
+	extabindex  start:0x8000C7CC end:0x8000C808
+	.text       start:0x803FBC7C end:0x803FC7C8
+	.data       start:0x80494670 end:0x804946F8
 
 MSL_C/wstring.c:
 	.text       start:0x803FC7C8 end:0x803FC828
@@ -4737,14 +4818,25 @@ MSL_C/wstring.c:
 MSL_C/wchar_io.c:
 	.text       start:0x803FC828 end:0x803FC8AC
 
-MSL_C/uart_console_io.c:
-	.text       start:0x803FC97C end:0x803FC984
+MSL_C/uart_console_io_gcn.c:
+	extab       start:0x8000972C end:0x80009734
+	extabindex  start:0x8000C808 end:0x8000C814
+	.text       start:0x803FC8AC end:0x803FC984
+	.sbss       start:0x805A12E8 end:0x805A12F0
 
-MSL_C/abort_exit.c:
-	.text       start:0x803FC9B8 end:0x803FC9BC
+MSL_C/abort_exit_ppc_eabi.c:
+	extab       start:0x80009734 end:0x8000973C
+	extabindex  start:0x8000C814 end:0x8000C820
+	.text       start:0x803FC984 end:0x803FC9BC
+	.sbss       start:0x805A12F0 end:0x805A12F8
+
+MSL_C/math_sun.c:
+	extab       start:0x8000973C end:0x80009744
+	extabindex  start:0x8000C820 end:0x8000C82C
+	.text       start:0x803FC9BC end:0x803FC9FC
 
 MSL_C/extras.c:
-	.text       start:0x803FC9FC end:0x803FCB50
+	.text       start:0x803FC9FC end:0x803FCB54
 
 MSL_C/MSL_Common_Embedded/Math/Double_precision/e_acos.c:
 	.text       start:0x803FCB54 end:0x803FCE18

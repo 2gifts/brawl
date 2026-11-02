@@ -99,6 +99,10 @@ Select an object from the left sidebar to begin diffing. Changes to the project 
 
 ![](assets/objdiff.png)
 
+## Library code from other decompilations
+
+Some SDK and library units are adapted from other GameCube/Wii decompilation projects and checked against Brawl with objdiff and the hash check: MSL_C from [Petari](https://github.com/SMGCommunity/Petari) with functions from [mscharged-decomp](https://github.com/yannicksuter/mscharged-decomp), [wii-ipl](https://github.com/koopthekoopa/wii-ipl) and [ogws](https://github.com/doldecomp/ogws).
+
 ---
 
 The following section is intended primarily for AI agents:

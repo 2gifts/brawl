@@ -22,7 +22,7 @@ void fn_8035E390(void) {
     if (fn_8035D1B8(&aCore->mRefCount) == 1) {
         if (!aCore->mIsStaticInitComplete) {
             fn_8035D248(&aCore->mQueueCrit);
-            fn_803FC9B8(fn_8035E380);
+            atexit(fn_8035E380);
             aCore->mIsStaticInitComplete = 1;
         }
         fn_8035D24C(&aCore->mQueueCrit);

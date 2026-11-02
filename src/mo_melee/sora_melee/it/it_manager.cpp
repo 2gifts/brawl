@@ -84,8 +84,8 @@ extern u32 lbl_27_data_7419C;
 extern u8 lbl_27_data_71EB8[];
 extern s16 lbl_27_rodata_53A0[];
 
-void fn_803F86E4(void* unk1, void* unk2, ...);
-void fn_803FC984();
+void fprintf(void* unk1, void* unk2, ...);
+void abort();
 extern u8 __files[];
 extern u8 lbl_27_data_7908C[];
 
@@ -96,8 +96,8 @@ extern itManager* g_ftItemEnabled;
 
 bool itManager::isItemSwitch(int unk1) {
     if ((u32)unk1 >= NUM_IT_KINDS) {
-        fn_803F86E4(__files + 0xA0, lbl_27_data_7908C);
-        fn_803FC984();
+        fprintf(__files + 0xA0, lbl_27_data_7908C);
+        abort();
     }
     return (((u32*)&m_itemSwitch)[(u32)unk1 >> 5] & (1 << (unk1 & 31))) != 0;
 }
@@ -1064,8 +1064,8 @@ float itManager::getPerBase(itGenParam* param, ItemSwitch* itemSwitch) {
         }
         if (valid) {
             if ((u32)kind >= NUM_IT_KINDS) {
-                fn_803F86E4(__files + 0xA0, lbl_27_data_7908C);
-                fn_803FC984();
+                fprintf(__files + 0xA0, lbl_27_data_7908C);
+                abort();
             }
             if ((((u32*)itemSwitch)[(u32)kind >> 5] & (1 << (kind & 31))) == 0) {
                 continue;
@@ -1117,8 +1117,8 @@ float itManager::getRandBasicItemValue(int kind, ItemSwitch* itemSwitch) {
                 }
                 if (valid) {
                     if ((u32)entryKind >= NUM_IT_KINDS) {
-                        fn_803F86E4(__files + 0xA0, lbl_27_data_7908C);
-                        fn_803FC984();
+                        fprintf(__files + 0xA0, lbl_27_data_7908C);
+                        abort();
                     }
                     if ((((u32*)itemSwitch)[(u32)entryKind >> 5] & (1 << (entryKind & 31))) == 0) {
                         continue;
@@ -1674,8 +1674,8 @@ void itManager::start(int mode) {
     do {
         bool allowed = fn_8005136C(i);
         if (i >= NUM_IT_KINDS) {
-            fn_803F86E4(__files + 0xA0, lbl_27_data_79068);
-            fn_803FC984();
+            fprintf(__files + 0xA0, lbl_27_data_79068);
+            abort();
         }
         u32 bit = 1 << (i & 31);
         u32* word = (u32*)((u8*)this + (i >> 5) * 4);

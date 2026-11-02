@@ -652,14 +652,14 @@ GHTTPBool fn_8037F7D8(GHIPostDataState* state) {
         if (state->file == NULL) {
             return 0;
         }
-        if (fn_803F5EA8(state->file, 0, 2) != 0) {
+        if (fseek(state->file, 0, 2) != 0) {
             return 0;
         }
-        state->len = fn_803F5CE0(state->file);
+        state->len = ftell(state->file);
         if (state->len == -1) {
             return 0;
         }
-        fn_803F5EAC(state->file);
+        rewind(state->file);
     } else if (type != GHIFileMemory && type != GHIXmlData) {
         return 0;
     }
@@ -677,7 +677,7 @@ int fn_8037FE60(GHIPostDataState* state, GHIConnection* connection) {
     int padLen;
 
     while (1) {
-        len = fn_803F524C(buffer, 1, sizeof(buffer), state->file);
+        len = fread(buffer, 1, sizeof(buffer), state->file);
         if (len <= 0) {
             connection->completed = 1;
             connection->result = 0xE;
