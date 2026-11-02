@@ -202,11 +202,9 @@ void grGWFireSpring::getTopNode(Vec3f* pos) {
     case 0: {
         Vec3f* top = m_posWork;
         pos->m_x = top->m_x;
-        float y = top->m_y;
-        // MATCH-ONLY: the original stores the base y before it adds the offset
-        pos->m_y = y;
+        pos->m_y = top->m_y;
         pos->m_z = top->m_z;
-        pos->m_y = y + m_scale.m_y * 0.9f * 8.0f;
+        pos->m_y += m_scale.m_y * 0.9f * 8.0f;
         break;
     }
     }
