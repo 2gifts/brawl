@@ -24,8 +24,6 @@ u32 fn_800455E0(utArchiveManager* manager, gfArchive* archive);
 s32 fn_80045DC0(utArchiveManager* manager, u32 resourceId, s32 flag);
 // HYPOTHESIS: utArchiveManager's release of a resource id.
 void fn_80045E64(utArchiveManager* manager, u32 resourceId);
-// HYPOTHESIS: sndSystem::isSoundGroupLoaded (declared in snd/snd_system.h; the symbol is unnamed).
-bool fn_80073D08(sndSystem* system, u32 groupId);
 
 } // extern "C"
 
@@ -374,7 +372,7 @@ bool emManager::isCompArchive(int createId) {
     }
     if (entry->m_soundHeapLevel >= 0) {
         u32 seId = emInfo::getInstance()->getSEId(entry->m_kind);
-        if (seId != -1 && fn_80073D08(g_sndSystem, seId) == false) {
+        if (seId != -1 && g_sndSystem->isFinishLoad1(seId) == false) {
             return false;
         }
     }

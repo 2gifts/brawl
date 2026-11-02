@@ -1,4 +1,5 @@
 #include <gm/gm_global.h>
+#include <memory.h>
 #include <stdio.h>
 #include <types.h>
 
@@ -334,3 +335,52 @@ void muDiagTransformDataValue(char* buf, u32* unitMsgId, MuDiagDataKind kind, u3
     }
     *unitMsgId = msgId;
 }
+
+muProcDiagram::muProcDiagram(MuObject** objs, nw4r::g3d::G3dObj** mdls, void* msgData) : muProcMenu(objs, mdls) {
+    m_itemCount = 0;
+    m_msgData = msgData;
+    m_pages[Page_1p] = new (Heaps::MenuInstance) muProcDiagram1p(m_objs, m_mdls);
+    m_pages[Page_2p] = new (Heaps::MenuInstance) muProcDiagram2p(m_objs, m_mdls);
+    m_pages[Page_3p] = new (Heaps::MenuInstance) muProcDiagram3p(m_objs, m_mdls);
+    m_pages[Page_4p] = new (Heaps::MenuInstance) muProcDiagram4p(m_objs, m_mdls);
+}
+
+muProcDiagram::~muProcDiagram() {
+    for (int i = 0; i < Page_Num; i++) {
+        delete m_pages[i];
+    }
+}
+
+void muProcDiagramPageBase::setConf(nw4r::g3d::ScnGroup* group, MuMsg* msg, int msgWnd) {
+    m_group = group;
+}
+
+int muProcDiagramPageBase::getUseNumOfMsgWnd() {
+    return 0;
+}
+
+void muProcDiagramPageBase::begin() { }
+
+void muProcDiagramPageBase::finish() { }
+
+bool muProcDiagramPageBase::isPageChanging() {
+    return false;
+}
+
+// The base page only goes back (B)
+bool muProcDiagramPageBase::controlProc() {
+    return !(padUpdate() & Pad_Cancel);
+}
+
+void muProcDiagramPageBase::main() { }
+
+void muProcDiagramPageBase::post() { }
+
+void muProcDiagram::exit() {
+    m_msg->detachMuObject(m_objs[Obj_MsgWnd]);
+    delete m_msg;
+    m_group->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_objs[Obj_Unk111]->m_sceneModel));
+    m_group->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_mdls[Mdl_Unk13]));
+}
+
+void muProcDiagram::playSE_CursorMove() { }

@@ -37,6 +37,10 @@ public:
 
     int loadSoundGroup(SndGroupID sndGroupId, int, bool isRequest);
     bool isFinishLoad();   // the sound groups that loadSoundGroup requested are loaded (the load thread is done)
+    // HYPOTHESIS: the names of the next two follow the main map's order (freeGroup, isFinishLoad, isFinishLoad1,
+    // isFinishFree, isExist); they ask the load thread (sndLoadThread::isFinish1 / isFinishFree).
+    bool isFinishLoad1(u32 groupId);  // HYPOTHESIS: the group that loadSoundGroup requested is loaded
+    bool isFinishFree();
     bool isSoundGroupLoaded(SndGroupID sndGroupId);
     void freeGroup(int heapLevel, int);
     bool loadArchiveHeader();
