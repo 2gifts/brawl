@@ -23,8 +23,6 @@
 // observer's weak vtable (0 in those slots), as the original does. The handler takes the int index of soDamageModuleImpl's
 // (see so/anim/so_anim_cmd_event_presenter.h).
 #define SO_ANIM_CMD_EVENT_OBSERVER_PURE
-// MATCH-ONLY: updateDamageAttackInfo and the hit handlers read the task category of the collision log as a byte.
-#define SO_COLLISION_LOG_CATEGORY_BYTE
 // The attack data's bitfields are plain members (reqCommonEffect copies their words one by one).
 #define SO_COLLISION_ATTACK_DATA_PLAIN_BITFIELDS
 // BYTES: the effector base keeps its destructor out of line (the soDamageEffectorImpl destructor calls a weak copy of

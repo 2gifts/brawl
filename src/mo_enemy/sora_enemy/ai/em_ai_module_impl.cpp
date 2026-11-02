@@ -9,8 +9,6 @@
 #define SO_EVENT_OBSERVER_DTOR_EXTERN
 // The weak soArrayQueue<emAIInfo>::unshift sits right after update (its first user): the in-class definition.
 #define SO_ARRAY_QUEUE_UNSHIFT_IN_CLASS
-// MATCH-ONLY: notifyEventCollisionAttack reads the task category of the log as a byte.
-#define SO_COLLISION_LOG_CATEGORY_BYTE
 // The anim cmd argument list destructor is the one of sora_melee.
 #define SO_ARRAY_CONTRACTIBLE_TABLE_DTOR_EXTERN
 // soAnimCmdModule::interpretCmd1 takes the frame last (see so/anim/so_anim_cmd_module_impl.h).

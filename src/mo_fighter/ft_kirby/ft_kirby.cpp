@@ -529,8 +529,7 @@ void ftKirby::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleA
             }
         }
     } else if (moduleAccesser->getStatusModule().getStatusKind() == 0x116 && static_cast<u8>(collisionLog->_33) == 1) {
-        // MATCH-ONLY: the category is read as a plain byte, not through the bitfield.
-        gfTask* task = gfTaskScheduler::getInstance()->getTaskById(static_cast<gfTask::Category>(reinterpret_cast<u8*>(collisionLog)[0x22]), collisionLog->m_taskId);
+        gfTask* task = gfTaskScheduler::getInstance()->getTaskById(static_cast<gfTask::Category>(collisionLog->m_taskCategory), collisionLog->m_taskId);
         if (task->m_taskCategory == gfTask::Category_Fighter) {
             soExternalValueAccesser::getTeamNo(&dynamic_cast<StageObject&>(*task));
             Fighter* target = dynamic_cast<Fighter*>(task);

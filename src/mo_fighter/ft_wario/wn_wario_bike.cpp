@@ -383,7 +383,7 @@ baseEvent:
 void wnWarioBike::notifyEventCollisionAttack(float power, soCollisionLog* log,
                                              soModuleAccesser* accesser) {
     gfTask* task = gfTaskScheduler::getInstance()->getTaskById(
-        static_cast<gfTask::Category>(reinterpret_cast<const u8*>(log)[0x22]), log->m_taskId);
+        static_cast<gfTask::Category>(log->m_taskCategory), log->m_taskId);
     soCollisionAttackData* attackData = accesser->getCollisionAttackModule().getData(
         log->m_damageIndex, log->m_isAbsolute);
     float one = 1.0f;
