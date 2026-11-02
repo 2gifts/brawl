@@ -419,6 +419,9 @@ cflags_gamespy = [
     "-i include/GameSpy/platform/rvl",
 ]
 
+# DWC (sources and flags from mscharged-decomp)
+cflags_dwc = [*cflags_gamespy, "-DSDK_FINALROM=1", "-i src"]
+
 cflags_sib_rfl = [
     "-nodefaults",
     "-proc gekko",
@@ -497,24 +500,34 @@ config.warn_missing_source = False
 config.libs = [
     {
         "lib": "DWC",
+        "mw_version": "GC/3.0a5.2",
+        "cflags": cflags_dwc,
+        "host": False,
+        "objects": [
+            Object(NonMatching, "DWC/dwc_base64.c"),
+            Object(NonMatching, "DWC/dwc_ghttp.c"),
+            Object(NonMatching, "DWC/dwc_common.c"),
+            Object(NonMatching, "DWC/dwc_friend.c"),
+            Object(NonMatching, "DWC/dwc_login.c"),
+            Object(NonMatching, "DWC/dwc_main.c"),
+            Object(NonMatching, "DWC/dwci_np_math.c"),
+            Object(NonMatching, "DWC/dwc_cf.c"),
+            Object(NonMatching, "DWC/dwc_account.c"),
+            Object(NonMatching, "DWC/dwc_auth_interface.c"),
+        ],
+    },
+    {
+        "lib": "DWC_legacy",
         "mw_version": config.linker_version,
         "cflags": cflags_common,
         "host": False,
         "objects": [
-            Object(NonMatching, "DWC/dwcbase64.c"),
             Object(NonMatching, "DWC/dwcerror.c"),
             Object(NonMatching, "DWC/dwcmemfunc.c"),
             Object(NonMatching, "DWC/dwcinit.c"),
             Object(NonMatching, "DWC/dwcreport.c"),
-            Object(NonMatching, "DWC/dwcghttp.c"),
-            Object(NonMatching, "DWC/dwccommon.c"),
-            Object(NonMatching, "DWC/dwcfriend.c"),
-            Object(NonMatching, "DWC/dwclogin.c"),
-            Object(NonMatching, "DWC/dwcmain.c"),
             Object(NonMatching, "DWC/dwcmatch.c"),
             Object(NonMatching, "DWC/dwctransport.c"),
-            Object(NonMatching, "DWC/dwcutil.c"),
-            Object(NonMatching, "DWC/dwc_auth_interface.c"),
             Object(NonMatching, "DWC/dwc_stats_http.c"),
             Object(NonMatching, "DWC/dwc_nd.c"),
         ],

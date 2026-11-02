@@ -4296,8 +4296,9 @@ havok/hkVersionUtil.cpp:
 	.text       start:0x80334BF8 end:0x80334DE4
 	.rodata     start:0x804156D0 end:0x804156E0
 
-DWC/dwcbase64.c:
+DWC/dwc_base64.c:
 	.text       start:0x80334DE4 end:0x8033514C
+	.sdata      start:0x8059F058 end:0x8059F070
 
 DWC/dwcerror.c:
 	.text       start:0x8033514C end:0x80335264
@@ -4311,19 +4312,29 @@ DWC/dwcmemfunc.c:
 DWC/dwcreport.c:
 	.text       start:0x80335630 end:0x80335988
 
-DWC/dwcghttp.c:
+DWC/dwc_ghttp.c:
 	.text       start:0x80335988 end:0x803362EC
+	.data       start:0x80489310 end:0x80489450
+	.sdata      start:0x8059F070 end:0x8059F078
+	.sbss       start:0x805A0F68 end:0x805A0F70
 
-DWC/dwccommon.c:
+DWC/dwc_common.c:
 	.text       start:0x803362EC end:0x80336698
+	.data       start:0x80489450 end:0x80489460
+	.bss        start:0x80533718 end:0x80533730
 
-DWC/dwcfriend.c:
+DWC/dwc_friend.c:
 	.text       start:0x80336698 end:0x80338600
+	.data       start:0x80489460 end:0x80489A00
+	.sdata      start:0x8059F078 end:0x8059F088
+	.sbss       start:0x805A0F70 end:0x805A0F80
 
-DWC/dwclogin.c:
+DWC/dwc_login.c:
 	.text       start:0x80338600 end:0x8033949C
+	.data       start:0x80489A00 end:0x80489E48
+	.sbss       start:0x805A0F80 end:0x805A0F88
 
-DWC/dwcmain.c:
+DWC/dwc_main.c:
 	.text       start:0x8033949C end:0x8033C0D4
 	.data       start:0x80489E48 end:0x8048AA60
 	.bss        start:0x80533730 end:0x805338B0
@@ -4344,12 +4355,17 @@ DWC/dwctransport.c:
 	.sdata      start:0x8059F1B0 end:0x8059F1B8
 	.sbss       start:0x805A0FB0 end:0x805A0FB8
 
-DWC/dwcutil.c:
-	.text       start:0x8034F020 end:0x80352040
-	.data       start:0x8048D240 end:0x8048D400
-	.bss        start:0x80534008 end:0x80534030
-	.sdata      start:0x8059F1B8 end:0x8059F1C8
+DWC/dwci_np_math.c:
+	.text       start:0x8034F7A8 end:0x80350BBC
+
+DWC/dwc_cf.c:
+	.text       start:0x80350BBC end:0x80350C0C
 	.sbss       start:0x805A0FB8 end:0x805A0FD0
+
+DWC/dwc_account.c:
+	.text       start:0x80350C0C end:0x80352040
+	.data       start:0x8048D240 end:0x8048D400
+	.sdata      start:0x8059F1B8 end:0x8059F1C8
 
 DWC/dwc_auth_interface.c:
 	.text       start:0x80352040 end:0x8035423C

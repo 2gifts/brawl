@@ -36,7 +36,7 @@ void DWC_Free(int kind, void* allocation, int size) {
     lbl_805A0F58(kind, (DWCAllocationHeader*)allocation - 1, size);
 }
 
-extern void fn_8034F028(void* destination, const void* source, u32 size);
+extern void DWCi_Np_CPUCopyFast(void* destination, const void* source, u32 size);
 
 void* DWCi_GsMalloc(u32 size) { return DWC_Alloc(9, size); }
 
@@ -47,7 +47,7 @@ void* DWCi_GsRealloc(void* allocation, u32 size) {
         DWCAllocationHeader* header = (DWCAllocationHeader*)allocation - 1;
         u32 previousSize = header->size;
         u32 copySize = size < previousSize ? size : previousSize;
-        fn_8034F028(replacement, allocation, copySize);
+        DWCi_Np_CPUCopyFast(replacement, allocation, copySize);
         DWC_Free(9, allocation, previousSize);
     }
     return replacement;
