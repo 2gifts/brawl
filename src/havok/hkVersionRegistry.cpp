@@ -71,8 +71,7 @@ hkResult hkVersionRegistry::getVersionPath(const char* versionFrom, const char* 
                         return HK_SUCCESS;
                     }
                     next.pushBack(idx);
-                    toGoal.m_size--;
-                    toGoal[a] = toGoal[toGoal.m_size];
+                    toGoal.removeAt(a);
                 }
             }
         }

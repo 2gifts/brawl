@@ -91,8 +91,7 @@ void hk3AxisSweep::endOverlapCheckMarker(hkBpCheckMarker* markers, const hkBpNod
     } else {
         hkBpCheckMarker* marker = (hkBpCheckMarker*)((u8*)markers + ((u32)b->m_handle & ~1));
         int index = findCheckMarkerEntry(marker->m_list, (u16)value);
-        marker->m_list.m_size--;
-        ((u16*)marker->m_list.m_data)[index] = ((u16*)marker->m_list.m_data)[marker->m_list.m_size];
+        marker->m_list.removeAt(index);
     }
 }
 
