@@ -616,8 +616,7 @@ config.libs = [
             Object(NonMatching, "MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/dolphin_trk_glue.c"),
             Object(NonMatching, "MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/UDP_Stubs.c"),
             Object(NonMatching, "MetroTRK/gamedev/cust_connection/cc/exi2/GCN/EXI2_GDEV_GCN/main.c"),
-            Object(NonMatching, "RVL_SDK/rfl/rfl_manager_unk_a.c"),
-            Object(NonMatching, "RVL_SDK/rfl/rfl_manager_unk_b.c"),
+            Object(NonMatching, "RVL_SDK/rfl/rfl_manager_unk.c"),
         ],
     },
     # --- sibling-project libraries (begin) ---
