@@ -49,7 +49,7 @@ bool emAroaros::emShootItem(itKind kind, int variation, void* param, float lr, f
     BaseItem* item = items->createItem(kind, variation, ownerTaskId);
     if (item != NULL) {
         emItemShootNodeParam* shootParam = static_cast<emItemShootNodeParam*>(param);
-        // MATCH-ONLY: the vectors are declared first and copied member by member (the original copies floats).
+        // MATCH-ONLY: the offset is copied member by member (the original copies floats; `offset = m_offset` scores lower).
         Vec3f pos;
         Vec3f offset;
         soModelModule& model = moduleAccesser.getModelModule();
@@ -58,9 +58,7 @@ bool emAroaros::emShootItem(itKind kind, int variation, void* param, float lr, f
         offset.m_z = shootParam->m_offset.m_z;
         // The same bug as the Popperam's: the offset's address goes to the (node, bool) overload and is never applied.
         Vec3f nodePos = model.getNodeGlobalPosition(shootParam->m_nodeId, &offset);
-        pos.m_x = nodePos.m_x;
-        pos.m_y = nodePos.m_y;
-        pos.m_z = nodePos.m_z;
+        pos = nodePos;
         pos.m_y += 1.0f;
         item->warp(&pos);
         item->resetLr(lr);

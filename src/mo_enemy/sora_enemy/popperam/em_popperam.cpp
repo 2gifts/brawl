@@ -77,8 +77,7 @@ bool emPopperam::emShootItem(itKind kind, int variation, void* param, float, flo
     BaseItem* item = items->createItem(kind, variation, ownerTaskId);
     if (item != NULL) {
         emPopperamItemShootParam* shootParam = static_cast<emPopperamItemShootParam*>(param);
-        // MATCH-ONLY: the vectors are declared first and copied member by member (the original copies floats, an aggregate
-        // copy of Vec3f is a word copy).
+        // MATCH-ONLY: the offset is copied member by member (the original copies floats; `offset = m_offset` scores lower).
         Vec3f pos;
         Vec3f offset;
         Vec3f speed;
@@ -92,9 +91,7 @@ bool emPopperam::emShootItem(itKind kind, int variation, void* param, float, flo
         // 0x9C (u32, const Vec3f*, bool, bool), taking the address as is. The target turns &offset into 0/1 before the
         // call (subic/subfe), which only a pointer-to-bool conversion emits.
         Vec3f nodePos = model.getNodeGlobalPosition(shootParam->m_nodeId, &offset);
-        pos.m_x = nodePos.m_x;
-        pos.m_y = nodePos.m_y;
-        pos.m_z = nodePos.m_z;
+        pos = nodePos;
         mtSinCosf(0.017453292f * getValueRndFloat(shootParam->m_angleRange, &moduleAccesser), &speed.m_y, &speed.m_x);
         float speedScale = getValueFloat(&shootParam->m_speed, &moduleAccesser);
         speed.m_x *= speedScale;
