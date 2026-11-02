@@ -1,6 +1,6 @@
 #pragma force_active on
 #include <so/so_array.h>
-#include <so/templates/so_controller_impl.h>
+#include <so/controller/so_controller_impl.h>
 
 template s32 soArrayVector<soControllerImpl, 10>::getTopIndex() const;
 template void soArrayVector<soControllerImpl, 10>::setTopIndex(s32);

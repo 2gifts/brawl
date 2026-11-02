@@ -84,25 +84,35 @@ public:
         u8 m_count;
     };
 
-    float m_mainStickX;          // 0x08
-    float m_mainStickY;          // 0x0C
-    float m_mainStickPrevX;      // 0x10
-    float m_mainStickPrevY;      // 0x14
-    float m_savedMainStickX;     // 0x18 HYPOTHESIS: snapshot taken when going "off"
-    float m_savedMainStickY;     // 0x1C
-    float m_subStickX;           // 0x20
-    float m_subStickY;           // 0x24
-    float m_subStickPrevX;       // 0x28
-    float m_subStickPrevY;       // 0x2C
-    float m_savedSubStickX;      // 0x30
-    float m_savedSubStickY;      // 0x34
-    float m_lr;                  // 0x38
-    float m_lrPrev;              // 0x3C
-    float m_savedLr;             // 0x40
-    int m_button;                // 0x44
-    int m_buttonPrev;            // 0x48
-    int m_savedButton;           // 0x4C
-    int m_trigger;               // 0x50
+    // HYPOTHESIS: each input keeps its current, previous and saved value together in a small aggregate. The implicit
+    // copy of the controller (soArrayVector<soControllerImpl> assignments) moves the sticks two words at a time, the
+    // L/R values as 8 + 4 bytes and the buttons as two 8-byte pairs: aggregate copies, not float members (lfs/stfs).
+    // The names of the aggregates are guesses; "saved" is the snapshot taken when the controller goes off.
+    struct Stick {
+        float m_x;
+        float m_y;
+    };
+    struct StickState {
+        Stick m_now;
+        Stick m_prev;
+        Stick m_saved;
+    };
+    struct LrState {
+        float m_now;
+        float m_prev;
+        float m_saved;
+    };
+    struct ButtonState {
+        int m_now;
+        int m_prev;
+        int m_saved;
+        int m_trigger;
+    };
+
+    StickState m_mainStick;      // 0x08
+    StickState m_subStick;       // 0x20
+    LrState m_lr;                // 0x38
+    ButtonState m_button;        // 0x44
     int m_release;               // 0x54
     soControllerTriggerData m_triggerData[17]; // 0x58
     u8 m_flickX;                 // 0x7A
@@ -121,7 +131,6 @@ public:
     u8 m_flickBonusLr;           // 0x87
     bool m_hasSaved;             // 0x88
     bool m_isOff;                // 0x89
-    char _8A[2];
 
     soControllerImpl();
     virtual void resetFlick();
