@@ -183,6 +183,92 @@ typedef struct _AXPB {
 
 typedef void (*AXVoiceCallback)(void* vpb);
 
+// Mixer-control and sync flags (from mscharged-decomp, for mix.c / remote.c)
+typedef enum {
+    AX_MIXER_CTRL_L = (1 << 0),
+    AX_MIXER_CTRL_R = (1 << 1),
+    AX_MIXER_CTRL_DELTA = (1 << 2),
+    AX_MIXER_CTRL_S = (1 << 3),
+    AX_MIXER_CTRL_DELTA_S = (1 << 4),
+
+    AX_MIXER_CTRL_AL = (1 << 16),
+    AX_MIXER_CTRL_AR = (1 << 17),
+    AX_MIXER_CTRL_DELTA_A = (1 << 18),
+    AX_MIXER_CTRL_AS = (1 << 19),
+    AX_MIXER_CTRL_DELTA_AS = (1 << 20),
+
+    AX_MIXER_CTRL_BL = (1 << 21),
+    AX_MIXER_CTRL_BR = (1 << 22),
+    AX_MIXER_CTRL_DELTA_B = (1 << 23),
+    AX_MIXER_CTRL_BS = (1 << 24),
+    AX_MIXER_CTRL_DELTA_BS = (1 << 25),
+
+    AX_MIXER_CTRL_CL = (1 << 26),
+    AX_MIXER_CTRL_CR = (1 << 27),
+    AX_MIXER_CTRL_DELTA_C = (1 << 28),
+    AX_MIXER_CTRL_CS = (1 << 29),
+    AX_MIXER_CTRL_DELTA_CS = (1 << 30)
+};
+
+typedef enum {
+    AX_MIXER_CTRL_RMT_M0 = (1 << 0),
+    AX_MIXER_CTRL_RMT_DELTA_M0 = (1 << 1),
+    AX_MIXER_CTRL_RMT_A0 = (1 << 2),
+    AX_MIXER_CTRL_RMT_DELTA_A0 = (1 << 3),
+
+    AX_MIXER_CTRL_RMT_M1 = (1 << 4),
+    AX_MIXER_CTRL_RMT_DELTA_M1 = (1 << 5),
+    AX_MIXER_CTRL_RMT_A1 = (1 << 6),
+    AX_MIXER_CTRL_RMT_DELTA_A1 = (1 << 7),
+
+    AX_MIXER_CTRL_RMT_M2 = (1 << 8),
+    AX_MIXER_CTRL_RMT_DELTA_M2 = (1 << 9),
+    AX_MIXER_CTRL_RMT_A2 = (1 << 10),
+    AX_MIXER_CTRL_RMT_DELTA_A2 = (1 << 11),
+
+    AX_MIXER_CTRL_RMT_M3 = (1 << 12),
+    AX_MIXER_CTRL_RMT_DELTA_M3 = (1 << 13),
+    AX_MIXER_CTRL_RMT_A3 = (1 << 14),
+    AX_MIXER_CTRL_RMT_DELTA_A3 = (1 << 15)
+};
+
+typedef enum {
+    AX_PBSYNC_SELECT = (1 << 0),
+    AX_PBSYNC_MIXER_CTRL = (1 << 1),
+    AX_PBSYNC_STATE = (1 << 2),
+    AX_PBSYNC_TYPE = (1 << 3),
+    AX_PBSYNC_MIX = (1 << 4),
+    AX_PBSYNC_ITD = (1 << 5),
+    AX_PBSYNC_ITD_SHIFT = (1 << 6),
+    AX_PBSYNC_DPOP = (1 << 7),
+    AX_PBSYNC_VE = (1 << 8),
+    AX_PBSYNC_VE_DELTA = (1 << 9),
+    AX_PBSYNC_ADDR = (1 << 10),
+    AX_PBSYNC_LOOP_FLAG = (1 << 11),
+    AX_PBSYNC_LOOP_ADDR = (1 << 12),
+    AX_PBSYNC_END_ADDR = (1 << 13),
+    AX_PBSYNC_CURR_ADDR = (1 << 14),
+    AX_PBSYNC_ADPCM = (1 << 15),
+    AX_PBSYNC_SRC = (1 << 16),
+    AX_PBSYNC_SRC_RATIO = (1 << 17),
+    AX_PBSYNC_ADPCM_LOOP = (1 << 18),
+    AX_PBSYNC_LPF = (1 << 19),
+    AX_PBSYNC_LPF_COEFS = (1 << 20),
+    AX_PBSYNC_BIQUAD = (1 << 21),
+    AX_PBSYNC_BIQUAD_COEFS = (1 << 22),
+    AX_PBSYNC_REMOTE = (1 << 23),
+    AX_PBSYNC_RMT_MIXER_CTRL = (1 << 24),
+    AX_PBSYNC_RMTMIX = (1 << 25),
+    AX_PBSYNC_RMTDPOP = (1 << 26),
+    AX_PBSYNC_RMTSRC = (1 << 27),
+    AX_PBSYNC_RMTIIR = (1 << 28),
+    AX_PBSYNC_RMTIIR_LPF_COEFS = (1 << 29),
+    AX_PBSYNC_RMTIIR_BIQUAD_COEFS = (1 << 30),
+    AX_PBSYNC_ALL = (1 << 31),
+};
+
+#define AX_VOICE_MAX 96
+
 typedef struct _AXVPB {
     void* next;                // at 0x0
     void* prev;                // at 0x4

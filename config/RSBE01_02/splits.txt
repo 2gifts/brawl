@@ -2402,7 +2402,7 @@ RVL_SDK/axfx/AXFXHooks.c:
 RVL_SDK/mem/mem_heapCommon.c:
 	.text       start:0x80203D0C end:0x80204178
 	.bss        start:0x804E8A58 end:0x804E8A80
-	.sbss       start:0x805A0B58 end:0x805A0B5C
+	.sbss       start:0x805A0B58 end:0x805A0B60
 
 RVL_SDK/mem/mem_expHeap.c:
 	.text       start:0x80204178 end:0x802049BC
@@ -2424,10 +2424,15 @@ RVL_SDK/cx/CXUncompression.c:
 	.text       start:0x80205530 end:0x80206308
 
 RVL_SDK/mix/mix.c:
-	.text       start:0x80206308 end:0x8020981C
+	.text       start:0x80206308 end:0x80209388
 	.data       start:0x8047B2E0 end:0x8047BE70
-	.bss        start:0x804E8A80 end:0x804ECE00
-	.sbss       start:0x805A0B5C end:0x805A0B78
+	.bss        start:0x804E8A80 end:0x804EB480
+	.sbss       start:0x805A0B60 end:0x805A0B70
+
+RVL_SDK/mix/remote.c:
+	.text       start:0x80209388 end:0x8020981C
+	.bss        start:0x804EB480 end:0x804ECE00
+	.sbss       start:0x805A0B70 end:0x805A0B78
 
 RVL_SDK/dsp/dsp.c:
 	.text       start:0x8020981C end:0x80209A98
