@@ -49,7 +49,7 @@ void ftDededeStatusUniqProcessSpecialWaddledeeThrowPickup::initStatus(soModuleAc
     unsigned long taskId = moduleAccesser->getWorkManageModule().getInt(0x10000044);
     gfTask* task = gfTaskScheduler::getInstance()->getTaskById(gfTask::Category_Weapon, taskId);
     if (task != NULL && kind == 0x33) {
-        // MATCH-ONLY: preserve the owner argument's lifetime before the receiver.
+        // BYTES: the owner task id is declared before the follower (register order).
         int ownerTaskId;
         wnDededeFollower* follower = dynamic_cast<wnDededeFollower*>(task);
         ownerTaskId = moduleAccesser->m_stageObject->m_taskId;

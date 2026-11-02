@@ -123,7 +123,8 @@ static inline u8 getGameRule(const gmResultInfo* info) {
     return reinterpret_cast<const u8*>(info)[1];
 }
 
-// MATCH-ONLY: the shadow header declares the character as an enum bit field, the code reads the plain byte.
+// MATCH-ONLY: loadResource computes the record's address before the byte load; the plain member read
+// (info.m_characterKind, also through a local pointer to the records) folds the 0x24 into the load.
 static inline u8 getCharacterKind(const gmPlayerResultInfo& info) {
     return *reinterpret_cast<const u8*>(&info);
 }
@@ -348,7 +349,7 @@ void ifVsResultTask::printHitPanel(int player) {
                 m_msg->setFontColor(slot + 6, 0x90, 0xC9, 0xEB, 0xFF);
                 printHitNum(slot + 6, kos - fallsOnly - selfDestructs, true);
             }
-        } else if (static_cast<s8>(info->m_startStockCount) > 0 || resultInfo->m_decisionKind == gmResultInfo::Decision_NoContest) {
+        } else if (info->m_startStockCount > 0 || resultInfo->m_decisionKind == gmResultInfo::Decision_NoContest) {
             printTime(slot + 6, 0, false);
         } else {
             // HYPOTHESIS: the frame the player was eliminated at (not named in gmPlayerResultInfo yet)
@@ -613,7 +614,7 @@ void ifVsResultTask::processAnim() {
             g_sndSystem->playSE(static_cast<SndID>(0x20), -1, 0, 0, -1);
         } else {
             // the music of the character that won
-            m_bgmHandle = g_sndSystem->playBGM(bgmIds[getCharacterKind(resultInfo2->m_playersResultInfo[m_winnerPlayer])], 0, true);
+            m_bgmHandle = g_sndSystem->playBGM(bgmIds[resultInfo2->m_playersResultInfo[m_winnerPlayer].m_characterKind], 0, true);
             g_sndSystem->playSE(static_cast<SndID>(0x1E), -1, 0, 0, -1);
         }
         // the winner's controller rumbles
@@ -954,8 +955,7 @@ void ifVsResultTask::setWinnerName() {
     if (resultInfo->m_decisionKind == 9) {
         m_msgName->printf(0, lbl_8059E348);
     } else if (!resultInfo->m_isTeams) {
-        // MATCH-ONLY: the byte is read directly (the bitfield member is loaded as a word and shifted)
-        int character = *reinterpret_cast<const u8*>(&resultInfo->m_playersResultInfo[m_winnerPlayer]);
+        int character = resultInfo->m_playersResultInfo[m_winnerPlayer].m_characterKind;
         const char* name = fn_800AFA8C(muMenu::exchangeGmCharacterKind2MuStockchkind(character));
         m_msgName->printf(0, name);
     } else {
@@ -2144,8 +2144,7 @@ void ifVsResultTask::soundProcess() {
                     0x201A, 0x201B, 0x201C, 0x201E, 0x201E, 0x201F, 0x201F, 0x2020, 0x2020, 0x2021, 0x2022, 0x2023, 0x2024,
                     0x2025, 0x2026, 0x2027, 0x2028, 0x2029, 0x200D, 0x2016, 0x202A, 0x202A, 0x202A, 0x202A, 0,
                 };
-                // MATCH-ONLY: the kind is read as a plain byte (the shadow header declares it as an enum bit field)
-                u8 characterKind = *(u8*)&resultInfo->m_playersResultInfo[m_winnerPlayer];
+                u8 characterKind = resultInfo->m_playersResultInfo[m_winnerPlayer].m_characterKind;
                 g_sndSystem->playSE((SndID)voiceIds[characterKind], -1, 0, 0, -1);
             } else {
                 // HYPOTHESIS: the voices of the three teams, indexed by m_winnerTeam

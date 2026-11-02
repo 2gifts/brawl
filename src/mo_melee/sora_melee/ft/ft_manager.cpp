@@ -1217,7 +1217,7 @@ bool ftManager::isExistLoseFighterResult(int, int kind) const {
     for (i = 0; i < 7; i++, player++) {
         if (isTeamBattle(this) == true) {
             if (player->m_state != 3) {
-                if (*reinterpret_cast<u8*>(player) == kind) {
+                if (player->m_characterKind == kind) {
                     if (player->m_teamNo != reinterpret_cast<u8*>(info)[0x1E]) {
                         return true;
                     }
@@ -1225,7 +1225,7 @@ bool ftManager::isExistLoseFighterResult(int, int kind) const {
             }
         } else {
             if (player->m_state != 3) {
-                if (*reinterpret_cast<u8*>(player) == kind) {
+                if (player->m_characterKind == kind) {
                     return true;
                 }
             }

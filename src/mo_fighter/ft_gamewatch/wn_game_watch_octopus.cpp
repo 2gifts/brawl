@@ -89,7 +89,7 @@ void wnGameWatchOctopus::updateNodeSRT() {
     float scaleValue = moduleAccesser->getPostureModule().getScale();
     Vec3f scale;
     scale.m_x = scale.m_y = scale.m_z = scaleValue;
-    // MATCH-ONLY: preserve the native local vector storage order.
+    // BYTES: the rotation is declared before the position (the native frame keeps that storage order).
     Vec3f rotation;
     Vec3f position;
     position = moduleAccesser->getPostureModule().getPos();

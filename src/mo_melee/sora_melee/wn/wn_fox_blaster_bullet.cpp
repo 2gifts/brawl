@@ -157,10 +157,7 @@ void wnFoxBlasterBullet::updateNodeSRT() {
     rotation.m_y += m_moduleAccesser->getPostureModule().getRotYLr();
     float scaleValue = m_moduleAccesser->getPostureModule().getScale();
     Vec3f scale;
-    // MATCH-ONLY: retain the original order of the local scale stores.
-    scale.m_z = scaleValue;
-    scale.m_y = scaleValue;
-    scale.m_x = scaleValue;
+    scale.m_x = scale.m_y = scale.m_z = scaleValue;
     scale.m_z *= m_moduleAccesser->getWorkManageModule().getFloat(0x11000001);
     m_moduleAccesser->getModelModule().setNodeSRT(0, &scale, &rotation, &position);
 }

@@ -116,7 +116,7 @@ void grHomerunBarrier::updateState(float deltaFrame) {
         setMotion(2, false, true, &m_motionTimer);
         setVisibility(1);
         g_sndSystem->playSE(snd_se_Homerun_barrier_crash, 0, 0, 0, -1);
-        // MATCH-ONLY: declaring the model before the effect handle gives the handle r28 and the model r29
+        // BYTES: declaring the model before the effect handle gives the handle r28 and the model r29
         nw4r::g3d::ScnMdl* scnMdl;
         u32 effect = g_ecMgr->setEffect(ef_ptc_stg_homerun_crash);
         scnMdl = m_sceneModels[0];

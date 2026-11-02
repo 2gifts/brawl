@@ -1,3 +1,10 @@
+#define WN_WEAPON_BUILDER // The fighter also owns complete article teardown.
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: empty article parameter teardown is inlined.
+#define WN_KINETIC_MEDIATOR_INLINE_DTOR // BYTES: the null mediator teardown is inlined.
+// BYTES: the native model-node array holder uses the singleton null policy.
+#define FT_MODEL_VIRTUAL_NODE_SINGLETON_HOLDER
+// BYTES: native kinetic/article pools give the empty root no vptr.
+#define FT_POOL_ROOT_NONPOLYMORPHIC
 #define SO_GENERAL_WORK_BOUNDED_CLEAR
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
 #define FT_SOUND_GENERATOR_DTOR_NOINLINE
@@ -6,7 +13,52 @@
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #define FT_TEAM_TYPED_INTERFACE
+#include <so/event/so_event_system.h>
+class soStatusEventObserver;
+class soAnimCmdEventObserver;
+// These article observer lists call their shared sora_melee destructors.
+class soLinkEventObserver;
+class soArticleEventObserver;
+template <> class soEventUnitWithWorkArea<soStatusEventObserver, 16> : public soEventUnitImpl<soStatusEventObserver> {
+    soInstanceManagerFullPropertyVector<soStatusEventObserver*, 16> m_observerList;
+public:
+    soEventUnitWithWorkArea(s16 managerId, s16 eventId) : soEventUnitImpl<soStatusEventObserver>(managerId, eventId) { }
+    virtual ~soEventUnitWithWorkArea();
+    virtual u32 getObserverNum() const { return m_observerList.size(); }
+};
+template <> class soEventUnitWithWorkArea<soAnimCmdEventObserver, 32> : public soEventUnitImpl<soAnimCmdEventObserver> {
+    soInstanceManagerFullPropertyVector<soAnimCmdEventObserver*, 32> m_observerList;
+public:
+    soEventUnitWithWorkArea(s16 managerId, s16 eventId) : soEventUnitImpl<soAnimCmdEventObserver>(managerId, eventId) { }
+    virtual ~soEventUnitWithWorkArea();
+    virtual u32 getObserverNum() const { return m_observerList.size(); }
+};
+template <> class soEventUnitWithWorkArea<soLinkEventObserver, 2> : public soEventUnitImpl<soLinkEventObserver> {
+    soInstanceManagerFullPropertyVector<soLinkEventObserver*, 2> m_observerList;
+public:
+    soEventUnitWithWorkArea(s16 managerId, s16 eventId) : soEventUnitImpl<soLinkEventObserver>(managerId, eventId) { }
+    virtual ~soEventUnitWithWorkArea();
+    virtual u32 getObserverNum() const { return m_observerList.size(); }
+};
+template <> class soEventUnitWithWorkArea<soArticleEventObserver, 2> : public soEventUnitImpl<soArticleEventObserver> {
+    soInstanceManagerFullPropertyVector<soArticleEventObserver*, 2> m_observerList;
+public:
+    soEventUnitWithWorkArea(s16 managerId, s16 eventId) : soEventUnitImpl<soArticleEventObserver>(managerId, eventId) { }
+    virtual ~soEventUnitWithWorkArea();
+    virtual u32 getObserverNum() const { return m_observerList.size(); }
+};
 #include <ft/builder/ft_dol_array_list.h>
+
+// Shared model-node storage; declare it here before Luigi instantiates the builder.
+FT_DOL_ARRAY_VECTOR(soModelNodeSetUp, 11);
+
+// BYTES: this command-pointer vector uses the shared sora_melee destructor.
+template <> soArrayVector<ftAnimCmdConvPtr, 285>::~soArrayVector();
+#include <so/sound/so_sound_3d_generator_accesser_impl.h>
+// Empty article interfaces own no resources in this translation unit.
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+#include <so/so_value_accesser.h>
+inline soParamAccesser::~soParamAccesser() { }
 #define FT_KINETIC_MEDIATOR_TRANSACTOR ftLuigiKineticTransactor
 #include <ft/luigi/ft_luigi_kinetic_transactor.h>
 #include <ft/ft_class_info_impl.h>
@@ -22,6 +74,7 @@
 #include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
 
+#undef WN_ARTICLE_NATIVE_BUILDERS // Fighter kinetic teardown stays out of line.
 #define FT_BC ftLuigiBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
@@ -32,6 +85,15 @@ template soArrayVector<s32, 8>::~soArrayVector();
 #endif
 #pragma dont_inline off
 soStatusModuleImpl::~soStatusModuleImpl() { }
+
+// These interface and controller destructors belong to this fighter unit.
+#pragma dont_inline on
+ftVirtualNodeMatrixPool::~ftVirtualNodeMatrixPool() { }
+soTeam::~soTeam() { }
+soResourceIdAccesser::~soResourceIdAccesser() { }
+#pragma dont_inline off
+soArticleMediator::~soArticleMediator() { }
+ftKineticEnergyController::~ftKineticEnergyController() { }
 
 // HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt); the first lives in module 27 (sora_melee).
 extern "C" {
@@ -62,14 +124,6 @@ ftLuigi::ftLuigi(s32 entryId,
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 11);
 }
 
-// FIXME: Test code present only to emit the shared builder functions; delete once ftLuigi is done
-void testBuilder() {
-    soInsideEventManageModuleBuilder<ftLuigiInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> insideBuilder;
-    soResourceIdAccesserImpl idAccImpl(0, 1, 2);
-}
-soInsideEventManageModuleBuilder<ftLuigiInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> g_insideBuilder;
-
-// Virtual destructor, defined here as in ftMarth.
 ftLuigi::~ftLuigi() { }
 
 void ftLuigi::onStart(int startKind) {
