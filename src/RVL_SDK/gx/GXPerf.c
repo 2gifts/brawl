@@ -58,6 +58,10 @@ void GXSetGPMetric(GXPerf0 perf0, GXPerf1 perf1) {
     case GX_PERF0_AVG_QUAD_CNT:
         GX_WRITE_RA_REG(0x24000000);
         break;
+    case GX_PERF0_NONE:
+        break;
+    default:
+        break;
     }
 
     switch (gx->perf1) {
@@ -92,6 +96,10 @@ void GXSetGPMetric(GXPerf0 perf0, GXPerf1 perf1) {
     case GX_PERF1_CP_ALL_REQ:
         GX_CP_REG_WRITE_U16(3, 0);
         break;
+    case GX_PERF1_NONE:
+        break;
+    default:
+        break;
     }
 
     gx->perf0 = perf0;
@@ -125,6 +133,9 @@ void GXSetGPMetric(GXPerf0 perf0, GXPerf1 perf1) {
         break;
     case GX_PERF0_XF_REGRD_CLKS:
         GX_WRITE_XF_REG(0x1006, 0x1CE, 0);
+        break;
+    case GX_PERF0_CLOCKS:
+        GX_WRITE_XF_REG(0x1006, 0x21, 0);
         break;
     case GX_PERF0_CLIP_RATIO:
         GX_WRITE_XF_REG(0x1006, 0x153, 0);
@@ -198,10 +209,8 @@ void GXSetGPMetric(GXPerf0 perf0, GXPerf1 perf1) {
     case GX_PERF0_AVG_QUAD_CNT:
         GX_WRITE_RA_REG(0x2402C1AD);
         break;
-    case GX_PERF0_CLOCKS:
-        GX_WRITE_XF_REG(0x1006, 0x21, 0);
-        break;
     case GX_PERF0_NONE:
+    default:
         break;
     }
 
@@ -219,6 +228,12 @@ void GXSetGPMetric(GXPerf0 perf0, GXPerf1 perf1) {
     case GX_PERF1_TX_MEMSTALL:
         GX_WRITE_RA_REG(0x67000129);
         break;
+    case GX_PERF1_TC_MISS:
+        GX_WRITE_RA_REG(0x67000252);
+        break;
+    case GX_PERF1_CLOCKS:
+        GX_WRITE_RA_REG(0x67000021);
+        break;
     case GX_PERF1_TC_CHECK1_2:
         GX_WRITE_RA_REG(0x6700014B);
         break;
@@ -230,9 +245,6 @@ void GXSetGPMetric(GXPerf0 perf0, GXPerf1 perf1) {
         break;
     case GX_PERF1_TC_CHECK7_8:
         GX_WRITE_RA_REG(0x67000211);
-        break;
-    case GX_PERF1_TC_MISS:
-        GX_WRITE_RA_REG(0x67000252);
         break;
     case GX_PERF1_VC_ELEMQ_FULL:
         SC_SEL(2);
@@ -270,10 +282,8 @@ void GXSetGPMetric(GXPerf0 perf0, GXPerf1 perf1) {
     case GX_PERF1_CP_ALL_REQ:
         GX_CP_REG_WRITE_U16(3, 5);
         break;
-    case GX_PERF1_CLOCKS:
-        GX_WRITE_RA_REG(0x67000021);
-        break;
     case GX_PERF1_NONE:
+    default:
         break;
     }
 

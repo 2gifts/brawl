@@ -175,8 +175,13 @@ void GXGetProjectionv(f32 *ptr) {
 }
 
 void GXLoadPosMtxImm(const f32 mtx[3][4], u32 id) {
+    u32 cmd = 0;
+
+    // Brawl's SDK builds the XF load header in a local first (as mscharged-decomp's GX_XF_LOAD_REGS does).
+    cmd |= id * 4 + XF_MTX_POS_BASE;
+    cmd |= (4 * 3 - 1) << 16;
     GX_WRITE_U8(0x10);
-    GX_WRITE_U32((id * 4 + XF_MTX_POS_BASE) | ((4 * 3 - 1) << 16));
+    GX_WRITE_U32(cmd);
     WriteMTXPS4x3_i(&gxfifo, (const f32 *)mtx);
 }
 
@@ -191,8 +196,12 @@ void GXLoadPosMtxIndx(u16 mtx_indx, u32 id) {
 }
 
 void GXLoadNrmMtxImm(const f32 mtx[3][4], u32 id) {
+    u32 cmd = 0;
+
+    cmd |= id * 3 + XF_MTX_NRM_BASE;
+    cmd |= (3 * 3 - 1) << 16;
     GX_WRITE_U8(0x10);
-    GX_WRITE_U32((id * 3 + XF_MTX_NRM_BASE) | ((3 * 3 - 1) << 16));
+    GX_WRITE_U32(cmd);
     WriteMTXPS3x3_i(&gxfifo, (const f32 *)mtx);
 }
 
@@ -217,9 +226,10 @@ void GXLoadTexMtxImm(const f32 mtx[][4], u32 id, GXTexMtxType type) {
 
     addr = id >= 0x40 ? (id - 0x40) * 4 + XF_MTX_DUALTEX_BASE : id * 4 + (u64)XF_MTX_POS_BASE;
     num = type == GX_MTX2x4 ? (u64)(2 * 4) : 3 * 4;
+    num = (num - 1) << 16;
 
     GX_WRITE_U8(0x10);
-    GX_WRITE_U32(addr | ((num - 1) << 16));
+    GX_WRITE_U32(addr | num);
 
     if (type == GX_MTX3x4) {
         WriteMTXPS4x3_i(&gxfifo, (const f32 *)mtx);
