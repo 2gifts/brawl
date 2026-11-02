@@ -6787,6 +6787,7 @@ config.libs = [
             Object(NonMatching, "mo_menu/mu_proc_diagram.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_diagram_1p.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_diagram_2p.cpp"),
+            Object(NonMatching, "mo_menu/mu_proc_diagram_3p.cpp"),
         ],
     },
     {

@@ -243,28 +243,178 @@ public:
 };
 static_assert(sizeof(muProcDiagram2p) == 0x684, "Class is wrong size!");
 
-// What the rankings of three and four players share.
+namespace nw4r {
+namespace g3d {
+class ScnMdlExpand;
+}
+}
+
+// What the rankings of three and four players share: for one character (3p) or one name tag (4p), chosen with Up and
+// Down, a list of seven records with their values. Right moves the cursor into the list, where Up and Down choose a
+// record (its explanation is shown under the list), and Left moves it back.
+// HYPOTHESIS: the roles follow initMsg, controlProc and dispUpdate of the two pages; the names of the objects and models
+// follow what is attached to them.
 class muProcDiagram34pBase : public muProcDiagramPageBase {
 public:
+    // What the page does (the same states as muProcDiagram2p).
+    enum State {
+        State_Hidden = 0,
+        State_Shown = 1,
+        State_Come = 2,
+        State_Leave = 3,
+        State_ComeSide = 4,
+        State_LeaveSide = 5,
+        State_Num = 6,
+    };
+
+    // The animation of the names after Up or Down (m_scrollState).
+    enum Scroll {
+        Scroll_None = 0,
+        Scroll_Next = 1,
+        Scroll_Prev = 2,
+    };
+
+    // Where the cursor is (m_column).
+    enum Column {
+        Column_Name = 0,    // Up and Down choose the character or the name tag
+        Column_List = 1,    // Up and Down choose a record of the list
+    };
+
+    enum {
+        LineNum = 7,            // the records the list shows
+        Msg_AltName = 0,        // the message windows from m_msgWnd on: the name in the other language,
+        Msg_Name = 1,           // the name, the previous name, the next name,
+        Msg_PrevName = 2,
+        Msg_NextName = 3,
+        Msg_Title = 4,          // the titles of the seven lines,
+        Msg_Value = 11,         // their values,
+        Msg_Unit = 18,          // their units,
+        Msg_Expl = 25,          // then the explanation of the record of the cursor
+        MsgWndNum = 26,
+    };
+
+    int m_msgWnd;                       // 0x66C the first message window of the page
+    int m_state;                        // 0x670 State
+    int m_scrollState;                  // 0x674 Scroll
+    MuMsg* m_msg;                       // 0x678
+    MuObject* m_frameObj;               // 0x67C its visibility shows the arrows; the animations of the states
+    MuObject* m_nameObj;                // 0x680 the names are attached to it; the animations of Up and Down
+    MuObject* m_listObj;                // 0x684 the lines of the list are attached to it; its node frame is the cursor
+    MuObject* m_iconObj;                // 0x688 the icon of the character
+    // The two models put in the scene group while the page is shown. The icons of muProcDiagram4p are put on the node
+    // "pos01" of the first.
+    nw4r::g3d::ScnMdlExpand* m_listMdl; // 0x68C
+    nw4r::g3d::G3dObj* m_frameMdl;      // 0x690
+    int m_no;                           // 0x694 the character (the place in the list of 3p) or the name tag shown
+    int m_top;                          // 0x698 the place of the first line in the order of the records
+    int m_line;                         // 0x69C the line of the cursor
+    int m_column;                       // 0x6A0 Column
+
+    static const u8 sStateAnimIdx[State_Num];   // the entry of sStateAnims of each state
+    static MuAnimIdxData sStateAnims[State_Num];
+    static MuAnimIdxData sCursorAnims[3];       // the names come, the previous name, the next name
+
     muProcDiagram34pBase(MuObject** objs, nw4r::g3d::G3dObj** mdls) : muProcDiagramPageBase(objs, mdls) { }
     virtual ~muProcDiagram34pBase() { }
+    virtual void setConf(nw4r::g3d::ScnGroup* group, MuMsg* msg, int msgWnd);
+    virtual bool isPageChanging();
+    virtual void begin(int side);
+    virtual void main();
+    virtual void post(int side);
+    virtual void finish();
+    virtual int getUseNumOfMsgWnd() { return MsgWndNum; }
+    virtual void controlInit();
+    // Writes a line of the list: the title, the value and the unit of a record.
+    virtual void dispValue(MuDiagDataKind kind, int value, int line);
+    virtual void dispExpl(MuDiagDataKind kind);
+    virtual void setNextPrevCharNameVisible(bool visible);
+    void initMsg();
+    void changeState(int state);
 };
 
+// The third page: the records of each character.
+// HYPOTHESIS: the class is named for the page number of the map (muProcDiagram3p).
 class muProcDiagram3p : public muProcDiagram34pBase {
 public:
-    u32 m_unk66C[15];
+    enum {
+        Obj_Frame = 159,
+        Obj_Name = 160,
+        Obj_Icon = 161,
+        Obj_List = 162,
+        Mdl_List = 17,
+        Mdl_Frame = 18,
+        CharaNum = 35,      // the characters the page can list (MuCharKind 0 ... 34)
+        KindNum = 24,       // the records of the list
+    };
+
+    // The characters that can be used, in the order of the diagrams.
+    struct CharaList {
+        MuCharKind m_charas[CharaNum];  // 0x00
+        int m_num;                      // 0x8C
+    };
+
+    CharaList* m_charas;    // 0x6A4
+
+    static MuDiagDataKind sKindOrder[KindNum];
+
     muProcDiagram3p(MuObject** objs, nw4r::g3d::G3dObj** mdls) : muProcDiagram34pBase(objs, mdls) { }
-    virtual ~muProcDiagram3p();
+    virtual ~muProcDiagram3p() { }
     virtual void playSE_CursorMove();
+    virtual void setConf(nw4r::g3d::ScnGroup* group, MuMsg* msg, int msgWnd);
+    virtual bool controlProc();
+    virtual void begin(int side);
+    virtual void finish();
+    virtual void controlInit();
+    virtual void setNextPrevCharNameVisible(bool visible);
+    void dispUpdate(bool arrows);
+    void setArrowVisible(bool visible);
 };
 static_assert(sizeof(muProcDiagram3p) == 0x6A8, "Class is wrong size!");
 
+// The fourth page: the records of each name tag, then the characters it played most and least.
+// HYPOTHESIS: the class is named for the page number of the map (muProcDiagram4p); the roles of the last three records
+// follow makeUseCharRanking (the characters with the most play time, the second most, the least).
 class muProcDiagram4p : public muProcDiagram34pBase {
 public:
-    u32 m_unk66C[21];
+    enum {
+        Obj_Frame = 163,
+        Obj_Name = 164,
+        Obj_Icon = 165,
+        Obj_List = 166,
+        Obj_UseCharIcon = 167,  // the icons of the three characters of the ranking (167 ... 169)
+        Mdl_List = 19,
+        Mdl_Frame = 20,
+        KindNum = 27,           // the records of the list
+        UseCharNum = 3,
+        CharaNum = 35,          // the characters the ranking goes through (MuCharKind 0 ... 34)
+        NoChara = 35,           // no character in a place of the ranking
+    };
+
+    // A character and its play time
+    struct UseChar {
+        MuCharKind m_chara;
+        u32 m_time;
+    };
+
+    int m_nameNum;                          // 0x6A4 how many name tags there are
+    MuCharKind m_useChars[UseCharNum];      // 0x6A8 the most played, the second, the least played (NoChara for none)
+    MuObject* m_useCharIcons[UseCharNum];   // 0x6B4
+
+    static MuDiagDataKind sKindOrder[KindNum];
+
     muProcDiagram4p(MuObject** objs, nw4r::g3d::G3dObj** mdls) : muProcDiagram34pBase(objs, mdls) { }
-    virtual ~muProcDiagram4p();
+    virtual ~muProcDiagram4p() { }
     virtual void playSE_CursorMove();
+    virtual void setConf(nw4r::g3d::ScnGroup* group, MuMsg* msg, int msgWnd);
+    virtual bool controlProc();
+    virtual void begin(int side);
+    virtual void finish();
+    virtual void controlInit();
+    virtual void dispValue(MuDiagDataKind kind, int value, int line);
+    virtual void setNextPrevCharNameVisible(bool visible);
+    void dispUpdate(bool arrows);
+    void setArrowVisible(bool visible);
+    void makeUseCharRanking(int nameNo);
 };
 static_assert(sizeof(muProcDiagram4p) == 0x6C0, "Class is wrong size!");
 
