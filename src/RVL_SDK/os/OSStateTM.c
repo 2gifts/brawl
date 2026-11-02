@@ -17,7 +17,6 @@ enum {
 typedef void (*OSStateCallback)(void);
 
 // not named yet, called after the reset button callback has run
-extern void fn_801EA064(void);
 
 static u8 StmEhInBuf[32] __attribute__((aligned(32)));
 static u8 StmEhOutBuf[32] __attribute__((aligned(32)));
@@ -266,7 +265,7 @@ static s32 __OSStateEventHandler(s32 result, void *arg) {
             callback();
 
             OSRestoreInterrupts(enabled);
-            fn_801EA064();
+            VIResetDimmingCount();
         }
         __OSRegisterStateEvent();
     }

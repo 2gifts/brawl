@@ -4,7 +4,7 @@
 #include "revolution/os.h"
 #include "revolution/si.h"
 
-extern u32 fn_801E9B4C(void);
+extern u32 VIGetCurrentLine(void);
 extern u32 __PADFixBits;
 extern BOOL SITransfer(s32 chan, void *output, u32 outputBytes, void *input, u32 inputBytes, SICallback callback,
                        OSTime fire);
@@ -182,7 +182,7 @@ static void SIInterruptHandler(s16 interrupt, OSContext *context) {
         u32 vcount;
         u32 x;
 
-        vcount = fn_801E9B4C() + 1;
+        vcount = VIGetCurrentLine() + 1;
         x = (Si.poll >> 16) & 0x3FF;
 
         for (i = 0; i < SI_MAX_CHAN; i++) {
