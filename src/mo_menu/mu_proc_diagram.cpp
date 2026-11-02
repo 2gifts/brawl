@@ -289,7 +289,7 @@ u32 muDiagGetDataName(MuDiagDataKind kind, int nameNo) {
     return 0;
 }
 
-u8 muDiagGetDataUnitKind(MuDiagDataKind kind) {
+u32 muDiagGetDataUnitKind(MuDiagDataKind kind) {
     return sDataInfo[kind].m_unitKind;
 }
 
@@ -316,18 +316,21 @@ static MuAnimIdxData sHelpAnims[4] = {
 
 // Writes a value of the record kind to buf and gives the message of its unit (-1 for none). Distances are recorded in
 // tenths of the unit of the records and written in metres (kilometres from 1000 m) or in feet (miles from one mile).
+// Gives the length of the text.
 // HYPOTHESIS: the parameter roles; max is the largest value the screen shows.
-void muDiagTransformDataValue(char* buf, u32* unitMsgId, MuDiagDataKind kind, u32 value, u32 max) {
+int muDiagTransformDataValue(char* buf, int* unitMsgId, MuDiagDataKind kind, u32 value, u32 max) {
+    int length;
     int unitKind = sDataInfo[kind].m_unitKind;
     if (value > max) {
         value = max;
     }
-    u32 msgId = sUnitMsgId[unitKind];
-    switch (sDataInfo[kind].m_valueKind) {    case MuDiagValue_Hundredths:
-        sprintf(buf, "%.2f", value / 100.0f);
+    int msgId = sUnitMsgId[unitKind];
+    switch (sDataInfo[kind].m_valueKind) {
+    case MuDiagValue_Hundredths:
+        length = sprintf(buf, "%.2f", value / 100.0f);
         break;
     case MuDiagValue_MinSec:
-        sprintf(buf, "%d:%02d", value / 60, value % 60);
+        length = sprintf(buf, "%d:%02d", value / 60, value % 60);
         break;
     case MuDiagValue_Distance:
         value *= 10;
@@ -344,13 +347,14 @@ void muDiagTransformDataValue(char* buf, u32* unitMsgId, MuDiagDataKind kind, u3
         } else {
             value = value / 30.4788;
         }
-        sprintf(buf, "%d", value);
+        length = sprintf(buf, "%d", value);
         break;
     case MuDiagValue_Number:
-        sprintf(buf, "%d", value);
+        length = sprintf(buf, "%d", value);
         break;
     }
     *unitMsgId = msgId;
+    return length;
 }
 
 muProcDiagram::muProcDiagram(MuObject** objs, nw4r::g3d::G3dObj** mdls, void* msgData) : muProcMenu(objs, mdls) {
