@@ -1791,7 +1791,7 @@ void BaseItem::processFixPosition() {
 // ignored (the same shield / reflector hit again, or an attack that does no damage and cannot be countered).
 // HYPOTHESIS: the attack data is only read through the offsets (+0 power, +0x38 bit 5 flag).
 void BaseItem::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
-    u8 kind = *(reinterpret_cast<u8*>(collisionLog) + 0x21);
+    u8 kind = collisionLog->m_kind;
     if (kind == 3) {
         if (static_cast<u32>(m_15672) == static_cast<u32>(collisionLog->m_taskId)) {
             return;
@@ -1802,7 +1802,7 @@ void BaseItem::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModule
         }
     } else if (kind == 0) {
         gfTask* task = gfTaskScheduler::getInstance()->getTaskById(
-            static_cast<gfTask::Category>(*(reinterpret_cast<u8*>(collisionLog) + 0x22)), collisionLog->m_taskId);
+            static_cast<gfTask::Category>(collisionLog->m_taskCategory), collisionLog->m_taskId);
         if (task != NULL) {
             StageObject& attacker = dynamic_cast<StageObject&>(*task);
             soCollisionAttackModule* attack = soExternalValueAccesser::getCollisionAttackModule(&attacker);
@@ -1813,7 +1813,7 @@ void BaseItem::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModule
         }
     }
     if (m_customizer->onNotifyEventCollisionSearch(this, collisionLog)) {
-        kind = *(reinterpret_cast<u8*>(collisionLog) + 0x21);
+        kind = collisionLog->m_kind;
         int taskId = collisionLog->m_taskId;
         u8 index = collisionLog->m_collsionIndex;
         float posX = collisionLog->m_pos.m_x;
@@ -1825,7 +1825,7 @@ void BaseItem::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModule
         m_searchHitPos.m_y = posY;
         m_searchHitPos.m_z = posZ;
         m_15672 = (kind == 3) ? taskId : -1;
-        kind = *(reinterpret_cast<u8*>(collisionLog) + 0x21);
+        kind = collisionLog->m_kind;
         if (kind == 2) {
             m_15676 = m_searchHitTaskId;
             m_15681 = ftUtil::isCounterShield(collisionLog);

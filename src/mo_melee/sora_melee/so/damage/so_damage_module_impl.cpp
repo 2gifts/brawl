@@ -364,8 +364,8 @@ bool soDamageModuleImpl::setGroundDamage(u32 touchKind, soCollisionAttackData* a
         log.m_life = 0;
         log.m_30 = 0;
         log.m_teamNo = -1;
-        log._33 = 0;
-        *((u8*)&log + 0x22) = 0;
+        log.m_kind = 0;
+        log.m_taskCategory = 0;
         log._35 = 0;
         log.m_collsionIndex = 0;
         log.m_damageIndex = 0;
@@ -464,7 +464,7 @@ bool soDamageModuleImpl::setForceDamage(StageObject* stageObject, Vec3f* pos, u3
         log.m_life = 0;
         log.m_30 = 0;
         log.m_teamNo = -1;
-        log._33 = 0;
+        log.m_kind = 0;
         log.m_taskCategory = (gfTask::Category)stageObject->m_taskCategory;
         log._35 = 0;
         log.m_collsionIndex = collisionIndex;

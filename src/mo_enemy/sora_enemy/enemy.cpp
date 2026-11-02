@@ -2223,7 +2223,7 @@ void Enemy::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog
         acc->getCollisionAttackModule().getData(collisionLog->m_damageIndex, collisionLog->m_isAbsolute);
     float one = 1.0f;
     int hitStopFrame = soDamageUtilActor::calcHitStopFrame(power, one, one, acc, attackData, 0);
-    switch (static_cast<u8>(collisionLog->_33)) {
+    switch (collisionLog->m_kind) {
     case 1:
         // The hit stop of a reaction frame target replaces the computed one.
         if (task != NULL) {

@@ -102,12 +102,12 @@ void wnNessYoyoHead::notifyEventLink(soLinkEventArgs* event, soModuleAccesser* a
 }
 
 void wnNessYoyoHead::notifyEventCollisionAttack(float power, soCollisionLog* log, soModuleAccesser* acc) {
-    gfTask* task = gfTaskScheduler::getInstance()->getTaskById((gfTask::Category) * (u8*)((u8*)log + 0x22), log->m_taskId);
+    gfTask* task = gfTaskScheduler::getInstance()->getTaskById((gfTask::Category)log->m_taskCategory, log->m_taskId);
     soCollisionAttackData* attackData = acc->getCollisionAttackModule().getData(log->m_damageIndex, log->m_isAbsolute);
     float one = 1.0f;
     int frames = soDamageUtilActor::calcHitStopFrame(power, one, one, acc, attackData, 0);
     // The hit stop of a reaction frame target replaces the computed one.
-    if (*(u8*)((u8*)log + 0x21) == 1 && task != nullptr) {
+    if (log->m_kind == 1 && task != nullptr) {
         StageObject* target = dynamic_cast<StageObject*>(task);
         soCollisionHitModule* hit = soExternalValueAccesser::getCollisionHitModule(target);
         if (hit->isReactionFrame()) frames = hit->getReactionFrame();

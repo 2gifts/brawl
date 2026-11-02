@@ -39,7 +39,7 @@ void wnSnakeTrenchMortarBullet::notifyEventCollisionSearch(soCollisionLog* colli
         return;
     }
     if (m_moduleAccesser->getStatusModule().getStatusKind() == 0) {
-        if (static_cast<u8>(collisionLog->_33) == 3) {
+        if (collisionLog->m_kind == 3) {
             if (collisionLog->m_teamNo != m_moduleAccesser->getTeamModule().getTeam()->getNo() &&
                 m_moduleAccesser->getReflectModule().isReflect() == 1) {
                 m_moduleAccesser->getWorkManageModule().onFlag(0x22000005);

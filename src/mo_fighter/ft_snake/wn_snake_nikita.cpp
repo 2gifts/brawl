@@ -128,28 +128,26 @@ void wnSnakeNikitaMissile::processCollision() {
     StageObject::processCollision();
 }
 
-void wnSnakeNikitaMissile::notifyEventCollisionSearch(
-    soCollisionLog* collisionLog, soModuleAccesser*) {
-    if (collisionLog == nullptr) {
-        return;
-    }
-
-    const int statusKind = m_moduleAccesser->getStatusModule().getStatusKind();
-    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
-    if (statusKind == 0) {
-        if (collisionLog->_33 != 3) {
-            work.onFlag(0x22000001);
-        } else if (collisionLog->m_teamNo !=
-                   soExternalValueAccesser::getTeamNo(this) &&
-                   m_moduleAccesser->getReflectModule().isCountMax()) {
-            work.onFlag(0x22000002);
-        }
-    } else if (statusKind == 1) {
-        if (collisionLog->_33 != 3) {
-            work.onFlag(0x22000000);
-        } else if (collisionLog->m_teamNo !=
-                   soExternalValueAccesser::getTeamNo(this)) {
-            work.onFlag(0x22000001);
+void wnSnakeNikitaMissile::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser*) {
+    if (collisionLog != nullptr) {
+        int statusKind = m_moduleAccesser->getStatusModule().getStatusKind();
+        if (statusKind == 0) {
+            if (collisionLog->m_kind == 3) {
+                if (collisionLog->m_teamNo != m_moduleAccesser->getTeamModule().getTeam()->getNo() &&
+                    m_moduleAccesser->getReflectModule().isReflect() == 1) {
+                    m_moduleAccesser->getWorkManageModule().onFlag(0x22000002);
+                }
+            } else {
+                m_moduleAccesser->getWorkManageModule().onFlag(0x22000001);
+            }
+        } else if (statusKind == 1) {
+            if (collisionLog->m_kind == 3) {
+                if (collisionLog->m_teamNo != m_moduleAccesser->getTeamModule().getTeam()->getNo()) {
+                    m_moduleAccesser->getWorkManageModule().onFlag(0x22000001);
+                }
+            } else {
+                m_moduleAccesser->getWorkManageModule().onFlag(0x22000000);
+            }
         }
     }
 }

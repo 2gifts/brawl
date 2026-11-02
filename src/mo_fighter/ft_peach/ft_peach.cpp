@@ -177,15 +177,11 @@ void ftPeach::updateNodeSRT() {
     }
 }
 
-// HYPOTHESIS: the bytes of the collision log at 0x21, 0x23 and 0x24 are its hit kind and two flags (0x22 is the category).
-#define FT_PEACH_LOG_KIND(log) (reinterpret_cast<const u8*>(log)[0x21])
-#define FT_PEACH_LOG_FLAG1(log) (reinterpret_cast<const u8*>(log)[0x23])
-#define FT_PEACH_LOG_FLAG2(log) (reinterpret_cast<const u8*>(log)[0x24])
 
 void ftPeach::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
     Fighter::notifyEventCollisionSearch(collisionLog, m_moduleAccesser);
     if (collisionLog != NULL && m_moduleAccesser->getStatusModule().getStatusKind() == 0x117) {
-        if (FT_PEACH_LOG_KIND(collisionLog) == 2 && FT_PEACH_LOG_FLAG1(collisionLog) == 0 && collisionLog->m_taskCategory == 0xA && FT_PEACH_LOG_FLAG2(collisionLog) == 0) {
+        if (collisionLog->m_kind == 2 && collisionLog->_35 == 0 && collisionLog->m_taskCategory == 0xA && collisionLog->m_collsionIndex == 0) {
             return;
         }
         m_moduleAccesser->getWorkManageModule().onFlag(0x22000011);
