@@ -586,7 +586,6 @@ config.libs = [
         "objects": [
             Object(Matching, "RVL_SDK/pad/Pad.c", extra_cflags=["-lang c++"]),
             Object(Matching, "RVL_SDK/wenc/wenc.c"),
-            Object(NonMatching, "RVL_SDK/wpad/WPAD.c"),
             Object(NonMatching, "gf_scene_manager_register.cpp"),
             Object(NonMatching, "gf_scene_manager_transition.cpp"),
             Object(NonMatching, "gf_video.cpp"),
@@ -900,6 +899,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/mtx/quat.c"),
             Object(Matching, "RVL_SDK/nand/nand.c"),
             Object(Matching, "RVL_SDK/nand/NANDCore.c"),
+            Object(Matching, "RVL_SDK/wpad/WPAD.c", cflags=cflags_sib_sdk_wpad),
             Object(NonMatching, "RVL_SDK/wpad/WPADHIDParser.c"),
             Object(Matching, "RVL_SDK/thp/THPDec.c"),
             Object(Matching, "RVL_SDK/wpad/WPADEncrypt.c"),
