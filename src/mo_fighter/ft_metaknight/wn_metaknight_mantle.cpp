@@ -1,3 +1,6 @@
+#define FT_EFFECT_SCREEN_SINGLETON_HOLDER
+#define SO_SOUND_3D_GENERATOR_ACCESSER_DTOR_NOINLINE
+#define IP_INPUT_BUTTON_RAW // BYTES: the null-input query returns its mask directly.
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
 #define WN_WEAPON_BUILDER
 #define WN_TRANSITION_CTOR_INLINE
@@ -12,6 +15,13 @@
 #include <wn/metaknight/wn_metaknight_mantle.h>
 #include <wn/wn_activate_desc.h>
 #include <so/so_module_accesser.h>
+
+#pragma push
+#pragma dont_inline off
+soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+#pragma dont_inline on
+soParamAccesser::~soParamAccesser() { }
+#pragma pop
 
 wnMetaknightMantle::wnMetaknightMantle(s32 articleId, const wnArticleBuildInfo& info, const wnMetaknightMantleData* data) :
     wnWeaponBuilder<wnMetaknightMantleModuleAccesserBuildConfig>(

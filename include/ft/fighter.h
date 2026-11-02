@@ -1518,7 +1518,10 @@ public:
     virtual void analyzeSeal(void*);
 #endif
     virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
-#ifdef FT_MODULE_BUILDER
+#ifdef FT_COLLISION_ATTACK_FIGHTER_POWER_ARG
+    // BYTES: Meta Knight's native callback preserves and forwards the damage power.
+    virtual void notifyEventCollisionAttackFighter(float, soCollisionLog*, soModuleAccesser*) { }
+#elif defined(FT_MODULE_BUILDER)
     virtual void notifyEventCollisionAttackFighter(soCollisionLog*, soModuleAccesser*) { }
 #else
     virtual void notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);

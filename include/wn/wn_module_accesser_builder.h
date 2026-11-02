@@ -913,7 +913,12 @@ class soEffectModuleBuilder<wnEffectModuleBuildConfig<1, 1, 0, 1, -1, T> > :
     public soArraySelectHolder<1, soArrayVector<soEffectContinual, 1>, soArrayNull<soEffectContinual> > {
     // HYPOTHESIS: the disabled time selection occupies this slot (its array is the null singleton).
     u8 unk38[4];
-    soArraySelectHolder<1, soArrayVector<efScreenHandle, 1>, soArrayNull<efScreenHandle> > m_screens; // +0x3C
+#ifdef FT_EFFECT_SCREEN_SINGLETON_HOLDER
+    typedef soSingletonHolder<soArrayNull<efScreenHandle> > ScreenNullHolder;
+#else
+    typedef soArrayNull<efScreenHandle> ScreenNullHolder;
+#endif
+    soArraySelectHolder<1, soArrayVector<efScreenHandle, 1>, ScreenNullHolder> m_screens; // +0x3C
     soArrayVector<u32, 1> m_u32s;                                                                     // +0x48
     T m_effectModule;                                                                                 // +0x58
 public:
