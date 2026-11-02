@@ -102,7 +102,12 @@ public:
 template <u32 S, u32 N, typename T>
 class soModelModuleBuilder<soModelModuleBuildConfig<S, N, T> > {
     soArrayVector<soModelNodeSetUp, S> m_nodeSetUps;
-    soArraySelectHolder<1, soArrayVector<soModelVirtualNode, N>, soArrayNull<soModelVirtualNode> > m_virtualNodes;
+#ifdef FT_MODEL_VIRTUAL_NODE_SINGLETON_HOLDER
+    typedef soSingletonHolder<soArrayNull<soModelVirtualNode> > VirtualNodeNullHolder;
+#else
+    typedef soArrayNull<soModelVirtualNode> VirtualNodeNullHolder;
+#endif
+    soArraySelectHolder<1, soArrayVector<soModelVirtualNode, N>, VirtualNodeNullHolder> m_virtualNodes;
     T m_modelModule;
 public:
     static T* getModule(soModelModuleBuilder* b) {

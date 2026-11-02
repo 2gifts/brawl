@@ -52,8 +52,8 @@ public:
 class wnLuigiFireball;
 class wnLuigiNegativeZone;
 
+static_assert(sizeof(ftFighterBuilder<ftLuigiBuildConfig>) == 0xE1F4, "Luigi base extent");
 class ftLuigi : public ftFighterBuilder<ftLuigiBuildConfig> {
-    u8 unkTail[0xE1F4 - sizeof(ftFighterBuilder<ftLuigiBuildConfig>)];
     // HYPOTHESIS: status table at 0xE1F4 (destroyed before the base in the target destructor); contents unidentified.
     soArrayContractibleTable<const soStatusData> unkE1F4;
     ftData* m_data;
