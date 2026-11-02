@@ -28,9 +28,9 @@ struct hkEntity : hkWorldObject {
     // hkMaxSizeMotion (0x110 bytes, a hkMotion subobject). Kept as raw storage: hkMotion is abstract.
     u8 m_motion[0x110];                     // 0xA0
     u32 m_solverData;                       // 0x1B0
-    hkArrayBase m_collisionListeners;       // 0x1B4 (pointers)
+    hkArray<hkCollisionListener*> m_collisionListeners; // 0x1B4
     hkArrayBase m_activationListeners;      // 0x1C0
-    hkArrayBase m_entityListeners;          // 0x1CC (pointers)
+    hkArray<hkEntityListener*> m_entityListeners; // 0x1CC
     hkArrayBase m_actions;                  // 0x1D8
     u32 m_uid;                              // 0x1E4
     u8 m_padE8[0x8];                        // 0x1E8

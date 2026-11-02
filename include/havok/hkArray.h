@@ -138,6 +138,26 @@ struct hkArray : hkArrayBase {
     T& operator[](int i) {
         return ((T*)m_data)[i];
     }
+    int indexOf(const T& t) const {
+        for (int i = 0; i < m_size; i++) {
+            if (((const T*)m_data)[i] == t) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    // Removes the element at index; the last element takes its place (order not kept).
+    void removeAt(int index) {
+        m_size--;
+        ((T*)m_data)[index] = ((T*)m_data)[m_size];
+    }
+    // Removes the element at index, moving the later elements down one place (order kept).
+    void removeAtAndCopy(int index) {
+        m_size--;
+        for (int i = index; i < m_size; i++) {
+            ((T*)m_data)[i] = ((T*)m_data)[i + 1];
+        }
+    }
 };
 
 // Out-of-line template members (not inline: they are instantiated as separate functions).

@@ -12,10 +12,7 @@ template <typename T>
 void hkWorldCallbackUtil::removeNullListeners(hkArray<T*>& list) {
     for (int i = list.m_size - 1; i >= 0; i--) {
         if (list.begin()[i] == 0) {
-            list.m_size--;
-            for (int j = i; j < list.m_size; j++) {
-                list.begin()[j] = list.begin()[j + 1];
-            }
+            list.removeAtAndCopy(i);
         }
     }
 }
