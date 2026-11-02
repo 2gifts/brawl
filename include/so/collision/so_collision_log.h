@@ -1,7 +1,7 @@
 #pragma once
 
-// SHADOW of BrawlHeaders so/collision/so_collision_log.h (-I include comes first), with an opt-in byte view of the task
-// category for the units whose original reads it with lbz (SO_COLLISION_LOG_CATEGORY_BYTE, the enemy AI module).
+// SHADOW of BrawlHeaders so/collision/so_collision_log.h (-I include comes first): the task category is a plain byte,
+// not BrawlHeaders' enum bit-field (which loads with lwz/extract and builds logs through a word on the stack).
 
 #include <StaticAssert.h>
 #include <types.h>
@@ -17,11 +17,7 @@ public:
     short m_30;
     s8 m_teamNo;
     char _33;
-#ifdef SO_COLLISION_LOG_CATEGORY_BYTE
-    u8 m_taskCategory; // MATCH-ONLY: the same byte, read unsigned (a gfTask::Category)
-#else
-    gfTask::Category m_taskCategory : 8;
-#endif
+    u8 m_taskCategory; // a gfTask::Category kept in a byte (every reader loads it with lbz)
     char _35;
     u8 m_collsionIndex;
     u8 m_damageIndex;

@@ -219,11 +219,9 @@ struct emShieldShapeDraft {
     u32 _1c_rest : 22;
 };
 
-// The task category of a collision log is a plain byte at 0x22; BrawlHeaders declares it as a bit-field of the word at
-// 0x20, which loads differently.
-// TODO(layout): a soCollisionLog shadow with a u8 m_taskCategory (wnWarioBike and wnNessYoyoHead cast the byte too).
+// The task category of a collision log (a plain byte, see so/collision/so_collision_log.h).
 static inline gfTask::Category getTaskCategory(const soCollisionLog* log) {
-    return static_cast<gfTask::Category>(reinterpret_cast<const u8*>(log)[0x22]);
+    return static_cast<gfTask::Category>(log->m_taskCategory);
 }
 
 // The catch module slots after catchCut (0x2C), which so/catch/so_catch_module.h leaves to its users (the fighter

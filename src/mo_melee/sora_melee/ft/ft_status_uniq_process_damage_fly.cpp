@@ -1,4 +1,3 @@
-#define MT_VEC2F_MEMBER_COPY // MATCH-ONLY: see mt_vector.h.
 #include <ft/ft_status_uniq_process_damage_fly.h>
 #include <ft/ft_kinetic_energy.h>
 #include <gf/gf_task.h>
@@ -119,15 +118,14 @@ void ftStatusUniqProcessDamageFly::correctDamageVector(soModuleAccesser* moduleA
         return;
     }
     soKineticEnergyNormal& normal = dynamic_cast<soKineticEnergyNormal&>(*energy);
-    const Vec2f& speed = normal.getSpeed();
-    Vec3f velocity(speed.m_x, speed.m_y, 0.0f);
+    Vec3f velocity(normal.getSpeed(), 0.0f);
     float length = calcLength(velocity.m_z * velocity.m_z + (velocity.m_x * velocity.m_x + velocity.m_y * velocity.m_y));
     if (length < 0.00001f) {
         return;
     }
     soDamageLog* damageLog = moduleAccesser->getDamageModule().getDamageLog();
     float limit = soValueAccesser::getConstantFloat(moduleAccesser, 0xcda, 0);
-    if ((float)atan2((float)__fabs(velocity.m_y), (float)__fabs(velocity.m_x)) <= limit) {
+    if (!(atan2f(__fabs(velocity.m_y), __fabs(velocity.m_x)) > limit)) {
         return;
     }
     float angle = atan2(velocity.m_y, velocity.m_x);
@@ -199,7 +197,7 @@ void ftStatusUniqProcessDamageFly::checkAttack(soModuleAccesser* moduleAccesser,
         soKineticEnergyNormal* normal = &dynamic_cast<soKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(4));
         Vec2f speed = normal->getSpeed();
         Vec2f own = speed * soValueAccesser::getConstantFloat(moduleAccesser, 0xcee, 0);
-        StageObject* other = &dynamic_cast<StageObject&>(*gfTaskScheduler::getInstance()->getTaskById(log->m_taskCategory, log->m_taskId));
+        StageObject* other = &dynamic_cast<StageObject&>(*gfTaskScheduler::getInstance()->getTaskById(static_cast<gfTask::Category>(log->m_taskCategory), log->m_taskId));
         float myWeight = soValueAccesser::getConstantFloat(moduleAccesser, 0xbe1, 0);
         float ratio = myWeight / (myWeight + soExternalValueAccesser::getConstantFloat(other, 0xbe1));
         float t = 0.5f + (ratio - 0.5f) * soValueAccesser::getConstantFloat(moduleAccesser, 0xcef, 0);
