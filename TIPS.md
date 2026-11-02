@@ -904,6 +904,7 @@ Method used for `soModelModuleImpl` (sora_melee 0x77DC-0xE268, `include/so/model
 - **`while (g->count != 0) { int n = g->count; if (n != 0) g->Remove(n - 1); }`** reproduces the doubled test of the "remove all items" loop (the count is read once per iteration and the inline remove tests it again). **MED**
 - **`__attribute__((never_inline))` on a small member (`muProcMovieAdv::makeMovieList`)** keeps `-inline auto` from folding it into `init`; the larger sibling in the Movie unit is not folded without it. **MED**
 - **`list[count++] = id` and `list[count] = id; count++` allocate differently:** the first matched the strength-reduced `stwx` with a separate byte-offset register in `muProcMovie::makeMovieList`. **LOW**
+- **A derived override that starts with a full copy of the base class's version of the same virtual is a qualified base call:** `muProcDiagram34pBase::begin(side); dispUpdate(false); ...` and `muProcDiagram34pBase::setConf(...)` / `finish()` were folded by `-inline auto` into the 3p/4p overrides in the same unit and matched on the first build. Look for a base implementation earlier in the unit before writing out the copied body. Seen: `src/mo_menu/mu_proc_diagram_3p.cpp`. **MED**
 
 ## CPU AI (ai_input, ai_mgr) findings
 
