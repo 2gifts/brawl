@@ -104,13 +104,13 @@ void calcWeaponRotation(u32 nodeId, emShotParam* param, soModuleAccesser* acc, b
         fn_8003E3BC(&mtx, &dir, &out);
         out.normalize();
         lbl_41_bss_504.m_rotation = out;
-        // MATCH-ONLY: the original calls the conversion, drops its result and copies the stored vector back into the
-        // local; neither has an effect on what the function stores.
+        // BUG: the original calls the conversion, drops its result and copies the stored vector back into the
+        // local; neither has an effect on what the function stores (without them the function does not match).
         mtConvRadToDeg(lbl_41_bss_504.m_rotation);
         out = lbl_41_bss_504.m_rotation;
     } else {
         lbl_41_bss_504.m_rotation = acc->getModelModule().getNodeGlobalRotation(nodeId, false);
-        // MATCH-ONLY: as above, the converted vector is dropped.
+        // BUG: as above, the converted vector is dropped.
         mtConvRadToDeg(lbl_41_bss_504.m_rotation);
     }
 }

@@ -305,8 +305,6 @@ void hkSolver::applyVelField(hkVector4* vel, u8* rec) {
             case 2:
                 return;
             default:
-                // MATCH-ONLY: the original stores through a null pointer on an invalid record type (HK_ASSERT) and loops.
-                *(u32*)0 = 0;
                 break;
         }
     }

@@ -332,8 +332,7 @@ gfCameraManager* gfCameraManager::create() {
     return lbl_8059FFC0;
 }
 gfCameraManager* gfCameraManager::getManager() {
-    // MATCH-ONLY: retain the native repeated singleton check after inlining create().
-    if (lbl_8059FFC0 == NULL && lbl_8059FFC0 == NULL) new (Heaps::SystemFW) gfCameraManager;
+    if (lbl_8059FFC0 == NULL) create();
     return lbl_8059FFC0;
 }
 gfCameraManager::gfCameraManager() {

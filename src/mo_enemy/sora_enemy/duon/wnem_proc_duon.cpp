@@ -151,7 +151,7 @@ void wnemDuonProc::MissileFly(wnemSimple* wn, soModuleAccesser* acc) {
     float accelScale = param->m_accelScale;
     float turnStepB = param->m_turnStepB;
     float accelScaled = accel * accelScale;
-    // MATCH-ONLY: the original also reads the start value here and drops the result.
+    // BUG: the original also reads the start value here and drops the result (without the call the function does not match).
     fn_41_33B6C(&param->m_startTurn, acc);
     if (wn->getFrameCounter(1) >= homingFrames) {
         // After the homing frames the missile only keeps its direction, at the length of its acceleration.

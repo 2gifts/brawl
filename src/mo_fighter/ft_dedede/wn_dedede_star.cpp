@@ -143,7 +143,8 @@ void wnDededeFollowerKineticTransactor::addSpeedOutside(int type, void* speedDat
         if (0.0f != outside.m_x || 0.0f != outside.m_y) {
             soKineticEnergyGroundMovement* ground = getEnergy(pools, soIntToType<3>());
             addVec2(&ground->m_outsideSpeed, &outside, &ground->m_outsideSpeed);
-            // MATCH-ONLY: the original adds a zero it loads from the pool (a rotation input the follower never sets).
+            // BUG: the original adds a zero it loads from the pool (a rotation input the follower never sets; without the add
+            // the function does not match).
             ground->m_rotation = ground->m_rotation + lbl_117_rodata_C8;
             ground->enable();
         }
