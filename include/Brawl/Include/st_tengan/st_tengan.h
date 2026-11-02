@@ -101,7 +101,7 @@ class stTengan : public stMelee {
     SndID m_pendingLegendSound;
     float m_legendSoundDelayFrames;
     u8 m_boomerangMotion;
-    char m_slow;
+    u8 m_slow;
 
   public:
     bool eventLaserUpdate(float deltaFrame);

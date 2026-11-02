@@ -80,7 +80,7 @@ struct stFamicomYukaToss {
     float m_x;      // 0x00
     float m_y;      // 0x04
     float m_z;      // 0x08
-    float m_value;  // 0x0C
+    int m_value;    // 0x0C task id of the fighter (grCollStatus::m_taskId)
     u8 m_state;     // 0x10 0xD = nothing
     char _11[3];
 };
@@ -99,7 +99,7 @@ struct stFamicomPressureData {
     float unk30;
     float unk34;
     float unk38;
-    float unk3C;
+    int unk3C; // task id of the fighter who bumped the floor (copied from stFamicomYukaToss::m_value)
     u8 unk40;
     char _41[7];
 };
