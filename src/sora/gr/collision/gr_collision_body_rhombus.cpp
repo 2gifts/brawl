@@ -1874,7 +1874,6 @@ int grCollisionTestRhombus::testCollisionNotMove(grCollisionLineWork* lineWork) 
         return 0;
     }
     grCollisionLineWork neighbor;
-    grCollisionLineWork* neighborLw = &neighbor; // MATCH-ONLY: the line flags are read through a pointer to the local (no CSE with the checks)
     testCollisionSetup();
     float rate = 1.0f;
     int hits = 0;
@@ -1902,11 +1901,11 @@ int grCollisionTestRhombus::testCollisionNotMove(grCollisionLineWork* lineWork) 
     }
     line = lineWork->m_collisionLine;
     if (line->m_isLeft || line->m_isRight ||
-        (line->m_isUpper && lineWork->getNext(&neighbor) && isActiveLineWorkR2(&neighbor) && neighborLw->m_collisionLine->m_isUnder) ||
-        (lineWork->getPrev(&neighbor) && isActiveLineWorkR2(&neighbor) && neighborLw->m_collisionLine->m_isUnder) ||
+        (line->m_isUpper && lineWork->getNext(&neighbor) && isActiveLineWorkR2(&neighbor) && lineIsUnder(&neighbor)) ||
+        (lineWork->getPrev(&neighbor) && isActiveLineWorkR2(&neighbor) && lineIsUnder(&neighbor)) ||
         (lineWork->m_collisionLine->m_isUnder && lineWork->getNext(&neighbor) && isActiveLineWorkR2(&neighbor) &&
-         neighborLw->m_collisionLine->m_isUpper) ||
-        (lineWork->getPrev(&neighbor) && isActiveLineWorkR2(&neighbor) && neighborLw->m_collisionLine->m_isUpper)) {
+         lineIsUpper(&neighbor)) ||
+        (lineWork->getPrev(&neighbor) && isActiveLineWorkR2(&neighbor) && lineIsUpper(&neighbor))) {
         testCollisionNotMoveSlatingLine(lineWork, &rate);
     }
     if (m_unk8 > rate) {
@@ -1934,12 +1933,11 @@ int grCollisionTestRhombus::testCollisionNotMoveSlatingLine(grCollisionLineWork*
         grCollisionLine* line = lineWork->m_collisionLine;
         if (line->m_isRight) {
             grCollisionLineWork rightNext;
-            grCollisionLineWork* rightNextLw = &rightNext; // MATCH-ONLY: pointer to the local (no CSE)
             lineWork->getNext(&rightNext);
             if (rightNext.m_collisionLine != NULL && rightNext.m_collisionJoint != NULL && rightNext.m_collision != NULL) {
                 valid = true;
             }
-            if (isActiveGiven(&rightNext, valid) && rightNextLw->m_collisionLine->m_isUnder) {
+            if (isActiveGiven(&rightNext, valid) && lineIsUnder(&rightNext)) {
                 moveX = 1;
             } else {
                 lineWork->getPrev(&prev);
@@ -1949,12 +1947,11 @@ int grCollisionTestRhombus::testCollisionNotMoveSlatingLine(grCollisionLineWork*
             }
         } else if (line->m_isLeft) {
             grCollisionLineWork leftPrev;
-            grCollisionLineWork* leftPrevLw = &leftPrev; // MATCH-ONLY: pointer to the local (no CSE)
             lineWork->getPrev(&leftPrev);
             if (leftPrev.m_collisionLine != NULL && leftPrev.m_collisionJoint != NULL && leftPrev.m_collision != NULL) {
                 valid = true;
             }
-            if (isActiveGiven(&leftPrev, valid) && leftPrevLw->m_collisionLine->m_isUnder) {
+            if (isActiveGiven(&leftPrev, valid) && lineIsUnder(&leftPrev)) {
                 moveX = 1;
             } else {
                 lineWork->getNext(&next);

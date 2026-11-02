@@ -147,9 +147,7 @@ void grCollisionManager::processUpdate() {
         m_flags.m_isGameFrame = true;
     }
     if (m_flags.m_isActive) {
-        // MATCH-ONLY: reading the flag through a const reference reloads the flag byte like the original.
-        const Flags& flags = m_flags;
-        lbl_805A0358 = flags.unk_b5;
+        lbl_805A0358 = isUnkB5();
         OSGetTime();
         collisionUpdate(false);
         calcFloorRange();

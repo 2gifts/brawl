@@ -2368,10 +2368,6 @@ void wnPikminPikminKineticTransactor::updateEnergy12(wnKineticEnergyGravity* ene
     }
 }
 
-// MATCH-ONLY: the native queries go through the const element accessor of the per-colour table.
-#define PK_PARTICULAR(variation) \
-    static_cast<const soArrayContractibleTable<const wnPikminPikminParamParticular>&>(m_particular).at(variation)
-
 float wnPikminPikminParamAccesser::getParamFloat(soModuleAccesser* acc, s32 id, s32 index) {
     float result;
     if (id < 0xFC5) {
@@ -2380,85 +2376,85 @@ float wnPikminPikminParamAccesser::getParamFloat(soModuleAccesser* acc, s32 id, 
         u32 variation = acc->getWorkManageModule().getInt(Work_Int_Variation);
         switch (id) {
         case 0xFC6:
-            result = PK_PARTICULAR(variation).unk4;
+            result = m_particular.at(variation).unk4;
             break;
         case 0xFC7:
-            result = PK_PARTICULAR(variation).unk8;
+            result = m_particular.at(variation).unk8;
             break;
         case 0xFC8:
-            result = PK_PARTICULAR(variation).unkC;
+            result = m_particular.at(variation).unkC;
             break;
         case 0xFC9:
-            result = PK_PARTICULAR(variation).unk10;
+            result = m_particular.at(variation).unk10;
             break;
         case 0xFCA:
-            result = PK_PARTICULAR(variation).unk14;
+            result = m_particular.at(variation).unk14;
             break;
         case 0xFCB:
-            result = PK_PARTICULAR(variation).unk18;
+            result = m_particular.at(variation).unk18;
             break;
         case 0xFCC:
-            result = PK_PARTICULAR(variation).unk1C;
+            result = m_particular.at(variation).unk1C;
             break;
         case 0xFCD:
-            result = PK_PARTICULAR(variation).unk20;
+            result = m_particular.at(variation).unk20;
             break;
         case 0xFCE:
-            result = PK_PARTICULAR(variation).unk24;
+            result = m_particular.at(variation).unk24;
             break;
         case 0xFCF:
-            result = PK_PARTICULAR(variation).unk28;
+            result = m_particular.at(variation).unk28;
             break;
         case 0xFD0:
-            result = PK_PARTICULAR(variation).unk2C;
+            result = m_particular.at(variation).unk2C;
             break;
         case 0xFD1:
-            result = PK_PARTICULAR(variation).unk30;
+            result = m_particular.at(variation).unk30;
             break;
         case 0xFD2:
-            result = PK_PARTICULAR(variation).unk34;
+            result = m_particular.at(variation).unk34;
             break;
         case 0xFD3:
-            result = PK_PARTICULAR(variation).unk38;
+            result = m_particular.at(variation).unk38;
             break;
         case 0xFD4:
-            result = PK_PARTICULAR(variation).unk3C;
+            result = m_particular.at(variation).unk3C;
             break;
         case 0xFD5:
-            result = PK_PARTICULAR(variation).unk40;
+            result = m_particular.at(variation).unk40;
             break;
         case 0xFD6:
-            result = PK_PARTICULAR(variation).unk44;
+            result = m_particular.at(variation).unk44;
             break;
         case 0xFD7:
-            result = PK_PARTICULAR(variation).unk48;
+            result = m_particular.at(variation).unk48;
             break;
         case 0xFD8:
-            result = PK_PARTICULAR(variation).unk50;
+            result = m_particular.at(variation).unk50;
             break;
         case 0xFD9:
-            result = PK_PARTICULAR(variation).unk54;
+            result = m_particular.at(variation).unk54;
             break;
         case 0xFDA:
-            result = PK_PARTICULAR(variation).unk58;
+            result = m_particular.at(variation).unk58;
             break;
         case 0xFDB:
-            result = PK_PARTICULAR(variation).unk5C;
+            result = m_particular.at(variation).unk5C;
             break;
         case 0xFDC:
-            result = PK_PARTICULAR(variation).unk60;
+            result = m_particular.at(variation).unk60;
             break;
         case 0xFDD:
-            result = PK_PARTICULAR(variation).unk64;
+            result = m_particular.at(variation).unk64;
             break;
         case 0xFDE:
-            result = PK_PARTICULAR(variation).unk68;
+            result = m_particular.at(variation).unk68;
             break;
         case 0xFDF:
-            result = PK_PARTICULAR(variation).unk6C;
+            result = m_particular.at(variation).unk6C;
             break;
         case 0xFE0:
-            result = PK_PARTICULAR(variation).unk70;
+            result = m_particular.at(variation).unk70;
             break;
         default:
             result = 0.0f;
@@ -2476,10 +2472,10 @@ s32 wnPikminPikminParamAccesser::getParamInt(soModuleAccesser* acc, s32 id, s32 
         u32 variation = acc->getWorkManageModule().getInt(Work_Int_Variation);
         switch (id) {
         case 0x5DC9:
-            result = PK_PARTICULAR(variation).unk0;
+            result = m_particular.at(variation).unk0;
             break;
         case 0x5DCA:
-            result = PK_PARTICULAR(variation).unk4C;
+            result = m_particular.at(variation).unk4C;
             break;
         default:
             result = 0;

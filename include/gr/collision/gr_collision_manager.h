@@ -44,6 +44,10 @@ public:
         }
     };
 
+    // HYPOTHESIS: name; processUpdate copies this flag to the joint update's debug-check global through this const getter
+    // (the getter reloads the flag byte instead of reusing the m_isActive load).
+    bool isUnkB5() const { return m_flags.unk_b5; }
+
     // 0x40
     Flags m_flags;
     // 0x41
