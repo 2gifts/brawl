@@ -562,6 +562,21 @@ config.libs = [
         ],
     },
     {
+        # HOME Button Menu, from the Wii Sports decompilation (doldecomp/ogws, homebuttonMiniLib); headers in include/ogws.
+        "lib": "HBM",
+        "mw_version": config.linker_version,
+        "cflags": [*cflags_g3d, "-lang c++", "-i include/ogws/nw4r", "-i include/ogws/homebuttonMiniLib"],
+        "host": False,
+        "objects": [
+            Object(NonMatching, "HBM/HBMBase.cpp"),
+            Object(NonMatching, "HBM/HBMAnmController.cpp"),
+            Object(NonMatching, "HBM/HBMFrameController.cpp"),
+            Object(NonMatching, "HBM/HBMGUIManager.cpp"),
+            Object(NonMatching, "HBM/HBMController.cpp"),
+            Object(NonMatching, "HBM/HBMRemoteSpk.cpp"),
+        ],
+    },
+    {
         "lib": "SDKLib_media",
         "mw_version": config.linker_version,
         "cflags": cflags_common,
@@ -571,11 +586,6 @@ config.libs = [
             Object(NonMatching, "TMCC_JPEG/tmcc_jpeg_api.c"),
             Object(NonMatching, "TMCC_JPEG/tmcc_jpeg_decoder.c"),
             Object(NonMatching, "TMCC_JPEG/tmcc_jpeg_encoder.c"),
-            Object(NonMatching, "HBM/HBMBase.cpp"),
-            Object(NonMatching, "HBM/HBMAnmController.cpp"),
-            Object(NonMatching, "HBM/HBMGUIManager.cpp"),
-            Object(NonMatching, "HBM/HBMController.cpp"),
-            Object(NonMatching, "HBM/HBMRemoteSpk.cpp"),
         ],
     },
     {

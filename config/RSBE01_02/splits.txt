@@ -2902,7 +2902,7 @@ TMCC_JPEG/tmcc_jpeg_encoder.c:
 	.sdata2     start:0x805A3AD8 end:0x805A3AE8
 
 HBM/HBMBase.cpp:
-	.text       start:0x8026F4D4 end:0x80278B4C
+	.text       start:0x8026F4D4 end:0x80278AF0
 	.rodata     start:0x8040E738 end:0x8040E9E8
 	.data       start:0x804852F0 end:0x80485EE0
 	.bss        start:0x80532150 end:0x80532188
@@ -2910,8 +2910,11 @@ HBM/HBMBase.cpp:
 	.sdata2     start:0x805A3AE8 end:0x805A3B68
 
 HBM/HBMAnmController.cpp:
-	.text       start:0x80278B4C end:0x80278D9C
+	.text       start:0x80278AF0 end:0x80278BFC
 	.data       start:0x80485EE0 end:0x80485EF0
+
+HBM/HBMFrameController.cpp:
+	.text       start:0x80278BFC end:0x80278D9C
 	.sdata2     start:0x805A3B68 end:0x805A3B70
 
 HBM/HBMGUIManager.cpp:
