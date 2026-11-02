@@ -2371,14 +2371,14 @@ void gmAddDiagramResultName(gmResultInfo* result) {
                 continue;
             }
             if (result->m_isTeams != 1 || player->m_teamNo != other->m_teamNo) {
-                addMaxCheck(&name->unk0, player->m_playerBeatCounts[j], 0xFFFF);
+                addMaxCheck(&name->m_beatTotal, player->m_playerBeatCounts[j], 0xFFFF);
             }
-            addMaxCheck(&name->unk2, other->m_playerBeatCounts[i], 0xFFFF);
+            addMaxCheck(&name->m_fallTotal, other->m_playerBeatCounts[i], 0xFFFF);
         }
         u32 seconds = result->m_framesElapsed / 60;
         u8 charaIndex = exchangeGmCharacterKindToMuCharKind__6muMenuFiii(playerStat<u8>(player, 0));
-        addMaxCheck(&name->unk54[charaIndex], seconds, 359999999);
-        gmAddDiagramResultCommon(result, i, reinterpret_cast<gmDiagramResult*>(name->unk4));
+        addMaxCheck(&name->m_charPlayTime[charaIndex], seconds, 359999999);
+        gmAddDiagramResultCommon(result, i, &name->m_diagram);
     }
 }
 

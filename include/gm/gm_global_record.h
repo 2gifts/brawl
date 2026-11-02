@@ -276,10 +276,11 @@ struct gmGlobalRecord {
 
     // HYPOTHESIS: field layout from the record initializers; meanings unknown.
     struct NameData {
-        u16 unk0;
-        u16 unk2;
-        u8 unk4[0x50];
-        u32 unk54[35];
+        // Roles from gmAddDiagramResult (gm_common.cpp) and the Chronicle getters (mu_proc_diagram.cpp)
+        u16 m_beatTotal;             // 0x00 KOs the name tag scored
+        u16 m_fallTotal;             // 0x02 times the name tag was KO'd
+        gmDiagramResult m_diagram;   // 0x04
+        u32 m_charPlayTime[35];      // 0x54 seconds played with each character (MuCharKind)
         union {
             struct {
                 u16 unkE0;
