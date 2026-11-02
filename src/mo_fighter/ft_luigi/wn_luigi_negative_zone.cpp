@@ -1,3 +1,6 @@
+#define SO_SOUND_3D_GENERATOR_ACCESSER_DTOR_NOINLINE
+// BYTES: the native null-input query returns its button mask directly.
+#define IP_INPUT_BUTTON_RAW
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
 #define WN_WEAPON_BUILDER
 #define WN_ARTICLE_NATIVE_BUILDERS
@@ -17,6 +20,14 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <so/posture/so_posture_module_simple.h>
 #include <so/model/so_model_module_impl.h>
+
+// This article owns these empty interface teardowns.
+#pragma push
+#pragma dont_inline off
+soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+#pragma dont_inline on
+soParamAccesser::~soParamAccesser() { }
+#pragma pop
 
 // The status unique process of the end of the Negative Zone (wn_luigi_negative_zone_status_uniq_process_end.cpp).
 extern soStatusUniqProcess g_wnLuigiNegativeZoneStatusUniqProcessEnd;
