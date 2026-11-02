@@ -268,7 +268,7 @@ void emKineticEnergy::startEnergy(soModuleAccesser* moduleAccesser, s32 paramId,
     getEnergyTypeToGroup(m_param.m_kind);
     float speed;
     if (EM_IS_ROLL_KIND(m_param.m_kind)) {
-        // MATCH-ONLY: the roll test's body is a store the following one makes dead; its compare survives in the
+        // BUG: the roll test's body is a store the following one makes dead; its compare survives in the
         // original while the branch does not (an empty body or a never-read local drops the compare as well).
         speed = 0.0f;
     }
