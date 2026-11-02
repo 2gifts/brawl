@@ -101,9 +101,63 @@ public:
     virtual int getUseNumOfMsgWnd();
 };
 
+// The first page: the KOs of each character against each other character (the rows KO'd the columns), the rows in the
+// order of their total. Up and Down scroll the rows, Left and Right the columns.
+// HYPOTHESIS: what the page shows follows makeRankTbl and updateDispLine (gmGlobalRecord::CharaNumData::m_beatCount).
 class muProcDiagram1p : public muProcDiagramPageBase {
 public:
-    u32 m_unk66C[5];
+    // What the page does (the same states as muProcDiagram2p).
+    enum State {
+        State_Hidden = 0,
+        State_Shown = 1,
+        State_Come = 2,
+        State_Leave = 3,
+        State_ComeSide = 4,
+        State_LeaveSide = 5,
+        State_Num = 6,
+    };
+
+    enum {
+        Obj_RowArrow = 140,     // its visibility shows the arrows of the rows
+        Obj_ColumnArrow = 141,  // its visibility shows the arrows of the columns
+        Obj_Row = 142,          // the six rows (142 ... 147): the icon and rank of the character and its total
+        Obj_Column = 148,       // the five columns (148 ... 152): the icon of the character and its values
+        Mdl_Row = 14,           // the two models put in the scene group while the page is shown
+        Mdl_Column = 15,
+        RowNum = 6,             // the rows shown
+        ColumnNum = 5,          // the columns shown
+        CharaNum = 35,          // the characters the page can list (MuCharKind 0 ... 34)
+        Msg_Rank = 0,           // the message windows from m_msgWnd on: the rank of each row,
+        Msg_Total = 6,          // the total of each row,
+        Msg_Value = 12,         // then the values of the rows, ColumnNum for each row
+        MsgWndNum = 42,
+    };
+
+    // A row: a character and the KOs it made of all the characters listed.
+    struct Row {
+        MuCharKind m_chara;  // 0x0
+        u32 m_total;         // 0x4
+        u8 m_no;             // 0x8 the place of the character in m_charas (orders the rows with the same total)
+    };
+
+    // The characters that can be used and the rows of the table.
+    struct Table {
+        MuCharKind m_charas[CharaNum];  // 0x00 in the order of MuCharKind
+        u8 m_charaNum;                  // 0x8C
+        Row m_rows[CharaNum];           // 0x90 the most KOs first
+    };
+
+    int m_msgWnd;    // 0x66C the first message window of the page
+    int m_state;     // 0x670 State
+    MuMsg* m_msg;    // 0x674
+    Table* m_table;  // 0x678
+    u8 m_column;     // 0x67C the first column shown
+    u8 m_row;        // 0x67D the first row shown
+
+    static const u8 sStateAnimIdx[State_Num];  // the entry of sStateAnims of each state
+    static MuAnimIdxData sStateAnims[State_Num];
+    static MuAnimIdxData sCursorAnims[3];      // the page comes, scrolled back, scrolled on
+
     muProcDiagram1p(MuObject** objs, nw4r::g3d::G3dObj** mdls) : muProcDiagramPageBase(objs, mdls) { }
     virtual ~muProcDiagram1p();
     virtual void playSE_CursorMove();
@@ -115,6 +169,13 @@ public:
     virtual void post(int side);
     virtual void finish();
     virtual int getUseNumOfMsgWnd();
+    void makeRankTbl();
+    void initMsg();
+    void updateDisp(bool arrows);
+    void updateDispLine(int line, int row, Row* data);
+    int getRowArrowVisible();
+    int getColumnArrowVisible();
+    void changeState(int state);
 };
 static_assert(sizeof(muProcDiagram1p) == 0x680, "Class is wrong size!");
 
