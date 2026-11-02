@@ -1074,8 +1074,6 @@ ftManager::~ftManager() {
     m_dataProvider = nullptr;
 }
 
-// MATCH-ONLY: unnamed sndSystem query (8-byte function at 0x80073D10)
-extern "C" bool fn_80073D10(sndSystem* system);
 extern float lbl_27_data_4B84;
 
 // The first argument is ignored: the log observer always registers with the static log event manager.
@@ -1137,7 +1135,7 @@ bool ftManager::isResourceRemoveSync() const {
     bool result = false;
     if (m_isWaitingDraw == false) {
         if (g_ftDataProvider->isReady() == true) {
-            if (fn_80073D10(g_sndSystem) == true) {
+            if (g_sndSystem->isFinishFree() == true) {
                 result = true;
             }
         }
