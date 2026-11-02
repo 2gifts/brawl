@@ -509,11 +509,11 @@ static inline void clearNameTag(GameGlobal* self, int index) {
     gmSetAutosaveDirtyFlag();
     gmGlobalRecord::NameData* tag = &self->m_nameRecords[index];
     gmGlobalRecord::NameData* name = nameRecordByte(self, index);
-    name->unk0 = 0;
-    name->unk2 = 0;
-    memset(name->unk4, 0, sizeof(name->unk4));
+    name->m_beatTotal = 0;
+    name->m_fallTotal = 0;
+    memset(&name->m_diagram, 0, sizeof(name->m_diagram));
     for (int i = 0; i < 35; i++) {
-        name->unk54[i] = 0;
+        name->m_charPlayTime[i] = 0;
     }
     name->unkEE = 0;
     buttonConfigInit(reinterpret_cast<ipButtonConfig*>(nameRecordByte(self, index)->m_buttonConfig));
@@ -938,11 +938,11 @@ void GameGlobal::InitBattleRecord() {
     }
     for (int i = 0; i < 120; i++) {
         gmGlobalRecord::NameData* name = nameRecord(this, i);
-        name->unk0 = 0;
-        name->unk2 = 0;
-        memset(name->unk4, 0, sizeof(name->unk4));
+        name->m_beatTotal = 0;
+        name->m_fallTotal = 0;
+        memset(&name->m_diagram, 0, sizeof(name->m_diagram));
         for (int j = 0; j < 35; j++) {
-            name->unk54[j] = 0;
+            name->m_charPlayTime[j] = 0;
         }
         name->unkEE = 0;
     }
