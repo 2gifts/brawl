@@ -361,7 +361,10 @@ struct gmGlobalRecord {
     // single-player time count and total (the names follow muProcCount::getAdventureAllPlayTime / NobePlayTime).
     u32 m_advTimeCount;                     // 0x7F4
     u32 m_advTimeTotal;                     // 0x7F8
-    char _7FC[12];
+    char _7FC[8];
+    // HYPOTHESIS: the sound test shows the last categories of the sound effects only when it is set.
+    u32 m_unk804_31 : 1;                    // 0x804
+    u32 : 31;
     bool m_unk808_7 : 1;                    // 0x808; HYPOTHESIS: bit 7 is copied into the melee init data by gmInitMeleeDataDefault
     bool m_unk808_6 : 1;
     bool m_unk808_5 : 1;

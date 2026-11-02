@@ -36,6 +36,7 @@ public:
     char _710[0x4C0];
 
     int loadSoundGroup(SndGroupID sndGroupId, int, bool isRequest);
+    bool isFinishLoad();   // the sound groups that loadSoundGroup requested are loaded (the load thread is done)
     bool isSoundGroupLoaded(SndGroupID sndGroupId);
     void freeGroup(int heapLevel, int);
     bool loadArchiveHeader();

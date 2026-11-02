@@ -17,10 +17,13 @@ static_assert(sizeof(sndBgmRateData) == 0x8, "Class is wrong size!");
 struct sndBgmTitleData {
     u32 m_playId;    // 0x0
     u32 m_series;    // 0x4
-    u32 unk8;        // 0x8
-    char _C[0x4];
-    u32 m_msgIndex;  // 0x10
-    char _14[0x1C];
+    u32 unk8;        // 0x8 the sound test shows the icon of it (muProcSoundTest::getIconFrame)
+    u8 m_unkC;       // 0xC the sound test shows frame 1 of its colour animation when it is set
+    u32 m_msgIndex;  // 0x10 the title
+    // HYPOTHESIS: the names below follow how the sound test prints them.
+    u32 m_infoMsgIndex;     // 0x14 the game the track comes from
+    u32 m_creditMsgIndex[5]; // 0x18 the lines of the composer and the arranger (-1: none)
+    u32 m_altMsgIndex;      // 0x2C the text that shows while a button is held (-1: none)
 };
 static_assert(sizeof(sndBgmTitleData) == 0x30, "Class is wrong size!");
 
@@ -68,6 +71,21 @@ public:
     bool getSeriesAndId(u32 playId, u32* series, u32* index);
     u32 getSeriesId(u32 key);
     sndBgmTitleData* getBgmTitleDataPlayId(u32 playId);
+
+    // HYPOTHESIS: the names; the sound test reads the tables through these.
+    u32 getSeriesTitleCount(u32 series) {
+        if (series >= 24) {
+            return 0;
+        }
+        return m_seriesCount[series];
+    }
+    sndBgmTitleData* getSeriesTitleData(int series, u32 index) {
+        u32 title = m_seriesList[series][index];
+        if (title >= m_titleCount) {
+            return NULL;
+        }
+        return &m_titleData[title];
+    }
 };
 static_assert(sizeof(sndBgmRateSystem) == 0x14D8, "Class is wrong size!");
 

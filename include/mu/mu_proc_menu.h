@@ -85,7 +85,7 @@ public:
     void padRepeatClear(int buttons);
     void setAnimFrame(int obj, float frame, u32 flags);
     void setAnimUpdateRate(int obj, float rate, u32 flags);
-    static int getFixedControllerID();
+    int getFixedControllerID();         // not static: the screens pass this to it
     int getSceneStartCode();            // not static: the screens of the main menu pass this to it
     void exitScene(int code, bool force);
     void setComeAnim(bool keepFrame);
