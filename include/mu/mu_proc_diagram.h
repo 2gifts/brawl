@@ -94,9 +94,9 @@ public:
     virtual void setConf(nw4r::g3d::ScnGroup* group, MuMsg* msg, int msgWnd);
     virtual bool isPageChanging();
     virtual bool controlProc();
-    virtual void begin();
+    virtual void begin(int side);
     virtual void main();
-    virtual void post();
+    virtual void post(int side);
     virtual void finish();
     virtual int getUseNumOfMsgWnd();
 };
@@ -110,9 +110,9 @@ public:
     virtual void setConf(nw4r::g3d::ScnGroup* group, MuMsg* msg, int msgWnd);
     virtual bool isPageChanging();
     virtual bool controlProc();
-    virtual void begin();
+    virtual void begin(int side);
     virtual void main();
-    virtual void post();
+    virtual void post(int side);
     virtual void finish();
     virtual int getUseNumOfMsgWnd();
 };
@@ -127,9 +127,9 @@ public:
     virtual void setConf(nw4r::g3d::ScnGroup* group, MuMsg* msg, int msgWnd);
     virtual bool isPageChanging();
     virtual bool controlProc();
-    virtual void begin();
+    virtual void begin(int side);
     virtual void main();
-    virtual void post();
+    virtual void post(int side);
     virtual void finish();
     virtual int getUseNumOfMsgWnd();
 };
@@ -160,9 +160,9 @@ public:
 };
 static_assert(sizeof(muProcDiagram4p) == 0x6C0, "Class is wrong size!");
 
-// The Chronicle diagrams screen of the Vault.
-// HYPOTHESIS: the field roles follow init (m_msg made there, m_msgData given to it); the size is not known (nothing carved
-// makes the screen yet).
+// The Chronicle diagrams screen of the Vault: a bar at the top names the page shown and its neighbours, the arrows of the
+// bar show the buttons that turn the page, and a panel under it holds the page.
+// HYPOTHESIS: the field roles follow init and proc; the size is not known (nothing carved makes the screen yet).
 class muProcDiagram : public muProcMenu {
 public:
     enum Page {
@@ -173,22 +173,74 @@ public:
         Page_Num = 4,
     };
 
-    // HYPOTHESIS: the roles of these objects follow exit (the messages are attached to Obj_MsgWnd; the other two are put
-    // in the scene group by init).
+    // HYPOTHESIS: the roles of these objects follow init, setHelpArrowVisible and setPanelState.
     enum {
-        Obj_Unk111 = 111,
-        Obj_MsgWnd = 136,
-        Mdl_Unk13 = 13,
+        Obj_Panel = 111,        // its texture shows the page
+        Obj_Bar = 136,          // the page names are written on it; its visibility shows the arrows
+        Obj_Unk137 = 137,
+        Obj_ArrowPrev = 138,    // attached to the node "pos01" of the bar model
+        Obj_ArrowNext = 139,    // attached to the node "pos02"
+        Mdl_Bar = 13,           // the model the arrows are attached to
     };
 
-    u32 m_unk66C;
-    u32 m_unk670;
-    u32 m_unk674;
-    u32 m_unk678;
-    u32 m_unk67C;
+    // The message windows of the bar
+    enum {
+        Msg_PrevPage = 0,
+        Msg_Page = 1,
+        Msg_NextPage = 2,
+        Msg_PageWndNum = 3,     // the pages get the windows after these
+    };
+
+    // What the panel does (setPanelState).
+    enum PanelState {
+        Panel_Hidden = 0,
+        Panel_Come = 1,
+        Panel_Shown = 2,
+        Panel_Leave = 3,
+    };
+
+    // What the help bar does (setHelpState).
+    // HYPOTHESIS: the names follow the animations each state starts and the state helpMain moves to after it.
+    enum HelpState {
+        Help_Hidden = 0,
+        Help_Come = 1,
+        Help_Shown = 2,
+        Help_Leave = 3,
+        Help_TurnNext = 4,
+        Help_TurnPrev = 5,
+        Help_Unk6 = 6,
+        Help_Unk7 = 7,
+        Help_Unk8 = 8,
+    };
+
+    u8 m_unk66C_0 : 1;                          // 0x66C cleared by init
+    int m_page;                                 // 0x670 Page
+    int m_panelState;                           // 0x674 PanelState
+    int m_helpState;                            // 0x678 HelpState
+    u32 m_unk67C;                               // 0x67C cleared by init
     muProcDiagramPageBase* m_pages[Page_Num];   // 0x680
     MuMsg* m_msg;                               // 0x690
     void* m_msgData;                            // 0x694
+
+    // The title of each page and the short name the bar shows for it next to the page shown.
+    // HYPOTHESIS: the roles follow init and movePageMain (the title goes to the middle window, the names to the sides).
+    struct PageMsg {
+        u32 m_title;
+        u32 m_name;
+    };
+
+    // HYPOTHESIS: the tables are static members. The functions that read them name each one separately instead of
+    // reaching it from the base of the literals, as for objects with external linkage, and each is placed after the
+    // literals of the first function that reads it.
+    static const u8 sBarMsgBone[Msg_PageWndNum][2];   // the message windows of the bar and the bones they are written on
+    static const u8 sPageFrame[Page_Num];             // the frame of the texture of the panel for each page
+    // The frame of the texture of the page buttons for each pad type.
+    // HYPOTHESIS: the index is gfPadType (the frames show the buttons of that controller).
+    static const u8 sPadTypeFrame[4];
+    // The buttons that turn the page for each pad type: the next page, the previous page.
+    // HYPOTHESIS: the masks are gfPadButtons bits of the shoulder buttons of each controller.
+    static const u32 sPageButtons[4][2];
+    static const PageMsg sPageMsg[Page_Num];
 
     muProcDiagram(MuObject** objs, nw4r::g3d::G3dObj** mdls, void* msgData);
     virtual ~muProcDiagram();
@@ -196,4 +248,9 @@ public:
     virtual int proc();
     virtual void exit();
     virtual void playSE_CursorMove();
+    void setHelpArrowVisible(bool visible);
+    void setPanelState(int state);
+    void helpMain();
+    void setHelpState(int state);
+    void movePageMain();
 };

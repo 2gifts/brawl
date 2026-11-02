@@ -1,5 +1,9 @@
+#include <gf/gf_model.h>
+#include <gf/gf_pad_system.h>
 #include <gm/gm_global.h>
 #include <memory.h>
+#include <nw4r/g3d/g3d_scnmdlexpand.h>
+#include <snd/snd_system.h>
 #include <stdio.h>
 #include <types.h>
 
@@ -297,6 +301,19 @@ u32 muDiagGetDataExplMsgID(MuDiagDataKind kind) {
     return sDataInfo[kind].m_explMsgId;
 }
 
+// The panel of the page: comes in, goes out.
+static MuAnimIdxData sPanelAnims[2] = {
+    { 0.0f, 19.0f, 0, 0, 0x9 },
+    { 20.0f, 39.0f, 0, 0, 0x9 },
+};
+// The bar at the top: comes in, goes out, and the arrows of the next and the previous page flash.
+static MuAnimIdxData sHelpAnims[4] = {
+    { 0.0f, 9.0f, 0, 0, 0x11 },
+    { 10.0f, 19.0f, 0, 0, 0x11 },
+    { 20.0f, 23.0f, 0, 0, 0x11 },
+    { 30.0f, 33.0f, 0, 0, 0x11 },
+};
+
 // Writes a value of the record kind to buf and gives the message of its unit (-1 for none). Distances are recorded in
 // tenths of the unit of the records and written in metres (kilometres from 1000 m) or in feet (miles from one mile).
 // HYPOTHESIS: the parameter roles; max is the largest value the screen shows.
@@ -351,6 +368,88 @@ muProcDiagram::~muProcDiagram() {
     }
 }
 
+// The last page: the rankings of four players only come with name tags.
+// HYPOTHESIS: why the last page depends on the name tags.
+static inline int getLastPage() {
+    bool hasNames = g_GameGlobal->getNumName() > 0;
+    return hasNames + muProcDiagram::Page_3p;
+}
+
+// Shows the buttons of the controller of the screen on the page arrows.
+static inline void updatePageButtonTex(muProcDiagram* proc) {
+    gfPadStatus status;
+    g_gfPadSystem->getSysPadStatus(proc->getFixedControllerID(), &status);
+    float frame = muProcDiagram::sPadTypeFrame[status.m_controllerType];
+    proc->m_objs[muProcDiagram::Obj_ArrowPrev]->setFrameTex(frame);
+    proc->m_objs[muProcDiagram::Obj_ArrowNext]->setFrameTex(frame);
+}
+
+// The bar names the page shown, the previous page (left) and the next page (right).
+static inline void printPageNames(muProcDiagram* proc) {
+    int page = proc->m_page;
+    proc->m_msg->printIndex(muProcDiagram::Msg_Page, muProcDiagram::sPageMsg[page].m_title);
+    if (page > 0) {
+        proc->m_msg->printIndex(muProcDiagram::Msg_PrevPage, muProcDiagram::sPageMsg[page - 1].m_name);
+    } else {
+        proc->m_msg->printf(muProcDiagram::Msg_PrevPage, "");
+    }
+    if (page < getLastPage()) {
+        proc->m_msg->printIndex(muProcDiagram::Msg_NextPage, muProcDiagram::sPageMsg[page + 1].m_name);
+    } else {
+        proc->m_msg->printf(muProcDiagram::Msg_NextPage, "");
+    }
+}
+
+void muProcDiagram::init(nw4r::g3d::ScnGroup* group, int from) {
+    m_unk66C_0 = 0;
+    m_group = group;
+    m_page = Page_1p;
+    m_panelState = Panel_Hidden;
+    m_helpState = Help_Hidden;
+    m_panel->changeProcess1(0x22, 0);
+    group->Insert(group->sceneItemsCount, reinterpret_cast<nw4r::g3d::ScnObj*>(m_objs[Obj_Panel]->m_sceneModel));
+    group->Insert(group->sceneItemsCount, reinterpret_cast<nw4r::g3d::ScnObj*>(m_mdls[Mdl_Bar]));
+    m_objs[Obj_Unk137]->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+    m_objs[Obj_ArrowPrev]->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+    m_objs[Obj_ArrowNext]->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+    updatePageButtonTex(this);
+    m_unk664 = 0;
+
+    // BYTES: the original reads m_msgData before it makes the messages.
+    void* msgData = m_msgData;
+    m_msg = MuMsg::create(3, Heaps::MenuInstance, 0x2B);
+    m_msg->allocMsgBuf(0x100, 0x6C);
+    m_msg->setMsgData(msgData);
+    for (int i = 0; i < Msg_PageWndNum; i++) {
+        m_msg->attachScnMdlSimple(sBarMsgBone[i][0],
+                                  reinterpret_cast<nw4r::g3d::ScnMdlSimple*>(m_objs[Obj_Bar]->m_sceneModel),
+                                  sBarMsgBone[i][1], 1.0f / 16.0f);
+    }
+    m_msg->setFontType(Msg_PrevPage, 1);
+    m_msg->setFontType(Msg_NextPage, 1);
+
+    // Each page gets the message windows after the ones of the pages before it
+    m_pages[Page_1p]->setConf(group, m_msg, Msg_PageWndNum);
+    int msgWnd = Msg_PageWndNum + m_pages[Page_1p]->getUseNumOfMsgWnd();
+    m_pages[Page_2p]->setConf(group, m_msg, msgWnd);
+    msgWnd += m_pages[Page_2p]->getUseNumOfMsgWnd();
+    m_pages[Page_3p]->setConf(group, m_msg, msgWnd);
+    msgWnd += m_pages[Page_3p]->getUseNumOfMsgWnd();
+    m_pages[Page_4p]->setConf(group, m_msg, msgWnd);
+
+    m_unk67C = 0;
+    m_objs[Obj_Panel]->setFrameTex(sPageFrame[m_page]);
+    m_objs[Obj_Panel]->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+    setHelpArrowVisible(true);
+    printPageNames(this);
+    setPanelState(Panel_Come);
+    setHelpState(Help_Come);
+    m_pages[m_page]->begin(0);
+}
+
+const u8 muProcDiagram::sBarMsgBone[Msg_PageWndNum][2] = { { 0, 1 }, { 1, 0 }, { 2, 2 } };
+const u8 muProcDiagram::sPageFrame[Page_Num] = { 3, 4, 5, 6 };
+
 void muProcDiagramPageBase::setConf(nw4r::g3d::ScnGroup* group, MuMsg* msg, int msgWnd) {
     m_group = group;
 }
@@ -359,7 +458,111 @@ int muProcDiagramPageBase::getUseNumOfMsgWnd() {
     return 0;
 }
 
-void muProcDiagramPageBase::begin() { }
+void muProcDiagramPageBase::begin(int side) { }
+
+// Shows the arrows to the pages there are next to the page shown (visible) or hides both.
+void muProcDiagram::setHelpArrowVisible(bool visible) {
+    MuObject* barObj = m_objs[Obj_Bar];
+    bool prev = false;
+    bool next = false;
+    reinterpret_cast<nw4r::g3d::ScnMdlExpand*>(m_mdls[Mdl_Bar])->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_objs[Obj_ArrowPrev]->m_sceneModel));
+    reinterpret_cast<nw4r::g3d::ScnMdlExpand*>(m_mdls[Mdl_Bar])->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_objs[Obj_ArrowNext]->m_sceneModel));
+    barObj->m_modelAnim->m_anmObjVisRes->SetUpdateRate(0.0f);
+    barObj->setFrameVisible(0.0f);
+    if (visible) {
+        if (m_page > 0) {
+            reinterpret_cast<nw4r::g3d::ScnMdlExpand*>(m_mdls[Mdl_Bar])->PushBack(reinterpret_cast<nw4r::g3d::ScnObj*>(m_objs[Obj_ArrowPrev]->m_sceneModel), "pos01");
+            prev = true;
+        }
+        if (m_page < getLastPage()) {
+            reinterpret_cast<nw4r::g3d::ScnMdlExpand*>(m_mdls[Mdl_Bar])->PushBack(reinterpret_cast<nw4r::g3d::ScnObj*>(m_objs[Obj_ArrowNext]->m_sceneModel), "pos02");
+            next = true;
+        }
+        float frame;
+        if (prev) {
+            if (next) {
+                frame = 2.0f;
+            } else {
+                frame = 3.0f;
+            }
+        } else if (next) {
+            frame = 1.0f;
+        } else {
+            frame = 0.0f;
+        }
+        barObj->setFrameVisible(frame);
+    }
+}
+
+int muProcDiagram::proc() {
+    int ret = 0;
+    switch (m_unk664) {
+    case 0:
+        if (m_panelState != Panel_Come) {
+            m_unk664 = 2;
+        }
+        break;
+    case 1:
+        if (m_panelState != Panel_Come) {
+            m_unk664 = 2;
+        }
+        break;
+    case 2: {
+        u32 pad = padUpdate();
+        // B on the first page leaves the screen
+        bool stay;
+        if (m_page <= 0 && (pad & Pad_Cancel)) {
+            stay = false;
+        } else {
+            stay = true;
+        }
+        if (!stay) {
+            setPanelState(Panel_Leave);
+            setHelpState(Help_Leave);
+            m_unk664 = 3;
+            for (int i = 0; i < Page_Num; i++) {
+                m_pages[i]->finish();
+            }
+            m_result = 0x10;
+            ret = 1;
+        } else {
+            movePageMain();
+            if (!m_pages[m_page]->isPageChanging()) {
+                m_pages[m_page]->controlProc();
+            }
+        }
+        break;
+    }
+    case 3:
+        if (m_panelState == Panel_Hidden) {
+            ret = 3;
+        }
+        break;
+    }
+
+    switch (m_panelState) {
+    case Panel_Hidden:
+        break;
+    case Panel_Come:
+        if (m_objs[Obj_Panel]->m_modelAnim->m_anmObjChrRes->GetFrame() >= 19.0f) {
+            setPanelState(Panel_Shown);
+        }
+        break;
+    case Panel_Shown:
+        updatePageButtonTex(this);
+        break;
+    case Panel_Leave:
+        if (m_objs[Obj_Panel]->m_modelAnim->m_anmObjChrRes->GetFrame() >= 39.0f) {
+            setPanelState(Panel_Hidden);
+        }
+        break;
+    }
+    helpMain();
+    for (int i = 0; i < Page_Num; i++) {
+        m_pages[i]->main();
+    }
+    return ret;
+}
 
 void muProcDiagramPageBase::finish() { }
 
@@ -374,13 +577,182 @@ bool muProcDiagramPageBase::controlProc() {
 
 void muProcDiagramPageBase::main() { }
 
-void muProcDiagramPageBase::post() { }
+const u8 muProcDiagram::sPadTypeFrame[4] = { 0, 2, 3, 1 };
+
+void muProcDiagram::setPanelState(int state) {
+    if (state == m_panelState) {
+        return;
+    }
+    switch (state) {
+    case Panel_Hidden:
+        m_objs[Obj_Panel]->m_animIdxData = NULL;
+        m_objs[Obj_Panel]->setFrameNode(39.0f);
+        m_objs[Obj_Panel]->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+        m_objs[Obj_Panel]->setFrameTexSrt(39.0f);
+        m_objs[Obj_Panel]->m_modelAnim->m_anmObjTexSrtRes->SetUpdateRate(0.0f);
+        break;
+    case Panel_Come:
+        m_objs[Obj_Panel]->setAnimIdx(&sPanelAnims[0], false);
+        break;
+    case Panel_Shown:
+        m_objs[Obj_Panel]->m_animIdxData = NULL;
+        m_objs[Obj_Panel]->setFrameNode(19.0f);
+        m_objs[Obj_Panel]->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+        m_objs[Obj_Panel]->setFrameTexSrt(19.0f);
+        m_objs[Obj_Panel]->m_modelAnim->m_anmObjTexSrtRes->SetUpdateRate(0.0f);
+        break;
+    case Panel_Leave:
+        m_objs[Obj_Panel]->setAnimIdx(&sPanelAnims[1], false);
+        break;
+    }
+    m_panelState = state;
+}
+
+// When the animation of the bar has stopped, the state after it
+void muProcDiagram::helpMain() {
+    switch (m_helpState) {
+    case Help_Come:
+        if (m_objs[Obj_Bar]->m_modelAnim->m_anmObjChrRes->GetUpdateRate() == 0.0f) {
+            setHelpState(Help_Shown);
+        }
+        break;
+    case Help_Leave:
+        if (m_objs[Obj_Bar]->m_modelAnim->m_anmObjChrRes->GetUpdateRate() == 0.0f) {
+            setHelpState(Help_Hidden);
+        }
+        break;
+    case Help_TurnNext:
+        if (m_objs[Obj_Bar]->m_modelAnim->m_anmObjChrRes->GetUpdateRate() == 0.0f) {
+            setHelpState(Help_Shown);
+            setHelpArrowVisible(true);
+        }
+        break;
+    case Help_TurnPrev:
+        if (m_objs[Obj_Bar]->m_modelAnim->m_anmObjChrRes->GetUpdateRate() == 0.0f) {
+            setHelpState(Help_Shown);
+            setHelpArrowVisible(true);
+        }
+        break;
+    case Help_Unk6:
+        if (m_objs[Obj_Bar]->m_modelAnim->m_anmObjChrRes->GetUpdateRate() == 0.0f) {
+            setHelpState(Help_Unk8);
+        }
+        break;
+    case Help_Unk7:
+        if (m_objs[Obj_Bar]->m_modelAnim->m_anmObjChrRes->GetUpdateRate() == 0.0f) {
+            setHelpState(Help_Shown);
+        }
+        break;
+    case Help_Unk8:
+        break;
+    }
+}
+
+void muProcDiagram::setHelpState(int state) {
+    if (state == m_helpState) {
+        return;
+    }
+    MuObject* bar = m_objs[Obj_Bar];
+    switch (state) {
+    case Help_Hidden:
+        bar->m_animIdxData = NULL;
+        bar->setFrameNode(0.0f);
+        bar->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+        break;
+    case Help_Come:
+        bar->setAnimIdx(&sHelpAnims[0], false);
+        break;
+    case Help_Shown:
+        bar->m_animIdxData = NULL;
+        bar->setFrameNode(9.0f);
+        bar->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+        break;
+    case Help_Leave:
+        bar->setAnimIdx(&sHelpAnims[1], false);
+        break;
+    case Help_TurnNext:
+        bar->setAnimIdx(&sHelpAnims[2], false);
+        break;
+    case Help_TurnPrev:
+        bar->setAnimIdx(&sHelpAnims[3], false);
+        break;
+    case Help_Unk8:
+        bar->m_animIdxData = NULL;
+        bar->setFrameNode(44.0f);
+        bar->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+        break;
+    }
+    m_helpState = state;
+}
+
+const u32 muProcDiagram::sPageButtons[4][2] = {
+    { 0x520, 0xA40 },
+    { 0x520, 0xA40 },
+    { 0x200100, 0x400200 },
+    { 0x20100, 0x10200 },
+};
+
+// 1: a pad pressed a button of the next page, 2: of the previous page, 0: none.
+static inline int getPageMove() {
+    for (int i = 0; i < 8; i++) {
+        gfPadStatus status;
+        g_gfPadSystem->getSysPadStatus(i, &status);
+        if (status.m_error == 0) {
+            if (status.m_buttonsPressedThisFrame.bits & muProcDiagram::sPageButtons[status.m_controllerType][0]) {
+                return 1;
+            }
+            if (status.m_buttonsPressedThisFrame.bits & muProcDiagram::sPageButtons[status.m_controllerType][1]) {
+                return 2;
+            }
+        }
+    }
+    return 0;
+}
+
+// Turns the page: the page shown leaves to one side and the new one comes from the other.
+// HYPOTHESIS: the side argument of begin/post (1 left, 2 right, 0 none) follows the direction of the page change.
+void muProcDiagram::movePageMain() {
+    int oldPage = m_page;
+    int move = getPageMove();
+    if (move == 1) {
+        if (m_page < getLastPage()) {
+            g_sndSystem->playSE(static_cast<SndID>(0x23), -1, 0, 0, -1);
+            m_page++;
+            setHelpState(Help_TurnNext);
+            m_objs[Obj_Panel]->setFrameTex(sPageFrame[m_page]);
+            m_objs[Obj_Panel]->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+            printPageNames(this);
+            m_pages[oldPage]->post(1);
+            m_pages[m_page]->begin(2);
+        }
+    } else if (move == 2) {
+        if (m_page > 0) {
+            g_sndSystem->playSE(static_cast<SndID>(0x23), -1, 0, 0, -1);
+            m_page--;
+            setHelpState(Help_TurnPrev);
+            m_objs[Obj_Panel]->setFrameTex(sPageFrame[m_page]);
+            m_objs[Obj_Panel]->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+            printPageNames(this);
+            m_pages[oldPage]->post(2);
+            m_pages[m_page]->begin(1);
+        }
+    }
+}
+
+const muProcDiagram::PageMsg muProcDiagram::sPageMsg[Page_Num] = {
+    { 0x52, 0x56 },
+    { 0x53, 0x57 },
+    { 0x54, 0x58 },
+    { 0x55, 0x59 },
+};
+
+void muProcDiagramPageBase::post(int side) { }
 
 void muProcDiagram::exit() {
-    m_msg->detachMuObject(m_objs[Obj_MsgWnd]);
+    m_msg->detachMuObject(m_objs[Obj_Bar]);
     delete m_msg;
-    m_group->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_objs[Obj_Unk111]->m_sceneModel));
-    m_group->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_mdls[Mdl_Unk13]));
+    m_group->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_objs[Obj_Panel]->m_sceneModel));
+    m_group->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_mdls[Mdl_Bar]));
 }
 
 void muProcDiagram::playSE_CursorMove() { }
