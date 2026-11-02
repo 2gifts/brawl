@@ -12,7 +12,7 @@
 typedef soInsideEventManageModuleBuildConfig<
     32, 40, 4, 4, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 1, 1, 0, 2, 1, ftInsideEventManageModuleTypes
 > ftMetaknightInsideEventManageModuleBuildConfig;
-typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 5, 6, soCollisionAttackModuleImpl, 1, true, true> ftMetaknightCollisionAttackModuleBuildConfig;
+typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 5, 6, soCollisionAttackModuleImpl, 1, false, true> ftMetaknightCollisionAttackModuleBuildConfig;
 typedef soHeapModuleBuildConfig<soHeapModuleImpl> ftMetaknightHeapModuleBuildConfig;
 typedef soParamCustomizeModuleBuildConfig<ftParamCustomizeModuleImpl> ftMetaknightParamCustomizeModuleBuildConfig;
 typedef soResourceModuleBuildConfigDynamic<0, ftResourceIdAccesserImpl, soResourceModuleImpl> ftMetaknightResourceModuleBuildConfig;
@@ -61,8 +61,8 @@ public:
 
 class wnMetaknightMantle;
 
+static_assert(sizeof(ftFighterBuilder<ftMetaknightBuildConfig>) == 0xA5FC, "Meta Knight base extent");
 class ftMetaknight : public ftFighterBuilder<ftMetaknightBuildConfig> {
-    u8 unkTail[0xA5FC - sizeof(ftFighterBuilder<ftMetaknightBuildConfig>)];
     soArrayContractibleTable<const soStatusData> m_statusDataTable; // +0xA5FC
     ftData* m_data;                                                  // +0xA60C
 public:
@@ -74,6 +74,8 @@ public:
     virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
+    virtual void notifyEventCollisionAttackFighter(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventChangeMotion(int motionKind, int prevMotionKind, void* motionData, soModuleAccesser* moduleAccesser);
     // The hook the article mediator calls to start the article of the pool (HYPOTHESIS: the name follows the module map).
     static bool activeArticle(wnMetaknightMantle* weapon, soModuleAccesser* acc);
 };

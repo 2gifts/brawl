@@ -527,7 +527,12 @@ public:
 template <typename BC>
 class soEffectModuleBuilder : public soArraySelectHolder<1, soArrayVector<soEffectContinual, 1>, soArrayNull<soEffectContinual> > {
     soArraySelectHolder<1, soArrayVector<soEffectTime, 1>, soArrayNull<soEffectTime> > m_times;
-    soArraySelectHolder<1, soArrayVector<efScreenHandle, BC::ScreenCapacity>, soArrayNull<efScreenHandle> > m_screens;
+#ifdef FT_EFFECT_SCREEN_SINGLETON_HOLDER
+    typedef soSingletonHolder<soArrayNull<efScreenHandle> > ScreenNullHolder;
+#else
+    typedef soArrayNull<efScreenHandle> ScreenNullHolder;
+#endif
+    soArraySelectHolder<1, soArrayVector<efScreenHandle, BC::ScreenCapacity>, ScreenNullHolder> m_screens;
     soArrayVector<u32, 1> m_u32s;
     typename BC::ModuleType m_effectModule;
 public:

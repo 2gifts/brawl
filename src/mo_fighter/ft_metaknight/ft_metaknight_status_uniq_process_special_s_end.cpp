@@ -20,24 +20,24 @@ void ftMetaknightStatusUniqProcessSpecialSEnd::execStatus(soModuleAccesser* modu
     // HYPOTHESIS: work id 0x20000002 is a remaining-count work slot (0 means the move is finished).
     int count = moduleAccesser->getWorkManageModule().getInt(0x20000002);
     if (count <= 0) {
-        ftMetaknightPostureView* posture = &ftMetaknightPosture(moduleAccesser);
+        soPostureModule* posture = &moduleAccesser->getPostureModule();
         Vec3f unit(kSEndVectorValue, kSEndVectorValue, kSEndVectorValue);
-        posture->setPos(&unit, 0);
+        posture->setRot(&unit, 0);
         return;
     }
-    float x = ftMetaknightPosture(moduleAccesser).getPos(0).m_x;
+    float x = moduleAccesser->getPostureModule().getRot(0).m_x;
     float step = (kSEndScale * x) / (float)count;
-    ftMetaknightPostureView* posture = &ftMetaknightPosture(moduleAccesser);
-    Vec3f before = posture->getPos(0);
-    Vec3f after = posture->getPos(0);
+    soPostureModule* posture = &moduleAccesser->getPostureModule();
+    Vec3f before = posture->getRot(0);
+    Vec3f after = posture->getRot(0);
     Vec3f next(x - step, after.m_y, before.m_z);
-    posture->setPos(&next, 0);
+    posture->setRot(&next, 0);
 }
 
 void ftMetaknightStatusUniqProcessSpecialSEnd::exitStatus(soModuleAccesser* moduleAccesser, int) {
-    ftMetaknightPostureView* posture = &ftMetaknightPosture(moduleAccesser);
-    posture->setPos(&Vec3f(kSEndVectorValue, kSEndVectorValue, kSEndVectorValue), 0);
-    ftMetaknightPosture(moduleAccesser).unk54();
+    soPostureModule* posture = &moduleAccesser->getPostureModule();
+    posture->setRot(&Vec3f(kSEndVectorValue, kSEndVectorValue, kSEndVectorValue), 0);
+    moduleAccesser->getPostureModule().updateRotYLr();
 }
 
 ftMetaknightStatusUniqProcessSpecialSEnd g_ftMetaknightStatusUniqProcessSpecialSEnd;

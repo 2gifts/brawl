@@ -1,4 +1,5 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#include <ft/metaknight/ft_metaknight_status_uniq_process_final_end.h>
 #include <ft/metaknight/ft_metaknight_status_views.h>
 #include <ft/ft_external_value_accesser.h>
 #include <so/collision/so_collision_attack_module_impl.h>
@@ -9,19 +10,6 @@
 #include <types.h>
 
 
-class ftMetaknightStatusUniqProcessFinalEnd : public soStatusUniqProcess {
-public:
-    virtual ~ftMetaknightStatusUniqProcessFinalEnd() { }
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-
-    // HYPOTHESIS: parameter types; hits the linked target with attack slot index.
-    void attackFinal(Fighter* target, int index, soModuleAccesser* moduleAccesser);
-    // HYPOTHESIS: the power argument mirrors Fighter::notifyEventCollisionAttack, which forwards it here.
-    void notifyEventCollisionAttackFighter(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
-    // Finds the first link slot in 6..11 that is not linked; -1 when all are in use.
-    int getFreeFinalLinkWork(soModuleAccesser* moduleAccesser);
-};
 
 void ftMetaknightStatusUniqProcessFinalEnd::execFixPos(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000011)) {
@@ -78,6 +66,16 @@ void ftMetaknightStatusUniqProcessFinalEnd::notifyEventCollisionAttackFighter(fl
             if (moduleAccesser->getLinkModule().link(linkId, collisionLog->m_taskId) == false) {
                 return;
             }
+        }
+    }
+}
+
+// Tell every captured target that another collision has been checked.
+void ftMetaknightStatusUniqProcessFinalEnd::notifyEventCollisionAttackCheck(soModuleAccesser* moduleAccesser) {
+    ftMetaknightFinalLinkEvent event(0x44d);
+    for (int i = 6; i < 12; i++) {
+        if (moduleAccesser->getLinkModule().isLink(i) == true) {
+            moduleAccesser->getLinkModule().sendEventParents(i, event);
         }
     }
 }
