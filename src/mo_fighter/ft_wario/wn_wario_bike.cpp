@@ -392,7 +392,7 @@ void wnWarioBike::notifyEventCollisionAttack(float power, soCollisionLog* log,
 
     // Native only substitutes the target reaction frame for the log's
     // reaction-frame case; the task is looked up from the collision log.
-    if (*(u8*)((u8*)log + 0x21) == 1 && task != nullptr) {
+    if (log->m_kind == 1 && task != nullptr) {
         StageObject& target = dynamic_cast<StageObject&>(*task);
         soCollisionHitModule* hit =
             soExternalValueAccesser::getCollisionHitModule(&target);

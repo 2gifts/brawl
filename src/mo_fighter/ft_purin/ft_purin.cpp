@@ -213,7 +213,7 @@ void ftPurin::notifyEventChangeSituation(SituationKind kind, SituationKind previ
 void ftPurin::notifyEventCollisionAttackFighter(soCollisionLog* log, soModuleAccesser* acc) {
     // HYPOTHESIS: byte 0x21 selects the collision result; only value 1
     // requests the Rollout hit response. Its enum identity is unresolved.
-    if (static_cast<u8>(log->_33) == 1) {
+    if (log->m_kind == 1) {
         switch (acc->getStatusModule().getStatusKind()) {
         case 0x119:
         case 0x11a:

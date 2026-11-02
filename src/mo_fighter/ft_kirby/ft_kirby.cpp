@@ -528,7 +528,7 @@ void ftKirby::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleA
                 }
             }
         }
-    } else if (moduleAccesser->getStatusModule().getStatusKind() == 0x116 && static_cast<u8>(collisionLog->_33) == 1) {
+    } else if (moduleAccesser->getStatusModule().getStatusKind() == 0x116 && collisionLog->m_kind == 1) {
         gfTask* task = gfTaskScheduler::getInstance()->getTaskById(static_cast<gfTask::Category>(collisionLog->m_taskCategory), collisionLog->m_taskId);
         if (task->m_taskCategory == gfTask::Category_Fighter) {
             soExternalValueAccesser::getTeamNo(&dynamic_cast<StageObject&>(*task));

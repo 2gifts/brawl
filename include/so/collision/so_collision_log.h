@@ -16,9 +16,11 @@ public:
     short m_life;
     short m_30;
     s8 m_teamNo;
-    char _33;
+    // HYPOTHESIS: what the collision touched: 0 a hurtbox, 1 a target with its own reaction frame, 2 a shield, 3 a
+    // reflector (every reader compares it unsigned).
+    u8 m_kind;
     u8 m_taskCategory; // a gfTask::Category kept in a byte (every reader loads it with lbz)
-    char _35;
+    u8 _35; // HYPOTHESIS: nonzero for a valid collision part (ftUtil::isCounterShield)
     u8 m_collsionIndex;
     u8 m_damageIndex;
     char _38;

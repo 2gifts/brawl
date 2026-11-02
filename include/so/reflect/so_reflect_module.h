@@ -22,7 +22,6 @@ public:
     virtual bool isReflect() = 0;
     virtual float getSpeedMul() = 0;
     // HYPOTHESIS: original source bool types; native return/store widths agree.
-    // Native Nikita search callback invokes the secondary vptr slot +0x3C with no argument.
     virtual bool isCountMax() = 0;
     virtual void setNoSpeedMul(bool) = 0;
 };

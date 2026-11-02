@@ -637,17 +637,15 @@ public:
 
 #define PIKMIN_CATCH() ((wnPikminCatchModuleView*)m_moduleAccesser->m_enumerationStart->m_catchModule)
 
-// HYPOTHESIS: the native code reads the log's kind byte as unsigned (the header declares it signed).
-#define PIKMIN_LOG_KIND(log) (((u8*)(log))[0x21])
 
 void wnPikminPikmin::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
     if (collisionLog != NULL && m_moduleAccesser->getStatusModule().getStatusKind() == 0x15) {
-        if (PIKMIN_LOG_KIND(collisionLog) == 3) {
+        if (collisionLog->m_kind == 3) {
             if (collisionLog->m_teamNo != m_moduleAccesser->getTeamModule().getTeam()->getNo() &&
                 m_moduleAccesser->getReflectModule().isReflect() == 1) {
                 m_moduleAccesser->getWorkManageModule().onFlag(0x22000001);
             }
-        } else if (PIKMIN_LOG_KIND(collisionLog) != 2) {
+        } else if (collisionLog->m_kind != 2) {
             if (collisionLog->m_taskCategory == 10) {
                 if (collisionLog->m_teamNo != m_moduleAccesser->getTeamModule().getTeam()->getNo() &&
                     (m_moduleAccesser->getLinkModule().isModelConstraint() != 1 ||

@@ -881,10 +881,10 @@ void ftUtil::setShieldSetoffSpeed(soModuleAccesser* acc, float power, float lr) 
 // HYPOTHESIS: log fields 0x21 == 2 mark a shield contact and 0x23 a valid collision part.
 bool ftUtil::isCounterShield(soCollisionLog* collisionLog) {
     gfTask* task;
-    if ((u8) collisionLog->_33 != 2) {
+    if (collisionLog->m_kind != 2) {
         return false;
     }
-    if ((u8) collisionLog->_35 == 0) {
+    if (collisionLog->_35 == 0) {
         return false;
     }
     task = gfTask::getTask(collisionLog->m_taskId);
