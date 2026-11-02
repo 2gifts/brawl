@@ -76,10 +76,10 @@ int muDiagGetMuCharKindRawNo(MuCharKind kind);
 
 u32 muDiagGetDataChar(MuDiagDataKind kind, MuCharKind chara);
 u32 muDiagGetDataName(MuDiagDataKind kind, int nameNo);
-u8 muDiagGetDataUnitKind(MuDiagDataKind kind);
+u32 muDiagGetDataUnitKind(MuDiagDataKind kind);
 u32 muDiagGetDataTitleMsgID(MuDiagDataKind kind);
 u32 muDiagGetDataExplMsgID(MuDiagDataKind kind);
-void muDiagTransformDataValue(char* buf, u32* unitMsgId, MuDiagDataKind kind, u32 value, u32 max);
+int muDiagTransformDataValue(char* buf, int* unitMsgId, MuDiagDataKind kind, u32 value, u32 max);
 
 // A page of the diagrams: the table of one player, the comparison of two, the rankings of three or four. muProcDiagram
 // makes the four pages and runs the one of the number of players chosen.
@@ -118,9 +118,53 @@ public:
 };
 static_assert(sizeof(muProcDiagram1p) == 0x680, "Class is wrong size!");
 
+// The second page: for each record (Up and Down choose it), the five characters with the highest value.
+// HYPOTHESIS: the class is named for the page number of the map (muProcDiagram2p); what it shows follows setConf and
+// updateDisp.
 class muProcDiagram2p : public muProcDiagramPageBase {
 public:
-    u32 m_unk66C[6];
+    // What the page does.
+    // HYPOTHESIS: the names follow the animations each state starts (sStateAnims) and the state main moves to after it.
+    enum State {
+        State_Hidden = 0,
+        State_Shown = 1,
+        State_Come = 2,
+        State_Leave = 3,
+        State_ComeSide = 4,
+        State_LeaveSide = 5,
+        State_Num = 6,
+    };
+
+    enum {
+        Obj_Page = 153,         // the messages are attached to it; its visibility shows the arrows
+        Obj_CharIcon = 154,     // the five icons of the characters (154 ... 158)
+        Mdl_Page = 16,          // put in the scene group while the page is shown
+        RankNum = 5,            // the characters shown for each record
+        KindNum = 24,           // the records the page goes through
+        Msg_Title = 0,          // the message windows from m_msgWnd on: the title of the record, its explanation,
+        Msg_Expl = 1,           // then the values of the five characters
+        Msg_Value = 2,
+        MsgWndNum = 7,
+    };
+
+    // A character and its value of a record.
+    struct Rank {
+        MuCharKind m_chara;
+        u32 m_value;
+    };
+
+    int m_msgWnd;               // 0x66C the first message window of the page
+    int m_state;                // 0x670 State
+    MuMsg* m_msg;               // 0x674
+    int m_index;                // 0x678 the place of the record shown in sKindOrder
+    MuDiagDataKind m_kind;      // 0x67C the record shown
+    Rank (*m_ranks)[RankNum];   // 0x680 RankNum characters for each of the KindNum records, best first
+
+    static const u8 sStateAnimIdx[State_Num];       // the entry of sStateAnims of each state
+    static MuAnimIdxData sStateAnims[State_Num];
+    static MuAnimIdxData sCursorAnims[3];           // the page comes, the previous record, the next record
+    static MuDiagDataKind sKindOrder[KindNum];
+
     muProcDiagram2p(MuObject** objs, nw4r::g3d::G3dObj** mdls) : muProcDiagramPageBase(objs, mdls) { }
     virtual ~muProcDiagram2p();
     virtual void playSE_CursorMove();
@@ -132,6 +176,9 @@ public:
     virtual void post(int side);
     virtual void finish();
     virtual int getUseNumOfMsgWnd();
+    int getArrowVisible();
+    void changeState(int state);
+    void updateDisp(bool arrows);
 };
 static_assert(sizeof(muProcDiagram2p) == 0x684, "Class is wrong size!");
 

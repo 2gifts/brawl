@@ -6672,6 +6672,7 @@ config.libs = [
             Object(NonMatching, "mo_menu/mu_proc_stadium.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_sound_test.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_diagram.cpp"),
+            Object(NonMatching, "mo_menu/mu_proc_diagram_2p.cpp"),
         ],
     },
     {
