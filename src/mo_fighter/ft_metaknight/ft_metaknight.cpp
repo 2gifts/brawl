@@ -44,8 +44,14 @@ FT_DOL_ARRAY_VECTOR(soCollisionAttackAbsolute, 6);
 // Empty article interfaces have no resources to release in this unit.
 inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
 inline soParamAccesser::~soParamAccesser() { }
+// Native mediator calls go directly to the fighter's typed update templates.
+#include <ft/metaknight/ft_metaknight_kinetic_transactor.h>
+#define FT_KINETIC_MEDIATOR_TRANSACTOR ftMetaknightKineticTransactor
+#define FT_KINETIC_MEDIATOR_DIRECT_UPDATES
 #include <ft/ft_class_info_impl.h>
 #include <ft/metaknight/ft_metaknight.h>
+#undef FT_KINETIC_MEDIATOR_DIRECT_UPDATES
+#undef FT_KINETIC_MEDIATOR_TRANSACTOR
 #include <ft/metaknight/ft_metaknight_status_uniq_process_final_end.h>
 #include <gf/gf_task_scheduler.h>
 #include <so/collision/so_collision_log.h>

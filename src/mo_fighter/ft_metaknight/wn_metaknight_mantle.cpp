@@ -55,9 +55,9 @@ void wnMetaknightMantle::activate(int founderTaskId, int resourceId, int unkC, i
     desc.flagsBit3 = 1;
     desc.flagsLow = 0;
     desc.unk4DHigh = 0;
-    desc.flag4DBit6 = 1;
     desc.unkC = unkC;
     desc.unk14 = 0;
     desc.unk10 = 1;
+    desc.flag4DBit6 = 1;
     Weapon::activate(&desc);
 }
