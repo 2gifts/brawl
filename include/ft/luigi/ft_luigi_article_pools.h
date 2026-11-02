@@ -14,8 +14,8 @@ class Vec3f;
 struct wnMarioFireballData;
 struct wnLuigiNegativeZoneData;
 
-// The fireball. The full class lives in wn/luigi/wn_luigi_fireball.h (a weapon builder specialization that cannot coexist with
-// this Fighter-based builder unit), so the fighter unit sees an opaque shell of the right size.
+// The fireball pool uses its imported constructor and destructor; the full
+// implementation lives in wn/luigi/wn_luigi_fireball.h.
 class wnLuigiFireball : public Weapon {
     u8 m_unreconstructed[0x1F44 - sizeof(Weapon)];
 public:
@@ -24,15 +24,11 @@ public:
 };
 static_assert(sizeof(wnLuigiFireball) == 0x1F44, "Luigi fireball layout is wrong!");
 
-// The Negative Zone (the down special). Same reason for the shell (wn/luigi/wn_luigi_negative_zone.h).
-class wnLuigiNegativeZone : public Weapon {
-    u8 m_unreconstructed[0x2090 - sizeof(Weapon)];
-public:
-    wnLuigiNegativeZone(s32 articleId, const wnArticleBuildInfo& info, const wnLuigiNegativeZoneData* data);
-    virtual ~wnLuigiNegativeZone();
-    void activate(int founderTaskId, int resourceId, int team, float lr);
-    void toFly(Vec3f* position);
-};
+// Negative Zone teardown belongs to the fighter, so its complete type is required.
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/luigi/wn_luigi_negative_zone.h>
 static_assert(sizeof(wnLuigiNegativeZone) == 0x2090, "Luigi negative zone layout is wrong!");
 
 typedef wnArticleHierarchy<wnLuigiNegativeZone, 1, soInstancePoolRoot> ftLuigiNegativeZonePool;

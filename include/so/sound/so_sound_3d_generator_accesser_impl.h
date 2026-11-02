@@ -53,6 +53,9 @@ public:
     soSound3dGeneratorAccesserImpl();
 #ifdef SO_BUILDER_HELPERS_WEAK
     virtual ~soSound3dGeneratorAccesserImpl() __attribute__((never_inline)) { } // BYTES: a weak copy of the Enemy unit
+#elif defined(SO_SOUND_3D_GENERATOR_ACCESSER_DTOR_NOINLINE)
+    // BYTES: article teardown calls this body, while its empty base still inlines.
+    virtual ~soSound3dGeneratorAccesserImpl() __attribute__((never_inline));
 #else
     virtual ~soSound3dGeneratorAccesserImpl();
 #endif
