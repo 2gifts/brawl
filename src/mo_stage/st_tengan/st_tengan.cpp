@@ -35,8 +35,7 @@
 stClassInfoImpl<Stages::Tengan, stTengan> stTengan::bss_loc_14;
 
 stTengan::stTengan() : stMelee("stTengan", Stages::Tengan) {
-    // MATCH-ONLY: the original stores 0xff as an unsigned byte; the header declares m_slow as char.
-    *reinterpret_cast<u8*>(&m_slow) = 0xff;
+    m_slow = 0xff;
     unk1d8 = 0.0;
     m_substage = 0;
     unk1dc = 0.0;
@@ -95,7 +94,7 @@ stTengan::stTengan() : stMelee("stTengan", Stages::Tengan) {
     m_pendingLegendSound = snd_se_invalid;
     m_legendSoundDelayFrames = 0.0;
     m_boomerangMotion = 0;
-    *reinterpret_cast<u8*>(&m_slow) = 0xff;
+    m_slow = 0xff;
 }
 
 stTengan* stTengan::create() {
@@ -107,7 +106,7 @@ stTengan::~stTengan() {
     gfCopyEFBMgr::getInstance()->m_104=false;
     gfCopyEFBMgr::getInstance()->m_108=0x80;
     g_gfSceneRoot->m_transformFlag.m_mask &= 0xFFFFFF;
-    if (m_slow != -1) {
+    if (m_slow != 0xff) {
         
     }
 }
@@ -774,9 +773,9 @@ bool stTengan::eventSlowUpdate(float deltaFrame) {
         }
 
         if (event == 0 || event == 1) {
-            m_slow = static_cast<char>(gfSlowManager::requestSlow(2).m_id);
+            m_slow = gfSlowManager::requestSlow(2).m_id;
         } else if (event == 2) {
-            m_slow = static_cast<char>(gfSlowManager::requestSlow(4).m_id);
+            m_slow = gfSlowManager::requestSlow(4).m_id;
         }
 
         eventSlow.setPhase(1);
@@ -797,9 +796,8 @@ bool stTengan::eventSlowUpdate(float deltaFrame) {
                 unk200 = 0.0f;
             }
             if (unk200 == 0.0f) {
-                if (m_slow != -1) {
-                    u8 request = static_cast<u8>(m_slow);
-                    gfSlowManager::removeRequest(request);
+                if (m_slow != 0xff) {
+                    gfSlowManager::removeRequest(m_slow);
                 }
                 gfCopyEFBMgr* copyEFB = gfCopyEFBMgr::getInstance();
                 copyEFB->m_104 = false;

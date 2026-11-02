@@ -55,8 +55,7 @@ stFamicom::stFamicom() : stMelee("stFamicom", Stages::Famicom) {
         m_yukaToss[i].m_x = 0.0f;
         m_yukaToss[i].m_y = 0.0f;
         m_yukaToss[i].m_z = 0.0f;
-        // MATCH-ONLY: the original stores an integer 0 here (m_value holds a task id, see grFamicomYuka), the header types it float
-        *reinterpret_cast<s32*>(&m_yukaToss[i].m_value) = 0;
+        m_yukaToss[i].m_value = 0;
         m_yukaToss[i].m_state = 0xD;
     }
     m_triggerYuka[0] = NULL;
@@ -556,8 +555,7 @@ void stFamicom::updateYuka(float deltaFrame) {
     do {
         stFamicomYukaToss* toss = &m_yukaToss[index & 0xFF];
         if (toss->m_state == 0) {
-            // HYPOTHESIS: m_value holds a 32-bit integer that is copied as a word; the header types it as float.
-            *(u32*)&m_pressureYuka[count]->unk3C = *(u32*)&toss->m_value;
+            m_pressureYuka[count]->unk3C = toss->m_value;
             stFamicomPressureData* pressure = m_pressureYuka[count];
             pressure->unk18 = toss->m_x;
             pressure->unk1C = toss->m_y;
