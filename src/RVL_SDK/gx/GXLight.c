@@ -202,13 +202,13 @@ void GXGetLightColor(const GXLightObj *lt_obj, GXColor *color) {
 }
 
 // BYTES: the original copies with paired singles and stores the three reserved words as zero
-static inline void WriteLightObj_i(register volatile void *dst, register const GXLightObjInt *src) {
-    register u32 color;
+static inline void WriteLightObj_i(register const GXLightObjInt *src, register volatile void *dst) {
+    register u32 zero, color;
     register f32 ps_0, ps_1, ps_2, ps_3, ps_4, ps_5;
 
     asm volatile {
         lwz color, src->Color
-        xor r6, r6, r6
+        xor zero, zero, zero
         psq_l ps_0, GXLightObjInt.a(src), 0, 0
         psq_l ps_1, GXLightObjInt.a[2](src), 0, 0
         psq_l ps_2, GXLightObjInt.k[1](src), 0, 0
@@ -216,9 +216,9 @@ static inline void WriteLightObj_i(register volatile void *dst, register const G
         psq_l ps_4, GXLightObjInt.lpos[2](src), 0, 0
         psq_l ps_5, GXLightObjInt.ldir[1](src), 0, 0
 
-        stwu r6, -0x8000(dst)
-        stw r6, 0(dst)
-        stw r6, 0(dst)
+        stw zero, 0(dst)
+        stw zero, 0(dst)
+        stw zero, 0(dst)
 
         stw color, 0(dst)
         psq_st ps_0, 0(dst), 0, 0
@@ -231,18 +231,23 @@ static inline void WriteLightObj_i(register volatile void *dst, register const G
 }
 
 void GXLoadLightObjImm(const GXLightObj *lt_obj, GXLightID light) {
+    const GXLightObjInt *lt;
     u32 addr;
     u32 idx;
-    volatile u8 *fifo = (volatile u8 *)0xCC010000;
-    GX_SETUP_LIGHT(lt, lt_obj);
+    u32 cmd;
 
+    lt = (GXLightObjInt *)lt_obj;
     idx = 31 - __cntlzw(light);
     idx &= 7;
     addr = idx * XF_LIGHT_SIZE + XF_LIGHT_BASE;
 
-    *(volatile u8 *)(fifo - 0x8000) = 0x10;
-    *(volatile u32 *)(fifo - 0x8000) = addr | ((XF_LIGHT_SIZE - 1) << 16);
-    WriteLightObj_i(fifo, lt);
+    // XF register load header, built as the SDK's GX_XF_LOAD_REGS does (mscharged-decomp)
+    cmd = 0;
+    cmd |= addr;
+    cmd |= (XF_LIGHT_SIZE - 1) << 16;
+    GX_WRITE_U8(0x10);
+    GX_WRITE_U32(cmd);
+    WriteLightObj_i(lt, &gxfifo);
 
     gx->bpSentNot = GX_TRUE;
 }

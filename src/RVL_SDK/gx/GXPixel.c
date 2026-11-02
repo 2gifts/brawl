@@ -103,7 +103,7 @@ void GXInitFogAdjTable(GXFogAdjTable *table, u16 width, const Mtx44 proj) {
         sidec = radius / proj[0][0];
     } else {
         sidec = 1.0f / proj[0][0];
-        radius = 1.7320508f * sidec;
+        radius = 1.73205f * sidec;
     }
 
     pixel = 2.0f / width;

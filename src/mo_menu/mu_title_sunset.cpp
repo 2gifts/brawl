@@ -30,8 +30,8 @@ static inline bool isLargeChar(int kind) {
 }
 
 // MSL: fprintf and abort, and the files (stderr is the third one)
-extern "C" void fn_803F86E4(void* file, const char* format, ...);
-extern "C" void fn_803FC984();
+extern "C" void fprintf(void* file, const char* format, ...);
+extern "C" void abort();
 extern "C" u8 __files[];
 
 // HYPOTHESIS: std::bitset<51> (the game's copy of the library: two words of bits) with test(), which checks the position and
@@ -42,8 +42,8 @@ public:
 
     bool test(u32 pos) const {
         if (pos >= 51) {
-            fn_803F86E4(__files + 0xA0, "index out of range of bitset::test");
-            fn_803FC984();
+            fprintf(__files + 0xA0, "index out of range of bitset::test");
+            abort();
         }
         u32 mask = 1 << (pos & 31);
         return m_bits[pos >> 5] & mask;

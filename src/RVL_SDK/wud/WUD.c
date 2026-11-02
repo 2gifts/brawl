@@ -15,7 +15,7 @@
 
 // MATCH-ONLY: bte, sc and os pieces that have no header yet
 extern u32 BTE_GetMemSize(void);
-extern u8 lbl_805A0C71;                                     // an sc dirty flag, I think
+extern u8 _scFlush;                                     // an sc dirty flag, I think
 extern u32 lbl_805A0674;                                    // low word of the boot time
 
 /*******************************************************************************
@@ -2428,7 +2428,7 @@ static void WUDSecurityCallback(tBTA_DM_SEC_EVT event, tBTA_DM_SEC* pData) {
                 for (i = 0; i < 4; i++) {
                     if (memcmp(_scArray.info[i + 10].bd_addr, d, WUD_ADDR_LEN) == 0) {
                         memset(&_scArray.info[i + 10], 0, sizeof(_scArray.info[0]));
-                        lbl_805A0C71 = 1;
+                        _scFlush = 1;
                     }
                 }
             }

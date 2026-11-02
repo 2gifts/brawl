@@ -22,7 +22,7 @@ static ShutdownQueue ShutdownFunctionQueue;
 
 // HYPOTHESIS: no names for these two yet, one is the dol argument handed to the reboot call and the other is
 // set while shutting down into the menu
-u32 lbl_805A06E4;
+u32 __OSIsReturnToIdle;
 u32 lbl_805A06E0;
 
 // not named yet, they live in OSExec / OSPlayRecord / the reboot code
@@ -205,7 +205,7 @@ void OSShutdownSystem(void) {
     __OSGetIOSRev(&iosRev);
 
     if (idleMode.mode == 1) {
-        lbl_805A06E4 = 1;
+        __OSIsReturnToIdle = 1;
         OSDisableScheduler();
         __OSShutdownDevices(5);
         OSEnableScheduler();

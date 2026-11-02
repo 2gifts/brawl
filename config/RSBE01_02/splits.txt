@@ -2188,15 +2188,15 @@ RVL_SDK/vi/vi.c:
 
 RVL_SDK/vi/i2c.c:
 	.text       start:0x801EA098 end:0x801EAAB4
-	.sdata      start:0x8059EA40 end:0x8059EA44
-	.sbss       start:0x805A0850 end:0x805A0854
+	.sdata      start:0x8059EA40 end:0x8059EA48
+	.sbss       start:0x805A0850 end:0x805A0858
 
 RVL_SDK/vi/vi3in1.c:
 	.text       start:0x801EAAB4 end:0x801EC158
 	.data       start:0x804754A8 end:0x80475A40
 	.bss        start:0x804DE6C0 end:0x804DE6E0
-	.sdata      start:0x8059EA44 end:0x8059EA60
-	.sbss       start:0x805A0854 end:0x805A0870
+	.sdata      start:0x8059EA48 end:0x8059EA60
+	.sbss       start:0x805A0858 end:0x805A0870
 
 RVL_SDK/mtx/mtx.c:
 	.text       start:0x801EC158 end:0x801ECD70
@@ -2221,7 +2221,7 @@ RVL_SDK/mtx/quat.c:
 
 RVL_SDK/gx/GXInit.c:
 	.text       start:0x801ED554 end:0x801EE720
-	.data       start:0x80475A40 end:0x80475C80
+	.data       start:0x80475A40 end:0x80475C80 align:32
 	.bss        start:0x804DE6E0 end:0x804DE760
 	.sdata      start:0x8059EA68 end:0x8059EA70
 	.sbss       start:0x805A0870 end:0x805A0898
@@ -2402,7 +2402,7 @@ RVL_SDK/axfx/AXFXHooks.c:
 RVL_SDK/mem/mem_heapCommon.c:
 	.text       start:0x80203D0C end:0x80204178
 	.bss        start:0x804E8A58 end:0x804E8A80
-	.sbss       start:0x805A0B58 end:0x805A0B5C
+	.sbss       start:0x805A0B58 end:0x805A0B60
 
 RVL_SDK/mem/mem_expHeap.c:
 	.text       start:0x80204178 end:0x802049BC
@@ -2420,14 +2420,22 @@ RVL_SDK/mem/mem_list.c:
 RVL_SDK/cx/CXCompression.c:
 	.text       start:0x80204FC8 end:0x80205530
 
+RVL_SDK/cx/CXStreamingUncompression.c:
+	.text       start:0x80205530 end:0x80205FD8
+
 RVL_SDK/cx/CXUncompression.c:
-	.text       start:0x80205530 end:0x80206308
+	.text       start:0x80205FD8 end:0x80206308
 
 RVL_SDK/mix/mix.c:
-	.text       start:0x80206308 end:0x8020981C
+	.text       start:0x80206308 end:0x80209388
 	.data       start:0x8047B2E0 end:0x8047BE70
-	.bss        start:0x804E8A80 end:0x804ECE00
-	.sbss       start:0x805A0B5C end:0x805A0B78
+	.bss        start:0x804E8A80 end:0x804EB480
+	.sbss       start:0x805A0B60 end:0x805A0B70
+
+RVL_SDK/mix/remote.c:
+	.text       start:0x80209388 end:0x8020981C
+	.bss        start:0x804EB480 end:0x804ECE00
+	.sbss       start:0x805A0B70 end:0x805A0B78
 
 RVL_SDK/dsp/dsp.c:
 	.text       start:0x8020981C end:0x80209A98
@@ -2897,7 +2905,7 @@ TMCC_JPEG/tmcc_jpeg_encoder.c:
 	.sdata2     start:0x805A3AD8 end:0x805A3AE8
 
 HBM/HBMBase.cpp:
-	.text       start:0x8026F4D4 end:0x80278B4C
+	.text       start:0x8026F4D4 end:0x80278AF0
 	.rodata     start:0x8040E738 end:0x8040E9E8
 	.data       start:0x804852F0 end:0x80485EE0
 	.bss        start:0x80532150 end:0x80532188
@@ -2905,8 +2913,11 @@ HBM/HBMBase.cpp:
 	.sdata2     start:0x805A3AE8 end:0x805A3B68
 
 HBM/HBMAnmController.cpp:
-	.text       start:0x80278B4C end:0x80278D9C
+	.text       start:0x80278AF0 end:0x80278BFC
 	.data       start:0x80485EE0 end:0x80485EF0
+
+HBM/HBMFrameController.cpp:
+	.text       start:0x80278BFC end:0x80278D9C
 	.sdata2     start:0x805A3B68 end:0x805A3B70
 
 HBM/HBMGUIManager.cpp:
@@ -4285,8 +4296,9 @@ havok/hkVersionUtil.cpp:
 	.text       start:0x80334BF8 end:0x80334DE4
 	.rodata     start:0x804156D0 end:0x804156E0
 
-DWC/dwcbase64.c:
+DWC/dwc_base64.c:
 	.text       start:0x80334DE4 end:0x8033514C
+	.sdata      start:0x8059F058 end:0x8059F070
 
 DWC/dwcerror.c:
 	.text       start:0x8033514C end:0x80335264
@@ -4300,19 +4312,29 @@ DWC/dwcmemfunc.c:
 DWC/dwcreport.c:
 	.text       start:0x80335630 end:0x80335988
 
-DWC/dwcghttp.c:
+DWC/dwc_ghttp.c:
 	.text       start:0x80335988 end:0x803362EC
+	.data       start:0x80489310 end:0x80489450
+	.sdata      start:0x8059F070 end:0x8059F078
+	.sbss       start:0x805A0F68 end:0x805A0F70
 
-DWC/dwccommon.c:
+DWC/dwc_common.c:
 	.text       start:0x803362EC end:0x80336698
+	.data       start:0x80489450 end:0x80489460
+	.bss        start:0x80533718 end:0x80533730
 
-DWC/dwcfriend.c:
+DWC/dwc_friend.c:
 	.text       start:0x80336698 end:0x80338600
+	.data       start:0x80489460 end:0x80489A00
+	.sdata      start:0x8059F078 end:0x8059F088
+	.sbss       start:0x805A0F70 end:0x805A0F80
 
-DWC/dwclogin.c:
+DWC/dwc_login.c:
 	.text       start:0x80338600 end:0x8033949C
+	.data       start:0x80489A00 end:0x80489E48
+	.sbss       start:0x805A0F80 end:0x805A0F88
 
-DWC/dwcmain.c:
+DWC/dwc_main.c:
 	.text       start:0x8033949C end:0x8033C0D4
 	.data       start:0x80489E48 end:0x8048AA60
 	.bss        start:0x80533730 end:0x805338B0
@@ -4333,12 +4355,17 @@ DWC/dwctransport.c:
 	.sdata      start:0x8059F1B0 end:0x8059F1B8
 	.sbss       start:0x805A0FB0 end:0x805A0FB8
 
-DWC/dwcutil.c:
-	.text       start:0x8034F020 end:0x80352040
-	.data       start:0x8048D240 end:0x8048D400
-	.bss        start:0x80534008 end:0x80534030
-	.sdata      start:0x8059F1B8 end:0x8059F1C8
+DWC/dwci_np_math.c:
+	.text       start:0x8034F7A8 end:0x80350BBC
+
+DWC/dwc_cf.c:
+	.text       start:0x80350BBC end:0x80350C0C
 	.sbss       start:0x805A0FB8 end:0x805A0FD0
+
+DWC/dwc_account.c:
+	.text       start:0x80350C0C end:0x80352040
+	.data       start:0x8048D240 end:0x8048D400
+	.sdata      start:0x8059F1B8 end:0x8059F1C8
 
 DWC/dwc_auth_interface.c:
 	.text       start:0x80352040 end:0x8035423C
@@ -4369,10 +4396,13 @@ SBS/sbs_client.c:
 	.bss        start:0x80534618 end:0x80534638
 	.sdata2     start:0x805A4978 end:0x805A4980
 
-GameSpy/common/darray.c:
-	.text       start:0x8035A460 end:0x8035B34C
+GameSpy/darray.c:
+	.text       start:0x8035A460 end:0x8035AEB4
 
-GameSpy/common/md5c.c:
+GameSpy/hashtable.c:
+	.text       start:0x8035AEB4 end:0x8035B34C
+
+GameSpy/md5c.c:
 	.text       start:0x8035B34C end:0x8035C26C
 	.data       start:0x8048E7B8 end:0x8048E7F8
 	.sdata      start:0x8059F588 end:0x8059F590
@@ -4395,27 +4425,122 @@ GameSpy/common/gsCore.c:
 	.text       start:0x8035E380 end:0x8035EA70
 	.bss        start:0x805348E0 end:0x805349A8
 
+GameSpy/common/gsCrypt.c:
+	.text       start:0x8035EA70 end:0x8035EB8C
+
 GameSpy/common/gsLargeInt.c:
-	.text       start:0x8035EA70 end:0x803621B8
-	.rodata     start:0x80415D40 end:0x80415D50
+	.text       start:0x8035EB8C end:0x8036133C
 	.bss        start:0x805349A8 end:0x80534A40
+
+GameSpy/common/gsRC4.c:
+	.text       start:0x8036133C end:0x8036180C
+
+GameSpy/common/gsSHA1.c:
+	.text       start:0x8036180C end:0x803621B8
+	.rodata     start:0x80415D40 end:0x80415D50
 
 GameSpy/common/gsSoapXml.c:
 	.text       start:0x803621B8 end:0x80367C28
 	.data       start:0x8048E898 end:0x8048EA30
 	.sdata      start:0x8059F5A8 end:0x8059F600
 
-GameSpy/gp/gp.c:
-	.text       start:0x80367C28 end:0x803733BC
-	.data       start:0x8048EA30 end:0x8048FBB8
-	.sdata      start:0x8059F600 end:0x8059F980
+GameSpy/GP/gp.c:
+	.text       start:0x80367C28 end:0x803689DC
+	.data       start:0x8048EA30 end:0x8048EC60
+	.sdata      start:0x8059F600 end:0x8059F610
+
+GameSpy/GP/gpi.c:
+	.text       start:0x803689DC end:0x803691D8
+	.data       start:0x8048EC60 end:0x8048ECD8
+	.sdata      start:0x8059F610 end:0x8059F640
+
+GameSpy/GP/gpiBuddy.c:
+	.text       start:0x803691D8 end:0x8036A1A4
+	.data       start:0x8048ECD8 end:0x8048ED80
+	.sdata      start:0x8059F640 end:0x8059F698
+
+GameSpy/GP/gpiBuffer.c:
+	.text       start:0x8036A1A4 end:0x8036AAF0
+	.data       start:0x8048ED80 end:0x8048EDE8
+	.sdata      start:0x8059F698 end:0x8059F6B8
+
+GameSpy/GP/gpiCallback.c:
+	.text       start:0x8036AAF0 end:0x8036AFA8
+	.data       start:0x8048EDE8 end:0x8048EDF8
+
+GameSpy/GP/gpiConnect.c:
+	.text       start:0x8036AFA8 end:0x8036C554
+	.data       start:0x8048EDF8 end:0x8048F1C0
+	.sdata      start:0x8059F6B8 end:0x8059F748
+
+GameSpy/GP/gpiInfo.c:
+	.text       start:0x8036C554 end:0x8036E9EC
+	.data       start:0x8048F1C0 end:0x8048F518
+	.sdata      start:0x8059F748 end:0x8059F800
 	.sdata2     start:0x805A4990 end:0x805A4998
 
-GameSpy/gt2/gt2.c:
-	.text       start:0x803733BC end:0x80378BB4
+GameSpy/GP/gpiOperation.c:
+	.text       start:0x8036E9EC end:0x8036F06C
+	.data       start:0x8048F518 end:0x8048F528
+
+GameSpy/GP/gpiPeer.c:
+	.text       start:0x8036F06C end:0x803703DC
+	.data       start:0x8048F528 end:0x8048F648
+	.sdata      start:0x8059F800 end:0x8059F868
+
+GameSpy/GP/gpiProfile.c:
+	.text       start:0x803703DC end:0x80370B9C
+	.data       start:0x8048F648 end:0x8048F800
+	.sdata      start:0x8059F868 end:0x8059F878
+
+GameSpy/GP/gpiSearch.c:
+	.text       start:0x80370B9C end:0x80372BC4
+	.data       start:0x8048F800 end:0x8048FAF8
+	.sdata      start:0x8059F878 end:0x8059F950
+
+GameSpy/GP/gpiTransfer.c:
+	.text       start:0x80372BC4 end:0x80372CAC
+	.data       start:0x8048FAF8 end:0x8048FB20
+	.sdata      start:0x8059F950 end:0x8059F960
+
+GameSpy/GP/gpiUnique.c:
+	.text       start:0x80372CAC end:0x80372DD8
+	.data       start:0x8048FB20 end:0x8048FB60
+	.sdata      start:0x8059F960 end:0x8059F968
+
+GameSpy/GP/gpiUtility.c:
+	.text       start:0x80372DD8 end:0x803733BC
+	.data       start:0x8048FB60 end:0x8048FBB8
+	.sdata      start:0x8059F968 end:0x8059F980
+
+GameSpy/gt2/gt2Auth.c:
+	.text       start:0x803733BC end:0x80373780
 	.data       start:0x8048FBB8 end:0x8048FBE0
-	.bss        start:0x80534A40 end:0x80535A80
-	.sdata      start:0x8059F980 end:0x8059F9A8
+
+GameSpy/gt2/gt2Buffer.c:
+	.text       start:0x80373780 end:0x80373924
+
+GameSpy/gt2/gt2Callback.c:
+	.text       start:0x80373924 end:0x803741A4
+
+GameSpy/gt2/gt2Connection.c:
+	.text       start:0x803741A4 end:0x80374878
+
+GameSpy/gt2/gt2Main.c:
+	.text       start:0x80374878 end:0x80374C30
+
+GameSpy/gt2/gt2Message.c:
+	.text       start:0x80374C30 end:0x80377D34
+	.bss        start:0x80534A40 end:0x80535A40
+	.sdata      start:0x8059F980 end:0x8059F990
+
+GameSpy/gt2/gt2Socket.c:
+	.text       start:0x80377D34 end:0x803788C8
+
+GameSpy/gt2/gt2Utility.c:
+	.text       start:0x803788C8 end:0x80378BB4
+	.bss        start:0x80535A40 end:0x80535A80
+	.sdata      start:0x8059F990 end:0x8059F9A8
 	.sbss       start:0x805A1050 end:0x805A1058
 
 GameSpy/qr2/qr2.c:
@@ -4429,35 +4554,93 @@ GameSpy/qr2/qr2.c:
 GameSpy/qr2/qr2regkeys.c:
 	.text       start:0x8037B354 end:0x8037B37C
 
-GameSpy/ghttp/ghttp.c:
-	.text       start:0x8037B37C end:0x803822D8
-	.rodata     start:0x80415D50 end:0x80415D80
-	.data       start:0x804905E8 end:0x804909A0
-	.sdata      start:0x8059FA40 end:0x8059FAF0
-	.sbss       start:0x805A1060 end:0x805A1098
+GameSpy/ghttp/ghttpBuffer.c:
+	.text       start:0x8037B37C end:0x8037BD4C
+	.sdata      start:0x8059FA40 end:0x8059FA58
+
+GameSpy/ghttp/ghttpCallbacks.c:
+	.text       start:0x8037BD4C end:0x8037BE6C
+
+GameSpy/ghttp/ghttpCommon.c:
+	.text       start:0x8037BE6C end:0x8037C2DC
+
+GameSpy/ghttp/ghttpConnection.c:
+	.text       start:0x8037C2DC end:0x8037CA28
+	.data       start:0x804905E8 end:0x804905F8
+
+GameSpy/ghttp/ghttpEncryption.c:
+	.text       start:0x8037CA28 end:0x8037E7F4
+	.rodata     start:0x80415D50 end:0x80415D70
+	.data       start:0x804905F8 end:0x80490670
+	.sdata      start:0x8059FA58 end:0x8059FA78
+
+GameSpy/ghttp/ghttpMain.c:
+	.text       start:0x8037E7F4 end:0x8037F078
+	.data       start:0x80490670 end:0x80490690
+
+GameSpy/ghttp/ghttpPost.c:
+	.text       start:0x8037F078 end:0x803809F4
+	.data       start:0x80490690 end:0x804908D0
+	.sdata      start:0x8059FA78 end:0x8059FA98
 	.sdata2     start:0x805A49A0 end:0x805A49A8
 
+GameSpy/ghttp/ghttpProcess.c:
+	.text       start:0x803809F4 end:0x803822D8
+	.rodata     start:0x80415D70 end:0x80415D80
+	.data       start:0x804908D0 end:0x804909A0
+	.sdata      start:0x8059FA98 end:0x8059FAF0
+
+GameSpy/gstats/gbucket.c:
+	.text       start:0x803822D8 end:0x80383470
+	.sbss       start:0x805A1098 end:0x805A10B0
+	.sdata2     start:0x805A49A8 end:0x805A49B0
+
 GameSpy/gstats/gstats.c:
-	.text       start:0x803822D8 end:0x80385558
+	.text       start:0x80383470 end:0x80385558
 	.data       start:0x804909A0 end:0x80490BF8
 	.bss        start:0x80535DE0 end:0x80535FE0
 	.sdata      start:0x8059FAF0 end:0x8059FB58
-	.sbss       start:0x805A1098 end:0x805A10D0
-	.sdata2     start:0x805A49A8 end:0x805A49B0
+	.sbss       start:0x805A10B0 end:0x805A10D0
+
+GameSpy/natneg/NATify.c:
+	.text       start:0x80385558 end:0x80385CC4
+	.bss        start:0x80535FE0 end:0x80536220
+	.sdata      start:0x8059FB58 end:0x8059FB70
+	.sbss       start:0x805A10D0 end:0x805A10F0
 
 GameSpy/natneg/natneg.c:
-	.text       start:0x80385558 end:0x80387608
+	.text       start:0x80385CC4 end:0x80387608
 	.data       start:0x80490BF8 end:0x80490D18
-	.bss        start:0x80535FE0 end:0x80536500
-	.sdata      start:0x8059FB58 end:0x8059FB82
-	.sbss       start:0x805A10D0 end:0x805A1120
+	.bss        start:0x80536220 end:0x80536500
+	.sdata      start:0x8059FB70 end:0x8059FB82
+	.sbss       start:0x805A10F0 end:0x805A1120
 
-GameSpy/serverbrowsing/sb.c:
-	.text       start:0x80387608 end:0x8038D394
-	.data       start:0x80490D18 end:0x80490DA0
-	.sdata      start:0x8059FB88 end:0x8059FBD8
-	.sbss       start:0x805A1120 end:0x805A1138
-	.sdata2     start:0x805A49B0 end:0x805A49C8
+GameSpy/serverbrowsing/sb_crypt.c:
+	.text       start:0x80387608 end:0x80387A3C
+
+GameSpy/serverbrowsing/sb_queryengine.c:
+	.text       start:0x80387A3C end:0x80388508
+	.data       start:0x80490D18 end:0x80490D40
+	.sdata      start:0x8059FB88 end:0x8059FB90
+
+GameSpy/serverbrowsing/sb_server.c:
+	.text       start:0x80388508 end:0x803891B8
+	.data       start:0x80490D40 end:0x80490D50
+	.sdata      start:0x8059FB90 end:0x8059FBC0
+	.sbss       start:0x805A1120 end:0x805A1130
+	.sdata2     start:0x805A49B0 end:0x805A49B8
+
+GameSpy/serverbrowsing/sb_serverbrowsing.c:
+	.text       start:0x803891B8 end:0x803899CC
+	.data       start:0x80490D50 end:0x80490D80
+	.sdata      start:0x8059FBC0 end:0x8059FBC8
+
+GameSpy/serverbrowsing/sb_serverlist.c:
+	.text       start:0x803899CC end:0x8038D394
+	.data       start:0x80490D80 end:0x80490DA0
+	.sdata      start:0x8059FBC8 end:0x8059FBD8
+	.sbss       start:0x805A1130 end:0x805A1138
+	.sdata2     start:0x805A49B8 end:0x805A49C8
 
 GameSpy/sake/sake.c:
 	.text       start:0x8038D394 end:0x8038E3F0
@@ -4540,11 +4723,10 @@ FAT/sd_host.c:
 	.sdata      start:0x8059FE98 end:0x8059FEA0
 	.sbss       start:0x805A1230 end:0x805A1250
 
-RVL_SDK/rfl/rfl_manager_unk_a.c:
-	.text       start:0x803CD270 end:0x803CD32C
-
-RVL_SDK/rfl/rfl_manager_unk_b.c:
-	.text       start:0x803CD3B4 end:0x803CD484
+RVL_SDK/rfl/rfl_manager_unk.c:
+	extab       start:0x8000926C end:0x80009274
+	extabindex  start:0x8000C13C end:0x8000C148
+	.text       start:0x803CD270 end:0x803CD484
 	.data       start:0x80492F50 end:0x80492F60
 
 FAT/pf_clib.c:
@@ -4634,6 +4816,10 @@ sora/snd/snd_sound_handle.cpp:
 	.sbss       start:0x805A12C8 end:0x805A12D0
 	.sdata2     start:0x805A4B00 end:0x805A4B68
 
+Runtime.PPCEABI.H/__mem.c:
+	.init       start:0x80004338 end:0x8000446C
+	.text       start:0x803F0640 end:0x803F065C
+
 Runtime.PPCEABI.H/__va_arg.c:
 	.text       start:0x803F065C end:0x803F0724
 
@@ -4643,15 +4829,23 @@ Runtime.PPCEABI.H/global_destructor_chain.c:
 	.sbss       start:0x805A12D0 end:0x805A12D8
 
 Runtime.PPCEABI.H/NMWException.cpp:
-	.text       start:0x803F07D0 end:0x803F0A1C
+	extab       start:0x800094CC end:0x80009514
+	extabindex  start:0x8000C4CC end:0x8000C508
+	.text       start:0x803F07D0 end:0x803F0DCC
+	.rodata     start:0x8041F3D8 end:0x8041F3E8
 	.sdata      start:0x8059FF20 end:0x8059FF30
 
 Runtime.PPCEABI.H/ptmf.c:
 	.text       start:0x803F0DCC end:0x803F0E84
+	.rodata     start:0x8041F3E8 end:0x8041F3F8
 
 Runtime.PPCEABI.H/RTTI.c:
-	.text       start:0x803F11E0 end:0x803F11F8
-	.data       start:0x80493D74 end:0x80493D8C
+	extab       start:0x80009514 end:0x80009534
+	extabindex  start:0x8000C508 end:0x8000C538
+	.text       start:0x803F0E84 end:0x803F11F8
+	.rodata     start:0x8041F3F8 end:0x8041F460
+	.data       start:0x80493D38 end:0x80493D90
+	.sdata      start:0x8059FF30 end:0x8059FF48
 
 Runtime.PPCEABI.H/runtime.c:
 	.text       start:0x803F11F8 end:0x803F1A08
@@ -4664,75 +4858,151 @@ Runtime.PPCEABI.H/__init_cpp_exceptions.cpp:
 	.dtors      start:0x804067E4 end:0x804067E8 rename:.dtors$15
 	.sdata      start:0x8059FF48 end:0x8059FF50
 
-Runtime.PPCEABI.H/Gecko_ExceptionPPC.c:
-	.text       start:0x803F1A78 end:0x803F1B64
+Runtime.PPCEABI.H/Gecko_ExceptionPPC.cpp:
+	extab       start:0x80009534 end:0x80009574
+	extabindex  start:0x8000C538 end:0x8000C574
+	.text       start:0x803F1A78 end:0x803F2F90
+	.data       start:0x80493D90 end:0x80493E60
 	.bss        start:0x80599BE0 end:0x80599BEC
-
-Runtime.PPCEABI.H/Gecko_ExceptionPPC_part2.c:
-	.text       start:0x803F2948 end:0x803F2A4C
-
-Runtime.PPCEABI.H/Gecko_ExceptionPPC_part3.c:
-	.text       start:0x803F2E4C end:0x803F2F90
 
 Runtime.PPCEABI.H/GCN_mem_alloc.c:
 	.text       start:0x803F2F90 end:0x803F3048
 	.rodata     start:0x8041F478 end:0x8041F4E8
 
 MSL_C/alloc.c:
-	.text       start:0x803F3198 end:0x803F3240
+	extab       start:0x80009574 end:0x8000958C
+	extabindex  start:0x8000C574 end:0x8000C598
+	.text       start:0x803F3048 end:0x803F355C
+	.rodata     start:0x8041F4E8 end:0x8041F500
+	.bss        start:0x80599BF0 end:0x80599C28
+	.sbss       start:0x805A12D8 end:0x805A12E0
+
+MSL_C/errno.c:
+	.sbss       start:0x805A12E0 end:0x805A12E8
+
+MSL_C/ansi_files.c:
+	extab       start:0x8000958C end:0x800095A4
+	extabindex  start:0x8000C598 end:0x8000C5BC
+	.text       start:0x803F355C end:0x803F36F0
+	.data       start:0x80493E60 end:0x80493FA0
+	.bss        start:0x80599C28 end:0x80599F28
 
 MSL_C/ansi_fp.c:
-	.text       start:0x803F3A54 end:0x803F3B40
+	extab       start:0x800095A4 end:0x800095DC
+	extabindex  start:0x8000C5BC end:0x8000C610
+	.text       start:0x803F36F0 end:0x803F5060
+	.rodata     start:0x8041F500 end:0x8041F5E0
+	.data       start:0x80493FA0 end:0x80494108
+	.sdata2     start:0x805A4B68 end:0x805A4BA0
 
-MSL_C/ansi_fp_part2.c:
-	.text       start:0x803F3EAC end:0x803F4090
+MSL_C/ctype.c:
+	.rodata     start:0x8041F5E0 end:0x8041F9E0
+
+MSL_C/locale.c:
+	.rodata     start:0x8041F9E0 end:0x8041FAE8
+	.data       start:0x80494108 end:0x80494300
+	.sdata2     start:0x805A4BA0 end:0x805A4BB8
 
 MSL_C/arith.c:
 	.text       start:0x803F5060 end:0x803F5070
 
 MSL_C/buffer_io.c:
-	.text       start:0x803F5070 end:0x803F5098
+	extab       start:0x800095DC end:0x800095EC
+	extabindex  start:0x8000C610 end:0x8000C628
+	.text       start:0x803F5070 end:0x803F524C
+
+MSL_C/direct_io.c:
+	extab       start:0x800095EC end:0x800095FC
+	extabindex  start:0x8000C628 end:0x8000C640
+	.text       start:0x803F524C end:0x803F5898
 
 MSL_C/file_io.c:
-	.text       start:0x803F5A88 end:0x803F5B48
+	extab       start:0x800095FC end:0x80009614
+	extabindex  start:0x8000C640 end:0x8000C664
+	.text       start:0x803F5898 end:0x803F5C38
 
 MSL_C/FILE_POS.c:
-	.text       start:0x803F5C38 end:0x803F5CE4
-
-MSL_C/FILE_POS_part2.c:
-	.text       start:0x803F5EA8 end:0x803F5EAC
+	extab       start:0x80009614 end:0x80009624
+	extabindex  start:0x8000C664 end:0x8000C67C
+	.text       start:0x803F5C38 end:0x803F5EF4
 
 MSL_C/mbstring.c:
-	.text       start:0x803F5EF4 end:0x803F5F74
+	extab       start:0x80009624 end:0x8000962C
+	extabindex  start:0x8000C67C end:0x8000C688
+	.text       start:0x803F5EF4 end:0x803F602C
 
 MSL_C/mem.c:
-	.text       start:0x803F60F8 end:0x803F619C
+	extab       start:0x8000962C end:0x80009634
+	extabindex  start:0x8000C688 end:0x8000C694
+	.text       start:0x803F602C end:0x803F619C
 
 MSL_C/mem_funcs.c:
 	.text       start:0x803F619C end:0x803F646C
+
+MSL_C/math_api.c:
+	extab       start:0x80009634 end:0x8000964C
+	extabindex  start:0x8000C694 end:0x8000C6B8
+	.text       start:0x803F646C end:0x803F6568
 
 MSL_C/misc_io.c:
 	.text       start:0x803F6568 end:0x803F6578
 
 MSL_C/printf.c:
-	.text       start:0x803F6B74 end:0x803F6D9C
-	.data       start:0x80494424 end:0x804944A8
+	extab       start:0x8000964C end:0x800096BC
+	extabindex  start:0x8000C6B8 end:0x8000C760
+	.text       start:0x803F6578 end:0x803F8ACC
+	.rodata     start:0x8041FAE8 end:0x8041FB18
+	.data       start:0x80494300 end:0x80494550
+	.sdata      start:0x8059FF50 end:0x8059FF58
+	.sdata2     start:0x805A4BB8 end:0x805A4BC0
 
-MSL_C/printf_part2.c:
-	.text       start:0x803F7404 end:0x803F752C
+MSL_C/qsort.c:
+	extab       start:0x800096BC end:0x800096C4
+	extabindex  start:0x8000C760 end:0x8000C76C
+	.text       start:0x803F8ACC end:0x803F8C3C
 
 MSL_C/rand.c:
 	.text       start:0x803F8C3C end:0x803F8C64
-	.sdata      start:0x8059FF50 end:0x8059FF60
+	.sdata      start:0x8059FF58 end:0x8059FF60
 
 MSL_C/scanf.c:
-	.text       start:0x803FA078 end:0x803FA108
+	extab       start:0x800096C4 end:0x800096DC
+	extabindex  start:0x8000C76C end:0x8000C790
+	.text       start:0x803F8C64 end:0x803FA1D0
+	.rodata     start:0x8041FB18 end:0x8041FB40
+	.data       start:0x80494550 end:0x80494670
+
+MSL_C/signal.c:
+	extab       start:0x800096DC end:0x800096E4
+	extabindex  start:0x8000C790 end:0x8000C79C
+	.text       start:0x803FA1D0 end:0x803FA280
+	.bss        start:0x80599F28 end:0x80599F48
 
 MSL_C/string.c:
-	.text       start:0x803FA280 end:0x803FA5D0
+	extab       start:0x800096E4 end:0x800096F4
+	extabindex  start:0x8000C79C end:0x8000C7B4
+	.text       start:0x803FA280 end:0x803FA804
+	.sdata      start:0x8059FF60 end:0x8059FF68
+	.sdata2     start:0x805A4BC0 end:0x805A4BC8
 
-MSL_C/string_part2.c:
-	.text       start:0x803FA798 end:0x803FA804
+MSL_C/float.c:
+	.sdata      start:0x8059FF68 end:0x8059FF78
+
+MSL_C/strtold.c:
+	extab       start:0x800096F4 end:0x80009704
+	extabindex  start:0x8000C7B4 end:0x8000C7CC
+	.text       start:0x803FA804 end:0x803FBC7C
+	.rodata     start:0x8041FB40 end:0x8041FB50
+	.sdata2     start:0x805A4BC8 end:0x805A4C00
+
+MSL_C/wctype.c:
+	.rodata     start:0x8041FB50 end:0x80420150
+
+MSL_C/strtoul.c:
+	extab       start:0x80009704 end:0x8000972C
+	extabindex  start:0x8000C7CC end:0x8000C808
+	.text       start:0x803FBC7C end:0x803FC7C8
+	.data       start:0x80494670 end:0x804946F8
 
 MSL_C/wstring.c:
 	.text       start:0x803FC7C8 end:0x803FC828
@@ -4740,14 +5010,25 @@ MSL_C/wstring.c:
 MSL_C/wchar_io.c:
 	.text       start:0x803FC828 end:0x803FC8AC
 
-MSL_C/uart_console_io.c:
-	.text       start:0x803FC97C end:0x803FC984
+MSL_C/uart_console_io_gcn.c:
+	extab       start:0x8000972C end:0x80009734
+	extabindex  start:0x8000C808 end:0x8000C814
+	.text       start:0x803FC8AC end:0x803FC984
+	.sbss       start:0x805A12E8 end:0x805A12F0
 
-MSL_C/abort_exit.c:
-	.text       start:0x803FC9B8 end:0x803FC9BC
+MSL_C/abort_exit_ppc_eabi.c:
+	extab       start:0x80009734 end:0x8000973C
+	extabindex  start:0x8000C814 end:0x8000C820
+	.text       start:0x803FC984 end:0x803FC9BC
+	.sbss       start:0x805A12F0 end:0x805A12F8
+
+MSL_C/math_sun.c:
+	extab       start:0x8000973C end:0x80009744
+	extabindex  start:0x8000C820 end:0x8000C82C
+	.text       start:0x803FC9BC end:0x803FC9FC
 
 MSL_C/extras.c:
-	.text       start:0x803FC9FC end:0x803FCB50
+	.text       start:0x803FC9FC end:0x803FCB54
 
 MSL_C/MSL_Common_Embedded/Math/Double_precision/e_acos.c:
 	.text       start:0x803FCB54 end:0x803FCE18
@@ -4879,6 +5160,8 @@ MetroTRK/debugger/embedded/MetroTRK/Portable/nubevent.c:
 
 MetroTRK/debugger/embedded/MetroTRK/Portable/nubinit.c:
 	.text       start:0x804010B8 end:0x8040123C
+	.rodata     start:0x80420468 end:0x80420488
+	.bss        start:0x80599F70 end:0x80599F78
 
 MetroTRK/debugger/embedded/MetroTRK/Portable/msg.c:
 	.text       start:0x8040123C end:0x80401268
@@ -4886,23 +5169,24 @@ MetroTRK/debugger/embedded/MetroTRK/Portable/msg.c:
 MetroTRK/debugger/embedded/MetroTRK/Portable/msgbuf.c:
 	.text       start:0x80401268 end:0x80401AA4
 	.rodata     start:0x80420488 end:0x804204A8
-	.bss        start:0x80599F70 end:0x8059B928
+	.bss        start:0x80599F78 end:0x8059B928
 
 MetroTRK/debugger/embedded/MetroTRK/Portable/serpoll.c:
 	.text       start:0x80401AA4 end:0x80401C50
 	.bss        start:0x8059B928 end:0x8059B940
+	.sbss       start:0x805A1308 end:0x805A1310
 
 MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/usr_put.c:
 	.text       start:0x80401C50 end:0x80401CDC
 
 MetroTRK/debugger/embedded/MetroTRK/Portable/dispatch.c:
 	.text       start:0x80401CDC end:0x80401E24
-	.data       start:0x804946F8 end:0x80494764
+	.data       start:0x804946F8 end:0x80494768
 
 MetroTRK/debugger/embedded/MetroTRK/Portable/msghndlr.c:
 	.text       start:0x80401E24 end:0x80402F00
 	.rodata     start:0x804204A8 end:0x804204E0
-	.data       start:0x80494764 end:0x804947AC
+	.data       start:0x80494768 end:0x804947A0
 	.bss        start:0x8059B940 end:0x8059B948
 
 MetroTRK/debugger/embedded/MetroTRK/Portable/support.c:
@@ -4918,28 +5202,40 @@ MetroTRK/debugger/embedded/MetroTRK/Processor/ppc/Generic/flush_cache.c:
 	.text       start:0x80403664 end:0x8040369C
 
 MetroTRK/debugger/embedded/MetroTRK/Portable/mem_TRK.c:
+	.init       start:0x8000446C end:0x800044C0
 	.text       start:0x8040369C end:0x80403754
 
 MetroTRK/debugger/embedded/MetroTRK/Portable/string_TRK.c:
 	.text       start:0x80403754 end:0x80403770
 
 MetroTRK/debugger/embedded/MetroTRK/Processor/ppc/Generic/targimpl.c:
-	.text       start:0x80403770 end:0x804051B0
-	.rodata     start:0x804204E0 end:0x8042056C
-	.data       start:0x804947AC end:0x804947D0
+	.text       start:0x80403770 end:0x80405190
+	.rodata     start:0x804204E0 end:0x80420568
+	.data       start:0x804947A0 end:0x804947D0
 	.bss        start:0x8059B948 end:0x8059BEC8
+
+MetroTRK/debugger/embedded/MetroTRK/Processor/ppc/Export/targsupp.s:
+	.text       start:0x80405190 end:0x804051B0 align:16
 
 MetroTRK/debugger/embedded/MetroTRK/Processor/ppc/Generic/mpc_7xx_603e.c:
 	.text       start:0x804051B0 end:0x80405520
 
+MetroTRK/debugger/embedded/MetroTRK/Export/mslsupp.c:
+	.text       start:0x80405520 end:0x80405698
+
 MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/dolphin_trk.c:
-	.text       start:0x80405698 end:0x80405B0C
-	.rodata     start:0x8042056C end:0x80420670
+	.init       start:0x800063F4 end:0x80006420
+	.text       start:0x80405698 end:0x804059B4
 	.data       start:0x804947D0 end:0x80494810
-	.bss        start:0x8059BEC8 end:0x8059BED8
+	.bss        start:0x8059BEC8 end:0x8059BED0
+
+MetroTRK/debugger/embedded/MetroTRK/Portable/main_TRK.c:
+	.text       start:0x804059B4 end:0x804059F8
+	.bss        start:0x8059BED0 end:0x8059BED8
 
 MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/dolphin_trk_glue.c:
-	.text       start:0x80405B0C end:0x80405EB8
+	.text       start:0x804059F8 end:0x80405EB8
+	.rodata     start:0x80420568 end:0x80420670
 	.data       start:0x80494810 end:0x80494838
 	.bss        start:0x8059BED8 end:0x8059BEE0
 
@@ -4948,15 +5244,15 @@ MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/targcont.c:
 
 MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/target_options.c:
 	.text       start:0x80405EEC end:0x80405F08
-	.bss        start:0x8059BEE0 end:0x8059BEE4
+	.bss        start:0x8059BEE0 end:0x8059BEE8
 
 MetroTRK/debugger/embedded/MetroTRK/Os/dolphin/UDP_Stubs.c:
 	.text       start:0x80405F08 end:0x80405F50
 
 MetroTRK/gamedev/cust_connection/cc/exi2/GCN/EXI2_GDEV_GCN/main.c:
 	.text       start:0x80405F50 end:0x80406210
-	.bss        start:0x8059BEE4 end:0x8059C404
-	.sbss       start:0x805A1308 end:0x805A1314
+	.bss        start:0x8059BEE8 end:0x8059C404
+	.sbss       start:0x805A1310 end:0x805A1314
 
 MetroTRK/gamedev/cust_connection/utils/common/CircleBuffer.c:
 	.text       start:0x80406210 end:0x80406478

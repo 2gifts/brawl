@@ -33,57 +33,51 @@ struct hkEntityCallbackUtil {
 
 void hkEntityCallbackUtil::fireContactPointConfirmedInternal(hkEntity* entity, hkCollisionEventConfirmed* ev) {
     ev->m_entity = entity;
-    int n = entity->m_collisionListeners.m_size;
+    int n = entity->m_collisionListeners.getSize();
     for (int i = n - 1; i >= 0; i--) {
-        hkCollisionListener* listener = ((hkCollisionListener**)entity->m_collisionListeners.m_data)[i];
+        hkCollisionListener* listener = entity->m_collisionListeners[i];
         if (listener) {
             listener->contactPointConfirmed(ev);
         }
     }
-    for (int i = entity->m_collisionListeners.m_size - 1; i >= 0; i--) {
-        if (((void**)entity->m_collisionListeners.m_data)[i] == 0) {
-            entity->m_collisionListeners.m_size--;
-            for (int j = i; j < entity->m_collisionListeners.m_size; j++) {
-                ((void**)entity->m_collisionListeners.m_data)[j] = ((void**)entity->m_collisionListeners.m_data)[j + 1];
-            }
+    // Listeners removed during the callbacks left null slots: drop them now, keeping the order.
+    for (int i = entity->m_collisionListeners.getSize() - 1; i >= 0; i--) {
+        if (entity->m_collisionListeners[i] == NULL) {
+            entity->m_collisionListeners.removeAtAndCopy(i);
         }
     }
 }
 
 void hkEntityCallbackUtil::fireContactPointRemovedInternal(hkEntity* entity, hkCollisionEventRemoved* ev) {
     ev->m_entity = entity;
-    int n = entity->m_collisionListeners.m_size;
+    int n = entity->m_collisionListeners.getSize();
     for (int i = n - 1; i >= 0; i--) {
-        hkCollisionListener* listener = ((hkCollisionListener**)entity->m_collisionListeners.m_data)[i];
+        hkCollisionListener* listener = entity->m_collisionListeners[i];
         if (listener) {
             listener->contactPointRemoved(ev);
         }
     }
-    for (int i = entity->m_collisionListeners.m_size - 1; i >= 0; i--) {
-        if (((void**)entity->m_collisionListeners.m_data)[i] == 0) {
-            entity->m_collisionListeners.m_size--;
-            for (int j = i; j < entity->m_collisionListeners.m_size; j++) {
-                ((void**)entity->m_collisionListeners.m_data)[j] = ((void**)entity->m_collisionListeners.m_data)[j + 1];
-            }
+    // Listeners removed during the callbacks left null slots: drop them now, keeping the order.
+    for (int i = entity->m_collisionListeners.getSize() - 1; i >= 0; i--) {
+        if (entity->m_collisionListeners[i] == NULL) {
+            entity->m_collisionListeners.removeAtAndCopy(i);
         }
     }
 }
 
 void hkEntityCallbackUtil::fireContactProcessInternal(hkEntity* entity, hkCollisionEventConfirmed* ev) {
     ev->m_entity = entity;
-    int n = entity->m_collisionListeners.m_size;
+    int n = entity->m_collisionListeners.getSize();
     for (int i = n - 1; i >= 0; i--) {
-        hkCollisionListener* listener = ((hkCollisionListener**)entity->m_collisionListeners.m_data)[i];
+        hkCollisionListener* listener = entity->m_collisionListeners[i];
         if (listener) {
             listener->contactProcess(ev);
         }
     }
-    for (int i = entity->m_collisionListeners.m_size - 1; i >= 0; i--) {
-        if (((void**)entity->m_collisionListeners.m_data)[i] == 0) {
-            entity->m_collisionListeners.m_size--;
-            for (int j = i; j < entity->m_collisionListeners.m_size; j++) {
-                ((void**)entity->m_collisionListeners.m_data)[j] = ((void**)entity->m_collisionListeners.m_data)[j + 1];
-            }
+    // Listeners removed during the callbacks left null slots: drop them now, keeping the order.
+    for (int i = entity->m_collisionListeners.getSize() - 1; i >= 0; i--) {
+        if (entity->m_collisionListeners[i] == NULL) {
+            entity->m_collisionListeners.removeAtAndCopy(i);
         }
     }
 }

@@ -846,7 +846,8 @@ void stJungle::updateAI(float deltaFrame) {
         min.m_y = m_limit[1].m_y - 0.25f * (m_limit[1].m_y - m_limit[0].m_y);
     }
     min.m_x = m_limit[0].m_x;
-    // MATCH-ONLY: the original reads max.m_y before it is set below, which keeps the 10.0f load in the schedule.
+    // BUG: the original subtracts 10 from max.m_y before max is set (it reads an uninitialized value); the store is dead,
+    // overwritten below. Without it the 10.0f load and the schedule differ.
     max.m_y = max.m_y - 10.0f;
     max.m_x = m_limit[1].m_x;
     max.m_y = m_limit[1].m_y;

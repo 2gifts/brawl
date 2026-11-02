@@ -62,14 +62,14 @@ extern qr2_implementation_s lbl_8048FBE0;
 // "%d"
 extern char lbl_8059F9AC[3];
 
-void fn_80378E24(qr2_t qrec, qr2_callback_t nncallback);  // qr2_register_natneg_callback
-void fn_80378E38(qr2_t qrec, qr2_callback_t cmcallback);  // qr2_register_clientmessage_callback
-void fn_80378E4C(qr2_t qrec, qr2_callback_t pacallback);  // qr2_register_publicaddress_callback
-void fn_803791BC(qr2_t qrec);                             // qr2_shutdown
-int fn_8037925C(qr2_keybuffer_t keybuffer, int keyid);    // qr2_keybuffer_add
-int fn_8037929C(qr2_buffer_t outbuf, int value);          // qr2_buffer_add_int
-int fn_8037933C(qr2_buffer_t outbuf, const char* value);  // qr2_buffer_add
-void fn_8037AC14(qr2_t qrec, int statechanged);           // send_heartbeat
+void qr2_register_natneg_callback(qr2_t qrec, qr2_callback_t nncallback);  // qr2_register_natneg_callback
+void qr2_register_clientmessage_callback(qr2_t qrec, qr2_callback_t cmcallback);  // qr2_register_clientmessage_callback
+void qr2_register_publicaddress_callback(qr2_t qrec, qr2_callback_t pacallback);  // qr2_register_publicaddress_callback
+void qr2_shutdown(qr2_t qrec);                             // qr2_shutdown
+int qr2_keybuffer_add(qr2_keybuffer_t keybuffer, int keyid);    // qr2_keybuffer_add
+int qr2_buffer_add_int(qr2_buffer_t outbuf, int value);          // qr2_buffer_add_int
+int qr2_buffer_addA(qr2_buffer_t outbuf, const char* value);  // qr2_buffer_add
+void send_heartbeat(qr2_t qrec, int statechanged);           // send_heartbeat
 
 #ifdef __cplusplus
 }

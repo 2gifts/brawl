@@ -85,35 +85,35 @@ extern int lbl_805A1048;
 
 char* fn_8035D654(const char* s);  // goastrdup
 
-int fn_80387A3C(SBServerFIFO* fifo, SBServer server);                              // FIFORemove
-void fn_80387AB0(SBQueryEngine* engine, SBServer server);                          // QEStartQuery
-void fn_80387D30(SBQueryEngine* engine, int maxupdates, int queryversion, int lanBrowse, SBEngineCallbackFn callback, void* instance);  // SBQueryEngineInit
-void fn_80387DD8(SBQueryEngine* engine);                                           // SBQueryEngineClearQueue? (FIFO reset)
-void fn_80387DF8(SBQueryEngine* engine);                                           // SBEngineCleanup
-void fn_80387E4C(SBQueryEngine* engine, SBServer server, int addfront, int querytype, int usequerychallenge);  // SBQueryEngineUpdateServer
+int FIFORemove(SBServerFIFO* fifo, SBServer server);                              // FIFORemove
+void QEStartQuery(SBQueryEngine* engine, SBServer server);                          // QEStartQuery
+void SBQueryEngineInit(SBQueryEngine* engine, int maxupdates, int queryversion, int lanBrowse, SBEngineCallbackFn callback, void* instance);  // SBQueryEngineInit
+void SBEngineHaltUpdates(SBQueryEngine* engine);                                           // SBQueryEngineClearQueue? (FIFO reset)
+void SBEngineCleanup(SBQueryEngine* engine);                                           // SBEngineCleanup
+void SBQueryEngineUpdateServer(SBQueryEngine* engine, SBServer server, int addfront, int querytype, int usequerychallenge);  // SBQueryEngineUpdateServer
 void fn_80388120(SBQueryEngine* engine, int processAll);                           // ProcessIncomingReplies
-void fn_8038831C(SBQueryEngine* engine);                                           // SBQueryEngineThink
-void fn_80388498(SBQueryEngine* engine, u8 keyid);                                 // SBQueryEngineAddQueryKey
-void fn_803884B8(SBQueryEngine* engine, SBServer server);                          // SBQueryEngineRemoveServerFromFIFOs
-int fn_80388508(const void* elem, int numBuckets);                                 // RefStringHash
-int fn_8038857C(const void* elem1, const void* elem2);                             // RefStringCompare
-void fn_80388588(void* elem);                                                      // RefStringFree
-HashTable fn_80388590(SBServerList* slist);                                        // SBRefStrHash
-void fn_803885E8(SBServerList* slist);                                             // SBRefStrHashCleanup
-void fn_8038862C(void* elem);                                                      // SBServerFree
-char* fn_8038892C(SBServer server);                                                // SBServerGetPublicAddress
-u16 fn_80388960(SBServer server);                                                  // SBServerGetPublicQueryPort
-int fn_80388970(SBServer server);                                                  // SBServerHasPrivateAddress
-char* fn_8038897C(SBServer server);                                                // SBServerGetPrivateAddress
-u16 fn_803889B0(SBServer server);                                                  // SBServerGetPrivateQueryPort
-const char* fn_8038A1B0(SBServerList* slist, const char* str);                     // SBRefStr
-void fn_8038A238(SBServerList* slist, const char* str);                            // SBReleaseStr
-void fn_80388FD4(void* elem);                                                      // KeyValFree
-int fn_80389088(const void* elem1, const void* elem2);                             // KeyValCompare
-void fn_80389180(SBServer server, u32 ip, u16 port);                               // SBServerSetPrivateAddr
-int fn_803891A4(SBServer server);                                                  // SBIsNullServer
-int fn_8038CFA4(void* sb, u32 ip, u16 port, const void* data, int len);           // SBSendMessageToServer
-void fn_8038D0A8(void* sb, u32 ip, u16 port, int cookie);                          // SBSendNatNegotiateCookieToServer
+void SBQueryEngineThink(SBQueryEngine* engine);                                           // SBQueryEngineThink
+void SBQueryEngineAddQueryKey(SBQueryEngine* engine, u8 keyid);                                 // SBQueryEngineAddQueryKey
+void SBQueryEngineRemoveServerFromFIFOs(SBQueryEngine* engine, SBServer server);                          // SBQueryEngineRemoveServerFromFIFOs
+int RefStringHash(const void* elem, int numBuckets);                                 // RefStringHash
+int RefStringCompare(const void* elem1, const void* elem2);                             // RefStringCompare
+void RefStringFree(void* elem);                                                      // RefStringFree
+HashTable SBRefStrHash(SBServerList* slist);                                        // SBRefStrHash
+void SBRefStrHashCleanup(SBServerList* slist);                                             // SBRefStrHashCleanup
+void SBServerFree(void* elem);                                                      // SBServerFree
+char* SBServerGetPublicAddress(SBServer server);                                                // SBServerGetPublicAddress
+u16 SBServerGetPublicQueryPort(SBServer server);                                                  // SBServerGetPublicQueryPort
+int SBServerHasPrivateAddress(SBServer server);                                                  // SBServerHasPrivateAddress
+char* SBServerGetPrivateAddress(SBServer server);                                                // SBServerGetPrivateAddress
+u16 SBServerGetPrivateQueryPort(SBServer server);                                                  // SBServerGetPrivateQueryPort
+const char* SBRefStr(SBServerList* slist, const char* str);                     // SBRefStr
+void SBReleaseStr(SBServerList* slist, const char* str);                            // SBReleaseStr
+void KeyValFree(void* elem);                                                      // KeyValFree
+int KeyValCompareKey(const void* elem1, const void* elem2);                             // KeyValCompare
+void SBServerSetPrivateAddr(SBServer server, u32 ip, u16 port);                               // SBServerSetPrivateAddr
+int SBIsNullServer(SBServer server);                                                  // SBIsNullServer
+int SBSendMessageToServer(void* sb, u32 ip, u16 port, const void* data, int len);           // SBSendMessageToServer
+void SBSendNatNegotiateCookieToServer(void* sb, u32 ip, u16 port, int cookie);                          // SBSendNatNegotiateCookieToServer
 
 #ifdef __cplusplus
 }

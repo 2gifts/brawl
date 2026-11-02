@@ -77,27 +77,27 @@ typedef struct GSIThreadID {
 
 int socket(int domain, int type, int protocol);
 int closesocket(int s);
-int fn_8035C2D8(int s, int how);                 // shutdown
-void fn_8035D720(void);                          // SocketStartUp
-void fn_8035D724(void);                          // SocketShutDown
+int shutdown(int s, int how);                 // shutdown
+void SocketStartUp(void);                          // SocketStartUp
+void SocketShutDown(void);                          // SocketShutDown
 int listen(int s, int backlog);
 int recv(int s, char* buf, int len, int flags);
 int send(int s, const char* buf, int len, int flags);
 int sendto(int s, const char* buf, int len, int flags, const void* to, int tolen);
-int fn_8035C658(int s);                          // GOAGetLastError
+int GOAGetLastError(int s);                          // GOAGetLastError
 int fn_8035C660(int s, int* readFlag, int* writeFlag, int* exceptFlag);  // GSISocketSelect
 int CanReceiveOnSocket(int sock);
 int CanSendOnSocket(int sock);
 u32 fn_8035D1B8(u32* value);                     // gsiInterlockedIncrement
 void fn_8035D258(s64* t);                        // time
 int fn_8035D560(GSIThreadID* thread);            // gsiCleanupThread
-u32 fn_8035D728(void);                           // current_time
+u32 current_time(void);                           // current_time
 void fn_8035D774(u32 msec);                      // msleep
 void fn_8035DA18(int seed);                      // Util_RandSeed
-void fn_8035DFCC(gsMallocCB p_malloc, gsFreeCB p_free, gsReallocCB p_realloc, gsMemalignCB p_memalign);  // gsiMemoryCallbacksSet
-void* fn_8035DFE8(u32 size);                     // gsimalloc
-void* fn_8035DFF8(void* ptr, u32 size);          // gsirealloc
-void fn_8035E00C(void* ptr);                     // gsifree
+void gsiMemoryCallbacksSet(gsMallocCB p_malloc, gsFreeCB p_free, gsReallocCB p_realloc, gsMemalignCB p_memalign);  // gsiMemoryCallbacksSet
+void* gsimalloc(u32 size);                     // gsimalloc
+void* gsirealloc(void* ptr, u32 size);          // gsirealloc
+void gsifree(void* ptr);                     // gsifree
 
 #ifdef __cplusplus
 }

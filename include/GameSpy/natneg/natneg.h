@@ -95,14 +95,14 @@ extern DArray lbl_805A10F0;
 gs_hostent* fn_8035CF8C(void);        // getlocalhost
 int fn_8035D140(u32* addr);           // IsPrivateIP
 
-u32 fn_8038563C(void);                                       // GetLocalIP (natneg.c)
-void fn_80385CC4(void);                                      // NNFreeNegotiateList
-u32 fn_80385CF8(void);                                       // GetLocalIP (natify.c)
-int fn_80385A00(int sock, NAT* nat);                         // NatifyThink
-int fn_80385A04(NAT* nat);                                   // DetermineNatType
-int fn_80386238(int sock);                                   // NNThink detection step
-void fn_80386658(int cookie);                                // NNCancel
-void fn_8038724C(NATNegotiator neg, NatNegPacket* p, gs_sockaddr_in* fromaddr);  // ProcessPacket
+u32 GetLocalIP(void);                                       // GetLocalIP (natneg.c)
+void NNFreeNegotiateList(void);                                      // NNFreeNegotiateList
+u32 GetLocalIP(void);                                       // GetLocalIP (natify.c)
+int NatifyThink(int sock, NAT* nat);                         // NatifyThink
+int DetermineNatType(NAT* nat);                                   // DetermineNatType
+int CheckNatifyStatus(int sock);                                   // NNThink detection step
+void NNCancel(int cookie);                                // NNCancel
+void ProcessInitPacket(NATNegotiator neg, NatNegPacket* p, gs_sockaddr_in* fromaddr);  // ProcessPacket
 
 #ifdef __cplusplus
 }

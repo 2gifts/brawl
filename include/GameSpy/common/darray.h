@@ -47,30 +47,30 @@ typedef HashImplementation* HashTable;
 __static_assert(sizeof(DArrayImplementation) == 0x18, "DArrayImplementation");
 __static_assert(sizeof(HashImplementation) == 0x14, "HashImplementation");
 
-DArray fn_8035A460(int elemSize, int numElemsToAllocate, ArrayElementFreeFn elemFreeFn);  // ArrayNew
-void fn_8035A4FC(DArray array);                                                          // ArrayFree
-int fn_8035A590(DArray array);                                                           // ArrayLength
-void* fn_8035A598(DArray array, int n);                                                  // ArrayNth
-void fn_8035A5C8(DArray array, const void* newElem);                                     // ArrayAppend
-void fn_8035A6EC(DArray array, const void* newElem, ArrayCompareFn comparator);          // ArrayInsertSorted
-void fn_8035A86C(DArray array, int n);                                                   // ArrayRemoveAt
-void fn_8035A918(DArray array, int n);                                                   // ArrayDeleteAt
-void fn_8035AA08(DArray array, const void* newElem, int n);                              // ArrayReplaceAt
-void fn_8035AAC0(DArray array, ArrayCompareFn comparator);                               // ArraySort
-int fn_8035AAD8(DArray array, const void* key, ArrayCompareFn comparator, int fromIndex, int isSorted); // ArraySearch
-void fn_8035AC70(DArray array, ArrayMapFn fn, void* clientData);                         // ArrayMapBackwards
-void* fn_8035AD0C(DArray array, ArrayMapFn2 fn, void* clientData);                       // ArrayMapBackwards2
-void fn_8035ADB0(DArray array);                                                          // ArrayClear
+DArray ArrayNew(int elemSize, int numElemsToAllocate, ArrayElementFreeFn elemFreeFn);  // ArrayNew
+void ArrayFree(DArray array);                                                          // ArrayFree
+int ArrayLength(DArray array);                                                           // ArrayLength
+void* ArrayNth(DArray array, int n);                                                  // ArrayNth
+void ArrayAppend(DArray array, const void* newElem);                                     // ArrayAppend
+void ArrayInsertSorted(DArray array, const void* newElem, ArrayCompareFn comparator);          // ArrayInsertSorted
+void ArrayRemoveAt(DArray array, int n);                                                   // ArrayRemoveAt
+void ArrayDeleteAt(DArray array, int n);                                                   // ArrayDeleteAt
+void ArrayReplaceAt(DArray array, const void* newElem, int n);                              // ArrayReplaceAt
+void ArraySort(DArray array, ArrayCompareFn comparator);                               // ArraySort
+int ArraySearch(DArray array, const void* key, ArrayCompareFn comparator, int fromIndex, int isSorted); // ArraySearch
+void ArrayMapBackwards(DArray array, ArrayMapFn fn, void* clientData);                         // ArrayMapBackwards
+void* ArrayMapBackwards2(DArray array, ArrayMapFn2 fn, void* clientData);                       // ArrayMapBackwards2
+void ArrayClear(DArray array);                                                          // ArrayClear
 
-HashTable fn_8035AEB4(int elemSize, int nBuckets, TableHashFn hashFn, TableCompareFn compFn, TableElementFreeFn freeFn); // TableNew
-HashTable fn_8035AED0(int elemSize, int nBuckets, int nChains, TableHashFn hashFn, TableCompareFn compFn, TableElementFreeFn freeFn); // TableNew2
-void fn_8035AF74(HashTable table);                                                       // TableFree
-int fn_8035AFF0(HashTable table);                                                        // TableCount
-void fn_8035B078(HashTable table, const void* newElem);                                  // TableEnter
-int fn_8035B120(HashTable table, const void* delElem);                                   // TableRemove
-void* fn_8035B1C4(HashTable table, const void* elemKey);                                 // TableLookup
-void fn_8035B264(HashTable table, TableMapFn fn, void* clientData);                      // TableMapSafe
-void* fn_8035B2D0(HashTable table, TableMapFn2 fn, void* clientData);                    // TableMapSafe2
+HashTable TableNew(int elemSize, int nBuckets, TableHashFn hashFn, TableCompareFn compFn, TableElementFreeFn freeFn); // TableNew
+HashTable TableNew2(int elemSize, int nBuckets, int nChains, TableHashFn hashFn, TableCompareFn compFn, TableElementFreeFn freeFn); // TableNew2
+void TableFree(HashTable table);                                                       // TableFree
+int TableCount(HashTable table);                                                        // TableCount
+void TableEnter(HashTable table, const void* newElem);                                  // TableEnter
+int TableRemove(HashTable table, const void* delElem);                                   // TableRemove
+void* TableLookup(HashTable table, const void* elemKey);                                 // TableLookup
+void TableMapSafe(HashTable table, TableMapFn fn, void* clientData);                      // TableMapSafe
+void* TableMapSafe2(HashTable table, TableMapFn2 fn, void* clientData);                    // TableMapSafe2
 
 #ifdef __cplusplus
 }

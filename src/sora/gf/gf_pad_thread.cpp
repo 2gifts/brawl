@@ -10,7 +10,7 @@ void gfPadReadThread::run() {
     m_name = "gfPadReadThread";
     OSAlarm* alarm = &g_gfPadSystem->m_alarm;
 
-    u64 period = (OS_BUS_CLOCK_SPEED / 4) / 59.941f;
+    s64 period = (OS_BUS_CLOCK_SPEED / 4) / 59.941f;
     s64 tick = ((OS_BUS_CLOCK_SPEED / 4) / 1000) + OSGetTime();
 
     OSCreateAlarm(alarm);
