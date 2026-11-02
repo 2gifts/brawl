@@ -341,7 +341,7 @@ bool emAreaModuleImpl::isTargetFighter(soModuleAccesser* acc, u32 area) {
 
 // The fighter of a target kind 0-3, NULL when it is gone or not accessible.
 Fighter* emAreaModuleImpl::getTargetFighterPtr(u32 area) {
-    // MATCH-ONLY: dead local (the original builds a position here and never uses it).
+    // BUG: dead local (the original builds a position here and never uses it; without it the function does not match).
     Vec3f unused(0.0f, 0.0f, 0.0f);
     if (area <= 3) {
         int entryId = -1;
@@ -1309,7 +1309,7 @@ bool emAreaModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* mod
         dir.m_y = 0.0f;
         READ_FLOAT_ARG(args, 3, moduleAccesser, dir.m_x)
         READ_FLOAT_ARG(args, 4, moduleAccesser, dir.m_y)
-        // MATCH-ONLY: a dead default (both branches of the read assign it); its third literal makes MWCC address the
+        // BYTES: a dead default (both branches of the read assign it); its third literal makes MWCC address the
         // literal pool of the function through a base register, as the original does.
         float rotSign = 1.0f;
         READ_FLOAT_ARG(args, 5, moduleAccesser, rotSign)

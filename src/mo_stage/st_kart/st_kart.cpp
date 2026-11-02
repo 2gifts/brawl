@@ -205,7 +205,7 @@ void stKart::createObjIcon(int team, int mdlIndex) {
 
 void stKart::update(float deltaFrame) {
     if (m_isDevil == true) {
-        // MATCH-ONLY: the original leaves the value unset when there is no camera
+        // BUG: the original leaves the value unset when there is no camera (a zero initializer does not match)
         float bottom;
         cmStageParam* param = &CameraController::getInstance()->m_stageCameraParam;
         if (param != NULL) {

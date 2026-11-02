@@ -137,7 +137,7 @@ void wnWarioBikeKineticTransactor::changeKineticSub5(
         soKineticEnergy::AttributeFlag(1));
     float brake = soValueAccesser::getConstantFloat(accesser, 4029, 0);
     float gravityAcceleration = soValueAccesser::getConstantFloat(accesser, 4009, 0);
-    // MATCH-ONLY: the native queries constant 4008 and discards its result.
+    // HYPOTHESIS: the native queries constant 4008 and discards its result (the function scores lower without the call).
     soValueAccesser::getConstantFloat(accesser, 4008, 0);
     float limit = soValueAccesser::getConstantFloat(accesser, 4006, 0);
     float gravitySpeedLimit = soValueAccesser::getConstantFloat(accesser, 4010, 0);

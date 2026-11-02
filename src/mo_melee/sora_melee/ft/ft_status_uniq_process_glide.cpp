@@ -150,7 +150,7 @@ void ftStatusUniqProcessGlide::execStatus(soModuleAccesser* moduleAccesser) {
             angle += angleSpeed;
         }
         angle = clampf(angle, param->m_angleMin, param->m_angleMax);
-        // MATCH-ONLY: unused, but the original has -90.0f in its constant pool at this spot.
+        // BUG: unused, but the original has -90.0f in its constant pool at this spot (without it the function does not match).
         float unusedMin = -90.0f;
         if (moduleAccesser->getWorkManageModule().isFlag(Glide_Flag_Stall) == false) {
             float power = moduleAccesser->getWorkManageModule().getFloat(Glide_Float_Power)

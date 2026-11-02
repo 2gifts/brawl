@@ -37,7 +37,7 @@ void wnWarioBikeStatusUniqProcessItem::initStatus(soModuleAccesser* a) {
         } else if (rotation.m_x != 0.0f) {
             rotation.m_y = 0.0f;
         } else if (rotation.m_x == 0.0f && rotation.m_z == 0.0f) {
-            // MATCH-ONLY: retain the native repeated tests and Z/Y/X stores.
+            // BUG: the last test repeats what the earlier branches already established (a plain else does not match).
             rotation.m_x = rotation.m_y = rotation.m_z = 0.0f;
         }
         bike->resetRotation(&rotation);

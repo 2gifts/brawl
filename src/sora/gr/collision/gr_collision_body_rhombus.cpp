@@ -410,7 +410,7 @@ void grCollisionTestRhombus::ajustShape() {
     Vec2f center = m_unk2bc->getCenterPos();
     Vec2f space;
     calcSpace(&center, &space);
-    // MATCH-ONLY: both branches of this comparison are identical in the original.
+    // BUG: both branches of this comparison are identical in the original (one branch alone does not match).
     if (curWidth < width) {
         if (width <= space.m_x - 0.02f) {
             rhombus->m_rightPos = rhombus->m_centerPos + m_cornerOffsetRight;

@@ -3208,7 +3208,7 @@ int grCollisionTest::lastCorrection() {
         result = 1;
     }
     if (m_sides2C9.m_down) {
-        if (m_collStatus->m_setting == grCollStatus::Setting_Air || m_collStatus->m_setting == grCollStatus::Setting_Air) { // MATCH-ONLY: the test is duplicated
+        if (m_collStatus->m_setting == grCollStatus::Setting_Air || m_collStatus->m_setting == grCollStatus::Setting_Air) { // BUG: the test is duplicated (the single test does not match).
             fn_801340A0(m_collStatus);
             m_collStatus->m_collLineWorkArray[3] = m_unk31C;
             m_unk224 = m_unk31C;

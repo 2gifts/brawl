@@ -326,7 +326,6 @@ void grCollision::updateLineStatus() {
 }
 
 void grCollision::updateLinkVirtual() {
-    Vec2f margin(1.0f, 1.0f); // MATCH-ONLY: the original keeps an unused tolerance vector here
     for (u32 i = 0; i < m_jointLen; i++) {
         grCollisionJoint* joint = &m_joints[i];
         if (joint->m_0x54_6 && joint->m_0x54_0) {

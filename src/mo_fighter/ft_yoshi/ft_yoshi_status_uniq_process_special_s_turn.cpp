@@ -43,7 +43,7 @@ void ftYoshiStatusUniqProcessSpecialSTurn::execStatus(soModuleAccesser* acc) {
     const float halfTurn = 3.1415927f;
     float oldMagnitude = ftyoshi::ABS(oldSpeed);
     float magnitude = ftyoshi::ABS(velocity.m_x);
-    // MATCH-ONLY: retain the discarded ABS call and its native half-turn literal.
+    // BUG: the original computes this product and discards it (without it the function does not match).
     ftyoshi::ABS(param->turnModelAngle) * halfTurn;
     float modelAngle = ftyoshi::ABS(param->turnModelAngle);
     if (oldSpeed > 0.0f) {
