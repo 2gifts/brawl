@@ -4633,6 +4633,10 @@ sora/snd/snd_sound_handle.cpp:
 	.sbss       start:0x805A12C8 end:0x805A12D0
 	.sdata2     start:0x805A4B00 end:0x805A4B68
 
+Runtime.PPCEABI.H/__mem.c:
+	.init       start:0x80004338 end:0x8000446C
+	.text       start:0x803F0640 end:0x803F065C
+
 Runtime.PPCEABI.H/__va_arg.c:
 	.text       start:0x803F065C end:0x803F0724
 
@@ -4642,15 +4646,23 @@ Runtime.PPCEABI.H/global_destructor_chain.c:
 	.sbss       start:0x805A12D0 end:0x805A12D8
 
 Runtime.PPCEABI.H/NMWException.cpp:
-	.text       start:0x803F07D0 end:0x803F0A1C
+	extab       start:0x800094CC end:0x80009514
+	extabindex  start:0x8000C4CC end:0x8000C508
+	.text       start:0x803F07D0 end:0x803F0DCC
+	.rodata     start:0x8041F3D8 end:0x8041F3E8
 	.sdata      start:0x8059FF20 end:0x8059FF30
 
 Runtime.PPCEABI.H/ptmf.c:
 	.text       start:0x803F0DCC end:0x803F0E84
+	.rodata     start:0x8041F3E8 end:0x8041F3F8
 
 Runtime.PPCEABI.H/RTTI.c:
-	.text       start:0x803F11E0 end:0x803F11F8
-	.data       start:0x80493D74 end:0x80493D8C
+	extab       start:0x80009514 end:0x80009534
+	extabindex  start:0x8000C508 end:0x8000C538
+	.text       start:0x803F0E84 end:0x803F11F8
+	.rodata     start:0x8041F3F8 end:0x8041F460
+	.data       start:0x80493D38 end:0x80493D90
+	.sdata      start:0x8059FF30 end:0x8059FF48
 
 Runtime.PPCEABI.H/runtime.c:
 	.text       start:0x803F11F8 end:0x803F1A08
@@ -4663,15 +4675,12 @@ Runtime.PPCEABI.H/__init_cpp_exceptions.cpp:
 	.dtors      start:0x804067E4 end:0x804067E8 rename:.dtors$15
 	.sdata      start:0x8059FF48 end:0x8059FF50
 
-Runtime.PPCEABI.H/Gecko_ExceptionPPC.c:
-	.text       start:0x803F1A78 end:0x803F1B64
+Runtime.PPCEABI.H/Gecko_ExceptionPPC.cpp:
+	extab       start:0x80009534 end:0x80009574
+	extabindex  start:0x8000C538 end:0x8000C574
+	.text       start:0x803F1A78 end:0x803F2F90
+	.data       start:0x80493D90 end:0x80493E60
 	.bss        start:0x80599BE0 end:0x80599BEC
-
-Runtime.PPCEABI.H/Gecko_ExceptionPPC_part2.c:
-	.text       start:0x803F2948 end:0x803F2A4C
-
-Runtime.PPCEABI.H/Gecko_ExceptionPPC_part3.c:
-	.text       start:0x803F2E4C end:0x803F2F90
 
 Runtime.PPCEABI.H/GCN_mem_alloc.c:
 	.text       start:0x803F2F90 end:0x803F3048
