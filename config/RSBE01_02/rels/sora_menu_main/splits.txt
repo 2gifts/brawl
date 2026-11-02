@@ -116,6 +116,11 @@ mo_menu/mu_proc_diagram.cpp:
 	.rodata     start:0x00000B40 end:0x00000E48
 	.data       start:0x00002ED0 end:0x00003098
 
+mo_menu/mu_proc_diagram_1p.cpp:
+	.text       start:0x00027388 end:0x00028428
+	.rodata     start:0x00000E48 end:0x00000E88
+	.data       start:0x00003098 end:0x000031C8
+
 mo_menu/mu_proc_diagram_2p.cpp:
 	.text       start:0x00028428 end:0x00028E8C
 	.rodata     start:0x00000E88 end:0x00000EB0
