@@ -1,6 +1,7 @@
 #include <gf/gf_application.h>
 #include <gf/gf_heap_manager.h>
 #include <gf/gf_pad_system.h>
+#include <gm/gm_common.h>
 #include <gm/gm_global.h>
 #include <memory.h>
 #include <mu/mu_tour_panel_ctrl.h>
@@ -18,8 +19,6 @@
 extern "C" void fn_800151FC(gfArchive* archive, const char* path, Heaps::HeapType heap, int offset, int size, u32 id);
 // The random numbers of main.dol: an integer from 0 up to the argument
 long randi(long max);
-// gmCharacterKind::gmCheckChKindUseEnable(kind): the fighter can be picked (it is unlocked)
-extern "C" int fn_8004F4A0(int kind);
 // GameGlobal::checkHideMenuRandomStageSW(): the random stage switch of the menus is hidden
 // GameGlobal::getName(number, buffer)
 // muMenuController::getAButtonPushedControllerID(): the pad that pushed A
@@ -256,7 +255,7 @@ muTourRuleTask::muTourRuleTask(int mode) : gfTask("muTourRuleTask", Category_Inf
     m_charCount = 0;
     for (int i = 0; i < 0x23; i++) {
         int kind = sCharKinds[i];
-        if (fn_8004F4A0(exchangeMuCharKindToGmCharacterKind__6muMenuFiii(kind)) == 1) {
+        if (gmCheckChKindUseEnable(static_cast<gmCharacterKind>(exchangeMuCharKindToGmCharacterKind__6muMenuFiii(kind))) == true) {
             m_charList[m_charCount] = kind;
             m_charCount++;
         }

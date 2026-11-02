@@ -14,3 +14,5 @@ extern muNameLetterRow g_muNameLetterTbl[5][11];
 extern char* g_muNameDakutenTbl[41];
 // The letter that is a blank (an ideographic space).
 extern char* g_muNameBlank;
+// The digits 0 ... 9, as full-width letters.
+extern char* g_muNameDigits;
