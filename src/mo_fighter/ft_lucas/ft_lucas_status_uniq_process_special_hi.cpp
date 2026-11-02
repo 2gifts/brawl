@@ -46,7 +46,7 @@ void ftLucasStatusUniqProcessSpecialHi::execFixPosCounter(soModuleAccesser* a) {
     case 0:
         if (inAimWindow) {
             phase = 2;
-            // MATCH-ONLY: declaring the normal first places aim below it in the native frame.
+            // BYTES: declaring the normal first places aim below it in the native frame.
             Vec2f groundNormal;
             Vec2f aim;
             aim.m_x = fighterPos.m_x - targetPos.m_x;

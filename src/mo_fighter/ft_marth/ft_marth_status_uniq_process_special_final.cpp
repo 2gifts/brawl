@@ -133,7 +133,7 @@ void ftMarthStatusUniqProcessFinal::updateHpWindow(soModuleAccesser* moduleAcces
         for (int i = 0; i < count; i++) {
             if (moduleAccesser->getWorkManageModule().getInt(ftMarthWork::Final_WindowMoveTimer + i) > 0) {
                 moduleAccesser->getWorkManageModule().subInt(1, ftMarthWork::Final_WindowMoveTimer + i);
-                // MATCH-ONLY: reserve trig temporaries before the angle to retain register order.
+                // BYTES: the sine and cosine results are declared before the angle (register order).
                 float y, x;
                 // A fixed per-slot angle produces a repeated linear step while its timer runs.
                 float angle = moduleAccesser->getWorkManageModule().getFloat(ftMarthWork::Final_WindowAngle + i);

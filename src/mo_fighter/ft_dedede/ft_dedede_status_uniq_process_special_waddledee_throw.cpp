@@ -74,7 +74,7 @@ void ftDededeStatusUniqProcessSpecialWaddledeeThrow::initStatus(soModuleAccesser
         int selectedOutcome;
         if (includeFourthOutcome) {
             float totalWeight = weight3 + (weight2 + (weight0 + weight1));
-            // MATCH-ONLY: order the used threshold temporary before the random value.
+            // BYTES: the threshold is declared before the random value (register order).
             float boundary;
             float randomValue = randf();
             float roll = totalWeight * randomValue;
@@ -95,7 +95,7 @@ void ftDededeStatusUniqProcessSpecialWaddledeeThrow::initStatus(soModuleAccesser
             }
         } else {
             float totalWeight = weight2 + (weight0 + weight1);
-            // MATCH-ONLY: order the used threshold temporary before the random value.
+            // BYTES: the threshold is declared before the random value (register order).
             float boundary;
             float randomValue = randf();
             float roll = totalWeight * randomValue;
@@ -199,7 +199,7 @@ void ftDededeStatusUniqProcessSpecialWaddledeeThrow::execFixPos(soModuleAccesser
         if (moduleAccesser->getWorkManageModule().isFlag(0x22000013)) {
             if (moduleAccesser->getWorkManageModule().isFlag(0x22000017)) {
                 int instanceId = moduleAccesser->getWorkManageModule().getInt(0x20000001);
-                // MATCH-ONLY: retain the used ground receiver before the item receiver.
+                // BYTES: the ground module pointer is declared before the item (register order).
                 soGroundModule* ground;
                 BaseItem* item = itManager::getInstance()->getItemFromInstanceId(instanceId);
                 float speed;
@@ -210,7 +210,7 @@ void ftDededeStatusUniqProcessSpecialWaddledeeThrow::execFixPos(soModuleAccesser
                 } else {
                     speed = soValueAccesser::getConstantFloat(moduleAccesser, 0xFAA, 0);
                 }
-                // MATCH-ONLY: order the used sine temporary before its input locals.
+                // BYTES: the sine is declared before its input locals (register order).
                 float sine;
                 float radians = 0.017453292f * moduleAccesser->getWorkManageModule().getFloat(0x21000004);
                 float lr = moduleAccesser->getPostureModule().getLr();

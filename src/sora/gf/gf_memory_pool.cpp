@@ -256,7 +256,7 @@ void free(void* ptr) {
 }
 
 void* gfMemoryPoolMemAllocatorAlloc(MEMAllocator* allocator, u32 size) {
-    // MATCH-ONLY: declaring the saved id first gives it the target register.
+    // BYTES: declaring the saved id first gives it the target register.
     u8 id;
     gfMemoryPool* pool = reinterpret_cast<gfMemoryPool*>(allocator->heap);
     id = pool->m_id;
