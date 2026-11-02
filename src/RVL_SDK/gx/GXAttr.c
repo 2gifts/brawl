@@ -119,10 +119,10 @@ void GXSetVtxDescv(const GXVtxDescList* list) {
 
 // the xf side wants the vertex format summarised too, this was a separate helper that got inlined
 static inline void XfVtxSpecs_i(void) {
+    unsigned int cmd;
     u32 nrm;
     u32 clr;
     u32 txc;
-    u32 cmd;
 
     nrm = gx->hasBiNrms ? 2 : (gx->hasNrms ? 1 : 0);
 

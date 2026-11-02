@@ -8,7 +8,7 @@ extern void fn_8034F020(BOOL initialized);
 extern void fn_8034F684(void);
 extern void fn_80350BBC(void);
 extern void* gethostbyname(const char* name);
-extern void fn_8035DFCC(void* (*alloc)(u32), void (*free)(void*),
+extern void gsiMemoryCallbacksSet(void* (*alloc)(u32), void (*free)(void*),
                       void* (*realloc)(void*, u32), void* (*memalign)(int, u32));
 extern void* DWCi_GsMalloc(u32 size);
 extern void DWCi_GsFree(void* allocation);
@@ -26,7 +26,7 @@ s32 DWC_Init(int mode, const char* gameName, u32 gamecode, DWCAlloc alloc, DWCFr
     DWCi_SetMemFunc(alloc, free);
     fn_80352040(mode);
     lbl_805A0F50 = gamecode;
-    fn_8035DFCC(DWCi_GsMalloc, DWCi_GsFree, DWCi_GsRealloc, DWCi_GsMemalign);
+    gsiMemoryCallbacksSet(DWCi_GsMalloc, DWCi_GsFree, DWCi_GsRealloc, DWCi_GsMemalign);
     strcpy(lbl_80535BE0, gameName);
     if (mode == 0) strcpy(lbl_804909D0, lbl_80489190);
     fn_8034F020(1);
@@ -35,7 +35,7 @@ s32 DWC_Init(int mode, const char* gameName, u32 gamecode, DWCAlloc alloc, DWCFr
 }
 
 void DWC_Shutdown(void) {
-    fn_8035DFCC(DWCi_GsMalloc, DWCi_GsFree, DWCi_GsRealloc, DWCi_GsMemalign);
+    gsiMemoryCallbacksSet(DWCi_GsMalloc, DWCi_GsFree, DWCi_GsRealloc, DWCi_GsMemalign);
     gethostbyname(lbl_8059F060);
     fn_80350BBC();
     fn_8034F020(0);

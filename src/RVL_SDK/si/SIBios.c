@@ -4,7 +4,7 @@
 #include "revolution/os.h"
 #include "revolution/si.h"
 
-extern u32 fn_801E9B4C(void);
+extern u32 VIGetCurrentLine(void);
 extern u32 __PADFixBits;
 extern BOOL SITransfer(s32 chan, void *output, u32 outputBytes, void *input, u32 inputBytes, SICallback callback,
                        OSTime fire);
@@ -52,7 +52,7 @@ typedef struct SIControl {
     SICallback callback;
 } SIControl;
 
-const char *__SIVersion = "<< RVL_SDK - SI \trelease build: Nov 30 2006 03:31:44 (0x4199_60831) >>";
+const char *__SIVersion = "<< RVL_SDK - SI \trelease build: May  8 2007 13:00:23 (0x4199_60831) >>";
 
 static SIControl Si = {SI_CHAN_NONE, 0, 0, NULL, NULL};
 static u32 Type[SI_MAX_CHAN] = {SI_ERROR_NO_RESPONSE, SI_ERROR_NO_RESPONSE, SI_ERROR_NO_RESPONSE,
@@ -182,7 +182,7 @@ static void SIInterruptHandler(s16 interrupt, OSContext *context) {
         u32 vcount;
         u32 x;
 
-        vcount = fn_801E9B4C() + 1;
+        vcount = VIGetCurrentLine() + 1;
         x = (Si.poll >> 16) & 0x3FF;
 
         for (i = 0; i < SI_MAX_CHAN; i++) {
@@ -529,25 +529,25 @@ BOOL SITransfer(s32 chan, void *output, u32 outputBytes, void *input, u32 inputB
 
 // BYTES: the loop that hands the finished type to whoever asked is repeated verbatim in the retail
 // code, once per exit of the wireless id fixing below
-#define RUN_TYPE_CALLBACKS()                                  \
-    do {                                                      \
-        SITypeAndStatusCallback *cbs = TypeCallback[chan];    \
-        s32 i;                                                \
-        u32 cbType = Type[chan];                              \
-        for (i = 0; i < 4; i++) {                             \
-            SITypeAndStatusCallback cb = cbs[i];              \
-            if (cb) {                                         \
-                cbs[i] = NULL;                                \
-                cb(chan, cbType);                             \
-            }                                                 \
-        }                                                     \
-    } while (0)
+static void CallTypeAndStatusCallback(s32 chan, u32 type) {
+    SITypeAndStatusCallback callback;
+    int i;
+
+    for (i = 0; i < 4; ++i) {
+        callback = TypeCallback[chan][i];
+        if (callback) {
+            TypeCallback[chan][i] = 0;
+            callback(chan, type);
+        }
+    }
+}
 
 static void GetTypeCallback(s32 chan, u32 error, OSContext *context) {
     static u32 cmdFixDevice[SI_MAX_CHAN];
     u32 type;
+    u32 chanBit;
+    BOOL fix;
     u32 id;
-    u32 fix;
 
     Type[chan] &= ~SI_ERROR_BUSY;
     Type[chan] |= error;
@@ -555,13 +555,14 @@ static void GetTypeCallback(s32 chan, u32 error, OSContext *context) {
 
     type = Type[chan];
 
-    fix = __PADFixBits & (0x80000000 >> chan);
-    __PADFixBits &= ~(0x80000000 >> chan);
+    chanBit = 0x80000000 >> chan;
+    fix = (BOOL)(__PADFixBits & chanBit);
+    __PADFixBits &= ~chanBit;
 
     if ((error & 0xF) || (type & SI_TYPE_MASK) != SI_TYPE_GC || !(type & SI_GC_WIRELESS) ||
         (type & SI_WIRELESS_IR)) {
         OSSetWirelessID(chan, 0);
-        RUN_TYPE_CALLBACKS();
+        CallTypeAndStatusCallback(chan, Type[chan]);
         return;
     }
 
@@ -577,7 +578,8 @@ static void GetTypeCallback(s32 chan, u32 error, OSContext *context) {
     if (type & SI_WIRELESS_FIX_ID) {
         if ((id & SI_WIRELESS_ID_MASK) != (type & SI_WIRELESS_ID_MASK)) {
             if (!(id & SI_WIRELESS_FIX_ID)) {
-                id = (type & SI_WIRELESS_ID_MASK) | SI_WIRELESS_FIX_ID;
+                id = type & SI_WIRELESS_ID_MASK;
+                id |= SI_WIRELESS_FIX_ID;
                 OSSetWirelessID(chan, (u16)((id >> 8) & 0xFFFF));
             }
 
@@ -587,7 +589,8 @@ static void GetTypeCallback(s32 chan, u32 error, OSContext *context) {
             return;
         }
     } else if (type & SI_WIRELESS_RECEIVED) {
-        id = (type & SI_WIRELESS_ID_MASK) | SI_WIRELESS_FIX_ID;
+        id = type & SI_WIRELESS_ID_MASK;
+        id |= SI_WIRELESS_FIX_ID;
         OSSetWirelessID(chan, (u16)((id >> 8) & 0xFFFF));
 
         cmdFixDevice[chan] = 0x4E000000 | id;
@@ -598,7 +601,7 @@ static void GetTypeCallback(s32 chan, u32 error, OSContext *context) {
         OSSetWirelessID(chan, 0);
     }
 
-    RUN_TYPE_CALLBACKS();
+    CallTypeAndStatusCallback(chan, Type[chan]);
 }
 
 u32 SIGetType(s32 chan) {

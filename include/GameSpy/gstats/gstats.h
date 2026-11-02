@@ -34,11 +34,11 @@ extern int lbl_8059FAF0;
 // the current game, used when no game is passed
 extern statsgame_t lbl_805A10B0;
 
-void* fn_803822D8(bucketset_t set, char* name, bucketType type, void* initialValue);  // BucketNew
-int fn_80383698(void);                                                               // IsStatsConnected
-int fn_80384E70(statsgame_t game, char* name, bucketfunc_t func, int value);        // BucketIntOp
-double fn_80384EFC(statsgame_t game, char* name, bucketfunc_t func, double value);  // BucketFloatOp
-char* fn_80384F88(statsgame_t game, char* name, bucketfunc_t func, char* value);    // BucketStringOp
+void* BucketNew(bucketset_t set, char* name, bucketType type, void* initialValue);  // BucketNew
+int IsStatsConnected(void);                                                               // IsStatsConnected
+int ServerOpInt(statsgame_t game, char* name, bucketfunc_t func, int value);        // BucketIntOp
+double ServerOpFloat(statsgame_t game, char* name, bucketfunc_t func, double value);  // BucketFloatOp
+char* ServerOpString(statsgame_t game, char* name, bucketfunc_t func, char* value);    // BucketStringOp
 
 #ifdef __cplusplus
 }

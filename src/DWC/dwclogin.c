@@ -42,7 +42,7 @@ extern BOOL DWCi_RemoteLogin(void);
 extern void DWCi_RemoteLoginProcess(void);
 extern BOOL DWCi_IsError(void);
 extern void DWCi_SetError(s32 error, s32 code);
-extern s32 fn_80367C74(void* connection);
+extern s32 gpProcess(void* connection);
 extern u64 OSGetTime(void);
 
 void DWCi_LoginInit(void* control, void* userData, void* connection, u32 product, u32 gameCode,
@@ -83,7 +83,7 @@ void DWCi_LoginProcess(void) {
         break;
     case 2: case 3: case 4:
         if (lbl_805A0F80->connection != NULL && *(u32*)lbl_805A0F80->connection != 0)
-            fn_80367C74(lbl_805A0F80->connection);
+            gpProcess(lbl_805A0F80->connection);
         if (lbl_805A0F80->timed != 0 &&
             (s64)(OSGetTime() - lbl_805A0F80->startTime) / (OS_BUS_CLOCK_SPEED / 4 / 1000) > 60000) {
             if (lbl_805A0F80 != NULL) {
@@ -162,14 +162,14 @@ typedef char DWCLoginMatchTimeOffsetCheck[offsetof(DWCLoginMatchTimeView, elapse
 extern const char* fn_8034F7A4(void);
 extern u64 fn_8034F684(void);
 extern const char* fn_8034F79C(void);
-extern s32 fn_80368058(void* connection, s32 field, const char* text);
+extern s32 gpSetInfosA(void* connection, s32 field, const char* text);
 extern DWCLoginMatchTimeView* fn_8034E158(void);
 extern u32 fn_80342554(void);
 extern s32 fn_80342328(s32 status);
 extern s32 fn_8033AAF0(void);
 extern s32 fn_8033CD90(s32 profile);
 extern void DWCi_GPGetInfoCallback(void* connection, void* event, void* parameter);
-extern s32 fn_80367F78(void* connection, s32 profile, s32 cache, s32 blocking,
+extern s32 gpGetInfo(void* connection, s32 profile, s32 cache, s32 blocking,
                       void (*callback)(void*, void*, void*), void* parameter);
 
 void DWCi_GPConnectCallback(void* connection, void* argument, void* parameter) {
@@ -187,7 +187,7 @@ void DWCi_GPConnectCallback(void* connection, void* argument, void* parameter) {
     consoleId = fn_8034F684();
     consoleName = fn_8034F79C();
     snprintf(identity, 31, lbl_80489A00 + 0x11C, consoleName, consoleId, gameName);
-    if (DWCi_LoginHandleGPError(fn_80368058(connection, 0x704, identity)) != 0) return;
+    if (DWCi_LoginHandleGPError(gpSetInfosA(connection, 0x704, identity)) != 0) return;
     if (event->result != 0) {
         DWCi_LoginHandleGPError(event->result);
         return;
@@ -220,7 +220,7 @@ void DWCi_GPConnectCallback(void* connection, void* argument, void* parameter) {
             }
         }
     } else if (lbl_805A0F80->state == 3) {
-        DWCi_LoginHandleGPError(fn_80367F78(connection, event->profile, 0, 0, DWCi_GPGetInfoCallback, NULL));
+        DWCi_LoginHandleGPError(gpGetInfo(connection, event->profile, 0, 0, DWCi_GPGetInfoCallback, NULL));
     }
 }
 
@@ -274,7 +274,7 @@ extern s32 fn_80352B0C(void);
 extern void fn_80352B18(char* token, char* challenge);
 extern u64 fn_80352B64(void);
 extern void fn_80350C24(void* loginId, u64 userId);
-extern s32 fn_80367D20(void* connection, const char* token, const char* challenge,
+extern s32 gpConnectPreAuthenticatedA(void* connection, const char* token, const char* challenge,
                      s32 firewall, s32 blocking,
                      void (*callback)(void*, void*, void*), void* parameter);
 
@@ -289,7 +289,7 @@ void DWCi_RemoteLoginProcess(void) {
             DWC_Printf(0x20, lbl_80489A00 + 0x300);
             lbl_805A0F80->startTime = OSGetTime();
             lbl_805A0F80->timed = 1;
-            result = fn_80367D20(lbl_805A0F80->connection, lbl_805A0F80->authToken,
+            result = gpConnectPreAuthenticatedA(lbl_805A0F80->connection, lbl_805A0F80->authToken,
                                 lbl_805A0F80->authChallenge, 1, 0, DWCi_GPConnectCallback, NULL);
             if (DWCi_LoginHandleGPError(result) == 0) lbl_805A0F80->state = 2;
         } else {
@@ -297,7 +297,7 @@ void DWCi_RemoteLoginProcess(void) {
             DWC_Printf(0x20, lbl_80489A00 + 0x300);
             lbl_805A0F80->startTime = OSGetTime();
             lbl_805A0F80->timed = 1;
-            result = fn_80367D20(lbl_805A0F80->connection, lbl_805A0F80->authToken,
+            result = gpConnectPreAuthenticatedA(lbl_805A0F80->connection, lbl_805A0F80->authToken,
                                 lbl_805A0F80->authChallenge, 1, 0, DWCi_GPConnectCallback, NULL);
             if (DWCi_LoginHandleGPError(result) == 0) lbl_805A0F80->state = 3;
         }
@@ -336,7 +336,7 @@ typedef struct DWCLoginInfoEvent {
 } DWCLoginInfoEvent;
 typedef char DWCLoginLastNameCheck[offsetof(DWCLoginInfoEvent, lastName) == 0x8E ? 1 : -1];
 extern void fn_80351480(void* userData, const void* loginId, s32 profile);
-extern void fn_80367E4C(void* connection);
+extern void gpDisconnect(void* connection);
 extern s32 fn_80368990(void* connection, char* ticket);
 
 void DWCi_GPGetInfoCallback(void* connection, void* eventPointer, void* parameter) {
@@ -354,15 +354,15 @@ void DWCi_GPGetInfoCallback(void* connection, void* eventPointer, void* paramete
         if (event->lastName[0] == 0) {
             DWC_Printf(0x20, lbl_80489A00 + 0x340);
             fn_80350D74((u8*)lbl_805A0F80->userData + 4, lbl_805A0F80->gameCode, newName);
-            result = fn_80368058(connection, 0x705, newName);
+            result = gpSetInfosA(connection, 0x705, newName);
             if (DWCi_LoginHandleGPError(result) != 0) return;
             lbl_805A0F80->state = 4;
-            result = fn_80367F78(connection, event->profile, 0, 0, DWCi_GPGetInfoCallback, NULL);
+            result = gpGetInfo(connection, event->profile, 0, 0, DWCi_GPGetInfoCallback, NULL);
             if (DWCi_LoginHandleGPError(result) != 0) return;
             DWC_Printf(0x20, lbl_80489A00 + 0x374);
         } else {
             DWC_Printf(0x20, lbl_80489A00 + 0x38C);
-            fn_80367E4C(connection);
+            gpDisconnect(connection);
             DWCi_RemoteLogin();
             lbl_805A0F80->state = 1;
         }
@@ -372,16 +372,16 @@ void DWCi_GPGetInfoCallback(void* connection, void* eventPointer, void* paramete
             fn_80350D74(lbl_805A0F80->temporaryLoginId, lbl_805A0F80->gameCode, temporaryName);
             DWC_Printf(0x20, lbl_80489A00 + 0x3C0, temporaryName, pseudoName, event->profile);
             fn_80351480(lbl_805A0F80->userData, lbl_805A0F80->temporaryLoginId, event->profile);
-            fn_80367E4C(connection);
+            gpDisconnect(connection);
             DWC_Printf(0x20, lbl_80489A00 + 0x300);
             lbl_805A0F80->startTime = OSGetTime();
             lbl_805A0F80->timed = 1;
-            result = fn_80367D20(lbl_805A0F80->connection, lbl_805A0F80->authToken,
+            result = gpConnectPreAuthenticatedA(lbl_805A0F80->connection, lbl_805A0F80->authToken,
                                 lbl_805A0F80->authChallenge, 1, 0, DWCi_GPConnectCallback, NULL);
             if (DWCi_LoginHandleGPError(result) == 0) lbl_805A0F80->state = 2;
         } else {
             DWC_Printf(0x20, lbl_80489A00 + 0x3E8, event->lastName, event->profile);
-            result = fn_80367F78(connection, event->profile, 0, 0, DWCi_GPGetInfoCallback, NULL);
+            result = gpGetInfo(connection, event->profile, 0, 0, DWCi_GPGetInfoCallback, NULL);
             if (DWCi_LoginHandleGPError(result) != 0) return;
         }
     }

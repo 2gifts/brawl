@@ -11,16 +11,12 @@
 
 struct wnMetaknightMantleData;
 
-// The Mantle. The full class lives in wn/metaknight/wn_metaknight_mantle.h (a weapon builder specialization that cannot
-// coexist with this Fighter-based builder unit), so the fighter unit sees an opaque shell of the right size.
-class wnMetaknightMantle : public Weapon {
-    u8 m_unreconstructed[0x20A4 - sizeof(Weapon)];
-public:
-    wnMetaknightMantle(s32 articleId, const wnArticleBuildInfo& info, const wnMetaknightMantleData* data);
-    virtual ~wnMetaknightMantle();
-    void activate(int founderTaskId, int resourceId, int unkC, int team);
-};
-static_assert(sizeof(wnMetaknightMantle) == 0x20A4, "Metaknight mantle layout is wrong!");
+// The fighter owns Mantle teardown and needs its complete type.
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/metaknight/wn_metaknight_mantle.h>
+static_assert(sizeof(wnMetaknightMantle) == 0x20A4, "Meta Knight Mantle extent");
 
 typedef wnArticleHierarchy<wnMetaknightMantle, 1, soInstancePoolRoot> ftMetaknightMantlePool;
 

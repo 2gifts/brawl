@@ -1,3 +1,10 @@
+#define WN_WEAPON_BUILDER // The fighter owns the complete Mantle article type.
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR
+#define WN_KINETIC_MEDIATOR_INLINE_DTOR
+#define SO_KINETIC_ROTATION_FIELDWISE_ZERO
+#define FT_COLLISION_ATTACK_FIGHTER_POWER_ARG
+#define FT_EFFECT_SCREEN_SINGLETON_HOLDER
+#define FT_SOUND_GENERATOR_DTOR_NOINLINE
 #define FT_POOL_ROOT_NONPOLYMORPHIC
 #define SO_GENERAL_WORK_BOUNDED_CLEAR
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
@@ -6,14 +13,55 @@
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #define FT_TEAM_TYPED_INTERFACE
+#include <so/event/so_event_system.h>
+class soStatusEventObserver;
+class soAnimCmdEventObserver;
+class soLinkEventObserver;
+class soArticleEventObserver;
+class soModelEventObserver;
+
+// These Mantle observer units use the shared sora_melee constructor and teardown.
+#define FT_METAKNIGHT_SHARED_EVENT_UNIT(Observer, Capacity) \
+    template <> class soEventUnitWithWorkArea<Observer, Capacity> : public soEventUnitImpl<Observer> { \
+        soInstanceManagerFullPropertyVector<Observer*, Capacity> m_observerList; \
+    public: \
+        soEventUnitWithWorkArea(s16 managerId, s16 eventId); \
+        virtual ~soEventUnitWithWorkArea(); \
+        virtual u32 getObserverNum() const { return m_observerList.size(); } \
+    };
+FT_METAKNIGHT_SHARED_EVENT_UNIT(soStatusEventObserver, 17)
+FT_METAKNIGHT_SHARED_EVENT_UNIT(soAnimCmdEventObserver, 33)
+FT_METAKNIGHT_SHARED_EVENT_UNIT(soLinkEventObserver, 2)
+FT_METAKNIGHT_SHARED_EVENT_UNIT(soArticleEventObserver, 2)
+FT_METAKNIGHT_SHARED_EVENT_UNIT(soModelEventObserver, 5)
+#undef FT_METAKNIGHT_SHARED_EVENT_UNIT
+
 #include <ft/builder/ft_dol_array_list.h>
+// The six absolute-attack slots use the shared sora_melee vector implementation.
+FT_DOL_ARRAY_VECTOR(soCollisionAttackAbsolute, 6);
+#include <so/sound/so_sound_3d_generator_accesser_impl.h>
+#include <so/so_value_accesser.h>
+// Empty article interfaces have no resources to release in this unit.
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+inline soParamAccesser::~soParamAccesser() { }
+// Native mediator calls go directly to the fighter's typed update templates.
+#include <ft/metaknight/ft_metaknight_kinetic_transactor.h>
+#define FT_KINETIC_MEDIATOR_TRANSACTOR ftMetaknightKineticTransactor
+#define FT_KINETIC_MEDIATOR_DIRECT_UPDATES
 #include <ft/ft_class_info_impl.h>
 #include <ft/metaknight/ft_metaknight.h>
+#undef FT_KINETIC_MEDIATOR_DIRECT_UPDATES
+#undef FT_KINETIC_MEDIATOR_TRANSACTOR
+#include <ft/metaknight/ft_metaknight_status_uniq_process_final_end.h>
+#include <gf/gf_task_scheduler.h>
+#include <so/collision/so_collision_log.h>
+#include <so/so_external_value_accesser.h>
 #include <ft/metaknight/ft_metaknight_extend_param_accesser.h>
 #include <ft/ft_owner.h>
 #include <ft/ft_resource_id_accesser_impl.h>
 #include <so/article/so_article_mediator.h>
 
+#undef WN_ARTICLE_NATIVE_BUILDERS // Fighter kinetic teardown remains out of line.
 #define FT_BC ftMetaknightBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
@@ -24,6 +72,13 @@ template soArrayVector<s32, 8>::~soArrayVector();
 #endif
 #pragma dont_inline off
 soStatusModuleImpl::~soStatusModuleImpl() { }
+
+#pragma dont_inline on
+soTeam::~soTeam() { }
+soResourceIdAccesser::~soResourceIdAccesser() { }
+#pragma dont_inline off
+ftKineticEnergyController::~ftKineticEnergyController() { }
+soArticleMediator::~soArticleMediator() { }
 
 // HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt).
 extern "C" {
@@ -99,60 +154,59 @@ void ftMetaknight::notifyEventChangeStatus(int statusKind, int prevStatusKind, s
 }
 
 // HYPOTHESIS: the Final Smash end status keeps the hit state; its entry points are in the status process unit.
-extern soStatusUniqProcess g_ftMetaknightStatusUniqProcessFinalEnd;
-extern "C" void fn_111_D548(soStatusUniqProcess* process, soModuleAccesser* moduleAccesser);
 
 bool ftMetaknight::notifyEventCollisionAttackCheck(u32 flags) {
     if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x116) {
-        fn_111_D548(&g_ftMetaknightStatusUniqProcessFinalEnd, m_moduleAccesser);
+        g_ftMetaknightStatusUniqProcessFinalEnd.notifyEventCollisionAttackCheck(m_moduleAccesser);
     }
     return Fighter::notifyEventCollisionAttackCheck(flags);
+}
+
+
+// The first successful Final Smash hit stops the two external movement energies,
+// starts the capture rumble, and hands the struck fighter to the link process.
+void ftMetaknight::notifyEventCollisionAttackFighter(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    if (collisionLog != NULL && m_moduleAccesser->getStatusModule().getStatusKind() == 0x116) {
+        StageObject* target = dynamic_cast<StageObject*>(
+            gfTaskScheduler::getInstance()->getTaskById(gfTask::Category_Fighter, collisionLog->m_taskId));
+        if (target != NULL && soExternalValueAccesser::getCollisionHitModule(target)->getStatus(
+                collisionLog->m_collsionIndex, collisionLog->_35) == 0) {
+            if (!moduleAccesser->getWorkManageModule().isFlag(0x22000010)) {
+                moduleAccesser->getWorkManageModule().onFlag(0x22000010);
+                moduleAccesser->getKineticModule().getEnergy(5)->disable();
+                moduleAccesser->getKineticModule().getEnergy(6)->disable();
+                moduleAccesser->getControllerModule().setRumble(12, 0, false, -1);
+            }
+            g_ftMetaknightStatusUniqProcessFinalEnd.notifyEventCollisionAttackFighter(power, collisionLog, moduleAccesser);
+        }
+    }
+}
+
+// These two motions fix the ground collision rhombus while they play.
+void ftMetaknight::notifyEventChangeMotion(int motionKind, int, void*, soModuleAccesser* moduleAccesser) {
+    if (motionKind >= 0x1be) {
+        return;
+    }
+    if (motionKind < 0x1bc) {
+        return;
+    }
+    return moduleAccesser->getGroundModule().setShapeFlag(soGroundShapeImpl::Shape_Rhombus_Modify_Flag_Fix, true, 0);
 }
 
 // ---- the article holders --------------------------------------------------------------------------------------------
 // What the constructor of the article is given: the kind record of the owner (kind 0, sub kind Metaknight, copied into the
 // descriptor), the heap module and the data block of the fighter kind.
 // HYPOTHESIS: the original builds these in the holder constructor itself.
-struct ftMetaknightArticleDataTag {
-    bool m_unused;
-    bool m_resourceGroup;
-    ftMetaknightArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
-};
-
 struct ftMetaknightArticleKind : wnArticleKindInfo {
+    ftKind getSubKind() const { return static_cast<ftKind>(subKind); }
     ftMetaknightArticleKind() {
         kind = 0;
         subKind = Fighter_MetaKnight;
     }
 };
 
-// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
-struct ftMetaknightArticleBuildInfo : wnArticleBuildInfo {
-    ftMetaknightArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
-        kindInfo = &kindArg;
-        heapModule = heap;
-    }
-};
-
-// The data block of the article comes from the common data accessor of sora_melee (only declared here).
-extern "C" void* fn_27_1496A8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-
-template <class W> struct ftMetaknightArticleTraits;
-#define FT_METAKNIGHT_TRAITS(W, DATA, ID, GETTER) \
-    template <> struct ftMetaknightArticleTraits<W> { \
-        enum { ArticleId = ID }; \
-        static const DATA* getData() { \
-            ftMetaknightArticleDataTag tag; \
-            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_MetaKnight, &tag.m_resourceGroup)); \
-        } \
-    };
-
-FT_METAKNIGHT_TRAITS(wnMetaknightMantle, wnMetaknightMantleData, 0, fn_27_1496A8)
-
-// The article of the fighter is built by this constructor from the data of the fighter kind.
-template <class W>
-wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
-    m_instance(ftMetaknightArticleTraits<W>::ArticleId, ftMetaknightArticleBuildInfo(ftMetaknightArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftMetaknightArticleTraits<W>::getData()) { }
+#include <ft/builder/ft_builder_article.h>
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(inline, wnMetaknightMantle, wnMetaknightMantleData, 0, ftMetaknightArticleKind, getWeaponData128)
 
 // ---- the article of Meta Knight and its mediator --------------------------------------------------------------------
 
@@ -263,13 +317,6 @@ bool ftMetaknightArticleMediator::shoot(soModuleAccesser* acc, soArticle* articl
     default: return false;
     }
 }
-
-// FIXME: Test code present only to emit the shared builder functions; delete once ftMetaknight is done
-void testBuilder() {
-    soInsideEventManageModuleBuilder<ftMetaknightInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> insideBuilder;
-    soResourceIdAccesserImpl idAccImpl(0, 1, 2);
-}
-soInsideEventManageModuleBuilder<ftMetaknightInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> g_insideBuilder;
 
 // Virtual-slot view used only to emit virtual tail calls; the slots are never defined in this unit.
 struct ftMetaknightVirtualSlots {

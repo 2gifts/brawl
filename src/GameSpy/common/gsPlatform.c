@@ -57,7 +57,7 @@ int closesocket(int s) {
     return -1;
 }
 
-int fn_8035C2D8(int s, int how) {
+int shutdown(int s, int how) {
     int result = SOShutdown(s, how);
 
     if (result >= 0) {
@@ -111,7 +111,7 @@ int sendto(int s, const char* buf, int len, int flags, const void* to, int tolen
     return -1;
 }
 
-int fn_8035C658(int s) {
+int GOAGetLastError(int s) {
     return lbl_805A1044;
 }
 
@@ -177,7 +177,7 @@ int fn_8035D560(GSIThreadID* thread) {
     return result;
 }
 
-u32 fn_8035D728(void) {
+u32 current_time(void) {
     return OS_TICKS_TO_MSEC(OSGetTime());
 }
 
@@ -194,22 +194,22 @@ void fn_8035DA18(int seed) {
     lbl_8059F598 = value;
 }
 
-void fn_8035DFCC(gsMallocCB p_malloc, gsFreeCB p_free, gsReallocCB p_realloc, gsMemalignCB p_memalign) {
+void gsiMemoryCallbacksSet(gsMallocCB p_malloc, gsFreeCB p_free, gsReallocCB p_realloc, gsMemalignCB p_memalign) {
     lbl_80534638.mallocCB = p_malloc;
     lbl_80534638.freeCB = p_free;
     lbl_80534638.reallocCB = p_realloc;
     lbl_80534638.memalignCB = p_memalign;
 }
 
-void* fn_8035DFE8(u32 size) {
+void* gsimalloc(u32 size) {
     return lbl_80534638.mallocCB(size);
 }
 
-void* fn_8035DFF8(void* ptr, u32 size) {
+void* gsirealloc(void* ptr, u32 size) {
     return lbl_80534638.reallocCB(ptr, size);
 }
 
-void fn_8035E00C(void* ptr) {
+void gsifree(void* ptr) {
     if (ptr != NULL) {
         lbl_80534638.freeCB(ptr);
     }

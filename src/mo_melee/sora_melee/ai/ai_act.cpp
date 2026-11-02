@@ -3,8 +3,9 @@
 #include <ai/ai_input.h>
 
 extern "C" {
-// HYPOTHESIS: a zero vector in the DOL's read-only data; its name is not known.
-extern const Vec3f lbl_8041F3E8;
+// The runtime's null pointer-to-member constant (ptmf.c). HYPOTHESIS: m_unkB0/BC/C8 are member-function
+// pointers reset to null; they are still typed as Vec3f here.
+extern const Vec3f __ptmf_null;
 }
 
 aiAct::aiAct(aiInput* input, aiStat* stat) {
@@ -36,7 +37,7 @@ aiAct::aiAct(aiInput* input, aiStat* stat) {
     m_defendAirRate = 0.0f;
     m_unkA8 = 0;
     m_unkAC = 0;
-    m_unkB0 = m_unkBC = m_unkC8 = lbl_8041F3E8;
+    m_unkB0 = m_unkBC = m_unkC8 = __ptmf_null;
     m_unkDC = 1.0f;
     m_goalPos.m_x = m_goalPos.m_y = m_goalEdgeL.m_x = m_goalEdgeL.m_y = m_goalEdgeR.m_x = m_goalEdgeR.m_y = 0.0f;
     m_goalUnk48 = m_viaUnk48 = m_unk10C = 0;

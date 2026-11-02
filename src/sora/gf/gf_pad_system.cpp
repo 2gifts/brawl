@@ -129,27 +129,27 @@ extern Network g_Network;
 extern "C" {
 void fn_801E74C8(int);
 void fn_80215E68();
-void fn_80218D64();
-void fn_80218D60(void* (*)(u32), u8 (*)(void*));
+void WPADGetWorkMemorySize();
+void WPADRegisterAllocator(void* (*)(u32), u8 (*)(void*));
 void fn_80227E54();
 void fn_8022555C(int, int);
 void fn_80225570(int, float, float);
-int fn_8021C938(int);
-void fn_8021C9AC(int, int, int);
+int WPADIsDpdEnabled(int);
+void WPADControlDpd(int, int, int);
 void WPADSetConnectCallback(int, void (*)(int));
 void fn_80215FC4(PadStatusRaw*);
 void fn_80215C54(u32);
 int fn_80227728(int, KpadStatusRaw*, int);
 double fn_80400B44(float, float);
 void fn_802162A4(int, int);
-void fn_8021A558(int, int);
+void WPADControlMotor(int, int);
 void fn_80228138(int);
 void fn_80228154(int);
 void fn_80146B80(Network*);
-void fn_80219F60(int);
-int fn_80218D54();
-void fn_80218D5C(void (*)(int));
-int fn_80218D58();
+void WPADDisconnect(int);
+int WPADStartSimpleSync();
+void WPADSetSimpleSyncCallback(void (*)(int));
+int WPADStopSimpleSync();
 int fn_802250C8(int, int, int, int, void (*)(int, int));
 int fn_80224D18(int, int, int, int, void (*)(int, int));
 }
@@ -363,24 +363,24 @@ gfPadSystem::gfPadSystem() {
 
     fn_801E74C8(0xB);
     fn_80215E68();
-    fn_80218D64();
-    fn_80218D60(fn_80028808, fn_80028818);
+    WPADGetWorkMemorySize();
+    WPADRegisterAllocator(fn_80028808, fn_80028818);
     fn_80227E54();
     fn_8022555C(0, 0x7F);
     for (int i = 0; i <= 3; i++) {
         fn_80225570(i, 0.1f, 0.85f);
     }
-    if (fn_8021C938(0)) {
-        fn_8021C9AC(0, 0, 0);
+    if (WPADIsDpdEnabled(0)) {
+        WPADControlDpd(0, 0, 0);
     }
-    if (fn_8021C938(1)) {
-        fn_8021C9AC(1, 0, 0);
+    if (WPADIsDpdEnabled(1)) {
+        WPADControlDpd(1, 0, 0);
     }
-    if (fn_8021C938(2)) {
-        fn_8021C9AC(2, 0, 0);
+    if (WPADIsDpdEnabled(2)) {
+        WPADControlDpd(2, 0, 0);
     }
-    if (fn_8021C938(3)) {
-        fn_8021C9AC(3, 0, 0);
+    if (WPADIsDpdEnabled(3)) {
+        WPADControlDpd(3, 0, 0);
     }
     for (int i = 0; i < 4; i++) {
         WPADSetConnectCallback(0, fn_80028B74);
@@ -786,7 +786,7 @@ void gfPadSystem::updateSystem() {
                 if (i < 4) {
                     fn_802162A4(i, 0);
                 } else {
-                    fn_8021A558(i - 4, 0);
+                    WPADControlMotor(i - 4, 0);
                 }
                 m_padMotorMasks[i] = 0;
             }
@@ -858,7 +858,7 @@ void gfPadSystem::maskMotor(u16 mask) {
                 if (i < 4) {
                     fn_802162A4(i, 0);
                 } else {
-                    fn_8021A558(i - 4, 0);
+                    WPADControlMotor(i - 4, 0);
                 }
                 m_padMotorMasks[i] = 0;
             }
@@ -873,7 +873,7 @@ void gfPadSystem::startMotor(int padNum) {
             if (padNum < 4) {
                 fn_802162A4(padNum, 1);
             } else if (m_gamePads[padNum].m_controllerType != gfPadType::WII_CLASSIC) {
-                fn_8021A558(padNum - 4, 1);
+                WPADControlMotor(padNum - 4, 1);
             }
             m_padMotorMasks[padNum] = 0xFFFF;
         }
@@ -886,7 +886,7 @@ void gfPadSystem::startMotor(int padNum, u16 mask) {
             if (padNum < 4) {
                 fn_802162A4(padNum, 1);
             } else if (m_gamePads[padNum].m_controllerType != gfPadType::WII_CLASSIC) {
-                fn_8021A558(padNum - 4, 1);
+                WPADControlMotor(padNum - 4, 1);
             }
             m_padMotorMasks[padNum] = mask;
         }
@@ -898,7 +898,7 @@ void gfPadSystem::stopMotor(int padNum) {
         if (padNum < 4) {
             fn_802162A4(padNum, 0);
         } else {
-            fn_8021A558(padNum - 4, 0);
+            WPADControlMotor(padNum - 4, 0);
         }
         m_padMotorMasks[padNum] = 0;
     }
@@ -909,7 +909,7 @@ void gfPadSystem::stopMotorH(int padNum) {
         if (padNum < 4) {
             fn_802162A4(padNum, 2);
         } else {
-            fn_8021A558(padNum - 4, 0);
+            WPADControlMotor(padNum - 4, 0);
         }
         m_padMotorMasks[padNum] = 0;
     }
@@ -920,7 +920,7 @@ void gfPadSystem::stopMotorAllForce() {
         fn_802162A4(i, 0);
     }
     for (int i = 0; i < 4; i++) {
-        fn_8021A558(i, 0);
+        WPADControlMotor(i, 0);
     }
 }
 
@@ -929,7 +929,7 @@ void gfPadSystem::pauseNotify() {
         fn_802162A4(i, 0);
     }
     for (int i = 0; i < 4; i++) {
-        fn_8021A558(i, 0);
+        WPADControlMotor(i, 0);
     }
 }
 
@@ -1068,7 +1068,7 @@ void gfPadSystem::disconectWiiControler() {
     int j = 0;
     for (u32 i = 4; i < 8; i++) {
         if (m_debugPads[i].m_error == gfPadError::NONE) {
-            fn_80219F60(j);
+            WPADDisconnect(j);
         }
         j++;
     }
@@ -1081,13 +1081,13 @@ void gfPadSystem::wpadSimpleSyncCallback(int result) {
 }
 
 extern "C" bool fn_8002B504() {
-    return fn_80218D54() == 1;
+    return WPADStartSimpleSync() == 1;
 }
 
 bool gfPadSystem::startSimpleSync() {
     m_flags34.f6 = 0;
-    fn_80218D5C(wpadSimpleSyncCallback);
-    return fn_80218D58() == 1;
+    WPADSetSimpleSyncCallback(wpadSimpleSyncCallback);
+    return WPADStopSimpleSync() == 1;
 }
 
 bool gfPadSystem::readGameDataRequest(int a, int b, int c, int d) {

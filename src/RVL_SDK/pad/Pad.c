@@ -87,7 +87,7 @@ extern BOOL SIBusy(void);
 extern BOOL SIUnregisterPollingHandler(void (*handler)(s16, OSContext *));
 extern void SIRefreshSamplingRate(void);
 extern u32 __PADFixBits;
-extern void fn_801EA088(void);
+extern void __VIResetSIIdle(void);
 
 // low memory: the wireless pad id the fix step hands out, and a few flags
 
@@ -723,7 +723,7 @@ static void SPEC2_MakeStatus(s32 chan, PADStatus *status, u32 data[2]) {
             abs(status->triggerLeft * status->triggerLeft - LastStatus[chan].triggerLeft * LastStatus[chan].triggerLeft) >= 9 ||
             abs(status->triggerRight * status->triggerRight - LastStatus[chan].triggerRight * LastStatus[chan].triggerRight) >= 9 ||
             status->button != LastStatus[chan].button) {
-            fn_801EA088();
+            __VIResetSIIdle();
         }
 
         memcpy(&LastStatus[chan], status, sizeof(PADStatus));

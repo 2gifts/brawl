@@ -13,15 +13,15 @@
 void fn_80362DD4(GSXmlStreamWriter stream) {
     GSIXmlStreamWriter* writer = stream;
 
-    fn_8035E00C(writer->mBuffer);
-    fn_8035E00C(writer);
+    gsifree(writer->mBuffer);
+    gsifree(writer);
 }
 
 GSSoapTask* fn_803621B8(const char* URL, const char* service, GSXmlStreamWriter request, GSSoapCallbackFunc callback, void* userData) {
     GSSoapTask* aSoapTask;
     GSTask* aCoreTask;
 
-    aSoapTask = fn_8035DFE8(sizeof(GSSoapTask));
+    aSoapTask = gsimalloc(sizeof(GSSoapTask));
     if (aSoapTask == NULL) {
         return NULL;
     }
@@ -39,7 +39,7 @@ GSSoapTask* fn_803621B8(const char* URL, const char* service, GSXmlStreamWriter 
 
     aCoreTask = fn_8035EA18();
     if (aCoreTask == NULL) {
-        fn_8035E00C(aSoapTask);
+        gsifree(aSoapTask);
         return NULL;
     }
     aCoreTask->mCallbackFunc = fn_80362488;
@@ -78,7 +78,7 @@ int fn_80362348(void* taskData) {
     if (aSoapTask->mCompleted) {
         return 4;
     }
-    fn_8037EEE8(aSoapTask->mRequestId);
+    ghttpRequestThink(aSoapTask->mRequestId);
     return 1;
 }
 
@@ -86,19 +86,19 @@ void fn_80362384(void* taskData) {
     GSSoapTask* aSoapTask = taskData;
     void* post;
 
-    post = fn_8037EFE8();
+    post = ghttpNewPost();
     aSoapTask->mPostData = post;
     if (post == NULL) {
         aSoapTask->mCompleted = 1;
         aSoapTask->mRequestResult = 1;
         return;
     }
-    fn_8037EFEC(post, 0);
-    fn_8037F074(aSoapTask->mPostData, aSoapTask->mRequestSoap);
+    ghttpPostSetAutoFree(post, 0);
+    ghttpPostAddXml(aSoapTask->mPostData, aSoapTask->mRequestSoap);
     if (aSoapTask->mCustomFunc) {
         aSoapTask->mCustomFunc(aSoapTask->mPostData, aSoapTask->mUserData);
     }
-    aSoapTask->mRequestId = fn_8037EAFC(aSoapTask->mURL, aSoapTask->mService, NULL, 0, aSoapTask->mPostData, 0, 0, NULL,
+    aSoapTask->mRequestId = ghttpGetExA(aSoapTask->mURL, aSoapTask->mService, NULL, 0, aSoapTask->mPostData, 0, 0, NULL,
                                         fn_803622B0, aSoapTask);
 }
 
@@ -107,7 +107,7 @@ void fn_80362434(void* taskData) {
 
     if (!aSoapTask->mCompleted) {
         if (aSoapTask->mRequestId >= 0) {
-            fn_8037EF20(aSoapTask->mRequestId);
+            ghttpCancelRequest(aSoapTask->mRequestId);
         }
         aSoapTask->mRequestResult = 0x12;
         aSoapTask->mCompleted = 1;
@@ -123,19 +123,19 @@ void fn_80362488(void* taskData, int result) {
 GSXmlStreamReader fn_80362C98(void) {
     GSIXmlStreamReader* newStream;
 
-    newStream = fn_8035DFE8(sizeof(GSIXmlStreamReader));
+    newStream = gsimalloc(sizeof(GSIXmlStreamReader));
     if (newStream == NULL) {
         return NULL;
     }
-    newStream->mElementArray = fn_8035A460(0x18, 0x20, fn_80362F4C);
+    newStream->mElementArray = ArrayNew(0x18, 0x20, fn_80362F4C);
     if (newStream->mElementArray == NULL) {
-        fn_8035E00C(newStream);
+        gsifree(newStream);
         return NULL;
     }
-    newStream->mAttributeArray = fn_8035A460(0x18, 0x10, fn_80362F50);
+    newStream->mAttributeArray = ArrayNew(0x18, 0x10, fn_80362F50);
     if (newStream->mAttributeArray == NULL) {
-        fn_8035A4FC(newStream->mElementArray);
-        fn_8035E00C(newStream);
+        ArrayFree(newStream->mElementArray);
+        gsifree(newStream);
         return NULL;
     }
     newStream->mElemReadIndex = -1;
@@ -160,9 +160,9 @@ int fn_80362D50(GSXmlStreamReader stream, char* data, int len) {
 void fn_80362E0C(GSXmlStreamReader stream) {
     GSIXmlStreamReader* reader = stream;
 
-    fn_8035A4FC(reader->mAttributeArray);
-    fn_8035A4FC(reader->mElementArray);
-    fn_8035E00C(reader);
+    ArrayFree(reader->mAttributeArray);
+    ArrayFree(reader->mElementArray);
+    gsifree(reader);
 }
 
 int fn_80367838(GSXmlStreamReader stream) {
@@ -177,8 +177,8 @@ int fn_8036784C(GSXmlStreamReader stream, const char* matchtag) {
     GSIXmlStreamReader* reader = stream;
     int i;
 
-    for (i = reader->mElemReadIndex + 1; i < fn_8035A590(reader->mElementArray); i++) {
-        if (fn_80367B44(matchtag, fn_8035A598(reader->mElementArray, i))) {
+    for (i = reader->mElemReadIndex + 1; i < ArrayLength(reader->mElementArray); i++) {
+        if (fn_80367B44(matchtag, ArrayNth(reader->mElementArray, i))) {
             reader->mElemReadIndex = i;
             reader->mValueReadIndex = -1;
             return 1;
