@@ -12,26 +12,22 @@ public:
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
 };
 
-// Module rodata constants lbl_111_rodata_20 (0.0) and lbl_111_rodata_24 (1.0).
+// Drill Rush recovers its pitch by twice the current rotation divided by the remaining count.
 static const float kSEndVectorValue = 0.0f;
-static const float kSEndScale = 1.0f;
+static const float kSEndScale = 2.0f;
 
 void ftMetaknightStatusUniqProcessSpecialSEnd::execStatus(soModuleAccesser* moduleAccesser) {
     // HYPOTHESIS: work id 0x20000002 is a remaining-count work slot (0 means the move is finished).
     int count = moduleAccesser->getWorkManageModule().getInt(0x20000002);
     if (count <= 0) {
         soPostureModule* posture = &moduleAccesser->getPostureModule();
-        Vec3f unit(kSEndVectorValue, kSEndVectorValue, kSEndVectorValue);
-        posture->setRot(&unit, 0);
+        posture->setRot(&Vec3f(kSEndVectorValue, kSEndVectorValue, kSEndVectorValue), 0);
         return;
     }
     float x = moduleAccesser->getPostureModule().getRot(0).m_x;
     float step = (kSEndScale * x) / (float)count;
     soPostureModule* posture = &moduleAccesser->getPostureModule();
-    Vec3f before = posture->getRot(0);
-    Vec3f after = posture->getRot(0);
-    Vec3f next(x - step, after.m_y, before.m_z);
-    posture->setRot(&next, 0);
+    posture->setRot(&Vec3f(x - step, posture->getRot(0).m_y, posture->getRot(0).m_z), 0);
 }
 
 void ftMetaknightStatusUniqProcessSpecialSEnd::exitStatus(soModuleAccesser* moduleAccesser, int) {

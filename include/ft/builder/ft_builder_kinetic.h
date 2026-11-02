@@ -126,7 +126,13 @@ public:
     static void updateEnergy(E* energy, soModuleAccesser* acc) {
 #ifdef FT_KINETIC_MEDIATOR_TRANSACTOR
         // Fighter-local overloads implement movement specific to the selected transactor.
+#ifdef FT_KINETIC_MEDIATOR_DIRECT_UPDATES
+        if (energy->isEnable() == true && energy->isSuspend() == false) {
+            return FT_KINETIC_MEDIATOR_TRANSACTOR::updateEnergy(energy, acc);
+        }
+#else
         return FT_KINETIC_MEDIATOR_TRANSACTOR::updateEnergy(energy, acc);
+#endif
 #else
         if (energy->isEnable() != true) {
             return;
@@ -413,16 +419,34 @@ public:
         FT_KINETIC_EACH_POOL(FT_KINETIC_CLEAR)
     }
 
+#ifdef FT_KINETIC_MEDIATOR_DIRECT_UPDATES
+#define FT_KINETIC_UPDATE(L)                                                                                              for (int i = 0; i < 1; i++) {                                                                                             ftKineticPool##L##Info::Type* energy = FT_KINETIC_SUB(L).getInstanceAt(i);                                             if (energy->isEnable() == true && !energy->isSuspend()) {                                                                  FT_KINETIC_MEDIATOR_TRANSACTOR::updateEnergy(energy, acc);                                                                    }                                                                                                                  }
+#else
 #define FT_KINETIC_UPDATE(L)                                                                                              for (int i = 0; i < 1; i++) {                                                                                             ftKineticPool##L##Info::Type* energy = FT_KINETIC_SUB(L).getInstanceAt(i);                                             if (energy->isEnable() == true && !energy->isSuspend()) {                                                                  ftKineticTransactor::updateEnergy(energy, acc);                                                                    }                                                                                                                  }
+#endif
     virtual void updateEnergy(soModuleAccesser* acc) {
         FT_KINETIC_EACH_POOL(FT_KINETIC_UPDATE)
     }
 
     virtual void updateEnergy1(soModuleAccesser* acc, soKineticAttributeMask flag) {
+#ifdef FT_KINETIC_MEDIATOR_DIRECT_UPDATES
+        soKineticUpdateEnergyHolderHelper<FT_KINETIC_MEDIATOR_TRANSACTOR> helper(flag);
+#else
         soKineticUpdateEnergyHolderHelper<ftKineticTransactor> helper(flag);
+#endif
         m_pools.forEachHolderModuleAccesser(helper, acc);
     }
 
+#ifdef FT_KINETIC_MEDIATOR_DIRECT_UPDATES
+    virtual void updateEnergy2(soArray<soKineticEnergy**>* energies, soModuleAccesser* acc) {
+        for (int i = 0; i < energies->size(); i++) {
+            soKineticEnergy* energy = *energies->at(i);
+            if (energy->isEnable() != false && energy->isSuspend() != true) {
+                ftKineticTransactor::updateEnergy(energy, acc);
+            }
+        }
+    }
+#else
     virtual void updateEnergy2(soArray<soKineticEnergy**>* energies, soModuleAccesser* acc) {
         for (int i = 0; i < energies->size(); i++) {
             soKineticEnergy* energy = **&energies->at(i);
@@ -435,6 +459,7 @@ public:
             }
         }
     }
+#endif
 
     virtual void postUpdateEnergy() { }
     virtual void addSpeed(void* speed, soModuleAccesser* acc) { ftKineticTransactor::addSpeed(speed, &m_pools, acc); }

@@ -44,8 +44,14 @@ FT_DOL_ARRAY_VECTOR(soCollisionAttackAbsolute, 6);
 // Empty article interfaces have no resources to release in this unit.
 inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
 inline soParamAccesser::~soParamAccesser() { }
+// Native mediator calls go directly to the fighter's typed update templates.
+#include <ft/metaknight/ft_metaknight_kinetic_transactor.h>
+#define FT_KINETIC_MEDIATOR_TRANSACTOR ftMetaknightKineticTransactor
+#define FT_KINETIC_MEDIATOR_DIRECT_UPDATES
 #include <ft/ft_class_info_impl.h>
 #include <ft/metaknight/ft_metaknight.h>
+#undef FT_KINETIC_MEDIATOR_DIRECT_UPDATES
+#undef FT_KINETIC_MEDIATOR_TRANSACTOR
 #include <ft/metaknight/ft_metaknight_status_uniq_process_final_end.h>
 #include <gf/gf_task_scheduler.h>
 #include <so/collision/so_collision_log.h>
@@ -191,46 +197,16 @@ void ftMetaknight::notifyEventChangeMotion(int motionKind, int, void*, soModuleA
 // What the constructor of the article is given: the kind record of the owner (kind 0, sub kind Metaknight, copied into the
 // descriptor), the heap module and the data block of the fighter kind.
 // HYPOTHESIS: the original builds these in the holder constructor itself.
-struct ftMetaknightArticleDataTag {
-    bool m_unused;
-    bool m_resourceGroup;
-    ftMetaknightArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
-};
-
 struct ftMetaknightArticleKind : wnArticleKindInfo {
+    ftKind getSubKind() const { return static_cast<ftKind>(subKind); }
     ftMetaknightArticleKind() {
         kind = 0;
         subKind = Fighter_MetaKnight;
     }
 };
 
-// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
-struct ftMetaknightArticleBuildInfo : wnArticleBuildInfo {
-    ftMetaknightArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
-        kindInfo = &kindArg;
-        heapModule = heap;
-    }
-};
-
-// The data block of the article comes from the common data accessor of sora_melee (only declared here).
-extern "C" void* fn_27_1496A8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-
-template <class W> struct ftMetaknightArticleTraits;
-#define FT_METAKNIGHT_TRAITS(W, DATA, ID, GETTER) \
-    template <> struct ftMetaknightArticleTraits<W> { \
-        enum { ArticleId = ID }; \
-        static const DATA* getData() { \
-            ftMetaknightArticleDataTag tag; \
-            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_MetaKnight, &tag.m_resourceGroup)); \
-        } \
-    };
-
-FT_METAKNIGHT_TRAITS(wnMetaknightMantle, wnMetaknightMantleData, 0, fn_27_1496A8)
-
-// The article of the fighter is built by this constructor from the data of the fighter kind.
-template <class W>
-wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
-    m_instance(ftMetaknightArticleTraits<W>::ArticleId, ftMetaknightArticleBuildInfo(ftMetaknightArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftMetaknightArticleTraits<W>::getData()) { }
+#include <ft/builder/ft_builder_article.h>
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(inline, wnMetaknightMantle, wnMetaknightMantleData, 0, ftMetaknightArticleKind, getWeaponData128)
 
 // ---- the article of Meta Knight and its mediator --------------------------------------------------------------------
 
