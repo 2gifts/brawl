@@ -1,20 +1,22 @@
 #pragma once
 
-// Local BrawlHeaders shadow: m_decisionKind holds a DecisionKind in a plain byte, as stResult::createObj reads it.
+// Local BrawlHeaders shadow: m_decisionKind (a DecisionKind) and m_characterKind (a gmCharacterKind) are plain bytes:
+// stResult::createObj and ftManager::isExistLoseFighterResult read them with lbz. m_gameRule stays an enum bit field
+// (gmAddDiagramResultCommon reads it with lwz and a signed extract).
 
 #include <StaticAssert.h>
 #include <types.h>
 #include <gm/gm_lib.h>
 
 struct gmPlayerResultInfo {
-    gmCharacterKind m_characterKind : 8;
+    u8 m_characterKind; // gmCharacterKind
     u8 m_state;
     s8 m_colorFileIdx;
     char _3[3];
     u8 m_teamNo;
     char _7[1];
     s16 m_hitPointMax;
-    u8 m_startStockCount;
+    s8 m_startStockCount; // signed: ifVsResultTask tests it with > 0 on the byte
     char _11[1];
     s16 m_startDamage;
     u8 m_rank;
