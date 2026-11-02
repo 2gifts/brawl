@@ -35,7 +35,7 @@ struct wnParamDededeFollowerCommon {
 static_assert(sizeof(wnParamDededeFollowerCommon) == 0x6C, "Dedede follower per-variation parameter extent");
 
 class wnDededeFollowerParamAccesser : public wnExtendParamAccesser<3999, 27, 23999, 16, 0, 0> {
-    soArrayContractibleTable<const wnParamDededeFollowerCommon> m_common; // +0xD4
+    const soArrayContractibleTable<const wnParamDededeFollowerCommon> m_common; // +0xD4
 public:
     wnDededeFollowerParamAccesser(const wnParamDededeFollower* param, const wnParamDededeFollowerCommon* common);
     virtual ~wnDededeFollowerParamAccesser() { }

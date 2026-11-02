@@ -618,8 +618,6 @@ wnDededeFollowerParamAccesser::wnDededeFollowerParamAccesser(const wnParamDedede
     m_ints[5] = &param->unk2C;
 }
 
-// MATCH-ONLY: the native queries call the const element accessor of the table.
-#define DEDEDE_FOLLOWER_COMMON(variation)     static_cast<const soArrayContractibleTable<const wnParamDededeFollowerCommon>&>(m_common).at(variation)
 
 float wnDededeFollowerParamAccesser::getParamFloat(soModuleAccesser* acc, s32 id, s32 index) {
     float result;
@@ -629,58 +627,58 @@ float wnDededeFollowerParamAccesser::getParamFloat(soModuleAccesser* acc, s32 id
         u32 variation = acc->getWorkManageModule().getInt(0x10000005);
         switch (id) {
         case 0xFA9:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk0;
+            result = m_common.at(variation).unk0;
             break;
         case 0xFAA:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk4;
+            result = m_common.at(variation).unk4;
             break;
         case 0xFAB:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unkC;
+            result = m_common.at(variation).unkC;
             break;
         case 0xFAC:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk24;
+            result = m_common.at(variation).unk24;
             break;
         case 0xFAD:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk28;
+            result = m_common.at(variation).unk28;
             break;
         case 0xFAE:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk2C;
+            result = m_common.at(variation).unk2C;
             break;
         case 0xFAF:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk30;
+            result = m_common.at(variation).unk30;
             break;
         case 0xFB0:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk34;
+            result = m_common.at(variation).unk34;
             break;
         case 0xFB1:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk38;
+            result = m_common.at(variation).unk38;
             break;
         case 0xFB2:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk3C;
+            result = m_common.at(variation).unk3C;
             break;
         case 0xFB3:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk40;
+            result = m_common.at(variation).unk40;
             break;
         case 0xFB4:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk44;
+            result = m_common.at(variation).unk44;
             break;
         case 0xFB5:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk48;
+            result = m_common.at(variation).unk48;
             break;
         case 0xFB6:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk4C;
+            result = m_common.at(variation).unk4C;
             break;
         case 0xFB7:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk50;
+            result = m_common.at(variation).unk50;
             break;
         case 0xFB8:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk54;
+            result = m_common.at(variation).unk54;
             break;
         case 0xFB9:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk5C;
+            result = m_common.at(variation).unk5C;
             break;
         case 0xFBA:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk60;
+            result = m_common.at(variation).unk60;
             break;
         default:
             result = 0.0f;
@@ -698,31 +696,31 @@ s32 wnDededeFollowerParamAccesser::getParamInt(soModuleAccesser* acc, s32 id, s3
         u32 variation = acc->getWorkManageModule().getInt(0x10000005);
         switch (id) {
         case 0x5DC7:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk8;
+            result = m_common.at(variation).unk8;
             break;
         case 0x5DC8:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk10;
+            result = m_common.at(variation).unk10;
             break;
         case 0x5DC9:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk14;
+            result = m_common.at(variation).unk14;
             break;
         case 0x5DCA:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk18;
+            result = m_common.at(variation).unk18;
             break;
         case 0x5DCB:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk1C;
+            result = m_common.at(variation).unk1C;
             break;
         case 0x5DCC:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk20;
+            result = m_common.at(variation).unk20;
             break;
         case 0x5DCD:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk58;
+            result = m_common.at(variation).unk58;
             break;
         case 0x5DCE:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk64;
+            result = m_common.at(variation).unk64;
             break;
         case 0x5DCF:
-            result = DEDEDE_FOLLOWER_COMMON(variation).unk68;
+            result = m_common.at(variation).unk68;
             break;
         default:
             result = 0;

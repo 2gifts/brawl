@@ -48,7 +48,7 @@ struct wnPikminPikminParamParticular {
 static_assert(sizeof(wnPikminPikminParamParticular) == 0x74, "Pikmin per-colour parameter extent");
 
 class wnPikminPikminParamAccesser : public wnExtendParamAccesser<3999, 65, 23999, 11, 0, 0> {
-    soArrayContractibleTable<const wnPikminPikminParamParticular> m_particular; // +0x158
+    const soArrayContractibleTable<const wnPikminPikminParamParticular> m_particular; // +0x158
 public:
     wnPikminPikminParamAccesser(const wnPikminPikminParam* param, const wnPikminPikminParamParticular* particular)
         __attribute__((never_inline)) :
