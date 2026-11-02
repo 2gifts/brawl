@@ -2420,8 +2420,11 @@ RVL_SDK/mem/mem_list.c:
 RVL_SDK/cx/CXCompression.c:
 	.text       start:0x80204FC8 end:0x80205530
 
+RVL_SDK/cx/CXStreamingUncompression.c:
+	.text       start:0x80205530 end:0x80205FD8
+
 RVL_SDK/cx/CXUncompression.c:
-	.text       start:0x80205530 end:0x80206308
+	.text       start:0x80205FD8 end:0x80206308
 
 RVL_SDK/mix/mix.c:
 	.text       start:0x80206308 end:0x80209388
