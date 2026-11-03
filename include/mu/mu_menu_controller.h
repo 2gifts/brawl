@@ -1,6 +1,7 @@
 #pragma once
 
 #include <StaticAssert.h>
+#include <types.h>
 
 // Local shadow of the header of the shared headers (this directory comes first in the include paths): the constructor
 // and the destructor of the controller of a menu are inline, so each module that has an array of controllers carries
@@ -12,7 +13,9 @@ extern "C" void fn_800B9984(muMenuController* controller);
 
 class muMenuController {
 public:
-    char _unk[0xA8];
+    char _unk0[0x10];
+    u32 m_trigger;      // 0x10 HYPOTHESIS: the buttons pressed in this frame, in the bits of gfPadButtons
+    char _unk14[0x94];
 
     muMenuController() { fn_800B96E8(this, 0xFF); }
     ~muMenuController() { }
