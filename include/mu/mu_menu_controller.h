@@ -13,6 +13,7 @@ extern "C" void fn_800B9984(muMenuController* controller);
 
 class muMenuController {
 public:
+    void init(int pad);
     char _unk0[0x8];
     u32 m_held;         // 0x08 HYPOTHESIS: the buttons that are held (the name entry copies it to m_buttonsCurrentFrame2)
     u32 m_pressed;      // 0x0C HYPOTHESIS: the buttons that were just pressed (1 left, 2 right in the Yes/No windows)
