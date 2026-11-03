@@ -14,6 +14,7 @@
 #endif
 
 class soModuleAccesser;
+struct soAnimCmdAddressPackConv;
 
 /*
  * This class is weird, it has a bunch of data before the event presenter vtable and info,
@@ -56,8 +57,15 @@ public:
         m_kind(kind), m_moduleAccesser(nullptr), unk48(0), unk4C(0) { }
     ~soAnimCmdInterpreter() { }
     virtual bool dispatchCmdIf(const acAnimCmd* cmd);
+    virtual s32 dispatchCmdSwitch(const acAnimCmd* cmd) const;
+    virtual bool isBreakInterpret();
     virtual bool isSleepStackData(s32 kind) const;
+    virtual bool isSkipEnd() const;
     void interpretCmd(soModuleAccesser* moduleAccesser, float timeStep);
+    void resetInterpreter(const soAnimCmdAddressPackConv& pack, soModuleAccesser* moduleAccesser, float frame);
+    void resetInterpreter(const acAnimCmdConv* initCmd, soModuleAccesser* moduleAccesser, u32 flag, float frame);
+    void skipNextMotionGroup(soModuleAccesser* moduleAccesser);
+    void systemCmdFuncWaitLoop();
 };
 static_assert(sizeof(soAnimCmdInterpreter) == 0x50, "Class is the wrong size!");
 #endif
