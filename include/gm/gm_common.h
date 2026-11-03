@@ -109,3 +109,6 @@ u32 gmGetAllMeleeTimeTotal();
 u32 gmGetVsMeleeTotalCount();
 u32 gmGetOfflineVsMeleeTotalCount();
 u32 gmGetOnlineVsMeleeTotalCount();
+u32 gmSubCoin(u32 num);
+bool isClearGetterOpen(int index);
+void setClearGetterOpen(int index);

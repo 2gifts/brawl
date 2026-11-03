@@ -312,9 +312,19 @@ struct gmGlobalRecord {
         gmDiagramResult m_diagram;  // 0x48 the per-character records of the Chronicle diagrams
         u16 unk98;
         char _9A[0x2];
-        u8 unk9C[0x44];
+        union {
+            u8 unk9C[0x44];
+            struct {
+                u16 : 5;
+                u16 m_unk9C_10 : 3; // HYPOTHESIS: bits 10-8 of the halfword at 0x9C
+                u16 : 8;
+                u32 m_unkA0; // HYPOTHESIS: high score at 0xA0
+                u8 _A4[0x3C];
+            };
+        };
     };
     static_assert(sizeof(CharaNumData) == 0xE0, "Class is wrong size!");
+static_assert(offsetof(CharaNumData, m_unkA0) == 0xA0, "Class is wrong size!");
 
     char _0[0x18];
     u8 m_stageAppFlag[0x4];                 // 0x18
@@ -413,11 +423,21 @@ struct gmAdvData {
 
         char _0[0x04];                    // 0x00
         LevelClear m_levelClears[34]; // 0x04
-        char unk2AC[0x467C];
+        union {
+            char unk2AC[0x467C];
+            struct {
+                char _pad2AC[0x4678];
+                u8 : 1;
+                u8 m_unk4924_6 : 1; // HYPOTHESIS: bit 6 of byte 0x4924
+                u8 : 6;
+                char _pad4925[3];
+            };
+        };
         u32 unk4928;
         u32 unk492C;
     };
     static_assert(sizeof(Record) == 0x4930, "Class is wrong size!");
+    static_assert(offsetof(Record, unk4928) == 0x4928, "Class is wrong size!");
 
     Record m_record;
     char unk4930[0x28];
