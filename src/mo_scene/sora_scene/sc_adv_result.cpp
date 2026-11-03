@@ -15,28 +15,21 @@ void scAdvResult::setModule() {
     setLoadModule("sora_adv_menu_result.rel", false);
 }
 
-struct UnkParam {
-    union {
-        bool asBool;
-        u32 asInt;
-    } unk0;
-    u32 unk4;
-};
+typedef gmAdvData::PadInfo UnkParam;
 
 void scAdvResult::start() {
     UnkParam stack18;
     UnkParam stack10;
     UnkParam stack8;
     if (g_GameGlobal->m_advData) {
-        stack10.unk0.asInt = g_GameGlobal->m_advData->m_record.unk4928;
-        stack10.unk4 = g_GameGlobal->m_advData->m_record.unk492C;
+        stack10 = g_GameGlobal->m_advData->m_padInfo[0];
     } else {
-        stack18.unk0.asBool = false;
-        stack18.unk4 = -1;
+        stack18.m_flag.m_isSet = false;
+        stack18.m_padNo = -1;
         stack10 = stack18;
     }
     stack8 = stack10;
-    m_mainPlayerPort = stack8.unk4;
+    m_mainPlayerPort = stack8.m_padNo;
     muAdvResultTaskParam param = { m_mainPlayerPort, m_earnedCoinsForClear,
             m_scoreInCurrentStage, m_totalScore, &unk20, &unk34, &unk48 };
     m_task = muAdvResultTask::create(&param);

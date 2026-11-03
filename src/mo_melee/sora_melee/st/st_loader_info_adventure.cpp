@@ -32,9 +32,8 @@ struct stLoaderInfoAdventureIfView {
     void* unk104;
 };
 
-// MATCH-ONLY: the Subspace save fields read as the original does; gmAdvData leaves this range unnamed.
 static inline u8 getAdvMode(gmAdvData* advData) {
-    return reinterpret_cast<u8*>(advData)[0x604];
+    return advData->m_mode;
 }
 
 static stLoaderSandBagMarker sMarkerA(0xFF, 0);
@@ -50,7 +49,7 @@ void stLoaderInfoAdventure::processBegin() {
         gmAdvData* advData = g_GameGlobal->m_advData;
         if (getAdvMode(advData) != 2) {
             reinterpret_cast<stLoaderInfoAdventureIfView*>(advMngr)->unk50 =
-                *reinterpret_cast<int*>(reinterpret_cast<u8*>(advData) + 0x4910);
+                advData->unk4910;
         }
         switch (m_state) {
             case 0:
