@@ -340,3 +340,22 @@ public:
     virtual void userProc();
     virtual ~stObsTriggerPlayerIncludeAreaCB();
 };
+
+class stObsTriggerKeyArea : public stObsTriggerArea {
+public:
+    // HYPOTHESIS: 0xC bytes of additional state (sizeof 0x48 in stTrigger::setKeyAreaTrigger).
+    u8 unk3C[0xC];
+
+    stObsTriggerKeyArea(bool* flag, bool unkC);
+    void createArea(stGimmickAreaData* areaData, Vec2f pos);
+};
+static_assert(sizeof(stObsTriggerKeyArea) == 0x48, "Class is wrong size!");
+
+class stObsTriggerTruckArea : public stObsTriggerArea {
+public:
+    // HYPOTHESIS: 0xC bytes of additional state (sizeof 0x48 in stTrigger::setTruckAreaTrigger).
+    u8 unk3C[0xC];
+
+    stObsTriggerTruckArea(bool* flag, bool unkC);
+    void createArea(stGimmickAreaData* areaData, Vec2f pos);
+};
