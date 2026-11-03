@@ -1,8 +1,10 @@
 #include <cm/cm_camera_controller.h>
+#include <cm/cm_controller_photo.h>
 #include <gf/gf_pad_system.h>
 #include <gf/gf_task_scheduler.h>
 #include <if/if_photo.h>
 #include <if/if_snap_save.h>
+#include <memory.h>
 #include <mu/mu_msg.h>
 #include <mu/mu_object.h>
 #include <nw4r/g3d/g3d_scngroup.h>
@@ -95,4 +97,40 @@ s32 IfPhoto::photoStepSnapSaveMain() {
         return 1;
     }
     return m_step;
+}
+
+void IfPhoto::exitPause() {
+    if (m_snapSaveTask) {
+        m_snapSaveTask->exit();
+        m_snapSaveTask = NULL;
+    }
+    CameraController* camera = getCameraController();
+    cmPhotoController* photo = dynamic_cast<cmPhotoController*>(camera->getCameraController(CameraController::Photo));
+    if (photo->unk60 <= 0) {
+        camera->changeInput(static_cast<CameraController::Kind>(m_cameraInput));
+    }
+}
+
+void cmPhotoController::clearControl() {
+    memset(unk14, 0, sizeof(unk14));
+}
+
+void IfPhoto::getMediaState(IfSnapSaveMedia* media, int kind) {
+    // HYPOTHESIS: the nonzero media kind leaves the free-size value unset.
+    int status;
+    u32 size;
+    if (kind == 0) {
+        size = 0x1000000;
+        status = 0;
+    } else {
+        status = 1;
+    }
+    switch (status) {
+    case 0:
+        size >>= 17;
+        status = 0;
+        break;
+    }
+    media->m_status = status;
+    media->m_free = size;
 }
