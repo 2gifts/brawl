@@ -1,6 +1,7 @@
 #include <types.h>
 
 #include <mu/wifi/mu_wifi_interface.h>
+#include <nt/nt_net_report.h>
 #include <nt/network.h>
 #include <nt/nt_offline.h>
 #include <nt/nt_report.h>
