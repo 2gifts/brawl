@@ -133,19 +133,6 @@ static inline u8 getCharacterKind(const gmPlayerResultInfo& info) {
 // blank for a missing leading digit); it lives in the range of ifSimpleResultTask.
 extern const char* lbl_8045B674[];
 
-// HYPOTHESIS: bit views of bytes of gmResultInfo that the shadow header does not name yet.
-struct ResultPlayerFlags {   // byte 7 of gmPlayerResultInfo
-    u8 : 1;
-    u8 : 1;
-    u8 : 1;
-    u8 hasController : 1;    // 0x10
-    u8 : 4;
-};
-struct ResultInfoFlags {     // byte 0xE of gmResultInfo
-    u8 tournament : 1;       // 0x80
-    u8 : 7;
-};
-
 ifVsResultTask::ifVsResultTask()
     : gfTask("ifVsResultTask", Category_Info, 14, 6, true),
       m_state(0),
@@ -191,7 +178,7 @@ ifVsResultTask::ifVsResultTask()
         m_playerState[i] = state;
         if (state == 0) {
             m_unkC0 |= 1 << i;
-            if (reinterpret_cast<ResultPlayerFlags*>(&player->_7[0])->hasController) {
+            if (player->m_hasController) {
                 m_unkC1 |= 1 << i;
             } else {
                 m_unkC2 |= 1 << i;
@@ -208,11 +195,10 @@ ifVsResultTask::ifVsResultTask()
         m_unkC4[i] = 0;
     }
 
-    // HYPOTHESIS: gmResultInfo has no names for these bytes yet: the winner (0x1F) and the winning team (0x1E)
-    m_winnerPlayer = reinterpret_cast<u8*>(resultInfo)[0x1F];
-    m_winnerTeam = reinterpret_cast<u8*>(resultInfo)[0x1E];
+    m_winnerPlayer = resultInfo->m_winningPlayer;
+    m_winnerTeam = resultInfo->m_winningTeam;
     bool tournamentLike = false;
-    if (reinterpret_cast<ResultInfoFlags*>(&reinterpret_cast<u8*>(resultInfo)[0xE])->tournament) {
+    if (resultInfo->m_isTournament) {
         if (g_GameGlobal->m_setRule->m_spMeleeSetting1 == 2) {
             tournamentLike = true;
         }
@@ -504,7 +490,8 @@ static inline float getControllerIconFrame(const gfPadStatus& pad) {
         (task)->m_objects[index]->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);        \
     } while (0)
 
-// MATCH-ONLY: the controller number (+1, 0 for none) and the rumble setting of a player of the result are read as bytes.
+// MATCH-ONLY: the controller number (+1, 0 for none) and the rumble setting of a player of the result are read as bytes
+// at a scaled offset from the result: the member reads (m_controllerNo, m_unk5) strength-reduce the loops' addresses.
 static inline u8 getResultPadNo(const gmResultInfo* info, int player) {
     return reinterpret_cast<const u8*>(info)[0x28 + player * 0x2AC];
 }
