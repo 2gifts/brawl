@@ -10,6 +10,8 @@
 #include <st/operator/st_operator.h>
 #include <types.h>
 
+class stEventRule;
+
 class stOperatorRule : public stOperator {
 public:
     enum DecisionKind {
@@ -27,14 +29,32 @@ public:
 
     bool canSaveReplay();
     void startSaveReplay();
+    void checkDispCorps();
 
     void* m_operatorBgm;
     void* m_operatorNetwork;
     void* m_operatorController;
-    char _20[32];
-    bool m_isGameSet;
-    bool unk75;
-    char _76[0x3E];
+    union {
+        char _20[32];
+        struct {
+            stEventRule* unk54;
+            char unk58[0x1C];
+        };
+    };
+    union {
+        struct {
+            bool m_isGameSet;
+            bool unk75;
+            char _76[0x3E];
+        };
+        struct {
+            u8 unk74[4];
+            u32 unk78;
+            int unk7C[4];
+            float unk8C[4];
+            char unk9C[0x18];
+        };
+    };
     u32 unkB4;
     u32 unkB8;
     bool unkBC;

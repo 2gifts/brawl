@@ -48,11 +48,18 @@ struct soCollisionReflectorGroupData {
 };
 
 class soCollisionShieldPart;
+class soCollision;
+class soModelModule;
 
 class soCollisionShieldGroup {
 public:
 	~soCollisionShieldGroup();
 	void init();
+    // HYPOTHESIS: add returns the number of parts consumed; indices are unsigned.
+    int add(soCollision* collision, soArray<soCollisionShieldPart>* parts, soCollisionShieldGroupData* data, u32 groupIndex, u32 partStart);
+    int add(soCollision* collision, soArray<soCollisionShieldPart>* parts, soCollisionReflectorGroupData* data, u32 groupIndex, u32 partStart);
+    // HYPOTHESIS: position, scale and facing are forwarded as doubles with the model module.
+    bool update(soCollision* collision, soArray<soCollisionShieldPart>* parts, soModelModule* model, double posX, double scale, double lr);
 	void set(soArray<soCollisionShieldPart>* parts, u32 index, soCollisionShieldData* data);
 	void setReflectorData(const soCollisionReflectorData* data);
 	bool isShield(soArray<soCollisionShieldPart>* parts, u32 index) const;

@@ -1,4 +1,4 @@
-// Local BrawlHeaders shadow: expose the video state at 0x0 and the replay timing counter at 0x100.
+// Local BrawlHeaders shadow: expose the video state at 0x0, the replay timing counter at 0x100, and the pause and low-effect skip state.
 #pragma once
 
 #include <StaticAssert.h>
@@ -23,13 +23,40 @@ public:
     gfKeepFrameBuffer unkD0;
     u8 unkD1[0x13];
     int m_e4;
-    u8 unkE8[0x5];
-    u8 unkED; // 0xED HYPOTHESIS: bit 0x2 requests a frame-buffer capture (IfSnapSaveTask)
-    u8 unkEE[0xA];
+    union {
+        struct {
+            u8 unkE8[0x5];
+            u8 unkED; // 0xED HYPOTHESIS: bit 0x2 requests a frame-buffer capture (IfSnapSaveTask)
+            u8 unkEE[0xA];
+        };
+        struct {
+            u8 _padE8[0x4];
+            u32 : 5;
+            // HYPOTHESIS: one requested-pause bit per index.
+            u32 m_pauseFlags : 5;
+            u32 : 22;
+        };
+        struct {
+            u8 _padED[0x5];
+            u8 : 5;
+            // HYPOTHESIS: low-effect skipping is allowed.
+            u8 m_lowEffectEnabled : 1;
+            u8 : 2;
+            u8 : 7;
+            // HYPOTHESIS: the low-effect skip state published for this frame.
+            u8 m_skipLowEffect : 1;
+            // HYPOTHESIS: the low-effect skip state being tracked.
+            u8 m_lowEffectActive : 1;
+        };
+    };
     u16 m_frameRate;
     u8 unkFA[6];
     u32 unk100; // replay recording observes changes in this application counter
-    u8 unk104[0x8];
+    union {
+        u8 unk104[0x8];
+        // HYPOTHESIS: frames spent above or below the low-effect threshold.
+        s32 m_skipCounter;
+    };
     void* unk10C; // 0x10C HYPOTHESIS: the capture destination (IfSnapSaveTask)
     u8 unk110[0x4];
     gfCallBackList m_114;
@@ -43,6 +70,9 @@ public:
     void restart();
     void mainLoop();
     void exit();
+    void setPause(int value, int index);
+    void clearPause();
+    void setSkipLowEffect(u8 level);
 
     inline static gfApplication* getInstance() { return g_gfApplication; }
 };

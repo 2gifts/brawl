@@ -51,6 +51,7 @@ struct NtBase {
     NtBase() : unk4(0) { }
     virtual ~NtBase() { }
     static bool isMatchStatusOnline();
+    static bool isNetCondOnline();
     static void setSIDPlayer(u8 station, u8 count);
 
     s32 unk4;

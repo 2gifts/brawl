@@ -1,10 +1,13 @@
 // MATCH-ONLY: the editor inlines its native paired-single vector multiplication.
 #define MT_VEC3F_MUL_INLINE
-#include <mu/mu_stage_edit_ui.h>
-#include <math.h>
+#include <gf/gf_heap_manager.h>
+#include <gf/gf_pad_system.h>
 #include <gf/gf_scene.h>
+#include <math.h>
+#include <mu/mu_stage_edit_ui.h>
 #include <nw4r/g3d/g3d_scngroup.h>
 #include <snd/snd_system.h>
+#include <st/st_data_container.h>
 
 // HYPOTHESIS: the RVL SDK texture-object accessor, which the GX headers do not declare.
 extern "C" void* GXGetTexObjData(const _GXTexObj* texture);
@@ -291,6 +294,77 @@ s16 muStageEditUI::getSettingDataNum() {
 void muStageEditUI::setStageThumbnail(_GXTexObj* texture) {
     m_thumbnail->changeMaterialTex("thumbnail_mat", texture);
     m_thumbnailData = GXGetTexObjData(texture);
+}
+
+void muStageEditUI::ctrlSetup(gfPadStatus* output, int repeat) {
+    u32 buttons = 0;
+    for (int i = 0; i < 8; ++i) {
+        gfPadStatus status;
+        g_gfPadSystem->getSysPadStatus(i, &status);
+        if (status.m_error < 0) continue;
+        switch (status.m_controllerType) {
+        case gfPadType::WIIMOTE:
+            buttons |= status.m_buttonsPressedThisFrame2.bits | unk74;
+            if (status.m_buttonsPressedThisFrame.bits & 0x200000) {
+                output->m_buttonsPressedThisFrame.bits |= 0x400;
+            } else if (status.m_buttonsPressedThisFrame.bits & 0x400000) {
+                output->m_buttonsPressedThisFrame.bits |= 0x10;
+                output->m_buttonsPressedThisFrame.bits &= ~0x40;
+            } else if (status.m_buttonsCurrentFrame2.bits & 0x80000) {
+                buttons = 0;
+                if (status.m_buttonsPressedThisFrame.bits & 4) {
+                    output->m_buttonsPressedThisFrame.bits |= 0x20;
+                } else if (status.m_buttonsPressedThisFrame.bits & 8) {
+                    output->m_buttonsPressedThisFrame.bits |= 0x40;
+                }
+            }
+            break;
+        case gfPadType::NUNCHUK:
+            buttons |= unk74;
+            if (repeat) buttons |= status.m_buttonsPressedThisFrame2.bits;
+            if (status.m_buttonsPressedThisFrame.bits & 0x80000) {
+                output->m_buttonsPressedThisFrame.bits |= 0x400;
+            } else if (status.m_buttonsPressedThisFrame.bits & 0x20000) {
+                output->m_buttonsPressedThisFrame.bits |= 0x800;
+            } else if (status.m_buttonsPressedThisFrame.bits & 4) {
+                output->m_buttonsPressedThisFrame.bits |= 0x20;
+            } else if (status.m_buttonsPressedThisFrame.bits & 8) {
+                output->m_buttonsPressedThisFrame.bits |= 0x40;
+            } else if (status.m_buttonsPressedThisFrame2.bits & 0x40000) {
+                unk68 = 1;
+                buttons = 0;
+                output->m_subStickY = output->m_stickY;
+                output->m_buttonsPressedThisFrame.bits &= ~0x400;
+            }
+            break;
+        default:
+            buttons |= status.m_buttonsPressedThisFrame2.bits | unk74;
+            break;
+        }
+    }
+    output->m_buttonsPressedThisFrame2.bits = buttons;
+}
+
+extern const char lbl_5_data_600[];
+
+muStageEditDataManager::muStageEditDataManager(int size, int load)
+    : unk5D0(size), m_loaded(false), unk608(true), unk60C(NULL) {
+    if (load && !unk604.m_request) {
+        m_loaded = false;
+        unk608 = false;
+        unk604.readRequest(lbl_5_data_600, static_cast<HeapType>(0x2B), 0, 0);
+    }
+}
+
+muStageEditDataManager::~muStageEditDataManager() {
+    if (!unk608) {
+        gfHeapManager::free(unk604.getBuffer());
+        unk604.release();
+    }
+    if (unk60C) {
+        delete unk60C;
+        unk60C = NULL;
+    }
 }
 
 muStageEditDataManager::Data* muStageEditDataManager::getDataId(u32 id) {
