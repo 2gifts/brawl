@@ -1,11 +1,43 @@
 #define SO_PHYSICS_MODULE_IMPL_FULL
 #include <ph/ph_2ndary_controller.h>
 #include <so/physics/so_physics_module_impl.h>
+#include <so/so_module_accesser.h>
 #include <so/templates/so_array_value_soPhysicsIKHandle.h>
 #include <types.h>
 
 extern "C" void fn_8008F3E0(ph2ndary2Controller* controller, int status);
 extern "C" void fn_80095990(ph2ndaryController* controller, const int* winding);
+
+soPhysicsModule::~soPhysicsModule() {
+}
+
+void soPhysicsModuleImpl::init(void* ikData) {
+    m_ikData = ikData;
+    for (int i = 0; i < m_ikHandles->size(); i++) {
+        m_ikHandles->at(i).unk34 = 0.0f;
+    }
+}
+
+void soPhysicsModuleImpl::begin() {
+    unk44_80 = 0;
+    if (m_2ndaryController != NULL) {
+        if (m_moduleAccesser->getStopModule().isStop() == true && unk44_08) {
+            m_2ndaryController->setSleep(true);
+        } else {
+            m_2ndaryController->setSleep(m_2ndSleep);
+        }
+    }
+}
+
+bool soPhysicsModuleImpl::isNcessarySetUpMtx2ndBoth(bool reverse) {
+    if (m_2ndary2Controller != NULL && !unk44_80) {
+        if ((!reverse && is2ndBoth() == true) ||
+            (reverse == true && is2ndBothReverse() == true)) {
+            return true;
+        }
+    }
+    return false;
+}
 
 bool soPhysicsModuleImpl::isIK(int ikId) {
     return m_ikHandles->at(ikId).unk34 > 0.0f;

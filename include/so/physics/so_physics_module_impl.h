@@ -21,7 +21,7 @@ class soStatusData;
 // HYPOTHESIS: the parameters of the slots that so_physics_module_impl.cpp does not define yet.
 class soPhysicsModule : private soNull, public soNullable {
 public:
-    virtual ~soPhysicsModule() { }
+    virtual ~soPhysicsModule();
     virtual void constructController() = 0;
     virtual void destructController() = 0;
     virtual void deactivate() = 0;
@@ -101,6 +101,9 @@ public:
     u8 unk44_08 : 1;
 
     soPhysicsModuleImpl(soModuleAccesser* acc, void* ikData, soArray<soPhysicsIKHandle>* handles, int n);
+    void init(void* ikData);
+    // HYPOTHESIS: the selector is boolean, tested against zero and one.
+    bool isNcessarySetUpMtx2ndBoth(bool reverse);
     virtual ~soPhysicsModuleImpl();
     virtual void constructController();
     virtual void destructController();

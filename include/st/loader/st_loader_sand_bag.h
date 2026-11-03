@@ -64,18 +64,6 @@ struct stLoaderSandBagAppearInfo {
 };
 static_assert(sizeof(stLoaderSandBagAppearInfo) == 0x44, "Class is wrong size!");
 
-// MATCH-ONLY: gmPlayerInitData read as the original does: the character kind as an unsigned byte, and the flag byte at
-// 0x1B whose bit below m_isMetal the shared header leaves unnamed.
-struct stLoaderSandBagInitDataView {
-    u8 m_characterKind;
-    char _1[0x1A];
-    bool : 1;
-    bool : 1;
-    bool : 1;
-    bool m_isMetal : 1;
-    bool unk1B_3 : 1;
-};
-
 // HYPOTHESIS: two eight-byte constant objects, (0xff, 0) and (0xff, 1), that the original builds as file-local
 // statics in the loader units; nothing reads them, they only make the static initializer of each file.
 struct stLoaderSandBagMarker {
