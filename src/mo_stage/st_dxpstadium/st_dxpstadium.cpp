@@ -29,11 +29,6 @@
 
 stClassInfoImpl<Stages::DxPStadium, stDxPStadium> stDxPStadium::bss_loc_14;
 
-// MATCH-ONLY: the original reads the first two bytes of a player's init data (character kind, state) as bytes.
-struct stDxPStadiumPlayerBytes {
-    u8 kind;
-    u8 state;
-};
 
 static inline void stDxPStadiumSetShort(s16* dst, s16 value) {
     *dst = value;
@@ -807,10 +802,10 @@ void stDxPStadium::startPlayerVision() {
     int index = m_visionNext;
     m_visionPlayer = players[index];
     m_visionNext = index + 1;
-    stDxPStadiumPlayerBytes* player = reinterpret_cast<stDxPStadiumPlayerBytes*>(&g_GameGlobal->m_modeMelee->m_playersInitData[m_visionPlayer]);
+    gmPlayerInitData* player = &g_GameGlobal->m_modeMelee->m_playersInitData[m_visionPlayer];
     // The flag is set while the big screen shows a Jigglypuff that is in the match.
     gmMeleeInitData* flags = &g_GameGlobal->m_modeMelee->m_meleeInitData;
-    if (player->kind == Character_Jigglypuff && player->state == 3) {
+    if (player->m_characterKind == Character_Jigglypuff && player->m_state == 3) {
         flags->m_isAmplifySongAttack = true;
     } else {
         flags->m_isAmplifySongAttack = false;

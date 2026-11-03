@@ -255,8 +255,7 @@ static inline void initSelCharDataBody() {
         head->m_slots[i].m_total = 0;
         gmPlayerInitData* player = &select->m_playersInitData[i];
         player->m_state = 3;
-        // MATCH-ONLY: the native code stores the fighter slot as a plain byte, not as an enum bit field.
-        *reinterpret_cast<u8*>(player) = Character_SelectNone;
+        player->m_characterKind = Character_SelectNone;
         player->m_nameIndex = 0x78;
         player->m_hitPointMax = 150;
         player->m_cpuRank = 2;
@@ -753,7 +752,7 @@ struct gmResultInfoDraft {
 static_assert(sizeof(gmResultInfoDraft) == sizeof(gmResultInfo), "Class is wrong size!");
 
 // The bytes of a player's init data that the result record copies, as plain bytes and unsigned halfwords (the header has
-// the first as a bit field and the halfwords signed).
+// the halfwords signed).
 struct gmPlayerInitBytes {
     u8 m_characterKind;  // 0x00
     u8 m_state;          // 0x01

@@ -27,11 +27,6 @@
 #include <st_stadium/st_stadium.h>
 #include <mt/mt_ps_minmax.h>
 
-// MATCH-ONLY: the original reads the first two bytes of a player's init data (character kind, state) as bytes.
-struct stStadiumPlayerBytes {
-    u8 kind;
-    u8 state;
-};
 // HYPOTHESIS: the stage parameter file (m_stageData): timings of the terrain changes.
 struct stStadiumParam {
     char _0[0x2C];
@@ -1048,10 +1043,10 @@ void stStadium::enableVisionScreen() {
     m_visionActive = 1;
     m_visionPlayer = players[index];
     m_visionNext = index + 1;
-    stStadiumPlayerBytes* player = reinterpret_cast<stStadiumPlayerBytes*>(&g_GameGlobal->m_modeMelee->m_playersInitData[m_visionPlayer]);
+    gmPlayerInitData* player = &g_GameGlobal->m_modeMelee->m_playersInitData[m_visionPlayer];
     // The flag is set while the big screen shows a Jigglypuff that is in the match.
     gmMeleeInitData* flags = &g_GameGlobal->m_modeMelee->m_meleeInitData;
-    if (player->kind == Character_Jigglypuff && player->state == 3) {
+    if (player->m_characterKind == Character_Jigglypuff && player->m_state == 3) {
         flags->m_isAmplifySongAttack = true;
     } else {
         flags->m_isAmplifySongAttack = false;

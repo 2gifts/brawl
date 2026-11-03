@@ -420,7 +420,7 @@ static_assert(sizeof(gmMeleeInitData) == 0x90, "Class is wrong size!");
 
 class gmPlayerInitData {
 public:
-    gmCharacterKind m_characterKind : 8; // 0x00 (Otherwise known as SlotID)
+    u8 m_characterKind; // 0x00 gmCharacterKind (otherwise known as SlotID); a plain byte: every reader and writer uses lbz/stb
     u8 m_state;                          // 0x01
     u8 m_playerId;                       // 0x02
     u8 m_playerNo;                       // 0x03
