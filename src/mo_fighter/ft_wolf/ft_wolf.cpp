@@ -15,7 +15,7 @@
 #include <ft/wolf/ft_wolf_builder.h>
 #include <ft/wolf/ft_wolf_extend_param_accesser.h>
 #include <ft/wolf/ft_wolf_transactor.h>
-#include <ft/ft_physics_iface.h>
+#include <so/so_module_hyp.h>
 #include <ft/wolf/ft_wolf_status_uniq_process_reflector.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_resource_id_accesser_impl.h>
@@ -99,8 +99,8 @@ ftWolf::ftWolf(s32 entryId,
     fn_27_195B34(reflectorRecord, reflectorShape, &reflectorGroup);
     m_moduleAccesser->getCollisionReflectorModule().add(reinterpret_cast<soCollisionReflectorGroupData*>(&reflectorGroup), 2);
     m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
-    ftPhysicsModuleCall54(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0);
-    ftPhysicsModuleCall6C(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0x14);
+    getPhysicsModule(m_moduleAccesser).unk54(0);
+    getPhysicsModule(m_moduleAccesser).unk6C(0x14);
 }
 
 ftWolf::~ftWolf() { }
