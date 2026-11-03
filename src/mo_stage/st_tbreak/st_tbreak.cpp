@@ -600,14 +600,7 @@ bool stTargetBreak::putItem() {
             if (m_itemNodeModel->getNodeMatrix(&nodeMtx, 0, sItems[i].m_nodeName)) {
                 BaseItem* item = itManager::getInstance()->createItem(sItems[i].m_kind, sItems[i].m_variant);
                 if (item != NULL) {
-                    Vec3f pos;
-                    // MATCH-ONLY: the original loads z first and stores y, x, z; separate locals force that order
-                    float z = nodeMtx(2, 3);
-                    float y = nodeMtx(1, 3);
-                    float x = nodeMtx(0, 3);
-                    pos.m_y = y;
-                    pos.m_x = x;
-                    pos.m_z = z;
+                    Vec3f pos = nodeMtx.getTranslation();
                     item->warp(&pos);
                     item->setVanishMode(false);
                 }
