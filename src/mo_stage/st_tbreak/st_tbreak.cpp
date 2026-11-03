@@ -102,15 +102,6 @@ static inline void tbreakAssignVec2f(Vec2f& dst, Vec2f src) {
     dst = src;
 }
 
-// MATCH-ONLY: the original builds this vector in a temporary and copies it.
-struct stTargetBreakRaw3 {
-    float x, y, z;
-};
-static inline void tbreakAssignVec3f(Vec3f& dst, float x, float y, float z) {
-    stTargetBreakRaw3 tmp = {x, y, z};
-    *reinterpret_cast<stTargetBreakRaw3*>(&dst) = tmp;
-}
-
 // Registers sound effect number `slot` of a gimmick: played at once, at the gimmick's origin, without a repeat.
 #define TBREAK_SOUND(gimmick, slot, soundId)                                                   \
     (gimmick)->m_soundEffects[slot].m_id = (soundId);                                          \
@@ -216,7 +207,7 @@ void stTargetBreak::createObj() {
     // The damage the floor does (to fighters that fall out of the level, HYPOTHESIS): power 10, angle 361.
     stTargetBreakWords damageFloorWords = *reinterpret_cast<const stTargetBreakWords*>(sDamageFloorImage);
     grGimmickDamageFloor* damageFloor = reinterpret_cast<grGimmickDamageFloor*>(&damageFloorWords);
-    tbreakAssignVec3f(damageFloor->m_attackData.m_offsetPos, 0.0f, 0.0f, 0.0f);
+    damageFloor->m_attackData.m_offsetPos = Vec3f(0.0f, 0.0f, 0.0f);
     setStageAttackData(damageFloor, 0);
 
     // The conveyor belts of the level are marked by two nodes each.
