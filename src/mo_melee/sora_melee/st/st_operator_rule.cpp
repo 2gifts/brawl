@@ -1,4 +1,7 @@
+#include <if/if_mngr.h>
 #include <st/operator/st_operator_rule.h>
+#include <st/st_event_rule.h>
+#include <string.h>
 #include <types.h>
 
 struct stOperatorRuleCharacterKindEntry {
@@ -69,4 +72,47 @@ void stOperatorRule::startSaveReplay() {
     unkB4 = lbl_27_data_4EDD8;
     unkB8 = 0;
     unkBC = false;
+}
+
+void stOperatorRule::notifyEventBeat(u32 playerIndex1, u32 playerIndex2) {
+    if (m_condition->m_meleeInitData.m_0x3_2 && g_IfMngr) {
+        if (m_condition->m_meleeInitData.m_isTeams == true &&
+            (u8)m_condition->m_playersInitData[playerIndex1].m_teamNo ==
+                (u8)m_condition->m_playersInitData[playerIndex2].m_teamNo) {
+            g_IfMngr->m_ifPlayers[m_condition->m_playersInitData[playerIndex1].m_playerId]->setScoreVary(-1);
+            g_IfMngr->m_ifPlayers[m_condition->m_playersInitData[playerIndex2].m_playerId]->setScoreVary(-1);
+            return;
+        } else {
+            g_IfMngr->m_ifPlayers[m_condition->m_playersInitData[playerIndex1].m_playerId]->setScoreVary(1);
+        }
+        g_IfMngr->m_ifPlayers[m_condition->m_playersInitData[playerIndex2].m_playerId]->setScoreVary(-1);
+    }
+}
+
+void stOperatorRule::startOperator() {
+    if (unk54) {
+        unk54->notifyEventStartGame();
+    }
+}
+
+void stOperatorRule::notifyEventStartStage() {
+    unk78 = 0;
+    memset(unk7C, 0, sizeof(unk7C));
+    memset(unk8C, 0, sizeof(unk8C));
+    checkDispCorps();
+    if (unk54) {
+        unk54->notifyEventStartStage();
+    }
+}
+
+void stOperatorRule::notifyEventYoshiEgg() {
+    if (unk54) {
+        unk54->notifyEventYoshiEgg();
+    }
+}
+
+void stOperatorRule::notifyEventPikminBloom() {
+    if (unk54) {
+        unk54->notifyEventPikminBloom();
+    }
 }
