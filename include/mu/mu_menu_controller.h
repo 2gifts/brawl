@@ -12,6 +12,7 @@ extern "C" void fn_800B9984(muMenuController* controller);
 
 class muMenuController {
 public:
+    void init(int pad);
     char _unk[0xA8];
 
     muMenuController() { fn_800B96E8(this, 0xFF); }
