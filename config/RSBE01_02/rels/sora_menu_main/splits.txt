@@ -166,6 +166,12 @@ mo_menu/mu_proc_wifi_opt.cpp:
 	.rodata     start:0x00000F90 end:0x00000FC8
 	.data       start:0x00003B18 end:0x00003CC8
 
+mo_menu/mu_button.cpp:
+	.text       start:0x00030568 end:0x00035B90
+	.rodata     start:0x00000FC8 end:0x00001598
+	.data       start:0x00003CC8 end:0x00004220
+	.bss        start:0x00000050 end:0x00000058
+
 mo_menu/mu_main_panel_ctrl.cpp:
 	.text       start:0x00035B90 end:0x00036934
 	.rodata     start:0x00001598 end:0x00001628

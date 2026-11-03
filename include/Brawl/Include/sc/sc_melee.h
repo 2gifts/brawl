@@ -40,9 +40,18 @@ public:
     void* m_eventRule;
     char _176[36];
     int m_endNum;
-    char _216[12];
+    // HYPOTHESIS: flags of the scene; scButton tests b6 and b4 in process and its button task clears b5 when it ends.
+    bool unkD8_b7 : 1;
+    bool unkD8_b6 : 1;
+    bool unkD8_b5 : 1;
+    bool unkD8_b4 : 1;
+    char _217[11];
     GameRule m_gameRule;
-    char _232[24];
+    char _232[21];
+    // HYPOTHESIS: the name entry whose button settings are used (GameGlobal::getButtonConfig); scButton's constructor
+    // clears it and muButtonTask reads it.
+    u8 m_buttonConfigNo; // 0xFD
+    char _254[2];
 
     virtual void start();
     virtual s32 process();

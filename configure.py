@@ -6774,6 +6774,7 @@ config.libs = [
             Object(NonMatching, "mo_menu/mu_proc_wifi_friend.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_wifi_anybody.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_wifi_opt.cpp"),
+            Object(NonMatching, "mo_menu/mu_button.cpp"),
             Object(NonMatching, "mo_menu/mu_main_panel_ctrl.cpp"),
             Object(NonMatching, "mo_menu/mu_soft_list_data.cpp"),
             Object(NonMatching, "mo_menu/mu_soft_list.cpp"),
