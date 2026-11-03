@@ -47,15 +47,6 @@ struct stEditWords {
 static const u32 sDamageFloorImage[25] = {0x41700000, 0, 0, 0, 0, 0x5A, 0x46, 0x50, 0x32, 0, 2, 0x101, 0,
                                           0, 0, 0x64, 1, 3, 0, 0, 0, 0xF, 0, 1, 0xFFFFFFFF};
 
-// MATCH-ONLY: the original builds this vector in a temporary and copies it.
-struct stEditRaw3 {
-    float x, y, z;
-};
-static inline void stEditAssignVec3f(Vec3f& dst, float x, float y, float z) {
-    stEditRaw3 tmp = {x, y, z};
-    *reinterpret_cast<stEditRaw3*>(&dst) = tmp;
-}
-
 static inline void stEditSetStartPos(Vec3f& dst, float x, float y) {
     dst.m_x = x;
     dst.m_y = y;
@@ -395,7 +386,7 @@ void stEdit::createObj() {
     }
     stEditWords damageFloorWords = *reinterpret_cast<const stEditWords*>(sDamageFloorImage);
     grGimmickDamageFloor* damageFloor = reinterpret_cast<grGimmickDamageFloor*>(&damageFloorWords);
-    stEditAssignVec3f(damageFloor->m_attackData.m_offsetPos, 0.0f, 0.0f, 0.0f);
+    damageFloor->m_attackData.m_offsetPos = Vec3f(0.0f, 0.0f, 0.0f);
     setStageAttackData(damageFloor, 0);
     loadStageEditData();
 }
