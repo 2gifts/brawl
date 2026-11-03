@@ -55,8 +55,8 @@ struct muVCTrialName {
         strcat(name.m_str, "__");
         return name;
     }
-    muVCTrialName operator+(int no) const {
-        muVCTrialName name = *this;
+    // The name with a number appended.
+    friend muVCTrialName operator+(muVCTrialName name, int no) {
         sprintf(name.m_str + strlen(name.m_str), "%d", no);
         return name;
     }
@@ -106,7 +106,8 @@ static inline const char* getMdlName(MuObject* object) {
 
 // The name of an animation of an object: the name of its model, the separator and the number of the animation.
 static inline muVCTrialName<65> getAnimName(MuObject* object, int no) {
-    return muVCTrialName<65>(getMdlName(object)).separated() + no;
+    muVCTrialName<65> name(getMdlName(object));
+    return name.separated() + no;
 }
 
 // HYPOTHESIS: an object of sora_scene's loader is reset from it (nothing writes it).
