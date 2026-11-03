@@ -355,9 +355,8 @@ void GameGlobal::init() {
     rule = m_setRule;
     rule->m_allowPause = true;
     rule->m_showDamageGauge = 1;
-    // HYPOTHESIS: two more rule fields that start at zero (not named in gmSetRule).
-    reinterpret_cast<u8*>(rule)[0x20] = 0;
-    *reinterpret_cast<u32*>(reinterpret_cast<u8*>(rule) + 0x24) = 0;
+    rule->unk20 = 0;
+    rule->m_ctrlNamePlayerNo = 0;
 
     // The Adventure save data starts empty: no level cleared, all slots unused.
     gmAdvDataView* adv = reinterpret_cast<gmAdvDataView*>(g_GameGlobal->m_advData);
