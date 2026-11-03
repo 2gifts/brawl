@@ -36,19 +36,19 @@ void muSelcharPanelCtrlTask::processAnim() {
 }
 
 // Shows the text of the help (when asked to), and remembers its number.
-void muSelcharPanelCtrlTask::setMsg(int msgNo, int unk1, int unk2) {
-    if (unk1 != 0) {
+void muSelcharPanelCtrlTask::setMsg(int msgNo, int print, void* msgData) {
+    if (print != 0) {
         m_msg->printIndex(0, msgNo);
     }
-    m_unk40 = msgNo;
+    m_msgNo = msgNo;
 }
 
-void muSelcharPanelCtrlTask::changeProcess(int unk1, int unk2) {
-    m_unk40 = unk2;
-    m_unk44 = 0;
+void muSelcharPanelCtrlTask::changeProcess(u32 panel, int msgNo, int bg, float titleFrame) {
+    m_msgNo = msgNo;
+    m_timer = 0;
 }
 
-void muSelcharPanelCtrlTask::changeProcess1(int unk1, int unk2) {
+void muSelcharPanelCtrlTask::changeProcess1(int screen, int msgNo) {
 }
 
 void muSelcharPanelCtrlTask::frameCancel() {

@@ -70,7 +70,7 @@ void muProcMovieAdv::init(nw4r::g3d::ScnGroup* group, int from) {
     dispPage(m_top);
     m_objs[Obj_Bar]->setFrameNode(m_cursor);
     m_objs[Obj_Bar]->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
-    m_panel->setMsg(Msg_Help, 1, reinterpret_cast<int>(m_msg->getBinary()));
+    m_panel->setMsg(Msg_Help, 1, m_msg->getBinary());
     m_objs[Obj_List]->setFrameTex(getPictureFrame(this));
     m_objs[Obj_List]->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
     m_objs[Obj_List]->setAnimIdx(&sMovieAdvAnims[1], false);

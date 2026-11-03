@@ -14,9 +14,9 @@ public:
     muTourPanelCtrlTask(MuObject* option, void* msgData);
     virtual void processAnim();
     virtual ~muTourPanelCtrlTask();
-    virtual void setMsg(int msgNo, int unk1, int unk2);
-    virtual void changeProcess1(int unk1, int unk2);
-    virtual void changeProcess(int unk1, int unk2);
+    virtual void setMsg(int msgNo, int print, void* msgData);
+    virtual void changeProcess1(int screen, int msgNo);
+    virtual void changeProcess(u32 panel, int msgNo, int bg, float titleFrame);
     virtual void frameCancel();
 };
 static_assert(sizeof(muTourPanelCtrlTask) == 0x50, "Class is wrong size!");

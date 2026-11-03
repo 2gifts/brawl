@@ -10,19 +10,23 @@
 // HYPOTHESIS: the class has more fields (the size is a guess from the constructor).
 class muPanelCtrlTask : public gfTask {
 public:
-    int m_unk40;            // 0x40
-    int m_unk44;            // 0x44 cleared by the constructor
+    int m_msgNo;            // 0x40 the text that is shown (or that is shown when the panel has come in)
+    int m_timer;            // 0x44 the frames since the last change (cleared by the constructor)
     MuMsg* m_msg;           // 0x48
 
     muPanelCtrlTask();
     virtual void processAnim();
     virtual ~muPanelCtrlTask();
-    virtual void setMsg(int msgNo, int unk1, int unk2);
+    // Shows the text msgNo of msgData (when print is set) and remembers it.
+    virtual void setMsg(int msgNo, int print, void* msgData);
     virtual void clearMsg() { m_msg->printf(0, ""); }
     virtual void setMsgData(void* data) { m_msg->setMsgData(data); }
-    virtual void* getMsgData() { return *reinterpret_cast<void**>(reinterpret_cast<char*>(m_msg) + 4); }
-    virtual void changeProcess1(int unk1, int unk2);
-    virtual void changeProcess(int unk1, int unk2);
+    virtual void* getMsgData() { return m_msg->getBinary(); }
+    // The menu goes to the screen `screen`, whose help is the text msgNo.
+    virtual void changeProcess1(int screen, int msgNo);
+    // The panel `panel` comes in with the title titleFrame and the background bg (see muMainPanelCtrlTask).
+    virtual void changeProcess(u32 panel, int msgNo, int bg, float titleFrame);
+    // Puts every animation at its end at once.
     virtual void frameCancel();
     virtual void startupSpecialMelee();
 };
