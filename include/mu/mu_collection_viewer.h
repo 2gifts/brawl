@@ -127,8 +127,6 @@ public:
         ~Work();
     };
 
-    u8 m_unk40[0x168];
-    u32 m_input;                    // 0x1A8
     Work* m_work;                   // 0x1AC
 
     muCollectionViewer(const char* name);
