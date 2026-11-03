@@ -7,30 +7,13 @@
 
 extern "C" {
 int fn_80110310(int* trigger, int* padNo);
-void fn_800E4D28(IfPlayer* player, int visible);
 void fn_800E5174(IfPlayer* player, int mode);
 bool fn_27_23AC10(stLoader* loader);
 extern u8 lbl_27_bss_59D8;
 }
 
-// HYPOTHESIS: IfPlayer state read by the operator (offsets from the operator code only). IfMngr maps
-// a player index to its IfPlayer slot through the bytes at 0x68 (unk68 in the local IfMngr header).
-struct IfPlayerOperatorView {
-    char _0[0x2b0];
-    u32 m_2b0;
-    char _2b4[0x9c];
-    bool m_350;
-    char _351[3];
-    u32 m_354;
-};
-
-// HYPOTHESIS: the flag byte at 0x1C of gmPlayerInitData, whose third bit BrawlHeaders leaves unnamed.
-struct gmPlayerInitDataFlagView {
-    char _0[0x1c];
-    bool m_1c_7 : 1;
-    bool m_1c_6 : 1;
-    bool m_1c_5 : 1;
-};
+// HYPOTHESIS: IfMngr maps a player index to its IfPlayer slot through the bytes at 0x68 (unk68 in the local IfMngr
+// header).
 
 // HYPOTHESIS: two (value, flag) pairs filled by the static initializer (same shape as other sora_melee units).
 struct stOperatorInfoPair {
@@ -111,7 +94,7 @@ void stOperatorInfo::unlockPlayer() {
 
 void stOperatorInfo::setPlayerCursorClear(u8 index) {
     IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[index])];
-    if (reinterpret_cast<IfPlayerOperatorView*>(player)->m_354) {
+    if (player->m_headCursorMode) {
         fn_800E5174(player, 0);
     }
     m_playersCursorStatus[index] = 0;
@@ -123,7 +106,7 @@ void stOperatorInfo::setPlayerCursorStatus(u8 idx, u8 status) {
     int index = idx;
     if (status == 0 && status != m_playersCursorStatus[index] && m_playersNameCursorStatus[index] == 0) {
         IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[index])];
-        if (reinterpret_cast<IfPlayerOperatorView*>(player)->m_354) {
+        if (player->m_headCursorMode) {
             fn_800E5174(player, 0);
         }
         m_98[index] = 0.0f;
@@ -136,7 +119,7 @@ void stOperatorInfo::setPlayerNameCursorStatus(u8 idx, u8 status) {
     int index = idx;
     if (status == 0 && status != m_playersNameCursorStatus[index] && m_playersCursorStatus[index] == 0) {
         IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[index])];
-        if (reinterpret_cast<IfPlayerOperatorView*>(player)->m_354) {
+        if (player->m_headCursorMode) {
             fn_800E5174(player, 0);
         }
         m_98[index] = 0.0f;
@@ -147,8 +130,8 @@ void stOperatorInfo::setPlayerNameCursorStatus(u8 idx, u8 status) {
 void stOperatorInfo::setPlayerLoupeStatus(u8 index, u8 status) {
     if (status == 0 && status != m_playersLoupeStatus[index]) {
         IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[index])];
-        if (reinterpret_cast<IfPlayerOperatorView*>(player)->m_350) {
-            fn_800E4D28(player, 0);
+        if (player->m_isLoupeVisible) {
+            player->setLoupeVisible(false);
         }
     }
     m_playersLoupeStatus[index] = status;
@@ -168,12 +151,12 @@ void stOperatorInfo::clearPlayerCursor() {
             if (g_ftManager->getEntryId(i) != -1) {
                 u8 playerId = m_condition->m_playersInitData[i].m_playerId;
                 IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[playerId])];
-                if (reinterpret_cast<IfPlayerOperatorView*>(player)->m_350) {
-                    fn_800E4D28(player, 0);
+                if (player->m_isLoupeVisible) {
+                    player->setLoupeVisible(false);
                 }
                 player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[playerId])];
-                if (reinterpret_cast<IfPlayerOperatorView*>(player)->m_2b0) {
-                    reinterpret_cast<IfPlayerOperatorView*>(player)->m_2b0 = 0;
+                if (player->unk2B0) {
+                    player->unk2B0 = 0;
                 }
             }
         }
@@ -190,7 +173,7 @@ void stOperatorInfo::checkOnamaeForcePut() {
         if (data->m_state != 3) {
             bool forcePut = false;
             u8 playerId = data->m_playerId;
-            if (reinterpret_cast<gmPlayerInitDataFlagView*>(data)->m_1c_5 && !data->m_isSpycloak) {
+            if (data->m_0x1C_5 && !data->m_isSpycloak) {
                 forcePut = true;
             }
             m_72[playerId] = forcePut;

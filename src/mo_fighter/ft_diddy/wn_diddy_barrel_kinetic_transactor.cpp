@@ -86,6 +86,10 @@ void wnDiddyBarrelKineticTransactor::addSpeedOutside(
     }
 }
 
+inline void wnDiddyBarrelKineticTransactor::changeKineticStop(void*, soModuleAccesser* moduleAccesser) {
+    moduleAccesser->getKineticModule().unableEnergyAll();
+}
+
 void wnDiddyBarrelKineticTransactor::changeKinetic(
     int mode, void* pools, soModuleAccesser* moduleAccesser) {
     if (mode <= 0x1F) {
@@ -95,8 +99,8 @@ void wnDiddyBarrelKineticTransactor::changeKinetic(
 
     switch (mode) {
     case 0x20: {
-        volatile u8 unk9 = 0; // MATCH-ONLY: native initializes this unused local byte.
-        moduleAccesser->getKineticModule().unableEnergyAll();
+        wnDiddyBarrelKineticTransactor empty = {};
+        empty.changeKineticStop(pools, moduleAccesser);
         break;
     }
     case 0x21: {

@@ -61,15 +61,6 @@ static stTargetBreakStatics sStatics = {
     },
 };
 
-// MATCH-ONLY: the original copies the stage's damage floor from a constant image (a grGimmickDamageFloor: damage 10,
-// vector 361, reaction 50 / 0 / 100, cut-up attribute, air and ground, 15 serial hit frames, medium sound level,
-// cut-up sound, first index, any team).
-struct stTargetBreakWords {
-    u32 m_words[25];
-};
-static const u32 sDamageFloorImage[25] = {0x41200000, 0, 0, 0, 0, 0x169, 0x32, 0, 0x64, 0, 2, 0x101, 0,
-                                          0, 0, 0xF, 1, 3, 0, 0, 0, 0xA, 0, 1, 0xFFFFFFFF};
-
 // The items that are loaded with the stage and handed out at the nodes of the item model.
 static stTargetBreakItem sItems[16] = {
     {"ItemNodeChewingBomb", (itKind)31, 0},   {"ItemNodeBeamSword", (itKind)4, 0},
@@ -205,10 +196,16 @@ void stTargetBreak::createObj() {
     }
 
     // The damage the floor does (to fighters that fall out of the level, HYPOTHESIS): power 10, angle 361.
-    stTargetBreakWords damageFloorWords = *reinterpret_cast<const stTargetBreakWords*>(sDamageFloorImage);
-    grGimmickDamageFloor* damageFloor = reinterpret_cast<grGimmickDamageFloor*>(&damageFloorWords);
-    damageFloor->m_attackData.m_offsetPos = Vec3f(0.0f, 0.0f, 0.0f);
-    setStageAttackData(damageFloor, 0);
+    // Damage 10, vector 361, reaction 50 / 0 / 100, cut-up attribute, air and ground, 15 serial hit frames, medium
+    // sound level, cut-up sound, power 10, index 1, any team.
+    grGimmickDamageFloor damageFloor = {
+        {10.0f, Vec3f(0.0f, 0.0f, 0.0f), 0.0f, 361, 50, 0, 100, {0, 0, 0, 0}, soCollisionAttackData::Attribute_Cutup,
+         false, false, true, true, 0.0f, 0.0f, 0.0f, 15, soCollisionAttackData::Sound_Level_Medium,
+         soCollisionAttackData::Sound_Attribute_Cutup, false, soCollision::Shape_Sphere, {0, 0}, {{0, 0}}, 0, 10},
+        {0, 0, 0, 0},
+        1,
+        -1};
+    setStageAttackData(&damageFloor, 0);
 
     // The conveyor belts of the level are marked by two nodes each.
     for (int i = 0; i < 4; i++) {

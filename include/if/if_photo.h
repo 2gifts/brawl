@@ -39,6 +39,8 @@ public:
 
     IfPhoto();
     void init();
+    void exitPause();
+    void getMediaState(IfSnapSaveMedia* media, int kind);
     // HYPOTHESIS: parameter types (the map has none).
     void startMelee(nw4r::g3d::ScnGroup* scnGroup);
     static CameraController* getCameraController();

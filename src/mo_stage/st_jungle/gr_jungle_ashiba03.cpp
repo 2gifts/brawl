@@ -157,7 +157,6 @@ bool grJungleAshiba03::setNode() {
 
 // The hit objects of the platform: two hit spheres (the button and the spikes); there is no attack.
 void grJungleAshiba03::setHit() {
-    // MATCH-ONLY: the original allocates the hit data as raw storage (no element construction)
     m_hitData = new (Heaps::StageInstance) soCollisionHitData[2];
     m_hitSimple = new (Heaps::StageInstance) soCollisionHitData::Simple[2];
     m_hitSet = reinterpret_cast<soSet<soCollisionHitData::Simple>*>(new (Heaps::StageInstance) u8[sizeof(soSet<soCollisionHitData::Simple>) * 2]);

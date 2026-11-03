@@ -9,6 +9,8 @@
 #include <ut/ut_list.h>
 #include <yk/yakumono.h>
 
+class stTriggerCB;
+
 class stTrigger : public utListNode {
 
     Gimmick::AreaKind m_gimmickAreaKind;
@@ -17,7 +19,15 @@ class stTrigger : public utListNode {
     char _spacer[7];
     stObsTriggerCB* m_obsTriggerCB;
     Yakumono* m_yakumono;
-    char _spacer2[12];
+    union {
+        char _spacer2[12];
+        struct {
+            // HYPOTHESIS: callback list heads at 0x20, 0x24, 0x28
+            stTriggerCB* unk20;
+            stTriggerCB* unk24;
+            stTriggerCB* unk28;
+        };
+    };
     bool m_isValid;
     char _spacer3[3];
 
@@ -32,6 +42,8 @@ public:
     stObsTriggerSquareWindCB* setWindTrigger(grGimmickWindData* gimmickAreaData);
 
     void setAreaSleep(bool);
+    void setKeyAreaTrigger(stGimmickAreaData* areaData, Vec2f pos);
+    void setTruckAreaTrigger(stSimpleAreaData* areaData);
     void setWindParam(grGimmickWindData2nd* wnd, s32 p2);
     void setBeltConveyorParam(grGimmickBeltConveyorData* belt);
     //void setBeltConveyorParam(grGimmickTriBeltConveyorData* belt);
