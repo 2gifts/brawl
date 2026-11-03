@@ -728,10 +728,10 @@ void ftWarioKineticTransactor::changeKinetic(int mode, void* pools, soModuleAcce
         changeKineticSub(&result, pools, &speed, acc);
         break;
     }
-    case 0x65: { volatile bool result = false; break; }
-    case 0x66: { volatile bool result = false; break; }
-    case 0x67: { volatile bool result = false; break; }
-    case 0x68: { volatile bool result = false; break; }
+    case 0x65: ftKineticTransactor::changeKineticHook(soIntToType<0x65>(), pools, acc); break;
+    case 0x66: ftKineticTransactor::changeKineticHook(soIntToType<0x66>(), pools, acc); break;
+    case 0x67: ftKineticTransactor::changeKineticHook(soIntToType<0x67>(), pools, acc); break;
+    case 0x68: ftKineticTransactor::changeKineticHook(soIntToType<0x68>(), pools, acc); break;
     default:
         return;
     }

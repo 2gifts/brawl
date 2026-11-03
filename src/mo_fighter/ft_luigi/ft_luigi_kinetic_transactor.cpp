@@ -66,16 +66,12 @@ void ftLuigiKineticTransactor::changeKinetic(int mode, void* pools, soModuleAcce
         ftLuigiKineticTransactor::changeKineticSub7(&result, pools, &speed, moduleAccesser);
         break;
     }
-    // MATCH-ONLY: the native default hooks retain two distinct false-result
-    // stores after inlining. Ordinary unused bools erase them in this build.
-    case 0x6C: {
-        volatile bool result = false;
+    case 0x6c:
+        ftKineticTransactor::changeKineticHook(soIntToType<0x6c>(), pools, moduleAccesser);
         break;
-    }
-    case 0x6D: {
-        volatile bool result = false;
+    case 0x6d:
+        ftKineticTransactor::changeKineticHook(soIntToType<0x6d>(), pools, moduleAccesser);
         break;
-    }
     default:
         return;
     }
