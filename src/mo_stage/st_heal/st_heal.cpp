@@ -35,24 +35,6 @@ namespace {
     const bss_loc_8_t bss_loc_10(1);
 }
 
-// MATCH-ONLY: gmPlayerCorpsInitData with the fighter kind as a plain byte (the original reads it with a byte load).
-struct stHealCorpsPlayer {
-    u8 m_characterKind;
-    u8 _01[0x13];
-};
-
-// Overlay on the parts of gmGlobalCorps the All-Star rest area reads (names are HYPOTHESIS).
-struct stHealCorps {
-    u8 _00[0x1C];
-    u8 m_figureCount;       // 0x1C: number of defeated fighters to show as figures
-    s8 m_remaining;         // 0x1D
-    u8 m_heartMask;         // 0x1E: bit n set while heart n has not been taken yet
-    u8 m_stageNo;           // 0x1F: round number, selects the "Info_stgNN" sign
-    u16 m_extraFigureId;    // 0x20
-    u8 _22[2];
-    stHealCorpsPlayer m_players[0x24]; // 0x24
-};
-
 // TODO: If possible, use a pragma-free alternative that will allocate a
 // non-const, 0-valued global variable to .data rather than to .bss
 #pragma push
@@ -75,7 +57,7 @@ bool stHeal::loading() {
 }
 
 void stHeal::createObj() {
-    stHealCorps* corps = (stHealCorps*)g_GameGlobal->m_corps;
+    gmGlobalCorps* corps = g_GameGlobal->m_corps;
     testStageParamInit(m_fileData, 10);
     m_mainGround = grMadein::create(1, "", "", Heaps::StageInstance);
     addGround(m_mainGround);
@@ -164,7 +146,7 @@ namespace {
 // The rest area script: hand out the hearts and the figures of the defeated fighters, then wait for a fighter to
 // walk into the warp zone.
 void stHeal::update(float deltaFrame) {
-    stHealCorps* corps = (stHealCorps*)g_GameGlobal->m_corps;
+    gmGlobalCorps* corps = g_GameGlobal->m_corps;
     switch (m_state) {
         case 0:
             m_timer = data_loc_C8;
@@ -223,13 +205,13 @@ void stHeal::update(float deltaFrame) {
             for (int i = 0; i < corps->m_figureCount; i++) {
                 Matrix mtx(true);
                 if (m_mainGround->getNodeMatrix(&mtx, 0, m_figureNode[i])) {
-                    u16 figureId = stOperatorRule::exchangeGmCharacterKind2FigureId((gmCharacterKind)corps->m_players[i].m_characterKind);
+                    u16 figureId = stOperatorRule::exchangeGmCharacterKind2FigureId((gmCharacterKind)corps->m_playersInitData[i].m_characterKind);
                     BaseItem* item = itManager::getInstance()->createItem(Item_Figure, figureId);
                     if (item != NULL) {
                         item->action(1, 1.0f);
                         Vec3f pos = mtx.getPosition();
-                        OSReport("PutCorpsFigure%02d:%02d -> %02d  Pos(%f,%f,%f)\n", i, corps->m_players[i].m_characterKind,
-                                 (u16)stOperatorRule::exchangeGmCharacterKind2FigureId((gmCharacterKind)corps->m_players[i].m_characterKind),
+                        OSReport("PutCorpsFigure%02d:%02d -> %02d  Pos(%f,%f,%f)\n", i, corps->m_playersInitData[i].m_characterKind,
+                                 (u16)stOperatorRule::exchangeGmCharacterKind2FigureId((gmCharacterKind)corps->m_playersInitData[i].m_characterKind),
                                  pos.m_x, pos.m_y, pos.m_z);
                         pos.m_y += 1.0f;
                         item->warp(&pos);

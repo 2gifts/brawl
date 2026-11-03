@@ -1,9 +1,51 @@
 #include <so/collision/so_collision.h>
 #include <so/collision/so_collision_shield_module_impl.h>
 #include <so/collision/so_collision_shield_part.h>
+#include <so/so_module_accesser.h>
 #include <types.h>
 
 soCollisionShieldModule::~soCollisionShieldModule() { }
+
+void soCollisionShieldModuleImpl::clean() {
+    for (int i = 0; i < m_collisionShieldGroupArray->size(); i++) {
+        m_collisionShieldGroupArray->at(i).init();
+    }
+    _24 = 0;
+    m_collision.clean();
+}
+
+void soCollisionShieldModuleImpl::deactivate() {
+    if (_52 == 0) {
+        clean();
+    } else {
+        m_collision.initLogAll();
+    }
+    m_collision.m_taskId = -1;
+}
+
+void soCollisionShieldModuleImpl::add(soCollisionShieldGroupData* data, u32 collisionShieldGroupIndex) {
+    _24 += m_collisionShieldGroupArray->at(collisionShieldGroupIndex).add(&m_collision, m_partArray, data, collisionShieldGroupIndex, _24);
+}
+
+void soCollisionShieldModuleImpl::add(soCollisionReflectorGroupData* data, u32 collisionShieldGroupIndex) {
+    _24 += m_collisionShieldGroupArray->at(collisionShieldGroupIndex).add(&m_collision, m_partArray, data, collisionShieldGroupIndex, _24);
+}
+
+void soCollisionShieldModuleImpl::update(double posX, double scale, double lr, u32 collisionShieldGroupIndex) {
+    soModelModule& model = m_moduleAccesser->getModelModule();
+    soCollisionShieldGroup& group = m_collisionShieldGroupArray->at(collisionShieldGroupIndex);
+    if (group.update(&m_collision, m_partArray, &model, posX, scale, lr) == true && _50 == 0) {
+        m_collision.addCheckList();
+        _50 = 1;
+    }
+}
+
+void soCollisionShieldModuleImpl::update(double posX, double scale, double lr) {
+    int num = getGroupNum();
+    for (int i = 0; i < num; i++) {
+        update(posX, scale, lr, i);
+    }
+}
 
 void soCollisionShieldModuleImpl::begin() {
     _50 = 0;

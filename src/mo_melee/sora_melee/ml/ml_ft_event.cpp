@@ -4,16 +4,213 @@
 #include <ft/ft_manager.h>
 #include <gm/gm_global.h>
 #include <if/if_mngr.h>
+#include <if/if_player.h>
 #include <ml/ml_ft_event.h>
+#include <nt/nt_etc_upload_eval.h>
+#include <revolution/OS/OSError.h>
+#include <so/damage/so_damage.h>
 #include <st/operator/st_operator_info.h>
 #include <st/operator/st_operator_rule.h>
 #include <st/stage.h>
 #include <types.h>
 
 extern "C" u8 fn_27_111D70(ftOwner* owner);
-extern "C" void fn_8009C9B8(CameraController* controller, int playerNo);
 extern "C" void fn_800DD0CC(IfMngr* mngr, int areaNo1, int areaNo2);
 extern "C" void fn_800DD200(IfMngr* mngr);
+
+mlFtEvent::~mlFtEvent() {
+}
+
+void mlFtEvent::notifyEventBeat(int entryId1, int entryId2) {
+    if (!isInfoManager()) {
+        return;
+    }
+    if (!unk34_20) {
+        return;
+    }
+    if (m_operatorRule != NULL && m_operatorRule->isGameSet()) {
+        return;
+    }
+    int playerNo1 = g_ftManager->getPlayerNo(entryId1);
+    int playerNo2 = g_ftManager->getPlayerNo(entryId2);
+    if (m_operatorRule != NULL) {
+        m_operatorRule->notifyEventBeat(playerNo1, playerNo2);
+    } else if (m_condition->m_meleeInitData.m_0x3_2 && g_IfMngr != NULL) {
+        if (m_condition->m_meleeInitData.m_isTeams == true
+            && static_cast<u8>(m_condition->m_playersInitData[playerNo1].m_teamNo) == static_cast<u8>(m_condition->m_playersInitData[playerNo2].m_teamNo)) {
+            g_IfMngr->m_ifPlayers[m_condition->m_playersInitData[playerNo1].m_playerId]->setScoreVary(-1);
+            g_IfMngr->m_ifPlayers[m_condition->m_playersInitData[playerNo2].m_playerId]->setScoreVary(-1);
+        } else {
+            g_IfMngr->m_ifPlayers[m_condition->m_playersInitData[playerNo1].m_playerId]->setScoreVary(1);
+            g_IfMngr->m_ifPlayers[m_condition->m_playersInitData[playerNo2].m_playerId]->setScoreVary(-1);
+        }
+    }
+    nteUpdateEvaluator* evaluator = nteUpdateEvaluator::getInstance();
+    if (evaluator != NULL) {
+        evaluator->notifyEventBeat(playerNo1, playerNo2);
+    }
+}
+
+void mlFtEvent::notifyEventChangeEnd(int entryId, int playerNo, int activeInstanceIndex, ftKind kind) {
+    if (!isInfoManager()) {
+        return;
+    }
+    u32 faceKind;
+    switch (g_ftManager->getFighterGmKind(entryId)) {
+    case 29:
+    case 31:
+    case 33:
+        switch (kind) {
+        case 0x1D: faceKind = 0x1D; break;
+        case 0x1F: faceKind = 0x21; break;
+        case 0x1E: faceKind = 0x1F; break;
+        }
+        break;
+    case 3:
+    case 4:
+        switch (kind) {
+        case 3: faceKind = 3; break;
+        case 0x18: faceKind = 4; break;
+        }
+        break;
+    case 14:
+    case 15:
+        switch (kind) {
+        case 0xD: faceKind = 0xE; break;
+        case 0xE: faceKind = 0xF; break;
+        }
+        break;
+    case 12:
+    case 44:
+        switch (kind) {
+        case 0xB: faceKind = 0xC; break;
+        case 0x30: faceKind = 0x2C; break;
+        }
+        break;
+    case 23:
+    case 45:
+        switch (kind) {
+        case 0x15: faceKind = 0x17; break;
+        case 0x31: faceKind = 0x2D; break;
+        }
+        break;
+    default:
+        return;
+    }
+    g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[getInfoAreaNo(playerNo)])]->setStockFace(
+        0, faceKind);
+}
+
+void mlFtEvent::notifyEventOnDamage(int entryId, u32 hp, soDamage* damage) {
+    int playerNo = g_ftManager->getPlayerNo(entryId);
+    if (m_operatorInfo != NULL) {
+        m_operatorInfo->m_playerDamage[playerNo] = hp;
+    }
+    if (!isInfoManager()) {
+        return;
+    }
+    if (m_condition->m_meleeInitData.m_hideDamageGauge) {
+        return;
+    }
+    if (!unk34_20) {
+        return;
+    }
+    if (m_operatorRule != NULL && m_operatorRule->isGameSet()) {
+        return;
+    }
+    if (hp != 0) {
+        IfPlayer* damagePlayer = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[getInfoAreaNo(playerNo)])];
+        damagePlayer->updateDamageHP(hp, 0);
+        float rumbleRate = getDamageInfoRumbleRate(damage->m_damageAdd);
+        IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[getInfoAreaNo(playerNo)])];
+        if (player->unk1C == player->unk18) {
+            player->unk264 = rumbleRate;
+            player->setDamageState(1);
+        }
+    }
+    nteUpdateEvaluator* evaluator = nteUpdateEvaluator::getInstance();
+    if (evaluator != NULL) {
+        evaluator->notifyEventOnDamage(playerNo, hp);
+    }
+}
+
+void mlFtEvent::notifyEventRecover(int entryId, int hp) {
+    int playerNo = g_ftManager->getPlayerNo(entryId);
+    if (!isInfoManager()) {
+        return;
+    }
+    if (m_condition->m_meleeInitData.m_hideDamageGauge) {
+        return;
+    }
+    if (!unk34_20) {
+        return;
+    }
+    if (m_operatorRule != NULL && m_operatorRule->isGameSet()) {
+        return;
+    }
+    if (playerNo >= 0) {
+        IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[getInfoAreaNo(playerNo)])];
+        player->updateDamageHP(hp, 1);
+    }
+}
+
+void mlFtEvent::notifyEventSetDamage(int entryId, float damage, u32 percent, bool p4, bool p5) {
+    int playerNo = g_ftManager->getPlayerNo(entryId);
+    if (m_operatorInfo != NULL) {
+        m_operatorInfo->m_playerDamage[playerNo] = percent;
+    }
+    if (!isInfoManager()) {
+        return;
+    }
+    if (m_condition->m_meleeInitData.m_hideDamageGauge) {
+        return;
+    }
+    if (!unk34_20) {
+        return;
+    }
+    if (m_operatorRule != NULL && m_operatorRule->isGameSet()) {
+        return;
+    }
+    CameraController::getInstance()->clearDisablePlayerNo(playerNo);
+    if (playerNo >= 0) {
+        IfPlayer* player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[getInfoAreaNo(playerNo)])];
+        player->updateDamageHP(percent, p5);
+        if (p4) {
+            float rumbleRate = getDamageInfoRumbleRate(damage);
+            IfPlayer* rumblePlayer = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[getInfoAreaNo(playerNo)])];
+            if (rumblePlayer->unk1C == rumblePlayer->unk18) {
+                rumblePlayer->unk264 = rumbleRate;
+                rumblePlayer->setDamageState(1);
+            }
+        }
+    } else {
+        OSReport("mlFtEvent::notifyEventSetDamage() nEntryID(0x%08x) is not safe!!!\n", entryId);
+    }
+}
+
+void mlFtEvent::notifyEventSuicide(int entryId) {
+    if (!isInfoManager()) {
+        return;
+    }
+    if (!unk34_20) {
+        return;
+    }
+    if (m_operatorRule != NULL && m_operatorRule->isGameSet()) {
+        return;
+    }
+    int playerNo = g_ftManager->getPlayerNo(entryId);
+    if (g_IfMngr != NULL && m_condition->m_meleeInitData.m_0x3_2) {
+        g_IfMngr->m_ifPlayers[m_condition->m_playersInitData[playerNo].m_playerId]->setScoreVary(
+            m_condition->m_meleeInitData.m_suicideScoreMultiplier);
+    }
+    if (g_Stage == NULL) {
+        return;
+    }
+    if (unk38 != entryId) {
+        return;
+    }
+    g_Stage->endAppear();
+}
 
 bool mlFtEvent::isInfoManager() {
     return g_IfMngr != NULL;
@@ -60,7 +257,7 @@ void mlFtEvent::notifyEventKnockout(int entryId) {
         m_operatorRule->notifyEventKnockout(g_ftManager->getScoreEntryId(entryId));
     }
     int playerNo = g_ftManager->getPlayerNo(entryId);
-    fn_8009C9B8(CameraController::getInstance(), playerNo);
+    CameraController::getInstance()->setDisablePlayerNo(playerNo);
 }
 
 void mlFtEvent::setCondition(gmGlobalModeMelee* condition) {

@@ -22,7 +22,10 @@
 #include <it/item.h>
 #include <so/so_null.h>
 #include <so/ground/so_ground_util.h>
+#include <so/so_archive_db.h>
 #include <types.h>
+#include <ut/ut_list.h>
+#include <ut/ut_ref.h>
 
 // The fighter data provider (loads and serves fighter resource data); only isReady is used by the fighter manager.
 class ftDataProvider {
@@ -32,7 +35,75 @@ public:
     void reqCommon(u32 a, u32 b, int c);
     void process();
     bool isReady();
-    char _4[0x109C];
+    class ftDataTask : public utListNode {
+    public:
+        utRef m_ref; // HYPOTHESIS: reference counter
+        u8 m_state; // HYPOTHESIS: task state
+        virtual ~ftDataTask();
+        virtual void remove(bool);
+        int m_kind; // HYPOTHESIS: fighter kind
+
+        // HYPOTHESIS: inlined release and remove helper
+        bool tryRemove(bool cancel) {
+            if (m_ref.release()) {
+                remove(cancel);
+                return true;
+            }
+            return false;
+        }
+    };
+
+    class ftDataTaskResource : public ftDataTask {
+    public:
+        soArchiveItem m_archiveItem; // HYPOTHESIS: archive item
+        int unk24;
+        char* unk28;
+        int unk2C;
+        u8 unk30;
+        u8 unk31;
+        u8 unk32;
+        u8 unk33_0 : 7;
+        u8 unk33_7 : 1;
+
+        ftDataTaskResource();
+        virtual ~ftDataTaskResource();
+        virtual void remove(bool);
+    };
+
+    ftDataTaskResource* searchTask(ftKind kind, int p2, int p3, int p4, u32 p5);
+    void reqItem(ftKind kind);
+    // HYPOTHESIS: inlined task release and list move
+    bool removeResourceTask(ftDataTask* task, bool cancel) {
+        if (task->tryRemove(cancel) == true) {
+            m_activeTaskList.removeExist(task);
+            m_compTaskList.removeExist(task);
+            m_freeTaskList.addTail(task);
+            return true;
+        }
+        return false;
+    }
+
+    // HYPOTHESIS: inlined list search helper
+    // HYPOTHESIS: the list walk searchTask inlines twice; the name is not from the map.
+    static ftDataTaskResource* searchList(utList* list, ftKind kind, int p2, int p3, int p4, u32 p5) {
+        for (ftDataTaskResource* task = static_cast<ftDataTaskResource*>(list->getHead()); task != NULL; task = static_cast<ftDataTaskResource*>(task->m_next)) {
+            if ((task->unk31 == 0xFF || task->unk31 == p2) &&
+                (task->m_kind == -1 || task->m_kind == kind) &&
+                (task->unk30 == 0xFF || task->unk30 == p5) &&
+                (task->unk32 == 0xFF || task->unk32 == p3) &&
+                task->unk33_0 == p4) {
+                return task;
+            }
+        }
+        return NULL;
+    }
+
+    ftDataTaskResource m_commonTask; // HYPOTHESIS: common Fighter.pac task
+    ftDataTaskResource m_tasks[0x50]; // HYPOTHESIS: task pool
+    int m_commonSoundGroup; // HYPOTHESIS: common sound group id
+    utList m_freeTaskList; // HYPOTHESIS: unused tasks
+    utList m_activeTaskList; // HYPOTHESIS: loading tasks
+    utList m_compTaskList; // HYPOTHESIS: completed tasks
     bool m_isUseCompressedMode;
     char _10a1[3];
 };

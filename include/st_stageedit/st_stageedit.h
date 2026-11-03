@@ -205,6 +205,11 @@ public:
     void disableGimmickBlocks();
     void startGimmickSE();
     void loadStageEditData();
+    void initStageBlocks();
+    void enableBg(bool enableTrainer);
+    void disableBg();
+    void setScene(int scene);
+    float getCameraParamDistanceMax();
 
     // Helpers that the original inlines everywhere (HYPOTHESIS: names).
     bool getBlockAt(u32 x, u32 y, u32* desc);

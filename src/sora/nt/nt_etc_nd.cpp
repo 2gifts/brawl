@@ -1,5 +1,5 @@
-#include <mu/wifi/mu_wifi_interface.h>
 #include <nt/nt_etc_nd.h>
+#include <nt/nt_net_report.h>
 #include <revolution/OS/OSHardware.h>
 #include <types.h>
 

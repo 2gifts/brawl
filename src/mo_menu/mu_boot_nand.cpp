@@ -12,10 +12,8 @@
 // main.dol functions with names that the shared headers do not declare.
 // Creates the camera task that draws the menu models (the task keeps the scene group at +0x48)
 extern "C" muEndCameraTask* fn_800AFBFC(const char* name, int heap, gfArchive* archive, int unk);
-// GameGlobal::setSaveDataFlags(flags) and GameGlobal::setSystemData(data): they apply the parts of the save data that
-// are in use and the loaded system data.
-// HYPOTHESIS: the names; they are called after the check and after the load of the system data.
-extern "C" void fn_8004EAE0(GameGlobal* global, u8 flags);
+// GameGlobal::setSystemData(data): applies the loaded system data.
+// HYPOTHESIS: the name; it is called after the load of the system data.
 extern "C" void fn_8004EB20(GameGlobal* global, void* data);
 // nw4r::g3d::ResFile::Release()
 extern "C" void Release__Q34nw4r3g3d7ResFileFv(nw4r::g3d::ResFile* resFile);
@@ -66,7 +64,7 @@ void muBootNandTask::processDefault() {
     case 0x02:
         // all the parts of the save data are in use until the player says no
         m_flags |= 0x1F;
-        fn_8004EAE0(g_GameGlobal, m_flags);
+        g_GameGlobal->setEnableSaveLoad(m_flags);
         m_recorder->requestCheck(Heaps::MenuResource, 8);
         m_step = 3;
         break;
@@ -466,7 +464,7 @@ void muBootNandTask::processDefault() {
         break;
     case 0x37:
         // the parts of the save data that are in use are told to the game, then the system data is loaded
-        fn_8004EAE0(g_GameGlobal, m_flags);
+        g_GameGlobal->setEnableSaveLoad(m_flags);
         if (gfSysRecorder2::isEnable(0) == 1) {
             m_step = 0x38;
         } else {
@@ -501,7 +499,7 @@ void muBootNandTask::processDefault() {
         // an error that has no window (the text is "an unexpected error happened")
         OSReport("\x91\x7A\x92\xE8\x8A\x4F\x82\xCC\x83\x47\x83\x89\x81\x5B\x94\xAD\x90\xB6\n");
         m_flags &= 0xE0;
-        fn_8004EAE0(g_GameGlobal, m_flags);
+        g_GameGlobal->setEnableSaveLoad(m_flags);
         m_step = 0x3D;
         break;
     case 0x3D:
