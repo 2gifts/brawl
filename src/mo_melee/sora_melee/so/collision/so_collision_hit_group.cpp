@@ -138,3 +138,44 @@ int soCollisionHitGroup::getPartStatus(soArray<soCollisionHitPart>* parts, u32 i
 void soCollisionHitGroup::initMultiSituation() {
     m_multiSituation = 0;
 }
+
+void soCollisionHitGroup::reset(soCollision* collision, soArray<soCollisionHitPart>* parts, float posX, float scale, float lr, SituationKind situation) {
+    m_posX = posX;
+    m_scale = scale;
+    m_situationKind = situation;
+    m_lr = lr;
+    m_multiSituation = 0;
+    if (m_index != -1) {
+        unk24 = 0.0f;
+        m_whole = 0;
+        m_global = 0;
+        m_49 = false;
+        m_xluFrameGlobal = 0;
+        m_50 = false;
+        m_invincibleFrameGlobal = 0;
+        m_51 = 1;
+        unk48 = 0;
+        soCollision::getSituation(situation);
+        soCollisionHitPart* part;
+        for (int i = 0; i < m_partSize; i++) {
+            part = &parts->at(m_partStart + i);
+            part->reset(collision->getCollision(i, m_index));
+        }
+    }
+}
+
+void soCollisionHitGroup::set(soArray<soCollisionHitPart>* parts, u32 index, soCollisionHitData* data) {
+    parts->at(m_partStart + index).setData(data);
+}
+
+void soCollisionHitGroup::set(soArray<soCollisionHitPart>* parts, soSet<soCollisionHitData>* data) {
+    for (int i = 0; i < (int)data->m_size; i++) {
+        parts->at(m_partStart + i).setData(&data->m_elements[i]);
+    }
+}
+
+void soCollisionHitGroup::setCheckCatch(soArray<soCollisionHitPart>* parts, bool checkCatch) {
+    for (int i = 0; i < m_partSize; i++) {
+        parts->at(m_partStart + i).setCheckCatch(checkCatch);
+    }
+}

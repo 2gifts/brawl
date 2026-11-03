@@ -53,6 +53,11 @@ class soCollisionHitPart {
     char _0x64[4];
 
 public:
+    // HYPOTHESIS: signatures follow the hit-group calls and the linker map.
+    void setData(soCollisionHitData* data);
+    void setCheckCatch(bool checkCatch);
+    // HYPOTHESIS: reset receives the collision primitive returned for this part.
+    void reset(newCollision* collision);
     soCollisionHitPart();
     soCollisionHitPart(soCollision::Category selfCategory, u32 opponentCategory);
     ~soCollisionHitPart();
