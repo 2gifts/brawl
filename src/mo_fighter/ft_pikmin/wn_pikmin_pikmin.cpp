@@ -21,6 +21,7 @@
 #include <so/so_kinetic_energy_normal.h>
 #include <so/so_kinetic_utility.h>
 #include <wn/wn_kinetic_energy_gravity.h>
+#include <ft/ft_kinetic_energy.h>
 #include <wn/wn_kinetic_transactor.h>
 #include <so/so_type_list.h>
 #include <wn/wn_activate_desc.h>
@@ -1194,6 +1195,20 @@ struct PkVec2Temp {
 // overloads; the value-initialized one-byte tag temporary is the zero byte stored before each lookup.
 static inline soKineticEnergyNormal* pkGetEnergy(void* pools, const soIntToType<0>&) { return PK_NORMAL(pools); }
 static inline wnKineticEnergyGravity* pkGetEnergy(void* pools, const soIntToType<1>&) { return PK_GRAVITY(pools); }
+// HYPOTHESIS: pool levels 2-5 follow at the same 0xC holder stride: ground movement, wind, and two energies the
+// transactor only enables (their types are unknown).
+static inline soKineticEnergyGroundMovement* pkGetEnergy(void* pools, const soIntToType<2>&) {
+    return reinterpret_cast<soKineticEnergyGroundMovement*>(static_cast<u8*>(pools) + 0x70);
+}
+static inline soKineticEnergyWindNormal* pkGetEnergy(void* pools, const soIntToType<3>&) {
+    return reinterpret_cast<soKineticEnergyWindNormal*>(static_cast<u8*>(pools) + 0xAC);
+}
+static inline soKineticEnergy* pkGetEnergy(void* pools, const soIntToType<4>&) {
+    return reinterpret_cast<soKineticEnergy*>(static_cast<u8*>(pools) + 0xF8);
+}
+static inline soKineticEnergy* pkGetEnergy(void* pools, const soIntToType<5>&) {
+    return reinterpret_cast<soKineticEnergy*>(static_cast<u8*>(pools) + 0x118);
+}
 #define PK_PARAMS(acc) (static_cast<soParamAccesser*>((acc)->getWorkManageModule().getParamAccesser()))
 #define PK_VEC2(name, x, y) \
     Vec2f name;             \
@@ -1267,10 +1282,10 @@ void wnPikminPikminKineticTransactor::addSpeedOutside(int type, float* speed, vo
             result = soKineticUtility::projectionNormalFollow(&along, &normal);
         }
         if (result.m_x != 0.0f || result.m_y != 0.0f) {
-            volatile u8 unk9 = 0; // MATCH-ONLY: native clears this unused local byte before the pool update.
-            *reinterpret_cast<Vec2f*>(poolBytes + 0x78) += result;
-            *reinterpret_cast<float*>(poolBytes + 0x94) = *reinterpret_cast<float*>(poolBytes + 0x94) + 0.0f;
-            reinterpret_cast<soKineticEnergy*>(poolBytes + 0x70)->enable();
+            soKineticEnergyGroundMovement* ground = pkGetEnergy(pools, soIntToType<2>());
+            ground->m_outsideSpeed += result;
+            ground->m_rotation = ground->m_rotation + 0.0f;
+            ground->enable();
         }
         break;
     }
@@ -1296,15 +1311,22 @@ void wnPikminPikminKineticTransactor::addSpeedOutside(int type, float* speed, vo
             break;
         }
         if (delta.m_x != 0.0f || delta.m_y != 0.0f) {
-            volatile u8 unk8 = 0; // MATCH-ONLY: native clears this unused local byte before the pool update.
-            *reinterpret_cast<Vec2f*>(poolBytes + 0xE0) += delta;
-            *reinterpret_cast<float*>(poolBytes + 0xE8) = soValueAccesser::getConstantFloat(acc, 0xFE0, 0);
-            *reinterpret_cast<Vec2f*>(poolBytes + 0xCC) = brake;
-            reinterpret_cast<soKineticEnergy*>(poolBytes + 0xAC)->enable();
+            soKineticEnergyWindNormal* wind = pkGetEnergy(pools, soIntToType<3>());
+            wind->m_windSpeed += delta;
+            wind->m_responseRetention = soValueAccesser::getConstantFloat(acc, 0xFE0, 0);
+            wind->m_brake = brake;
+            wind->enable();
         }
         break;
     }
     }
+}
+
+// HYPOTHESIS (name): mode 0x22 reuses mode 0x21's setup through an inline member that builds a transactor of its
+// own; that second empty object is the byte the case zeroes at the bottom of the frame.
+inline void wnPikminPikminKineticTransactor::changeKineticSub1Again(void* pools, soModuleAccesser* acc) {
+    wnPikminPikminKineticTransactor sub = {};
+    sub.changeKineticSub1(pools, acc);
 }
 
 void wnPikminPikminKineticTransactor::changeKinetic(int mode, void* pools, soModuleAccesser* acc) {
@@ -1329,8 +1351,7 @@ void wnPikminPikminKineticTransactor::changeKinetic(int mode, void* pools, soMod
     }
     case 0x22: {
         wnPikminPikminKineticTransactor empty = {};
-        // MATCH-ONLY: native zeroes a second transactor at the bottom of the frame before the store-then-address call.
-        (wnPikminPikminKineticTransactor() = empty).changeKineticSub1(pools, acc);
+        empty.changeKineticSub1Again(pools, acc);
         break;
     }
     case 0x23: {
@@ -1451,11 +1472,8 @@ void wnPikminPikminKineticTransactor::changeKinetic(int mode, void* pools, soMod
     default:
         return;
     }
-    // MATCH-ONLY: native clears an unused one-byte local before each enable.
-    wnPikminPikminKineticTransactor unkA = {};
-    reinterpret_cast<soKineticEnergy*>(poolBytes + 0x118)->enable();
-    wnPikminPikminKineticTransactor unkB = {};
-    reinterpret_cast<soKineticEnergy*>(poolBytes + 0xF8)->enable();
+    pkGetEnergy(pools, soIntToType<5>())->enable();
+    pkGetEnergy(pools, soIntToType<4>())->enable();
 }
 
 void wnPikminPikminKineticTransactor::changeKineticSub(void* pools, soModuleAccesser* acc) {
