@@ -9,6 +9,12 @@
 // described yet.
 struct grAdventureElevatorData;
 
+struct grAdventureElevatorData {
+    u8 unk0[0x28];
+    float unk28;
+    float unk2C;
+};
+
 class grAdventureElevator : public grYakumono {
 protected:
     grAdventureElevatorData* m_data;  // 0x150
@@ -19,9 +25,24 @@ protected:
     u32 m_floorCount;                 // 0x164
     u32 m_floorIndex;                 // 0x168
     u32 m_targetFloorIndex;           // 0x16C
-    u8 unk170[0x14];
+    union {
+        u8 unk170[0x14];
+        struct {
+            float unk170Value;
+            float unk174;
+            float unk178;
+            float unk17C;
+            float unk180;
+        };
+    };
     float unk184;                     // 0x184
-    u8 unk188[0x30];
+    union {
+        u8 unk188[0x30];
+        struct {
+            float unk188Value;
+            u8 unk18C[0x2C];
+        };
+    };
     u32 unk1B8;                       // 0x1B8
     u32 unk1BC;                       // 0x1BC
     u8 unk1C0[4];
@@ -43,5 +64,8 @@ public:
     virtual void onGimmickEvent(soGimmickEventArgs* eventInfo, int* taskId);
 
     static grAdventureElevator* create(int mdlIndex, const char* taskName);
+    void moveFloor();
+    void setMoveParameter(Vec3f* position);
+    void getNextFloorTime();
 };
 static_assert(sizeof(grAdventureElevator) == 0x1C4, "Class is wrong size!");
