@@ -462,8 +462,8 @@ public:
     bool : 1;
     bool : 1;
     bool m_isStamina : 1;                // 0x1C
-    bool : 1;
-    bool : 1;
+    bool m_0x1C_6 : 1;
+    bool m_0x1C_5 : 1;                   // HYPOTHESIS: forces the name tag on (stOperatorInfo)
     bool m_isRebirthXlu : 1;
     bool m_isRabbitCap : 1;
     bool m_isFlower : 1;
