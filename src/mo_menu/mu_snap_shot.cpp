@@ -13,9 +13,6 @@
 // main.dol functions with names that the shared headers do not declare.
 // Message::getPrintIndexData(data, index, text, size)
 extern "C" void getPrintIndexData__7MessageFPvUlPPcPUl(void* data, u32 index, char** text, u32* size);
-// HYPOTHESIS: the loader of a file of the menu: reset(loader) and request(loader, path, heap, 0)
-extern "C" void fn_800FABEC(muCollectionViewer::MsgFile* loader);
-extern "C" void fn_800FAC58(muCollectionViewer::MsgFile* loader, const char* path, Heaps::HeapType heap, int unk);
 // the pictures of the collection: the name of the file, the decoded picture and the check that the collection is ready
 extern "C" muCollectionFileName fn_800C3538(const char* names, int index);
 extern "C" void fn_800C7324(muSnapShotJpeg* result, void* summary, Heaps::HeapType heap, int unk);
