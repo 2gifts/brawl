@@ -24,6 +24,7 @@
 //   0x8009BA28     4  notifiAllEndCalcWorldTimingC   [map: phInterface__notifiAllEndCalcWorldTimingC]
 //   0x8009BA2C    20  errorReport   [map: phInterface__errorReport]
 
+#include <ph/ph2ndaryWorld.h>
 #include <ph/ph_Interface.h>
 #include <gf/gf_heap_manager.h>
 #include <revolution/OS/OSError.h>
@@ -166,4 +167,11 @@ void phInterface::notifiAllEndCalcWorldTimingC() {
 
 void phInterface::errorReport(const char* msg) {
     OSReport("[physics]:%s", msg);
+}
+
+void phInterface::delete2ndaryWorld() {
+    if (m_2ndaryWorld != nullptr && m_2ndaryControllers.m_size == 0) {
+        delete m_2ndaryWorld;
+        m_2ndaryWorld = nullptr;
+    }
 }

@@ -7,6 +7,7 @@
 // src/sora/ph/ph_2ndary_world.cpp. Field names are HYPOTHESIS; unkNN marks fields not yet seen in the asm.
 class ph2ndaryWorld {
 public:
+    ~ph2ndaryWorld();
     // One entry of the constraint list: kind byte, owning pointer and an id.
     struct ConstraintEntry {
         u8 kind;   // 0x00
