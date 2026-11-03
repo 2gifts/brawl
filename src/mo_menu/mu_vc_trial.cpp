@@ -90,6 +90,12 @@ struct muVCTrialText {
         append(name.m_str, strlen(name.m_str));
         append(after);
     }
+    // Appends three texts.
+    void append(const muVCTrialMsgText& first, const muVCTrialMsgText& second, const muVCTrialMsgText& third) {
+        append(first);
+        append(second);
+        append(third);
+    }
 };
 
 // The name of the model of an object (from the resource of the model), which the names of its animations start with.
@@ -397,18 +403,14 @@ static inline bool checkNand(bool* isFull) {
 }
 
 inline void muVCTrialTask::openNotice(int msg) {
-    bool isQuestion = msg == 11;
     nw4r::g3d::ScnGroup* group = g_gfSceneRoot->unk38C[gfSceneRoot::Layer_Info].unk4;
+    bool isQuestion = msg == 11;
     muNoticeWndTask* wnd;
     if (msg == 11) {
-        muVCTrialText<0x200> text;
         int nameMsg = getCurTitle().m_nameMsg;
-        muVCTrialMsgText after(m_msg.get(), 12);
-        muVCTrialMsgText name(m_msg.get(), nameMsg);
-        muVCTrialMsgText before(m_msg.get(), 11);
-        text.append(before);
-        text.append(name);
-        text.append(after);
+        muVCTrialText<0x200> text;
+        text.append(muVCTrialMsgText(m_msg.get(), 11), muVCTrialMsgText(m_msg.get(), nameMsg),
+                    muVCTrialMsgText(m_msg.get(), 12));
         wnd = fn_800BF048(isQuestion, text.m_data, text.m_size, &m_wndRes, group, 0x14, 0, Heaps::MenuInstance,
                           Heaps::MenuResource, 0, 0, 0xF0);
     } else {
@@ -418,6 +420,8 @@ inline void muVCTrialTask::openNotice(int msg) {
     m_notice.reset(wnd);
 }
 
+// HYPOTHESIS: the original is a coroutine whose states are source lines; it jumps to the line that waits for the next
+// frame, so the code below jumps to the label in front of each state instead of setting the state again.
 void muVCTrialTask::main() {
     switch (m_state) {
     case State_Start:
@@ -436,30 +440,33 @@ void muVCTrialTask::main() {
         if (!checkNand(&m_isNandFull)) {
             break;
         }
-        if (m_isNandFull) {
-            m_notices[0] = 6;
-            m_notices[1] = -1;
-            openNotice(6);
-            m_state = State_NoticeOpen;
-        } else {
-            m_state = State_Select;
+        if (!m_isNandFull) {
+            goto select;
         }
+        m_notices[0] = 6;
+        m_notices[1] = -1;
+        openNotice(m_notices[0]);
+        goto noticeOpen;
+    select:
+        m_state = State_Select;
         break;
     case State_Select:
         if (m_input & 2) {
             decide();
             g_sndSystem->playSE(static_cast<SndID>(1), -1, 0, 0, -1);
-            m_state = State_NoticeOpen;
         } else if (m_input & 4) {
             g_sndSystem->playSE(static_cast<SndID>(2), -1, 0, 0, -1);
-            m_state = State_Leave;
+            goto leave;
         } else {
             int prev = getCurTitleNo();
             moveCursor();
             if (prev != getCurTitleNo()) {
                 g_sndSystem->playSE(static_cast<SndID>(0), -1, 0, 0, -1);
             }
+            break;
         }
+    noticeOpen:
+        m_state = State_NoticeOpen;
         break;
     case State_NoticeOpen:
         m_state = State_Notice;
@@ -477,36 +484,36 @@ void muVCTrialTask::main() {
             m_notices[2] = m_notices[3];
             if (m_notices[0] >= 0) {
                 openNotice(m_notices[0]);
-                m_state = State_NoticeOpen;
-                break;
+                goto noticeOpen;
             }
             if (selected == 0) {
                 if (!m_isNandFull) {
-                    m_state = State_Select;
-                } else {
-                    m_state = State_Leave;
+                    goto select;
                 }
-                break;
+                goto leave;
             }
         }
         m_selected = getCurTitleNo();
         m_fade.reset(utility::FadeOutTask::create(Heaps::MenuInstance));
-        // The flag in the save data that tells that a title was played (17: the title has none).
-        int playedFlags[NumTitles] = { 17, 17, 14, 17, 17, 17, 15, 16, 12, 17, 17, 17, 17, 17, 13, 17 };
+        // The flag in the save data that tells that a title was played.
+        // HYPOTHESIS: the "no flag" value is a plain local in the original (the table in .data has 0 in its entries and
+        // the code stores it after copying the table).
+        int noFlag = 17;
+        int playedFlags[NumTitles] = { noFlag, noFlag, 14, noFlag, noFlag, noFlag, 15, 16,
+                                       12, noFlag, noFlag, noFlag, noFlag, noFlag, 13, noFlag };
         int flag = playedFlags[getCurTitleNo()];
         bool changed;
-        if (flag == 17) {
+        if (flag == noFlag) {
             changed = false;
         } else {
             changed = setPlayedFlag(flag);
         }
-        if (changed) {
-            g_gfShutdownManager.unkD = false;
-            gmSysSave::create(Heaps::MenuInstance);
-            m_state = State_Save;
-        } else {
-            m_state = State_FadeOut;
+        if (!changed) {
+            goto fadeOut;
         }
+        g_gfShutdownManager.unkD = false;
+        gmSysSave::create(Heaps::MenuInstance);
+        m_state = State_Save;
         break;
     }
     case State_Save:
@@ -520,12 +527,16 @@ void muVCTrialTask::main() {
         m_state = State_SaveDone2;
         break;
     case State_SaveDone2:
+    fadeOut:
         m_state = State_FadeOut;
         break;
     case State_FadeOut:
         if (m_fade.get() == NULL || m_fade->isEnd()) {
-            m_state = State_End;
+            goto end;
         }
+        break;
+    leave:
+        m_state = State_Leave;
         break;
     case State_Leave: {
         scVCTrialLoader* loader = lbl_1_bss_20;
@@ -543,9 +554,11 @@ void muVCTrialTask::main() {
     }
     case State_Loading:
         fn_1_4A44(lbl_1_bss_20, 3, Heaps::InfoExtraResource, Heaps::MenuResource);
-        if (lbl_1_bss_20->m_isLoaded) {
-            m_state = State_End;
+        if (!lbl_1_bss_20->m_isLoaded) {
+            break;
         }
+    end:
+        m_state = State_End;
         break;
     case State_End:
         m_isEnd = 1;
@@ -591,11 +604,11 @@ void muVCTrialTask::moveCursor() {
 void muVCTrialTask::decide() {
     gfPadStatus pad;
     g_gfPadSystem->getSysPadStatus(0, &pad);
+    bool hasPad = pad.m_error == 0;
     m_notices[0] = 9;
     m_notices[1] = 10;
     m_notices[2] = 11;
     m_notices[3] = -1;
-    bool hasPad = pad.m_error == 0;
     if (!hasPad) {
         gfPadStatus remote;
         g_gfPadSystem->getSysPadStatus(4, &remote);
