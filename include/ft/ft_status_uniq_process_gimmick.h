@@ -1,3 +1,4 @@
+// Local BrawlHeaders shadow: add ladder correction and status helper declarations.
 #pragma once
 
 #include <StaticAssert.h>
@@ -62,6 +63,25 @@ static_assert(sizeof(ftStatusUniqProcessGimmickSpring) == 0x14, "Class is the wr
 
 class ftStatusUniqProcessGimmickLadder : public ftStatusUniqProcessGimmick {
 public:
+    void correctX(soModuleAccesser* moduleAccesser, float x, int interpolate);
+    void correctY(soModuleAccesser* moduleAccesser, float upperY, float lowerY, int interpolate);
+    void adjustLadderMovement(soModuleAccesser* moduleAccesser, float x, float y);
+    void initLadderCatch(soModuleAccesser*, soGimmickLadderEventArgs*);
+    void initLadderCatchBottom(soModuleAccesser*, soGimmickLadderEventArgs*);
+    void initLadder(soModuleAccesser*, soGimmickLadderEventArgs*);
+    void initLadderEnd(soModuleAccesser*, soGimmickLadderEventArgs*);
+    void execLadderCatch(soModuleAccesser*, soGimmickLadderEventArgs*);
+    void execLadderCatchBottom(soModuleAccesser*, soGimmickLadderEventArgs*);
+    void execLadder(soModuleAccesser*, soGimmickLadderEventArgs*);
+    void execLadderEnd(soModuleAccesser*, soGimmickLadderEventArgs*);
+    void fixPosLadderCatch(soModuleAccesser*, soGimmickLadderEventArgs*);
+    void fixPosLadderCatchBottom(soModuleAccesser*, soGimmickLadderEventArgs*);
+    void fixPosLadder(soModuleAccesser*, soGimmickLadderEventArgs*);
+    void fixPosLadderEnd(soModuleAccesser*, soGimmickLadderEventArgs*);
+    void exitLadderCatch(soModuleAccesser*);
+    void exitLadderCatchBottom(soModuleAccesser*);
+    void exitLadder(soModuleAccesser*);
+    void exitLadderEnd(soModuleAccesser*);
     ftStatusUniqProcessGimmickLadder(soModuleAccesser* acc) : ftStatusUniqProcessGimmick(acc) { }
     virtual ~ftStatusUniqProcessGimmickLadder() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);

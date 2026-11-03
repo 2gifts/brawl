@@ -2,6 +2,7 @@
 // is the single entry point the rest of the game uses to start, query and affect fighters.
 // MATCH-ONLY: keeps the original local order of the checks in soEventObserver::addObserverSub (see so_event_presenter.h).
 #define SO_EVENT_OBSERVER_CHECK_ORDER
+#include <ai/ai_mgr.h>
 #include <ft/ft_manager.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_external_value_accesser.h>
@@ -1350,12 +1351,6 @@ void ftManager::startInputEvent() {
     }
     unk6c_10 = true;
 }
-
-// MATCH-ONLY: stand-in declaration, the aiMgr header is not needed here
-class aiMgr {
-public:
-    static void create(int unk);
-};
 
 void ftManager::create() {
     g_ftManager = new (Heaps::System) ftManager(g_ftSystem.unk0, g_ftSystem.unk4);

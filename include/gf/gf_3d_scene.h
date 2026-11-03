@@ -9,8 +9,18 @@
 #include <nw4r/g3d/g3d_scnmdl.h>
 #include <types.h>
 
+namespace nw4r {
+namespace g3d {
+class ScnRoot;
+class ScnGroup;
+} // namespace g3d
+} // namespace nw4r
+
 class gfSceneRoot : public gfTask {
 public:
+    gfSceneRoot();
+    static void create();
+
     enum LayerType {
         Layer_Ground = 0x0,
         Layer_Ground_And_Chara = 0x1,
@@ -26,9 +36,25 @@ public:
         Layer_Info = 0x8,
     };
 
-    char _64[20];
+    union {
+        char _64[20];
+        struct {
+            nw4r::g3d::ScnRoot* unk40;
+            nw4r::g3d::ScnRoot* unk44;
+            nw4r::g3d::ScnRoot* unk48;
+            u32 unk4C;
+            u32 unk50;
+        };
+    };
     nw4r::g3d::AnmScnRes* m_anmScnRes;
-    char _88[12];
+    union {
+        char _88[12];
+        struct {
+            u32 unk58;
+            nw4r::g3d::AnmScnRes* unk5C;
+            nw4r::g3d::AnmScnRes* unk60;
+        };
+    };
     union TransformFlag {
         u32 m_mask;
         struct {
@@ -67,7 +93,26 @@ public:
         };
     } m_transformFlag;
 
-    char _104[1044];
+    // HYPOTHESIS: per-layer record (layout from the layer functions; the name is not from the map).
+    struct Layer {
+        u32 unk0;
+        nw4r::g3d::ScnGroup* unk4;
+        nw4r::g3d::AnmScnRes* unk8;
+        u8 unkC;
+        u8 unkD_7 : 1;
+        u8 unkD_0 : 7;
+        u16 unkE;
+        u32 unk10;
+        u32 unk14;
+    };
+    union {
+        char _104[1044];
+        struct {
+            char unk68[0x324];
+            Layer unk38C[9];
+            char unk464[0x18];
+        };
+    };
     float m_shadowPitch;
     float m_shadowYaw;
     float m_1156;
@@ -83,6 +128,11 @@ public:
 
     void setCurrentFrame(float);
     void removeResAnmScn();
+    void setLayerDispStatus(LayerType layer, bool status);
+    bool clear(LayerType layer);
+    void setAnmScnResToScnRoot3D(nw4r::g3d::AnmScnRes* anmScn);
+    void setFinalSceneAnm(nw4r::g3d::ResAnmScn* anmScn);
+    void removeFinalSceneAnm();
     void setInfoCamResAnm(nw4r::g3d::ResAnmScn* anmScn);   // the camera of the Info layer (map: gfSceneRoot::setInfoCamResAnm)
     void removeInfoCamResAnm();
     nw4r::g3d::LightObj* getLightObj(u8 p1);

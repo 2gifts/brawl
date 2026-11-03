@@ -67,6 +67,13 @@ public:
     void* m_figureManager;
     char _5308[4];
 
+    // HYPOTHESIS: const element accessors. The read-only loops call the lists' const at() overload, which a
+    // const member function selects; the names are ours.
+    BaseItem* const& itemAt(int index) const { return m_itemArrayList.at(index); }
+    itArchive* const& itArchiveAt(int index) const { return m_itArchiveArrayList.at(index); }
+    itGenArchive* const& genArchiveAt(int index) const { return m_genArchiveArrayList.at(index); }
+    const ItemInfo& pokemonInfoAt(int index) const { return m_pokemonInfoArrayList.at(index); }
+
     virtual void processDefault();
     virtual void processBegin();
     virtual void processUpdate();

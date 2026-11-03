@@ -5,7 +5,9 @@
 #include <types.h>
 
 class gfArea;
+class Vec2f;
 struct soAreaData;
+struct stMovementData;
 
 class soAreaInstance {
 public:
@@ -23,7 +25,15 @@ public:
             soAreaData* m_data;
             gfArea* m_area;
             int m_enableFrame; // HYPOTHESIS: the second argument of enable()
-            char _0xc[0x10];
+            union {
+                char _0xc[0x10];
+                struct {
+                    float unkC;
+                    float unk10;
+                    float unk14;
+                    float unk18;
+                };
+            };
             u8 m_shapeType;
             u8 m_isEnable : 1;
             u8 m_isCreated : 1; // HYPOTHESIS: getId only reads the area id while this is set
@@ -48,5 +58,10 @@ public:
     void setTeamId(u32 teamId);
     u32 getTeamId();
     void setShapeType(ShapeType shapeType);
+    void destroy();
+    void setShape(const Vec2f& center, const Vec2f& size);
+    void setShape(const Vec2f& center, float radius);
+    void setWind(const stMovementData& data);
+    void unsetWind();
 };
 static_assert(sizeof(soAreaInstance) == 36, "Class is wrong size!");

@@ -1,5 +1,125 @@
+#include <gf/gf_heap_manager.h>
+#include <gm/gm_global.h>
+#include <if/if_wifipr_player.h>
+#include <mu/mu_object.h>
+#include <mu/mu_scn_mdl_expand.h>
+#include <string.h>
 #include <types.h>
 
+// HYPOTHESIS: the one HUD model this screen builds. start/end select the object slots (one model when start >= end) and the draw priority is added to the caller's priority.
+struct IfWifiprPlayerModel {
+    const char* m_suffix;
+    u8 m_start;
+    u8 m_end;
+    u8 m_priority;
+};
+
+IfWifiprPlayerModel lbl_805A2720 = {"State0000_TopN", 0, 0, 2};
+
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
-unsigned char lbl_805A0308[0x4] __attribute__((aligned(4))) = { 0 };
-unsigned char lbl_805A030C[0x4] __attribute__((aligned(4))) = { 0 };
+MuObject* lbl_805A0308;
+nw4r::g3d::ScnMdlExpand* lbl_805A030C;
+
+void IfWifiprPlayer::createPlayerLocator(nw4r::g3d::ResFile* res) {
+    const char* name = "InfPos_TopN";
+    lbl_805A0308 = MuObject::create(res, name, 1, NULL, Heaps::InfoInstance);
+    char animName[0x40];
+    strcpy(animName, name);
+    strcat(animName, "__0");
+    lbl_805A0308->changeAnimN(animName);
+    lbl_805A0308->m_modelAnim->setUpdateRate(0.0f);
+    float frame;
+    if (g_GameGlobal->getGlobalRecordMenuDatap()->m_isWidescreen) {
+        frame = 14.0f;
+    } else {
+        frame = 4.0f;
+    }
+    lbl_805A0308->setFrame(frame);
+    lbl_805A030C = nw4r::g3d::ScnMdlExpand::Construct(gfHeapManager::getMEMAllocator(Heaps::InfoInstance), NULL, 4,
+                                                      lbl_805A0308->m_sceneModel);
+}
+
+void IfWifiprPlayer::destroyPlayerLocator() {
+    if (lbl_805A030C != NULL) {
+        lbl_805A030C->Destroy();
+        lbl_805A030C = NULL;
+    }
+    if (lbl_805A0308 != NULL) {
+        delete lbl_805A0308;
+        lbl_805A0308 = NULL;
+    }
+}
+
+void IfWifiprPlayer::startMelee(nw4r::g3d::ScnGroup* group) {
+    group->Insert(group->sceneItemsCount, lbl_805A030C);
+}
+
+IfWifiprPlayer::IfWifiprPlayer(int playerNo, int mode) : m_heap(Heaps::InfoInstance) {
+    m_object = NULL;
+    m_state = 0;
+    unk10 = 0;
+    m_scnGroup = NULL;
+    m_playerNo = playerNo;
+    m_mode = mode;
+    m_heap = mode == 0 ? Heaps::InfoInstance : Heaps::MenuInstance;
+}
+
+IfWifiprPlayer::~IfWifiprPlayer() {
+    if (m_object != NULL) {
+        delete m_object;
+        m_object = NULL;
+    }
+}
+
+static const char* s_names[] = {"WifiInf", "MenSelchr"};
+
+static const IfWifiprPlayer::DispStateFunc s_dispState[] = {
+    {IfWifiprPlayer::wifiDispStateNoneInit, NULL},
+    {IfWifiprPlayer::wifiDispStateAcceptInit, IfWifiprPlayer::wifiDispStateAcceptMain},
+    {IfWifiprPlayer::wifiDispStateSelCharInit, IfWifiprPlayer::wifiDispStateSelCharMain},
+    {IfWifiprPlayer::wifiDispStateSelStageInit, IfWifiprPlayer::wifiDispStateSelStageMain},
+    {IfWifiprPlayer::wifiDispStatePracticeInit, IfWifiprPlayer::wifiDispStatePracticeMain},
+    {IfWifiprPlayer::wifiDispStateEscapeInit, IfWifiprPlayer::wifiDispStateEscapeMain},
+    {IfWifiprPlayer::wifiDispStateMeleeInit, NULL},
+};
+
+void IfWifiprPlayer::setWifiStatePlayerColor(int color) {
+    MuObject* object = m_object;
+    object->setFrameMatCol(static_cast<float>(color));
+    object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);
+}
+
+void IfWifiprPlayer::createModel(nw4r::g3d::ResFile* res, int priority) {
+    m_object = NULL;
+    IfWifiprPlayerModel* info = &lbl_805A2720;
+    const char* name = s_names[m_mode];
+    m_state = 0;
+    unk10 = 0;
+    m_scnGroup = NULL;
+    u8 end = info->m_end;
+    u8 start = info->m_start;
+    int count = 1;
+    if (start < end) {
+        count = end - start;
+    }
+    char modelName[0x40];
+    char animName[0x40];
+    strcpy(modelName, name);
+    strcat(modelName, info->m_suffix);
+    strcpy(animName, modelName);
+    strcat(animName, "__0");
+    int i;
+    for (i = 0; i < count; i++) {
+        (&m_object)[info->m_start + i] = MuObject::create(res, modelName, info->m_priority + priority, NULL, m_heap);
+        (&m_object)[info->m_start + i]->changeAnimN(animName);
+    }
+    setWifiStatePlayerColor(m_playerNo);
+}
+
+void IfWifiprPlayer::setWifiDispState(int state) {
+    void (*init)(IfWifiprPlayer*) = s_dispState[state].m_init;
+    if (init != NULL) {
+        init(this);
+    }
+    m_state = state;
+}

@@ -17,6 +17,7 @@
 #include <types.h>
 
 class soModuleAccesser;
+class Vec2f;
 
 class soCaptureModuleImpl : public soCaptureModule, public soEventPresenter<soCaptureEventObserver> {
 public:
@@ -36,6 +37,13 @@ public:
     bool m_ignoreCatching;              // 0x32
 
     soCaptureModuleImpl(soModuleAccesser* moduleAccesser);
+    Vec2f getNodeOffset(bool);
+    virtual void captureCut(bool, bool constrained);
+    bool checkDamage(int);
+    bool checkDamageThrown();
+    void thrown();
+    void updatePosThrown();
+    void updateLRThrown();
     virtual ~soCaptureModuleImpl();
     virtual void activate();
     virtual void deactivate();

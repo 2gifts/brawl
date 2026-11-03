@@ -114,7 +114,7 @@ void gfTaskScheduler::process(bool p1) {
     unk0_1 = 1;
     // loop over ProcessTypes?
     for (i = 0; i < 0x10; i++) {
-        unk0_2 = i;
+        m_processType = i;
         // UBFIX: logic depends on shift overflow?
         if (!unk8 || !(1 << i)) {
             // loop over task priority levels?

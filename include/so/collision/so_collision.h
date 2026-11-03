@@ -110,7 +110,9 @@ public:
     void refLogGroup(u32 groupIndex, u32 logGroupIndex);
     void unRefLogGroup(u32 groupIndex);
     void invalidLog(soCollisionLog* collisionLog, u32 groupIndex);
+    void clean();
     void initLogAll();
+    void addCheckList();
     void initPastLogAll(u32 groupIndex);
     void initAbsolute(u32 groupIndex);
     bool isRefLogGroup(u32 groupIndex);
