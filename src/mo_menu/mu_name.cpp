@@ -42,7 +42,6 @@ extern "C" void PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(void*
 extern "C" void PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjUl(void* scnMdl, void* object, u32 node);
 // muMenuController::getPadNo() and muMenuController::main()
 extern "C" int fn_800BA3D8(muMenuController* controller);
-extern "C" int fn_800BA2E0();
 // The name of the player that is given when there is no name (the "new name" line of the list).
 extern "C" const char* fn_800B96B0();
 // GameGlobal: the names that were saved
@@ -833,12 +832,12 @@ void MuSelctChrNameEntry::getCandidacy(char* out, const char* letters, const cha
 
 // Runs the entry for a frame. The result says what happened: the name was decided (and written to out), the player went back,
 // the name is still typed, or the entry is not open.
-int MuSelctChrNameEntry::main(gfPadStatus pad, char* out, bool allowRandom, bool playSound) {
+int MuSelctChrNameEntry::main(gfPadStatus* pad, char* out, bool allowRandom, bool playSound) {
     if (m_isOpen == 0) {
         return Result_Closed;
     }
     updatePadIcon();
-    int result = abButtonMain(&pad, allowRandom);
+    int result = abButtonMain(pad, allowRandom);
     if (result == Result_Decided) {
         strcpy(out, m_name);
         if (playSound) {
@@ -848,7 +847,7 @@ int MuSelctChrNameEntry::main(gfPadStatus pad, char* out, bool allowRandom, bool
     if (result != Result_Editing) {
         return result;
     }
-    cursorMain(&pad);
+    cursorMain(pad);
     return Result_Editing;
 }
 
@@ -1875,7 +1874,7 @@ int muNameTask::mainStepSelectNameMain(muNameTask* task) {
         if (slot->m_taken) {
             playSE(3);
         } else {
-            task->m_playerNo = fn_800BA2E0();
+            task->m_playerNo = muMenuController::getAButtonPushedControllerID();
             int id = slot->m_nameNo;
             int nameNo = -1;
             if (id != -2 && id != -1) {
@@ -1997,13 +1996,15 @@ int muNameTask::mainStepNameEntryMain(muNameTask* task) {
     pad.m_buttonsPressedThisFrame.bits = ctrlWord(task, 0xC);
     pad.m_buttonsPressedThisFrame2.bits = ctrlWord(task, 0x10);
     char name[0x20];
-    int result = task->m_entry.main(pad, name, allowRandom, true);
+    // HYPOTHESIS: the entry gets a copy of the pad (the original copies it before the call, muWifiCnctWndTask does not).
+    gfPadStatus entryPad = pad;
+    int result = task->m_entry.main(&entryPad, name, allowRandom, true);
     if (result == MuSelctChrNameEntry::Result_Decided) {
         GameGlobal* global = g_GameGlobal;
         if (global->getNameNum(name) >= 0 || !MuSelctChrNameEntry::isNameValid(name) || global->getNameCapacityRest() <= 0) {
             playSE(3);
         } else {
-            int color = fn_800BA2E0();
+            int color = muMenuController::getAButtonPushedControllerID();
             if (color == -1) {
                 color = 0;
             }
@@ -2012,7 +2013,7 @@ int muNameTask::mainStepNameEntryMain(muNameTask* task) {
             int index = global->getNumName();
             global->setName(index, wide, color);
             task->addNameList(index);
-            task->m_playerNo = fn_800BA2E0();
+            task->m_playerNo = muMenuController::getAButtonPushedControllerID();
             task->updateAll();
             task->m_resultNameNo = index;
             task->m_resultKind = Result_NewName;

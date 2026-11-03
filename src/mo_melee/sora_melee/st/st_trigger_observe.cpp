@@ -1,6 +1,7 @@
 #include <st/st_trigger_observe.h>
 #include <gf/gf_area.h>
 #include <math.h>
+#include <st/st_area_manager.h>
 #include <st/stage.h>
 #include <types.h>
 
@@ -38,6 +39,14 @@ void stObsNumTriggerCB2::userProc() {
 }
 
 stObsTriggerArea::stObsTriggerArea(bool* flag, bool unkC) : stObsTriggerCB(flag, unkC) { }
+
+stObsTriggerArea::~stObsTriggerArea() {
+    if (m_area != nullptr) {
+        stAreaManager::getInstance()->erase(m_area->m_id);
+        delete m_area;
+    }
+    m_area = nullptr;
+}
 
 void stObsTriggerArea::userProc() { }
 
@@ -109,6 +118,69 @@ void stObsTriggerFrameCB::userProc() {
     }
     float delta = g_stGameFrame.m_frameDelta;
     unk14 += delta;
+}
+
+stObsTriggerSquareWindCB::stObsTriggerSquareWindCB(bool* flag, grGimmickWindData2nd* windData)
+    : stObsTriggerArea(flag, false) {
+    windData->m_areaData.m_group = gfArea::Stage_Group_Space_Wind;
+    createArea(&windData->m_areaData, Vec2f(windData->m_pos.m_x, windData->m_pos.m_y));
+    stMovementAreaInfoData info;
+    info.m_data.m_gimmickKind = Gimmick::Area_Wind_2nd;
+    info.m_data.m_speed = windData->m_speed;
+    info.m_data.m_vector = windData->m_vector;
+    info.m_data._0xC = windData->m_60;
+    info.m_data._0x10 = windData->m_64;
+    info.m_data._0x14 = windData->m_68;
+    info.m_data._0x1c = windData->m_72;
+    getAreaID(&info.m_areaId);
+    m_windIndex = stAreaManager::getInstance()->setWind(&info);
+}
+
+stObsTriggerSquareWindCB::~stObsTriggerSquareWindCB() { }
+
+stObsTriggerSquareBeltConveyorCB::stObsTriggerSquareBeltConveyorCB(bool* flag, grGimmickPressureAreaData* beltData)
+    : stObsTriggerArea(flag, false) {
+    beltData->m_areaData.m_group = gfArea::Stage_Group_Space_Movement_Area;
+    createArea(&beltData->m_areaData, Vec2f(beltData->m_pos.m_x, beltData->m_pos.m_y));
+    stMovementAreaInfoData info;
+    if (beltData->m_isPow == true) {
+        info.m_data.m_gimmickKind = Gimmick::Area_Pow;
+    } else {
+        info.m_data.m_gimmickKind = Gimmick::Area_Yuka;
+    }
+    info.m_data.m_speed = beltData->m_speed;
+    info.m_data._0xC = 0.0f;
+    info.m_data._0x10 = 0.0f;
+    info.m_data.m_vector = beltData->m_vector;
+    info.m_data.m_taskId = beltData->m_taskId;
+    info.m_data._0x1c = 0;
+    getAreaID(&info.m_areaId);
+    m_beltConveyorIndex = stAreaManager::getInstance()->setBelt(&info);
+}
+
+stObsTriggerSquareBeltConveyorCB::~stObsTriggerSquareBeltConveyorCB() { }
+
+void stObsTriggerSquareBeltConveyorCB::setParam(grGimmickBeltConveyorData* beltData) {
+    if (getAreaPointer() != nullptr && dynamic_cast<gfAreaRectangle*>(getAreaPointer()) != nullptr) {
+        dynamic_cast<gfAreaRectangle*>(getAreaPointer())->setShape(
+            Vec2f(beltData->m_areaData.m_offsetPos.m_x + beltData->m_pos.m_x,
+                  beltData->m_areaData.m_offsetPos.m_y + beltData->m_pos.m_y),
+            Vec2f(beltData->m_areaData.m_range.m_x, beltData->m_areaData.m_range.m_y));
+    }
+    stMovementAreaInfoData info;
+    info.m_data.m_gimmickKind = Gimmick::Area_BeltConveyor;
+    info.m_data.m_speed = beltData->m_speed;
+    info.m_data._0xC = 0.0f;
+    info.m_data._0x10 = 0.0f;
+    if (beltData->m_isRight) {
+        info.m_data.m_vector = 0.0f;
+    }
+    if (!beltData->m_isRight) {
+        info.m_data.m_vector = 180.0f;
+    }
+    info.m_data._0x1c = 0;
+    getAreaID(&info.m_areaId);
+    stAreaManager::getInstance()->setBeltParam(&info, m_beltConveyorIndex);
 }
 
 stObsTriggerCameraReactionCB::~stObsTriggerCameraReactionCB() { }

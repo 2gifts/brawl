@@ -30,28 +30,6 @@ struct muAdvSelmapTaskParam {
     int m_button;               // 0x14 the button that the menu starts on (0 or below: the map is shown first)
 };
 
-// A place of the map. The nodes are the first thing in the data of the adventure mode.
-// HYPOTHESIS: the names follow how the menu reads them.
-struct muAdvSelmapNode {
-    int m_hidden;               // 0x00 1: the place is not on the map
-    int m_kind;                 // 0x04 0: the place is not open, 1..4: the kind of the place
-    int m_value;                // 0x08 shown by the model of the place
-    int m_unk0C;
-    int m_unk10;
-};
-
-// The data of the adventure mode that the menu reads.
-struct muAdvSelmapAdvData {
-    muAdvSelmapNode m_nodes[34];        // 0x000
-    float m_unk2A8;                     // 0x2A8
-    u16 m_mapFlags;                     // 0x2AC the parts of the map that are shown
-    u8 m_unk2AE[0x60C - 0x2AE];
-    int m_unk60C;                       // 0x60C
-    u8 m_unk610[0x48A0 - 0x610];
-    u32 m_unk48A0;                      // 0x48A0
-    u32 m_unk48A4;                      // 0x48A4
-};
-
 // One model of the menu: the name, the slots of the task it fills (start, end) and the draw priority.
 struct muAdvSelmapModel {
     const char* m_name;

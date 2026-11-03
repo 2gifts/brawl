@@ -355,9 +355,8 @@ void GameGlobal::init() {
     rule = m_setRule;
     rule->m_allowPause = true;
     rule->m_showDamageGauge = 1;
-    // HYPOTHESIS: two more rule fields that start at zero (not named in gmSetRule).
-    reinterpret_cast<u8*>(rule)[0x20] = 0;
-    *reinterpret_cast<u32*>(reinterpret_cast<u8*>(rule) + 0x24) = 0;
+    rule->unk20 = 0;
+    rule->m_ctrlNamePlayerNo = 0;
 
     // The Adventure save data starts empty: no level cleared, all slots unused.
     gmAdvDataView* adv = reinterpret_cast<gmAdvDataView*>(g_GameGlobal->m_advData);
@@ -413,12 +412,10 @@ void GameGlobal::init() {
     gmInitAssistKindUseEnable();
     gmInitEventOpened();
 
-    // HYPOTHESIS: the part of the record in front of the per-character data (counters of the Statistics screen).
-    u8* record = reinterpret_cast<u8*>(m_record);
-    memset(record + 0x1528, 0, 0x81);
-    u32* counters = reinterpret_cast<u32*>(reinterpret_cast<u8*>(m_record) + 0x15AC);
+    memset(m_record->unk1528, 0, 0x81);
+    u32* softFlags = m_record->m_softFlags;
     for (int i = 0; i < 34; i++) {
-        counters[i] = 0;
+        softFlags[i] = 0;
     }
 
     memset(&adv->unk4910, 0, 0x48);
@@ -895,10 +892,10 @@ void GameGlobal::InitAllRecord() {
     gmInitAssistKindUseEnable();
     gmInitEventOpened();
 
-    memset(reinterpret_cast<u8*>(m_record) + 0x1528, 0, 0x81);
-    u32* unk15AC = reinterpret_cast<u32*>(reinterpret_cast<u8*>(m_record) + 0x15AC);
+    memset(m_record->unk1528, 0, 0x81);
+    u32* softFlags = m_record->m_softFlags;
     for (int i = 0; i < 34; i++) {
-        unk15AC[i] = 0;
+        softFlags[i] = 0;
     }
     fn_80078768(lbl_805A01D8);
 
@@ -1375,7 +1372,7 @@ void GameGlobal::setAdventureSaveData(const void* data) {
     if (found >= 0) {
         index = found;
     }
-    reinterpret_cast<u8*>(m_advData)[0x600] = index;
+    m_advData->m_nameIndex = index;
 }
 
 void GameGlobal::getAdventureSaveData(void* data) {
@@ -1389,7 +1386,7 @@ void GameGlobal::getAdventureSaveData(void* data) {
     *reinterpret_cast<u32*>(nameBlock) = 0x07092000;
     nameBlock[4] = 1;
     char name[0x15] = { 0 };
-    u8 index = reinterpret_cast<u8*>(m_advData)[0x600];
+    u8 index = m_advData->m_nameIndex;
     if (index < 0x78) {
         nameUTF8(this, index, name);
     }

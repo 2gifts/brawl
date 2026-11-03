@@ -10,7 +10,7 @@
 class stOperatorNetwork : public stOperator {
 public:
     virtual void processBegin() { }
-    virtual ~stOperatorNetwork() { }
+    virtual ~stOperatorNetwork();
     virtual void setPrepareLoadStageComplete() { }
     virtual bool isPreparedLoadStageEveryone() { return true; }
     virtual bool isSync() { return true; }

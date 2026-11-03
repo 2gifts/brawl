@@ -1,39 +1,10 @@
 #include <gf/gf_task.h>
 #include <gf/gf_task_scheduler.h>
 #include <so/so_module_accesser.h>
+#include <so/so_module_hyp.h>
 #include <so/stageobject.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
-
-// MATCH-ONLY: view of the soAnimCmdModule vtable that exposes the slot at +0x28, used to run the
-// pre-check anim cmd of a status. The real name/signature are unknown (BrawlHeaders mislabels this
-// part of the soAnimCmdModule vtable).
-// HYPOTHESIS: 4 byte aligned flag object whose first member is a u16 mask.
-union AnimCmdPreCheckFlag {
-    u16 m_mask;
-    u32 m_pad;
-};
-
-class soAnimCmdModulePreCheckView {
-public:
-    virtual void unk08();
-    virtual void unk0c();
-    virtual void interpretCmd(soModuleAccesser* moduleAccesser, u16* flag, float frame); // +0x10 (HYPOTHESIS signature)
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1c();
-    virtual void unk20();
-    virtual void unk24();
-    virtual void preCheck(u16* flag, void* cmd, soModuleAccesser* moduleAccesser, int a, int b);
-};
-
-static inline void callAnimCmdInterpret(soAnimCmdModule& module, soModuleAccesser* acc, u16* flag, float frame) {
-    ((soAnimCmdModulePreCheckView&)module).interpretCmd(acc, flag, frame);
-}
-
-static inline void callAnimCmdPreCheck(soAnimCmdModule& module, u16* flag, void* cmd, soModuleAccesser* acc, int a, int b) {
-    ((soAnimCmdModulePreCheckView&)module).preCheck(flag, cmd, acc, a, b);
-}
 
 static inline soLockable& getWorkLock(soModuleAccesser* moduleAccesser) {
     return static_cast<soLockable&>(static_cast<soWorkManageModuleImpl&>(moduleAccesser->getWorkManageModule()));
@@ -246,31 +217,12 @@ bool soStatusModuleImpl::notifyEventAnimCmd(acAnimCmd* animCmd, soModuleAccesser
     return false;
 }
 
-// MATCH-ONLY: view of the (undeclared) debug module; slot +0x3c receives the status kind on each change.
-class soDebugModuleStatusView {
-public:
-    virtual void unk08();
-    virtual void unk0c();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1c();
-    virtual void unk20();
-    virtual void unk24();
-    virtual void unk28();
-    virtual void unk2c();
-    virtual void unk30();
-    virtual void unk34();
-    virtual void unk38();
-    virtual void notifyStatus(int status);
-};
-
 void soStatusModuleImpl::changeStatus(int status, soModuleAccesser* moduleAccesser) {
     if (status > -1 && status < m_statusDataArr->size() && getStatusKind() > -1
         && moduleAccesser->getSituationModule().getKind() == Situation_Air
         && (*(s32*)((const char*)&m_statusDataArr->at(status) + 0xC) >> 28) == 0) {
-        ((soDebugModuleStatusView*)moduleAccesser->m_enumerationStart->m_debugModule)->notifyStatus(m_statusKind);
-        ((soDebugModuleStatusView*)moduleAccesser->m_enumerationStart->m_debugModule)->notifyStatus(status);
+        getDebugModule(moduleAccesser).notifyStatus(m_statusKind);
+        getDebugModule(moduleAccesser).notifyStatus(status);
         return;
     }
     moduleAccesser->getSlowModule().resetSkip();
@@ -309,9 +261,7 @@ void soStatusModuleImpl::changeStatus(int status, soModuleAccesser* moduleAccess
         }
     }
     m_isCollisionAttackOccer = false;
-    AnimCmdPreCheckFlag flag;
-    flag.m_mask = 5;
-    callAnimCmdInterpret(moduleAccesser->getAnimCmdModule(), moduleAccesser, &flag.m_mask, 0.0f);
+    moduleAccesser->getAnimCmdModule().interpretCmd(moduleAccesser, soAttributeFlag(5), 0.0f);
     checkTransition(moduleAccesser);
 }
 
@@ -456,25 +406,17 @@ static inline void changeStatusSub(soStatusModuleImpl* self, int status, soModul
         self->m_nextStatusKind = status;
         if (self->m_preCheckAnimCmdArr != 0 && status > -1 && status < self->m_preCheckAnimCmdNum
             && self->m_preCheckAnimCmdArr[status] != 0) {
-            AnimCmdPreCheckFlag flag;
-            flag.m_mask = 1;
-            callAnimCmdPreCheck(moduleAccesser->getAnimCmdModule(), &flag.m_mask, self->m_preCheckAnimCmdArr[status], moduleAccesser, 1, 0);
+            moduleAccesser->getAnimCmdModule().resetInterpreter4(soAttributeFlag(1), self->m_preCheckAnimCmdArr[status], moduleAccesser, 1, 0);
         }
         self->changeStatus(self->m_nextStatusKind, moduleAccesser);
         getWorkLock(moduleAccesser).unlock();
     }
 }
 
-// HYPOTHESIS: mirror of the leading bitfields of gfTaskScheduler (the header's view is private/offset differs).
-struct gfTaskSchedulerPhaseView {
-    u32 unk0_1 : 8;
-    s32 phase : 8;
-};
-
 bool soStatusModuleImpl::changeStatusRequest(int status, soModuleAccesser* moduleAccesser) {
     // MATCH-ONLY: keeps the requested status memory-resident like the original.
     gfTaskScheduler* scheduler = gfTaskScheduler::getInstance();
-    if (scheduler != 0 && (((gfTaskSchedulerPhaseView*)scheduler)->phase <= 1 || ((gfTaskSchedulerPhaseView*)scheduler)->phase >= 6)) {
+    if (scheduler != 0 && (scheduler->getProcessType() <= 1 || scheduler->getProcessType() >= 6)) {
         if (m_changeRequestQueue.isEmpty() != true) {
             while (m_changeRequestQueue.isEmpty() == false) {
                 int next = m_changeRequestQueue.at(0);
@@ -494,9 +436,7 @@ bool soStatusModuleImpl::changeStatusRequest(int status, soModuleAccesser* modul
 
 void soStatusModuleImpl::processFixPosition(soModuleAccesser* moduleAccesser, bool unk) {
     if (unk == true) {
-        AnimCmdPreCheckFlag flag;
-        flag.m_mask = 1;
-        callAnimCmdInterpret(moduleAccesser->getAnimCmdModule(), moduleAccesser, &flag.m_mask, 0.0f);
+        moduleAccesser->getAnimCmdModule().interpretCmd(moduleAccesser, soAttributeFlag(1), 0.0f);
         return;
     }
     bool processed;
@@ -512,13 +452,9 @@ void soStatusModuleImpl::processFixPosition(soModuleAccesser* moduleAccesser, bo
     }
     if (processed == false && m_unk7c == false) {
         if (moduleAccesser->getStopModule().isStop() == false) {
-            AnimCmdPreCheckFlag flag;
-            flag.m_mask = 0x1d;
-            callAnimCmdInterpret(moduleAccesser->getAnimCmdModule(), moduleAccesser, &flag.m_mask, 1.0f);
+            moduleAccesser->getAnimCmdModule().interpretCmd(moduleAccesser, soAttributeFlag(0x1d), 1.0f);
         } else {
-            AnimCmdPreCheckFlag flag;
-            flag.m_mask = 0x10;
-            callAnimCmdInterpret(moduleAccesser->getAnimCmdModule(), moduleAccesser, &flag.m_mask, 1.0f);
+            moduleAccesser->getAnimCmdModule().interpretCmd(moduleAccesser, soAttributeFlag(0x10), 1.0f);
         }
     }
 }

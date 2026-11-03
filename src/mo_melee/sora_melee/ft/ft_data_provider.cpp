@@ -1,9 +1,11 @@
-#include <types.h>
+#include <ft/ft_common_data_accesser.h>
+#include <ft/ft_info.h>
 #include <ft/ft_manager.h>
-#include <ut/ut_list.h>
-
-#include <ft/ft_manager.h>
+#include <it/it_manager.h>
+#include <snd/snd_system.h>
 #include <so/so_archive_db.h>
+#include <types.h>
+#include <ut/ut_list.h>
 
 extern "C" {
     s32 fn_27_70004(void* arg0);
@@ -12,7 +14,13 @@ extern "C" {
     u32 fn_80046998();
     // HYPOTHESIS: takes the archive manager returned by getManager(0)
     u32 fn_800469AC(utArchiveManager* arg0);
+    // soArchiveDb::release (the map name); em_manager.cpp calls it by this stand-in name.
+    void fn_27_6FDE0(u32 index);
+    extern const int lbl_27_rodata_1C60[];
+    extern const int lbl_27_rodata_1D3C[];
 } // extern "C"
+
+extern int g_ftItemEnabled;
 
 struct ftDataNode : public utListNode {
     char unk8[8];
@@ -28,6 +36,58 @@ struct ftDataProviderFields {
     utList unk1088;
     utList unk1094;
 };
+
+ftDataProvider::ftDataTaskResource::~ftDataTaskResource() {
+}
+
+ftDataProvider::ftDataTask::~ftDataTask() {
+}
+
+utRef::~utRef() {
+}
+
+ftDataProvider::~ftDataProvider() {
+    if (removeResourceTask(&m_commonTask, true) == true) {
+        if (m_commonSoundGroup >= 0) {
+            g_sndSystem->freeGroup(m_commonSoundGroup, 0);
+            m_commonSoundGroup = -1;
+        }
+    }
+    ftCommonDataAccesser::reset();
+    fn_27_6FDE0(0);
+    g_ftDataProvider = NULL;
+}
+
+ftDataProvider::ftDataTaskResource* ftDataProvider::searchTask(ftKind kind, int p2, int p3, int p4, u32 p5) {
+    ftDataTaskResource* task = searchList(&m_activeTaskList, kind, p2, p3, p4, p5);
+    if (task == NULL) {
+        task = searchList(&m_compTaskList, kind, p2, p3, p4, p5);
+    }
+    return task;
+}
+
+int ftInfo::getSoundGroupId(int kind) {
+    return lbl_27_rodata_1C60[kind];
+}
+
+int ftInfo::getKirbySoundGroupId(int kind) {
+    return lbl_27_rodata_1D3C[kind];
+}
+
+void ftDataProvider::reqItem(ftKind kind) {
+    if (ftCommonDataAccesser::isValidDat(kind) == true) {
+        ftData* data = g_ftCommonDataAccesser.getData(kind);
+        if (data->unk60 != NULL) {
+            for (int i = 0; i < data->unk60->m_count; i++) {
+                if (g_ftItemEnabled != 0) {
+                    if (!itManager::getInstance()->isCompItemKindArchive(data->unk60->m_items[i], 0, true)) {
+                        itManager::getInstance()->preloadItemKindArchive(data->unk60->m_items[i], 0, itArchive::Temp, true);
+                    }
+                }
+            }
+        }
+    }
+}
 
 void ftDataProvider::process() {
     ftDataProviderFields* self = (ftDataProviderFields*)this;

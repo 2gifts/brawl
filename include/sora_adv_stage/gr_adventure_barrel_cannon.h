@@ -8,11 +8,31 @@
 // are listed.
 class grAdventureBarrelCannon : public grYakumono {
 protected:
-    u8 unk150[0xC];  // 0x150
+    union {
+        u8 unk150[0xC];  // 0x150
+        struct {
+            u8 unk0[0x38];
+            float unk38;
+            float unk3C;
+            u8 unk40[0x8A];
+            u8 unkCA;
+            u8 unkCB[0x11];
+            stTriggerData unkDC;
+            stTriggerData unkE0;
+        }* unk150Data;
+    };
     u32 unk15C;      // 0x15C
     u32 unk160;      // 0x160
-    u8 unk164;       // 0x164, HYPOTHESIS: the cannon kind that create stores
-    u8 unk165[7];    // 0x165
+    union {
+        struct {
+            u8 unk164;       // 0x164, HYPOTHESIS: the cannon kind that create stores
+            u8 unk165[7];    // 0x165
+        };
+        struct {
+            u8 unk164Pad[4];
+            float unk168;
+        };
+    };
     u8 unk16C;       // 0x16C
     u8 unk16D;       // 0x16D
     u8 unk16E;       // 0x16E
@@ -37,7 +57,10 @@ protected:
     float unk1A8;    // 0x1A8
     int unk1AC;      // 0x1AC
     int unk1B0;      // 0x1B0
-    u8 unk1B4[0x2C]; // 0x1B4
+    union {
+        u8 unk1B4[0x2C]; // 0x1B4
+        float unk1B4Float;
+    };
     u32 unk1E0;      // 0x1E0
     u32 unk1E4;      // 0x1E4
     u32 unk1E8;      // 0x1E8
@@ -45,5 +68,9 @@ protected:
 public:
     grAdventureBarrelCannon(const char* taskName);
     virtual ~grAdventureBarrelCannon();
+    virtual void setInitializeFlag();
+    virtual void update(float deltaFrame);
+    virtual void updateMove(float deltaFrame);
+    static grAdventureBarrelCannon* create(int mdlIndex, u8 kind, const char* taskName);
 };
 static_assert(sizeof(grAdventureBarrelCannon) == 0x1EC, "Class is wrong size!");

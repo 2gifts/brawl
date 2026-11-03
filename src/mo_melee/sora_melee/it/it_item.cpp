@@ -180,7 +180,7 @@ struct ItemView {
     IT_PAD(pad3a, 0x27A8 + sizeof(soLinkModuleImpl), 0x27FC);
     soVisibilityModuleSimple visibility; // 0x27FC
     IT_PAD(pad3b, 0x27FC + sizeof(soVisibilityModuleSimple), 0x297C);
-    soArrayVector<s32, 31> intWork; // 0x297C
+    const soArrayVector<s32, 31> intWork; // 0x297C: only read here (the trait flags are word 8)
     IT_PAD(pad4, 0x297C + sizeof(soArrayVector<s32, 31>), 0x2AAC);
     soWorkManageModuleImpl workManage; // 0x2AAC
     IT_PAD(pad5, 0x2AAC + sizeof(soWorkManageModuleImpl), 0x2C34);
@@ -590,7 +590,7 @@ bool BaseItem::isCanInhaled() {
     if (isHaved() || !m_customizer->isSafe(this)) {
         return false;
     }
-    return !(static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x1000000);
+    return !(v->intWork.at(8) & 0x1000000);
 }
 
 Vec3f BaseItem::getStartInhaledPos() {
@@ -671,7 +671,7 @@ void BaseItem::updateLifeTime() {
     int lifeTime = work->getInt(Instance::Work::Int_Life_Time);
     if (lifeTime > 0) {
         u32 vanish = work->isFlag(Instance::Work::Flag_Vanish);
-        if (vanish != 0 && (static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x4C00) == 0) {
+        if (vanish != 0 && (v->intWork.at(8) & 0x4C00) == 0) {
             u32 landed = v->kinetic.isTouchDown(*reinterpret_cast<int*>(reinterpret_cast<u8*>(this) + 0x60));
             if (landed != 0) {
                 int held = (moduleAccesser.getStatusModule().getStatusKind() == 2) ? 1 : v->link.isLink(Link::No_Have);
@@ -707,8 +707,8 @@ void BaseItem::updateLifeTime() {
             }
         }
     }
-    const s32* flags = &static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8);
-    if ((*flags & 0xC00) != 0 && ((flags = &static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8)), true) &&
+    const s32* flags = &v->intWork.at(8);
+    if ((*flags & 0xC00) != 0 && ((flags = &v->intWork.at(8)), true) &&
         ((*flags & 0x8000000) | (*flags & 0x4000)) == 0) {
         bool held = moduleAccesser.getStatusModule().getStatusKind() == 2 ? true : v->link.isLink(Link::No_Have);
         if (!held && moduleAccesser.getStatusModule().getStatusKind() != 6 &&
@@ -851,7 +851,7 @@ void BaseItem::setSafePos(Vec2f* pos) {
 }
 
 int BaseItem::getTrait() {
-    return static_cast<const soArrayVector<s32, 31>&>(reinterpret_cast<ItemView*>(this)->intWork).at(8);
+    return reinterpret_cast<ItemView*>(this)->intWork.at(8);
 }
 
 template <class T>
@@ -1195,7 +1195,7 @@ void BaseItem::throwAttack(float lr, Vec3f* velocity, float powerMulStatus) {
     if (moduleAccesser.getStatusModule().getStatusKind() == 5) {
         v->workManage.onFlag(0x22000000);
         if (v->workManage.isFlag(0x22000000) &&
-            (static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x4C00) == 0) {
+            (v->intWork.at(8) & 0x4C00) == 0) {
             Vec2f arg = speed;
             v->attack.setSpeed(&arg);
             v->attack.setSpeedPowerAdd(itValueAccesserGlobal.getFloat(&moduleAccesser, 0xD6F, 0));
@@ -1238,7 +1238,7 @@ void BaseItem::fall(Vec3f* velocity, float lr) {
     v->status.changeStatusRequest(3, &moduleAccesser);
     v->workManage.onFlag(0x22000000);
     if (v->workManage.isFlag(0x22000000) &&
-        (static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x4C00) == 0) {
+        (v->intWork.at(8) & 0x4C00) == 0) {
         Vec2f arg;
         arg.m_y = velocity->m_y;
         arg.m_x = velocity->m_x;
@@ -1252,7 +1252,7 @@ void BaseItem::fall(Vec3f* velocity, float lr) {
 void BaseItem::reqLostEffect() {
     ItemView* v = reinterpret_cast<ItemView*>(this);
     int group = -1;
-    const s32* flagsPtr = &static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8);
+    const s32* flagsPtr = &v->intWork.at(8);
     u32 flags = *flagsPtr;
     if ((flags & 0x4000) == 0) {
         if ((flags & 0x800) != 0) {
@@ -1312,7 +1312,7 @@ void BaseItem::appear(Vec3f* position, int mode, float speed) {
         vel.m_y = (randaf() * 0.7f * vel.m_y);
         break;
     }
-    if ((static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x800) != 0) {
+    if ((v->intWork.at(8) & 0x800) != 0) {
         vel.m_x = 0.0f;
     }
     v->kinetic.addSpeed(&vel, &moduleAccesser);
@@ -1356,7 +1356,7 @@ void BaseItem::appear1(float rate, Vec3f* speed) {
         rest = 0.0f;
     }
     speed->m_x = speed->m_x * (rest + horizontal * (limit * 0.7f + 0.3f) * rate);
-    if ((static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x800) != 0) {
+    if ((v->intWork.at(8) & 0x800) != 0) {
         speed->m_x = 0.0f;
     }
     v->kinetic.addSpeed(speed, &moduleAccesser);
@@ -1550,7 +1550,7 @@ bool BaseItem::inhaled(float step, Vec3f* pos) {
     if (held != 0 || !m_customizer->isSafe(this)) {
         canInhale = 0;
     } else {
-        canInhale = !(static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x1000000);
+        canInhale = !(v->intWork.at(8) & 0x1000000);
     }
     if (canInhale == 0) {
         return false;
@@ -1733,11 +1733,11 @@ void BaseItem::processFixPosition() {
             int reflectCount = work->getInt(0x10000017);
             reflectCount = reflectCount + 1;
             work->setInt(reflectCount, 0x10000017);
-            if ((static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x4000) == 0) {
+            if ((v->intWork.at(8) & 0x4000) == 0) {
                 v->animCmd.resetInterpreter2(0.0f, 4, &moduleAccesser, 1);
             }
             if (moduleAccesser.getStatusModule().getStatusKind() == 5) {
-                u32 scaleBits = static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x10000F;
+                u32 scaleBits = v->intWork.at(8) & 0x10000F;
                 u32 scaled = -scaleBits >> 31;
                 if (m_kind == 0x57) {
                     scaled = 0;
@@ -1747,7 +1747,7 @@ void BaseItem::processFixPosition() {
                     float mul = itValueAccesserGlobal.getFloat(&moduleAccesser, 0xD62, 0);
                     v->attack.setPowerMulStatus(power * mul);
                 }
-                if ((static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x815D01) == 0) {
+                if ((v->intWork.at(8) & 0x815D01) == 0) {
                     int limit = itValueAccesserGlobal.getInt(&moduleAccesser, 0x59DA, 0);
                     if (limit <= reflectCount) {
                         v->status.changeStatusRequest(6, &moduleAccesser);
@@ -1854,7 +1854,7 @@ bool BaseItem::notifyEventCollisionSearchCheck() {
         }
     } else if (static_cast<u32>(m_15676) != 0xFFFFFFFF && (flags & 4) != 0) {
         if (m_15681 != 0 && itValueAccesserGlobal.getInt(&moduleAccesser, 0x5B73, 0) == 3 &&
-            (static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x8000) != 0) {
+            (v->intWork.at(8) & 0x8000) != 0) {
             v->workManage.onFlag(0x22000005);
             if (m_customizer->onNotifyEventCollisionSearchCheck(this, m_searchHitTaskId, searchHitCollisionIndex, &m_searchHitPos)) {
                 return true;
@@ -1899,9 +1899,9 @@ bool BaseItem::onReflect() {
         mirror.m_y = 1.0f;
         m_moduleAccesser->getKineticModule().mulSpeed(&mirror, soKineticEnergy::AttributeFlag(1));
         m_moduleAccesser->getKineticModule().mulAccel(&mirror, soKineticEnergy::AttributeFlag(1));
-        if ((static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x4000) != 0 &&
+        if ((v->intWork.at(8) & 0x4000) != 0 &&
             *reinterpret_cast<int*>(reinterpret_cast<u8*>(this) + 0x2124) < 5 &&
-            (static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0xC00) == 0) {
+            (v->intWork.at(8) & 0xC00) == 0) {
             u32 baseLife = work->getInt(0x10000006);
             int life = work->getInt(0x10000009);
             if (0 < static_cast<int>(baseLife) && 0 < life) {
@@ -1974,11 +1974,11 @@ bool BaseItem::notifyEventCollisionAttackCheck(u32 hitMask) {
             }
         } else if ((hitMask & 1) != 0) {
             if (moduleAccesser.getStatusModule().getStatusKind() == 5 ||
-                (static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x4000) != 0) {
+                (v->intWork.at(8) & 0x4000) != 0) {
                 if (onShield()) {
                     return true;
                 }
-                u32 flags = static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8);
+                u32 flags = v->intWork.at(8);
                 if ((flags & 0x10000F) != 0) {
                     v->kinetic.characterBound(&moduleAccesser, false);
                 }
@@ -2059,7 +2059,7 @@ void BaseItem::processUpdate() {
         *(reinterpret_cast<u8*>(this) + 0x2130) = 0;
         if (v->attack.getSpeedPowerCoef() <= 0.0f &&
             v->workManage.isFlag(Status::Work::Flag_Use_Speed_Power) &&
-            (static_cast<const soArrayVector<s32, 31>&>(v->intWork).at(8) & 0x4C00) == 0) {
+            (v->intWork.at(8) & 0x4C00) == 0) {
             v->attack.setSpeedPowerAdd(itValueAccesserGlobal.getFloat(&moduleAccesser, itValueAccesser::Specialized_Param_Float_Throw_Power_Speed_Add, 0));
             v->attack.setSpeedPowerMul(itValueAccesserGlobal.getFloat(&moduleAccesser, itValueAccesser::Specialized_Param_Float_Throw_Power_Speed_Mul, 0));
         }

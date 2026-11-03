@@ -3,9 +3,9 @@
 #include <sora_adv_stage/gr_adventure_savepoint.h>
 #include <st/st_trigger.h>
 
-// HYPOTHESIS: the save request byte of the adventure data (gmAdvData is only partly described; 7 asks for a save).
+// The save request byte of the adventure data (7 asks for a save).
 static inline u8& advSaveRequest() {
-    return reinterpret_cast<u8*>(g_GameGlobal->m_advData)[0x603];
+    return g_GameGlobal->m_advData->m_saveRequest;
 }
 
 grAdventureSavePoint* grAdventureSavePoint::create(int mdlIndex, const char* taskName) {
