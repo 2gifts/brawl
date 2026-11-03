@@ -66,6 +66,10 @@ public:
     virtual ~CameraController();
 
     gfCamera* getCameraInternal();
+    CameraController();
+    static CameraController* create();
+    bool isForceEnableCamControll3D();
+    unsigned int isSubjectSettingFlags();
     void changeInput(Kind cameraControllerKind);
     void setRangeOffset(Vec2f* offset);
     void setCameraRange(Rect2D*);
