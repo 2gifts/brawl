@@ -1607,37 +1607,6 @@ extern "C" void fn_800551C8(gmResultInfo* result);
 // muMenu::exchangeGmCharacterKindToMuCharKind: the mangled name says (int, int, int) but every caller passes one argument.
 extern "C" int exchangeGmCharacterKindToMuCharKind__6muMenuFiii(int gmCharacterKind);
 
-// Same records as gmPlayerResultInfo, seen from the start of gmResultInfo (the players start at 0x24): the compiler of
-// the original addressed the players this way, with the fields it has no names for.
-// MATCH-ONLY: a second view of m_playersResultInfo so that both loops address the players from the result pointer.
-struct gmPlayerResultView {
-    char _0[0x25];
-    u8 m_state;         // 0x25
-    char _26[3];
-    u8 m_unk29;         // 0x29: third argument of the auto handicap lookup
-    char _2A;
-    char m_flags;       // 0x2B: bit 4 marks the players that take part in the coin payout (HYPOTHESIS)
-    char _2C[7];
-    u8 m_unk33;         // 0x33: HYPOTHESIS: zero for players that lost
-    u32 m_koCount;      // 0x34
-    char _38[4];
-    u16 m_suicideCount; // 0x3C
-    char _3E[0x1B6];
-    u32 m_unk1F4;       // HYPOTHESIS: damage dealt, summed into the record's damage total
-    char _1F8[0x58];
-    int m_unk250;       // input of the coin rate: gmCountMeleeCoin(kind, m_unk250)
-    char _254[0x58];
-};
-static_assert(sizeof(gmPlayerResultView) == sizeof(gmPlayerResultInfo), "Class is wrong size!");
-
-// Result record fields that gmPlayerResultInfo has no names for.
-static inline int& gmResultUnk22C(gmPlayerResultInfo* player) {
-    return *reinterpret_cast<int*>(reinterpret_cast<u8*>(player) + 0x22C);
-}
-static inline u32 gmResultUnk1D0(gmPlayerResultInfo* player) {
-    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(player) + 0x1D0);
-}
-
 // Record counters saturate: 99999999 for counts, 100000 hours in seconds for play times.
 static const u32 kCountMax = 99999999;
 static const u32 kTimeMax = 359999999;
@@ -1753,29 +1722,23 @@ void gmAddOnlineAnybodyTimeCount(u32 time) {
     gmAddTime(g_GameGlobal->getGlobalRecordOnlineAnybodyTimeCountDatap(), time);
 }
 
-// HYPOTHESIS: bit 4 of the byte at +0x7 marks the players that take part in the coin payout.
-static inline bool gmResultPaysCoins(const char* flags) {
-    return (*(const u8*)flags >> 4) & 1;
-}
-
-// Pays out the coins of the finished match: every human player (result state 0) with the flag at +0x7 bit 4 earns
+// Pays out the coins of the finished match: every human player (result state 0) with m_hasController set earns
 // gmCountMeleeCoin coins, the rate depending on how many such players there are. The sum goes to the record's
 // figure coin counter (capped at 99999) and to the total of collected coins (capped at u32 max).
 void gmAddMeleeCoin() {
     GameGlobal* global = g_GameGlobal;
     gmResultInfo* result = global->m_resultInfo;
-    gmPlayerResultView* view = reinterpret_cast<gmPlayerResultView*>(result);
     u32 coins = 0;
     int humans = 0;
     for (int i = 0; i < 4; i++) {
-        if (view[i].m_state == 0 && gmResultPaysCoins(&result->m_playersResultInfo[i]._7[0])) {
+        if (result->m_playersResultInfo[i].m_state == 0 && result->m_playersResultInfo[i].m_hasController) {
             humans++;
         }
     }
     if (humans >= 1 && humans <= 4) {
         for (int i = 0; i < 4; i++) {
-            if (view[i].m_state == 0 && gmResultPaysCoins(&result->m_playersResultInfo[i]._7[0])) {
-                coins += gmCountMeleeCoin(humans + 3, view[i].m_unk250);
+            if (result->m_playersResultInfo[i].m_state == 0 && result->m_playersResultInfo[i].m_hasController) {
+                coins += gmCountMeleeCoin(humans + 3, result->m_playersResultInfo[i].m_unk22C);
             }
         }
         u32* figCoin = g_GameGlobal->getGlobalRecordFigCoinDatap();
@@ -1792,7 +1755,6 @@ void gmAddMeleeCoin() {
 // lose 20 (2 players) or 10 (3 or 4 players, except the lowest).
 void gmSetAutoHandiModeResult() {
     gmResultInfo* result = g_GameGlobal->m_resultInfo;
-    gmPlayerResultView* view = reinterpret_cast<gmPlayerResultView*>(result);
     if (*(reinterpret_cast<u8*>(g_GameGlobal->m_setRule) + 5) != 1) {
         return;
     }
@@ -1801,10 +1763,10 @@ void gmSetAutoHandiModeResult() {
     int order[4];
     int* orderEnd = order;
     for (int i = 0; i < 4; i++) {
-        if (view[i].m_state != 3) {
+        if (result->m_playersResultInfo[i].m_state != 3) {
             players++;
-            handi[i] = g_GameGlobal->getVsModeAutoHandiPlayerVal(i, view[i].m_unk29);
-            if (view[i].m_unk33 != 0) {
+            handi[i] = g_GameGlobal->getVsModeAutoHandiPlayerVal(i, result->m_playersResultInfo[i].m_unk5);
+            if (result->m_playersResultInfo[i].m_unkF != 0) {
                 *orderEnd++ = i;
             }
         }
@@ -1826,17 +1788,17 @@ void gmSetAutoHandiModeResult() {
             order[1] = order[2];
             order[2] = t;
         }
-        if (*handi[order[0]] == *handi[order[1]] && view[order[0]].m_unk33 < view[order[1]].m_unk33) {
+        if (*handi[order[0]] == *handi[order[1]] && result->m_playersResultInfo[order[0]].m_unkF < result->m_playersResultInfo[order[1]].m_unkF) {
             int t = order[0];
             order[0] = order[1];
             order[1] = t;
         }
-        if (*handi[order[0]] == *handi[order[2]] && view[order[0]].m_unk33 < view[order[2]].m_unk33) {
+        if (*handi[order[0]] == *handi[order[2]] && result->m_playersResultInfo[order[0]].m_unkF < result->m_playersResultInfo[order[2]].m_unkF) {
             int t = order[0];
             order[0] = order[2];
             order[2] = t;
         }
-        if (*handi[order[1]] == *handi[order[2]] && view[order[1]].m_unk33 < view[order[2]].m_unk33) {
+        if (*handi[order[1]] == *handi[order[2]] && result->m_playersResultInfo[order[1]].m_unkF < result->m_playersResultInfo[order[2]].m_unkF) {
             int t = order[1];
             order[1] = order[2];
             order[2] = t;
@@ -1845,9 +1807,9 @@ void gmSetAutoHandiModeResult() {
     }
     for (int i = 0; i < 4; i++) {
         u16* value;
-        if (view[i].m_state != 3 && (value = handi[i]) != NULL) {
+        if (result->m_playersResultInfo[i].m_state != 3 && (value = handi[i]) != NULL) {
             u16 v = *value;
-            if (view[i].m_unk33 == 0) {
+            if (result->m_playersResultInfo[i].m_unkF == 0) {
                 v += 20;
                 if (v > 300) {
                     v = 300;
@@ -1900,7 +1862,6 @@ struct gmSelCharTotalView {
 void gmMeleeDest(bool isStamina, bool isOnline) {
     gmResultInfo* result = g_GameGlobal->m_resultInfo;
     gmGlobalModeMelee* melee = g_GameGlobal->m_modeMelee;
-    gmPlayerResultView* view = reinterpret_cast<gmPlayerResultView*>(result);
     u8 decisionKind = result->m_decisionKind;
 
     if (decisionKind != 9 && decisionKind != 10) {
@@ -1921,11 +1882,9 @@ void gmMeleeDest(bool isStamina, bool isOnline) {
         gmAddMeleeCoin();
         if (!isOnline) {
             if (decisionKind != 9 && decisionKind != 10) {
-                // MATCH-ONLY: the players are addressed from the start of the melee data.
-                u8* player = reinterpret_cast<u8*>(melee);
-                for (int i = 0; i < 4; i++, player += sizeof(gmPlayerInitData)) {
-                    if (player[0x99] == 0 && decisionKind != 9 && decisionKind != 10) {
-                        int muKind = exchangeGmCharacterKindToMuCharKind__6muMenuFiii(player[0x98]);
+                for (int i = 0; i < 4; i++) {
+                    if (melee->m_playersInitData[i].m_state == 0 && decisionKind != 9 && decisionKind != 10) {
+                        int muKind = exchangeGmCharacterKindToMuCharKind__6muMenuFiii(melee->m_playersInitData[i].m_characterKind);
                         gmGlobalRecord::CharaNumData* chara = g_GameGlobal->getGlobalRecordCharaNumDatap(muKind);
                         if (chara->unk98 < 0xFFFF) {
                             chara->unk98++;
@@ -1944,7 +1903,7 @@ void gmMeleeDest(bool isStamina, bool isOnline) {
             u32* partyPlayerCount = g_GameGlobal->getGlobalRecordVsPartyPlayerCountDatap();
             u32 humans = 0;
             for (int i = 0; i < 4; i++) {
-                if (view[i].m_state == 0) {
+                if (result->m_playersResultInfo[i].m_state == 0) {
                     humans++;
                 }
             }
@@ -1960,12 +1919,11 @@ void gmMeleeDest(bool isStamina, bool isOnline) {
         // HYPOTHESIS: per-player accumulated KO counts (u16, stride 4 from +0xC) of the character selection data.
         GameGlobal* global = g_GameGlobal;
         gmResultInfo* res = global->m_resultInfo;
-        gmPlayerResultView* resView = reinterpret_cast<gmPlayerResultView*>(res);
         gmSelCharTotalView* sel = reinterpret_cast<gmSelCharTotalView*>(global->m_selCharData);
         for (int i = 0; i < 4; i++) {
-            if (resView[i].m_state == 0) {
+            if (res->m_playersResultInfo[i].m_state == 0) {
                 u16* total = &sel->m_totals[i].m_total;
-                int add = (u16)resView[i].m_koCount;
+                int add = (u16)res->m_playersResultInfo[i].m_koCount;
                 bool overflow = true;
                 if (*total <= 0xFFFF - add) {
                     overflow = false;
@@ -1977,15 +1935,14 @@ void gmMeleeDest(bool isStamina, bool isOnline) {
 
     if (decisionKind != 9 && decisionKind != 10 && gmCmpCurrentSequence("sqVsMelee") == 0) {
         gmResultInfo* res = g_GameGlobal->m_resultInfo;
-        gmPlayerResultView* resView = reinterpret_cast<gmPlayerResultView*>(res);
         for (int i = 0; i < 4; i++) {
-            if (resView[i].m_state == 0) {
+            if (res->m_playersResultInfo[i].m_state == 0) {
                 u32* kills = g_GameGlobal->getGlobalRecordKillTotalCountDatap();
                 u32* suicides = g_GameGlobal->getGlobalRecordSuicideTotalCountDatap();
                 u32* damage = g_GameGlobal->getGlobalRecordDamageTotalCountDatap();
-                gmAddTotal(kills, resView[i].m_koCount);
-                gmAddTotal(suicides, resView[i].m_suicideCount);
-                gmAddTotal(damage, resView[i].m_unk1F4);
+                gmAddTotal(kills, res->m_playersResultInfo[i].m_koCount);
+                gmAddTotal(suicides, res->m_playersResultInfo[i].m_suicideCount);
+                gmAddTotal(damage, res->m_playersResultInfo[i].m_unk1D0);
             }
         }
     }

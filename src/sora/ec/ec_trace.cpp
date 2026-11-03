@@ -1,4 +1,5 @@
 #include <types.h>
+#include <mt/mt_vector.h>
 
 struct ecMgr {
     void endEffect(u32 arg0);
@@ -8,10 +9,16 @@ extern ecMgr* g_ecMgr;
 extern f32 lbl_805A1998;
 extern "C" void fn_80065C98(struct ecTrace* p1);
 
+// HYPOTHESIS: an element of the trace's 0x18-byte per-point array (unk0). fn_80065C98 allocates it with new[] and an
+// empty constructor; it has no destructor, so delete[] frees the block behind the array header without a destroy call.
+struct ecTracePoint {
+    u8 _0[0x18];
+    ecTracePoint() {}
+};
+
 struct ecTrace {
-    // HYPOTHESIS: unk0 and unk4 are heap arrays that carry a 0x10-byte header before the data
-    u8* unk0;
-    u8* unk4;
+    ecTracePoint* unk0;
+    Vec3f* unk4; // HYPOTHESIS: the 0xC-byte elements of the second per-point array (empty constructor, no destructor)
     s16 unk8;
     u8 unkA[0x4];
     u8 unkE;
@@ -68,17 +75,11 @@ void ecTrace::end(u32 p1, u32 p2) {
 
 ecTrace::~ecTrace() {
     if (unk0 != NULL) {
-        // MATCH-ONLY: the original tests the pointer a second time before the header adjust
-        if (unk0 != NULL) {
-            delete[] (unk0 - 0x10);
-        }
+        delete[] unk0;
         unk0 = NULL;
     }
     if (unk4 != NULL) {
-        // MATCH-ONLY: the original tests the pointer a second time before the header adjust
-        if (unk4 != NULL) {
-            delete[] (unk4 - 0x10);
-        }
+        delete[] unk4;
         unk4 = NULL;
     }
     g_ecMgr->endEffect(unk2C);
