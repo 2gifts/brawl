@@ -1,4 +1,4 @@
-// Local BrawlHeaders shadow: adds control storage, pause state, and clearControl.
+// Local BrawlHeaders shadow: declares cmPhotoController's virtual destructor (emitted in cm_camera_controller.o), its control storage, pause state and clearControl.
 #pragma once
 
 #include <StaticAssert.h>
@@ -13,6 +13,8 @@ public:
     s32 unk60;
 
     void clearControl();
+
+    virtual ~cmPhotoController();
     void addCallBack(utListNode* cb);
     void removeCallBack(utListNode* cb);
     void setFreezeMode(void* p1);

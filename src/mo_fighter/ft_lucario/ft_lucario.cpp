@@ -8,7 +8,7 @@
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #define FT_TEAM_TYPED_INTERFACE
 #include <ft/builder/ft_dol_array_list.h>
-#include <ft/ft_physics_iface.h>
+#include <so/so_module_hyp.h>
 #include <so/so_value_accesser.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/lucario/ft_lucario.h>
@@ -83,7 +83,7 @@ ftLucario::ftLucario(s32 entryId,
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 19);
     // HYPOTHESIS: the common data record points at the fighter's shield shape group (+0x9c); it is installed as group 1.
     m_moduleAccesser->getCollisionShieldModule().add(*reinterpret_cast<soCollisionShieldGroupData**>(reinterpret_cast<u8*>(m_data) + 0x9c), 1);
-    ftPhysicsModuleCall6C(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0x13);
+    getPhysicsModule(m_moduleAccesser).unk6C(0x13);
 }
 
 // BYTES: the native function addresses the local static's guard, object and destructor registration separately

@@ -32,7 +32,13 @@ public:
     // HYPOTHESIS: parameter type from the field it sets.
     void setCondition(gmGlobalModeMelee* condition);
 
+    virtual void notifyEventOnDamage(int entryId, u32 hp, soDamage* damage);
+    virtual void notifyEventSetDamage(int entryId, float, u32 percent, bool, bool);
+    virtual void notifyEventRecover(int entryId, int);
+    virtual void notifyEventBeat(int entryId1, int entryId2);
+    virtual void notifyEventSuicide(int entryId);
     virtual void notifyEventChangeStart(int entryId, int playerNo, int activeInstanceIndex, ftKind);
+    virtual void notifyEventChangeEnd(int entryId, int playerNo, int activeInstanceIndex, ftKind);
     virtual void notifyEventAddDragoonParts(int entryId, int);
     virtual void notifyEventCompDragoonParts(int entryId);
     virtual void notifyEventRemoveDragoonParts(int entryId, int);

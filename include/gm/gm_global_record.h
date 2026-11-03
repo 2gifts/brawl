@@ -418,27 +418,89 @@ struct nteGlobalData {
 static_assert(sizeof(nteGlobalData) == 0x88, "Class is wrong size!");
 
 
+// The Subspace Emissary save data. Names are HYPOTHESIS, from the readers (map menu, item generator, keep manager,
+// save point, result screens) and from GameGlobal's reset.
 struct gmAdvData {
-
-    struct Record {
-        struct LevelClear {
-            u32 m_state;           // 0x00
-            s32 m_difficulty;      // 0x04
-            u32 m_unk1;            // 0x08
-            s32 m_percent;         // 0x0C
-            u32 m_unk2;            // 0x10
-        };
-        static_assert(sizeof(LevelClear) == 0x14, "Class is wrong size!");
-
-        char _0[0x04];                    // 0x00
-        LevelClear m_levelClears[34]; // 0x04
-        char unk2AC[0x467C];
-        u32 unk4928;
-        u32 unk492C;
+    // A place of the map: hidden (1) or shown, its kind (0 not open, 1..4), the value its model shows.
+    struct Level {
+        int m_hidden;  // 0x00
+        int m_kind;    // 0x04
+        int m_value;   // 0x08
+        int m_percent; // 0x0C
+        int m_unk10;   // 0x10
     };
-    static_assert(sizeof(Record) == 0x4930, "Class is wrong size!");
+    struct Slot {
+        s32 m_id;
+        u8 m_value;
+    };
+    // The controller the adventure is played with.
+    // BYTES: the flag is a union with its word: the scene units copy the structure word by word through
+    // temporaries on the stack (with a plain bool the copies are folded away).
+    struct PadInfo {
+        union Flag {
+            bool m_isSet;
+            u32 m_word;
+        } m_flag;
+        s32 m_padNo;
+    };
+    // One-bit flags.
+    struct Flags {
+        u8 m_unk0 : 1;
+        u8 m_unk1 : 1;
+        u8 m_unk2 : 1;
+        u8 m_unk3 : 1;
+        u8 m_unk4 : 1;
+        u8 m_unk5 : 1;
+        u8 m_unk6 : 1;
+        u8 m_unk7 : 1;
+    };
 
-    Record m_record;
-    char unk4930[0x28];
+    Level m_levels[34];          // 0x000
+    float m_unk2A8;              // 0x2A8
+    u16 m_mapFlags;              // 0x2AC: the parts of the map that are shown
+    char _2AE[6];
+    u8 unk2B4;                   // 0x2B4
+    u8 unk2B5;
+    char _2B6[3];
+    u8 unk2B9[0x27];             // 0x2B9
+    Slot m_slots[99];            // 0x2E0
+    char _5F8[2];
+    u8 unk5FA;                   // 0x5FA
+    char _5FB;
+    u8 unk5FC;                   // 0x5FC
+    u8 m_difficultyLevel;        // 0x5FD
+    u8 unk5FE;
+    u8 unk5FF;
+    u8 m_nameIndex;              // 0x600: the name record of the player (0x78 none)
+    u8 unk601;
+    char _602;
+    u8 m_saveRequest;            // 0x603: 7 asks for a save
+    u8 m_mode;                   // 0x604
+    char _605[7];
+    u32 unk60C;                  // 0x60C
+    char _610[0xC];
+    u32 unk61C;                  // 0x61C
+    int m_itemGenKind;           // 0x620: the item generator sheet of the stage
+    s32 unk624;
+    u32 unk628;
+    u32 unk62C;
+    char _630[0x20];
+    u32 m_globalFlags[0x20];     // 0x650
+    char _6D0[0x41C8];
+    u32 unk4898[24];             // 0x4898: four words, then ten pairs (GameGlobal's constructor)
+    u32 unk48F8;                 // 0x48F8
+    char _48FC[0x14];
+    u32 unk4910;                 // 0x4910 (the saved data ends here)
+    bool m_isNanaDead[2];        // 0x4914: per player
+    u8 unk4916;                  // 0x4916: subtracted from the difficulty level
+    u8 unk4917;
+    u32 unk4918;
+    u32 unk491C;
+    u16 m_stageCoin;             // 0x4920: coins picked up on the stage (times 10 when added)
+    char _4922[2];
+    Flags m_flags;               // 0x4924
+    char _4925[3];
+    PadInfo m_padInfo[2];        // 0x4928
+    char _4938[0x20];
 };
 static_assert(sizeof(gmAdvData) == 0x4958, "Class is wrong size!");

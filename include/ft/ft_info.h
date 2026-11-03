@@ -76,6 +76,8 @@ public:
     // Non-virtual accessors (not in BrawlHeaders; this header shadows it).
     int getEntryArticleID(int kind);
     int getConstInt(int kind, int index);
+    int getSoundGroupId(int kind);
+    int getKirbySoundGroupId(int kind);
 
     static ftInfo* getInstance();
 

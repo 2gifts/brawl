@@ -2,19 +2,41 @@
 
 #include <StaticAssert.h>
 #include <gf/gf_task.h>
+#include <mu/mu_menu_controller.h>
 #include <nw4r/g3d/g3d_resfile.h>
 #include <types.h>
+
+class MuObject;
+class MuMsg;
+namespace nw4r { namespace g3d { class ScnGroup; } }
 
 // The window with a text and a few buttons that the menus open for a notice (for example "the save data is broken").
 // HYPOTHESIS: the fields are the ones that the menus of the start of the game read and write; the rest is not known.
 class muNoticeWndTask : public gfTask {
 public:
-    u8 m_unk40[0xC0];
+    // HYPOTHESIS: pointer and controller types follow the notice task calls.
+    MuObject* unk40;
+    nw4r::g3d::ScnGroup* unk44;
+    MuMsg* unk48;
+    void* unk4C;
+    u32 unk50;
+    muMenuController unk54;
+    int unkFC;
     u8 m_selected;              // 0x100 the button that was chosen
     u8 m_unk101[3];
     int m_step;                 // 0x104 the step of the window (3: it was answered)
-    u8 m_unk108[0x18];
+    int unk108;
+    int unk10C;
+    int unk110;
+    int unk114;
+    char* unk118;
+    int unk11C;
     u8 m_unk120;                // 0x120 set by the menus of the start of the game for every window they open
+    virtual ~muNoticeWndTask();
+    virtual void processDefault();
+    void printText(u32 index, const char* text, int length, int kind);
+    void setDoneButtonLabel(void* msgData, u32 index);
+    static int mainStepAppearMain(muNoticeWndTask* task);
 };
 
 // muNoticeWndTask::create(kind, text file, text number, resource file, scene group, unk, default button, heap, ...)

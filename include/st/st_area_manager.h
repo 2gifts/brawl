@@ -3,6 +3,7 @@
 
 #include <StaticAssert.h>
 #include <gf/gf_task.h>
+#include <sr/sr_common.h>
 #include <st/st_trigger_observe.h>
 #include <types.h>
 
@@ -67,6 +68,8 @@ class stAreaManager : public gfTask {
 
 public:
     stAreaManager();
+    // HYPOTHESIS: inline accessor that creates the instance on first use (the map has no out-of-line copy).
+    static stAreaManager* getInstance();
     virtual void processBegin();
     virtual ~stAreaManager();
 
@@ -88,3 +91,12 @@ public:
     bool getHitPointEffect(u32 areaId, stHitPointEffectData* data);
 };
 static_assert(sizeof(stAreaManager) == 0x54, "Class is wrong size!");
+
+extern stAreaManager* lbl_27_bss_5780;
+
+inline stAreaManager* stAreaManager::getInstance() {
+    if (lbl_27_bss_5780 == NULL) {
+        lbl_27_bss_5780 = new (Heaps::System) stAreaManager();
+    }
+    return lbl_27_bss_5780;
+}

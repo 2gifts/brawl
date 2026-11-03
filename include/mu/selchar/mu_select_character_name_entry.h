@@ -58,7 +58,7 @@ public:
               int msgIndex, MuMsg* msg, int posNo, bool allowEmpty);
     void open(const char* initial, char* buf, int maxLen);
     void getCandidacy(char* out, const char* letters, const char* current);
-    int main(gfPadStatus pad, char* out, bool allowRandom, bool playSound);
+    int main(gfPadStatus* pad, char* out, bool allowRandom, bool playSound);
     void close();
     void cursorMain(gfPadStatus* pad);
     int abButtonMain(gfPadStatus* pad, bool allowRandom);
