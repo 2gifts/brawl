@@ -110,11 +110,15 @@ struct muReplayRecord {
 };
 
 // Resets one of the loaders of the menu, clears the data around it and asks it to read the file.
-static inline void requestResource(void* loader, int* unk, u8* flag, const char* path) {
-    fn_800FABEC(loader);
+// HYPOTHESIS: Work's words at 0x00 and 0x9C start a utility::AutoResFile each (the ResFile, the loader node, the
+// AutoFile at +0x14 = MsgFile and the init flag at +0x2C), so this is AutoResFile::request; Work does not declare them as
+// such yet, because their constructors and destructors would then be part of Work's.
+// BYTES: the cast at each call; one local AutoFile pointer for both calls is kept in a register (97.5 -> 91.3).
+static inline void requestResource(muCollectionViewer::MsgFile* loader, int* unk, u8* flag, const char* path) {
+    reinterpret_cast<utility::AutoFile*>(loader)->clear();
     *unk = 0;
     *flag = 0;
-    fn_800FAC58(loader, path, Heaps::MenuResource, 0);
+    reinterpret_cast<utility::AutoFile*>(loader)->request(path, Heaps::MenuResource, 0);
 }
 
 static inline void callVirtualFloat(void* object, int offset, float value) {
@@ -151,9 +155,9 @@ void muReplayTask::loadResource() {
     requestResource(&work->m_brres, &work->m_unk000, &work->m_brresFlag, "/menu/collection/Replay.brres");
     work = getWork();
     requestResource(&work->m_wait, &work->m_unk09C, &work->m_waitFlag, "/menu/common/Wait.brres");
-    fn_800FAC58(&getWork()->m_msgFile[0], "/menu/msg/replay.msbin", Heaps::MenuResource, 0);
-    fn_800FAC58(&getWork()->m_msgFile[1], "/menu/msg/save_load.msbin", Heaps::MenuResource, 0);
-    fn_800FAC58(&getWork()->m_stageNames, "/menu/msg/stage_name.msbin", Heaps::MenuResource, 0);
+    reinterpret_cast<utility::AutoFile*>(&getWork()->m_msgFile[0])->request("/menu/msg/replay.msbin", Heaps::MenuResource, 0);
+    reinterpret_cast<utility::AutoFile*>(&getWork()->m_msgFile[1])->request("/menu/msg/save_load.msbin", Heaps::MenuResource, 0);
+    getWork()->m_stageNames.request("/menu/msg/stage_name.msbin", Heaps::MenuResource, 0);
 }
 
 void muReplayTask::createModel() {

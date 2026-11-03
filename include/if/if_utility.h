@@ -24,10 +24,6 @@ struct utLoaderList {
 };
 extern utLoaderList lbl_8049E550;
 
-// main.dol functions of utility::AutoFile that have no names yet: clear() drops the file (it cancels the read or frees the
-// buffer) and request(path, heap, unk) starts to read a file.
-extern "C" void fn_800FABEC(void* file);
-extern "C" void fn_800FAC58(void* file, const char* path, Heaps::HeapType heap, int unk);
 
 namespace utility {
 
@@ -102,8 +98,11 @@ public:
         clear();
         m_handle.release();
     }
-    void clear() { fn_800FABEC(this); }
-    void request(const char* path, Heaps::HeapType heap, int unk) { fn_800FAC58(this, path, heap, unk); }
+    // Drops the file (cancels the read or frees the buffer).
+    // HYPOTHESIS: the names of clear and request; request is a real member call (the callers compute this first).
+    void clear();
+    // Starts to read a file.
+    void request(const char* path, Heaps::HeapType heap, int unk);
 };
 
 // A resource file (brres) that is read in the background and set up once it is there.

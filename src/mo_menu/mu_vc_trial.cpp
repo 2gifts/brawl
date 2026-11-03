@@ -556,11 +556,12 @@ void muVCTrialTask::main() {
 void muVCTrialTask::moveCursor() {
     // HYPOTHESIS: the merged pad status is not used.
     gfPadStatus pad = fn_800B9F90(&m_controller, 0);
-    int row = m_cursor / NumColumns;
-    int column = m_cursor % NumColumns;
+    int cursor = m_cursor;
+    int row = cursor / NumColumns;
+    int column = cursor % NumColumns;
     int numPages = (m_numTitles + NumPanels - 1) / NumPanels;
-    int page = m_page;
     u32 trigger = m_controller.m_trigger;
+    int page = m_page;
     if (m_input & 8) {
         page = page - 1 > 0 ? page - 1 : 0;
     } else if (m_input & 0x10) {
