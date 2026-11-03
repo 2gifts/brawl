@@ -3,8 +3,15 @@
 
 #include <StaticAssert.h>
 #include <ft/ft_entry.h>
+#include <it/it_create.h>
 #include <so/so_common_data_accesser.h>
 #include <types.h>
+
+// HYPOTHESIS: per-fighter item preload table at ftData + 0x60
+struct ftDataItemList {
+    itKind* m_items;
+    int m_count;
+};
 
 // One (action id, command list) pair; the table ends at the first negative id (see soAnimCmdControlUnitBuilderDisguise::setupDisguiseList).
 struct soAnimCmdDisguiseList {
@@ -29,7 +36,13 @@ struct ftData {
     u8 unk40[0x10]; // HYPOTHESIS: possibly two bone-float tables and two bone-reference tables (0x40..0x4C in the moveset header order)
     soAnimCmdDisguiseList* entryActionOverrides; // 0x50: per-action replacement entry scripts
     soAnimCmdDisguiseList* exitActionOverrides;  // 0x54: per-action replacement exit scripts
-    u8 unk58[0x24]; // HYPOTHESIS: possibly unknown-22, bone floats 3, unknown-24, static articles, entry article, two unknowns and two flag words (0x58..0x78 in the moveset header order)
+    union {
+        u8 unk58[0x24]; // HYPOTHESIS: possibly unknown-22, bone floats 3, unknown-24, static articles, entry article, two unknowns and two flag words (0x58..0x78 in the moveset header order)
+        struct {
+            u8 unk58_pad[0x8];
+            ftDataItemList* unk60; // HYPOTHESIS: fighter item preload list
+        };
+    };
     void* extendParam[6];
 };
 
