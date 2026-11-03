@@ -1,3 +1,7 @@
+#include <gr/collision/gr_collision_collection.h>
+#include <mt/mt_prng.h>
+#include <ph/ph2ndaryWorld.h>
+
 // Brawl physics wrapper translation unit ph_2ndary_world.o (main.dol 0x80082438-0x8008AC5C).
 // Not yet decompiled. Functions in address order with their map names:
 //   0x80082438   268  __ct   [map: ph2ndaryWorld____ct]
@@ -30,39 +34,68 @@
 //   0x8008A3CC   900  operationExecuteSleepCreateLocalSpace   [map: ph2ndaryWorld__operationExecuteSleepCreateLocalSpace]
 //   0x8008A750   876  operationExecuteSleepRestructuring   [map: ph2ndaryWorld__operationExecuteSleepRestructuring]
 //   0x8008AABC   416  isCollisionBetweenPoints   [map: ph2ndaryWorld__isCollisionBetweenPoints]
-#include <mt/mt_prng.h>
-#include <ph/ph2ndaryWorld.h>
+
+extern const f32 lbl_805A1BB8;
+extern const f32 lbl_805A1BBC;
+extern const f32 lbl_805A1C14;
+
+ph2ndaryWorld::ph2ndaryWorld() {
+    unkC = -1;
+    unk10 = 0;
+    unk14 = 0;
+    unk18 = 0;
+    unk1C = 0;
+    unk20.m_data = hkThreadMemory::s_instance->allocateChunk(0, 0x15);
+    unk20.m_size = 0;
+    unk20.m_capacityAndFlags = 0;
+    unk2C.m_data = hkThreadMemory::s_instance->allocateChunk(0, 0x15);
+    unk2C.m_size = 0;
+    unk2C.m_capacityAndFlags = 0;
+    unk38 = 1;
+    unk39 = 0;
+    unk3A = 0;
+    unk3B = 0;
+    unk3C = 0;
+    unk3D = 0;
+    unk40 = 0;
+    unk44 = lbl_805A1BB8;
+    m_unk48 = lbl_805A1BB8;
+    unk4CValue = 1;
+    unk50 = 0;
+    unk54 = 0;
+    unk58 = lbl_805A1BBC;
+    unk5C = 0;
+    unk60 = 0;
+    unk64 = 0;
+    unk68 = 1;
+    m_nextId = 0;
+    unk10 = new (Heaps::Physics) grCollCollection(0xDC);
+}
 
 s32 ph2ndaryWorld::addConstraintArray(void* ptr, const u8* kind) {
-    for (int i = 0; i < m_constraints.m_size; i++) {
+    for (int i = 0; i < m_constraints.getSize(); i++) {
         if (((ConstraintEntry*)m_constraints.m_data)[i].ptr == ptr) {
             return -1;
         }
     }
-    s32 cap = m_constraints.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK;
     u8 k = *kind;
     s32 id = m_nextId;
-    if (m_constraints.m_size == cap) {
-        hkArrayUtil::_reserveMore(&m_constraints, sizeof(ConstraintEntry));
-    }
-    ConstraintEntry* entry = &((ConstraintEntry*)m_constraints.m_data)[m_constraints.m_size];
-    m_constraints.m_size++;
-    entry->kind = k;
-    entry->ptr = ptr;
-    entry->id = id;
-    m_nextId++;
-    return id;
+    ConstraintEntry& entry = m_constraints.expandOne();
+    entry.kind = k;
+    entry.ptr = ptr;
+    entry.id = id;
+    return m_nextId++;
 }
 
 f32 ph2ndaryWorld::getSamusRandomAccel(f32 a, f32 b, f32 c) {
-    f32 r = randf();
-    if (r > 0.9f) {
-        if (a < 0.0f) {
-            return a - m_unk48 * (b * (randf()));
+    f32 r = lbl_805A1BBC * randf();
+    if (r > lbl_805A1C14) {
+        if (a < lbl_805A1BB8) {
+            return a - m_unk48 * (b * (lbl_805A1BBC * randf()));
         }
-        return a + m_unk48 * (c * (randf()));
+        return a + m_unk48 * (c * (lbl_805A1BBC * randf()));
     }
-    return 0.0f;
+    return lbl_805A1BB8;
 }
 
 void ph2ndaryWorld::removeConstraintArray(void* ptr) {
