@@ -93,15 +93,6 @@ bool soTransitionModuleImpl::isEnableTermGroup(int groupID) {
     return m_transitionTermGroupArray->at(groupID <= -1 ? m_groupID : groupID).m_enable.isEnable();
 }
 
-// MATCH-ONLY: first remaining argument of the (consumed-as-read) argument list.
-static inline acCmdArg getFrontArg(const soArrayContractibleTable<acCmdArgConv>& args) {
-    return acCmdArg(&args.at(0));
-}
-
-static inline void shiftArg(soArrayContractibleTable<acCmdArgConv>& args) {
-    args.shift();
-}
-
 int soTransitionModuleImpl::notifyEventAnimCmd(int commandType, soArrayContractibleTable<acCmdArgConv> commandArgList, u8* option, soModuleAccesser* accesser) {
     if (commandType <= -1 || commandType >= 14) {
         return 0;
@@ -116,25 +107,25 @@ int soTransitionModuleImpl::notifyEventAnimCmd(int commandType, soArrayContracti
         s32 groupID = -1;
         s32 kind = -1;
         if (commandType == 3) {
-            const acCmdArg& arg1 = getFrontArg(args);
+            const acCmdArg& arg1 = acGetCmdArg(args, 0);
             groupID = arg1.getIntData();
-            shiftArg(args);
-            const acCmdArg& arg2 = getFrontArg(args);
+            acShiftCmdArg(args);
+            const acCmdArg& arg2 = acGetCmdArg(args, 0);
             unitID = arg2.getIntData();
-            shiftArg(args);
-            const acCmdArg& arg3 = getFrontArg(args);
+            acShiftCmdArg(args);
+            const acCmdArg& arg3 = acGetCmdArg(args, 0);
             kind = (s16) arg3.getIntData();
-            shiftArg(args);
+            acShiftCmdArg(args);
         } else if (commandType == 2) {
-            const acCmdArg& arg4 = getFrontArg(args);
+            const acCmdArg& arg4 = acGetCmdArg(args, 0);
             kind = (s16) arg4.getIntData();
-            shiftArg(args);
+            acShiftCmdArg(args);
         } else if (commandType == 0) {
-            const acCmdArg& arg5 = getFrontArg(args);
+            const acCmdArg& arg5 = acGetCmdArg(args, 0);
             unitID = arg5.getIntData();
-            shiftArg(args);
+            acShiftCmdArg(args);
         }
-        const acCmdArg& arg = getFrontArg(args);
+        const acCmdArg& arg = acGetCmdArg(args, 0);
         s32 value;
         if (arg.getArgType() == 0) {
             value = arg.getIntData();
@@ -143,7 +134,7 @@ int soTransitionModuleImpl::notifyEventAnimCmd(int commandType, soArrayContracti
         } else {
             return 1;
         }
-        shiftArg(args);
+        acShiftCmdArg(args);
         soTransitionTerm term;
         term.m_flags |= 0x80;
         term.m_targetKind = value;
@@ -157,12 +148,12 @@ int soTransitionModuleImpl::notifyEventAnimCmd(int commandType, soArrayContracti
         addGeneralTermLastTerm(-1, (soGeneralTerm*) &args);
         return 1;
     case 5: {
-        const acCmdArg& arg6 = getFrontArg(args);
+        const acCmdArg& arg6 = acGetCmdArg(args, 0);
         s32 groupID = arg6.getIntData();
-        shiftArg(args);
-        const acCmdArg& arg7 = getFrontArg(args);
+        acShiftCmdArg(args);
+        const acCmdArg& arg7 = acGetCmdArg(args, 0);
         s32 unitID = arg7.getIntData();
-        shiftArg(args);
+        acShiftCmdArg(args);
         addGeneralTerm(groupID, unitID, (soGeneralTerm*) &args);
         return 1;
     }
@@ -172,21 +163,21 @@ int soTransitionModuleImpl::notifyEventAnimCmd(int commandType, soArrayContracti
     case 9: {
         s32 groupID = -1;
         if (commandType != 6 && commandType != 8) {
-            const acCmdArg& arg8 = getFrontArg(args);
+            const acCmdArg& arg8 = acGetCmdArg(args, 0);
             groupID = arg8.getIntData();
-            shiftArg(args);
+            acShiftCmdArg(args);
         }
         if (commandType == 6 || commandType == 7) {
-            enableTerm(getFrontArg(args).getIntData(), groupID);
+            enableTerm(acGetCmdArg(args, 0).getIntData(), groupID);
         } else {
-            unableTerm(getFrontArg(args).getIntData(), groupID);
+            unableTerm(acGetCmdArg(args, 0).getIntData(), groupID);
         }
         return 1;
     }
     case 10:
     case 11:
         {
-            s32 groupID = getFrontArg(args).getIntData();
+            s32 groupID = acGetCmdArg(args, 0).getIntData();
             if (commandType == 10) {
                 enableTermGroup(groupID);
             } else {
@@ -195,7 +186,7 @@ int soTransitionModuleImpl::notifyEventAnimCmd(int commandType, soArrayContracti
         }
         return 1;
     case 12: {
-        const acCmdArg& arg = getFrontArg(args);
+        const acCmdArg& arg = acGetCmdArg(args, 0);
         s32 groupID = arg.getIntData();
         if (groupID > -1) {
             m_groupID = groupID;
