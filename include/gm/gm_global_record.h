@@ -378,7 +378,10 @@ struct gmGlobalRecord {
 
     MenuData m_menuData; // 2064
 
-    char _spacer[0xDF4]; // MenuData ends at 0x840: its doubleword switches make it 8-byte aligned
+    char _spacer[0xD6C]; // MenuData ends at 0x840: its doubleword switches make it 8-byte aligned
+    // Two flags for each title of the Masterpieces list (muSoftListDataManager): bit 2 * n it can be played, bit
+    // 2 * n + 1 it is new.
+    u32 m_softFlags[0x22];                  // 0x15AC
     CharaNumData m_charaNumData[35];        // 0x1634
     u8 unk34D4[0x74];
     u8 unk3548[0x44];
@@ -386,6 +389,7 @@ struct gmGlobalRecord {
 };
 static_assert(offsetof(gmGlobalRecord, m_infoAppFlagData) == 0x1C, "Class is wrong size!");
 static_assert(offsetof(gmGlobalRecord, m_eventHiScoreData) == 0x32C, "Class is wrong size!");
+static_assert(offsetof(gmGlobalRecord, m_softFlags) == 0x15AC, "Class is wrong size!");
 static_assert(offsetof(gmGlobalRecord, m_charaNumData) == 0x1634, "Class is wrong size!");
 static_assert(sizeof(gmGlobalRecord) == 0x3cf0, "Class is wrong size!");
 
