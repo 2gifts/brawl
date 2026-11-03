@@ -10,7 +10,15 @@
 struct gmSelCharData {
     char _0[0x4];
     u8 m_selCharType;   // 0x04 the kind of the select screen (versus, a solo mode, a minigame ...)
-    char _5[0xb3];
+    union {
+        char _5[0xb3];
+        struct {
+            u8 _pad5[0x29];
+            // HYPOTHESIS: 3-bit difficulty setting at offset 0x2E
+            u8 unk2E_b7 : 3;
+            u8 _pad2F[0x89];
+        };
+    };
     gmPlayerInitData m_playersInitData[MAX_PLAYERS];
     char _0x33c[4];
 };
