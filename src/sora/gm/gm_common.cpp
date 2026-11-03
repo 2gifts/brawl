@@ -1101,31 +1101,30 @@ bool gmCheckCharaAccept(u64 flag, int kind) {
     return (set.words[kind / 32] & (1 << (kind % 32))) != 0;
 }
 
-// HYPOTHESIS: turns an all-star list into a corps list. Byte 4 == 1 marks an all-star setup whose first player
-// record carries the fighter count in its stock field; the first player's fighter/cpu/reaction data moves to the
+// HYPOTHESIS: turns an all-star list into a corps list. m_isAllStarList == 1 marks an all-star setup whose first
+// player record carries the fighter count in its stock field; the first player's fighter/cpu/reaction data moves to the
 // corps header, the per-player costume ids are packed into the byte array at 0x24 and repeated up to the count.
 void gmGlobalCorpsConvertAllStarToCorps(gmGlobalCorps* corps) {
-    u8* raw = reinterpret_cast<u8*>(corps);
-    if (raw[0x4] == 1) {
+    if (corps->m_isAllStarList == 1) {
         int count = 100;
         if (corps->m_playersInitData[0].m_stockCount < 100) {
             count = corps->m_playersInitData[0].m_stockCount;
         }
         if (count > 1) {
-            int period = raw[0x1];
-            u8 kind = raw[0x24];
-            u8 cpuType = raw[0x27];
-            u8 cpuRank = raw[0x28];
+            int period = corps->m_numFightersToBeat;
+            int kind = corps->m_playersInitData[0].m_characterKind;
+            u8 cpuType = corps->m_playersInitData[0].m_cpuType;
+            s8 cpuRank = corps->m_playersInitData[0].m_cpuRank;
             float attackMul = corps->m_playersInitData[0].m_attackReactionMul;
             float damageMul = corps->m_playersInitData[0].m_damageReactionMul;
             float scale = corps->m_playersInitData[0].m_scale;
-            raw[0x4] = 0;
-            raw[0xA] = kind;
-            raw[0xB] = cpuType;
-            raw[0xC] = cpuRank;
-            *reinterpret_cast<float*>(raw + 0x10) = attackMul;
-            *reinterpret_cast<float*>(raw + 0x14) = damageMul;
-            *reinterpret_cast<float*>(raw + 0x18) = scale;
+            corps->m_isAllStarList = 0;
+            corps->m_characterKind = kind;
+            corps->m_cpuType = cpuType;
+            corps->m_cpuRank = cpuRank;
+            corps->m_attackReactionMul = attackMul;
+            corps->m_damageReactionMul = damageMul;
+            corps->m_scale = scale;
             int packed = count;
             if (period < count) {
                 packed = period;
@@ -1133,16 +1132,16 @@ void gmGlobalCorpsConvertAllStarToCorps(gmGlobalCorps* corps) {
             int n = 0;
             gmPlayerCorpsInitData* src = corps->m_playersInitData;
             while (n < packed) {
-                raw[0x24 + n] = src->m_costumeId;
+                corps->m_costumeIds[n] = src->m_costumeId;
                 n++;
                 src++;
             }
             for (int i = period; i < count; i++) {
-                raw[0x24 + i] = raw[0x24 + i % period];
+                corps->m_costumeIds[i] = corps->m_costumeIds[i % period];
             }
-            raw[0x5] |= 0x40;
-            raw[0x1] = count;
-            raw[0x3] = count;
+            corps->m_flags |= 0x40;
+            corps->m_numFightersToBeat = count;
+            corps->m_numFightersInCurrentStage = count;
         }
     }
 }
@@ -1379,9 +1378,9 @@ int gmGetKindCountSealExist() {
     return total;
 }
 
-// HYPOTHESIS: the name comes from the map; the value is a word of the set-rule record at 0x24.
+// HYPOTHESIS: the name comes from the map; the value is the set rule's controls-name player number (0x24).
 u32 gmGetMenuDecisionPad() {
-    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(g_GameGlobal->m_setRule) + 0x24);
+    return g_GameGlobal->m_setRule->m_ctrlNamePlayerNo;
 }
 
 // Copy of the exact definition in gm_common.cpp (cluster A's file).
@@ -1517,12 +1516,12 @@ static inline void saveRuleBytes(u8* rule, u8* backup, int first, int count) {
 }
 
 void gmRuleBackupForNet() {
-    saveRuleBytes(reinterpret_cast<u8*>(g_GameGlobal->m_setRule), *reinterpret_cast<u8**>(reinterpret_cast<u8*>(g_GameGlobal) + 0x48), 2, 6);
-    saveRuleBytes(reinterpret_cast<u8*>(g_GameGlobal->m_setRule), *reinterpret_cast<u8**>(reinterpret_cast<u8*>(g_GameGlobal) + 0x4C), 8, 5);
+    saveRuleBytes(reinterpret_cast<u8*>(g_GameGlobal->m_setRule), g_GameGlobal->unk48, 2, 6);
+    saveRuleBytes(reinterpret_cast<u8*>(g_GameGlobal->m_setRule), g_GameGlobal->unk4C, 8, 5);
 }
 
 void gmRuleResetForNet() {
-    u8* backup = *reinterpret_cast<u8**>(reinterpret_cast<u8*>(g_GameGlobal) + 0x48);
+    u8* backup = g_GameGlobal->unk48;
     u8* rule = reinterpret_cast<u8*>(g_GameGlobal->m_setRule);
     rule[2] = backup[0];
     rule[3] = backup[1];
@@ -1530,7 +1529,7 @@ void gmRuleResetForNet() {
     rule[5] = backup[3];
     rule[6] = backup[4];
     rule[7] = backup[5];
-    backup = *reinterpret_cast<u8**>(reinterpret_cast<u8*>(g_GameGlobal) + 0x4C);
+    backup = g_GameGlobal->unk4C;
     rule = reinterpret_cast<u8*>(g_GameGlobal->m_setRule);
     rule[8] = backup[0];
     rule[9] = backup[1];
@@ -1695,12 +1694,12 @@ void gmAddMeleeCoin() {
     }
 }
 
-// Auto handicap bookkeeping at the end of a match: results are only used when the set rule's byte at +0x5 is 1
+// Auto handicap bookkeeping at the end of a match: results are only used when the set rule's handicap byte is 1
 // (HYPOTHESIS: auto handicap). Players whose flag byte at +0xF is zero get 20 more handicap (max 300), the others
 // lose 20 (2 players) or 10 (3 or 4 players, except the lowest).
 void gmSetAutoHandiModeResult() {
     gmResultInfo* result = g_GameGlobal->m_resultInfo;
-    if (*(reinterpret_cast<u8*>(g_GameGlobal->m_setRule) + 5) != 1) {
+    if (g_GameGlobal->m_setRule->m_handicap != 1) {
         return;
     }
     int players = 0;
@@ -2265,7 +2264,7 @@ void gmAddDiagramResultName(gmResultInfo* result) {
 
 // Whether the clear getter of this index is open (state 2). HYPOTHESIS: the record keeps one state byte per getter at 0x1528.
 bool isClearGetterOpen(int index) {
-    return (reinterpret_cast<u8*>(g_GameGlobal->m_record) + index)[0x1528] == 2;
+    return g_GameGlobal->m_record->unk1528[index] == 2;
 }
 
 // Marks the clear getter as open in the clear-get app flags.

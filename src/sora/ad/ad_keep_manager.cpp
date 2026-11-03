@@ -22,8 +22,8 @@ extern "C" void fn_8015AE80(adKeepManager* keepManager, bool addStageCoin);
 // HYPOTHESIS: the global instance keeps its placeholder name; no map name is known.
 adKeepManager lbl_8049ED30;
 
-static inline adKeepAdvData* getAdvData() {
-    return reinterpret_cast<adKeepAdvData*>(g_GameGlobal->m_advData);
+static inline gmAdvData* getAdvData() {
+    return g_GameGlobal->m_advData;
 }
 
 adKeepManager::adKeepManager() {
@@ -179,12 +179,12 @@ void adKeepManager::useStageSelectTiming() {
 }
 
 void adKeepManager::useWorldMapTiming() {
-    adKeepAdvData* advData = getAdvData();
+    gmAdvData* advData = getAdvData();
     advData->unk4910 = 0;
     advData->unk4916 = 0;
-    advData->unk4920 = 0;
-    advData->unk4914[0] = false;
-    advData->unk4914[1] = false;
+    advData->m_stageCoin = 0;
+    advData->m_isNanaDead[0] = false;
+    advData->m_isNanaDead[1] = false;
     advData->unk4918 = 0;
     advData->unk491C = 0;
 }
@@ -326,7 +326,7 @@ adKeepRareItem* adKeepManager::getAdLostRareItem(u32 index) {
 }
 
 void adKeepManager::setResultOfTotaling(bool addCoin, bool applyItems) {
-    adKeepAdvData* advData = getAdvData();
+    gmAdvData* advData = getAdvData();
     if (applyItems) {
         for (u32 i = 0; i < m_gotRareItemNum; i++) {
             if (m_gotRareItems[i].unk8 != 0) {
@@ -346,22 +346,22 @@ void adKeepManager::setResultOfTotaling(bool addCoin, bool applyItems) {
         useGameOverOutTimingContinue();
     }
     if (addCoin) {
-        fn_80051440(advData->unk4920 * 10);
-        advData->unk4920 = 0;
+        fn_80051440(advData->m_stageCoin * 10);
+        advData->m_stageCoin = 0;
     }
-    advData->unk4914[0] = false;
-    advData->unk4914[1] = false;
+    advData->m_isNanaDead[0] = false;
+    advData->m_isNanaDead[1] = false;
 }
 
 void adKeepManager::setNanaDeadFlag(u32 index, bool dead) {
     if (g_GameGlobal->m_advData) {
-        getAdvData()->unk4914[index] = dead;
+        getAdvData()->m_isNanaDead[index] = dead;
     }
 }
 
 bool adKeepManager::isNanaDeadFlag(u32 index) {
     if (g_GameGlobal->m_advData) {
-        return getAdvData()->unk4914[index];
+        return getAdvData()->m_isNanaDead[index];
     }
     return false;
 }

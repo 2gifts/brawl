@@ -355,9 +355,8 @@ void GameGlobal::init() {
     rule = m_setRule;
     rule->m_allowPause = true;
     rule->m_showDamageGauge = 1;
-    // HYPOTHESIS: two more rule fields that start at zero (not named in gmSetRule).
-    reinterpret_cast<u8*>(rule)[0x20] = 0;
-    *reinterpret_cast<u32*>(reinterpret_cast<u8*>(rule) + 0x24) = 0;
+    rule->unk20 = 0;
+    rule->m_ctrlNamePlayerNo = 0;
 
     // The Adventure save data starts empty: no level cleared, all slots unused.
     gmAdvDataView* adv = reinterpret_cast<gmAdvDataView*>(g_GameGlobal->m_advData);
@@ -1373,7 +1372,7 @@ void GameGlobal::setAdventureSaveData(const void* data) {
     if (found >= 0) {
         index = found;
     }
-    reinterpret_cast<u8*>(m_advData)[0x600] = index;
+    m_advData->m_nameIndex = index;
 }
 
 void GameGlobal::getAdventureSaveData(void* data) {
@@ -1387,7 +1386,7 @@ void GameGlobal::getAdventureSaveData(void* data) {
     *reinterpret_cast<u32*>(nameBlock) = 0x07092000;
     nameBlock[4] = 1;
     char name[0x15] = { 0 };
-    u8 index = reinterpret_cast<u8*>(m_advData)[0x600];
+    u8 index = m_advData->m_nameIndex;
     if (index < 0x78) {
         nameUTF8(this, index, name);
     }
