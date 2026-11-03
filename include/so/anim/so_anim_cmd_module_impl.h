@@ -14,6 +14,7 @@
 #endif
 
 class soModuleAccesser;
+struct soAnimCmdAddressPackConv;
 
 /*
  * This class is weird, it has a bunch of data before the event presenter vtable and info,
@@ -56,8 +57,15 @@ public:
         m_kind(kind), m_moduleAccesser(nullptr), unk48(0), unk4C(0) { }
     ~soAnimCmdInterpreter() { }
     virtual bool dispatchCmdIf(const acAnimCmd* cmd);
+    virtual s32 dispatchCmdSwitch(const acAnimCmd* cmd) const;
+    virtual bool isBreakInterpret();
     virtual bool isSleepStackData(s32 kind) const;
+    virtual bool isSkipEnd() const;
     void interpretCmd(soModuleAccesser* moduleAccesser, float timeStep);
+    void resetInterpreter(const soAnimCmdAddressPackConv& pack, soModuleAccesser* moduleAccesser, float frame);
+    void resetInterpreter(const acAnimCmdConv* initCmd, soModuleAccesser* moduleAccesser, u32 flag, float frame);
+    void skipNextMotionGroup(soModuleAccesser* moduleAccesser);
+    void systemCmdFuncWaitLoop();
 };
 static_assert(sizeof(soAnimCmdInterpreter) == 0x50, "Class is the wrong size!");
 #endif
@@ -144,7 +152,8 @@ static_assert(sizeof(soAnimCmdControlUnit) == 0x8, "Class is the wrong size!");
 class soAnimCmdModule: public soNullable {
 public:
     virtual void registInterpreter(const soAnimCmdControlUnit& unit, const soAttributeFlag& attr);
-    virtual void interpretCmd();
+    // HYPOTHESIS: signature from soStatusModuleImpl (frame 0 or 1 with an attribute mask of the command groups to run).
+    virtual void interpretCmd(soModuleAccesser* moduleAccesser, const soAttributeFlag& attr, float frame);
     virtual void interpretCmdAdjust();
 #ifdef SO_ANIM_CMD_INTERPRET_CMD1_FRAME_LAST
     // The frame is the last parameter: every unscheduled caller (the sora_enemy REL: Enemy::activate, the AI module and
@@ -168,7 +177,8 @@ public:
     // HYPOTHESIS: parameters from Enemy::activate, which hands group 0 the anim cmd table of its parameters (constant
     // 0xA810), runs it once with interpretCmd1 and resets the group with NULL.
     virtual void resetInterpreter3(int group, void* animCmdTable, soModuleAccesser* moduleAccesser);
-    virtual void resetInterpreter4();
+    // HYPOTHESIS: signature from soStatusModuleImpl, which runs a status's pre-check anim cmd table through it.
+    virtual void resetInterpreter4(const soAttributeFlag& attr, void* animCmdTable, soModuleAccesser* moduleAccesser, int unk1, int unk2);
     virtual void isInterpreterAnimCmd();
     virtual void skipNextMotionGroup();
     virtual bool isAnimCmdEnd();

@@ -6,7 +6,7 @@
 #include <ft/ft_class_info_impl.h>
 #include <ft/ft_owner.h>
 #include <ft/robot/ft_robot.h>
-#include <ft/ft_physics_iface.h>
+#include <so/so_module_hyp.h>
 #include <ft/robot/ft_robot_extend_param_accesser.h>
 #include <ft/robot/ft_robot_link_event.h>
 #include <ft/robot/ft_robot_unk8.h>
@@ -64,7 +64,7 @@ ftRobot::ftRobot(s32 entryId,
     soCollisionReflectorGroupData* reflectors = *reinterpret_cast<soCollisionReflectorGroupData**>(reinterpret_cast<u8*>(m_commonData) + 0xb0);
     m_moduleAccesser->getCollisionReflectorModule().add(reflectors, 2);
     m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
-    ftPhysicsModuleCall54(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0);
+    getPhysicsModule(m_moduleAccesser).unk54(0);
     static_cast<soSlopeModule*>(m_moduleAccesser->m_enumerationStart->m_slopeModule)->setPartNode(0x5D);
     static_cast<soSlopeModule*>(m_moduleAccesser->m_enumerationStart->m_slopeModule)->setInvalidStatus(6);
 }
@@ -321,7 +321,7 @@ void ftRobot::notifyArticleEventRemove(int unk1, int* unk2) {
 // HYPOTHESIS: a motion whose data has flag 8 set makes the physics module run its slot 0x4c with 1.
 void ftRobot::notifyEventChangeMotion(int motionKind, int prevMotionKind, void* motionData, soModuleAccesser* acc) {
     if (static_cast<u8*>(motionData)[1] & 0x8) {
-        ftPhysicsModuleCall4C(m_moduleAccesser->m_enumerationStart->m_physicsModule, 1);
+        getPhysicsModule(m_moduleAccesser).unk4C(1);
     }
 }
 

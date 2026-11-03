@@ -21,8 +21,6 @@ extern "C" void fn_800151FC(gfArchive* archive, const char* path, Heaps::HeapTyp
 long randi(long max);
 // GameGlobal::checkHideMenuRandomStageSW(): the random stage switch of the menus is hidden
 // GameGlobal::getName(number, buffer)
-// muMenuController::getAButtonPushedControllerID(): the pad that pushed A
-extern "C" int fn_800BA2E0();
 // CameraController::getInstance() and changeInput(kind)
 extern "C" void* getInstance__16CameraControllerFv();
 extern "C" void changeInput__16CameraControllerFQ216CameraController4Kind(void* camera, int kind);
@@ -1734,7 +1732,7 @@ void muTourRuleTask::processAnim() {
                     if (m_edited == 0) {
                         initPlayerData();
                     }
-                    m_ctrlPad = fn_800BA2E0();
+                    m_ctrlPad = muMenuController::getAButtonPushedControllerID();
                     m_colorShown = true;
                     m_page = 0;
                     m_pageY = 0.0f;

@@ -35,18 +35,6 @@ static stOperatorDefeatBossUnk8 g_stOperatorDefeatBossUnk8B(0xFF, 1);
 // HYPOTHESIS: set while items are enabled in the match (see ft_manager.cpp).
 extern int g_ftItemEnabled;
 
-// HYPOTHESIS: a byte of one-bit flags in the adventure data (gmAdvData is only partly described).
-struct AdvFlags {
-    u8 unk0 : 1;
-    u8 unk1 : 1;
-    u8 unk2 : 1;
-    u8 unk3 : 1;
-    u8 unk4 : 1;
-    u8 unk5 : 1;
-    u8 unk6 : 1;
-    u8 unk7 : 1;
-};
-
 // HYPOTHESIS: the running stage as a Subspace Emissary stage, or NULL.
 static inline stAdventure2* getAdventureStage() {
     Stage* stage = g_Stage;
@@ -92,7 +80,7 @@ void stOperatorDefeatBoss::phaseDefeatbossIdle() {
     if ((*(u32*)&g_gfApplication->unkE8[4] >> 27) != 0) {
         return;
     }
-    reinterpret_cast<AdvFlags*>(reinterpret_cast<u8*>(g_GameGlobal->m_advData) + 0x4924)->unk5 = true;
+    g_GameGlobal->m_advData->m_flags.m_unk5 = true;
     m_phase = Phase_Init;
 }
 
@@ -109,7 +97,7 @@ void stOperatorDefeatBoss::phaseInit() {
     found = false;
 done:
     unk50 = found;
-    unk51 = reinterpret_cast<AdvFlags*>(reinterpret_cast<u8*>(g_GameGlobal->m_advData) + 0x4924)->unk1;
+    unk51 = g_GameGlobal->m_advData->m_flags.m_unk1;
     if (unk50) {
         m_param = getAdventureStage()->getDestroyBossParamCommon(1);
     } else if (unk51) {

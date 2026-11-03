@@ -143,8 +143,7 @@ void itManager::removeItem1(int createOwnerTaskId) {
 u32 itManager::getItemNum(itKind kind, int variation, int taskId, int genId) {
     u32 count = 0;
     for (s32 i = 0; i < m_itemArrayList.size(); i++) {
-        // MATCH-ONLY: the original calls the const at() overload on the member each time
-        BaseItem* item = static_cast<const soArrayList<BaseItem*, 64>&>(m_itemArrayList).at(i);
+        BaseItem* item = itemAt(i);
         if (item != NULL && (((s32) kind == (s32) item->m_kind) || ((s32) kind == -1)) &&
             ((variation == 0) || (variation == (s32) item->m_variation)) &&
             (((u32) (taskId + 0x10000) == 0xFFFF) || ((u32) taskId == (u32) item->m_createOwnerTaskId)) &&
@@ -419,7 +418,7 @@ BaseItem* itManager::getItemFromKind(int kind) {
 int itManager::getGenItemNum() {
     int count = 0;
     for (s32 i = 0; i < m_itemArrayList.size(); i++) {
-        BaseItem* item = static_cast<const soArrayList<BaseItem*, 64>&>(m_itemArrayList).at(i);
+        BaseItem* item = itemAt(i);
         if (item != NULL && (u32)item->m_genId != 0xFFFFFFFF) {
             count++;
         }
@@ -430,7 +429,7 @@ int itManager::getGenItemNum() {
 int itManager::getItemShotNum() {
     int count = 0;
     for (s32 i = 0; i < m_itemArrayList.size(); i++) {
-        BaseItem* item = static_cast<const soArrayList<BaseItem*, 64>&>(m_itemArrayList).at(i);
+        BaseItem* item = itemAt(i);
         if (item != NULL && isWeaponItem(item->m_kind)) {
             count++;
         }
@@ -455,7 +454,7 @@ BaseItem* itManager::findLowPriorityItemInstance() {
     int bestPriority = 10000;
     int count = m_itemArrayList.size();
     for (int i = 0; i < count; i++) {
-        BaseItem* item = static_cast<const soArrayList<BaseItem*, 64>&>(m_itemArrayList).at(i);
+        BaseItem* item = itemAt(i);
         int priority = getPriorityItemInstance(item);
         if (priority < 10000) {
             if (priority == bestPriority) {
@@ -947,9 +946,9 @@ BaseItem* itManager::getItemFromAreaId(int areaId) {
 // (checked only when requested), or a Heart Swap / technique-practice process is running.
 bool itManager::isExclusiveManaphy(bool checkPokemonList) {
     if (checkPokemonList) {
-        for (int i = 0; i < static_cast<const soArrayList<ItemInfo, 12>&>(m_pokemonInfoArrayList).size(); i++) {
+        for (int i = 0; i < m_pokemonInfoArrayList.size(); i++) {
             // HYPOTHESIS: the queue holds bare itKind words in vanilla, so compare the whole word
-            if (*(int*)&static_cast<const soArrayList<ItemInfo, 12>&>(m_pokemonInfoArrayList).at(i) == 0x78) {
+            if (*(int*)&pokemonInfoAt(i) == 0x78) {
                 return true;
             }
         }
@@ -1027,9 +1026,9 @@ itGenSheetKind itManager::getRandBasicItemSheet() {
     } else {
         level = 0;
     }
-    if (static_cast<const soArrayList<itGenArchive*, 3>&>(m_genArchiveArrayList).size() > 1) {
-        for (int i = 0; i < static_cast<const soArrayList<itGenArchive*, 3>&>(m_genArchiveArrayList).size(); i++) {
-            itGenArchive* archive = static_cast<const soArrayList<itGenArchive*, 3>&>(m_genArchiveArrayList).at(i);
+    if (m_genArchiveArrayList.size() > 1) {
+        for (int i = 0; i < m_genArchiveArrayList.size(); i++) {
+            itGenArchive* archive = genArchiveAt(i);
             if (archive != NULL && archive->isComp()) {
                 itGenSheetKind kind = archive->m_sheetKind;
                 itGenSheetKind first = archive->m_sheetKind;
@@ -1321,8 +1320,8 @@ itArchive* itManager::getItemKindArchive(int kind, int variation) {
     if (archiveIdOf(this, kind) >= 0) {
         kind = -3;
     }
-    for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).size(); i++) {
-        itArchive* archive = static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).at(i);
+    for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
+        itArchive* archive = itArchiveAt(i);
         if (archive != NULL && kind == archive->m_itKind && variation == (int)archive->m_itVariation) {
             return archive;
         }
@@ -1817,8 +1816,8 @@ nw4r::g3d::ResFile itManager::getResFileData(int set) {
         kind = -3;
     }
     itArchive* archive = NULL;
-    for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).size(); i++) {
-        itArchive* cur = static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).at(i);
+    for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
+        itArchive* cur = itArchiveAt(i);
         if (cur != NULL && kind == cur->m_itKind && cur->m_itVariation == 0) {
             archive = cur;
             break;
@@ -1937,8 +1936,8 @@ int itManager::removeRequestTrainingItem(int kind) {
             archiveKind = -3;
         }
         itArchive* found = NULL;
-        for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).size(); i++) {
-            itArchive* cur = static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).at(i);
+        for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
+            itArchive* cur = itArchiveAt(i);
             if (cur != NULL && archiveKind == cur->m_itKind && cur->m_itVariation == 0) {
                 found = cur;
                 break;
@@ -2003,8 +2002,8 @@ bool itManager::isCompItemKindArchive(itKind kind, u32 variation, bool recurseGr
         lookupKind = -3;
     }
     itArchive* archive = NULL;
-    for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).size(); i++) {
-        itArchive* cur = static_cast<const soArrayList<itArchive*, 128>&>(m_itArchiveArrayList).at(i);
+    for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
+        itArchive* cur = itArchiveAt(i);
         if (cur != NULL && lookupKind == cur->m_itKind && resolved == cur->m_itVariation) {
             archive = cur;
             break;
@@ -2111,8 +2110,8 @@ static inline bool stageBlocksSpecialItem(Stage* stage) {
 
 // The archive of this kind that has variation 0 (an inline loop of isExclusiveSpecialItem).
 static inline itArchive* findBaseArchive(itManager* manager, int kind) {
-    for (int i = 0; i < static_cast<const soArrayList<itArchive*, 128>&>(manager->m_itArchiveArrayList).size(); i++) {
-        itArchive* cur = static_cast<const soArrayList<itArchive*, 128>&>(manager->m_itArchiveArrayList).at(i);
+    for (int i = 0; i < manager->m_itArchiveArrayList.size(); i++) {
+        itArchive* cur = manager->itArchiveAt(i);
         if (cur != NULL && kind == cur->m_itKind && cur->m_itVariation == 0) {
             return cur;
         }
@@ -2444,7 +2443,7 @@ static inline itArchive* findKindArchive(itManager* manager, int kind, u32 varia
     if (archiveIdOf(manager, kind) >= 0) {
         lookupKind = -3;
     }
-    const soArrayList<itArchive*, 128>& list = static_cast<const soArrayList<itArchive*, 128>&>(manager->m_itArchiveArrayList);
+    const soArrayList<itArchive*, 128>& list = manager->m_itArchiveArrayList;
     for (int i = 0; i < list.size(); i++) {
         itArchive* cur = list.at(i);
         if (cur != NULL && lookupKind == cur->m_itKind && resolved == cur->m_itVariation) {

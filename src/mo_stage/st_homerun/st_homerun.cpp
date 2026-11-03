@@ -1201,8 +1201,7 @@ void stHomerun::fixposCamera() {
         m_keyTarget.m_elapsed = 0.0f;
         m_keyTarget.m_duration = 90.0f;
         m_keyTarget.m_ease = 1;
-        // MATCH-ONLY: the camera field at 0xD4 is not named by the shared header (the field of view the camera starts from).
-        m_keyFov.m_start = *reinterpret_cast<float*>(reinterpret_cast<char*>(camera) + 0xD4);
+        m_keyFov.m_start = camera->m_fovScale;
         m_keyFov.m_end = 1.0f;
         m_keyFov.m_elapsed = 0.0f;
         m_keyFov.m_duration = 90.0f;

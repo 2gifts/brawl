@@ -23,7 +23,11 @@ public:
     u8 m_c4;
     u32 m_c8;
     u32 m_cc;
-    char _d0[0x1C];
+    union {
+        char _d0[0x1C];
+        // HYPOTHESIS: the per-player damage or HP that mlFtEvent stores for the HUD cursor update.
+        u32 m_playerDamage[MAX_PLAYERS];
+    };
     s32 m_ec[8];
     u8 m_10c;
     float m_110;
