@@ -6777,6 +6777,7 @@ config.libs = [
             Object(NonMatching, "mo_menu/mu_main_panel_ctrl.cpp"),
             Object(NonMatching, "mo_menu/mu_soft_list_data.cpp"),
             Object(NonMatching, "mo_menu/mu_soft_list.cpp"),
+            Object(NonMatching, "mo_menu/mu_wifi_cnct_wnd.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_record.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_name.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_figure.cpp"),

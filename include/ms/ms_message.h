@@ -39,12 +39,15 @@ public:
     void setCursorY(float);
     void printf(const char* format, ...);
 
+    static int stripTags(const u8* src, int len, int unused, u8* dst);
     static u32 utf8to16(wchar_t* dst, const char* src);
     static u32 utf16to8(char* dst, const wchar_t* src);
     // Adds count letters of src (from letter skip on) at the end of dst.
     static bool appendSubstr(char* dst, const char* src, int skip, int count);
     static void getPrintIndexData(void* msgbin, u32 index, char** outStr, u32* outLen);
     static void drawBoxLine(s32 p1, s32 p2, s32 p3, float f1, float f2, float f3, float f4, float f5);
+    // Copies src without its tags (len bytes) to dst and returns the length of the copy.
+    static int stripTags(const u8* src, int len, int unused, u8* dst);
 
 
 };

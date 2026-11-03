@@ -79,7 +79,12 @@ public:
     muWifiPlayerArea m_playerAreas[4];
     char unk6C[0x4];
     muWifiAIDInfo m_aidInfos[5];
-    char unkAE8[0x4E3];
+    char unkAE8[0x4E2];
+    u8 unkFCA_b7 : 1;
+    u8 unkFCA_b6 : 1;
+    u8 unkFCA_b5 : 1;
+    u8 unkFCA_b4 : 1;           // cleared after the name entry of muWifiCnctWndTask has set the name
+    u8 unkFCA_b0 : 4;
     u8 unkFCB_b7 : 1;
     u8 unkFCB_b0 : 7;
     s32 unkFCC_b24 : 8;
@@ -109,6 +114,12 @@ public:
     static bool haveErrorCode(int index);
     static u32 getBadNameErrorMsgID();
     void connect(bool);
+    // HYPOTHESIS: 1 while the connection runs, then 2 connected, 3 failed, 4 the name was refused; the outputs are
+    // the error (an index for getErrorMsgID), the error code and whether a new Wi-Fi user was made.
+    int getConnectResult(int* errorIndex, int* errorCode, bool* isNewUser);
+    // HYPOTHESIS: 1 while the disconnection runs, then 2 done.
+    int getDisconnectResult(int* errorIndex);
+    void putMyFriendStatusName(const wchar_t* name);
     static u64 getUserID();
     bool disconnect();
     bool isMyPlayerArea(int index);
@@ -144,8 +155,5 @@ public:
     muWifiAIDInfo* getSafeParentAIDInfo();
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
-
-void netReport(const char* fmt, ...);
-void netReport0(const char* fmt, ...);
 
 extern muWifiInterfaceTask* g_muWifiInterfaceTask;
