@@ -351,10 +351,13 @@ struct gmGlobalRecord {
     u32 m_damageTotalCount;                 // 0x2D8
     u32 m_killTotalCount;                   // 0x2DC
     u32 m_suicideTotalCount;                // 0x2E0
-    u8 m_unk2E4;                            // HYPOTHESIS: copied into the melee init data by gmInitGlobalModeMelee
-    u8 m_unk2E5;
+    // The rarity bit sets of the trophy and the sticker lotteries (gmGetRecFigureRareBit / gmGetRecSealRareBit); the
+    // melee init data keeps a copy of each for the match.
+    u8 m_figureRareBit;                     // 0x2E4
+    u8 m_sealRareBit;                       // 0x2E5
     u8 m_openedEvent[0x2];                  // 0x2E6
-    u8 m_stagePlayCount[0x44];              // 0x2E8
+    u8 m_stagePlayCount[0x43];              // 0x2E8
+    u8 m_friendCount;                       // 0x32B (gmSetFriendCount / gmGetFriendCount, 0-64)
 
     EventHiScoreData m_eventHiScoreData[2];
 
@@ -378,7 +381,20 @@ struct gmGlobalRecord {
 
     MenuData m_menuData; // 2064
 
-    char _spacer[0xD6C]; // MenuData ends at 0x840: its doubleword switches make it 8-byte aligned
+    // MenuData ends at 0x840: its doubleword switches make it 8-byte aligned.
+    char _840[2];
+    // One halfword per trophy (index from gmFig_Id2Index) and per sticker (gmSeal_Id2Index): bit 15 owned, bit 14
+    // referred, bit 13 info, bit 12 info referred, bits 0-9 the number owned (stops at 999).
+    // HYPOTHESIS: the sticker table runs up to the next known field (1000 entries). Each table is its own struct
+    // (names invented): the writers of gm_common.cpp take the table's address and index from that base.
+    struct FigureData {
+        u16 m_flags[0x28B];
+    } m_figureData;                         // 0x842
+    struct SealData {
+        u16 m_flags[0x3E8];
+    } m_sealData;                           // 0xD58
+    u8 unk1528[0x81];                       // 0x1528: cleared with the Masterpieces flags; meaning unknown
+    char _15A9[3];
     // Two flags for each title of the Masterpieces list (muSoftListDataManager): bit 2 * n it can be played, bit
     // 2 * n + 1 it is new.
     u32 m_softFlags[0x22];                  // 0x15AC
@@ -389,6 +405,9 @@ struct gmGlobalRecord {
 };
 static_assert(offsetof(gmGlobalRecord, m_infoAppFlagData) == 0x1C, "Class is wrong size!");
 static_assert(offsetof(gmGlobalRecord, m_eventHiScoreData) == 0x32C, "Class is wrong size!");
+static_assert(offsetof(gmGlobalRecord, m_figureData) == 0x842, "Class is wrong size!");
+static_assert(offsetof(gmGlobalRecord, m_sealData) == 0xD58, "Class is wrong size!");
+static_assert(offsetof(gmGlobalRecord, m_friendCount) == 0x32B, "Class is wrong size!");
 static_assert(offsetof(gmGlobalRecord, m_softFlags) == 0x15AC, "Class is wrong size!");
 static_assert(offsetof(gmGlobalRecord, m_charaNumData) == 0x1634, "Class is wrong size!");
 static_assert(sizeof(gmGlobalRecord) == 0x3cf0, "Class is wrong size!");

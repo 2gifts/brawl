@@ -413,12 +413,10 @@ void GameGlobal::init() {
     gmInitAssistKindUseEnable();
     gmInitEventOpened();
 
-    // HYPOTHESIS: the part of the record in front of the per-character data (counters of the Statistics screen).
-    u8* record = reinterpret_cast<u8*>(m_record);
-    memset(record + 0x1528, 0, 0x81);
-    u32* counters = reinterpret_cast<u32*>(reinterpret_cast<u8*>(m_record) + 0x15AC);
+    memset(m_record->unk1528, 0, 0x81);
+    u32* softFlags = m_record->m_softFlags;
     for (int i = 0; i < 34; i++) {
-        counters[i] = 0;
+        softFlags[i] = 0;
     }
 
     memset(&adv->unk4910, 0, 0x48);
@@ -895,10 +893,10 @@ void GameGlobal::InitAllRecord() {
     gmInitAssistKindUseEnable();
     gmInitEventOpened();
 
-    memset(reinterpret_cast<u8*>(m_record) + 0x1528, 0, 0x81);
-    u32* unk15AC = reinterpret_cast<u32*>(reinterpret_cast<u8*>(m_record) + 0x15AC);
+    memset(m_record->unk1528, 0, 0x81);
+    u32* softFlags = m_record->m_softFlags;
     for (int i = 0; i < 34; i++) {
-        unk15AC[i] = 0;
+        softFlags[i] = 0;
     }
     fn_80078768(lbl_805A01D8);
 
