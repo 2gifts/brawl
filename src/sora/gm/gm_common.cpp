@@ -304,8 +304,7 @@ u32 gmCountBGMOpend() {
 
 void gmInitPlayerDataDefault(gmPlayerInitData* player, int playerNo) {
     memset(player, 0, sizeof(gmPlayerInitData));
-    // MATCH-ONLY: the native code stores the fighter slot as a plain byte, not as an enum bit field.
-    *reinterpret_cast<u8*>(player) = Character_SelectNone;
+    player->m_characterKind = Character_SelectNone;
     player->m_state = 3;
     player->m_nameIndex = 0x78;
     player->m_playerId = 0;

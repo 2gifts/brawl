@@ -78,9 +78,17 @@ public:
     virtual void attachPartialAnimChr(u32);
     virtual int getPartialSize();
     virtual int getPartialKind(int);
+#ifdef SO_MOTION_PARTIAL_INDEX_FIRST
+    virtual void setPartialRate(int part, float rate);
+#else
     virtual void setPartialRate(float rate, int);
+#endif
     virtual float getPartialRate(int);
+#ifdef SO_MOTION_PARTIAL_INDEX_FIRST
+    virtual void setPartialFrame(int part, float frame);
+#else
     virtual void setPartialFrame(float frame, int);
+#endif
     virtual void setPartialFrameSyncAnimCmd(float frame, int);
     virtual float getPartialFrame(int);
     virtual float getPartialEndFrame(int);
@@ -249,9 +257,17 @@ public:
     virtual void attachPartialAnimChr(u32);
     virtual int getPartialSize();
     virtual int getPartialKind(int);
+#ifdef SO_MOTION_PARTIAL_INDEX_FIRST
+    virtual void setPartialRate(int part, float rate);
+#else
     virtual void setPartialRate(float rate, int);
+#endif
     virtual float getPartialRate(int);
+#ifdef SO_MOTION_PARTIAL_INDEX_FIRST
+    virtual void setPartialFrame(int part, float frame);
+#else
     virtual void setPartialFrame(float frame, int);
+#endif
     virtual void setPartialFrameSyncAnimCmd(float frame, int);
     virtual float getPartialFrame(int);
     virtual float getPartialEndFrame(int);

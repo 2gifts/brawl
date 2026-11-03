@@ -15,9 +15,8 @@ void fn_800DC57C(IfMngr* mngr, gmGlobalModeMelee* melee);
 void fn_800DC2E0(IfMngr* mngr);
 }
 
-// MATCH-ONLY: the native code reads the character kind as an unsigned byte, not through the enum bitfield.
 static inline u8 getCharacterKind(gmPlayerInitData* initData) {
-    return reinterpret_cast<stLoaderSandBagInitDataView*>(initData)->m_characterKind;
+    return initData->m_characterKind;
 }
 
 static stLoaderSandBagMarker sMarkerA(0xFF, 0);
