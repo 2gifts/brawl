@@ -33,6 +33,7 @@ public:
     void setWidthModeAuto(u8);                      // added for ifVsResultTask
     void write(const void* data, int size);         // writes the bytes of a text (added for ifVsResultTask)
     void writeIndexData(void* msgbin, u32 index);   // writes a text of a message file (added for ifVsResultTask)
+    void setBufField34(int index, int value);       // HYPOTHESIS: a setting of one text buffer (menus pass 7)
     void setScale(float);
     void setScale(float, float);
     void setCursorX(float);
