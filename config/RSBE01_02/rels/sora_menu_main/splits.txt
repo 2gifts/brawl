@@ -171,6 +171,11 @@ mo_menu/mu_main_panel_ctrl.cpp:
 	.rodata     start:0x00001598 end:0x00001628
 	.data       start:0x00004220 end:0x00004610
 
+mo_menu/mu_soft_list.cpp:
+	.text       start:0x00036934 end:0x00038530
+	.rodata     start:0x00001628 end:0x00001698
+	.data       start:0x00004610 end:0x00004B08
+
 mo_menu/mo_menu.cpp:
 	.text       start:0x0003D1B8 end:0x0003D254
 	.data       start:0x000052E8 end:0x000052F4
