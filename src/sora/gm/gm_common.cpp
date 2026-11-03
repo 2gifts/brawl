@@ -1941,7 +1941,7 @@ void gmMeleeDest(bool isStamina, bool isOnline) {
                 u32* damage = g_GameGlobal->getGlobalRecordDamageTotalCountDatap();
                 gmAddTotal(kills, res->m_playersResultInfo[i].m_koCount);
                 gmAddTotal(suicides, res->m_playersResultInfo[i].m_suicideCount);
-                gmAddTotal(damage, res->m_playersResultInfo[i].m_unk1D0);
+                gmAddTotal(damage, res->m_playersResultInfo[i].m_takeDamage);
             }
         }
     }
@@ -1963,12 +1963,6 @@ static inline void addMaxCheck(u8* value, u32 add, u32 max) {
     u8 current = *value;
     bool overflow = add > max || current > max - add;
     *value = overflow ? max : current + add;
-}
-
-// HYPOTHESIS: the part of gmPlayerResultInfo past the named members is not decoded yet; these read it by offset.
-template <class T>
-static inline T playerStat(const gmPlayerResultInfo* player, int offset) {
-    return *reinterpret_cast<const T*>(reinterpret_cast<const u8*>(player) + offset);
 }
 
 
@@ -2090,14 +2084,13 @@ int gmRetKetsuPlayerFromResult(gmResultInfo* result) {
         return best;
     }
 
-    // HYPOTHESIS: the third tally (fewest) at 0x1D0 of the player record
+    // least damage taken
     best = 4;
     for (int i = 0; i < 4; i++) {
         if (candidate[i]) {
             if (best == 4) {
                 best = i;
-            } else if (playerStat<u32>(&result->m_playersResultInfo[best], 0x1D0) >
-                       playerStat<u32>(&players[i], 0x1D0)) {
+            } else if (result->m_playersResultInfo[best].m_takeDamage > players[i].m_takeDamage) {
                 best = i;
             }
             bestPlayer = &result->m_playersResultInfo[best];
@@ -2106,7 +2099,8 @@ int gmRetKetsuPlayerFromResult(gmResultInfo* result) {
     same = 0;
     for (int i = 0; i < 4; i++) {
         if (candidate[i] && best != i) {
-            if (playerStat<u32>(&players[i], 0x1D0) == playerStat<u32>(bestPlayer, 0x1D0)) {
+            u32 takeDamage = players[i].m_takeDamage;
+            if (takeDamage == bestPlayer->m_takeDamage) {
                 same++;
             } else {
                 candidate[i] = false;
@@ -2117,14 +2111,13 @@ int gmRetKetsuPlayerFromResult(gmResultInfo* result) {
         return best;
     }
 
-    // HYPOTHESIS: the fourth tally (most) at 0x28C of the player record
+    // longest walk distance
     best = 4;
     for (int i = 0; i < 4; i++) {
         if (candidate[i]) {
             if (best == 4) {
                 best = i;
-            } else if (playerStat<u32>(&result->m_playersResultInfo[best], 0x28C) <
-                       playerStat<u32>(&players[i], 0x28C)) {
+            } else if (result->m_playersResultInfo[best].m_walkDistance < players[i].m_walkDistance) {
                 best = i;
             }
             bestPlayer = &result->m_playersResultInfo[best];
@@ -2133,7 +2126,8 @@ int gmRetKetsuPlayerFromResult(gmResultInfo* result) {
     same = 0;
     for (int i = 0; i < 4; i++) {
         if (candidate[i] && best != i) {
-            if (playerStat<u32>(&players[i], 0x28C) == playerStat<u32>(bestPlayer, 0x28C)) {
+            u32 walkDistance = players[i].m_walkDistance;
+            if (walkDistance == bestPlayer->m_walkDistance) {
                 same++;
             } else {
                 candidate[i] = false;
@@ -2161,7 +2155,7 @@ int gmRetKetsuPlayerFromResult(gmResultInfo* result) {
 
 // HYPOTHESIS: the 0x50-byte block of lifetime battle statistics that the result adds into, one per character
 // (gmGlobalRecord::CharaNumData at 0x48) and one per name tag (NameData at 0x4). The field order follows the
-// diagram page getters of the menu (muDiagGet...), the players' source tallies are read by offset below.
+// diagram page getters of the menu (muDiagGet...); gmPlayerResultInfo names its source tallies after them.
 static_assert(sizeof(gmDiagramResult) == 0x50, "Class is wrong size!");
 
 // Adds the result of one player (index) to its diagram block.
@@ -2169,13 +2163,13 @@ void gmAddDiagramResultCommon(gmResultInfo* result, int index, gmDiagramResult* 
     gmPlayerResultInfo* player = &result->m_playersResultInfo[index];
 
     addMaxCheck(&diagram->m_suicide, player->m_suicideCount, 0xFFFF);
-    addMaxCheck(&diagram->m_totalBeat, playerStat<u32>(player, 0x284), 0xFFFFFFFF);
-    addMaxCheck(&diagram->m_totalFall, playerStat<u32>(player, 0x288), 0xFFFFFFFF);
-    addMaxCheck(&diagram->m_giveDamage, playerStat<u32>(player, 0x1CC), 99999999);
-    addMaxCheck(&diagram->m_takeDamage, playerStat<u32>(player, 0x1D0), 99999999);
-    addMaxCheck(&diagram->m_recoverDamage, playerStat<u32>(player, 0x1D4), 99999999);
+    addMaxCheck(&diagram->m_totalBeat, player->m_totalBeat, 0xFFFFFFFF);
+    addMaxCheck(&diagram->m_totalFall, player->m_totalFall, 0xFFFFFFFF);
+    addMaxCheck(&diagram->m_giveDamage, player->m_giveDamage, 99999999);
+    addMaxCheck(&diagram->m_takeDamage, player->m_takeDamage, 99999999);
+    addMaxCheck(&diagram->m_recoverDamage, player->m_recoverDamage, 99999999);
 
-    u32 maxDamage = playerStat<u32>(player, 0x1D8);
+    u32 maxDamage = player->m_maxDamage;
     if (diagram->m_maxDamage < maxDamage) {
         diagram->m_maxDamage = maxDamage;
         if (diagram->m_maxDamage > 999) {
@@ -2219,16 +2213,16 @@ void gmAddDiagramResultCommon(gmResultInfo* result, int index, gmDiagramResult* 
         }
     } else {
         int winner = 0;
-        if (result->m_playersResultInfo[0].m_state != 3 && playerStat<u8>(&result->m_playersResultInfo[0], 0xF) == 0) {
+        if (result->m_playersResultInfo[0].m_state != 3 && result->m_playersResultInfo[0].m_unkF == 0) {
             winner = 0;
         }
-        if (result->m_playersResultInfo[1].m_state != 3 && playerStat<u8>(&result->m_playersResultInfo[1], 0xF) == 0) {
+        if (result->m_playersResultInfo[1].m_state != 3 && result->m_playersResultInfo[1].m_unkF == 0) {
             winner = 1;
         }
-        if (result->m_playersResultInfo[2].m_state != 3 && playerStat<u8>(&result->m_playersResultInfo[2], 0xF) == 0) {
+        if (result->m_playersResultInfo[2].m_state != 3 && result->m_playersResultInfo[2].m_unkF == 0) {
             winner = 2;
         }
-        if (result->m_playersResultInfo[3].m_state != 3 && playerStat<u8>(&result->m_playersResultInfo[3], 0xF) == 0) {
+        if (result->m_playersResultInfo[3].m_state != 3 && result->m_playersResultInfo[3].m_unkF == 0) {
             winner = 3;
         }
         if (index == winner) {
@@ -2241,17 +2235,17 @@ void gmAddDiagramResultCommon(gmResultInfo* result, int index, gmDiagramResult* 
     }
 
     addMaxCheck(&diagram->m_playTime, result->m_framesElapsed / 60, 359999999);
-    addMaxCheck(&diagram->m_walkDistance, playerStat<u32>(player, 0x28C), 99999999);
-    addMaxCheck(&diagram->m_jumpDistance, playerStat<u32>(player, 0x290), 99999999);
-    addMaxCheck(&diagram->m_fallDistance, playerStat<u32>(player, 0x294), 99999999);
-    addMaxCheck(&diagram->m_blowDistance, playerStat<u32>(player, 0x1DC), 99999999);
-    addMaxCheck(&diagram->m_swimDistance, playerStat<u32>(player, 0x298), 99999999);
-    addMaxCheck(&diagram->m_swimFall, playerStat<u32>(player, 0x29C), 99999999);
-    addMaxCheck(&diagram->m_fallButtocks, playerStat<u32>(player, 0x2A0), 99999999);
+    addMaxCheck(&diagram->m_walkDistance, player->m_walkDistance, 99999999);
+    addMaxCheck(&diagram->m_jumpDistance, player->m_jumpDistance, 99999999);
+    addMaxCheck(&diagram->m_fallDistance, player->m_fallDistance, 99999999);
+    addMaxCheck(&diagram->m_blowDistance, player->m_blowDistance, 99999999);
+    addMaxCheck(&diagram->m_swimDistance, player->m_swimDistance, 99999999);
+    addMaxCheck(&diagram->m_swimFall, player->m_swimFall, 99999999);
+    addMaxCheck(&diagram->m_fallButtocks, player->m_fallButtocks, 99999999);
 
     if (result->m_gameRule == Game_Rule_Coin) {
         addMaxCheck(&diagram->m_getCoin, player->m_pickupCoins, 99999999);
-        addMaxCheck(&diagram->m_makeDropCoin, playerStat<u32>(player, 0x228), 99999999);
+        addMaxCheck(&diagram->m_makeDropCoin, player->m_makeDropCoin, 99999999);
         addMaxCheck(&diagram->m_dropCoin, player->m_lostCoins, 99999999);
     }
 }
@@ -2269,7 +2263,7 @@ void gmAddDiagramResultChara(gmResultInfo* result) {
             continue;
         }
         gmGlobalRecord::CharaNumData* chara = g_GameGlobal->getGlobalRecordCharaNumDatap(
-            (u8)exchangeGmCharacterKindToMuCharKind__6muMenuFiii(playerStat<u8>(player, 0)));
+            (u8)exchangeGmCharacterKindToMuCharKind__6muMenuFiii(player->m_characterKind));
         for (int j = 0; j < 4; j++) {
             gmPlayerResultInfo* other = &result->m_playersResultInfo[j];
             if (i == j || other->m_state == 3) {
@@ -2280,7 +2274,7 @@ void gmAddDiagramResultChara(gmResultInfo* result) {
             }
             if (result->m_isTeams != 1 || player->m_teamNo != other->m_teamNo) {
                 u16* beaten = chara->m_beatCount;
-                addMaxCheck(&beaten[(u8)exchangeGmCharacterKindToMuCharKind__6muMenuFiii(playerStat<u8>(other, 0))],
+                addMaxCheck(&beaten[(u8)exchangeGmCharacterKindToMuCharKind__6muMenuFiii(other->m_characterKind)],
                             player->m_playerBeatCounts[j], 0xFFFF);
             }
             addMaxCheck(&chara->m_fallCount, other->m_playerBeatCounts[i], 0xFFFF);
@@ -2298,7 +2292,7 @@ void gmAddDiagramResultName(gmResultInfo* result) {
             continue;
         }
         // HYPOTHESIS: byte 5 of the player record is the name tag, 0x78 means none.
-        u8 nameTag = playerStat<u8>(player, 5);
+        u8 nameTag = player->m_unk5;
         if (nameTag == 0x78) {
             continue;
         }
@@ -2317,7 +2311,7 @@ void gmAddDiagramResultName(gmResultInfo* result) {
             addMaxCheck(&name->m_fallTotal, other->m_playerBeatCounts[i], 0xFFFF);
         }
         u32 seconds = result->m_framesElapsed / 60;
-        u8 charaIndex = exchangeGmCharacterKindToMuCharKind__6muMenuFiii(playerStat<u8>(player, 0));
+        u8 charaIndex = exchangeGmCharacterKindToMuCharKind__6muMenuFiii(player->m_characterKind);
         addMaxCheck(&name->m_charPlayTime[charaIndex], seconds, 359999999);
         gmAddDiagramResultCommon(result, i, &name->m_diagram);
     }

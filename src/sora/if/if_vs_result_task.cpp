@@ -2136,32 +2136,31 @@ bool ifVsResultTask::isLoadEnd() {
 }
 
 // 0x800EB314: the values that gmResultInfo keeps in game units are converted for the display. Per player that is not
-// absent (m_state 3): the total fly distance (stored at 0x1DC, converted in place and kept as the display value at
-// 0x1E0..) and the two maximum speeds (floats at 0x2A4 / 0x2A8).
+// absent (m_state 3): the total fly distance (converted in place) and the two maximum speeds (also kept truncated as
+// display values).
 // HYPOTHESIS: the field meanings come from the OSReport strings; the unit conversions (30.4788 cm per foot,
 // 2011.68 = 1 mile in 0.1 m / 60 ...) are from the constants.
 void ifVsResultTask::adjustResultinfo() {
     for (int i = 0; i < PlayerMax; i++) {
-        // HYPOTHESIS: the stat fields are not declared in gmPlayerResultInfo yet; offsets are relative to the entry
-        u8* player = (u8*)&g_GameGlobal->m_resultInfo->m_playersResultInfo[i];
-        if (player[1] != 3) {
+        gmPlayerResultInfo* player = &g_GameGlobal->m_resultInfo->m_playersResultInfo[i];
+        if (player->m_state != 3) {
             OSReport("ifVsResultTask::adjustResultinfo normaldata[%d]\n", i);
-            OSReport("    _flydisttotal:%dg\n", *(u32*)(player + 0x1DC));
-            OSReport("    _damagespeedmax:%fg/f\n", *(float*)(player + 0x2A4));
-            OSReport("    _attackspeedmax:%fg/f\n", *(float*)(player + 0x2A8));
-            *(u32*)(player + 0x1DC) = (u32)(10.0f * *(u32*)(player + 0x1DC) / 30.4788f);
-            *(float*)(player + 0x2A4) = (10.0f * *(float*)(player + 0x2A4) * 60.0f * 60.0f * 60.0f) / 2011.68f;
-            *(float*)(player + 0x2A8) = (10.0f * *(float*)(player + 0x2A8) * 60.0f * 60.0f * 60.0f) / 2011.68f;
-            OSReport("    _flydisttotal:%dft\n", *(u32*)(player + 0x1DC));
-            OSReport("    _damagespeedmaxf:%fft/h\n", *(float*)(player + 0x2A4));
-            OSReport("    _attackspeedmaxf:%fft/h\n", *(float*)(player + 0x2A8));
-            *(u32*)(player + 0x210) = (u32)*(float*)(player + 0x2A4);
-            *(u32*)(player + 0x214) = (u32)*(float*)(player + 0x2A8);
-            *(u32*)(player + 0x1E0) = (u32)(*(u32*)(player + 0x1E0) / 60.0f);
-            *(u32*)(player + 0x1E4) = (u32)(*(u32*)(player + 0x1E4) / 60.0f);
-            *(u32*)(player + 0x1E8) = (u32)(*(u32*)(player + 0x1E8) / 60.0f);
-            *(u32*)(player + 0x218) = (u32)(*(u32*)(player + 0x218) / 60.0f);
-            *(u32*)(player + 0x21C) = (u32)(*(u32*)(player + 0x21C) / 60.0f);
+            OSReport("    _flydisttotal:%dg\n", player->m_blowDistance);
+            OSReport("    _damagespeedmax:%fg/f\n", player->m_damageSpeedMax);
+            OSReport("    _attackspeedmax:%fg/f\n", player->m_attackSpeedMax);
+            player->m_blowDistance = (u32)(10.0f * player->m_blowDistance / 30.4788f);
+            player->m_damageSpeedMax = (10.0f * player->m_damageSpeedMax * 60.0f * 60.0f * 60.0f) / 2011.68f;
+            player->m_attackSpeedMax = (10.0f * player->m_attackSpeedMax * 60.0f * 60.0f * 60.0f) / 2011.68f;
+            OSReport("    _flydisttotal:%dft\n", player->m_blowDistance);
+            OSReport("    _damagespeedmaxf:%fft/h\n", player->m_damageSpeedMax);
+            OSReport("    _attackspeedmaxf:%fft/h\n", player->m_attackSpeedMax);
+            player->m_damageSpeedMaxDisplay = (u32)player->m_damageSpeedMax;
+            player->m_attackSpeedMaxDisplay = (u32)player->m_attackSpeedMax;
+            player->m_unk1E0 = (u32)(player->m_unk1E0 / 60.0f);
+            player->m_unk1E4 = (u32)(player->m_unk1E4 / 60.0f);
+            player->m_unk1E8 = (u32)(player->m_unk1E8 / 60.0f);
+            player->m_unk218 = (u32)(player->m_unk218 / 60.0f);
+            player->m_unk21C = (u32)(player->m_unk21C / 60.0f);
         }
     }
 }

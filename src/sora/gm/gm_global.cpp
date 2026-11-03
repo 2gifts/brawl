@@ -673,120 +673,6 @@ u32 gmSetCoinNum(u32 num);
 void gmRecFigureAllInit();
 void gmRecSealAllInit();
 
-// HYPOTHESIS: gmPlayerResultInfo as the original wrote it for the placeholder data: plain bytes where the header has a
-// bit field, and the part behind m_lostCoins that has no names yet. The roles of the arrays come from their sizes only.
-struct gmResultPlayerDraft {
-    u8 m_characterKind;  // 0x00
-    u8 m_state;          // 0x01
-    s8 m_colorFileIdx;   // 0x02
-    char _3[2];
-    u8 unk5;             // 0x05 (copy of the name index of the init data)
-    u8 m_teamNo;         // 0x06
-    bool unk7_7 : 1;     // 0x07
-    bool unk7_6 : 1;     // HYPOTHESIS: copy of a flag of the player's init data (bit 6 of its byte 0x1B)
-    bool m_isStamina : 1; // HYPOTHESIS: copy of the stamina flag of the player's init data
-    bool unk7_4 : 1;
-    bool unk7_3 : 1;
-    bool unk7_2 : 1;
-    bool unk7_1 : 1;
-    bool unk7_0 : 1;
-    u16 m_hitPointMax;   // 0x08 (the header has it signed; the original copies it as an unsigned halfword)
-    u8 m_startStockCount; // 0x0A
-    char _B;
-    u16 m_startDamage;   // 0x0C
-    u8 m_rank;           // 0x0E
-    char _F;
-    u32 m_koCount;       // 0x10
-    u32 m_deadCount;     // 0x14
-    u16 m_suicideCount;  // 0x18
-    char _1A[0x12];
-    u32 m_pickupCoins;   // 0x2C
-    u32 m_lostCoins;     // 0x30
-    u8 koTarget[100];    // 0x34 HYPOTHESIS: one entry per KO (m_koCount of them): the player that was knocked out
-    u8 koCause[100];     // 0x98
-    u8 deadTarget[100];  // 0xFC HYPOTHESIS: one entry per death (m_deadCount of them)
-    u8 deadCause[100];   // 0x160
-    char _1C4[8];
-    u32 unk1CC[8];       // 0x1CC
-    u8 unk1EC;
-    char _1ED[3];
-    u32 unk1F0[16];      // 0x1F0
-    char _230[4];
-    u32 unk234;
-    u32 unk238;
-    u32 unk23C;
-    u32 unk240;
-    u32 unk244;
-    char _248[0x64];
-};
-static_assert(sizeof(gmResultPlayerDraft) == sizeof(gmPlayerResultInfo), "Class is wrong size!");
-
-// HYPOTHESIS: the bytes of gmResultInfo that the header has as padding or as bit fields (the original writes them as
-// plain bytes).
-struct gmResultInfoDraft {
-    char _0;
-    u8 m_gameRule;               // 0x01
-    u8 m_isTeams;                // 0x02
-    s8 m_suicideScoreMultiplier; // 0x03
-    u32 m_timeMinutes;           // 0x04
-    u32 m_stockCount;            // 0x08
-    char _C[2];
-    u8 unkE_7 : 1;               // 0x0E
-    u8 unkE_rest : 7;
-    u8 m_numWinners;             // 0x0F
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;                    // index of the first entry of the placeholder order that is zero
-    char _14[6];
-    u8 unk1A;
-    char _1B[0x134D];
-    u32 unk1368;
-    u8 unk136C;
-    char _136D[3];
-    u32 unk1370;
-    u32 unk1374;
-    u8 m_decisionKind;           // 0x1378
-    char _1379[0xF];
-};
-static_assert(sizeof(gmResultInfoDraft) == sizeof(gmResultInfo), "Class is wrong size!");
-
-// The bytes of a player's init data that the result record copies, as plain bytes and unsigned halfwords (the header has
-// the halfwords signed).
-struct gmPlayerInitBytes {
-    u8 m_characterKind;  // 0x00
-    u8 m_state;          // 0x01
-    char _2[2];
-    u8 m_stockCount;     // 0x04
-    u8 m_colorFileNo;    // 0x05
-    char _6[5];
-    u8 m_teamNo;         // 0x0B
-    char _C[0xC];
-    u8 m_nameIndex;      // 0x18
-    char _19[2];
-    bool unk1B_7 : 1;    // 0x1B
-    bool m_0x1B_6 : 1;
-    bool unk1B_5 : 1;
-    bool unk1B_4 : 1;
-    bool unk1B_3 : 1;
-    bool unk1B_2 : 1;
-    bool unk1B_1 : 1;
-    bool unk1B_0 : 1;
-    bool m_isStamina : 1; // 0x1C
-    bool unk1C_6 : 1;
-    bool unk1C_5 : 1;
-    bool unk1C_4 : 1;
-    bool unk1C_3 : 1;
-    bool unk1C_2 : 1;
-    bool unk1C_1 : 1;
-    bool unk1C_0 : 1;
-    char _1D[5];
-    u16 m_startDamage;   // 0x22
-    u16 m_hitPointMax;   // 0x24
-    char _26[0x36];
-};
-static_assert(sizeof(gmPlayerInitBytes) == sizeof(gmPlayerInitData), "Class is wrong size!");
-
 // MATCH-ONLY: GameGlobal::getGlobalRecordNameDatap lives in the neighbouring unit (gm_global.cpp) while the original
 // object inlined it here, so this static twin stands in for the inline body.
 static inline gmGlobalRecord::NameData* nameRecord(GameGlobal* global, u8 index) {
@@ -816,51 +702,49 @@ static inline void gmResetBit(u32* bits, int bit) {
     bits[bit / 32] &= ~(1 << (bit % 32));
 }
 
-static inline gmResultInfoDraft* draftOf(gmResultInfo* result) {
-    return reinterpret_cast<gmResultInfoDraft*>(result);
-}
-
 // HYPOTHESIS: fills the result record with fixed placeholder values (settings of the running melee, then the same
 // made-up KO lists, ranks and counters for each of the seven players), the way the result screen can be shown without a match.
 void GameGlobal::initResultInfoData() {
     gmMeleeInitData* melee = &m_modeMelee->m_meleeInitData;
     u8 order[4] = { 0, 1, 2, 3 }; // HYPOTHESIS: indexed by the player number, although the loop below runs over seven players
 
-    draftOf(m_resultInfo)->m_gameRule = melee->m_gameRule;
-    draftOf(m_resultInfo)->m_isTeams = melee->m_isTeams;
-    draftOf(m_resultInfo)->m_suicideScoreMultiplier = melee->m_suicideScoreMultiplier;
-    draftOf(m_resultInfo)->m_timeMinutes = (u32)melee->m_timeLimitFrames / 60 / 60;
-    draftOf(m_resultInfo)->m_stockCount = m_setRule->m_stockCount;
-    draftOf(m_resultInfo)->unkE_7 = 0;
-    draftOf(m_resultInfo)->m_numWinners = 1;
-    draftOf(m_resultInfo)->unk10 = 1;
-    draftOf(m_resultInfo)->unk11 = 2;
-    draftOf(m_resultInfo)->unk12 = 2;
+    // MATCH-ONLY: the header declares the rule as an enum bit field (gmAddDiagramResultCommon reads it with lwz and a
+    // signed extract); this writer stores the plain byte, as ifVsResultTask's getGameRule reads it.
+    reinterpret_cast<u8*>(m_resultInfo)[1] = melee->m_gameRule;
+    m_resultInfo->m_isTeams = melee->m_isTeams;
+    m_resultInfo->m_suicidePenalty = melee->m_suicideScoreMultiplier;
+    m_resultInfo->m_timeOrCoins = (u32)melee->m_timeLimitFrames / 60 / 60;
+    m_resultInfo->m_stockCount = m_setRule->m_stockCount;
+    m_resultInfo->m_isTournament = 0;
+    m_resultInfo->m_numWinners = 1;
+    m_resultInfo->m_unk10 = 1;
+    m_resultInfo->m_unk11 = 2;
+    m_resultInfo->m_unk12 = 2;
     if (order[0] == 0) {
-        draftOf(m_resultInfo)->unk13 = 0;
+        m_resultInfo->m_unk13 = 0;
     } else if (order[1] == 0) {
-        draftOf(m_resultInfo)->unk13 = 1;
+        m_resultInfo->m_unk13 = 1;
     } else if (order[2] == 0) {
-        draftOf(m_resultInfo)->unk13 = 2;
+        m_resultInfo->m_unk13 = 2;
     } else if (order[3] == 0) {
-        draftOf(m_resultInfo)->unk13 = 3;
+        m_resultInfo->m_unk13 = 3;
     }
-    draftOf(m_resultInfo)->unk1A = 0;
-    draftOf(m_resultInfo)->unk1368 = 0;
-    draftOf(m_resultInfo)->unk136C = 0;
-    draftOf(m_resultInfo)->unk1370 = 1;
-    draftOf(m_resultInfo)->unk1374 = 0;
-    draftOf(m_resultInfo)->m_decisionKind = gmResultInfo::Decision_Timeup;
+    m_resultInfo->m_unk1A = 0;
+    m_resultInfo->m_unk1368 = 0;
+    m_resultInfo->m_unk136C = 0;
+    m_resultInfo->m_unk1370 = 1;
+    m_resultInfo->m_unk1374 = 0;
+    m_resultInfo->m_decisionKind = gmResultInfo::Decision_Timeup;
 
     for (u8 i = 0; i < 7; i++) {
-        gmPlayerInitBytes* init = reinterpret_cast<gmPlayerInitBytes*>(&m_modeMelee->m_playersInitData[i]);
-        gmResultPlayerDraft* player = reinterpret_cast<gmResultPlayerDraft*>(&m_resultInfo->m_playersResultInfo[i]);
+        gmPlayerInitData* init = &m_modeMelee->m_playersInitData[i];
+        gmPlayerResultInfo* player = &m_resultInfo->m_playersResultInfo[i];
         player->m_characterKind = init->m_characterKind;
         player->m_state = init->m_state;
         player->m_colorFileIdx = init->m_colorFileNo;
-        player->unk5 = init->m_nameIndex;
+        player->m_unk5 = init->m_nameIndex;
         player->m_teamNo = init->m_teamNo;
-        player->unk7_6 = init->m_0x1B_6;
+        player->m_unk7_6 = init->m_0x1B_6;
         player->m_isStamina = init->m_isStamina;
         player->m_hitPointMax = init->m_hitPointMax;
         player->m_startStockCount = init->m_stockCount;
@@ -872,30 +756,43 @@ void GameGlobal::initResultInfoData() {
         player->m_pickupCoins = 300 - i;
         player->m_lostCoins = 4 * i;
         for (u32 j = 0; j < player->m_koCount; j++) {
-            player->koTarget[j] = (i + 1) % 4;
-            player->koCause[j] = 0;
+            player->m_koTargets[j] = (i + 1) % 4;
+            player->m_koCauses[j] = 0;
         }
         for (u32 j = 0; j < player->m_deadCount; j++) {
-            player->deadTarget[j] = (i + 1) % 4;
-            player->deadCause[j] = 0;
+            player->m_deadTargets[j] = (i + 1) % 4;
+            player->m_deadCauses[j] = 0;
         }
-        player->unk1CC[0] = 200;
-        player->unk1CC[1] = 200;
-        player->unk1CC[2] = 200;
-        player->unk1CC[3] = 200;
-        player->unk1CC[4] = 200;
-        player->unk1CC[5] = 200;
-        player->unk1CC[6] = 200;
-        player->unk1CC[7] = 200;
-        player->unk1EC = 200;
-        for (int k = 0; k < 16; k++) {
-            player->unk1F0[k] = 200;
-        }
-        player->unk234 = 50;
-        player->unk238 = 0;
-        player->unk23C = 0;
-        player->unk240 = 58;
-        player->unk244 = 157;
+        player->m_giveDamage = 200;
+        player->m_takeDamage = 200;
+        player->m_recoverDamage = 200;
+        player->m_maxDamage = 200;
+        player->m_blowDistance = 200;
+        player->m_unk1E0 = 200;
+        player->m_unk1E4 = 200;
+        player->m_unk1E8 = 200;
+        player->m_unk1EC = 200;
+        player->m_unk1F0 = 200;
+        player->m_unk1F4 = 200;
+        player->m_unk1F8 = 200;
+        player->m_unk1FC = 200;
+        player->m_unk200 = 200;
+        player->m_unk204 = 200;
+        player->m_unk208 = 200;
+        player->m_unk20C = 200;
+        player->m_damageSpeedMaxDisplay = 200;
+        player->m_attackSpeedMaxDisplay = 200;
+        player->m_unk218 = 200;
+        player->m_unk21C = 200;
+        player->m_unk220 = 200;
+        player->m_unk224 = 200;
+        player->m_makeDropCoin = 200;
+        player->m_unk22C = 200;
+        player->m_unk234 = 50;
+        player->m_unk238 = 0;
+        player->m_unk23C = 0;
+        player->m_unk240 = 58;
+        player->m_unk244 = 157;
     }
 }
 

@@ -67,12 +67,11 @@ void stLoaderSandBag::entryInfo(bool) {
         gmPlayerInitData* initData = getWatchPlayerInitData();
         stLoaderSandBagAppearInfo info;
         info.m_state = initData->m_state;
-        stLoaderSandBagInitDataView* view = reinterpret_cast<stLoaderSandBagInitDataView*>(initData);
-        info.m_characterKind = view->m_characterKind;
+        info.m_characterKind = initData->m_characterKind;
         info.m_colorFileNo = initData->m_colorFileNo;
-        if (view->unk1B_3) {
+        if (initData->m_0x1B_3) {
             info.unk10 = 2;
-        } else if (view->m_isMetal) {
+        } else if (initData->m_isMetal) {
             info.unk10 = 1;
         } else {
             info.unk10 = 0;
