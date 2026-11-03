@@ -17,6 +17,7 @@ public:
     grYakumonoSwitch(bool* isOn, const char* taskName);
     virtual ~grYakumonoSwitch();
     virtual void update(float deltaFrame);
+    virtual void setInitializeFlag();
     virtual void judgeTriggerState();
     virtual void setOn(int isTrigger);
     virtual void setOff(int isTrigger);
