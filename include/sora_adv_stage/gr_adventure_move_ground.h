@@ -11,6 +11,8 @@ protected:
     float* unk150; // 0x150, HYPOTHESIS: the motion-path speed that the derived gimmicks set per difficulty level
 
 public:
+    grAdventureMoveGround(const char* taskName);
+    virtual ~grAdventureMoveGround();
     virtual void createMoveGroundMotionPath();
 };
 static_assert(sizeof(grAdventureMoveGround) == 0x154, "Class is wrong size!");

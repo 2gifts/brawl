@@ -22,6 +22,7 @@ protected:
     EfID m_effectId;        // 0x164
 
 public:
+    grAdventureMoveAttackGround(const char* taskName);
     virtual ~grAdventureMoveAttackGround();
     virtual void update(float deltaFrame);
     virtual void setVisibilityByClipping(u32 unk1);
@@ -29,6 +30,8 @@ public:
     virtual void setValid(u32 unk1);
     virtual void setValidAttachedEffect(u32 unk1);
     virtual void setAttackMoveGround();
+
+    static grAdventureMoveAttackGround* create(int mdlIndex, const char* taskName);
 
     void setEffect(EfID effectId);
 };
