@@ -1891,8 +1891,7 @@ void gmMeleeDest(bool isStamina, bool isOnline) {
                         }
                     }
                 }
-                // HYPOTHESIS: the u16 at +0xC of the result is the stage kind that was played.
-                u8* stagePlayCount = g_GameGlobal->getGlobalRecordGetStagePlayCountDatap(*reinterpret_cast<u16*>(reinterpret_cast<u8*>(result) + 0xC));
+                u8* stagePlayCount = g_GameGlobal->getGlobalRecordGetStagePlayCountDatap(result->m_stageKind);
                 *stagePlayCount = *stagePlayCount <= 0xFE ? *stagePlayCount + 1 : 0xFF;
                 if (gmCmpCurrentSequence("sqVsMelee") == 0) {
                     fn_80055058(result);
@@ -1972,23 +1971,9 @@ static inline T playerStat(const gmPlayerResultInfo* player, int offset) {
     return *reinterpret_cast<const T*>(reinterpret_cast<const u8*>(player) + offset);
 }
 
-// HYPOTHESIS: team results of a team battle: one 0x30-byte record per team (red, blue, green) from 0x12D8 of
-// gmResultInfo, the part read here sits at the end of the record.
-struct gmTeamResultInfo {
-    char _0[0x2C];
-    u8 m_rank;      // 0x2C
-    u8 m_unk2D;     // 0x2D: zero for the winning team
-    u8 m_isPlaying; // 0x2E: nonzero if the team has players
-    char _2F[1];
-};
-static_assert(sizeof(gmTeamResultInfo) == 0x30, "Class is wrong size!");
-
-static inline gmTeamResultInfo* gmTeamResults(gmResultInfo* result) {
-    return reinterpret_cast<gmTeamResultInfo*>(reinterpret_cast<u8*>(result) + 0x12D8);
-}
 
 static inline u8 teamRank(gmResultInfo* result, int team) {
-    return reinterpret_cast<u8*>(result)[team * sizeof(gmTeamResultInfo) + 0x1304];
+    return result->m_teamResultInfo[team].m_rank;
 }
 
 // HYPOTHESIS: "ketsu" (slang for the bottom) is last place; this is the worst rank number among the players or
@@ -1996,7 +1981,7 @@ static inline u8 teamRank(gmResultInfo* result, int team) {
 int gmRetKetsuRankFromResult(gmResultInfo* result) {
     int rank = 0;
     if (result->m_isTeams == 1) {
-        gmTeamResultInfo* teams = gmTeamResults(result);
+        gmTeamResultInfo* teams = result->m_teamResultInfo;
         for (int i = 0; i < 3; i++) {
             if (teams[i].m_isPlaying != 0 && teams[i].m_rank > rank) {
                 rank = teams[i].m_rank;
@@ -2218,7 +2203,7 @@ void gmAddDiagramResultCommon(gmResultInfo* result, int index, gmDiagramResult* 
 
     // The winner of the match: the last team (or player) that is flagged as not defeated.
     if (result->m_isTeams == 1) {
-        gmTeamResultInfo* teams = gmTeamResults(result);
+        gmTeamResultInfo* teams = result->m_teamResultInfo;
         int winner = 0;
         if (teams[0].m_isPlaying != 0 && teams[0].m_unk2D == 0) {
             winner = 0;

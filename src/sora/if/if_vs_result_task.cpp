@@ -319,7 +319,7 @@ void ifVsResultTask::printHitPanel(int player) {
         m_msg->setFontColor(slot + 6, 0x90, 0xC9, 0xEB, 0xFF);
         printHitNum(slot + 6, info->m_coins, true);
     } else {
-        s32 selfDestructPenalty = reinterpret_cast<s8*>(resultInfo)[3];
+        s32 selfDestructPenalty = resultInfo->m_suicidePenalty;
         u32 fallsOnly = info->m_deadCount - info->m_suicideCount;
         s32 selfDestructs = -(info->m_suicideCount * selfDestructPenalty);
         printHitNum(slot + 3, info->m_koCount, true);
@@ -1415,7 +1415,7 @@ u32 ifVsResultTask::storeTexExt2(int player, bool store) {
     pos[1] = 0.0f;
     pos[0] = 0.0f;
     u32 count = 0x32;
-    if (*(reinterpret_cast<const u8*>(resultInfo) + 1) == 2) {
+    if (getGameRule(resultInfo) == 2) {
         count = 0x38;
     }
     if (resultInfo->m_isTeams == 1) {
@@ -1557,17 +1557,6 @@ extern "C" int fn_800AF6F0(int stock);
 // The strings of the full width digits and symbols (0..9, then the name and no-limit marks).
 
 // The bytes of gmResultInfo that the header hides.
-struct VsResultInfoView {
-    u8 m_gameMode;          // 0x00 GameMode: the tournament and the Wifi for-fun mode have their own title
-    u8 m_gameRule;          // 0x01 GameRule: time, stock or coin
-    u8 m_isTeams;           // 0x02
-    u8 _3;
-    u32 m_timeOrCoins;      // 0x04 the limit of the time and coin rules
-    u32 m_stockCount;       // 0x08 the limit of the stock rule
-    s8 _C[2];
-    u8 m_flag0E_7 : 1;      // 0x0E bit 7. HYPOTHESIS: unknown flag; it picks the third title and, with the set rule, ifVsResultTask::m_unkD4
-    u8 : 7;
-};
 
 // HYPOTHESIS: the frame of the color animation of a player's row: 1..4 for the player number (free for all), 9 for a cpu,
 // the team color 1, 2 or 4 (+10 for a cpu) in a team match.
@@ -1611,15 +1600,13 @@ static inline bool isQuMeleeSequence() {
 // finally the tables of the players, drawn into textures through storeTexExt2 with a screen sized camera.
 void ifVsResultTask::initMdlData() {
     gmResultInfo* resultInfo = g_GameGlobal->m_resultInfo;
-    VsResultInfoView* view = reinterpret_cast<VsResultInfoView*>(resultInfo);
-    u8* resultBytes = reinterpret_cast<u8*>(resultInfo);
 
-    // HYPOTHESIS: the rank of each team, read from the team records of gmResultInfo (0x30 bytes each, the header hides them).
+    // the rank of each team
     u8 teamRank[3];
     if (resultInfo->m_isTeams == 1) {
-        teamRank[0] = resultBytes[0x1304];
-        teamRank[1] = resultBytes[0x1334];
-        teamRank[2] = resultBytes[0x1364];
+        teamRank[0] = resultInfo->m_teamResultInfo[0].m_rank;
+        teamRank[1] = resultInfo->m_teamResultInfo[1].m_rank;
+        teamRank[2] = resultInfo->m_teamResultInfo[2].m_rank;
     }
 
     // The objects of the screen: the panel, the mark of the winner, the hit numbers and the MVP.
@@ -1630,7 +1617,7 @@ void ifVsResultTask::initMdlData() {
     if (resultInfo->m_decisionKind == gmResultInfo::Decision_NoContest) {
         m_objects[Obj_Mark] = MuObject::create(&m_resFiles[0], "InfResultMarkNocon_TopN", 0x11, NULL, Heaps::MenuInstance);
     } else {
-        sprintf(nodeName, "InfResultMark%02d_TopN", fn_800AF6F0(muMenu::exchangeGmCharacterKind2MuStockchkind(*reinterpret_cast<u8*>(&resultInfo->m_playersResultInfo[m_winnerPlayer]))) + 1);
+        sprintf(nodeName, "InfResultMark%02d_TopN", fn_800AF6F0(muMenu::exchangeGmCharacterKind2MuStockchkind(resultInfo->m_playersResultInfo[m_winnerPlayer].m_characterKind)) + 1);
         m_objects[Obj_Mark] = MuObject::create(&m_resFiles[0], nodeName, 0x11, NULL, Heaps::MenuInstance);
     }
     m_objects[Obj_HitNum] = MuObject::create(&m_resFiles[0], "InfResultHitnum_TopN", 0x17, NULL, Heaps::MenuInstance);
@@ -1765,7 +1752,7 @@ void ifVsResultTask::initMdlData() {
             if (m_unkC1 & (1 << i)) {
                 m_expands[1 + i]->PushBack(m_objects[Obj_Contl + i]->m_scnMdl, "pos02");
             }
-            if (resultBytes[0x1F] == i) {
+            if (resultInfo->m_winningPlayer == i) {
                 m_expands[1 + i]->PushBack(m_objects[Obj_Mvp]->m_scnMdl, "pos03");
             }
         }
@@ -1802,11 +1789,11 @@ void ifVsResultTask::initMdlData() {
     // HYPOTHESIS: the frame of the texture animation that picks the title of the hit numbers (per rule) and of the player rows.
     float hitFrame = 0.0f;
     float rowFrame = hitFrame;
-    if (view->m_gameRule == Game_Rule_Coin) {
+    if (getGameRule(resultInfo) == Game_Rule_Coin) {
         hitFrame = 1.0f;
         rowFrame = hitFrame;
     }
-    if (view->m_gameRule == Game_Rule_Stock) {
+    if (getGameRule(resultInfo) == Game_Rule_Stock) {
         hitFrame = 3.0f;
     }
     if (m_unkD4) {
@@ -1915,7 +1902,7 @@ void ifVsResultTask::initMdlData() {
         m_msg->setFontWidthModeAuto(c);
     }
     m_msg->attachScnMdlSimple(0, m_objects[Obj_Panel]->m_sceneModel, 2, 0.0625f);
-    switch (view->m_gameMode) {
+    switch (resultInfo->m_gameMode) {
     case Game_Mode_Tournament:
         m_msg->printIndex(0, 0x30);
         break;
@@ -1930,9 +1917,9 @@ void ifVsResultTask::initMdlData() {
                 index = 0x2F;
             }
             m_msg->printIndex(0, index);
-        } else if (view->m_isTeams == 1) {
+        } else if (resultInfo->m_isTeams == 1) {
             m_msg->printIndex(0, 1);
-        } else if (view->m_flag0E_7) {
+        } else if (resultInfo->m_isTournament) {
             m_msg->printIndex(0, 2);
         } else {
             m_msg->printIndex(0, 0);
@@ -1946,22 +1933,22 @@ void ifVsResultTask::initMdlData() {
         m_msg->attachScnMdlSimple(1, m_objects[Obj_Panel]->m_sceneModel, 3, 1.0f / 28.0f);
         m_msg->printIndex(1, 6);
     } else {
-        switch (view->m_gameRule) {
+        switch (getGameRule(resultInfo)) {
         case Game_Rule_Time:
             m_msg->attachScnMdlSimple(1, m_objects[Obj_Panel]->m_sceneModel, 3, 1.0f / 28.0f);
             m_msg->printIndex(1, 3);
-            limit = view->m_timeOrCoins;
+            limit = resultInfo->m_timeOrCoins;
             break;
         case Game_Rule_Stock:
             m_msg->attachScnMdlSimple(1, m_objects[Obj_Panel]->m_sceneModel, 3, 1.0f / 32.0f);
             m_msg->printIndex(1, 5);
-            limit = view->m_stockCount;
+            limit = resultInfo->m_stockCount;
             isStock = true;
             break;
         case Game_Rule_Coin:
             m_msg->attachScnMdlSimple(1, m_objects[Obj_Panel]->m_sceneModel, 3, 1.0f / 28.0f);
             m_msg->printIndex(1, 4);
-            limit = view->m_timeOrCoins;
+            limit = resultInfo->m_timeOrCoins;
             break;
         }
         m_msg->attachScnMdlSimple(2, m_objects[Obj_Panel]->m_sceneModel, 4, 1.0f / 24.0f);
@@ -1997,7 +1984,7 @@ void ifVsResultTask::initMdlData() {
     for (int i = 0; i < PlayerMax; i++) {
         u32 channel = 3 + 4 * i;
         if (m_playerState[i] != 3) {
-            if (view->m_gameRule == Game_Rule_Coin || m_unkD4) {
+            if (getGameRule(resultInfo) == Game_Rule_Coin || m_unkD4) {
                 m_msg->attachScnMdlSimple(channel, m_objects[Obj_HitNum]->m_sceneModel, 0x10 + i, 0.0625f);
                 m_msg->setAlignMode(channel, MuMsg::Align_Right);
                 m_msg->setFontColor(channel, 0x90, 0xC9, 0xEB, 0xFF);
@@ -2331,8 +2318,7 @@ void ifVsResultTask::subPlayerControl(int player) {
     int bit = 1 << player;
     int padIndex = -1;
     if (m_unkC1 & bit) {
-        // HYPOTHESIS: the byte at +4 of the player is the number of the controller port + 1
-        padIndex = reinterpret_cast<u8*>(&resultInfo->m_playersResultInfo[player])[4] - 1;
+        padIndex = resultInfo->m_playersResultInfo[player].m_controllerNo - 1;
     } else if (m_playerState[player] == 1 && allPlayers) {
         padIndex = GF_PAD_SYSTEM_GET_ALL_PADS;
     }
@@ -2387,7 +2373,7 @@ void ifVsResultTask::subPlayerControl(int player) {
             }
             int port;
             if (m_unk444C && (m_unkC1 & bit) &&
-                (port = reinterpret_cast<u8*>(&g_GameGlobal->m_resultInfo->m_playersResultInfo[player])[4]) > 0) {
+                (port = g_GameGlobal->m_resultInfo->m_playersResultInfo[player].m_controllerNo) > 0) {
                 {
                     MuObject** replay = &m_objects[Obj_Replay + player];
                     m_expands[1 + player]->PushBack((*replay)->m_scnMdl, "pos02");
@@ -2477,7 +2463,7 @@ void ifVsResultTask::subPlayerControl(int player) {
             }
             int port;
             if (m_unk444C && (m_unkC1 & bit) &&
-                (port = reinterpret_cast<u8*>(&g_GameGlobal->m_resultInfo->m_playersResultInfo[player])[4]) > 0) {
+                (port = g_GameGlobal->m_resultInfo->m_playersResultInfo[player].m_controllerNo) > 0) {
                 {
                     MuObject** replay = &m_objects[Obj_Replay + player];
                     m_expands[1 + player]->PushBack((*replay)->m_scnMdl, "pos02");
@@ -2602,7 +2588,7 @@ void ifVsResultTask::subPlayerControl(int player) {
             }
             int port;
             if (m_unk444C && (m_unkC1 & bit) &&
-                (port = reinterpret_cast<u8*>(&g_GameGlobal->m_resultInfo->m_playersResultInfo[player])[4]) > 0) {
+                (port = g_GameGlobal->m_resultInfo->m_playersResultInfo[player].m_controllerNo) > 0) {
                 {
                     MuObject** replay = &m_objects[Obj_Replay + player];
                     m_expands[1 + player]->PushBack((*replay)->m_scnMdl, "pos02");

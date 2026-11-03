@@ -42,6 +42,16 @@ struct gmPlayerResultInfo {
 };
 static_assert(sizeof(gmPlayerResultInfo) == 684, "Class is wrong size!");
 
+// HYPOTHESIS: the result of a team in a team battle; only the end of the record is read so far.
+struct gmTeamResultInfo {
+    char _0[0x2C];
+    u8 m_rank;      // 0x2C
+    u8 m_unk2D;     // 0x2D: zero for the winning team
+    u8 m_isPlaying; // 0x2E: nonzero if the team has players
+    char _2F[1];
+};
+static_assert(sizeof(gmTeamResultInfo) == 0x30, "Class is wrong size!");
+
 class gmResultInfo {
 public:
     enum DecisionKind {
@@ -56,10 +66,13 @@ public:
         Decision_NoContest = 0x9,
     };
 
-    char _0[1];
+    u8 m_gameMode;          // 0x00 GameMode: the tournament and the Wifi for-fun mode have their own result title
     GameRule m_gameRule : 8;
     bool m_isTeams;
-    char _3[0xb];
+    s8 m_suicidePenalty;    // 0x03 HYPOTHESIS: the points a self-destruct costs (ifVsResultTask multiplies the count by it)
+    u32 m_timeOrCoins;      // 0x04 the limit of the time and coin rules
+    u32 m_stockCount;       // 0x08 the limit of the stock rule
+    u16 m_stageKind;        // 0x0C HYPOTHESIS: the stage that was played (its play count is bumped by gmSetMeleeResult)
     u8 m_isTournament : 1; // 0xE HYPOTHESIS: a tournament match (ifVsResultTask)
     u8 : 7;
     u8 m_numWinners;
@@ -68,7 +81,8 @@ public:
     u8 m_winningPlayer; // 0x1F: a plain byte (ifVsResultTask reads it without sign extension)
     char _32[4];
     gmPlayerResultInfo m_playersResultInfo[MAX_PLAYERS];
-    char _4824[0xa0];
+    gmTeamResultInfo m_teamResultInfo[3]; // 0x12D8 HYPOTHESIS: red, blue, green
+    char _1368[0x10];
     u8 m_decisionKind;
     char _0x1379[11];
     int m_framesElapsed;
