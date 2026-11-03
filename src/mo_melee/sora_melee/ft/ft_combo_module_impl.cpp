@@ -110,10 +110,6 @@ void ftComboModuleImpl::notifyEventChangeStatus(int statusKind, int prevStatusKi
 
 typedef soArrayContractibleTable<const acCmdArgConv> ArgTable;
 
-static inline acCmdArg getFrontArg(const ArgTable& args) {
-    return acCmdArg(&args.at(0));
-}
-
 bool ftComboModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3) {
     s8 group = acmd->getGroup();
     if (!isObserv(group)) {
@@ -128,7 +124,7 @@ bool ftComboModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* mo
             return true;
         }
         ArgTable args = acmd->getArgList();
-        set(getFrontArg(args).getIntData());
+        set(acGetCmdArg(args, 0).getIntData());
         return true;
     }
     case 1:
