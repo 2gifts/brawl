@@ -21,7 +21,10 @@ public:
 #ifdef YK_STAGE_FULL
     float unk18;
 #else
-    char _24[4];
+    union {
+        char _24[4];
+        float unk24;
+    };
 #endif
     int m_whole;
     int m_global;
@@ -36,7 +39,10 @@ public:
         };
         soCollision::SituationMask m_multiSituation;
     };
-    char _48[1];
+    union {
+        char _48[1];
+        u8 unk48;
+    };
     bool m_49;
     bool m_50;
     u8 m_51;
@@ -66,6 +72,12 @@ public:
     int getGlobal();
     int getPartStatus(soArray<soCollisionHitPart>* parts, u32 index);
     void initMultiSituation();
+    // HYPOTHESIS: reset arguments follow the stored values and callee registers.
+    void reset(soCollision* collision, soArray<soCollisionHitPart>* parts, float posX, float scale, float lr, SituationKind situation);
+    // HYPOTHESIS: signatures follow the hit-module interface and register use.
+    void set(soArray<soCollisionHitPart>* parts, u32 index, soCollisionHitData* data);
+    void set(soArray<soCollisionHitPart>* parts, soSet<soCollisionHitData>* data);
+    void setCheckCatch(soArray<soCollisionHitPart>* parts, bool checkCatch);
     Vec3f getCenterPos(soCollision* collision, u16 index);
 
     soCollisionHitGroup();
