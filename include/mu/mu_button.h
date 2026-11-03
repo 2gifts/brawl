@@ -5,6 +5,7 @@
 #include <gf/gf_task.h>
 #include <memory.h>
 #include <mu/mu_menu_controller.h>
+#include <nw4r/g3d/g3d_resfile.h>
 #include <types.h>
 
 class MuMsg;
@@ -12,7 +13,6 @@ class MuObject;
 class scButton;
 namespace nw4r {
 namespace g3d {
-class ResFile;
 class ScnMdlExpand;
 } // namespace g3d
 } // namespace nw4r
@@ -90,9 +90,9 @@ public:
     // The work of the task (allocated by create).
     struct Work {
         scButton* m_scene;         // 0x000
-        void* m_resButton;         // 0x004 HYPOTHESIS: the buffer of /menu/option/Button.brres
-        void* m_resScene;          // 0x008 HYPOTHESIS: the buffer of the scene file
-        void* m_msgData;           // 0x00C HYPOTHESIS: the buffer of /menu/msg/button.msbin
+        nw4r::g3d::ResFile m_resButton; // 0x004 /menu/option/Button.brres
+        nw4r::g3d::ResFile m_resScene;  // 0x008 the camera scene (DefaultScene / DefaultSceneWide)
+        void* m_msgData;           // 0x00C /menu/msg/button.msbin
         MuObject* m_objs[ObjNum];  // 0x010
         nw4r::g3d::ScnMdlExpand* m_groups[GroupNum]; // 0x09C
         int m_step;                // 0x0B0 the index in sSteps
@@ -103,7 +103,7 @@ public:
         Config m_configs[PadKind_Num]; // 0x168 the settings of the name, one for each kind
         Config m_edit;             // 0x19C the settings that are being changed
         int m_cursor;              // 0x1AC the cursor position on the button screen
-        int m_unk1B0;              // 0x1B0
+        int m_listIndex;           // 0x1B0 the action of the button that is being changed, in its action list
         u8 m_isListOpen;           // 0x1B4 the list of free actions is shown
         int m_dlgKind;             // 0x1B8 the dialog that is open (0: none)
         u8 m_unk1BC;               // 0x1BC cleared when the restore and store dialogs open
@@ -171,6 +171,7 @@ public:
     void createObjResFile(const ObjData* data, int count, nw4r::g3d::ResFile* resFile);
     void setSelectAnim(int anim);
     void setupButtons(int padKind);
+    void setAssignAnim(int anim);
     void printButton(int padKind, int button, int line, int action, bool markDuplicates);
     void setButtonCursor(int padKind, int cursor);
     int getFreeActions(int padKind, int* actions);

@@ -172,11 +172,11 @@ muButtonTask::~muButtonTask() {
         for (int i = 0; i < ObjNum; i++) {
             delete m_work->m_objs[i];
         }
-        if (m_work->m_resButton != NULL) {
-            gfHeapManager::free(m_work->m_resButton);
+        if (m_work->m_resButton.ptr() != NULL) {
+            gfHeapManager::free(m_work->m_resButton.ptr());
         }
-        if (m_work->m_resScene != NULL) {
-            gfHeapManager::free(m_work->m_resScene);
+        if (m_work->m_resScene.ptr() != NULL) {
+            gfHeapManager::free(m_work->m_resScene.ptr());
         }
         if (m_work->m_msg != NULL) {
             delete m_work->m_msg;
@@ -249,8 +249,8 @@ void muButtonTask::getNameButtonConfig(int no) {
 
 void muButtonTask::initWork() {
     m_work->m_scene = NULL;
-    m_work->m_resButton = NULL;
-    m_work->m_resScene = NULL;
+    m_work->m_resButton = nw4r::g3d::ResFile();
+    m_work->m_resScene = nw4r::g3d::ResFile();
     for (int i = 0; i < ObjNum; i++) {
         m_work->m_objs[i] = NULL;
     }
@@ -267,7 +267,7 @@ void muButtonTask::initWork() {
     }
     memset(&m_work->m_edit, 0, sizeof(Config));
     m_work->m_cursor = 0;
-    m_work->m_unk1B0 = 0;
+    m_work->m_listIndex = 0;
     m_work->m_isListOpen = 0;
     m_work->m_dlgKind = 0;
     m_work->m_unk1BC = 0;
@@ -499,6 +499,16 @@ void muButtonTask::setupButtons(int padKind) {
     if (info->m_stickKind >= 2) {
         m_work->m_objs[8]->setFrameTex(m_work->m_edit.m_flag6 == 1 ? 1.0f : 0.0f);
     }
+}
+
+void muButtonTask::setAssignAnim(int anim) {
+    static const char* sName = "MenButton0060_TopN__0";
+    static MuAnimNameData sAnims[3] = {
+        { 0.0f, 0.0f, false, sName, 1 },
+        { 0.0f, 4.0f, false, sName, 1 },
+        { 5.0f, 9.0f, false, sName, 1 },
+    };
+    m_work->m_objs[22]->setAnimName(&sAnims[anim], false);
 }
 
 // The colours of a button text: plain, the default setting, an action that no other button has.
@@ -758,6 +768,54 @@ void muButtonTask::initStepLoading(muButtonTask* task) {
     muMenu::loadMenuSound();
 }
 
+// Takes the file that a handle has read (NULL when the read failed).
+static inline void* takeBuffer(gfFileIOHandle* handle) {
+    void* buffer;
+    if (handle->getReturnStatus() == 0x15) {
+        buffer = NULL;
+    } else {
+        buffer = handle->getBuffer();
+        handle->release();
+    }
+    return buffer;
+}
+
+// Takes a model file that a handle has read and prepares it for use.
+static inline nw4r::g3d::ResFile takeResFile(gfFileIOHandle* handle) {
+    nw4r::g3d::ResFile resFile(static_cast<void*>(NULL));
+    void* buffer = takeBuffer(handle);
+    if (buffer != NULL) {
+        resFile = nw4r::g3d::ResFile(buffer);
+        nw4r::g3d::ResFile::Init(&resFile);
+    }
+    return resFile;
+}
+
+void muButtonTask::mainStepLoading(muButtonTask* task) {
+    for (int i = 0; i < 3; i++) {
+        if (!task->m_handles[i].isReady()) {
+            return;
+        }
+    }
+    if (!muMenu::isLoadFinishMenuSound()) {
+        return;
+    }
+    task->m_work->m_resButton = takeResFile(&task->m_handles[0]);
+    task->createModel(&task->m_work->m_resButton);
+    task->m_work->m_resScene = takeResFile(&task->m_handles[1]);
+    nw4r::g3d::ResAnmScn anmScn;
+    anmScn = task->m_work->m_resScene.GetResAnmScn(0);
+    anmScn.Bind(anmScn);
+    task->m_work->m_scene->setCamAnm(&anmScn);
+    task->m_work->m_msgData = takeBuffer(&task->m_handles[2]);
+    task->initMsg(task->m_work->m_msgData);
+    const Step* step = &sSteps[1];
+    if (step->m_init != NULL) {
+        step->m_init(task);
+    }
+    task->m_work->m_step = 1;
+}
+
 void muButtonTask::initStepSelectAppear(muButtonTask* task) {
     g_gfApplication->unkD0.endKeepScreen();
     task->m_work->m_scene->removeAllObj();
@@ -800,6 +858,48 @@ void muButtonTask::initStepButtonSelect(muButtonTask* task) {
             }
         }
     }
+}
+
+// The place of an action in an action list (-1: not in it).
+static inline int findAction(const u8* list, int action) {
+    for (int i = 0; list[i] != muButtonTask::ActionNum; i++) {
+        if (list[i] == action) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// The number of actions in an action list.
+static inline int countActions(const u8* list) {
+    int num = 0;
+    while (list[num] != muButtonTask::ActionNum) {
+        num++;
+    }
+    return num;
+}
+
+void muButtonTask::initStepButtonAssign(muButtonTask* task) {
+    Work* work = task->m_work;
+    int padKind = work->m_padKind;
+    int cursor = work->m_cursor;
+    int index = findAction(sPadInfos[padKind].m_actionLists[cursor], work->m_edit.m_buttons[cursor]);
+    if (index < 0) {
+        index = 0;
+    }
+    work->m_listIndex = index;
+    int action = task->m_work->m_edit.m_buttons[cursor];
+    task->printButton(padKind, cursor, cursor + 5, action, true);
+    task->m_work->m_msg->printIndex(1, sActionMsgs[action].m_expl, NULL);
+    int arrows = 0;
+    if (index > 0) {
+        arrows |= 1;
+    }
+    if (index < countActions(sPadInfos[padKind].m_actionLists[cursor]) - 1) {
+        arrows |= 2;
+    }
+    task->m_work->m_objs[22]->setFrameVisible(arrows);
+    task->setAssignAnim(0);
 }
 
 void muButtonTask::initStepRestoreDlg(muButtonTask* task) {
