@@ -14,10 +14,12 @@ protected:
     void* m_switchData;  // 0x15C
 
 public:
+    grYakumonoSwitch(bool* isOn, const char* taskName);
     virtual ~grYakumonoSwitch();
+    virtual void update(float deltaFrame);
     virtual void judgeTriggerState();
-    virtual void setOn(bool isTrigger);
-    virtual void setOff(bool isTrigger);
+    virtual void setOn(int isTrigger);
+    virtual void setOff(int isTrigger);
 };
 static_assert(sizeof(grYakumonoSwitch) == 0x160, "Class is wrong size!");
 
@@ -36,11 +38,14 @@ protected:
     u32 unk190[5];                          // 0x190
 
 public:
+    grAdventureAttackSwitch(bool* isOn, const char* taskName);
     virtual ~grAdventureAttackSwitch();
     virtual void update(float deltaFrame);
     virtual void startup(gfArchive* data, u32 unk1, gfSceneRoot::LayerType layerType);
     virtual void onDamage(int index, soDamage* damage, soDamageAttackerInfo* attackerInfo);
-    virtual void setOn(bool isTrigger);
-    virtual void setOff(bool isTrigger);
+    virtual void setOn(int isTrigger);
+    virtual void setOff(int isTrigger);
+
+    static grAdventureAttackSwitch* create(int mdlIndex, bool* isOn, const char* taskName);
 };
 static_assert(sizeof(grAdventureAttackSwitch) == 0x1A4, "Class is wrong size!");
