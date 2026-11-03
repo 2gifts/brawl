@@ -72,6 +72,9 @@ public:
     void setDeadRange(Rect2D* range);
     void setStageParam(cmStageParam* param);
     gfCameraController* getCameraController(Kind kind);
+    // HYPOTHESIS: clears the "this player may not be targeted" mark of the camera (mlFtEvent calls it on a new damage).
+    void clearDisablePlayerNo(int playerNo);
+    void setDisablePlayerNo(int playerNo);
     static CameraController* getInstance();
 };
 static_assert(sizeof(CameraController) == 420, "Class is wrong size!");
