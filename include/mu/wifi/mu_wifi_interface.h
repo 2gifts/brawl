@@ -133,6 +133,7 @@ public:
     void clearPrepareLoadStage();
     int getFriendAIDIndexAID(int aid);
     void clearShortComment(int aid);
+    void closeAIDWifi(int aid);
     s32 getMeleeRestTime(u8* flag);
     u8 getRuleType();
     u8 getPlayerArea(int index, u8* localPlayer);
