@@ -4,6 +4,9 @@
 #include <sr/sr_common.h>
 #include <types.h>
 
+struct NWC24MsgObj;
+struct NWC24DlTask;
+
 // The interface that nteWiiConnect24 tells its errors to (the name is the one of its RTTI in sora_menu_main).
 // HYPOTHESIS: the parameters follow how muProcOptWifi::notify_Error uses them: the kind of the error (0: none), a word
 // that the screen does not read, and the error code that the screen shows.
@@ -28,6 +31,15 @@ public:
     void setErrorHandler(IWiiConnect24_Error* handler);
     // HYPOTHESIS: the return types; the callers test them against 1.
     bool check_getStatus(int kind);
+    u64 getMyWiiID();
+    bool friend_makeList();
+    u16* friend_getName(u32 index);
+    u64 friend_getWiiID(u32 index);
+    void startSearchMail(u32 appId);
+    bool getNextMailForMe(NWC24MsgObj* message, u32* remaining);
+    bool _setupDlTask(NWC24DlTask* task, u16 index, int* error);
+    int _openLibrary(int kind);
+    int _procGeneralError(int error);
     bool dl_registerDLTask();
     bool dl_deleteDLTask();
     bool dl_deleteDLTaskAll();
