@@ -66,6 +66,10 @@ struct wnActivateDesc {
     u8 unk4E[2];
 
     wnActivateDesc() { }
+    // HYPOTHESIS: parameter types and order follow the sword activation constructor ABI.
+    wnActivateDesc(u32 founderTaskId_, u32 resourceId_, bool flagBit6_, const Vec3f& pos_, float lr_,
+                   int team_, int life_, int unk18_, int unk1C_, int unk38_, int unk10_,
+                   u32 unkC_, u32 unk8_, int unk48_, bool flagBit3_, int unk3C_);
     // HYPOTHESIS: the activators that copy the position as words build the descriptor through a member-wise
     // constructor: pos is copy-constructed (aggregate word moves) while the unit's own Vec3f assignments stay float
     // copies. The flag bytes are then written field by field.
