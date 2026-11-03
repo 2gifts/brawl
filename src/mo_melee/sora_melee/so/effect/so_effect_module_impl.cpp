@@ -3,6 +3,7 @@
 #include <so/effect/so_effect_module_impl.h>
 #include <so/effect/so_effect_time.h>
 #include <so/so_array.h>
+#include <so/so_module_accesser.h>
 #include <types.h>
 
 void soEffectModuleImpl::activate() {
@@ -119,4 +120,52 @@ bool soEffectModuleImpl::isSyncVisibility() {
 
 void soEffectModuleImpl::setSyncVisibility(bool sync) {
     m_isSyncVisibility = sync;
+}
+
+u32 soEffectModuleImpl::req2D(EfID effectID, Vec3f* pos, Vec3f* rot, float scale, u32 group) {
+    g_ecMgr->preSet2dScene(true);
+    u32 handle = req(effectID, pos, rot, scale, group, -1);
+    g_ecMgr->preSet2dScene(false);
+    return handle;
+}
+
+u32 soEffectModuleImpl::req(EfID effectID, int node, Vec3f* pos, Vec3f* rot, float scale, Vec3f* posRange, Vec3f* rotRange, bool follow, u32 group) {
+    int handle = 0xFFFF;
+    return req(effectID, node, &handle, pos, rot, scale, posRange, rotRange, follow, group);
+}
+
+void soEffectModuleImpl::reqPause(bool pause) {
+    if (pause) {
+        if (!unk135_0) {
+            g_ecMgr->pauseEffectGroup(m_groupId | 2, 0xFFFF02);
+            ecMgr::getInst()->m_traceMgr.pauseGroup(true, m_groupId | 2, -1);
+            unk135_0 = true;
+        }
+    } else if (!m_moduleAccesser->getStopModule().isStop() && unk135_0 == true) {
+        g_ecMgr->playEffectGroup(m_groupId | 2, 0xFFFF02);
+        ecMgr::getInst()->m_traceMgr.pauseGroup(false, m_groupId | 2, -1);
+        unk135_0 = false;
+    }
+    unk135_2 = pause;
+}
+
+void soEffectModuleImpl::begin() {
+    unk135_1 = false;
+    if (m_moduleAccesser->getStopModule().isSpecialStop()) {
+        if (!unk135_2 && unk135_0 == true) {
+            g_ecMgr->playEffectGroup(m_groupId | 2, 0xFFFF02);
+            ecMgr::getInst()->m_traceMgr.pauseGroup(false, m_groupId | 2, -1);
+            unk135_0 = false;
+        }
+    } else if (m_moduleAccesser->getStopModule().isStop() || unk135_2 == true) {
+        if (!unk135_0) {
+            g_ecMgr->pauseEffectGroup(m_groupId | 2, 0xFFFF02);
+            ecMgr::getInst()->m_traceMgr.pauseGroup(true, m_groupId | 2, -1);
+            unk135_0 = true;
+        }
+    } else if (unk135_0 == true) {
+        g_ecMgr->playEffectGroup(m_groupId | 2, 0xFFFF02);
+        ecMgr::getInst()->m_traceMgr.pauseGroup(false, m_groupId | 2, -1);
+        unk135_0 = false;
+    }
 }
