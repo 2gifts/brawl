@@ -27,7 +27,8 @@ class gfTaskScheduler {
     static const s32 unkF8Size = 14;
 
     s32 unk0_1 : 8;
-    u32 unk0_2 : 8;
+    // HYPOTHESIS: the process type (pass) process() is currently running; signed (the status module reads it with srawi).
+    s32 m_processType : 8;
     bool unk2_b7 : 1;
     u32 unk2 : 15;
     u16 m_numRegisteredTasks;
@@ -67,7 +68,7 @@ public:
 
     gfTaskScheduler() :
       unk0_1(0),
-      unk0_2(0),
+      m_processType(0),
       m_numRegisteredTasks(0),
       unk6(0),
       unk8(nullptr),
@@ -84,6 +85,7 @@ public:
     }
 
     s32 getUnk0_1() const { return unk0_1; }
+    s32 getProcessType() const { return m_processType; }
     void setUnk2_7() { unk2_b7 = true; }
 };
 static_assert(sizeof(gfTaskScheduler) == 0x178, "Class is the wrong size!");

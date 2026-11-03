@@ -207,6 +207,15 @@ struct soDebugModuleHyp {
     virtual void unk18();
     // HYPOTHESIS: the visibility modules recompute their visibility only while this is set.
     virtual bool unk1C();
+    virtual void unk20();
+    virtual void unk24();
+    virtual void unk28();
+    virtual void unk2C();
+    virtual void unk30();
+    virtual void unk34();
+    virtual void unk38();
+    // HYPOTHESIS: told the status kind on an air status change that the status module refuses (old and requested kind).
+    virtual void notifyStatus(int status);
 };
 
 }  // namespace soHyp
