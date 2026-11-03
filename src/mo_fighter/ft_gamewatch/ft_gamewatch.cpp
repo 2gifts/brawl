@@ -10,7 +10,6 @@
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #include <so/anim/so_anim_obj.h>
 #include <ft/builder/ft_dol_array_list.h>
-#include <ft/ft_physics_iface.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/gamewatch/ft_gamewatch.h>
 #include <ft/gamewatch/ft_gamewatch_extend_param_accesser.h>
