@@ -11,18 +11,82 @@
 #include <types.h>
 
 class ecMgr;
+class gfArchive;
+namespace nw4r { namespace g3d { class ScnGroup; } }
+class ecResource {
+public:
+    // HYPOTHESIS: resource storage types follow word accesses and null checks.
+    gfArchive* unk0;
+    void* unk4;
+    void* unk8;
+    void* unkC;
+    u32 unk10;
+    u8 unk14;
+    u8 unk15[3];
+
+    ecResource();
+    ~ecResource();
+    void release(bool);
+};
+
+class ecEffectWork {
+public:
+    u8 unk0[0x30];
+    ecResource* unk30;
+    u8 unk34[0x28];
+    u32 unk5C;
+    u16 unk60;
+    u8 unk62[0x1A];
+    u32 unk7C;
+    u32 unk80;
+
+    ecEffectWork();
+    void release(bool);
+    void end(bool, bool);
+};
+
 extern ecMgr* g_ecMgr;
 class ecMgr : public gfTask {
 public:
-    u8 unk40[0x50];
+    union {
+        u8 unk40[0x50];
+        struct {
+            u8 unk40_;
+            u8 unk41;
+            u8 unk42;
+            u8 unk43;
+            u32 unk44;
+            u32 unk48;
+            nw4r::g3d::ScnGroup* unk4C;
+            nw4r::g3d::ScnGroup* unk50;
+            nw4r::g3d::ScnGroup* unk54;
+            ecResource* unk58;
+            u32 unk5C;
+            ecEffectWork* unk60;
+            u32 unk64;
+            u32 unk68;
+            u32 unk6C;
+            u32 unk70;
+            u32 unk74;
+            u32 unk78;
+            u32 unk7C;
+            u8 unk80;
+            u8 unk81;
+            u8 unk82[2];
+            u32 unk84;
+            u8 unk88[8];
+        };
+    };
     u32 unk90;
     u32 unk94;
-    union {
-        u8 unk98[0x10];
-        ecTraceMgr m_traceMgr;
-    };
+    ecTraceMgr m_traceMgr;
 
     ecMgr();
+    // HYPOTHESIS: counts are unsigned, as shown by allocation and bounds checks.
+    ecMgr(u32, u32, u32);
+    static void create(u32, u32, u32);
+    void registResource(char*, void*, int, int);
+    void releaseResource(char*);
     void setDrawPrio(int prio);
     u32 setEffect(EfID effectID);
     u32 setEffect(EfID effectID, Vec3f* pos);
