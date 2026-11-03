@@ -18,6 +18,12 @@ struct gfBootItemArchive {
 
 gfBootItemArchive* globalGetItemArchive();
 
+// HYPOTHESIS: the data pointer and size of one preload archive.
+struct gfPreLoadDataBuffer {
+    u8* m_data;
+    u32 m_size;
+};
+
 class gfBootTask : public gfTask {
 public:
     // HYPOTHESIS: a pair of file handles with two cleared 8-bit fields.
@@ -51,6 +57,8 @@ public:
     u8 unk88[0x8];
 
     // HYPOTHESIS: parameter type from the callee's register use; the map has none.
+    // HYPOTHESIS: index selects an 8-byte preload entry copied into out.
+    static void getPreLoadDataBuffer(gfPreLoadDataBuffer* out, int index);
     static gfBootTask* create(bool flag);
     gfBootTask(bool flag);
     virtual void processDefault();
