@@ -5,12 +5,12 @@
 #include <gf/gf_shutdown_manager.h>
 #include <gf/gf_sys_recorder2.h>
 #include <gm/gm_global.h>
+#include <nt/nt_etc_xchg.h>
 #include <types.h>
 
 // HYPOTHESIS: stand-ins for callees that are not named yet; the map gives GameGlobal::setEnableSaveLoad (the
-// save/load switches), getSaveDataSize, checkSaveData and getAdventureSaveDataSize, and the nteExchange destructor.
+// save/load switches), getSaveDataSize, checkSaveData and getAdventureSaveDataSize.
 extern "C" u8 fn_8004EAD4(GameGlobal* global);
-extern "C" void fn_8014E520(nteExchange* exchange, int del);
 // HYPOTHESIS: this unit's request workers gfSysRecorder2::_processCheck, _processRenew and _processLoad (not matched
 // yet).
 extern "C" void fn_80030FA4(gfSysRecorder2* recorder);
@@ -107,7 +107,7 @@ gfSysRecorder2::~gfSysRecorder2() {
         m_unk94 = NULL;
     }
     if (m_exchange) {
-        fn_8014E520(m_exchange, 1);
+        delete m_exchange;
         m_exchange = NULL;
     }
 }
@@ -217,7 +217,7 @@ bool gfSysRecorder2::requestRenew(Heaps::HeapType heap, int kind) {
         m_unk94 = NULL;
     }
     if (m_exchange) {
-        fn_8014E520(m_exchange, 1);
+        delete m_exchange;
         m_exchange = NULL;
     }
     if (m_isKind8 || m_kind == 4) {
@@ -326,7 +326,7 @@ void gfSysRecorder2::returnToIdle(int result) {
         m_unk94 = NULL;
     }
     if (m_exchange) {
-        fn_8014E520(m_exchange, 1);
+        delete m_exchange;
         m_exchange = NULL;
     }
 }
