@@ -3,6 +3,7 @@
 #include <gf/gf_file_io.h>
 #include <gf/gf_heap_manager.h>
 #include <gm/gm_global.h>
+#include <nt/nt_etc_nwc24.h>
 #include <revolution/OS/OSHardware.h>
 #include <revolution/OS/OSMutex.h>
 #include <revolution/OS/OSThread.h>
@@ -10,11 +11,8 @@
 #include <types.h>
 
 // HYPOTHESIS: stand-ins for callees that are not named yet; the map gives
-// a GameGlobal flags getter (bit 3 enables VF save/load),
-// the nteWiiConnect24 constructor and destructor, and this unit's request workers.
+// a GameGlobal flags getter (bit 3 enables VF save/load) and this unit's request workers.
 extern "C" u8 fn_8004EAD4(GameGlobal* global);
-extern "C" nteWiiConnect24* fn_8014CD60(nteWiiConnect24* wc24, Heaps::HeapType heap);
-extern "C" void fn_8014CD7C(nteWiiConnect24* wc24, int del);
 extern "C" int fn_8003A23C(gfCollectionIO* io, gfCollectionIO::Request* request);
 extern "C" int fn_8003A6F0(gfCollectionIO* io, gfCollectionIO::Request* request);
 extern "C" int fn_8003AD48(gfCollectionIO* io, gfCollectionIO::Request* request);
@@ -69,12 +67,7 @@ void gfCollectionIO_DSThread::run() {
 
 gfCollectionIO::gfCollectionIO(Heaps::HeapType heap)
     : gfTask("gfCollectionIO", Category_None, 0xE, 6, true), m_heap(heap), m_thread(nullptr) {
-    // MATCH-ONLY: stand-in for new (heap) nteWiiConnect24(heap) until its constructor is named.
-    nteWiiConnect24* wc24 = static_cast<nteWiiConnect24*>(operator new(0x14, heap));
-    if (wc24) {
-        wc24 = fn_8014CD60(wc24, heap);
-    }
-    m_wc24 = wc24;
+    m_wc24 = new (heap) nteWiiConnect24(heap);
     m_isReady = true;
     m_result = 0;
     m_fileName[0] = 0;
@@ -124,8 +117,7 @@ gfCollectionIO::~gfCollectionIO() {
         m_thread = nullptr;
     }
     if (m_wc24) {
-        // MATCH-ONLY: stand-in for delete m_wc24 until its destructor is named.
-        fn_8014CD7C(m_wc24, 1);
+        delete m_wc24;
         m_wc24 = nullptr;
     }
     OSLockMutex(lbl_8059C6D4);
