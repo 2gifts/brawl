@@ -264,3 +264,33 @@ Vec2f soCollisionAttackModuleImpl::getSpeed() {
 float soCollisionAttackModuleImpl::getSpeedX() {
     return m_speed.m_x;
 }
+
+void soCollisionAttackModuleImpl::deactivate() {
+    if (!unk9c_5) {
+        m_collision.clean();
+    } else {
+        m_collision.initLogAll();
+        m_collision.initPastLogAll(0);
+    }
+    m_collision.m_taskId = -1;
+}
+
+bool soCollisionAttackModuleImpl::isAttack(u32 index, bool isAbsolute) {
+    if (isAbsolute == true) {
+        return m_collisionAttackAbsoluteArray->at(index).m_isAttack;
+    } else {
+        bool isAttack = false;
+        if (m_collisionAttackPart->at(index).m_status != soCollisionAttackPart::Status_Inactive && !m_isSleep) {
+            isAttack = true;
+        }
+        return isAttack;
+    }
+}
+
+bool soCollisionAttackModuleImpl::setOffset(u32 index, Vec3f* offsetPos) {
+    if (m_collisionAttackPart->at(index).m_status == soCollisionAttackPart::Status_Inactive) {
+        return false;
+    }
+    m_collisionAttackPart->at(index).m_attackData.m_offsetPos = *offsetPos;
+    return true;
+}

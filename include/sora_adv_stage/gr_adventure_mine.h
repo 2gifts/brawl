@@ -10,6 +10,7 @@
 struct grGimmickMineData;
 
 class grAdventureMine : public grGimmickBlock {
+    friend class grAdventureMineManager;
 protected:
     u32 unk15C;        // 0x15C
     u8 m_isUpdate;     // 0x160, set again each frame by the mine manager (HYPOTHESIS)

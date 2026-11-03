@@ -38,6 +38,8 @@ public:
     s32 isExistNode(utListNode* node) const;
 
     void init();
+    // HYPOTHESIS: direct access to the first intrusive list node.
+    utListNode* getHead() const { return m_head; }
     u32 getLength() const { return m_length; }
 
     inline void clear() {

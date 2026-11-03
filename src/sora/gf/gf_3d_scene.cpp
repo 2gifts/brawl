@@ -1,5 +1,12 @@
 #include <gf/gf_3d_scene.h>
+#include <gf/gf_heap_manager.h>
+#include <nw4r/g3d/g3d_scnroot.h>
+#include <sr/sr_common.h>
 #include <types.h>
+
+void gfSceneRoot::create() {
+    g_gfSceneRoot = new (Heaps::System) gfSceneRoot;
+}
 
 // MATCH-ONLY: placeholder virtuals so that unk3C sits at vtable offset 0x3C
 class gfSceneRootLayerObj {
@@ -90,4 +97,45 @@ void gfSceneRoot::removeResAnmScn() {
     }
     m_anmScnRes = NULL;
     *reinterpret_cast<s32*>(reinterpret_cast<char*>(this) + 0x58) = 0;
+}
+
+void gfSceneRoot::setLayerDispStatus(LayerType layer, bool status) {
+    unk38C[layer].unkD_7 = status;
+}
+
+bool gfSceneRoot::clear(LayerType layer) {
+    bool result = false;
+    nw4r::g3d::ScnGroup* group = unk38C[layer].unk4;
+    if (group != NULL) {
+        while (!group->Empty()) {
+            group->PopBack();
+        }
+        unk38C[layer].unkE = 0;
+        result = true;
+    }
+    return result;
+}
+
+void gfSceneRoot::removeFinalSceneAnm() {
+    if (unk60 != NULL) {
+        RemoveAnmScn__Q34nw4r3g3d7ScnRootFv(unk40);
+        unk60->Destroy();
+    }
+    unk60 = NULL;
+    if (m_anmScnRes != NULL) {
+        setAnmScnResToScnRoot3D(m_anmScnRes);
+    }
+}
+
+void gfSceneRoot::setFinalSceneAnm(nw4r::g3d::ResAnmScn* anmScn) {
+    if (unk60 != NULL) {
+        removeFinalSceneAnm();
+    }
+    if (anmScn->IsValid()) {
+        u32 size;
+        MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::FighterTechqniq);
+        unk60 = nw4r::g3d::AnmScnRes::Construct(
+            allocator, &size, *anmScn, false);
+        setAnmScnResToScnRoot3D(unk60);
+    }
 }

@@ -45,6 +45,8 @@ public:
     static bool appendSubstr(char* dst, const char* src, int skip, int count);
     static void getPrintIndexData(void* msgbin, u32 index, char** outStr, u32* outLen);
     static void drawBoxLine(s32 p1, s32 p2, s32 p3, float f1, float f2, float f3, float f4, float f5);
+    // Copies src without its tags (len bytes) to dst and returns the length of the copy.
+    static int stripTags(const u8* src, int len, int unused, u8* dst);
 
 
 };

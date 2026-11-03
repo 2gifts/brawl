@@ -200,8 +200,7 @@ u32 stLoaderStage::getMemoryBlankSize() {
         return 0x100000;
     }
     if (stageKind == Stages::Adventure) {
-        // HYPOTHESIS: an adventure state byte inside the unmapped part of gmAdvData.
-        u8 state = reinterpret_cast<u8*>(g_GameGlobal->m_advData)[0x604];
+        u8 state = g_GameGlobal->m_advData->m_mode;
         // MATCH-ONLY: the negated conjunction keeps two compares where `state == 3 || state == 4` becomes a range test.
         if (!(state != 3 && state != 4)) {
             return 0x2840;
@@ -387,7 +386,7 @@ void stLoaderStage::entryEntity() {
         if (stageKind != Stages::Adventure) {
             sheet = itGenSheetKind((srStageKind)stageKind, 0);
         } else {
-            sheet = itGenSheetKind(Stages::Adventure, *reinterpret_cast<int*>(reinterpret_cast<u8*>(g_GameGlobal->m_advData) + 0x620));
+            sheet = itGenSheetKind(Stages::Adventure, g_GameGlobal->m_advData->m_itemGenKind);
         }
         itManager::getInstance()->preloadItemGenArchive(sheet, 0);
         itManager::getInstance()->preloadItemKindArchiveFromGenArchive(sheet, 0);

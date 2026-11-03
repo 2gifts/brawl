@@ -1372,7 +1372,7 @@ void GameGlobal::setAdventureSaveData(const void* data) {
     if (found >= 0) {
         index = found;
     }
-    reinterpret_cast<u8*>(m_advData)[0x600] = index;
+    m_advData->m_nameIndex = index;
 }
 
 void GameGlobal::getAdventureSaveData(void* data) {
@@ -1386,7 +1386,7 @@ void GameGlobal::getAdventureSaveData(void* data) {
     *reinterpret_cast<u32*>(nameBlock) = 0x07092000;
     nameBlock[4] = 1;
     char name[0x15] = { 0 };
-    u8 index = reinterpret_cast<u8*>(m_advData)[0x600];
+    u8 index = m_advData->m_nameIndex;
     if (index < 0x78) {
         nameUTF8(this, index, name);
     }

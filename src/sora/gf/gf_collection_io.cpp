@@ -10,9 +10,8 @@
 #include <revolution/OS/OSTime.h>
 #include <types.h>
 
-// HYPOTHESIS: stand-ins for callees that are not named yet; the map gives
-// a GameGlobal flags getter (bit 3 enables VF save/load) and this unit's request workers.
-extern "C" u8 fn_8004EAD4(GameGlobal* global);
+// HYPOTHESIS: stand-ins for callees that are not named yet; the map gives this unit's request workers.
+// (GameGlobal::getEnableSaveLoad bit 3 enables VF save/load.)
 extern "C" int fn_8003A23C(gfCollectionIO* io, gfCollectionIO::Request* request);
 extern "C" int fn_8003A6F0(gfCollectionIO* io, gfCollectionIO::Request* request);
 extern "C" int fn_8003AD48(gfCollectionIO* io, gfCollectionIO::Request* request);
@@ -242,7 +241,7 @@ bool gfCollectionIO::isDropReady() {
 }
 
 bool gfCollectionIO::requestNewFileNameVF(int fileType) {
-    if (!((fn_8004EAD4(g_GameGlobal) >> 3) & 1)) {
+    if (!((g_GameGlobal->getEnableSaveLoad() >> 3) & 1)) {
         m_result = 8;
         m_isReady = true;
         unkE8 = 0;
@@ -301,7 +300,7 @@ bool gfCollectionIO::requestNewFileNameSD(int fileType) {
 }
 
 bool gfCollectionIO::requestSaveVF(int fileType, const char* fileName, void* data, int size, bool unk) {
-    if (!((fn_8004EAD4(g_GameGlobal) >> 3) & 1)) {
+    if (!((g_GameGlobal->getEnableSaveLoad() >> 3) & 1)) {
         m_result = 8;
         m_isReady = true;
         unkE8 = 0;
@@ -368,7 +367,7 @@ bool gfCollectionIO::requestSaveSD(int fileType, const char* fileName, void* dat
 }
 
 bool gfCollectionIO::requestLoadVF(int fileType, const char* fileName) {
-    if (!((fn_8004EAD4(g_GameGlobal) >> 3) & 1)) {
+    if (!((g_GameGlobal->getEnableSaveLoad() >> 3) & 1)) {
         m_result = 8;
         m_isReady = true;
         unkE8 = 0;
@@ -429,7 +428,7 @@ bool gfCollectionIO::requestLoadSD(int fileType, const char* fileName) {
 }
 
 bool gfCollectionIO::requestListVF(int fileType) {
-    if (!((fn_8004EAD4(g_GameGlobal) >> 3) & 1)) {
+    if (!((g_GameGlobal->getEnableSaveLoad() >> 3) & 1)) {
         m_result = 8;
         m_isReady = true;
         unkE8 = 0;
@@ -486,7 +485,7 @@ bool gfCollectionIO::requestListSD(int fileType) {
 }
 
 bool gfCollectionIO::requestListCountVF(int fileType) {
-    if (!((fn_8004EAD4(g_GameGlobal) >> 3) & 1)) {
+    if (!((g_GameGlobal->getEnableSaveLoad() >> 3) & 1)) {
         m_result = 8;
         m_isReady = true;
         unkE8 = 0;
@@ -543,7 +542,7 @@ bool gfCollectionIO::requestListCountSD(int fileType) {
 }
 
 bool gfCollectionIO::requestSummaryVF(int fileType, const char* fileName) {
-    if (!((fn_8004EAD4(g_GameGlobal) >> 3) & 1)) {
+    if (!((g_GameGlobal->getEnableSaveLoad() >> 3) & 1)) {
         m_result = 8;
         m_isReady = true;
         return true;
@@ -602,7 +601,7 @@ bool gfCollectionIO::requestSummarySD(int fileType, const char* fileName) {
 }
 
 bool gfCollectionIO::requestDeleteVF(int fileType, const char* fileName) {
-    if (!((fn_8004EAD4(g_GameGlobal) >> 3) & 1)) {
+    if (!((g_GameGlobal->getEnableSaveLoad() >> 3) & 1)) {
         m_result = 8;
         m_isReady = true;
         return true;
@@ -669,7 +668,7 @@ const char* gfCollectionIO::getSampleFileName(int fileType, int index) {
 }
 
 bool gfCollectionIO::isEnableVFSaveLoad() {
-    return (fn_8004EAD4(g_GameGlobal) >> 3) & 1;
+    return (g_GameGlobal->getEnableSaveLoad() >> 3) & 1;
 }
 
 gfCollSummaryStageEdit::~gfCollSummaryStageEdit() {
