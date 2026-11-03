@@ -7,7 +7,17 @@
 class sqSingleBoss : public gfSequence {
 public:
     s32 unk8;
-    u8 unkC[0x1C];
+    union {
+        u8 unkC[0x1C];
+        struct {
+            u8 unkC_pad[5];
+            u8 unk11;
+            u8 unk12[10];
+            s32 unk1C;
+            s32 unk20;
+            s32 unk24;
+        };
+    };
     s32 unk28;
 
     static sqSingleBoss* create();
@@ -15,5 +25,7 @@ public:
     virtual void start();
     virtual void setNext();
     virtual void exit();
+    void checkClearGet();
+    void makeStageTable();
 };
 static_assert(sizeof(sqSingleBoss) == 0x2C, "Class is wrong size!");

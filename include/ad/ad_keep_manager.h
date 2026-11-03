@@ -54,6 +54,7 @@ public:
 
     adKeepManager();
     static adKeepManager* getInstance();
+    void useBossBattleEnd();
     ~adKeepManager();
     adKeepStepFlag* getStepFlag(u32 stepId);
     void resetGlobalFlag();

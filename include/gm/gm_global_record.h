@@ -446,7 +446,7 @@ struct gmAdvData {
             char unk2AC[0x467C];
             struct {
                 char _pad2AC[0x4678];
-                u8 : 1;
+                u8 unk4924_7 : 1; // HYPOTHESIS: bit 7 of byte 0x4924
                 u8 m_unk4924_6 : 1; // HYPOTHESIS: bit 6 of byte 0x4924
                 u8 : 6;
                 char _pad4925[3];
