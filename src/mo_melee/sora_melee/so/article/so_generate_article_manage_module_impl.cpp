@@ -2,6 +2,7 @@
 #include <so/article/so_article.h>
 #include <so/article/so_article_mediator.h>
 #include <so/article/so_generate_article_manage_module.h>
+#include <so/event/so_event_system.h>
 #include <so/so_array.h>
 #include <so/stageobject.h>
 #include <types.h>
@@ -137,5 +138,146 @@ void soGenerateArticleManageModuleImpl::setAutoRecycle(bool enabled) {
     m_mediator->setAutoRecycle(enabled);
     if (m_dynamicMediator != NULL) {
         m_dynamicMediator->setAutoRecycle(enabled);
+    }
+}
+
+soArticle* soGenerateArticleManageModuleImpl::generate(int articleId, void* logAttackInfo, bool syncOwnerStatus) {
+    soModuleAccesser* moduleAccesser = static_cast<soModuleAccesser*>(logAttackInfo);
+    if (moduleAccesser == NULL) {
+        moduleAccesser = m_moduleAccesser;
+    }
+    soArticle* article;
+    if (articleId < m_mediator->getMediateNum()) {
+        article = m_mediator->generate(articleId, moduleAccesser);
+    } else {
+        if (m_dynamicMediator == NULL) {
+            return reinterpret_cast<soArticle*>(g_ftRobotNullArticleStorage);
+        }
+        article = m_dynamicMediator->generate(articleId, moduleAccesser);
+    }
+    article->setSyncOwnerStatus(syncOwnerStatus);
+    return article;
+}
+
+void soGenerateArticleManageModuleImpl::setVisibilityWhole(int articleId, u8 visible, int selector) {
+    if (isExist(articleId)) {
+        soArrayVector<soArticle*, 24> articles;
+        getArticleList(&articles, articleId, selector);
+        for (int i = 0; i < articles.size(); i++) {
+            articles.at(i)->setVisibilityWhole(visible);
+        }
+    }
+}
+
+void soGenerateArticleManageModuleImpl::set2nd(int articleId, u8 second, int selector) {
+    if (isExist(articleId)) {
+        soArrayVector<soArticle*, 24> articles;
+        getArticleList(&articles, articleId, selector);
+        for (int i = 0; i < articles.size(); i++) {
+            articles.at(i)->set2nd(second);
+        }
+    }
+}
+
+void soGenerateArticleManageModuleImpl::have(int articleId, int arg, int selector, int taskId) {
+    if (isExist(articleId)) {
+        if ((u32)taskId == (u32)-1) {
+            taskId = m_moduleAccesser->m_stageObject->m_taskId;
+        }
+        soArrayVector<soArticle*, 24> articles;
+        getArticleList(&articles, articleId, selector);
+        for (int i = 0; i < articles.size(); i++) {
+            articles.at(i)->have(taskId, arg, -1);
+        }
+    }
+}
+
+void soGenerateArticleManageModuleImpl::eject(int taskId) {
+    int j;
+    soArticle* article;
+    s32 removeId;
+    for (int i = m_articles->size() - 1; i >= 0; i--) {
+        if (m_articles->at(i) != NULL && (u32)taskId == (u32)m_articles->at(i)->getTaskId()) {
+            article = m_articles->at(i);
+            int count = m_observers->size();
+            for (j = 0; j < count; j++) {
+                s16 manageId = article->getArticleEventManageId();
+                soArticleEventObserver& observer = m_observers->at(j);
+                if (manageId != -1) {
+                    removeId = observer.m_manageID;
+                    if (manageId == removeId) {
+                        if (soEventSystem::getInstance()->getInstanceManager().isContain(removeId) == true) {
+                            soEventSystem::getInstance()->getManager(observer.m_manageID)->eraseObserver(observer.m_unitID, observer.m_sendID);
+                        }
+                        observer.m_sendID = -1;
+                        observer.m_manageID = -1;
+                    }
+                }
+            }
+            m_articles->erase(i);
+            article->unlinkOwner(1);
+        }
+    }
+}
+
+void soGenerateArticleManageModuleImpl::removeExistTaskId(int taskId) {
+    int j;
+    soArticle* article;
+    s32 removeId;
+    for (int i = m_articles->size() - 1; i >= 0; i--) {
+        if (m_articles->at(i) != NULL && (u32)taskId == (u32)m_articles->at(i)->getTaskId()) {
+            soArticle* removed = m_articles->at(i);
+            article = m_articles->at(i);
+            int count = m_observers->size();
+            for (j = 0; j < count; j++) {
+                s16 manageId = article->getArticleEventManageId();
+                soArticleEventObserver& observer = m_observers->at(j);
+                if (manageId != -1) {
+                    removeId = observer.m_manageID;
+                    if (manageId == removeId) {
+                        if (soEventSystem::getInstance()->getInstanceManager().isContain(removeId) == true) {
+                            soEventSystem::getInstance()->getManager(observer.m_manageID)->eraseObserver(observer.m_unitID, observer.m_sendID);
+                        }
+                        observer.m_sendID = -1;
+                        observer.m_manageID = -1;
+                    }
+                }
+            }
+            m_articles->erase(i);
+            article->unlinkOwner(1);
+            removed->remove();
+        }
+    }
+}
+
+void soGenerateArticleManageModuleImpl::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    int j;
+    soArticle* article;
+    s32 removeId;
+    for (int i = 0; i < m_articles->size(); i++) {
+        if (m_articles->at(i) != NULL) {
+            soArticle* removed = m_articles->at(i);
+            if (removed->isSyncOwnerStatus() == true) {
+                article = m_articles->at(i);
+                int count = m_observers->size();
+                for (j = 0; j < count; j++) {
+                    s16 manageId = article->getArticleEventManageId();
+                    soArticleEventObserver& observer = m_observers->at(j);
+                    if (manageId != -1) {
+                        removeId = observer.m_manageID;
+                        if (manageId == removeId) {
+                            if (soEventSystem::getInstance()->getInstanceManager().isContain(removeId) == true) {
+                                soEventSystem::getInstance()->getManager(observer.m_manageID)->eraseObserver(observer.m_unitID, observer.m_sendID);
+                            }
+                            observer.m_sendID = -1;
+                            observer.m_manageID = -1;
+                        }
+                    }
+                }
+                m_articles->erase(i);
+                article->unlinkOwner(1);
+                removed->remove();
+            }
+        }
     }
 }
