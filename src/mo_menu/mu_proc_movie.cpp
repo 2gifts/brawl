@@ -182,7 +182,7 @@ int muProcMovie::proc() {
             sprintf(name, "pos%02d", getCursorNo(this, row, col));
             getSlotGroup(this)->PushBack(cursor, name);
             int id = m_list[m_page * Slots + getCursorNo(this, row, col)];
-            m_panel->setMsg(id == Id_Adv ? Msg_AdvHelp : sMovieTexts[id].m_help, 1, reinterpret_cast<int>(m_msg->getBinary()));
+            m_panel->setMsg(id == Id_Adv ? Msg_AdvHelp : sMovieTexts[id].m_help, 1, m_msg->getBinary());
             m_helpShown = 1;
         }
         u32 pad = padUpdate();
@@ -382,7 +382,7 @@ int muProcMovie::moveCursorMain(u32 pad) {
         sprintf(name, "pos%02d", getCursorNo(this, row, col));
         getSlotGroup(this)->PushBack(cursor, name);
         int id = m_list[m_page * Slots + getCursorNo(this, row, col)];
-        m_panel->setMsg(id == Id_Adv ? Msg_AdvHelp : sMovieTexts[id].m_help, 1, reinterpret_cast<int>(m_msg->getBinary()));
+        m_panel->setMsg(id == Id_Adv ? Msg_AdvHelp : sMovieTexts[id].m_help, 1, m_msg->getBinary());
         g_sndSystem->playSE(static_cast<SndID>(0), -1, 0, 0, -1);
     }
     return moved;
