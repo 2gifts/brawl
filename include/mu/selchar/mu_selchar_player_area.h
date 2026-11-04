@@ -75,12 +75,6 @@ public:
     union {
         char _0x408[0x30];
         struct {
-            char unk408pad[0x1E];
-            u8 unk426Flag;
-            char unk427pad[5];
-            int unk42C;
-        };
-        struct {
             char unk408[4];
             MuMsg* unk40C;
             char unk410[0x15];
@@ -165,6 +159,13 @@ public:
     void bindCalcWorldFlag();
     void getDefName(char* name);
     void nameEntryButtonPointed(int pointed);
+    void playerKindButtonPointed(int hand);
+    void cpLevelButtonPointed(int hand);
+    void wifiFriendCommandButtonPointed(int hand);
+    void handiButtonPointed(int hand);
+    bool isColorIncButtonPushed();
+    // HYPOTHESIS: an inline accessor returns the area controller status by value.
+    gfPadStatus getPadStatus();
     int getCollKind(Vec2f* pos, int* arg, float* rect);
     void openHandiList();
     void forceCloseList();
@@ -183,6 +184,5 @@ public:
     void createWifiModel(nw4r::g3d::ResFile* resFile, int priority);
     int getWifiStateByWifiCond();
     void wifiExitCpuPlayer();
-    void wifiRequestPlayerEntry(int controller);
 };
 static_assert(sizeof(muSelCharPlayerArea) == 0x448, "Wrong size for class!");

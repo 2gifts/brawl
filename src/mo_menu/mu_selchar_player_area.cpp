@@ -632,3 +632,115 @@ void muSelCharPlayerArea::createWifiModel(nw4r::g3d::ResFile* resFile, int prior
     unk41C = new (Heaps::MenuInstance) IfWifiprPlayer(playerNo, 1);
     unk41C->createModel(resFile, priority);
 }
+
+void muSelCharPlayerArea::playerKindButtonPointed(int hand) {
+    MuObject* object = m_objs[Obj_Nameplate];
+    float rate = object->m_modelAnim->m_anmObjMatClrRes->GetUpdateRate();
+    if (hand >= 0) {
+        if (0.0f == rate) {
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+        }
+    } else {
+        if (0.0f != rate) {
+            object->setFrameMatCol(0.0f);
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);
+        }
+    }
+}
+
+void muSelCharPlayerArea::cpLevelButtonPointed(int hand) {
+    MuObject* object = m_objs[Obj_ComputerLvl];
+    float rate = object->m_modelAnim->m_anmObjMatClrRes->GetUpdateRate();
+    if (hand >= 0) {
+        if (0.0f == rate) {
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+        }
+    } else {
+        if (0.0f != rate) {
+            object->setFrameMatCol(0.0f);
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);
+        }
+    }
+}
+
+void muSelCharPlayerArea::wifiFriendCommandButtonPointed(int hand) {
+    MuObject* object = m_objs[38];
+    float rate = object->m_modelAnim->m_anmObjMatClrRes->GetUpdateRate();
+    if (hand >= 0) {
+        if (0.0f == rate) {
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+        }
+    } else {
+        if (0.0f != rate) {
+            object->setFrameMatCol(0.0f);
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);
+        }
+    }
+}
+
+void muSelCharPlayerArea::handiButtonPointed(int hand) {
+    MuObject* object = m_objs[Obj_Handicap];
+    if (object) {
+        float rate = object->m_modelAnim->m_anmObjMatClrRes->GetUpdateRate();
+        if (hand >= 0) {
+            if (0.0f == rate) {
+                object->changeAnimN(1, 0x10, true, false);
+            }
+        } else {
+            if (0.0f != rate) {
+                object->changeAnimN(0, 0x10, false, false);
+                object->setFrameMatCol(m_handi);
+            }
+        }
+    }
+}
+
+void muSelCharPlayerArea::createObjResFile(const void* descriptors, int count, nw4r::g3d::ResFile* resFile, int priority) {
+    int num;
+    int index;
+    int instance;
+    // HYPOTHESIS: eight-byte descriptors contain a model name, index range and priority.
+    const struct {
+        const char* unk0;
+        u8 unk4;
+        u8 unk5;
+        u8 unk6;
+        u8 unk7;
+    }* model = static_cast<const __typeof__(*model)*>(descriptors);
+    for (index = 0; index < count; index++, model++) {
+        num = 1;
+        if (model->unk4 < model->unk5) {
+            num = model->unk5 - model->unk4;
+        }
+        for (instance = 0; instance < num; instance++) {
+            MuObject* object = MuObject::create(resFile, model->unk0, model->unk6 + priority, NULL, Heaps::MenuInstance);
+            m_objs[model->unk4 + instance] = object;
+            char animName[0x40];
+            strcpy(animName, model->unk0);
+            strcat(animName, "__0");
+            object->changeAnimN(animName);
+            if (object->m_modelAnim != NULL) {
+                object->m_modelAnim->setUpdateRate(0.0f);
+            }
+        }
+    }
+}
+
+extern const u32 lbl_10_rodata_788[4];
+
+// HYPOTHESIS: an inline accessor returns the area controller status by value.
+
+inline gfPadStatus muSelCharPlayerArea::getPadStatus() {
+    gfPadStatus pad;
+    if (m_controllerNo >= 0) {
+        g_gfPadSystem->getSysPadStatus(m_controllerNo, &pad);
+    } else {
+        memset(&pad, 0, sizeof(pad));
+    }
+    return pad;
+}
+
+bool muSelCharPlayerArea::isColorIncButtonPushed() {
+    gfPadStatus pad = getPadStatus();
+    return (pad.m_buttonsPressedThisFrame.bits & lbl_10_rodata_788[pad.m_controllerType]) != 0;
+}
