@@ -13145,9 +13145,9 @@ initLadderEnd__32ftStatusUniqProcessGimmickLadderFP16soModuleAccesserP24soGimmic
 execLadderEnd__32ftStatusUniqProcessGimmickLadderFP16soModuleAccesserP24soGimmickLadderEventArgs = .text:0x00177E80; // type:function size:0xC
 fixPosLadderEnd__32ftStatusUniqProcessGimmickLadderFP16soModuleAccesserP24soGimmickLadderEventArgs = .text:0x00177E8C; // type:function size:0x1A4
 exitLadderEnd__32ftStatusUniqProcessGimmickLadderFP16soModuleAccesser = .text:0x00178030; // type:function size:0x4
-fn_27_178034 = .text:0x00178034; // type:function size:0xB4
+initStatus__32ftStatusUniqProcessGimmickSpringFP16soModuleAccesser = .text:0x00178034; // type:function size:0xB4
 execStatus__32ftStatusUniqProcessGimmickSpringFP16soModuleAccesser = .text:0x001780E8; // type:function size:0x4
-fn_27_1780EC = .text:0x001780EC; // type:function size:0x60
+exitStatus__32ftStatusUniqProcessGimmickSpringFP16soModuleAccesseri = .text:0x001780EC; // type:function size:0x60
 notifyEvent__32ftStatusUniqProcessGimmickSpringFP18soGimmickEventArgsP16soModuleAccesser = .text:0x0017814C; // type:function size:0x148
 fn_27_178294 = .text:0x00178294; // type:function size:0xC8
 fn_27_17835C = .text:0x0017835C; // type:function size:0x110
