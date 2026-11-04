@@ -80,27 +80,65 @@ static inline NWC24Err CheckDlTask_i(const NWC24iDlTask *task, BOOL wantWrite) {
 }
 
 NWC24Err NWC24CheckDlTask(const NWC24DlTask *pTask, BOOL wantWrite) {
-    return CheckDlTask_i((const NWC24iDlTask *)pTask, wantWrite);
-}
+    const NWC24iDlTask *task = (const NWC24iDlTask *)pTask;
+    NWC24iDlHeader *hdr = DlHeader_i();
 
-// Schedules the task's next update from its interval.
-static inline void SetNextTime_i(const NWC24iDlTask *task) {
-    s64 now = 0;
-    NWC24Err result;
+    if (task == NULL) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
 
-    result = NWC24iGetUniversalTime(&now);
-    if (result >= 0) {
-        s64 when = now + task->interval * 60;
+    if (hdr == NULL) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
 
-        result = CheckDlTask_i(task, FALSE);
-        if (result == NWC24_OK) {
-            u16 id = task->id;
+    if (wantWrite && !NWC24IsMsgLibOpenedByTool()) {
+        u32 appId = task->appId;
+        BOOL same = (NWC24GetAppId() & ~0xFF) == (appId & ~0xFF);
 
-            if (id != 0xFFFF) {
-                DlHeader_i()->entries[id].nextTime = when / 60;
+        if (!same) {
+            u32 group = task->groupId;
+            BOOL ok = FALSE;
+
+            if ((task->flags & DL_TASK_FLAG_ANYONE) && group == NWC24GetGroupId()) {
+                ok = TRUE;
+            }
+
+            if (!ok) {
+                return NWC24_ERR_PROTECTED;
             }
         }
     }
+
+    if (task->id != 0xFFFF && task->id >= hdr->maxTasks) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+
+    return NWC24_OK;
+}
+
+// Schedules the task's next update from its interval and reports clock,
+// validation and unassigned-slot errors. The interval setter ignores this status.
+static inline NWC24Err SetNextTime_i(const NWC24iDlTask *task) {
+    s64 now = 0;
+    NWC24Err result = NWC24iGetUniversalTime(&now);
+    NWC24Err check;
+    s64 when;
+    u16 id;
+    if (result < 0) {
+        return result;
+    }
+    when = now + task->interval * 60;
+    check = CheckDlTask_i(task, FALSE);
+    if (check == NWC24_OK) {
+        id = task->id;
+        if (id == 0xFFFF) {
+            check = NWC24_ERR_FAILED;
+        } else {
+            DlEntry_i(id)->nextTime = when / 60;
+            check = NWC24_OK;
+        }
+    }
+    return check;
 }
 
 // sets up a fresh task of the given type
@@ -143,7 +181,11 @@ NWC24Err fn_803A2A18(NWC24iDlTask *task, int type) {
     task->interval = 0xB40;
     task->margin = 0x5A0;
 
-    isOctet = type == NWC24_DLTYPE_OCTETSTREAM_V1 || type == NWC24_DLTYPE_OCTETSTREAM_V2;
+    if (type == NWC24_DLTYPE_OCTETSTREAM_V1 || type == NWC24_DLTYPE_OCTETSTREAM_V2) {
+        isOctet = TRUE;
+    } else {
+        isOctet = FALSE;
+    }
     if (isOctet) {
         strcpy(task->fileName, "content.bin");
     }
@@ -177,6 +219,18 @@ NWC24Err fn_803A2C58(NWC24iDlTask *task, u32 interval) {
     return NWC24_OK;
 }
 
+// Validates the URL length and its HTTP/HTTPS scheme.
+static inline NWC24Err CheckDlUrl_i(const char *url) {
+    NWC24Err result = fn_80399EE0(url, 7, 0x100);
+    if (result < 0) {
+        return result;
+    }
+    if (strncmp(url, "http://", 7) != 0 && strncmp(url, "https://", 8) != 0) {
+        return NWC24_ERR_FORMAT;
+    }
+    return NWC24_OK;
+}
+
 // the url to download from, http or https
 NWC24Err fn_803A2EA4(NWC24iDlTask *task, const char *url) {
     NWC24Err result;
@@ -186,14 +240,7 @@ NWC24Err fn_803A2EA4(NWC24iDlTask *task, const char *url) {
         return result;
     }
 
-    result = fn_80399EE0(url, 7, 0x100);
-    if (result >= 0) {
-        if (strncmp(url, "http://", 7) != 0 && strncmp(url, "https://", 8) != 0) {
-            result = NWC24_ERR_FORMAT;
-        } else {
-            result = NWC24_OK;
-        }
-    }
+    result = CheckDlUrl_i(url);
 
     if (result < 0) {
         return result;
@@ -227,6 +274,9 @@ NWC24Err fn_803A3064(NWC24iDlTask *task, u32 flags) {
         if ((flags & 0x80000000) | (flags & 0x38)) {
             return -40;
         }
+        break;
+    case NWC24_DLTYPE_MULTIPART_V2:
+    case NWC24_DLTYPE_OCTETSTREAM_V2:
         break;
     default:
         break;
@@ -799,14 +849,7 @@ NWC24Err fn_803A5284(NWC24iDlTask *task, u16 first, u16 last) {
     if (task->id >= DlHeader_i()->maxTasks && task->id != 0xFFFF) {
         result = NWC24_ERR_INVALID_VALUE;
     } else {
-        result = fn_80399EE0(task->url, 7, 0x100);
-        if (result >= 0) {
-            if (strncmp(task->url, "http://", 7) != 0 && strncmp(task->url, "https://", 8) != 0) {
-                result = NWC24_ERR_FORMAT;
-            } else {
-                result = NWC24_OK;
-            }
-        }
+        result = CheckDlUrl_i(task->url);
     }
 
     if (result < 0) {
@@ -844,10 +887,18 @@ NWC24Err fn_803A5284(NWC24iDlTask *task, u16 first, u16 last) {
     }
 }
 
-// older list files only have a count for the sub tasks, this fills in the task limits of the header
-static inline void FixDlHeader_i(void) {
-    NWC24iDlHeader *hdr = DlHeader_i();
+// Checks the task counts carried by a repaired or current-format header.
+static inline NWC24Err CheckDlHeaderLimits_i(const NWC24iDlHeader *hdr) {
+    if (hdr->maxTasks < 1 || hdr->privateTasks < 1 || hdr->maxTasks < hdr->privateTasks) {
+        return NWC24_ERR_BROKEN;
+    }
 
+    return NWC24_OK;
+}
+
+// Older list files only have a subtask count. Repair the supplied record,
+// then validate that same record after the file operations.
+static inline NWC24Err FixDlHeader_i(NWC24iDlHeader *hdr) {
     if (hdr->maxTasks == 0 && hdr->maxSubTasks != 0) {
         NWC24File file;
 
@@ -864,56 +915,43 @@ static inline void FixDlHeader_i(void) {
             NWC24FClose(&file);
         }
     }
-}
-
-static inline NWC24Err CheckDlHeaderLimits_i(const NWC24iDlHeader *hdr) {
-    if (hdr->maxTasks < 1 || hdr->privateTasks < 1 || hdr->maxTasks < hdr->privateTasks) {
-        return NWC24_ERR_BROKEN;
-    }
-
-    return NWC24_OK;
+    return CheckDlHeaderLimits_i(hdr);
 }
 
 // puts a task into the list, filling in the next update time
 NWC24Err fn_803A3D64(NWC24iDlTask *task) {
     NWC24Err result;
 
-    FixDlHeader_i();
-    result = CheckDlHeaderLimits_i(DlHeader_i());
-    if (result < 0) {
-        return result;
-    }
-
-    result = fn_803A5284(task, DlHeader_i()->privateTasks, DlHeader_i()->maxTasks);
+    result = FixDlHeader_i(DlHeader_i());
     if (result < 0) {
         return result;
     }
 
     {
-        s64 now = 0;
-
-        result = NWC24iGetUniversalTime(&now);
-        if (result >= 0) {
-            s64 when = now + task->interval * 60;
-
-            result = CheckDlTask_i(task, FALSE);
-            if (result == NWC24_OK) {
-                u16 id = task->id;
-
-                if (id == 0xFFFF) {
-                    result = NWC24_ERR_FAILED;
-                } else {
-                    DlEntry_i(id)->nextTime = when / 60;
-                    result = NWC24_OK;
-                }
-            }
-        }
+        // Preserve the native order of these two header reads.
+        u16 first = DlHeader_i()->privateTasks;
+        u16 last = DlHeader_i()->maxTasks;
+        result = fn_803A5284(task, first, last);
     }
-
+    if (result >= 0) {
+        result = SetNextTime_i(task);
+    }
     return result;
 }
 
 // reads the list header from the file
+static inline NWC24Err ReadDlHeader_i(NWC24File *file) {
+    NWC24Err result = NWC24FSeek(file, 0, NWC24_SEEK_BEG);
+    if (result < 0) {
+        return result;
+    }
+    result = NWC24FRead(NWC24WorkP->dlHeader, DL_HEADER_SIZE, file);
+    if (result < 0) {
+        return result;
+    }
+    return NWC24_OK;
+}
+
 NWC24Err fn_803A4D00(void) {
     NWC24File file;
     NWC24Err result;
@@ -925,15 +963,7 @@ NWC24Err fn_803A4D00(void) {
         return result;
     }
 
-    result = NWC24FSeek(&file, 0, NWC24_SEEK_BEG);
-    if (result >= 0) {
-        result = NWC24FRead(NWC24WorkP->dlHeader, DL_HEADER_SIZE, &file);
-        if (result < 0) {
-            read = result;
-        }
-
-        result = read;
-    }
+    result = ReadDlHeader_i(&file);
 
     if (result < 0) {
         return result;
@@ -941,8 +971,7 @@ NWC24Err fn_803A4D00(void) {
 
     read = NWC24FGetLength(&file, &length);
     if (read >= 0) {
-        FixDlHeader_i();
-        read = CheckDlHeaderLimits_i(DlHeader_i());
+        read = FixDlHeader_i(DlHeader_i());
     }
 
     result = NWC24FClose(&file);
