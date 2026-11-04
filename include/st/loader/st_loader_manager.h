@@ -32,6 +32,8 @@ public:
     // HYPOTHESIS: parameter types from the callers' register use.
     void sqSetupRequest(const u32* request);
     bool sqSetupSync(bool wait);
+    stLoaderManager();
+    static void create();
 };
 static_assert(sizeof(stLoaderManager) == 0x54, "Class is wrong size!");
 
