@@ -37,30 +37,6 @@ struct wnemRoboMissileParam {
     s32 m_bombAnimCmd;     // 0x1C, the anim cmd of the explosion's attack (0 for none)
 };
 
-// The collision search data of a missile (soCollisionSearchData, 0x18 bytes). HYPOTHESIS: only the 10-bit field at
-// 0x10 is known; Fly sets it to 2 when it starts to search.
-struct wnemRoboSearchHead {
-    s32 unk0;
-    s32 unk4;
-};
-struct wnemRoboSearchBits {
-    unsigned unk0 : 16;
-    unsigned m_kind : 10;
-    unsigned unk26 : 6;
-};
-struct wnemRoboSearchTail {
-    wnemRoboSearchBits m_bits;
-    s32 unk14;
-    wnemRoboSearchTail() { }
-};
-struct wnemRoboSearchData {
-    wnemRoboSearchHead m_head;
-    s32 unk8;
-    float unkC;
-    wnemRoboSearchTail m_tail;
-    wnemRoboSearchData() { }
-};
-
 void wnemRoboProc::MissileFly(wnemSimple* wn, soModuleAccesser* acc) {
     wnemRoboMissileParam* param = NULL;
     if (wn->unk2234 != NULL) {
@@ -78,9 +54,9 @@ void wnemRoboProc::MissileFly(wnemSimple* wn, soModuleAccesser* acc) {
     if (acc->getTeamModule().getTeam()->getNo() != TeamNo_None) {
         // A missile that belongs to a team searches for what it hits, and keeps its direction at a slow acceleration.
         if (acc->getCollisionSearchModule().isSearch(0)) {
-            wnemRoboSearchData data = *reinterpret_cast<wnemRoboSearchData*>(acc->getCollisionSearchModule().getData(0));
-            data.m_tail.m_bits.m_kind = 2;
-            acc->getCollisionSearchModule().set(0, 0, reinterpret_cast<soCollisionSearchData*>(&data));
+            soCollisionSearchData data = *acc->getCollisionSearchModule().getData(0);
+            data.m_unk10b = 2;
+            acc->getCollisionSearchModule().set(0, 0, &data);
         } else {
             wnemCommonProc::Report("[warning!!] wnemRoboProc::MissileFly -- refrect but, isSearch(0) = false \n");
         }

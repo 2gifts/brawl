@@ -13,11 +13,16 @@ extern "C" void fn_800B9984(muMenuController* controller);
 
 class muMenuController {
 public:
-    char _unk0[0x10];
+    char _unk0[0x8];
+    u32 m_held;         // 0x08 HYPOTHESIS: the buttons that are held (the name entry copies it to m_buttonsCurrentFrame2)
+    u32 m_pressed;      // 0x0C HYPOTHESIS: the buttons that were just pressed (1 left, 2 right in the Yes/No windows)
     u32 m_trigger;      // 0x10 HYPOTHESIS: the buttons pressed in this frame, in the bits of gfPadButtons
     char _unk14[0x94];
 
     muMenuController() { fn_800B96E8(this, 0xFF); }
     ~muMenuController() { }
+
+    // The controller whose A button was pressed last (-1 for none).
+    static int getAButtonPushedControllerID();
 };
 static_assert(sizeof(muMenuController) == 0xA8, "Wrong size for class!");

@@ -17,13 +17,7 @@ void scAdvGameover::setModule() {
     setLoadModule("sora_adv_menu_game_over.rel", false);
 }
 
-struct UnkParam {
-    union {
-        bool asBool;
-        u32 asInt;
-    } unk0;
-    u32 unk4;
-};
+typedef gmAdvData::PadInfo UnkParam;
 
 void scAdvGameover::start() {
     UnkParam stack18;
@@ -32,15 +26,14 @@ void scAdvGameover::start() {
     muAdvGameOverTaskParam param = { };
     param.unk0 = unkC;
     if (g_GameGlobal->m_advData) {
-        stack10.unk0.asInt = g_GameGlobal->m_advData->m_record.unk4928;
-        stack10.unk4 = g_GameGlobal->m_advData->m_record.unk492C;
+        stack10 = g_GameGlobal->m_advData->m_padInfo[0];
     } else {
-        stack18.unk0.asBool = false;
-        stack18.unk4 = -1;
+        stack18.m_flag.m_isSet = false;
+        stack18.m_padNo = -1;
         stack10 = stack18;
     }
     stack8 = stack10;
-    param.unk4 = stack8.unk4;
+    param.unk4 = stack8.m_padNo;
     param.unk8 = &unk60;
     param.unkC = &unk4C;
     param.unk10 = &unk74;

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <StaticAssert.h>
+#include <gf/gf_file_io_handle.h>
+#include <gf/gf_pad_status.h>
 #include <gf/gf_task.h>
 #include <mu/mu_collection_viewer.h>
 #include <mu/mu_object.h>
@@ -14,7 +16,15 @@
 class muStageEditUI : public gfTask {
 public:
     int m_state; // 40
-    u8 unk44[0x7D160 - 0x44];
+    union {
+        u8 unk44[0x7D160 - 0x44];
+        struct {
+            u8 unk0044[0x68 - 0x44];
+            int unk68;
+            u8 unk6C[8];
+            u32 unk74;
+        };
+    };
     int m_stageSize; // 7D160: small/medium/large
     int m_paletteCategory;
     u8 unk7D168[8];
@@ -77,6 +87,7 @@ public:
     void calcMoveGrid(int immediate);
     void setGridScroll(int direction, int clearOpposite);
     void setGridPartsCursor(int show);
+    void ctrlSetup(gfPadStatus* output, int repeat);
     s16 getSettingDataNum();
     // HYPOTHESIS: the parameter type follows the material and texture calls it is passed to.
     void setStageThumbnail(_GXTexObj* texture);
@@ -91,6 +102,8 @@ static_assert(offsetof(muStageEditUI, m_thumbnailData) == 0xC4754, "Editor thumb
 
 // HYPOTHESIS: the Stage Builder part table looked up by id; names and the 0x44-byte record
 // follow the lookup, and the rest of the layout is not modeled.
+class stDataMultiContainer;
+
 class muStageEditDataManager {
 public:
     struct Data {
@@ -100,8 +113,21 @@ public:
 
     Data* m_data;           // 0x000
     u32 m_numData;          // 0x004
-    u8 unk008[0x600 - 0x8];
+    union {
+        u8 unk008[0x600 - 0x8];
+        struct {
+            u8 unk0008[0x5D0 - 0x8];
+            int unk5D0;
+        };
+    };
     bool m_loaded;          // 0x600
+    gfFileIOHandle unk604;
+    bool unk608;
+    stDataMultiContainer* unk60C;
+
+    // HYPOTHESIS: the first argument indexes the stage-size string table.
+    muStageEditDataManager(int size, int load);
+    ~muStageEditDataManager();
 
     Data* getDataId(u32 id);
 };

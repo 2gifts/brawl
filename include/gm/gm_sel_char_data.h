@@ -13,14 +13,15 @@ struct gmSelCharData {
     union {
         char _5[0xb3];
         struct {
-            char _pad5[0x29];
-            u8 m_unk2E_7 : 3; // HYPOTHESIS: top 3 bits of byte 0x2E
-            u8 m_unk2E_4 : 3; // HYPOTHESIS: the next 3 bits of byte 0x2E
-            u8 : 2;
+            u8 _pad5[0x29];
+            // HYPOTHESIS: 3-bit difficulty setting at offset 0x2E
+            u8 unk2E_b7 : 3;
+            // HYPOTHESIS: 3-bit stock setting at offset 0x2E.
+            u8 unk2E_b4 : 3;
+            u8 _pad2F[0x89];
         };
     };
     gmPlayerInitData m_playersInitData[MAX_PLAYERS];
     char _0x33c[4];
 };
 static_assert(sizeof(gmSelCharData) == 0x340, "Class is wrong size!");
-static_assert(offsetof(gmSelCharData, m_playersInitData) == 0xB8, "Class is wrong size!");

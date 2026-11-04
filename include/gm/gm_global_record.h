@@ -316,15 +316,24 @@ struct gmGlobalRecord {
             u8 unk9C[0x44];
             struct {
                 u16 : 5;
-                u16 m_unk9C_10 : 3; // HYPOTHESIS: bits 10-8 of the halfword at 0x9C
+                // HYPOTHESIS: highest cleared difficulty plus one.
+                u16 unk9C_b10 : 3;
                 u16 : 8;
-                u32 m_unkA0; // HYPOTHESIS: high score at 0xA0
-                u8 _A4[0x3C];
+                u8 _pad9E[2];
+                // HYPOTHESIS: high score stored by sqSingleSimple::updateHiScore.
+                u32 unkA0;
+            };
+            struct {
+                u16 unk9C_15 : 1;
+                u16 : 10;
+                u16 unk9C_4 : 3;
+                u16 : 2;
+                char _9E[0xA];
+                u32 unkA8;
             };
         };
     };
     static_assert(sizeof(CharaNumData) == 0xE0, "Class is wrong size!");
-static_assert(offsetof(CharaNumData, m_unkA0) == 0xA0, "Class is wrong size!");
 
     char _0[0x18];
     u8 m_stageAppFlag[0x4];                 // 0x18
@@ -409,7 +418,23 @@ static_assert(offsetof(CharaNumData, m_unkA0) == 0xA0, "Class is wrong size!");
     // 2 * n + 1 it is new.
     u32 m_softFlags[0x22];                  // 0x15AC
     CharaNumData m_charaNumData[35];        // 0x1634
-    u8 unk34D4[0x74];
+    union {
+        u8 unk34D4[0x74];
+        struct {
+            u16 unk34D4_15 : 1;
+            u16 : 7;
+            u16 unk34D4_7 : 3;
+            u16 : 4;
+            u16 unk34D4_0 : 1;
+            char _34D6[6];
+            u32 unk34DC;
+            char _34E0[0x48];
+            u8 unk3528;
+            u8 unk3529;
+            u8 unk352A;
+            u8 unk352B;
+        };
+    };
     u8 unk3548[0x44];
     char _358C[0x764];
 };
@@ -428,37 +453,100 @@ struct nteGlobalData {
 static_assert(sizeof(nteGlobalData) == 0x88, "Class is wrong size!");
 
 
+// The Subspace Emissary save data. Names are HYPOTHESIS, from the readers (map menu, item generator, keep manager,
+// save point, result screens) and from GameGlobal's reset.
 struct gmAdvData {
-
-    struct Record {
-        struct LevelClear {
-            u32 m_state;           // 0x00
-            s32 m_difficulty;      // 0x04
-            u32 m_unk1;            // 0x08
-            s32 m_percent;         // 0x0C
-            u32 m_unk2;            // 0x10
-        };
-        static_assert(sizeof(LevelClear) == 0x14, "Class is wrong size!");
-
-        char _0[0x04];                    // 0x00
-        LevelClear m_levelClears[34]; // 0x04
-        union {
-            char unk2AC[0x467C];
-            struct {
-                char _pad2AC[0x4678];
-                u8 unk4924_7 : 1; // HYPOTHESIS: bit 7 of byte 0x4924
-                u8 m_unk4924_6 : 1; // HYPOTHESIS: bit 6 of byte 0x4924
-                u8 : 6;
-                char _pad4925[3];
-            };
-        };
-        u32 unk4928;
-        u32 unk492C;
+    // A place of the map: hidden (1) or shown, its kind (0 not open, 1..4), the value its model shows.
+    struct Level {
+        int m_hidden;  // 0x00
+        int m_kind;    // 0x04
+        int m_value;   // 0x08
+        int m_percent; // 0x0C
+        int m_unk10;   // 0x10
     };
-    static_assert(sizeof(Record) == 0x4930, "Class is wrong size!");
-    static_assert(offsetof(Record, unk4928) == 0x4928, "Class is wrong size!");
+    struct Slot {
+        s32 m_id;
+        u8 m_value;
+    };
+    // The controller the adventure is played with.
+    // BYTES: the flag is a union with its word: the scene units copy the structure word by word through
+    // temporaries on the stack (with a plain bool the copies are folded away).
+    struct PadInfo {
+        union Flag {
+            bool m_isSet;
+            u32 m_word;
+        } m_flag;
+        s32 m_padNo;
+    };
+    // One-bit flags.
+    struct Flags {
+        u8 m_unk0 : 1;
+        u8 m_unk1 : 1;
+        u8 m_unk2 : 1;
+        u8 m_unk3 : 1;
+        u8 m_unk4 : 1;
+        u8 m_unk5 : 1;
+        u8 m_unk6 : 1;
+        u8 m_unk7 : 1;
+    };
 
-    Record m_record;
-    char unk4930[0x28];
+    Level m_levels[34];          // 0x000
+    float m_unk2A8;              // 0x2A8
+    u16 m_mapFlags;              // 0x2AC: the parts of the map that are shown
+    char _2AE[6];
+    u8 unk2B4;                   // 0x2B4
+    u8 unk2B5;
+    char _2B6[3];
+    u8 unk2B9[0x27];             // 0x2B9
+    Slot m_slots[99];            // 0x2E0
+    union {
+        char _5F8[2];
+        u16 unk5F8;
+    };
+    u8 unk5FA;                   // 0x5FA
+    char _5FB;
+    u8 unk5FC;                   // 0x5FC
+    u8 m_difficultyLevel;        // 0x5FD
+    u8 unk5FE;
+    u8 unk5FF;
+    u8 m_nameIndex;              // 0x600: the name record of the player (0x78 none)
+    u8 unk601;
+    char _602;
+    u8 m_saveRequest;            // 0x603: 7 asks for a save
+    u8 m_mode;                   // 0x604
+    union {
+        char _605[7];
+        struct {
+            char _605b;
+            u8 unk606_7 : 1;
+            u8 : 7;
+            char _607[5];
+        };
+    };
+    u32 unk60C;                  // 0x60C
+    char _610[0xC];
+    u32 unk61C;                  // 0x61C
+    int m_itemGenKind;           // 0x620: the item generator sheet of the stage
+    s32 unk624;
+    u32 unk628;
+    u32 unk62C;
+    char _630[0x20];
+    u32 m_globalFlags[0x20];     // 0x650
+    char _6D0[0x41C8];
+    u32 unk4898[24];             // 0x4898: four words, then ten pairs (GameGlobal's constructor)
+    u32 unk48F8;                 // 0x48F8
+    char _48FC[0x14];
+    u32 unk4910;                 // 0x4910 (the saved data ends here)
+    bool m_isNanaDead[2];        // 0x4914: per player
+    u8 unk4916;                  // 0x4916: subtracted from the difficulty level
+    u8 unk4917;
+    u32 unk4918;
+    u32 unk491C;
+    u16 m_stageCoin;             // 0x4920: coins picked up on the stage (times 10 when added)
+    char _4922[2];
+    Flags m_flags;               // 0x4924
+    char _4925[3];
+    PadInfo m_padInfo[2];        // 0x4928
+    char _4938[0x20];
 };
 static_assert(sizeof(gmAdvData) == 0x4958, "Class is wrong size!");

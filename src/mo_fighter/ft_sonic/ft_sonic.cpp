@@ -24,7 +24,7 @@
 #include <so/article/so_generate_article_manage_module.h>
 #include <so/link/so_link_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
-#include <ft/ft_physics_iface.h>
+#include <so/so_module_hyp.h>
 #include <so/so_value_accesser.h>
 #include <wn/sonic/wn_sonic_gimmick_jump.h>
 #include <wn/sonic/wn_sonic_super_sonic.h>
@@ -66,7 +66,7 @@ ftSonic::ftSonic(s32 entryId,
     processes[20] = &g_ftSonicStatusUniqProcessFinalEnd;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 21);
     // HYPOTHESIS: selects the physics preset used by Sonic's movement.
-    ftPhysicsModuleCall6C(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0x32);
+    getPhysicsModule(m_moduleAccesser).unk6C(0x32);
 }
 
 // ---- fighter events ---------------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ void ftSonic::onStart(int param) {
     Fighter::onStart(param);
     m_moduleAccesser->getCollisionHitModule().setStatusNodeDefault(0x13, 3, 0);
     m_moduleAccesser->getCollisionHitModule().resetStatusAll(0);
-    ftPhysicsModuleCall94(m_moduleAccesser->m_enumerationStart->m_physicsModule);
+    getPhysicsModule(m_moduleAccesser).unk94();
     if (getOwner()->getSpycloak()) {
         m_moduleAccesser->getWorkManageModule().onFlag(0x1200003e);
     } else {
