@@ -80,3 +80,80 @@ float stEdit::getCameraParamDistanceMax() {
         return m_cameraParam1->m_horizontalRotationFactor;
     }
 }
+
+void stEdit::getFighterReStartPos(Vec3f* startPos, int fighterIndex) {
+    *startPos = m_restartPos;
+}
+
+void stEdit::getFighterStartPos(Vec3f* startPos, int fighterIndex) {
+    *startPos = m_startPos[fighterIndex];
+}
+
+stEdit* stEdit::create() {
+    return new (Heaps::StageInstance) stEdit;
+}
+
+void stEdit::getItemPos(Vec3f* pos, Vec3f* end, u32 index) {
+    if (index < m_itemPosCount && m_itemPos) {
+        Vec3f* item = &m_itemPos[index * 2];
+        pos->m_x = item[0].m_x;
+        pos->m_y = item[0].m_y;
+        pos->m_z = item[0].m_z;
+        end->m_x = item[1].m_x;
+        end->m_y = item[1].m_y;
+        end->m_z = item[1].m_z;
+    }
+}
+
+GXColor stEdit::getFinalTechniqColor() {
+    u32 packed;
+    switch (m_theme) {
+        case 0:
+            packed = 0x140004B8;
+            break;
+        case 1:
+            packed = 0x14000496;
+            break;
+        case 2:
+            packed = 0x1400047D;
+            break;
+        default:
+            packed = 0;
+            break;
+    }
+    return *reinterpret_cast<GXColor*>(&packed);
+}
+
+u32 stEdit::getModeFlag(u32 category, u32 type) {
+    u32 flags;
+    if (category == 1) {
+        flags = 0x10;
+    } else if (category == 3 && type == 9) {
+        flags = 0x10;
+    } else {
+        flags = 0;
+    }
+    if (category == 0 && type == 5) {
+        flags |= 0x80;
+    }
+    if (category == 1) {
+        flags |= 0x800;
+    }
+    if (category != 3) {
+        return flags;
+    }
+    switch (type) {
+        case 0: return flags | 0x1020;
+        case 1: return flags | 0x20;
+        case 2: return flags | 3;
+        case 3: return flags | 0x420;
+        case 4: return flags | 0x21;
+        case 5: return flags | 0x40;
+        case 6: return flags | 2;
+        case 7:
+        case 8:
+        case 9:
+            break;
+    }
+    return flags;
+}
