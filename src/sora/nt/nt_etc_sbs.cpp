@@ -124,7 +124,7 @@ bool nteSBS::download(void* buf, int size, DWCDate* date, DWCTime* time) {
                 if (unk50) {
                     if (err < 0)
                         err = -err;
-                    unk50->notifyDoneSOProc(static_cast<nteSODone::NotifType>(err), type);
+                    unk50->showError(err, type);
                 }
                 if (unk5C == 0)
                     DWC_ClearError();
@@ -161,7 +161,7 @@ bool nteSBS::downloadWinCount(void* out) {
                 if (unk50) {
                     if (err < 0)
                         err = -err;
-                    unk50->notifyDoneSOProc(static_cast<nteSODone::NotifType>(err), type);
+                    unk50->showError(err, type);
                 }
                 if (unk5C == 0)
                     DWC_ClearError();
