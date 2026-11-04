@@ -916,3 +916,32 @@ void ftPokeTrainer::setNameCursor(bool) { }
 void ftPokeTrainer::setCursor(bool) { }
 
 void ftPokeTrainer::standbyAdvFollow() { }
+
+ftPokeTrainerWanderingModule::~ftPokeTrainerWanderingModule() { }
+
+void ftPokeTrainerExtendParamAccesser::setup(const u8* extData) {
+    const ftData* data = reinterpret_cast<const ftData*>(extData);
+    for (int variation = 0; variation < NumVariations; variation++) {
+        void* group;
+        if (variation == 0) {
+            group = data->extendParam[0];
+        } else {
+            group = data->extendParam[1];
+        }
+        const float* floats = static_cast<const float*>(group);
+        const int* ints = static_cast<const int*>(group);
+        m_floats[variation][0] = &floats[0];
+        m_floats[variation][1] = &floats[1];
+        m_floats[variation][2] = &floats[2];
+        m_floats[variation][3] = &floats[3];
+        m_floats[variation][4] = &floats[6];
+        m_floats[variation][5] = &floats[7];
+        m_floats[variation][6] = &floats[8];
+        m_floats[variation][7] = &floats[9];
+        m_floats[variation][8] = &floats[12];
+        m_ints[variation][0] = &ints[4];
+        m_ints[variation][1] = &ints[5];
+        m_ints[variation][2] = &ints[10];
+        m_ints[variation][3] = &ints[11];
+    }
+}

@@ -6,6 +6,7 @@
 #endif
 #include <ft/fighter.h>
 #include <types.h>
+#include <ft/ft_extend_param_accesser.h>
 
 class ftPokeTrainer;
 
@@ -42,6 +43,7 @@ public:
 class ftPokeTrainerWanderingModule {
 public:
     u8 m_data[0x60];
+    ~ftPokeTrainerWanderingModule();
     void replace(u8 index, ftPokeTrainer* trainer, soModuleAccesser* acc);
     void setDirectionTarget(soModuleAccesser* acc);
     void start(ftPokeTrainer* trainer, Vec3f* pos, Vec3f* unk, soModuleAccesser* acc);
@@ -114,4 +116,9 @@ public:
     void sendPartnerPosEvents();
     void reqAdvFollowEffect(Vec2f* pos);
     bool isExistAdvFollowEffect();
+};
+
+class ftPokeTrainerExtendParamAccesser : public ftExtendParamAccesserEx<3999, 9, 23999, 4> {
+public:
+    virtual void setup(const u8* extData);
 };

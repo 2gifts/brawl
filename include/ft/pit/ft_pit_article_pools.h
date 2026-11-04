@@ -13,6 +13,7 @@ class Vec3f;
 struct wnPitBowData;
 struct wnPitBowArrowData;
 struct wnPitParthenaData;
+class wnPitIkarus;
 
 // Pit's bow (the class is in sora_melee). Opaque shell: the full class is a weapon builder that cannot coexist with this unit.
 class wnPitBow : public Weapon {
@@ -39,6 +40,7 @@ public:
     wnPitParthena(s32 articleId, const wnArticleBuildInfo& info, const wnPitParthenaData* data);
     virtual ~wnPitParthena();
     void activate(int founderTaskId, int resourceId, int team, float scale);
+    static bool activeArticle(wnPitIkarus* weapon, soModuleAccesser* acc);
 };
 static_assert(sizeof(wnPitParthena) == 0x180A4, "wnPitParthena layout is wrong!");
 

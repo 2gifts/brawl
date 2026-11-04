@@ -98,4 +98,6 @@ public:
     static bool activeArticle2(wnDededeFollower* weapon, soModuleAccesser* acc);
     static bool activeArticle3(wnDededeWaddledooBeam* weapon, soModuleAccesser* acc);
     static bool shootArticle(wnDededeFollower* weapon, soModuleAccesser* acc);
+    virtual bool notifyEventCollisionSearchCheck();
+    virtual void onStart(int startKind);
 };

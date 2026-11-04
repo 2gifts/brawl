@@ -97,6 +97,9 @@ public:
     static bool activeArticle3(wnDiddyExplosion* weapon, soModuleAccesser* acc);
     static bool shootArticle(wnDiddyBarrel* weapon, soModuleAccesser* acc);
     virtual ~ftDiddy();
+    virtual void processFixPosition();
+    virtual void onStart(int entryId);
+    virtual void processUpdate();
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual void notifyEventOnDamage(soDamage* damage, bool isDamage, soModuleAccesser* moduleAccesser);
 };

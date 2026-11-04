@@ -21,6 +21,8 @@
 #include <so/so_value_accesser.h>
 #include <so/team/so_team.h>
 #include <so/param/so_param_customize_module_impl.h>
+#include <it/it_manager.h>
+#include <so/collision/so_collision_log.h>
 
 #define FT_NO_REFLECTOR_INSTANTIATION
 #define FT_BC ftGameWatchBuildConfig
@@ -141,6 +143,38 @@ ftGameWatch::ftGameWatch(s32 entryId,
     absorber.add(&group, 0);
     absorber.setStatus(0, 0, 0);
     ftTurnModuleCall30(m_moduleAccesser->m_enumerationStart->m_turnModule, 1);
+}
+
+void ftGameWatch::notifyEventOnDamage(soDamage* damage, bool unk2, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventOnDamage(damage, unk2, moduleAccesser);
+    m_moduleAccesser->getWorkManageModule().offFlag(0x1200003e);
+}
+
+void ftGameWatch::analyzeSeal(void* seal) {
+    ftOwnerSeal* record = static_cast<ftOwnerSeal*>(seal);
+    if (record->m_kind == 0x3d) {
+        int count = static_cast<int>(record->m_value / 2.0f);
+        m_moduleAccesser->getWorkManageModule().setInt(count, 0x10000046);
+    }
+}
+
+void ftGameWatch::notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeSituation(kind, prevKind, moduleAccesser);
+    if (kind != Situation_Air && moduleAccesser->getStatusModule().getStatusKind() != 0x114) {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003e);
+    }
+}
+
+void ftGameWatch::notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    if (moduleAccesser->getMotionModule().getKind() == 0x1d6 &&
+        !moduleAccesser->getWorkManageModule().isFlag(0x1200003f) &&
+        collisionLog->m_taskCategory == 0xa) {
+        moduleAccesser->getWorkManageModule().onFlag(0x1200003f);
+        Vec3f offset(0.0f, 5.0f, 0.0f);
+        Vec3f position = moduleAccesser->getModelModule().getNodeGlobalPosition(0x1d, &offset, false, false);
+        float facing = moduleAccesser->getPostureModule().getLr();
+        itManager::getInstance()->createItem(&position, facing, static_cast<itKind>(0x40), 0, -1, NULL, 0, 0xffff, 0, 0xffff);
+    }
 }
 
 // The sausage starts through the transactor with the model resource of the fighter.

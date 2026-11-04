@@ -8,6 +8,8 @@
 class soDamageModule;
 
 namespace ftExternalValueAccesser {
+    // HYPOTHESIS: audience parameters are returned as a table of words.
+    u32* getAudienceData();
     soCollisionHitModule* getsoCollisionHitModule(Fighter* fighter);
     soDamageModule* getDamageModule(Fighter* fighter);
     float getWeight(Fighter* fighter);

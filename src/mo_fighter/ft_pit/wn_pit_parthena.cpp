@@ -4,11 +4,30 @@
 #include <st/stage.h>
 #include <so/so_module_accesser.h>
 #include <wn/wn_activate_desc.h>
+#include <wn/pit/wn_pit_ikarus.h>
+#include <mt/mt_prng.h>
+#include <so/team/so_team.h>
 
 // Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
 extern "C" {
 
 } // extern "C"
+
+bool wnPitParthena::activeArticle(wnPitIkarus* weapon, soModuleAccesser* acc) {
+    Vec3f position = acc->getPostureModule().getPos();
+    float radius = soValueAccesser::getConstantFloat(acc, 4001, 0);
+    float angle = 6.2831855f * randf();
+    position.m_x = radius * (float)cos(angle);
+    position.m_y = radius * (float)sin(angle);
+    position.m_z *= soValueAccesser::getConstantFloat(acc, 4002, 0);
+    soTeamModule& team = acc->getTeamModule();
+    soResourceModule& resources = acc->getResourceModule();
+    u32 founderTaskId = acc->getStageObject().m_taskId;
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getBinResId(),
+                     team.getTeam()->getNo(), position, angle,
+                     acc->getWorkManageModule().getFloat(0x11000001));
+    return false;
+}
 
 // HYPOTHESIS: the army appears at kirifuda point 6 of the stage, scaled by the kirifuda scale of that point.
 void wnPitParthena::activate(int founderTaskId, int resourceId, int team, float scale) {
