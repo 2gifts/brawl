@@ -775,13 +775,11 @@ void IfPlayer::makeTexture(IfPlayerAppearInfo* info) {
 }
 
 int IfPlayer::makeApealCommentTex(ApealComment* comment, const wchar_t* text) {
-    wchar_t line[30];
-    static const GXColor colors[2] = { { 0xFF, 0xFF, 0xFF, 0xFF }, { 0x00, 0x00, 0x00, 0xFF } };
-    GXColor white = colors[0];
-    GXColor black = colors[1];
+    wchar_t line[22];
     wchar_t* first = line;
     int length = 0;
-    // the comment is wrapped after ten characters
+    GXColor white = { 255, 255, 255, 255 };
+    GXColor black = { 0, 0, 0, 255 };
     for (; length < 10 && *text != 0; text++) {
         *first = *text;
         first++;
