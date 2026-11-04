@@ -214,7 +214,9 @@ void gfAreaCircle::debugDrawImp() {
     if (m_isDrawFill) {
         shape.draw(m_debugColor, 1.0f, true);
     } else {
-        shape.draw(lbl_8059FF8C, 1.0f, false);
+        union { u32 rgba; GXColor color; } outline;
+        outline.rgba = lbl_8059FF8C.ToU32();
+        shape.draw(outline.color, 1.0f, false);
     }
 }
 
@@ -291,6 +293,8 @@ void gfAreaTriangle::debugDrawImp() {
     if (m_isDrawFill) {
         shape.draw(m_debugColor, 1.0f, true);
     } else {
-        shape.draw(lbl_8059FF8C, 1.0f, false);
+        union { u32 rgba; GXColor color; } outline;
+        outline.rgba = lbl_8059FF8C.ToU32();
+        shape.draw(outline.color, 1.0f, false);
     }
 }
