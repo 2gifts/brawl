@@ -43,6 +43,8 @@ public:
     void setStageFlag(u32 id, bool on);
     bool getStageFlag(u32 id);
     void setGlobalFlag(u32 id, bool on);
+    // HYPOTHESIS: inlined range sync of global flags to gmAdvData.
+    void resetGlobalFlag(u32 start, u32 end);
     bool getGlobalFlag(u32 id);
     bool getKeepFlag(u32 id, u32 kind);
     void useInitilizeTiming();
