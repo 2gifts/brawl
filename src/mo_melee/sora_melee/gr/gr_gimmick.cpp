@@ -4,6 +4,10 @@
 #include <st/stage.h>
 #include <string.h>
 #include <types.h>
+#include <mu/mu_mat_color.h>
+#include <nw4r/ut/ut_Color.h>
+
+extern "C" nw4r::g3d::ResMatChan GetResMatChan__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(nw4r::g3d::ScnMdl::CopiedMatAccess* access, bool sync);
 
 bool grVisibleProduction::isFinished() {
     return m_0x4 == VisibleProduction_Finished;
@@ -121,4 +125,49 @@ void grGimmick::setTransparency(u32 flag, u32 settings) {
         setEnableCollisionStatusByClipping(flag);
     }
     m_transparencyFlag = flag;
+}
+
+void grGimmick::setPos(Matrix* matrix) {
+    grNodeCallbackData* data = m_calcWorldCallBack.m_nodeCallbackDatas;
+    if (data != NULL) {
+        float x = matrix->m[0][3];
+        float y = matrix->m[1][3];
+        data->m_pos.m_x = x;
+        float z = matrix->m[2][3];
+        data->m_pos.m_y = y;
+        data->m_pos.m_z = z;
+    }
+}
+
+void grGimmick::getMatrix(Matrix* matrix) {
+    grNodeCallbackData* data = m_calcWorldCallBack.m_nodeCallbackDatas;
+    if (data != NULL) {
+        *matrix = data->m_matrix;
+    } else {
+        matrix->setIdentity();
+    }
+}
+
+void grGimmick::setMaterialAlpha(const char* name, u32 alpha) {
+    nw4r::g3d::ResMdl resMdl;
+    nw4r::g3d::ResMat resMat;
+    nw4r::g3d::ResMatChan resMatChan;
+    GXColor color = nw4r::ut::Color(0xFFFFFFFF);
+    nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[0];
+    if (scnMdl != NULL) {
+        resMdl = scnMdl->m_resMdl;
+        if (resMdl.IsValid()) {
+            resMat = resMdl.GetResMat(name);
+            if (resMat.IsValid()) {
+                nw4r::g3d::ScnMdl::CopiedMatAccess access(scnMdl, resMat.ref().m_id);
+                resMatChan = GetResMatChan__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(&access, false);
+                if (resMatChan.IsValid()) {
+                    resMatChan.GXGetChanMatColor(GX_ALPHA0, &color);
+                    color.a = alpha;
+                    resMatChan.GXSetChanMatColor(GX_ALPHA0, color);
+                    resMat.DCStore(false);
+                }
+            }
+        }
+    }
 }
