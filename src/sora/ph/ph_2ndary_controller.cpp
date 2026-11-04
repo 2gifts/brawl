@@ -43,6 +43,7 @@
 //   0x80095F78    28  isHitCollisionLastNode2Pos   [map: ph2ndary2Controller__isHitCollisionLastNode2Pos]
 //   0x80095F94    48  applyFeedback   [map: ph2ndary2Controller__applyFeedback]
 
+#include <ph/ph2ndaryWorld.h>
 #include <ph/ph_Interface.h>
 #include <ph/ph_2ndary_controller.h>
 #include <ph/ph_2ndary_constraint.h>
@@ -51,6 +52,8 @@
 #include <ut/ut_nw.h>
 
 extern u8 lbl_8059DC08;
+extern u8 lbl_8059DC09;
+extern phInterface* lbl_8049DEC8[];
 
 // ph2ndary2Controller: pair of ph2ndaryController objects created through phInterface.
 ph2ndary2Controller::ph2ndary2Controller(void* a, void* b) {
@@ -314,4 +317,42 @@ void ph2ndaryController::draw() {
 
 bool ph2ndary2Controller::isHitCollisionLastNode2Pos() {
     return (m_controller[0]->m_flags & 7) != 0;
+}
+
+void ph2ndary2Controller::setUndispNode(nw4r::g3d::ScnMdl* scnMdl) {
+    u32 nodes[200];
+    int count = get2ndaryUndispNode(nodes, scnMdl->m_resMdl);
+    if (count != 0) {
+        nwSMSetNodeVisibility(scnMdl, count, nodes, false);
+    }
+}
+
+void ph2ndaryController::initNode(nw4r::math::MTX34* matrices, nw4r::g3d::ResMdl resMdl) {
+    if (unk20) {
+        if (!unk0F[0]) {
+            ph2ndaryWorld* world = lbl_8049DEC8[0]->m_2ndaryWorld;
+            unk24 = (world ? world : 0)->addConstraintArray(this, &lbl_8059DC09);
+            unk0F[0] = 1;
+        }
+        if (!unk0D) {
+            initCallBack(matrices, resMdl);
+            unk0D = 1;
+        }
+        if (unk0E) {
+            int i = 0;
+            if (m_lines.getSize() > 0) {
+                for (; i < m_lines.getSize(); i++) {
+                    nw4r::g3d::ResNode node = resMdl.GetResNode(m_lines[i]->m_id);
+                    u32 index = node.IsValid() ? node.ptr()->m_id : 0;
+                    m_lines[i]->unkDC = matrices[index];
+                    m_lines[i]->updateMatrixForMyPosture();
+                }
+            }
+            unk0E = 0;
+        }
+    }
+}
+
+void ph2ndary2Controller::applyFeedback(f32 scale, int a, nw4r::g3d::ResMdl resMdl, Vec3f* position) {
+    m_controller[1]->applyFeedback(scale, a, resMdl, position);
 }

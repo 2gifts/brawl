@@ -3,6 +3,7 @@
 #include <havok/hkArray.h>
 #include <mt/mt_vector.h>
 #include <nw4r/g3d/g3d_resmdl.h>
+#include <nw4r/math/math_types.h>
 #include <revolution/MTX.h>
 #include <types.h>
 
@@ -39,6 +40,9 @@ public:
     bool isHitCollisionLastNode2Pos(u32 mask);
     void processDefault();
     void draw();
+    void initCallBack(const nw4r::math::MTX34* matrices, nw4r::g3d::ResMdl resMdl); // HYPOTHESIS: parameter types
+    void initNode(nw4r::math::MTX34* matrices, nw4r::g3d::ResMdl resMdl); // HYPOTHESIS: parameter types
+    void applyFeedback(f32 scale, int a, nw4r::g3d::ResMdl resMdl, Vec3f* position); // HYPOTHESIS: parameter types
 
     hkArray<ph2ndaryLine*> m_lines;   // 0x00 (data, count, capacity)
     u8 unk0C;                         // 0x0C
@@ -46,7 +50,9 @@ public:
     u8 unk0E;                         // 0x0E
     u8 unk0F[0x20 - 0x0F];            // 0x0F
     u8 unk20;                         // 0x20, latched from a global flag by setLastVelocity
-    u8 unk21[0x30 - 0x21];            // 0x21
+    u8 unk21[3];                      // 0x21
+    int unk24;                        // 0x24, id returned by ph2ndaryWorld::addConstraintArray (HYPOTHESIS)
+    u8 unk28[0x30 - 0x28];            // 0x28
     int unk30;                        // 0x30, last line index
     u8 unk34[0x3C - 0x34];            // 0x34
     f32 m_gravity;                    // 0x3C, set by soPhysicsModuleImpl::set2ndGravity
@@ -95,6 +101,8 @@ public:
 
     bool isHitCollisionLastNode2Pos();
     void setUndispNode(nw4r::g3d::ScnMdl* scnMdl);
+    int get2ndaryUndispNode(u32* nodes, nw4r::g3d::ResMdl resMdl);
+    void applyFeedback(f32 scale, int a, nw4r::g3d::ResMdl resMdl, Vec3f* position); // HYPOTHESIS: parameter types
 
     ph2ndaryController* m_controller[2];   // 0x00, 0x04
     u8 unk08[3];                           // 0x08..0x0A
