@@ -235,7 +235,8 @@ void soCameraModuleImpl::setRun(u32 index) {
 }
 
 void soCameraModuleImpl::exitRun(u32 index) {
-    m_cameraSubjectArray->at(index).getInstance()->m_isRun = false;
+    cmSubject* subject = m_cameraSubjectArray->at(index).getInstance();
+    subject->m_isRun = false;
 }
 
 void soCameraModuleImpl::getSubjectRange(Rect2D* outRange, u32 index) {
