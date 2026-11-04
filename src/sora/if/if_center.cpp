@@ -5,6 +5,7 @@
 #include <nw4r/g3d/g3d_scnmdl.h>
 #include <snd/snd_bgm.h>
 #include <types.h>
+#include <gf/gf_pad_system.h>
 
 // HYPOTHESIS: IfCenter::updateTimeFast (0x800DDCF8, still fn_) takes the time to show.
 extern "C" void fn_800DDCF8(IfCenter* center, s32 time);
@@ -381,4 +382,32 @@ void IfCenter::eraseCorps() {
         }
     }
     m_group->Remove(corps);
+}
+
+extern const u8 lbl_805A23A0[8];
+
+void IfCenter::setVisibleReplaySave(bool visible, int controller, bool enabled, bool alternate) {
+    MuObject* obj = m_models[80];
+    m_group->Remove(obj->m_sceneModel);
+    if (visible) {
+        gfPadStatus status;
+        g_gfPadSystem->getSysPadStatus(controller, &status);
+        float frame;
+        if (status.m_error == gfPadError::NONE) {
+            frame = lbl_805A23A0[status.m_controllerType];
+        } else if (controller < 4) {
+            frame = 0.0f;
+        } else {
+            frame = 2.0f;
+        }
+        obj->setFrameTex(frame);
+        obj->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+        int visibleFrame = !enabled;
+        if (alternate) {
+            visibleFrame += 2;
+        }
+        obj->setFrameVisible(visibleFrame);
+        obj->m_modelAnim->m_anmObjVisRes->SetUpdateRate(0.0f);
+        m_group->Insert(m_group->sceneItemsCount, obj->m_sceneModel);
+    }
 }

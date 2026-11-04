@@ -67,5 +67,6 @@ public:
     static s32 centerGoalMain(IfCenter* center);
 
     void eraseCorps();
+    void setVisibleReplaySave(bool visible, int controller, bool enabled, bool alternate);
 };
 static_assert(sizeof(IfCenter) == 0x1E4, "Class is wrong size!");
