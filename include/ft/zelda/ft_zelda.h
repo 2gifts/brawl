@@ -73,6 +73,13 @@ public:
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
+    void** getExtendParam();
+    virtual void processUpdate();
+    virtual void changeSucceedCore(void* work, int status);
+    virtual void change(void* work, int startKind);
+    virtual bool notifyEventCollisionReflectorCheck();
+    virtual void notifyEventCollisionReflector(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnZeldaDein* weapon, soModuleAccesser* acc);
     static bool activeArticle1(wnZeldaLightingBow* weapon, soModuleAccesser* acc);

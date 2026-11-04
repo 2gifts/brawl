@@ -20,6 +20,8 @@
 
 #define FT_BC ftZeldaBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
+#include <ft/ft_change_succeed_work.h>
+#include <so/collision/so_collision_log.h>
 
 // Status teardown destroys its owned change-request queue before observers.
 #pragma dont_inline on
@@ -467,7 +469,6 @@ u8* fn_104_C020(u8* p, int x) {
 
 // Single-store and pointer-chain accessors.
 void fn_104_BF30(u8* p, u8 v) { *(u8*)(p + 0x10000 - 0x17C) = v; }
-u8* fn_104_9974(u8* p) { return *(u8**)(p + 0x18670) + 0x7C; }
 
 // Virtual destructors: delete the object when the flag is positive, then return it.
 void* fn_104_1E70(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
@@ -519,4 +520,58 @@ struct ftZeldaVirtualSlots {
 // Tail-call virtual slot (offset 0x58) of the object.
 void fn_104_BFA8(void* p) { return ((ftZeldaVirtualSlots*)p)->slot20(); }
 
+}
+
+void** ftZelda::getExtendParam() {
+    return m_data->extendParam;
+}
+
+void ftZelda::processUpdate() {
+    Fighter::processUpdate();
+    unk18675 = 0;
+    unk18674 = 0;
+}
+
+void ftZelda::changeSucceedCore(void* work, int status) {
+    Fighter::changeSucceedCore(work, status);
+    m_moduleAccesser->getWorkManageModule().setInt(static_cast<ftChangeSucceedWork*>(work)->unk100[0], 0x10000040);
+}
+
+void ftZelda::change(void* work, int startKind) {
+    onStart(startKind);
+    changeSucceedCore(work, 0x11B);
+}
+
+bool ftZelda::notifyEventCollisionReflectorCheck() {
+    if (unk18674 == 1) {
+        return true;
+    }
+    if (unk18675 == 1) {
+        m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
+    }
+    return Fighter::notifyEventCollisionReflectorCheck();
+}
+
+void ftZelda::notifyEventCollisionReflector(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser) {
+    if (groupIndex == 2) {
+        if (power >= m_moduleAccesser->getCollisionReflectorModule().getAttackLimit(groupIndex)) {
+            unk18675 = 1;
+            return;
+        }
+        unk18674 = 1;
+    }
+    Fighter::notifyEventCollisionReflector(attackModule, power, collisionLog, groupIndex, posX, posY, moduleAccesser);
+}
+
+void ftZelda::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventCollisionSearch(collisionLog, moduleAccesser);
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+    int count = work.getInt(0x20000000);
+    if (count < 8) {
+        work.setInt(collisionLog->m_taskId, 0x20000001 + count);
+        work.setInt(collisionLog->_35, 0x20000009 + count);
+        work.setInt(collisionLog->m_collsionIndex, 0x20000011 + count);
+        ++count;
+    }
+    work.setInt(count, 0x20000000);
 }
