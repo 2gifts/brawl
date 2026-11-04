@@ -47,7 +47,7 @@ static void lerp2Quat(const hkSweptTransform& st, hkReal t, hkQuaternion& out) {
         hkReal len2 = out.m_vec.lengthSquared4();
         hkReal r = 0.75f - 0.125f * len2;
         r = r * (1.5f - 0.5f * len2 * r * r);
-        out.m_vec.mul4(r);
+        out.m_vec.setMul4(out.m_vec, r);
     }
 
     if (t < 0.5f) {

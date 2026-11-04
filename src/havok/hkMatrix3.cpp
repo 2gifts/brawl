@@ -20,71 +20,9 @@ void hkMatrix3::transpose() {
     m[6] = value9;
 }
 
+// Same code as hkMatrix3::setMul (the C entry point of the product).
 void hkMatrix3_setMulMat3Mat3(hkMatrix3* dst, const hkMatrix3* lhs, const hkMatrix3* rhs) {
-    const float* a = &lhs->m_col0.x;
-    const float* b = &rhs->m_col0.x;
-    float* out = &dst->m_col0.x;
-
-    const float a0 = a[0];
-    const float a1 = a[1];
-    const float a2 = a[2];
-    const float a4 = a[4];
-    const float a5 = a[5];
-    const float a6 = a[6];
-    const float a8 = a[8];
-    const float a9 = a[9];
-    const float a10 = a[10];
-
-    const float b0 = b[0];
-    const float b1 = b[1];
-    const float b2 = b[2];
-    const float b4 = b[4];
-    const float b5 = b[5];
-    const float b6 = b[6];
-    const float b8 = b[8];
-    const float b9 = b[9];
-    const float b10 = b[10];
-
-    float sum0 = b1 * a4;
-    sum0 = b0 * a0 + sum0;
-    const float r0 = b2 * a8 + sum0;
-    float sum1 = b1 * a5;
-    sum1 = b0 * a1 + sum1;
-    const float r1 = b2 * a9 + sum1;
-    float sum2 = b1 * a6;
-    sum2 = b0 * a2 + sum2;
-    const float r2 = b2 * a10 + sum2;
-    float sum4 = b5 * a4;
-    sum4 = b4 * a0 + sum4;
-    const float r4 = b6 * a8 + sum4;
-    float sum5 = b5 * a5;
-    sum5 = b4 * a1 + sum5;
-    const float r5 = b6 * a9 + sum5;
-    float sum6 = b5 * a6;
-    sum6 = b4 * a2 + sum6;
-    const float r6 = b6 * a10 + sum6;
-    float sum8 = b9 * a4;
-    sum8 = b8 * a0 + sum8;
-    const float r8 = b10 * a8 + sum8;
-    float sum9 = b9 * a5;
-    sum9 = b8 * a1 + sum9;
-    const float r9 = b10 * a9 + sum9;
-    float sum10 = b9 * a6;
-    sum10 = b8 * a2 + sum10;
-    const float r10 = b10 * a10 + sum10;
-
-    out[0] = r0;
-    out[1] = r1;
-    out[2] = r2;
-    out[3] = 0.0f;
-    out[4] = r4;
-    out[5] = r5;
-    out[6] = r6;
-    out[7] = 0.0f;
-    out[8] = r8;
-    out[9] = r9;
-    out[10] = r10;
-    out[11] = 0.0f;
+    dst->_setMul(*lhs, *rhs);
 }
 
 void hkMatrix3_invertSymmetric(hkMatrix3* matrix) {
@@ -110,35 +48,7 @@ void hkMatrix3::setTranspose(const hkMatrix3& other) {
 }
 
 void hkMatrix3::setMul(const hkMatrix3& lhs, const hkMatrix3& rhs) {
-    const float* a = &lhs.m_col0.x;
-    // HYPOTHESIS: lhs is copied to an aligned local first so the product stays correct when this aliases lhs.
-    hkVector4 columns[3];
-    columns[0].x = a[0];
-    columns[0].y = a[1];
-    columns[0].z = a[2];
-    columns[0].w = a[3];
-    columns[1].x = a[4];
-    columns[1].y = a[5];
-    columns[1].z = a[6];
-    columns[1].w = a[7];
-    columns[2].x = a[8];
-    columns[2].y = a[9];
-    columns[2].z = a[10];
-    columns[2].w = a[11];
-
-    const float* b = &rhs.m_col0.x;
-    float* out = &m_col0.x;
-    for (int i = 0; i < 3; i++) {
-        const float v0 = b[0];
-        const float v1 = b[1];
-        const float v2 = b[2];
-        out[0] = v0 * columns[0].x + v1 * columns[1].x + v2 * columns[2].x;
-        out[1] = v0 * columns[0].y + v1 * columns[1].y + v2 * columns[2].y;
-        out[2] = v0 * columns[0].z + v1 * columns[1].z + v2 * columns[2].z;
-        out[3] = 0.0f;
-        b += 4;
-        out += 4;
-    }
+    _setMul(lhs, rhs);
 }
 
 void hkMatrix3::setMul(float scalar, const hkMatrix3& other) {
@@ -162,7 +72,7 @@ void hkMatrix3::setMul(float scalar, const hkMatrix3& other) {
 void hkMatrix3::setMulInverse(const hkMatrix3& lhs, const hkMatrix3& rhs) {
     hkMatrix3 transposed;
     transposed.setTranspose(rhs);
-    setMul(lhs, transposed);
+    _setMul(lhs, transposed);
 }
 
 hkBool hkMatrix3::isApproximatelyEqual(float epsilon, const hkMatrix3& other) const {
@@ -219,71 +129,27 @@ hkResult hkMatrix3::invert(float epsilon) {
 }
 
 void hkMatrix3::invertSymmetric() {
-    float* m = &m_col0.x;
+    hkVector4 r0;
+    r0.setCross(m_col1, m_col2);
+    hkVector4 r1;
+    r1.setCross(m_col2, m_col0);
+    hkVector4 r2;
+    r2.setCross(m_col0, m_col1);
 
-    const float m0 = m[0];
-    const float m1 = m[1];
-    const float m2 = m[2];
-    const float m4 = m[4];
-    const float m5 = m[5];
-    const float m6 = m[6];
-    const float m8 = m[8];
-    const float m9 = m[9];
-    const float m10 = m[10];
+    hkReal determinant = m_col0.dot3(r0);
+    const hkReal eps = 1.6940659e-21f;
+    determinant = (eps > determinant) ? eps : determinant;
 
-    const float c0 = m6 * m8 - m4 * m10;
-    const float c1 = m5 * m10 - m6 * m9;
-    const float c2 = m4 * m9 - m5 * m8;
-    float determinant = m1 * c0;
-    determinant = m0 * c1 + determinant;
-    determinant = m2 * c2 + determinant;
-
-    if (!(determinant >= 1.6940659e-21f)) {
-        determinant = 1.6940659e-21f;
-    }
-
-    const float invDeterminant = 1.0f / determinant;
-    m[0] = invDeterminant * c1;
-    m[1] = invDeterminant * c0;
-    m[2] = invDeterminant * c2;
-    m[3] = invDeterminant * 0.0f;
-    m[4] = invDeterminant * (m9 * m2 - m10 * m1);
-    m[5] = invDeterminant * (m10 * m0 - m8 * m2);
-    m[6] = invDeterminant * (m8 * m1 - m9 * m0);
-    m[7] = invDeterminant * 0.0f;
-    m[8] = invDeterminant * (m1 * m6 - m2 * m5);
-    m[9] = invDeterminant * (m2 * m4 - m0 * m6);
-    m[10] = invDeterminant * (m0 * m5 - m1 * m4);
-    m[11] = invDeterminant * 0.0f;
+    hkReal invDeterminant = 1.0f / determinant;
+    m_col0.setMul4(invDeterminant, r0);
+    m_col1.setMul4(invDeterminant, r1);
+    m_col2.setMul4(invDeterminant, r2);
 }
 
 void hkMatrix3::add(const hkMatrix3& other) {
-    float* dst = &m_col0.x;
-    const float* src = &other.m_col0.x;
-    const float m1 = src[1];
-    const float m2 = src[2];
-    const float m3 = src[3];
-    const float m4 = src[4];
-    const float m5 = src[5];
-    const float m6 = src[6];
-    const float m7 = src[7];
-    const float m8 = src[8];
-    const float m9 = src[9];
-    const float m10 = src[10];
-    const float m11 = src[11];
-
-    dst[0] = dst[0] + src[0];
-    dst[1] = dst[1] + m1;
-    dst[2] = dst[2] + m2;
-    dst[3] = dst[3] + m3;
-    dst[4] = dst[4] + m4;
-    dst[5] = dst[5] + m5;
-    dst[6] = dst[6] + m6;
-    dst[7] = dst[7] + m7;
-    dst[8] = dst[8] + m8;
-    dst[9] = dst[9] + m9;
-    dst[10] = dst[10] + m10;
-    dst[11] = dst[11] + m11;
+    m_col0.add4(other.m_col0);
+    m_col1.add4(other.m_col1);
+    m_col2.add4(other.m_col2);
 }
 
 void hkMatrix3::mul(float scalar) {

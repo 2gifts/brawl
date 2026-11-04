@@ -153,7 +153,7 @@ void hkSphereMotion::applyAngularImpulse(const hkVector4& impulse) {
 
 void hkSphereMotion::applyForce(hkReal timestep, const hkVector4& force) {
     hkVector4 impulse;
-    impulse.setMul4(force, timestep);
+    impulse.setMul4(timestep, force);
     m_linearVelocity.x = m_linearVelocity.x + m_inertiaAndMassInv.w * impulse.x;
     m_linearVelocity.y = m_linearVelocity.y + m_inertiaAndMassInv.w * impulse.y;
     m_linearVelocity.z = m_linearVelocity.z + m_inertiaAndMassInv.w * impulse.z;
@@ -162,12 +162,12 @@ void hkSphereMotion::applyForce(hkReal timestep, const hkVector4& force) {
 
 void hkSphereMotion::applyForce(hkReal timestep, const hkVector4& force, const hkVector4& point) {
     hkVector4 impulse;
-    impulse.setMul4(force, timestep);
+    impulse.setMul4(timestep, force);
     applyPointImpulse(impulse, point);
 }
 
 void hkSphereMotion::applyTorque(hkReal timestep, const hkVector4& torque) {
     hkVector4 impulse;
-    impulse.setMul4(torque, timestep);
+    impulse.setMul4(timestep, torque);
     applyAngularImpulse(impulse);
 }

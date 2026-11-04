@@ -1532,7 +1532,7 @@ config.libs = [
             Object(Matching, "havok/hkString.cpp"),
             Object(Matching, "havok/hkMultiThreadLock.cpp"),
             Object(Matching, "havok/hkAabbClass.cpp"),
-            Object(NonMatching, "havok/hkMatrix3.cpp"),
+            Object(NonMatching, "havok/hkMatrix3.cpp", extra_cflags=["-inline noauto"]),
             Object(Matching, "havok/hkMotionStateClass.cpp"),
             Object(Matching, "havok/hkSweptTransformClass.cpp"),
             Object(Matching, "havok/hkCdBodyClass.cpp", extra_cflags=["-Cpp_exceptions on"]),

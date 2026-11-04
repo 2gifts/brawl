@@ -44,11 +44,26 @@ struct hkVector4 {
     void setNeg3(const hkVector4& a) { set(-a.x, -a.y, -a.z, a.w); }
     void setAdd4(const hkVector4& a, const hkVector4& b) { set(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w); }
     void setSub4(const hkVector4& a, const hkVector4& b) { set(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w); }
+    // HYPOTHESIS: vector-first overload (no image evidence for this argument order).
     void setMul4(const hkVector4& a, hkReal s) { set(a.x * s, a.y * s, a.z * s, a.w * s); }
+    // this = s * a. Scalar-first products, lane order x..w: hkSolver's out-of-line weak copy (vector in r4,
+    // scalar in f1).
+    void setMul4(hkReal s, const hkVector4& a) {
+        x = s * a.x;
+        y = s * a.y;
+        z = s * a.z;
+        w = s * a.w;
+    }
     void setCross(const hkVector4& a, const hkVector4& b) {
         set(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x, 0.0f);
     }
-    void mul4(hkReal s) { setMul4(*this, s); }
+    // In place, lane order x..w (the out-of-line weak copy in hkSimpleContactConstraintInfo loads x first).
+    void mul4(hkReal s) {
+        x *= s;
+        y *= s;
+        z *= s;
+        w *= s;
+    }
     void add4(const hkVector4& a) {
         x += a.x;
         y += a.y;

@@ -26,6 +26,30 @@ struct hkMatrix3 {
         m_col2 = zero;
     }
 
+    // this = lhs * rhs. HYPOTHESIS: the name; the inline form is evidenced by setMulInverse, which carries the product
+    // inlined after its setTranspose call, while setMul and hkMatrix3_setMulMat3Mat3 are out-of-line copies of it.
+    // lhs is copied to aligned locals first, so the product stays correct when this aliases lhs.
+    void _setMul(const hkMatrix3& lhs, const hkMatrix3& rhs) {
+        hkVector4 columns[3];
+        columns[0] = lhs.m_col0;
+        columns[1] = lhs.m_col1;
+        columns[2] = lhs.m_col2;
+
+        const float* b = &rhs.m_col0.x;
+        float* out = &m_col0.x;
+        for (int i = 0; i < 3; i++) {
+            const float v2 = b[2];
+            const float v1 = b[1];
+            const float v0 = b[0];
+            out[0] = v0 * columns[0].x + v1 * columns[1].x + v2 * columns[2].x;
+            out[1] = v0 * columns[0].y + v1 * columns[1].y + v2 * columns[2].y;
+            out[2] = v0 * columns[0].z + v1 * columns[1].z + v2 * columns[2].z;
+            out[3] = 0.0f;
+            b += 4;
+            out += 4;
+        }
+    }
+
     void transpose();
     void setTranspose(const hkMatrix3& other);
     void setMul(const hkMatrix3& lhs, const hkMatrix3& rhs);
