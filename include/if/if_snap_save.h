@@ -157,7 +157,7 @@ public:
     s32 unk94;                        // 0x94
     s32 unk98;                        // 0x98
     nteSection m_section;             // 0x9C
-    s32 unkA4;                        // 0xA4
+    void* unkA4;                      // 0xA4
     s32 unkA8;                        // 0xA8
     muCollection* m_collection;       // 0xAC
     bool m_scanEnable;                // 0xB0

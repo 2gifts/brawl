@@ -87,6 +87,8 @@ public:
     void changeMaterialTex(const char* matName, int texNode, nw4r::g3d::ResFile* textureSource);
     void changeMaterialTex(u32 matNode, const char* textureName, nw4r::g3d::ResFile* textureSource = nullptr);
     void changeMaterialTex(const char* matName, _GXTexObj* texture);
+    // HYPOTHESIS: raw image data with its width and height
+    void changeMaterialTex(const char* matName, void* image, u16 width, u16 height);
     // void anmPlayPolicyOneTime(float, float, float);
 
     void getNode(int objNode);
