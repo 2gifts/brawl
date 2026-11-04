@@ -576,3 +576,65 @@ void fn_112_DD08(u8* self, soCollisionSearchModule* searchModule, soCollisionLog
 void fn_112_DD20(u8* self, soCollisionSearchModule* searchModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser) { ((Fighter*)(self - 0xA0))->Fighter::notifyEventCollisionReflectorSearch(searchModule, collisionLog, groupIndex, moduleAccesser); }
 void fn_112_DD38(u8* self, soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser) { ((Fighter*)(self - 0xAC))->Fighter::notifyEventCollisionAbsorber(attackModule, power, collisionLog, groupIndex, posX, posY, moduleAccesser); }
 } // extern "C"
+
+void ftPit::notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeSituation(kind, prevKind, moduleAccesser);
+    if (kind != 2) {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003D);
+    }
+}
+
+void ftPit::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+    if (moduleAccesser->getItemManageModule().isHaveItem(0) == true) {
+        soVisibilityModule& visibility = moduleAccesser->getVisibilityModule();
+        if (visibility.get(1) != 3) {
+            visibility.set(1, 2);
+        }
+    }
+}
+
+void ftPit::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    switch (eventInfo->m_eventKind) {
+    case 0x3C:
+        if (stageObj->soGetKind() == 2 && stageObj->soGetSubKind() == 0x7E) {
+            moduleAccesser->getEffectModule().clearScreen(0, 0);
+            endFinal(true, true, false);
+        }
+        break;
+    }
+    Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+
+void ftPit::notifyEventCollisionReflector(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser) {
+    if (groupIndex >= 2) {
+        unk297B0 = groupIndex;
+        if (power >= m_moduleAccesser->getCollisionReflectorModule().getAttackLimit(groupIndex)) {
+            unk297B5 = 1;
+            return;
+        }
+        unk297B4 = 1;
+    }
+    Fighter::notifyEventCollisionReflector(attackModule, power, collisionLog, groupIndex, posX, posY, moduleAccesser);
+}
+
+void ftPit::onStart(int kind) {
+    m_moduleAccesser->getWorkManageModule().setFloat(soValueAccesser::getConstantInt(m_moduleAccesser, 0x5DC3, 0), 0x11000013);
+    m_moduleAccesser->getWorkManageModule().offFlag(0x1200003D);
+    m_moduleAccesser->getWorkManageModule().setFloat(soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFBB, 0), 0x11000014);
+    m_moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x11000015);
+    m_moduleAccesser->getWorkManageModule().setInt(-1, 0x10000041);
+    Fighter::onStart(kind);
+}
+
+void ftPit::notifyEventCollisionShield(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser) {
+    if (groupIndex == 1) {
+        int collisionIndex = collisionLog->m_collsionIndex;
+        soCollisionAttackData* attackData = attackModule->getData(collisionIndex, collisionLog->m_isAbsolute);
+        if (power > m_moduleAccesser->getWorkManageModule().getFloat(0x11000015)) {
+            m_moduleAccesser->getWorkManageModule().setFloat(power, 0x11000015);
+            m_moduleAccesser->getWorkManageModule().setFloat(m_moduleAccesser->getDamageModule().getDamageLr(posX, posY, attackModule, attackData, collisionIndex, collisionLog->m_isAbsolute), 0x11000016);
+        }
+    }
+    Fighter::notifyEventCollisionShield(attackModule, power, collisionLog, groupIndex, posX, posY, moduleAccesser);
+}
