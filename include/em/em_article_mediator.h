@@ -86,6 +86,9 @@ public:
         }
         return m_next.find(predicate);
     }
+    // The mediators select the pool to search with an empty soIntToType tag (see SO_ARTICLE_SLOT_TAGS).
+    template <class Predicate, int L>
+    T* find(Predicate& predicate, const soIntToType<L>&) { return find(predicate); }
 
 private:
     soInstancePoolSub<typename Info::Prev, KindInfo> m_next;
@@ -202,13 +205,11 @@ struct soEachCounter {
 // The null article the mediator hands out when nothing can be generated (shared with sora_melee).
 inline soArticle* soGetNullArticle() { return reinterpret_cast<soArticle*>(g_ftRobotNullArticleStorage); }
 
-// MATCH-ONLY: every case of the 17-slot dispatch builds a two-byte marker on the stack (stb 0 twice) and the generate
-// cases a third one next to the checker; MWCC drops plain empty locals, so the bytes are volatile.
-struct soArticleSlotTag {
-    volatile u8 m_pad0;
-    volatile u8 m_pad1;
-    soArticleSlotTag() : m_pad0(0), m_pad1(0) { }
-};
+// HYPOTHESIS (as in wn_article_pool.h): the 17-slot dispatch hands every case to a slot member overloaded on two empty
+// soIntToType tags (the slot and the pool level); the two value-initialized one-byte tag temporaries are the two zero
+// bytes each case stores, and the generate cases' third byte is the tag of the pool find(). Which ints the tags carry is
+// not known; SO_ARTICLE_SLOT_TAGS passes zero for both.
+#define SO_ARTICLE_SLOT_TAGS soIntToType<0>(), soIntToType<0>()
 
 template <class PoolTL, class AssignTL, class KindInfo, class Extra>
 class soArticleMediatorImpl : public soArticleMediator {
@@ -240,11 +241,11 @@ private:
 // The slot operations of the mediator for article id N; slots past the end of the type list are empty.
 template <class Mediator, class AssignTL, int N, bool Exists>
 struct soArticleMediatorSlot {
-    static soArticle* generate(Mediator&, soModuleAccesser*) { return soGetNullArticle(); }
-    static bool isGeneratable(Mediator&) { return false; }
-    static s32 getActiveNum(Mediator&) { return 0; }
-    static s32 getGenerateMaxNum() { return 0; }
-    static bool shoot(soArticle&, soModuleAccesser*) { return true; }
+    static soArticle* generate(Mediator&, soModuleAccesser*, const soIntToType<0>&, const soIntToType<0>&) { return soGetNullArticle(); }
+    static bool isGeneratable(Mediator&, const soIntToType<0>&, const soIntToType<0>&) { return false; }
+    static s32 getActiveNum(Mediator&, const soIntToType<0>&, const soIntToType<0>&) { return 0; }
+    static s32 getGenerateMaxNum(const soIntToType<0>&, const soIntToType<0>&) { return 0; }
+    static bool shoot(soArticle&, soModuleAccesser*, const soIntToType<0>&, const soIntToType<0>&) { return true; }
 };
 
 template <class Mediator, class AssignTL, int N>
@@ -255,10 +256,9 @@ struct soArticleMediatorSlot<Mediator, AssignTL, N, true> {
     enum { num = Level::num };
 
     // Hands out the first inactive instance (newest first), else deactivates the oldest active one and reuses it.
-    static soArticle* generate(Mediator& mediator, soModuleAccesser* acc) {
+    static soArticle* generate(Mediator& mediator, soModuleAccesser* acc, const soIntToType<0>&, const soIntToType<0>&) {
         soArticleDeactivateChecker checker;
-        volatile u8 findTag = 0; // MATCH-ONLY: see soArticleSlotTag
-        Instance* instance = mediator.template getPool<N>().find(checker);
+        Instance* instance = mediator.template getPool<N>().find(checker, soIntToType<0>());
         if (instance == NULL) {
             instance = static_cast<Instance*>(checker.getCandidate());
             if (instance == NULL) {
@@ -272,7 +272,7 @@ struct soArticleMediatorSlot<Mediator, AssignTL, N, true> {
         return soGetNullArticle();
     }
     // Generatable while one of the instances is inactive.
-    static bool isGeneratable(Mediator& mediator) {
+    static bool isGeneratable(Mediator& mediator, const soIntToType<0>&, const soIntToType<0>&) {
         bool allActive;
         s32 i;
         for (i = 0; i < num; ++i) {
@@ -285,7 +285,7 @@ struct soArticleMediatorSlot<Mediator, AssignTL, N, true> {
     done:
         return allActive == false;
     }
-    static s32 getActiveNum(Mediator& mediator) {
+    static s32 getActiveNum(Mediator& mediator, const soIntToType<0>&, const soIntToType<0>&) {
         soEachCounter<bool(soArticle*)> counter(wnArticleIsActive);
         for (s32 i = 0; i < num; ++i) {
             soEachCounter<bool(soArticle*)>* c = &counter;
@@ -295,9 +295,9 @@ struct soArticleMediatorSlot<Mediator, AssignTL, N, true> {
         }
         return counter.m_trueNum;
     }
-    static s32 getGenerateMaxNum() { return num; }
+    static s32 getGenerateMaxNum(const soIntToType<0>&, const soIntToType<0>&) { return num; }
     // soArticleMediatorAssignmentNull: shooting only checks the type of the article.
-    static bool shoot(soArticle& article, soModuleAccesser*) {
+    static bool shoot(soArticle& article, soModuleAccesser*, const soIntToType<0>&, const soIntToType<0>&) {
         (void)dynamic_cast<Instance&>(article);
         return true;
     }
@@ -305,10 +305,7 @@ struct soArticleMediatorSlot<Mediator, AssignTL, N, true> {
 
 #define SO_ARTICLE_MEDIATOR_SLOT(n) soArticleMediatorSlot<soArticleMediatorImpl, AssignTL, n, (n < mediateNum)>
 #define SO_ARTICLE_MEDIATOR_CASE(n, expr) \
-    case n: { \
-        soArticleSlotTag tag; \
-        return SO_ARTICLE_MEDIATOR_SLOT(n)::expr; \
-    }
+    case n: return SO_ARTICLE_MEDIATOR_SLOT(n)::expr;
 #define SO_ARTICLE_MEDIATOR_CASES(expr) \
     SO_ARTICLE_MEDIATOR_CASE(0, expr) SO_ARTICLE_MEDIATOR_CASE(1, expr) SO_ARTICLE_MEDIATOR_CASE(2, expr) \
     SO_ARTICLE_MEDIATOR_CASE(3, expr) SO_ARTICLE_MEDIATOR_CASE(4, expr) SO_ARTICLE_MEDIATOR_CASE(5, expr) \
@@ -320,7 +317,7 @@ struct soArticleMediatorSlot<Mediator, AssignTL, N, true> {
 template <class PoolTL, class AssignTL, class KindInfo, class Extra>
 soArticle* soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::generate(s32 articleId, soModuleAccesser* acc) {
     switch (articleId) {
-    SO_ARTICLE_MEDIATOR_CASES(generate(*this, acc))
+    SO_ARTICLE_MEDIATOR_CASES(generate(*this, acc, SO_ARTICLE_SLOT_TAGS))
     default: return soGetNullArticle();
     }
 }
@@ -328,7 +325,7 @@ soArticle* soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::generate(s3
 template <class PoolTL, class AssignTL, class KindInfo, class Extra>
 bool soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::isGeneratable(soModuleAccesser* acc, s32 articleId) {
     switch (articleId) {
-    SO_ARTICLE_MEDIATOR_CASES(isGeneratable(*this))
+    SO_ARTICLE_MEDIATOR_CASES(isGeneratable(*this, SO_ARTICLE_SLOT_TAGS))
     default: return false;
     }
 }
@@ -336,7 +333,7 @@ bool soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::isGeneratable(soM
 template <class PoolTL, class AssignTL, class KindInfo, class Extra>
 s32 soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::getActiveNum(soModuleAccesser* acc, s32 articleId) {
     switch (articleId) {
-    SO_ARTICLE_MEDIATOR_CASES(getActiveNum(*this))
+    SO_ARTICLE_MEDIATOR_CASES(getActiveNum(*this, SO_ARTICLE_SLOT_TAGS))
     default: return 0;
     }
 }
@@ -344,7 +341,7 @@ s32 soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::getActiveNum(soMod
 template <class PoolTL, class AssignTL, class KindInfo, class Extra>
 s32 soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::getGenerateMaxNum(s32 articleId) {
     switch (articleId) {
-    SO_ARTICLE_MEDIATOR_CASES(getGenerateMaxNum())
+    SO_ARTICLE_MEDIATOR_CASES(getGenerateMaxNum(SO_ARTICLE_SLOT_TAGS))
     default: return 0;
     }
 }
@@ -352,7 +349,7 @@ s32 soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::getGenerateMaxNum(
 template <class PoolTL, class AssignTL, class KindInfo, class Extra>
 bool soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::shoot(soModuleAccesser* acc, soArticle* article) {
     switch (article->getArticleId()) {
-    SO_ARTICLE_MEDIATOR_CASES(shoot(*article, acc))
+    SO_ARTICLE_MEDIATOR_CASES(shoot(*article, acc, SO_ARTICLE_SLOT_TAGS))
     default: return false;
     }
 }
