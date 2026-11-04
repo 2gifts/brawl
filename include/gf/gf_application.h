@@ -84,3 +84,5 @@ static_assert(sizeof(gfApplication) == 0x170, "Class is wrong size!");
 
 
 static_assert(offsetof(gfApplication, unk100) == 0x100, "Replay timing counter offset");
+
+void VC_launch(const char* title, int duration);
