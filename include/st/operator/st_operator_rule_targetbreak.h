@@ -13,8 +13,17 @@ public:
     int m_leftTime;
     int m_brokenTargetCount;
     u32 m_level;
-    u8 m_numPlayers;
-    char _0x271[23];
+    union {
+        struct {
+            u8 m_numPlayers;
+            char _0x271[23];
+        };
+        struct {
+            char unk270[20];
+            // HYPOTHESIS: count incremented by notifyEventDead.
+            int unk284;
+        };
+    };
     bool m_isComplete;
     char _0x289[3];
 
