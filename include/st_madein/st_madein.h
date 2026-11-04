@@ -119,7 +119,10 @@ static_assert(sizeof(stMadeinAiData) == 0x74, "Class is wrong size!");
 // arrows, Nureruna = don't get wet, Umakutobe = jump over the hammer, Narase = pull the crackers, Ugokuna = don't move,
 // Apirusiro = strike a pose, Kudake = smash the blocks). The names of the fields are HYPOTHESIS; the ones that are only
 // an offset (unkN) are state of the micro-games that is not named yet.
+class mlFtEvent;
+
 class stMadein : public stMelee {
+    friend class mlFtEvent;
     grTenganEvent m_event0;           // 0x1D8: the flow of the stage (pick a micro-game, play it, judge the fighters)
     grTenganEvent m_event1;           // 0x284: the micro-game that is played
     grTenganEvent m_event2;           // 0x330: the title of the micro-game flies in

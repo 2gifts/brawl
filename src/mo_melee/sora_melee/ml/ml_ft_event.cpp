@@ -12,6 +12,7 @@
 #include <st/operator/st_operator_info.h>
 #include <st/operator/st_operator_rule.h>
 #include <st/stage.h>
+#include <st_madein/st_madein.h>
 #include <types.h>
 
 extern "C" u8 fn_27_111D70(ftOwner* owner);
@@ -353,4 +354,26 @@ void mlFtEvent::notifyEventHeartSwapEnd(int entryId1, int entryId2) {
 
 bool mlFtEventResult::isInfoManager() {
     return false;
+}
+
+void mlFtEvent::notifyEventOnInput(int entryId) {
+    if (g_Stage != NULL) {
+        if (m_condition->m_meleeInitData.m_stageKind == Stages::Madein && g_Stage != NULL) {
+            int playerNo = g_ftManager->getPlayerNo(entryId);
+            static_cast<stMadein*>(g_Stage)->m_unk954[playerNo & 3] = 0;
+        }
+    }
+}
+
+mlFtEventTraining::~mlFtEventTraining() {
+}
+
+void mlFtEventTraining::notifyEventOnDamage(int entryId, u32 hp, soDamage* damage) {
+    mlFtEvent::notifyEventOnDamage(entryId, hp, damage);
+    if (unk34_80 && m_operatorInfo != NULL && g_ftManager->getPlayerNo(entryId) != 0) {
+        m_damage = static_cast<int>(damage->m_damageAdd);
+        if (g_IfMngr != NULL) {
+            g_IfMngr->setTrainingStatusDamage(m_damage);
+        }
+    }
 }
