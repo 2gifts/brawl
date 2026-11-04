@@ -1135,6 +1135,86 @@ void muButtonTask::initStepButtonAssign(muButtonTask* task) {
     task->setAssignAnim(0);
 }
 
+// The settings kind of a pad (a pad that cannot be read counts as a Wii remote).
+static inline int getPadKind(int padNo) {
+    gfPadStatus status;
+    g_gfPadSystem->getSysPadStatus(padNo, &status);
+    return status.m_error == gfPadError::NONE ? muButtonTask::sPadKinds[status.m_controllerType]
+                                              : muButtonTask::PadKind_WiiRemote;
+}
+
+// The first pad (0 ... 7) on which A or START was pushed (-1: none).
+static inline int getStartPad() {
+    for (int i = 0; i < 8; i++) {
+        gfPadStatus status;
+        g_gfPadSystem->getSysPadStatus(i, &status);
+        if (status.m_error != gfPadError::NO_CONTROLLER &&
+            ((status.m_buttonsPressedThisFrame.bits & 0x100) || (status.m_buttonsPressedThisFrame.bits & 0x1000))) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// The player picks the action of the button with up and down; A or B takes it, START tries the buttons in a practice
+// fight with the pad on which it was pushed.
+void muButtonTask::mainStepButtonAssign(muButtonTask* task) {
+    u32 trigger = task->m_work->m_controller.m_trigger;
+    int index = task->m_work->m_listIndex;
+    int padKind = task->m_work->m_padKind;
+    int cursor = task->m_work->m_cursor;
+    if (trigger & 2) {
+        if (index < countActions(sPadInfos[padKind].m_actionLists[cursor]) - 1) {
+            index++;
+            task->setAssignAnim(1);
+        }
+    } else if (trigger & 1) {
+        if (index > 0) {
+            index--;
+            task->setAssignAnim(2);
+        }
+    }
+    if (index != task->m_work->m_listIndex) {
+        int action = sPadInfos[padKind].m_actionLists[cursor][index];
+        task->printButton(padKind, cursor, cursor + 5, action, true);
+        int arrows = 0;
+        if (index > 0) {
+            arrows |= 1;
+        }
+        if (index < countActions(sPadInfos[padKind].m_actionLists[cursor]) - 1) {
+            arrows |= 2;
+        }
+        task->m_work->m_objs[22]->setFrameVisible(arrows);
+        task->m_work->m_listIndex = index;
+        task->m_work->m_msg->printIndex(1, sActionMsgs[action].m_expl, NULL);
+        g_sndSystem->playSE(static_cast<SndID>(0x23), -1, 0, 0, -1);
+    }
+    gfPadStatus pad = getSysPadStatus();
+    u32 pushed = pad.m_buttonsPressedThisFrame.bits;
+    if ((pushed & 0x100) || (pushed & 0x200)) { // A, B
+        g_sndSystem->playSE(static_cast<SndID>(1), -1, 0, 0, -1);
+        int action = sPadInfos[padKind].m_actionLists[cursor][task->m_work->m_listIndex];
+        task->m_work->m_edit.m_buttons[cursor] = action;
+        task->printButton(padKind, cursor, cursor + 5, action, false);
+        changeStep(task, 4);
+    }
+    if (isPushed(getSysPadStatus(), 0x1000)) { // START
+        task->m_work->m_edit.m_buttons[cursor] = sPadInfos[padKind].m_actionLists[cursor][task->m_work->m_listIndex];
+        int padNo = getStartPad();
+        int step;
+        int kind = getPadKind(padNo);
+        if (kind != task->m_work->m_padKind) {
+            g_sndSystem->playSE(static_cast<SndID>(3), -1, 0, 0, -1);
+            step = 8;
+        } else {
+            g_sndSystem->playSE(static_cast<SndID>(1), -1, 0, 0, -1);
+            task->m_work->m_contNo = padNo;
+            step = 10;
+        }
+        changeStep(task, step);
+    }
+}
+
 // Any button of any controller was pushed.
 static inline bool isAnyPushed(muButtonTask* task) {
     gfPadStatus pad;
@@ -1324,14 +1404,6 @@ static inline void clearPushDisp(muButtonTask* task) {
         task->m_work->m_objs[info->m_pushObj]->setFrameVisible(0.0f);
         task->m_work->m_msg->printf(info->m_pushLine, "");
     }
-}
-
-// The settings kind of a pad (a pad that cannot be read counts as a Wii remote).
-static inline int getPadKind(int padNo) {
-    gfPadStatus status;
-    g_gfPadSystem->getSysPadStatus(padNo, &status);
-    return status.m_error == gfPadError::NONE ? muButtonTask::sPadKinds[status.m_controllerType]
-                                              : muButtonTask::PadKind_WiiRemote;
 }
 
 // The practice fight: the pad that tries the buttons gets the settings that are being changed.
