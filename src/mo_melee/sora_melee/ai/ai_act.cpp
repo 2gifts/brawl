@@ -660,3 +660,110 @@ void aiAct::act_m_stroll(Vec2f* stick, ipPadButton* button) {
         }
     }
 }
+
+void aiAct::act_d_air_sway(Vec2f* stick, ipPadButton* button) {
+    switch (m_step) {
+        case 0:
+            m_unk94 = 12;
+            if (m_input->m_par.m_rank <= 30) {
+                m_step = 2;
+            } else {
+                m_step = 1;
+            }
+            m_stepFrame = (m_stat->m_flags & 1) ? 0 : -10;
+            break;
+        case 1:
+        case 2:
+            if (m_stepFrame >= 0 && !(m_stat->m_flags & 1)) {
+                set_id(0);
+                return;
+            }
+            break;
+        case 4:
+            stick->m_y = -1.0f;
+            button->m_mask |= soController::getButtonMask(soController::Pad_Button_Special);
+        default:
+            if (m_stepFrame >= 0) {
+                set_id(0);
+            }
+            return;
+    }
+    if (!m_stat->chk_stat_air_free()) {
+        return;
+    }
+    if (m_stat->m_status == 0x49) {
+        return;
+    }
+    aiWeaponMark* mark = m_stat->getMarkWeapon();
+    if (mark != NULL) {
+        u32 reflect = chkUseReflector(mark->m_weapon);
+        Vec3f* velocity = &mark->m_weapon->m_velocity;
+        float speed = aiLengthOf(velocity->m_z * velocity->m_z +
+                                 (velocity->m_x * velocity->m_x + velocity->m_y * velocity->m_y));
+        int frames = (int)speed > 6 ? (int)speed : 6;
+        frames = frames < 12 ? frames : 12;
+        if (reflect & 0x20) {
+            switch (m_stat->m_chrKind) {
+                case 0:
+                case 23:
+                    frames += 2;
+                    break;
+            }
+        }
+        if (mark->m_hitFrames < frames) {
+            if (reflect & 0x20) {
+                m_unk94 = 60;
+                setReflectDone();
+                button->m_mask |= soController::getButtonMask(soController::Pad_Button_Special);
+                switch (m_stat->m_chrKind) {
+                    case 0:
+                        stick->m_x = m_stat->m_pos.m_x < mark->m_weapon->m_pos.m_x ? 1.0f : -1.0f;
+                        m_step = 3;
+                        break;
+                    case 13:
+                        m_step = 3;
+                        break;
+                    default:
+                        stick->m_y = -1.0f;
+                        m_step = 4;
+                        m_stepFrame = -30;
+                        break;
+                }
+            } else {
+                button->m_mask |= soController::getButtonMask(soController::Pad_Button_Guard);
+                m_step = 0;
+            }
+        } else if ((reflect & 0x40) && mark->m_hitFrames > frames + 4) {
+            m_unk94 = 60;
+            setReflectDone();
+            button->m_mask |= soController::getButtonMask(soController::Pad_Button_Special);
+            switch (m_stat->m_chrKind) {
+                case 12:
+                    m_step = 3;
+                    break;
+                case 23:
+                    stick->m_x = m_stat->m_pos.m_x < mark->m_weapon->m_pos.m_x ? 1.0f : -1.0f;
+                    m_step = 3;
+                    break;
+                default:
+                    stick->m_y = -1.0f;
+                    m_step = 4;
+                    m_stepFrame = -30;
+                    break;
+            }
+        }
+    }
+    if (m_step == 1) {
+        float dist;
+        s8 nearest = m_input->get_near_target(&dist, 0);
+        if (nearest != m_input->m_chrIdx.m_idx && dist < 70.0f) {
+            s8 rank = m_input->m_par.m_rank;
+            if (randf() < 0.0098f * rank) {
+                button->m_mask |= soController::getButtonMask(soController::Pad_Button_Guard);
+                m_step = 0;
+            } else {
+                m_step++;
+            }
+        }
+    }
+}

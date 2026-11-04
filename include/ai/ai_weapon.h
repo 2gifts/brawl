@@ -54,7 +54,7 @@ struct aiWeaponMark {
     u32 m_objId;
     int m_frames;
     aiWeapon* m_weapon;
-    u32 unkC;
+    int m_hitFrames; // 0x0C: HYPOTHESIS: aiWeapon::predict's frames until contact (aiStat::getMarkWeapon stores it)
 };
 static_assert(sizeof(aiWeaponMark) == 0x10, "Class is wrong size!");
 

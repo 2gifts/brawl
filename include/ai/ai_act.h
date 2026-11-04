@@ -131,6 +131,10 @@ public:
     // opponent comes near. On Corneria it may instead jump off to the left (step 10). HYPOTHESIS: the meaning of the
     // tests and of m_unk0[0]/[1].
     void act_m_stroll(Vec2f* stick, ipPadButton* button);
+    // Swaying in the air (the name from the map): against the marked weapon (aiStat::getMarkWeapon) about to hit,
+    // reflect it (special) when chkUseReflector agrees, else air-dodge (guard); near an opponent, maybe air-dodge.
+    // HYPOTHESIS: the meaning of the steps and of the character kinds tested.
+    void act_d_air_sway(Vec2f* stick, ipPadButton* button);
 };
 static_assert(sizeof(aiAct) == 0x114, "Class is wrong size!");
 

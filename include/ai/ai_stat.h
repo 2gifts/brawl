@@ -10,6 +10,7 @@
 // One CPU character's view of the match (position, speed, floor, transition flags); 0x1C4 bytes, one per aiChrIdx.
 // HYPOTHESIS: only the offsets used so far are named, the rest is still unknown.
 class aiEnemy;
+struct aiWeaponMark;
 struct aiJumpPar;
 
 namespace aistat {
@@ -103,6 +104,9 @@ public:
     u32 chk_over_ground(Vec3f* pos); // HYPOTHESIS: the position is passed straight to aiMgr::get_under_floor
     bool chk_near_deadarea();
     Vec2f getNearFloorEdge();
+    // The marked weapon to react to (one of the records at 0x0C, whose last word holds the predicted frames until
+    // contact), or NULL. HYPOTHESIS: the selection rule (only the act_d_air_sway caller is written).
+    aiWeaponMark* getMarkWeapon();
     bool chk_stat_fpass();
     bool chk_stat_ffall();
     float get_lr_tgt(aiChrIdx* target);
