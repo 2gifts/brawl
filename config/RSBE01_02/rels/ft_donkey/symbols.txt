@@ -581,7 +581,7 @@ __dt__79soAnimCmdControlUnitBuilder<48soAnimCmdControlUnitBuildConfig<0,1,1,0,0,
 __dt__71soModuleAccesserBuilder<44wnDonkeyBarrelCongaModuleAccesserBuildConfig>Fv = .text:0x00011EBC; // type:function size:0x180
 __dt__77soReflectModuleBuilder<51soReflectModuleBuildConfig<0,19soReflectModuleImpl>>Fv = .text:0x0001203C; // type:function size:0x5C
 __dt__175soStatusModuleBuilder<149wnStatusModuleBuildConfig<1,31soGeneralWorkBuildConfig<2,2,1>,1,82soTransitionModuleBuildConfig<49soTypeList<14soIntToType<6>,18soTypeListNullType>>>>Fv = .text:0x00012098; // type:function size:0x9C
-fn_92_12134 = .text:0x00012134; // type:function size:0x5C
+__dt__123soArraySelectHolder<1,39soArrayVector<P19soStatusUniqProcess,1>,56soSingletonHolder<35soArrayNull<P19soStatusUniqProcess>>>Fv = .text:0x00012134; // type:function size:0x5C
 __dt__111soCollisionAttackModuleBuilder<77soCollisionAttackModuleBuildConfig<0,1,0,27soCollisionAttackModuleImpl,1,0,1>>Fv = .text:0x00012190; // type:function size:0x84
 __dt__10soTeamImplFv = .text:0x00012214; // type:function size:0x5C
 __dt__240soMotionModuleBuilder<214soMotionModuleBuildConfig<5,18soMotionModuleImpl,0,0,82soTransitionModuleBuildConfig<49soTypeList<14soIntToType<4>,18soTypeListNullType>>,73soMotionAnimObjCacheModuleBuildConfig<0,30soMotionAnimObjCacheModuleNull>>>Fv = .text:0x00012270; // type:function size:0x78
@@ -739,14 +739,14 @@ __dt__79soAnimCmdControlUnitBuilder<48soAnimCmdControlUnitBuildConfig<1,2,2,0,0,
 __dt__79soAnimCmdControlUnitBuilder<48soAnimCmdControlUnitBuildConfig<0,1,2,0,0,0,0,8>>Fv = .text:0x00014900; // type:function size:0x8C scope:weak
 __dt__71soModuleAccesserBuilder<44wnDonkeySoundEffectModuleAccesserBuildConfig>Fv = .text:0x0001498C; // type:function size:0x174
 __dt__175soStatusModuleBuilder<149wnStatusModuleBuildConfig<2,31soGeneralWorkBuildConfig<2,2,1>,2,82soTransitionModuleBuildConfig<49soTypeList<14soIntToType<6>,18soTypeListNullType>>>>Fv = .text:0x00014B00; // type:function size:0x9C
-fn_92_14B9C = .text:0x00014B9C; // type:function size:0x5C
+__dt__123soArraySelectHolder<1,39soArrayVector<P19soStatusUniqProcess,2>,56soSingletonHolder<35soArrayNull<P19soStatusUniqProcess>>>Fv = .text:0x00014B9C; // type:function size:0x5C
 __dt__111soCollisionAttackModuleBuilder<77soCollisionAttackModuleBuildConfig<0,2,0,27soCollisionAttackModuleImpl,1,0,1>>Fv = .text:0x00014BF8; // type:function size:0x84
 __dt__240soMotionModuleBuilder<214soMotionModuleBuildConfig<2,18soMotionModuleImpl,0,0,82soTransitionModuleBuildConfig<49soTypeList<14soIntToType<4>,18soTypeListNullType>>,73soMotionAnimObjCacheModuleBuildConfig<0,30soMotionAnimObjCacheModuleNull>>>Fv = .text:0x00014C7C; // type:function size:0x78
 __dt__180soInsideEventManageModuleBuilder<110soInsideEventManageModuleBuildConfig<16,32,4,2,4,4,4,4,2,4,4,4,4,4,1,1,0,0,0,30wnInsideEventManageModuleTypes>,30wnInsideEventManageModuleTypes>Fv = .text:0x00014CF4; // type:function size:0x12C
 __dt__32wnDonkeySoundEffectParamAccesserFv = .text:0x00014E20; // type:function size:0x60
-activate__19wnDonkeySoundEffectFiiP5Vec3ffffb = .text:0x00014E80; // type:function size:0x388
+activate__19wnDonkeySoundEffectFiiP5Vec3fffffb = .text:0x00014E80; // type:function size:0x388
 notifyEventCollisionAttackCheck__19wnDonkeySoundEffectFUl = .text:0x00015208; // type:function size:0x8
-fn_92_15210 = .text:0x00015210; // type:function size:0x174
+updateNodeSRT__19wnDonkeySoundEffectFv = .text:0x00015210; // type:function size:0x174
 __as__5Vec3fFRC5Vec3f = .text:0x00015384; // type:function size:0x1C
 getParamFloat__41wnExtendParamAccesser<3999,4,23999,1,0,0>FP16soModuleAccesserll = .text:0x000153A0; // type:function size:0x20
 getParamInt__41wnExtendParamAccesser<3999,4,23999,1,0,0>FP16soModuleAccesserll = .text:0x000153C0; // type:function size:0x20

@@ -2296,8 +2296,8 @@ static struct {
     NWC24MsgBoxId box;
 } MBoxMount;
 
-extern NWC24Err fn_8039D0EC(NWC24iMBCEntry *entry, NWC24iMsgObj *msg);
-extern NWC24Err fn_8039CF40(NWC24iMsgObj *msg, NWC24iMBCEntry *entry);
+extern NWC24Err fn_8039D0EC(const NWC24iMBCEntry *entry, NWC24iMsgObj *msg);
+extern NWC24Err fn_8039CF40(const NWC24iMsgObj *msg, NWC24iMBCEntry *entry);
 
 static NWC24Err fn_8039C984(NWC24MsgBoxId id, NWC24iMBCHeader **hdrOut);
 static NWC24Err fn_8039CDB4(NWC24MsgBoxId id);
@@ -2845,7 +2845,7 @@ static NWC24Err fn_8039C984(NWC24MsgBoxId id, NWC24iMBCHeader **hdrOut) {
 }
 
 // takes a free block off the free chain and puts the message in it
-static NWC24Err fn_8039CB7C(NWC24iMBCHeader *hdr, NWC24iMsgObj *msg, NWC24File *file) {
+static NWC24Err fn_8039CB7C(NWC24iMBCHeader *hdr, const NWC24iMsgObj *msg, NWC24File *file) {
     u32 block = hdr->freeChain;
     NWC24iMBCEntry *entry = &NWC24WorkP->mbcEntry;
     NWC24Err result;
@@ -2955,7 +2955,7 @@ static NWC24Err fn_8039CDB4(NWC24MsgBoxId id) {
     return NWC24_OK;
 }
 
-static NWC24Err fn_8039C60C(NWC24iMBCHeader *hdr, NWC24iMsgObj *msg, NWC24File *file, NWC24MsgBoxId id);
+static NWC24Err fn_8039C60C(NWC24iMBCHeader *hdr, const NWC24iMsgObj *msg, NWC24File *file, NWC24MsgBoxId id);
 
 NWC24Err NWC24iMBoxAddMsgObj(NWC24MsgBoxId id, NWC24iMsgObj *msg) {
     NWC24iMBCHeader *hdr;
@@ -3190,7 +3190,7 @@ NWC24Err fn_8039C16C(NWC24MsgBoxId id, u32 msgId, BOOL checkAccess) {
 
 // looks for an older copy of the message that is about to be stored (same tag or same contents) and
 // throws it out, also keeps the oldest message id of the box up to date
-static NWC24Err fn_8039C60C(NWC24iMBCHeader *hdr, NWC24iMsgObj *msg, NWC24File *file, NWC24MsgBoxId id) {
+static NWC24Err fn_8039C60C(NWC24iMBCHeader *hdr, const NWC24iMsgObj *msg, NWC24File *file, NWC24MsgBoxId id) {
     NWC24Err result = NWC24_OK;
     u32 off;
     u32 oldest = 0;
@@ -3280,7 +3280,7 @@ static NWC24Err fn_8039C60C(NWC24iMBCHeader *hdr, NWC24iMsgObj *msg, NWC24File *
 // the message object keeps strings/blobs as {offset, size} pairs, in the control file they are packed into
 // one word (size in the top 12 bits, offset in the low 20)
 static inline u32 PackData_i(const NWC24Data *data) {
-    return (data->size << 20) | (data->offset & 0xFFFFF);
+    return (data->offset & 0xFFFFF) | (data->size << 20);
 }
 
 static inline void UnpackData_i(NWC24Data *data, u32 packed) {
@@ -3289,7 +3289,16 @@ static inline void UnpackData_i(NWC24Data *data, u32 packed) {
 }
 
 // message object -> control file entry
-NWC24Err fn_8039CF40(NWC24iMsgObj *msg, NWC24iMBCEntry *entry) {
+NWC24Err fn_8039CF40(const NWC24iMsgObj *msg, NWC24iMBCEntry *entry) {
+    // Snapshot the five compact offset/length words before copying the record.
+    u32 fromField = PackData_i(&msg->fromField);
+    u32 toField = PackData_i(&msg->toField);
+    u32 subject = PackData_i(&msg->subject);
+    u32 contentType = PackData_i(&msg->contentType);
+    u32 txEncoding = PackData_i(&msg->txEncoding);
+
+    int i;
+
     entry->id = msg->id;
     entry->flags = msg->flags;
     entry->length = msg->length;
@@ -3304,25 +3313,24 @@ NWC24Err fn_8039CF40(NWC24iMsgObj *msg, NWC24iMBCEntry *entry) {
     entry->numTo = msg->numTo;
     entry->numAttached = msg->numAttached;
     entry->groupId = msg->groupId;
-    entry->fromField = PackData_i(&msg->fromField);
-    entry->toField = PackData_i(&msg->toField);
-    entry->subject = PackData_i(&msg->subject);
-    entry->contentType = PackData_i(&msg->contentType);
-    entry->txEncoding = PackData_i(&msg->txEncoding);
+    entry->fromField = fromField;
+    entry->toField = toField;
+    entry->subject = subject;
+    entry->contentType = contentType;
+    entry->txEncoding = txEncoding;
     entry->text = msg->text;
-    entry->attached[0] = msg->attached[0];
-    entry->attached[1] = msg->attached[1];
-    entry->attachedSize[0] = msg->attachedSize[0];
-    entry->attachedSize[1] = msg->attachedSize[1];
-    entry->attachedType[0] = msg->attachedType[0];
-    entry->attachedType[1] = msg->attachedType[1];
     entry->dwcId = msg->dwcId;
     entry->unk78 = msg->iconNew;
+    for (i = 0; i < NWC24i_MSG_ATTACHMENT_MAX; i++) {
+        entry->attached[i] = msg->attached[i];
+        entry->attachedSize[i] = msg->attachedSize[i];
+        entry->attachedType[i] = msg->attachedType[i];
+    }
     return NWC24_OK;
 }
 
 // control file entry -> message object
-NWC24Err fn_8039D0EC(NWC24iMBCEntry *entry, NWC24iMsgObj *msg) {
+NWC24Err fn_8039D0EC(const NWC24iMBCEntry *entry, NWC24iMsgObj *msg) {
     int i;
 
     msg->id = entry->id;
@@ -3339,21 +3347,21 @@ NWC24Err fn_8039D0EC(NWC24iMBCEntry *entry, NWC24iMsgObj *msg) {
     msg->numTo = entry->numTo;
     msg->numAttached = entry->numAttached;
     msg->groupId = entry->groupId;
+    msg->text = entry->text;
+    msg->dwcId = entry->dwcId;
+    msg->iconNew = entry->unk78;
+
+    // Expand the compact references after copying the common message fields.
     UnpackData_i(&msg->fromField, entry->fromField);
     UnpackData_i(&msg->toField, entry->toField);
     UnpackData_i(&msg->subject, entry->subject);
     UnpackData_i(&msg->contentType, entry->contentType);
     UnpackData_i(&msg->txEncoding, entry->txEncoding);
-    msg->text = entry->text;
-    msg->attached[0] = entry->attached[0];
-    msg->attached[1] = entry->attached[1];
-    msg->attachedSize[0] = entry->attachedSize[0];
-    msg->attachedSize[1] = entry->attachedSize[1];
-    msg->attachedType[0] = entry->attachedType[0];
-    msg->attachedType[1] = entry->attachedType[1];
-    msg->dwcId = entry->dwcId;
-    msg->iconNew = entry->unk78;
-
+    for (i = 0; i < NWC24i_MSG_ATTACHMENT_MAX; i++) {
+        msg->attached[i] = entry->attached[i];
+        msg->attachedSize[i] = entry->attachedSize[i];
+        msg->attachedType[i] = entry->attachedType[i];
+    }
     for (i = 0; i < NWC24i_MSG_RECIPIENT_MAX; i++) {
         msg->to[i].id = 0;
     }
@@ -3647,7 +3655,7 @@ NWC24Err NWC24SetMsgAttached(NWC24MsgObj *pMsg, const char *data, u32 size, NWC2
     return NWC24_OK;
 }
 
-NWC24Err fn_8039B160(NWC24iMsgObj *msg, u32 *count) {
+NWC24Err fn_8039B160(const NWC24iMsgObj *msg, u32 *count) {
     NWC24Err result = NWC24_OK;
     u32 n = msg->numAttached;
 
@@ -3659,7 +3667,7 @@ NWC24Err fn_8039B160(NWC24iMsgObj *msg, u32 *count) {
     return result;
 }
 
-NWC24Err fn_8039B17C(NWC24iMsgObj *msg, u32 idx, u32 *size) {
+NWC24Err fn_8039B17C(const NWC24iMsgObj *msg, u32 idx, u32 *size) {
     if (idx >= NWC24i_MSG_ATTACHMENT_MAX || idx >= msg->numAttached) {
         return NWC24_ERR_INVALID_VALUE;
     }
@@ -3674,7 +3682,7 @@ NWC24Err fn_8039B1B0(u32 *src, u32 *dst) {
 }
 
 // checks the header fields of a message
-NWC24Err fn_8039E9CC(NWC24iMsgObj *msg) {
+NWC24Err fn_8039E9CC(const NWC24iMsgObj *msg) {
     char *it;
 
     if (msg->numTo == 0) {
@@ -4003,7 +4011,7 @@ static char *TextEncodingFmt = "Content-Transfer-Encoding: %s\r\n\r\n";
 static BOOL SendToSelfIsReceive = TRUE;
 
 // writes a mail address, either "w<id>@domain" or a plain string
-NWC24Err fn_8039EDE8(NWC24iAddr *addr, u32 flags, char *dst, int maxlen, int *written) {
+NWC24Err fn_8039EDE8(const NWC24iAddr *addr, u32 flags, char *dst, int maxlen, int *written) {
     NWC24Err result = NWC24_OK;
     char *domain;
     char idStr[24];
@@ -5154,7 +5162,7 @@ NWC24Err NWC24iOpenMBox(void) {
 }
 
 // which box a committed message lives in
-static inline NWC24Err MsgBoxOf_i(NWC24iMsgObj *msg, NWC24MsgBoxId *id) {
+static inline NWC24Err MsgBoxOf_i(const NWC24iMsgObj *msg, NWC24MsgBoxId *id) {
     if (msg->flags & NWC24_MSGOBJ_TO_SEND) {
         *id = NWC24_MSGBOX_SEND;
     } else if (msg->flags & NWC24_MSGOBJ_TO_RECV) {
@@ -5167,7 +5175,7 @@ static inline NWC24Err MsgBoxOf_i(NWC24iMsgObj *msg, NWC24MsgBoxId *id) {
 }
 
 // reads the subject of a committed message back out of its file
-NWC24Err fn_8039FD68(NWC24iMsgObj *msg, char *buf, u32 size) {
+NWC24Err fn_8039FD68(const NWC24iMsgObj *msg, char *buf, u32 size) {
     NWC24File file;
     NWC24MsgBoxId id;
     NWC24Err result;
@@ -5214,10 +5222,10 @@ NWC24Err fn_8039FD68(NWC24iMsgObj *msg, char *buf, u32 size) {
     return result != NWC24_OK ? result : close;
 }
 
-NWC24Err fn_803A001C(NWC24File *file, NWC24Data *src, u8 *out, u32 outSize, u32 *written);
+NWC24Err fn_803A001C(NWC24File *file, const NWC24Data *src, u8 *out, u32 outSize, u32 *written);
 
 // reads (and decodes) attachment number idx of a committed message
-NWC24Err fn_8039FEB0(NWC24iMsgObj *msg, u32 idx, u8 *buf, u32 size) {
+NWC24Err fn_8039FEB0(const NWC24iMsgObj *msg, u32 idx, u8 *buf, u32 size) {
     NWC24File file;
     NWC24MsgBoxId id;
     NWC24Err result;
@@ -5261,7 +5269,7 @@ NWC24Err fn_8039FEB0(NWC24iMsgObj *msg, u32 idx, u8 *buf, u32 size) {
 }
 
 // decodes a base64 block out of the message file (up to the line that ends in "=" padding)
-NWC24Err fn_803A001C(NWC24File *file, NWC24Data *src, u8 *out, u32 outSize, u32 *written) {
+NWC24Err fn_803A001C(NWC24File *file, const NWC24Data *src, u8 *out, u32 outSize, u32 *written) {
     u8 *readBuf = (u8 *)NWC24WorkP->WORK_0x400;
     u32 off = src->offset;
     int remaining = src->size;
