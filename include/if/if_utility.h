@@ -2,6 +2,8 @@
 #pragma once
 
 #include <StaticAssert.h>
+#include <ef/ef_screen_handle.h>
+#include <gf/gf_3d_scene.h>
 #include <gf/gf_file_io_handle.h>
 #include <gf/gf_heap_manager.h>
 #include <gf/gf_task.h>
@@ -165,8 +167,11 @@ public:
 // A task that fades the screen out; it is done when the fade is.
 class FadeOutTask : public gfTask {
 public:
+    int unk40;
+    efScreenHandle unk44;
     // HYPOTHESIS: the names of create and isEnd.
     static FadeOutTask* create(Heaps::HeapType heap);
+    virtual void processDefault();
     virtual ~FadeOutTask();
     virtual bool isEnd();
 };
@@ -179,6 +184,16 @@ public:
     virtual ~DepthScaler();
     virtual void ExecCallback_CALC_WORLD(nw4r::g3d::ScnObj::Timing, nw4r::g3d::ScnObj*, u32, void*);
     virtual void ExecCallback_CALC_VIEW(nw4r::g3d::ScnObj::Timing, nw4r::g3d::ScnObj*, u32, void*);
+    virtual void ExecCallback_DRAW_OPA(nw4r::g3d::ScnObj::Timing, nw4r::g3d::ScnObj*, u32, void*);
+    virtual void ExecCallback_DRAW_XLU(nw4r::g3d::ScnObj::Timing, nw4r::g3d::ScnObj*, u32, void*);
+    virtual void setZScaleOffset(nw4r::g3d::ScnObj::Timing) const;
+};
+
+class DepthClearer {
+public:
+    gfSceneRoot::LayerType unk0;
+    DepthClearer(gfSceneRoot::LayerType layer);
+    ~DepthClearer();
 };
 
 }
