@@ -1,3 +1,4 @@
+// Local BrawlHeaders shadow: declare setTRS and playDefaultSE and expose unk178.
 #pragma once
 // Shadows include/Brawl/Include/gr/gr_gimmick_motion_path.h (-I include comes first) to declare getTRS's scale as a
 // float*: the function stores one float through it (sora_melee, getTRS__19grGimmickMotionPathFP5Vec3fP5Vec3fPf), and
@@ -14,7 +15,13 @@ public:
     char _spacer2[12];
     unsigned int m_frameCount;
     grGimmickMotionPathData* m_motionPathData;
-    char _spacer3[20];
+    union {
+        char _spacer3[20];
+        struct {
+            char _pad168[16];
+            int unk178;
+        };
+    };
     int m_nodeIndex;
     char m_nodeName[32];
 
@@ -43,4 +50,6 @@ public:
     bool isStartFrame();
     void getTRS(Vec3f* pos, Vec3f* rotation, float* scale);
     void stopStartSE();
+    void setTRS();
+    void playDefaultSE();
 };
