@@ -70,6 +70,9 @@ public:
     void initMsg(void*);
     virtual void processDefault();
     void setWndSealPrize(int);
+    void setWndFigurePrize(int);
+    void setWndBGMPrize(int);
+    void openWnd(int);
     bool appendPrizeList(const muPrizeWndEntry*);
     static int mainStepAppearMain(muPrizeWndTask*);
     static void mainStepSelectingInit(muPrizeWndTask*);

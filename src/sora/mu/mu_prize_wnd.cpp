@@ -3,6 +3,13 @@
 #include <snd/snd_system.h>
 #include <stdio.h>
 #include <string.h>
+#include <gm/gm_common.h>
+
+extern "C" int exchangeMuSelchkindToMuCharKind__6muMenuFiii(int selchKind);
+extern "C" int getInfoMsgID__6muMenuFiii(int info);
+extern const char lbl_8059E0FC[4];
+extern const char lbl_8059E100[6];
+extern const u8 lbl_804080E8[16];
 
 extern struct {
     const char* unk0;
@@ -155,4 +162,57 @@ void muPrizeWndTask::mainStepLeaveInit(muPrizeWndTask* task) {
 
 void muPrizeWndTask::setBgmID(int index, muPrizeWndEntry* entry) {
     entry->unk4 = lbl_80407C58[index].unk4;
+}
+
+void muPrizeWndTask::openWnd(int index) {
+    nw4r::g3d::ScnMdlExpand* group = unk54[0];
+    muPrizeWndEntry& entry = prizeList[index];
+    MuObject* window = unk40[0];
+    int frameIndex;
+    window->setFrameVisible(0.0f);
+    window->setFrameMatCol(0.0f);
+    group->Remove(unk40[1]->m_sceneModel);
+    group->Remove(unk40[2]->m_sceneModel);
+    group->Remove(unk40[3]->m_sceneModel);
+    group->Remove(unk40[4]->m_sceneModel);
+    unk5C->printf(0, lbl_8059E0FC);
+    unk5C->printf(1, lbl_8059E0FC);
+    unk5C->printf(2, lbl_8059E0FC);
+    unk5C->printf(3, lbl_8059E0FC);
+    switch (entry.unk0) {
+    case 0:
+        setWndFigurePrize(index);
+        break;
+    case 1:
+        setWndSealPrize(index);
+        break;
+    case 2:
+        setWndBGMPrize(index);
+        break;
+    case 3: {
+        muPrizeWndTask7TexLoadFv& texture = unk34C[index];
+        int characterKind;
+        MuObject* character = unk40[4];
+        characterKind = entry.unk8;
+        nw4r::g3d::ScnMdlExpand* characterGroup = unk54[0];
+        character->changeMaterialTex("Character_dammy_Mat", 0, &texture.unk4);
+        character->changeMaterialTex("Character_dammy_shadow_Mat", 0, &texture.unk4);
+        characterGroup->PushBack(character->m_sceneModel, lbl_8059E100);
+        int menuKind = exchangeMuSelchkindToMuCharKind__6muMenuFiii(characterKind);
+        int message = getInfoMsgID__6muMenuFiii(static_cast<u8>(gmRetIfKindMenukind(menuKind)));
+        unk5C->printIndex(0, message, NULL);
+        unk40[0]->setFrameVisible(6.0f);
+        break;
+    }
+    case 4: {
+        frameIndex = entry.unkC_word;
+        unk5C->printIndex(0, entry.unk8, NULL);
+        unk40[0]->setFrameVisible(lbl_804080E8[frameIndex]);
+        break;
+    }
+    }
+    if (entry.unk4 > 0) {
+        g_sndSystem->stopBGM(0);
+        g_sndSystem->playBGM(entry.unk4, 0, true);
+    }
 }
