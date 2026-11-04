@@ -1,9 +1,10 @@
 #define MT_VEC3F_ASSIGN_NOINLINE
 #include <ft/robot/ft_robot_article_pools.h>
 #include <ft/robot/ft_robot_link_event.h>
-#include <wn/wn_activate_desc.h>
-#include <mt/mt_prng.h>
 #include <memory.h>
+#include <mt/mt_prng.h>
+#include <wn/robot/wn_robot_gyro_status_uniq_process.h>
+#include <wn/wn_activate_desc.h>
 
 // Shared transition tables remain imported from the original data owner.
 // HYPOTHESIS: table names and source grouping; the receiver indexes three
@@ -219,3 +220,9 @@ void wnRobotFinalBeam::notifyEventLink(soLinkEventArgs* event, soModuleAccesser*
     }
     Weapon::notifyEventLink(event, acc, parent, index);
 }
+
+wnRobotGyroStatusUniqProcessHold::~wnRobotGyroStatusUniqProcessHold() { }
+
+wnRobotGyroStatusUniqProcessMove::~wnRobotGyroStatusUniqProcessMove() { }
+
+wnRobotGyroStatusUniqProcessStop::~wnRobotGyroStatusUniqProcessStop() { }
