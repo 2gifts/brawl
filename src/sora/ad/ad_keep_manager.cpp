@@ -191,12 +191,19 @@ void adKeepManager::useWorldMapTiming() {
 
 void adKeepManager::useStepInTiming() {}
 
-void adKeepManager::useStepOutTiming() {
-    for (u32 i = 0x300; i < 0x3A7; i++) {
-        if (getGlobalFlag(i)) {
-            getAdvData()->m_globalFlags[i >> 5] |= 1 << (i & 0x1F);
+// HYPOTHESIS: inlined range sync of global flags to gmAdvData.
+inline void adKeepManager::resetGlobalFlag(u32 start, u32 end) {
+    for (; start < end; start++) {
+        u32 word = start >> 5;
+        u32 bit = start & 0x1F;
+        if (getGlobalFlag(start)) {
+            getAdvData()->m_globalFlags[word] |= 1 << bit;
         }
     }
+}
+
+void adKeepManager::useStepOutTiming() {
+    resetGlobalFlag(0x300, 0x3A7);
 }
 
 void adKeepManager::useSealInfoPrepareStart() {
@@ -228,11 +235,7 @@ void adKeepManager::useGameOverOutTimingContinue() {
 
 void adKeepManager::useGameOverOutTiming() {
     setResultOfTotaling(true, true);
-    for (u32 i = 0; i < 0x400; i++) {
-        if (getGlobalFlag(i)) {
-            getAdvData()->m_globalFlags[i >> 5] |= 1 << (i & 0x1F);
-        }
-    }
+    resetGlobalFlag(0, 0x400);
 }
 
 void adKeepManager::useStageClearInTiming() {
@@ -246,22 +249,14 @@ void adKeepManager::useStageClearInTiming() {
 
 void adKeepManager::useStageClearOutTiming() {
     setResultOfTotaling(true, true);
-    for (u32 i = 0; i < 0x400; i++) {
-        if (getGlobalFlag(i)) {
-            getAdvData()->m_globalFlags[i >> 5] |= 1 << (i & 0x1F);
-        }
-    }
+    resetGlobalFlag(0, 0x400);
 }
 
 void adKeepManager::useSavePointTiming() {
     fn_8015AAA4(this);
     fn_8015AE80(this, false);
     setResultOfTotaling(false, true);
-    for (u32 i = 0; i < 0x400; i++) {
-        if (getGlobalFlag(i)) {
-            getAdvData()->m_globalFlags[i >> 5] |= 1 << (i & 0x1F);
-        }
-    }
+    resetGlobalFlag(0, 0x400);
 }
 
 void adKeepManager::useQuitAdventureTiming() {
@@ -277,11 +272,7 @@ void adKeepManager::useReturnMapTiming() {
     fn_8015AAA4(this);
     fn_8015AE80(this, false);
     setResultOfTotaling(false, true);
-    for (u32 i = 0; i < 0x400; i++) {
-        if (getGlobalFlag(i)) {
-            getAdvData()->m_globalFlags[i >> 5] |= 1 << (i & 0x1F);
-        }
-    }
+    resetGlobalFlag(0, 0x400);
 }
 
 void adKeepManager::useGameEndingTiming() {}
