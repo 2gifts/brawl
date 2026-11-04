@@ -3,6 +3,7 @@
 #include <ft/ft_owner_impl.h>
 #include <it/it_manager.h>
 #include <mt/mt_prng.h>
+#include <ft/ft_external_value_accesser.h>
 
 // HYPOTHESIS: ftOwnerData fields: a counter at 0x64 (coins), then the controller state block at 0x78 (kind and four stick floats)
 struct ftOwnerControllerState {
@@ -222,6 +223,13 @@ int ftOwner::getDeadCount() {
     return m_data->m_deadCount;
 }
 
+void ftOwner::setBeatCount(s32 playerIndex, s32 beatCount) {
+    if (unkA == 1) {
+        m_data->m_beatCount[playerIndex] = beatCount;
+    }
+    m_data->m_cheerDefeatFrame = ftExternalValueAccesser::getAudienceData()[0x44 / sizeof(u32)];
+}
+
 int ftOwner::getBeatCount(int playerIndex) {
     return m_data->m_beatCount[playerIndex];
 }
@@ -259,12 +267,28 @@ void ftOwner::setTrainerStartLr(float lr) {
     m_data->m_trainerStartLr = lr;
 }
 
+void ftOwner::setStartPos(Vec3f* pos) {
+    Vec3f* startPos = &m_data->m_startPos;
+    float x = pos->m_x;
+    float y = pos->m_y;
+    startPos->m_x = x;
+    float z = pos->m_z;
+    startPos->m_y = y;
+    startPos->m_z = z;
+}
+
 Vec3f ftOwner::getStartPos() {
     return m_data->m_startPos;
 }
 
 void ftOwner::setTrainerStartPos(Vec3f* pos) {
-    m_data->m_trainerStartPos = *pos;
+    Vec3f* startPos = &m_data->m_trainerStartPos;
+    float x = pos->m_x;
+    float y = pos->m_y;
+    startPos->m_x = x;
+    float z = pos->m_z;
+    startPos->m_y = y;
+    startPos->m_z = z;
 }
 
 Vec3f ftOwner::getTrainerStartPos() {
@@ -641,6 +665,16 @@ float ftOwner::getResultWinRotY() {
 
 void ftOwner::setResultWinRotY(float rotY) {
     m_data->m_resultWinRotY = rotY;
+}
+
+void ftOwner::addCoin(int coins) {
+    if (unkA == 1) {
+        s32 room = 0x7FFFFFFF - m_data->m_coin;
+        if (room < coins) {
+            coins = room;
+        }
+        m_data->m_coin = m_data->m_coin + coins;
+    }
 }
 
 int ftOwner::getCoin() {
