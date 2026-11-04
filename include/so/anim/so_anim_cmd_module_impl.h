@@ -66,6 +66,9 @@ public:
     void resetInterpreter(const acAnimCmdConv* initCmd, soModuleAccesser* moduleAccesser, u32 flag, float frame);
     void skipNextMotionGroup(soModuleAccesser* moduleAccesser);
     void systemCmdFuncWaitLoop();
+    void systemCmdFuncWaitMotionTransition();
+    void systemCmdFuncSyncMotionFrame();
+    void systemCmdFuncWaitRnadi();
 };
 static_assert(sizeof(soAnimCmdInterpreter) == 0x50, "Class is the wrong size!");
 #endif
