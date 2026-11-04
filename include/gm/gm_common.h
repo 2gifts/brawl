@@ -8,6 +8,10 @@
 enum GmMovieID {};
 enum GmHideBGMKind {};
 
+u32 gmSubCoin(u32 num);
+bool isClearGetterOpen(int index);
+void setClearGetterOpen(int index);
+
 // HYPOTHESIS: all parameter types below come from the callee's own register use; the map has no parameter types.
 const char* getChKindNameString(int kind);
 const char* getStageNameString(int kind);

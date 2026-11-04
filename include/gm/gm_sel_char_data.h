@@ -16,6 +16,8 @@ struct gmSelCharData {
             u8 _pad5[0x29];
             // HYPOTHESIS: 3-bit difficulty setting at offset 0x2E
             u8 unk2E_b7 : 3;
+            // HYPOTHESIS: 3-bit stock setting at offset 0x2E.
+            u8 unk2E_b4 : 3;
             u8 _pad2F[0x89];
         };
     };
