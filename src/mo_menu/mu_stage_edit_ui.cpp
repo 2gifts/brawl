@@ -4,8 +4,10 @@
 #include <gf/gf_pad_system.h>
 #include <gf/gf_scene.h>
 #include <math.h>
+#include <ms/ms_message.h>
 #include <mu/mu_stage_edit_ui.h>
 #include <nw4r/g3d/g3d_scngroup.h>
+#include <snd/snd_bgm.h>
 #include <snd/snd_system.h>
 #include <st/st_data_container.h>
 
@@ -484,4 +486,31 @@ void muStageEditSelectTask::controlBrowsing() { }
 
 int muStageEditSelectTask::dispThumbnail(MuObject* object, void* summary) {
     return 0;
+}
+
+bool muStageEditDataManager::isLoadFinish() {
+    if (!m_loaded) {
+        if (!unk604.isReady()) {
+            return false;
+        }
+        setData(static_cast<stDataContainerData*>(unk604.getBuffer()));
+        m_loaded = true;
+        return true;
+    }
+    return true;
+}
+
+sndBgmTitleData* muStageEditSelectTask::NewData::getBgmData() const {
+    return lbl_805A01D8->getSeriesTitleData(unk8, unkC);
+}
+
+void muStageEditSelectTask::getMineLabel(muCollectionMsgBuf* buf) {
+    void* data = m_work->m_msgFile[0].m_handle.getBuffer();
+    u32 size;
+    char* text;
+    Message::getPrintIndexData(data, 6, &text, &size);
+    u32 length = size;
+    int used = buf->m_size;
+    memcpy(buf->m_data + used, text, length);
+    buf->m_size = used + length;
 }
