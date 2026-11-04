@@ -34,7 +34,8 @@ struct AiClBlock {
     Vec2f m_edgeR;      // 0x20: right end
     float m_top;        // 0x28: highest point of the block
     float m_bottom;     // 0x2C: lowest point of the block
-    char unk30[0xE];
+    char unk30[0xD];
+    s8 m_lr;            // 0x3D: HYPOTHESIS: the way (+1 right / -1 left) to leave the block towards the goal (aiInput::md_hammer)
     u8 m_teamMask;      // 0x3E: teams (bit per team) the danger flag applies to
     u8 unk3F;
     u32 m_flags;        // 0x40: 2 = usable, 0x20 = pass-through, 0x800 = hazard for m_teamMask, 0x1000 / 0x10000 = worse hazards

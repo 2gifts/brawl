@@ -2544,3 +2544,150 @@ int aiInput::md_dragoon(Vec2f* stick, ipPadButton* button) {
     }
     return 1;
 }
+
+// The hammer mode: while the character holds a hammer (flag 0x1000) it walks towards its target's floor and swings.
+// With flag 0x2000 (HYPOTHESIS: the hammer head can come off) a rank 40+ CPU in the air or moving fast presses attack and
+// guard together at random. Step 0 picks the nearest target and a random delay, step 1 picks the goal floor and the way
+// to walk (towards the target on the ground, away from it in the air), steps 2-12 walk there; step 3 and up also hold
+// the stick up (jump) for a while. The stick turns back at a floor end; reaching the target's floor height restarts.
+// The Golden Hammer (it can fly) gets a wider jump reach and attacks while falling in the air.
+// HYPOTHESIS: the meaning of flags 0x100 / 1 follows other modes.
+// BYTES: defined at the end of the file for the same literal-pool reason as auto_passfall.
+int aiInput::md_hammer(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    if (!(stat->m_flags & 0x1000)) {
+        aiChrIdx none;
+        change_md(1, &none, 0, 0);
+        return 1;
+    }
+    if (stat->m_flags & 0x2000) {
+        float rank = m_par.m_rank;
+        if (rank >= 40.0f && !(m_stepFrame & 1)) {
+            if (!stat->chk_over_ground() || stat->m_speed.length() > 2.5f) {
+                if (randf() < 0.01f * (rank - 35.0f)) {
+                    button->m_mask |= soController::getButtonMask(soController::Pad_Button_Attack);
+                    button->m_mask |= soController::getButtonMask(soController::Pad_Button_Guard);
+                }
+            }
+        }
+    }
+    switch (m_step) {
+    case 0:
+        m_target.m_idx = get_near_target(NULL, 0);
+        m_stepFrame = (int)(-180.0f * randf()) - 60;
+        m_step++;
+    case 1: {
+        aiStat* target = aiMgr::get_aiStat(&m_target);
+        AiClBlock* via = target->m_floor;
+        if (stat->m_flags & 0x100) {
+            m_act->m_lr = target->m_pos.m_x > stat->m_pos.m_x ? 1.0f : -1.0f;
+            if (via != stat->m_floor) {
+                via = g_aiMgr->get_via_blk2_team(stat->m_floor, (Vec2f*)&stat->m_pos, via, stat->m_team,
+                                                 stat->m_haveItemKind == Item_GoldenHammer ? 80.0f : 20.0f, 20.0f, 0.5f);
+                if (via == stat->m_floor) {
+                    via = target->m_floor;
+                } else if (via != target->m_floor) {
+                    m_act->m_lr = via->m_lr;
+                }
+            }
+            m_act->set_goal_inf(via, target->m_floor, 0.0f, 0.0f);
+        } else {
+            m_act->m_lr = target->m_pos.m_x > stat->m_pos.m_x ? -1.0f : 1.0f;
+            if (via == stat->m_floor) {
+                Vec2f pos(stat->m_pos.m_x, stat->m_pos.m_y);
+                via = g_aiMgr->get_via_blk_team(stat->m_floor, 0, stat->m_pos.m_x, stat->m_team, &pos, 1, 0,
+                                                stat->m_haveItemKind == Item_GoldenHammer ? 80.0f : 20.0f, 20.0f, 0.25f);
+                if (via != stat->m_floor) {
+                    m_act->m_lr = via->m_lr;
+                }
+            }
+            m_act->set_goal_inf(via, NULL, 0.0f, 0.0f);
+        }
+        m_step++;
+    }
+    }
+    AiClBlock* goal = g_aiMgr->search_blk1(&m_act->m_goalJointId);
+    aiStat* target = aiMgr::get_aiStat(&m_target);
+    if (goal == NULL) {
+        m_step = 0;
+        goto end;
+    }
+    AiClBlock* floor = stat->m_floor;
+    float dist = 99999.9f;
+    float lr;
+    if (target->m_floor == floor) {
+        lr = target->m_pos.m_x > stat->m_pos.m_x ? 1.0f : -1.0f;
+        dist = lr * (target->m_pos.m_x - stat->m_pos.m_x);
+        if (!(stat->m_flags & 0x100)) {
+            if (m_par.m_rank < 50) {
+                lr = -lr;
+            } else {
+                lr = 0.5f * (floor->m_edgeL.m_x + floor->m_edgeR.m_x) > stat->m_pos.m_x ? 1.0f : -1.0f;
+            }
+        }
+    } else if (goal != floor || stat->m_unkC0 == 2) {
+        lr = m_act->m_lr;
+    } else {
+        lr = 0.0f;
+    }
+    if (stat->m_flags & 1) {
+        if (stat->m_haveItemKind == Item_GoldenHammer && stat->m_speed.m_y <= 0.0f) {
+            if (!stat->chk_over_ground() || goal != stat->m_floor || stat->m_unkC0 == 2) {
+                if (!(m_stepFrame & 7)) {
+                    button->m_mask |= soController::getButtonMask(soController::Pad_Button_Attack);
+                }
+            }
+        }
+    } else {
+        float dy = target->m_pos.m_y - stat->m_pos.m_y;
+        if (dy > 10.0f && dy < 50.0f && m_step == 2) {
+            m_step = 3;
+        }
+    }
+    if (!stat->chk_over_ground()) {
+        floor = stat->m_floor;
+        lr = 0.5f * (floor->m_edgeL.m_x + floor->m_edgeR.m_x) > stat->m_pos.m_x ? 1.0f : -1.0f;
+    } else {
+        float range = stat->get_range_floor(lr, &stat->m_pos);
+        if (stat->m_flags & 0x100) {
+            if (range < 10.0f && target->m_floor == stat->m_floor) {
+                floor = stat->m_floor;
+                lr = 0.5f * (floor->m_edgeL.m_x + floor->m_edgeR.m_x) > stat->m_pos.m_x ? 1.0f : -1.0f;
+            } else if (stat->m_lr * lr > 0.0f) {
+                if (dist < 10.0f) {
+                    goto step;
+                }
+                if (range < 10.0f) {
+                    if (!g_aiMgr->chk_goto_blk(stat->m_floor, goal, stat->m_team, stat->m_pos.m_x,
+                                               stat->m_haveItemKind == Item_GoldenHammer ? 80.0f : 20.0f, 20.0f)) {
+                        goto step;
+                    }
+                    if (!(stat->m_flags & 1) && stat->m_pos.m_y < 10.0f + goal->m_bottom && m_step == 2) {
+                        m_step = 3;
+                    }
+                }
+            }
+        } else if (range < 10.0f) {
+            floor = stat->m_floor;
+            lr = 0.5f * (floor->m_edgeL.m_x + floor->m_edgeR.m_x) > stat->m_pos.m_x ? 1.0f : -1.0f;
+        }
+    }
+    stick->m_x = lr;
+step:
+    if (m_step >= 3) {
+        if (m_step > 3) {
+            stick->m_y = 1.0f;
+        }
+        m_step++;
+        if (m_step > 12) {
+            m_step = 2;
+        }
+    } else if (!(stat->m_flags & 1) && goal == stat->m_floor && goal != target->m_floor) {
+        m_step = 1;
+    }
+    if (m_stepFrame > 0) {
+        m_step = 0;
+    }
+end:
+    return 1;
+}

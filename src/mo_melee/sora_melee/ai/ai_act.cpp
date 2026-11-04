@@ -38,7 +38,7 @@ aiAct::aiAct(aiInput* input, aiStat* stat) {
     m_unkA8 = 0;
     m_unkAC = 0;
     m_unkB0 = m_unkBC = m_unkC8 = __ptmf_null;
-    m_unkDC = 1.0f;
+    m_lr = 1.0f;
     m_goalPos.m_x = m_goalPos.m_y = m_goalEdgeL.m_x = m_goalEdgeL.m_y = m_goalEdgeR.m_x = m_goalEdgeR.m_y = 0.0f;
     m_goalUnk48 = m_viaUnk48 = m_unk10C = 0;
     m_goalJointId = m_viaJointId = m_unk108 = 0;

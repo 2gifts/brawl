@@ -75,7 +75,7 @@ public:
     Vec3f m_unkBC;
     Vec3f m_unkC8;
     u16 m_unkD4[4];
-    float m_unkDC;         // 0xDC: 1 when reset
+    float m_lr;            // 0xDC: 1 when reset; HYPOTHESIS: the way (+1 / -1) to walk to the goal (aiInput::md_hammer)
     // The goal that set_goal_inf records: a position and the floor blocks of the goal and of the way there.
     Vec2f m_goalPos;       // 0xE0
     Vec2f m_goalEdgeL;     // 0xE8: the goal block's walkable ends

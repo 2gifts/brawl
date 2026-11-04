@@ -3,6 +3,7 @@
 #include <ai/ai_cl_block.h>
 #include <ai/ai_ip_buf.h>
 #include <ai/ai_mgr.h>
+#include <it/it_create.h>
 #include <mt/mt_vector.h>
 #include <types.h>
 
@@ -73,7 +74,11 @@ public:
     float m_unkDC;
     u32 m_taskId;            // 0xE0: compared with soCollisionLog::m_taskId to find the attacker
     aiIpBuf m_ipBuf;         // 0xE4: HYPOTHESIS: this character's recent stick/button frames
-    char unk1A8[0x11];
+    int m_unk1A8;            // 0x1A8
+    itKind m_haveItemKind;   // 0x1AC: the kind of the item held (soItemManageModule::getHaveItemKind), -1 = none
+    int m_unk1B0;            // 0x1B0
+    int m_unk1B4;            // 0x1B4
+    u8 m_unk1B8;             // 0x1B8
     u8 m_unk1B9;
     u8 m_situation;          // 0x1BA: 1 = ground, 2 = air, 6/7 = special
     u8 m_unk1BB;

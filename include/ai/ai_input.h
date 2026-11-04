@@ -143,4 +143,5 @@ public:
     int md_slide(Vec2f* stick, ipPadButton* button);
     int md_dragoon(Vec2f* stick, ipPadButton* button);
     int md_final(Vec2f* stick, ipPadButton* button);
+    int md_hammer(Vec2f* stick, ipPadButton* button);
 };
