@@ -485,6 +485,10 @@ public:
         float zSq = m_z * m_z;
         return zSq + (xSq + ySq);
     }
+#elif defined(MT_VEC3F_LENGTH_SQ_PLAIN)
+    { // BYTES: matches the plain left-to-right grouping mt_vector.cpp's own normalize/angle use.
+        return m_x * m_x + m_y * m_y + m_z * m_z;
+    }
 #else
     ;
 #endif
