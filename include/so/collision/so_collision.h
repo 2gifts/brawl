@@ -118,6 +118,7 @@ public:
     void initAbsolute(u32 groupIndex);
     bool isRefLogGroup(u32 groupIndex);
     void unUseLogGroup(u32 groupIndex);
+    void addPastLog(soCollision* collision, u32 index, u32 groupIndex);
     // HYPOTHESIS: primitive pointer and situation conversion follow the reset calls.
     newCollision* getCollision(u32 index, u32 groupIndex);
     static Situation getSituation(int situation);
