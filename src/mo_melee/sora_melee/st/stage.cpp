@@ -697,6 +697,46 @@ void Stage::setStageAttackData(grGimmickDamageFloor* attackData, u32 index) {
     m_collisionAttrParam.setCollisionAttackData(attackData);
 }
 
+void Stage::CameraParam::setParam(float* param) {
+    m_range.m_left = param[16];
+    m_range.m_right = param[17];
+    m_range.m_up = param[18];
+    m_range.m_down = param[19];
+    m_verticalRotationFactor = param[22];
+    m_horizontalRotationFactor = param[23];
+    m_minZ = param[20];
+    m_maxZ = param[21];
+    m_centerPos.m_x = param[24];
+    m_centerPos.m_y = param[25];
+    m_centerPos.m_z = param[26];
+    m_tiltThreshold = param[27];
+    m_fov = param[28];
+    m_speed = param[29];
+    m_fighterBubbleBufferMultiplier = param[30];
+    m_48 = param[31];
+}
+
+void Stage::loadStageAttackData(gfArchive* archive, int fileIndex, u8 attackRate) {
+    stDataContainerData* data = static_cast<stDataContainerData*>(archive->getData(Data_Type_Misc, fileIndex, 0xFFFE));
+    if (data != NULL) {
+        const char* magic;
+        stDataMultiContainer* container = stDataMultiContainer::create(data, Heaps::StageInstance);
+        if (g_BlocMagic.data == container->m_filedata->m_MAGIC) {
+            magic = "GDMD";
+            stDataContainer* damageContainer;
+            u32 containerIndex = 0;
+            while ((damageContainer = container->searchContainer(*reinterpret_cast<const u32*>(magic), containerIndex++)) != NULL) {
+                for (u32 dataIndex = 0; dataIndex < damageContainer->m_filedata->m_numFiles; dataIndex++) {
+                    grGimmickDamageFloor* damageFloor = static_cast<grGimmickDamageFloor*>(static_cast<void*>(damageContainer->getData(dataIndex)));
+                    m_collisionAttrParam.setCollisionAttackData(damageFloor);
+                }
+            }
+        }
+        delete container;
+    }
+    m_collisionAttrParam.m_attackRate = attackRate;
+}
+
 void Stage::createStagePositions(nw4r::g3d::ResFile* resFile) {
     m_stagePositions = stPositions::create(*resFile);
     updateStagePositions();
