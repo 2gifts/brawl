@@ -281,3 +281,41 @@ void soGenerateArticleManageModuleImpl::notifyEventChangeStatus(int statusKind, 
         }
     }
 }
+
+void soGenerateArticleManageModuleImpl::changeStatus(int articleId, int statusKind, int selector) {
+    int j;
+    soArticle* article;
+    s32 removeId;
+    if (!isExist(articleId)) {
+        OSReport("\x91\xB6\x8D\xDD\x82\xB5\x82\xC8\x82\xA2" "Article" "\x82\xD6\x82\xCC" "changeStatus" "\x96\xBD\x97\xDF\x82\xC5\x82\xB7" " kind:%d");
+        return;
+    }
+    soArrayVector<soArticle*, 24> articles;
+    getArticleList(&articles, articleId, selector);
+    for (int i = 0; i < articles.size(); i++) {
+        if (articles.at(i)->isSyncOwnerStatus() == true) {
+            soArticle* removed = m_articles->at(i);
+            article = m_articles->at(i);
+            int count = m_observers->size();
+            for (j = 0; j < count; j++) {
+                s16 manageId = article->getArticleEventManageId();
+                soArticleEventObserver& observer = m_observers->at(j);
+                if (manageId != -1) {
+                    removeId = observer.m_manageID;
+                    if (manageId == removeId) {
+                        if (soEventSystem::getInstance()->getInstanceManager().isContain(removeId) == true) {
+                            soEventSystem::getInstance()->getManager(observer.m_manageID)->eraseObserver(observer.m_unitID, observer.m_sendID);
+                        }
+                        observer.m_sendID = -1;
+                        observer.m_manageID = -1;
+                    }
+                }
+            }
+            m_articles->erase(i);
+            article->unlinkOwner(1);
+            removed->remove();
+        } else {
+            articles.at(i)->changeStatus(statusKind);
+        }
+    }
+}

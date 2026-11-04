@@ -858,10 +858,10 @@ __ct__56soKineticUpdateEnergyHolderHelper<19wnKineticTransactor>FRC56soKineticUp
 @136@getArticleId__6WeaponFv = .text:0x00018840; // type:function size:0x8
 @136@remove__6WeaponFv = .text:0x00018848; // type:function size:0x8
 @136@__dt__13wnDiddyBarrelFv = .text:0x00018850; // type:function size:0x8
-fn_115_18858 = .text:0x00018858; // type:function size:0x128
+initStatus__30wnDiddyBarrelStatusUniqProcessFP16soModuleAccesser = .text:0x00018858; // type:function size:0x128
 fn_115_18980 = .text:0x00018980; // type:function size:0x730
 atan2f = .text:0x000190B0; // type:function size:0x24
-fn_115_190D4 = .text:0x000190D4; // type:function size:0xEC
+execStop__30wnDiddyBarrelStatusUniqProcessFP16soModuleAccesser = .text:0x000190D4; // type:function size:0xEC
 addIntWork__21soGeneralWorkAbstractFlUl = .text:0x000191C0; // type:function size:0x4 scope:weak
 __dt__30wnDiddyBarrelStatusUniqProcessFv = .text:0x000191C4; // type:function size:0x40
 __sinit_\wn_diddy_barrel_cpp = .text:0x00019204; // type:function size:0x48

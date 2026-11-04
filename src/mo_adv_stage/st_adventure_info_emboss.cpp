@@ -7,18 +7,58 @@ extern "C" void fn_40_15B48(stAdventureInfoContact* contact);
 void stAdventureInfoEmBoss::setInfoParam(int createId) {
     Enemy* enemy = getEnemy(createId);
     if (enemy != NULL && enemy->getEnemyKind() == 0x2E) {
-        m_params[0] = getIconParamForEnemy(createId, m_packnWnLeft, 0, &m_params[0]);
-        m_params[1] = getIconParamForEnemy(createId, m_packnWnRight, 1, &m_params[1]);
+        stAdventureInfoIconParam param0 = getIconParamForEnemy(createId, m_packnWnLeft, 0, &m_params[0]);
+        m_params[0].m_disp.m_index = param0.m_disp.m_index;
+        m_params[0].m_disp.m_hp = param0.m_disp.m_hp;
+        m_params[0].m_disp.m_maxHp = param0.m_disp.m_maxHp;
+        m_params[0].m_disp.m_nameMsgId = param0.m_disp.m_nameMsgId;
+        m_params[0].m_disp.m_faceTex = param0.m_disp.m_faceTex;
+        m_params[0].m_isValid = param0.m_isValid;
+        m_params[0].unk15 = param0.unk15;
+        m_params[0].m_faceTexData = param0.m_faceTexData;
+        stAdventureInfoIconParam param1 = getIconParamForEnemy(createId, m_packnWnRight, 1, &m_params[1]);
+        m_params[1].m_disp.m_index = param1.m_disp.m_index;
+        m_params[1].m_disp.m_hp = param1.m_disp.m_hp;
+        m_params[1].m_disp.m_maxHp = param1.m_disp.m_maxHp;
+        m_params[1].m_disp.m_nameMsgId = param1.m_disp.m_nameMsgId;
+        m_params[1].m_disp.m_faceTex = param1.m_disp.m_faceTex;
+        m_params[1].m_isValid = param1.m_isValid;
+        m_params[1].unk15 = param1.unk15;
+        m_params[1].m_faceTexData = param1.m_faceTexData;
     } else if (m_isPair) {
         if (enemy != NULL && enemy->getEnemyKind() == 0x3B) {
-            m_params[0] = getIconParamForEnemy(createId, enemy->getTaskId(), 0, &m_params[0]);
+            stAdventureInfoIconParam param0 = getIconParamForEnemy(createId, enemy->getTaskId(), 0, &m_params[0]);
+            m_params[0].m_disp.m_index = param0.m_disp.m_index;
+            m_params[0].m_disp.m_hp = param0.m_disp.m_hp;
+            m_params[0].m_disp.m_maxHp = param0.m_disp.m_maxHp;
+            m_params[0].m_disp.m_nameMsgId = param0.m_disp.m_nameMsgId;
+            m_params[0].m_disp.m_faceTex = param0.m_disp.m_faceTex;
+            m_params[0].m_isValid = param0.m_isValid;
+            m_params[0].unk15 = param0.unk15;
+            m_params[0].m_faceTexData = param0.m_faceTexData;
         }
         Enemy* subEnemy = getEnemy(m_subCreateId);
         if (subEnemy != NULL && subEnemy->getEnemyKind() == 0x3C) {
-            m_params[1] = getIconParamForEnemy(m_subCreateId, subEnemy->getTaskId(), 1, &m_params[1]);
+            stAdventureInfoIconParam param1 = getIconParamForEnemy(m_subCreateId, subEnemy->getTaskId(), 1, &m_params[1]);
+            m_params[1].m_disp.m_index = param1.m_disp.m_index;
+            m_params[1].m_disp.m_hp = param1.m_disp.m_hp;
+            m_params[1].m_disp.m_maxHp = param1.m_disp.m_maxHp;
+            m_params[1].m_disp.m_nameMsgId = param1.m_disp.m_nameMsgId;
+            m_params[1].m_disp.m_faceTex = param1.m_disp.m_faceTex;
+            m_params[1].m_isValid = param1.m_isValid;
+            m_params[1].unk15 = param1.unk15;
+            m_params[1].m_faceTexData = param1.m_faceTexData;
         }
     } else if (enemy != NULL) {
-        m_params[0] = getIconParamForEnemy(createId, enemy->getTaskId(), 0, &m_params[0]);
+        stAdventureInfoIconParam param0 = getIconParamForEnemy(createId, enemy->getTaskId(), 0, &m_params[0]);
+        m_params[0].m_disp.m_index = param0.m_disp.m_index;
+        m_params[0].m_disp.m_hp = param0.m_disp.m_hp;
+        m_params[0].m_disp.m_maxHp = param0.m_disp.m_maxHp;
+        m_params[0].m_disp.m_nameMsgId = param0.m_disp.m_nameMsgId;
+        m_params[0].m_disp.m_faceTex = param0.m_disp.m_faceTex;
+        m_params[0].m_isValid = param0.m_isValid;
+        m_params[0].unk15 = param0.unk15;
+        m_params[0].m_faceTexData = param0.m_faceTexData;
     }
 }
 

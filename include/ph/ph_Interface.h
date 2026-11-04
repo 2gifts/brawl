@@ -5,6 +5,8 @@
 #include <ph/ph_2ndary_controller.h>
 
 class ph2ndaryWorld;
+struct hkThreadMemory;
+struct hkWorld;
 class phIKController; // HYPOTHESIS: IK controller class, owned by the ph_ik_* units
 
 // Physics system task (gfTask, category Physics). Singleton behind s_instance.
@@ -43,10 +45,10 @@ public:
 
 
     u8 m_flags40[8];                         // 0x40..0x47
-    int unk48;                               // 0x48
-    int unk4C;                               // 0x4C
+    hkThreadMemory* unk48;                               // 0x48
+    void* unk4C;                               // 0x4C
     int unk50;                               // 0x50
-    int unk54;                               // 0x54
+    hkWorld* unk54;                               // 0x54
     ph2ndaryWorld* m_2ndaryWorld;            // 0x58
     u8 m_worldFlag;                          // 0x5C
     // Raw array headers (hkArrayBase layout); the constructor writes them in body order.

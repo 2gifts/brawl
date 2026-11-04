@@ -112,6 +112,13 @@ public:
     void unRefLogGroup(u32 groupIndex);
     void invalidLog(soCollisionLog* collisionLog, u32 groupIndex);
     void clean();
+    // HYPOTHESIS: parameter types follow collision-search callers.
+    void allocateCollision(u32 index, bool isAbsolute, u32 groupIndex);
+    void initLog(u32 groupIndex);
+    void initPastLog(u32 groupIndex, bool keep);
+    void initCheck(u32 groupIndex);
+    void updateGroup(float posX, float posY, u32 groupIndex);
+    void updatePastLog(bool isStop, u32 groupIndex);
     void initLogAll();
     void addCheckList();
     void initPastLogAll(u32 groupIndex);

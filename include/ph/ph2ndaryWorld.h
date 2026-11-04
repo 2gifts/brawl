@@ -6,6 +6,7 @@
 class Vec2f;
 class gfArea;
 class grCollCollection;
+struct ph2ndaryLine;
 
 // Secondary-motion world (map class ph2ndaryWorld). Offsets come from the asm of
 // src/sora/ph/ph_2ndary_world.cpp. Field names are HYPOTHESIS; unkNN marks fields not yet seen in the asm.
@@ -38,6 +39,15 @@ public:
     // HYPOTHESIS: parameter types from the register use.
     void getWindArray();
     u32 isCollisionBetweenPoints(const Vec2f* from, const Vec2f* to);
+    // HYPOTHESIS: argument types inferred from forwarding and gravity register use.
+    void operationAwakeExecute(ph2ndaryLine* line, ph2ndaryLine* body, const f32* gravity,
+                               int flag1, int flag2, int flag3, int flag4,
+                               u8 flag5, u8 flag6, u8 flag7, u8 flag8,
+                               u8 flag9, int index, u8 flag10, u8 flag11);
+    // HYPOTHESIS: argument types inferred from register use and recursive calls.
+    int operationGravity(ph2ndaryLine* line, ph2ndaryLine* body, const f32* gravity,
+                         int flag1, int flag2, int flag3, int flag4,
+                         u8 flag5, u8 flag6, u8 flag7, u8 flag8);
 
     hkArray<ConstraintEntry> m_constraints; // 0x00: data, size and capacity word
     union {

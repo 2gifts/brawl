@@ -452,3 +452,13 @@ void ftLucario::notifyEventCollisionShield(soCollisionAttackModule* attackModule
     }
     Fighter::notifyEventCollisionShield(attackModule, power, collisionLog, groupIndex, posX, posY, moduleAccesser);
 }
+
+void ftLucario::setAuraScale(float scale) {
+    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+    soEffectModule& effects = m_moduleAccesser->getEffectModule();
+    int firstEffect = work.getInt(0x10000047);
+    int secondEffect = work.getInt(0x10000048);
+    Vec3f auraScale(scale, scale, scale);
+    effects.setScale(firstEffect, &auraScale);
+    effects.setScale(secondEffect, &auraScale);
+}

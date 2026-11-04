@@ -71,6 +71,7 @@ public:
     static bool activeArticle(wnLucarioQigong* weapon, soModuleAccesser* acc);
     static void setMachValidity(soModuleAccesser* moduleAccesser, bool valid);
     float calcAuraScale();
+    void setAuraScale(float scale);
     virtual void notifyEventOnDamage(soDamage* damage, bool isDamage, soModuleAccesser* moduleAccesser);
     virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
     virtual void notifyEventCollisionShield(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser);

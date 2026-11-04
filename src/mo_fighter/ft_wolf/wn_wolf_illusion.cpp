@@ -9,6 +9,11 @@ extern "C" {
 
 } // extern "C"
 
+void wnWolfIllusion::processUpdate() {
+    wnFoxIllusionUtil::processUpdate(m_moduleAccesser);
+    Weapon::processUpdate();
+}
+
 void wnWolfIllusion::activate(s32 founderTaskId, s32 unk1, s32 team, float lr, s32 unk2, s32 unk3) {
     Vec3f pos(0.0f, 0.0f, 0.0f);
     wnActivateDesc desc;

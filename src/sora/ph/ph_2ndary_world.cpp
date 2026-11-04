@@ -6,6 +6,8 @@
 #include <mt/mt_prng.h>
 #include <mt/mt_vector.h>
 #include <ph/ph2ndaryWorld.h>
+#include <gf/gf_slow_manager.h>
+#include <gm/gm_global.h>
 
 // Brawl physics wrapper translation unit ph_2ndary_world.o (main.dol 0x80082438-0x8008AC5C).
 // Not yet decompiled. Functions in address order with their map names:
@@ -44,6 +46,49 @@
 extern const f32 lbl_805A1BB8;
 extern const f32 lbl_805A1BBC;
 extern const f32 lbl_805A1C14;
+
+void ph2ndaryWorld::operationAwakeExecute(ph2ndaryLine* line, ph2ndaryLine* body, const f32* gravity,
+                                        int flag1, int flag2, int flag3, int flag4,
+                                        u8 flag5, u8 flag6, u8 flag7, u8 flag8,
+                                        u8 flag9, int index, u8 flag10, u8 flag11) {
+    if (gfSlowManager::getSlowRate() != 1) {
+        unk3C = 1;
+        unk40 = 1;
+        if (g_GameGlobal->isPrevJustGameFrame() == true) {
+            unk40 = 1;
+        } else if (g_GameGlobal->isJustGameFrame() == true) {
+            unk40 = 0;
+        } else {
+            unk40 = 2;
+        }
+        m_unk48 = 1.0f / gfSlowManager::getSlowRate();
+        f32 frame = g_GameGlobal->getGameFrame();
+        unk44 = frame - (int)frame;
+    } else {
+        unk44 = 0.0f;
+        m_unk48 = 1.0f;
+        unk3C = 0;
+        unk3D = 0;
+    }
+    if ((s32)unk4CValue > 1) {
+        m_unk48 /= (s32)unk4CValue;
+    }
+    getWindArray();
+    operationGravity(line, body, gravity, flag1, flag2, flag3, flag4,
+                     flag5, flag6, flag7, flag11);
+    if (unk2C.mustDeallocate()) {
+        hkThreadMemory::s_instance->deallocateChunk(unk2C.m_data, (unk2C.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * 4, 0x15);
+    }
+    unk2C.m_data = 0;
+    unk2C.m_size = 0;
+    unk2C.m_capacityAndFlags = (unk2C.m_capacityAndFlags & hkArrayBase::FORCE_SIGN_FLAG) | hkArrayBase::DONT_DEALLOCATE_FLAG;
+    if (unk20.mustDeallocate()) {
+        hkThreadMemory::s_instance->deallocateChunk(unk20.m_data, (unk20.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * 4, 0x15);
+    }
+    unk20.m_data = 0;
+    unk20.m_size = 0;
+    unk20.m_capacityAndFlags = (unk20.m_capacityAndFlags & hkArrayBase::FORCE_SIGN_FLAG) | hkArrayBase::DONT_DEALLOCATE_FLAG;
+}
 
 ph2ndaryWorld::ph2ndaryWorld() {
     unkC = -1;

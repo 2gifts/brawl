@@ -659,6 +659,11 @@ bool gfCollectionIO::requestDeleteSD(int fileType, const char* fileName) {
     return true;
 }
 
+void gfCollectionIO::getBasePathVF(int fileType, char* path) {
+    strcpy(path, "vf0:");
+    strcat(path, lbl_80423560[fileType]);
+}
+
 const char* gfCollectionIO::getDeliveryFileName(int fileType) {
     return lbl_804235B8[fileType];
 }
