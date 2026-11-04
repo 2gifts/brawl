@@ -5,6 +5,7 @@
 #include <if/if_photo.h>
 #include <if/if_snap_save.h>
 #include <memory.h>
+#include <mu/mu_adv_name.h>
 #include <mu/mu_msg.h>
 #include <mu/mu_object.h>
 #include <nw4r/g3d/g3d_scngroup.h>
@@ -12,6 +13,53 @@
 
 // IfSnapSaveTask::getState (map name; still unnamed in if_snap_save.cpp)
 extern "C" s32 fn_800F2894(IfSnapSaveTask* task);
+
+// HYPOTHESIS: model records share the menu model table layout.
+extern const muAdvNameModel lbl_805A2590[1];
+extern const muAdvNameModel lbl_80408B98[5];
+extern const muAdvNameModel lbl_80408BC0[5];
+
+void IfPhoto::createModel(nw4r::g3d::ResFile* modelFile, nw4r::g3d::ResFile* resFile,
+                          void* msgData, nw4r::g3d::ResFile* resFile2, u32 helpFlags) {
+    init();
+    m_resFile = *resFile;
+    m_msgData = msgData;
+    m_resFile2 = *resFile2;
+    createModelByTbl(modelFile, lbl_805A2590, 1);
+    m_helpFlags = helpFlags;
+    if (helpFlags & 3) {
+        createModelByTbl(modelFile, lbl_80408B98, 5);
+        if (helpFlags & 2) {
+            for (int index = 1; index < 6; index++) {
+                m_objects[index]->setFrameVisible(1.0f);
+            }
+        }
+    }
+    if (helpFlags & 4) {
+        createModelByTbl(modelFile, lbl_80408BC0, 5);
+    }
+    initMsg();
+}
+
+void IfPhoto::createModelByTbl(nw4r::g3d::ResFile* modelFile, const void* table, int count) {
+    int copies;
+    int index;
+    int copy;
+    const muAdvNameModel* entry = static_cast<const muAdvNameModel*>(table);
+    for (index = 0; index < count; index++, entry++) {
+        copies = 1;
+        if (entry->m_start < entry->m_end) {
+            copies = entry->m_end - entry->m_start;
+        }
+        for (copy = 0; copy < copies; copy++) {
+            MuObject* object = MuObject::create(modelFile, entry->m_name, entry->m_priority,
+                                               NULL, Heaps::MenuInstance);
+            m_objects[entry->m_start + copy] = object;
+            object->changeAnimN(entry->m_name);
+            m_objects[entry->m_start + copy]->m_modelAnim->setUpdateRate(0.0f);
+        }
+    }
+}
 
 IfPhoto::IfPhoto() {
     init();
