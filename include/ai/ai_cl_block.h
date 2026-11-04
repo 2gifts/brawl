@@ -39,9 +39,16 @@ struct AiClBlock {
     u8 unk3F;
     u32 m_flags;        // 0x40: 2 = usable, 0x20 = pass-through, 0x800 = hazard for m_teamMask, 0x1000 / 0x10000 = worse hazards
     tag_AiClJointList* m_joint; // 0x44: collision joint the block belongs to (NULL = static floor)
-    int m_unk48;        // 0x48
+    u32 m_unk48;        // 0x48: with the joint id, the key aiMgr::search_blk1 looks a block up by
 
     AiClBlock();
     bool chk_fl_danger(int team);
+    // Whether the block is the one a {joint id, m_unk48} key names (a static floor never matches). HYPOTHESIS: name.
+    bool chk_key(u32* key) {
+        if (m_joint == NULL) {
+            return false;
+        }
+        return key[1] == m_unk48 && key[0] == m_joint->m_id;
+    }
 };
 static_assert(sizeof(AiClBlock) == 0x4C, "Class is wrong size!");

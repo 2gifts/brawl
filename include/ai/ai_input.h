@@ -120,6 +120,8 @@ public:
     // HYPOTHESIS: target = the character that was hit by this CPU's attack.
     void swingHit(aiChrIdx* target, soDamage* damage);
     void keepOnFloor(Vec2f* stick, int* unk, float frames, float margin, float maxBias);
+    void auto_passfall(Vec2f* stick, ipPadButton* button);
+    int attention_check(Vec2f* stick, ipPadButton* button);
     // The dizzy mode: the stick is spun around (faster at a higher rank). HYPOTHESIS: the md_* handlers all take the stick
     // and the button word they fill in and return 1 when they ran; button is not used here.
     // Recovering to the stage: after a few frames over the edge, jump back (action 0x2050) when there is no ground below

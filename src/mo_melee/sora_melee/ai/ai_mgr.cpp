@@ -1158,16 +1158,7 @@ AiClBlock* aiMgr::search_blk1(u32* key) {
     if (key[0] != 0) {
         AiClBlock* block = m_blocks;
         for (int count = m_numBlocks; count > 0; count--) {
-            bool match;
-            if (block->m_joint == NULL) {
-                match = false;
-            } else {
-                match = false;
-                if (key[1] == (u32)block->m_unk48 && key[0] == block->m_joint->m_id) {
-                    match = true;
-                }
-            }
-            if (match == true) {
+            if (block->chk_key(key) == true) {
                 return block;
             }
             block++;

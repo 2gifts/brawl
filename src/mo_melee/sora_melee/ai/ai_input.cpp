@@ -320,6 +320,7 @@ void aiInput::keepOnFloor(Vec2f* stick, int* unk, float frames, float margin, fl
     stick->m_x += m_stickBiasX;
 }
 
+
 // The CPU was hit: starts (or shortens) the reaction delay m_reactWait, picked from the rank's reaction parameters
 // when frames <= 0. With a damage record it also counts the hit on the character's aiStat and, when the attacker is
 // the CPU's target, raises m_unk118 (by 2..3 after its own swing hit something, else by 1..2 while below 10).
@@ -1062,4 +1063,194 @@ int aiInput::md_slide(Vec2f* stick, ipPadButton* button) {
 // Defined here, between the aiInput functions of the original unit.
 aiWeaponMgr* aiMgr::getWeaponMgr() {
     return g_aiMgr->m_weaponMgr;
+}
+
+// Drops through a pass-through floor on purpose: while falling (speed y < -0.3) on a floor with flags, with no button
+// held, when both ends of the floor have the same block 5 units below and that block is safe, the CPU may press the
+// stick down (stick y = -1) at random (chance 0.015 per rank above 40) in the modes that go to a goal block that is
+// this block, or when the target is on (or the target's floor is about level with) the block below; only when the
+// predicted path over the next 2 frames crosses a floor line. HYPOTHESIS: names and the meaning of the modes and flags.
+// BYTES: defined after the md_* handlers (its address is right after keepOnFloor): the unit's literal pool is still
+// incomplete and its new literals placed here shift the pool offsets of the handlers written before it.
+void aiInput::auto_passfall(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    if (m_par.m_rank >= 45 && button->m_mask == 0 && stat->m_unkC0 == 1 && stat->m_floor->m_flags != 0 &&
+        stat->m_speed.m_y < -0.3f && (stat->m_flags & 0x80000)) {
+        bool danger = false;
+        AiClBlock* blockL = NULL;
+        AiClBlock* blockR = NULL;
+        aiMgr* mgr = g_aiMgr;
+        Vec3f posL(stat->m_floor->m_edgeL.m_x, stat->m_floor->m_edgeL.m_y - 5.0f, 0.0f);
+        Vec3f posR(stat->m_floor->m_edgeR.m_x, stat->m_floor->m_edgeR.m_y - 5.0f, 0.0f);
+        mgr->get_under_floor(&posL, &blockL, NULL, -1, -9999.9f, 0.0f, 0.0f);
+        mgr->get_under_floor(&posR, &blockR, NULL, -1, -9999.9f, 0.0f, 0.0f);
+        if (blockL != NULL && blockL == blockR) {
+        int team = stat->m_team;
+        if ((blockL->m_flags & 0x1000) || blockL->chk_fl_danger(team)) {
+            danger = true;
+        }
+        if (!danger) {
+        bool pass = false;
+        float chance = 0.015f * (m_par.m_rank - 40);
+        switch (m_md) {
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 11:
+        case 22:
+        case 122:
+            if (blockL->chk_key(&m_act->m_goalJointId)) {
+                pass = true;
+            }
+            break;
+        default: {
+            aiStat* target = aiMgr::get_aiStat(&m_target);
+            if (m_act->m_id == 0x10A0) {
+                if (blockL == target->m_floor) {
+                    pass = true;
+                    break;
+                }
+                if (!(stat->m_floor->m_flags & 0xC0) && (blockL->m_flags & 0xC0)) {
+                    pass = true;
+                    break;
+                }
+            }
+            float top = stat->m_floor->m_top;
+            if (blockL->m_top > top - 26.0f) {
+                if (target->m_floor == stat->m_floor) {
+                    chance *= 0.5f;
+                    pass = true;
+                } else if ((target->m_floor == blockL || target->m_pos.m_y < top - 1.0f) && stat->m_situation != 14) {
+                    pass = true;
+                }
+            } else if (target->m_pos.m_y < top - 1.0f && (stat->m_situation != 14 || target->m_floor != blockL)) {
+                pass = true;
+            }
+            break;
+        }
+        }
+        if (pass && randf() < chance) {
+            Vec2f speed = stat->m_speed;
+            speed *= 2.0f;
+            Vec2f from;
+            Vec2f to(stat->m_pos.m_x + speed.m_x, stat->m_pos.m_y + speed.m_y);
+            float x = stat->m_pos.m_x;
+            float y = stat->m_pos.m_y;
+            from.m_x = x;
+            from.m_y = y;
+            if (mgr->chk_cl_cross(&from, &to, 2, NULL, NULL)) {
+                stick->m_y = -1.0f;
+            }
+        }
+        }
+        }
+    }
+}
+
+// Picks a character to pay attention to in the idle modes (1, 2, 6, 11, 12) while the CPU can act: the nearest other
+// fighter (by centre) that is an enemy flagged 0x100, flagged 0x80, or an enemy in state 1/7; with none, under flag
+// 0x200000 (or as CPU type 4, 30% of the time) the nearest target. Within 100 units (30 when another fighter of
+// another m_unkCC was seen) and at random by rank it becomes the target: an enemy within 30 units in x is attacked
+// (mode 0x65), a fighter in status 0xBE further than 30 units away is approached (mode 0x66), else the CPU waits
+// (mode 5) and, as fighter kind 0x2E near a target flagged 0x80, may use its up special (stick up + special) when
+// nothing is above it; returns 1 in that case. HYPOTHESIS: names, the meaning of the flags, modes and actions.
+// BYTES: defined at the end of the file for the same literal-pool reason as auto_passfall.
+int aiInput::attention_check(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    if ((stat->m_flags & 0x20000) || (stat->m_flags & 0x100)) {
+        return 0;
+    }
+    switch (m_md) {
+    case 1:
+    case 2:
+    case 6:
+    case 11:
+    case 12:
+        if (stat->chk_stat_gr_free() || stat->chk_stat_air_free()) {
+    s8 rank;
+    int best = -1;
+    bool other = false;
+    float bestDist = 9999980000.0f;
+    int i;
+    for (i = 0; i < aiMgr::NumPlayers; i++) {
+        aiChrIdx idx;
+        idx.m_idx = i;
+        aiStat* chr = aiMgr::get_aiStat(&idx);
+        if (i == m_chrIdx.m_idx) {
+            continue;
+        }
+        if (chr->m_flags & 0x8000) {
+            continue;
+        }
+        if ((chr->m_team != stat->m_team && (chr->m_flags & 0x100)) || (chr->m_flags & 0x80) ||
+            (chr->m_team != stat->m_team && chr->chk_chr_stat(1, 7))) {
+            Vec3f diff = stat->m_center - chr->m_center;
+            float dist = diff.m_z * diff.m_z + (diff.m_x * diff.m_x + diff.m_y * diff.m_y);
+            if (bestDist > dist) {
+                bestDist = dist;
+                best = i;
+            }
+        } else if (chr->m_unkCC != stat->m_unkCC) {
+            other = true;
+        }
+    }
+    if (best < 0 && ((stat->m_flags & 0x200000) || (m_cpuType == 4 && randf() < 0.3f))) {
+        best = get_near_target(&bestDist, 0);
+        bestDist *= bestDist;
+        other = m_cpuType == 4;
+    }
+    if (best >= 0 && bestDist < (other ? 900.0f : 10000.0f)) {
+        rank = m_par.m_rank;
+        if (randf() <= 0.015f * rank) {
+            m_target.m_idx = best;
+            aiStat* target = aiMgr::get_aiStat(&m_target);
+            if (target->m_team != stat->m_team && target->chk_chr_stat(1, 7)) {
+                if (__fabsf(stat->m_center.m_x - target->m_center.m_x) < 30.0f) {
+                    if (stat->m_flags & 1) {
+                        change_md(0x65, &m_target, stat->m_unkA8 > 0 ? 0x55 : 0x3060, 0);
+                    } else {
+                        change_md(0x65, &m_target, randf() < 0.7f ? 0x72 : 0x21, 0);
+                    }
+                    m_unk111 = 0;
+                }
+            } else if (target->m_status == 0xBE && stat->get_range(0.0f, &m_target) > 30.0f) {
+                if (m_md != 2) {
+                    change_md(0x66, &m_target, 0x3010, 0);
+                }
+            } else {
+                aiChrIdx none;
+                none.m_idx = -1;
+                change_md(5, &none, 0, 0);
+                m_flags |= 2;
+                m_unk65 = 1.0 + 1.5 * randf();
+                m_unk5C = 70;
+                if (stat->m_chrKind == 0x2E && bestDist < 1600.0f) {
+                    aiChrIdx idx;
+                    idx.m_idx = best;
+                    if (aiMgr::get_aiStat(&idx)->m_flags & 0x80) {
+                        rank = m_par.m_rank;
+                        if (randf() <= 0.005f * rank) {
+                            Vec2f from;
+                            Vec2f to(stat->m_pos.m_x, 100.0f + stat->m_pos.m_y);
+                            float x = stat->m_pos.m_x;
+                            float y = stat->m_pos.m_y;
+                            from.m_x = x;
+                            from.m_y = y;
+                            if (!g_aiMgr->chk_cl_cross(&from, &to, 0xFF, NULL, NULL)) {
+                                stick->m_y = 1.0f;
+                                button->m_mask |= soController::getButtonMask(soController::Pad_Button_Special);
+                                m_unk70 = 5.0f * randf();
+                                return 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+        }
+        break;
+    }
+    return 0;
 }

@@ -81,9 +81,9 @@ public:
     Vec2f m_goalEdgeL;     // 0xE8: the goal block's walkable ends
     Vec2f m_goalEdgeR;     // 0xF0
     u32 m_goalJointId;     // 0xF8: the goal block's joint (tag_AiClJointList::m_id), 0 = static floor or none
-    int m_goalUnk48;       // 0xFC: the goal block's AiClBlock::m_unk48
+    u32 m_goalUnk48;       // 0xFC: the goal block's AiClBlock::m_unk48
     u32 m_viaJointId;      // 0x100: the same for the block on the way
-    int m_viaUnk48;        // 0x104
+    u32 m_viaUnk48;        // 0x104
     int m_unk108;
     int m_unk10C;
     float m_unk110;
