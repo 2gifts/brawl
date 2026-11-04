@@ -2,6 +2,7 @@
 #include <ai/ai_act.h>
 #include <ai/ai_enemy.h>
 #include <ai/ai_stat.h>
+#include <ft/fighter.h>
 #include <gf/gf_archive.h>
 #include <gf/gf_heap_manager.h>
 #include <math.h>
@@ -62,8 +63,8 @@ aiInput::aiInput(u32 contNo, int unk2C, int player, int ftKind, s8 state, aiInpu
     target[0] = -1;
     m_act->act_change(0, target, 0, 0);
     m_md = m_mdNext = parent == NULL ? 1 : 0x79;
-    m_unk50 = 0;
-    m_unk54 = 0;
+    m_step = 0;
+    m_stepFrame = 0;
     m_unk5C = 0;
     m_unk5E = 0;
     m_unk8A = 0;
@@ -457,7 +458,7 @@ s8 aiInput::get_fix_target(float* distance) {
 
 int aiInput::md_return(Vec2f* stick, ipPadButton* button) {
     aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
-    if (stat->m_situation == 5 && stat->m_unkB4 != 0x44 && m_act->m_id != 0x2050 && (m_unk116 & 2)) {
+    if (stat->m_situation == 5 && stat->m_status != Fighter::Status::Damage_Air && m_act->m_id != 0x2050 && (m_unk116 & 2)) {
         if (++m_unk75 > 4) {
             Vec2f edge = stat->getNearFloorEdge();
             if (stat->chk_over_ground() || stat->m_pos.m_y + 10.0f * stat->m_speed.m_y > edge.m_y - 5.0f) {
@@ -492,14 +493,78 @@ int aiInput::md_piyo(Vec2f* stick, ipPadButton* button) {
         return 1;
     }
     if (m_par.m_rank >= 20) {
-        float angle = 0.03125f * (3.1415927f * m_unk54) * (1.0f + 0.03f * m_par.m_rank);
+        float angle = 0.03125f * (3.1415927f * m_stepFrame) * (1.0f + 0.03f * m_par.m_rank);
         stick->m_x = sin(angle);
         stick->m_y = cos(angle);
     }
-    if (stat->m_unkB4 == 0xEC && !stat->chk_over_ground()) {
+    if (stat->m_status == Fighter::Status::Yoshi_Egg && !stat->chk_over_ground()) {
         Vec2f goal;
         m_act->get_return_goal(&goal.m_x, &goal.m_y, 0);
         stick->m_x = stat->m_pos.m_x > goal.m_x ? -1.0f : 1.0f;
+    }
+    return 1;
+}
+
+// Swimming (situation 12). Step 0 picks the way out: from the deep water or a dive/rise/drown status head for the return
+// goal (step 1), otherwise swim up where the CPU is (step 2). Step 1 steers to the goal and moves on to step 2 once nothing
+// is above the head; each step gives up after a while. Leaving the water goes to mode 7 over ground, 3 otherwise.
+// HYPOTHESIS: the meaning of aiStat::m_unkC0 == 2 and of the modes 3 and 7.
+int aiInput::md_swim(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    if (stat->m_situation != 12) {
+        aiChrIdx none;
+        aiChrIdx* target = &none;
+        change_md(stat->chk_over_ground() ? 7 : 3, target, 0, 0);
+        return 1;
+    }
+    if (m_step == 0) {
+        if (stat->m_unkC0 != 2 && stat->m_status != Fighter::Status::Swim_Dive &&
+            stat->m_status != Fighter::Status::Swim_Rise && stat->m_status != Fighter::Status::Swim_Up &&
+            stat->m_status != Fighter::Status::Swim_Drown_Out) {
+            m_act->m_goalPos.m_x = stat->m_pos.m_x;
+            m_stepFrame = 0;
+            m_step = 2;
+        } else {
+            Vec2f goal;
+            m_act->get_return_goal(&goal.m_x, &goal.m_y, 0);
+            m_act->set_goal_inf(stat->m_floor, NULL, goal.m_x, goal.m_y);
+            m_step = 1;
+        }
+    }
+    switch (m_step) {
+    case 1:
+        stick->m_x = stat->m_pos.m_x > m_act->m_goalPos.m_x ? -1.0f : 1.0f;
+        if (stat->m_status != Fighter::Status::Swim_Dive && stat->m_status != Fighter::Status::Swim_Rise &&
+            stat->m_status != Fighter::Status::Swim_Up && stat->m_status != Fighter::Status::Swim_Drown_Out) {
+            Vec2f pos;
+            Vec2f up(stat->m_pos.m_x, 10.0f + stat->m_pos.m_y);
+            float x = stat->m_pos.m_x;
+            float y = stat->m_pos.m_y;
+            pos.m_x = x;
+            pos.m_y = y;
+            if (!g_aiMgr->chk_cl_cross(&pos, &up, 0x1C, NULL, NULL)) {
+                m_stepFrame = 0;
+                m_step++;
+                break;
+            }
+        }
+        if (m_stepFrame >= 50) {
+            m_step = 0;
+        }
+        break;
+    case 2: {
+        float dx = m_act->m_goalPos.m_x - stat->m_pos.m_x;
+        if (dx > 10.0f) {
+            stick->m_x = 1.0f;
+        } else if (dx < -10.0f) {
+            stick->m_x = -1.0f;
+        }
+        stick->m_y = 1.0f;
+        if (m_stepFrame >= 16) {
+            m_step = 0;
+        }
+        break;
+    }
     }
     return 1;
 }

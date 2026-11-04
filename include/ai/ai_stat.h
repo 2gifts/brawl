@@ -59,7 +59,7 @@ public:
     s16 m_hitCount;          // 0xAA: hits taken (aiInput::damageStart counts them; HYPOTHESIS: name)
     int m_chrKind;           // 0xAC
     int m_unkB0;
-    int m_unkB4;
+    int m_status;            // 0xB4: the fighter's status kind (Fighter::Status::Kind)
     int m_unkB8;
     AiClBlock* m_floor;      // 0xBC
     u8 m_unkC0;              // 0xC0

@@ -208,7 +208,7 @@ aiStat::aiStat() {
     m_unkA4 = 0.0f;
     m_unkA8 = 0;
     m_unkB8 = 0;
-    m_unkB4 = 0;
+    m_status = 0;
     m_floor = (AiClBlock*)g_aiMgr->m_work; // HYPOTHESIS: the manager's work area doubles as the "no floor" block
     m_unkC4 = 0.0f;
     m_hitCount = 0;
@@ -410,7 +410,7 @@ void aiStat::init(int chrIdx, int chrKind, aiInput* input, int unk) {
     m_unkA4 = 0.0f;
     m_unkA8 = 0;
     m_unkB8 = 0;
-    m_unkB4 = 0;
+    m_status = 0;
     m_floor = (AiClBlock*)g_aiMgr->m_work; // HYPOTHESIS: the manager's work area doubles as the "no floor" block
     m_unkC4 = 0.0f;
     m_unkCC = -1;
@@ -583,7 +583,7 @@ void aiStat::update_enemy(aiEnemy* enemy, aiChrIdx* chrIdx) {
     if ((enemy->m_flags & 2) == 0) {
         m_flags |= 1;
     }
-    m_unkB4 = enemy->m_status;
+    m_status = enemy->m_status;
     m_center.m_x = enemy->m_pos.m_x;
     m_center.m_y = enemy->m_pos.m_y;
     m_center.m_z = enemy->m_pos.m_z;

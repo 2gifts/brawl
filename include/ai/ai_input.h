@@ -48,8 +48,8 @@ public:
     aiAct* m_act;          // 0x44
     int m_md;              // 0x48: current mode (md_* index)
     int m_mdNext;          // 0x4C
-    int m_unk50;
-    int m_unk54;           // 0x54: HYPOTHESIS: frames spent in the current mode (md_piyo spins the stick by it)
+    int m_step;            // 0x50: step within the current mode (md_swim)
+    int m_stepFrame;       // 0x54: HYPOTHESIS: frames spent in the current step (md_swim gives up after a while)
     u16 m_unk58;
     s16 m_reactWait;       // 0x5A: frames left before the CPU reacts after being hit (damageStart)
     u16 m_unk5C;
@@ -120,5 +120,6 @@ public:
     // Recovering to the stage: after a few frames over the edge, jump back (action 0x2050) when there is no ground below
     // or the character is too low; with no action running, pick one. HYPOTHESIS: action meanings from the map names.
     int md_return(Vec2f* stick, ipPadButton* button);
+    int md_swim(Vec2f* stick, ipPadButton* button);
     int md_piyo(Vec2f* stick, ipPadButton* button);
 };
