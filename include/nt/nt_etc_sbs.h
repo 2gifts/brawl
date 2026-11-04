@@ -7,7 +7,18 @@
 struct DWCAccUserData;
 struct DWCDate;
 struct DWCTime;
-class nteSODone;
+
+// HYPOTHESIS: nteWatchingErrorProc is the one-slot error callback at nteWatching offset 0x340.
+class nteWatchingErrorProc {
+public:
+    virtual void showError(s32 kind, s32 code) = 0;
+};
+
+// HYPOTHESIS: nteWatchingEndProc is the one-slot completion callback at nteWatching offset 0x344.
+class nteWatchingEndProc {
+public:
+    virtual void notifySBSEndProc(s32 arg, s32 code) = 0;
+};
 
 // HYPOTHESIS: field roles follow the constructor stores and the debug strings in finishSBS.
 class nteSBS : public gfTask {
@@ -16,9 +27,9 @@ public:
     s32 unk44;
     bool _fInitialized;
     bool unk49;
-    // HYPOTHESIS: listeners use the same one-virtual shape as nteSODone
-    nteSODone* unk4C;
-    nteSODone* unk50;
+    // HYPOTHESIS: the completion and error listeners
+    nteWatchingEndProc* unk4C;
+    nteWatchingErrorProc* unk50;
     s32 unk54;
     s32 unk58;
     u8 unk5C;
