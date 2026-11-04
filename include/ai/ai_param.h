@@ -71,10 +71,35 @@ public:
     u8 m_reactExtraRate; // 0x4B: with this chance (percent)
     u8 m_workB4C[8];     // 0x4C
     u16 m_workH54[2];    // 0x54
-    u8 m_workB58[11];    // 0x58
-    float m_workF64[2];  // 0x64
-    u16 m_workH6C[4];    // 0x6C
-    u8 m_workB74[11];    // 0x74
+    u8 m_workB58[3];     // 0x58
+    // 0x5B-0x7E: how aiInput::target_check scores each candidate target. Each *Rate is the most points one criterion
+    // adds, scaled by where the candidate's value falls between the matching low and high bounds.
+    // HYPOTHESIS: names follow target_check's use only.
+    u8 m_targetNearRate;       // 0x5B: full points at m_targetNearDist or closer, none at m_targetFarDist or further
+    u8 m_targetDamageRate;     // 0x5C: a target with more damage (aiStat::m_unkC4) scores higher
+    u8 m_targetLowDamageRate;  // 0x5D: a target with less damage scores higher
+    u8 m_targetStockRate;      // 0x5E: stock rule: a target with more stocks (aiStat::m_unkD0) scores higher
+    u8 m_targetFewStockRate;   // 0x5F: stock rule: a target with fewer stocks scores higher
+    u8 m_targetAttackerRate;   // 0x60: added for a target on the team that last hit the CPU
+    u8 m_targetOffstageRate;   // 0x61: added for a target with no ground below it
+    u8 m_targetRandomRate;     // 0x62: the start score is random in 0..(this + 0.1)
+    float m_targetFarDist;     // 0x64
+    float m_targetNearDist;    // 0x68
+    u16 m_targetDamageLo;      // 0x6C
+    u16 m_targetDamageHi;      // 0x6E
+    u16 m_targetLowDamageLo;   // 0x70
+    u16 m_targetLowDamageHi;   // 0x72
+    u8 m_targetStockLo;        // 0x74
+    u8 m_targetStockHi;        // 0x75
+    u8 m_targetFewStockLo;     // 0x76
+    u8 m_targetFewStockHi;     // 0x77
+    u8 m_targetHumanRate;      // 0x78: added for a target that is not a CPU (aiMgr::m_chrState 0)
+    u8 m_targetTimeLeadRate;   // 0x79: time rule: a target further ahead of the last place (aiStat::m_unkD4) scores higher
+    u8 m_targetCoinLeadRate;   // 0x7A: coin rule: the same
+    u8 m_targetTimeLeadLo;     // 0x7B
+    u8 m_targetTimeLeadHi;     // 0x7C
+    u8 m_targetCoinLeadLo;     // 0x7D
+    u8 m_targetCoinLeadHi;     // 0x7E
 
     aiParam();
     // The rank as a 0..1 ratio. HYPOTHESIS: name (aiInput::swingHit).

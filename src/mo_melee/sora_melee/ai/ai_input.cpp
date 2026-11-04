@@ -7,6 +7,8 @@
 #include <so/controller/so_controller_impl.h>
 #include <gf/gf_archive.h>
 #include <gf/gf_heap_manager.h>
+#include <gm/gm_global.h>
+#include <gm/gm_result_info.h>
 #include <math.h>
 #include <mt/mt_prng.h>
 #include <nw4r/math/math_arithmetic.h>
@@ -2111,4 +2113,148 @@ int aiInput::md_attack(Vec2f* stick, ipPadButton* button) {
         }
     }
     return 1;
+}
+
+// Where value falls between lo and hi, as a 0..1 ratio (the range counts as at least 1). HYPOTHESIS: an inline helper.
+// BYTES: hi comes before lo: the original loads lo first and MWCC evaluates inline arguments right to left.
+static inline float aiRangeRatio(float value, float hi, float lo) {
+    float range = hi - lo;
+    if (range < 1.0f) {
+        range = 1.0f;
+    }
+    float ratio = (value - lo) / range;
+    if (ratio > 1.0f) {
+        ratio = 1.0f;
+    } else if (ratio < 0.0f) {
+        ratio = 0.0f;
+    }
+    return ratio;
+}
+
+// Picks the target (m_target): a fixed target first, the nearest one when the CPU type asks for it (flag 0x100), else
+// every other fighter not on the CPU's team gets a score from the aiParam target weights (distance, damage, stocks or
+// score lead by rule, the last attacker, offstage, a random part, humans; minus 500 when flag 0x20000 is set or it is
+// in situation 0xF, minus 200 on a dangerous floor) and the best one above -2000 wins; with none, the nearest.
+// Nothing changes while m_unk111 is set. BYTES: defined at the end of the file for the same literal-pool reason as
+// auto_passfall.
+void aiInput::target_check() {
+    s8 fixed = get_fix_target(NULL);
+    if (fixed != m_chrIdx.m_idx) {
+        m_target.m_idx = fixed;
+        return;
+    }
+    if (m_unk116 & 0x100) {
+        m_target.m_idx = get_near_target(NULL, 0);
+        return;
+    }
+    aiStat* self = aiMgr::get_aiStat(&m_chrIdx);
+    if (m_unk111 != 0) {
+        return;
+    }
+    float score[aiMgr::NumPlayers];
+    for (int i = 0; i < aiMgr::NumPlayers; i++) {
+        aiChrIdx idx;
+        idx.m_idx = i;
+        aiStat* stat = aiMgr::get_aiStat(&idx);
+        score[i] = -5000.0f;
+        if (i == m_chrIdx.m_idx) {
+            continue;
+        }
+        u32 flags = stat->m_flags;
+        if ((flags & 0x8000) != 0 && (flags & 0x40000000) == 0) {
+            continue;
+        }
+        if (stat->m_unkCC == self->m_unkCC) {
+            continue;
+        }
+        u8 randomRate = m_par.m_targetRandomRate; // BYTES: loaded before the randf call
+        float random = randf();
+        score[i] = random * (0.1f + randomRate);
+        if (m_par.m_targetHumanRate != 0) {
+            aiMgr* mgr = g_aiMgr;
+            s8 state;
+            if (i < 0 || (u32)i >= aiMgr::NumChrs) {
+                state = -1;
+            } else {
+                state = mgr->m_chrState[i];
+            }
+            if (state == 0) {
+                score[i] += m_par.m_targetHumanRate;
+            }
+        }
+        if (m_par.m_targetNearRate != 0) {
+            float nearDist = m_par.m_targetNearDist;
+            float farDist = m_par.m_targetFarDist;
+            // BYTES: the target's position is copied to a temporary (word copies) before the subtraction.
+            Vec3f diff = self->m_pos - Vec3f(stat->m_pos);
+            float dist = aiLengthOf(diff.m_z * diff.m_z + (diff.m_x * diff.m_x + diff.m_y * diff.m_y));
+            float ratio = 1.0f - aiRangeRatio(dist, farDist, nearDist);
+            score[i] += ratio * m_par.m_targetNearRate;
+        }
+        if (m_par.m_targetDamageRate != 0) {
+            float ratio = aiRangeRatio(stat->m_unkC4, m_par.m_targetDamageHi, m_par.m_targetDamageLo);
+            score[i] += ratio * m_par.m_targetDamageRate;
+        }
+        if (m_par.m_targetLowDamageRate != 0) {
+            float ratio = 1.0f - aiRangeRatio(stat->m_unkC4, m_par.m_targetLowDamageHi, m_par.m_targetLowDamageLo);
+            score[i] += ratio * m_par.m_targetLowDamageRate;
+        }
+        if ((stat->m_flags & 0x20000) || stat->m_situation == 0xF) {
+            score[i] -= 500.0f;
+        }
+        int team = self->m_team;
+        bool danger = false;
+        if ((stat->m_floor->m_flags & 0x1000) || stat->m_floor->chk_fl_danger(team)) {
+            danger = true;
+        }
+        if (danger) {
+            score[i] -= 200.0f;
+        }
+        switch (g_GameGlobal->m_resultInfo->m_gameRule) {
+            case Game_Rule_Time:
+                if (m_par.m_targetTimeLeadRate != 0) {
+                    float ratio = aiRangeRatio(stat->m_unkD4 - g_aiMgr->m_unk378,
+                                               m_par.m_targetTimeLeadHi, m_par.m_targetTimeLeadLo);
+                    score[i] += ratio * m_par.m_targetTimeLeadRate;
+                }
+                break;
+            case Game_Rule_Stock:
+                if (m_par.m_targetStockRate != 0) {
+                    float ratio = aiRangeRatio(stat->m_unkD0, m_par.m_targetStockHi, m_par.m_targetStockLo);
+                    score[i] += ratio * m_par.m_targetStockRate;
+                }
+                if (m_par.m_targetFewStockRate != 0) {
+                    float ratio = 1.0f - aiRangeRatio(stat->m_unkD0,
+                                                      m_par.m_targetFewStockHi, m_par.m_targetFewStockLo);
+                    score[i] += ratio * m_par.m_targetFewStockRate;
+                }
+                break;
+            case Game_Rule_Coin:
+                if (m_par.m_targetCoinLeadRate != 0) {
+                    float ratio = aiRangeRatio(stat->m_unkD4 - g_aiMgr->m_unk378,
+                                               m_par.m_targetCoinLeadHi, m_par.m_targetCoinLeadLo);
+                    score[i] += ratio * m_par.m_targetCoinLeadRate;
+                }
+                break;
+        }
+        if (self->m_damageTeam == stat->m_unkCC) {
+            score[i] += m_par.m_targetAttackerRate;
+        }
+        if (m_par.m_targetOffstageRate != 0 && !stat->chk_over_ground()) {
+            score[i] += m_par.m_targetOffstageRate;
+        }
+    }
+    int best = -1;
+    float bestScore = -2000.0f;
+    for (int i = 0; i < aiMgr::NumPlayers; i++) {
+        if (bestScore < score[i]) {
+            bestScore = score[i];
+            best = i;
+        }
+    }
+    if (best < 0) {
+        m_target.m_idx = get_near_target(NULL, 0);
+    } else {
+        m_target.m_idx = best;
+    }
 }
