@@ -6,6 +6,11 @@
 
 // Array header used by phContainer and phActor: data pointer, element count, capacity with a flag in bit 31.
 struct phContainerArray {
+    ~phContainerArray();
+    // HYPOTHESIS: ownership accessor follows hkArray::mustDeallocate.
+    bool mustDeallocate() const {
+        return (m_capacityAndFlags & 0x80000000) == 0;
+    }
     void* m_data;             // 0x00
     int m_size;               // 0x04
     u32 m_capacityAndFlags;   // 0x08 HYPOTHESIS: bit 31 = data not owned (constructor stores 0x80000000)
@@ -18,7 +23,13 @@ struct phContainer {
     void applyData(); // HYPOTHESIS: signature not recovered yet
     void relAll();    // HYPOTHESIS: signature not recovered yet
 
-    u8 unk00[0x08];              // 0x00
+    union {
+        u8 unk00[0x08];              // 0x00
+        struct {
+            u32 unk0;
+            hkReferencedObject* unk4;
+        };
+    };
     phContainerArray m_arrayA;   // 0x08
     phContainerArray m_arrayB;   // 0x14
     phContainerArray m_arrayC;   // 0x20
