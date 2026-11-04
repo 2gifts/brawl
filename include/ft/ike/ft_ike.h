@@ -56,6 +56,13 @@ public:
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
     virtual void onStart(int startKind);
+    static int getLoopDamageMotionVariation();
+    static void setFinalTargetPosBaseWork(soModuleAccesser* moduleAccesser, const Vec3f& position);
+    static Vec3f getFinalTargetPosBaseWork(soModuleAccesser* moduleAccesser);
+    virtual void notifyEventOnDamage(soDamage* damage, bool reset, soModuleAccesser* moduleAccesser);
+    virtual bool notifyEventCollisionSearchCheck();
+    virtual void processFixPosition();
+    virtual void notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     // The hooks the article mediator calls to start and to throw the sword (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnIkeSword* weapon, soModuleAccesser* acc);
     static bool shootArticle(wnIkeSword* weapon, soModuleAccesser* acc);
