@@ -21,6 +21,15 @@ struct hkVector4 {
     hkVector4() {}
     hkVector4(hkReal xx, hkReal yy, hkReal zz, hkReal ww) { set(xx, yy, zz, ww); }
 
+    // User-declared copy: the image has an out-of-line weak hkVector4::__as (4 lfs + 4 stfs) and copies
+    // hkVector4 members as floats, never as words.
+    void operator=(const hkVector4& v) {
+        x = v.x;
+        y = v.y;
+        z = v.z;
+        w = v.w;
+    }
+
     void set(hkReal xx, hkReal yy, hkReal zz, hkReal ww) {
         x = xx;
         y = yy;
