@@ -18,6 +18,17 @@ public:
     ~muPrizeWndTask7TexLoadFv();
 };
 
+// HYPOTHESIS: one entry of the prize list (copied by appendPrizeList).
+struct muPrizeWndEntry {
+    int unk0;
+    int unk4;
+    int unk8;
+    union {
+        u8 unkC;
+        u32 unkC_word;
+    };
+};
+
 // HYPOTHESIS: uninspected pointer members retain opaque types.
 class muPrizeWndTask : public gfTask {
 public:
@@ -31,7 +42,10 @@ public:
     int unk110;
     int unk114;
     int unk118;
-    u8 unk11C[0x100];
+    union {
+        u8 unk11C[0x100];
+        muPrizeWndEntry prizeList[16];
+    };
     int unk21C;
     int unk220;
     void* unk224;
@@ -56,5 +70,11 @@ public:
     void initMsg(void*);
     virtual void processDefault();
     void setWndSealPrize(int);
+    bool appendPrizeList(const muPrizeWndEntry*);
+    static int mainStepAppearMain(muPrizeWndTask*);
+    static void mainStepSelectingInit(muPrizeWndTask*);
+    static int mainStepSelectingMain(muPrizeWndTask*);
+    static void mainStepLeaveInit(muPrizeWndTask*);
+    void setBgmID(int, muPrizeWndEntry*);
 };
 static_assert(sizeof(muPrizeWndTask) == 0x3D4, "Class is wrong size!");
