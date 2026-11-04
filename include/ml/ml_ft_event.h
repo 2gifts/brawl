@@ -52,6 +52,7 @@ public:
     virtual void notifyEventGetItem(int entryId, itKind kind, int itVariation, int genParamId, int instanceId);
     virtual void notifyEventSucceedHit(int entryId, u32 consecutiveHits, float totalDamage);
     virtual void notifyEventPikminMakeBloomAll(int entryId);
+    virtual void notifyEventOnInput(int entryId);
     virtual void notifyEventKnockout(int entryId);
     virtual void notifyEventHeartSwapStart(int entryId1, int entryId2);
     virtual void notifyEventHeartSwapEnd(int, int);
@@ -65,3 +66,13 @@ class mlFtEventResult : public mlFtEvent {
 public:
     virtual bool isInfoManager();
 };
+
+class mlFtEventTraining : public mlFtEvent {
+public:
+    // HYPOTHESIS: the damage the training HUD shows, set by notifyEventOnDamage.
+    int m_damage;
+
+    virtual void notifyEventOnDamage(int entryId, u32 hp, soDamage* damage);
+    virtual ~mlFtEventTraining();
+};
+static_assert(sizeof(mlFtEventTraining) == 0x40, "Class is wrong size!");
