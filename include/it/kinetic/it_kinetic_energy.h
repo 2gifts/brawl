@@ -88,10 +88,7 @@ public:
     virtual Vec2f getSpeed() { return Vec2f(m_speed.m_x, m_speed.m_y); }
     virtual Vec3f getSpeed3f() { return m_speed; }
     virtual Vec3f getRotation() { return Vec3f(0.0f, 0.0f, 0.0f); }
-    virtual void resetEnergy(int, Vec2f* speed, Vec3f*, soModuleAccesser*) {
-        m_speed.m_x = speed->m_x;
-        m_speed.m_y = speed->m_y;
-    }
+    virtual void resetEnergy(int, Vec2f* speed, Vec3f*, soModuleAccesser*);
     virtual void clearSpeed() { m_speed = Vec3f(0.0f, 0.0f, 0.0f); }
     virtual void clearRotSpeed() { }
     virtual void mulSpeed(Vec3f* speed);
