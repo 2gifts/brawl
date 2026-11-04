@@ -147,6 +147,21 @@ bool ftDedede::activeArticle(wnDededeStar* weapon, soModuleAccesser* acc) {
     return false;
 }
 
+bool ftDedede::notifyEventCollisionSearchCheck() {
+    if (ftDededeTransactor::getInstance()->unk11(m_moduleAccesser) == true) {
+        return true;
+    }
+    return Fighter::notifyEventCollisionSearchCheck();
+}
+
+void ftDedede::onStart(int startKind) {
+    m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+    m_moduleAccesser->getWorkManageModule().setInt(0, 0x10000042);
+    m_moduleAccesser->getWorkManageModule().setInt(-1, 0x10000043);
+    m_moduleAccesser->getWorkManageModule().setInt(-1, 0x10000044);
+    Fighter::onStart(startKind);
+}
+
 // BYTES: the native function addresses the local static's guard, object and destructor registration separately
 // instead of from one pooled BSS base. The setting is per function: unit-wide it breaks the pooled constructor and
 // __sinit, and an in-class inline definition makes the static weak and moves it to the end of .bss.
