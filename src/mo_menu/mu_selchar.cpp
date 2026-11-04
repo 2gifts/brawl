@@ -10,6 +10,8 @@
 #include <mu/selchar/mu_selchar_hand.h>
 #include <mu/selchar/mu_selchar_player_area.h>
 #include <types.h>
+#include <snd/snd_system.h>
+#include <string.h>
 
 // The menu helpers take three integers; this unit passes only the first one (see TIPS.md).
 extern "C" int exchangeMuSelchkindToMuCharKind__6muMenuFiii(int selchKind);
@@ -390,4 +392,103 @@ u8 muSelCharTask::getSelCharTypeHighScoreKind(int selCharType) {
         return sKumiteHighScoreKind[m_kumiteType];
     }
     return getSelCharTypeData(selCharType)->m_highScoreKind;
+}
+
+int muSelCharHand::getMode(int* arg) {
+    if (arg) {
+        *arg = m_modeArg;
+    }
+    return m_mode;
+}
+
+extern const u8 lbl_10_rodata_2C8[0x28];
+
+void muSelCharTask::createWifiModel(nw4r::g3d::ResFile* resFile) {
+    createObjResFile(lbl_10_rodata_2C8, 5, resFile, nullptr, false);
+}
+
+extern MuAnimIdxData lbl_10_data_610[5][2];
+
+void muSelCharTask::dispDiffLevel(int level, bool enabled) {
+    lbl_10_data_610[level][!enabled].m_flags = 1;
+    m_objs[Obj_DiffLevel]->setAnimIdx(&lbl_10_data_610[level][!enabled], false);
+}
+
+
+void muSelCharTask::ruleCall() {
+    SndID sound = (SndID)0x202B;
+    switch (unk5D4) {
+    case 0:
+        sound = (SndID)0x202B;
+        break;
+    case 1:
+        sound = (SndID)0x202D;
+        break;
+    case 2:
+        sound = (SndID)0x202C;
+        break;
+    }
+    g_sndSystem->playSEwithFixEffect(sound, 1.0f, 1.0f);
+}
+
+muSelCharTask* muSelCharTask::create(void* data) {
+    muSelCharTask* task = new ((HeapType)0x2A) muSelCharTask;
+    task->initProc(data);
+    return task;
+}
+
+void muSelCharTask::sendSystemAllCharKind() {
+    for (int area = 0; area < m_numPlayerAreas; area++) {
+        m_selCharPlayerAreas[area]->sendSystemCharKind();
+    }
+}
+
+int muSelCharTask::getRuleDispType() {
+    int dispType = (getSelCharTypeData(getSelCharType())->m_unk4 >> 5) & 7;
+    if (m_unk5D0) {
+        dispType = 3;
+    }
+    if (getSelCharType() == 12 && isWifiGameMaster()) {
+        dispType = 0;
+    }
+    return dispType;
+}
+
+int muSelCharTask::getCollKindPlayerArea(Vec2f* pos, int* areaIdx, int* arg, float* rect) {
+    for (int i = 0; i < m_numPlayerAreas; i++) {
+        int collKind = m_selCharPlayerAreas[i]->getCollKind(pos, arg, rect);
+        if (collKind) {
+            *areaIdx = i;
+            return collKind;
+        }
+    }
+    return 0;
+}
+
+void muSelCharTask::setRuleNumHoldCursorVisible(bool visible) {
+    MuObject* obj = m_objs[Obj_RuleNumHold];
+    m_scnGroup->Remove(obj->m_sceneModel);
+    if (visible) {
+        m_scnGroup->Insert(m_scnGroup->sceneItemsCount, obj->m_sceneModel);
+        obj->setFrameMatCol(0.0f);
+        obj->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+    }
+}
+
+void muSelCharTask::setFaceIconMotion(int faceIdx, int motion) {
+    static MuAnimNameData sMotions[] = {
+        { 10.0f, 10.0f, 0, NULL, 0x11 },
+        { 0.0f, 9.0f, 0, NULL, 1 },
+        { 10.0f, 30.0f, 0, NULL, 0x10 },
+        { 10.0f, 20.0f, 0, NULL, 1 },
+    };
+    MuObject* obj = m_objs[Obj_FaceBase + faceIdx];
+    char animName[64];
+    const nw4r::g3d::ResMdlData* mdl = obj->m_resMdl.ptr();
+    strcpy(animName, mdl->m_toName != 0 ? reinterpret_cast<const char*>(mdl) + mdl->m_toName : NULL);
+    strcat(animName, "__0");
+    sMotions[motion].m_name = animName;
+    obj->setAnimName(&sMotions[motion], false);
+    obj->m_scnMdl->SetPriorityDrawOpa(0x49);
+    obj->m_scnMdl->SetPriorityDrawXlu(0x49);
 }

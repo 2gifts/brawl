@@ -18,6 +18,7 @@
 #include <types.h>
 
 class muSelCharCBCalcWorld;
+class MuMsg;
 
 class muSelCharPlayerArea {
 protected:
@@ -70,7 +71,16 @@ public:
     MuSelctChrList m_chrList;   // 0x1FC
     MuSelctChrNameEntry m_nameEntry;
     nw4r::g3d::ScnMdlExpand* m_baseMdlGroup;    // 0x404 HYPOTHESIS: the models attached to the nodes of the base model of the area
-    char _0x408[0x30];
+    union {
+        char _0x408[0x30];
+        struct {
+            char unk408[4];
+            MuMsg* unk40C;
+            char unk410[0x15];
+            bool unk425;
+            char unk426[0x12];
+        };
+    };
     nw4r::g3d::ResFileData* m_charPicData;
     nw4r::g3d::ResFile m_charPicRes;
     char _0x440[0x8];
@@ -122,5 +132,17 @@ public:
     // The character kind of each of the three Pokemon of the Pokemon Trainer (and of the trainer).
     static u8 exchangePoke3ToGmCharKind(int poke);
     void closeNameEntry();
+    void sendSystemCharKind();
+    static void clearCharPicTexResArchive();
+    void submitFriendCertify();
+    void submitFriendApply();
+    void createNameModel(nw4r::g3d::ResFile* resFile, int priority);
+    void createSingleModel(nw4r::g3d::ResFile* resFile, int priority);
+    // HYPOTHESIS: the first parameter is an opaque array of eight-byte model descriptors.
+    void createObjResFile(const void* descriptors, int count, nw4r::g3d::ResFile* resFile, int priority);
+    void dispWifiFriendProfileName(const wchar_t* name);
+    void dispWifiFriendProfileNameBaseColor();
+    bool getWifiFriendProfileNameVisible();
+    int getCollKind(Vec2f* pos, int* arg, float* rect);
 };
 static_assert(sizeof(muSelCharPlayerArea) == 0x448, "Wrong size for class!");

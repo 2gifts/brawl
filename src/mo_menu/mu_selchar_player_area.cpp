@@ -2,6 +2,8 @@
 #include <gm/gm_global.h>
 #include <mu/selchar/mu_selchar_player_area.h>
 #include <types.h>
+#include <mu/wifi/mu_wifi_interface.h>
+#include <mu/mu_msg.h>
 
 // The menu helpers take three integers; this caller passes only the first one (see TIPS.md).
 extern "C" int getNumCharColor__6muMenuFiii(int charKind);
@@ -351,4 +353,43 @@ int muSelCharPlayerArea::getHandiDispMode() {
 
 bool muSelCharPlayerArea::isTeamBattle() {
     return m_selCharTask->m_isTeamBattle;
+}
+
+extern void* lbl_10_bss_8[2];
+extern const u8 lbl_10_rodata_648[0x40];
+extern const u8 lbl_10_rodata_688[0x8];
+
+void muSelCharPlayerArea::clearCharPicTexResArchive() {
+    lbl_10_bss_8[0] = nullptr;
+}
+
+void muSelCharPlayerArea::submitFriendCertify() {
+    g_muWifiInterfaceTask->requestExchangeFriendKey(m_areaIdx);
+}
+
+void muSelCharPlayerArea::createNameModel(nw4r::g3d::ResFile* resFile, int priority) {
+    createObjResFile(lbl_10_rodata_648, 8, resFile, priority);
+}
+
+void muSelCharPlayerArea::createSingleModel(nw4r::g3d::ResFile* resFile, int priority) {
+    createObjResFile(lbl_10_rodata_688, 1, resFile, priority);
+}
+
+void muSelCharPlayerArea::submitFriendApply() {
+    g_muWifiInterfaceTask->requestExchangeFriendKey(m_areaIdx);
+    unk425 = true;
+}
+
+void muSelCharPlayerArea::dispWifiFriendProfileName(const wchar_t* name) {
+    char nameUtf8[0x20];
+    Message::utf16to8(nameUtf8, name);
+    unk40C->printf(0x1D, nameUtf8);
+}
+
+void muSelCharPlayerArea::dispWifiFriendProfileNameBaseColor() {
+    m_objs[37]->setFrameMatCol(m_areaIdx);
+}
+
+bool muSelCharPlayerArea::getWifiFriendProfileNameVisible() {
+    return 0.0f != m_objs[37]->m_modelAnim->m_anmObjVisRes->GetFrame();
 }

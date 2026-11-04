@@ -76,6 +76,7 @@ public:
         Obj_StockUp = 175,
         Obj_HomerunRule = 181,  // the rule button of the Home-Run Contest
         Obj_KumiteRule = 182,   // the rule button of the Multi-Man Brawl
+        Obj_RuleNumHold = 10,   // HYPOTHESIS: the cursor of the number of a rule that a hand holds
         Obj_Num = 188,
         Expand_FaceBase = 2,
     };
@@ -95,8 +96,17 @@ public:
     u8 m_teamBattleTouch;                       // 0x5C9 HYPOTHESIS: the team button was touched
     char _0x5ca[0x2];
     int m_handiMode;                            // 0x5CC HYPOTHESIS: the handicap setting of the rules of the screen
-    bool m_unk5D0;                              // 0x5D0 HYPOTHESIS: the handicap is shown as a number
-    char _0x5d1[0xB];
+    union {
+        struct {
+            bool m_unk5D0;                              // 0x5D0 HYPOTHESIS: the handicap is shown as a number
+            char _0x5d1[0xB];
+        };
+        struct {
+            char unk5D0[4];
+            int unk5D4;
+            char unk5D8[4];
+        };
+    };
     int m_ruleNumStock;                         // 0x5DC
     int m_difficulty;                           // 0x5E0
     int m_maxDiff;                              // 0x5E4
@@ -120,6 +130,17 @@ public:
     virtual void processDefault();
     virtual ~muSelCharTask();
 
+    muSelCharTask();
+    // HYPOTHESIS: initProc receives a pointer to the screen initialization data.
+    static muSelCharTask* create(void* data);
+    void initProc(void* data);
+    void createWifiModel(nw4r::g3d::ResFile* resFile);
+    // HYPOTHESIS: the model table contains eight-byte records; the last flag varies priority.
+    void createObjResFile(const void* models, int count, nw4r::g3d::ResFile* resFile,
+                          nw4r::g3d::ResFile* textureFile, bool varyPriority);
+    void dispDiffLevel(int level, bool enabled);
+    void ruleCall();
+    void sendSystemAllCharKind();
     void setHomerunRule(int rule);
     void setKumiteType(int type);
     void setQueueMeleeDropRule(int rule);
@@ -167,6 +188,11 @@ public:
     int getRuleTimeMax();
     int getRuleTimeMin();
     void dispHighScore(int, int, int);
+    int getRuleDispType();
+    bool isWifiGameMaster();
+    int getCollKindPlayerArea(Vec2f* pos, int* areaIdx, int* arg, float* rect);
+    void setRuleNumHoldCursorVisible(bool visible);
+    void setFaceIconMotion(int faceIdx, int motion);
 
     // Which part of the screen a point is in: 0 above the area of the characters, 1 the area of the characters, 2 below it
     // (the areas of the players).

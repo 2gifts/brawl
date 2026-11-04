@@ -74,6 +74,7 @@ public:
     // HYPOTHESIS: an inline accessor; the coin copies the position of the hand through it.
     Vec2f getPos() { return Vec2f(m_pos.m_x, m_pos.m_y); }
 
+    int getMode(int* arg);
     int getPlayerNo();
     void updatePlayerNo();
     void updateColorNo();
