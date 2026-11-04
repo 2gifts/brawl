@@ -187,3 +187,13 @@ void soPostureModuleImpl::setRot(Vec3f* rot, u32 index) {
 Vec3f soPostureModuleImpl::getRot(u32 index) {
     return m_interpolationArray->at(index).m_elements[0];
 }
+
+void soPostureModuleImpl::initRot(u32 index) {
+    Vec3f zero(0.0f, 0.0f, 0.0f);
+    soInterpolation<Vec3f>& first = m_interpolationArray->at(index);
+    first.m_elements[0] = zero;
+    first.m_elements[2] = first.m_elements[1] = zero;
+    Vec3f last(0.0f, 0.0f, 0.0f);
+    soInterpolation<Vec3f>& second = m_interpolationArray->at(index);
+    second.m_elements[3] = last;
+}
