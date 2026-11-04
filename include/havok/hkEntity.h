@@ -3,6 +3,7 @@
 #include <havok/hkWorldObject.h>
 #include <havok/hkMotion.h>
 #include <havok/hkArray.h>
+#include <havok/hkMaterial.h>
 
 struct hkSimulationIsland;
 struct hkEntityDeactivator;
@@ -14,7 +15,7 @@ struct hkConstraintInstance; // HYPOTHESIS: pointer stored in the constraint arr
 // Layout from hkEntityClass.cpp.
 struct hkEntity : hkWorldObject {
     hkSimulationIsland* m_simulationIsland; // 0x58
-    u8 m_material[0xC];                     // 0x5C (hkMaterial, layout not recovered yet)
+    hkMaterial m_material;                  // 0x5C
     hkEntityDeactivator* m_deactivator;     // 0x68
     // Master constraints: 0x24-byte elements whose first word is the constraint pointer.
     hkArrayBase m_constraintsMaster;        // 0x6C

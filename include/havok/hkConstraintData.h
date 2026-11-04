@@ -10,15 +10,21 @@ struct hkConstraintRuntimeInfo {
     u32 unk04;
 };
 
-// Constraint info block filled by getConstraintInfo (six words; unk10 is a pointer, unk14 its size).
-// HYPOTHESIS: unk04 and unk08 are size/offset counters advanced per modifier (hkConstraintAtom.cpp).
+// Solver size summary of a constraint (0x10 bytes). Layout and names from main.dol's hkConstraintInfoClass;
+// the modifier atoms add their schema and Jacobian sizes to it (hkConstraintAtom.cpp).
 struct hkConstraintInfo {
-    u32 unk00;
-    u32 unk04;
-    u32 unk08;
-    u32 unk0C;
-    void* unk10;
-    u32 unk14;
+    int m_maxSizeOfJacobians; // 0x00
+    int m_sizeOfJacobians;    // 0x04
+    int m_sizeOfSchemas;      // 0x08
+    int m_numSolverResults;   // 0x0C
+};
+
+// getConstraintInfo fills two more words after the reflected summary: the first atom of the constraint and the
+// byte size of its atoms (the two values getConstraintInfoUtil takes).
+// HYPOTHESIS: a separate record type; the getConstraintInfo symbols take an hkConstraintInfo*.
+struct hkConstraintInfoWithAtoms : hkConstraintInfo {
+    void* unk10; // 0x10 first atom
+    u32 unk14;   // 0x14 size of the atoms in bytes
 };
 
 // Base constraint description. Reflection layout: hkConstraintDataClass.cpp (size 0xC, userData at 0x8).

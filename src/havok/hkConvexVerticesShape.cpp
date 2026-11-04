@@ -47,9 +47,9 @@ int hkConvexVerticesShape::getType() const {
 
 void hkConvexVerticesShape::getFirstVertex(hkVector4& out) const {
     const hkConvexVerticesShapeFourVectors* v = (const hkConvexVerticesShapeFourVectors*)m_rotatedVertices.m_data;
-    out.x = v->x.x;
-    out.y = v->y.x;
-    out.z = v->z.x;
+    out.x = v->m_x.x;
+    out.y = v->m_y.x;
+    out.z = v->m_z.x;
     out.w = 1.0f;
 }
 

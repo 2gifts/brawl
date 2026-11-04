@@ -29,30 +29,7 @@
 //   0x8028CFAC   472  buildJacobianFromSoftContactModifier   [map: hkSoftContactModifierConstraintAtom__buildJacobianFromSoftContactModifier]
 
 #include <havok/hkConstraintAtom.h>
-
-// Local declarations for the atom classes that are not in a header yet (owned by this unit).
-// HYPOTHESIS: byte fields are unidentified; only the numSolverResults accessors are recovered here.
-struct hkLinSoftConstraintAtom : hkConstraintAtom { int numSolverResults() const; };
-struct hkLinLimitConstraintAtom : hkConstraintAtom { int numSolverResults() const; };
-struct hkLinFrictionConstraintAtom : hkConstraintAtom { int numSolverResults() const; };
-struct hkLinMotorConstraintAtom : hkConstraintAtom { int numSolverResults() const; };
-struct hk2dAngConstraintAtom : hkConstraintAtom { int numSolverResults() const; };
-struct hkAngConstraintAtom : hkConstraintAtom {
-    u8 unk02;
-    u8 unk03; // 0x03
-    int numSolverResults() const;
-};
-struct hkAngLimitConstraintAtom : hkConstraintAtom { int numSolverResults() const; };
-struct hkConeLimitConstraintAtom : hkConstraintAtom { int numSolverResults() const; };
-struct hkTwistLimitConstraintAtom : hkConstraintAtom { int numSolverResults() const; };
-struct hkAngFrictionConstraintAtom : hkConstraintAtom {
-    u8 unk02[2];
-    u8 unk04; // 0x04
-    int numSolverResults() const;
-};
-struct hkAngMotorConstraintAtom : hkConstraintAtom { int numSolverResults() const; };
-struct hkRagdollMotorConstraintAtom : hkConstraintAtom { int numSolverResults() const; };
-struct hkPulleyConstraintAtom : hkConstraintAtom { int numSolverResults() const; };
+#include <havok/hkLinSoftConstraintAtom.h>
 
 int hkLinSoftConstraintAtom::numSolverResults() const {
     return 1;
@@ -75,7 +52,7 @@ int hk2dAngConstraintAtom::numSolverResults() const {
 }
 
 int hkAngConstraintAtom::numSolverResults() const {
-    return unk03;
+    return m_numConstrainedAxes;
 }
 
 int hkAngLimitConstraintAtom::numSolverResults() const {
@@ -91,7 +68,7 @@ int hkTwistLimitConstraintAtom::numSolverResults() const {
 }
 
 int hkAngFrictionConstraintAtom::numSolverResults() const {
-    return unk04;
+    return m_numFrictionAxes;
 }
 
 int hkAngMotorConstraintAtom::numSolverResults() const {

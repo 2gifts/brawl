@@ -149,8 +149,8 @@ u32 hkModifierConstraintAtom::addModifierDataToConstraintInfo(hkConstraintInfo* 
     }
     if (m_type > 0x19) {
         if (m_type < 0x1B) { // MOVING_SURFACE
-            info->unk08 += 0x20;
-            info->unk04 += 0x20;
+            info->m_sizeOfSchemas += 0x20;
+            info->m_sizeOfJacobians += 0x20;
         }
         return 0;
     }
@@ -158,8 +158,8 @@ u32 hkModifierConstraintAtom::addModifierDataToConstraintInfo(hkConstraintInfo* 
         return 2;
     }
     if (m_type > 0x17) { // MASS_CHANGER
-        info->unk08 += 0x20;
-        info->unk04 += 0x40;
+        info->m_sizeOfSchemas += 0x20;
+        info->m_sizeOfJacobians += 0x40;
     }
     return 0;
 }

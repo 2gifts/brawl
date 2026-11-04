@@ -13,7 +13,7 @@ struct hkConstraintMotor;
 // Scheme block embedded in the generic constraint data (0x40 bytes, hkGenericConstraintSchemeClass.cpp).
 // The first four words are the constraint info summary copied out by getConstraintInfo.
 struct hkGenericConstraintDataScheme {
-    u32 m_info[4];                              // 0x00 (maxSizeOfJacobians, sizeOfJacobians, sizeOfSchemas, numSolverResults)
+    hkConstraintInfo m_info;                    // 0x00
     hkArray<hkVector4> m_data;                  // 0x10
     hkArray<int> m_commands;                    // 0x1C
     hkArray<hkConstraintModifier*> m_modifiers; // 0x28
@@ -24,10 +24,10 @@ struct hkGenericConstraintDataScheme {
         : m_data(flag), m_commands(flag), m_modifiers(flag), m_motors(flag) {}
 };
 
-// Generic constraint data (0x58 bytes, hkGenericConstraintDataClass.cpp). The bridge atom sits at 0x0C and
-// points back at this object; the scheme follows at 0x18.
+// Generic constraint data (0x58 bytes, hkGenericConstraintDataClass.cpp). The atoms (a single bridge atom that
+// points back at this object) sit at 0x0C; the scheme follows at 0x18.
 struct hkGenericConstraintData : hkConstraintData {
-    hkBridgeConstraintAtom m_bridgeAtom; // 0x0C
+    hkBridgeAtoms m_atoms;                  // 0x0C
     hkGenericConstraintDataScheme m_scheme; // 0x18
 
     HK_DECLARE_REF_ALLOCATOR(0x2A)

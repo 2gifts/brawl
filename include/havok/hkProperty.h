@@ -10,6 +10,6 @@ struct hkPropertyValue {
 // Keyed property (0x10 bytes). Layout from hkPropertyClass.cpp.
 struct hkProperty {
     u32 m_key;               // 0x00
-    u32 alignmentPadding;    // 0x04
+    u32 m_alignmentPadding;    // 0x04
     hkPropertyValue m_value; // 0x08
 };

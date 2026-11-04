@@ -6,6 +6,8 @@
 // The motion (hkFixedRigidMotion / hkKeyframedRigidMotion style) is reached through hkEntity::getMotion().
 struct hkRigidBody : hkEntity {
     hkRigidBody(hkFinishLoadedObjectFlag flag) : hkEntity(flag) {}
+    // Out of line (__ct__11hkRigidBodyFi, 0x802E2840); phShape calls it. HYPOTHESIS: the int parameter.
+    hkRigidBody(int flag);
 
     // Loaded-object support (static init registration).
     static void finishLoadedObjecthkRigidBody(void* p);

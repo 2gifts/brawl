@@ -69,15 +69,15 @@ const void* hkKeyframedRigidMotion::getVtablehkMaxSizeMotion() {
 
 hkKeyframedRigidMotion::hkKeyframedRigidMotion(const hkVector4& position, const hkQuaternion& rotation)
     : hkMotion(position, rotation) {
-    savedMotion = 0;
-    savedQualityTypeIndex = 0;
+    m_savedMotion = 0;
+    m_savedQualityTypeIndex = 0;
     m_inertiaAndMassInv.setZero4();
     m_type = MOTION_KEYFRAMED;
 }
 
 hkKeyframedRigidMotion::~hkKeyframedRigidMotion() {
-    if (savedMotion) {
-        savedMotion->removeReference();
+    if (m_savedMotion) {
+        m_savedMotion->removeReference();
     }
 }
 
@@ -136,8 +136,8 @@ void hkKeyframedRigidMotion::setStoredMotion(hkMaxSizeMotion* motion) {
     if (motion) {
         motion->addReference();
     }
-    if (savedMotion) {
-        savedMotion->removeReference();
+    if (m_savedMotion) {
+        m_savedMotion->removeReference();
     }
-    savedMotion = motion;
+    m_savedMotion = motion;
 }

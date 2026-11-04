@@ -23,7 +23,7 @@ struct hkWorldObject : hkReferencedObject {
     hkWorld* m_world;                    // 0x08
     void* m_userData;                    // 0x0C
     const char* m_name;                  // 0x10
-    hkMultiThreadLock m_multiThreadLock; // 0x14
+    hkMultiThreadLock m_multithreadLock; // 0x14
     hkLinkedCollidable m_collidable;     // 0x1C
     // Typed hkArray<hkProperty> in the original. Untyped here so the finish constructor does not
     // default-construct it (the loaded-object path never writes it).

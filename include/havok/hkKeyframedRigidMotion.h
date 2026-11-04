@@ -18,8 +18,8 @@ struct hkKeyframedRigidMotion : hkMotion {
         hkThreadMemory::s_instance->deallocateChunk(p, ((hkReferencedObject*)p)->m_memSizeAndFlags, 0x2c);
     }
 
-    hkMaxSizeMotion* savedMotion; // 0x100
-    int savedQualityTypeIndex;    // 0x104
+    hkMaxSizeMotion* m_savedMotion; // 0x100
+    int m_savedQualityTypeIndex;    // 0x104
 
     hkKeyframedRigidMotion(const hkVector4& position, const hkQuaternion& rotation);
     hkKeyframedRigidMotion(hkFinishLoadedObjectFlag f) : hkMotion(f) {}

@@ -7722,6 +7722,30 @@ config.progress_categories = [
 ]
 config.progress_each_module = args.verbose
 
+# Havok layout check: tests/havok_layout/*.cpp (written by tools/havok_reflect.py check from main.dol's
+# reflection tables) assert sizeof/offsetof of every reflected class against its header. They are compiled
+# with the Havok flags and never linked, so a header layout that disagrees with the executable fails the build.
+havok_layout_steps = []
+for layout_src in sorted(Path("tests/havok_layout").glob("*.cpp")):
+    layout_obj = config.out_path() / "havok_layout" / layout_src.with_suffix(".o").name
+    layout_implicit = [config.compilers()]
+    if config.compiler_wrapper() is not None and config.use_wibo():
+        layout_implicit.append(config.compiler_wrapper())
+    havok_layout_steps.append(
+        {
+            "rule": "mwcc",
+            "inputs": layout_src,
+            "outputs": layout_obj,
+            "implicit": layout_implicit,
+            "variables": {
+                "cflags": " ".join([*cflags_havok, "-lang=c++"]),
+                "basedir": layout_obj.parent,
+                "basefile": layout_obj.with_suffix(""),
+            },
+        }
+    )
+config.custom_build_steps = {"post-compile": havok_layout_steps}
+
 if args.mode == "configure":
     # Write build.ninja and objdiff.json
     generate_build(config)

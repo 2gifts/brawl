@@ -9,8 +9,8 @@
 struct hkGroupFilter : hkCollisionFilter {
     HK_DECLARE_REF_ALLOCATOR(0x25)
 
-    int nextFreeSystemGroup;        // 0x18
-    u32 collisionLookupTable[32];   // 0x1C: one bit per layer pair, indexed by the first layer
+    int m_nextFreeSystemGroup;        // 0x18
+    u32 m_collisionLookupTable[32];   // 0x1C: one bit per layer pair, indexed by the first layer
 
     hkGroupFilter();
     hkGroupFilter(hkFinishLoadedObjectFlag flag) {}
