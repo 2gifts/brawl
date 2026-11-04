@@ -6,6 +6,9 @@
 #include <so/so_module_accesser.h>
 #include <types.h>
 
+// ecMgr::killEffectGroup (the map name); src/mo_melee/sora_melee/st/stage.cpp calls it by this stand-in name.
+extern "C" void fn_80060E20(ecMgr* mgr, int group, int unk2, int unk3, int unk4, int unk5);
+
 void soEffectModuleImpl::activate() {
     removeAllAfterImage(0, 0);
     removeAllContinual();
@@ -168,4 +171,34 @@ void soEffectModuleImpl::begin() {
         ecMgr::getInst()->m_traceMgr.pauseGroup(false, m_groupId | 2, -1);
         unk135_0 = false;
     }
+}
+
+void soEffectModuleImpl::removeAll(u32 flags) {
+    g_ecMgr->endEffectGroup(m_groupId | flags, flags | 0xFFFF00);
+}
+
+void soEffectModuleImpl::killKind(int effectKind, bool p2, bool p3) {
+    fn_80060E20(g_ecMgr, m_groupId, 0xFFFF00, p2, p3, effectKind);
+}
+
+void soEffectModuleImpl::killAll(u32 flags, bool p2, bool p3) {
+    fn_80060E20(g_ecMgr, m_groupId | flags, flags | 0xFFFF00, p2, p3, 0);
+}
+
+bool soEffectModuleImpl::removeAfterImage(int id, int p2) {
+    return g_ecMgr->m_traceMgr.end(id, p2, 0);
+}
+
+void soEffectModuleImpl::removeAllAfterImage(u32 flags, int p2) {
+    g_ecMgr->m_traceMgr.endGroup(m_groupId | flags, flags | 0xFFFF00, p2);
+}
+
+void soEffectModuleImpl::pushGroupIgnoreScaleZ(u32 group) {
+    g_ecMgr->pushsetCurrentGroup(group);
+    g_ecMgr->setFlatMode(false);
+}
+
+void soEffectModuleImpl::pushGroupScaleZ(u32 group) {
+    g_ecMgr->pushsetCurrentGroup(group);
+    g_ecMgr->setFlatMode(true);
 }
