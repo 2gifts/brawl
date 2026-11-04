@@ -63,7 +63,7 @@ grFamicomPow* grFamicomPow::create(int mdlIndex, const char* tgtNodeName, const 
 
 grFamicomPow::~grFamicomPow() {
     if (m_hitData != NULL) {
-        delete[] reinterpret_cast<u8*>(m_hitData); // MATCH-ONLY: raw storage (no element destructors)
+        delete[] reinterpret_cast<u8*>(m_hitData); // BYTES: raw storage (no array cookie), see setHit
     }
     m_hitData = NULL;
     if (m_hitSimple != NULL) {
@@ -266,7 +266,8 @@ void grFamicomPow::updateCallBack(float deltaFrame) {
 
 // The hit object of the block: a hit module with one hit sphere (size 6) and a damage module that reports the hits to onDamage.
 void grFamicomPow::setHit() {
-    // MATCH-ONLY: the original allocates the hit data as raw storage (no element construction)
+    // BYTES: raw storage (no element construction, no array cookie). grEarthPelletFlower and grGWChefEtc
+    // array-construct the same types, so this unit's original allocated untyped bytes.
     m_hitData = reinterpret_cast<soCollisionHitData*>(new (Heaps::StageInstance) u8[sizeof(soCollisionHitData)]);
     m_hitSimple = reinterpret_cast<soCollisionHitData::Simple*>(new (Heaps::StageInstance) u8[sizeof(soCollisionHitData::Simple)]);
     m_hitSet = new (Heaps::StageInstance) soSet<soCollisionHitData::Simple>;

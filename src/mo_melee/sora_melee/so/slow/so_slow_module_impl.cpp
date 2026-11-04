@@ -113,11 +113,6 @@ void soSlowModuleImpl::setWholeFrame(int wholeFrame) {
     }
 }
 
-// MATCH-ONLY: mirrors the inlined argument accessor (as getFrontArg in so_controller_module_impl.cpp).
-static inline acCmdArg getCmdArg(const soArrayContractibleTable<const acCmdArgConv>& args, s32 index) {
-    return acCmdArg(&args.at(index));
-}
-
 bool soSlowModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3) {
     s8 group = acmd->getGroup();
     if (!isObserv(group)) {
@@ -129,9 +124,9 @@ bool soSlowModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* mod
     switch (acmd->getType()) {
     case 0: {
         soArrayContractibleTable<const acCmdArgConv> args = acmd->getArgList();
-        acCmdArg magArg = getCmdArg(args, 0);
+        acCmdArg magArg = acGetCmdArg(args, 0);
         int mag = magArg.getIntData();
-        acCmdArg frameArg = getCmdArg(args, 1);
+        acCmdArg frameArg = acGetCmdArg(args, 1);
         setWhole(mag, frameArg.getIntData());
         return true;
     }

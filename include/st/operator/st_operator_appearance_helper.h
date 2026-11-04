@@ -5,6 +5,7 @@
 
 class stOperatorAppearanceHelper : public stOperator {
 public:
+    void endOperator();
     virtual void processBegin();
     virtual ~stOperatorAppearanceHelper();
 };

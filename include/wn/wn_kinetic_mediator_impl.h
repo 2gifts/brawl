@@ -52,6 +52,8 @@ private:
     Holder m_holder;
 public:
     soInstancePoolSub(soModuleAccesser* acc) : m_holder(acc) { }
+    // HYPOTHESIS: direct access to the sole energy in this pool.
+    typename Info::Type* getEnergy() { return m_holder.getEnergy(); }
     // MATCH-ONLY: native mediator loops call this per-energy lookup separately.
     typename Info::Type* getInstanceAt(int index) __attribute__((never_inline)) {
         if (index == 0) return m_holder.getEnergy();
@@ -85,6 +87,8 @@ private:
     soInstancePoolSub<Info, Next> m_sub;
 public:
     soInstancePool(soModuleAccesser* acc) : Parent(acc), m_sub(acc) { }
+    // HYPOTHESIS: the tag selects the energy at this hierarchy level.
+    typename Info::Type* getEnergy(const soIntToType<Index>&) { return m_sub.getEnergy(); }
     void clearSpeed() {
         for (int i = 0; i < Info::Count; i++)
             soKineticTransactHelper::checkClearSpeed(m_sub.getInstanceAt(i));

@@ -185,6 +185,7 @@ public:
     virtual GXColor getFinalTechniqColor();
 
     void setPokeTrainerBasePos(Vec3f* pos);
+    void setCameraParamDistance(float nearDistance, float farDistance);
     u32 getModeFlag(u32 category, u32 type);
     u32 getModeFlag_NoHang(u32 flags, u32* block, u32* mask, u32 width, u32 height);
     u32 getModeFlag_DisableLink(u32 flags, u32* block, u32* mask, u32 width, u32 height);

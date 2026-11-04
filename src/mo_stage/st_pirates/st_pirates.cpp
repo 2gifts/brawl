@@ -947,10 +947,7 @@ void stPirates::updateEventBomb(float deltaFrame) {
                 Vec3f hit;
                 Vec3f normal;
                 float width = m_posLimit[1].m_x - m_posLimit[0].m_x;
-                float seaZ = mtx(6)->m[2][3];
-                float seaY = mtx(6)->m[1][3];
-                float seaX = mtx(6)->m[0][3];
-                Vec3f seaPos(seaX, seaY, seaZ);
+                Vec3f seaPos = mtx(6)->getTranslation();
                 float rnd = randf();
                 float full = 0.7f * width;
                 float half = 0.35f * width;
@@ -1027,10 +1024,7 @@ void stPirates::updateSea(float deltaFrame) {
     if (m_waterTrigger != NULL && m_waterData != NULL) {
         stPiratesData* data = static_cast<stPiratesData*>(m_stageData);
         if (data != NULL) {
-            float seaZ = mtx(6)->m[2][3];
-            float seaY = mtx(6)->m[1][3];
-            float seaX = mtx(6)->m[0][3];
-            Vec3f sea(seaX, seaY, seaZ);
+            Vec3f sea = mtx(6)->getTranslation();
             m_waterData->m_swimHeight = sea.m_y;
             m_waterData->m_speed = data->waterVelocity * unk604;
             grGimmickWaterData* area = m_waterData;

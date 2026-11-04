@@ -9,7 +9,7 @@
 
 class soModuleAccesser;
 
-// MATCH-ONLY: the inline overrides follow the vtable order (MWCC emits deferred inline virtuals backwards).
+// The inline overrides are declared in vtable order (MWCC emits deferred inline virtuals backwards, as in the original).
 class ftControllerModuleImpl : public soControllerModuleImpl, public soStatusEventObserver, public soTurnEventObserver {
 public:
     soModuleAccesser* m_moduleAccesser;   // 0x2C

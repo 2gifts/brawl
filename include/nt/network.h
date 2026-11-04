@@ -63,6 +63,9 @@ class Network {
 public:
     virtual ~Network();
     void create(bool);
+    // HYPOTHESIS: matching arguments are word-sized integers in the menu callers.
+    bool retryMatching(int, int);
+    bool disconnectAll(bool);
     void setLocalDataSize(u16 size);
     // HYPOTHESIS: the original calls these out of line; their weak copies are
     // emitted in mu_wifi_interface.o.
@@ -70,7 +73,20 @@ public:
     static u8 getParentAID() __attribute__((never_inline));
 
 private:
-    char _0x4[0x2C];
+    friend class ntReturnStatusCallback;
+    // HYPOTHESIS: callback state, countdown and matching arguments occupy these words.
+    union {
+        char _0x4[0x2C];
+        struct {
+            char unk4[0x10];
+            s32 unk14;
+            s32 unk18;
+            int unk1C;
+            int unk20;
+            int unk24;
+            char unk28[8];
+        };
+    };
 
 public:
     NetworkUserData* m_userData;

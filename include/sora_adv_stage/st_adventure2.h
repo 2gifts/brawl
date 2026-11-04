@@ -10,7 +10,14 @@ class stAdventure2 : public Stage {
     u8 m_unreconstructed[0x554 - sizeof(Stage)];
 
 public:
+    // HYPOTHESIS: the request carries an unsigned jump-table key.
+    void requestStepJump(u32 jumpData);
     // 0x554, five rows of four floats indexed by background layer: x scale, y scale, x/y/z offset
     // (grAdventureBackGround::setBackGround).
     const float* m_backGroundParams;
+
+    void stopCameraAdvCameraOffset();
+    void setFighterPos(int player, Vec3f* pos);
+    // HYPOTHESIS: the camera offset argument contains two floats.
+    void setCameraAdvCameraOffset(Vec2f* offset);
 };

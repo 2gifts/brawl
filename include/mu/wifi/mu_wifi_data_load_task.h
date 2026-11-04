@@ -26,6 +26,9 @@ public:
     int m_unk68;
     bool m_unk6C;
 
+    muWifiDataLoadTask();
+    static int mainStepLoadMain(muWifiDataLoadTask* task);
+
     virtual void processDefault();
     virtual ~muWifiDataLoadTask();
     virtual void exit();

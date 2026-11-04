@@ -30,36 +30,31 @@ typedef soCollisionSearchModuleBuilder<soCollisionSearchModuleBuildConfig<soColl
 // with the Sonic specific types (100-117, HYPOTHESIS: the spin dash / Super Sonic kinetic types) it is updated unconditionally,
 // by the energy's ordinary updateEnergy or, for some energy and type pairs, by a type specific update that lives in sora_melee
 // (the original passes it a one-byte tag object; HYPOTHESIS: an empty soIntToType<type> tag).
-// MATCH-ONLY: the original builds one volatile marker byte per case on the stack.
 class ftKineticEnergyGravity;
 class ftKineticEnergyController;
 class ftKineticEnergyStop;
 extern "C" {
-void fn_27_3BD860(ftKineticEnergyGravity* energy, u8* tag, soModuleAccesser* acc);
-void fn_27_3BE2B0(ftKineticEnergyGravity* energy, u8* tag, soModuleAccesser* acc);
-void fn_27_3BDDB4(ftKineticEnergyController* energy, u8* tag, soModuleAccesser* acc);
-void fn_27_3BE568(ftKineticEnergyController* energy, u8* tag, soModuleAccesser* acc);
-void fn_27_3BD5B8(ftKineticEnergyStop* energy, u8* tag, soModuleAccesser* acc);
-void fn_27_3BD698(ftKineticEnergyStop* energy, u8* tag, soModuleAccesser* acc);
-void fn_27_3BD914(ftKineticEnergyStop* energy, u8* tag, soModuleAccesser* acc);
-void fn_27_3BDE6C(ftKineticEnergyStop* energy, u8* tag, soModuleAccesser* acc);
-void fn_27_3BE364(ftKineticEnergyStop* energy, u8* tag, soModuleAccesser* acc);
+void fn_27_3BD860(ftKineticEnergyGravity* energy, const soIntToType<103>& tag, soModuleAccesser* acc);
+void fn_27_3BE2B0(ftKineticEnergyGravity* energy, const soIntToType<114>& tag, soModuleAccesser* acc);
+void fn_27_3BDDB4(ftKineticEnergyController* energy, const soIntToType<108>& tag, soModuleAccesser* acc);
+void fn_27_3BE568(ftKineticEnergyController* energy, const soIntToType<117>& tag, soModuleAccesser* acc);
+void fn_27_3BD5B8(ftKineticEnergyStop* energy, const soIntToType<100>& tag, soModuleAccesser* acc);
+void fn_27_3BD698(ftKineticEnergyStop* energy, const soIntToType<101>& tag, soModuleAccesser* acc);
+void fn_27_3BD914(ftKineticEnergyStop* energy, const soIntToType<104>& tag, soModuleAccesser* acc);
+void fn_27_3BDE6C(ftKineticEnergyStop* energy, const soIntToType<107>& tag, soModuleAccesser* acc);
+void fn_27_3BE364(ftKineticEnergyStop* energy, const soIntToType<115>& tag, soModuleAccesser* acc);
 }
 
-struct ftSonicKineticNoTag { };
-struct ftSonicKineticTag {
-    u8 m_value;
-};
+// Every case hands its update a value-initialized soIntToType<type> tag (the first zero byte each case stores); the type
+// specific updates build a tag of their own for the sora_melee function (the second zero byte of those cases).
 template <class E, int Type>
 struct ftSonicKineticUpdate {
-    typedef ftSonicKineticNoTag Tag;
-    static void run(E* energy, Tag&, soModuleAccesser* acc) { energy->updateEnergy(acc); }
+    static void run(E* energy, const soIntToType<Type>&, soModuleAccesser* acc) { energy->updateEnergy(acc); }
 };
-#define FT_SONIC_KINETIC_SPECIAL(E, Type, Fn)                                                                  \
-    template <>                                                                                                \
-    struct ftSonicKineticUpdate<E, Type> {                                                                     \
-        typedef ftSonicKineticTag Tag;                                                                         \
-        static void run(E* energy, Tag& tag, soModuleAccesser* acc) { tag.m_value = 0; Fn(energy, &tag.m_value, acc); }         \
+#define FT_SONIC_KINETIC_SPECIAL(E, Type, Fn)                                                                    \
+    template <>                                                                                                  \
+    struct ftSonicKineticUpdate<E, Type> {                                                                       \
+        static void run(E* energy, soIntToType<Type> tag, soModuleAccesser* acc) { Fn(energy, tag, acc); } \
     }
 FT_SONIC_KINETIC_SPECIAL(ftKineticEnergyGravity, 103, fn_27_3BD860);
 FT_SONIC_KINETIC_SPECIAL(ftKineticEnergyGravity, 114, fn_27_3BE2B0);
@@ -71,12 +66,7 @@ FT_SONIC_KINETIC_SPECIAL(ftKineticEnergyStop, 104, fn_27_3BD914);
 FT_SONIC_KINETIC_SPECIAL(ftKineticEnergyStop, 107, fn_27_3BDE6C);
 FT_SONIC_KINETIC_SPECIAL(ftKineticEnergyStop, 115, fn_27_3BE364);
 #define FT_SONIC_KINETIC_CASE(n) \
-    case n: { \
-        typename ftSonicKineticUpdate<E, n>::Tag tag; \
-        volatile u8 marker = 0; \
-        ftSonicKineticUpdate<E, n>::run(energy, tag, acc); \
-        break; \
-    }
+    case n: ftSonicKineticUpdate<E, n>::run(energy, soIntToType<n>(), acc); break;
 class ftSonicKineticTransactor : public ftKineticTransactor {
 public:
     static void changeKinetic(int mode, void* pools, soModuleAccesser* acc);

@@ -100,15 +100,7 @@ void wnLucasPKThunderMediator::deactivate() {
 
 s32 wnLucasPKThunderMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
     switch (articleId) {
-    case 0: {
-        wnArticleSlotTag tag;
-        wnArticleActiveCounter counter;
-        for (s32 i = 0; i < 6; ++i) {
-            wnArticleActiveCounter* c = &counter;
-            (*c)(&static_cast<soArticle&>(*m_pools.getSub().getInstanceAt(i)));
-        }
-        return counter.m_activeNum;
-    }
+    case 0: return wnArticleSlotActiveNum<wnArticlePool<wnLucasPKThunderChild, 6, soInstancePoolRoot>, wnArticleSlotCounter>(this, WN_ARTICLE_SLOT_TAGS);
     WN_ARTICLE_UNUSED_SLOTS_FROM_1(0)
     default: return 0;
     }
@@ -116,20 +108,7 @@ s32 wnLucasPKThunderMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
 
 bool wnLucasPKThunderMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
     switch (articleId) {
-    case 0: {
-        wnArticleSlotTag tag;
-        bool allActive;
-        s32 i;
-        for (i = 0; i < 6; ++i) {
-            if (static_cast<soArticle&>(*m_pools.getSub().getInstanceAt(i)).isActiveArticle() == false) {
-                allActive = false;
-                goto done;
-            }
-        }
-        allActive = true;
-    done:
-        return allActive == false;
-    }
+    case 0: return wnArticleSlotIsGeneratable<wnArticlePool<wnLucasPKThunderChild, 6, soInstancePoolRoot> >(this, WN_ARTICLE_SLOT_TAGS);
     WN_ARTICLE_UNUSED_SLOTS_FROM_1(false)
     default: return false;
     }
