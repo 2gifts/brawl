@@ -1,5 +1,5 @@
 #include <gf/gf_sys_recorder2.h>
-#include <nt/nt_friendinfo.h>
+#include <nt/nt_offline.h>
 #include <revolution/NET/crc.h>
 #include <string.h>
 #include <types.h>
@@ -10,7 +10,6 @@ unsigned char lbl_8049ECA0[0x18] __attribute__((aligned(8))) = { 0 };
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
 unsigned char lbl_805A044C[0x4] __attribute__((aligned(4))) = { 0 };
 
-extern s32 lbl_805A0448;
 
 extern "C" int DWC_CheckUserData(const DWCAccUserData* userdata);
 
@@ -31,7 +30,7 @@ void ntFriendInfoSave::processDefault() {
         gfSysRecorder2::dropInstance();
         unk40 = 0;
         if (unk44) exit();
-        --lbl_805A0448;
+        --s_savingCount;
     }
 }
 

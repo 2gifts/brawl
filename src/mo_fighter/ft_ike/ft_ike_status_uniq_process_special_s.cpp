@@ -18,27 +18,6 @@ public:
 
 void ftKineticEnergyDisableAndClear(int index, soModuleAccesser* moduleAccesser);
 
-// MATCH-ONLY: the layout of soCollisionSearchData (0x18 bytes) as far as Quick Draw fills it.
-struct ftIkeSpecialSSearchData {
-    float unk0;
-    float unk4;
-    float unk8;
-    float unkC;
-    u32 m_node : 9;
-    u32 unk10a : 7;
-    u32 unk10b : 10;
-    u32 unk10c : 3;
-    u32 unk10d : 1;
-    u32 unk10e : 2;
-    u32 unk14a : 4;
-    u32 unk14b : 4;
-    u32 unk14c : 1;
-    u32 unk14d : 17;
-    u32 unk14e : 1;
-    u32 unk14f : 1;
-    u32 unk14g : 4;
-};
-
 void ftIkeStatusUniqProcessSpecialS::initStatus(soModuleAccesser* moduleAccesser) {
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
@@ -207,23 +186,23 @@ void ftIkeStatusUniqProcessSpecialS::exitStatus(soModuleAccesser* moduleAccesser
 }
 
 void ftIkeStatusUniqProcessSpecialS::setSearch(soModuleAccesser* moduleAccesser) {
-    ftIkeSpecialSSearchData data;
-    data.unk0 = 0.0f;
-    data.unk4 = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb0, 0);
-    data.unk8 = soValueAccesser::getConstantFloat(moduleAccesser, 0xfaf, 0);
-    data.unkC = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb1, 0);
+    soCollisionSearchData data;
+    data.m_offset.m_x = 0.0f;
+    data.m_offset.m_y = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb0, 0);
+    data.m_offset.m_z = soValueAccesser::getConstantFloat(moduleAccesser, 0xfaf, 0);
+    data.m_size = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb1, 0);
     data.m_node = 0xb;
-    data.unk10a = 2;
-    data.unk10b = 0xf;
-    data.unk10c = 7;
-    data.unk10d = 0;
-    data.unk14a = 0xf;
-    data.unk14b = 0xf;
-    data.unk14c = 0;
-    data.unk14d = 0;
-    data.unk14e = 0;
-    data.unk14f = 0;
-    moduleAccesser->getCollisionSearchModule().set(0, 0, reinterpret_cast<soCollisionSearchData*>(&data));
+    data.m_unk10a = 2;
+    data.m_unk10b = 0xf;
+    data.m_unk10c = 7;
+    data.m_unk10d = 0;
+    data.m_unk14a = 0xf;
+    data.m_unk14b = 0xf;
+    data.m_unk14c = 0;
+    data.m_unk14d = 0;
+    data.m_unk14e = 0;
+    data.m_unk14f = 0;
+    moduleAccesser->getCollisionSearchModule().set(0, 0, &data);
 }
 
 ftIkeStatusUniqProcessSpecialS g_ftIkeStatusUniqProcessSpecialS;

@@ -18,6 +18,7 @@ public:
 
     void changeKineticSub(void* pools, soModuleAccesser* moduleAccesser);
     void changeKineticSub1(void* pools, soModuleAccesser* moduleAccesser);
+    void changeKineticSub1Again(void* pools, soModuleAccesser* moduleAccesser);
     void changeKineticSub2(void* pools, soModuleAccesser* moduleAccesser);
     void changeKineticSub3(void* pools, soModuleAccesser* moduleAccesser);
     void changeKineticSub4(void* pools, soModuleAccesser* moduleAccesser);

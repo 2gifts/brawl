@@ -117,7 +117,7 @@ grFamicomEnemy::grFamicomEnemy(const char* taskName) : grFamicom(taskName), m_sn
 
 grFamicomEnemy::~grFamicomEnemy() {
     if (m_hitData != NULL) {
-        delete[] reinterpret_cast<u8*>(m_hitData); // MATCH-ONLY: raw storage (no element destructors)
+        delete[] reinterpret_cast<u8*>(m_hitData); // BYTES: raw storage (no array cookie), see setHit
     }
     m_hitData = NULL;
     if (m_hitSimple != NULL) {
@@ -719,7 +719,8 @@ void grFamicomEnemy::updateCallBack(float deltaFrame) {
 // The hit object of the enemy: an attack module (the enemy hurts fighters) and a hit module with a damage module (fighters
 // hurt the enemy), both with one part. The hit sphere (size 9.2) is around the record of the enemy.
 void grFamicomEnemy::setHit() {
-    // MATCH-ONLY: the original allocates the hit data as raw storage (no element construction)
+    // BYTES: raw storage (no element construction, no array cookie). grEarthPelletFlower and grGWChefEtc
+    // array-construct the same types, so this unit's original allocated untyped bytes.
     m_hitData = reinterpret_cast<soCollisionHitData*>(new (Heaps::StageInstance) u8[sizeof(soCollisionHitData)]);
     m_hitSimple = reinterpret_cast<soCollisionHitData::Simple*>(new (Heaps::StageInstance) u8[sizeof(soCollisionHitData::Simple)]);
     m_hitSet = new (Heaps::StageInstance) soSet<soCollisionHitData::Simple>;

@@ -69,6 +69,13 @@ public:
     soGenerateArticleManageModuleImpl(soModuleAccesser*, soArray<soArticle*>*,
         soArticleMediator*, soArray<soArticleEventObserver>*);
     virtual ~soGenerateArticleManageModuleImpl();
+    virtual soArticle* generate(int articleId, void* logAttackInfo, bool);
+    virtual void setVisibilityWhole(int articleId, u8, int selector);
+    virtual void set2nd(int articleId, u8, int selector);
+    virtual void removeExistTaskId(int taskId);
+    virtual void eject(int taskId);
+    virtual void have(int articleId, int, int selector, int taskId);
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual void activate();
     virtual void changeMotion(int articleId, int motionKind, bool);
     virtual void setFrame(int articleId, float);

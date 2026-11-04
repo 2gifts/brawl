@@ -1,4 +1,5 @@
 #define SO_PHYSICS_MODULE_IMPL_FULL
+#include <ph/ph_2ndary_constraint.h>
 #include <ph/ph_2ndary_controller.h>
 #include <so/physics/so_physics_module_impl.h>
 #include <so/so_module_accesser.h>
@@ -43,6 +44,41 @@ bool soPhysicsModuleImpl::isIK(int ikId) {
     return m_ikHandles->at(ikId).unk34 > 0.0f;
 }
 
+void soPhysicsModuleImpl::setUpMtx2ndPreCollision() {
+    if (m_2ndaryController != NULL && (u32)m_2ndPreCollisionNode != 0xFFFFFFFF && is2nd() == true) {
+        Matrix* worldMtx = m_moduleAccesser->getModelModule().getWorldMtxArray();
+        nw4r::g3d::ResMdl resMdl = m_moduleAccesser->getModelModule().getScnMdl()->m_resMdl;
+        u32 nodes[200];
+        m_2ndaryController->setAwake(true, m_2ndPreCollisionNode);
+        int count = m_2ndaryController->get2ndaryLastNode(nodes, resMdl);
+        m_moduleAccesser->getModelModule().setUpMtx(nodes, count);
+        m_2ndaryController->calacCallBackTimingCFor2ndary((int)worldMtx,
+            (int)m_moduleAccesser->getModelModule().getScnMdl(), 1, 0);
+        m_2ndaryController->setAwake(false, m_2ndPreCollisionNode);
+    }
+}
+
+void soPhysicsModuleImpl::setUpMtx2nd() {
+    if (m_2ndaryController != NULL && is2nd() == true) {
+        Matrix* worldMtx = m_moduleAccesser->getModelModule().getWorldMtxArray();
+        u32 nodes[200];
+        int count = m_2ndaryController->get2ndaryLastNode(nodes,
+            m_moduleAccesser->getModelModule().getScnMdl()->m_resMdl);
+        m_moduleAccesser->getModelModule().setUpMtx(nodes, count);
+        m_2ndaryController->calacCallBackTimingCFor2ndary((int)worldMtx,
+            (int)m_moduleAccesser->getModelModule().getScnMdl(), 1, 0);
+    }
+}
+
+void soPhysicsModuleImpl::setUpVisibility() {
+    if (m_2ndaryController != NULL && is2nd() == true) {
+        m_2ndaryController->setUndispNode(m_moduleAccesser->getModelModule().getScnMdl());
+    }
+    if (m_2ndary2Controller != NULL && (is2ndBoth() == true || is2ndBothReverse() == true)) {
+        m_2ndary2Controller->setUndispNode(m_moduleAccesser->getModelModule().getScnMdl());
+    }
+}
+
 bool soPhysicsModuleImpl::is2nd() {
     ph2ndaryController* controller = m_2ndaryController;
     if (controller != NULL) {
@@ -83,6 +119,42 @@ int soPhysicsModuleImpl::get2ndLineCount() {
         return m_2ndary2Controller->m_controller[0]->m_lines.getSize();
     }
     return 0;
+}
+
+float soPhysicsModuleImpl::get2ndLineLength(int lineId) {
+    if (m_2ndaryController != NULL) {
+        return m_2ndaryController->m_lines[lineId]->unk80;
+    }
+    if (m_2ndary2Controller != NULL) {
+        return m_2ndary2Controller->m_controller[0]->m_lines[lineId]->unk80;
+    }
+    return 0.0f;
+}
+
+void soPhysicsModuleImpl::set2ndLineLength(int lineId, float length) {
+    ph2ndaryController* controller = m_2ndaryController;
+    if (controller != NULL) {
+        if (controller->unk55 == 0 && lineId == controller->m_lines.getSize() - 1) {
+            if (controller->unk55 != 0 && lineId != 0) {
+                controller->m_lines[lineId]->unk80 = length;
+            }
+        }
+        return;
+    }
+    ph2ndary2Controller* controller2 = m_2ndary2Controller;
+    if (controller2 != NULL) {
+        if (controller2->m_controller[0]->unk55 == 0 && lineId == controller2->m_controller[0]->m_lines.getSize() - 1) {
+            if (controller2->m_controller[0]->unk55 != 0 && lineId != 0) {
+                controller2->m_controller[0]->m_lines[lineId]->unk80 = length;
+            }
+        }
+        lineId = controller2->m_controller[0]->m_lines.getSize() - 1 - lineId;
+        if (controller2->m_controller[1]->unk55 == 0 && lineId == controller2->m_controller[1]->m_lines.getSize() - 1) {
+            if (controller2->m_controller[1]->unk55 != 0 && lineId != 0) {
+                controller2->m_controller[1]->m_lines[lineId]->unk80 = length;
+            }
+        }
+    }
 }
 
 int soPhysicsModuleImpl::get2ndActiveNodeNum() {

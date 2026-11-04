@@ -184,10 +184,7 @@ void grFzeroTrainer::updateCallBack(float deltaFrame) {
             }
             if (m_mtxWork != NULL) {
                 Matrix* matrix = &m_mtxWork[m_mtxIndex];
-                float z = matrix->m[2][3];
-                float y = matrix->m[1][3];
-                float x = matrix->m[0][3];
-                Vec3f pos(x, y, z);
+                Vec3f pos = matrix->getTranslation();
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_pos = pos;
             }
         }

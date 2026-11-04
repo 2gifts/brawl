@@ -31,9 +31,9 @@ static inline s8 advGetPlayerNumber(int taskId) {
 // HYPOTHESIS: the difficulty level of the adventure data (byte 0x5FD) less the bias byte 0x4916, clamped to 0..14
 // (gmAdvData is only partly described).
 static inline u8 advGetDifficultyLevel() {
-    u8* advData = reinterpret_cast<u8*>(g_GameGlobal->m_advData);
-    int level = advData[0x5FD] - advData[0x4916];
-    int minLevel = advData[0x5FD] - 5;
+    gmAdvData* advData = g_GameGlobal->m_advData;
+    int level = advData->m_difficultyLevel - advData->unk4916;
+    int minLevel = advData->m_difficultyLevel - 5;
     if (level < minLevel) {
         level = minLevel;
     }

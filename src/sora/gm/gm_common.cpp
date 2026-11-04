@@ -1101,31 +1101,30 @@ bool gmCheckCharaAccept(u64 flag, int kind) {
     return (set.words[kind / 32] & (1 << (kind % 32))) != 0;
 }
 
-// HYPOTHESIS: turns an all-star list into a corps list. Byte 4 == 1 marks an all-star setup whose first player
-// record carries the fighter count in its stock field; the first player's fighter/cpu/reaction data moves to the
+// HYPOTHESIS: turns an all-star list into a corps list. m_isAllStarList == 1 marks an all-star setup whose first
+// player record carries the fighter count in its stock field; the first player's fighter/cpu/reaction data moves to the
 // corps header, the per-player costume ids are packed into the byte array at 0x24 and repeated up to the count.
 void gmGlobalCorpsConvertAllStarToCorps(gmGlobalCorps* corps) {
-    u8* raw = reinterpret_cast<u8*>(corps);
-    if (raw[0x4] == 1) {
+    if (corps->m_isAllStarList == 1) {
         int count = 100;
         if (corps->m_playersInitData[0].m_stockCount < 100) {
             count = corps->m_playersInitData[0].m_stockCount;
         }
         if (count > 1) {
-            int period = raw[0x1];
-            u8 kind = raw[0x24];
-            u8 cpuType = raw[0x27];
-            u8 cpuRank = raw[0x28];
+            int period = corps->m_numFightersToBeat;
+            int kind = corps->m_playersInitData[0].m_characterKind;
+            u8 cpuType = corps->m_playersInitData[0].m_cpuType;
+            s8 cpuRank = corps->m_playersInitData[0].m_cpuRank;
             float attackMul = corps->m_playersInitData[0].m_attackReactionMul;
             float damageMul = corps->m_playersInitData[0].m_damageReactionMul;
             float scale = corps->m_playersInitData[0].m_scale;
-            raw[0x4] = 0;
-            raw[0xA] = kind;
-            raw[0xB] = cpuType;
-            raw[0xC] = cpuRank;
-            *reinterpret_cast<float*>(raw + 0x10) = attackMul;
-            *reinterpret_cast<float*>(raw + 0x14) = damageMul;
-            *reinterpret_cast<float*>(raw + 0x18) = scale;
+            corps->m_isAllStarList = 0;
+            corps->m_characterKind = kind;
+            corps->m_cpuType = cpuType;
+            corps->m_cpuRank = cpuRank;
+            corps->m_attackReactionMul = attackMul;
+            corps->m_damageReactionMul = damageMul;
+            corps->m_scale = scale;
             int packed = count;
             if (period < count) {
                 packed = period;
@@ -1133,16 +1132,16 @@ void gmGlobalCorpsConvertAllStarToCorps(gmGlobalCorps* corps) {
             int n = 0;
             gmPlayerCorpsInitData* src = corps->m_playersInitData;
             while (n < packed) {
-                raw[0x24 + n] = src->m_costumeId;
+                corps->m_costumeIds[n] = src->m_costumeId;
                 n++;
                 src++;
             }
             for (int i = period; i < count; i++) {
-                raw[0x24 + i] = raw[0x24 + i % period];
+                corps->m_costumeIds[i] = corps->m_costumeIds[i % period];
             }
-            raw[0x5] |= 0x40;
-            raw[0x1] = count;
-            raw[0x3] = count;
+            corps->m_flags |= 0x40;
+            corps->m_numFightersToBeat = count;
+            corps->m_numFightersInCurrentStage = count;
         }
     }
 }

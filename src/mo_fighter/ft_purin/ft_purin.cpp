@@ -292,14 +292,13 @@ bool ftPurin::activeArticle(wnSimple* article, soModuleAccesser* acc) {
     return true;
 }
 
-// MATCH-ONLY: empty type-list markers survive in each native slot dispatch.
-// Their source type is unresolved; inactive slots still own distinct lifetimes.
-struct ftPurinArticleSlotTag {
-    volatile u8 unk0, unk1;
-    ftPurinArticleSlotTag() : unk0(0), unk1(0) { }
-    ~ftPurinArticleSlotTag() { }
-};
-#define FT_PURIN_UNUSED_SLOT(n, value) case n: { ftPurinArticleSlotTag tag; return value; }
+// The per-slot members of the mediator, as wnArticleSlot* in wn/wn_article_pool.h (Puff's pool is its own one-weapon
+// chain): each slot case calls a member overloaded on two empty soIntToType tags, whose value-initialized temporaries
+// are the two zero bytes every case stores.
+#define FT_PURIN_SLOT_TAGS soIntToType<0>(), soIntToType<0>()
+template <class T, int S, int L>
+static inline T ftPurinSlotUnused(T value, const soIntToType<S>&, const soIntToType<L>&) { return value; }
+#define FT_PURIN_UNUSED_SLOT(n, value) case n: return ftPurinSlotUnused(value, FT_PURIN_SLOT_TAGS);
 #define FT_PURIN_UNUSED_SLOTS(value) \
     FT_PURIN_UNUSED_SLOT(1, value) FT_PURIN_UNUSED_SLOT(2, value) \
     FT_PURIN_UNUSED_SLOT(3, value) FT_PURIN_UNUSED_SLOT(4, value) \
@@ -314,29 +313,33 @@ static soArticle* ftPurinNullArticle() {
     return reinterpret_cast<soArticle*>(g_ftRobotNullArticleStorage);
 }
 
+// The first inactive article, else the oldest active one deactivated (the find tag is the third byte of the case).
+template <int N>
+static inline wnSimple* ftPurinFind(ftPurinArticleSubPool& sub, soArticleDeactivateChecker& checker, const soIntToType<N>&) {
+    if (checker(&static_cast<soArticle&>(*sub.getInstance())) == true) {
+        return sub.getInstance();
+    }
+    return NULL;
+}
+
+template <int S, int L>
+static inline soArticle* ftPurinSlotGenerate(ftPurinArticleHierarchy& pool, soModuleAccesser* acc, const soIntToType<S>&, const soIntToType<L>&) {
+    soArticleDeactivateChecker checker;
+    wnSimple* instance = ftPurinFind(pool.getSub(), checker, soIntToType<0>());
+    if (instance == NULL) {
+        instance = static_cast<wnSimple*>(checker.getCandidate());
+        if (instance == NULL) { return ftPurinNullArticle(); }
+        instance->deactivateArticle();
+    }
+    if (ftPurin::activeArticle(instance, acc) == true) {
+        return &static_cast<soArticle&>(*instance);
+    }
+    return ftPurinNullArticle();
+}
+
 soArticle* ftPurinArticleMediator::generate(s32 articleId, soModuleAccesser* acc) {
     switch (articleId) {
-    case 0: {
-        ftPurinArticleSlotTag tag;
-        soArticleDeactivateChecker checker;
-        // MATCH-ONLY: native empty traversal marker has its own byte lifetime.
-        volatile u8 traversalTag = 0;
-        wnSimple* instance;
-        if (checker(&static_cast<soArticle&>(*m_pool.getSub().getInstance())) == true) {
-            instance = m_pool.getSub().getInstance();
-        } else {
-            instance = NULL;
-        }
-        if (instance == NULL) {
-            instance = static_cast<wnSimple*>(checker.getCandidate());
-            if (instance == NULL) { return ftPurinNullArticle(); }
-            instance->deactivateArticle();
-        }
-        if (ftPurin::activeArticle(instance, acc) == true) {
-            return &static_cast<soArticle&>(*instance);
-        }
-        return ftPurinNullArticle();
-    }
+    case 0: return ftPurinSlotGenerate(m_pool, acc, FT_PURIN_SLOT_TAGS);
     FT_PURIN_UNUSED_SLOTS(ftPurinNullArticle())
     default: return ftPurinNullArticle();
     }
@@ -350,45 +353,50 @@ static inline bool ftPurinAllArticlesActive(ftPurinArticleHierarchy& pool) {
     return true;
 }
 
+template <int S, int L>
+static inline bool ftPurinSlotIsGeneratable(ftPurinArticleHierarchy& pool, const soIntToType<S>&, const soIntToType<L>&) {
+    return !ftPurinAllArticlesActive(pool);
+}
+
 bool ftPurinArticleMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
     switch (articleId) {
-    case 0: {
-        ftPurinArticleSlotTag tag;
-        return !ftPurinAllArticlesActive(m_pool);
-    }
+    case 0: return ftPurinSlotIsGeneratable(m_pool, FT_PURIN_SLOT_TAGS);
     FT_PURIN_UNUSED_SLOTS(false)
     default: return false;
     }
 }
 
-// The generic visitor records both active and inactive counts. The native
-// active query uses its first count and retains the indirect predicate call.
+// The active counter: both counts and the predicate, a plain aggregate filled member by member through a pointer (as
+// wnArticleSlotActiveNum's counter); the native query keeps the indirect predicate call and returns the first count.
 struct ftPurinArticleActiveCounter {
-    // MATCH-ONLY: retain the native visitor storage and indirect predicate load;
-    // its original aliasing through the generic pool visitor is unresolved.
-    bool (*volatile isActive)(soArticle*);
-    volatile s32 activeCount, inactiveCount;
+    bool (*isActive)(soArticle*);
+    s32 activeCount, inactiveCount;
     static bool checkActivate(soArticle* article);
-    ftPurinArticleActiveCounter() : isActive(checkActivate), activeCount(0), inactiveCount(0) { }
-    void operator()(soArticle* article) {
-        if (isActive(article) == true) { ++activeCount; }
-        else { ++inactiveCount; }
-    }
 };
 bool ftPurinArticleActiveCounter::checkActivate(soArticle* article) {
     return article->isActiveArticle();
 }
 
+template <int S, int L>
+static inline s32 ftPurinSlotActiveNum(ftPurinArticleHierarchy& pool, const soIntToType<S>&, const soIntToType<L>&) {
+    ftPurinArticleActiveCounter counter;
+    counter.isActive = ftPurinArticleActiveCounter::checkActivate;
+    counter.activeCount = 0;
+    counter.inactiveCount = 0;
+    for (s32 i = 0; i < 1; ++i) {
+        ftPurinArticleActiveCounter* c = &counter;
+        if (c->isActive(&static_cast<soArticle&>(*pool.getSub().getInstanceAt(i))) == true) {
+            ++c->activeCount;
+        } else {
+            ++c->inactiveCount;
+        }
+    }
+    return counter.activeCount;
+}
+
 s32 ftPurinArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
     switch (articleId) {
-    case 0: {
-        ftPurinArticleSlotTag tag;
-        ftPurinArticleActiveCounter counter;
-        for (s32 i = 0; i < 1; ++i) {
-            counter(&static_cast<soArticle&>(*m_pool.getSub().getInstanceAt(i)));
-        }
-        return counter.activeCount;
-    }
+    case 0: return ftPurinSlotActiveNum(m_pool, FT_PURIN_SLOT_TAGS);
     FT_PURIN_UNUSED_SLOTS(0)
     default: return 0;
     }
@@ -396,15 +404,21 @@ s32 ftPurinArticleMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
 
 s32 ftPurinArticleMediator::getGenerateMaxNum(s32 articleId) {
     switch (articleId) {
-    case 0: { ftPurinArticleSlotTag tag; return 1; }
+    case 0: return ftPurinSlotUnused(1, FT_PURIN_SLOT_TAGS);
     FT_PURIN_UNUSED_SLOTS(0)
     default: return 0;
     }
 }
 
+template <int S, int L>
+static inline bool ftPurinSlotShoot(soArticle* article, const soIntToType<S>&, const soIntToType<L>&) {
+    (void)dynamic_cast<wnSimple&>(*article);
+    return true;
+}
+
 bool ftPurinArticleMediator::shoot(soModuleAccesser*, soArticle* article) {
     switch (article->getArticleId()) {
-    case 0: { ftPurinArticleSlotTag tag; (void)dynamic_cast<wnSimple&>(*article); return true; }
+    case 0: return ftPurinSlotShoot(article, FT_PURIN_SLOT_TAGS);
     FT_PURIN_UNUSED_SLOTS(true)
     default: return false;
     }

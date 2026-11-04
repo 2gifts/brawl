@@ -166,6 +166,9 @@ public:
         unsigned int m_nodeIndex;
         int m_power;
 
+#ifndef MATCHING
+        // Custom constructors (BrawlHeaders). The original AttackData is an aggregate: the stage damage floors are
+        // brace-initialized locals (stTargetBreak::createObj, stEdit::createObj copy a constant image, then the offset).
         inline AttackData() {};
 
         inline AttackData(Vec3f* offsetPos, float size, int vector,
@@ -192,6 +195,7 @@ public:
                        targetSituationAir, serialHitFrame, soundLevel, soundAttribute, noScale, targetSituationGround,
                        vector);
         };
+#endif
 
         inline void initialize(Vec3f* offsetPos, float size, int vector,
                                int reactionEffect, int reactionFix, int reactionAdd,

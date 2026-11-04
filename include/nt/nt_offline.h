@@ -1,9 +1,11 @@
-// Local BrawlHeaders shadow: adds save-data fields and operations.
+// Local BrawlHeaders shadow: adds ntFriendInfo's save-data fields and operations and ntFriendInfoSave.
 #pragma once
 
 #include <StaticAssert.h>
+#include <gf/gf_task.h>
 #include <types.h>
 
+class gfSysRecorder2;
 struct DWCstAccUserData;
 typedef struct DWCstAccUserData DWCAccUserData;
 
@@ -59,8 +61,27 @@ public:
     bool isValid(const DWCAccUserData* data);
     UnkFriendInfo* getFriendInfo();
     static ntFriendInfo* getInstance();
+    // HYPOTHESIS: the data of the friends for the Wi-Fi part of the save (muWifiCnctWndTask copies it to the buffer of
+    // gfSysRecorder2); size is the size of the buffer on entry and of the data on return.
+    bool getSaveData(void** data, int* size);
 };
 // TODO size assertion
+
+// The save of the friend data (the name comes from the text that muWifiCnctWndTask prints while it waits for it).
+class ntFriendInfoSave : public gfTask {
+public:
+    gfSysRecorder2* unk40;
+    bool unk44;
+
+    // HYPOTHESIS: the number of saves that are running (ntFriendInfo adds one when it starts one).
+    static int s_savingCount;
+
+    ntFriendInfoSave();
+    virtual ~ntFriendInfoSave();
+    virtual void processDefault();
+
+    static bool isNotSaving() { return s_savingCount == 0; }
+};
 
 class NtOffline {
 public:

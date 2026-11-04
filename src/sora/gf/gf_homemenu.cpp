@@ -1,6 +1,89 @@
-#include <types.h>
 #include <gf/gf_homemenu.h>
+#include <gf/gf_trigger_callback.h>
+#include <mt/mt_vector.h>
+#include <nw4r/snd/snd_RemoteSpeaker.h>
+#include <nw4r/snd/snd_RemoteSpeakerManager.h>
+#include <revolution/MEM/mem_allocator.h>
+#include <types.h>
 
+extern "C" void HBMStartBlackOut();
+
+gfTriggerCallback::~gfTriggerCallback() { }
+
+void gfHomeMenu::userProc() {
+    unkB1_20 = 1;
+    if (unkB1_10 && unkB0.unkB0Hi == 2) {
+        HBMStartBlackOut();
+    }
+}
+
+bool gfHomeMenu::returnStatus() {
+    bool result = false;
+    if (unkB0.unkB0Mode != 1 || !unkB1_10 || unkB0.unkB0Hi != 2) {
+        result = true;
+    }
+    return result;
+}
+
+void SpeakerSetupCallback(long, long);
+void SpeakerShutdownCallback(long, long);
+
+void ConnectCallback(long channel, long status) {
+    if (status == 0) {
+        nw4r::snd::detail::RemoteSpeakerManager::GetInstance().GetRemoteSpeaker(channel).Setup(SpeakerSetupCallback);
+    } else if (status == -1) {
+        nw4r::snd::detail::RemoteSpeakerManager::GetInstance().GetRemoteSpeaker(channel).Shutdown(SpeakerShutdownCallback);
+    }
+}
+
+class Allocator : public MEMAllocator {
+public:
+    // HYPOTHESIS: allocator cursor and end follow two unclassified words.
+    u32 unk10[2];
+    u8* unk18;
+    u8* unk1C;
+    static void* funcAlloc(MEMAllocator*, unsigned long);
+};
+
+void* Allocator::funcAlloc(MEMAllocator* allocator, unsigned long size) {
+    Allocator* self = static_cast<Allocator*>(allocator);
+    u8* result = self->unk18;
+    self->unk18 += (size + 7) & ~7UL;
+    if (self->unk18 > self->unk1C) {
+        return 0;
+    }
+    return result;
+}
+
+// HYPOTHESIS: cursor coordinates use the existing two-component vector type.
+bool calcDigitalCursorPos(u32 buttons, Vec2f* pos) {
+    switch (buttons & 0xC003) {
+    case 1: pos->m_y -= 0.03515625f; break;
+    case 2: pos->m_x -= 0.03515625f; break;
+    case 0x4000: pos->m_y += 0.03515625f; break;
+    case 0x8000: pos->m_x += 0.03515625f; break;
+    case 3:
+        pos->m_y -= 0.024858983233571053f;
+        pos->m_x -= 0.024858983233571053f;
+        break;
+    case 0x8001:
+        pos->m_y -= 0.024858983233571053f;
+        pos->m_x += 0.024858983233571053f;
+        break;
+    case 0x4002:
+        pos->m_y += 0.024858983233571053f;
+        pos->m_x -= 0.024858983233571053f;
+        break;
+    case 0xC000:
+        pos->m_y += 0.024858983233571053f;
+        pos->m_x += 0.024858983233571053f;
+        break;
+    default: return false;
+    }
+    pos->m_x = pos->m_x > 1.0f ? 1.0f : pos->m_x < -1.0f ? -1.0f : pos->m_x;
+    pos->m_y = pos->m_y > 1.0f ? 1.0f : pos->m_y < -1.0f ? -1.0f : pos->m_y;
+    return true;
+}
 extern "C" void fn_80228154(s32 p1);
 extern "C" void fn_80228138(s32 p1);
 

@@ -12,6 +12,7 @@
 #include <math.h>
 #include <memory.h>
 #include <mt/mt_prng.h>
+#include <nw4r/ut/ut_Color.h>
 #include <nw4r/g3d/g3d_resfile.h>
 #include <revolution/OS/OSError.h>
 #include <snd/snd_id.h>
@@ -102,16 +103,6 @@ static inline void newporkAssignVec2f(Vec2f& dst, Vec2f src) {
     m_soundEffects[slot].m_nodeIndex = 0;                                 \
     m_soundEffects[slot].m_endFrame = 0;                                  \
     newporkAssignVec2f(m_soundEffects[slot].m_offsetPos, Vec2f(0.0f, 0.0f))
-
-// MATCH-ONLY: the original builds this color in a temporary and copies it.
-static inline GXColor newporkColor(u8 r, u8 g, u8 b, u8 a) {
-    GXColor color;
-    color.r = r;
-    color.g = g;
-    color.b = b;
-    color.a = a;
-    return color;
-}
 
 // True when a fighter stands in the area.
 static inline bool newporkIsAnyPlayerIn(grPlayerAreaCheck* area) {
@@ -675,7 +666,7 @@ limousineEnd:
                 m_chimeraAttack->startEntity();
                 m_chimeraAttack->setSleepAttack(true);
                 fn_27_279FC8(m_chimeraAttack, &m_chimeraMtx, true);
-                GXColor fill = newporkColor(0, 0, 0, 0x70);
+                GXColor fill = nw4r::ut::Color(0, 0, 0, 0x70);
                 m_chimeraReady = false;
                 newporkDisableSubject(&m_subject);
                 m_screenFill = (u32)g_efScreen->requestFill(60.0f, 0, 0xFF, &fill) >> 24;

@@ -38,6 +38,7 @@ private:
 
 public:
     void* getBinary() const { return m_msgData; } // the message file that setMsgData was given
+    Message* getMessage() const { return m_message; } // the text writer of the lines
     bool allocMsgBuf(u32 msgSizes, u32 numMsgs);
     void setMsgData(void* msgBinData);
     const char* getMsgData(u32 msgIndex, int* msgLength);

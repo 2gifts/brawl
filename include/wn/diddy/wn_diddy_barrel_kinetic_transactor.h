@@ -9,6 +9,8 @@ class wnDiddyBarrelKineticTransactor {
     u8 unk0;
 public:
     void changeKineticSub(void* pools, soModuleAccesser* moduleAccesser);
+    // HYPOTHESIS: mode 0x20 (no energy) is an inline member of the same per-mode transactor object as mode 0x21.
+    inline void changeKineticStop(void* pools, soModuleAccesser* moduleAccesser);
     static void changeKinetic(int mode, void* pools, soModuleAccesser* moduleAccesser);
     static void addSpeed(void* speed, void* pools, soModuleAccesser* moduleAccesser);
     static void addSpeedOutside(int type, void* speed, void* pools, soModuleAccesser* moduleAccesser);

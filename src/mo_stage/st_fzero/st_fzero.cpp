@@ -432,15 +432,8 @@ void stFzero::update(float deltaFrame) {
     updateFloor(deltaFrame);
 
     // HYPOTHESIS: the two limit matrices mark the course's floor, and the camera never looks below the lower one.
-    // MATCH-ONLY: the components are read into named locals in this order to fix the register assignment.
-    float upperZ = mtx(22)->m[2][3];
-    float upperY = mtx(22)->m[1][3];
-    float upperX = mtx(22)->m[0][3];
-    float lowerZ = mtx(23)->m[2][3];
-    float lowerY = mtx(23)->m[1][3];
-    float lowerX = mtx(23)->m[0][3];
-    Vec3f upper(upperX, upperY, upperZ);
-    Vec3f lower(lowerX, lowerY, lowerZ);
+    Vec3f upper = mtx(22)->getTranslation();
+    Vec3f lower = mtx(23)->getTranslation();
     Vec3f floorPos;
     if (upper.m_y < lower.m_y) {
         floorPos = upper;

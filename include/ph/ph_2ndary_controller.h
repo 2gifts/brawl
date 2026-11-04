@@ -94,6 +94,7 @@ public:
     ~ph2ndary2Controller();
 
     bool isHitCollisionLastNode2Pos();
+    void setUndispNode(nw4r::g3d::ScnMdl* scnMdl);
 
     ph2ndaryController* m_controller[2];   // 0x00, 0x04
     u8 unk08[3];                           // 0x08..0x0A

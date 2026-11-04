@@ -76,17 +76,8 @@ void soControllerModuleImpl::endClatter(u32 index) {
 
 typedef soArrayContractibleTable<const acCmdArgConv> ArgTable;
 
-// MATCH-ONLY helpers mirroring the inlined argument accessors.
-static inline acCmdArg getFrontArg(const ArgTable& args) {
-    return acCmdArg(&args.at(0));
-}
-
-static inline void shiftArg(ArgTable& args) {
-    args.shift();
-}
-
 // MATCH-ONLY: macro so the "unsupported argument type" early return stays a direct branch.
-#define READ_FLOAT_ARG(args, accesser, out)                                                            if (getFrontArg(args).getArgType() == 1) {                                                             out = getFrontArg(args).getFloatData();                                                        } else if (getFrontArg(args).getArgType() == 5) {                                                      out = (float) soValueAccesser::getValueInt(accesser, getFrontArg(args).getIntData(), 0);       } else {                                                                                               return true;                                                                                   }
+#define READ_FLOAT_ARG(args, accesser, out)                                                            if (acGetCmdArg(args, 0).getArgType() == 1) {                                                             out = acGetCmdArg(args, 0).getFloatData();                                                        } else if (acGetCmdArg(args, 0).getArgType() == 5) {                                                      out = (float) soValueAccesser::getValueInt(accesser, acGetCmdArg(args, 0).getIntData(), 0);       } else {                                                                                               return true;                                                                                   }
 
 bool soControllerModuleImpl::notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* accesser, s32 unk3) {
     s32 group = cmd->getGroup();
@@ -114,25 +105,25 @@ bool soControllerModuleImpl::notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser
         ArgTable args = cmd->getArgList();
         float time, p2, p3;
         READ_FLOAT_ARG(args, accesser, time)
-        shiftArg(args);
+        acShiftCmdArg(args);
         READ_FLOAT_ARG(args, accesser, p2)
-        shiftArg(args);
+        acShiftCmdArg(args);
         READ_FLOAT_ARG(args, accesser, p3)
-        shiftArg(args);
+        acShiftCmdArg(args);
         bool flag = false;
         if (argNum > 3) {
-            flag = getFrontArg(args).getBoolData();
-            shiftArg(args);
+            flag = acGetCmdArg(args, 0).getBoolData();
+            acShiftCmdArg(args);
         }
         s32 kind = -1;
         if (argNum > 4) {
-            kind = getFrontArg(args).getIntData();
-            shiftArg(args);
+            kind = acGetCmdArg(args, 0).getIntData();
+            acShiftCmdArg(args);
         }
         u32 index = 0;
         if (argNum > 5) {
-            index = getFrontArg(args).getIntData();
-            shiftArg(args);
+            index = acGetCmdArg(args, 0).getIntData();
+            acShiftCmdArg(args);
         }
         startClatter(time, p2, p3, flag, (char) kind, index, false);
         return true;
@@ -145,10 +136,10 @@ bool soControllerModuleImpl::notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser
         ArgTable args = cmd->getArgList();
         float time;
         READ_FLOAT_ARG(args, accesser, time)
-        shiftArg(args);
+        acShiftCmdArg(args);
         u32 index = 0;
         if (cmd->getArgNum() > 1) {
-            index = getFrontArg(args).getIntData();
+            index = acGetCmdArg(args, 0).getIntData();
         }
         if (cmd->getType() == 5) {
             time *= -1.0f;
@@ -195,7 +186,7 @@ bool soControllerModuleImpl::notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser
             return true;
         }
         ArgTable args = cmd->getArgList();
-        const acCmdArg& arg = getFrontArg(args);
+        const acCmdArg& arg = acGetCmdArg(args, 0);
         if (arg.getArgType() != 0) {
             return true;
         }

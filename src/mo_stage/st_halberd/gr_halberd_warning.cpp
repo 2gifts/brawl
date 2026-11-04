@@ -132,11 +132,7 @@ void grHalberdWarning::updateCallBack(float deltaFrame) {
                     return;
                 }
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix = mtx;
-                // MATCH-ONLY: the components are read z, y, x to get the float registers of the original
-                float z = mtx.m[2][3];
-                float y = mtx.m[1][3];
-                float x = mtx.m[0][3];
-                Vec3f pos(x, y, z);
+                Vec3f pos = mtx.getTranslation();
                 m_snd.setPos(&pos);
             }
         }
