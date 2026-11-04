@@ -4,9 +4,11 @@
 #include <ai/ai_mgr.h>
 #include <ai/ai_stat.h>
 #include <ai/ai_weapon.h>
+#include <gm/gm_lib.h>
 #include <mt/mt_prng.h>
 #include <math.h>
 #include <so/controller/so_controller_impl.h>
+#include <st_madein/st_madein.h>
 
 extern "C" {
 // The runtime's null pointer-to-member constant (ptmf.c). HYPOTHESIS: m_unkB0/BC/C8 are member-function
@@ -458,6 +460,203 @@ void aiAct::act_r_jump_aft_shot(Vec2f* stick, ipPadButton* button) {
                 stick->m_x = stick->m_y = 0.0f;
                 button->m_mask |= soController::getButtonMask(soController::Pad_Button_Special);
                 break;
+        }
+    }
+}
+
+void aiAct::act_c_g_blow_f_sheik(Vec2f* stick, ipPadButton* button) {
+    switch (m_step) {
+        case 0:
+            m_stepFrame = 0;
+            m_step++;
+        case 1: {
+            if (!m_stat->chk_stat_gr_free()) {
+                if (m_stepFrame > 10) {
+                    set_id(0);
+                }
+                break;
+            }
+            stick->m_x = m_stat->get_lr_tgt(&m_input->m_target);
+            button->m_mask |= soController::getButtonMask(soController::Pad_Button_Special);
+            s8 rank = m_input->m_par.m_rank;
+            if (rank < 50 && randf() > 0.02f * rank) {
+                set_id(0);
+                break;
+            }
+            m_stepFrame = 0;
+            m_step++;
+            break;
+        }
+        case 2:
+            button->m_mask |= soController::getButtonMask(soController::Pad_Button_Special);
+            if (m_stepFrame > 24) {
+                m_unk94 = 10.0f + 120.0f * randf();
+                m_stepFrame = 0;
+                if (randf() < 0.5f) {
+                    m_step++;
+                } else {
+                    m_step = 10;
+                }
+            }
+            break;
+        default: {
+            Vec3f dir;
+            if (m_stat->chk_stat_gr_free()) {
+                set_id(0);
+                break;
+            }
+            button->m_mask |= soController::getButtonMask(soController::Pad_Button_Special);
+            switch (m_step) {
+                case 3: {
+                    // BYTES: the rank rate in a local (the product's operands come out swapped without it).
+                    float rate = m_input->m_par.m_rankRate;
+                    m_stat->get_tgt_vector(0.5f * rate, &dir, &m_input->m_target);
+                    dir.normalize();
+                    stick->m_x = dir.m_x;
+                    stick->m_y = dir.m_y;
+                    if (m_stepFrame > 10) {
+                        m_stepFrame = 0;
+                        m_step++;
+                    }
+                    break;
+                }
+                case 4:
+                case 6:
+                    stick->m_x = 2.0f * (randf() - 0.5f);
+                    stick->m_y = 0.5f + 2.0f * (randf() - 0.5f);
+                    if (m_stepFrame > 4) {
+                        m_stepFrame = 0;
+                        if (m_step == 6) {
+                            m_step = 3;
+                        } else {
+                            m_step++;
+                        }
+                    }
+                    break;
+                case 5: {
+                    // BYTES: the rank rate in a local (the product's operands come out swapped without it).
+                    float rate = m_input->m_par.m_rankRate;
+                    m_stat->get_tgt_vector(0.5f * rate, &dir, &m_input->m_target);
+                    dir.normalize();
+                    stick->m_x = -dir.m_x;
+                    stick->m_y = 0.3f - dir.m_y;
+                    if (m_stepFrame > 6) {
+                        m_stepFrame = 0;
+                        m_step++;
+                    }
+                    break;
+                }
+                case 10: {
+                    // BYTES: s and c declared before angle (declared at their assignments, the angle and the sine
+                    // swap f30/f31).
+                    float s, c;
+                    float angle = 0.125f * (3.14159f * m_stepFrame);
+                    s = sin(angle);
+                    stick->m_x = m_stat->m_lr * s + 0.8f * (randf() - 0.5f);
+                    c = cos(angle);
+                    stick->m_y = (0.4f + c) + 0.8f * (randf() - 0.5f);
+                    break;
+                }
+            }
+            break;
+        }
+    }
+}
+
+void aiAct::act_m_stroll(Vec2f* stick, ipPadButton* button) {
+    switch (m_step) {
+        case 10:
+            stick->m_x = m_lr;
+            stick->m_y = 1.0f;
+            if (m_stat->m_pos.m_x < -135.0f) {
+                m_input->m_unk58 = 0;
+                set_id(0);
+            }
+            return;
+        case 0: {
+            AiClBlock* floor = m_stat->m_floor;
+            float width = floor->m_edgeR.m_x - floor->m_edgeL.m_x;
+            if (width < 0.1f) {
+                width = 100.0f;
+            }
+            float ratio = (m_stat->m_pos.m_x - floor->m_edgeL.m_x) / width;
+            float goal;
+            if (ratio < 0.333333f) {
+                m_lr = 1.0f;
+                goal = 0.4f + 0.5f * randf();
+            } else if (ratio > 0.666667f) {
+                m_lr = -1.0f;
+                goal = 0.6f - 0.5f * randf();
+            } else {
+                m_lr = randf() < 0.5f ? -1.0f : 1.0f;
+                if (m_lr > 0.0f) {
+                    goal = 0.566667f + 0.333333f * randf();
+                } else {
+                    goal = 0.433333f - 0.333333f * randf();
+                }
+            }
+            m_unk0[0] = goal;
+            s8 rank = m_input->m_par.m_rank;
+            float r = randf();
+            m_unk0[1] = 120.0f * (0.2f + 0.8f * r) * (0.2f + 0.008f * (100 - rank));
+            m_unk94 = 120;
+            m_step++;
+            m_stepFrame = 0;
+            break;
+        }
+    }
+    if (m_step == 1) {
+        if (m_stepFrame < 8) {
+            stick->m_x = m_lr * (0.125f * m_stepFrame);
+        } else {
+            stick->m_x = m_lr;
+        }
+        stMadeinAiData* madein = reinterpret_cast<stMadeinAiData*>(aiMgr::getMadeinAiData(true));
+        if (madein != NULL) {
+            switch (madein->m_game) {
+                case 2:
+                    stick->m_x *= 0.7f;
+                    break;
+                case 3:
+                    stick->m_x *= 0.4f;
+                    break;
+            }
+        }
+        AiClBlock* floor = m_stat->m_floor;
+        m_goalPos.m_x = floor->m_edgeL.m_x + m_unk0[0] * (floor->m_edgeR.m_x - floor->m_edgeL.m_x);
+        m_goalPos.m_y = floor->m_edgeL.m_y + m_unk0[0] * (floor->m_edgeR.m_y - floor->m_edgeL.m_y);
+        if (m_lr > 0.0f) {
+            if (m_stat->m_pos.m_x > m_goalPos.m_x) {
+                m_step++;
+            }
+        } else if (m_stat->m_pos.m_x < m_goalPos.m_x) {
+            m_step++;
+        }
+        if (m_step > 1) {
+            m_unk0[1] += m_stepFrame;
+        }
+    } else if (m_stepFrame > m_unk0[1]) {
+        switch (g_aiMgr->m_stageKind) {
+            case Stages::Corneria:
+                if (m_lr < 0.0f && !(m_stat->m_flags & 1) && m_stat->m_pos.m_y < -5.0f && randf() < 0.9f) {
+                    m_step = 10;
+                    m_stepFrame = 0;
+                    stick->m_y = 1.0f;
+                    m_unk94 = 90;
+                    m_input->m_unk58 = -90;
+                    return;
+                }
+                break;
+        }
+        set_id(0);
+    }
+    if (m_stepFrame > 24 && aiMgr::getMadeinAiData(false) == NULL) {
+        float dist;
+        m_input->m_target.m_idx = m_input->get_near_target(&dist, 0);
+        // BYTES: the range in a local (compared in place, it is loaded after the distance).
+        float range = m_input->m_par.m_workF14[1];
+        if (m_input->m_target.m_idx != m_input->m_chrIdx.m_idx && dist < range) {
+            set_id(0);
         }
     }
 }

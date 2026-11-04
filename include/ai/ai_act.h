@@ -122,6 +122,15 @@ public:
     // Breaking a wall (the name from the map): face the target, or away from it when a wall blocks that side, walk
     // into the wall, then attack and pick the next action. HYPOTHESIS: the meaning of the tests.
     void act_a_brk_wall(Vec2f* stick, ipPadButton* button);
+    // Sheik's forward throw on the ground (the name from the map): holds special while grounded (ranks below 50 may
+    // give up), then either wiggles the stick at and around the target or circles it (step 10). HYPOTHESIS: the
+    // meaning of the steps.
+    void act_c_g_blow_f_sheik(Vec2f* stick, ipPadButton* button);
+    // Strolling (the name from the map): walk towards a random point of the floor (m_unk0[0], a fraction of its
+    // width) for a while (m_unk0[1] frames, rank-scaled), slower in some WarioWare microgames; ends early when an
+    // opponent comes near. On Corneria it may instead jump off to the left (step 10). HYPOTHESIS: the meaning of the
+    // tests and of m_unk0[0]/[1].
+    void act_m_stroll(Vec2f* stick, ipPadButton* button);
 };
 static_assert(sizeof(aiAct) == 0x114, "Class is wrong size!");
 

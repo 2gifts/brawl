@@ -52,7 +52,7 @@ public:
     int m_mdPrev;          // 0x4C: the mode before the current one (change_md)
     int m_step;            // 0x50: step within the current mode (md_swim)
     int m_stepFrame;       // 0x54: HYPOTHESIS: frames spent in the current step (md_swim gives up after a while)
-    u16 m_unk58;
+    s16 m_unk58;           // 0x58: HYPOTHESIS: a signed frame count (act_m_stroll stores -90)
     s16 m_reactWait;       // 0x5A: frames left before the CPU reacts after being hit (damageStart)
     u16 m_unk5C;
     u16 m_unk5E;
