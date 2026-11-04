@@ -42,6 +42,13 @@ struct hkVector4 {
     void setZero4() { x = y = z = w = 0.0f; }
     void setAbs4(const hkVector4& a) { set(fabsf(a.x), fabsf(a.y), fabsf(a.z), fabsf(a.w)); }
     void setNeg3(const hkVector4& a) { set(-a.x, -a.y, -a.z, a.w); }
+    // Lane order x..w, like its out-of-line weak copy in hkSimulation.
+    void setNeg4(const hkVector4& a) {
+        x = -a.x;
+        y = -a.y;
+        z = -a.z;
+        w = -a.w;
+    }
     void setAdd4(const hkVector4& a, const hkVector4& b) { set(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w); }
     void setSub4(const hkVector4& a, const hkVector4& b) { set(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w); }
     // HYPOTHESIS: vector-first overload (no image evidence for this argument order).
@@ -111,6 +118,11 @@ struct hkVector4 {
     // Column-major product: this = m.col0 * v.x + m.col1 * v.y + m.col2 * v.z, w = 0. The inline behind
     // setRotatedDir (byte-identical); defined in hkRotation.h. hkSolver.cpp defines HK_VECTOR4_OUTLINE_SETMUL3
     // to keep its out-of-line weak copy until the solver functions that fail to inline it are decompiled.
+    // this = R * v, w = 0. Named by its weak out-of-line copy in hkGenericConstraintData; defined in hkRotation.h.
+    inline void _setRotatedDir(const hkRotation& r, const hkVector4& v);
+    // this = R^T * v (each lane is v dotted with one column), w = 0. Named by its weak out-of-line copy in
+    // hkBoxBoxCollisionDetection; defined in hkRotation.h.
+    inline void _setRotatedInverseDir(const hkRotation& r, const hkVector4& v);
 #ifdef HK_VECTOR4_OUTLINE_SETMUL3
     void _setMul3(const hkRotation& m, const hkVector4& v);
 #else
