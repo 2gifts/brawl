@@ -56,7 +56,7 @@ public:
     float m_lr;              // 0xA0: facing, +1 right / -1 left
     float m_unkA4;
     u16 m_unkA8;
-    u16 m_unkAA;
+    s16 m_hitCount;          // 0xAA: hits taken (aiInput::damageStart counts them; HYPOTHESIS: name)
     int m_chrKind;           // 0xAC
     int m_unkB0;
     int m_unkB4;

@@ -4,6 +4,7 @@
 #include <ai/ai_stat.h>
 #include <gf/gf_archive.h>
 #include <gf/gf_heap_manager.h>
+#include <mt/mt_prng.h>
 #include <nw4r/math/math_arithmetic.h>
 
 aiInput::aiInput(u32 contNo, int unk2C, int player, int ftKind, s8 state, aiInput* parent, Heaps::HeapType heap)
@@ -19,7 +20,7 @@ aiInput::aiInput(u32 contNo, int unk2C, int player, int ftKind, s8 state, aiInpu
     m_flags = 0x8000;
     m_target.m_idx = m_chrIdx.m_idx;
     m_unk58 = 0;
-    m_unk5A = 0;
+    m_reactWait = 0;
     m_unk6A = 0;
     m_unk6C = 1;
     m_unk74 = 0;
@@ -88,7 +89,7 @@ void aiInput::reset() {
     m_md = 0;
     m_target.m_idx = m_chrIdx.m_idx;
     m_unk58 = 0;
-    m_unk5A = 0;
+    m_reactWait = 0;
     m_unk6A = 0;
     m_unk74 = 0;
     m_unk60 = 0;
@@ -313,6 +314,106 @@ void aiInput::keepOnFloor(Vec2f* stick, int* unk, float frames, float margin, fl
         }
     }
     stick->m_x += m_stickBiasX;
+}
+
+// The CPU was hit: starts (or shortens) the reaction delay m_reactWait, picked from the rank's reaction parameters
+// when frames <= 0. With a damage record it also counts the hit on the character's aiStat and, when the attacker is
+// the CPU's target, raises m_unk118 (by 2..3 after its own swing hit something, else by 1..2 while below 10).
+// HYPOTHESIS: the meaning of m_unk118, m_unk74/77/78/7C/80 and of the aiStat fields.
+void aiInput::damageStart(soDamage* damage, s16 frames, int unk) {
+    if (frames <= 0) {
+        int extra = randi(100) < m_par.m_reactExtraRate ? m_par.m_reactExtra : 0;
+        frames = m_par.m_reactBase + (extra + randi(m_par.m_reactRand + 1));
+    }
+    if (m_reactWait == 0 || m_reactWait > frames) {
+        m_reactWait = frames;
+    }
+    if (unk) {
+        m_flags |= 1;
+    }
+    if (damage != NULL) {
+        aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+        if (m_swingChr.m_idx >= 0) {
+            aiStat* target = aiMgr::get_aiStat(&m_target);
+            if (!(stat->m_flags & 1) && stat->m_hitCount == 0 && damage->m_collisionLog.m_taskId == target->m_taskId) {
+                m_unk118 += 2.0f + randf();
+                if (m_unk118 > 20.0f) {
+                    m_unk118 = 20.0f;
+                }
+            }
+            m_swingChr.m_idx = -1;
+            m_swingState = 0;
+        } else {
+            aiStat* target = aiMgr::get_aiStat(&m_target);
+            if (!(stat->m_flags & 1) && stat->m_hitCount == 0 && damage->m_collisionLog.m_taskId == target->m_taskId &&
+                m_unk118 < 10.0f)
+            {
+                m_unk118 += 1.0f + randf();
+            }
+        }
+        stat->m_hitCount++;
+        if (m_unk74 > 0) {
+            m_unk74 = 13;
+        }
+        m_act->addDefendAirRate(0.3f);
+        m_unk78 = 1.2f;
+        if (m_unk77 != 0) {
+            m_unk80 -= 0.1f;
+            if (m_unk80 < 0.0f) {
+                m_unk80 = 0.0f;
+            }
+            m_unk7C += 0.6f;
+            if (m_unk7C > 1.5f) {
+                m_unk7C = 1.5f;
+            }
+        }
+    }
+}
+
+// This CPU's attack hit `target`. When it is the character the swing check was armed for, m_unk118 either decays
+// towards 0 by 0.7 (more likely at a higher rank) or moves by a random amount (larger at a lower rank) in a random
+// direction; the swing check is then reset. Otherwise m_unk118 decays towards 0 by a random 0..0.3.
+// HYPOTHESIS: the meaning of m_unk118 and m_unk62.
+void aiInput::swingHit(aiChrIdx* target, soDamage* damage) {
+    m_unk62 = 50;
+    if (m_swingChr.m_idx >= 0) {
+        if (target->m_idx == m_swingChr.m_idx) {
+            float chance = randf();
+            float rank = m_par.getRankRatio();
+            if (chance < 0.1f + 0.8f * rank) {
+                if (m_unk118 > 0.0f) {
+                    m_unk118 -= 0.7f;
+                    if (m_unk118 < 0.0f) {
+                        m_unk118 = 0.0f;
+                    }
+                } else {
+                    m_unk118 += 0.7f;
+                    if (m_unk118 > 0.0f) {
+                        m_unk118 = 0.0f;
+                    }
+                }
+            } else {
+                float amount = (0.2f + 0.8f * (1.0f - rank)) * (5.0f * (0.5f + 0.5f * randf()));
+                if (randf() < 0.5f) {
+                    m_unk118 += amount;
+                } else {
+                    m_unk118 -= amount;
+                }
+            }
+        }
+        m_swingChr.m_idx = -1;
+        m_swingState = 0;
+    } else if (m_unk118 > 0.0f) {
+        m_unk118 -= 0.3f * randf();
+        if (m_unk118 < 0.0f) {
+            m_unk118 = 0.0f;
+        }
+    } else {
+        m_unk118 += 0.3f * randf();
+        if (m_unk118 > 0.0f) {
+            m_unk118 = 0.0f;
+        }
+    }
 }
 
 // The character slot that this CPU has to attack no matter what (the four CPU types 0xE..0x11 of the Subspace Emissary

@@ -211,7 +211,7 @@ aiStat::aiStat() {
     m_unkB4 = 0;
     m_floor = (AiClBlock*)g_aiMgr->m_work; // HYPOTHESIS: the manager's work area doubles as the "no floor" block
     m_unkC4 = 0.0f;
-    m_unkAA = 0;
+    m_hitCount = 0;
     m_unkCC = -1;
     m_team = -1;
     m_unkD0 = 0;
@@ -391,7 +391,7 @@ void aiStat::init(int chrIdx, int chrKind, aiInput* input, int unk) {
     m_enableAway = -1;
     m_unk1B9 = 0;
     m_unk1BB = 0;
-    m_unkAA = 0;
+    m_hitCount = 0;
     m_unk2 = 0;
     m_unk8 = 0;
     m_chrStat = 0;

@@ -59,8 +59,24 @@ public:
     s8 m_rank;           // 0x08: CPU level, clamped to 0..100
     u32 m_disableCmds;   // 0x0C: commands the AI may not use (bit per command)
     float m_rankRate;    // 0x10: (rank - 20) / 2 clamped to 0..30
+    // 0x14-0x7F: the working parameters, each blended between the high-rank and low-rank values of m_par by the rank
+    // (par_work_update). HYPOTHESIS: only the reaction delay fields are understood; their names follow damageStart.
+    float m_workF14[12]; // 0x14
+    u8 m_workB44[4];     // 0x44
+    u8 m_reactBase;      // 0x48: frames the CPU waits before reacting to a hit
+    u8 m_reactRand;      // 0x49: plus 0..m_reactRand random frames
+    u8 m_reactExtra;     // 0x4A: plus this many frames,
+    u8 m_reactExtraRate; // 0x4B: with this chance (percent)
+    u8 m_workB4C[8];     // 0x4C
+    u16 m_workH54[2];    // 0x54
+    u8 m_workB58[11];    // 0x58
+    float m_workF64[2];  // 0x64
+    u16 m_workH6C[4];    // 0x6C
+    u8 m_workB74[11];    // 0x74
 
     aiParam();
+    // The rank as a 0..1 ratio. HYPOTHESIS: name (aiInput::swingHit).
+    float getRankRatio() const { return 0.01f * m_rank; }
     void setRank(int rank, u32 force, int update);
     void par_work_update();
     void init_par(aiParData* par, int kind, char* atkData);
@@ -84,5 +100,6 @@ public:
     static float get_jump_high_sp(aiJumpPar* par, aiStat* stat);
     static float get_jump_length(aiJumpPar* par, aiStat* stat);
 };
+static_assert(sizeof(aiParam) == 0x80, "Class is wrong size!");
 
 int get_motnum_chr(ftKind kind); // HYPOTHESIS: int return

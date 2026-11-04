@@ -51,7 +51,7 @@ public:
     int m_unk50;
     int m_unk54;
     u16 m_unk58;
-    u16 m_unk5A;
+    s16 m_reactWait;       // 0x5A: frames left before the CPU reacts after being hit (damageStart)
     u16 m_unk5C;
     u16 m_unk5E;
     u8 m_unk60;
@@ -66,7 +66,7 @@ public:
     u16 m_unk6A;
     int m_unk6C;
     int m_unk70;
-    u8 m_unk74;
+    s8 m_unk74;
     u8 m_unk75;
     u8 m_unk76;
     u8 m_unk77;
@@ -78,7 +78,6 @@ public:
     u16 m_unk8A;
     float m_stickBiasX;    // 0x8C: added to the stick x by keepOnFloor (HYPOTHESIS)
     aiParam m_par;         // 0x90
-    char unkA4[0x6C];
     aiChrIdx m_target;     // 0x110: the character slot (aiChrIdx) the CPU is after; its own slot = none (HYPOTHESIS)
     u8 m_unk111;
     u8 m_unk112;
