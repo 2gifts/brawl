@@ -5,6 +5,8 @@
 // muMenuController::getControllerID(): the pad of the controller (below 0: there is none).
 extern "C" int fn_800BA3D8(muMenuController* controller);
 
+extern const u8 lbl_40_rodata_930[4][2];
+
 // The trainer and the three Pokemon, Zelda and Sheik, Samus and Zero Suit Samus each take one entry: the first of a
 // group keeps the group's first kind, the next ones of the same group give CharKind_None.
 int muAdvSelchrCTask::normalizeCharKind(int kind, bool* pokeTrainerSeen, bool* zeldaSeen, bool* samusSeen) {
@@ -201,4 +203,60 @@ bool muAdvSelchrCTask::isSelected() {
         return true;
     }
     return false;
+}
+
+muAdvSelchrCTask::PlayerWork::PlayerWork() { }
+
+muAdvSelchrCTask::PlayerWork::~PlayerWork() { }
+
+int muAdvSelchrCTask::getDirButtonRepeat(int player) {
+    return m_players[player].m_controller.m_trigger;
+}
+
+void muAdvSelchrCTask::mainStepSelectedInit(muAdvSelchrCTask* task) {
+    int anim = 3;
+    MuObject* object = task->m_objects[1];
+    if (task->m_unkC28[1]) {
+        anim = 1;
+    }
+    task->storeResult();
+    object->changeAnimN(anim, 0x11, true, false);
+    task->m_timer = 0;
+}
+
+int muAdvSelchrCTask::mainStepAppearMain(muAdvSelchrCTask* task) {
+    MuObject* object = task->m_objects[1];
+    if (object->isNodeAnimFinished() && object->isClrAnimFinished()) {
+        if (task->m_numTeams <= 1 || task->m_unkC28[2]) {
+            return 2;
+        }
+        return 1;
+    }
+    return task->m_step;
+}
+
+// HYPOTHESIS: the table has the kind of each of the four forms and the bit of m_unkC28[4] that says it is unlocked.
+int muAdvSelchrCTask::getNextPoke(int kind, bool forward) {
+    int index;
+    for (index = 0; index < 4; index++) {
+        if (kind == lbl_40_rodata_930[index][0]) {
+            break;
+        }
+    }
+    if (forward) {
+        do {
+            index++;
+            if (index >= 4) {
+                index = 0;
+            }
+        } while (kind != lbl_40_rodata_930[index][0] && (m_unkC28[4] & lbl_40_rodata_930[index][1]) == 0);
+    } else {
+        do {
+            index--;
+            if (index < 0) {
+                index = 3;
+            }
+        } while (kind != lbl_40_rodata_930[index][0] && (m_unkC28[4] & lbl_40_rodata_930[index][1]) == 0);
+    }
+    return lbl_40_rodata_930[index][0];
 }
