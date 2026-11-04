@@ -2,6 +2,7 @@
 
 #include <StaticAssert.h>
 #include <gf/gf_file_io_handle.h>
+#include <gf/gf_pad_system.h>
 #include <gf/gf_task.h>
 #include <mu/mu_menu_controller.h>
 #include <mu/mu_object.h>
@@ -60,6 +61,9 @@ public:
         int m_members[40];          // 0xA8 the characters that the player picked (the positions in the team)
         int m_count;                // 0x148
         int m_cursor;               // 0x14C the character that the cursor is on
+
+        PlayerWork();
+        ~PlayerWork();
     };
 
     // HYPOTHESIS: the game has a class of its own for the handles (its destructor is a function of the unit).
@@ -109,8 +113,14 @@ public:
     void dispNumber(int player, int pos, int number);
     void removeNumber(int player, int number);
     bool isSelected();
+    int getDirButtonRepeat(int player);
+    int getNextPoke(int kind, bool forward);
+    void storeResult();
+    gfPadStatus getPadStatus(int player);
+    int findNextCharCursorPos(int player, int pos);
 
     static void mainStepSelectedInit(muAdvSelchrCTask* task);
+    static int mainStepAppearMain(muAdvSelchrCTask* task);
     static int mainStepSelectedMain(muAdvSelchrCTask* task);
     static void mainStepZombieInit(muAdvSelchrCTask* task);
     static int mainStepZombieMain(muAdvSelchrCTask* task);
