@@ -1,6 +1,7 @@
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_info.h>
 #include <ft/ft_manager.h>
+#include <gf/gf_heap_manager.h>
 #include <it/it_manager.h>
 #include <snd/snd_system.h>
 #include <so/so_archive_db.h>
@@ -121,4 +122,97 @@ bool ftDataProvider::isReady() {
         return false;
     }
     return true;
+}
+
+void* ftDataProvider::getBinData(int p2, int p4, ftKind kind, int fileIndex, int p5, int* size) {
+    ftDataTaskResource* task = searchList(&m_compTaskList, kind, p2, 0xFF, p4, 0xFF);
+    if (task != NULL) {
+        return task->m_archiveItem.getData(Data_Type_Misc, fileIndex, size, 0, p5);
+    }
+    return NULL;
+}
+
+bool ftDataProvider::isExistEffect(u32 resourceId, u32 p2) {
+    if (resourceId != 0xFFFF) {
+        ftDataTaskResource* task = searchResource(&m_compTaskList, resourceId);
+        if (task != NULL) {
+            if (p2 == 1 && task->m_ref.m_count > 1) {
+                return false;
+            }
+            return task->m_archiveItem.isExistEffect();
+        }
+    }
+    return false;
+}
+
+bool ftDataProvider::removeResourceTask(ftDataTask* task, bool cancel) {
+    if (task->tryRemove(cancel) == true) {
+        m_activeTaskList.removeExist(task);
+        m_compTaskList.removeExist(task);
+        m_freeTaskList.addTail(task);
+        return true;
+    }
+    return false;
+}
+
+void ftDataProvider::ftDataTask::remove(bool) {
+    m_ref.m_count = 0;
+    m_state = 0;
+}
+
+ftDataProvider::ftDataTaskResource::ftDataTaskResource() : m_archiveItem(0) {
+    unk24 = 0xFF;
+    unk28 = NULL;
+    unk2C = -1;
+}
+
+void ftDataProvider::ftDataTaskResource::remove(bool cancel) {
+    ftDataTask::remove(cancel);
+    if (unk28 != NULL) {
+        gfHeapManager::free(unk28);
+        unk28 = NULL;
+    }
+    unk2C = -1;
+    unk30 = 0;
+    m_archiveItem.unload(cancel);
+    m_archiveItem.init();
+}
+
+void ftDataProvider::ftDataTaskResource::init(const char* path, long kind, u8 p3, u8 p4, u8 p5, u8 p6, bool p7, srHeapType heap, u8 state, long p10, bool p11) {
+    m_kind = kind;
+    unk30 = p3;
+    unk31 = p5;
+    unk32 = p6;
+    m_state = state;
+    unk24 = heap;
+    unk33_7 = p7;
+    unk33_0 = p4;
+    unk2C = p10;
+    if (path != NULL) {
+        size_t length = strlen(path) + 1;
+        unk28 = (char*)gfHeapManager::alloc(heap, length);
+        strcpy(unk28, path);
+        int offset = 0;
+        switch (p4) {
+        case 6:
+        case 7:
+            switch (kind) {
+            case 3:
+            case 5:
+            case 11:
+            case 13:
+            case 14:
+            case 24:
+            case 29:
+            case 30:
+            case 31:
+            case 48:
+                offset = 1;
+                break;
+            }
+            break;
+        }
+        m_archiveItem.reqLoad(path, heap, p7, offset, p11, 0x1F, true);
+    }
+    m_ref.m_count++;
 }
