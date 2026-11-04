@@ -1,3 +1,4 @@
+#include <so/link/so_link_event_throw.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
@@ -19,3 +20,7 @@ void ftDiddyStatusUniqProcessSpecialSThrow::exitStatus(soModuleAccesser* moduleA
 void ftDiddyStatusUniqProcessSpecialSThrow::execStop(soModuleAccesser* moduleAccesser) {}
 
 ftDiddyStatusUniqProcessSpecialSThrow g_ftDiddyStatusUniqProcessSpecialSThrow;
+
+soLinkEventThrow::soLinkEventThrow(int eventKind, int value, bool enabled)
+    : soLinkEventArgs(eventKind), unk8(value), unkC(-1), unk10(-1), unk14(-1),
+      unk18(1.0f), unk1C(enabled) {}
