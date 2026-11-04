@@ -1,7 +1,9 @@
 #define FT_MODULE_BUILDER
 #include <em/term/em_general_term_decide_module_impl.h>
+#include <mt/mt_prng.h>
 #include <so/anim/so_anim_cmd_module_impl.h>
 #include <so/so_module_accesser.h>
+#include <so/so_value_accesser.h>
 #include <so/transition/so_transition_module_impl.h>
 #include <types.h>
 
@@ -146,4 +148,47 @@ void soAnimCmdInterpreter::systemCmdFuncWaitLoop() {
     float curFrame = m_moduleAccesser->getMotionModule().getFrame();
     acCmdInterpreterStackData data(static_cast<acCmdInterpreterStackData::Kind>(8), 0, true, addr, curFrame);
     pushSystemStack(data);
+}
+
+void soAnimCmdInterpreter::systemCmdFuncWaitMotionTransition() {
+    acCmdInterpreterStackData data(static_cast<acCmdInterpreterStackData::Kind>(9));
+    pushSystemStack(data);
+}
+
+void soAnimCmdInterpreter::systemCmdFuncSyncMotionFrame() {
+    if (m_moduleAccesser != nullptr) {
+        m_currentFrame = m_moduleAccesser->getMotionModule().getFrame();
+    }
+}
+
+void soAnimCmdInterpreter::systemCmdFuncWaitRnadi() {
+    if (m_moduleAccesser == nullptr) {
+        return;
+    }
+    if (m_currentCmd == nullptr) {
+        return;
+    }
+    const acAnimCmd* cmd = getCurrentCmd();
+    s32 maximum;
+    s32 minimum = 0;
+    acCmdArg argument;
+    cmd->getArg(&argument, 0);
+    if (argument.getArgType() == 0) {
+        maximum = argument.getIntData();
+    } else {
+        maximum = soValueAccesser::getValueInt(m_moduleAccesser, argument.getValueIndexData(), 0);
+    }
+    if (cmd->getArgNum() >= 2) {
+        minimum = maximum;
+        cmd->getArg(&argument, 1);
+        if (argument.getArgType() == 0) {
+            maximum = argument.getIntData();
+        } else {
+            maximum = soValueAccesser::getValueInt(m_moduleAccesser, argument.getValueIndexData(), 0);
+        }
+    }
+    if (maximum - minimum > 0) {
+        minimum += randi(maximum - minimum);
+    }
+    systemCmdFuncWaitSub(minimum);
 }
