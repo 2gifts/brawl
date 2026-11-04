@@ -12,6 +12,7 @@ struct gfPadStatus;
 class muMenuController;
 extern "C" void fn_800B96E8(muMenuController* controller, int pad);
 extern "C" void fn_800B9984(muMenuController* controller);
+extern "C" void fn_800BA364(muMenuController* controller, int buttons);
 
 class muMenuController {
 public:

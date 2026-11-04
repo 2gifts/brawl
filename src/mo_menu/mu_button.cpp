@@ -619,10 +619,10 @@ void muButtonTask::setButtonCursor(int padKind, int cursor) {
     if (cursor == -1) {
         return;
     }
-    if (cursor >= Cursor_Try) {
+    if (cursor >= Cursor_Restore) {
         MuObject* obj = m_work->m_objs[23];
         m_work->m_scene->addObj(obj->m_sceneModel);
-        obj->setFrameNode(cursor - Cursor_Try);
+        obj->setFrameNode(cursor - Cursor_Restore);
     } else if (cursor == Cursor_FlickJump) {
         if (info->m_stickKind == 1) {
             m_work->m_objs[6]->setFrameVisible(1.0f);
@@ -776,13 +776,13 @@ static inline void moveDlgCursor(muButtonTask* task, u32 pressed) {
 void muButtonTask::printExplByButtonCursor(int cursor) {
     int msg;
     switch (cursor) {
-    case 22:
+    case Cursor_Restore:
         msg = 11;
         break;
-    case 23:
+    case Cursor_Try:
         msg = 12;
         break;
-    case 24:
+    case Cursor_Store:
         msg = 13;
         break;
     case Cursor_FlickJump:
@@ -1079,17 +1079,176 @@ void muButtonTask::initStepButtonSelect(muButtonTask* task) {
     task->printExplByButtonCursor(cursor);
     task->m_work->m_objs[22]->setFrameVisible(0.0f);
     cursor = task->m_work->m_cursor;
-    if (cursor == 23 || cursor == 24) {
+    if (cursor == Cursor_Try || cursor == Cursor_Store) {
         int actions[ListMax];
         int num = task->getFreeActions(padKind, actions);
         if (num > 0) {
-            int frame = cursor != 23;
+            int frame = cursor != Cursor_Try;
             if (!task->m_work->m_isListOpen) {
                 task->openActionList(0x1D, frame, actions, num);
             } else {
                 task->m_work->m_objs[24]->setFrameTex(frame);
             }
         }
+    }
+}
+
+// The settings kind of a pad (a pad that cannot be read counts as a Wii remote).
+static inline int getPadKind(int padNo) {
+    gfPadStatus status;
+    g_gfPadSystem->getSysPadStatus(padNo, &status);
+    return status.m_error == gfPadError::NONE ? muButtonTask::sPadKinds[status.m_controllerType]
+                                              : muButtonTask::PadKind_WiiRemote;
+}
+
+// The first pad (0 ... 7) on which A or START was pushed (-1: none).
+static inline int getStartPad() {
+    for (int i = 0; i < 8; i++) {
+        gfPadStatus status;
+        g_gfPadSystem->getSysPadStatus(i, &status);
+        if (status.m_error != gfPadError::NO_CONTROLLER &&
+            ((status.m_buttonsPressedThisFrame.bits & 0x100) || (status.m_buttonsPressedThisFrame.bits & 0x1000))) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Tries the buttons in a practice fight with the pad on which A or START was pushed; a pad of another controller kind
+// gets the try dialog instead.
+static inline void startPractice(muButtonTask* task) {
+    int padNo = getStartPad();
+    int step;
+    int kind = getPadKind(padNo);
+    if (kind != task->m_work->m_padKind) {
+        g_sndSystem->playSE(static_cast<SndID>(3), -1, 0, 0, -1);
+        step = 8;
+    } else {
+        g_sndSystem->playSE(static_cast<SndID>(1), -1, 0, 0, -1);
+        task->m_work->m_contNo = padNo;
+        step = 10;
+    }
+    changeStep(task, step);
+}
+
+// The cursor position of a controller kind (the end of its table when there is none).
+static inline const muButtonTask::CursorNode* findCursorNode(int padKind, int cursor) {
+    const muButtonTask::CursorNode* node = muButtonTask::sCursorTables[padKind].m_nodes;
+    for (int i = 0; i < muButtonTask::sCursorTables[padKind].m_num; i++) {
+        if (node->m_cursor == cursor) {
+            break;
+        }
+        node++;
+    }
+    return node;
+}
+
+// The settings that are being changed differ from the settings of the controller kind.
+static inline bool isEdited(muButtonTask* task) {
+    return memcmp(&task->m_work->m_edit, &task->m_work->m_configs[task->m_work->m_padKind],
+                  sizeof(muButtonTask::Config)) != 0;
+}
+
+// The player moves the cursor with the directions; A changes the button (or the switch) the cursor is on or takes one
+// of the three buttons under the controller, B leaves (asking to store changed settings first), START tries the buttons.
+void muButtonTask::mainStepButtonSelect(muButtonTask* task) {
+    u32 trigger = task->m_work->m_controller.m_trigger;
+    int padKind = task->m_work->m_padKind;
+    int cursor = task->m_work->m_cursor;
+    if (trigger & 0xF) {
+        int dir;
+        if (trigger & 8) {
+            dir = 0;
+        }
+        if (trigger & 4) {
+            dir = 2;
+        }
+        if (trigger & 2) {
+            dir = 1;
+        }
+        if (trigger & 1) {
+            dir = 3;
+        }
+        cursor = findCursorNode(padKind, cursor)->m_links[dir];
+        task->setButtonCursor(padKind, cursor);
+        int repeat = findCursorNode(padKind, cursor)->m_unk4;
+        if (repeat != 0) {
+            fn_800BA364(&task->m_work->m_controller, repeat);
+        }
+    }
+    if (cursor != task->m_work->m_cursor) {
+        g_sndSystem->playSE(static_cast<SndID>(0), -1, 0, 0, -1);
+        task->printExplByButtonCursor(cursor);
+        int actions[ListMax];
+        int num;
+        if ((cursor == Cursor_Try || cursor == Cursor_Store) && (num = task->getFreeActions(padKind, actions)) > 0) {
+            int frame = cursor != Cursor_Try;
+            if (!task->m_work->m_isListOpen) {
+                task->openActionList(0x1D, frame, actions, num);
+            } else {
+                task->m_work->m_objs[24]->setFrameTex(frame);
+            }
+        } else {
+            task->m_work->m_scene->removeObj(task->m_work->m_objs[24]->m_sceneModel);
+            task->m_work->m_isListOpen = false;
+        }
+        task->m_work->m_cursor = cursor;
+    }
+    if (isPushed(getSysPadStatus(), 0x200)) { // B
+        if (isEdited(task)) {
+            g_sndSystem->playSE(static_cast<SndID>(5), -1, 0, 0, -1);
+            changeStep(task, 9);
+        } else {
+            g_sndSystem->playSE(static_cast<SndID>(2), -1, 0, 0, -1);
+            changeStep(task, 6);
+        }
+        return;
+    }
+    if (isPushed(getSysPadStatus(), 0x100)) { // A
+        switch (task->m_work->m_cursor) {
+        case Cursor_FlickJump: {
+            g_sndSystem->playSE(static_cast<SndID>(0x23), -1, 0, 0, -1);
+            const PadInfo* info = &sPadInfos[padKind];
+            bool on = task->m_work->m_edit.m_flickJump != true;
+            task->m_work->m_edit.m_flickJump = on;
+            int obj;
+            switch (info->m_stickKind) {
+            case 1:
+                obj = 6;
+                break;
+            case 2:
+                obj = 7;
+                break;
+            }
+            task->m_work->m_objs[obj]->setFrameTex(on ? 1.0f : 0.0f);
+            break;
+        }
+        case Cursor_Shake: {
+            g_sndSystem->playSE(static_cast<SndID>(0x23), -1, 0, 0, -1);
+            bool on = task->m_work->m_edit.m_flag6 != true;
+            task->m_work->m_edit.m_flag6 = on;
+            task->m_work->m_objs[8]->setFrameTex(on ? 1.0f : 0.0f);
+            break;
+        }
+        case Cursor_Restore:
+            g_sndSystem->playSE(static_cast<SndID>(5), -1, 0, 0, -1);
+            changeStep(task, 7);
+            break;
+        case Cursor_Try:
+            startPractice(task);
+            break;
+        case Cursor_Store:
+            memcpy(&task->m_work->m_configs[padKind], &task->m_work->m_edit, sizeof(Config));
+            changeStep(task, 12);
+            break;
+        default:
+            g_sndSystem->playSE(static_cast<SndID>(1), -1, 0, 0, -1);
+            changeStep(task, 5);
+            break;
+        }
+    }
+    if (isPushed(getSysPadStatus(), 0x1000)) { // START
+        startPractice(task);
     }
 }
 
@@ -1133,27 +1292,6 @@ void muButtonTask::initStepButtonAssign(muButtonTask* task) {
     }
     task->m_work->m_objs[22]->setFrameVisible(arrows);
     task->setAssignAnim(0);
-}
-
-// The settings kind of a pad (a pad that cannot be read counts as a Wii remote).
-static inline int getPadKind(int padNo) {
-    gfPadStatus status;
-    g_gfPadSystem->getSysPadStatus(padNo, &status);
-    return status.m_error == gfPadError::NONE ? muButtonTask::sPadKinds[status.m_controllerType]
-                                              : muButtonTask::PadKind_WiiRemote;
-}
-
-// The first pad (0 ... 7) on which A or START was pushed (-1: none).
-static inline int getStartPad() {
-    for (int i = 0; i < 8; i++) {
-        gfPadStatus status;
-        g_gfPadSystem->getSysPadStatus(i, &status);
-        if (status.m_error != gfPadError::NO_CONTROLLER &&
-            ((status.m_buttonsPressedThisFrame.bits & 0x100) || (status.m_buttonsPressedThisFrame.bits & 0x1000))) {
-            return i;
-        }
-    }
-    return -1;
 }
 
 // The player picks the action of the button with up and down; A or B takes it, START tries the buttons in a practice
