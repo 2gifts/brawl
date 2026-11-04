@@ -80,7 +80,14 @@ struct ftDataCommon {
     u8 unk2C[4];
     // HYPOTHESIS: size-customize scaling exponents read by ftUtil::getReactionMul for param customizes 0 and 1.
     float* sizeCustomizeScale[2];
-    u8 unk38[0x10];
+    union {
+        u8 unk38[0x10];
+        struct {
+            float* rabbitCapScale; // HYPOTHESIS: per-attribute multipliers of the rabbit cap customize
+            float* metalScale; // HYPOTHESIS: per-attribute multipliers of the metal customize
+            u8 unk40[8];
+        };
+    };
     GXColor subColors;
     ftEffectCommonData* effectCommonData;
     ftEffectScreenData* effectScreenData;
