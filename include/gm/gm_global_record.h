@@ -312,7 +312,18 @@ struct gmGlobalRecord {
         gmDiagramResult m_diagram;  // 0x48 the per-character records of the Chronicle diagrams
         u16 unk98;
         char _9A[0x2];
-        u8 unk9C[0x44];
+        union {
+            u8 unk9C[0x44];
+            struct {
+                u16 : 5;
+                // HYPOTHESIS: highest cleared difficulty plus one.
+                u16 unk9C_b10 : 3;
+                u16 : 8;
+                u8 _pad9E[2];
+                // HYPOTHESIS: high score stored by sqSingleSimple::updateHiScore.
+                u32 unkA0;
+            };
+        };
     };
     static_assert(sizeof(CharaNumData) == 0xE0, "Class is wrong size!");
 

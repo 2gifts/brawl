@@ -14,6 +14,8 @@ public:
 
 class NtMatching {
 public:
+    // HYPOTHESIS: matching arguments are word-sized integers in the menu callers.
+    bool retryMatching(int, int);
     // HYPOTHESIS: the matching manager NtTr resets (only the methods its callers use are declared).
     void watchResetNodeMissMatch();
     // HYPOTHESIS: starts the save of the user data (the name of the Wi-Fi user) in a thread, when the network state

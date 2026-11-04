@@ -15,4 +15,9 @@ public:
     // 0x554, five rows of four floats indexed by background layer: x scale, y scale, x/y/z offset
     // (grAdventureBackGround::setBackGround).
     const float* m_backGroundParams;
+
+    void stopCameraAdvCameraOffset();
+    void setFighterPos(int player, Vec3f* pos);
+    // HYPOTHESIS: the camera offset argument contains two floats.
+    void setCameraAdvCameraOffset(Vec2f* offset);
 };

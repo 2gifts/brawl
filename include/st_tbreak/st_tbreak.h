@@ -103,6 +103,7 @@ struct stTargetBreakItem {
 // Break the Targets: ten targets (more precisely: m_targets) have to be broken; hitting one starts a chain reaction
 // that breaks the targets close to it, too.
 class stTargetBreak : public stMelee {
+    friend class stOperatorRuleTargetBreak;
     grTargetBreak* m_field;                  // 0x1D8: the level
     grTargetBreak* m_targets[10];            // 0x1DC
     grTargetBreak* m_nodeModel;              // 0x204: the node model the targets are attached to

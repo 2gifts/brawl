@@ -82,6 +82,8 @@ public:
     void dispHomerunStart(int arg1, int arg2);
     bool isFinishedHomerunStartAnim();
     void eraseCorps();
+    // HYPOTHESIS: eight-byte entries contain a character kind and costume byte.
+    void dispCorps(const void*, int);
     void dispKumiteKills(int kills);
     void closeTrainingMenu();
     int getTrainingSpeed();

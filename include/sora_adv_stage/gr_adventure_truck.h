@@ -8,8 +8,19 @@
 // HYPOTHESIS: the type name is from the sora_adv_stage map (createGimmickFunc<18grGimmickTruckData, ...>); only the
 // trigger that setInitializeFlag reads is named.
 struct grGimmickTruckData {
-    u8 unk0[0x1E0];
+    union {
+        u8 unk0[0x1E0];
+        struct {
+            float unk0_float;
+            u8 unk4[0x1DC];
+        };
+    };
     stTriggerData m_validTrigger; // 0x1E0
+    u8 unk1E4[8];
+    grGimmick::AttackData unk1EC;
+    u8 unk244[0x2C];
+    stTriggerData unk270;
+    Vec2f unk274;
 };
 
 // HYPOTHESIS: the adventure mine truck (sora_adv_stage gr_adventure_truck.o); only the members its constructor clears are listed.
@@ -43,6 +54,10 @@ public:
     }
     virtual ~grAdventureTruck();
     virtual void setInitializeFlag();
+    virtual void setVisibilityByClipping(u32 visible);
+    virtual void setVisibilityAttachedEffect(u32 visible);
+    void startTruck();
+    virtual void onGimmickEvent(soGimmickEventArgs* eventInfo, int* taskId);
 
     static grAdventureTruck* create(int mdlIndex, const char* taskName);
 };

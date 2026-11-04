@@ -46,6 +46,7 @@ struct ftData {
     void* extendParam[6];
 };
 
+
 // The fighter attribute block (an array of 4-byte entries, 0x2E4 bytes in the moveset file). modelScale lines up with the
 // attribute list's size entry, and 0x1FC..0x208 are the camera extents read by ftManager::getCameraRange.
 struct ftParam {
@@ -153,6 +154,13 @@ public:
     // HYPOTHESIS: const qualification; native pointer ABI and getter identity are verified.
     const wnGameWatchNormalWeaponData* getGameWatchNormalWeaponData() const;
     // The static data block of a weapon article: indexed by the weapon number (123, 124, ... in the module maps).
+    void* getWeaponData0(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData1(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData2(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData3(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData4(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData5(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData14(ftKind kind, bool* resourceGroup) const;
     void* getWeaponData91(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Flash
     void* getWeaponData92(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Fire
     void* getWeaponData93(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Thunder

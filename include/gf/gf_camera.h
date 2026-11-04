@@ -5,6 +5,7 @@
 #include <stddef.h>
 namespace nw4r { namespace g3d { class Camera; } }
 #include <mt/mt_vector.h>
+#include <nw4r/math/math_types.h>
 #include <types.h>
 
 class gfCamera {
@@ -44,7 +45,11 @@ public:
     };
 
     // HYPOTHESIS: local field names; extents verified by view construction and consumers.
-    float m_view[3][4];
+    union {
+        float m_view[3][4];
+        // HYPOTHESIS: same 3x4 view, copied as one aggregate
+        nw4r::math::_MTX34 m_viewMatrix;
+    };
     float m_inverseView[3][4];
     Vec3f m_targetPos;
     Vec3f m_centerPos;

@@ -4,6 +4,7 @@
 #include <so/so_archive_db.h>
 
 #include <ft/ft_common_data_accesser.h>
+#include <ft/builder/ft_builder_kinetic.h>
 
 extern "C" s32 fn_27_1454C0();
 extern "C" u32 fn_27_12006C(ftSlot* slot, int type, ftKind kind, bool flag);
@@ -236,6 +237,41 @@ void* ftCommonDataAccesser::getSZerosuitArmorData() const
 {
     // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x98)
     return lbl_27_bss_3210[Fighter_SZeroSuit].data->extendParam[7];
+}
+
+void* ftCommonDataAccesser::getWeaponData0(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_Kirby].data->extendParam[42];
+}
+
+void* ftCommonDataAccesser::getWeaponData1(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_Kirby].data->extendParam[43];
+}
+
+void* ftCommonDataAccesser::getWeaponData2(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_Kirby].data->extendParam[45];
+}
+
+void* ftCommonDataAccesser::getWeaponData3(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_Kirby].data->extendParam[46];
+}
+
+void* ftCommonDataAccesser::getWeaponData4(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_Kirby].data->extendParam[47];
+}
+
+void* ftCommonDataAccesser::getWeaponData5(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_Kirby].data->extendParam[48];
+}
+
+void* ftCommonDataAccesser::getWeaponData14(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_Link].data->extendParam[11];
 }
 
 void* ftCommonDataAccesser::getWeaponData91(ftKind kind, bool* resourceGroup) const

@@ -18,6 +18,7 @@ protected:
     int m_state; // 0x168, HYPOTHESIS: 0 standby, 1 start, 2 moving, 3 stopped
 
 public:
+    grAdventureMoveAttackTriggerOnce(const char* taskName) : grAdventureMoveAttackGround(taskName), m_state(0) { }
     virtual ~grAdventureMoveAttackTriggerOnce();
     virtual void update(float deltaFrame);
     virtual void startup(gfArchive* data, u32 unk1, gfSceneRoot::LayerType layerType);
