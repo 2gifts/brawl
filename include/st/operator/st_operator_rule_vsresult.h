@@ -3,9 +3,11 @@
 #include <st/operator/st_operator_rule.h>
 #include <types.h>
 
+class ifVsResultTask;
+
 class stOperatorRuleVsResult : public stOperatorRule {
 public:
-    u32 unkCC;
+    ifVsResultTask* unkCC;
 
     stOperatorRuleVsResult();
     virtual ~stOperatorRuleVsResult();
