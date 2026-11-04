@@ -3,6 +3,7 @@
 #include <ai/ai_cl_block.h>
 #include <ai/ai_ip_buf.h>
 #include <ai/ai_mgr.h>
+#include <ai/ai_weapon.h>
 #include <it/it_create.h>
 #include <mt/mt_vector.h>
 #include <types.h>
@@ -10,7 +11,6 @@
 // One CPU character's view of the match (position, speed, floor, transition flags); 0x1C4 bytes, one per aiChrIdx.
 // HYPOTHESIS: only the offsets used so far are named, the rest is still unknown.
 class aiEnemy;
-struct aiWeaponMark;
 struct aiJumpPar;
 
 namespace aistat {
@@ -22,28 +22,18 @@ namespace aistat {
     void initUniqStatusTable();
 }
 
-// HYPOTHESIS: aiStat 0x0C-0x4B holds four 16-byte records that start out zeroed (the constructor's array loop).
-struct aiStatUnkRecord {
-    int m_unk0;
-    int m_unk4;
-    int m_unk8;
-    int m_unkC;
-
-    aiStatUnkRecord() : m_unk0(0), m_unk4(0), m_unk8(0), m_unkC(0) { }
-};
-
 class aiStat {
 public:
     aiStat();
 
     aiChrIdx m_chrIdx;       // 0x00: -1 = unused
     u8 m_unk1;               // 0x01
-    u8 m_unk2;               // 0x02
+    u8 m_markChecked;        // 0x02: getMarkWeapon has picked m_markWeapon (HYPOTHESIS: cleared every frame)
     s8 m_enableAway;         // 0x03: chkEnableAway cache, -1 = not computed yet
     u8 m_unk4;               // 0x04
     char unk5[3];
-    int m_unk8;              // 0x08
-    aiStatUnkRecord m_unkC[4]; // 0x0C
+    aiWeaponMark* m_markWeapon; // 0x08: getMarkWeapon's pick, the marked weapon that hits soonest (NULL = none)
+    aiWeaponMark m_marks[4]; // 0x0C: the weapons this character keeps an eye on (aiWeaponMgr::mark_wpn_update)
     aiInput* m_input;        // 0x4C: the aiInput driving this character (0 for humans)
     u32 m_flags;             // 0x50
     u32 m_transition;        // 0x54: transition bits (chk_transition)

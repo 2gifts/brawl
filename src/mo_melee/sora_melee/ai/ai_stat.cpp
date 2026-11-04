@@ -1,6 +1,8 @@
 #include <ai/ai_enemy.h>
+#include <ai/ai_input.h>
 #include <ai/ai_param.h>
 #include <ai/ai_stat.h>
+#include <ai/ai_weapon.h>
 #include <ft/fighter.h>
 #include <math.h>
 #include <gf/gf_memory_util.h>
@@ -190,8 +192,8 @@ aiStat::aiStat() {
     m_input = NULL;
     m_flags = 0x8000;
     m_transition = 0;
-    m_unk2 = 0;
-    m_unk8 = 0;
+    m_markChecked = 0;
+    m_markWeapon = NULL;
     m_chrStat = 0;
     m_center = Vec3f(0.0f, 0.0f, 0.0f);
     m_pos.m_x = 0.0f;
@@ -392,8 +394,8 @@ void aiStat::init(int chrIdx, int chrKind, aiInput* input, int unk) {
     m_unk1B9 = 0;
     m_unk1BB = 0;
     m_hitCount = 0;
-    m_unk2 = 0;
-    m_unk8 = 0;
+    m_markChecked = 0;
+    m_markWeapon = NULL;
     m_chrStat = 0;
     m_center = Vec3f(0.0f, 0.0f, 0.0f);
     m_pos.m_x = 0.0f;
@@ -536,6 +538,42 @@ float aiStat::get_range_floor(float scale, Vec3f* pos) {
         range = 0.001f;
     }
     return range * sign;
+}
+
+aiWeaponMark* aiStat::getMarkWeapon() {
+    if (!m_markChecked) {
+        aiWeaponMark* best = NULL;
+        int bestFrames = 999999;
+        float height = aiParam::get_height(&m_chrIdx);
+        float radius = 3.0f + 0.5f * (aiParam::get_width(&m_chrIdx) + height);
+        float speedSq = m_speed.m_x * m_speed.m_x + m_speed.m_y * m_speed.m_y;
+        int frames = (int)(0.5f * m_input->m_par.m_rank) + 10;
+        for (int i = 0; i < 4; i++) {
+            if (m_marks[i].m_weapon != NULL && m_marks[i].m_frames <= 0 && m_team != m_marks[i].m_weapon->m_team) {
+                Vec3f center = m_center;
+                m_marks[i].m_hitFrames = m_marks[i].m_weapon->predict(&center, radius, frames);
+                if (m_marks[i].m_hitFrames < 0 && speedSq > 0.09f) {
+                    // BYTES: the original copies the sum from a temporary (lwz/stw) before the call.
+                    Vec3f ahead = Vec3f(m_center + Vec3f(12.0f * m_speed.m_x, 12.0f * m_speed.m_y, 0.0f));
+                    m_marks[i].m_hitFrames = m_marks[i].m_weapon->predict(&ahead, radius, frames);
+                    if (m_marks[i].m_hitFrames >= 0) {
+                        m_marks[i].m_hitFrames += 6;
+                    }
+                }
+            }
+        }
+        m_markChecked = true;
+        for (int i = 0; i < 4; i++) {
+            if (m_marks[i].m_weapon != NULL && m_marks[i].m_frames <= 0 && m_team != m_marks[i].m_weapon->m_team &&
+                m_marks[i].m_hitFrames >= 0 && bestFrames > m_marks[i].m_hitFrames)
+            {
+                bestFrames = m_marks[i].m_hitFrames;
+                best = &m_marks[i];
+            }
+        }
+        m_markWeapon = best;
+    }
+    return m_markWeapon;
 }
 
 bool aiStat::chkEnableAway(aiJumpPar* par) {
