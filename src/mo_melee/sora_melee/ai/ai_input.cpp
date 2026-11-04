@@ -64,7 +64,7 @@ aiInput::aiInput(u32 contNo, int unk2C, int player, int ftKind, s8 state, aiInpu
     s8 target[16];
     target[0] = -1;
     m_act->act_change(0, target, 0, 0);
-    m_md = m_mdNext = parent == NULL ? 1 : 0x79;
+    m_md = m_mdPrev = parent == NULL ? 1 : 0x79;
     m_step = 0;
     m_stepFrame = 0;
     m_unk5C = 0;
@@ -485,6 +485,108 @@ int aiInput::md_return(Vec2f* stick, ipPadButton* button) {
     return 1;
 }
 
+// Ladder (situation 8). The goal height depends on the mode the CPU came from: a little higher than the action goal
+// after the modes 5-7/0xB/0x16/0x7A, above or below the CPU after mode 2, the target's position otherwise. Step 1 climbs
+// towards it (and gives up after a while, at the top, or on aiStat flag 0x4000000), step 2 picks a side (towards the
+// target on the same floor block, else towards the goal), steps 3/4 jump off that way; after 8 frames back to mode 1
+// (same floor as the target) or mode 6. HYPOTHESIS: the mode and step meanings follow the map name and the values.
+int aiInput::md_ladder(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    if (!aiChrIdx::IsValid(&m_target) || m_target.m_idx == m_chrIdx.m_idx) {
+        target_check();
+    }
+    aiStat* target = aiMgr::get_aiStat(&m_target);
+    switch (m_mdPrev) {
+    case 5:
+    case 6:
+    case 7:
+    case 0xB:
+    case 0x16:
+    case 0x7A:
+        if (m_step == 0) {
+            m_act->m_goalPos.m_y += 22.0f;
+        }
+        break;
+    case 2:
+        m_act->m_goalPos.m_x = stat->m_pos.m_x;
+        if (stat->m_pos.m_y > target->m_pos.m_y) {
+            m_act->m_goalPos.m_y = 30.0f + stat->m_pos.m_y;
+        } else {
+            m_act->m_goalPos.m_y = stat->m_pos.m_y - 30.0f;
+        }
+        break;
+    default:
+        m_act->m_goalPos.m_x = target->m_pos.m_x;
+        m_act->m_goalPos.m_y = target->m_pos.m_y;
+        break;
+    }
+    switch (m_step) {
+    case 0:
+        m_stepFrame = -8.0f * randf();
+        m_step++;
+    case 1:
+        if (stat->m_situation != 8) {
+            aiChrIdx none;
+            change_md(1, &none, 0, 0);
+            return 1;
+        }
+        if (stat->m_pos.m_y > m_act->m_goalPos.m_y) {
+            stick->m_y = -1.0f;
+            if (m_stepFrame > 10) {
+                m_step = 2;
+                m_stepFrame = 0;
+            }
+        } else {
+            stick->m_y = 1.0f;
+            if (15.0f + stat->m_pos.m_y > m_act->m_goalPos.m_y) {
+                if (!aiChrIdx::GetFighterNo(&m_chrIdx)) {
+                    m_step = 2;
+                    m_stepFrame = 0;
+                }
+            } else if (stat->m_flags & 0x4000000) {
+                m_step = 2;
+                m_stepFrame = 0;
+            } else if (m_stepFrame > 10 && (stat->m_speed.m_y < 0.001f || m_stepFrame > 180)) {
+                m_step = 2;
+                m_stepFrame = 0;
+            }
+        }
+        if (m_step == 1) {
+            break;
+        }
+    default:
+        if (m_step == 2) {
+            if (stat->m_floor == target->m_floor) {
+                stick->m_x = stat->get_lr_tgt(&m_target);
+            } else {
+                stick->m_x = stat->m_pos.m_x < m_act->m_goalPos.m_x ? 1.0f : -1.0f;
+            }
+            if (stick->m_x > 0.0f) {
+                m_step = 3;
+            } else {
+                m_step = 4;
+            }
+        } else if (m_step == 3) {
+            stick->m_x = 1.0f;
+        } else {
+            stick->m_x = -1.0f;
+        }
+        button->m_mask = soController::getButtonMask(soController::Pad_Button_Jump);
+        if (m_stepFrame > 8) {
+            if (stat->m_floor == target->m_floor) {
+                aiChrIdx none;
+                change_md(1, &none, 0, 0);
+            } else {
+                aiChrIdx none;
+                change_md(6, &none, 0, 0);
+            }
+            return 1;
+        }
+        break;
+    }
+    return 1;
+}
+
 // Dizzy (situation 9): spin the stick; when the dizzy status 0xEC happens over no ground, steer back towards the stage.
 // Any other situation goes back to mode 1. HYPOTHESIS: the meaning of situation 9 and status 0xEC follows the map name.
 int aiInput::md_piyo(Vec2f* stick, ipPadButton* button) {
@@ -503,6 +605,80 @@ int aiInput::md_piyo(Vec2f* stick, ipPadButton* button) {
         Vec2f goal;
         m_act->get_return_goal(&goal.m_x, &goal.m_y, 0);
         stick->m_x = stat->m_pos.m_x > goal.m_x ? -1.0f : 1.0f;
+    }
+    return 1;
+}
+
+// Grabbing (situations 10/11). Outside a grab, a CPU above rank 50 that holds chr-stat 4 (HYPOTHESIS: an item throw) may
+// switch to mode 0x65 at random, otherwise it goes back to mode 1. Chr-stat 2 for kind 0x1B: press attack (or the stick
+// up in the air) every other frame after a rank-dependent wait. Chr-stat 1 for kinds 5/0x20: step 0 picks a pummel
+// count (step 1: walk the held character towards the far side first, step 2: attack, step 3: down throw), then after
+// a rank-dependent wait press attack or the stick down every other frame. Any other grab starts action 0x1120 on
+// the nearest target. HYPOTHESIS: all meanings follow the map name and how the values are used.
+int aiInput::md_catch(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    s8 rank;
+    if (stat->m_situation != 10 && stat->m_situation != 11) {
+        if (stat->chk_chr_stat(4, 1) && !(stat->m_flags & 1)) {
+            rank = m_par.m_rank;
+            if (rank > 50 && randf() < 0.007f * rank) {
+                aiChrIdx none;
+                change_md(0x65, &none, 0x54, 0);
+                return 1;
+            }
+        }
+        aiChrIdx none;
+        change_md(1, &none, 0, 0);
+        return 1;
+    }
+    if (stat->chk_chr_stat(2, 0x1B)) {
+        if (m_stepFrame >= (80 - m_par.m_rank) / 4 && !(m_stepFrame & 1)) {
+            if (stat->chk_over_ground()) {
+                button->m_mask |= soController::getButtonMask(soController::Pad_Button_Attack);
+            } else {
+                stick->m_y = 1.0f;
+            }
+        }
+    } else if (stat->chk_chr_stat(1, 5) || stat->chk_chr_stat(1, 0x20)) {
+        switch (m_step) {
+        case 0:
+            if (m_cpuType == 0x1B || stat->m_chrKind == 0x20 || randf() < 0.2f) {
+                rank = m_par.m_rank;
+                if (randf() < 0.01f * rank) {
+                    m_step = 1;
+                } else {
+                    m_step = 2;
+                    break;
+                }
+            } else {
+                m_step = 3;
+                break;
+            }
+        case 1:
+            if (!(stat->m_flags & 1) && m_stepFrame < 8) {
+                float front = stat->get_range_floor(stat->m_lr, &stat->m_pos);
+                if (front > stat->get_range_floor(-stat->m_lr, &stat->m_pos)) {
+                    stick->m_x = -0.5f * stat->m_lr;
+                    break;
+                }
+                m_step++;
+            } else {
+                m_step++;
+            }
+            break;
+        }
+        int step = m_step;
+        if (step > 1 && m_stepFrame >= (70 - m_par.m_rank) / 2 && !(m_stepFrame & 1)) {
+            if (step != 3) {
+                button->m_mask |= soController::getButtonMask(soController::Pad_Button_Attack);
+            } else {
+                stick->m_y = -1.0f;
+            }
+        }
+    } else if (m_act->m_id != 0x1120) {
+        m_target.m_idx = get_near_target(NULL, 0);
+        aiChrIdx none;
+        m_act->act_change(0x1120, &none, 0, 0);
     }
     return 1;
 }
@@ -720,6 +896,74 @@ int aiInput::md_relax(Vec2f* stick, ipPadButton* button) {
             return 1;
         }
         break;
+    }
+    return 1;
+}
+
+// Smash DI (HYPOTHESIS: the map's "slide"): while the character is being launched (aiStat flag 0x400000) the stick is held
+// against the attacker's direction; m_unk74 (set by damageStart) counts down faster after a single hit and ends the mode.
+// Below rank 60 a random away-and-up/down direction is kept for 30 frames; from rank 60 a stronger one is picked and
+// decays every frame. HYPOTHESIS: aiAct::m_unk0[0..1] holds the chosen stick between frames.
+int aiInput::md_slide(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    if (!(stat->m_flags & 0x400000)) {
+        if (stat->m_hitCount <= 1) {
+            m_unk74 -= 2;
+        } else {
+            m_unk74 -= 1;
+        }
+        if (m_unk74 <= 0) {
+            m_unk74 = 0;
+            aiChrIdx none;
+            change_md(1, &none, 0, 0);
+            return 1;
+        }
+    }
+    float rate = m_par.getRankRatio();
+    if (rate < 0.6f) {
+        switch (m_step) {
+        case 0:
+            if (rate >= 0.4f) {
+                m_act->m_unk0[0] = -0.8f * stat->get_lr_tgt(&m_target);
+            } else {
+                m_act->m_unk0[0] = -0.8f * ((0.2f + rate) * stat->get_lr_tgt(&m_target));
+            }
+            m_act->m_unk0[1] = (0.4f + rate) * (randf() < 0.3f ? 1.0f : -1.0f);
+            m_stepFrame = -30;
+            m_step++;
+            break;
+        default:
+            stick->m_x = m_act->m_unk0[0];
+            stick->m_y = m_act->m_unk0[1];
+            if (m_stepFrame >= 0) {
+                m_step = 0;
+            }
+            break;
+        }
+    } else {
+        switch (m_step) {
+        case 0:
+            m_act->m_unk0[0] = -0.7f * stat->get_lr_tgt(&m_target);
+            m_act->m_unk0[1] = -1.0f + (1.0f - rate);
+            if (randf() < 0.3f) {
+                m_act->m_unk0[1] *= -1.0f;
+            }
+            m_stepFrame = -20.0f + 10.0f * rate;
+            m_step++;
+        }
+        stick->m_x = m_act->m_unk0[0];
+        stick->m_y = m_act->m_unk0[1];
+        m_act->m_unk0[0] *= 0.3f;
+        if (__fabsf(m_act->m_unk0[0]) < 0.2f) {
+            m_act->m_unk0[0] = 0.0f;
+        }
+        m_act->m_unk0[1] *= 0.3f;
+        if (__fabsf(m_act->m_unk0[1]) < 0.2f) {
+            m_act->m_unk0[1] = 0.0f;
+        }
+        if (m_stepFrame >= 0) {
+            m_step = 0;
+        }
     }
     return 1;
 }

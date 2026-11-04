@@ -47,7 +47,7 @@ public:
     aiChrIdx m_unk43;      // 0x43
     aiAct* m_act;          // 0x44
     int m_md;              // 0x48: current mode (md_* index)
-    int m_mdNext;          // 0x4C
+    int m_mdPrev;          // 0x4C: the mode before the current one (change_md)
     int m_step;            // 0x50: step within the current mode (md_swim)
     int m_stepFrame;       // 0x54: HYPOTHESIS: frames spent in the current step (md_swim gives up after a while)
     u16 m_unk58;
@@ -113,6 +113,8 @@ public:
     // HYPOTHESIS: returns the slot of the nearest target (its own slot when there is none) and its distance; the meaning
     // of the int is not known yet.
     s8 get_near_target(float* distance, int unk);
+    // HYPOTHESIS: picks a new target (m_target) when the current one is not valid; the return type is not known.
+    void target_check();
     // HYPOTHESIS: parameter names; frames <= 0 = pick the reaction delay at random from the AI parameters.
     void damageStart(soDamage* damage, s16 frames, int unk);
     // HYPOTHESIS: target = the character that was hit by this CPU's attack.
@@ -123,8 +125,11 @@ public:
     // Recovering to the stage: after a few frames over the edge, jump back (action 0x2050) when there is no ground below
     // or the character is too low; with no action running, pick one. HYPOTHESIS: action meanings from the map names.
     int md_return(Vec2f* stick, ipPadButton* button);
+    int md_catch(Vec2f* stick, ipPadButton* button);
     int md_swim(Vec2f* stick, ipPadButton* button);
+    int md_ladder(Vec2f* stick, ipPadButton* button);
     int md_piyo(Vec2f* stick, ipPadButton* button);
     int md_glide(Vec2f* stick, ipPadButton* button);
     int md_relax(Vec2f* stick, ipPadButton* button);
+    int md_slide(Vec2f* stick, ipPadButton* button);
 };
