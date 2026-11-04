@@ -15,5 +15,6 @@ public:
     // The body lives in the module blob; declared so the class info createArray can construct articles.
     wnPikachuThunderJolt2(s32 articleId, const wnArticleBuildInfo& info, const wnPikachuThunderJolt2Data* data);
     virtual ~wnPikachuThunderJolt2();
+    void setPosition(Vec3f* position, const Vec2f* direction, bool resetFrame, float lr);
 };
 static_assert(sizeof(wnPikachuThunderJolt2) == 0x1FC4, "Pikachu thunder jolt 2 article extent");
