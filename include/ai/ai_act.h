@@ -140,6 +140,12 @@ public:
     // attack as it gets up or acts (aiParam's down/cliff attack frames) or give up after m_unk0[2] frames.
     // HYPOTHESIS: the meaning of the steps, of m_unk0[0..2] and of the statuses tested.
     void act_a_ambush(Vec2f* stick, ipPadButton* button);
+    // Rolling (the name from the map) while m_stat->m_flags bit 0x20 is set: head for the target (or for the
+    // get_safe_fall point), turning back before floor ends, and press the button of the character kind when the
+    // roll's time is up (m_unk0[0] = distance kept from floor ends, m_unk0[1] = frames before turning back,
+    // m_unk0[2] = frames between specials, m_unk0[3] = going for the safe point). HYPOTHESIS: the meaning of the
+    // steps, of m_unk0[0..3] and of the character kinds tested.
+    void act_a_goro(Vec2f* stick, ipPadButton* button);
 };
 static_assert(sizeof(aiAct) == 0x114, "Class is wrong size!");
 

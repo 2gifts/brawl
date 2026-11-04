@@ -919,3 +919,208 @@ void aiAct::act_a_ambush(Vec2f* stick, ipPadButton* button) {
             break;
     }
 }
+
+void aiAct::act_a_goro(Vec2f* stick, ipPadButton* button) {
+    if (!(m_stat->m_flags & 0x20)) {
+        set_id(0);
+        return;
+    }
+    int kind = m_stat->m_chrKind;
+    if (kind == 5) {
+        if (m_stat->chk_chr_stat(2, -1)) {
+            kind = 0x16;
+        } else if (m_stat->chk_chr_stat(4, -1)) {
+            kind = 0x25;
+        }
+    }
+    if (m_step == 0) {
+        m_unk94 = 0;
+        m_unk0[3] = -1.0f;
+        if (kind == 0x15 && !m_stat->chk_over_ground()) {
+            m_step = 2;
+            m_stepFrame = 60;
+        } else {
+            switch (kind) {
+                case 0x16:
+                    m_unk0[0] = 25.0f;
+                    m_unk0[2] = 1.0f;
+                    break;
+                default:
+                    m_unk0[0] = 15.0f;
+                    break;
+            }
+            s8 rank = m_input->m_par.m_rank;
+            if (rank < 50 && rank * randf() < 20.0f) {
+                m_unk0[0] = 0.0f;
+            }
+            m_unk0[1] = 0.0f;
+            switch (kind) {
+                case 5:
+                    m_stepFrame = (int)(-50.0f * randf()) - 10;
+                    break;
+                default:
+                    if (m_input->m_md != 2) {
+                        m_stepFrame = (int)(-300.0f * randf()) - 60;
+                    } else {
+                        m_stepFrame = (int)(-60.0f * randf()) - 30;
+                    }
+                    break;
+            }
+            m_step++;
+        }
+    }
+    if (m_step == 1) {
+        aiStat* target = aiMgr::get_aiStat(&m_input->m_target);
+        if (m_unk0[3] < 0.0f) {
+            if (m_stepFrame >= 0 && kind != 5 && m_stat->get_distance(0.0f, &m_input->m_target) < 30.0f) {
+                m_unk0[3] = 1.0f;
+                m_stepFrame = (int)(-50.0f - 50.0f * randf());
+            }
+        } else if (m_unk0[3] > 0.0f) {
+            if (m_stat->get_distance(0.0f, &m_input->m_target) > 35.0f) {
+                m_stepFrame = 0;
+            }
+        }
+        switch (kind) {
+            case 1:
+            case 8:
+            case 0xB:
+            case 0x30:
+                break;
+            default:
+                if (!m_stat->chk_over_ground() || (target->m_flags & 0x8000) || m_stat->chk_near_deadarea() ||
+                    target->chk_near_deadarea() || m_stepFrame >= 0) {
+                    m_step = 2;
+                    m_stepFrame = m_input->m_par.m_rank / 2 + 20;
+                    if (m_stepFrame > 52) {
+                        m_stepFrame = 52;
+                    }
+                    m_stepFrame += (int)(8.0f * randf());
+                    if (!m_stat->chk_over_ground() && kind == 0x15) {
+                        if (m_stepFrame < 40) {
+                            m_stepFrame = -300;
+                        } else {
+                            m_stepFrame -= 30;
+                        }
+                    }
+                }
+                break;
+        }
+        Vec2f goal;
+        if (m_input->m_md == 2 || m_unk0[3] > 0.0f) {
+            get_safe_fall(&goal.m_x, &goal.m_y);
+        } else {
+            goal = Vec2f(target->m_pos.m_x, target->m_pos.m_y);
+        }
+        if (m_stat->m_speed.m_x > 0.0f) {
+            goal.m_x += 15.0f;
+        } else if (m_stat->m_speed.m_x < 0.0f) {
+            goal.m_x -= 15.0f;
+        }
+        if (kind == 0x2F && m_stat->get_range(0.0f, &m_input->m_target) < 5.0f) {
+            m_step = 3;
+            m_stepFrame = -3;
+        } else {
+            float lr;
+            if (kind == 8 || kind == 0xB) {
+                lr = m_stat->m_speed.m_x > 0.0f ? 1.0f : -1.0f;
+            } else {
+                lr = m_stat->m_lr;
+            }
+            float dir;
+            if (!m_stat->chk_over_ground()) {
+                AiClBlock* floor = m_stat->m_floor;
+                dir = m_stat->m_pos.m_x < 0.5f * (floor->m_edgeL.m_x + floor->m_edgeR.m_x) ? 1.0f : -1.0f;
+            } else if (m_stat->get_range_floor(lr, &m_stat->m_pos) < m_unk0[0]) {
+                dir = -lr;
+            } else {
+                dir = m_stat->m_pos.m_x > goal.m_x ? -1.0f : 1.0f;
+            }
+            if (dir * m_stat->m_lr < 0.0f) {
+                if (m_unk0[1] > 0.0f) {
+                    m_unk0[1] -= 1.0f;
+                    stick->m_x = -dir;
+                } else {
+                    stick->m_x = dir;
+                    if (kind == 0x1E) {
+                        m_step = 2;
+                        m_stepFrame = 60;
+                        goto step;
+                    }
+                }
+            } else {
+                m_unk0[1] = (15.0f / 70.0f) * (70 - m_input->m_par.m_rank);
+                stick->m_x = dir;
+            }
+            if (m_input->m_md != 2) {
+                switch (kind) {
+                    case 0xF:
+                    case 0x10:
+                    case 0x16:
+                        if (__fabsf(m_stat->m_pos.m_x - target->m_pos.m_x) < 30.0f &&
+                            m_stat->m_pos.m_y < target->m_center.m_y) {
+                            m_unk0[2] -= 1.0f;
+                            if (m_unk0[2] <= 0.0f) {
+                                button->m_mask = soController::getButtonMask(soController::Pad_Button_Special);
+                                m_unk0[2] = (16.0f / 70.0f) * (70 - m_input->m_par.m_rank);
+                                if (m_unk0[2] < 0.0f) {
+                                    m_unk0[2] = 0.0f;
+                                }
+                                m_unk0[2] += 2.0f;
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+    }
+step:
+    switch (m_step) {
+        case 2:
+            if (m_stepFrame < 60) {
+                break;
+            }
+            switch (kind) {
+                case 1:
+                case 8:
+                case 0xB:
+                case 0xF:
+                case 0x10:
+                case 0x16:
+                case 0x30:
+                    break;
+                default:
+                    if (!(m_stepFrame & 1)) {
+                        if (kind == 0x2F) {
+                            if (m_stat->m_unkA8 > 0 && randf() < 0.3f) {
+                                button->m_mask = soController::getButtonMask(soController::Pad_Button_Jump);
+                            } else {
+                                button->m_mask = soController::getButtonMask(soController::Pad_Button_Guard);
+                            }
+                        } else if (kind == 0x15) {
+                            button->m_mask = soController::getButtonMask(soController::Pad_Button_Attack);
+                        } else {
+                            button->m_mask = soController::getButtonMask(soController::Pad_Button_Special);
+                        }
+                    }
+                    break;
+            }
+            if (m_stat->m_chrKind == 0x2F && m_stat->chk_near_deadarea()) {
+                stick->m_x = m_stat->m_pos.m_x < 0.0f ? 1.0f : -1.0f;
+            } else if (!m_stat->chk_over_ground()) {
+                switch (kind) {
+                    case 0xF:
+                    case 0x10:
+                    case 0x16:
+                        stick->m_x = m_stat->m_pos.m_x < m_stat->m_floor->m_edgeL.m_x ? 1.0f : -1.0f;
+                        break;
+                }
+            }
+            break;
+        case 3:
+            if (m_stepFrame >= 0 && !(m_stepFrame & 1)) {
+                stick->m_y = 1.0f;
+            }
+            break;
+    }
+}
