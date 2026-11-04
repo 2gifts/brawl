@@ -23,6 +23,8 @@ public:
     u16 m_countB;               // 0x56
     u16 m_countC;               // 0x58
     u8 m_unk5A[6];
+
+    virtual void notify_Error(int kind, int unk, int code);
 };
 static_assert(sizeof(nteBootTask) == 0x60, "Class is wrong size!");
 // nteBootTask::nteBootTask(heap) and nteBootTask::startTask()
