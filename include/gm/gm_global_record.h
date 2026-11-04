@@ -323,6 +323,14 @@ struct gmGlobalRecord {
                 // HYPOTHESIS: high score stored by sqSingleSimple::updateHiScore.
                 u32 unkA0;
             };
+            struct {
+                u16 unk9C_15 : 1;
+                u16 : 10;
+                u16 unk9C_4 : 3;
+                u16 : 2;
+                char _9E[0xA];
+                u32 unkA8;
+            };
         };
     };
     static_assert(sizeof(CharaNumData) == 0xE0, "Class is wrong size!");
@@ -410,7 +418,23 @@ struct gmGlobalRecord {
     // 2 * n + 1 it is new.
     u32 m_softFlags[0x22];                  // 0x15AC
     CharaNumData m_charaNumData[35];        // 0x1634
-    u8 unk34D4[0x74];
+    union {
+        u8 unk34D4[0x74];
+        struct {
+            u16 unk34D4_15 : 1;
+            u16 : 7;
+            u16 unk34D4_7 : 3;
+            u16 : 4;
+            u16 unk34D4_0 : 1;
+            char _34D6[6];
+            u32 unk34DC;
+            char _34E0[0x48];
+            u8 unk3528;
+            u8 unk3529;
+            u8 unk352A;
+            u8 unk352B;
+        };
+    };
     u8 unk3548[0x44];
     char _358C[0x764];
 };
@@ -475,7 +499,10 @@ struct gmAdvData {
     char _2B6[3];
     u8 unk2B9[0x27];             // 0x2B9
     Slot m_slots[99];            // 0x2E0
-    char _5F8[2];
+    union {
+        char _5F8[2];
+        u16 unk5F8;
+    };
     u8 unk5FA;                   // 0x5FA
     char _5FB;
     u8 unk5FC;                   // 0x5FC
@@ -487,7 +514,15 @@ struct gmAdvData {
     char _602;
     u8 m_saveRequest;            // 0x603: 7 asks for a save
     u8 m_mode;                   // 0x604
-    char _605[7];
+    union {
+        char _605[7];
+        struct {
+            char _605b;
+            u8 unk606_7 : 1;
+            u8 : 7;
+            char _607[5];
+        };
+    };
     u32 unk60C;                  // 0x60C
     char _610[0xC];
     u32 unk61C;                  // 0x61C
