@@ -2,6 +2,7 @@
 #include <st_stageedit/st_stageedit.h>
 #include <string.h>
 #include <types.h>
+#include <st/st_area_manager.h>
 
 // Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
 extern "C" {
@@ -156,4 +157,98 @@ u32 stEdit::getModeFlag(u32 category, u32 type) {
             break;
     }
     return flags;
+}
+
+// stTriggerMng::eraseObsTrigger (the map name); src/mo_stage/st_stageedit/st_stageedit.cpp calls it by this stand-in name.
+extern "C" void fn_27_232374(stTriggerMng* mng, void* trigger);
+
+stEdit::stEdit() : stMelee("stEdit", Stages::Edit) {
+    m_theme = 0;
+    m_size = 0;
+    m_bgmId = 0x2C;
+    m_loaded = 0;
+    m_itemPosCount = 0;
+    m_fallBlockCount = 0;
+    m_linkCollA = NULL;
+    m_linkCollB = NULL;
+    m_linkMaskA = NULL;
+    m_linkMaskB = NULL;
+    m_flags = 0;
+    m_pokeTrainerBase = NULL;
+    m_pokeTrainerBaseColl = NULL;
+    m_itemPos = NULL;
+    m_fallBlocks = NULL;
+    m_seCount = 0;
+    memset(m_startPos, 0, 0x1A28);
+    stAreaManager::getInstance()->initMng(0x20);
+}
+
+void stEdit::deleteBlock(stEditBlock* block) {
+    if (block->m_collision != NULL) {
+        delete block->m_collision;
+        block->m_collision = NULL;
+    }
+    Ground* ground = block->m_ground;
+    if (ground != NULL) {
+        grMadein* madein = dynamic_cast<grMadein*>(ground);
+        if (madein != NULL) {
+            madein->endEntity();
+        }
+        removeGround(ground);
+        ground->preExit();
+        ground->exit();
+        block->m_ground = NULL;
+    }
+    if (block->m_trigger != NULL) {
+        fn_27_232374(m_triggerMng, block->m_trigger);
+        block->m_trigger = NULL;
+    }
+    if (block->m_data != NULL) {
+        gfHeapManager::free(block->m_data);
+        block->m_data = NULL;
+    }
+    block->m_desc = 0;
+}
+
+void stEdit::createMoveController(u32 countA, u32 countB) {
+    if (m_linkCollA != NULL || m_linkCollB != NULL) {
+        if (m_linkCollA != NULL) {
+            gfHeapManager::free(m_linkCollA);
+            m_linkCollA = NULL;
+        }
+        if (m_linkCollB != NULL) {
+            gfHeapManager::free(m_linkCollB);
+            m_linkCollB = NULL;
+        }
+        if (m_linkMaskA != NULL) {
+            gfHeapManager::free(m_linkMaskA);
+            m_linkMaskA = NULL;
+        }
+        if (m_linkMaskB != NULL) {
+            gfHeapManager::free(m_linkMaskB);
+            m_linkMaskB = NULL;
+        }
+    }
+    if (countA != 0) {
+        u32 bytes = (countA & 0xFF) << 2;
+        m_linkCollA = static_cast<grCollision**>(gfHeapManager::alloc(Heaps::StageInstance, bytes, 0x20));
+        if (m_linkCollA != NULL) {
+            memset(m_linkCollA, 0, bytes);
+        }
+        m_linkMaskA = static_cast<u32*>(gfHeapManager::alloc(Heaps::StageInstance, bytes, 0x20));
+        if (m_linkMaskA != NULL) {
+            memset(m_linkMaskA, 0, bytes);
+        }
+    }
+    if (countB != 0) {
+        u32 bytes = (countB & 0xFF) << 2;
+        m_linkCollB = static_cast<grCollision**>(gfHeapManager::alloc(Heaps::StageInstance, bytes, 0x20));
+        if (m_linkCollB != NULL) {
+            memset(m_linkCollB, 0, bytes);
+        }
+        m_linkMaskB = static_cast<u32*>(gfHeapManager::alloc(Heaps::StageInstance, bytes, 0x20));
+        if (m_linkMaskB != NULL) {
+            memset(m_linkMaskB, 0, bytes);
+        }
+    }
 }
