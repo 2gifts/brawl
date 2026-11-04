@@ -1,6 +1,7 @@
 #include <ai/ai_act.h>
 #include <ai/ai_ip_buf.h>
 #include <ai/ai_param.h>
+#include <mt/mt_prng.h>
 
 // aiIpBuf: a 16-frame history of the stick and buttons a CPU character pressed.
 
@@ -273,6 +274,61 @@ static inline int ai_cmd2act_id(int cmd) {
     return 0;
 }
 
+u16 aiParam::get_act_list_id(int list, u8* hold, u8* mode, u8* param, bool unk) {
+    if (list >= 0 && (u32)list < NumActLists && m_par->m_actList[list] != 0) {
+        tag_AI_PAR_ACT_LIST* act = (tag_AI_PAR_ACT_LIST*)((char*)m_par + m_par->m_actList[list]);
+        int num = 0;
+        float total = 0.0f;
+        float highRate = 0.01f * m_rank;
+        float lowRate = 1.0f - highRate;
+        // BYTES: each loop is written out twice, with and without the m_disableCmds test (the original has both copies).
+        if (m_disableCmds != 0) {
+            for (; act->m_cmd != 0; act++) {
+                if ((m_disableCmds & (1 << (act->m_cmd - 1))) == 0) {
+                    num++;
+                    total += act->m_ratioHigh * highRate + act->m_ratioLow * lowRate;
+                }
+            }
+        } else {
+            for (; act->m_cmd != 0; act++) {
+                num++;
+                total += act->m_ratioHigh * highRate + act->m_ratioLow * lowRate;
+            }
+        }
+        if (num > 0) {
+            total *= randf();
+            act = (tag_AI_PAR_ACT_LIST*)((char*)m_par + m_par->m_actList[list]);
+            if (m_disableCmds != 0) {
+                for (; act[1].m_cmd != 0; act++) {
+                    if ((m_disableCmds & (1 << (act->m_cmd - 1))) == 0) {
+                        total -= act->m_ratioHigh * highRate + act->m_ratioLow * lowRate;
+                        if (total <= 0.0f) {
+                            break;
+                        }
+                    }
+                }
+            } else {
+                for (; act[1].m_cmd != 0; act++) {
+                    total -= act->m_ratioHigh * highRate + act->m_ratioLow * lowRate;
+                    if (total <= 0.0f) {
+                        break;
+                    }
+                }
+            }
+            u8 cmd = act->m_cmd - 1;
+            if (cmd < 0x16) {
+                if (hold != NULL && mode != NULL) {
+                    calc_command_param(hold, mode, param, cmd);
+                }
+                m_disableCmds = 0;
+                return ai_cmd2act_id(cmd);
+            }
+        }
+    }
+    m_disableCmds = 0;
+    return 0;
+}
+
 u16 aiParam::enum_act_list_id(int list, int n) {
     if (list >= 0 && (u32)list < NumActLists && m_par->m_actList[list] != 0) {
         tag_AI_PAR_ACT_LIST* act = (tag_AI_PAR_ACT_LIST*)((char*)m_par + m_par->m_actList[list]);
@@ -305,6 +361,77 @@ bool aiParam::chkCmdFall(int cmd) {
 
 bool aiParam::chkCmdReflect(int cmd) {
     return m_par->m_reflectCmds & (1 << cmd);
+}
+
+void aiParam::calc_command_param(u8* hold, u8* mode, u8* param, int cmd) {
+    u32 bit = 1 << cmd;
+    if ((m_par->m_holdModeCmds & bit) || (m_par->m_modeCmds & bit)) {
+        *mode = 3;
+    } else {
+        *mode = 0;
+    }
+    if ((m_par->m_randHoldCmds & bit) || (m_par->m_holdModeCmds & bit)) {
+        switch (cmd) {
+        case 4:
+        case 5:
+        case 6:
+            if (randf() < 0.9f) {
+                *hold = 10.0f * randf();
+            } else {
+                *hold = 10.0f + 50.0f * randf();
+            }
+            break;
+        default:
+            if (randf() < 0.4f) {
+                *hold = 20.0f * randf();
+            } else {
+                *hold = 15.0f + 45.0f * randf();
+            }
+            break;
+        }
+        if ((m_par->m_randHoldCmds & bit) && randf() < 0.8f) {
+            *mode = 0;
+        }
+    } else if (m_par->m_modeCmds & bit) {
+        *hold = *mode + 7;
+    } else {
+        *hold = 0;
+    }
+    if (param != NULL) {
+        if (cmd >= 0 && cmd < 22) {
+            *param = m_par->m_cmdParam[cmd];
+        } else {
+            *param = 0;
+        }
+    }
+}
+
+u8 tag_AI_PAR_ACT::getRatio(s8 rank, float adjust) {
+    int ratio;
+    if (rank >= m_rankHigh) {
+        ratio = m_ratioHigh;
+    } else if (rank <= m_rankLow) {
+        ratio = m_ratioLow;
+    } else {
+        float t = (float)(rank - m_rankLow) / (float)(m_rankHigh - m_rankLow);
+        float rest = 1.0f - t;
+        ratio = t * m_ratioHigh + rest * m_ratioLow;
+    }
+    if (adjust > 0.0001f) {
+        if (ratio < 100) {
+            ratio += (int)((100 - ratio) * adjust);
+        } else {
+            ratio += (int)((255 - ratio) * adjust);
+        }
+    } else if (adjust < -0.0001f) {
+        ratio += (int)(ratio * adjust);
+    }
+    if (ratio < 0) {
+        ratio = 0;
+    } else if (ratio > 255) {
+        ratio = 255;
+    }
+    return ratio;
 }
 
 int ai_act_id2cmd(aiAct::actId id) {

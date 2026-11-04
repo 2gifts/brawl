@@ -25,9 +25,14 @@ struct tag_AI_ATK_DATA_HED {
 // Per-character AI parameter block loaded from the AIPD / ATKD data files.
 // HYPOTHESIS: only the command bit masks the aiParam::chkCmd* helpers read are named.
 struct aiParData {
-    char unk0[0x160];
+    char unk0[0x138];
+    // HYPOTHESIS: the names of 0x138-0x15F and 0x164 follow aiParam::calc_command_param only.
+    u8 m_cmdParam[22];  // 0x138: per-command value calc_command_param passes through
+    char unk14E[0xA];
+    u32 m_randHoldCmds; // 0x158: commands given a random hold time (and usually mode 0)
+    u32 m_holdModeCmds; // 0x15C: commands given a random hold time and mode 3
     u32 m_fallCmds;     // 0x160
-    char unk164[4];
+    u32 m_modeCmds;     // 0x164: commands given mode 3 and a hold time of mode + 7
     u32 m_reviseCmds;   // 0x168
     u32 m_reflectCmds;  // 0x16C
     int m_actList[24];  // 0x170: offset of each action list (tag_AI_PAR_ACT_LIST entries ending with cmd 0) from the start of the block, 0 = none
@@ -40,6 +45,19 @@ struct tag_AI_PAR_ACT_LIST {
     u8 m_cmd;        // command number + 1, 0 ends the list
     u8 m_ratioHigh;
     u8 m_ratioLow;
+};
+
+// The weight of one action of a situation entry, blended by CPU level: m_ratioHigh at m_rankHigh and above,
+// m_ratioLow at m_rankLow and below, linear in between. HYPOTHESIS: names follow getRatio only.
+struct tag_AI_PAR_ACT {
+    u8 m_ratioHigh; // 0x0
+    u8 m_ratioLow;  // 0x1
+    u8 m_rankHigh;  // 0x2
+    u8 m_rankLow;   // 0x3
+
+    // The weight at CPU level `rank`, pushed towards 100 (or 255) by a positive `adjust` and towards 0 by a
+    // negative one, clamped to 0..255.
+    u8 getRatio(s8 rank, float adjust);
 };
 
 // Jump parameters of one character (HYPOTHESIS: possibly a larger view of aiReferPar).
@@ -110,7 +128,14 @@ public:
     bool chkCmdRevise(int cmd);
     bool chkCmdFall(int cmd);
     bool chkCmdReflect(int cmd);
+    // The input parameters of command `cmd` (see aiParData::m_randHoldCmds); `param` may be NULL.
+    // HYPOTHESIS: argument names.
+    void calc_command_param(u8* hold, u8* mode, u8* param, int cmd);
     void set_disable_cmd(int cmd);
+    // A random action of action list `list` (weighted by the CPU level, disabled commands skipped), 0 = none;
+    // fills hold/mode/param like calc_command_param and re-enables all commands.
+    // HYPOTHESIS: the last argument is unused.
+    u16 get_act_list_id(int list, u8* hold, u8* mode, u8* param, bool unk);
     u16 enum_act_list_id(int list, int n); // HYPOTHESIS: the n-th enabled action of an action list (0 = none)
     int select_situation(int start, int end, aiChrIdx* chr, aiChrIdx* target); // HYPOTHESIS: parameter types from chk_situation's use
 
