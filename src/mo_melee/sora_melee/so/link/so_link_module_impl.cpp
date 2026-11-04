@@ -14,6 +14,21 @@
 #include <so/article/so_generate_article_manage_module.h>
 #include <so/ground/so_ground_module_impl.h>
 
+soLinkModule::~soLinkModule() {
+}
+
+void soLinkModuleImpl::adjustModelConstraintPosture(Vec3f* rot, Vec3f* pos) {
+    adjustModelConstraintPosture(m_modelConstraintFlag.m_mask, rot, pos);
+}
+
+Vec3f soLinkModuleImpl::getModelConstraintTargetNodePosition() {
+    return m_connections->at(m_modelConstraintNo).m_parent.getLinkModule()->m_moduleAccesser->getModelModule().getNodeGlobalPosition(m_modelConstraintTargetNode, false);
+}
+
+Vec3f soLinkModuleImpl::getModelConstraintTargetNodeRotation() {
+    return m_connections->at(m_modelConstraintNo).m_parent.getLinkModule()->m_moduleAccesser->getModelModule().getNodeGlobalRotation(m_modelConstraintTargetNode, false);
+}
+
 StageObject* soLinkModuleImpl::getOwner() {
     return m_moduleAccesser->m_stageObject;
 }
