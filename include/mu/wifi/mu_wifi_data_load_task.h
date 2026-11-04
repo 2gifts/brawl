@@ -7,6 +7,8 @@
 #include <nw4r/g3d/g3d_scngroup.h>
 #include <types.h>
 
+class muNoticeWndTask;
+
 // The window that loads the Wi-Fi data of the save before a connection (and offers to remake it when it is broken).
 // Its code (main.dol 0x800DAA30 ...) is not decompiled yet; the fields are the ones that create and the constructor
 // write. Function names come from the sora map.
@@ -20,7 +22,7 @@ public:
     int m_step;                         // 0x50 5 once the window is done
     int m_prevStep;                     // 0x54
     int m_priority;                     // 0x58
-    int m_unk5C;
+    muNoticeWndTask* m_unk5C; // HYPOTHESIS: the notice window that the step shows
     gfSysRecorder2* m_recorder;         // 0x60
     int m_unk64;
     int m_unk68;
@@ -28,6 +30,12 @@ public:
 
     muWifiDataLoadTask();
     static int mainStepLoadMain(muWifiDataLoadTask* task);
+    static void mainStepRemakeInit(muWifiDataLoadTask* task);
+    static int mainStepRemakeMain(muWifiDataLoadTask* task);
+    static void mainStepRemakeErrorInit(muWifiDataLoadTask* task);
+    static int mainStepRemakeErrorMain(muWifiDataLoadTask* task);
+    static void mainStepDoneInit(muWifiDataLoadTask* task);
+    static int mainStepDoneMain(muWifiDataLoadTask* task);
 
     virtual void processDefault();
     virtual ~muWifiDataLoadTask();
