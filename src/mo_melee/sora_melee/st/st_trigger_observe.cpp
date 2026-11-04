@@ -183,6 +183,63 @@ void stObsTriggerSquareBeltConveyorCB::setParam(grGimmickBeltConveyorData* beltD
     stAreaManager::getInstance()->setBeltParam(&info, m_beltConveyorIndex);
 }
 
+void stObsTriggerSquareBeltConveyorCB::setParam(grGimmickPressureAreaData* beltData) {
+    if (getAreaPointer() != nullptr && dynamic_cast<gfAreaRectangle*>(getAreaPointer()) != nullptr) {
+        dynamic_cast<gfAreaRectangle*>(getAreaPointer())->setShape(
+            Vec2f(beltData->m_areaData.m_offsetPos.m_x + beltData->m_pos.m_x,
+                  beltData->m_areaData.m_offsetPos.m_y + beltData->m_pos.m_y),
+            Vec2f(beltData->m_areaData.m_range.m_x, beltData->m_areaData.m_range.m_y));
+    }
+    stMovementAreaInfoData info;
+    if (beltData->m_isPow == true) {
+        info.m_data.m_gimmickKind = Gimmick::Area_Pow;
+    } else {
+        info.m_data.m_gimmickKind = Gimmick::Area_Yuka;
+    }
+    info.m_data.m_speed = beltData->m_speed;
+    info.m_data._0xC = 0.0f;
+    info.m_data._0x10 = 0.0f;
+    info.m_data.m_vector = beltData->m_vector;
+    info.m_data.m_taskId = beltData->m_taskId;
+    info.m_data._0x1c = 0;
+    getAreaID(&info.m_areaId);
+    stAreaManager::getInstance()->setBeltParam(&info, m_beltConveyorIndex);
+}
+
+stObsTriggerTriBeltConveyorCB::~stObsTriggerTriBeltConveyorCB() { }
+
+stObsTriggerSquareWaterCB::stObsTriggerSquareWaterCB(bool* flag, grGimmickWaterData* waterData)
+    : stObsTriggerArea(flag, false) {
+    waterData->m_areaData.m_group = gfArea::Stage_Group_Space_Water;
+    createArea(&waterData->m_areaData, Vec2f(0.0f, 0.0f));
+    stWaterAreaInfoData info;
+    info.m_data.m_gimmickKind = Gimmick::Area_Water;
+    info.m_data.m_swimHeight = waterData->m_swimHeight;
+    info.m_data.m_0xc = waterData->m_canDrown != false;
+    info.m_data.m_currentSpeed = waterData->m_speed;
+    getAreaID(&info.m_areaId);
+    m_waterIndex = stAreaManager::getInstance()->setWater(&info);
+}
+
+stObsTriggerSquareWaterCB::~stObsTriggerSquareWaterCB() { }
+
+void stObsTriggerSquareWaterCB::setParam(grGimmickWaterData* waterData) {
+    if (getAreaPointer() != nullptr && dynamic_cast<gfAreaRectangle*>(getAreaPointer()) != nullptr) {
+        dynamic_cast<gfAreaRectangle*>(getAreaPointer())->setShape(
+            Vec2f(waterData->m_areaData.m_offsetPos.m_x, waterData->m_areaData.m_offsetPos.m_y),
+            Vec2f(waterData->m_areaData.m_range.m_x, waterData->m_areaData.m_range.m_y));
+    }
+    stWaterAreaInfoData info;
+    info.m_data.m_gimmickKind = Gimmick::Area_Water;
+    info.m_data.m_swimHeight = waterData->m_swimHeight;
+    info.m_data.m_0xc = waterData->m_canDrown != false;
+    info.m_data.m_currentSpeed = waterData->m_speed;
+    getAreaID(&info.m_areaId);
+    stAreaManager::getInstance()->setWaterParam(&info, m_waterIndex);
+}
+
+stObsTriggerSquareHitPointEffectCB::~stObsTriggerSquareHitPointEffectCB() { }
+
 stObsTriggerCameraReactionCB::~stObsTriggerCameraReactionCB() { }
 
 stObsTriggerPlayerIncludeAreaCB::~stObsTriggerPlayerIncludeAreaCB() { }
