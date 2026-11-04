@@ -1,4 +1,5 @@
 #include <mu/wifi/mu_wifi_interface.h>
+#include <nt/nt_net_report.h>
 #include <types.h>
 
 class DWCAllocType {

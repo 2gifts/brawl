@@ -30,6 +30,7 @@ public:
 
 class soDamageEventObserver : public soEventObserver<soDamageEventObserver> {
 public:
+    ~soDamageEventObserver();
     soDamageEventObserver() : soEventObserver<soDamageEventObserver>(0x6) {};
     soDamageEventObserver(short unitID) : soEventObserver<soDamageEventObserver>(unitID) {};
     soDamageEventObserver(short param1, s8 param2) : soEventObserver<soDamageEventObserver>(0x6) {

@@ -343,11 +343,11 @@ void muAdvResultTask::mainStepLoadInit2(muAdvResultTask* task) {
     desc.m_figMng = task->m_figMng;
     desc.m_sealMng = task->m_sealMng;
     int value;
-    gmAdvData* advData = *reinterpret_cast<gmAdvData**>(reinterpret_cast<u8*>(g_GameGlobal) + 0x30);
+    gmAdvData* advData = g_GameGlobal->m_advData;
     if (advData == NULL) {
         value = -1;
     } else {
-        value = *reinterpret_cast<int*>(reinterpret_cast<u8*>(advData) + 0x492C);
+        value = advData->m_padInfo[0].m_padNo;
     }
     desc.m_unk20 = value << 24;
     desc.m_texts0 = task->m_archive->getData(0, Data_Type_Misc, 0x28, 0xFFFE);

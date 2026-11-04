@@ -400,9 +400,9 @@ static inline void gmInitPlayersFromSelect(gmGlobalModeMelee* global) {
         }
     }
     gmGlobalRecord* record = g_GameGlobal->getGlobalRecordGameDatap();
-    g_GameGlobal->m_modeMelee->m_meleeInitData.m_0x58 = record->m_unk2E4;
+    g_GameGlobal->m_modeMelee->m_meleeInitData.m_figureRareBit = record->m_figureRareBit;
     record = g_GameGlobal->getGlobalRecordGameDatap();
-    g_GameGlobal->m_modeMelee->m_meleeInitData.m_0x59 = record->m_unk2E5;
+    g_GameGlobal->m_modeMelee->m_meleeInitData.m_sealRareBit = record->m_sealRareBit;
 }
 
 void gmInitVSMelee(gmGlobalModeMelee* global) {
@@ -827,59 +827,41 @@ u32 gmCountMeleeCoin(int kind, int playerCount) {
     return 10.0f * (r * (0.11f * playerCount));
 }
 
-// HYPOTHESIS: the bytes 0x2E4 and 0x2E5 of the record are rarity bit sets for the trophy and for the sticker lottery;
-// the melee settings keep a copy of each (bytes 0x60 and 0x61 of the melee data). They are not declared in the headers.
-static inline u8& gmRecordFigureRareBit(gmGlobalRecord* record) {
-    return reinterpret_cast<u8*>(record)[0x2E4];
-}
-
-static inline u8& gmRecordSealRareBit(gmGlobalRecord* record) {
-    return reinterpret_cast<u8*>(record)[0x2E5];
-}
-
-static inline u8& gmMeleeFigureRareBit(gmGlobalModeMelee* melee) {
-    return reinterpret_cast<u8*>(melee)[0x60];
-}
-
-static inline u8& gmMeleeSealRareBit(gmGlobalModeMelee* melee) {
-    return reinterpret_cast<u8*>(melee)[0x61];
-}
-
 u8 gmGetRecFigureRareBit() {
-    return gmRecordFigureRareBit(g_GameGlobal->getGlobalRecordGameDatap());
+    return g_GameGlobal->getGlobalRecordGameDatap()->m_figureRareBit;
 }
 
 // gmSetupMeleeFigureRareBit: copies the trophy rarity bits of the record to the melee settings.
 extern "C" void fn_800515E8() {
-    u8 bits = gmRecordFigureRareBit(g_GameGlobal->getGlobalRecordGameDatap());
-    gmMeleeFigureRareBit(g_GameGlobal->m_modeMelee) = bits;
+    u8 bits = g_GameGlobal->getGlobalRecordGameDatap()->m_figureRareBit;
+    g_GameGlobal->m_modeMelee->m_meleeInitData.m_figureRareBit = bits;
 }
 
 void gmSetRecFigureRareBit(u8 bit) {
-    gmRecordFigureRareBit(g_GameGlobal->getGlobalRecordGameDatap()) |= bit;
+    g_GameGlobal->getGlobalRecordGameDatap()->m_figureRareBit |= bit;
 }
 
 u8 gmGetRecSealRareBit() {
-    return gmRecordSealRareBit(g_GameGlobal->getGlobalRecordGameDatap());
+    return g_GameGlobal->getGlobalRecordGameDatap()->m_sealRareBit;
 }
 
 // gmSetupMeleeSealRareBit: the same for the sticker rarity bits.
 extern "C" void fn_80051680() {
-    u8 bits = gmRecordSealRareBit(g_GameGlobal->getGlobalRecordGameDatap());
-    gmMeleeSealRareBit(g_GameGlobal->m_modeMelee) = bits;
+    u8 bits = g_GameGlobal->getGlobalRecordGameDatap()->m_sealRareBit;
+    g_GameGlobal->m_modeMelee->m_meleeInitData.m_sealRareBit = bits;
 }
 
 void gmSetRecSealRareBit(u8 bit) {
-    gmRecordSealRareBit(g_GameGlobal->getGlobalRecordGameDatap()) |= bit;
+    g_GameGlobal->getGlobalRecordGameDatap()->m_sealRareBit |= bit;
 }
 
 // gmLotFigure: lotteries a trophy with the rarity bits of the match.
 extern "C" u16 fn_800516F0() {
-    return fn_8005630C(gmMeleeFigureRareBit(g_GameGlobal->m_modeMelee));
+    return fn_8005630C(g_GameGlobal->m_modeMelee->m_meleeInitData.m_figureRareBit);
 }
 
 u16 gmLotFigureForCoinshooter() {
-    return fn_8005630C(gmMeleeFigureRareBit(g_GameGlobal->m_modeMelee) | 1);
+    return fn_8005630C(g_GameGlobal->m_modeMelee->m_meleeInitData.m_figureRareBit | 1);
 }
 
 u16 gmCheckFigureRarity(u32 id) {
@@ -915,7 +897,7 @@ u16 gmLotSealToBitset(u8 rareBits, u8 kind) {
 
 // gmLotSeal: lotteries a sticker with the rarity bits of the match.
 extern "C" u16 fn_80051844(u8 kind) {
-    return gmLotSealToBitset(gmMeleeSealRareBit(g_GameGlobal->m_modeMelee), kind);
+    return gmLotSealToBitset(g_GameGlobal->m_modeMelee->m_meleeInitData.m_sealRareBit, kind);
 }
 
 // A bit of the CD (song) acquired flags or stage flags: 32 bits per word.
@@ -996,61 +978,63 @@ extern "C" bool fn_80051A6C() {
     return true;
 }
 
-// HYPOTHESIS: one halfword per figure or sticker in the record (figures from 0x842, stickers from 0xD58): bit 15
-// 'owned', bits 12-14 the viewed/info flags and bits 0-9 the number owned (stops at 999). This is a view of the part of
-// the record that is not declared in the header yet.
-struct gmRecordCollectionView {
-    char _0[0x842];
-    u16 m_figureFlags[0x28B];
-    u16 m_sealFlags[1]; // 0xD58, more entries follow
-};
-
-static inline gmRecordCollectionView* gmRecordCollection(gmGlobalRecord* record) {
-    return reinterpret_cast<gmRecordCollectionView*>(record);
-}
-
 static inline void gmSetRecordFigureRareBit(u8 bits) {
-    gmRecordFigureRareBit(g_GameGlobal->getGlobalRecordGameDatap()) = bits;
+    g_GameGlobal->getGlobalRecordGameDatap()->m_figureRareBit = bits;
 }
 
 static inline void gmSetRecordSealRareBit(u8 bits) {
-    gmRecordSealRareBit(g_GameGlobal->getGlobalRecordGameDatap()) = bits;
+    g_GameGlobal->getGlobalRecordGameDatap()->m_sealRareBit = bits;
+}
+
+// HYPOTHESIS: inline getters of the record and of its trophy and sticker tables (the shape of GameGlobal's
+// getGlobalRecord*Datap getters, which are out of line). The writers below fetch the table through them at every use,
+// which is what keeps the table base (record + offset) in its own register.
+static inline gmGlobalRecord* gmGetRecord(GameGlobal* global) {
+    return global->m_record;
+}
+
+static inline gmGlobalRecord::FigureData* gmGetRecordFigureData(GameGlobal* global) {
+    return &global->m_record->m_figureData;
+}
+
+static inline gmGlobalRecord::SealData* gmGetRecordSealData(GameGlobal* global) {
+    return &global->m_record->m_sealData;
 }
 
 // Resets the trophy collection and gives the player one random trophy.
 void gmRecFigureAllInit() {
     int count = gmGetFigMaxCount();
     for (int i = 0; i < count; i++) {
-        gmRecordCollection(g_GameGlobal->m_record)->m_figureFlags[i] = 0;
+        gmGetRecord(g_GameGlobal)->m_figureData.m_flags[i] = 0;
     }
-    reinterpret_cast<u8*>(g_GameGlobal->getGlobalRecordGameDatap())[0x2E4] = 2;
+    g_GameGlobal->getGlobalRecordGameDatap()->m_figureRareBit = 2;
     int index = gmFig_Id2Index(fn_8005630C(2));
-    u16 entry = gmRecordCollection(g_GameGlobal->m_record)->m_figureFlags[index];
+    u16 entry = gmGetRecordFigureData(g_GameGlobal)->m_flags[index];
     int number = (entry & 0x3FF) + 1;
     if (number >= 1000) {
         number = 999;
     }
     entry = (entry & 0xF000) | 0x8000;
     entry |= number;
-    gmRecordCollection(g_GameGlobal->m_record)->m_figureFlags[index] = entry;
+    gmGetRecordFigureData(g_GameGlobal)->m_flags[index] = entry;
 }
 
 // Resets the sticker collection and gives the player one random sticker.
 void gmRecSealAllInit() {
     int count = gmGetSealMaxCount();
     for (int i = 0; i < count; i++) {
-        gmRecordCollection(g_GameGlobal->m_record)->m_sealFlags[i] = 0;
+        gmGetRecord(g_GameGlobal)->m_sealData.m_flags[i] = 0;
     }
-    reinterpret_cast<u8*>(g_GameGlobal->getGlobalRecordGameDatap())[0x2E5] = 4;
+    g_GameGlobal->getGlobalRecordGameDatap()->m_sealRareBit = 4;
     int index = gmSeal_Id2Index(gmLotSealToBitset(4, 2));
-    u16 entry = gmRecordCollection(g_GameGlobal->m_record)->m_sealFlags[index];
+    u16 entry = gmGetRecordSealData(g_GameGlobal)->m_flags[index];
     int number = (entry & 0x3FF) + 1;
     if (number >= 1000) {
         number = 999;
     }
     entry = (entry & 0xF000) | 0x8000;
     entry |= number;
-    gmRecordCollection(g_GameGlobal->m_record)->m_sealFlags[index] = entry;
+    gmGetRecordSealData(g_GameGlobal)->m_flags[index] = entry;
 }
 
 u8 gmGetMeleeCPULevel(u8 level) {
@@ -1117,31 +1101,30 @@ bool gmCheckCharaAccept(u64 flag, int kind) {
     return (set.words[kind / 32] & (1 << (kind % 32))) != 0;
 }
 
-// HYPOTHESIS: turns an all-star list into a corps list. Byte 4 == 1 marks an all-star setup whose first player
-// record carries the fighter count in its stock field; the first player's fighter/cpu/reaction data moves to the
+// HYPOTHESIS: turns an all-star list into a corps list. m_isAllStarList == 1 marks an all-star setup whose first
+// player record carries the fighter count in its stock field; the first player's fighter/cpu/reaction data moves to the
 // corps header, the per-player costume ids are packed into the byte array at 0x24 and repeated up to the count.
 void gmGlobalCorpsConvertAllStarToCorps(gmGlobalCorps* corps) {
-    u8* raw = reinterpret_cast<u8*>(corps);
-    if (raw[0x4] == 1) {
+    if (corps->m_isAllStarList == 1) {
         int count = 100;
         if (corps->m_playersInitData[0].m_stockCount < 100) {
             count = corps->m_playersInitData[0].m_stockCount;
         }
         if (count > 1) {
-            int period = raw[0x1];
-            u8 kind = raw[0x24];
-            u8 cpuType = raw[0x27];
-            u8 cpuRank = raw[0x28];
+            int period = corps->m_numFightersToBeat;
+            int kind = corps->m_playersInitData[0].m_characterKind;
+            u8 cpuType = corps->m_playersInitData[0].m_cpuType;
+            s8 cpuRank = corps->m_playersInitData[0].m_cpuRank;
             float attackMul = corps->m_playersInitData[0].m_attackReactionMul;
             float damageMul = corps->m_playersInitData[0].m_damageReactionMul;
             float scale = corps->m_playersInitData[0].m_scale;
-            raw[0x4] = 0;
-            raw[0xA] = kind;
-            raw[0xB] = cpuType;
-            raw[0xC] = cpuRank;
-            *reinterpret_cast<float*>(raw + 0x10) = attackMul;
-            *reinterpret_cast<float*>(raw + 0x14) = damageMul;
-            *reinterpret_cast<float*>(raw + 0x18) = scale;
+            corps->m_isAllStarList = 0;
+            corps->m_characterKind = kind;
+            corps->m_cpuType = cpuType;
+            corps->m_cpuRank = cpuRank;
+            corps->m_attackReactionMul = attackMul;
+            corps->m_damageReactionMul = damageMul;
+            corps->m_scale = scale;
             int packed = count;
             if (period < count) {
                 packed = period;
@@ -1149,16 +1132,16 @@ void gmGlobalCorpsConvertAllStarToCorps(gmGlobalCorps* corps) {
             int n = 0;
             gmPlayerCorpsInitData* src = corps->m_playersInitData;
             while (n < packed) {
-                raw[0x24 + n] = src->m_costumeId;
+                corps->m_costumeIds[n] = src->m_costumeId;
                 n++;
                 src++;
             }
             for (int i = period; i < count; i++) {
-                raw[0x24 + i] = raw[0x24 + i % period];
+                corps->m_costumeIds[i] = corps->m_costumeIds[i % period];
             }
-            raw[0x5] |= 0x40;
-            raw[0x1] = count;
-            raw[0x3] = count;
+            corps->m_flags |= 0x40;
+            corps->m_numFightersToBeat = count;
+            corps->m_numFightersInCurrentStage = count;
         }
     }
 }
@@ -1190,9 +1173,8 @@ extern "C" bool fn_800526E4() {
     return g_GameGlobal->m_modeMelee->m_meleeInitData.m_isUseDragoon == 1;
 }
 
-// HYPOTHESIS: the figure collection is a halfword array at gmGlobalRecord+0x842 (stickers: +0xD58), one entry per
-// collection index: bit 15 owned, bit 14 referred to, bit 13 info seen, bit 12 info-ref seen, low 10 bits the
-// count owned (capped at 999).
+// The bits of the gmGlobalRecord trophy and sticker tables (one entry per collection index): bit 15 owned, bit 14
+// referred to, bit 13 info seen, bit 12 info-ref seen, low 10 bits the count owned (capped at 999).
 #define GM_COLLECT_OWNED 0x8000
 #define GM_COLLECT_REFER 0x4000
 #define GM_COLLECT_INFO 0x2000
@@ -1200,115 +1182,89 @@ extern "C" bool fn_800526E4() {
 #define GM_COLLECT_FLAGS 0xF000
 #define GM_COLLECT_COUNT 0x03FF
 
-static inline u16* figureTable() {
-    return reinterpret_cast<u16*>(reinterpret_cast<u8*>(g_GameGlobal->m_record) + 0x842);
-}
-
-static inline u16* sealTable() {
-    return reinterpret_cast<u16*>(reinterpret_cast<u8*>(g_GameGlobal->m_record) + 0xD58);
-}
-
-// MATCH-ONLY: the record writers keep the table base (record + offset) in its own register; this needs
-// opt_propagation off (the readers further down do not).
-#pragma push
-#pragma opt_propagation off
-
 // Not renamed: ad_keep_manager.cpp calls it as fn_80052704.
 extern "C" void fn_80052704(int id, int num) {
     int index = gmFig_Id2Index(id);
-    u16* table = figureTable();
-    u16 entry = table[index];
+    u16 entry = gmGetRecordFigureData(g_GameGlobal)->m_flags[index];
     num += entry & GM_COLLECT_COUNT;
     if (num >= 1000) {
         num = 999;
     }
     u16 flags = entry & GM_COLLECT_FLAGS;
     flags |= GM_COLLECT_OWNED;
-    table[index] = flags | num;
+    gmGetRecordFigureData(g_GameGlobal)->m_flags[index] = flags | num;
 }
 
 int gmCheckCountFigure(int id) {
     int index = gmFig_Id2Index(id);
-    u8* record = reinterpret_cast<u8*>(g_GameGlobal->m_record);
-    return *reinterpret_cast<u16*>(record + 0x842 + index * 2) & GM_COLLECT_COUNT;
+    return g_GameGlobal->m_record->m_figureData.m_flags[index] & GM_COLLECT_COUNT;
 }
 
 // Copy of the exact definition in gm_common.cpp (cluster A's file); the owned flag is bit 15.
 bool gmCheckExistFigure(u16 id) {
     s32 index = gmFig_Id2Index(id);
-    u8* record = reinterpret_cast<u8*>(g_GameGlobal->m_record);
-    // HYPOTHESIS: unk842 is a u16 table in gmGlobalRecord indexed by figure index; bit 15 is the existence flag.
-    u16 flags = *reinterpret_cast<u16*>(record + 0x842 + index * 2);
+    u16 flags = g_GameGlobal->m_record->m_figureData.m_flags[index];
     return (flags >> 15) & 1;
 }
 
 bool gmCheckReferFigure(int id) {
     int index = gmFig_Id2Index(id);
-    u8* record = reinterpret_cast<u8*>(g_GameGlobal->m_record);
-    return (*reinterpret_cast<u16*>(record + 0x842 + index * 2) >> 14) & 1;
+    return (g_GameGlobal->m_record->m_figureData.m_flags[index] >> 14) & 1;
 }
 
 bool gmCheckInfoFigure(int id) {
     int index = gmFig_Id2Index(id);
-    u8* record = reinterpret_cast<u8*>(g_GameGlobal->m_record);
-    return (*reinterpret_cast<u16*>(record + 0x842 + index * 2) >> 13) & 1;
+    return (g_GameGlobal->m_record->m_figureData.m_flags[index] >> 13) & 1;
 }
 
 bool gmCheckInfoRefFigure(int id) {
     int index = gmFig_Id2Index(id);
-    u8* record = reinterpret_cast<u8*>(g_GameGlobal->m_record);
-    return (*reinterpret_cast<u16*>(record + 0x842 + index * 2) >> 12) & 1;
+    return (g_GameGlobal->m_record->m_figureData.m_flags[index] >> 12) & 1;
 }
 
 void gmSetFlagReferFigure(int id, u32 flag) {
     int index = gmFig_Id2Index(id);
-    u16* table = figureTable();
-    u16 entry = table[index];
+    u16 entry = gmGetRecordFigureData(g_GameGlobal)->m_flags[index];
     if (flag == 1) {
         entry |= GM_COLLECT_REFER;
     } else {
         entry &= ~GM_COLLECT_REFER;
     }
-    table[index] = entry;
+    gmGetRecordFigureData(g_GameGlobal)->m_flags[index] = entry;
 }
 
 void gmSetFlagInfoFigure(int id, u32 flag) {
     int index = gmFig_Id2Index(id);
-    u16* table = figureTable();
-    u16 entry = table[index];
+    u16 entry = gmGetRecordFigureData(g_GameGlobal)->m_flags[index];
     if (flag == 1) {
         entry |= GM_COLLECT_INFO;
     } else {
         entry &= ~GM_COLLECT_INFO;
     }
-    table[index] = entry;
+    gmGetRecordFigureData(g_GameGlobal)->m_flags[index] = entry;
 }
 
 void gmSetFlagInfoRefFigure(int id, u32 flag) {
     int index = gmFig_Id2Index(id);
-    u16* table = figureTable();
-    u16 entry = table[index];
+    u16 entry = gmGetRecordFigureData(g_GameGlobal)->m_flags[index];
     if (flag == 1) {
         entry |= GM_COLLECT_INFOREF;
     } else {
         entry &= ~GM_COLLECT_INFOREF;
     }
-    table[index] = entry;
+    gmGetRecordFigureData(g_GameGlobal)->m_flags[index] = entry;
 }
 
-#pragma pop
 
-// MATCH-ONLY: the counting loops test the owned bit directly instead of calling gmCheckExistFigure/Seal.
+// The counting loops test the owned bit inline instead of calling gmCheckExistFigure/Seal.
 static inline bool figureOwned(u16 id) {
     int index = gmFig_Id2Index(id);
-    u8* record = reinterpret_cast<u8*>(g_GameGlobal->m_record);
-    return (*reinterpret_cast<u16*>(record + 0x842 + index * 2) & GM_COLLECT_OWNED) != 0;
+    return (g_GameGlobal->m_record->m_figureData.m_flags[index] & GM_COLLECT_OWNED) != 0;
 }
 
 static inline bool sealOwned(u16 id) {
     int index = gmSeal_Id2Index(id);
-    u8* record = reinterpret_cast<u8*>(g_GameGlobal->m_record);
-    return (*reinterpret_cast<u16*>(record + 0xD58 + index * 2) & GM_COLLECT_OWNED) != 0;
+    return (g_GameGlobal->m_record->m_sealData.m_flags[index] & GM_COLLECT_OWNED) != 0;
 }
 
 // Number of figures the player owns.
@@ -1336,88 +1292,77 @@ bool gmCheckAllFigureExistRare(u32 rarity) {
     return true;
 }
 
-#pragma push
-#pragma opt_propagation off
 
 // Not renamed: ad_keep_manager.cpp calls it as fn_80052AC0.
 extern "C" void fn_80052AC0(int id, int num) {
     int index = gmSeal_Id2Index(id);
-    u16* table = sealTable();
-    u16 entry = table[index];
+    u16 entry = gmGetRecordSealData(g_GameGlobal)->m_flags[index];
     num += entry & GM_COLLECT_COUNT;
     if (num >= 1000) {
         num = 999;
     }
     u16 flags = entry & GM_COLLECT_FLAGS;
     flags |= GM_COLLECT_OWNED;
-    table[index] = flags | num;
+    gmGetRecordSealData(g_GameGlobal)->m_flags[index] = flags | num;
 }
 
 bool gmCheckExistSeal(int id) {
     int index = gmSeal_Id2Index(id);
-    u8* record = reinterpret_cast<u8*>(g_GameGlobal->m_record);
-    return (*reinterpret_cast<u16*>(record + 0xD58 + index * 2) >> 15) & 1;
+    return (g_GameGlobal->m_record->m_sealData.m_flags[index] >> 15) & 1;
 }
 
 bool gmCheckInfoSeal(int id) {
     int index = gmSeal_Id2Index(id);
-    u8* record = reinterpret_cast<u8*>(g_GameGlobal->m_record);
-    return (*reinterpret_cast<u16*>(record + 0xD58 + index * 2) >> 13) & 1;
+    return (g_GameGlobal->m_record->m_sealData.m_flags[index] >> 13) & 1;
 }
 
 bool gmCheckInfoRefSeal(int id) {
     int index = gmSeal_Id2Index(id);
-    u8* record = reinterpret_cast<u8*>(g_GameGlobal->m_record);
-    return (*reinterpret_cast<u16*>(record + 0xD58 + index * 2) >> 12) & 1;
+    return (g_GameGlobal->m_record->m_sealData.m_flags[index] >> 12) & 1;
 }
 
 void gmSetFlagCountSeal(int id, u32 count) {
     int index = gmSeal_Id2Index(id);
-    u16* table = sealTable();
-    u16 entry = table[index];
+    u16 entry = gmGetRecordSealData(g_GameGlobal)->m_flags[index];
     if (count > 1000) {
         count = 999;
     }
-    table[index] = count | (entry & GM_COLLECT_FLAGS);
+    gmGetRecordSealData(g_GameGlobal)->m_flags[index] = count | (entry & GM_COLLECT_FLAGS);
 }
 
 void gmSetFlagReferSeal(int id, u32 flag) {
     int index = gmSeal_Id2Index(id);
-    u16* table = sealTable();
-    u16 entry = table[index];
+    u16 entry = gmGetRecordSealData(g_GameGlobal)->m_flags[index];
     if (flag == 1) {
         entry |= GM_COLLECT_REFER;
     } else {
         entry &= ~GM_COLLECT_REFER;
     }
-    table[index] = entry;
+    gmGetRecordSealData(g_GameGlobal)->m_flags[index] = entry;
 }
 
 void gmSetFlagInfoSeal(int id, u32 flag) {
     int index = gmSeal_Id2Index(id);
-    u16* table = sealTable();
-    u16 entry = table[index];
+    u16 entry = gmGetRecordSealData(g_GameGlobal)->m_flags[index];
     if (flag == 1) {
         entry |= GM_COLLECT_INFO;
     } else {
         entry &= ~GM_COLLECT_INFO;
     }
-    table[index] = entry;
+    gmGetRecordSealData(g_GameGlobal)->m_flags[index] = entry;
 }
 
 void gmSetFlagInfoRefSeal(int id, u32 flag) {
     int index = gmSeal_Id2Index(id);
-    u16* table = sealTable();
-    u16 entry = table[index];
+    u16 entry = gmGetRecordSealData(g_GameGlobal)->m_flags[index];
     if (flag == 1) {
         entry |= GM_COLLECT_INFOREF;
     } else {
         entry &= ~GM_COLLECT_INFOREF;
     }
-    table[index] = entry;
+    gmGetRecordSealData(g_GameGlobal)->m_flags[index] = entry;
 }
 
-#pragma pop
 
 
 // Number of stickers the player owns.
@@ -1433,9 +1378,9 @@ int gmGetKindCountSealExist() {
     return total;
 }
 
-// HYPOTHESIS: the name comes from the map; the value is a word of the set-rule record at 0x24.
+// HYPOTHESIS: the name comes from the map; the value is the set rule's controls-name player number (0x24).
 u32 gmGetMenuDecisionPad() {
-    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(g_GameGlobal->m_setRule) + 0x24);
+    return g_GameGlobal->m_setRule->m_ctrlNamePlayerNo;
 }
 
 // Copy of the exact definition in gm_common.cpp (cluster A's file).
@@ -1571,12 +1516,12 @@ static inline void saveRuleBytes(u8* rule, u8* backup, int first, int count) {
 }
 
 void gmRuleBackupForNet() {
-    saveRuleBytes(reinterpret_cast<u8*>(g_GameGlobal->m_setRule), *reinterpret_cast<u8**>(reinterpret_cast<u8*>(g_GameGlobal) + 0x48), 2, 6);
-    saveRuleBytes(reinterpret_cast<u8*>(g_GameGlobal->m_setRule), *reinterpret_cast<u8**>(reinterpret_cast<u8*>(g_GameGlobal) + 0x4C), 8, 5);
+    saveRuleBytes(reinterpret_cast<u8*>(g_GameGlobal->m_setRule), g_GameGlobal->unk48, 2, 6);
+    saveRuleBytes(reinterpret_cast<u8*>(g_GameGlobal->m_setRule), g_GameGlobal->unk4C, 8, 5);
 }
 
 void gmRuleResetForNet() {
-    u8* backup = *reinterpret_cast<u8**>(reinterpret_cast<u8*>(g_GameGlobal) + 0x48);
+    u8* backup = g_GameGlobal->unk48;
     u8* rule = reinterpret_cast<u8*>(g_GameGlobal->m_setRule);
     rule[2] = backup[0];
     rule[3] = backup[1];
@@ -1584,7 +1529,7 @@ void gmRuleResetForNet() {
     rule[5] = backup[3];
     rule[6] = backup[4];
     rule[7] = backup[5];
-    backup = *reinterpret_cast<u8**>(reinterpret_cast<u8*>(g_GameGlobal) + 0x4C);
+    backup = g_GameGlobal->unk4C;
     rule = reinterpret_cast<u8*>(g_GameGlobal->m_setRule);
     rule[8] = backup[0];
     rule[9] = backup[1];
@@ -1664,7 +1609,6 @@ void gmIncAnybodyWatchCount() {
     *count = value <= kCountMax - 1 ? value + 1 : kCountMax;
 }
 
-// HYPOTHESIS: the friend count is the byte after m_stagePlayCount[0x43] (0x32B); the header's m_stagePlayCount[0x44] spans it.
 void gmSetFriendCount(int count) {
     if (count < 0) {
         count = 0;
@@ -1672,11 +1616,11 @@ void gmSetFriendCount(int count) {
     if (count > 0x40) {
         count = 0x40;
     }
-    *(reinterpret_cast<u8*>(g_GameGlobal->m_record) + 0x32B) = count;
+    g_GameGlobal->m_record->m_friendCount = count;
 }
 
 u32 gmGetFriendCount() {
-    return *(reinterpret_cast<u8*>(g_GameGlobal->m_record) + 0x32B);
+    return g_GameGlobal->m_record->m_friendCount;
 }
 
 // Adds to a record counter, saturating at max.
@@ -1750,12 +1694,12 @@ void gmAddMeleeCoin() {
     }
 }
 
-// Auto handicap bookkeeping at the end of a match: results are only used when the set rule's byte at +0x5 is 1
+// Auto handicap bookkeeping at the end of a match: results are only used when the set rule's handicap byte is 1
 // (HYPOTHESIS: auto handicap). Players whose flag byte at +0xF is zero get 20 more handicap (max 300), the others
 // lose 20 (2 players) or 10 (3 or 4 players, except the lowest).
 void gmSetAutoHandiModeResult() {
     gmResultInfo* result = g_GameGlobal->m_resultInfo;
-    if (*(reinterpret_cast<u8*>(g_GameGlobal->m_setRule) + 5) != 1) {
+    if (g_GameGlobal->m_setRule->m_handicap != 1) {
         return;
     }
     int players = 0;
@@ -2320,7 +2264,7 @@ void gmAddDiagramResultName(gmResultInfo* result) {
 
 // Whether the clear getter of this index is open (state 2). HYPOTHESIS: the record keeps one state byte per getter at 0x1528.
 bool isClearGetterOpen(int index) {
-    return (reinterpret_cast<u8*>(g_GameGlobal->m_record) + index)[0x1528] == 2;
+    return g_GameGlobal->m_record->unk1528[index] == 2;
 }
 
 // Marks the clear getter as open in the clear-get app flags.

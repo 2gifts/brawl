@@ -26,17 +26,6 @@ struct wnemBombheadParam {
     u32 m_searchFrame;     // 0x8, the frame of the flight on which the search starts (HeadFly)
 };
 
-// TODO(layout): so/collision/so_collision_search_part.h declares soCollisionSearchData as 0x18 anonymous bytes. The
-// copy HeadFly makes of it uses a float at 0xC and a bitfield at 0x10 (patch in the worker notes).
-struct wnemBombheadSearchData {
-    Vec3f unk0;   // 0x0, HYPOTHESIS: a Vec3f (the copy is the Vec3f copy); its role is unknown
-    float unkC;
-    u32 unk10_0 : 16;
-    u32 m_kind : 10;
-    u32 unk10_26 : 6;
-    s32 unk14;
-};
-
 void wnemBombheadProc::HeadFly(wnemSimple* wn, soModuleAccesser* acc) {
     bool isFirstFrame = wn->unk2214;
     wn->unk2214 = false;
@@ -60,9 +49,9 @@ void wnemBombheadProc::HeadFly(wnemSimple* wn, soModuleAccesser* acc) {
             wn->m_accel.m_y = shot->m_flySpeedY;
         }
         if (acc->getCollisionSearchModule().isSearch(0)) {
-            wnemBombheadSearchData data = *reinterpret_cast<wnemBombheadSearchData*>(acc->getCollisionSearchModule().getData(0));
-            data.m_kind = 2;
-            acc->getCollisionSearchModule().set(0, 0, reinterpret_cast<soCollisionSearchData*>(&data));
+            soCollisionSearchData data = *acc->getCollisionSearchModule().getData(0);
+            data.m_unk10b = 2;
+            acc->getCollisionSearchModule().set(0, 0, &data);
             acc->getCollisionAttackModule().clearAll();
         } else {
             wnemCommonProc::Report("[warning!!] wnemRoboProc::MissileFly -- refrect but, isSearch(0) = false \n");

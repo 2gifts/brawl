@@ -11,7 +11,7 @@
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/diddy/ft_diddy.h>
-#include <ft/ft_physics_iface.h>
+#include <so/so_module_hyp.h>
 #include <ft/diddy/ft_diddy_extend_param_accesser.h>
 #include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
@@ -81,7 +81,7 @@ ftDiddy::ftDiddy(s32 entryId,
     processes[27] = &lbl_115_bss_324;
     processes[28] = &lbl_115_bss_324;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 29);
-    ftPhysicsModuleCall54(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0);
+    getPhysicsModule(m_moduleAccesser).unk54(0);
 }
 
 // Shared-class destructors and accessors that this module emits itself (same pattern as ft_marth.cpp).

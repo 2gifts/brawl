@@ -13,29 +13,22 @@ scAdvSave* scAdvSave::create() {
 
 void scAdvSave::setModule() { }
 
-struct UnkParam {
-    union {
-        bool asBool;
-        u32 asInt;
-    } unk0;
-    u32 unk4;
-};
+typedef gmAdvData::PadInfo UnkParam;
 
 void scAdvSave::start() {
     UnkParam stack20;
     UnkParam stack18;
     UnkParam stack10;
     if (g_GameGlobal->m_advData) {
-        stack18.unk0.asInt = g_GameGlobal->m_advData->m_record.unk4928;
-        stack18.unk4 = g_GameGlobal->m_advData->m_record.unk492C;
+        stack18 = g_GameGlobal->m_advData->m_padInfo[0];
     } else {
-        stack20.unk0.asBool = false;
-        stack20.unk4 = -1;
+        stack20.m_flag.m_isSet = false;
+        stack20.m_padNo = -1;
         stack18 = stack20;
     }
     stack10 = stack18;
     muAdvSaveTaskParam param;
-    param.unk0 = stack10.unk4;
+    param.unk0 = stack10.m_padNo;
     s32 layout = gfSceneManager::getInstance()->m_memoryLayout;
     if (layout == 0) {
         muAdvSaveTask* task = muAdvSaveTask::create(&param, Heaps::MenuInstance, 43);
@@ -84,16 +77,15 @@ void scAdvLoad::start() {
     UnkParam stack18;
     UnkParam stack10;
     if (g_GameGlobal->m_advData) {
-        stack18.unk0.asInt = g_GameGlobal->m_advData->m_record.unk4928;
-        stack18.unk4 = g_GameGlobal->m_advData->m_record.unk492C;
+        stack18 = g_GameGlobal->m_advData->m_padInfo[0];
     } else {
-        stack20.unk0.asBool = false;
-        stack20.unk4 = -1;
+        stack20.m_flag.m_isSet = false;
+        stack20.m_padNo = -1;
         stack18 = stack20;
     }
     stack10 = stack18;
     muAdvLoadTaskParam param;
-    param.unk0 = stack10.unk4;
+    param.unk0 = stack10.m_padNo;
     muAdvLoadTask* task = muAdvLoadTask::create(&param);
     if (m_task) {
         m_task->exit();

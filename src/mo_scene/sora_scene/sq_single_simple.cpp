@@ -1,15 +1,10 @@
 #include <gf/gf_application.h>
 #include <gf/gf_boot_task.h>
-#include <gf/gf_scene.h>
 #include <gm/gm_common.h>
 #include <gm/gm_global.h>
 #include <mu/menu.h>
 #include <sq/sq_single_simple.h>
-#include <sr/sr_common.h>
 #include <types.h>
-
-// gmAddSeal (the map name); ad_keep_manager.cpp calls it by this stand-in name.
-extern "C" void fn_80052AC0(u16 id, u8 num);
 
 // HYPOTHESIS: one row of the simple-mode stage table.
 struct SqStageRow {
@@ -23,6 +18,10 @@ struct SqStageRow {
 };
 static_assert(sizeof(SqStageRow) == 0x50, "Class is wrong size!");
 
+extern const double lbl_1_rodata_A28;
+
+// gmAddSeal (the map name); gm_common.cpp defines it by this stand-in name.
+extern "C" void fn_80052AC0(int id, int num);
 extern "C" int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int kind);
 extern "C" int exchangeGmCharacterKindToMuCharKind__6muMenuFiii(int kind);
 
@@ -34,6 +33,7 @@ static u32 lbl_1_data_7298[5] = {10, 20, 30, 50, 100};
 namespace {
 void setupData(u8* data, u32 size);
 void decisionStage(int kind);
+}
 
 int checkStageType(SqStageRow* rows) {
     int result = 0;
@@ -50,12 +50,13 @@ int checkStageType(SqStageRow* rows) {
     default:
         break;
     }
-    for (int i = 0; i < 3; i++) {
-        if (rows[i].m_value >= 1.2) {
+    for (u8 i = 0; i < 3; i++) {
+        SqStageRow* row = &rows[i];
+        if (row->m_value >= lbl_1_rodata_A28) {
             result = 3;
             break;
         }
-        if (rows[i].m_flag == 1) {
+        if (row->m_flag == 1) {
             result = 5;
             break;
         }
@@ -87,27 +88,21 @@ int checkStageHideChar(SqStageRow* rows) {
     return result;
 }
 
-struct KeepStageChecks {
-    KeepStageChecks() {
-        checkStageType(0);
-        checkStageHideChar(0);
-    }
-};
-static KeepStageChecks keepStageChecks;
-} // namespace
-
 sqSingleSimple* sqSingleSimple::create() {
     sqSingleSimple* seq = new (Heaps::GlobalMode) sqSingleSimple("sqSingleSimple");
     if (lbl_1_bss_198C == 0) {
-        gfPreLoadDataBuffer buf;
-        gfBootTask::getPreLoadDataBuffer(&buf, 1);
-        u8* data = buf.m_data;
-        u32 size = buf.m_size;
+        gfBootTask::PreLoadDataBuffer buf = gfBootTask::getPreLoadDataBuffer(1);
+        u8* data = buf.addr;
+        u32 size = buf.size;
         lbl_1_bss_198C = data;
         lbl_1_bss_1990 = size;
         setupData(data, size);
     }
     return seq;
+}
+
+void sqSingleSimple::exit() {
+    g_GameGlobal->m_advData->m_flags.m_unk1 = 0;
 }
 
 void sqSingleSimple::start() {
@@ -122,22 +117,23 @@ void sqSingleSimple::start() {
     } else {
         unk8 = 0;
         unk10 = 0;
-        unk2F = g_gfApplication->unk110[0] != 0;
+        unk2F = g_gfApplication->unk110Value != 0;
         g_GameGlobal->initSelCharData();
-        g_GameGlobal->m_selCharData->m_unk2E_7 = 1;
+        g_GameGlobal->m_selCharData->unk2E_b7 = 1;
     }
 }
+
 
 void sqSingleSimple::setSimpleSetting() {
     gmGlobalModeMelee* melee = g_GameGlobal->m_modeMelee;
     gmSelCharData* sel = g_GameGlobal->m_selCharData;
     gmResultInfo* result = g_GameGlobal->m_resultInfo;
-    unk32 = sel->m_unk2E_7;
-    u8 mid = sel->m_unk2E_4;
+    unk32 = sel->unk2E_b7;
+    u8 mid = sel->unk2E_b4;
     unk14 = 0;
     unk31 = mid;
     unk18 = 0;
-    unk1C = 0;
+    unk1CValue = 0;
     unk24 = 0;
     unk28 = 0;
     unk2C = 1;
@@ -173,7 +169,7 @@ void sqSingleSimple::setSimpleSetting() {
     u8 kind2 = melee->m_playersInitData[0].m_characterKind;
     unk33 = kind2;
     decisionStage(kind2);
-    g_GameGlobal->m_advData->m_record.m_unk4924_6 = 0;
+    g_GameGlobal->m_advData->m_flags.m_unk1 = 0;
 }
 
 void sqSingleSimple::setStageContinueSetting() {
@@ -195,7 +191,7 @@ void sqSingleSimple::setStageContinueSetting() {
     }
     result->m_playersResultInfo[0].m_unk23C = tens + mod;
     gmSubCoin(lbl_1_data_7298[unk32] * 10);
-    u8 stocks = sel->m_unk2E_4;
+    u8 stocks = sel->unk2E_b4;
     unk31 = stocks;
     gmGlobalModeMelee* melee = g_GameGlobal->m_modeMelee;
     melee->m_playersInitData[0].m_stockCount = stocks;
@@ -225,26 +221,22 @@ void sqSingleSimple::setStageContinueSetting() {
         }
     } else {
         gmGlobalCorps* corps = g_GameGlobal->m_corps;
-        int left = (int)corps->m_unkC - 10;
-        corps->m_unkC = left < 0 ? 0 : left;
+        int left = (int)(u8)corps->m_cpuRank - 10;
+        corps->m_cpuRank = left < 0 ? 0 : left;
     }
-}
-
-void sqSingleSimple::exit() {
-    g_GameGlobal->m_advData->m_record.m_unk4924_6 = 0;
 }
 
 void sqSingleSimple::updateHiScore(int charKind, int flag, u32 score) {
     gmGlobalRecord::CharaNumData* data =
         g_GameGlobal->getGlobalRecordCharaNumDatap((u8)exchangeGmCharacterKindToMuCharKind__6muMenuFiii(charKind));
-    if (data->m_unkA0 < score) {
-        data->m_unkA0 = score;
+    if (data->unkA0 < score) {
+        data->unkA0 = score;
     }
     if (flag == 0) {
         return;
     }
-    if (data->m_unk9C_10 < unk32 + 1) {
-        data->m_unk9C_10 = unk32 + 1;
+    if (data->unk9C_b10 < unk32 + 1) {
+        data->unk9C_b10 = unk32 + 1;
     }
     if (isClearGetterOpen(0x29) == 1) {
         if (unk32 == 0) {

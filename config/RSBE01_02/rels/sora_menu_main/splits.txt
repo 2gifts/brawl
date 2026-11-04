@@ -171,10 +171,26 @@ mo_menu/mu_main_panel_ctrl.cpp:
 	.rodata     start:0x00001598 end:0x00001628
 	.data       start:0x00004220 end:0x00004610
 
+mo_menu/mu_soft_list_data.cpp:
+	.text       start:0x00036934 end:0x00036DB4
+	.rodata     start:0x00001628 end:0x00001630
+	.data       start:0x00004610 end:0x00004840
+
 mo_menu/mu_soft_list.cpp:
-	.text       start:0x00036934 end:0x00038530
-	.rodata     start:0x00001628 end:0x00001698
-	.data       start:0x00004610 end:0x00004B08
+	.text       start:0x00036DB4 end:0x00038530
+	.rodata     start:0x00001630 end:0x00001698
+	.data       start:0x00004840 end:0x00004B08
+
+mo_menu/mu_wifi_cnct_wnd.cpp:
+	.text       start:0x00038530 end:0x00039F58
+	.rodata     start:0x00001698 end:0x00001770
+	.data       start:0x00004B08 end:0x00004D30
+
+mo_menu/mu_delete_nand_task.cpp:
+	.text       start:0x0003CBB4 end:0x0003D1B8
+	.rodata     start:0x000017F0 end:0x000017F8
+	.data       start:0x00005220 end:0x000052E8
+	.bss        start:0x00000058 end:0x00000074
 
 mo_menu/mo_menu.cpp:
 	.text       start:0x0003D1B8 end:0x0003D254
