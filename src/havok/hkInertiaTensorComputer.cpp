@@ -40,37 +40,19 @@ hkVector4& hkTransform::getTranslation() {
     return m_translation;
 }
 
-// can't include hkMatrix3.h next to hkTransform.h (both define hkRotation), so this is the part of it used here
-struct __attribute__((aligned(16))) hkMatrix3 {
-    float elements[12];
-
-    void add(const hkMatrix3& other);
-    void changeBasis(const hkRotation& basis);
-};
-
-static inline hkMatrix3& asMatrix(hkMatrix3Storage& s) { return *reinterpret_cast<hkMatrix3*>(&s); }
-static inline const hkMatrix3& asMatrix(const hkMatrix3Storage& s) { return *reinterpret_cast<const hkMatrix3*>(&s); }
-// a mass element's transform is the 0x40 bytes at +0x50, laid out like an hkTransform
-static inline const hkTransform& transformOf(const hkMassElement& e) { return *reinterpret_cast<const hkTransform*>(&e.m_rotation); }
 
 hkMassProperties::hkMassProperties() {
     m_volume = 0.0f;
     m_mass = 0.0f;
     // HYPOTHESIS: Havok's setZero4 is a chained x = y = z = w = 0 (stores w first); the header's set() order gives x first
     m_centerOfMass.x = m_centerOfMass.y = m_centerOfMass.z = m_centerOfMass.w = 0.0f;
-    // HYPOTHESIS: the inlined hkMatrix3::setZero, copying a zero vector into each column
-    hkVector4 zero;
-    zero.x = zero.y = zero.z = zero.w = 0.0f;
-    hkVector4* cols = reinterpret_cast<hkVector4*>(m_inertiaTensor.v);
-    cols[0] = zero;
-    cols[1] = zero;
-    cols[2] = zero;
+    m_inertiaTensor.setZero();
 }
 
 // inertia(r, c) is elements[c * 4 + r]. moving the tensor onto the center of mass takes away mass * (shift^2 terms) on the
 // diagonal and puts the shift products back on the off-diagonals (which are symmetric)
 void hkInertiaTensorComputer::shiftInertiaToCom(hkVector4& shift, hkReal mass, hkMatrix3& inertia) {
-    float* m = inertia.elements;
+    float* m = &inertia.m_col0.x;
     m[0] -= mass * (shift.y * shift.y + shift.z * shift.z);
     m[5] -= mass * (shift.z * shift.z + shift.x * shift.x);
     m[10] -= mass * (shift.x * shift.x + shift.y * shift.y);
@@ -84,7 +66,7 @@ void hkInertiaTensorComputer::shiftInertiaToCom(hkVector4& shift, hkReal mass, h
 
 // same thing the other way round: signs flip
 void hkInertiaTensorComputer::shiftInertiaFromCom(hkVector4& shift, hkReal mass, hkMatrix3& inertia) {
-    float* m = inertia.elements;
+    float* m = &inertia.m_col0.x;
     m[0] += mass * (shift.y * shift.y + shift.z * shift.z);
     m[5] += mass * (shift.z * shift.z + shift.x * shift.x);
     m[10] += mass * (shift.x * shift.x + shift.y * shift.y);
@@ -105,7 +87,7 @@ hkResult hkInertiaTensorComputer::combineMassProperties(const hkArray<hkMassElem
     int i;
     for (i = 0; i < elements.m_size; i++) {
         hkVector4 centerOfMassInCommon;
-        centerOfMassInCommon.setTransformedPos(transformOf(elements[i]), elements[i].m_properties.m_centerOfMass);
+        centerOfMassInCommon.setTransformedPos(elements[i].m_transform, elements[i].m_properties.m_centerOfMass);
         groupCenterOfMass.x += elements[i].m_properties.m_mass * centerOfMassInCommon.x;
         groupCenterOfMass.y += elements[i].m_properties.m_mass * centerOfMassInCommon.y;
         groupCenterOfMass.z += elements[i].m_properties.m_mass * centerOfMassInCommon.z;
@@ -123,21 +105,21 @@ hkResult hkInertiaTensorComputer::combineMassProperties(const hkArray<hkMassElem
     result.m_mass = groupMass;
     result.m_volume = groupVolume;
     for (i = 0; i < 12; i++) {
-        result.m_inertiaTensor.v[i] = 0.0f;
+        (&result.m_inertiaTensor.m_col0.x)[i] = 0.0f;
     }
 
     // each tensor gets rotated into the common space, moved away from its own center of mass to the group's, and added up
     for (i = 0; i < elements.m_size; i++) {
         hkMatrix3 inertiaTensorInCommonSpace;
-        inertiaTensorInCommonSpace = asMatrix(elements[i].m_properties.m_inertiaTensor);
-        inertiaTensorInCommonSpace.changeBasis(transformOf(elements[i]).m_rotation);
+        inertiaTensorInCommonSpace = elements[i].m_properties.m_inertiaTensor;
+        inertiaTensorInCommonSpace.changeBasis(elements[i].m_transform.m_rotation);
 
         hkVector4 shift;
-        shift.setTransformedPos(transformOf(elements[i]), elements[i].m_properties.m_centerOfMass);
+        shift.setTransformedPos(elements[i].m_transform, elements[i].m_properties.m_centerOfMass);
         shift.setSub4(shift, groupCenterOfMass);
         shiftInertiaFromCom(shift, elements[i].m_properties.m_mass, inertiaTensorInCommonSpace);
 
-        asMatrix(result.m_inertiaTensor).add(inertiaTensorInCommonSpace);
+        result.m_inertiaTensor.add(inertiaTensorInCommonSpace);
     }
     return 0; // HK_SUCCESS
 }

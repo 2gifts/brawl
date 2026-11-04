@@ -1,18 +1,30 @@
 #pragma once
 
 #include <havok/hkBase.h>
+#include <havok/hkVector4.h>
 #include <StaticAssert.h>
 
 struct hkRotation;
 struct hkQuaternion;
 
-// Local declaration for the math class absent from the BrawlHeaders submodule.
-// Native storage is three columns of four floats. The fourth lanes are retained
-// by scalar/add operations and cleared by matrix products and setTranspose.
-// 16-byte alignment: main.dol's hkClassMember::TYPE_PROPERTIES gives hkMatrix3 alignment 16. The attribute
-// goes after the body; MWCC ignores it between 'struct' and the name.
+// 3x3 matrix stored as three column vectors (column-major): entry (row r, column c) is m_col<c>[r].
+// The fourth lanes are retained by scalar/add operations and cleared by matrix products and setTranspose.
+// Column members (not a float array): main.dol has an out-of-line weak hkMatrix3::__as that copies the 12 floats
+// through hkVector4's float-wise operator=, and hkRotation (which is an hkMatrix3) is read by column everywhere.
+// 16-byte alignment: main.dol's hkClassMember::TYPE_PROPERTIES gives hkMatrix3 alignment 16.
 struct hkMatrix3 {
-    float elements[12];
+    hkVector4 m_col0; // 0x00
+    hkVector4 m_col1; // 0x10
+    hkVector4 m_col2; // 0x20
+
+    // One zero vector copied to the three columns (inlined in hkKeyframedRigidMotion and hkMassProperties' ctor).
+    void setZero() {
+        hkVector4 zero;
+        zero.setZero4();
+        m_col0 = zero;
+        m_col1 = zero;
+        m_col2 = zero;
+    }
 
     void transpose();
     void setTranspose(const hkMatrix3& other);
@@ -27,14 +39,6 @@ struct hkMatrix3 {
     // HYPOTHESIS: callers establish the basis storage, but not the source type name.
     void changeBasis(const hkRotation& basis);
 } __attribute__((aligned(16)));
-
-// HYPOTHESIS: hkRotation specializes the same matrix storage without new fields.
-struct hkRotation : hkMatrix3 {
-    // defined in hkRotation.cpp, which has its own (column based) view of the same 0x30 bytes
-    void set(const hkQuaternion& q);
-    // true if the columns are unit length and perpendicular within tolerance. also defined in hkRotation.cpp
-    bool isOrthonormal(float tolerance) const;
-};
 
 static_assert(sizeof(hkMatrix3) == 0x30, "hkMatrix3 size");
 

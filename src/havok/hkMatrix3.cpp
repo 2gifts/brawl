@@ -1,10 +1,11 @@
 #include <havok/hkMatrix3.h>
+#include <havok/hkRotation.h>
 #include <havok/hkVector4.h>
 
 #include <math.h>
 
 void hkMatrix3::transpose() {
-    float* m = elements;
+    float* m = &m_col0.x;
 
     float value4 = m[4];
     m[4] = m[1];
@@ -20,9 +21,9 @@ void hkMatrix3::transpose() {
 }
 
 void hkMatrix3_setMulMat3Mat3(hkMatrix3* dst, const hkMatrix3* lhs, const hkMatrix3* rhs) {
-    const float* a = lhs->elements;
-    const float* b = rhs->elements;
-    float* out = dst->elements;
+    const float* a = &lhs->m_col0.x;
+    const float* b = &rhs->m_col0.x;
+    float* out = &dst->m_col0.x;
 
     const float a0 = a[0];
     const float a1 = a[1];
@@ -91,8 +92,8 @@ void hkMatrix3_invertSymmetric(hkMatrix3* matrix) {
 }
 
 void hkMatrix3::setTranspose(const hkMatrix3& other) {
-    const float* src = other.elements;
-    float* dst = elements;
+    const float* src = &other.m_col0.x;
+    float* dst = &m_col0.x;
 
     dst[0] = src[0];
     dst[5] = src[5];
@@ -109,7 +110,7 @@ void hkMatrix3::setTranspose(const hkMatrix3& other) {
 }
 
 void hkMatrix3::setMul(const hkMatrix3& lhs, const hkMatrix3& rhs) {
-    const float* a = lhs.elements;
+    const float* a = &lhs.m_col0.x;
     // HYPOTHESIS: lhs is copied to an aligned local first so the product stays correct when this aliases lhs.
     hkVector4 columns[3];
     columns[0].x = a[0];
@@ -125,8 +126,8 @@ void hkMatrix3::setMul(const hkMatrix3& lhs, const hkMatrix3& rhs) {
     columns[2].z = a[10];
     columns[2].w = a[11];
 
-    const float* b = rhs.elements;
-    float* out = elements;
+    const float* b = &rhs.m_col0.x;
+    float* out = &m_col0.x;
     for (int i = 0; i < 3; i++) {
         const float v0 = b[0];
         const float v1 = b[1];
@@ -141,8 +142,8 @@ void hkMatrix3::setMul(const hkMatrix3& lhs, const hkMatrix3& rhs) {
 }
 
 void hkMatrix3::setMul(float scalar, const hkMatrix3& other) {
-    const float* src = other.elements;
-    float* dst = elements;
+    const float* src = &other.m_col0.x;
+    float* dst = &m_col0.x;
 
     dst[0] = scalar * src[0];
     dst[1] = scalar * src[1];
@@ -165,8 +166,8 @@ void hkMatrix3::setMulInverse(const hkMatrix3& lhs, const hkMatrix3& rhs) {
 }
 
 hkBool hkMatrix3::isApproximatelyEqual(float epsilon, const hkMatrix3& other) const {
-    const float* lhs = elements;
-    const float* rhs = other.elements;
+    const float* lhs = &m_col0.x;
+    const float* rhs = &other.m_col0.x;
 
     for (int i = 0; i < 12; ++i) {
         if (epsilon < (float)fabs(lhs[i] - rhs[i])) {
@@ -177,7 +178,7 @@ hkBool hkMatrix3::isApproximatelyEqual(float epsilon, const hkMatrix3& other) co
 }
 
 hkResult hkMatrix3::invert(float epsilon) {
-    float* m = elements;
+    float* m = &m_col0.x;
 
     const float m0 = m[0];
     const float m1 = m[1];
@@ -218,7 +219,7 @@ hkResult hkMatrix3::invert(float epsilon) {
 }
 
 void hkMatrix3::invertSymmetric() {
-    float* m = elements;
+    float* m = &m_col0.x;
 
     const float m0 = m[0];
     const float m1 = m[1];
@@ -257,8 +258,8 @@ void hkMatrix3::invertSymmetric() {
 }
 
 void hkMatrix3::add(const hkMatrix3& other) {
-    float* dst = elements;
-    const float* src = other.elements;
+    float* dst = &m_col0.x;
+    const float* src = &other.m_col0.x;
     const float m1 = src[1];
     const float m2 = src[2];
     const float m3 = src[3];
@@ -286,7 +287,7 @@ void hkMatrix3::add(const hkMatrix3& other) {
 }
 
 void hkMatrix3::mul(float scalar) {
-    float* m = elements;
+    float* m = &m_col0.x;
 
     m[0] = m[0] * scalar;
     m[1] = m[1] * scalar;

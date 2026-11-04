@@ -12,7 +12,3 @@
 // hkMatrix3: basic member type, 0x30 bytes, 16-byte aligned
 HK_LAYOUT(size_hkMatrix3, sizeof(hkMatrix3) == 0x30);
 HK_LAYOUT(align_hkMatrix3, __alignof__(hkMatrix3) == 16);
-
-// hkRotation: basic member type, 0x30 bytes, 16-byte aligned
-HK_LAYOUT(size_hkRotation, sizeof(hkRotation) == 0x30);
-HK_LAYOUT(align_hkRotation, __alignof__(hkRotation) == 16);

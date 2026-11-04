@@ -10,8 +10,8 @@
 #include <havok/hkMatrix6.h>
 
 // each hkMatrix3 is 3 columns of 4 floats, so treat a block as 3 hkVector4s
-static inline hkVector4* cols(hkMatrix3& m) { return reinterpret_cast<hkVector4*>(m.elements); }
-static inline const hkVector4* cols(const hkMatrix3& m) { return reinterpret_cast<const hkVector4*>(m.elements); }
+static inline hkVector4* cols(hkMatrix3& m) { return &m.m_col0; }
+static inline const hkVector4* cols(const hkMatrix3& m) { return &m.m_col0; }
 
 // a -= b, all 12 floats (yes the w lanes too, the asm does them)
 static inline void subBlock(hkMatrix3& a, const hkMatrix3& b) {
@@ -29,7 +29,7 @@ static inline void addBlock(hkMatrix3& a, const hkMatrix3& b) {
 
 // out = m * v on xyz, w gets zeroed (the asm stores a 0.0f constant there)
 static inline void setMul3(hkVector4& out, const hkMatrix3& m, const hkVector4& v) {
-    const float* e = m.elements;
+    const float* e = &m.m_col0.x;
     out.x = e[0] * v.x + e[4] * v.y + e[8] * v.z;
     out.y = e[1] * v.x + e[5] * v.y + e[9] * v.z;
     out.z = e[2] * v.x + e[6] * v.y + e[10] * v.z;
@@ -52,15 +52,15 @@ static inline void addMul4(hkVector4& dst, hkReal r, const hkVector4& src) {
 
 static inline void zeroBlock(hkMatrix3& m) {
     for (int i = 0; i < 12; i++) {
-        m.elements[i] = 0.0f;
+        (&m.m_col0.x)[i] = 0.0f;
     }
 }
 
 static inline void identityBlock(hkMatrix3& m) {
     zeroBlock(m);
-    m.elements[0] = 1.0f;
-    m.elements[5] = 1.0f;
-    m.elements[10] = 1.0f;
+    m.m_col0.x = 1.0f;
+    m.m_col1.y = 1.0f;
+    m.m_col2.z = 1.0f;
 }
 
 void hkMatrix6::sub(const hkMatrix6& other) {
@@ -96,7 +96,7 @@ void hkMatrix6::setInvert(const hkMatrix6& tmpIn) {
 
     for (int row2 = 0; row2 < 2; row2++) {
         for (int row3 = 0; row3 < 3; row3++) {
-            hkReal multiplier = 1.0f / in.m_m[row2][row2].elements[row3 * 4 + row3];
+            hkReal multiplier = 1.0f / (&in.m_m[row2][row2].m_col0.x)[row3 * 4 + row3];
 
             cols(in.m_m[0][row2])[row3].mul4(multiplier);
             cols(in.m_m[1][row2])[row3].mul4(multiplier);
@@ -106,7 +106,7 @@ void hkMatrix6::setInvert(const hkMatrix6& tmpIn) {
             for (int col2 = 0; col2 < 2; col2++) {
                 for (int col3 = 0; col3 < 3; col3++) {
                     if (col2 != row2 || col3 != row3) {
-                        hkReal m = -in.m_m[row2][col2].elements[col3 * 4 + row3];
+                        hkReal m = -(&in.m_m[row2][col2].m_col0.x)[col3 * 4 + row3];
 
                         addMul4(cols(in.m_m[0][col2])[col3], m, cols(in.m_m[0][row2])[row3]);
                         addMul4(cols(in.m_m[1][col2])[col3], m, cols(in.m_m[1][row2])[row3]);

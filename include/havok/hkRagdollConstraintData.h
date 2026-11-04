@@ -1,7 +1,7 @@
 #pragma once
 
 #include <havok/hkConstraintData.h>
-#include <havok/hkMatrix3.h>
+#include <havok/hkRotation.h>
 #include <havok/hkMemory.h>
 
 struct hkConstraintMotor;

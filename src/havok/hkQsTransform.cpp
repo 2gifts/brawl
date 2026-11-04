@@ -10,10 +10,6 @@
 #include <havok/hkQsTransform.h>
 #include <havok/hkTransform.h>
 
-// hkMatrix3 can't be included next to hkRotation.h (they define hkRotation differently), so just the bit we call
-struct hkMatrix3 {
-    void setMul(const hkMatrix3& lhs, const hkMatrix3& rhs);
-};
 
 // v rotated by quaternion q. sign = -1 does the inverse rotation instead (same thing as conjugating q)
 static inline void rotateByQuat(hkVector4& out, const hkQuaternion& q, const hkVector4& v, hkReal sign) {
@@ -48,7 +44,7 @@ void hkQsTransform::get4x4ColumnMajor(hkReal* m) const {
     scaMatrix.m_col2.z = m_scale.z;
 
     hkRotation rotSca;
-    reinterpret_cast<hkMatrix3&>(rotSca).setMul(reinterpret_cast<hkMatrix3&>(rotMatrix), reinterpret_cast<hkMatrix3&>(scaMatrix));
+    rotSca.setMul(rotMatrix, scaMatrix);
 
     hkTransform temp;
     temp.m_rotation = rotSca;

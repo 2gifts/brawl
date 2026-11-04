@@ -85,24 +85,13 @@ void hkKeyframedRigidMotion::setMass(hkReal mass) {}
 
 void hkKeyframedRigidMotion::setMassInv(hkReal massInv) {}
 
-// Havok's hkMatrix3::setZero: one zero vector copied to the three columns. hkMatrix3 is only forward-declared here
-// (hkMatrix3.h conflicts with hkRotation.h, see hkBoxMotion.cpp), so the columns are viewed as hkVector4s.
-static inline void setZero(hkMatrix3& m) {
-    hkVector4* cols = (hkVector4*)&m;
-    hkVector4 zero;
-    zero.setZero4();
-    cols[0] = zero;
-    cols[1] = zero;
-    cols[2] = zero;
-}
-
 // Inertia is not tracked for keyframed bodies: the matrices are returned as zero.
 void hkKeyframedRigidMotion::getInertiaLocal(hkMatrix3& out) const {
-    setZero(out);
+    out.setZero();
 }
 
 void hkKeyframedRigidMotion::getInertiaWorld(hkMatrix3& out) const {
-    setZero(out);
+    out.setZero();
 }
 
 void hkKeyframedRigidMotion::setInertiaLocal(const hkMatrix3& in) {}
@@ -110,11 +99,11 @@ void hkKeyframedRigidMotion::setInertiaLocal(const hkMatrix3& in) {}
 void hkKeyframedRigidMotion::setInertiaInvLocal(const hkMatrix3& in) {}
 
 void hkKeyframedRigidMotion::getInertiaInvLocal(hkMatrix3& out) const {
-    setZero(out);
+    out.setZero();
 }
 
 void hkKeyframedRigidMotion::getInertiaInvWorld(hkMatrix3& out) const {
-    setZero(out);
+    out.setZero();
 }
 
 void hkKeyframedRigidMotion::applyLinearImpulse(const hkVector4& impulse) {}

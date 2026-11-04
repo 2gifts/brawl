@@ -3,21 +3,11 @@
 // pretty much the havok 5.1 version, the calls in the asm line up with it one for one
 //   0x802821DC  2024  decompose4x4ColTransform
 #include <havok/hkMathUtil.h>
-#include <havok/hkMatrix3.h>
-
-// can't pull in hkTransform.h here (see hkMathUtil.h), so this is just the bit we need of it
-struct hkTransform {
-    hkRotation m_rotation;
-    hkVector4 m_translation;
-
-    void set4x4ColumnMajor(const hkReal* p);
-};
+#include <havok/hkTransform.h>
 
 // the identity transform sitting in .data (hkTransform::getIdentity), used for the skew check at the end
 extern hkMatrix3 lbl_804864F0;
 
-static inline hkMatrix3& asMat(hkMatrix3Storage& s) { return *reinterpret_cast<hkMatrix3*>(&s); }
-static inline hkVector4& colOf(hkMatrix3& m, int c) { return *reinterpret_cast<hkVector4*>(&m.elements[c * 4]); }
 
 void hkMathUtil::decompose4x4ColTransform(const hkReal* matrixIn, Decomposition& out) {
     // this is an iteration so give up after 30 rounds (5.1 says it usually takes about 7)
@@ -52,17 +42,17 @@ void hkMathUtil::decompose4x4ColTransform(const hkReal* matrixIn, Decomposition&
             numIterations++;
         } while (numIterations < maxNumIterations && !qNext.isApproximatelyEqual(tolerance, qCur));
 
-        asMat(out.m_basis) = qNext;
+        out.m_basis = qNext;
     }
 
     // rotation quaternion + whether the basis mirrors things
     {
-        hkMatrix3& basis = asMat(out.m_basis);
-        hkVector4 c1 = colOf(basis, 0);
+        hkMatrix3& basis = out.m_basis;
+        hkVector4 c1 = basis.m_col0;
         c1.normalize3();
-        hkVector4 c2 = colOf(basis, 1);
+        hkVector4 c2 = basis.m_col1;
         c2.normalize3();
-        hkVector4 c3 = colOf(basis, 2);
+        hkVector4 c3 = basis.m_col2;
         c3.normalize3();
 
         hkVector4 r0;
@@ -78,9 +68,9 @@ void hkMathUtil::decompose4x4ColTransform(const hkReal* matrixIn, Decomposition&
 
         {
             hkRotation rot;
-            colOf(rot, 0) = c1;
-            colOf(rot, 1) = c2;
-            colOf(rot, 2) = c3;
+            rot.m_col0 = c1;
+            rot.m_col1 = c2;
+            rot.m_col2 = c3;
             out.m_rotation.set(rot);
             out.m_rotation.normalize();
         }
@@ -93,13 +83,13 @@ void hkMathUtil::decompose4x4ColTransform(const hkReal* matrixIn, Decomposition&
         hkRotation rotInvM;
         rotInvM.set(rotInvQ);
 
-        asMat(out.m_scaleAndSkew).setMul(rotInvM, t.m_rotation);
+        out.m_scaleAndSkew.setMul(rotInvM, t.m_rotation);
     }
 
     // scale is just the diagonal
     {
-        hkMatrix3& ss = asMat(out.m_scaleAndSkew);
-        out.m_scale.set(ss.elements[0], ss.elements[5], ss.elements[10], 0.0f);
+        hkMatrix3& ss = out.m_scaleAndSkew;
+        out.m_scale.set(ss.m_col0.x, ss.m_col1.y, ss.m_col2.z, 0.0f);
 
         // HYPOTHESIS: 0.001 is the tolerance for "is the scale 1". 5.1 uses equals3's default for this
         out.m_hasScale = !(fabsf(out.m_scale.x - 1.0f) < 0.001f && fabsf(out.m_scale.y - 1.0f) < 0.001f &&
@@ -110,13 +100,13 @@ void hkMathUtil::decompose4x4ColTransform(const hkReal* matrixIn, Decomposition&
     {
         hkMatrix3 scaleInv;
         for (int i = 0; i < 12; i++) {
-            scaleInv.elements[i] = 0.0f;
+            (&scaleInv.m_col0.x)[i] = 0.0f;
         }
-        scaleInv.elements[0] = 1.0f / out.m_scale.x;
-        scaleInv.elements[5] = 1.0f / out.m_scale.y;
-        scaleInv.elements[10] = 1.0f / out.m_scale.z;
-        asMat(out.m_skew).setMul(scaleInv, asMat(out.m_scaleAndSkew));
+        scaleInv.m_col0.x = 1.0f / out.m_scale.x;
+        scaleInv.m_col1.y = 1.0f / out.m_scale.y;
+        scaleInv.m_col2.z = 1.0f / out.m_scale.z;
+        out.m_skew.setMul(scaleInv, out.m_scaleAndSkew);
 
-        out.m_hasSkew = !asMat(out.m_skew).isApproximatelyEqual(0.001f, lbl_804864F0);
+        out.m_hasSkew = !out.m_skew.isApproximatelyEqual(0.001f, lbl_804864F0);
     }
 }

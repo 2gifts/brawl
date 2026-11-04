@@ -51,13 +51,9 @@ void hkTransform::set4x4ColumnMajor(const hkReal* m) {
 }
 
 // Inverse of a rigid transform: rotation transposed, translation -(R^T t).
-// hkMatrix3 is declared in its own header, which the hkRotation.h here shadows, so only its transpose entry point is declared locally.
-struct hkMatrix3 {
-    void setTranspose(const hkMatrix3& other);
-};
 
 void hkTransform::setInverse(const hkTransform& t) {
-    reinterpret_cast<hkMatrix3&>(m_rotation).setTranspose(reinterpret_cast<const hkMatrix3&>(t.m_rotation));
+    m_rotation.setTranspose(t.m_rotation);
 
     // translation = this rotation applied to -t.translation (inlined rotated-direction product).
     hkVector4 negTranslation;

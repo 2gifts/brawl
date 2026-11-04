@@ -1,17 +1,15 @@
 #pragma once
 
 #include <havok/hkArray.h>
-#include <havok/hkMathUtil.h> // hkMatrix3Storage (hkMatrix3.h can't be included next to hkTransform.h)
+#include <havok/hkTransform.h>
 #include <havok/hkVector4.h>
-
-struct hkMatrix3;
 
 // Mass, volume, center of mass and inertia tensor of a body or a piece of one (0x50 bytes)
 struct hkMassProperties {
     hkReal m_volume;                  // 0x00
     hkReal m_mass;                    // 0x04
     hkVector4 m_centerOfMass;         // 0x10
-    hkMatrix3Storage m_inertiaTensor; // 0x20 an hkMatrix3, kept as raw storage here
+    hkMatrix3 m_inertiaTensor;        // 0x20
 
     hkMassProperties(); // everything zero
 };
@@ -19,8 +17,7 @@ struct hkMassProperties {
 // one piece of a compound body: its own mass properties plus where it sits (0x90 bytes)
 struct hkMassElement {
     hkMassProperties m_properties;   // 0x00
-    hkMatrix3Storage m_rotation;     // 0x50 the piece's transform: rotation...
-    hkVector4 m_translation;         // 0x80 ...and translation
+    hkTransform m_transform;         // 0x50 where the piece sits
 };
 
 struct hkInertiaTensorComputer {

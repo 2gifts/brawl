@@ -4,10 +4,9 @@
 #include <havok/hkBoxMotion.h>
 #include <havok/hkRegistry.h>
 
-// hkMatrix3 is only forward-declared in these headers (its header conflicts with hkRotation.h).
-// Elements are the 12 floats of three columns, indexed as in hkMatrix3::elements.
-static float* matrixElements(hkMatrix3& m) { return (float*)&m; }
-static const float* matrixElements(const hkMatrix3& m) { return (const float*)&m; }
+// The 12 floats of the three columns: entry (row r, column c) is [c * 4 + r].
+static float* matrixElements(hkMatrix3& m) { return &m.m_col0.x; }
+static const float* matrixElements(const hkMatrix3& m) { return &m.m_col0.x; }
 
 static hkMotionTypeInfo s_hkBoxMotionTypeInfo("hkBoxMotion", hkBoxMotion::finishLoadedObjecthkBoxMotion,
                                               hkBoxMotion::cleanupLoadedObjecthkBoxMotion,
@@ -35,8 +34,6 @@ hkBoxMotion::hkBoxMotion(const hkVector4& position, const hkQuaternion& rotation
     m_type = MOTION_BOX_INERTIA;
 }
 
-// hkMatrix3 member helpers used below (the class is incomplete in these headers; see hkMatrix3.h).
-extern "C" void changeBasis__9hkMatrix3FRC10hkRotation(hkMatrix3* self, const hkRotation& basis);
 
 void hkBoxMotion::getInertiaLocal(hkMatrix3& out) const {
     // Three diagonal entries (1 / inverse inertia) on zeroed off-diagonal lanes.
@@ -89,7 +86,7 @@ void hkBoxMotion::setInertiaInvLocal(const hkMatrix3& in) {
 // Inertia in world space: local diagonal inertia rotated by the body basis.
 void hkBoxMotion::getInertiaWorld(hkMatrix3& out) const {
     getInertiaLocal(out);
-    changeBasis__9hkMatrix3FRC10hkRotation((hkMatrix3*)&out, m_motionState.m_transform.m_rotation);
+    out.changeBasis(m_motionState.m_transform.m_rotation);
 }
 
 void hkBoxMotion::setMass(hkReal mass) {

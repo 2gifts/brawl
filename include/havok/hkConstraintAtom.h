@@ -1,7 +1,7 @@
 #pragma once
 
 #include <havok/hkBase.h>
-#include <havok/hkMatrix3.h>
+#include <havok/hkTransform.h>
 #include <havok/hkVector4.h>
 
 struct hkConstraintData;
@@ -10,8 +10,6 @@ struct hkConstraintMotor;
 
 // Constraint atoms. Layouts and member names come from main.dol's reflection (hkConstraintAtomClasses.cpp;
 // tests/havok_layout checks them). Atoms are plain structs (no vtable); the type selects the atom behaviour.
-// The local-transforms atom (hkTransform members) is not declared yet: hkTransform's hkRotation and the one in
-// hkMatrix3.h are still two definitions.
 
 // Contact record passed to the modifier callbacks; the contact normal sits at 0x10.
 struct hkModifierContact {

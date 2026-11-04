@@ -20,9 +20,9 @@
 #include <havok/hkSphereMotion.h>
 #include <havok/hkRegistry.h>
 
-// hkMatrix3 is only forward-declared in these headers (see hkBoxMotion.cpp); elements are the 12 floats of three columns.
-static float* matrixElements(hkMatrix3& m) { return (float*)&m; }
-static const float* matrixElements(const hkMatrix3& m) { return (const float*)&m; }
+// The 12 floats of the three columns: entry (row r, column c) is [c * 4 + r].
+static float* matrixElements(hkMatrix3& m) { return &m.m_col0.x; }
+static const float* matrixElements(const hkMatrix3& m) { return &m.m_col0.x; }
 
 static hkMotionTypeInfo s_hkSphereMotionTypeInfo("hkSphereMotion", hkSphereMotion::finishLoadedObjecthkSphereMotion,
                                                  hkSphereMotion::cleanupLoadedObjecthkSphereMotion,
