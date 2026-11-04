@@ -22,6 +22,7 @@ class wnWolfIllusion : public Weapon {
 public:
     wnWolfIllusion(s32 articleId, const wnArticleBuildInfo& info, const wnWolfIllusionData* data);
     virtual ~wnWolfIllusion();
+    virtual void processUpdate();
     void activate(s32 founderTaskId, s32 unk1, s32 team, float lr, s32 unk2, s32 unk3);
 };
 static_assert(sizeof(wnWolfIllusion) == 0x1DE4, "Wolf Illusion layout is wrong!");
