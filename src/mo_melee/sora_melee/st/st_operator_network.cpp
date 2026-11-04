@@ -64,3 +64,7 @@ void stOperatorNetworkMelee::checkNoContest() {
 void stOperatorNetworkMelee::setNullPadForNetworkOut(bool isNull) {
     ipSwitch::getInstance()->m_flags.nullNetworkOutput = isNull;
 }
+
+bool NtBase::isParent() {
+    return lbl_8059E742 == lbl_8059E745 && lbl_8059E742 != 0xFF;
+}
