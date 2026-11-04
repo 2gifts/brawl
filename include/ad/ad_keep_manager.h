@@ -72,5 +72,7 @@ public:
     void setResultOfTotaling(bool addCoin, bool applyItems);
     void setNanaDeadFlag(u32 index, bool dead);
     bool isNanaDeadFlag(u32 index);
+    void useBossBattleStart(int index, int flagId);
+    void useBossBattleEnd();
 };
 static_assert(sizeof(adKeepManager) == 0x28, "Class is the wrong size!");
