@@ -15,3 +15,9 @@ float grMadein::getEntityFrame() {
         return anim->getFrame();
     }
 }
+
+grMadein::StageHitData::StageHitData() {
+    m_30 = 0;
+    m_34 = 0;
+    m_38 = 0;
+}
