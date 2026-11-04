@@ -36,6 +36,10 @@ public:
     gfFileIORequest* allocRequest();
     bool freeRequest(gfFileIORequest* req);
     void push(gfFileIORequest* req);
+    gfFileIOManager();
+    static gfFileIOManager* create();
+    static void syncCallback(u8 command, u16 value);
+    void callback(u8 command, u16 value);
 };
 static_assert(sizeof(gfFileIOManager) == 0x9c, "Wrong size for class!");
 
