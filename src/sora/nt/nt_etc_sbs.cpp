@@ -25,6 +25,8 @@ extern "C" void SBS_CancelRequest();
 extern "C" int DWC_GetLastError(int* errorCode);
 extern "C" s32 DWC_GetLastErrorEx(s32* errorCode, s32* errorType);
 extern "C" void DWC_ClearError();
+extern "C" void SBS_GetServerTime(DWCDate* date, DWCTime* time);
+extern "C" int SBS_PostDataAsync(int kind, const void* data, int size, const s32* battleInfo);
 
 // HYPOTHESIS: scoped mutex guard, inlined at every lock
 class nteSBSLock {
@@ -238,3 +240,64 @@ s64 nteSBS::cnvTime(DWCDate* date, DWCTime* time) {
         return 0;
     return OSCalendarTimeToTicks(&cal);
 }
+
+s64 nteSBS::getTime() {
+    DWCDate date;
+    DWCTime time;
+    {
+        nteSBSLock lock(&lbl_8049ED08);
+        SBS_GetServerTime(&date, &time);
+    }
+    return cnvTime(&date, &time);
+}
+
+void nteSBS::updateBattleInfo(int index, s32 first, s32 second, s32 third, s32 fourth, s32 value) {
+    unk60[1] = first;
+    unk60[2] = second;
+    unk60[3] = third;
+    unk60[4] = fourth;
+    unk60[0] = (&unk60[1])[index];
+    unk60[5] = value;
+}
+
+bool nteSBS::upload(int kind, const void* data, int size) {
+    if (!_fInitialized)
+        return true;
+    if (isNowInProgress())
+        return false;
+    const s32* battleInfo = nullptr;
+    if (kind == 0)
+        battleInfo = unk60;
+    {
+        nteSBSLock lock(&lbl_8049ED08);
+        if (SBS_PostDataAsync(kind, data, size, battleInfo) != 0) {
+            s32 type;
+            s32 error;
+            s32 hasError = 0;
+            if (unk5C != 0) {
+                error = -lbl_805A03F0;
+                type = lbl_805A03F4;
+                hasError = lbl_805A03EC;
+            }
+            if (hasError == 0)
+                hasError = DWC_GetLastErrorEx(&error, &type);
+            if (hasError != 0) {
+                if (unk50) {
+                    if (error < 0)
+                        error = -error;
+                    unk50->showError(error, type);
+                }
+                if (unk5C == 0)
+                    DWC_ClearError();
+            }
+            return false;
+        }
+    }
+    if (isNowInProgress())
+        return false;
+    unk44 = 2;
+    unk40 = 1;
+    return true;
+}
+
+nteSBS::~nteSBS() {}

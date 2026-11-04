@@ -36,6 +36,7 @@ public:
     s32 unk60[6];
 
     nteSBS(u8 flag);
+    virtual ~nteSBS();
     bool startupSBS(DWCAccUserData* userData, const char* gameName, const char* secretKey, int param);
     bool finishSBS();
     bool download(void* buf, int size, DWCDate* date, DWCTime* time);
@@ -43,6 +44,9 @@ public:
     void cancel();
     int getErrorCode(u32 kind);
     s64 cnvTime(DWCDate* date, DWCTime* time);
+    s64 getTime();
+    void updateBattleInfo(int index, s32 first, s32 second, s32 third, s32 fourth, s32 value);
+    bool upload(int kind, const void* data, int size);
 
     // HYPOTHESIS: true while a request is active or a proc id is set
     bool isNowInProgress() const {
