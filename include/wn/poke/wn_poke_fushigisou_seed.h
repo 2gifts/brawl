@@ -16,6 +16,7 @@ public:
     wnPokeFushigisouSeed(s32 articleId, const wnArticleBuildInfo& info, const wnPokeFushigisouSeedData* data);
     virtual ~wnPokeFushigisouSeed();
     virtual void onDeactivate();
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
 };
 static_assert(sizeof(wnPokeFushigisouSeed) == 0x16A8, "Pokemon seed article extent");
