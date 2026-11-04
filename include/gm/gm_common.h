@@ -113,3 +113,6 @@ u32 gmGetAllMeleeTimeTotal();
 u32 gmGetVsMeleeTotalCount();
 u32 gmGetOfflineVsMeleeTotalCount();
 u32 gmGetOnlineVsMeleeTotalCount();
+
+class gmPlayerInitData;
+void gmInitPlayerDataDefault(gmPlayerInitData* player, int playerNo);

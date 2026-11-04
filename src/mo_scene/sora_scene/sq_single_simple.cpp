@@ -3,6 +3,7 @@
 #include <gm/gm_common.h>
 #include <gm/gm_global.h>
 #include <mu/menu.h>
+#include <sc/sc_fig_get_demo.h>
 #include <sq/sq_single_simple.h>
 #include <types.h>
 
@@ -281,4 +282,142 @@ void sqSingleSimple::updateHiScore(int charKind, int flag, u32 score) {
             setClearGetterOpen(id);
         }
     }
+}
+
+// gmAddFigure (the map name); sq_single_allstar.cpp calls it by this stand-in name.
+extern "C" void fn_80052704(u16 id, int num);
+
+extern struct {
+    struct {
+        int unk0;
+        int unk4;
+        u8 unk8;
+        u8 unk9[3];
+    } unk0[35];
+    u8 unk1A4[4];
+} lbl_1_data_72B0;
+
+extern const struct {
+    struct {
+        int unk0;
+        int unk4;
+    } unk0[39];
+} lbl_1_rodata_AC8;
+
+namespace {
+
+__declspec(force_export) void setHitTbl(int kind) {
+    switch (kind) {
+    case 0x10:
+    case 0x11:
+    case 0x12:
+        kind = 0x10;
+        break;
+    case 0x1D:
+    case 0x1E:
+    case 0x1F:
+    case 0x20:
+    case 0x21:
+    case 0x22:
+    case 0x48:
+        kind = 0x1D;
+        break;
+    case 3:
+    case 4:
+    case 0x49:
+        kind = 3;
+        break;
+    case 0xE:
+    case 0xF:
+    case 0x4A:
+        kind = 0xE;
+        break;
+    }
+    for (int i = 0; i < 35; i++) {
+        if (kind == lbl_1_data_72B0.unk0[i].unk0) {
+            lbl_1_data_72B0.unk0[i].unk8 = 1;
+            return;
+        }
+    }
+}
+
+__declspec(force_export) void setSimpleGetFigure(int kind) {
+    scFigureGetDemo* scene = static_cast<scFigureGetDemo*>(lbl_1_bss_1994->searchScene("scFigureGetDemo"));
+    switch (kind) {
+    case 0x11:
+    case 0x12:
+        kind = 0x10;
+        break;
+    case 0x1E:
+        kind = 0x1D;
+        break;
+    case 0x20:
+        kind = 0x1F;
+        break;
+    case 0x22:
+        kind = 0x21;
+        break;
+    }
+    __typeof__(lbl_1_rodata_AC8) table = lbl_1_rodata_AC8;
+    int figure = 0;
+    for (int i = 0; i < 39; i++) {
+        if (kind == table.unk0[i].unk0) {
+            figure = table.unk0[i].unk4;
+            break;
+        }
+    }
+    fn_80052704(figure, 1);
+    switch (figure) {
+    case 0x43:
+    case 0x45:
+    case 0x47:
+        figure = 0x41;
+        fn_80052704(0x41, 1);
+        break;
+    }
+    scene->unkC = figure;
+    for (int i = 0; i < 39; i++) {
+        if (gmCheckExistFigure(table.unk0[i].unk4) == true) {
+            int id = table.unk0[i].unk4;
+            if (id != 0x43 && id != 0x45 && id != 0x47 && id != figure) {
+                scene->unk10.pushBack(id);
+            }
+        }
+    }
+    if (gmCheckExistFigure(0x41) == true && figure != 0x41) {
+        scene->unk10.pushBack(0x41);
+    }
+}
+
+__declspec(force_export) void setupChallenger() {
+    int colorFile;
+    int color;
+    gmSelCharData* sel;
+    gmPlayerInitData* player;
+    player = g_GameGlobal->unkC;
+    sel = g_GameGlobal->m_selCharData;
+    gmInitPlayerDataDefault(player, 0);
+    player->m_state = 0;
+    u8 kind = sel->m_playersInitData[0].m_characterKind;
+    player->m_characterKind = kind;
+    player->m_teamNo = 0;
+    color = (u8)sel->m_playersInitData[0].m_colorFileNo;
+    player->m_colorNo = color;
+    int selection = exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(kind);
+    if (selection == Selch_SelectNone) {
+        colorFile = 0;
+    } else {
+        colorFile = muMenu::getFighterColorFileNo(selection, color);
+    }
+    player->m_colorFileNo = colorFile;
+    player->m_controllerNo = sel->m_playersInitData[0].m_controllerNo;
+    u8 name = sel->m_playersInitData[0].m_nameIndex;
+    player->m_nameIndex = name;
+    if (name != 120) {
+        g_GameGlobal->getNameUTF16(name, player->m_name);
+    }
+    g_GameGlobal->m_setRule->m_ctrlNamePlayerNo = (u8)player->m_controllerNo - 1;
+    g_GameGlobal->m_advData->m_flags.m_unk1 = 0;
+}
+
 }
