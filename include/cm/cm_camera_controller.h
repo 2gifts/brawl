@@ -8,6 +8,8 @@
 #include <gf/gf_task.h>
 #include <types.h>
 
+class cmSubject;
+
 class CameraController : public gfTask {
 public:
     enum Kind {
@@ -29,7 +31,14 @@ public:
     };
 
     Kind m_currentControllerKind;
-    char _68[4];
+    union {
+        char _68[4];
+        struct {
+            u8 unk44;
+            u8 unk45;
+            u8 unk46[2];
+        };
+    };
     gfCameraController* m_currentController;
     gfCameraController* m_defaultController;
     cmAnimationController* m_animationController;
@@ -55,7 +64,14 @@ public:
     float unk15C;
     float unk160;
     float unk164;
-    char unk168[36];
+    union {
+        char unk168[36];
+        struct {
+            char unk168Pad[0x1C];
+            float unk184;
+            int unk188;
+        };
+    };
     float unk18C; // HYPOTHESIS: reset to 0 by the stage camera range setup (st_fzero)
     char unk190[20];
 
@@ -79,6 +95,11 @@ public:
     // HYPOTHESIS: clears the "this player may not be targeted" mark of the camera (mlFtEvent calls it on a new damage).
     void clearDisablePlayerNo(int playerNo);
     void setDisablePlayerNo(int playerNo);
+    // HYPOTHESIS: reference qualifiers and float parameter names follow the start callee's register use.
+    void startZoomIn(cmSubject* subject, u16 frame, const Vec2f& rotation, const Vec2f& targetRotation, float zoom, float distance);
+    void setDisableZoomStart();
+    void setDisableZoomEnd();
+    bool isDisableZoom();
     static CameraController* getInstance();
 };
 static_assert(sizeof(CameraController) == 420, "Class is wrong size!");
