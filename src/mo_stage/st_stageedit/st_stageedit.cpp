@@ -40,22 +40,6 @@ extern stAreaManager* lbl_27_bss_5780;
 void fn_27_22AB74(stAreaManager* manager);
 }
 
-// MATCH-ONLY: the original copies the stage's damage floor from a constant image (a grGimmickDamageFloor).
-struct stEditWords {
-    u32 m_words[25];
-};
-static const u32 sDamageFloorImage[25] = {0x41700000, 0, 0, 0, 0, 0x5A, 0x46, 0x50, 0x32, 0, 2, 0x101, 0,
-                                          0, 0, 0x64, 1, 3, 0, 0, 0, 0xF, 0, 1, 0xFFFFFFFF};
-
-// MATCH-ONLY: the original builds this vector in a temporary and copies it.
-struct stEditRaw3 {
-    float x, y, z;
-};
-static inline void stEditAssignVec3f(Vec3f& dst, float x, float y, float z) {
-    stEditRaw3 tmp = {x, y, z};
-    *reinterpret_cast<stEditRaw3*>(&dst) = tmp;
-}
-
 static inline void stEditSetStartPos(Vec3f& dst, float x, float y) {
     dst.m_x = x;
     dst.m_y = y;
@@ -393,10 +377,16 @@ void stEdit::createObj() {
         collision->setDisable();
         delete collData;
     }
-    stEditWords damageFloorWords = *reinterpret_cast<const stEditWords*>(sDamageFloorImage);
-    grGimmickDamageFloor* damageFloor = reinterpret_cast<grGimmickDamageFloor*>(&damageFloorWords);
-    stEditAssignVec3f(damageFloor->m_attackData.m_offsetPos, 0.0f, 0.0f, 0.0f);
-    setStageAttackData(damageFloor, 0);
+    // Damage 15, vector 90, reaction 70 / 80 / 50, cut-up attribute, air and ground, 100 serial hit frames, medium
+    // sound level, cut-up sound, power 15, index 1, any team.
+    grGimmickDamageFloor damageFloor = {
+        {15.0f, Vec3f(0.0f, 0.0f, 0.0f), 0.0f, 90, 70, 80, 50, {0, 0, 0, 0}, soCollisionAttackData::Attribute_Cutup,
+         false, false, true, true, 0.0f, 0.0f, 0.0f, 100, soCollisionAttackData::Sound_Level_Medium,
+         soCollisionAttackData::Sound_Attribute_Cutup, false, soCollision::Shape_Sphere, {0, 0}, {{0, 0}}, 0, 15},
+        {0, 0, 0, 0},
+        1,
+        -1};
+    setStageAttackData(&damageFloor, 0);
     loadStageEditData();
 }
 

@@ -13,10 +13,13 @@ struct grGimmickDamageFloor {
     u32 m_index;
     int m_teamNo;
 
+#ifndef MATCHING
+    // Custom constructors (BrawlHeaders); the original is an aggregate like grGimmick::AttackData.
     inline grGimmickDamageFloor() {};
     inline grGimmickDamageFloor(grGimmick::AttackData* attackData, u32 index, int teamNo = -1)
     : m_attackData(*attackData), m_index(index), m_teamNo(teamNo) {
     }
+#endif
 };
 static_assert(sizeof(grGimmickDamageFloor) == 100, "Class is wrong size!");
 

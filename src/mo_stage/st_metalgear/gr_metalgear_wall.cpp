@@ -474,7 +474,8 @@ void grMetalgearWall::setHit() {
     Vec3f nodePos;
     u32 rootNode = 0;
     getNodePosition(&nodePos, 0, rootNode);
-    // MATCH-ONLY: the original allocates the hit data as raw storage (no element construction)
+    // BYTES: raw storage (no element construction, no array cookie). grEarthPelletFlower and grGWChefEtc
+    // array-construct the same types, so this unit's original allocated untyped bytes.
     m_hitData = reinterpret_cast<soCollisionHitData*>(new (Heaps::StageInstance) u8[sizeof(soCollisionHitData)]);
     m_hitSimple = reinterpret_cast<soCollisionHitData::Simple*>(new (Heaps::StageInstance) u8[sizeof(soCollisionHitData::Simple)]);
     m_hitSet = reinterpret_cast<soSet<soCollisionHitData::Simple>*>(new (Heaps::StageInstance) u8[sizeof(soSet<soCollisionHitData::Simple>)]);

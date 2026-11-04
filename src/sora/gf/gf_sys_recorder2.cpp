@@ -8,9 +8,6 @@
 #include <nt/nt_etc_xchg.h>
 #include <types.h>
 
-// HYPOTHESIS: stand-ins for callees that are not named yet; the map gives GameGlobal::setEnableSaveLoad (the
-// save/load switches), getSaveDataSize, checkSaveData and getAdventureSaveDataSize.
-extern "C" u8 fn_8004EAD4(GameGlobal* global);
 // HYPOTHESIS: this unit's request workers gfSysRecorder2::_processCheck, _processRenew and _processLoad (not matched
 // yet).
 extern "C" void fn_80030FA4(gfSysRecorder2* recorder);
@@ -53,7 +50,7 @@ gfSysRecorder2* gfSysRecorder2::createInstance(Heaps::HeapType heap) {
 }
 
 bool gfSysRecorder2::isEnable(int kind) {
-    u8 flags = fn_8004EAD4(g_GameGlobal);
+    u8 flags = g_GameGlobal->getEnableSaveLoad();
     return flags & (1 << kind);
 }
 

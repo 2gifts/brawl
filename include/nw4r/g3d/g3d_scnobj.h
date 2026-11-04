@@ -26,7 +26,9 @@ namespace nw4r {
 
             virtual ~ScnObj();
 
-            char _spacer[0xCC];
+            G3dObj* m_parent;            // +0x04 the group the object is in (nw4r G3dObj::mpParent)
+            void* m_heap;                // +0x08 nw4r G3dObj::mpHeap
+            char _spacer[0xC4];
             u8 m_priorityDrawOpa;        // +0xD0
             u8 m_priorityDrawXlu;        // +0xD1
             char _spacerD2[2];

@@ -83,3 +83,53 @@ float soPostureModuleImpl::getRotYLr() {
     return m_rotYLr;
 }
 
+void soPostureModuleImpl::init(Vec3f* pos, float lr) {
+    soPostureModuleSimple::init(pos, lr);
+    initRot();
+    initRotYLr();
+    // MATCH-ONLY: the original loads all three components before storing any.
+    float z, y, x, scale;
+    x = pos->m_x;
+    scale = 1.0f;
+    y = pos->m_y;
+    z = pos->m_z;
+    m_ownerScale = scale;
+    m_prevRoughPos.m_x = x;
+    m_prevRoughPos.m_y = y;
+    m_prevRoughPos.m_z = z;
+}
+
+void soPostureModuleImpl::initPos(Vec3f* pos) {
+    soPostureModuleSimple::initPos(pos);
+    m_moduleAccesser->getGroundModule().relocate(reinterpret_cast<Vec2f*>(pos), 0);
+}
+
+void soPostureModuleImpl::setPrevRoughPos(Vec3f* roughPos) {
+    // MATCH-ONLY: the original loads all three components before storing any.
+    float z, y, x;
+    x = roughPos->m_x;
+    y = roughPos->m_y;
+    z = roughPos->m_z;
+    m_prevRoughPos.m_x = x;
+    m_prevRoughPos.m_y = y;
+    m_prevRoughPos.m_z = z;
+}
+
+void soPostureModuleImpl::begin() {
+    soPostureModuleSimple::begin();
+    int count = m_interpolationArray->size();
+    for (int i = 0; i < count; i++) {
+        soInterpolation<Vec3f>& element = m_interpolationArray->at(i);
+        element.m_elements[1] = element.m_elements[0];
+    }
+}
+
+void soPostureModuleImpl::turnBack() {
+    soPostureModuleSimple::turnBack();
+    int count = m_interpolationArray->size();
+    for (int i = 0; i < count; i++) {
+        soInterpolation<Vec3f>& element = m_interpolationArray->at(i);
+        element.m_elements[0] = element.m_elements[2];
+    }
+}
+

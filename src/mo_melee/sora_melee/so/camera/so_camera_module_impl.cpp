@@ -1,7 +1,7 @@
 #include <so/camera/so_camera_module_impl.h>
-#include <so/so_module_accesser.h>
-#include <so/so_heap_module.h>
 #include <so/posture/so_posture_module_simple.h>
+#include <so/so_heap_module.h>
+#include <so/so_module_accesser.h>
 #include <st/stage.h>
 
 soCameraModuleImpl::soCameraModuleImpl(soModuleAccesser* acc, soArray<soCameraSubject>* subjects, soSet<soCameraRange>* rangeSet,
@@ -66,13 +66,15 @@ void soCameraModuleImpl::update() {
     s32 size = m_cameraSubjectArray->size();
     Vec3f pos = m_moduleAccesser->getPostureModule().getPos();
     Vec3f prevPos = m_moduleAccesser->getPostureModule().getPrevPos();
+    soCameraSubject* subject;
+    bool isActive;
     for (s32 i = 0; i < size; i++) {
-        soCameraSubject& subject = m_cameraSubjectArray->at(i);
-        bool isActive = false;
+        subject = &m_cameraSubjectArray->at(i);
+        isActive = false;
         if (bool(m_isWhole) == true && m_cameraSubjectArray->at(i).isEnable() == true) {
             isActive = true;
         }
-        subject.update(&pos, &prevPos, m_moduleAccesser, isActive);
+        subject->update(&pos, &prevPos, m_moduleAccesser, isActive);
     }
 }
 
@@ -218,15 +220,18 @@ void soCameraModuleImpl::setDamage(short damage, u32 index) {
 }
 
 void soCameraModuleImpl::setDamageFly(u32 index) {
-    m_cameraSubjectArray->at(index).getInstance()->m_isDamageFly = true;
+    cmSubject* subject = m_cameraSubjectArray->at(index).getInstance();
+    subject->m_isDamageFly = true;
 }
 
 void soCameraModuleImpl::exitDamageFly(u32 index) {
-    m_cameraSubjectArray->at(index).getInstance()->m_isDamageFly = false;
+    cmSubject* subject = m_cameraSubjectArray->at(index).getInstance();
+    subject->m_isDamageFly = false;
 }
 
 void soCameraModuleImpl::setRun(u32 index) {
-    m_cameraSubjectArray->at(index).getInstance()->m_isRun = true;
+    cmSubject* subject = m_cameraSubjectArray->at(index).getInstance();
+    subject->m_isRun = true;
 }
 
 void soCameraModuleImpl::exitRun(u32 index) {

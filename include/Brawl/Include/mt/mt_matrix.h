@@ -37,6 +37,11 @@ public:
         this->getPosition(&outPos);
         return outPos;
     }
+    // HYPOTHESIS: name. The translation column as a Vec3f value: the constructor's arguments are read right to left
+    // (z, y, x), which is the load order of every stage/weapon copy of a node position (getPosition reads x, y, z).
+    inline Vec3f getTranslation() const {
+        return Vec3f(m[0][3], m[1][3], m[2][3]);
+    }
 
     inline Matrix operator*(Matrix& A) {
         Matrix outMatrix;

@@ -232,6 +232,18 @@ struct grGimmickFrameTriggerData {
 };
 static_assert(sizeof(grGimmickFrameTriggerData) == 0x1C, "Class is the wrong size!");
 
+// HYPOTHESIS: pressure area data passed to stTrigger::setPressureAreaTrigger and stObsTriggerSquareBeltConveyorCB.
+struct grGimmickPressureAreaData {
+    stGimmickAreaData m_areaData;
+    Vec3f m_pos;
+    float m_speed;
+    float m_vector;
+    int m_taskId;
+    bool m_isPow;
+    char _spacer[3];
+};
+static_assert(sizeof(grGimmickPressureAreaData) == 0x44, "Class is wrong size!");
+
 class stObsTriggerCB : public gfCallBack {
 public:
     bool* unk8;
@@ -277,6 +289,7 @@ public:
     virtual stGimmickAreaData* getAreaDataPointer();
     virtual void setArea(gfArea* area);
 
+    void createArea(stGimmickAreaData* areaData, Vec2f pos);
     void setDefaultGimmickAreaData(stSimpleAreaData* simpleAreaData, stGimmickAreaData* gimmickAreaData);
 };
 static_assert(sizeof(stObsTriggerArea) == 0x3C, "Class is wrong size!");
@@ -292,7 +305,10 @@ static_assert(sizeof(stObsTriggerSquareHitPointEffectCB) == 0x40, "Class is wron
 class stObsTriggerSquareBeltConveyorCB : public stObsTriggerArea {
     int m_beltConveyorIndex;
 
+public:
+    stObsTriggerSquareBeltConveyorCB(bool* flag, grGimmickPressureAreaData* beltData);
     virtual ~stObsTriggerSquareBeltConveyorCB();
+    void setParam(grGimmickBeltConveyorData* beltData);
 };
 static_assert(sizeof(stObsTriggerSquareBeltConveyorCB) == 0x40, "Class is wrong size!");
 
@@ -306,6 +322,8 @@ static_assert(sizeof(stObsTriggerSquareWaterCB) == 0x40, "Class is wrong size!")
 class stObsTriggerSquareWindCB : public stObsTriggerArea {
     int m_windIndex;
 
+public:
+    stObsTriggerSquareWindCB(bool* flag, grGimmickWindData2nd* windData);
     virtual ~stObsTriggerSquareWindCB();
 };
 static_assert(sizeof(stObsTriggerSquareWindCB) == 0x40, "Class is wrong size!");
@@ -339,4 +357,23 @@ public:
 
     virtual void userProc();
     virtual ~stObsTriggerPlayerIncludeAreaCB();
+};
+
+class stObsTriggerKeyArea : public stObsTriggerArea {
+public:
+    // HYPOTHESIS: 0xC bytes of additional state (sizeof 0x48 in stTrigger::setKeyAreaTrigger).
+    u8 unk3C[0xC];
+
+    stObsTriggerKeyArea(bool* flag, bool unkC);
+    void createArea(stGimmickAreaData* areaData, Vec2f pos);
+};
+static_assert(sizeof(stObsTriggerKeyArea) == 0x48, "Class is wrong size!");
+
+class stObsTriggerTruckArea : public stObsTriggerArea {
+public:
+    // HYPOTHESIS: 0xC bytes of additional state (sizeof 0x48 in stTrigger::setTruckAreaTrigger).
+    u8 unk3C[0xC];
+
+    stObsTriggerTruckArea(bool* flag, bool unkC);
+    void createArea(stGimmickAreaData* areaData, Vec2f pos);
 };

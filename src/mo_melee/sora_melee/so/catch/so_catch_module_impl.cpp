@@ -3,6 +3,9 @@
 #include <so/so_module_accesser.h>
 #include <types.h>
 
+// Matrix::mulVec (the map name); em_kinetic_energy.cpp calls it by this stand-in name.
+extern "C" void fn_8003E3BC(const Matrix* mtx, const Vec3f* in, Vec3f* out);
+
 soCatchModule::~soCatchModule() { }
 
 void soCatchModuleImpl::activate() {
@@ -44,4 +47,35 @@ void soCatchModuleImpl::offCatchFlag() {
 
 void soCatchModuleImpl::setSendCutEvent(bool sendCutEvent) {
     m_sendCutEvent = sendCutEvent;
+}
+
+void soCatchModuleImpl::updatePosCling() {
+    if (m_moduleAccesser->getLinkModule().isLink(0) == true) {
+        Vec3f pos = m_moduleAccesser->getPostureModule().getPos();
+        Vec3f nodePos = m_moduleAccesser->getModelModule().getNodeGlobalPosition(m_node2, false);
+        pos.m_x = nodePos.m_x;
+        pos.m_y = nodePos.m_y - unk1C * m_moduleAccesser->getPostureModule().getScale();
+        m_moduleAccesser->getPostureModule().setPos(&pos);
+    }
+}
+
+void soCatchModuleImpl::updateLRCling() {
+    if (m_moduleAccesser->getLinkModule().isLink(0) == true) {
+        Matrix matrix(true);
+        m_moduleAccesser->getModelModule().getNodeGlobalMtx(m_node2, &matrix, false);
+        Vec3f direction(0.0f, 0.0f, 0.0f);
+        Vec3f forward(0.0f, 0.0f, 1.0f);
+        fn_8003E3BC(&matrix, &forward, &direction);
+        float y = direction.m_y;
+        Vec2f xy(direction.m_x, y);
+        Vec2f right(1.0f, 0.0f);
+        float lr = -1.0f;
+        if (right.m_x * xy.m_x + right.m_y * xy.m_y >= 0.00001f) {
+            lr = 1.0f;
+        }
+        if (lr != m_moduleAccesser->getPostureModule().getLr()) {
+            m_moduleAccesser->getPostureModule().reverseLr();
+            m_moduleAccesser->getPostureModule().updateRotYLr();
+        }
+    }
 }

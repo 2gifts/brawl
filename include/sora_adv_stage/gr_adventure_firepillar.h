@@ -1,9 +1,16 @@
 #pragma once
 
 #include <StaticAssert.h>
+#include <mt/mt_quaternion.h>
 #include <sora_adv_stage/gr_adventure_motion_attack_ground.h>
 #include <sora_adv_stage/gr_adventure_notify_gimmick_trigger_status.h>
 #include <types.h>
+
+// HYPOTHESIS: gimmick data struct name from sora_adv_stage.map (createGimmickFunc<23grGimmickFirePillarData, ...>).
+struct grGimmickFirePillarData : public grGimmickMotionAttackGroundData {
+    u8 unk23C[0x11];
+    u8 unk24D;
+};
 
 // HYPOTHESIS: the adventure fire pillar, an attacking motion ground switched by a trigger (sora_adv_stage gr_adventure_firepillar.o).
 class grAdventureFirePillar : public grAdventureMotionAttackGround, public grAdventureNotifyGimmickTriggerStatus {

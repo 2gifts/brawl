@@ -23,22 +23,18 @@ void ftPikachuKineticTransactor::changeKinetic(int mode, void* pools, soModuleAc
         changeKineticSub(&result, pools, acc);
         break;
     }
-    case 0x65: {
-        volatile bool result = false;
+    case 0x65:
+        changeKineticHook(soIntToType<0x65>(), pools, acc);
         break;
-    }
-    case 0x66: {
-        volatile bool result = false;
+    case 0x66:
+        changeKineticHook(soIntToType<0x66>(), pools, acc);
         break;
-    }
-    case 0x67: {
-        volatile bool result = false;
+    case 0x67:
+        changeKineticHook(soIntToType<0x67>(), pools, acc);
         break;
-    }
-    case 0x68: {
-        volatile bool result = false;
+    case 0x68:
+        changeKineticHook(soIntToType<0x68>(), pools, acc);
         break;
-    }
     default:
         return;
     }

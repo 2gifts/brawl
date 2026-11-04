@@ -389,8 +389,8 @@ public:
             char _0x4c_pad[0x04];
             u8 m_0x50;           // 0x50
             char _0x51[0x07];
-            u8 m_0x58;           // 0x58 (copied from the record)
-            u8 m_0x59;           // 0x59 (copied from the record)
+            u8 m_figureRareBit;  // 0x58: the trophy lottery rarity bits of the match (copied from the record)
+            u8 m_sealRareBit;    // 0x59: the sticker lottery rarity bits (copied from the record)
             u8 m_isUseRisetsan : 1; // 0x5A: Mr. Resetti appeared in this match (gmSetUseRisetsan, gmCheckRisetsan)
             u8 m_isUseDragoon : 1;  // the Dragoon was assembled in this match (fn_800526E4)
             u8 m_0x5a_5 : 1;
@@ -462,8 +462,8 @@ public:
     bool : 1;
     bool : 1;
     bool m_isStamina : 1;                // 0x1C
-    bool : 1;
-    bool : 1;
+    bool m_0x1C_6 : 1;
+    bool m_0x1C_5 : 1;                   // HYPOTHESIS: forces the name tag on (stOperatorInfo)
     bool m_isRebirthXlu : 1;
     bool m_isRabbitCap : 1;
     bool m_isFlower : 1;

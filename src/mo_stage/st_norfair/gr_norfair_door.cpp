@@ -54,7 +54,7 @@ grNorfairDoor* grNorfairDoor::create(int mdlIndex, const char* tgtNodeName, cons
 
 grNorfairDoor::~grNorfairDoor() {
     if (m_hitData != NULL) {
-        delete[] reinterpret_cast<u8*>(m_hitData); // MATCH-ONLY: raw storage (no element destructors)
+        delete[] reinterpret_cast<u8*>(m_hitData); // BYTES: raw storage (no array cookie), see setHit
     }
     m_hitData = NULL;
     if (m_hitSimple != NULL) {
@@ -281,7 +281,8 @@ void grNorfairDoor::setMotion(u32 animId, bool loop, bool force, float* frameCou
 
 // The hit object of the door: two hit spheres, one on each side of it (at x = -20 and x = 20), and an attack module.
 void grNorfairDoor::setHit() {
-    // MATCH-ONLY: the original allocates the hit data as raw storage (no element construction)
+    // BYTES: raw storage (no element construction, no array cookie). grEarthPelletFlower and grGWChefEtc
+    // array-construct the same types, so this unit's original allocated untyped bytes.
     m_hitData = reinterpret_cast<soCollisionHitData*>(new (Heaps::StageInstance) u8[sizeof(soCollisionHitData) * 2]);
     m_hitSimple = reinterpret_cast<soCollisionHitData::Simple*>(new (Heaps::StageInstance) u8[sizeof(soCollisionHitData::Simple) * 2]);
     m_hitSet = new (Heaps::StageInstance) soSet<soCollisionHitData::Simple>;

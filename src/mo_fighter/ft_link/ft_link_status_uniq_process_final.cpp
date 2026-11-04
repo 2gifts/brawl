@@ -59,28 +59,6 @@ struct ftLinkCaptureRequestEvent : soLinkEventArgs {
     ftLinkCaptureRequestEvent() : soLinkEventArgs(0xB), m_unk8(0xA3), m_unkC(-1), m_unk10(-1), m_unk14(-1), m_scale(1.0f), m_unk1C(1) { }
 };
 
-// MATCH-ONLY: the layout of soCollisionSearchData (0x18 bytes) as far as the final smash fills it: the sphere (offset, depth,
-// radius), the model node and the flag bits (their meanings are not known).
-struct ftLinkSearchData {
-    float m_x;
-    float m_y;
-    float m_depth;
-    float m_radius;
-    u32 m_node : 9;
-    u32 m_unk10a : 7;
-    u32 m_unk10b : 10;
-    u32 m_unk10c : 3;
-    u32 m_unk10d : 1;
-    u32 m_unk10e : 2;
-    u32 m_unk14a : 4;
-    u32 m_unk14b : 4;
-    u32 m_unk14c : 1;
-    u32 m_unk14d : 17;
-    u32 m_unk14e : 1;
-    u32 m_unk14f : 1;
-    u32 m_unk14g : 4;
-};
-
 // HYPOTHESIS: the slots of the catch module after catchCut (0x30..0x3C unknown); 0x40 takes a bool that the final smash sets
 // before it cuts the catch.
 class soCatchModuleFinalView : public soCatchModule {
@@ -127,14 +105,14 @@ void ftLinkStatusUniqProcessFinal::execFixPos(soModuleAccesser* moduleAccesser) 
     soWorkManageModule* work = &moduleAccesser->getWorkManageModule();
     if (work->isFlag(Work_Flag_SearchAsked) && !work->isFlag(Work_Flag_SearchSet)) {
         work->onFlag(Work_Flag_SearchSet);
-        ftLinkSearchData data;
+        soCollisionSearchData data;
         memset(&data, 0, sizeof(data));
         int node = moduleAccesser->getModelModule().getCorrectNodeId(300);
         data.m_node = node;
-        data.m_radius = soValueAccesser::getConstantFloat(moduleAccesser, 0xFAC, 0);
-        data.m_x = 0.0f;
-        data.m_y = 0.0f;
-        data.m_depth = soValueAccesser::getConstantFloat(moduleAccesser, 0xFAD, 0);
+        data.m_size = soValueAccesser::getConstantFloat(moduleAccesser, 0xFAC, 0);
+        data.m_offset.m_x = 0.0f;
+        data.m_offset.m_y = 0.0f;
+        data.m_offset.m_z = soValueAccesser::getConstantFloat(moduleAccesser, 0xFAD, 0);
         data.m_unk10a = 2;
         data.m_unk10b = 1;
         data.m_unk10c = 3;
@@ -146,7 +124,7 @@ void ftLinkStatusUniqProcessFinal::execFixPos(soModuleAccesser* moduleAccesser) 
         data.m_unk14d = 0;
         data.m_unk14e = 1;
         data.m_unk14f = 0;
-        moduleAccesser->getCollisionSearchModule().set(0, 0, reinterpret_cast<soCollisionSearchData*>(&data));
+        moduleAccesser->getCollisionSearchModule().set(0, 0, &data);
     }
     if (work->isFlag(Work_Flag_CatchSuccess)) {
         work->offFlag(Work_Flag_CatchSuccess);

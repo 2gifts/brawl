@@ -21,24 +21,6 @@ struct adKeepRareItem {
 };
 static_assert(sizeof(adKeepRareItem) == 0xC, "Class is the wrong size!");
 
-// HYPOTHESIS: view of the gmAdvData fields this unit reads and writes.
-struct adKeepAdvData {
-    char unk0[0x5FD];
-    u8 unk5FD;
-    char unk5FE[0xE];
-    u32 unk60C;
-    char unk610[0x40];
-    u32 m_globalFlags[0x20];
-    s8 unk6D0[0x4240];
-    u32 unk4910;
-    bool unk4914[2];
-    u8 unk4916;
-    u8 unk4917;
-    u32 unk4918;
-    u32 unk491C;
-    u16 unk4920;
-};
-
 class adKeepManager {
 public:
     u32* m_stageFlags;                 // 0x00

@@ -45,31 +45,6 @@ public:
     int m_size;                     // 0x10
 };
 
-namespace utility {
-
-// A node of a list that knows the list it is on: it puts itself at the end of the list when it is made.
-// HYPOTHESIS: the name; the layout follows from how the menu constructs and destroys the file below.
-class ListedNode : public utListNode {
-public:
-    utList* m_list;                 // 0x08 the list that the node is on
-
-    ListedNode(utList* list);
-    ~ListedNode();
-};
-
-// A file that reads in the background and is on a list of the files that are open.
-// HYPOTHESIS: the name is from the map of the module.
-class AutoFile : public ListedNode {
-public:
-    virtual ~AutoFile();
-    gfFileIOHandle m_handle;        // 0x10
-    bool m_flag;                    // 0x14
-
-    AutoFile();
-};
-
-} // namespace utility
-static_assert(sizeof(utility::AutoFile) == 0x18, "Class is wrong size!");
 
 // The browser of the saved replays of the collection: shows the thumbnail of the stage or the mode and the characters of
 // the replay that the cursor is on, and starts the replay that the player decides on.

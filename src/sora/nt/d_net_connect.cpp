@@ -1,5 +1,6 @@
 #include <cstring>
 #include <mu/wifi/mu_wifi_interface.h>
+#include <nt/nt_net_report.h>
 #include <nt/d_net_connect.h>
 #include <nt/nt_match.h>
 #include <revolution/SO/SOBasic.h>
