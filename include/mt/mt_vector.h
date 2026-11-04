@@ -117,7 +117,7 @@ public:
     // HYPOTHESIS: native calls pass vector addresses; original reference qualifiers are unresolved.
     float mtVecAngle(Vec2f& other);
 
-    float lengthSq()
+    float lengthSq() const
 #ifdef MT_VEC2F_LENGTH_SQ_OUT_OF_LINE
         __attribute__((never_inline)); // BYTES: retain the owning Vanish unit's helper calls.
 #elif !defined(MT_VEC2F_LENGTH_SQ_SPLIT)
@@ -172,9 +172,10 @@ public:
 #endif
 
     void normalize();
-    void normalize(Vec2f* input);
+    void normalize(const Vec2f* input);
 
-    void rot(float angle, Vec2f* out);
+    void rot(Vec2f* out, float rot) const;
+    float angle(const Vec2f* v) const;
 
     // Writes this vector scaled by c to out (the weapon articles call the out-of-line copy: opt in with MT_VEC2F_SCALE_NOINLINE).
     void scale(float c, Vec2f* out)
@@ -435,7 +436,7 @@ public:
     }
 #endif
 
-    Vec3f operator*(const float c);
+    Vec3f operator*(const float c) const;
 
     Vec3f operator/(const float c) {
         return *this * (1 / c);
@@ -476,7 +477,7 @@ public:
         m_z = m_z * c;
     }
 
-    float lengthSq()
+    float lengthSq() const
 #ifdef MT_VEC3F_LENGTH_SQ_INLINE
     { // MATCH-ONLY: this unit expands the verified Z + (X + Y) grouping inline.
         float xSq = m_x * m_x;
@@ -494,9 +495,11 @@ public:
     }
     // HYPOTHESIS: source argument order is unresolved; axis/angle/output roles are verified.
     // Original DOL fn_8003DF50 stays unrenamed until its source signature is established.
-    void rot(Vec3f* axis, float angle, Vec3f* out);
+    void rot(const Vec3f* axis, float rot, Vec3f* out) const;
     void normalize();
-    void normalize(Vec3f* input);
+    void normalize(const Vec3f* input);
+    float angle(const Vec3f* v) const;
+    void slerp(const Vec3f* v, Vec3f* out, float t) const;
 };
 static_assert(sizeof(Vec3f) == 12, "Class is wrong size!");
 
@@ -513,7 +516,7 @@ inline Vec2f::Vec2f(const Vec3f& xyz) : m_x(xyz.m_x), m_y(xyz.m_y) { }
 inline Vec2f::Vec2f(const Vec3f& xyz) { m_x = xyz.m_x; m_y = xyz.m_y; }
 #endif
 #if defined(MATCHING) && defined(MT_VEC3F_MUL_INLINE)
-inline Vec3f Vec3f::operator*(const float c) {
+inline Vec3f Vec3f::operator*(const float c) const {
     Vec3f result;
     Vec3fScale(&result, this, c);
     return result;

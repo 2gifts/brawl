@@ -19,7 +19,7 @@ void soAreaEnviromentElementCheckerImpl::check(soModuleAccesser* accesser) {
                 movement.m_speed > 0.0f && movement.m_gimmickKind != 13) {
                 Vec2f rotatedSpeed;
                 Vec2f speed(movement.m_speed, 0.0f);
-                speed.rot(0.01745329238474369f * movement.m_vector, &rotatedSpeed);
+                speed.rot(&rotatedSpeed, 0.01745329238474369f * movement.m_vector);
                 soKineticEnergy::OutsideType outsideType;
                 if (contact->unkD == gfArea::Stage_Group_Space_Wind) {
                     outsideType = soKineticEnergy::Outside_Wind;
