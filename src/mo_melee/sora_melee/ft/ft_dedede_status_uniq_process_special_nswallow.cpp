@@ -4,6 +4,9 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
+#include <ft/kirby/ft_kirby_copy_ability_id_converter.h>
+#include <so/catch/so_catch_module.h>
+#include <so/collision/so_collision_hit_module_impl.h>
 
 // Link event with a kind; soLinkEventArgs keeps its constructor protected.
 class ftDededeSwallowLinkEvent : public soLinkEventArgs {
@@ -22,6 +25,15 @@ public:
 ftDededeStatusUniqProcessSpecialNSwallow g_ftDededeStatusUniqProcessSpecialNSwallow;
 
 void ftDededeStatusUniqProcessSpecialNSwallow::initStatus(soModuleAccesser* moduleAccesser) {
+    switch (g_ftKirbyCopyAbilityIdConverter.convCorrectToOrigId(0, moduleAccesser->getStatusModule().getStatusKind(), moduleAccesser,
+                                                                 true)) {
+    case 0x119:
+        static_cast<soCatchModule*>(moduleAccesser->m_enumerationStart->m_catchModule)->setCatch(-1);
+        break;
+    case 0x11a:
+        moduleAccesser->getCollisionHitModule().setXluGlobal(0);
+        break;
+    }
 }
 
 void ftDededeStatusUniqProcessSpecialNSwallow::execStatus(soModuleAccesser* moduleAccesser) {
@@ -32,5 +44,22 @@ void ftDededeStatusUniqProcessSpecialNSwallow::execStatus(soModuleAccesser* modu
     }
 }
 
-void ftDededeStatusUniqProcessSpecialNSwallow::exitStatus(soModuleAccesser* moduleAccesser, int) {
+void ftDededeStatusUniqProcessSpecialNSwallow::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
+    switch (g_ftKirbyCopyAbilityIdConverter.convCorrectToOrigId(0, nextStatus, moduleAccesser, true)) {
+    case 0x11b:
+    case 0x121:
+        if (moduleAccesser->getLinkModule().isLinked(0) == 1) {
+            ftDededeSwallowLinkEvent event(0x13);
+            moduleAccesser->getLinkModule().sendEventNodes(0, event, 0);
+        }
+        break;
+    case 0x11a:
+        return;
+    default:
+        if (moduleAccesser->getLinkModule().isLinked(0) == 1) {
+            static_cast<soCatchModule*>(moduleAccesser->m_enumerationStart->m_catchModule)->catchCut(false, true);
+        }
+        moduleAccesser->getCollisionHitModule().cancelXluGlobal(0);
+        break;
+    }
 }
