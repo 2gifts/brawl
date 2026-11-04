@@ -335,18 +335,18 @@ float aiStat::calcArraiveFrameY(float target) {
     return calc_arraive_f(target - m_pos.m_y, m_speed.m_y, m_accel.m_y);
 }
 
+// Distance covered after `frame` frames from speed `speed` under constant
+// acceleration `accel` (the game's discrete-step form of v*t + a*t^2/2).
+static inline float calc_arraive_d(float frame, float speed, float accel) {
+    return speed * frame + (0.5f * ((0.5f + frame) * (accel * (0.5f + frame))) - 0.125f * accel);
+}
+
 float aiStat::calcArraivePosX(float frame) {
-    float speed = m_speed.m_x;
-    float accel = m_accel.m_x;
-    float h = 0.5f + frame;
-    return m_pos.m_x + (speed * frame + (0.5f * (h * (accel * h)) - 0.125f * accel));
+    return m_pos.m_x + calc_arraive_d(frame, m_speed.m_x, m_accel.m_x);
 }
 
 float aiStat::calcArraivePosY(float frame) {
-    float speed = m_speed.m_y;
-    float accel = m_accel.m_y;
-    float h = 0.5f + frame;
-    return m_pos.m_y + (speed * frame + (0.5f * (h * (accel * h)) - 0.125f * accel));
+    return m_pos.m_y + calc_arraive_d(frame, m_speed.m_y, m_accel.m_y);
 }
 
 float calc_arraive_f(float dist, float vel, float acc) {
@@ -368,8 +368,7 @@ float calc_arraive_f(float dist, float vel, float acc) {
         return dist / vel;
     }
     float t = -(vel / acc);
-    float h = 0.5f + t;
-    float r = mtSqrtf(__fabsf((0.125f * acc + (dist - (vel * t + (0.5f * (h * (acc * h)) - 0.125f * acc)))) / (0.5f * acc)));
+    float r = mtSqrtf(__fabsf((0.125f * acc + (dist - calc_arraive_d(t, vel, acc))) / (0.5f * acc)));
     return (r - 0.5f) + t;
 }
 
@@ -505,8 +504,8 @@ float aiStat::get_range_floor(float scale, Vec3f* pos) {
     AiClBlock* floor = m_floor;
     Vec2f edgeL = floor->m_edgeL;
     Vec2f edgeR = floor->m_edgeR;
-    float sign = 1.0f;
     float range;
+    float sign = 1.0f;
     if (m_unkC0 == 2) {
         float x = pos->m_x;
         if (x < edgeL.m_x) {
@@ -518,22 +517,24 @@ float aiStat::get_range_floor(float scale, Vec3f* pos) {
         } else {
             float toLeft = __fabsf(x - edgeL.m_x);
             float toRight = __fabsf(x - edgeR.m_x);
+            float d;
             if (toLeft < toRight) {
-                toLeft = -toLeft;
+                d = -toLeft * scale;
             } else {
-                toLeft = toRight;
+                d = toRight * scale;
             }
-            range = __fabsf(toLeft * scale);
+            range = __fabsf(d);
         }
     } else {
+        float edge;
         if (scale > 0.0f) {
-            range = scale * (edgeR.m_x - pos->m_x);
+            edge = edgeR.m_x;
         } else {
-            range = scale * (edgeL.m_x - pos->m_x);
+            edge = edgeL.m_x;
         }
+        range = scale * (edge - pos->m_x);
     }
-    float width = aiParam::get_width(&m_chrIdx);
-    range = range - width;
+    range -= aiParam::get_width(&m_chrIdx);
     if (range < 0.001f) {
         range = 0.001f;
     }
