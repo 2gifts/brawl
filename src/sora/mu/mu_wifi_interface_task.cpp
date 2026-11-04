@@ -411,3 +411,39 @@ muWifiAIDInfo* muWifiInterfaceTask::getSafeParentAIDInfo() {
     }
     return info;
 }
+
+u8 muWifiInterfaceTask::getMyFriendStatusIcon() {
+    return ntFriendInfo::getInstance()->unk0->unk450[0xDA];
+}
+
+u8 muWifiInterfaceTask::getFriendStatusIcon(int index) {
+    return ntFriendInfo::getInstance()->unk0->unk5B3[index].unk8[0];
+}
+
+u8 muWifiInterfaceTask::getFriendStatusWiFiStatus(int index) {
+    return ntFriendInfo::getInstance()->unk0->unk5B3[index].unk8[0x4D];
+}
+
+u8 muWifiInterfaceTask::getFriendStatusRoundTripTime(int index) {
+    return ntFriendInfo::getInstance()->unk0->unk350[index].unk2[1];
+}
+
+u64 muWifiInterfaceTask::getMyRFLID() {
+    u64 id;
+    ntFriendInfo* info = ntFriendInfo::getInstance();
+    memcpy(&id, &info->unk0->unk450[0x129], 8);
+    return id;
+}
+
+void muWifiInterfaceTask::setMyRFLID(u64 id) {
+    memcpy(&ntFriendInfo::getInstance()->unk0->unk450[0x129], &id, 8);
+    ntFriendInfo::getInstance()->setDirtyFlag(true);
+}
+
+u8 muWifiInterfaceTask::getFriendStatusEntryPlayers(int index) {
+    u8 players = ntFriendInfo::getInstance()->unk0->unk5B3[index].unk8[0x4E];
+    if (players == 0) {
+        players++;
+    }
+    return players;
+}

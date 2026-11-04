@@ -155,6 +155,14 @@ public:
     u64 getComposedCharaAcceptFlag();
     muWifiAIDInfo* getSafeParentAIDInfo();
     void requestExchangeFriendKey(int playerArea);
+    u8 getMyFriendStatusIcon();
+    u8 getFriendStatusIcon(int index);
+    u8 getFriendStatusWiFiStatus(int index);
+    u8 getFriendStatusRoundTripTime(int index);
+    u64 getMyRFLID();
+    void endMatching();
+    void setMyRFLID(u64 id);
+    u8 getFriendStatusEntryPlayers(int index);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 
