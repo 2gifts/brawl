@@ -1,6 +1,20 @@
+#define MT_VEC3F_ASSIGN_NOINLINE
+#define MT_VEC3F_CTOR_NOINLINE
+#define WN_KINETIC_GENERIC_BUILDER
+#include <so/kinetic/so_kinetic_energy_3f.h>
+#include <so/kinetic/so_kinetic_module_impl.h>
+#include <so/kinetic/so_kinetic_transactor.h>
+#include <so/so_kinetic_energy_rot_normal.h>
+#include <so/so_module_accesser.h>
+#include <so/so_type_list.h>
+#include <so/so_value_accesser.h>
+#include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 #include <wn/pit/wn_pit_ikarus.h>
 #include <wn/wn_activate_desc.h>
+#include <wn/wn_kinetic_energy_gravity.h>
+#include <wn/wn_kinetic_energy_normal.h>
+#include <wn/wn_kinetic_transactor.h>
 
 // Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
 extern "C" {
@@ -38,3 +52,73 @@ bool wnPitIkarus::notifyEventCollisionAttackCheck(u32 flags) {
 }
 
 wnPitIkarus::~wnPitIkarus() { }
+
+soKineticEnergy3f::~soKineticEnergy3f() { }
+
+template <typename E>
+void soKineticTransactor::updateEnergy(E* energy, soModuleAccesser* moduleAccesser) {
+    if (energy->isEnable() == true && !energy->isSuspend())
+        energy->updateEnergy(moduleAccesser);
+}
+template void soKineticTransactor::updateEnergy<soKineticEnergy3f>(soKineticEnergy3f*, soModuleAccesser*);
+template void soKineticTransactor::updateEnergy<soKineticEnergyRotNormal>(soKineticEnergyRotNormal*, soModuleAccesser*);
+template void soKineticTransactor::updateEnergy<wnKineticEnergyNormal>(wnKineticEnergyNormal*, soModuleAccesser*);
+template void soKineticTransactor::updateEnergy<wnKineticEnergyGravity>(wnKineticEnergyGravity*, soModuleAccesser*);
+
+// HYPOTHESIS: the transactor reaches an energy of the Ikarus instance pools through an overload selected by an empty
+// soIntToType<pool level> tag (as in wn_diddy_barrel_kinetic_transactor.cpp).
+static inline soKineticEnergy3f* getEnergy(void* pools, const soIntToType<0>&) {
+    return reinterpret_cast<soKineticEnergy3f*>(static_cast<u8*>(pools) + 0x10);
+}
+static inline soKineticEnergyRotNormal* getEnergy(void* pools, const soIntToType<1>&) {
+    return reinterpret_cast<soKineticEnergyRotNormal*>(static_cast<u8*>(pools) + 0x64);
+}
+
+void wnPitIkarusKineticTransactor::changeKineticSub(void* pools, soModuleAccesser* moduleAccesser) {
+    moduleAccesser->getKineticModule().unableEnergyAll();
+    soKineticEnergy3f* energy = getEnergy(pools, soIntToType<0>());
+    energy->resetEnergy(-1, &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    energy->enable();
+}
+
+void wnPitIkarusKineticTransactor::changeKineticSub(void* pools, soModuleAccesser* moduleAccesser) const {
+    moduleAccesser->getKineticModule().unableEnergyAll();
+
+    soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
+    float frames = soValueAccesser::getConstantInt(moduleAccesser, 0x5dc1, 0);
+    float angle = 90.0f * workManage.getFloat(0x21000000) / frames;
+    soKineticEnergyRotNormal* energy = getEnergy(pools, soIntToType<1>());
+    Vec3f rotation(0.0f, angle, 0.0f);
+    energy->m_rotSpeed = rotation;
+    energy->enable();
+}
+
+void wnPitIkarusKineticTransactor::changeKinetic(int mode, void* pools, soModuleAccesser* moduleAccesser) {
+    if (mode <= 0x1F) {
+        wnKineticTransactor::changeKinetic(mode, pools, moduleAccesser);
+        return;
+    }
+
+    switch (mode) {
+    case 0x20: {
+        wnPitIkarusKineticTransactor empty = {};
+        empty.changeKineticSub(pools, moduleAccesser);
+        break;
+    }
+    case 0x21: {
+        const wnPitIkarusKineticTransactor empty = {};
+        empty.changeKineticSub(pools, moduleAccesser);
+        break;
+    }
+    case 0x22: {
+        wnPitIkarusKineticTransactor empty = {};
+        empty.changeKineticSub(static_cast<const void*>(pools), moduleAccesser);
+        break;
+    }
+    case 0x23: {
+        const wnPitIkarusKineticTransactor empty = {};
+        empty.changeKineticSub(static_cast<const void*>(pools), moduleAccesser);
+        break;
+    }
+    }
+}
