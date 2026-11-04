@@ -297,6 +297,7 @@ static_assert(sizeof(stObsTriggerArea) == 0x3C, "Class is wrong size!");
 class stObsTriggerSquareHitPointEffectCB : public stObsTriggerArea {
     int m_hitPointEffectIndex;
 
+public:
     virtual ~stObsTriggerSquareHitPointEffectCB();
 
 };
@@ -309,15 +310,27 @@ public:
     stObsTriggerSquareBeltConveyorCB(bool* flag, grGimmickPressureAreaData* beltData);
     virtual ~stObsTriggerSquareBeltConveyorCB();
     void setParam(grGimmickBeltConveyorData* beltData);
+    void setParam(grGimmickPressureAreaData* beltData);
 };
 static_assert(sizeof(stObsTriggerSquareBeltConveyorCB) == 0x40, "Class is wrong size!");
 
 class stObsTriggerSquareWaterCB : public stObsTriggerArea {
     int m_waterIndex;
 
+public:
+    stObsTriggerSquareWaterCB(bool* flag, grGimmickWaterData* waterData);
     virtual ~stObsTriggerSquareWaterCB();
+    void setParam(grGimmickWaterData* waterData);
 };
 static_assert(sizeof(stObsTriggerSquareWaterCB) == 0x40, "Class is wrong size!");
+
+class stObsTriggerTriBeltConveyorCB : public stObsTriggerArea {
+    int m_beltConveyorIndex;
+
+public:
+    virtual ~stObsTriggerTriBeltConveyorCB();
+};
+static_assert(sizeof(stObsTriggerTriBeltConveyorCB) == 0x40, "Class is wrong size!");
 
 class stObsTriggerSquareWindCB : public stObsTriggerArea {
     int m_windIndex;
