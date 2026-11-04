@@ -10675,31 +10675,38 @@ mo_melee/sora_melee/wn/wn_class_info.cpp:
 
 mo_melee/sora_melee/ai/ai_mgr.cpp:
 	.text       start:0x001E8590 end:0x001F329C
+	.rodata     start:0x00002B80 end:0x00002CF0
 
 mo_melee/sora_melee/ai/ai_input.cpp:
 	.text       start:0x001F329C end:0x00206D94
+	.rodata     start:0x00002CF0 end:0x00002F68
 
 mo_melee/sora_melee/ai/ai_stat.cpp:
 	.text       start:0x00206D94 end:0x0020C56C
+	.rodata     start:0x00002F68 end:0x00003000
 
 mo_melee/sora_melee/ai/ai_act.cpp:
 	.text       start:0x0020C56C end:0x00217590
 	.ctors      start:0x0000029C end:0x000002A0
+	.rodata     start:0x00003000 end:0x000031B8
 
 mo_melee/sora_melee/ai/ai_weapon.cpp:
 	.text       start:0x00217590 end:0x0021BE00
+	.rodata     start:0x000031B8 end:0x00003280
 
 mo_melee/sora_melee/so/so_array_list_members_ptr_BaseItem_64_part1.cpp:
 	.text       start:0x0021BE00 end:0x0021BE10
 
 mo_melee/sora_melee/ai/ai_enemy.cpp:
 	.text       start:0x0021BE40 end:0x0021CB30
+	.rodata     start:0x00003280 end:0x00003290
 
 mo_melee/sora_melee/so/so_array_list_members_Ul_32_part1.cpp:
 	.text       start:0x0021CB30 end:0x0021CD58
 
 mo_melee/sora_melee/ai/ai_param.cpp:
 	.text       start:0x0021CD58 end:0x00220150
+	.rodata     start:0x00003290 end:0x00003320
 
 mo_melee/sora_melee/st/stage.cpp:
 	.text       start:0x00221A24 end:0x002257BC
