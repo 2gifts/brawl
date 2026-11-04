@@ -69,6 +69,7 @@ public:
     soGenerateArticleManageModuleImpl(soModuleAccesser*, soArray<soArticle*>*,
         soArticleMediator*, soArray<soArticleEventObserver>*);
     virtual ~soGenerateArticleManageModuleImpl();
+    virtual void changeStatus(int articleId, int statusKind, int selector);
     virtual soArticle* generate(int articleId, void* logAttackInfo, bool);
     virtual void setVisibilityWhole(int articleId, u8, int selector);
     virtual void set2nd(int articleId, u8, int selector);
