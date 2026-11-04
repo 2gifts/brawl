@@ -150,6 +150,7 @@ public:
 
     void* searchAtkData(int ftKind, u32 id);
 
+    AiClBlock* get_random_block(AiClBlock* exclude, int team);
     AiClBlock* get_top_block(int team);
     AiClBlock* get_right_block(int team);
     AiClBlock* get_center_block(int team);

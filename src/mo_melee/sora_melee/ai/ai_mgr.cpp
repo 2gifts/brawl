@@ -866,6 +866,46 @@ bool AiClBlock::chk_fl_danger(int team) {
     return false;
 }
 
+// Picks a usable block other than exclude at random. The hazard blocks (0x1000) only count for a team-less CPU and the
+// blocks dangerous to the team get a small weight. HYPOTHESIS: the name; get_via_blk_team falls back to it when it has
+// no goal block.
+AiClBlock* aiMgr::get_random_block(AiClBlock* exclude, int team) {
+    AiClBlock* block = m_blocks;
+    float total = 0.0f;
+    for (int i = 0; i < m_numBlocks; i++, block++) {
+        if ((block->m_flags & 2) && block != exclude) {
+            if (block->m_flags & 0x1000) {
+                if (team < 0) {
+                    total += 0.0001f;
+                }
+            } else if (block->chk_fl_danger(team)) {
+                total += 0.01f;
+            } else {
+                total += 1.0f;
+            }
+        }
+    }
+    total *= randf();
+    block = m_blocks;
+    for (int i = 0; i < m_numBlocks - 1; i++, block++) {
+        if ((block->m_flags & 2) && block != exclude) {
+            if (block->m_flags & 0x1000) {
+                if (team < 0) {
+                    total -= 0.0001f;
+                }
+            } else if (block->chk_fl_danger(team)) {
+                total -= 0.01f;
+            } else {
+                total -= 1.0f;
+            }
+            if (total <= 0.0f) {
+                break;
+            }
+        }
+    }
+    return block;
+}
+
 AiClBlock* aiMgr::get_top_block(int team) {
     int count = m_numBlocks;
     AiClBlock* block = m_blocks;
@@ -1178,6 +1218,34 @@ AiClBlock* aiMgr::get_via_blk2_core(AiClBlock* goal, AiClBlock* from, AiClBlock*
 
 bool aiMgr::chk_cl_cross(Vec2f* from, Vec2f* to, u32 mask, Vec2f* hitPos, AiClBlock* ignore) {
     return chk_cl_cross2(from, to, mask, hitPos, ignore) != NULL;
+}
+
+// Whether the segments a-b and c-d cross; the crossing point goes to cross when given.
+// HYPOTHESIS: the name; a free function of the unit (the callers pass the points in r3-r6, no aiMgr).
+bool aiChkSegmentCross(const Vec2f* a, const Vec2f* b, const Vec2f* c, const Vec2f* d, Vec2f* cross) {
+    float det = (c->m_x - d->m_x) * (a->m_y - b->m_y) - (a->m_x - b->m_x) * (c->m_y - d->m_y);
+    float num = (a->m_x - b->m_x) * (d->m_y - b->m_y) - (d->m_x - b->m_x) * (a->m_y - b->m_y);
+    if (__fabsf(det) < 0.00001f) {
+        return false;
+    }
+    float t = num / det;
+    if (t < 0.0f || t > 1.0f) {
+        return false;
+    }
+    float s;
+    if (a->m_x != b->m_x) {
+        s = (t * (c->m_x - d->m_x) + (d->m_x - b->m_x)) / (a->m_x - b->m_x);
+    } else {
+        s = (t * (c->m_y - d->m_y) + (d->m_y - b->m_y)) / (a->m_y - b->m_y);
+    }
+    if (s < 0.0f || s > 1.0f) {
+        return false;
+    }
+    if (cross != NULL) {
+        cross->m_x = a->m_x * s + b->m_x * (1.0f - s);
+        cross->m_y = a->m_y * s + b->m_y * (1.0f - s);
+    }
+    return true;
 }
 
 // Whether the input of the character in this slot still comes from its controller: true until the AI has its floor
