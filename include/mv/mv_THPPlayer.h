@@ -47,7 +47,7 @@ struct UnkTHPClass {
             u32 unk90;
             u32 unk94;
             u32 unk98;
-            u32 unk9C;
+            void* unk9C;
             s32 unkA0;
             u8 unkA4;
             u8 unkA5;
