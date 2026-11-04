@@ -17,6 +17,10 @@ public:
     // HYPOTHESIS: parameter types follow register widths and output stores.
     bool refSendCmd(u8, void**, u16, u16*, u8);
 
+    static bool isSendQueueEmpty();
+    void broadcastMyShortComment();
+    void broadcastMyName();
+
     u8 unk8[0x10];
     u32 unk18;
     u32 unk1C;
@@ -30,7 +34,8 @@ public:
     u32 unk38;
     u8 unk3C;
     u8 unk3D;
-    u8 unk3E_b6 : 2;
+    u8 unk3E_b7 : 1;
+    u8 unk3E_b6 : 1;
     u8 unk3E_b5 : 1;
     u8 unk3E_b4 : 1;
     u8 unk3E_b2 : 2;
@@ -51,7 +56,22 @@ public:
         u8 unk12[2];
         s32 unk14;
         s32 unk18;
-        u8 unk1C[4][0x38C];
+        union {
+            u8 unk1C[4][0x38C];
+            struct {
+                u32 unk0;
+                u16 unk4;
+                u8 unk6;
+                u8 unk7;
+                u8 unk8[2];
+                u8 unkA;
+                u8 unkB;
+                u16 unkC;
+                u16 unkE;
+                u8 unk10[6];
+                u8 unk16[0x376];
+            } unk1CData[4];
+        };
         u8 unkE4C[4];
         // HYPOTHESIS: inline initialization shared by the per-AID reset paths.
         void init() {
@@ -66,17 +86,27 @@ public:
             memset(unk1C, 0, sizeof(unk1C));
         }
     } unk44[4];
-    struct {
-        u32 unk0;
-        u32 unk4;
+    class ntTrRecvQue {
+    public:
+        bool stock(u8, u8, const void*, u32);
+        void* unk0;
+        void* unk4;
         void* unk8;
         u32 unkC;
         struct {
-            u32 unk0;
+            void* unk0;
             void* unk4;
-            u8 unk8[0x388];
+            union {
+                u8 unk8[0x388];
+                struct {
+                    u8 unk8Data;
+                    u8 unk9;
+                    u8 unkA[0x386];
+                };
+            };
         } unk10[4];
-    } unk3984;
+    };
+    ntTrRecvQue unk3984;
     u32 unk47D4;
     u32 unk47D8;
     u32 unk47DC;
