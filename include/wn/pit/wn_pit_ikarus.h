@@ -5,6 +5,18 @@
 #include <wn/wn_weapon_builder.h>
 
 class wnPitIkarusModuleAccesserBuildConfig;
+class soModuleAccesser;
+
+// HYPOTHESIS: the transactor of the Ikarus article; the per-mode changeKineticSub helpers run on an empty one-byte object.
+class wnPitIkarusKineticTransactor {
+    u8 unk0;
+public:
+    static void changeKinetic(int mode, void* pools, soModuleAccesser* moduleAccesser);
+    void changeKineticSub(void* pools, soModuleAccesser* moduleAccesser);
+    void changeKineticSub(void* pools, soModuleAccesser* moduleAccesser) const;
+    void changeKineticSub(const void* pools, soModuleAccesser* moduleAccesser);
+    void changeKineticSub(const void* pools, soModuleAccesser* moduleAccesser) const;
+};
 
 template <>
 class wnWeaponBuilder<wnPitIkarusModuleAccesserBuildConfig> : public Weapon {

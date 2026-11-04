@@ -8,5 +8,7 @@
 // weapon statuses write at +0x8 is modelled.
 class soKineticEnergy3f : public soKineticEnergy {
 public:
+    virtual ~soKineticEnergy3f();
+    void resetEnergy(int, Vec3f*, Vec3f*, soModuleAccesser*);
     Vec3f m_speed3f; // +0x08
 };
