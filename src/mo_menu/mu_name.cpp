@@ -45,7 +45,6 @@ extern "C" int fn_800BA3D8(muMenuController* controller);
 // The name of the player that is given when there is no name (the "new name" line of the list).
 extern "C" const char* fn_800B96B0();
 // GameGlobal: the names that were saved
-extern "C" int fn_8004D9A8(GameGlobal* global, int nameNo);
 // gfPadSystem::getSysPadStatus, WPADProbe(channel, type), the sound of the Wii Remote, gfPadSystem::fn_8002B504()
 extern "C" void fn_80077B98(sndSystem* system, int pad, int unk, int unk2, int unk3);
 extern "C" void fn_8002B504(gfPadSystem* system);
@@ -2632,7 +2631,7 @@ void muNameTask::mainStepRemoteStoreWriteInit(muNameTask* task) {
     muNameRemoteData data;
     memset(&data, 0, sizeof(data));
     global->getNameUTF16(task->m_remoteNameNo, reinterpret_cast<wchar_t*>(data.m_name));
-    data.m_flag = fn_8004D9A8(global, task->m_remoteNameNo);
+    data.m_flag = global->getNameRumbleSwitch(task->m_remoteNameNo);
     memcpy(data.m_data, global->getButtonConfig(static_cast<u8>(task->m_remoteNameNo)), sizeof(data.m_data));
     task->m_returnCallback.m_canReturn = false;
     task->m_remote->write(&data);

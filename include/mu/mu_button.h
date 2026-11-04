@@ -9,6 +9,7 @@
 #include <types.h>
 
 class MuMsg;
+struct ipButtonConfig;
 class MuObject;
 class scButton;
 namespace nw4r {
@@ -66,10 +67,10 @@ public:
         u8 m_padObj;               // 0x6 the object of the controller model (the button group hangs on its nodes)
         u8 m_group;                // 0x7 the group of the button texts and the cursor
         u8 m_cursorObj;            // 0x8 HYPOTHESIS: the object that marks the selected button
-        u8 m_unk9;                 // 0x9
+        u8 m_pushObj;              // 0x9 the object that shows the pushed button in the practice
         u8 m_unkA;                 // 0xA
         u8 m_unkB;                 // 0xB
-        u8 m_unkC;                 // 0xC
+        u8 m_pushLine;             // 0xC the text line of the pushed button in the practice
     };
 
     // The texts of an action: its name and its explanation.
@@ -106,14 +107,14 @@ public:
         int m_listIndex;           // 0x1B0 the action of the button that is being changed, in its action list
         u8 m_isListOpen;           // 0x1B4 the list of free actions is shown
         int m_dlgKind;             // 0x1B8 the dialog that is open (0: none)
-        u8 m_unk1BC;               // 0x1BC cleared when the restore and store dialogs open
-        s16 m_unk1BE;              // 0x1BE
+        u8 m_dlgYes;               // 0x1BC the cursor of the restore and store dialogs is on yes (they open on no)
+        s16 m_pushWait;            // 0x1BE the frames the pushed button stays shown in the practice
         s16 m_dlgWait;             // 0x1C0 the frames the dialog of the stored settings stays open
-        int m_unk1C4;              // 0x1C4
-        int m_unk1C8;              // 0x1C8
+        int m_contNo;              // 0x1C4 the pad that tries the buttons in the practice
+        int m_practicePadKind;     // 0x1C8 the controller kind of that pad when the practice started
         u8 m_isSubStickOn;         // 0x1CC the C stick was tilted on the last frame (it acts as one more button)
         int m_exitWait;            // 0x1D0 the frames before the scene is told that the menu ended
-        u8 m_unk1D4;               // 0x1D4
+        u8 m_isContSet;            // 0x1D4 the practice fighter has the pad (scButton::setContNo succeeded)
     };
 
     // A model of the menu: the node name, the objects it fills (m_objs[m_first ... m_last - 1], at least one) and the
@@ -165,6 +166,8 @@ public:
     virtual ~muButtonTask();
 
     void getNameButtonConfig(int no);
+    // The settings of the four controller kinds in the order of ipButtonConfig (the reverse of getNameButtonConfig).
+    ipButtonConfig makeButtonConfig(const Config* configs);
     void initWork();
     void initMsg(void* msgData);
     void createModel(nw4r::g3d::ResFile* resFile);

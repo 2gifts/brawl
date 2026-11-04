@@ -40,5 +40,7 @@ public:
     // The camera animation of the menu scene.
     void setCamAnm(nw4r::g3d::ResAnmScn* anm);
     void updateFrame();
+    // Gives the practice fighter a pad (false while the fight cannot take it yet).
+    bool setContNo(int contNo);
 };
 static_assert(sizeof(scButton) == 0x108, "Class is wrong size!");
