@@ -13,9 +13,6 @@
 // main.dol functions with names that the shared headers do not declare.
 // Message::getPrintIndexData(data, index, text, size)
 extern "C" void getPrintIndexData__7MessageFPvUlPPcPUl(void* data, u32 index, char** text, u32* size);
-// HYPOTHESIS: the loader of a file of the menu: reset(loader) and request(loader, path, heap, 0)
-extern "C" void fn_800FABEC(muCollectionViewer::MsgFile* loader);
-extern "C" void fn_800FAC58(muCollectionViewer::MsgFile* loader, const char* path, Heaps::HeapType heap, int unk);
 // the pictures of the collection: the name of the file, the decoded picture and the check that the collection is ready
 extern "C" muCollectionFileName fn_800C3538(const char* names, int index);
 extern "C" void fn_800C7324(muSnapShotJpeg* result, void* summary, Heaps::HeapType heap, int unk);
@@ -75,11 +72,15 @@ struct muSnapShotMenuBits {
 };
 
 // Resets one of the loaders of the menu, clears the data around it and asks it to read the file.
+// HYPOTHESIS: Work's words at 0x00 and 0x9C start a utility::AutoResFile each (the ResFile, the loader node, the
+// AutoFile at +0x14 = MsgFile and the init flag at +0x2C), so this is AutoResFile::request; Work does not declare them as
+// such yet, because their constructors and destructors would then be part of Work's.
+// BYTES: the cast at each call; one local AutoFile pointer for both calls is kept in a register (97.5 -> 91.3).
 static inline void requestResource(muCollectionViewer::MsgFile* loader, int* unk, u8* flag, const char* path) {
-    fn_800FABEC(loader);
+    reinterpret_cast<utility::AutoFile*>(loader)->clear();
     *unk = 0;
     *flag = 0;
-    fn_800FAC58(loader, path, Heaps::MenuResource, 0);
+    reinterpret_cast<utility::AutoFile*>(loader)->request(path, Heaps::MenuResource, 0);
 }
 
 static inline void callVirtualFloat(void* object, int offset, float value) {
@@ -106,8 +107,8 @@ void muSnapShotTask::loadResource() {
     requestResource(&work->m_brres, &work->m_unk000, &work->m_brresFlag, "/menu/collection/Snap.brres");
     work = getWork();
     requestResource(&work->m_wait, &work->m_unk09C, &work->m_waitFlag, "/menu/common/Wait.brres");
-    fn_800FAC58(&getWork()->m_msgFile[0], "/menu/msg/snap_shot.msbin", Heaps::MenuResource, 0);
-    fn_800FAC58(&getWork()->m_msgFile[1], "/menu/msg/save_load.msbin", Heaps::MenuResource, 0);
+    reinterpret_cast<utility::AutoFile*>(&getWork()->m_msgFile[0])->request("/menu/msg/snap_shot.msbin", Heaps::MenuResource, 0);
+    reinterpret_cast<utility::AutoFile*>(&getWork()->m_msgFile[1])->request("/menu/msg/save_load.msbin", Heaps::MenuResource, 0);
 }
 
 void muSnapShotTask::createModel() {

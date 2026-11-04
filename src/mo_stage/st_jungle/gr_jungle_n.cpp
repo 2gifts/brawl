@@ -160,10 +160,7 @@ void grJungleN::updateCallBack(float deltaFrame) {
                 fn_8003F074(&mtx, m_shake.m_x, m_shake.m_y, m_shake.m_z);
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix = mtx;
             }
-            float posZ = calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix(2, 3);
-            float posY = calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix(1, 3);
-            float posX = calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix(0, 3);
-            Vec3f pos(posX, posY, posZ);
+            Vec3f pos = calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix.getTranslation();
             m_snd.setPos(&pos);
         }
     }

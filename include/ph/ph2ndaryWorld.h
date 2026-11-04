@@ -3,10 +3,13 @@
 #include <havok/hkArray.h>
 #include <types.h>
 
+class grCollCollection;
+
 // Secondary-motion world (map class ph2ndaryWorld). Offsets come from the asm of
 // src/sora/ph/ph_2ndary_world.cpp. Field names are HYPOTHESIS; unkNN marks fields not yet seen in the asm.
 class ph2ndaryWorld {
 public:
+    ph2ndaryWorld();
     ~ph2ndaryWorld();
     // One entry of the constraint list: kind byte, owning pointer and an id.
     struct ConstraintEntry {
@@ -21,8 +24,40 @@ public:
     f32 getSamusRandomAccel(f32 a, f32 b, f32 c);
 
     hkArray<ConstraintEntry> m_constraints; // 0x00: data, size and capacity word
-    u8 unk0C[0x48 - 0x0C];                // 0x0C
+    union {
+        u8 unk0C[0x48 - 0x0C];
+        struct {
+            s32 unkC;
+            grCollCollection* unk10;
+            u8 unk14;
+            u32 unk18;
+            u32 unk1C;
+            // HYPOTHESIS: four-byte array elements; only base storage is exposed.
+            hkArrayBase unk20;
+            hkArrayBase unk2C;
+            u8 unk38;
+            u8 unk39;
+            u8 unk3A;
+            u8 unk3B;
+            u8 unk3C;
+            u8 unk3D;
+            u32 unk40;
+            f32 unk44;
+        };
+    };
     f32 m_unk48;                          // 0x48, scale used by getSamusRandomAccel (HYPOTHESIS: a random-accel factor)
-    u8 unk4C[0x6C - 0x4C];                // 0x4C
+    union {
+        u8 unk4C[0x6C - 0x4C];
+        struct {
+            u32 unk4CValue;
+            u8 unk50;
+            u32 unk54;
+            f32 unk58;
+            u32 unk5C;
+            u32 unk60;
+            u32 unk64;
+            u8 unk68;
+        };
+    };
     s32 m_nextId;                         // 0x6C, id given to the next constraint
 };

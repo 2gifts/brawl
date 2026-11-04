@@ -1,5 +1,9 @@
 #include <cm/cm_camera_controller.h>
+#include <cm/cm_controller_demo.h>
+#include <cm/cm_controller_fig_disp1.h>
+#include <cm/cm_controller_photo.h>
 #include <gf/gf_camera.h>
+#include <sr/sr_common.h>
 
 extern "C" void fn_800A6BF0(gfCameraController* controller);
 extern "C" void fn_800A6B78(gfCameraController* controller);
@@ -127,4 +131,59 @@ gfCamera* CameraController::getCameraInternal()
 }
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
-unsigned char lbl_805A0278[0x8] __attribute__((aligned(4))) = { 0 };
+// HYPOTHESIS: the CameraController instance pointer (the map leaves this .sbss pair unnamed).
+CameraController* lbl_805A0278[2] __attribute__((aligned(4))) = { 0 };
+
+CameraController* CameraController::create()
+{
+    if (!lbl_805A0278[0]) {
+        lbl_805A0278[0] = new (Heaps::System) CameraController();
+        lbl_805A0278[0]->init();
+    }
+    return lbl_805A0278[0];
+}
+
+cmPhotoController::~cmPhotoController()
+{
+}
+
+cmFigDisp1Controller::~cmFigDisp1Controller()
+{
+}
+
+bool CameraController::isForceEnableCamControll3D()
+{
+    if (m_currentControllerKind == AI || m_currentControllerKind == MeleeFixed) {
+        return false;
+    }
+    if (m_currentControllerKind == Demo) {
+        return static_cast<cmDemoController*>(m_demoController)->isForceCamControl3D();
+    }
+    return true;
+}
+
+unsigned int CameraController::isSubjectSettingFlags()
+{
+    unsigned int flags = 0;
+    if (m_currentControllerKind == Demo && m_demoController != nullptr) {
+        switch (static_cast<cmDemoController*>(m_demoController)->m_targetType) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            flags = 1;
+            break;
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+            flags = 4;
+            break;
+        case 9:
+            flags = 3;
+            break;
+        }
+    }
+    return flags | 1;
+}

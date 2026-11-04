@@ -25,7 +25,7 @@ void stLoaderLocalAdventure::processBegin() {
                 if ((u8)_0x45[2] == 1) {
                     m_state = 5;
                 } else if (stage != NULL) {
-                    unk6C = *reinterpret_cast<int*>(reinterpret_cast<u8*>(m_advData) + 0x620);
+                    unk6C = m_advData->m_itemGenKind;
                     stage->startLoadLocalData();
                     m_state = 2;
                 }

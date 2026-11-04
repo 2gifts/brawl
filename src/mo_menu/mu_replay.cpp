@@ -15,11 +15,6 @@
 // main.dol functions with names that the shared headers do not declare.
 // Message::getPrintIndexData(data, index, text, size)
 extern "C" void getPrintIndexData__7MessageFPvUlPPcPUl(void* data, u32 index, char** text, u32* size);
-// HYPOTHESIS: the loader of a file of the menu: reset(loader) and request(loader, path, heap, 0)
-extern "C" void fn_800FABEC(void* loader);
-extern "C" void fn_800FAC58(void* loader, const char* path, Heaps::HeapType heap, int unk);
-// gfFileIOHandle::~gfFileIOHandle(handle, flags)
-extern "C" void __dt__14gfFileIOHandleFv(gfFileIOHandle* handle, int flags);
 // the collection: the name of the file, and the check that the collection is ready
 extern "C" muCollectionFileName fn_800C3538(const char* names, int index);
 extern "C" int fn_800C39D8(void* collection);
@@ -65,7 +60,6 @@ extern "C" muReplaySummary* fn_6_8180(void* summaries, const muCollectionFileNam
 
 // the data of the global record of the match (the players) and the data of the stage
 extern u8* lbl_805A01D8;
-extern utList lbl_8049E550;
 
 // The text of a notice: the data and how much of it is used.
 struct muReplayNotice {
@@ -116,11 +110,15 @@ struct muReplayRecord {
 };
 
 // Resets one of the loaders of the menu, clears the data around it and asks it to read the file.
-static inline void requestResource(void* loader, int* unk, u8* flag, const char* path) {
-    fn_800FABEC(loader);
+// HYPOTHESIS: Work's words at 0x00 and 0x9C start a utility::AutoResFile each (the ResFile, the loader node, the
+// AutoFile at +0x14 = MsgFile and the init flag at +0x2C), so this is AutoResFile::request; Work does not declare them as
+// such yet, because their constructors and destructors would then be part of Work's.
+// BYTES: the cast at each call; one local AutoFile pointer for both calls is kept in a register (97.5 -> 91.3).
+static inline void requestResource(muCollectionViewer::MsgFile* loader, int* unk, u8* flag, const char* path) {
+    reinterpret_cast<utility::AutoFile*>(loader)->clear();
     *unk = 0;
     *flag = 0;
-    fn_800FAC58(loader, path, Heaps::MenuResource, 0);
+    reinterpret_cast<utility::AutoFile*>(loader)->request(path, Heaps::MenuResource, 0);
 }
 
 static inline void callVirtualFloat(void* object, int offset, float value) {
@@ -135,38 +133,6 @@ static inline const char* getResMdlName(MuObject* object) {
     const u8* resData = *reinterpret_cast<u8* const*>(&object->m_resMdl);
     int nameOffset = *reinterpret_cast<const int*>(resData + 0x3C);
     return nameOffset != 0 ? reinterpret_cast<const char*>(resData + nameOffset) : NULL;
-}
-
-inline utility::ListedNode::ListedNode(utList* list) : m_list(NULL) {
-    m_next = NULL;
-    m_prev = NULL;
-    list->addTail(this);
-    m_list = list;
-}
-
-inline utility::ListedNode::~ListedNode() {
-    if (this != NULL) {
-        if (this != NULL) {
-            lbl_8049E550.removeExist(this);
-            utList* list = NULL;
-            m_list = list;
-            if (this != NULL && list != NULL) {
-                list->removeExist(this);
-                m_list = list;
-            }
-        }
-    }
-}
-
-inline utility::AutoFile::AutoFile() : ListedNode(&lbl_8049E550) {
-    m_handle.m_request = NULL;
-    m_flag = false;
-}
-
-utility::AutoFile::~AutoFile() {
-    fn_800FABEC(this);
-    m_handle.release();
-    __dt__14gfFileIOHandleFv(&m_handle, -1);
 }
 
 inline muReplayTask::Work::Work() : muCollectionViewer::Work(0x1E, 5, "snap_PhotoMat"), m_scene(NULL), m_exitMode(-1), m_exitWait(-1) {
@@ -189,9 +155,9 @@ void muReplayTask::loadResource() {
     requestResource(&work->m_brres, &work->m_unk000, &work->m_brresFlag, "/menu/collection/Replay.brres");
     work = getWork();
     requestResource(&work->m_wait, &work->m_unk09C, &work->m_waitFlag, "/menu/common/Wait.brres");
-    fn_800FAC58(&getWork()->m_msgFile[0], "/menu/msg/replay.msbin", Heaps::MenuResource, 0);
-    fn_800FAC58(&getWork()->m_msgFile[1], "/menu/msg/save_load.msbin", Heaps::MenuResource, 0);
-    fn_800FAC58(&getWork()->m_stageNames, "/menu/msg/stage_name.msbin", Heaps::MenuResource, 0);
+    reinterpret_cast<utility::AutoFile*>(&getWork()->m_msgFile[0])->request("/menu/msg/replay.msbin", Heaps::MenuResource, 0);
+    reinterpret_cast<utility::AutoFile*>(&getWork()->m_msgFile[1])->request("/menu/msg/save_load.msbin", Heaps::MenuResource, 0);
+    getWork()->m_stageNames.request("/menu/msg/stage_name.msbin", Heaps::MenuResource, 0);
 }
 
 void muReplayTask::createModel() {

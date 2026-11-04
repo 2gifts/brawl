@@ -61,3 +61,39 @@ void gfApplication::mainLoop() {
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
 unsigned char lbl_80494890[0x10] __attribute__((aligned(8))) = { 0 };
+
+void gfApplication::setPause(int value, int index) {
+    m_pauseFlags = (m_pauseFlags & ~(1 << index)) | (value << index);
+}
+
+void gfApplication::clearPause() {
+    m_pauseFlags = 0;
+}
+
+void gfApplication::setSkipLowEffect(u8 level) {
+    if (m_lowEffectEnabled) {
+        if (m_lowEffectActive) {
+            if (level < 3) {
+                m_skipCounter += 1;
+                if (m_skipCounter > 30u) {
+                    m_lowEffectActive = 0;
+                }
+            } else {
+                m_skipCounter = 0;
+            }
+        } else if (level >= 3) {
+            m_skipCounter += 1;
+            if (m_skipCounter > 10u) {
+                m_skipCounter = 0;
+                m_lowEffectActive = 1;
+            }
+        } else if (m_skipCounter != 0) {
+            m_skipCounter -= 1;
+        }
+    } else {
+        m_skipLowEffect = 0;
+        m_skipCounter = 0;
+        m_lowEffectActive = 0;
+    }
+    m_skipLowEffect = m_lowEffectActive;
+}

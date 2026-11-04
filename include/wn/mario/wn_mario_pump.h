@@ -30,6 +30,7 @@ typedef wnArticleHierarchy<wnMarioPumpWater, 12, soInstancePoolRoot> wnMarioPump
 class wnMarioPumpMediator : public soArticleMediator {
     wnMarioPumpWaterPool m_pools;
     u8 m_autoRecycle;
+    WN_ARTICLE_SLOT_FRIENDS
 public:
     wnMarioPumpMediator(soModuleAccesser* acc) : soArticleMediator(acc), m_pools(acc), m_autoRecycle(false) { }
     virtual ~wnMarioPumpMediator() { }

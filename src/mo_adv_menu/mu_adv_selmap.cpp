@@ -133,17 +133,17 @@ muAdvSelmapTask::~muAdvSelmapTask() {
     }
 }
 
-static inline muAdvSelmapAdvData* getAdvData() {
-    return reinterpret_cast<muAdvSelmapAdvData*>(g_GameGlobal->m_advData);
+static inline gmAdvData* getAdvData() {
+    return g_GameGlobal->m_advData;
 }
 
 // Whether the second part of the adventure mode is open.
 // HYPOTHESIS: the two words say which of the places after the first part were opened.
-static inline bool isAdvOpen(muAdvSelmapAdvData* adv) {
-    if (adv->m_unk48A0 != 0) {
+static inline bool isAdvOpen(gmAdvData* adv) {
+    if (adv->unk4898[2] != 0) {
         return true;
     }
-    if (adv->m_unk48A4 != 0) {
+    if (adv->unk4898[3] != 0) {
         return true;
     }
     return false;
@@ -182,7 +182,7 @@ void muAdvSelmapTask::initProc(const muAdvSelmapTaskParam* param) {
         m_unk4B8 = true;
         m_unk4B9 = true;
     }
-    muAdvSelmapAdvData* adv = getAdvData();
+    gmAdvData* adv = getAdvData();
     m_unk4BA = false;
     if (isAdvOpen(adv) == false) {
         m_unk4BA = true;
@@ -246,7 +246,7 @@ static inline Vec2f getNodePos(muAdvSelmapTask* task, int node) {
 int muAdvSelmapTask::getNextNode(int player, int node) {
     float best = 0.0f;
     int next = node;
-    muAdvSelmapNode* target = getAdvData()->m_nodes;
+    gmAdvData::Level* target = getAdvData()->m_levels;
     int direction = *reinterpret_cast<int*>(reinterpret_cast<u8*>(&m_controllers[player]) + 0x94);
     if (direction == 8) {
         return node;
@@ -307,7 +307,7 @@ void muAdvSelmapTask::processDefault() {
 // The scroll of the map is as far as the farthest place that is open: the places are in groups.
 int muAdvSelmapTask::getScrollLimit() {
     int limit = 0;
-    muAdvSelmapNode* node = getAdvData()->m_nodes;
+    gmAdvData::Level* node = getAdvData()->m_levels;
     for (int i = 0; i < 34; i++, node++) {
         if (node->m_hidden == 1) {
             continue;
@@ -587,7 +587,7 @@ void muAdvSelmapTask::mainProc() {
         m_frame++;
         if (isDecide(pad1) == true && m_frame >= 0x3C) {
             g_sndSystem->playSE(static_cast<SndID>(1), -1, 0, 0, -1);
-            if (getAdvData()->m_nodes[node].m_kind == 1) {
+            if (getAdvData()->m_levels[node].m_kind == 1) {
                 if (node == 4 || node == 0xD || node == 0x11 || node == 0x12 || node == 0x1A) {
                     m_result = 5;
                 } else if (static_cast<u32>(node - 0x1E) <= 3) {
@@ -790,10 +790,10 @@ static inline int getNodeSlot(int kind, int node) {
 // hidden and the cursor is put on the place that the menu starts with.
 void muAdvSelmapTask::initScene() {
     char name[6] = {0};
-    muAdvSelmapAdvData* adv = getAdvData();
+    gmAdvData* adv = getAdvData();
     nw4r::g3d::G3dObj* map = m_scnMdls[0];
     g_gfSceneRoot->add(gfSceneRoot::Layer_Info, reinterpret_cast<nw4r::g3d::ScnMdl*>(map));
-    muAdvSelmapNode* node = adv->m_nodes;
+    gmAdvData::Level* node = adv->m_levels;
     for (int i = 0; i < 34; i++, node++) {
         sprintf(name, "pos%02d", i);
         if (node->m_hidden != 1 && node->m_kind != 0) {
@@ -873,16 +873,16 @@ void muAdvSelmapTask::initScene() {
 void muAdvSelmapTask::selectNode(int node) {
     char buf1[10] = {0};
     char buf2[10] = {0};
-    muAdvSelmapAdvData* adv = getAdvData();
+    gmAdvData* adv = getAdvData();
     moveMarker(node);
     updateArrows();
     m_msg->printIndex(1, node, NULL);
     m_objects[2]->setFrameTex(1.0f + static_cast<float>(node));
-    muAdvSelmapNode* entry = &adv->m_nodes[node];
+    gmAdvData::Level* entry = &adv->m_levels[node];
     MuObject* label = m_objects[3];
     label->setFrameTex(static_cast<float>(entry->m_value + 1));
     label->setFrameMatCol(static_cast<float>(entry->m_value + 1));
-    sprintf(buf1, "%d", adv->m_unk60C);
+    sprintf(buf1, "%d", adv->unk60C);
     m_msg->printf(2, buf1);
     sprintf(buf2, "%d", static_cast<int>(adv->m_unk2A8));
     m_msg->printf(6, buf2);
@@ -1085,7 +1085,7 @@ void muAdvSelmapTask::stepSelectInit(muAdvSelmapTask* task) {
 
 // Keeps the animations of the map and the icons: they run while the map is shown.
 int muAdvSelmapTask::stepSelectMain(muAdvSelmapTask* task) {
-    muAdvSelmapNode* node = getAdvData()->m_nodes;
+    gmAdvData::Level* node = getAdvData()->m_levels;
     task->m_objects[0]->setFrameNode(static_cast<float>(task->m_scroll));
     for (int i = 0; i < 34; i++, node++) {
         if (node->m_hidden != 1 && node->m_kind != 0) {

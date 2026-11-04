@@ -9,7 +9,7 @@
 #define FT_TEAM_TYPED_INTERFACE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_reflector_group.h>
-#include <ft/ft_physics_iface.h>
+#include <so/so_module_hyp.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/zelda/ft_zelda.h>
 #include <ft/zelda/ft_zelda_extend_param_accesser.h>
@@ -75,7 +75,7 @@ ftZelda::ftZelda(s32 entryId,
     fn_27_195B34(reflectorRecord, shape, &group);
     m_moduleAccesser->getCollisionReflectorModule().add(reinterpret_cast<soCollisionReflectorGroupData*>(&group), 2);
     m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
-    ftPhysicsModuleCall6C(m_moduleAccesser->m_enumerationStart->m_physicsModule, 0x4B);
+    getPhysicsModule(m_moduleAccesser).unk6C(0x4B);
 }
 
 // HYPOTHESIS: the record at +0x80 of the common data holds the offsets (in the facing direction and up) of the fireball from

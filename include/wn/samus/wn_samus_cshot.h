@@ -15,5 +15,6 @@ public:
     // The body lives in the module blob; declared so the class info's createArray can construct articles.
     wnSamusCShot(s32 articleId, const wnArticleBuildInfo& info, const wnSamusCShotData* data);
     virtual ~wnSamusCShot();
+    void setCharge(float charge);
 };
 static_assert(sizeof(wnSamusCShot) == 0x1828, "Samus charge shot article extent");

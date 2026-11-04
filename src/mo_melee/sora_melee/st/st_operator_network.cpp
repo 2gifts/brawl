@@ -1,6 +1,7 @@
 #include <ip/ip_switch.h>
 #include <mu/wifi/mu_wifi_interface.h>
 #include <nt/network.h>
+#include <nt/nt_report.h>
 #include <revolution/OS/OSError.h>
 #include <st/operator/st_operator_network.h>
 #include <types.h>
@@ -12,6 +13,16 @@ int fn_800CBCB0(muWifiInterfaceTask* task, int* detail);
 
 // HYPOTHESIS: the operator that receives the network stop and exit callbacks.
 static stOperatorNetwork* unk_bss_operator;
+
+stOperatorNetwork::~stOperatorNetwork() {
+}
+
+bool NtBase::isNetCondOnline() {
+    return gUnk805a03d8 >= 3 && gUnk805a03d8 <= 6;
+}
+
+void netReport(const char* fmt, ...) {
+}
 
 void stNetworkOperatorStopCallback(u16 frame, u8 result) {
     if (unk_bss_operator != NULL) {

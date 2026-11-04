@@ -29,6 +29,28 @@ static_assert(sizeof(muCollectionDrive) == 0x14, "Class is the wrong size!");
 // HYPOTHESIS: view of the collection (album) save task (mu_collection.o); only the members read here.
 class muCollection : public gfTask {
 public:
+    class FileInfo {
+    public:
+        // HYPOTHESIS: field types follow constructor stores and filename-copy accesses.
+        u8 unk0;
+        u8 unk1;
+        u16 unk2;
+        u32 unk4;
+        u32 unk8;
+        u32 unkC;
+        char* unk10;
+
+        FileInfo();
+    };
+
+    class FileHandle {
+    public:
+        // HYPOTHESIS: the collection filename occupies 0x41 bytes.
+        char unk0[0x41];
+
+        FileHandle(const char* name);
+    };
+
     u8 unk40[0x310];
     s32 m_busy;                    // 0x350 HYPOTHESIS: non-zero while a request runs
     u8 unk354[0x4];

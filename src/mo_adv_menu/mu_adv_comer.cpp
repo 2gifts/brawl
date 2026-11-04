@@ -13,13 +13,6 @@
 
 // MuMsg::printData(message, data, length)
 
-// What the game keeps in the data of the adventure mode about the pad of the player: the second word is the number of the
-// pad (-1: there is none).
-// HYPOTHESIS: the names; the data is at 0x4928 of the data of the adventure mode.
-struct muAdvComerPadInfo {
-    int m_unk0;
-    int m_padNo;
-};
 
 muAdvComerTask* muAdvComerTask::create() {
     return new (Heaps::MenuInstance) muAdvComerTask();
@@ -100,15 +93,15 @@ muAdvComerTask::muAdvComerTask() : gfTask("AdvComer", Category_Menu, 0xF, 8, tru
 muAdvComerTask::~muAdvComerTask() { }
 
 void muAdvComerTask::processDefault() {
-    muAdvComerPadInfo info;
-    u8* advData = reinterpret_cast<u8*>(g_GameGlobal->m_advData);
+    gmAdvData::PadInfo info;
+    gmAdvData* advData = g_GameGlobal->m_advData;
     if (advData != NULL) {
-        info = *reinterpret_cast<muAdvComerPadInfo*>(advData + 0x4928);
+        info = advData->m_padInfo[0];
     } else {
-        info.m_unk0 = 0;
+        info.m_flag.m_word = 0;
         info.m_padNo = -1;
     }
-    muAdvComerPadInfo pad = info;
+    gmAdvData::PadInfo pad = info;
     gfPadStatus status;
     g_gfPadSystem->getSysPadStatus(pad.m_padNo, &status);
     switch (m_step) {

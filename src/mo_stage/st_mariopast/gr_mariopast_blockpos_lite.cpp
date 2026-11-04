@@ -215,7 +215,8 @@ void grMarioPastBlockPosLite::initYaku() {
             block++;
         }
         m_rowNum[m_group] = rowCount;
-        // MATCH-ONLY: the original allocates the spheres and the sets as raw storage
+        // BYTES: raw storage (no element construction, no array cookie). grEarthPelletFlower and grGWChefEtc
+        // array-construct the same types, so this unit's original allocated untyped bytes.
         m_hitSimple[m_group] = reinterpret_cast<soCollisionHitData::Simple*>(new (Heaps::StageInstance) u8[num * sizeof(soCollisionHitData::Simple)]);
         soCollisionHitData::Simple* simple = m_hitSimple[m_group];
         soSet<soCollisionHitData::Simple>* sets = reinterpret_cast<soSet<soCollisionHitData::Simple>*>(new (Heaps::StageInstance) u8[rowCount * sizeof(soSet<soCollisionHitData::Simple>)]);

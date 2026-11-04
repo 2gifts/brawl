@@ -1,6 +1,7 @@
 #include <cstring>
 #include <gf/gf_heap_manager.h>
 #include <mu/wifi/mu_wifi_interface.h>
+#include <nt/nt_net_report.h>
 #include <nt/nt_report.h>
 #include <nt/nt_send.h>
 #include <revolution/DWC/dwc_transport.h>

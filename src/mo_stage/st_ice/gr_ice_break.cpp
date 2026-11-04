@@ -187,14 +187,7 @@ void grIceBreak::updateCallBack(float deltaFrame) {
                 Matrix matrix = *m_mtxWork;
                 fn_8003F074(m_shake.m_x, m_shake.m_y, m_shake.m_z, &matrix);
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix = matrix;
-                Vec3f pos;
-                // MATCH-ONLY: the position components are read into temporaries in z, y, x order and stored in y, x, z order
-                float z = matrix.m[2][3];
-                float y = matrix.m[1][3];
-                float x = matrix.m[0][3];
-                pos.m_y = y;
-                pos.m_x = x;
-                pos.m_z = z;
+                Vec3f pos = matrix.getTranslation();
                 m_snd.setPos(&pos);
             }
         }

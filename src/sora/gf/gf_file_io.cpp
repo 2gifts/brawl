@@ -1,14 +1,15 @@
-#include <types.h>
-#include <string.h>
 #include <gf/gf_callback.h>
 #include <gf/gf_error_manager.h>
 #include <gf/gf_file_io.h>
+#include <gf/gf_memory_pool.h>
 #include <revolution/FA.h>
 #include <revolution/NAND.h>
 #include <revolution/NET/crc.h>
 #include <revolution/OS.h>
 #include <revolution/OS/OSMutex.h>
 #include <revolution/VF/d_vf.h>
+#include <string.h>
+#include <types.h>
 
 extern "C" int fn_803EC0CC(const char* path);
 extern "C" int fn_803EBE4C();
@@ -26,6 +27,14 @@ extern "C" s32 fn_803C3048(const char* path, u32 size);
 extern "C" s32 fn_803C31B4(const char* drive, const char* path);
 extern "C" s32 NANDCreateDir(const char* path, u8 perm, u8 attr);
 extern "C" DVDDiskID lbl_80494938;
+extern "C" const char* lbl_80421198[];
+extern "C" char lbl_8059C584;
+extern "C" char lbl_8059C594;
+extern "C" char lbl_8059C59C;
+extern "C" char lbl_8059C5A0;
+extern "C" char lbl_8059C5A4;
+extern "C" VFFile VFCreateFile(const char* path, u32 attr);
+extern "C" s32 NANDReadDir(const char* path, char* names, u32* count);
 extern "C" gfFileIO::FS_TYPE lbl_8059C528;
 extern "C" int lbl_8059C52C;
 extern "C" char lbl_8059C550;
@@ -700,3 +709,129 @@ int gfFileIO::getFileNumSD(const char* path) {
     }
     return count;
 }
+
+int gfFileIO::writeVFFile(gfFileIORequest* request) {
+    gfFileIOLock lock(&lbl_80494910.m_mutex);
+    char path[0x80];
+    bool isOpen;
+    int result;
+    char* filepath = request->m_pFilepath;
+    int length = request->m_readLen;
+    void* buffer = request->m_dest;
+    isOpen = false;
+    result = 1;
+    u8 drive = request->m_vfUnk;
+    strcpy(path, &lbl_8059C58C);
+    path[0] = drive + 'B';
+    if (*filepath == '/') {
+        path[2] = 0;
+    }
+    strncat(path, filepath, 0x80);
+    VFFile file = VFOpenFile(filepath, &lbl_8059C5A0, 0);
+    if (file || (file = VFCreateFile(filepath, 0))) {
+        isOpen = true;
+        if (VFWriteFile(file, buffer, (length + 31) & ~31) == 0) {
+            OSReport(lbl_80421198[4], &lbl_8059C594, filepath, length, buffer);
+            request->m_readLen = length;
+            request->m_dest = buffer;
+            result = 0;
+        } else {
+            OSReport(lbl_80421198[7], &lbl_8059C594, filepath);
+            result = 3;
+        }
+    }
+    if (isOpen) {
+        VFCloseFile(file);
+    } else {
+        OSReport(lbl_80421198[5], &lbl_8059C594, filepath);
+    }
+    return result;
+}
+
+int gfFileIO::writeSDFile(gfFileIORequest* request) {
+    gfFileIOLock lock(&lbl_80494910.m_mutex);
+    char path[0x80];
+    bool isOpen;
+    int result;
+    char* filepath = request->m_pFilepath;
+    int length = request->m_readLen;
+    int offset = request->m_offset;
+    void* buffer = request->m_dest;
+    isOpen = false;
+    result = 1;
+    strcpy(path, &lbl_8059C598);
+    if (*filepath == '/') {
+        path[2] = 0;
+    }
+    strncat(path, filepath, 0x80);
+    FAHandle* file;
+    if (offset != 0) {
+        file = FAFopen(path, &lbl_8059C5A4);
+    } else {
+        file = FAFopen(path, &lbl_8059C5A0);
+    }
+    if (file) {
+        isOpen = true;
+        u32 size = (length + 31) & ~31;
+        if (offset != 0) {
+            FAFseek(file, offset, 0);
+        }
+        u32 written = FAFwrite(buffer, 1, size, file);
+        if (written == size) {
+            OSReport(lbl_80421198[4], &lbl_8059C59C, filepath, length, buffer);
+            request->m_readLen = length;
+            request->m_dest = buffer;
+            result = 0;
+        } else {
+            OSReport(lbl_80421198[7], &lbl_8059C59C, filepath);
+            result = 3;
+        }
+    }
+    if (isOpen) {
+        FAFclose(file);
+    } else {
+        OSReport(lbl_80421198[5], &lbl_8059C59C, filepath);
+    }
+    return result;
+}
+
+int gfFileIO::readDirNAND(gfFileIORequest* request) {
+    gfFileIOLock lock(&lbl_80494910.m_mutex);
+    char path[0x80];
+    char home[0x80];
+    u32 count;
+    char* filepath = request->m_pFilepath;
+    int result = 5;
+    path[0] = 0;
+    if (strncmp(filepath, &lbl_8059C57C, 4) == 0) {
+        strcat(path, filepath);
+    } else {
+        NANDGetHomeDir(home);
+        strncpy(path, home, 0x40);
+        strcat(path, filepath);
+    }
+    s32 ret = NANDReadDir(path, NULL, &count);
+    if (ret != 0) {
+        gfNandErrorCheck(ret, 0);
+        OSReport("NAND Create Dir: (%s)", path);
+    } else {
+        u32 size = (count * 13 + 31) & ~31;
+        if (size) {
+            char* buffer = (char*)gfMemoryPool::alloc(const_cast<void*>(request->m_heap), size, 32);
+            if (!buffer) {
+                OSReport(lbl_80421198[2], &lbl_8059C584, filepath, size);
+                result = 4;
+            } else {
+                ret = NANDReadDir(path, buffer, &count);
+                if (ret != 0) {
+                    gfNandErrorCheck(ret, 0);
+                    OSReport("NAND Create Dir: (%s)", path);
+                } else {
+                    result = 0;
+                }
+            }
+        }
+    }
+    return result;
+}
+

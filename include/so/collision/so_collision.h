@@ -28,6 +28,7 @@ struct clTarget {
 static_assert(sizeof(clTarget) == 0x8, "Class is wrong size!");
 
 class soCollisionLog;
+class newCollision;
 
 class soCollision {
 public:
@@ -110,10 +111,15 @@ public:
     void refLogGroup(u32 groupIndex, u32 logGroupIndex);
     void unRefLogGroup(u32 groupIndex);
     void invalidLog(soCollisionLog* collisionLog, u32 groupIndex);
+    void clean();
     void initLogAll();
+    void addCheckList();
     void initPastLogAll(u32 groupIndex);
     void initAbsolute(u32 groupIndex);
     bool isRefLogGroup(u32 groupIndex);
     void unUseLogGroup(u32 groupIndex);
+    // HYPOTHESIS: primitive pointer and situation conversion follow the reset calls.
+    newCollision* getCollision(u32 index, u32 groupIndex);
+    static Situation getSituation(int situation);
 };
 static_assert(sizeof(soCollision) == 24, "Class is wrong size!");

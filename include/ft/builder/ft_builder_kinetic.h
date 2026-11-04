@@ -34,6 +34,10 @@ public:
     // Native generic dispatcher: mode in r3, pool in r4, accesser in r5.
     static void changeKinetic(int mode, void* pools, soModuleAccesser* acc);
     static void changeKineticImpl(int mode);
+    // HYPOTHESIS: the modes a fighter reserves without an energy change of its own go through an empty hook selected
+    // by a soIntToType<mode> tag; the value-initialized tag temporary is the zero byte each such case stores.
+    template <int Mode>
+    static void changeKineticHook(const soIntToType<Mode>&, void*, soModuleAccesser*) { }
     // HYPOTHESIS: the numbered setups behind changeKineticImpl's mode switch (names follow the map).
     static void changeKineticSub(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser);
     static void changeKineticSub1(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser);
