@@ -88,6 +88,9 @@
 //   0x8029E8B0   232  applyVelField   [map: hkSolver__applyVelField]
 //   0x8029E998     4  
 
+// BYTES: hkSolver's weak out-of-line hkVector4::_setMul3 is emitted by solver functions that are not decompiled
+// yet, so it is defined below as a plain function instead of using the header inline.
+#define HK_VECTOR4_OUTLINE_SETMUL3
 #include <havok/hkSolver.h>
 #include <havok/hkJacobianSchema.h>
 #include <havok/hkJacobianHeaderSchema.h>

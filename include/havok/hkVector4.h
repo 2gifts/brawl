@@ -108,7 +108,12 @@ struct hkVector4 {
     void setTransformedInversePos(const hkTransform& t, const hkVector4& v);
     void setRotatedDir(const hkRotation& r, const hkVector4& v);
     void setRotatedInverseDir(const hkRotation& r, const hkVector4& v);
-    // Column-major product: this = m.col0 * v.x + m.col1 * v.y + m.col2 * v.z (w lane from a constant).
-    // Declared only; the definition belongs to the unit that owns hkSolver's _setMul3 (not in this header).
+    // Column-major product: this = m.col0 * v.x + m.col1 * v.y + m.col2 * v.z, w = 0. The inline behind
+    // setRotatedDir (byte-identical); defined in hkRotation.h. hkSolver.cpp defines HK_VECTOR4_OUTLINE_SETMUL3
+    // to keep its out-of-line weak copy until the solver functions that fail to inline it are decompiled.
+#ifdef HK_VECTOR4_OUTLINE_SETMUL3
     void _setMul3(const hkRotation& m, const hkVector4& v);
+#else
+    inline void _setMul3(const hkRotation& m, const hkVector4& v);
+#endif
 } __attribute__((aligned(16)));

@@ -39,7 +39,7 @@ static inline void setInterpolate4(hkVector4& out, const hkVector4& a, const hkV
 
 // blends the two end rotations. the "0.75 - 0.125 * len2" thing is a quick 1/sqrt for the midpoint,
 // then we lerp start->mid for the first half of the step and mid->end for the second half
-static void lerp2Quat(const hkSweptTransform& st, hkReal t, hkQuaternion& out) {
+static inline void lerp2Quat(const hkSweptTransform& st, hkReal t, hkQuaternion& out) {
     hkVector4 rot0 = st.m_rotation0.m_vec;
     hkVector4 rot1 = st.m_rotation1.m_vec;
     {
@@ -60,7 +60,7 @@ static void lerp2Quat(const hkSweptTransform& st, hkReal t, hkQuaternion& out) {
 }
 
 // pose at t: blended rotation, blended center of mass, then shove the origin back by the rotated local center
-static void lerp2Transform(const hkSweptTransform& st, hkReal t, hkTransform& out) {
+static inline void lerp2Transform(const hkSweptTransform& st, hkReal t, hkTransform& out) {
     hkQuaternion qt;
     lerp2Quat(st, t, qt);
 
@@ -68,16 +68,16 @@ static void lerp2Transform(const hkSweptTransform& st, hkReal t, hkTransform& ou
     setInterpolate4(out.m_translation, st.m_centerOfMass0, st.m_centerOfMass1, t);
 
     hkVector4 centerShift;
-    centerShift.setRotatedDir(out.m_rotation, st.m_centerOfMassLocal);
+    centerShift._setMul3(out.m_rotation, st.m_centerOfMassLocal);
     out.m_translation.sub4(centerShift);
 }
 
 // same idea as lerp2Transform but pins the rotation to the end of the step
-static void calcTransAtT1(const hkSweptTransform& st, hkTransform& out) {
+static inline void calcTransAtT1(const hkSweptTransform& st, hkTransform& out) {
     out.m_rotation.set(st.m_rotation1);
 
     hkVector4 centerShift;
-    centerShift.setRotatedDir(out.m_rotation, st.m_centerOfMassLocal);
+    centerShift._setMul3(out.m_rotation, st.m_centerOfMassLocal);
     out.m_translation.setSub4(st.m_centerOfMass1, centerShift);
 }
 
@@ -145,7 +145,7 @@ void hkSweptTransformUtil::warpTo(const hkVector4& position, const hkQuaternion&
     ms.m_transform.m_translation = position;
 
     hkVector4 centerShift;
-    centerShift.setRotatedDir(ms.m_transform.m_rotation, st.m_centerOfMassLocal);
+    centerShift._setMul3(ms.m_transform.m_rotation, st.m_centerOfMassLocal);
 
     hkReal baseTime = st.m_centerOfMass0.w;
 
@@ -168,7 +168,7 @@ void hkSweptTransformUtil::warpTo(const hkTransform& transform, hkMotionState& m
     st.m_rotation1 = rotation;
 
     hkVector4 centerShift;
-    centerShift.setRotatedDir(transform.m_rotation, st.m_centerOfMassLocal);
+    centerShift._setMul3(transform.m_rotation, st.m_centerOfMassLocal);
 
     hkReal baseTime = st.m_centerOfMass0.w;
 
@@ -187,7 +187,7 @@ void hkSweptTransformUtil::warpToPosition(const hkVector4& position, hkMotionSta
     ms.m_transform.m_translation = position;
 
     hkVector4 centerShift;
-    centerShift.setRotatedDir(currentRotation, st.m_centerOfMassLocal);
+    centerShift._setMul3(currentRotation, st.m_centerOfMassLocal);
 
     hkReal baseTime = st.m_centerOfMass0.w;
 
