@@ -154,6 +154,7 @@ public:
     void clearPlayerLive(u8 aid, u16 time);
     u64 getComposedCharaAcceptFlag();
     muWifiAIDInfo* getSafeParentAIDInfo();
+    void requestExchangeFriendKey(int playerArea);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 
