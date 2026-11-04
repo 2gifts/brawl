@@ -906,6 +906,45 @@ AiClBlock* aiMgr::get_random_block(AiClBlock* exclude, int team) {
     return block;
 }
 
+// HYPOTHESIS: an inline of the original: the difference vector is a temporary of the call, not a local of the caller.
+static inline float aiDistance(Vec2f* from, Vec2f* to) {
+    Vec2f disp;
+    from->sub(to, &disp);
+    return disp.length();
+}
+
+// BYTES: the original has this function before get_random_block; it follows it here so that the literal pool
+// keeps get_random_block's offsets while the unit is incomplete.
+// For every block: the block itself (NULL when it is not usable), the end of the block nearest to the centre of goal and
+// its distance (goal itself gets its centre and 0). HYPOTHESIS: the name; get_via_blk_team and the block route search
+// call it right after picking their goal block.
+void aiMgr::get_blk_goal_dist(AiClBlock** blocks, Vec2f* points, float* dists, AiClBlock* goal) {
+    AiClBlock* block = m_blocks;
+    Vec2f center = (goal->m_edgeL + goal->m_edgeR) * 0.5f;
+    for (int i = 0; i < m_numBlocks; i++, block++) {
+        if (!(block->m_flags & 2)) {
+            blocks[i] = NULL;
+            continue;
+        }
+        blocks[i] = block;
+        if (block == goal) {
+            points[i].m_x = 0.5f * (block->m_edgeL.m_x + block->m_edgeR.m_x);
+            points[i].m_y = 0.5f * (block->m_edgeL.m_y + block->m_edgeR.m_y);
+            dists[i] = 0.0f;
+            continue;
+        }
+        float distL = aiDistance(&block->m_edgeL, &center);
+        float distR = aiDistance(&block->m_edgeR, &center);
+        if (distL < distR) {
+            points[i] = block->m_edgeL;
+            dists[i] = distL;
+        } else {
+            points[i] = block->m_edgeR;
+            dists[i] = distR;
+        }
+    }
+}
+
 AiClBlock* aiMgr::get_top_block(int team) {
     int count = m_numBlocks;
     AiClBlock* block = m_blocks;

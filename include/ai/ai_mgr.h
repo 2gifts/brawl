@@ -150,6 +150,7 @@ public:
 
     void* searchAtkData(int ftKind, u32 id);
 
+    void get_blk_goal_dist(AiClBlock** blocks, Vec2f* points, float* dists, AiClBlock* goal);
     AiClBlock* get_random_block(AiClBlock* exclude, int team);
     AiClBlock* get_top_block(int team);
     AiClBlock* get_right_block(int team);
