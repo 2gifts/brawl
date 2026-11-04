@@ -11,6 +11,8 @@ struct grGimmickBreakFloorData {
     u8 unk0[0x19C];
     stTriggerData m_validTrigger; // 0x19C
     stTriggerData m_breakTrigger; // 0x1A0
+    u8 unk1A4[0x3C];
+    u32 unk1E0;
 };
 
 // The floor of the Subspace stages that breaks after a fighter lands on it (sora_adv_stage gr_adventure_break_floor.o).
