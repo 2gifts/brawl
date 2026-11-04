@@ -1,4 +1,5 @@
 #include <cm/cm_controller_fig_disp1.h>
+#include <gf/gf_pad_status.h>
 #include <math.h>
 #include <nw4r/math/math_arithmetic.h>
 #include <types.h>
@@ -36,4 +37,30 @@ void cmFigDisp1Controller::setCamParamByObjWidth(float width) {
     unk30 = minAngle;
     unk38 = width;
     unk1C = minAngle + 0.8f * (unk34 - minAngle);
+}
+
+Vec2f cmFigDisp1Controller::getCameraRotControl(const gfPadStatus& status) {
+    Vec2f rotation;
+    if (status.m_controllerType == gfPadType::WIIMOTE) {
+        rotation.m_y = 0.0f;
+        rotation.m_x = 0.0f;
+        if (status.m_buttonsCurrentFrame2.bits & 2) rotation.m_x = 0.4f;
+        if (status.m_buttonsCurrentFrame2.bits & 1) rotation.m_x = -0.4f;
+        if (status.m_buttonsCurrentFrame2.bits & 8) rotation.m_y = 0.4f;
+        if (status.m_buttonsCurrentFrame2.bits & 4) rotation.m_y = -0.4f;
+    } else {
+        s8 magnitudeX = status.m_stickX < 0 ? -status.m_stickX : status.m_stickX;
+        if (magnitudeX <= 30) rotation.m_x = 0.0f;
+        else {
+            rotation.m_x = (magnitudeX - 30) / 98.0f;
+            if (status.m_stickX < 0) rotation.m_x = -rotation.m_x;
+        }
+        s8 magnitudeY = status.m_stickY < 0 ? -status.m_stickY : status.m_stickY;
+        if (magnitudeY <= 30) rotation.m_y = 0.0f;
+        else {
+            rotation.m_y = (magnitudeY - 30) / 98.0f;
+            if (status.m_stickY < 0) rotation.m_y = -rotation.m_y;
+        }
+    }
+    return rotation;
 }

@@ -9,6 +9,14 @@ struct wnDededeFollowerModuleAccesserBuildConfig;
 // and the follower's appended fields remain unreconstructed.
 class wnDededeFollower : public wnWeaponBuilder<wnDededeFollowerModuleAccesserBuildConfig> {
 public:
+    virtual void processUpdate();
+    void toShoot(Vec3f* pos, float lr, float unk1, float unk2, bool unk3);
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+    bool isPickup();
+    bool isFinal();
+    void updateAttackInfoStatus();
+    virtual bool isCanInhaled();
+    virtual bool isCanEat();
     void had(int ownerTaskId, int nodeId, int teamNo);
     bool isPossibleDeadChange();
     void toDead();

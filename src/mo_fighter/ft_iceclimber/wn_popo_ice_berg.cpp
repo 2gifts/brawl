@@ -16,6 +16,7 @@
 #include <so/collision/so_collision_hit_module_impl.h>
 #include <so/status/so_status_module_impl.h>
 #include <wn/wn_kinetic_energy_normal.h>
+#include <so/so_value_accesser.h>
 
 // MATCH-ONLY: the unit's rodata starts with this word (HYPOTHESIS: the remains of a constant of an unreconstructed function).
 #pragma force_active on
@@ -51,4 +52,45 @@ void wnPopoIceBerg::syncCapsuleSRT(u32 index) {
         m_moduleAccesser->getWorkManageModule().getFloat(0x11000001);
         m_moduleAccesser->getWorkManageModule().getFloat(0x11000002);
     }
+}
+
+void wnPopoIceBergKineticTransactor::changeKinetic(int kineticType, wnPopoIceBergKineticPools* pools, soModuleAccesser* acc) {
+    if (kineticType <= 0x1f) {
+        wnKineticTransactor::changeKinetic(kineticType, pools, acc);
+        return;
+    }
+    switch (kineticType) {
+    case 32:
+        changeKineticSub(soIntToType<32>(), pools, acc);
+        break;
+    case 33:
+        changeKineticSub(soIntToType<33>(), pools, acc);
+        break;
+    }
+}
+
+void wnPopoIceBergKineticTransactor::changeKineticSub(const soIntToType<32>&, wnPopoIceBergKineticPools* pools, soModuleAccesser* acc) {
+    acc->getKineticModule().unableEnergyAll();
+    float targetY = acc->getWorkManageModule().getFloat(0x11000004);
+    float distance = targetY - acc->getPostureModule().getPos().m_y;
+    float frames = soValueAccesser::getConstantInt(acc, 0x5dc0, 0);
+    soKineticEnergyNormal* energy = pools->getEnergy(soIntToType<0>());
+    *energy = soKineticEnergyNormal(Vec2f(0.0f, 0.0f), Vec2f(0.0f, 0.0f), Vec2f(-1.0f, -1.0f),
+                                  Vec2f(0.0f, 0.0f), Vec2f(-1.0f, -1.0f), false, false);
+    energy->setSpeed(&Vec2f(0.0f, distance / frames));
+    energy->enable();
+}
+
+void wnPopoIceBergKineticTransactor::changeKineticSub(const soIntToType<33>&, wnPopoIceBergKineticPools* pools, soModuleAccesser* acc) {
+    acc->getKineticModule().unableEnergyAll();
+    float targetY = acc->getWorkManageModule().getFloat(0x11000004);
+    float offset = soValueAccesser::getConstantFloat(acc, 0xfa2, 0);
+    offset *= acc->getWorkManageModule().getFloat(0x11000002);
+    float distance = targetY - offset - acc->getPostureModule().getPos().m_y;
+    float frames = soValueAccesser::getConstantInt(acc, 0x5dc1, 0);
+    soKineticEnergyNormal* energy = pools->getEnergy(soIntToType<0>());
+    *energy = soKineticEnergyNormal(Vec2f(0.0f, 0.0f), Vec2f(0.0f, 0.0f), Vec2f(-1.0f, -1.0f),
+                                  Vec2f(0.0f, 0.0f), Vec2f(-1.0f, -1.0f), false, false);
+    energy->setSpeed(&Vec2f(0.0f, distance / frames));
+    energy->enable();
 }
