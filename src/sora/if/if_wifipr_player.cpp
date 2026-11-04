@@ -3,6 +3,7 @@
 #include <if/if_wifipr_player.h>
 #include <mu/mu_object.h>
 #include <mu/mu_scn_mdl_expand.h>
+#include <stdio.h>
 #include <string.h>
 #include <types.h>
 
@@ -122,4 +123,190 @@ void IfWifiprPlayer::setWifiDispState(int state) {
         init(this);
     }
     m_state = state;
+}
+
+void IfWifiprPlayer::wifiDispStateNoneInit(IfWifiprPlayer* player) {
+    MuObject* object = player->m_object;
+    nw4r::g3d::ScnMdl* model = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        lbl_805A030C->Remove(model);
+    } else {
+        player->m_scnGroup->Remove(model);
+    }
+}
+
+void IfWifiprPlayer::wifiDispStateAcceptInit(IfWifiprPlayer* player) {
+    nw4r::g3d::ScnMdl* attached;
+    MuObject* object = player->m_object;
+    nw4r::g3d::ScnMdl* model = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        lbl_805A030C->Remove(model);
+    } else {
+        player->m_scnGroup->Remove(model);
+    }
+    attached = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        char nodeName[8];
+        sprintf(nodeName, "pos%02d", player->m_playerNo + 1);
+        lbl_805A030C->PushBack(attached, nodeName);
+    } else {
+        player->m_scnGroup->Insert(player->m_scnGroup->sceneItemsCount, attached);
+    }
+    object->changeAnimN(0, 3, true, false);
+    object->setFrameTex(1.0f + static_cast<float>(static_cast<int>(player->m_playerNo)));
+    object->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+    player->unk10 = 0;
+}
+
+int IfWifiprPlayer::wifiDispStateAcceptMain(IfWifiprPlayer* player) {
+    if (player->unk10 == 0) {
+        if (player->m_object->isNodeAnimFinished()) {
+            nw4r::g3d::ScnMdl* attached;
+            MuObject* object = player->m_object;
+            nw4r::g3d::ScnMdl* model = object->m_sceneModel;
+            if (player->m_mode == 0) {
+                lbl_805A030C->Remove(model);
+            } else {
+                player->m_scnGroup->Remove(model);
+            }
+            attached = object->m_sceneModel;
+            if (player->m_mode == 0) {
+                char nodeName[8];
+                sprintf(nodeName, "pos%02d", player->m_playerNo + 1);
+                lbl_805A030C->PushBack(attached, nodeName);
+            } else {
+                player->m_scnGroup->Insert(player->m_scnGroup->sceneItemsCount, attached);
+            }
+            object->changeAnimN(1, 3, true, false);
+            object->setFrameTex(1.0f + static_cast<float>(static_cast<int>(player->m_playerNo)));
+            object->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+            player->unk10 = 1;
+        }
+    }
+    return player->m_state;
+}
+
+void IfWifiprPlayer::wifiDispStateSelCharInit(IfWifiprPlayer* player) {
+    nw4r::g3d::ScnMdl* attached;
+    MuObject* object = player->m_object;
+    nw4r::g3d::ScnMdl* model = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        lbl_805A030C->Remove(model);
+    } else {
+        player->m_scnGroup->Remove(model);
+    }
+    attached = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        char nodeName[8];
+        sprintf(nodeName, "pos%02d", player->m_playerNo + 1);
+        lbl_805A030C->PushBack(attached, nodeName);
+    } else {
+        player->m_scnGroup->Insert(player->m_scnGroup->sceneItemsCount, attached);
+    }
+    object->changeAnimN(2, 3, true, false);
+    object->setFrameTex(1.0f + static_cast<float>(static_cast<int>(player->m_playerNo)));
+    object->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+    player->unk10 = 2;
+}
+
+void IfWifiprPlayer::wifiDispStateSelStageInit(IfWifiprPlayer* player) {
+    nw4r::g3d::ScnMdl* attached;
+    MuObject* object = player->m_object;
+    nw4r::g3d::ScnMdl* model = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        lbl_805A030C->Remove(model);
+    } else {
+        player->m_scnGroup->Remove(model);
+    }
+    attached = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        char nodeName[8];
+        sprintf(nodeName, "pos%02d", player->m_playerNo + 1);
+        lbl_805A030C->PushBack(attached, nodeName);
+    } else {
+        player->m_scnGroup->Insert(player->m_scnGroup->sceneItemsCount, attached);
+    }
+    object->changeAnimN(5, 3, true, false);
+    object->setFrameTex(1.0f + static_cast<float>(static_cast<int>(player->m_playerNo)));
+    object->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+    player->unk10 = 5;
+}
+
+int IfWifiprPlayer::wifiDispStateSelStageMain(IfWifiprPlayer* player) {
+    if (player->unk10 == 5) {
+        if (player->m_object->isNodeAnimFinished()) {
+            nw4r::g3d::ScnMdl* attached;
+            MuObject* object = player->m_object;
+            nw4r::g3d::ScnMdl* model = object->m_sceneModel;
+            if (player->m_mode == 0) {
+                lbl_805A030C->Remove(model);
+            } else {
+                player->m_scnGroup->Remove(model);
+            }
+            attached = object->m_sceneModel;
+            if (player->m_mode == 0) {
+                char nodeName[8];
+                sprintf(nodeName, "pos%02d", player->m_playerNo + 1);
+                lbl_805A030C->PushBack(attached, nodeName);
+            } else {
+                player->m_scnGroup->Insert(player->m_scnGroup->sceneItemsCount, attached);
+            }
+            object->changeAnimN(6, 3, true, false);
+            object->setFrameTex(1.0f + static_cast<float>(static_cast<int>(player->m_playerNo)));
+            object->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+            player->unk10 = 6;
+        }
+    }
+    return player->m_state;
+}
+
+void IfWifiprPlayer::wifiDispStatePracticeInit(IfWifiprPlayer* player) {
+    nw4r::g3d::ScnMdl* attached;
+    MuObject* object = player->m_object;
+    nw4r::g3d::ScnMdl* model = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        lbl_805A030C->Remove(model);
+    } else {
+        player->m_scnGroup->Remove(model);
+    }
+    attached = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        char nodeName[8];
+        sprintf(nodeName, "pos%02d", player->m_playerNo + 1);
+        lbl_805A030C->PushBack(attached, nodeName);
+    } else {
+        player->m_scnGroup->Insert(player->m_scnGroup->sceneItemsCount, attached);
+    }
+    object->changeAnimN(7, 3, true, false);
+    object->setFrameTex(1.0f + static_cast<float>(static_cast<int>(player->m_playerNo)));
+    object->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+    player->unk10 = 7;
+}
+
+int IfWifiprPlayer::wifiDispStatePracticeMain(IfWifiprPlayer* player) {
+    if (player->unk10 == 7) {
+        if (player->m_object->isNodeAnimFinished()) {
+            nw4r::g3d::ScnMdl* attached;
+            MuObject* object = player->m_object;
+            nw4r::g3d::ScnMdl* model = object->m_sceneModel;
+            if (player->m_mode == 0) {
+                lbl_805A030C->Remove(model);
+            } else {
+                player->m_scnGroup->Remove(model);
+            }
+            attached = object->m_sceneModel;
+            if (player->m_mode == 0) {
+                char nodeName[8];
+                sprintf(nodeName, "pos%02d", player->m_playerNo + 1);
+                lbl_805A030C->PushBack(attached, nodeName);
+            } else {
+                player->m_scnGroup->Insert(player->m_scnGroup->sceneItemsCount, attached);
+            }
+            object->changeAnimN(8, 3, true, false);
+            object->setFrameTex(1.0f + static_cast<float>(static_cast<int>(player->m_playerNo)));
+            object->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+            player->unk10 = 8;
+        }
+    }
+    return player->m_state;
 }
