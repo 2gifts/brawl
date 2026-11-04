@@ -139,6 +139,22 @@ void soCollisionHitGroup::initMultiSituation() {
     m_multiSituation = 0;
 }
 
+void soCollisionHitGroup::setMultiSituation(SituationKind situation) {
+    m_multiSituation = 1 << soCollision::getSituation(situation);
+}
+
+void soCollisionHitGroup::setOpponentCategory(soArray<soCollisionHitPart>* parts, u32 categoryMask, bool enable) {
+    for (int i = 0; i < m_partSize; i++) {
+        parts->at(m_partStart + i).setOpponentCategory(categoryMask, enable);
+    }
+}
+
+void soCollisionHitGroup::setSelfCategory(soArray<soCollisionHitPart>* parts, soCollision::Category category) {
+    for (int i = 0; i < m_partSize; i++) {
+        parts->at(m_partStart + i).setSelfCategory(category);
+    }
+}
+
 void soCollisionHitGroup::reset(soCollision* collision, soArray<soCollisionHitPart>* parts, float posX, float scale, float lr, SituationKind situation) {
     m_posX = posX;
     m_scale = scale;

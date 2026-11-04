@@ -72,6 +72,9 @@ public:
     int getGlobal();
     int getPartStatus(soArray<soCollisionHitPart>* parts, u32 index);
     void initMultiSituation();
+    void setMultiSituation(SituationKind situation);
+    void setOpponentCategory(soArray<soCollisionHitPart>* parts, u32 categoryMask, bool enable);
+    void setSelfCategory(soArray<soCollisionHitPart>* parts, soCollision::Category category);
     // HYPOTHESIS: reset arguments follow the stored values and callee registers.
     void reset(soCollision* collision, soArray<soCollisionHitPart>* parts, float posX, float scale, float lr, SituationKind situation);
     // HYPOTHESIS: signatures follow the hit-module interface and register use.

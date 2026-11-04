@@ -56,6 +56,8 @@ public:
     // HYPOTHESIS: signatures follow the hit-group calls and the linker map.
     void setData(soCollisionHitData* data);
     void setCheckCatch(bool checkCatch);
+    void setOpponentCategory(u32 categoryMask, bool enable);
+    void setSelfCategory(soCollision::Category category);
     // HYPOTHESIS: reset receives the collision primitive returned for this part.
     void reset(newCollision* collision);
     soCollisionHitPart();
