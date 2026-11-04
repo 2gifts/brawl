@@ -96,7 +96,13 @@ public:
     u8 unk60[0x4];
     s32 unk64;
     int m_shieldEffect;
-    u8 unk6C[0x8];
+    union {
+        u8 unk6C[0x8];
+        struct {
+            u8 _pad6C[0x4];
+            s32 unk70;
+        };
+    };
     s32 unk74;
     u8 unk78[0xBC];
     u8 unk134;
@@ -110,6 +116,8 @@ public:
     u8 unk136[0x2];
 
     void pushGroup(u32 group); // HYPOTHESIS: parameter type from ecMgr::pushsetCurrentGroup
+    void pushGroupIgnoreScaleZ(u32 group); // HYPOTHESIS: pushGroup followed by ecMgr::setFlatMode(false)
+    void pushGroupScaleZ(u32 group); // HYPOTHESIS: pushGroup followed by ecMgr::setFlatMode(true)
 
     virtual ~soEffectModuleImpl();
     virtual void activate();

@@ -141,6 +141,9 @@ public:
     void setParent(u32 handleId, nw4r::g3d::ScnMdl*, u32, bool);
     void setParent(u32 handleId1, u32 handleId2, const char*, bool);
     void pushsetCurrentGroup(u32 p1);
+    // HYPOTHESIS: parameter types from register use at call sites.
+    void endEffectGroup(u32, u32);
+    void setFlatMode(bool);
     void popCurrentGroup();
     // HYPOTHESIS: parameter types from argument registers and effect call sites.
     void preSet2dScene(bool);
