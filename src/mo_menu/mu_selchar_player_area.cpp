@@ -5,6 +5,8 @@
 #include <mu/wifi/mu_wifi_interface.h>
 #include <mu/mu_msg.h>
 #include <gf/gf_pad_system.h>
+#include <stdio.h>
+#include <string.h>
 
 // The menu helpers take three integers; this caller passes only the first one (see TIPS.md).
 extern "C" int getNumCharColor__6muMenuFiii(int charKind);
@@ -473,4 +475,94 @@ void muSelCharPlayerArea::setControllerNo(int controller) {
     if (controller < 0) forceCloseList();
     if (controller >= 0) fn_800B9804(&m_menuController, static_cast<u8>(controller));
     m_selCharHand->updateControllerNo();
+}
+
+extern const u8 lbl_10_rodata_744[6][2];
+extern char lbl_10_data_B08[0x18];
+
+void muSelCharPlayerArea::colorChangePointed(int pointed) {
+    if (!m_selCharTask->m_isTeamBattle) return;
+    int anim;
+    int teamColor = m_teamColor;
+    if (pointed >= 0) anim = lbl_10_rodata_744[teamColor][1];
+    else anim = lbl_10_rodata_744[teamColor][0];
+    const char* name = lbl_10_data_B08;
+    static MuAnimNameData animations[] = {
+        {0.0f, 0.0f, 0, name, 0x10},
+        {30.0f, 30.0f, 0, name, 0x10},
+        {60.0f, 60.0f, 0, name, 0x10},
+        {0.0f, 29.0f, 1, name, 0x10},
+        {30.0f, 59.0f, 1, name, 0x10},
+        {60.0f, 89.0f, 1, name, 0x10}
+    };
+    m_objs[Obj_Frag]->setAnimName(&animations[anim], false);
+}
+
+void muSelCharPlayerArea::initCharKind(MuSelchkind charKind) {
+    switch (charKind) {
+    case Selch_Samus: m_selectedSamus = 0; charKind = Selch_Samus; break;
+    case Selch_SZeroSuit: m_selectedSamus = 0; charKind = Selch_Samus; break;
+    case Selch_Zelda: m_selectedZelda = 0; charKind = Selch_Zelda; break;
+    case Selch_Sheik: m_selectedZelda = 1; charKind = Selch_Zelda; break;
+    case Selch_PokeTrainer: m_selectedPoke = 0; charKind = Selch_PokeTrainer; break;
+    case Selch_PokeLizardon: m_selectedPoke = 1; charKind = Selch_PokeTrainer; break;
+    case Selch_PokeZenigame: m_selectedPoke = 2; charKind = Selch_PokeTrainer; break;
+    case Selch_PokeFushigisou: m_selectedPoke = 3; charKind = Selch_PokeTrainer; break;
+    }
+    m_charKind = charKind;
+}
+
+extern const GXColor lbl_10_rodata_750[6];
+
+void muSelCharPlayerArea::dispWifiFriendName(const wchar_t* name, bool isTeamBattle, int teamColor) {
+    GXColor color = lbl_10_rodata_750[isTeamBattle ? sTeamColorAnim[teamColor] : m_areaIdx];
+    unk40C->setFontColor(0x1E, color.r, color.g, color.b, 255);
+    char nameUtf8[0x14];
+    Message::utf16to8(nameUtf8, name);
+    unk40C->printf(0x1E, nameUtf8);
+}
+
+extern const u8 lbl_10_rodata_6AC[8];
+void ScnObj_EnableCallbackTiming(nw4r::g3d::ScnObj* obj, u32 timing);
+void ScnObj_EnableCallbackExecOp(nw4r::g3d::ScnObj* obj, u32 op);
+
+void muSelCharPlayerArea::bindCalcWorldFlag() {
+    nw4r::g3d::ScnMdl* model;
+    for (int index = 0; index < 7; ++index) {
+        int obj;
+        if (index >= 0 && index < 7) obj = lbl_10_rodata_6AC[index];
+        else obj = Obj_Num;
+        MuObject* object = m_objs[obj];
+        if (object) {
+            model = object->getSceneModel();
+            m_calcWorldCBs[index].m_next = model->m_callback;
+            model->m_callback = &m_calcWorldCBs[index];
+            ScnObj_EnableCallbackExecOp(model, 4);
+            ScnObj_EnableCallbackTiming(model, 1);
+        }
+    }
+}
+
+void muSelCharPlayerArea::getDefName(char* name) {
+    int nameNumber = unk1CC;
+    int length;
+    const char* message = unk40C->getMsgData(nameNumber > 0, &length);
+    memcpy(name, message, length);
+    char number[16];
+    if (nameNumber > 0) sprintf(number, "%02d", nameNumber);
+    else sprintf(number, "%2d", m_areaIdx + 1);
+    strcpy(name + length, number);
+}
+
+void muSelCharPlayerArea::nameEntryButtonPointed(int pointed) {
+    MuObject* object = m_objs[Obj_TagBtn];
+    float rate = object->m_modelAnim->m_anmObjMatClrRes->GetUpdateRate();
+    if (pointed >= 0) {
+        if (0.0f == rate) object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+    } else {
+        if (0.0f != rate) {
+            object->setFrameMatCol(0.0f);
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);
+        }
+    }
 }

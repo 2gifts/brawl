@@ -54,7 +54,7 @@ public:
     u8 m_teamSet;
     char _0x1C5[3];
     int m_nameId;
-    char _0x1CC[0x4];
+    union { char _0x1CC[0x4]; int unk1CC; };
     int m_handi;                        // 0x1D0 the handicap (the line of the list)
     int m_cpLevel;                      // 0x1D4 the level of the computer (the line of the list)
     char _0x1D8[0x4];
@@ -143,6 +143,12 @@ public:
     void dispWifiFriendProfileName(const wchar_t* name);
     void dispWifiFriendProfileNameBaseColor();
     bool getWifiFriendProfileNameVisible();
+    void colorChangePointed(int pointed);
+    void initCharKind(MuSelchkind charKind);
+    void dispWifiFriendName(const wchar_t* name, bool isTeamBattle, int teamColor);
+    void bindCalcWorldFlag();
+    void getDefName(char* name);
+    void nameEntryButtonPointed(int pointed);
     int getCollKind(Vec2f* pos, int* arg, float* rect);
     void openHandiList();
     void forceCloseList();
