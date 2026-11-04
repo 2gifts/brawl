@@ -12,11 +12,13 @@
 #include <ms/ms_message.h>
 #include <nw4r/g3d/g3d_anmclr.h>
 #include <nw4r/g3d/g3d_anmtexsrt.h>
+#include <nw4r/g3d/g3d_anmvis.h>
 #include <nw4r/g3d/g3d_scnmdlexpand.h>
 #include <gf/gf_application.h>
 #include <stdio.h>
 #include <nw4r/ut/ut_Color.h>
 #include <sc/sc_button.h>
+#include <snd/snd_system.h>
 #include <string.h>
 
 #include <mu/mu_button.h>
@@ -838,6 +840,146 @@ void muButtonTask::initStepSelectAppear(muButtonTask* task) {
     }
 }
 
+// The pad status of all the controllers together.
+static inline gfPadStatus getSysPadStatus() {
+    gfPadStatus pad;
+    g_gfPadSystem->getSysPadStatus(0xF0, &pad);
+    return pad;
+}
+
+// Moves to a step of sSteps and runs its init.
+static inline void changeStep(muButtonTask* task, int step) {
+    const muButtonTask::Step* entry = &muButtonTask::sSteps[step];
+    if (entry->m_init != NULL) {
+        entry->m_init(task);
+    }
+    task->m_work->m_step = step;
+}
+
+// Any button of any controller (the pad status is passed by value).
+static inline bool isAnyPushed(muButtonTask* task, gfPadStatus pad) {
+    if (pad.m_buttonsPressedThisFrame.bits != 0 || task->m_work->m_controller.m_pressed != 0) {
+        return true;
+    }
+    return false;
+}
+
+// A button of the pad status was pushed (the pad status is passed by value).
+static inline bool isPushed(gfPadStatus pad, u32 button) {
+    return pad.m_buttonsPressedThisFrame.bits & button;
+}
+
+// The controller choice comes in (it is skipped with any button).
+void muButtonTask::mainStepSelectAppear(muButtonTask* task) {
+    gfPadStatus pad;
+    if (!(task->m_work->m_objs[0]->m_modelAnim->m_anmObjChrRes->GetFrame() >= 9.0f)) {
+        g_gfPadSystem->getSysPadStatus(0xF0, &pad);
+        if (!isAnyPushed(task, pad)) {
+            return;
+        }
+    }
+    changeStep(task, 2);
+}
+
+void muButtonTask::initStepSelect(muButtonTask* task) {
+    nw4r::g3d::ScnMdlExpand* group = task->m_work->m_groups[0];
+    MuObject* pad = task->m_work->m_objs[1];
+    group->Remove(pad->m_sceneModel);
+    group->PushBack(pad->m_sceneModel, "pos00");
+    int anim = sPadAnims[task->m_work->m_padKind];
+    task->setSelectAnim(anim);
+    task->m_work->m_selectAnim = anim;
+    MuObject* bg = task->m_work->m_objs[0];
+    bg->setFrameNode(9.0f);
+    bg->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+    bg->setFrameMatCol(9.0f);
+    bg->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);
+    task->m_work->m_cursor = 0;
+    task->m_work->m_msg->printIndex(1, 0, NULL);
+}
+
+// The player turns the controller model to a kind with right and left, takes it with A or leaves with B.
+void muButtonTask::mainStepSelect(muButtonTask* task) {
+    int anim;
+    if (task->m_work->m_objs[1]->m_modelAnim->m_anmObjChrRes->GetUpdateRate() == 0.0f) {
+        if (task->m_work->m_controller.m_trigger & 2) {
+            int padKind = task->m_work->m_padKind;
+            if (padKind < PadKind_Classic) {
+                anim = sNextPadAnims[padKind];
+                task->setSelectAnim(anim);
+                task->m_work->m_selectAnim = anim;
+                task->m_work->m_padKind = padKind + 1;
+                g_sndSystem->playSE(static_cast<SndID>(0), -1, 0, 0, -1);
+            }
+        }
+        if (task->m_work->m_controller.m_trigger & 1) {
+            int padKind = task->m_work->m_padKind;
+            if (padKind > PadKind_Gc) {
+                anim = sPrevPadAnims[padKind];
+                task->setSelectAnim(anim);
+                task->m_work->m_selectAnim = anim;
+                task->m_work->m_padKind = padKind - 1;
+                g_sndSystem->playSE(static_cast<SndID>(0), -1, 0, 0, -1);
+            }
+        }
+        if (isPushed(getSysPadStatus(), 0x100)) { // A
+            task->m_work->m_groups[0]->Remove(task->m_work->m_objs[1]->m_sceneModel);
+            memcpy(&task->m_work->m_edit, &task->m_work->m_configs[task->m_work->m_padKind], sizeof(Config));
+            changeStep(task, 3);
+            g_sndSystem->playSE(static_cast<SndID>(1), -1, 0, 0, -1);
+        }
+        if (isPushed(getSysPadStatus(), 0x200)) { // B
+            g_sndSystem->playSE(static_cast<SndID>(2), -1, 0, 0, -1);
+            changeStep(task, 13);
+        }
+    }
+    if (task->m_work->m_objs[1]->m_modelAnim->m_anmObjChrRes->GetUpdateRate() == 0.0f) {
+        int anim = sAnimsAfter[task->m_work->m_selectAnim];
+        if (anim != 10) {
+            task->setSelectAnim(anim);
+            task->m_work->m_selectAnim = anim;
+        }
+    }
+}
+
+// The buttons of the chosen controller kind come in.
+void muButtonTask::initStepButtonAppear(muButtonTask* task) {
+    int padKind = task->m_work->m_padKind;
+    task->m_work->m_scene->removeAllObj();
+    task->m_work->m_scene->addObj(task->m_work->m_groups[0]);
+    task->setupButtons(padKind);
+    const PadInfo* info = &sPadInfos[padKind];
+    task->m_work->m_scene->addObj(task->m_work->m_groups[info->m_group]);
+    MuObject* pad = task->m_work->m_objs[info->m_padObj];
+    pad->setFrameVisible(0.0f);
+    pad->setFrameNode(0.0f);
+    pad->setFrameTexSrt(0.0f);
+    pad->m_modelAnim->m_anmObjVisRes->SetUpdateRate(1.0f);
+    pad->m_modelAnim->m_anmObjChrRes->SetUpdateRate(1.0f);
+    pad->m_modelAnim->m_anmObjTexSrtRes->SetUpdateRate(1.0f);
+    task->setButtonCursor(padKind, -1);
+    task->m_work->m_msg->printf(1, "");
+}
+
+// The buttons come in until frame 20 (it is skipped with any button).
+void muButtonTask::mainStepButtonAppear(muButtonTask* task) {
+    gfPadStatus pad;
+    const PadInfo* info = &sPadInfos[task->m_work->m_padKind];
+    MuObject* padObj = task->m_work->m_objs[info->m_padObj];
+    if (!(padObj->m_modelAnim->m_anmObjChrRes->GetFrame() >= 20.0f)) {
+        g_gfPadSystem->getSysPadStatus(0xF0, &pad);
+        if (!isAnyPushed(task, pad)) {
+            return;
+        }
+    }
+    padObj->setFrameVisible(20.0f);
+    padObj->setFrameNode(20.0f);
+    padObj->setFrameTexSrt(20.0f);
+    padObj->m_modelAnim->m_anmObjVisRes->SetUpdateRate(0.0f);
+    padObj->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+    padObj->m_modelAnim->m_anmObjTexSrtRes->SetUpdateRate(0.0f);
+    changeStep(task, 4);
+}
 
 void muButtonTask::initStepButtonSelect(muButtonTask* task) {
     int padKind = task->m_work->m_padKind;
