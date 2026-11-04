@@ -39,6 +39,8 @@ public:
     public:
         utRef m_ref; // HYPOTHESIS: reference counter
         u8 m_state; // HYPOTHESIS: task state
+        // HYPOTHESIS: inlined constructor
+        ftDataTask() : m_state(0) { }
         virtual ~ftDataTask();
         virtual void remove(bool);
         int m_kind; // HYPOTHESIS: fighter kind
@@ -68,20 +70,16 @@ public:
         ftDataTaskResource();
         virtual ~ftDataTaskResource();
         virtual void remove(bool);
+        // HYPOTHESIS: parameter meanings from the stores into the task fields.
+        void init(const char* path, long kind, u8 p3, u8 p4, u8 p5, u8 p6, bool p7, srHeapType heap, u8 state, long p10, bool p11);
     };
 
     ftDataTaskResource* searchTask(ftKind kind, int p2, int p3, int p4, u32 p5);
     void reqItem(ftKind kind);
-    // HYPOTHESIS: inlined task release and list move
-    bool removeResourceTask(ftDataTask* task, bool cancel) {
-        if (task->tryRemove(cancel) == true) {
-            m_activeTaskList.removeExist(task);
-            m_compTaskList.removeExist(task);
-            m_freeTaskList.addTail(task);
-            return true;
-        }
-        return false;
-    }
+    bool removeResourceTask(ftDataTask* task, bool cancel);
+    // HYPOTHESIS: parameter meanings from the comparison against the task fields.
+    void* getBinData(int p2, int p4, ftKind kind, int fileIndex, int p5, int* size);
+    bool isExistEffect(u32 resourceId, u32 p2);
 
     // HYPOTHESIS: inlined list search helper
     // HYPOTHESIS: the list walk searchTask inlines twice; the name is not from the map.
@@ -92,6 +90,16 @@ public:
                 (task->unk30 == 0xFF || task->unk30 == p5) &&
                 (task->unk32 == 0xFF || task->unk32 == p3) &&
                 task->unk33_0 == p4) {
+                return task;
+            }
+        }
+        return NULL;
+    }
+
+    // HYPOTHESIS: the list walk isExistEffect inlines; the name is not from the map.
+    static ftDataTaskResource* searchResource(utList* list, u32 resourceId) {
+        for (ftDataTaskResource* task = static_cast<ftDataTaskResource*>(list->getHead()); task != NULL; task = static_cast<ftDataTaskResource*>(task->m_next)) {
+            if (resourceId == task->m_archiveItem.m_resourceId) {
                 return task;
             }
         }
