@@ -22,3 +22,20 @@ wnKirbyHammer::wnKirbyHammer(s32 articleId, const wnArticleBuildInfo& info, cons
                                   0, 0, 0, 0, 0, 0, 0)) {
     Weapon::deactivate(false);
 }
+
+void wnKirbyHammer::activate(int founderTaskId, int modelResourceId, int flag) {
+    Vec3f position;
+    position.m_x = 0.0f;
+    position.m_y = 0.0f;
+    position.m_z = 0.0f;
+    wnActivateDesc desc(founderTaskId, modelResourceId, modelResourceId, modelResourceId, -1, -1, 0, 0, position, 0.0f,
+                        -1, 0, 2, 0x80, 0, 0x35F, 0);
+    desc.flagsHighPair = 3;
+    desc.flagsMidPair = 0;
+    desc.flagsBit3 = 1;
+    desc.flagsLow = 0;
+    desc.unk4DHigh = 0;
+    desc.flag4DBit7 = 0;
+    Weapon::activate(&desc);
+    m_moduleAccesser->getStatusModule().changeStatusForce(flag ? 1 : 0, m_moduleAccesser);
+}

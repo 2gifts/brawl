@@ -33,4 +33,5 @@ class wnKirbyHammer : public wnWeaponBuilder<wnKirbyHammerModuleAccesserBuildCon
 public:
     wnKirbyHammer(s32 articleId, const wnArticleBuildInfo& info, const wnKirbyHammerData* data);
     virtual ~wnKirbyHammer() { }
+    void activate(int founderTaskId, int modelResourceId, int flag);
 };
