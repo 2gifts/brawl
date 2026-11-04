@@ -9,7 +9,7 @@ s32 lbl_8059C4BC = 1;
 s32 lbl_8059C4C0 = 2;
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
-unsigned char lbl_804948C0[0x18] __attribute__((aligned(8))) = { 0 };
+gfBootTask::PreLoadDataBuffer lbl_804948C0[3] __attribute__((aligned(8)));
 unsigned char lbl_804948D8[0x10] __attribute__((aligned(8))) = { 0 };
 gfBootItemArchive* lbl_8059FFB8;
 // HYPOTHESIS: untyped placeholder for the zero-initialized .sbss of this unit, size from the original layout.
@@ -36,3 +36,7 @@ gfBootTask::gfBootTask(bool flag)
 }
 
 gfBootTask::~gfBootTask() { }
+
+gfBootTask::PreLoadDataBuffer gfBootTask::getPreLoadDataBuffer(s32 index) {
+    return lbl_804948C0[index];
+}
