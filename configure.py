@@ -254,6 +254,7 @@ cflags_sora_enemy = ["-O2,s" if flag == "-O4,p" else flag for flag in cflags_rel
 cflags_st_starfox = [*cflags_rel, "-inline on,noauto"]
 
 # Havok middleware (embedded in the main DOL): no RTTI, string literals in .rodata
+# Pinned by a version/flag sweep: GC/3.0a5.2 with these flags (+ -O4,p -inline auto -ipa file from cflags_common)
 cflags_havok = [*cflags_common, "-RTTI off", "-str reuse,readonly", "-use_lmw_stmw on"]
 
 config.linker_version = "GC/3.0a5.2"
@@ -1498,9 +1499,9 @@ config.libs = [
             Object(Matching, "havok/hkClassMemberClass.cpp"),
             Object(Matching, "havok/hkClassVersion1Class.cpp"),
             Object(Matching, "havok/hkError.cpp"),
-            Object(NonMatching, "havok/hkArray.cpp"),
+            Object(Matching, "havok/hkArray.cpp"),
             Object(NonMatching, "havok/hkPointerMapBase.cpp"),
-            Object(NonMatching, "havok/hkStringMapBase.cpp"),
+            Object(Matching, "havok/hkStringMapBase.cpp"),
             Object(NonMatching, "havok/hkMemory.cpp"),
             Object(Matching, "havok/hkScratchpad.cpp"),
             Object(Matching, "havok/hkStackTracer.cpp"),

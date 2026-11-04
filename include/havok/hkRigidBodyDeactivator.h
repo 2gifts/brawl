@@ -24,7 +24,8 @@ struct hkRigidBodyDeactivator : hkEntityDeactivator {
 
     hkRigidBodyDeactivator() {}
     hkRigidBodyDeactivator(hkFinishLoadedObjectFlag flag) : hkEntityDeactivator(flag) {}
-    virtual ~hkRigidBodyDeactivator(); // 0x08 (out of line in src/havok/hkFakeRigidBodyDeactivator.cpp)
+    // BYTES: inline; ~hkSpatialRigidBodyDeactivator has no call to it (weak copy kept in hkFakeRigidBodyDeactivator.o)
+    virtual ~hkRigidBodyDeactivator() {} // 0x08
 
     virtual int getRigidBodyDeactivatorType() const = 0;         // 0x0C
     // HYPOTHESIS: the real parameters are not visible in the implementations (they ignore them).

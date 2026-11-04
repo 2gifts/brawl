@@ -1,21 +1,21 @@
 #include <havok/hkArray.h>
 #include <havok/hkString.h>
 
+// HYPOTHESIS: the original keeps the flag test in its own function, as hkArray<T>::mustDeallocate does
+static inline bool mustDeallocate(const hkArrayBase* array) {
+    return (array->m_capacityAndFlags & hkArrayBase::DONT_DEALLOCATE_FLAG) == 0;
+}
+
 void hkArrayUtil::_reserve(hkArrayBase* array, int newCapacity, int elemSize) {
     void* newData = hkThreadMemory::s_instance->allocateChunk(newCapacity * elemSize, 0x15);
     hkString::memCpy(newData, array->m_data, array->m_size * elemSize);
-    if (!(array->m_capacityAndFlags & hkArrayBase::DONT_DEALLOCATE_FLAG)) {
+    if (mustDeallocate(array)) {
         hkThreadMemory::s_instance->deallocateChunk(
             array->m_data, elemSize * (array->m_capacityAndFlags & hkArrayBase::CAPACITY_MASK), 0x15);
     }
     array->m_data = newData;
     array->m_capacityAndFlags =
         newCapacity | (array->m_capacityAndFlags & hkArrayBase::FORCE_SIGN_FLAG);
-}
-
-// HYPOTHESIS: the original keeps the flag test in its own function, as hkArray<T>::mustDeallocate does
-static inline bool mustDeallocate(const hkArrayBase* array) {
-    return (array->m_capacityAndFlags & hkArrayBase::DONT_DEALLOCATE_FLAG) == 0;
 }
 
 void hkArrayUtil::_reserveMore(hkArrayBase* array, int elemSize) {

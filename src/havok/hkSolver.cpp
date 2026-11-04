@@ -98,6 +98,7 @@
 #include <havok/hkJacobianStiffSpringChainSchema.h>
 #include <havok/hkVelocityAccumulatorOffset.h>
 #include <havok/hkVelocityAccumulator.h>
+#include <havok/hkRotation.h>
 #include <havok/hk1Lin2AngJacobian.h>
 #include <havok/hk2Lin2AngJacobian.h>
 #include <havok/hk2AngJacobian.h>
@@ -264,9 +265,13 @@ void hkVector8::setSub8(const hkVector8& a, const hkVector8& b) {
 
 // Column-major product: this = m.col0 * v.x + m.col1 * v.y + m.col2 * v.z (columns are 0x10 apart).
 void hkVector4::_setMul3(const hkRotation& m, const hkVector4& v) {
-    const hkVector4* c = (const hkVector4*)&m;
-    set(c[0].x * v.x + c[1].x * v.y + c[2].x * v.z, c[0].y * v.x + c[1].y * v.y + c[2].y * v.z,
-        c[0].z * v.x + c[1].z * v.y + c[2].z * v.z, 0.0f);
+    hkReal vx = v.x;
+    hkReal vy = v.y;
+    hkReal vz = v.z;
+    x = vx * m.m_col0.x + vy * m.m_col1.x + vz * m.m_col2.x;
+    y = vx * m.m_col0.y + vy * m.m_col1.y + vz * m.m_col2.y;
+    z = vx * m.m_col0.z + vy * m.m_col1.z + vz * m.m_col2.z;
+    w = 0.0f;
 }
 
 void hkSolver::applyVelField(hkVector4* vel, u8* rec) {

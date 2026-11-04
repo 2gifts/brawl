@@ -1,6 +1,15 @@
 #include <havok/hkStringMapBase.h>
 #include <havok/hkString.h>
 
+// HYPOTHESIS: insert and findKey share one inline string hash (h = 31 * h + c, top bit cleared).
+static inline unsigned long hashString(const char* key) {
+    int hash = 0;
+    for (int i = 0; key[i] != 0; i++) {
+        hash = hash * 31 + key[i];
+    }
+    return hash & 0x7FFFFFFF;
+}
+
 hkStringMapBase::hkStringMapBase() {
     m_elem = (unsigned long*)hkMemory::getInstance().allocateChunk(0xC0, 0x15);
     hkString::memSet(m_elem, 0xFF, 0x40);
@@ -47,41 +56,30 @@ hkBool hkStringMapBase::isValid(int index) const {
     return hkBool(index <= m_hashMod);
 }
 
-#pragma dont_inline on
 void hkStringMapBase::insert(const char* key, unsigned long value) {
-    int hash = 0;
-    for (const char* p = key; *p != 0; p++) {
-        hash = hash * 31 + *p;
-    }
-    unsigned long h = hash & 0x7FFFFFFF;
+    unsigned long h = hashString(key);
     if (m_numElems * 2 > m_hashMod) {
         resizeTable(m_hashMod * 2 + 2);
     }
     int slot = h & m_hashMod;
     while (true) {
-        unsigned long k = m_elem[slot];
-        if (k == 0xFFFFFFFF) {
+        if (m_elem[slot] == 0xFFFFFFFF) {
             m_numElems++;
             break;
         }
-        if (h == k && hkString::strCmp(key, (const char*)m_elem[slot + m_hashMod + 1]) == 0) {
+        if (h == m_elem[slot] && hkString::strCmp(key, (const char*)m_elem[slot + m_hashMod + 1]) == 0) {
             break;
         }
         slot = (slot + 1) & m_hashMod;
     }
     m_elem[slot] = h;
     (m_elem + (slot + m_hashMod))[1] = (unsigned long)key;
-    (m_elem + (slot + m_hashMod * 2))[2] = value;
+    // BYTES: written as a sum (not m_hashMod * 2) so the shifted size is the first add operand
+    (m_elem + (m_hashMod + m_hashMod + slot))[2] = value;
 }
 
-#pragma dont_inline reset
-
 int hkStringMapBase::findKey(const char* key) const {
-    int hash = 0;
-    for (const char* p = key; *p != 0; p++) {
-        hash = hash * 31 + *p;
-    }
-    unsigned long h = hash & 0x7FFFFFFF;
+    unsigned long h = hashString(key);
     int slot = h & m_hashMod;
     while (m_elem[slot] != 0xFFFFFFFF) {
         if (h == m_elem[slot] &&
@@ -111,6 +109,8 @@ unsigned long hkStringMapBase::getWithDefault(const char* key, unsigned long def
     return v;
 }
 
+// BYTES: insert and resizeTable call each other; under -ipa file insert would otherwise inline this
+#pragma auto_inline off
 void hkStringMapBase::resizeTable(int newCapacity) {
     int oldCap;
     unsigned long* oldElem = m_elem;
@@ -126,6 +126,7 @@ void hkStringMapBase::resizeTable(int newCapacity) {
     }
     hkMemory::getInstance().deallocateChunk(oldElem, oldCap * 12, 0x15);
 }
+#pragma auto_inline reset
 
 void hkStringMapBase::clear() {
     for (int i = 0; i < m_hashMod + 1; i++) {

@@ -25,10 +25,6 @@ void hkFakeRigidBodyDeactivator::finishLoadedObjecthkFakeRigidBodyDeactivator(vo
     new (p) hkFakeRigidBodyDeactivator(hkFinishLoadedObjectFlag());
 }
 
-hkEntityDeactivator::~hkEntityDeactivator() {}
-
-hkRigidBodyDeactivator::~hkRigidBodyDeactivator() {}
-
 void hkFakeRigidBodyDeactivator::cleanupLoadedObjecthkFakeRigidBodyDeactivator(void* p) {
     ((hkFakeRigidBodyDeactivator*)p)->~hkFakeRigidBodyDeactivator();
 }

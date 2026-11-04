@@ -11,5 +11,6 @@ struct hkEntityDeactivator : hkReferencedObject {
 
     hkEntityDeactivator() {}
     hkEntityDeactivator(hkFinishLoadedObjectFlag flag) {}
-    virtual ~hkEntityDeactivator(); // 0x08 (out of line in src/havok/hkFakeRigidBodyDeactivator.cpp)
+    // BYTES: inline; ~hkSpatialRigidBodyDeactivator has no call to it (weak copy kept in hkFakeRigidBodyDeactivator.o)
+    virtual ~hkEntityDeactivator() {} // 0x08
 };
