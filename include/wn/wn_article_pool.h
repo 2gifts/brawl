@@ -11,7 +11,7 @@
 #include <so/article/so_generate_article_manage_module.h>
 
 // Marker the mediator builds on the stack in every one of its 17 slot cases (one two-byte object per case). Only the
-// slot cases not yet spelled as calls to the wnArticleSlot* members below still use it.
+// slot cases not yet spelled as calls to the wnArticleSlot* members below still use it (only Snake's shoot()).
 struct wnArticleSlotTag {
     // MATCH-ONLY: keeps the native per-case marker stores, which MWCC would otherwise eliminate.
     volatile u8 m_pad0;
@@ -216,6 +216,13 @@ inline bool wnArticleSlotShoot(soArticle* article, const soIntToType<S>&, const 
     (void)dynamic_cast<W&>(*article);
     return true;
 }
+
+// The counter of wnArticleSlotActiveNum: wnArticleActiveCounter's layout as a plain aggregate.
+struct wnArticleSlotCounter {
+    bool (*m_isActive)(soArticle*);
+    s32 m_activeNum;
+    s32 m_inactiveNum;
+};
 
 // Counts the active articles of a slot with the counter functor of the unit (Counter has wnArticleActiveCounter's
 // layout and is filled member by member).

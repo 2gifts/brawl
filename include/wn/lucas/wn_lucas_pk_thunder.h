@@ -44,6 +44,7 @@ template wnArticleHierarchy<wnLucasPKThunderChild, 6, soInstancePoolRoot>::~wnAr
 class wnLucasPKThunderMediator : public soArticleMediator {
     wnLucasPKThunderChildPool m_pools;
     u8 m_autoRecycle;
+    WN_ARTICLE_SLOT_FRIENDS
 public:
     wnLucasPKThunderMediator(soModuleAccesser* acc) : soArticleMediator(acc), m_pools(acc), m_autoRecycle(false) { }
     virtual ~wnLucasPKThunderMediator();
