@@ -83,5 +83,9 @@ public:
     static bool activeArticle4(wnGameWatchOil* weapon, soModuleAccesser* acc);
     static bool activeArticle5(wnGameWatchOctopus* weapon, soModuleAccesser* acc);
     static bool activeArticle6(wnGameWatchNormalWeapon* weapon, soModuleAccesser* acc);
+    virtual void notifyEventOnDamage(soDamage* damage, bool unk2, soModuleAccesser* moduleAccesser);
+    virtual void analyzeSeal(void* seal);
+    virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
 };
 static_assert(sizeof(ftGameWatch) == 0x1FDE4, "Class is the wrong size!");
