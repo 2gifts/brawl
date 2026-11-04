@@ -7,7 +7,14 @@
 class sqNetFriendMelee : public gfSequence {
 public:
     s32 unk8;
-    u8 unkC[0x8];
+    union {
+        u8 unkC[0x8];
+        struct {
+            u8 _padC[0x5];
+            u8 m_isNetOnline; // HYPOTHESIS: set from the application flag at 0x110
+            u8 _pad12[0x2];
+        };
+    };
 
     static sqNetFriendMelee* create();
     sqNetFriendMelee(const char* name) : gfSequence(name), unk8(0) { }
