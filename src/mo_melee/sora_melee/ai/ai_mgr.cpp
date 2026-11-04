@@ -1210,6 +1210,85 @@ AiClBlock* aiMgr::get_via_blk(AiClBlock* from, int unk1, float x, Vec2f* pos, in
     return get_via_blk_team(from, unk1, x, -1, pos, unk2, unk3, f1, f2, f3);
 }
 
+// The first block on the route from `from` towards goal (a random usable block when goal is NULL): the blocks are
+// tried in order of their distance to goal, plus the distance from pos weighted by distWeight and penalties for the
+// hazard, dangerous and pass-through blocks. Returns from when the tables cannot be allocated.
+// HYPOTHESIS: the parameter names; f1 and f2 are passed on to get_via_blk2_core after pos's x.
+AiClBlock* aiMgr::get_via_blk2_team(AiClBlock* from, Vec2f* pos, AiClBlock* goal, int team, float f1, float f2, float distWeight) {
+    AiClBlock** blocks = (AiClBlock**)gfHeapManager::alloc(Heaps::Tmp, m_numBlocks * sizeof(AiClBlock*));
+    float* dists = (float*)gfHeapManager::alloc(Heaps::Tmp, m_numBlocks * sizeof(float));
+    Vec2f* points = (Vec2f*)gfHeapManager::alloc(Heaps::Tmp, m_numBlocks * sizeof(Vec2f));
+    if (blocks == NULL || dists == NULL || points == NULL) {
+        if (blocks != NULL) {
+            gfHeapManager::free(blocks);
+        }
+        if (dists != NULL) {
+            gfHeapManager::free(dists);
+        }
+        if (points != NULL) {
+            gfHeapManager::free(points);
+        }
+        return from;
+    }
+    if (goal == NULL) {
+        goal = get_random_block(from, team);
+    }
+    get_blk_goal_dist(blocks, points, dists, goal);
+    AiClBlock** block = blocks;
+    float* dist = dists;
+    Vec2f* point = points;
+    int i;
+    for (i = 0; i < m_numBlocks; i++, block++, dist++, point++) {
+        if (*block == NULL) {
+            continue;
+        }
+        if (*block == goal) {
+            *block = NULL;
+            continue;
+        }
+        Vec2f p = *pos;
+        *dist += distWeight * aiDistance(&p, point);
+        if ((*block)->m_flags & 0x10000) {
+            *dist += 10000000.0f;
+        } else if ((*block)->m_flags & 0x1000) {
+            *dist += 100000.0f;
+        } else if ((*block)->chk_fl_danger(team)) {
+            *dist += 1000.0f;
+        }
+        if ((*block)->m_flags & 0x20) {
+            *dist += 50.0f;
+        }
+    }
+    block = blocks;
+    dist = dists;
+    int j;
+    for (i = 0; i < m_numBlocks - 1; i++, block++, dist++) {
+        AiClBlock** other = &blocks[i + 1];
+        float* otherDist = &dists[i + 1];
+        for (j = i + 1; j < m_numBlocks; j++, other++, otherDist++) {
+            if (*other != NULL && (*block == NULL || *dist > *otherDist)) {
+                AiClBlock* swap = *block;
+                float swapDist = *dist;
+                *block = *other;
+                *other = swap;
+                *dist = *otherDist;
+                *otherDist = swapDist;
+            }
+        }
+    }
+    AiClBlock* via = get_via_blk2_core(from, goal, blocks, team, pos->m_x, f1, f2);
+    if (blocks != NULL) {
+        gfHeapManager::free(blocks);
+    }
+    if (dists != NULL) {
+        gfHeapManager::free(dists);
+    }
+    if (points != NULL) {
+        gfHeapManager::free(points);
+    }
+    return via;
+}
+
 // One step of the route search between floor blocks: every block still in the table that can be reached from
 // `from` is taken out of it and searched from in turn. Returns the block to go to first, or goal when there is no
 // route (the caller compares the result with goal).
