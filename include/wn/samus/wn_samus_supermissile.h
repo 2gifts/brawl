@@ -7,6 +7,9 @@ struct wnSamusSuperMissileParam {
     float unk0;
     float unk4;
     s32 unk8; // HYPOTHESIS: the life renewed into work int 0x10000006 after a reflect or hop
+    float unkC;
+    float unk10;
+    float unk14;
 };
 
 // HYPOTHESIS: the static data block of the article; layout of the untouched part.
