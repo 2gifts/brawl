@@ -47,8 +47,8 @@ void wnSonicSuperSonicKineticTransactor::changeKinetic(
     }
     switch (kineticType) {
     case 0x20: {
-        volatile u8 unk9 = 0; // MATCH-ONLY: native initializes the local byte before the common policy call.
-        changeKineticFinalMoveCommon(pools, acc);
+        wnSonicSuperSonicKineticTransactor empty = {};
+        empty.changeKineticFinalMove(pools, acc);
         break;
     }
     case 0x21: {

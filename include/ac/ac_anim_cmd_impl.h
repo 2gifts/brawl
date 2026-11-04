@@ -83,6 +83,20 @@ public:
     }
 };
 
+// HYPOTHESIS: names. The argument reader each module's notifyEventAnimCmd inlines: the argument at index of the list
+// (a soArrayContractibleTable consumed front-first with acShiftCmdArg, or a soArrayFixed indexed directly). The extra
+// inline level around shift() is in the bytes: a direct args.shift() in the caller inlines the table's shift body,
+// the original calls it out of line.
+template <typename List>
+inline acCmdArg acGetCmdArg(const List& args, s32 index) {
+    return acCmdArg(&args.at(index));
+}
+
+template <typename List>
+inline void acShiftCmdArg(List& args) {
+    args.shift();
+}
+
 // TODO: confirm class name
 struct acAnimCmdConv
 {

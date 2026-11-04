@@ -137,14 +137,7 @@ void grGimmickMovement::getPosNode(Vec3f* out, u32 mdlIndex, u32 nodeIndex) {
                 Vec3f origin(0.0f, 0.0f, 0.0f);
                 Vec3f result;
                 reinterpret_cast<Matrix*>(&mtx)->mulPos(&origin, &result);
-                // MATCH-ONLY: the result is read into locals before the stores, in z, y, x order.
-                float x, y, z;
-                z = result.m_z;
-                y = result.m_y;
-                x = result.m_x;
-                out->m_x = x;
-                out->m_y = y;
-                out->m_z = z;
+                out->set(result.m_x, result.m_y, result.m_z);
             }
         }
     }

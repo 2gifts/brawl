@@ -897,90 +897,57 @@ soArticle* ftSnakeArticleMediator::generate(s32 articleId, soModuleAccesser* acc
     }
 }
 
-// shoot() still uses the slot marker (wnArticleSlotTag, see its tag) in every case: the two item cases store a third
-// marker byte whose source form is not found yet (a trailing third tag argument stores it in the right order but in the
-// caller's frame area), and spelling only the other cases with tag arguments moves their stack slots.
+template <int S, int L>
+inline bool ftSnakeShootMine(soArticle* article, soModuleAccesser* acc, const soIntToType<S>&, const soIntToType<L>&) {
+    wnSnakeMine& mine = dynamic_cast<wnSnakeMine&>(*article);
+    mine.shoot(acc->getPostureModule().getPos());
+    return true;
+}
+
+template <int S, int L>
+inline bool ftSnakeShootCypher(soArticle* article, soModuleAccesser* acc, const soIntToType<S>&, const soIntToType<L>&) {
+    return ftSnake::shootArticle(&dynamic_cast<wnSnakeCypher&>(*article), acc);
+}
+
+template <int S, int L>
+inline bool ftSnakeShootC4(soArticle* article, const soIntToType<S>&, const soIntToType<L>&) {
+    dynamic_cast<wnSnakeC4&>(*article).shoot();
+    return true;
+}
+
+// The item slots (13 and 14) take a third tag after the slot and level tags, the native code's third zero byte in these
+// two cases. HYPOTHESIS: it is the item counterpart of the article type the other slots are checked against.
+template <int S, int L, int I>
+inline bool ftSnakeShootSlot13(soArticle* article, soModuleAccesser* acc, const soIntToType<S>&, const soIntToType<L>&, const soIntToType<I>&) {
+    bool flag = false;
+    return ftSnake::shootItem(article, &flag, acc);
+}
+
+template <int S, int L, int I>
+inline bool ftSnakeShootSlot14(soArticle* article, soModuleAccesser* acc, const soIntToType<S>&, const soIntToType<L>&, const soIntToType<I>&) {
+    bool flag = false;
+    return ftSnake::shootItem1(article, &flag, acc);
+}
+
 bool ftSnakeArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
     switch (article->getArticleId()) {
-    case 0: {
-        wnArticleSlotTag tag;
-        wnSnakeMine& mine = dynamic_cast<wnSnakeMine&>(*article);
-        mine.shoot(acc->getPostureModule().getPos());
-        return true;
-    }
-    case 1: {
-        wnArticleSlotTag tag;
-        (void)dynamic_cast<wnSnakeTrenchMortar&>(*article);
-        return true;
-    }
-    case 2: {
-        wnArticleSlotTag tag;
-        (void)dynamic_cast<wnSnakeRpg7&>(*article);
-        return true;
-    }
-    case 3: {
-        wnArticleSlotTag tag;
-        return ftSnake::shootArticle(&dynamic_cast<wnSnakeCypher&>(*article), acc);
-    }
-    case 4: {
-        wnArticleSlotTag tag;
-        dynamic_cast<wnSnakeC4&>(*article).shoot();
-        return true;
-    }
-    case 5: {
-        wnArticleSlotTag tag;
-        (void)dynamic_cast<wnSnakeC4Switch&>(*article);
-        return true;
-    }
-    case 6: {
-        wnArticleSlotTag tag;
-        (void)dynamic_cast<wnSnakeNikita&>(*article);
-        return true;
-    }
-    case 7: {
-        wnArticleSlotTag tag;
-        (void)dynamic_cast<wnSnakeLadder&>(*article);
-        return true;
-    }
-    case 8: {
-        wnArticleSlotTag tag;
-        (void)dynamic_cast<wnSnakeRgb6&>(*article);
-        return true;
-    }
-    case 9: {
-        wnArticleSlotTag tag;
-        (void)dynamic_cast<wnSnakeRgb6Sight&>(*article);
-        return true;
-    }
-    case 10: {
-        wnArticleSlotTag tag;
-        (void)dynamic_cast<wnSnakeRgb6Clip&>(*article);
-        return true;
-    }
-    case 11: {
-        wnArticleSlotTag tag;
-        (void)dynamic_cast<wnSnakeRgb6Bullet&>(*article);
-        return true;
-    }
-    case 12: {
-        wnArticleSlotTag tag;
-        (void)dynamic_cast<wnSimple&>(*article);
-        return true;
-    }
-    case 13: {
-        volatile u8 itemMarker = 0; // MATCH-ONLY: the native case keeps one more marker byte than the article cases
-        wnArticleSlotTag tag;
-        bool flag = false;
-        return ftSnake::shootItem(article, &flag, acc);
-    }
-    case 14: {
-        volatile u8 itemMarker = 0; // MATCH-ONLY: the native case keeps one more marker byte than the article cases
-        wnArticleSlotTag tag;
-        bool flag = false;
-        return ftSnake::shootItem1(article, &flag, acc);
-    }
-    case 15: { wnArticleSlotTag tag; return true; }
-    case 16: { wnArticleSlotTag tag; return true; }
+    case 0: return ftSnakeShootMine(article, acc, WN_ARTICLE_SLOT_TAGS);
+    case 1: return wnArticleSlotShoot<wnSnakeTrenchMortar>(article, WN_ARTICLE_SLOT_TAGS);
+    case 2: return wnArticleSlotShoot<wnSnakeRpg7>(article, WN_ARTICLE_SLOT_TAGS);
+    case 3: return ftSnakeShootCypher(article, acc, WN_ARTICLE_SLOT_TAGS);
+    case 4: return ftSnakeShootC4(article, WN_ARTICLE_SLOT_TAGS);
+    case 5: return wnArticleSlotShoot<wnSnakeC4Switch>(article, WN_ARTICLE_SLOT_TAGS);
+    case 6: return wnArticleSlotShoot<wnSnakeNikita>(article, WN_ARTICLE_SLOT_TAGS);
+    case 7: return wnArticleSlotShoot<wnSnakeLadder>(article, WN_ARTICLE_SLOT_TAGS);
+    case 8: return wnArticleSlotShoot<wnSnakeRgb6>(article, WN_ARTICLE_SLOT_TAGS);
+    case 9: return wnArticleSlotShoot<wnSnakeRgb6Sight>(article, WN_ARTICLE_SLOT_TAGS);
+    case 10: return wnArticleSlotShoot<wnSnakeRgb6Clip>(article, WN_ARTICLE_SLOT_TAGS);
+    case 11: return wnArticleSlotShoot<wnSnakeRgb6Bullet>(article, WN_ARTICLE_SLOT_TAGS);
+    case 12: return wnArticleSlotShoot<wnSimple>(article, WN_ARTICLE_SLOT_TAGS);
+    case 13: return ftSnakeShootSlot13(article, acc, WN_ARTICLE_SLOT_TAGS, soIntToType<0>());
+    case 14: return ftSnakeShootSlot14(article, acc, WN_ARTICLE_SLOT_TAGS, soIntToType<0>());
+    case 15: return wnArticleSlotUnused(true, WN_ARTICLE_SLOT_TAGS);
+    case 16: return wnArticleSlotUnused(true, WN_ARTICLE_SLOT_TAGS);
     default: return false;
     }
 }

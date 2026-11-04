@@ -2,14 +2,10 @@
 #include <nw4r/g3d/g3d_scnmdl.h>
 #include <types.h>
 
-// HYPOTHESIS: the zero-initialized block contains the loader list and one unknown word.
-struct {
-    utList unk0;
-    u32 unkC;
-} lbl_8049E550 __attribute__((aligned(8)));
+utLoaderList lbl_8049E550 __attribute__((aligned(8)));
 
 bool utility::Loader::isLoadFinish() {
-    utListNode* node = lbl_8049E550.unk0.getHead();
+    utListNode* node = lbl_8049E550.m_list.getHead();
     utListNode* end = 0;
     for (; node != end; node = node->m_next) {
         if (!static_cast<Loader*>(node)->loading()) return false;
@@ -18,11 +14,11 @@ bool utility::Loader::isLoadFinish() {
 }
 
 bool utility::AutoResFile::loading() {
-    if (!unk24.isReady()) return false;
-    if (!unk2C && unk24.getReturnStatus() == 0) {
-        static_cast<nw4r::g3d::ResFile&>(*this) = nw4r::g3d::ResFile(unk24.getBuffer());
+    if (!m_file.m_handle.isReady()) return false;
+    if (!m_isInit && m_file.m_handle.getReturnStatus() == 0) {
+        static_cast<nw4r::g3d::ResFile&>(*this) = nw4r::g3d::ResFile(m_file.m_handle.getBuffer());
         nw4r::g3d::ResFile::Init(this);
-        unk2C = true;
+        m_isInit = true;
     }
     return true;
 }

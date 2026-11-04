@@ -43,6 +43,8 @@ public:
     bool isFinishFree();
     bool isSoundGroupLoaded(SndGroupID sndGroupId);
     void freeGroup(int heapLevel, int);
+    void loadGroupThread(SndGroupID, int);
+    void freeGroupThread(int, int);
     bool loadArchiveHeader();
     bool setupBuffers();
     void loadCommon();

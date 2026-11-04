@@ -210,7 +210,8 @@ bool grDxGreensBlockPos::setNode() {
 // Builds the hit objects: the first one has a hit sphere on every block node (and the damage module that tells which one
 // was hit), the second one holds the attacks of the blocks and follows the first one.
 void grDxGreensBlockPos::setHit() {
-    // MATCH-ONLY: the original allocates the arrays of the spheres as raw storage (no element construction and no array cookie)
+    // BYTES: raw storage (no element construction, no array cookie). grEarthPelletFlower and grGWChefEtc
+    // array-construct the same types, so this unit's original allocated untyped bytes.
     m_hitData = reinterpret_cast<soCollisionHitData*>(new (Heaps::StageInstance) u8[sizeof(soCollisionHitData) * 30]);
     m_hitSimple = reinterpret_cast<soCollisionHitData::Simple*>(new (Heaps::StageInstance) u8[sizeof(soCollisionHitData::Simple) * 30]);
     m_simpleSets = reinterpret_cast<soSet<soCollisionHitData::Simple>*>(new (Heaps::StageInstance) u8[sizeof(soSet<soCollisionHitData::Simple>) * 30]);

@@ -31,6 +31,12 @@ public:
     wnPokeLizardonRock(s32 articleId, const wnArticleBuildInfo& info, const wnPokeLizardonRockData* data);
     virtual ~wnPokeLizardonRock();
     void shoot(bool unk);
+    void activate(u32 founderTaskId, u32 resourceId, int team, const Vec3f& pos, float lr, float unk);
+    virtual void updateNodeSRT();
+    virtual bool notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* acc, int index);
+    virtual void notifyEventLink(soLinkEventArgs* event, soModuleAccesser* acc, StageObject* sender, int index);
+    virtual void notifyEventCollisionHit(float power, soCollisionAttackData* data, u32 index, int kind,
+                                         soModuleAccesser* acc, soCollisionLog* log);
     static bool activeArticle(wnPokeLizardonRockStone* stone, soModuleAccesser* acc);
 };
 static_assert(sizeof(wnPokeLizardonRock) == 0x18EC, "wnPokeLizardonRock layout is wrong!");

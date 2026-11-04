@@ -27,6 +27,10 @@ public:
     static void changeKineticFinalMoveCommon(wnSonicSuperSonicKineticPools* pools,
                                              soModuleAccesser* acc);
     void changeKineticSub(wnSonicSuperSonicKineticPools* pools, soModuleAccesser* acc);
+    // HYPOTHESIS: mode 0x20 is an inline member of the same per-mode transactor object as mode 0x21 (changeKineticSub).
+    void changeKineticFinalMove(wnSonicSuperSonicKineticPools* pools, soModuleAccesser* acc) {
+        changeKineticFinalMoveCommon(pools, acc);
+    }
 
     static void updateEnergy(soKineticEnergyNormal*, soModuleAccesser*);
     static void updateEnergy(wnKineticEnergyGravity*, soModuleAccesser*);

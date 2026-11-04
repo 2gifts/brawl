@@ -114,7 +114,8 @@ void grDxYorsterBlockPos::updateYakumono(float deltaFrame) {
             }
         }
     } else {
-        // MATCH-ONLY: the original allocates both arrays as raw storage (no element construction and no array cookie)
+        // BYTES: raw storage (no element construction, no array cookie). grEarthPelletFlower and grGWChefEtc
+        // array-construct the same types, so this unit's original allocated untyped bytes.
         m_hitData = reinterpret_cast<soCollisionHitData*>(new (Heaps::StageInstance) u8[sizeof(soCollisionHitData) * 9]);
         m_hitSimple = reinterpret_cast<soCollisionHitData::Simple*>(new (Heaps::StageInstance) u8[sizeof(soCollisionHitData::Simple) * 9]);
         m_simpleSet = new (Heaps::StageInstance) soSet<soCollisionHitData::Simple>;
