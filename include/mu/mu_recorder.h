@@ -5,6 +5,14 @@
 
 class muRecorder : public gfTask {
 public:
+    class Data {
+    public:
+        void* unk0;
+        Data() : unk0(0) {}
+        ~Data();
+        void reset(void* data);
+    };
+    Data getAdvData();
     // HYPOTHESIS: only the adventure request words are reconstructed here.
     u8 unk40[0xC0];
     int unk100;
