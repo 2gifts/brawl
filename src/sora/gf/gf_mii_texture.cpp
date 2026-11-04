@@ -210,7 +210,16 @@ bool gfMii::getMyMiiCandidateTextureByCreateID(u64 createId, GXTexObj* texObj) {
                 break;
             }
         }
-        result = getMyMiiCandidateTexture(found, texObj);
+        bool textureResult = false;
+        gfMiiTextureArray& textures = m_myMiiTextures;
+        if (textures.m_textures != NULL && textures.m_capacity > found) {
+            gfMiiTexture* texture = &textures.m_textures[found];
+            if (texture->m_isValid) {
+                GXInitTexObj(texObj, texture->m_image, 64, 64, GX_TF_RGB565, GX_CLAMP, GX_CLAMP, FALSE);
+                textureResult = true;
+            }
+        }
+        result = textureResult;
     }
     return result;
 }
@@ -333,4 +342,27 @@ bool gfMii::getFriendMiiTexture(u16 index, GXTexObj* texObj) {
         }
     }
     return result;
+}
+
+void gfMii::_drawBGTile_Pre(Mtx mtx) {
+    GXLoadPosMtxImm(mtx, GX_PNMTX1);
+    GXSetCurrentMtx(GX_PNMTX1);
+    GXSetBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_CLEAR);
+    GXSetColorUpdate(TRUE);
+    GXSetChanCtrl(GX_COLOR0A0, FALSE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT0, GX_DF_NONE, GX_AF_NONE);
+    GXColor color = {0xFF, 0xFF, 0xFF, 0xFF};
+    GXSetFog(GX_FOG_ORTHO_LIN, color, -1000.0f, 700.0f, 0.5f, 1000.0f);
+    GXClearVtxDesc();
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetNumTexGens(0);
+    GXSetNumChans(1);
+    GXSetVtxDesc(GX_VA_TEX0, GX_NONE);
+    GXSetTevOp(GX_TEVSTAGE0, GX_BLEND);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetZMode(TRUE, GX_LEQUAL, TRUE);
+    GXSetZCompLoc(FALSE);
+    GXSetCullMode(GX_CULL_BACK);
 }
