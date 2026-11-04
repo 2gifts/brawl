@@ -43,6 +43,7 @@ public:
     // HYPOTHESIS: the data of the friends for the Wi-Fi part of the save (muWifiCnctWndTask copies it to the buffer of
     // gfSysRecorder2); size is the size of the buffer on entry and of the data on return.
     bool getSaveData(void** data, int* size);
+    void setDirtyFlag(bool dirty);
 };
 // TODO size assertion
 
