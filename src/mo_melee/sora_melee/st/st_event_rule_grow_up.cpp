@@ -1,6 +1,13 @@
 #include <types.h>
+#include <st/st_event_rule_grow_up.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+extern "C" u32 lbl_27_data_54290;
 
-} // extern "C"
+stEventRuleGrowUp::stEventRuleGrowUp(int param) : stEventRule(1), m_param(param), m_value(lbl_27_data_54290), m_count(0) {
+    m_value = lbl_27_data_54290;
+    m_count = 0;
+    unk8 = 0;
+}
+
+stEventRuleGrowUp::~stEventRuleGrowUp() {
+}
