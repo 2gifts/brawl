@@ -14,6 +14,7 @@
 class acAnimCmd;
 class ph2ndaryController;
 class ph2ndary2Controller;
+class phIkController;
 class soModuleAccesser;
 class soPhysicsIKHandle;
 class soStatusData;
@@ -89,7 +90,7 @@ public:
     soModuleAccesser* m_moduleAccesser;         // 0x24
     ph2ndaryController* m_2ndaryController;     // 0x28
     ph2ndary2Controller* m_2ndary2Controller;   // 0x2C
-    u32 unk30;                                  // 0x30
+    phIkController* unk30;                      // 0x30
     soArray<soPhysicsIKHandle>* m_ikHandles;    // 0x34
     void* m_ikData;                             // 0x38
     int m_2ndPreCollisionNode;                  // 0x3C

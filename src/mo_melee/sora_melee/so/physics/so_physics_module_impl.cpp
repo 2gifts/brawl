@@ -1,5 +1,6 @@
 #define SO_PHYSICS_MODULE_IMPL_FULL
 #include <ph/ph_2ndary_constraint.h>
+#include <ph/phIkController.h>
 #include <ph/ph_2ndary_controller.h>
 #include <so/physics/so_physics_module_impl.h>
 #include <so/so_module_accesser.h>
@@ -362,4 +363,19 @@ void soPhysicsModuleImpl::set2ndDefault() {
 
 void soPhysicsModuleImpl::set2ndDefault(int on) {
     m_2ndDefault = on;
+}
+
+void soPhysicsModuleImpl::destructController() {
+    if (m_2ndaryController != NULL) {
+        delete m_2ndaryController;
+        m_2ndaryController = NULL;
+    }
+    if (m_2ndary2Controller != NULL) {
+        delete m_2ndary2Controller;
+        m_2ndary2Controller = NULL;
+    }
+    if (unk30 != NULL) {
+        delete unk30;
+        unk30 = NULL;
+    }
 }
