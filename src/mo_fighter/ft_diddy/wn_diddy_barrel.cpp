@@ -21,14 +21,15 @@ wnDiddyBarrelStatusUniqProcess* wnDiddyBarrelStatusUniqProcess::getInstance() {
 wnDiddyBarrelStatusUniqProcess::~wnDiddyBarrelStatusUniqProcess() { }
 
 void wnDiddyBarrelStatusUniqProcess::initStatus(soModuleAccesser* moduleAccesser) {
-    soWorkManageModule& work = moduleAccesser->getWorkManageModule();
-    soParamAccesser* params = (soParamAccesser*)work.getParamAccesser();
-    int status = moduleAccesser->getStatusModule().getStatusKind();
-    if (status == 1) {
-        work.onFlag(0x22000000);
-        work.setInt(params->getParamInt(moduleAccesser, 0x5DC1, 0), 0x20000002);
-    } else if (status == 2) {
-        work.setInt(params->getParamInt(moduleAccesser, 0x5DC4, 0), 0x20000000);
+    soParamAccesser* params = (soParamAccesser*)moduleAccesser->getWorkManageModule().getParamAccesser();
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 1:
+        moduleAccesser->getWorkManageModule().onFlag(0x22000000);
+        moduleAccesser->getWorkManageModule().setInt(params->getParamInt(moduleAccesser, 0x5DC1, 0), 0x20000002);
+        break;
+    case 2:
+        moduleAccesser->getWorkManageModule().setInt(params->getParamInt(moduleAccesser, 0x5DC4, 0), 0x20000000);
+        break;
     }
 }
 
@@ -113,10 +114,9 @@ void wnDiddyBarrelStatusUniqProcess::execStatus(soModuleAccesser* moduleAccesser
 }
 
 void wnDiddyBarrelStatusUniqProcess::execStop(soModuleAccesser* moduleAccesser) {
-    soKineticModule& kinetic = moduleAccesser->getKineticModule();
-    Vec2f speed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1));
+    Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
     speed.normalize();
-    float angle = atan2f(speed.m_x, speed.m_y) * 57.29578f;
+    float angle = 57.29578f * atan2f(speed.m_x, speed.m_y);
     Vec3f rotation = moduleAccesser->getModelModule().getNodeRotate(3);
     float lr = moduleAccesser->getPostureModule().getLr();
     rotation.m_x = angle * lr;
