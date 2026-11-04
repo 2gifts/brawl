@@ -7,6 +7,7 @@ class phIkTwoJointSolver;
 // IK controller (map class phIkController). Offsets from src/sora/ph/ph_ik_controller.cpp.
 class phIkController {
 public:
+    ~phIkController();
     void setEnable(int idx, bool enable);
     void setStressReferencePoint(int idx, const f32* pos);
     void resetToeAngle(int idx);
