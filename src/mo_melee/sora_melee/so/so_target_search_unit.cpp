@@ -33,3 +33,23 @@ void soTargetSearchUnit::update() {
         m_frameCounter.start();
     }
 }
+
+bool soTargetSearchUnit::isFoundTarget(soModuleAccesser* acc, u32 target) {
+    if (!checkTargetExist(acc, target)) {
+        return false;
+    }
+    if (unk14 > 0 && m_frameCounter.getCounter() != 0) {
+        return false;
+    }
+    return isSearchTargetSub(acc, target);
+}
+
+bool soTargetSearchUnit::isLostTarget(soModuleAccesser* acc, u32 target) {
+    if (!checkTargetExist(acc, target)) {
+        return true;
+    }
+    if (unk14 > 0 && m_frameCounter.getCounter() != 0) {
+        return false;
+    }
+    return !isSearchTargetSub(acc, target);
+}

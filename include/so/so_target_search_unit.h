@@ -43,5 +43,8 @@ public:
     void createTargetSearchUnit(soModuleAccesser* acc, UnkTargetSearchUnit* data);
     void resetIntervalCount();
     void update();
+    bool isFoundTarget(soModuleAccesser* acc, u32 target);
+    bool isLostTarget(soModuleAccesser* acc, u32 target);
+    bool isSearchTargetSub(soModuleAccesser* acc, u32 target);
 };
 static_assert(sizeof(soTargetSearchUnit) == 0x18, "Class is the wrong size!");
