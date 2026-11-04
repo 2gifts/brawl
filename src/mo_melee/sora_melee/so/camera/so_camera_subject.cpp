@@ -134,11 +134,11 @@ u8 soCameraSubject::getPlayerNo() {
 void soCameraSubject::getCameraRangeGlobalRect(Rect2D* outRange) {
     cmSubject* subject = m_cmSubject;
     Rect2D range;
-    Vec3f pos = subject->m_pos;
     range.m_left = subject->m_60.m_left;
     range.m_right = subject->m_60.m_right;
     range.m_up = subject->m_60.m_up;
     range.m_down = subject->m_60.m_down;
+    Vec3f pos = subject->m_pos;
     outRange->m_up = range.m_up + pos.m_y;
     outRange->m_down = range.m_down + pos.m_y;
     outRange->m_left = range.m_left + pos.m_x;
