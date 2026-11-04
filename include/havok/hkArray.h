@@ -18,6 +18,9 @@ struct hkArrayBase {
     int getSize() const {
         return m_size;
     }
+    bool mustDeallocate() const {
+        return (m_capacityAndFlags & DONT_DEALLOCATE_FLAG) == 0;
+    }
 };
 
 struct hkArrayUtil {

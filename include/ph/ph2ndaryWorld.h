@@ -3,6 +3,8 @@
 #include <havok/hkArray.h>
 #include <types.h>
 
+class Vec2f;
+class gfArea;
 class grCollCollection;
 
 // Secondary-motion world (map class ph2ndaryWorld). Offsets come from the asm of
@@ -18,10 +20,24 @@ public:
         s32 id;    // 0x08
     };
 
+    // HYPOTHESIS: body of one wind area record (the kind halfword is compared against 12 and 13).
+    struct WindEntry {
+        u16 m_kind;     // 0x00
+        u8 _02[0x1E];   // 0x02
+    };
+    // HYPOTHESIS: one record of the stage wind table (stride 0x24).
+    struct WindElement {
+        u32 m_id;          // 0x00
+        WindEntry m_entry; // 0x04
+    };
+
     // Returns the id of the new entry, or -1 when ptr is already in the list.
     s32 addConstraintArray(void* ptr, const u8* kind);
     void removeConstraintArray(void* ptr);
     f32 getSamusRandomAccel(f32 a, f32 b, f32 c);
+    // HYPOTHESIS: parameter types from the register use.
+    void getWindArray();
+    u32 isCollisionBetweenPoints(const Vec2f* from, const Vec2f* to);
 
     hkArray<ConstraintEntry> m_constraints; // 0x00: data, size and capacity word
     union {
@@ -30,8 +46,8 @@ public:
             s32 unkC;
             grCollCollection* unk10;
             u8 unk14;
-            u32 unk18;
-            u32 unk1C;
+            WindEntry* unk18;
+            gfArea* unk1C;
             // HYPOTHESIS: four-byte array elements; only base storage is exposed.
             hkArrayBase unk20;
             hkArrayBase unk2C;
