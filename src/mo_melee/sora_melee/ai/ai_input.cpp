@@ -32,7 +32,7 @@ aiInput::aiInput(u32 contNo, int unk2C, int player, int ftKind, s8 state, aiInpu
     m_unk61 = 0;
     m_unk62 = 0;
     m_unk63 = 0;
-    m_unk64 = 0;
+    m_finalWait = 0;
     m_unk65 = 0;
     m_unk66 = 0;
     m_unk68 = 0;
@@ -100,7 +100,7 @@ void aiInput::reset() {
     m_unk61 = 0;
     m_unk62 = 0;
     m_unk63 = 0;
-    m_unk64 = 0;
+    m_finalWait = 0;
     m_unk65 = 0;
     m_unk66 = 0;
     m_unk68 = 0;
@@ -1327,6 +1327,333 @@ int aiInput::snake_c4_check(Vec2f* stick, ipPadButton* button) {
     if (m_unk70 <= 0) {
         s8 rank = m_par.m_rank;
         m_unk70 = 10.0f + 30.0f * randf() + 0.5f * (100 - rank);
+    }
+    return 0;
+}
+
+// Danger avoidance, in modes 1, 2, 6, 11, 12, 13 and 20: falling in the air into a danger zone, jump (or, for the
+// characters 0x12, 0x2E and 0x2F, special up); while the stage has danger zones and the CPU is in one, pick the nearest
+// opponent at random by rank and run away (mode 5), except on the stages 7 and 0x33 where a gimmick close by or coming
+// closer makes it start mode 2 with a dodge action; otherwise, when the target (characters 6 and 0x13) is in a
+// matching state in front of it at the same height, start mode 1 with action 0x80 or 0x71. Always returns 0.
+// HYPOTHESIS: names; the action numbers, the stage kinds and the meaning of m_unk35A/m_unk35C (taken to count the
+// danger zones), aiStat::m_unkD4 and aiMgr::m_unk374/m_unk378.
+// BYTES: defined at the end of the file for the same literal-pool reason as auto_passfall.
+int aiInput::danger_check(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    switch (m_md) {
+    case 1:
+    case 2:
+    case 6:
+    case 11:
+    case 12:
+    case 13:
+    case 20:
+        if (stat->chk_stat_air_free() && stat->m_speed.m_y < 0.0f &&
+            aiMgr::chkDangerZone((Vec2f*)&stat->m_center, stat->m_team, 0x10))
+        {
+            if (stat->m_unkA8 > 0) {
+                button->m_mask |= soController::getButtonMask(soController::Pad_Button_Jump);
+            } else {
+                switch (stat->m_chrKind) {
+                case 0x12:
+                case 0x2E:
+                case 0x2F:
+                    stick->m_y = 1.0f;
+                    button->m_mask |= soController::getButtonMask(soController::Pad_Button_Special);
+                    break;
+                }
+            }
+        }
+        bool zones = g_aiMgr->m_unk35A != 0 || g_aiMgr->m_unk35C != 0;
+        if (zones && stat->chkDangerZoneAway() && (stat->chk_stat_gr_free() || stat->chk_stat_air_free())) {
+            s8 rank = m_par.m_rank;
+            if (randf() <= 0.02f * rank) {
+                m_target.m_idx = get_near_target(NULL, 0);
+                aiStat* target = aiMgr::get_aiStat(&m_target);
+                switch (g_aiMgr->m_stageKind) {
+                case 7:
+                case 0x33: {
+                    aiWeaponMgr* weaponMgr = g_aiMgr->m_weaponMgr;
+                    if (weaponMgr->search_gimmic(&stat->m_pos, 100.0f) > 0) {
+                        aiWeapon* gimmick = weaponMgr->near_searched((Vec2f*)&stat->m_pos);
+                        float dx = gimmick->m_pos.m_x - stat->m_pos.m_x;
+                        if (__fabsf(dx) < 30.0f || gimmick->m_velocity.m_x * dx < 0.0f) {
+                            switch (g_aiMgr->m_stageKind) {
+                            case 7: {
+                                float r = randf();
+                                u16 act = stat->chk_stat_gr_free() ? 0x71 : 0x3060;
+                                if (r < 0.5f) {
+                                    if (dx * (target->m_pos.m_x - stat->m_pos.m_x) < 0.0f) {
+                                        act = 0x52;
+                                    }
+                                } else if (dx * stat->m_lr > 0.0f) {
+                                    act = 0x55;
+                                }
+                                change_md(2, &m_target, act, 0);
+                                return 0;
+                            }
+                            }
+                            u16 act;
+                            if (stat->m_unkA8 <= 0) {
+                                act = stat->chk_stat_gr_free() ? 0x71 : 0x3060;
+                            } else {
+                                float r = randf();
+                                act = 0x54;
+                                if (r < 0.2f) {
+                                    act = 0x80;
+                                } else if (r < 0.5f) {
+                                    if (dx * (target->m_pos.m_x - stat->m_pos.m_x) > 0.0f) {
+                                        act = 0x52;
+                                    }
+                                } else if (r < 0.8f) {
+                                    if (dx * stat->m_lr < 0.0f) {
+                                        act = 0x55;
+                                    }
+                                }
+                            }
+                            change_md(2, &m_target, act, 0);
+                            return 0;
+                        }
+                    }
+                    break;
+                }
+                }
+                if (!(stat->m_floor->m_flags & 0x1000) && target->m_floor == stat->m_floor &&
+                    (stat->m_unkD4 < g_aiMgr->m_unk374 || stat->m_unkD4 == g_aiMgr->m_unk378))
+                {
+                    return 0;
+                }
+                aiChrIdx none;
+                none.m_idx = -1;
+                change_md(5, &none, 0, 0);
+                m_flags |= 2;
+                m_unk5C = 70;
+            }
+        } else {
+            aiStat* target = aiMgr::get_aiStat(&m_target);
+            switch (target->m_chrKind) {
+            case 6:
+            case 0x13:
+                if (target->chk_chr_stat(2, -1) && (stat->chk_stat_gr_free() || stat->m_situation == 3)) {
+                    float dy = __fabsf(stat->m_center.m_y - target->m_center.m_y);
+                    if (dy < 0.6f * aiParam::get_height(&m_chrIdx)) {
+                        float dx = target->m_lr * (stat->m_pos.m_x - target->m_pos.m_x);
+                        if (dx > 1.0f && dx < 200.0f) {
+                            s8 rank = m_par.m_rank;
+                            if (randf() <= 0.0015f * rank) {
+                                if (randf() < 0.4f && dx > 25.0f) {
+                                    change_md(1, &m_target, 0x80, 0);
+                                } else {
+                                    change_md(1, &m_target, 0x71, 0);
+                                }
+                                return 0;
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        break;
+    }
+    return 0;
+}
+
+// Using the Final Smash (mode 0xF) once the CPU holds it (aiStat flags 0x400/0x800): with flag 0x800 at once; else,
+// in the modes 1, 2, 5, 6, 11, 12 and 0x16 when no opponent (another m_unkCC) holds flag 0x20000, or in mode 3 for the
+// characters listed there, depending on the character: when over the ground, when the target is close, when the
+// target (led by its speed at a higher rank) is in front within reach at about the same height, or at once. The
+// characters 1, 5 and 8 first walk to the centre block of a small stage (mode 0x16). m_finalWait delays the next
+// check. Always returns 0. HYPOTHESIS: names; the meaning of the character groups and of the flags.
+// BYTES: defined at the end of the file for the same literal-pool reason as auto_passfall.
+int aiInput::final_check(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    aiStat* target = aiMgr::get_aiStat(&m_target);
+    if (stat->m_flags & 0x800) {
+        aiChrIdx none;
+        none.m_idx = -1;
+        change_md(0xF, &none, 0, 0);
+        m_step = 20;
+    } else if (m_finalWait > 0) {
+        m_finalWait--;
+    } else {
+    int checkSelf = 1;
+    int checkTarget = 0;
+    switch (m_md) {
+    case 1:
+    case 2:
+    case 5:
+    case 6:
+    case 11:
+    case 12:
+    case 0x16: {
+        int i;
+        for (i = 0; i < aiMgr::NumPlayers; i++) {
+            aiChrIdx idx;
+            idx.m_idx = i;
+            aiStat* chr = aiMgr::get_aiStat(&idx);
+            if (i == m_chrIdx.m_idx || chr->m_unkCC == stat->m_unkCC || (chr->m_flags & 0x8000)) {
+                continue;
+            }
+            if (chr->m_flags & 0x20000) {
+                break;
+            }
+        }
+        if (i < aiMgr::NumPlayers) {
+            return 0;
+        }
+        switch (stat->m_chrKind) {
+        case 0x11:
+            checkTarget = 1;
+            break;
+        }
+        break;
+    }
+    case 3:
+        switch (stat->m_chrKind) {
+        case 0x04:
+        case 0x06:
+        case 0x07:
+        case 0x13:
+        case 0x15:
+        case 0x19:
+        case 0x1B:
+        case 0x21:
+        case 0x2C:
+        case 0x2E:
+        case 0x2F:
+            checkSelf = 0;
+            break;
+        case 0x02:
+        case 0x0D:
+        case 0x0E:
+        case 0x11:
+        case 0x16:
+        case 0x22:
+        case 0x29:
+            checkSelf = 0;
+            checkTarget = 1;
+            break;
+        default:
+            return 0;
+        }
+        break;
+    default:
+        return 0;
+    }
+    if (stat->m_flags & 0xC00) {
+    switch (stat->m_chrKind) {
+    case 0x00:
+    case 0x03:
+        if (stat->chk_stat_gr_free() && m_md != 6 && stat->chk_over_ground()) {
+            aiChrIdx none;
+            none.m_idx = -1;
+            change_md(0xF, &none, 0, 0);
+            if (m_md == 0xF) {
+                m_step = 10;
+            }
+        }
+        break;
+    case 0x01:
+    case 0x05:
+    case 0x08: {
+        if (m_par.m_rank > 40 && aiMgr::isSmallMap()) {
+            s8 rank = m_par.m_rank;
+            if (randf() < 0.009f * rank) {
+                AiClBlock* floor = stat->m_floor;
+                float dist = __fabsf(0.5f * (floor->m_edgeL.m_x + floor->m_edgeR.m_x) - stat->m_pos.m_x);
+                dist -= aiParam::get_width(&m_chrIdx);
+                if (g_aiMgr->get_center_block(stat->m_team) != stat->m_floor || dist > 30.0f) {
+                    if (m_md != 0x16) {
+                        aiChrIdx none;
+                        none.m_idx = -1;
+                        change_md(0x16, &none, 0, 0);
+                    }
+                    m_finalWait = 10.0f + 10.0f * randf();
+                    break;
+                }
+            }
+        }
+        if ((stat->chk_stat_gr_free() || stat->chk_stat_air_free() || stat->m_situation == 3) &&
+            (!checkSelf || stat->chk_over_ground()) && (!checkTarget || target->chk_over_ground()) && stat->get_distance(0.0f, &m_target) < 30.0f) {
+            aiChrIdx none;
+            none.m_idx = -1;
+            change_md(0xF, &none, 0, 0);
+        }
+        break;
+    }
+    case 0x02:
+    case 0x09:
+    case 0x0D:
+    case 0x0E:
+    case 0x11:
+    case 0x14:
+    case 0x16:
+    case 0x1D:
+    case 0x1E:
+    case 0x1F:
+    case 0x22:
+    case 0x29:
+        if ((stat->chk_stat_gr_free() || stat->chk_stat_air_free() || stat->m_situation == 3) &&
+            (!checkSelf || stat->chk_over_ground()) && (!checkTarget || target->chk_over_ground())) {
+            float lead = 30.0f;
+            switch (stat->m_chrKind) {
+            case 0x02:
+            case 0x22:
+            case 0x29:
+                lead = 0.0f;
+                break;
+            case 0x0D:
+            case 0x0E:
+            case 0x16:
+                lead = 8.0f;
+                break;
+            }
+            Vec2f pos;
+            if (m_par.m_rank >= 20) {
+                float t = lead / 80.0f * (m_par.m_rank - 20);
+                float leadX = target->m_speed.m_x * t;
+                float leadY = target->m_speed.m_y * t;
+                pos.m_x = leadX + target->m_center.m_x;
+                pos.m_y = leadY + target->m_center.m_y;
+            } else {
+                pos.m_x = target->m_center.m_x;
+                pos.m_y = target->m_center.m_y;
+            }
+            float targetWidth = aiParam::get_width(&m_target);
+            float width = aiParam::get_width(&m_chrIdx);
+            float reach = width + targetWidth;
+            float dx = stat->m_lr * (pos.m_x - stat->m_center.m_x) - reach;
+            float range;
+            switch (stat->m_chrKind) {
+            case 0x0D:
+            case 0x0E:
+            case 0x11:
+            case 0x14:
+                range = 150.0f;
+                break;
+            default:
+                range = 55.0f;
+                break;
+            }
+            if (dx < range && dx > 1.0f && __fabsf(stat->m_center.m_y - pos.m_y) < 0.7f * target->m_unkA4) {
+                aiChrIdx none;
+                none.m_idx = -1;
+                change_md(0xF, &none, 0, 0);
+            }
+        }
+        break;
+    default:
+        if (m_md != 6 && (stat->chk_stat_gr_free() || stat->chk_stat_air_free() || stat->m_situation == 3) &&
+            (!checkSelf || stat->chk_over_ground()) && (!checkTarget || target->chk_over_ground())) {
+            aiChrIdx none;
+            none.m_idx = -1;
+            change_md(0xF, &none, 0, 0);
+        }
+        break;
+    }
+    }
     }
     return 0;
 }

@@ -58,7 +58,7 @@ public:
     u8 m_unk61;
     u8 m_unk62;
     u8 m_unk63;
-    u8 m_unk64;
+    s8 m_finalWait;        // 0x64: frames before final_check looks again (HYPOTHESIS: name)
     u8 m_unk65;
     u8 m_unk66;
     s8 m_unk67;
@@ -123,6 +123,8 @@ public:
     void auto_passfall(Vec2f* stick, ipPadButton* button);
     int attention_check(Vec2f* stick, ipPadButton* button);
     int snake_c4_check(Vec2f* stick, ipPadButton* button);
+    int danger_check(Vec2f* stick, ipPadButton* button);
+    int final_check(Vec2f* stick, ipPadButton* button);
     // The dizzy mode: the stick is spun around (faster at a higher rank). HYPOTHESIS: the md_* handlers all take the stick
     // and the button word they fill in and return 1 when they ran; button is not used here.
     // Recovering to the stage: after a few frames over the edge, jump back (action 0x2050) when there is no ground below
