@@ -14,5 +14,7 @@ public:
     virtual void start();
     virtual void setNext();
     virtual void exit();
+    void setupKumiteReplay();
+    bool checkHomerunVirsusReplay();
 };
 static_assert(sizeof(sqReplay) == 0x14, "Class is wrong size!");
