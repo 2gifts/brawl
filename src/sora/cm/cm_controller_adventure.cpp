@@ -33,3 +33,7 @@ void cmAdventureController::resetTarget() {
     Vec3f zero(0.0f, 0.0f, 0.0f);
     _80 = zero;
 }
+
+cmAdventureFreeController::cmAdventureFreeController() {
+    unkB_3 = 1;
+}

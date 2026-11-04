@@ -128,4 +128,9 @@ public:
     void debugUpdate();
     void setQuakeAtOffset();
 };
+
+class cmAdventureFreeController : public cmAdventureController {
+public:
+    cmAdventureFreeController();
+};
 static_assert(sizeof(cmAdventureController) == 0x148, "Class is wrong size!");
