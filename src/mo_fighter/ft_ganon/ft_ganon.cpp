@@ -365,3 +365,13 @@ template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 20>, soIntToType<1> >::
 template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<1> >, soKindInfoGeneric<0, 20> >;
 template class soInstancePool<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<1> >, soInstancePoolRoot, soKindInfoGeneric<0, 20>, 1>;
 #pragma dont_inline off
+
+bool ftGanon::activeArticle(wnSimple* weapon, soModuleAccesser* acc) {
+    int founderTaskId;
+    soResourceModule& resources = acc->getResourceModule();
+    founderTaskId = acc->getStageObject().m_taskId;
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(),
+        static_cast<const wnSimpleData*>(g_ftCommonDataAccesser.getData(Fighter_Ganon)->extendParam[5]),
+        true, false, Vec3f(0.0f, 0.0f, 0.0f), 0xffff, 0xffff, 0, true, false, -1, 0, false, 2, 0, false);
+    return true;
+}

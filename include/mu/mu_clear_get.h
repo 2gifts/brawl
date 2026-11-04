@@ -15,7 +15,10 @@ class ScnMdlExpand;
 // HYPOTHESIS: one record of the muClearGetDataList table (0x28 bytes, a negative first word ends it).
 struct muClearGetData {
     int unk0;
-    u8 unk4[0x24];
+    union {
+        u8 unk4[0x24];
+        int unk4Words[9];
+    };
 };
 
 class muClearGetDataManager {
@@ -49,14 +52,26 @@ public:
     u32 unk108C;
     u32 unk1090;
     u32 unk1094;
-    bool unk1098;
-    u8 unk1099[0x10A8 - 0x1099];
+    union {
+        struct {
+            bool unk1098;
+            u8 unk1099[0x10A8 - 0x1099];
+        };
+        struct {
+            u8 _1098[8];
+            u32 unk10A0;
+            bool unk10A4;
+        };
+    };
     u32 unk10A8[128];
     u32 unk12A8;
     float unk12AC;
     u32 unk12B0;
     u32 unk12B4;
-    u8 unk12B8[0x12CC - 0x12B8];
+    union {
+        u8 unk12B8[0x12CC - 0x12B8];
+        u32 unk12B8Words[5];
+    };
     Vec3f unk12CC;
     bool unk12D8;
     u8 unk12D9[7];
@@ -71,4 +86,6 @@ public:
     void releaseHammer(int);
     u32 setBreakBoxId(u32);
     void setPosRot(u32);
+    void setPrizeModel(u32, int);
+    bool calcHammerClose();
 };

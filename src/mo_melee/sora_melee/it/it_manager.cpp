@@ -10,6 +10,15 @@
 #include <so/situation/so_situation_module_impl.h>
 #include <so/area/so_area_module_impl.h>
 
+int itManager::lotCreateItem(soArray<BaseItem*>* items, itGenSheetKind sheet, itGenId genId, Vec3f* pos, int createOwnerTaskId, int ownerTaskId, itKind kind) {
+    return safeLotCreateItem(items, sheet, genId, pos, pos, createOwnerTaskId, ownerTaskId, kind);
+}
+
+int itManager::safeLotCreateItem(itGenSheetKind sheet, itGenId genId, Vec3f* safePos, Vec3f* pos, int createOwnerTaskId, int ownerTaskId, itKind kind) {
+    soArrayVector<BaseItem*, 1> items;
+    return safeLotCreateItem(&items, sheet, genId, safePos, pos, createOwnerTaskId, ownerTaskId, kind);
+}
+
 // Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
 extern "C" {
 

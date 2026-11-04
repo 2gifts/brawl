@@ -39,6 +39,8 @@ public:
     // HYPOTHESIS: the record's original type name is unknown.
     void* getSealDataId(u32 id);
     bool isPutChara(int chara, u32 id);
+    u32 getPutCharaNum(u32 id);
+    u32 getPutCharaNo(u32 id, u32 index);
 };
 
 // HYPOTHESIS: polygon arguments are arrays of two-float vertices and unsigned counts.

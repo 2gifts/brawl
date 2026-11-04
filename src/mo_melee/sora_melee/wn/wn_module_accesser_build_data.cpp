@@ -1,5 +1,6 @@
 #include <types.h>
 #include <wn/wn_module_accesser_build_data.h>
+#include <so/so_module_accesser.h>
 
 // Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
 extern "C" {
@@ -26,4 +27,10 @@ wnModuleAccesserBuildData::wnModuleAccesserBuildData(s32 kind, const void* data,
     this->unk34 = unk34;
     this->unk38 = unk38;
     this->unk3C = unk3C;
+}
+
+bool wnGroundConditionCheckerImpl::isConditionNoCliffStop(soModuleAccesser* moduleAccesser)
+{
+    Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(2));
+    return speed.lengthSq() > 0.0f;
 }

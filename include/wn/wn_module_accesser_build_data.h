@@ -5,6 +5,12 @@
 #include <StaticAssert.h>
 #include <so/so_module_accesser_build_data.h>
 #include <types.h>
+#include <so/ground/so_ground_module_impl.h>
+
+class wnGroundConditionCheckerImpl : public soGroundConditionChecker {
+public:
+    virtual bool isConditionNoCliffStop(soModuleAccesser* moduleAccesser);
+};
 
 // The build data of an article: the module accesser builder queries it through the soModuleAccesserBuildData interface
 // (sora_melee implements the queries from the article data block).

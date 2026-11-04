@@ -206,7 +206,7 @@ notifyEventCollisionAttackFighter__7ftGanonFP14soCollisionLogP16soModuleAccesser
 fn_109_86B8 = .text:0x000086B8; // type:function size:0x250
 fn_109_8908 = .text:0x00008908; // type:function size:0x154
 getNWModelInstanceHeap__18ftFighterBuildDataCFv = .text:0x00008A5C; // type:function size:0x8 scope:weak
-fn_109_8A64 = .text:0x00008A64; // type:function size:0xF0
+activeArticle__7ftGanonFP8wnSimpleP16soModuleAccesser = .text:0x00008A64; // type:function size:0xF0
 __ct__5Vec3fFfff = .text:0x00008B54; // type:function size:0x10
 getParamIndefinite__21ftExtendParamAccesserFP16soModuleAccesserll = .text:0x00008B64; // type:function size:0x8
 setup__26ftGanonExtendParamAccesserFPCUc = .text:0x00008B6C; // type:function size:0x110

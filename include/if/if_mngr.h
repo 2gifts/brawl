@@ -68,6 +68,8 @@ public:
     bool isLoadResourceFinished();
     void main();
     void startPauseMenu(int arg1, int arg2, int playerNo, bool arg4);
+    void exitPauseMenu();
+    void startIntrMenu(int padNo, int kind);
     void exitIntrMenu();
     int getIntrMenuState();
     void openDlg(int arg1, int msgId, int arg3);

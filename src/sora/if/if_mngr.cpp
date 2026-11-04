@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <types.h>
+#include <if/if_wifi_intr_menu.h>
 
 namespace nw4r {
 namespace g3d {
@@ -28,6 +29,7 @@ public:
 struct IfPhoto {
     u8 unk0[0x70];
     int unk70;
+    void exitPause();
 };
 
 struct IfAdvBoss {
@@ -226,6 +228,17 @@ void IfMngr::startPauseMenu(int arg1, int arg2, int playerNo, bool arg4) {
     fn_800F00D4(m_ifPhoto, arg1, arg2, playerNo >= 0 ? unk68[playerNo] : -1, arg4);
     unk18->SetChoice(1);
     m_isPauseMenuActive = true;
+}
+
+void IfMngr::exitPauseMenu() {
+    static_cast<IfPhoto*>(m_ifPhoto)->exitPause();
+    unk18->SetChoice(0);
+    m_isPauseMenuActive = false;
+}
+
+void IfMngr::startIntrMenu(int padNo, int kind) {
+    static_cast<IfWifiIntrMenu*>(m_ifWifiIntrMenu)->startMenu(padNo, kind);
+    unkAC = 1;
 }
 
 void IfMngr::exitIntrMenu() {

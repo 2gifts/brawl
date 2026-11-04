@@ -77,3 +77,26 @@ bool tySealListDataManager::isPutChara(int chara, u32 id) {
     }
     return (flags & mask) != 0;
 }
+
+u32 tySealListDataManager::getPutCharaNum(u32 id) {
+    u32 count = 0;
+    for (u32 chara = 0; chara < 62; ++chara) {
+        if (isPutChara(chara, id)) {
+            ++count;
+        }
+    }
+    return count;
+}
+
+u32 tySealListDataManager::getPutCharaNo(u32 id, u32 index) {
+    u32 count = 0;
+    for (u32 chara = 0; chara < 62; ++chara) {
+        if (isPutChara(chara, id)) {
+            if (count == index) {
+                return chara;
+            }
+            ++count;
+        }
+    }
+    return 62;
+}
