@@ -192,3 +192,36 @@ void soAnimCmdInterpreter::systemCmdFuncWaitRnadi() {
     }
     systemCmdFuncWaitSub(minimum);
 }
+
+void soAnimCmdInterpreter::systemCmdFuncWaitRnadf() {
+    if (m_moduleAccesser == nullptr) {
+        return;
+    }
+    if (m_currentCmd == nullptr) {
+        return;
+    }
+    const acAnimCmd* cmd = getCurrentCmd();
+    float maximum;
+    float minimum = 0.0f;
+    acCmdArg argument;
+    cmd->getArg(&argument, 0);
+    if (argument.getArgType() == 1) {
+        maximum = argument.getFloatData();
+    } else {
+        maximum = soValueAccesser::getValueFloat(m_moduleAccesser, argument.getValueIndexData(), 0);
+    }
+    if (cmd->getArgNum() >= 2) {
+        minimum = maximum;
+        cmd->getArg(&argument, 1);
+        if (argument.getArgType() == 1) {
+            maximum = argument.getFloatData();
+        } else {
+            maximum = soValueAccesser::getValueFloat(m_moduleAccesser, argument.getValueIndexData(), 0);
+        }
+    }
+    float range = maximum - minimum;
+    if (range > 0.0f) {
+        minimum += range * randf();
+    }
+    systemCmdFuncWaitSub(minimum);
+}
