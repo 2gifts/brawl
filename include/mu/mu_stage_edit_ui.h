@@ -103,6 +103,8 @@ static_assert(offsetof(muStageEditUI, m_thumbnailData) == 0xC4754, "Editor thumb
 // HYPOTHESIS: the Stage Builder part table looked up by id; names and the 0x44-byte record
 // follow the lookup, and the rest of the layout is not modeled.
 class stDataMultiContainer;
+struct stDataContainerData;
+struct sndBgmTitleData;
 
 class muStageEditDataManager {
 public:
@@ -130,6 +132,8 @@ public:
     ~muStageEditDataManager();
 
     Data* getDataId(u32 id);
+    bool isLoadFinish();
+    void setData(stDataContainerData* data);
 };
 
 // HYPOTHESIS: a view of the muCollection words that the stage browser's pop-up check reads.
@@ -143,6 +147,15 @@ struct muStageEditCollection {
 // vtable slots of its native vtable, and only the recovered ones are declared.
 class muStageEditSelectTask : public muCollectionViewer {
 public:
+    class NewData {
+    public:
+        u8 unk0[8];
+        int unk8;
+        u32 unkC;
+
+        sndBgmTitleData* getBgmData() const;
+    };
+
     class Work : public muCollectionViewer::Work {
     public:
         virtual ~Work();
