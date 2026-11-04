@@ -1718,26 +1718,29 @@ void IfPlayer::damageRumbleInit(IfPlayer* player, int prevState) {
 }
 
 int IfPlayer::damageRumbleMain(IfPlayer* player) {
+    int i;
+    Vec3f pos;
     player->unk12C += 2.0943952f;
     if (player->unk12C >= 6.2831855f) {
-        player->unk130++;
         player->unk134++;
+        player->unk130++;
         if (player->unk130 >= 4) {
-            for (int i = 0; i < 4; i++) {
-                Vec3f pos;
+            for (i = 0; i < 4; i++) {
+                MuObject* object = player->m_objects[2 + i];
                 pos.m_x = player->m_digitPos[i][0];
                 pos.m_y = player->m_digitPos[i][1];
                 pos.m_z = player->m_digitPos[i][2];
-                player->m_objects[2 + i]->setTrans(&pos);
+                object->setTrans(&pos);
             }
             return 0;
         }
         player->unk12C -= 6.2831855f;
     }
+    float angle = player->unk12C;
     float shake = 0.75f + 2.25f * player->unk264;
-    shake *= (float)sin(player->unk12C);
-    for (int i = 0; i < 4; i++) {
-        Vec3f pos;
+    shake *= (float)sin(angle);
+    for (i = 0; i < 4; i++) {
+        MuObject* object = player->m_objects[2 + i];
         pos.m_x = player->m_digitPos[i][0];
         pos.m_y = player->m_digitPos[i][1];
         pos.m_z = player->m_digitPos[i][2];
@@ -1746,7 +1749,7 @@ int IfPlayer::damageRumbleMain(IfPlayer* player) {
         } else {
             pos.m_y += shake;
         }
-        player->m_objects[2 + i]->setTrans(&pos);
+        object->setTrans(&pos);
     }
     return player->m_damageState;
 }
