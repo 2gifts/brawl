@@ -1,8 +1,12 @@
+#include <revolution/NWC24/NWC24Download.h>
 #include <gf/gf_heap_manager.h>
+#include <gm/gm_global.h>
 #include <memory.h>
+#include <nt/nt_etc_global.h>
 #include <nt/nt_etc_nwc24.h>
 #include <nt/nt_offline.h>
 #include <revolution/NWC24/NWC24Config.h>
+#include <revolution/OS/OSTime.h>
 #include <string.h>
 #include <types.h>
 
@@ -41,6 +45,48 @@ extern const u8 lbl_80409660[];
 extern const u8 lbl_80409760[];
 extern u16 lbl_8059E7D4;
 extern s16 lbl_8059E7D2;
+extern u8 lbl_8059E7D8[8];
+
+// NWC24IterateDlTask (the map name); src/RVL_SDK/nwc24/nwc24.c calls it by this stand-in name.
+extern "C" NWC24Err fn_803A3540(u16* idx, BOOL first);
+
+NWC24Err Patch_NWC24DeleteDlTasksForOptOut(u32 appId, BOOL all) {
+    NWC24Err result = NWC24_OK;
+    NWC24Err previousError = NWC24_OK;
+    u16 index = 0;
+    NWC24DlTask task;
+    NWC24Err iteration = fn_803A3540(&index, TRUE);
+    while (iteration >= 0) {
+        if (previousError != NWC24_OK) result = previousError;
+        previousError = result;
+        result = NWC24GetDlTask(&task, index);
+        if (result >= 0 && task.optFlags != 0 && (all || appId == task.appId)) {
+            result = NWC24DeleteDlTaskForced(&task);
+        }
+        iteration = fn_803A3540(&index, FALSE);
+    }
+    return previousError;
+}
+
+u32 nteWiiConnect24::_getMailSentSizeToday() {
+    u32 size = 0;
+    OSCalendarTime sentDate;
+    OSCalendarTime today;
+    OSTicksToCalendarTime(OSGetTime(), &today);
+    OSTicksToCalendarTime(nteGlobal::getNWCSendDate(), &sentDate);
+    if (sentDate.year == today.year && sentDate.yday == today.yday) {
+        size = nteGlobal::getNWCSendSize();
+    }
+    return size;
+}
+
+u8 nteWiiConnect24::getLangId() {
+    u32 language = g_GameGlobal->getLanguage();
+    if (language >= 7) language = 0;
+    u8 languageId = lbl_8059E7D8[language];
+    if (languageId == 17) languageId = 1;
+    return languageId;
+}
 
 u64 nteWiiConnect24::getMyWiiID() {
     if (!_openLibrary(1)) return 0;
