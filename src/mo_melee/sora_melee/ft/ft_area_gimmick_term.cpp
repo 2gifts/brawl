@@ -1,6 +1,11 @@
 #include <types.h>
+#include <ft/ft_area_gimmick_term.h>
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
+extern ftAreaGimmickTerm* lbl_27_data_2DBE0[16];
 
-} // extern "C"
+ftAreaGimmickTerm* ftAreaGimmickTerm::getTerm(int index) {
+    return lbl_27_data_2DBE0[index];
+}
+
+ftAreaGimmickTermNull::~ftAreaGimmickTermNull() {
+}
