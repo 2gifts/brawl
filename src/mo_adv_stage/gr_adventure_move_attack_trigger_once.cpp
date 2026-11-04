@@ -1,6 +1,22 @@
 #include <sora_adv_stage/gr_adventure_gimmick_id.h>
 #include <sora_adv_stage/gr_adventure_move_attack_trigger_once.h>
 
+grAdventureMoveAttackTriggerOnce* grAdventureMoveAttackTriggerOnce::create(int mdlIndex, const char* taskName) {
+    grAdventureMoveAttackTriggerOnce* ground = new (Heaps::StageInstance) grAdventureMoveAttackTriggerOnce(taskName);
+    if (ground != NULL) {
+        ground->setMdlIndex(mdlIndex);
+    }
+    return ground;
+}
+
+void grAdventureMoveAttackTriggerOnce::startup(gfArchive* data, u32 unk1, gfSceneRoot::LayerType layerType) {
+    grAdventureMoveAttackGround::startup(data, unk1, layerType);
+    grYakumono::disableAttack(0);
+    grYakumono::setTeamYakumono(0x11, -1);
+}
+
+grAdventureMoveAttackTriggerOnce::~grAdventureMoveAttackTriggerOnce() { }
+
 void grAdventureMoveAttackTriggerOnce::frowStandby(float deltaFrame) { }
 
 void grAdventureMoveAttackTriggerOnce::frowStart(float deltaFrame) {
