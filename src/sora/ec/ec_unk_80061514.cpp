@@ -1,9 +1,12 @@
 #include <ec/ec_mgr.h>
 #include <ef/ef_effect.h>
 #include <gf/gf_model.h>
+#include <mt/mt_matrix.h>
 #include <nw4r/g3d/g3d_scngroup.h>
 #include <types.h>
 #include <ut/ut_nw.h>
+
+void ScnMdl_SetNodeMtx(nw4r::g3d::ScnMdl* mdl, u32 nodeId, const Matrix* mtx);
 
 void ecEffectWork::render() {
     if (unk24 == 2) {
@@ -139,4 +142,141 @@ void ecEffectWork::set_parent(nw4r::g3d::ScnMdl* p1, u32 p2, bool p3) {
         }
         init_attach();
     }
+}
+
+void ecEffectWork::set_delay(int frames) {
+    if (unk24 != 0) {
+        return;
+    }
+    unk28 = -frames;
+}
+
+void ecEffectWork::set_visible(bool visible) {
+    if (visible) {
+        unk56 &= ~0x8000;
+        if (unk28 < 0) {
+            return;
+        }
+        if (unk44 != NULL && unk3C != 0) {
+            nwSMSetVisibility(unk44, true);
+        }
+        if (unk34_ != NULL) {
+            for (u32 i = 0; i < unk38; i++) {
+                if (unk34_[i] != NULL) {
+                    unk34_[i]->unkD_b6 = true;
+                }
+            }
+        }
+    } else {
+        unk56 |= 0x8000;
+        if (unk44 != NULL) {
+            nwSMSetVisibility(unk44, false);
+        }
+        if (unk34_ != NULL) {
+            for (u32 i = 0; i < unk38; i++) {
+                if (unk34_[i] != NULL) {
+                    unk34_[i]->unkD_b6 = false;
+                }
+            }
+        }
+    }
+}
+
+void ecEffectWork::set_rot(const Vec3f* rot) {
+    m_rot = *rot;
+    if (unk64 == 0 && unk50 == NULL && unk44 != NULL) {
+        Matrix mtx(true);
+        mtx.setSRT(m_scale, m_rot, m_pos);
+        ScnMdl_SetNodeMtx(unk44, 0, &mtx);
+    }
+    if (unk30->unkC->unk10[unk2C].unk4 != 0 && unk34_ != NULL) {
+        efEffect* effect = unk34_[unk38 - 1];
+        if (effect != NULL) {
+            effect->m_rot = m_rot;
+        }
+    }
+}
+
+void ecEffectWork::set_scl(const Vec3f* scale) {
+    m_scale = *scale;
+    if (unk64 == 0 && unk50 == NULL && unk44 != NULL) {
+        Matrix mtx(true);
+        mtx.setSRT(m_scale, m_rot, m_pos);
+        ScnMdl_SetNodeMtx(unk44, 0, &mtx);
+    }
+    if (unk30->unkC->unk10[unk2C].unk4 != 0 && unk34_ != NULL) {
+        efEffect* effect = unk34_[unk38 - 1];
+        if (effect != NULL) {
+            effect->m_scale = m_scale;
+        }
+    }
+}
+
+void ecEffectWork::set_mdl_texpat(u32 patIndex) {
+    if (unk48 == NULL) {
+        return;
+    }
+    if (unk48->m_anmObjTexPatRes == NULL) {
+        return;
+    }
+    unk56 |= 8;
+    unk48->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+    unk48->m_anmObjTexPatRes->SetFrame((float)patIndex);
+}
+
+void ecEffectWork::set_mdl_frame(float frame, s8 flags) {
+    if (unk48 == NULL) {
+        return;
+    }
+    if ((u8)flags == 0xFF) {
+        unk48->setFrame(frame);
+    } else {
+        if (flags & 1) {
+            if (unk48->m_anmObjChrRes != NULL) {
+                unk48->m_anmObjChrRes->SetFrame(frame);
+            }
+        }
+        if (flags & 2) {
+            if (unk48->m_anmObjVisRes != NULL) {
+                unk48->m_anmObjVisRes->SetFrame(frame);
+            }
+        }
+        if (flags & 4) {
+            if (unk48->m_anmObjTexPatRes != NULL) {
+                unk48->m_anmObjTexPatRes->SetFrame(frame);
+            }
+        }
+        if (flags & 8) {
+            if (unk48->m_anmObjTexSrtRes != NULL) {
+                unk48->m_anmObjTexSrtRes->SetFrame(frame);
+            }
+        }
+        if (flags & 0x10) {
+            if (unk48->m_anmObjMatClrRes != NULL) {
+                unk48->m_anmObjMatClrRes->SetFrame(frame);
+            }
+        }
+        if (flags & 0x20) {
+            if (unk48->m_anmObjShpRes != NULL) {
+                unk48->m_anmObjShpRes->SetFrame(frame);
+            }
+        }
+    }
+    unk3C = -1;
+}
+
+void ecEffectWork::set_mdl_calc_mtx(void (*callback)(nw4r::g3d::ScnMdl*, void*), void* arg) {
+    unk56 |= 0x80;
+    if (callback == NULL) {
+        return;
+    }
+    unk70 = callback;
+    unk74 = arg;
+}
+
+void ecEffectWork::change_mdl_tex(const char* matName, const char* texName, nw4r::g3d::ResFile* resFile, int filter) {
+    if (unk44 == NULL) {
+        return;
+    }
+    unk30->change_tex(unk44, unk2C, matName, texName, resFile, filter);
 }
