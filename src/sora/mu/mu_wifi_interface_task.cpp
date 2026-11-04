@@ -447,3 +447,31 @@ u8 muWifiInterfaceTask::getFriendStatusEntryPlayers(int index) {
     }
     return players;
 }
+
+int muWifiInterfaceTask::getNetcond() {
+    int condition = gUnk805a03d8;
+    if (condition < 3) {
+        return 0;
+    }
+    if (condition == 3) {
+        return 1;
+    }
+    if (condition == 4) {
+        return 2;
+    }
+    if (condition == 7) {
+        return 3;
+    }
+    netReport("Unknown Network::Netcond %d\n", condition);
+    return 0;
+}
+
+void muWifiInterfaceTask::setFriendFlag(int index, bool flag) {
+    u8 aid = Network::getMyAID();
+    if (aid == 0xFF) {
+        aid = 4;
+    }
+    muWifiAIDInfo* info = &m_aidInfos[aid];
+    info->unk59_b4 = (info->unk59_b4 & ~(1 << index)) | (flag << index);
+}
+

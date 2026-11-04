@@ -44,7 +44,14 @@ struct muWifiAIDInfo {
     u8 unk56_b3 : 3;
     u8 unk56_b2 : 1;
     u8 unk56_b0 : 2;
-    char unk57[0x21];
+    union {
+        char unk57[0x21];
+        struct {
+            char _pad57[2];
+            u8 unk59_b4 : 4;
+            u8 unk59_b0 : 4;
+        };
+    };
     u8 unk78_b7 : 1;
     u8 unk78_b3 : 4;
     u8 unk78_b2 : 1;
@@ -163,6 +170,9 @@ public:
     void endMatching();
     void setMyRFLID(u64 id);
     u8 getFriendStatusEntryPlayers(int index);
+    int getNetcond();
+    // HYPOTHESIS: parameter types follow the bit index and flag register use.
+    void setFriendFlag(int index, bool flag);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 
