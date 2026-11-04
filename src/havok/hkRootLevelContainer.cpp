@@ -5,18 +5,18 @@ void* hkRootLevelContainer::findObjectByType(const char* typeName, const void* p
     int offset = 0;
     const hkRootLevelContainerNamedVariant* e;
     do {
-        if (prevObject == 0 || i >= m_namedVariants.m_size) {
+        if (prevObject == 0 || i >= m_numNamedVariants) {
             break;
         }
         i++;
-        e = (const hkRootLevelContainerNamedVariant*)((char*)m_namedVariants.m_data + offset);
+        e = (const hkRootLevelContainerNamedVariant*)((char*)m_namedVariants + offset);
         offset += sizeof(hkRootLevelContainerNamedVariant);
     } while (e->m_variant.m_object != prevObject);
     offset = i * sizeof(hkRootLevelContainerNamedVariant);
-    for (; i < m_namedVariants.m_size; offset += sizeof(hkRootLevelContainerNamedVariant), i++) {
-        e = (const hkRootLevelContainerNamedVariant*)((char*)m_namedVariants.m_data + offset);
+    for (; i < m_numNamedVariants; offset += sizeof(hkRootLevelContainerNamedVariant), i++) {
+        e = (const hkRootLevelContainerNamedVariant*)((char*)m_namedVariants + offset);
         if (hkString::strCmp(typeName, e->getTypeName()) == 0) {
-            return ((hkRootLevelContainerNamedVariant*)m_namedVariants.m_data)[i].m_variant.m_object;
+            return m_namedVariants[i].m_variant.m_object;
         }
     }
     return 0;

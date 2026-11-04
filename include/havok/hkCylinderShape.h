@@ -8,7 +8,7 @@
 // base radius factor at 0x14, cylinder axis vertices at 0x20 and 0x30, perpendicular axes at 0x40 and 0x50.
 struct hkCylinderShape : hkConvexShape {
     hkReal m_cylRadius;                    // 0x10
-    hkReal m_cylBaseRadiusFactorForHeightField; // 0x14
+    hkReal m_cylBaseRadiusFactorForHeightFieldCollisions; // 0x14
     hkVector4 m_vertexA;                   // 0x20
     hkVector4 m_vertexB;                   // 0x30
     hkVector4 m_perpendicular1;            // 0x40

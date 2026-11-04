@@ -39,7 +39,7 @@ struct hkMeshShape : hkShapeCollection {
     int m_numBitsForSubpartIndex;           // 0x30
     hkArray<hkMeshShapeSubpart> m_subparts; // 0x34
     hkReal m_radius;                        // 0x40
-    int pad[3];                             // 0x44
+    int m_pad[3];                           // 0x44
 
     hkMeshShape(const hkFinishLoadedObjectFlag& flag); // finish-loading ctor: vtables and refcount only
     virtual ~hkMeshShape();

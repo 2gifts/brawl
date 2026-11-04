@@ -9,8 +9,9 @@ struct hkQuaternion;
 // Local declaration for the math class absent from the BrawlHeaders submodule.
 // Native storage is three columns of four floats. The fourth lanes are retained
 // by scalar/add operations and cleared by matrix products and setTranspose.
-// HYPOTHESIS: 16-byte type alignment follows the aligned native matrix temporaries.
-struct __attribute__((aligned(16))) hkMatrix3 {
+// 16-byte alignment: main.dol's hkClassMember::TYPE_PROPERTIES gives hkMatrix3 alignment 16. The attribute
+// goes after the body; MWCC ignores it between 'struct' and the name.
+struct hkMatrix3 {
     float elements[12];
 
     void transpose();
@@ -25,7 +26,7 @@ struct __attribute__((aligned(16))) hkMatrix3 {
     void mul(float scalar);
     // HYPOTHESIS: callers establish the basis storage, but not the source type name.
     void changeBasis(const hkRotation& basis);
-};
+} __attribute__((aligned(16)));
 
 // HYPOTHESIS: hkRotation specializes the same matrix storage without new fields.
 struct hkRotation : hkMatrix3 {

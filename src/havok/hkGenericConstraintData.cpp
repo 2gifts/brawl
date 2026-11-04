@@ -60,8 +60,8 @@ const void* hkGenericConstraintData::getVtablehkGenericConstraintData() {
 
 hkGenericConstraintData::hkGenericConstraintData(hkFinishLoadedObjectFlag flag)
     : hkConstraintData(flag), m_scheme(flag) {
-    m_bridgeAtom.init(m_bridgeAtom.m_constraintData);
-    m_bridgeAtom.init(this);
+    m_atoms.m_bridgeAtom.init(m_atoms.m_bridgeAtom.m_constraintData);
+    m_atoms.m_bridgeAtom.init(this);
 }
 
 // Releases the motors (reference counted), then the member arrays are destroyed in reverse order.
@@ -72,20 +72,20 @@ hkGenericConstraintData::~hkGenericConstraintData() {
 }
 
 void hkGenericConstraintData::getConstraintInfo(hkConstraintInfo* info) {
-    info->unk10 = &m_bridgeAtom;
-    info->unk14 = (u32)((u8*)&m_scheme - (u8*)&m_bridgeAtom);
-    info->unk00 = 0;
-    info->unk04 = 0;
-    info->unk08 = 0;
-    info->unk0C = 0;
-    info->unk00 = m_scheme.m_info[0];
-    info->unk04 = m_scheme.m_info[1];
-    info->unk08 = m_scheme.m_info[2];
-    info->unk0C = m_scheme.m_info[3];
+    ((hkConstraintInfoWithAtoms*)info)->unk10 = &m_atoms.m_bridgeAtom;
+    ((hkConstraintInfoWithAtoms*)info)->unk14 = (u32)((u8*)&m_scheme - (u8*)&m_atoms.m_bridgeAtom);
+    info->m_maxSizeOfJacobians = 0;
+    info->m_sizeOfJacobians = 0;
+    info->m_sizeOfSchemas = 0;
+    info->m_numSolverResults = 0;
+    info->m_maxSizeOfJacobians = m_scheme.m_info.m_maxSizeOfJacobians;
+    info->m_sizeOfJacobians = m_scheme.m_info.m_sizeOfJacobians;
+    info->m_sizeOfSchemas = m_scheme.m_info.m_sizeOfSchemas;
+    info->m_numSolverResults = m_scheme.m_info.m_numSolverResults;
 }
 
 void hkGenericConstraintData::getRuntimeInfo(void* unusedA, hkConstraintRuntimeInfo* out) {
-    u32 n = m_scheme.m_info[3];
+    u32 n = m_scheme.m_info.m_numSolverResults;
     out->unk04 = n;
     out->unk00 = n * 8;
 }

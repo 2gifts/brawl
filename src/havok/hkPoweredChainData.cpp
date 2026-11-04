@@ -43,21 +43,21 @@ u32 hkPoweredChainData::getType() const {
 
 // Info block: the sizes are linear in the chain length n.
 void hkPoweredChainData::getConstraintInfo(hkConstraintInfo* info) const {
-    info->unk10 = (void*)&m_bridgeAtom;
-    info->unk14 = (u32)((u8*)&m_unk18 - (u8*)&m_bridgeAtom);
-    info->unk00 = 0;
-    info->unk04 = 0;
-    info->unk0C = 0;
-    info->unk08 = 0x18;
+    ((hkConstraintInfoWithAtoms*)info)->unk10 = (void*)&m_bridgeAtom;
+    ((hkConstraintInfoWithAtoms*)info)->unk14 = (u32)((u8*)&m_unk18 - (u8*)&m_bridgeAtom);
+    info->m_maxSizeOfJacobians = 0;
+    info->m_sizeOfJacobians = 0;
+    info->m_numSolverResults = 0;
+    info->m_sizeOfSchemas = 0x18;
     s32 n = m_chainLength;
     s32 n1 = n + 1;
     s32 sizeA = n1 * 0x20 + n * 0x20;
     s32 sizeB = (n1 << 2) + n * 0x4C;
-    info->unk0C = n * 6;
-    info->unk08 = sizeB + 0x30;
+    info->m_numSolverResults = n * 6;
+    info->m_sizeOfSchemas = sizeB + 0x30;
     s32 sizeC = n * 0xF0;
     s32 sizeD = n * 0x3C0;
-    info->unk04 = sizeA + (sizeC + sizeD);
+    info->m_sizeOfJacobians = sizeA + (sizeC + sizeD);
 }
 
 void hkPoweredChainData::getRuntimeInfo(void* unusedA, hkConstraintRuntimeInfo* out) const {

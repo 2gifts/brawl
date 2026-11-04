@@ -43,16 +43,16 @@ u32 hkBallSocketChainData::getType() const {
 
 // Chain info block: six words. HYPOTHESIS: unk10 points at the chain header block (this + 0xC, 0xC bytes long).
 void hkBallSocketChainData::getConstraintInfo(hkConstraintInfo* info) const {
-    info->unk10 = (void*)&m_bridgeAtom;
-    info->unk14 = (u32)((u8*)&m_chain - (u8*)&m_bridgeAtom);
-    info->unk00 = 0;
-    info->unk04 = 0;
-    info->unk0C = 0;
-    info->unk08 = 0x18;
+    ((hkConstraintInfoWithAtoms*)info)->unk10 = (void*)&m_bridgeAtom;
+    ((hkConstraintInfoWithAtoms*)info)->unk14 = (u32)((u8*)&m_chain - (u8*)&m_bridgeAtom);
+    info->m_maxSizeOfJacobians = 0;
+    info->m_sizeOfJacobians = 0;
+    info->m_numSolverResults = 0;
+    info->m_sizeOfSchemas = 0x18;
     s32 n = m_chain.m_size;
-    info->unk0C = 3 * n;
-    info->unk08 = 4 * (n + 1) + 0x28;
-    info->unk04 = 16 * (n + 1) + 0x90 * n;
+    info->m_numSolverResults = 3 * n;
+    info->m_sizeOfSchemas = 4 * (n + 1) + 0x28;
+    info->m_sizeOfJacobians = 16 * (n + 1) + 0x90 * n;
 }
 
 void hkBallSocketChainData::getRuntimeInfo(const hkBool* hasChain, hkConstraintRuntimeInfo* out) const {

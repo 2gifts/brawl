@@ -65,8 +65,10 @@ struct hkRootLevelContainerNamedVariant {
     }
 };
 
+// Packfile root object (0x08 bytes): a simple array of named variants (main.dol's hkRootLevelContainerClass).
 struct hkRootLevelContainer {
-    hkArrayBase m_namedVariants; // 0x00
+    hkRootLevelContainerNamedVariant* m_namedVariants; // 0x00
+    int m_numNamedVariants;                            // 0x04
 
     void* findObjectByType(const char* typeName, const void* prevObject = 0) const;
 };

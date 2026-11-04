@@ -15,8 +15,8 @@
 
 hkWorldObject::hkWorldObject(hkFinishLoadedObjectFlag flag) {
     hkLinkedCollidable* collidable = &m_collidable;
-    m_multiThreadLock.m_threadId = HK_WORLD_OBJECT_NO_THREAD_ID;
-    m_multiThreadLock.m_lockCount = 0;
+    m_multithreadLock.m_threadId = HK_WORLD_OBJECT_NO_THREAD_ID;
+    m_multithreadLock.m_lockCount = 0;
     collidable->m_broadPhaseHandle.m_id = 0;
     if (flag.m_finishing != 0) {
         collidable->m_broadPhaseHandle.m_ownerOffset =
@@ -36,8 +36,8 @@ hkWorldObject::hkWorldObject(hkShape* shape) {
     m_world = 0;
     m_userData = 0;
     m_name = 0;
-    m_multiThreadLock.m_threadId = HK_WORLD_OBJECT_NO_THREAD_ID;
-    m_multiThreadLock.m_lockCount = 0;
+    m_multithreadLock.m_threadId = HK_WORLD_OBJECT_NO_THREAD_ID;
+    m_multithreadLock.m_lockCount = 0;
     collidable->m_shape = shape;
     collidable->m_motion = 0;
     collidable->m_parent = 0;

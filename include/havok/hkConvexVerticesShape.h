@@ -8,9 +8,9 @@
 
 // Four vertices in structure-of-arrays form (0x30 bytes): the x, y and z lanes of four vertices each.
 struct hkConvexVerticesShapeFourVectors {
-    hkVector4 x; // 0x00
-    hkVector4 y; // 0x10
-    hkVector4 z; // 0x20
+    hkVector4 m_x; // 0x00
+    hkVector4 m_y; // 0x10
+    hkVector4 m_z; // 0x20
 };
 
 // Convex hull given by its vertices (0x50 bytes). Layout from hkConvexVerticesShapeClass.cpp.

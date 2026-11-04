@@ -18,8 +18,8 @@ void hkLinSoftConstraintAtom::buildJacobianFromLinSoftAtom(void* a, const hkVect
     hkLinSoftAtomScratch s;
     s.m_a = b[3];
     s.m_b = table[3];
-    s.m_c = table[m_index];
-    s.m_d = m_unk04;
-    s.m_e = m_unk08;
+    s.m_c = table[m_axisIndex];
+    s.m_d = m_tau;
+    s.m_e = m_damping;
     fn_8028E8E8(&s, a, d);
 }

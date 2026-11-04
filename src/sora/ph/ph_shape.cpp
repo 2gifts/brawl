@@ -7,17 +7,12 @@
 #include <havok/hkEntity.h>
 #include <havok/hkMemory.h>
 #include <havok/hkQuaternion.h>
+#include <havok/hkRigidBody.h>
 #include <havok/hkRotation.h>
 #include <havok/hkVector4.h>
 #include <havok/hkWorld.h>
 #include <ph/ph_shape.h>
 #include <revolution/GX.h>
-
-// Local declaration (MARKED): the havok header defines the hkRigidBody flag constructor inline, which would
-// inline the base constructor into phShape. The target calls the out-of-line constructor (hkRigidBody____ct).
-struct hkRigidBody : hkEntity {
-    hkRigidBody(int flag);
-};
 
 // HYPOTHESIS: source object of getMatrixPosture; float blocks at 0xE0 and 0x120.
 struct phPostureSource {

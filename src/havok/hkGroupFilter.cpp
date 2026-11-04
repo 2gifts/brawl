@@ -37,9 +37,9 @@ const void* hkGroupFilter::getVtablehkGroupFilter() {
 
 hkGroupFilter::hkGroupFilter() {
     for (int i = 0; i < 32; i++) {
-        collisionLookupTable[i] = 0xFFFFFFFF;
+        m_collisionLookupTable[i] = 0xFFFFFFFF;
     }
-    nextFreeSystemGroup = 0;
+    m_nextFreeSystemGroup = 0;
 }
 
 hkGroupFilter::~hkGroupFilter() {}
@@ -56,7 +56,7 @@ hkBool hkGroupFilter::isCollisionEnabled(u32 infoA, u32 infoB) const {
         }
         return true;
     }
-    u32 row = collisionLookupTable[infoA & 0x1F];
+    u32 row = m_collisionLookupTable[infoA & 0x1F];
     return (row & (1u << (infoB & 0x1F))) != 0;
 }
 #pragma auto_inline reset
@@ -127,34 +127,34 @@ void hkGroupFilter::enableCollisionsUsingBitfield(u32 layersA, u32 layersB) {
     for (int i = 0; i < 8; i++) {
         u32 bit = one << layer;
         if (layersA & bit) {
-            row->collisionLookupTable[0] |= layersB;
+            row->m_collisionLookupTable[0] |= layersB;
         }
         if (layersB & bit) {
-            row->collisionLookupTable[0] |= layersA;
+            row->m_collisionLookupTable[0] |= layersA;
         }
         layer++;
         bit = one << layer;
         if (layersA & bit) {
-            row->collisionLookupTable[1] |= layersB;
+            row->m_collisionLookupTable[1] |= layersB;
         }
         if (layersB & bit) {
-            row->collisionLookupTable[1] |= layersA;
+            row->m_collisionLookupTable[1] |= layersA;
         }
         layer++;
         bit = one << layer;
         if (layersA & bit) {
-            row->collisionLookupTable[2] |= layersB;
+            row->m_collisionLookupTable[2] |= layersB;
         }
         if (layersB & bit) {
-            row->collisionLookupTable[2] |= layersA;
+            row->m_collisionLookupTable[2] |= layersA;
         }
         layer++;
         bit = one << layer;
         if (layersA & bit) {
-            row->collisionLookupTable[3] |= layersB;
+            row->m_collisionLookupTable[3] |= layersB;
         }
         if (layersB & bit) {
-            row->collisionLookupTable[3] |= layersA;
+            row->m_collisionLookupTable[3] |= layersA;
         }
         layer++;
         row = (hkGroupFilter*)((char*)row + 0x10);
@@ -162,8 +162,8 @@ void hkGroupFilter::enableCollisionsUsingBitfield(u32 layersA, u32 layersB) {
 }
 
 void hkGroupFilter::disableCollisionsBetween(u32 layerA, u32 layerB) {
-    collisionLookupTable[layerA] &= ~(1u << layerB);
-    collisionLookupTable[layerB] &= ~(1u << layerA);
+    m_collisionLookupTable[layerA] &= ~(1u << layerB);
+    m_collisionLookupTable[layerB] &= ~(1u << layerA);
 }
 
 hkBool hkGroupFilter::dummyUnused() const {
