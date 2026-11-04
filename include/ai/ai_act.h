@@ -6,6 +6,7 @@
 
 class aiInput;
 class aiStat;
+class aiWeapon;
 struct ipPadButton;
 struct AiClBlock;
 
@@ -57,7 +58,7 @@ public:
     u16 m_nextId;          // 0x7E: HYPOTHESIS: the action to run after this one (the act_* handlers store it before ending)
     u8 m_unk80;
     u8 m_unk81;
-    u16 m_unk82;
+    u16 m_reflectUse;      // 0x82: chkUseReflector's result: 1 = decided this time, 0x20/0x40 = HYPOTHESIS: the two ways to use it
     float m_unk84;
     float m_unk88;
     float m_unk8C;
@@ -94,6 +95,9 @@ public:
     void act_change(int id, void* target, int unk1, int unk2);
     void script_reload(void* script);
     void set_id(u16 id);
+    // HYPOTHESIS: the id of an action of the requested kind (the act_* handlers pass a kind and three zeros); the
+    // parameter types are guesses from the register use.
+    u16 get_c_req_id(int kind, int unk1, int unk2, int unk3);
     // HYPOTHESIS: the parameter order; the blocks come in r4/r5 and the position in f1/f2.
     void set_goal_inf(AiClBlock* goal, AiClBlock* via, float x, float y);
     void setReflectDone();
@@ -103,6 +107,9 @@ public:
     // A point to drop to: past the end of the hazardous floor the CPU stands on, or a random point on a safe floor
     // block (on the side away from where the target is heading).
     void get_safe_fall(float* x, float* y);
+    // Decides once (until m_reflectUse is cleared) whether to use a reflector against weapon, by character kind and a
+    // rank-scaled chance; returns the 0x20/0x40 bits. HYPOTHESIS: the meaning of the bits and of the kinds tested.
+    u32 chkUseReflector(aiWeapon* weapon);
     // HYPOTHESIS: the act_* handlers take the stick and buttons to write, like aiInput's md_* handlers.
     // The fall-through jump down (the name from the map): drop through the floor, then steer to the get_safe_fall point.
     void act_r_dfjump(Vec2f* stick, ipPadButton* button);
@@ -112,6 +119,9 @@ public:
     // A jump after a shot (the name from the map): from rank 55, for an airborne CPU that has fired (aiInput
     // m_unk116 bits 1-2), presses special towards the nearest floor edge. HYPOTHESIS: the meaning of the tests.
     void act_r_jump_aft_shot(Vec2f* stick, ipPadButton* button);
+    // Breaking a wall (the name from the map): face the target, or away from it when a wall blocks that side, walk
+    // into the wall, then attack and pick the next action. HYPOTHESIS: the meaning of the tests.
+    void act_a_brk_wall(Vec2f* stick, ipPadButton* button);
 };
 static_assert(sizeof(aiAct) == 0x114, "Class is wrong size!");
 

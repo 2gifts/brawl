@@ -3,6 +3,7 @@
 #include <ai/ai_input.h>
 #include <ai/ai_mgr.h>
 #include <ai/ai_stat.h>
+#include <ai/ai_weapon.h>
 #include <mt/mt_prng.h>
 #include <math.h>
 #include <so/controller/so_controller_impl.h>
@@ -27,7 +28,7 @@ aiAct::aiAct(aiInput* input, aiStat* stat) {
     m_script = m_unk64 = NULL;
     m_unk68 = m_unk6C = NULL;
     m_unk81 = 0;
-    m_unk82 = 0;
+    m_reflectUse = 0;
     m_unk84 = 0.0f;
     m_unk88 = 0.0f;
     m_unk8C = 0.0f;
@@ -137,6 +138,67 @@ void aiAct::get_safe_fall(float* x, float* y) {
         *x += floor->m_edgeR.m_x;
         *y += floor->m_edgeR.m_y;
     }
+}
+
+u32 aiAct::chkUseReflector(aiWeapon* weapon) {
+    if (m_reflectUse == 0) {
+        float rate = m_reflectRate * ((m_stat->m_flags & 1) ? 0.005f : 0.01f);
+        switch (m_stat->m_chrKind) {
+            case 12: {
+                s8 rank = m_input->m_par.m_rank;
+                if (randf() < 0.3f * rate * rank) {
+                    m_reflectUse |= 0x40;
+                }
+                break;
+            }
+            default:
+                if ((weapon->m_flags & 0x20) && weapon->m_speed > 0.05f) {
+                    s8 rank = m_input->m_par.m_rank;
+                    if (randf() < 0.98f * rate * rank) {
+                        switch (m_stat->m_chrKind) {
+                            case 23:
+                                m_reflectUse |= 0x60;
+                                break;
+                            case 10:
+                            case 26:
+                                if (m_stat->m_flags & 1) {
+                                    break;
+                                }
+                            case 0:
+                            case 6:
+                            case 13:
+                            case 19:
+                            case 44:
+                                m_reflectUse |= 0x20;
+                                break;
+                        }
+                    }
+                }
+                if (weapon->m_flags & 0x40) {
+                    s8 rank = m_input->m_par.m_rank;
+                    if (randf() < 0.98f * rate * rank) {
+                        switch (m_stat->m_chrKind) {
+                            case 10:
+                            case 26:
+                                m_reflectUse |= 0x40;
+                                break;
+                            case 18:
+                                if (!m_stat->chk_chr_stat(1, -1)) {
+                                    m_reflectUse |= 0x40;
+                                }
+                                break;
+                        }
+                    }
+                }
+                break;
+        }
+        if (m_reflectUse == 0) {
+            m_reflectDone = 180;
+            m_reflectRate *= 0.85f;
+        }
+        m_reflectUse |= 1;
+    }
+    return m_reflectUse & 0x60;
 }
 
 void aiAct::setReflectDone() {
@@ -294,6 +356,60 @@ void aiAct::act_a_meteo_aft(Vec2f* stick, ipPadButton* button) {
         m_input->change_md(1, &target, 0, 1);
         m_input->m_unk111 = 1;
         m_nextId = 1;
+    }
+}
+
+void aiAct::act_a_brk_wall(Vec2f* stick, ipPadButton* button) {
+    switch (m_step) {
+        case 0: {
+            float lr = m_stat->get_lr_tgt(&m_input->m_target);
+            AiClBlock* floor = m_stat->m_floor;
+            if (lr > 0.0f) {
+                if (!(floor->m_flags & 0x100) && !(floor->m_wallTopL < 1.0f + floor->m_edgeL.m_y) &&
+                    ((floor->m_flags & 0x200) || floor->m_wallTopR < 1.0f + floor->m_edgeR.m_y)) {
+                    lr = -lr;
+                }
+            } else {
+                if (!(floor->m_flags & 0x200) && !(floor->m_wallTopR < 1.0f + floor->m_edgeR.m_y) &&
+                    ((floor->m_flags & 0x100) || floor->m_wallTopL < 1.0f + floor->m_edgeL.m_y)) {
+                    lr = -lr;
+                }
+            }
+            m_lr = lr;
+            m_unk94 = 120;
+            m_step++;
+        }
+        case 1:
+            stick->m_x = m_lr;
+            if (m_stat->m_lr * m_lr > 0.0f && m_stat->get_range_floor(m_stat->m_lr, &m_stat->m_pos) < 5.0f) {
+                if (randf() < 0.3f) {
+                    m_step++;
+                }
+            } else if (m_stat->m_status == 0x65) {
+                m_step++;
+            }
+            break;
+        default:
+            if (m_stat->m_situation == 3) {
+                button->m_mask |= soController::getButtonMask(soController::Pad_Button_Attack);
+            } else if (m_stat->chk_stat_gr_free()) {
+                float r = randf();
+                if (r < 0.4f) {
+                    m_nextId = get_c_req_id(0x6014, 0, 0, 0);
+                } else if (r < 0.7f) {
+                    m_nextId = get_c_req_id(0x6011, 0, 0, 0);
+                } else {
+                    m_nextId = get_c_req_id(0x6015, 0, 0, 0);
+                }
+                switch (m_nextId) {
+                    case 0x603C:
+                    case 0x603D:
+                        m_nextId = 0x6035;
+                        break;
+                }
+            }
+            set_id(0);
+            break;
     }
 }
 

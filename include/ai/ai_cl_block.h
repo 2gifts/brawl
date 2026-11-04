@@ -34,7 +34,11 @@ struct AiClBlock {
     Vec2f m_edgeR;      // 0x20: right end
     float m_top;        // 0x28: highest point of the block
     float m_bottom;     // 0x2C: lowest point of the block
-    char unk30[0xD];
+    // HYPOTHESIS: the tops of walls at the left/right ends (aiAct::act_a_brk_wall compares them with the edge heights + 1;
+    // m_flags 0x100 / 0x200 skip the left / right one).
+    float m_wallTopL;   // 0x30
+    float m_wallTopR;   // 0x34
+    char unk38[5];
     s8 m_lr;            // 0x3D: HYPOTHESIS: the way (+1 right / -1 left) to leave the block towards the goal (aiInput::md_hammer)
     u8 m_teamMask;      // 0x3E: teams (bit per team) the danger flag applies to
     u8 unk3F;
