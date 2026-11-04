@@ -60,6 +60,7 @@ public:
             Heaps::HeapType nwMotionInstHeap);
     virtual void onStart(int startKind);
     virtual void change(void* work, int startKind);
+    virtual void processUpdate();
     // The hook the article mediator calls to start an article of the pool (HYPOTHESIS: the name follows the module map).
     static bool activeArticle(wnKoopaBreath* weapon, soModuleAccesser* acc);
 };

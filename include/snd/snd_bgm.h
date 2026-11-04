@@ -66,6 +66,7 @@ public:
     int prepareBGM(int category, u32 id, int bgmId);
     bool isPreparedBGM();
     void startBGM(u32 param);
+    void bgmStateChange(u32 state, int fade);
     u16 getPlayTiming();
     int setBgmId(int category, u32 id, int bgmId);
     bool getSeriesAndId(u32 playId, u32* series, u32* index);

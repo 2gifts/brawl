@@ -9,6 +9,7 @@
 #include <ft/ft_extend_param_accesser.h>
 
 class ftPokeTrainer;
+class wnPokeTrainerMBall;
 
 // The Final Smash article of the trainer (wn_poke_trainer_final.cpp). HYPOTHESIS: only the position query is known here.
 class wnPokeTrainerFinal : public StageObject {
@@ -112,6 +113,7 @@ public:
     virtual void notifyEventPokeTrainerReplace(u8 index);
 
     Fighter* getPartner();
+    static bool activeArticle(wnPokeTrainerMBall* weapon, soModuleAccesser* acc);
     void setChange(int changeKind);
     void sendPartnerPosEvents();
     void reqAdvFollowEffect(Vec2f* pos);

@@ -5,6 +5,7 @@
 #include <mu/mu_notice_wnd.h>
 #include <mu/mu_object.h>
 #include <types.h>
+#include <nw4r/g3d/g3d_scngroup.h>
 
 extern const struct {
     void (*unk0)(muNoticeWndTask*);
@@ -62,4 +63,12 @@ void muNoticeWndTask::processDefault() {
     if (lbl_80407C08[m_step].unk4 != NULL) {
         m_step = lbl_80407C08[m_step].unk4(this);
     }
+}
+
+int muNoticeWndTask::mainStepLeaveMain(muNoticeWndTask* task) {
+    if (task->unk40->isNodeAnimFinished()) {
+        task->unk44->Remove(task->unk40->m_sceneModel);
+        return 3;
+    }
+    return task->m_step;
 }

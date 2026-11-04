@@ -12,6 +12,11 @@
 #include <revolution/OS/OSTime.h>
 #include <snd/snd_system.h>
 #include <types.h>
+#include <gf/gf_pad_system.h>
+#include <gf/gf_homemenu.h>
+#include <gf/gf_memory_pool.h>
+
+extern const u8 lbl_80408CD0[0x20];
 
 // HYPOTHESIS: still fn_ in other units; names from the map (mu_collection.o, nt_etc_file.o).
 extern "C" muCollection* fn_800C35CC(void* mem, int kind, nw4r::g3d::ResFile resFile, nw4r::g3d::ResFile resFile2,
@@ -615,6 +620,111 @@ void IfSnapSaveTask::photoStepWaitMediaInit(IfSnapSaveTask* task) {
 s32 IfSnapSaveTask::photoStepWaitMediaMain(IfSnapSaveTask* task) {
     if (task->m_collection->m_busy == 0) {
         return 0;
+    }
+    return task->m_step;
+}
+
+s32 IfSnapSaveTask::photoStepDoneMain(IfSnapSaveTask* task) {
+    if (++task->m_stepWork.m_count < 15) {
+        return task->m_step;
+    }
+    gfPadStatus pad;
+    pad = g_gfPadSystem->getSysPadStatus(0xF0);
+    if ((pad.m_buttonsPressedThisFrame.bits & GF_PAD_BUTTON_BIT_A) || task->m_stepWork.m_count >= 60) {
+        g_gfHomeMenu->setBan(0, 5);
+        g_gfShutdownManager.unkD = true;
+        task->m_msg->printf(3, "");
+        task->m_result = 1;
+        return 11;
+    }
+    return task->m_step;
+}
+
+s32 IfSnapSaveTask::photoStepErrorMain(IfSnapSaveTask* task) {
+    if (++task->m_stepWork.m_count < 15) {
+        return task->m_step;
+    }
+    gfPadStatus pad;
+    pad = g_gfPadSystem->getSysPadStatus(0xF0);
+    if ((pad.m_buttonsPressedThisFrame.bits & GF_PAD_BUTTON_BIT_A) || task->m_stepWork.m_count >= 420) {
+        g_sndSystem->playSE((SndID)1, -1, 0, 0, -1);
+        u32 messageIndex = 5;
+        if (task->unk68 == 0) {
+            messageIndex = 4;
+        }
+        task->m_msg->printf(messageIndex, "");
+        return 5;
+    }
+    return task->m_step;
+}
+
+void IfSnapSaveTask::initMsg(void* msgData, Heaps::HeapType heap, Heaps::HeapType heap2) {
+    const u8* messageData;
+    int messageIndex;
+    u32 fontSetting;
+    u32 fontType;
+    if (g_HeapInfos[0x2F].m_name != NULL || g_HeapInfos[0x31].m_name != NULL) {
+        fontSetting = 1;
+        fontType = 0;
+    } else {
+        fontSetting = 8;
+        fontType = 4;
+    }
+    m_msg = MuMsg::create(fontSetting, heap, heap2);
+    m_msg->allocMsgBuf(0x200, 10);
+    m_msg->setMsgData(msgData);
+    for (messageIndex = 0, messageData = lbl_80408CD0; messageIndex < 9; messageIndex++, messageData += 3) {
+        m_msg->attachScnMdlSimple(messageIndex, m_objects[messageData[0]]->m_sceneModel, messageData[1], 0.0625f);
+        m_msg->getMessage()->setBufField34(messageIndex, 7);
+        switch (messageData[2]) {
+        case 1:
+            m_msg->setFontColor(messageIndex, 255, 255, 255, 255);
+            m_msg->setEdgeEnable(messageIndex, true);
+            m_msg->setEdge(messageIndex, 0, 0, 0, 3.0f);
+            break;
+        case 2:
+            m_msg->setFontColor(messageIndex, 128, 128, 128, 255);
+            break;
+        }
+        m_msg->setFontType(messageIndex, fontType);
+    }
+    m_msg->getWScale(4, 48.0f);
+    m_msg->getWScale(5, 48.0f);
+    m_msg->getWScale(3, 48.0f);
+    m_msg->printIndex(6, 0x47);
+    m_msg->printIndex(7, 0x48);
+    m_msg->printIndex(8, 0x49);
+}
+
+s32 IfSnapSaveTask::photoStepFadeMain(IfSnapSaveTask* task) {
+    MuObject* object = task->m_objects[0];
+    gfPadStatus pad;
+    pad = g_gfPadSystem->getSysPadStatus(0xF0);
+    if (object->m_modelAnim->m_anmObjChrRes->GetFrame() >= 10.0f || pad.m_buttonsPressedThisFrame.bits != 0) {
+        object->setFrameNode(10.0f);
+        object->setFrameMatCol(10.0f);
+        object->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+        object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);
+        if (task->m_kind != 2) {
+            g_sndSystem->playSE((SndID)1, -1, 0, 0, -1);
+        }
+        bool scanned;
+        for (int mediaIndex = 0; mediaIndex < 2; mediaIndex++) {
+            if (task->m_media[mediaIndex].m_status == 0) {
+                scanned = false;
+                goto scanComplete;
+            }
+        }
+        scanned = true;
+    scanComplete:
+        if (scanned) {
+            if (task->unkD8) {
+                task->m_scnGroup->Insert(task->m_scnGroup->sceneItemsCount, task->m_expand);
+                return 7;
+            }
+            return 5;
+        }
+        return 4;
     }
     return task->m_step;
 }

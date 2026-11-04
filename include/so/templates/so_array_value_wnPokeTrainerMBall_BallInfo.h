@@ -3,10 +3,14 @@
 #include <StaticAssert.h>
 #include <types.h>
 
+class Vec3f;
+
 // Local copy layout used only by abstract array instantiations; SDK unchanged.
 // HYPOTHESIS: field grouping follows copies; field meanings remain unknown.
 class wnPokeTrainerMBall {
 public:
+    // HYPOTHESIS: activation parameter types follow the trainer's article callback.
+    void activate(int founderTaskId, int parentTaskId, u32 mdlResId, int kind, bool changeRequested, Vec3f* pos);
 class BallInfo {
 public:
     struct { u32 unk0, unk4; } unk0;

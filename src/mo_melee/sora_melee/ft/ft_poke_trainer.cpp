@@ -16,6 +16,7 @@
 #include <so/so_value_accesser.h>
 #include <st/stage.h>
 #include <types.h>
+#include <so/templates/so_array_value_wnPokeTrainerMBall_BallInfo.h>
 
 // HYPOTHESIS: only the module slots called here are known.
 class soDebugModuleTrainerView {
@@ -944,4 +945,29 @@ void ftPokeTrainerExtendParamAccesser::setup(const u8* extData) {
         m_ints[variation][2] = &ints[10];
         m_ints[variation][3] = &ints[11];
     }
+}
+
+bool ftPokeTrainer::activeArticle(wnPokeTrainerMBall* weapon, soModuleAccesser* acc) {
+    int kind;
+    int status = acc->getStatusModule().getStatusKind();
+    if (status == 0x117) {
+        kind = 0;
+    } else if (status == 0x123 || status == 0x124) {
+        kind = 1;
+    } else if (status == 0x125 || status == 0x126) {
+        kind = 2;
+    } else if (status == 0x116) {
+        kind = 3;
+    }
+    Vec3f pos(acc->getWorkManageModule().getFloat(0x11000013),
+              acc->getWorkManageModule().getFloat(0x11000014), 0.0f);
+    int parentTaskId = -1;
+    if (acc->getLinkModule().isLink(6) == true) {
+        parentTaskId = acc->getLinkModule().getParent(6)->getTaskId();
+    }
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().getTaskId();
+    weapon->activate(founderTaskId, parentTaskId, resources.getResourceIdAccesser()->getMdlResId(),
+                     kind, acc->getWorkManageModule().isFlag(Work_Flag_ChangeRequested), &pos);
+    return true;
 }

@@ -19,6 +19,72 @@
 #include <so/so_slow.h>
 #include <gf/gf_task_scheduler.h>
 #include <it/item.h>
+#include <so/so_external_value_accesser.h>
+#include <ft/ft_external_value_accesser.h>
+
+void ftIke::notifyEventCollisionShield(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser) {
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x115 && groupIndex == 1) {
+        if (!m_moduleAccesser->getWorkManageModule().isFlag(0x22000013)) {
+            m_moduleAccesser->getWorkManageModule().onFlag(0x22000013);
+            m_moduleAccesser->getWorkManageModule().setFloat(power, 0x21000004);
+            soCollisionAttackData* attackData = attackModule->getData(collisionLog->m_collsionIndex, collisionLog->m_isAbsolute);
+            float lr = m_moduleAccesser->getDamageModule().getDamageLr(posX, posY, attackModule, attackData, collisionLog->m_collsionIndex, collisionLog->m_isAbsolute);
+            m_moduleAccesser->getWorkManageModule().setFloat(lr, 0x21000005);
+        }
+        StageObject& attacker = dynamic_cast<StageObject&>(*gfTaskScheduler::getInstance()->getTask(collisionLog->m_taskId));
+        soStopModule* stop = soExternalValueAccesser::getStopModule(&attacker);
+        stop->setHitStopFrameFix(soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc7, 0));
+    }
+    Fighter::notifyEventCollisionShield(attackModule, power, collisionLog, groupIndex, posX, posY, moduleAccesser);
+}
+
+void ftIke::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    soStatusModule& status = moduleAccesser->getStatusModule();
+    switch (eventInfo->m_eventKind) {
+    case 0x27:
+        if (status.getStatusKind() == 0x116 || status.getStatusKind() == 0x122 ||
+            status.getStatusKind() == 0x123 || status.getStatusKind() == 0x124) {
+            soLinkEventIkeFinal* message = static_cast<soLinkEventIkeFinal*>(eventInfo);
+            message->unk1C = moduleAccesser->getWorkManageModule().getFloat(0x2100000c);
+            message->unk20 = moduleAccesser->getWorkManageModule().getFloat(0x2100000d);
+            message->unk24 = moduleAccesser->getWorkManageModule().getFloat(0x2100000e);
+            message->unk18 = soValueAccesser::getConstantInt(moduleAccesser, 0x5dc9, 0);
+            message->unk14 = moduleAccesser->getWorkManageModule().getFloat(0x21000010);
+        }
+        break;
+    case 0x28:
+        break;
+    case 0x29:
+        if (status.getStatusKind() == 0x125) {
+            status.changeStatusRequest(0x126, m_moduleAccesser);
+        }
+        break;
+    }
+    Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+
+void ftIke::notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    if (moduleAccesser->getStatusModule().getStatusKind() == 0x116 ||
+        moduleAccesser->getStatusModule().getStatusKind() == 0x124 ||
+        moduleAccesser->getStatusModule().getStatusKind() == 0x126) {
+        gfTask* task = gfTaskScheduler::getInstance()->getTask(collisionLog->m_taskId);
+        if (task->m_taskCategory == gfTask::Category_Fighter && collisionLog->m_kind == 1) {
+            Fighter& target = dynamic_cast<Fighter&>(*task);
+            if (ftExternalValueAccesser::getsoCollisionHitModule(&target)->getTotalStatus(0) == 0) {
+                moduleAccesser->getWorkManageModule().onFlag(0x22000011);
+                moduleAccesser->getWorkManageModule().onFlag(0x22000014);
+                if (moduleAccesser->getWorkManageModule().getInt(0x20000001) == 0) {
+                    Vec3f position = getFinalTargetPosBase(moduleAccesser);
+                    setFinalTargetPosBaseWork(moduleAccesser, position);
+                }
+                if (moduleAccesser->getWorkManageModule().getInt(0x20000001) < 6) {
+                    moduleAccesser->getWorkManageModule().setInt(collisionLog->m_taskId, 0x20000002 + moduleAccesser->getWorkManageModule().getInt(0x20000001));
+                    moduleAccesser->getWorkManageModule().addInt(1, 0x20000001);
+                }
+            }
+        }
+    }
+}
 
 // Status teardown destroys its owned change-request queue before observers.
 #pragma dont_inline on

@@ -27,6 +27,94 @@
 #define FT_NO_REFLECTOR_INSTANTIATION
 #define FT_BC ftGameWatchBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
+#include <wn/gamewatch/wn_game_watch_octopus_link_event_collision.h>
+#include <so/so_slow.h>
+
+void ftGameWatch::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObject, int unk4) {
+    if (stageObject->soGetKind() == 2 && stageObject->soGetSubKind() == 0x7a) {
+        switch (eventInfo->m_eventKind) {
+        case 0x838:
+            moduleAccesser->getWorkManageModule().offFlag(0x12000040);
+            return;
+        case 0x839: {
+            wnGameWatchOctopusLinkEventCollision* collision = static_cast<wnGameWatchOctopusLinkEventCollision*>(eventInfo);
+            m_moduleAccesser->getStopModule().setHitStop((int)collision->m_power, collision->unkC);
+            moduleAccesser->getControllerModule().setRumble(13, 0, false, -1);
+            return;
+        }
+        case 0x83a:
+            moduleAccesser->getStatusModule().changeStatusRequest(0x138, moduleAccesser);
+            return;
+        }
+    }
+    switch (eventInfo->m_eventKind) {
+    case 6:
+        moduleAccesser->getWorkManageModule().offFlag(0x1200003e);
+        break;
+    }
+    Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObject, unk4);
+}
+
+void ftGameWatch::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+    if (statusKind != prevStatusKind) {
+        soGenerateArticleManageModule& articles = moduleAccesser->getGenerateArticleManageModule();
+        switch (prevStatusKind) {
+        case 0x24:
+        case 0x25:
+            if (statusKind != 0x24 && statusKind != 0x25) articles.removeExist(6, 0);
+            break;
+        case 0x29:
+            articles.removeExist(6, 0);
+            break;
+        case 0x2a:
+        case 0x2b:
+        case 0x2c:
+            if (statusKind != 0x2a && statusKind != 0x2b && statusKind != 0x2c) articles.removeExist(6, 0);
+            break;
+        case 0x33:
+        case 0x18:
+            if (statusKind != 0x33 && statusKind != 0x18) articles.removeExist(6, 0);
+            break;
+        case 0x116:
+            if (statusKind < 0x11d || statusKind > 0x138) {
+                moduleAccesser->getVisibilityModule().setWhole(1);
+                articles.removeExist(5, 0);
+                endFinal(true, true, false);
+            }
+            break;
+        }
+        if (prevStatusKind >= 0x11d && prevStatusKind <= 0x138 && (statusKind < 0x11d || statusKind > 0x138)) {
+            moduleAccesser->getWorkManageModule().offFlag(0x12000041);
+            moduleAccesser->getVisibilityModule().setWhole(1);
+            articles.removeExist(5, 0);
+            endFinal(true, true, false);
+        }
+    }
+}
+
+void ftGameWatch::processHit() {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (soSlow::getInstance()->isEstimate() == true) {
+        int statusKind = moduleAccesser->getStatusModule().getStatusKind();
+        if (statusKind >= 0x11d && statusKind < 0x138) {
+            Vec3f position = moduleAccesser->getModelModule().getNodeGlobalPosition(14, false);
+            int waterArea;
+            if (moduleAccesser->getAreaModule().getEnviromentElementChecker()->testWater((Vec2f*)&position, &waterArea) == true &&
+                !moduleAccesser->getWorkManageModule().isFlag(0x12000041)) {
+                Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(0xffff));
+                if (moduleAccesser->getSituationModule().getKind() == 0) {
+                    moduleAccesser->getStatusModule().changeStatusRequest(0x12f, moduleAccesser);
+                    moduleAccesser->getWorkManageModule().onFlag(0x12000041);
+                } else if (speed.m_y < 0.0f) {
+                    moduleAccesser->getStatusModule().changeStatusRequest(0x12d, moduleAccesser);
+                    moduleAccesser->getWorkManageModule().onFlag(0x12000041);
+                }
+            }
+        }
+    }
+    Fighter::processHit();
+}
 
 // Status teardown destroys its owned change-request queue before observers.
 #pragma dont_inline on

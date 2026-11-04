@@ -23,6 +23,33 @@ void ftKoopa::change(void* work, int startKind) {
     Fighter::changeSucceedCore(work, 0x122);
 }
 
+#include <so/so_slow.h>
+
+template <class T> T (CLAMP)(T value, T minimum, T maximum);
+
+void ftKoopa::processUpdate() {
+    Fighter::processUpdate();
+    if (soSlow::getInstance()->isEstimate() == true && !m_moduleAccesser->getStopModule().isStop()) {
+        float first = m_moduleAccesser->getWorkManageModule().getFloat(0x11000014);
+        float second = m_moduleAccesser->getWorkManageModule().getFloat(0x11000013);
+        if (m_moduleAccesser->getStatusModule().getStatusKind() != 0x112) {
+            first += soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfaa, 0);
+            second += soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfab, 0);
+        } else if (m_moduleAccesser->getWorkManageModule().getInt(0x20000002) == 1) {
+            first -= soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfac, 0);
+            second -= soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfad, 0);
+        }
+        float firstMinimum = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfa7, 0);
+        float firstMaximum = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfa6, 0);
+        first = CLAMP<float>(first, firstMinimum, firstMaximum);
+        m_moduleAccesser->getWorkManageModule().setFloat(first, 0x11000014);
+        float secondMinimum = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfa9, 0);
+        float secondMaximum = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfa8, 0);
+        second = CLAMP<float>(second, secondMinimum, secondMaximum);
+        m_moduleAccesser->getWorkManageModule().setFloat(second, 0x11000013);
+    }
+}
+
 // Status teardown destroys its owned change-request queue before observers.
 #pragma dont_inline on
 #ifndef FT_REL_LINK_EXTERN // with FT_REL_LINK_EXTERN the queue destructor is the sora_melee function (ft_dol_instances.h)

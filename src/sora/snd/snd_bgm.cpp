@@ -228,3 +228,79 @@ u32 sndBgmRateSystem::getSeriesId(u32 key) {
     }
     return i;
 }
+
+void sndBgmRateSystem::bgmStateChange(u32 state, int fade) {
+    switch (m_bgmId) {
+        case 0x2751:
+            if (state == 2 || state == 3) {
+                g_sndSystem->stopBGM(fade);
+                m_bgmId = 0x2756;
+                m_frame = 0;
+                unk18C = true;
+                unk17C = 120;
+            }
+            break;
+        case 0x2756:
+            if (state == 0 || state == 1) {
+                g_sndSystem->stopBGM(fade);
+                m_bgmId = 0x2751;
+                m_frame = 0;
+                unk18C = true;
+                unk17C = 120;
+            }
+            break;
+        case 0x27A1: {
+            g_sndSystem->stopBGM(fade);
+            int bgmId;
+            switch (state) {
+                case 0: bgmId = 0x27A9; break;
+                case 1: bgmId = 0x27AA; break;
+                case 2: bgmId = 0x27AB; break;
+                case 3: bgmId = 0x27AC; break;
+                case 4: bgmId = 0x27AD; break;
+                case 5: bgmId = 0x27AE; break;
+                case 6: bgmId = 0x27AF; break;
+                case 7: bgmId = 0x27B0; break;
+                case 8: bgmId = 0x27B1; break;
+                case 9: bgmId = 0x27B2; break;
+                default: bgmId = 0x27A1; break;
+            }
+            m_bgmId = bgmId;
+            g_sndSystem->playBGM(bgmId, fade, true);
+            break;
+        }
+        case 0x27A9:
+        case 0x27AA:
+        case 0x27AB:
+        case 0x27AC:
+        case 0x27AD:
+        case 0x27AE:
+        case 0x27AF:
+        case 0x27B0:
+        case 0x27B1:
+        case 0x27B2:
+            g_sndSystem->stopBGM(fade);
+            if (state == 10) {
+                m_bgmId = 0x27A1;
+                g_sndSystem->playBGM(0x27A1, fade, true);
+            } else {
+                int bgmId;
+                switch (state) {
+                case 0: bgmId = 0x27A9; break;
+                case 1: bgmId = 0x27AA; break;
+                case 2: bgmId = 0x27AB; break;
+                case 3: bgmId = 0x27AC; break;
+                case 4: bgmId = 0x27AD; break;
+                case 5: bgmId = 0x27AE; break;
+                case 6: bgmId = 0x27AF; break;
+                case 7: bgmId = 0x27B0; break;
+                case 8: bgmId = 0x27B1; break;
+                case 9: bgmId = 0x27B2; break;
+                    default: bgmId = 0x27A1; break;
+                }
+                m_bgmId = bgmId;
+                g_sndSystem->playBGM(bgmId, fade, true);
+            }
+            break;
+    }
+}

@@ -39,6 +39,8 @@ public:
     void printText(u32 index, const char* text, int length, int kind);
     void setDoneButtonLabel(void* msgData, u32 index);
     static int mainStepAppearMain(muNoticeWndTask* task);
+    static void mainStepLeaveInit(muNoticeWndTask* task);
+    static int mainStepLeaveMain(muNoticeWndTask* task);
 };
 
 // muNoticeWndTask::create(kind, text file, text number, resource file, scene group, unk, default button, heap, ...)
