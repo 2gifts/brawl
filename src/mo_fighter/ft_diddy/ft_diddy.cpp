@@ -21,6 +21,7 @@
 
 #define FT_BC ftDiddyBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
+#include <so/so_slow.h>
 
 // HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt); the repeated ones are the null placeholders of the
 // unused status ranges.
@@ -604,3 +605,35 @@ void* fn_115_46CC(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 void* fn_115_470C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_115_474C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+
+void ftDiddy::processFixPosition() {
+    Fighter::processFixPosition();
+    if (m_moduleAccesser->getSituationModule().getKind() != 2 &&
+        m_moduleAccesser->getSituationModule().getKind() != 5) {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003e);
+        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003f);
+    }
+}
+
+void ftDiddy::onStart(int entryId) {
+    m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+    m_moduleAccesser->getWorkManageModule().setInt(0, 0x10000040);
+    m_moduleAccesser->getWorkManageModule().offFlag(0x1200003e);
+    m_moduleAccesser->getWorkManageModule().offFlag(0x1200003f);
+    m_moduleAccesser->getWorkManageModule().setInt(0, 0x20000002);
+    Fighter::onStart(entryId);
+}
+
+void ftDiddy::processUpdate() {
+    if (soSlow::getInstance()->isEstimate() == true &&
+        m_moduleAccesser->getStopModule().isStop() == 0 &&
+        m_moduleAccesser->getWorkManageModule().isFlag(0x1200003d)) {
+        m_moduleAccesser->getWorkManageModule().addInt(1, 0x10000040);
+        if (m_moduleAccesser->getWorkManageModule().getInt(0x10000040) >=
+            soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc1, 0)) {
+            m_moduleAccesser->getWorkManageModule().offFlag(0x1200003d);
+            m_moduleAccesser->getWorkManageModule().setInt(0, 0x10000040);
+        }
+    }
+    Fighter::processUpdate();
+}
