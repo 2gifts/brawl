@@ -1,10 +1,42 @@
+#include <gm/gm_global.h>
 #include <if/if_adv_mngr.h>
 #include <if/if_player.h>
 #include <st/operator/st_operator_info_adventure.h>
 #include <types.h>
 
 extern "C" {
+extern u32 lbl_27_data_53998[2];
+extern const char lbl_27_data_539A0[0x30];
 void fn_800E5174(IfPlayer* player, int mode);
+}
+
+stOperatorInfoAdventure::stOperatorInfoAdventure() : stOperatorInfo(lbl_27_data_539A0) {
+    m_isEnableOperation = false;
+    m_isStopRequest = false;
+    m_11d = false;
+    m_11e = false;
+    m_11f = false;
+    m_128 = lbl_27_data_53998[0];
+    m_12c = 0;
+    m_124 = 0;
+}
+
+void stOperatorInfoAdventure::startOperator() {
+    m_isEnableOperation = true;
+    m_128 = lbl_27_data_53998[0];
+    m_12c = 0;
+    gmAdvData::PadInfo defaultPadInfo;
+    gmAdvData::PadInfo padInfo;
+    gmAdvData::PadInfo currentPadInfo;
+    if (g_GameGlobal->m_advData) {
+        padInfo = g_GameGlobal->m_advData->m_padInfo[0];
+    } else {
+        defaultPadInfo.m_flag.m_isSet = false;
+        defaultPadInfo.m_padNo = -1;
+        padInfo = defaultPadInfo;
+    }
+    currentPadInfo = padInfo;
+    m_124 = currentPadInfo.m_padNo;
 }
 
 // HYPOTHESIS: two (value, flag) pairs filled by the static initializer (same shape as other sora_melee units).
