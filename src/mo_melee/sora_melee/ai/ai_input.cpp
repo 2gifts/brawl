@@ -1254,3 +1254,79 @@ int aiInput::attention_check(Vec2f* stick, ipPadButton* button) {
     }
     return 0;
 }
+
+// Half of a character's width plus height, the reach snake_c4_check adds to the C4's radius. HYPOTHESIS: name.
+static inline float aiHalfSize(aiChrIdx* idx) {
+    float height = aiParam::get_height(idx);
+    float width = aiParam::get_width(idx);
+    return 0.5f * (width + height);
+}
+
+// Snake's C4 (weapon kind 0x18): in modes 1, 2, 5, 6 and 11, while the CPU can act over ground and its own C4 is
+// planted at least 32 units beyond its reach, it detonates the C4 (stick down + special) when an opponent (another
+// m_unkCC) comes within 5 units of it, at random by rank, then waits (mode 0) and returns 1. m_unk70 is the delay
+// before the next check: 30-60 frames plus up to 50 more at a low rank after a detonation, 10-40 plus the same while
+// idle. HYPOTHESIS: names; chk_chr_stat(1, -1) is taken to mean "is Snake"; the meaning of m_unkCC.
+// BYTES: defined at the end of the file for the same literal-pool reason as auto_passfall.
+int aiInput::snake_c4_check(Vec2f* stick, ipPadButton* button) {
+    Vec2f diff;
+    int i;
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    if (stat->chk_chr_stat(1, -1)) {
+        switch (m_md) {
+        case 1:
+        case 2:
+        case 5:
+        case 6:
+        case 11:
+            if ((stat->chk_stat_gr_free() || stat->chk_stat_air_free()) && stat->chk_over_ground()) {
+                aiWeaponMgr* weaponMgr = g_aiMgr->m_weaponMgr;
+                if (weaponMgr->search1(aiChrIdx::GetPlayerNo(&m_chrIdx), 0x18) > 0) {
+                    aiWeapon* c4 = weaponMgr->enum_searched();
+                    float size = aiHalfSize(&m_chrIdx);
+                    diff.m_x = c4->m_pos.m_x - stat->m_center.m_x;
+                    diff.m_y = c4->m_pos.m_y - stat->m_center.m_y;
+                    float range = 32.0f + (c4->m_radius + size);
+                    if (diff.m_x * diff.m_x + diff.m_y * diff.m_y >= range * range) {
+                        if (m_unk70 > 0) {
+                            m_unk70--;
+                            return 0;
+                        }
+                        for (i = 0; i < aiMgr::NumPlayers; i++) {
+                            aiChrIdx idx;
+                            idx.m_idx = i;
+                            aiStat* chr = aiMgr::get_aiStat(&idx);
+                            if (i == m_chrIdx.m_idx || (chr->m_flags & 0x8000) || chr->m_unkCC == stat->m_unkCC) {
+                                continue;
+                            }
+                            float size = aiHalfSize(&idx);
+                            diff.m_x = c4->m_pos.m_x - chr->m_center.m_x;
+                            diff.m_y = c4->m_pos.m_y - chr->m_center.m_y;
+                            float range = 5.0f + (c4->m_radius + size);
+                            if (diff.m_x * diff.m_x + diff.m_y * diff.m_y < range * range) {
+                                s8 rank = m_par.m_rank;
+                                if (100.0f * randf() <= rank) {
+                                    stick->m_y = -1.0f;
+                                    button->m_mask |= soController::getButtonMask(soController::Pad_Button_Special);
+                                    rank = m_par.m_rank;
+                                    m_unk70 = 30.0f + 30.0f * randf() + 0.5f * (100 - rank);
+                                    aiChrIdx none;
+                                    none.m_idx = -1;
+                                    change_md(0, &none, 0, 0);
+                                    return 1;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            break;
+        }
+    }
+    if (m_unk70 <= 0) {
+        s8 rank = m_par.m_rank;
+        m_unk70 = 10.0f + 30.0f * randf() + 0.5f * (100 - rank);
+    }
+    return 0;
+}
