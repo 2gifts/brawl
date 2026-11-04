@@ -141,4 +141,5 @@ public:
     int md_glide(Vec2f* stick, ipPadButton* button);
     int md_relax(Vec2f* stick, ipPadButton* button);
     int md_slide(Vec2f* stick, ipPadButton* button);
+    int md_final(Vec2f* stick, ipPadButton* button);
 };

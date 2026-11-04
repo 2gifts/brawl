@@ -2258,3 +2258,155 @@ void aiInput::target_check() {
         m_target.m_idx = best;
     }
 }
+
+// The Final Smash mode: once the CPU can act (on the ground or in the air) it presses special. Step 10 first turns
+// towards the side with more opponents (on a tie, the half of the stage it stands on) and, at rank > 40 with more than
+// 20 units of floor behind it, may leave for mode 2 instead; steps 11-12 may jump back first while the target is not
+// below it. From step 20 on, while flag 0x800 stays set, it runs action 0x1130 at a fresh target. Without flags 0xC00
+// it falls back to mode 1.
+// HYPOTHESIS: the meaning of the flags (Final Smash ready / running) and of the steps comes from this function alone.
+// BYTES: defined at the end of the file for the same literal-pool reason as auto_passfall.
+int aiInput::md_final(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    s8 rank;
+    if (!(stat->m_flags & 0xC00)) {
+        aiChrIdx none;
+        none.m_idx = -1;
+        change_md(1, &none, 0, 0);
+        return 1;
+    }
+    if (m_step < 20 && (stat->m_flags & 0x800)) {
+        m_step = 20;
+    }
+    // BYTES: the steps are tested as three groups (0-9, 10-19, 20 and up), as the original's compare tree shows.
+    if (m_step < 10) {
+        switch (m_step) {
+            case 0:
+                if (stat->chk_stat_gr_free() || stat->chk_stat_air_free()) {
+                    switch (stat->m_chrKind) {
+                        case 0x12:
+                            m_unk70 = 0;
+                            break;
+                    }
+                    button->m_mask = soController::getButtonMask(soController::Pad_Button_Special);
+                    m_step = 20;
+                    m_stepFrame = 0;
+                    return 1;
+                }
+                break;
+        }
+    } else if (m_step < 20) {
+        switch (m_step) {
+            case 10:
+                if (!(stat->m_flags & 1)) {
+                    int left = 0;
+                    int right = 0;
+                    for (int i = 0; i < aiMgr::NumPlayers; i++) {
+                        aiChrIdx idx;
+                        idx.m_idx = i;
+                        aiStat* other = aiMgr::get_aiStat(&idx);
+                        if (i == m_chrIdx.m_idx || (other->m_flags & 0x8000) || other->m_unkCC == stat->m_unkCC) {
+                            continue;
+                        }
+                        bool isRight = other->m_pos.m_x > stat->m_pos.m_x;
+                        if (isRight) {
+                            right++;
+                        }
+                        if (!isRight) {
+                            left++;
+                        }
+                    }
+                    float dir;
+                    if (right > left) {
+                        dir = 1.0f;
+                    } else if (right < left) {
+                        dir = -1.0f;
+                    } else if (stat->m_pos.m_x >= 0.0f) {
+                        dir = 1.0f;
+                    } else {
+                        dir = -1.0f;
+                    }
+                    if (stat->m_lr * dir > 0.0f) {
+                        if (m_par.m_rank > 40 && stat->get_range_floor(-dir, &stat->m_pos) > 20.0f) {
+                            rank = m_par.m_rank;
+                            if (randf() < 0.009f * rank) {
+                                int act = stat->m_lr * dir > 0.0f ? 0x72 : 0x71;
+                                aiChrIdx none;
+                                none.m_idx = -1;
+                                change_md(2, &none, act, 0);
+                                m_finalWait = 2.0f + 8.0f * randf();
+                                return 1;
+                            }
+                        }
+                        m_stepFrame = 0;
+                        m_step++;
+                    } else {
+                        stick->m_x = 0.6f * dir;
+                    }
+                } else {
+                    aiChrIdx none;
+                    none.m_idx = -1;
+                    change_md(1, &none, 0, 0);
+                    return 1;
+                }
+                break;
+            case 11:
+                if (stat->chk_stat_gr_free()) {
+                    if (aiMgr::get_aiStat(&m_target)->m_center.m_y >= stat->m_pos.m_y) {
+                        rank = m_par.m_rank;
+                        if (randf() < 0.008f * rank) {
+                            stick->m_x = -stat->m_lr;
+                            stick->m_y = 1.0f;
+                            m_stepFrame = 0;
+                            m_step++;
+                            break;
+                        }
+                    }
+                    button->m_mask = soController::getButtonMask(soController::Pad_Button_Special);
+                    m_step = 20;
+                    m_stepFrame = 0;
+                } else if (m_stepFrame > 30) {
+                    aiChrIdx none;
+                    none.m_idx = -1;
+                    change_md(1, &none, 0, 0);
+                    return 1;
+                }
+                break;
+            case 12:
+                stick->m_x = -stat->m_lr;
+                stick->m_y = 1.0f;
+                if (stat->m_flags & 1) {
+                    if (stat->m_speed.m_y < 0.0f) {
+                        m_step++;
+                    }
+                } else if (m_stepFrame > 30) {
+                    aiChrIdx none;
+                    none.m_idx = -1;
+                    change_md(1, &none, 0, 0);
+                    return 1;
+                }
+                break;
+            case 13:
+                button->m_mask = soController::getButtonMask(soController::Pad_Button_Special);
+                m_step = 20;
+                m_stepFrame = 0;
+                break;
+    
+        }
+    } else {
+        if (!(stat->m_flags & 0x800)) {
+            aiChrIdx none;
+            none.m_idx = -1;
+            change_md(1, &none, 0, 0);
+            return 1;
+        }
+        if (m_act->m_id != 0x1130) {
+            target_check();
+            aiChrIdx none;
+            none.m_idx = -1;
+            m_act->act_change(0x1130, &none, 0, 0);
+        }
+    
+    }
+    return 1;
+}
