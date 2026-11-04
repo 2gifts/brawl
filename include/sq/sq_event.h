@@ -12,6 +12,9 @@ public:
     u8 unk19[0xB];
     s32 unk24;
 
+    static sqEvent* create();
+    sqEvent(const char* name) : gfSequence(name), unk8(0), unk24(0) { }
+    void setupSelCharSetting();
     virtual void start();
     virtual void setNext();
     virtual void exit();
