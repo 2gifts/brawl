@@ -5,6 +5,8 @@
 #include <mt/mt_vector.h>
 #include <types.h>
 
+class cmSubject;
+
 class cmTechController : public gfCameraController {
 public:
     void* m_target; // HYPOTHESIS: the object start() receives; resetTarget clears it
@@ -24,6 +26,8 @@ public:
     cmTechController();
     ~cmTechController();
     void resetTarget();
+    // HYPOTHESIS: reference qualifiers and float parameter names follow the native register use.
+    void start(cmSubject* subject, u16 frame, const Vec2f& rotation, const Vec2f& targetRotation, float zoom, float distance);
     virtual void update(float);
 };
 static_assert(sizeof(cmTechController) == 0x58, "Class is wrong size!");

@@ -2,6 +2,7 @@
 #include <cm/cm_controller_demo.h>
 #include <cm/cm_controller_fig_disp1.h>
 #include <cm/cm_controller_photo.h>
+#include <cm/cm_controller_tech.h>
 #include <gf/gf_camera.h>
 #include <sr/sr_common.h>
 
@@ -186,4 +187,39 @@ unsigned int CameraController::isSubjectSettingFlags()
         }
     }
     return flags | 1;
+}
+
+void CameraController::clearDisablePlayerNo(int playerNo)
+{
+    if ((u32)playerNo < 7) {
+        unk45 &= ~(u8)(1 << playerNo);
+    }
+}
+
+void CameraController::startZoomIn(cmSubject* subject, u16 frame, const Vec2f& rotation, const Vec2f& targetRotation, float zoom, float distance)
+{
+    cmTechController* controller = static_cast<cmTechController*>(lbl_805A0278[0]->m_techController);
+    controller->start(subject, frame, rotation, targetRotation, zoom, distance);
+    controller->unk10 = m_currentControllerKind;
+    changeInput(Tech);
+}
+
+void CameraController::setDisableZoomStart()
+{
+    if (unk188 == 0 && m_currentControllerKind == Demo && m_aiController != nullptr) {
+        fn_8009FCF4(m_aiController, 10.0f);
+    }
+    ++unk188;
+}
+
+void CameraController::setDisableZoomEnd()
+{
+    if (unk188 > 0) {
+        --unk188;
+    }
+}
+
+bool CameraController::isDisableZoom()
+{
+    return unk188 > 0;
 }
