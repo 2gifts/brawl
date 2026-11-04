@@ -71,9 +71,18 @@ public:
 };
 
 // HYPOTHESIS: the save section (nt_etc_file.o); its constructor, destructor and getSize are still fn_.
+struct nteSectionData;
 struct nteSection {
-    u8 unk0[0x8];
+    nteSectionData* m_data;
+    u8 unk4;
+    u8 unk5[3];
+
+    u8 getDataType();
+    u8 getStateType();
+    s64 getCreated();
+    bool setOwnState(s64 created, u32 state);
 };
+static_assert(sizeof(nteSection) == 8, "Class is the wrong size!");
 
 struct IfSnapSaveMedia {
     s32 m_status; // 0x00 HYPOTHESIS: 1 ready, 2..5 error messages

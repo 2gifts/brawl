@@ -1,0 +1,39 @@
+#pragma once
+
+#include <sr/sr_common.h>
+#include <types.h>
+
+// HYPOTHESIS: the 0x20-byte header at the front of a section buffer.
+struct nteSectionData {
+    u64 m_wiiId;
+    s64 m_created;
+    u32 m_crc;
+    u8 m_region;
+    u8 m_dataType;
+    u8 m_stateType;
+    u8 unk17;
+    u32 unk18;
+    u32 m_dataSize;
+};
+static_assert(sizeof(nteSectionData) == 0x20, "Class is the wrong size!");
+
+// HYPOTHESIS: one slot of nteFile. The first 0x20 bytes are the section header.
+struct nteFileEntry {
+    u8 m_header[0x1C];
+    u32 m_dataSize;
+    void* m_data;
+};
+static_assert(sizeof(nteFileEntry) == 0x24, "Class is the wrong size!");
+
+class nteFile {
+public:
+    nteFileEntry m_entries[5];
+    u32 m_count;
+    Heaps::HeapType m_heap;
+
+    nteFile(Heaps::HeapType heap);
+    ~nteFile();
+    void makeFile(u8* buffer);
+    u32 getDataFileSize();
+};
+static_assert(sizeof(nteFile) == 0xBC, "Class is the wrong size!");
