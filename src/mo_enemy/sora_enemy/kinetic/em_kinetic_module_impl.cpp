@@ -35,11 +35,9 @@
 // manager's add / atIndexFast.
 template bool soInstanceManagerFixed<soKineticEnergy*>::isEmpty() const;
 
-float vec2fAngle(Vec2f* a, Vec2f* b);
 
 extern "C" {
 void fn_8003E3BC(const Matrix*, const Vec3f*, Vec3f*); // HYPOTHESIS: the matrix-vector product (map: unnamed)
-float fn_8003DF9C(const Vec3f*, const Vec3f*);         // HYPOTHESIS: the angle between two vectors (map: unnamed)
 }
 
 // HYPOTHESIS: reverseEnergy calls MSL's fabs, which the SDK's math.h provides as an inline function (double fabs(double)
@@ -149,7 +147,7 @@ float emKineticModuleImpl::getKineticAngleFromSpeed(float lr, Vec2f speed) {
     Vec2f front(lr, 0.0f);
     front.normalize();
     speed.normalize();
-    float angle = vec2fAngle(&speed, &front);
+    float angle = speed.angle(&front);
     if (speed.m_y >= 0.0f) {
         return 57.29578f * angle;
     }
@@ -170,9 +168,9 @@ Vec2f emKineticModuleImpl::getTraSpeedLevelGround(soModuleAccesser* moduleAccess
     tangent.m_y = normal3.m_z * axis.m_x - normal3.m_x * axis.m_z;
     tangent.m_z = normal3.m_x * axis.m_y - normal3.m_y * axis.m_x;
     if (dotProduct(&Vec2f(tangent.m_x, tangent.m_y), &result) >= 0.0f) {
-        normal.rot(&normal, -1.5707964f);
+        normal.rot(-1.5707964f, &normal);
     } else {
-        normal.rot(&normal, 1.5707964f);
+        normal.rot(1.5707964f, &normal);
     }
     // MATCH-ONLY: the literal of the inline Vec2f::length (the original pools it here, at the first call, although
     // the call is out of line).
@@ -200,7 +198,7 @@ float emKineticModuleImpl::getSpeedAngleWithTouchGround(soModuleAccesser* module
         return angle;
     }
     Vec2f normal = ground.getTouchNormal(touchMask, 0);
-    angle = 57.29578f * vec2fAngle(&normal, const_cast<Vec2f*>(speed));
+    angle = 57.29578f * normal.angle(speed);
     if (dotProduct(&Vec2f(normal.m_x, normal.m_y), const_cast<Vec2f*>(speed)) >= 0.0f) {
         return 90.0f - angle;
     }
@@ -458,7 +456,7 @@ void emKineticModuleImpl::reflectEnergy(int index, int paramId, bool alongNormal
     } else {
         vec2fReflection(&normal, &speed, &reflected);
     }
-    m_reflectAngle = 57.29578f * vec2fAngle(&normal, &reflected);
+    m_reflectAngle = 57.29578f * normal.angle(&reflected);
     float angle = param->m_angle;
     if (angle == emKineticValue_CurrentX) {
         float lr = m_accesser->getPostureModule().getLr();
@@ -994,7 +992,7 @@ bool emKineticModuleImpl::isOverTurn(soModuleAccesser* moduleAccesser, int nodeI
     }
     fn_8003E3BC(&mtx, &dir, &dir);
     Vec3f up(0.0f, 1.0f, 0.0f);
-    return 57.29578f * fn_8003DF9C(&up, &dir) <= limit;
+    return 57.29578f * up.angle(&dir) <= limit;
 }
 
 bool emKineticModuleImpl::isObserv(char group) {

@@ -86,7 +86,7 @@ float ftUtil::setAngleWallNormal(soModuleAccesser* acc, float lr) {
     } else if (acc->getGroundModule().isTouch(static_cast<grCollStatus::TouchMask>(2), 0)) {
         normal = acc->getGroundModule().getTouchNormal(2, 0);
     }
-    normal.rot(&rotated, 0.017453292f * (90.0f * lr));
+    normal.rot(0.017453292f * (90.0f * lr), &rotated);
     float y = rotated.m_y;
     float x = rotated.m_x;
     float radians = atan2(x, y);

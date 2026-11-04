@@ -13,7 +13,6 @@
 #include <mt/mt_prng.h>
 #include <math.h>
 
-float vec2fAngle(Vec2f*, Vec2f*);
 
 // HYPOTHESIS: descriptive names, corroborated by the movement-status reader.
 enum {
@@ -94,7 +93,7 @@ bool wnPokeFushigisouLeafCutter::notifyEventAnimCmd(acAnimCmd* cmd,
         Vec2f surface;
         Vec2f::copy(surface, accesser->getGroundModule().getTouchNormal(
             static_cast<grCollStatus::TouchMask>(0xFF), 0));
-        float incidence = 57.29578f * vec2fAngle(&surface, &velocity);
+        float incidence = 57.29578f * surface.angle(&velocity);
         if (incidence - 90.0f < soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFA4, 0)) {
             float retention = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFA5, 0);
             float lr = m_moduleAccesser->getPostureModule().getLr();

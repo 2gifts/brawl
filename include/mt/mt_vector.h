@@ -117,7 +117,13 @@ public:
     // HYPOTHESIS: native calls pass vector addresses; original reference qualifiers are unresolved.
     float mtVecAngle(Vec2f& other);
 
-    float lengthSq() const
+    // MATCH-ONLY: const only for mt_vector.cpp, whose const members call it; the other units were matched against the
+    // non-const declaration, and the const one changes their float register allocation (clCircle2D::checkIntersect,
+    // soGroundModuleImpl::getTouchNormal).
+    float lengthSq()
+#ifdef MT_VEC2F_LENGTH_SQ_CONST
+        const
+#endif
 #ifdef MT_VEC2F_LENGTH_SQ_OUT_OF_LINE
         __attribute__((never_inline)); // BYTES: retain the owning Vanish unit's helper calls.
 #elif !defined(MT_VEC2F_LENGTH_SQ_SPLIT)
@@ -174,7 +180,8 @@ public:
     void normalize();
     void normalize(const Vec2f* input);
 
-    void rot(Vec2f* out, float rot) const;
+    // The angle comes first: the callers set up the output pointer after it (the callee itself cannot tell the order).
+    void rot(float rot, Vec2f* out) const;
     float angle(const Vec2f* v) const;
 
     // Writes this vector scaled by c to out (the weapon articles call the out-of-line copy: opt in with MT_VEC2F_SCALE_NOINLINE).
@@ -439,7 +446,14 @@ public:
     Vec3f operator*(const float c) const;
 
     Vec3f operator/(const float c) {
+#ifdef MT_VEC3F_DIV_SCALE
+        // mt_vector.cpp's slerp scales straight into the result.
+        Vec3f res;
+        Vec3fScale(&res, this, 1 / c);
+        return res;
+#else
         return *this * (1 / c);
+#endif
     }
 
     Vec3f& operator+=(const Vec3f& v)
@@ -485,6 +499,10 @@ public:
         float zSq = m_z * m_z;
         return zSq + (xSq + ySq);
     }
+#elif defined(MT_VEC3F_LENGTH_SQ_SUM)
+    { // The plain left-to-right sum mt_vector.cpp expands inline.
+        return m_x * m_x + m_y * m_y + m_z * m_z;
+    }
 #else
     ;
 #endif
@@ -494,7 +512,6 @@ public:
         return disp.length();
     }
     // HYPOTHESIS: source argument order is unresolved; axis/angle/output roles are verified.
-    // Original DOL fn_8003DF50 stays unrenamed until its source signature is established.
     void rot(const Vec3f* axis, float rot, Vec3f* out) const;
     void normalize();
     void normalize(const Vec3f* input);

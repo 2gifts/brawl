@@ -14,12 +14,8 @@
 // shell, a shot that flies until it touches the ground (HitGround), a shell or something else (HitEtc) or its life runs
 // out (Erase).
 
-// sora_melee: fn_8003DF50 is Vec3f::rot (this = the vector, then the axis, the angle in radians and the result) and
-// fn_8003DF9C the angle between two vectors (radians); both keep their address names (not named in the DOL symbols).
-extern "C" {
-void fn_8003DF50(Vec3f* vec, Vec3f* axis, float angle, Vec3f* out);
-float fn_8003DF9C(Vec3f* a, Vec3f* b);
-}
+// Vec3f::rot (this = the vector, then the axis, the angle in radians and the result) and Vec3f::angle (radians) are
+// DOL functions (mt_vector.cpp).
 
 // Whether the animation command `index` of the weapon's resource exists (the weapon's animation command table is
 // read at m_shotWork.m_param->0x70). Called out of line, as wnemSimple's method keeps its address name.
@@ -89,8 +85,8 @@ Vec2f wnemCommonProc::HormingTarget(Vec3f& to, Vec3f& from, float maxAngle, Vec3
     Vec3f vAim = to - from;
     Vec3f left;
     Vec3f right;
-    fn_8003DF50(&delta, &g_turnAxis, 0.017453292f * -maxAngle, &left);
-    fn_8003DF50(&delta, &g_turnAxis, 0.017453292f * maxAngle, &right);
+    delta.rot(&g_turnAxis, 0.017453292f * -maxAngle, &left);
+    delta.rot(&g_turnAxis, 0.017453292f * maxAngle, &right);
     if (!delta.testNormal()) {
         delta = g_defaultAim;
     }
@@ -98,12 +94,12 @@ Vec2f wnemCommonProc::HormingTarget(Vec3f& to, Vec3f& from, float maxAngle, Vec3
         vAim = g_defaultAim;
     }
     Vec2f result;
-    float deltaToAim = fn_8003DF9C(&delta, &vAim);
-    if (deltaToAim <= fn_8003DF9C(&delta, &right)) {
+    float deltaToAim = delta.angle(&vAim);
+    if (deltaToAim <= delta.angle(&right)) {
         result.set(vAim.m_x, vAim.m_y);
     } else {
-        float leftToAim = fn_8003DF9C(&left, &vAim);
-        if (leftToAim <= fn_8003DF9C(&right, &vAim)) {
+        float leftToAim = left.angle(&vAim);
+        if (leftToAim <= right.angle(&vAim)) {
             result.set(left.m_x, left.m_y);
         } else {
             result.set(right.m_x, right.m_y);
@@ -118,8 +114,8 @@ Vec2f wnemCommonProc::HormingTarget1(Vec3f& to, Vec3f& from, float* angle, Vec3f
     Vec3f vAim = to - from;
     Vec3f left;
     Vec3f right;
-    fn_8003DF50(&delta, &g_turnAxis, 0.017453292f * -*angle, &left);
-    fn_8003DF50(&delta, &g_turnAxis, 0.017453292f * *angle, &right);
+    delta.rot(&g_turnAxis, 0.017453292f * -*angle, &left);
+    delta.rot(&g_turnAxis, 0.017453292f * *angle, &right);
     // These are const locals in the original: MWCC folds their uses into the pooled literals, and still emits each one
     // as an unreferenced object at the end of .rodata (1.125, 0.65, 0.0 after the 1.0 of the static initializer;
     // functions in reverse order, a function's locals in declaration order). HYPOTHESIS: the names. No code reads a
@@ -146,16 +142,16 @@ Vec2f wnemCommonProc::HormingTarget1(Vec3f& to, Vec3f& from, float* angle, Vec3f
         wnemCommonProc::Report("wnemCommonProc::HormingTarget : !vAim.testNormal()  \n");
         vAim = g_defaultAim;
     }
-    float deltaToAim = fn_8003DF9C(&delta, &vAim);
-    if (deltaToAim <= fn_8003DF9C(&delta, &right)) {
+    float deltaToAim = delta.angle(&vAim);
+    if (deltaToAim <= delta.angle(&right)) {
         result.set(vAim.m_x, vAim.m_y);
         *angle = *angle - step;
         if (*angle <= minAngle) {
             *angle = minAngle;
         }
     } else {
-        float leftToAim = fn_8003DF9C(&left, &vAim);
-        float rightToAim = fn_8003DF9C(&right, &vAim);
+        float leftToAim = left.angle(&vAim);
+        float rightToAim = right.angle(&vAim);
         *angle = *angle + step * stepScale;
         if (*angle <= limit) {
             *angle = limit;

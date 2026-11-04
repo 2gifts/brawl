@@ -1,3 +1,11 @@
+// The inline forms of mt/mt_vector.h that this unit expands (const lengthSq, the plain Vec3f sum, paired-single
+// scale/add with fresh registers, operator/ scaling straight into the result).
+#define MT_VEC2F_LENGTH_SQ_CONST
+#define MT_VEC3F_LENGTH_SQ_SUM
+#define MT_VEC3F_MUL_INLINE
+#define MT_VEC3F_SCALE_FRESH_REGS
+#define MT_VEC3F_DIV_SCALE
+#define MT_VEC3F_ADD_FRESH_REGS
 #include <math.h>
 #include <mt/mt_common.h>
 #include <mt/mt_matrix.h>
@@ -43,7 +51,7 @@ void Vec2f::normalize(const Vec2f* input) {
     m_y = input->m_y * invLength;
 }
 
-void Vec2f::rot(Vec2f* out, float rot) const {
+void Vec2f::rot(float rot, Vec2f* out) const {
     bool zero = false;
     if (isZero(m_x) && isZero(m_y))
         zero = true;

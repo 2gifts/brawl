@@ -18,7 +18,6 @@
 
 // HYPOTHESIS: the weak ABS<f> copy that the module map places in the pop-gun unit (still unnamed there).
 extern "C" float fn_115_E59C(float);
-float vec2fAngle(Vec2f*, Vec2f*);
 
 // HYPOTHESIS: the fighter attribute block is copied whole (0x2E4 bytes); the four floats at 0x64 seed the air gravity.
 struct ftDiddyAirParam {
@@ -126,7 +125,7 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetJump::execFixPos(soModuleAccesser* 
     case 0x127:
         if (moduleAccesser->getGroundModule().isTouch(grCollStatus::TouchMask(0xff), 0)) {
             Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(0xff, 0);
-            float angle = vec2fAngle(&speed, &normal);
+            float angle = speed.angle(&normal);
             if (angle - 1.5707964f >= 0.017453292f * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb5, 0)) {
                 float bounce = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb8, 0);
                 moduleAccesser->getWorkManageModule().setFloat(normal.m_x * bounce, 0x21000007);

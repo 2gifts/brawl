@@ -461,7 +461,6 @@ void Weapon::removeConstraint() {
 }
 
 // Raw views of soCollisionLog bytes that the shared header leaves unnamed.
-float vec2fAngle(Vec2f*, Vec2f*); // native helper in the main binary
 
 #define LOG_U8(log, offset) (*(reinterpret_cast<u8*>(log) + (offset)))
 
@@ -491,7 +490,7 @@ void Weapon::notifyEventCollisionAttack(float power, soCollisionLog* collisionLo
                         dir.m_x *= 1.0f / length;
                         dir.m_y *= 1.0f / length;
                         Vec2f speed = attack.getSpeed();
-                        if (vec2fAngle(&dir, &speed) * 57.29578f < 135.0f) {
+                        if (dir.angle(&speed) * 57.29578f < 135.0f) {
                             m_reflectDirX = dir.m_x;
                             m_reflectDirY = dir.m_y;
                             unkA4Bit7 = 1;

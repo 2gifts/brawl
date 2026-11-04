@@ -8,7 +8,6 @@
 #include <memory.h>
 
 // Angle between two vectors in radians (main dol).
-float vec2fAngle(Vec2f* a, Vec2f* b);
 
 // Work variables (from the base weapon): int 0x10000004 is the remaining life, flag 0x12000003 marks the strong beam.
 
@@ -87,7 +86,7 @@ bool wnRobotBeam::notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* moduleAcc
             Vec2f surface;
             Vec2f::copy(surface, moduleAccesser->getGroundModule().getTouchNormal(static_cast<grCollStatus::TouchMask>(0xff), 0));
             float lr = moduleAccesser->getPostureModule().getLr();
-            float incidence = vec2fAngle(&velocity, &surface);
+            float incidence = velocity.angle(&surface);
             if (m_param->ricochetAngle * 0.017453292f < incidence - 1.5707964f) {
                 deactivate(false);
                 return true;

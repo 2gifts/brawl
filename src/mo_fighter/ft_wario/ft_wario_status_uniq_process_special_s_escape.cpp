@@ -42,7 +42,7 @@ void ftWarioStatusUniqProcessSpecialSEscape::execFixPosCounter(soModuleAccesser*
             link->unlink(6);
             a->getSituationModule().setKind(Situation_Air, false);
         }
-        speed.rot(&speed, 0.017453292f * (-angle * lr));
+        speed.rot(0.017453292f * (-angle * lr), &speed);
         a->getStageObject().updateNodeSRT();
         ftKineticEnergyStop& horizontal = dynamic_cast<ftKineticEnergyStop&>(*kinetic->getEnergy(3));
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*kinetic->getEnergy(1));

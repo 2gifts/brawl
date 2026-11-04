@@ -5,9 +5,7 @@
 #include <revolution/OS/OSError.h>
 #include <types.h>
 
-struct Quatf {
-    float x, y, z, w;
-};
+typedef nw4r::math::QUAT Quatf;
 
 static inline float atan2f_(float y, float x) {
     return atan2(y, x);
@@ -500,7 +498,7 @@ extern "C" asm void fn_8003F898(const float* src, float* dst) {
 }
 
 // quaternion from axis and angle
-extern "C" void fn_8003F8FC(Quatf* out, float angle, const Vec3f* axis) {
+void mtQuatRotAxis(Quatf* out, const Vec3f* axis, float angle) {
     float s = sin(0.5f * angle);
     float c = cos(0.5f * angle);
     Vec3f n;
@@ -543,7 +541,7 @@ extern "C" asm void fn_8003F9A8(const Quatf* a, const Quatf* b, Quatf* out) {
 }
 
 // rotate a vector by a quaternion
-extern "C" void fn_8003FA14(const Quatf* q, const Vec3f* v, Vec3f* out) {
+void mtQuatRotVec(const Quatf* q, const Vec3f* v, Vec3f* out) {
     Quatf conj;
     conj.x = -q->x;
     conj.y = -q->y;
