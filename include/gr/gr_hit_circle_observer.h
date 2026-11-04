@@ -37,6 +37,24 @@ public:
         : m_start(NULL), m_end(NULL), m_current(NULL), m_count(0), m_team(team), m_isEnable(true) { }
     virtual ~grHitCircleObserverTeam();
 
+    void enableHitCircle(bool isEnable, u32 id);
+    void enableHitCircle(bool isEnable);
+    void setPos(Vec2f* pos, u32 id);
+
+    // HYPOTHESIS: inlined node-list cleanup used by ~grHitCircleObserverTeam.
+    void clear() {
+        m_current = m_start;
+        for (u32 i = 0, count = m_count; i < count; i++) {
+            grHitCircleListNode<grHitCircleData*>* node = m_current;
+            m_current = node->m_next;
+            delete node;
+        }
+        m_start = NULL;
+        m_end = NULL;
+        m_current = NULL;
+        m_count = 0;
+    }
+
     grHitCircleListNode<grHitCircleData*>* m_start;
     grHitCircleListNode<grHitCircleData*>* m_end;
     grHitCircleListNode<grHitCircleData*>* m_current;
