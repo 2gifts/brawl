@@ -379,3 +379,61 @@ void soPhysicsModuleImpl::destructController() {
         unk30 = NULL;
     }
 }
+
+void soPhysicsModuleImpl::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    set2ndGravity(1.0f);
+    set2ndSleep(false);
+    if (unk30 != NULL) {
+        for (int index = 0; index < m_ikHandles->size(); ++index) {
+            unk30->resetToeAngle(m_ikHandles->at(index).unk0);
+        }
+    }
+}
+
+bool soPhysicsModuleImpl::is2ndBothReverse() {
+    ph2ndary2Controller* controller = m_2ndary2Controller;
+    if (controller != NULL) {
+        int state;
+        ph2ndaryController& first = *controller->m_controller[0];
+        state = first.unk57;
+        int status;
+        ph2ndaryController* second = controller->m_controller[1];
+        if (second != NULL && !first.unk20 && !second->unk20) {
+            if (state == 8) {
+                status = 3;
+            } else {
+                status = 6;
+            }
+        } else if (state == 0) {
+            if (first.m_winding) {
+                status = 4;
+            } else {
+                status = 0;
+            }
+        } else if (state == 4) {
+            if (first.m_winding) {
+                status = 5;
+            } else {
+                status = 1;
+            }
+        } else if (state == 5) {
+            status = 2;
+        } else if (state == 6) {
+            if (first.m_winding) {
+                status = 5;
+            } else {
+                status = 1;
+            }
+        } else if (state == 7) {
+            status = 6;
+        } else if (state == 9) {
+            status = 7;
+        } else if (state == 10) {
+            status = 8;
+        } else {
+            status = 3;
+        }
+        return status == 2;
+    }
+    return false;
+}

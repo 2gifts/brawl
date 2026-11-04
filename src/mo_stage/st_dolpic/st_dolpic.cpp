@@ -1257,7 +1257,6 @@ void stDolpic::updateCollision1(float deltaFrame, u32 scene, bool enable) {
 }
 
 // stTrigger::setWaterParam
-extern "C" void fn_27_233C70(stTrigger* trigger, grGimmickWaterData* data);
 
 // The water follows the scene's collision: its surface is at the water line of the scene (the distance the plaza places
 // the scene's matrix at, plus a fixed offset per scene).
@@ -1324,12 +1323,12 @@ void stDolpic::updateWater(float deltaFrame) {
     water->m_areaData.m_range.m_y = room;
     water->m_areaData.m_offsetPos.m_x = 0.0f;
     water->m_areaData.m_offsetPos.m_y = height - 0.5f * room;
-    fn_27_233C70(m_trigger, m_waterData);
+    m_trigger->setWaterParam(m_waterData);
     switch ((u8)scene) {
     case 3:
         water->m_areaData.m_offsetPos.m_x = 0.3125f * -(m_limit[1].m_x - m_limit[0].m_x);
         water->m_areaData.m_range.m_x = 0.2f * (m_limit[1].m_x - m_limit[0].m_x);
-        fn_27_233C70(m_trigger, m_waterData);
+        m_trigger->setWaterParam(m_waterData);
         // fall through
     case 1:
     case 2:

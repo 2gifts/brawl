@@ -4,16 +4,14 @@
 
 // HYPOTHESIS: two stTrigger callback-list setters (sora_melee) shaped like stTrigger::setValidCallback but for the
 // lists at +0x24 and +0x28 of the trigger.
-extern "C" void fn_27_233F58(stTrigger* trigger, gfCallBack* cb);
-extern "C" void fn_27_233FCC(stTrigger* trigger, gfCallBack* cb);
 
 void grAdventureNotifyGimmickTriggerStatus::createGimmickStatusTrigger(grAdventureNotifyGimmickTriggerStatus* owner, stTrigger* trigger, stTriggerData* data, int index, int flag) {
     // MATCH-ONLY: the valid flag is read as the whole byte (the shared header declares it as a bit)
     m_triggers[index] = new (Heaps::StageInstance) stActTriggerGimmickStatus(owner, index, reinterpret_cast<u8*>(data)[2] != 0, flag);
     if (index == 1) {
-        fn_27_233F58(trigger, m_triggers[index]);
+        trigger->setValidEdgeCallback(m_triggers[index]);
     } else {
-        fn_27_233FCC(trigger, m_triggers[index]);
+        trigger->setUnValidEdgeCallback(m_triggers[index]);
     }
 }
 

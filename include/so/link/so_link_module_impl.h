@@ -53,7 +53,7 @@ public:
     };
 
     soLinkModule() { }
-    virtual ~soLinkModule() { };
+    virtual ~soLinkModule();
     virtual void activate() = 0;
     virtual void deactivate() = 0;
     virtual bool link(u32 index, int taskId) = 0;

@@ -14,6 +14,7 @@
 #include <st/stage.h>
 #include <st_madein/st_madein.h>
 #include <types.h>
+#include <st/st_result.h>
 
 extern "C" u8 fn_27_111D70(ftOwner* owner);
 extern "C" void fn_800DD0CC(IfMngr* mngr, int areaNo1, int areaNo2);
@@ -374,6 +375,34 @@ void mlFtEventTraining::notifyEventOnDamage(int entryId, u32 hp, soDamage* damag
         m_damage = static_cast<int>(damage->m_damageAdd);
         if (g_IfMngr != NULL) {
             g_IfMngr->setTrainingStatusDamage(m_damage);
+        }
+    }
+}
+
+void mlFtEventResult::notifyEventResultWin(int entryId, int winAnim) {
+    if (g_Stage != NULL) {
+        int fighterKind = g_ftManager->getResultFighterGmKind(entryId);
+        stResult* stage = static_cast<stResult*>(g_Stage);
+        stage->unk270 = 1;
+        stage->m_winningCharKind = fighterKind;
+        stage->m_winAnim = winAnim;
+    }
+}
+
+mlFtEventResult::~mlFtEventResult() {
+}
+
+void mlFtEventTraining::notifyEventSucceedHit(int entryId, u32 consecutiveHits, float totalDamage) {
+    if (unk34_80 && m_operatorInfo != NULL && g_ftManager->getPlayerNo(entryId) != 0) {
+        unk40 = consecutiveHits;
+        unk44 = static_cast<int>(totalDamage);
+        if (g_IfMngr != NULL) {
+            g_IfMngr->setTrainingStatusCombo(consecutiveHits);
+            g_IfMngr->setTrainingStatusTotalDamage(unk44);
+        }
+        if (unk4C < unk40) {
+            unk4C = unk40 <= 65535 ? unk40 : 65535;
+            unk48->unkC8 = unk4C;
         }
     }
 }

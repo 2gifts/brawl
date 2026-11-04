@@ -51,6 +51,12 @@ struct IfSnapSaveStageEditData {
     u32 unk24A0;
 };
 
+// HYPOTHESIS: the wide flag is the high bit of the byte at 0x28 of the menu data.
+struct IfSnapSaveMenuBits {
+    u8 m_unk00[0x28];
+    bool m_isWide : 1;
+};
+
 struct IfSnapSaveModelData {
     const char* m_name;
     u8 m_start;
@@ -128,7 +134,7 @@ IfSnapSaveTask* IfSnapSaveTask::create(nw4r::g3d::ResFile* resFile, nw4r::g3d::R
 // HYPOTHESIS: IfSnapSaveTask::create for a replay (0x800F18C4, still fn_: IfMngr calls it by that name).
 extern "C" IfSnapSaveTask* fn_800F18C4(nw4r::g3d::ResFile* resFile, nw4r::g3d::ResFile* resFile2, void* msgData,
                                        nw4r::g3d::ScnGroup* scnGroup, int drawPriority, IfSnapSaveFileData* data,
-                                       s32 unkA4, Heaps::HeapType heap, Heaps::HeapType heap2,
+                                       void* unkA4, Heaps::HeapType heap, Heaps::HeapType heap2,
                                        Heaps::HeapType dataHeap) {
     static const u8 kinds[4] = { 0xFF, 0, 1, 2 };
     IfSnapSaveTask* task = new (heap) IfSnapSaveTask();
@@ -152,7 +158,7 @@ IfSnapSaveTask::IfSnapSaveTask() : gfTask("IfSnapSave", Category_Info, 0xE, 6, t
     m_jpegBuffer = NULL;
     m_result = 0;
     fn_80153488(&m_section);
-    unkA4 = 0;
+    unkA4 = NULL;
     unkA8 = 0;
     m_collection = NULL;
     m_scanEnable = false;
@@ -467,6 +473,26 @@ void IfSnapSaveTask::photoStepCaptureInit(IfSnapSaveTask* task) {
     app->unk10C = task->m_captureBuffer;
     task->unkC0 = 0;
     memset(task->m_jpegBuffer, 0, 0x19008);
+}
+
+void IfSnapSaveTask::photoStepFadeInit(IfSnapSaveTask* task) {
+    MuObject* obj = task->m_objects[0];
+    task->m_scnGroup->Remove(obj->m_sceneModel);
+    task->m_scnGroup->Insert(task->m_scnGroup->sceneItemsCount, obj->m_sceneModel);
+    obj->setFrameNode(8.0f);
+    obj->setFrameMatCol(8.0f);
+    obj->m_modelAnim->m_anmObjChrRes->SetUpdateRate(1.0f);
+    obj->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+    MuObject* photoObj = task->m_objects[1];
+    float frame;
+    if (task->m_kind != 1) {
+        photoObj->changeMaterialTex("PausePhotoMat", task->unkA4, 0xA0, 0x78);
+        frame = static_cast<float>(reinterpret_cast<IfSnapSaveMenuBits*>(g_GameGlobal->getGlobalRecordMenuDatap())->m_isWide);
+    } else {
+        frame = 2.0f;
+    }
+    photoObj->setFrameVisible(frame);
+    photoObj->m_modelAnim->m_anmObjVisRes->SetUpdateRate(0.0f);
 }
 
 void IfSnapSaveTask::photoStepMediaScanWaitInit(IfSnapSaveTask* task) {

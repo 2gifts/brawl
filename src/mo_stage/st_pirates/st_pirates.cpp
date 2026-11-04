@@ -34,7 +34,6 @@
 #include <st_pirates/st_pirates.h>
 
 // stTrigger::setWaterParam
-extern "C" void fn_27_233C70(stTrigger* trigger, grGimmickWaterData* data);
 
 stClassInfoImpl<Stages::Pirates, stPirates> stPirates::bss_loc_14;
 
@@ -762,7 +761,7 @@ void stPirates::updateEvent(float deltaFrame) {
             } else {
                 unk604 = 1.0f;
             }
-            fn_27_233C70(m_waterTrigger, m_waterData);
+            m_waterTrigger->setWaterParam(m_waterData);
             switch (unk56B) {
             case 1:
                 if (unk564 < 1020.0f) {
@@ -1033,7 +1032,7 @@ void stPirates::updateSea(float deltaFrame) {
             area->m_areaData.m_range.m_y = height;
             area->m_areaData.m_offsetPos.m_x = sea.m_x;
             area->m_areaData.m_offsetPos.m_y = sea.m_y - height * 0.5f;
-            fn_27_233C70(m_waterTrigger, m_waterData);
+            m_waterTrigger->setWaterParam(m_waterData);
             float shift = 0.0f;
             CameraController* camera = CameraController::getInstance();
             Rect2D range = *reinterpret_cast<Rect2D*>(reinterpret_cast<u8*>(camera) + 0x148);

@@ -18,9 +18,7 @@
 #include <st_famicom/st_famicom.h>
 
 // stTrigger::setPressureAreaTrigger (sora_melee, unnamed)
-extern "C" void fn_27_233898(stTrigger* trigger, stFamicomPressureData* data);
 // stTrigger::setPressureParam (sora_melee, unnamed)
-extern "C" void fn_27_233BE4(stTrigger* trigger, stFamicomPressureData* data);
 
 stClassInfoImpl<Stages::Famicom, stFamicom> stFamicom::bss_loc_14;
 
@@ -321,7 +319,7 @@ void stFamicom::createObjYukaSideC(int index) {
     if (m_pressureYuka[i] != NULL) {                                                                  \
         FAMICOM_PRESSURE_DATA(m_pressureYuka[i], data, 20.0f, 0)                                       \
         m_triggerYuka[i] = g_stTriggerMng->createTrigger(Gimmick::Area_Yuka, -1);                      \
-        fn_27_233898(m_triggerYuka[i], m_pressureYuka[i]);                                            \
+        m_triggerYuka[i]->setPressureAreaTrigger(reinterpret_cast<grGimmickPressureAreaData*>(m_pressureYuka[i]));                                            \
         m_triggerYuka[i]->setAreaSleep(true);
 
 void stFamicom::createObjYukaTrigger() {
@@ -351,7 +349,7 @@ void stFamicom::createObjPow(int index) {
             if (m_pressurePow != NULL) {
                 FAMICOM_PRESSURE_DATA(m_pressurePow, data, 500.0f, 1)
                 m_triggerPow = g_stTriggerMng->createTrigger(Gimmick::Area_Pow, -1);
-                fn_27_233898(m_triggerPow, m_pressurePow);
+                m_triggerPow->setPressureAreaTrigger(reinterpret_cast<grGimmickPressureAreaData*>(m_pressurePow));
                 m_triggerPow->setAreaSleep(true);
             }
         }
@@ -559,7 +557,7 @@ void stFamicom::updateYuka(float deltaFrame) {
             stFamicomPressureData* pressure = m_pressureYuka[count];
             pressure->unk18 = toss->m_x;
             pressure->unk1C = toss->m_y;
-            fn_27_233BE4(m_triggerYuka[count], m_pressureYuka[count]);
+            m_triggerYuka[count]->setPressureParam(reinterpret_cast<grGimmickPressureAreaData*>(m_pressureYuka[count]));
             m_triggerYuka[count]->setAreaSleep(false);
             toss->m_state = 0xD;
             count++;

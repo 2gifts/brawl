@@ -29,6 +29,8 @@ public:
     Stage* m_stage;                 // 0xC4
     stLoaderStage* m_commonLoader;  // 0xC8
 
+    stLoaderStage();
+
     virtual void processBegin();
     virtual ~stLoaderStage();
     virtual void entryEntity();

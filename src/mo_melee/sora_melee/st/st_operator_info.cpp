@@ -133,6 +133,10 @@ void stOperatorInfo::setPlayerLoupeStatus(u8 index, u8 status) {
         if (player->m_isLoupeVisible) {
             player->setLoupeVisible(false);
         }
+        player = g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[index])];
+        if (player->unk2B0) {
+            player->unk2B0 = 0;
+        }
     }
     m_playersLoupeStatus[index] = status;
 }

@@ -43,6 +43,28 @@ extern u8* lbl_8049DEC8;
 static itGenSheetKind g_unkItemSheet0(Stages::srStageKind(0xff), 0);
 static itGenSheetKind g_unkItemSheet1(Stages::srStageKind(0xff), 1);
 
+extern const char lbl_27_data_4D438[0xE];
+
+stLoaderStage::stLoaderStage() : stLoader(lbl_27_data_4D438) {
+    m_moduleName = nullptr;
+    m_stageKind = -1;
+    m_subStageKind = -1;
+    m_effectResourceId = 0;
+    unk98 = 0;
+    unk99 = 0;
+    m_archive = nullptr;
+    m_secondaryArchive = nullptr;
+    m_fileArchive = nullptr;
+    m_effectArchive = nullptr;
+    m_secondaryData = nullptr;
+    m_fileData = nullptr;
+    m_effectData = nullptr;
+    m_heapBuffer = nullptr;
+    m_readBuffer = nullptr;
+    m_stage = nullptr;
+    m_commonLoader = nullptr;
+}
+
 stLoaderStage::~stLoaderStage() {
     if (m_archive) {
         delete m_archive;

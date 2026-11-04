@@ -22,9 +22,7 @@
 // sndSystem::stopSE (main, unnamed)
 extern "C" void fn_80075F1C(sndSystem* system, s32 handle, int fade);
 // stTrigger::setBeltConveyorTrigger for the triangle belt (sora_melee, unnamed)
-extern "C" void fn_27_233808(stTrigger* trigger, stEarthBeltData* belt);
 // stTrigger::setBeltConveyorParam for the triangle belt (sora_melee, unnamed)
-extern "C" void fn_27_233B58(stTrigger* trigger, stEarthBeltData* belt);
 
 // HYPOTHESIS: two small constant objects (an 0xFF marker with an index) that the unit's headers instantiate.
 struct stEarthMarker {
@@ -410,7 +408,7 @@ void stEarth::createObjBeltConv() {
         m_beltData->m_areaData.m_range.m_y = 0.0f;
         m_beltData->m_areaData.m_shapeType = static_cast<gfArea::ShapeType>(2);
         m_triggerBelt = g_stTriggerMng->createTrigger(Gimmick::Area_BeltConveyor, -1);
-        fn_27_233808(m_triggerBelt, m_beltData);
+        m_triggerBelt->setBeltConveyorTrigger(m_beltData);
         m_triggerBelt->setAreaSleep(true);
     }
 }
@@ -895,7 +893,7 @@ void stEarth::updateBelt(float deltaFrame) {
         m_beltData->m_points[2].m_x = start.m_x;
         m_beltData->m_points[2].m_y = end.m_y - 3.0f;
         m_beltData->m_speed = m_riverSpeed;
-        fn_27_233B58(m_triggerBelt, m_beltData);
+        m_triggerBelt->setBeltConveyorParam(m_beltData);
         if (m_riverSpeed == 0.0f) {
             m_triggerBelt->setAreaSleep(true);
         } else {

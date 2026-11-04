@@ -1,3 +1,4 @@
+// Local BrawlHeaders shadow: adds Stage::CameraParam.
 #pragma once
 
 // Supersedes include/lib/BrawlHeaders/Brawl/Include/st/stage.h (shadows it via -I include).
@@ -135,6 +136,12 @@ class Stage;
 extern Stage* g_Stage;
 class Stage : public gfTask {
 public:
+    class CameraParam : public cmStageParam {
+    public:
+        // HYPOTHESIS: the input is the 32-float record filled by Stage::testStageInfoInit.
+        void setParam(float* param);
+    };
+
     // Offsets are from the start of the object (gfTask is 0x40 bytes); recovered from the constructor,
     // initializeStage, closeStage and the accessors in sora_melee st/stage.o.
     // 40: begin-frame state machine (processBegin): 0 start, 1 loading, 2 loaded, 3/4 running

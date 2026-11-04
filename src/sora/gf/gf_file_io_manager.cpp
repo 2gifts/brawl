@@ -5,6 +5,15 @@
 #include <types.h>
 #include <new>
 
+gfFileIOManager* gfFileIOManager::create() {
+    new (Heaps::SystemFW) gfFileIOManager;
+    return g_gfFileIOManager;
+}
+
+void gfFileIOManager::syncCallback(u8 command, u16 value) {
+    g_gfFileIOManager->callback(command, value);
+}
+
 void gfFileIOManager::push(gfFileIORequest* req) {
     m_queue1->push(req);
 }

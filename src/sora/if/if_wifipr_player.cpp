@@ -310,3 +310,58 @@ int IfWifiprPlayer::wifiDispStatePracticeMain(IfWifiprPlayer* player) {
     }
     return player->m_state;
 }
+
+void IfWifiprPlayer::wifiDispStateEscapeInit(IfWifiprPlayer* player) {
+    nw4r::g3d::ScnMdl* attached;
+    MuObject* object = player->m_object;
+    nw4r::g3d::ScnMdl* model = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        lbl_805A030C->Remove(model);
+    } else {
+        player->m_scnGroup->Remove(model);
+    }
+    attached = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        char nodeName[8];
+        sprintf(nodeName, "pos%02d", player->m_playerNo + 1);
+        lbl_805A030C->PushBack(attached, nodeName);
+    } else {
+        player->m_scnGroup->Insert(player->m_scnGroup->sceneItemsCount, attached);
+    }
+    object->changeAnimN(9, 3, true, false);
+    object->setFrameTex(1.0f + static_cast<float>(static_cast<int>(player->m_playerNo)));
+    object->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+    player->unk10 = 9;
+}
+
+int IfWifiprPlayer::wifiDispStateEscapeMain(IfWifiprPlayer* player) {
+    if (player->unk10 == 9) {
+        if (player->m_object->isNodeAnimFinished()) {
+            return 1;
+        }
+    }
+    return player->m_state;
+}
+
+void IfWifiprPlayer::wifiDispStateMeleeInit(IfWifiprPlayer* player) {
+    nw4r::g3d::ScnMdl* attached;
+    MuObject* object = player->m_object;
+    nw4r::g3d::ScnMdl* model = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        lbl_805A030C->Remove(model);
+    } else {
+        player->m_scnGroup->Remove(model);
+    }
+    attached = object->m_sceneModel;
+    if (player->m_mode == 0) {
+        char nodeName[8];
+        sprintf(nodeName, "pos%02d", player->m_playerNo + 1);
+        lbl_805A030C->PushBack(attached, nodeName);
+    } else {
+        player->m_scnGroup->Insert(player->m_scnGroup->sceneItemsCount, attached);
+    }
+    object->changeAnimN(10, 3, true, false);
+    object->setFrameTex(1.0f + static_cast<float>(static_cast<int>(player->m_playerNo)));
+    object->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+    player->unk10 = 10;
+}
