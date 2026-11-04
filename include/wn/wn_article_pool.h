@@ -10,16 +10,6 @@
 #include <so/article/so_article_mediator.h>
 #include <so/article/so_generate_article_manage_module.h>
 
-// Marker the mediator builds on the stack in every one of its 17 slot cases (one two-byte object per case). Only the
-// slot cases not yet spelled as calls to the wnArticleSlot* members below still use it (only Snake's shoot()).
-struct wnArticleSlotTag {
-    // MATCH-ONLY: keeps the native per-case marker stores, which MWCC would otherwise eliminate.
-    volatile u8 m_pad0;
-    volatile u8 m_pad1;
-    wnArticleSlotTag() : m_pad0(0), m_pad1(0) { }
-    ~wnArticleSlotTag() { }
-};
-
 // The kind info of the article pools of a stage object. HYPOTHESIS: Category 0 is a fighter and Kind its fighter kind
 // (Yoshi 4, Kirby 5, Dedede 32 in the type strings), category 2 an article and Kind its article kind.
 template <int Category, int Kind>
