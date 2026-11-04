@@ -2,7 +2,9 @@
 #include <ai/ai_act.h>
 #include <ai/ai_enemy.h>
 #include <ai/ai_stat.h>
+#include <ai/ai_weapon.h>
 #include <ft/fighter.h>
+#include <so/controller/so_controller_impl.h>
 #include <gf/gf_archive.h>
 #include <gf/gf_heap_manager.h>
 #include <math.h>
@@ -565,6 +567,159 @@ int aiInput::md_swim(Vec2f* stick, ipPadButton* button) {
         }
         break;
     }
+    }
+    return 1;
+}
+
+// Gliding (situation 16). Step 0 starts a random delay (the frame counter goes negative) before the stick may point down.
+// Step 1 presses attack at a near enemy in front; over ground the CPU dives down and, near the floor, lands with an
+// attack (at random, more often at a higher rank) or gives up gliding; over no ground it steers its height back towards
+// the middle of the floor block. HYPOTHESIS: the meaning of the steps follows the map name and how the values are used.
+int aiInput::md_glide(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    if (stat->m_situation != 16) {
+        aiChrIdx none;
+        change_md(1, &none, 0, 0);
+        return 1;
+    }
+    if (m_step == 0) {
+        m_stepFrame = -60.0f * randf();
+        m_step++;
+    }
+    if (m_step == 1) {
+        float dist;
+        s8 target = get_near_target(&dist, 0);
+        if (target != m_chrIdx.m_idx && dist < 20.0f) {
+            aiChrIdx targetIdx;
+            targetIdx.m_idx = target;
+            if (stat->m_lr * stat->get_lr_tgt(&targetIdx) > 0.0f && !stat->m_ipBuf.getButton(0)) {
+                button->m_mask |= soController::getButtonMask(soController::Pad_Button_Attack);
+            }
+        }
+    }
+    if (stat->chk_over_ground()) {
+        if (m_stepFrame >= 0) {
+            stick->m_y = -1.0f;
+        }
+        if (m_step == 1 && stat->m_pos.m_y + 10.0f * stat->m_speed.m_y < 5.0f + stat->m_floor->m_bottom &&
+            !stat->m_ipBuf.getButton(0)) {
+            s8 rank = m_par.m_rank;
+            if (70.0f * randf() < rank) {
+                button->m_mask |= soController::getButtonMask(soController::Pad_Button_Attack);
+            } else {
+                m_step++;
+            }
+        }
+    } else {
+        m_stepFrame--;
+        AiClBlock* floor = stat->m_floor;
+        if (stat->m_lr * (0.5f * (floor->m_edgeL.m_x + floor->m_edgeR.m_x) - stat->m_pos.m_x) > 0.0f) {
+            if (stat->m_pos.m_y > 10.0f + floor->m_bottom) {
+                if (stat->m_speed.m_y > -0.15f) {
+                    stick->m_y = -0.4f;
+                }
+            } else if (stat->m_speed.m_y < 0.1f) {
+                stick->m_y = 0.4f;
+            }
+        } else {
+            stick->m_y = 1.0f;
+        }
+    }
+    return 1;
+}
+
+// Idle while no opponent is a threat. Any active opponent (not flagged 0x8000, and not in situation 5 unless the CPU's rank is
+// 60+ and the opponent's flag 1 is clear), or, above rank 45, a near enemy or an item to pick up, ends the mode; so do the
+// Made-in-Wario AI data (mode 0x66) and a dangerous floor (mode 5). Step 0 waits for a free ground state (the Pokemon
+// kinds 0x1D-0x1F may press special with the stick down), step 1 taunts at random unless an opponent is on the respawn
+// platform, step 2 waits and goes back to mode 1.
+// HYPOTHESIS: the meaning of m_flags 4, of aiStat flags 0x8000/1, situation 5 and of the modes 1, 5 and 0x66.
+int aiInput::md_relax(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    bool rebirth = false;
+    if (!(m_flags & 4)) {
+        int i;
+        int rank = m_par.m_rank;
+        for (i = 0; i < 7; i++) {
+            aiChrIdx idx;
+            idx.m_idx = i;
+            aiStat* other = aiMgr::get_aiStat(&idx);
+            if (i == m_chrIdx.m_idx || other->m_unkCC == stat->m_unkCC) {
+                continue;
+            }
+            if (other->m_status == Fighter::Status::Rebirth) {
+                rebirth = true;
+            }
+            if (other->m_flags & 0x8000) {
+                continue;
+            }
+            if (other->m_situation == 5 && (rank < 60 || (other->m_flags & 1))) {
+                continue;
+            }
+            aiChrIdx none;
+            change_md(1, &none, 0, 0);
+            return 1;
+        }
+        if (rank > 45 && (g_aiMgr->m_enemyMgr->getEnemyNear(&stat->m_center, NULL) != NULL ||
+                          aiMgr::getWeaponMgr()->m_hasPickupItem)) {
+            aiChrIdx none;
+            change_md(1, &none, 0, 0);
+            return 1;
+        }
+    }
+    if (aiMgr::getMadeinAiData(false)) {
+        change_md(0x66, &m_target, 0x90, 0);
+        return 1;
+    }
+    AiClBlock* floor = stat->m_floor;
+    int team = stat->m_team;
+    bool danger = (floor->m_flags & 0x1000) || floor->chk_fl_danger(team);
+    if (danger) {
+        aiChrIdx none;
+        change_md(5, &none, 0, 0);
+        return 1;
+    }
+    switch (m_step) {
+    case 0:
+        if (stat->chk_stat_gr_free()) {
+            switch (stat->m_chrKind) {
+            case 0x1D:
+            case 0x1E:
+            case 0x1F:
+                if (stat->chk_chr_stat(1, -1) || randf() < 0.1f) {
+                    stick->m_y = -1.0f;
+                    button->m_mask |= soController::getButtonMask(soController::Pad_Button_Special);
+                }
+                break;
+            }
+            m_stepFrame = -20.0f * randf();
+            m_step++;
+        }
+        break;
+    case 1:
+        if (m_stepFrame >= 0) {
+            if (!rebirth) {
+                float r = randf();
+                if (r < 0.3f) {
+                    button->m_mask |= soController::getButtonMask(soController::Pad_Button_Appeal_Hi);
+                } else if (r < 0.6f) {
+                    button->m_mask |= soController::getButtonMask(soController::Pad_Button_Appeal_Lw);
+                } else if (r < 0.9f) {
+                    button->m_mask |= soController::getButtonMask(soController::Pad_Button_Appeal_S);
+                }
+            }
+            m_flags &= ~4;
+            m_stepFrame = -180.0f * randf() - 120.0f;
+            m_step++;
+        }
+        break;
+    default:
+        if (m_stepFrame >= 0) {
+            aiChrIdx none;
+            change_md(1, &none, 0, 0);
+            return 1;
+        }
+        break;
     }
     return 1;
 }

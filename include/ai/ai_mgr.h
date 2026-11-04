@@ -195,7 +195,8 @@ public:
     bool chkChildOptionMd(int player);
     // HYPOTHESIS: registers the CPU input of a player slot; the parameter names follow how the function uses them.
     void set_ai_player(int player, s8 state, aiInput* input, int ftKind);
-    static aiWeaponMgr* getWeaponMgr();
+    // BYTES: defined in ai_input.cpp, where every caller (md_relax ...) calls it; with -ipa file MWCC inlines it otherwise.
+    static aiWeaponMgr* getWeaponMgr() __attribute__((never_inline));
     static void* getAiSystemPar();
     static aiReferPar* getAiReferPar(int index);
 

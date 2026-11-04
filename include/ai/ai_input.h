@@ -110,6 +110,9 @@ public:
     void swingChkReset(int force);
     void swingChkSet(int hit);
     s8 get_fix_target(float* distance);
+    // HYPOTHESIS: returns the slot of the nearest target (its own slot when there is none) and its distance; the meaning
+    // of the int is not known yet.
+    s8 get_near_target(float* distance, int unk);
     // HYPOTHESIS: parameter names; frames <= 0 = pick the reaction delay at random from the AI parameters.
     void damageStart(soDamage* damage, s16 frames, int unk);
     // HYPOTHESIS: target = the character that was hit by this CPU's attack.
@@ -122,4 +125,6 @@ public:
     int md_return(Vec2f* stick, ipPadButton* button);
     int md_swim(Vec2f* stick, ipPadButton* button);
     int md_piyo(Vec2f* stick, ipPadButton* button);
+    int md_glide(Vec2f* stick, ipPadButton* button);
+    int md_relax(Vec2f* stick, ipPadButton* button);
 };
