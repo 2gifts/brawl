@@ -1,3 +1,4 @@
+#include <cl/cl_collision.h>
 #include <so/collision/so_collision_shield_group.h>
 #include <so/collision/so_collision_shield_part.h>
 #include <types.h>
@@ -51,4 +52,29 @@ void soCollisionShieldGroup::setTargetProperty(soArray<soCollisionShieldPart>* p
     for (int i = 0; i < m_partSize; i++) {
         parts->at(m_partStart + i).setTargetProperty(property);
     }
+}
+
+soCollisionShieldGroup::soCollisionShieldGroup() {
+    unk0 = -1;
+    m_partStart = 0;
+    m_partSize = 0;
+    m_scaleX = 1.0f;
+    m_scaleY = 1.0f;
+    m_scaleZ = 1.0f;
+    m_flags = 0;
+    m_hopAngle = 0.0f;
+    m_attackMul = 1.0f;
+    m_speedMul = 1.0f;
+    m_lifeMul = 0.0f;
+    m_isFront = false;
+    m_isHop = false;
+    m_isTurn = false;
+    m_isNoMBall = false;
+    m_isNoHop = false;
+    unkC = 0.0f;
+    unk8 = 0.0f;
+}
+
+Vec3f soCollisionShieldGroup::getCenterPos(soCollision* collision, u32 index) {
+    return collision->getCollision(index, unk0)->getCenterPos();
 }

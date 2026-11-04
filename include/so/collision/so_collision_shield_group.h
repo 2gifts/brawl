@@ -53,8 +53,10 @@ class soModelModule;
 
 class soCollisionShieldGroup {
 public:
+	soCollisionShieldGroup();
 	~soCollisionShieldGroup();
 	void init();
+	Vec3f getCenterPos(soCollision* collision, u32 index);
     // HYPOTHESIS: add returns the number of parts consumed; indices are unsigned.
     int add(soCollision* collision, soArray<soCollisionShieldPart>* parts, soCollisionShieldGroupData* data, u32 groupIndex, u32 partStart);
     int add(soCollision* collision, soArray<soCollisionShieldPart>* parts, soCollisionReflectorGroupData* data, u32 groupIndex, u32 partStart);
@@ -72,9 +74,20 @@ public:
 	s16 m_partSize;
 	float unk8;
 	float unkC;
-	u8 _10[0x80];
+	union {
+        u8 _10[0x80];
+        struct {
+            u8 _pad10[0x50];
+            // HYPOTHESIS: three floats set to 1.0f by the constructor
+            float m_scaleX, m_scaleY, m_scaleZ;
+            u8 _pad6c[8];
+            u32 _74_rest : 27;
+            u32 m_flags : 5; // HYPOTHESIS: low bits cleared by the constructor
+            u8 _pad78[0x18];
+        };
+    };
 	float m_posX;
-	u32 _94;
+	float _94;
 	float m_Lr;
 	float m_hopAngle;
 	float m_attackMul;

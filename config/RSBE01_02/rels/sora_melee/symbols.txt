@@ -1429,7 +1429,7 @@ setData__21soCollisionShieldPartFP21soCollisionShieldData = .text:0x00046784; //
 update__21soCollisionShieldPartFP16soModuleAccesserP25soCollisionShieldPartUnitf = .text:0x000467C8; // type:function size:0xC0
 setTargetProperty__21soCollisionShieldPartFUl = .text:0x00046888; // type:function size:0x48
 debugDisplay__21soCollisionShieldPartFiP25soCollisionShieldPartUnit = .text:0x000468D0; // type:function size:0x1A4
-fn_27_46A74 = .text:0x00046A74; // type:function size:0x6C
+__ct__22soCollisionShieldGroupFv = .text:0x00046A74; // type:function size:0x6C
 fn_27_46AE0 = .text:0x00046AE0; // type:function size:0x40
 __dt__22soCollisionShieldGroupFv = .text:0x00046B20; // type:function size:0x40
 init__22soCollisionShieldGroupFv = .text:0x00046B60; // type:function size:0x54
@@ -1442,7 +1442,7 @@ update__22soCollisionShieldGroupFP11soCollisionP32soArray<21soCollisionShieldPar
 isShield__22soCollisionShieldGroupCFP32soArray<21soCollisionShieldPart>Ul = .text:0x00046F94; // type:function size:0x4C
 setStatus__22soCollisionShieldGroupFP32soArray<21soCollisionShieldPart>UlUl = .text:0x00046FE0; // type:function size:0x4C
 clearAll__22soCollisionShieldGroupFP32soArray<21soCollisionShieldPart> = .text:0x0004702C; // type:function size:0x80
-fn_27_470AC = .text:0x000470AC; // type:function size:0x50
+getCenterPos__22soCollisionShieldGroupFP11soCollisionUl = .text:0x000470AC; // type:function size:0x50
 setTargetProperty__22soCollisionShieldGroupFP32soArray<21soCollisionShieldPart>Ul = .text:0x000470FC; // type:function size:0x84
 fn_27_47180 = .text:0x00047180; // type:function size:0xA0
 __ct__37soCollisionShieldEventPresenterShieldFP16soModuleAccesser = .text:0x00047220; // type:function size:0x18C
