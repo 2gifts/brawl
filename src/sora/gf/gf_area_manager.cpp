@@ -141,6 +141,25 @@ void gfAreaManager::removeArea(gfArea* area) {
     node->m_areaList.Erase(area);
 }
 
+void gfAreaManager::forEachArea(gfAreaForeachProc* proc, u8 group) {
+    forEachAreaSub(&m_root, proc, group);
+}
+
+void gfAreaManager::forEachAreaSub(QuadTree* node, gfAreaForeachProc* proc, u8 group) {
+    for (u32 i = 0; i < 4; i++) {
+        if (node->m_children[i] != NULL) {
+            forEachAreaSub(node->m_children[i], proc, group);
+        }
+    }
+    if (!node->m_areaList.IsEmpty()) {
+        for (nw4r::ut::LinkList<gfArea, 0>::Iterator it = node->m_areaList.GetBeginIter(); it != node->m_areaList.GetEndIter(); ++it) {
+            if (it->m_isDrawFill && group == it->m_group) {
+                proc->exec(&*it);
+            }
+        }
+    }
+}
+
 void gfAreaManager::renderDebug() {
     if (m_unk75 != 0) {
         m_root.debugDraw();

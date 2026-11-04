@@ -2,6 +2,7 @@
 
 #include <StaticAssert.h>
 #include <gr/collision/gr_collision_handle.h>
+#include <mt/mt_coll2d.h>
 #include <mt/mt_vector.h>
 #include <types.h>
 
@@ -27,7 +28,8 @@ static_assert(sizeof(tag_AiClJointList) == 0x20, "Class is wrong size!");
 // One floor segment of the stage as the CPU AI sees it (the AI keeps an array of these in aiMgr).
 // HYPOTHESIS: layout recovered from the aiMgr block searches only.
 struct AiClBlock {
-    char unk0[0x18];
+    clAABBox2D m_box;   // 0x00: the bounds of the block (min x, min y, max x, max y)
+    char unk10[8];
     Vec2f m_edgeL;      // 0x18: left end of the walkable surface
     Vec2f m_edgeR;      // 0x20: right end
     float m_top;        // 0x28: highest point of the block

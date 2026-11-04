@@ -11,9 +11,12 @@
 #include <ai/ai_param.h>
 #include <ft/ft_manager.h>
 #include <gf/gf_archive.h>
+#include <gf/gf_area.h>
+#include <gf/gf_area_manager.h>
 #include <gf/gf_heap_manager.h>
 #include <gf/gf_memory_util.h>
 #include <gm/gm_lib.h>
+#include <mt/mt_prng.h>
 #include <gr/collision/gr_collision.h>
 #include <st/stage.h>
 #include <st_madein/st_madein.h>
@@ -31,6 +34,35 @@ extern s8 lbl_27_data_47BF8;
 
 // HYPOTHESIS: debug timings of aiMgr::processBegin (weapon pass, floor blocks, weapon/enemy update, fighter stats).
 extern s64 g_aiMgrProcTime[4];
+// HYPOTHESIS: the ladder that aiMgr::search_ladder picked last.
+extern gfArea* g_aiLadderArea;
+
+// The ladders (Stage Builder parts) that a CPU can climb from one floor block to another (see aiMgr::search_ladder).
+// HYPOTHESIS: the member names; the layout follows the original's stack object.
+class chkAreaProc : public gfAreaForeachProc {
+public:
+    AiClBlock* m_block;   // 0x04: the block the CPU stands on (ignored by the collision checks)
+    AiClBlock* m_target;  // 0x08: the block to reach
+    float m_width;        // 0x0C: margins added around both blocks
+    float m_height;       // 0x10
+    gfArea* m_areas[16];  // 0x14: the ladders found
+    u32 m_numAreas;       // 0x54
+
+    virtual bool exec(gfArea* area);
+};
+
+// Whether the segment from -> to crosses a collision other than ignore.
+static inline bool aiChkCross(const Vec2f& from, const Vec2f& to, AiClBlock* ignore) {
+    return g_aiMgr->chk_cl_cross(const_cast<Vec2f*>(&from), const_cast<Vec2f*>(&to), 0xFF, NULL, ignore);
+}
+
+// Sets box from its corners.
+static inline void aiSetBox(clAABBox2D* box, const Vec2f& min, const Vec2f& max) {
+    box->m_unk1 = min.m_x;
+    box->m_unk2 = min.m_y;
+    box->m_unk3 = max.m_x;
+    box->m_unk4 = max.m_y;
+}
 
 // HYPOTHESIS: create precedes setEnable in the unit, so the original spells setEnable's body out here instead of calling it.
 void aiMgr::create(int enable) {
@@ -942,6 +974,35 @@ AiClBlock* aiMgr::get_center_block(int team) {
     return result;
 }
 
+bool aiMgr::search_ladder(AiClBlock* block, AiClBlock* target, float width, float height) {
+    if (m_stageKind != Stages::Edit) {
+        return false;
+    }
+    chkAreaProc proc;
+    proc.m_block = block;
+    proc.m_target = target;
+    proc.m_numAreas = 0;
+    proc.m_width = 1.1f * width;
+    proc.m_height = 0.9f * height;
+    lbl_8059FF90->forEachArea(&proc, gfArea::Stage_Group_Gimmick_Ladder);
+    int num = proc.m_numAreas;
+    if (num > 0) {
+        int idx;
+        if (num == 1) {
+            idx = 0;
+        } else {
+            idx = num * randf();
+            int last = num - 1;
+            if (idx > last) {
+                idx = last;
+            }
+        }
+        g_aiLadderArea = proc.m_areas[idx];
+        return true;
+    }
+    return false;
+}
+
 bool aiMgr::chkUnderFloor(float slope, Vec2f* pos) {
     int count = m_numBlocks;
     AiClBlock* block = m_blocks;
@@ -1158,4 +1219,51 @@ void aiMgr::setAdventureMd(u32 md) {
             input->m_unk112 = g_aiMgr->m_adventureMd;
         }
     }
+}
+
+// Keeps a ladder that touches both blocks and from which the near edge of the target can be reached without
+// crossing other collisions.
+bool chkAreaProc::exec(gfArea* area) {
+    if (m_numAreas < 16) {
+        clAABBox2D* box = &area->m_aabBox;
+        clAABBox2D targetBox;
+        aiSetBox(&targetBox, Vec2f(m_target->m_box.m_unk1 - m_width, m_target->m_box.m_unk2 - m_height),
+                 Vec2f(m_target->m_box.m_unk3 + m_width, m_target->m_box.m_unk4 + m_height));
+        if (box->checkIntersect1(targetBox)) {
+            clAABBox2D blockBox;
+            aiSetBox(&blockBox, Vec2f(m_block->m_box.m_unk1 - m_width, m_block->m_box.m_unk2 - m_height),
+                     Vec2f(m_block->m_box.m_unk3 + m_width, m_block->m_box.m_unk4 + m_height));
+            if (box->checkIntersect1(blockBox)) {
+                Vec2f to;
+                Vec2f from;
+                from.m_x = 0.5f * (box->m_unk1 + box->m_unk3);
+                if (from.m_x > 0.5f * (m_target->m_edgeL.m_x + m_target->m_edgeR.m_x)) {
+                    to = m_target->m_edgeR;
+                    to.m_x += 1.0f;
+                } else {
+                    to = m_target->m_edgeL;
+                    to.m_x -= 1.0f;
+                }
+                to.m_y += 3.0f;
+                if (to.m_y < box->m_unk2) {
+                    from.m_y = box->m_unk2;
+                } else if (to.m_y > box->m_unk4) {
+                    from.m_y = box->m_unk4;
+                } else {
+                    from.m_y = to.m_y;
+                }
+                // A ladder whose straight path is blocked still counts when the target edge is close enough to be
+                // reached with one step across and one step up.
+                if (!aiChkCross(from, to, m_block) ||
+                    (__fabsf(to.m_x - from.m_x) < 0.5f * m_width && to.m_y - from.m_y < 0.8f * m_height &&
+                     !aiChkCross(from, Vec2f(to.m_x, from.m_y), m_block) &&
+                     !aiChkCross(Vec2f(to.m_x, from.m_y), to, m_block)))
+                {
+                    m_areas[m_numAreas] = area;
+                    m_numAreas++;
+                }
+            }
+        }
+    }
+    return true;
 }

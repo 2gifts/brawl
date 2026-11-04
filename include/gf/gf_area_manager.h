@@ -10,6 +10,12 @@
 #include <nw4r/ut/ut_LinkList.h>
 #include <types.h>
 
+// A callback for gfAreaManager::forEachArea. HYPOTHESIS: the name of the method; the walk ignores its return value.
+class gfAreaForeachProc {
+public:
+    virtual bool exec(gfArea* area) = 0;
+};
+
 // HYPOTHESIS: layouts from the constructor, the tree walks and the debug draw of gf_area_manager.cpp
 // (main.dol 0x80011C74-0x800134C0); field names other than the map's are local.
 class gfAreaManager : public gfTask {
@@ -64,6 +70,10 @@ public:
     gfArea* testPosIncludeSub(QuadTree* node, u8 group, Vec2f* pos);
     void registArea(gfArea* area);
     void removeArea(gfArea* area);
+    // Calls proc for every registered area of the group. HYPOTHESIS: the names.
+    void forEachArea(gfAreaForeachProc* proc, u8 group);
+    // BYTES: the original calls the walk with bl, from forEachArea and from itself; MWCC inlines it into both.
+    void forEachAreaSub(QuadTree* node, gfAreaForeachProc* proc, u8 group) __attribute__((never_inline));
 };
 static_assert(sizeof(gfAreaManager::QuadTree) == 0x34, "Class is wrong size!");
 static_assert(sizeof(gfAreaManager) == 0x78, "Class is wrong size!");

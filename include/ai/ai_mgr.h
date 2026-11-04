@@ -157,6 +157,9 @@ public:
     // The block whose joint walk reaches line of joint in collision (aiStat passes the fighter's ground line work).
     AiClBlock* search_blk(grCollision* collision, grCollisionJoint* joint, grCollisionLine* line);
     AiClBlock* search_blk1(u32* key);
+    // HYPOTHESIS: on the Stage Builder stage, picks one of the ladders that lead from block to target (at random when
+    // there are several) into g_aiLadderArea; false when there is none.
+    bool search_ladder(AiClBlock* block, AiClBlock* target, float width, float height);
     // HYPOTHESIS: the segment from -> to against the floor blocks whose flags match mask, skipping ignore; returns the
     // block that is crossed (and the crossing point in hitPos when given).
     AiClBlock* chk_cl_cross2(Vec2f* from, Vec2f* to, u32 mask, Vec2f* hitPos, AiClBlock* ignore);
