@@ -86,10 +86,6 @@ struct muWifiAIDInfo {
             u32 unk110;
             char _pad114[0x24];
         };
-        struct {
-            char _pad57Nodes[0x11];
-            u8 unk68[4];
-        };
     };
     char m_shortComment[0xA0];
     char unk1D8[0x39];

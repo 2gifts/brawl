@@ -365,3 +365,28 @@ bool soCollisionAttackModuleImpl::setOffsetFromNode(u32 index, int node) {
     Vec3f offset(offsetX, offsetY, offsetZ);
     return setOffset(index, &offset);
 }
+
+void soCollisionAttackModuleImpl::set(u32 index, u32 groupIndex) {
+    if (m_collisionAttackPart->at(index).m_status != soCollisionAttackPart::Status_Inactive &&
+        (int)groupIndex == m_collisionAttackPart->at(index).m_groupIndex) {
+        return;
+    }
+    m_collisionAttackPart->at(index).resetStatus();
+    m_collisionAttackPart->at(index).m_groupIndex = groupIndex;
+    m_collision.initLog(groupIndex);
+    int i;
+    int currentGroup = m_collisionAttackPart->at(index).m_groupIndex;
+    if (m_collision.isRefLogGroup(currentGroup) != true || m_collision.isUseLogGroup(currentGroup) != true) {
+        for (i = 0; i < m_collisionAttackPart->size(); ++i) {
+            if (m_collisionAttackPart->at(i).m_status != soCollisionAttackPart::Status_Inactive &&
+                i != (int)index && currentGroup == m_collisionAttackPart->at(i).m_groupIndex) {
+                goto groupReady;
+            }
+        }
+        m_collision.initPastLog(currentGroup, true);
+    }
+groupReady:
+    if (m_collision.isRefLogGroup(groupIndex) == true) {
+        m_collision.useLogGroup(groupIndex);
+    }
+}
