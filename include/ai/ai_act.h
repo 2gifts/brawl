@@ -135,6 +135,11 @@ public:
     // reflect it (special) when chkUseReflector agrees, else air-dodge (guard); near an opponent, maybe air-dodge.
     // HYPOTHESIS: the meaning of the steps and of the character kinds tested.
     void act_d_air_sway(Vec2f* stick, ipPadButton* button);
+    // Waiting in ambush (the name from the map) for a target that is down (status 0x53) or on a ledge (0x74/0x75):
+    // keep a rank-scaled distance (m_unk0[0], aiParam's down/cliff attack range), back off when too close, then
+    // attack as it gets up or acts (aiParam's down/cliff attack frames) or give up after m_unk0[2] frames.
+    // HYPOTHESIS: the meaning of the steps, of m_unk0[0..2] and of the statuses tested.
+    void act_a_ambush(Vec2f* stick, ipPadButton* button);
 };
 static_assert(sizeof(aiAct) == 0x114, "Class is wrong size!");
 

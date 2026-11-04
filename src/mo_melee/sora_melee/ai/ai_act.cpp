@@ -767,3 +767,155 @@ void aiAct::act_d_air_sway(Vec2f* stick, ipPadButton* button) {
         }
     }
 }
+
+void aiAct::act_a_ambush(Vec2f* stick, ipPadButton* button) {
+    aiStat* target = aiMgr::get_aiStat(&m_input->m_target);
+    float range = __fabsf(m_stat->get_range(0.0f, &m_input->m_target));
+    switch (m_step) {
+        case 0:
+            switch (target->m_status) {
+                case 0x74:
+                case 0x75: {
+                    m_unk0[0] = aiParam::get_cliff_atk_r(&m_input->m_target);
+                    m_unk0[1] = 1.0f;
+                    // BYTES: the rank is read before randf.
+                    s8 rank = m_input->m_par.m_rank;
+                    m_unk0[2] = 4.0f + (0.3f * rank + 10.0f * randf());
+                    m_unk94 = 300;
+                    if (!(m_input->m_unk116 & 0x220)) {
+                        m_unk0[0] += 10.0f * randf();
+                        m_unk0[2] += 30.0f + 60.0f * randf();
+                        m_unk94 += 120;
+                    }
+                    break;
+                }
+                default:
+                    m_unk0[0] = aiParam::get_down_atk_r(&m_input->m_target);
+                    m_unk0[1] = 0.0f;
+                    m_unk0[2] = 30.0f + 180.0f * randf();
+                    m_unk94 = 150;
+                    if (!(m_input->m_unk116 & 0x220)) {
+                        m_unk0[0] += 10.0f * randf();
+                    }
+                    break;
+            }
+            if (range > 60.0f && !(m_stat->m_flags & 1) && m_stat->m_situation != 3) {
+                // BYTES: the rank is read before randf.
+                s8 rank = m_input->m_par.m_rank;
+                if (randf() < 0.0095f * rank) {
+                    m_step = 0x100;
+                    return;
+                }
+            }
+            m_step++;
+        case 0x100:
+            if (m_step == 0x100) {
+                if (!m_stat->chk_stat_gr_free() && m_stepFrame < 8) {
+                    return;
+                }
+                m_step = 1;
+                m_stepFrame = 0;
+            }
+        case 1:
+        case 2:
+            if (target->m_situation != 4 && target->m_situation != 6) {
+                int status = target->m_status;
+                if (randf() < 0.2f) {
+                    status = 0;
+                }
+                switch (status) {
+                    case 0x53:
+                        m_step = 0x10;
+                        m_stepFrame = -aiParam::get_down_atk_f(&m_input->m_target);
+                        break;
+                    case 0x76:
+                        m_step = 0x10;
+                        m_stepFrame = -aiParam::get_cliff_atk_f(&m_input->m_target);
+                        break;
+                    default: {
+                        float r = randf();
+                        if (r < 0.35f) {
+                            m_nextId = 0x51;
+                        } else if (r < 0.38f) {
+                            m_nextId = 0x53;
+                        } else if (r < 0.4f) {
+                            m_nextId = 0x56;
+                        }
+                        set_id(0);
+                        break;
+                    }
+                }
+                if (m_step == 0x10) {
+                    if (range < m_unk0[0] - 5.0f) {
+                        m_step = 0x20;
+                        m_stepFrame += 4;
+                    }
+                    m_unk94 = 300;
+                }
+            } else {
+                if (m_step == 1) {
+                    float reach;
+                    switch (m_stat->m_chrKind) {
+                        case 8:
+                            reach = 14.0f;
+                            break;
+                        default:
+                            reach = 8.0f;
+                            break;
+                    }
+                    if (range < m_unk0[0] + reach) {
+                        if (range < m_unk0[0]) {
+                            if (m_stat->chk_stat_gr_free()) {
+                                stick->m_x = -1.0f * m_stat->get_lr_tgt(&m_input->m_target);
+                                m_step = 3;
+                                m_stepFrame = 0;
+                            }
+                        } else {
+                            m_stepFrame = 0;
+                            m_step++;
+                        }
+                    } else {
+                        stick->m_x = 0.7f * m_stat->get_lr_tgt(&m_input->m_target);
+                    }
+                } else {
+                    aiStat* stat = m_stat;
+                    if (stat->m_lr * stat->get_lr_tgt(&m_input->m_target) < 0.0f) {
+                        stick->m_x = -0.5f * stat->m_lr;
+                    } else if (!(target->m_flags & 0x20000)) {
+                        m_unk0[2] -= 1.0f;
+                        if (m_unk0[2] < 0.0f) {
+                            if (target->m_situation == 6) {
+                                m_nextId = 0x601A;
+                            }
+                            set_id(0);
+                        }
+                    }
+                }
+            }
+            break;
+        case 3:
+            stick->m_x = -1.0f * m_stat->get_lr_tgt(&m_input->m_target);
+            if (m_stepFrame > 5 && range > m_unk0[0] - 5.0f) {
+                m_step = 2;
+            }
+            break;
+        default:
+            if (m_stepFrame <= 0) {
+                break;
+            }
+            if (m_step == 0x20) {
+                m_nextId = randf() < 0.5f ? 0x3020 : 0x30A0;
+                set_id(0);
+            } else {
+                m_nextId = 0x1020;
+                if (m_stat->m_chrKind == 8 && m_unk0[1] > 0.5f) {
+                    float rate = target->m_unkC4 < 100.0f ? 0.9f : 0.3f;
+                    if (randf() < rate) {
+                        m_nextId = 0x1090;
+                    }
+                }
+                set_id(0);
+            }
+            break;
+    }
+}
