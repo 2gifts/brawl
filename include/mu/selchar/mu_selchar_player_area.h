@@ -19,6 +19,7 @@
 
 class muSelCharCBCalcWorld;
 class MuMsg;
+class IfWifiprPlayer;
 
 class muSelCharPlayerArea {
 protected:
@@ -79,6 +80,15 @@ public:
             char unk410[0x15];
             bool unk425;
             char unk426[0x12];
+        };
+        struct {
+            char unk408Pad[0x14];
+            IfWifiprPlayer* unk41C;
+            char unk420[6];
+            bool unk426Flag;
+            char unk427[5];
+            int unk42C;
+            char unk430[8];
         };
     };
     nw4r::g3d::ResFileData* m_charPicData;
@@ -155,5 +165,15 @@ public:
     void setNameNo(int name);
     void setControllerNo(int controller);
     void dispName(int name, int playerKind, bool teamBattle, int teamColor);
+    u8 getWifiAID(u8* localPlayer);
+    muSelCharPlayerArea();
+    // HYPOTHESIS: initialization data is an opaque parameter block.
+    static muSelCharPlayerArea* create(void* data);
+    void initProc(void* data);
+    void wifiRequestPlayerEntry(int entry);
+    void dispWifiDispState(int state);
+    void dispCharPicEffect();
+    void setWifiFriendProfileNameVisible(bool visible);
+    void createWifiModel(nw4r::g3d::ResFile* resFile, int priority);
 };
 static_assert(sizeof(muSelCharPlayerArea) == 0x448, "Wrong size for class!");

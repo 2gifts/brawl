@@ -7,6 +7,10 @@
 #include <gf/gf_pad_system.h>
 #include <stdio.h>
 #include <string.h>
+#include <gf/gf_archive.h>
+#include <if/if_wifipr_player.h>
+#include <revolution/CX/CXCompression.h>
+#include <revolution/OS/OSCache.h>
 
 // The menu helpers take three integers; this caller passes only the first one (see TIPS.md).
 extern "C" int getNumCharColor__6muMenuFiii(int charKind);
@@ -565,4 +569,66 @@ void muSelCharPlayerArea::nameEntryButtonPointed(int pointed) {
             object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);
         }
     }
+}
+
+u8 muSelCharPlayerArea::getWifiAID(u8* localPlayer) {
+    u8 player;
+    u8 aid = g_muWifiInterfaceTask->getPlayerArea(m_areaIdx, &player);
+    if (aid == 0xFF) {
+        player = 0xFF;
+    }
+    *localPlayer = player;
+    return aid;
+}
+
+muSelCharPlayerArea* muSelCharPlayerArea::create(void* data) {
+    muSelCharPlayerArea* area = new (Heaps::MenuInstance) muSelCharPlayerArea;
+    area->initProc(data);
+    return area;
+}
+
+void muSelCharPlayerArea::wifiRequestPlayerEntry(int entry) {
+    if (g_muWifiInterfaceTask->requestApproval(m_areaIdx)) {
+        dispWifiDispState(2);
+        unk42C = entry;
+        unk426Flag = true;
+    }
+}
+
+nw4r::g3d::ResFile* muSelCharPlayerArea::getCharPicTexResFile(int charKind) {
+    int stockKind = muMenu::exchangeMuSelchkind2MuStockchkind(charKind);
+    int fileIndex = muMenu::exchangeGmCharacterKind2Something(stockKind);
+    void* compressed = static_cast<gfArchive*>(lbl_10_bss_8[0])->getData(Data_Type_Misc, fileIndex, 0xFFFE);
+    CXUncompressLZ(compressed, m_charPicData);
+    DCFlushRange(m_charPicData, 0x40000);
+    m_charPicRes = nw4r::g3d::ResFile(m_charPicData);
+    nw4r::g3d::ResFile::Init(&m_charPicRes);
+    return &m_charPicRes;
+}
+
+
+void muSelCharPlayerArea::dispCharPicEffect() {
+    m_objs[Obj_CharPic]->changeAnimN(1, 0x10, true, false);
+    m_objs[Obj_Unk5]->setFrameMatCol(1.0f);
+    m_objs[Obj_Unk5]->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+    m_unk1F9 = true;
+}
+
+extern char lbl_10_data_BA8[8];
+
+void muSelCharPlayerArea::setWifiFriendProfileNameVisible(bool visible) {
+    m_objs[37]->setFrameVisible(visible ? 1.0f : 0.0f);
+    if (!visible) {
+        unk40C->printf(0x1D, lbl_10_data_BA8);
+        unk40C->printf(0x1E, lbl_10_data_BA8);
+    }
+}
+
+extern const u8 lbl_10_rodata_690[0x18];
+
+void muSelCharPlayerArea::createWifiModel(nw4r::g3d::ResFile* resFile, int priority) {
+    createObjResFile(lbl_10_rodata_690, 3, resFile, priority);
+    int playerNo = m_areaIdx;
+    unk41C = new (Heaps::MenuInstance) IfWifiprPlayer(playerNo, 1);
+    unk41C->createModel(resFile, priority);
 }
