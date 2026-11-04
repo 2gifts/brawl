@@ -1,3 +1,5 @@
+#include <mt/mt_matrix.h>
+#include <so/link/so_link_module_impl.h>
 #include <so/posture/so_posture_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/controller/so_controller_module_impl.h>
@@ -133,3 +135,55 @@ void soPostureModuleImpl::turnBack() {
     }
 }
 
+
+void soPostureModuleImpl::fixRot() {
+    int count = m_interpolationArray->size();
+    for (int i = 0; i < count; i++) {
+        soInterpolation<Vec3f>& element = m_interpolationArray->at(i);
+        element.m_elements[1] = element.m_elements[0];
+    }
+}
+
+void soPostureModuleImpl::setLr(float lr) {
+    m_lr = lr;
+    soLinkEventArgs args(5);
+    m_moduleAccesser->getLinkModule().sendEventNodes(-1, args, 0x200);
+}
+
+void soPostureModuleImpl::fixConstraintNodePosture(int node, void* mtx) {
+    if (static_cast<u32>(node) == static_cast<u32>(m_syncConstraintNode)) {
+        Matrix* matrix = static_cast<Matrix*>(mtx);
+        float z = matrix->m[2][3];
+        float y = matrix->m[1][3];
+        float x = matrix->m[0][3];
+        Vec3f pos;
+        pos.m_y = y;
+        pos.m_x = x;
+        pos.m_z = z;
+        setPos(&pos);
+    }
+}
+
+void soPostureModuleSimple::setPos(Vec3f* pos) {
+    float z, y, x;
+    x = pos->m_x;
+    y = pos->m_y;
+    z = pos->m_z;
+    m_pos.m_x = x;
+    m_pos.m_y = y;
+    m_pos.m_z = z;
+}
+
+void soPostureModuleImpl::setRot(Vec3f* rot, u32 index) {
+    Vec3f& element = m_interpolationArray->at(index).m_elements[0];
+    float x = rot->m_x;
+    float y = rot->m_y;
+    element.m_x = x;
+    float z = rot->m_z;
+    element.m_y = y;
+    element.m_z = z;
+}
+
+Vec3f soPostureModuleImpl::getRot(u32 index) {
+    return m_interpolationArray->at(index).m_elements[0];
+}

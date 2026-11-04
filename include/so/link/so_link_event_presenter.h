@@ -12,6 +12,7 @@ struct soLinkEventArgs {
     // HYPOTHESIS: the capture module constructs the shared link event directly.
     friend class soCaptureModuleImpl;
     friend class wnPokeLizardonRock;
+    friend class soPostureModuleImpl;
     int m_eventKind;
     bool _0x4;
 protected:
