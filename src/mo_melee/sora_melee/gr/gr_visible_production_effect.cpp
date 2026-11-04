@@ -28,7 +28,7 @@ void grVisibleProductionEffect::productFlowProducing(float deltaFrame) {
             if (!m_ground->getNodeMatrix(&matrix, 0, "effect_locator")) {
                 m_ground->getNodeMatrix(&matrix, 0, u32(0));
             }
-            m_pos = matrix.getPosition();
+            m_pos.set(matrix(0, 3), matrix(1, 3), matrix(2, 3));
             matrix.getRotate(&m_rot);
             getScalingFactor(&matrix, &m_scale);
             g_ecMgr->setEffect((EfID)m_effectId, &m_pos, &m_rot, &m_scale);
