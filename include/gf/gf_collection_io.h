@@ -85,6 +85,7 @@ public:
     virtual void processDefault();
 
     bool isDropReady();
+    static void getBasePathVF(int fileType, char* path);
     // HYPOTHESIS: parameter types from the callers (file type, file name, data, size, flag).
     bool requestNewFileNameVF(int fileType);
     bool requestNewFileNameSD(int fileType);
