@@ -47,6 +47,19 @@ public:
 
 class wnIkeSword;
 
+// HYPOTHESIS: final link-event payload types inferred from its constructor and notification handler.
+class soLinkEventIkeFinal : public soLinkEventArgs {
+public:
+    int unk8;
+    int unkC;
+    int unk10;
+    float unk14;
+    float unk18;
+    float unk1C;
+    float unk20;
+    float unk24;
+};
+
 class ftIke : public ftFighterBuilder<ftIkeBuildConfig> {
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
     ftData* m_data;
@@ -63,6 +76,10 @@ public:
     virtual bool notifyEventCollisionSearchCheck();
     virtual void processFixPosition();
     virtual void notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionShield(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
+    virtual void notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    static Vec3f getFinalTargetPosBase(soModuleAccesser* moduleAccesser);
     // The hooks the article mediator calls to start and to throw the sword (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnIkeSword* weapon, soModuleAccesser* acc);
     static bool shootArticle(wnIkeSword* weapon, soModuleAccesser* acc);
