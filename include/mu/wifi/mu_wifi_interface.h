@@ -162,6 +162,8 @@ public:
     u64 getComposedCharaAcceptFlag();
     muWifiAIDInfo* getSafeParentAIDInfo();
     void requestExchangeFriendKey(int playerArea);
+    // HYPOTHESIS: parameter types follow the player index, name buffer and byte-sized name number.
+    void setLocalPlayersOnamae(int player, const wchar_t* name, u8 nameNo);
     u8 getMyFriendStatusIcon();
     u8 getFriendStatusIcon(int index);
     u8 getFriendStatusWiFiStatus(int index);

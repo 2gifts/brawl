@@ -144,5 +144,10 @@ public:
     void dispWifiFriendProfileNameBaseColor();
     bool getWifiFriendProfileNameVisible();
     int getCollKind(Vec2f* pos, int* arg, float* rect);
+    void openHandiList();
+    void forceCloseList();
+    void setNameNo(int name);
+    void setControllerNo(int controller);
+    void dispName(int name, int playerKind, bool teamBattle, int teamColor);
 };
 static_assert(sizeof(muSelCharPlayerArea) == 0x448, "Wrong size for class!");

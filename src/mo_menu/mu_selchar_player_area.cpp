@@ -4,6 +4,7 @@
 #include <types.h>
 #include <mu/wifi/mu_wifi_interface.h>
 #include <mu/mu_msg.h>
+#include <gf/gf_pad_system.h>
 
 // The menu helpers take three integers; this caller passes only the first one (see TIPS.md).
 extern "C" int getNumCharColor__6muMenuFiii(int charKind);
@@ -392,4 +393,84 @@ void muSelCharPlayerArea::dispWifiFriendProfileNameBaseColor() {
 
 bool muSelCharPlayerArea::getWifiFriendProfileNameVisible() {
     return 0.0f != m_objs[37]->m_modelAnim->m_anmObjVisRes->GetFrame();
+}
+
+void muSelCharPlayerArea::openHandiList() {
+    int kind;
+    int handi;
+    int type = g_GameGlobal->m_selCharData->m_selCharType;
+    int group;
+    if (isSelCharTypeIn(type, 0, 4)) { group = 0; goto groupSelected; }
+    if (isSelCharTypeIn(type, 4, 12)) { group = 1; goto groupSelected; }
+    {
+        bool inGroup = isSelCharTypeIn(type, 12, 16);
+        group = 3;
+        if (!inGroup) goto groupSelected;
+        group = 2;
+    }
+    groupSelected:
+    int mode;
+    if (group == 1) mode = 0;
+    else if (m_selCharTask->m_unk5D0) mode = 2;
+    else mode = m_selCharTask->m_handiMode == 2;
+    switch (mode) {
+    case 1:
+        kind = MuSelctChrList::Kind_Handi;
+        handi = m_handi;
+        break;
+    case 2:
+        kind = MuSelctChrList::Kind_Hp;
+        handi = m_handi;
+        break;
+    }
+    Vec3f pos;
+    pos.m_x = pos.m_y = pos.m_z = 0.0f;
+    m_chrList.open(kind, handi, &pos);
+}
+
+void muSelCharPlayerArea::setNameNo(int name) {
+    dispName(name, m_playerKind, m_selCharTask->m_isTeamBattle, m_teamColor);
+    m_nameId = name;
+    muWifiInterfaceTask* wifi = g_muWifiInterfaceTask;
+    if (wifi) {
+        wchar_t text[6];
+        if (name >= 0) {
+            int type = g_GameGlobal->m_selCharData->m_selCharType;
+            int group;
+            if (isSelCharTypeIn(type, 0, 4)) { group = 0; goto groupSelected; }
+            if (isSelCharTypeIn(type, 4, 12)) { group = 1; goto groupSelected; }
+            {
+                bool inGroup = isSelCharTypeIn(type, 12, 16);
+                group = 3;
+                if (!inGroup) goto groupSelected;
+                group = 2;
+            }
+            groupSelected:
+            if (group == 2) {
+                g_GameGlobal->getNameUTF16(name, text);
+                goto sendName;
+            }
+        }
+        text[0] = 0;
+    sendName:
+        wifi->setLocalPlayersOnamae(m_areaIdx, text, name < 0 ? 120 : static_cast<u8>(name));
+    }
+}
+
+// muMenuController::setControllerID (the map name); src/mo_menu/mu_event.cpp calls it by this stand-in name.
+extern "C" void fn_800B9804(muMenuController* controller, int pad);
+
+void muSelCharPlayerArea::setControllerNo(int controller) {
+    m_controllerNo = controller;
+    if ((controller >= 0) & (controller < 8)) {
+        gfPadStatus status;
+        g_gfPadSystem->getSysPadStatus(controller, &status);
+        m_controllerKind = status.m_controllerType;
+    } else {
+        m_controllerKind = static_cast<gfPadType::PadType>(4);
+    }
+    dispControllerKind(m_playerKind, m_controllerKind, m_controllerNo);
+    if (controller < 0) forceCloseList();
+    if (controller >= 0) fn_800B9804(&m_menuController, static_cast<u8>(controller));
+    m_selCharHand->updateControllerNo();
 }
