@@ -5,6 +5,14 @@
 
 class stOperatorRuleKumite : public stOperatorRuleMelee {
 public:
+    u8 unk25C[4];
+    // HYPOTHESIS: list length, current index, and character bytes used by createRandomMyCharaList.
+    int unk260;
+    int unk264;
+    u8 unk268[0x40];
+
+    void createRandomMyCharaList(u32);
+
     // HYPOTHESIS: forwards the stOperatorRuleMelee constructor argument.
     stOperatorRuleKumite(u8);
     virtual ~stOperatorRuleKumite();

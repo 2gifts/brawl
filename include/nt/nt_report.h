@@ -53,6 +53,9 @@ struct NtBase {
     static bool isMatchStatusOnline();
     static bool isNetCondOnline();
     static void setSIDPlayer(u8 station, u8 count);
+    const char* getErrorStr(s32 error);
+    static void initStaticWork();
+    static void clearErrorStatus();
 
     s32 unk4;
 };

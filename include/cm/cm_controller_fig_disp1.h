@@ -4,6 +4,8 @@
 #include <gf/gf_camera_controller.h>
 #include <types.h>
 
+struct gfPadStatus;
+
 class cmFigDisp1Controller : public gfCameraController {
     float unk8;
     float unkC;
@@ -23,6 +25,7 @@ public:
     cmFigDisp1Controller();
     // HYPOTHESIS: the parameter is the displayed object's width (the constructor passes 26.0f).
     void setCamParamByObjWidth(float width);
+    Vec2f getCameraRotControl(const gfPadStatus& status);
     virtual void update(float);
     virtual ~cmFigDisp1Controller();
 };

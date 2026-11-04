@@ -11,8 +11,19 @@
 #include <types.h>
 
 class ecMgr;
+class ecScnObjCallback;
+class efEffect;
 class gfArchive;
+class gfModelAnimation;
 namespace nw4r { namespace g3d { class ScnGroup; } }
+class ecScnObjCallback {
+public:
+    virtual ~ecScnObjCallback();
+    // HYPOTHESIS: parameter type from boolean condition check in SetCallbackCondition.
+    void SetCallbackCondition(bool);
+
+    nw4r::g3d::ScnObj* unk4;
+};
 class ecResource {
 public:
     // HYPOTHESIS: resource storage types follow word accesses and null checks.
@@ -31,9 +42,35 @@ public:
 
 class ecEffectWork {
 public:
-    u8 unk0[0x30];
+    union {
+        u8 unk0[0x30];
+        struct {
+            u8 unk0_[0x24];
+            u32 unk24;
+            s32 unk28;
+            u32 unk2C;
+        };
+    };
     ecResource* unk30;
-    u8 unk34[0x28];
+    union {
+        u8 unk34[0x28];
+        struct {
+            efEffect** unk34_;
+            u32 unk38;
+            s32 unk3C;
+            nw4r::g3d::ScnGroup* unk40;
+            nw4r::g3d::ScnMdl* unk44;
+            gfModelAnimation* unk48;
+            ecScnObjCallback* unk4C;
+            nw4r::g3d::ScnMdl* unk50;
+            u16 unk54;
+            u16 unk56;
+            u8 unk58;
+            u8 unk59;
+            u8 unk5A;
+            u8 unk5B;
+        };
+    };
     u32 unk5C;
     u16 unk60;
     u8 unk62[0x1A];
@@ -41,8 +78,15 @@ public:
     u32 unk80;
 
     ecEffectWork();
+    void render();
     void release(bool);
+    void pause();
+    void play();
     void end(bool, bool);
+    // HYPOTHESIS: parameter types from ecMgr::setParent forwarding.
+    void set_parent(nw4r::g3d::ScnMdl*, const char*, bool);
+    void set_parent(nw4r::g3d::ScnMdl*, u32, bool);
+    void init_attach();
 };
 
 extern ecMgr* g_ecMgr;

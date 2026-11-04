@@ -58,7 +58,11 @@ public:
         s32 m_skipCounter;
     };
     void* unk10C; // 0x10C HYPOTHESIS: the capture destination (IfSnapSaveTask)
-    u8 unk110[0x4];
+    union {
+        u8 unk110[0x4];
+        // HYPOTHESIS: byte tested by sqSingleSimple::start.
+        u8 unk110Value;
+    };
     gfCallBackList m_114;
     gfCallBackList unk118;
     vcBootParam m_bootParam;

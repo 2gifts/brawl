@@ -7,6 +7,8 @@
 #include <st/operator/st_operator_rule.h>
 #include <types.h>
 
+class gmGlobalCorps;
+
 class stOperatorRuleMelee : public stOperatorRule {
 public:
     gmResultInfo* m_resultInfo;
@@ -32,6 +34,7 @@ public:
     // HYPOTHESIS: the argument is stored as a byte at 0x224.
     stOperatorRuleMelee(u8);
     void setNormalResultInfo();
+    void initCorpsRule(gmGlobalCorps*);
 
     virtual void processBegin();
     virtual ~stOperatorRuleMelee();
