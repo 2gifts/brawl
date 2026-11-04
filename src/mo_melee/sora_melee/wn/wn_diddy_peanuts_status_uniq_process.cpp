@@ -21,6 +21,14 @@ void wnDiddyPeanutsStatusUniqProcess::execStatus(soModuleAccesser* moduleAccesse
 }
 
 void wnDiddyPeanutsStatusUniqProcess::execStop(soModuleAccesser* moduleAccesser) {
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0: {
+        Vec3f rotation = moduleAccesser->getModelModule().getNodeRotate(1);
+        rotation.m_x = moduleAccesser->getWorkManageModule().getFloat(0x21000000);
+        moduleAccesser->getModelModule().setNodeRotate(1, &rotation);
+        break;
+    }
+    }
 }
 
 void wnDiddyPeanutsStatusUniqProcess::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
