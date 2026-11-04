@@ -18,6 +18,11 @@
 #define FT_BC ftKoopaBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
+void ftKoopa::change(void* work, int startKind) {
+    onStart(startKind);
+    Fighter::changeSucceedCore(work, 0x122);
+}
+
 // Status teardown destroys its owned change-request queue before observers.
 #pragma dont_inline on
 #ifndef FT_REL_LINK_EXTERN // with FT_REL_LINK_EXTERN the queue destructor is the sora_melee function (ft_dol_instances.h)
