@@ -475,3 +475,83 @@ void muWifiInterfaceTask::setFriendFlag(int index, bool flag) {
     info->unk59_b4 = (info->unk59_b4 & ~(1 << index)) | (flag << index);
 }
 
+
+int muWifiInterfaceTask::getNumNode() {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        info = NULL;
+    } else {
+        info = &m_aidInfos[aid];
+    }
+    if (info == NULL) {
+        return 1;
+    }
+    int count = 0;
+    for (int i = 0; i < 4; i++) {
+        if ((int)info->unk68[i] == 1) {
+            count++;
+        }
+    }
+    return count;
+}
+
+wchar_t* muWifiInterfaceTask::getMyFriendStatusName(wchar_t* name) {
+    u8* destination;
+    const u8* source = &ntFriendInfo::getInstance()->unk0->unk450[0xA0];
+    destination = (u8*)name;
+    int count = 5;
+    memset(name, 0, 12);
+    while (--count >= 0) {
+        int character = source[0];
+        destination[0] = character;
+        character |= source[1];
+        destination[1] = source[1];
+        source += 2;
+        destination += 2;
+        if (character == 0) {
+            break;
+        }
+    }
+    return name;
+}
+
+wchar_t* muWifiInterfaceTask::getMyFriendStatusComment(wchar_t* name) {
+    u8* destination;
+    const u8* source = &ntFriendInfo::getInstance()->unk0->unk450[0xAA];
+    destination = (u8*)name;
+    int count = 20;
+    memset(name, 0, 42);
+    while (--count >= 0) {
+        int character = source[0];
+        destination[0] = character;
+        character |= source[1];
+        destination[1] = source[1];
+        source += 2;
+        destination += 2;
+        if (character == 0) {
+            break;
+        }
+    }
+    return name;
+}
+
+wchar_t* muWifiInterfaceTask::getMyShortComment(int index, wchar_t* name) {
+    u8* destination;
+    const u8* source = &ntFriendInfo::getInstance()->unk0->unk450[index * 0x28];
+    destination = (u8*)name;
+    int count = 20;
+    memset(name, 0, 42);
+    while (--count >= 0) {
+        int character = source[0];
+        destination[0] = character;
+        character |= source[1];
+        destination[1] = source[1];
+        source += 2;
+        destination += 2;
+        if (character == 0) {
+            break;
+        }
+    }
+    return name;
+}

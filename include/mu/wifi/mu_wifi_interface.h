@@ -51,6 +51,10 @@ struct muWifiAIDInfo {
             u8 unk59_b4 : 4;
             u8 unk59_b0 : 4;
         };
+        struct {
+            char _pad57Nodes[0x11];
+            u8 unk68[4];
+        };
     };
     u8 unk78_b7 : 1;
     u8 unk78_b3 : 4;
@@ -173,6 +177,11 @@ public:
     int getNetcond();
     // HYPOTHESIS: parameter types follow the bit index and flag register use.
     void setFriendFlag(int index, bool flag);
+    int getNumNode();
+    // HYPOTHESIS: outputs are wide strings stored as byte pairs in the save data.
+    wchar_t* getMyFriendStatusName(wchar_t* name);
+    wchar_t* getMyFriendStatusComment(wchar_t* comment);
+    wchar_t* getMyShortComment(int index, wchar_t* comment);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 
