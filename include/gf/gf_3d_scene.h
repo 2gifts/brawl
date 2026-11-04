@@ -105,10 +105,34 @@ public:
         u32 unk10;
         u32 unk14;
     };
+    // HYPOTHESIS: light handle returned by allocLightHandle (slot index and a byte copied from the slot).
+    struct LightHandle {
+        u8 m_index;
+        u8 m_unk1;
+        // HYPOTHESIS: inline accessor
+        bool isValid() const { return m_index != 0xFF; }
+    };
+    // HYPOTHESIS: per-light slot at 0x68 + i * 0xC (layout from allocLightHandle/releaseLightHandle).
+    struct LightSlot {
+        nw4r::g3d::LightObj* m_light;
+        u8 m_used : 1;
+        u8 m_released : 1;
+        u8 m_flags : 6;
+        u8 m_unk5;
+        u8 m_unk6;
+        u8 m_unk7;
+        u8 m_unk8;
+        u8 m_unk9;
+        u8 m_unkA;
+        u8 m_unkB;
+    };
     union {
         char _104[1044];
         struct {
-            char unk68[0x324];
+            union {
+                char unk68[0x324];
+                LightSlot m_lightSlots[10];
+            };
             Layer unk38C[9];
             char unk464[0x18];
         };
@@ -138,6 +162,8 @@ public:
     nw4r::g3d::LightObj* getLightObj(u8 p1);
     void updateZoneLightSet(u8 p1, u8 p2);
     void setUseCopyFB(u8 p1);
+    LightHandle allocLightHandle(nw4r::g3d::LightObj* light);
+    void releaseLightHandle(LightHandle* handle);
 
     bool add(gfSceneRoot::LayerType lt, nw4r::g3d::ScnMdl* scnMdl);
     bool remove(nw4r::g3d::ScnMdl* scnMdl);
