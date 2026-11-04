@@ -5,6 +5,8 @@
 #include <gf/gf_camera_controller.h>
 #include <mt/mt_vector.h>
 
+struct cmStageParam;
+
 class cmAIController : public gfCameraController {
 public:
     // HYPOTHESIS: layouts of the two blocks the constructor copies from the unit's default tables.
@@ -43,7 +45,7 @@ public:
     float m_userDistMin;
     DefaultParam unkBC;
     DefaultParam2 unk120;
-    void* unk138;
+    cmStageParam* unk138;
     void* unk13C;
     void* unk140;
     char unk144[0x18];
@@ -62,6 +64,12 @@ public:
     virtual void updateCameraPosTarget();
 
     void reset();
+    // HYPOTHESIS: tuning values are floats; range and shift-state layouts remain unresolved.
+    void setCameraParam(const float* param);
+    void normalUpdate(void* range, cmCameraParam* param, void* state, float aspect, float rate);
+    void getAtShiftNormal(cmCameraParam* param, void* range, float rate);
+    void getEyeShiftNormal(cmCameraParam* param, void* state, float rate);
+    void correctRangeEyeAt(Vec3f* eye, Vec3f* at, Rect2D* range, float fovy, float aspect, float xScale, float yScale);
     void setUserDistMin(float distance);
     void updateMeleeFix(float p1);
     void resetDevilOffset();
