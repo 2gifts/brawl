@@ -39,6 +39,11 @@ public:
 
     IfPhoto();
     void init();
+    // HYPOTHESIS: parameter types follow resource copies and model table accesses.
+    void createModel(nw4r::g3d::ResFile* modelFile, nw4r::g3d::ResFile* resFile,
+                     void* msgData, nw4r::g3d::ResFile* resFile2, u32 helpFlags);
+    void createModelByTbl(nw4r::g3d::ResFile* modelFile, const void* table, int count);
+    void initMsg();
     void exitPause();
     void getMediaState(IfSnapSaveMedia* media, int kind);
     // HYPOTHESIS: parameter types (the map has none).
