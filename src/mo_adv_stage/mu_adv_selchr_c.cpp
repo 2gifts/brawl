@@ -1,5 +1,6 @@
 #include <mu/mu_adv_selchr_c.h>
 #include <stdio.h>
+#include <string.h>
 #include <types.h>
 
 // muMenuController::getControllerID(): the pad of the controller (below 0: there is none).
@@ -259,4 +260,30 @@ int muAdvSelchrCTask::getNextPoke(int kind, bool forward) {
         } while (kind != lbl_40_rodata_930[index][0] && (m_unkC28[4] & lbl_40_rodata_930[index][1]) == 0);
     }
     return lbl_40_rodata_930[index][0];
+}
+
+gfPadStatus muAdvSelchrCTask::getPadStatus(int player) {
+    gfPadStatus status;
+    int padNo = fn_800BA3D8(&m_players[player].m_controller);
+    if (padNo >= 0) {
+        g_gfPadSystem->getSysPadStatus(padNo, &status);
+    } else {
+        memset(&status, 0, sizeof(status));
+    }
+    return status;
+}
+
+int muAdvSelchrCTask::findNextCharCursorPos(int player, int pos) {
+    int next = pos;
+    int count = m_teams[m_teamCurPos].m_count;
+    do {
+        next++;
+        if (next >= count) {
+            next = 0;
+        }
+        if (canLocateCursor(player, next)) {
+            return next;
+        }
+    } while (next != pos);
+    return -1;
 }

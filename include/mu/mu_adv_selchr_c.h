@@ -2,6 +2,7 @@
 
 #include <StaticAssert.h>
 #include <gf/gf_file_io_handle.h>
+#include <gf/gf_pad_system.h>
 #include <gf/gf_task.h>
 #include <mu/mu_menu_controller.h>
 #include <mu/mu_object.h>
@@ -115,6 +116,8 @@ public:
     int getDirButtonRepeat(int player);
     int getNextPoke(int kind, bool forward);
     void storeResult();
+    gfPadStatus getPadStatus(int player);
+    int findNextCharCursorPos(int player, int pos);
 
     static void mainStepSelectedInit(muAdvSelchrCTask* task);
     static int mainStepAppearMain(muAdvSelchrCTask* task);
