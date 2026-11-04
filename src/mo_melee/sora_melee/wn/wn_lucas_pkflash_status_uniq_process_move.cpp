@@ -20,4 +20,17 @@ void wnLucasPKFlashStatusUniqProcessMove::execStatus(soModuleAccesser* moduleAcc
 }
 
 void wnLucasPKFlashStatusUniqProcessMove::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
+    soWorkManageModule& work = moduleAccesser->getWorkManageModule();
+    soKineticModule& kinetic = moduleAccesser->getKineticModule();
+    kinetic.changeKinetic(2, moduleAccesser);
+    soKineticEnergy* energy = kinetic.getEnergy(2);
+    energy->clearSpeed();
+    energy->disable();
+    if (nextStatus == 1) {
+        int handle = work.getInt(0x20000000);
+        moduleAccesser->getEffectModule().kill(handle, true, true);
+        soEffectModule& effect = moduleAccesser->getEffectModule();
+        effect.reqFollow(static_cast<EfID>(0x1B000D), 0,
+            &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, false, 0, 0, -1);
+    }
 }
