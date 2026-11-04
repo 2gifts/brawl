@@ -49,6 +49,12 @@ public:
     u32 getGamePadQueueCount();
     int getDebugPadStatus(int padNum, gfPadStatus* dest);
     int getSysPadStatus(int padNum, gfPadStatus* dest);
+    // HYPOTHESIS: the by-value overload supplies a snapshot to interface steps.
+    gfPadStatus getSysPadStatus(int padNum) {
+        gfPadStatus status;
+        getSysPadStatus(padNum, &status);
+        return status;
+    }
     int getGamePadStatus(int padNum, gfPadStatus* dest);
     void maskMotor(u16);
     static void merge(gfPadStatus* src, int numPads, u32 mask, gfPadStatus* dest);
