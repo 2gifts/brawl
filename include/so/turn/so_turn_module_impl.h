@@ -41,6 +41,7 @@ public:
     virtual ~soTurnModuleImpl();
     virtual void activate();
     virtual void set(const soTurnData* data, bool changeLr, bool isExtern, float lr);
+    virtual void end();
     virtual bool isTurn() { return m_state != 0; }
     virtual bool isExtern() { return m_isExtern; }
     virtual float getRY() { return m_rotY; }
