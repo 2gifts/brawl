@@ -6,6 +6,7 @@
 #include <StaticAssert.h>
 
 class efScreenHandle;
+struct _GXColor;
 template <class T> class soArray;
 
 class soEffectScreen {
@@ -14,6 +15,9 @@ public:
 
     soEffectScreen(soArray<efScreenHandle>* handles);
     ~soEffectScreen();
+    void fill(int index, int frames, const _GXColor& color, int layer, int priority);
+    void clear(int index, int frames);
+    void clearAll();
     void notifyEventAnimCmd(const acAnimCmd* cmd, soModuleAccesser* accessor);
 };
 static_assert(sizeof(soEffectScreen) == 4, "Class is wrong size!");

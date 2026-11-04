@@ -1,10 +1,19 @@
 #define FT_SNAKE_ARTICLE_POOLS
-#include <types.h>
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/snake/ft_snake_builder.h>
+#include <math.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
+#include <types.h>
+
+bool mtIsZero(float value) {
+    bool result = false;
+    double magnitude = __fabs(value);
+    value = magnitude;
+    if (value < 0.00001f) result = true;
+    return result;
+}
 
 void wnSnakeMine::processCollision() {
     if (m_moduleAccesser->getStatusModule().getStatusKind() == 1) {

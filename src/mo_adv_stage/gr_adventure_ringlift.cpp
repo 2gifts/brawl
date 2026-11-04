@@ -74,3 +74,11 @@ void grAdventureRingLift::notifyEventOnTrigger(int flag) {
 }
 
 void grAdventureRingLift::notifyEventOffTrigger(int flag) { }
+
+grAdventureRingLift* grAdventureRingLift::create(int mdlIndex, const char* taskName) {
+    grAdventureRingLift* ground = new (Heaps::StageInstance) grAdventureRingLift(taskName);
+    ground->setMdlIndex(mdlIndex);
+    return ground;
+}
+
+grAdventureRingLift::~grAdventureRingLift() { }

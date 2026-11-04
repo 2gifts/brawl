@@ -72,9 +72,13 @@ void* soArchiveItem::getData(const char* nodeName) {
 }
 
 void soArchiveDb::Processer::processBegin() {
-    for (int i = 0; i < 3; i++) {
-        if (lbl_27_bss_120[i] != nullptr) {
-            fn_800457F4(lbl_27_bss_120[i]);
+    int index = 0;
+    utArchiveManager** manager = lbl_27_bss_120;
+    do {
+        if (*manager != nullptr) {
+            fn_800457F4(*manager);
         }
-    }
+        ++index;
+        ++manager;
+    } while (index < 3);
 }

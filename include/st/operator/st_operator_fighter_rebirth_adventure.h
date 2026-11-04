@@ -16,4 +16,5 @@ public:
     virtual ~stOperatorFighterRebirthAdventure();
     virtual void startOperator();
     virtual void resetRebirth();
+    void fighterRebirth2POnStartButton();
 };

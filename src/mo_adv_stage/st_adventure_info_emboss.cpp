@@ -1,4 +1,5 @@
 #include <em/enemy.h>
+#include <gm/gm_global.h>
 #include <sora_adv_stage/st_adventure_info_emboss.h>
 
 extern "C" void fn_40_15B48(stAdventureInfoContact* contact);
@@ -43,4 +44,39 @@ void stAdventureInfoEmBoss::setBossPacknWnRight(u32 createId) {
 void stAdventureInfoEmBoss::remove() {
     m_isActive = false;
     fn_40_15B48(this);
+}
+
+void stAdventureInfoEmBoss::init(int createId) {
+    if (isBoss(createId)) {
+        m_isPair = g_GameGlobal->m_advData->m_flags.m_unk1;
+        if (m_isPair) {
+            Enemy* enemy = getEnemy(createId);
+            bool isSub;
+            if (enemy != NULL && enemy->getEnemyKind() == 0x3C) {
+                isSub = true;
+            } else {
+                isSub = false;
+            }
+            if (isSub) {
+                m_subCreateId = createId;
+                return;
+            }
+        }
+        m_createId = createId;
+        m_isActive = true;
+    }
+}
+
+void stAdventureInfoEmBoss::notifyDead(u32 createId) {
+    Enemy* enemy = getEnemy(createId);
+    if (enemy != NULL && enemy->getEnemyKind() == 0x2E) {
+        m_isDead[0] = true;
+        m_isDead[1] = true;
+    } else if (m_isPair && enemy != NULL && enemy->getEnemyKind() == 0x3B) {
+        m_isDead[0] = true;
+    } else if (m_isPair && enemy != NULL && enemy->getEnemyKind() == 0x3C) {
+        m_isDead[1] = true;
+    } else if (isBoss(createId)) {
+        m_isDead[0] = true;
+    }
 }

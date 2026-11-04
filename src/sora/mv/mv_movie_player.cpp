@@ -1,5 +1,7 @@
-#include <types.h>
+#include <mv/mv_THPPlayer.h>
 #include <mv/mv_movie_player.h>
+#include <revolution/OS/OSInterrupt.h>
+#include <types.h>
 
 extern "C" void fn_8007C168();
 extern "C" void fn_8007C9DC();
@@ -46,3 +48,14 @@ unsigned char lbl_8049DDB0[0x10] __attribute__((aligned(8))) = { 0 };
 unsigned char lbl_8049DDC0[0x10] __attribute__((aligned(8))) = { 0 };
 unsigned char lbl_8049DDD0[0x20] __attribute__((aligned(8))) = { 0 };
 unsigned char lbl_8049DDF0[0xd8] __attribute__((aligned(8))) = { 0 };
+
+extern "C" void MIXUpdateSettings();
+extern void (*lbl_805A0230)();
+
+void CallbackTHPAudioFrame() {
+    if (lbl_805A0230) lbl_805A0230();
+    BOOL interrupts = OSEnableInterrupts();
+    MIXUpdateSettings();
+    THPPlayerStreamUpdate();
+    OSRestoreInterrupts(interrupts);
+}

@@ -4,6 +4,8 @@
 #include <GX.h>
 #include <types.h>
 
+class efScreenHandle;
+
 class efScreen {
     char _spacer[0x1DC];
 
@@ -16,6 +18,7 @@ private:
 
 public:
     int requestFill(float, int, int, GXColor*);
+    void requestFill(efScreenHandle handle, float frames, GXColor* color);
     int requestFlash(float frames, int layer, u8 alpha, u32 cycles, GXColor* color);
     static efScreen* getInstance();
 };

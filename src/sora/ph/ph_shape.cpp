@@ -4,15 +4,14 @@
 //   0x80096048   128  __dt   [map: phShape____dt]
 //   0x800960C8   164  getMatrixPosture   [map: phShape__getMatrixPosture]
 //   0x8009616C   372  draw   [map: phShape__draw]
-#include <ph/ph_shape.h>
-
 #include <havok/hkEntity.h>
 #include <havok/hkMemory.h>
-#include <havok/hkWorld.h>
-#include <revolution/GX.h>
-#include <havok/hkRotation.h>
 #include <havok/hkQuaternion.h>
+#include <havok/hkRotation.h>
 #include <havok/hkVector4.h>
+#include <havok/hkWorld.h>
+#include <ph/ph_shape.h>
+#include <revolution/GX.h>
 
 // Local declaration (MARKED): the havok header defines the hkRigidBody flag constructor inline, which would
 // inline the base constructor into phShape. The target calls the out-of-line constructor (hkRigidBody____ct).
@@ -42,11 +41,10 @@ static hkRigidBody* allocRigidBody() {
 
 phShape::phShape(int flag) {
     m_rigidBody = NULL;
-    hkRigidBody* rb = allocRigidBody();
-    if (rb != NULL) {
-        rb = new (rb) hkRigidBody(flag);
-    }
-    m_rigidBody = rb;
+    hkReferencedObject* allocation = (hkReferencedObject*)hkMemory::getInstance().allocateChunk(0x1F0, 0x2B);
+    allocation->m_memSizeAndFlags = 0x1F0;
+    hkRigidBody* rigidBody = (hkRigidBody*)allocation;
+    m_rigidBody = new (rigidBody) hkRigidBody(flag);
 }
 
 phShape::~phShape() {
