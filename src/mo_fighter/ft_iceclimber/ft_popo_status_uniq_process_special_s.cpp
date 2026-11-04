@@ -34,13 +34,15 @@ void ftPopoStatusUniqProcessSpecialS::execStatus(soModuleAccesser* moduleAccesse
     if (moduleAccesser->getSituationModule().getKind() != 0) {
         return;
     }
+    soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
     int threshold = soValueAccesser::getConstantInt(moduleAccesser, 0x5dc0, 0);
-    if (moduleAccesser->getWorkManageModule().getInt(0x20000002) < threshold) {
+    if (workManage.getInt(0x20000002) < threshold) {
         return;
     }
-    u32 mask = soController::getButtonMask(soController::PadButton(1));
     soControllerModule& controller = moduleAccesser->getControllerModule();
-    if ((controller.getTrigger() & mask) == 0) {
+    u32 mask = soController::getButtonMask(soController::PadButton(1));
+    u32 trigger = controller.getTrigger();
+    if ((trigger & mask) == 0) {
         return;
     }
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000010) == true) {
