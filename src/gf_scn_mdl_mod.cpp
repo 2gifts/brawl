@@ -3,6 +3,8 @@
 #include <nw4r/math/math_types.h>
 #include <types.h>
 
+ScnMdlMod::~ScnMdlMod() {}
+
 void CalcWorldPartialScale(nw4r::math::MTX34* matrices, const u8* byteCode,
                           nw4r::g3d::ResMdl model, const nw4r::math::VEC3* scales) {
     if (byteCode || (byteCode = model.GetResByteCode("NodeTree"))) {
