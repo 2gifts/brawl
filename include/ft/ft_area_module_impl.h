@@ -12,5 +12,7 @@ public:
                      soEventObserverRegistrationDesc* regDesc, int unk8);
     virtual ~ftAreaModuleImpl();
     void setAreaData(soSet<soAreaData>* areas);
+    virtual void activate(int ownerId);
+    virtual void update();
 };
 static_assert(sizeof(ftAreaModuleImpl) == 0x68, "Fighter area module layout");

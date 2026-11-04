@@ -150,6 +150,7 @@ public:
 };
 
 class soAreaModuleImpl : public soAreaModule, public gfAreaEventReciver, public soAnimCmdEventObserver, public soStatusEventObserver, public soSituationEventObserver {
+    friend class ftAreaModuleImpl;
     soArray<soAreaInstance>* m_areaInstanceArray;
     soArray<soAreaContactLog>* m_areaContactLogArray;
     union {
