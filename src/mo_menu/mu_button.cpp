@@ -274,7 +274,7 @@ void muButtonTask::initWork() {
     m_work->m_dlgKind = 0;
     m_work->m_unk1BC = 0;
     m_work->m_unk1BE = 0;
-    m_work->m_unk1C0 = 0;
+    m_work->m_dlgWait = 0;
     m_work->m_unk1C4 = 0;
     m_work->m_isSubStickOn = 0;
     m_work->m_unk1D4 = 0;
@@ -1044,6 +1044,52 @@ void muButtonTask::initStepButtonAssign(muButtonTask* task) {
     task->setAssignAnim(0);
 }
 
+// Any button of any controller was pushed.
+static inline bool isAnyPushed(muButtonTask* task) {
+    gfPadStatus pad;
+    g_gfPadSystem->getSysPadStatus(0xF0, &pad);
+    return isAnyPushed(task, pad);
+}
+
+// The buttons leave: the action list closes and the controller model turns back.
+void muButtonTask::initStepButtonLeave(muButtonTask* task) {
+    int padKind = task->m_work->m_padKind;
+    task->m_work->m_scene->removeObj(task->m_work->m_objs[24]->m_sceneModel);
+    task->m_work->m_isListOpen = false;
+    const PadInfo* info = &sPadInfos[padKind];
+    MuObject* pad = task->m_work->m_objs[info->m_padObj];
+    pad->setFrameVisible(30.0f);
+    pad->setFrameNode(30.0f);
+    pad->setFrameTexSrt(30.0f);
+    pad->m_modelAnim->m_anmObjVisRes->SetUpdateRate(1.0f);
+    pad->m_modelAnim->m_anmObjChrRes->SetUpdateRate(1.0f);
+    pad->m_modelAnim->m_anmObjTexSrtRes->SetUpdateRate(1.0f);
+    task->setButtonCursor(padKind, -1);
+    task->m_work->m_msg->printf(1, "");
+}
+
+// The buttons leave until frame 37 (it is cut short with any button), then they are taken off the scene.
+void muButtonTask::mainStepButtonLeave(muButtonTask* task) {
+    const PadInfo* info = &sPadInfos[task->m_work->m_padKind];
+    MuObject* padObj = task->m_work->m_objs[info->m_padObj];
+    bool done;
+    if (padObj->m_modelAnim->m_anmObjChrRes->GetFrame() >= 37.0f || isAnyPushed(task)) {
+        padObj->setFrameVisible(37.0f);
+        padObj->setFrameNode(37.0f);
+        padObj->setFrameTexSrt(37.0f);
+        padObj->m_modelAnim->m_anmObjVisRes->SetUpdateRate(0.0f);
+        padObj->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+        padObj->m_modelAnim->m_anmObjTexSrtRes->SetUpdateRate(0.0f);
+        task->m_work->m_scene->removeObj(task->m_work->m_groups[info->m_group]);
+        done = true;
+    } else {
+        done = false;
+    }
+    if (done) {
+        changeStep(task, 2);
+    }
+}
+
 void muButtonTask::initStepRestoreDlg(muButtonTask* task) {
     task->setButtonCursor(task->m_work->m_padKind, -1);
     task->openDlg(1, 0x1E);
@@ -1055,10 +1101,73 @@ void muButtonTask::initStepTryDlg(muButtonTask* task) {
     task->openDlg(2, 0x1F);
 }
 
+// The try dialog closes with any button.
+void muButtonTask::mainStepTryDlg(muButtonTask* task) {
+    gfPadStatus pad;
+    g_gfPadSystem->getSysPadStatus(0xF0, &pad);
+    if (isAnyPushed(task, pad)) {
+        task->m_work->m_scene->removeObj(task->m_work->m_objs[25]->m_sceneModel);
+        task->m_work->m_dlgKind = 0;
+        changeStep(task, 4);
+    }
+}
+
 void muButtonTask::initStepStoreDlg(muButtonTask* task) {
     task->setButtonCursor(task->m_work->m_padKind, -1);
     task->openDlg(3, 0x20);
     task->m_work->m_unk1BC = 0;
+}
+
+// The buttons leave before the practice fight (as in initStepButtonLeave, without the text).
+void muButtonTask::initStepToPractice(muButtonTask* task) {
+    int padKind = task->m_work->m_padKind;
+    task->m_work->m_scene->removeObj(task->m_work->m_objs[24]->m_sceneModel);
+    task->m_work->m_isListOpen = false;
+    const PadInfo* info = &sPadInfos[padKind];
+    MuObject* pad = task->m_work->m_objs[info->m_padObj];
+    pad->setFrameVisible(30.0f);
+    pad->setFrameNode(30.0f);
+    pad->setFrameTexSrt(30.0f);
+    pad->m_modelAnim->m_anmObjVisRes->SetUpdateRate(1.0f);
+    pad->m_modelAnim->m_anmObjChrRes->SetUpdateRate(1.0f);
+    pad->m_modelAnim->m_anmObjTexSrtRes->SetUpdateRate(1.0f);
+    task->setButtonCursor(padKind, -1);
+}
+
+// As mainStepButtonLeave; then the practice fight starts.
+void muButtonTask::mainStepToPractice(muButtonTask* task) {
+    const PadInfo* info = &sPadInfos[task->m_work->m_padKind];
+    MuObject* padObj = task->m_work->m_objs[info->m_padObj];
+    bool done;
+    if (padObj->m_modelAnim->m_anmObjChrRes->GetFrame() >= 37.0f || isAnyPushed(task)) {
+        padObj->setFrameVisible(37.0f);
+        padObj->setFrameNode(37.0f);
+        padObj->setFrameTexSrt(37.0f);
+        padObj->m_modelAnim->m_anmObjVisRes->SetUpdateRate(0.0f);
+        padObj->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+        padObj->m_modelAnim->m_anmObjTexSrtRes->SetUpdateRate(0.0f);
+        task->m_work->m_scene->removeObj(task->m_work->m_groups[info->m_group]);
+        done = true;
+    } else {
+        done = false;
+    }
+    if (done) {
+        changeStep(task, 11);
+    }
+}
+
+// The dialog that tells that the settings were stored closes with any button or after its time.
+void muButtonTask::mainStepStoredDlg(muButtonTask* task) {
+    gfPadStatus pad;
+    g_gfPadSystem->getSysPadStatus(0xF0, &pad);
+    if (!isAnyPushed(task, pad)) {
+        if (--task->m_work->m_dlgWait > 0) {
+            return;
+        }
+    }
+    task->m_work->m_scene->removeObj(task->m_work->m_objs[25]->m_sceneModel);
+    task->m_work->m_dlgKind = 0;
+    changeStep(task, 6);
 }
 
 void muButtonTask::initStepExit(muButtonTask* task) {
