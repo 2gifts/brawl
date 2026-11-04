@@ -13,6 +13,8 @@ struct soLinkEventArgs {
     friend class soCaptureModuleImpl;
     friend class wnPokeLizardonRock;
     friend class soPostureModuleImpl;
+    // HYPOTHESIS: Dedede constructs the shared link event directly.
+    friend class ftDedede;
     int m_eventKind;
     bool _0x4;
 protected:

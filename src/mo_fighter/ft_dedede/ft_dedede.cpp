@@ -48,6 +48,40 @@ ftDededeExtendParamAccesser g_ftDededeExtendParamAccesser;
 
 ftClassInfoImpl<Fighter_Dedede, ftDedede> g_ftClassInfoDedede;
 
+void ftDedede::notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser) {
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x113:
+    case 0x129:
+        if (kind == 0) {
+            soLinkEventArgs eventArgs(0x838);
+            moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        } else {
+            soLinkEventArgs eventArgs(0x839);
+            moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        }
+        break;
+    case 0x115:
+    case 0x12F:
+    case 0x130:
+    case 0x131:
+    case 0x132:
+    case 0x133:
+    case 0x134:
+    case 0x135:
+    case 0x136:
+    case 0x137:
+        if (kind == 0) {
+            soLinkEventArgs eventArgs(0x838);
+            moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        } else {
+            soLinkEventArgs eventArgs(0x839);
+            moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        }
+        break;
+    }
+    Fighter::notifyEventChangeSituation(kind, prevKind, moduleAccesser);
+}
+
 ftDedede::ftDedede(s32 entryId,
                  Heaps::HeapType instHeap,
                  Heaps::HeapType nwModelInstHeap,
