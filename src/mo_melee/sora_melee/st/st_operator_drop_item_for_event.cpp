@@ -2,3 +2,10 @@
 #include <types.h>
 
 stOperatorDropItemEvent::~stOperatorDropItemEvent() { }
+
+stOperatorDropItemEvent::stOperatorDropItemEvent()
+    : stOperatorDropItemMelee("StOperatorDropItemEvent") {
+    unk74 = 0.0f;
+    unk70 = 0.0f;
+    unk78 = 0;
+}
