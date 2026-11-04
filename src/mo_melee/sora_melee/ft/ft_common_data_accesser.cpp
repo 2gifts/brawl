@@ -274,6 +274,51 @@ void* ftCommonDataAccesser::getWeaponData14(ftKind kind, bool* resourceGroup) co
     return lbl_27_bss_3210[Fighter_Link].data->extendParam[11];
 }
 
+void* ftCommonDataAccesser::getWeaponData15(ftKind kind, bool* resourceGroup) const
+{
+    switch (kind) {
+    case Fighter_Link:
+        return lbl_27_bss_3210[Fighter_Link].data->extendParam[16];
+    default:
+        return NULL;
+    }
+}
+
+void* ftCommonDataAccesser::getWeaponData18(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_Snake].data->extendParam[7];
+}
+
+void* ftCommonDataAccesser::getWeaponData24(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_Snake].data->extendParam[13];
+}
+
+void* ftCommonDataAccesser::getWeaponData32(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_Pikachu].data->extendParam[7];
+}
+
+void* ftCommonDataAccesser::getWeaponData38(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_PokeFushigisou].data->extendParam[4];
+}
+
+void* ftCommonDataAccesser::getWeaponData40(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_PokeFushigisou].data->extendParam[6];
+}
+
+void* ftCommonDataAccesser::getWeaponData42(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_PokeTrainer].data->extendParam[4];
+}
+
+void* ftCommonDataAccesser::getWeaponData43(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[Fighter_PokeTrainer].data->extendParam[5];
+}
+
 void* ftCommonDataAccesser::getWeaponData91(ftKind kind, bool* resourceGroup) const
 {
     switch (kind) {

@@ -161,6 +161,14 @@ public:
     void* getWeaponData4(ftKind kind, bool* resourceGroup) const;
     void* getWeaponData5(ftKind kind, bool* resourceGroup) const;
     void* getWeaponData14(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData15(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData18(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData24(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData32(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData38(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData40(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData42(ftKind kind, bool* resourceGroup) const;
+    void* getWeaponData43(ftKind kind, bool* resourceGroup) const;
     void* getWeaponData91(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Flash
     void* getWeaponData92(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Fire
     void* getWeaponData93(ftKind kind, bool* resourceGroup) const;  // HYPOTHESIS: Lucas PK Thunder
