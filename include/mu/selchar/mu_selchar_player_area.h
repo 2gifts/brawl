@@ -122,5 +122,6 @@ public:
     // The character kind of each of the three Pokemon of the Pokemon Trainer (and of the trainer).
     static u8 exchangePoke3ToGmCharKind(int poke);
     void closeNameEntry();
+    void sendSystemCharKind();
 };
 static_assert(sizeof(muSelCharPlayerArea) == 0x448, "Wrong size for class!");

@@ -10,6 +10,7 @@
 #include <mu/selchar/mu_selchar_hand.h>
 #include <mu/selchar/mu_selchar_player_area.h>
 #include <types.h>
+#include <snd/snd_system.h>
 
 // The menu helpers take three integers; this unit passes only the first one (see TIPS.md).
 extern "C" int exchangeMuSelchkindToMuCharKind__6muMenuFiii(int selchKind);
@@ -390,4 +391,53 @@ u8 muSelCharTask::getSelCharTypeHighScoreKind(int selCharType) {
         return sKumiteHighScoreKind[m_kumiteType];
     }
     return getSelCharTypeData(selCharType)->m_highScoreKind;
+}
+
+int muSelCharHand::getMode(int* arg) {
+    if (arg) {
+        *arg = m_modeArg;
+    }
+    return m_mode;
+}
+
+extern const u8 lbl_10_rodata_2C8[0x28];
+
+void muSelCharTask::createWifiModel(nw4r::g3d::ResFile* resFile) {
+    createObjResFile(lbl_10_rodata_2C8, 5, resFile, nullptr, false);
+}
+
+extern MuAnimIdxData lbl_10_data_610[5][2];
+
+void muSelCharTask::dispDiffLevel(int level, bool enabled) {
+    lbl_10_data_610[level][!enabled].m_flags = 1;
+    m_objs[Obj_DiffLevel]->setAnimIdx(&lbl_10_data_610[level][!enabled], false);
+}
+
+
+void muSelCharTask::ruleCall() {
+    SndID sound = (SndID)0x202B;
+    switch (unk5D4) {
+    case 0:
+        sound = (SndID)0x202B;
+        break;
+    case 1:
+        sound = (SndID)0x202D;
+        break;
+    case 2:
+        sound = (SndID)0x202C;
+        break;
+    }
+    g_sndSystem->playSEwithFixEffect(sound, 1.0f, 1.0f);
+}
+
+muSelCharTask* muSelCharTask::create(void* data) {
+    muSelCharTask* task = new ((HeapType)0x2A) muSelCharTask;
+    task->initProc(data);
+    return task;
+}
+
+void muSelCharTask::sendSystemAllCharKind() {
+    for (int area = 0; area < m_numPlayerAreas; area++) {
+        m_selCharPlayerAreas[area]->sendSystemCharKind();
+    }
 }
