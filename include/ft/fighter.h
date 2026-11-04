@@ -1,3 +1,4 @@
+// Local BrawlHeaders shadow: add item animation and knockout declarations.
 #pragma once
 // SHADOW of BrawlHeaders/ft/fighter.h: inline virtuals of the fighter RELs (FT_MODULE_BUILDER)
 
@@ -1457,6 +1458,7 @@ public:
     virtual int checkDead();
     virtual void onDeadEnd();
     virtual void toKnockOut();
+    void toKnockOut(soDamageAttackerInfo* attackerInfo);
     virtual void activate();
 #ifdef FT_MODULE_BUILDER
     virtual void onActivate() { }
@@ -1601,6 +1603,7 @@ public:
     virtual void* getVirtualNodeMatrixPool();
 
     void start(Vec3f* pos, float lr, float damage, int, bool);
+    void setItemHoldAnim(BaseItem* item, u32 index, bool enabled);
     void setCurry(bool setStatus, int unk2);
     void setHammer(bool setStatus, int unk2);
     void setSuperStar(bool setStatus, int duration, bool);

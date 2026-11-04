@@ -7,6 +7,7 @@
 #include <so/so_slow.h>
 #include <so/so_value_accesser.h>
 #include <types.h>
+#include <it/item.h>
 
 void Fighter::postCreate() { }
 
@@ -240,4 +241,33 @@ bool Fighter::isInhaled() {
 
 void Fighter::offInhaled() {
     m_moduleAccesser->getWorkManageModule().offFlag(0x12000036);
+}
+
+void Fighter::toKnockOut(soDamageAttackerInfo* attackerInfo) {
+    m_moduleAccesser->getDamageModule().restoreAttackerInfo(attackerInfo);
+    toKnockOut();
+}
+
+void Fighter::setItemHoldAnim(BaseItem* item, u32 index, bool enabled) {
+    int haveKind = item->getParam(itValueAccesser::Specialized_Param_Int_Have_Kind);
+    switch (haveKind) {
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+        if (enabled == true) {
+            int holdKind;
+            switch (haveKind) {
+            case 3: holdKind = 0; break;
+            case 4: holdKind = 1; break;
+            case 5: holdKind = 2; break;
+            case 6: holdKind = 3; break;
+            }
+            attachItemHoldAnim(holdKind, index);
+        } else {
+            m_moduleAccesser->getMotionModule().removePartialAnimChr(0);
+            m_moduleAccesser->getMotionModule().enablePartialCancelNode(false);
+        }
+        break;
+    }
 }
