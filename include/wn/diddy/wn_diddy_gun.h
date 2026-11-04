@@ -16,5 +16,7 @@ public:
     // The body lives in the module blob; declared so the class info's createArray can construct articles.
     wnDiddyGun(s32 articleId, const wnArticleBuildInfo& info, const wnDiddyGunData* data);
     virtual ~wnDiddyGun();
+    void activate(int founderTaskId, int resourceId, bool constraint, int nodeId);
+    virtual void notifyEventLink(soLinkEventArgs* event, soModuleAccesser* moduleAccesser, StageObject* sender, int selector);
 };
 static_assert(sizeof(wnDiddyGun) == 0x1CB4, "Diddy popgun article extent");
