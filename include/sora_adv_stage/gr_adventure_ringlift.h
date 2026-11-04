@@ -21,6 +21,7 @@ protected:
     float m_animFrame;      // 0x170
 
 public:
+    grAdventureRingLift(const char* taskName) : grAdventureMoveGround(taskName), m_state(0) { }
     virtual void notifyEventOnTrigger(int flag);
     virtual void notifyEventOffTrigger(int flag);
     virtual ~grAdventureRingLift();
