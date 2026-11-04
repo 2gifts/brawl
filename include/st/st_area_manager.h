@@ -89,6 +89,8 @@ public:
     bool getMovementArea(u32 areaId, stMovementData* data);
     bool getWater(u32 areaId, stWaterData* data);
     bool getHitPointEffect(u32 areaId, stHitPointEffectData* data);
+    // HYPOTHESIS: the first argument is unused; the second is the area ID.
+    void setValidTriggerfromAreaID(u32 unused, u32 areaId);
 };
 static_assert(sizeof(stAreaManager) == 0x54, "Class is wrong size!");
 
