@@ -1495,6 +1495,80 @@ AiClBlock* aiMgr::get_via_blk2_core(AiClBlock* goal, AiClBlock* from, AiClBlock*
     return goal;
 }
 
+bool aiChkSegmentCross(const Vec2f* a, const Vec2f* b, const Vec2f* c, const Vec2f* d, Vec2f* cross);
+
+// Whether a floor line of joint `list` that lies in the box min..max crosses a floor line of joint `other` (both
+// lists walked as in aiNextJointLine). Lines that are nearly horizontal or vertical must lie inside the box.
+// HYPOTHESIS: the name; update_cl_blocks calls it for every joint of a block against the joint of another block.
+bool aiChkJointCross(tag_AiClJointList* list, tag_AiClJointList* other, const Vec2f* min, const Vec2f* max) {
+    grCollisionLine* l = list->m_line;
+    bool walkRight = false;
+    if (!list->m_collision.isValid() || !other->m_collision.isValid()) {
+        return false;
+    }
+    grCollision* coll = list->m_collision.getCollision();
+    grCollision* otherColl = other->m_collision.getCollision();
+    do {
+        if (!l->m_isUnder) {
+            continue;
+        }
+        grCollSegmentEx seg;
+        Vec2f left;
+        Vec2f right;
+        coll->getSegment(&seg, l, 0);
+        if (seg.m_segment.m_p0Pos.m_x <= seg.m_segment.m_p1Pos.m_x) {
+            left = seg.m_segment.m_p0Pos;
+            right = seg.m_segment.m_p1Pos;
+        } else {
+            right = seg.m_segment.m_p0Pos;
+            left = seg.m_segment.m_p1Pos;
+        }
+        if (left.m_x > max->m_x || right.m_x < min->m_x) {
+            continue;
+        }
+        if (left.m_y > max->m_y && right.m_y > max->m_y) {
+            continue;
+        }
+        if (left.m_y < min->m_y && right.m_y < min->m_y) {
+            continue;
+        }
+        if (__fabsf(left.m_y - right.m_y) < 0.01f) {
+            if (left.m_y < min->m_y || left.m_y > max->m_y) {
+                continue;
+            }
+        } else if (__fabsf(left.m_x - right.m_x) < 0.01f) {
+            if (left.m_x < min->m_x || left.m_x > max->m_x) {
+                continue;
+            }
+        }
+        grCollisionLine* otherLine = other->m_line;
+        bool otherRight = false;
+        do {
+            if (!otherLine->m_isUnder) {
+                continue;
+            }
+            grCollSegmentEx otherSeg;
+            Vec2f otherLeft;
+            Vec2f otherRightEnd;
+            otherColl->getSegment(&otherSeg, otherLine, 0);
+            if (otherSeg.m_segment.m_p0Pos.m_x <= otherSeg.m_segment.m_p1Pos.m_x) {
+                otherLeft = otherSeg.m_segment.m_p0Pos;
+                otherRightEnd = otherSeg.m_segment.m_p1Pos;
+            } else {
+                otherRightEnd = otherSeg.m_segment.m_p0Pos;
+                otherLeft = otherSeg.m_segment.m_p1Pos;
+            }
+            if (left.m_x > otherRightEnd.m_x || right.m_x < otherLeft.m_x) {
+                continue;
+            }
+            if (aiChkSegmentCross(&left, &right, &otherLeft, &otherRightEnd, NULL) == true) {
+                return true;
+            }
+        } while ((otherLine = aiNextJointLine(other, otherColl, otherLine, otherRight)) != NULL);
+    } while ((l = aiNextJointLine(list, coll, l, walkRight)) != NULL);
+    return false;
+}
+
 bool aiMgr::chk_cl_cross(Vec2f* from, Vec2f* to, u32 mask, Vec2f* hitPos, AiClBlock* ignore) {
     return chk_cl_cross2(from, to, mask, hitPos, ignore) != NULL;
 }
