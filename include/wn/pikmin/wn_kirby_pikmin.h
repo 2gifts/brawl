@@ -15,5 +15,7 @@ public:
     // The body lives in the module blob; declared so the class info's createArray can construct articles.
     wnKirbyPikmin(s32 articleId, const wnArticleBuildInfo& info, const wnKirbyPikminData* data);
     virtual ~wnKirbyPikmin();
+    virtual bool notifyEventCollisionAttackCheck(u32 flags);
+    bool reflectRequest(Vec2f* speedMul, Vec2f* accelMul);
 };
 static_assert(sizeof(wnKirbyPikmin) == 0x20DC, "Kirby's Pikmin article extent");
