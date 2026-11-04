@@ -1,5 +1,10 @@
+#include <gf/gf_area_manager.h>
+#include <gr/collision/gr_collision.h>
 #include <gr/collision/gr_collision_collection.h>
+#include <gr/collision/gr_collision_test_types.h>
+#include <mt/mt_coll2d.h>
 #include <mt/mt_prng.h>
+#include <mt/mt_vector.h>
 #include <ph/ph2ndaryWorld.h>
 
 // Brawl physics wrapper translation unit ph_2ndary_world.o (main.dol 0x80082438-0x8008AC5C).
@@ -34,6 +39,7 @@
 //   0x8008A3CC   900  operationExecuteSleepCreateLocalSpace   [map: ph2ndaryWorld__operationExecuteSleepCreateLocalSpace]
 //   0x8008A750   876  operationExecuteSleepRestructuring   [map: ph2ndaryWorld__operationExecuteSleepRestructuring]
 //   0x8008AABC   416  isCollisionBetweenPoints   [map: ph2ndaryWorld__isCollisionBetweenPoints]
+
 
 extern const f32 lbl_805A1BB8;
 extern const f32 lbl_805A1BBC;
@@ -110,5 +116,88 @@ void ph2ndaryWorld::removeConstraintArray(void* ptr) {
             cur->id = last->id;
             return;
         }
+    }
+}
+u32 ph2ndaryWorld::isCollisionBetweenPoints(const Vec2f* from, const Vec2f* to) {
+    Vec2f dir = *to - *from;
+    dir.normalize();
+    grCollSegmentEx moveSeg;
+    moveSeg.m_segment.m_p0Pos = *to;
+    moveSeg.m_segment.m_p1Pos = *from;
+    moveSeg.m_unk10 = 0;
+    u32 result = 0;
+    for (u32 i = 0; i < unk10->m_lineWorks.m_num; i++) {
+        grCollisionLineWork* lineWork = &unk10->m_lineWorks.m_works[i];
+        grCollSegmentEx lineSeg;
+        lineWork->m_collision->getSegment(&lineSeg, lineWork->m_collisionLine, 0);
+        Vec2f normal = lineWork->getNormalVec();
+        normal.normalize();
+        if (!(dir.m_x * normal.m_x + dir.m_y * normal.m_y > 0.0f)) {
+            if (!lineWork->m_collisionLine->m_isTargetOther) {
+                if (clSegment2D::checkIntersect(&lineSeg.m_segment, &moveSeg.m_segment)) {
+                    if (lineWork->m_collisionLine->m_isLeft || lineWork->m_collisionLine->m_isRight) {
+                        result |= 1;
+                    }
+                    if (lineWork->m_collisionLine->m_isUnder) {
+                        result |= 2;
+                    }
+                    if (lineWork->m_collisionLine->m_isUpper) {
+                        result |= 4;
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
+
+// HYPOTHESIS: stage wind table, a pointer to it lives in lbl_8049DEC8.
+struct WindTable {
+    u8 _00[0x7C];
+    ph2ndaryWorld::WindElement* m_elements; // 0x7C
+    u32 m_count;                            // 0x80
+};
+extern WindTable* lbl_8049DEC8[];
+
+void ph2ndaryWorld::getWindArray() {
+    if (unk2C.mustDeallocate()) {
+        hkThreadMemory::s_instance->deallocateChunk(unk2C.m_data, (unk2C.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * 4, 0x15);
+    }
+    unk2C.m_data = 0;
+    unk2C.m_size = 0;
+    unk2C.m_capacityAndFlags = (unk2C.m_capacityAndFlags & hkArrayBase::FORCE_SIGN_FLAG) | hkArrayBase::DONT_DEALLOCATE_FLAG;
+    if (unk20.mustDeallocate()) {
+        hkThreadMemory::s_instance->deallocateChunk(unk20.m_data, (unk20.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * 4, 0x15);
+    }
+    unk20.m_data = 0;
+    unk20.m_size = 0;
+    unk20.m_capacityAndFlags = (unk20.m_capacityAndFlags & hkArrayBase::FORCE_SIGN_FLAG) | hkArrayBase::DONT_DEALLOCATE_FLAG;
+    if (unk50) {
+        unk14 = 0;
+        return;
+    }
+    int found = 0;
+    for (u32 i = 0; i < lbl_8049DEC8[0]->m_count; i++) {
+        WindElement* element = &lbl_8049DEC8[0]->m_elements[i];
+        unk18 = &element->m_entry;
+        if (unk18->m_kind == 12 || unk18->m_kind == 13) {
+            unk1C = lbl_8059FF90->testIDInclude(0x1A, element->m_id);
+            if (unk1C != 0) {
+                if (unk2C.m_size == (unk2C.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK)) {
+                    hkArrayUtil::_reserveMore(&unk2C, 4);
+                }
+                ((gfArea**)unk2C.m_data)[unk2C.m_size++] = unk1C;
+                if (unk20.m_size == (unk20.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK)) {
+                    hkArrayUtil::_reserveMore(&unk20, 4);
+                }
+                ((WindEntry**)unk20.m_data)[unk20.m_size++] = unk18;
+                found = 1;
+            }
+        }
+    }
+    if (!found) {
+        unk14 = 0;
+    } else {
+        unk14 = 1;
     }
 }
