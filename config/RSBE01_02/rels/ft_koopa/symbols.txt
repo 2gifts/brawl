@@ -192,8 +192,8 @@ pushRange<PC13acAnimCmdConv>__14soArrayUtilityFP26soArray<PC13acAnimCmdConv>PCPC
 getEntryList__99soAnimCmdControlUnitBuilderDisguise<60soAnimCmdControlUnitBuildConfigDisguise<0,1,291,291,0,1,0,8>>Fi = .text:0x00007ECC; // type:function size:0x3C
 setupDisguiseList__99soAnimCmdControlUnitBuilderDisguise<60soAnimCmdControlUnitBuildConfigDisguise<0,1,291,291,0,1,0,8>>FiP26soAnimCmdDisguiseListEntry = .text:0x00007F08; // type:function size:0xB0
 onStart__7ftKoopaFi = .text:0x00007FB8; // type:function size:0x110
-fn_102_80C8 = .text:0x000080C8; // type:function size:0x268
-fn_102_8330 = .text:0x00008330; // type:function size:0x14
+processUpdate__7ftKoopaFv = .text:0x000080C8; // type:function size:0x268
+CLAMP<f>__Ffff_f = .text:0x00008330; // type:function size:0x14
 fn_102_8344 = .text:0x00008344; // type:function size:0x10C
 isObserv__7FighterFc = .text:0x00008450; // type:function size:0x1C
 fn_102_846C = .text:0x0000846C; // type:function size:0x330
