@@ -38,7 +38,8 @@ void grVisibleProductionMaterialMotion::productFlowStart() {
 
 void grVisibleProductionMaterialMotion::productFlowProducing(float deltaFrame) {
     nw4r::g3d::AnmObjMatClrRes* anmObj = m_modelAnim->m_anmObjMatClrRes;
-    if (anmObj->GetFrame() >= anmObj->m_anmMatClrFile.ref().m_animLength) {
+    u16 animLength = anmObj->m_anmMatClrFile.ref().m_animLength;
+    if (anmObj->GetFrame() >= animLength) {
         setState(VisibleProduction_Finished);
         m_visiblePermission = true;
     }
