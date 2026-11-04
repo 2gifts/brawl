@@ -139,3 +139,36 @@ void gfSceneRoot::setFinalSceneAnm(nw4r::g3d::ResAnmScn* anmScn) {
         setAnmScnResToScnRoot3D(unk60);
     }
 }
+
+gfSceneRoot::LightHandle gfSceneRoot::allocLightHandle(nw4r::g3d::LightObj* light) {
+    for (u8 i = 0; i < 10; i++) {
+        LightSlot* slot = &m_lightSlots[i];
+        if (!slot->m_used) {
+            slot->m_light = light;
+            slot->m_used = 1;
+            LightHandle handle;
+            handle.m_index = i;
+            handle.m_unk1 = slot->m_unk5;
+            return handle;
+        }
+    }
+    LightHandle invalid;
+    invalid.m_index = 0xFF;
+    invalid.m_unk1 = 0x14;
+    return invalid;
+}
+
+void gfSceneRoot::releaseLightHandle(LightHandle* handle) {
+    if (handle->isValid()) {
+        LightSlot& slot = m_lightSlots[handle->m_index];
+        slot.m_light = NULL;
+        slot.m_used = 0;
+        slot.m_released = 1;
+        slot.m_unk7 = 0x14;
+        slot.m_unk8 = 0x14;
+        slot.m_unkA = 0;
+        slot.m_unk9 = 0;
+        handle->m_index = 0xFF;
+        handle->m_unk1 = 0x14;
+    }
+}
