@@ -7,7 +7,13 @@
 class sqToMelee : public gfSequence {
 public:
     s32 unk8;
-    u8 unkC[0x10];
+    union {
+        u8 unkC[0x10];
+        struct {
+            u8 unkC_pad[0xC];
+            bool unk18;
+        };
+    };
 
     static sqToMelee* create();
     sqToMelee(const char* name) : gfSequence(name), unk8(0) { }
