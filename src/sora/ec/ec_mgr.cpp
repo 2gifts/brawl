@@ -1,4 +1,5 @@
 #include <ec/ec_mgr.h>
+#include <gf/gf_heap_manager.h>
 #include <revolution/MTX/mtx.h>
 #include <sr/sr_common.h>
 #include <types.h>
@@ -20,7 +21,7 @@ unsigned char lbl_805A0154[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A0158[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A015C[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A0160[0x4] __attribute__((aligned(4))) = { 0 };
-unsigned char lbl_805A0164[0x4] __attribute__((aligned(4))) = { 0 };
+ecEffectWork* lbl_805A0164 = 0;
 unsigned char lbl_805A0168[0x8] __attribute__((aligned(4))) = { 0 };
 
 ecResource::ecResource() {
@@ -69,5 +70,63 @@ void ecMgr::registResource(char* name, void* data, int size, int flag) {
             fn_8005EA4C(this, id, 0, 0, true, 0xFF);
         }
         fn_8005EA4C(this, id, data, size, flag != 0, 0xFF);
+    }
+}
+
+void ecMgr::render() {
+    m_traceMgr.renderXlu();
+    if (unk6C) {
+        u32 index = unk70;
+        ecEffectWork* work = &unk60[index];
+        for (; index <= unk74; ++index, ++work) {
+            if (work->unk7C) {
+                work->render();
+            }
+        }
+    }
+    if (unk40_) {
+        gfHeapManager::getHeap(Heaps::Effect);
+    }
+}
+
+void ecMgr::setHeapInstance(int heapId) {
+    if (heapId == 0xFF) {
+        unk48 = 3;
+    } else {
+        unk48 = heapId;
+    }
+}
+
+void ecMgr::preSet2dScene(bool enabled) {
+    if (enabled) {
+        unk54 = unk50 ? unk50 : unk4C;
+    } else {
+        unk54 = unk4C;
+    }
+}
+
+void ecMgr::setMdlPriority(u32 handleId, int priority) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work && work->unk44) {
+        nw4r::g3d::ScnMdl* model = work->unk44;
+        model->SetPriorityDrawOpa(priority);
+        model->SetPriorityDrawXlu(priority);
     }
 }

@@ -130,6 +130,9 @@ public:
     ecMgr(u32, u32, u32);
     static void create(u32, u32, u32);
     void registResource(char*, void*, int, int);
+    void render();
+    void setHeapInstance(int);
+    void setMdlPriority(u32, int);
     void releaseResource(char*);
     void setDrawPrio(int prio);
     u32 setEffect(EfID effectID);
