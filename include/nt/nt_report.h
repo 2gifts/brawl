@@ -57,6 +57,7 @@ struct NtBase {
     const char* getErrorStr(s32 error);
     static void initStaticWork();
     static void clearErrorStatus();
+    static void setMatchingStatus(int status);
 
     s32 unk4;
 };

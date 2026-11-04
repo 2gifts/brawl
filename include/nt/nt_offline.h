@@ -41,6 +41,11 @@ public:
     union {
         u8 unk0[0x350];
         struct {
+            u8 _padRecords0[8];
+            u32 unk8;
+            u32 unkC;
+        };
+        struct {
             u16 unk0_0;
             u16 unk2;
             u16 unk4;
