@@ -13,7 +13,6 @@
 extern "C" void fn_800B96E8(muMenuController* controller, int pad);
 extern "C" void fn_800B9984(muMenuController* controller);
 // muMenuController::initRepeatCounter(buttons): the buttons of the mask repeat from the start again
-extern "C" void fn_800BA364(muMenuController* controller, int buttons);
 // muMenuController::setAButtonPushedControllerData(): remembers the controller that pressed A
 extern "C" void fn_800BA2E8(muProcMenu* menu);
 // muMenuMain: closes the menu with a code (in the module of the scene)

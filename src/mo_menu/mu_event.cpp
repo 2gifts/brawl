@@ -22,7 +22,6 @@
 // muMenuController::setPadMask(mask), setPad(pad) and resetRepeat(buttons); getPadNo()
 extern "C" void fn_800B98DC(muMenuController* controller, int mask);
 extern "C" void fn_800B9804(muMenuController* controller, int pad);
-extern "C" void fn_800BA364(muMenuController* controller, int buttons);
 extern "C" int fn_800BA3D8(muMenuController* controller);
 // GameGlobal::getName(number, buffer) and GameGlobal::isEventOpen(list, event)
 // MuMsg::printData(message, data, length) and MuMsg::setFontWidthModeFixed(message, width)

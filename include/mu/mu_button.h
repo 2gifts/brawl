@@ -44,13 +44,15 @@ public:
     enum {
         Cursor_FlickJump = 20, // HYPOTHESIS: the jump-with-the-stick switch
         Cursor_Shake = 21,     // HYPOTHESIS: the nunchuk's shake switch
-        Cursor_Try = 22,       // HYPOTHESIS: 22 ... 24 are the three buttons under the controller
+        Cursor_Restore = 22,   // the three buttons under the controller: restore the defaults,
+        Cursor_Try = 23,       // try the buttons in a practice fight,
+        Cursor_Store = 24,     // store the settings
     };
 
     // A cursor position of a controller and the positions the cursor moves to.
     struct CursorNode {
-        int m_cursor;              // 0x0
-        int m_unk4;                // 0x4 HYPOTHESIS: the column (or the page) of the position
+        u8 m_cursor;               // 0x0
+        int m_unk4;                // 0x4 the directions passed to fn_800BA364 when the cursor arrives here (0: none)
         u8 m_links[4];             // 0x8 HYPOTHESIS: the positions above, right, below, left
     };
 
