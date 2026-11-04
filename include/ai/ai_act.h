@@ -97,6 +97,8 @@ public:
     void set_goal_inf(AiClBlock* goal, AiClBlock* via, float x, float y);
     void setReflectDone();
     void addDefendAirRate(float amount);
+    // The point to head back to the stage from (x, y). HYPOTHESIS: the flag's meaning (act passes id == 0x27).
+    void get_return_goal(float* x, float* y, int unk);
 };
 static_assert(sizeof(aiAct) == 0x114, "Class is wrong size!");
 

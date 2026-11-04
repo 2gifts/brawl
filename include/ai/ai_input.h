@@ -49,7 +49,7 @@ public:
     int m_md;              // 0x48: current mode (md_* index)
     int m_mdNext;          // 0x4C
     int m_unk50;
-    int m_unk54;
+    int m_unk54;           // 0x54: HYPOTHESIS: frames spent in the current mode (md_piyo spins the stick by it)
     u16 m_unk58;
     s16 m_reactWait;       // 0x5A: frames left before the CPU reacts after being hit (damageStart)
     u16 m_unk5C;
@@ -115,4 +115,10 @@ public:
     // HYPOTHESIS: target = the character that was hit by this CPU's attack.
     void swingHit(aiChrIdx* target, soDamage* damage);
     void keepOnFloor(Vec2f* stick, int* unk, float frames, float margin, float maxBias);
+    // The dizzy mode: the stick is spun around (faster at a higher rank). HYPOTHESIS: the md_* handlers all take the stick
+    // and the button word they fill in and return 1 when they ran; button is not used here.
+    // Recovering to the stage: after a few frames over the edge, jump back (action 0x2050) when there is no ground below
+    // or the character is too low; with no action running, pick one. HYPOTHESIS: action meanings from the map names.
+    int md_return(Vec2f* stick, ipPadButton* button);
+    int md_piyo(Vec2f* stick, ipPadButton* button);
 };

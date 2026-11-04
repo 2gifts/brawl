@@ -4,6 +4,7 @@
 #include <ai/ai_stat.h>
 #include <gf/gf_archive.h>
 #include <gf/gf_heap_manager.h>
+#include <math.h>
 #include <mt/mt_prng.h>
 #include <nw4r/math/math_arithmetic.h>
 
@@ -452,6 +453,55 @@ s8 aiInput::get_fix_target(float* distance) {
     }
     }
     return m_chrIdx.m_idx;
+}
+
+int aiInput::md_return(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    if (stat->m_situation == 5 && stat->m_unkB4 != 0x44 && m_act->m_id != 0x2050 && (m_unk116 & 2)) {
+        if (++m_unk75 > 4) {
+            Vec2f edge = stat->getNearFloorEdge();
+            if (stat->chk_over_ground() || stat->m_pos.m_y + 10.0f * stat->m_speed.m_y > edge.m_y - 5.0f) {
+                aiChrIdx none;
+                m_act->act_change(0x2050, &none, 0, 0);
+            }
+            m_unk75 = 0;
+        }
+    } else {
+        m_unk75 = 0;
+    }
+    if (m_act->m_id == 0) {
+        aiChrIdx none;
+        m_act->act_change(m_par.select_action(0, &m_chrIdx, &m_target, m_unk116, m_act, m_cpuType == 0x1A), &none, 0, 0);
+        // A new 0x2040 action far from the floor and above the bottom of the area becomes 0x2010.
+        if (m_act->m_id == 0x2040 && stat->get_range_floor(stat->m_lr, &stat->m_pos) < -80.0f &&
+            stat->m_pos.m_y > 30.0f + g_aiMgr->m_areaBottom) {
+            aiChrIdx none;
+            m_act->act_change(0x2010, &none, 0, 0);
+        }
+    }
+    return 1;
+}
+
+// Dizzy (situation 9): spin the stick; when the dizzy status 0xEC happens over no ground, steer back towards the stage.
+// Any other situation goes back to mode 1. HYPOTHESIS: the meaning of situation 9 and status 0xEC follows the map name.
+int aiInput::md_piyo(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    if (stat->m_situation != 9) {
+        aiChrIdx none;
+        change_md(1, &none, 0, 0);
+        return 1;
+    }
+    if (m_par.m_rank >= 20) {
+        float angle = 0.03125f * (3.1415927f * m_unk54) * (1.0f + 0.03f * m_par.m_rank);
+        stick->m_x = sin(angle);
+        stick->m_y = cos(angle);
+    }
+    if (stat->m_unkB4 == 0xEC && !stat->chk_over_ground()) {
+        Vec2f goal;
+        m_act->get_return_goal(&goal.m_x, &goal.m_y, 0);
+        stick->m_x = stat->m_pos.m_x > goal.m_x ? -1.0f : 1.0f;
+    }
+    return 1;
 }
 
 // Defined here, between the aiInput functions of the original unit.

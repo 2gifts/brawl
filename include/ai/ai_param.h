@@ -4,6 +4,8 @@
 #include <ai/ai_stat.h>
 #include <types.h>
 
+class aiAct;
+
 // One attack the AI knows about (entry of the ATKD block); HYPOTHESIS: 0x18 bytes, id first.
 struct tag_AI_ATK_DATA {
     u16 m_id;
@@ -86,6 +88,10 @@ public:
     void set_disable_cmd(int cmd);
     u16 enum_act_list_id(int list, int n); // HYPOTHESIS: the n-th enabled action of an action list (0 = none)
     int select_situation(int start, int end, aiChrIdx* chr, aiChrIdx* target); // HYPOTHESIS: parameter types from chk_situation's use
+
+    // Picks the next action for the situation. HYPOTHESIS: parameter names and types (aiInput::md_return passes the CPU
+    // type's flags m_unk116 and whether the CPU type is 0x1A).
+    u16 select_action(int situation, aiChrIdx* chr, aiChrIdx* target, u16 flags, aiAct* act, int unk);
 
     static bool check_revision(char* data);
     static float get_down_atk_r(aiChrIdx* chr);
