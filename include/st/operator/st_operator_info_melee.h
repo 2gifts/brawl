@@ -14,9 +14,19 @@ public:
     bool m_11b_1 : 1;
     bool m_11b_0 : 1;
     bool m_11c_7 : 1;
-    char _11d[0x1f];
+    union {
+        char _11d[0x1f];
+        struct {
+            char _pad11d[0x1b];
+            s8 m_138;
+        };
+    };
     u32 m_13c;
     u32 m_140;
+    u32 m_144;
+    u32 m_148;
+    u32 m_14c;
+    u32 m_150;
 
     stOperatorInfoMelee();
     virtual void processBegin();
