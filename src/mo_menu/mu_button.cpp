@@ -249,6 +249,62 @@ void muButtonTask::getNameButtonConfig(int no) {
     classic->m_flickJump = (src->wii.classic.flags >> 7) & 1;
 }
 
+// The settings of the four controller kinds in the order of ipButtonConfig.
+ipButtonConfig muButtonTask::makeButtonConfig(const Config* configs) {
+    ipButtonConfig config;
+    const Config* gc = &configs[PadKind_Gc];
+    config.gc.l = gc->m_buttons[0];
+    config.gc.r = gc->m_buttons[1];
+    config.gc.z = gc->m_buttons[2];
+    config.gc.y = gc->m_buttons[3];
+    config.gc.x = gc->m_buttons[4];
+    config.gc.a = gc->m_buttons[5];
+    config.gc.b = gc->m_buttons[6];
+    config.gc.substick = gc->m_buttons[7];
+    config.gc.up = gc->m_buttons[8];
+    config.gc.side = gc->m_buttons[9];
+    config.gc.down = gc->m_buttons[10];
+    config.gc.flags = (config.gc.flags & ~0x80) | (gc->m_flickJump << 7);
+    const Config* nunchuk = &configs[PadKind_Nunchuk];
+    config.wii.nunchuk.up = nunchuk->m_buttons[0];
+    config.wii.nunchuk.side = nunchuk->m_buttons[1];
+    config.wii.nunchuk.down = nunchuk->m_buttons[2];
+    config.wii.nunchuk.a = nunchuk->m_buttons[3];
+    config.wii.nunchuk.b = nunchuk->m_buttons[4];
+    config.wii.nunchuk.ab = nunchuk->m_buttons[5];
+    config.wii.nunchuk.c = nunchuk->m_buttons[6];
+    config.wii.nunchuk.z = nunchuk->m_buttons[7];
+    config.wii.nunchuk.cz = nunchuk->m_buttons[8];
+    config.wii.nunchuk.motion = nunchuk->m_buttons[9];
+    config.wii.nunchuk.extra = nunchuk->m_buttons[10];
+    config.wii.nunchuk.flags = (config.wii.nunchuk.flags & ~0x40) | (nunchuk->m_flickJump << 6);
+    config.wii.nunchuk.flags = (config.wii.nunchuk.flags & ~0x80) | (nunchuk->m_flag6 << 7);
+    const Config* core = &configs[PadKind_WiiRemote];
+    config.wii.core.up = core->m_buttons[0];
+    config.wii.core.a = core->m_buttons[1];
+    config.wii.core.extra = core->m_buttons[2];
+    config.wii.core.two = core->m_buttons[3];
+    config.wii.core.one = core->m_buttons[4];
+    config.wii.core.oneTwo = core->m_buttons[5];
+    config.wii.core.b = core->m_buttons[6];
+    config.wii.core.ab = core->m_buttons[7];
+    const Config* classic = &configs[PadKind_Classic];
+    config.wii.classic.l = classic->m_buttons[0];
+    config.wii.classic.r = classic->m_buttons[1];
+    config.wii.classic.zl = classic->m_buttons[2];
+    config.wii.classic.zr = classic->m_buttons[3];
+    config.wii.classic.x = classic->m_buttons[4];
+    config.wii.classic.y = classic->m_buttons[5];
+    config.wii.classic.a = classic->m_buttons[6];
+    config.wii.classic.b = classic->m_buttons[7];
+    config.wii.classic.substick = classic->m_buttons[8];
+    config.wii.classic.up = classic->m_buttons[9];
+    config.wii.classic.side = classic->m_buttons[10];
+    config.wii.classic.down = classic->m_buttons[11];
+    config.wii.classic.flags = (config.wii.classic.flags & ~0x80) | (classic->m_flickJump << 7);
+    return config;
+}
+
 void muButtonTask::initWork() {
     m_work->m_scene = NULL;
     m_work->m_resButton = nw4r::g3d::ResFile();
@@ -272,12 +328,12 @@ void muButtonTask::initWork() {
     m_work->m_listIndex = 0;
     m_work->m_isListOpen = 0;
     m_work->m_dlgKind = 0;
-    m_work->m_unk1BC = 0;
-    m_work->m_unk1BE = 0;
+    m_work->m_dlgYes = 0;
+    m_work->m_pushWait = 0;
     m_work->m_dlgWait = 0;
-    m_work->m_unk1C4 = 0;
+    m_work->m_contNo = 0;
     m_work->m_isSubStickOn = 0;
-    m_work->m_unk1D4 = 0;
+    m_work->m_isContSet = 0;
 }
 
 // Sets up the texts: the help lines, the switches, the buttons, the list of free actions, the dialog and the name.
@@ -679,6 +735,41 @@ void muButtonTask::openDlg(int kind, int msg) {
     }
     m_work->m_scene->addObj(dlg->m_sceneModel);
     m_work->m_msg->printIndex(0x17, msg, NULL);
+}
+
+// Moves the cursor of the restore or store dialog with right (no) and left (yes).
+static inline void moveDlgCursor(muButtonTask* task, u32 pressed) {
+    float frame;
+    if ((pressed & 2) && task->m_work->m_dlgYes) {
+        switch (task->m_work->m_dlgKind) {
+        case 1:
+            frame = 1.0f;
+            break;
+        case 3:
+            frame = 4.0f;
+            break;
+        }
+        MuObject* dlg = task->m_work->m_objs[25];
+        dlg->setFrameNode(frame);
+        dlg->setFrameVisible(frame);
+        task->m_work->m_dlgYes = false;
+        g_sndSystem->playSE(static_cast<SndID>(0), -1, 0, 0, -1);
+    }
+    if ((pressed & 1) && !task->m_work->m_dlgYes) {
+        switch (task->m_work->m_dlgKind) {
+        case 1:
+            frame = 0.0f;
+            break;
+        case 3:
+            frame = 3.0f;
+            break;
+        }
+        MuObject* dlg = task->m_work->m_objs[25];
+        dlg->setFrameNode(frame);
+        dlg->setFrameVisible(frame);
+        task->m_work->m_dlgYes = true;
+        g_sndSystem->playSE(static_cast<SndID>(0), -1, 0, 0, -1);
+    }
 }
 
 // Prints the explanation of what the cursor is on.
@@ -1093,7 +1184,55 @@ void muButtonTask::mainStepButtonLeave(muButtonTask* task) {
 void muButtonTask::initStepRestoreDlg(muButtonTask* task) {
     task->setButtonCursor(task->m_work->m_padKind, -1);
     task->openDlg(1, 0x1E);
-    task->m_work->m_unk1BC = 0;
+    task->m_work->m_dlgYes = 0;
+}
+
+// Yes puts the default settings of the controller kind back; A or B closes the dialog.
+void muButtonTask::mainStepRestoreDlg(muButtonTask* task) {
+    u32 pressed = task->m_work->m_controller.m_pressed;
+    gfPadStatus pad = getSysPadStatus();
+    moveDlgCursor(task, pressed);
+    u32 pushed = pad.m_buttonsPressedThisFrame.bits;
+    if ((pushed & 0x100) || (pushed & 0x200)) {
+        if ((pushed & 0x100) && task->m_work->m_dlgYes) {
+            g_sndSystem->playSE(static_cast<SndID>(1), -1, 0, 0, -1);
+            Config* edit = &task->m_work->m_edit;
+            int padKind = task->m_work->m_padKind;
+            const PadInfo* info = &sPadInfos[padKind];
+            for (int i = 0; i < info->m_buttonNum; i++) {
+                edit->m_buttons[i] = sDefaultButtons[padKind][i];
+            }
+            if (info->m_stickKind >= 1) {
+                edit->m_flickJump = true;
+            }
+            if (info->m_stickKind >= 2) {
+                edit->m_flag6 = false;
+            }
+            int num = info->m_buttonNum;
+            for (int i = 0; i < num; i++) {
+                task->printButton(padKind, i, i + 5, task->m_work->m_edit.m_buttons[i], false);
+            }
+            if (info->m_stickKind >= 1) {
+                bool on = task->m_work->m_edit.m_flickJump == 1;
+                int obj;
+                switch (info->m_stickKind) {
+                case 1:
+                    obj = 6;
+                    break;
+                case 2:
+                    obj = 7;
+                    break;
+                }
+                task->m_work->m_objs[obj]->setFrameTex(on ? 1.0f : 0.0f);
+            }
+            if (info->m_stickKind >= 2) {
+                task->m_work->m_objs[8]->setFrameTex(task->m_work->m_edit.m_flag6 == 1 ? 1.0f : 0.0f);
+            }
+        }
+        task->m_work->m_scene->removeObj(task->m_work->m_objs[25]->m_sceneModel);
+        task->m_work->m_dlgKind = 0;
+        changeStep(task, 4);
+    }
 }
 
 void muButtonTask::initStepTryDlg(muButtonTask* task) {
@@ -1115,7 +1254,29 @@ void muButtonTask::mainStepTryDlg(muButtonTask* task) {
 void muButtonTask::initStepStoreDlg(muButtonTask* task) {
     task->setButtonCursor(task->m_work->m_padKind, -1);
     task->openDlg(3, 0x20);
-    task->m_work->m_unk1BC = 0;
+    task->m_work->m_dlgYes = 0;
+}
+
+// Yes stores the settings of the controller kind and tells it; A or B closes the dialog.
+void muButtonTask::mainStepStoreDlg(muButtonTask* task) {
+    u32 pressed = task->m_work->m_controller.m_pressed;
+    gfPadStatus pad = getSysPadStatus();
+    moveDlgCursor(task, pressed);
+    u32 pushed = pad.m_buttonsPressedThisFrame.bits;
+    u32 a = pushed & 0x100;
+    if (a || (pushed & 0x200)) {
+        task->m_work->m_scene->removeObj(task->m_work->m_objs[25]->m_sceneModel);
+        task->m_work->m_dlgKind = 0;
+        int step;
+        if (a && task->m_work->m_dlgYes) {
+            memcpy(&task->m_work->m_configs[task->m_work->m_padKind], &task->m_work->m_edit, sizeof(Config));
+            step = 12;
+        } else {
+            g_sndSystem->playSE(static_cast<SndID>(6), -1, 0, 0, -1);
+            step = 6;
+        }
+        changeStep(task, step);
+    }
 }
 
 // The buttons leave before the practice fight (as in initStepButtonLeave, without the text).
@@ -1154,6 +1315,88 @@ void muButtonTask::mainStepToPractice(muButtonTask* task) {
     if (done) {
         changeStep(task, 11);
     }
+}
+
+// Hides the pushed button of every controller kind.
+static inline void clearPushDisp(muButtonTask* task) {
+    for (int i = 0; i < muButtonTask::PadKind_Num; i++) {
+        const muButtonTask::PadInfo* info = &muButtonTask::sPadInfos[i];
+        task->m_work->m_objs[info->m_pushObj]->setFrameVisible(0.0f);
+        task->m_work->m_msg->printf(info->m_pushLine, "");
+    }
+}
+
+// The settings kind of a pad (a pad that cannot be read counts as a Wii remote).
+static inline int getPadKind(int padNo) {
+    gfPadStatus status;
+    g_gfPadSystem->getSysPadStatus(padNo, &status);
+    return status.m_error == gfPadError::NONE ? muButtonTask::sPadKinds[status.m_controllerType]
+                                              : muButtonTask::PadKind_WiiRemote;
+}
+
+// The practice fight: the pad that tries the buttons gets the settings that are being changed.
+void muButtonTask::initStepPractice(muButtonTask* task) {
+    ipButtonConfig config;
+    ipPadConfig* padConfig = ipPadConfig::getInstance();
+    int padKind = getPadKind(task->m_work->m_contNo);
+    int pushObj = sPadInfos[padKind].m_pushObj;
+    task->m_work->m_scene->removeAllObj();
+    clearPushDisp(task);
+    task->m_work->m_scene->addObj(task->m_work->m_objs[pushObj]->m_sceneModel);
+    task->m_work->m_practicePadKind = padKind;
+    task->m_work->m_isSubStickOn = false;
+    task->m_work->m_pushWait = 0;
+    Config configs[PadKind_Num];
+    memcpy(configs, task->m_work->m_configs, sizeof(configs));
+    configs[task->m_work->m_padKind] = task->m_work->m_edit;
+    config = task->makeButtonConfig(configs);
+    padConfig->setButtonConfig(0, task->m_work->m_contNo, &config);
+    g_gfPadSystem->maskMotor(
+        g_GameGlobal->getNameRumbleSwitch(task->m_work->m_scene->m_buttonConfigNo) ? 0 : 1 << task->m_work->m_contNo);
+    task->m_work->m_isContSet = task->m_work->m_scene->setContNo(task->m_work->m_contNo);
+    task->m_work->m_scene->addObj(task->m_work->m_objs[34]->m_sceneModel);
+}
+
+// The practice fight shows the button that is pushed; it ends with START or when the pad changes its kind.
+void muButtonTask::mainStepPractice(muButtonTask* task) {
+    int contNo = task->m_work->m_contNo;
+    int padKind = getPadKind(contNo);
+    const PadInfo* info = &sPadInfos[padKind];
+    if (!task->m_work->m_isContSet) {
+        task->m_work->m_isContSet = task->m_work->m_scene->setContNo(task->m_work->m_contNo);
+    }
+    if (getSysPadStatus().m_buttonsPressedThisFrame.bits & 0x1000 || padKind != task->m_work->m_practicePadKind) {
+        g_sndSystem->playSE(static_cast<SndID>(1), -1, 0, 0, -1);
+        clearPushDisp(task);
+        task->m_work->m_scene->removeObj(task->m_work->m_objs[info->m_pushObj]->m_sceneModel);
+        task->m_work->m_scene->removeObj(task->m_work->m_objs[34]->m_sceneModel);
+        changeStep(task, 3);
+        return;
+    }
+    if (task->m_work->m_pushWait > 0) {
+        if (--task->m_work->m_pushWait <= 0) {
+            clearPushDisp(task);
+        }
+    }
+    int button = task->getPushedButton(contNo);
+    if (button >= 0) {
+        clearPushDisp(task);
+        task->m_work->m_objs[info->m_pushObj]->setFrameVisible(1.0f + button);
+        task->printButton(padKind, button, info->m_pushLine, task->m_work->m_edit.m_buttons[button], false);
+        task->m_work->m_pushWait = 120;
+    }
+}
+
+// Stores the settings for the name and tells it in a dialog.
+void muButtonTask::initStepStoredDlg(muButtonTask* task) {
+    GameGlobal* global = g_GameGlobal;
+    int no = task->m_work->m_scene->m_buttonConfigNo;
+    ipButtonConfig config = task->makeButtonConfig(task->m_work->m_configs);
+    global->setButtonConfig(no, &config);
+    task->setButtonCursor(task->m_work->m_padKind, -1);
+    task->openDlg(2, 0x21);
+    g_sndSystem->playSE(static_cast<SndID>(0x27), -1, 0, 0, -1);
+    task->m_work->m_dlgWait = 120;
 }
 
 // The dialog that tells that the settings were stored closes with any button or after its time.

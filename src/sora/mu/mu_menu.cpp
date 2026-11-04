@@ -61,7 +61,6 @@ extern const u8 lbl_80407BE0[10][2];
 struct GameGlobal;
 extern GameGlobal* g_GameGlobal;
 extern "C" int fn_8004D9E8(GameGlobal*);
-extern "C" int fn_8004D9A8(GameGlobal*, int);
 
 // 8 bytes per entry. Stored at lbl_80455AA8.
 struct muEntry8 {
@@ -370,7 +369,7 @@ extern "C" const char* fn_800AFA8C(int idx) {
 void muMenu::startRumbleController(int controller, int strength, int setting) {
     int enabled;
     if (setting >= 0) {
-        enabled = fn_8004D9A8(g_GameGlobal, setting);
+        enabled = g_GameGlobal->getNameRumbleSwitch(setting);
     } else {
         enabled = g_GameGlobal->getRumbleSetting(controller);
     }
