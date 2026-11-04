@@ -13,6 +13,8 @@ public:
     void setPlayerWiFiStateAccept(int playerNo);
     void setPlayerWiFiStateSelChar(int playerNo);
     void setPlayerWiFiStateSelStage(int playerNo);
+    void setDlgDWCErrorCode(int code);
+    void openJoinFriendDlg(const wchar_t* name);
 };
 // TODO size assertion
 

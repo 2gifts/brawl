@@ -32,6 +32,8 @@ public:
     char* unk118;
     int unk11C;
     u8 m_unk120;                // 0x120 set by the menus of the start of the game for every window they open
+    u32 unk124;
+    u32 unk128;
     virtual ~muNoticeWndTask();
     virtual void processDefault();
     void printText(u32 index, const char* text, int length, int kind);
