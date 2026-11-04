@@ -49,7 +49,6 @@ extern "C" void fn_27_239AF4(stMelee* stage, Vec3f* eye, Vec3f* target, float ro
 extern "C" void fn_27_239BDC(stMelee* stage, Vec3f* out, Vec3f* from, Vec3f* to, float t, u8 ease);
 extern "C" void fn_27_239E58(stMelee* stage, float* out, float from, float to, float t, u8 ease);
 // stTrigger::setBeltConveyorParam
-extern "C" void fn_27_233ACC(stTrigger* trigger, grGimmickBeltConveyorData* data);
 // stPositions::getItemPos
 // soExternalValueAccesser::isGroundTouch
 extern "C" int fn_27_8CC2C(BaseItem* item, int kind);
@@ -554,7 +553,7 @@ void stHomerun::updateBeltConv(float deltaFrame) {
         area->m_areaData.m_range.m_x = 3000.0f;
         area->m_areaData.m_range.m_y = 10.0f;
         area->m_areaData.m_shapeType = gfArea::Shape_Rectangle;
-        fn_27_233ACC(m_beltTrigger, m_beltData);
+        m_beltTrigger->setBeltConveyorParam(m_beltData);
     }
 }
 

@@ -16,7 +16,6 @@
 #include <st_dxgarden/st_dxgarden.h>
 
 // stTrigger::setWaterParam
-extern "C" void fn_27_233C70(stTrigger* trigger, grGimmickWaterData* data);
 
 stClassInfoImpl<Stages::DxGarden, stDxGarden> stDxGarden::bss_loc_14;
 
@@ -264,7 +263,7 @@ void stDxGarden::updateRiver(float deltaFrame) {
     water->m_areaData.m_range.m_y = 50.0f + (data[0] - m_limit[1].m_y);
     water->m_areaData.m_offsetPos.m_x = 0.0f;
     water->m_areaData.m_offsetPos.m_y = data[0] - 0.5f * water->m_areaData.m_range.m_y;
-    return fn_27_233C70(m_trigger, m_waterData);
+    return m_trigger->setWaterParam(m_waterData);
 }
 
 bool stDxGarden::isBamperVector() {

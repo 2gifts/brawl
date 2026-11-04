@@ -80,3 +80,69 @@ void stTrigger::setFrameTrigger(float frame) {
     }
     m_obsTriggerCB = cb;
 }
+
+void stTrigger::setValidEdgeCallback(gfCallBack* cb) {
+    gfCallBack* last = unk24;
+    if (last != nullptr) {
+        while (last->m_next != nullptr) {
+            last = last->m_next;
+        }
+        last->m_next = cb;
+    } else {
+        unk24 = dynamic_cast<stTriggerCB*>(cb);
+    }
+}
+
+void stTrigger::setUnValidEdgeCallback(gfCallBack* cb) {
+    gfCallBack* last = unk28;
+    if (last != nullptr) {
+        while (last->m_next != nullptr) {
+            last = last->m_next;
+        }
+        last->m_next = cb;
+    } else {
+        unk28 = dynamic_cast<stTriggerCB*>(cb);
+    }
+}
+
+void stTrigger::setBeltConveyorParam(grGimmickBeltConveyorData* data) {
+    if (dynamic_cast<stObsTriggerSquareBeltConveyorCB*>(m_obsTriggerCB) != nullptr) {
+        dynamic_cast<stObsTriggerSquareBeltConveyorCB*>(m_obsTriggerCB)->setParam(data);
+    }
+}
+
+void stTrigger::setBeltConveyorParam(stEarthBeltData* data) {
+    if (dynamic_cast<stObsTriggerTriBeltConveyorCB*>(m_obsTriggerCB) != nullptr) {
+        dynamic_cast<stObsTriggerTriBeltConveyorCB*>(m_obsTriggerCB)->setParam(data);
+    }
+}
+
+void stTrigger::setPressureParam(grGimmickPressureAreaData* data) {
+    if (dynamic_cast<stObsTriggerSquareBeltConveyorCB*>(m_obsTriggerCB) != nullptr) {
+        dynamic_cast<stObsTriggerSquareBeltConveyorCB*>(m_obsTriggerCB)->setParam(data);
+    }
+}
+
+void stTrigger::setWaterParam(grGimmickWaterData* data) {
+    if (dynamic_cast<stObsTriggerSquareWaterCB*>(m_obsTriggerCB) != nullptr) {
+        dynamic_cast<stObsTriggerSquareWaterCB*>(m_obsTriggerCB)->setParam(data);
+    }
+}
+
+stObsTriggerTriBeltConveyorCB* stTrigger::setBeltConveyorTrigger(stEarthBeltData* data) {
+    stObsTriggerTriBeltConveyorCB* cb = new (Heaps::StageInstance) stObsTriggerTriBeltConveyorCB(&m_isValid, data);
+    if (m_obsTriggerCB != nullptr) {
+        delete m_obsTriggerCB;
+    }
+    m_obsTriggerCB = cb;
+    return cb;
+}
+
+stObsTriggerSquareBeltConveyorCB* stTrigger::setPressureAreaTrigger(grGimmickPressureAreaData* data) {
+    stObsTriggerSquareBeltConveyorCB* cb = new (Heaps::StageInstance) stObsTriggerSquareBeltConveyorCB(&m_isValid, data);
+    if (m_obsTriggerCB != nullptr) {
+        delete m_obsTriggerCB;
+    }
+    m_obsTriggerCB = cb;
+    return cb;
+}

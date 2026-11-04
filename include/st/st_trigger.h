@@ -10,6 +10,7 @@
 #include <yk/yakumono.h>
 
 class stTriggerCB;
+struct stEarthBeltData;
 
 class stTrigger : public utListNode {
 
@@ -37,6 +38,12 @@ public:
 
     void setObserveYakumono(Yakumono* yakumono);
     void setValidCallback(gfCallBack* cb);
+    void setValidEdgeCallback(gfCallBack* cb);
+    void setUnValidEdgeCallback(gfCallBack* cb);
+    stObsTriggerTriBeltConveyorCB* setBeltConveyorTrigger(stEarthBeltData* belt);
+    stObsTriggerSquareBeltConveyorCB* setPressureAreaTrigger(grGimmickPressureAreaData* pressure);
+    void setBeltConveyorParam(stEarthBeltData* belt);
+    void setPressureParam(grGimmickPressureAreaData* pressure);
     stObsTriggerSquareBeltConveyorCB* setBeltConveyorTrigger(grGimmickBeltConveyorData* gimmickAreaData);
     stObsTriggerSquareHitPointEffectCB* setHitPointEffectTrigger(grGimmickHitPointEffectData* gimmickAreaData);
     stObsTriggerSquareWaterCB* setWaterTrigger(grGimmickWaterData* gimmickAreaData);

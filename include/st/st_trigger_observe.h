@@ -324,10 +324,14 @@ public:
 };
 static_assert(sizeof(stObsTriggerSquareWaterCB) == 0x40, "Class is wrong size!");
 
+struct stEarthBeltData;
+
 class stObsTriggerTriBeltConveyorCB : public stObsTriggerArea {
     int m_beltConveyorIndex;
 
 public:
+    stObsTriggerTriBeltConveyorCB(bool* flag, stEarthBeltData* beltData);
+    void setParam(stEarthBeltData* beltData);
     virtual ~stObsTriggerTriBeltConveyorCB();
 };
 static_assert(sizeof(stObsTriggerTriBeltConveyorCB) == 0x40, "Class is wrong size!");

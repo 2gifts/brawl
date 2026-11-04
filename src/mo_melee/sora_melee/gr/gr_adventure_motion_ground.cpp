@@ -5,8 +5,6 @@
 #include <st/st_trigger.h>
 
 // HYPOTHESIS: stTrigger::setValidEdgeCallback and setUnValidEdgeCallback (sora_melee map names, still unnamed).
-extern "C" void fn_27_233F58(stTrigger* trigger, gfCallBack* cb);
-extern "C" void fn_27_233FCC(stTrigger* trigger, gfCallBack* cb);
 // HYPOTHESIS: grVisibleProductionMaterialMotion::create (sora_melee map name, still unnamed) and its parameter types.
 extern "C" grVisibleProduction* fn_27_2714A4(nw4r::g3d::ScnMdl* sceneModel, gfModelAnimation* modelAnim, u32* animIndex);
 // HYPOTHESIS: the "effect_locator" node name that the grGimmick effect set-up shares (sora_melee .data).
@@ -110,11 +108,11 @@ void grAdventureMotionGround::startup(gfArchive* data, u32 unk1, gfSceneRoot::La
         stActTriggerMotionBind* bind = new (Heaps::StageInstance) stActTriggerMotionBind(this, m_motionRatio);
         stActTriggerMotionStop* stop = new (Heaps::StageInstance) stActTriggerMotionStop(this, m_motionRatio);
         if (m_data->m_motionTrigger.m_isValid) {
-            fn_27_233F58(trigger, bind);
-            fn_27_233FCC(trigger, stop);
+            trigger->setValidEdgeCallback(bind);
+            trigger->setUnValidEdgeCallback(stop);
         } else {
-            fn_27_233F58(trigger, stop);
-            fn_27_233FCC(trigger, bind);
+            trigger->setValidEdgeCallback(stop);
+            trigger->setUnValidEdgeCallback(bind);
             changeNodeAnim(0, 0);
             changeTexSrtAnim(0, 0);
         }
