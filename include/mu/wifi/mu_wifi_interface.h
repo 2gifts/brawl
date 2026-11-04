@@ -38,7 +38,13 @@ struct muWifiAIDInfo {
     u64 unk30;
     char unk38[0x4];
     LocalPlayer m_localPlayers[2];
-    char unk4C[0xA];
+    union {
+        char unk4C[0xA];
+        struct {
+            char _pad4C[9];
+            u8 unk55;
+        };
+    };
     u8 unk56_b7 : 1;
     u8 unk56_b6 : 1;
     u8 unk56_b3 : 3;
@@ -50,23 +56,41 @@ struct muWifiAIDInfo {
             char _pad57[2];
             u8 unk59_b4 : 4;
             u8 unk59_b0 : 4;
+            char _pad5A[0xE];
+            u8 unk68[4];
+        };
+    };
+    union {
+        struct {
+            u8 unk78_b7 : 1;
+            u8 unk78_b3 : 4;
+            u8 unk78_b2 : 1;
+            u8 unk78_b0 : 2;
+            char unk79[0x4];
+            u8 unk7D_b4 : 4;
+            u8 unk7D_b2 : 2;
+            u8 unk7D_b0 : 2;
+            char unk7E[0x67];
+            AssignedPlayer m_assignedPlayers[4];
+            char unk10D[0x2B];
+        };
+        struct {
+            char _pad78[0x6C];
+            struct {
+                u8 unk0;
+                u8 unk1[9];
+            } unkE4[4];
+            u8 unk10C;
+            u8 unk10DData;
+            char _pad10E[2];
+            u32 unk110;
+            char _pad114[0x24];
         };
         struct {
             char _pad57Nodes[0x11];
             u8 unk68[4];
         };
     };
-    u8 unk78_b7 : 1;
-    u8 unk78_b3 : 4;
-    u8 unk78_b2 : 1;
-    u8 unk78_b0 : 2;
-    char unk79[0x4];
-    u8 unk7D_b4 : 4;
-    u8 unk7D_b2 : 2;
-    u8 unk7D_b0 : 2;
-    char unk7E[0x67];
-    AssignedPlayer m_assignedPlayers[4];
-    char unk10D[0x2B];
     char m_shortComment[0xA0];
     char unk1D8[0x39];
     s8 m_friendAIDIndex;
@@ -187,6 +211,11 @@ public:
     wchar_t* getMyFriendStatusName(wchar_t* name);
     wchar_t* getMyFriendStatusComment(wchar_t* comment);
     wchar_t* getMyShortComment(int index, wchar_t* comment);
+    // HYPOTHESIS: argument and result types follow the original register accesses.
+    bool needKeepAlive();
+    u8 getAssignedStageKind(u8* substage, u32* music);
+    void clearGlobalAIDStatusLive();
+    u8 getAssignedPlayerKind(int index);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 

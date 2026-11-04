@@ -7,6 +7,8 @@
 #include <nt/nt_report.h>
 #include <string.h>
 #include <nt/nt_match.h>
+#include <ip/ip_switch.h>
+#include <gm/gm_global.h>
 
 extern "C" void fn_800CF22C(muWifiInterfaceTask* self);
 extern "C" void fn_801473C4(muWifiInterfaceTask* self);
@@ -602,4 +604,85 @@ bool muWifiInterfaceTask::isEqualServerGameMode() {
         netReport("isEqualServerGameMode:gameMode:%d  wifiStatus:%d\n", unk6CData, status);
         return false;
     }
+}
+
+bool muWifiInterfaceTask::needKeepAlive() {
+    if (ipSwitch::getInstance()->m_source == 1) {
+        return false;
+    }
+    if (g_GameGlobal->m_selCharData->unk6 != 0) {
+        muWifiAIDInfo* info;
+        u8 aid = Network::getParentAID();
+        if (aid == 0xFF) {
+            info = NULL;
+        } else {
+            info = &m_aidInfos[aid];
+        }
+        if (info == NULL) {
+            return false;
+        }
+        if (info->unk55 == 4) {
+            return false;
+        }
+    }
+    return true;
+}
+
+extern const char lbl_80457AB0[0x64];
+extern const char lbl_80457A48[0x2C];
+extern const char lbl_80457A74[0x3C];
+
+u8 muWifiInterfaceTask::getAssignedStageKind(u8* substage, u32* music) {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        info = NULL;
+    } else {
+        info = &m_aidInfos[aid];
+    }
+    if (info == NULL) {
+        return 0xFF;
+    }
+    if (!((info->unk78_b3 >> 2) & 1)) {
+        return 0xFF;
+    }
+    *substage = info->unk10DData;
+    *music = info->unk110;
+    netReport(lbl_80457AB0, info->unk10C, *substage, *music);
+    return info->unk10C;
+}
+
+void muWifiInterfaceTask::clearGlobalAIDStatusLive() {
+    muWifiAIDInfo* info;
+    Network::getMyAID();
+    for (u8 aid = 0; aid < 5; aid++) {
+        info = &m_aidInfos[aid];
+        for (int player = 0; player < 4; player++) {
+            info->unk68[player] = 0;
+        }
+    }
+}
+
+u8 muWifiInterfaceTask::getAssignedPlayerKind(int index) {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        info = NULL;
+    } else {
+        info = &m_aidInfos[aid];
+    }
+    u8* kind;
+    if (info == NULL) {
+        netReport(lbl_80457A48);
+        kind = NULL;
+    } else if (!((info->unk78_b3 >> 2) & 1)) {
+        netReport(lbl_80457A74);
+        kind = NULL;
+    } else {
+        kind = &info->unkE4[index].unk0;
+    }
+    if (kind == NULL) {
+        return 3;
+    }
+    return *kind;
 }
