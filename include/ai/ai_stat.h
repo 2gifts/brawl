@@ -51,8 +51,8 @@ public:
     Vec3f m_center;          // 0x74: HYPOTHESIS: body centre used for distances
     Vec2f m_speed;           // 0x80
     Vec2f m_accel;           // 0x88
-    Vec2f m_unk90;           // HYPOTHESIS: a Vec2f (zeroed through a temporary like speed/accel)
-    Vec2f m_unk98;
+    Vec2f m_sightPos;        // 0x90: HYPOTHESIS: the Dragoon sight's position (aiInput::md_dragoon steers it to the target)
+    Vec2f m_sightSpeed;      // 0x98: HYPOTHESIS: the Dragoon sight's speed (md_dragoon's stick output)
     float m_lr;              // 0xA0: facing, +1 right / -1 left
     float m_unkA4;
     s16 m_unkA8;             // 0xA8: HYPOTHESIS: signed (attention_check tests > 0)

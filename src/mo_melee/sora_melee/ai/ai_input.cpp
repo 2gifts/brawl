@@ -2410,3 +2410,137 @@ int aiInput::md_final(Vec2f* stick, ipPadButton* button) {
     }
     return 1;
 }
+
+// The Dragoon mode: while the character rides the Dragoon (situation 15) the stick steers the Dragoon's sight towards
+// the target's centre, led by its speed (more at a higher rank), or towards (0, 30) while the CPU has no target; the
+// sight speeds up by a rank-dependent step and is slowed down near the goal. Attack fires once the sight has been close
+// for a few frames (with the sight up) or after a delay (otherwise); step 3 fires again and starts over. A target that is
+// gone (flag 0x8000) restarts the mode; leaving the Dragoon goes back to mode 1.
+// HYPOTHESIS: chk_chr_stat(4, 0x2E) tests for the Dragoon sight being shown; flag 0x20000 = the target cannot be hit.
+// BYTES: defined at the end of the file for the same literal-pool reason as auto_passfall.
+int aiInput::md_dragoon(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    aiStat* target = aiMgr::get_aiStat(&m_target);
+    if (stat->m_situation != 15) {
+        aiChrIdx none;
+        none.m_idx = -1;
+        change_md(1, &none, 0, 0);
+        return 1;
+    }
+    switch (m_step) {
+        case 0:
+            target_check();
+            target = aiMgr::get_aiStat(&m_target);
+            stat->m_sightSpeed.m_x = randf() - 0.5f;
+            stat->m_sightSpeed.m_y = randf() - 0.5f;
+            if (stat->chk_chr_stat(4, 0x2E)) {
+                m_stepFrame = -50.0f * (1.0f - m_par.m_rank / 100.0f);
+                m_step = 2;
+
+                break;
+            }
+            m_stepFrame = m_par.m_rank / 4 - 155;
+            m_step++;
+
+        case 1:
+            if (m_stepFrame < 0) {
+                break;
+            }
+            m_step++;
+        case 2: {
+            float rank = m_par.m_rank / 100.0f;
+            float range = 100.0f - 70.0f * rank;
+            Vec3f goal;
+            // BYTES: one Vec2f holds the target's lead first and the sight-to-goal difference afterwards (the original
+            // keeps both in the same stack slot, assigned with the float-wise operator=).
+            Vec2f diff;
+            goal.m_z = target->m_center.m_z;
+            diff = target->m_speed * (25.0f * (rank - 0.2f));
+            goal.m_x = target->m_center.m_x + diff.m_x;
+            goal.m_y = target->m_center.m_y + diff.m_y;
+            if (stat->chk_chr_stat(4, 0x2E)) {
+                if (target->m_flags & 0x8000) {
+                    m_step = 0;
+                    break;
+                }
+                if (m_chrIdx.m_idx == m_target.m_idx) {
+                    goal.m_x = 0.0f;
+                    goal.m_y = 30.0f;
+                    goal.m_z = 0.0f;
+                    target_check();
+                }
+            } else if (m_target.m_idx == m_chrIdx.m_idx || (target->m_flags & 0x8000)) {
+                m_step = 0;
+                break;
+            }
+            // BYTES: the original copies the goal float by float into a second Vec3f before taking the difference.
+            Vec3f g(goal.m_x, goal.m_y, goal.m_z);
+            diff.m_x = g.m_x - stat->m_sightPos.m_x;
+            diff.m_y = g.m_y - stat->m_sightPos.m_y;
+            Vec2f accel;
+            Vec2f maxSpeed;
+            maxSpeed.m_x = maxSpeed.m_y = 0.3f + 0.7f * rank;
+            if (__fabsf(diff.m_x) <= range) {
+                accel.m_x = (1.0f + 2.0f * rank) / 64.0f;
+                maxSpeed.m_x *= 1.0f - (0.2f + 0.8f * rank) * (1.0f - __fabsf(diff.m_x) / range);
+            } else {
+                m_stepFrame = 0;
+                accel.m_x = (1.0f + 4.0f * rank) / 128.0f;
+            }
+            if (__fabsf(diff.m_y) <= range) {
+                accel.m_y = (1.0f + 2.0f * rank) / 64.0f;
+                maxSpeed.m_y *= 1.0f - (0.2f + 0.8f * rank) * (1.0f - __fabsf(diff.m_y) / range);
+            } else {
+                m_stepFrame = 0;
+                accel.m_y = (1.0f + 4.0f * rank) / 128.0f;
+            }
+            if (diff.m_x < 0.0f) {
+                stat->m_sightSpeed.m_x -= accel.m_x;
+                if (stat->m_sightSpeed.m_x < -maxSpeed.m_x) {
+                    stat->m_sightSpeed.m_x = -maxSpeed.m_x;
+                }
+            } else {
+                stat->m_sightSpeed.m_x += accel.m_x;
+                if (stat->m_sightSpeed.m_x > maxSpeed.m_x) {
+                    stat->m_sightSpeed.m_x = maxSpeed.m_x;
+                }
+            }
+            if (diff.m_y < 0.0f) {
+                stat->m_sightSpeed.m_y -= accel.m_y;
+                if (stat->m_sightSpeed.m_y < -maxSpeed.m_y) {
+                    stat->m_sightSpeed.m_y = -maxSpeed.m_y;
+                }
+            } else {
+                stat->m_sightSpeed.m_y += accel.m_y;
+                if (stat->m_sightSpeed.m_y > maxSpeed.m_y) {
+                    stat->m_sightSpeed.m_y = maxSpeed.m_y;
+                }
+            }
+            stick->m_x = stat->m_sightSpeed.m_x;
+            stick->m_y = stat->m_sightSpeed.m_y;
+            if (stat->chk_chr_stat(4, 0x2E)) {
+                if (m_stepFrame < 0) {
+                    break;
+                }
+                float near = 50.0f + 100.0f * (1.0f - rank);
+                if (diff.m_x * diff.m_x + diff.m_y * diff.m_y > near * near) {
+                    m_stepFrame = 0;
+                }
+                if (m_stepFrame > 1.0f + 8.0f * (1.0f - rank) && m_chrIdx.m_idx != m_target.m_idx && !(target->m_flags & 0x20000)) {
+                    m_step++;
+                    m_stepFrame = -30.0f * (1.0f - rank);
+                }
+            } else if (m_stepFrame > 60.0f - 58.0f * rank && !(target->m_flags & 0x20000)) {
+                button->m_mask = soController::getButtonMask(soController::Pad_Button_Attack);
+            }
+            break;
+        }
+        case 3:
+            if (m_stepFrame >= 0) {
+                button->m_mask = soController::getButtonMask(soController::Pad_Button_Attack);
+                m_step = 0;
+            }
+            break;
+    }
+    return 1;
+}
