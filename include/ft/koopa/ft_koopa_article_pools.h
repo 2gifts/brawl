@@ -18,6 +18,8 @@ class wnKoopaBreath : public Weapon {
 public:
     wnKoopaBreath(s32 articleId, const wnArticleBuildInfo& info, const wnKoopaBreathData* data);
     virtual ~wnKoopaBreath();
+    virtual void updateNodeSRT();
+    virtual bool notifyEventCollisionAttackCheck(u32 flags);
 };
 static_assert(sizeof(wnKoopaBreath) == 0x1F80, "wnKoopaBreath layout is wrong!");
 
