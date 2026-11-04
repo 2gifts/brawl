@@ -70,7 +70,8 @@ public:
 	soCollision m_collision;
 	u8 _40[0x8];
 	soArray<soCollisionShieldGroup>* m_collisionShieldGroupArray;
-	u32 _4C;
+	// HYPOTHESIS: observer whose slot 0x14 is the collision check.
+	soCollisionShieldEventObserver* _4C;
 	u8 _50;
 	u8 m_collisionOccurred;
 	u8 _52;
