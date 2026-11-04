@@ -6,6 +6,7 @@
 
 class aiInput;
 class aiStat;
+struct ipPadButton;
 struct AiClBlock;
 
 // One command of an AI script: a type byte and the size of the command in bytes (the next command follows it).
@@ -53,7 +54,7 @@ public:
     u16 m_id;              // 0x78: action id being run
     u16 m_unk7A;
     u16 m_prevId;          // 0x7C: previous non-zero action id
-    u16 m_unk7E;
+    u16 m_nextId;          // 0x7E: HYPOTHESIS: the action to run after this one (the act_* handlers store it before ending)
     u8 m_unk80;
     u8 m_unk81;
     u16 m_unk82;
@@ -64,13 +65,13 @@ public:
     u8 m_unk91;
     u8 m_unk92;
     u8 m_unk93;
-    int m_unk94;
+    int m_unk94;           // 0x94: HYPOTHESIS: a frame count (act_r_dfjump sets 40)
     float m_unk98;         // 0x98: -1 when reset
     u16 m_reflectDone;     // 0x9C: frames the reflect-done penalty lasts
     float m_reflectRate;   // 0xA0
     float m_defendAirRate; // 0xA4
-    int m_unkA8;
-    int m_unkAC;
+    int m_step;            // 0xA8: step within the running action (the act_* handlers)
+    int m_stepFrame;       // 0xAC: HYPOTHESIS: frames in the current step (act_r_dfjump waits for more than 4)
     Vec3f m_unkB0;
     Vec3f m_unkBC;
     Vec3f m_unkC8;
@@ -99,6 +100,18 @@ public:
     void addDefendAirRate(float amount);
     // The point to head back to the stage from (x, y). HYPOTHESIS: the flag's meaning (act passes id == 0x27).
     void get_return_goal(float* x, float* y, int unk);
+    // A point to drop to: past the end of the hazardous floor the CPU stands on, or a random point on a safe floor
+    // block (on the side away from where the target is heading).
+    void get_safe_fall(float* x, float* y);
+    // HYPOTHESIS: the act_* handlers take the stick and buttons to write, like aiInput's md_* handlers.
+    // The fall-through jump down (the name from the map): drop through the floor, then steer to the get_safe_fall point.
+    void act_r_dfjump(Vec2f* stick, ipPadButton* button);
+    // After a meteor smash (the name from the map): ends action 0x10A0 once the target is in situation 4 or 6;
+    // otherwise, when another opponent is within 30 of the CPU, switches aiInput to mode 1 on that one.
+    void act_a_meteo_aft(Vec2f* stick, ipPadButton* button);
+    // A jump after a shot (the name from the map): from rank 55, for an airborne CPU that has fired (aiInput
+    // m_unk116 bits 1-2), presses special towards the nearest floor edge. HYPOTHESIS: the meaning of the tests.
+    void act_r_jump_aft_shot(Vec2f* stick, ipPadButton* button);
 };
 static_assert(sizeof(aiAct) == 0x114, "Class is wrong size!");
 

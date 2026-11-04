@@ -169,6 +169,8 @@ public:
     // HYPOTHESIS: parameter meaning; the types follow the register use of the original and of its callers.
     // HYPOTHESIS: the parameters follow the call sites (position, found block, unused, team, then three limits).
     u32 get_under_floor(Vec3f* pos, AiClBlock** block, void* unk1, int team, float f1, float f2, float f3);
+    // HYPOTHESIS: a floor block for the CPU of input (whose aiStat is stat) to land on safely; NULL when none.
+    AiClBlock* get_safe_floor(aiInput* input, aiStat* stat);
     AiClBlock* get_via_blk(AiClBlock* from, int goal, float x, Vec2f* points, int numPoints, int bestOut, float f1, float f2, float distWeight);
     AiClBlock* get_via_blk_team(AiClBlock* from, int goal, float x, int team, Vec2f* points, int numPoints, int bestOut, float f1, float f2, float distWeight);
     // HYPOTHESIS: the float parameters are the ones get_via_blk passes on (aiStat passes the jump length and height);
