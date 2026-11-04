@@ -333,5 +333,35 @@ void soCollisionAttackModuleImpl::hitAbsolute(u32 index, int nodeId, int targetT
 void soCollisionAttackModuleImpl::extractAnimCmd(acAnimCmd* command, soCollisionAttackData* attackData, u32* index, u32* groupIndex, soModuleAccesser* moduleAccesser) {
     soArrayContractibleTable<const acCmdArgConv> args = command->getArgList();
     extractAnimCmdArg(soGeneralFlag<bool>(false), moduleAccesser, &args, index, groupIndex, attackData);
-    extractAnimCmdArg(soGeneralFlag<bool>(false), moduleAccesser, &args, attackData);
+    attackData->m_targetCategory = soCollision::CATEGORY_MASK_ALL;
+    attackData->m_targetLr = false;
+    attackData->m_targetPart = soCollision::PART_MASK_ALL;
+    attackData->m_noScale = false;
+    attackData->m_isShieldable = true;
+    attackData->m_isReflectable = false;
+    attackData->m_isAbsorbable = false;
+    attackData->m_serialHitFrame = 0;
+    attackData->m_isInvalidInvincible = false;
+    attackData->m_isInvalidXlu = false;
+    attackData->m_lrCheck = 0;
+    attackData->m_isCatch = false;
+    attackData->m_noTeam = false;
+    attackData->m_noHitStop = false;
+    attackData->m_noEffect = false;
+    attackData->m_noTransaction = false;
+    attackData->m_shapeType = soCollision::Shape_Sphere;
+}
+
+bool soCollisionAttackModuleImpl::setOffsetFromNode(u32 index, int node) {
+    if (m_collisionAttackPart->at(index).m_status == soCollisionAttackPart::Status_Inactive) {
+        return false;
+    }
+    soCollisionAttackData attackData = m_collisionAttackPart->at(index).m_attackData;
+    Matrix nodeMatrix(true);
+    m_moduleAccesser->getModelModule().getNodeLocalMtxFromNode(attackData.m_nodeIndex, node, &nodeMatrix, false);
+    float offsetZ = nodeMatrix.m[2][3];
+    float offsetY = nodeMatrix.m[1][3];
+    float offsetX = nodeMatrix.m[0][3];
+    Vec3f offset(offsetX, offsetY, offsetZ);
+    return setOffset(index, &offset);
 }
