@@ -1206,8 +1206,168 @@ void aiMgr::removePlayer(aiChrIdx* idx) {
     }
 }
 
-AiClBlock* aiMgr::get_via_blk(AiClBlock* from, int unk1, float x, Vec2f* pos, int unk2, int unk3, float f1, float f2, float f3) {
-    return get_via_blk_team(from, unk1, x, -1, pos, unk2, unk3, f1, f2, f3);
+AiClBlock* aiMgr::get_via_blk(AiClBlock* from, int goal, float x, Vec2f* points, int numPoints, int bestOut, float f1, float f2, float distWeight) {
+    return get_via_blk_team(from, goal, x, -1, points, numPoints, bestOut, f1, f2, distWeight);
+}
+
+// The first block to walk to from `from` towards goal (a random usable block when goal is 0): every block that
+// chk_goto_blk accepts is scored by its distance to goal plus distWeight times its distances to the given points and
+// the penalties for the hazard, dangerous and pass-through blocks. A reachable block next to goal is taken at once.
+// Without bestOut only reachable blocks are kept; with it the lowest-scored block of all is also written to bestOut.
+// Returns from when nothing better is found or the tables cannot be allocated.
+// HYPOTHESIS: goal and bestOut are ints in the original's signature (the map's mangled name); the callers pass a
+// block and the address of an AiClBlock* in them.
+AiClBlock* aiMgr::get_via_blk_team(AiClBlock* from, int goal, float x, int team, Vec2f* points, int numPoints, int bestOut, float f1, float f2, float distWeight) {
+    AiClBlock** block;
+    float* dist;
+    Vec2f* goalPoint;
+    int i;
+    bool reachable;
+    AiClBlock** blocks = (AiClBlock**)gfHeapManager::alloc(Heaps::Tmp, m_numBlocks * sizeof(AiClBlock*));
+    float* dists = (float*)gfHeapManager::alloc(Heaps::Tmp, m_numBlocks * sizeof(float));
+    Vec2f* goalPoints = (Vec2f*)gfHeapManager::alloc(Heaps::Tmp, m_numBlocks * sizeof(Vec2f));
+    if (blocks == NULL || dists == NULL || goalPoints == NULL) {
+        if (blocks != NULL) {
+            gfHeapManager::free(blocks);
+        }
+        if (dists != NULL) {
+            gfHeapManager::free(dists);
+        }
+        if (goalPoints != NULL) {
+            gfHeapManager::free(goalPoints);
+        }
+        return from;
+    }
+    if (goal == 0) {
+        goal = (int)get_random_block(from, team);
+    }
+    get_blk_goal_dist(blocks, goalPoints, dists, (AiClBlock*)goal);
+    if (bestOut == 0) {
+        block = blocks;
+        dist = dists;
+        for (i = 0; i < m_numBlocks; i++, block++, dist++) {
+            reachable = false;
+            if (*block == NULL) {
+                continue;
+            }
+            if (*block != from) {
+                reachable = chk_goto_blk(from, *block, team, x, f1, f2);
+            }
+            if (!reachable) {
+                *block = NULL;
+                continue;
+            }
+            if (*dist < 0.1f && distWeight >= 0.0f) {
+                AiClBlock* via = *block;
+                if (blocks != NULL) {
+                    gfHeapManager::free(blocks);
+                }
+                if (dists != NULL) {
+                    gfHeapManager::free(dists);
+                }
+                if (goalPoints != NULL) {
+                    gfHeapManager::free(goalPoints);
+                }
+                return via;
+            }
+        }
+        float best = 10000000.0f;
+        block = blocks;
+        dist = dists;
+        goalPoint = goalPoints;
+        for (i = 0; i < m_numBlocks; i++, block++, dist++, goalPoint++) {
+            if (*block == NULL) {
+                continue;
+            }
+            float score = *dist;
+            if (points != NULL) {
+                Vec2f* point = points;
+                for (int j = 0; j < numPoints; point++, j++) {
+                    score += distWeight * aiDistance(point, goalPoint);
+                }
+            }
+            if ((*block)->m_flags & 0x10000) {
+                score += 10000000.0f;
+            } else if ((*block)->m_flags & 0x1000) {
+                score += 100000.0f;
+            } else if ((*block)->chk_fl_danger(team)) {
+                score += 1000.0f;
+            }
+            if ((*block)->m_flags & 0x20) {
+                score += 50.0f;
+            }
+            if (best > score) {
+                best = score;
+                from = *block;
+            }
+        }
+        if (blocks != NULL) {
+            gfHeapManager::free(blocks);
+        }
+        if (dists != NULL) {
+            gfHeapManager::free(dists);
+        }
+        if (goalPoints != NULL) {
+            gfHeapManager::free(goalPoints);
+        }
+        return from;
+    }
+    AiClBlock* via = from;
+    AiClBlock* bestBlock = from;
+    float best = 10000000.0f;
+    float bestScore = 10000000.0f;
+    block = blocks;
+    dist = dists;
+    goalPoint = goalPoints;
+    for (i = 0; i < m_numBlocks; i++, block++, dist++, goalPoint++) {
+        reachable = false;
+        if (*block == NULL) {
+            continue;
+        }
+        float score = *dist;
+        if (*block != from) {
+            reachable = chk_goto_blk(from, *block, team, x, f1, f2);
+        }
+        if (reachable && score < 0.1f && distWeight >= 0.0f) {
+            via = *block;
+            break;
+        }
+        if (points != NULL) {
+            Vec2f* point = points;
+            for (int j = 0; j < numPoints; point++, j++) {
+                score += distWeight * aiDistance(point, goalPoint);
+            }
+        }
+        if ((*block)->m_flags & 0x20) {
+            score += 50.0f;
+        }
+        if ((*block)->m_flags & 0x10000) {
+            score += 10000000.0f;
+        } else if ((*block)->m_flags & 0x1000) {
+            score += 100000.0f;
+        } else if ((*block)->chk_fl_danger(team)) {
+            score += 1000.0f;
+        }
+        if (reachable && best > score) {
+            best = score;
+            via = *block;
+        }
+        if (bestScore > score) {
+            bestScore = score;
+            bestBlock = *block;
+        }
+    }
+    *(AiClBlock**)bestOut = bestBlock;
+    if (blocks != NULL) {
+        gfHeapManager::free(blocks);
+    }
+    if (dists != NULL) {
+        gfHeapManager::free(dists);
+    }
+    if (goalPoints != NULL) {
+        gfHeapManager::free(goalPoints);
+    }
+    return via;
 }
 
 // The first block on the route from `from` towards goal (a random usable block when goal is NULL): the blocks are
