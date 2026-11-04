@@ -414,3 +414,41 @@ void* fn_118_4DD8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 void* fn_118_4E18(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_118_4E58(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+
+void ftLucario::setMachValidity(soModuleAccesser* moduleAccesser, bool valid) {
+    ftLucario& fighter = dynamic_cast<ftLucario&>(moduleAccesser->getStageObject());
+    fighter.m_moduleAccesser->getWorkManageModule().setFlag(valid, 0x1200003F);
+}
+
+// soModuleAccesser::set_visible (the map name); src/mo_fighter/ft_lucario/ft_lucario.cpp calls it by this stand-in name.
+extern "C" void fn_118_99DC(u8* acc, u32 id, u32 visible);
+
+void ftLucario::notifyEventOnDamage(soDamage* damage, bool isDamage, soModuleAccesser* moduleAccesser) {
+    m_moduleAccesser->getWorkManageModule().setFlag(true, 0x1200003F);
+    Fighter::notifyEventOnDamage(damage, isDamage, moduleAccesser);
+}
+
+void ftLucario::notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser) {
+    if (kind != 0) {
+        m_moduleAccesser->getWorkManageModule().setFlag(true, 0x1200003F);
+    }
+    Fighter::notifyEventChangeSituation(kind, prevKind, moduleAccesser);
+}
+
+// clampf (the map name); src/mo_fighter/ft_lucario/ft_lucario_status_uniq_process_final.cpp calls it by this stand-in name.
+extern "C" float fn_118_8F8C(float value, float min, float max);
+
+float ftLucario::calcAuraScale() {
+    const float* parameters = static_cast<const float*>(m_data->extendParam[1]);
+    float aura = m_moduleAccesser->getWorkManageModule().getFloat(0x11000013);
+    float rate = fn_118_8F8C((aura - parameters[1]) / (parameters[3] - parameters[1]), 0.0f, 1.0f);
+    float remaining = 1.0f - rate;
+    return parameters[0] + (parameters[2] - parameters[0]) * (1.0f - remaining * remaining);
+}
+
+void ftLucario::notifyEventCollisionShield(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser) {
+    if (groupIndex == 1) {
+        moduleAccesser->getWorkManageModule().onFlag(0x22000010);
+    }
+    Fighter::notifyEventCollisionShield(attackModule, power, collisionLog, groupIndex, posX, posY, moduleAccesser);
+}
