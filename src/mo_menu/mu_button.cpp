@@ -1338,18 +1338,7 @@ void muButtonTask::mainStepButtonAssign(muButtonTask* task) {
     }
     if (isPushed(getSysPadStatus(), 0x1000)) { // START
         task->m_work->m_edit.m_buttons[cursor] = sPadInfos[padKind].m_actionLists[cursor][task->m_work->m_listIndex];
-        int padNo = getStartPad();
-        int step;
-        int kind = getPadKind(padNo);
-        if (kind != task->m_work->m_padKind) {
-            g_sndSystem->playSE(static_cast<SndID>(3), -1, 0, 0, -1);
-            step = 8;
-        } else {
-            g_sndSystem->playSE(static_cast<SndID>(1), -1, 0, 0, -1);
-            task->m_work->m_contNo = padNo;
-            step = 10;
-        }
-        changeStep(task, step);
+        startPractice(task);
     }
 }
 
