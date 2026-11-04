@@ -19,6 +19,15 @@ protected:
     u8 m_isWarning;    // 0x16C
 
 public:
+    // HYPOTHESIS: constructor body, read from the copy inlined into create.
+    grAdventureMine(const char* taskName) : grGimmickBlock(taskName) {
+        unk15C = 0;
+        m_isUpdate = false;
+        unk164 = 1;
+        unk168 = 0.0f;
+        m_isWarning = false;
+    }
+
     virtual void processUpdate();
     virtual ~grAdventureMine();
     virtual void update(float deltaFrame);
@@ -29,5 +38,25 @@ public:
     void callWarning();
     void callCancelWarning();
     void callBreak();
+
+private:
+    // HYPOTHESIS: inlined accessor for the sound-effect work that startup fills in.
+    inline void setSoundEffect(int index, int soundId, Vec2f offset) {
+        m_soundEffects[index].m_id = soundId;
+        m_soundEffects[index].m_repeatFrame = 0;
+        m_soundEffects[index].m_nodeIndex = 0;
+        m_soundEffects[index].m_endFrame = 0;
+        m_soundEffects[index].m_offsetPos = offset;
+    }
+
+    // HYPOTHESIS: inlined accessor for the effect work that startup fills in.
+    inline void setEffect(int index, int effectId, const char* nodeName, Vec2f offset, float scale) {
+        m_effects[index].m_id = effectId;
+        m_effects[index].m_repeatFrame = 0;
+        m_effects[index].m_nodeIndex = getNodeIndex(0, nodeName);
+        m_effects[index].m_endFrame = 0;
+        m_effects[index].m_offsetPos = offset;
+        m_effects[index].m_scale = scale;
+    }
 };
 static_assert(sizeof(grAdventureMine) == 0x170, "Class is wrong size!");
