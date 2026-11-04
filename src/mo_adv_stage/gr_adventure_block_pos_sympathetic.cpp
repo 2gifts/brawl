@@ -58,3 +58,17 @@ void grAdventureBlockSympatheticManager::setInitializeFlag() {
         }
     }
 }
+
+void grAdventureBlockSympatheticManager::notifyHitCircle(void* circle) {
+    u32 count = m_count;
+    m_cursor = m_head;
+    for (u32 i = 0; i < count; i++) {
+        grGimmickBlockSympathetic* block = m_cursor->m_block;
+        if (circle == block->m_hitCircle) {
+            block->requestBreak();
+            enableHitCircle(0, 1, circle);
+            break;
+        }
+        m_cursor = m_cursor->m_next;
+    }
+}
