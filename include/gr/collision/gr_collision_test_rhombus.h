@@ -160,8 +160,6 @@ static_assert(offsetof(grCollisionTestRhombus, m_unk47C) == 0x47C, "Class is wro
 // ---------------------------------------------------------------------------------------------------------------------------
 class grCollStatus;
 extern "C" {
-// grCollision::getSegment, 4-argument overload (5 words out: the segment and `unk`, every caller passes 0). 0x80111968
-void fn_80111968(grCollision* collision, grCollSegmentEx* out, grCollisionLine* line, int unk);
 // grCollision::getPreSegment1 (same shape, the line's segment one frame ago). 0x80111AF4
 void fn_80111AF4(grCollision* collision, grCollSegmentEx* out, grCollisionLine* line, int unk);
 // grCollisionLineWork::getPrevNoVLink / getNextNoVLink. 0x80113F88 / 0x80114024

@@ -55,9 +55,6 @@ grCollisionTest::grCollisionTest(grCollStatus* status)
     m_unk10 = 0;
 }
 
-// HYPOTHESIS: grCollision::getSegment with a fourth argument (main.dol 0x80111968): fills the segment of a line.
-extern "C" void fn_80111968(grCollision* collision, grCollSegmentEx* out, grCollisionLine* line, int unk);
-
 // HYPOTHESIS: grCollStatus::clearTouchLine (0x80134468): forgets the touch line of the given touch id.
 extern "C" void fn_80134468(grCollStatus* status, int touchId);
 
@@ -256,7 +253,7 @@ int grCollisionTest::getNextGroundLine(grCollisionLineWork* cur, grCollisionLine
     }
     if (result) {
         grCollSegmentEx segment;
-        fn_80111968(out->m_collision, &segment, out->m_collisionLine, 0);
+        out->m_collision->getSegment(&segment, out->m_collisionLine, 0);
         if (segment.m_segment.m_p0Pos.m_x > segment.m_segment.m_p1Pos.m_x) {
             result = 0;
         }
@@ -293,7 +290,7 @@ int grCollisionTest::getNextRightLine(grCollisionLineWork* cur, grCollisionLineW
     }
     if (result) {
         grCollSegmentEx segment;
-        fn_80111968(out->m_collision, &segment, out->m_collisionLine, 0);
+        out->m_collision->getSegment(&segment, out->m_collisionLine, 0);
         if (segment.m_segment.m_p0Pos.m_y >= segment.m_segment.m_p1Pos.m_y) {
             result = 0;
         }
@@ -316,7 +313,7 @@ int grCollisionTest::getNextLeftLine(grCollisionLineWork* cur, grCollisionLineWo
     }
     if (result) {
         grCollSegmentEx segment;
-        fn_80111968(out->m_collision, &segment, out->m_collisionLine, 0);
+        out->m_collision->getSegment(&segment, out->m_collisionLine, 0);
         if (segment.m_segment.m_p0Pos.m_y <= segment.m_segment.m_p1Pos.m_y) {
             result = 0;
         }
@@ -339,7 +336,7 @@ int grCollisionTest::getNextTopLine(grCollisionLineWork* cur, grCollisionLineWor
     }
     if (result) {
         grCollSegmentEx segment;
-        fn_80111968(out->m_collision, &segment, out->m_collisionLine, 0);
+        out->m_collision->getSegment(&segment, out->m_collisionLine, 0);
         if (segment.m_segment.m_p0Pos.m_x < segment.m_segment.m_p1Pos.m_x) {
             result = 0;
         }
@@ -356,7 +353,7 @@ int grCollisionTest::getNextTopLine(grCollisionLineWork* cur, grCollisionLineWor
 int grCollisionTest::checkMoveLenXDown(const Vec2f* pos, grCollisionLineWork* lineWork) {
     int reachedEnd = 0;
     grCollSegmentEx segment;
-    fn_80111968(lineWork->m_collision, &segment, lineWork->m_collisionLine, 0);
+    lineWork->m_collision->getSegment(&segment, lineWork->m_collisionLine, 0);
     Vec2f foot;
     segment.m_segment.projection1(*pos, foot);
     float length = (segment.m_segment.m_p1Pos - segment.m_segment.m_p0Pos).length();
@@ -391,7 +388,7 @@ void grCollisionTest::calcOffsetVector(grCollisionLineWork* lineWork, const Vec2
     grCollSegmentEx preSegment;
     fn_80111AF4(lineWork->m_collision, &preSegment, lineWork->m_collisionLine, 0);
     grCollSegmentEx segment;
-    fn_80111968(lineWork->m_collision, &segment, lineWork->m_collisionLine, 0);
+    lineWork->m_collision->getSegment(&segment, lineWork->m_collisionLine, 0);
     Vec2f preDir = preSegment.m_segment.m_p1Pos - preSegment.m_segment.m_p0Pos;
     Vec2f preToPos = *pos - preSegment.m_segment.m_p0Pos;
     float preLengthSq = preDir.m_x * preDir.m_x + preDir.m_y * preDir.m_y;
@@ -418,7 +415,7 @@ void grCollisionTest::calcNewShapeOnGround(grCollisionLineWork* lineWork, int en
     Vec2f to;
     Vec2f newDown;
     Vec2f down = m_unk2c4->getDownPos();
-    fn_80111968(lineWork->m_collision, &segment, lineWork->m_collisionLine, 0);
+    lineWork->m_collision->getSegment(&segment, lineWork->m_collisionLine, 0);
     if (m_unkE & DIR_RIGHT) {
         from = segment.m_segment.m_p0Pos;
         to = segment.m_segment.m_p1Pos;
@@ -461,7 +458,7 @@ void grCollisionTest::calcNewShapeOnRight(grCollisionLineWork* lineWork) {
     Vec2f to;
     Vec2f newRight;
     Vec2f right = m_unk2c4->getRightPos();
-    fn_80111968(lineWork->m_collision, &segment, lineWork->m_collisionLine, 0);
+    lineWork->m_collision->getSegment(&segment, lineWork->m_collisionLine, 0);
     bool clipped = false;
     if (m_unkE & DIR_UP) {
         from = segment.m_segment.m_p0Pos;
@@ -509,7 +506,7 @@ void grCollisionTest::calcNewShapeOnLeft(grCollisionLineWork* lineWork) {
     Vec2f to;
     Vec2f newLeft;
     Vec2f left = m_unk2c4->getLeftPos();
-    fn_80111968(lineWork->m_collision, &segment, lineWork->m_collisionLine, 0);
+    lineWork->m_collision->getSegment(&segment, lineWork->m_collisionLine, 0);
     bool clipped = false;
     if (m_unkE & DIR_UP) {
         from = segment.m_segment.m_p1Pos;
@@ -556,7 +553,7 @@ void grCollisionTest::calcNewShapeOnTop(grCollisionLineWork* lineWork) {
     Vec2f from;
     Vec2f to;
     Vec2f top(m_unk2c4->getTopPos());
-    fn_80111968(lineWork->m_collision, &segment, lineWork->m_collisionLine, 0);
+    lineWork->m_collision->getSegment(&segment, lineWork->m_collisionLine, 0);
     bool clipped = false;
     if (m_unkE & DIR_RIGHT) {
         from = segment.m_segment.m_p1Pos;
@@ -694,7 +691,7 @@ int grCollisionTest::initPos() {
         if (isActiveLineWork(lineWork) && lineWork->m_collisionLine->m_isUnder
             && (lineWork->m_collisionLine->m_targetCategory & (u8)m_collStatus->m_targetLineCategory) != 0) {
             grCollSegmentEx segment;
-            fn_80111968(lineWork->m_collision, &segment, lineWork->m_collisionLine, 0);
+            lineWork->m_collision->getSegment(&segment, lineWork->m_collisionLine, 0);
             if (segment.m_segment.m_p0Pos.m_x <= down.m_x && down.m_x <= segment.m_segment.m_p1Pos.m_x) {
                 float rate = (down.m_x - segment.m_segment.m_p0Pos.m_x) / (segment.m_segment.m_p1Pos.m_x - segment.m_segment.m_p0Pos.m_x);
                 Vec2f point = segment.m_segment.m_p0Pos + (segment.m_segment.m_p1Pos - segment.m_segment.m_p0Pos) * rate;
@@ -721,7 +718,7 @@ int grCollisionTest::initPos() {
             if (isActiveLineWork(lineWork) && lineWork->m_collisionLine->m_isUpper
                 && (lineWork->m_collisionLine->m_targetCategory & (u8)m_collStatus->m_targetLineCategory) != 0) {
                 grCollSegmentEx segment;
-                fn_80111968(lineWork->m_collision, &segment, lineWork->m_collisionLine, 0);
+                lineWork->m_collision->getSegment(&segment, lineWork->m_collisionLine, 0);
                 if (segment.m_segment.m_p1Pos.m_x <= down.m_x && down.m_x <= segment.m_segment.m_p0Pos.m_x) {
                     float rate = (down.m_x - segment.m_segment.m_p1Pos.m_x) / (segment.m_segment.m_p0Pos.m_x - segment.m_segment.m_p1Pos.m_x);
                     Vec2f point = segment.m_segment.m_p1Pos + (segment.m_segment.m_p0Pos - segment.m_segment.m_p1Pos) * rate;
@@ -779,7 +776,7 @@ int grCollisionTest::initPos() {
         grCollisionLine* line = lineWork->m_collisionLine;
         if ((line->m_isLeft || line->m_isRight) && (line->m_targetCategory & (u8)m_collStatus->m_targetLineCategory) != 0) {
             grCollSegmentEx segment;
-            fn_80111968(lineWork->m_collision, &segment, lineWork->m_collisionLine, 0);
+            lineWork->m_collision->getSegment(&segment, lineWork->m_collisionLine, 0);
             if (lineWork->m_collisionLine->m_isLeft) {
                 if (segment.m_segment.m_p0Pos.m_y >= center.m_y && center.m_y >= segment.m_segment.m_p1Pos.m_y) {
                     Vec2f projected;
@@ -925,7 +922,7 @@ int grCollisionTest::test() {
 // HYPOTHESIS: the four-argument getSegment writes five words (grCollSegmentEx); cluster B only wants the segment.
 static inline void getSegmentCompat(grCollision* collision, clSegment2D* out, grCollisionLine* line) {
     grCollSegmentEx ex;
-    fn_80111968(collision, &ex, line, 0);
+    collision->getSegment(&ex, line, 0);
     *out = ex.m_segment;
 }
 
@@ -2032,7 +2029,7 @@ int grCollisionTest::testRightWallMain() {
     int touchId = 2;
     while (true) {
         const Vec2f& target = m_unk2c4->getRightPos();
-        fn_80111968(wall.m_collision, &seg, wall.m_collisionLine, 0);
+        wall.m_collision->getSegment(&seg, wall.m_collisionLine, 0);
         float y0 = seg.m_segment.m_p0Pos.m_y;
         float y1 = seg.m_segment.m_p1Pos.m_y;
         float maxY = psMax(y0, y1);
@@ -2063,7 +2060,7 @@ int grCollisionTest::testRightWallMain() {
         }
         wall = next;
         updateTouchLine(touchId, &wall, rate);
-        fn_80111968(wall.m_collision, &nextSeg, wall.m_collisionLine, 0);
+        wall.m_collision->getSegment(&nextSeg, wall.m_collisionLine, 0);
         Vec2f pos;
         if (m_unkE & DIR_UP) {
             if (nextSeg.m_segment.m_p0Pos.m_y < nextSeg.m_segment.m_p1Pos.m_y) {
@@ -2182,7 +2179,7 @@ int grCollisionTest::testLeftWallMain() {
     int touchId = 1;
     while (true) {
         const Vec2f& target = m_unk2c4->getLeftPos();
-        fn_80111968(wall.m_collision, &seg, wall.m_collisionLine, 0);
+        wall.m_collision->getSegment(&seg, wall.m_collisionLine, 0);
         float y0 = seg.m_segment.m_p0Pos.m_y;
         float y1 = seg.m_segment.m_p1Pos.m_y;
         float maxY = psMax(y0, y1);
@@ -2213,7 +2210,7 @@ int grCollisionTest::testLeftWallMain() {
         }
         wall = next;
         updateTouchLine(touchId, &wall, rate);
-        fn_80111968(wall.m_collision, &nextSeg, wall.m_collisionLine, 0);
+        wall.m_collision->getSegment(&nextSeg, wall.m_collisionLine, 0);
         Vec2f pos;
         if (m_unkE & DIR_UP) {
             if (nextSeg.m_segment.m_p0Pos.m_y < nextSeg.m_segment.m_p1Pos.m_y) {
@@ -2324,7 +2321,7 @@ int grCollisionTest::testTopMain() {
         float height = m_unk2c0->getHeight();
         Vec2f top = m_unk2bc->getTopPos();
         grCollisionLineWork* upLine = &status->m_collLineWorkArray[0];
-        fn_80111968(upLine->m_collision, &seg, upLine->m_collisionLine, 0);
+        upLine->m_collision->getSegment(&seg, upLine->m_collisionLine, 0);
         float maxY = psMax(seg.m_segment.m_p0Pos.m_y, seg.m_segment.m_p1Pos.m_y);
         float minY = psMin(seg.m_segment.m_p0Pos.m_y, seg.m_segment.m_p1Pos.m_y);
         box.m_unk2 = psMin(box.m_unk2, psMin(maxY, top.m_y - height));
@@ -2337,7 +2334,7 @@ int grCollisionTest::testTopMain() {
     float rate = 1.0f;
     int touchId = 0;
     while (true) {
-        fn_80111968(wall.m_collision, &seg, wall.m_collisionLine, 0);
+        wall.m_collision->getSegment(&seg, wall.m_collisionLine, 0);
         float x0 = seg.m_segment.m_p0Pos.m_x;
         float x1 = seg.m_segment.m_p1Pos.m_x;
         float maxX = psMax(x0, x1);
@@ -2369,7 +2366,7 @@ int grCollisionTest::testTopMain() {
         }
         wall = next;
         updateTouchLine(touchId, &wall, rate);
-        fn_80111968(wall.m_collision, &nextSeg, wall.m_collisionLine, 0);
+        wall.m_collision->getSegment(&nextSeg, wall.m_collisionLine, 0);
         Vec2f pos;
         if (m_unkE & DIR_RIGHT) {
             if (nextSeg.m_segment.m_p0Pos.m_x < nextSeg.m_segment.m_p1Pos.m_x) {
@@ -2466,7 +2463,7 @@ int grCollisionTest::testCliff() {
                     sides |= 2;
                 }
                 if (sides != 0) {
-                    fn_80111968(lineWork.m_collision, &lineSeg, cliffLine.m_collisionLine, 0);
+                    lineWork.m_collision->getSegment(&lineSeg, cliffLine.m_collisionLine, 0);
                     Vec2f edge;
                     if (m_unk20 == 0) {
                         edge = lineSeg.m_segment.m_p1Pos;
@@ -2649,7 +2646,7 @@ int grCollisionTest::testCliffCheck() {
                             ends &= ~2;
                         }
                         if (ends != 0) {
-                            fn_80111968(lineWork->m_collision, &lineSeg, line, 0);
+                            lineWork->m_collision->getSegment(&lineSeg, line, 0);
                             u32 rightEnd = (ends >> 1) & 1;
                             u32 leftEnd = ends & 1;
                             if ((rightEnd == 0 || !lineWork->getPrev(&neighbor) || (!neighbor.m_collisionLine->m_isLeft &&

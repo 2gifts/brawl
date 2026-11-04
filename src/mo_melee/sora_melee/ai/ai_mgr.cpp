@@ -18,6 +18,7 @@
 #include <gm/gm_lib.h>
 #include <mt/mt_prng.h>
 #include <gr/collision/gr_collision.h>
+#include <gr/collision/gr_collision_test_types.h>
 #include <st/stage.h>
 #include <st_madein/st_madein.h>
 #include <cm/cm_camera_controller.h>
@@ -1287,6 +1288,95 @@ bool aiChkSegmentCross(const Vec2f* a, const Vec2f* b, const Vec2f* c, const Vec
     return true;
 }
 
+
+// The block whose lines the segment from -> to crosses (the crossing nearest to the origin goes to hitPos when given;
+// without hitPos the first block found is returned). mask selects the directions that are tested: 2 down, 4 up, 8 left,
+// 0x10 right; a vertical movement also tests the side lines and a horizontal one the ceilings.
+AiClBlock* aiMgr::chk_cl_cross2(Vec2f* from, Vec2f* to, u32 mask, Vec2f* hitPos, AiClBlock* ignore) {
+    Vec2f dir = *to - *from;
+    AiClBlock* block = m_blocks;
+    float bestDist = 9999980000.0f;
+    u8 dirs = 0;
+    AiClBlock* best = NULL;
+    if (dir.m_y < 0.0f) {
+        dirs |= 2;
+    }
+    if (dir.m_y > 0.0f) {
+        dirs |= 4;
+    }
+    if (dir.m_x < 0.0f) {
+        dirs |= 8;
+    }
+    if (dir.m_x > 0.0f) {
+        dirs |= 0x10;
+    }
+    dirs &= mask;
+    if ((dirs & 2) || (dirs & 4)) {
+        dirs |= 0x18;
+    } else if (dirs & 0x18) {
+        dirs |= 4;
+    }
+    Vec2f min;
+    Vec2f max;
+    if (from->m_x < to->m_x) {
+        min.m_x = from->m_x;
+        max.m_x = to->m_x;
+    } else {
+        min.m_x = to->m_x;
+        max.m_x = from->m_x;
+    }
+    if (from->m_y < to->m_y) {
+        min.m_y = from->m_y;
+        max.m_y = to->m_y;
+    } else {
+        min.m_y = to->m_y;
+        max.m_y = from->m_y;
+    }
+    u32 down = dirs & 2;
+    u32 up = dirs & 4;
+    u32 left = dirs & 8;
+    u32 right = dirs & 0x10;
+    for (int i = 0; i < m_numBlocks; i++, block++) {
+        if (block == ignore || (block->m_flags & dirs) == 0) {
+            continue;
+        }
+        tag_AiClJointList* list = block->m_joint;
+        if (max.m_x < block->m_box.m_unk1 || min.m_x > block->m_box.m_unk3 || max.m_y < block->m_box.m_unk2 ||
+            min.m_y > block->m_box.m_unk4)
+        {
+            continue;
+        }
+        for (; list != NULL; list = list->m_next) {
+            grCollisionLine* l = list->m_line;
+            bool walkRight = false;
+            if (list->m_collision.isValid()) {
+                grCollision* coll = list->m_collision.getCollision();
+                for (; l != NULL; l = aiNextJointLine(list, coll, l, walkRight)) {
+                    if ((down && l->m_isUnder) || (up && l->m_isUpper && !l->m_isThroughable) || (left && l->m_isLeft) ||
+                        (right && l->m_isRight))
+                    {
+                        grCollSegmentEx seg;
+                        Vec2f cross;
+                        coll->getSegment(&seg, l, 0);
+                        if (aiChkSegmentCross(from, to, &seg.m_segment.m_p0Pos, &seg.m_segment.m_p1Pos, &cross) == true) {
+                            if (hitPos == NULL) {
+                                return block;
+                            }
+                            float dist = cross.m_x * cross.m_x + cross.m_y * cross.m_y;
+                            if (bestDist > dist) {
+                                hitPos->m_x = cross.m_x;
+                                bestDist = dist;
+                                best = block;
+                                hitPos->m_y = cross.m_y;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return best;
+}
 // Whether the input of the character in this slot still comes from its controller: true until the AI has its floor
 // information, and for every slot that the AI has not registered.
 bool aiMgr::chkIpHumanUpdate(aiChrIdx* idx) {

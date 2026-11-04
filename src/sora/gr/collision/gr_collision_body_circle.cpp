@@ -1,11 +1,11 @@
+#include <gr/collision/gr_collision.h>
+#include <gr/collision/gr_collision_test_types.h>
 #include <gr/collision/gr_collision_linework.h>
 #include <gr/collision/gr_collision_status.h>
 #include <gr/collision/gr_collision_test_circle.h>
 #include <mt/mt_coll2d.h>
 #include <types.h>
 
-// HYPOTHESIS: grCollision::getSegment (gr_collision.o) fills the segment of a line.
-extern "C" void fn_80111968(grCollision* collision, void* out, grCollisionLine* line, int unk);
 extern "C" int fn_80132468(grCollisionTestCircle* test, const clCircle2D* start, const clCircle2D* end, void* segment, float* rate);
 
 grCollisionTestCircle::grCollisionTestCircle(grCollStatus* status) : grCollisionTest(status) {
@@ -64,10 +64,10 @@ int grCollisionTestCircle::testStaticCorrectionLast(grCollisionLineWork* lineWor
 int grCollisionTestCircle::testCollisionNotMove(grCollisionLineWork* lineWork) {
     clCircle2D start = m_shape1.m_circle;
     clCircle2D end = m_shape2.m_circle;
-    clSegment2D segment;
+    grCollSegmentEx segment;
     float rate = m_unk8;
-    fn_80111968(lineWork->m_collision, &segment, lineWork->m_collisionLine, 0);
-    int result = fn_80132468(this, &start, &end, &segment, &rate);
+    lineWork->m_collision->getSegment(&segment, lineWork->m_collisionLine, 0);
+    int result = fn_80132468(this, &start, &end, &segment.m_segment, &rate);
     if (result) {
         Vec2f normal = m_unk378 - m_unk370;
         m_unk8 = rate;
