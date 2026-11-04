@@ -160,6 +160,8 @@ public:
     void render();
     void setHeapInstance(int);
     void setMdlPriority(u32, int);
+    bool isExistEffectResource(u32);
+    void setMdlCalcMtx(u32, void (*)(nw4r::g3d::ScnMdl*, void*), void*);
     void releaseResource(char*);
     void setDrawPrio(int prio);
     u32 setEffect(EfID effectID);

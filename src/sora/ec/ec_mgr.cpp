@@ -130,3 +130,40 @@ workFound:
         model->SetPriorityDrawXlu(priority);
     }
 }
+
+bool ecMgr::isExistEffectResource(u32 resourceId) {
+    if (unk6C) {
+        u32 index = unk70;
+        ecEffectWork* work = &unk60[index];
+        for (; index <= unk74; ++index, ++work) {
+            if (work->unk7C && work->unk30->unk10 == resourceId) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void ecMgr::setMdlCalcMtx(u32 handleId, void (*callback)(nw4r::g3d::ScnMdl*, void*), void* userData) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        work->set_mdl_calc_mtx(callback, userData);
+    }
+}
