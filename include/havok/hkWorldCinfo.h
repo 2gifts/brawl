@@ -73,6 +73,8 @@ struct hkWorldCinfo : hkReferencedObject {
 
     hkWorldCinfo();
     hkWorldCinfo(hkFinishLoadedObjectFlag flag);
+    virtual ~hkWorldCinfo();
+    static void operator delete(void* p);
 
     static void finishLoadedObjecthkWorldCinfo(void* p);
     static void cleanupLoadedObjecthkWorldCinfo(void* p);

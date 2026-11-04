@@ -5,6 +5,8 @@
 //   0x8009A0A0    92  __dt   [map: hkWorldCinfo____dt]
 //   0x8009A0FC     8  stepTime   [map: phWorld__stepTime]
 #include <ph/ph_world.h>
+#include <havok/hkWorldCinfo.h>
+#include <havok/hkMemory.h>
 
 // Local declaration (MARKED): hkWorld::stepDeltaTime is not declared in include/havok/hkWorld.h yet.
 struct hkWorld : hkReferencedObject {
@@ -20,4 +22,11 @@ phWorld::~phWorld() {
 
 void phWorld::stepTime(hkReal dt) {
     m_hkWorld->stepDeltaTime(dt);
+}
+
+inline void hkWorldCinfo::operator delete(void* p) {
+    hkMemory::s_instance->deallocateChunk(p, static_cast<hkWorldCinfo*>(p)->m_memSizeAndFlags, 0x13);
+}
+
+hkWorldCinfo::~hkWorldCinfo() {
 }
