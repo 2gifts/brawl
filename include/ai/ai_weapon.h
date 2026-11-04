@@ -75,6 +75,8 @@ public:
     ~aiWeaponMgr();
     void reset();
     void update();
+    // HYPOTHESIS: the per-frame pass that aiMgr::processBegin runs before the floor blocks are refreshed.
+    void prepare();
     // MATCH-ONLY: preserve the native out-of-line classifier call boundary.
     void update_core(StageObject* object, s8 type, int kind, u8* stale,
                      u32 objId, int constraintParentId) __attribute__((never_inline));

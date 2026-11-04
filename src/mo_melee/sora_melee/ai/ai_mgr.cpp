@@ -17,6 +17,9 @@
 #include <gr/collision/gr_collision.h>
 #include <st/stage.h>
 #include <st_madein/st_madein.h>
+#include <cm/cm_camera_controller.h>
+#include <gm/gm_global.h>
+#include <revolution/OS.h>
 #include <types.h>
 
 // The CPU player AI manager (aiMgr) and its helpers. HYPOTHESIS: the member names follow how the functions use them.
@@ -25,6 +28,9 @@ extern "C" {
 // aiMgr readiness flag: -1 while the AI is disabled, 0.. once the floor information has been prepared
 extern s8 lbl_27_data_47BF8;
 }
+
+// HYPOTHESIS: debug timings of aiMgr::processBegin (weapon pass, floor blocks, weapon/enemy update, fighter stats).
+extern s64 g_aiMgrProcTime[4];
 
 // HYPOTHESIS: create precedes setEnable in the unit, so the original spells setEnable's body out here instead of calling it.
 void aiMgr::create(int enable) {
@@ -499,7 +505,7 @@ void aiMgr::setEnable(int enable) {
 }
 
 void aiMgr::CrearWork() {
-    m_unkA8 = 0;
+    m_frame = 0;
     m_unkA4.m_idx = -1;
     for (int i = 0; i < 24; i++) {
         m_dangerAttr[i] = 0;
@@ -523,11 +529,138 @@ void aiMgr::CrearWork() {
     m_unk378 = 0;
     m_unk374 = 0;
     m_unk37C = 0.0f;
-    m_unk380 = 0;
-    m_unk384 = 0;
+    m_ruleTime = 0;
+    m_numTeams = 0;
     m_unk385 = 0;
     m_unk386 = 0;
     gfMemFill(m_work, 0, sizeof(m_work));
+}
+
+// HYPOTHESIS: refreshes the aiStat of every fighter in the match and of its sub-character, averages their m_unkC4
+// into m_unk37C and counts the distinct m_unkCC values (teams) in m_numTeams.
+static inline void aiUpdateStats(aiMgr* mgr, ftManager* ftMgr, int preparing) {
+    mgr->m_numTeams = 0;
+    int teams[aiMgr::NumPlayers];
+    int count = 0;
+    for (int i = 0; i < aiMgr::NumPlayers; i++) {
+        if (ftMgr->getEntryId(i) >= 0) {
+            mgr->m_stat[i].update(preparing);
+            (mgr->m_stat + aiMgr::NumPlayers)[i].update(preparing);
+            mgr->m_unk37C += mgr->m_stat[i].m_unkC4;
+            count++;
+            int j;
+            for (j = 0; j < mgr->m_numTeams; j++) {
+                if (teams[j] == mgr->m_stat[i].m_unkCC) {
+                    break;
+                }
+            }
+            if (j >= mgr->m_numTeams) {
+                teams[j] = mgr->m_stat[i].m_unkCC;
+                mgr->m_numTeams++;
+            }
+        }
+    }
+    if (count > 0) {
+        mgr->m_unk37C /= count;
+    }
+}
+
+// Per frame, while a match is running: reads the stage area the CPUs stay inside (lowered for the stages whose floor
+// kills: Jungle Japes, Norfair's magma, Brinstar's acid, Summit's water zones), refreshes the weapons, the floor blocks
+// and every fighter's aiStat. The pieces are timed into g_aiMgrProcTime.
+void aiMgr::processBegin() {
+    s64 start = OSGetTime();
+    ftManager* ftMgr = g_ftManager;
+    Stage* stage;
+    if (m_jointLists != NULL && m_enable && (stage = g_Stage) != NULL && (stage->unk40 == 3 || stage->unk40 == 4) &&
+        ftMgr->isExistEntry())
+    {
+        if (stage != NULL) {
+            gmGlobalModeMelee* melee = g_GameGlobal->m_modeMelee;
+            if (melee != NULL) {
+                switch (melee->m_meleeInitData.m_gameRule) {
+                    case 1:
+                        m_ruleTime = 0;
+                        break;
+                    case 0:
+                    case 2:
+                    default:
+                        m_ruleTime = stage->getFrameRuleTime();
+                        break;
+                }
+            }
+            m_stageKind = stage->m_stageKind;
+            CameraController* camera = CameraController::getInstance();
+            m_areaLeft = camera->unk158;
+            m_areaRight = camera->unk15C;
+            m_areaTop = camera->unk160;
+            m_areaBottom = camera->unk164;
+            switch (m_stageKind) {
+                case Stages::JungleJapes:
+                    m_areaBottom = -40.0f;
+                    break;
+                case Stages::Norfair: {
+                    Stage* st = g_Stage;
+                    if (m_areaBottom < st->getMagmaHeight()) {
+                        m_areaBottom = st->getMagmaHeight();
+                    }
+                    break;
+                }
+                case Stages::Brinstar: {
+                    Stage* st = g_Stage;
+                    if (m_areaBottom < st->getAcidHeight()) {
+                        m_areaBottom = st->getAcidHeight();
+                    }
+                    break;
+                }
+                case Stages::Summit:
+                    if (m_numDangerZones) {
+                        aiDangerZone* zone = m_dangerZone;
+                        bool found = false;
+                        for (int i = 0; i < 8; i++, zone++) {
+                            if (m_dangerAttr[i]) {
+                                if (!found || m_areaBottom > zone->m_maxY - 5.0f) {
+                                    m_areaBottom = zone->m_maxY - 5.0f;
+                                    found = true;
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
+        } else {
+            m_areaLeft = -99999.9f;
+            m_areaBottom = -99999.9f;
+            m_areaRight = 99999.9f;
+            m_areaTop = 99999.9f;
+        }
+        m_unk374 = -999999;
+        m_unk378 = 999999;
+        m_unk37C = 0.0f;
+        if (m_unk385) {
+            m_unk385--;
+        }
+        m_unk386 = 0;
+        m_weaponMgr->prepare();
+        g_aiMgrProcTime[0] = OSGetTime() - start;
+        start = OSGetTime();
+        if (!update_cl_blocks()) {
+            lbl_27_data_47BF8 = 0;
+            aiUpdateStats(this, ftMgr, true);
+        } else {
+            g_aiMgrProcTime[1] = OSGetTime() - start;
+            s64 t = OSGetTime();
+            m_weaponMgr->update();
+            m_enemyMgr->update();
+            g_aiMgrProcTime[2] = OSGetTime() - t;
+            start = OSGetTime();
+            m_unkA4.m_idx = -1;
+            aiUpdateStats(this, ftMgr, false);
+            lbl_27_data_47BF8 = 1;
+        }
+    }
+    m_frame++;
+    g_aiMgrProcTime[3] = OSGetTime() - start;
 }
 
 // Turns the CPU of one player (and of its sub-character) on or off. On re-enable the controllers re-apply their

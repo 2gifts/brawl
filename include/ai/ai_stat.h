@@ -97,6 +97,9 @@ public:
     void change(int chrIdx, int chrKind, aiInput* input, int unk);
     void update_enemy(aiEnemy* enemy, aiChrIdx* chrIdx);
     void set_floor_info(int unk);
+    // HYPOTHESIS: refreshes the character's state for this frame; aiMgr::processBegin passes 1 while the floor blocks
+    // are still being prepared and 0 once they are ready.
+    void update(int preparing);
     void get_tgt_vector(float scale, Vec3f* out, aiChrIdx* target);
     float get_range(float scale, aiChrIdx* target);
     float get_distance(float scale, aiChrIdx* target);

@@ -76,7 +76,7 @@ public:
     aiChrIdx m_unkA4;                   // 0xA4: HYPOTHESIS: the sub-enemy (aiEnemyMgr slot) that the CPUs look at last, -1 = none
                                         // (an aiChrIdx: the constructor sets it to -1 before the members that follow)
     char unkA5[3];
-    int m_unkA8;                        // 0xA8
+    int m_frame;                        // 0xA8: HYPOTHESIS: counts the processBegin calls since CrearWork
     u8 m_work[0x4C];                    // 0xAC: HYPOTHESIS: per-match work, cleared by CrearWork
     aiStat* m_stat;                     // 0xF8: the aiStat of each character slot (NumChrs, plus one for the enemies)
     aiWeaponMgr* m_weaponMgr;           // 0xFC
@@ -115,11 +115,11 @@ public:
     float m_areaTop;                    // 0x368
     float m_areaBottom;                 // 0x36C
     int m_stageKind;                    // 0x370: HYPOTHESIS: the stage that is loaded (compared with Stages::Madein and 0x1C/0x1F)
-    int m_unk374;                       // 0x374
-    int m_unk378;                       // 0x378
-    float m_unk37C;                     // 0x37C
-    int m_unk380;                       // 0x380
-    u8 m_unk384;                        // 0x384
+    int m_unk374;                       // 0x374: processBegin resets it to -999999 every frame
+    int m_unk378;                       // 0x378: processBegin resets it to 999999 every frame
+    float m_unk37C;                     // 0x37C: HYPOTHESIS: the average aiStat::m_unkC4 of the fighters in the match
+    int m_ruleTime;                     // 0x380: HYPOTHESIS: Stage::getFrameRuleTime, 0 in stock matches
+    s8 m_numTeams;                      // 0x384: the distinct aiStat::m_unkCC values of the fighters in the match
     u8 m_unk385;                        // 0x385
     u8 m_unk386;                        // 0x386
     char unk387;
@@ -140,6 +140,8 @@ public:
     static void setEnable(int enable);
     static void pacCmnRegist(void* data, int size, bool owned);
     void CrearWork();
+    // HYPOTHESIS: builds or refreshes the floor blocks from the stage collision; 0 while they are not ready yet.
+    int update_cl_blocks();
     void setCpuType(int player, int type);
     void setCpuRank(int player, s8 rank);
     void regist_ai_child(int player, aiInput* input, int chrKind);
