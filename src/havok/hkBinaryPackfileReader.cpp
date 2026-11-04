@@ -45,10 +45,7 @@ hkResult PackfileObjectsListener::objectCallback(void* object, const hkClass& kl
             m_visited.insert((hkUlong)target, 1);
             i++;
         } else {
-            pointers.m_size--;
-            for (int j = i; j < pointers.m_size; j++) {
-                pointers[j] = pointers[j + 1];
-            }
+            pointers.removeAtAndCopy(i);
         }
     }
     return HK_SUCCESS;

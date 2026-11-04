@@ -63,50 +63,22 @@ void hkEntity::setDeactivator(hkEntityDeactivator* deactivator) {
 
 // Appends the listener to the first empty slot, or to the end of the array.
 void hkEntity::addEntityListener(hkEntityListener* listener) {
-    int idx = 0;
-    int off = 0;
-    int n = m_entityListeners.m_size;
-    while (idx < n) {
-        if (*(void**)((u8*)m_entityListeners.m_data + off) == 0) {
-            break;
-        }
-        off += 4;
-        idx++;
-    }
-    if (idx == n) {
-        idx = -1;
-    }
+    // A free (null) slot left by a removal is reused before the array grows.
+    int idx = m_entityListeners.indexOf(NULL);
     if (idx >= 0) {
-        ((void**)m_entityListeners.m_data)[idx] = listener;
+        m_entityListeners[idx] = listener;
     } else {
-        if (m_entityListeners.m_size == (m_entityListeners.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK)) {
-            hkArrayUtil::_reserveMore(&m_entityListeners, 4);
-        }
-        ((void**)m_entityListeners.m_data)[m_entityListeners.m_size++] = listener;
+        m_entityListeners.pushBack(listener);
     }
 }
 
 void hkEntity::addCollisionListener(hkCollisionListener* listener) {
-    int idx = 0;
-    int off = 0;
-    int n = m_collisionListeners.m_size;
-    while (idx < n) {
-        if (*(void**)((u8*)m_collisionListeners.m_data + off) == 0) {
-            break;
-        }
-        off += 4;
-        idx++;
-    }
-    if (idx == n) {
-        idx = -1;
-    }
+    // A free (null) slot left by a removal is reused before the array grows.
+    int idx = m_collisionListeners.indexOf(NULL);
     if (idx >= 0) {
-        ((void**)m_collisionListeners.m_data)[idx] = listener;
+        m_collisionListeners[idx] = listener;
     } else {
-        if (m_collisionListeners.m_size == (m_collisionListeners.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK)) {
-            hkArrayUtil::_reserveMore(&m_collisionListeners, 4);
-        }
-        ((void**)m_collisionListeners.m_data)[m_collisionListeners.m_size++] = listener;
+        m_collisionListeners.pushBack(listener);
     }
 }
 

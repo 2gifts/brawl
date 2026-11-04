@@ -1,6 +1,6 @@
 #pragma once
 
-// Donkey Kong's sound effect (his giant punch shock wave) article (article kind 0x72).
+// The musical-note article emitted by Donkey Kong's Konga Beat (article kind 0x72).
 
 #include <wn/wn_weapon_builder.h>
 #include <wn/wn_extend_param_accesser.h>
@@ -11,10 +11,10 @@ WN_STATUS_PROC_VECTOR_ARG_CTOR(2);
 // HYPOTHESIS: meaning of the parameters.
 struct wnDonkeySoundEffectParam {
     s32 unk0;
-    float unk4;
-    float unk8;
-    float unkC;
-    float unk10;
+    float missSpeed;
+    float hitSpeed;
+    float scaleGrowthTime;
+    float targetScaleMul;
 };
 
 // The static data block of the article (read by its wnModuleAccesserBuildData).
@@ -28,10 +28,10 @@ struct wnDonkeySoundEffectData {
 class wnDonkeySoundEffectParamAccesser : public wnExtendParamAccesser<3999, 4, 23999, 1, 0, 0> {
 public:
     wnDonkeySoundEffectParamAccesser(const wnDonkeySoundEffectParam* param) : wnExtendParamAccesser<3999, 4, 23999, 1, 0, 0>(0x72) {
-        m_floats[0] = &param->unk4;
-        m_floats[1] = &param->unk8;
-        m_floats[2] = &param->unkC;
-        m_floats[3] = &param->unk10;
+        m_floats[0] = &param->missSpeed;
+        m_floats[1] = &param->hitSpeed;
+        m_floats[2] = &param->scaleGrowthTime;
+        m_floats[3] = &param->targetScaleMul;
         m_ints[0] = &param->unk0;
     }
     virtual ~wnDonkeySoundEffectParamAccesser() { }
@@ -65,5 +65,8 @@ private:
 public:
     wnDonkeySoundEffect(s32 articleId, const wnArticleBuildInfo& info, const wnDonkeySoundEffectData* data);
     virtual ~wnDonkeySoundEffect() { }
+    void activate(int founderTaskId, int team, Vec3f* position, float angle,
+                  float powerMul, float speedMul, float scale, bool goodStrike);
+    virtual void updateNodeSRT();
     virtual bool notifyEventCollisionAttackCheck(u32) { return false; }
 };

@@ -45,10 +45,7 @@ void hkPhantom::firePhantomRemoved() {
     }
     for (int i = m_phantomListeners.m_size - 1; i >= 0; i--) {
         if (((hkPhantomListener**)m_phantomListeners.m_data)[i] == 0) {
-            m_phantomListeners.m_size--;
-            for (int j = i; j < m_phantomListeners.m_size; j++) {
-                m_phantomListeners[j] = m_phantomListeners[j + 1];
-            }
+            m_phantomListeners.removeAtAndCopy(i);
         }
     }
 }
@@ -62,10 +59,7 @@ void hkPhantom::firePhantomAdded() {
     }
     for (int i = m_phantomListeners.m_size - 1; i >= 0; i--) {
         if (((hkPhantomListener**)m_phantomListeners.m_data)[i] == 0) {
-            m_phantomListeners.m_size--;
-            for (int j = i; j < m_phantomListeners.m_size; j++) {
-                m_phantomListeners[j] = m_phantomListeners[j + 1];
-            }
+            m_phantomListeners.removeAtAndCopy(i);
         }
     }
 }
@@ -79,19 +73,8 @@ void hkPhantom::addPhantomOverlapListener(hkPhantomOverlapListener* listener) {
 }
 
 void hkPhantom::removePhantomOverlapListener(hkPhantomOverlapListener* listener) {
-    int idx;
-    for (idx = 0; idx < m_overlapListeners.m_size; idx++) {
-        if (((hkPhantomOverlapListener**)m_overlapListeners.m_data)[idx] == listener) {
-            goto found; // MATCH-ONLY: the not-found index is set on fallthrough
-        }
-    }
-    idx = -1;
-found:
-    m_overlapListeners.m_size = m_overlapListeners.m_size - 1;
-    for (int j = idx; j < m_overlapListeners.m_size; j++) {
-        ((hkPhantomOverlapListener**)m_overlapListeners.m_data)[j] =
-            ((hkPhantomOverlapListener**)m_overlapListeners.m_data)[j + 1];
-    }
+    int idx = m_overlapListeners.indexOf(listener);
+    m_overlapListeners.removeAtAndCopy(idx);
 }
 
 // Statistics collector interface: only the slot used here (0x10) is known; names are placeholders.

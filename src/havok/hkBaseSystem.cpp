@@ -52,8 +52,7 @@ void hkBaseSystem::initSingletons() {
                 *n->m_instance = inst;
                 *link = n;
                 link = &n->m_next;
-                pending.m_size--;
-                pending[i] = pending[pending.m_size];
+                pending.removeAt(i);
             }
         }
     }

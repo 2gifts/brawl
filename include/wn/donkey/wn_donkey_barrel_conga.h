@@ -52,5 +52,6 @@ public:
     wnDonkeyBarrelCongaParamAccesser m_paramAccesser; // +0x2084
     wnDonkeyBarrelConga(s32 articleId, const wnArticleBuildInfo& info, const wnDonkeyBarrelCongaData* data);
     virtual ~wnDonkeyBarrelConga() { }
+    void activate(int founderTaskId, int resourceId, int team);
 };
 static_assert(sizeof(wnDonkeyBarrelConga) == 0x2088, "Barrel Conga extent");

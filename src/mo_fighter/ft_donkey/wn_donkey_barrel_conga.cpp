@@ -20,3 +20,18 @@ wnDonkeyBarrelConga::wnDonkeyBarrelConga(s32 articleId, const wnArticleBuildInfo
     m_param(data->m_param), m_paramAccesser(data->m_param) {
     Weapon::deactivate(false);
 }
+
+// The bongo barrel is activated at the origin; the descriptor's constraint flags
+// attach it to its owner, whose team and resource set are supplied by the fighter.
+void wnDonkeyBarrelConga::activate(int founderTaskId, int resourceId, int team) {
+    Vec3f position(0.0f, 0.0f, 0.0f);
+    wnActivateDesc desc(founderTaskId, resourceId, resourceId, resourceId, -1, -1, 0, 0,
+                        position, 0.0f, team, 0, 2, 0x80, 0, 0x35F, 0);
+    desc.flagsHighPair = 3;
+    desc.flagsMidPair = 0;
+    desc.flagsBit3 = 1;
+    desc.flagsLow = 0;
+    desc.unk4DHigh = 0;
+    Weapon::activate(&desc);
+    updateNodeSRT();
+}

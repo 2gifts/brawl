@@ -92,15 +92,8 @@ void hkWorld::addWorldDeletionListener(hkWorldDeletionListener* listener) {
 }
 
 void hkWorld::removeWorldDeletionListener(hkWorldDeletionListener* listener) {
-    // HYPOTHESIS: an entry is cleared in place (no compaction). Not found leaves index -1.
-    int index;
-    for (index = 0; index < m_worldDeletionListeners.m_size; index++) {
-        if (m_worldDeletionListeners[index] == listener) {
-            goto found; // MATCH-ONLY: the not-found path below is shared with the store
-        }
-    }
-    index = -1;
-found:
+    // HYPOTHESIS: an entry is cleared in place (no compaction).
+    int index = m_worldDeletionListeners.indexOf(listener);
     m_worldDeletionListeners[index] = NULL;
 }
 
@@ -160,15 +153,7 @@ void hkWorld::removePhantom(hkPhantom* phantom) {
     hkWorldOperationUtil::removePhantomBP(this, phantom);
 
     // take it out of the list: last one gets moved into the hole
-    int index = -1;
-    for (int i = 0; i < m_phantoms.m_size; i++) {
-        if (m_phantoms[i] == phantom) {
-            index = i;
-            break;
-        }
-    }
-    m_phantoms.m_size--;
-    m_phantoms[index] = m_phantoms[m_phantoms.m_size];
+    m_phantoms.removeAt(m_phantoms.indexOf(phantom));
     phantom->m_world = NULL;
 
     // loaded from a packfile (memSize 0) means it might still own empty arrays that need freeing
