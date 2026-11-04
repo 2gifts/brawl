@@ -28,6 +28,14 @@ public:
     void setPlayerWiFiStateAccept(int playerNo);
     void setPlayerWiFiStateSelChar(int playerNo);
     void setPlayerWiFiStateSelStage(int playerNo);
+    void setPlayerWiFiStatePractice(int playerNo);
+    void setPlayerWiFiStateEscape(int playerNo);
+    void setPlayerWiFiStateMelee(int playerNo);
+    void setCntWndTime(int frames);
+    void setCntWndStyle(int style);
+    void openDlg(int useSecondMsg, int msgId, int kind);
+    void closeDlg();
+    int getDlgState();
 
     u8 unk0[0x8];
     nw4r::g3d::ResFile unk8;
@@ -64,6 +72,8 @@ static_assert(sizeof(IfWifiprMngr) == 0x68, "Class is the wrong size!");
 // muWifiCntWndTask::create (the map name); if_vs_result_task.cpp calls it by this stand-in name.
 extern "C" muWifiCntWndTask* fn_800DA15C(int kind, nw4r::g3d::ResFile* resFile, nw4r::g3d::ScnMdlExpand* expand, const char* node,
                                          int priority, int heap, int heap2);
+// muWifiCntWndTask::setCounter (the map name); if_vs_result_task.cpp calls it by this stand-in name.
+extern "C" void fn_800DA6EC(muWifiCntWndTask* task, int seconds, int unk);
 extern "C" void fn_800FD448(s32 unk);
 extern "C" void fn_800FD8E0(s32 unk);
 extern "C" s32 fn_800FBFDC();
@@ -160,6 +170,72 @@ void IfWifiprMngr::setPlayerWiFiStateSelChar(int playerNo) {
 
 void IfWifiprMngr::setPlayerWiFiStateSelStage(int playerNo) {
     m_players[playerNo]->setWifiDispState(3);
+}
+
+void IfWifiprMngr::setPlayerWiFiStatePractice(int playerNo) {
+    m_players[playerNo]->setWifiDispState(4);
+}
+
+void IfWifiprMngr::setPlayerWiFiStateEscape(int playerNo) {
+    m_players[playerNo]->setWifiDispState(5);
+}
+
+void IfWifiprMngr::setPlayerWiFiStateMelee(int playerNo) {
+    m_players[playerNo]->setWifiDispState(6);
+}
+
+void IfWifiprMngr::setCntWndTime(int frames) {
+    int seconds = (frames + 59) / 60;
+    fn_800DA6EC(m_cntWnd, seconds, 0);
+    if (m_cntWnd->unk64 == 1) {
+        fn_800DA6EC(m_cntWnd, seconds / 60, seconds % 60);
+    } else {
+        fn_800DA6EC(m_cntWnd, seconds, 0);
+    }
+}
+
+void IfWifiprMngr::setCntWndStyle(int style) {
+    int wndStyle;
+    int digits;
+    if (style == 0) {
+        wndStyle = 0;
+        digits = 3;
+    } else {
+        wndStyle = 1;
+        digits = 2;
+    }
+    m_cntWnd->setWndStyle(wndStyle, digits);
+}
+
+void IfWifiprMngr::openDlg(int useSecondMsg, int msgId, int kind) {
+    bool isQuestion = kind != 0;
+    void* msgData;
+    if (useSecondMsg == 0) {
+        msgData = unk48;
+    } else {
+        msgData = unk4C;
+    }
+    m_notice = fn_800BEEB8(isQuestion, msgData, msgId, &unkC, unk14, 0x40, 0x1E, 0x28, 0x2A, 1, 1, 0xF0);
+}
+
+void IfWifiprMngr::closeDlg() {
+    fn_800BF830(m_notice);
+    m_notice->exit();
+    m_notice = NULL;
+}
+
+int IfWifiprMngr::getDlgState() {
+    if (m_notice == NULL) {
+        return 0;
+    }
+    if (m_notice->m_step != 3) {
+        return 1;
+    }
+    int state = 3;
+    if (m_notice->m_selected != 0) {
+        state = 2;
+    }
+    return state;
 }
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
