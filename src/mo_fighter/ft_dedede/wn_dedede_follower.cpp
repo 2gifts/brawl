@@ -1,15 +1,16 @@
 #define WN_DAMAGE_ACTOR_INTERFACE
 #define WN_KINETIC_GENERIC_BUILDER
-#include <types.h>
 #include <ft/builder/ft_builder_kinetic.h>
+#include <mt/mt_prng.h>
+#include <so/damage/so_damage_value_accesser.h>
 #include <so/so_kinetic_energy_normal.h>
+#include <so/so_module_accesser.h>
+#include <so/so_value_accesser.h>
+#include <types.h>
+#include <wn/dedede/wn_dedede_follower.h>
+#include <wn/dedede/wn_dedede_follower_damage_transactor.h>
 #include <wn/dedede/wn_dedede_follower_kinetic_transactor.h>
 #include <wn/dedede/wn_dedede_follower_status_uniq_process.h>
-#include <wn/dedede/wn_dedede_follower_damage_transactor.h>
-#include <so/so_module_accesser.h>
-#include <so/damage/so_damage_value_accesser.h>
-#include <so/so_value_accesser.h>
-#include <mt/mt_prng.h>
 
 // The energies of the follower's kinetic mediator (the list of the Diddy Kong barrel).
 typedef soInstancePoolInfo<soKineticEnergyNormal, 1, soKineticEnergyHolder, soKineticEnergyInitInfo<0, 1> > wnDededeFollowerEnergy0Info;
@@ -351,3 +352,86 @@ void wnDededeFollowerDamageTransactorImpl::onGroundDamageAfter(soModuleAccesser*
 bool wnDededeFollowerDamageTransactorImpl::onCompositionDamageSpeed(soModuleAccesser*, soDamage*, Vec2f*, int) { return false; }
 
 wnDededeFollowerDamageTransactorImpl g_wnDededeFollowerDamageTransactorImpl;
+
+void wnDededeFollower::processUpdate() {
+    m_moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x11000001);
+    Weapon::processUpdate();
+}
+
+void wnDededeFollower::toShoot(Vec3f* pos, float lr, float unk1, float unk2, bool unk3) {
+    m_moduleAccesser->getPostureModule().init(pos, lr);
+    m_moduleAccesser->getLinkModule().removeModelConstraint(true);
+    Weapon::unlinkOwner(3);
+    m_moduleAccesser->getWorkManageModule().setFloat(unk2, 0x21000005);
+    m_moduleAccesser->getWorkManageModule().setFloat(unk1, 0x21000006);
+    if (unk3) {
+        m_moduleAccesser->getStatusModule().changeStatusForce(0x10, m_moduleAccesser);
+    } else {
+        m_moduleAccesser->getStatusModule().changeStatusForce(2, m_moduleAccesser);
+    }
+    m_moduleAccesser->getAreaModule().setWhole(true);
+}
+
+void wnDededeFollower::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    Weapon::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+    updateAttackInfoStatus();
+}
+
+bool wnDededeFollower::isPickup() {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (moduleAccesser->getWorkManageModule().getInt(0x20000004) == 2) {
+        return false;
+    }
+    if (m_moduleAccesser->getWorkManageModule().isFlag(0x22000005)) {
+        return false;
+    }
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0:
+    case 1:
+    case 7:
+    case 8:
+        return false;
+    }
+    return true;
+}
+
+bool wnDededeFollower::isFinal() {
+    return m_moduleAccesser->getWorkManageModule().isFlag(0x22000005);
+}
+
+void wnDededeFollower::updateAttackInfoStatus() {
+    switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+    case 1:
+        updateLogAttackInfo();
+    }
+}
+
+bool wnDededeFollower::isCanInhaled() {
+    switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+    case 8:
+    case 9:
+        return false;
+    }
+    if (m_moduleAccesser->getWorkManageModule().isFlag(0x22000004)) {
+        return false;
+    }
+    return Weapon::isCanInhaled();
+}
+
+bool wnDededeFollower::isCanEat() {
+    if (m_moduleAccesser->getWorkManageModule().getInt(0x20000004) == 2) {
+        return false;
+    }
+    switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0:
+    case 1:
+    case 7:
+    case 8:
+    case 9:
+    case 0x17:
+    case 0x18:
+    case 0x19:
+        return false;
+    }
+    return !isInhaled();
+}
