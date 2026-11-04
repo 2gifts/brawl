@@ -69,4 +69,9 @@ public:
             Heaps::HeapType nwMotionInstHeap);
     // The hook the article mediator calls to start the Aura Sphere (HYPOTHESIS: the name follows the module map).
     static bool activeArticle(wnLucarioQigong* weapon, soModuleAccesser* acc);
+    static void setMachValidity(soModuleAccesser* moduleAccesser, bool valid);
+    float calcAuraScale();
+    virtual void notifyEventOnDamage(soDamage* damage, bool isDamage, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionShield(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser);
 };
