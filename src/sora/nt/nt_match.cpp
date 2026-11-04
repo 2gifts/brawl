@@ -1,12 +1,9 @@
 #include <mu/wifi/mu_wifi_interface.h>
+#include <nt/nt_match.h>
 #include <nt/nt_net_report.h>
+#include <nt/nt_offline.h>
+#include <string.h>
 #include <types.h>
-
-class DWCAllocType {
-public:
-    static void* ntAlloc(int, u32, u32);
-    static void ntFree(int, void*);
-};
 
 class gfMemoryPool {
 public:
@@ -48,4 +45,38 @@ void DWCAllocType::ntFree(int arg0, void* arg1) {
 
 
 void netReport0(const char* fmt, ...) {
+}
+
+extern s32 gUnk805a03d8;
+extern char lbl_8045F9F8[0x20];
+extern char lbl_8045FA18[0x1C];
+extern char lbl_8045FA34[0x1C];
+
+bool NtMatching::deleteFriend(int index) {
+    unk3421 = index;
+    deleteDisplayOrder(index, true);
+    unk3411 = true;
+    unk3412 = true;
+    return true;
+}
+
+void NtMatching::freeDisplayOrder() {
+    memset(unk12, 0, sizeof(unk12));
+}
+
+void NtMatching::updateServerCallback(int error, int isChanged, void* param) {
+    if (gUnk805a03d8 != 7 && error == 0) {
+        netReport(lbl_8045F9F8);
+        if (isChanged) {
+            netReport(lbl_8045FA18);
+            ntFriendInfo::getInstance()->setDirtyFlag(true);
+        }
+    }
+}
+
+void NtMatching::changetFriendStatusCallback(int index, u8 status, const char* statusString, void* param) {
+    if (gUnk805a03d8 != 7) {
+        netReport(lbl_8045FA34, index);
+        ntFriendInfo::getInstance()->setDirtyFlag(true);
+    }
 }
