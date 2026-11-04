@@ -88,7 +88,7 @@ public:
     u32 m_viaUnk48;        // 0x104
     int m_unk108;
     int m_unk10C;
-    float m_unk110;
+    float m_unk110;        // 0x110: HYPOTHESIS: 0..1; get_return_goal aims at the point (0.3 + 0.4 * it) of the way from the right end to the left one
 
     aiAct(aiInput* input, aiStat* stat);
     ~aiAct();

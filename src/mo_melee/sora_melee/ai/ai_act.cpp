@@ -99,6 +99,83 @@ void aiAct::set_goal_inf(AiClBlock* goal, AiClBlock* via, float x, float y) {
     }
 }
 
+// Whether the segment from -> to crosses a collision of the kinds 0x1C. HYPOTHESIS: 0x1C = walls and ceilings.
+static inline bool aiChkCrossWall(const Vec2f& from, const Vec2f& to) {
+    return g_aiMgr->chk_cl_cross(const_cast<Vec2f*>(&from), const_cast<Vec2f*>(&to), 0x1C, NULL, NULL);
+}
+
+void aiAct::get_return_goal(float* x, float* y, int unk) {
+    AiClBlock* floor = m_stat->m_floor;
+    Vec3f pos = m_stat->m_pos;
+    Vec2f edgeL = floor->m_edgeL;
+    Vec2f edgeR = floor->m_edgeR;
+    if (unk == 0 && !m_stat->chk_over_ground()) {
+        float nearX;
+        float nearY;
+        float lr;
+        if (pos.m_x > 0.5f * (edgeL.m_x + edgeR.m_x)) {
+            nearX = edgeR.m_x;
+            nearY = edgeR.m_y;
+            lr = 1.0f;
+        } else {
+            nearX = edgeL.m_x;
+            nearY = edgeL.m_y;
+            lr = -1.0f;
+        }
+        if (pos.m_y < nearY && lr * (pos.m_x - (nearX + 20.0f * lr)) < 0.0f &&
+            (pos.m_y < nearY - 20.0f || lr * (pos.m_x - nearX) < 0.0f))
+        {
+            float distL = __fabsf(pos.m_x - edgeL.m_x);
+            float distR = __fabsf(pos.m_x - edgeR.m_x);
+            if (distL < distR) {
+                *x = edgeL.m_x - 20.0f;
+                *y = edgeL.m_y - 1.0f;
+            } else {
+                *x = 20.0f + edgeR.m_x;
+                *y = edgeR.m_y - 1.0f;
+            }
+            if (__fabsf(edgeL.m_x - edgeR.m_x) <= 50.0f) {
+                if (aiChkCrossWall(Vec2f(pos.m_x, pos.m_y), Vec2f(*x, pos.m_y)) ||
+                    aiChkCrossWall(Vec2f(*x, pos.m_y), Vec2f(*x, *y)))
+                {
+                    float goalX;
+                    float goalY;
+                    if (distL < distR) {
+                        goalX = 10.0f + edgeR.m_x;
+                        goalY = edgeR.m_y - 1.0f;
+                    } else {
+                        goalX = edgeL.m_x - 10.0f;
+                        goalY = edgeL.m_y - 1.0f;
+                    }
+                    if (!aiChkCrossWall(Vec2f(pos.m_x, pos.m_y), Vec2f(goalX, pos.m_y)) &&
+                        !aiChkCrossWall(Vec2f(goalX, pos.m_y), Vec2f(goalX, goalY)))
+                    {
+                        *x = goalX;
+                        *y = goalY;
+                    }
+                }
+            }
+            return;
+        }
+        if ((pos.m_x < edgeL.m_x && pos.m_y < 15.0f + edgeL.m_y) ||
+            (pos.m_x > edgeR.m_x && pos.m_y < 15.0f + edgeR.m_y))
+        {
+            if (__fabsf(pos.m_x - edgeL.m_x) < __fabsf(pos.m_x - edgeR.m_x)) {
+                *x = 1.0f + edgeL.m_x;
+                *y = edgeL.m_y;
+            } else {
+                *x = edgeR.m_x - 1.0f;
+                *y = edgeR.m_y;
+            }
+            return;
+        }
+    }
+    float rate = 0.3f + 0.4f * m_unk110;
+    float rest = 1.0f - rate;
+    *x = edgeL.m_x * rate + edgeR.m_x * rest;
+    *y = edgeL.m_y * rate + edgeR.m_y * rest;
+}
+
 void aiAct::get_safe_fall(float* x, float* y) {
     if (m_stat->m_unkC0 == 1 && (m_stat->m_floor->m_flags & 0x10000)) {
         if (m_stat->m_speed.m_x > 0.0f) {
