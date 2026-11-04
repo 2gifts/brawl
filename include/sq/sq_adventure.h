@@ -14,8 +14,9 @@ public:
     s32 unk10;
     s32 unk14;
     u8 unk18[0xC];
-    s32 unk24;
-    s32 unk28;
+    // HYPOTHESIS: heap blocks owned by the scene, freed in exit.
+    void* unk24;
+    void* unk28;
 
     static sqAdventure* create();
     // HYPOTHESIS: signed map index and step identifier inferred from register use.
@@ -24,5 +25,7 @@ public:
     virtual void start();
     virtual void setNext();
     virtual void exit();
+    // HYPOTHESIS: a static helper, the scene object is not used.
+    static void calculateClearPercent();
 };
 static_assert(sizeof(sqAdventure) == 0x2C, "Class is wrong size!");
