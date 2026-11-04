@@ -79,28 +79,23 @@ public:
 };
 
 void ftDonkeyStatusUniqProcessSpecialS::initStatus(soModuleAccesser* moduleAccesser) {
-    soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
-    ftDonkeySituationModuleStub* situation = reinterpret_cast<ftDonkeySituationModuleStub*>(moduleAccesser->m_enumerationStart->m_situationModule);
-    ftDonkeyKineticStub* kinetic = reinterpret_cast<ftDonkeyKineticStub*>(moduleAccesser->m_enumerationStart->m_kineticModule);
-    float* param = *reinterpret_cast<float**>(reinterpret_cast<u8*>(g_ftCommonDataAccesser.getData(static_cast<ftKind>(1))) + 0x80);
-    s16 isRef = 1;
-    void* energy639C = __dynamic_cast(kinetic->getEnergy(1), 0, lbl_92_data_639C, lbl_92_data_1874, isRef);
-    void* energy62B8 = __dynamic_cast(kinetic->getEnergy(3), 0, lbl_92_data_62B8, lbl_92_data_1874, isRef);
-    s16 minusOne = -1;
-    Vec2f sumSpeed = kinetic->unk3C(&minusOne);
-    if (situation->unk14() != 0) {
-        kinetic->unk5C(0xa, moduleAccesser);
-        sumSpeed.m_x /= param[0];
-        sumSpeed.m_y = lbl_92_rodata_10;
-        __as__5Vec2fFRC5Vec2f(energyVec2fAt(energy62B8, 0x8), &sumSpeed);
-        Vec2f tmp;
-        ftDonkeyVec2fCt(&tmp, param[1], lbl_92_rodata_10);
-        __as__5Vec2fFRC5Vec2f(energyVec2fAt(energy62B8, 0x20), &tmp);
-        *energyFloatAt(energy639C, 0xc) = lbl_92_rodata_10;
-        *energyFloatAt(energy639C, 0x10) = -param[2];
-        setEnergyFlagByte5(energy639C, ~0x40);
+    soSituationModule* situation = moduleAccesser->m_enumerationStart->m_situationModule;
+    soKineticModule* kinetic = moduleAccesser->m_enumerationStart->m_kineticModule;
+    float* param = static_cast<float*>(g_ftCommonDataAccesser.getData(static_cast<ftKind>(1))->extendParam[1]);
+    ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*kinetic->getEnergy(1));
+    ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*kinetic->getEnergy(3));
+    Vec2f sumSpeed = kinetic->getSumSpeed(soKineticEnergy::AttributeFlag(-1));
+    if (situation->getKind() == 0) {
+        kinetic->changeKinetic(6, moduleAccesser);
     } else {
-        kinetic->unk5C(6, moduleAccesser);
+        kinetic->changeKinetic(0xa, moduleAccesser);
+        sumSpeed.m_x /= param[0];
+        sumSpeed.m_y = 0.0f;
+        stop.m_speed = sumSpeed;
+        stop.m_brake = Vec2f(param[1], 0.0f);
+        gravity.m_speedY = 0.0f;
+        gravity.m_gravity = -param[2];
+        gravity.disable();
     }
 }
 
