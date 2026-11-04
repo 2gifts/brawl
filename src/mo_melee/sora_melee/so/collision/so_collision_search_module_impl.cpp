@@ -4,6 +4,7 @@
 #include <so/collision/so_collision_search_module_impl.h>
 #include <so/collision/so_collision_search_part.h>
 #include <types.h>
+#include <so/so_module_accesser.h>
 
 // HYPOTHESIS: the part layout as the module reads it; ft/builder/ft_dol_types.h keeps an opaque copy for the fighter RELs.
 class soCollisionSearchPart {
@@ -15,6 +16,9 @@ public:
     int unk5C;
 
     void reset();
+    // HYPOTHESIS: parameter types follow the search-module calls.
+    void set(soCollisionSearchData* data, newCollision* collision);
+    void initPos(float scale, soModelModule* modelModule, newCollision* collision);
     void debugDisplay(nw4r::math::_MTX34* view, void* collision);
 };
 static_assert(sizeof(soCollisionSearchPart) == 0x60, "Class is wrong size!");
@@ -123,5 +127,36 @@ void soCollisionSearchModuleImpl::renderDebug() {
                 part.debugDisplay(&view, m_collision.getCollision(i, groupIndex));
             }
         }
+    }
+}
+
+void soCollisionSearchModuleImpl::set(u32 partIndex, u32 groupIndex, soCollisionSearchData* collisionSearchData) {
+    int index;
+    int activeGroup;
+    m_collision.allocateCollision(partIndex, collisionSearchData->m_unk14e, groupIndex);
+    newCollision* collision = m_collision.getCollision(partIndex, groupIndex);
+    if (m_collisionSearchPartArray->at(partIndex).m_status == 0 ||
+        (int)groupIndex != m_collisionSearchPartArray->at(partIndex).unk58) {
+        soCollisionSearchPart& newPart = m_collisionSearchPartArray->at(partIndex);
+        newPart.m_status = 1;
+        m_collisionSearchPartArray->at(partIndex).unk58 = groupIndex;
+        m_collision.initLog(groupIndex);
+        activeGroup = m_collisionSearchPartArray->at(partIndex).unk58;
+        for (index = 0; index < m_collisionSearchPartArray->size(); index++) {
+            if (m_collisionSearchPartArray->at(index).m_status != 0 && index != (int)partIndex &&
+                activeGroup == m_collisionSearchPartArray->at(index).unk58) {
+                goto setData;
+            }
+        }
+        m_collision.initPastLog(activeGroup, false);
+    }
+setData:
+    m_collisionSearchPartArray->at(partIndex).set(collisionSearchData, collision);
+    m_collision.m_isNoTeam = collisionSearchData->m_unk14d & 1;
+    if (unk104 == 1) {
+        soCollisionSearchPart* part;
+        soModelModule* modelModule = m_moduleAccesser->m_enumerationStart->m_modelModule;
+        part = &m_collisionSearchPartArray->at(partIndex);
+        part->initPos(m_48, modelModule, collision);
     }
 }
