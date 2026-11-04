@@ -8,6 +8,7 @@
 #include <so/so_value_accesser.h>
 #include <types.h>
 #include <it/item.h>
+#include <it/it_manager.h>
 
 void Fighter::postCreate() { }
 
@@ -269,5 +270,28 @@ void Fighter::setItemHoldAnim(BaseItem* item, u32 index, bool enabled) {
             m_moduleAccesser->getMotionModule().enablePartialCancelNode(false);
         }
         break;
+    }
+}
+
+void Fighter::setHeartSwap(int givingPlayerEntryID, int givingPlayerEntryId, bool setStatus) {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (givingPlayerEntryID != -1) {
+        int taskId = m_taskId;
+        Vec3f position = g_ftManager->getFighterCenterPos(givingPlayerEntryID, -1);
+        int heartId = itManager::getInstance()->createManaphyHeart(&position, taskId, taskId);
+        moduleAccesser->getWorkManageModule().setInt(heartId, 0x10000030);
+        moduleAccesser->getWorkManageModule().setInt(givingPlayerEntryID, 0x1000002f);
+        moduleAccesser->getStatusModule().changeStatusForce(0xf4, moduleAccesser);
+    } else if (moduleAccesser->getWorkManageModule().getInt(0x1000002f) != -1) {
+        moduleAccesser->getWorkManageModule().setInt(-1, 0x1000002f);
+        if (setStatus == true) {
+            int taskId = m_taskId;
+            Vec3f position = g_ftManager->getFighterCenterPos(givingPlayerEntryId, -1);
+            int heartId = itManager::getInstance()->createManaphyHeart(&position, taskId, taskId);
+            moduleAccesser->getWorkManageModule().setInt(heartId, 0x10000030);
+            if (moduleAccesser->getSituationModule().getKind() != 5) {
+                moduleAccesser->getStatusModule().changeStatusForce(0xf5, moduleAccesser);
+            }
+        }
     }
 }
