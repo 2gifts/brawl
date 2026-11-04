@@ -144,4 +144,9 @@ public:
     int md_dragoon(Vec2f* stick, ipPadButton* button);
     int md_final(Vec2f* stick, ipPadButton* button);
     int md_hammer(Vec2f* stick, ipPadButton* button);
+    // The chase mode: walk (or jump) towards the target's floor (mode 11: the floor of the item m_unk84 is after).
+    int md_chase(Vec2f* stick, ipPadButton* button);
+    // HYPOTHESIS: the parameter types; via = the next floor block on the way, the int is not known yet.
+    void md_chase_sub_init(AiClBlock* via, int unk);
+    int md_chase_sub(Vec2f* stick, ipPadButton* button);
 };

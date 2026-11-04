@@ -88,6 +88,14 @@ public:
 
     int chk_over_ground(); // HYPOTHESIS: int (the xori result is returned as-is)
     bool chk_stat_gr_free();
+    // HYPOTHESIS: on the ground (m_unkC0 == 0) of a floor block with flag 0x4000.
+    bool chk_floor_4000() {
+        bool on = false;
+        if (m_unkC0 == 0 && (m_floor->m_flags & 0x4000)) {
+            on = true;
+        }
+        return on;
+    }
     bool chk_stat_air_free();
     bool chk_transition(u32 mask);
     bool chk_chr_stat(u32 mask, int chrKind);

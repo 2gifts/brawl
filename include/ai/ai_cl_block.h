@@ -44,6 +44,14 @@ struct AiClBlock {
 
     AiClBlock();
     bool chk_fl_danger(int team);
+    // Whether the block is a hazard (flag 0x1000) or dangerous for the team. HYPOTHESIS: name.
+    bool chk_danger(int team) {
+        bool danger = false;
+        if ((m_flags & 0x1000) || chk_fl_danger(team)) {
+            danger = true;
+        }
+        return danger;
+    }
     // Whether the block is the one a {joint id, m_unk48} key names (a static floor never matches). HYPOTHESIS: name.
     bool chk_key(u32* key) {
         if (m_joint == NULL) {

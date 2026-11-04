@@ -2691,3 +2691,157 @@ step:
 end:
     return 1;
 }
+
+// The chase mode: head for the target's floor block (mode 11: the floor of the item the CPU is after). Step 0 faces
+// the target and may (at random) set flag 0x20, the special jump; steps 1-2 pick the next block on the way, run away
+// (mode 0x66) from a hazard floor, give up on a target that cannot be reached and hand over to md_chase_sub_init;
+// over a danger zone the CPU jumps towards the goal side, and in step 22 far from the goal it may jump (step 3) at
+// random. All other steps run md_chase_sub.
+// HYPOTHESIS: the names and the meaning of the action numbers, aiParam's 0xEA byte and m_unk84 (the item's id).
+// BYTES: defined at the end of the file for the same literal-pool reason as auto_passfall.
+int aiInput::md_chase(Vec2f* stick, ipPadButton* button) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    AiClBlock* goal;
+    AiClBlock* via;
+    switch (m_step) {
+    case 0:
+        m_act->m_lr = stat->get_lr_tgt(&m_target);
+        if ((m_unk116 & 2) && m_par.m_workB58[2] != 0 && !(stat->m_flags & 1)) {
+            float chance = stat->m_chrKind == 0x10 ? 0.9f : 0.3f;
+            if (randf() < chance) {
+                m_flags |= 0x20;
+            }
+        }
+        m_step++;
+    case 1:
+    case 2: {
+        aiStat* target = aiMgr::get_aiStat(&m_target);
+        if (m_md == 11) {
+            aiWeapon* weapon = aiMgr::getWeaponMgr()->getWeapon(m_unk84);
+            if (weapon == NULL) {
+                aiChrIdx none;
+                change_md(2, &none, 0, 0);
+                return 1;
+            }
+            goal = weapon->getFloorBlk();
+            if (goal == NULL) {
+                aiChrIdx none;
+                change_md(2, &none, 0, 0);
+                return 1;
+            }
+        } else {
+            goal = target->m_floor;
+            if (m_target.m_idx != m_chrIdx.m_idx && stat->m_floor == goal) {
+                stick->m_x = 0.7f * stat->get_lr_tgt(&m_target);
+                change_md(1, &m_target, 0, 0);
+                return 1;
+            }
+        }
+        if (m_cpuType == 12 || (m_cpuType == 7 && m_md == 6)) {
+            if (randf() < 0.4f) {
+                Vec2f pos(stat->m_pos.m_x, stat->m_pos.m_y);
+                float high;
+                if (m_flags & 0x20) {
+                    high = aiParam::get_jump_high_sp((aiJumpPar*)&m_par, stat);
+                } else {
+                    high = aiParam::get_jump_high((aiJumpPar*)&m_par, stat);
+                }
+                aiMgr* mgr = g_aiMgr;
+                via = mgr->get_via_blk_team(stat->m_floor, 0, pos.m_x, stat->m_team, &pos, 1, 0,
+                                            aiParam::get_jump_length((aiJumpPar*)&m_par, stat), high, 0.125f);
+            } else {
+                change_md(0x66, &m_target, 0x90, 0);
+                return 1;
+            }
+        } else {
+            if (goal != NULL) {
+                if (goal->chk_danger(stat->m_team) && stat->m_unkD4 == g_aiMgr->m_unk374 && stat->m_unkD4 > g_aiMgr->m_unk378) {
+                    if (stat->m_floor->chk_danger(stat->m_team) && (stat->chk_floor_4000() ||
+                                        aiMgr::chkDangerZone((Vec2f*)&stat->m_center, stat->m_team, 2))) {
+                            float r = randf();
+                            int act;
+                            if (r < 0.3f) {
+                                act = 0x80;
+                            } else if (r < 0.5f) {
+                                act = 0x54;
+                            } else if (r < 0.7f) {
+                                act = 0x52;
+                            } else if (r < 0.9f) {
+                                act = 0x56;
+                            } else {
+                                act = 0x72;
+                            }
+                            change_md(0x66, &m_target, act, 0);
+                    } else {
+                        change_md(0x66, &m_target, 0x90, 0);
+                    }
+                    return 1;
+                }
+            }
+            float high;
+            if (m_flags & 0x20) {
+                high = aiParam::get_jump_high_sp((aiJumpPar*)&m_par, stat);
+            } else {
+                high = aiParam::get_jump_high((aiJumpPar*)&m_par, stat);
+            }
+            aiMgr* mgr = g_aiMgr;
+            via = mgr->get_via_blk2_team(stat->m_floor, (Vec2f*)&stat->m_pos, goal, stat->m_team,
+                                         aiParam::get_jump_length((aiJumpPar*)&m_par, stat), high, 0.5f * randf());
+        }
+        if (via == NULL || stat->m_floor == via) {
+            switch (g_aiMgr->m_stageKind) {
+            case Stages::ShadowMoses:
+                change_md(1, &m_target, 0x1150, 0);
+                return 1;
+            }
+            if (randf() < 0.4f) {
+                Vec2f pos(stat->m_pos.m_x, stat->m_pos.m_y);
+                float high;
+                if (m_flags & 0x20) {
+                    high = aiParam::get_jump_high_sp((aiJumpPar*)&m_par, stat);
+                } else {
+                    high = aiParam::get_jump_high((aiJumpPar*)&m_par, stat);
+                }
+                aiMgr* mgr = g_aiMgr;
+                via = mgr->get_via_blk_team(stat->m_floor, 0, pos.m_x, -1, &pos, 1, 0,
+                                            aiParam::get_jump_length((aiJumpPar*)&m_par, stat), high, 0.125f);
+            }
+            if (via == NULL || stat->m_floor == via) {
+                s8 near = get_near_target(NULL, 1);
+                if (near != m_chrIdx.m_idx && near != m_target.m_idx) {
+                    m_target.m_idx = near;
+                    m_step = 0;
+                    m_stepFrame = -1;
+                } else {
+                    change_md(2, &m_target, 0x90, 0);
+                }
+                return 1;
+            }
+        }
+        md_chase_sub_init(via, 0);
+        if (m_step == 0) {
+            return 1;
+        }
+        if ((stat->chk_floor_4000() || aiMgr::chkDangerZone((Vec2f*)&stat->m_center, stat->m_team, 2)) &&
+            (stat->chk_stat_air_free() || stat->chk_stat_gr_free()) && stat->m_unkA8 > 0 && stat->m_speed.m_y < 0.1f)
+        {
+            m_step = 4;
+            stick->m_x = m_act->m_lr;
+            button->m_mask |= soController::getButtonMask(soController::Pad_Button_Jump);
+            break;
+        }
+        if (m_step == 22 && m_stepFrame >= 0 && !(stat->m_flags & 1) && !(stat->m_flags & 8) && stat->m_situation != 3 &&
+            __fabsf(stat->m_pos.m_x - m_act->m_goalPos.m_x) > 40.0f)
+        {
+            s8 rank = m_par.m_rank;
+            if (randf() < 0.0095f * rank) {
+                m_step = 3;
+                break;
+            }
+        }
+    }
+    default:
+        return md_chase_sub(stick, button);
+    }
+    return 1;
+}
