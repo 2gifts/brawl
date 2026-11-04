@@ -23,8 +23,6 @@
 #include <havok/hkCollideTriangleUtil.h>
 #include <havok/hkContactPoint.h>
 
-#pragma fp_contract on
-
 // Lookup table of the modulo-3 successor/predecessor (other unit, referenced by its symbol).
 extern "C" const s8 lbl_805A47DC[];
 

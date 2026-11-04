@@ -1,5 +1,4 @@
 // Havok translation unit hkMotion.o (main.dol 0x802E4338-0x802E46B0).
-#pragma fp_contract on
 #include <havok/hkMotion.h>
 #include <havok/hkTransform.h>
 #include <havok/hkSweptTransformUtil.h>

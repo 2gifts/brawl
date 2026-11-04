@@ -24,7 +24,6 @@
 //   0x802B7894     4  updateShapeCollectionFilter   [map: hkSymmetricAgentLinearCast_18hkHeightFieldAgent___updateShapeCollectionFilter]
 //   0x802B7898   156  __dt   [map: hkSymmetricAgent_18hkHeightFieldAgent_____dt]
 
-#pragma fp_contract on
 #include <havok/hkHeightFieldAgent.h>
 #include <havok/hkBvTreeAgent.h>
 

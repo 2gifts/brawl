@@ -38,8 +38,6 @@
 // Stand-in for a helper in another TU (not yet named).
 extern "C" void fn_80288B40(void* a, void* b, u32 c, u32 d);
 
-#pragma fp_contract on
-
 void hkGenericConstraintData::finishLoadedObjecthkGenericConstraintData(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;

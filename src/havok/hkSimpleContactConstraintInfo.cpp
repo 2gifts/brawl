@@ -38,7 +38,6 @@
 //   0x80295098   108  length3   [map: hkVector4__length3]
 //   0x80295104     4  exitBuilder   [map: hkJacobianBuilder__exitBuilder]
 
-#pragma fp_contract on
 #include <havok/hkSimpleContactConstraintInfo.h>
 #include <havok/hkSimpleContactConstraintAtom.h>
 #include <havok/hkContactPoint.h>

@@ -5,7 +5,6 @@
 //   0x802872F4   244  setInverse
 //   0x802873E8   536  setMul
 //   0x80287600   752  setMulInverseMul
-#pragma fp_contract on
 #include <havok/hkTransform.h>
 
 // Column-major 4x4: m[col * 4 + row], with the w entries 0 and the translation column last.

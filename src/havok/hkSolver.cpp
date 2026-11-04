@@ -88,7 +88,6 @@
 //   0x8029E8B0   232  applyVelField   [map: hkSolver__applyVelField]
 //   0x8029E998     4  
 
-#pragma fp_contract on
 #include <havok/hkSolver.h>
 #include <havok/hkJacobianSchema.h>
 #include <havok/hkJacobianHeaderSchema.h>

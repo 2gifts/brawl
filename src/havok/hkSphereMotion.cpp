@@ -15,7 +15,6 @@
 //   0x802E5FBC   112  applyForce   [map: hkSphereMotion__applyForce1]
 //   0x802E602C   112  applyTorque   [map: hkSphereMotion__applyTorque]
 //   0x802E609C    80  __sinit_\hkSphereMotion_cpp   [map: hkSphereMotioncpp____sinit_]
-#pragma fp_contract on
 #include <new>
 #include <havok/hkSphereMotion.h>
 #include <havok/hkRegistry.h>

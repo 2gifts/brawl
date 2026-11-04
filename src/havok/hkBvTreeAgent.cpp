@@ -38,7 +38,6 @@
 //   0x802A8D68   160  __dt   [map: hkSymmetricAgent_13hkBvTreeAgent_____dt]
 //   0x802A8E08    20  __sinit_\hkBvTreeAgent_cpp   [map: hkBvTreeAgentcpp____sinit_]
 
-#pragma fp_contract on
 #include <havok/hkBvTreeAgent.h>
 #include <havok/hkCollisionDispatcher.h>
 

@@ -255,7 +255,10 @@ cflags_st_starfox = [*cflags_rel, "-inline on,noauto"]
 
 # Havok middleware (embedded in the main DOL): no RTTI, string literals in .rodata
 # Pinned by a version/flag sweep: GC/3.0a5.2 with these flags (+ -O4,p -inline auto -ipa file from cflags_common)
-cflags_havok = [*cflags_common, "-RTTI off", "-str reuse,readonly", "-use_lmw_stmw on"]
+# -fp_contract on: Havok's math is fused (fmadds/fmsubs) across the library, not only in the units that used to
+# carry the pragma. hkMatrix4/hk3AxisSweep keep it off until their drafts are rewritten from the asm (they score
+# lower with it on today).
+cflags_havok = [*cflags_common, "-RTTI off", "-str reuse,readonly", "-use_lmw_stmw on", "-fp_contract on"]
 
 config.linker_version = "GC/3.0a5.2"
 
@@ -1529,7 +1532,7 @@ config.libs = [
             Object(Matching, "havok/hkString.cpp"),
             Object(Matching, "havok/hkMultiThreadLock.cpp"),
             Object(Matching, "havok/hkAabbClass.cpp"),
-            Object(NonMatching, "havok/hkMatrix3.cpp", extra_cflags=["-fp_contract on"]),
+            Object(NonMatching, "havok/hkMatrix3.cpp"),
             Object(Matching, "havok/hkMotionStateClass.cpp"),
             Object(Matching, "havok/hkSweptTransformClass.cpp"),
             Object(Matching, "havok/hkCdBodyClass.cpp", extra_cflags=["-Cpp_exceptions on"]),
@@ -1607,7 +1610,7 @@ config.libs = [
             Object(NonMatching, "havok/hkMotionState.cpp"),
             Object(NonMatching, "havok/hkMathTypes.cpp"),
             Object(NonMatching, "havok/hkMathUtil.cpp"),
-            Object(NonMatching, "havok/hkMatrix4.cpp"),
+            Object(NonMatching, "havok/hkMatrix4.cpp", extra_cflags=["-fp_contract off"]),
             Object(NonMatching, "havok/hkMatrix6.cpp"),
             Object(NonMatching, "havok/hkQsTransform.cpp"),
             Object(NonMatching, "havok/hkQuaternion.cpp"),
@@ -1723,7 +1726,7 @@ config.libs = [
             Object(NonMatching, "havok/hkPredGskAgent3.cpp"),
             Object(NonMatching, "havok/hkPredGskCylinderAgent3.cpp"),
             Object(NonMatching, "havok/hkBoxBoxCollisionDetection.cpp"),
-            Object(NonMatching, "havok/hk3AxisSweep.cpp"),
+            Object(NonMatching, "havok/hk3AxisSweep.cpp", extra_cflags=["-fp_contract off"]),
             Object(NonMatching, "havok/hkBroadPhase.cpp"),
             Object(NonMatching, "havok/hkContinuousGsk.cpp"),
             Object(NonMatching, "havok/hkGskManifoldUtil.cpp"),

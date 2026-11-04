@@ -5,7 +5,6 @@
 //   0x802879F8   108  setRotatedDir   [map: hkVector4__setRotatedDir]
 //   0x80287A64   108  setRotatedInverseDir   [map: hkVector4__setRotatedInverseDir]
 //   0x80287AD0    52  __sinit_\hkVector4_cpp   [map: hkVector4cpp____sinit_]
-#pragma fp_contract on
 #include <havok/hkTransform.h>
 
 // HYPOTHESIS: two static vectors; the second is copied from the first during static initialisation.

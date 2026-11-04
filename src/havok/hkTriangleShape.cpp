@@ -19,8 +19,6 @@
 #include <havok/hkTriangleShape.h>
 #include <havok/hkShapeType.h>
 
-#pragma fp_contract on
-
 void hkTriangleShape::finishLoadedObjecthkTriangleShape(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;

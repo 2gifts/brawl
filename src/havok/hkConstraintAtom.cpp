@@ -12,7 +12,6 @@
 //   0x802D99B4   120  addModifierDataToConstraintInfo   [map: hkModifierConstraintAtom__addModifierDataToConstraintInfo]
 //   0x802D9A2C   104  addAllModifierDataToConstraintInfo   [map: hkModifierConstraintAtom__addAllModifierDataToConstraintInfo]
 //   0x802D9A94    68  __sinit_\hkConstraintAtom_cpp   [map: hkConstraintAtomcpp____sinit_]
-#pragma fp_contract on
 #include <havok/hkConstraintAtom.h>
 #include <havok/hkConstraintData.h>
 

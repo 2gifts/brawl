@@ -16,7 +16,6 @@
 //   0x8032CFCC   776  combineMassProperties   [map: hkInertiaTensorComputer__combineMassProperties]
 //   0x8032D2D4   172  shiftInertiaToCom   [map: hkInertiaTensorComputer__shiftInertiaToCom]
 //   0x8032D380   172  shiftInertiaFromCom   [map: hkInertiaTensorComputer__shiftInertiaFromCom]
-#pragma fp_contract on
 #include <havok/hkInertiaTensorComputer.h>
 #include <havok/hkTransform.h>
 

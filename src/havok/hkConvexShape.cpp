@@ -7,8 +7,6 @@
 #include <havok/hkConvexShape.h>
 #include <havok/hkShapeType.h>
 
-#pragma fp_contract on
-
 hkReal hkConvexShape::getMaximumProjection(const hkVector4& direction) const {
     hkVector4 support;
     getSupportingVertex(direction, support);

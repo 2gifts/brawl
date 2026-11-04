@@ -18,8 +18,6 @@
 #include <havok/hkBoxShape.h>
 #include <havok/hkShapeType.h>
 
-#pragma fp_contract on
-
 void hkBoxShape::finishLoadedObjecthkBoxShape(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;

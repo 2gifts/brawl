@@ -8,8 +8,6 @@
 
 #include <havok/hkShapeContainer.h>
 
-#pragma fp_contract on
-
 void hkSingleShapeContainer::finishLoadedObjecthkSingleShapeContainer(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;

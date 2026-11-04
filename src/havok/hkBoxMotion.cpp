@@ -1,5 +1,4 @@
 // Havok translation unit hkBoxMotion.o (main.dol 0x802E4828-0x802E5258).
-#pragma fp_contract on
 #include <new>
 #include <havok/hkBoxMotion.h>
 #include <havok/hkRegistry.h>

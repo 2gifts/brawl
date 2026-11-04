@@ -31,8 +31,6 @@ struct hkShapeRayCastInput {
     u32 unk24;         // 0x24 HYPOTHESIS
 };
 
-#pragma fp_contract on
-
 void hkConvexTranslateShape::finishLoadedObjecthkConvexTranslateShape(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;

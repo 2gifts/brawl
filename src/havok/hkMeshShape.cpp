@@ -18,8 +18,6 @@
 #include <havok/hkMeshShape.h>
 #include <havok/hkShapeType.h>
 
-#pragma fp_contract on
-
 void hkMeshShape::finishLoadedObjecthkMeshShape(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;

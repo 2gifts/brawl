@@ -22,8 +22,6 @@ static hkReal hkRsqrtApprox(hkReal x) {
     return hkInfinity();
 }
 
-#pragma fp_contract on
-
 // Gram terms of the two edges a = v0 - v1 and c = v2 - v1, normalised by the Gram determinant.
 void hkCollideTriangleUtil::setupClosestPointTriangleCache(const hkVector4* tri, hkVector4* cache) {
     hkVector4 a;

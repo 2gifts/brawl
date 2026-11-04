@@ -20,8 +20,6 @@
 #include <havok/hkShapeType.h>
 #include <havok/hkWorldCinfo.h>
 
-#pragma fp_contract on
-
 void hkSphereShape::finishLoadedObjecthkSphereShape(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;

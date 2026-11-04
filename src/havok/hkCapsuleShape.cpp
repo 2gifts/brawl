@@ -22,8 +22,6 @@
 #include <havok/hkCapsuleShape.h>
 #include <havok/hkShapeType.h>
 
-#pragma fp_contract on
-
 void hkCapsuleShape::finishLoadedObjecthkCapsuleShape(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;

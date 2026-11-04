@@ -10,8 +10,6 @@
 #include <havok/hkQsTransform.h>
 #include <havok/hkQuaternion.h>
 
-#pragma fp_contract on
-
 hkVector4& hkQsTransform::getTranslation() {
     return m_translation;
 }

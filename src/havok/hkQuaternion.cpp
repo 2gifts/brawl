@@ -4,7 +4,6 @@
 //   0x802856E4   552  quaternionFromRotatation   [map: hkQuadReal__quaternionFromRotatation]
 //   0x8028590C     4  set   [map: hkQuaternion__set]
 //   0x80285910   312  setFlippedRotation   [map: hkQuaternion__setFlippedRotation]
-#pragma fp_contract on
 #include <havok/hkQuaternion.h>
 #include <havok/hkRotation.h>
 #include <math.h>

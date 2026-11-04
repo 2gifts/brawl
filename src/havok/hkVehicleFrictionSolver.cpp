@@ -6,7 +6,6 @@
 //   0x802A0BF8    84  sqrt   [map: hkMath__sqrt]
 //   0x802A0C4C    16  min2<f>   [map: hkMath__min2_f_]
 //   0x802A0C5C    12  __sinit_\hkVehicleFrictionSolver_cpp   [map: hkVehicleFrictionSolvercpp____sinit_]
-#pragma fp_contract on
 #include <havok/hkBase.h>
 
 // hkMath members (declared locally; hkMath.h belongs to another worker).

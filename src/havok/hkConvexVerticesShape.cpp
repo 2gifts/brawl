@@ -18,8 +18,6 @@
 #include <havok/hkConvexVerticesShape.h>
 #include <havok/hkShapeType.h>
 
-#pragma fp_contract on
-
 void hkConvexVerticesShape::finishLoadedObjecthkConvexVerticesShape(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;

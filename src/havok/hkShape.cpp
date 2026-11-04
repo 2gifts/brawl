@@ -4,8 +4,6 @@
 
 #include <havok/hkShape.h>
 
-#pragma fp_contract on
-
 // HYPOTHESIS: |half| with the sign bit of direction (bit copy, no fabsf call).
 static inline hkReal copySignBits(hkReal mag, hkReal sign) {
     union {

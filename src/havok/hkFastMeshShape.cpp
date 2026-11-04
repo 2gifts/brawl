@@ -11,8 +11,6 @@
 #include <havok/hkFastMeshShape.h>
 #include <havok/hkShapeType.h>
 
-#pragma fp_contract on
-
 void hkFastMeshShape::finishLoadedObjecthkFastMeshShape(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;
