@@ -193,6 +193,10 @@ public:
     int getCollKindPlayerArea(Vec2f* pos, int* areaIdx, int* arg, float* rect);
     void setRuleNumHoldCursorVisible(bool visible);
     void setFaceIconMotion(int faceIdx, int motion);
+    int findFreeWiiControllerNo();
+    void dispWifiPrompt(u32 message);
+    int getCollCharKind(Vec2f* pos);
+    void dispHighScoreDiffLevel(int level);
 
     // Which part of the screen a point is in: 0 above the area of the characters, 1 the area of the characters, 2 below it
     // (the areas of the players).

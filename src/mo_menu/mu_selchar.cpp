@@ -12,6 +12,7 @@
 #include <types.h>
 #include <snd/snd_system.h>
 #include <string.h>
+#include <gf/gf_pad_system.h>
 
 // The menu helpers take three integers; this unit passes only the first one (see TIPS.md).
 extern "C" int exchangeMuSelchkindToMuCharKind__6muMenuFiii(int selchKind);
@@ -491,4 +492,63 @@ void muSelCharTask::setFaceIconMotion(int faceIdx, int motion) {
     obj->setAnimName(&sMotions[motion], false);
     obj->m_scnMdl->SetPriorityDrawOpa(0x49);
     obj->m_scnMdl->SetPriorityDrawXlu(0x49);
+}
+
+int muSelCharTask::findFreeWiiControllerNo() {
+    gfPadStatus status;
+    for (int controller = 4; controller < 8; controller++) {
+        g_gfPadSystem->getSysPadStatus(controller, &status);
+        if (status.m_error == 0 && status.m_controllerType != 0) {
+            int area;
+            for (area = 0; area < m_numPlayerAreas; area++) {
+                if (m_selCharPlayerAreas[area]->m_controllerNo == controller) {
+                    break;
+                }
+            }
+            if (area >= m_numPlayerAreas) {
+                return controller;
+            }
+        }
+    }
+    return -1;
+}
+
+void muSelCharTask::dispWifiPrompt(u32 message) {
+    MuObject* obj = m_objs[187];
+    m_highScoreMsg->printIndex(7, message, NULL);
+    m_scnGroup->Remove(obj->m_sceneModel);
+    m_scnGroup->Insert(m_scnGroup->sceneItemsCount, obj->m_sceneModel);
+    obj->setFrameNode(0.0f);
+    obj->m_modelAnim->m_anmObjChrRes->SetUpdateRate(1.0f);
+    g_sndSystem->playSE((SndID)0x1EF3, -1, 0, 0, -1);
+}
+
+int muSelCharTask::getCollCharKind(Vec2f* pos) {
+    for (int faceIdx = 0; faceIdx < m_charListNum; faceIdx++) {
+        Rect2D rect;
+        m_objs[Obj_FaceBase + faceIdx]->getRect3D(&rect, "colL", "colR");
+        if (rect.m_left <= pos->m_x && rect.m_right >= pos->m_x &&
+            rect.m_down <= pos->m_y && rect.m_up >= pos->m_y) {
+            return m_charList[faceIdx];
+        }
+    }
+    return 0x28;
+}
+
+void muSelCharTask::dispHighScoreDiffLevel(int level) {
+    MuObject* obj = m_objs[177];
+    nw4r::g3d::ScnMdlExpand* expand;
+    const char* node;
+    if (getSelCharType() == 7) {
+        expand = m_highScoreExpand;
+        node = "pos04";
+    } else {
+        expand = m_diffExpand;
+        node = "pos02";
+    }
+    expand->Remove(obj->m_sceneModel);
+    if (level >= 0) {
+        obj->setFrameVisible(level + 1);
+        expand->PushBack(obj->m_sceneModel, node);
+    }
 }
