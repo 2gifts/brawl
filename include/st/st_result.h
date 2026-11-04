@@ -91,6 +91,7 @@ unkStruct fighterResultData[] = {
 };
 
 class stResult : public stMelee {
+    friend class mlFtEventResult;
 //    void* m_shrineStageData;
     Vec3f m_positions[12];
     u32 m_winningCharKind;

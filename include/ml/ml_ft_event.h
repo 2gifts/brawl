@@ -3,6 +3,7 @@
 #include <StaticAssert.h>
 #include <ft/ft_manager.h>
 #include <types.h>
+#include <gm/gm_global_record.h>
 
 class gmGlobalModeMelee;
 class stOperatorInfo;
@@ -64,6 +65,8 @@ static_assert(sizeof(mlFtEvent) == 0x3C, "Class is wrong size!");
 
 class mlFtEventResult : public mlFtEvent {
 public:
+    virtual ~mlFtEventResult();
+    virtual void notifyEventResultWin(int entryId, int winAnim);
     virtual bool isInfoManager();
 };
 
@@ -71,8 +74,13 @@ class mlFtEventTraining : public mlFtEvent {
 public:
     // HYPOTHESIS: the damage the training HUD shows, set by notifyEventOnDamage.
     int m_damage;
+    int unk40;
+    int unk44;
+    gmGlobalRecord::CharaNumData* unk48;
+    int unk4C;
 
     virtual void notifyEventOnDamage(int entryId, u32 hp, soDamage* damage);
+    virtual void notifyEventSucceedHit(int entryId, u32 consecutiveHits, float totalDamage);
     virtual ~mlFtEventTraining();
 };
-static_assert(sizeof(mlFtEventTraining) == 0x40, "Class is wrong size!");
+static_assert(sizeof(mlFtEventTraining) == 0x50, "Class is wrong size!");
