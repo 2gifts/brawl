@@ -8,6 +8,12 @@
 
 class aiAct;
 
+// The stick range in pad units and the dead zone of a normalized stick (main DOL constants). HYPOTHESIS: names.
+extern const float g_ipStickRange;
+extern const float g_ipStickDeadZone;
+
+void aiNormalizeStick(Vec2f* stick);
+
 // One row of the AI system parameter table, indexed by CPU type (HYPOTHESIS layout).
 struct aiCpuTypePar {
     u16 m_unk0;
@@ -70,7 +76,7 @@ public:
     int m_unk84;
     u16 m_unk88;
     u16 m_unk8A;
-    float m_unk8C;
+    float m_stickBiasX;    // 0x8C: added to the stick x by keepOnFloor (HYPOTHESIS)
     aiParam m_par;         // 0x90
     char unkA4[0x6C];
     aiChrIdx m_target;     // 0x110: the character slot (aiChrIdx) the CPU is after; its own slot = none (HYPOTHESIS)
@@ -109,4 +115,5 @@ public:
     void damageStart(soDamage* damage, s16 frames, int unk);
     // HYPOTHESIS: target = the character that was hit by this CPU's attack.
     void swingHit(aiChrIdx* target, soDamage* damage);
+    void keepOnFloor(Vec2f* stick, int* unk, float frames, float margin, float maxBias);
 };

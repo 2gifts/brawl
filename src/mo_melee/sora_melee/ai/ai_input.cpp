@@ -4,6 +4,7 @@
 #include <ai/ai_stat.h>
 #include <gf/gf_archive.h>
 #include <gf/gf_heap_manager.h>
+#include <nw4r/math/math_arithmetic.h>
 
 aiInput::aiInput(u32 contNo, int unk2C, int player, int ftKind, s8 state, aiInput* parent, Heaps::HeapType heap)
     : IpHuman(contNo) {
@@ -69,7 +70,7 @@ aiInput::aiInput(u32 contNo, int unk2C, int player, int ftKind, s8 state, aiInpu
     m_unk70 = 0;
     m_unk3E = 0;
     m_unk3F = 0;
-    m_unk8C = 0.0f;
+    m_stickBiasX = 0.0f;
     m_unk118 = 0.0f;
     m_swingChr.m_idx = -1;
     m_swingState = 0;
@@ -102,7 +103,7 @@ void aiInput::reset() {
     m_unk88 = 0;
     m_swingChr.m_idx = -1;
     m_swingState = 0;
-    m_unk8C = 0.0f;
+    m_stickBiasX = 0.0f;
     m_unk78 = 0.0f;
     m_unk7C = 0.0f;
     m_unk80 = 0.0f;
@@ -242,6 +243,76 @@ ipPadTrigger aiInput::getTrigger() const {
 
 s32 aiInput::getContNo() const {
     return m_contNo;
+}
+
+// Turns a stick value in pad units into the -1..1 range of IpHuman: scaled by 1 / g_ipStickRange, clamped, and
+// snapped to 0 inside the dead zone.
+void aiNormalizeStick(Vec2f* stick) {
+    stick->m_x *= 1.0f / g_ipStickRange;
+    stick->m_y *= 1.0f / g_ipStickRange;
+    if (stick->m_x > 1.0f) {
+        stick->m_x = 1.0f;
+    } else if (stick->m_x < -1.0f) {
+        stick->m_x = -1.0f;
+    }
+    if (stick->m_y > 1.0f) {
+        stick->m_y = 1.0f;
+    } else if (stick->m_y < -1.0f) {
+        stick->m_y = -1.0f;
+    }
+    if (float(__fabs(stick->m_x)) <= g_ipStickDeadZone) {
+        stick->m_x = 0.0f;
+    }
+    if (float(__fabs(stick->m_y)) <= g_ipStickDeadZone) {
+        stick->m_y = 0.0f;
+    }
+}
+
+// Whether there is a floor below the point (pos.m_x, y). HYPOTHESIS: name.
+static inline u32 aiHasFloorUnder(Vec3f* pos, float y) {
+    pos->m_y = y;
+    pos->m_z = 0.0f;
+    return g_aiMgr->get_under_floor(pos, NULL, NULL, -1, -9999.9f, 0.0f, 0.0f);
+}
+
+// Keeps the CPU on the floor it stands on: when the x position predicted `frames` ahead leaves the floor (shrunk by
+// `margin`, and kept 30 units inside the stage area) and there is no floor under that point, the stick bias
+// m_stickBiasX grows by 0.5 per call towards the floor up to `maxBias`; otherwise it decays to 0 by 1/12 per call.
+// The bias is then added to the stick.
+// HYPOTHESIS: names; `unk` is passed by the callers but not used.
+void aiInput::keepOnFloor(Vec2f* stick, int* unk, float frames, float margin, float maxBias) {
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    Vec3f pos;
+    float areaLeft = 30.0f + g_aiMgr->m_areaLeft;
+    float areaRight = g_aiMgr->m_areaRight - 30.0f;
+    pos.m_x = stat->m_pos.m_x + stat->m_speed.m_x * frames;
+    AiClBlock* floor = stat->m_floor;
+    float left = margin + nw4r::math::FSelect(floor->m_edgeL.m_x - areaLeft, floor->m_edgeL.m_x, areaLeft);
+    float right = nw4r::math::FSelect(floor->m_edgeR.m_x - areaRight, areaRight, floor->m_edgeR.m_x) - margin;
+    if ((pos.m_x < left || pos.m_x > right) && !aiHasFloorUnder(&pos, stat->m_pos.m_y)) {
+            if (pos.m_x < left) {
+                m_stickBiasX += 0.5f;
+                if (m_stickBiasX > maxBias) {
+                    m_stickBiasX = maxBias;
+                }
+            } else {
+                m_stickBiasX -= 0.5f;
+                if (m_stickBiasX < -maxBias) {
+                    m_stickBiasX = -maxBias;
+                }
+            }
+    } else if (m_stickBiasX > 0.0f) {
+        m_stickBiasX -= 1.0f / 12.0f;
+        if (m_stickBiasX < 0.0f) {
+            m_stickBiasX = 0.0f;
+        }
+    } else if (m_stickBiasX < 0.0f) {
+        m_stickBiasX += 1.0f / 12.0f;
+        if (m_stickBiasX > 0.0f) {
+            m_stickBiasX = 0.0f;
+        }
+    }
+    stick->m_x += m_stickBiasX;
 }
 
 // The character slot that this CPU has to attack no matter what (the four CPU types 0xE..0x11 of the Subspace Emissary
