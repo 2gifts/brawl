@@ -32,4 +32,6 @@ class wnKirbyCookHat : public wnWeaponBuilder<wnKirbyCookHatModuleAccesserBuildC
 public:
     wnKirbyCookHat(s32 articleId, const wnArticleBuildInfo& info, const wnKirbyCookHatData* data);
     virtual ~wnKirbyCookHat() { }
+    void activate(int founderTaskId, int resourceId, float lr, bool unk);
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* linkedObject, int unk4);
 };
