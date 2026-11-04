@@ -1657,3 +1657,458 @@ int aiInput::final_check(Vec2f* stick, ipPadButton* button) {
     }
     return 0;
 }
+
+// The length of a vector from its squared length (0 for a denormal). HYPOTHESIS: the same inline as in ai_stat.cpp.
+static inline float aiLengthOf(float lengthSq) {
+    float length;
+    if ((float)fabs(lengthSq) <= 1.17549435e-38f) {
+        length = 0.0f;
+    } else {
+        length = lengthSq * rsqrtf(lengthSq);
+    }
+    return length;
+}
+
+// The defending mode. For the CPU types 1, 2, 3 and 0x18 the stick is driven directly: 2 walks back and forth along
+// its floor (backing away from the edge or out of status 0x7D), 3 jumps whenever it is on the ground, 0x18 holds the
+// stick down. CPU type 0x1C (character 0xD) starts action 0x603B on the ground or 0x6049 in the air. Otherwise a
+// partner (m_child set: the slot 7 after this one) that is too far away is followed; then the nearest opponent becomes
+// the target (mode 0x14 when there is none) and an action is chosen through aiParam::select_action, with a dodge
+// (0x72/0x71) against a target below on another floor and, for some CPU types and characters, a switch to mode 6.
+// Returns 1, or 0 after switching to mode 6. HYPOTHESIS: names; the CPU type, action, status and flag meanings.
+// BYTES: defined at the end of the file for the same literal-pool reason as auto_passfall.
+int aiInput::md_defend(Vec2f* stick, ipPadButton* button) {
+    // BYTES: declared here, the original's partner slot is the highest one on the stack (declared where it is used it
+    // moves below the other aiChrIdx slots).
+    aiChrIdx partner;
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    switch (stat->m_situation) {
+    case 0x0B:
+    case 0x18:
+        if (!stat->chk_stat_gr_free()) {
+            return 1;
+        }
+        break;
+    }
+    switch (m_cpuType) {
+    case 1:
+    case 2:
+    case 3:
+    case 0x18:
+        if (m_act->m_id != 0) {
+            aiChrIdx none;
+            none.m_idx = -1;
+            m_act->act_change(0, &none, 0, 0);
+        }
+        switch (m_cpuType) {
+        case 2: {
+            u32 edge = stat->m_lr > 0.0f ? 0x80200 : 0x40100;
+            if ((edge & stat->m_floor->m_flags) != edge && stat->get_range_floor(stat->m_lr, &stat->m_pos) < 5.0f) {
+                stick->m_x = -0.5f * stat->m_lr;
+            } else if (stat->m_status == 0x7D) {
+                stick->m_x = -0.5f * stat->m_lr;
+            } else {
+                stick->m_x = 0.5f * stat->m_lr;
+            }
+            break;
+        }
+        case 3:
+            switch (m_step) {
+            case 0:
+                if (stat->chk_stat_gr_free()) {
+                    m_stepFrame = 0;
+                    m_step++;
+                }
+                break;
+            case 1:
+                stick->m_y = 1.0f;
+                if (m_stepFrame > 20) {
+                    m_step = 0;
+                }
+                break;
+            }
+            break;
+        case 0x18:
+            stick->m_y = -1.0f;
+            break;
+        }
+        break;
+    case 0x1C:
+        if (stat->m_chrKind == 0xD && m_act->m_id == 0) {
+            if (stat->chk_stat_gr_free()) {
+                aiChrIdx none;
+                none.m_idx = -1;
+                m_act->act_change(0x603B, &none, 0, 0);
+                return 1;
+            }
+            if (stat->chk_stat_air_free()) {
+                aiChrIdx none;
+                none.m_idx = -1;
+                m_act->act_change(0x6049, &none, 0, 0);
+                return 1;
+            }
+        }
+        // fall through
+    default: {
+        aiStat* target = aiMgr::get_aiStat(&m_target);
+        if (target == NULL || ((target->m_flags & 0x8000) && !(target->m_flags & 0x40000000))) {
+            m_unk111 = 0;
+            aiChrIdx none;
+            none.m_idx = -1;
+            m_act->act_change(0, &none, 0, 0);
+        }
+        // BYTES: m_act->m_id is tested twice (the original has two identical beq in a row).
+        if (m_child != NULL && m_act->m_id != 0 && m_act->m_id != 0 &&
+            m_target.m_idx == (s8)(m_chrIdx.m_idx + 7))
+        {
+            aiChrIdx none;
+            none.m_idx = -1;
+            m_act->act_change(0, &none, 0, 0);
+        }
+        if (m_act->m_id == 0) {
+            if (m_child != NULL) {
+                partner.m_idx = m_chrIdx.m_idx + 7;
+                aiStat* partnerStat = aiMgr::get_aiStat(&partner);
+                if (!(partnerStat->m_flags & 0x8000)) {
+                    aiSystemPar* systemPar = (aiSystemPar*)aiMgr::getAiSystemPar();
+                    Vec3f diff = partnerStat->m_pos - stat->m_pos;
+                    float follow = systemPar->m_followDist * stat->m_scale.m_x;
+                    float dist = aiLengthOf(diff.m_z * diff.m_z + (diff.m_x * diff.m_x + diff.m_y * diff.m_y));
+                    if (dist > 10.0f + follow && randf() < 0.9f) {
+                        m_target = partner;
+                        if (partnerStat->m_floor != stat->m_floor) {
+                            aiChrIdx none;
+                            none.m_idx = -1;
+                            change_md(6, &none, 0, 0);
+                        } else {
+                            aiChrIdx none;
+                            none.m_idx = -1;
+                            m_act->act_change(0x33, &none, 0, 0);
+                        }
+                        return 1;
+                    }
+                }
+            }
+            m_target.m_idx = get_near_target(NULL, 0);
+            if (m_target.m_idx == m_chrIdx.m_idx) {
+                aiChrIdx none;
+                none.m_idx = -1;
+                change_md(0x14, &none, 0, 0);
+                return 1;
+            }
+            u32 act = m_par.select_action(2, &m_chrIdx, &m_target, m_unk116, m_act, m_cpuType == 0x1A);
+            switch (m_cpuType) {
+            case 5:
+                if (act == 0x3010) {
+                    // BYTES: the original loads the chance before calling randf.
+                    float chance = m_par.m_workF14[9];
+                    if (randf() < chance) {
+                        act = 0x3050;
+                    }
+                }
+                break;
+            default:
+                if (m_unk116 & 2) {
+                    target = aiMgr::get_aiStat(&m_target);
+                    if (target->m_floor != stat->m_floor && !(stat->m_flags & 1)) {
+                        // BYTES: chance declared before range gives the original's f30/f31.
+                        float chance;
+                        float range = __fabsf(stat->get_range(0.0f, &m_target));
+                        switch (m_cpuType) {
+                        case 4:
+                        case 5:
+                            break;
+                        default:
+                            if (!(target->m_flags & 0x100) && !stat->chk_chr_stat(1, 0x19) &&
+                                (range > m_par.m_workF14[0] || __fabsf(target->m_pos.m_y - stat->m_pos.m_y) > 40.0f))
+                            {
+                                chance = 0.25f;
+                                if (g_aiMgr->m_unk386) {
+                                    chance = 0.0f;
+                                } else {
+                                    switch (stat->m_chrKind) {
+                                    case 3:
+                                    case 0x2E:
+                                        chance = 0.03125f;
+                                        break;
+                                    case 0x19:
+                                        if (!(stat->m_flags & 4)) {
+                                            chance = 0.0f;
+                                        }
+                                        break;
+                                    }
+                                }
+                                if (randf() < chance) {
+                                    aiChrIdx none;
+                                    none.m_idx = -1;
+                                    change_md(6, &none, 0, 0);
+                                    return 0;
+                                }
+                            }
+                            break;
+                        }
+                        if (range < m_par.m_workF14[1] && target->m_pos.m_y < stat->m_pos.m_y - 1.0f) {
+                            s8 rank = m_par.m_rank;
+                            if (randf() < 0.012f * rank) {
+                                float r = randf();
+                                if (target->m_unk4 == 2 || target->m_unk4 == 3) {
+                                    rank = m_par.m_rank;
+                                    if (randf() < 0.01f * rank) {
+                                        r *= 0.32f;
+                                    }
+                                }
+                                if (r < 0.2f) {
+                                    aiChrIdx none;
+                                    none.m_idx = -1;
+                                    m_act->act_change(0x72, &none, 0, 0);
+                                    return 1;
+                                }
+                                if (r < 0.3f) {
+                                    aiChrIdx none;
+                                    none.m_idx = -1;
+                                    m_act->act_change(0x71, &none, 0, 0);
+                                    return 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+            aiChrIdx none;
+            none.m_idx = -1;
+            m_act->act_change(act, &none, 0, 0);
+        }
+        break;
+    }
+    }
+    return 1;
+}
+
+// The attacking mode. Drops a target that is gone (the CPU then picks a new one through target_check, at once or, with
+// a chance growing with the rank, later), follows a partner that is too far away like md_defend, starts the 0x1C
+// character-0xD actions like md_defend, and switches to mode 0x14 when there is no target (CPU type 8: towards the
+// nearest teammate in mode 8 when the 0x100 flag is set). Against a target on another floor it may start action 0x3030
+// (far away) or switch to mode 6, or dodge (0x72/0x71) a target below; otherwise an action is chosen through
+// aiParam::select_action. Action 0x10A0 against a target on another floor also switches to mode 6. Returns 1, or 0 after
+// switching to mode 6 or 8. HYPOTHESIS: names; the CPU type, action, status and flag meanings.
+// BYTES: defined at the end of the file for the same literal-pool reason as auto_passfall.
+int aiInput::md_attack(Vec2f* stick, ipPadButton* button) {
+    // BYTES: declared here like md_defend's partner (the highest stack slot).
+    aiChrIdx partner;
+    bool lostTarget = false;
+    aiStat* stat = aiMgr::get_aiStat(&m_chrIdx);
+    switch (stat->m_situation) {
+    case 0x0B:
+    case 0x18:
+        if (!stat->chk_stat_gr_free()) {
+            return 1;
+        }
+        break;
+    }
+    if (stat->chk_chr_stat(1, 1)) {
+        return 1;
+    }
+    aiStat* target = aiMgr::get_aiStat(&m_target);
+    if ((target == NULL || ((target->m_flags & 0x8000) && !(target->m_flags & 0x40000000))) && m_act->m_id != 0x1100) {
+        m_unk111 = 0;
+        aiChrIdx none;
+        none.m_idx = -1;
+        m_act->act_change(0, &none, 0, 0);
+        m_target = m_chrIdx;
+        lostTarget = true;
+    }
+    // BYTES: m_act->m_id is tested twice as in md_defend.
+    if (m_child != NULL && m_act->m_id != 0 && m_act->m_id != 0 && m_target.m_idx == (s8)(m_chrIdx.m_idx + 7)) {
+        m_target.m_idx = m_chrIdx.m_idx;
+        lostTarget = false;
+    }
+    if (m_act->m_id == 0 ||
+        (m_chrIdx.m_idx == m_target.m_idx && m_act->m_id != 0x90 && (m_act->m_id & 0xF000) != 0x6000))
+    {
+        if (m_child != NULL) {
+            partner.m_idx = m_chrIdx.m_idx + 7;
+            aiStat* partnerStat = aiMgr::get_aiStat(&partner);
+            if (!(partnerStat->m_flags & 0x8000)) {
+                aiSystemPar* systemPar = (aiSystemPar*)aiMgr::getAiSystemPar();
+                Vec3f diff = partnerStat->m_pos - stat->m_pos;
+                float follow = systemPar->m_followDist * stat->m_scale.m_x;
+                float dist = aiLengthOf(diff.m_z * diff.m_z + (diff.m_x * diff.m_x + diff.m_y * diff.m_y));
+                if (dist > 10.0f + follow && randf() < 0.9f) {
+                    m_target = partner;
+                    if (partnerStat->m_floor != stat->m_floor) {
+                        aiChrIdx none;
+                        none.m_idx = -1;
+                        change_md(6, &none, 0, 0);
+                    } else {
+                        aiChrIdx none;
+                        none.m_idx = -1;
+                        m_act->act_change(0x33, &none, 0, 0);
+                    }
+                    return 1;
+                }
+            }
+        }
+        if (m_cpuType == 0x1C && stat->m_chrKind == 0xD) {
+            if (stat->chk_stat_gr_free()) {
+                aiChrIdx none;
+                none.m_idx = -1;
+                m_act->act_change(0x603B, &none, 0, 0);
+                return 1;
+            }
+            if (stat->chk_stat_air_free()) {
+                aiChrIdx none;
+                none.m_idx = -1;
+                m_act->act_change(0x6049, &none, 0, 0);
+                return 1;
+            }
+        }
+        s8 rank = m_par.m_rank;
+        if (!lostTarget || randf() < 0.015f * rank) {
+            target_check();
+            lostTarget = false;
+        }
+        if (m_chrIdx.m_idx == m_target.m_idx) {
+            // BYTES: the CPU type 8 tests here and below are switches (signed cmpwi; an if compares unsigned).
+            switch (m_cpuType) {
+            case 8:
+                break;
+            default: {
+                aiChrIdx none;
+                none.m_idx = -1;
+                change_md(0x14, &none, 0, 0);
+                if (lostTarget && m_md == 0x14) {
+                    m_flags |= 4;
+                }
+                return 1;
+            }
+            }
+        }
+        if ((m_unk116 & 0x100) && m_chrIdx.m_idx == m_target.m_idx) {
+            switch (m_cpuType) {
+            case 8: {
+                // BYTES: i declared first gets the original's registers.
+                int i;
+                float nearest = 9999980000.0f;
+                int nearestIdx = -1;
+                for (i = 0; i < 7; i++) {
+                    aiChrIdx idx;
+                    idx.m_idx = i;
+                    aiStat* other = aiMgr::get_aiStat(&idx);
+                    if (i != m_chrIdx.m_idx && !(other->m_flags & 0x8000) && other->m_unkCC == stat->m_unkCC) {
+                        aiChrIdx otherIdx;
+                        otherIdx.m_idx = i;
+                        float dist = stat->get_distance(0.0f, &otherIdx);
+                        if (nearest > dist) {
+                            nearest = dist;
+                            nearestIdx = i;
+                        }
+                    }
+                }
+                if (nearestIdx >= 0 && nearest > 20.0f) {
+                    m_unk43.m_idx = nearestIdx;
+                    aiChrIdx none;
+                    none.m_idx = -1;
+                    change_md(8, &none, 0, 0);
+                    return 0;
+                }
+                break;
+            }
+            }
+            aiChrIdx none;
+            none.m_idx = -1;
+            m_act->act_change(0x3050, &none, 0, 0);
+            return 1;
+        }
+        if (m_act->m_id != 0x3030) {
+            target = aiMgr::get_aiStat(&m_target);
+            if (target->m_floor != stat->m_floor) {
+                if (__fabsf(stat->get_distance(0.0f, &m_target)) > m_par.m_workF14[1] || (stat->m_flags & 0x80) ||
+                    randf() < 0.2f)
+                {
+                    if (!(stat->m_flags & 4) && !(stat->m_flags & 0x80) &&
+                        __fabsf(stat->get_range(0.0f, &m_target)) > m_par.m_workF14[0])
+                    {
+                        float chance;
+                        switch (stat->m_chrKind) {
+                        case 0:
+                            chance = 0.0f;
+                            break;
+                        case 0x19:
+                            chance = 0.1f + 0.9f * m_par.getRankRatio();
+                            break;
+                        default:
+                            chance = 0.8f * m_par.getRankRatio();
+                            break;
+                        }
+                        if (randf() < chance) {
+                            aiChrIdx none;
+                            none.m_idx = -1;
+                            m_act->act_change(0x3030, &none, 0, 0);
+                            return 1;
+                        }
+                    }
+                    if (!(target->m_flags & 0x100) && !(target->m_flags & 0x80) && !stat->chk_chr_stat(1, 0x19)) {
+                        float chance = 0.9f;
+                        if ((stat->m_flags & 0x100) || (stat->m_flags & 0x80)) {
+                            chance = 1.1f;
+                        } else if (g_aiMgr->m_unk386) {
+                            chance = 0.001f;
+                        } else {
+                            switch (stat->m_chrKind) {
+                            case 3:
+                            case 0x2E:
+                                chance = 0.3f;
+                                break;
+                            case 0x19:
+                                if (!(stat->m_flags & 4)) {
+                                    chance = 0.2f;
+                                }
+                                break;
+                            }
+                        }
+                        if (randf() < chance) {
+                            aiChrIdx none;
+                            none.m_idx = -1;
+                            change_md(6, &none, 0, 0);
+                            return 0;
+                        }
+                    }
+                } else if (target->m_pos.m_y < stat->m_pos.m_y - 1.0f) {
+                    s8 rank = m_par.m_rank;
+                    if (randf() < 0.012f * rank) {
+                        float r = randf();
+                        if (target->m_unk4 == 2 || target->m_unk4 == 3) {
+                            r *= 0.32f;
+                        }
+                        if (r < 0.2f) {
+                            aiChrIdx none;
+                            none.m_idx = -1;
+                            m_act->act_change(0x72, &none, 0, 0);
+                            return 1;
+                        }
+                        if (r < 0.3f) {
+                            aiChrIdx none;
+                            none.m_idx = -1;
+                            m_act->act_change(0x71, &none, 0, 0);
+                            return 1;
+                        }
+                    }
+                }
+            }
+        }
+        aiChrIdx none;
+        none.m_idx = -1;
+        m_act->act_change(m_par.select_action(1, &m_chrIdx, &m_target, m_unk116, m_act, m_cpuType == 0x1A), &none, 0, 0);
+    }
+    if (m_act->m_id == 0x10A0) {
+        aiStat* self = aiMgr::get_aiStat(&m_chrIdx);
+        if (aiMgr::get_aiStat(&m_target)->m_floor != self->m_floor) {
+            aiChrIdx none;
+            none.m_idx = -1;
+            change_md(6, &none, 0, 0);
+            return 0;
+        }
+    }
+    return 1;
+}

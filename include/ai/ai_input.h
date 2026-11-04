@@ -22,7 +22,9 @@ struct aiCpuTypePar {
 };
 
 struct aiSystemPar {
-    char unk0[0x1D];
+    char unk0[4];
+    float m_followDist;    // 0x04: HYPOTHESIS: how far (times the character scale) a partner may get before md_defend follows it
+    char unk8[0x15];
     // BYTES: read as lbz then extsb into the argument register (an unsigned byte converted to s8 at the use); an s8
     // member loads straight into the argument register.
     u8 m_childRank;        // 0x1D: the rank a sub-character (Nana) controller starts with (HYPOTHESIS)
@@ -125,6 +127,8 @@ public:
     int snake_c4_check(Vec2f* stick, ipPadButton* button);
     int danger_check(Vec2f* stick, ipPadButton* button);
     int final_check(Vec2f* stick, ipPadButton* button);
+    int md_attack(Vec2f* stick, ipPadButton* button);
+    int md_defend(Vec2f* stick, ipPadButton* button);
     // The dizzy mode: the stick is spun around (faster at a higher rank). HYPOTHESIS: the md_* handlers all take the stick
     // and the button word they fill in and return 1 when they ran; button is not used here.
     // Recovering to the stage: after a few frames over the edge, jump back (action 0x2050) when there is no ground below
