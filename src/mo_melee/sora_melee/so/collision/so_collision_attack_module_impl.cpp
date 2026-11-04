@@ -2,6 +2,8 @@
 #include <so/param/so_param_customize_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <types.h>
+#include <cl/cl_collision.h>
+#include <so/model/so_model_module_simple.h>
 
 soCollisionAttackModule::~soCollisionAttackModule() { }
 
@@ -293,4 +295,43 @@ bool soCollisionAttackModuleImpl::setOffset(u32 index, Vec3f* offsetPos) {
     }
     m_collisionAttackPart->at(index).m_attackData.m_offsetPos = *offsetPos;
     return true;
+}
+
+void soCollisionAttackModuleImpl::setSpeed(Vec2f* speed) {
+    float speedY;
+    float speedX = speed->m_x;
+    speedY = speed->m_y;
+    m_speed.m_x = speedX;
+    m_speed.m_y = speedY;
+    unk9c_2 = false;
+}
+
+
+void soCollisionAttackModuleImpl::setWhole(u32 index, bool isWhole) {
+    m_collision.getCollision(index, m_collisionAttackPart->at(index).m_groupIndex)->m_isInfinite = isWhole;
+}
+
+
+void soCollisionAttackModuleImpl::addPastLog(void* module, u32 index, u32 groupIndex) {
+    soCollision* collision = static_cast<soCollisionAttackModule*>(module)->getCollision();
+    if (collision != 0) {
+        m_collision.addPastLog(collision, index, groupIndex);
+    }
+}
+
+void soCollisionAttackModuleImpl::hitAbsolute(u32 index, const char* nodeName, int targetTaskId, int targetGroup, int targetNo) {
+    int nodeId = m_moduleAccesser->getModelModule().getNodeId(nodeName);
+    hitAbsolute(index, nodeId, targetTaskId, targetGroup, targetNo);
+}
+
+void soCollisionAttackModuleImpl::hitAbsolute(u32 index, int nodeId, int targetTaskId, int targetGroup, int targetNo) {
+    int correctNodeId = m_moduleAccesser->getModelModule().getCorrectNodeId(nodeId);
+    Vec3f nodeGlobalPos = m_moduleAccesser->getModelModule().getNodeGlobalPosition(correctNodeId, false);
+    hitAbsolute(index, &nodeGlobalPos, targetTaskId, targetGroup, targetNo);
+}
+
+void soCollisionAttackModuleImpl::extractAnimCmd(acAnimCmd* command, soCollisionAttackData* attackData, u32* index, u32* groupIndex, soModuleAccesser* moduleAccesser) {
+    soArrayContractibleTable<const acCmdArgConv> args = command->getArgList();
+    extractAnimCmdArg(soGeneralFlag<bool>(false), moduleAccesser, &args, index, groupIndex, attackData);
+    extractAnimCmdArg(soGeneralFlag<bool>(false), moduleAccesser, &args, attackData);
 }

@@ -6,6 +6,7 @@
 #include <StaticAssert.h>
 #include <types.h>
 #include <mt/mt_vector.h>
+#include <nw4r/ut.h>
 
 class cmSubject {
 public:
@@ -41,11 +42,17 @@ public:
     void setPos(Vec3f* pos);
     void clear();
     void draw(float scale);
+    void setRange(Rect2D* range);
+    void regist();
+    void shiftRange(float scale);
 };
 static_assert(sizeof(cmSubject) == 132, "Class is wrong size!");
 
-class cmSubjectList {
-    // TODO
+// HYPOTHESIS: the list of subjects is a LinkList.
+class cmSubjectList : public nw4r::ut::LinkList<cmSubject, 0> {
+public:
+    ~cmSubjectList();
+    static void update(float scale);
 public:
     static cmSubject* getSubjectByPlayerNo(u32 playerNo);
 };

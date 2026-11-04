@@ -207,6 +207,11 @@ public:
     virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
 
+    void extractAnimCmd(acAnimCmd* command, soCollisionAttackData* attackData, u32* index, u32* groupIndex, soModuleAccesser* moduleAccesser);
+    // HYPOTHESIS: the leading byte parameters are general flags passed by value.
+    static void extractAnimCmdArg(soGeneralFlag<bool> flag, soModuleAccesser* moduleAccesser, soArrayContractibleTable<const acCmdArgConv>* args, u32* index, u32* groupIndex, soCollisionAttackData* attackData);
+    static void extractAnimCmdArg(soGeneralFlag<bool> flag, soModuleAccesser* moduleAccesser, soArrayContractibleTable<const acCmdArgConv>* args, soCollisionAttackData* attackData);
+
     soCollisionAttackModuleImpl(soModuleAccesser* moduleAccesser, int taskId, gfTask::Category taskCategory,
                                 soArray<soCollisionAttackPart>*, soArray<soCollisionGroup>*,
                                         soArray<soCollisionAttackAbsolute>*, soEventObserverRegistrationDesc*, bool);

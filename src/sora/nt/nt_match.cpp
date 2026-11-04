@@ -137,3 +137,99 @@ void NtMatching::newClientCallback(int index, void* param) {
         netReport(lbl_8045FC14);
     }
 }
+
+extern "C" u64 DWC_GetFriendKey(const UnkFriendInfo::FriendData* data);
+extern char lbl_804602D0[0x15];
+extern s32 lbl_805A03E8;
+extern s32 lbl_805A03F4;
+extern s32 lbl_805A03E0;
+extern u8 lbl_805A0410[1];
+extern u8 lbl_805A0414;
+extern u8 lbl_805A0418[8];
+extern u8 lbl_8059E743;
+extern u8 lbl_8059E744;
+extern u32 g_NtAIDBitmap;
+
+void NtMatching::requestDisconnectAIDBitmap(u8 bitmap) {
+    unk34AB |= bitmap;
+}
+
+bool NtMatching::isSaveFriendInfoDone() {
+    return ntFriendInfoSave::isNotSaving();
+}
+
+u8 NtMatching::getCloseAIDBitmap() {
+    u8 bitmap = unk34AA;
+    unk34AA = 0;
+    return bitmap;
+}
+
+void NtMatching::setSequenceWatch(int sequence, int state) {
+    unk3430 = sequence;
+    unk3434 = state;
+    unk3438 = OSGetTick();
+}
+
+u64 NtMatching::getRegisterFriendCode(int index) {
+    return DWC_GetFriendKey(&ntFriendInfo::getInstance()->getFriendInfo()->m_friendData[index]);
+}
+
+void NtMatching::shutdown() {
+    if (!unk11) {
+        unk33CD = 1;
+    } else if (!unk33CC) {
+        unk33CC = 1;
+        OSResumeThread(&unkA0);
+        netReport(lbl_804602D0);
+    }
+}
+
+bool NtMatching::isNetShutdownErrorOccured() {
+    switch (lbl_805A03E8) {
+    case 7: {
+        bool error;
+        switch (lbl_805A03F4) {
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            error = true;
+            break;
+        default:
+            error = false;
+            break;
+        }
+        if (error) {
+            return true;
+        }
+        break;
+    }
+    case 2:
+    case 3:
+    case 6:
+    case 14:
+        return true;
+    }
+    return false;
+}
+
+void NtMatching::resetWork() {
+    g_NtMatchingStatus = 5;
+    lbl_805A03E0 = 5;
+    unk33CE = 0;
+    unk33F5 = 0;
+    unk33F6 = 0;
+    unk3404 = 0;
+    memset(lbl_805A0410, 0, 4);
+    g_NtAIDBitmap = 0;
+    lbl_805A0414 = 0;
+    lbl_8059E742 = 0xFF;
+    lbl_8059E745 = 0xFF;
+    lbl_8059E743 = 0xFF;
+    lbl_8059E744 = 0xFF;
+    for (int index = 0; index < 8; index++) {
+        lbl_805A0418[index] = 0;
+    }
+}

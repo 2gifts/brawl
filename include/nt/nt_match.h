@@ -2,6 +2,7 @@
 
 #include <StaticAssert.h>
 #include <types.h>
+#include <revolution/OS/OSThread.h>
 
 // Local shadow of BrawlHeaders' nt/nt_match.h: adds NtMatching (watchResetNodeMissMatch and thSaveUserDataNow; main.dol 0x80147434 ..., names from the sora map).
 
@@ -32,19 +33,54 @@ public:
     // HYPOTHESIS: the final argument selects updates to the local display order.
     bool deleteDisplayOrder(int index, bool updateLocal);
 
-    u8 unk0[0x12];
-    u8 unk12[0x40];
+    void requestDisconnectAIDBitmap(u8 bitmap);
+    bool isSaveFriendInfoDone();
+    u8 getCloseAIDBitmap();
+    void setSequenceWatch(int sequence, int state);
+    u64 getRegisterFriendCode(int index);
+    void shutdown();
+    bool isNetShutdownErrorOccured();
+    void resetWork();
+
     union {
-        u8 unk52[0x33BF];
         struct {
-            u8 _pad52[0x337A];
-            u8 unk33CC;
+            u8 unk0[0x12];
+            u8 unk12[0x40];
+            union {
+                u8 unk52[0x33BF];
+                struct {
+                    u8 _pad52[0x337A];
+                    u8 unk33CC;
+                };
+            };
+            bool unk3411;
+            bool unk3412;
+            u8 unk3413[0xE];
+            s8 unk3421;
+            u8 unk3422[0x11A];
+            void* unk353C;
+        };
+        // HYPOTHESIS: typed state and thread fields occupy the existing padding.
+        struct {
+            u8 _pad0[0x11];
+            u8 unk11;
+            u8 _pad12[0x8E];
+            OSThread unkA0;
+            u8 _pad3B8[0x3015];
+            u8 unk33CD;
+            u8 unk33CE;
+            u8 _pad33CF[0x26];
+            u8 unk33F5;
+            u8 unk33F6;
+            u8 _pad33F7[0xD];
+            u32 unk3404;
+            u8 _pad3408[0x28];
+            int unk3430;
+            int unk3434;
+            u32 unk3438;
+            u8 _pad343C[0x6E];
+            u8 unk34AA;
+            u8 unk34AB;
         };
     };
-    bool unk3411;
-    bool unk3412;
-    u8 unk3413[0xE];
-    s8 unk3421;
-    u8 unk3422[0x11A];
-    void* unk353C;
 };

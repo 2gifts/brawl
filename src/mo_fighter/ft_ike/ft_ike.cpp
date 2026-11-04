@@ -15,6 +15,10 @@
 
 #define FT_BC ftIkeBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
+#include <mt/mt_prng.h>
+#include <so/so_slow.h>
+#include <gf/gf_task_scheduler.h>
+#include <it/item.h>
 
 // Status teardown destroys its owned change-request queue before observers.
 #pragma dont_inline on
@@ -385,3 +389,66 @@ void* fn_119_34B8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 void* fn_119_34F8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_119_3538(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+
+extern "C" const int lbl_119_rodata_0[4];
+
+int ftIke::getLoopDamageMotionVariation() {
+    int variation = randi(4);
+    if (variation < 0 || variation >= 4) {
+        variation = 0;
+    }
+    return lbl_119_rodata_0[variation];
+}
+
+void ftIke::notifyEventOnDamage(soDamage* damage, bool reset, soModuleAccesser* moduleAccesser) {
+    if (reset) {
+        m_moduleAccesser->getWorkManageModule().setInt(0, 0x10000040);
+    }
+    Fighter::notifyEventOnDamage(damage, reset, moduleAccesser);
+}
+
+void ftIke::setFinalTargetPosBaseWork(soModuleAccesser* moduleAccesser, const Vec3f& position) {
+    moduleAccesser->getWorkManageModule().setFloat(position.m_x, 0x2100000c);
+    moduleAccesser->getWorkManageModule().setFloat(position.m_y, 0x2100000d);
+    moduleAccesser->getWorkManageModule().setFloat(position.m_z, 0x2100000e);
+}
+
+Vec3f ftIke::getFinalTargetPosBaseWork(soModuleAccesser* moduleAccesser) {
+    soWorkManageModule& work = moduleAccesser->getWorkManageModule();
+    return Vec3f(work.getFloat(0x2100000c), work.getFloat(0x2100000d), work.getFloat(0x2100000e));
+}
+
+bool ftIke::notifyEventCollisionSearchCheck() {
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x11b &&
+        m_moduleAccesser->getWorkManageModule().isFlag(0x22000013)) {
+        m_moduleAccesser->getStatusModule().changeStatusRequest(0x11c, m_moduleAccesser);
+        m_moduleAccesser->getWorkManageModule().onFlag(0x22000013);
+        return true;
+    }
+    return Fighter::notifyEventCollisionSearchCheck();
+}
+
+void ftIke::processFixPosition() {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (soSlow::getInstance()->isEstimate() == true &&
+        !moduleAccesser->getStopModule().isStop() &&
+        moduleAccesser->getSituationModule().getKind() == 0) {
+        moduleAccesser->getWorkManageModule().setInt(0, 0x10000040);
+    }
+    Fighter::processFixPosition();
+}
+
+void ftIke::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x11b && collisionLog->m_kind == 1) {
+        gfTask* task = gfTaskScheduler::getInstance()->getTask(collisionLog->m_taskId);
+        if (task->m_taskCategory == gfTask::Category_Item) {
+            BaseItem* item = dynamic_cast<BaseItem*>(task);
+            if (item->m_kind == 0x31 || item->m_kind == 0x4f) {
+                m_moduleAccesser->getWorkManageModule().onFlag(0x22000013);
+            }
+        } else {
+            m_moduleAccesser->getWorkManageModule().onFlag(0x22000013);
+        }
+    }
+    Fighter::notifyEventCollisionSearch(collisionLog, moduleAccesser);
+}
