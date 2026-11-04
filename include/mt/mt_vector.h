@@ -172,7 +172,7 @@ public:
 #endif
 
     void normalize();
-    void normalize(Vec2f* input);
+    void normalize(const Vec2f* input);
 
     void rot(float angle, Vec2f* out);
 
@@ -496,7 +496,7 @@ public:
     // Original DOL fn_8003DF50 stays unrenamed until its source signature is established.
     void rot(Vec3f* axis, float angle, Vec3f* out);
     void normalize();
-    void normalize(Vec3f* input);
+    void normalize(const Vec3f* input);
 };
 static_assert(sizeof(Vec3f) == 12, "Class is wrong size!");
 
