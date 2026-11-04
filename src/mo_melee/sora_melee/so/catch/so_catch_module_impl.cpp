@@ -1,6 +1,7 @@
 #include <so/catch/so_catch_module_impl.h>
 #include <so/link/so_link_module_impl.h>
 #include <so/so_module_accesser.h>
+#include <so/stageobject.h>
 #include <types.h>
 
 // Matrix::mulVec (the map name); em_kinetic_energy.cpp calls it by this stand-in name.
@@ -23,6 +24,18 @@ void soCatchModuleImpl::setNodes(int node1, int node2, float unk) {
 
 void soCatchModuleImpl::initInfo() {
     unk54 = 3.4028235e38f;
+}
+
+void soCatchModuleImpl::setCatch(int taskId) {
+    m_sendCutEvent = true;
+    if (static_cast<u32>(taskId) != 0xFFFFFFFF) {
+        if (m_moduleAccesser->getLinkModule().link(0, taskId) == true) {
+            onCatchFlag();
+            UnkLinkEvent event(0x11, -1);
+            m_moduleAccesser->getLinkModule().sendEventParents(0, event);
+            m_moduleAccesser->getLinkModule().setModelConstraintPosOrt(0, m_node1, event.unk8, 3, true);
+        }
+    }
 }
 
 bool soCatchModuleImpl::isCatch() {

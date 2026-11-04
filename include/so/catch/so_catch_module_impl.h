@@ -30,6 +30,7 @@ public:
     virtual void deactivate();
     virtual void setNodes(int node1, int node2, float);
     virtual void initInfo();
+    virtual void setCatch(int taskId);
     virtual bool isCatch();
     virtual void onCatchFlag();
     virtual void offCatchFlag();
