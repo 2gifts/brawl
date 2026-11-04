@@ -315,6 +315,10 @@ struct gmGlobalRecord {
         union {
             u8 unk9C[0x44];
             struct {
+                u8 _pad9C[0x2C];
+                u16 unkC8;
+            };
+            struct {
                 u16 : 5;
                 // HYPOTHESIS: highest cleared difficulty plus one.
                 u16 unk9C_b10 : 3;
