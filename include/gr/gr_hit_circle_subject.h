@@ -17,6 +17,7 @@ public:
     // HYPOTHESIS: signatures from grAdventureBlockSympatheticManager (pos, kind, flag, radius).
     void* addHitCircle(Vec2f* pos, u8 kind, int flag, float radius);
     void enableHitCircle(int unk1, int unk2, void* circle);
+    void setHitCirclePos(Vec2f* pos, int kind, void* circle);
 
     u8 unk4;
     u8 unk5;
