@@ -143,5 +143,6 @@ public:
     void dispWifiFriendProfileName(const wchar_t* name);
     void dispWifiFriendProfileNameBaseColor();
     bool getWifiFriendProfileNameVisible();
+    int getCollKind(Vec2f* pos, int* arg, float* rect);
 };
 static_assert(sizeof(muSelCharPlayerArea) == 0x448, "Wrong size for class!");

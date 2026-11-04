@@ -76,6 +76,7 @@ public:
         Obj_StockUp = 175,
         Obj_HomerunRule = 181,  // the rule button of the Home-Run Contest
         Obj_KumiteRule = 182,   // the rule button of the Multi-Man Brawl
+        Obj_RuleNumHold = 10,   // HYPOTHESIS: the cursor of the number of a rule that a hand holds
         Obj_Num = 188,
         Expand_FaceBase = 2,
     };
@@ -187,6 +188,11 @@ public:
     int getRuleTimeMax();
     int getRuleTimeMin();
     void dispHighScore(int, int, int);
+    int getRuleDispType();
+    bool isWifiGameMaster();
+    int getCollKindPlayerArea(Vec2f* pos, int* areaIdx, int* arg, float* rect);
+    void setRuleNumHoldCursorVisible(bool visible);
+    void setFaceIconMotion(int faceIdx, int motion);
 
     // Which part of the screen a point is in: 0 above the area of the characters, 1 the area of the characters, 2 below it
     // (the areas of the players).
