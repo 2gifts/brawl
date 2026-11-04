@@ -624,3 +624,129 @@ void muSelCharTask::sendWifiGameRule(bool force, bool send) {
         unk637 = rule;
     }
 }
+
+int muSelCharTask::isPushedUnusedControllerStartButton() {
+    bool used[8];
+    memset(used, 0, sizeof(used));
+    muSelCharPlayerArea* player;
+    for (int area = 0; area < m_numPlayerAreas; area++) {
+        player = getPlayerArea(area);
+        int controller = player->m_controllerNo;
+        if (controller >= 0) {
+            used[controller] = true;
+        }
+        controller = player->unk426Flag ? player->unk42C : -1;
+        if (controller >= 0) {
+            used[controller] = true;
+        }
+    }
+    for (int controller = 0; controller < 8; controller++) {
+        if (!used[controller]) {
+            gfPadStatus status;
+            g_gfPadSystem->getSysPadStatus(controller, &status);
+            if (status.m_error == 0 && (status.m_buttonsPressedThisFrame.bits & GF_PAD_BUTTON_BIT_START)) {
+                return controller;
+            }
+        }
+    }
+    return -1;
+}
+
+bool muSelCharTask::canWifiEntry() {
+    int area;
+    bool canEntry = false;
+    int players = 0;
+    int available = 0;
+    muWifiInterfaceTask* wifi = g_muWifiInterfaceTask;
+    if (getSelCharType() == 12) {
+        for (area = 0; area < m_numPlayerAreas; area++) {
+            muSelCharPlayerArea* player = m_selCharPlayerAreas[area];
+            switch (player->_0) {
+            case 0:
+                if (player->m_playerKind != 2) {
+                    players++;
+                } else {
+                    available++;
+                }
+                break;
+            case 1:
+                int state = player->getWifiStateByWifiCond();
+                if (state == 0 && wifi->testRequestApproval(area)) {
+                    available++;
+                }
+                if (state == 1 || state == 2) {
+                    players++;
+                }
+                break;
+            case 2:
+            default:
+                break;
+            }
+        }
+        if (available > 0 && players < 3) {
+            canEntry = true;
+        }
+    }
+    return canEntry;
+}
+
+extern const u32 lbl_10_rodata_4F8[6];
+
+void muSelCharTask::dispKumiteRule(int type) {
+    int motion = 0;
+    m_highScoreMsg->printIndex(1, lbl_10_rodata_4F8[type], NULL);
+    int selCharType = getSelCharType();
+    int group;
+    if (isSelCharTypeIn(selCharType, 0, 4)) {
+        group = 0;
+    } else if (isSelCharTypeIn(selCharType, 4, 12)) {
+        group = 1;
+    } else {
+        bool inGroup = isSelCharTypeIn(selCharType, 12, 16);
+        group = 3;
+        if (inGroup) {
+            group = 2;
+        }
+    }
+    if (group == 2 && !isWifiGameMaster()) {
+        motion = 4;
+    }
+    m_objs[Obj_KumiteRule]->changeAnimN(motion, 0x10, false, false);
+}
+
+void muSelCharTask::wifiEntryPlayer() {
+    muSelCharPlayerArea* player;
+    int controller;
+    int area;
+    int entryArea = -1;
+    bool replaceCpu = false;
+    if (canWifiEntry()) {
+        controller = isPushedUnusedControllerStartButton();
+        if (controller >= 0) {
+            for (area = 0; area < m_numPlayerAreas; area++) {
+                player = getPlayerArea(area);
+                if (player->_0 == 1 && player->getWifiStateByWifiCond() == 0) {
+                    entryArea = area;
+                    break;
+                }
+            }
+            if (entryArea < 0) {
+                for (area = 0; area < m_numPlayerAreas; area++) {
+                    player = getPlayerArea(area);
+                    if (player->_0 == 0 && player->m_playerKind == 2) {
+                        entryArea = area;
+                        replaceCpu = true;
+                        break;
+                    }
+                }
+            }
+            if (entryArea >= 0) {
+                player = m_selCharPlayerAreas[entryArea];
+                if (replaceCpu) {
+                    player->wifiExitCpuPlayer();
+                }
+                player->wifiRequestPlayerEntry(controller);
+            }
+        }
+    }
+}

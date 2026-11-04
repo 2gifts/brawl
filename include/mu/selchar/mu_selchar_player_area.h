@@ -75,6 +75,12 @@ public:
     union {
         char _0x408[0x30];
         struct {
+            char unk408pad[0x1E];
+            u8 unk426Flag;
+            char unk427pad[5];
+            int unk42C;
+        };
+        struct {
             char unk408[4];
             MuMsg* unk40C;
             char unk410[0x15];
@@ -175,5 +181,8 @@ public:
     void dispCharPicEffect();
     void setWifiFriendProfileNameVisible(bool visible);
     void createWifiModel(nw4r::g3d::ResFile* resFile, int priority);
+    int getWifiStateByWifiCond();
+    void wifiExitCpuPlayer();
+    void wifiRequestPlayerEntry(int controller);
 };
 static_assert(sizeof(muSelCharPlayerArea) == 0x448, "Wrong size for class!");

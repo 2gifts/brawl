@@ -219,6 +219,20 @@ public:
     void dispWifiPrompt(u32 message);
     int getCollCharKind(Vec2f* pos);
     void dispHighScoreDiffLevel(int level);
+    int isPushedUnusedControllerStartButton();
+    bool canWifiEntry();
+    void wifiEntryPlayer();
+    void dispKumiteRule(int type);
+    // HYPOTHESIS: range classification shared by the character select menus.
+    static inline bool isSelCharTypeIn(int type, int first, int end) {
+        bool in;
+        if (type >= first && type < end) {
+            in = true;
+        } else {
+            in = false;
+        }
+        return in;
+    }
 
     // Which part of the screen a point is in: 0 above the area of the characters, 1 the area of the characters, 2 below it
     // (the areas of the players).

@@ -178,6 +178,7 @@ public:
     int getNetcond();
     // HYPOTHESIS: parameter types follow the bit index and flag register use.
     void setFriendFlag(int index, bool flag);
+    bool testRequestApproval(int areaIdx);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 
