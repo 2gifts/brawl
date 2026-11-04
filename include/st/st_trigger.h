@@ -32,6 +32,7 @@ class stTrigger : public utListNode {
     char _spacer3[3];
 
 public:
+    friend class stActTriggerFrameExcelCB;
     virtual ~stTrigger();
 
     void setObserveYakumono(Yakumono* yakumono);
@@ -44,6 +45,7 @@ public:
     void setAreaSleep(bool);
     void setKeyAreaTrigger(stGimmickAreaData* areaData, Vec2f pos);
     void setTruckAreaTrigger(stSimpleAreaData* areaData);
+    void setObserveFlag(bool flag);
     void setWindParam(grGimmickWindData2nd* wnd, s32 p2);
     void setBeltConveyorParam(grGimmickBeltConveyorData* belt);
     //void setBeltConveyorParam(grGimmickTriBeltConveyorData* belt);

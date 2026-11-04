@@ -40,6 +40,7 @@ public:
     ~cmSubject();
     void setPos(Vec3f* pos);
     void clear();
+    void draw(float scale);
 };
 static_assert(sizeof(cmSubject) == 132, "Class is wrong size!");
 

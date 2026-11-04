@@ -108,7 +108,7 @@ public:
         int m_dlgKind;             // 0x1B8 the dialog that is open (0: none)
         u8 m_unk1BC;               // 0x1BC cleared when the restore and store dialogs open
         s16 m_unk1BE;              // 0x1BE
-        s16 m_unk1C0;              // 0x1C0
+        s16 m_dlgWait;             // 0x1C0 the frames the dialog of the stored settings stays open
         int m_unk1C4;              // 0x1C4
         int m_unk1C8;              // 0x1C8
         u8 m_isSubStickOn;         // 0x1CC the C stick was tilted on the last frame (it acts as one more button)

@@ -50,8 +50,18 @@ public:
     void* unk84;
     u8 unk88[0x8];
 
+    // HYPOTHESIS: preload buffer address and size returned by getPreLoadDataBuffer.
+    struct PreLoadDataBuffer {
+        u8* addr;
+        u32 size;
+        PreLoadDataBuffer() { }
+        PreLoadDataBuffer(const PreLoadDataBuffer& other) : addr(other.addr), size(other.size) { }
+    };
+
     // HYPOTHESIS: parameter type from the callee's register use; the map has none.
     static gfBootTask* create(bool flag);
+    // HYPOTHESIS: parameter and return types from callers and register use.
+    static PreLoadDataBuffer getPreLoadDataBuffer(s32 index);
     gfBootTask(bool flag);
     virtual void processDefault();
     virtual ~gfBootTask();

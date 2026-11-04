@@ -79,6 +79,17 @@ typedef soTypeList<soInstancePoolInfo<soKineticEnergyNormal, 1, soKineticEnergyH
 typedef soKineticTransactorInfo<wnKineticTransactor, wnKineticTransactor, wnKineticTransactor, soKineticTransactHelper>
     wnPopoIceBergKineticTransactorInfo;
 
+typedef soLineInvertHierarchy<wnPopoIceBergKineticEnergyTypeList, soInstancePool, soInstancePoolRoot>
+    wnPopoIceBergKineticPools;
+
+class wnPopoIceBergKineticTransactor {
+public:
+    static void changeKinetic(int kineticType, wnPopoIceBergKineticPools* pools, soModuleAccesser* acc);
+    // HYPOTHESIS: the one-byte arguments select kinetic kinds 32 and 33.
+    static void changeKineticSub(const soIntToType<32>&, wnPopoIceBergKineticPools* pools, soModuleAccesser* acc);
+    static void changeKineticSub(const soIntToType<33>&, wnPopoIceBergKineticPools* pools, soModuleAccesser* acc);
+};
+
 FT_DOL_ARRAY_VECTOR(soArticle*, 1);
 WN_ARTICLE_EVENT_OBSERVER_VECTOR(1);
 static_assert(sizeof(soArrayVector<soArticleEventObserver, 1>) == 0x1c, "Observer array layout is wrong!");
