@@ -76,5 +76,7 @@ public:
     bool isNanaDeadFlag(u32 index);
     void useBossBattleStart(int index, int flagId);
     void useBossBattleEnd();
+    // HYPOTHESIS: the map point index, the start step id and two out counters, from register use in sqAdventure::calculateClearPercent.
+    float setMapPointClearPercent(u32 index, s32 stepId, s32* clearNum, s32* totalNum);
 };
 static_assert(sizeof(adKeepManager) == 0x28, "Class is the wrong size!");
