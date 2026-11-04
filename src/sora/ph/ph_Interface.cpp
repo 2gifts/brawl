@@ -169,6 +169,12 @@ void phInterface::errorReport(const char* msg) {
     OSReport("[physics]:%s", msg);
 }
 
+ph2ndaryWorld* phInterface::create2ndaryWorld() {
+    if (m_worldFlag && m_2ndaryWorld == nullptr) {
+        m_2ndaryWorld = new (Heaps::Physics) ph2ndaryWorld();
+    }
+}
+
 void phInterface::delete2ndaryWorld() {
     if (m_2ndaryWorld != nullptr && m_2ndaryControllers.m_size == 0) {
         delete m_2ndaryWorld;
