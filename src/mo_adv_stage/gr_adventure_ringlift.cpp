@@ -16,7 +16,7 @@ void grAdventureRingLift::update(float deltaFrame) {
 void grAdventureRingLift::frowPreparation(float deltaFrame) { }
 
 void grAdventureRingLift::frowEntry(float deltaFrame) {
-    *unk150 = static_cast<grAdventureRingLiftData*>(m_gimmickData)->m_motionSpeeds[advGetDifficultyLevel()];
+    unk150->m_motionPathData.m_motionRatio = static_cast<grAdventureRingLiftData*>(m_gimmickData)->m_motionSpeeds[advGetDifficultyLevel()];
     if (m_gimmickMotionPath->isMoveEnd()) {
         m_state = 2;
         m_gimmickMotionPath->changeNodeAnim(1, 0);
