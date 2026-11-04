@@ -30,16 +30,35 @@ phContainer::phContainer() {
     unk3C = 0;
 }
 
+inline phContainerArray::~phContainerArray() {
+    if (mustDeallocate()) {
+        hkThreadMemory::s_instance->deallocateChunk(m_data, (m_capacityAndFlags & 0x3fffffff) * 4, 0x15);
+    }
+}
+
 phContainer::~phContainer() {
-    if (!(m_arrayC.m_capacityAndFlags & 0x80000000)) {
-        hkThreadMemory::s_instance->deallocateChunk(m_arrayC.m_data, m_arrayC.m_capacityAndFlags * 4, 0x15);
+}
+
+void phContainer::relAll() {
+    if (m_arrayA.mustDeallocate()) {
+        hkThreadMemory::s_instance->deallocateChunk(m_arrayA.m_data, (m_arrayA.m_capacityAndFlags & 0x3fffffff) * 4, 0x15);
     }
-    if (!(m_arrayB.m_capacityAndFlags & 0x80000000)) {
-        hkThreadMemory::s_instance->deallocateChunk(m_arrayB.m_data, m_arrayB.m_capacityAndFlags * 4, 0x15);
+    m_arrayA.m_data = NULL;
+    m_arrayA.m_size = 0;
+    m_arrayA.m_capacityAndFlags = (m_arrayA.m_capacityAndFlags & 0x40000000) | 0x80000000;
+    if (m_arrayB.mustDeallocate()) {
+        hkThreadMemory::s_instance->deallocateChunk(m_arrayB.m_data, (m_arrayB.m_capacityAndFlags & 0x3fffffff) * 4, 0x15);
     }
-    if (!(m_arrayA.m_capacityAndFlags & 0x80000000)) {
-        hkThreadMemory::s_instance->deallocateChunk(m_arrayA.m_data, m_arrayA.m_capacityAndFlags * 4, 0x15);
+    m_arrayB.m_data = NULL;
+    m_arrayB.m_size = 0;
+    m_arrayB.m_capacityAndFlags = (m_arrayB.m_capacityAndFlags & 0x40000000) | 0x80000000;
+    if (m_arrayC.mustDeallocate()) {
+        hkThreadMemory::s_instance->deallocateChunk(m_arrayC.m_data, (m_arrayC.m_capacityAndFlags & 0x3fffffff) * 4, 0x15);
     }
+    m_arrayC.m_data = NULL;
+    m_arrayC.m_size = 0;
+    m_arrayC.m_capacityAndFlags = (m_arrayC.m_capacityAndFlags & 0x40000000) | 0x80000000;
+    unk4->removeReference();
 }
 
 phStreamReader::~phStreamReader() {
