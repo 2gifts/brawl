@@ -68,8 +68,11 @@ public:
 
 template <typename T>
 struct soMotionAnimObjCacheUnit {
-    u8 m_opaque[8];
+    T* m_animObj;
+    s32 m_kind : 16;
+    s32 m_size : 16;
 };
+static_assert(sizeof(soMotionAnimObjCacheUnit<void*>) == 8, "Class is wrong size!");
 
 class soModuleAccesser;
 class soEventObserverRegistrationDesc;

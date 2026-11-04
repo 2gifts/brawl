@@ -13,6 +13,7 @@
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/builder/ft_dol_types.h>
 #include <ft/builder/ft_dol_instances.h>
+#include <so/motion/so_motion_anim_obj_cache_module_impl.h>
 #include <so/motion/so_motion_module_impl.h>
 #include <types.h>
 
@@ -32,10 +33,6 @@ typedef soMotionAnimObjCacheUnit<nw4r::g3d::AnmObjChrRes> ftMotionAnimObjCacheUn
 FT_DOL_ARRAY_VECTOR(ftMotionAnimObjCacheUnitChrRes, 5);
 typedef const soMotionData soMotionDataConst;
 FT_DOL_CONTRACTIBLE_TABLE(soMotionDataConst);
-
-FT_DOL_POLY_BEGIN(soMotionAnimObjCacheModuleImpl, 0x8);
-    soMotionAnimObjCacheModuleImpl(soArray<ftMotionAnimObjCacheUnitChrRes>* units);
-FT_DOL_POLY_END;
 
 // The type list of the transition term groups of the motion module (a single group of 8 terms).
 typedef soTypeList<soIntToType<8>, soTypeListNullType> ftMotionTransitionTypeList;
