@@ -36,4 +36,5 @@ public:
     const wnGKoopaBreathParam* m_param;
     wnGKoopaBreath(s32 articleId, const wnArticleBuildInfo& info, const wnGKoopaBreathData* data);
     virtual ~wnGKoopaBreath() { }
+    virtual bool notifyEventCollisionAttackCheck(u32 flags);
 };
