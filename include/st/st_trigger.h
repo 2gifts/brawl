@@ -46,6 +46,7 @@ public:
     void setKeyAreaTrigger(stGimmickAreaData* areaData, Vec2f pos);
     void setTruckAreaTrigger(stSimpleAreaData* areaData);
     void setObserveFlag(bool flag);
+    void setFrameTrigger(float frame);
     void setWindParam(grGimmickWindData2nd* wnd, s32 p2);
     void setBeltConveyorParam(grGimmickBeltConveyorData* belt);
     //void setBeltConveyorParam(grGimmickTriBeltConveyorData* belt);

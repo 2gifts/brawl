@@ -72,3 +72,11 @@ void stTrigger::setTruckAreaTrigger(stSimpleAreaData* areaData) {
     }
     m_obsTriggerCB = cb;
 }
+
+void stTrigger::setFrameTrigger(float frame) {
+    stObsTriggerFrameCB* cb = new (Heaps::StageInstance) stObsTriggerFrameCB(&m_isValid, frame);
+    if (m_obsTriggerCB != nullptr) {
+        delete m_obsTriggerCB;
+    }
+    m_obsTriggerCB = cb;
+}
