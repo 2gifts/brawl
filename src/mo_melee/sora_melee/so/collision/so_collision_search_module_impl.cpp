@@ -1,3 +1,4 @@
+#include <gf/gf_camera.h>
 #include <so/anim/so_anim_cmd_event_presenter.h>
 #include <so/status/so_status_event_presenter.h>
 #include <so/collision/so_collision_search_module_impl.h>
@@ -12,6 +13,9 @@ public:
     soArrayVector<clTarget, 6> m_targets;
     int unk58;
     int unk5C;
+
+    void reset();
+    void debugDisplay(nw4r::math::_MTX34* view, void* collision);
 };
 static_assert(sizeof(soCollisionSearchPart) == 0x60, "Class is wrong size!");
 
@@ -69,4 +73,55 @@ void soCollisionSearchModuleImpl::setCheckInterval(int interval) {
 
 int soCollisionSearchModuleImpl::isInflict() {
     return m_isInflict;
+}
+
+void soCollisionSearchModuleImpl::activate(float param, int taskId) {
+    m_collision.m_taskId = taskId;
+    m_48 = param;
+    unk100 = m_checkInterval;
+    for (int i = 0; i < m_collisionSearchPartArray->size(); i++) {
+        m_collisionSearchPartArray->at(i).reset();
+    }
+    m_isInflict = 0;
+}
+
+void soCollisionSearchModuleImpl::deactivate() {
+    if (unk105 == 0) {
+        m_collision.clean();
+    } else {
+        m_collision.initLogAll();
+        m_collision.initPastLogAll(0);
+    }
+    m_collision.m_taskId = -1;
+}
+
+void soCollisionSearchModuleImpl::setPos(int nodeIndex, Vec3f* startOffsetPos, Vec3f* endOffsetPos) {
+    float ez, ey, ex, sz, sy, sx;
+    sx = startOffsetPos->m_x;
+    sy = startOffsetPos->m_y;
+    sz = startOffsetPos->m_z;
+    ex = endOffsetPos->m_x;
+    ey = endOffsetPos->m_y;
+    ez = endOffsetPos->m_z;
+    m_startOffsetPos.m_x = sx;
+    m_startOffsetPos.m_y = sy;
+    m_startOffsetPos.m_z = sz;
+    m_endOffsetPos.m_x = ex;
+    m_endOffsetPos.m_y = ey;
+    m_endOffsetPos.m_z = ez;
+    m_nodeIndex = nodeIndex;
+}
+
+void soCollisionSearchModuleImpl::renderDebug() {
+    int groupIndex;
+    nw4r::math::_MTX34 view = gfCameraManager::getManager()->m_cameras[0].m_viewMatrix;
+    for (int i = 0; i < m_collisionSearchPartArray->size(); i++) {
+        if (m_collisionSearchPartArray->at(i).m_status != 0) {
+            if (m_checkInterval == 0 || unk100 == m_checkInterval) {
+                groupIndex = m_collisionSearchPartArray->at(i).unk58;
+                soCollisionSearchPart& part = m_collisionSearchPartArray->at(i);
+                part.debugDisplay(&view, m_collision.getCollision(i, groupIndex));
+            }
+        }
+    }
 }
