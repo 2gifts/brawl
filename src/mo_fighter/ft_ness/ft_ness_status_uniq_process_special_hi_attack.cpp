@@ -2,6 +2,7 @@
 #include <so/status/so_status_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <types.h>
+#include <ft/ft_common_data_accesser.h>
 
 // Ness's PSI Magnet attack (special hi attack). Only the class shape is in place; the status bodies are not
 // reconstructed yet.
@@ -27,7 +28,19 @@ void ftNessStatusUniqProcessSpecialHiAttack::execStop(soModuleAccesser* moduleAc
 
 void ftNessStatusUniqProcessSpecialHiAttack::execFixPosCounter(soModuleAccesser*) {}
 
-void ftNessStatusUniqProcessSpecialHiAttack::exitStatus(soModuleAccesser*, int) {}
+void ftNessStatusUniqProcessSpecialHiAttack::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
+    moduleAccesser->getModelModule().setNodeRotateZ(5, 0.0f);
+    soPostureModule& posture = moduleAccesser->getPostureModule();
+    Vec3f rotation(0.0f, 0.0f, 0.0f);
+    posture.setRot(&rotation, 0);
+    if (nextStatus == 0x19) {
+        const float* parameters = static_cast<const float*>(g_ftCommonDataAccesser.getData(Fighter_Ness)->extendParam[2]);
+        float duration = parameters[11];
+        if (duration > 0.0f) {
+            moduleAccesser->getWorkManageModule().setFloat(duration, 0x11000000);
+        }
+    }
+}
 
 // Leaf functions shared with other fighter modules (same module-map names and bodies).
 extern "C" {
