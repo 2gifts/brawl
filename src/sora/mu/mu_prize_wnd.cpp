@@ -1,4 +1,7 @@
+#include <gf/gf_pad_system.h>
 #include <mu/mu_prize_wnd.h>
+#include <snd/snd_system.h>
+#include <stdio.h>
 #include <string.h>
 
 extern struct {
@@ -13,6 +16,11 @@ extern const struct {
     void (*unk0)(muPrizeWndTask*);
     int (*unk4)(muPrizeWndTask*);
 } lbl_80407C28[];
+
+extern const struct {
+    int unk0;
+    int unk4;
+} lbl_80407C58[];
 
 extern const char lbl_80456DD8[];
 extern const char lbl_8059E0F8[4];
@@ -73,4 +81,78 @@ void muPrizeWndTask::processDefault() {
     if (lbl_80407C28[unk10C].unk4 != NULL) {
         unk10C = lbl_80407C28[unk10C].unk4(this);
     }
+}
+
+bool muPrizeWndTask::appendPrizeList(const muPrizeWndEntry* entry) {
+    if (unk21C >= 16) {
+        return false;
+    }
+    prizeList[unk21C++] = *entry;
+    return true;
+}
+
+int muPrizeWndTask::mainStepAppearMain(muPrizeWndTask* task) {
+    if (task->unk40[0]->isNodeAnimFinished()) {
+        return 3;
+    }
+    return task->unk10C;
+}
+
+void muPrizeWndTask::mainStepSelectingInit(muPrizeWndTask* task) {
+    task->unk118 = 0;
+    task->unk3D0 = false;
+}
+
+int muPrizeWndTask::mainStepSelectingMain(muPrizeWndTask* task) {
+    bool isYes = true;
+    gfPadStatus pad;
+    g_gfPadSystem->getSysPadStatus(0xF0, &pad);
+    if (task->unk114 < 0) {
+        return task->unk10C;
+    }
+    if (++task->unk118 < task->unk114) {
+        return task->unk10C;
+    }
+    muPrizeWndEntry* entry = &task->prizeList[task->unk220];
+    if (entry->unk0 == 2 && entry->unkC != 0) {
+        bool old = task->unk108;
+        bool selected = old;
+        if (task->unk60.m_pressed & 1) {
+            selected = true;
+        }
+        if (task->unk60.m_pressed & 2) {
+            selected = false;
+        }
+        if (selected != old) {
+            task->unk40[0]->setFrameMatCol(selected ? 1.0f : 2.0f);
+            task->unk108 = selected;
+            g_sndSystem->playSE(static_cast<SndID>(0), -1, 0, 0, -1);
+        }
+        isYes = !task->unk108;
+    }
+    if ((pad.m_buttonsPressedThisFrame.bits & 0x100) || (pad.m_buttonsPressedThisFrame.bits & 0x1000) || task->unk3D0) {
+        if (isYes || task->unk3D0) {
+            if (task->unk3CC != g_sndSystem->getBGMId()) {
+                g_sndSystem->stopBGM(0);
+            }
+            return 4;
+        }
+        g_sndSystem->stopBGM(0);
+        g_sndSystem->playBGM(entry->unk8, 0, true);
+    }
+    return task->unk10C;
+}
+
+void muPrizeWndTask::mainStepLeaveInit(muPrizeWndTask* task) {
+    MuObject* object = task->unk40[0];
+    char animName[0x40];
+    const nw4r::g3d::ResMdlData& data = object->m_resMdl.ref();
+    sprintf(animName, "%s__1", data.m_toName != 0 ? reinterpret_cast<const char*>(&data) + data.m_toName : NULL);
+    object->changeNodeAnimN(animName);
+    object->setFrameNode(0.0f);
+    object->m_modelAnim->m_anmObjChrRes->SetUpdateRate(1.0f);
+}
+
+void muPrizeWndTask::setBgmID(int index, muPrizeWndEntry* entry) {
+    entry->unk4 = lbl_80407C58[index].unk4;
 }
