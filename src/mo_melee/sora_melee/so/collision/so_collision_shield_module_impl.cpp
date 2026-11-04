@@ -1,3 +1,4 @@
+#include <gf/gf_camera.h>
 #include <so/collision/so_collision.h>
 #include <so/collision/so_collision_shield_module_impl.h>
 #include <so/collision/so_collision_shield_part.h>
@@ -165,4 +166,27 @@ double soCollisionShieldModuleImpl::getPosX(u32 collisionShieldGroupIndex) const
 
 void soCollisionShieldModuleImpl::setTargetProperty(u32 property, u32 collisionShieldGroupIndex) {
     m_collisionShieldGroupArray->at(collisionShieldGroupIndex).setTargetProperty(m_partArray, property);
+}
+
+bool soCollisionShieldModuleImpl::check() {
+    if (m_collisionOccurred) {
+        return _4C->notifyEventCollisionShieldCheck();
+    }
+    return false;
+}
+
+void soCollisionShieldModuleImpl::renderDebug() {
+    nw4r::math::_MTX34 view = gfCameraManager::getManager()->getCamera(0)->m_viewMatrix;
+    int num = m_collisionShieldGroupArray->size();
+    for (int i = 0; i < num; i++) {
+        m_collisionShieldGroupArray->at(i).renderDebug(&view, &m_collision, m_partArray);
+    }
+}
+
+Vec3f soCollisionShieldModuleImpl::getCenterPos(u32 index, u32 collisionShieldGroupIndex) {
+    return m_collisionShieldGroupArray->at(collisionShieldGroupIndex).getCenterPos(&m_collision, index);
+}
+
+float soCollisionShieldModuleImpl::getLR(u32 collisionShieldGroupIndex) const {
+    return m_collisionShieldGroupArray->at(collisionShieldGroupIndex).m_Lr;
 }

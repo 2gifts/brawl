@@ -2,6 +2,7 @@
 
 #include <StaticAssert.h>
 #include <mt/mt_vector.h>
+#include <nw4r/math/math_types.h>
 #include <so/so_array.h>
 #include <types.h>
 
@@ -66,6 +67,9 @@ public:
 	void setStatus(soArray<soCollisionShieldPart>* parts, u32 index, u32 status);
 	void clearAll(soArray<soCollisionShieldPart>* parts);
 	void setTargetProperty(soArray<soCollisionShieldPart>* parts, u32 property);
+	// HYPOTHESIS: draws the group's shields with the camera view matrix.
+	void renderDebug(nw4r::math::_MTX34* view, soCollision* collision, soArray<soCollisionShieldPart>* parts);
+	Vec3f getCenterPos(soCollision* collision, u32 index);
 
 	int unk0;
 	s16 m_partStart; // HYPOTHESIS: first index of the group's parts in the module's part array
