@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gf/gf_task.h>
+#include <gm/gm_global.h>
 #include <mt/mt_vector.h>
 #include <types.h>
 
@@ -11,11 +12,28 @@ class ScnMdlExpand;
 }
 }
 
+// HYPOTHESIS: one record of the muClearGetDataList table (0x28 bytes, a negative first word ends it).
+struct muClearGetData {
+    int unk0;
+    u8 unk4[0x24];
+};
+
 class muClearGetDataManager {
 public:
-    void* unk0;
+    muClearGetData* unk0;
     u32 unk4;
     int unk8[128];
+
+    ~muClearGetDataManager();
+    void setData(u8* buffer, u32 size);
+    void setOpenState(u32 index);
+    // HYPOTHESIS: inlined accessor that copies the open states into the save record.
+    void saveFlags() {
+        u8* flags = g_GameGlobal->m_record->unk1528;
+        for (int i = 0; i < 128; i++) {
+            flags[i] = unk8[i];
+        }
+    }
 };
 
 class muClearGetTask : public gfTask {

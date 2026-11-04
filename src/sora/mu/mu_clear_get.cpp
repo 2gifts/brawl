@@ -3,6 +3,7 @@
 #include <nw4r/g3d/g3d_scnmdlexpand.h>
 #include <stdio.h>
 #include <types.h>
+#include <ut/ut_relocate.h>
 
 extern MuAnimNameData lbl_804569E0[];
 
@@ -75,4 +76,33 @@ u32 muClearGetTask::setBreakBoxId(u32 id) {
         ++unk12A8;
     }
     return unk12A8;
+}
+
+void muClearGetDataManager::setData(u8* buffer, u32 size) {
+    utRelocate relocate(buffer, size);
+    unk0 = static_cast<muClearGetData*>(relocate.getPublicAddress("muClearGetDataList"));
+    for (unk4 = 0; unk0[unk4].unk0 >= 0; unk4++) {
+    }
+    if (unk4 > 128) {
+        unk4 = 128;
+    }
+    u8* flags = g_GameGlobal->m_record->unk1528;
+    for (int i = 0; i < 128; i++) {
+        unk8[i] = flags[i];
+    }
+}
+
+void muClearGetDataManager::setOpenState(u32 index) {
+    unk8[index] = 2;
+    if (index >= 4 && unk8[index - 4] == 0) {
+        unk8[index - 4] = 1;
+    }
+    if (index + 4 < 128 && unk8[index + 4] == 0) {
+        unk8[index + 4] = 1;
+    }
+    saveFlags();
+}
+
+muClearGetDataManager::~muClearGetDataManager() {
+    saveFlags();
 }
