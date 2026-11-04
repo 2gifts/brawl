@@ -6,6 +6,7 @@
 #include <nt/nt_offline.h>
 #include <nt/nt_report.h>
 #include <string.h>
+#include <nt/nt_match.h>
 
 extern "C" void fn_800CF22C(muWifiInterfaceTask* self);
 extern "C" void fn_801473C4(muWifiInterfaceTask* self);
@@ -554,4 +555,51 @@ wchar_t* muWifiInterfaceTask::getMyShortComment(int index, wchar_t* name) {
         }
     }
     return name;
+}
+
+extern const char lbl_80457A10[0x38];
+
+bool muWifiInterfaceTask::isPlayerAssignRecieved() {
+    if (!((unkFC9 >> 4) & 1)) {
+        return false;
+    }
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        info = NULL;
+    } else {
+        info = &m_aidInfos[aid];
+    }
+    if (info == NULL) {
+        netReport(lbl_80457A10);
+        NtMatching::setErrorStatus(12);
+        return false;
+    }
+    if ((info->unk78_b3 >> 2) & 1) {
+        u8 ownAid = Network::getMyAID();
+        if (ownAid == 0xFF) { ownAid = 4; }
+        m_aidInfos[ownAid].unk3 = info->unk3;
+    }
+    return (info->unk78_b3 >> 2) & 1;
+}
+
+bool muWifiInterfaceTask::isEqualServerGameMode() {
+    u8 index = unkFD8;
+    if (index >= 0x40) { return false; }
+    u8 status = getFriendStatusWiFiStatus(index);
+    switch (status) {
+    case 19:
+    case 23:
+    case 25:
+        return unk6CData == 0;
+    case 20:
+    case 26:
+        return unk6CData == 1;
+    case 21:
+    case 27:
+        return unk6CData == 2;
+    default:
+        netReport("isEqualServerGameMode:gameMode:%d  wifiStatus:%d\n", unk6CData, status);
+        return false;
+    }
 }

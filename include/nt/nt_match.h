@@ -41,6 +41,7 @@ public:
     void shutdown();
     bool isNetShutdownErrorOccured();
     void resetWork();
+    static void setErrorStatus(s32 error);
 
     union {
         struct {

@@ -88,9 +88,11 @@ public:
     s32 unk40;
     char unk44[0x8];
     muWifiPlayerArea m_playerAreas[4];
-    char unk6C[0x4];
+    // HYPOTHESIS: game mode used when comparing the server status.
+    union { char unk6C[0x4]; s32 unk6CData; };
     muWifiAIDInfo m_aidInfos[5];
-    char unkAE8[0x4E2];
+    // HYPOTHESIS: bit 4 records the player-assignment receive state.
+    union { char unkAE8[0x4E2]; struct { char _padAE8[0x4E1]; u8 unkFC9; }; };
     u8 unkFCA_b7 : 1;
     u8 unkFCA_b6 : 1;
     u8 unkFCA_b5 : 1;
@@ -100,7 +102,8 @@ public:
     u8 unkFCB_b0 : 7;
     s32 unkFCC_b24 : 8;
     u32 unkFCC_b0 : 24;
-    char unkFD0[0xA];
+    // HYPOTHESIS: friend index used for the server game-mode comparison.
+    union { char unkFD0[0xA]; struct { char _padFD0[8]; u8 unkFD8; u8 _padFD9; }; };
     u16 m_limitTime;
     char unkFDC[0x13];
     u8 m_playerLive[4];
@@ -133,6 +136,8 @@ public:
     void putMyFriendStatusName(const wchar_t* name);
     static u64 getUserID();
     bool disconnect();
+    bool isPlayerAssignRecieved();
+    bool isEqualServerGameMode();
     bool isMyPlayerArea(int index);
     u8 getTeamColor(int index);
     u8 getAssignedTeamColor(int index);
