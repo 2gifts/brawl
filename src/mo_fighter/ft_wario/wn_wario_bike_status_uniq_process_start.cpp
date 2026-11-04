@@ -30,7 +30,7 @@ void wnWarioBikeStatusUniqProcessStart::exitStatus(soModuleAccesser* a, int next
         if (link.getParentSituationKind(3) == Situation_Ground) {
             float speed = params->getParamFloat(a, 0xfa0, 0);
             Vec2f direction(1.0f, 0.0f);
-            direction.rot(0.017453292f * angle, &direction);
+            direction.rot(&direction, 0.017453292f * angle);
             direction.m_x *= lr;
             Vec2f launchVelocity = direction * speed;
             normal.setSpeed(&launchVelocity);

@@ -129,7 +129,7 @@ void ftLucasStatusUniqProcessSpecialHiAttack::execFixPosCounter(soModuleAccesser
             Vec2f normal = ground.getTouchNormal(static_cast<grCollStatus::TouchMask>(8), 0);
             float baseAngle = atan2f(normal.m_y, normal.m_x) - 1.57079637f;
             Vec2f adjusted = direction;
-            adjusted.rot(baseAngle, &adjusted);
+            adjusted.rot(&adjusted, baseAngle);
             flight.m_speed = Vec2f(speed * adjusted.m_x, speed * adjusted.m_y);
         }
     } else {
@@ -175,7 +175,7 @@ void ftLucasStatusUniqProcessSpecialHiAttack::execFixPosCounter(soModuleAccesser
                     angle += currentAngle - oppositeAngle >= 0.0f ? -1.57079637f : 1.57079637f;
                 }
                 Vec2f adjusted = direction;
-                adjusted.rot(angle - currentAngle, &adjusted);
+                adjusted.rot(&adjusted, angle - currentAngle);
                 flight.m_speed = Vec2f(adjusted.m_x * speed, adjusted.m_y * speed);
                 work.setFloat(currentAngle, 0x21000004);
                 kinetic.changeKinetic(0x68, a);

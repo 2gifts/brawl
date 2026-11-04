@@ -170,9 +170,9 @@ Vec2f emKineticModuleImpl::getTraSpeedLevelGround(soModuleAccesser* moduleAccess
     tangent.m_y = normal3.m_z * axis.m_x - normal3.m_x * axis.m_z;
     tangent.m_z = normal3.m_x * axis.m_y - normal3.m_y * axis.m_x;
     if (dotProduct(&Vec2f(tangent.m_x, tangent.m_y), &result) >= 0.0f) {
-        normal.rot(-1.5707964f, &normal);
+        normal.rot(&normal, -1.5707964f);
     } else {
-        normal.rot(1.5707964f, &normal);
+        normal.rot(&normal, 1.5707964f);
     }
     // MATCH-ONLY: the literal of the inline Vec2f::length (the original pools it here, at the first call, although
     // the call is out of line).

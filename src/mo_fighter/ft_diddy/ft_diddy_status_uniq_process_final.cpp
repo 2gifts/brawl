@@ -278,7 +278,7 @@ void ftDiddyStatusUniqProcessFinal::updateControl(soModuleAccesser* moduleAccess
         if (angle < 0.0f) {
             angle += 360.0f;
         }
-        thrust.rot(0.017453292f * (360.0f - angle), &thrust);
+        thrust.rot(&thrust, 0.017453292f * (360.0f - angle));
     }
     float bodyAngle = 180.0f + rotX * lr;
     if (bodyAngle > 360.0f) {

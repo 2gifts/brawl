@@ -1014,7 +1014,7 @@ void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool a
             }
             float angle = getRealAngle(moduleAccesser, m_transAngle, m_nodeId);
             // (The rotated vector is a temporary of this statement, as in the original; MWCC takes its address.)
-            Vec2f(trans.m_x, trans.m_y).rot(0.017453292f * (angle * m_lr), &speed);
+            Vec2f(trans.m_x, trans.m_y).rot(&speed, 0.017453292f * (angle * m_lr));
             m_speed = speed;
         }
         break;
@@ -1375,7 +1375,7 @@ Vec3f emKineticEnergy::getRotation() {
 Vec2f emKineticEnergy::getTransSpeed(float length, float angle, float lr) {
     Vec2f base(length * lr, 0.0f);
     Vec2f speed(0.0f, 0.0f);
-    base.rot(0.017453292f * (angle * lr), &speed);
+    base.rot(&speed, 0.017453292f * (angle * lr));
     return speed;
 }
 

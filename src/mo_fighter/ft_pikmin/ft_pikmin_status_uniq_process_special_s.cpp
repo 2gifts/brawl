@@ -66,7 +66,7 @@ void ftPikminStatusUniqProcessSpecialS::execFixPos(soModuleAccesser* moduleAcces
                 offset.m_x = -offset.m_x;
             }
             if (slope != 0.0f) {
-                offset.rot(-slope, &offset);
+                offset.rot(&offset, -slope);
             }
             float scale = moduleAccesser->getPostureModule().getScale();
             offset.m_x *= scale;

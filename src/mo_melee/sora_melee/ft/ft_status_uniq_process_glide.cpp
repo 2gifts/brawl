@@ -171,7 +171,7 @@ void ftStatusUniqProcessGlide::execStatus(soModuleAccesser* moduleAccesser) {
             }
             Vec2f velocity;
             Vec2f forward(power * moduleAccesser->getPostureModule().getLr(), 0.0f);
-            forward.rot(0.017453292f * (angle * moduleAccesser->getPostureModule().getLr()), &velocity);
+            forward.rot(&velocity, 0.017453292f * (angle * moduleAccesser->getPostureModule().getLr()));
             float gravity = moduleAccesser->getWorkManageModule().getFloat(Glide_Float_Gravity);
             gravity = gravity + param->m_gravityAccel;
             gravity = clampf(gravity, -param->m_gravitySpeed, param->m_gravitySpeed);

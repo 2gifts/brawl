@@ -105,8 +105,8 @@ void emAreaModuleImpl::setSideLineVec() {
         Vec2f side;
         side.m_x = 1.0f;
         side.m_y = 0.0f;
-        side.rot(0.017453292f * halfAngle, &m_sideLine0);
-        side.rot(0.017453292f * -halfAngle, &m_sideLine1);
+        side.rot(&m_sideLine0, 0.017453292f * halfAngle);
+        side.rot(&m_sideLine1, 0.017453292f * -halfAngle);
     }
 }
 
@@ -616,7 +616,7 @@ float emAreaModuleImpl::getTargetAngleToMotionFrameSub(soModuleAccesser* acc, Ve
 // The offset of a target flipped for the facing lr, turned by rot (radians) and scaled by scl (a weak copy).
 inline Vec2f soPostureModule::adjustPosOffset(Vec2f offset, float lr, float scl, float rot) {
     offset.m_x = offset.m_x * lr;
-    offset.rot(rot, &offset);
+    offset.rot(&offset, rot);
     offset.m_x = offset.m_x * scl;
     offset.m_y = offset.m_y * scl;
     return offset;
