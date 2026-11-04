@@ -47,7 +47,15 @@ static_assert(sizeof(wnZeldaLightingBow) == 0x1F28, "wnZeldaLightingBow layout i
 
 // The light arrow of the Final Smash (the class is in sora_melee).
 class wnZeldaLightingBowArrow : public Weapon {
-    u8 m_unreconstructed[0x1F30 - sizeof(Weapon)];
+public:
+    union {
+        u8 m_unreconstructed[0x1F30 - sizeof(Weapon)];
+        struct {
+            u8 _pad[0x1EF8 - sizeof(Weapon)];
+            // HYPOTHESIS: the arrow's data record pointer sits right after the Weapon base state.
+            const wnZeldaLightingBowArrowData* m_data;
+        };
+    };
 public:
     wnZeldaLightingBowArrow(s32 articleId, const wnArticleBuildInfo& info, const wnZeldaLightingBowArrowData* data);
     virtual ~wnZeldaLightingBowArrow();
