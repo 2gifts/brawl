@@ -420,6 +420,97 @@ void aiInput::swingHit(aiChrIdx* target, soDamage* damage) {
     }
 }
 
+// The nearest opponent of this CPU: a fixed target (get_fix_target) wins; otherwise the nearest fighter of another team,
+// preferring, for a registered main character, one that no other registered CPU is after; with jumpCheck, only fighters
+// whose floor block this CPU can jump to. In Subspace Emissary mode (m_unk112) the nearest enemy is taken when no fighter
+// is. Returns its own slot when there is nobody; distance (optional) gets the distance to the target.
+// HYPOTHESIS: the meaning of situation 0xF (counted 1000 units further away) and of the aiStat flags is not known.
+s8 aiInput::get_near_target(float* distance, int jumpCheck) {
+    s8 target = get_fix_target(distance);
+    if (target != m_chrIdx.m_idx) {
+        return target;
+    }
+    aiStat* self = aiMgr::get_aiStat(&m_chrIdx);
+    int i;
+    int best = m_chrIdx.m_idx;
+    aiMgr* mgr = g_aiMgr;
+    float bestDist = 99999.9f;
+    u32 bestFree = 0;
+    s8 selfState;
+    if (m_chrIdx.m_idx < 0 || (u32)m_chrIdx.m_idx >= aiMgr::NumChrs) {
+        selfState = -1;
+    } else {
+        selfState = mgr->m_chrState[m_chrIdx.m_idx];
+    }
+    bool selfRegistered = selfState == 1;
+    for (i = 0; i < aiMgr::NumPlayers; i++) {
+        aiChrIdx idx;
+        idx.m_idx = i;
+        aiStat* other = aiMgr::get_aiStat(&idx);
+        u32 free = 1;
+        if (i == m_chrIdx.m_idx) {
+            continue;
+        }
+        u32 flags = other->m_flags;
+        if ((flags & 0x8000) != 0 && (flags & 0x40000000) == 0) {
+            continue;
+        }
+        if (other->m_unkCC == self->m_unkCC) {
+            continue;
+        }
+        if (selfRegistered) {
+            aiMgr* mgr = g_aiMgr;
+            s8 state;
+            if (i < 0 || (u32)i >= aiMgr::NumChrs) {
+                state = -1;
+            } else {
+                state = mgr->m_chrState[i];
+            }
+            if (state == 1 && mgr->getAiCpuTarget(i) == m_target.m_idx) {
+                if (bestFree == 1) {
+                    continue;
+                }
+                free = 0;
+            }
+        }
+        if (jumpCheck != 0) {
+            // HYPOTHESIS: aiParam's working area holds the rank-blended jump parameters at aiJumpPar's offsets.
+            float high;
+            if (m_flags & 0x20) {
+                high = aiParam::get_jump_high_sp((aiJumpPar*)&m_par, self);
+            } else {
+                high = aiParam::get_jump_high((aiJumpPar*)&m_par, self);
+            }
+            aiMgr* mgr = g_aiMgr;
+            if (!mgr->chk_goto_blk(self->m_floor, other->m_floor, self->m_team, self->m_pos.m_x,
+                                   aiParam::get_jump_length((aiJumpPar*)&m_par, self), high)) {
+                continue;
+            }
+        }
+        aiChrIdx distIdx;
+        distIdx.m_idx = i;
+        float dist = self->get_distance(0.0f, &distIdx);
+        if (other->m_situation == 0xF) {
+            dist += 1000.0f;
+        }
+        if (bestDist > dist || (free != 0 && bestFree == 0)) {
+            bestDist = dist;
+            best = i;
+            bestFree = free;
+        }
+    }
+    if (m_unk112 != 0 && best == m_chrIdx.m_idx) {
+        aiEnemy* enemy = g_aiMgr->m_enemyMgr->getEnemyNear(&self->m_pos, &bestDist);
+        if (enemy != NULL) {
+            best = enemy->m_index + 0xE;
+        }
+    }
+    if (distance != NULL && best != m_chrIdx.m_idx) {
+        *distance = bestDist;
+    }
+    return best;
+}
+
 // The character slot that this CPU has to attack no matter what (the four CPU types 0xE..0x11 of the Subspace Emissary
 // "follow player N" scripts), or, when the stage is 0x1C, the slot of the enemy nearest to it. Falls back to its own slot.
 // HYPOTHESIS: the meaning of the aiStat flags 0x8000 / 0x40000000 and of m_unkCC (probably the team) is not known.
