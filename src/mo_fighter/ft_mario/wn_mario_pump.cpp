@@ -176,34 +176,14 @@ void wnMarioPumpMediator::deactivate() {
 }
 s32 wnMarioPumpMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
     switch (articleId) {
-    case 0: {
-        wnArticleSlotTag tag;
-        wnArticleActiveCounter counter;
-        for (s32 i = 0; i < 12; ++i) {
-            wnArticleActiveCounter* c = &counter;
-            (*c)(&static_cast<soArticle&>(*m_pools.getSub().getInstanceAt(i)));
-        }
-        return counter.m_activeNum;
-    }
+    case 0: return wnArticleSlotActiveNum<wnArticlePool<wnMarioPumpWater, 12, soInstancePoolRoot>, wnArticleSlotCounter>(this, WN_ARTICLE_SLOT_TAGS);
     WN_ARTICLE_UNUSED_SLOTS_FROM_1(0)
     default: return 0;
     }
 }
 bool wnMarioPumpMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
     switch (articleId) {
-    case 0: {
-        wnArticleSlotTag tag;
-        bool allActive;
-        for (s32 i = 0; i < 12; ++i) {
-            if (!static_cast<soArticle&>(*m_pools.getSub().getInstanceAt(i)).isActiveArticle()) {
-                allActive = false;
-                goto done;
-            }
-        }
-        allActive = true;
-    done:
-        return allActive == false;
-    }
+    case 0: return wnArticleSlotIsGeneratable<wnArticlePool<wnMarioPumpWater, 12, soInstancePoolRoot> >(this, WN_ARTICLE_SLOT_TAGS);
     WN_ARTICLE_UNUSED_SLOTS_FROM_1(false)
     default: return false;
     }

@@ -44,6 +44,7 @@ template wnArticleHierarchy<wnNessPKThunderChild, 6, soInstancePoolRoot>::~wnArt
 class wnNessPKThunderMediator : public soArticleMediator {
     wnNessPKThunderChildPool m_pools;
     u8 m_autoRecycle;
+    WN_ARTICLE_SLOT_FRIENDS
 public:
     wnNessPKThunderMediator(soModuleAccesser* acc) : soArticleMediator(acc), m_pools(acc), m_autoRecycle(false) { }
     virtual ~wnNessPKThunderMediator();
