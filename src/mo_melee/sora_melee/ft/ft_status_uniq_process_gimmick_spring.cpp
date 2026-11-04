@@ -6,6 +6,18 @@
 #include <so/status/so_status_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
+#include <so/stageobject.h>
+
+void ftStatusUniqProcessGimmickSpring::initStatus(soModuleAccesser* moduleAccesser) {
+    ftStatusUniqProcessGimmick::initStatus(moduleAccesser);
+    soGimmickSpringEventArgs_On args;
+    presentEvent(&args, moduleAccesser);
+    Vec3f pos = moduleAccesser->getPostureModule().getPos();
+    pos.m_x = args.m_topPos.m_x;
+    pos.m_y = args.m_topPos.m_y;
+    moduleAccesser->getPostureModule().setPos(&pos);
+    moduleAccesser->getStageObject().updateNodeSRT();
+}
 
 void ftStatusUniqProcessGimmickSpring::execStatus(soModuleAccesser* moduleAccesser) { }
 
