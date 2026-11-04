@@ -8,8 +8,6 @@
 #include <so/ground/so_ground_module_impl.h>
 #include <mt/mt_vector.h>
 
-// Native helper: vec2fAngle__FP5Vec2fP5Vec2f at 0x8003DDD0.
-float vec2fAngle(Vec2f*, Vec2f*);
 void ftLucasStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* a) {
     soWorkManageModule& work = a->getWorkManageModule();
     // HYPOTHESIS: This observed call may lazily initialize or cache fighter data.
@@ -62,7 +60,7 @@ void ftLucasStatusUniqProcessSpecialHi::execFixPosCounter(soModuleAccesser* a) {
                 groundNormal = ground.getTouchNormal(static_cast<grCollStatus::TouchMask>(8), 0);
                 groundNormal.normalize();
                 aim.normalize();
-                float groundAngle = vec2fAngle(&groundNormal, &aim);
+                float groundAngle = groundNormal.angle(&aim);
                 if (groundAngle < 1.5707964f) work.onFlag(0x22000011);
                 // HYPOTHESIS: Lucas extend-param group 3 +0x24 is the per-move angular allowance.
                 if (groundAngle > 0.017453292f * (90.0f + *reinterpret_cast<const float*>(lucasParamGroup3 + 0x24))) {

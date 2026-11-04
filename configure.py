@@ -1291,7 +1291,7 @@ config.libs = [
             Object(Matching, "sora/gf/gf_capture_util.cpp"),
             Object(Matching, "sora/gf/gf_monitor.cpp"),
             Object(Matching, "sora/gf/gf_resource_loader.cpp"),
-            Object(Matching, "sora/mt/mt_vector.cpp"),
+            Object(Matching, "sora/mt/mt_vector.cpp", extra_cflags=["-DMT_VECTOR_USE_UPSTREAM_HEADER"]),
             Object(Matching, "sora/mt/mt_vector_old.cpp"),
             Object(NonMatching, "sora/mt/mt_matrix.cpp"),
             Object(Matching, "sora/mt/mt_prng.cpp", extra_cflags=["-RTTI off"]),

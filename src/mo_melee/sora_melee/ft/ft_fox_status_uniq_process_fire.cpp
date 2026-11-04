@@ -10,7 +10,6 @@
 #include <types.h>
 
 void ftKineticEnergyDisableAndClear(int index, soModuleAccesser* moduleAccesser);
-float vec2fAngle(Vec2f*, Vec2f*);
 
 // Fox's up special (Fire Fox). Status 0x114 is the startup, 0x117 the flight, 0x118 the fall that follows and 0x119 the
 // landing slide on the ground. The flight angle (radians, 0 = to the right) is kept in the work float 0x21000004 and is
@@ -58,7 +57,7 @@ void ftFoxStatusUniqProcessFire::initStatus(soModuleAccesser* moduleAccesser) {
             bool leaveGround = true;
             if (!((float)fabs(stickX) + (float)fabs(stickY) < stickMin)) {
                 Vec2f stick(stickX, stickY);
-                if (vec2fAngle(&groundNormal, &stick) >= FIRE_PI_HALF) {
+                if (groundNormal.angle(&stick) >= FIRE_PI_HALF) {
                     leaveGround = false;
                 }
             }
@@ -201,7 +200,7 @@ void ftFoxStatusUniqProcessFire::execFixPos(soModuleAccesser* moduleAccesser) {
             // Hitting the ground at a shallow enough angle ends the flight with a slide.
             Vec2f groundNormal = moduleAccesser->getGroundModule().getTouchNormal(8, 0);
             Vec2f sumSpeed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
-            float angle = vec2fAngle(&groundNormal, &sumSpeed);
+            float angle = groundNormal.angle(&sumSpeed);
             if (angle >= 0.0174532924f * (90.0f + soValueAccesser::getConstantFloat(moduleAccesser, 0xfb7, 0))) {
                 moduleAccesser->getStatusModule().changeStatusRequest(0x119, moduleAccesser);
             }

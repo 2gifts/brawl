@@ -72,7 +72,7 @@ void wnNessPKStarStorm::activate(int founderTaskId, int team, Vec3f* pos, float 
     m_moduleAccesser->getStatusModule().changeStatusForce(0, m_moduleAccesser);
     dir.m_x = 0.0f;
     dir.m_y = -1.0f;
-    dir.rot(&dir, angle);
+    rot__5Vec2fCFP5Vec2ff(&dir, angle, &dir);
     float speedMul = m_param->m_speed;
     dir.scale(speedMul, &speedTemp);
     Vec2f::copy(speedUnused, speedTemp);

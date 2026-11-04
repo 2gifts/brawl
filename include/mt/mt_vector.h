@@ -1,6 +1,11 @@
 // Local BrawlHeaders shadow: allow the original Marth collision constructor call.
 #pragma once
 
+// mt_vector.cpp is written against the upstream header (its inline asm helpers decide its matches); every other unit keeps this one.
+#ifdef MT_VECTOR_USE_UPSTREAM_HEADER
+#include <Brawl/Include/mt/mt_vector.h>
+#else
+
 #include <StaticAssert.h>
 #include <math.h>
 #include <mt/mt_common.h>
@@ -117,7 +122,7 @@ public:
     // HYPOTHESIS: native calls pass vector addresses; original reference qualifiers are unresolved.
     float mtVecAngle(Vec2f& other);
 
-    float lengthSq() const
+    float lengthSq()
 #ifdef MT_VEC2F_LENGTH_SQ_OUT_OF_LINE
         __attribute__((never_inline)); // BYTES: retain the owning Vanish unit's helper calls.
 #elif !defined(MT_VEC2F_LENGTH_SQ_SPLIT)
@@ -436,7 +441,7 @@ public:
     }
 #endif
 
-    Vec3f operator*(const float c) const;
+    Vec3f operator*(const float c);
 
     Vec3f operator/(const float c) {
         return *this * (1 / c);
@@ -477,17 +482,13 @@ public:
         m_z = m_z * c;
     }
 
-    float lengthSq() const
+    float lengthSq()
 #ifdef MT_VEC3F_LENGTH_SQ_INLINE
     { // MATCH-ONLY: this unit expands the verified Z + (X + Y) grouping inline.
         float xSq = m_x * m_x;
         float ySq = m_y * m_y;
         float zSq = m_z * m_z;
         return zSq + (xSq + ySq);
-    }
-#elif defined(MT_VEC3F_LENGTH_SQ_PLAIN)
-    { // BYTES: matches the plain left-to-right grouping mt_vector.cpp's own normalize/angle use.
-        return m_x * m_x + m_y * m_y + m_z * m_z;
     }
 #else
     ;
@@ -498,7 +499,6 @@ public:
         return disp.length();
     }
     // HYPOTHESIS: source argument order is unresolved; axis/angle/output roles are verified.
-    // Original DOL fn_8003DF50 stays unrenamed until its source signature is established.
     void rot(const Vec3f* axis, float rot, Vec3f* out) const;
     void normalize();
     void normalize(const Vec3f* input);
@@ -506,6 +506,10 @@ public:
     void slerp(const Vec3f* v, Vec3f* out, float t) const;
 };
 static_assert(sizeof(Vec3f) == 12, "Class is wrong size!");
+
+// MATCH-ONLY: Vec2f::rot under its symbol name, for callers that evaluate the angle before the output address (a member call
+// or an inline wrapper evaluates the output first).
+extern "C" void rot__5Vec2fCFP5Vec2ff(const Vec2f* self, float rot, Vec2f* out);
 
 // Native Wario Utility callers identify these member operators and hidden returns.
 // HYPOTHESIS: source const qualifiers retain the established declarations.
@@ -520,7 +524,7 @@ inline Vec2f::Vec2f(const Vec3f& xyz) : m_x(xyz.m_x), m_y(xyz.m_y) { }
 inline Vec2f::Vec2f(const Vec3f& xyz) { m_x = xyz.m_x; m_y = xyz.m_y; }
 #endif
 #if defined(MATCHING) && defined(MT_VEC3F_MUL_INLINE)
-inline Vec3f Vec3f::operator*(const float c) const {
+inline Vec3f Vec3f::operator*(const float c) {
     Vec3f result;
     Vec3fScale(&result, this, c);
     return result;
@@ -547,3 +551,5 @@ public:
 };
 
 Vec3f operator*(const float c, const Vec3f& v);
+
+#endif

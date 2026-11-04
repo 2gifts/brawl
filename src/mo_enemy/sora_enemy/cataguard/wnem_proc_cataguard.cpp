@@ -177,9 +177,9 @@ void wnemCataguardProc::HelmBullet(wnemSimple* wn, soModuleAccesser* acc) {
         dir.m_x *= speed;
         dir.m_y *= speed;
         if (wn->m_linkId == 1) {
-            dir.rot(&dir, 0.017453292f * -angle);
+            rot__5Vec2fCFP5Vec2ff(&dir, 0.017453292f * -angle, &dir);
         } else if (wn->m_linkId == 2) {
-            dir.rot(&dir, 0.017453292f * angle);
+            rot__5Vec2fCFP5Vec2ff(&dir, 0.017453292f * angle, &dir);
         }
         s32* bounceCount = &wn->m_intParams.at(0);
         *bounceCount = 0;

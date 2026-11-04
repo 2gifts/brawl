@@ -1,6 +1,3 @@
-#define MT_VEC3F_MUL_INLINE
-#define MT_VEC3F_LENGTH_SQ_PLAIN
-
 #include <math.h>
 #include <mt/mt_common.h>
 #include <mt/mt_matrix.h>

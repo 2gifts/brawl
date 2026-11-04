@@ -27,7 +27,6 @@ float fn_41_15FB0(float y, float x);
 }
 
 // sora_melee: the angle between two vectors (radians).
-float vec2fAngle(Vec2f*, Vec2f*);
 
 // HYPOTHESIS: proc numbers: 2 is Fly, 3 is Turn; 0x3D is the boomerang's touch-ground / end-of-life proc (Erase).
 static const s32 Proc_BoomerangFly = 2;
@@ -143,7 +142,7 @@ void wnemPrimProc::BoomerangFly(wnemSimple* wn, soModuleAccesser* acc) {
         if (acc->getPostureModule().getLr() == 1.0f) {
             if (acc->getGroundModule().isTouch(grCollStatus::TouchMask(4), 0) == true) {
                 normal = acc->getGroundModule().getTouchNormal(4, 0);
-                if (vec2fAngle(&normal, speedPtr(wn)) >= 1.5707964f + bounceAngle) {
+                if (normal.angle(speedPtr(wn)) >= 1.5707964f + bounceAngle) {
                     wn->changeProcFnc(Proc_BoomerangTurn, 1);
                     wn->m_speed.m_x = wn->m_speed.m_y = 0.0f;
                     return;
@@ -152,7 +151,7 @@ void wnemPrimProc::BoomerangFly(wnemSimple* wn, soModuleAccesser* acc) {
         } else {
             if (acc->getGroundModule().isTouch(grCollStatus::TouchMask(2), 0) == true) {
                 normal = acc->getGroundModule().getTouchNormal(2, 0);
-                if (vec2fAngle(&normal, speedPtr(wn)) >= 1.5707964f + bounceAngle) {
+                if (normal.angle(speedPtr(wn)) >= 1.5707964f + bounceAngle) {
                     wn->changeProcFnc(Proc_BoomerangTurn, 1);
                     wn->m_speed.m_x = wn->m_speed.m_y = 0.0f;
                     return;

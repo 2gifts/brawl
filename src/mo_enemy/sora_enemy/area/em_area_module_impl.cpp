@@ -55,7 +55,6 @@ bool fn_27_14D550(int statusKind);
 }
 // MSL's atan2f, called through its out-of-line weak copy (shared with the kinetic module unit).
 extern "C" float atan2f(float y, float x);
-float vec2fAngle(Vec2f* a, Vec2f* b);
 
 // The argument types of acCmdArg::getArgType that the area anim cmds accept besides plain values.
 static const s32 CmdArgType_ValueIndex = 5;
@@ -105,8 +104,8 @@ void emAreaModuleImpl::setSideLineVec() {
         Vec2f side;
         side.m_x = 1.0f;
         side.m_y = 0.0f;
-        side.rot(&m_sideLine0, 0.017453292f * halfAngle);
-        side.rot(&m_sideLine1, 0.017453292f * -halfAngle);
+        rot__5Vec2fCFP5Vec2ff(&side, 0.017453292f * halfAngle, &m_sideLine0);
+        rot__5Vec2fCFP5Vec2ff(&side, 0.017453292f * -halfAngle, &m_sideLine1);
     }
 }
 
@@ -616,7 +615,7 @@ float emAreaModuleImpl::getTargetAngleToMotionFrameSub(soModuleAccesser* acc, Ve
 // The offset of a target flipped for the facing lr, turned by rot (radians) and scaled by scl (a weak copy).
 inline Vec2f soPostureModule::adjustPosOffset(Vec2f offset, float lr, float scl, float rot) {
     offset.m_x = offset.m_x * lr;
-    offset.rot(&offset, rot);
+    rot__5Vec2fCFP5Vec2ff(&offset, rot, &offset);
     offset.m_x = offset.m_x * scl;
     offset.m_y = offset.m_y * scl;
     return offset;
@@ -928,7 +927,7 @@ float emAreaModuleImpl::getTargetAngleFromAxisSub(soModuleAccesser* acc, Vec3f* 
     self.m_y = y;
     Vec2f target(pos->m_x + offset.m_x, pos->m_y + offset.m_y);
     Vec2f diff = target - self;
-    return RadToDeg * vec2fAngle(&axis, &diff);
+    return RadToDeg * axis.angle(&diff);
 }
 
 float emAreaModuleImpl::getTargetAngleFromAxis(soModuleAccesser* acc, u32 area, Vec2f offset, Vec2f axis, u32 useLr) {

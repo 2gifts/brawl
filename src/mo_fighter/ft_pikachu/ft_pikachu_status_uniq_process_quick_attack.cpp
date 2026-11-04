@@ -20,7 +20,6 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
-float vec2fAngle(Vec2f*, Vec2f*);
 
 // MATCH-ONLY: the fighter's controller module is only modelled as an opaque class (ft_dol_types.h); the original casts the
 // accesser's controller module to it and calls the soControllerModule virtuals on the result.
@@ -39,7 +38,7 @@ static inline bool isStickTurned(soModuleAccesser* moduleAccesser, soWorkManageM
             Vec2f direction;
             direction.m_x = directionX;
             direction.m_y = directionY;
-            if (vec2fAngle(&direction, &stick) > 0.017453292f * (float)param->unk4C) {
+            if (direction.angle(&stick) > 0.017453292f * (float)param->unk4C) {
                 return true;
             }
         }
@@ -99,7 +98,7 @@ void ftPikachuStatusUniqProcessSpecialQuickAttackWarp::initStatus(soModuleAccess
         if (ground.isTouch(static_cast<grCollStatus::TouchMask>(8), 0)) {
             Vec2f normal;
             normal = ground.getTouchNormal(8, 0);
-            if (vec2fAngle(&normal, &stick) < 1.5707964f) {
+            if (normal.angle(&stick) < 1.5707964f) {
                 aimed = true;
             }
             if (ground.isPassableGround(0)) {
@@ -205,19 +204,19 @@ void ftPikachuStatusUniqProcessSpecialQuickAttackWarp::execFixPos(soModuleAccess
     Vec2f normal;
     if (ground.isTouch(static_cast<grCollStatus::TouchMask>(1), 0)) {
         normal = ground.getTouchNormal(1, 0);
-        if (vec2fAngle(&speedCopy, &normal) > 0.017453292f * (90.0f + param->unk44)) {
+        if (speedCopy.angle(&normal) > 0.017453292f * (90.0f + param->unk44)) {
             status.changeStatusRequest(0x118, moduleAccesser);
         }
     }
     if (ground.isTouch(static_cast<grCollStatus::TouchMask>(4), 0)) {
         normal = ground.getTouchNormal(4, 0);
-        if (vec2fAngle(&speedCopy, &normal) > 0.017453292f * (90.0f + param->unk44)) {
+        if (speedCopy.angle(&normal) > 0.017453292f * (90.0f + param->unk44)) {
             status.changeStatusRequest(0x118, moduleAccesser);
         }
     }
     if (ground.isTouch(static_cast<grCollStatus::TouchMask>(2), 0)) {
         normal = ground.getTouchNormal(2, 0);
-        if (vec2fAngle(&speedCopy, &normal) > 0.017453292f * (90.0f + param->unk44)) {
+        if (speedCopy.angle(&normal) > 0.017453292f * (90.0f + param->unk44)) {
             status.changeStatusRequest(0x118, moduleAccesser);
         }
     }

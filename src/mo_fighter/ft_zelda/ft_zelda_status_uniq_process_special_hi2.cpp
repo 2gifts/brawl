@@ -14,7 +14,6 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
-float vec2fAngle(Vec2f*, Vec2f*);
 
 class ftZeldaStatusUniqProcessSpecialHi2 : public soStatusUniqProcess {
 public:
@@ -57,7 +56,7 @@ void ftZeldaStatusUniqProcessSpecialHi2::initStatus(soModuleAccesser* moduleAcce
         useInputDirection = true;
     } else {
         Vec2f normal = ground.getTouchNormal(0xff, 0);
-        if (vec2fAngle(&normal, &stick) < 1.57079637f) {
+        if (normal.angle(&stick) < 1.57079637f) {
             useInputDirection = true;
         }
         if (ground.isPassableGround(0)) {
@@ -127,7 +126,7 @@ void ftZeldaStatusUniqProcessSpecialHi2::execFixPosCounter(soModuleAccesser* mod
     const u8* params = static_cast<const u8*>(data->extendParam[2]);
     Vec2f speed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(-1));
     Vec2f normal = ground.getTouchNormal(touchMask, 0);
-    float angle = vec2fAngle(&normal, &speed);
+    float angle = normal.angle(&speed);
     s32 extraAngle = *reinterpret_cast<const s32*>(params + 0x28);
     float maxAngle = ((float)extraAngle + 90.0f) * 0.0174532924f;
     if (angle > maxAngle) {

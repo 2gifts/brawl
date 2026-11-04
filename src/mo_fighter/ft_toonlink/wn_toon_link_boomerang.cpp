@@ -13,8 +13,6 @@
 #include <wn/wn_kinetic_energy_normal.h>
 #include <ac/ac_anim_cmd_impl.h>
 
-// Native helper: vec2fAngle__FP5Vec2fP5Vec2f at 0x8003DDD0.
-float vec2fAngle(Vec2f*, Vec2f*);
 
 // The status unique processes of the boomerang (wn_link_boomerang_status_uniq_process_*.cpp).
 extern soStatusUniqProcess g_wnToonLinkBoomerangStatusUniqProcessHaved;
@@ -142,7 +140,7 @@ bool wnToonLinkBoomerang::notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* a
             if (acc->getPostureModule().getLr() == 1.0f) {
                 if (acc->getGroundModule().isTouch((grCollStatus::TouchMask)0xa4, 0) == 1) {
                     Vec2f wall = acc->getGroundModule().getTouchNormal(0xa4, 0);
-                    if (vec2fAngle(&wall, &speed) >= 1.57079637f + param->unk28) {
+                    if (wall.angle(&speed) >= 1.57079637f + param->unk28) {
                         acc->getStatusModule().changeStatusRequest(3, m_moduleAccesser);
                         return true;
                     }
@@ -150,7 +148,7 @@ bool wnToonLinkBoomerang::notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* a
             } else {
                 if (acc->getGroundModule().isTouch((grCollStatus::TouchMask)0x52, 0) == 1) {
                     Vec2f wall = acc->getGroundModule().getTouchNormal(0x52, 0);
-                    if (vec2fAngle(&wall, &speed) >= 1.57079637f + param->unk28) {
+                    if (wall.angle(&speed) >= 1.57079637f + param->unk28) {
                         acc->getStatusModule().changeStatusRequest(3, m_moduleAccesser);
                         return true;
                     }
