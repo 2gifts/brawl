@@ -3,6 +3,7 @@
 
 #include <StaticAssert.h>
 #include <gf/gf_task.h>
+#include <sr/sr_common.h>
 #include <types.h>
 
 class gfSysRecorder2;
@@ -32,6 +33,11 @@ class UnkFriendInfo {
 public:
     static const u32 FriendRosterLimit = 64;
 
+    // HYPOTHESIS: stands in for DWCAccFriendData (12 bytes; GameSpy dwc headers are not on the include path).
+    struct FriendData {
+        u8 unk0[0xC];
+    };
+
     union {
         u8 unk0[0x350];
         struct {
@@ -41,6 +47,10 @@ public:
             u8 unk6;
             u8 unk7[9];
             u8 unk10[0x340];
+        };
+        struct {
+            u8 _pad0[0x50];
+            FriendData m_friendData[FriendRosterLimit];
         };
     };
     UnkClass1 unk350[FriendRosterLimit];

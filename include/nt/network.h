@@ -13,6 +13,7 @@ class NtShared {
 public:
     typedef void (*ntPutProductDataCallback_t)(void**, u32*);
     static void ntSetPutProductDataCallback(ntPutProductDataCallback_t cb);
+    static void ntDecodeCmd(u8 aid, u8* buffer, int size);
     typedef void (*ntConsumedDataCallback_t)(const u16*);
     static void ntSetConsumedDataCallback(ntConsumedDataCallback_t cb) {
         NtConsumedDataCallback = cb;
