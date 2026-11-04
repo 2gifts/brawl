@@ -20,3 +20,10 @@ wnGKoopaBreath::wnGKoopaBreath(s32 articleId, const wnArticleBuildInfo& info, co
     m_param(data->m_param) {
     Weapon::deactivate(false);
 }
+
+bool wnGKoopaBreath::notifyEventCollisionAttackCheck(u32 flags) {
+    if (flags & 6) {
+        return false;
+    }
+    return Weapon::notifyEventCollisionAttackCheck(flags);
+}
