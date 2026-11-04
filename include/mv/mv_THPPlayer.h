@@ -92,3 +92,5 @@ class movieOpen {
 public:
     void freeMovieBuffer();
 };
+
+void THPPlayerStreamUpdate();
