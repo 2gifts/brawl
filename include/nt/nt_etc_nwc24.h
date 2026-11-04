@@ -43,5 +43,7 @@ public:
     bool dl_registerDLTask();
     bool dl_deleteDLTask();
     bool dl_deleteDLTaskAll();
+    u32 _getMailSentSizeToday();
+    u8 getLangId();
 };
 static_assert(sizeof(nteWiiConnect24) == 0x14, "Class is wrong size!");
