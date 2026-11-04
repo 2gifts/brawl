@@ -13,6 +13,8 @@
 #include <snd/snd_system.h>
 #include <string.h>
 #include <gf/gf_pad_system.h>
+#include <stdio.h>
+#include <mu/wifi/mu_wifi_interface.h>
 
 // The menu helpers take three integers; this unit passes only the first one (see TIPS.md).
 extern "C" int exchangeMuSelchkindToMuCharKind__6muMenuFiii(int selchKind);
@@ -550,5 +552,75 @@ void muSelCharTask::dispHighScoreDiffLevel(int level) {
     if (level >= 0) {
         obj->setFrameVisible(level + 1);
         expand->PushBack(obj->m_sceneModel, node);
+    }
+}
+
+extern char lbl_10_data_6E8[8];
+
+void muSelCharTask::setHighScoreStyle(int style) {
+    MuObject* object;
+    nw4r::g3d::ScnMdlExpand* expand = m_highScoreExpand;
+    object = m_objs[176];
+    m_scnGroup->Remove(expand);
+    if (style != 0) {
+        float frame = (float)style - 1.0f;
+        object->setFrameVisible(frame);
+        object->setFrameNode(frame);
+        m_scnGroup->Insert(m_scnGroup->sceneItemsCount, expand);
+    }
+}
+
+void muSelCharTask::dispNumStock(int count, bool enabled) {
+    int index;
+    nw4r::g3d::ScnMdlExpand* expand = m_stockExpand;
+    lbl_10_data_610[count - 1][!enabled].m_flags = 3;
+    m_objs[167]->setAnimIdx(&lbl_10_data_610[count - 1][!enabled], false);
+    for (index = 0; index < 5; index++) {
+        expand->Remove(m_objs[168 + index]->m_sceneModel);
+    }
+    char node[8];
+    for (index = 0; index < count; index++) {
+        sprintf(node, lbl_10_data_6E8, index + 2);
+        expand->PushBack(m_objs[168 + index]->m_sceneModel, node);
+    }
+}
+
+int muSelCharTask::strcatHighScoreUnit(char* text, int capacity, int kind) {
+    int message = -1;
+    switch (kind) {
+    case 2:
+        if (g_GameGlobal->getLanguage() == 1) message = 26;
+        else message = 25;
+        break;
+    case 3: message = 27; break;
+    case 5: message = 28; break;
+    case 6: message = 29; break;
+    case 4: message = 30; break;
+    }
+    int length = strlen(text);
+    if (message >= 0) {
+        int size;
+        const char* unit = m_highScoreMsg->getMsgData(message, &size);
+        memcpy(text + length, unit, size);
+        length += size;
+        text[length] = 0;
+        length++;
+    }
+    return length;
+}
+
+void muSelCharTask::sendWifiGameRule(bool force, bool send) {
+    __typeof__(unk637) rule;
+    memset(&rule, 0, sizeof(rule));
+    rule.unk0_6 = unk5D4;
+    rule.unk0_4 = m_handiMode;
+    rule.unk0_2 = m_isTeamBattle != 0;
+    rule.unk2 = unk5D8;
+    rule.unk3 = m_ruleNumStock;
+    rule.unk1_5 = m_kumiteType;
+    rule.unk1_4 = m_homerunRule;
+    if (force || memcmp(&rule, &unk637, sizeof(rule)) != 0) {
+        g_muWifiInterfaceTask->setSelCharGameRule(&rule, send);
+        unk637 = rule;
     }
 }

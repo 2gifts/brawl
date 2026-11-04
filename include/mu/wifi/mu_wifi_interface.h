@@ -120,6 +120,8 @@ public:
     static u32 getErrorMsgID(int index);
     static bool haveErrorCode(int index);
     static u32 getBadNameErrorMsgID();
+    // HYPOTHESIS: opaque four-byte rule packet and transmission flag.
+    void setSelCharGameRule(const void* rule, bool send);
     void connect(bool);
     // HYPOTHESIS: 1 while the connection runs, then 2 connected, 3 failed, 4 the name was refused; the outputs are
     // the error (an index for getErrorMsgID), the error code and whether a new Wi-Fi user was made.
