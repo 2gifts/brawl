@@ -11,6 +11,7 @@
 #include <wn/dedede/wn_dedede_follower_damage_transactor.h>
 #include <wn/dedede/wn_dedede_follower_kinetic_transactor.h>
 #include <wn/dedede/wn_dedede_follower_status_uniq_process.h>
+#include <so/so_slow.h>
 
 // The energies of the follower's kinetic mediator (the list of the Diddy Kong barrel).
 typedef soInstancePoolInfo<soKineticEnergyNormal, 1, soKineticEnergyHolder, soKineticEnergyInitInfo<0, 1> > wnDededeFollowerEnergy0Info;
@@ -434,4 +435,25 @@ bool wnDededeFollower::isCanEat() {
         return false;
     }
     return !isInhaled();
+}
+
+void wnDededeFollower::processHit() {
+    Weapon::processHit();
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (soSlow::getInstance()->isAdjust() == true &&
+        moduleAccesser->getStatusModule().getStatusKind() != 0 &&
+        moduleAccesser->getStatusModule().getStatusKind() != 1 &&
+        moduleAccesser->getStatusModule().getStatusKind() != 8 &&
+        moduleAccesser->getStatusModule().getStatusKind() != 9 &&
+        moduleAccesser->getStatusModule().getStatusKind() != 0x18 &&
+        moduleAccesser->getStatusModule().getStatusKind() != 0x19 &&
+        moduleAccesser->getSituationModule().getKind() != 3 &&
+        moduleAccesser->getAreaModule().getEnviromentElementChecker()->isWater() == true &&
+        m_moduleAccesser->getWorkManageModule().getInt(0x20000004) != 2) {
+        if (moduleAccesser->getWorkManageModule().isFlag(0x22000005)) {
+            moduleAccesser->getStatusModule().changeStatusRequest(0x19, moduleAccesser);
+        } else {
+            moduleAccesser->getStatusModule().changeStatusRequest(9, moduleAccesser);
+        }
+    }
 }

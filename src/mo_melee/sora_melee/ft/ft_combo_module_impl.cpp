@@ -42,6 +42,8 @@ void ftComboModuleImpl::set(int kind) {
     switch (kind) {
     case 1:
         switch (m_count) {
+        case 3:
+            break;
         case 1:
             m_frame = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xBDA, 0);
             break;
@@ -52,6 +54,8 @@ void ftComboModuleImpl::set(int kind) {
         break;
     case 2:
         switch (m_count) {
+        case 3:
+            break;
         case 1:
             m_frame = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xBDC, 0);
             break;

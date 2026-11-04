@@ -69,6 +69,7 @@ public:
     void systemCmdFuncWaitMotionTransition();
     void systemCmdFuncSyncMotionFrame();
     void systemCmdFuncWaitRnadi();
+    void systemCmdFuncWaitRnadf();
 };
 static_assert(sizeof(soAnimCmdInterpreter) == 0x50, "Class is the wrong size!");
 #endif

@@ -5,6 +5,8 @@
 #include <wn/wn_weapon_builder.h>
 #include <wn/wn_extend_param_accesser.h>
 
+struct soVisibilityData;
+
 
 // The parameter block of the article (1 float, id 4000).
 // HYPOTHESIS: meaning of the parameters.
@@ -18,6 +20,13 @@ struct wnKirbyStoneData {
     s32 m_resGroupNo;
     u8 unk4[0x30];
     const wnKirbyStoneParam* m_param; // +0x34
+    // HYPOTHESIS: per-form visibility, constraint nodes and activation data.
+    struct {
+        soVisibilityData* unk0;
+        int unk4;
+        int unk8;
+        int unkC;
+    }* unk38[5];
 };
 
 class wnKirbyStoneParamAccesser : public wnExtendParamAccesser<3999, 1, 23999, 0, 0, 0> {
@@ -56,5 +65,6 @@ private:
     wnKirbyStoneParamAccesser m_paramAccesser; // +0x20D0
 public:
     wnKirbyStone(s32 articleId, const wnArticleBuildInfo& info, const wnKirbyStoneData* data);
+    void activate(int founderTaskId, int resourceId, int team, int kind);
     virtual ~wnKirbyStone() { }
 };

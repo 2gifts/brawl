@@ -5,6 +5,9 @@
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
+#include <cm/cm_camera_controller.h>
+#include <so/article/so_generate_article_manage_module.h>
+#include <so/stageobject.h>
 
 // Local view of the effect module. The header's soEffectModule is missing slots, so setWhole is placed by its
 // vtable offset (0xC4): two leading words, then 47 unnamed slots.
@@ -77,8 +80,34 @@ void ftZeldaStatusUniqProcessFinal::initStatus(soModuleAccesser* moduleAccesser)
 void ftZeldaStatusUniqProcessFinal::execStatus(soModuleAccesser*) {
 }
 
-// HYPOTHESIS: not reconstructed yet; left as a stub.
-void ftZeldaStatusUniqProcessFinal::execFixPosCounter(soModuleAccesser*) {
+void ftZeldaStatusUniqProcessFinal::execFixPosCounter(soModuleAccesser* moduleAccesser) {
+    soCollisionSearchModule& search = moduleAccesser->getCollisionSearchModule();
+    if (search.isSearch(0)) {
+        if (moduleAccesser->getWorkManageModule().isFlag(0x22000012)) {
+            search.clear(0);
+            int articleId = 0;
+            switch (moduleAccesser->getStageObject().soGetSubKind()) {
+            case 13: articleId = 3; break;
+            case 14: articleId = 5; break;
+            }
+            moduleAccesser->getGenerateArticleManageModule().remove(articleId, 0);
+            moduleAccesser->getWorkManageModule().offFlag(0x22000012);
+        } else {
+            int nodeId = 0;
+            switch (moduleAccesser->getStageObject().soGetSubKind()) {
+            case 13: nodeId = 0x45; break;
+            case 14: nodeId = 0x1e; break;
+            }
+            float lr = moduleAccesser->getPostureModule().getLr();
+            Vec3f startPos = moduleAccesser->getModelModule().getNodeGlobalPosition(nodeId, false);
+            startPos.m_z = 0.0f;
+            Vec3f endPos = startPos;
+            CameraController* camera = CameraController::getInstance();
+            endPos.m_x = lr == 1.0f ? camera->m_stageCameraBounds.m_right : camera->m_stageCameraBounds.m_left;
+            search.setPos(0, &startPos, &endPos);
+            moduleAccesser->getWorkManageModule().onFlag(0x22000012);
+        }
+    }
 }
 
 void ftZeldaStatusUniqProcessFinal::exitStatus(soModuleAccesser* moduleAccesser, int) {

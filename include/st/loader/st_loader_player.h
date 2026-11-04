@@ -26,6 +26,7 @@ public:
 
     // HYPOTHESIS: the player id type follows m_playerId.
     stLoaderPlayer(u32 playerId);
+    void entryEntityResult();
 
     virtual void processBegin();
     virtual ~stLoaderPlayer();

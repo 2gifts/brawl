@@ -36,6 +36,8 @@ public:
     void* unk1B8;
 
     stOperatorAppearanceFighter();
+    // HYPOTHESIS: the player index is an int, used to select unk74.
+    bool isEntryFighter(int player);
     virtual void processBegin();
     virtual ~stOperatorAppearanceFighter();
     virtual bool isEnd();
