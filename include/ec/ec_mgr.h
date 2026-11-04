@@ -15,7 +15,7 @@ class ecScnObjCallback;
 class efEffect;
 class gfArchive;
 class gfModelAnimation;
-namespace nw4r { namespace g3d { class ScnGroup; } }
+namespace nw4r { namespace g3d { class ScnGroup; class ResFile; } }
 class ecScnObjCallback {
 public:
     virtual ~ecScnObjCallback();
@@ -30,7 +30,17 @@ public:
     gfArchive* unk0;
     void* unk4;
     void* unk8;
-    void* unkC;
+    // HYPOTHESIS: rows of effect data begin 0x10 bytes into this table.
+    struct {
+        u8 unk0[0x10];
+        struct {
+            s16 unk0;
+            s16 unk2;
+            u32 unk4;
+            u32 unk8;
+            u32 unkC;
+        } unk10[1];
+    }* unkC;
     u32 unk10;
     u8 unk14;
     u8 unk15[3];
@@ -38,19 +48,19 @@ public:
     ecResource();
     ~ecResource();
     void release(bool);
+    // HYPOTHESIS: parameter types from the tail call in ecEffectWork::change_mdl_tex.
+    void change_tex(nw4r::g3d::ScnMdl*, u32, const char*, const char*, nw4r::g3d::ResFile*, int);
 };
 
 class ecEffectWork {
 public:
-    union {
-        u8 unk0[0x30];
-        struct {
-            u8 unk0_[0x24];
-            u32 unk24;
-            s32 unk28;
-            u32 unk2C;
-        };
-    };
+    // HYPOTHESIS: translation, rotation and scale stored for Matrix::setSRT.
+    Vec3f m_pos;
+    Vec3f m_rot;
+    Vec3f m_scale;
+    u32 unk24;
+    s32 unk28;
+    u32 unk2C;
     ecResource* unk30;
     union {
         u8 unk34[0x28];
@@ -73,7 +83,15 @@ public:
     };
     u32 unk5C;
     u16 unk60;
-    u8 unk62[0x1A];
+    u16 unk62;
+    // HYPOTHESIS: ground line; non-null skips the free model matrix.
+    u32 unk64;
+    u32 unk68;
+    float unk6C;
+    // HYPOTHESIS: optional model-matrix callback and its argument.
+    void (*unk70)(nw4r::g3d::ScnMdl*, void*);
+    void* unk74;
+    u32 unk78;
     u32 unk7C;
     u32 unk80;
 
@@ -87,7 +105,16 @@ public:
     void set_parent(nw4r::g3d::ScnMdl*, const char*, bool);
     void set_parent(nw4r::g3d::ScnMdl*, u32, bool);
     void init_attach();
+    void set_delay(int);
+    void set_visible(bool);
+    void set_rot(const Vec3f*);
+    void set_scl(const Vec3f*);
+    void set_mdl_texpat(u32);
+    void set_mdl_frame(float, s8);
+    void set_mdl_calc_mtx(void (*)(nw4r::g3d::ScnMdl*, void*), void*);
+    void change_mdl_tex(const char*, const char*, nw4r::g3d::ResFile*, int);
 };
+static_assert(sizeof(ecEffectWork) == 0x84, "ecEffectWork size");
 
 extern ecMgr* g_ecMgr;
 class ecMgr : public gfTask {
