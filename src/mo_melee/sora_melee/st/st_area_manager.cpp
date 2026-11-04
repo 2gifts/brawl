@@ -1,6 +1,7 @@
 #include <gf/gf_task.h>
 #include <sr/sr_common.h>
 #include <st/st_area_manager.h>
+#include <st/st_trigger.h>
 #include <types.h>
 
 template <class T> bool stAreaManager::search(T* areas, u32 areaId, u32* index) {
@@ -135,4 +136,10 @@ bool stAreaManager::getHitPointEffect(u32 areaId, stHitPointEffectData* data) {
         return true;
     }
     return false;
+}
+
+void stAreaManager::setValidTriggerfromAreaID(u32 unused, u32 areaId) {
+    if (g_stTriggerMng) {
+        g_stTriggerMng->setValidfromAreaID(areaId);
+    }
 }

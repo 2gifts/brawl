@@ -99,6 +99,7 @@ public:
     stTrigger* createTrigger(Gimmick::AreaKind gimmickKind, stTriggerData* triggerData);
     void setTriggerFlag(stTriggerData* triggerData);
     bool getTriggerFlag(stTriggerData* triggerData, bool defaultFlag);
+    void setValidfromAreaID(u32 areaId);
 };
 static_assert(sizeof(stTriggerMng) == 100, "Class is wrong size!");
 
