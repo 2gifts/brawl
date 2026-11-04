@@ -46,11 +46,14 @@ public:
     typedef ftGanonGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
+class wnSimple;
+
 class ftGanon : public ftFighterBuilder<ftGanonBuildConfig> {
     u8 unkTail[0xC994 - sizeof(ftFighterBuilder<ftGanonBuildConfig>)];
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
     ftData* m_data;
 public:
+    static bool activeArticle(wnSimple* weapon, soModuleAccesser* acc);
     ftGanon(s32 entryId,
             Heaps::HeapType instHeap,
             Heaps::HeapType nwModelInstHeap,
