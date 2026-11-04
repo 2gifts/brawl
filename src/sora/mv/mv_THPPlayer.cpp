@@ -3,6 +3,7 @@
 #include <mv/mv_THPPlayer.h>
 #include <mv/mv_THPRead.h>
 #include <mv/mv_THPVideoDecode.h>
+#include <revolution/GX/GXMisc.h>
 #include <revolution/OS/OSCache.h>
 #include <revolution/VI/vi.h>
 #include <string.h>
@@ -24,10 +25,15 @@ union {
         OSMessage unk7E0[2];
         OSMessage unk7E8[3];
         u32 unk7F4;
-        u32 unk7F8;
-        u32 unk7FC;
+        union { u32 unk7F8; _AXVPB* unk7F8Typed; };
+        union { u32 unk7FC; _AXVPB* unk7FCTyped; };
         u32 unk800;
         u32 unk804;
+        u64 unk808[5];
+        u32 unk830;
+        s32 unk834;
+        u8 unk838[0x10];
+        u64 unk848;
     } *unk0Typed;
 } lbl_805A01F8[2] = { 0 };
 
@@ -119,4 +125,74 @@ void SetTHPPlayerWork(void* work) {
 void movieOpen::freeMovieBuffer() {
     LCDisable();
     if (lbl_805A01F8[0].unk0Typed) lbl_805A01F8[0].unk0Typed->unk0 = 0;
+}
+
+BOOL THPPlayerGetVideoInfo(void* info) {
+    if (g_thpObject.unkA0) {
+        memcpy(info, &g_thpObject.unk80Width, 12);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+BOOL THPPlayerGetAudioInfo(void* info) {
+    if (g_thpObject.unkA0) {
+        memcpy(info, &g_thpObject.unk8C, 16);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+u32 THPPlayerGetTotalFrame() {
+    if (g_thpObject.unkA0) return g_thpObject.unk50;
+    return 0;
+}
+
+void THPPlayerDrawDone() {
+    GXDrawDone();
+    if (lbl_805A01F8[0].unk0Typed->unk0) {
+        while (true) {
+            OSMessage message;
+            void* texture;
+            if (OSReceiveMessage(&lbl_805A01F8[0].unk0Typed->unk7C0, &message, 0) == TRUE)
+                texture = message;
+            else
+                texture = 0;
+            if (!texture) break;
+            PushFreeTextureSet(texture);
+        }
+    }
+}
+
+void FillStreamBuffer(s16* right, s16* left, u32 count) {
+    u64 total = lbl_805A01F8[0].unk0Typed->unk848;
+    u32 remaining = count;
+    s16* rightCursor = right;
+    s16* leftCursor = left;
+    while (true) {
+        s32 status;
+        u32 copied = GetAudioSample(rightCursor, leftCursor, remaining, &status);
+        total += copied;
+        if (status == 0) break;
+        if (status == 1) {
+            remaining -= copied;
+            rightCursor += copied;
+            if (leftCursor) leftCursor += copied;
+            s32& index = lbl_805A01F8[0].unk0Typed->unk834;
+            lbl_805A01F8[0].unk0Typed->unk808[index] = total;
+            ++index;
+            if (lbl_805A01F8[0].unk0Typed->unk834 >= 5)
+                lbl_805A01F8[0].unk0Typed->unk834 = 0;
+        } else {
+            memset(rightCursor, 0, remaining * sizeof(s16));
+            if (leftCursor) memset(leftCursor, 0, remaining * sizeof(s16));
+            break;
+        }
+    }
+    lbl_805A01F8[0].unk0Typed->unk848 += count;
+}
+
+void THPPlayerGetStreamAXPB(_AXVPB** right, _AXVPB** left) {
+    *right = lbl_805A01F8[0].unk0Typed->unk7F8Typed;
+    *left = lbl_805A01F8[0].unk0Typed->unk7FCTyped;
 }

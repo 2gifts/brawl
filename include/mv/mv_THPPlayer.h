@@ -94,3 +94,13 @@ public:
 };
 
 void THPPlayerStreamUpdate();
+
+struct _AXVPB;
+
+BOOL THPPlayerGetVideoInfo(void* info);
+BOOL THPPlayerGetAudioInfo(void* info);
+u32 THPPlayerGetTotalFrame();
+void THPPlayerDrawDone();
+u32 GetAudioSample(s16* right, s16* left, u32 count, s32* status);
+void FillStreamBuffer(s16* right, s16* left, u32 count);
+void THPPlayerGetStreamAXPB(_AXVPB** right, _AXVPB** left);
