@@ -9,6 +9,7 @@ class muButtonTask;
 class muObjProcessTask;
 namespace nw4r {
 namespace g3d {
+class ResAnmScn;
 class ScnObj;
 } // namespace g3d
 } // namespace nw4r
@@ -36,6 +37,8 @@ public:
     void addObj(nw4r::g3d::ScnObj* obj);
     void removeObj(nw4r::g3d::ScnObj* obj);
     void removeAllObj();
+    // The camera animation of the menu scene.
+    void setCamAnm(nw4r::g3d::ResAnmScn* anm);
     void updateFrame();
 };
 static_assert(sizeof(scButton) == 0x108, "Class is wrong size!");
