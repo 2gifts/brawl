@@ -107,22 +107,22 @@ hkBvTreeAgent* hkBvTreeAgent::createBvBvAgent(void* a, void* b, void* c, hkConta
 }
 
 void hkSymmetricAgentLinearCast_13hkBvTreeAgent::getPenetrations(void* a, void* b, void* c, void* target) {
-    hkSymmetricFlagTarget wrap((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipBodyCollector wrap(target);
     hkBvTreeAgent::getPenetrations(b, a, c, &wrap);
 }
 
 void hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticGetPenetrations(void* a, void* b, void* c, void* target) {
-    hkSymmetricFlagTarget wrap((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipBodyCollector wrap(target);
     hkBvTreeAgent::staticGetPenetrations(b, a, c, &wrap);
 }
 
 void hkSymmetricAgentLinearCast_13hkBvTreeAgent::getClosestPoints(void* a, void* b, void* c, void* target) {
-    hkSymmetricClosestTarget wrap((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipCollector wrap(target);
     hkBvTreeAgent::getClosestPoints(b, a, c, &wrap);
 }
 
 void hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticGetClosestPoints(void* a, void* b, void* c, void* target) {
-    hkSymmetricClosestTarget wrap((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipCollector wrap(target);
     hkBvTreeAgent::staticGetClosestPoints(b, a, c, &wrap);
 }
 

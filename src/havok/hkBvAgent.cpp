@@ -298,26 +298,26 @@ hkBvAgent* hkBvAgent::createShapeBvAgent(void* a1, void* a2, void* a3, hkContact
 // reorder the pair (a, b) and forward the target inside a hkSymmetricTarget.
 template <class T>
 void hkSymmetricAgentLinearCast<T>::getPenetrations(void* a, void* b, void* c, void* target) {
-    hkSymmetricTarget wrapped((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
     T::getPenetrations(b, a, c, &wrapped);
 }
 
 template <class T>
 void hkSymmetricAgentLinearCast<T>::staticGetPenetrations(void* a, void* b, void* c, hkPenetrationTarget* target) {
-    hkSymmetricTarget wrapped(target);
-    T::staticGetPenetrations(b, a, c, &wrapped);
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    T::staticGetPenetrations(b, a, c, (hkPenetrationTarget*)&wrapped);
 }
 
 template <class T>
 void hkSymmetricAgentLinearCast<T>::getClosestPoints(void* a, void* b, void* c, void* target) {
-    hkSymmetricTarget wrapped((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipCollector wrapped(target);
     T::getClosestPoints(b, a, c, &wrapped);
 }
 
 template <class T>
 void hkSymmetricAgentLinearCast<T>::staticGetClosestPoints(void* a, void* b, void* c, hkPenetrationTarget* target) {
-    hkSymmetricTarget wrapped(target);
-    T::staticGetClosestPoints(b, a, c, &wrapped);
+    hkSymmetricAgentFlipCollector wrapped(target);
+    T::staticGetClosestPoints(b, a, c, (hkPenetrationTarget*)&wrapped);
 }
 
 template <class T>

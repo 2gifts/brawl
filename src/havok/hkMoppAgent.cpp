@@ -23,22 +23,22 @@
 hkMoppAgent::hkMoppAgent(hkContactMgr* contactMgr) : hkBvTreeAgent(contactMgr) {}
 
 void hkSymmetricAgentLinearCast_11hkMoppAgent::getPenetrations(void* a, void* b, void* c, void* target) {
-    hkSymmetricFlagTarget wrap((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipBodyCollector wrap(target);
     hkMoppAgent::getPenetrations(b, a, c, &wrap);
 }
 
 void hkSymmetricAgentLinearCast_11hkMoppAgent::staticGetPenetrations(void* a, void* b, void* c, void* target) {
-    hkSymmetricFlagTarget wrap((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipBodyCollector wrap(target);
     hkMoppAgent::staticGetPenetrations(b, a, c, &wrap);
 }
 
 void hkSymmetricAgentLinearCast_11hkMoppAgent::getClosestPoints(void* a, void* b, void* c, void* target) {
-    hkSymmetricClosestTarget wrap((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipCollector wrap(target);
     hkMoppAgent::getClosestPoints(b, a, c, &wrap);
 }
 
 void hkSymmetricAgentLinearCast_11hkMoppAgent::staticGetClosestPoints(void* a, void* b, void* c, void* target) {
-    hkSymmetricClosestTarget wrap((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipCollector wrap(target);
     hkMoppAgent::staticGetClosestPoints(b, a, c, &wrap);
 }
 

@@ -44,22 +44,22 @@ void hkHeightFieldAgent::linearCast(void* a, void* b, void* c, void* target, voi
 #pragma dont_inline reset
 
 void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::getPenetrations(void* a, void* b, void* c, void* target) {
-    hkSymmetricFlagTarget wrap((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipBodyCollector wrap(target);
     hkHeightFieldAgent::getPenetrations(b, a, c, &wrap);
 }
 
 void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticGetPenetrations(void* a, void* b, void* c, void* target) {
-    hkSymmetricFlagTarget wrap((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipBodyCollector wrap(target);
     hkHeightFieldAgent::staticGetPenetrations(b, a, c, &wrap);
 }
 
 void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::getClosestPoints(void* a, void* b, void* c, void* target) {
-    hkSymmetricClosestTarget wrap((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipCollector wrap(target);
     hkHeightFieldAgent::getClosestPoints(b, a, c, &wrap);
 }
 
 void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticGetClosestPoints(void* a, void* b, void* c, void* target) {
-    hkSymmetricClosestTarget wrap((hkPenetrationTarget*)target);
+    hkSymmetricAgentFlipCollector wrap(target);
     hkHeightFieldAgent::staticGetClosestPoints(b, a, c, &wrap);
 }
 
