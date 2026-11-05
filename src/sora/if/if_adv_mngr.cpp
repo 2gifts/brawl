@@ -18,6 +18,7 @@
 #include <sr/sr_common.h>
 #include <string.h>
 #include <ty/ty_fig_listmng.h>
+#include <if/if_adv_radar.h>
 
 namespace nw4r {
 namespace g3d {
@@ -44,9 +45,6 @@ void fn_80109850(IfAdvPause* pause);
 void fn_80109BEC(IfAdvPause* pause);
 void fn_8010A800(IfAdvPause* pause, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2);
 void fn_8010A874(IfAdvPause* pause);
-IfAdvRadarData* fn_8010CF44(IfAdvRadarData* data, void* arg1, void* arg2, void* arg3, void* arg4);
-void fn_8010CF88(IfAdvRadarData* data, int arg);
-void fn_8010D00C();
 nw4r::g3d::ScnChoice* fn_801B3440(MEMAllocator* allocator, u32* size, int capacity);
 nw4r::g3d::ScnGroup* fn_801AB6CC(MEMAllocator* allocator, u32* size, int capacity);
 void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(nw4r::g3d::ResAnmScn* self, nw4r::g3d::ResAnmScn* anm);
@@ -374,10 +372,7 @@ extern "C" void fn_80106A64(IfAdvMngr* mngr, void* arg1, void* arg2, void* arg3,
     mngr->unk58 = mngr->m_archive->getData(0, Data_Type_Misc, 9, 0xFFFE);
     mngr->unk5C = mngr->m_archive->getData(0, Data_Type_Misc, 0xA, 0xFFFE);
     if (arg1 && arg2 && arg3 && arg4) {
-        IfAdvRadarData* data = static_cast<IfAdvRadarData*>(operator new(8, Heaps::System));
-        if (data) {
-            data = fn_8010CF44(data, arg1, arg2, arg3, arg4);
-        }
+        IfAdvRadarData* data = new (Heaps::System) IfAdvRadarData(arg1, arg2, arg3, arg4);
         if (mngr->m_radarData.m_ptr != data) {
             delete mngr->m_radarData.m_ptr;
             mngr->m_radarData.m_ptr = data;
@@ -473,7 +468,7 @@ void IfAdvMngr::createModel() {
     Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(&anm, reinterpret_cast<nw4r::g3d::ResAnmScn*>(&anm2));
     g_gfSceneRoot->setInfoCamResAnm(&anm);
     if (m_radarData.m_ptr) {
-        fn_8010CF88(m_radarData.m_ptr, 0);
+        IfAdvRadar::create(m_radarData.m_ptr, 0);
     }
 }
 
@@ -522,7 +517,7 @@ void IfAdvMngr::destroyModel() {
         m_task->exit();
         m_task = NULL;
     }
-    fn_8010D00C();
+    IfAdvRadar::destroy();
     if (m_choice) {
         m_choice->Destroy();
         m_choice = NULL;
