@@ -52,8 +52,6 @@ void fn_8010D00C();
 nw4r::g3d::ScnChoice* fn_801B3440(MEMAllocator* allocator, u32* size, int capacity);
 nw4r::g3d::ScnGroup* fn_801AB6CC(MEMAllocator* allocator, u32* size, int capacity);
 void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(nw4r::g3d::ResAnmScn* self, nw4r::g3d::ResAnmScn* anm);
-void fn_800DFAB4(nw4r::g3d::ResFile* resFile, int numPlayer);
-IfPlayer* fn_800DFCB4(IfPlayer* player, int index);
 void fn_800E023C(IfPlayer* player, int arg1, int arg2, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2);
 void fn_800E244C(IfPlayer* player);
 void fn_800E26B8(IfPlayer* player);
@@ -439,12 +437,9 @@ void IfAdvMngr::createModel() {
     MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::InfoInstance);
     m_choice = fn_801B3440(allocator, NULL, 2);
     m_group = fn_801AB6CC(allocator, NULL, 0x20);
-    fn_800DFAB4(&unk14, m_numPlayer);
+    IfPlayer::createPlayerLocator(&unk14, m_numPlayer);
     for (i = 0; i < m_numPlayer; i++) {
-        IfPlayer* player = static_cast<IfPlayer*>(operator new(0x5D8, Heaps::InfoInstance));
-        if (player) {
-            player = fn_800DFCB4(player, i);
-        }
+        IfPlayer* player = new (Heaps::InfoInstance) IfPlayer(i);
         m_players[i] = player;
         fn_800E023C(player, 0, 0, &unk14, &unk2C);
     }

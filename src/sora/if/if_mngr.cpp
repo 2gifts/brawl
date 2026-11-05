@@ -82,8 +82,6 @@ extern "C" void fn_800E244C(IfPlayer* player);
 extern "C" void fn_80108E5C(IfAdvBoss* boss);
 extern "C" void fn_800F0F84(void* photo);
 extern "C" int fn_800FBFDC(void* menu);
-// HYPOTHESIS: map names IfPlayer::portriteRenderMainFastInit, portriteRenderMainFast
-extern "C" void fn_800E2964(void* work, int* count, int numPlayers);
 // HYPOTHESIS: map names IfPlayer::receiveShareStock, addDragoonParts
 extern "C" void fn_800E1D78(IfPlayer* player, Vec3f* pos);
 // HYPOTHESIS: map names IfPhoto::startPause
@@ -468,7 +466,7 @@ void ifTask::renderPre() {
     IfMngr* mngr = g_IfMngr;
     int count;
     u8 work[0x78];
-    fn_800E2964(work, &count, MAX_PLAYERS);
+    IfPlayer::portriteRenderMainFastInit(reinterpret_cast<Rect2D*>(work), &count, MAX_PLAYERS);
     IfPlayer::loupeRenderPreInit();
     for (i = 0; i < MAX_PLAYERS; i++) {
         IfPlayer* player = mngr->m_ifPlayers[i];

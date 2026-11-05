@@ -36,7 +36,7 @@ public:
 }}
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
-unsigned char lbl_8049DEDC[0xc] __attribute__((aligned(4))) = { 0 };
+nw4r::ut::LinkList<cmSubject, 0> lbl_8049DEDC;
 unsigned char lbl_8049DEE8[0x128] __attribute__((aligned(8))) = { 0 };
 unsigned char lbl_8049E010[0xc] __attribute__((aligned(8))) = { 0 };
 unsigned char lbl_8049E01C[0x14] __attribute__((aligned(4))) = { 0 };
@@ -287,8 +287,14 @@ void IfPlayer::createPlayerLocator(nw4r::g3d::ResFile* res, int frameOffset) {
     strcat(animName, "__0");
     lbl_805A02D8->changeAnimN(animName);
     lbl_805A02D8->m_modelAnim->setUpdateRate(0.0f);
-    float frame = g_GameGlobal->getGlobalRecordMenuDatap()->m_isWidescreen ? 10.0f : 0.0f;
-    frame += (float)frameOffset;
+    float frame;
+    if (g_GameGlobal->getGlobalRecordMenuDatap()->m_isWidescreen) {
+        frame = 10.0f;
+    } else {
+        frame = 0.0f;
+    }
+    float offset = (float)frameOffset;
+    frame += offset;
     lbl_805A02D8->setFrame(frame);
     lbl_805A02DC = nw4r::g3d::ScnMdlExpand::Construct(gfHeapManager::getMEMAllocator(Heaps::InfoInstance), NULL, 0x100,
                                                       lbl_805A02D8->m_sceneModel);
@@ -1410,10 +1416,11 @@ void IfPlayer::portriteRenderMain() {
 // subject that is in play (state 2 or 3, HYPOTHESIS: a fighter on the field) to the HUD with the table-based
 // conversion of IfCommon, and stores up to max rectangles.
 void IfPlayer::portriteRenderMainFastInit(Rect2D* rects, int* count, int max) {
+    nw4r::ut::LinkList<cmSubject, 0>::Iterator it;
     fn_800DB444();
     *count = 0;
-    for (nw4r::ut::LinkList<cmSubject, 0>::Iterator it = reinterpret_cast<nw4r::ut::LinkList<cmSubject, 0>&>(lbl_8049DEDC).GetBeginIter();
-         it != reinterpret_cast<nw4r::ut::LinkList<cmSubject, 0>&>(lbl_8049DEDC).GetEndIter() && *count < max; ++it) {
+    for (it = lbl_8049DEDC.GetBeginIter();
+         it.operator->() != lbl_8049DEDC.GetEndIter().operator->() && *count < max; ++it) {
         if (it->m_stateB == 3 || it->m_stateB == 2) {
             Vec3f pos;
             pos = it->m_pos;
