@@ -313,7 +313,7 @@ u32 fn_803A5C60(u16 idx) {
     return DlHeader_i()->entries[idx].nextTime;
 }
 
-u8 fn_803A5C88(u16 idx) {
+u32 fn_803A5C88(u16 idx) {
     return DlHeader_i()->entries[idx].flags;
 }
 
@@ -665,7 +665,7 @@ NWC24Err fn_803A367C(DlWalkState *state, u16 *out) {
         getKey = fn_803A5C60;
         break;
     case 2:
-        getKey = (KeyFn)fn_803A5C88;
+        getKey = fn_803A5C88;
         break;
     default:
         return NWC24_ERR_INVALID_VALUE;

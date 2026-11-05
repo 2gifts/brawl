@@ -6,6 +6,8 @@ The same assembly can come from very different C++ (`add r3,r3,r4` could be `x +
 
 ## Source review before accepting a match
 
+- **Separate each serialized field's length from the running total:** reusing one `len` for successive MIME header fields, accumulating `total`, and advancing the buffer after each field matches NWC24's attachment header. Keeping charset and encoding pointers separate from those two counters also matches its text header. The public ogws SDK provides useful source patterns, but check each against Brawl's own code and metadata offsets. Seen: `nwc24.c`, `fn_8039F7B0` and `fn_8039F920`. **MED**
+
 - **Keep an opaque SDK output parameter and its private typed view distinct:** casting `NWC24DlTask *pTask` into a named `NWC24iDlTask *task` inside the public loader preserves the output-buffer lifetime across open/seek/read/close. Passing the cast directly into the private inline loader swapped the saved output and slot registers. For sorted walks, snapshot the previous and candidate keys before choosing the comparison direction, and audit first-pass and equal-key transitions before tuning registers. Seen: `NWC24Download.c`, `NWC24GetDlTask` and `fn_803A367C`. **MED**
 
 - **Materialize a `%c` argument at character width before appending it:** `char value = va_arg(args, int);` preserves the SDK formatter's argument/scan lifetimes. In NWC24, this combined with the real conversion-state declarations and the string-append helper's cursor/count order matches `Mail_vsprintf`. For body output, keeping immutable inputs separate from the mutable cursor and remaining count also matches the Base64 writer. No register pins or dummy locals are needed. **MED** (`nwc24.c`)

@@ -93,32 +93,15 @@ char *Mail_strcat(char *dst, const char *src) {
     return dst;
 }
 
+static inline int StrLen(const char *str);
+
 char *Mail_strncat(char *dst, const char *src, size_t maxlen) {
-    int len;
-    const char *p;
-    char *d;
-    size_t i;
-    size_t end;
-    char c;
-
-    len = 0;
-    p = dst;
-    while (*p != 0) {
-        p++;
-        len++;
+    int len = StrLen(dst);
+    int i;
+    for (i = 0; i < maxlen && src[i] != 0; i++) {
+        dst[len + i] = src[i];
     }
-
-    d = dst + len;
-    i = 0;
-
-    while (i < maxlen && (c = *src) != 0) {
-        *d++ = c;
-        i++;
-        src++;
-    }
-
-    end = len + i;
-    dst[end] = 0;
+    dst[len + i] = 0;
     return dst;
 }
 
@@ -178,13 +161,12 @@ static inline void PutCharFront(char *str, char ch) {
     str[0] = ch;
 }
 
-static int fn_80397878(char *buf, u32 value, int base, int hexOffset, int isSigned, int width, char padCh,
+static int fn_80397878(char *buf, u32 value, int base, char hexOffset, int isSigned, int width, char padCh,
                        char flag) {
-    int count = 0;
-    int written = 0;
+    int written;
+    int count;
     int neg;
     char digit;
-    char c;
 
     if (isSigned && (value & 0x80000000)) {
         value = -value;
@@ -193,19 +175,21 @@ static int fn_80397878(char *buf, u32 value, int base, int hexOffset, int isSign
         neg = 0;
     }
 
+    written = count = 0;
+
     while (value != 0) {
         digit = value % base;
         value /= base;
 
-        PutCharFront(buf, digit > 9 ? digit + hexOffset : digit + '0');
-        written++;
+        PutCharFront(buf, digit + (char)(digit > 9 ? hexOffset : '0'));
         count++;
+        written++;
     }
 
     if (*buf == 0) {
         PutCharFront(buf, '0');
-        written++;
         count++;
+        written++;
     }
 
     if (padCh != '0') {
@@ -3385,16 +3369,16 @@ void NWC24InitBase64Table(char *table) {
         table[i] = -1;
     }
 
-    for (i = 0; i < 26; i++) {
-        table['A' + i] = i;
+    for (i = 'A'; i <= 'Z'; i++) {
+        table[i] = i - 'A';
     }
 
-    for (i = 0; i < 26; i++) {
-        table['a' + i] = 26 + i;
+    for (i = 'a'; i <= 'z'; i++) {
+        table[i] = 26 + i - 'a';
     }
 
-    for (i = 0; i < 10; i++) {
-        table['0' + i] = 52 + i;
+    for (i = '0'; i <= '9'; i++) {
+        table[i] = 52 + i - '0';
     }
 
     table['+'] = 62;
@@ -4424,86 +4408,87 @@ NWC24Err fn_8039F6B0(NWC24iMsgObj *msg) {
 // header of one attachment part
 NWC24Err fn_8039F7B0(NWC24iMsgObj *msg, int idx) {
     char *buf;
-    char *mimeStr;
-    char *suffix;
-    int n1;
-    int n2;
-    int n3;
+    const char *mimeStr;
+    const char *suffix;
+    int len;
     int total;
     NWC24Err result;
 
+    result = NWC24_OK;
+    total = 0;
     Mail_memset(NWC24WorkP->stringWork, 0, NWC24i_STRING_WORK_SIZE);
     buf = NWC24WorkP->stringWork;
-
-    mimeStr = (char *)NWC24GetMIMETypeStr(msg->attachedType[idx]);
-    suffix = (char *)NWC24iGetMIMETypeSuffix(msg->attachedType[idx]);
-
-    if (Mail_strlen(PartTypeFmt) + Mail_strlen(PartEncodingFmt) + Mail_strlen(PartDispositionFmt) + Mail_strlen(mimeStr) + 4 >=
-        NWC24i_STRING_WORK_SIZE) {
+    mimeStr = NWC24GetMIMETypeStr(msg->attachedType[idx]);
+    suffix = NWC24iGetMIMETypeSuffix(msg->attachedType[idx]);
+    len = Mail_strlen(PartTypeFmt) + Mail_strlen(PartEncodingFmt) +
+          Mail_strlen(PartDispositionFmt) + Mail_strlen(mimeStr) + 4;
+    if (len >= NWC24i_STRING_WORK_SIZE) {
         return NWC24_ERR_NOMEM;
     }
-
-    n1 = Mail_sprintf(buf, PartTypeFmt, mimeStr, (char)('a' + idx), msg->id, suffix);
-    if (n1 <= 0) {
+    len = Mail_sprintf(buf, PartTypeFmt, mimeStr, (char)('a' + idx), msg->id, suffix);
+    if (len <= 0) {
         return NWC24_ERR_FAILED;
     }
-
-    buf += n1;
-    n2 = Mail_sprintf(buf, PartEncodingFmt);
-    if (n2 <= 0) {
+    buf += len;
+    total += len;
+    len = Mail_sprintf(buf, PartEncodingFmt);
+    if (len <= 0) {
         return NWC24_ERR_FAILED;
     }
-
-    total = n1 + n2;
-    n3 = Mail_sprintf(buf + n2, PartDispositionFmt, (char)('a' + idx), msg->id, suffix);
-    if (n3 <= 0) {
+    buf += len;
+    total += len;
+    len = Mail_sprintf(buf, PartDispositionFmt, (char)('a' + idx), msg->id, suffix);
+    if (len <= 0) {
         return NWC24_ERR_FAILED;
     }
-
-    total += n3;
+    buf += len;
+    total += len;
     result = NWC24FWrite(NWC24WorkP, total, OutFile);
     if (result == NWC24_OK) {
         msg->length += total;
     }
-
     return result;
 }
 
 // headers for the text part (charset + transfer encoding)
 NWC24Err fn_8039F920(NWC24iMsgObj *msg) {
-    char *buf = NWC24WorkP->stringWork;
-    int len = 0;
-    char *name;
+    char *buf;
+    const char *charset;
+    const char *encoding;
+    u32 total;
     NWC24Err result;
+    int len;
 
+    total = 0;
+    result = NWC24_OK;
+    buf = NWC24WorkP->stringWork;
     Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
-
-    name = (char *)NWC24GetCharsetStr(msg->charset);
-    if (name != NULL) {
-        Mail_sprintf(buf, TextTypeFmt, name);
+    charset = NWC24GetCharsetStr(msg->charset);
+    if (charset != NULL) {
+        Mail_sprintf(buf, TextTypeFmt, charset);
         msg->contentType.offset = msg->length + 0x22;
-        msg->contentType.size = Mail_strlen(name) + 1;
+        len = Mail_strlen(charset);
+        msg->contentType.size = len + 1;
         len = Mail_strlen(buf);
+        total += len;
         buf += len;
     }
-
-    name = (char *)NWC24GetEncodingStr(msg->encoding);
-    if (name != NULL) {
-        Mail_sprintf(buf, TextEncodingFmt, name);
-        msg->txEncoding.offset = len + msg->length + 0x1B;
-        msg->txEncoding.size = Mail_strlen(name) + 1;
-        len += Mail_strlen(buf);
+    encoding = NWC24GetEncodingStr(msg->encoding);
+    if (encoding != NULL) {
+        Mail_sprintf(buf, TextEncodingFmt, encoding);
+        msg->txEncoding.offset = total + msg->length + 0x1B;
+        len = Mail_strlen(encoding);
+        msg->txEncoding.size = len + 1;
+        len = Mail_strlen(buf);
+        total += len;
     }
-
-    if (len == 0) {
+    if (total == 0) {
         return NWC24_OK;
     }
-
-    result = NWC24FWrite(NWC24WorkP, len, OutFile);
+    result = NWC24FWrite(NWC24WorkP, total, OutFile);
     if (result == NWC24_OK) {
-        msg->length += len;
+        msg->length += total;
     }
-
     return result;
 }
 
