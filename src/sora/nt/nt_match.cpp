@@ -233,3 +233,97 @@ void NtMatching::resetWork() {
         lbl_805A0418[index] = 0;
     }
 }
+
+extern char lbl_80460264[0x38];
+extern char lbl_8046029C[0x34];
+extern char lbl_8045FF54[0x70];
+extern char lbl_8045FFC4[0x2A0];
+extern int lbl_805A03FC;
+extern int lbl_805A0404;
+extern int lbl_805A0400;
+extern u8 lbl_805A0409;
+
+bool NtMatching::requestSuspendMatching(bool suspend, bool wait) {
+    int status = g_NtMatchingStatus;
+    bool matching = false;
+    if (status >= 7 && status <= 9) {
+        matching = true;
+    }
+    if (!matching) {
+        return false;
+    }
+    if (suspend) {
+        unk34A8 = lbl_8059E745;
+    }
+    unk34A9 = wait;
+    unk33F6 = suspend;
+    unk33F5 = 1;
+    if (suspend) {
+        if (unk34A4) {
+            netReport(lbl_80460264, unk34A4);
+            unk34A4 = 2;
+        } else {
+            unk34A4 = 2;
+            netReport(lbl_8046029C);
+        }
+    }
+    return true;
+}
+
+int NtMatching::calcWinningPercentage() {
+    u32 rounds = ntFriendInfo::getInstance()->unk0->unk8;
+    u32 wins = ntFriendInfo::getInstance()->unk0->unkC;
+    int percentage;
+    if (rounds) {
+        percentage = 100.0f * (float(wins) / float(rounds));
+        if (percentage > 100) {
+            percentage = 100;
+        }
+    } else {
+        percentage = 50;
+    }
+    netReport(lbl_8045FFC4, percentage, wins, rounds);
+    lbl_805A0434->unk3498 = percentage;
+    return percentage;
+}
+
+bool NtMatching::startMatching(int mode, int rule, int players) {
+    if (g_NtMatchingStatus != 5) {
+        return false;
+    }
+    lbl_805A03FC = mode;
+    lbl_805A0404 = rule;
+    lbl_805A0400 = players;
+    lbl_805A0434->unk33F4 = 0;
+    lbl_805A0434->unk33F5 = 0;
+    lbl_805A0434->unk33F6 = 0;
+    lbl_805A0434->unk34A4 = 0;
+    lbl_805A0434->unk34AA = 0;
+    lbl_805A0434->unk34AB = 0;
+    unk3428 = 0;
+    unk342C = 0;
+    lbl_805A0409 = 30;
+    g_NtMatchingStatus = 5;
+    lbl_805A03E0 = 5;
+    unk33CE = 0;
+    unk33F5 = 0;
+    unk33F6 = 0;
+    unk3404 = 0;
+    memset(lbl_805A0410, 0, 4);
+    g_NtAIDBitmap = 0;
+    lbl_805A0414 = 0;
+    lbl_8059E742 = 0xFF;
+    lbl_8059E745 = 0xFF;
+    lbl_8059E743 = 0xFF;
+    lbl_8059E744 = 0xFF;
+    for (int index = 0; index < 8; index++) {
+        lbl_805A0418[index] = 0;
+    }
+    if (unk34A4) {
+        unk34A4 = 0;
+        netReport(lbl_8045FF54);
+    }
+    unk3430 = 0;
+    NtBase::setMatchingStatus(6);
+    return true;
+}

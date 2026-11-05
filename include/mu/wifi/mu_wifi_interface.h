@@ -38,7 +38,13 @@ struct muWifiAIDInfo {
     u64 unk30;
     char unk38[0x4];
     LocalPlayer m_localPlayers[2];
-    char unk4C[0xA];
+    union {
+        char unk4C[0xA];
+        struct {
+            char _pad4C[9];
+            u8 unk55;
+        };
+    };
     u8 unk56_b7 : 1;
     u8 unk56_b6 : 1;
     u8 unk56_b3 : 3;
@@ -50,19 +56,37 @@ struct muWifiAIDInfo {
             char _pad57[2];
             u8 unk59_b4 : 4;
             u8 unk59_b0 : 4;
+            char _pad5A[0xE];
+            u8 unk68[4];
         };
     };
-    u8 unk78_b7 : 1;
-    u8 unk78_b3 : 4;
-    u8 unk78_b2 : 1;
-    u8 unk78_b0 : 2;
-    char unk79[0x4];
-    u8 unk7D_b4 : 4;
-    u8 unk7D_b2 : 2;
-    u8 unk7D_b0 : 2;
-    char unk7E[0x67];
-    AssignedPlayer m_assignedPlayers[4];
-    char unk10D[0x2B];
+    union {
+        struct {
+            u8 unk78_b7 : 1;
+            u8 unk78_b3 : 4;
+            u8 unk78_b2 : 1;
+            u8 unk78_b0 : 2;
+            char unk79[0x4];
+            u8 unk7D_b4 : 4;
+            u8 unk7D_b2 : 2;
+            u8 unk7D_b0 : 2;
+            char unk7E[0x67];
+            AssignedPlayer m_assignedPlayers[4];
+            char unk10D[0x2B];
+        };
+        struct {
+            char _pad78[0x6C];
+            struct {
+                u8 unk0;
+                u8 unk1[9];
+            } unkE4[4];
+            u8 unk10C;
+            u8 unk10DData;
+            char _pad10E[2];
+            u32 unk110;
+            char _pad114[0x24];
+        };
+    };
     char m_shortComment[0xA0];
     char unk1D8[0x39];
     s8 m_friendAIDIndex;
@@ -84,9 +108,11 @@ public:
     s32 unk40;
     char unk44[0x8];
     muWifiPlayerArea m_playerAreas[4];
-    char unk6C[0x4];
+    // HYPOTHESIS: game mode used when comparing the server status.
+    union { char unk6C[0x4]; s32 unk6CData; };
     muWifiAIDInfo m_aidInfos[5];
-    char unkAE8[0x4E2];
+    // HYPOTHESIS: bit 4 records the player-assignment receive state.
+    union { char unkAE8[0x4E2]; struct { char _padAE8[0x4E1]; u8 unkFC9; }; };
     u8 unkFCA_b7 : 1;
     u8 unkFCA_b6 : 1;
     u8 unkFCA_b5 : 1;
@@ -96,7 +122,8 @@ public:
     u8 unkFCB_b0 : 7;
     s32 unkFCC_b24 : 8;
     u32 unkFCC_b0 : 24;
-    char unkFD0[0xA];
+    // HYPOTHESIS: friend index used for the server game-mode comparison.
+    union { char unkFD0[0xA]; struct { char _padFD0[8]; u8 unkFD8; u8 _padFD9; }; };
     u16 m_limitTime;
     char unkFDC[0x13];
     u8 m_playerLive[4];
@@ -131,6 +158,8 @@ public:
     void putMyFriendStatusName(const wchar_t* name);
     static u64 getUserID();
     bool disconnect();
+    bool isPlayerAssignRecieved();
+    bool isEqualServerGameMode();
     bool isMyPlayerArea(int index);
     u8 getTeamColor(int index);
     u8 getAssignedTeamColor(int index);
@@ -179,6 +208,16 @@ public:
     // HYPOTHESIS: parameter types follow the bit index and flag register use.
     void setFriendFlag(int index, bool flag);
     bool testRequestApproval(int areaIdx);
+    int getNumNode();
+    // HYPOTHESIS: outputs are wide strings stored as byte pairs in the save data.
+    wchar_t* getMyFriendStatusName(wchar_t* name);
+    wchar_t* getMyFriendStatusComment(wchar_t* comment);
+    wchar_t* getMyShortComment(int index, wchar_t* comment);
+    // HYPOTHESIS: argument and result types follow the original register accesses.
+    bool needKeepAlive();
+    u8 getAssignedStageKind(u8* substage, u32* music);
+    void clearGlobalAIDStatusLive();
+    u8 getAssignedPlayerKind(int index);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 

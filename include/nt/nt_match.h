@@ -41,8 +41,25 @@ public:
     void shutdown();
     bool isNetShutdownErrorOccured();
     void resetWork();
+    static void setErrorStatus(s32 error);
+    bool requestSuspendMatching(bool suspend, bool wait);
+    static int calcWinningPercentage();
+    bool startMatching(int mode, int rule, int players);
 
     union {
+        struct {
+            u8 _padState0[0x33F4];
+            u8 unk33F4;
+            u8 _padState33F5[0x33];
+            u32 unk3428;
+            u32 unk342C;
+            u8 _padState3430[0x68];
+            int unk3498;
+            u8 _padState349C[8];
+            int unk34A4;
+            u8 unk34A8;
+            u8 unk34A9;
+        };
         struct {
             u8 unk0[0x12];
             u8 unk12[0x40];
