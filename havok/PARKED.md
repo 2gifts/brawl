@@ -64,3 +64,46 @@ One entry per function given up on: symbol, unit, match %, the remaining diff, a
 - Tried: the six load orders of the column loop, block scoping, permuter (200 s, best only adds a
   `__typeof__` copy).
 - Diagnosis: compiler (register coloring).
+
+## Phase 4 (donor-covered out-of-line functions)
+
+### Monitor-stream timer, "N form" (blocks ~300 timer sites in ~35 units)
+- Diff: `HK_TIMER_BEGIN`/`END` (include/havok/hkMonitorStream.h) reproduce the "E form" exactly (end word
+  loaded first, `extsb.` branch; hkWorld::stepDeltaTime is exact with it). About 300 sites, mostly in functions
+  with a 16-byte aligned stack frame, instead load the limit word (0x0C) first and branch on a materialized bool:
+  `extsb rX, r0; neg r0, rX; or r0, r0, rX; srwi. r0, r0, 31`. The same function never mixes the two forms.
+- Tried: ~40 condition spellings (hkBool member/temp/local, `== true`, `!= false`, `?:`, `!!`, int/bool casts,
+  `memoryAvailable()` in-class / out-of-class / static non-inline, timer as inline function vs macro, timer
+  inside an inlined body, `-inline noauto/deferred`, `-ipa file` off, GC 2.6-3.0a5.2 and Wii 1.0-1.3).
+  `unkC > unk4` gives the N load order and registers; only the bool materialization is missing.
+- Diagnosis: compiler (bool folding); source form not found. High value: solving it unblocks most agents.
+
+### `hkSphereBoxAgent::staticGetPenetrations` (hkSphereBoxAgent.cpp, 81.9%, 764 bytes; Halo 0x2f23c0, 0.91)
+- Diff: body structure and saved registers exact; the two N-form timers (+3 insns each) and the fabs lane order
+  of setAbs4 (target loads x, y, fabs x, then z, w).
+- Diagnosis: blocked by the N-form timer.
+
+### `hkBvAgent::getPenetrations` (94.3%) / `staticGetPenetrations` (96.2%) (hkBvAgent.cpp; Halo 0x2e7670/0x2e7710)
+- Diff: the timer names are at +0x26/+0x32 of the unit's string pool (LthkBvAgent, StcheckBvShape, Stchild, lt
+  come first, from processCollision and the other list-timer functions not written yet), and the child body
+  stores: target loads motion, shape, key and stores parent, motion, key, shape.
+- Tried: all 96 ctor/assignment orders of the child hkCdBody (best kept).
+- Diagnosis: other (string pool needs the earlier functions) + scheduling of the child body construction.
+
+### `hkGsk::convertFeatureToClosestDistance` (hkGsk.cpp, 41.9%, 208 bytes; Halo 0x3032c0, 0.99)
+- Diff: logic exact (no sign flip of the plane on this target, unlike Halo). In the branches the target copies
+  the point lane by lane (lfs/stfs through f1, as if `out` could alias `this`); ours loads all lanes first.
+- Tried: real members instead of byte-offset access, local distance / out.m_normal as the source,
+  `-schedule off` (wrong the other way).
+- Diagnosis: compiler (alias analysis / scheduling).
+
+### `hkCollisionDispatcher::registerCollisionAgent` (79.3%, Halo 0x2e6190, 0.91)
+- Diff: the hkAgentFuncs copy is word-by-word through r0 in the target (lwz/stw pairs); ours loads all fields
+  first. Same symptom as convertFeatureToClosestDistance. Symmetry flags are hkBool (the `extsb.` test).
+- Tried: struct assignment, explicit member copy, `-inline noauto`, `-O4,s`, `-opt nopeephole`.
+- Diagnosis: compiler (alias analysis / scheduling).
+
+### 16 `registerAgent` functions (99.7-99.8%)
+- Diff: `li r0, 0x1` (symmetricA = true) scheduled one slot later in the target; flag assignment order, true/false
+  literals do not move it.
+- Diagnosis: compiler (scheduling).
