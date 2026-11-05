@@ -34,16 +34,16 @@ extern "C" void fn_802B7FD0();
 
 void hkSphereBoxAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs box;
-    box.symmetricA = 1;
-    box.symmetricB = 0;
-    box.create = (hkAgentFunc)createBoxSphereAgent;
+    box.create = (hkAgentFunc)createSphereBoxAgent;
     box.staticGetPenetrations = (hkAgentFunc)hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetPenetrations;
     box.staticGetClosestPoints = (hkAgentFunc)hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetClosestPoints;
     box.staticLinearCast = (hkAgentFunc)fn_802C3B88;
+    box.symmetricA = 1;
+    box.symmetricB = 0;
     dispatcher->registerCollisionAgent(&box, HK_SHAPE_BOX, HK_SHAPE_SPHERE);
 
     hkAgentFuncs sphere;
-    sphere.create = (hkAgentFunc)createSphereBoxAgent;
+    sphere.create = (hkAgentFunc)createBoxSphereAgent;
     sphere.staticGetPenetrations = (hkAgentFunc)staticGetPenetrations;
     sphere.staticGetClosestPoints = (hkAgentFunc)staticGetClosestPoints;
     sphere.staticLinearCast = (hkAgentFunc)fn_802B7FD0;
@@ -74,22 +74,22 @@ void hkSphereBoxAgent::getPenetrations(void* unk0, void* unk1, void* unk2, void*
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
 void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCollector flip(unk3);
+    hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkSphereBoxAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCollector flip(unk3);
+    hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkSphereBoxAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCastCollector flip(unk3);
+    hkSymmetricAgentFlipCollector flip(unk3);
     hkSphereBoxAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCastCollector flip(unk3);
+    hkSymmetricAgentFlipCollector flip(unk3);
     hkSphereBoxAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
 }
 

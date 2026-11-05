@@ -11,8 +11,8 @@ struct hkAgentFuncs {
     hkAgentFunc staticGetPenetrations;  // 0x04
     hkAgentFunc staticGetClosestPoints; // 0x08
     hkAgentFunc staticLinearCast;       // 0x0C
-    u8 symmetricA;                      // 0x10 HYPOTHESIS: the table entry for (typeA, typeB) is also used by the reverse pair
-    u8 symmetricB;                      // 0x11 HYPOTHESIS: when set, the (typeB, typeA) lookup tables are filled too
+    hkBool symmetricA;                    // 0x10 HYPOTHESIS: the table entry for (typeA, typeB) is also used by the reverse pair
+    hkBool symmetricB;                    // 0x11 HYPOTHESIS: when set, the (typeB, typeA) lookup tables are filled too
 };
 
 // Collision dispatcher: reference counted, owns an 8 x 8 table of reference counted entries and the agent registration
