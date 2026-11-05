@@ -16,7 +16,9 @@ struct hkBroadPhaseHandlePair {
 
 // Broad-phase base class. Vtable slots from hk3AxisSweep's vtable (names from the map): 0x08 dtor,
 // 0x0C calcStatistics, 0x10 addObject, 0x14 addObjectBatch, 0x18 removeObject, 0x1C removeObjectBatch,
-// 0x20 getNumObjects; the later slots are not needed yet.
+// 0x20 getNumObjects, 0x24/0x28 unknown, 0x2C getAllAabbs, 0x30 getAabb, 0x34 an aabb query (unnamed in the map),
+// 0x38 reQuerySingleObject; the later slots are not needed yet. Only the slots something calls are declared
+// by name; the others are placeholders (hk3AxisSweep declares its overrides as plain members).
 // HYPOTHESIS: the parameter types (the hk3AxisSweep overrides are not written yet; the callers pass the
 // handle, the aabb and the pair list in this order).
 struct hkBroadPhase : hkReferencedObject {
@@ -26,4 +28,12 @@ struct hkBroadPhase : hkReferencedObject {
                            hkArray<hkBroadPhaseHandlePair>& pairsOut);                    // 0x10
     virtual void addObjectBatch();                                                         // 0x14 (signature unknown)
     virtual void removeObject(hkBroadPhaseHandle* object, hkArray<hkBroadPhaseHandlePair>& pairsOut); // 0x18
+    virtual void unk1C();
+    virtual void unk20();
+    virtual void unk24();
+    virtual void unk28();
+    virtual void unk2C();
+    virtual void unk30();
+    // HYPOTHESIS: the name (hkWorld::activateRegion collects the pairs overlapping a box with it)
+    virtual void querySingleAabb(const hkAabb& aabb, hkArray<hkBroadPhaseHandlePair>& pairsOut) const; // 0x34
 };
