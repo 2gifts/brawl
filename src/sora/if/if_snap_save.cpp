@@ -23,8 +23,6 @@ extern "C" muCollection* fn_800C35CC(void* mem, int kind, nw4r::g3d::ResFile res
                                      void* msgData, nw4r::g3d::ScnGroup* scnGroup, int drawPriority,
                                      Heaps::HeapType heap, Heaps::HeapType heap2, int unk, int unk2);
 extern "C" bool fn_800C39D8(muCollection* collection);
-extern "C" void fn_800C6E3C(muCollection* collection, int unk, int unk2);
-extern "C" void fn_800C6E64(muCollection* collection, int drive, int unk, int unk2);
 extern "C" nteFileDataPhoto* fn_80152970(void* mem, Heaps::HeapType heap);
 extern "C" void fn_80153488(nteSection* section);
 extern "C" void fn_80153498(nteSection* section, int unk);
@@ -380,10 +378,10 @@ void IfSnapSaveTask::scanMediaMain() {
     case 0:
         if (m_scanEnable && m_collection->m_busy == 0) {
             if (!m_scanned) {
-                fn_800C6E3C(m_collection, 0, 0);
+                m_collection->scanAll(0, 0);
                 m_scanned = true;
             } else {
-                fn_800C6E64(m_collection, 1, 0, 0);
+                m_collection->scan(1, 0, 0);
             }
             m_scanState = 1;
         }

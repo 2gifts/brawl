@@ -10,13 +10,12 @@
 #include <snd/snd_bgm.h>
 #include <snd/snd_system.h>
 #include <st/st_data_container.h>
+#include <if/if_snap_save.h>
 
 // HYPOTHESIS: the RVL SDK texture-object accessor, which the GX headers do not declare.
 extern "C" void* GXGetTexObjData(const _GXTexObj* texture);
-// HYPOTHESIS: main.dol muCollection::FileHandle constructor, isDropReady and checkLimit (map names).
 extern "C" muCollectionFileName fn_800C3538(const char* names, int index);
 extern "C" int fn_800C39D8(void* collection);
-extern "C" void fn_800C6E2C(void* collection, int media);
 
 // HYPOTHESIS: descriptive table names inferred from the grid readers.
 // Parameter tables indexed by stage size, then zoom level. Their native storage
@@ -437,7 +436,7 @@ muCollectionFileName muStageEditSelectTask::getFileHandle(int index) {
 void muStageEditSelectTask::controlPopUpCheckStart() {
     muStageEditCollection* collection = static_cast<muStageEditCollection*>(m_work->m_collection);
     if (collection->unk350 == 0) {
-        fn_800C6E2C(collection, getWork()->m_curMedia);
+        reinterpret_cast<muCollection*>(collection)->checkLimit(getWork()->m_curMedia);
         m_work->m_state = 0x1A;
     }
 }
