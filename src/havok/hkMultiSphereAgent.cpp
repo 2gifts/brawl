@@ -47,6 +47,12 @@
 #include <havok/hkSymmetricAgentProcessCollision.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkShapeType.h>
+#include <havok/hkMultiSphereShape.h>
+#include <havok/hkSphereShape.h>
+#include <havok/hkMotionState.h>
+#include <havok/hkMonitorStream.h>
+#include <havok/hkCdBody.h>
+#include <havok/hkCdBodyPairCollector.h>
 
 // Stand-ins for the query functions of the symmetric multi-sphere agents (not written yet).
 extern "C" void fn_802B7FD0(void* a, void* b, void* c, void* target, void* d);
@@ -90,6 +96,224 @@ void hkMultiSphereAgent::cleanup() {
     delete this;
 }
 
+// Runs each child agent against one sphere of the shape: a sphere shape on the stack takes the sphere's radius and a
+// copy of A's motion state the sphere's center (rotated into world space), so the child sees a plain sphere body.
+// HYPOTHESIS: the motion state assignment of these queries copies the transform through four vector temporaries (the
+// target keeps their dead stack copies, col0 at the top and the translation lowest). Kept local to this unit: an
+// hkTransform::operator= of this form costs hkSweptTransformUtil::warpTo 30%.
+static inline void hkMultiSphereAgent_copyMotionState(hkMotionState& dst, const hkMotionState& src) {
+    hkVector4 c0 = src.m_transform.m_rotation.m_col0;
+    hkVector4 c1 = src.m_transform.m_rotation.m_col1;
+    hkVector4 c2 = src.m_transform.m_rotation.m_col2;
+    hkVector4 tr = src.m_transform.m_translation;
+    dst.m_transform.m_rotation.m_col0 = c0;
+    dst.m_transform.m_rotation.m_col1 = c1;
+    dst.m_transform.m_rotation.m_col2 = c2;
+    dst.m_transform.m_translation = tr;
+    dst.m_sweptTransform = src.m_sweptTransform;
+    dst.m_deltaAngle = src.m_deltaAngle;
+    dst.m_objectRadius = src.m_objectRadius;
+    dst.m_maxLinearVelocity = src.m_maxLinearVelocity;
+    dst.m_maxAngularVelocity = src.m_maxAngularVelocity;
+    dst.m_linearDamping = src.m_linearDamping;
+    dst.m_angularDamping = src.m_angularDamping;
+    dst.m_deactivationClass = src.m_deactivationClass;
+    dst.m_deactivationCounter = src.m_deactivationCounter;
+}
+
+// Queries of the multi-sphere agent: each child agent (or, for the statics, the dispatcher's function for the sphere
+// against B) runs against one sphere of the shape. A sphere shape on the stack takes the sphere's radius and a copy of
+// A's motion state the sphere's center rotated into world space, so the child sees a plain sphere body.
+// NONMATCHING: the dead stack copies of the transform vectors are scheduled differently (96-97%); the statics also
+// differ in register coloring (86-97%). The linear cast always uses the first entry's agent (as in the target).
+void hkMultiSphereAgent::getClosestPoints(void* a, void* b, void* c, void* target) {
+    HK_TIMER_BEGIN("MultiSphere");
+    const hkCdBody* bodyA = (const hkCdBody*)a;
+    const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA->m_shape;
+    hkMotionState motion;
+    hkMotionState* childMotion = &motion;
+    hkMultiSphereAgent_copyMotionState(motion, *(const hkMotionState*)bodyA->m_motion);
+    hkSphereShape sphere(0.0f);
+    const hkVector4* spheres = shape->m_spheres;
+    hkCdBody childBody(bodyA);
+    childBody.m_motion = (hkMotion*)childMotion;
+    hkMultiSphereAgentEntry* entry = m_entries.begin();
+    for (int i = m_entries.m_size - 1; i >= 0; i--) {
+        const hkVector4& s = spheres[entry->unk0];
+        hkVector4 center;
+        center._setRotatedDir(motion.m_transform.m_rotation, s);
+        const hkVector4& pos = ((const hkMotionState*)bodyA->m_motion)->m_transform.m_translation;
+        motion.m_transform.m_translation.x = pos.x + center.x;
+        motion.m_transform.m_translation.y = pos.y + center.y;
+        motion.m_transform.m_translation.z = pos.z + center.z;
+        motion.m_transform.m_translation.w = pos.w + center.w;
+        hkSimdReal radius = s.w;
+        sphere.m_radius = radius;
+        childBody.m_shape = &sphere;
+        childBody.m_shapeKey = i;
+        entry->agent->getClosestPoints(&childBody, b, c, target);
+        entry++;
+    }
+    HK_TIMER_END();
+}
+
+void hkMultiSphereAgent::staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, void* target) {
+    HK_TIMER_BEGIN("MultiSphere");
+    const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA.m_shape;
+    hkMotionState motion;
+    hkMotionState* childMotion = &motion;
+    hkMultiSphereAgent_copyMotionState(motion, *(const hkMotionState*)bodyA.m_motion);
+    hkSphereShape sphere(0.0f);
+    hkCdBody childBody(&bodyA);
+    childBody.m_motion = (hkMotion*)childMotion;
+    int typeB = bodyB.m_shape->getType();
+    const hkVector4* spheres = shape->m_spheres;
+    for (int i = 0; i < shape->m_numSpheres; i++) {
+        const hkVector4& s = spheres[i];
+        hkVector4 center;
+        center._setRotatedDir(motion.m_transform.m_rotation, s);
+        const hkVector4& pos = ((const hkMotionState*)bodyA.m_motion)->m_transform.m_translation;
+        motion.m_transform.m_translation.x = pos.x + center.x;
+        motion.m_transform.m_translation.y = pos.y + center.y;
+        motion.m_transform.m_translation.z = pos.z + center.z;
+        motion.m_transform.m_translation.w = pos.w + center.w;
+        hkSimdReal radius = s.w;
+        sphere.m_radius = radius;
+        childBody.m_shape = &sphere;
+        childBody.m_shapeKey = i;
+        typedef void (*QueryFunc)(void*, void*, void*, void*);
+        ((QueryFunc)input.m_dispatcher->getGetClosestPointsFunc(sphere.getType(), typeB))(&childBody, (void*)&bodyB, (void*)&input, target);
+    }
+    HK_TIMER_END();
+}
+
+void hkMultiSphereAgent::linearCast(void* a, void* b, void* c, void* target, void* d) {
+    HK_TIMER_BEGIN("MultiSphere");
+    const hkCdBody* bodyA = (const hkCdBody*)a;
+    const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA->m_shape;
+    hkMotionState motion;
+    hkMotionState* childMotion = &motion;
+    hkMultiSphereAgent_copyMotionState(motion, *(const hkMotionState*)bodyA->m_motion);
+    hkSphereShape sphere(0.0f);
+    const hkVector4* spheres = shape->m_spheres;
+    hkCdBody childBody(bodyA);
+    childBody.m_motion = (hkMotion*)childMotion;
+    hkMultiSphereAgentEntry* entry = m_entries.begin();
+    for (int i = m_entries.m_size - 1; i >= 0; i--) {
+        const hkVector4& s = spheres[i];
+        hkVector4 center;
+        center._setRotatedDir(motion.m_transform.m_rotation, s);
+        const hkVector4& pos = ((const hkMotionState*)bodyA->m_motion)->m_transform.m_translation;
+        motion.m_transform.m_translation.x = pos.x + center.x;
+        motion.m_transform.m_translation.y = pos.y + center.y;
+        motion.m_transform.m_translation.z = pos.z + center.z;
+        motion.m_transform.m_translation.w = pos.w + center.w;
+        hkSimdReal radius = s.w;
+        sphere.m_radius = radius;
+        childBody.m_shape = &sphere;
+        childBody.m_shapeKey = i;
+        entry->agent->linearCast(&childBody, b, c, target, d);
+    }
+    HK_TIMER_END();
+}
+
+void hkMultiSphereAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, void* target, void* d) {
+    HK_TIMER_BEGIN("MultiSphere");
+    const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA.m_shape;
+    hkMotionState motion;
+    hkMotionState* childMotion = &motion;
+    hkMultiSphereAgent_copyMotionState(motion, *(const hkMotionState*)bodyA.m_motion);
+    hkSphereShape sphere(0.0f);
+    hkCdBody childBody(&bodyA);
+    childBody.m_motion = (hkMotion*)childMotion;
+    int typeB = bodyB.m_shape->getType();
+    const hkVector4* spheres = shape->m_spheres;
+    for (int i = 0; i < shape->m_numSpheres; i++) {
+        const hkVector4& s = spheres[i];
+        hkVector4 center;
+        center._setRotatedDir(motion.m_transform.m_rotation, s);
+        const hkVector4& pos = ((const hkMotionState*)bodyA.m_motion)->m_transform.m_translation;
+        motion.m_transform.m_translation.x = pos.x + center.x;
+        motion.m_transform.m_translation.y = pos.y + center.y;
+        motion.m_transform.m_translation.z = pos.z + center.z;
+        motion.m_transform.m_translation.w = pos.w + center.w;
+        hkSimdReal radius = s.w;
+        sphere.m_radius = radius;
+        childBody.m_shape = &sphere;
+        childBody.m_shapeKey = i;
+        typedef void (*QueryFunc)(void*, void*, void*, void*, void*);
+        ((QueryFunc)input.m_dispatcher->getLinearCastFunc(sphere.getType(), typeB))(&childBody, (void*)&bodyB, (void*)&input, target, d);
+    }
+    HK_TIMER_END();
+}
+
+void hkMultiSphereAgent::getPenetrations(void* a, void* b, void* c, void* target) {
+    HK_TIMER_BEGIN("MultiSphere");
+    const hkCdBody* bodyA = (const hkCdBody*)a;
+    const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA->m_shape;
+    hkMotionState motion;
+    hkMotionState* childMotion = &motion;
+    hkMultiSphereAgent_copyMotionState(motion, *(const hkMotionState*)bodyA->m_motion);
+    hkSphereShape sphere(0.0f);
+    const hkVector4* spheres = shape->m_spheres;
+    hkCdBody childBody(bodyA);
+    childBody.m_motion = (hkMotion*)childMotion;
+    hkMultiSphereAgentEntry* entry = m_entries.begin();
+    for (int i = m_entries.m_size - 1; i >= 0; i--) {
+        const hkVector4& s = spheres[entry->unk0];
+        hkVector4 center;
+        center._setRotatedDir(motion.m_transform.m_rotation, s);
+        const hkVector4& pos = ((const hkMotionState*)bodyA->m_motion)->m_transform.m_translation;
+        motion.m_transform.m_translation.x = pos.x + center.x;
+        motion.m_transform.m_translation.y = pos.y + center.y;
+        motion.m_transform.m_translation.z = pos.z + center.z;
+        motion.m_transform.m_translation.w = pos.w + center.w;
+        hkSimdReal radius = s.w;
+        sphere.m_radius = radius;
+        childBody.m_shape = &sphere;
+        childBody.m_shapeKey = i;
+        entry->agent->getPenetrations(&childBody, b, c, target);
+        if (((hkCdBodyPairCollector*)target)->m_earlyOut) {
+            break;
+        }
+        entry++;
+    }
+    HK_TIMER_END();
+}
+
+void hkMultiSphereAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, void* target) {
+    HK_TIMER_BEGIN("MultiSphere");
+    const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA.m_shape;
+    hkMotionState motion;
+    hkMotionState* childMotion = &motion;
+    hkMultiSphereAgent_copyMotionState(motion, *(const hkMotionState*)bodyA.m_motion);
+    hkSphereShape sphere(0.0f);
+    hkCdBody childBody(&bodyA);
+    childBody.m_motion = (hkMotion*)childMotion;
+    int typeB = bodyB.m_shape->getType();
+    const hkVector4* spheres = shape->m_spheres;
+    for (int i = 0; i < shape->m_numSpheres; i++) {
+        const hkVector4& s = spheres[i];
+        hkVector4 center;
+        center._setRotatedDir(motion.m_transform.m_rotation, s);
+        const hkVector4& pos = ((const hkMotionState*)bodyA.m_motion)->m_transform.m_translation;
+        motion.m_transform.m_translation.x = pos.x + center.x;
+        motion.m_transform.m_translation.y = pos.y + center.y;
+        motion.m_transform.m_translation.z = pos.z + center.z;
+        motion.m_transform.m_translation.w = pos.w + center.w;
+        hkSimdReal radius = s.w;
+        sphere.m_radius = radius;
+        childBody.m_shape = &sphere;
+        childBody.m_shapeKey = i;
+        typedef void (*QueryFunc)(void*, void*, void*, void*);
+        ((QueryFunc)input.m_dispatcher->getGetPenetrationsFunc(sphere.getType(), typeB))(&childBody, (void*)&bodyB, (void*)&input, target);
+        if (((hkCdBodyPairCollector*)target)->m_earlyOut) {
+            break;
+        }
+    }
+    HK_TIMER_END();
+}
+
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
 // the points back.
 void hkSymmetricAgent_18hkMultiSphereAgent_::linearCast(void* a, void* b, void* c, void* target, void* d) {
@@ -114,9 +338,9 @@ void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticLinearCast(void* a,
     hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
     if (d != 0) {
         hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
-        hkMultiSphereAgent::staticLinearCast(b, a, &flippedInput, &flipped, &flippedStart);
+        hkMultiSphereAgent::staticLinearCast(*(const hkCdBody*)b, *(const hkCdBody*)a, flippedInput, &flipped, &flippedStart);
     } else {
-        hkMultiSphereAgent::staticLinearCast(b, a, &flippedInput, &flipped, 0);
+        hkMultiSphereAgent::staticLinearCast(*(const hkCdBody*)b, *(const hkCdBody*)a, flippedInput, &flipped, 0);
     }
 }
 
@@ -147,7 +371,7 @@ void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::getPenetrations(void* a, 
 
 void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticGetPenetrations(void* a, void* b, void* c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrapped(target);
-    hkMultiSphereAgent::staticGetPenetrations(b, a, c, &wrapped);
+    hkMultiSphereAgent::staticGetPenetrations(*(const hkCdBody*)b, *(const hkCdBody*)a, *(const hkCollisionInput*)c, &wrapped);
 }
 
 void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::getClosestPoints(void* a, void* b, void* c, void* target) {
@@ -157,7 +381,7 @@ void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::getClosestPoints(void* a,
 
 void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticGetClosestPoints(void* a, void* b, void* c, void* target) {
     hkSymmetricAgentFlipCollector wrapped(target);
-    hkMultiSphereAgent::staticGetClosestPoints(b, a, c, &wrapped);
+    hkMultiSphereAgent::staticGetClosestPoints(*(const hkCdBody*)b, *(const hkCdBody*)a, *(const hkCollisionInput*)c, &wrapped);
 }
 
 void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::getPenetrations(void* a, void* b, void* c, void* target) {

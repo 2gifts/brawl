@@ -4,6 +4,8 @@
 #include <havok/hkArray.h>
 
 struct hkCollisionDispatcher;
+struct hkCdBody;
+struct hkCollisionInput;
 
 // One child entry of the multi-sphere agent: a 32-bit key and the child agent (8 bytes per entry).
 struct hkMultiSphereAgentEntry {
@@ -29,12 +31,15 @@ struct hkMultiSphereAgent : hkCollisionAgent {
     static hkMultiSphereAgent* createListBAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
 
     virtual void cleanup();
-    virtual void getPenetrations(void* a, void* b, void* c, void* target); // not written yet
-    virtual void getClosestPoints(void* a, void* b, void* c, void* target); // not written yet
-    static void staticGetPenetrations(void* a, void* b, void* c, void* target); // not written yet
-    static void staticGetClosestPoints(void* a, void* b, void* c, void* target); // not written yet
-    virtual void linearCast(void* a, void* b, void* c, void* target, void* d); // not written yet
-    static void staticLinearCast(void* a, void* b, void* c, void* target, void* d); // not written yet
+    virtual void getPenetrations(void* a, void* b, void* c, void* target);
+    virtual void getClosestPoints(void* a, void* b, void* c, void* target);
+    static void staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                      void* target);
+    static void staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                       void* target);
+    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
+    static void staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                 void* target, void* d);
     virtual void processCollision(void* a, void* b, void* c, void* d); // not written yet
 };
 
