@@ -187,6 +187,9 @@ public:
     virtual void analyzeSeal(void* seal);
     virtual bool checkTransitionStatus(u32 statusKind);
     virtual void adjustParentGroundCollision(int unk1, float* unk2);
+    int getHaveItemKind(StageObject* partner);
+    bool isApproachPartner(StageObject* partner);
+    void reqSummonsEffect();
     static bool isModelSwapColor(int color);
     static bool isEnableCoupleTech(int status);
     // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).

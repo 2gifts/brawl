@@ -21,6 +21,8 @@
 
 #define FT_BC ftPopoBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
+#include <ft/ft_owner.h>
+#include <so/so_external_value_accesser.h>
 
 // HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt); the repeated ones are the null placeholders of the
 // unused status ranges.
@@ -867,4 +869,81 @@ struct ftPopoVSlotsArticle {
 };
 int fn_105_F4D8(ftPopoVSlotsArticle* p) { return p->slot20(); } // soArticle checkActivate (virtual tail call)
 
+}
+
+void ftPopo::analyzeSeal(void* seal) {
+    ftOwnerSeal* record = static_cast<ftOwnerSeal*>(seal);
+    if (record->m_kind == 0x3c) {
+        int count = static_cast<int>(record->m_value / 2.0f);
+        m_moduleAccesser->getWorkManageModule().setInt(count, 0x10000041);
+    }
+}
+
+int ftPopo::getHaveItemKind(StageObject* partner) {
+    soItemManageModule* items = soExternalValueAccesser::getItemManageModule(partner);
+    if (items->isHaveItem(0) == false) {
+        return -1;
+    }
+    return items->getHaveItemKind(0);
+}
+
+void ftPopo::reqSummonsEffect() {
+    Vec3f position = m_moduleAccesser->getPostureModule().getPos();
+    m_moduleAccesser->getEffectModule().req(static_cast<EfID>(0x36), &position, &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, 0, -1);
+}
+
+void ftPopo::toKnockOut() {
+    Fighter::toKnockOut();
+    if (!m_moduleAccesser->getWorkManageModule().isFlag(0x1200003e)
+        && m_moduleAccesser->getLinkModule().isLink(6) == 1) {
+        ftPopoLinkKindEventArgs event(0x461);
+        m_moduleAccesser->getLinkModule().sendEventNodes(6, event, 0);
+    }
+}
+
+void ftPopo::adjustParentGroundCollision(int, float* bounds) {
+    switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x117:
+    case 0x11a: {
+        float up, down, left, right;
+        m_moduleAccesser->getGroundModule().calcRhombusModify(&up, &down, &left, &right, 0);
+        if (left < bounds[2]) {
+            bounds[2] = left;
+        }
+        if (right > bounds[3]) {
+            bounds[3] = right;
+        }
+        break;
+    }
+    }
+}
+
+void ftPopo::onDeadEnd() {
+    Fighter::onDeadEnd();
+    Fighter* partner = getPartner();
+    if (partner && !m_isPartner && soExternalValueAccesser::getStatusKind(partner) != 0x10b
+        && getOwner()->getStockCount() == 0 && m_moduleAccesser->getLinkModule().isLink(6) == 1) {
+        ftPopoLinkKindEventArgs event(0x45e);
+        m_moduleAccesser->getLinkModule().sendEventNodes(6, event, 0);
+    }
+}
+
+bool ftPopo::checkTransitionStatus(u32 statusKind) {
+    if (!Fighter::checkTransitionStatus(statusKind)) {
+        return false;
+    }
+    switch (static_cast<int>(statusKind)) {
+    case 0x26:
+    case 0x2a:
+        getPartner();
+        if (m_isPartner == true) {
+            Fighter* partner = getPartner();
+            if (partner && getHaveItemKind(partner) == 0x21 && isApproachPartner(partner)
+                && soExternalValueAccesser::getStatusKind(partner) == 0xa1) {
+                return false;
+            }
+        }
+        break;
+    }
+    return true;
 }

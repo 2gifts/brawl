@@ -6,6 +6,8 @@
 #include <snd/snd_bgm.h>
 #include <types.h>
 #include <gf/gf_pad_system.h>
+#include <nw4r/g3d/g3d_scnmdlexpand.h>
+#include <stdio.h>
 
 // HYPOTHESIS: IfCenter::updateTimeFast (0x800DDCF8, still fn_) takes the time to show.
 extern "C" void fn_800DDCF8(IfCenter* center, s32 time);
@@ -81,6 +83,39 @@ void IfCenter::setTimePos(int index) {
 void IfCenter::removeCenterTime() {
     unk0_40 = true;
     fn_800DDCF8(this, unk17C);
+}
+
+extern const u8 lbl_805A2398[4][2];
+extern const char lbl_8059E228[8];
+
+void IfCenter::updateTimeInit() {
+    if (m_timeDisp) {
+        nw4r::g3d::ResMdl model = static_cast<nw4r::g3d::ScnMdlExpand*>(m_expands[0])->m_scnMdl->m_resMdl;
+        char nodeName[8];
+        for (int digit = 0; digit < 4; digit++) {
+            for (int part = 0; part < 2; part++) {
+                sprintf(nodeName, lbl_8059E228, lbl_805A2398[digit][part]);
+                unk180Nodes[digit][part] = model.GetResNode(nodeName).GetID();
+            }
+        }
+        m_models[0]->m_modelAnim->setUpdateRate(0.0f);
+        m_models[0]->m_sceneModel->SetScnObjOption(8, 1);
+        for (int index = 1; index < 9; index++) {
+            m_models[index]->m_modelAnim->setUpdateRate(0.0f);
+            m_models[index]->m_sceneModel->SetScnObjOption(8, 1);
+        }
+        m_models[9]->m_modelAnim->setUpdateRate(0.0f);
+        for (int digit = 0; digit < 4; digit++) {
+            for (int part = 0; part < 2; part++) {
+                unk1A0[digit][part] = -1;
+            }
+        }
+        for (int digit = 0; digit < 4; digit++) {
+            for (int part = 0; part < 2; part++) {
+                unk1C0[digit][part] = -1;
+            }
+        }
+    }
 }
 
 void IfCenter::destroyModel() {

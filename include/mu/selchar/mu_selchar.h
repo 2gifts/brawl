@@ -185,6 +185,9 @@ public:
     virtual ~muSelCharTask();
 
     muSelCharTask();
+    void appearHomerunRule();
+    int bButtonHoldProc();
+    void setReadyState(int state);
     // HYPOTHESIS: initProc receives a pointer to the screen initialization data.
     static muSelCharTask* create(void* data);
     void initProc(void* data);
@@ -228,6 +231,7 @@ public:
     bool isTeamBattle();
     muSelCharPlayerArea* getPlayerArea(int areaIdx);
     int getRuleNumStock();
+    void setRuleNumStock(int count);
     int getHomerunRule();
     int getKumiteType();
     int getQueueMeleeDropRule();
@@ -282,6 +286,10 @@ public:
     bool canWifiEntry();
     void wifiEntryPlayer();
     void dispKumiteRule(int type);
+    void assignTeam();
+    void dispHomerunRule(int rule);
+    bool isWifiMode();
+    void readyStateMain();
     // HYPOTHESIS: range classification shared by the character select menus.
     static inline bool isSelCharTypeIn(int type, int first, int end) {
         bool in;

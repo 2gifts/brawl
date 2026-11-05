@@ -5,6 +5,14 @@
 #include <types.h>
 #include <new>
 
+int gfFileIOReplayCallback::notify_SyncCommand(u8 command, u16 value) {
+    if (command != 0) {
+        return 0;
+    }
+    g_gfFileIOManager->callback(command, value);
+    return 1;
+}
+
 gfFileIOManager* gfFileIOManager::create() {
     new (Heaps::SystemFW) gfFileIOManager;
     return g_gfFileIOManager;

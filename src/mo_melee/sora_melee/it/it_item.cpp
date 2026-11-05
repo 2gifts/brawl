@@ -35,6 +35,9 @@
 #include <so/event/so_event_manage_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
 #include <so/param/so_param_customize_module_impl.h>
+#include <it/it_resource_id_accesser_impl.h>
+#include <it/it_status_uniq_process.h>
+#include <so/resource/so_resource_module_ref.h>
 
 // MATCH-ONLY: it_manager.h cannot be included here (its customizer declarations disagree with the bool hooks of
 // itCustomizerInterface below), so the two itManager members BaseItem uses are declared on their own.
@@ -2164,4 +2167,79 @@ bool itGroundConditionCheckerImpl::isConditionNoCliffStop(soModuleAccesser* acce
         if (stopEnergy->getSpeed().lengthSq() > 0.1f * 0.1f) stopping = true;
     }
     return stopping;
+}
+
+soCollisionShieldEventObserver::soCollisionShieldEventObserver(short manageId, s8 priority)
+    : soEventObserver<soCollisionShieldEventObserver>(0xe) {
+    initialize(manageId, priority);
+}
+
+soCollisionReflectorEventObserver::soCollisionReflectorEventObserver(short manageId, s8 priority)
+    : soEventObserver<soCollisionReflectorEventObserver>(0xf) {
+    initialize(manageId, priority);
+}
+
+void itStatusUniqProcessHave::exitStatus(soModuleAccesser* accesser, int statusKind) {
+    if (statusKind != BaseItem::Status::Have) {
+        if (accesser->getLinkModule().isLink(BaseItem::Link::No_Have) == true) {
+            if (accesser->getLinkModule().isModelConstraint() == true) {
+                BaseItem::removeModelConstraint(accesser, statusKind, true);
+            }
+            accesser->getLinkModule().unlink(BaseItem::Link::No_Have);
+        }
+    }
+}
+
+u32 BaseItem::shoot(u32 count, float lr, float speed) {
+    ItemView* modules = reinterpret_cast<ItemView*>(this);
+    if (0.0f == lr && modules->link.isLink(Link::No_Have)) {
+        lr = modules->link.getParentLr(Link::No_Have);
+    }
+    return m_customizer->onShoot(this, count, lr, speed);
+}
+
+
+itResourceIdAccesserImpl::itResourceIdAccesserImpl(soModuleAccesser* moduleAccesser, u32 modelId, u32 animationId, u32 archiveId)
+    : soResourceIdAccesserImpl(modelId, modelId, animationId),
+      m_moduleAccsr(moduleAccesser), m_archiveId(archiveId) {
+}
+
+void BaseItem::onUpdateAiDir(Vec2f* direction, Vec2f* target, Vec2f* position, Vec2f* speed) {
+    m_customizer->onUpdateAiDir(this, direction, target, position, speed);
+}
+
+itStatusUniqProcessStandby::~itStatusUniqProcessStandby() {
+}
+
+itStatusUniqProcessHave::~itStatusUniqProcessHave() {
+}
+
+soSituationEventObserver::soSituationEventObserver(short manageId, s8 priority)
+    : soEventObserver<soSituationEventObserver>(8) {
+    initialize(manageId, priority);
+}
+
+gfTask::Category gfTask::getCategory() {
+    return m_taskCategory;
+}
+
+soResourceIdAccesser* soResourceModuleRef::getResourceIdAccesser() {
+    return unk24->getResourceIdAccesser();
+}
+
+void soResourceModuleRef::setGroupNo(u8 group, u16 index) {
+    unk28 = group;
+    soResourceModule* resource = &unkC;
+    resource->setGroupNo(group, index);
+}
+
+u32 soResourceModuleRef::getGroupNo(int index) {
+    if (unk28 >= 0) {
+        return static_cast<u8>(unk28);
+    }
+    return unk24->getGroupNo(index);
+}
+
+void itKineticModuleImpl::addSpeed(Vec3f* speed, soModuleAccesser* moduleAccesser) {
+    addSpeed(speed, true, moduleAccesser);
 }

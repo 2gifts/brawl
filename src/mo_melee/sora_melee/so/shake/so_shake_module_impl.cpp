@@ -1,6 +1,8 @@
 #include <so/shake/so_shake_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <types.h>
+#include <ac/ac_anim_cmd_impl.h>
+#include <so/so_value_accesser.h>
 
 void soShakeModuleImpl::activate() {
     stop();
@@ -77,4 +79,45 @@ void soShakeModuleImpl::update(bool) {
 
 bool soShakeModuleImpl::isObserv(char group) {
     return group == 0x1D;
+}
+
+bool soShakeModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3) {
+    s8 group = acmd->getGroup();
+    if (!isObserv(group)) {
+        return false;
+    }
+    if (acmd->getType() <= -1 || acmd->getType() >= 1) {
+        return false;
+    }
+    switch (acmd->getType()) {
+    case 0: {
+        soArrayContractibleTable<const acCmdArgConv> args = acmd->getArgList();
+        int kind;
+        if (acGetCmdArg(args, 0).getArgType() == 0) {
+            kind = acGetCmdArg(args, 0).getIntData();
+        } else if (acGetCmdArg(args, 0).getArgType() == 5) {
+            kind = soValueAccesser::getValueInt(moduleAccesser, acGetCmdArg(args, 0).getValueIndexData(), 0);
+        } else {
+            return true;
+        }
+        int frame;
+        if (acGetCmdArg(args, 1).getArgType() == 0) {
+            frame = acGetCmdArg(args, 1).getIntData();
+        } else if (acGetCmdArg(args, 1).getArgType() == 5) {
+            frame = soValueAccesser::getValueInt(moduleAccesser, acGetCmdArg(args, 1).getValueIndexData(), 0);
+        } else {
+            return true;
+        }
+        soGroundModule& ground = m_moduleAccesser->getGroundModule();
+        int touchMask = acGetCmdArg(args, 2).getIntData();
+        Vec2f offset(0.0f, 1.0f);
+        bool touching = ground.isTouch(touchMask, 0);
+        if (touching == true) {
+            offset = ground.getTouchNormal(touchMask, 0);
+        }
+        req(kind, frame, touching, &offset);
+        return true;
+    }
+    }
+    return false;
 }

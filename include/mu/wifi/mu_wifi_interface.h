@@ -97,22 +97,32 @@ struct muWifiAIDInfo {
         };
         struct {
             char _pad78[0x6C];
-            AssignedPlayer unkE4[4];
+            struct {
+                // HYPOTHESIS: the assigned handicap occupies the final halfword.
+                union {
+                    struct { u8 unk0; u8 unk1[9]; };
+                    struct { u8 _pad0[8]; u16 unk8; };
+                    struct { u8 _pad2[2]; u8 unk2Data; };
+                };
+            } unkE4[4];
             u8 unk10C;
             u8 unk10DData;
-            char _pad10E[2];
+            // HYPOTHESIS: appearance frequency, item switches and seed follow register access widths.
+            u8 _pad10E;
+            s8 unk10F;
             u32 unk110;
-            char _pad114[0x24];
+            char _pad114[0xC];
+            u64 unk120[2];
+            u8 unk130[4];
+            char _pad134[4];
         };
     };
     char m_shortComment[0xA0];
+    // HYPOTHESIS: the AID name holds five wide characters as byte pairs.
     union {
         char unk1D8[0x39];
-        struct {
-            char _pad1D8[0x12];
-            u8 unk1EA[3][10];
-            u8 unk208[3];
-        };
+        struct { char _pad1D8[8]; u8 unk1E0[0xA]; };
+        struct { char _pad1D8Names[0x12]; u8 unk1EA[3][10]; u8 unk208[3]; };
     };
     s8 m_friendAIDIndex;
     char unk212[0x6];
@@ -247,6 +257,11 @@ public:
     wchar_t* getMyFriendStatusComment(wchar_t* comment);
     wchar_t* getMyShortComment(int index, wchar_t* comment);
     // HYPOTHESIS: argument and result types follow the original register accesses.
+    int getNetworkErrorLevel();
+    int _getNetworkErrorLevel();
+    int selectRandomNetCharKind(u64 accepted);
+    bool isCompleteCloseMatchingAllNode();
+    bool isPreparedLoadAllStage();
     bool needKeepAlive();
     u8 getAssignedStageKind(u8* substage, u32* music);
     void clearGlobalAIDStatusLive();
@@ -263,6 +278,12 @@ public:
     wchar_t* getLocalPlayersOnamae(int index, wchar_t* name, u8* nameNo);
     // HYPOTHESIS: the mask parameter is word-sized in the original comparisons.
     bool isStageSyncFlagSet(u32 flags);
+    u8 getRuleMasterAID();
+    // HYPOTHESIS: argument and field types follow access widths in the original functions.
+    u16 getAssignedPlayerHandicap(int index);
+    u64* takeItemSwitch(s8* appearance);
+    wchar_t* getAIDName(u32 aid, wchar_t* name);
+    u32 setGlobalRandSeed();
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 

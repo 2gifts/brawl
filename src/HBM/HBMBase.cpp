@@ -3064,6 +3064,36 @@ const int HomeButton::scSoundHeapSize_but3 = 0x6f800;
 const int HomeButton::scSoundThreadPrio = 4;
 const int HomeButton::scDvdThreadPrio = 3;
 
+void HomeButton::create_sound(nw4r::snd::SoundArchive* pArchive, bool loadGroup) {
+    u32 heapSize;
+    void* streamBuffer;
+    if (void* memory = MEMAllocFromAllocator(&sAllocator, sizeof(nw4r::snd::SoundArchivePlayer))) {
+        mpSoundArchivePlayer = new (memory) nw4r::snd::SoundArchivePlayer();
+    }
+    u32 requiredSize = mpSoundArchivePlayer->GetRequiredMemSize(pArchive);
+    u32 streamSize = mpSoundArchivePlayer->GetRequiredStrmBufferSize(pArchive);
+    streamBuffer = MEMAllocFromAllocator(&sAllocator, streamSize);
+    void* archiveBuffer = MEMAllocFromAllocator(&sAllocator, requiredSize);
+    mpSoundArchivePlayer->Setup(pArchive, archiveBuffer, requiredSize, streamBuffer, streamSize);
+    if (void* memory = MEMAllocFromAllocator(&sAllocator, sizeof(nw4r::snd::SoundHandle))) {
+        mpSoundHandle = new (memory) nw4r::snd::SoundHandle();
+    }
+    if (loadGroup) {
+        if (void* memory = MEMAllocFromAllocator(&sAllocator, sizeof(nw4r::snd::SoundHeap))) {
+            mpSoundHeap = new (memory) nw4r::snd::SoundHeap();
+        }
+        heapSize = scSoundHeapSize_but3;
+        if (mButtonNum == 2) {
+            heapSize = scSoundHeapSize_but2;
+        }
+        void* heapBuffer = MEMAllocFromAllocator(&sAllocator, heapSize);
+        mpSoundHeap->Create(heapBuffer, heapSize);
+        mpSoundArchivePlayer->LoadGroup(0, mpSoundHeap, 0);
+    } else {
+        mpSoundHeap = NULL;
+    }
+}
+
 void HomeButton::update_sound() {
     if (mpSoundArchivePlayer != NULL) {
         nw4r::ut::detail::AutoLock<OSMutex> lock(sMutex);

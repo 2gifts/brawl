@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <mu/wifi/mu_wifi_interface.h>
 #include <mu/mu_notice_wnd.h>
+#include <nt/network.h>
 
 // The menu helpers take three integers; this unit passes only the first one (see TIPS.md).
 extern "C" int exchangeMuSelchkindToMuCharKind__6muMenuFiii(int selchKind);
@@ -827,5 +828,239 @@ void muSelCharTask::processDefault() {
         }
         break;
     }
+    }
+}
+
+void muSelCharTask::setRuleNumStock(int count) {
+    u8 aid;
+    m_ruleNumStock = count;
+    int type = getSelCharType();
+    int group;
+    if (isSelCharTypeIn(type, 0, 4)) group = 0;
+    else if (isSelCharTypeIn(type, 4, 12)) group = 1;
+    else {
+        bool inGroup = isSelCharTypeIn(type, 12, 16);
+        group = 3;
+        if (inGroup) group = 2;
+    }
+    if (group == 2) {
+        muWifiInterfaceTask& wifi = *g_muWifiInterfaceTask;
+        int master = wifi.unkFCA_b5;
+        if (!master) {
+            aid = Network::getMyAID();
+            if (aid == 0xFF) aid = 4;
+            u8 masterAid = wifi.getRuleMasterAID();
+            master = masterAid == aid;
+        }
+        if (master) sendWifiGameRule(false, true);
+    }
+}
+
+extern const u8 lbl_10_rodata_4F0[4][2];
+
+void muSelCharTask::appearHomerunRule() {
+    int rule = m_homerunRule;
+    int disabled = 0;
+    int type = getSelCharType();
+    int group;
+    if (isSelCharTypeIn(type, 0, 4)) group = 0;
+    else if (isSelCharTypeIn(type, 4, 12)) group = 1;
+    else {
+        bool inGroup = isSelCharTypeIn(type, 12, 16);
+        group = 3;
+        if (inGroup) group = 2;
+    }
+    if (group == 2 && !isWifiGameMaster()) disabled = 1;
+    int motion;
+    if (rule == 0) motion = lbl_10_rodata_4F0[disabled][0];
+    else motion = lbl_10_rodata_4F0[disabled][1];
+    m_objs[Obj_HomerunRule]->changeAnimN(motion, 0x10, false, false);
+    MuObject* object = m_objs[Obj_HomerunRule];
+    object->changeAnimN(2, 1, true, false);
+    m_scnGroup->Insert(m_scnGroup->sceneItemsCount, object->m_sceneModel);
+}
+
+extern const u8 lbl_10_rodata_118[8];
+
+int muSelCharTask::bButtonHoldProc() {
+    float frame = 0.0f;
+    int player = -1;
+    int count = 0;
+    for (int area = 0; area < m_numPlayerAreas; area++) {
+        int held = m_selCharPlayerAreas[area]->m_selCharHand->m_bButtonCnt;
+        if (held > count) {
+            count = held;
+            player = area;
+        }
+    }
+    if (player >= 0) {
+        int controller = m_selCharPlayerAreas[player]->getControllerKind();
+        if (controller < 4) frame = lbl_10_rodata_118[controller];
+    }
+    MuObject* object = m_objs[3];
+    m_scnGroup->Remove(object->m_sceneModel);
+    if (count > 0) {
+        m_scnGroup->Insert(m_scnGroup->sceneItemsCount, object->m_sceneModel);
+        object->setFrameVisible(frame);
+        object->setFrameNode(count);
+    }
+    if (count >= 30) return player;
+    return -1;
+}
+
+extern const u8 lbl_10_rodata_4E0[4];
+extern const u8 lbl_10_rodata_4E8[4][2];
+
+void muSelCharTask::setReadyState(int state) {
+    MuObject* object = m_objs[Obj_ReadyButton];
+    m_scnGroup->Remove(object->m_sceneModel);
+    if (state != 0) {
+        m_scnGroup->Insert(m_scnGroup->sceneItemsCount, object->m_sceneModel);
+        object->changeAnimN(state != 1, 0x11, true, false);
+    }
+    u32 motion = lbl_10_rodata_4E0[state];
+    object = m_objs[1];
+    int type = getSelCharType();
+    int group;
+    if (isSelCharTypeIn(type, 0, 4)) group = 0;
+    else if (isSelCharTypeIn(type, 4, 12)) group = 1;
+    else {
+        bool inGroup = isSelCharTypeIn(type, 12, 16);
+        group = 3;
+        if (inGroup) group = 2;
+    }
+    int animation;
+    bool play;
+    if (motion <= 1) {
+        animation = lbl_10_rodata_4E8[group][0];
+        play = motion == 1;
+    } else {
+        animation = lbl_10_rodata_4E8[group][1];
+        play = true;
+    }
+    object->changeAnimN(animation, 0x18, play, false);
+    m_readyState = state;
+}
+
+extern const u8 lbl_10_rodata_4F0[4][2];
+extern const u8 lbl_10_rodata_4E8[4][2];
+
+void muSelCharTask::assignTeam() {
+    int count = 0;
+    for (int area = 0; area < m_numPlayerAreas; area++) {
+        if (m_selCharPlayerAreas[area]->m_playerKind != 0) {
+            count++;
+        }
+    }
+    int* assignment;
+    int countAssigned;
+    int team;
+    int teamSize;
+    for (teamSize = count - 1; teamSize > 0; teamSize--) {
+        if (count % teamSize == 0) {
+            break;
+        }
+    }
+    if (teamSize <= 0) {
+        teamSize = 1;
+    }
+    int teams[4];
+    assignment = teams;
+    countAssigned = 0;
+    for (team = 0; team < 3 && countAssigned < 4; team++) {
+        for (int member = 0; member < teamSize && countAssigned < 4;) {
+            *assignment = team;
+            member++;
+            assignment++;
+            countAssigned++;
+        }
+    }
+    int* assignedTeam = teams;
+    for (int area = 0; area < m_numPlayerAreas; area++) {
+        muSelCharPlayerArea* player = m_selCharPlayerAreas[area];
+        if (player->m_playerKind != 0) {
+            player->setTeamColor(*assignedTeam, player->m_teamSet);
+            assignedTeam++;
+        }
+    }
+}
+
+void muSelCharTask::dispHomerunRule(int rule) {
+    int mode = 0;
+    int selCharType = getSelCharType();
+    int group;
+    if (isSelCharTypeIn(selCharType, 0, 4)) {
+        group = 0;
+    } else if (isSelCharTypeIn(selCharType, 4, 12)) {
+        group = 1;
+    } else {
+        bool inGroup = isSelCharTypeIn(selCharType, 12, 16);
+        group = 3;
+        if (inGroup) {
+            group = 2;
+        }
+    }
+    if (group == 2 && !isWifiGameMaster()) {
+        mode = 1;
+    }
+    m_objs[Obj_HomerunRule]->changeAnimN(rule == 0 ? lbl_10_rodata_4F0[mode][0] : lbl_10_rodata_4F0[mode][1], 0x10, false, false);
+}
+
+bool muSelCharTask::isWifiMode() {
+    int selCharType = getSelCharType();
+    int group;
+    if (isSelCharTypeIn(selCharType, 0, 4)) {
+        group = 0;
+    } else if (isSelCharTypeIn(selCharType, 4, 12)) {
+        group = 1;
+    } else {
+        bool inGroup = isSelCharTypeIn(selCharType, 12, 16);
+        group = 3;
+        if (inGroup) {
+            group = 2;
+        }
+    }
+    if (group == 0) goto offline;
+    selCharType = getSelCharType();
+    if (isSelCharTypeIn(selCharType, 0, 4)) {
+        group = 0;
+    } else if (isSelCharTypeIn(selCharType, 4, 12)) {
+        group = 1;
+    } else {
+        bool inGroup = isSelCharTypeIn(selCharType, 12, 16);
+        group = 3;
+        if (inGroup) {
+            group = 2;
+        }
+    }
+    if (group != 1) goto online;
+offline:
+    return false;
+online:
+    return true;
+}
+
+void muSelCharTask::readyStateMain() {
+    if (m_readyState == 1) {
+        MuObject* object = m_objs[Obj_ReadyButton];
+        if (object->isNodeAnimFinished()) {
+            m_readyState = 2;
+            object->changeAnimN(m_readyButtonPointed ? 2 : 1, 0x11, true, false);
+            object = m_objs[1];
+            int selCharType = getSelCharType();
+            int group;
+            if (isSelCharTypeIn(selCharType, 0, 4)) {
+                group = 0;
+            } else if (isSelCharTypeIn(selCharType, 4, 12)) {
+                group = 1;
+            } else {
+                bool inGroup = isSelCharTypeIn(selCharType, 12, 16);
+                group = 3;
+                if (inGroup) {
+                    group = 2;
+                }
+            }
+            object->changeAnimN(lbl_10_rodata_4E8[group][1], 0x18, true, false);
+        }
     }
 }

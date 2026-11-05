@@ -14,6 +14,7 @@ class itKineticModuleImpl : public soKineticModuleImpl, public soStatusEventObse
 
 public:
     using soKineticModuleImpl::addSpeed;
+    virtual void addSpeed(Vec3f* speed, soModuleAccesser* moduleAccesser);
     // HYPOTHESIS: the argument is the item's task-related int at +0x60 (only BaseItem::updateLifeTime calls it).
     bool isTouchDown(int);
     // HYPOTHESIS: refreshes the on-ground flag of the kinetic energies (called from BaseItem::processFixPosition).

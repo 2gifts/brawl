@@ -95,9 +95,7 @@ void wnDededeFollowerStatusUniqProcess::execStatus(soModuleAccesser* moduleAcces
     soParamAccesser* params = (soParamAccesser*)moduleAccesser->getWorkManageModule().getParamAccesser();
     switch (moduleAccesser->getStatusModule().getStatusKind()) {
     case 5: {
-        soWorkManageModule& work = moduleAccesser->getWorkManageModule();
-        int count = work.getInt(0x20000001);
-        if (work.getInt(0x20000000) >= count) {
+        if (moduleAccesser->getWorkManageModule().getInt(0x20000000) >= moduleAccesser->getWorkManageModule().getInt(0x20000001)) {
             changeStatus(moduleAccesser);
         }
         moduleAccesser->getWorkManageModule().addInt(1, 0x20000000);
@@ -455,5 +453,40 @@ void wnDededeFollower::processHit() {
         } else {
             moduleAccesser->getStatusModule().changeStatusRequest(9, moduleAccesser);
         }
+    }
+}
+
+void wnDededeFollowerStatusUniqProcessFinal::initStatus(soModuleAccesser* moduleAccesser) {
+    soParamAccesser* params = (soParamAccesser*)moduleAccesser->getWorkManageModule().getParamAccesser();
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x13:
+        moduleAccesser->getPostureModule().reverseLr();
+        moduleAccesser->getWorkManageModule().setFloat(params->getParamFloat(moduleAccesser, 0xFB8, 0), 0x21000007);
+        break;
+    case 0x14:
+        moduleAccesser->getWorkManageModule().offFlag(0x22000003);
+        break;
+    case 0x15:
+        moduleAccesser->getWorkManageModule().setInt(params->getParamInt(moduleAccesser, 0x5DCD, 0), 0x20000005);
+        break;
+    case 0x16: {
+        float chance = params->getParamFloat(moduleAccesser, 0xFBA, 0);
+        if (randf() < chance) {
+            Vec3f pos = moduleAccesser->getPostureModule().getPos();
+            if (pos.m_x * moduleAccesser->getPostureModule().getLr() > 0.0f) {
+                moduleAccesser->getWorkManageModule().onFlag(0x22000008);
+            }
+        }
+        break;
+    }
+    case 0x17:
+        if (!moduleAccesser->getWorkManageModule().isFlag(0x22000004)) {
+            float damage = moduleAccesser->getWorkManageModule().getFloat(0x21000000);
+            moduleAccesser->getWorkManageModule().addFloat(damage, 0x21000004);
+            if (moduleAccesser->getWorkManageModule().getFloat(0x21000004) >= params->getParamFloat(moduleAccesser, 0xFAB, 0)) {
+                moduleAccesser->getWorkManageModule().onFlag(0x22000004);
+            }
+        }
+        break;
     }
 }

@@ -87,15 +87,14 @@ static inline void hkTransformAgent_copyMotionState(hkMotionState& dst, const hk
 // The hkSimdReal motion state scalar (see hkMotionState.h) puts this function in the mode that keeps the hkCollisionAgent
 // vtable store and the dead transform temporary, as in the target.
 // The `mr r30, r31` copy in the create functions is the object pointer kept for the exception cleanup of the base (the
-// unit is built with -Cpp_exceptions on). NONMATCHING (create functions 98.5-98.8%): bodyA and the child shape swap
-// r24/r25, and B colors its forwarded parameters differently.
+// unit is built with -Cpp_exceptions on).
 hkTransformAgent::hkTransformAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                    hkContactMgr* mgr)
     : hkCollisionAgent((int)mgr) {
     const hkTransformShape* shape = (const hkTransformShape*)bodyA.m_shape;
-    const hkShape* child = shape->m_childShape.m_childShape;
     hkMotionState motion;
     hkMotionState* childMotion = &motion;
+    const hkShape* child = shape->m_childShape.m_childShape;
     hkTransformAgent_copyMotionState(motion, *(const hkMotionState*)bodyA.m_motion);
     motion.m_transform.setMul(*(const hkTransform*)bodyA.m_motion, shape->m_transform);
     hkCdBody childBody(&bodyA, childMotion);

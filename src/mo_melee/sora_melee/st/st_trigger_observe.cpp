@@ -4,6 +4,29 @@
 #include <st/st_area_manager.h>
 #include <st/stage.h>
 #include <types.h>
+#include <cm/cm_camera_controller.h>
+#include <gm/gm_global.h>
+
+stObsTriggerCameraReactionCB::stObsTriggerCameraReactionCB(bool* flag, Rect2D* area, bool keep)
+    : stObsTriggerCB(flag, keep) {
+    __memcpy(&unk10, area, sizeof(unk10));
+}
+
+void stObsTriggerCameraReactionCB::userProc() {
+    if (CameraController::getInstance() != nullptr && CameraController::getInstance()->isIntersect(&unk10)) {
+        *unk8 = true;
+    }
+}
+
+stObsTriggerPlayerIncludeAreaCB::stObsTriggerPlayerIncludeAreaCB(bool* flag, Rect2D* area, bool keep)
+    : stObsTriggerCB(flag, keep) {
+    __memcpy(&unk10, area, sizeof(unk10));
+    unk20 = 0;
+    unk24 = false;
+    if (g_GameGlobal->m_advData->m_flags.m_unk0 == true) {
+        unk24 = true;
+    }
+}
 
 stObsTriggerCB::stObsTriggerCB(bool* flag, bool unkC) : unk8(flag), unkC(unkC) { }
 

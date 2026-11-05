@@ -101,5 +101,6 @@ public:
     void setDisableZoomEnd();
     bool isDisableZoom();
     static CameraController* getInstance();
+    bool isIntersect(const Rect2D* area);
 };
 static_assert(sizeof(CameraController) == 420, "Class is wrong size!");
