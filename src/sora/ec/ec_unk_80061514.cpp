@@ -280,3 +280,53 @@ void ecEffectWork::change_mdl_tex(const char* matName, const char* texName, nw4r
     }
     unk30->change_tex(unk44, unk2C, matName, texName, resFile, filter);
 }
+
+void ecEffectWork::update_odd(float frames) {
+    if (unk5A > 1) {
+        frames *= 1.0f / unk5A;
+    }
+    switch (unk24) {
+    case 1:
+        if (!(unk58 & 0x10)) {
+            renew_attach();
+            if (unk44 != NULL && unk3C != 0) {
+                if (unk58 & 1) {
+                    if (unk48 != NULL && !(unk56 & 0x7E)) {
+                        unk48->setUpdateRate(0.0f);
+                    }
+                } else if (unk48 != NULL) {
+                    if (!(unk56 & 0x7E)) {
+                        unk48->setUpdateRate(frames);
+                    } else {
+                        if (!(unk56 & 2) && unk48->m_anmObjChrRes != NULL) {
+                            unk48->m_anmObjChrRes->SetUpdateRate(frames);
+                        }
+                        if (!(unk56 & 4) && unk48->m_anmObjVisRes != NULL) {
+                            unk48->m_anmObjVisRes->SetUpdateRate(frames);
+                        }
+                        if (!(unk56 & 8) && unk48->m_anmObjTexPatRes != NULL) {
+                            unk48->m_anmObjTexPatRes->SetUpdateRate(frames);
+                        }
+                        if (!(unk56 & 0x10) && unk48->m_anmObjTexSrtRes != NULL) {
+                            unk48->m_anmObjTexSrtRes->SetUpdateRate(frames);
+                        }
+                        if (!(unk56 & 0x20) && unk48->m_anmObjMatClrRes != NULL) {
+                            unk48->m_anmObjMatClrRes->SetUpdateRate(frames);
+                        }
+                        if (!(unk56 & 0x40) && unk48->m_anmObjShpRes != NULL) {
+                            unk48->m_anmObjShpRes->SetUpdateRate(frames);
+                        }
+                    }
+                }
+                unk44->UpdateFrame();
+                unk44->SetScnObjOption(2, 0);
+                unk44->G3dProc(1, 0, 0);
+                unk44->SetScnObjOption(2, 1);
+                if ((unk56 & 0x80) && unk70 != NULL) {
+                    unk70(unk44, unk74);
+                }
+            }
+        }
+        break;
+    }
+}
