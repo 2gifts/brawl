@@ -85,7 +85,7 @@ struct hkWorldOperation {
 
     struct BiggestOperation {
         u8 m_kind;               // 0x00 HYPOTHESIS: operation kind (first byte moved by the sort)
-        u8 m_unk01[0x03];        // 0x01
+        // 0x01-0x03 padding, not a member (BYTES: the sort's copies move byte 0 alone, then four words)
         hkEntity* m_entityA;     // 0x04 HYPOTHESIS: entity whose simulation island orders the queue
         hkEntity* m_entityB;     // 0x08 HYPOTHESIS: second entity, used as tie breaker
         int m_unk0C;             // 0x0C

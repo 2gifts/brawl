@@ -19,53 +19,7 @@
 #include <havok/hkPhantom.h>
 #include <havok/hkMotion.h>
 
-// Local algorithm helper (hkAlgorithm in the Havok TU map). Used only by the operation queue.
-// the original keeps quickSort as its own function, so no inlining while these are defined
-#pragma dont_inline on
-struct hkAlgorithm {
-    template <typename T, typename Less>
-    static void quickSortRecursive(T* elements, int lo, int hi, Less less) {
-        for (;;) {
-            int i = lo;
-            int j = hi;
-            T pivot = elements[(lo + hi) >> 1];
-            do {
-                while (less(elements[i], pivot)) {
-                    i++;
-                }
-                while (less(pivot, elements[j])) {
-                    j--;
-                }
-                if (j < i) {
-                } else if (j == i) {
-                    i++;
-                    j--;
-                } else {
-                    T tmp = elements[i];
-                    elements[i] = elements[j];
-                    elements[j] = tmp;
-                    i++;
-                    j--;
-                }
-            } while (i <= j);
-            if (lo < j) {
-                quickSortRecursive(elements, lo, j, less);
-            }
-            if (i >= hi) {
-                return;
-            }
-            lo = i;
-        }
-    }
-
-    template <typename T, typename Less>
-    static void quickSort(T* elements, int n, Less less) {
-        if (n > 1) {
-            quickSortRecursive(elements, 0, n - 1, less);
-        }
-    }
-};
-#pragma dont_inline reset
+#include <havok/hkAlgorithm.h>
 
 hkWorldOperationQueue::hkWorldOperationQueue(hkWorld* world) {
     m_world = world;
