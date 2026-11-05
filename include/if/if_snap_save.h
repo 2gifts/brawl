@@ -69,7 +69,13 @@ public:
             void* unk110;                // 0x110
             u8 unk114_pad[0x15D - 0x114];
             FileName unk15D;             // 0x15D
-            u8 unk19E_pad[0x204 - 0x19E];
+            union {
+                u8 unk19E_pad[0x204 - 0x19E];
+                struct {
+                    u8 unk19E[0xA];
+                    FileName unk1A8;
+                };
+            };
             char unk204[0x41];           // 0x204
         };
     };
@@ -100,6 +106,8 @@ public:
     void erase(int drive, FileName name);
     void erase(const FileKey& key);
     void copy(int drive, FileName name);
+    void move(int drive, FileName name);
+    void readSummary(int drive, FileName name);
 };
 static_assert(sizeof(muCollection) == 0x394, "Class is the wrong size!");
 

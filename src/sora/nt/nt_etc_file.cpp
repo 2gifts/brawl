@@ -170,3 +170,46 @@ u64 nteSection::getWiiId() {
     }
     return data->m_wiiId;
 }
+
+u32 nteFile::getSections_Direct(const u8* buffer) {
+    u32 count = buffer[4];
+    if (count > 5) {
+        count = 0;
+    }
+    return count;
+}
+
+nteSectionData* nteFile::getSectionData_Direct(u8* buffer, u32 index) {
+    u32 count = getSections_Direct(buffer);
+    if (count < (u8)index) {
+        return NULL;
+    }
+    const u32* entry = (const u32*)buffer + index * 3;
+    if (NETCalcCRC32(buffer + entry[2], entry[3]) != entry[4]) {
+        return NULL;
+    }
+    return (nteSectionData*)(buffer + entry[2]);
+}
+
+bool nteFile::addSection(nteSectionData* section) {
+    if (section == NULL) {
+        return false;
+    }
+    bool success = false;
+    if ((s32)m_count < 5) {
+        u32 size = section->m_dataSize;
+        if (size == 0) {
+            return false;
+        }
+        nteFileEntry* entry = &m_entries[m_count];
+        entry->m_data = gfHeapManager::alloc(m_heap, size, 32);
+        if (entry->m_data == NULL) {
+            return false;
+        }
+        memcpy(entry, section, sizeof(nteSectionData));
+        memcpy(entry->m_data, section + 1, size);
+        m_count++;
+        success = true;
+    }
+    return success;
+}

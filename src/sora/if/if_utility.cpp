@@ -97,3 +97,5 @@ utility::StandardTask::~StandardTask() {
     }
     g_gfSceneRoot->removeInfoCamResAnm();
 }
+
+utility::DepthScaler::~DepthScaler() { }

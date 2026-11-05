@@ -296,6 +296,7 @@ void WPADGetAccGravityUnit(s32 chan, u32 type, WPADAccGravityUnit* pAcc);
 
 void WPADDisconnect(s32 chan);
 s32 WPADProbe(s32 chan, s32* pDevType);
+u8 WPADGetRadioSensitivity(s32 chan);
 
 WPADSamplingCallback WPADSetSamplingCallback(s32 chan,
                                              WPADSamplingCallback pCallback);

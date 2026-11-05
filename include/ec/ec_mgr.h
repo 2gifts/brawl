@@ -98,6 +98,8 @@ public:
     u32 unk80;
 
     ecEffectWork();
+    void update_odd(float frames);
+    void renew_attach();
     void render();
     void release(bool);
     void pause();

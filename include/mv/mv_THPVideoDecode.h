@@ -37,3 +37,4 @@ void* VideoDecoderForOnMemory(void* p1);
 bool THPVideoDecodeOneShot(u32* p1);
 
 void PushFreeTextureSet(void* buffer);
+OSMessage PopDecodedTextureSet(u32 flags);

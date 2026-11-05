@@ -22,6 +22,18 @@
 #include <so/so_external_value_accesser.h>
 #include <ft/ft_external_value_accesser.h>
 
+soLinkEventIkeFinal::soLinkEventIkeFinal(int eventKind, int unk8)
+    : soLinkEventArgs(eventKind), unk8(unk8), unkC(-1), unk10(0), unk14(0.0f) {
+}
+
+float Vec3f::length() {
+    float lengthSquared = m_z * m_z + (m_x * m_x + m_y * m_y);
+    if (static_cast<float>(__fabs(lengthSquared)) <= 1.17549435e-38f) {
+        return 0.0f;
+    }
+    return lengthSquared * rsqrtf(lengthSquared);
+}
+
 void ftIke::notifyEventCollisionShield(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser) {
     if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x115 && groupIndex == 1) {
         if (!m_moduleAccesser->getWorkManageModule().isFlag(0x22000013)) {
@@ -517,4 +529,18 @@ void ftIke::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAcc
         }
     }
     Fighter::notifyEventCollisionSearch(collisionLog, moduleAccesser);
+}
+
+bool ftIke::notifyEventCollisionShieldCheck() {
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x115 &&
+        m_moduleAccesser->getWorkManageModule().isFlag(0x22000013)) {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x22000013);
+        m_moduleAccesser->getStatusModule().changeStatusRequest(0x121, m_moduleAccesser);
+        m_moduleAccesser->getPostureModule().setLr(m_moduleAccesser->getWorkManageModule().getFloat(0x21000005));
+        m_moduleAccesser->getPostureModule().updateRotYLr();
+        int stopFrames = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc7, 0);
+        m_moduleAccesser->getStopModule().setHitStopFrame(stopFrames, 0);
+        return true;
+    }
+    return Fighter::notifyEventCollisionShieldCheck();
 }
