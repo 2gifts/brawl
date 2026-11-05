@@ -115,6 +115,7 @@ public:
     nw4r::g3d::ResFile m_charPicRes;
     union { char _0x440[0x8]; struct { int unk440; u8 unk444; u8 unk445; u8 unk446; u8 unk447; }; };
 
+    void main();
     void setCharPic(int charKind, int playerKind, int curCostume, bool isTeamBattle, int teamColor, int unk);
     nw4r::g3d::ResFile* getCharPicTexResFile(int charKind);
     bool isTeamBattle() __attribute__((never_inline)); // BYTES: the area calls it out of line, MWCC would inline it

@@ -15,6 +15,7 @@
 #include <gf/gf_pad_system.h>
 #include <stdio.h>
 #include <mu/wifi/mu_wifi_interface.h>
+#include <mu/mu_notice_wnd.h>
 #include <nt/network.h>
 
 // The menu helpers take three integers; this unit passes only the first one (see TIPS.md).
@@ -749,6 +750,84 @@ void muSelCharTask::wifiEntryPlayer() {
                 player->wifiRequestPlayerEntry(controller);
             }
         }
+    }
+}
+
+void muSelCharTask::processDefault() {
+    u8 selected;
+    int i;
+    unk64C--;
+    if (isSelCharTypeOnline(getSelCharType())) wifiMain();
+    int ruleState = m_ruleTaskState;
+    if (ruleState != 0) mainRule();
+    faceIconMain();
+    for (i = 0; i < m_numPlayerAreas; i++) m_selCharPlayerAreas[i]->main();
+    switch (unk40) {
+    case 0:
+        if (ruleState == 0) selectingMain();
+        break;
+    case 1:
+        if (--unk5F8 <= 0) {
+            setToGlobal();
+            if (isSelCharTypeOnline(getSelCharType())) g_muWifiInterfaceTask->noticeEndOfCharSelect();
+            setState(2, 0, 0);
+        }
+        break;
+    case 3:
+        unk40 = 4;
+        break;
+    case 6: {
+        int result;
+        if (unk60C->m_step != 3) result = 0;
+        else {
+            selected = unk60C->m_selected;
+            closeWifiDlg();
+            result = 2;
+            if (selected) result = 1;
+        }
+        switch (result) {
+        case 1: setState(4, 0, 0); break;
+        case 2: setState(0, 0, 0); break;
+        }
+        break;
+    }
+    case 7: {
+        int result;
+        if (unk60C->m_step != 3) result = 0;
+        else {
+            selected = unk60C->m_selected;
+            closeWifiDlg();
+            result = 2;
+            if (selected) result = 1;
+        }
+        if (result != 0) {
+            if (unk644 == 3) setState(4, 0, 0);
+            else setState(5, 0, 0);
+        }
+        break;
+    }
+    case 8: {
+        u8 aid;
+        int player;
+        if (g_muWifiInterfaceTask->isCancelApprovalCalled(&aid, &player) && aid == unk635Byte && player == unk636Byte) {
+            closeWifiDlg();
+            setState(0, 0, 0);
+        } else {
+            int result;
+            if (unk60C->m_step != 3) result = 0;
+            else {
+                selected = unk60C->m_selected;
+                closeWifiDlg();
+                result = 2;
+                if (selected) result = 1;
+            }
+            if (result != 0) {
+                g_muWifiInterfaceTask->answerRequestedEntry(result == 1, unk635Byte, unk636Byte);
+                setState(0, 0, 0);
+            }
+        }
+        break;
+    }
     }
 }
 

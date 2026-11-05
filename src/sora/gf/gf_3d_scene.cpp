@@ -3,6 +3,13 @@
 #include <nw4r/g3d/g3d_scnroot.h>
 #include <sr/sr_common.h>
 #include <types.h>
+#include <gf/gf_display.h>
+#include <gf/gf_copyefb.h>
+#include <nw4r/g3d/g3d_camera.h>
+#include <nw4r/ut/ut_Color.h>
+#include <mt/mt_matrix.h>
+
+extern const float lbl_805A1364;
 
 void gfSceneRoot::create() {
     g_gfSceneRoot = new (Heaps::System) gfSceneRoot;
@@ -172,6 +179,73 @@ void gfSceneRoot::releaseLightHandle(LightHandle* handle) {
         handle->m_unk1 = 0x14;
     }
 }
+
+void gfSceneRoot::drawFrameBufferReverse(int direction) {
+    gfFrameBuffer* frameBuffer = gfFrameBuffer::getInstance();
+    int width = frameBuffer->m_efbWidth;
+    int height = frameBuffer->m_efbHeight;
+    nw4r::g3d::CameraData cameraData;
+    nw4r::g3d::Camera camera(&cameraData);
+    camera.Init();
+    camera.SetOrtho(0.0f, height, 0.0f, width, lbl_805A1364, 10.0f);
+    camera.SetViewport(0.0f, 0.0f, width, height);
+    camera.GXSetViewport();
+    camera.GXSetProjection();
+    camera.GXSetScissor();
+    camera.GXSetScissorBoxOffset();
+    GXTexObj* texture = gfCopyEFBMgr::getInstance()->getCopyEFBTex(0);
+    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+    GXLoadTexObj(texture, GX_TEXMAP0);
+    GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 60, false, 125);
+    GXSetNumTexGens(1);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetNumTevStages(1);
+    GXSetNumIndStages(0);
+    GXSetTevDirect(GX_TEVSTAGE0);
+    GXSetChanCtrl(GX_COLOR0A0, false, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanCtrl(GX_COLOR1A1, false, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanMatColor(GX_COLOR0A0, nw4r::ut::Color(0xFFFFFFFF));
+    GXSetChanAmbColor(GX_COLOR0A0, nw4r::ut::Color(0xFFFFFFFF));
+    GXSetNumChans(0);
+    GXSetZCompLoc(false);
+    GXSetZMode(false, GX_ALWAYS, true);
+    GXSetClipMode(GX_CLIP_DISABLE);
+    GXSetBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_CLEAR);
+    Matrix matrix;
+    GXLoadPosMtxImm(matrix.m, GX_PNMTX0);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+    float bottom = height;
+    float right = width;
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    if (direction == 1) {
+        GXPosition3f32(0.0f, 0.0f, -1.0f);
+        GXTexCoord2f32(1.0f, 0.0f);
+        GXPosition3f32(right, 0.0f, -1.0f);
+        GXTexCoord2f32(0.0f, 0.0f);
+        GXPosition3f32(right, bottom, -1.0f);
+        GXTexCoord2f32(0.0f, 1.0f);
+        GXPosition3f32(0.0f, bottom, -1.0f);
+        GXTexCoord2f32(1.0f, 1.0f);
+    } else {
+        GXPosition3f32(0.0f, 0.0f, -1.0f);
+        GXTexCoord2f32(0.0f, 1.0f);
+        GXPosition3f32(right, 0.0f, -1.0f);
+        GXTexCoord2f32(1.0f, 1.0f);
+        GXPosition3f32(right, bottom, -1.0f);
+        GXTexCoord2f32(1.0f, 0.0f);
+        GXPosition3f32(0.0f, bottom, -1.0f);
+        GXTexCoord2f32(0.0f, 0.0f);
+    }
+}
+
+
+
 
 gfSceneRoot::Layer::~Layer() {
     nw4r::g3d::ScnGroup* group = unk4;

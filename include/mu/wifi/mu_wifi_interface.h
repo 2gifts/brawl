@@ -1,3 +1,4 @@
+// Local BrawlHeaders shadow: adds game-rule and friend-list accessors.
 #pragma once
 // Local BrawlHeaders shadow: adds the recovered online menu task accessors and the
 // task fields they read.
@@ -10,7 +11,7 @@
 struct muWifiPlayerArea {
     u8 m_aid;
     u8 m_localPlayer;
-    u8 unk2[3];
+    union { u8 unk2[3]; struct { u8 unk2Data; u8 _pad3[2]; }; };
     u8 unk5_b7 : 1;
     u8 unk5_b0 : 7;
     u8 unk6[2];
@@ -24,8 +25,8 @@ struct muWifiAIDInfo {
         u8 unk1[7];
     };
     struct AssignedPlayer {
-        u8 m_aid;
-        u8 unk1[3];
+        union { u8 m_aid; u8 unk0; };
+        union { u8 unk1[3]; struct { u8 _pad1; u8 unk2Data; u8 _pad3; }; };
         u8 m_teamColor;
         u8 unk5[5];
     };
@@ -52,15 +53,35 @@ struct muWifiAIDInfo {
     u8 unk56_b0 : 2;
     union {
         char unk57[0x21];
+        // HYPOTHESIS: status byte and four-byte rule packet share this region.
+        struct {
+            u8 unk57Data;
+            char _pad58[0xC];
+            u8 unk64[4];
+        };
         struct {
             char _pad57[2];
             u8 unk59_b4 : 4;
             u8 unk59_b0 : 4;
-            char _pad5A[0xE];
+            union {
+                char _pad5A[0xE];
+                struct { u8 unk5A; char _pad5B[0xD]; };
+            };
             u8 unk68[4];
+        };
+        struct {
+            u8 unk57_b7 : 1;
+            u8 unk57_b0 : 7;
+            u8 unk58_b4 : 4;
+            u8 unk58_b0 : 4;
         };
     };
     union {
+        // HYPOTHESIS: four-byte game-rule packet begins at offset 0x7D.
+        struct {
+            char _pad78Rule[5];
+            u8 unk7DData[4];
+        };
         struct {
             u8 unk78_b7 : 1;
             u8 unk78_b3 : 4;
@@ -83,6 +104,7 @@ struct muWifiAIDInfo {
                     struct { u8 unk0; u8 unk1[9]; };
                     struct { u8 _pad3[3]; u8 unk3; u8 unk4; u8 _pad5[5]; };
                     struct { u8 _pad0[8]; u16 unk8; };
+                    struct { u8 _pad2[2]; u8 unk2Data; };
                 };
             } unkE4[4];
             u8 unk10C;
@@ -102,6 +124,7 @@ struct muWifiAIDInfo {
     union {
         char unk1D8[0x39];
         struct { char _pad1D8[8]; u8 unk1E0[0xA]; };
+        struct { char _pad1D8Names[0x12]; u8 unk1EA[3][10]; u8 unk208[3]; };
     };
     s8 m_friendAIDIndex;
     char unk212[0x6];
@@ -146,7 +169,11 @@ public:
     // HYPOTHESIS: paired rule packets use the byte and halfword layout of their copy.
     union {
         struct {
-            char unkFFC[0x28];
+            union {
+                char unkFFC[0x28];
+                // HYPOTHESIS: cached rule packet used to detect selection changes.
+                u8 unkFFCData[4];
+            };
             u8 m_assignedMeleeRule[0xA];
             u8 m_assignedHomerunRule;
             u8 m_assignedKumiteType;
@@ -210,6 +237,9 @@ public:
     bool isPlayerAssignRecieved();
     bool isEqualServerGameMode();
     bool isMyPlayerArea(int index);
+    void noticeEndOfCharSelect();
+    bool isCancelApprovalCalled(u8* aid, int* player);
+    void answerRequestedEntry(bool accepted, u8 aid, int player);
     u8 getTeamColor(int index);
     u8 getAssignedTeamColor(int index);
     u8 getAssignedHomerunRule();
@@ -229,6 +259,7 @@ public:
     void resetLimitTime(int seconds);
     static bool testSendAIDInfoDone();
     void clearPrepareLoadStage();
+    void sendAIDInfo(bool send, u8 aid);
     int getFriendAIDIndexAID(int aid);
     void clearShortComment(int aid);
     void closeAIDWifi(int aid);
@@ -272,6 +303,18 @@ public:
     u8 getAssignedStageKind(u8* substage, u32* music);
     void clearGlobalAIDStatusLive();
     u8 getAssignedPlayerKind(int index);
+    // HYPOTHESIS: output is a four-byte rule packet; force bypasses comparison.
+    bool getSelCharGameRule(void* rule, bool force);
+    // HYPOTHESIS: argument indexes the global player-area table.
+    bool isEnoughRoomForFriendList(int player);
+    // HYPOTHESIS: argument and return types follow the original register accesses.
+    bool isExchangingFriendKey(int index);
+    u8 getLocalPlayerContNum(int index);
+    bool isWifiPreloadCharacter();
+    wchar_t* getGlobalPlayersOnamae(int index, wchar_t* name, u8* nameNo);
+    wchar_t* getLocalPlayersOnamae(int index, wchar_t* name, u8* nameNo);
+    // HYPOTHESIS: the mask parameter is word-sized in the original comparisons.
+    bool isStageSyncFlagSet(u32 flags);
     // HYPOTHESIS: argument and field types follow access widths in the original functions.
     u16 getAssignedPlayerHandicap(int index);
     u64* takeItemSwitch(s8* appearance);

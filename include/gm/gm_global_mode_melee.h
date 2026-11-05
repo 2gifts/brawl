@@ -8,8 +8,11 @@
 #include <gm/gm_lib.h>
 #include <types.h>
 
+#include <it/it_create.h>
+
 class gmItSwitch {
 public:
+    bool gmCheckItemSwitch(itKind kind);
     enum Frequency {
         Frequency_None = 0x0,
         Frequency_Low = 0x1,
@@ -385,6 +388,10 @@ public:
     float m_gameSpeed;          // 0x48
     union {
         char _0x4c[0x2C];        // 0x4C
+        struct {
+            char unk4C[0x08];
+            u32 unk54;
+        };
         struct {
             char _0x4c_pad[0x04];
             u8 m_0x50;           // 0x50

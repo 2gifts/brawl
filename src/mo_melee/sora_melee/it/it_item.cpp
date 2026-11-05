@@ -2122,6 +2122,53 @@ bool itCustomizerInterface::isReferenceControlerHave(BaseItem*) { return false; 
 itParam::KineticFlag itCustomizerInterface::getKineticFlags(BaseItem*) { return itParam::KineticFlag(0); }
 bool itCustomizerInterface::isUsePhysics(BaseItem*) { return false; }
 
+void itStatusUniqProcessStandby::exitStatus(soModuleAccesser* accesser, int nextStatus) {
+    if (nextStatus == 0) return;
+    accesser->getVisibilityModule().setWhole(1);
+    accesser->getCollisionHitModule().setWhole(0, 0);
+    accesser->getAreaModule().setWhole(true);
+    accesser->getCameraModule().setWhole(true);
+    accesser->getJostleModule().setByte47(true);
+    accesser->getShadowModule().setActiveStatus(true);
+    dynamic_cast<BaseItem&>(*accesser->m_stageObject).setVisibilityWholeForce(1);
+}
+
+void itStatusUniqProcessStandby::initStatus(soModuleAccesser* accesser) {
+    accesser->getVisibilityModule().setWhole(0);
+    accesser->getCollisionHitModule().setWhole(2, 0);
+    accesser->getAreaModule().setWhole(false);
+    accesser->getCameraModule().setWhole(false);
+    accesser->getSituationModule().setKind(static_cast<SituationKind>(5), false);
+    accesser->getGroundModule().setCorrect(soGroundShapeImpl::Correct_None, 0);
+    soMotionChangeParam motion;
+    motion.m_kind = -1;
+    motion.m_frame = 0.0f;
+    motion.m_rate = 1.0f;
+    motion._12 = 0;
+    motion._13 = 0;
+    motion._14 = 0;
+    motion._15 = 0;
+    accesser->getMotionModule().changeMotionRequest(&motion);
+    accesser->getJostleModule().setByte47(false);
+    accesser->getShadowModule().setActiveStatus(false);
+    dynamic_cast<BaseItem&>(*accesser->m_stageObject).setVisibilityWholeForce(0);
+}
+
+bool itGroundConditionCheckerImpl::isConditionNoCliffStop(soModuleAccesser* accesser) {
+    soKineticEnergy* groundEnergy = accesser->getKineticModule().getEnergy(9);
+    bool moving = false;
+    if (groundEnergy->isEnable() == true) {
+        if (groundEnergy->getSpeed().lengthSq() > 0.1f * 0.1f) moving = true;
+    }
+    if (moving) return true;
+    soKineticEnergy* stopEnergy = accesser->getKineticModule().getEnergy(7);
+    bool stopping = false;
+    if (stopEnergy->isEnable() == true) {
+        if (stopEnergy->getSpeed().lengthSq() > 0.1f * 0.1f) stopping = true;
+    }
+    return stopping;
+}
+
 soCollisionShieldEventObserver::soCollisionShieldEventObserver(short manageId, s8 priority)
     : soEventObserver<soCollisionShieldEventObserver>(0xe) {
     initialize(manageId, priority);

@@ -547,3 +547,8 @@ public:
     static itNullCustomizer* getInstance();
 };
 static_assert(sizeof(itNullCustomizer) == 12, "Class is wrong size!");
+
+class itGroundConditionCheckerImpl : public soGroundConditionChecker {
+public:
+    virtual bool isConditionNoCliffStop(soModuleAccesser* moduleAccesser);
+};
