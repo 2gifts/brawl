@@ -296,6 +296,80 @@ void hkBvTreeAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkColl
     HK_TIMER_END_LIST();
 }
 
+// Not written yet (out of line in this unit): hkSweptTransformUtil::calcTimInfo, calcAabbAndQueryTree, the hit list sort
+// and the two hkAgentDispatchUtil<u32, hkBvAgentEntryInfo, hkAgentDispatchUtilHelper> templates.
+extern "C" void fn_802A6A38(const hkMotionState* a, const hkMotionState* b, hkReal deltaTime, hkVector4& timInfo);
+extern "C" int fn_802A6B94(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkTransform& bTa, const hkVector4& timInfo,
+                           hkProcessCollisionInput& input, hkReal* cachedAabb, hkArray<u32>& hitList);
+extern "C" void fn_802A4C14(u32* keys, int numKeys);
+extern "C" void fn_802A4E34(hkArray<hkBvTreeAgent::hkBvAgentEntryInfo>& entries, hkArray<u32>& hitList,
+                            const hkCdBody& bodyA, const hkCdBody& bodyB, hkProcessCollisionInput& input,
+                            hkContactMgr* mgr, void* helper);
+extern "C" void fn_802A52F0(hkArray<hkBvTreeAgent::hkBvAgentEntryInfo>& entries, hkArray<u32>& hitList,
+                            const hkCdBody& bodyA, const hkCdBody& bodyB, hkProcessCollisionInput& input,
+                            hkContactMgr* mgr, void* helper);
+
+// HYPOTHESIS: global hkBool switches read here (sda21): use the cached aabb at 0x20, and update the entry list
+// without sorting the hits first.
+extern hkBool lbl_805A0F14;
+extern hkBool lbl_805A0F10;
+
+// Helper handed to the dispatch-util templates: the tree's collection and a child body of B.
+// HYPOTHESIS: layout (0x480 in the caller's frame: collection, then the body; the rest is the shape buffer).
+struct hkBvTreeAgentDispatchHelper {
+    const hkShapeCollection* m_collection; // 0x00
+    hkCdBody m_body;                       // 0x04
+    hkShapeContainer::ShapeBuffer m_buffer;
+
+    explicit hkBvTreeAgentDispatchHelper(const hkCdBody& body) : m_body(&body) {}
+};
+
+// Queries the tree with the aabb of A swept over the step and updates the entry list from the hits (one child agent
+// per hit key). Inlined into processCollision (the hit list is destroyed on both exits).
+static inline void hkBvTreeAgent_updateEntries(hkBvTreeAgent* agent, const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                               hkProcessCollisionInput& input) {
+    hkInplaceArray<u32, 128> hitList;
+    hkTransform bTa;
+    bTa.setMulInverseMul(*(const hkTransform*)bodyB.m_motion, *(const hkTransform*)bodyA.m_motion);
+    hkVector4 timInfo;
+    fn_802A6A38((const hkMotionState*)bodyA.m_motion, (const hkMotionState*)bodyB.m_motion, input.unk18, timInfo);
+    hkReal* cachedAabb = lbl_805A0F14 ? agent->unk20 : 0;
+    if (fn_802A6B94(bodyA, bodyB, bTa, timInfo, input, cachedAabb, hitList) != 0) {
+        return;
+    }
+    const hkShapeCollection* collection = ((const hkBvTreeShape*)bodyB.m_shape)->m_collection;
+    hkBvTreeAgentDispatchHelper helper(bodyB);
+    helper.m_collection = collection;
+    if (lbl_805A0F10) {
+        fn_802A4E34(agent->m_entries, hitList, bodyA, bodyB, input, (hkContactMgr*)agent->unk8, &helper);
+    } else {
+        fn_802A4C14(hitList.begin(), hitList.getSize());
+        fn_802A52F0(agent->m_entries, hitList, bodyA, bodyB, input, (hkContactMgr*)agent->unk8, &helper);
+    }
+}
+
+// Updates the entries, then runs every entry's agent on its child of B.
+void hkBvTreeAgent::processCollision(const hkCdBody& bodyA, const hkCdBody& bodyB, hkProcessCollisionInput& input,
+                                     void* output) {
+    HK_TIMER_BEGIN_LIST("BvTree", "QueryTree");
+    hkBvTreeAgent_updateEntries(this, bodyA, bodyB, input);
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    hkCdBody childBody(&bodyB);
+    HK_TIMER_SPLIT_LIST("NarrowPhase");
+    const hkBvTreeShape* bvTree = (const hkBvTreeShape*)bodyB.m_shape;
+    const hkShapeCollection* collection = bvTree->m_collection;
+    hkShapeContainer::ShapeBuffer shapeBuffer;
+    for (; entry != end; entry++) {
+        const hkShape* child = collection->m_container.getChildShape(entry->m_key, shapeBuffer);
+        u32 key = entry->m_key;
+        childBody.m_shape = (hkShape*)child;
+        childBody.m_shapeKey = key;
+        entry->m_collisionAgent->processCollision(bodyA, childBody, input, output);
+    }
+    HK_TIMER_END_LIST();
+}
+
 void hkBvTreeAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                           void* target) {
     hkShapeContainer::ShapeBuffer shapeBuffer;

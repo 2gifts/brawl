@@ -43,6 +43,10 @@ struct hkLinearCastCollisionInput : hkCollisionInput {
     hkLinearCastAgentConfig* unk28; // 0x28
 };
 
-// Input of processCollision (Havok's name; the Skyrim reference has it as a plain derived struct). HYPOTHESIS: no
-// members of its own are read by the agents written so far.
-struct hkProcessCollisionInput : hkCollisionInput {};
+// Input of processCollision (Havok's name; the Skyrim reference has it as a plain derived struct).
+// HYPOTHESIS: step times; hkBvTreeAgent::processCollision passes unk18 to hkSweptTransformUtil::calcTimInfo.
+struct hkProcessCollisionInput : hkCollisionInput {
+    hkReal unk10; // 0x10
+    hkReal unk14; // 0x14
+    hkReal unk18; // 0x18
+};
