@@ -30,12 +30,12 @@ struct hkShapeCollectionAgent : hkCollisionAgent {
     static hkShapeCollectionAgent* createListBAgent(void* a, void* b, void* c, int d);
     static void registerAgent(void* dispatcher);
 
-    virtual void getPenetrations(void* a, void* b, void* c, void* target);
-    virtual void getClosestPoints(void* a, void* b, void* c, void* target);
-    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
-    virtual void processCollision(void* unk0, void* unk1, void* unk2, void* unk3);
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
+    virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, const hkProcessCollisionInput& unk2, void* unk3);
     virtual void cleanup();
-    virtual void updateShapeCollectionFilter(void* a, void* b, void* c);
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c);
     virtual void invalidateTim(void* arg);
     virtual void warpTime(float t0, float t1, void* arg);
 
@@ -56,5 +56,5 @@ struct hkShapeCollectionAgentVariant : hkShapeCollectionAgent {
     hkShapeCollectionAgentVariant(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
                                   hkContactMgr* mgr)
         : hkShapeCollectionAgent(bodyA, bodyB, input, mgr) {}
-    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };

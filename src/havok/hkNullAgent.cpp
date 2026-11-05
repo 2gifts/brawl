@@ -33,9 +33,9 @@ hkNullAgent* hkNullAgent::getNullAgent() {
 }
 
 void hkNullAgent::cleanup() {}
-void hkNullAgent::processCollision(void* a, void* b, void* c, void* d) {}
-void hkNullAgent::linearCast(void* a, void* b, void* c, void* target, void* d) {}
-void hkNullAgent::getClosestPoints(void* a, void* b, void* c, void* target) {}
-void hkNullAgent::getPenetrations(void* a, void* b, void* c, void* target) {}
+void hkNullAgent::processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d) {}
+void hkNullAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {}
+void hkNullAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {}
+void hkNullAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {}
 
 hkNullAgent::~hkNullAgent() {}

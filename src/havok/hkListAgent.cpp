@@ -39,10 +39,10 @@ extern "C" void fn_802FEA54(void* subObject, void* args);
 
 // Argument block handed to fn_802FEA54 by updateShapeCollectionFilter (lives on the stack there).
 struct FilterArgs {
-    void* a;      // 0x00
-    void* b;      // 0x04
-    u32 bValue;   // 0x08 first word of b
-    void* d;      // 0x0C
+    const hkCdBody* a;         // 0x00
+    const hkCdBody* b;         // 0x04
+    u32 bValue;                // 0x08 first word of b
+    const hkCollisionInput* d; // 0x0C
     int unk8;     // 0x10
 };
 
@@ -51,14 +51,13 @@ void hkListAgent::cleanup() {
     delete this;
 }
 
-void hkListAgent::updateShapeCollectionFilter(void* a, void* b, void* d) {
+void hkListAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& d) {
     FilterArgs args;
-    u32 first = *(u32*)b;
-    args.a = a;
-    args.b = b;
-    args.d = d;
-    args.bValue = first;
+    args.a = &a;
+    args.b = &b;
+    args.d = &d;
     args.unk8 = unk8;
+    args.bValue = (u32)b.m_shape;
     fn_802FEA54(m_subObject, &args);
 }
 
@@ -70,14 +69,14 @@ void hkListAgent::warpTime(float t0, float t1, void* arg) {
     fn_802FC988((char*)this + 0x10, t0, t1, arg);
 }
 
-void hkListAgent::getClosestPoints(void* a, void* b, void* c, void* target) {
+void hkListAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
     staticGetClosestPoints(a, b, c, (hkPenetrationTarget*)target);
 }
 
-void hkListAgent::getPenetrations(void* a, void* b, void* c, void* target) {
+void hkListAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
     staticGetPenetrations(a, b, c, (hkPenetrationTarget*)target);
 }
 
-void hkListAgent::linearCast(void* a, void* b, void* c, void* target, void* d) {
+void hkListAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
     staticLinearCast(a, b, c, (hkPenetrationTarget*)target, d);
 }

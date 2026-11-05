@@ -32,9 +32,9 @@ struct hkConvexListAgent : hkCollisionAgent {
     static hkCollisionAgent* createConvexListAgent(void* a, void* b, void* c, int flag);
     static hkCollisionAgent* createListConvexAgent(void* a, void* b, void* c, int flag);
 
-    static void staticGetClosestPoints(void* a, void* b, void* c, void* d);
-    static void staticGetPenetrations(void* a, void* b, void* c, void* d);
-    static void staticLinearCast(void* a, void* b, void* c, void* d, void* e);
+    static void staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* d);
+    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* d);
+    static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* d, void* e);
 
     // Overrides of the hkCollisionAgent slots (vtable 0x28..0x38 of lbl_80486AE8), base parameter lists.
     virtual void invalidateTim(void* arg);
@@ -42,23 +42,23 @@ struct hkConvexListAgent : hkCollisionAgent {
     virtual void removePoint(u16 key);
     virtual void commitPotential(u16 key);
     virtual void createZombie(u16 key);
-    virtual void updateShapeCollectionFilter(void* a, void* b, void* d);
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& d);
     void switchToStreamMode();
     void switchToGskMode();
 
     virtual void cleanup();
-    virtual void processCollision(void* a, void* b, void* c, void* d); // HYPOTHESIS: slot order follows hkPhantomAgent
-    virtual void getClosestPoints(void* a, void* b, void* c, void* d);
-    virtual void getPenetrations(void* a, void* b, void* c, void* d);
-    virtual void linearCast(void* a, void* b, void* c, void* d, void* e);
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d); // HYPOTHESIS: slot order follows hkPhantomAgent
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* d);
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* d);
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* d, void* e);
 };
 
 // HYPOTHESIS: hkSymmetricAgent<hkConvexListAgent> (map name); only its linear cast is written.
 struct hkSymmetricAgent_17hkConvexListAgent_ : hkConvexListAgent {
-    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };
 
 // HYPOTHESIS: hkSymmetricAgentLinearCast<hkConvexListAgent> (map name); only its static linear cast is written.
 struct hkSymmetricAgentLinearCast_17hkConvexListAgent_ : hkSymmetricAgent_17hkConvexListAgent_ {
-    static void staticLinearCast(void* a, void* b, void* c, void* target, void* d);
+    static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };

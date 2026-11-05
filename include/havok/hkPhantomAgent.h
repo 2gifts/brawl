@@ -27,7 +27,7 @@ struct hkPhantomCallbackShape {
 // forwarding functions). Slot 0x08 is not identified yet.
 struct hkPenetrationTarget {
     virtual void unkSlot08() = 0;
-    virtual void forwardPenetrations(void* a, void* b, void* c) = 0; // 0x0C
+    virtual void forwardPenetrations(const hkCdBody& a, const hkCdBody& b, const void* c) = 0; // 0x0C
 };
 
 // Phantom callback collision agent. Constructed from the two collision bodies of a pair. The
@@ -53,12 +53,12 @@ struct hkPhantomAgent : hkCollisionAgent {
                                               hkContactMgr* contactMgr);
     static void registerAgent(hkCollisionDispatcher* dispatcher);
     static void staticGetClosestPoints();
-    static void staticGetPenetrations(void* a, void* b, void* c, hkPenetrationTarget* target);
+    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, hkPenetrationTarget* target);
     static void staticLinearCast();
 
     virtual void cleanup();
-    virtual void processCollision(void* a, void* b, void* c, void* d);
-    virtual void getPenetrations(void* a, void* b, void* c, void* target);
-    virtual void getClosestPoints(void* a, void* b, void* c, void* target);
-    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d);
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };

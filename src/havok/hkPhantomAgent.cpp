@@ -72,17 +72,17 @@ void hkPhantomAgent::cleanup() {
 
 hkPhantomAgent::~hkPhantomAgent() {}
 
-void hkPhantomAgent::processCollision(void* a, void* b, void* c, void* d) {}
+void hkPhantomAgent::processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d) {}
 
-void hkPhantomAgent::getPenetrations(void* a, void* b, void* c, void* target) {
-    static_cast<hkPenetrationTarget*>(target)->forwardPenetrations(a, b, c);
+void hkPhantomAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+    static_cast<hkPenetrationTarget*>(target)->forwardPenetrations(a, b, &c);
 }
 
-void hkPhantomAgent::staticGetPenetrations(void* a, void* b, void* c, hkPenetrationTarget* target) {
+void hkPhantomAgent::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, hkPenetrationTarget* target) {
     target->forwardPenetrations(a, b, target);
 }
 
-void hkPhantomAgent::getClosestPoints(void* a, void* b, void* c, void* target) {}
+void hkPhantomAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {}
 void hkPhantomAgent::staticGetClosestPoints() {}
-void hkPhantomAgent::linearCast(void* a, void* b, void* c, void* target, void* d) {}
+void hkPhantomAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {}
 void hkPhantomAgent::staticLinearCast() {}

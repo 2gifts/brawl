@@ -14,7 +14,7 @@ struct hkCdBody {
 
     hkCdBody() {}
     // Child body of a parent: same motion and shape key, the given shape (the agents wrap a sub-shape this way).
-    hkCdBody(const hkCdBody* parent) {
+    explicit hkCdBody(const hkCdBody* parent) {
         m_parent = (hkCdBody*)parent;
         m_motion = parent->m_motion;
     }

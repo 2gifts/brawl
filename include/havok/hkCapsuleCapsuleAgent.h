@@ -21,9 +21,9 @@ struct hkCapsuleCapsuleAgent : hkCollisionAgent {
     static void registerAgent(hkCollisionDispatcher* dispatcher);
     static hkCapsuleCapsuleAgent* createCapsuleCapsuleAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
 
-    static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
+    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
 
     virtual void cleanup();
-    virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
 };

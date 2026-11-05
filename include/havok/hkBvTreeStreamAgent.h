@@ -26,9 +26,9 @@ struct hkBvTreeStreamAgent : hkCollisionAgent {
                         hkContactMgr* contactMgr);
     virtual ~hkBvTreeStreamAgent();
 
-    virtual void processCollision(void* a, void* b, void* c, void* d); // 0x1C not written yet
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d); // 0x1C not written yet
     virtual void cleanup();
-    virtual void updateShapeCollectionFilter(void* a, void* b, void* c); // 0x24
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c); // 0x24
     virtual void invalidateTim(void* arg);
     virtual void warpTime(float t0, float t1, void* arg);
 
@@ -41,9 +41,9 @@ struct hkBvTreeStreamAgent : hkCollisionAgent {
     static void registerMultiRayAgent(void* dispatcher);
 
     // Forwarders to the hkBvTreeAgent static query functions (tail calls in the original).
-    void getPenetrations(void* a, void* b, void* c, void* d);
-    void getClosestPoints(void* a, void* b, void* c, void* d);
-    void linearCast(void* a, void* b, void* c, void* d, void* e);
+    void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* d);
+    void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* d);
+    void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* d, void* e);
 };
 
 // HYPOTHESIS: agent variant created by createBvTreeShapeAgent. Its vtable (lbl_804868E8) is not
@@ -52,5 +52,5 @@ struct hkBvTreeStreamAgentVariant : hkBvTreeStreamAgent {
     hkBvTreeStreamAgentVariant(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
                                hkContactMgr* contactMgr)
         : hkBvTreeStreamAgent(bodyA, bodyB, input, contactMgr) {}
-    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };

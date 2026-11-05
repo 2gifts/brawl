@@ -63,10 +63,10 @@ void hkBoxBoxAgent::cleanup() {
 
 hkBoxBoxAgent::~hkBoxBoxAgent() {}
 
-void hkBoxBoxAgent::getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkBoxBoxAgent::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
     staticGetClosestPoints(unk0, unk1, unk2, unk3);
 }
 
-void hkBoxBoxAgent::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkBoxBoxAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
     staticGetPenetrations(unk0, unk1, unk2, unk3);
 }

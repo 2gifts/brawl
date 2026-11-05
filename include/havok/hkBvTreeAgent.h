@@ -47,12 +47,12 @@ struct hkBvTreeAgent : hkCollisionAgent {
                                          hkContactMgr* contactMgr);
 
     virtual void calcStatistics(void* collector) const;
-    virtual void getPenetrations(void* a, void* b, void* c, void* target);
-    virtual void getClosestPoints(void* a, void* b, void* c, void* target);
-    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
-    virtual void processCollision(void* a, void* b, void* c, void* d);
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d);
     virtual void cleanup();
-    virtual void updateShapeCollectionFilter(void* a, void* b, void* c);
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c);
     virtual void invalidateTim(void* arg);
     virtual void warpTime(float t0, float t1, void* arg);
 
@@ -60,7 +60,7 @@ struct hkBvTreeAgent : hkCollisionAgent {
                                       void* target);
     static void staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
                                        void* target);
-    static void staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkLinearCastCollisionInput& input,
+    static void staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, hkLinearCastCollisionInput& input,
                                  void* target, void* startTarget);
 };
 
@@ -70,18 +70,18 @@ struct hkBvTreeAgent : hkCollisionAgent {
 // HYPOTHESIS: symmetric variant of hkBvTreeAgent; the class name is the map name (hkSymmetricAgentLinearCast<hkBvTreeAgent>): each wrapper swaps the
 // first two pair arguments and forwards to the hkBvTreeAgent function.
 struct hkSymmetricAgentLinearCast_13hkBvTreeAgent : hkBvTreeAgent {
-    virtual void getPenetrations(void* a, void* b, void* c, void* target);
-    static void staticGetPenetrations(void* a, void* b, void* c, void* target);
-    virtual void getClosestPoints(void* a, void* b, void* c, void* target);
-    static void staticGetClosestPoints(void* a, void* b, void* c, void* target);
-    virtual void updateShapeCollectionFilter(void* a, void* b, void* c);
-    static void staticLinearCast(void* a, void* b, void* c, void* target, void* d);
-    virtual void processCollision(void* a, void* b, void* c, void* d);
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    static void staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c);
+    static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d);
 
     hkSymmetricAgentLinearCast_13hkBvTreeAgent(hkContactMgr* contactMgr) : hkBvTreeAgent(contactMgr) {}
 };
 
 // HYPOTHESIS: hkSymmetricAgent<hkBvTreeAgent> (map name); only its linear cast is written.
 struct hkSymmetricAgent_13hkBvTreeAgent_ : hkBvTreeAgent {
-    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };

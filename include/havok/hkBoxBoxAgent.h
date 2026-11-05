@@ -24,11 +24,11 @@ struct hkBoxBoxAgent : hkCollisionAgent {
     // The size test compares the input's 0x08 value (HYPOTHESIS: the tolerance) with twice each box's m_halfExtents.w.
     static hkCollisionAgent* createBoxBoxAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
                                                hkContactMgr* contactMgr);
-    static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
+    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
 
     virtual void cleanup();
-    virtual void processCollision(void* unk0, void* unk1, void* unk2, void* unk3); // 0x1C, not written yet
-    virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
+    virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, const hkProcessCollisionInput& unk2, void* unk3); // 0x1C, not written yet
+    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
 };
