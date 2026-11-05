@@ -153,10 +153,10 @@ void hkFlagCdBodyPairCollector::addCdBodyPair(hkCdBody* bodyA, hkCdBody* bodyB) 
 }
 
 void hkClosestCdPointCollector::addCdPoint(hkCdPoint* point) {
-    if (m_lastChainA != 0 && !(point->data.f7 < m_point.f7)) {
+    if (m_lastChainA != 0 && !(point->m_contact.m_normal.w < m_point.m_normal.w)) {
         return;
     }
-    m_point = point->data;
+    m_point = point->m_contact;
     hkCdPointChain* last;
     for (last = point->m_chainA; last->m_next != 0; last = last->m_next) {
     }
@@ -166,14 +166,14 @@ void hkClosestCdPointCollector::addCdPoint(hkCdPoint* point) {
     }
     m_lastChainB = last;
     m_idB = point->m_chainB->m_id;
-    m_dist = point->data.f7;
+    m_dist = point->m_contact.m_normal.w;
 }
 
 void hkSimpleClosestContactCollector::addCdPoint(hkCdPoint* point) {
-    if (m_hit && !(point->data.f7 < m_point.f7)) {
+    if (m_hit && !(point->m_contact.m_normal.w < m_point.m_normal.w)) {
         return;
     }
-    m_point = point->data;
+    m_point = point->m_contact;
     m_hit = hkBool(true);
-    m_dist = point->data.f7;
+    m_dist = point->m_contact.m_normal.w;
 }

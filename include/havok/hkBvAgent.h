@@ -15,8 +15,8 @@ struct hkBvAgent : hkCollisionAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
     // 0x08 (hkCollisionAgent::unk8) holds the contact manager passed to the constructor as its last argument.
-    hkBvAgent* m_childA;        // 0x0C
-    hkBvAgent* m_childB;        // 0x10
+    hkCollisionAgent* m_childA; // 0x0C agent of the bounding volume shape against B
+    hkCollisionAgent* m_childB; // 0x10 agent of the child shape against B, made on the first overlap
 
     // HYPOTHESIS: the constructor takes the pair as passed by the dispatcher (createShapeBvAgent
     // swaps the first two). Parameter types are not recovered yet.
@@ -44,6 +44,7 @@ struct hkBvAgent : hkCollisionAgent {
     static void registerAgent(void* dispatcher);
     static void staticGetPenetrations(void* a, void* b, void* c, hkPenetrationTarget* target);
     static void staticGetClosestPoints(void* a, void* b, void* c, hkPenetrationTarget* target);
+    static void staticLinearCast(void* a, void* b, void* c, void* target, void* d);
 };
 
 // HYPOTHESIS: the symmetric variant (map name hkSymmetricAgent<hkBvAgent>). It differs from
