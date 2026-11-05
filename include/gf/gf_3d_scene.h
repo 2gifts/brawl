@@ -95,6 +95,7 @@ public:
 
     // HYPOTHESIS: per-layer record (layout from the layer functions; the name is not from the map).
     struct Layer {
+        ~Layer();
         u32 unk0;
         nw4r::g3d::ScnGroup* unk4;
         nw4r::g3d::AnmScnRes* unk8;

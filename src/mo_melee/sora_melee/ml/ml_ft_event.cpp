@@ -465,3 +465,14 @@ void mlFtEvent::notifyEventAppeal(int entryId, int appeal) {
         static_cast<stMadein*>(g_Stage)->m_unk9E3[static_cast<u8>(playerNo)] = 1;
     }
 }
+
+void mlFtEvent::notifyEventResultWin(int entryId, int winAnim) {
+    OSReport("win no %d \n", winAnim);
+    if (g_Stage != NULL) {
+        int fighterKind = g_ftManager->getResultFighterGmKind(entryId);
+        stResult* stage = static_cast<stResult*>(g_Stage);
+        stage->unk270 = 1;
+        stage->m_winningCharKind = fighterKind;
+        stage->m_winAnim = winAnim;
+    }
+}

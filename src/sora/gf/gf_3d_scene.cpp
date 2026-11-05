@@ -172,3 +172,12 @@ void gfSceneRoot::releaseLightHandle(LightHandle* handle) {
         handle->m_unk1 = 0x14;
     }
 }
+
+gfSceneRoot::Layer::~Layer() {
+    nw4r::g3d::ScnGroup* group = unk4;
+    while (!group->Empty()) {
+        group->PopBack();
+    }
+    unk4->Destroy();
+    unk0 = 0;
+}
