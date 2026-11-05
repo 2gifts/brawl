@@ -21,5 +21,8 @@ struct hkCdPointCollector {
     virtual ~hkCdPointCollector() {}
     virtual void addCdPoint(hkCdPoint* point) = 0; // HYPOTHESIS: name from the map
 
-    hkReal m_earlyOutDistance; // 0x04 (the closest-point collectors keep their best distance here)
+    // 0x04 (the closest-point collectors keep their best distance here). BYTES: hkSimdReal, the aligned typedef:
+    // constructing a collector stores a value of that type, which turns copy propagation off in the function (the
+    // symmetric linear cast wrappers keep the collector addresses in registers because of it).
+    hkSimdReal m_earlyOutDistance;
 };
