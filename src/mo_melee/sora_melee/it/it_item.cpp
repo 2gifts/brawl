@@ -37,6 +37,7 @@
 #include <so/param/so_param_customize_module_impl.h>
 #include <it/it_resource_id_accesser_impl.h>
 #include <it/it_status_uniq_process.h>
+#include <so/resource/so_resource_module_ref.h>
 
 // MATCH-ONLY: it_manager.h cannot be included here (its customizer declarations disagree with the bool hooks of
 // itCustomizerInterface below), so the two itManager members BaseItem uses are declared on their own.
@@ -2169,4 +2170,29 @@ itStatusUniqProcessHave::~itStatusUniqProcessHave() {
 soSituationEventObserver::soSituationEventObserver(short manageId, s8 priority)
     : soEventObserver<soSituationEventObserver>(8) {
     initialize(manageId, priority);
+}
+
+gfTask::Category gfTask::getCategory() {
+    return m_taskCategory;
+}
+
+soResourceIdAccesser* soResourceModuleRef::getResourceIdAccesser() {
+    return unk24->getResourceIdAccesser();
+}
+
+void soResourceModuleRef::setGroupNo(u8 group, u16 index) {
+    unk28 = group;
+    soResourceModule* resource = &unkC;
+    resource->setGroupNo(group, index);
+}
+
+u32 soResourceModuleRef::getGroupNo(int index) {
+    if (unk28 >= 0) {
+        return static_cast<u8>(unk28);
+    }
+    return unk24->getGroupNo(index);
+}
+
+void itKineticModuleImpl::addSpeed(Vec3f* speed, soModuleAccesser* moduleAccesser) {
+    addSpeed(speed, true, moduleAccesser);
 }
