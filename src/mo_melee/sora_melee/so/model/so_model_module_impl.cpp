@@ -52,8 +52,6 @@ extern "C" void fn_80047FCC();
 extern "C" void fn_801B0A28();
 extern "C" void fn_8003E828(const Matrix* mtx, const Vec3f* scale, Matrix* out); // HYPOTHESIS: scales the matrix
 extern "C" void fn_8001A194(int, const Vec3f* axes, const Vec3f* pos); // HYPOTHESIS: debug axis render
-extern "C" void fn_8000D06C(gfSceneRoot* root, gfSceneRootEvent* evt); // HYPOTHESIS: gfSceneRoot::addEvent
-extern "C" void fn_8000D074(gfSceneRoot* root, gfSceneRootEvent* evt); // HYPOTHESIS: gfSceneRoot::removeEvent
 extern "C" void* fn_8018D310(const nw4r::g3d::ResFile* resFile, const char* name); // ResPltt lookup (st_croll.cpp)
 extern "C" void* fn_801AFF94(nw4r::g3d::ScnMdl::CopiedMatAccess* acc, bool);
 extern "C" void* fn_80190DC8(void* resPltt, int);
@@ -176,7 +174,7 @@ void soModelModuleImpl::constructInstance(gfSceneRoot::LayerType lt, u32 flags, 
                 soModelModuleScnObjCallback::SetCallbackCondition(shadowScnMdl);
                 m_shadowScnMdl = shadowScnMdl;
                 m_shadowNode = shadowNode;
-                fn_8000D06C(g_gfSceneRoot, &m_sceneRootEvent);
+                g_gfSceneRoot->addEventNotify(&m_sceneRootEvent);
             }
             if (loupeNo != g_noLoupeNo) {
                 gfLoupe::addPlayerLoupeScnObj(loupeNo, lt, m_scnMdl);
@@ -277,7 +275,7 @@ void soModelModuleImpl::destructInstance() {
         }
         getScnMdl(true)->m_callback = NULL;
         m_shadowScnMdl = NULL;
-        fn_8000D074(g_gfSceneRoot, &m_sceneRootEvent);
+        g_gfSceneRoot->removeEventNotify(&m_sceneRootEvent);
     }
 }
 
@@ -438,7 +436,7 @@ void soModelModuleImpl::setScnMdl(nw4r::g3d::ScnMdl* mdl, void* data, gfSceneRoo
         gfLoupe::addPlayerLoupeScnObj(m_loupeNo, lt, mdl);
     }
     if (getScnMdl(true) != NULL) {
-        fn_8000D06C(g_gfSceneRoot, &m_sceneRootEvent);
+        g_gfSceneRoot->addEventNotify(&m_sceneRootEvent);
     }
 }
 
@@ -457,7 +455,7 @@ nw4r::g3d::ScnMdl* soModelModuleImpl::detachScnMdl(void* data) {
     }
 
     if (getScnMdl(true) != NULL) {
-        fn_8000D074(g_gfSceneRoot, &m_sceneRootEvent);
+        g_gfSceneRoot->removeEventNotify(&m_sceneRootEvent);
     }
 
     InstanceData* instance = static_cast<InstanceData*>(data);

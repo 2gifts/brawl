@@ -10,6 +10,37 @@
 #include <mt/mt_matrix.h>
 
 extern const float lbl_805A1364;
+#include <gf/gf_3d_scene_event.h>
+
+void gfSceneRoot::addEventNotify(gfSceneRootEvent* event) {
+    unk468.addTail(event);
+}
+
+void gfSceneRoot::removeEventNotify(gfSceneRootEvent* event) {
+    unk468.remove(event);
+}
+
+void gfSceneRoot::setUseCameraAnim(bool useCameraAnim) {
+    unk464_0 = !useCameraAnim;
+}
+
+void gfSceneRoot::setClearDepthBufferState(LayerType layer, bool clear) {
+    unk38C[layer].unkD_6 = clear;
+}
+
+void gfSceneRoot::setResAnmScn(nw4r::g3d::ResAnmScn* anmScn, int heap) {
+    if (anmScn->IsValid()) {
+        removeResAnmScn();
+        unk4C = anmScn->ptr();
+        u32 size;
+        MEMAllocator* allocator = gfHeapManager::getMEMAllocator(static_cast<Heaps::HeapType>(heap));
+        m_anmScnRes = nw4r::g3d::AnmScnRes::Construct(allocator, &size, *anmScn, false);
+        setAnmScnResToScnRoot3D(m_anmScnRes);
+    } else {
+        removeResAnmScn();
+        unk465_6 = false;
+    }
+}
 
 void gfSceneRoot::create() {
     g_gfSceneRoot = new (Heaps::System) gfSceneRoot;

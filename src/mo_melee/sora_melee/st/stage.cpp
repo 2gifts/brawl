@@ -14,8 +14,6 @@
 #include <st/stage.h>
 #include <types.h>
 
-// gfSceneRoot::setResAnmScn (main.dol 0x8000D2E0), still called by this name from mu_title_sunset.
-extern "C" void fn_8000D2E0(gfSceneRoot* root, nw4r::g3d::ResAnmScn* anmScn, int unk);
 // ecMgr::killEffectGroup (main.dol 0x80060E20, map name; parameters from the call).
 extern "C" void fn_80060E20(ecMgr* mgr, int group, int unk2, int unk3, int unk4, int unk5);
 
@@ -417,7 +415,7 @@ bool Stage::registScnAnim(nw4r::g3d::ResFileData* data, u32 index) {
     if (data != NULL && file.HasResAnmScn()) {
         nw4r::g3d::ResAnmScn scn = file.GetResAnmScn(index);
         scn.Bind(scn);
-        fn_8000D2E0(g_gfSceneRoot, &scn, 0xF);
+        g_gfSceneRoot->setResAnmScn(&scn, 0xF);
         result = true;
     }
     return result;
