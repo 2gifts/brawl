@@ -63,8 +63,6 @@
 // Dispatcher registration entry point (not recovered yet; takes the dispatcher, a registration record
 // and the two shape type ids). Same routine as hkPhantomAgent and hkSphereSphereAgent use.
 // Stand-ins for the symmetric linear-cast agent functions (other classes, other units).
-extern "C" void fn_802B1454();
-extern "C" void fn_802B14E4();
 // Constructor of hkConvexListAgent (not recovered yet): this, first two pair arguments, pair pointer, flag.
 extern "C" void fn_802AF148(hkConvexListAgent* self, void* a, void* b, void* c, int flag);
 // hkListAgent constructor (hkListAgent.cpp): the fallback object of createConvexListAgent.
@@ -102,8 +100,8 @@ struct FilterArgs {
 void hkConvexListAgent::registerAgent(void* dispatcher) {
     hkAgentFuncs convexList;
     convexList.create = (hkAgentFunc)createListConvexAgent;
-    convexList.staticGetPenetrations = (hkAgentFunc)fn_802B1454;
-    convexList.staticGetClosestPoints = (hkAgentFunc)fn_802B14E4;
+    convexList.staticGetPenetrations = (hkAgentFunc)hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetPenetrations;
+    convexList.staticGetClosestPoints = (hkAgentFunc)hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetClosestPoints;
     convexList.staticLinearCast = (hkAgentFunc)hkSymmetricAgentLinearCast_17hkConvexListAgent_::staticLinearCast;
     convexList.symmetricA = 1;
     convexList.symmetricB = 1;
@@ -215,6 +213,9 @@ void hkConvexListAgent::cleanup() {
     delete this;
 }
 
+// BYTES: the symmetric wrappers call these forwarders; without the pragma they are inlined there.
+#pragma push
+#pragma auto_inline off
 void hkConvexListAgent::getClosestPoints(void* a, void* b, void* c, void* d) {
     staticGetClosestPoints(a, b, c, d);
 }
@@ -222,6 +223,7 @@ void hkConvexListAgent::getClosestPoints(void* a, void* b, void* c, void* d) {
 void hkConvexListAgent::getPenetrations(void* a, void* b, void* c, void* d) {
     staticGetPenetrations(a, b, c, d);
 }
+#pragma pop
 
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
 // the points back.
@@ -255,6 +257,21 @@ void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(void* a, void* b
 
 template void hkSymmetricAgentLinearCast<hkListAgent>::updateShapeCollectionFilter(void*, void*, void*);
 template void hkSymmetricAgentLinearCast<hkConvexListAgent>::updateShapeCollectionFilter(void*, void*, void*);
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::getPenetrations(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    T::getPenetrations(b, a, c, &wrapped);
+}
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::getClosestPoints(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    T::getClosestPoints(b, a, c, &wrapped);
+}
+
+template void hkSymmetricAgentLinearCast<hkListAgent>::getPenetrations(void*, void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkListAgent>::getClosestPoints(void*, void*, void*, void*);
 
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
 // the points back.
@@ -301,4 +318,38 @@ void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticLinearCast(void* 
     } else {
         hkShapeCollectionAgent::staticLinearCast(*(const hkCdBody*)b, *(const hkCdBody*)a, flippedInput, &flipped, 0);
     }
+}
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::staticGetPenetrations(void* a, void* b, void* c, hkPenetrationTarget* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    T::staticGetPenetrations(b, a, c, (hkPenetrationTarget*)&wrapped);
+}
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::staticGetClosestPoints(void* a, void* b, void* c, hkPenetrationTarget* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    T::staticGetClosestPoints(b, a, c, (hkPenetrationTarget*)&wrapped);
+}
+
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::getPenetrations(void*, void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetPenetrations(void*, void*, void*, hkPenetrationTarget*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::getClosestPoints(void*, void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetClosestPoints(void*, void*, void*, hkPenetrationTarget*);
+
+// The shape collection agent's static queries take the bodies by reference.
+template <>
+void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetPenetrations(void* a, void* b, void* c,
+                                                                              hkPenetrationTarget* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    hkShapeCollectionAgent::staticGetPenetrations(*(const hkCdBody*)b, *(const hkCdBody*)a, *(const hkCollisionInput*)c,
+                                                  &wrapped);
+}
+
+template <>
+void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetClosestPoints(void* a, void* b, void* c,
+                                                                               hkPenetrationTarget* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    hkShapeCollectionAgent::staticGetClosestPoints(*(const hkCdBody*)b, *(const hkCdBody*)a, *(const hkCollisionInput*)c,
+                                                   &wrapped);
 }

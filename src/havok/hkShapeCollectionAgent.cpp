@@ -28,8 +28,6 @@
 #include <havok/hkBvAgent.h>
 
 // Stand-ins for functions in other TUs or not yet recovered (the names are the map names).
-extern "C" void fn_802B0FE0(void* a, void* b, void* c, void* d);
-extern "C" void fn_802B1028(void* a, void* b, void* c, void* d, void* e);
 // Dispatcher registration (not recovered yet).
 
 // HYPOTHESIS: registration record passed to the collision dispatcher (same layout as hkPhantomAgent.cpp).
@@ -54,8 +52,8 @@ hkShapeCollectionAgent* hkShapeCollectionAgent::createListBAgent(void* a, void* 
 void hkShapeCollectionAgent::registerAgent(void* dispatcher) {
     hkAgentFuncs regAB;
     regAB.create = (hkAgentFunc)&hkShapeCollectionAgent::createListBAgent;
-    regAB.staticGetPenetrations = (hkAgentFunc)fn_802B0FE0;
-    regAB.staticGetClosestPoints = (hkAgentFunc)fn_802B1028;
+    regAB.staticGetPenetrations = (hkAgentFunc)hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetPenetrations;
+    regAB.staticGetClosestPoints = (hkAgentFunc)hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetClosestPoints;
     regAB.staticLinearCast = (hkAgentFunc)hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticLinearCast;
     regAB.symmetricA = true;
     regAB.symmetricB = true;

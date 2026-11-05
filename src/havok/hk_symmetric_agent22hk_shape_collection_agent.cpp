@@ -21,6 +21,21 @@ void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(void* a, void* b
 
 template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::updateShapeCollectionFilter(void*, void*, void*);
 
+template <class T>
+void hkSymmetricAgentLinearCast<T>::getPenetrations(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    T::getPenetrations(b, a, c, &wrapped);
+}
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::getClosestPoints(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    T::getClosestPoints(b, a, c, &wrapped);
+}
+
+template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::getPenetrations(void*, void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::getClosestPoints(void*, void*, void*, void*);
+
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
 // the points back.
 void hkShapeCollectionAgentVariant::linearCast(void* a, void* b, void* c, void* target, void* d) {

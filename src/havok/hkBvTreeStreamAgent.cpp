@@ -105,6 +105,9 @@ void hkBvTreeStreamAgent::warpTime(float t0, float t1, void* arg) {
     fn_802FC988(&m_list);
 }
 
+// BYTES: the symmetric wrappers call these forwarders; without the pragma they are inlined there.
+#pragma push
+#pragma auto_inline off
 void hkBvTreeStreamAgent::getPenetrations(void* a, void* b, void* c, void* d) {
     hkBvTreeAgent::staticGetPenetrations(a, b, c, d);
 }
@@ -112,6 +115,7 @@ void hkBvTreeStreamAgent::getPenetrations(void* a, void* b, void* c, void* d) {
 void hkBvTreeStreamAgent::getClosestPoints(void* a, void* b, void* c, void* d) {
     hkBvTreeAgent::staticGetClosestPoints(a, b, c, d);
 }
+#pragma pop
 
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
 // the points back.
@@ -233,4 +237,19 @@ void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(void* a, void* b
 }
 
 template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::updateShapeCollectionFilter(void*, void*, void*);
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::getPenetrations(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    T::getPenetrations(b, a, c, &wrapped);
+}
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::getClosestPoints(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    T::getClosestPoints(b, a, c, &wrapped);
+}
+
+template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::getPenetrations(void*, void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::getClosestPoints(void*, void*, void*, void*);
 
