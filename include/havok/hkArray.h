@@ -115,6 +115,11 @@ struct hkArray : hkArrayBase {
         m_size = newSize;
         return (T*)m_data + oldSize;
     }
+    // Sets the element count, growing the storage first when needed (new elements are not initialised).
+    void setSize(int n) {
+        reserveSmart(n);
+        m_size = n;
+    }
     // Same without the capacity check (the caller reserved the room).
     T* expandByUnchecked(int n) {
         int oldSize = m_size;
@@ -211,9 +216,5 @@ template <typename T, int N>
 struct hkInplaceArray : hkArray<T> {
     T m_storage[N];
 
-    hkInplaceArray() {
-        this->m_data = m_storage;
-        this->m_size = 0;
-        this->m_capacityAndFlags = N | DONT_DEALLOCATE_FLAG;
-    }
+    hkInplaceArray() : hkArray<T>(m_storage, 0, N) {}
 };

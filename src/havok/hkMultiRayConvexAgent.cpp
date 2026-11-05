@@ -15,6 +15,7 @@
 #include <havok/hkMultiRayConvexAgent.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkShapeType.h>
+#include <havok/hkCdBody.h>
 
 // Stand-in for hkIterativeLinearCastAgent::staticLinearCast (other unit).
 extern "C" void fn_802B7FD0();
@@ -23,6 +24,23 @@ namespace {
 
 // Layout of the table handed to the dispatcher (stack copy in registerAgent).
 } // namespace
+
+// BYTES: the create functions call the constructor; without the pragma it is inlined into them.
+#pragma push
+#pragma auto_inline off
+// One contact point id per ray of the multi-ray shape (body A), none held yet.
+hkMultiRayConvexAgent::hkMultiRayConvexAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr)
+    : hkCollisionAgent((int)contactMgr) {
+    const hkMultiRayShape* shape = (const hkMultiRayShape*)((const hkCdBody*)a0)->m_shape;
+    int numRays = shape->m_rays.getSize();
+    m_contactPointIds.setSize(numRays);
+    for (int i = 0; i < numRays; i++) {
+        m_contactPointIds[i] = 0xFFFF;
+    }
+}
+#pragma pop
+
+hkMultiRayConvexAgent::~hkMultiRayConvexAgent() {}
 
 void hkMultiRayConvexAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs symmetric;
@@ -60,9 +78,9 @@ hkMultiRayConvexAgent* hkMultiRayConvexAgent::createMultiRayConvexAgent(void* a0
 }
 
 void hkMultiRayConvexAgent::cleanup() {
-    int count = m_count;
+    int count = m_contactPointIds.getSize();
     for (int i = 0; i < count; i++) {
-        u16 slot = m_slots[i];
+        u16 slot = m_contactPointIds[i];
         if (slot != 0xFFFF) {
             ((hkContactMgr*)unk8)->removeContactPoint(slot);
         }
