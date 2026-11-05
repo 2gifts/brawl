@@ -14,21 +14,23 @@ struct hkContactMgr;
 // each new key gets an agent from the dispatcher, or the null agent when the collision filter rejects the child.
 // ENTRY has m_key and m_collisionAgent; HELPER (hkAgentDispatchUtilHelper) turns a key into a child body of B.
 // HYPOTHESIS: parameter types (the map has none); the bodies and input are the caller's, passed through unchanged.
+// The members are inline: hkBvTreeAgent::prepareCollisionPartners(+LinearCast) inline both, processCollision calls the
+// out-of-line copies (emitted right after prepareCollisionPartners).
 template <typename KEY, typename ENTRY, typename HELPER>
 struct hkAgentDispatchUtil {
     // The keys are in any order: pass 1 removes the entries whose key is no longer in the list, pass 2 inserts an
     // entry in front of the first entry that does not match the next key.
     static void fastUpdate(hkArray<ENTRY>& entries, hkArray<KEY>& keys, const hkCdBody& bodyA, const hkCdBody& bodyB,
-                           hkProcessCollisionInput& input, hkContactMgr* mgr, HELPER& helper);
+                           hkCollisionInput& input, hkContactMgr* mgr, HELPER& helper);
     // The keys are sorted: the entries (sorted the same way) are merged with them into a new list.
     static void update(hkArray<ENTRY>& entries, hkArray<KEY>& keys, const hkCdBody& bodyA, const hkCdBody& bodyB,
-                       hkProcessCollisionInput& input, hkContactMgr* mgr, HELPER& helper);
+                       hkCollisionInput& input, hkContactMgr* mgr, HELPER& helper);
 };
 
 template <typename KEY, typename ENTRY, typename HELPER>
-void hkAgentDispatchUtil<KEY, ENTRY, HELPER>::fastUpdate(hkArray<ENTRY>& entries, hkArray<KEY>& keys,
+inline void hkAgentDispatchUtil<KEY, ENTRY, HELPER>::fastUpdate(hkArray<ENTRY>& entries, hkArray<KEY>& keys,
                                                          const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                         hkProcessCollisionInput& input, hkContactMgr* mgr,
+                                                         hkCollisionInput& input, hkContactMgr* mgr,
                                                          HELPER& helper) {
     {
         ENTRY* entry = entries.begin();
@@ -79,9 +81,9 @@ void hkAgentDispatchUtil<KEY, ENTRY, HELPER>::fastUpdate(hkArray<ENTRY>& entries
 }
 
 template <typename KEY, typename ENTRY, typename HELPER>
-void hkAgentDispatchUtil<KEY, ENTRY, HELPER>::update(hkArray<ENTRY>& entries, hkArray<KEY>& keys,
+inline void hkAgentDispatchUtil<KEY, ENTRY, HELPER>::update(hkArray<ENTRY>& entries, hkArray<KEY>& keys,
                                                      const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                     hkProcessCollisionInput& input, hkContactMgr* mgr,
+                                                     hkCollisionInput& input, hkContactMgr* mgr,
                                                      HELPER& helper) {
     KEY* key = keys.begin();
     KEY* keyEnd = key + keys.getSize();

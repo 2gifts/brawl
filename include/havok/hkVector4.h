@@ -116,7 +116,8 @@ struct hkVector4 {
         hkVector4 eps;
         eps.setAll(epsilon);
         hkVector4 diff;
-        diff.setSub4(*this, v);
+        // HYPOTHESIS: set() order here (the lane-wise setSub4 scores lower in hkMatrix3::isApproximatelyEqual).
+        diff.set(x - v.x, y - v.y, z - v.z, w - v.w);
         diff.setAbs4(diff);
         return (eps.compareLessThan4(diff) & 0xE) == 0;
     }

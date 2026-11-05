@@ -140,6 +140,105 @@ void hkBvTreeAgent::warpTime(float t0, float t1, void* arg) {
     }
 }
 
+// HYPOTHESIS: global hkBool switches read here (sda21): use the cached aabb at 0x20, and update the entry list
+// without sorting the hits first.
+extern hkBool lbl_805A0F14;
+extern hkBool lbl_805A0F10;
+
+// Helper handed to the dispatch-util templates (map name hkAgentDispatchUtilHelper): the tree's collection and a child
+// body of B pointed at the child for a key (the templates read the collection at 0x00, the body at 0x04 and the shape
+// buffer at 0x20).
+struct hkAgentDispatchUtilHelper {
+    const hkShapeCollection* m_collection;        // 0x00
+    hkCdBody m_bodyB;                             // 0x04
+    hkShapeContainer::ShapeBuffer m_shapeBuffer;  // 0x20
+
+    explicit hkAgentDispatchUtilHelper(const hkCdBody& body) : m_bodyB(&body) {}
+
+    const hkCdBody& getBodyB(u32 key) {
+        m_bodyB.m_shape = (hkShape*)m_collection->m_container.getChildShape(key, m_shapeBuffer);
+        m_bodyB.m_shapeKey = key;
+        return m_bodyB;
+    }
+};
+
+typedef hkAgentDispatchUtil<u32, hkBvTreeAgent::hkBvAgentEntryInfo, hkAgentDispatchUtilHelper> hkBvTreeAgentDispatchUtil;
+
+// Brings the entry list up to date with the tree for the queries without a time step (getClosestPoints,
+// getPenetrations): A's aabb in B's space, grown by half the tolerance, is queried against the tree unless the cached
+// aabb still contains it. Gives up (and flags the memory system) when the new agents may not fit in the memory left.
+void hkBvTreeAgent::prepareCollisionPartners(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input) {
+    hkTransform bTa;
+    bTa.setMulInverseMul(*(const hkTransform*)bodyB.m_motion, *(const hkTransform*)bodyA.m_motion);
+    hkAabb aabb;
+    hkReal halfTolerance = 0.5f * input.unk8;
+    bodyA.m_shape->getAabb(bTa, input.unk8 + halfTolerance, aabb);
+    if (lbl_805A0F14) {
+        if (m_cachedAabb.contains(aabb)) {
+            return;
+        }
+        m_cachedAabb = aabb;
+    }
+    hkInplaceArray<u32, 128> hitList;
+    const hkBvTreeShape* bvTree = (const hkBvTreeShape*)bodyB.m_shape;
+    bvTree->queryAabb(aabb, hitList);
+    // HYPOTHESIS: an upper bound of the memory the new child agents take (128 bytes each).
+    int needed = (hitList.getSize() - m_entries.getSize()) * 128;
+    if (needed > hkMemory::getAvailableMemory()) {
+        hkMemory::getInstance().unk4 = 1;
+        return;
+    }
+    const hkShapeCollection* collection = bvTree->m_collection;
+    hkAgentDispatchUtilHelper helper(bodyB);
+    helper.m_collection = collection;
+    if (lbl_805A0F10) {
+        hkBvTreeAgentDispatchUtil::fastUpdate(m_entries, hitList, bodyA, bodyB, input, (hkContactMgr*)unk8, helper);
+    } else {
+        hkAlgorithm::quickSort(hitList.begin(), hitList.getSize());
+        hkBvTreeAgentDispatchUtil::update(m_entries, hitList, bodyA, bodyB, input, (hkContactMgr*)unk8, helper);
+    }
+}
+
+// The same for the linear cast: A's aabb grown along the cast path (turned into B's space) always replaces the cached
+// aabb, and the hits are sorted before either update (HYPOTHESIS: the first sort is redundant in the unsorted mode).
+void hkBvTreeAgent::prepareCollisionPartnersLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                       const hkLinearCastCollisionInput& input) {
+    hkTransform bTa;
+    bTa.setMulInverseMul(*(const hkTransform*)bodyB.m_motion, *(const hkTransform*)bodyA.m_motion);
+    hkAabb aabb;
+    bodyA.m_shape->getAabb(bTa, input.unk8, aabb);
+    {
+        hkVector4 pathB;
+        pathB.setRotatedInverseDir(((const hkTransform*)bodyB.m_motion)->m_rotation, input.m_path);
+        hkVector4 zero;
+        zero.setZero4();
+        hkVector4 pathMin;
+        pathMin.setMin4(zero, pathB);
+        hkVector4 pathMax;
+        pathMax.setMax4(zero, pathB);
+        aabb.m_min.add4(pathMin);
+        aabb.m_max.add4(pathMax);
+    }
+    m_cachedAabb = aabb;
+    hkInplaceArray<u32, 128> hitList;
+    const hkBvTreeShape* bvTree = (const hkBvTreeShape*)bodyB.m_shape;
+    bvTree->queryAabb(aabb, hitList);
+    const hkShapeCollection* collection = bvTree->m_collection;
+    hkAlgorithm::quickSort(hitList.begin(), hitList.getSize());
+    hkAgentDispatchUtilHelper helper(bodyB);
+    helper.m_collection = collection;
+    if (lbl_805A0F10) {
+        // HYPOTHESIS: the const input is handed to the templates through a cast (the const parameter colours the
+        // registers as in the target; a non-const one shifts every saved register by one).
+        hkBvTreeAgentDispatchUtil::fastUpdate(m_entries, hitList, bodyA, bodyB, (hkCollisionInput&)input,
+                                              (hkContactMgr*)unk8, helper);
+    } else {
+        hkAlgorithm::quickSort(hitList.begin(), hitList.getSize());
+        hkBvTreeAgentDispatchUtil::update(m_entries, hitList, bodyA, bodyB, (hkCollisionInput&)input,
+                                          (hkContactMgr*)unk8, helper);
+    }
+}
+
 void hkSymmetricAgentLinearCast_13hkBvTreeAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrap(target);
     hkBvTreeAgent::getPenetrations(b, a, c, &wrap);
@@ -300,30 +399,11 @@ void hkBvTreeAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkColl
 }
 
 
-// HYPOTHESIS: global hkBool switches read here (sda21): use the cached aabb at 0x20, and update the entry list
-// without sorting the hits first.
-extern hkBool lbl_805A0F14;
-extern hkBool lbl_805A0F10;
-
-// Helper handed to the dispatch-util templates (map name hkAgentDispatchUtilHelper): the tree's collection and a child
-// body of B pointed at the child for a key (the templates read the collection at 0x00, the body at 0x04 and the shape
-// buffer at 0x20).
-struct hkAgentDispatchUtilHelper {
-    const hkShapeCollection* m_collection;        // 0x00
-    hkCdBody m_bodyB;                             // 0x04
-    hkShapeContainer::ShapeBuffer m_shapeBuffer;  // 0x20
-
-    explicit hkAgentDispatchUtilHelper(const hkCdBody& body) : m_bodyB(&body) {}
-
-    const hkCdBody& getBodyB(u32 key) {
-        m_bodyB.m_shape = (hkShape*)m_collection->m_container.getChildShape(key, m_shapeBuffer);
-        m_bodyB.m_shapeKey = key;
-        return m_bodyB;
-    }
-};
-
-typedef hkAgentDispatchUtil<u32, hkBvTreeAgent::hkBvAgentEntryInfo, hkAgentDispatchUtilHelper> hkBvTreeAgentDispatchUtil;
-
+// BYTES: the dispatch-util templates are inline (prepareCollisionPartners inlines them) but this helper calls their
+// out-of-line copies; dont_inline over the helper's definition does that and the helper itself is still inlined into
+// processCollision. HYPOTHESIS: in the original the helper's calls are kept out of line some other way.
+#pragma push
+#pragma dont_inline on
 // Queries the tree with the aabb of A swept over the step and updates the entry list from the hits (one child agent
 // per hit key). Inlined into processCollision (the hit list is destroyed on both exits).
 static inline void hkBvTreeAgent_updateEntries(hkBvTreeAgent* agent, const hkCdBody& bodyA, const hkCdBody& bodyB,
@@ -350,6 +430,8 @@ static inline void hkBvTreeAgent_updateEntries(hkBvTreeAgent* agent, const hkCdB
                                           helper);
     }
 }
+
+#pragma pop
 
 // Updates the entries, then runs every entry's agent on its child of B.
 void hkBvTreeAgent::processCollision(const hkCdBody& bodyA, const hkCdBody& bodyB, hkProcessCollisionInput& input,

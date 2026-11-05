@@ -46,6 +46,13 @@ struct hkMemory {
         return *s_instance;
     }
     static void replaceInstance(hkMemory* m);
+    // Bytes left below the limit at 0x08 (weak out-of-line copy in hkBvTreeStreamAgent). HYPOTHESIS: m_stats[6] and
+    // m_stats[1] are the bytes in use.
+    static int getAvailableMemory() {
+        hkMemory& m = getInstance();
+        int used = m.m_stats[6] + m.m_stats[1];
+        return m.unk8 <= used ? 0 : m.unk8 - used;
+    }
 };
 
 // Class-specific allocation for reference counted objects: the allocation size is stashed in
