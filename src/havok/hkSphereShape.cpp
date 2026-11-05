@@ -68,11 +68,13 @@ int hkSphereShape::getNumVertices() const {
 }
 
 void hkSphereShape::getAabb(const hkTransform& xf, hkReal expansion, hkAabb& out) const {
+    // HYPOTHESIS: the target also stores r into a dead 16-byte aligned stack vector (an hkVector4 extent splat in
+    // the original, its stores scheduled among the lanes); that vector form (extent, setSub4/setAdd4) compiles to
+    // the same instructions with the extent stores sunk to the end, and scores lower than this scalar form.
     hkReal r = expansion + m_radius;
-    hkVector4 extent;
-    extent.set(r, r, r, r);
-    out.m_min.setSub4(xf.m_translation, extent);
-    out.m_max.setAdd4(xf.m_translation, extent);
+    const hkVector4& t = xf.m_translation;
+    out.m_min.set(t.x - r, t.y - r, t.z - r, t.w - r);
+    out.m_max.set(t.x + r, t.y + r, t.z + r, t.w + r);
 }
 
 void hkSphereShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const {

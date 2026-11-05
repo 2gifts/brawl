@@ -17,7 +17,7 @@ struct hkSphereShape : hkConvexShape {
     virtual void calcStatistics(hkStatisticsCollector* collector) const;   // 0x0C
     virtual int getType() const;                                             // 0x10
     virtual void getAabb(const hkTransform& xf, hkReal expansion, hkAabb& out) const; // 0x14
-    virtual hkBool castRay(const hkShapeRayCastInput& input, hkVector4& normalOut) const; // 0x1C
+    virtual hkBool castRay(const hkShapeRayCastInput& input, hkShapeRayCastOutput& results) const; // 0x1C
     virtual void getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const; // 0x28
     virtual hkVector4* getCollisionSpheres(hkVector4* out) const;            // 0x2C
     virtual void getSupportingVertex(const hkVector4& direction, hkVector4& out) const; // 0x30

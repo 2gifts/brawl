@@ -22,6 +22,7 @@
 #include <havok/hkCdBody.h>
 
 #include <havok/hkShapeRayCastInput.h>
+#include <havok/hkMonitorStream.h>
 
 void hkConvexTranslateShape::finishLoadedObjecthkConvexTranslateShape(void* p) {
     hkFinishLoadedObjectFlag flag;
@@ -52,13 +53,7 @@ void hkConvexTranslateShape::getAabb(const hkTransform& xf, hkReal expansion, hk
     m_childShape.m_childShape->getAabb(xf, expansion, out);
     // Rotated translation: xf.rotation * m_translation (the translation part of xf is not used).
     hkVector4 offset;
-    offset.setMul4(xf.m_rotation.m_col1, m_translation.y);
-    offset.set(xf.m_rotation.m_col0.x * m_translation.x + offset.x,
-               xf.m_rotation.m_col0.y * m_translation.x + offset.y,
-               xf.m_rotation.m_col0.z * m_translation.x + offset.z, 0.0f);
-    offset.set(xf.m_rotation.m_col2.x * m_translation.z + offset.x,
-               xf.m_rotation.m_col2.y * m_translation.z + offset.y,
-               xf.m_rotation.m_col2.z * m_translation.z + offset.z, 0.0f);
+    offset._setRotatedDir(xf.m_rotation, m_translation);
     out.m_min.setAdd4(out.m_min, offset);
     out.m_max.setAdd4(out.m_max, offset);
 }
@@ -68,13 +63,21 @@ hkReal hkConvexTranslateShape::getMaximumProjection(const hkVector4& direction) 
     return childProjection + direction.dot3(m_translation);
 }
 
-// The original also brackets this with the hkMonitorStream timer commands (HK_TIMER); not reproduced here.
-// HYPOTHESIS: the child is tested with the ray moved into its space.
-hkBool hkConvexTranslateShape::castRay(const hkShapeRayCastInput& input, hkVector4& normalOut) const {
+// The child is tested with the ray moved into its space, one level deeper in the hit's shape key path; a hit
+// through this wrapper records key 0 for the child at that level. HYPOTHESIS: unk18/unk38 as the key path and depth.
+hkBool hkConvexTranslateShape::castRay(const hkShapeRayCastInput& input, hkShapeRayCastOutput& results) const {
+    HK_TIMER_BEGIN("rcConvTransl");
     hkShapeRayCastInput localInput = input;
     localInput.m_from.setSub4(input.m_from, m_translation);
     localInput.m_to.setSub4(input.m_to, m_translation);
-    return m_childShape.m_childShape->castRay(localInput, normalOut);
+    results.unk38++;
+    hkBool hit = m_childShape.m_childShape->castRay(localInput, results);
+    results.unk38--;
+    if (hit) {
+        results.unk18[results.unk38] = 0;
+    }
+    HK_TIMER_END();
+    return hit;
 }
 
 void hkConvexTranslateShape::castRayWithCollector(const hkShapeRayCastInput& input, const hkCdBody& body,

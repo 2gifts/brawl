@@ -21,7 +21,7 @@ struct hkConvexTranslateShape : hkConvexShape {
     virtual int getType() const;                                                         // 0x10
     virtual void getAabb(const hkTransform& xf, hkReal expansion, hkAabb& out) const;    // 0x14
     virtual hkReal getMaximumProjection(const hkVector4& direction) const;               // 0x18
-    virtual hkBool castRay(const hkShapeRayCastInput& input, hkVector4& normalOut) const; // 0x1C
+    virtual hkBool castRay(const hkShapeRayCastInput& input, hkShapeRayCastOutput& results) const; // 0x1C
     virtual void castRayWithCollector(const hkShapeRayCastInput& input, const hkCdBody& body,
                                       hkShapeRayCastCollector& collector) const;         // 0x20
     virtual void getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const;            // 0x28

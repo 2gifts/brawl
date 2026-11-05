@@ -111,8 +111,7 @@ void hkMultiRayConvexAgent::getClosestPoints(const hkCdBody& unk0, const hkCdBod
         hkShapeRayCastOutput output;
         rayInput.m_from._setTransformedPos(aTb, ray->m_start);
         rayInput.m_to._setTransformedPos(aTb, ray->m_end);
-        // HYPOTHESIS: the slot takes the whole output; hkShape declares it by its leading normal.
-        if (convex->castRay(rayInput, output.m_normal)) {
+        if (convex->castRay(rayInput, output)) {
             const hkTransform& bTransform = *(const hkTransform*)bodyB.m_motion;
             hkVector4 hitPoint;
             hitPoint.setInterpolate4(rayInput.m_from, rayInput.m_to, output.m_hitFraction);
@@ -148,8 +147,7 @@ void hkMultiRayConvexAgent::staticGetClosestPoints(const hkCdBody& unk0, const h
         hkShapeRayCastOutput output;
         rayInput.m_from._setTransformedPos(aTb, ray->m_start);
         rayInput.m_to._setTransformedPos(aTb, ray->m_end);
-        // HYPOTHESIS: the slot takes the whole output; hkShape declares it by its leading normal.
-        if (convex->castRay(rayInput, output.m_normal)) {
+        if (convex->castRay(rayInput, output)) {
             const hkTransform& bTransform = *(const hkTransform*)bodyB.m_motion;
             hkVector4 hitPoint;
             hitPoint.setInterpolate4(rayInput.m_from, rayInput.m_to, output.m_hitFraction);
@@ -187,7 +185,7 @@ void hkMultiRayConvexAgent::staticGetPenetrations(const hkCdBody& unk0, const hk
     while (numRays-- && !collector.m_earlyOut) {
         rayInput.m_from._setTransformedPos(aTb, ray->m_start);
         rayInput.m_to._setTransformedPos(aTb, ray->m_end);
-        if (convex->castRay(rayInput, output.m_normal)) {
+        if (convex->castRay(rayInput, output)) {
             collector.addCdBodyPair(bodyA, bodyB);
         }
         ray++;

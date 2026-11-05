@@ -87,10 +87,7 @@ hkResult hkInertiaTensorComputer::combineMassProperties(const hkArray<hkMassElem
     for (i = 0; i < elements.m_size; i++) {
         hkVector4 centerOfMassInCommon;
         centerOfMassInCommon.setTransformedPos(elements[i].m_transform, elements[i].m_properties.m_centerOfMass);
-        groupCenterOfMass.x += elements[i].m_properties.m_mass * centerOfMassInCommon.x;
-        groupCenterOfMass.y += elements[i].m_properties.m_mass * centerOfMassInCommon.y;
-        groupCenterOfMass.z += elements[i].m_properties.m_mass * centerOfMassInCommon.z;
-        groupCenterOfMass.w += elements[i].m_properties.m_mass * centerOfMassInCommon.w;
+        groupCenterOfMass.addMul4(elements[i].m_properties.m_mass, centerOfMassInCommon);
         groupMass += elements[i].m_properties.m_mass;
         groupVolume += elements[i].m_properties.m_volume;
     }
@@ -99,13 +96,11 @@ hkResult hkInertiaTensorComputer::combineMassProperties(const hkArray<hkMassElem
         return 1; // HK_FAILURE
     }
 
-    groupCenterOfMass.setMul4(groupCenterOfMass, 1.0f / groupMass);
+    groupCenterOfMass.setMul4(1.0f / groupMass, groupCenterOfMass);
     result.m_centerOfMass = groupCenterOfMass;
     result.m_mass = groupMass;
     result.m_volume = groupVolume;
-    for (i = 0; i < 12; i++) {
-        (&result.m_inertiaTensor.m_col0.x)[i] = 0.0f;
-    }
+    result.m_inertiaTensor.setZero();
 
     // each tensor gets rotated into the common space, moved away from its own center of mass to the group's, and added up
     for (i = 0; i < elements.m_size; i++) {

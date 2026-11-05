@@ -29,12 +29,31 @@ static inline hkReal getInterpolationValueHiAccuracy(const hkSweptTransform& st,
     return dt * getInvDeltaTime(st);
 }
 
-// out = a + (b - a) * t
+// out = (1 - t) * a + t * b
 static inline void setInterpolate4(hkVector4& out, const hkVector4& a, const hkVector4& b, hkReal t) {
-    out.x = a.x + (b.x - a.x) * t;
-    out.y = a.y + (b.y - a.y) * t;
-    out.z = a.z + (b.z - a.z) * t;
-    out.w = a.w + (b.w - a.w) * t;
+    hkReal s = 1.0f - t;
+    out.x = s * a.x + t * b.x;
+    out.y = s * a.y + t * b.y;
+    out.z = s * a.z + t * b.z;
+    out.w = s * a.w + t * b.w;
+}
+
+// +infinity
+static inline hkReal hkInfinity() {
+    u32 bits = 0x7f800000;
+    return *(hkReal*)&bits;
+}
+
+// 1/sqrt(x) with the hardware estimate and one Newton step: 0 for 0, +infinity for negative x.
+static inline hkReal sqrtInverse(hkReal x) {
+    if (x == 0.0f) {
+        return 0.0f;
+    }
+    if (x <= 0.0f) {
+        return hkInfinity();
+    }
+    hkReal r = (hkReal)__frsqrte(x);
+    return (0.5f * r) * -(r * (x * r) - 3.0f);
 }
 
 // blends the two end rotations. the "0.75 - 0.125 * len2" thing is a quick 1/sqrt for the midpoint,
@@ -56,7 +75,7 @@ static inline void lerp2Quat(const hkSweptTransform& st, hkReal t, hkQuaternion&
         setInterpolate4(out.m_vec, out.m_vec, rot1, 2.0f * t - 1.0f);
     }
     hkReal len2 = out.m_vec.lengthSquared4();
-    out.m_vec.mul4(1.0f / sqrtf(len2));
+    out.m_vec.mul4(sqrtInverse(len2));
 }
 
 // pose at t: blended rotation, blended center of mass, then shove the origin back by the rotated local center
@@ -68,8 +87,8 @@ static inline void lerp2Transform(const hkSweptTransform& st, hkReal t, hkTransf
     setInterpolate4(out.m_translation, st.m_centerOfMass0, st.m_centerOfMass1, t);
 
     hkVector4 centerShift;
-    centerShift._setMul3(out.m_rotation, st.m_centerOfMassLocal);
-    out.m_translation.sub4(centerShift);
+    centerShift._setRotatedDir(out.m_rotation, st.m_centerOfMassLocal);
+    out.m_translation.setSub4(out.m_translation, centerShift);
 }
 
 // same idea as lerp2Transform but pins the rotation to the end of the step

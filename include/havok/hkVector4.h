@@ -111,11 +111,12 @@ struct hkVector4 {
         return ((x <= a.x) << 3) | ((y <= a.y) << 2) | ((z <= a.z) << 1) | (w <= a.w);
     }
     // True when |this - v| <= epsilon in x, y and z (w is computed but masked out). HYPOTHESIS: the name; the shape
-    // is inlined once per column in hkMatrix3::isApproximatelyEqual.
+    // is inlined once per column in hkMatrix3::isApproximatelyEqual and once in hkRotation::isOrthonormal (there the
+    // target puts eps above diff on the stack, which this declaration order gives; isApproximatelyEqual is unchanged).
     hkBool equals3(const hkVector4& v, hkReal epsilon) const {
+        hkVector4 diff;
         hkVector4 eps;
         eps.setAll(epsilon);
-        hkVector4 diff;
         // HYPOTHESIS: set() order here (the lane-wise setSub4 scores lower in hkMatrix3::isApproximatelyEqual).
         diff.set(x - v.x, y - v.y, z - v.z, w - v.w);
         diff.setAbs4(diff);

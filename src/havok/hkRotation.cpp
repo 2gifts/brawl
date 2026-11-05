@@ -49,10 +49,5 @@ hkBool hkRotation::isOrthonormal(hkReal epsilon) const {
     }
     hkVector4 cross;
     cross.setCross(m_col0, m_col1);
-    hkVector4 eps;
-    eps.setAll(epsilon);
-    hkVector4 diff;
-    diff.setSub4(cross, m_col2);
-    diff.setAbs4(diff);
-    return (eps.compareLessThan4(diff) & 0xE) == 0;
+    return cross.equals3(m_col2, epsilon);
 }
