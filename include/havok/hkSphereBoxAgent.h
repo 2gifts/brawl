@@ -51,4 +51,5 @@ struct hkSymmetricAgentLinearCast_16hkSphereBoxAgent_ : hkSphereBoxAgent {
 
     static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
     static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
+    virtual void processCollision(void* a, void* b, void* c, void* d);
 };

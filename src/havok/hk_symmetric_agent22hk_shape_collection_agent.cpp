@@ -10,6 +10,7 @@
 #include <havok/hkShapeCollectionAgent.h>
 #include <havok/hkCollisionInput.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkSymmetricAgentProcessCollision.h>
 #include <havok/hkBvAgent.h>
 
 // Symmetric wrapper of hkShapeCollectionAgent (map name hkSymmetricAgentLinearCast_22hkShapeCollectionAgent___
@@ -20,6 +21,7 @@ void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(void* a, void* b
 }
 
 template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::updateShapeCollectionFilter(void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::processCollision(void*, void*, void*, void*);
 
 template <class T>
 void hkSymmetricAgentLinearCast<T>::getPenetrations(void* a, void* b, void* c, void* target) {

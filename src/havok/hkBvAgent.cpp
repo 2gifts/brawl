@@ -38,6 +38,7 @@
 #include <havok/hkFlagCdBodyPairCollector.h>
 #include <havok/hkSimpleClosestContactCollector.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkSymmetricAgentProcessCollision.h>
 
 // The agent for the bounding volume (A) is made with the agent; the agent for the shape inside (B) only once the
 // bounding volume is found overlapping. The bounding volume body replaces the shape of body A by the bounding

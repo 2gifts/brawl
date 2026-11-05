@@ -18,6 +18,7 @@
 #include <havok/hkMoppAgent.h>
 #include <havok/hkCollisionInput.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkSymmetricAgentProcessCollision.h>
 #include <havok/hkCollisionDispatcher.h>
 
 hkMoppAgent::hkMoppAgent(hkContactMgr* contactMgr) : hkBvTreeAgent(contactMgr) {}
@@ -74,4 +75,8 @@ void hkSymmetricAgentLinearCast_11hkMoppAgent::staticLinearCast(void* a, void* b
     } else {
         hkMoppAgent::staticLinearCast(b, a, &flippedInput, &flipped, 0);
     }
+}
+
+void hkSymmetricAgentLinearCast_11hkMoppAgent::processCollision(void* a, void* b, void* c, void* d) {
+    hkSymmetricAgent_processCollision<hkMoppAgent>(this, a, b, c, d);
 }

@@ -67,4 +67,5 @@ struct hkSymmetricAgentLinearCast : T {
     static void staticGetClosestPoints(void* a, void* b, void* c, hkPenetrationTarget* target);
     virtual void updateShapeCollectionFilter(void* a, void* b, void* c);
     static void staticLinearCast(void* a, void* b, void* c, void* target, void* d);
+    virtual void processCollision(void* a, void* b, void* c, void* d);
 };

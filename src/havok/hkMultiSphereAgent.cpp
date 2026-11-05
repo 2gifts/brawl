@@ -44,6 +44,7 @@
 #include <havok/hkMultiSphereAgent.h>
 #include <havok/hkCollisionInput.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkSymmetricAgentProcessCollision.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkShapeType.h>
 
@@ -117,6 +118,10 @@ void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticLinearCast(void* a,
     } else {
         hkMultiSphereAgent::staticLinearCast(b, a, &flippedInput, &flipped, 0);
     }
+}
+
+void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::processCollision(void* a, void* b, void* c, void* d) {
+    hkSymmetricAgent_processCollision<hkMultiSphereAgent>(this, a, b, c, d);
 }
 
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns

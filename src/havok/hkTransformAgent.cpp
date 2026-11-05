@@ -40,6 +40,7 @@
 #include <havok/hkClosestCdPointCollector.h>
 #include <havok/hkSimpleClosestContactCollector.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkSymmetricAgentProcessCollision.h>
 
 
 namespace {
@@ -206,4 +207,8 @@ void hkSymmetricAgentLinearCast_16hkTransformAgent_::staticLinearCast(void* a, v
     } else {
         hkTransformAgent::staticLinearCast(b, a, &flippedInput, &flipped, 0);
     }
+}
+
+void hkSymmetricAgentLinearCast_16hkTransformAgent_::processCollision(void* a, void* b, void* c, void* d) {
+    hkSymmetricAgent_processCollision<hkTransformAgent>(this, a, b, c, d);
 }

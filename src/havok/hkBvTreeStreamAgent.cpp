@@ -45,6 +45,7 @@
 #include <havok/hkBvTreeStreamAgent.h>
 #include <havok/hkCollisionInput.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkSymmetricAgentProcessCollision.h>
 #include <havok/hkBvTreeAgent.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkShapeType.h>
@@ -237,6 +238,7 @@ void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(void* a, void* b
 }
 
 template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::updateShapeCollectionFilter(void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::processCollision(void*, void*, void*, void*);
 
 template <class T>
 void hkSymmetricAgentLinearCast<T>::getPenetrations(void* a, void* b, void* c, void* target) {

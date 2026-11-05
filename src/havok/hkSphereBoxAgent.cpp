@@ -21,6 +21,7 @@
 #include <havok/hkSphereBoxAgent.h>
 #include <havok/hkCollisionInput.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkSymmetricAgentProcessCollision.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkCdBodyPairCollector.h>
@@ -135,4 +136,8 @@ void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticLinearCast(void* a, v
     } else {
         fn_802B7FD0(b, a, &flippedInput, &flipped, 0);
     }
+}
+
+void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::processCollision(void* a, void* b, void* c, void* d) {
+    hkSymmetricAgent_processCollision<hkSphereBoxAgent>(this, a, b, c, d);
 }

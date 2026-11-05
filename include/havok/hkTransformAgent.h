@@ -75,4 +75,5 @@ struct hkSymmetricAgentLinearCast_16hkTransformAgent_ : hkSymmetricAgent_16hkTra
     static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
     static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
     static void staticLinearCast(void* unk0, void* unk1, void* unk2, void* unk3, void* unk4);
+    virtual void processCollision(void* a, void* b, void* c, void* d);
 };

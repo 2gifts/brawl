@@ -26,6 +26,7 @@ struct hkBvTreeStreamAgent : hkCollisionAgent {
     hkBvTreeStreamAgent(void* unused0, void* unused1, const int* src, int unk8Value);
     virtual ~hkBvTreeStreamAgent();
 
+    virtual void processCollision(void* a, void* b, void* c, void* d); // 0x1C not written yet
     virtual void cleanup();
     virtual void updateShapeCollectionFilter(void* a, void* b, void* c); // 0x24
     virtual void invalidateTim(void* arg);

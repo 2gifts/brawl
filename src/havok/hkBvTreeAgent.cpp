@@ -41,6 +41,7 @@
 #include <havok/hkBvTreeAgent.h>
 #include <havok/hkCollisionInput.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkSymmetricAgentProcessCollision.h>
 #include <havok/hkCollisionDispatcher.h>
 
 hkBvTreeAgent::hkBvTreeAgent(hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
@@ -158,4 +159,8 @@ void hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticLinearCast(void* a, void*
     } else {
         hkBvTreeAgent::staticLinearCast(b, a, &flippedInput, &flipped, 0);
     }
+}
+
+void hkSymmetricAgentLinearCast_13hkBvTreeAgent::processCollision(void* a, void* b, void* c, void* d) {
+    hkSymmetricAgent_processCollision<hkBvTreeAgent>(this, a, b, c, d);
 }

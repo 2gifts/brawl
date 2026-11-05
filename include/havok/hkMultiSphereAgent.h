@@ -35,6 +35,7 @@ struct hkMultiSphereAgent : hkCollisionAgent {
     static void staticGetClosestPoints(void* a, void* b, void* c, void* target); // not written yet
     virtual void linearCast(void* a, void* b, void* c, void* target, void* d); // not written yet
     static void staticLinearCast(void* a, void* b, void* c, void* target, void* d); // not written yet
+    virtual void processCollision(void* a, void* b, void* c, void* d); // not written yet
 };
 
 // Flipped (symmetric) variant created by createListBAgent; the class name follows the Havok TU map.
@@ -51,6 +52,7 @@ struct hkSymmetricAgentLinearCast_18hkMultiSphereAgent_ : hkSymmetricAgent_18hkM
     virtual void getClosestPoints(void* a, void* b, void* c, void* target);
     static void staticGetClosestPoints(void* a, void* b, void* c, void* target);
     static void staticLinearCast(void* a, void* b, void* c, void* target, void* d);
+    virtual void processCollision(void* a, void* b, void* c, void* d);
 };
 
 // HYPOTHESIS: hkSymmetricAgentLinearCast<hkMultiSphereTriangleAgent> (map name, in hkMultiSphereAgent.o); the

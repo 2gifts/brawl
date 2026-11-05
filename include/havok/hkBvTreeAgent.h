@@ -64,6 +64,7 @@ struct hkSymmetricAgentLinearCast_13hkBvTreeAgent : hkBvTreeAgent {
     static void staticGetClosestPoints(void* a, void* b, void* c, void* target);
     virtual void updateShapeCollectionFilter(void* a, void* b, void* c);
     static void staticLinearCast(void* a, void* b, void* c, void* target, void* d);
+    virtual void processCollision(void* a, void* b, void* c, void* d);
 
     hkSymmetricAgentLinearCast_13hkBvTreeAgent(hkContactMgr* contactMgr) : hkBvTreeAgent(contactMgr) {}
 };

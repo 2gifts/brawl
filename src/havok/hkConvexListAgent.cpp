@@ -53,6 +53,7 @@
 #include <havok/hkConvexListAgent.h>
 #include <havok/hkCollisionInput.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkSymmetricAgentProcessCollision.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkBvAgent.h>
@@ -257,6 +258,8 @@ void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(void* a, void* b
 
 template void hkSymmetricAgentLinearCast<hkListAgent>::updateShapeCollectionFilter(void*, void*, void*);
 template void hkSymmetricAgentLinearCast<hkConvexListAgent>::updateShapeCollectionFilter(void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkListAgent>::processCollision(void*, void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::processCollision(void*, void*, void*, void*);
 
 template <class T>
 void hkSymmetricAgentLinearCast<T>::getPenetrations(void* a, void* b, void* c, void* target) {
