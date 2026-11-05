@@ -2407,26 +2407,8 @@ stClassInfoImpl<Stages::CharacterRoll, stCharacterRoll> stCharacterRoll::bss_loc
 #pragma dont_inline on
 
 // The pad of the system (a copy of what the pad system has read).
-inline int gfPadStatus::gfPadGetSysStatus(int index, gfPadStatus* dest) {
-    gfPadSystem* sys = g_gfPadSystem;
-    u32* d = reinterpret_cast<u32*>(dest);
-    if (index == 0xF0) {
-        u32* s = reinterpret_cast<u32*>(reinterpret_cast<u8*>(sys) + 0x844);
-        for (int i = 0; i < 16; i++) {
-            d[i] = s[i];
-        }
-    } else if ((1 << index & *reinterpret_cast<u16*>(reinterpret_cast<u8*>(sys) + 0x3A)) == 0) {
-        u32* s = reinterpret_cast<u32*>(reinterpret_cast<u8*>(sys) + 0x244 + index * 0x40);
-        for (int i = 0; i < 16; i++) {
-            d[i] = s[i];
-        }
-    } else {
-        for (int i = 0; i < 16; i++) {
-            d[i] = 0;
-        }
-        reinterpret_cast<u8*>(dest)[0x3C] = 0xFF;
-    }
-    return 1;
+int gfPadStatus::gfPadGetSysStatus(int index, gfPadStatus* dest) {
+    return g_gfPadSystem->getSysPadStatus(index, dest);
 }
 
 inline bool gfPadStatus::bitcheckEdgeOn(u32 mask) const {
@@ -2451,3 +2433,6 @@ static int crollCameraInput(CameraController* controller) {
     return *reinterpret_cast<int*>(reinterpret_cast<u8*>(controller) + 0x40);
 }
 #pragma dont_inline reset
+
+SoraCharacterRoll::CharacterPanel::~CharacterPanel() {
+}

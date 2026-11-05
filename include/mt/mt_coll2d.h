@@ -39,6 +39,14 @@ public:
     Vec2f m_centerPos;
     float m_radius;
 
+    // HYPOTHESIS: center access returns the coordinates by value.
+    Vec2f getCenterPos() const {
+        Vec2f center;
+        center.m_x = m_centerPos.m_x;
+        center.m_y = m_centerPos.m_y;
+        return center;
+    }
+
     void getAABBox(clAABBox2D& aabBox) const;
     // HYPOTHESIS: true when the circle touches the segment; parameter types from register use.
     bool checkIntersect(const clSegment2D& segment) const;

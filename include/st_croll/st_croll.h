@@ -101,6 +101,7 @@ namespace SoraCharacterRoll {
 // The picture of a name of the roll (a texture of the stage file: "ChrRollFighter.NN" and the like).
 class CharacterPanel {
 public:
+    ~CharacterPanel();
     u8 m_isCharacter;               // 0x00 1 for the three kinds of characters (they are drawn with a different blend)
     u8 m_hasTex;                    // 0x01 the texture exists
     u8 m_hasTlut;                   // 0x02 the texture is color indexed

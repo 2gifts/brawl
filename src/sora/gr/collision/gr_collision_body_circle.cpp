@@ -21,10 +21,8 @@ void grCollisionTestCircle::resetWork() {
     m_unk2bc->set(*m_collStatus->m_prevCollShape);
     m_unk2c0->set(*m_collStatus->m_currentCollShape);
     m_unk2c4->set(*m_unk2c0);
-    Vec2f start = m_shape1.m_circle.m_centerPos;
-    Vec2f end = m_shape3.m_circle.m_centerPos;
-    Vec2f diff = end - start;
     m_unkE = 0;
+    Vec2f diff = m_shape3.m_circle.getCenterPos() - m_shape1.m_circle.getCenterPos();
     if (diff.m_x > 0.00001f) {
         m_unkE |= 2;
     }

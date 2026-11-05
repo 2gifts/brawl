@@ -43,10 +43,73 @@ void ftNessStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAccess
     work.setInt(1, 0x20000003);
 }
 
-void ftNessStatusUniqProcessSpecialHi::execFixPosCounter(soModuleAccesser* moduleAccesser) {
-    // TODO: not reconstructed yet.
-}
+// ABS<f> (the map name); src/mo_fighter/ft_ness/ft_ness.cpp calls it by this stand-in name.
+extern "C" float fn_101_CA34(float x);
+void ftNessStatusUniqProcessSpecialHi::execFixPosCounter(soModuleAccesser* a) {
+    soWorkManageModule& work = a->getWorkManageModule();
+    soSituationModule& situation = a->getSituationModule();
+    soPostureModule& posture = a->getPostureModule();
+    soStatusModule& status = a->getStatusModule();
+    soGroundModule& ground = a->getGroundModule();
+    soLinkModule& link = a->getLinkModule();
+    if (!link.isLink(6)) return;
 
+    ftData* nessData = g_ftCommonDataAccesser.getData(Fighter_Ness);
+    const float* nessParamGroup3 = static_cast<const float*>(nessData->extendParam[2]);
+    bool inAimWindow = false;
+    int phase = work.getInt(0x20000003);
+    work.getInt(0x20000004);
+    float scale = posture.getScale();
+    Vec3f fighterPos = posture.getPos();
+    u32 parentNode = 0;
+    Vec3f targetPos = link.getParentModelNodeGlobalPosition(6, parentNode, false);
+    link.getParentModelNodeGlobalPosition(6, parentNode, true);
+    fighterPos.m_y += 5.0f * scale;
+    if (fn_101_CA34(fighterPos.m_x - targetPos.m_x) < 8.333333f * scale &&
+        fn_101_CA34(fighterPos.m_y - targetPos.m_y) < 12.333333f * scale) {
+        inAimWindow = true;
+    }
+
+    switch (phase) {
+    case 0:
+        if (inAimWindow) {
+            phase = 2;
+            Vec2f groundNormal;
+            Vec2f aim;
+            aim.m_x = fighterPos.m_x - targetPos.m_x;
+            aim.m_y = fighterPos.m_y - targetPos.m_y;
+            float lr = aim.m_x >= 0.0f ? 1.0f : -1.0f;
+            float vertical = aim.m_y >= 0.0f ? 1.0f : -1.0f;
+            float angle = atan2f(aim.m_y, aim.m_x * lr);
+            posture.setLr(lr);
+            work.setFloat(vertical, 0x21000005);
+            work.setFloat(angle, 0x21000004);
+            work.offFlag(0x22000011);
+            if (situation.getKind() == Situation_Ground) {
+                groundNormal = ground.getTouchNormal(static_cast<grCollStatus::TouchMask>(8), 0);
+                groundNormal.normalize();
+                aim.normalize();
+                float groundAngle = groundNormal.angle(&aim);
+                if (groundAngle < 1.5707964f) work.onFlag(0x22000011);
+                // HYPOTHESIS: Ness extend-param group 3 +0x24 is the per-move angular allowance.
+                if (groundAngle > 0.017453292f * (90.0f + nessParamGroup3[9])) {
+                    status.changeStatusRequest(0x4a, a);
+                } else {
+                    status.changeStatusRequest(0x11c, a);
+                }
+            } else {
+                work.onFlag(0x22000011);
+                status.changeStatusRequest(0x11c, a);
+            }
+        }
+        break;
+    case 1:
+        if (!inAimWindow) phase = 0;
+        break;
+    }
+
+    work.setInt(phase, 0x20000003);
+}
 void ftNessStatusUniqProcessSpecialHi::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
     soLinkModule& link = moduleAccesser->getLinkModule();
     if (link.isLink(6)) {

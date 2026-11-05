@@ -18,13 +18,13 @@ public:
     int m_job;                          // 0x24 what _requestJob was asked to do
     int m_jobArg;                       // 0x28
     u8 m_unk2C[4];
-    char m_unk30[0x40];                 // 0x30 cleared by the constructor
+    u64 m_unk30[8];                 // 0x30 cleared by the constructor
     u16 m_unk70;
     int m_unk74;
     int m_unk78;
     int m_unk7C;
-    u8 m_unk80[8];                      // 0x80 cleared by the constructor
-    int m_unk88;
+    u16 m_unk80[4];                      // 0x80 cleared by the constructor
+    void* m_unk88;
     bool m_jobDone;                     // 0x8C the last job is over (true before any job)
     int m_result;                       // 0x90 how the last job ended (0: well)
 
@@ -34,5 +34,10 @@ public:
     // Starts a job on the thread; false when the thread of the last job is still running.
     // HYPOTHESIS: the types of the parameters.
     bool _requestJob(int job, int arg);
+    void mail_AddSendTo(u64 recipient);
+    void mail_ClearSendTo();
+    u16 getRemainSendPoint();
+    int _mail_SendMail();
+    int _mail_ReceiveMail(int arg, u16* result);
 };
 static_assert(sizeof(nteExchange) == 0x98, "Class is wrong size!");
