@@ -1,3 +1,4 @@
+// Local BrawlHeaders shadow: adds game-rule and friend-list accessors.
 #pragma once
 // Local BrawlHeaders shadow: adds the recovered online menu task accessors and the
 // task fields they read.
@@ -52,6 +53,12 @@ struct muWifiAIDInfo {
     u8 unk56_b0 : 2;
     union {
         char unk57[0x21];
+        // HYPOTHESIS: status byte and four-byte rule packet share this region.
+        struct {
+            u8 unk57Data;
+            char _pad58[0xC];
+            u8 unk64[4];
+        };
         struct {
             char _pad57[2];
             u8 unk59_b4 : 4;
@@ -61,6 +68,11 @@ struct muWifiAIDInfo {
         };
     };
     union {
+        // HYPOTHESIS: four-byte game-rule packet begins at offset 0x7D.
+        struct {
+            char _pad78Rule[5];
+            u8 unk7DData[4];
+        };
         struct {
             u8 unk78_b7 : 1;
             u8 unk78_b3 : 4;
@@ -129,7 +141,11 @@ public:
     u8 m_playerLive[4];
     char unkFF3[0x1];
     u16 m_playerLiveTime[4];
-    char unkFFC[0x28];
+    union {
+        char unkFFC[0x28];
+        // HYPOTHESIS: cached rule packet used to detect selection changes.
+        u8 unkFFCData[4];
+    };
     u8 m_assignedMeleeRule[0xA];
     u8 m_assignedHomerunRule;
     u8 m_assignedKumiteType;
@@ -221,6 +237,10 @@ public:
     u8 getAssignedStageKind(u8* substage, u32* music);
     void clearGlobalAIDStatusLive();
     u8 getAssignedPlayerKind(int index);
+    // HYPOTHESIS: output is a four-byte rule packet; force bypasses comparison.
+    bool getSelCharGameRule(void* rule, bool force);
+    // HYPOTHESIS: argument indexes the global player-area table.
+    bool isEnoughRoomForFriendList(int player);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 

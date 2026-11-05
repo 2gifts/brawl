@@ -686,3 +686,40 @@ u8 muWifiInterfaceTask::getAssignedPlayerKind(int index) {
     }
     return *kind;
 }
+
+bool muWifiInterfaceTask::getSelCharGameRule(void* rule, bool force) {
+    muWifiAIDInfo* info = getSafeParentAIDInfo();
+    bool changed = memcmp(unkFFCData, info->unk7DData, 4) != 0;
+    if (force || changed) {
+        for (int i = 0; i < 4; i++) { unkFFCData[i] = info->unk7DData[i]; }
+        u8* output = (u8*)rule;
+        for (int i = 0; i < 4; i++) { output[i] = info->unk7DData[i]; }
+        u8 aid = Network::getMyAID();
+        if (aid == 0xFF) { aid = 4; }
+        muWifiAIDInfo* own = &m_aidInfos[aid];
+        for (int i = 0; i < 4; i++) { own->unk64[i] = info->unk7DData[i]; }
+        for (int i = 0; i < 4; i++) { own->unk7DData[i] = own->unk64[i]; }
+        return true;
+    }
+    return false;
+}
+
+bool muWifiInterfaceTask::isEnoughRoomForFriendList(int player) {
+    u8 aid = Network::getMyAID();
+    if (aid == 0xFF) { aid = 4; }
+    if (aid == 4) { return false; }
+    aid = Network::getMyAID();
+    if (aid == 0xFF) { aid = 4; }
+    if ((m_aidInfos[aid].unk56_b3 >> 1) & 1) { return false; }
+    u8 other = m_playerAreas[player].m_aid;
+    bool live;
+    if (other >= 4) { live = false; }
+    else { live = getSafeParentAIDInfo()->unk68[other] == 1; }
+    if (!live) { return false; }
+    muWifiAIDInfo* info = &m_aidInfos[other];
+    aid = Network::getMyAID();
+    if (aid == 0xFF) { aid = 4; }
+    if (info->unk59_b4 & (1 << aid)) { return true; }
+    return (info->unk57Data >> 6) & 1;
+}
+
