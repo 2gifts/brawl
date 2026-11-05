@@ -9,8 +9,6 @@
 #include <nw4r/g3d/g3d_scnmdl.h>
 #include <types.h>
 
-// Stage-to-info projection; the last argument's purpose remains unknown.
-extern "C" Vec3f fn_800DB360(const Vec3f* position, int unk1);
 // Declaration-only call into the existing scene-group constructor.
 extern "C" nw4r::g3d::ScnGroup* fn_801AB6CC(MEMAllocator* allocator, u32* size, u32 capacity);
 void ScnMdl_SetNodeMtx(nw4r::g3d::ScnMdl*, u32, const Matrix*);
@@ -40,7 +38,7 @@ void IfMarthFinalObjCallback::ExecCallback_CALC_WORLD(nw4r::g3d::ScnObj::Timing 
         scale.m_x = 1.0f;
         scale.m_y = 1.0f;
         scale.m_z = 1.0f;
-        Vec3f converted = fn_800DB360(&m_position, 2);
+        Vec3f converted = Vec3f::IfCommon_exchangeStageObjPosToInfoPos(&m_position, 2);
         fn_106_D4E4(&position, &converted);
         // MATCH-ONLY: retain the zero temporary and the original load order.
         float zero = 0.0f;

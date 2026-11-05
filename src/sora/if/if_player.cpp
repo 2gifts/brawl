@@ -55,11 +55,8 @@ void ScnMdl_SetNodeMtx(nw4r::g3d::ScnMdl* mdl, u32 node, const Matrix* mtx);
 void ScnObj_EnableCallbackExecOp(nw4r::g3d::ScnObj* obj, u32 flag);
 void ScnObj_EnableCallbackTiming(nw4r::g3d::ScnObj* obj, u32 timing);
 
-// HYPOTHESIS: map names IfCommon_exchangeStageObjPosToInfoPosFastInit, ...FastCursor1 (stage position to a cursor
-// matrix) and ...FastLoupe (stage position to the HUD position of the loupe), and Matrix::copy, Matrix::setRotateZ.
 extern "C" void fn_800DB444();
 extern "C" void fn_800DB674(const nw4r::math::VEC3* pos, Matrix* mtx);
-extern "C" Vec3f fn_800DB71C(const nw4r::math::VEC3* pos);
 extern "C" void fn_8003E388(const Matrix* src, Matrix* dst);
 extern "C" void fn_8003E9B4(Matrix* mtx, float angle);
 // nw4r::g3d::ScnMdl::CopiedMatAccess::GetResMatChan(sync): main.dol has it, the shared header does not.
@@ -240,7 +237,7 @@ Vec3f IfPlayerObjCallback::calcLoupePosFast(float* angle, const nw4r::math::VEC3
     }
     Vec3f out;
     Vec3f raw;
-    raw = fn_800DB71C(pos);
+    raw = Vec3f::IfCommon_exchangeStageObjPosToInfoPosFastLoupe(reinterpret_cast<const Vec3f*>(pos));
     if (raw.m_x > limits[1]) {
         float scale = limits[1] / raw.m_x;
         out.m_x = limits[1];
@@ -1270,10 +1267,7 @@ void IfPlayer::updateCoinScoreSub(u32 amount) {
 // The camera subjects (fighters and the like) the HUD is checked against, and the data of if_player.cpp.
 
 
-// HYPOTHESIS: map names IfCommon_exchangeStageObjPosToInfoPos, ...FastInit, ...FastCursor
-extern "C" Vec3f fn_800DB360(const Vec3f* position, int unk1);
 extern "C" void fn_800DB444();
-extern "C" void fn_800DB5F4(const Vec3f* position, Vec3f* out);
 
 // True when the float is a NaN (exponent bits all set and a non-zero mantissa).
 static inline int isNaN(float f) {
@@ -1376,11 +1370,11 @@ void IfPlayer::portriteRenderMain() {
                 corner.m_x = pos.m_x + it->m_range.m_left;
                 corner.m_y = pos.m_y + it->m_range.m_down;
                 corner.m_z = 0.0f;
-                p1 = fn_800DB360(&corner, 2);
+                p1 = Vec3f::IfCommon_exchangeStageObjPosToInfoPos(&corner, 2);
                 corner.m_x = pos.m_x + it->m_range.m_right;
                 corner.m_y = pos.m_y + it->m_range.m_up;
                 corner.m_z = 0.0f;
-                p2 = fn_800DB360(&corner, 2);
+                p2 = Vec3f::IfCommon_exchangeStageObjPosToInfoPos(&corner, 2);
                 rect.m_left = p1.m_x < p2.m_x ? p1.m_x : p2.m_x;
                 rect.m_right = p1.m_x > p2.m_x ? p1.m_x : p2.m_x;
                 rect.m_down = p1.m_y < p2.m_y ? p1.m_y : p2.m_y;
@@ -1429,11 +1423,11 @@ void IfPlayer::portriteRenderMainFastInit(Rect2D* rects, int* count, int max) {
             corner.m_y = pos.m_y + it->m_range.m_down;
             corner.m_z = 0.0f;
             Vec3f p1;
-            fn_800DB5F4(&corner, &p1);
+            Vec3f::IfCommon_exchangeStageObjPosToInfoPosFastCursor(&corner, &p1);
             corner.m_x = pos.m_x + it->m_range.m_right;
             corner.m_y = pos.m_y + it->m_range.m_up;
             Vec3f p2;
-            fn_800DB5F4(&corner, &p2);
+            Vec3f::IfCommon_exchangeStageObjPosToInfoPosFastCursor(&corner, &p2);
             Rect2D* rect = &rects[(*count)++];
             rect->m_left = p1.m_x < p2.m_x ? p1.m_x : p2.m_x;
             rect->m_right = p1.m_x > p2.m_x ? p1.m_x : p2.m_x;

@@ -207,6 +207,9 @@ static_assert(sizeof(Vec2f) == 8, "Class is wrong size!");
 
 class Vec3f {
 public:
+    static void IfCommon_exchangeStageObjPosToInfoPosFastCursor(const Vec3f* position, Vec3f* out);
+    static Vec3f IfCommon_exchangeStageObjPosToInfoPosFastLoupe(const Vec3f* position);
+    static Vec3f IfCommon_exchangeStageObjPosToInfoPos(const Vec3f* position, int unk1);
     union {
         struct {
             float m_x;
