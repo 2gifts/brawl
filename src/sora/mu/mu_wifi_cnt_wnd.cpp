@@ -65,3 +65,20 @@ void muWifiCntWndTask::setWndStyle(int style, int digits) {
     }
     unk40[0]->setFrameNode(frame);
 }
+
+void muWifiCntWndTask::setCounter(int primary, int secondary) {
+    nw4r::g3d::ScnMdlExpand* group = unk54;
+    while (!group->Empty()) {
+        group->PopBack();
+    }
+    float frame;
+    if (unk64 == 0) {
+        dispNum(primary, unk60, 1, 0, 1);
+        frame = unk60 - 1;
+    } else {
+        dispNum(secondary, 2, 0, 0, 1);
+        dispNum(primary, 2, 1, 2, 3);
+        frame = unk60 + 2;
+    }
+    unk40[0]->setFrameNode(frame);
+}

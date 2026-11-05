@@ -25,6 +25,7 @@
 #include <nw4r/g3d/g3d_scngroup.h>
 #include <gf/gf_scene.h>
 #include <nw4r/g3d/g3d_obj.h>
+#include <mu/mu_wifi_cnt_wnd.h>
 
 // ---- 0x800E5858-0x800E7BD0 ----
 
@@ -408,14 +409,11 @@ void ifVsResultTask::printTime(int msgSlot, u32 frames, bool format) {
 
 extern "C" void OSReport(const char* msg, ...);
 
-// HYPOTHESIS: the Wifi counter window is a task whose class is not modeled here (only exit() of gfTask is used).
-class muWifiCntWndTask : public gfTask {};
 
 // HYPOTHESIS: map names muWifiCntWndTask::create / setCounter, muWifiInterfaceTask::setContinueNextGame /
 // isReadyNextGame, IfSnapSaveTask::getState and gfSceneRoot::layerUpdateFrame.
 extern "C" muWifiCntWndTask* fn_800DA15C(int kind, nw4r::g3d::ResFile* resFile, nw4r::g3d::ScnMdlExpand* expand, const char* node,
                                         int drawPriority, int heap, int heap2);
-extern "C" void fn_800DA6EC(muWifiCntWndTask* task, int seconds, int unk);
 extern "C" void fn_800D1ADC(muWifiInterfaceTask* task, bool next);
 extern "C" bool fn_800D1BC8(muWifiInterfaceTask* task);
 extern "C" int fn_800F2894(IfSnapSaveTask* task);
@@ -581,7 +579,7 @@ void ifVsResultTask::processAnim() {
         m_unk44 = 1;
         if (g_muWifiInterfaceTask != NULL) {
             m_cntWnd = fn_800DA15C(2, &m_resFiles.m_wifiCount, m_expands[0], "pos05", 0x11, 0x2A, 0x2A);
-            fn_800DA6EC(m_cntWnd, (m_timer + 59) / 60, 0);
+            m_cntWnd->setCounter((m_timer + 59) / 60, 0);
         }
         if (resultInfo->m_decisionKind == gmResultInfo::Decision_NoContest) {
             m_soundStep = 2;
@@ -753,7 +751,7 @@ void ifVsResultTask::processAnim() {
             m_state = State_Closing;
             m_unk74 = 0;
             g_sndSystem->stopBGM(0x3C);
-            fn_800DA6EC(m_cntWnd, 0, 0);
+            m_cntWnd->setCounter(0, 0);
             m_timer = -1;
         } else if (m_timer < 0) {
             m_unk74++;
@@ -779,7 +777,7 @@ void ifVsResultTask::processAnim() {
                 m_state = State_Closing;
                 m_unk74 = 0;
                 g_sndSystem->stopBGM(0x3C);
-                fn_800DA6EC(m_cntWnd, 0, 0);
+                m_cntWnd->setCounter(0, 0);
                 m_timer = -1;
             } else {
                 m_unk74++;
@@ -846,7 +844,7 @@ void ifVsResultTask::processAnim() {
         if (timer > 0) {
             timer = timer - 1;
             m_timer = timer;
-            fn_800DA6EC(m_cntWnd, (timer + 0x3B) / 0x3C, 0);
+            m_cntWnd->setCounter((timer + 0x3B) / 0x3C, 0);
             if (timer < 0x12D && timer == timer / 0x3C * 0x3C) {
                 g_sndSystem->playSE(static_cast<SndID>(10), -1, 0, 0, -1);
             }
@@ -2066,7 +2064,6 @@ extern "C" IfSnapSaveTask* fn_800F18C4(nw4r::g3d::ResFile* resFile, nw4r::g3d::R
                                        nw4r::g3d::ScnGroup* scnGroup, int drawPriority, nteFileDataReplay* data,
                                        int unkA4, Heaps::HeapType heap, Heaps::HeapType heap2,
                                        Heaps::HeapType dataHeap);
-// muWifiCntWndTask::setCounter(task, seconds, unk)
 
 
 
@@ -2744,7 +2741,7 @@ void ifVsResultTask::subPlayerControl(int player) {
                 } else {
                     m_state = State_Unk9;
                     m_timer = -1;
-                    fn_800DA6EC(m_cntWnd, 0, 0);
+                    m_cntWnd->setCounter(0, 0);
                 }
                 if (m_noticeGroup != NULL) {
                     m_noticeGroup->Destroy();
