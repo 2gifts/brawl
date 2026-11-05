@@ -32,41 +32,42 @@ NWC24Err NWC24iCheckUserIdCrc(NWC24UserId id) {
     return NWC24_OK;
 }
 
-// Inverse of the WiiConnect24 ID nibble substitution. The byte permutation
-// is reversed separately; the upper five bits bypass the substitution.
-static const u8 IdInverseNibble[16] = {
-    13, 5, 9, 7, 0, 15, 10, 2, 12, 3, 14, 1, 8, 6, 11, 4
-};
+static const u8 IdInverseNibble[16] = {13, 5, 9, 7, 0, 15, 10, 2, 12, 3, 14, 1, 8, 6, 11, 4};
+static const u8 IdByteOrder[8] = {1, 5, 0, 4, 2, 3, 6, 7};
 
-static inline u8 UnscrambleByte(u8 value) {
-    return (IdInverseNibble[value >> 4] << 4) | IdInverseNibble[value & 15];
+static inline u8 GetIdByte(u64 value, u8 index) {
+    return (value >> (index * 8)) & 0xFF;
 }
 
-// Undo the XOR, 53-bit rotation, byte permutation, nibble substitution and
-// final rotation/XOR so the caller can validate the original CRC polynomial.
-static inline u8 GetIdByte(u64 id, unsigned int pos) {
-    return (id >> (pos * 8)) & 0xFF;
+static inline u64 SetIdByte(u64 value, u8 index, u8 set) {
+    return (value & ~(0xFFULL << ((u64)8 * index))) | ((u64)set << ((u64)8 * index));
 }
 
-static u64 getUnScrambleId(u64 id) {
-    u64 value = (id & 0x001FFFFFFFFFFFFFULL) ^ 0x00005E5E5E5E5E5EULL;
-    u64 permuted;
+// Decode the 53-bit ID before checking its CRC. The two six-byte loops
+// preserve the upper five bits while undoing the permutation and substitution.
+static u64 getUnScrambleId(u64 v) {
+    u64 input;
+    u8 i;
 
-    value = ((value >> 1) | ((value & 1) << 52));
-    // Preserve the input bytes while permuting, then substitute in place.
-    permuted = value;
-    permuted = (permuted & ~(0xFFULL << 0)) | ((u64)(GetIdByte(value, 1)) << 0);
-    permuted = (permuted & ~(0xFFULL << 8)) | ((u64)(GetIdByte(value, 5)) << 8);
-    permuted = (permuted & ~(0xFFULL << 16)) | ((u64)(GetIdByte(value, 0)) << 16);
-    permuted = (permuted & ~(0xFFULL << 24)) | ((u64)(GetIdByte(value, 4)) << 24);
-    permuted = (permuted & ~(0xFFULL << 32)) | ((u64)(GetIdByte(value, 2)) << 32);
-    permuted = (permuted & ~(0xFFULL << 40)) | ((u64)(GetIdByte(value, 3)) << 40);
+    // Remove the key, then rotate the bounded 53-bit value right once.
+    v &= 0x1FFFFFFFFFFFFFULL;
+    v ^= 0x5E5E5E5E5E5EULL;
+    v &= 0x1FFFFFFFFFFFFFULL;
+    v |= (((v & 0xFF) << 5) & 0x20) << 48;
+    v >>= 1;
 
-    permuted = (permuted & ~(0xFFULL << 0)) | ((u64)(UnscrambleByte(GetIdByte(permuted, 0))) << 0);
-    permuted = (permuted & ~(0xFFULL << 8)) | ((u64)(UnscrambleByte(GetIdByte(permuted, 1))) << 8);
-    permuted = (permuted & ~(0xFFULL << 16)) | ((u64)(UnscrambleByte(GetIdByte(permuted, 2))) << 16);
-    permuted = (permuted & ~(0xFFULL << 24)) | ((u64)(UnscrambleByte(GetIdByte(permuted, 3))) << 24);
-    permuted = (permuted & ~(0xFFULL << 32)) | ((u64)(UnscrambleByte(GetIdByte(permuted, 4))) << 32);
-    permuted = (permuted & ~(0xFFULL << 40)) | ((u64)(UnscrambleByte(GetIdByte(permuted, 5))) << 40);
-    return (((permuted & 0x000007FFFFFFFFFFULL) << 10) | (permuted >> 43)) ^ 0x0000B3B3B3B3B3B3ULL;
+    // Every permutation source comes from the same snapshot.
+    input = v;
+    for (i = 0; i < 6; ++i) {
+        v = SetIdByte(v, i, GetIdByte(input, IdByteOrder[i]));
+    }
+
+    for (i = 0; i < 6; ++i) {
+        v = SetIdByte(v, i, (IdInverseNibble[(GetIdByte(v, i) >> 4) & 0xF] << 4) | IdInverseNibble[GetIdByte(v, i) & 0xF]);
+    }
+
+    // Undo the final 53-bit rotation and key.
+    v = ((v & 0x7FFFFFFFFFFULL) << 10) | ((v >> 43) & 0x3FF);
+    v ^= 0xB3B3B3B3B3B3ULL;
+    return v;
 }
