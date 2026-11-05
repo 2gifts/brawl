@@ -425,6 +425,8 @@ public:
     bool isSafe();
     int getBullet();
     u32 shootBlanks(u32 count);
+    u32 shoot(u32 count, float lr, float speed);
+    static void removeModelConstraint(soModuleAccesser* accesser, int statusKind, bool adjustPosture);
     int getResult();
     void setHavedLog(int index, bool haved);
     int getTeamNo();
@@ -467,6 +469,11 @@ public:
     void updateLifeTime();
 };
 static_assert(sizeof(BaseItem) == 0x3d60, "Class is wrong size!");
+
+class itStatusUniqProcessHave : public soStatusUniqProcess {
+public:
+    virtual void exitStatus(soModuleAccesser* accesser, int statusKind);
+};
 
 class itCustomizerInterface : public utUnCopyable, public soNullable {
 public:

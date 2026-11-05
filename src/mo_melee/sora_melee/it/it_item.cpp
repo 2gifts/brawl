@@ -2118,3 +2118,32 @@ bool itCustomizerInterface::isConstraintHave(BaseItem*) { return true; }
 bool itCustomizerInterface::isReferenceControlerHave(BaseItem*) { return false; }
 itParam::KineticFlag itCustomizerInterface::getKineticFlags(BaseItem*) { return itParam::KineticFlag(0); }
 bool itCustomizerInterface::isUsePhysics(BaseItem*) { return false; }
+
+soCollisionShieldEventObserver::soCollisionShieldEventObserver(short manageId, s8 priority)
+    : soEventObserver<soCollisionShieldEventObserver>(0xe) {
+    initialize(manageId, priority);
+}
+
+soCollisionReflectorEventObserver::soCollisionReflectorEventObserver(short manageId, s8 priority)
+    : soEventObserver<soCollisionReflectorEventObserver>(0xf) {
+    initialize(manageId, priority);
+}
+
+void itStatusUniqProcessHave::exitStatus(soModuleAccesser* accesser, int statusKind) {
+    if (statusKind != BaseItem::Status::Have) {
+        if (accesser->getLinkModule().isLink(BaseItem::Link::No_Have) == true) {
+            if (accesser->getLinkModule().isModelConstraint() == true) {
+                BaseItem::removeModelConstraint(accesser, statusKind, true);
+            }
+            accesser->getLinkModule().unlink(BaseItem::Link::No_Have);
+        }
+    }
+}
+
+u32 BaseItem::shoot(u32 count, float lr, float speed) {
+    ItemView* modules = reinterpret_cast<ItemView*>(this);
+    if (0.0f == lr && modules->link.isLink(Link::No_Have)) {
+        lr = modules->link.getParentLr(Link::No_Have);
+    }
+    return m_customizer->onShoot(this, count, lr, speed);
+}
