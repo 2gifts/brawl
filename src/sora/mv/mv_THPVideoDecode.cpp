@@ -143,3 +143,15 @@ bool THPVideoDecodeOneShot(u32* p1) {
     }
     return true;
 }
+
+void PushFreeTextureSet(void* buffer) {
+    OSSendMessage(&lbl_805A0208[0]->m_freeTextureQueue, buffer, 0);
+}
+
+OSMessage PopDecodedTextureSet(u32 flags) {
+    OSMessage message;
+    if (OSReceiveMessage(&lbl_805A0208[0]->m_decodedTextureQueue, &message, flags) == true) {
+        return message;
+    }
+    return nullptr;
+}
