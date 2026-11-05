@@ -544,3 +544,14 @@ public:
     static itNullCustomizer* getInstance();
 };
 static_assert(sizeof(itNullCustomizer) == 12, "Class is wrong size!");
+
+class itStatusUniqProcessStandby : public soStatusUniqProcess {
+public:
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
+};
+
+class itGroundConditionCheckerImpl : public soGroundConditionChecker {
+public:
+    virtual bool isConditionNoCliffStop(soModuleAccesser* moduleAccesser);
+};
