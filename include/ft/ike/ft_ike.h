@@ -74,6 +74,7 @@ public:
     static void setFinalTargetPosBaseWork(soModuleAccesser* moduleAccesser, const Vec3f& position);
     static Vec3f getFinalTargetPosBaseWork(soModuleAccesser* moduleAccesser);
     virtual void notifyEventOnDamage(soDamage* damage, bool reset, soModuleAccesser* moduleAccesser);
+    virtual bool notifyEventCollisionShieldCheck();
     virtual bool notifyEventCollisionSearchCheck();
     virtual void processFixPosition();
     virtual void notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);

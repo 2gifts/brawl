@@ -530,3 +530,17 @@ void ftIke::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAcc
     }
     Fighter::notifyEventCollisionSearch(collisionLog, moduleAccesser);
 }
+
+bool ftIke::notifyEventCollisionShieldCheck() {
+    if (m_moduleAccesser->getStatusModule().getStatusKind() == 0x115 &&
+        m_moduleAccesser->getWorkManageModule().isFlag(0x22000013)) {
+        m_moduleAccesser->getWorkManageModule().offFlag(0x22000013);
+        m_moduleAccesser->getStatusModule().changeStatusRequest(0x121, m_moduleAccesser);
+        m_moduleAccesser->getPostureModule().setLr(m_moduleAccesser->getWorkManageModule().getFloat(0x21000005));
+        m_moduleAccesser->getPostureModule().updateRotYLr();
+        int stopFrames = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc7, 0);
+        m_moduleAccesser->getStopModule().setHitStopFrame(stopFrames, 0);
+        return true;
+    }
+    return Fighter::notifyEventCollisionShieldCheck();
+}
