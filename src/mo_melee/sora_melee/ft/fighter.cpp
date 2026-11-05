@@ -13,6 +13,230 @@
 #include <so/item/so_item_manage_module_impl.h>
 #include <so/so_module_hyp.h>
 
+soCollisionReflectorEventObserver::~soCollisionReflectorEventObserver() { }
+
+template <>
+inline void soEventObserver<soCollisionAbsorberEventObserver>::addObserverSub(s32 manageId, soCollisionAbsorberEventObserver* observer, s8 priority) {
+    s32 previousManageId;
+    bool managerExists, unitExists, idsValid, registered;
+    unitExists = false;
+    managerExists = false;
+    registered = false;
+    idsValid = false;
+    s32 currentManageId = m_manageID;
+
+    if (m_manageID >= 0 && m_unitID >= 0)
+        idsValid = true;
+    if (idsValid && m_sendID > -1)
+        registered = true;
+    if (registered && soEventSystem::getInstance()->getInstanceManager().isContain(currentManageId) == true)
+        managerExists = true;
+    if (managerExists && soEventSystem::getInstance()->getManager(m_manageID)->getObserverCapacity(m_unitID) == 1)
+        unitExists = true;
+    if (unitExists == true) {
+        previousManageId = m_manageID;
+        removeObserver(previousManageId);
+    }
+    if (manageId <= -1 || m_unitID <= -1 ||
+        soEventSystem::getInstance()->getInstanceManager().isContain(manageId) == false)
+        return;
+    soEventManager* eventManager = soEventSystem::getInstance()->getManager(manageId);
+    if (eventManager->isNullUnit(m_unitID) != true) {
+        m_sendID = addObserverPrivate(manageId, observer, priority);
+        if (m_sendID > -1 && m_sendID > -1)
+            m_manageID = manageId;
+    }
+}
+
+void soCollisionAbsorberEventObserver::addObserver(short manageId, s8 priority) {
+    addObserverSub(manageId, this, priority);
+}
+
+template <>
+inline void soEventObserver<soCaptureEventObserver>::addObserverSub(s32 manageId, soCaptureEventObserver* observer, s8 priority) {
+    s32 previousManageId;
+    bool managerExists, unitExists, idsValid, registered;
+    unitExists = false;
+    managerExists = false;
+    registered = false;
+    idsValid = false;
+    s32 currentManageId = m_manageID;
+
+    if (m_manageID >= 0 && m_unitID >= 0)
+        idsValid = true;
+    if (idsValid && m_sendID > -1)
+        registered = true;
+    if (registered && soEventSystem::getInstance()->getInstanceManager().isContain(currentManageId) == true)
+        managerExists = true;
+    if (managerExists && soEventSystem::getInstance()->getManager(m_manageID)->getObserverCapacity(m_unitID) == 1)
+        unitExists = true;
+    if (unitExists == true) {
+        previousManageId = m_manageID;
+        removeObserver(previousManageId);
+    }
+    if (manageId <= -1 || m_unitID <= -1 ||
+        soEventSystem::getInstance()->getInstanceManager().isContain(manageId) == false)
+        return;
+    soEventManager* eventManager = soEventSystem::getInstance()->getManager(manageId);
+    if (eventManager->isNullUnit(m_unitID) != true) {
+        m_sendID = addObserverPrivate(manageId, observer, priority);
+        if (m_sendID > -1 && m_sendID > -1)
+            m_manageID = manageId;
+    }
+}
+
+void soCaptureEventObserver::addObserver(short manageId, s8 priority) {
+    addObserverSub(manageId, this, priority);
+}
+
+template <>
+inline void soEventObserver<soItemManageEventObserver>::addObserverSub(s32 manageId, soItemManageEventObserver* observer, s8 priority) {
+    s32 previousManageId;
+    bool managerExists, unitExists, idsValid, registered;
+    unitExists = false;
+    managerExists = false;
+    registered = false;
+    idsValid = false;
+    s32 currentManageId = m_manageID;
+
+    if (m_manageID >= 0 && m_unitID >= 0)
+        idsValid = true;
+    if (idsValid && m_sendID > -1)
+        registered = true;
+    if (registered && soEventSystem::getInstance()->getInstanceManager().isContain(currentManageId) == true)
+        managerExists = true;
+    if (managerExists && soEventSystem::getInstance()->getManager(m_manageID)->getObserverCapacity(m_unitID) == 1)
+        unitExists = true;
+    if (unitExists == true) {
+        previousManageId = m_manageID;
+        removeObserver(previousManageId);
+    }
+    if (manageId <= -1 || m_unitID <= -1 ||
+        soEventSystem::getInstance()->getInstanceManager().isContain(manageId) == false)
+        return;
+    soEventManager* eventManager = soEventSystem::getInstance()->getManager(manageId);
+    if (eventManager->isNullUnit(m_unitID) != true) {
+        m_sendID = addObserverPrivate(manageId, observer, priority);
+        if (m_sendID > -1 && m_sendID > -1)
+            m_manageID = manageId;
+    }
+}
+
+void soItemManageEventObserver::addObserver(short manageId, s8 priority) {
+    addObserverSub(manageId, this, priority);
+}
+
+template <>
+inline void soEventObserver<soMotionEventObserver>::addObserverSub(s32 manageId, soMotionEventObserver* observer, s8 priority) {
+    s32 previousManageId;
+    bool managerExists, unitExists, idsValid, registered;
+    unitExists = false;
+    managerExists = false;
+    registered = false;
+    idsValid = false;
+    s32 currentManageId = m_manageID;
+
+    if (m_manageID >= 0 && m_unitID >= 0)
+        idsValid = true;
+    if (idsValid && m_sendID > -1)
+        registered = true;
+    if (registered && soEventSystem::getInstance()->getInstanceManager().isContain(currentManageId) == true)
+        managerExists = true;
+    if (managerExists && soEventSystem::getInstance()->getManager(m_manageID)->getObserverCapacity(m_unitID) == 1)
+        unitExists = true;
+    if (unitExists == true) {
+        previousManageId = m_manageID;
+        removeObserver(previousManageId);
+    }
+    if (manageId <= -1 || m_unitID <= -1 ||
+        soEventSystem::getInstance()->getInstanceManager().isContain(manageId) == false)
+        return;
+    soEventManager* eventManager = soEventSystem::getInstance()->getManager(manageId);
+    if (eventManager->isNullUnit(m_unitID) != true) {
+        m_sendID = addObserverPrivate(manageId, observer, priority);
+        if (m_sendID > -1 && m_sendID > -1)
+            m_manageID = manageId;
+    }
+}
+
+void soMotionEventObserver::addObserver(short manageId, s8 priority) {
+    addObserverSub(manageId, this, priority);
+}
+
+template <>
+inline void soEventObserver<soTurnEventObserver>::addObserverSub(s32 manageId, soTurnEventObserver* observer, s8 priority) {
+    s32 previousManageId;
+    bool managerExists, unitExists, idsValid, registered;
+    unitExists = false;
+    managerExists = false;
+    registered = false;
+    idsValid = false;
+    s32 currentManageId = m_manageID;
+
+    if (m_manageID >= 0 && m_unitID >= 0)
+        idsValid = true;
+    if (idsValid && m_sendID > -1)
+        registered = true;
+    if (registered && soEventSystem::getInstance()->getInstanceManager().isContain(currentManageId) == true)
+        managerExists = true;
+    if (managerExists && soEventSystem::getInstance()->getManager(m_manageID)->getObserverCapacity(m_unitID) == 1)
+        unitExists = true;
+    if (unitExists == true) {
+        previousManageId = m_manageID;
+        removeObserver(previousManageId);
+    }
+    if (manageId <= -1 || m_unitID <= -1 ||
+        soEventSystem::getInstance()->getInstanceManager().isContain(manageId) == false)
+        return;
+    soEventManager* eventManager = soEventSystem::getInstance()->getManager(manageId);
+    if (eventManager->isNullUnit(m_unitID) != true) {
+        m_sendID = addObserverPrivate(manageId, observer, priority);
+        if (m_sendID > -1 && m_sendID > -1)
+            m_manageID = manageId;
+    }
+}
+
+void soTurnEventObserver::addObserver(short manageId, s8 priority) {
+    addObserverSub(manageId, this, priority);
+}
+
+template <>
+inline void soEventObserver<ftEntryEventObserver>::addObserverSub(s32 manageId, ftEntryEventObserver* observer, s8 priority) {
+    s32 previousManageId;
+    bool managerExists, unitExists, idsValid, registered;
+    unitExists = false;
+    managerExists = false;
+    registered = false;
+    idsValid = false;
+    s32 currentManageId = m_manageID;
+
+    if (m_manageID >= 0 && m_unitID >= 0)
+        idsValid = true;
+    if (idsValid && m_sendID > -1)
+        registered = true;
+    if (registered && soEventSystem::getInstance()->getInstanceManager().isContain(currentManageId) == true)
+        managerExists = true;
+    if (managerExists && soEventSystem::getInstance()->getManager(m_manageID)->getObserverCapacity(m_unitID) == 1)
+        unitExists = true;
+    if (unitExists == true) {
+        previousManageId = m_manageID;
+        removeObserver(previousManageId);
+    }
+    if (manageId <= -1 || m_unitID <= -1 ||
+        soEventSystem::getInstance()->getInstanceManager().isContain(manageId) == false)
+        return;
+    soEventManager* eventManager = soEventSystem::getInstance()->getManager(manageId);
+    if (eventManager->isNullUnit(m_unitID) != true) {
+        m_sendID = addObserverPrivate(manageId, observer, priority);
+        if (m_sendID > -1 && m_sendID > -1)
+            m_manageID = manageId;
+    }
+}
+
+void ftEntryEventObserver::addObserver(short manageId, s8 priority) {
+    addObserverSub(manageId, this, priority);
+}
+
 // Fighter::setFlower (the map name); src/mo_melee/sora_melee/ft/ft_damage_transactor_impl.cpp calls it by this stand-in name.
 extern "C" void fn_27_1392D4(Fighter* fighter, bool setStatus, float rate, float size, int unk4, bool unk5);
 

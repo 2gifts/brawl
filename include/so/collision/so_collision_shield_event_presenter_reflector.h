@@ -1,3 +1,4 @@
+// Local BrawlHeaders shadow: declare the reflector observer destructor.
 #pragma once
 // SHADOW of BrawlHeaders/so/collision/so_collision_shield_event_presenter_reflector.h: addObserver is inline in the fighter RELs (FT_MODULE_BUILDER)
 
@@ -12,6 +13,7 @@ class soCollisionSearchModule;
 
 class soCollisionReflectorEventObserver : public soEventObserver<soCollisionReflectorEventObserver> {
 public:
+    ~soCollisionReflectorEventObserver();
     soCollisionReflectorEventObserver() : soEventObserver<soCollisionReflectorEventObserver>(0xf) {};
     soCollisionReflectorEventObserver(short unitID) : soEventObserver<soCollisionReflectorEventObserver>(unitID) {};
 #ifdef EM_ENEMY_BUILDER
