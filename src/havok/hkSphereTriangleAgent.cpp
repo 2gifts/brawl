@@ -71,7 +71,7 @@ void hkSphereTriangleAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
 // The create functions inline this; the dead `mr r30, r3` there is the object pointer kept for the exception cleanup
 // of the base (the unit is built with -Cpp_exceptions on).
 hkSphereTriangleAgent::hkSphereTriangleAgent(const hkCdBody& triangleBody, hkContactMgr* contactMgr)
-    : hkCollisionAgent((int)contactMgr) {
+    : hkIterativeLinearCastAgent((int)contactMgr) {
     unkC = 0xFFFF;
     const hkTriangleShape* triangle = (const hkTriangleShape*)triangleBody.m_shape;
     hkCollideTriangleUtil::setupClosestPointTriangleCache(&triangle->m_vertexA, (hkVector4*)unk10);

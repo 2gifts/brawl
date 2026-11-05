@@ -1,6 +1,6 @@
 #pragma once
 
-#include <havok/hkCollisionAgent.h>
+#include <havok/hkIterativeLinearCastAgent.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
 #include <havok/hkArray.h>
 #include <havok/hkShape.h>
@@ -25,7 +25,7 @@ struct hkContactMgr;
 // Agent for a convex shape against a multi-ray shape (shape type HK_SHAPE_MULTI_RAY). Object size 0x20.
 // 0x08 (hkCollisionAgent::unk8) is the contact manager; 0x0C holds one contact point id per ray (0xFFFF = none),
 // with inline room for four. cleanup() removes every contact point still held.
-struct hkMultiRayConvexAgent : hkCollisionAgent {
+struct hkMultiRayConvexAgent : hkIterativeLinearCastAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
     hkInplaceArray<u16, 4> m_contactPointIds; // 0x0C

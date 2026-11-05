@@ -1,6 +1,6 @@
 #pragma once
 
-#include <havok/hkCollisionAgent.h>
+#include <havok/hkIterativeLinearCastAgent.h>
 #include <havok/hkCdBody.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
 
@@ -10,7 +10,7 @@ struct hkCollisionInput;
 // Collision agent for sphere x triangle (sphere first; the triangle-first pairs use the symmetric variant). Object size
 // 0x20: the 0x08 word is the contact manager, 0x0C a 16-bit slot released by cleanup when it is not 0xFFFF, and 0x10 the
 // triangle's closest-point cache (hkCollideTriangleUtil::setupClosestPointTriangleCache).
-struct hkSphereTriangleAgent : hkCollisionAgent {
+struct hkSphereTriangleAgent : hkIterativeLinearCastAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
     u16 unkC;     // 0x0C, set to 0xFFFF by the constructor

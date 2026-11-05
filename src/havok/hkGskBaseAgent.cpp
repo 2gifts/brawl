@@ -23,12 +23,14 @@
 extern "C" void fn_8031C8CC(void* self, void* shapeA, void* shapeB, void* relative);
 extern "C" void fn_8031CD64(void* self, void* shapeA, void* shapeB, void* relative);
 
-hkGskBaseAgent::hkGskBaseAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
+hkGskBaseAgent::hkGskBaseAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkContactMgr* contactMgr) : hkIterativeLinearCastAgent((int)contactMgr) {
     hkTransform relative;
     hkShape* shapeA = bodyA.m_shape;
     hkShape* shapeB = bodyB.m_shape;
     // a motion state starts with its hkTransform, so the pointers can be used as transforms directly
-    relative.setMulInverseMul(*(const hkTransform*)bodyA.m_motion, *(const hkTransform*)bodyB.m_motion);
+    const hkTransform& tb = *(const hkTransform*)bodyB.m_motion;
+    const hkTransform& ta = *(const hkTransform*)bodyA.m_motion;
+    relative.setMulInverseMul(ta, tb);
     if (shapeB->getType() == HK_SHAPE_TRIANGLE) {
         fn_8031C8CC(unkC, shapeA, shapeB, &relative);
     } else {

@@ -32,7 +32,7 @@ extern "C" void fn_802B7FD0(const hkCdBody& a, const hkCdBody& b, hkLinearCastCo
                             void* d);
 
 hkCapsuleTriangleAgent::hkCapsuleTriangleAgent(const hkCdBody& triangleBody, hkContactMgr* contactMgr)
-    : hkCollisionAgent((int)contactMgr) {
+    : hkIterativeLinearCastAgent((int)contactMgr) {
     unkC[0] = 0xFFFF;
     unkC[1] = 0xFFFF;
     unkC[2] = 0xFFFF;

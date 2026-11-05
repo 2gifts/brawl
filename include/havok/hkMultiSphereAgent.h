@@ -1,6 +1,6 @@
 #pragma once
 
-#include <havok/hkCollisionAgent.h>
+#include <havok/hkIterativeLinearCastAgent.h>
 #include <havok/hkArray.h>
 
 struct hkCollisionDispatcher;
@@ -62,7 +62,7 @@ struct hkSymmetricAgentLinearCast_18hkMultiSphereAgent_ : hkSymmetricAgent_18hkM
 
 // HYPOTHESIS: hkSymmetricAgentLinearCast<hkMultiSphereTriangleAgent> (map name, in hkMultiSphereAgent.o); the
 // triangle agent itself is not recovered. Its static linear cast goes to the iterative linear cast.
-struct hkMultiSphereTriangleAgent : hkCollisionAgent {
+struct hkMultiSphereTriangleAgent : hkIterativeLinearCastAgent {
     virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target); // not written yet
     virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target); // not written yet
     static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target); // not written yet

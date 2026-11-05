@@ -1,6 +1,6 @@
 #pragma once
 
-#include <havok/hkCollisionAgent.h>
+#include <havok/hkIterativeLinearCastAgent.h>
 #include <havok/hkBoxBoxManifold.h>
 #include <havok/hkCdBody.h>
 
@@ -9,14 +9,14 @@ struct hkCollisionInput;
 
 // Collision agent for box x box pairs (and the box side of box x other pairs) with a contact manifold. Object size 0x60.
 // The 0x08 word (inherited) holds the contact manager; the manifold sits at 0x10 (its point count is at 0x31).
-struct hkBoxBoxAgent : hkCollisionAgent {
+struct hkBoxBoxAgent : hkIterativeLinearCastAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
     u8 unkC[0x10 - 0x0C]; // 0x0C not identified yet
     hkBoxBoxManifold m_manifold; // 0x10
     u8 unk34[0x60 - 0x34];       // 0x34 not identified yet
 
-    hkBoxBoxAgent(hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {}
+    hkBoxBoxAgent(hkContactMgr* contactMgr) : hkIterativeLinearCastAgent((int)contactMgr) {}
     virtual ~hkBoxBoxAgent();
 
     static void registerAgent(hkCollisionDispatcher* dispatcher);

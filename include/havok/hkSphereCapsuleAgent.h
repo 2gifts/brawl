@@ -1,18 +1,18 @@
 #pragma once
 
-#include <havok/hkCollisionAgent.h>
+#include <havok/hkIterativeLinearCastAgent.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
 
 struct hkCollisionDispatcher;
 
 // Collision agent for capsule x sphere (capsule first in the pair). Object size 0x10, same layout as
 // hkSphereBoxAgent: 0x08 contact manager, 0x0C 16-bit slot released by cleanup when it is not 0xFFFF.
-struct hkSphereCapsuleAgent : hkCollisionAgent {
+struct hkSphereCapsuleAgent : hkIterativeLinearCastAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
     u16 unkC; // 0x0C, set to 0xFFFF by the constructor
 
-    hkSphereCapsuleAgent(hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
+    hkSphereCapsuleAgent(hkContactMgr* contactMgr) : hkIterativeLinearCastAgent((int)contactMgr) {
         unkC = 0xFFFF;
     }
     virtual ~hkSphereCapsuleAgent() {} // inline: the symmetric destructor calls it without a bl

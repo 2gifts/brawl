@@ -1,13 +1,13 @@
 #pragma once
 
-#include <havok/hkCollisionAgent.h>
+#include <havok/hkIterativeLinearCastAgent.h>
 #include <havok/hkCdBody.h>
 
 struct hkContactMgr;
 
 // Base of the GSK collision agents (GJK/separating-axis pair agents). Object size 0x30; hkGskfAgent is 0x80. The constructor takes the two collision bodies
 // and the contact manager, which is stored in the 0x08 word inherited from hkCollisionAgent.
-struct hkGskBaseAgent : hkCollisionAgent {
+struct hkGskBaseAgent : hkIterativeLinearCastAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
     u8 unkC[0x18 - 0x0C]; // 0x0C GSK cache/state initialised by the constructor (not identified)

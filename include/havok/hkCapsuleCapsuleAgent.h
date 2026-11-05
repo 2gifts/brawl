@@ -1,17 +1,17 @@
 #pragma once
 
-#include <havok/hkCollisionAgent.h>
+#include <havok/hkIterativeLinearCastAgent.h>
 
 struct hkCollisionDispatcher;
 
 // Collision agent for capsule x capsule pairs. Object size 0x14: the 0x08 word (inherited) is the contact manager,
 // and three 16-bit slots at 0x0C hold per-query state; the constructor sets all three to 0xFFFF.
-struct hkCapsuleCapsuleAgent : hkCollisionAgent {
+struct hkCapsuleCapsuleAgent : hkIterativeLinearCastAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
     u16 unkC[3]; // 0x0C, set to 0xFFFF by the constructor; cleanup releases the contact manager for slots != 0xFFFF
 
-    hkCapsuleCapsuleAgent(hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
+    hkCapsuleCapsuleAgent(hkContactMgr* contactMgr) : hkIterativeLinearCastAgent((int)contactMgr) {
         unkC[0] = 0xFFFF;
         unkC[1] = 0xFFFF;
         unkC[2] = 0xFFFF;

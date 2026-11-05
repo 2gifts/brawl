@@ -35,7 +35,7 @@ namespace {
 #pragma auto_inline off
 // One contact point id per ray of the multi-ray shape (body A), none held yet.
 hkMultiRayConvexAgent::hkMultiRayConvexAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr)
-    : hkCollisionAgent((int)contactMgr) {
+    : hkIterativeLinearCastAgent((int)contactMgr) {
     const hkMultiRayShape* shape = (const hkMultiRayShape*)bodyA.m_shape;
     int numRays = shape->m_rays.getSize();
     m_contactPointIds.setSize(numRays);

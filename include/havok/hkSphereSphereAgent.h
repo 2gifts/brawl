@@ -1,6 +1,6 @@
 #pragma once
 
-#include <havok/hkCollisionAgent.h>
+#include <havok/hkIterativeLinearCastAgent.h>
 
 struct hkCdBody;
 struct hkCollisionDispatcher;
@@ -8,12 +8,12 @@ struct hkCollisionInput;
 
 // Collision agent for two spheres. Object size 0x10. The 0x08 word (inherited from hkCollisionAgent) holds the
 // contact manager passed to the create function; 0x0C is a 16-bit slot that cleanup releases when it is not 0xFFFF.
-struct hkSphereSphereAgent : hkCollisionAgent {
+struct hkSphereSphereAgent : hkIterativeLinearCastAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
     u16 unkC; // 0x0C, set to 0xFFFF by the constructor
 
-    hkSphereSphereAgent(hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
+    hkSphereSphereAgent(hkContactMgr* contactMgr) : hkIterativeLinearCastAgent((int)contactMgr) {
         unkC = 0xFFFF;
     }
     virtual ~hkSphereSphereAgent();
