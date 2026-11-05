@@ -5,9 +5,6 @@
 #include <if/if_adv_mngr.h>
 #include <if/if_player.h>
 
-// IfAdvGauge::removePressStart (the map name); src/sora/if/if_adv_mngr.cpp calls it by this stand-in name.
-void fn_8010C0DC(IfAdvGauge* gauge, nw4r::g3d::ScnMdlExpand* locator);
-
 stOperatorAppearanceHelper::~stOperatorAppearanceHelper() { }
 
 void stOperatorAppearanceHelper::startOperator() {
@@ -21,7 +18,7 @@ void stOperatorAppearanceHelper::startOperator() {
                 if (mngr->unk48_40 == 1) {
                     mngr->m_gauge->addPressStart(IfPlayer::getPlayerLocator());
                 } else {
-                    fn_8010C0DC(mngr->m_gauge, IfPlayer::getPlayerLocator());
+                    mngr->m_gauge->removePressStart(IfPlayer::getPlayerLocator());
                 }
             }
         }

@@ -18,6 +18,7 @@
 #include <sr/sr_common.h>
 #include <string.h>
 #include <ty/ty_fig_listmng.h>
+#include <if/if_adv_gauge.h>
 
 namespace nw4r {
 namespace g3d {
@@ -68,7 +69,6 @@ void fn_8010BD74(IfAdvGauge* gauge, nw4r::g3d::ResFile* resFile1, nw4r::g3d::Res
 void fn_8010B9E4(IfAdvGauge* gauge, int flag);
 void fn_8010BE98();
 void fn_8010C004(nw4r::g3d::ScnGroup* group);
-void fn_8010C0DC(IfAdvGauge* gauge, nw4r::g3d::ScnMdlExpand* locator);
 void fn_8010C9D8(IfAdvGauge* gauge);
 void fn_8010BDCC(IfAdvGauge* gauge);
 void fn_8010C6C8(IfAdvGauge* gauge, s32 value);
@@ -80,7 +80,6 @@ void fn_8010C52C(IfAdvGauge* gauge, s32 num);
 void fn_8010CA20(IfAdvGauge* gauge, int flag);
 void fn_8010CA94(IfAdvGauge* gauge, s32 num, u8* stock);
 void fn_8010CC80(IfAdvGauge* gauge);
-void fn_8010CCA0(IfAdvGauge* gauge, u8 count);
 void fn_8010CCE0(IfAdvGauge* gauge, float scale, u8 count, IfPlayer* player, u8 arg);
 void fn_80108D1C(nw4r::g3d::ResFile* resFile);
 void* fn_8010890C(void* data);
@@ -482,7 +481,7 @@ void IfAdvMngr::createModel() {
 
 void IfAdvMngr::destroyModel() {
     if (m_gauge) {
-        fn_8010C0DC(m_gauge, IfPlayer::getPlayerLocator());
+        m_gauge->removePressStart(IfPlayer::getPlayerLocator());
     }
     if (m_gauge) {
         fn_8010C9D8(m_gauge);
@@ -636,7 +635,7 @@ void IfAdvMngr::meleeMain() {
             fn_8010CC80(m_gauge);
         }
         if (m_gauge) {
-            fn_8010CCA0(m_gauge, unk57);
+            m_gauge->drawStockSlotAnime(unk57);
         }
     }
     if (unk68[0]) {
@@ -831,7 +830,7 @@ extern "C" int fn_80107A70(IfAdvMngr* mngr, int arg, bool flag) {
                 fn_8010CC80(mngr->m_gauge);
             }
             if (mngr->m_gauge) {
-                fn_8010CCA0(mngr->m_gauge, mngr->unk57);
+                mngr->m_gauge->drawStockSlotAnime(mngr->unk57);
             }
         }
     }
