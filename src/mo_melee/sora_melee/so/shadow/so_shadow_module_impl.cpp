@@ -7,9 +7,6 @@
 
 void getScalingFactor(Matrix* matrix, Vec3f* scale);
 
-// stShadow::eraseShadowObject (sora_melee map 0x228C04), still unnamed in st_shadow.
-extern "C" void fn_27_228C04(stShadow* shadow, nw4r::g3d::ScnMdl* scnMdl);
-
 soShadowModuleImpl::soShadowModuleImpl(soModuleAccesser* moduleAccesser, float size, int node) :
     soStatusEventObserver(static_cast<soEventManager&>(moduleAccesser->getEventManageModule()).getManageId(), -1),
     soAnimCmdEventObserver(5, static_cast<soEventManager&>(moduleAccesser->getEventManageModule()).getManageId()),
@@ -63,7 +60,7 @@ void soShadowModuleImpl::notifyEventChangeStatus(int statusKind, int prevStatusK
 
 void soShadowModuleImpl::notifyEventDestructInstance(soModuleAccesser* moduleAccesser) {
     stShadow* shadow = g_Stage->m_shadow;
-    fn_27_228C04(shadow, moduleAccesser->getModelModule().getScnMdl(true));
+    shadow->eraseShadowObject(moduleAccesser->getModelModule().getScnMdl(true));
 }
 
 bool soShadowModuleImpl::isDispProjection() {
