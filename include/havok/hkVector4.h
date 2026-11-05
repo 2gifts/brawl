@@ -99,6 +99,16 @@ struct hkVector4 {
     int compareLessThan4(const hkVector4& a) const {
         return ((x < a.x) << 3) | ((y < a.y) << 2) | ((z < a.z) << 1) | (w < a.w);
     }
+    // True when |this - v| <= epsilon in x, y and z (w is computed but masked out). HYPOTHESIS: the name; the shape
+    // is inlined once per column in hkMatrix3::isApproximatelyEqual.
+    hkBool equals3(const hkVector4& v, hkReal epsilon) const {
+        hkVector4 eps;
+        eps.setAll(epsilon);
+        hkVector4 diff;
+        diff.setSub4(*this, v);
+        diff.setAbs4(diff);
+        return (eps.compareLessThan4(diff) & 0xE) == 0;
+    }
     // Lane-wise reciprocal (out of line: defined in src/havok/hkRigidMotionUtil.cpp).
     void setReciprocal4(const hkVector4& a);
     // Lane-wise product in place: this *= a (out of line: defined in src/havok/hkRigidMotionUtil.cpp).

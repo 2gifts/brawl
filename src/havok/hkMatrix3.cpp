@@ -76,56 +76,28 @@ void hkMatrix3::setMulInverse(const hkMatrix3& lhs, const hkMatrix3& rhs) {
 }
 
 hkBool hkMatrix3::isApproximatelyEqual(float epsilon, const hkMatrix3& other) const {
-    const float* lhs = &m_col0.x;
-    const float* rhs = &other.m_col0.x;
-
-    for (int i = 0; i < 12; ++i) {
-        if (epsilon < (float)fabs(lhs[i] - rhs[i])) {
-            return hkBool(false);
-        }
-    }
-    return hkBool(true);
+    return m_col0.equals3(other.m_col0, epsilon) && m_col1.equals3(other.m_col1, epsilon) &&
+           m_col2.equals3(other.m_col2, epsilon);
 }
 
 hkResult hkMatrix3::invert(float epsilon) {
-    float* m = &m_col0.x;
+    hkVector4 r0;
+    r0.setCross(m_col1, m_col2);
+    hkVector4 r1;
+    r1.setCross(m_col2, m_col0);
+    hkVector4 r2;
+    r2.setCross(m_col0, m_col1);
 
-    const float m0 = m[0];
-    const float m1 = m[1];
-    const float m2 = m[2];
-    const float m4 = m[4];
-    const float m5 = m[5];
-    const float m6 = m[6];
-    const float m8 = m[8];
-    const float m9 = m[9];
-    const float m10 = m[10];
-
-    const float c0 = m6 * m8 - m4 * m10;
-    const float c1 = m5 * m10 - m6 * m9;
-    const float c2 = m4 * m9 - m5 * m8;
-    float determinant = m1 * c0;
-    determinant = m0 * c1 + determinant;
-    determinant = m2 * c2 + determinant;
-
-    if ((float)fabs(determinant) <= epsilon * epsilon * epsilon) {
-        return HK_FAILURE;
+    const hkReal determinant = m_col0.dot3(r0);
+    if ((hkReal)fabs(determinant) > epsilon * epsilon * epsilon) {
+        const hkReal invDeterminant = 1.0f / determinant;
+        m_col0.setMul4(invDeterminant, r0);
+        m_col1.setMul4(invDeterminant, r1);
+        m_col2.setMul4(invDeterminant, r2);
+        transpose();
+        return HK_SUCCESS;
     }
-
-    const float invDeterminant = 1.0f / determinant;
-    m[0] = invDeterminant * c1;
-    m[1] = invDeterminant * c0;
-    m[2] = invDeterminant * c2;
-    m[3] = invDeterminant * 0.0f;
-    m[4] = invDeterminant * (m9 * m2 - m10 * m1);
-    m[5] = invDeterminant * (m10 * m0 - m8 * m2);
-    m[6] = invDeterminant * (m8 * m1 - m9 * m0);
-    m[7] = invDeterminant * 0.0f;
-    m[8] = invDeterminant * (m1 * m6 - m2 * m5);
-    m[9] = invDeterminant * (m2 * m4 - m0 * m6);
-    m[10] = invDeterminant * (m0 * m5 - m1 * m4);
-    m[11] = invDeterminant * 0.0f;
-    transpose();
-    return HK_SUCCESS;
+    return HK_FAILURE;
 }
 
 void hkMatrix3::invertSymmetric() {
