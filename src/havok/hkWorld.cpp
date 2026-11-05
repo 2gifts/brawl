@@ -59,6 +59,7 @@
 #include <havok/hkWorldOperationQueue.h>
 #include <havok/hkMemory.h>
 #include <havok/hkString.h>
+#include <havok/hkMonitorStream.h>
 #include <havok/hkEntity.h>
 
 // Operation record queued while the world is locked (8 bytes). HYPOTHESIS: field names; the
@@ -208,21 +209,29 @@ void hkWorld::activateRegion(hkAabb* aabb) {
     }
 }
 
-// runs the simulation for one step. the original wraps the memory-watchdog part in profiler timer markers
-// (hkMonitorStream), those aren't here
-int hkWorld::stepDeltaTime(hkReal physicsDeltaTime) {
-    typedef int (*StepFn)(void*, hkReal);
-    void* simulation = m_unk08;
-    int result = reinterpret_cast<StepFn>((*reinterpret_cast<void***>(simulation))[0x10 / 4])(simulation, physicsDeltaTime);
+// The two virtual calls made by stepDeltaTime. HYPOTHESIS: names from what the calls do (step the
+// simulation, ask the watchdog to free memory); only slot 0x10 of each vtable is used.
+struct hkWorldStepSimulation : hkReferencedObject {
+    virtual int stepDeltaTime(hkReal physicsDeltaTime); // 0x10
+};
+struct hkWorldFreeMemoryWatchDog : hkReferencedObject {
+    int m_memoryLimit; // 0x08
+    virtual void freeMemory(hkWorld* world); // 0x10
+};
 
-    void* watchDog = worldField<void*>(this, 0x50);
-    if (result == 0 && watchDog != NULL) {
-        // HYPOTHESIS: if the memory in use goes over the watchdog's limit (+8) it gets told to free some (vtable 0x10)
-        hkMemory& memory = hkMemory::getInstance();
-        int used = worldField<int>(&memory, 0x28) + worldField<int>(&memory, 0x14);
-        if (used > worldField<int>(watchDog, 8)) {
-            typedef void (*FreeFn)(void*, hkWorld*);
-            reinterpret_cast<FreeFn>((*reinterpret_cast<void***>(watchDog))[0x10 / 4])(watchDog, this);
+// Runs the simulation for one step. When that succeeded and the memory in use (hkMemory 0x28 + 0x14) is over
+// the watchdog's limit, the watchdog is asked to free memory, bracketed by a timer.
+int hkWorld::stepDeltaTime(hkReal physicsDeltaTime) {
+    int result = ((hkWorldStepSimulation*)m_unk08)->stepDeltaTime(physicsDeltaTime);
+    if (result == 0) {
+        hkWorldFreeMemoryWatchDog* watchDog = worldField<hkWorldFreeMemoryWatchDog*>(this, 0x50);
+        if (watchDog != NULL) {
+            hkMemory& memory = hkMemory::getInstance();
+            if (worldField<int>(&memory, 0x28) + worldField<int>(&memory, 0x14) > watchDog->m_memoryLimit) {
+                HK_TIMER_BEGIN("WatchDog:FreeMem");
+                watchDog->freeMemory(this);
+                HK_TIMER_END();
+            }
         }
     }
     return result;
