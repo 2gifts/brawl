@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <types.h>
+#include <mu/mu_adv_selchr_b.h>
 
 // muMenuController::getControllerID(): the pad of the controller (below 0: there is none).
 extern "C" int fn_800BA3D8(muMenuController* controller);
@@ -333,4 +334,25 @@ muAdvSelchrCTask::muAdvSelchrCTask()
     }
     m_unkC10[0] = 0;
     m_unkC10[1] = 0;
+}
+
+void muAdvSelchrCTask::createObjResFile(const void* modelData, int count, nw4r::g3d::ResFile* resFile) {
+    int num;
+    int model;
+    int index;
+    const muAdvSelchrBModel* models = static_cast<const muAdvSelchrBModel*>(modelData);
+    MuObject* object;
+    for (model = 0; model < count; model++, models++) {
+        num = 1;
+        if (models->m_start < models->m_end) num = models->m_end - models->m_start;
+        for (index = 0; index < num; index++) {
+            object = MuObject::create(resFile, models->m_name, models->m_priority, NULL, m_resourceHeap);
+            m_objects[models->m_start + index] = object;
+            char animName[0x40];
+            strcpy(animName, models->m_name);
+            strcat(animName, "__0");
+            object->changeAnimN(animName);
+            if (object->m_modelAnim) object->m_modelAnim->setUpdateRate(0.0f);
+        }
+    }
 }
