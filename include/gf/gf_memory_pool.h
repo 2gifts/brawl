@@ -60,6 +60,9 @@ public:
     // HYPOTHESIS: parameter types follow create(void*, size_t, const char*).
     gfMemoryPool(const char* heapName, void* heapAddr, size_t size);
     void clear();
+    // HYPOTHESIS: frees an allocated block back into this pool.
+    void free(void* ptr);
+    void dump();
     u32 getMaxFreeBlockSize();
     // HYPOTHESIS: both parameters are stored as the allocator's heap parameters.
     void createMEMAllocator(int heapId, int param);

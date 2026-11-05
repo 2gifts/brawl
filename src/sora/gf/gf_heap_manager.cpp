@@ -6,7 +6,6 @@
 #include <sr/sr_common.h>
 #include <types.h>
 
-extern "C" void fn_800260B4(gfMemoryPool* pool);
 extern const char lbl_804224D8[];
 
 // HYPOTHESIS: layout of the heap tables that gfApplication and gfBootTask pass in, ended by a NULL name.
@@ -107,7 +106,7 @@ void gfHeapManager::destroyHeap(int heapId) {
             OSReport("----------------------------------------\n");
             OSReport("-HeapName: %s\n", g_HeapInfos[heapId].m_name);
             OSReport("----------------------------------------\n");
-            fn_800260B4(dumped);
+            dumped->dump();
         }
         PPCHalt();
     }
@@ -177,7 +176,7 @@ void gfHeapManager::dumpAll() {
     for (i = 0; i < 0x47; i++) {
         pool = info->m_memoryPool;
         if (pool != NULL) {
-            fn_800260B4(pool);
+            pool->dump();
             total += static_cast<u8*>(pool->m_end) - static_cast<u8*>(pool->m_start);
         }
         info++;

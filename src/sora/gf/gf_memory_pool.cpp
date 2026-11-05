@@ -6,13 +6,10 @@
 #include <string.h>
 #include <types.h>
 
-extern "C" void fn_80025F2C(gfMemoryPool* pool, void* ptr);
-extern "C" void fn_800260B4(gfMemoryPool* pool);
-
 // HYPOTHESIS: local name; a scoped lock that only locks pools with m_useMutex set.
 struct gfMemoryPoolLock {
     OSMutex* m_mutex;
-    bool m_locked;
+    u8 m_locked : 8;
 
     gfMemoryPoolLock(gfMemoryPool* pool) : m_mutex(&pool->m_mutex), m_locked(pool->m_useMutex) {
         if (m_locked) {
@@ -78,7 +75,7 @@ static inline void freeChecked(void* ptr) {
                 }
             }
         }
-        fn_80025F2C(tag->m_block->m_pool, ptr);
+        tag->m_block->m_pool->free(ptr);
     }
 }
 
@@ -200,9 +197,9 @@ void* gfMemoryPool::alloc(void* heapAddr, size_t size, int align) {
         }
         OSReport("<<gfMemoryPool>>(%s) adr:<0x%08x>,  size:<%d(0x%08x)>\n  total free:  %08x \n  max   free:  %08x \x1b[00m\n",
                  pool->m_name, pool, size, size, totalFree, maxFree);
-        fn_800260B4(pool);
+        pool->dump();
         if (pool->m_debugFlags & 0x20) {
-            fn_800260B4(pool);
+            pool->dump();
         }
     }
     if (pool->m_debugFlags & 0x10) {
@@ -267,5 +264,139 @@ void* gfMemoryPoolMemAllocatorAlloc(MEMAllocator* allocator, u32 size) {
 }
 
 void gfMemoryPoolMemAllocatorFree(MEMAllocator* allocator, void* block) {
-    fn_80025F2C(reinterpret_cast<gfMemoryPool*>(allocator->heap), block);
+    reinterpret_cast<gfMemoryPool*>(allocator->heap)->free(block);
+}
+
+void gfMemoryPool::free(void* ptr) {
+    gfMemoryPoolLock lock(this);
+    if (ptr != NULL) {
+        gfMemoryPoolBlock* next;
+        u32 size;
+        gfMemoryPoolBlock* prev = m_blocks;
+        gfMemoryPoolBlock* block = static_cast<gfMemoryPoolTag*>(ptr)[-1].m_block;
+        size = block->m_size;
+        if (!(block->m_flags & 1)) {
+            while (next = prev->m_next, prev < next) {
+                if (prev < block && block < next) {
+                    break;
+                }
+                prev = next;
+            }
+            if (reinterpret_cast<u8*>(block) + size == reinterpret_cast<u8*>(next)) {
+                block->m_size = block->m_size + next->m_size;
+                block->m_next = prev->m_next->m_next;
+            } else {
+                block->m_next = next;
+            }
+            if (reinterpret_cast<u8*>(prev) + prev->m_size == reinterpret_cast<u8*>(block)) {
+                prev->m_size = prev->m_size + block->m_size;
+                prev->m_next = block->m_next;
+            } else {
+                prev->m_next = block;
+            }
+            block->m_flags |= 1;
+            static_cast<gfMemoryPoolTag*>(ptr)[-1].m_magic = 0xDDDDDDDD;
+            m_allocCount--;
+            m_usage -= size;
+        }
+    }
+}
+
+void gfMemoryPool::dump() {
+    gfMemoryPoolBlock* blocks = m_blocks;
+    OSReport("===================================================================
+");
+    OSReport("-HeapName: %s
+", m_name);
+    OSReport("===================================================================
+");
+    OSReport("MemoryPool: < Start:0x%08x, End:0x%08x, Size:0x%08x >
+", this, m_end, reinterpret_cast<u32>(m_end) - reinterpret_cast<u32>(this));
+    gfMemoryPoolBlock* first = m_blocks->m_next;
+    u32 totalFree = 0;
+    for (gfMemoryPoolBlock* block = first;;) {
+        u32 freeSize = block->m_size - sizeof(gfMemoryPoolBlock);
+        gfMemoryPoolBlock* next = block->m_next;
+        totalFree += freeSize > 0 ? freeSize : 0;
+        if (block >= next) {
+            break;
+        }
+        block = next;
+    }
+    u32 maxFree = 0;
+    for (gfMemoryPoolBlock* block = first;;) {
+        s32 freeSize = block->m_size - sizeof(gfMemoryPoolBlock);
+        freeSize = freeSize > 0 ? freeSize : 0;
+        if (maxFree < freeSize) {
+            maxFree = freeSize;
+        }
+        gfMemoryPoolBlock* next = block->m_next;
+        if (block >= next) {
+            break;
+        }
+        block = next;
+    }
+    OSReport("Free              : 0x%08x
+Max Free          : 0x%08x
+", totalFree, maxFree);
+    OSReport("Alloc Couner      :   %8d
+Peek Alloc Counter:   %8d
+Peek Usage        : 0x%08x
+
+", m_allocCount, m_peakAllocCount, m_peakUsage);
+    int count = 0;
+    gfMemoryPoolBlock* block = blocks;
+    for (;;) {
+        if (block->m_size == 0) {
+            block = block->m_next;
+            continue;
+        }
+        gfMemoryPoolBlock* cur = reinterpret_cast<gfMemoryPoolBlock*>(reinterpret_cast<u8*>(block) + block->m_size);
+        if (cur == m_end) {
+            break;
+        }
+        gfMemoryPoolBlock* next = block->m_next;
+        gfMemoryPoolBlock* end;
+        if (block < next) {
+            end = next;
+        } else {
+            end = static_cast<gfMemoryPoolBlock*>(m_end);
+        }
+        while (cur < end) {
+            bool found = false;
+            u32* word;
+            for (word = reinterpret_cast<u32*>(cur); word < reinterpret_cast<u32*>(end); word++) {
+                if (*word == reinterpret_cast<u32>(cur)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                gfMemoryPoolBlock* used = reinterpret_cast<gfMemoryPoolBlock*>(*word);
+                u8* ptr = reinterpret_cast<u8*>(word) + 0xC;
+                u8* usedEnd = reinterpret_cast<u8*>(used) + used->m_size;
+                OSReport(" Address: <0x%08x, 0x%08x> Size: 0x%06x, Id:0x%02x", ptr, usedEnd, usedEnd - ptr, used->m_id);
+                if (cur->m_file != NULL) {
+                    OSReport(" File:  %s(%d)
+", cur->m_file, cur->m_line);
+                } else {
+                    OSReport("
+");
+                }
+                cur = reinterpret_cast<gfMemoryPoolBlock*>(reinterpret_cast<u8*>(cur) + cur->m_size);
+            } else {
+                OSReport(" Address: <0x%08x, 0x%08x> Size: 0x%08x  Bloken Memory Block found!!", cur, end, reinterpret_cast<u8*>(end) - reinterpret_cast<u8*>(cur));
+                cur = end;
+            }
+            count++;
+        }
+        next = block->m_next;
+        if (block > next) {
+            break;
+        }
+        block = next;
+    }
+    OSReport("
+Memory Block Num:  %d
+", count);
 }
