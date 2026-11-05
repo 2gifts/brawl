@@ -3,6 +3,139 @@
 #include <gm/gm_hide_lib.h>
 #include <types.h>
 
+// gmAddFigure (the map name); src/sora/gm/gm_common.cpp calls it by this stand-in name.
+extern "C" void fn_80052704(int id, int num);
+// gmAddSeal (the map name); src/sora/gm/gm_common.cpp calls it by this stand-in name.
+extern "C" void fn_80052AC0(int id, int num);
+// gmSetBGMIDUseEnable (the map name); src/sora/ad/ad_keep_manager.cpp calls it by this stand-in name.
+extern "C" void fn_8004FB48(u32 id);
+
+extern const struct {
+    struct {
+        u16 unk0[5];
+    } unk0;
+    u16 unkA[3];
+} lbl_80406E98;
+
+void gmActionOpenClearGet(int condition, int kind, int reward) {
+    switch (kind) {
+    case 5: {
+        u32* flags = (u32*)g_GameGlobal->getHideEtcAppFlag();
+        int bit = (reward - 1) * 2;
+        flags[bit / 32] |= 1 << (bit % 32);
+        break;
+    }
+    case 3: {
+        u32* flags = (u32*)g_GameGlobal->getHideEtcAppFlag();
+        int bit = (reward + 2) * 2;
+        flags[bit / 32] |= 1 << (bit % 32);
+        break;
+    }
+    case 1:
+        fn_80052704((u16)reward, 1);
+        gmSetFlagInfoFigure((u16)reward, 1);
+        break;
+    case 0: {
+        __typeof__(lbl_80406E98.unk0) seals = lbl_80406E98.unk0;
+        int seal = seals.unk0[reward - 1];
+        fn_80052AC0(seal, 1);
+        gmSetFlagInfoSeal(seal, 1);
+        break;
+    }
+    case 2:
+        fn_8004FB48(reward);
+        break;
+    case 4:
+        gmSetStageUseEnable((srStageKind)reward);
+        break;
+    }
+}
+
+bool gmCheckTargetBreakHideElement() {
+    if (!(g_GameGlobal->getCharaAppFlag()[0] & 0x10000000)) {
+        for (int level = 0; level < 5; ++level) {
+            u32 count = 0;
+            for (int character = 0; character < 35; ++character) {
+                if (g_GameGlobal->getGlobalRecordCharaNumDatap(character)->unkCC[level].unk0_30 == 1) {
+                    ++count;
+                    if (count >= 30) break;
+                }
+            }
+            if (count >= 30) {
+                g_GameGlobal->getCharaAppFlag()[0] |= 0x8000000;
+                return true;
+            }
+        }
+    }
+    if (!(g_GameGlobal->getCharaAppFlag()[0] & 0x10000)) {
+        u32 cleared = 0;
+        for (int level = 0; level < 5; ++level) {
+            cleared = 0;
+            for (int character = 0; character < 35; ++character) {
+                if (g_GameGlobal->getGlobalRecordCharaNumDatap(character)->unkCC[level].unk0_30 == 1) {
+                    cleared = 1;
+                    break;
+                }
+            }
+            if (((g_GameGlobal->m_record->unk34FC[level].unk0 >> 30) & 1) == 1) cleared = 1;
+            if (!cleared) break;
+        }
+        if (cleared == 1) {
+            g_GameGlobal->getCharaAppFlag()[0] |= 0x8000;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool checkAllstar(int condition) {
+    bool satisfied = false;
+    switch (condition) {
+    case 27:
+    case 24:
+        int count = 0;
+        for (int character = 0; character < 35; ++character) {
+            if (g_GameGlobal->getGlobalRecordCharaNumDatap(character)->unk9C_7) ++count;
+        }
+        switch (condition) {
+        case 27:
+            if (count >= 35) satisfied = true;
+            break;
+        case 24:
+            if (count >= 10) satisfied = true;
+            break;
+        }
+        break;
+    }
+    return satisfied;
+}
+
+bool checkBossBattle(int condition) {
+    bool satisfied = false;
+    switch (condition) {
+    case 127:
+    case 101:
+    case 61:
+        int count = 0;
+        for (int character = 0; character < 35; ++character) {
+            if (g_GameGlobal->getGlobalRecordCharaNumDatap(character)->unk9C_4) ++count;
+        }
+        switch (condition) {
+        case 127:
+            if (count >= 35) satisfied = true;
+            break;
+        case 101:
+            if (count >= 10) satisfied = true;
+            break;
+        case 61:
+            if (count >= 20) satisfied = true;
+            break;
+        }
+        break;
+    }
+    return satisfied;
+}
+
 namespace {
 void gmCheckClearGetCondition();
 void gmCheckInfoCondition();

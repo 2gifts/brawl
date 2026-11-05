@@ -315,6 +315,19 @@ struct gmGlobalRecord {
         union {
             u8 unk9C[0x44];
             struct {
+                u16 : 8;
+                u16 unk9C_7 : 3;
+                u16 : 5;
+            };
+            struct {
+                u8 _pad9C_CC[0x30];
+                struct {
+                    u32 : 1;
+                    u32 unk0_30 : 1;
+                    u32 : 30;
+                } unkCC[5];
+            };
+            struct {
                 u8 _pad9C[0x2C];
                 u16 unkC8;
             };
@@ -425,6 +438,13 @@ struct gmGlobalRecord {
     CharaNumData m_charaNumData[35];        // 0x1634
     union {
         u8 unk34D4[0x74];
+        struct {
+            u8 _pad34D4_34FC[0x28];
+            struct {
+                u32 unk0;
+                u32 unk4;
+            } unk34FC[5];
+        };
         struct {
             u16 unk34D4_15 : 1;
             u16 : 7;
