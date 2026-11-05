@@ -12558,7 +12558,7 @@ __ct__22ftControllerModuleImplFP16soModuleAccessersP27soArray<16soControllerImpl
 __dt__22ftControllerModuleImplFv = .text:0x00150488; // type:function size:0x154
 activate__22ftControllerModuleImplFv = .text:0x001505DC; // type:function size:0x68
 deactivate__22ftControllerModuleImplFv = .text:0x00150644; // type:function size:0x44
-fn_27_150688 = .text:0x00150688; // type:function size:0x360
+update__22ftControllerModuleImplFP5Inputb = .text:0x00150688; // type:function size:0x360
 setPrev__22ftControllerModuleImplFl = .text:0x001509E8; // type:function size:0x94
 setLogActive__22ftControllerModuleImplFb = .text:0x00150A7C; // type:function size:0x24
 getClatterThreshold__22ftControllerModuleImplFUl = .text:0x00150AA0; // type:function size:0x10
