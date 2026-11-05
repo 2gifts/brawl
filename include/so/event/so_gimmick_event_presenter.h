@@ -129,15 +129,21 @@ struct soGimmickBarrelEventArgs : soGimmickEventArgs {
     float m_shootAngleOffset;
     float m_shootFallSpeed;
 protected:
+    // HYPOTHESIS: position-only barrel events copy the supplied position directly.
+    inline soGimmickBarrelEventArgs(Gimmick::EventKind kind, int sendID, const Vec3f& pos) : soGimmickEventArgs(kind, sendID), m_pos(pos), m_attackData(NULL) {};
     inline soGimmickBarrelEventArgs(Gimmick::EventKind kind, int sendID) : soGimmickEventArgs(kind, sendID) {};
     inline soGimmickBarrelEventArgs(Gimmick::EventKind kind, int sendID, Vec3f pos, soCollisionAttackData* attackData) : soGimmickEventArgs(kind, sendID), m_pos(pos), m_attackData(attackData) {};
     inline soGimmickBarrelEventArgs(Gimmick::EventKind kind, int sendID, Vec3f pos, soCollisionAttackData* attackData, float rot) : soGimmickEventArgs(kind, sendID), m_pos(pos), m_attackData(attackData), m_rot(rot) {};
     inline soGimmickBarrelEventArgs(Gimmick::EventKind kind, int sendID, Vec3f pos, soCollisionAttackData* attackData, float rot, float shootSpeed, float shootTimerSpeed, float shootAngleoffset, float shootStunTimerSpeed) : soGimmickEventArgs(kind, sendID), m_pos(pos), m_attackData(attackData), m_rot(rot), m_shootSpeed(shootSpeed), m_shootTimerSpeed(shootTimerSpeed), m_shootAngleOffset(shootAngleoffset), m_shootFallSpeed(shootStunTimerSpeed) {};
 };
 struct soGimmickBarrelEventArgs_In : soGimmickBarrelEventArgs {
+    // HYPOTHESIS: barrel entry forwards the fighter's position by reference.
+    inline soGimmickBarrelEventArgs_In(const Vec3f& pos) : soGimmickBarrelEventArgs(Gimmick::Barrel_Event_In, 0, pos) {};
     inline soGimmickBarrelEventArgs_In() : soGimmickBarrelEventArgs(Gimmick::Barrel_Event_In, 0, Vec3f(0.0, 0.0, 0.0), NULL) {};
 };
 struct soGimmickBarrelEventArgs_ShootTrigger : soGimmickBarrelEventArgs {
+    // HYPOTHESIS: the trigger event accepts an explicit position.
+    inline soGimmickBarrelEventArgs_ShootTrigger(const Vec3f& pos) : soGimmickBarrelEventArgs(Gimmick::Barrel_Event_Shoot_Trigger, 0, pos) {};
     inline soGimmickBarrelEventArgs_ShootTrigger() : soGimmickBarrelEventArgs(Gimmick::Barrel_Event_Shoot_Trigger, 0, Vec3f(0.0, 0.0, 0.0), NULL) {};
 };
 struct soGimmickBarrelEventArgs_Shoot: soGimmickBarrelEventArgs {
