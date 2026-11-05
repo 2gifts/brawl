@@ -91,3 +91,20 @@ void soCatchModuleImpl::updateLRCling() {
         }
     }
 }
+
+bool soCatchModuleImpl::checkDamage() {
+    if (m_moduleAccesser->getLinkModule().isLinked(0) == true || m_moduleAccesser->getLinkModule().isLink(0) == true) {
+        if (m_moduleAccesser->getDamageModule().isCatchCut() == false) {
+            if (m_moduleAccesser->getLinkModule().isNodeDamageReaction(0) == true) {
+                if (m_moduleAccesser->getLinkModule().isNodeDamageCaptureCut(0) == false) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        } else if (m_moduleAccesser->getLinkModule().isNodeDamageReaction(0) == true) {
+            m_moduleAccesser->getLinkModule().isNodeDamageCaptureCut(0);
+        }
+    }
+    return false;
+}

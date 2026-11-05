@@ -39,7 +39,7 @@ public:
     virtual void updatePosCling();
     virtual void updateLRCling();
     virtual void clingCut();
-    virtual void checkDamage();
+    virtual bool checkDamage();
     virtual void setSendCutEvent(bool sendCutEvent);
     virtual void check();
 };
