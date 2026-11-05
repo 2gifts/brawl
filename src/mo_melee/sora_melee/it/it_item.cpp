@@ -35,6 +35,8 @@
 #include <so/event/so_event_manage_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
 #include <so/param/so_param_customize_module_impl.h>
+#include <it/it_resource_id_accesser_impl.h>
+#include <it/it_status_uniq_process.h>
 
 // MATCH-ONLY: it_manager.h cannot be included here (its customizer declarations disagree with the bool hooks of
 // itCustomizerInterface below), so the two itManager members BaseItem uses are declared on their own.
@@ -2146,4 +2148,25 @@ u32 BaseItem::shoot(u32 count, float lr, float speed) {
         lr = modules->link.getParentLr(Link::No_Have);
     }
     return m_customizer->onShoot(this, count, lr, speed);
+}
+
+
+itResourceIdAccesserImpl::itResourceIdAccesserImpl(soModuleAccesser* moduleAccesser, u32 modelId, u32 animationId, u32 archiveId)
+    : soResourceIdAccesserImpl(modelId, modelId, animationId),
+      m_moduleAccsr(moduleAccesser), m_archiveId(archiveId) {
+}
+
+void BaseItem::onUpdateAiDir(Vec2f* direction, Vec2f* target, Vec2f* position, Vec2f* speed) {
+    m_customizer->onUpdateAiDir(this, direction, target, position, speed);
+}
+
+itStatusUniqProcessStandby::~itStatusUniqProcessStandby() {
+}
+
+itStatusUniqProcessHave::~itStatusUniqProcessHave() {
+}
+
+soSituationEventObserver::soSituationEventObserver(short manageId, s8 priority)
+    : soEventObserver<soSituationEventObserver>(8) {
+    initialize(manageId, priority);
 }

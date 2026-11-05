@@ -419,6 +419,7 @@ public:
     Vec3f getPos();
     Vec3f getRot();
     void onUpdateAiMove(Vec2f*, Vec2f*, Vec2f*);
+    void onUpdateAiDir(Vec2f*, Vec2f*, Vec2f*, Vec2f*);
     void onUpdateKinetic();
     void onPreBound(Vec2f*, BoundMask);
     bool onPreDamageCheck(int damageStatusKind, soDamageLog*);
