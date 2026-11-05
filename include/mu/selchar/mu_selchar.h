@@ -169,6 +169,7 @@ public:
     bool isTeamBattle();
     muSelCharPlayerArea* getPlayerArea(int areaIdx);
     int getRuleNumStock();
+    void setRuleNumStock(int count);
     int getHomerunRule();
     int getKumiteType();
     int getQueueMeleeDropRule();

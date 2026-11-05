@@ -218,6 +218,7 @@ public:
     u8 getAssignedStageKind(u8* substage, u32* music);
     void clearGlobalAIDStatusLive();
     u8 getAssignedPlayerKind(int index);
+    u8 getRuleMasterAID();
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 

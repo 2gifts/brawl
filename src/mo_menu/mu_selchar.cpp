@@ -15,6 +15,7 @@
 #include <gf/gf_pad_system.h>
 #include <stdio.h>
 #include <mu/wifi/mu_wifi_interface.h>
+#include <nt/network.h>
 
 // The menu helpers take three integers; this unit passes only the first one (see TIPS.md).
 extern "C" int exchangeMuSelchkindToMuCharKind__6muMenuFiii(int selchKind);
@@ -748,5 +749,30 @@ void muSelCharTask::wifiEntryPlayer() {
                 player->wifiRequestPlayerEntry(controller);
             }
         }
+    }
+}
+
+void muSelCharTask::setRuleNumStock(int count) {
+    u8 aid;
+    m_ruleNumStock = count;
+    int type = getSelCharType();
+    int group;
+    if (isSelCharTypeIn(type, 0, 4)) group = 0;
+    else if (isSelCharTypeIn(type, 4, 12)) group = 1;
+    else {
+        bool inGroup = isSelCharTypeIn(type, 12, 16);
+        group = 3;
+        if (inGroup) group = 2;
+    }
+    if (group == 2) {
+        muWifiInterfaceTask& wifi = *g_muWifiInterfaceTask;
+        int master = wifi.unkFCA_b5;
+        if (!master) {
+            aid = Network::getMyAID();
+            if (aid == 0xFF) aid = 4;
+            u8 masterAid = wifi.getRuleMasterAID();
+            master = masterAid == aid;
+        }
+        if (master) sendWifiGameRule(false, true);
     }
 }
