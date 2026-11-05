@@ -88,8 +88,6 @@ extern "C" void fn_800E1D78(IfPlayer* player, Vec3f* pos);
 extern "C" void fn_800F00D4(void* photo, int arg1, int arg2, int playerNo, bool arg4);
 // HYPOTHESIS: map names IfWifiIntrMenu::endMenu
 extern "C" void fn_800FBF90(void* menu);
-// HYPOTHESIS: map names muNoticeWndTask::dispSubMsg
-extern "C" void fn_800BF928(muNoticeWndTask* wnd, const char* text);
 // HYPOTHESIS: map names IfCenter::dispKumiteKills
 extern "C" void fn_800DF4AC(void* center, int kills);
 // HYPOTHESIS: map names IfAdvBoss::eraseBoss
@@ -255,7 +253,7 @@ void IfMngr::openDlg(int arg1, int msgId, int arg3) {
     int kind = arg3 != 0;
     void* msgData = unk90;
     if (unkB0 != NULL) {
-        fn_800BF830(unkB0);
+        unkB0->deleteWnd();
         unkB0->exit();
         unkB0 = NULL;
     }
@@ -265,7 +263,7 @@ void IfMngr::openDlg(int arg1, int msgId, int arg3) {
 
 void IfMngr::closeDlg() {
     if (unkB0 != NULL) {
-        fn_800BF830(unkB0);
+        unkB0->deleteWnd();
         unkB0->exit();
         unkB0 = NULL;
     }
@@ -293,7 +291,7 @@ void IfMngr::setDlgDWCErrorCode(int code) {
     Message::getPrintIndexData(unk90, 0x13, &text, &size);
     memcpy(buf, text, size);
     size += sprintf(buf + size, "%05d", code);
-    fn_800BF928(unkB0, buf);
+    unkB0->dispSubMsg(buf);
 }
 
 bool IfMngr::sharePlayerStock(int giver, int receiver) {

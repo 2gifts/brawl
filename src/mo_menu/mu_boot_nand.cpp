@@ -27,7 +27,7 @@ muBootNandTask::~muBootNandTask() { }
 // Takes the open window away.
 inline void muBootNandTask::closeWnd() {
     if (m_wnd != NULL) {
-        fn_800BF830(m_wnd);
+        m_wnd->deleteWnd();
         m_wnd->exit();
         m_wnd = NULL;
     }
@@ -98,8 +98,8 @@ void muBootNandTask::processDefault() {
     case 0x05:
         // asks whether the save data may be made new
         openWnd(1, m_msgData, 0, 0);
-        fn_800BF97C(m_wnd, m_msgData, 0xE);
-        fn_800BFA04(m_wnd, m_msgData, 0xF);
+        m_wnd->setYesButtonLabel(m_msgData, 0xE);
+        m_wnd->setNoButtonLabel(m_msgData, 0xF);
         m_step = 6;
         break;
     case 0x06:
@@ -133,7 +133,7 @@ void muBootNandTask::processDefault() {
         break;
     case 0x0A:
         if (m_recorder->m_busy == 0) {
-            fn_800BF828(m_wnd, 2);
+            m_wnd->setStep(2);
             nw4r::g3d::ScnGroup* root = m_cameraTask->m_scnRoot;
             root->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_object->m_scnMdl));
             m_step = 0xB;
@@ -205,8 +205,8 @@ void muBootNandTask::processDefault() {
     case 0x16:
         // asks whether the game should be started without the save data
         openWnd(1, m_msgData, 5, 0);
-        fn_800BF97C(m_wnd, m_msgData, 0x10);
-        fn_800BFA04(m_wnd, m_msgData, 0x11);
+        m_wnd->setYesButtonLabel(m_msgData, 0x10);
+        m_wnd->setNoButtonLabel(m_msgData, 0x11);
         m_step = 0x17;
         break;
     case 0x17:
@@ -246,8 +246,8 @@ void muBootNandTask::processDefault() {
     }
     case 0x1A:
         { void* msgData = m_msgData; int msgId = m_requireKind + 6; openWnd(1, msgData, msgId, 0); }
-        fn_800BF97C(m_wnd, m_msgData, 0xE);
-        fn_800BFA04(m_wnd, m_msgData, 0xF);
+        m_wnd->setYesButtonLabel(m_msgData, 0xE);
+        m_wnd->setNoButtonLabel(m_msgData, 0xF);
         m_step = 0x1B;
         break;
     case 0x1B:
@@ -285,7 +285,7 @@ void muBootNandTask::processDefault() {
         break;
     case 0x1F:
         if (m_recorder->m_busy == 0) {
-            fn_800BF828(m_wnd, 2);
+            m_wnd->setStep(2);
             nw4r::g3d::ScnGroup* root = m_cameraTask->m_scnRoot;
             root->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_object->m_scnMdl));
             m_step = 0x20;
@@ -358,8 +358,8 @@ void muBootNandTask::processDefault() {
     case 0x2B:
         // asks whether this part of the save data may be left out
         { int msgId = m_requireKind + 0x16; void* msgData = m_msgData; openWnd(1, msgData, msgId, 0); }
-        fn_800BF97C(m_wnd, m_msgData, 0x10);
-        fn_800BFA04(m_wnd, m_msgData, 0x11);
+        m_wnd->setYesButtonLabel(m_msgData, 0x10);
+        m_wnd->setNoButtonLabel(m_msgData, 0x11);
         m_step = 0x2C;
         break;
     case 0x2C:
@@ -401,7 +401,7 @@ void muBootNandTask::processDefault() {
         break;
     case 0x30:
         if (m_recorder->m_busy == 0) {
-            fn_800BF828(m_wnd, 2);
+            m_wnd->setStep(2);
             nw4r::g3d::ScnGroup* root = m_cameraTask->m_scnRoot;
             root->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_object->m_scnMdl));
             m_step = 0x31;

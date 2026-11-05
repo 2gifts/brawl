@@ -83,15 +83,9 @@ extern "C" void fn_800FD448(s32 unk);
 extern "C" void fn_800FD8E0(s32 unk);
 extern "C" s32 fn_800FBFDC();
 extern "C" void fn_8000DB40(gfSceneRoot* root, s32 layer);
-// muNoticeWndTask::dispSubMsg (the map name); if_mngr.cpp calls it by this stand-in name.
-extern "C" void fn_800BF928(muNoticeWndTask* wnd, const char* text);
 // muNoticeWndTask::create (the map name); mu_notice_wnd.h calls it by this stand-in name.
 extern "C" muNoticeWndTask* fn_800BF048(int kind, const char* text, int size, nw4r::g3d::ResFile* resFile, void* scnRoot, int unk14,
                                        int defaultButton, int heap, int heap2, int unk0, int unk1, int unk2);
-// muNoticeWndTask::setYesButtonLabel (the map name); mu_notice_wnd.h calls it by this stand-in name.
-extern "C" void fn_800BF97C(muNoticeWndTask* wnd, void* msgData, int msgId);
-// muNoticeWndTask::setNoButtonLabel (the map name); mu_notice_wnd.h calls it by this stand-in name.
-extern "C" void fn_800BFA04(muNoticeWndTask* wnd, void* msgData, int msgId);
 
 extern gfSceneRoot* g_gfSceneRoot;
 
@@ -155,7 +149,7 @@ void IfWifiprMngr::destroyModel() {
         m_task = NULL;
     }
     if (m_notice != NULL) {
-        fn_800BF830(m_notice);
+        m_notice->deleteWnd();
         m_notice->exit();
         m_notice = NULL;
     }
@@ -233,7 +227,7 @@ void IfWifiprMngr::openDlg(int useSecondMsg, int msgId, int kind) {
 }
 
 void IfWifiprMngr::closeDlg() {
-    fn_800BF830(m_notice);
+    m_notice->deleteWnd();
     m_notice->exit();
     m_notice = NULL;
 }
@@ -259,7 +253,7 @@ void IfWifiprMngr::setDlgDWCErrorCode(int code) {
     Message::getPrintIndexData(unk4C, 0x13, &text, &size);
     memcpy(buffer, text, size);
     size += sprintf(buffer + size, "%05d", code);
-    fn_800BF928(m_notice, buffer);
+    m_notice->dispSubMsg(buffer);
 }
 
 void IfWifiprMngr::openJoinFriendDlg(const wchar_t* name) {
@@ -282,8 +276,8 @@ void IfWifiprMngr::openJoinFriendDlg(const wchar_t* name) {
     m_notice = fn_800BF048(1, buffer, length + 1, &unkC, unk14, 0x40, 0x3C, 0x28, 0x2A, 1, 1, 0xF0);
     m_notice->m_unk120 = 1;
     m_notice->unk128 = 0x2055;
-    fn_800BF97C(m_notice, unk4C, 0x21);
-    fn_800BFA04(m_notice, unk4C, 0x22);
+    m_notice->setYesButtonLabel(unk4C, 0x21);
+    m_notice->setNoButtonLabel(unk4C, 0x22);
 }
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.

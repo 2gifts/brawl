@@ -2707,8 +2707,8 @@ void ifVsResultTask::subPlayerControl(int player) {
                     g_gfSceneRoot->add(gfSceneRoot::Layer_Info, (nw4r::g3d::ScnMdl*)m_noticeGroup);
                     m_noticeWnd = fn_800BF048(1, (const char*)text, length + 1, &m_resFiles[7], m_noticeGroup, 0x1E, 0, 0x2A,
                                               0x2A, 0, 0, 0xF0);
-                    fn_800BF97C(m_noticeWnd, m_msg->getBinary(), 0x2C);
-                    fn_800BFA04(m_noticeWnd, m_msg->getBinary(), 0x2D);
+                    m_noticeWnd->setYesButtonLabel(m_msg->getBinary(), 0x2C);
+                    m_noticeWnd->setNoButtonLabel(m_msg->getBinary(), 0x2D);
                     m_noticeWnd->m_unk120 = 1;
                     m_unk48[player] = 4;
                     m_unk66A = 1;

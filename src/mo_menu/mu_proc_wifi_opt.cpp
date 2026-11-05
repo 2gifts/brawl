@@ -251,7 +251,7 @@ int muProcOptWifi::proc() {
         return 0;
     case Step_WaitWnd:
         if (m_exchange->m_jobDone == true && m_frame >= 60) {
-            fn_800BF828(m_wnd, 2);
+            m_wnd->setStep(2);
             m_unk664 = Step_CloseWnd;
         }
         m_frame++;
