@@ -11,6 +11,7 @@
 #include <types.h>
 
 class stEventRule;
+class gmResultInfo;
 
 class stOperatorRule : public stOperator {
 public:
@@ -30,6 +31,7 @@ public:
     bool canSaveReplay();
     void startSaveReplay();
     void checkDispCorps();
+    void updateRealtimeHandi(gmResultInfo* result, float deltaFrame);
 
     void* m_operatorBgm;
     void* m_operatorNetwork;
@@ -52,7 +54,10 @@ public:
             u32 unk78;
             int unk7C[4];
             float unk8C[4];
-            char unk9C[0x18];
+            union {
+                char unk9C[0x18];
+                struct { float unk9CValues[4]; char unkAC[8]; };
+            };
         };
     };
     u32 unkB4;
