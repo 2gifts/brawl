@@ -67,7 +67,10 @@ hkReal hkConvexTranslateShape::getMaximumProjection(const hkVector4& direction) 
 // through this wrapper records key 0 for the child at that level. HYPOTHESIS: unk18/unk38 as the key path and depth.
 hkBool hkConvexTranslateShape::castRay(const hkShapeRayCastInput& input, hkShapeRayCastOutput& results) const {
     HK_TIMER_BEGIN("rcConvTransl");
-    hkShapeRayCastInput localInput = input;
+    // BYTES: an alignment attribute on the local itself turns copy propagation off (the target's N-form timer
+    // test); the struct's own hkVector4 alignment does not. Remaining: the target never moves this->m_translation
+    // loads above the copy's stores (reloads it per lane); not reproduced by any copy/sub spelling tried.
+    hkShapeRayCastInput localInput __attribute__((aligned(16))) = input;
     localInput.m_from.setSub4(input.m_from, m_translation);
     localInput.m_to.setSub4(input.m_to, m_translation);
     results.unk38++;
