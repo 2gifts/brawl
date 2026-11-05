@@ -32,11 +32,7 @@ void G3DState_Invalidate(u32 flags);
 
 
 MenuRoot* MenuRoot::create(const char* name, int scnSize, const char* cameraPath) {
-    MenuRoot* obj = (MenuRoot*)operator new(sizeof(MenuRoot), Heaps::MenuInstance);
-    if (obj != NULL) {
-        obj = new (obj) MenuRoot(name, scnSize, cameraPath, Heaps::MenuResource);
-    }
-    return obj;
+    return new (Heaps::MenuInstance) MenuRoot(name, scnSize, cameraPath, Heaps::MenuResource);
 }
 
 // HYPOTHESIS: MenuRoot::create(name, scnSize, archive, index); it keeps its fn_ name while the boot menus call it by that name.
