@@ -34,7 +34,6 @@ extern "C" {
 void fn_8003EBF4(Matrix* mtx, float angle);
 void fn_8003EA9C(Matrix* mtx, float angle);
 void fn_8003ECA0(Matrix* mtx, float x, float y, float z);
-void fn_8003E3BC(const Matrix* mtx, const Vec3f* in, Vec3f* out); // the matrix-vector product
 }
 
 // HYPOTHESIS: the enemy's offset of a path motion from its path (value floats 0xbee / 0xbef: x and y).
@@ -1000,7 +999,7 @@ void emKineticEnergy::updateEnergySpeed(soModuleAccesser* moduleAccesser, bool a
                                                    moduleAccesser->getWorkManageModule().isFlag(WorkFlag_Front));
                 Matrix mtx;
                 setRotRadians(&mtx, toRadians(topRot));
-                fn_8003E3BC(&mtx, &trans, &trans);
+                mtx.mulVec(&trans, &trans);
                 vec3fMulAssign(&trans, moduleAccesser->getSlowModule().getRate());
                 vec3fAddTo(&trans, posture->getPos());
                 posture->setPos(&trans);
@@ -1524,7 +1523,7 @@ float emKineticEnergy::getRealAngle(soModuleAccesser* moduleAccesser, float angl
         }
         Vec3f rot;
         mtx.getRotate(&rot);
-        fn_8003E3BC(&mtx, &axis, &axis);
+        mtx.mulVec(&axis, &axis);
         Vec2f dir(axis.m_x, axis.m_y);
         if (0.0f == dir.length()) {
             return 0.0f;

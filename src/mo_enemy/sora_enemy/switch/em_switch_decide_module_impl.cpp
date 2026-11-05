@@ -105,7 +105,6 @@ static const u32 PostureParamMax = 5;
 extern "C" int fn_27_7B610(soSwitchDecideModule* module, int kind, soArrayContractibleTable<const acCmdArgConv>* args,
                            soModuleAccesser* acc);
 // Rotates a vector by the rotation of a matrix (the translation is ignored).
-extern "C" void fn_8003E3BC(const Matrix* mtx, const Vec3f* src, Vec3f* dst);
 
 // The argument at index (a virtual call through the array interface, as in the Enemy unit).
 static inline acCmdArg getCmdArg(const soArrayFixed<const acCmdArgConv>& args, s32 index) {
@@ -240,7 +239,7 @@ int emSwitchDecideModuleImpl::decideSwitch(int kind, soArrayContractibleTable<co
                    kind == SwitchKind_TargetAxisSideNodeNameZ || kind == SwitchKind_TargetFoundAxisSideNodeNameZ) {
             axis = Vec3f(0.0f, 0.0f, 1.0f);
         }
-        fn_8003E3BC(&nodeMtx, &axis, &axis);
+        nodeMtx.mulVec(&axis, &axis);
         int target;
         READ_INT_ARG_FROM_FLOAT(args, 1, moduleAccesser, target)
         Vec2f targetOffset(0.0f, 0.0f);
@@ -349,7 +348,7 @@ int emSwitchDecideModuleImpl::decideSwitch(int kind, soArrayContractibleTable<co
                    kind == SwitchKind_TargetFoundRotSpeedDirNodeNameNegZ) {
             axis = Vec3f(0.0f, 0.0f, -1.0f);
         }
-        fn_8003E3BC(&nodeMtx, &axis, &axis);
+        nodeMtx.mulVec(&axis, &axis);
         int target;
         READ_INT_ARG_FROM_FLOAT(args, 1, moduleAccesser, target)
         Vec2f targetOffset(0.0f, 0.0f);
@@ -423,7 +422,7 @@ int emSwitchDecideModuleImpl::decideSwitch(int kind, soArrayContractibleTable<co
                    kind == SwitchKind_RotSpeedDirTouchGroundNodeNameNegZ) {
             axis = Vec3f(0.0f, 0.0f, -1.0f);
         }
-        fn_8003E3BC(&nodeMtx, &axis, &axis);
+        nodeMtx.mulVec(&axis, &axis);
         // (The call takes the xy projection of the axis: Vec2f has a converting constructor from Vec3f.)
         // MATCH-ONLY: the cast makes the converted axis an unnamed temporary (a named local gets a frame slot of its own).
         return emKineticModuleImpl::getRotSpeedDirForAxisAdjustWithTouchGround(

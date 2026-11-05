@@ -31,7 +31,6 @@ extern "C" void fn_27_2AA7AC(itManager* manager, ItemKind kind, int lotId, Vec3f
 // the stage that is played (sora_melee .bss)
 extern "C" Stage* lbl_27_bss_5668;
 // Matrix::setTrans (main, unnamed)
-extern "C" void fn_8003F03C(Matrix* mtx, float x, float y, float z);
 // HYPOTHESIS: makes a texture object of a texture resource, and sets the wrap mode of it (main, unnamed)
 extern "C" void fn_8001AA88(GXTexObj* texObj, nw4r::g3d::ResTex* tex);
 extern "C" void Destroy__Q34nw4r3g3d6G3dObjFv(void* obj);
@@ -157,7 +156,7 @@ void grMarioPastBlockPosLite::drawProc(nw4r::g3d::ScnProc* proc, bool opa) {
 void grMarioPastBlockPosLite::processAnim() {
     if (m_posGimmick != NULL) {
         setPos(m_posGimmick);
-        fn_8003F03C(&m_mtx, m_posGimmick->m_x, m_posGimmick->m_y, m_posGimmick->m_z);
+        m_mtx.setTrans(m_posGimmick->m_x, m_posGimmick->m_y, m_posGimmick->m_z);
     }
     Ground::processAnim();
 }

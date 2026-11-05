@@ -26,7 +26,6 @@ extern "C" void fn_80110B98(grCollision* collision, int status, int unk);
 extern "C" void fn_80075F1C(sndSystem* system, int handle, int fadeFrames);
 // Matrix helpers of main: place a matrix with a translation / scale
 extern "C" void fn_8003F074(float x, float y, float z, Matrix* matrix);
-extern "C" void fn_8003E828(Matrix* in, Vec3f* scale, Matrix* out);
 
 // MATCH-ONLY: plain copy of a vertex (the original copies it by words)
 struct dolpicVertex {
@@ -1247,7 +1246,7 @@ void stDolpic::updateCollision1(float deltaFrame, u32 scene, bool enable) {
             joint->m_0x55_3 = enable;
             collisionMtx()->setIdentity();
             fn_8003F074(0.0f, -length, 0.0f, collisionMtx());
-            fn_8003E828(collisionMtx(), &m_scale, collisionMtx());
+            collisionMtx()->scale(&m_scale, collisionMtx());
             joint->m_matrix = collisionMtx();
             i++;
             joint->m_0x54_3 = 1;

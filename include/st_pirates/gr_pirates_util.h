@@ -16,9 +16,6 @@
 #include <mt/mt_prng.h>
 #include <st_pirates/gr_pirates_anim.h>
 
-// The scale of a matrix (mt, unnamed): scales the axes of the matrix by the vector.
-extern "C" void fn_8003E828(const Matrix* mtx, const Vec3f* scale, Matrix* out);
-
 // The five animations of the index are bound, each one only when the file has it (character, visibility, texture pattern,
 // texture SRT, material color).
 #define PIRATES_BIND_CHR(animId, model, modelAnim)                                                \

@@ -951,7 +951,7 @@ void stHalberd::updateArmPos(float deltaFrame) {
         dir.m_z *= len;
         Vec3f hand(shoulder.m_x + dir.m_x, shoulder.m_y + dir.m_y, shoulder.m_z + dir.m_z);
         mtx(&m_mtxHand[0])->setIdentity();
-        fn_8003F03C(mtx(&m_mtxHand[0]), hand.m_x, hand.m_y, hand.m_z);
+        mtx(&m_mtxHand[0])->setTrans(hand.m_x, hand.m_y, hand.m_z);
         Vec3f whole(hand.m_x - shoulder.m_x, hand.m_y - shoulder.m_y, hand.m_z - shoulder.m_z);
         float dist = whole.length();
         float step = (dist - 10.0f) / 13.0f;
@@ -978,7 +978,7 @@ void stHalberd::updateArmPos(float deltaFrame) {
             point.m_y = (shoulder.m_y + sag * sine) + (hand.m_y - shoulder.m_y) * frac;
             Matrix* joint = mtx(&m_mtxJoint[i]);
             joint->setIdentity();
-            fn_8003F03C(joint, point.m_x, point.m_y, point.m_z);
+            joint->setTrans(point.m_x, point.m_y, point.m_z);
             mtx(&m_mtx[6])->mul(joint, joint);
             Vec3f seg(point.m_x - prev.m_x, point.m_y - prev.m_y, point.m_z - prev.m_z);
             float segLen = seg.length();
@@ -997,7 +997,7 @@ void stHalberd::updateArmPos(float deltaFrame) {
             bone->rotY(angleY * 0.017453292f);
             fn_8003EA9C(bone, angleX * 0.017453292f);
             fn_8003EBF4(bone, angleZ * 0.017453292f);
-            fn_8003E828(bone, &scale, bone);
+            bone->scale(&scale, bone);
             mtx(&m_mtx[6])->mul(bone, bone);
             prev = point;
         }
@@ -1018,7 +1018,7 @@ void stHalberd::updateArmPos(float deltaFrame) {
         bone->rotY(angleY * 0.017453292f);
         fn_8003EA9C(bone, angleX * 0.017453292f);
         fn_8003EBF4(bone, angleZ * 0.017453292f);
-        fn_8003E828(bone, &scale, bone);
+        bone->scale(&scale, bone);
         mtx(&m_mtx[6])->mul(bone, bone);
         fn_8003EA9C(mtx(&m_mtxHand[0]), angleX * 0.017453292f);
         mtx(&m_mtxHand[0])->rotY(angleY * 0.017453292f);

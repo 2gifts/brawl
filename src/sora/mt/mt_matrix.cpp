@@ -4,6 +4,7 @@
 #include <math.h>
 #include <revolution/OS/OSError.h>
 #include <types.h>
+#include <mt/mt_quaternion.h>
 
 typedef nw4r::math::QUAT Quatf;
 
@@ -30,7 +31,6 @@ extern "C" {
 void fn_8003DEE0(Vec3f* out, const Vec3f* in);
 void fn_8003E6DC(const Matrix* mtx, Vec3f* scale);
 void fn_8003ECA0(Matrix* mtx, float x, float y, float z);
-void fn_8003F9A8(const Quatf* a, const Quatf* b, Quatf* out);
 }
 
 #pragma scheduling 603
@@ -52,7 +52,7 @@ void Matrix::setIdentity() {
 }
 #pragma scheduling reset
 
-extern "C" asm void fn_8003E388(const Matrix* src, Matrix* dst) {
+asm void Matrix::copy(Matrix* dst) const {
     nofralloc
     psq_l f0, 0x0(r3), 0, 0
     psq_l f1, 0x8(r3), 0, 0
@@ -70,7 +70,8 @@ extern "C" asm void fn_8003E388(const Matrix* src, Matrix* dst) {
 }
 
 // rotate-only transform of a vector (no translation)
-extern "C" void fn_8003E3BC(register const Matrix* mtx, register const Vec3f* src, register Vec3f* dst) {
+void Matrix::mulVec(register const Vec3f* src, register Vec3f* dst) const {
+    register const Matrix* mtx = this;
     register f32 zero = 0.0f;
     register f32 vxy, vz, a0, a1, a2, c0, c1;
     asm {
@@ -123,7 +124,7 @@ asm void Matrix::mulPos(const Vec3f* pos, Vec3f* out) {
     blr
 }
 
-extern "C" asm void fn_8003E46C(const Matrix* mtx, const Vec3f* src, Vec3f* dst) {
+asm void Matrix::mulPos(const Vec3f* src, Vec3f* dst) const {
     nofralloc
     psq_l f0, 0x0(r4), 0, 0
     psq_l f1, 0x8(r4), 1, 0
@@ -216,7 +217,7 @@ extern "C" void fn_8003E6DC(const Matrix* mtx, Vec3f* scale) {
 }
 
 // scale the rows of the matrix by a vector
-extern "C" asm void fn_8003E828(const Matrix* mtx, const Vec3f* scale, Matrix* out) {
+asm void Matrix::scale(const Vec3f* scale, Matrix* out) const {
     nofralloc
     psq_l f0, 0x0(r4), 0, 0
     psq_l f2, 0x0(r3), 0, 0
@@ -242,51 +243,51 @@ extern "C" asm void fn_8003E828(const Matrix* mtx, const Vec3f* scale, Matrix* o
 }
 
 #pragma scheduling 603
-extern "C" void fn_8003E87C(Matrix* mtx, float angle) {
+void Matrix::setRotateX(float angle) {
     float s = sin(angle);
     float c = cos(angle);
-    mtx->setIdentity();
-    mtx->m[1][1] = c;
-    mtx->m[1][2] = -s;
-    mtx->m[2][1] = s;
-    mtx->m[2][2] = c;
+    setIdentity();
+    m[1][1] = c;
+    m[1][2] = -s;
+    m[2][1] = s;
+    m[2][2] = c;
 }
 #pragma scheduling reset
 
 #pragma scheduling 603
-extern "C" void fn_8003E918(Matrix* mtx, float angle) {
+void Matrix::setRotateY(float angle) {
     float s = sin(angle);
     float c = cos(angle);
-    mtx->setIdentity();
-    mtx->m[0][0] = c;
-    mtx->m[0][2] = s;
-    mtx->m[2][0] = -s;
-    mtx->m[2][2] = c;
+    setIdentity();
+    m[0][0] = c;
+    m[0][2] = s;
+    m[2][0] = -s;
+    m[2][2] = c;
 }
 #pragma scheduling reset
 
 #pragma scheduling 603
-extern "C" void fn_8003E9B4(Matrix* mtx, float angle) {
+void Matrix::setRotateZ(float angle) {
     float s = sin(angle);
     float c = cos(angle);
-    mtx->setIdentity();
-    mtx->m[0][0] = c;
-    mtx->m[0][1] = -s;
-    mtx->m[1][0] = s;
-    mtx->m[1][1] = c;
+    setIdentity();
+    m[0][0] = c;
+    m[0][1] = -s;
+    m[1][0] = s;
+    m[1][1] = c;
 }
 #pragma scheduling reset
 
-extern "C" void fn_8003EA50(Matrix* mtx, const Vec3f* angles) {
-    Matrix rot(true);
-    fn_8003ECA0(&rot, angles->m_x, angles->m_y, angles->m_z);
-    mtx->mul(&rot, mtx);
+void Matrix::rot(const Vec3f* angles) {
+    Matrix rotation(true);
+    fn_8003ECA0(&rotation, angles->m_x, angles->m_y, angles->m_z);
+    this->mul(&rotation, this);
 }
 
 #pragma scheduling 603
 extern "C" void fn_8003EA9C(Matrix* mtx, float angle) {
     Matrix rot(true);
-    fn_8003E87C(&rot, angle);
+    rot.setRotateX(angle);
     mtx->mul(&rot, mtx);
 }
 #pragma scheduling reset
@@ -294,7 +295,7 @@ extern "C" void fn_8003EA9C(Matrix* mtx, float angle) {
 #pragma scheduling 603
 void Matrix::rotY(float angle) {
     Matrix rot(true);
-    fn_8003E918(&rot, angle);
+    rot.setRotateY(angle);
     this->mul(&rot, this);
 }
 #pragma scheduling reset
@@ -302,7 +303,7 @@ void Matrix::rotY(float angle) {
 #pragma scheduling 603
 extern "C" void fn_8003EBF4(Matrix* mtx, float angle) {
     Matrix rot(true);
-    fn_8003E9B4(&rot, angle);
+    rot.setRotateZ(angle);
     mtx->mul(&rot, mtx);
 }
 #pragma scheduling reset
@@ -343,11 +344,11 @@ void Matrix::getRotate(Vec3f* outRot) {
 }
 
 #pragma scheduling 603
-extern "C" void fn_8003F03C(Matrix* mtx, float x, float y, float z) {
-    mtx->setIdentity();
-    mtx->m[0][3] = x;
-    mtx->m[1][3] = y;
-    mtx->m[2][3] = z;
+void Matrix::setTrans(float x, float y, float z) {
+    setIdentity();
+    m[0][3] = x;
+    m[1][3] = y;
+    m[2][3] = z;
 }
 #pragma scheduling reset
 
@@ -509,7 +510,7 @@ void mtQuatRotAxis(Quatf* out, const Vec3f* axis, float angle) {
     out->w = c;
 }
 
-extern "C" asm void fn_8003F9A8(const Quatf* a, const Quatf* b, Quatf* out) {
+asm void Quat::mul(const Quat* other, Quat* out) const {
     nofralloc
     psq_l f2, 0x0(r3), 0, 0
     psq_l f4, 0x0(r4), 0, 0
@@ -550,7 +551,7 @@ void mtQuatRotVec(const Quatf* q, const Vec3f* v, Vec3f* out) {
     Quatf vq;
     quatSet(&vq, v->m_x, v->m_y, v->m_z, 0.0f);
     Quatf tmp;
-    fn_8003F9A8(q, &vq, &tmp);
-    fn_8003F9A8(&tmp, &conj, &tmp);
+    reinterpret_cast<const Quat*>(q)->mul(reinterpret_cast<const Quat*>(&vq), reinterpret_cast<Quat*>(&tmp));
+    reinterpret_cast<const Quat*>(&tmp)->mul(reinterpret_cast<const Quat*>(&conj), reinterpret_cast<Quat*>(&tmp));
     vecSet(out, tmp.x, tmp.y, tmp.z);
 }

@@ -5,7 +5,6 @@
 #include <types.h>
 
 // Matrix::mulVec (the map name); em_kinetic_energy.cpp calls it by this stand-in name.
-extern "C" void fn_8003E3BC(const Matrix* mtx, const Vec3f* in, Vec3f* out);
 
 soCatchModule::~soCatchModule() { }
 
@@ -78,7 +77,7 @@ void soCatchModuleImpl::updateLRCling() {
         m_moduleAccesser->getModelModule().getNodeGlobalMtx(m_node2, &matrix, false);
         Vec3f direction(0.0f, 0.0f, 0.0f);
         Vec3f forward(0.0f, 0.0f, 1.0f);
-        fn_8003E3BC(&matrix, &forward, &direction);
+        matrix.mulVec(&forward, &direction);
         float y = direction.m_y;
         Vec2f xy(direction.m_x, y);
         Vec2f right(1.0f, 0.0f);
