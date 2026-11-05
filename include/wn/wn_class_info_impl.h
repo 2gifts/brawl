@@ -24,7 +24,6 @@ extern "C" void* fn_27_148BBC(const ftCommonDataAccesser* accesser, s32 subKind,
 extern "C" void* fn_27_148C54(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_149844(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148AB0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_147C88(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_14959C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148E54(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148910(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
@@ -35,10 +34,7 @@ extern "C" void* fn_27_148524(const ftCommonDataAccesser* accesser, s32 subKind,
 extern "C" void* fn_27_1480CC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148CE8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1491DC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148264(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1482C0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1494D0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_149B70(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148F64(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_147C9C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148050(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
@@ -130,7 +126,7 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
     return fn_27_148AB0(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnKirbyPikmin*) {
-    return fn_27_147C88(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnKirbyPikminData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnNessPKFlash*) {
     return fn_27_14959C(&g_ftCommonDataAccesser, subKind, resourceGroup);
@@ -170,16 +166,16 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
     return fn_27_1491DC(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnPokeFushigisouSeed*) {
-    return fn_27_148264(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnPokeFushigisouSeedData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnPokeZenigameWater*) {
-    return fn_27_1482C0(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnPokeZenigameWaterData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnLucarioAuraBall*) {
     return fn_27_1494D0(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnDummyFighter*) {
-    return fn_27_149B70(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnDummyFighterData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnPeachKinopio*) {
     return fn_27_148F64(&g_ftCommonDataAccesser, subKind, resourceGroup);
