@@ -24,26 +24,31 @@
 #include <havok/hkSymmetricAgentFlipCollectors.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkCollisionDispatcher.h>
+#include <havok/hkTriangleShape.h>
 
 // Stand-ins for the sub-object constructor and the symmetric linear cast of other units (not written yet).
 extern "C" void fn_80325334(void* src, void* dst);
 extern "C" void fn_802B7FD0(void* a, void* b, void* c, void* target, void* d);
 
-hkCapsuleTriangleAgent::hkCapsuleTriangleAgent(hkContactMgr* contactMgr, void* src) : hkCollisionAgent((int)contactMgr) {
+hkCapsuleTriangleAgent::hkCapsuleTriangleAgent(const hkCdBody& triangleBody, hkContactMgr* contactMgr)
+    : hkCollisionAgent((int)contactMgr) {
     unkC[0] = 0xFFFF;
     unkC[1] = 0xFFFF;
     unkC[2] = 0xFFFF;
-    fn_80325334((u8*)src + 0x10, unk14);
+    const hkTriangleShape* triangle = (const hkTriangleShape*)triangleBody.m_shape;
+    fn_80325334((void*)&triangle->m_vertexA, unk14);
 }
 
-hkCapsuleTriangleAgent* hkCapsuleTriangleAgent::createTriangleCapsuleAgent(void* unk0, void* unk1, void* unk2,
+hkCapsuleTriangleAgent* hkCapsuleTriangleAgent::createTriangleCapsuleAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                                          const hkCollisionInput& input,
                                                                           hkContactMgr* contactMgr) {
-    return new hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_(contactMgr, *(void**)unk0);
+    return new hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_(bodyA, contactMgr);
 }
 
-hkCapsuleTriangleAgent* hkCapsuleTriangleAgent::createCapsuleTriangleAgent(void* unk0, void* unk1, void* unk2,
+hkCapsuleTriangleAgent* hkCapsuleTriangleAgent::createCapsuleTriangleAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                                          const hkCollisionInput& input,
                                                                           hkContactMgr* contactMgr) {
-    return new hkCapsuleTriangleAgent(contactMgr, *(void**)unk1);
+    return new hkCapsuleTriangleAgent(bodyB, contactMgr);
 }
 
 void hkCapsuleTriangleAgent::registerAgent(hkCollisionDispatcher* dispatcher) {

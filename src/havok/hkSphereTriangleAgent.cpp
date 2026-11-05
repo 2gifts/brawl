@@ -67,21 +67,23 @@ void hkSphereTriangleAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     dispatcher->registerCollisionAgent(&sphere, HK_SHAPE_SPHERE, HK_SHAPE_TRIANGLE);
 }
 
-// NONMATCHING (create functions 76-89%): the target keeps a dead copy of `this` (mr r30, r3) and reads the triangle
-// before the vtable store; source of both not found (same copy as in hkTransformAgent's create functions).
+// The create functions inline this; the dead `mr r30, r3` there is the object pointer kept for the exception cleanup
+// of the base (the unit is built with -Cpp_exceptions on).
 hkSphereTriangleAgent::hkSphereTriangleAgent(const hkCdBody& triangleBody, hkContactMgr* contactMgr)
     : hkCollisionAgent((int)contactMgr) {
-    const hkTriangleShape* triangle = (const hkTriangleShape*)triangleBody.m_shape;
     unkC = 0xFFFF;
+    const hkTriangleShape* triangle = (const hkTriangleShape*)triangleBody.m_shape;
     hkCollideTriangleUtil::setupClosestPointTriangleCache(&triangle->m_vertexA, (hkVector4*)unk10);
 }
 
-hkSphereTriangleAgent* hkSphereTriangleAgent::createTriangleSphereAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr) {
-    return new hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_(*(const hkCdBody*)unk0, contactMgr);
+hkSphereTriangleAgent* hkSphereTriangleAgent::createTriangleSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                                        const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_(bodyA, contactMgr);
 }
 
-hkSphereTriangleAgent* hkSphereTriangleAgent::createSphereTriangleAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr) {
-    return new hkSphereTriangleAgent(*(const hkCdBody*)unk1, contactMgr);
+hkSphereTriangleAgent* hkSphereTriangleAgent::createSphereTriangleAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                                        const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkSphereTriangleAgent(bodyB, contactMgr);
 }
 
 // Reports the pair when the closest point of the triangle to the sphere centre (in the triangle's frame) is closer

@@ -86,9 +86,9 @@ static inline void hkTransformAgent_copyMotionState(hkMotionState& dst, const hk
 // The child body: A's motion state moved by the shape's transform, the shape's child shape and A's key.
 // The hkSimdReal motion state scalar (see hkMotionState.h) puts this function in the mode that keeps the hkCollisionAgent
 // vtable store and the dead transform temporary, as in the target.
-// NONMATCHING (create functions, ~87%): the target also keeps a dead copy of `this` (mr r30, r31) from the inlined
-// constructor, which costs it two more saved registers; the source of that copy is not found (hkSphereTriangleAgent's
-// create functions show the same copy).
+// The `mr r30, r31` copy in the create functions is the object pointer kept for the exception cleanup of the base (the
+// unit is built with -Cpp_exceptions on). NONMATCHING (create functions 98.5-98.8%): bodyA and the child shape swap
+// r24/r25, and B colors its forwarded parameters differently.
 hkTransformAgent::hkTransformAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
                                    hkContactMgr* mgr)
     : hkCollisionAgent((int)mgr) {
@@ -104,13 +104,14 @@ hkTransformAgent::hkTransformAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
     m_childAgent = input.m_dispatcher->getNewCollisionAgent(childBody, bodyB, input, mgr);
 }
 
-hkTransformAgent* hkTransformAgent::createTransformAAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr) {
-    return new hkTransformAgent(*(const hkCdBody*)unk0, *(const hkCdBody*)unk1, *(const hkCollisionInput*)unk2, contactMgr);
+hkTransformAgent* hkTransformAgent::createTransformAAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                         const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkTransformAgent(bodyA, bodyB, input, contactMgr);
 }
 
-hkTransformAgent* hkTransformAgent::createTransformBAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr) {
-    return new hkSymmetricAgentLinearCast_16hkTransformAgent_(*(const hkCdBody*)unk0, *(const hkCdBody*)unk1,
-                                                              *(const hkCollisionInput*)unk2, contactMgr);
+hkTransformAgent* hkTransformAgent::createTransformBAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                         const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkSymmetricAgentLinearCast_16hkTransformAgent_(bodyA, bodyB, input, contactMgr);
 }
 
 // The child gets a full motion state: A's motion state moved by the shape's transform (the swept rotations turned by

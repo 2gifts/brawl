@@ -36,8 +36,10 @@ struct hkTransformAgent : hkCollisionAgent {
     hkTransformAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* mgr);
 
     // Create functions registered with the dispatcher (A: transform shape first; B: the symmetric agent, shapes swapped).
-    static hkTransformAgent* createTransformAAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
-    static hkTransformAgent* createTransformBAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
+    static hkTransformAgent* createTransformAAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                                   hkContactMgr* contactMgr);
+    static hkTransformAgent* createTransformBAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                                   hkContactMgr* contactMgr);
 
     virtual ~hkTransformAgent();
 

@@ -5,6 +5,7 @@
 #include <havok/hkSymmetricAgentFlipCollectors.h>
 
 struct hkCollisionDispatcher;
+struct hkCollisionInput;
 
 // Collision agent for sphere x triangle (sphere first; the triangle-first pairs use the symmetric variant). Object size
 // 0x20: the 0x08 word is the contact manager, 0x0C a 16-bit slot released by cleanup when it is not 0xFFFF, and 0x10 the
@@ -22,10 +23,12 @@ struct hkSphereTriangleAgent : hkCollisionAgent {
 
     // Registers the triangle/sphere agent functions with the dispatcher (two pairs, see the .cpp).
     static void registerAgent(hkCollisionDispatcher* dispatcher);
-    // Triangle first: the triangle is the first argument (unk0); builds the symmetric variant.
-    static hkSphereTriangleAgent* createTriangleSphereAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
-    // Sphere first: the triangle is the second argument (unk1); builds the plain agent.
-    static hkSphereTriangleAgent* createSphereTriangleAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
+    // Triangle first: the triangle is bodyA; builds the symmetric variant.
+    static hkSphereTriangleAgent* createTriangleSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                            const hkCollisionInput& input, hkContactMgr* contactMgr);
+    // Sphere first: the triangle is bodyB; builds the plain agent.
+    static hkSphereTriangleAgent* createSphereTriangleAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                            const hkCollisionInput& input, hkContactMgr* contactMgr);
 
     virtual void cleanup();
     virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
