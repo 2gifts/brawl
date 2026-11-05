@@ -4,27 +4,41 @@
 
 // Collector wrappers used by the symmetric (shape-swapping) agent wrappers. A wrapper builds one of these on
 // its stack and passes its address as the collector argument, so the results reach the original collector
-// with the sides flipped. Layout: 0x00 vtable, 0x04 flag/fraction, 0x08 wrapped collector.
-// HYPOTHESIS: names come from the Havok map (hkSymmetricAgentFlip*Collector__addCdPoint); the vtable slots and
-// the addCdPoint bodies are not recovered yet.
+// with the sides flipped. Layout: 0x00 vtable, 0x04 early-out flag / distance, 0x08 wrapped collector.
+// Which wrapper uses which class: from the vtables the wrappers store (their 0x0C slot is the map's
+// hkSymmetricAgentFlip*Collector::addCd* function).
 
-// Penetration collector (flag 0 at 0x04).
-struct hkSymmetricAgentFlipCollector {
-    virtual void addCdPoint(void* point); // HYPOTHESIS
-    u8 unk4;    // 0x04 HYPOTHESIS: zero for penetration queries
-    void* unk8; // 0x08 wrapped collector
-
-    hkSymmetricAgentFlipCollector(void* collector) {
-        unk4 = 0;
-        unk8 = collector;
-    }
+// HYPOTHESIS: base of the body pair collectors; the constructor clears the early-out flag.
+struct hkSymmetricAgentFlipBodyCollectorBase {
+    hkSymmetricAgentFlipBodyCollectorBase() { unk4 = 0; }
+    virtual void addCdBodyPair(void* bodyA, void* bodyB) = 0; // 0x0C HYPOTHESIS (the dtor is slot 0x08)
+    u8 unk4; // 0x04 HYPOTHESIS: early-out flag
 };
 
-// Closest-points collector (0.0f fraction at 0x04).
-struct hkSymmetricAgentFlipCastCollector {
-    virtual void addCdPoint(void* point); // HYPOTHESIS
-    float unk4; // 0x04 HYPOTHESIS: zero for closest-points queries
+// Penetration queries (body pairs). Vtable lbl_80487178.
+struct hkSymmetricAgentFlipBodyCollector : hkSymmetricAgentFlipBodyCollectorBase {
     void* unk8; // 0x08 wrapped collector
+    hkSymmetricAgentFlipBodyCollector(void* collector) : unk8(collector) {}
+    virtual void addCdBodyPair(void* bodyA, void* bodyB);
+};
 
-    hkSymmetricAgentFlipCastCollector(void* collector) : unk4(0.0f), unk8(collector) {}
+// HYPOTHESIS: base of the point collectors; the constructor sets the early-out distance to 0.
+struct hkSymmetricAgentFlipPointCollectorBase {
+    hkSymmetricAgentFlipPointCollectorBase() : unk4(0.0f) {}
+    virtual void addCdPoint(void* point) = 0; // 0x0C HYPOTHESIS (the dtor is slot 0x08)
+    float unk4; // 0x04 HYPOTHESIS: early-out distance
+};
+
+// Closest-point queries. Vtable lbl_80487198.
+struct hkSymmetricAgentFlipCollector : hkSymmetricAgentFlipPointCollectorBase {
+    void* unk8; // 0x08 wrapped collector
+    hkSymmetricAgentFlipCollector(void* collector) : unk8(collector) {}
+    virtual void addCdPoint(void* point);
+};
+
+// Linear casts. Vtable lbl_80487188.
+struct hkSymmetricAgentFlipCastCollector : hkSymmetricAgentFlipPointCollectorBase {
+    void* unk8; // 0x08 wrapped collector
+    hkSymmetricAgentFlipCastCollector(void* collector) : unk8(collector) {}
+    virtual void addCdPoint(void* point);
 };

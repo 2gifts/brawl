@@ -13,22 +13,22 @@
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
 void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCollector flip(unk3);
+    hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkMultiRayConvexAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCollector flip(unk3);
+    hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkMultiRayConvexAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCastCollector flip(unk3);
+    hkSymmetricAgentFlipCollector flip(unk3);
     hkMultiRayConvexAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCastCollector flip(unk3);
+    hkSymmetricAgentFlipCollector flip(unk3);
     hkMultiRayConvexAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
 }
 

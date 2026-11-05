@@ -125,22 +125,22 @@ hkSymmetricAgentLinearCast_16hkTransformAgent_::~hkSymmetricAgentLinearCast_16hk
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
 void hkSymmetricAgentLinearCast_16hkTransformAgent_::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCollector flip(unk3);
+    hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkTransformAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_16hkTransformAgent_::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCollector flip(unk3);
+    hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkTransformAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_16hkTransformAgent_::getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCastCollector flip(unk3);
+    hkSymmetricAgentFlipCollector flip(unk3);
     hkTransformAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_16hkTransformAgent_::staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCastCollector flip(unk3);
+    hkSymmetricAgentFlipCollector flip(unk3);
     hkTransformAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
 }
 

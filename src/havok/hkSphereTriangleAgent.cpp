@@ -132,22 +132,22 @@ void hkSphereTriangleAgent::cleanup() {
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
 void hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCollector flip(unk3);
+    hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkSphereTriangleAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCollector flip(unk3);
+    hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkSphereTriangleAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_::getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCastCollector flip(unk3);
+    hkSymmetricAgentFlipCollector flip(unk3);
     hkSphereTriangleAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_::staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
-    hkSymmetricAgentFlipCastCollector flip(unk3);
+    hkSymmetricAgentFlipCollector flip(unk3);
     hkSphereTriangleAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
 }
 
