@@ -16,13 +16,25 @@ public:
         int unk18;
         Vec3f unk1C;
     } unk28_t;
-    u8 unk8[0xC];
+    union {
+        u8 unk8[0xC];
+        struct {
+            int unk8_0, unkC;
+            float unk10;
+        };
+    };
     // HYPOTHESIS: unnamed control result contains button flags and two vectors.
     typedef struct {
         u8 unk0;
         Vec2f unk4, unkC;
     } unk14_t;
-    u8 unk14[0x14];
+    union {
+        u8 unk14[0x14];
+        struct {
+            u8 unk14_0;
+            Vec2fPlainBase unk18, unk20;
+        };
+    };
     union {
         u8 unk28[0x38];
         struct {
@@ -36,10 +48,34 @@ public:
         };
     };
     s32 unk60;
-    u8 unk64[0x50];
+    union {
+        u8 unk64[0x50];
+        struct {
+            float unk64_0, unk68;
+            struct {
+                float unk0, unk4, unk8;
+                union {
+                    u8 unkC;
+                    struct {
+                        u8 unkC_0 : 1;
+                        u8 unkC_1 : 7;
+                    };
+                };
+                u8 unkD[3];
+            } unk6C[4];
+        };
+    };
     int unkB4;
 
     void clearControl();
+    virtual void update(float deltaFrame);
+    void updateShot();
+    void updateMoveFig();
+    void updateLockPlayerNo(bool* seamless, int* playerNo, const unk14_t* control);
+    void updateLockFigNo(bool* seamless, int* figNo, const unk14_t* control);
+    void setFigPosList(int figNo, const Vec3f* position);
+    void removeFigPosList(int figNo);
+    void updateControl(const gfPadStatus* pad, bool menu);
     unk14_t getControl(const gfPadStatus* pad, bool menu);
     void getTrackingControl(const gfPadStatus* pad, Vec2f* control);
     void getOrbitControl(const gfPadStatus* pad, Vec2f* control);
