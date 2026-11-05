@@ -124,6 +124,7 @@ public:
 };
 class nteFileDataPhoto : public nteFileDataPhotoBase {
 public:
+    nteFileDataPhoto(Heaps::HeapType heap);
     virtual ~nteFileDataPhoto();
     void setData(void* data, u32 size);
     union {
@@ -142,6 +143,7 @@ struct nteSection {
     u8 unk4;
     u8 unk5[3];
 
+    u32 getSize();
     u8 getDataType();
     u8 getStateType();
     s64 getCreated();
