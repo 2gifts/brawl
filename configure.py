@@ -1022,7 +1022,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/nwc24/NWC24DateParser.c"),
             Object(Matching, "RVL_SDK/nwc24/NWC24FriendList.c"),
             Object(Matching, "RVL_SDK/nwc24/NWC24SecretFList.c"),
-            Object(NonMatching, "RVL_SDK/nwc24/NWC24UserId.c", mw_version="GC/3.0a5.2"),
+            Object(Matching, "RVL_SDK/nwc24/NWC24UserId.c", mw_version="GC/3.0a5.2"),
             Object(Matching, "RVL_SDK/nwc24/NWC24Time.c", mw_version="GC/3.0a5.2"),
             Object(Matching, "RVL_SDK/nwc24/NWC24Ipc.c"),
             Object(NonMatching, "RVL_SDK/nwc24/NWC24Download.c"),
