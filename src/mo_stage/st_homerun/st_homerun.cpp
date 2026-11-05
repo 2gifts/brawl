@@ -44,8 +44,6 @@ extern "C" void fn_800DCDB0(IfMngr* mngr, float a, float b, float c);
 extern "C" void fn_800DCDD4(IfMngr* mngr, int kind, float distance);
 // IfPlayer::updateDamageHP / setDamageState (the barrier shows its health on the damage gauge of the player)
 extern "C" void fn_800E14A4(IfPlayer* player, u32 value, int a);
-// stMelee::setPlayerPositionIndexFixed, setCamera (position, target, roll, fov), interpolate, interpolate1
-extern "C" void fn_27_239AF4(stMelee* stage, Vec3f* eye, Vec3f* target, float roll, float fov);
 extern "C" void fn_27_239BDC(stMelee* stage, Vec3f* out, Vec3f* from, Vec3f* to, float t, u8 ease);
 extern "C" void fn_27_239E58(stMelee* stage, float* out, float from, float to, float t, u8 ease);
 // stTrigger::setBeltConveyorParam
@@ -1334,7 +1332,7 @@ void stHomerun::fixposCamera() {
         break;
     }
     }
-    fn_27_239AF4(this, &eye, &target, 0.0f, fov);
+    this->calcCamera(&eye, &target, 0.0f, fov);
     fixposPauseCamera();
 }
 
