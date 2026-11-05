@@ -51,8 +51,6 @@ extern "C" void* fn_801AB6CC(MEMAllocator* allocator, u32* size, u32 capacity);
 // GXInvalidateTexAll() and GXSetColorUpdate()
 extern "C" void fn_801F3194();
 extern "C" void fn_801F471C(int enable);
-// sora_melee: grMadein::switchToMatrix() / grMadein::setMatrix()
-extern "C" void fn_27_279FA4(grMadein* ground);
 extern "C" void fn_27_279FC8(grMadein* ground, Mtx matrix, int unk);
 
 namespace nw4r {
@@ -2271,7 +2269,7 @@ void stCharacterRoll::createObj() {
         addGround(ground);
         ground->startup(m_fileData, 0, gfSceneRoot::Layer_Ground);
         ground->initializeEntity();
-        fn_27_279FA4(ground);
+        ground->switchToMatrix();
     }
     ground = grMadein::create(2, "", "grCharaRollBeamLModel", Heaps::StageInstance);
     m_grBeamL = ground;
@@ -2279,7 +2277,7 @@ void stCharacterRoll::createObj() {
         addGround(ground);
         ground->startup(m_fileData, 0, gfSceneRoot::Layer_Ground);
         ground->initializeEntity();
-        fn_27_279FA4(ground);
+        ground->switchToMatrix();
     }
     ground = grMadein::create(3, "", "grCharaRollBeamRModel", Heaps::StageInstance);
     m_grBeamR = ground;
@@ -2287,7 +2285,7 @@ void stCharacterRoll::createObj() {
         addGround(ground);
         ground->startup(m_fileData, 0, gfSceneRoot::Layer_Ground);
         ground->initializeEntity();
-        fn_27_279FA4(ground);
+        ground->switchToMatrix();
     }
     ground = grMadein::create(4, "", "grResultModel", Heaps::StageInstance);
     m_grResult = ground;
@@ -2295,7 +2293,7 @@ void stCharacterRoll::createObj() {
         addGround(ground);
         ground->startup(m_fileData, 0, gfSceneRoot::Layer_Ground);
         ground->initializeEntity();
-        fn_27_279FA4(ground);
+        ground->switchToMatrix();
     }
 
     m_resFile = nw4r::g3d::ResFile(m_fileData->getData(Data_Type_Tex, 0, 0xFFFE));
