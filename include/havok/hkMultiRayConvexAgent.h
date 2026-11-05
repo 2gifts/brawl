@@ -40,10 +40,10 @@ struct hkMultiRayConvexAgent : hkCollisionAgent {
 
     virtual void cleanup();
     virtual void processCollision(void* unk0, void* unk1, void* unk2, void* unk3); // not written yet
-    virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3); // not written yet
-    static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3); // not written yet
+    virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
+    static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
     virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3); // not written yet
+    static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
 };
 
 // HYPOTHESIS: the symmetric (shape-swapped) variant, map name hkSymmetricAgent<hkMultiRayConvexAgent>.

@@ -17,6 +17,7 @@
 #include <havok/hkShapeType.h>
 #include <havok/hkCdBody.h>
 #include <havok/hkCdPoint.h>
+#include <havok/hkCdBodyPairCollector.h>
 #include <havok/hkShapeRayCastInput.h>
 #include <havok/hkTransform.h>
 #include <havok/hkMonitorStream.h>
@@ -172,4 +173,31 @@ void hkMultiRayConvexAgent::staticGetClosestPoints(void* unk0, void* unk1, void*
 
 void hkMultiRayConvexAgent::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
     staticGetPenetrations(unk0, unk1, unk2, unk3);
+}
+
+// Reports the pair once for every ray that hits the convex shape, until the collector has seen enough.
+void hkMultiRayConvexAgent::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+    hkCdBodyPairCollector& collector = *(hkCdBodyPairCollector*)unk3;
+    const hkCdBody& bodyA = *(const hkCdBody*)unk0;
+    const hkCdBody& bodyB = *(const hkCdBody*)unk1;
+    HK_TIMER_BEGIN("multiRay-cnvx-getPen");
+    const hkMultiRayShape* shape = (const hkMultiRayShape*)bodyA.m_shape;
+    const hkShape* convex = bodyB.m_shape;
+    hkTransform aTb;
+    aTb.setMulInverseMul(*(const hkTransform*)bodyB.m_motion, *(const hkTransform*)bodyA.m_motion);
+    int numRays = shape->m_rays.getSize();
+    const hkMultiRayShape::Ray* ray = shape->m_rays.begin();
+    hkShapeRayCastInput rayInput;
+    rayInput.unk20 = 0;
+    rayInput.unk24 = 0;
+    hkShapeRayCastOutput output;
+    while (numRays-- && !collector.m_earlyOut) {
+        rayInput.m_from._setTransformedPos(aTb, ray->m_start);
+        rayInput.m_to._setTransformedPos(aTb, ray->m_end);
+        if (convex->castRay(rayInput, output.m_normal)) {
+            collector.addCdBodyPair(bodyA, bodyB);
+        }
+        ray++;
+    }
+    HK_TIMER_END();
 }
