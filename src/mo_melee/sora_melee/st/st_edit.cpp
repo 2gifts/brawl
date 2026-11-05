@@ -3,6 +3,23 @@
 #include <string.h>
 #include <types.h>
 #include <st/st_area_manager.h>
+#include <snd/snd_system.h>
+
+grGimmickEditSpring::~grGimmickEditSpring() { }
+
+void grGimmickEditSpring::setMotionOn() {
+    m_motionRatio = 1.0f;
+    changeNodeAnim(1, 0);
+    m_state = 1;
+    m_animFrame = 0.0f;
+}
+
+void grGimmickEditSpring::setMotionOff() {
+    changeNodeAnim(0, 0);
+    g_sndSystem->playSE(static_cast<SndID>(0x1D9A), -1, 0, 0, -1);
+    m_state = 2;
+    m_animFrame = 0.0f;
+}
 
 // Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
 extern "C" {

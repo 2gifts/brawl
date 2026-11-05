@@ -13,8 +13,6 @@
 #include <so/item/so_item_manage_module_impl.h>
 #include <so/so_module_hyp.h>
 
-soCollisionReflectorEventObserver::~soCollisionReflectorEventObserver() { }
-
 template <>
 inline void soEventObserver<soCollisionAbsorberEventObserver>::addObserverSub(s32 manageId, soCollisionAbsorberEventObserver* observer, s8 priority) {
     s32 previousManageId;

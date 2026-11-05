@@ -471,11 +471,6 @@ public:
 };
 static_assert(sizeof(BaseItem) == 0x3d60, "Class is wrong size!");
 
-class itStatusUniqProcessHave : public soStatusUniqProcess {
-public:
-    virtual void exitStatus(soModuleAccesser* accesser, int statusKind);
-};
-
 class itCustomizerInterface : public utUnCopyable, public soNullable {
 public:
     virtual ~itCustomizerInterface() {}
