@@ -153,19 +153,19 @@ void hkFlagCdBodyPairCollector::addCdBodyPair(hkCdBody* bodyA, hkCdBody* bodyB) 
 }
 
 void hkClosestCdPointCollector::addCdPoint(hkCdPoint* point) {
-    if (m_lastChainA != 0 && !(point->m_contact.m_normal.w < m_point.m_normal.w)) {
+    if (m_rootA != 0 && !(point->m_contact.m_normal.w < m_point.m_normal.w)) {
         return;
     }
     m_point = point->m_contact;
-    hkCdPointChain* last;
-    for (last = point->m_chainA; last->m_next != 0; last = last->m_next) {
+    const hkCdBody* root;
+    for (root = point->m_cdBodyA; root->m_parent != 0; root = root->m_parent) {
     }
-    m_lastChainA = last;
-    m_idA = point->m_chainA->m_id;
-    for (last = point->m_chainB; last->m_next != 0; last = last->m_next) {
+    m_rootA = root;
+    m_shapeKeyA = point->m_cdBodyA->m_shapeKey;
+    for (root = point->m_cdBodyB; root->m_parent != 0; root = root->m_parent) {
     }
-    m_lastChainB = last;
-    m_idB = point->m_chainB->m_id;
+    m_rootB = root;
+    m_shapeKeyB = point->m_cdBodyB->m_shapeKey;
     m_dist = point->m_contact.m_normal.w;
 }
 

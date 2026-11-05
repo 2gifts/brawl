@@ -13,7 +13,8 @@ struct hkMultiRayShape : hkShape {
         hkVector4 m_start; // 0x00
         hkVector4 m_end;   // 0x10
     };
-    hkArray<Ray> m_rays; // 0x0C
+    hkArray<Ray> m_rays;              // 0x0C
+    hkReal m_rayPenetrationDistance; // 0x18 HYPOTHESIS: added to every hit distance by the agent
 };
 
 struct hkCollisionDispatcher;
