@@ -223,6 +223,9 @@ Things that moved registers, roughly in the order worth trying:
 
 - **Unreachable code after a branch (calls with unset `r3`, compares of registers nobody loaded) is a test the compiler folded against a value it has just stored:** MWCC turns `m_state = 3; ...; if (m_state == 2) { ... }` into an unconditional `b` over the body but keeps the body, minus the loads. Write the test after the store to get the dead block back. Seen: the two unreachable record saves in `muProcOptSound::proc`. **MED**
 
+- **A begin/end pointer pair for a loop whose registers come out swapped (the `this` register reused for the wrong one): compute `end` first.** `T* end = arr.begin() + arr.getSize(); T* it = arr.begin();` colors like the target where `T* it = arr.begin(); T* end = it + arr.getSize();` swaps the pair (and a for-init `begin()` after other code is much worse). Seen: `hkBvTreeAgent::getPenetrations` (56 -> 9 differing lines). **MEDIUM**
+- **To rule exceptions in or out as the cause of a constructor diff, diff the extab, not just the code.** `dtk elf disasm` prints each function's extab actions (DESTROYBASE / DESTROYMEMBER / DELETEPOINTER and their PC ranges). When ours lists the same actions over the same (shifted) ranges as the target, the unit's exception setting is right and the remaining code diff has another cause (Havok `hkGskBaseAgent` / `hkBvTreeStreamAgent` constructors: the kept base vtable store is not an EH effect). Seen: `src/havok/hkBvTreeStreamAgent.cpp`. **MEDIUM**
+
 ## 7. Data and sections
 - **MWCC's frame order: objects with destructors first, then parse-time temporaries in source order, then plain named
   locals, then temporaries created by inlining.** A temporary out of source order therefore points to an inlined call;
