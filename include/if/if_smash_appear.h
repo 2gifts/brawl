@@ -84,6 +84,7 @@ public:
     // HYPOTHESIS: parameter types (the map has none); the third argument selects delayed printing.
     IfSmashAppearTask(const char* name, gfArchive* archive, bool delayPrint, s32 drawPriority);
     void createModel(ModelData* data, s32 count);
+    bool setScript(ScriptStep* script, s32 id);
     void setMessage(s32 msgIndex, s32 face, s32 openFrames, s32 closeFrames, s32 waitFrames);
 
     virtual void processDefault();

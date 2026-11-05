@@ -28,7 +28,6 @@ extern "C" void endPrint__5MuMsgFv(MuMsg* msg, u32 msgIndex);
 extern "C" void fn_800F5084(IfSmashAppearTask* task, void* msgData, IfSmashAppearTask::MsgData* data);
 extern "C" void fn_800F5284(IfSmashAppearTask* task);
 extern "C" void fn_800F5344(IfSmashAppearTask* task);
-extern "C" bool fn_800F5EEC(IfSmashAppearTask* task, IfSmashAppearTask::ScriptStep* script, s32 id);
 
 // The model name of a ResMdl, read as mu_object.cpp does (ResMdlData is opaque in the headers).
 static inline const char* ResMdl_GetName(nw4r::g3d::ResMdl& mdl) {
@@ -359,7 +358,7 @@ void IfFoxSmashAppearTask::start(s32 id) {
     }
     IfSmashAppearTask::start(id);
     ScriptStep* script = (ScriptStep*)getArchivePublicAddress(m_archive, 0x76, "scripts");
-    fn_800F5EEC(this, script, id);
+    setScript(script, id);
 }
 
 void IfFoxSmashAppearTask::processDefault() {
@@ -454,7 +453,7 @@ void IfDxFoxSmashAppearTask::start(s32 id) {
         }
     }
     ScriptStep* script = (ScriptStep*)getArchivePublicAddress(m_archive, 0x76, "scripts");
-    fn_800F5EEC(this, script, id);
+    setScript(script, id);
     m_talker = -1;
     for (int i = 0; i < m_stepCount; i++) {
         if (m_talker < 0) {
@@ -581,7 +580,7 @@ void IfSnakeSmashAppearTask::start(s32 id) {
     m_talker = -1;
     m_isDead = false;
     ScriptStep* script = (ScriptStep*)getArchivePublicAddress(m_archive, 0x3EF, "scripts");
-    fn_800F5EEC(this, script, id);
+    setScript(script, id);
     for (int i = 0; i < m_stepCount; i++) {
         if (m_talker < 0) {
             s32 face = m_steps[i].m_face;
@@ -717,9 +716,58 @@ void IfSnakeSmashAppearTask::onDead() {
             break;
     }
     if (id >= 0) {
-        fn_800F5EEC(this, script, id);
+        setScript(script, id);
         m_state = 3;
         m_stateFrame = 0;
         onLoop();
     }
+}
+
+bool IfSmashAppearTask::setScript(ScriptStep* script, s32 id) {
+    if (script == NULL) {
+        return false;
+    }
+    m_stepCount = 0;
+    unk408 = -1;
+    unk410 = 0.0f;
+    unk40C = -1.0f;
+    u32 soundGroup = -1;
+    int conversation = 0;
+    for (;; script++) {
+        if (script->m_msgIndex == -2) {
+            break;
+        }
+        if (script->m_msgIndex == -1) {
+            if (id == conversation) {
+                if (soundGroup != 0xFFFFFFFF && m_sndGroupId == 0xFFFFFFFF) {
+                    m_sndGroupId = soundGroup;
+                    unk420 = 0.0f;
+                    if (m_sndGroup < 0) {
+                        bool loading = !g_sndSystem->isFinishLoad1(soundGroup);
+                        if (!loading && !g_sndSystem->isSoundGroupLoaded((SndGroupID)m_sndGroupId)) {
+                            m_sndGroup = g_sndSystem->loadSoundGroup((SndGroupID)m_sndGroupId, 1, true);
+                            if (m_sndGroup >= 0) {
+                                unk420 = 60.0f;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+            conversation++;
+        } else if (conversation == id) {
+            if (script->m_msgIndex == -3) {
+                soundGroup = script->m_se;
+            } else if (script->m_msgIndex == -4) {
+                unk40C = 60.0f + script->m_face;
+            } else {
+                if (m_stepCount >= sizeof(m_steps) / sizeof(m_steps[0])) {
+                    return false;
+                }
+                m_steps[m_stepCount] = *script;
+                m_stepCount++;
+            }
+        }
+    }
+    return false;
 }
