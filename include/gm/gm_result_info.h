@@ -100,8 +100,11 @@ struct gmTeamResultInfo {
 };
 static_assert(sizeof(gmTeamResultInfo) == 0x30, "Class is wrong size!");
 
+class gmGlobalModeMelee;
+
 class gmResultInfo {
 public:
+    void gmSetSelStagePlayerModeResult(gmGlobalModeMelee* melee);
     enum DecisionKind {
         Decision_Timeup = 0x1,
         Decision_Win = 0x2,
