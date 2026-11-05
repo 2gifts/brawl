@@ -2852,3 +2852,184 @@ int gmGetSealMaxCount() {
 // HYPOTHESIS: the static object of gm_data_collection.cpp, constructed by this unit's __sinit_.
 gfFileIOHandle g_gmDataCollectionFileHandle;
 
+
+bool gmItSwitch::gmCheckItemSwitch(itKind kind) {
+    int bit = -1;
+    int table;
+    switch (kind) {
+    case Item_AssistTrophy: bit = 1; table = ItemSwitchTable_Item; break;
+    case Item_FranklinBadge: bit = 47; table = ItemSwitchTable_Item; break;
+    case Item_BananaPeel: bit = 41; table = ItemSwitchTable_Item; break;
+    case Item_Barrel: bit = 3; table = ItemSwitchTable_Item; break;
+    case Item_BeamSword: bit = 19; table = ItemSwitchTable_Item; break;
+    case Item_Bill: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_BobOmb: bit = 30; table = ItemSwitchTable_Item; break;
+    case Item_Crate: bit = 3; table = ItemSwitchTable_Item; break;
+    case Item_Bumper: bit = 42; table = ItemSwitchTable_Item; break;
+    case Item_Capsule: bit = 3; table = ItemSwitchTable_Item; break;
+    case Item_RollingCrate: bit = 3; table = ItemSwitchTable_Item; break;
+    case Item_CD: bit = 51; table = ItemSwitchTable_Item; break;
+    case Item_GooeyBomb: bit = 32; table = ItemSwitchTable_Item; break;
+    case Item_CrackerLauncher: bit = 29; table = ItemSwitchTable_Item; break;
+    case Item_CrackerLauncher_Shot: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_Coin: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_SuperspicyCurry: bit = 16; table = ItemSwitchTable_Item; break;
+    case Item_SuperspicyCurry_Shot: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_DekuNut: bit = 34; table = ItemSwitchTable_Item; break;
+    case Item_MrSaturn: bit = 39; table = ItemSwitchTable_Item; break;
+    case Item_Dragoon_Part: bit = 9; table = ItemSwitchTable_Item; break;
+    case Item_Dragoon_Set: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_Dragoon_Sight: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_Trophy: bit = 50; table = ItemSwitchTable_Item; break;
+    case Item_FireFlower: bit = 28; table = ItemSwitchTable_Item; break;
+    case Item_FireFlower_Shot: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_Freezie: bit = 35; table = ItemSwitchTable_Item; break;
+    case Item_GoldenHammer: bit = 25; table = ItemSwitchTable_Item; break;
+    case Item_GreenShell: bit = 40; table = ItemSwitchTable_Item; break;
+    case Item_Hammer: bit = 24; table = ItemSwitchTable_Item; break;
+    case Item_Hammer_Head: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_Fan: bit = 21; table = ItemSwitchTable_Item; break;
+    case Item_HeartContainer: bit = 8; table = ItemSwitchTable_Item; break;
+    case Item_HomeRunBat: bit = 20; table = ItemSwitchTable_Item; break;
+    case Item_PartyBall: bit = 3; table = ItemSwitchTable_Item; break;
+    case Item_Manaphy_Heart: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_MaximTomato: bit = 7; table = ItemSwitchTable_Item; break;
+    case Item_PoisonMushroom: bit = 11; table = ItemSwitchTable_Item; break;
+    case Item_SuperMushroom: bit = 10; table = ItemSwitchTable_Item; break;
+    case Item_MetalBox: bit = 14; table = ItemSwitchTable_Item; break;
+    case Item_Hothead: bit = 38; table = ItemSwitchTable_Item; break;
+    case Item_Pitfall: bit = 37; table = ItemSwitchTable_Item; break;
+    case Item_PokeBall: bit = 2; table = ItemSwitchTable_Item; break;
+    case Item_BlastBox: bit = 4; table = ItemSwitchTable_Item; break;
+    case Item_RayGun: bit = 27; table = ItemSwitchTable_Item; break;
+    case Item_RayGun_Shot: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_LipStick: bit = 22; table = ItemSwitchTable_Item; break;
+    case Item_LipStick_Flower: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_LipStick_Shot: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_Sandbag: bit = 5; table = ItemSwitchTable_Item; break;
+    case Item_ScrewAttack: bit = 48; table = ItemSwitchTable_Item; break;
+    case Item_Sticker: bit = 49; table = ItemSwitchTable_Item; break;
+    case Item_MotionSensorBomb: bit = 31; table = ItemSwitchTable_Item; break;
+    case Item_Timer: bit = 17; table = ItemSwitchTable_Item; break;
+    case Item_SmartBomb: bit = 33; table = ItemSwitchTable_Item; break;
+    case Item_SmashBall: bit = 0; table = ItemSwitchTable_Item; break;
+    case Item_SmokeBall: bit = 36; table = ItemSwitchTable_Item; break;
+    case Item_Spring: bit = 43; table = ItemSwitchTable_Item; break;
+    case Item_StarRod: bit = 23; table = ItemSwitchTable_Item; break;
+    case Item_StarRod_Shot: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_SoccerBall: bit = 45; table = ItemSwitchTable_Item; break;
+    case Item_SuperScope: bit = 26; table = ItemSwitchTable_Item; break;
+    case Item_SuperScope_Shot: bit = -1; table = ItemSwitchTable_Item; break;
+    case Item_Star: bit = 13; table = ItemSwitchTable_Item; break;
+    case Item_Food: bit = 6; table = ItemSwitchTable_Item; break;
+    case Item_TeamHealer: bit = 46; table = ItemSwitchTable_Item; break;
+    case Item_Lightning: bit = 18; table = ItemSwitchTable_Item; break;
+    case Item_Unira: bit = 44; table = ItemSwitchTable_Item; break;
+    case Item_BunnyHood: bit = 15; table = ItemSwitchTable_Item; break;
+    case Item_WarpStar: bit = 12; table = ItemSwitchTable_Item; break;
+    case Item_Stage_Vegetable: bit = 6; table = ItemSwitchTable_Item; break;
+    case Item_DiddyKong_Peanut_Seed: bit = 6; table = ItemSwitchTable_Item; break;
+    case Item_Pokemon_Torchic: bit = 0; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Celebi: bit = 1; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Chikorita: bit = 2; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Chikorita_Shot: bit = -1; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Entei: bit = 3; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Moltres: bit = 4; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Munchlax: bit = 5; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Deoxys: bit = 6; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Groudon: bit = 7; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Gulpin: bit = 8; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Staryu: bit = 9; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Staryu_Shot: bit = -1; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_HoOh: bit = 10; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_HoOh_Shot: bit = -1; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Jirachi: bit = 11; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Snorlax: bit = 12; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Bellossom: bit = 13; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Kyogre: bit = 14; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Kyogre_Shot: bit = -1; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_LatiasLatios: bit = 15; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Lugia: bit = 16; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Lugia_Shot: bit = -1; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Manaphy: bit = 17; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Weavile: bit = 18; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Electrode: bit = 19; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Metagross: bit = 20; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Mew: bit = 21; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Meowth: bit = 22; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Meowth_Shot: bit = -1; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Piplup: bit = 23; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Togepi: bit = 24; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Goldeen: bit = 25; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Gardevoir: bit = 26; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Wobbuffet: bit = 27; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Suicune: bit = 28; table = ItemSwitchTable_Pokemon; break;
+    case Item_Pokemon_Bonsly: bit = 29; table = ItemSwitchTable_Pokemon; break;
+    case Item_Assist_Andross: bit = 0; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Andross_Shot: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Barbara: bit = 1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_GrayFox: bit = 2; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_RayMKII: bit = 3; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_RayMKII_Bomb: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_RayMKII_Gun: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_SamuraiGoroh: bit = 4; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Devil: bit = 5; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Excitebike: bit = 6; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Jeff: bit = 7; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Jeff_PencilBullet: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Jeff_PencilRocket: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Lakitu: bit = 8; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_KnuckleJoe: bit = 9; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_KnuckleJoe_Shot: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_HammerBro: bit = 10; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_HammerBro_Hammer: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Helirin: bit = 11; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_KatAna: bit = 12; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_KatAna_Ana: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_JillDozer: bit = 13; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Lyn: bit = 14; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_LittleMac: bit = 15; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Metroid: bit = 16; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Nintendog: bit = 17; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Nintendog_Full: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_MrResetti: bit = 18; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Isaac: bit = 19; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Isaac_Shot: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Saki: bit = 20; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Saki_Shot1: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Saki_Shot2: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Shadow: bit = 21; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_War_Infantry: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_War_Infantry_Shot: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Starfy: bit = 22; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_War_Tank: bit = 23; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_War_Tank_Shot: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Tingle: bit = 24; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Lakitu_Spiny: bit = -1; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_Waluigi: bit = 25; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_DrWright: bit = 26; table = ItemSwitchTable_Assist; break;
+    case Item_Assist_DrWright_Building: bit = -1; table = ItemSwitchTable_Assist; break;
+    }
+    bool enabled = true;
+    if (bit != -1) {
+        u32 value = 0;
+        switch (table) {
+        case ItemSwitchTable_Item:
+            if (bit < 32) {
+                value = static_cast<u32>(m_item.m_mask);
+            } else {
+                value = static_cast<u32>(m_item.m_mask >> 32);
+                bit -= 32;
+            }
+            break;
+        case ItemSwitchTable_Pokemon:
+            value = m_pokemon.m_mask;
+            break;
+        case ItemSwitchTable_Assist:
+            value = m_assist.m_mask;
+            break;
+        }
+        enabled = (value & (1 << bit)) != 0;
+    }
+    return enabled;
+}

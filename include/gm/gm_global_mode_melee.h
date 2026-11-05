@@ -8,8 +8,11 @@
 #include <gm/gm_lib.h>
 #include <types.h>
 
+#include <it/it_create.h>
+
 class gmItSwitch {
 public:
+    bool gmCheckItemSwitch(itKind kind);
     enum Frequency {
         Frequency_None = 0x0,
         Frequency_Low = 0x1,
