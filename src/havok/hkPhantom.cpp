@@ -36,6 +36,16 @@ void hkPhantom::firePhantomDeleted() {
     }
 }
 
+// compacts a listener list by dropping its null entries (the same shape as hkWorldCallbackUtil's)
+template <typename T>
+static inline void removeNullListeners(hkArray<T*>& list) {
+    for (int i = list.m_size - 1; i >= 0; i--) {
+        if (list.begin()[i] == 0) {
+            list.removeAtAndCopy(i);
+        }
+    }
+}
+
 void hkPhantom::firePhantomRemoved() {
     for (int i = m_phantomListeners.getSize() - 1; i >= 0; i--) {
         hkPhantomListener* listener = m_phantomListeners[i];
@@ -43,11 +53,7 @@ void hkPhantom::firePhantomRemoved() {
             listener->phantomRemoved(this);
         }
     }
-    for (int i = m_phantomListeners.m_size - 1; i >= 0; i--) {
-        if (((hkPhantomListener**)m_phantomListeners.m_data)[i] == 0) {
-            m_phantomListeners.removeAtAndCopy(i);
-        }
-    }
+    removeNullListeners(m_phantomListeners);
 }
 
 void hkPhantom::firePhantomAdded() {
@@ -57,11 +63,7 @@ void hkPhantom::firePhantomAdded() {
             listener->phantomAdded(this);
         }
     }
-    for (int i = m_phantomListeners.m_size - 1; i >= 0; i--) {
-        if (((hkPhantomListener**)m_phantomListeners.m_data)[i] == 0) {
-            m_phantomListeners.removeAtAndCopy(i);
-        }
-    }
+    removeNullListeners(m_phantomListeners);
 }
 
 hkPhantom::~hkPhantom() {

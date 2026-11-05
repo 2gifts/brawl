@@ -31,6 +31,16 @@ struct hkEntityCallbackUtil {
     static void fireContactProcessInternal(hkEntity* entity, hkCollisionEventConfirmed* ev);
 };
 
+// compacts a listener list by dropping its null entries (the same shape as hkWorldCallbackUtil's)
+template <typename T>
+static inline void removeNullListeners(hkArray<T*>& list) {
+    for (int i = list.m_size - 1; i >= 0; i--) {
+        if (list.begin()[i] == 0) {
+            list.removeAtAndCopy(i);
+        }
+    }
+}
+
 void hkEntityCallbackUtil::fireContactPointConfirmedInternal(hkEntity* entity, hkCollisionEventConfirmed* ev) {
     ev->m_entity = entity;
     int n = entity->m_collisionListeners.getSize();
@@ -41,11 +51,7 @@ void hkEntityCallbackUtil::fireContactPointConfirmedInternal(hkEntity* entity, h
         }
     }
     // Listeners removed during the callbacks left null slots: drop them now, keeping the order.
-    for (int i = entity->m_collisionListeners.getSize() - 1; i >= 0; i--) {
-        if (entity->m_collisionListeners[i] == NULL) {
-            entity->m_collisionListeners.removeAtAndCopy(i);
-        }
-    }
+    removeNullListeners(entity->m_collisionListeners);
 }
 
 void hkEntityCallbackUtil::fireContactPointRemovedInternal(hkEntity* entity, hkCollisionEventRemoved* ev) {
@@ -58,11 +64,7 @@ void hkEntityCallbackUtil::fireContactPointRemovedInternal(hkEntity* entity, hkC
         }
     }
     // Listeners removed during the callbacks left null slots: drop them now, keeping the order.
-    for (int i = entity->m_collisionListeners.getSize() - 1; i >= 0; i--) {
-        if (entity->m_collisionListeners[i] == NULL) {
-            entity->m_collisionListeners.removeAtAndCopy(i);
-        }
-    }
+    removeNullListeners(entity->m_collisionListeners);
 }
 
 void hkEntityCallbackUtil::fireContactProcessInternal(hkEntity* entity, hkCollisionEventConfirmed* ev) {
@@ -75,9 +77,5 @@ void hkEntityCallbackUtil::fireContactProcessInternal(hkEntity* entity, hkCollis
         }
     }
     // Listeners removed during the callbacks left null slots: drop them now, keeping the order.
-    for (int i = entity->m_collisionListeners.getSize() - 1; i >= 0; i--) {
-        if (entity->m_collisionListeners[i] == NULL) {
-            entity->m_collisionListeners.removeAtAndCopy(i);
-        }
-    }
+    removeNullListeners(entity->m_collisionListeners);
 }
