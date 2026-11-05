@@ -155,6 +155,11 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
 - **`Matrix` element reads through the const `operator()` (by value) and through the `float&` one give the same loads with
   mirrored register assignment;** try the other one when only the three float registers are reversed. Seen:
   `emLinkModuleImpl::getModelConstraintTargetNodePosition`. **MED**
+- **Havok child body (`lwz key` hoisted between the parent and motion stores, child shape in r3 and reused for
+  `getType`):** construct the body first, then read the child shape into a local, store the key, store the shape, and take
+  `typeA`/`typeB` as locals from that child pointer before the dispatcher call. Reading the child before the constructor,
+  storing the shape first, or calling `childBody.m_shape->getType()` each cost 1-9 %. Made all three
+  `hkTransformAgent` statics exact (`src/havok/hkTransformAgent.cpp`). **MED**
 Things that moved registers, roughly in the order worth trying:
 1. **Reorder local declarations** (declaration order sets virtual register order). Fixed `hkArrayUtil::_reduce`. **HIGH**
    The first-declared local gets the highest callee-saved register (r31), the next r30, and so on; parameters and the
