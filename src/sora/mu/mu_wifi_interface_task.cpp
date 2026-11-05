@@ -792,3 +792,95 @@ bool muWifiInterfaceTask::isPreparedLoadAllStage() {
     }
     return true;
 }
+
+
+u16 muWifiInterfaceTask::getAssignedPlayerHandicap(int index) {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) { info = NULL; }
+    else { info = &m_aidInfos[aid]; }
+    __typeof__(info->unkE4[0])* player;
+    if (info == NULL) {
+        netReport(lbl_80457A48);
+        player = NULL;
+    } else if (!((info->unk78_b3 >> 2) & 1)) {
+        netReport(lbl_80457A74);
+        player = NULL;
+    } else {
+        player = &info->unkE4[index];
+    }
+    if (player == NULL) { return 0; }
+    if (m_assignedMeleeRule[4] == 0) { return 0; }
+    return player->unk8;
+}
+
+extern const char lbl_80459884[0x3B];
+extern const char lbl_804598C0[0xC4];
+
+u64* muWifiInterfaceTask::takeItemSwitch(s8* appearance) {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) { info = NULL; }
+    else { info = &m_aidInfos[aid]; }
+    if (info == NULL) {
+        aid = Network::getMyAID();
+        if (aid == 0xFF) { aid = 4; }
+        info = &m_aidInfos[aid];
+    }
+    u64* items = info->unk120;
+    s8 frequency = info->unk10F;
+    netReport(lbl_80459884, items[0], items[1]);
+    netReport(lbl_804598C0, frequency);
+    *appearance = frequency;
+    return items;
+}
+
+extern u32 g_NtAIDBitmap;
+extern const char lbl_80458808[0x12];
+
+wchar_t* muWifiInterfaceTask::getAIDName(u32 aid, wchar_t* name) {
+    if (aid != 4 && (!(g_NtAIDBitmap & (1 << aid)) || !((unkFC9 >> 7) & 1))) {
+        *name = 0;
+        return name;
+    }
+    u8* destination;
+    const u8* source = m_aidInfos[aid].unk1E0;
+    destination = (u8*)name;
+    int count = 5;
+    memset(name, 0, 12);
+    while (--count >= 0) {
+        int character = source[0];
+        destination[0] = character;
+        character |= source[1];
+        destination[1] = source[1];
+        source += 2;
+        destination += 2;
+        if (character == 0) { break; }
+    }
+    netReport(lbl_80458808, aid);
+    return name;
+}
+
+extern "C" void srand(unsigned int seed);
+
+extern const char lbl_804588C0[0x44];
+extern const char lbl_80458904[0x370];
+
+u32 muWifiInterfaceTask::setGlobalRandSeed() {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) { info = NULL; }
+    else { info = &m_aidInfos[aid]; }
+    if (info == NULL) {
+        aid = Network::getMyAID();
+        if (aid == 0xFF) { aid = 4; }
+        info = &m_aidInfos[aid];
+        netReport(lbl_804588C0);
+    }
+    u32 seed = (info->unk130[0] << 24) + (info->unk130[1] << 16) +
+               (info->unk130[2] << 8) + info->unk130[3];
+    srand(seed);
+    srandi(seed);
+    netReport(lbl_80458904, seed);
+    return seed;
+}
