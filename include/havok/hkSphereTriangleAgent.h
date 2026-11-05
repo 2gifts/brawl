@@ -12,6 +12,7 @@ struct hkSphereTriangleAgent : hkCollisionAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
     u16 unkC;     // 0x0C, set to 0xFFFF by the constructor
+    u16 unkE;     // 0x0E padding
     u8 unk10[16]; // 0x10 HYPOTHESIS: sub-object, see the constructor
 
     // src: the triangle data pointer (the sub-object is copied from src + 0x10).

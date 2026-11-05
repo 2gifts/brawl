@@ -25,9 +25,24 @@
 #include <havok/hkSphereTriangleAgent.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkCollisionDispatcher.h>
+#include <havok/hkCdBodyPairCollector.h>
+#include <havok/hkMonitorStream.h>
+#include <havok/hkSphereShape.h>
+#include <havok/hkTriangleShape.h>
+#include <havok/hkTransform.h>
 
 // Stand-in for the sub-object constructor (other unit): copies the triangle data at src into dst.
 extern "C" void fn_80325184(void* src, void* dst);
+// Result of the point-triangle query (hkCollideTriangleUtil::closestPointTriangle). HYPOTHESIS: the vector is the
+// separating direction; only the distance at 0x10 is read here.
+struct hkClosestPointTriangleResult {
+    hkVector4 m_direction; // 0x00
+    hkReal m_distance;     // 0x10
+};
+// Stand-in for hkCollideTriangleUtil::closestPointTriangle (other unit, not written yet): closest point of the
+// triangle to the point, using the cache built by setupClosestPointTriangleCache (fn_80325184).
+extern "C" int fn_8032561C(const hkVector4* point, const hkVector4* triangle, const void* cache,
+                           hkClosestPointTriangleResult* result);
 // Stand-ins for the symmetric linear cast and the linear cast of other units (staticLinearCast not written yet).
 extern "C" void fn_802C84B4();
 extern "C" void fn_802B7FD0();
@@ -63,6 +78,48 @@ hkSphereTriangleAgent* hkSphereTriangleAgent::createTriangleSphereAgent(void* un
 
 hkSphereTriangleAgent* hkSphereTriangleAgent::createSphereTriangleAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr) {
     return new hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_(contactMgr, *(void**)unk1);
+}
+
+// Reports the pair when the closest point of the triangle to the sphere centre (in the triangle's frame) is closer
+// than the sum of the radii. The agent keeps the triangle cache at 0x10; the static form builds it on the stack.
+void hkSphereTriangleAgent::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+    HK_TIMER_BEGIN("SphereTri");
+    const hkSphereShape* sphere = (const hkSphereShape*)((const hkCdBody*)unk0)->m_shape;
+    const hkTriangleShape* triangle = (const hkTriangleShape*)((const hkCdBody*)unk1)->m_shape;
+
+    hkVector4 centre;
+    centre._setTransformedInversePos(*(const hkTransform*)((const hkCdBody*)unk1)->m_motion,
+                                     ((const hkTransform*)((const hkCdBody*)unk0)->m_motion)->m_translation);
+    hkClosestPointTriangleResult result;
+    fn_8032561C(&centre, &triangle->m_vertexA, unk10, &result);
+    hkReal triangleRadius = triangle->m_radius;
+    hkReal sphereRadius = sphere->m_radius;
+    hkReal radius = sphereRadius + triangleRadius;
+    if (result.m_distance < radius) {
+        ((hkCdBodyPairCollector*)unk3)->addCdBodyPair(*(const hkCdBody*)unk0, *(const hkCdBody*)unk1);
+    }
+    HK_TIMER_END();
+}
+
+void hkSphereTriangleAgent::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+    HK_TIMER_BEGIN("SphereTri");
+    const hkSphereShape* sphere = (const hkSphereShape*)((const hkCdBody*)unk0)->m_shape;
+    const hkTriangleShape* triangle = (const hkTriangleShape*)((const hkCdBody*)unk1)->m_shape;
+    u8 cache[16];
+    fn_80325184((void*)&triangle->m_vertexA, cache);
+
+    hkVector4 centre;
+    centre._setTransformedInversePos(*(const hkTransform*)((const hkCdBody*)unk1)->m_motion,
+                                     ((const hkTransform*)((const hkCdBody*)unk0)->m_motion)->m_translation);
+    hkClosestPointTriangleResult result;
+    fn_8032561C(&centre, &triangle->m_vertexA, cache, &result);
+    hkReal triangleRadius = triangle->m_radius;
+    hkReal sphereRadius = sphere->m_radius;
+    hkReal radius = sphereRadius + triangleRadius;
+    if (result.m_distance < radius) {
+        ((hkCdBodyPairCollector*)unk3)->addCdBodyPair(*(const hkCdBody*)unk0, *(const hkCdBody*)unk1);
+    }
+    HK_TIMER_END();
 }
 
 void hkSphereTriangleAgent::cleanup() {

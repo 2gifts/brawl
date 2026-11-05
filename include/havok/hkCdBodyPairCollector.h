@@ -1,0 +1,9 @@
+#pragma once
+
+#include <havok/hkCdBody.h>
+
+// Collector for body pairs (penetration queries). Vtable: 0x08 dtor, 0x0C addCdBodyPair.
+struct hkCdBodyPairCollector {
+    virtual ~hkCdBodyPairCollector();
+    virtual void addCdBodyPair(const hkCdBody& bodyA, const hkCdBody& bodyB); // 0x0C
+};

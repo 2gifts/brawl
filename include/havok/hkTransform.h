@@ -19,3 +19,25 @@ struct hkTransform {
     void setMul(const hkTransform& a, const hkTransform& b);
     void setMulInverseMul(const hkTransform& a, const hkTransform& b);
 };
+
+inline void hkVector4::_setTransformedPos(const hkTransform& t, const hkVector4& v) {
+    const hkRotation& r = t.m_rotation;
+    hkReal vz = v.z;
+    hkReal vy = v.y;
+    hkReal vx = v.x;
+    x = t.m_translation.x + (vx * r.m_col0.x + vy * r.m_col1.x + vz * r.m_col2.x);
+    y = t.m_translation.y + (vx * r.m_col0.y + vy * r.m_col1.y + vz * r.m_col2.y);
+    z = t.m_translation.z + (vx * r.m_col0.z + vy * r.m_col1.z + vz * r.m_col2.z);
+    w = 0.0f;
+}
+
+inline void hkVector4::_setTransformedInversePos(const hkTransform& t, const hkVector4& v) {
+    const hkRotation& r = t.m_rotation;
+    hkReal dx = v.x - t.m_translation.x;
+    hkReal dy = v.y - t.m_translation.y;
+    hkReal dz = v.z - t.m_translation.z;
+    x = dx * r.m_col0.x + dy * r.m_col0.y + dz * r.m_col0.z;
+    y = dx * r.m_col1.x + dy * r.m_col1.y + dz * r.m_col1.z;
+    z = dx * r.m_col2.x + dy * r.m_col2.y + dz * r.m_col2.z;
+    w = 0.0f;
+}

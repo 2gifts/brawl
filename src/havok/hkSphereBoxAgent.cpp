@@ -21,6 +21,11 @@
 #include <havok/hkSphereBoxAgent.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkCollisionDispatcher.h>
+#include <havok/hkCdBodyPairCollector.h>
+#include <havok/hkMonitorStream.h>
+#include <havok/hkSphereShape.h>
+#include <havok/hkBoxShape.h>
+#include <havok/hkTransform.h>
 
 // Stand-in for the symmetric linear cast (staticLinearCast, not written yet).
 extern "C" void fn_802C3B88();
@@ -86,4 +91,32 @@ void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::getClosestPoints(void* unk0
 void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
     hkSymmetricAgentFlipCastCollector flip(unk3);
     hkSphereBoxAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
+}
+
+// Reports the pair when the sphere centre is closer to the box than the sum of the two convex radii.
+// The centre is brought into box space, clamped to the half extents (keeping its signs) and moved back.
+void hkSphereBoxAgent::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+    HK_TIMER_BEGIN("SphereBox");
+
+    const hkSphereShape* sphere = (const hkSphereShape*)((const hkCdBody*)unk0)->m_shape;
+    const hkBoxShape* box = (const hkBoxShape*)((const hkCdBody*)unk1)->m_shape;
+    const hkVector4& centre = ((const hkTransform*)((const hkCdBody*)unk0)->m_motion)->m_translation;
+
+    hkVector4 local;
+    local.setTransformedInversePos(*(const hkTransform*)((const hkCdBody*)unk1)->m_motion, centre);
+    hkVector4 clamped;
+    clamped.setAbs4(local);
+    clamped.setMin4(clamped, box->m_halfExtents);
+    clamped.setFlipSign4(clamped, local);
+
+    hkVector4 nearest;
+    nearest._setTransformedPos(*(const hkTransform*)((const hkCdBody*)unk1)->m_motion, clamped);
+    hkVector4 offset;
+    offset.setSub4(nearest, centre);
+    hkReal distSq = offset.lengthSquared3();
+    hkReal radius = sphere->m_radius + box->m_radius;
+    if (distSq < radius * radius) {
+        ((hkCdBodyPairCollector*)unk3)->addCdBodyPair(*(const hkCdBody*)unk0, *(const hkCdBody*)unk1);
+    }
+    HK_TIMER_END();
 }

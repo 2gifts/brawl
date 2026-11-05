@@ -117,6 +117,20 @@ struct hkVector4 {
     void setMul4(const hkVector4& a, const hkVector4& b) {
         set(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
     }
+    // Lane-wise minimum, a < b ? a : b per lane (sphere/box agent).
+    void setMin4(const hkVector4& a, const hkVector4& b) {
+        x = a.x < b.x ? a.x : b.x;
+        y = a.y < b.y ? a.y : b.y;
+        z = a.z < b.z ? a.z : b.z;
+        w = a.w < b.w ? a.w : b.w;
+    }
+    // Flips the sign of each lane of this where the lane of s is negative (integer xor of the sign bits).
+    void setFlipSign4(const hkVector4& a, const hkVector4& s) {
+        ((u32*)this)[0] = ((const u32*)&a)[0] ^ (((const u32*)&s)[0] & 0x80000000);
+        ((u32*)this)[1] = ((const u32*)&a)[1] ^ (((const u32*)&s)[1] & 0x80000000);
+        ((u32*)this)[2] = ((const u32*)&a)[2] ^ (((const u32*)&s)[2] & 0x80000000);
+        ((u32*)this)[3] = ((const u32*)&a)[3] ^ (((const u32*)&s)[3] & 0x80000000);
+    }
     // Component access by index (x, y, z, w).
     hkReal& operator[](int i) { return (&x)[i]; }
     hkReal getSimdAt(int i) const { return (&x)[i]; }
@@ -133,6 +147,10 @@ struct hkVector4 {
     // setTransformedPos: this = R * v + t.   setRotatedDir: this = R * v.
     void setTransformedPos(const hkTransform& t, const hkVector4& v);
     void setTransformedInversePos(const hkTransform& t, const hkVector4& v);
+    // Inline form of setTransformedPos (same body); defined in hkTransform.h. Inlined by the sphere agents.
+    inline void _setTransformedPos(const hkTransform& t, const hkVector4& v);
+    // Inline form of setTransformedInversePos (same body); defined in hkTransform.h. Inlined by the sphere agents.
+    inline void _setTransformedInversePos(const hkTransform& t, const hkVector4& v);
     void setRotatedDir(const hkRotation& r, const hkVector4& v);
     void setRotatedInverseDir(const hkRotation& r, const hkVector4& v);
     // Column-major product: this = m.col0 * v.x + m.col1 * v.y + m.col2 * v.z, w = 0. The inline behind
