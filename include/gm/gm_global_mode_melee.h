@@ -389,6 +389,10 @@ public:
     union {
         char _0x4c[0x2C];        // 0x4C
         struct {
+            char unk4C[0x08];
+            u32 unk54;
+        };
+        struct {
             char _0x4c_pad[0x04];
             u8 m_0x50;           // 0x50
             char _0x51[0x07];
