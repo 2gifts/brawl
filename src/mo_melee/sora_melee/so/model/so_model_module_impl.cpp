@@ -38,14 +38,12 @@ extern "C" char* strrchr(const char* str, int ch); // MSL, not in the project he
 extern "C" void* GXGetTexObjData(const GXTexObj* texture); // as in mu_stage_edit_ui.cpp
 #include <types.h>
 #include <ut/ut_nw.h>
+#include <gf/gf_scn_mdl_mod.h>
 
 // Node matrix helpers of the main binary that only this module uses (names unknown). HYPOTHESIS: the parameter
 // meanings, read from the calls below: `flags` is the per-node mark array, `scales` the per-node scale array.
 extern "C" void fn_800471A4(nw4r::g3d::ScnMdl* mdl, int, int, s8* flags, Vec3f* scales, int, int, int);
 extern "C" void fn_800479A8(nw4r::g3d::ScnMdl* mdl, s8* flags);
-extern "C" void fn_80047A50(nw4r::g3d::ScnMdl* mdl, s8* flags, u32 nodeId);
-extern "C" void fn_80047AE0(nw4r::g3d::ScnMdl* mdl, s8* flags, u32* nodeIds, int numNodeIds);
-extern "C" void fn_80047BAC(nw4r::g3d::ScnMdl* mdl, s8* flags);
 extern "C" bool fn_80047C0C(s8* flags, u32 nodeId);
 extern "C" void fn_8004765C(nw4r::g3d::ScnMdl* shadowMdl, nw4r::g3d::ScnMdl* mdl, void* shadowNode, u32 numNodes);
 extern "C" void fn_80047FCC();
@@ -631,7 +629,7 @@ void soModelModuleImpl::setUpConstraintNodeMtx() {
     }
     if (i != 12) {
         if (m_moduleAccesser->getLinkModule().getModelConstraintFlag() & 0x10) {
-            fn_80047A50(m_scnMdl, m_nodeSetUpFlags, nodeId);
+            reinterpret_cast<ScnMdlMod*>(m_scnMdl)->EnableNodeFlag(m_nodeSetUpFlags, nodeId);
         } else {
             clearSetUpMtx();
         }
@@ -644,7 +642,7 @@ void soModelModuleImpl::setUpMtxFinal() {
         setUpConstraintNodeMtx();
         nw4r::g3d::ScnMdl* scnMdl = m_scnMdl;
         m_nodeSetUpCursor = NULL;
-        fn_80047BAC(scnMdl, m_nodeSetUpFlags);
+        reinterpret_cast<ScnMdlMod*>(scnMdl)->EnableAllNodeFlags(m_nodeSetUpFlags);
         fn_800471A4(scnMdl, 0, 0, m_nodeSetUpFlags, m_nodeScales, 1, 0, 1);
         m_setUpState = SetUpState_Final;
     }
@@ -672,7 +670,7 @@ void soModelModuleImpl::setUpMtx(u32 nodeId) {
             if (m_nodeSetUpFlags[parentNodeId] != 1) {
                 nw4r::g3d::ScnMdl* scnMdl = m_scnMdl;
                 m_nodeSetUpCursor = NULL;
-                fn_80047A50(scnMdl, m_nodeSetUpFlags, parentNodeId);
+                reinterpret_cast<ScnMdlMod*>(scnMdl)->EnableNodeFlag(m_nodeSetUpFlags, parentNodeId);
                 fn_800471A4(scnMdl, 0, 0, m_nodeSetUpFlags, m_nodeScales, 0, 0, 0);
                 m_setUpState = SetUpState_Begin;
             }
@@ -684,7 +682,7 @@ void soModelModuleImpl::setUpMtx(u32 nodeId) {
         if (m_nodeSetUpFlags[nodeId] != 1) {
             nw4r::g3d::ScnMdl* scnMdl = m_scnMdl;
             m_nodeSetUpCursor = NULL;
-            fn_80047A50(scnMdl, m_nodeSetUpFlags, nodeId);
+            reinterpret_cast<ScnMdlMod*>(scnMdl)->EnableNodeFlag(m_nodeSetUpFlags, nodeId);
             fn_800471A4(scnMdl, 0, 0, m_nodeSetUpFlags, m_nodeScales, 0, 0, 0);
             m_setUpState = SetUpState_Begin;
         }
@@ -730,7 +728,7 @@ void soModelModuleImpl::setUpMtx(u32* nodeIds, s32 numNodeIds) {
     if (numSetUpNodeIds <= 0) {
         return;
     }
-    fn_80047AE0(scnMdl, m_nodeSetUpFlags, setUpNodeIds, numSetUpNodeIds);
+    reinterpret_cast<ScnMdlMod*>(scnMdl)->EnableNodeFlag(m_nodeSetUpFlags, setUpNodeIds, numSetUpNodeIds);
     m_nodeSetUpCursor = NULL;
     fn_800471A4(scnMdl, 0, 0, m_nodeSetUpFlags, m_nodeScales, 0, 0, 0);
     m_setUpState = SetUpState_Begin;

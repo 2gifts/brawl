@@ -24,3 +24,50 @@ void CalcWorldPartialScale(nw4r::math::MTX34* matrices, const u8* byteCode,
         }
     }
 }
+
+void ScnMdlMod::EnableAllNodeFlags(s8* flags) {
+    nw4r::g3d::ResMdl model = m_resMdl;
+    u32 count = model.GetResNodeNumEntries();
+    for (u32 index = 0; index < count; ++index, ++flags) {
+        if (*flags == 0) {
+            *flags = 3;
+        }
+    }
+}
+
+void ScnMdlMod::EnableNodeFlag(s8* flags, u32 nodeId) {
+    nw4r::g3d::ResMdl model = m_resMdl;
+    nw4r::g3d::ResNode node = model.GetResNode(nodeId);
+    s8 flag = 2;
+    while (node.IsValid()) {
+        u32 index = node.GetID();
+        if (flags[index] >= 1) {
+            break;
+        }
+        flags[index] = flag;
+        flag = 3;
+        node = node.GetParentNode();
+    }
+}
+
+void ScnMdlMod::EnableNodeFlag(s8* flags, u32* nodeIds, int numNodeIds) {
+    nw4r::g3d::ResMdl model = m_resMdl;
+    u32* currentNodeId = nodeIds;
+    u32 maxIndex = 0;
+    for (int index = 0; index < numNodeIds; ++index) {
+        nw4r::g3d::ResNode node = model.GetResNode(*currentNodeId);
+        while (node.IsValid()) {
+            u32 nodeIndex = node.GetID();
+            if (flags[nodeIndex] >= 1) {
+                break;
+            }
+            if (nodeIndex > maxIndex) {
+                maxIndex = nodeIndex;
+            }
+            flags[nodeIndex] = 3;
+            node = node.GetParentNode();
+        }
+        ++currentNodeId;
+    }
+    flags[maxIndex] = 2;
+}
