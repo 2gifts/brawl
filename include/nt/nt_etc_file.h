@@ -35,5 +35,8 @@ public:
     ~nteFile();
     void makeFile(u8* buffer);
     u32 getDataFileSize();
+    static u32 getSections_Direct(const u8* buffer);
+    static nteSectionData* getSectionData_Direct(u8* buffer, u32 index);
+    bool addSection(nteSectionData* section);
 };
 static_assert(sizeof(nteFile) == 0xBC, "Class is the wrong size!");
