@@ -37,3 +37,7 @@ void cmAdventureController::resetTarget() {
 cmAdventureFreeController::cmAdventureFreeController() {
     unkB_3 = 1;
 }
+
+void cmAdventureController::initialize() {
+    _1C = 120.0f;
+}
