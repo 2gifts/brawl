@@ -21,6 +21,7 @@
 
 #define FT_BC ftPopoBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
+#include <so/so_external_value_accesser.h>
 
 // HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt); the repeated ones are the null placeholders of the
 // unused status ranges.
@@ -867,4 +868,58 @@ struct ftPopoVSlotsArticle {
 };
 int fn_105_F4D8(ftPopoVSlotsArticle* p) { return p->slot20(); } // soArticle checkActivate (virtual tail call)
 
+}
+
+void ftPopo::onStart(int startKind) {
+    Fighter::onStart(startKind);
+    switch (startKind) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 8:
+        if (m_isPartner == true) {
+            Fighter* partner = getPartner();
+            Vec3f position = soExternalValueAccesser::getPos(partner);
+            float facing = soExternalValueAccesser::getLr(partner);
+            soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+            work.setInt(0, 0x10000040);
+            work.setFloat(position.m_x, 0x11000013);
+            work.setFloat(position.m_x, 0x11000014);
+            work.setFloat(position.m_x, 0x11000015);
+            work.setFloat(position.m_x, 0x11000016);
+            work.setFloat(position.m_x, 0x11000017);
+            work.setFloat(position.m_y, 0x11000018);
+            work.setFloat(position.m_y, 0x11000019);
+            work.setFloat(position.m_y, 0x1100001A);
+            work.setFloat(position.m_y, 0x1100001B);
+            work.setFloat(position.m_y, 0x1100001C);
+            work.setFloat(facing, 0x1100001D);
+            work.setFloat(facing, 0x1100001E);
+            work.setFloat(facing, 0x1100001F);
+            work.setFloat(facing, 0x11000020);
+            work.setFloat(facing, 0x11000021);
+        }
+        break;
+    }
+    switch (startKind) {
+    case 8: {
+        Fighter* partner = getPartner();
+        if (partner != NULL && m_isPartner == false && soExternalValueAccesser::getStatusKind(partner) != 0x10B
+            && m_moduleAccesser->getLinkModule().isLink(6) == true) {
+            ftPopoLinkKindEventArgs event(0x45E);
+            m_moduleAccesser->getLinkModule().sendEventNodes(6, event, 0);
+        }
+        break;
+    }
+    case 4:
+        if (m_isPartner == true) {
+            Fighter* partner = getPartner();
+            if (partner != NULL) {
+                int value = soExternalValueAccesser::getWorkInt(partner, 0x20000000);
+                m_moduleAccesser->getWorkManageModule().setInt(value, 0x20000000);
+            }
+        }
+        break;
+    }
 }
