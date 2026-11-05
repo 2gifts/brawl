@@ -27,6 +27,17 @@ struct sndBgmTitleData {
 };
 static_assert(sizeof(sndBgmTitleData) == 0x30, "Class is wrong size!");
 
+// HYPOTHESIS: one entry of the packed "snd_bgmSysData" symbol (0xC bytes, ended by category 0xFF).
+struct sndBgmRateSource {
+    u8 m_category;     // 0x0
+    u8 _1[3];
+    u32 m_bgmId;       // 0x4
+    u8 m_rate;         // 0x8
+    u8 _9;
+    u16 m_playTiming;  // 0xA
+};
+static_assert(sizeof(sndBgmRateSource) == 0xC, "Class is wrong size!");
+
 class sndBgmRateSystem {
 public:
     sndBgmRateData* m_rateData;          // 0x0
@@ -56,6 +67,7 @@ public:
 
     sndBgmRateSystem();
     static sndBgmRateSystem* create();
+    void setupBGMRate();
     void setupBGMList();
     // HYPOTHESIS: parameter types from the register use (signed category, unsigned ids).
     void setRate(int category, u32 bgmId, u8 rate);

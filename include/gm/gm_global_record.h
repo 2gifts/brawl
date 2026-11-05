@@ -7,6 +7,7 @@
 #include <types.h>
 #include <stddef.h>
 #include <gm/gm_global_mode_melee.h>
+#include <snd/snd_bgm.h>
 
 // The per-character (and per-name) match records that gmAddDiagramResultCommon accumulates.
 struct gmDiagramResult {
@@ -480,7 +481,10 @@ struct gmGlobalRecord {
         };
     };
     u8 unk3548[0x44];
-    char _358C[0x764];
+    union {
+        char _358C[0x764];
+        sndBgmRateData m_bgmRateData[0xEC];  // HYPOTHESIS: the rate table of sndBgmRateSystem
+    };
 };
 static_assert(offsetof(gmGlobalRecord, m_infoAppFlagData) == 0x1C, "Class is wrong size!");
 static_assert(offsetof(gmGlobalRecord, m_eventHiScoreData) == 0x32C, "Class is wrong size!");
