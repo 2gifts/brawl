@@ -19,6 +19,7 @@
 #include <string.h>
 #include <ty/ty_fig_listmng.h>
 #include <if/if_adv_gauge.h>
+#include <if/if_adv_pause.h>
 
 namespace nw4r {
 namespace g3d {
@@ -40,12 +41,9 @@ extern "C" void fn_800DE360(s32 value);
 extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 
 extern "C" {
-IfAdvPause* fn_80109600(int arg1, int arg2);
 void fn_80109774(IfAdvPause* pause, int flag);
 void fn_80109850(IfAdvPause* pause);
-void fn_80109BEC(IfAdvPause* pause);
 void fn_8010A800(IfAdvPause* pause, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2);
-void fn_8010A874(IfAdvPause* pause);
 IfAdvRadarData* fn_8010CF44(IfAdvRadarData* data, void* arg1, void* arg2, void* arg3, void* arg4);
 void fn_8010CF88(IfAdvRadarData* data, int arg);
 void fn_8010D00C();
@@ -340,7 +338,7 @@ IfAdvMngr::IfAdvMngr(int arg1, int arg2) :
         unk64[i] = 0;
         unk66[i] = 0;
     }
-    m_pause = fn_80109600(arg1, arg2);
+    m_pause = IfAdvPause::create(arg1, arg2);
 }
 
 void IfAdvMngr::loadResource(gfArchive* archive) {
@@ -508,7 +506,7 @@ void IfAdvMngr::destroyModel() {
     }
     fn_801084CC();
     if (m_pause) {
-        fn_8010A874(m_pause);
+        m_pause->destroyModel();
     }
     if (m_group) {
         m_group->Destroy();
@@ -892,7 +890,7 @@ void IfAdvMngr::startPauseMenu(bool arg1, bool arg2) {
 }
 
 void IfAdvMngr::exitPauseMenu() {
-    fn_80109BEC(m_pause);
+    m_pause->exitPause();
     m_choice->SetChoice(0);
     m_isPause = 0;
 }

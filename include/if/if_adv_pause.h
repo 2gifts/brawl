@@ -43,6 +43,9 @@ public:
 
     // HYPOTHESIS: parameter types follow the manager's create call and register use.
     IfAdvPause(int arg1, int arg2);
+    static IfAdvPause* create(int arg1, int arg2);
+    void exitPause();
+    void destroyModel();
     void drawCameraGuide(int visible);
     void createObjResFile(const void* nodeInfo, s32 nodeCount, nw4r::g3d::ResFile* resFile);
     void photoStepNoneInit();
