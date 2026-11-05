@@ -1988,6 +1988,7 @@ NWC24Err fn_8039A350(u32 mode) {
     u32 isEnabled;
     u32 sp08;
     u32 restrictions;
+    NWC24Err scheduler;
 
     GlobalErrorCode = 0;
 
@@ -2048,9 +2049,10 @@ NWC24Err fn_8039A350(u32 mode) {
     }
 
     sp08 = 0;
-    result = fn_8039A53C((s32 *)&sp08, mode);
-    if (result < 0) {
+    scheduler = fn_8039A53C((s32 *)&sp08, mode);
+    if (scheduler < 0) {
         GlobalErrorCode = sp08;
+        result = scheduler;
         goto end;
     }
 
@@ -2131,8 +2133,8 @@ static NWC24Err fn_8039A53C(s32 *outCode, u32 mode) {
 // HYPOTHESIS: turns one scheduler error code (a six digit number, digits mean something) into how long the
 // user should be told to wait and whether it counts as a network or server problem
 static NWC24Err fn_8039A69C(s32 code, u32 mode, u32 *delay) {
-    s32 n;
     s8 d0, d1, d2, d3, d4, d5;
+    s32 n;
     s32 low;
 
     *delay = 0;
@@ -2877,8 +2879,8 @@ static NWC24Err fn_8039CB7C(NWC24iMBCHeader *hdr, const NWC24iMsgObj *msg, NWC24
         hdr->oldestMsgId = msg->id;
     }
 
-    hdr->totalMsgSize += msg->length;
     hdr->numMsgs++;
+    hdr->totalMsgSize += msg->length;
     return NWC24_OK;
 }
 
