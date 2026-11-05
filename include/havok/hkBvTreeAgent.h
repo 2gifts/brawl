@@ -3,6 +3,7 @@
 #include <havok/hkCollisionAgent.h>
 #include <havok/hkArray.h>
 #include <havok/hkBvAgent.h>
+#include <havok/hkAabb.h>
 
 struct hkCollisionDispatcher;
 struct hkCdBody;
@@ -31,8 +32,9 @@ struct hkBvTreeAgent : hkCollisionAgent {
     hkArray<hkBvAgentEntryInfo> m_entries; // 0x0C
     int unk18;                             // 0x18 not written by the constructor
     int unk1C;                             // 0x1C not written by the constructor
-    float unk20[4];                        // 0x20 zeroed by the constructor (HYPOTHESIS: vector)
-    float unk30[4];                        // 0x30 zeroed by the constructor (HYPOTHESIS: vector)
+    // 0x20 aabb of A (in B's space) that the last tree query covered, grown by the expected motion
+    // (calcAabbAndQueryTree); zeroed by the constructor, max first. HYPOTHESIS: the name.
+    hkAabb m_cachedAabb;
 
     hkBvTreeAgent(hkContactMgr* contactMgr) __attribute__((never_inline));
     virtual ~hkBvTreeAgent() {}
@@ -68,10 +70,9 @@ struct hkBvTreeAgent : hkCollisionAgent {
 
     // Queries the tree with A's aabb (in B's space, grown by the step's time of impact info) into hitList; returns
     // non-zero when the cached aabb (cachedAabb, the agent's 0x20 when the global switch is set) still covers it and
-    // the entry list needs no update. Not written yet.
-    // HYPOTHESIS: parameter and return types, the cached aabb as floats (min 0x20, max 0x30 of the agent).
+    // the tree need not be queried again. HYPOTHESIS: parameter and return types.
     static int calcAabbAndQueryTree(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkTransform& bTa,
-                                    const hkVector4& timInfo, hkProcessCollisionInput& input, hkReal* cachedAabb,
+                                    const hkVector4& timInfo, hkProcessCollisionInput& input, hkAabb* cachedAabb,
                                     hkArray<u32>& hitList);
 };
 

@@ -62,8 +62,8 @@ struct hkVector4 {
         z = -a.z;
         w = -a.w;
     }
-    void setAdd4(const hkVector4& a, const hkVector4& b) { set(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w); }
-    void setSub4(const hkVector4& a, const hkVector4& b) { set(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w); }
+    void setAdd4(const hkVector4& a, const hkVector4& b) { x = a.x + b.x; y = a.y + b.y; z = a.z + b.z; w = a.w + b.w; }
+    void setSub4(const hkVector4& a, const hkVector4& b) { x = a.x - b.x; y = a.y - b.y; z = a.z - b.z; w = a.w - b.w; }
     // HYPOTHESIS: vector-first overload (no image evidence for this argument order).
     void setMul4(const hkVector4& a, hkReal s) { set(a.x * s, a.y * s, a.z * s, a.w * s); }
     // this = s * a. Scalar-first products, lane order x..w: hkSolver's out-of-line weak copy (vector in r4,
@@ -105,6 +105,10 @@ struct hkVector4 {
     // Bit mask of the lanes where this < a: x -> 8, y -> 4, z -> 2, w -> 1 (weak copy in hkBoxBoxCollisionDetection).
     int compareLessThan4(const hkVector4& a) const {
         return ((x < a.x) << 3) | ((y < a.y) << 2) | ((z < a.z) << 1) | (w < a.w);
+    }
+    // Bit mask of the lanes where this <= a, same lane bits (hkAabb::contains in hkBvTreeAgent::calcAabbAndQueryTree).
+    int compareLessEqual4(const hkVector4& a) const {
+        return ((x <= a.x) << 3) | ((y <= a.y) << 2) | ((z <= a.z) << 1) | (w <= a.w);
     }
     // True when |this - v| <= epsilon in x, y and z (w is computed but masked out). HYPOTHESIS: the name; the shape
     // is inlined once per column in hkMatrix3::isApproximatelyEqual.

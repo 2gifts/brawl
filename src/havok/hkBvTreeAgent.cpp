@@ -55,14 +55,14 @@
 #include <havok/hkSweptTransformUtil.h>
 
 hkBvTreeAgent::hkBvTreeAgent(hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
-    unk30[0] = 0.0f;
-    unk30[1] = 0.0f;
-    unk30[2] = 0.0f;
-    unk30[3] = 0.0f;
-    unk20[0] = 0.0f;
-    unk20[1] = 0.0f;
-    unk20[2] = 0.0f;
-    unk20[3] = 0.0f;
+    m_cachedAabb.m_max.x = 0.0f;
+    m_cachedAabb.m_max.y = 0.0f;
+    m_cachedAabb.m_max.z = 0.0f;
+    m_cachedAabb.m_max.w = 0.0f;
+    m_cachedAabb.m_min.x = 0.0f;
+    m_cachedAabb.m_min.y = 0.0f;
+    m_cachedAabb.m_min.z = 0.0f;
+    m_cachedAabb.m_min.w = 0.0f;
 }
 
 void hkBvTreeAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
@@ -334,7 +334,7 @@ static inline void hkBvTreeAgent_updateEntries(hkBvTreeAgent* agent, const hkCdB
     hkVector4 timInfo;
     hkSweptTransformUtil::calcTimInfo(*(const hkMotionState*)bodyA.m_motion, *(const hkMotionState*)bodyB.m_motion, input.unk18,
                                       timInfo);
-    hkReal* cachedAabb = lbl_805A0F14 ? agent->unk20 : 0;
+    hkAabb* cachedAabb = lbl_805A0F14 ? &agent->m_cachedAabb : 0;
     if (hkBvTreeAgent::calcAabbAndQueryTree(bodyA, bodyB, bTa, timInfo, input, cachedAabb, hitList) != 0) {
         return;
     }
@@ -393,6 +393,88 @@ void hkSweptTransformUtil::calcTimInfo(const hkMotionState& ms0, const hkMotionS
     timInfo.setMul4(f0, diff0);
     timInfo.addMul4(f1, diff1);
     timInfo.w = f0 * ms0.m_deltaAngle.w * ms0.m_objectRadius + f1 * ms1.m_deltaAngle.w * ms1.m_objectRadius;
+}
+
+// A's aabb in B's space for this step. With the swept form (unk28->unk10) it is A's aabb grown by A's rotation over the
+// step, clipped to the sphere around A's end center that bounds it, and then grown by A's linear motion relative to B
+// (timInfo turned into B's space, plus the motion B's rotation gives A's center). With a cached aabb the query is
+// skipped while the cached box still contains the new one; otherwise the cache is refreshed with a box grown by the
+// tolerance and by up to twice the motion backwards (at most 0.4 of the box extent).
+// HYPOTHESIS: the deltaAngle w lanes are angular step lengths (calcTimInfo multiplies them by the object radius too).
+int hkBvTreeAgent::calcAabbAndQueryTree(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkTransform& bTa,
+                                        const hkVector4& timInfo, hkProcessCollisionInput& input, hkAabb* cachedAabb,
+                                        hkArray<u32>& hitList) {
+    const hkMotionState* msA;
+    const hkMotionState* msB = (const hkMotionState*)bodyB.m_motion;
+    hkAabb aabb;
+    hkVector4 linearTimInfo;
+    linearTimInfo._setRotatedInverseDir(msB->m_transform.m_rotation, timInfo);
+    msA = (const hkMotionState*)bodyA.m_motion;
+    hkVector4 extent;
+    if (input.unk28->unk10) {
+        hkReal angularA = msA->m_objectRadius * (msA->m_deltaAngle.w + msB->m_deltaAngle.w);
+        hkReal angularB = msB->m_objectRadius * (msB->m_deltaAngle.w * msB->m_deltaAngle.w);
+        bodyA.m_shape->getAabb(bTa, 0.5f * input.unk8 + (angularA + angularB), aabb);
+        hkVector4 center;
+        hkVector4 radius;
+        radius.setAll(angularB + (0.5f * input.unk8 + msA->m_objectRadius));
+        center._setTransformedInversePos(msB->m_transform, msA->m_sweptTransform.m_centerOfMass1);
+        hkVector4 sphereMax;
+        sphereMax.setAdd4(center, radius);
+        hkVector4 sphereMin;
+        sphereMin.setSub4(center, radius);
+        aabb.m_min.setMax4(aabb.m_min, sphereMin);
+        aabb.m_max.setMin4(aabb.m_max, sphereMax);
+        extent.setSub4(aabb.m_max, aabb.m_min);
+        if (msB->m_deltaAngle.w > 0.0f) {
+            hkVector4 arm;
+            arm.setSub4(center, msB->m_sweptTransform.m_centerOfMassLocal);
+            hkVector4 rotation;
+            rotation.setCross(arm, msB->m_deltaAngle);
+            linearTimInfo.addMul4(input.unk18 * msB->m_sweptTransform.m_centerOfMass1.w, rotation);
+        }
+        hkVector4 zero;
+        zero.setZero4();
+        hkVector4 pathMin;
+        pathMin.setMin4(zero, linearTimInfo);
+        hkVector4 pathMax;
+        pathMax.setMax4(zero, linearTimInfo);
+        aabb.m_min.add4(pathMin);
+        aabb.m_max.add4(pathMax);
+    } else {
+        bodyA.m_shape->getAabb(bTa, 0.5f * input.unk8, aabb);
+        extent.setSub4(aabb.m_max, aabb.m_min);
+    }
+    if (cachedAabb != 0) {
+        if (cachedAabb->contains(aabb)) {
+            return 1;
+        }
+        hkVector4 zero;
+        zero.setZero4();
+        hkVector4 pathMin;
+        pathMin.setMin4(zero, linearTimInfo);
+        hkVector4 pathMax;
+        pathMax.setMax4(zero, linearTimInfo);
+        hkVector4 tolerance;
+        tolerance.setAll(0.5f * input.unk8);
+        aabb.m_min.sub4(tolerance);
+        aabb.m_max.add4(tolerance);
+        hkVector4 growMin;
+        growMin.setMul4(-2.0f, pathMax);
+        hkVector4 growMax;
+        growMax.setMul4(-2.0f, pathMin);
+        hkVector4 limit;
+        limit.setMul4(0.4f, extent);
+        growMax.setMin4(growMax, limit);
+        hkVector4 negLimit;
+        negLimit.setNeg4(limit);
+        growMin.setMax4(growMin, negLimit);
+        aabb.m_min.add4(growMin);
+        aabb.m_max.add4(growMax);
+        *cachedAabb = aabb;
+    }
+    ((const hkBvTreeShape*)bodyB.m_shape)->queryAabb(aabb, hitList);
+    return 0;
 }
 
 void hkBvTreeAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,

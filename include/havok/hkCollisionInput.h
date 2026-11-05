@@ -49,4 +49,13 @@ struct hkProcessCollisionInput : hkCollisionInput {
     hkReal unk10; // 0x10
     hkReal unk14; // 0x14
     hkReal unk18; // 0x18
+    u32 unk1C;    // 0x1C
+    u32 unk20;    // 0x20
+    u32 unk24;    // 0x24
+    // 0x28 HYPOTHESIS: per-pair quality settings; hkBvTreeAgent::calcAabbAndQueryTree grows A's aabb by its motion
+    // over the step only when unk28->unk10 is set.
+    struct Unk28 {
+        u32 unk0[4];  // 0x00
+        hkBool unk10; // 0x10
+    }* unk28;
 };

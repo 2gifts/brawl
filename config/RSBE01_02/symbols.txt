@@ -11769,7 +11769,7 @@ prepareCollisionPartnersLinearCast__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyRC26hk
 updateShapeCollectionFilter__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInput = .text:0x802A6508; // type:function size:0x20C
 processCollision__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR23hkProcessCollisionInputPv = .text:0x802A6714; // type:function size:0x324
 calcTimInfo__20hkSweptTransformUtilFRC13hkMotionStateRC13hkMotionStatefR9hkVector4 = .text:0x802A6A38; // type:function size:0x15C
-calcAabbAndQueryTree__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyRC11hkTransformRC9hkVector4R23hkProcessCollisionInputPfR11hkArray<Ul> = .text:0x802A6B94; // type:function size:0xB80
+calcAabbAndQueryTree__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyRC11hkTransformRC9hkVector4R23hkProcessCollisionInputP6hkAabbR11hkArray<Ul> = .text:0x802A6B94; // type:function size:0xB80
 linearCast__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR26hkLinearCastCollisionInputPvPv = .text:0x802A7714; // type:function size:0x1E4
 staticLinearCast__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR26hkLinearCastCollisionInputPvPv = .text:0x802A78F8; // type:function size:0x45C
 getClosestPoints__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputPv = .text:0x802A7D54; // type:function size:0x1DC
