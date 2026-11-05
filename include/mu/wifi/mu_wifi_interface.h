@@ -214,6 +214,11 @@ public:
     wchar_t* getMyFriendStatusComment(wchar_t* comment);
     wchar_t* getMyShortComment(int index, wchar_t* comment);
     // HYPOTHESIS: argument and result types follow the original register accesses.
+    int getNetworkErrorLevel();
+    int _getNetworkErrorLevel();
+    int selectRandomNetCharKind(u64 accepted);
+    bool isCompleteCloseMatchingAllNode();
+    bool isPreparedLoadAllStage();
     bool needKeepAlive();
     u8 getAssignedStageKind(u8* substage, u32* music);
     void clearGlobalAIDStatusLive();

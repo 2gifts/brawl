@@ -9,6 +9,7 @@
 #include <nt/nt_match.h>
 #include <ip/ip_switch.h>
 #include <gm/gm_global.h>
+#include <mt/mt_prng.h>
 
 extern "C" void fn_800CF22C(muWifiInterfaceTask* self);
 extern "C" void fn_801473C4(muWifiInterfaceTask* self);
@@ -685,4 +686,109 @@ u8 muWifiInterfaceTask::getAssignedPlayerKind(int index) {
         return 3;
     }
     return *kind;
+}
+
+extern const char lbl_80457C84[0x19];
+extern const char lbl_80457CA0[0x20];
+extern const char lbl_80459984[0x34];
+extern int lbl_805A03E8;
+extern int lbl_805A03F4;
+extern mtRand lbl_805A0420;
+
+int muWifiInterfaceTask::getNetworkErrorLevel() {
+    int level = _getNetworkErrorLevel();
+    if (level == 0) { return level; }
+    if (!unkFCB_b7) {
+        flushLogToSDCard();
+        if (level != 1) {
+            netReport(lbl_80457C84, level);
+            return level;
+        }
+        unkFCB_b7 = true;
+        if (NtBase::isNetCondOnline() && ntFriendInfoSave::isNotSaving()) {
+            ntFriendInfoSave* save = new ((Heaps::HeapType)6) ntFriendInfoSave;
+            if (save != NULL) { save->startSave((Heaps::HeapType)6, true); }
+        }
+    }
+    if (!ntFriendInfoSave::isNotSaving()) {
+        netReport(lbl_80457CA0);
+        return 0;
+    }
+    netReport(lbl_80457C84, level);
+    return level;
+}
+
+int muWifiInterfaceTask::_getNetworkErrorLevel() {
+    int level = m_appNetworkError[1];
+    if (level != 0) { return level; }
+    if (&g_Network == NULL) { return 0; }
+    int error = lbl_805A03E8;
+    if (error == 0) { return 0; }
+    switch (error) {
+    case 1: case 2: case 3: return 1;
+    case 4: return 2;
+    case 6: return 1;
+    case 7:
+        switch (lbl_805A03F4) {
+        case 0: return 0;
+        case 1: return 2;
+        case 2: case 3: case 6: return 1;
+        case 7: return 3;
+        default: return 1;
+        }
+    case 8: return 2;
+    case 9: return 2;
+    case 10: return 2;
+    case 11: return 2;
+    case 12: return 2;
+    case 13: return 2;
+    case 14: return 1;
+    default: return 0;
+    }
+}
+
+int muWifiInterfaceTask::selectRandomNetCharKind(u64 accepted) {
+    int count = 0;
+    for (int kind = 0; kind < 35; kind++) {
+        if (accepted & (1ULL << kind)) { count++; }
+    }
+    if (count == 0) {
+        netReport(lbl_80459984);
+        count = 1;
+    }
+    int selected = (int)(count * lbl_805A0420.randf());
+    for (int kind = 0; kind < 35; kind++) {
+        if (accepted & (1ULL << kind)) {
+            if (--selected < 0) { return kind; }
+        }
+    }
+    return 0;
+}
+
+bool muWifiInterfaceTask::isCompleteCloseMatchingAllNode() {
+    if (!fn_8014592C(lbl_805A03A8)) { return false; }
+    for (u8 aid = 0; aid < 4; aid++) {
+        bool live;
+        if (aid >= 4) {
+            live = false;
+        } else {
+            live = getSafeParentAIDInfo()->unk68[aid] == 1;
+        }
+        if (live && !(m_aidInfos[aid].unk56_b3 & 1)) { return false; }
+    }
+    return true;
+}
+
+bool muWifiInterfaceTask::isPreparedLoadAllStage() {
+    if (!fn_8014592C(lbl_805A03A8)) { return false; }
+    for (u8 aid = 0; aid < 4; aid++) {
+        bool live;
+        if (aid >= 4) {
+            live = false;
+        } else {
+            live = getSafeParentAIDInfo()->unk68[aid] == 1;
+        }
+        if (live && !m_aidInfos[aid].unk56_b6) { return false; }
+    }
+    return true;
 }
