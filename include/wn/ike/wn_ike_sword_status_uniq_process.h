@@ -9,5 +9,6 @@ public:
     wnIkeSwordStatusUniqProcess();
     virtual ~wnIkeSwordStatusUniqProcess();
     virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
     virtual void execStop(soModuleAccesser* moduleAccesser);
 };
