@@ -49,7 +49,7 @@ hkCollisionAgent* hkBoxBoxAgent::createBoxBoxAgent(const hkCdBody& bodyA, const 
     const hkBoxShape* boxA = (const hkBoxShape*)bodyA.m_shape;
     const hkBoxShape* boxB = (const hkBoxShape*)bodyB.m_shape;
     if (input.unk8 >= kBoxSizeScale * boxA->m_halfExtents.w || input.unk8 >= kBoxSizeScale * boxB->m_halfExtents.w) {
-        return hkGskfAgent::createGskfAgent((hkCdBody*)&bodyA, (hkCdBody*)&bodyB, (void*)&input, contactMgr);
+        return hkGskfAgent::createGskfAgent(bodyA, bodyB, input, contactMgr);
     }
     return new hkBoxBoxAgent(contactMgr);
 }

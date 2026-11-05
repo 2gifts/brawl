@@ -147,9 +147,10 @@ void hkBvTreeStreamAgent::linearCast(void* a, void* b, void* c, void* d, void* e
 // list stores (the no-dead-store mode, see TIPS; trigger not found here).
 #pragma push
 #pragma auto_inline off
-hkBvTreeStreamAgent::hkBvTreeStreamAgent(void* unused0, void* unused1, const int* src, int unk8Value)
-    : hkCollisionAgent(unk8Value) {
-    unkC = *src;
+hkBvTreeStreamAgent::hkBvTreeStreamAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                         hkContactMgr* contactMgr)
+    : hkCollisionAgent((int)contactMgr) {
+    unkC = (int)input.m_dispatcher;
     unk10[3] = 0.0f;
     unk10[2] = 0.0f;
     unk10[1] = 0.0f;
@@ -162,17 +163,14 @@ hkBvTreeStreamAgent::hkBvTreeStreamAgent(void* unused0, void* unused1, const int
 }
 #pragma pop
 
-hkBvTreeStreamAgent* hkBvTreeStreamAgent::createBvTreeShapeAgent(void* a, void* b, const int* c, int d) {
-    hkBvTreeStreamAgent* agent = (hkBvTreeStreamAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkBvTreeStreamAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkBvTreeStreamAgent);
-    return new (agent) hkBvTreeStreamAgentVariant(b, a, c, d);
+hkBvTreeStreamAgent* hkBvTreeStreamAgent::createBvTreeShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                                 const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkBvTreeStreamAgentVariant(bodyB, bodyA, input, contactMgr);
 }
 
-hkBvTreeStreamAgent* hkBvTreeStreamAgent::createShapeBvAgent(void* a, void* b, const int* c, int d) {
-    hkBvTreeStreamAgent* agent = (hkBvTreeStreamAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkBvTreeStreamAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkBvTreeStreamAgent);
-    new (agent) hkBvTreeStreamAgent(a, b, c, d);
-    return agent;
+hkBvTreeStreamAgent* hkBvTreeStreamAgent::createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                             const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkBvTreeStreamAgent(bodyA, bodyB, input, contactMgr);
 }
 
 

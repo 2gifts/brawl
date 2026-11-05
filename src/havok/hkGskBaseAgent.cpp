@@ -23,12 +23,12 @@
 extern "C" void fn_8031C8CC(void* self, void* shapeA, void* shapeB, void* relative);
 extern "C" void fn_8031CD64(void* self, void* shapeA, void* shapeB, void* relative);
 
-hkGskBaseAgent::hkGskBaseAgent(hkCdBody* bodyA, hkCdBody* bodyB, hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
+hkGskBaseAgent::hkGskBaseAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
     hkTransform relative;
-    hkShape* shapeA = bodyA->m_shape;
-    hkShape* shapeB = bodyB->m_shape;
+    hkShape* shapeA = bodyA.m_shape;
+    hkShape* shapeB = bodyB.m_shape;
     // a motion state starts with its hkTransform, so the pointers can be used as transforms directly
-    relative.setMulInverseMul(*(const hkTransform*)bodyA->m_motion, *(const hkTransform*)bodyB->m_motion);
+    relative.setMulInverseMul(*(const hkTransform*)bodyA.m_motion, *(const hkTransform*)bodyB.m_motion);
     if (shapeB->getType() == HK_SHAPE_TRIANGLE) {
         fn_8031C8CC(unkC, shapeA, shapeB, &relative);
     } else {
@@ -40,14 +40,8 @@ hkGskBaseAgent::hkGskBaseAgent(hkCdBody* bodyA, hkCdBody* bodyB, hkContactMgr* c
     unk2C = -1.0f;
     unk18 = -1.0f;
     // BYTES: the depths are read into hkSimdReal locals (propagation off, as in the target), each right after its walk.
-    while (bodyA->m_parent != 0) {
-        bodyA = bodyA->m_parent;
-    }
-    hkSimdReal valueA = ((const hkCollidable*)bodyA)->m_allowedPenetrationDepth;
-    while (bodyB->m_parent != 0) {
-        bodyB = bodyB->m_parent;
-    }
-    hkSimdReal valueB = ((const hkCollidable*)bodyB)->m_allowedPenetrationDepth;
+    hkSimdReal valueA = ((const hkCollidable*)bodyA.getRootCollidable())->m_allowedPenetrationDepth;
+    hkSimdReal valueB = ((const hkCollidable*)bodyB.getRootCollidable())->m_allowedPenetrationDepth;
     unk1C = valueA < valueB ? valueA : valueB;
 }
 
