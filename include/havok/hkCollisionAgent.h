@@ -29,17 +29,18 @@ struct hkCollisionAgent : hkReferencedObject {
     }
     virtual ~hkCollisionAgent() {}
 
-    // The bodies are const references and the inputs references, as the code requires: MWCC moves loads through a
-    // pointer-to-const parameter past stores to the stack (the child bodies the agents build), and the agents' bodies
-    // are scheduled that way, while the symmetric linear casts copy their input in strict load/store order, which a
-    // const input parameter does not give (BYTES). The collector / output arguments are still void* (their classes are
-    // not modeled everywhere yet).
-    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);   // 0x10
-    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);  // 0x14
+    // BYTES: the bodies are const references and the inputs plain references. MWCC lets a load through a
+    // pointer-to-const parameter move past stores to stack objects (the child bodies the agents build), and the agents'
+    // body reads are scheduled that way; their input reads are not (the symmetric linear casts copy the input in strict
+    // load/store order, the dispatcher and filter loads stay behind the child-body stores), which only a non-const
+    // input parameter gives. The same holds for the agent constructors and create functions. The collector / output
+    // arguments are still void* (their classes are not modeled everywhere yet).
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);   // 0x10
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);  // 0x14
     virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d); // 0x18
-    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d);                                // 0x1C
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d);                                // 0x1C
     virtual void cleanup();                                                                  // 0x20
-    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c);                     // 0x24
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c);                     // 0x24
     virtual void invalidateTim(void* arg);                                                   // 0x28
     virtual void warpTime(float t0, float t1, void* arg);                                    // 0x2C
     virtual void removePoint(u16 key);                                                       // 0x30

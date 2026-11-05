@@ -34,7 +34,7 @@ struct hkGskfAgent : hkGskBaseAgent {
 
     // Allocates a hkGskfAgent (0x80 bytes) when contactMgr is set, otherwise a hkGskBaseAgent (0x30 bytes).
     // HYPOTHESIS: the third parameter is unused.
-    static hkGskBaseAgent* createGskfAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static hkGskBaseAgent* createGskfAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                            hkContactMgr* contactMgr);
 
     virtual void cleanup();

@@ -45,7 +45,7 @@ void hkBoxBoxAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
 }
 
 hkCollisionAgent* hkBoxBoxAgent::createBoxBoxAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                   const hkCollisionInput& input, hkContactMgr* contactMgr) {
+                                                   hkCollisionInput& input, hkContactMgr* contactMgr) {
     const hkBoxShape* boxA = (const hkBoxShape*)bodyA.m_shape;
     const hkBoxShape* boxB = (const hkBoxShape*)bodyB.m_shape;
     if (input.unk8 >= kBoxSizeScale * boxA->m_halfExtents.w || input.unk8 >= kBoxSizeScale * boxB->m_halfExtents.w) {
@@ -63,10 +63,10 @@ void hkBoxBoxAgent::cleanup() {
 
 hkBoxBoxAgent::~hkBoxBoxAgent() {}
 
-void hkBoxBoxAgent::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkBoxBoxAgent::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     staticGetClosestPoints(unk0, unk1, unk2, unk3);
 }
 
-void hkBoxBoxAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkBoxBoxAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     staticGetPenetrations(unk0, unk1, unk2, unk3);
 }

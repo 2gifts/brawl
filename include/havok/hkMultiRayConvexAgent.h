@@ -31,22 +31,22 @@ struct hkMultiRayConvexAgent : hkCollisionAgent {
     hkInplaceArray<u16, 4> m_contactPointIds; // 0x0C
 
     // HYPOTHESIS: the constructor takes the two bodies of the pair, a third value and the contact manager.
-    hkMultiRayConvexAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
+    hkMultiRayConvexAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr);
     virtual ~hkMultiRayConvexAgent();
 
     // Registers the convex x multi-ray agent functions with the dispatcher (two pairs, see the .cpp).
     static void registerAgent(hkCollisionDispatcher* dispatcher);
     // Creates the convex x multi-ray agent (the convex shape first). Its vtable is the symmetric one.
-    static hkMultiRayConvexAgent* createConvexMultiRayAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
+    static hkMultiRayConvexAgent* createConvexMultiRayAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr);
     // Creates the multi-ray x convex agent in the order given.
-    static hkMultiRayConvexAgent* createMultiRayConvexAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
+    static hkMultiRayConvexAgent* createMultiRayConvexAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr);
 
     virtual void cleanup();
-    virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, const hkProcessCollisionInput& unk2, void* unk3); // not written yet
-    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
-    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
-    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
-    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
+    virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, hkProcessCollisionInput& unk2, void* unk3); // not written yet
+    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
 };
 
 // HYPOTHESIS: the symmetric (shape-swapped) variant, map name hkSymmetricAgent<hkMultiRayConvexAgent>.
@@ -59,15 +59,15 @@ struct hkSymmetricAgent_21hkMultiRayConvexAgent_ : hkMultiRayConvexAgent {
 // HYPOTHESIS: hkSymmetricAgentLinearCast<hkMultiRayConvexAgent>. The wrappers swap the two shapes and
 // replace the collector by a flipping collector on the stack (same scheme as hkSphereBoxAgent).
 struct hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_ : hkMultiRayConvexAgent {
-    hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr)
+    hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr)
         : hkMultiRayConvexAgent(bodyA, bodyB, input, contactMgr) {}
     virtual ~hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_();
 
-    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
-    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
-    virtual void updateShapeCollectionFilter(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2);
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    virtual void updateShapeCollectionFilter(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2);
 
-    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
-    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3);
+    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
     static void staticLinearCast(const hkCdBody& unk0, const hkCdBody& unk1, hkLinearCastCollisionInput& unk2, void* unk3, void* unk4);
 };

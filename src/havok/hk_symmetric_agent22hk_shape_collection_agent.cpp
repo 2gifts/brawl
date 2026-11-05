@@ -16,27 +16,27 @@
 // Symmetric wrapper of hkShapeCollectionAgent (map name hkSymmetricAgentLinearCast_22hkShapeCollectionAgent___
 // updateShapeCollectionFilter): swap the bodies and forward to the plain agent.
 template <class T>
-void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c) {
+void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c) {
     T::updateShapeCollectionFilter(b, a, c);
 }
 
-template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::updateShapeCollectionFilter(const hkCdBody&, const hkCdBody&, const hkCollisionInput&);
-template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::processCollision(const hkCdBody&, const hkCdBody&, const hkProcessCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::updateShapeCollectionFilter(const hkCdBody&, const hkCdBody&, hkCollisionInput&);
+template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::processCollision(const hkCdBody&, const hkCdBody&, hkProcessCollisionInput&, void*);
 
 template <class T>
-void hkSymmetricAgentLinearCast<T>::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast<T>::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrapped(target);
     T::getPenetrations(b, a, c, &wrapped);
 }
 
 template <class T>
-void hkSymmetricAgentLinearCast<T>::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast<T>::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrapped(target);
     T::getClosestPoints(b, a, c, &wrapped);
 }
 
-template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::getPenetrations(const hkCdBody&, const hkCdBody&, const hkCollisionInput&, void*);
-template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::getClosestPoints(const hkCdBody&, const hkCdBody&, const hkCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::getPenetrations(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::getClosestPoints(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
 
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
 // the points back.

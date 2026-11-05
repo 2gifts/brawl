@@ -22,7 +22,7 @@ hkGskfAgent::hkGskfAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkContact
 }
 #pragma dont_inline reset
 
-hkGskBaseAgent* hkGskfAgent::createGskfAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+hkGskBaseAgent* hkGskfAgent::createGskfAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                              hkContactMgr* contactMgr) {
     hkGskBaseAgent* agent;
     if (contactMgr != 0) {

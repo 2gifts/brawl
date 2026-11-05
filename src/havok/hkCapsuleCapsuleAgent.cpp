@@ -43,6 +43,6 @@ void hkCapsuleCapsuleAgent::cleanup() {
     delete this;
 }
 
-void hkCapsuleCapsuleAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkCapsuleCapsuleAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     staticGetPenetrations(unk0, unk1, unk2, unk3);
 }

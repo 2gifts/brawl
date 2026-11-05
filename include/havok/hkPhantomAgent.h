@@ -49,16 +49,16 @@ struct hkPhantomAgent : hkCollisionAgent {
     hkPhantomAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkContactMgr* contactMgr);
     virtual ~hkPhantomAgent();
 
-    static hkPhantomAgent* createPhantomAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static hkPhantomAgent* createPhantomAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                               hkContactMgr* contactMgr);
     static void registerAgent(hkCollisionDispatcher* dispatcher);
     static void staticGetClosestPoints();
-    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, hkPenetrationTarget* target);
+    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, hkPenetrationTarget* target);
     static void staticLinearCast();
 
     virtual void cleanup();
-    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d);
-    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
-    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d);
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
     virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };

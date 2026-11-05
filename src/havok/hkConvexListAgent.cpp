@@ -94,7 +94,7 @@ struct FilterArgs {
     const hkCdBody* a;         // 0x00
     const hkCdBody* b;         // 0x04
     u32 bValue;                // 0x08 first word of b
-    const hkCollisionInput* d; // 0x0C
+    hkCollisionInput* d; // 0x0C
     int unk8;     // 0x10
 };
 
@@ -172,7 +172,7 @@ void hkConvexListAgent::createZombie(u16 key) {
 }
 
 #pragma dont_inline on
-void hkConvexListAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& d) {
+void hkConvexListAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& d) {
     if (m_streamMode == 0) {
         FilterArgs args;
         args.a = &a;
@@ -217,11 +217,11 @@ void hkConvexListAgent::cleanup() {
 // BYTES: the symmetric wrappers call these forwarders; without the pragma they are inlined there.
 #pragma push
 #pragma auto_inline off
-void hkConvexListAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* d) {
+void hkConvexListAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d) {
     staticGetClosestPoints(a, b, c, d);
 }
 
-void hkConvexListAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* d) {
+void hkConvexListAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d) {
     staticGetPenetrations(a, b, c, d);
 }
 #pragma pop
@@ -252,29 +252,29 @@ void hkConvexListAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinea
 // Symmetric wrapper of hkListAgent and of this agent (map names hkSymmetricAgentLinearCast_11hkListAgent___
 // and hkSymmetricAgentLinearCast_17hkConvexListAgent___updateShapeCollectionFilter): swap the bodies, forward.
 template <class T>
-void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c) {
+void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c) {
     T::updateShapeCollectionFilter(b, a, c);
 }
 
-template void hkSymmetricAgentLinearCast<hkListAgent>::updateShapeCollectionFilter(const hkCdBody&, const hkCdBody&, const hkCollisionInput&);
-template void hkSymmetricAgentLinearCast<hkConvexListAgent>::updateShapeCollectionFilter(const hkCdBody&, const hkCdBody&, const hkCollisionInput&);
-template void hkSymmetricAgentLinearCast<hkListAgent>::processCollision(const hkCdBody&, const hkCdBody&, const hkProcessCollisionInput&, void*);
-template void hkSymmetricAgentLinearCast<hkConvexListAgent>::processCollision(const hkCdBody&, const hkCdBody&, const hkProcessCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkListAgent>::updateShapeCollectionFilter(const hkCdBody&, const hkCdBody&, hkCollisionInput&);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::updateShapeCollectionFilter(const hkCdBody&, const hkCdBody&, hkCollisionInput&);
+template void hkSymmetricAgentLinearCast<hkListAgent>::processCollision(const hkCdBody&, const hkCdBody&, hkProcessCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::processCollision(const hkCdBody&, const hkCdBody&, hkProcessCollisionInput&, void*);
 
 template <class T>
-void hkSymmetricAgentLinearCast<T>::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast<T>::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrapped(target);
     T::getPenetrations(b, a, c, &wrapped);
 }
 
 template <class T>
-void hkSymmetricAgentLinearCast<T>::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast<T>::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrapped(target);
     T::getClosestPoints(b, a, c, &wrapped);
 }
 
-template void hkSymmetricAgentLinearCast<hkListAgent>::getPenetrations(const hkCdBody&, const hkCdBody&, const hkCollisionInput&, void*);
-template void hkSymmetricAgentLinearCast<hkListAgent>::getClosestPoints(const hkCdBody&, const hkCdBody&, const hkCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkListAgent>::getPenetrations(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkListAgent>::getClosestPoints(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
 
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
 // the points back.
@@ -324,25 +324,25 @@ void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticLinearCast(const 
 }
 
 template <class T>
-void hkSymmetricAgentLinearCast<T>::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, hkPenetrationTarget* target) {
+void hkSymmetricAgentLinearCast<T>::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, hkPenetrationTarget* target) {
     hkSymmetricAgentFlipBodyCollector wrapped(target);
     T::staticGetPenetrations(b, a, c, (hkPenetrationTarget*)&wrapped);
 }
 
 template <class T>
-void hkSymmetricAgentLinearCast<T>::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, hkPenetrationTarget* target) {
+void hkSymmetricAgentLinearCast<T>::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, hkPenetrationTarget* target) {
     hkSymmetricAgentFlipCollector wrapped(target);
     T::staticGetClosestPoints(b, a, c, (hkPenetrationTarget*)&wrapped);
 }
 
-template void hkSymmetricAgentLinearCast<hkConvexListAgent>::getPenetrations(const hkCdBody&, const hkCdBody&, const hkCollisionInput&, void*);
-template void hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetPenetrations(const hkCdBody&, const hkCdBody&, const hkCollisionInput&, hkPenetrationTarget*);
-template void hkSymmetricAgentLinearCast<hkConvexListAgent>::getClosestPoints(const hkCdBody&, const hkCdBody&, const hkCollisionInput&, void*);
-template void hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetClosestPoints(const hkCdBody&, const hkCdBody&, const hkCollisionInput&, hkPenetrationTarget*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::getPenetrations(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetPenetrations(const hkCdBody&, const hkCdBody&, hkCollisionInput&, hkPenetrationTarget*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::getClosestPoints(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetClosestPoints(const hkCdBody&, const hkCdBody&, hkCollisionInput&, hkPenetrationTarget*);
 
 // The shape collection agent's static queries take the bodies by reference.
 template <>
-void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c,
+void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c,
                                                                               hkPenetrationTarget* target) {
     hkSymmetricAgentFlipBodyCollector wrapped(target);
     hkShapeCollectionAgent::staticGetPenetrations(b, a, c,
@@ -350,7 +350,7 @@ void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetPenetrations(c
 }
 
 template <>
-void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c,
+void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c,
                                                                                hkPenetrationTarget* target) {
     hkSymmetricAgentFlipCollector wrapped(target);
     hkShapeCollectionAgent::staticGetClosestPoints(b, a, c,

@@ -89,7 +89,7 @@ static inline void hkTransformAgent_copyMotionState(hkMotionState& dst, const hk
 // The `mr r30, r31` copy in the create functions is the object pointer kept for the exception cleanup of the base (the
 // unit is built with -Cpp_exceptions on). NONMATCHING (create functions 98.5-98.8%): bodyA and the child shape swap
 // r24/r25, and B colors its forwarded parameters differently.
-hkTransformAgent::hkTransformAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+hkTransformAgent::hkTransformAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                    hkContactMgr* mgr)
     : hkCollisionAgent((int)mgr) {
     const hkTransformShape* shape = (const hkTransformShape*)bodyA.m_shape;
@@ -105,12 +105,12 @@ hkTransformAgent::hkTransformAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
 }
 
 hkTransformAgent* hkTransformAgent::createTransformAAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                         const hkCollisionInput& input, hkContactMgr* contactMgr) {
+                                                         hkCollisionInput& input, hkContactMgr* contactMgr) {
     return new hkTransformAgent(bodyA, bodyB, input, contactMgr);
 }
 
 hkTransformAgent* hkTransformAgent::createTransformBAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                         const hkCollisionInput& input, hkContactMgr* contactMgr) {
+                                                         hkCollisionInput& input, hkContactMgr* contactMgr) {
     return new hkSymmetricAgentLinearCast_16hkTransformAgent_(bodyA, bodyB, input, contactMgr);
 }
 
@@ -118,7 +118,7 @@ hkTransformAgent* hkTransformAgent::createTransformBAgent(const hkCdBody& bodyA,
 // the shape's rotation, the local center of mass expressed in the child's frame).
 // NONMATCHING (~53%): structure, timer form and stack layout match; the quaternion products are scheduled differently
 // (the target needs one more FPR, f31).
-void hkTransformAgent::processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d) {
+void hkTransformAgent::processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d) {
     HK_TIMER_BEGIN("Transform");
     const hkCdBody* bodyA = &a;
     const hkTransformShape* shape = (const hkTransformShape*)bodyA->m_shape;
@@ -144,7 +144,7 @@ void hkTransformAgent::processCollision(const hkCdBody& a, const hkCdBody& b, co
 // Every query hands the child agent (or, for the statics, the dispatcher's function for the child shape against B) a
 // child body: the transform shape's child, A's shape key, and A's transform composed with the shape's transform.
 // All of them are exact.
-void hkTransformAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkTransformAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     HK_TIMER_BEGIN("Transform");
     const hkCdBody* bodyA = &a;
     const hkTransformShape* shape = (const hkTransformShape*)bodyA->m_shape;
@@ -159,7 +159,7 @@ void hkTransformAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, con
     m_childAgent->getPenetrations(childBody, b, c, target);
 }
 
-void hkTransformAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+void hkTransformAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                              void* target) {
     HK_TIMER_BEGIN("Transform");
     const hkTransformShape* shape = (const hkTransformShape*)bodyA.m_shape;
@@ -177,7 +177,7 @@ void hkTransformAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBo
     HK_TIMER_END();
 }
 
-void hkTransformAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkTransformAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     HK_TIMER_BEGIN("Transform");
     const hkCdBody* bodyA = &a;
     const hkTransformShape* shape = (const hkTransformShape*)bodyA->m_shape;
@@ -191,7 +191,7 @@ void hkTransformAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, co
     HK_TIMER_END();
 }
 
-void hkTransformAgent::staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+void hkTransformAgent::staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                               void* target) {
     HK_TIMER_BEGIN("Transform");
     const hkTransformShape* shape = (const hkTransformShape*)bodyA.m_shape;
@@ -223,7 +223,7 @@ void hkTransformAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinear
     HK_TIMER_END();
 }
 
-void hkTransformAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+void hkTransformAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                         void* target, void* d) {
     HK_TIMER_BEGIN("Transform");
     const hkTransformShape* shape = (const hkTransformShape*)bodyA.m_shape;
@@ -243,7 +243,7 @@ void hkTransformAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdBody& b
 
 // BYTES: the symmetric wrapper calls this function, it does not inline it.
 #pragma auto_inline off
-void hkTransformAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c) {
+void hkTransformAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c) {
     const hkCdBody* bodyA = &a;
     const hkTransformShape* shape = (const hkTransformShape*)bodyA->m_shape;
     hkTransform transform;
@@ -288,27 +288,27 @@ hkSymmetricAgent_16hkTransformAgent_::~hkSymmetricAgent_16hkTransformAgent_() {}
 hkSymmetricAgentLinearCast_16hkTransformAgent_::~hkSymmetricAgentLinearCast_16hkTransformAgent_() {}
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
-void hkSymmetricAgentLinearCast_16hkTransformAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_16hkTransformAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkTransformAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_16hkTransformAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_16hkTransformAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkTransformAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_16hkTransformAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_16hkTransformAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkTransformAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_16hkTransformAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_16hkTransformAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkTransformAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_16hkTransformAgent_::updateShapeCollectionFilter(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2) {
+void hkSymmetricAgentLinearCast_16hkTransformAgent_::updateShapeCollectionFilter(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2) {
     hkTransformAgent::updateShapeCollectionFilter(unk1, unk0, unk2);
 }
 
@@ -372,6 +372,6 @@ void hkSymmetricAgentLinearCast_16hkTransformAgent_::staticLinearCast(const hkCd
     }
 }
 
-void hkSymmetricAgentLinearCast_16hkTransformAgent_::processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d) {
+void hkSymmetricAgentLinearCast_16hkTransformAgent_::processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d) {
     hkSymmetricAgent_processCollision<hkTransformAgent>(this, a, b, c, d);
 }

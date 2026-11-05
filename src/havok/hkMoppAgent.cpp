@@ -23,27 +23,27 @@
 
 hkMoppAgent::hkMoppAgent(hkContactMgr* contactMgr) : hkBvTreeAgent(contactMgr) {}
 
-void hkSymmetricAgentLinearCast_11hkMoppAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_11hkMoppAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrap(target);
     hkMoppAgent::getPenetrations(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_11hkMoppAgent::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_11hkMoppAgent::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrap(target);
     hkMoppAgent::staticGetPenetrations(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_11hkMoppAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_11hkMoppAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrap(target);
     hkMoppAgent::getClosestPoints(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_11hkMoppAgent::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_11hkMoppAgent::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrap(target);
     hkMoppAgent::staticGetClosestPoints(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_11hkMoppAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c) {
+void hkSymmetricAgentLinearCast_11hkMoppAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c) {
     hkMoppAgent::updateShapeCollectionFilter(b, a, c);
 }
 
@@ -77,6 +77,6 @@ void hkSymmetricAgentLinearCast_11hkMoppAgent::staticLinearCast(const hkCdBody& 
     }
 }
 
-void hkSymmetricAgentLinearCast_11hkMoppAgent::processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d) {
+void hkSymmetricAgentLinearCast_11hkMoppAgent::processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d) {
     hkSymmetricAgent_processCollision<hkMoppAgent>(this, a, b, c, d);
 }

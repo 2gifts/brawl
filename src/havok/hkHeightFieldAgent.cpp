@@ -30,11 +30,11 @@
 #include <havok/hkBvTreeAgent.h>
 
 #pragma dont_inline on
-void hkHeightFieldAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkHeightFieldAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     staticGetPenetrations(a, b, c, target);
 }
 
-void hkHeightFieldAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkHeightFieldAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     staticGetClosestPoints(a, b, c, target);
 }
 
@@ -43,27 +43,27 @@ void hkHeightFieldAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLine
 }
 #pragma dont_inline reset
 
-void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrap(target);
     hkHeightFieldAgent::getPenetrations(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrap(target);
     hkHeightFieldAgent::staticGetPenetrations(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrap(target);
     hkHeightFieldAgent::getClosestPoints(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrap(target);
     hkHeightFieldAgent::staticGetClosestPoints(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c) {}
+void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c) {}
 
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
 // the points back.

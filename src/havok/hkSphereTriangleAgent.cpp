@@ -78,18 +78,18 @@ hkSphereTriangleAgent::hkSphereTriangleAgent(const hkCdBody& triangleBody, hkCon
 }
 
 hkSphereTriangleAgent* hkSphereTriangleAgent::createTriangleSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                                        const hkCollisionInput& input, hkContactMgr* contactMgr) {
+                                                                        hkCollisionInput& input, hkContactMgr* contactMgr) {
     return new hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_(bodyA, contactMgr);
 }
 
 hkSphereTriangleAgent* hkSphereTriangleAgent::createSphereTriangleAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                                        const hkCollisionInput& input, hkContactMgr* contactMgr) {
+                                                                        hkCollisionInput& input, hkContactMgr* contactMgr) {
     return new hkSphereTriangleAgent(bodyB, contactMgr);
 }
 
 // Reports the pair when the closest point of the triangle to the sphere centre (in the triangle's frame) is closer
 // than the sum of the radii. The agent keeps the triangle cache at 0x10; the static form builds it on the stack.
-void hkSphereTriangleAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSphereTriangleAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     HK_TIMER_BEGIN("SphereTri");
     const hkSphereShape* sphere = (const hkSphereShape*)(&unk0)->m_shape;
     const hkTriangleShape* triangle = (const hkTriangleShape*)(&unk1)->m_shape;
@@ -108,7 +108,7 @@ void hkSphereTriangleAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody
     HK_TIMER_END();
 }
 
-void hkSphereTriangleAgent::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSphereTriangleAgent::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     HK_TIMER_BEGIN("SphereTri");
     const hkSphereShape* sphere = (const hkSphereShape*)(&unk0)->m_shape;
     const hkTriangleShape* triangle = (const hkTriangleShape*)(&unk1)->m_shape;
@@ -138,22 +138,22 @@ void hkSphereTriangleAgent::cleanup() {
 }
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
-void hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkSphereTriangleAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkSphereTriangleAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkSphereTriangleAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkSphereTriangleAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
 }

@@ -71,34 +71,34 @@ void hkSphereBoxAgent::cleanup() {
     delete this;
 }
 
-void hkSphereBoxAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSphereBoxAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     staticGetPenetrations(unk0, unk1, unk2, unk3);
 }
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
-void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkSphereBoxAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkSphereBoxAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkSphereBoxAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkSphereBoxAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
 }
 
 // Reports the pair when the sphere centre is closer to the box than the sum of the two convex radii.
 // The centre is brought into box space, clamped to the half extents (keeping its signs) and moved back.
-void hkSphereBoxAgent::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSphereBoxAgent::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     HK_TIMER_BEGIN("SphereBox");
 
     const hkSphereShape* sphere = (const hkSphereShape*)(&unk0)->m_shape;
@@ -139,6 +139,6 @@ void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticLinearCast(const hkCd
     }
 }
 
-void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d) {
+void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d) {
     hkSymmetricAgent_processCollision<hkSphereBoxAgent>(this, a, b, c, d);
 }

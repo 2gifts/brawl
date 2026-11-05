@@ -41,13 +41,13 @@ hkCapsuleTriangleAgent::hkCapsuleTriangleAgent(const hkCdBody& triangleBody, hkC
 }
 
 hkCapsuleTriangleAgent* hkCapsuleTriangleAgent::createTriangleCapsuleAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                                          const hkCollisionInput& input,
+                                                                          hkCollisionInput& input,
                                                                           hkContactMgr* contactMgr) {
     return new hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_(bodyA, contactMgr);
 }
 
 hkCapsuleTriangleAgent* hkCapsuleTriangleAgent::createCapsuleTriangleAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                                          const hkCollisionInput& input,
+                                                                          hkCollisionInput& input,
                                                                           hkContactMgr* contactMgr) {
     return new hkCapsuleTriangleAgent(bodyB, contactMgr);
 }
@@ -83,25 +83,25 @@ void hkCapsuleTriangleAgent::cleanup() {
 }
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
-void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2,
+void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2,
                                                                           void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkCapsuleTriangleAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2,
+void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2,
                                                                                 void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkCapsuleTriangleAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2,
+void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2,
                                                                            void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkCapsuleTriangleAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2,
+void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2,
                                                                                  void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkCapsuleTriangleAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);

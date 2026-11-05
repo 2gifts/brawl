@@ -82,13 +82,13 @@ hkMultiSphereAgent* hkMultiSphereAgent::createListAAgent(void* unk0, void* unk1,
     hkReferencedObject* mem = (hkReferencedObject*)hkMemory::getInstance().allocateChunk(0x38, 0x1d);
     mem->m_memSizeAndFlags = 0x38;
     hkMultiSphereAgent* agent = (hkMultiSphereAgent*)mem;
-    new (agent) hkMultiSphereAgent(*(const hkCdBody*)unk0, *(const hkCdBody*)unk1, *(const hkCollisionInput*)unk2, contactMgr);
+    new (agent) hkMultiSphereAgent(*(const hkCdBody*)unk0, *(const hkCdBody*)unk1, *(hkCollisionInput*)unk2, contactMgr);
     return agent;
 }
 
 hkMultiSphereAgent* hkMultiSphereAgent::createListBAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr) {
     return new hkSymmetricAgent_18hkMultiSphereAgent_(*(const hkCdBody*)unk1, *(const hkCdBody*)unk0,
-                                                      *(const hkCollisionInput*)unk2, contactMgr);
+                                                      *(hkCollisionInput*)unk2, contactMgr);
 }
 
 void hkMultiSphereAgent::cleanup() {
@@ -133,7 +133,7 @@ static inline void hkMultiSphereAgent_copyMotionState(hkMotionState& dst, const 
 // BYTES: the create functions call the constructor, so it is not auto-inlined into them.
 #pragma push
 #pragma auto_inline off
-hkMultiSphereAgent::hkMultiSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+hkMultiSphereAgent::hkMultiSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                        hkContactMgr* contactMgr)
     : hkCollisionAgent((int)contactMgr) {
     const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA.m_shape;
@@ -178,7 +178,7 @@ hkMultiSphereAgent::hkMultiSphereAgent(const hkCdBody& bodyA, const hkCdBody& bo
 // A's motion state the sphere's center rotated into world space, so the child sees a plain sphere body.
 // NONMATCHING: the dead stack copies of the transform vectors are scheduled differently (96-97%); the statics also
 // differ in register coloring (86-97%). The linear cast always uses the first entry's agent (as in the target).
-void hkMultiSphereAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkMultiSphereAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     HK_TIMER_BEGIN("MultiSphere");
     const hkCdBody* bodyA = &a;
     const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA->m_shape;
@@ -208,7 +208,7 @@ void hkMultiSphereAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, 
     HK_TIMER_END();
 }
 
-void hkMultiSphereAgent::staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, void* target) {
+void hkMultiSphereAgent::staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, void* target) {
     HK_TIMER_BEGIN("MultiSphere");
     const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA.m_shape;
     hkMotionState motion;
@@ -266,7 +266,7 @@ void hkMultiSphereAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLine
     HK_TIMER_END();
 }
 
-void hkMultiSphereAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, void* target, void* d) {
+void hkMultiSphereAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, void* target, void* d) {
     HK_TIMER_BEGIN("MultiSphere");
     const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA.m_shape;
     hkMotionState motion;
@@ -295,7 +295,7 @@ void hkMultiSphereAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdBody&
     HK_TIMER_END();
 }
 
-void hkMultiSphereAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkMultiSphereAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     HK_TIMER_BEGIN("MultiSphere");
     const hkCdBody* bodyA = &a;
     const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA->m_shape;
@@ -328,7 +328,7 @@ void hkMultiSphereAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, c
     HK_TIMER_END();
 }
 
-void hkMultiSphereAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, void* target) {
+void hkMultiSphereAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, void* target) {
     HK_TIMER_BEGIN("MultiSphere");
     const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA.m_shape;
     hkMotionState motion;
@@ -390,7 +390,7 @@ void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticLinearCast(const hk
     }
 }
 
-void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d) {
+void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d) {
     hkSymmetricAgent_processCollision<hkMultiSphereAgent>(this, a, b, c, d);
 }
 
@@ -410,42 +410,42 @@ void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::staticLinearCast(
 }
 
 // Queries with the bodies swapped: the collector is wrapped in one that turns the results back.
-void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrapped(target);
     hkMultiSphereAgent::getPenetrations(b, a, c, &wrapped);
 }
 
-void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrapped(target);
     hkMultiSphereAgent::staticGetPenetrations(b, a, c, &wrapped);
 }
 
-void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrapped(target);
     hkMultiSphereAgent::getClosestPoints(b, a, c, &wrapped);
 }
 
-void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrapped(target);
     hkMultiSphereAgent::staticGetClosestPoints(b, a, c, &wrapped);
 }
 
-void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrapped(target);
     hkMultiSphereTriangleAgent::getPenetrations(b, a, c, &wrapped);
 }
 
-void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrapped(target);
     hkMultiSphereTriangleAgent::staticGetPenetrations(b, a, c, &wrapped);
 }
 
-void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrapped(target);
     hkMultiSphereTriangleAgent::getClosestPoints(b, a, c, &wrapped);
 }
 
-void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrapped(target);
     hkMultiSphereTriangleAgent::staticGetClosestPoints(b, a, c, &wrapped);
 }

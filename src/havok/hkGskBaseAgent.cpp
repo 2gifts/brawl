@@ -45,7 +45,7 @@ hkGskBaseAgent::hkGskBaseAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkC
     unk1C = valueA < valueB ? valueA : valueB;
 }
 
-void hkGskBaseAgent::processCollision(const hkCdBody& unk0, const hkCdBody& unk1, const hkProcessCollisionInput& unk2, void* unk3) {}
+void hkGskBaseAgent::processCollision(const hkCdBody& unk0, const hkCdBody& unk1, hkProcessCollisionInput& unk2, void* unk3) {}
 
 void hkGskBaseAgent::invalidateTim(void* arg) {
     unk2C = 0.0f;

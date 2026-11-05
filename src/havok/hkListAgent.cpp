@@ -42,7 +42,7 @@ struct FilterArgs {
     const hkCdBody* a;         // 0x00
     const hkCdBody* b;         // 0x04
     u32 bValue;                // 0x08 first word of b
-    const hkCollisionInput* d; // 0x0C
+    hkCollisionInput* d; // 0x0C
     int unk8;     // 0x10
 };
 
@@ -51,7 +51,7 @@ void hkListAgent::cleanup() {
     delete this;
 }
 
-void hkListAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& d) {
+void hkListAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& d) {
     FilterArgs args;
     args.a = &a;
     args.b = &b;
@@ -69,11 +69,11 @@ void hkListAgent::warpTime(float t0, float t1, void* arg) {
     fn_802FC988((char*)this + 0x10, t0, t1, arg);
 }
 
-void hkListAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkListAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     staticGetClosestPoints(a, b, c, (hkPenetrationTarget*)target);
 }
 
-void hkListAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkListAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     staticGetPenetrations(a, b, c, (hkPenetrationTarget*)target);
 }
 

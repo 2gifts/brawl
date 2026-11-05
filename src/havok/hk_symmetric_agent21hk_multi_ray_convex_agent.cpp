@@ -37,22 +37,22 @@ void hkSymmetricAgent_21hkMultiRayConvexAgent_::linearCast(const hkCdBody& unk0,
 }
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
-void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkMultiRayConvexAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkMultiRayConvexAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkMultiRayConvexAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkMultiRayConvexAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
 }
@@ -71,7 +71,7 @@ void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::staticLinearCast(const
     }
 }
 
-void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::updateShapeCollectionFilter(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2) {}
+void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::updateShapeCollectionFilter(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2) {}
 
 hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::~hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_() {}
 hkSymmetricAgent_21hkMultiRayConvexAgent_::~hkSymmetricAgent_21hkMultiRayConvexAgent_() {}

@@ -22,21 +22,21 @@ struct hkBvAgent : hkCollisionAgent {
     hkCollisionAgent* m_childB; // 0x10 agent of the child shape against B, made on the first overlap
 
     // The constructor takes the pair as passed by the dispatcher (createShapeBvAgent swaps the first two).
-    hkBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
+    hkBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr);
     virtual ~hkBvAgent() {}
 
     // Creates the agent for the pair in the order given (create function of the dispatcher table).
-    static hkBvAgent* createBvShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
+    static hkBvAgent* createBvShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr);
     // Same, with the first two arguments swapped; the object has the hkSymmetricBvAgent vtable.
-    static hkBvAgent* createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
+    static hkBvAgent* createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr);
 
     // Overrides of the hkCollisionAgent slots, with the base parameter lists.
-    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);   // 0x10 HYPOTHESIS
-    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);  // 0x14 HYPOTHESIS
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);   // 0x10 HYPOTHESIS
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);  // 0x14 HYPOTHESIS
     virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d); // 0x18 HYPOTHESIS
-    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d);                // 0x1C HYPOTHESIS
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d);                // 0x1C HYPOTHESIS
     virtual void cleanup();                                                  // 0x20
-    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c);     // 0x24 HYPOTHESIS
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c);     // 0x24 HYPOTHESIS
     virtual void invalidateTim(void* arg);                                   // 0x28
     virtual void warpTime(float t0, float t1, void* arg);                    // 0x2C
     virtual void removePoint(u16 key);                                       // 0x30
@@ -44,15 +44,15 @@ struct hkBvAgent : hkCollisionAgent {
     virtual void createZombie(u16 key);                                      // 0x38
 
     static void registerAgent(void* dispatcher);
-    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, hkPenetrationTarget* target);
-    static void staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, hkPenetrationTarget* target);
+    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, hkPenetrationTarget* target);
+    static void staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, hkPenetrationTarget* target);
     static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };
 
 // HYPOTHESIS: the symmetric variant (map name hkSymmetricAgent<hkBvAgent>). It differs from
 // hkBvAgent by its vtable only; the constructor is the base constructor followed by the vptr store.
 struct hkSymmetricBvAgent : hkBvAgent {
-    hkSymmetricBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr)
+    hkSymmetricBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr)
         : hkBvAgent(bodyA, bodyB, input, contactMgr) {}
     virtual ~hkSymmetricBvAgent() {}
     virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
@@ -63,11 +63,11 @@ struct hkSymmetricBvAgent : hkBvAgent {
 // around the target.
 template <class T>
 struct hkSymmetricAgentLinearCast : T {
-    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
-    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, hkPenetrationTarget* target);
-    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
-    static void staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, hkPenetrationTarget* target);
-    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c);
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, hkPenetrationTarget* target);
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    static void staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, hkPenetrationTarget* target);
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c);
     static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
-    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d);
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d);
 };

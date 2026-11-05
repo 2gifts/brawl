@@ -67,27 +67,27 @@ void hkSphereCapsuleAgent::cleanup() {
     delete this;
 }
 
-void hkSphereCapsuleAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSphereCapsuleAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     staticGetPenetrations(unk0, unk1, unk2, unk3);
 }
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
-void hkSymmetricAgentLinearCast_20hkSphereCapsuleAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_20hkSphereCapsuleAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkSphereCapsuleAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_20hkSphereCapsuleAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_20hkSphereCapsuleAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkSphereCapsuleAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_20hkSphereCapsuleAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_20hkSphereCapsuleAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkSphereCapsuleAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_20hkSphereCapsuleAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, const hkCollisionInput& unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_20hkSphereCapsuleAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkSphereCapsuleAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
 }

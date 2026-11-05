@@ -11,7 +11,7 @@
 // normal negation; see havok/PARKED.md), the contact loop matches.
 template <class T>
 inline void hkSymmetricAgent_processCollision(T* agent, const hkCdBody& a, const hkCdBody& b,
-                                              const hkProcessCollisionInput& c, void* d) {
+                                              hkProcessCollisionInput& c, void* d) {
     hkProcessCollisionOutput* output = (hkProcessCollisionOutput*)d;
     hkProcessCdPoint* cp = output->m_firstFreeContactPoint;
     hkReal toiTime = output->m_toi.m_time;
@@ -36,6 +36,6 @@ inline void hkSymmetricAgent_processCollision(T* agent, const hkCdBody& a, const
 }
 
 template <class T>
-void hkSymmetricAgentLinearCast<T>::processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d) {
+void hkSymmetricAgentLinearCast<T>::processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d) {
     hkSymmetricAgent_processCollision<T>(this, a, b, c, d);
 }

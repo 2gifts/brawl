@@ -32,8 +32,8 @@ struct hkConvexListAgent : hkCollisionAgent {
     static hkCollisionAgent* createConvexListAgent(void* a, void* b, void* c, int flag);
     static hkCollisionAgent* createListConvexAgent(void* a, void* b, void* c, int flag);
 
-    static void staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* d);
-    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* d);
+    static void staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d);
+    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d);
     static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* d, void* e);
 
     // Overrides of the hkCollisionAgent slots (vtable 0x28..0x38 of lbl_80486AE8), base parameter lists.
@@ -42,14 +42,14 @@ struct hkConvexListAgent : hkCollisionAgent {
     virtual void removePoint(u16 key);
     virtual void commitPotential(u16 key);
     virtual void createZombie(u16 key);
-    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& d);
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& d);
     void switchToStreamMode();
     void switchToGskMode();
 
     virtual void cleanup();
-    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d); // HYPOTHESIS: slot order follows hkPhantomAgent
-    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* d);
-    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* d);
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d); // HYPOTHESIS: slot order follows hkPhantomAgent
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d);
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d);
     virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* d, void* e);
 };
 

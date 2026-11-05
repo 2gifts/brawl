@@ -23,28 +23,28 @@ struct hkShapeCollectionAgent : hkCollisionAgent {
     hkInplaceArray<hkShapeCollectionAgentKeyAgentPair, 4> m_agents; // 0x0C (storage for four children at 0x18)
 
     // Arguments: collection body, other body, collision input, contact manager (kept in the 0x08 word).
-    hkShapeCollectionAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* mgr);
+    hkShapeCollectionAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* mgr);
     virtual ~hkShapeCollectionAgent();
 
     static hkShapeCollectionAgent* createListAAgent(void* a, void* b, void* c, int d);
     static hkShapeCollectionAgent* createListBAgent(void* a, void* b, void* c, int d);
     static void registerAgent(void* dispatcher);
 
-    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
-    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
     virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
-    virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, const hkProcessCollisionInput& unk2, void* unk3);
+    virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, hkProcessCollisionInput& unk2, void* unk3);
     virtual void cleanup();
-    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c);
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c);
     virtual void invalidateTim(void* arg);
     virtual void warpTime(float t0, float t1, void* arg);
 
     // Same queries without an agent: each child goes to the dispatcher's static function for its shape type pair.
-    static void staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static void staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                       void* target);
-    static void staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static void staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                        void* target);
-    static void staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static void staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, hkLinearCastCollisionInput& input,
                                  void* target, void* d);
 };
 
@@ -53,7 +53,7 @@ struct hkShapeCollectionAgent : hkCollisionAgent {
 // HYPOTHESIS: agent variant created by createListBAgent. Its vtable (lbl_80486F38) is not identified
 // yet; the class adds no members and only replaces the vtable after the base constructor.
 struct hkShapeCollectionAgentVariant : hkShapeCollectionAgent {
-    hkShapeCollectionAgentVariant(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    hkShapeCollectionAgentVariant(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                   hkContactMgr* mgr)
         : hkShapeCollectionAgent(bodyA, bodyB, input, mgr) {}
     virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);

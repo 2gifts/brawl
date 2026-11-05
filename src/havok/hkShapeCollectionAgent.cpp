@@ -35,7 +35,7 @@
 hkShapeCollectionAgent* hkShapeCollectionAgent::createListAAgent(void* a, void* b, void* c, int d) {
     hkShapeCollectionAgent* agent = (hkShapeCollectionAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkShapeCollectionAgent), 0x1d);
     agent->m_memSizeAndFlags = sizeof(hkShapeCollectionAgent);
-    new (agent) hkShapeCollectionAgent(*(const hkCdBody*)a, *(const hkCdBody*)b, *(const hkCollisionInput*)c,
+    new (agent) hkShapeCollectionAgent(*(const hkCdBody*)a, *(const hkCdBody*)b, *(hkCollisionInput*)c,
                                        (hkContactMgr*)d);
     return agent;
 }
@@ -44,7 +44,7 @@ hkShapeCollectionAgent* hkShapeCollectionAgent::createListBAgent(void* a, void* 
     hkShapeCollectionAgent* agent = (hkShapeCollectionAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkShapeCollectionAgent), 0x1d);
     agent->m_memSizeAndFlags = sizeof(hkShapeCollectionAgent);
     agent = new (agent) hkShapeCollectionAgentVariant(*(const hkCdBody*)b, *(const hkCdBody*)a,
-                                                      *(const hkCollisionInput*)c, (hkContactMgr*)d);
+                                                      *(hkCollisionInput*)c, (hkContactMgr*)d);
     return agent;
 }
 
@@ -69,7 +69,7 @@ void hkShapeCollectionAgent::registerAgent(void* dispatcher) {
 }
 
 hkShapeCollectionAgent::hkShapeCollectionAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                               const hkCollisionInput& input, hkContactMgr* mgr)
+                                               hkCollisionInput& input, hkContactMgr* mgr)
     : hkCollisionAgent((int)mgr) {
     const hkShapeCollection* collection = (const hkShapeCollection*)bodyA.m_shape;
     hkCdBody childBody(&bodyA);
@@ -111,7 +111,7 @@ void hkShapeCollectionAgent::warpTime(float t0, float t1, void* arg) {
 }
 
 // Runs every child agent on its child shape of the collection (body A) against body B.
-void hkShapeCollectionAgent::processCollision(const hkCdBody& unk0, const hkCdBody& unk1, const hkProcessCollisionInput& unk2, void* unk3) {
+void hkShapeCollectionAgent::processCollision(const hkCdBody& unk0, const hkCdBody& unk1, hkProcessCollisionInput& unk2, void* unk3) {
     HK_TIMER_BEGIN("ShapeCollection");
     const hkCdBody& bodyA = unk0;
     const hkShapeCollection* collection = (const hkShapeCollection*)bodyA.m_shape;
@@ -129,7 +129,7 @@ void hkShapeCollectionAgent::processCollision(const hkCdBody& unk0, const hkCdBo
     HK_TIMER_END();
 }
 
-void hkShapeCollectionAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkShapeCollectionAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     const hkCdBody& bodyA = a;
     HK_TIMER_BEGIN("ShapeCollection");
     const hkShapeCollection* collection = (const hkShapeCollection*)bodyA.m_shape;
@@ -149,7 +149,7 @@ void hkShapeCollectionAgent::getClosestPoints(const hkCdBody& a, const hkCdBody&
 
 // Without agents: every child the filter accepts goes to the dispatcher's static function for its shape types.
 void hkShapeCollectionAgent::staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                    const hkCollisionInput& input, void* target) {
+                                                    hkCollisionInput& input, void* target) {
     HK_TIMER_BEGIN("ShapeCollection");
     const hkShapeCollection* collection = (const hkShapeCollection*)bodyA.m_shape;
     hkCdBody childBody(&bodyA);
@@ -161,7 +161,7 @@ void hkShapeCollectionAgent::staticGetClosestPoints(const hkCdBody& bodyA, const
             childBody.m_shape = (hkShape*)collection->m_container.getChildShape(key, shapeBuffer);
             childBody.m_shapeKey = key;
             int typeA = childBody.m_shape->getType();
-            typedef void (*QueryFunc)(const hkCdBody&, const hkCdBody&, const hkCollisionInput&, void*);
+            typedef void (*QueryFunc)(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
             ((QueryFunc)input.m_dispatcher->getGetClosestPointsFunc(typeA, typeB))(childBody, bodyB, input, target);
         }
     }
@@ -187,7 +187,7 @@ void hkShapeCollectionAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hk
 }
 
 void hkShapeCollectionAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                              const hkCollisionInput& input, void* target, void* d) {
+                                              hkLinearCastCollisionInput& input, void* target, void* d) {
     HK_TIMER_BEGIN("ShapeCollection");
     const hkShapeCollection* collection = (const hkShapeCollection*)bodyA.m_shape;
     hkCdBody childBody(&bodyA);
@@ -199,7 +199,7 @@ void hkShapeCollectionAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdB
             childBody.m_shape = (hkShape*)collection->m_container.getChildShape(key, shapeBuffer);
             childBody.m_shapeKey = key;
             int typeA = childBody.m_shape->getType();
-            typedef void (*LinearCastFunc)(const hkCdBody&, const hkCdBody&, const hkCollisionInput&, void*, void*);
+            typedef void (*LinearCastFunc)(const hkCdBody&, const hkCdBody&, hkLinearCastCollisionInput&, void*, void*);
             ((LinearCastFunc)input.m_dispatcher->getLinearCastFunc(typeA, typeB))(childBody, bodyB, input, target, d);
         }
     }
@@ -207,7 +207,7 @@ void hkShapeCollectionAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdB
 }
 
 // Stops at the first child once the collector has seen enough.
-void hkShapeCollectionAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target) {
+void hkShapeCollectionAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     const hkCdBody& bodyA = a;
     HK_TIMER_BEGIN("ShapeCollection");
     const hkShapeCollection* collection = (const hkShapeCollection*)bodyA.m_shape;
@@ -229,7 +229,7 @@ void hkShapeCollectionAgent::getPenetrations(const hkCdBody& a, const hkCdBody& 
 }
 
 void hkShapeCollectionAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                   const hkCollisionInput& input, void* target) {
+                                                   hkCollisionInput& input, void* target) {
     HK_TIMER_BEGIN("ShapeCollection");
     const hkShapeCollection* collection = (const hkShapeCollection*)bodyA.m_shape;
     hkCdBody childBody(&bodyA);
@@ -241,7 +241,7 @@ void hkShapeCollectionAgent::staticGetPenetrations(const hkCdBody& bodyA, const 
             childBody.m_shape = (hkShape*)collection->m_container.getChildShape(key, shapeBuffer);
             childBody.m_shapeKey = key;
             int typeA = childBody.m_shape->getType();
-            typedef void (*QueryFunc)(const hkCdBody&, const hkCdBody&, const hkCollisionInput&, void*);
+            typedef void (*QueryFunc)(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
             ((QueryFunc)input.m_dispatcher->getGetPenetrationsFunc(typeA, typeB))(childBody, bodyB, input, target);
             if (((hkCdBodyPairCollector*)target)->m_earlyOut) {
                 break;
@@ -263,10 +263,8 @@ static inline int findAgent(const hkArray<hkShapeCollectionAgentKeyAgentPair>& a
 
 // Brings the child agents in line with the filter: new agents for children that now collide, cleanup for those
 // that no longer do, and the update passed on to the others.
-void hkShapeCollectionAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c) {
-    const hkCdBody& bodyA = a;
-    const hkCdBody& bodyB = b;
-    const hkCollisionInput& input = c;
+void hkShapeCollectionAgent::updateShapeCollectionFilter(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                         hkCollisionInput& input) {
     const hkShapeCollection* collection = (const hkShapeCollection*)bodyA.m_shape;
     hkCdBody childBody(&bodyA);
     hkShapeContainer::ShapeBuffer shapeBuffer;
@@ -282,7 +280,7 @@ void hkShapeCollectionAgent::updateShapeCollectionFilter(const hkCdBody& a, cons
                 pair.m_key = key;
                 pair.m_agent = input.m_dispatcher->getNewCollisionAgent(childBody, bodyB, input, (hkContactMgr*)unk8);
             } else {
-                m_agents[index].m_agent->updateShapeCollectionFilter(childBody, b, c);
+                m_agents[index].m_agent->updateShapeCollectionFilter(childBody, bodyB, input);
             }
         } else if (index != -1) {
             m_agents[index].m_agent->cleanup();

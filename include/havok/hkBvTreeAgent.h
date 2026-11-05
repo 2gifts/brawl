@@ -36,29 +36,29 @@ struct hkBvTreeAgent : hkCollisionAgent {
 
     static void registerAgent(hkCollisionDispatcher* dispatcher);
     // HYPOTHESIS: parameter types (the queries pass their pair and input through unchanged).
-    void prepareCollisionPartners(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input);
+    void prepareCollisionPartners(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input);
     void prepareCollisionPartnersLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB,
                                             const hkLinearCastCollisionInput& input);
-    static hkBvTreeAgent* createBvTreeShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static hkBvTreeAgent* createBvTreeShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                          hkContactMgr* contactMgr);
-    static hkBvTreeAgent* createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static hkBvTreeAgent* createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                          hkContactMgr* contactMgr);
-    static hkBvTreeAgent* createBvBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static hkBvTreeAgent* createBvBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                          hkContactMgr* contactMgr);
 
     virtual void calcStatistics(void* collector) const;
-    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
-    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
     virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
-    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d);
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d);
     virtual void cleanup();
-    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c);
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c);
     virtual void invalidateTim(void* arg);
     virtual void warpTime(float t0, float t1, void* arg);
 
-    static void staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static void staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                       void* target);
-    static void staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static void staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                        void* target);
     static void staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, hkLinearCastCollisionInput& input,
                                  void* target, void* startTarget);
@@ -70,13 +70,13 @@ struct hkBvTreeAgent : hkCollisionAgent {
 // HYPOTHESIS: symmetric variant of hkBvTreeAgent; the class name is the map name (hkSymmetricAgentLinearCast<hkBvTreeAgent>): each wrapper swaps the
 // first two pair arguments and forwards to the hkBvTreeAgent function.
 struct hkSymmetricAgentLinearCast_13hkBvTreeAgent : hkBvTreeAgent {
-    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
-    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
-    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
-    static void staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c, void* target);
-    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& c);
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    static void staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c);
     static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
-    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& c, void* d);
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d);
 
     hkSymmetricAgentLinearCast_13hkBvTreeAgent(hkContactMgr* contactMgr) : hkBvTreeAgent(contactMgr) {}
 };
