@@ -17,6 +17,12 @@ private:
     char _1E0[0xC];
 
 public:
+    // HYPOTHESIS: construction resets the screen state before publishing the singleton.
+    efScreen() { reset(); }
+    ~efScreen();
+    void reset();
+    static void create();
+    static void destroy();
     int requestFill(float, int, int, GXColor*);
     void requestFill(efScreenHandle handle, float frames, GXColor* color);
     int requestFlash(float frames, int layer, u8 alpha, u32 cycles, GXColor* color);
@@ -24,5 +30,7 @@ public:
 };
 
 extern efScreen* g_efScreen;
+
+inline efScreen::~efScreen() { g_efScreen = 0; }
 
 inline efScreen* efScreen::getInstance() { return g_efScreen; }
