@@ -17,11 +17,10 @@ struct hkMultiSphereAgentEntry {
 struct hkMultiSphereAgent : hkCollisionAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
-    hkArray<hkMultiSphereAgentEntry> m_entries; // 0x0C (data, count in m_size, capacity and flags)
-    u8 unk18[0x38 - 0x18];                      // 0x18 not identified yet
+    hkInplaceArray<hkMultiSphereAgentEntry, 4> m_entries; // 0x0C (inline storage for four entries at 0x18)
 
-    // The constructor (fn_802BAEB8) is not recovered yet.
-    hkMultiSphereAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
+    // One child agent per sphere of A's multi-sphere shape (unk0, unk1, unk2: bodyA, bodyB, input).
+    hkMultiSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
     static void* operator new(unsigned long, void* p) { return p; }
     virtual ~hkMultiSphereAgent() {}
 
@@ -45,8 +44,9 @@ struct hkMultiSphereAgent : hkCollisionAgent {
 
 // Flipped (symmetric) variant created by createListBAgent; the class name follows the Havok TU map.
 struct hkSymmetricAgent_18hkMultiSphereAgent_ : hkMultiSphereAgent {
-    hkSymmetricAgent_18hkMultiSphereAgent_(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr)
-        : hkMultiSphereAgent(unk0, unk1, unk2, contactMgr) {}
+    hkSymmetricAgent_18hkMultiSphereAgent_(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                           hkContactMgr* contactMgr)
+        : hkMultiSphereAgent(bodyA, bodyB, input, contactMgr) {}
     virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
 };
 

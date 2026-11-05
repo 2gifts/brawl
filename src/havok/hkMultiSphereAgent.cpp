@@ -81,12 +81,13 @@ hkMultiSphereAgent* hkMultiSphereAgent::createListAAgent(void* unk0, void* unk1,
     hkReferencedObject* mem = (hkReferencedObject*)hkMemory::getInstance().allocateChunk(0x38, 0x1d);
     mem->m_memSizeAndFlags = 0x38;
     hkMultiSphereAgent* agent = (hkMultiSphereAgent*)mem;
-    new (agent) hkMultiSphereAgent(unk0, unk1, unk2, contactMgr);
+    new (agent) hkMultiSphereAgent(*(const hkCdBody*)unk0, *(const hkCdBody*)unk1, *(const hkCollisionInput*)unk2, contactMgr);
     return agent;
 }
 
 hkMultiSphereAgent* hkMultiSphereAgent::createListBAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr) {
-    return new hkSymmetricAgent_18hkMultiSphereAgent_(unk1, unk0, unk2, contactMgr);
+    return new hkSymmetricAgent_18hkMultiSphereAgent_(*(const hkCdBody*)unk1, *(const hkCdBody*)unk0,
+                                                      *(const hkCollisionInput*)unk2, contactMgr);
 }
 
 void hkMultiSphereAgent::cleanup() {
@@ -120,6 +121,56 @@ static inline void hkMultiSphereAgent_copyMotionState(hkMotionState& dst, const 
     dst.m_deactivationClass = src.m_deactivationClass;
     dst.m_deactivationCounter = src.m_deactivationCounter;
 }
+
+// The child bodies share one sphere shape and one copy of A's motion state on the stack; for each sphere the copy is moved
+// by the sphere's center (rotated into world space) and the dispatcher picks the child agent.
+// The parameters are const references (the Havok form; the map gives no signature): with void* parameters and casts the
+// target's hkCollisionAgent vtable store is lost (it needs the motion state copy, which stores an hkSimdReal into the
+// stack, to read through a const source; see TIPS).
+// NONMATCHING (~97%): the dead transform temporaries of the copy are laid out the other way round (col0 lowest in ours),
+// and the dispatcher pointer is loaded one slot earlier.
+// BYTES: the create functions call the constructor, so it is not auto-inlined into them.
+#pragma push
+#pragma auto_inline off
+hkMultiSphereAgent::hkMultiSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                       hkContactMgr* contactMgr)
+    : hkCollisionAgent((int)contactMgr) {
+    const hkMultiSphereShape* shape = (const hkMultiSphereShape*)bodyA.m_shape;
+    int numSpheres = shape->m_numSpheres;
+    m_entries.reserveSmart(numSpheres);
+    hkSphereShape sphere(0.0f);
+    hkMotionState motion;
+    hkMotionState* childMotion = &motion;
+    hkMultiSphereAgent_copyMotionState(motion, *(const hkMotionState*)bodyA.m_motion);
+    hkCdBody childBody(&bodyA, childMotion);
+    const hkVector4* s = shape->m_spheres;
+    for (int i = 0; i < numSpheres; i++) {
+        hkVector4 center;
+        center._setRotatedDir(motion.m_transform.m_rotation, *s);
+        const hkMotionState* src = (const hkMotionState*)bodyA.m_motion;
+        motion.m_transform.m_translation.x = src->m_transform.m_translation.x + center.x;
+        motion.m_transform.m_translation.y = src->m_transform.m_translation.y + center.y;
+        motion.m_transform.m_translation.z = src->m_transform.m_translation.z + center.z;
+        motion.m_transform.m_translation.w = src->m_transform.m_translation.w + center.w;
+        motion.m_sweptTransform.m_centerOfMass0.x = src->m_sweptTransform.m_centerOfMass0.x + center.x;
+        motion.m_sweptTransform.m_centerOfMass0.y = src->m_sweptTransform.m_centerOfMass0.y + center.y;
+        motion.m_sweptTransform.m_centerOfMass0.z = src->m_sweptTransform.m_centerOfMass0.z + center.z;
+        motion.m_sweptTransform.m_centerOfMass0.w = src->m_sweptTransform.m_centerOfMass0.w + center.w;
+        motion.m_sweptTransform.m_centerOfMass1.x = src->m_sweptTransform.m_centerOfMass1.x + center.x;
+        motion.m_sweptTransform.m_centerOfMass1.y = src->m_sweptTransform.m_centerOfMass1.y + center.y;
+        motion.m_sweptTransform.m_centerOfMass1.z = src->m_sweptTransform.m_centerOfMass1.z + center.z;
+        motion.m_sweptTransform.m_centerOfMass1.w = src->m_sweptTransform.m_centerOfMass1.w + center.w;
+        sphere.m_radius = s->w;
+        childBody.m_shape = &sphere;
+        childBody.m_shapeKey = i;
+        hkMultiSphereAgentEntry* entry = m_entries.expandByUnchecked(1);
+        entry->agent = input.m_dispatcher->getNewCollisionAgent(childBody, bodyB, input, contactMgr);
+        entry->unk0 = i;
+        s++;
+    }
+}
+#pragma pop
+
 
 // Queries of the multi-sphere agent: each child agent (or, for the statics, the dispatcher's function for the sphere
 // against B) runs against one sphere of the shape. A sphere shape on the stack takes the sphere's radius and a copy of
