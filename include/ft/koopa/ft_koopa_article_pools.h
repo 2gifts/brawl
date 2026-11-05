@@ -14,12 +14,26 @@ struct wnKoopaBreathData;
 
 // Bowser's fire breath (the class is in sora_melee). Opaque shell for the same reason as the other fighter pools.
 class wnKoopaBreath : public Weapon {
-    u8 m_unreconstructed[0x1F80 - sizeof(Weapon)];
+    union {
+        u8 m_unreconstructed[0x1F80 - sizeof(Weapon)];
+        struct {
+            u8 unkCC[0x1F7C - sizeof(Weapon)];
+            struct {
+                float unk0;
+                int unk4;
+                int unk8;
+                float unkC;
+                float unk10;
+            }* unk1F7C;
+        };
+    };
 public:
     wnKoopaBreath(s32 articleId, const wnArticleBuildInfo& info, const wnKoopaBreathData* data);
     virtual ~wnKoopaBreath();
     virtual void updateNodeSRT();
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
+    void activate(int founderTaskId, int team, const Vec3f* position, int kind,
+                  float lr, float speed, float scale, float speedMul, float angle);
 };
 static_assert(sizeof(wnKoopaBreath) == 0x1F80, "wnKoopaBreath layout is wrong!");
 
