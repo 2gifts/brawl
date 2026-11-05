@@ -198,8 +198,7 @@ void hkMultiSphereAgent::getClosestPoints(void* a, void* b, void* c, void* targe
         motion.m_transform.m_translation.y = pos.y + center.y;
         motion.m_transform.m_translation.z = pos.z + center.z;
         motion.m_transform.m_translation.w = pos.w + center.w;
-        hkSimdReal radius = s.w;
-        sphere.m_radius = radius;
+        sphere.m_radius = s.w;
         childBody.m_shape = &sphere;
         childBody.m_shapeKey = i;
         entry->agent->getClosestPoints(&childBody, b, c, target);
@@ -228,8 +227,7 @@ void hkMultiSphereAgent::staticGetClosestPoints(const hkCdBody& bodyA, const hkC
         motion.m_transform.m_translation.y = pos.y + center.y;
         motion.m_transform.m_translation.z = pos.z + center.z;
         motion.m_transform.m_translation.w = pos.w + center.w;
-        hkSimdReal radius = s.w;
-        sphere.m_radius = radius;
+        sphere.m_radius = s.w;
         childBody.m_shape = &sphere;
         childBody.m_shapeKey = i;
         typedef void (*QueryFunc)(void*, void*, void*, void*);
@@ -259,8 +257,7 @@ void hkMultiSphereAgent::linearCast(void* a, void* b, void* c, void* target, voi
         motion.m_transform.m_translation.y = pos.y + center.y;
         motion.m_transform.m_translation.z = pos.z + center.z;
         motion.m_transform.m_translation.w = pos.w + center.w;
-        hkSimdReal radius = s.w;
-        sphere.m_radius = radius;
+        sphere.m_radius = s.w;
         childBody.m_shape = &sphere;
         childBody.m_shapeKey = i;
         entry->agent->linearCast(&childBody, b, c, target, d);
@@ -288,8 +285,7 @@ void hkMultiSphereAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdBody&
         motion.m_transform.m_translation.y = pos.y + center.y;
         motion.m_transform.m_translation.z = pos.z + center.z;
         motion.m_transform.m_translation.w = pos.w + center.w;
-        hkSimdReal radius = s.w;
-        sphere.m_radius = radius;
+        sphere.m_radius = s.w;
         childBody.m_shape = &sphere;
         childBody.m_shapeKey = i;
         typedef void (*QueryFunc)(void*, void*, void*, void*, void*);
@@ -319,8 +315,7 @@ void hkMultiSphereAgent::getPenetrations(void* a, void* b, void* c, void* target
         motion.m_transform.m_translation.y = pos.y + center.y;
         motion.m_transform.m_translation.z = pos.z + center.z;
         motion.m_transform.m_translation.w = pos.w + center.w;
-        hkSimdReal radius = s.w;
-        sphere.m_radius = radius;
+        sphere.m_radius = s.w;
         childBody.m_shape = &sphere;
         childBody.m_shapeKey = i;
         entry->agent->getPenetrations(&childBody, b, c, target);
@@ -352,8 +347,7 @@ void hkMultiSphereAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCd
         motion.m_transform.m_translation.y = pos.y + center.y;
         motion.m_transform.m_translation.z = pos.z + center.z;
         motion.m_transform.m_translation.w = pos.w + center.w;
-        hkSimdReal radius = s.w;
-        sphere.m_radius = radius;
+        sphere.m_radius = s.w;
         childBody.m_shape = &sphere;
         childBody.m_shapeKey = i;
         typedef void (*QueryFunc)(void*, void*, void*, void*);
