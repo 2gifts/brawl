@@ -7,6 +7,7 @@
 #include <gm/gm_global.h>
 #include <gm/gm_result_info.h>
 #include <if/if_snap_save.h>
+#include <nt/nt_etc_file.h>
 #include <ip/ip_switch.h>
 #include <mu/menu.h>
 #include <mu/mu_msg.h>
@@ -420,17 +421,6 @@ extern "C" void fn_800D1ADC(muWifiInterfaceTask* task, bool next);
 extern "C" bool fn_800D1BC8(muWifiInterfaceTask* task);
 extern "C" int fn_800F2894(IfSnapSaveTask* task);
 extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
-
-// HYPOTHESIS: the heap object of the replay save, only its virtual destructor (vptr at 0x8) is used here.
-class nteFileDataReplayBase {
-public:
-    u8 unk0[0x8];
-};
-class nteFileDataReplay : public nteFileDataReplayBase {
-public:
-    virtual ~nteFileDataReplay();
-    u8 unkC[0x8];
-};
 
 // The frame of the animation that colors the mark of a player's row: the number of the player for a human, 9 for a CPU,
 // the team color in the team battles (+10 for a CPU).
@@ -2058,9 +2048,6 @@ extern "C" void OSReport(const char* msg, ...);
 // HYPOTHESIS: the stand-ins of functions that are not named yet (the map names are in the comments).
 // ScnGroup constructor (the group that the notice window and the replay save window are drawn in)
 extern "C" nw4r::g3d::ScnGroup* fn_801AB6CC(MEMAllocator* allocator, u32* size, u32 capacity);
-// nteFileDataReplay::__ct, setData
-extern "C" nteFileDataReplay* fn_80152B5C(void* mem, Heaps::HeapType heap);
-extern "C" void fn_80152C4C(nteFileDataReplay* data, void* buffer, u32 size);
 // IfSnapSaveTask::create for a replay
 extern "C" IfSnapSaveTask* fn_800F18C4(nw4r::g3d::ResFile* resFile, nw4r::g3d::ResFile* resFile2, void* msgData,
                                        nw4r::g3d::ScnGroup* scnGroup, int drawPriority, nteFileDataReplay* data,
@@ -2338,15 +2325,11 @@ void ifVsResultTask::subPlayerControl(int player) {
             u32 groupSize;
             m_noticeGroup = fn_801AB6CC(gfHeapManager::getMEMAllocator(Heaps::HeapType(0x2A)), &groupSize, 8);
             g_gfSceneRoot->add(gfSceneRoot::Layer_Info, (nw4r::g3d::ScnMdl*)m_noticeGroup);
-            void* mem = operator new(0x14, Heaps::HeapType(0x2A));
-            if (mem != NULL) {
-                mem = fn_80152B5C(mem, Heaps::HeapType(0x2A));
-            }
-            m_replayData = (nteFileDataReplay*)mem;
+            m_replayData = new (Heaps::HeapType(0x2A)) nteFileDataReplay(Heaps::HeapType(0x2A));
             u32 size;
             void* buffer;
             ipSwitch::getInstance()->m_keyRecorder->getBufferData(&buffer, &size);
-            fn_80152C4C(m_replayData, buffer, size);
+            m_replayData->setData(buffer, size);
             m_replaySaveTask = fn_800F18C4(&m_resFiles[9], &m_resFiles[7], m_wifiMsgData, m_noticeGroup, 0x1E,
                                            m_replayData, 0, Heaps::HeapType(0x2A), Heaps::HeapType(0x2A),
                                            Heaps::HeapType(0xFF));

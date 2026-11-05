@@ -7,7 +7,7 @@
 #include <string.h>
 #include <types.h>
 
-extern "C" u32 NETCalcCRC32(const void* data, u32 len);
+extern "C" u32 NETCalcCRC32(const void* data, u32 len);
 
 u8 nteSection::getDataType() {
     nteSectionData* data = m_data;
@@ -231,3 +231,42 @@ nteFileDataPhoto::nteFileDataPhoto(Heaps::HeapType heap) {
     unk0_word = 1;
     unk4 = heap;
 }
+
+nteFileDataReplay::nteFileDataReplay(Heaps::HeapType heap) {
+    unkC = static_cast<u8*>(gfHeapManager::alloc(heap, 0x34, 32));
+    if (unkC != NULL) {
+        memset(unkC, 0, 0x34);
+    }
+    unk10 = 0;
+    unk0 = 2;
+    unk4 = heap;
+}
+
+void nteFileDataReplay::setData(void* data, u32 size) {
+    if (data == NULL || size == 0) {
+        return;
+    }
+    if (unk10 != size) {
+        u8* buffer = static_cast<u8*>(gfHeapManager::alloc(unk4, size + 0x34, 32));
+        if (buffer != NULL) {
+            if (unkC != NULL) {
+                memcpy(buffer, unkC, 0x34);
+            } else {
+                memset(buffer, 0, 0x34);
+            }
+            memcpy(buffer + 0x34, data, size);
+        }
+        if (unkC != NULL) {
+            gfHeapManager::free(unkC);
+        }
+        unkC = buffer;
+        if (buffer != NULL) {
+            unk10 = size;
+        } else {
+            unk10 = 0;
+        }
+    } else if (unkC != NULL) {
+        memcpy(unkC + 0x34, data, size);
+    }
+}
+
