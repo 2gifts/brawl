@@ -121,3 +121,95 @@ bool nteFile::addSection(nteSectionData* section) {
     }
     return success;
 }
+
+nteFileDataPhoto::~nteFileDataPhoto() {
+    if (unkC_ptr != NULL) {
+        gfHeapManager::free(unkC_ptr);
+    }
+}
+
+void nteFileDataPhoto::setData(void* data, u32 size) {
+    if (data == NULL || size == 0) {
+        return;
+    }
+    if (unk10 != size) {
+        u8* buffer = static_cast<u8*>(gfHeapManager::alloc(unk4, size + 0x34, 32));
+        if (buffer != NULL) {
+            if (unkC_ptr != NULL) {
+                memcpy(buffer, unkC_ptr, 0x34);
+            } else {
+                memset(buffer, 0, 0x34);
+            }
+            memcpy(buffer + 0x34, data, size);
+        }
+        if (unkC_ptr != NULL) {
+            gfHeapManager::free(unkC_ptr);
+        }
+        unkC_ptr = buffer;
+        if (buffer != NULL) {
+            unk10 = size;
+        } else {
+            unk10 = 0;
+        }
+    } else if (unkC_ptr != NULL) {
+        memcpy(unkC_ptr + 0x34, data, size);
+    }
+}
+
+nteFileDataStage::nteFileDataStage(Heaps::HeapType heap) {
+    unkC = static_cast<u8*>(gfHeapManager::alloc(heap, 0x34, 32));
+    if (unkC != NULL) {
+        memset(unkC, 0, 0x34);
+    }
+    unk10 = 0;
+    unk0 = 3;
+    unk4 = heap;
+}
+
+nteFileDataStage::~nteFileDataStage() {
+    if (unkC != NULL) {
+        gfHeapManager::free(unkC);
+    }
+}
+
+void nteFileDataStage::setData(void* data, u32 size) {
+    if (data == NULL || size == 0) {
+        return;
+    }
+    if (unk10 != size) {
+        u8* buffer = static_cast<u8*>(gfHeapManager::alloc(unk4, size + 0x34, 32));
+        if (buffer != NULL) {
+            if (unkC != NULL) {
+                memcpy(buffer, unkC, 0x34);
+            } else {
+                memset(buffer, 0, 0x34);
+            }
+            memcpy(buffer + 0x34, data, size);
+        }
+        if (unkC != NULL) {
+            gfHeapManager::free(unkC);
+        }
+        unkC = buffer;
+        if (buffer != NULL) {
+            unk10 = size;
+        } else {
+            unk10 = 0;
+        }
+    } else if (unkC != NULL) {
+        memcpy(unkC + 0x34, data, size);
+    }
+}
+
+nteFileDataSetting::~nteFileDataSetting() {
+    if (unkC != NULL) {
+        gfHeapManager::free(unkC);
+    }
+}
+
+u64 nteSection::getWiiId() {
+    nteSectionData* data = m_data;
+    if (data == NULL) {
+        return 0;
+    }
+    return data->m_wiiId;
+}

@@ -114,12 +114,25 @@ static_assert(sizeof(muCollection) == 0x394, "Class is the wrong size!");
 // HYPOTHESIS: the photo data object (nt_etc_file.o) has a virtual destructor after eight bytes of data.
 class nteFileDataPhotoBase {
 public:
-    u8 unk0[0x8];
+    union {
+        u8 unk0[0x8];
+        struct {
+            u32 unk0_word;
+            Heaps::HeapType unk4;
+        };
+    };
 };
 class nteFileDataPhoto : public nteFileDataPhotoBase {
 public:
     virtual ~nteFileDataPhoto();
-    u8 unkC[0x8];
+    void setData(void* data, u32 size);
+    union {
+        u8 unkC[0x8];
+        struct {
+            u8* unkC_ptr;
+            u32 unk10;
+        };
+    };
 };
 
 // HYPOTHESIS: the save section (nt_etc_file.o); its constructor, destructor and getSize are still fn_.
@@ -132,6 +145,7 @@ struct nteSection {
     u8 getDataType();
     u8 getStateType();
     s64 getCreated();
+    u64 getWiiId();
     bool setOwnState(s64 created, u32 state);
 };
 static_assert(sizeof(nteSection) == 8, "Class is the wrong size!");

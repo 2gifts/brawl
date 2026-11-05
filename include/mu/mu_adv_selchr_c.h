@@ -131,6 +131,8 @@ public:
     int findNextCharCursorPos(int player, int pos);
     int findLocateCursorPosX(int player, int team, int row, int column);
     muAdvSelchrCTask();
+    // HYPOTHESIS: the model descriptors share the type B menu layout.
+    void createObjResFile(const void* modelData, int count, nw4r::g3d::ResFile* resFile);
 
     static void mainStepSelectedInit(muAdvSelchrCTask* task);
     static int mainStepAppearMain(muAdvSelchrCTask* task);
