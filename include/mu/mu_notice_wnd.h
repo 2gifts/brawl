@@ -34,6 +34,9 @@ public:
     u8 m_unk120;                // 0x120 set by the menus of the start of the game for every window they open
     u32 unk124;
     u32 unk128;
+    muNoticeWndTask();
+    void createObjResFile(const void* models, int count, nw4r::g3d::ResFile* resFile, int priority, HeapType heap);
+    static void mainStepAppearInit(muNoticeWndTask* task);
     virtual ~muNoticeWndTask();
     virtual void processDefault();
     void printText(u32 index, const char* text, int length, int kind);
