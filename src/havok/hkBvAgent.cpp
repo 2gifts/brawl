@@ -295,7 +295,7 @@ hkBvAgent* hkBvAgent::createShapeBvAgent(void* a1, void* a2, void* a3, hkContact
 }
 
 // Sub-agents and the penetration target are passed around as in the original. The wrappers
-// reorder the pair (a, b) and forward the target inside a hkSymmetricTarget.
+// reorder the pair (a, b) and forward the target inside a flip collector (hkSymmetricAgentFlipCollectors.h).
 template <class T>
 void hkSymmetricAgentLinearCast<T>::getPenetrations(void* a, void* b, void* c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrapped(target);

@@ -56,19 +56,8 @@ struct hkSymmetricBvAgent : hkBvAgent {
     virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
 };
 
-// HYPOTHESIS: penetration target wrapper built on the stack by hkSymmetricAgentLinearCast. Holds the
-// caller's target and a flag that is always false here.
-struct hkSymmetricTarget : hkPenetrationTarget {
-    hkSymmetricTarget(hkPenetrationTarget* target) : m_flag(0), m_target(target) {}
-    virtual void unkSlot08();
-    virtual void forwardPenetrations(void* a, void* b, void* c);
-
-    u8 m_flag;                    // 0x04 relative to the object
-    hkPenetrationTarget* m_target; // 0x08
-};
-
 // HYPOTHESIS: template of the map names hkSymmetricAgentLinearCast<T>::*, instantiated for hkBvAgent.
-// Each wrapper swaps the first two pair arguments and calls the T version with a hkSymmetricTarget
+// Each wrapper swaps the first two pair arguments and calls the T version with a flip collector
 // around the target.
 template <class T>
 struct hkSymmetricAgentLinearCast : T {
