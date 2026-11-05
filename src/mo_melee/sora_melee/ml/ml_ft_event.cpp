@@ -406,3 +406,14 @@ void mlFtEventTraining::notifyEventSucceedHit(int entryId, u32 consecutiveHits, 
         }
     }
 }
+
+void mlFtEvent::notifyEventResultWin(int entryId, int winAnim) {
+    OSReport("win no %d \n", winAnim);
+    if (g_Stage != NULL) {
+        int fighterKind = g_ftManager->getResultFighterGmKind(entryId);
+        stResult* stage = static_cast<stResult*>(g_Stage);
+        stage->unk270 = 1;
+        stage->m_winningCharKind = fighterKind;
+        stage->m_winAnim = winAnim;
+    }
+}

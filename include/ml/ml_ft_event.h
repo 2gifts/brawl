@@ -57,6 +57,7 @@ public:
     virtual void notifyEventKnockout(int entryId);
     virtual void notifyEventHeartSwapStart(int entryId1, int entryId2);
     virtual void notifyEventHeartSwapEnd(int, int);
+    virtual void notifyEventResultWin(int entryId, int winAnim);
     virtual ~mlFtEvent();
     virtual void destroy();
     virtual bool isInfoManager();
