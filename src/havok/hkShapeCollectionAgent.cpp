@@ -20,6 +20,9 @@
 #include <havok/hkShapeCollectionAgent.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkShapeType.h>
+#include <havok/hkShapeCollection.h>
+#include <havok/hkMonitorStream.h>
+#include <havok/hkCdBody.h>
 
 // Stand-ins for functions in other TUs or not yet recovered (the names are the map names).
 extern "C" void fn_802B0FE0(void* a, void* b, void* c, void* d);
@@ -65,3 +68,23 @@ void hkShapeCollectionAgent::registerAgent(void* dispatcher) {
     regBA.symmetricB = true;
     ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&regBA, HK_SHAPE_COLLECTION, HK_SHAPE_ALL);
 }
+
+// Runs every child agent on its child shape of the collection (body A) against body B.
+void hkShapeCollectionAgent::processCollision(void* unk0, void* unk1, void* unk2, void* unk3) {
+    const hkCdBody& bodyA = *(const hkCdBody*)unk0;
+    HK_TIMER_BEGIN("ShapeCollection");
+    const hkShapeCollection* collection = (const hkShapeCollection*)bodyA.m_shape;
+    hkCdBody childBody(&bodyA);
+    hkShapeContainer::ShapeBuffer shapeBuffer;
+    hkShapeCollectionAgentKeyAgentPair* pair = m_agents.begin();
+    for (int i = m_agents.m_size - 1; i >= 0; i--) {
+        u32 key = pair->m_key;
+        const u32& keyRef = key; // MATCH-ONLY: the reference keeps the key in a callee-saved register
+        childBody.m_shape = (hkShape*)collection->m_container.getChildShape(keyRef, shapeBuffer);
+        childBody.m_shapeKey = key;
+        pair->m_agent->processCollision(&childBody, unk1, unk2, unk3);
+        pair++;
+    }
+    HK_TIMER_END();
+}
+

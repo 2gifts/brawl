@@ -29,7 +29,7 @@ struct hkMultiRayConvexAgent : hkCollisionAgent {
     static hkMultiRayConvexAgent* createMultiRayConvexAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr);
 
     virtual void cleanup();
-    virtual void processCollision(void* unk0, void* unk1, void* unk2); // not written yet
+    virtual void processCollision(void* unk0, void* unk1, void* unk2, void* unk3); // not written yet
     virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3); // not written yet
     static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3); // not written yet
     virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);

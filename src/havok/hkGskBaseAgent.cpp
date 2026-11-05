@@ -49,7 +49,7 @@ hkGskBaseAgent::hkGskBaseAgent(hkCdBody* bodyA, hkCdBody* bodyB, hkContactMgr* c
     unk1C = valueA < valueB ? valueA : valueB;
 }
 
-void hkGskBaseAgent::processCollision(void* unk0, void* unk1, void* unk2) {}
+void hkGskBaseAgent::processCollision(void* unk0, void* unk1, void* unk2, void* unk3) {}
 
 void hkGskBaseAgent::invalidateTim(void* arg) {
     unk2C = 0.0f;

@@ -20,7 +20,7 @@ struct hkListAgent : hkCollisionAgent {
     virtual void getPenetrations(void* a, void* b, void* c, void* target);                  // 0x10 HYPOTHESIS
     virtual void getClosestPoints(void* a, void* b, void* c, void* target);                 // 0x14 HYPOTHESIS
     virtual void linearCast(void* a, void* b, void* c, void* target, void* d);              // 0x18 HYPOTHESIS
-    virtual void processCollision(void* a, void* b, void* c);                               // 0x1C HYPOTHESIS
+    virtual void processCollision(void* a, void* b, void* c, void* d);                               // 0x1C HYPOTHESIS
     virtual void cleanup();                                                                 // 0x20 HYPOTHESIS
     virtual void updateShapeCollectionFilter(void* a, void* b, void* c);                    // 0x24 HYPOTHESIS
     virtual void invalidateTim(void* arg);                                                  // 0x28 HYPOTHESIS

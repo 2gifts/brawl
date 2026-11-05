@@ -47,7 +47,7 @@ struct hkConvexListAgent : hkCollisionAgent {
     void switchToGskMode();
 
     virtual void cleanup();
-    virtual void processCollision(void* a, void* b, void* c); // HYPOTHESIS: slot order follows hkPhantomAgent
+    virtual void processCollision(void* a, void* b, void* c, void* d); // HYPOTHESIS: slot order follows hkPhantomAgent
     virtual void getClosestPoints(void* a, void* b, void* c, void* d);
     virtual void getPenetrations(void* a, void* b, void* c, void* d);
     virtual void linearCast(void* a, void* b, void* c, void* d, void* e);

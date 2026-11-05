@@ -26,7 +26,7 @@ struct hkSphereBoxAgent : hkCollisionAgent {
     static hkSphereBoxAgent* createSphereBoxAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
 
     virtual void cleanup();
-    virtual void processCollision(void* unk0, void* unk1, void* unk2);
+    virtual void processCollision(void* unk0, void* unk1, void* unk2, void* unk3);
     virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
     virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) __attribute__((never_inline));
 

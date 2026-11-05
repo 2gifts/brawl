@@ -46,7 +46,7 @@ struct hkTransformAgent : hkCollisionAgent {
     virtual void createZombie(u16 key);
 
     // Not written yet (see hkTransformAgent.cpp): linear cast, closest points, penetrations, processCollision.
-    virtual void processCollision(void* unk0, void* unk1, void* unk2);
+    virtual void processCollision(void* unk0, void* unk1, void* unk2, void* unk3);
     virtual void linearCast(void* unk0, void* unk1, void* unk2, void* unk3, void* unk4);
     static void staticLinearCast(void* unk0, void* unk1, void* unk2, void* unk3);
     virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
