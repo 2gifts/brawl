@@ -723,3 +723,143 @@ bool muWifiInterfaceTask::isEnoughRoomForFriendList(int player) {
     return (info->unk57Data >> 6) & 1;
 }
 
+
+bool muWifiInterfaceTask::isExchangingFriendKey(int index) {
+    u8 ownAid = Network::getMyAID();
+    if (ownAid == 0xFF) { ownAid = 4; }
+    if (ownAid == 4) { return false; }
+    u8 aid = m_playerAreas[index].m_aid;
+    bool live;
+    if (aid >= 4) { live = false; }
+    else { live = getSafeParentAIDInfo()->unk68[aid] == 1; }
+    if (!live) { return false; }
+    ownAid = Network::getMyAID();
+    if (ownAid == 0xFF) { ownAid = 4; }
+    int flags = m_aidInfos[ownAid].unk58_b0;
+    if (flags & (1 << aid)) { return true; }
+    return false;
+}
+
+u8 muWifiInterfaceTask::getLocalPlayerContNum(int index) {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) { info = NULL; }
+    else { info = &m_aidInfos[aid]; }
+    muWifiAIDInfo::AssignedPlayer* player;
+    if (info == NULL) { netReport(lbl_80457A48); player = NULL; }
+    else if (!((info->unk78_b3 >> 2) & 1)) {
+        netReport(lbl_80457A74); player = NULL;
+    } else { player = &info->unkE4[index]; }
+    if (player == NULL) { return 0; }
+    aid = Network::getMyAID();
+    if (aid == 0xFF) { aid = 4; }
+    u8 localPlayer = player->unk2Data;
+    for (int area = 0; area < 4; area++) {
+        if (aid == m_playerAreas[area].m_aid && localPlayer == m_playerAreas[area].m_localPlayer) {
+            return m_playerAreas[area].unk2Data;
+        }
+    }
+    return 0;
+}
+
+bool muWifiInterfaceTask::isWifiPreloadCharacter() {
+    u8 ownAid = Network::getMyAID();
+    if (ownAid == 0xFF) { ownAid = 4; }
+    if (ownAid == 4) { return false; }
+    if (Network::getParentAID() == 0xFF) { return false; }
+    bool ready = true;
+    for (u8 aid = 0; aid < 4; aid++) {
+        muWifiAIDInfo* info = &m_aidInfos[aid];
+        bool live;
+        if (aid >= 4) { live = false; }
+        else { live = getSafeParentAIDInfo()->unk68[aid] == 1; }
+        if (live && !info->unk57_b7) {
+            ready = false;
+            break;
+        }
+    }
+    return ready;
+}
+
+extern u32 g_NtAIDBitmap;
+
+wchar_t* muWifiInterfaceTask::getLocalPlayersOnamae(int index, wchar_t* name, u8* nameNo) {
+    u8* destination;
+    const u8* source;
+    int count;
+    muWifiAIDInfo* info;
+    u8 player;
+    u8 aid = m_playerAreas[index].m_aid;
+    player = m_playerAreas[index].m_localPlayer;
+    if (!(g_NtAIDBitmap & (1 << aid)) || !((unkFC9 >> 7) & 1)) {
+        if (name != NULL) { *name = 0; }
+        if (nameNo != NULL) {
+            u8 ownAid = Network::getMyAID();
+            if (ownAid == 0xFF) { ownAid = 4; }
+            *nameNo = aid == ownAid ? m_aidInfos[aid].unk208[player] : 0x78;
+        }
+        return name;
+    }
+    info = &m_aidInfos[aid];
+    if (name != NULL) {
+        source = info->unk1EA[player];
+        destination = (u8*)name;
+        count = 5;
+        memset(destination, 0, 12);
+        while (--count >= 0) {
+            int character = source[0];
+            destination[0] = character;
+            character |= source[1];
+            destination[1] = source[1];
+            source += 2;
+            destination += 2;
+            if (character == 0) { break; }
+        }
+    }
+    if (nameNo != NULL) {
+        u8 ownAid = Network::getMyAID();
+        if (ownAid == 0xFF) { ownAid = 4; }
+        *nameNo = aid == ownAid ? info->unk208[player] : 0x78;
+    }
+    return name;
+}
+
+wchar_t* muWifiInterfaceTask::getGlobalPlayersOnamae(int index, wchar_t* name, u8* nameNo) {
+    int count;
+    const u8* source;
+    u8* destination;
+    muWifiAIDInfo* info;
+    u8 aid = m_playerAreas[index].m_aid;
+    u8 player = m_playerAreas[index].m_localPlayer;
+    if (!(g_NtAIDBitmap & (1 << aid)) || !((unkFC9 >> 7) & 1)) {
+        if (name != NULL) { *name = 0; }
+        if (nameNo != NULL) {
+            u8 ownAid = Network::getMyAID();
+            if (ownAid == 0xFF) { ownAid = 4; }
+            *nameNo = aid == ownAid ? m_aidInfos[aid].unk208[player] : 0x78;
+        }
+    } else {
+        info = &m_aidInfos[aid];
+        if (name != NULL) {
+            source = info->unk1EA[player];
+            destination = (u8*)name;
+            count = 5;
+            memset(destination, 0, 12);
+            while (--count >= 0) {
+                int character = source[0];
+                destination[0] = character;
+                character |= source[1];
+                destination[1] = source[1];
+                source += 2;
+                destination += 2;
+                if (character == 0) { break; }
+            }
+        }
+        if (nameNo != NULL) {
+            u8 ownAid = Network::getMyAID();
+            if (ownAid == 0xFF) { ownAid = 4; }
+            *nameNo = aid == ownAid ? info->unk208[player] : 0x78;
+        }
+    }
+    return name;
+}

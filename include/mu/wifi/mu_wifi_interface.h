@@ -11,7 +11,7 @@
 struct muWifiPlayerArea {
     u8 m_aid;
     u8 m_localPlayer;
-    u8 unk2[3];
+    union { u8 unk2[3]; struct { u8 unk2Data; u8 _pad3[2]; }; };
     u8 unk5_b7 : 1;
     u8 unk5_b0 : 7;
     u8 unk6[2];
@@ -25,8 +25,8 @@ struct muWifiAIDInfo {
         u8 unk1[7];
     };
     struct AssignedPlayer {
-        u8 m_aid;
-        u8 unk1[3];
+        union { u8 m_aid; u8 unk0; };
+        union { u8 unk1[3]; struct { u8 _pad1; u8 unk2Data; u8 _pad3; }; };
         u8 m_teamColor;
         u8 unk5[5];
     };
@@ -66,6 +66,12 @@ struct muWifiAIDInfo {
             char _pad5A[0xE];
             u8 unk68[4];
         };
+        struct {
+            u8 unk57_b7 : 1;
+            u8 unk57_b0 : 7;
+            u8 unk58_b4 : 4;
+            u8 unk58_b0 : 4;
+        };
     };
     union {
         // HYPOTHESIS: four-byte game-rule packet begins at offset 0x7D.
@@ -88,10 +94,7 @@ struct muWifiAIDInfo {
         };
         struct {
             char _pad78[0x6C];
-            struct {
-                u8 unk0;
-                u8 unk1[9];
-            } unkE4[4];
+            AssignedPlayer unkE4[4];
             u8 unk10C;
             u8 unk10DData;
             char _pad10E[2];
@@ -100,7 +103,14 @@ struct muWifiAIDInfo {
         };
     };
     char m_shortComment[0xA0];
-    char unk1D8[0x39];
+    union {
+        char unk1D8[0x39];
+        struct {
+            char _pad1D8[0x12];
+            u8 unk1EA[3][10];
+            u8 unk208[3];
+        };
+    };
     s8 m_friendAIDIndex;
     char unk212[0x6];
 };
@@ -241,6 +251,12 @@ public:
     bool getSelCharGameRule(void* rule, bool force);
     // HYPOTHESIS: argument indexes the global player-area table.
     bool isEnoughRoomForFriendList(int player);
+    // HYPOTHESIS: argument and return types follow the original register accesses.
+    bool isExchangingFriendKey(int index);
+    u8 getLocalPlayerContNum(int index);
+    bool isWifiPreloadCharacter();
+    wchar_t* getGlobalPlayersOnamae(int index, wchar_t* name, u8* nameNo);
+    wchar_t* getLocalPlayersOnamae(int index, wchar_t* name, u8* nameNo);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 
