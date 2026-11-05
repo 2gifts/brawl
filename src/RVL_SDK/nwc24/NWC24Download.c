@@ -589,7 +589,45 @@ static inline NWC24Err GetDlTask_i(NWC24iDlTask *pTask, u16 id) {
 }
 
 NWC24Err NWC24GetDlTask(NWC24DlTask *pTask, u16 id) {
-    return GetDlTask_i((NWC24iDlTask *)pTask, id);
+    NWC24iDlTask *task = (NWC24iDlTask *)pTask;
+    NWC24File file;
+    NWC24Err result;
+    NWC24Err readResult;
+    u16 max;
+
+    if (DlHeader_i() == NULL) {
+        return NWC24_ERR_LIB_NOT_OPENED;
+    }
+
+    result = CheckDlEntryAvailable_i(id);
+    if (result < 0) {
+        return result;
+    }
+
+    result = NWC24FOpen(&file, DLFilePath, NWC24_OPEN_NAND_RBUFF);
+    if (result < 0) {
+        return result;
+    }
+
+    max = DlHeader_i()->maxTasks;
+    if (max > NWC24i_DL_TASK_MAX || id >= max) {
+        result = NWC24_ERR_INVALID_VALUE;
+    } else {
+        result = NWC24FSeek(&file, DL_HEADER_SIZE + id * DL_TASK_SIZE, NWC24_SEEK_BEG);
+    }
+
+    if (result < 0) {
+        readResult = result;
+    } else {
+        result = NWC24FRead(task, DL_TASK_SIZE, &file);
+        readResult = NWC24_OK;
+        if (result < 0) {
+            readResult = result;
+        }
+    }
+
+    result = NWC24FClose(&file);
+    return readResult != NWC24_OK ? readResult : result;
 }
 
 // the sorted walk over the task list. the state says what to sort by (last access / next time / flags),
@@ -599,18 +637,20 @@ typedef struct DlWalkState {
     s32 best;
     s32 last;
     s32 lastIdx;
-    u32 started;
+    u32 firstPass;
     u32 valid;
 } DlWalkState;
 
 NWC24Err fn_803A367C(DlWalkState *state, u16 *out) {
     typedef u32 (*KeyFn)(u16);
-    KeyFn getKey;
-    NWC24Err result;
     BOOL desc;
+    NWC24Err result;
     BOOL found = FALSE;
+    KeyFn getKey;
     u16 idx;
     s32 key;
+    s32 previous;
+    s32 best;
 
     if (state->valid == 0) {
         return NWC24_ERR_INVALID_VALUE;
@@ -631,20 +671,23 @@ NWC24Err fn_803A367C(DlWalkState *state, u16 *out) {
         return NWC24_ERR_INVALID_VALUE;
     }
 
-    if (state->started == 0) {
+    // After the first key, visit equal keys in increasing slot order.
+    if (state->firstPass == 0) {
         result = fn_803A3540(&idx, TRUE);
         while (result >= 0) {
             key = getKey(idx);
             if (key == state->best && state->lastIdx < idx) {
                 *out = idx;
                 state->best = key;
-                state->last = key;
                 state->lastIdx = idx;
+                state->last = key;
                 return NWC24_OK;
             }
 
             result = fn_803A3540(&idx, FALSE);
         }
+    } else {
+        state->firstPass = 0;
     }
 
     if (!(state->order & 0x80000000)) {
@@ -656,8 +699,10 @@ NWC24Err fn_803A367C(DlWalkState *state, u16 *out) {
     result = fn_803A3540(&idx, TRUE);
     while (result >= 0) {
         key = getKey(idx);
-        if (desc ? (state->last < key) : (key < state->last)) {
-            if (desc ? (key < state->best) : (state->best < key)) {
+        previous = state->last;
+        if (desc ? (key < previous) : (previous < key)) {
+            best = state->best;
+            if (desc ? (best < key) : (key < best)) {
                 found = TRUE;
                 *out = idx;
                 state->best = key;
@@ -692,7 +737,7 @@ NWC24Err fn_803A4110(void) {
     state.last = 0x80000001;
     state.order = 0;
     state.lastIdx = -1;
-    state.started = 1;
+    state.firstPass = 1;
     state.valid = 1;
 
     do {
@@ -933,8 +978,30 @@ NWC24Err fn_803A3D64(NWC24iDlTask *task) {
         u16 last = DlHeader_i()->maxTasks;
         result = fn_803A5284(task, first, last);
     }
+    // Schedule the first run only after slot assignment succeeds.
     if (result >= 0) {
-        result = SetNextTime_i(task);
+        s64 now = 0;
+        NWC24Err clockResult = NWC24iGetUniversalTime(&now);
+        NWC24Err check;
+        s64 when;
+        u16 id;
+        if (clockResult < 0) {
+            return clockResult;
+        }
+        when = now + task->interval * 60;
+        check = CheckDlTask_i(task, FALSE);
+        switch (check) {
+        case NWC24_OK:
+            id = task->id;
+            if (id == 0xFFFF) {
+                check = NWC24_ERR_FAILED;
+            } else {
+                DlEntry_i(id)->nextTime = when / 60;
+                check = NWC24_OK;
+            }
+            break;
+        }
+        return check;
     }
     return result;
 }
@@ -980,15 +1047,16 @@ NWC24Err fn_803A4D00(void) {
 
 // walks the list and drops tasks that cannot be read back or that have run out of runs
 NWC24Err fn_803A49B0(NWC24iDlHeader *hdr, BOOL clear) {
-    NWC24iDlTask task;
+    NWC24iDlTask storage;
+    NWC24iDlTask *task = &storage;
     u16 i;
 
     for (i = 0; i < hdr->maxTasks; i++) {
         if (CheckDlEntryAvailable_i(i) == NWC24_OK && clear) {
-            if (GetDlTask_i(&task, i) < 0) {
-                DeleteDlTaskForced_i(&task);
-            } else if (i >= DlHeader_i()->privateTasks && task.count == 0) {
-                DeleteDlTaskForced_i(&task);
+            if (GetDlTask_i(task, i) < 0) {
+                DeleteDlTaskForced_i(task);
+            } else if (i >= DlHeader_i()->privateTasks && task->count == 0) {
+                DeleteDlTaskForced_i(task);
             }
         }
     }

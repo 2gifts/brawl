@@ -6,6 +6,8 @@ The same assembly can come from very different C++ (`add r3,r3,r4` could be `x +
 
 ## Source review before accepting a match
 
+- **Keep an opaque SDK output parameter and its private typed view distinct:** casting `NWC24DlTask *pTask` into a named `NWC24iDlTask *task` inside the public loader preserves the output-buffer lifetime across open/seek/read/close. Passing the cast directly into the private inline loader swapped the saved output and slot registers. For sorted walks, snapshot the previous and candidate keys before choosing the comparison direction, and audit first-pass and equal-key transitions before tuning registers. Seen: `NWC24Download.c`, `NWC24GetDlTask` and `fn_803A367C`. **MED**
+
 - **Materialize a `%c` argument at character width before appending it:** `char value = va_arg(args, int);` preserves the SDK formatter's argument/scan lifetimes. In NWC24, this combined with the real conversion-state declarations and the string-append helper's cursor/count order matches `Mail_vsprintf`. For body output, keeping immutable inputs separate from the mutable cursor and remaining count also matches the Base64 writer. No register pins or dummy locals are needed. **MED** (`nwc24.c`)
 
 - **Keep a repaired SDK record live across file calls:** NWC24's legacy download-header repair validates the same header pointer after open/seek/write/close. Reloading the header from the global work pointer loses that lifetime. Returning the repair/check status and keeping the seek/read step in its own inline transaction recovers the header reader. Check both successful paths and error propagation when rebuilding these boundaries. Seen: `NWC24Download.c`, `FixDlHeader_i` and `ReadDlHeader_i`. **MED**
