@@ -33,3 +33,6 @@ compile_commands.json
 # Miscellaneous
 /*.txt
 *.exe
+
+# Local-only Havok progress notes, not for the repo
+havok/PARKED.md
