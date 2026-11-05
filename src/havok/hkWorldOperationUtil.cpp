@@ -213,7 +213,7 @@ void hkWorldOperationUtil::mergeIslands(hkWorld* world, hkEntity* entityA, hkEnt
     hkSimulationIsland* islandB = entityB->m_simulationIsland;
     if (world->m_lockCount != 0) {
         hkWorldOperation::BiggestOperation operation;
-        operation.m_kind = 0x0C;
+        operation.m_type = 0x0C;
         operation.m_entityA = entityA;
         operation.m_entityB = entityB;
         world->queueOperation(&operation);

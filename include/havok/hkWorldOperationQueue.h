@@ -62,6 +62,7 @@ struct hkWorldOperation {
     // queueOperation touches (the rest of the 5.1 list has the same shape, add as needed)
     struct BaseOperation {
         u8 m_type; // 0x00
+        BaseOperation() : m_type(0) {}
     };
     struct SingleObjectOperation : BaseOperation {
         void* m_object; // 0x04 entity / constraint / action / phantom / rigid body / world object, depending on m_type
@@ -83,13 +84,15 @@ struct hkWorldOperation {
         hkAabb* m_aabb;       // 0x08 the queue keeps its own copy
     };
 
-    struct BiggestOperation {
-        u8 m_kind;               // 0x00 HYPOTHESIS: operation kind (first byte moved by the sort)
-        // 0x01-0x03 padding, not a member (BYTES: the sort's copies move byte 0 alone, then four words)
-        hkEntity* m_entityA;     // 0x04 HYPOTHESIS: entity whose simulation island orders the queue
-        hkEntity* m_entityB;     // 0x08 HYPOTHESIS: second entity, used as tie breaker
-        int m_unk0C;             // 0x0C
-        int m_unk10;             // 0x10
+    struct BiggestOperation : BaseOperation {
+        // BYTES: the payload is one aggregate after the type byte (0x01-0x03 padding): copies move byte 0, then the
+        // payload as a block through one address; the default ctor zeroes the type byte (inplace array ctor loop).
+        struct {
+            hkEntity* m_entityA; // 0x04 HYPOTHESIS: entity whose simulation island orders the queue
+            hkEntity* m_entityB; // 0x08 HYPOTHESIS: second entity, used as tie breaker
+            int m_unk0C;         // 0x0C
+            int m_unk10;         // 0x10
+        };
 
         // Orders operations by the island key (u16 at island + 0x20), then by the second entity's island.
         static hkBool islandLess(const BiggestOperation& a, const BiggestOperation& b);

@@ -187,7 +187,9 @@ void hkWorldOperationQueue::executeAllPending() {
     }
 
     // take everything that's pending right now, so anything queued while this runs lands in a fresh list
-    hkInplaceArray<hkWorldOperation::BiggestOperation, 16> stolenPending;
+    // BYTES: an aligned local puts this function in the propagation-off mode the target shows (N-form hkBool
+    // tests, the inplace element ctor loop not unrolled). HYPOTHESIS: which local carries it in the original.
+    hkInplaceArray<hkWorldOperation::BiggestOperation, 16> stolenPending __attribute__((aligned(4)));
     stolenPending.swap(m_operations0);
     m_world->m_pendingOperationQueueCount++;
 
