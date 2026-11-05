@@ -456,3 +456,14 @@ void soPhysicsModuleImpl::setToeAngleLimit(int ikId, float limit) {
         unk30->setToeAngle(m_ikHandles->at(ikId).unk0, limit);
     }
 }
+
+// HYPOTHESIS: layout of one entry of the IK table behind m_ikData.
+struct soPhysicsIKNodeTable {
+    const char** m_names;
+    int m_count;
+};
+
+const char* soPhysicsModuleImpl::getIKEndNodeName(int ikId, int index) {
+    soPhysicsIKNodeTable* table = static_cast<soPhysicsIKNodeTable*>(m_ikData);
+    return table[ikId].m_names[table[ikId].m_count - (index + 1)];
+}
