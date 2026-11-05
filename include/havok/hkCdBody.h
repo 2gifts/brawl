@@ -12,6 +12,13 @@ struct hkCdBody {
     hkMotion* m_motion; // 0x08
     hkCdBody* m_parent; // 0x0C
 
+    hkCdBody() {}
+    // Child body of a parent: same motion and shape key, the given shape (the agents wrap a sub-shape this way).
+    hkCdBody(const hkCdBody* parent) {
+        m_parent = (hkCdBody*)parent;
+        m_motion = parent->m_motion;
+    }
+
     // Walks the m_parent chain up to the body without a parent (map name hkCdBody__getRootCollidable).
     hkCdBody* getRootCollidable() {
         hkCdBody* body = this;

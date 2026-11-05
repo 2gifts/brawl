@@ -32,6 +32,8 @@
 
 #include <havok/hkBvAgent.h>
 #include <havok/hkCollisionDispatcher.h>
+#include <havok/hkBvShape.h>
+#include <havok/hkMonitorStream.h>
 
 void hkBvAgent::cleanup() {
     m_childA->cleanup();
@@ -40,6 +42,37 @@ void hkBvAgent::cleanup() {
         m_childB = 0;
     }
     delete this;
+}
+
+// Penetrations are those of the bounding volume: the query goes to the bounding volume agent with body A
+// replaced by its bounding volume shape.
+void hkBvAgent::getPenetrations(void* a, void* b, void* c, void* target) {
+    HK_TIMER_BEGIN("hkBvAgent");
+    const hkCdBody* bodyA = (const hkCdBody*)a;
+    const hkBvShape* bvShape = (const hkBvShape*)bodyA->m_shape;
+    hkCdBody bv(bodyA);
+    bv.m_shapeKey = bodyA->m_shapeKey;
+    bv.m_shape = bvShape->m_boundingVolumeShape;
+    m_childA->getPenetrations(&bv, b, c, target);
+    HK_TIMER_END();
+}
+
+// Same, through the dispatcher's static penetration function for the (bounding volume, B) shape types. The
+// first word of the collision input is the dispatcher.
+void hkBvAgent::staticGetPenetrations(void* a, void* b, void* c, hkPenetrationTarget* target) {
+    HK_TIMER_BEGIN("hkBvAgent");
+    const hkCdBody* bodyA = (const hkCdBody*)a;
+    const hkBvShape* bvShape = (const hkBvShape*)bodyA->m_shape;
+    hkCdBody bv(bodyA);
+    bv.m_shapeKey = bodyA->m_shapeKey;
+    bv.m_shape = bvShape->m_boundingVolumeShape;
+    int typeA = bv.m_shape->getType();
+    int typeB = ((const hkCdBody*)b)->m_shape->getType();
+    hkCollisionDispatcher* dispatcher = *(hkCollisionDispatcher**)c;
+    typedef void (*PenetrationsFunc)(void*, void*, void*, hkPenetrationTarget*);
+    ((PenetrationsFunc)dispatcher->m_agentFuncs[((u8(*)[32])dispatcher->m_lookup190)[typeA][typeB]].staticGetPenetrations)(
+        &bv, b, c, target);
+    HK_TIMER_END();
 }
 
 // Argument block handed to the children: the first word comes from the object that a points to, the
