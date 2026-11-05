@@ -406,3 +406,62 @@ void mlFtEventTraining::notifyEventSucceedHit(int entryId, u32 consecutiveHits, 
         }
     }
 }
+
+void mlFtEvent::notifyEventAppeal(int entryId, int appeal) {
+    if (!isInfoManager()) {
+        return;
+    }
+    if (unk34_40 && appeal < 4 && g_IfMngr != NULL) {
+        int areaNo = getInfoAreaNo(g_ftManager->getPlayerNo(entryId));
+        g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[areaNo])]->dispApealCommentBalloon(appeal);
+        Vec3f position = g_ftManager->getFighterCursorPos(entryId, -1);
+        g_IfMngr->m_ifPlayers[static_cast<u8>(g_IfMngr->unk68[areaNo])]->setApealCommentBalloonPos(
+            (const nw4r::math::VEC3*)&position);
+    }
+    if (appeal == 4) {
+        switch (g_ftManager->getFighterGmKind(entryId)) {
+        case 7:
+            if (m_condition->m_meleeInitData.m_stageKind == 0x13 && g_Stage != NULL) {
+                g_Stage->setAppearKind(0);
+                unk34_10 = g_Stage->startAppear();
+                unk38 = entryId;
+                unk34_10 = true;
+            }
+            if (m_condition->m_meleeInitData.m_stageKind == 0x30 && g_Stage != NULL) {
+                g_Stage->setAppearKind(0);
+                unk34_10 = g_Stage->startAppear();
+                unk38 = entryId;
+            }
+            break;
+        case 0x15:
+            if (m_condition->m_meleeInitData.m_stageKind == 0x13 && g_Stage != NULL) {
+                g_Stage->setAppearKind(1);
+                unk34_10 = g_Stage->startAppear();
+                unk38 = entryId;
+            }
+            if (m_condition->m_meleeInitData.m_stageKind == 0x30 && g_Stage != NULL) {
+                g_Stage->setAppearKind(1);
+                unk34_10 = g_Stage->startAppear();
+                unk38 = entryId;
+            }
+            break;
+        case 0x29:
+            if (m_condition->m_meleeInitData.m_stageKind == 0x13 && g_Stage != NULL) {
+                g_Stage->setAppearKind(2);
+                unk34_10 = g_Stage->startAppear();
+                unk38 = entryId;
+            }
+            break;
+        case 0x2A:
+            if (m_condition->m_meleeInitData.m_stageKind == 0x22 && g_Stage != NULL) {
+                g_Stage->setAppearKind(0);
+                unk34_10 = g_Stage->startAppear();
+                unk38 = entryId;
+            }
+            break;
+        }
+    } else if (m_condition->m_meleeInitData.m_stageKind == Stages::Madein && g_Stage != NULL) {
+        int playerNo = g_ftManager->getPlayerNo(entryId);
+        static_cast<stMadein*>(g_Stage)->m_unk9E3[static_cast<u8>(playerNo)] = 1;
+    }
+}
