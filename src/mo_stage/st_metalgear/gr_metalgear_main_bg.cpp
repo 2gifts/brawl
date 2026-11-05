@@ -99,7 +99,7 @@ void grMetalgearMainBg::updateBreak(float deltaFrame) {
             setMotion(0, false, true, &m_frameCount);
             setNodeVisibility(false, 0, m_nodeYaneNormal, true, false);
             setNodeVisibility(true, 0, m_nodeYaneCrash, true, false);
-            fn_27_224DB8(snd_se_stage_Metalgear_10, 0.0f);
+            StSeUtil::playSe(snd_se_stage_Metalgear_10, 0.0f);
             u32 handle = g_ecMgr->setEffect(ef_ptc_stg_metalgear_tenzyo_crash);
             g_ecMgr->setParent(handle, m_sceneModels[0], "StgMetalgear00_base", false);
             handle = g_ecMgr->setEffect(ef_ptc_stg_metalgear_hahenkemuri);
