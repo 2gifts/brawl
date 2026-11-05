@@ -4,6 +4,9 @@
 #include <havok/hkPhantomAgent.h>
 
 struct hkCollisionDispatcher;
+struct hkCdBody;
+struct hkCollisionInput;
+struct hkContactMgr;
 
 // Bounding-volume collision agent. It owns up to two sub-agents: A at 0x0C (always set by the
 // constructor) and B at 0x10 (null after construction, optional).
@@ -18,15 +21,14 @@ struct hkBvAgent : hkCollisionAgent {
     hkCollisionAgent* m_childA; // 0x0C agent of the bounding volume shape against B
     hkCollisionAgent* m_childB; // 0x10 agent of the child shape against B, made on the first overlap
 
-    // HYPOTHESIS: the constructor takes the pair as passed by the dispatcher (createShapeBvAgent
-    // swaps the first two). Parameter types are not recovered yet.
-    hkBvAgent(void* a1, void* a2, void* a3, hkContactMgr* contactMgr);
+    // The constructor takes the pair as passed by the dispatcher (createShapeBvAgent swaps the first two).
+    hkBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
     virtual ~hkBvAgent() {}
 
     // Creates the agent for the pair in the order given (create function of the dispatcher table).
-    static hkBvAgent* createBvShapeAgent(void* a1, void* a2, void* a3, hkContactMgr* contactMgr);
+    static hkBvAgent* createBvShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
     // Same, with the first two arguments swapped; the object has the hkSymmetricBvAgent vtable.
-    static hkBvAgent* createShapeBvAgent(void* a1, void* a2, void* a3, hkContactMgr* contactMgr);
+    static hkBvAgent* createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
 
     // Overrides of the hkCollisionAgent slots, with the base parameter lists.
     virtual void getPenetrations(void* a, void* b, void* c, void* target);   // 0x10 HYPOTHESIS
@@ -50,8 +52,8 @@ struct hkBvAgent : hkCollisionAgent {
 // HYPOTHESIS: the symmetric variant (map name hkSymmetricAgent<hkBvAgent>). It differs from
 // hkBvAgent by its vtable only; the constructor is the base constructor followed by the vptr store.
 struct hkSymmetricBvAgent : hkBvAgent {
-    hkSymmetricBvAgent(void* a1, void* a2, void* a3, hkContactMgr* contactMgr)
-        : hkBvAgent(a1, a2, a3, contactMgr) {}
+    hkSymmetricBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr)
+        : hkBvAgent(bodyA, bodyB, input, contactMgr) {}
     virtual ~hkSymmetricBvAgent() {}
     virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
 };

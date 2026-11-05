@@ -34,9 +34,9 @@ namespace {
 #pragma push
 #pragma auto_inline off
 // One contact point id per ray of the multi-ray shape (body A), none held yet.
-hkMultiRayConvexAgent::hkMultiRayConvexAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr)
+hkMultiRayConvexAgent::hkMultiRayConvexAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr)
     : hkCollisionAgent((int)contactMgr) {
-    const hkMultiRayShape* shape = (const hkMultiRayShape*)((const hkCdBody*)a0)->m_shape;
+    const hkMultiRayShape* shape = (const hkMultiRayShape*)bodyA.m_shape;
     int numRays = shape->m_rays.getSize();
     m_contactPointIds.setSize(numRays);
     for (int i = 0; i < numRays; i++) {
@@ -69,17 +69,12 @@ void hkMultiRayConvexAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
 
 // The allocation size is stored before the constructor runs; the convex x multi-ray agent is the
 // symmetric variant (its vtable is stored after the constructor).
-hkMultiRayConvexAgent* hkMultiRayConvexAgent::createConvexMultiRayAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr) {
-    hkMultiRayConvexAgent* agent = (hkMultiRayConvexAgent*)hkMemory::getInstance().allocateChunk(sizeof(hkMultiRayConvexAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkMultiRayConvexAgent);
-    return ::new (agent) hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_(a1, a0, a2, contactMgr);
+hkMultiRayConvexAgent* hkMultiRayConvexAgent::createConvexMultiRayAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_(bodyB, bodyA, input, contactMgr);
 }
 
-hkMultiRayConvexAgent* hkMultiRayConvexAgent::createMultiRayConvexAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr) {
-    hkMultiRayConvexAgent* agent = (hkMultiRayConvexAgent*)hkMemory::getInstance().allocateChunk(sizeof(hkMultiRayConvexAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkMultiRayConvexAgent);
-    ::new (agent) hkMultiRayConvexAgent(a0, a1, a2, contactMgr);
-    return agent;
+hkMultiRayConvexAgent* hkMultiRayConvexAgent::createMultiRayConvexAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkMultiRayConvexAgent(bodyA, bodyB, input, contactMgr);
 }
 
 void hkMultiRayConvexAgent::cleanup() {

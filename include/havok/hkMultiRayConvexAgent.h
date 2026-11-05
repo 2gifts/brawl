@@ -18,6 +18,9 @@ struct hkMultiRayShape : hkShape {
 };
 
 struct hkCollisionDispatcher;
+struct hkCdBody;
+struct hkCollisionInput;
+struct hkContactMgr;
 
 // Agent for a convex shape against a multi-ray shape (shape type HK_SHAPE_MULTI_RAY). Object size 0x20.
 // 0x08 (hkCollisionAgent::unk8) is the contact manager; 0x0C holds one contact point id per ray (0xFFFF = none),
@@ -28,15 +31,15 @@ struct hkMultiRayConvexAgent : hkCollisionAgent {
     hkInplaceArray<u16, 4> m_contactPointIds; // 0x0C
 
     // HYPOTHESIS: the constructor takes the two bodies of the pair, a third value and the contact manager.
-    hkMultiRayConvexAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr);
+    hkMultiRayConvexAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
     virtual ~hkMultiRayConvexAgent();
 
     // Registers the convex x multi-ray agent functions with the dispatcher (two pairs, see the .cpp).
     static void registerAgent(hkCollisionDispatcher* dispatcher);
     // Creates the convex x multi-ray agent (the convex shape first). Its vtable is the symmetric one.
-    static hkMultiRayConvexAgent* createConvexMultiRayAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr);
+    static hkMultiRayConvexAgent* createConvexMultiRayAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
     // Creates the multi-ray x convex agent in the order given.
-    static hkMultiRayConvexAgent* createMultiRayConvexAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr);
+    static hkMultiRayConvexAgent* createMultiRayConvexAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr);
 
     virtual void cleanup();
     virtual void processCollision(void* unk0, void* unk1, void* unk2, void* unk3); // not written yet
@@ -56,8 +59,8 @@ struct hkSymmetricAgent_21hkMultiRayConvexAgent_ : hkMultiRayConvexAgent {
 // HYPOTHESIS: hkSymmetricAgentLinearCast<hkMultiRayConvexAgent>. The wrappers swap the two shapes and
 // replace the collector by a flipping collector on the stack (same scheme as hkSphereBoxAgent).
 struct hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_ : hkMultiRayConvexAgent {
-    hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_(void* a0, void* a1, void* a2, hkContactMgr* contactMgr)
-        : hkMultiRayConvexAgent(a0, a1, a2, contactMgr) {}
+    hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr)
+        : hkMultiRayConvexAgent(bodyA, bodyB, input, contactMgr) {}
     virtual ~hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_();
 
     virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);

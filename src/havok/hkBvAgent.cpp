@@ -46,14 +46,12 @@
 // BYTES: the create functions call the constructor; without the pragma it is inlined into them.
 #pragma push
 #pragma auto_inline off
-hkBvAgent::hkBvAgent(void* a1, void* a2, void* a3, hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
-    const hkCdBody* bodyA = (const hkCdBody*)a1;
-    const hkCollisionInput* input = (const hkCollisionInput*)a3;
-    const hkBvShape* bvShape = (const hkBvShape*)bodyA->m_shape;
-    hkCdBody bv(bodyA);
-    bv.m_shapeKey = bodyA->m_shapeKey;
+hkBvAgent::hkBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
+    const hkBvShape* bvShape = (const hkBvShape*)bodyA.m_shape;
+    hkCdBody bv(&bodyA);
+    bv.m_shapeKey = bodyA.m_shapeKey;
     bv.m_shape = bvShape->m_boundingVolumeShape;
-    m_childA = input->m_dispatcher->getNewCollisionAgent(bv, *(const hkCdBody*)a2, *input, contactMgr);
+    m_childA = input.m_dispatcher->getNewCollisionAgent(bv, bodyB, input, contactMgr);
     m_childB = 0;
 }
 #pragma pop
@@ -283,16 +281,12 @@ void hkBvAgent::createZombie(u16 key) {
     }
 }
 
-hkBvAgent* hkBvAgent::createBvShapeAgent(void* a1, void* a2, void* a3, hkContactMgr* contactMgr) {
-    hkBvAgent* agent = (hkBvAgent*)hkMemory::getInstance().allocateChunk(sizeof(hkBvAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkBvAgent);
-    ::new (agent) hkBvAgent(a1, a2, a3, contactMgr);
-    return agent;
+hkBvAgent* hkBvAgent::createBvShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkBvAgent(bodyA, bodyB, input, contactMgr);
 }
 
-hkBvAgent* hkBvAgent::createShapeBvAgent(void* a1, void* a2, void* a3, hkContactMgr* contactMgr) {
-    hkBvAgent* agent = new hkSymmetricBvAgent(a2, a1, a3, contactMgr);
-    return agent;
+hkBvAgent* hkBvAgent::createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkSymmetricBvAgent(bodyB, bodyA, input, contactMgr);
 }
 
 // Sub-agents and the penetration target are passed around as in the original. The wrappers
