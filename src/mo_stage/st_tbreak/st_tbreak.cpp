@@ -31,8 +31,6 @@
 // Unnamed helpers of sora_melee the stage calls directly (see st_newpork.cpp).
 // grMadein::setMatrix(Matrix*, bool): lets the ground (and optionally its attack) follow the matrix.
 extern "C" void fn_27_279FC8(grMadein* ground, Matrix* matrix, bool followAttack);
-// grMadein::switchToMatrix
-extern "C" void fn_27_279FA4(grMadein* ground);
 
 // The level table: a first word that the coroutine tag starts with, then the five levels (the last number of the
 // belts, 100, is the same everywhere). HYPOTHESIS: only the use of the leading fields is known.
@@ -242,7 +240,7 @@ void stTargetBreak::createObj() {
             target->markEnemy();
             target->initializeEntity();
             target->startEntity();
-            fn_27_279FA4(target);
+            target->switchToMatrix();
             target->thisIsTarget();
             m_targetHitBy[i] = -1;
         }
@@ -306,7 +304,7 @@ void stTargetBreak::createObj() {
                         m_steps[i]->setStageData(m_stageData);
                         m_steps[i]->initializeEntity();
                         m_steps[i]->startEntity();
-                        fn_27_279FA4(m_steps[i]);
+                        m_steps[i]->switchToMatrix();
                         createCollision(m_fileData, 3, m_steps[i]);
                     } else {
                         m_steps[i] = NULL;

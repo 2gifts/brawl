@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 // HYPOTHESIS: IfCenter::updateTimeFast (0x800DDCF8, still fn_) takes the time to show.
+// IfCenter::updateTimeFast (the map name); src/mo_melee/sora_melee/st/st_operator_rule_time.cpp calls it by this stand-in name.
 extern "C" void fn_800DDCF8(IfCenter* center, s32 time);
 
 struct IfCenterStateFunc {
@@ -445,4 +446,90 @@ void IfCenter::setVisibleReplaySave(bool visible, int controller, bool enabled, 
         obj->m_modelAnim->m_anmObjVisRes->SetUpdateRate(0.0f);
         m_group->Insert(m_group->sceneItemsCount, obj->m_sceneModel);
     }
+}
+
+void IfCenter::startMelee(nw4r::g3d::ScnGroup* group, int mode, bool flag, int time, nw4r::g3d::ScnGroup* timeGroup) {
+    m_group = group;
+    unkC = timeGroup;
+    m_timeDisp = false;
+    unk0_40 = false;
+    unk0_20 = false;
+    if (mode != 0) {
+        m_timeDisp = true;
+        unk0_20 = flag;
+        if (mode == 2) {
+            unk0_40 = true;
+        }
+    }
+    if (m_timeDisp) {
+        updateTimeInit();
+        fn_800DDCF8(this, time);
+    }
+    m_state = 0;
+}
+
+void IfCenter::main() {
+    int previousState = m_state;
+    if (s_stateFuncTbl[m_state].m_main != NULL) {
+        m_state = s_stateFuncTbl[m_state].m_main(this);
+    }
+    if (m_state != previousState) {
+        if (s_stateFuncTbl[m_state].m_init != NULL) {
+            s_stateFuncTbl[m_state].m_init(this);
+        }
+    }
+    if (m_timeDisp && unk178 >= 0) {
+        if (unk178 >= 0) {
+            if (m_expands[0]->m_parent != NULL) {
+                if (unkC != NULL) {
+                    unkC->Remove(m_expands[0]);
+                } else {
+                    m_group->Remove(m_expands[0]);
+                }
+            }
+            bool hidden;
+            if (--unk178 < 0 || (unk178 % 15) / 7 > 0) {
+                hidden = false;
+            } else {
+                hidden = true;
+            }
+            if (!hidden) {
+                if (m_expands[0]->m_parent == NULL) {
+                    if (unkC != NULL) {
+                        unkC->Insert(unkC->sceneItemsCount, m_expands[0]);
+                    } else {
+                        m_group->Insert(m_group->sceneItemsCount, m_expands[0]);
+                    }
+                }
+            }
+            m_models[0]->calcMatrix();
+        }
+    }
+}
+
+void IfCenter::dispKumiteKills(int kills) {
+    nw4r::g3d::ScnMdlExpand* group = static_cast<nw4r::g3d::ScnMdlExpand*>(m_expands[3]);
+    while (group->sceneItemsCount != 0) {
+        if (group->sceneItemsCount != 0) {
+            group->Remove(group->sceneItemsCount - 1);
+        }
+    }
+    m_group->Remove(group);
+    kills = kills > 0 ? kills : 0;
+    kills = kills < 9999 ? kills : 9999;
+    int digit = 0;
+    for (; digit < 4 && (kills > 0 || digit == 0); digit++) {
+        MuObject* obj = m_models[76 + digit];
+        obj->setFrameTex(kills % 10);
+        obj->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+        obj->calcMatrix();
+        char nodeName[8];
+        sprintf(nodeName, lbl_8059E228, digit);
+        group->PushBack(obj->m_sceneModel, nodeName);
+        kills /= 10;
+    }
+    MuObject* obj = m_models[75];
+    obj->setFrameNode(digit);
+    obj->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+    m_group->Insert(m_group->sceneItemsCount, group);
 }

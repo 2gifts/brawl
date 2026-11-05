@@ -29,10 +29,6 @@
 // Unnamed helpers the stage calls directly (see st_dxcorneria.cpp for the grMadein ones).
 // grMadein::setMatrix(Matrix*, bool): lets the ground (and optionally its attack) follow the matrix.
 extern "C" void fn_27_279FC8(grMadein* ground, Matrix* matrix, bool followAttack);
-// grMadein::switchToMatrix
-extern "C" void fn_27_279FA4(grMadein* ground);
-// grMadein: HYPOTHESIS: switches the looping flag of the ground's motion.
-extern "C" void fn_27_279228(grMadein* ground, int loop);
 // efScreen: ends a fill requested with requestFill (HYPOTHESIS: fades it out over `frames`).
 extern "C" void fn_8005E3C8(efScreen* screen, efScreenHandle* handle, float frames);
 // Matrix helpers of sora/mt (see mt_matrix.cpp).
@@ -251,7 +247,7 @@ void stOldin::createObj() {
         addGround(m_bulblin);
         m_bulblin->startup(m_fileData, 0, gfSceneRoot::Layer_Ground);
         m_bulblin->setStageData(m_stageData);
-        fn_27_279FA4(m_bulblin);
+        m_bulblin->switchToMatrix();
         m_bulblin->setVisibility(0);
         m_bulblin->setEnableCollisionStatus(false);
         m_bulblinNode = m_bulblin->getNodeIndex(0, "StgOldinBulblin_TransN");
@@ -264,7 +260,7 @@ void stOldin::createObj() {
             Vec3f hitEnd(4.0f, 8.0f, 0.0f);
             m_bulblinHit->setHitPoint(5.0f, &hitStart, &hitEnd, true, 0);
             m_bulblinHit->initializeEntity();
-            fn_27_279FA4(m_bulblinHit);
+            m_bulblinHit->switchToMatrix();
         }
     }
 
@@ -274,7 +270,7 @@ void stOldin::createObj() {
         m_kingBulblin->startup(m_fileData, 0, gfSceneRoot::Layer_Ground);
         m_kingBulblin->setStageData(m_stageData);
         m_kingBulblin->startEntityAutoLoop();
-        fn_27_279FA4(m_kingBulblin);
+        m_kingBulblin->switchToMatrix();
         m_kingBulblin->setVisibility(0);
         m_kingBulblin->setEnableCollisionStatus(false);
         m_kingBulblin->setMotionRatio(0.8f);
@@ -291,7 +287,7 @@ void stOldin::createObj() {
             m_kingBulblinHit->setHitPoint(6.5f, &hitStart, &hitEnd, true, 0);
             m_kingBulblinHit->initializeEntity();
             m_kingBulblinHit->startEntity();
-            fn_27_279FA4(m_kingBulblinHit);
+            m_kingBulblinHit->switchToMatrix();
         }
     }
 
@@ -303,7 +299,7 @@ void stOldin::createObj() {
         m_lordNode[0] = m_lordBullbo->getNodeIndex(0, "StgOldinLordBullbo_TransN");
         m_lordNode[1] = m_lordBullbo->getNodeIndex(0, "StgOldinLordBullbo_center");
         m_lordNode[2] = m_lordBullbo->getNodeIndex(0, "StgOldinLordBullbo_center");
-        fn_27_279FA4(m_lordBullbo);
+        m_lordBullbo->switchToMatrix();
         m_lordBullbo->setVisibility(0);
         m_lordBullbo->setEnableCollisionStatus(false);
         m_lordBullbo->setMotionRatio(0.8f);
@@ -322,7 +318,7 @@ void stOldin::createObj() {
             setLordBullboAttack(&attackOffset);
             m_lordBullboHit->initializeEntity();
             m_lordBullboHit->startEntity();
-            fn_27_279FA4(m_lordBullboHit);
+            m_lordBullboHit->switchToMatrix();
         }
     }
 
@@ -331,7 +327,7 @@ void stOldin::createObj() {
         addGround(m_taru);
         m_taru->startup(m_fileData, 0, gfSceneRoot::Layer_Ground);
         m_taru->setStageData(m_stageData);
-        fn_27_279FA4(m_taru);
+        m_taru->switchToMatrix();
         m_taru->setVisibility(0);
         m_taru->setEnableCollisionStatus(false);
         m_taruNode = m_taru->getNodeIndex(0, "StgOldinTaru_TaruM");
@@ -344,7 +340,7 @@ void stOldin::createObj() {
             setTaruAttack(&attackOffset);
             m_taruAttack->initializeEntity();
             m_taruAttack->startEntity();
-            fn_27_279FA4(m_taruAttack);
+            m_taruAttack->switchToMatrix();
         }
     }
 
@@ -835,7 +831,7 @@ void stOldin::BulblinUpdate(float deltaFrame) {
                     goto dead;
                 }
                 m_bulblinStun = 4.0f;
-                fn_27_279228(m_bulblin, 1);
+                m_bulblin->pauseEntity(1);
                 // FALL-THROUGH
             case 0x540:
                 while (0.0f < m_bulblinStun) {
@@ -843,7 +839,7 @@ void stOldin::BulblinUpdate(float deltaFrame) {
                     OLDIN_SAVE(m_bulblinSeq, 0x540, 1);
                     return;
                 }
-                fn_27_279228(m_bulblin, 0);
+                m_bulblin->pauseEntity(0);
                 fn_27_279FC8(m_bulblin, &m_bulblinNodeMtx, false);
                 m_bulblin->setMotion(2);
                 OLDIN_SET_FRAME(m_bulblin, 0.0f);
@@ -870,7 +866,7 @@ void stOldin::BulblinUpdate(float deltaFrame) {
             dead:
                 m_bulblinHit->endEntity();
                 m_bulblinStun = 4.0f;
-                fn_27_279228(m_bulblin, 1);
+                m_bulblin->pauseEntity(1);
                 // FALL-THROUGH
             case 0x569:
                 while (0.0f < m_bulblinStun) {
@@ -878,7 +874,7 @@ void stOldin::BulblinUpdate(float deltaFrame) {
                     OLDIN_SAVE(m_bulblinSeq, 0x569, 1);
                     return;
                 }
-                fn_27_279228(m_bulblin, 0);
+                m_bulblin->pauseEntity(0);
                 m_bulblinSpeed.m_x = -2.0f;
                 m_bulblinSpeed.m_y = -0.2f;
                 m_bulblinSpeed.m_z = 2.0f;

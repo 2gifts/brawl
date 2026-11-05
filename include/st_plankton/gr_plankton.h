@@ -22,8 +22,6 @@
 extern "C" void fn_27_26399C(Yakumono* yakumono);
 // the stage that is played (sora_melee .bss)
 extern "C" Stage* lbl_27_bss_5668;
-// ecMgr::setEffect(EfID, const Vec3f*) (unnamed in the symbols; the code is the same as setEffect(EfID, Vec3f*))
-extern "C" u32 fn_8005F800(ecMgr* mgr, EfID effectID, Vec3f* pos);
 // Ground::isCollisionStatusOwnerTask (sora_melee): the symbol takes an int pointer (the header declares another type)
 extern "C" bool isCollisionStatusOwnerTask__6GroundFP12grCollStatusPi(Ground* ground, grCollStatus* collStatus, int* flags);
 

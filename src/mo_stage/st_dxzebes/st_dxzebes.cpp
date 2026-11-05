@@ -26,8 +26,6 @@
 extern "C" void fn_8005E3C8(efScreen* screen, efScreenHandle* handle, float frames);
 // Stage: HYPOTHESIS: true while the stage is the active one (not the one used for the menu preview).
 extern "C" int fn_27_2249E0(Stage* stage);
-// grMadein: HYPOTHESIS: switches the looping flag of the ground's motion.
-extern "C" void fn_27_279228(grMadein* ground, int loop);
 
 // The frames the acid stays at one level before it moves to the next one (see grZebesWaterProc): the base, a spare,
 // the random extra and the height the level is around. A line of zeros ends the table. HYPOTHESIS: names follow their
@@ -486,11 +484,11 @@ void stDxZebes::update(float deltaFrame) {
 void stDxZebes::updateBirdman(float deltaFrame) {
     switch (m_eventPhase.getPhase()) {
         case 0:
-            fn_27_279228(ZEBES_GROUND(6), 1);
+            ZEBES_GROUND(6)->pauseEntity(1);
             if (m_eventPhase.isReadyEnd() == 1) {
                 m_eventPhase.setPhase(1);
                 m_eventShaft.start();
-                fn_27_279228(ZEBES_GROUND(6), 0);
+                ZEBES_GROUND(6)->pauseEntity(0);
                 ZEBES_GROUND(6)->setMotion(m_motionToggle);
                 ZEBES_GROUND(6)->startEntity();
             }

@@ -1,3 +1,4 @@
+// Local BrawlHeaders shadow: subject registration, display status and allocation declarations.
 #pragma once
 
 // Local shadow of BrawlHeaders/cm/cm_subject.h: names the constructor, destructor and the helpers the stages call
@@ -7,27 +8,41 @@
 #include <types.h>
 #include <mt/mt_vector.h>
 #include <nw4r/ut.h>
+#include <sr/sr_common.h>
 
 class cmSubject {
 public:
     char _0[8];
-    // HYPOTHESIS: the stages switch these on and off (1 while the subject is out of the camera's reach).
-    u32 m_state : 3;
-    u32 m_stateB : 3;
-    // soCameraSubject setAdvPri/setPlayerNo and soCameraModuleImpl setDamageFly/setRun write these bits.
-    u32 m_advPri : 3;
-    // HYPOTHESIS: the player number that getSubjectByPlayerNo and the camera controllers compare.
-    u32 m_playerNo : 3;
-    u32 _8_bit12 : 3;
-    // HYPOTHESIS: the subject the loupe (the off-screen bubble) may show (gfLoupe::setup takes only these).
-    u32 m_isLoupeTarget : 1;
-    u32 m_isDamageFly : 1;
-    u32 _8_bit17 : 1;
-    // HYPOTHESIS: set while registered (soCameraSubject::unRegist only unregisters when it is set).
-    u32 m_isRegist : 1;
-    u32 m_isRun : 1;
-    u32 _8_rest : 12;
-    char _12[2];
+    union {
+        struct {
+            // HYPOTHESIS: the stages switch these on and off (1 while the subject is out of the camera's reach).
+            u32 m_state : 3;
+            u32 m_stateB : 3;
+            // soCameraSubject setAdvPri/setPlayerNo and soCameraModuleImpl setDamageFly/setRun write these bits.
+            u32 m_advPri : 3;
+            // HYPOTHESIS: the player number that getSubjectByPlayerNo and the camera controllers compare.
+            u32 m_playerNo : 3;
+            u32 _8_bit12 : 3;
+            // HYPOTHESIS: the subject the loupe (the off-screen bubble) may show (gfLoupe::setup takes only these).
+            u32 m_isLoupeTarget : 1;
+            u32 m_isDamageFly : 1;
+            u32 _8_bit17 : 1;
+            // HYPOTHESIS: set while registered (soCameraSubject::unRegist only unregisters when it is set).
+            u32 m_isRegist : 1;
+            u32 m_isRun : 1;
+            u32 _8_rest : 12;
+        };
+        struct {
+            u32 unk8Pad0 : 13;
+            u32 unk8Bit13 : 1;
+            u32 unk8Bit14 : 1;
+            u32 unk8Pad15 : 17;
+        };
+    };
+    union {
+        char _12[2];
+        s16 unkC;
+    };
     s16 m_damage;
     Vec3f m_pos;
     char _28[16];
@@ -44,6 +59,8 @@ public:
     void draw(float scale);
     void setRange(Rect2D* range);
     void regist();
+    void unRegist();
+    void updateDispStatus();
     void shiftRange(float scale);
 };
 static_assert(sizeof(cmSubject) == 132, "Class is wrong size!");
@@ -56,3 +73,5 @@ public:
 public:
     static cmSubject* getSubjectByPlayerNo(u32 playerNo);
 };
+
+cmSubject* cmSubjectGetStruct(HeapType heap, int kind, int flag);

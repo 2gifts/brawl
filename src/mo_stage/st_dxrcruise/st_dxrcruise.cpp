@@ -29,8 +29,6 @@ struct stDxCruiseSceneFlags {
 extern stDxCruiseSceneFlags* lbl_805A0360;
 
 // Unnamed helpers of sora_melee the stage calls directly.
-// HYPOTHESIS: sets a ground's blend/speed constant (on = 1)
-extern "C" void fn_27_279228(Ground* ground, bool on);
 // HYPOTHESIS: gives the position of the fighter with this entry id (false when it cannot be found)
 
 // Reads the "landed on" weight of a madein ground (grMadein::m_304 at +0x170 is protected).
@@ -168,7 +166,7 @@ void stDxCruise::createObj() {
         static_cast<grGimmick*>(getGround(i))->setScale(&scale);
     }
     for (int i = 0; i < 3; i++) {
-        fn_27_279228(getGround(i + 2), true);
+        reinterpret_cast<grMadein*>(getGround(i + 2))->pauseEntity(true);
         u8* flags = reinterpret_cast<u8*>(getGround(i + 6)) + 0x16C;
         *flags |= 1;
         m_carpetFlag[i] = 0;
@@ -294,10 +292,10 @@ void stDxCruise::update(float deltaFrame) {
         switch (m_carpetEvent[i].getPhase()) {
             case 0:
                 if (cruiseGround(this, i + 6)->isLandWeightAtLeast(1.0f) == true) {
-                    fn_27_279228(getGround(i + 2), false);
+                    reinterpret_cast<grMadein*>(getGround(i + 2))->pauseEntity(false);
                     m_carpetEvent[i].setPhase(1);
                 } else {
-                    fn_27_279228(getGround(i + 2), true);
+                    reinterpret_cast<grMadein*>(getGround(i + 2))->pauseEntity(true);
                 }
                 break;
             case 1:
@@ -306,11 +304,11 @@ void stDxCruise::update(float deltaFrame) {
                     m_carpetEvent[i].m_manualFramesLeft = 0.0f;
                 }
                 if (cruiseGround(this, i + 6)->isLandWeightAtLeast(1.0f) == true) {
-                    fn_27_279228(getGround(i + 2), false);
+                    reinterpret_cast<grMadein*>(getGround(i + 2))->pauseEntity(false);
                     m_carpetFlag[i] = 1;
                     m_carpetEvent[i].m_manualFramesLeft = 0.0f;
                 } else {
-                    fn_27_279228(getGround(i + 2), true);
+                    reinterpret_cast<grMadein*>(getGround(i + 2))->pauseEntity(true);
                     m_carpetEvent[i].m_manualFramesLeft += deltaFrame;
                     if (m_carpetEvent[i].m_manualFramesLeft > 200.0f) {
                         m_carpetEvent[i].setPhase(2);
@@ -350,7 +348,7 @@ void stDxCruise::update(float deltaFrame) {
                     int route = i + 2;
                     static_cast<grMadein*>(getGround(route))->endEntity();
                     static_cast<grMadein*>(getGround(route))->startEntity();
-                    fn_27_279228(getGround(route), true);
+                    reinterpret_cast<grMadein*>(getGround(route))->pauseEntity(true);
                     m_carpetEvent[i].setPhase(4);
                     m_carpetEvent[i].m_manualFramesLeft = 0.0f;
                     m_carpetFlag[i] = 0;

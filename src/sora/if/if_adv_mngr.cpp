@@ -20,6 +20,7 @@
 #include <ty/ty_fig_listmng.h>
 #include <if/if_adv_gauge.h>
 #include <if/if_adv_pause.h>
+#include <if/if_adv_radar.h>
 
 namespace nw4r {
 namespace g3d {
@@ -37,7 +38,6 @@ struct IfAdvDispInfo {
 };
 
 extern "C" s32 fn_80109C88(s32 state);
-extern "C" void fn_800DE360(s32 value);
 extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 
 extern "C" {
@@ -47,6 +47,7 @@ void fn_8010A800(IfAdvPause* pause, nw4r::g3d::ResFile* resFile1, nw4r::g3d::Res
 IfAdvRadarData* fn_8010CF44(IfAdvRadarData* data, void* arg1, void* arg2, void* arg3, void* arg4);
 void fn_8010CF88(IfAdvRadarData* data, int arg);
 void fn_8010D00C();
+void fn_8010A874(IfAdvPause* pause);
 nw4r::g3d::ScnChoice* fn_801B3440(MEMAllocator* allocator, u32* size, int capacity);
 nw4r::g3d::ScnGroup* fn_801AB6CC(MEMAllocator* allocator, u32* size, int capacity);
 void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(nw4r::g3d::ResAnmScn* self, nw4r::g3d::ResAnmScn* anm);
@@ -54,8 +55,6 @@ void fn_800E023C(IfPlayer* player, int arg1, int arg2, nw4r::g3d::ResFile* resFi
 void fn_800E244C(IfPlayer* player);
 void fn_800E26B8(IfPlayer* player);
 void fn_800DD6E4(IfCenter* center, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2, int arg1, int arg2);
-// HYPOTHESIS: the fourth parameter is a bool (its argument is loaded out of order like a narrower type).
-void fn_800DDA50(IfCenter* center, nw4r::g3d::ScnGroup* group, int arg1, bool arg2, int arg3, int arg4);
 void fn_8010BDD0(nw4r::g3d::ResFile* resFile);
 void fn_8010BF3C(nw4r::g3d::ResFile* resFile);
 IfAdvGauge* fn_8010B76C();
@@ -372,10 +371,7 @@ extern "C" void fn_80106A64(IfAdvMngr* mngr, void* arg1, void* arg2, void* arg3,
     mngr->unk58 = mngr->m_archive->getData(0, Data_Type_Misc, 9, 0xFFFE);
     mngr->unk5C = mngr->m_archive->getData(0, Data_Type_Misc, 0xA, 0xFFFE);
     if (arg1 && arg2 && arg3 && arg4) {
-        IfAdvRadarData* data = static_cast<IfAdvRadarData*>(operator new(8, Heaps::System));
-        if (data) {
-            data = fn_8010CF44(data, arg1, arg2, arg3, arg4);
-        }
+        IfAdvRadarData* data = new (Heaps::System) IfAdvRadarData(arg1, arg2, arg3, arg4);
         if (mngr->m_radarData.m_ptr != data) {
             delete mngr->m_radarData.m_ptr;
             mngr->m_radarData.m_ptr = data;
@@ -468,7 +464,7 @@ void IfAdvMngr::createModel() {
     Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(&anm, reinterpret_cast<nw4r::g3d::ResAnmScn*>(&anm2));
     g_gfSceneRoot->setInfoCamResAnm(&anm);
     if (m_radarData.m_ptr) {
-        fn_8010CF88(m_radarData.m_ptr, 0);
+        IfAdvRadar::create(m_radarData.m_ptr, 0);
     }
 }
 
@@ -517,7 +513,7 @@ void IfAdvMngr::destroyModel() {
         m_task->exit();
         m_task = NULL;
     }
-    fn_8010D00C();
+    IfAdvRadar::destroy();
     if (m_choice) {
         m_choice->Destroy();
         m_choice = NULL;
@@ -526,7 +522,7 @@ void IfAdvMngr::destroyModel() {
 
 void IfAdvMngr::startMelee() {
     unk4_80 = false;
-    fn_800DDA50(m_center, m_group, 0, 0, 0, 0);
+    m_center->startMelee(m_group, 0, 0, 0, 0);
     IfPlayer::startMelee(m_group);
     fn_8010C004(m_group);
     fn_80108E44(m_group);
@@ -562,7 +558,7 @@ s32 IfAdvMngr::main() {
         }
     } else {
         meleeMain();
-        fn_800DE360(reinterpret_cast<s32>(m_center));
+        m_center->main();
     }
     g_gfSceneRoot->remove(reinterpret_cast<nw4r::g3d::ScnMdl*>(m_choice));
     if (unk118 != 0) {

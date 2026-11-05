@@ -125,7 +125,7 @@ void grEarthPelletFlower::updateState(float deltaFrame) {
                 m_snd.setPos(&m_pelletData->m_pos);
                 m_snd.playSE(static_cast<SndID>(0x1CC5), 0, 0, -1);
                 u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x4E0003));
-                fn_8005FF8C(g_ecMgr, effect, 0x14);
+                g_ecMgr->setDelay(effect, 0x14);
                 g_ecMgr->setParent(effect, m_sceneModels[0], "TopN", 1);
                 m_state = 0x13;
             }

@@ -25,8 +25,6 @@
 // Unnamed helpers of other modules the stage calls directly (the names are the ones of the sora maps).
 // stMelee::getFighterCenterPosition
 extern "C" void fn_27_239FEC(stMelee* stage, u8 index, Vec3f* pos);
-// grMadein::pauseEntity
-extern "C" void fn_27_279228(grMadein* ground, bool pause);
 // sndBgmRateSystem::stopBGM and the instance it works on
 extern "C" void fn_800790FC(void* system, int a);
 extern void* lbl_805A01D8;
@@ -527,7 +525,7 @@ void stMadein::setYokeroStage() {
         m_unk9E0 = r;
         MADEIN(0x43)->setMotion(m_unk9E0);
         MADEIN(0x43)->startEntity();
-        fn_27_279228(MADEIN(0x43), true);
+        MADEIN(0x43)->pauseEntity(true);
     }
     if (bgGround[m_game] == 0x40) {
         u32 r = randi(3);
@@ -1972,7 +1970,7 @@ bool stMadein::updateApirusiro(float deltaFrame) {
             m_unk954[2] = 1;
             m_unk954[1] = 1;
             m_unk954[0] = 1;
-            fn_27_279228(MADEIN(0x43), false);
+            MADEIN(0x43)->pauseEntity(false);
             m_event1.setPhase(1);
             m_unk9E3[3] = 0;
             m_unk9E3[2] = 0;

@@ -62,6 +62,8 @@ public:
     }
     T* get() const { return m_obj; }
     T* operator->() const { return m_obj; }
+    // HYPOTHESIS: scene-parent comparisons access the held object directly.
+    operator T*() const { return m_obj; }
 
 private:
     T* m_obj;
