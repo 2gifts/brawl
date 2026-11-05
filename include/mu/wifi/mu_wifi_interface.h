@@ -161,6 +161,9 @@ public:
     bool isPlayerAssignRecieved();
     bool isEqualServerGameMode();
     bool isMyPlayerArea(int index);
+    void noticeEndOfCharSelect();
+    bool isCancelApprovalCalled(u8* aid, int* player);
+    void answerRequestedEntry(bool accepted, u8 aid, int player);
     u8 getTeamColor(int index);
     u8 getAssignedTeamColor(int index);
     u8 getAssignedHomerunRule();

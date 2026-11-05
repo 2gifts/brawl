@@ -17,6 +17,7 @@ class muSelCharPlayerArea;
 class muSelCharCoin;
 class muSelCharHand;
 class muRuleTask;
+class muNoticeWndTask;
 
 enum TeamBattleType { // custom
     Team_Battle_None = 0,
@@ -60,7 +61,10 @@ class muSelCharTask : public gfTask {
 public:
     const static u8 num_player_areas = 4;
 
-    char _0x40[4];
+    union {
+        char _0x40[4];
+        int unk40;
+    };
     muSelCharPlayerArea* m_selCharPlayerAreas[num_player_areas];   // 0x44
     char _0x54[0x18];
     nw4r::g3d::ScnGroup* m_scnGroup;            // 0x6C the group of the scene that the models of the screen are drawn in
@@ -111,39 +115,71 @@ public:
     int m_difficulty;                           // 0x5E0
     int m_maxDiff;                              // 0x5E4
     int m_readyState;                           // 0x5E8 HYPOTHESIS: 2 while the battle can start
-    u8 m_readyButtonPointed;                    // 0x5EC a hand is on the button that starts the battle
-    char _0x5ed[0xF];
+    union {
+        struct {
+            u8 m_readyButtonPointed;                    // 0x5EC a hand is on the button that starts the battle
+            char _0x5ed[0xF];
+        };
+        struct {
+            char unk5EC[0xC];
+            int unk5F8;
+        };
+    };
     u8 m_isEntried2P;                           // 0x5FC
     char _0x5fd[3];
     int m_homerunRule;                          // 0x600 HYPOTHESIS: the rule of the Home-Run Contest (solo or co-op)
     int m_kumiteType;                           // 0x604 the kind of the Multi-Man Brawl
-    char _0x608[0x18];
+    union {
+        char _0x608[0x18];
+        struct {
+            char unk608[4];
+            muNoticeWndTask* unk60C;
+            char unk610[0x10];
+        };
+    };
     int m_queueMeleeDropRule;                   // 0x620
     char _0x624[0x8];
     muRuleTask* m_ruleTask;                     // 0x62C the rules screen that opens over the select screen
     int m_ruleTaskState;                        // 0x630
-    u8 m_ruleControlEnable;                     // 0x634
     union {
-        char _0x635[0x13];
         struct {
-            char unk635[2];
-            // HYPOTHESIS: four-byte Wi-Fi rule packet cached for change detection.
-            struct {
-                u8 unk0_6 : 2;
-                u8 unk0_4 : 2;
-                u8 unk0_2 : 2;
-                u8 unk0_0 : 2;
-                u8 unk1_5 : 3;
-                u8 unk1_4 : 1;
-                u8 unk1_0 : 4;
-                u8 unk2;
-                u8 unk3;
-            } unk637;
-            char unk63B[0xD];
+            u8 m_ruleControlEnable;                     // 0x634
+            union {
+                char _0x635[0x13];
+                struct {
+                    char unk635[2];
+                    // HYPOTHESIS: four-byte Wi-Fi rule packet cached for change detection.
+                    struct {
+                        u8 unk0_6 : 2;
+                        u8 unk0_4 : 2;
+                        u8 unk0_2 : 2;
+                        u8 unk0_0 : 2;
+                        u8 unk1_5 : 3;
+                        u8 unk1_4 : 1;
+                        u8 unk1_0 : 4;
+                        u8 unk2;
+                        u8 unk3;
+                    } unk637;
+                    char unk63B[0xD];
+                };
+            };
+        };
+        struct {
+            u8 unk634;
+            u8 unk635Byte;
+            u8 unk636Byte;
+            char unk637Pad[0xD];
+            int unk644;
         };
     };
     int m_numPlayerAreas;                       // 0x648
-    char _0x64c[0x8];
+    union {
+        char _0x64c[0x8];
+        struct {
+            int unk64C;
+            char unk650[4];
+        };
+    };
 
     virtual void processDefault();
     virtual ~muSelCharTask();
@@ -152,6 +188,29 @@ public:
     // HYPOTHESIS: initProc receives a pointer to the screen initialization data.
     static muSelCharTask* create(void* data);
     void initProc(void* data);
+    void wifiMain();
+    void mainRule();
+    void faceIconMain();
+    void selectingMain();
+    void setToGlobal();
+    void setState(int state, int argument, int extra);
+    void closeWifiDlg();
+    // HYPOTHESIS: classification shared by the menu-mode checks.
+    static inline int getSelCharTypeGroup(int type) {
+        if (isSelCharTypeIn(type, 0, 4)) return 0;
+        if (isSelCharTypeIn(type, 4, 12)) return 1;
+        bool inGroup = isSelCharTypeIn(type, 12, 16);
+        int group = 3;
+        if (inGroup) group = 2;
+        return group;
+    }
+    // HYPOTHESIS: online modes exclude the first two mode groups.
+    static inline bool isSelCharTypeOnline(int type) {
+        bool online;
+        if (getSelCharTypeGroup(type) == 0 || getSelCharTypeGroup(type) == 1) online = false;
+        else online = true;
+        return online;
+    }
     void createWifiModel(nw4r::g3d::ResFile* resFile);
     // HYPOTHESIS: the model table contains eight-byte records; the last flag varies priority.
     void createObjResFile(const void* models, int count, nw4r::g3d::ResFile* resFile,
