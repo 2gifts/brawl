@@ -38,6 +38,8 @@
 
 #include <havok/hkSimulation.h>
 #include <havok/hkRigidBody.h>
+#include <havok/hkProcessCollisionOutput.h>
+#include <havok/hkCdPoint.h>
 
 hkSimulation::hkSimulation(hkWorld* world) {
     m_world = world;
@@ -79,11 +81,13 @@ void hkSimulation::collideEntitiesNarrowPhaseDiscrete(hkEntity** entities, int n
 
 void hkSimulation::resetCollisionInformationForEntities(hkEntity** entities, int numEntities, hkWorld* world,
                                                         hkBool flag) {
+    // HYPOTHESIS: the flag's meaning; a set flag skips the reset (hkWorldOperationUtil::removeEntityBP passes true)
     if (flag) {
-        // HYPOTHESIS: world +0x68 is the world's collision input
-        processAgentsOfEntities(entities, numEntities, **(const hkProcessCollisionInput**)((char*)world + 0x68),
-                                &hkSimulation::processAgentResetCollisionInformation, 0);
+        return;
     }
+    // HYPOTHESIS: world +0x68 is the world's collision input
+    processAgentsOfEntities(entities, numEntities, **(const hkProcessCollisionInput**)((char*)world + 0x68),
+                            &hkSimulation::processAgentResetCollisionInformation, 0);
 }
 
 void hkSimulation::processAgentResetCollisionInformation(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,
@@ -104,6 +108,22 @@ hkTransform& hkRigidBody::getTransform() {
     return *(hkTransform*)((u8*)this + 0xB0);
 }
 
+const hkQuaternion& hkMotion::getRotation() const {
+    return m_motionState.m_sweptTransform.m_rotation1;
+}
+
+const hkVector4& hkContactPoint::getSeparatingNormal() const {
+    return m_normal;
+}
+
+const hkCollidable* hkWorldObject::getCollidable() const {
+    return &m_collidable;
+}
+
 hkVector4& hkRigidBody::getCenterOfMassInWorld() {
     return *(hkVector4*)((u8*)this + 0x100);
+}
+
+hkProcessCollisionOutput::hkProcessCollisionOutput() {
+    m_toi.m_time = HK_REAL_MAX;
 }

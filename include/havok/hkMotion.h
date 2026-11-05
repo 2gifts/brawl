@@ -45,6 +45,8 @@ struct hkMotion : hkReferencedObject {
     hkVector4 m_angularVelocity;   // 0xF0
 
     hkMotion(const hkVector4& position, const hkQuaternion& rotation);
+    // HYPOTHESIS: return type and const (map name only); the swept transform's second rotation
+    const hkQuaternion& getRotation() const;
     hkMotion(hkFinishLoadedObjectFlag f) {}
     virtual ~hkMotion() {}                                              // 0x08
     // calcStatistics                                                   // 0x0C (inherited)

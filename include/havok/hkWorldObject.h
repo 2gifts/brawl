@@ -38,4 +38,6 @@ struct hkWorldObject : hkReferencedObject {
     virtual bool setShape(hkShape* shape);
     void addReference();
     void removeReference();
+    // HYPOTHESIS: return type and const (map name only)
+    const hkCollidable* getCollidable() const;
 };

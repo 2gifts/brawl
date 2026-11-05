@@ -26,4 +26,7 @@ struct hkProcessCollisionOutput {
     hkProcessCdPoint* m_firstFreeContactPoint; // 0x0000
     hkProcessCdPoint m_contactPoints[256];     // 0x0010
     ToiInfo m_toi;                             // 0x3010
+
+    // Out of line (processAgentsOfEntities calls it): only the time of impact is initialised, to the largest float.
+    hkProcessCollisionOutput();
 };
