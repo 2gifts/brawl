@@ -149,6 +149,9 @@ public:
     virtual ~muSelCharTask();
 
     muSelCharTask();
+    void appearHomerunRule();
+    int bButtonHoldProc();
+    void setReadyState(int state);
     // HYPOTHESIS: initProc receives a pointer to the screen initialization data.
     static muSelCharTask* create(void* data);
     void initProc(void* data);

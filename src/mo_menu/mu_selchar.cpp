@@ -776,3 +776,89 @@ void muSelCharTask::setRuleNumStock(int count) {
         if (master) sendWifiGameRule(false, true);
     }
 }
+
+extern const u8 lbl_10_rodata_4F0[4][2];
+
+void muSelCharTask::appearHomerunRule() {
+    int rule = m_homerunRule;
+    int disabled = 0;
+    int type = getSelCharType();
+    int group;
+    if (isSelCharTypeIn(type, 0, 4)) group = 0;
+    else if (isSelCharTypeIn(type, 4, 12)) group = 1;
+    else {
+        bool inGroup = isSelCharTypeIn(type, 12, 16);
+        group = 3;
+        if (inGroup) group = 2;
+    }
+    if (group == 2 && !isWifiGameMaster()) disabled = 1;
+    int motion;
+    if (rule == 0) motion = lbl_10_rodata_4F0[disabled][0];
+    else motion = lbl_10_rodata_4F0[disabled][1];
+    m_objs[Obj_HomerunRule]->changeAnimN(motion, 0x10, false, false);
+    MuObject* object = m_objs[Obj_HomerunRule];
+    object->changeAnimN(2, 1, true, false);
+    m_scnGroup->Insert(m_scnGroup->sceneItemsCount, object->m_sceneModel);
+}
+
+extern const u8 lbl_10_rodata_118[8];
+
+int muSelCharTask::bButtonHoldProc() {
+    float frame = 0.0f;
+    int player = -1;
+    int count = 0;
+    for (int area = 0; area < m_numPlayerAreas; area++) {
+        int held = m_selCharPlayerAreas[area]->m_selCharHand->m_bButtonCnt;
+        if (held > count) {
+            count = held;
+            player = area;
+        }
+    }
+    if (player >= 0) {
+        int controller = m_selCharPlayerAreas[player]->getControllerKind();
+        if (controller < 4) frame = lbl_10_rodata_118[controller];
+    }
+    MuObject* object = m_objs[3];
+    m_scnGroup->Remove(object->m_sceneModel);
+    if (count > 0) {
+        m_scnGroup->Insert(m_scnGroup->sceneItemsCount, object->m_sceneModel);
+        object->setFrameVisible(frame);
+        object->setFrameNode(count);
+    }
+    if (count >= 30) return player;
+    return -1;
+}
+
+extern const u8 lbl_10_rodata_4E0[4];
+extern const u8 lbl_10_rodata_4E8[4][2];
+
+void muSelCharTask::setReadyState(int state) {
+    MuObject* object = m_objs[Obj_ReadyButton];
+    m_scnGroup->Remove(object->m_sceneModel);
+    if (state != 0) {
+        m_scnGroup->Insert(m_scnGroup->sceneItemsCount, object->m_sceneModel);
+        object->changeAnimN(state != 1, 0x11, true, false);
+    }
+    u32 motion = lbl_10_rodata_4E0[state];
+    object = m_objs[1];
+    int type = getSelCharType();
+    int group;
+    if (isSelCharTypeIn(type, 0, 4)) group = 0;
+    else if (isSelCharTypeIn(type, 4, 12)) group = 1;
+    else {
+        bool inGroup = isSelCharTypeIn(type, 12, 16);
+        group = 3;
+        if (inGroup) group = 2;
+    }
+    int animation;
+    bool play;
+    if (motion <= 1) {
+        animation = lbl_10_rodata_4E8[group][0];
+        play = motion == 1;
+    } else {
+        animation = lbl_10_rodata_4E8[group][1];
+        play = true;
+    }
+    object->changeAnimN(animation, 0x18, play, false);
+    m_readyState = state;
+}
