@@ -15,6 +15,7 @@ struct UnkIpNetworkMsg {
 // byte 1: "front" index
 // TODO: relationship to ipPadStatus and/or ipPadButton?
 class ipNetworkProducer {
+    friend class stOperatorNetworkMelee;
     u8 unk0;
     u8 unk1;
     UnkIpNetworkMsg unk2;

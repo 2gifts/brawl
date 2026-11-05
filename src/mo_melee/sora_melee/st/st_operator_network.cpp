@@ -5,6 +5,7 @@
 #include <revolution/OS/OSError.h>
 #include <st/operator/st_operator_network.h>
 #include <types.h>
+#include <ip/ip_network_producer.h>
 
 extern "C" {
 // HYPOTHESIS: muWifiInterfaceTask::getNetworkError (map name), the error code with its detail.
@@ -22,6 +23,26 @@ bool NtBase::isNetCondOnline() {
 }
 
 void netReport(const char* fmt, ...) {
+}
+
+extern int lbl_27_data_52B78;
+extern char lbl_27_data_52E10[0x28];
+
+void stOperatorNetworkMelee::setPrepareLoadStageComplete() {
+    unk6C = lbl_27_data_52B78;
+    unk70 = 0;
+    if (m_isOnline) {
+        muWifiInterfaceTask* task = g_muWifiInterfaceTask;
+        u8 aid = Network::getMyAID();
+        if (aid == 0xFF) {
+            aid = 4;
+        }
+        task->m_aidInfos[aid].unk56_b6 = true;
+        netReport(lbl_27_data_52E10);
+        task->sendAIDInfo(false, 0xFE);
+        ipNetworkProducer* producer = ipNetworkProducer::getInstance();
+        producer->unk0 = 0;
+    }
 }
 
 void stNetworkOperatorStopCallback(u16 frame, u8 result) {

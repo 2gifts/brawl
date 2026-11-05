@@ -212,6 +212,7 @@ public:
     void resetLimitTime(int seconds);
     static bool testSendAIDInfoDone();
     void clearPrepareLoadStage();
+    void sendAIDInfo(bool send, u8 aid);
     int getFriendAIDIndexAID(int aid);
     void clearShortComment(int aid);
     void closeAIDWifi(int aid);
