@@ -141,9 +141,14 @@ void hkBvTreeStreamAgent::linearCast(void* a, void* b, void* c, void* d, void* e
 }
 #pragma pop
 
-#pragma dont_inline on
+// BYTES: the factories call this constructor, so it must not be auto-inlined into them; `dont_inline` would also stop
+// the hkCollisionAgent constructor from being inlined here. m_list is an inplace array (its storage is addressed from
+// the array's own this). NONMATCHING (~76%): the target keeps the hkCollisionAgent vtable store and loads *src after the
+// list stores (the no-dead-store mode, see TIPS; trigger not found here).
+#pragma push
+#pragma auto_inline off
 hkBvTreeStreamAgent::hkBvTreeStreamAgent(void* unused0, void* unused1, const int* src, int unk8Value)
-    : hkCollisionAgent(unk8Value), m_list(&m_inlineEntry, 0, 1) {
+    : hkCollisionAgent(unk8Value) {
     unkC = *src;
     unk10[3] = 0.0f;
     unk10[2] = 0.0f;
@@ -155,7 +160,7 @@ hkBvTreeStreamAgent::hkBvTreeStreamAgent(void* unused0, void* unused1, const int
     unk10[4] = 0.0f;
     fn_802FCB14(&m_list);
 }
-#pragma dont_inline reset
+#pragma pop
 
 hkBvTreeStreamAgent* hkBvTreeStreamAgent::createBvTreeShapeAgent(void* a, void* b, const int* c, int d) {
     hkBvTreeStreamAgent* agent = (hkBvTreeStreamAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkBvTreeStreamAgent), 0x1d);

@@ -19,8 +19,7 @@ struct hkBvTreeStreamAgent : hkCollisionAgent {
 
     int unkC;                      // 0x0C copied from *src in the constructor
     hkReal unk10[8];               // 0x10..0x2F zeroed by the constructor (HYPOTHESIS: two vectors)
-    hkArray<unsigned int> m_list;  // 0x30 HYPOTHESIS: list managed by hkAgent1nMachine (see cleanup)
-    unsigned int m_inlineEntry;    // 0x3C inline storage of m_list (capacity 1)
+    hkInplaceArray<unsigned int, 1> m_list; // 0x30 HYPOTHESIS: list managed by hkAgent1nMachine (see cleanup)
 
     // HYPOTHESIS: the first two parameters are not used by the constructor.
     hkBvTreeStreamAgent(void* unused0, void* unused1, const int* src, int unk8Value);
