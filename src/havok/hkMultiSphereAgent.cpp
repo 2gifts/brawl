@@ -48,17 +48,13 @@
 #include <havok/hkShapeType.h>
 
 // Stand-ins for the query functions of the symmetric multi-sphere agents (not written yet).
-extern "C" void fn_802BD2C0();
-extern "C" void fn_802BD350();
-extern "C" void fn_802BCCE0();
-extern "C" void fn_802BBC8C();
 extern "C" void fn_802B7FD0(void* a, void* b, void* c, void* target, void* d);
 
 void hkMultiSphereAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs listB;
     listB.create = (hkAgentFunc)createListBAgent;
-    listB.staticGetPenetrations = (hkAgentFunc)fn_802BD2C0;
-    listB.staticGetClosestPoints = (hkAgentFunc)fn_802BD350;
+    listB.staticGetPenetrations = (hkAgentFunc)hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticGetPenetrations;
+    listB.staticGetClosestPoints = (hkAgentFunc)hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticGetClosestPoints;
     listB.staticLinearCast = (hkAgentFunc)hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticLinearCast;
     listB.symmetricA = 1;
     listB.symmetricB = 1;
@@ -66,8 +62,8 @@ void hkMultiSphereAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
 
     hkAgentFuncs listA;
     listA.create = (hkAgentFunc)createListAAgent;
-    listA.staticGetPenetrations = (hkAgentFunc)fn_802BCCE0;
-    listA.staticGetClosestPoints = (hkAgentFunc)fn_802BBC8C;
+    listA.staticGetPenetrations = (hkAgentFunc)hkMultiSphereAgent::staticGetPenetrations;
+    listA.staticGetClosestPoints = (hkAgentFunc)hkMultiSphereAgent::staticGetClosestPoints;
     listA.staticLinearCast = (hkAgentFunc)hkMultiSphereAgent::staticLinearCast;
     listA.symmetricA = 0;
     listA.symmetricB = 1;
@@ -136,4 +132,45 @@ void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::staticLinearCast(
     } else {
         fn_802B7FD0(b, a, &flippedInput, &flipped, 0);
     }
+}
+
+// Queries with the bodies swapped: the collector is wrapped in one that turns the results back.
+void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::getPenetrations(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    hkMultiSphereAgent::getPenetrations(b, a, c, &wrapped);
+}
+
+void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticGetPenetrations(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    hkMultiSphereAgent::staticGetPenetrations(b, a, c, &wrapped);
+}
+
+void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::getClosestPoints(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    hkMultiSphereAgent::getClosestPoints(b, a, c, &wrapped);
+}
+
+void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::staticGetClosestPoints(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    hkMultiSphereAgent::staticGetClosestPoints(b, a, c, &wrapped);
+}
+
+void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::getPenetrations(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    hkMultiSphereTriangleAgent::getPenetrations(b, a, c, &wrapped);
+}
+
+void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::staticGetPenetrations(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    hkMultiSphereTriangleAgent::staticGetPenetrations(b, a, c, &wrapped);
+}
+
+void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::getClosestPoints(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    hkMultiSphereTriangleAgent::getClosestPoints(b, a, c, &wrapped);
+}
+
+void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::staticGetClosestPoints(void* a, void* b, void* c, void* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    hkMultiSphereTriangleAgent::staticGetClosestPoints(b, a, c, &wrapped);
 }
