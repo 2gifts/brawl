@@ -1334,3 +1334,63 @@ u8 muWifiInterfaceTask::getAssignedPlayerContNum(int index) {
     }
     return index + 1;
 }
+
+bool muWifiInterfaceTask::isRequestedExchangeFriendKey(int index) {
+    u8 aid = Network::getMyAID();
+    if (aid == 0xFF) { aid = 4; }
+    if (aid == 4) { return false; }
+    muWifiAIDInfo* info;
+    aid = Network::getParentAID();
+    if (aid == 0xFF) { info = NULL; }
+    else { info = &m_aidInfos[aid]; }
+    if (info == NULL) { return false; }
+    if (!(info->unk78_b3 & 1)) { return false; }
+    u8 playerAid = m_playerAreas[index].m_aid;
+    if (playerAid == 0xFF) { return false; }
+    aid = Network::getMyAID();
+    if (aid == 0xFF) { aid = 4; }
+    if (playerAid == aid) { return false; }
+    bool live;
+    if (playerAid >= 4) { live = false; }
+    else { live = getSafeParentAIDInfo()->unk68[playerAid] == 1; }
+    if (!live) { return false; }
+    info = &m_aidInfos[playerAid];
+    if (info->m_friendAIDIndex >= 0) { return false; }
+    aid = Network::getMyAID();
+    if (aid == 0xFF) { aid = 4; }
+    if (info->unk58_b4 & (1 << aid)) { return true; }
+    return false;
+}
+
+bool muWifiInterfaceTask::getWifiPlayerInfo(int index, int* character, u8* color, bool* connected) {
+    muWifiAIDInfo* info = getSafeParentAIDInfo();
+    __typeof__(info->unkE4[0])* player = &info->unkE4[index];
+    *character = player->unk3;
+    *color = player->unk4;
+    u8 aid = Network::getMyAID();
+    if (aid == 0xFF) { aid = 4; }
+    int kind = player->unk0;
+    bool own = player->unk1Data == aid;
+    if (kind != 0) { own = false; }
+    *connected = kind != 3;
+    if (*character == 0x3E) { *connected = false; }
+    if (!NtBase::isNetCondOnline()) { *connected = false; }
+    aid = Network::getMyAID();
+    if (aid == 0xFF) { aid = 4; }
+    if (aid == 4) { *connected = false; }
+    if (Network::getParentAID() == 0xFF) { *connected = false; }
+    muWifiAIDInfo* parentInfo;
+    int count;
+    aid = Network::getParentAID();
+    if (aid == 0xFF) { parentInfo = NULL; }
+    else { parentInfo = &m_aidInfos[aid]; }
+    if (parentInfo == NULL) { count = 1; }
+    else {
+        count = 0;
+        for (int node = 0; node < 4; node++) {
+            if ((int)parentInfo->unk68[node] == 1) { count++; }
+        }
+    }
+    if (count < 2) { *connected = false; }
+    return own;
+}
