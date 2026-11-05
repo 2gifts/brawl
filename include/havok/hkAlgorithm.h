@@ -26,9 +26,11 @@ void quickSort(T* pArr, int numElem) __attribute__((never_inline));
 template <typename T, typename L>
 void quickSortRecursive(T* pArr, int d, int h, L cmpLess) {
     for (;;) {
-        int i = d;
+        // BYTES: j is set before i; the pivot's alignment attribute turns copy propagation off (the target
+        // materializes each less<> hkBool and keeps j as a byte offset shared with the swap).
         int j = h;
-        T pivot = pArr[(d + h) >> 1];
+        int i = d;
+        T pivot __attribute__((aligned(16))) = pArr[(d + h) >> 1];
         do {
             while (cmpLess(pArr[i], pivot)) {
                 i++;
@@ -36,14 +38,14 @@ void quickSortRecursive(T* pArr, int d, int h, L cmpLess) {
             while (cmpLess(pivot, pArr[j])) {
                 j--;
             }
-            if (i <= j) {
-                if (i != j) {
-                    T t = pArr[i];
-                    pArr[i] = pArr[j];
-                    pArr[j] = t;
+            if (j >= i) {
+                if (j != i) {
+                    T t __attribute__((aligned(16))) = pArr[j];
+                    pArr[j] = pArr[i];
+                    pArr[i] = t;
                 }
-                i++;
                 j--;
+                i++;
             }
         } while (i <= j);
         if (d < j) {
