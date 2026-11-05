@@ -20,6 +20,7 @@ class gfSceneRoot : public gfTask {
 public:
     gfSceneRoot();
     static void create();
+    static void drawFrameBufferReverse(int direction);
 
     enum LayerType {
         Layer_Ground = 0x0,
