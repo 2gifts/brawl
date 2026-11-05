@@ -49,8 +49,9 @@
 hkBvAgent::hkBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
     const hkBvShape* bvShape = (const hkBvShape*)bodyA.m_shape;
     hkCdBody bv(&bodyA);
+    hkShape* boundingVolume = bvShape->m_boundingVolumeShape;
     bv.m_shapeKey = bodyA.m_shapeKey;
-    bv.m_shape = bvShape->m_boundingVolumeShape;
+    bv.m_shape = boundingVolume;
     m_childA = input.m_dispatcher->getNewCollisionAgent(bv, bodyB, input, contactMgr);
     m_childB = 0;
 }
