@@ -98,3 +98,23 @@ void muCollection::erase(const FileKey& key) {
     unk384_ptr = unk15D.unk0;
     m_busy = 6;
 }
+
+void muCollection::move(int drive, FileName name) {
+    bool differs = strcmp(name.unk0, lbl_8059E14C) != 0;
+    if (differs) {
+        unk15D = name;
+        unk380_word = drive;
+        unk384_ptr = unk15D.unk0;
+        m_busy = 8;
+    }
+}
+
+void muCollection::readSummary(int drive, FileName name) {
+    bool differs = strcmp(name.unk0, lbl_8059E14C) != 0;
+    if (differs) {
+        unk1A8 = name;
+        unk380_word = drive;
+        unk384_ptr = unk1A8.unk0;
+        m_busy = 9;
+    }
+}
