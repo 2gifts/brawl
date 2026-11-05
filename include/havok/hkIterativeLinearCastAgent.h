@@ -13,4 +13,10 @@ struct hkIterativeLinearCastAgent : hkCollisionAgent {
     hkIterativeLinearCastAgent() {}
     explicit hkIterativeLinearCastAgent(int unk8Value) : hkCollisionAgent(unk8Value) {}
     virtual ~hkIterativeLinearCastAgent() {}
+
+    // Linear cast by conservative advancement: closest points at the start, then the body is moved along the path by
+    // the distance over the approach speed and queried again until it is close enough (both in hkCollisionAgent.o).
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
+    static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target,
+                                 void* d);
 };

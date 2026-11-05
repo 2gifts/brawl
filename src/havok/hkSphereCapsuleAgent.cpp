@@ -28,9 +28,6 @@
 #include <havok/hkCollisionDispatcher.h>
 
 // Stand-ins for the symmetric linear cast (staticLinearCast, not written yet) and the linear cast of other units.
-extern "C" void fn_802B7FD0(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target,
-                            void* d);
-
 void hkSphereCapsuleAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs capsule;
     capsule.create = (hkAgentFunc)createCapsuleSphereAgent;
@@ -45,7 +42,7 @@ void hkSphereCapsuleAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     sphere.create = (hkAgentFunc)createSphereCapsuleAgent;
     sphere.staticGetPenetrations = (hkAgentFunc)staticGetPenetrations;
     sphere.staticGetClosestPoints = (hkAgentFunc)staticGetClosestPoints;
-    sphere.staticLinearCast = (hkAgentFunc)fn_802B7FD0;
+    sphere.staticLinearCast = (hkAgentFunc)hkIterativeLinearCastAgent::staticLinearCast;
     sphere.symmetricA = 0;
     sphere.symmetricB = 0;
     dispatcher->registerCollisionAgent(&sphere, HK_SHAPE_SPHERE, HK_SHAPE_CAPSULE);
@@ -106,8 +103,8 @@ void hkSymmetricAgentLinearCast_20hkSphereCapsuleAgent_::staticLinearCast(const 
     hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
     if (d != 0) {
         hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
-        fn_802B7FD0(b, a, flippedInput, &flipped, &flippedStart);
+        hkIterativeLinearCastAgent::staticLinearCast(b, a, flippedInput, &flipped, &flippedStart);
     } else {
-        fn_802B7FD0(b, a, flippedInput, &flipped, 0);
+        hkIterativeLinearCastAgent::staticLinearCast(b, a, flippedInput, &flipped, 0);
     }
 }

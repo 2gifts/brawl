@@ -15,8 +15,6 @@
 #include <havok/hkCollisionDispatcher.h>
 
 // Stand-in for the linear cast of another unit (not written yet).
-extern "C" void fn_802B7FD0();
-
 hkCapsuleCapsuleAgent* hkCapsuleCapsuleAgent::createCapsuleCapsuleAgent(void* unk0, void* unk1, void* unk2,
                                                                        hkContactMgr* contactMgr) {
     return new hkCapsuleCapsuleAgent(contactMgr);
@@ -27,7 +25,7 @@ void hkCapsuleCapsuleAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     capsule.create = (hkAgentFunc)createCapsuleCapsuleAgent;
     capsule.staticGetPenetrations = (hkAgentFunc)staticGetPenetrations;
     capsule.staticGetClosestPoints = (hkAgentFunc)staticGetClosestPoints;
-    capsule.staticLinearCast = (hkAgentFunc)fn_802B7FD0;
+    capsule.staticLinearCast = (hkAgentFunc)hkIterativeLinearCastAgent::staticLinearCast;
     capsule.symmetricA = 0;
     capsule.symmetricB = 0;
     dispatcher->registerCollisionAgent(&capsule, HK_SHAPE_CAPSULE, HK_SHAPE_CAPSULE);

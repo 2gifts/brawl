@@ -19,8 +19,6 @@
 #include <havok/hkCdBodyPairCollector.h>
 
 // Stand-in for hkIterativeLinearCastAgent::staticLinearCast (other unit).
-extern "C" void fn_802B7FD0();
-
 void hkSphereSphereAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs funcs;
     funcs.symmetricA = 0;
@@ -28,7 +26,7 @@ void hkSphereSphereAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     funcs.create = (hkAgentFunc)createSphereSphereAgent;
     funcs.staticGetPenetrations = (hkAgentFunc)staticGetPenetrations;
     funcs.staticGetClosestPoints = (hkAgentFunc)staticGetClosestPoints;
-    funcs.staticLinearCast = (hkAgentFunc)fn_802B7FD0;
+    funcs.staticLinearCast = (hkAgentFunc)hkIterativeLinearCastAgent::staticLinearCast;
     dispatcher->registerCollisionAgent(&funcs, HK_SHAPE_SPHERE, HK_SHAPE_SPHERE);
 }
 

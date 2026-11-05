@@ -11,8 +11,6 @@
 // Stand-ins for the static query functions of hkGskBaseAgent and hkIterativeLinearCastAgent (other units, not recovered).
 extern "C" void fn_802B2490();
 extern "C" void fn_802B1C3C();
-extern "C" void fn_802B7FD0();
-
 void hkPredGskfAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs funcs;
     funcs.symmetricA = 0;
@@ -20,6 +18,6 @@ void hkPredGskfAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     funcs.create = (hkAgentFunc)createPredGskfAgent;
     funcs.staticGetPenetrations = (hkAgentFunc)fn_802B2490;
     funcs.staticGetClosestPoints = (hkAgentFunc)fn_802B1C3C;
-    funcs.staticLinearCast = (hkAgentFunc)fn_802B7FD0;
+    funcs.staticLinearCast = (hkAgentFunc)hkIterativeLinearCastAgent::staticLinearCast;
     dispatcher->registerCollisionAgent(&funcs, HK_SHAPE_CONVEX, HK_SHAPE_CONVEX);
 }

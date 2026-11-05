@@ -23,8 +23,6 @@
 #include <havok/hkMonitorStream.h>
 
 // Stand-in for hkIterativeLinearCastAgent::staticLinearCast (other unit).
-extern "C" void fn_802B7FD0();
-
 namespace {
 
 // Layout of the table handed to the dispatcher (stack copy in registerAgent).
@@ -61,7 +59,7 @@ void hkMultiRayConvexAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     plain.create = (hkAgentFunc)createMultiRayConvexAgent;
     plain.staticGetPenetrations = (hkAgentFunc)staticGetPenetrations;
     plain.staticGetClosestPoints = (hkAgentFunc)staticGetClosestPoints;
-    plain.staticLinearCast = (hkAgentFunc)fn_802B7FD0;
+    plain.staticLinearCast = (hkAgentFunc)hkIterativeLinearCastAgent::staticLinearCast;
     plain.symmetricA = 0;
     plain.symmetricB = 1;
     dispatcher->registerCollisionAgent(&plain, HK_SHAPE_MULTI_RAY, 1);

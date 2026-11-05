@@ -55,9 +55,6 @@
 #include <havok/hkCdBodyPairCollector.h>
 
 // Stand-ins for the query functions of the symmetric multi-sphere agents (not written yet).
-extern "C" void fn_802B7FD0(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target,
-                            void* d);
-
 void hkMultiSphereAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs listB;
     listB.create = (hkAgentFunc)createListBAgent;
@@ -403,9 +400,9 @@ void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::staticLinearCast(
     hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
     if (d != 0) {
         hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
-        fn_802B7FD0(b, a, flippedInput, &flipped, &flippedStart);
+        hkIterativeLinearCastAgent::staticLinearCast(b, a, flippedInput, &flipped, &flippedStart);
     } else {
-        fn_802B7FD0(b, a, flippedInput, &flipped, 0);
+        hkIterativeLinearCastAgent::staticLinearCast(b, a, flippedInput, &flipped, 0);
     }
 }
 

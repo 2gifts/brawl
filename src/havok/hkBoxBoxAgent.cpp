@@ -21,8 +21,6 @@
 #include <havok/hkBoxShape.h>
 
 // Stand-in for hkIterativeLinearCastAgent::staticLinearCast (other unit).
-extern "C" void fn_802B7FD0();
-
 // Contact manager view with the feature-id removal slot used by cleanup (0x18). HYPOTHESIS: the other slots are unnamed.
 struct hkBoxBoxContactMgr : hkReferencedObject {
     virtual void unk10();
@@ -38,7 +36,7 @@ void hkBoxBoxAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     funcs.create = (hkAgentFunc)createBoxBoxAgent;
     funcs.staticGetPenetrations = (hkAgentFunc)staticGetPenetrations;
     funcs.staticGetClosestPoints = (hkAgentFunc)staticGetClosestPoints;
-    funcs.staticLinearCast = (hkAgentFunc)fn_802B7FD0;
+    funcs.staticLinearCast = (hkAgentFunc)hkIterativeLinearCastAgent::staticLinearCast;
     funcs.symmetricA = 0;
     funcs.symmetricB = 0;
     dispatcher->registerCollisionAgent(&funcs, HK_SHAPE_BOX, HK_SHAPE_BOX);

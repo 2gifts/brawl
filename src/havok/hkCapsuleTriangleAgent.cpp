@@ -28,9 +28,6 @@
 
 // Stand-ins for the sub-object constructor and the symmetric linear cast of other units (not written yet).
 extern "C" void fn_80325334(void* src, void* dst);
-extern "C" void fn_802B7FD0(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target,
-                            void* d);
-
 hkCapsuleTriangleAgent::hkCapsuleTriangleAgent(const hkCdBody& triangleBody, hkContactMgr* contactMgr)
     : hkIterativeLinearCastAgent((int)contactMgr) {
     unkC[0] = 0xFFFF;
@@ -66,7 +63,7 @@ void hkCapsuleTriangleAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     capsule.create = (hkAgentFunc)createCapsuleTriangleAgent;
     capsule.staticGetPenetrations = (hkAgentFunc)staticGetPenetrations;
     capsule.staticGetClosestPoints = (hkAgentFunc)staticGetClosestPoints;
-    capsule.staticLinearCast = (hkAgentFunc)fn_802B7FD0;
+    capsule.staticLinearCast = (hkAgentFunc)hkIterativeLinearCastAgent::staticLinearCast;
     capsule.symmetricA = 0;
     capsule.symmetricB = 0;
     dispatcher->registerCollisionAgent(&capsule, HK_SHAPE_CAPSULE, HK_SHAPE_TRIANGLE);
@@ -118,8 +115,8 @@ void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticLinearCast(cons
     hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
     if (d != 0) {
         hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
-        fn_802B7FD0(b, a, flippedInput, &flipped, &flippedStart);
+        hkIterativeLinearCastAgent::staticLinearCast(b, a, flippedInput, &flipped, &flippedStart);
     } else {
-        fn_802B7FD0(b, a, flippedInput, &flipped, 0);
+        hkIterativeLinearCastAgent::staticLinearCast(b, a, flippedInput, &flipped, 0);
     }
 }
