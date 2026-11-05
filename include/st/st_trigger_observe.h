@@ -358,8 +358,9 @@ static_assert(sizeof(stObsTriggerFrameCB) == 0x18, "Class is wrong size!");
 class stObsTriggerCameraReactionCB : public stObsTriggerCB {
 public:
     // HYPOTHESIS: a 16-byte rectangle copied from the constructor argument and passed to CameraController::isIntersect.
-    float unk10[4];
+    Rect2D unk10;
 
+    stObsTriggerCameraReactionCB(bool* flag, Rect2D* area, bool keep);
     virtual void userProc();
     virtual ~stObsTriggerCameraReactionCB();
 };
@@ -367,11 +368,12 @@ public:
 class stObsTriggerPlayerIncludeAreaCB : public stObsTriggerCB {
 public:
     // HYPOTHESIS: the rectangle that ftManager::enumIncludeEntryId searches.
-    float unk10[4];
+    Rect2D unk10;
     int unk20;
     bool unk24;
     char _spacer25[3];
 
+    stObsTriggerPlayerIncludeAreaCB(bool* flag, Rect2D* area, bool keep);
     virtual void userProc();
     virtual ~stObsTriggerPlayerIncludeAreaCB();
 };
