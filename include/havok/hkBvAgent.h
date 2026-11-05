@@ -53,6 +53,7 @@ struct hkSymmetricBvAgent : hkBvAgent {
     hkSymmetricBvAgent(void* a1, void* a2, void* a3, hkContactMgr* contactMgr)
         : hkBvAgent(a1, a2, a3, contactMgr) {}
     virtual ~hkSymmetricBvAgent() {}
+    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
 };
 
 // HYPOTHESIS: penetration target wrapper built on the stack by hkSymmetricAgentLinearCast. Holds the
@@ -76,4 +77,5 @@ struct hkSymmetricAgentLinearCast : T {
     virtual void getClosestPoints(void* a, void* b, void* c, void* target);
     static void staticGetClosestPoints(void* a, void* b, void* c, hkPenetrationTarget* target);
     virtual void updateShapeCollectionFilter(void* a, void* b, void* c);
+    static void staticLinearCast(void* a, void* b, void* c, void* target, void* d);
 };

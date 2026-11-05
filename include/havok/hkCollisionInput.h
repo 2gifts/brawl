@@ -1,6 +1,7 @@
 #pragma once
 
 #include <havok/hkBase.h>
+#include <havok/hkVector4.h>
 
 struct hkCdBody;
 struct hkShapeCollection;
@@ -20,7 +21,16 @@ struct hkShapeCollectionFilter {
 struct hkCollisionInput {
     hkCollisionDispatcher* m_dispatcher; // 0x00 (hkBvAgent's static functions read it too)
     hkShapeCollectionFilter* m_filter;   // 0x04
-    u32 unk8;                            // 0x08
+    hkReal unk8;                         // 0x08 (copied as a float)
     // 0x0C HYPOTHESIS: picks the dispatcher's second lookup table when the agents create their children.
     hkBool m_createPredictiveAgents;
+};
+
+// Input of the linear cast queries: the collision input plus the cast path. The symmetric wrappers copy it and
+// negate the path. HYPOTHESIS: unk20/unk24 are distances (copied as floats), unk28 a pointer or word.
+struct hkLinearCastCollisionInput : hkCollisionInput {
+    hkVector4 m_path; // 0x10
+    hkReal unk20;     // 0x20
+    hkReal unk24;     // 0x24
+    u32 unk28;        // 0x28
 };

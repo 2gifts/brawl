@@ -4,9 +4,6 @@
 
 // Collector that keeps the closest contact reported so far, without the chain bookkeeping of
 // hkClosestCdPointCollector. 0x08 flags that a point has been stored.
-// Largest distance a collector starts with (0x7F7FFFEE, a little below FLT_MAX).
-#define HK_REAL_MAX 3.40282e38f
-
 struct hkSimpleClosestContactCollector {
     hkSimpleClosestContactCollector() {
         m_hit = false;

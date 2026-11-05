@@ -50,6 +50,7 @@ struct hkMultiRayConvexAgent : hkCollisionAgent {
 // Its linearCast is not recovered yet.
 struct hkSymmetricAgent_21hkMultiRayConvexAgent_ : hkMultiRayConvexAgent {
     virtual ~hkSymmetricAgent_21hkMultiRayConvexAgent_();
+    virtual void linearCast(void* unk0, void* unk1, void* unk2, void* unk3, void* unk4);
 };
 
 // HYPOTHESIS: hkSymmetricAgentLinearCast<hkMultiRayConvexAgent>. The wrappers swap the two shapes and
@@ -65,5 +66,5 @@ struct hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_ : hkMultiRayConvexAge
 
     static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
     static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticLinearCast(void* unk0, void* unk1, void* unk2, void* unk3); // not written yet
+    static void staticLinearCast(void* unk0, void* unk1, void* unk2, void* unk3, void* unk4);
 };

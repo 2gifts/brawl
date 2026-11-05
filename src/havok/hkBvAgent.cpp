@@ -37,6 +37,7 @@
 #include <havok/hkCollisionInput.h>
 #include <havok/hkFlagCdBodyPairCollector.h>
 #include <havok/hkSimpleClosestContactCollector.h>
+#include <havok/hkSymmetricAgentFlipCollectors.h>
 
 // The agent for the bounding volume (A) is made with the agent; the agent for the shape inside (B) only once the
 // bounding volume is found overlapping. The bounding volume body replaces the shape of body A by the bounding
@@ -324,7 +325,36 @@ void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(void* a, void* b
     T::updateShapeCollectionFilter(b, a, c);
 }
 
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+template <class T>
+void hkSymmetricAgentLinearCast<T>::staticLinearCast(void* a, void* b, void* c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = *(const hkLinearCastCollisionInput*)c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        T::staticLinearCast(b, a, &flippedInput, &flipped, &flippedStart);
+    } else {
+        T::staticLinearCast(b, a, &flippedInput, &flipped, 0);
+    }
+}
+
 template struct hkSymmetricAgentLinearCast<hkBvAgent>;
+
+void hkSymmetricBvAgent::linearCast(void* a, void* b, void* c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = *(const hkLinearCastCollisionInput*)c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkBvAgent::linearCast(b, a, &flippedInput, &flipped, &flippedStart);
+    } else {
+        hkBvAgent::linearCast(b, a, &flippedInput, &flipped, 0);
+    }
+}
 
 namespace {
 
@@ -333,7 +363,6 @@ namespace {
 
 // Stand-in for the dispatcher registration function (not recovered yet; takes the dispatcher as first argument).
 // Stand-ins for the linear cast statics of the symmetric and plain BV agents (not written yet).
-extern "C" void fn_802A35D0();
 
 // Registers the BV agent for the pair of shape types in both orders: the symmetric variant for
 // (any, 0x16) and the plain variant for (0x16, any).
@@ -342,7 +371,7 @@ void hkBvAgent::registerAgent(void* dispatcher) {
     symmetric.create = (hkAgentFunc)createShapeBvAgent;
     symmetric.staticGetPenetrations = (hkAgentFunc)hkSymmetricAgentLinearCast<hkBvAgent>::staticGetPenetrations;
     symmetric.staticGetClosestPoints = (hkAgentFunc)hkSymmetricAgentLinearCast<hkBvAgent>::staticGetClosestPoints;
-    symmetric.staticLinearCast = (hkAgentFunc)fn_802A35D0;
+    symmetric.staticLinearCast = (hkAgentFunc)hkSymmetricAgentLinearCast<hkBvAgent>::staticLinearCast;
     symmetric.symmetricA = true;
     symmetric.symmetricB = true;
     ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&symmetric, -1, 0x16);

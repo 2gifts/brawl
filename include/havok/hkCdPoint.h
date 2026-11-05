@@ -4,6 +4,9 @@
 
 #include <havok/hkCdBody.h>
 
+// Largest distance a collector starts with (0x7F7FFFEE, a little below FLT_MAX).
+#define HK_REAL_MAX 3.40282e38f
+
 // Collision point handed to the collector callbacks: the contact (position, normal, distance in the normal's w)
 // and the two bodies of the pair (the collectors walk their m_parent chains to the root).
 struct hkCdPoint {
@@ -14,6 +17,9 @@ struct hkCdPoint {
 
 // Receiver of collision points (closest point and linear cast queries). Vtable: 0x08 dtor, 0x0C addCdPoint.
 struct hkCdPointCollector {
+    hkCdPointCollector() : m_earlyOutDistance(HK_REAL_MAX) {}
     virtual ~hkCdPointCollector() {}
     virtual void addCdPoint(hkCdPoint* point) = 0; // HYPOTHESIS: name from the map
+
+    hkReal m_earlyOutDistance; // 0x04 (the closest-point collectors keep their best distance here)
 };
