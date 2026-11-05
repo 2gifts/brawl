@@ -44,8 +44,9 @@ void quickSortRecursive(T* pArr, int d, int h, L cmpLess) {
             if (j >= i) {
                 if (j != i) {
                     T t;
-                    t = pArr[j];
-                    pArr[j] = pArr[i];
+                    T* pj = pArr + j; // BYTES: the element address is formed before the byte load
+                    t = *pj;
+                    *pj = pArr[i];
                     pArr[i] = t;
                 }
                 j--;
