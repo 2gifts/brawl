@@ -7,6 +7,8 @@
 struct hkCollisionDispatcher;
 struct hkCdBody;
 struct hkPenetrationTarget;
+struct hkCollisionInput;
+struct hkLinearCastCollisionInput;
 
 // Bounding-volume-tree collision agent (object size 0x40, memory class 0x1d). Derives from hkCollisionAgent: the
 // 0x08 word is the contact manager passed to the constructor. The constructor zeroes the entry list at 0x0C
@@ -47,9 +49,12 @@ struct hkBvTreeAgent : hkCollisionAgent {
     virtual void invalidateTim(void* arg);
     virtual void warpTime(float t0, float t1, void* arg);
 
-    static void staticGetPenetrations(void* a, void* b, void* c, void* target);
-    static void staticGetClosestPoints(void* a, void* b, void* c, void* target);
-    static void staticLinearCast(void* a, void* b, void* c, void* target, void* d);
+    static void staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                      void* target);
+    static void staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                       void* target);
+    static void staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkLinearCastCollisionInput& input,
+                                 void* target, void* startTarget);
 };
 
 // HYPOTHESIS: the symmetric variant is the object created by createBvTreeShapeAgent (its vtable is set after the base

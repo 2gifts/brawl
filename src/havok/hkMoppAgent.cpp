@@ -30,7 +30,7 @@ void hkSymmetricAgentLinearCast_11hkMoppAgent::getPenetrations(void* a, void* b,
 
 void hkSymmetricAgentLinearCast_11hkMoppAgent::staticGetPenetrations(void* a, void* b, void* c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrap(target);
-    hkMoppAgent::staticGetPenetrations(b, a, c, &wrap);
+    hkMoppAgent::staticGetPenetrations(*(const hkCdBody*)b, *(const hkCdBody*)a, *(const hkCollisionInput*)c, &wrap);
 }
 
 void hkSymmetricAgentLinearCast_11hkMoppAgent::getClosestPoints(void* a, void* b, void* c, void* target) {
@@ -40,7 +40,7 @@ void hkSymmetricAgentLinearCast_11hkMoppAgent::getClosestPoints(void* a, void* b
 
 void hkSymmetricAgentLinearCast_11hkMoppAgent::staticGetClosestPoints(void* a, void* b, void* c, void* target) {
     hkSymmetricAgentFlipCollector wrap(target);
-    hkMoppAgent::staticGetClosestPoints(b, a, c, &wrap);
+    hkMoppAgent::staticGetClosestPoints(*(const hkCdBody*)b, *(const hkCdBody*)a, *(const hkCollisionInput*)c, &wrap);
 }
 
 void hkSymmetricAgentLinearCast_11hkMoppAgent::updateShapeCollectionFilter(void* a, void* b, void* c) {

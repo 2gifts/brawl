@@ -131,6 +131,13 @@ struct hkVector4 {
         z = a.z < b.z ? a.z : b.z;
         w = a.w < b.w ? a.w : b.w;
     }
+    // Lane-wise maximum, a > b ? a : b per lane (hkBvTreeAgent's swept box).
+    void setMax4(const hkVector4& a, const hkVector4& b) {
+        x = a.x > b.x ? a.x : b.x;
+        y = a.y > b.y ? a.y : b.y;
+        z = a.z > b.z ? a.z : b.z;
+        w = a.w > b.w ? a.w : b.w;
+    }
     // Flips the sign of each lane of this where the lane of s is negative (integer xor of the sign bits).
     void setFlipSign4(const hkVector4& a, const hkVector4& s) {
         ((u32*)this)[0] = ((const u32*)&a)[0] ^ (((const u32*)&s)[0] & 0x80000000);

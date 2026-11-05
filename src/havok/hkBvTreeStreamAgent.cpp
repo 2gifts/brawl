@@ -110,11 +110,11 @@ void hkBvTreeStreamAgent::warpTime(float t0, float t1, void* arg) {
 #pragma push
 #pragma auto_inline off
 void hkBvTreeStreamAgent::getPenetrations(void* a, void* b, void* c, void* d) {
-    hkBvTreeAgent::staticGetPenetrations(a, b, c, d);
+    hkBvTreeAgent::staticGetPenetrations(*(const hkCdBody*)a, *(const hkCdBody*)b, *(const hkCollisionInput*)c, d);
 }
 
 void hkBvTreeStreamAgent::getClosestPoints(void* a, void* b, void* c, void* d) {
-    hkBvTreeAgent::staticGetClosestPoints(a, b, c, d);
+    hkBvTreeAgent::staticGetClosestPoints(*(const hkCdBody*)a, *(const hkCdBody*)b, *(const hkCollisionInput*)c, d);
 }
 #pragma pop
 
@@ -137,7 +137,7 @@ void hkBvTreeStreamAgentVariant::linearCast(void* a, void* b, void* c, void* tar
 #pragma push
 #pragma auto_inline off
 void hkBvTreeStreamAgent::linearCast(void* a, void* b, void* c, void* d, void* e) {
-    hkBvTreeAgent::staticLinearCast(a, b, c, d, e);
+    hkBvTreeAgent::staticLinearCast(*(const hkCdBody*)a, *(const hkCdBody*)b, *(const hkLinearCastCollisionInput*)c, d, e);
 }
 #pragma pop
 
