@@ -105,6 +105,38 @@ hkBvTreeAgent* hkBvTreeAgent::createBvBvAgent(const hkCdBody& bodyA, const hkCdB
     return new hkSymmetricAgentLinearCast_13hkBvTreeAgent(contactMgr);
 }
 
+// The entries without an agent are skipped (the child was filtered out).
+void hkBvTreeAgent::cleanup() {
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    for (; entry != end; entry++) {
+        if (entry->m_collisionAgent != 0) {
+            entry->m_collisionAgent->cleanup();
+        }
+    }
+    delete this;
+}
+
+void hkBvTreeAgent::invalidateTim(void* arg) {
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    for (; entry != end; entry++) {
+        if (entry->m_collisionAgent != 0) {
+            entry->m_collisionAgent->invalidateTim(arg);
+        }
+    }
+}
+
+void hkBvTreeAgent::warpTime(float t0, float t1, void* arg) {
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    for (; entry != end; entry++) {
+        if (entry->m_collisionAgent != 0) {
+            entry->m_collisionAgent->warpTime(t0, t1, arg);
+        }
+    }
+}
+
 void hkSymmetricAgentLinearCast_13hkBvTreeAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrap(target);
     hkBvTreeAgent::getPenetrations(b, a, c, &wrap);
