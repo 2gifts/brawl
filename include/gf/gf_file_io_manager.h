@@ -44,3 +44,8 @@ public:
 static_assert(sizeof(gfFileIOManager) == 0x9c, "Wrong size for class!");
 
 extern gfFileIOManager* g_gfFileIOManager;
+
+class gfFileIOReplayCallback {
+public:
+    virtual int notify_SyncCommand(u8 command, u16 value);
+};
