@@ -131,6 +131,9 @@ public:
     int findNextCharCursorPos(int player, int pos);
     int findLocateCursorPosX(int player, int team, int row, int column);
     muAdvSelchrCTask();
+    // HYPOTHESIS: the parameter block is seven words; both heaps are passed to initialization.
+    static muAdvSelchrCTask* create(const u32* param, Heaps::HeapType instanceHeap, u32 resourceHeap);
+    void initProc();
 
     static void mainStepSelectedInit(muAdvSelchrCTask* task);
     static int mainStepAppearMain(muAdvSelchrCTask* task);
