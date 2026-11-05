@@ -16,7 +16,6 @@ struct hkLinearCastCollisionInput;
 // the word at 0x14 (set to 0x80000000, the flag word of the empty list).
 struct hkBvTreeAgent : hkCollisionAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
-    static void* operator new(unsigned long, void* where) { return where; } // placement new for the factories
 
     // HYPOTHESIS: 12-byte entry of the list at 0x0C (map name hkBvTreeAgent::hkBvAgentEntryInfo).
     struct hkBvAgentEntryInfo {
@@ -35,9 +34,12 @@ struct hkBvTreeAgent : hkCollisionAgent {
     virtual ~hkBvTreeAgent() {}
 
     static void registerAgent(hkCollisionDispatcher* dispatcher);
-    static hkBvTreeAgent* createBvTreeShapeAgent(void* a, void* b, void* c, hkContactMgr* contactMgr);
-    static hkBvTreeAgent* createShapeBvAgent(void* a, void* b, void* c, hkContactMgr* contactMgr);
-    static hkBvTreeAgent* createBvBvAgent(void* a, void* b, void* c, hkContactMgr* contactMgr);
+    static hkBvTreeAgent* createBvTreeShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                         hkContactMgr* contactMgr);
+    static hkBvTreeAgent* createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                         hkContactMgr* contactMgr);
+    static hkBvTreeAgent* createBvBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                         hkContactMgr* contactMgr);
 
     virtual void calcStatistics(void* collector) const;
     virtual void getPenetrations(void* a, void* b, void* c, void* target);

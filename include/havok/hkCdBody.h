@@ -25,8 +25,8 @@ struct hkCdBody {
     }
 
     // Walks the m_parent chain up to the body without a parent (map name hkCdBody__getRootCollidable).
-    hkCdBody* getRootCollidable() {
-        hkCdBody* body = this;
+    const hkCdBody* getRootCollidable() const {
+        const hkCdBody* body = this;
         while (body->m_parent != 0) {
             body = body->m_parent;
         }

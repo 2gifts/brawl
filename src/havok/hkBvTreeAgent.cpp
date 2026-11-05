@@ -48,6 +48,7 @@
 #include <havok/hkTransform.h>
 #include <havok/hkMonitorStream.h>
 #include <havok/hkCdBody.h>
+#include <havok/hkMotionState.h>
 #include <havok/hkCdBodyPairCollector.h>
 
 hkBvTreeAgent::hkBvTreeAgent(hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
@@ -83,34 +84,25 @@ void hkBvTreeAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     dispatcher->registerCollisionAgent(&funcs, 3, 3);
 }
 
-hkBvTreeAgent* hkBvTreeAgent::createBvTreeShapeAgent(void* a, void* b, void* c, hkContactMgr* contactMgr) {
-    hkBvTreeAgent* agent = (hkBvTreeAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkBvTreeAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkBvTreeAgent);
-    new (agent) hkSymmetricAgentLinearCast_13hkBvTreeAgent(contactMgr);
-    return agent;
+hkBvTreeAgent* hkBvTreeAgent::createBvTreeShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                     const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkSymmetricAgentLinearCast_13hkBvTreeAgent(contactMgr);
 }
 
-hkBvTreeAgent* hkBvTreeAgent::createShapeBvAgent(void* a, void* b, void* c, hkContactMgr* contactMgr) {
-    hkBvTreeAgent* agent = (hkBvTreeAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkBvTreeAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkBvTreeAgent);
-    new (agent) hkBvTreeAgent(contactMgr);
-    return agent;
+hkBvTreeAgent* hkBvTreeAgent::createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                 const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkBvTreeAgent(contactMgr);
 }
 
-hkBvTreeAgent* hkBvTreeAgent::createBvBvAgent(void* a, void* b, void* c, hkContactMgr* contactMgr) {
-    // HYPOTHESIS: the sort key is the float at 0xA0 of each body's motion (not identified yet).
-    float keyA = *(float*)((u8*)((hkCdBody*)a)->m_motion + 0xA0);
-    float keyB = *(float*)((u8*)((hkCdBody*)b)->m_motion + 0xA0);
-    if (keyA < keyB) {
-        hkBvTreeAgent* agent = (hkBvTreeAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkBvTreeAgent), 0x1d);
-        agent->m_memSizeAndFlags = sizeof(hkBvTreeAgent);
-        new (agent) hkBvTreeAgent(contactMgr);
-        return agent;
+// The tree with the smaller object radius is walked as the shape side.
+hkBvTreeAgent* hkBvTreeAgent::createBvBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                              hkContactMgr* contactMgr) {
+    hkReal radiusA = ((const hkMotionState*)bodyA.m_motion)->m_objectRadius;
+    hkReal radiusB = ((const hkMotionState*)bodyB.m_motion)->m_objectRadius;
+    if (radiusA < radiusB) {
+        return new hkBvTreeAgent(contactMgr);
     }
-    hkBvTreeAgent* agent = (hkBvTreeAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkBvTreeAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkBvTreeAgent);
-    new (agent) hkSymmetricAgentLinearCast_13hkBvTreeAgent(contactMgr);
-    return agent;
+    return new hkSymmetricAgentLinearCast_13hkBvTreeAgent(contactMgr);
 }
 
 void hkSymmetricAgentLinearCast_13hkBvTreeAgent::getPenetrations(void* a, void* b, void* c, void* target) {
