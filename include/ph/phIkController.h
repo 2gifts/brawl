@@ -11,6 +11,7 @@ public:
     void setEnable(int idx, bool enable);
     void setStressReferencePoint(int idx, const f32* pos);
     void resetToeAngle(int idx);
+    void setToeAngle(int idx, float angle);
     void setSolverParamData(int idx, const f32* data);
 
     u8 unk00;                    // 0x00, set to 1 by the constructor (HYPOTHESIS: enable flag)

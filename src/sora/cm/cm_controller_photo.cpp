@@ -3,6 +3,8 @@
 #include <mt/mt_vector.h>
 #include <string.h>
 #include <types.h>
+#include <cm/cm_camera_controller.h>
+#include <cm/cm_subject.h>
 
 void cmPhotoController::setSeamless(bool seamless)
 {
@@ -80,4 +82,133 @@ cmPhotoController::unk14_t cmPhotoController::getControl(const gfPadStatus* pad,
         getOrbitControlWithMenu(pad, &control.unkC);
     }
     return control;
+}
+
+void cmPhotoController::update(float deltaFrame)
+{
+    switch (unkC) {
+    case 0: updateShot(); break;
+    case 1: updateMoveFig(); break;
+    }
+}
+
+void cmPhotoController::setFigPosList(int figNo, const Vec3f* position)
+{
+    unk6C[figNo].unk0 = position->m_x;
+    unk6C[figNo].unk4 = position->m_y;
+    unk6C[figNo].unk8 = position->m_z;
+    unk6C[figNo].unkC |= 0x80;
+}
+
+void cmPhotoController::removeFigPosList(int figNo)
+{
+    unk6C[figNo].unkC_0 = 0;
+}
+
+void cmPhotoController::updateControl(const gfPadStatus* pad, bool menu)
+{
+    unk14_t control = getControl(pad, menu);
+    unk14_0 = control.unk0;
+    __memcpy(&unk18, &control.unk4, sizeof(unk18));
+    __memcpy(&unk20, &control.unkC, sizeof(unk20));
+}
+
+void cmPhotoController::updateLockFigNo(bool* seamless, int* figNo, const unk14_t* control)
+{
+    int action;
+    if (control->unk0 & 0x10) action = 1;
+    else if (control->unk0 & 4) action = 2;
+    else {
+        action = 0;
+        if (control->unk0 & 8) action = 3;
+    }
+    switch (action) {
+    case 0: break;
+    case 1: *figNo = -1; break;
+    case 2:
+        if (*figNo < -1) *figNo = -1;
+        do {
+            ++*figNo;
+            if (*figNo >= 4) {
+                *figNo = -1;
+                break;
+            }
+        } while (!unk6C[*figNo].unkC_0);
+        break;
+    case 3:
+        if (*figNo < 0) *figNo = 4;
+        do {
+            --*figNo;
+            if (*figNo < 0) {
+                *figNo = -1;
+                break;
+            }
+        } while (!unk6C[*figNo].unkC_0);
+        break;
+    }
+}
+
+void cmPhotoController::updateLockPlayerNo(bool* seamless, int* playerNo, const unk14_t* control)
+{
+    int action;
+    if (control->unk0 & 0x10) action = 1;
+    else if (control->unk0 & 4) action = 2;
+    else {
+        action = 0;
+        if (control->unk0 & 8) action = 3;
+    }
+    if (*seamless && action) {
+        *seamless = false;
+        return;
+    }
+    switch (action) {
+    case 0: break;
+    case 1: *playerNo = -1; break;
+    case 2: {
+        cmSubject* subject;
+        if (*playerNo < -1) *playerNo = -1;
+        do {
+            int player = ++*playerNo;
+            if (player >= 7) {
+                *playerNo = -1;
+                break;
+            }
+            u32 disabled = CameraController::getInstance()->unk45;
+            if (disabled & (1u << player)) {
+                subject = 0;
+            } else {
+                subject = cmSubjectList::getSubjectByPlayerNo((u8)player);
+                bool active = subject && subject->m_isLoupeTarget;
+                switch (active) {
+                case false: subject = 0; break;
+                default: break;
+                }
+            }
+        } while (!subject);
+        break;
+    }
+    case 3: {
+        cmSubject* subject;
+        if (*playerNo < 0) *playerNo = 7;
+        do {
+            int player = --*playerNo;
+            if (player < 0) {
+                *playerNo = -1;
+                break;
+            }
+            u32 disabled = CameraController::getInstance()->unk45;
+            if (disabled & (1u << player)) {
+                subject = 0;
+            } else {
+                subject = cmSubjectList::getSubjectByPlayerNo((u8)player);
+                bool active = subject && subject->m_isLoupeTarget;
+                switch (active) {
+                case false: subject = 0; break;
+                default: break;
+                }
+            }
+        } while (!subject);
+        break;
+    }
+    }
 }

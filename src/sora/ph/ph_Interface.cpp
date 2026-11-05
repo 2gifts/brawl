@@ -32,6 +32,8 @@
 #include <havok/hkWorld.h>
 #include <havok/hkBaseSystem.h>
 
+extern phInterface* lbl_8049DEC8[];
+
 phInterface* phInterface::s_instance = nullptr;
 
 phInterface::phInterface() : gfTask("PhysicsSystem", Category_Physics, 0xe, 0xd, true) {
@@ -77,9 +79,9 @@ phInterface::~phInterface() {
 }
 
 void phInterface::deleteInstance() {
-    if (s_instance != nullptr) {
+    if (lbl_8049DEC8[0] != nullptr) {
         if (m_2ndaryControllers.m_size != 0) {
-            if ((m_2ndaryControllers.m_capacityAndFlags & hkArrayBase::DONT_DEALLOCATE_FLAG) == 0) {
+            if (m_2ndaryControllers.mustDeallocate()) {
                 hkThreadMemory::s_instance->deallocateChunk(m_2ndaryControllers.m_data,
                                                             m_2ndaryControllers.m_capacityAndFlags << 2, 0x15);
             }
@@ -90,7 +92,7 @@ void phInterface::deleteInstance() {
                 hkArrayBase::DONT_DEALLOCATE_FLAG;
         }
         if (m_ikControllers.m_size != 0) {
-            if ((m_ikControllers.m_capacityAndFlags & hkArrayBase::DONT_DEALLOCATE_FLAG) == 0) {
+            if (m_ikControllers.mustDeallocate()) {
                 hkThreadMemory::s_instance->deallocateChunk(m_ikControllers.m_data,
                                                             m_ikControllers.m_capacityAndFlags << 2, 0x15);
             }
@@ -100,8 +102,8 @@ void phInterface::deleteInstance() {
                 (m_ikControllers.m_capacityAndFlags & hkArrayBase::FORCE_SIGN_FLAG) |
                 hkArrayBase::DONT_DEALLOCATE_FLAG;
         }
-        s_instance->exit();
-        s_instance = nullptr;
+        lbl_8049DEC8[0]->exit();
+        lbl_8049DEC8[0] = nullptr;
     }
 }
 
@@ -127,8 +129,8 @@ ph2ndaryController* phInterface::get2ndaryController(void* owner, int a, int b) 
 
 ph2ndary2Controller* phInterface::get2ndary2Controller(void* a, void* b) {
     ph2ndary2Controller* controller = nullptr;
-    if (s_instance != nullptr) {
-        bool enabled = s_instance->m_flags40[0] && s_instance->m_flags40[3];
+    if (lbl_8049DEC8[0] != nullptr) {
+        u8 enabled = lbl_8049DEC8[0]->m_flags40[0] ? lbl_8049DEC8[0]->m_flags40[3] : 0;
         if (enabled && a != nullptr) {
             controller = new (Heaps::Physics) ph2ndary2Controller(a, b);
         }
