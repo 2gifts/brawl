@@ -4,6 +4,13 @@
 #include <types.h>
 #include <mu/wifi/mu_wifi_interface.h>
 #include <mu/mu_msg.h>
+#include <gf/gf_pad_system.h>
+#include <stdio.h>
+#include <string.h>
+#include <gf/gf_archive.h>
+#include <if/if_wifipr_player.h>
+#include <revolution/CX/CXCompression.h>
+#include <revolution/OS/OSCache.h>
 
 // The menu helpers take three integers; this caller passes only the first one (see TIPS.md).
 extern "C" int getNumCharColor__6muMenuFiii(int charKind);
@@ -392,4 +399,348 @@ void muSelCharPlayerArea::dispWifiFriendProfileNameBaseColor() {
 
 bool muSelCharPlayerArea::getWifiFriendProfileNameVisible() {
     return 0.0f != m_objs[37]->m_modelAnim->m_anmObjVisRes->GetFrame();
+}
+
+void muSelCharPlayerArea::openHandiList() {
+    int kind;
+    int handi;
+    int type = g_GameGlobal->m_selCharData->m_selCharType;
+    int group;
+    if (isSelCharTypeIn(type, 0, 4)) { group = 0; goto groupSelected; }
+    if (isSelCharTypeIn(type, 4, 12)) { group = 1; goto groupSelected; }
+    {
+        bool inGroup = isSelCharTypeIn(type, 12, 16);
+        group = 3;
+        if (!inGroup) goto groupSelected;
+        group = 2;
+    }
+    groupSelected:
+    int mode;
+    if (group == 1) mode = 0;
+    else if (m_selCharTask->m_unk5D0) mode = 2;
+    else mode = m_selCharTask->m_handiMode == 2;
+    switch (mode) {
+    case 1:
+        kind = MuSelctChrList::Kind_Handi;
+        handi = m_handi;
+        break;
+    case 2:
+        kind = MuSelctChrList::Kind_Hp;
+        handi = m_handi;
+        break;
+    }
+    Vec3f pos;
+    pos.m_x = pos.m_y = pos.m_z = 0.0f;
+    m_chrList.open(kind, handi, &pos);
+}
+
+void muSelCharPlayerArea::setNameNo(int name) {
+    dispName(name, m_playerKind, m_selCharTask->m_isTeamBattle, m_teamColor);
+    m_nameId = name;
+    muWifiInterfaceTask* wifi = g_muWifiInterfaceTask;
+    if (wifi) {
+        wchar_t text[6];
+        if (name >= 0) {
+            int type = g_GameGlobal->m_selCharData->m_selCharType;
+            int group;
+            if (isSelCharTypeIn(type, 0, 4)) { group = 0; goto groupSelected; }
+            if (isSelCharTypeIn(type, 4, 12)) { group = 1; goto groupSelected; }
+            {
+                bool inGroup = isSelCharTypeIn(type, 12, 16);
+                group = 3;
+                if (!inGroup) goto groupSelected;
+                group = 2;
+            }
+            groupSelected:
+            if (group == 2) {
+                g_GameGlobal->getNameUTF16(name, text);
+                goto sendName;
+            }
+        }
+        text[0] = 0;
+    sendName:
+        wifi->setLocalPlayersOnamae(m_areaIdx, text, name < 0 ? 120 : static_cast<u8>(name));
+    }
+}
+
+// muMenuController::setControllerID (the map name); src/mo_menu/mu_event.cpp calls it by this stand-in name.
+extern "C" void fn_800B9804(muMenuController* controller, int pad);
+
+void muSelCharPlayerArea::setControllerNo(int controller) {
+    m_controllerNo = controller;
+    if ((controller >= 0) & (controller < 8)) {
+        gfPadStatus status;
+        g_gfPadSystem->getSysPadStatus(controller, &status);
+        m_controllerKind = status.m_controllerType;
+    } else {
+        m_controllerKind = static_cast<gfPadType::PadType>(4);
+    }
+    dispControllerKind(m_playerKind, m_controllerKind, m_controllerNo);
+    if (controller < 0) forceCloseList();
+    if (controller >= 0) fn_800B9804(&m_menuController, static_cast<u8>(controller));
+    m_selCharHand->updateControllerNo();
+}
+
+extern const u8 lbl_10_rodata_744[6][2];
+extern char lbl_10_data_B08[0x18];
+
+void muSelCharPlayerArea::colorChangePointed(int pointed) {
+    if (!m_selCharTask->m_isTeamBattle) return;
+    int anim;
+    int teamColor = m_teamColor;
+    if (pointed >= 0) anim = lbl_10_rodata_744[teamColor][1];
+    else anim = lbl_10_rodata_744[teamColor][0];
+    const char* name = lbl_10_data_B08;
+    static MuAnimNameData animations[] = {
+        {0.0f, 0.0f, 0, name, 0x10},
+        {30.0f, 30.0f, 0, name, 0x10},
+        {60.0f, 60.0f, 0, name, 0x10},
+        {0.0f, 29.0f, 1, name, 0x10},
+        {30.0f, 59.0f, 1, name, 0x10},
+        {60.0f, 89.0f, 1, name, 0x10}
+    };
+    m_objs[Obj_Frag]->setAnimName(&animations[anim], false);
+}
+
+void muSelCharPlayerArea::initCharKind(MuSelchkind charKind) {
+    switch (charKind) {
+    case Selch_Samus: m_selectedSamus = 0; charKind = Selch_Samus; break;
+    case Selch_SZeroSuit: m_selectedSamus = 0; charKind = Selch_Samus; break;
+    case Selch_Zelda: m_selectedZelda = 0; charKind = Selch_Zelda; break;
+    case Selch_Sheik: m_selectedZelda = 1; charKind = Selch_Zelda; break;
+    case Selch_PokeTrainer: m_selectedPoke = 0; charKind = Selch_PokeTrainer; break;
+    case Selch_PokeLizardon: m_selectedPoke = 1; charKind = Selch_PokeTrainer; break;
+    case Selch_PokeZenigame: m_selectedPoke = 2; charKind = Selch_PokeTrainer; break;
+    case Selch_PokeFushigisou: m_selectedPoke = 3; charKind = Selch_PokeTrainer; break;
+    }
+    m_charKind = charKind;
+}
+
+extern const GXColor lbl_10_rodata_750[6];
+
+void muSelCharPlayerArea::dispWifiFriendName(const wchar_t* name, bool isTeamBattle, int teamColor) {
+    GXColor color = lbl_10_rodata_750[isTeamBattle ? sTeamColorAnim[teamColor] : m_areaIdx];
+    unk40C->setFontColor(0x1E, color.r, color.g, color.b, 255);
+    char nameUtf8[0x14];
+    Message::utf16to8(nameUtf8, name);
+    unk40C->printf(0x1E, nameUtf8);
+}
+
+extern const u8 lbl_10_rodata_6AC[8];
+void ScnObj_EnableCallbackTiming(nw4r::g3d::ScnObj* obj, u32 timing);
+void ScnObj_EnableCallbackExecOp(nw4r::g3d::ScnObj* obj, u32 op);
+
+void muSelCharPlayerArea::bindCalcWorldFlag() {
+    nw4r::g3d::ScnMdl* model;
+    for (int index = 0; index < 7; ++index) {
+        int obj;
+        if (index >= 0 && index < 7) obj = lbl_10_rodata_6AC[index];
+        else obj = Obj_Num;
+        MuObject* object = m_objs[obj];
+        if (object) {
+            model = object->getSceneModel();
+            m_calcWorldCBs[index].m_next = model->m_callback;
+            model->m_callback = &m_calcWorldCBs[index];
+            ScnObj_EnableCallbackExecOp(model, 4);
+            ScnObj_EnableCallbackTiming(model, 1);
+        }
+    }
+}
+
+void muSelCharPlayerArea::getDefName(char* name) {
+    int nameNumber = unk1CC;
+    int length;
+    const char* message = unk40C->getMsgData(nameNumber > 0, &length);
+    memcpy(name, message, length);
+    char number[16];
+    if (nameNumber > 0) sprintf(number, "%02d", nameNumber);
+    else sprintf(number, "%2d", m_areaIdx + 1);
+    strcpy(name + length, number);
+}
+
+void muSelCharPlayerArea::nameEntryButtonPointed(int pointed) {
+    MuObject* object = m_objs[Obj_TagBtn];
+    float rate = object->m_modelAnim->m_anmObjMatClrRes->GetUpdateRate();
+    if (pointed >= 0) {
+        if (0.0f == rate) object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+    } else {
+        if (0.0f != rate) {
+            object->setFrameMatCol(0.0f);
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);
+        }
+    }
+}
+
+u8 muSelCharPlayerArea::getWifiAID(u8* localPlayer) {
+    u8 player;
+    u8 aid = g_muWifiInterfaceTask->getPlayerArea(m_areaIdx, &player);
+    if (aid == 0xFF) {
+        player = 0xFF;
+    }
+    *localPlayer = player;
+    return aid;
+}
+
+muSelCharPlayerArea* muSelCharPlayerArea::create(void* data) {
+    muSelCharPlayerArea* area = new (Heaps::MenuInstance) muSelCharPlayerArea;
+    area->initProc(data);
+    return area;
+}
+
+void muSelCharPlayerArea::wifiRequestPlayerEntry(int entry) {
+    if (g_muWifiInterfaceTask->requestApproval(m_areaIdx)) {
+        dispWifiDispState(2);
+        unk42C = entry;
+        unk426Flag = true;
+    }
+}
+
+nw4r::g3d::ResFile* muSelCharPlayerArea::getCharPicTexResFile(int charKind) {
+    int stockKind = muMenu::exchangeMuSelchkind2MuStockchkind(charKind);
+    int fileIndex = muMenu::exchangeGmCharacterKind2Something(stockKind);
+    void* compressed = static_cast<gfArchive*>(lbl_10_bss_8[0])->getData(Data_Type_Misc, fileIndex, 0xFFFE);
+    CXUncompressLZ(compressed, m_charPicData);
+    DCFlushRange(m_charPicData, 0x40000);
+    m_charPicRes = nw4r::g3d::ResFile(m_charPicData);
+    nw4r::g3d::ResFile::Init(&m_charPicRes);
+    return &m_charPicRes;
+}
+
+
+void muSelCharPlayerArea::dispCharPicEffect() {
+    m_objs[Obj_CharPic]->changeAnimN(1, 0x10, true, false);
+    m_objs[Obj_Unk5]->setFrameMatCol(1.0f);
+    m_objs[Obj_Unk5]->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+    m_unk1F9 = true;
+}
+
+extern char lbl_10_data_BA8[8];
+
+void muSelCharPlayerArea::setWifiFriendProfileNameVisible(bool visible) {
+    m_objs[37]->setFrameVisible(visible ? 1.0f : 0.0f);
+    if (!visible) {
+        unk40C->printf(0x1D, lbl_10_data_BA8);
+        unk40C->printf(0x1E, lbl_10_data_BA8);
+    }
+}
+
+extern const u8 lbl_10_rodata_690[0x18];
+
+void muSelCharPlayerArea::createWifiModel(nw4r::g3d::ResFile* resFile, int priority) {
+    createObjResFile(lbl_10_rodata_690, 3, resFile, priority);
+    int playerNo = m_areaIdx;
+    unk41C = new (Heaps::MenuInstance) IfWifiprPlayer(playerNo, 1);
+    unk41C->createModel(resFile, priority);
+}
+
+void muSelCharPlayerArea::playerKindButtonPointed(int hand) {
+    MuObject* object = m_objs[Obj_Nameplate];
+    float rate = object->m_modelAnim->m_anmObjMatClrRes->GetUpdateRate();
+    if (hand >= 0) {
+        if (0.0f == rate) {
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+        }
+    } else {
+        if (0.0f != rate) {
+            object->setFrameMatCol(0.0f);
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);
+        }
+    }
+}
+
+void muSelCharPlayerArea::cpLevelButtonPointed(int hand) {
+    MuObject* object = m_objs[Obj_ComputerLvl];
+    float rate = object->m_modelAnim->m_anmObjMatClrRes->GetUpdateRate();
+    if (hand >= 0) {
+        if (0.0f == rate) {
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+        }
+    } else {
+        if (0.0f != rate) {
+            object->setFrameMatCol(0.0f);
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);
+        }
+    }
+}
+
+void muSelCharPlayerArea::wifiFriendCommandButtonPointed(int hand) {
+    MuObject* object = m_objs[38];
+    float rate = object->m_modelAnim->m_anmObjMatClrRes->GetUpdateRate();
+    if (hand >= 0) {
+        if (0.0f == rate) {
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(1.0f);
+        }
+    } else {
+        if (0.0f != rate) {
+            object->setFrameMatCol(0.0f);
+            object->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(0.0f);
+        }
+    }
+}
+
+void muSelCharPlayerArea::handiButtonPointed(int hand) {
+    MuObject* object = m_objs[Obj_Handicap];
+    if (object) {
+        float rate = object->m_modelAnim->m_anmObjMatClrRes->GetUpdateRate();
+        if (hand >= 0) {
+            if (0.0f == rate) {
+                object->changeAnimN(1, 0x10, true, false);
+            }
+        } else {
+            if (0.0f != rate) {
+                object->changeAnimN(0, 0x10, false, false);
+                object->setFrameMatCol(m_handi);
+            }
+        }
+    }
+}
+
+void muSelCharPlayerArea::createObjResFile(const void* descriptors, int count, nw4r::g3d::ResFile* resFile, int priority) {
+    int num;
+    int index;
+    int instance;
+    // HYPOTHESIS: eight-byte descriptors contain a model name, index range and priority.
+    const struct {
+        const char* unk0;
+        u8 unk4;
+        u8 unk5;
+        u8 unk6;
+        u8 unk7;
+    }* model = static_cast<const __typeof__(*model)*>(descriptors);
+    for (index = 0; index < count; index++, model++) {
+        num = 1;
+        if (model->unk4 < model->unk5) {
+            num = model->unk5 - model->unk4;
+        }
+        for (instance = 0; instance < num; instance++) {
+            MuObject* object = MuObject::create(resFile, model->unk0, model->unk6 + priority, NULL, Heaps::MenuInstance);
+            m_objs[model->unk4 + instance] = object;
+            char animName[0x40];
+            strcpy(animName, model->unk0);
+            strcat(animName, "__0");
+            object->changeAnimN(animName);
+            if (object->m_modelAnim != NULL) {
+                object->m_modelAnim->setUpdateRate(0.0f);
+            }
+        }
+    }
+}
+
+extern const u32 lbl_10_rodata_788[4];
+
+// HYPOTHESIS: an inline accessor returns the area controller status by value.
+
+inline gfPadStatus muSelCharPlayerArea::getPadStatus() {
+    gfPadStatus pad;
+    if (m_controllerNo >= 0) {
+        g_gfPadSystem->getSysPadStatus(m_controllerNo, &pad);
+    } else {
+        memset(&pad, 0, sizeof(pad));
+    }
+    return pad;
+}
+
+bool muSelCharPlayerArea::isColorIncButtonPushed() {
+    gfPadStatus pad = getPadStatus();
+    return (pad.m_buttonsPressedThisFrame.bits & lbl_10_rodata_788[pad.m_controllerType]) != 0;
 }

@@ -120,6 +120,8 @@ public:
     static u32 getErrorMsgID(int index);
     static bool haveErrorCode(int index);
     static u32 getBadNameErrorMsgID();
+    // HYPOTHESIS: opaque four-byte rule packet and transmission flag.
+    void setSelCharGameRule(const void* rule, bool send);
     void connect(bool);
     // HYPOTHESIS: 1 while the connection runs, then 2 connected, 3 failed, 4 the name was refused; the outputs are
     // the error (an index for getErrorMsgID), the error code and whether a new Wi-Fi user was made.
@@ -162,6 +164,9 @@ public:
     u64 getComposedCharaAcceptFlag();
     muWifiAIDInfo* getSafeParentAIDInfo();
     void requestExchangeFriendKey(int playerArea);
+    // HYPOTHESIS: parameter types follow the player index, name buffer and byte-sized name number.
+    void setLocalPlayersOnamae(int player, const wchar_t* name, u8 nameNo);
+    bool requestApproval(int playerArea);
     u8 getMyFriendStatusIcon();
     u8 getFriendStatusIcon(int index);
     u8 getFriendStatusWiFiStatus(int index);
@@ -173,6 +178,7 @@ public:
     int getNetcond();
     // HYPOTHESIS: parameter types follow the bit index and flag register use.
     void setFriendFlag(int index, bool flag);
+    bool testRequestApproval(int areaIdx);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 

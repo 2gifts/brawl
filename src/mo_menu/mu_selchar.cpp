@@ -12,6 +12,9 @@
 #include <types.h>
 #include <snd/snd_system.h>
 #include <string.h>
+#include <gf/gf_pad_system.h>
+#include <stdio.h>
+#include <mu/wifi/mu_wifi_interface.h>
 
 // The menu helpers take three integers; this unit passes only the first one (see TIPS.md).
 extern "C" int exchangeMuSelchkindToMuCharKind__6muMenuFiii(int selchKind);
@@ -491,4 +494,259 @@ void muSelCharTask::setFaceIconMotion(int faceIdx, int motion) {
     obj->setAnimName(&sMotions[motion], false);
     obj->m_scnMdl->SetPriorityDrawOpa(0x49);
     obj->m_scnMdl->SetPriorityDrawXlu(0x49);
+}
+
+int muSelCharTask::findFreeWiiControllerNo() {
+    gfPadStatus status;
+    for (int controller = 4; controller < 8; controller++) {
+        g_gfPadSystem->getSysPadStatus(controller, &status);
+        if (status.m_error == 0 && status.m_controllerType != 0) {
+            int area;
+            for (area = 0; area < m_numPlayerAreas; area++) {
+                if (m_selCharPlayerAreas[area]->m_controllerNo == controller) {
+                    break;
+                }
+            }
+            if (area >= m_numPlayerAreas) {
+                return controller;
+            }
+        }
+    }
+    return -1;
+}
+
+void muSelCharTask::dispWifiPrompt(u32 message) {
+    MuObject* obj = m_objs[187];
+    m_highScoreMsg->printIndex(7, message, NULL);
+    m_scnGroup->Remove(obj->m_sceneModel);
+    m_scnGroup->Insert(m_scnGroup->sceneItemsCount, obj->m_sceneModel);
+    obj->setFrameNode(0.0f);
+    obj->m_modelAnim->m_anmObjChrRes->SetUpdateRate(1.0f);
+    g_sndSystem->playSE((SndID)0x1EF3, -1, 0, 0, -1);
+}
+
+int muSelCharTask::getCollCharKind(Vec2f* pos) {
+    for (int faceIdx = 0; faceIdx < m_charListNum; faceIdx++) {
+        Rect2D rect;
+        m_objs[Obj_FaceBase + faceIdx]->getRect3D(&rect, "colL", "colR");
+        if (rect.m_left <= pos->m_x && rect.m_right >= pos->m_x &&
+            rect.m_down <= pos->m_y && rect.m_up >= pos->m_y) {
+            return m_charList[faceIdx];
+        }
+    }
+    return 0x28;
+}
+
+void muSelCharTask::dispHighScoreDiffLevel(int level) {
+    MuObject* obj = m_objs[177];
+    nw4r::g3d::ScnMdlExpand* expand;
+    const char* node;
+    if (getSelCharType() == 7) {
+        expand = m_highScoreExpand;
+        node = "pos04";
+    } else {
+        expand = m_diffExpand;
+        node = "pos02";
+    }
+    expand->Remove(obj->m_sceneModel);
+    if (level >= 0) {
+        obj->setFrameVisible(level + 1);
+        expand->PushBack(obj->m_sceneModel, node);
+    }
+}
+
+extern char lbl_10_data_6E8[8];
+
+void muSelCharTask::setHighScoreStyle(int style) {
+    MuObject* object;
+    nw4r::g3d::ScnMdlExpand* expand = m_highScoreExpand;
+    object = m_objs[176];
+    m_scnGroup->Remove(expand);
+    if (style != 0) {
+        float frame = (float)style - 1.0f;
+        object->setFrameVisible(frame);
+        object->setFrameNode(frame);
+        m_scnGroup->Insert(m_scnGroup->sceneItemsCount, expand);
+    }
+}
+
+void muSelCharTask::dispNumStock(int count, bool enabled) {
+    int index;
+    nw4r::g3d::ScnMdlExpand* expand = m_stockExpand;
+    lbl_10_data_610[count - 1][!enabled].m_flags = 3;
+    m_objs[167]->setAnimIdx(&lbl_10_data_610[count - 1][!enabled], false);
+    for (index = 0; index < 5; index++) {
+        expand->Remove(m_objs[168 + index]->m_sceneModel);
+    }
+    char node[8];
+    for (index = 0; index < count; index++) {
+        sprintf(node, lbl_10_data_6E8, index + 2);
+        expand->PushBack(m_objs[168 + index]->m_sceneModel, node);
+    }
+}
+
+int muSelCharTask::strcatHighScoreUnit(char* text, int capacity, int kind) {
+    int message = -1;
+    switch (kind) {
+    case 2:
+        if (g_GameGlobal->getLanguage() == 1) message = 26;
+        else message = 25;
+        break;
+    case 3: message = 27; break;
+    case 5: message = 28; break;
+    case 6: message = 29; break;
+    case 4: message = 30; break;
+    }
+    int length = strlen(text);
+    if (message >= 0) {
+        int size;
+        const char* unit = m_highScoreMsg->getMsgData(message, &size);
+        memcpy(text + length, unit, size);
+        length += size;
+        text[length] = 0;
+        length++;
+    }
+    return length;
+}
+
+void muSelCharTask::sendWifiGameRule(bool force, bool send) {
+    __typeof__(unk637) rule;
+    memset(&rule, 0, sizeof(rule));
+    rule.unk0_6 = unk5D4;
+    rule.unk0_4 = m_handiMode;
+    rule.unk0_2 = m_isTeamBattle != 0;
+    rule.unk2 = unk5D8;
+    rule.unk3 = m_ruleNumStock;
+    rule.unk1_5 = m_kumiteType;
+    rule.unk1_4 = m_homerunRule;
+    if (force || memcmp(&rule, &unk637, sizeof(rule)) != 0) {
+        g_muWifiInterfaceTask->setSelCharGameRule(&rule, send);
+        unk637 = rule;
+    }
+}
+
+int muSelCharTask::isPushedUnusedControllerStartButton() {
+    bool used[8];
+    memset(used, 0, sizeof(used));
+    muSelCharPlayerArea* player;
+    for (int area = 0; area < m_numPlayerAreas; area++) {
+        player = getPlayerArea(area);
+        int controller = player->m_controllerNo;
+        if (controller >= 0) {
+            used[controller] = true;
+        }
+        controller = player->unk426Flag ? player->unk42C : -1;
+        if (controller >= 0) {
+            used[controller] = true;
+        }
+    }
+    for (int controller = 0; controller < 8; controller++) {
+        if (!used[controller]) {
+            gfPadStatus status;
+            g_gfPadSystem->getSysPadStatus(controller, &status);
+            if (status.m_error == 0 && (status.m_buttonsPressedThisFrame.bits & GF_PAD_BUTTON_BIT_START)) {
+                return controller;
+            }
+        }
+    }
+    return -1;
+}
+
+bool muSelCharTask::canWifiEntry() {
+    int area;
+    bool canEntry = false;
+    int players = 0;
+    int available = 0;
+    muWifiInterfaceTask* wifi = g_muWifiInterfaceTask;
+    if (getSelCharType() == 12) {
+        for (area = 0; area < m_numPlayerAreas; area++) {
+            muSelCharPlayerArea* player = m_selCharPlayerAreas[area];
+            switch (player->_0) {
+            case 0:
+                if (player->m_playerKind != 2) {
+                    players++;
+                } else {
+                    available++;
+                }
+                break;
+            case 1:
+                int state = player->getWifiStateByWifiCond();
+                if (state == 0 && wifi->testRequestApproval(area)) {
+                    available++;
+                }
+                if (state == 1 || state == 2) {
+                    players++;
+                }
+                break;
+            case 2:
+            default:
+                break;
+            }
+        }
+        if (available > 0 && players < 3) {
+            canEntry = true;
+        }
+    }
+    return canEntry;
+}
+
+extern const u32 lbl_10_rodata_4F8[6];
+
+void muSelCharTask::dispKumiteRule(int type) {
+    int motion = 0;
+    m_highScoreMsg->printIndex(1, lbl_10_rodata_4F8[type], NULL);
+    int selCharType = getSelCharType();
+    int group;
+    if (isSelCharTypeIn(selCharType, 0, 4)) {
+        group = 0;
+    } else if (isSelCharTypeIn(selCharType, 4, 12)) {
+        group = 1;
+    } else {
+        bool inGroup = isSelCharTypeIn(selCharType, 12, 16);
+        group = 3;
+        if (inGroup) {
+            group = 2;
+        }
+    }
+    if (group == 2 && !isWifiGameMaster()) {
+        motion = 4;
+    }
+    m_objs[Obj_KumiteRule]->changeAnimN(motion, 0x10, false, false);
+}
+
+void muSelCharTask::wifiEntryPlayer() {
+    muSelCharPlayerArea* player;
+    int controller;
+    int area;
+    int entryArea = -1;
+    bool replaceCpu = false;
+    if (canWifiEntry()) {
+        controller = isPushedUnusedControllerStartButton();
+        if (controller >= 0) {
+            for (area = 0; area < m_numPlayerAreas; area++) {
+                player = getPlayerArea(area);
+                if (player->_0 == 1 && player->getWifiStateByWifiCond() == 0) {
+                    entryArea = area;
+                    break;
+                }
+            }
+            if (entryArea < 0) {
+                for (area = 0; area < m_numPlayerAreas; area++) {
+                    player = getPlayerArea(area);
+                    if (player->_0 == 0 && player->m_playerKind == 2) {
+                        entryArea = area;
+                        replaceCpu = true;
+                        break;
+                    }
+                }
+            }
+            if (entryArea >= 0) {
+                player = m_selCharPlayerAreas[entryArea];
+                if (replaceCpu) {
+                    player->wifiExitCpuPlayer();
+                }
+                player->wifiRequestPlayerEntry(controller);
+            }
+        }
+    }
 }

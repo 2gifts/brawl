@@ -19,6 +19,7 @@
 
 class muSelCharCBCalcWorld;
 class MuMsg;
+class IfWifiprPlayer;
 
 class muSelCharPlayerArea {
 protected:
@@ -54,7 +55,7 @@ public:
     u8 m_teamSet;
     char _0x1C5[3];
     int m_nameId;
-    char _0x1CC[0x4];
+    union { char _0x1CC[0x4]; int unk1CC; };
     int m_handi;                        // 0x1D0 the handicap (the line of the list)
     int m_cpLevel;                      // 0x1D4 the level of the computer (the line of the list)
     char _0x1D8[0x4];
@@ -79,6 +80,15 @@ public:
             char unk410[0x15];
             bool unk425;
             char unk426[0x12];
+        };
+        struct {
+            char unk408Pad[0x14];
+            IfWifiprPlayer* unk41C;
+            char unk420[6];
+            bool unk426Flag;
+            char unk427[5];
+            int unk42C;
+            char unk430[8];
         };
     };
     nw4r::g3d::ResFileData* m_charPicData;
@@ -143,6 +153,36 @@ public:
     void dispWifiFriendProfileName(const wchar_t* name);
     void dispWifiFriendProfileNameBaseColor();
     bool getWifiFriendProfileNameVisible();
+    void colorChangePointed(int pointed);
+    void initCharKind(MuSelchkind charKind);
+    void dispWifiFriendName(const wchar_t* name, bool isTeamBattle, int teamColor);
+    void bindCalcWorldFlag();
+    void getDefName(char* name);
+    void nameEntryButtonPointed(int pointed);
+    void playerKindButtonPointed(int hand);
+    void cpLevelButtonPointed(int hand);
+    void wifiFriendCommandButtonPointed(int hand);
+    void handiButtonPointed(int hand);
+    bool isColorIncButtonPushed();
+    // HYPOTHESIS: an inline accessor returns the area controller status by value.
+    gfPadStatus getPadStatus();
     int getCollKind(Vec2f* pos, int* arg, float* rect);
+    void openHandiList();
+    void forceCloseList();
+    void setNameNo(int name);
+    void setControllerNo(int controller);
+    void dispName(int name, int playerKind, bool teamBattle, int teamColor);
+    u8 getWifiAID(u8* localPlayer);
+    muSelCharPlayerArea();
+    // HYPOTHESIS: initialization data is an opaque parameter block.
+    static muSelCharPlayerArea* create(void* data);
+    void initProc(void* data);
+    void wifiRequestPlayerEntry(int entry);
+    void dispWifiDispState(int state);
+    void dispCharPicEffect();
+    void setWifiFriendProfileNameVisible(bool visible);
+    void createWifiModel(nw4r::g3d::ResFile* resFile, int priority);
+    int getWifiStateByWifiCond();
+    void wifiExitCpuPlayer();
 };
 static_assert(sizeof(muSelCharPlayerArea) == 0x448, "Wrong size for class!");

@@ -104,7 +104,7 @@ public:
         struct {
             char unk5D0[4];
             int unk5D4;
-            char unk5D8[4];
+            int unk5D8;
         };
     };
     int m_ruleNumStock;                         // 0x5DC
@@ -123,7 +123,25 @@ public:
     muRuleTask* m_ruleTask;                     // 0x62C the rules screen that opens over the select screen
     int m_ruleTaskState;                        // 0x630
     u8 m_ruleControlEnable;                     // 0x634
-    char _0x635[0x13];
+    union {
+        char _0x635[0x13];
+        struct {
+            char unk635[2];
+            // HYPOTHESIS: four-byte Wi-Fi rule packet cached for change detection.
+            struct {
+                u8 unk0_6 : 2;
+                u8 unk0_4 : 2;
+                u8 unk0_2 : 2;
+                u8 unk0_0 : 2;
+                u8 unk1_5 : 3;
+                u8 unk1_4 : 1;
+                u8 unk1_0 : 4;
+                u8 unk2;
+                u8 unk3;
+            } unk637;
+            char unk63B[0xD];
+        };
+    };
     int m_numPlayerAreas;                       // 0x648
     char _0x64c[0x8];
 
@@ -138,6 +156,10 @@ public:
     // HYPOTHESIS: the model table contains eight-byte records; the last flag varies priority.
     void createObjResFile(const void* models, int count, nw4r::g3d::ResFile* resFile,
                           nw4r::g3d::ResFile* textureFile, bool varyPriority);
+    void setHighScoreStyle(int style);
+    void dispNumStock(int count, bool enabled);
+    int strcatHighScoreUnit(char* text, int capacity, int kind);
+    void sendWifiGameRule(bool force, bool send);
     void dispDiffLevel(int level, bool enabled);
     void ruleCall();
     void sendSystemAllCharKind();
@@ -193,6 +215,24 @@ public:
     int getCollKindPlayerArea(Vec2f* pos, int* areaIdx, int* arg, float* rect);
     void setRuleNumHoldCursorVisible(bool visible);
     void setFaceIconMotion(int faceIdx, int motion);
+    int findFreeWiiControllerNo();
+    void dispWifiPrompt(u32 message);
+    int getCollCharKind(Vec2f* pos);
+    void dispHighScoreDiffLevel(int level);
+    int isPushedUnusedControllerStartButton();
+    bool canWifiEntry();
+    void wifiEntryPlayer();
+    void dispKumiteRule(int type);
+    // HYPOTHESIS: range classification shared by the character select menus.
+    static inline bool isSelCharTypeIn(int type, int first, int end) {
+        bool in;
+        if (type >= first && type < end) {
+            in = true;
+        } else {
+            in = false;
+        }
+        return in;
+    }
 
     // Which part of the screen a point is in: 0 above the area of the characters, 1 the area of the characters, 2 below it
     // (the areas of the players).
