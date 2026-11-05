@@ -18,6 +18,11 @@ struct hkCdBody {
         m_parent = (hkCdBody*)parent;
         m_motion = parent->m_motion;
     }
+    // Child body of a parent with its own motion (the transform agent passes the composed transform).
+    hkCdBody(const hkCdBody* parent, const void* motion) {
+        m_parent = (hkCdBody*)parent;
+        m_motion = (hkMotion*)motion;
+    }
 
     // Walks the m_parent chain up to the body without a parent (map name hkCdBody__getRootCollidable).
     hkCdBody* getRootCollidable() {

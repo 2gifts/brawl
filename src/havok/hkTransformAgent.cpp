@@ -1,5 +1,5 @@
 // Havok translation unit hkTransformAgent.o (main.dol 0x802C8E9C-0x802CAA50).
-// Not yet decompiled. Functions in address order (method names from the Havok TU map; classes still to be identified):
+// Functions in address order (method names from the Havok TU map):
 //   0x802C8E9C   204  registerAgent   [map: hkTransformAgent__registerAgent]
 //   0x802C8F68    92  cleanup   [map: hkTransformAgent__cleanup]
 //   0x802C8FC4    92  __dt   [map: hkTransformAgent____dt]
@@ -41,12 +41,10 @@
 #include <havok/hkSimpleClosestContactCollector.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
 #include <havok/hkSymmetricAgentProcessCollision.h>
-
-
-namespace {
-
-// Layout of the table handed to the dispatcher (stack copy in registerAgent).
-} // namespace
+#include <havok/hkCollisionInput.h>
+#include <havok/hkMonitorStream.h>
+#include <havok/hkCdBody.h>
+#include <havok/hkMotionState.h>
 
 void hkTransformAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs symmetric;
@@ -68,56 +66,199 @@ void hkTransformAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     dispatcher->registerCollisionAgent(&plain, HK_SHAPE_TRANSFORM, -1);
 }
 
-// HYPOTHESIS: per-body record handed to the child agent. Layout from the stack copy: 0x00 shape field
-// 0x10, 0x04 shape key, 0x08 pointer to the composed transform, 0x0C the body itself.
-struct hkTransformAgentBodyInfo {
-    void* unk00;    // HYPOTHESIS: shape field at 0x10
-    u32 shapeKey;   // 0x04
-    void* transform; // 0x08
-    hkCdBody* body; // 0x0C
-};
-
-#pragma dont_inline on
-void hkTransformAgent::updateShapeCollectionFilter(void* unk0, void* unk1, void* unk2) {
-    hkCdBody* body = (hkCdBody*)unk0;
-    char* shape = (char*)body->m_shape;
-    hkTransform transform;
-    // body's transform composed with the transform shape's own transform (at 0x30 in the shape)
-    transform.setMul(*(const hkTransform*)body->m_motion, *(const hkTransform*)(shape + 0x30));
-    hkTransformAgentBodyInfo info;
-    info.body = body;
-    info.shapeKey = body->m_shapeKey;
-    info.transform = &transform;
-    info.unk00 = *(void**)(shape + 0x10);
-    m_childAgent->updateShapeCollectionFilterChild(&info, unk1, unk2);
+// NONMATCHING (create functions, ~55%): the target keeps the hkCollisionAgent vtable store, copies the motion state's
+// transform through a 0x40-byte temporary and materializes the predictive-table test, all signs of copy propagation
+// being off (the source of that is not found; hkGskBaseAgent's ctor shows the same vtable store).
+hkTransformAgent::hkTransformAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                   hkContactMgr* mgr)
+    : hkCollisionAgent((int)mgr) {
+    const hkTransformShape* shape = (const hkTransformShape*)bodyA.m_shape;
+    hkMotionState motion = *(const hkMotionState*)bodyA.m_motion;
+    motion.m_transform.setMul(*(const hkTransform*)bodyA.m_motion, shape->m_transform);
+    hkCdBody childBody(&bodyA, &motion);
+    const hkShape* child = shape->m_childShape.m_childShape;
+    childBody.m_shapeKey = bodyA.m_shapeKey;
+    childBody.m_shape = (hkShape*)child;
+    m_childAgent = input.m_dispatcher->getNewCollisionAgent(childBody, bodyB, input, mgr);
 }
-#pragma dont_inline reset
+
+hkTransformAgent* hkTransformAgent::createTransformAAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr) {
+    return new hkTransformAgent(*(const hkCdBody*)unk0, *(const hkCdBody*)unk1, *(const hkCollisionInput*)unk2, contactMgr);
+}
+
+hkTransformAgent* hkTransformAgent::createTransformBAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr) {
+    return new hkSymmetricAgentLinearCast_16hkTransformAgent_(*(const hkCdBody*)unk0, *(const hkCdBody*)unk1,
+                                                              *(const hkCollisionInput*)unk2, contactMgr);
+}
+
+// The child gets a full motion state: A's motion state moved by the shape's transform (the swept rotations turned by
+// the shape's rotation, the local center of mass expressed in the child's frame).
+// NONMATCHING (~53%): structure, timer form and stack layout match; the quaternion products are scheduled differently
+// (the target needs one more FPR, f31).
+void hkTransformAgent::processCollision(void* a, void* b, void* c, void* d) {
+    HK_TIMER_BEGIN("Transform");
+    const hkCdBody* bodyA = (const hkCdBody*)a;
+    const hkTransformShape* shape = (const hkTransformShape*)bodyA->m_shape;
+    hkMotionState motion;
+    motion.m_transform.setMul(*(const hkTransform*)bodyA->m_motion, shape->m_transform);
+    const hkMotionState* src = (const hkMotionState*)bodyA->m_motion;
+    motion.m_sweptTransform.m_centerOfMass0 = src->m_sweptTransform.m_centerOfMass0;
+    motion.m_sweptTransform.m_centerOfMass1 = src->m_sweptTransform.m_centerOfMass1;
+    motion.m_sweptTransform.m_rotation0.setMul(src->m_sweptTransform.m_rotation0, shape->m_rotation);
+    motion.m_sweptTransform.m_rotation1.setMul(src->m_sweptTransform.m_rotation1, shape->m_rotation);
+    motion.m_sweptTransform.m_centerOfMassLocal._setTransformedInversePos(shape->m_transform,
+                                                                          src->m_sweptTransform.m_centerOfMassLocal);
+    motion.m_deltaAngle = src->m_deltaAngle;
+    motion.m_objectRadius = src->m_objectRadius;
+    hkCdBody childBody(bodyA, &motion);
+    const hkShape* child = shape->m_childShape.m_childShape;
+    childBody.m_shapeKey = bodyA->m_shapeKey;
+    childBody.m_shape = (hkShape*)child;
+    m_childAgent->processCollision(&childBody, b, c, d);
+    HK_TIMER_END();
+}
+
+// Every query hands the child agent (or, for the statics, the dispatcher's function for the child shape against B) a
+// child body: the transform shape's child, A's shape key, and A's transform composed with the shape's transform.
+// The statics are exact; NONMATCHING (virtuals, 88-96%): the target keeps &transform in r3 and loads the key before the
+// motion store, ours colors &transform to r0 (permuter 150 s: nothing).
+void hkTransformAgent::getPenetrations(void* a, void* b, void* c, void* target) {
+    HK_TIMER_BEGIN("Transform");
+    const hkCdBody* bodyA = (const hkCdBody*)a;
+    const hkTransformShape* shape = (const hkTransformShape*)bodyA->m_shape;
+    hkTransform transform;
+    transform.setMul(*(const hkTransform*)bodyA->m_motion, shape->m_transform);
+    hkCdBody childBody(bodyA, &transform);
+    const hkShape* child = shape->m_childShape.m_childShape;
+    childBody.m_shapeKey = bodyA->m_shapeKey;
+    childBody.m_shape = (hkShape*)child;
+    // The timer ends before the child call here (unlike the other queries).
+    HK_TIMER_END();
+    m_childAgent->getPenetrations(&childBody, b, c, target);
+}
+
+void hkTransformAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                             void* target) {
+    HK_TIMER_BEGIN("Transform");
+    const hkTransformShape* shape = (const hkTransformShape*)bodyA.m_shape;
+    hkTransform transform;
+    transform.setMul(*(const hkTransform*)bodyA.m_motion, shape->m_transform);
+    hkCdBody childBody(&bodyA, &transform);
+    const hkShape* child = shape->m_childShape.m_childShape;
+    childBody.m_shapeKey = bodyA.m_shapeKey;
+    childBody.m_shape = (hkShape*)child;
+    int typeA = child->getType();
+    int typeB = bodyB.m_shape->getType();
+    typedef void (*QueryFunc)(void*, void*, void*, void*);
+    ((QueryFunc)input.m_dispatcher->getGetPenetrationsFunc(typeA, typeB))(
+        &childBody, (void*)&bodyB, (void*)&input, target);
+    HK_TIMER_END();
+}
+
+void hkTransformAgent::getClosestPoints(void* a, void* b, void* c, void* target) {
+    HK_TIMER_BEGIN("Transform");
+    const hkCdBody* bodyA = (const hkCdBody*)a;
+    const hkTransformShape* shape = (const hkTransformShape*)bodyA->m_shape;
+    hkTransform transform;
+    transform.setMul(*(const hkTransform*)bodyA->m_motion, shape->m_transform);
+    hkCdBody childBody(bodyA, &transform);
+    const hkShape* child = shape->m_childShape.m_childShape;
+    childBody.m_shapeKey = bodyA->m_shapeKey;
+    childBody.m_shape = (hkShape*)child;
+    m_childAgent->getClosestPoints(&childBody, b, c, target);
+    HK_TIMER_END();
+}
+
+void hkTransformAgent::staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                              void* target) {
+    HK_TIMER_BEGIN("Transform");
+    const hkTransformShape* shape = (const hkTransformShape*)bodyA.m_shape;
+    hkTransform transform;
+    transform.setMul(*(const hkTransform*)bodyA.m_motion, shape->m_transform);
+    hkCdBody childBody(&bodyA, &transform);
+    const hkShape* child = shape->m_childShape.m_childShape;
+    childBody.m_shapeKey = bodyA.m_shapeKey;
+    childBody.m_shape = (hkShape*)child;
+    int typeA = child->getType();
+    int typeB = bodyB.m_shape->getType();
+    typedef void (*QueryFunc)(void*, void*, void*, void*);
+    ((QueryFunc)input.m_dispatcher->getGetClosestPointsFunc(typeA, typeB))(
+        &childBody, (void*)&bodyB, (void*)&input, target);
+    HK_TIMER_END();
+}
+
+void hkTransformAgent::linearCast(void* a, void* b, void* c, void* target, void* d) {
+    HK_TIMER_BEGIN("Transform");
+    const hkCdBody* bodyA = (const hkCdBody*)a;
+    const hkTransformShape* shape = (const hkTransformShape*)bodyA->m_shape;
+    hkTransform transform;
+    transform.setMul(*(const hkTransform*)bodyA->m_motion, shape->m_transform);
+    hkCdBody childBody(bodyA, &transform);
+    const hkShape* child = shape->m_childShape.m_childShape;
+    childBody.m_shapeKey = bodyA->m_shapeKey;
+    childBody.m_shape = (hkShape*)child;
+    m_childAgent->linearCast(&childBody, b, c, target, d);
+    HK_TIMER_END();
+}
+
+void hkTransformAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                        void* target, void* d) {
+    HK_TIMER_BEGIN("Transform");
+    const hkTransformShape* shape = (const hkTransformShape*)bodyA.m_shape;
+    hkTransform transform;
+    transform.setMul(*(const hkTransform*)bodyA.m_motion, shape->m_transform);
+    hkCdBody childBody(&bodyA, &transform);
+    const hkShape* child = shape->m_childShape.m_childShape;
+    childBody.m_shapeKey = bodyA.m_shapeKey;
+    childBody.m_shape = (hkShape*)child;
+    int typeA = child->getType();
+    int typeB = bodyB.m_shape->getType();
+    typedef void (*CastFunc)(void*, void*, void*, void*, void*);
+    ((CastFunc)input.m_dispatcher->getLinearCastFunc(typeA, typeB))(
+        &childBody, (void*)&bodyB, (void*)&input, target, d);
+    HK_TIMER_END();
+}
+
+// BYTES: the symmetric wrapper calls this function, it does not inline it.
+#pragma auto_inline off
+void hkTransformAgent::updateShapeCollectionFilter(void* a, void* b, void* c) {
+    const hkCdBody* bodyA = (const hkCdBody*)a;
+    const hkTransformShape* shape = (const hkTransformShape*)bodyA->m_shape;
+    hkTransform transform;
+    transform.setMul(*(const hkTransform*)bodyA->m_motion, shape->m_transform);
+    hkCdBody childBody(bodyA, &transform);
+    const hkShape* child = shape->m_childShape.m_childShape;
+    childBody.m_shapeKey = bodyA->m_shapeKey;
+    childBody.m_shape = (hkShape*)child;
+    m_childAgent->updateShapeCollectionFilter(&childBody, b, c);
+}
+#pragma auto_inline reset
 
 void hkTransformAgent::cleanup() {
-    m_childAgent->cleanupChild();
+    m_childAgent->cleanup();
     delete this;
 }
 
 hkTransformAgent::~hkTransformAgent() {}
 
 void hkTransformAgent::invalidateTim(void* arg) {
-    m_childAgent->invalidateTimChild(arg);
+    m_childAgent->invalidateTim(arg);
 }
 
 void hkTransformAgent::warpTime(float t0, float t1, void* arg) {
-    m_childAgent->warpTimeChild(t0, t1, arg);
+    m_childAgent->warpTime(t0, t1, arg);
 }
 
 void hkTransformAgent::removePoint(u16 key) {
-    m_childAgent->removePointChild(key);
+    m_childAgent->removePoint(key);
 }
 
 void hkTransformAgent::commitPotential(u16 key) {
-    m_childAgent->commitPotentialChild(key);
+    m_childAgent->commitPotential(key);
 }
 
 void hkTransformAgent::createZombie(u16 key) {
-    m_childAgent->createZombieChild(key);
+    m_childAgent->createZombie(key);
 }
 
 hkSymmetricAgent_16hkTransformAgent_::~hkSymmetricAgent_16hkTransformAgent_() {}
@@ -132,7 +273,7 @@ void hkSymmetricAgentLinearCast_16hkTransformAgent_::getPenetrations(void* unk0,
 
 void hkSymmetricAgentLinearCast_16hkTransformAgent_::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
-    hkTransformAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
+    hkTransformAgent::staticGetPenetrations(*(const hkCdBody*)unk1, *(const hkCdBody*)unk0, *(const hkCollisionInput*)unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_16hkTransformAgent_::getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
@@ -142,7 +283,7 @@ void hkSymmetricAgentLinearCast_16hkTransformAgent_::getClosestPoints(void* unk0
 
 void hkSymmetricAgentLinearCast_16hkTransformAgent_::staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
-    hkTransformAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
+    hkTransformAgent::staticGetClosestPoints(*(const hkCdBody*)unk1, *(const hkCdBody*)unk0, *(const hkCollisionInput*)unk2, &flip);
 }
 
 void hkSymmetricAgentLinearCast_16hkTransformAgent_::updateShapeCollectionFilter(void* unk0, void* unk1, void* unk2) {
@@ -203,9 +344,9 @@ void hkSymmetricAgentLinearCast_16hkTransformAgent_::staticLinearCast(void* a, v
     hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
     if (d != 0) {
         hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
-        hkTransformAgent::staticLinearCast(b, a, &flippedInput, &flipped, &flippedStart);
+        hkTransformAgent::staticLinearCast(*(const hkCdBody*)b, *(const hkCdBody*)a, flippedInput, &flipped, &flippedStart);
     } else {
-        hkTransformAgent::staticLinearCast(b, a, &flippedInput, &flipped, 0);
+        hkTransformAgent::staticLinearCast(*(const hkCdBody*)b, *(const hkCdBody*)a, flippedInput, &flipped, 0);
     }
 }
 

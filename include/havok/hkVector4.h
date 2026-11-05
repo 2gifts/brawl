@@ -138,6 +138,13 @@ struct hkVector4 {
         ((u32*)this)[2] = ((const u32*)&a)[2] ^ (((const u32*)&s)[2] & 0x80000000);
         ((u32*)this)[3] = ((const u32*)&a)[3] ^ (((const u32*)&s)[3] & 0x80000000);
     }
+    // this += s * a, lane order x..w (hkQuaternion::setMul).
+    void addMul4(hkReal s, const hkVector4& a) {
+        x += s * a.x;
+        y += s * a.y;
+        z += s * a.z;
+        w += s * a.w;
+    }
     // this = a + s * b, lane order x..w (its weak out-of-line copy is in hkGsk).
     void setAddMul4(const hkVector4& a, const hkVector4& b, hkReal s) {
         x = a.x + s * b.x;
