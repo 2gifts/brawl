@@ -5,6 +5,13 @@
 
 // Havok math scalar. Shared by all hk math headers.
 typedef float hkReal;
+// Scalar result of the length reductions (lengthSquared3, length3, ...). HYPOTHESIS: the alignment attribute sits
+// on the typedef. BYTES: CodeWarrior turns copy propagation off in any function holding a value of a type
+// aligned this way, including the return value of an inline function whose return expression computes one
+// (a return that just forwards another call does not count), which is what gives most vector-math functions their timer form:
+// the hkBool of HK_TIMER_BEGIN/END becomes a bool before the branch (extsb; neg; or; srwi.). Functions without
+// such a value keep the folded extsb. test. The attribute does not change the layout of a float.
+typedef hkReal hkSimdReal __attribute__((aligned(4)));
 
 struct hkRotation;
 struct hkQuaternion;
@@ -142,11 +149,11 @@ struct hkVector4 {
     hkReal& operator[](int i) { return (&x)[i]; }
     hkReal getSimdAt(int i) const { return (&x)[i]; }
     hkReal dot3(const hkVector4& a) const { return x * a.x + y * a.y + z * a.z; }
-    hkReal lengthSquared3() const { return dot3(*this); }
-    hkReal lengthSquared4() const { return dot3(*this) + w * w; }
-    hkReal length3() const { return sqrtf(lengthSquared3()); }
+    hkSimdReal lengthSquared3() const { return x * x + y * y + z * z; }
+    hkSimdReal lengthSquared4() const { return dot3(*this) + w * w; }
+    hkSimdReal length3() const { return sqrtf(lengthSquared3()); }
     void normalize3() {
-        hkReal inv = 1.0f / length3();
+        hkReal inv = 1.0f / sqrtf(dot3(*this));
         set(x * inv, y * inv, z * inv, w);
     }
 

@@ -43,12 +43,15 @@ inline u32 hkMonitorStream_getTicks() {
 // end of the stream is read once (before the limit word). HK_TIMER_BEGIN takes the bare name and prefixes "Tt";
 // HK_TIMER_END writes "Et". Asm-verified on hkWorld::stepDeltaTime.
 // MATCH-ONLY: the direct hkBool(...) test instead of memoryAvailable(); the member call reloads the end pointer.
-// Not solved yet: about 300 timer sites (most functions with 16-byte aligned stack frames) test the limit
-// word first and turn the hkBool into a bool before branching (extsb; neg; or; srwi.). No source form found.
+// The limit word is read into a local first. With copy propagation on (most functions) it is folded back and the
+// end word loads first with an extsb. test; in functions where CodeWarrior turns propagation off (see hkSimdReal
+// in hkVector4.h) the limit word loads first and the hkBool becomes a bool before the branch
+// (extsb; neg; or; srwi.). One spelling gives both forms of the image.
 #define HK_MONITOR_TIMER_COMMAND(NAME)                                                       \
     {                                                                                        \
         hkMonitorStream& mStream = hkMonitorStream::getInstance();                           \
-        if (hkBool(mStream.unk4 < mStream.unkC)) {                                           \
+        char* limit = mStream.unkC;                                                          \
+        if (hkBool(mStream.unk4 < limit)) {                                                  \
             hkMonitorStream::TimerCommand* h = (hkMonitorStream::TimerCommand*)mStream.unk4; \
             h->m_name = NAME;                                                                \
             h->m_time = hkMonitorStream_getTicks();                                          \

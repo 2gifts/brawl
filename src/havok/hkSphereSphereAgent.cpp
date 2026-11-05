@@ -1,5 +1,5 @@
 // Havok translation unit hkSphereSphereAgent.o (main.dol 0x802C6490-0x802C6F98).
-// Not yet decompiled. Functions in address order (method names from the Havok TU map; classes still to be identified):
+// Functions in address order (method names from the Havok TU map; classes still to be identified):
 //   0x802C6490   104  registerAgent   [map: hkSphereSphereAgent__registerAgent]
 //   0x802C64F8   120  createSphereSphereAgent   [map: hkSphereSphereAgent__createSphereSphereAgent]
 //   0x802C6570   116  cleanup   [map: hkSphereSphereAgent__cleanup]
@@ -13,6 +13,10 @@
 #include <havok/hkSphereSphereAgent.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkCollisionDispatcher.h>
+#include <havok/hkMonitorStream.h>
+#include <havok/hkSphereShape.h>
+#include <havok/hkTransform.h>
+#include <havok/hkCdBodyPairCollector.h>
 
 // Stand-in for hkIterativeLinearCastAgent::staticLinearCast (other unit).
 extern "C" void fn_802B7FD0();
@@ -45,4 +49,24 @@ hkSphereSphereAgent::~hkSphereSphereAgent() {}
 
 void hkSphereSphereAgent::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
     staticGetPenetrations(unk0, unk1, unk2, unk3);
+}
+
+// Reports the pair when the centres are closer than the sum of the radii.
+void hkSphereSphereAgent::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+    HK_TIMER_BEGIN("SphereSphere");
+    const hkCdBody& bodyA = *(const hkCdBody*)unk0;
+    const hkCdBody& bodyB = *(const hkCdBody*)unk1;
+    const hkVector4& posB = ((const hkTransform*)bodyB.m_motion)->m_translation;
+    const hkVector4& posA = ((const hkTransform*)bodyA.m_motion)->m_translation;
+    const hkSphereShape* sphereA = (const hkSphereShape*)bodyA.m_shape;
+    const hkSphereShape* sphereB = (const hkSphereShape*)bodyB.m_shape;
+    hkVector4 vec;
+    vec.setSub4(posB, posA);
+    hkReal radiusB = sphereB->m_radius;
+    hkReal radiusA = sphereA->m_radius;
+    hkReal radiusSum = radiusA + radiusB;
+    if (vec.lengthSquared3() < radiusSum * radiusSum) {
+        ((hkCdBodyPairCollector*)unk3)->addCdBodyPair(bodyA, bodyB);
+    }
+    HK_TIMER_END();
 }
