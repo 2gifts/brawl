@@ -32,8 +32,13 @@ struct hkThreadMemory {
     void addReference();
     void removeReference();
     // Stack allocation from the chained stack area (16 byte granularity).
+    // BYTES: every function that inlines this has copy propagation off in the target (materialized hkBool tests,
+    // reloads): the hkLocalArray users (hkAgentDispatchUtil::update, the hkWorldOperationUtil broadphase functions),
+    // hk3AxisSweep::reQuerySingleObject, hkUnionFind::assignGroups. MWCC does that for a function holding a local with an
+    // alignment attribute (TIPS, extsb/neg/or/srwi. form). HYPOTHESIS: which local carries it in the original is unknown
+    // (size, p and next all give the same bytes); aligned(4) is the natural alignment, so the frame does not change.
     void* allocateStack(int nbytes) {
-        int size = (nbytes + 0x10) & ~0xF;
+        int size __attribute__((aligned(4))) = (nbytes + 0x10) & ~0xF;
         char* p = m_stackTop;
         char* next = p + size;
         if (next <= m_stackEnd) {
