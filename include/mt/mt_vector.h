@@ -506,6 +506,7 @@ public:
 #else
     ;
 #endif
+    void sub(const Vec3f* other, Vec3f* out);
     float length();
     float distance(Vec3f* v) {
         Vec3f disp = *this - *v;
