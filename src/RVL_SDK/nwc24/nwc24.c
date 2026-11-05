@@ -3471,119 +3471,106 @@ NWC24Err fn_8039D45C(const u8 *data, int dataSize, u8 *out, u32 outSize, u32 *ou
     return NWC24_OK;
 }
 
-// HYPOTHESIS: this is the inlined memcpy the compiler unrolled, the loop counter is a signed int
-static inline void CopyBytes_i(char *dst, const char *src, int n) {
-    int i;
-
-    for (i = 0; i < n; i++) {
-        *dst++ = *src++;
-    }
-}
-
-// a hex digit as ascii, the compiler turned the modulo 10 into a multiply so it must be written like that
-static inline int HexDigit_i(int digit) {
-    if (digit >= 10) {
-        return 'A' + digit % 10;
-    }
-
-    return '0' + digit % 10;
-}
-
-static NWC24Err fn_8039D7C4(char *text, u32 textSize, u32 *textWritten, const char *data, u32 dataSize,
+static NWC24Err fn_8039D7C4(char *text, u32 textSize, u32 *textWritten, const u8 *data, u32 dataSize,
                             u32 *dataRead, BOOL noSoftBreaks) {
-    NWC24Err result = NWC24_OK;
-    int lineLen;
+    char *cursor;
     u32 written;
     u32 consumedTotal;
-    char buf[4];
+    NWC24Err result;
+    int lineLen;
+    u8 buf[4];
+    BOOL softBreak;
+    int out;
+    int consumed;
+    s16 ch;
+    int i;
 
+    result = NWC24_OK;
     if (text == NULL) {
         return NWC24_ERR_INVALID_VALUE;
     }
-
     if (data == NULL) {
         return NWC24_ERR_INVALID_VALUE;
     }
-
     if (dataSize == 0) {
         return NWC24_ERR_OVERFLOW;
     }
-
     if (dataRead != NULL) {
         *dataRead = 0;
     }
-
     if (textWritten != NULL) {
         *textWritten = 0;
     }
-
+    cursor = text;
     lineLen = 0;
     written = 0;
     consumedTotal = 0;
     while (consumedTotal < dataSize) {
-        int consumed;
-        int out;
-        BOOL softBreak = FALSE;
-        char ch = *data;
-
-        if (ch >= 0x21 && ch <= 0x7E && ch != '=') {
-            buf[0] = ch;
+        ch = *data;
+        softBreak = FALSE;
+        if ((char)ch >= 0x21 && (char)ch <= 0x7E && (char)ch != '=') {
             consumed = 1;
             out = 1;
-        } else if (consumedTotal + 1 < dataSize && ch == '\r' && data[1] == '\n') {
-            buf[0] = ch;
+            buf[0] = *data;
+        } else if (consumedTotal + 1 < dataSize && (char)ch == '\r' && (char)data[1] == '\n') {
+            // BUG: Original CRLF handling consumes both bytes but emits only CR.
             consumed = 2;
             out = 1;
+            buf[0] = *data;
             buf[1] = data[1];
         } else {
             buf[0] = '=';
-            buf[1] = HexDigit_i((u8)*data >> 4);
-            buf[2] = HexDigit_i(*data & 0xF);
+            if ((*data >> 4) >= 10) {
+                buf[1] = (*data >> 4) % 10 + 'A';
+            }
+            else {
+                buf[1] = (*data >> 4) % 10 + '0';
+            }
+            if ((*data & 0xF) >= 10) {
+                buf[2] = (*data & 0xF) % 10 + 'A';
+            }
+            else {
+                buf[2] = (*data & 0xF) % 10 + '0';
+            }
             consumed = 1;
             out = 3;
         }
-
         if (!noSoftBreaks && lineLen + out >= 75) {
             softBreak = TRUE;
             out += 3;
         }
-
         if (written + out >= textSize) {
             result = NWC24_ERR_OVERFLOW;
             break;
         }
-
         written += out;
         if (softBreak) {
-            *text = '=';
-            lineLen = 0;
+            cursor[0] = '=';
+            cursor[1] = '\r';
+            cursor[2] = '\n';
+            cursor += 3;
             out -= 3;
-            text[1] = '\r';
-            text[2] = '\n';
-            text += 3;
+            lineLen = 0;
         }
-
         lineLen += out;
-        CopyBytes_i(text, buf, out);
-        text += out;
+        for (i = 0; i < out; i++) {
+            *cursor++ = buf[i];
+        }
         consumedTotal += consumed;
         data += consumed;
     }
-
     if (dataRead != NULL) {
         *dataRead = consumedTotal;
     }
-
     if (textWritten != NULL) {
         *textWritten = written;
     }
-
     return result;
 }
 
 NWC24Err NWC24EncodeQuotedPrintable(char *text, u32 textSize, u32 *textWritten, const u8 *data, u32 dataSize,
                                     u32 *dataRead) {
-    return fn_8039D7C4(text, textSize, textWritten, (const char *)data, dataSize, dataRead, FALSE);
+    return fn_8039D7C4(text, textSize, textWritten, data, dataSize, dataRead, FALSE);
 }
 
 /* ---------------------------------------------------------------------------------------------
@@ -4085,30 +4072,28 @@ NWC24Err fn_8039EEF8(NWC24iMsgObj *msg) {
 
 // RCPT TO: <rcpt> for everybody in the to list
 NWC24Err fn_8039EFE0(NWC24iMsgObj *msg) {
-    char *buf = NWC24WorkP->stringWork;
-    int n;
-    NWC24Err result = NWC24_OK;
-    char *p = buf;
+    char *p;
     u32 i;
-    int avail = 0x3FE;
-    u32 total = 0;
-    NWC24iAddr *addr = msg->to;
+    int n;
+    u32 total;
+    int avail;
+    NWC24Err result;
 
-    Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
-    for (i = 0; i < msg->numTo; i++, addr++) {
+    total = 0;
+    result = NWC24_OK;
+    p = NWC24WorkP->stringWork;
+    Mail_memset(p, 0, NWC24i_STRING_WORK_SIZE);
+    avail = 0x3FE;
+    for (i = 0; i < msg->numTo; i++) {
         Mail_strncat(p, "RCPT TO: ", avail);
         p += 9;
-
-        result = fn_8039EDE8(addr, msg->flags, p, avail, &n);
+        result = fn_8039EDE8(&msg->to[i], msg->flags, p, avail, &n);
         if (result != NWC24_OK) {
             break;
         }
-
         p += n;
-        *p = '\r';
-        p[1] = '\n';
-        p += 2;
-
+        *p++ = '\r';
+        *p++ = '\n';
         avail -= n + 11;
         total += n + 11;
         if (avail <= 0) {
@@ -4116,14 +4101,12 @@ NWC24Err fn_8039EFE0(NWC24iMsgObj *msg) {
             break;
         }
     }
-
     if (result == NWC24_OK) {
         result = NWC24FWrite(NWC24WorkP, total, OutFile);
         if (result == NWC24_OK) {
             msg->length += total;
         }
     }
-
     return result;
 }
 
@@ -5086,8 +5069,8 @@ done:
 }
 
 NWC24Err NWC24CommitMsg(NWC24MsgObj *pMsg) {
-    NWC24iMsgObj *msg = (NWC24iMsgObj *)pMsg;
     NWC24MsgBoxId id = NWC24_MSGBOX_SEND;
+    NWC24iMsgObj *msg = (NWC24iMsgObj *)pMsg;
     NWC24UserId myId;
 
     if (!NWC24IsMsgLibOpened() && !NWC24IsMsgLibOpenedByTool()) {
