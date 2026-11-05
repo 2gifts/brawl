@@ -23,7 +23,7 @@ muBootNetworkTask::~muBootNetworkTask() { }
 // Takes the open window away.
 inline void muBootNetworkTask::closeWnd() {
     if (m_wnd != NULL) {
-        fn_800BF830(m_wnd);
+        m_wnd->deleteWnd();
         m_wnd->exit();
         m_wnd = NULL;
     }
@@ -90,7 +90,7 @@ void muBootNetworkTask::processDefault() {
             if (m_task->m_errorState != 0) {
                 OSReport("NetEtcBoot ErrorState[%d]\n", m_task->m_errorState);
             }
-            fn_800BF828(m_wnd, 2);
+            m_wnd->setStep(2);
             nw4r::g3d::ScnGroup* root = m_cameraTask->m_scnRoot;
             root->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_object->m_scnMdl));
             m_step = 6;
@@ -169,7 +169,7 @@ void muBootNetworkTask::initialize() {
 // Takes the open window away (the part of the release of the task that the owner can call).
 void muBootNetworkTask::releaseWnd() {
     if (m_wnd != NULL) {
-        fn_800BF830(m_wnd);
+        m_wnd->deleteWnd();
         m_wnd->exit();
         m_wnd = NULL;
     }

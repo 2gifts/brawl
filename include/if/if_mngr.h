@@ -104,6 +104,12 @@ public:
     bool saveReplay();
     bool isSaveReplayFinished(int* state);
 
+    void setHomerunDistance(float distance);
+    void dispHomerunResult(bool newRecord);
+    void dispHomerunVersusResult(float distance0, float distance1, float distance2);
+    void doHeartSwap(int areaNo1, int areaNo2);
+    void initHeartSwap();
+
     inline static IfMngr* getInstance() { return g_IfMngr; }
 };
 static_assert(sizeof(IfMngr) == 200, "Class is wrong size!");

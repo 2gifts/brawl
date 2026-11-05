@@ -41,6 +41,11 @@ public:
     virtual void processDefault();
     void printText(u32 index, const char* text, int length, int kind);
     void setDoneButtonLabel(void* msgData, u32 index);
+    void setStep(int step);
+    void deleteWnd();
+    void dispSubMsg(const char* text);
+    void setYesButtonLabel(void* msgData, int msgId);
+    void setNoButtonLabel(void* msgData, int msgId);
     static int mainStepAppearMain(muNoticeWndTask* task);
     static void mainStepLeaveInit(muNoticeWndTask* task);
     static int mainStepLeaveMain(muNoticeWndTask* task);
@@ -54,8 +59,3 @@ extern "C" muNoticeWndTask* fn_800BEEB8(int kind, void* msgData, int msgId, nw4r
 // muNoticeWndTask::create1(...): the same with a text that is given (the text and its size) instead of a number
 extern "C" muNoticeWndTask* fn_800BF048(int kind, const char* text, int size, nw4r::g3d::ResFile* resFile, void* scnRoot, int unk14,
                                        int defaultButton, int heap, int heap2, int unk0, int unk1, int unk2);
-// muNoticeWndTask::setStep(step), deleteWnd(), setYesButtonLabel(text file, text number) and setNoButtonLabel(...)
-extern "C" void fn_800BF828(muNoticeWndTask* wnd, int step);
-extern "C" void fn_800BF830(muNoticeWndTask* wnd);
-extern "C" void fn_800BF97C(muNoticeWndTask* wnd, void* msgData, int msgId);
-extern "C" void fn_800BFA04(muNoticeWndTask* wnd, void* msgData, int msgId);

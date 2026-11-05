@@ -18,13 +18,11 @@
 // main.dol functions with names that the shared headers do not declare.
 // muMenuController::getControllerID()
 extern "C" int fn_800BA3D8(muMenuController* controller);
-// muMenuController::exchangeDir8ToVec(direction): the vector of one of the eight directions of the stick
 struct muAdvSelchrBDirVec {
     float m_x;
     float m_y;
 
 };
-extern "C" muAdvSelchrBDirVec fn_800BA0E0(int direction);
 // gfSceneRoot::layerUpdateFrame(layer)
 extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 // nw4r::g3d::ScnRoot::UpdateFrame()
@@ -565,7 +563,7 @@ int muAdvSelchrBTask::getNextPos(int player, int pos) {
     if (direction == 8) {
         return pos;
     }
-    muAdvSelchrBDirVec dirVec = fn_800BA0E0(direction);
+    Vec2f dirVec = muMenuController::exchangeDir8ToVec(direction);
     Vec2f dir(dirVec.m_x, dirVec.m_y);
     Vec2f delta;
     Vec2f current = m_chars[pos].getPos();

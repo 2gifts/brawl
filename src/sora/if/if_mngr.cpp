@@ -82,16 +82,12 @@ extern "C" void fn_800E244C(IfPlayer* player);
 extern "C" void fn_80108E5C(IfAdvBoss* boss);
 extern "C" void fn_800F0F84(void* photo);
 extern "C" int fn_800FBFDC(void* menu);
-// HYPOTHESIS: map names IfPlayer::portriteRenderMainFastInit, portriteRenderMainFast
-extern "C" void fn_800E2964(void* work, int* count, int numPlayers);
 // HYPOTHESIS: map names IfPlayer::receiveShareStock, addDragoonParts
 extern "C" void fn_800E1D78(IfPlayer* player, Vec3f* pos);
 // HYPOTHESIS: map names IfPhoto::startPause
 extern "C" void fn_800F00D4(void* photo, int arg1, int arg2, int playerNo, bool arg4);
 // HYPOTHESIS: map names IfWifiIntrMenu::endMenu
 extern "C" void fn_800FBF90(void* menu);
-// HYPOTHESIS: map names muNoticeWndTask::dispSubMsg
-extern "C" void fn_800BF928(muNoticeWndTask* wnd, const char* text);
 // HYPOTHESIS: map names IfCenter::dispKumiteKills
 extern "C" void fn_800DF4AC(void* center, int kills);
 // HYPOTHESIS: map names IfAdvBoss::eraseBoss
@@ -257,7 +253,7 @@ void IfMngr::openDlg(int arg1, int msgId, int arg3) {
     int kind = arg3 != 0;
     void* msgData = unk90;
     if (unkB0 != NULL) {
-        fn_800BF830(unkB0);
+        unkB0->deleteWnd();
         unkB0->exit();
         unkB0 = NULL;
     }
@@ -267,7 +263,7 @@ void IfMngr::openDlg(int arg1, int msgId, int arg3) {
 
 void IfMngr::closeDlg() {
     if (unkB0 != NULL) {
-        fn_800BF830(unkB0);
+        unkB0->deleteWnd();
         unkB0->exit();
         unkB0 = NULL;
     }
@@ -295,7 +291,7 @@ void IfMngr::setDlgDWCErrorCode(int code) {
     Message::getPrintIndexData(unk90, 0x13, &text, &size);
     memcpy(buf, text, size);
     size += sprintf(buf + size, "%05d", code);
-    fn_800BF928(unkB0, buf);
+    unkB0->dispSubMsg(buf);
 }
 
 bool IfMngr::sharePlayerStock(int giver, int receiver) {
@@ -468,7 +464,7 @@ void ifTask::renderPre() {
     IfMngr* mngr = g_IfMngr;
     int count;
     u8 work[0x78];
-    fn_800E2964(work, &count, MAX_PLAYERS);
+    IfPlayer::portriteRenderMainFastInit(reinterpret_cast<Rect2D*>(work), &count, MAX_PLAYERS);
     IfPlayer::loupeRenderPreInit();
     for (i = 0; i < MAX_PLAYERS; i++) {
         IfPlayer* player = mngr->m_ifPlayers[i];
@@ -481,4 +477,80 @@ void ifTask::renderPre() {
 
 void ifTask::processDefault() {
     g_IfMngr->main();
+}
+
+void IfMngr::setHomerunDistance(float distance) {
+    static_cast<IfMinigameHomerun*>(m_ifMinigameHomerun)->setDistance(distance);
+}
+
+void IfMngr::dispHomerunResult(bool newRecord) {
+    static_cast<IfMinigameHomerun*>(m_ifMinigameHomerun)->dispResult(newRecord);
+}
+
+void IfMngr::dispHomerunVersusResult(float distance0, float distance1, float distance2) {
+    static_cast<IfMinigameHomerun*>(m_ifMinigameHomerun)->dispVersusResult(distance0, distance1, distance2);
+}
+
+void IfMngr::doHeartSwap(int areaNo1, int areaNo2) {
+    u8 playerNo = unk68[areaNo1];
+    unk68[areaNo1] = unk68[areaNo2];
+    unk68[areaNo2] = playerNo;
+    IfPlayer* player1 = m_ifPlayers[areaNo1];
+    u32 loupeId = player1->m_loupeId;
+    player1->m_loupeId = m_ifPlayers[areaNo2]->m_loupeId;
+    player1->setLoupeVisible(player1->m_isLoupeVisible);
+    IfPlayer* player2 = m_ifPlayers[areaNo2];
+    player2->m_loupeId = loupeId;
+    player2->setLoupeVisible(player2->m_isLoupeVisible);
+    u32 damage = m_ifPlayers[areaNo1]->unk18;
+    m_ifPlayers[areaNo1]->updateDamageHP(m_ifPlayers[areaNo2]->unk18, 0);
+    m_ifPlayers[areaNo2]->updateDamageHP(damage, 0);
+    int colorNo = m_ifPlayers[areaNo1]->m_portraitColorNo;
+    m_ifPlayers[areaNo1]->m_portraitColorNo = m_ifPlayers[areaNo2]->m_portraitColorNo;
+    m_ifPlayers[areaNo2]->m_portraitColorNo = colorNo;
+    int teamNo = m_ifPlayers[areaNo1]->m_teamNo;
+    m_ifPlayers[areaNo1]->m_teamNo = m_ifPlayers[areaNo2]->m_teamNo;
+    m_ifPlayers[areaNo2]->m_teamNo = teamNo;
+    int characterKind1;
+    int type1 = m_ifPlayers[areaNo1]->getStockFace(&characterKind1);
+    int characterKind2;
+    int type2 = m_ifPlayers[areaNo2]->getStockFace(&characterKind2);
+    m_ifPlayers[areaNo1]->setStockFace(type2, characterKind2);
+    m_ifPlayers[areaNo2]->setStockFace(type1, characterKind1);
+}
+
+void IfMngr::initHeartSwap() {
+    int areaNo;
+    int playerNo;
+    for (areaNo = 0; areaNo < MAX_PLAYERS; areaNo++) {
+        playerNo = unk68[areaNo];
+        if (areaNo != playerNo) {
+            break;
+        }
+    }
+    if (areaNo < MAX_PLAYERS) {
+        u32 damage = m_ifPlayers[areaNo]->unk18;
+        m_ifPlayers[areaNo]->updateDamageHP(m_ifPlayers[playerNo]->unk18, 0);
+        m_ifPlayers[playerNo]->updateDamageHP(damage, 0);
+        int colorNo = m_ifPlayers[areaNo]->m_portraitColorNo;
+        m_ifPlayers[areaNo]->m_portraitColorNo = m_ifPlayers[playerNo]->m_portraitColorNo;
+        m_ifPlayers[playerNo]->m_portraitColorNo = colorNo;
+        int teamNo = m_ifPlayers[areaNo]->m_teamNo;
+        m_ifPlayers[areaNo]->m_teamNo = m_ifPlayers[playerNo]->m_teamNo;
+        m_ifPlayers[playerNo]->m_teamNo = teamNo;
+        int characterKind1;
+        int type1 = m_ifPlayers[areaNo]->getStockFace(&characterKind1);
+        int characterKind2;
+        int type2 = m_ifPlayers[playerNo]->getStockFace(&characterKind2);
+        m_ifPlayers[areaNo]->setStockFace(type2, characterKind2);
+        m_ifPlayers[playerNo]->setStockFace(type1, characterKind1);
+        for (u8 index = 0; index < MAX_PLAYERS; index++) {
+            if (index != unk68[index]) {
+                unk68[index] = index;
+                IfPlayer* player = m_ifPlayers[index];
+                player->m_loupeId = player->unk34C;
+                player->setLoupeVisible(player->m_isLoupeVisible);
+            }
+        }
+    }
 }

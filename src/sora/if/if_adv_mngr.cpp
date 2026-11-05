@@ -18,6 +18,8 @@
 #include <sr/sr_common.h>
 #include <string.h>
 #include <ty/ty_fig_listmng.h>
+#include <if/if_adv_gauge.h>
+#include <if/if_adv_pause.h>
 
 namespace nw4r {
 namespace g3d {
@@ -39,20 +41,15 @@ extern "C" void fn_800DE360(s32 value);
 extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 
 extern "C" {
-IfAdvPause* fn_80109600(int arg1, int arg2);
 void fn_80109774(IfAdvPause* pause, int flag);
 void fn_80109850(IfAdvPause* pause);
-void fn_80109BEC(IfAdvPause* pause);
 void fn_8010A800(IfAdvPause* pause, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2);
-void fn_8010A874(IfAdvPause* pause);
 IfAdvRadarData* fn_8010CF44(IfAdvRadarData* data, void* arg1, void* arg2, void* arg3, void* arg4);
 void fn_8010CF88(IfAdvRadarData* data, int arg);
 void fn_8010D00C();
 nw4r::g3d::ScnChoice* fn_801B3440(MEMAllocator* allocator, u32* size, int capacity);
 nw4r::g3d::ScnGroup* fn_801AB6CC(MEMAllocator* allocator, u32* size, int capacity);
 void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(nw4r::g3d::ResAnmScn* self, nw4r::g3d::ResAnmScn* anm);
-void fn_800DFAB4(nw4r::g3d::ResFile* resFile, int numPlayer);
-IfPlayer* fn_800DFCB4(IfPlayer* player, int index);
 void fn_800E023C(IfPlayer* player, int arg1, int arg2, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2);
 void fn_800E244C(IfPlayer* player);
 void fn_800E26B8(IfPlayer* player);
@@ -68,7 +65,6 @@ void fn_8010BD74(IfAdvGauge* gauge, nw4r::g3d::ResFile* resFile1, nw4r::g3d::Res
 void fn_8010B9E4(IfAdvGauge* gauge, int flag);
 void fn_8010BE98();
 void fn_8010C004(nw4r::g3d::ScnGroup* group);
-void fn_8010C0DC(IfAdvGauge* gauge, nw4r::g3d::ScnMdlExpand* locator);
 void fn_8010C9D8(IfAdvGauge* gauge);
 void fn_8010BDCC(IfAdvGauge* gauge);
 void fn_8010C6C8(IfAdvGauge* gauge, s32 value);
@@ -80,7 +76,6 @@ void fn_8010C52C(IfAdvGauge* gauge, s32 num);
 void fn_8010CA20(IfAdvGauge* gauge, int flag);
 void fn_8010CA94(IfAdvGauge* gauge, s32 num, u8* stock);
 void fn_8010CC80(IfAdvGauge* gauge);
-void fn_8010CCA0(IfAdvGauge* gauge, u8 count);
 void fn_8010CCE0(IfAdvGauge* gauge, float scale, u8 count, IfPlayer* player, u8 arg);
 void fn_80108D1C(nw4r::g3d::ResFile* resFile);
 void* fn_8010890C(void* data);
@@ -343,7 +338,7 @@ IfAdvMngr::IfAdvMngr(int arg1, int arg2) :
         unk64[i] = 0;
         unk66[i] = 0;
     }
-    m_pause = fn_80109600(arg1, arg2);
+    m_pause = IfAdvPause::create(arg1, arg2);
 }
 
 void IfAdvMngr::loadResource(gfArchive* archive) {
@@ -440,12 +435,9 @@ void IfAdvMngr::createModel() {
     MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::InfoInstance);
     m_choice = fn_801B3440(allocator, NULL, 2);
     m_group = fn_801AB6CC(allocator, NULL, 0x20);
-    fn_800DFAB4(&unk14, m_numPlayer);
+    IfPlayer::createPlayerLocator(&unk14, m_numPlayer);
     for (i = 0; i < m_numPlayer; i++) {
-        IfPlayer* player = static_cast<IfPlayer*>(operator new(0x5D8, Heaps::InfoInstance));
-        if (player) {
-            player = fn_800DFCB4(player, i);
-        }
+        IfPlayer* player = new (Heaps::InfoInstance) IfPlayer(i);
         m_players[i] = player;
         fn_800E023C(player, 0, 0, &unk14, &unk2C);
     }
@@ -482,7 +474,7 @@ void IfAdvMngr::createModel() {
 
 void IfAdvMngr::destroyModel() {
     if (m_gauge) {
-        fn_8010C0DC(m_gauge, IfPlayer::getPlayerLocator());
+        m_gauge->removePressStart(IfPlayer::getPlayerLocator());
     }
     if (m_gauge) {
         fn_8010C9D8(m_gauge);
@@ -514,7 +506,7 @@ void IfAdvMngr::destroyModel() {
     }
     fn_801084CC();
     if (m_pause) {
-        fn_8010A874(m_pause);
+        m_pause->destroyModel();
     }
     if (m_group) {
         m_group->Destroy();
@@ -636,7 +628,7 @@ void IfAdvMngr::meleeMain() {
             fn_8010CC80(m_gauge);
         }
         if (m_gauge) {
-            fn_8010CCA0(m_gauge, unk57);
+            m_gauge->drawStockSlotAnime(unk57);
         }
     }
     if (unk68[0]) {
@@ -831,7 +823,7 @@ extern "C" int fn_80107A70(IfAdvMngr* mngr, int arg, bool flag) {
                 fn_8010CC80(mngr->m_gauge);
             }
             if (mngr->m_gauge) {
-                fn_8010CCA0(mngr->m_gauge, mngr->unk57);
+                mngr->m_gauge->drawStockSlotAnime(mngr->unk57);
             }
         }
     }
@@ -898,7 +890,7 @@ void IfAdvMngr::startPauseMenu(bool arg1, bool arg2) {
 }
 
 void IfAdvMngr::exitPauseMenu() {
-    fn_80109BEC(m_pause);
+    m_pause->exitPause();
     m_choice->SetChoice(0);
     m_isPause = 0;
 }

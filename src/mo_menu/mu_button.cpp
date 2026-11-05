@@ -1173,7 +1173,7 @@ void muButtonTask::mainStepButtonSelect(muButtonTask* task) {
         task->setButtonCursor(padKind, cursor);
         int repeat = findCursorNode(padKind, cursor)->m_unk4;
         if (repeat != 0) {
-            fn_800BA364(&task->m_work->m_controller, repeat);
+            task->m_work->m_controller.initRepeatCounter(repeat);
         }
     }
     if (cursor != task->m_work->m_cursor) {

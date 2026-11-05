@@ -36,7 +36,7 @@ public:
 }}
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
-unsigned char lbl_8049DEDC[0xc] __attribute__((aligned(4))) = { 0 };
+nw4r::ut::LinkList<cmSubject, 0> lbl_8049DEDC;
 unsigned char lbl_8049DEE8[0x128] __attribute__((aligned(8))) = { 0 };
 unsigned char lbl_8049E010[0xc] __attribute__((aligned(8))) = { 0 };
 unsigned char lbl_8049E01C[0x14] __attribute__((aligned(4))) = { 0 };
@@ -55,11 +55,8 @@ void ScnMdl_SetNodeMtx(nw4r::g3d::ScnMdl* mdl, u32 node, const Matrix* mtx);
 void ScnObj_EnableCallbackExecOp(nw4r::g3d::ScnObj* obj, u32 flag);
 void ScnObj_EnableCallbackTiming(nw4r::g3d::ScnObj* obj, u32 timing);
 
-// HYPOTHESIS: map names IfCommon_exchangeStageObjPosToInfoPosFastInit, ...FastCursor1 (stage position to a cursor
-// matrix) and ...FastLoupe (stage position to the HUD position of the loupe), and Matrix::copy, Matrix::setRotateZ.
 extern "C" void fn_800DB444();
 extern "C" void fn_800DB674(const nw4r::math::VEC3* pos, Matrix* mtx);
-extern "C" Vec3f fn_800DB71C(const nw4r::math::VEC3* pos);
 extern "C" void fn_8003E388(const Matrix* src, Matrix* dst);
 extern "C" void fn_8003E9B4(Matrix* mtx, float angle);
 // nw4r::g3d::ScnMdl::CopiedMatAccess::GetResMatChan(sync): main.dol has it, the shared header does not.
@@ -240,7 +237,7 @@ Vec3f IfPlayerObjCallback::calcLoupePosFast(float* angle, const nw4r::math::VEC3
     }
     Vec3f out;
     Vec3f raw;
-    raw = fn_800DB71C(pos);
+    raw = Vec3f::IfCommon_exchangeStageObjPosToInfoPosFastLoupe(reinterpret_cast<const Vec3f*>(pos));
     if (raw.m_x > limits[1]) {
         float scale = limits[1] / raw.m_x;
         out.m_x = limits[1];
@@ -287,8 +284,14 @@ void IfPlayer::createPlayerLocator(nw4r::g3d::ResFile* res, int frameOffset) {
     strcat(animName, "__0");
     lbl_805A02D8->changeAnimN(animName);
     lbl_805A02D8->m_modelAnim->setUpdateRate(0.0f);
-    float frame = g_GameGlobal->getGlobalRecordMenuDatap()->m_isWidescreen ? 10.0f : 0.0f;
-    frame += (float)frameOffset;
+    float frame;
+    if (g_GameGlobal->getGlobalRecordMenuDatap()->m_isWidescreen) {
+        frame = 10.0f;
+    } else {
+        frame = 0.0f;
+    }
+    float offset = (float)frameOffset;
+    frame += offset;
     lbl_805A02D8->setFrame(frame);
     lbl_805A02DC = nw4r::g3d::ScnMdlExpand::Construct(gfHeapManager::getMEMAllocator(Heaps::InfoInstance), NULL, 0x100,
                                                       lbl_805A02D8->m_sceneModel);
@@ -1264,10 +1267,7 @@ void IfPlayer::updateCoinScoreSub(u32 amount) {
 // The camera subjects (fighters and the like) the HUD is checked against, and the data of if_player.cpp.
 
 
-// HYPOTHESIS: map names IfCommon_exchangeStageObjPosToInfoPos, ...FastInit, ...FastCursor
-extern "C" Vec3f fn_800DB360(const Vec3f* position, int unk1);
 extern "C" void fn_800DB444();
-extern "C" void fn_800DB5F4(const Vec3f* position, Vec3f* out);
 
 // True when the float is a NaN (exponent bits all set and a non-zero mantissa).
 static inline int isNaN(float f) {
@@ -1370,11 +1370,11 @@ void IfPlayer::portriteRenderMain() {
                 corner.m_x = pos.m_x + it->m_range.m_left;
                 corner.m_y = pos.m_y + it->m_range.m_down;
                 corner.m_z = 0.0f;
-                p1 = fn_800DB360(&corner, 2);
+                p1 = Vec3f::IfCommon_exchangeStageObjPosToInfoPos(&corner, 2);
                 corner.m_x = pos.m_x + it->m_range.m_right;
                 corner.m_y = pos.m_y + it->m_range.m_up;
                 corner.m_z = 0.0f;
-                p2 = fn_800DB360(&corner, 2);
+                p2 = Vec3f::IfCommon_exchangeStageObjPosToInfoPos(&corner, 2);
                 rect.m_left = p1.m_x < p2.m_x ? p1.m_x : p2.m_x;
                 rect.m_right = p1.m_x > p2.m_x ? p1.m_x : p2.m_x;
                 rect.m_down = p1.m_y < p2.m_y ? p1.m_y : p2.m_y;
@@ -1410,10 +1410,11 @@ void IfPlayer::portriteRenderMain() {
 // subject that is in play (state 2 or 3, HYPOTHESIS: a fighter on the field) to the HUD with the table-based
 // conversion of IfCommon, and stores up to max rectangles.
 void IfPlayer::portriteRenderMainFastInit(Rect2D* rects, int* count, int max) {
+    nw4r::ut::LinkList<cmSubject, 0>::Iterator it;
     fn_800DB444();
     *count = 0;
-    for (nw4r::ut::LinkList<cmSubject, 0>::Iterator it = reinterpret_cast<nw4r::ut::LinkList<cmSubject, 0>&>(lbl_8049DEDC).GetBeginIter();
-         it != reinterpret_cast<nw4r::ut::LinkList<cmSubject, 0>&>(lbl_8049DEDC).GetEndIter() && *count < max; ++it) {
+    for (it = lbl_8049DEDC.GetBeginIter();
+         it.operator->() != lbl_8049DEDC.GetEndIter().operator->() && *count < max; ++it) {
         if (it->m_stateB == 3 || it->m_stateB == 2) {
             Vec3f pos;
             pos = it->m_pos;
@@ -1422,11 +1423,11 @@ void IfPlayer::portriteRenderMainFastInit(Rect2D* rects, int* count, int max) {
             corner.m_y = pos.m_y + it->m_range.m_down;
             corner.m_z = 0.0f;
             Vec3f p1;
-            fn_800DB5F4(&corner, &p1);
+            Vec3f::IfCommon_exchangeStageObjPosToInfoPosFastCursor(&corner, &p1);
             corner.m_x = pos.m_x + it->m_range.m_right;
             corner.m_y = pos.m_y + it->m_range.m_up;
             Vec3f p2;
-            fn_800DB5F4(&corner, &p2);
+            Vec3f::IfCommon_exchangeStageObjPosToInfoPosFastCursor(&corner, &p2);
             Rect2D* rect = &rects[(*count)++];
             rect->m_left = p1.m_x < p2.m_x ? p1.m_x : p2.m_x;
             rect->m_right = p1.m_x > p2.m_x ? p1.m_x : p2.m_x;

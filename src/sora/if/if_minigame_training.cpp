@@ -17,8 +17,6 @@
 class Message;
 extern "C" void setBufField34__7MessageFii(Message* message, int index, int value);
 
-// HYPOTHESIS: muMenuController::setControllerID (0x800B9804) and main (0x800B9984), still fn_.
-extern "C" void fn_800B9804(muMenuController* controller, u8 controllerId);
 // HYPOTHESIS: muMenu item helpers (0x800AFA04, 0x800AFA1C, still fn_; the map labels around them are shifted):
 // the message of the name of a menu item kind, and the item kind to generate.
 extern "C" u32 fn_800AFA04(int kind);
@@ -255,7 +253,7 @@ void IfMinigameTraining::printStatusTotalDamage(int damage) {
 }
 
 void IfMinigameTraining::openMenu(int padNo, int playerNo) {
-    fn_800B9804(&m_controller, padNo);
+    m_controller.setControllerID(static_cast<u8>(padNo));
     unk2F8 = playerNo;
     setCameraType(CameraType_Menu);
     unk2FC = false;

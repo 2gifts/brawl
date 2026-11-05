@@ -85,6 +85,13 @@ public:
     union {
         u8 unk380[0x14];
         struct {
+            bool unk380_scan;
+            bool unk381_scan;
+            u8 unk382_b7 : 1;
+            u8 unk382_b6 : 1;
+            u8 unk382_rest : 6;
+        };
+        struct {
             union {
                 u8 unk380_flag;          // 0x380
                 s32 unk380_word;
@@ -100,6 +107,9 @@ public:
     };
 
     void* lock();
+    void checkLimit(int drive);
+    void scanAll(int unk, int unk2);
+    void scan(int drive, int unk, int unk2);
     void write(void* data, int size, int unk);
     void overwriteIf1000(FileKey key, int size, int unk);
     void read(int drive, FileName name);

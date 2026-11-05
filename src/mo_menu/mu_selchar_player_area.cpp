@@ -484,8 +484,6 @@ void muSelCharPlayerArea::setNameNo(int name) {
     }
 }
 
-// muMenuController::setControllerID (the map name); src/mo_menu/mu_event.cpp calls it by this stand-in name.
-extern "C" void fn_800B9804(muMenuController* controller, int pad);
 
 void muSelCharPlayerArea::setControllerNo(int controller) {
     m_controllerNo = controller;
@@ -498,7 +496,7 @@ void muSelCharPlayerArea::setControllerNo(int controller) {
     }
     dispControllerKind(m_playerKind, m_controllerKind, m_controllerNo);
     if (controller < 0) forceCloseList();
-    if (controller >= 0) fn_800B9804(&m_menuController, static_cast<u8>(controller));
+    if (controller >= 0) m_menuController.setControllerID(static_cast<u8>(controller));
     m_selCharHand->updateControllerNo();
 }
 

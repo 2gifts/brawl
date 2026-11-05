@@ -15,4 +15,6 @@ public:
     void createObjResFile(const void* nodeInfo, s32 nodeCount, nw4r::g3d::ResFile* resFile);
     void createExpMdl(const void* nodeInfo, s32 nodeCount);
     void addPressStart(nw4r::g3d::ScnMdlExpand* model);
+    void removePressStart(nw4r::g3d::ScnMdlExpand* model);
+    void drawStockSlotAnime(int count);
 };

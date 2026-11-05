@@ -22,8 +22,6 @@
 // main.dol functions with names that the shared headers do not declare.
 // muMenuController::getPadNo()
 extern "C" int fn_800BA3D8(muMenuController* controller);
-// muMenuController::exchangeDir8ToVec(direction): the vector of one of the eight directions of the stick
-extern "C" Vec2f fn_800BA0E0(int direction);
 // Vec2f::normalize()
 extern "C" void fn_8003DBA8(Vec2f* vec);
 // GameGlobal::getNameCount() and GameGlobal::getName(number, buffer): the names that were saved
@@ -251,7 +249,7 @@ int muAdvSelmapTask::getNextNode(int player, int node) {
     if (direction == 8) {
         return node;
     }
-    Vec2f dir = fn_800BA0E0(direction);
+    Vec2f dir = muMenuController::exchangeDir8ToVec(direction);
     Vec2f delta;
     Vec2f current = getNodePos(this, node);
     for (int i = 0; i < 34; i++, target++) {

@@ -5,6 +5,46 @@
 #include <nw4r/g3d/g3d_scngroup.h>
 #include <string.h>
 #include <types.h>
+#include <cm/cm_camera_controller.h>
+#include <gf/gf_task_scheduler.h>
+#include <if/if_adv_radar.h>
+#include <revolution/OS.h>
+
+extern IfAdvRadar* lbl_805A0348[2];
+char lbl_8045D268[] = "PauseExit\n";
+char lbl_8059E640[] = "Camera";
+
+IfAdvPause* IfAdvPause::create(int arg1, int arg2) {
+    return new (Heaps::System) IfAdvPause(arg1, arg2);
+}
+
+void IfAdvPause::exitPause() {
+    OSReport(lbl_8045D268);
+    unk147 = 0;
+    unk110->Remove(unkE8[0]->m_sceneModel);
+    if (unk12C != NULL) {
+        unk12C->exit();
+        unk12C = NULL;
+    }
+    CameraController* camera = static_cast<CameraController*>(gfTaskScheduler::getInstance()->getTask(lbl_8059E640));
+    camera->changeInput(static_cast<CameraController::Kind>(unk130));
+    if (lbl_805A0348[0] != NULL) {
+        lbl_805A0348[0]->hide();
+    }
+}
+
+void IfAdvPause::destroyModel() {
+    for (int i = 0; i < 7; i++) {
+        if (unkE8[i] != NULL) {
+            delete unkE8[i];
+            unkE8[i] = NULL;
+        }
+    }
+    if (unk110 != NULL) {
+        unk110->Destroy();
+        unk110 = NULL;
+    }
+}
 
 // muMenuController::getControllerID (the map name); the adventure menus call it by this stand-in name.
 extern "C" int fn_800BA3D8(muMenuController* controller);

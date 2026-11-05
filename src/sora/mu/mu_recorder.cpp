@@ -118,3 +118,24 @@ void muCollection::readSummary(int drive, FileName name) {
         m_busy = 9;
     }
 }
+
+void muCollection::checkLimit(int drive) {
+    unk380_word = drive;
+    m_busy = 3;
+}
+
+void muCollection::scanAll(int unk, int unk2) {
+    unk380_scan = 1;
+    unk381_scan = 1;
+    unk382_b7 = unk;
+    unk382_b6 = unk2;
+    m_busy = 2;
+}
+
+void muCollection::scan(int drive, int unk, int unk2) {
+    unk380_scan = drive == 0;
+    unk381_scan = drive == 1;
+    unk382_b7 = unk;
+    unk382_b6 = unk2;
+    m_busy = 2;
+}

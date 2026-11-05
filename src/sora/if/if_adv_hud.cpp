@@ -100,3 +100,11 @@ void IfStgeditMngr::freeResource() {
         }
     }
 }
+
+void IfAdvGauge::removePressStart(nw4r::g3d::ScnMdlExpand* model) {
+    model->Remove(unk0[0x40]->m_sceneModel);
+}
+
+void IfAdvGauge::drawStockSlotAnime(int count) {
+    unk0[0x41]->setFrameNode(count);
+}

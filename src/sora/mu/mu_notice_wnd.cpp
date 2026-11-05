@@ -153,3 +153,45 @@ int muNoticeWndTask::mainStepLeaveMain(muNoticeWndTask* task) {
     }
     return task->m_step;
 }
+
+void muNoticeWndTask::setStep(int step) {
+    m_step = step;
+}
+
+void muNoticeWndTask::deleteWnd() {
+    unk44->Remove(unk40->m_sceneModel);
+}
+
+void muNoticeWndTask::dispSubMsg(const char* text) {
+    printText(5, text, strlen(text), 1);
+}
+
+void muNoticeWndTask::setYesButtonLabel(void* msgData, int msgId) {
+    if (unkFC == 1) {
+        u32 size;
+        int length;
+        const char* text;
+        if (msgData == NULL) {
+            text = unk48->getMsgData(msgId, &length);
+        } else {
+            Message::getPrintIndexData(msgData, msgId, (char**)&text, &size);
+            length = size;
+        }
+        printText(2, text, length, 2);
+    }
+}
+
+void muNoticeWndTask::setNoButtonLabel(void* msgData, int msgId) {
+    if (unkFC == 1) {
+        u32 size;
+        int length;
+        const char* text;
+        if (msgData == NULL) {
+            text = unk48->getMsgData(msgId, &length);
+        } else {
+            Message::getPrintIndexData(msgData, msgId, (char**)&text, &size);
+            length = size;
+        }
+        printText(3, text, length, 2);
+    }
+}

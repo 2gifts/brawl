@@ -3,14 +3,10 @@
 #include <gm/gm_global.h>
 #include <memory.h>
 #include <types.h>
+#include <ad/ad_seal_info.h>
 
 extern "C" adSealInfoResult* fn_8015B0E0(void* sealInfo);
-extern "C" void fn_8015B17C(adSealInfoResult* sealInfo, s32 flag);
-extern "C" void fn_8015B1E0(adSealInfoResult* sealInfo);
-extern "C" bool fn_8015B228(adSealInfoResult* sealInfo);
 extern "C" void fn_8015B230(adSealInfoResult* sealInfo);
-extern "C" u32 fn_8015B3CC(adSealInfoResult* sealInfo, u32 index);
-extern "C" u32 fn_8015B4BC(adSealInfoResult* sealInfo, u32 index);
 extern "C" void fn_80052704(u16 id, u8 num);
 extern "C" void fn_80052AC0(u16 id, u8 num);
 extern "C" void fn_8004FB48(u32 id);
@@ -64,7 +60,7 @@ adKeepManager::~adKeepManager() {
     }
     m_lostRareItemNum = 0;
     if (m_sealInfoResult) {
-        fn_8015B17C(m_sealInfoResult, 1);
+        delete m_sealInfoResult;
     }
     m_sealInfoResult = NULL;
 }
@@ -166,7 +162,7 @@ void adKeepManager::createSealInfoResult() {
 
 void adKeepManager::releaseSealInfoResult() {
     if (m_sealInfoResult) {
-        fn_8015B17C(m_sealInfoResult, 1);
+        delete m_sealInfoResult;
     }
     m_sealInfoResult = NULL;
 }
@@ -209,7 +205,7 @@ void adKeepManager::useStepOutTiming() {
 void adKeepManager::useSealInfoPrepareStart() {
     createSealInfoResult();
     unk24_b31 = true;
-    fn_8015B1E0(m_sealInfoResult);
+    m_sealInfoResult->getSealInfoPrepare();
 }
 
 void adKeepManager::useGameOverInTiming() {
@@ -279,7 +275,7 @@ void adKeepManager::useGameEndingTiming() {}
 
 bool adKeepManager::isLoadFinishSeal() {
     if (unk24_b31) {
-        return fn_8015B228(m_sealInfoResult);
+        return m_sealInfoResult->isLoadFinish();
     }
     return true;
 }
@@ -295,8 +291,8 @@ void adKeepManager::getFighterSealInfo(u32 index, u32* num, u32* info) {
     *num = 0;
     *info = 0;
     if (m_sealInfoResult) {
-        *num = fn_8015B3CC(m_sealInfoResult, index);
-        *info = fn_8015B4BC(m_sealInfoResult, index);
+        *num = m_sealInfoResult->getFighterSealInfoNum(index);
+        *info = reinterpret_cast<u32>(m_sealInfoResult->getFighterSealInfo(index));
     }
 }
 

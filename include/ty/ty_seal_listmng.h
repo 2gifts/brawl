@@ -32,6 +32,7 @@ public:
     bool unk3EB0;
 
     bool isLoadFinish();
+    ~tySealListDataManager();
     void setData(u8* data, u32 size);
     void sortNew();
     void clearNarrow();

@@ -19,9 +19,6 @@
 #include <sc/sc_sel_event.h>
 
 // main.dol functions with names that the shared headers do not declare.
-// muMenuController::setPadMask(mask), setPad(pad) and resetRepeat(buttons); getPadNo()
-extern "C" void fn_800B98DC(muMenuController* controller, int mask);
-extern "C" void fn_800B9804(muMenuController* controller, int pad);
 extern "C" int fn_800BA3D8(muMenuController* controller);
 // GameGlobal::getName(number, buffer) and GameGlobal::isEventOpen(list, event)
 // MuMsg::printData(message, data, length) and MuMsg::setFontWidthModeFixed(message, width)
@@ -147,10 +144,10 @@ void muEventTask::initProc(nw4r::g3d::ScnGroup* group, const muEventSetting* set
     for (int i = 0; i < setting->m_playerCount; i++) {
         mask |= 1 << setting->m_pad[i];
     }
-    fn_800B98DC(&m_controllers[0], mask);
-    fn_800B9804(&m_controllers[1], setting->m_pad[0] & 0xFF);
+    m_controllers[0].setControllerFlag(mask);
+    m_controllers[1].setControllerID(setting->m_pad[0] & 0xFF);
     if (setting->m_playerCount > 1) {
-        fn_800B9804(&m_controllers[2], setting->m_pad[1] & 0xFF);
+        m_controllers[2].setControllerID(setting->m_pad[1] & 0xFF);
     }
     m_level = setting->m_level;
     m_cursor = setting->m_cursor;
@@ -521,8 +518,8 @@ bool muEventTask::acceptIntruder() {
     m_mode = 1;
     m_cursor = 0;
     m_pad[1] = pad;
-    fn_800B98DC(&m_controllers[0], *reinterpret_cast<u8*>(reinterpret_cast<u8*>(&m_controllers[0]) + 4) | (1 << pad));
-    fn_800B9804(&m_controllers[2], pad & 0xFF);
+    m_controllers[0].setControllerFlag(*reinterpret_cast<u8*>(reinterpret_cast<u8*>(&m_controllers[0]) + 4) | (1 << pad));
+    m_controllers[2].setControllerID(pad & 0xFF);
     initPanel(1);
     setCurEventListPos(m_cursor, 1);
     pasteThumb(m_cursor, 1);
@@ -849,7 +846,7 @@ int muEventTask::mainStepSelectEventMain(muEventTask* task) {
             dir = 0;
         }
         if (task->m_cursor == count - 1) {
-            fn_800BA364(&task->m_controllers[0], 2);
+            task->m_controllers[0].initRepeatCounter(2);
         }
     }
     if (buttons & GF_PAD_BUTTON_BIT_DPAD_LEFT) {
@@ -861,7 +858,7 @@ int muEventTask::mainStepSelectEventMain(muEventTask* task) {
             dir = 0;
         }
         if (task->m_cursor == 0) {
-            fn_800BA364(&task->m_controllers[0], 1);
+            task->m_controllers[0].initRepeatCounter(1);
         }
     }
     if (buttons & GF_PAD_BUTTON_BIT_DPAD_DOWN) {
@@ -874,7 +871,7 @@ int muEventTask::mainStepSelectEventMain(muEventTask* task) {
             }
             dir = 0;
         }
-        fn_800BA364(&task->m_controllers[0], 4);
+        task->m_controllers[0].initRepeatCounter(4);
     }
     if (buttons & GF_PAD_BUTTON_BIT_DPAD_UP) {
         if (task->m_cursor >= 20) {
@@ -886,7 +883,7 @@ int muEventTask::mainStepSelectEventMain(muEventTask* task) {
             }
             dir = 0;
         }
-        fn_800BA364(&task->m_controllers[0], 8);
+        task->m_controllers[0].initRepeatCounter(8);
     }
     if (dir != 3) {
         task->setCurEventListPos(task->m_cursor, task->m_mode);
@@ -931,7 +928,7 @@ int muEventTask::mainStepSelectLevelMain(muEventTask* task) {
             task->m_level = 0;
         }
         if (task->m_level == 2) {
-            fn_800BA364(&task->m_controllers[0], 2);
+            task->m_controllers[0].initRepeatCounter(2);
         }
         g_sndSystem->playSE(static_cast<SndID>(0), -1, 0, 0, -1);
         task->m_objects[0x10]->setFrameNode(static_cast<float>(task->m_level));
@@ -944,7 +941,7 @@ int muEventTask::mainStepSelectLevelMain(muEventTask* task) {
             task->m_level = 2;
         }
         if (task->m_level == 0) {
-            fn_800BA364(&task->m_controllers[0], 1);
+            task->m_controllers[0].initRepeatCounter(1);
         }
         g_sndSystem->playSE(static_cast<SndID>(0), -1, 0, 0, -1);
         task->m_objects[0x10]->setFrameNode(static_cast<float>(task->m_level));

@@ -13,8 +13,6 @@ unsigned char lbl_805A0314[0x1] __attribute__((aligned(4))) = { 0 };
 
 extern "C" void fn_80101810(...) {}
 
-// IfCommon_exchangeStageObjPosToInfoPos (the map name); src/sora/if/if_player.cpp calls it by this stand-in name.
-extern "C" Vec3f fn_800DB360(const Vec3f* position, int unk1);
 
 void IfCoinShooter::destroy() {
     if (lbl_805A0310) {
@@ -29,7 +27,7 @@ void IfCoinShooter::create() {
 
 void IfCoinShooterLabel::setPos(const Vec3f* position) {
     if (unk0) {
-        Vec3f converted = fn_800DB360(position, 0);
+        Vec3f converted = Vec3f::IfCommon_exchangeStageObjPosToInfoPos(position, 0);
         unk0->model()->setTrans(&converted);
     }
 }
