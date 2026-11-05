@@ -514,6 +514,7 @@ static_assert(sizeof(gmPlayerInitData) == 0x5C, "Class is wrong size!");
 
 class gmGlobalModeMelee {
 public:
+    void gmSetRuleToGlobalModeMelee();
     char _0[0x08];                         // 0x00
     gmMeleeInitData m_meleeInitData;       // 0x08
     gmPlayerInitData m_playersInitData[MAX_PLAYERS]; // 0x98

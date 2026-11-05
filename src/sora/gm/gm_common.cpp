@@ -438,9 +438,10 @@ void gmInitGlobalModeMelee(gmGlobalModeMelee* global) {
 
 // Copies the rule screen's settings (gmSetRule) into the global melee setup.
 // HYPOTHESIS: rule 1 is stock, 2 is coin and everything else is time; stock matches have their own time limit.
-void gmSetRuleToGlobalModeMelee(gmGlobalModeMelee* global) {
+void gmGlobalModeMelee::gmSetRuleToGlobalModeMelee() {
+    gmGlobalModeMelee* global = this;
     // The native code calls this accessor and drops the result (a leftover of a removed use of the menu data).
-    gmGlobalRecord::MenuData* menu = g_GameGlobal->getGlobalRecordMenuDatap();
+    g_GameGlobal->getGlobalRecordMenuDatap();
     gmSetRule* rule = g_GameGlobal->m_setRule;
     gmSelCharData* select = g_GameGlobal->m_selCharData;
     gmMeleeInitData* melee = &global->m_meleeInitData;
@@ -476,7 +477,7 @@ void gmSetRuleToGlobalModeMelee(gmGlobalModeMelee* global) {
             global->m_playersInitData[i].m_handicap = select->m_playersInitData[i].m_handicap;
             break;
         }
-        u16 handicap = global->m_playersInitData[i].m_handicap;
+        u32 handicap = global->m_playersInitData[i].m_handicap;
         global->m_playersInitData[i].m_startDamage = handicap;
     }
     float ratio = rule->m_damageRatio / 10.0f;
@@ -489,17 +490,19 @@ void gmSetRuleToGlobalModeMelee(gmGlobalModeMelee* global) {
     melee->m_allowPause = rule->m_allowPause;
     switch (melee->m_gameRule) {
     case Game_Rule_Time:
-    default:
+    default: {
+        bool showScore = rule->m_showScoreDisplay;
+        melee->m_scoreDisplay = showScore;
         melee->m_0x3_2 = true;
-        melee->m_scoreDisplay = rule->m_showScoreDisplay;
         break;
+    }
     case Game_Rule_Stock:
-        melee->m_0x3_2 = false;
         melee->m_scoreDisplay = true;
+        melee->m_0x3_2 = false;
         break;
     case Game_Rule_Coin:
-        melee->m_0x3_2 = true;
         melee->m_scoreDisplay = true;
+        melee->m_0x3_2 = true;
         break;
     }
     melee->m_hideDamageGauge = !rule->m_showDamageGauge;
