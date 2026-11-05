@@ -84,8 +84,6 @@ extern "C" int fn_800FBFDC(void* menu);
 extern "C" void fn_800E1D78(IfPlayer* player, Vec3f* pos);
 // HYPOTHESIS: map names IfPhoto::startPause
 extern "C" void fn_800F00D4(void* photo, int arg1, int arg2, int playerNo, bool arg4);
-// HYPOTHESIS: map names IfWifiIntrMenu::endMenu
-extern "C" void fn_800FBF90(void* menu);
 // HYPOTHESIS: map names IfCenter::dispKumiteKills
 extern "C" void fn_800DF4AC(void* center, int kills);
 // HYPOTHESIS: map names muNoticeWndTask::dispSubMsg
@@ -238,7 +236,7 @@ void IfMngr::startIntrMenu(int padNo, int kind) {
 }
 
 void IfMngr::exitIntrMenu() {
-    fn_800FBF90(m_ifWifiIntrMenu);
+    static_cast<IfWifiIntrMenu*>(m_ifWifiIntrMenu)->endMenu();
     unkAC = 0;
 }
 

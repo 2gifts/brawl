@@ -69,3 +69,8 @@ void IfWifiIntrMenu::startMenu(int padNo, int kind) {
     m_timer = 0xF;
     fn_800B96E8(&m_controller, padNo & 0xFF);
 }
+
+void IfWifiIntrMenu::endMenu() {
+    m_group->Remove(m_object->m_sceneModel);
+    m_active = 0;
+}
