@@ -8,7 +8,7 @@ struct hkThreadMemory {
     virtual void releaseCachedMemory();                     // 0x0C
     virtual ~hkThreadMemory();                              // 0x10
     virtual void* onStackOverflow(int nbytes);              // 0x14
-    virtual void onStackUnderflow();                        // 0x18
+    virtual void onStackUnderflow(void* p);                 // 0x18 (p: the freed position, unused here)
 
     hkMemory* m_memory;       // 0x04
     int m_referenceCount;     // 0x08
@@ -50,7 +50,7 @@ struct hkThreadMemory {
     void deallocateStack(void* p) {
         m_stackTop = (char*)p;
         if (p == m_stackBase) {
-            onStackUnderflow();
+            onStackUnderflow(p);
         }
     }
 

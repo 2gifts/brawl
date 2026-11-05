@@ -87,7 +87,7 @@ void hkUnionFind::assignGroups(hkArrayBase& groupSizes) {
         int p = parentData(m_parents)[i];
         if (p < 0) {
             int size = -p;
-            if (groupSizes.m_size == (groupSizes.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK)) {
+            if ((groupSizes.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) == groupSizes.m_size) {
                 hkArrayUtil::_reserveMore(&groupSizes, 4);
             }
             ((int*)groupSizes.m_data)[groupSizes.m_size++] = size;
@@ -99,8 +99,8 @@ void hkUnionFind::assignGroups(hkArrayBase& groupSizes) {
         }
     }
     int n = groupSizes.m_size;
-    int largest = 0;
     int largestSize = ((int*)groupSizes.m_data)[0];
+    int largest = 0;
     for (int k = 1; k < n; k++) {
         if (((int*)groupSizes.m_data)[k] > largestSize) {
             largestSize = ((int*)groupSizes.m_data)[k];
