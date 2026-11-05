@@ -10,6 +10,7 @@
 #include <st/st_melee.h>
 #include <st/st_trigger.h>
 #include <types.h>
+#include <gf/gf_camera.h>
 
 void stMelee::setPlayerPositionIndexSerial() {
     m_playerPositionIndex[0] = 0;
@@ -258,4 +259,19 @@ bool stCollisionWork::isValid() {
 
 void stMelee::getItemGenPac(gfArchive** archive) {
     *archive = &m_itemSheetArchive;
+}
+
+void stMelee::calcCamera(Vec3f* eye, Vec3f* target, float roll, float fov) {
+    gfCameraManager* manager = gfCameraManager::getManager();
+    if (manager != NULL && (eye->m_x != target->m_x || eye->m_y != target->m_y || eye->m_z != target->m_z)) {
+        gfCamera* camera = manager->getCamera(0);
+        camera->m_transformFlag.m_mask = 0x43;
+        camera->m_centerPos = *eye;
+        camera->m_targetPos = *target;
+        u16 flags = camera->unkFA.m_mask;
+        camera->m_rot.m_z = roll;
+        camera->unkFA.m_mask = flags | 0x42;
+        camera->m_fovScale = fov;
+        camera->calc();
+    }
 }

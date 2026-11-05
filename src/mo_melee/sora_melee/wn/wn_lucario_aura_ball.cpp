@@ -36,8 +36,6 @@ struct ftLucarioAuraBallParam {
     float m_scaleBase;  // +0x1C
 };
 
-// HYPOTHESIS: ftCommonDataAccesser::getLucarioAuraBallParam (module map), still unnamed in the symbols.
-extern "C" const ftLucarioAuraBallParam* fn_27_14954C(const ftCommonDataAccesser* accesser, int kind);
 
 // HYPOTHESIS: inline clamp helper (fsel based), as in ft_status_uniq_process_glide.cpp.
 static inline float clampf(float value, float lo, float hi) {
@@ -92,7 +90,7 @@ void wnLucarioAuraBall::activate(int founderTaskId, int team, float lr, int char
 
 // MATCH-ONLY: the charge-record lookup and the effect removal are written as helpers over the module accesser.
 static inline const ftLucarioAuraBallParam* getAuraBallParam(soModuleAccesser* acc) {
-    return fn_27_14954C(&g_ftCommonDataAccesser, acc->getWorkManageModule().getInt(0x10000009));
+    return g_ftCommonDataAccesser.getLucarioAuraBallParam(acc->getWorkManageModule().getInt(0x10000009));
 }
 
 static inline void removeChargeEffect(soModuleAccesser* acc) {
@@ -120,7 +118,7 @@ bool wnLucarioAuraBall::notifyEventCollisionAttackCheck(u32 flags) {
 
 float wnLucarioAuraBall::getChargeRate(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
-    const ftLucarioAuraBallParam* param = fn_27_14954C(&g_ftCommonDataAccesser, work.getInt(0x10000009));
+    const ftLucarioAuraBallParam* param = g_ftCommonDataAccesser.getLucarioAuraBallParam(work.getInt(0x10000009));
     int maxFrame = param->m_chargeLevelFrame * param->m_chargeLevelNum;
     float rate = static_cast<float>(work.getInt(0x10000005)) / static_cast<float>(maxFrame);
     return clampf(rate, 0.0f, 1.0f);
@@ -144,7 +142,7 @@ int wnLucarioAuraBall::getChargeFrame() {
 void wnLucarioAuraBall::setEffectScale(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     wnLucarioAuraBall& auraBall = dynamic_cast<wnLucarioAuraBall&>(*moduleAccesser->m_stageObject);
-    const ftLucarioAuraBallParam* param = fn_27_14954C(&g_ftCommonDataAccesser, work.getInt(0x10000009));
+    const ftLucarioAuraBallParam* param = g_ftCommonDataAccesser.getLucarioAuraBallParam(work.getInt(0x10000009));
     float baseScale = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa6, 0);
     float levelScale = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa7 + auraBall.getChargeLevel(), 0);
     float mul = work.getFloat(0x1100000A);

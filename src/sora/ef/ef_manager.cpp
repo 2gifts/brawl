@@ -6,9 +6,7 @@
 #include <gm/gm_global.h>
 #include <sr/sr_common.h>
 #include <types.h>
-
-extern "C" void fn_8005D558();
-extern "C" void fn_8005D5A8();
+#include <ef/ef_screen.h>
 
 using namespace nw4r::ef;
 
@@ -42,12 +40,12 @@ efManager::efManager() : gfTask("EffectManager", Category_Effect, 0xc, 7, true) 
     unk40.unk7C = unk40.unk6C;
     unk40.unk80 = unk40.unk70;
     g_gfApplication->unk118.add(&lbl_805A0108);
-    fn_8005D558();
+    efScreen::create();
     efParticle::setSlowParam(unk40.unk74, unk40.unk78, unk40.unk7C, unk40.unk80);
 }
 
 efManager::~efManager() {
-    fn_8005D5A8();
+    efScreen::destroy();
     g_gfApplication->unk118.remove(&lbl_805A0108);
     gfHeapManager::free(unk12C);
     gfHeapManager::free(unk130);

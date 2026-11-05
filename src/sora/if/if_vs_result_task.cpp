@@ -896,8 +896,6 @@ extern const char* lbl_8059E348;
 
 // the name of a character (defined in sora/mu/mu_menu.cpp, still unnamed there)
 extern "C" const char* fn_800AFA8C(int idx);
-// HYPOTHESIS: gfSceneRoot::setClearDepthBufferState (name from the Ghidra symbol pass; layer 8 is the Info layer)
-extern "C" void fn_8000E590(gfSceneRoot* root, int layer, bool clear);
 
 // HYPOTHESIS: the Wifi counter window; only gfTask::exit is used here
 
@@ -960,7 +958,7 @@ ifVsResultTask::~ifVsResultTask() {
     g_gfSceneRoot->removeInfoCamResAnm();
     gfSceneRootEntryList* list = *reinterpret_cast<gfSceneRootEntryList**>(reinterpret_cast<u8*>(g_gfSceneRoot) + 0x450);
     list->removeAll();
-    fn_8000E590(g_gfSceneRoot, gfSceneRoot::Layer_Info, false);
+    g_gfSceneRoot->setClearDepthBufferState(gfSceneRoot::Layer_Info, false);
     if (m_noticeGroup) {
         m_noticeGroup->Destroy();
         m_noticeGroup = NULL;
@@ -1776,7 +1774,7 @@ void ifVsResultTask::initMdlData() {
     gfSceneRoot* sceneRoot = g_gfSceneRoot;
     sceneRoot->add(gfSceneRoot::Layer_Info, reinterpret_cast<nw4r::g3d::ScnMdl*>(m_expands[0]));
     sceneRoot->add(gfSceneRoot::Layer_Info, m_objects[Obj_HitNum]->m_scnMdl);
-    fn_8000E590(sceneRoot, gfSceneRoot::Layer_Info, true);
+    sceneRoot->setClearDepthBufferState(gfSceneRoot::Layer_Info, true);
 
     // Everything starts stopped on its first frame.
     for (u32 i = 0; i < Obj_Count; i++) {

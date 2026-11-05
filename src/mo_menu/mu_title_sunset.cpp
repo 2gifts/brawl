@@ -12,8 +12,6 @@
 #include <mu/mu_title_sunset.h>
 
 // gfSceneRoot: main.dol has the functions, the shared header does not.
-extern "C" void fn_8000D07C(gfSceneRoot* root, bool unk);
-extern "C" void fn_8000D2E0(gfSceneRoot* root, nw4r::g3d::ResAnmScn* anmScn, int unk);
 extern "C" void fn_8000E708(gfSceneRoot* root);
 // nw4r::g3d::ResAnmScn
 extern "C" void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(nw4r::g3d::ResAnmScn* self, nw4r::g3d::ResAnmScn anmScn);
@@ -274,7 +272,7 @@ void muTitleSunsetTask::processDefault() {
                 m_anmScn = m_resFile.GetResAnmScn(2);
             }
             Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(&m_anmScn, m_anmScn);
-            fn_8000D2E0(g_gfSceneRoot, &m_anmScn, 0x2B);
+            g_gfSceneRoot->setResAnmScn(&m_anmScn, 0x2B);
             m_nagashiLoaded = 1;
         }
         m_frameA = 0.0f;
@@ -396,13 +394,13 @@ void muTitleSunsetTask::initialize() {
     m_sunsetLoaded = 0;
     m_state = 0;
     m_unk1458 = 0;
-    fn_8000D07C(g_gfSceneRoot, true);
+    g_gfSceneRoot->setUseCameraAnim(true);
     CameraController::getInstance()->changeInput(CameraController::AI);
 }
 
 // Deletes the models of the scene.
 void muTitleSunsetTask::release() {
-    fn_8000D07C(g_gfSceneRoot, false);
+    g_gfSceneRoot->setUseCameraAnim(false);
     m_resFile.Release();
     delete m_nagashiScene;
     m_nagashiScene = NULL;
@@ -532,7 +530,7 @@ void muTitleSunsetTask::addSunsetModel() {
             m_anmScn = m_resFile.GetResAnmScn(0);
         }
         Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(&m_anmScn, m_anmScn);
-        fn_8000D2E0(g_gfSceneRoot, &m_anmScn, 0x2B);
+        g_gfSceneRoot->setResAnmScn(&m_anmScn, 0x2B);
         m_sunsetLoaded = 1;
     }
 }

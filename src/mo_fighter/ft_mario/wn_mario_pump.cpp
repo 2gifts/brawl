@@ -20,8 +20,6 @@ FT_DOL_ARRAY_VECTOR(soModelNodeSetUp, 1);
 inline soKineticEnergy::~soKineticEnergy() { }
 
 extern soStatusUniqProcess g_wnMarioPumpStatusUniqProcessShoot;
-// HYPOTHESIS: original overload spelling is unresolved; the caller and data lookup establish water-shot data.
-extern "C" const wnMarioPumpWaterData* fn_27_147D64(const ftCommonDataAccesser*, ftKind, bool*);
 
 // Owner-kind words copied from wnArticleBuildInfo by Weapon construction.
 // HYPOTHESIS: original view spelling; the two words at C4/C8 are verified by construction and this holder.
@@ -53,7 +51,7 @@ wnArticleHolder<wnMarioPumpWater>::wnArticleHolder(soModuleAccesser* acc) : soIn
         wnMarioPumpWaterArgs(
             reinterpret_cast<wnMarioPumpOwnerKindView*>(&dynamic_cast<Weapon&>(acc->getStageObject()))->kindInfo,
             &acc->getHeapModule()).info,
-        fn_27_147D64(&g_ftCommonDataAccesser, waterOwnerKind(acc),
+        g_ftCommonDataAccesser.getWeaponData<wnMarioPumpWaterData>(waterOwnerKind(acc),
                     &wnMarioPumpWaterDataArgs().get().resourceGroup)) { }
 
 

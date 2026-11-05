@@ -1,3 +1,4 @@
+// Local BrawlHeaders shadow: adds scene event, camera and resource animation declarations.
 #pragma once
 
 // Shadows include/Brawl/Include/gf/gf_3d_scene.h (adds setInfoCamResAnm / removeInfoCamResAnm).
@@ -8,6 +9,9 @@
 #include <nw4r/g3d/g3d_light.h>
 #include <nw4r/g3d/g3d_scnmdl.h>
 #include <types.h>
+#include <ut/ut_list.h>
+
+class gfSceneRootEvent;
 
 namespace nw4r {
 namespace g3d {
@@ -43,7 +47,7 @@ public:
             nw4r::g3d::ScnRoot* unk40;
             nw4r::g3d::ScnRoot* unk44;
             nw4r::g3d::ScnRoot* unk48;
-            u32 unk4C;
+            nw4r::g3d::ResAnmScnData* unk4C;
             u32 unk50;
         };
     };
@@ -102,7 +106,8 @@ public:
         nw4r::g3d::AnmScnRes* unk8;
         u8 unkC;
         u8 unkD_7 : 1;
-        u8 unkD_0 : 7;
+        u8 unkD_6 : 1;
+        u8 unkD_0 : 6;
         u16 unkE;
         u32 unk10;
         u32 unk14;
@@ -136,7 +141,19 @@ public:
                 LightSlot m_lightSlots[10];
             };
             Layer unk38C[9];
-            char unk464[0x18];
+            union {
+                char unk464[0x18];
+                struct {
+                    u8 unk464_7 : 7;
+                    u8 unk464_0 : 1;
+                    u8 unk465_7 : 1;
+                    u8 unk465_6 : 1;
+                    u8 unk465_0 : 6;
+                    u8 unk466[2];
+                    utList unk468;
+                    u8 unk474[8];
+                };
+            };
         };
     };
     float m_shadowPitch;
@@ -153,6 +170,11 @@ public:
     virtual ~gfSceneRoot();
 
     void setCurrentFrame(float);
+    void addEventNotify(gfSceneRootEvent* event);
+    void removeEventNotify(gfSceneRootEvent* event);
+    void setUseCameraAnim(bool useCameraAnim);
+    void setClearDepthBufferState(LayerType layer, bool clear);
+    void setResAnmScn(nw4r::g3d::ResAnmScn* anmScn, int heap);
     void removeResAnmScn();
     void setLayerDispStatus(LayerType layer, bool status);
     bool clear(LayerType layer);

@@ -15,6 +15,7 @@
 #include <gf/gf_pad_system.h>
 #include <gf/gf_homemenu.h>
 #include <gf/gf_memory_pool.h>
+#include <new>
 
 extern const u8 lbl_80408CD0[0x20];
 
@@ -24,10 +25,11 @@ extern "C" muCollection* fn_800C35CC(void* mem, int kind, nw4r::g3d::ResFile res
                                      Heaps::HeapType heap, Heaps::HeapType heap2, int unk, int unk2);
 extern "C" bool fn_800C39D8(muCollection* collection);
 extern "C" nteFileDataPhoto* fn_80152970(void* mem, Heaps::HeapType heap);
+extern "C" void fn_800C6E3C(muCollection* collection, int unk, int unk2);
+extern "C" void fn_800C6E64(muCollection* collection, int drive, int unk, int unk2);
 extern "C" void fn_80153488(nteSection* section);
 extern "C" void fn_80153498(nteSection* section, int unk);
 extern "C" void fn_80153610(nteSection* section, void* data, s64 time, Heaps::HeapType heap, int unk, int unk2);
-extern "C" u32 fn_80153D50(nteSection* section);
 extern "C" nw4r::g3d::ScnGroup* Construct__Q34nw4r3g3d12ScnMdlExpandFP12MEMAllocatorPUliPQ34nw4r3g3d6ScnMdl(
     MEMAllocator* allocator, u32* size, int capacity, nw4r::g3d::ScnMdl* scnMdl);
 extern "C" bool PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(nw4r::g3d::ScnGroup* expand,
@@ -217,7 +219,7 @@ void IfSnapSaveTask::initProc(int kind, nw4r::g3d::ResFile* resFile, nw4r::g3d::
         m_jpegBuffer = gfHeapManager::alloc(m_dataHeap, 0x19008);
         void* photo = operator new(0x14, heap);
         if (photo != NULL) {
-            photo = fn_80152970(photo, m_dataHeap);
+            photo = new (photo) nteFileDataPhoto(m_dataHeap);
         }
         m_photoData = static_cast<nteFileDataPhoto*>(photo);
         m_jpegWork = new (heap) gfJpegEncodeWork();
@@ -325,7 +327,7 @@ void IfSnapSaveTask::mediaCursorStateInit(int state) {
     m_cursorState = state;
     obj->setFrameNode(frame);
     obj->m_modelAnim->m_anmObjChrRes->SetUpdateRate(play ? 1.0f : 0.0f);
-    u32 blocks = (fn_80153D50(&m_section) + 0x1FFFF) / 0x20000;
+    u32 blocks = (m_section.getSize() + 0x1FFFF) / 0x20000;
     bool enough = false;
     if (m_media[media].m_status == 1 && m_media[media].m_free >= blocks) {
         enough = true;
