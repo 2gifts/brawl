@@ -510,3 +510,77 @@ wnSimpleData* ftCommonDataAccesser::getSimpleData(ftKind kind, bool* resourceGro
 }
 
 ftCommonDataAccesser::~ftCommonDataAccesser() { }
+
+extern "C" const wnDummyFighterData lbl_27_rodata_14A4;
+
+const wnDummyFighterData* ftCommonDataAccesser::getDummyFighterData() const
+{
+    return &lbl_27_rodata_14A4;
+}
+
+template <>
+const wnDummyFighterData* ftCommonDataAccesser::getWeaponData<wnDummyFighterData>(int kind, bool* resourceGroup) const
+{
+    return &lbl_27_rodata_14A4;
+}
+
+template <>
+const wnKirbyPikminData* ftCommonDataAccesser::getWeaponData<wnKirbyPikminData>(int kind, bool* resourceGroup) const
+{
+    return static_cast<const wnKirbyPikminData*>(lbl_27_bss_3210[Fighter_Kirby].data->extendParam[61]);
+}
+
+template <>
+const wnMarioPumpWaterData* ftCommonDataAccesser::getWeaponData<wnMarioPumpWaterData>(int kind, bool* resourceGroup) const
+{
+    return static_cast<const wnMarioPumpWaterData*>(lbl_27_bss_3210[kind].data->extendParam[8]);
+}
+
+const ftLucarioAuraBallParam* ftCommonDataAccesser::getLucarioAuraBallParam(int kind) const
+{
+    switch (kind) {
+    case Fighter_Lucario:
+    default:
+        return static_cast<const ftLucarioAuraBallParam*>(lbl_27_bss_3210[Fighter_Lucario].data->extendParam[0]);
+    case Fighter_Kirby:
+        return static_cast<const ftLucarioAuraBallParam*>(lbl_27_bss_3210[Fighter_Kirby].data->extendParam[35]);
+    }
+}
+
+float* ftCommonDataAccesser::getLinkBowParam(int kind) const
+{
+    switch (kind) {
+    case Fighter_Link:
+        return static_cast<float*>(lbl_27_bss_3210[Fighter_Link].data->extendParam[0]);
+    case Fighter_Kirby:
+        return static_cast<float*>(lbl_27_bss_3210[Fighter_Kirby].data->extendParam[33]);
+    default:
+        return NULL;
+    }
+}
+
+template <>
+const wnPokeFushigisouSeedData* ftCommonDataAccesser::getWeaponData<wnPokeFushigisouSeedData>(int kind, bool* resourceGroup) const
+{
+    switch (kind) {
+    case Fighter_PokeFushigisou:
+        return static_cast<const wnPokeFushigisouSeedData*>(lbl_27_bss_3210[Fighter_PokeFushigisou].data->extendParam[5]);
+    case Fighter_Kirby:
+        return static_cast<const wnPokeFushigisouSeedData*>(lbl_27_bss_3210[Fighter_Kirby].data->extendParam[54]);
+    default:
+        return NULL;
+    }
+}
+
+template <>
+const wnPokeZenigameWaterData* ftCommonDataAccesser::getWeaponData<wnPokeZenigameWaterData>(int kind, bool* resourceGroup) const
+{
+    switch (kind) {
+    case Fighter_PokeZenigame:
+        return static_cast<const wnPokeZenigameWaterData*>(lbl_27_bss_3210[Fighter_PokeZenigame].data->extendParam[5]);
+    case Fighter_Kirby:
+        return static_cast<const wnPokeZenigameWaterData*>(lbl_27_bss_3210[Fighter_Kirby].data->extendParam[55]);
+    default:
+        return NULL;
+    }
+}

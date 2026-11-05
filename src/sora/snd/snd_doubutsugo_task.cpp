@@ -5,17 +5,14 @@
 #include <snd/snd_system.h>
 #include <sr/sr_common.h>
 #include <types.h>
+#include <snd/snd_doubutsugo.h>
 
 // HYPOTHESIS: stand-ins for Doubutsugo (Doubutsugo.o) and sndSystem::getBalanceSE, which are still fn_.
 extern "C" Doubutsugo* fn_803EEFCC(void* doubutsugo);
 extern "C" void fn_803EF044(Doubutsugo* doubutsugo, s32 deleteSelf);
-extern "C" void fn_803EF108(Doubutsugo* doubutsugo, nw4r::snd::SoundArchivePlayer* player);
 extern "C" bool fn_803EF174(Doubutsugo* doubutsugo);
 extern "C" void fn_803EF188(Doubutsugo* doubutsugo);
 extern "C" void fn_803EF1D0(Doubutsugo* doubutsugo);
-extern "C" void fn_803EF2AC(Doubutsugo* doubutsugo, const s16* words);
-extern "C" void fn_803EF3CC(Doubutsugo* doubutsugo, const void* script);
-extern "C" void fn_803EF478(Doubutsugo* doubutsugo, float volume);
 
 sndDoubutsugoTask::sndDoubutsugoTask(const void* archiveData, Heaps::HeapType heapType) :
     gfTask("sndDoubutsugoTask", Category_None, 0xE, 6, true) {
@@ -34,11 +31,11 @@ sndDoubutsugoTask::sndDoubutsugoTask(const void* archiveData, Heaps::HeapType he
     }
     m_doubutsugo = static_cast<Doubutsugo*>(mem);
     if (!fn_803EF174(m_doubutsugo)) {
-        fn_803EF108(m_doubutsugo, m_player);
+        m_doubutsugo->Setup(m_player);
     }
     sndSystem* system = g_sndSystem;
     float seVolume = system->unk70C;
-    fn_803EF478(m_doubutsugo, 2.0f * (seVolume * system->getBalanceSE()));
+    m_doubutsugo->SetVolume(2.0f * (seVolume * system->getBalanceSE()));
     unk9C = 0;
     for (int i = 0; i < 32; i++) {
         m_words[i] = 0xD3;
@@ -69,7 +66,7 @@ void sndDoubutsugoTask::processDefault() {
 void sndDoubutsugoTask::playWord(s16 word) {
     m_words[0] = word;
     m_words[1] = 0xD3;
-    fn_803EF2AC(m_doubutsugo, m_words);
+    m_doubutsugo->StartDirect(m_words);
 }
 
 void sndDoubutsugoTask::playSentence(s16* words) {
@@ -80,12 +77,12 @@ void sndDoubutsugoTask::playSentence(s16* words) {
         }
         words++;
     }
-    fn_803EF2AC(m_doubutsugo, m_words);
+    m_doubutsugo->StartDirect(m_words);
 }
 
 // HYPOTHESIS: sndDoubutsugoTask::playScript; its script parameter type is unknown, so it keeps its address name.
 extern "C" void fn_8007B0A4(sndDoubutsugoTask* task, const void* script) {
-    fn_803EF3CC(task->m_doubutsugo, script);
+    task->m_doubutsugo->Start(script);
 }
 
 void sndDoubutsugoTask::playPageSE() {

@@ -213,3 +213,21 @@ bool nteFile::addSection(nteSectionData* section) {
     }
     return success;
 }
+
+u32 nteSection::getSize() {
+    nteSectionData* data = m_data;
+    if (data == NULL) {
+        return 0;
+    }
+    return data->m_dataSize + 0x20;
+}
+
+nteFileDataPhoto::nteFileDataPhoto(Heaps::HeapType heap) {
+    unkC_ptr = static_cast<u8*>(gfHeapManager::alloc(heap, 0x34, 32));
+    if (unkC_ptr != NULL) {
+        memset(unkC_ptr, 0, 0x34);
+    }
+    unk10 = 0;
+    unk0_word = 1;
+    unk4 = heap;
+}

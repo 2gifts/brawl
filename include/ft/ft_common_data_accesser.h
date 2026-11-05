@@ -110,6 +110,12 @@ struct ftCommonData {
 
 struct wnSimpleData;
 struct wnGameWatchNormalWeaponData;
+struct wnDummyFighterData;
+struct wnKirbyPikminData;
+struct wnMarioPumpWaterData;
+struct wnPokeFushigisouSeedData;
+struct wnPokeZenigameWaterData;
+struct ftLucarioAuraBallParam;
 
 // HYPOTHESIS: leading flag word of a common fighter status's data (the bit with mask 0x8 marks statuses that cannot be trodden on).
 struct ftStatusFlagData {
@@ -125,6 +131,11 @@ struct ftStatusFlagData {
 
 class ftCommonDataAccesser {
 public:
+    const wnDummyFighterData* getDummyFighterData() const;
+    const ftLucarioAuraBallParam* getLucarioAuraBallParam(int kind) const;
+    float* getLinkBowParam(int kind) const;
+    // HYPOTHESIS: the getWeaponData overload family specializes on the article data type.
+    template <class Data> const Data* getWeaponData(int kind, bool* resourceGroup) const;
     // HYPOTHESIS: parameter types of the methods below follow the register use and callers (the module map has none).
     static void setupCommon(ftDataCommon* dataCommon);
     static bool isValidDat(ftKind kind);
@@ -198,6 +209,17 @@ public:
     void* getWeaponData129(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Sonic spring (gimmick jump)
     void* getWeaponData130(ftKind kind, bool* resourceGroup) const; // HYPOTHESIS: Super Sonic
 };
+
+template <>
+const wnDummyFighterData* ftCommonDataAccesser::getWeaponData<wnDummyFighterData>(int kind, bool* resourceGroup) const;
+template <>
+const wnKirbyPikminData* ftCommonDataAccesser::getWeaponData<wnKirbyPikminData>(int kind, bool* resourceGroup) const;
+template <>
+const wnMarioPumpWaterData* ftCommonDataAccesser::getWeaponData<wnMarioPumpWaterData>(int kind, bool* resourceGroup) const;
+template <>
+const wnPokeFushigisouSeedData* ftCommonDataAccesser::getWeaponData<wnPokeFushigisouSeedData>(int kind, bool* resourceGroup) const;
+template <>
+const wnPokeZenigameWaterData* ftCommonDataAccesser::getWeaponData<wnPokeZenigameWaterData>(int kind, bool* resourceGroup) const;
 
 extern ftCommonData g_ftCommonData;
 extern ftCommonDataAccesser g_ftCommonDataAccesser;

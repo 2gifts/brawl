@@ -70,5 +70,6 @@ public:
     static bool getPlayerPosition(int playerNo, Vec3f* pos);
     static bool getPlayerHipPosition(int playerNo, Vec3f* pos);
     static bool getPlayerCursorPosition(int playerNo, Vec3f* pos);
+    void calcCamera(Vec3f* eye, Vec3f* target, float roll, float fov);
 };
 static_assert(sizeof(stMelee) == 472, "Class is wrong size!");

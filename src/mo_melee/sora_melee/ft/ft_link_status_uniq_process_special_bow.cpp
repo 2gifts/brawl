@@ -14,8 +14,6 @@ struct ftLinkBowArticleIdsView {
     s32 m_arrowId2;
 };
 
-// HYPOTHESIS: parameter block of ftCommonDataAccesser::getLinkBowParam(subKind); the motion rate is at +4.
-extern "C" float* fn_27_147D94(ftCommonDataAccesser* accesser, int subKind);
 
 class ftLinkStatusUniqProcessSpecialBow : public soStatusUniqProcess {
 public:
@@ -29,12 +27,12 @@ public:
 ftLinkStatusUniqProcessSpecialBow g_ftLinkStatusUniqProcessSpecialBow;
 
 void ftLinkStatusUniqProcessSpecialBow::initStatus(soModuleAccesser* acc) {
-    float rate = fn_27_147D94(&g_ftCommonDataAccesser, acc->getStageObject().soGetSubKind())[1];
+    float rate = g_ftCommonDataAccesser.getLinkBowParam(acc->getStageObject().soGetSubKind())[1];
     acc->getMotionModule().setRate(rate);
 }
 
 void ftLinkStatusUniqProcessSpecialBow::execStatus(soModuleAccesser* acc) {
-    float* param = fn_27_147D94(&g_ftCommonDataAccesser, acc->getStageObject().soGetSubKind());
+    float* param = g_ftCommonDataAccesser.getLinkBowParam(acc->getStageObject().soGetSubKind());
     int state = acc->getWorkManageModule().getInt(0x20000000);
     if (state == 0) {
         if (acc->getWorkManageModule().isFlag(0x22000013)) {

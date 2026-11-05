@@ -10,7 +10,6 @@
 #include <wn/wn_article_build_info.h>
 #include <types.h>
 
-extern "C" const wnDummyFighterData* fn_27_149B64(const ftCommonDataAccesser* accesser);
 extern "C" void fn_27_1E3C78(wnDummyFighter* dummy, Vec3f* pos, Vec2f* speed, float* unk1, float* unk2, int flags, int unk6,
                              int unk7, float scale, float lr);
 
@@ -118,7 +117,7 @@ void ftChangeSucceedWork::createDummyFighter(Heaps::HeapType instHeap, Heaps::He
     if (m_heapModule == NULL && m_dummyFighter == NULL) {
         m_heapModule = new (instHeap) soHeapModuleImpl(instHeap, modelInstHeap, motionInstHeap, 0);
         m_dummyFighter = new (instHeap) wnDummyFighter(-1, ftChangeSucceedWorkArticleBuildInfo(ftChangeSucceedWorkArticleKind(), m_heapModule),
-                                                       fn_27_149B64(&g_ftCommonDataAccesser));
+                                                       g_ftCommonDataAccesser.getDummyFighterData());
     }
 }
 

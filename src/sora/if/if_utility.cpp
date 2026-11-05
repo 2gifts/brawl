@@ -64,15 +64,13 @@ void utility::DepthScaler::ExecCallback_DRAW_XLU(nw4r::g3d::ScnObj::Timing timin
     setZScaleOffset(timing);
 }
 
-// gfSceneRoot::setClearDepthBufferState (the map name); src/sora/if/if_vs_result_task.cpp calls it by this stand-in name.
-extern "C" void fn_8000E590(gfSceneRoot* root, int layer, bool clear);
 
 utility::DepthClearer::DepthClearer(gfSceneRoot::LayerType layer) : unk0(layer) {
-    fn_8000E590(g_gfSceneRoot, layer, true);
+    g_gfSceneRoot->setClearDepthBufferState(layer, true);
 }
 
 utility::DepthClearer::~DepthClearer() {
-    fn_8000E590(g_gfSceneRoot, unk0, false);
+    g_gfSceneRoot->setClearDepthBufferState(unk0, false);
 }
 
 void utility::FadeOutTask::processDefault() {
