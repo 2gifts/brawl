@@ -16,8 +16,16 @@ class stTrigger : public utListNode {
 
     Gimmick::AreaKind m_gimmickAreaKind;
     int m_id;
-    stTriggerData::KeepKind m_keepKind : 8;
-    char _spacer[7];
+    union {
+        struct {
+            stTriggerData::KeepKind m_keepKind : 8;
+            char _spacer[7];
+        };
+        struct {
+            char unk10[4];
+            int unk14;
+        };
+    };
     stObsTriggerCB* m_obsTriggerCB;
     Yakumono* m_yakumono;
     union {
@@ -35,6 +43,8 @@ class stTrigger : public utListNode {
 public:
     friend class stActTriggerFrameExcelCB;
     virtual ~stTrigger();
+
+    void process();
 
     void setObserveYakumono(Yakumono* yakumono);
     void setValidCallback(gfCallBack* cb);

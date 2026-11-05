@@ -146,3 +146,55 @@ stObsTriggerSquareBeltConveyorCB* stTrigger::setPressureAreaTrigger(grGimmickPre
     m_obsTriggerCB = cb;
     return cb;
 }
+
+void stTrigger::process() {
+    if (m_isValid == true) {
+        if (unk14 == 0 || unk14 == 3) {
+            unk14 = 1;
+        } else {
+            unk14 = 2;
+        }
+    } else {
+        if (unk14 == 1 || unk14 == 2) {
+            unk14 = 3;
+        } else {
+            unk14 = 0;
+        }
+    }
+    switch (unk14) {
+    case 1:
+        if (unk24 != nullptr) {
+            gfCallBack* callback = unk24;
+            callback->userProc();
+            for (callback = callback->m_next; callback != nullptr; callback = callback->m_next) {
+                callback->userProc();
+            }
+        }
+        if (unk20 != nullptr) {
+            gfCallBack* callback = unk20;
+            callback->userProc();
+            for (callback = callback->m_next; callback != nullptr; callback = callback->m_next) {
+                callback->userProc();
+            }
+        }
+        break;
+    case 2:
+        if (unk20 != nullptr) {
+            gfCallBack* callback = unk20;
+            callback->userProc();
+            for (callback = callback->m_next; callback != nullptr; callback = callback->m_next) {
+                callback->userProc();
+            }
+        }
+        break;
+    case 3:
+        if (unk28 != nullptr) {
+            gfCallBack* callback = unk28;
+            callback->userProc();
+            for (callback = callback->m_next; callback != nullptr; callback = callback->m_next) {
+                callback->userProc();
+            }
+        }
+        break;
+    }
+}
