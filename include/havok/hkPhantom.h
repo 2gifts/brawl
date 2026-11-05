@@ -35,10 +35,11 @@ struct hkPhantomOverlapListener {
     virtual void overlapRemoved(hkPhantomOverlapEvent* event) = 0; // 0x0C
 };
 
-// Phantom (0x70 bytes). Layout from hkPhantomClass.cpp. Vtable slots (byte offset) known so far:
-// 0x08 dtor, 0x0C calcStatistics, 0x10 getType (HYPOTHESIS, as in hkShape), 0x14 calcAabb (HYPOTHESIS),
-// 0x20 addOverlappingCollidable, 0x24 isOverlappingCollidableAdded (HYPOTHESIS), 0x28 removeOverlappingCollidable.
-// Slots 0x18 and 0x1C are not identified yet.
+// Phantom (0x70 bytes). Layout from hkPhantomClass.cpp. Vtable slots from hkPhantom's and hkAabbPhantom's
+// vtables in the image (names from the map): 0x08 dtor, 0x0C calcStatistics, 0x10 setShape (hkWorldObject),
+// 0x14 getMotionState, 0x18 getType, 0x1C calcAabb, 0x20 addOverlappingCollidable, 0x24
+// isOverlappingCollidableAdded, 0x28 removeOverlappingCollidable, 0x2C unknown, 0x30 updateShapeCollectionFilter,
+// 0x34 deallocateInternalArrays.
 struct hkPhantom : hkWorldObject {
     hkArray<hkPhantomOverlapListener*> m_overlapListeners; // 0x58
     hkArray<hkPhantomListener*> m_phantomListeners;        // 0x64
@@ -47,21 +48,21 @@ struct hkPhantom : hkWorldObject {
 
     virtual ~hkPhantom();
     virtual void calcStatistics(hkStatisticsCollector* collector) const;
-    virtual int getType() const = 0;
-    virtual void calcAabb(hkAabb* out) const = 0;
-    virtual void unk18() = 0;
-    virtual void updateShapeCollectionFilter() = 0;
+    virtual hkMotion* getMotionState() const = 0;                              // 0x14
+    virtual int getType() const = 0;                                           // 0x18
+    virtual void calcAabb(hkAabb* out) const = 0;                              // 0x1C
     virtual void addOverlappingCollidable(hkCollidable* collidable) = 0;      // 0x20
-    virtual hkBool isOverlappingCollidableAdded(hkCollidable* collidable) const = 0; // 0x24 HYPOTHESIS
+    virtual hkBool isOverlappingCollidableAdded(hkCollidable* collidable) const = 0; // 0x24
     virtual void removeOverlappingCollidable(hkCollidable* collidable) = 0;   // 0x28
-    virtual hkMotion* getMotionState() const = 0;
+    virtual void unk2C() = 0;                                                  // 0x2C
+    virtual void updateShapeCollectionFilter() = 0;                            // 0x30
+    virtual void deallocateInternalArrays();                                   // 0x34
 
     void firePhantomDeleted();
     void firePhantomRemoved();
     void firePhantomAdded();
     void addPhantomOverlapListener(hkPhantomOverlapListener* listener);
     void removePhantomOverlapListener(hkPhantomOverlapListener* listener);
-    void deallocateInternalArrays();
     void updateBroadPhase(void* arg);
 };
 

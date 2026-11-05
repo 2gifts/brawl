@@ -18,6 +18,7 @@
 #include <havok/hkRigidBody.h>
 #include <havok/hkPhantom.h>
 #include <havok/hkMotion.h>
+#include <havok/hkSimulation.h>
 
 #include <havok/hkAlgorithm.h>
 
@@ -178,18 +179,6 @@ struct hkActionVirtuals : hkReferencedObject {
 };
 struct hkWorldOperationUserCallback : hkReferencedObject {
     virtual void worldOperationUserCallback(int userData); // 0x10
-};
-struct hkSimulationVirtuals : hkReferencedObject {
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1C();
-    virtual void unk20();
-    virtual void unk24();
-    virtual void unk28();
-    virtual void unk2C();
-    virtual void unk30();
-    virtual void reintegrateAndRecollideEntities(hkEntity** entities, int count, hkWorld* world); // 0x34
 };
 
 static inline hkMotion* motionOf(hkRigidBody* body) { return reinterpret_cast<hkMotion*>(body->m_motion); }
@@ -495,7 +484,7 @@ void hkWorldOperationQueue::executeAllPending() {
             case hkWorldOperation::ENTITY_BATCH_REINTEGRATE_AND_RECOLLIDE: {
                 hkWorldOperation::BatchOperation& batch = static_cast<hkWorldOperation::BatchOperation&>(op);
                 // HYPOTHESIS: world +8 is the simulation
-                reinterpret_cast<hkSimulationVirtuals*>(m_world->m_unk08)
+                reinterpret_cast<hkSimulation*>(m_world->m_unk08)
                     ->reintegrateAndRecollideEntities(reinterpret_cast<hkEntity**>(batch.m_objects), batch.m_count, m_world);
                 removeReferencesFrom(batch.m_objects, batch.m_count);
                 freeBatch(batch.m_objects, batch.m_count);
