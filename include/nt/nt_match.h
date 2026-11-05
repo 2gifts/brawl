@@ -10,6 +10,8 @@ class DWCAllocType {
 public:
     static void* ntAlloc(int, u32, u32);
     static void ntFree(int, void*);
+    static void* ntDwcAlloc(int, u32, u32);
+    static void ntDwcFree(int, void*, u32);
 };
 // TODO size assertion
 
