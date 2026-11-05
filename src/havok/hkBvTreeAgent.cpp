@@ -197,6 +197,64 @@ void hkBvTreeAgent::staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody
     HK_TIMER_END_LIST();
 }
 
+void hkBvTreeAgent::linearCast(void* a, void* b, void* c, void* target, void* startTarget) {
+    HK_TIMER_BEGIN_LIST("BvTree", "QueryTree");
+    prepareCollisionPartnersLinearCast(*(const hkCdBody*)a, *(const hkCdBody*)b, *(const hkLinearCastCollisionInput*)c);
+    HK_TIMER_SPLIT_LIST("NarrowPhase");
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    const hkCdBody& bodyB = *(const hkCdBody*)b;
+    hkCdBody childBody(&bodyB);
+    const hkShapeCollection* collection = ((const hkBvTreeShape*)bodyB.m_shape)->m_collection;
+    hkShapeContainer::ShapeBuffer shapeBuffer;
+    for (; entry != end; entry++) {
+        childBody.m_shape = (hkShape*)collection->m_container.getChildShape(entry->m_key, shapeBuffer);
+        childBody.m_shapeKey = entry->m_key;
+        entry->m_collisionAgent->linearCast(a, &childBody, c, target, startTarget);
+    }
+    HK_TIMER_END_LIST();
+}
+
+void hkBvTreeAgent::getClosestPoints(void* a, void* b, void* c, void* target) {
+    HK_TIMER_BEGIN_LIST("BvTree", "QueryTree");
+    prepareCollisionPartners(*(const hkCdBody*)a, *(const hkCdBody*)b, *(const hkCollisionInput*)c);
+    HK_TIMER_SPLIT_LIST("NarrowPhase");
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    const hkCdBody& bodyB = *(const hkCdBody*)b;
+    hkCdBody childBody(&bodyB);
+    const hkShapeCollection* collection = ((const hkBvTreeShape*)bodyB.m_shape)->m_collection;
+    hkShapeContainer::ShapeBuffer shapeBuffer;
+    for (; entry != end; entry++) {
+        childBody.m_shape = (hkShape*)collection->m_container.getChildShape(entry->m_key, shapeBuffer);
+        childBody.m_shapeKey = entry->m_key;
+        entry->m_collisionAgent->getClosestPoints(a, &childBody, c, target);
+    }
+    HK_TIMER_END_LIST();
+}
+
+// Brings the child agent list up to date with the tree, then asks each child's agent.
+void hkBvTreeAgent::getPenetrations(void* a, void* b, void* c, void* target) {
+    HK_TIMER_BEGIN_LIST("BvTree", "QueryTree");
+    prepareCollisionPartners(*(const hkCdBody*)a, *(const hkCdBody*)b, *(const hkCollisionInput*)c);
+    HK_TIMER_SPLIT_LIST("NarrowPhase");
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    const hkCdBody& bodyB = *(const hkCdBody*)b;
+    hkCdBody childBody(&bodyB);
+    const hkShapeCollection* collection = ((const hkBvTreeShape*)bodyB.m_shape)->m_collection;
+    hkShapeContainer::ShapeBuffer shapeBuffer;
+    for (; entry != end; entry++) {
+        childBody.m_shape = (hkShape*)collection->m_container.getChildShape(entry->m_key, shapeBuffer);
+        childBody.m_shapeKey = entry->m_key;
+        entry->m_collisionAgent->getPenetrations(a, &childBody, c, target);
+        if (((hkCdBodyPairCollector*)target)->m_earlyOut) {
+            break;
+        }
+    }
+    HK_TIMER_END_LIST();
+}
+
 void hkBvTreeAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
                                           void* target) {
     HK_TIMER_BEGIN_LIST("BvTree", "QueryTree");

@@ -11757,7 +11757,7 @@ createBvBvAgent__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyRC16hkCollisionInputP12hk
 fn_802A3E74 = .text:0x802A3E74; // type:function size:0x94
 fn_802A3F08 = .text:0x802A3F08; // type:function size:0x78
 fn_802A3F80 = .text:0x802A3F80; // type:function size:0x98
-fn_802A4018 = .text:0x802A4018; // type:function size:0xBFC
+prepareCollisionPartners__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyRC16hkCollisionInput = .text:0x802A4018; // type:function size:0xBFC
 fn_802A4C14 = .text:0x802A4C14; // type:function size:0x2C
 fn_802A4C40 = .text:0x802A4C40; // type:function size:0x3C
 fn_802A4C7C = .text:0x802A4C7C; // type:function size:0x128
@@ -11765,7 +11765,7 @@ dtor_802A4DA4 = .text:0x802A4DA4; // type:function size:0x90
 fn_802A4E34 = .text:0x802A4E34; // type:function size:0x4BC
 fn_802A52F0 = .text:0x802A52F0; // type:function size:0x570
 dtor_802A5860 = .text:0x802A5860; // type:function size:0xC0
-fn_802A5920 = .text:0x802A5920; // type:function size:0xBE8
+prepareCollisionPartnersLinearCast__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyRC26hkLinearCastCollisionInput = .text:0x802A5920; // type:function size:0xBE8
 updateShapeCollectionFilter__13hkBvTreeAgentFPvPvPv = .text:0x802A6508; // type:function size:0x20C
 processCollision__13hkBvTreeAgentFPvPvPvPv = .text:0x802A6714; // type:function size:0x324
 fn_802A6A38 = .text:0x802A6A38; // type:function size:0x15C

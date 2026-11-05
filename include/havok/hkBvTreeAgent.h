@@ -17,11 +17,12 @@ struct hkLinearCastCollisionInput;
 struct hkBvTreeAgent : hkCollisionAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
-    // HYPOTHESIS: 12-byte entry of the list at 0x0C (map name hkBvTreeAgent::hkBvAgentEntryInfo).
+    // 12-byte entry of the list at 0x0C (map name hkBvTreeAgent::hkBvAgentEntryInfo): one child of the tree's
+    // collection with its agent (the queries rebuild the child body from the key and call the agent).
     struct hkBvAgentEntryInfo {
-        u32 unk0; // HYPOTHESIS
-        u32 unk4; // HYPOTHESIS
-        u32 unk8; // HYPOTHESIS
+        u32 m_key;                          // 0x00 child shape key in the tree's collection
+        u32 unk4;                           // 0x04 HYPOTHESIS
+        hkCollisionAgent* m_collisionAgent; // 0x08
     };
 
     hkArray<hkBvAgentEntryInfo> m_entries; // 0x0C
@@ -34,6 +35,10 @@ struct hkBvTreeAgent : hkCollisionAgent {
     virtual ~hkBvTreeAgent() {}
 
     static void registerAgent(hkCollisionDispatcher* dispatcher);
+    // HYPOTHESIS: parameter types (the queries pass their pair and input through unchanged).
+    void prepareCollisionPartners(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input);
+    void prepareCollisionPartnersLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                            const hkLinearCastCollisionInput& input);
     static hkBvTreeAgent* createBvTreeShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
                                          hkContactMgr* contactMgr);
     static hkBvTreeAgent* createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
