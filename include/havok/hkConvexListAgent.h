@@ -52,3 +52,13 @@ struct hkConvexListAgent : hkCollisionAgent {
     virtual void getPenetrations(void* a, void* b, void* c, void* d);
     virtual void linearCast(void* a, void* b, void* c, void* d, void* e);
 };
+
+// HYPOTHESIS: hkSymmetricAgent<hkConvexListAgent> (map name); only its linear cast is written.
+struct hkSymmetricAgent_17hkConvexListAgent_ : hkConvexListAgent {
+    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
+};
+
+// HYPOTHESIS: hkSymmetricAgentLinearCast<hkConvexListAgent> (map name); only its static linear cast is written.
+struct hkSymmetricAgentLinearCast_17hkConvexListAgent_ : hkSymmetricAgent_17hkConvexListAgent_ {
+    static void staticLinearCast(void* a, void* b, void* c, void* target, void* d);
+};

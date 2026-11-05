@@ -87,3 +87,8 @@ struct hkSymmetricAgentLinearCast_13hkBvTreeAgent : hkBvTreeAgent {
 
     hkSymmetricAgentLinearCast_13hkBvTreeAgent(hkContactMgr* contactMgr) : hkBvTreeAgent(contactMgr) {}
 };
+
+// HYPOTHESIS: hkSymmetricAgent<hkBvTreeAgent> (map name); only its linear cast is written.
+struct hkSymmetricAgent_13hkBvTreeAgent_ : hkBvTreeAgent {
+    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
+};

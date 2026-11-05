@@ -48,4 +48,5 @@ struct hkBvTreeStreamAgent : hkCollisionAgent {
 struct hkBvTreeStreamAgentVariant : hkBvTreeStreamAgent {
     hkBvTreeStreamAgentVariant(void* unused0, void* unused1, const int* src, int unk8Value)
         : hkBvTreeStreamAgent(unused0, unused1, src, unk8Value) {}
+    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
 };

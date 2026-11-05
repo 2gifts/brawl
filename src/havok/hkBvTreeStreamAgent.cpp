@@ -43,6 +43,9 @@
 //   0x802AA8C0   248  registerAgent   [map: hkMoppBvTreeStreamAgent__registerAgent]
 
 #include <havok/hkBvTreeStreamAgent.h>
+#include <havok/hkCollisionInput.h>
+#include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkBvTreeAgent.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkBvAgent.h>
@@ -51,7 +54,6 @@
 // hkBvTreeAgent static query functions (tail calls from the forwarders, also registered directly).
 extern "C" void fn_802A83F8(void* a, void* b, void* c, void* d); // static getPenetrations
 extern "C" void fn_802A7F30(void* a, void* b, void* c, void* d); // static getClosestPoints
-extern "C" void fn_802A78F8(void* a, void* b, void* c, void* d, void* e); // static linearCast
 // HYPOTHESIS: hkAgent1nMachine helpers (map names hkAgent1nMachine_Create / _Destroy) that work on m_list.
 extern "C" void fn_802FCB14(void* list);
 extern "C" void fn_802FC6AC(void* list, int a, int b);
@@ -61,7 +63,6 @@ extern "C" void fn_802FC988(void* list);
 // hkBvTreeAgent symmetric static functions (their own TU, not yet recovered).
 extern "C" void fn_802A8984(void* a, void* b, void* c, void* d);
 extern "C" void fn_802A8A14(void* a, void* b, void* c, void* d);
-extern "C" void fn_802A8A5C(void* a, void* b, void* c, void* d, void* e);
 
 // HYPOTHESIS: registration record passed to the collision dispatcher (same layout as hkPhantomAgent.cpp).
 
@@ -119,9 +120,28 @@ void hkBvTreeStreamAgent::getClosestPoints(void* a, void* b, void* c, void* d) {
     fn_802A7F30(a, b, c, d);
 }
 
-void hkBvTreeStreamAgent::linearCast(void* a, void* b, void* c, void* d, void* e) {
-    fn_802A78F8(a, b, c, d, e);
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkBvTreeStreamAgentVariant::linearCast(void* a, void* b, void* c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = *(const hkLinearCastCollisionInput*)c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkBvTreeStreamAgent::linearCast(b, a, &flippedInput, &flipped, &flippedStart);
+    } else {
+        hkBvTreeStreamAgent::linearCast(b, a, &flippedInput, &flipped, 0);
+    }
 }
+
+// BYTES: the symmetric linear cast calls this forwarder; without the pragma it is inlined there.
+#pragma push
+#pragma auto_inline off
+void hkBvTreeStreamAgent::linearCast(void* a, void* b, void* c, void* d, void* e) {
+    hkBvTreeAgent::staticLinearCast(a, b, c, d, e);
+}
+#pragma pop
 
 #pragma dont_inline on
 hkBvTreeStreamAgent::hkBvTreeStreamAgent(void* unused0, void* unused1, const int* src, int unk8Value)
@@ -159,14 +179,14 @@ void hkBvTreeStreamAgent::registerAgent(void* dispatcher) {
     reg.create = (hkAgentFunc)&hkBvTreeStreamAgent::createBvTreeShapeAgent;
     reg.staticGetPenetrations = (hkAgentFunc)fn_802A8984;
     reg.staticGetClosestPoints = (hkAgentFunc)fn_802A8A14;
-    reg.staticLinearCast = (hkAgentFunc)fn_802A8A5C;
+    reg.staticLinearCast = (hkAgentFunc)hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticLinearCast;
     reg.symmetricA = true;
     reg.symmetricB = true;
     ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&reg, HK_SHAPE_BV_TREE, HK_SHAPE_CONVEX);
     reg.create = (hkAgentFunc)&hkBvTreeStreamAgent::createShapeBvAgent;
     reg.staticGetPenetrations = (hkAgentFunc)fn_802A83F8;
     reg.staticGetClosestPoints = (hkAgentFunc)fn_802A7F30;
-    reg.staticLinearCast = (hkAgentFunc)fn_802A78F8;
+    reg.staticLinearCast = (hkAgentFunc)hkBvTreeAgent::staticLinearCast;
     reg.symmetricA = false;
     reg.symmetricB = true;
     ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&reg, HK_SHAPE_CONVEX, HK_SHAPE_BV_TREE);
@@ -179,14 +199,14 @@ void hkBvTreeStreamAgent::registerConvexListAgent(void* dispatcher) {
     reg.create = (hkAgentFunc)&hkBvTreeStreamAgent::createBvTreeShapeAgent;
     reg.staticGetPenetrations = (hkAgentFunc)fn_802A8984;
     reg.staticGetClosestPoints = (hkAgentFunc)fn_802A8A14;
-    reg.staticLinearCast = (hkAgentFunc)fn_802A8A5C;
+    reg.staticLinearCast = (hkAgentFunc)hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticLinearCast;
     reg.symmetricA = true;
     reg.symmetricB = true;
     ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&reg, HK_SHAPE_BV_TREE, HK_SHAPE_CONVEX_LIST);
     reverseReg.create = (hkAgentFunc)&hkBvTreeStreamAgent::createShapeBvAgent;
     reverseReg.staticGetPenetrations = (hkAgentFunc)fn_802A83F8;
     reverseReg.staticGetClosestPoints = (hkAgentFunc)fn_802A7F30;
-    reverseReg.staticLinearCast = (hkAgentFunc)fn_802A78F8;
+    reverseReg.staticLinearCast = (hkAgentFunc)hkBvTreeAgent::staticLinearCast;
     reverseReg.symmetricA = false;
     reverseReg.symmetricB = true;
     ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&reverseReg, HK_SHAPE_CONVEX_LIST, HK_SHAPE_BV_TREE);
@@ -198,7 +218,7 @@ void hkBvTreeStreamAgent::registerMultiRayAgent(void* dispatcher) {
     regAB.create = (hkAgentFunc)&hkBvTreeStreamAgent::createBvTreeShapeAgent;
     regAB.staticGetPenetrations = (hkAgentFunc)fn_802A8984;
     regAB.staticGetClosestPoints = (hkAgentFunc)fn_802A8A14;
-    regAB.staticLinearCast = (hkAgentFunc)fn_802A8A5C;
+    regAB.staticLinearCast = (hkAgentFunc)hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticLinearCast;
     regAB.symmetricA = true;
     regAB.symmetricB = true;
     ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&regAB, HK_SHAPE_BV_TREE, HK_SHAPE_MULTI_RAY);
@@ -206,7 +226,7 @@ void hkBvTreeStreamAgent::registerMultiRayAgent(void* dispatcher) {
     regBA.create = (hkAgentFunc)&hkBvTreeStreamAgent::createShapeBvAgent;
     regBA.staticGetPenetrations = (hkAgentFunc)fn_802A83F8;
     regBA.staticGetClosestPoints = (hkAgentFunc)fn_802A7F30;
-    regBA.staticLinearCast = (hkAgentFunc)fn_802A78F8;
+    regBA.staticLinearCast = (hkAgentFunc)hkBvTreeAgent::staticLinearCast;
     regBA.symmetricA = false;
     regBA.symmetricB = true;
     ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&regBA, HK_SHAPE_MULTI_RAY, HK_SHAPE_BV_TREE);
@@ -220,3 +240,4 @@ void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(void* a, void* b
 }
 
 template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::updateShapeCollectionFilter(void*, void*, void*);
+

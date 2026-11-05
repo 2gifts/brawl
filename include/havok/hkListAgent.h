@@ -43,3 +43,8 @@ struct hkListAgent : hkCollisionAgent {
 struct hkListAgentVariant : hkListAgent {
     hkListAgentVariant(void* a, void* b, void* c, int unk8Value) : hkListAgent(a, b, c, unk8Value) {}
 };
+
+// HYPOTHESIS: hkSymmetricAgent<hkListAgent> (map name); only its linear cast is written (in hkConvexListAgent.o).
+struct hkSymmetricAgent_11hkListAgent_ : hkListAgent {
+    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
+};

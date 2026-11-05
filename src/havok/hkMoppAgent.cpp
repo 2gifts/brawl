@@ -16,6 +16,8 @@
 //   0x802A990C   164  __dt   [map: hkSymmetricAgent_11hkMoppAgent_____dt]
 
 #include <havok/hkMoppAgent.h>
+#include <havok/hkCollisionInput.h>
+#include <havok/hkSymmetricAgentFlipCollectors.h>
 #include <havok/hkCollisionDispatcher.h>
 
 hkMoppAgent::hkMoppAgent(hkContactMgr* contactMgr) : hkBvTreeAgent(contactMgr) {}
@@ -42,4 +44,34 @@ void hkSymmetricAgentLinearCast_11hkMoppAgent::staticGetClosestPoints(void* a, v
 
 void hkSymmetricAgentLinearCast_11hkMoppAgent::updateShapeCollectionFilter(void* a, void* b, void* c) {
     hkMoppAgent::updateShapeCollectionFilter(b, a, c);
+}
+
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkSymmetricAgent_11hkMoppAgent_::linearCast(void* a, void* b, void* c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = *(const hkLinearCastCollisionInput*)c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkBvTreeAgent::linearCast(b, a, &flippedInput, &flipped, &flippedStart);
+    } else {
+        hkBvTreeAgent::linearCast(b, a, &flippedInput, &flipped, 0);
+    }
+}
+
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkSymmetricAgentLinearCast_11hkMoppAgent::staticLinearCast(void* a, void* b, void* c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = *(const hkLinearCastCollisionInput*)c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkMoppAgent::staticLinearCast(b, a, &flippedInput, &flipped, &flippedStart);
+    } else {
+        hkMoppAgent::staticLinearCast(b, a, &flippedInput, &flipped, 0);
+    }
 }

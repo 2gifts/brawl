@@ -56,4 +56,5 @@ struct hkShapeCollectionAgentVariant : hkShapeCollectionAgent {
     hkShapeCollectionAgentVariant(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
                                   hkContactMgr* mgr)
         : hkShapeCollectionAgent(bodyA, bodyB, input, mgr) {}
+    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
 };

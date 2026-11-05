@@ -25,11 +25,11 @@
 #include <havok/hkCdBody.h>
 #include <havok/hkCdBodyPairCollector.h>
 #include <havok/hkCollisionInput.h>
+#include <havok/hkBvAgent.h>
 
 // Stand-ins for functions in other TUs or not yet recovered (the names are the map names).
 extern "C" void fn_802B0FE0(void* a, void* b, void* c, void* d);
 extern "C" void fn_802B1028(void* a, void* b, void* c, void* d, void* e);
-extern "C" void fn_802B1070(void* a, void* b, void* c, void* d);
 // Dispatcher registration (not recovered yet).
 
 // HYPOTHESIS: registration record passed to the collision dispatcher (same layout as hkPhantomAgent.cpp).
@@ -56,7 +56,7 @@ void hkShapeCollectionAgent::registerAgent(void* dispatcher) {
     regAB.create = (hkAgentFunc)&hkShapeCollectionAgent::createListBAgent;
     regAB.staticGetPenetrations = (hkAgentFunc)fn_802B0FE0;
     regAB.staticGetClosestPoints = (hkAgentFunc)fn_802B1028;
-    regAB.staticLinearCast = (hkAgentFunc)fn_802B1070;
+    regAB.staticLinearCast = (hkAgentFunc)hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticLinearCast;
     regAB.symmetricA = true;
     regAB.symmetricB = true;
     ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&regAB, HK_SHAPE_ALL, HK_SHAPE_COLLECTION);

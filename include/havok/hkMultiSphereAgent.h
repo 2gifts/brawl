@@ -29,10 +29,24 @@ struct hkMultiSphereAgent : hkCollisionAgent {
     static hkMultiSphereAgent* createListBAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
 
     virtual void cleanup();
+    virtual void linearCast(void* a, void* b, void* c, void* target, void* d); // not written yet
+    static void staticLinearCast(void* a, void* b, void* c, void* target, void* d); // not written yet
 };
 
 // Flipped (symmetric) variant created by createListBAgent; the class name follows the Havok TU map.
 struct hkSymmetricAgent_18hkMultiSphereAgent_ : hkMultiSphereAgent {
     hkSymmetricAgent_18hkMultiSphereAgent_(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr)
         : hkMultiSphereAgent(unk0, unk1, unk2, contactMgr) {}
+    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
+};
+
+// HYPOTHESIS: hkSymmetricAgentLinearCast<hkMultiSphereAgent> (map name); only its static linear cast is written.
+struct hkSymmetricAgentLinearCast_18hkMultiSphereAgent_ : hkSymmetricAgent_18hkMultiSphereAgent_ {
+    static void staticLinearCast(void* a, void* b, void* c, void* target, void* d);
+};
+
+// HYPOTHESIS: hkSymmetricAgentLinearCast<hkMultiSphereTriangleAgent> (map name, in hkMultiSphereAgent.o); the
+// triangle agent itself is not recovered. Its static linear cast goes to the iterative linear cast.
+struct hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_ {
+    static void staticLinearCast(void* a, void* b, void* c, void* target, void* d);
 };

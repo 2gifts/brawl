@@ -177,3 +177,33 @@ void hkSimpleClosestContactCollector::addCdPoint(hkCdPoint* point) {
     m_hit = hkBool(true);
     m_dist = point->m_contact.m_normal.w;
 }
+
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkSymmetricAgent_16hkTransformAgent_::linearCast(void* a, void* b, void* c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = *(const hkLinearCastCollisionInput*)c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkTransformAgent::linearCast(b, a, &flippedInput, &flipped, &flippedStart);
+    } else {
+        hkTransformAgent::linearCast(b, a, &flippedInput, &flipped, 0);
+    }
+}
+
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkSymmetricAgentLinearCast_16hkTransformAgent_::staticLinearCast(void* a, void* b, void* c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = *(const hkLinearCastCollisionInput*)c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkTransformAgent::staticLinearCast(b, a, &flippedInput, &flipped, &flippedStart);
+    } else {
+        hkTransformAgent::staticLinearCast(b, a, &flippedInput, &flipped, 0);
+    }
+}
