@@ -405,15 +405,16 @@ static inline void gmInitPlayersFromSelect(gmGlobalModeMelee* global) {
     g_GameGlobal->m_modeMelee->m_meleeInitData.m_sealRareBit = record->m_sealRareBit;
 }
 
-void gmInitVSMelee(gmGlobalModeMelee* global) {
+void gmGlobalModeMelee::gmInitVSMelee() {
+    gmGlobalModeMelee* global = this;
     gmInitPlayersFromSelect(global);
     g_GameGlobal->m_handicapCounts[0] = 0;
     g_GameGlobal->m_handicapCounts[1] = 0;
     g_GameGlobal->m_handicapCounts[2] = 0;
     g_GameGlobal->m_handicapCounts[3] = 0;
-    global->_0[0] = -1;
-    global->_0[1] = 1;
-    global->_0[2] = -1;
+    global->unk0 = -1;
+    global->unk1 = 1;
+    global->unk2 = -1;
 }
 
 // Clears the handicap that was carried over from the previous match for the four human players.
@@ -1545,8 +1546,6 @@ void gmRuleResetForNet() {
 
 // Callees owned by other clusters of this temporarily split unit.
 // HYPOTHESIS: signatures come from the register use at the call sites; the names are from the sora map.
-// gmResultInfo::gmSetSelStagePlayerModeResult(gmResultInfo*, gmGlobalModeMelee*)
-extern "C" void fn_800555D8(gmResultInfo* result, gmGlobalModeMelee* melee);
 // gmResultInfo::gmAddDiagramResultChara()
 extern "C" void fn_80055058(gmResultInfo* result);
 // gmResultInfo::gmAddDiagramResultName()
@@ -1814,7 +1813,7 @@ void gmMeleeDest(bool isStamina, bool isOnline) {
     if (decisionKind != 9 && decisionKind != 10) {
         gmSetAutoHandiModeResult();
         if (!isOnline) {
-            fn_800555D8(result, melee);
+            result->gmSetSelStagePlayerModeResult(melee);
         }
     }
 
@@ -2337,7 +2336,8 @@ int gmSetRuleSelStage() {
 }
 
 // Picks the loser of the match: one of the players tied for the worst rank, at random, or -1.
-void gmSetSelStagePlayerModeResult(gmResultInfo* result, gmGlobalModeMelee* melee) {
+void gmResultInfo::gmSetSelStagePlayerModeResult(gmGlobalModeMelee* melee) {
+    gmResultInfo* result = this;
     int worst = -1;
     char candidates[4];
     memset(candidates, 0, sizeof(candidates));
@@ -2357,11 +2357,10 @@ void gmSetSelStagePlayerModeResult(gmResultInfo* result, gmGlobalModeMelee* mele
             out++;
         }
     }
-    gmStageChooseWork* work = reinterpret_cast<gmStageChooseWork*>(melee);
     if (count != 0) {
-        work->m_loser = candidates[randi(count)];
+        melee->unk2 = candidates[randi(count)];
     } else {
-        work->m_loser = -1;
+        melee->unk2 = -1;
     }
 }
 

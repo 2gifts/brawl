@@ -223,3 +223,14 @@ bool CameraController::isDisableZoom()
 {
     return unk188 > 0;
 }
+
+void CameraController::cancelZoomIn(cmSubject* subject)
+{
+    if (m_currentControllerKind == Tech) {
+        cmTechController* controller = static_cast<cmTechController*>(lbl_805A0278[0]->m_techController);
+        if (!subject || subject == controller->m_target) {
+            controller->resetTarget();
+            changeInput(static_cast<Kind>(controller->unk10));
+        }
+    }
+}

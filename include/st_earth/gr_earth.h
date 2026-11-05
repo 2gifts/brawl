@@ -51,8 +51,6 @@ extern "C" void fn_27_2AA7AC(itManager* manager, ItemKind kind, int lotId, Vec3f
 extern "C" bool fn_8005136C(int itemKind);
 // itManager::getItemVariationNum (sora_melee, unnamed)
 extern "C" int fn_27_2A0DDC(itManager* manager, int itemKind);
-// ecMgr::setDelay (main, unnamed): the effect starts after the frames
-extern "C" void fn_8005FF8C(ecMgr* manager, u32 effect, int frames);
 // Yakumono::setGlobalOffset (HYPOTHESIS: the name; the arguments are the offset kind and the hit group)
 extern "C" void fn_27_263800(Yakumono* yakumono, int kind, int group);
 // grYakumono::setAreaShape (sora_melee, unnamed in the symbols)

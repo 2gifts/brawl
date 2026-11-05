@@ -9,7 +9,7 @@
 class Vec3f;
 class Vec2f;
 class grCollisionLineWork;
-namespace nw4r { namespace g3d { class ScnProc; } }
+namespace nw4r { namespace g3d { class ScnProc; class ScnMdl; } }
 
 class stShadow : public gfTask {
 public:
@@ -68,6 +68,7 @@ public:
     virtual ~stShadow();
 
     void clearShadowObject();
+    void eraseShadowObject(nw4r::g3d::ScnMdl*);
     // HYPOTHESIS: the integer payloads identify and configure the shadow object.
     void addShadowObject(u32, const Vec3f*, float, u32, float, u32);
     static void advDrawShadowProc(nw4r::g3d::ScnProc*, bool);

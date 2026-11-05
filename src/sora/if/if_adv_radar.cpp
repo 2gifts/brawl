@@ -6,7 +6,29 @@
 #include <types.h>
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
-unsigned char lbl_805A0348[0x8] __attribute__((aligned(4))) = { 0 };
+IfAdvRadar* lbl_805A0348[2] = { 0 };
+
+IfAdvRadarData::IfAdvRadarData(void* arg1, void* arg2, void* arg3, void* arg4) {
+    unk0 = arg3;
+    nw4r::g3d::ResFile::Init(this);
+    unk4 = arg1;
+}
+
+IfAdvRadar* IfAdvRadar::create(IfAdvRadarData* data, int mode) {
+    if ((g_GameGlobal->m_advData->m_itemGenKind & 0xFF000000) != 0x2A000000 && mode == 0) {
+        return NULL;
+    }
+    return lbl_805A0348[0] = new (Heaps::InfoInstance) IfAdvRadar(data, mode);
+}
+
+inline IfAdvRadar::~IfAdvRadar() {
+    lbl_805A0348[0] = NULL;
+}
+
+void IfAdvRadar::destroy() {
+    delete lbl_805A0348[0];
+    lbl_805A0348[0] = NULL;
+}
 
 void IfAdvRadar::setPlayerNum(int count) {
     for (int player = 0; (u32)player < 2; ++player) {

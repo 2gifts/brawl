@@ -27,8 +27,6 @@
 // Unnamed helpers the stage calls directly (see st_newpork.cpp for the grMadein ones).
 // grMadein::setMatrix(Matrix*, bool): lets the ground (and optionally its attack) follow the matrix.
 extern "C" void fn_27_279FC8(grMadein* ground, Matrix* matrix, bool followAttack);
-// grMadein::switchToMatrix
-extern "C" void fn_27_279FA4(grMadein* ground);
 // Stage: HYPOTHESIS: true while the stage is the active one (not the one used for the menu preview).
 extern "C" int fn_27_2249E0(Stage* stage);
 // Matrix helpers of sora/mt (see mt_matrix.cpp).
@@ -211,7 +209,7 @@ void stDxCorneria::createObj() {
         CORNERIA_SETUP(m_greatFox);
         m_greatFox->initializeEntity();
         m_greatFox->startEntityAutoLoop();
-        fn_27_279FA4(m_greatFox);
+        m_greatFox->switchToMatrix();
         m_greatFox->m_calcWorldCallBack.m_nodeCallbackDatas[0].m_matrix.setIdentity();
         createCollision(m_fileData, 2, m_greatFox);
         m_gunNormalNode = m_greatFox->getNodeIndex(0, "GunNormalN");
@@ -251,7 +249,7 @@ void stDxCorneria::createObj() {
         CORNERIA_SETUP(m_arwing);
         m_arwing->initializeEntity();
         m_arwing->setEnableCollisionStatus(false);
-        fn_27_279FA4(m_arwing);
+        m_arwing->switchToMatrix();
         createCollision(m_fileData, 3, m_arwing);
         m_arwingBeamNode[0] = m_arwing->getNodeIndex(0, "BeamL");
         m_arwingBeamNode[1] = m_arwing->getNodeIndex(0, "BeamR");
@@ -262,7 +260,7 @@ void stDxCorneria::createObj() {
         CORNERIA_SETUP(m_wolfen);
         m_wolfen->initializeEntity();
         m_wolfen->setEnableCollisionStatus(false);
-        fn_27_279FA4(m_wolfen);
+        m_wolfen->switchToMatrix();
         createCollision(m_fileData, 4, m_wolfen);
         m_wolfenBeamNode[0] = m_wolfenBeamNode[1] = m_wolfen->getNodeIndex(0, "WolfenBeamN");
     }
@@ -304,7 +302,7 @@ void stDxCorneria::createObj() {
                 mesh->endEntity();
                 mesh->setVisibility(0);
                 mesh->setEnableCollisionStatus(false);
-                fn_27_279FA4(mesh);
+                mesh->switchToMatrix();
                 grNodeCallbackData* data = mesh->m_calcWorldCallBack.m_nodeCallbackDatas;
                 data->m_matrix.setIdentity();
                 Vec3f parked(-1000.0f, 0.0f, 0.0f);
@@ -312,7 +310,7 @@ void stDxCorneria::createObj() {
                 data->m_matrix.m[1][3] = parked.m_y;
                 data->m_matrix.m[2][3] = parked.m_z;
                 hit->endEntity();
-                fn_27_279FA4(hit);
+                hit->switchToMatrix();
                 data = hit->m_calcWorldCallBack.m_nodeCallbackDatas;
                 data->m_matrix.setIdentity();
                 data->m_matrix.m[0][3] = parked.m_x;
@@ -349,7 +347,7 @@ void stDxCorneria::createObj() {
                 mesh->endEntity();
                 mesh->setVisibility(0);
                 mesh->setEnableCollisionStatus(false);
-                fn_27_279FA4(mesh);
+                mesh->switchToMatrix();
                 grNodeCallbackData* data = mesh->m_calcWorldCallBack.m_nodeCallbackDatas;
                 data->m_matrix.setIdentity();
                 Vec3f parked(-1000.0f, 0.0f, 0.0f);
@@ -357,7 +355,7 @@ void stDxCorneria::createObj() {
                 data->m_matrix.m[1][3] = parked.m_y;
                 data->m_matrix.m[2][3] = parked.m_z;
                 hit->endEntity();
-                fn_27_279FA4(hit);
+                hit->switchToMatrix();
                 data = hit->m_calcWorldCallBack.m_nodeCallbackDatas;
                 data->m_matrix.setIdentity();
                 data->m_matrix.m[0][3] = parked.m_x;
@@ -375,7 +373,7 @@ void stDxCorneria::createObj() {
             CORNERIA_SETUP(m_trainerBase);
             m_trainerBase->initializeEntity();
             m_trainerBase->startEntityAutoLoop();
-            fn_27_279FA4(m_trainerBase);
+            m_trainerBase->switchToMatrix();
             m_trainerBase->m_calcWorldCallBack.m_nodeCallbackDatas[0].m_matrix.setIdentity();
             m_trainerNode[0] = m_trainerBase->getNodeIndex(0, "PokemonTrainer1N");
             m_trainerNode[1] = m_trainerBase->getNodeIndex(0, "PokemonTrainer2N");

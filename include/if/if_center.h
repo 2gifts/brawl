@@ -41,6 +41,9 @@ public:
 
     IfCenter();
     void init();
+    void startMelee(nw4r::g3d::ScnGroup* group, int mode, bool flag, int time, nw4r::g3d::ScnGroup* timeGroup);
+    void main();
+    void dispKumiteKills(int kills);
     virtual ~IfCenter();
     void setTimePos(int index);
     void removeCenterTime();

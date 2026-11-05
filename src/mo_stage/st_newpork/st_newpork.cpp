@@ -26,8 +26,6 @@
 // Unnamed helpers of other units that the stage calls directly.
 // HYPOTHESIS: grMadein::setMatrix(Matrix*, bool): lets the ground (and optionally its attack) follow the matrix.
 extern "C" void fn_27_279FC8(grMadein* ground, Matrix* matrix, bool followAttack);
-// grMadein::switchToMatrix
-extern "C" void fn_27_279FA4(grMadein* ground);
 // grSeqYakumono::createSeSeqWork(int bankCount)
 extern "C" void fn_27_27C150(grSeqYakumono* ground, int bankCount);
 // grSeqYakumono::registSeSeq(bank, table, entryCount)
@@ -203,7 +201,7 @@ void stNewpork::createObj() {
         m_viking->startup(m_fileData, 0, gfSceneRoot::Layer_Ground);
         m_viking->setStageData(m_stageData);
         m_viking->startEntityAutoLoop();
-        fn_27_279FA4(m_viking);
+        m_viking->switchToMatrix();
     }
 
     m_kowareIta = grNewpork::create(grNewpork::Part_KowareIta, "", "grNewporkKowareIta");
@@ -220,7 +218,7 @@ void stNewpork::createObj() {
         m_kowareIta->initializeEntity();
         m_kowareIta->startEntity();
         m_kowareIta->setMotionRatio(0.0f);
-        fn_27_279FA4(m_kowareIta);
+        m_kowareIta->switchToMatrix();
     }
 
     m_limousine = grNewpork::create(grNewpork::Part_Limousine, "", "grNewporkLimousine");
@@ -231,7 +229,7 @@ void stNewpork::createObj() {
         m_limousine->thisIsLimousine();
         m_limousine->initializeEntity();
         m_limousine->setEnableCollisionStatus(false);
-        fn_27_279FA4(m_limousine);
+        m_limousine->switchToMatrix();
     }
 
     m_limousineBG = grNewpork::create(grNewpork::Part_LimousineBG, "", "grNewporkLimousineBG");
@@ -242,7 +240,7 @@ void stNewpork::createObj() {
         m_limousineBG->thisIsLimousine();
         m_limousineBG->initializeEntity();
         m_limousineBG->setEnableCollisionStatus(false);
-        fn_27_279FA4(m_limousineBG);
+        m_limousineBG->switchToMatrix();
     }
 
     m_limousineMove = grNewpork::create(grNewpork::Part_LimousineMove, "", "grNewporkLimousineMove");
@@ -264,7 +262,7 @@ void stNewpork::createObj() {
         Vec3f headOffset(0.0f, 2.0f, 13.0f);
         m_chimera->thisIsUltimateChimera(8.5f, &headOffset, m_nodeChimeraHead, true);
         m_chimera->initializeEntity();
-        fn_27_279FA4(m_chimera);
+        m_chimera->switchToMatrix();
         Matrix identity;
         fn_27_279FC8(m_chimera, &identity, true);
 
@@ -276,7 +274,7 @@ void stNewpork::createObj() {
             Vec3f bodyOffset(2.5f, 8.5f, 0.0f);
             m_chimeraAttack->thisIsUltimateChimera(4.75f, &bodyOffset, 0, false);
             m_chimeraAttack->initializeEntity();
-            fn_27_279FA4(m_chimeraAttack);
+            m_chimeraAttack->switchToMatrix();
             fn_27_279FC8(m_chimeraAttack, &identity, true);
         }
     }

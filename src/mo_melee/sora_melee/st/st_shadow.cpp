@@ -7,6 +7,19 @@
 
 stShadow::ShadowObject::ShadowObject() : unk1c(0xFFFF) { }
 
+void stShadow::eraseShadowObject(nw4r::g3d::ScnMdl* model) {
+    ShadowObject* object = static_cast<ShadowObject*>(unk84.getHead());
+    while (object) {
+        ShadowObject* next = static_cast<ShadowObject*>(object->m_next);
+        if (object->unk8 == reinterpret_cast<u32>(model)) {
+            unk84.remove(object);
+            unk90.addTail(object);
+            break;
+        }
+        object = next;
+    }
+}
+
 void stShadow::addShadowObject(u32 id, const Vec3f* pos, float size, u32 arg3, float height, u32 arg5) {
     gfCamera::ClipSphere sphere;
     sphere.center.set(pos->m_x, pos->m_y - height, pos->m_z);

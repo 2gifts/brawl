@@ -1,11 +1,12 @@
 #include <types.h>
 #include <cm/cm_subject.h>
 #include <nw4r/ut.h>
+#include <cm/cm_camera_controller.h>
+#include <sr/sr_common.h>
 
 extern nw4r::ut::LinkList<cmSubject, 0> lbl_8049DEDC;
-
-// cmSubject::updateDispStatus (the map name); so_camera_subject.cpp calls it by this stand-in name.
-extern "C" void fn_8009EFCC(cmSubject* subject);
+extern const float lbl_805A1E5C;
+extern const float lbl_805A1E60;
 
 cmSubject::~cmSubject() {
     if (m_isRegist == 1) {
@@ -53,10 +54,57 @@ void cmSubjectList::update(float scale) {
     if (scale > 0.0f) {
         for (nw4r::ut::LinkList<cmSubject, 0>::Iterator it = lbl_8049DEDC.GetBeginIter();
              it != lbl_8049DEDC.GetEndIter(); ++it) {
-            fn_8009EFCC(&*it);
+            it->updateDispStatus();
             if (it->m_isLoupeTarget) {
                 it->shiftRange(scale);
             }
         }
+    }
+}
+
+void cmSubject::unRegist() {
+    if (m_isRegist == 1) {
+        lbl_8049DEDC.Erase(this);
+        m_isRegist = 0;
+    }
+}
+
+cmSubject* cmSubjectGetStruct(HeapType heap, int kind, int flag) {
+    return new (heap) cmSubject(kind, flag);
+}
+
+void cmSubject::updateDispStatus() {
+    if (m_state != 1 && !unk8Bit13) {
+        if (m_state == 2) {
+            if (unkC != 0) {
+                --unkC;
+                m_isLoupeTarget = 0;
+                return;
+            }
+            CameraController* controller = CameraController::getInstance();
+            float width = controller->m_stageCameraBounds.m_right - controller->m_stageCameraBounds.m_left;
+            float height = controller->m_stageCameraBounds.m_up - controller->m_stageCameraBounds.m_down;
+            if (width < 0.001f) {
+                width = 0.001f;
+            }
+            if (height < 0.001f) {
+                height = 0.001f;
+            }
+            float x = (m_pos.m_x - controller->m_stageCameraBounds.m_left) / width;
+            float y = (m_pos.m_y - controller->m_stageCameraBounds.m_down) / height;
+            if (x > lbl_805A1E5C || x < lbl_805A1E60 || y > lbl_805A1E5C || y < lbl_805A1E60) {
+                if (unk8Bit14) {
+                    unk8Bit14 = 0;
+                    unkC = 600;
+                }
+                m_isLoupeTarget = 0;
+                return;
+            }
+            unkC = 0;
+        }
+        unk8Bit14 = 1;
+        m_isLoupeTarget = 1;
+    } else {
+        m_isLoupeTarget = 0;
     }
 }

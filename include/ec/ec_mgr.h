@@ -169,9 +169,13 @@ public:
     bool isExistEffectResource(u32);
     void setMdlCalcMtx(u32, void (*)(nw4r::g3d::ScnMdl*, void*), void*);
     void releaseResource(char*);
+    void setDelay(u32 handleId, int frames);
+    void killEffectGroup(u32 group, u32 mask, bool immediate, bool release, int effectKind);
     void setDrawPrio(int prio);
     u32 setEffect(EfID effectID);
     u32 setEffect(EfID effectID, Vec3f* pos);
+    u32 setEffect(EfID effectID, const Vec3f* pos);
+    u32 setEffect(EfID effectID, u32 resourceId, const Vec3f* pos, const Vec3f* rot, const Vec3f* scale);
     u32 setEffect(EfID effectID, const Vec3f* pos, const Vec3f* rot, const Vec3f* scale);
     void endEffect(u32);
     void killEffect(u32, u32, u32);

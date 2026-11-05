@@ -167,3 +167,58 @@ workFound:
         work->set_mdl_calc_mtx(callback, userData);
     }
 }
+
+u32 ecMgr::setEffect(EfID effectID, const Vec3f* pos) {
+    return setEffect(effectID, static_cast<int>(effectID) >> 16, pos, 0, 0);
+}
+
+void ecMgr::setDelay(u32 handleId, int frames) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        work->set_delay(frames);
+    }
+}
+
+void ecMgr::killEffectGroup(u32 group, u32 mask, bool immediate, bool release, int effectKind) {
+    if (unk6C) {
+        u32 index = unk70;
+        ecEffectWork* work = &unk60[index];
+        if (group & 0xFF000000) {
+            mask |= 0xFF000000;
+        }
+        group &= mask;
+        if (!effectKind) {
+            for (; index <= unk74; ++index, ++work) {
+                if (work->unk7C && group == (work->unk78 & mask)) {
+                    work->end(immediate, release);
+                }
+            }
+        } else {
+            for (; index <= unk74; ++index, ++work) {
+                if (work->unk7C && group == (work->unk78 & mask)) {
+                    int currentEffect = (work->unk30->unk10 << 16) | (work->unk2C & 0xFFFF);
+                    if (currentEffect == effectKind) {
+                        work->end(immediate, release);
+                    }
+                }
+            }
+        }
+    }
+}

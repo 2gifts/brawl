@@ -97,6 +97,7 @@ public:
     void setDisablePlayerNo(int playerNo);
     // HYPOTHESIS: reference qualifiers and float parameter names follow the start callee's register use.
     void startZoomIn(cmSubject* subject, u16 frame, const Vec2f& rotation, const Vec2f& targetRotation, float zoom, float distance);
+    void cancelZoomIn(cmSubject* subject);
     void setDisableZoomStart();
     void setDisableZoomEnd();
     bool isDisableZoom();
