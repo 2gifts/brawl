@@ -263,6 +263,10 @@ public:
     u8 getFreeCharColor(int character, int count);
     int _getNetworkError(int* code);
     void startMatchingDaiRantou(int arg);
+    // HYPOTHESIS: argument and result types follow register use and string copies.
+    int getFriendAIDIndex(int index);
+    wchar_t* getShortComment(unsigned int aid, int index, wchar_t* comment);
+    u8 getAssignedPlayerContNum(int index);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 

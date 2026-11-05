@@ -10,6 +10,8 @@
 #include <ip/ip_switch.h>
 #include <gm/gm_global.h>
 
+extern u32 g_NtAIDBitmap;
+
 extern "C" void fn_800CF22C(muWifiInterfaceTask* self);
 extern "C" void fn_801473C4(muWifiInterfaceTask* self);
 extern "C" void fn_80145D24(s32 arg0, void* arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -860,4 +862,66 @@ void muWifiInterfaceTask::startMatchingDaiRantou(int arg) {
     rule->unkA = 0;
     unk1000[0] = unk1000[1];
     fn_800CCF30(this, arg, 0, 2, -1);
+}
+
+int muWifiInterfaceTask::getFriendAIDIndex(int index) {
+    u8 aid = m_playerAreas[index].m_aid;
+    bool live;
+    if (aid >= 4) {
+        live = false;
+    } else {
+        live = getSafeParentAIDInfo()->unk68[aid] == 1;
+    }
+    if (!live) {
+        return -1;
+    }
+    return m_aidInfos[aid].m_friendAIDIndex;
+}
+
+wchar_t* muWifiInterfaceTask::getShortComment(unsigned int aid, int index, wchar_t* comment) {
+    if (!(g_NtAIDBitmap & (1 << aid))) {
+        *comment = 0;
+        return comment;
+    }
+    muWifiAIDInfo* info = &m_aidInfos[aid];
+    u8 ownAid = Network::getMyAID();
+    if (ownAid == 0xFF) {
+        ownAid = 4;
+    }
+    const void* comments;
+    if (aid == ownAid) {
+        comments = ntFriendInfo::getInstance()->unk0->unk450;
+    } else {
+        comments = info->m_shortComment;
+    }
+    u8* destination = (u8*)comment;
+    const u8* source = (const u8*)comments + index * 0x28;
+    int count = 20;
+    memset(comment, 0, 42);
+    while (--count >= 0) {
+        int character = source[0];
+        destination[0] = character;
+        character |= source[1];
+        destination[1] = source[1];
+        source += 2;
+        destination += 2;
+        if (character == 0) {
+            break;
+        }
+    }
+    return comment;
+}
+
+u8 muWifiInterfaceTask::getAssignedPlayerContNum(int index) {
+    muWifiAIDInfo* info = getSafeParentAIDInfo();
+    int count;
+    for (count = 0; count < 4; count++) {
+        if (info->unkE4[count].unk0 != 0) {
+            break;
+        }
+    }
+    if (index >= count) {
+        return 0;
+    }
+    return index + 1;
 }
