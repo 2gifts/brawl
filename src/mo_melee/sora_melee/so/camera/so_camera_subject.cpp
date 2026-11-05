@@ -4,7 +4,6 @@
 #include <so/so_module_accesser.h>
 
 // main.dol cmSubject and CameraController helpers that are not named in symbols.txt yet (map names in comments).
-extern "C" void fn_8009CE3C(CameraController* controller, cmSubject* subject); // cancelZoomIn
 extern "C" void fn_8009CD94(CameraController* controller, cmSubject* subject, u16 frame, Vec2f pos, float zoom); // startZoomIn
 
 soCameraSubject::soCameraSubject() :
@@ -34,7 +33,7 @@ void soCameraSubject::construct(HeapType heap, soCameraRange* range, u32 activeS
 
 void soCameraSubject::deactivate() {
     cmSubject* subject = m_cmSubject;
-    fn_8009CE3C(CameraController::getInstance(), subject);
+    CameraController::getInstance()->cancelZoomIn(subject);
     subject->m_state = 1;
     subject->updateDispStatus();
     subject->unRegist();
@@ -116,7 +115,7 @@ void soCameraSubject::zoomIn(short frame, Vec2f pos, float zoom) {
 
 void soCameraSubject::zoomOut() {
     if (CameraController::getInstance()->m_currentControllerKind == CameraController::Tech) {
-        fn_8009CE3C(CameraController::getInstance(), 0);
+        CameraController::getInstance()->cancelZoomIn(0);
     }
 }
 
