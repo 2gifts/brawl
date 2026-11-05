@@ -167,16 +167,50 @@ static inline T& at(void* p, int offset) {
     return *reinterpret_cast<T*>(reinterpret_cast<char*>(p) + offset);
 }
 
-// call a virtual function by its vtable byte offset, for slots whose class has no header yet
-template <typename R, typename A, typename B>
-static inline R vcall2(void* obj, int slot, A a, B b) {
-    typedef R (*Fn)(void*, A, B);
-    return reinterpret_cast<Fn>((*reinterpret_cast<void***>(obj))[slot / 4])(obj, a, b);
-}
+// Views of virtual slots whose classes have no virtuals declared yet (MWCC: hkReferencedObject's dtor is 0x08,
+// calcStatistics 0x0C). Every call here passes one argument. HYPOTHESIS: the names, from what each case does.
+struct hkWorldObjectVirtuals : hkReferencedObject {
+    virtual void setShape(hkShape* shape); // 0x10
+};
+struct hkActionVirtuals : hkReferencedObject {
+    virtual void unk10();
+    virtual void getEntities(hkArray<hkEntity*>* entities); // 0x14 fills the array with the entities it touches
+};
+struct hkWorldOperationUserCallback : hkReferencedObject {
+    virtual void worldOperationUserCallback(int userData); // 0x10
+};
+struct hkSimulationVirtuals : hkReferencedObject {
+    virtual void unk10();
+    virtual void unk14();
+    virtual void unk18();
+    virtual void unk1C();
+    virtual void unk20();
+    virtual void unk24();
+    virtual void unk28();
+    virtual void unk2C();
+    virtual void unk30();
+    virtual void reintegrateAndRecollideEntities(hkEntity** entities, int count, hkWorld* world); // 0x34
+};
 
 static inline hkMotion* motionOf(hkRigidBody* body) { return reinterpret_cast<hkMotion*>(body->m_motion); }
 
 // the pointer lists the batch ops carry get freed the same way they were allocated: count * 4 bytes, class 4
+// motion type 7 is fixed. HYPOTHESIS: an inline hkBool query on the entity's motion (byte 0xA8)
+static inline hkBool isFixed(hkEntity* entity) {
+    return hkBool(at<u8>(entity, 0xA8) == 7);
+}
+// HYPOTHESIS: the byte-sized mode fields are stored as enums in a byte (Havok's hkEnum); reading one converts it.
+struct hkEnumU8 {
+    u8 m_storage;
+    operator int() const { return m_storage; }
+};
+static inline void removeReferencesFrom(void** objects, int count) {
+    void** pEnd = objects + count;
+    void** p = objects;
+    while (p < pEnd) {
+        removeReferenceFrom((p++)[0]);
+    }
+}
 static inline void freeBatch(void* objects, int count) {
     hkMemory::getInstance().deallocateChunk(objects, count * 4, 4);
 }
@@ -200,9 +234,12 @@ void hkWorldOperationQueue::executeAllPending() {
     for (int i = 0; i < stolenPending.m_size; i++) {
         hkWorldOperation::BaseOperation& op = reinterpret_cast<hkWorldOperation::BaseOperation&>(stolenPending[i]);
         void* o = &op;
+        // BYTES: with copy propagation off the target reads an operation field again after every call, so the
+        // pointers below are references into the operation (T*&), not copies; the cases that keep a value across
+        // a call (the rigid body ones, the merge) use a plain local.
         switch (op.m_type) {
             case hkWorldOperation::ENTITY_ADD: {
-                hkEntity* entity = at<hkEntity*>(o, 4);
+                hkEntity*& entity = at<hkEntity*>(o, 4);
                 if (entity->m_world == NULL) {
                     m_world->addEntity(entity, at<int>(o, 8));
                 }
@@ -210,7 +247,7 @@ void hkWorldOperationQueue::executeAllPending() {
                 break;
             }
             case hkWorldOperation::ENTITY_REMOVE: {
-                hkEntity* entity = at<hkEntity*>(o, 4);
+                hkEntity*& entity = at<hkEntity*>(o, 4);
                 if (entity->m_world == m_world) {
                     m_world->removeEntity(entity);
                 }
@@ -218,42 +255,36 @@ void hkWorldOperationQueue::executeAllPending() {
                 break;
             }
             case hkWorldOperation::RIGIDBODY_SET_MOTION_TYPE: {
-                hkRigidBody* body = at<hkRigidBody*>(o, 4);
-                body->setMotionType(at<u8>(o, 8), at<u8>(o, 9), at<u8>(o, 10));
+                hkRigidBody*& body = at<hkRigidBody*>(o, 4);
+                body->setMotionType(at<hkEnumU8>(o, 8), at<hkEnumU8>(o, 9), at<hkEnumU8>(o, 10));
                 removeReferenceFrom(body);
                 break;
             }
             case hkWorldOperation::WORLD_OBJECT_SET_SHAPE: {
-                hkWorldObject* object = at<hkWorldObject*>(o, 4);
-                // HYPOTHESIS: setShape is a virtual here (vtable 0x10), hkWorldObject.h has it as a plain member
-                vcall2<void, hkShape*, int>(object, 0x10, at<hkShape*>(o, 8), 0);
+                hkWorldObject*& object = at<hkWorldObject*>(o, 4);
+                reinterpret_cast<hkWorldObjectVirtuals*>(object)->setShape(at<hkShape*>(o, 8));
                 removeReferenceFrom(object);
                 removeReferenceFrom(at<hkShape*>(o, 8));
                 break;
             }
             case hkWorldOperation::ENTITY_BATCH_ADD: {
                 // no check that these were already added, the caller is trusted
-                hkEntity** entities = at<hkEntity**>(o, 4);
-                int count = at<u16>(o, 8);
-                m_world->addEntityBatch(entities, count, at<u8>(o, 10));
-                for (hkEntity** e = entities; e < entities + count; e++) {
-                    removeReferenceFrom(*e);
-                }
-                freeBatch(entities, count);
+                hkWorldOperation::BatchOperation& batch = static_cast<hkWorldOperation::BatchOperation&>(op);
+                bool active = at<bool>(o, 10);
+                m_world->addEntityBatch(reinterpret_cast<hkEntity**>(batch.m_objects), batch.m_count, active);
+                removeReferencesFrom(batch.m_objects, batch.m_count);
+                freeBatch(batch.m_objects, batch.m_count);
                 break;
             }
             case hkWorldOperation::ENTITY_BATCH_REMOVE: {
-                hkEntity** entities = at<hkEntity**>(o, 4);
-                int count = at<u16>(o, 8);
-                m_world->removeEntityBatch(entities, count);
-                for (hkEntity** e = entities; e < entities + count; e++) {
-                    removeReferenceFrom(*e);
-                }
-                freeBatch(entities, count);
+                hkWorldOperation::BatchOperation& batch = static_cast<hkWorldOperation::BatchOperation&>(op);
+                m_world->removeEntityBatch(reinterpret_cast<hkEntity**>(batch.m_objects), batch.m_count);
+                removeReferencesFrom(batch.m_objects, batch.m_count);
+                freeBatch(batch.m_objects, batch.m_count);
                 break;
             }
             case hkWorldOperation::CONSTRAINT_ADD: {
-                void* constraint = at<void*>(o, 4);
+                void*& constraint = at<void*>(o, 4);
                 // only adds it if it isn't owned yet and both of its entities are in this world
                 if (at<void*>(constraint, 8) == NULL && at<hkEntity*>(constraint, 0x14)->m_world == m_world &&
                     at<hkEntity*>(constraint, 0x18)->m_world == m_world) {
@@ -263,7 +294,7 @@ void hkWorldOperationQueue::executeAllPending() {
                 break;
             }
             case hkWorldOperation::CONSTRAINT_REMOVE: {
-                void* constraint = at<void*>(o, 4);
+                void*& constraint = at<void*>(o, 4);
                 if (at<void*>(constraint, 8) != NULL) {
                     m_world->removeConstraint(static_cast<hkConstraintInstance*>(constraint));
                 }
@@ -271,12 +302,12 @@ void hkWorldOperationQueue::executeAllPending() {
                 break;
             }
             case hkWorldOperation::ACTION_ADD: {
-                void* action = at<void*>(o, 4);
+                void*& action = at<void*>(o, 4);
                 if (at<void*>(action, 8) == NULL) {
                     // an action can only go in once every entity it touches is already in this world
                     hkArray<hkEntity*> actionEntities;
-                    vcall2<void, hkArray<hkEntity*>*, int>(action, 0x14, &actionEntities, 0);
-                    bool allInWorld = true;
+                    hkBool allInWorld = true;
+                    reinterpret_cast<hkActionVirtuals*>(action)->getEntities(&actionEntities);
                     for (int k = 0; k < actionEntities.m_size; k++) {
                         if (actionEntities[k]->m_world != m_world) {
                             allInWorld = false;
@@ -291,7 +322,7 @@ void hkWorldOperationQueue::executeAllPending() {
                 break;
             }
             case hkWorldOperation::ACTION_REMOVE: {
-                void* action = at<void*>(o, 4);
+                void*& action = at<void*>(o, 4);
                 if (at<void*>(action, 0xC) != NULL) {
                     m_world->removeAction(static_cast<hkAction*>(action));
                 }
@@ -299,21 +330,25 @@ void hkWorldOperationQueue::executeAllPending() {
                 break;
             }
             case hkWorldOperation::ISLAND_MERGE: {
-                hkEntity* a = at<hkEntity*>(o, 4);
-                hkEntity* b = at<hkEntity*>(o, 8);
-                if (a->m_world == m_world && b->m_world == m_world) {
-                    // a body may have gotten pinned (motion type 7 is fixed) since this was queued, then the merge is just skipped
-                    bool bothMovable = at<u8>(a, 0xA8) != 7 && at<u8>(b, 0xA8) != 7;
-                    if (bothMovable && a->m_simulationIsland != b->m_simulationIsland) {
-                        hkWorldOperationUtil::mergeIslands(a->m_world, a, b);
+                hkWorldOperation::MergeIslands& merge = static_cast<hkWorldOperation::MergeIslands&>(op);
+                hkEntity* a = merge.m_entities[0];
+                if (a->m_world == m_world) {
+                    hkEntity* b = merge.m_entities[1];
+                    if (b->m_world == m_world) {
+                        // a body may have gotten pinned since this was queued, then the merge is just skipped
+                        bool bothMovable = !bool(isFixed(a)) && !bool(isFixed(b));
+                        bool doMerge = bothMovable && a->m_simulationIsland != b->m_simulationIsland;
+                        if (doMerge) {
+                            hkWorldOperationUtil::mergeIslands(a->m_world, a, b);
+                        }
                     }
                 }
-                removeReferenceFrom(a);
-                removeReferenceFrom(b);
+                removeReferenceFrom(merge.m_entities[0]);
+                removeReferenceFrom(merge.m_entities[1]);
                 break;
             }
             case hkWorldOperation::PHANTOM_ADD: {
-                hkPhantom* phantom = at<hkPhantom*>(o, 4);
+                hkPhantom*& phantom = at<hkPhantom*>(o, 4);
                 if (phantom->m_world == NULL) {
                     m_world->addPhantom(phantom);
                 }
@@ -321,7 +356,7 @@ void hkWorldOperationQueue::executeAllPending() {
                 break;
             }
             case hkWorldOperation::PHANTOM_REMOVE: {
-                hkPhantom* phantom = at<hkPhantom*>(o, 4);
+                hkPhantom*& phantom = at<hkPhantom*>(o, 4);
                 if (phantom->m_world == m_world) {
                     m_world->removePhantom(phantom);
                 }
@@ -329,36 +364,31 @@ void hkWorldOperationQueue::executeAllPending() {
                 break;
             }
             case hkWorldOperation::PHANTOM_BATCH_ADD: {
-                hkPhantom** phantoms = at<hkPhantom**>(o, 4);
-                int count = at<u16>(o, 8);
-                m_world->addPhantomBatch(phantoms, count);
-                for (hkPhantom** p = phantoms; p < phantoms + count; p++) {
-                    removeReferenceFrom(*p);
-                }
-                freeBatch(phantoms, count);
+                hkWorldOperation::BatchOperation& batch = static_cast<hkWorldOperation::BatchOperation&>(op);
+                m_world->addPhantomBatch(reinterpret_cast<hkPhantom**>(batch.m_objects), batch.m_count);
+                removeReferencesFrom(batch.m_objects, batch.m_count);
+                freeBatch(batch.m_objects, batch.m_count);
                 break;
             }
             case hkWorldOperation::PHANTOM_BATCH_REMOVE: {
-                hkPhantom** phantoms = at<hkPhantom**>(o, 4);
-                int count = at<u16>(o, 8);
-                m_world->removePhantomBatch(phantoms, count);
-                for (hkPhantom** p = phantoms; p < phantoms + count; p++) {
-                    removeReferenceFrom(*p);
-                }
-                freeBatch(phantoms, count);
+                hkWorldOperation::BatchOperation& batch = static_cast<hkWorldOperation::BatchOperation&>(op);
+                m_world->removePhantomBatch(reinterpret_cast<hkPhantom**>(batch.m_objects), batch.m_count);
+                removeReferencesFrom(batch.m_objects, batch.m_count);
+                freeBatch(batch.m_objects, batch.m_count);
                 break;
             }
             case hkWorldOperation::ENTITY_UPDATE_BROAD_PHASE: {
-                hkEntity* entity = at<hkEntity*>(o, 4);
+                hkEntity*& entity = at<hkEntity*>(o, 4);
                 if (entity->m_world == m_world) {
                     hkWorldOperationUtil::updateEntityBP(m_world, entity);
                 }
-                removeReferenceFrom(entity);
+                // this one goes through hkWorldObject's own (out-of-line) removeReference
+                entity->removeReference();
                 break;
             }
             case hkWorldOperation::PHANTOM_UPDATE_BROAD_PHASE: {
-                hkPhantom* phantom = at<hkPhantom*>(o, 4);
-                void* aabb = at<void*>(o, 8);
+                hkPhantom*& phantom = at<hkPhantom*>(o, 4);
+                void*& aabb = at<void*>(o, 8);
                 if (phantom->m_world == m_world) {
                     phantom->updateBroadPhase(aabb);
                 }
@@ -367,93 +397,95 @@ void hkWorldOperationQueue::executeAllPending() {
                 break;
             }
             case hkWorldOperation::UPDATE_FILTER_ENTITY: {
-                hkEntity* entity = at<hkEntity*>(o, 4);
+                hkEntity*& entity = at<hkEntity*>(o, 4);
                 if (entity->m_world == m_world) {
-                    m_world->updateCollisionFilterOnEntity(entity, at<u8>(o, 8), at<u8>(o, 9));
+                    m_world->updateCollisionFilterOnEntity(entity, at<hkEnumU8>(o, 8), at<hkEnumU8>(o, 9));
                 }
                 removeReferenceFrom(entity);
                 break;
             }
             case hkWorldOperation::UPDATE_FILTER_PHANTOM: {
-                hkPhantom* phantom = at<hkPhantom*>(o, 4);
+                hkPhantom*& phantom = at<hkPhantom*>(o, 4);
                 if (phantom->m_world == m_world) {
-                    m_world->updateCollisionFilterOnPhantom(phantom, at<u8>(o, 8));
+                    m_world->updateCollisionFilterOnPhantom(phantom, at<hkEnumU8>(o, 8));
                 }
                 removeReferenceFrom(phantom);
                 break;
             }
             case hkWorldOperation::UPDATE_FILTER_WORLD:
-                m_world->updateCollisionFilterOnWorld(at<u8>(o, 1), at<u8>(o, 2));
+                m_world->updateCollisionFilterOnWorld(at<hkEnumU8>(o, 1), at<hkEnumU8>(o, 2));
                 break;
             case hkWorldOperation::UPDATE_MOVED_BODY_INFO: {
-                hkRigidBody* body = at<hkRigidBody*>(o, 4);
+                hkRigidBody*& body = at<hkRigidBody*>(o, 4);
                 body->updateBroadphaseAndResetCollisionInformationOfWarpedBody();
                 removeReferenceFrom(body);
                 break;
             }
             case hkWorldOperation::RIGIDBODY_SET_POSITION_AND_ROTATION: {
-                hkRigidBody* body = at<hkRigidBody*>(o, 4);
-                hkVector4* posAndRot = at<hkVector4*>(o, 8);
+                hkRigidBody*& body = at<hkRigidBody*>(o, 4);
+                hkVector4*& posAndRot = at<hkVector4*>(o, 8);
                 body->setPositionAndRotation(posAndRot[0], reinterpret_cast<hkQuaternion&>(posAndRot[1]));
                 hkMemory::getInstance().deallocateChunk(posAndRot, 0x20, 4);
                 removeReferenceFrom(body);
                 break;
             }
             case hkWorldOperation::RIGIDBODY_SET_LINEAR_VELOCITY: {
-                hkRigidBody* body = at<hkRigidBody*>(o, 4);
                 hkVector4 v(at<float>(o, 8), at<float>(o, 12), at<float>(o, 16), 0.0f);
+                hkRigidBody* body = at<hkRigidBody*>(o, 4);
                 body->activate();
                 motionOf(body)->setLinearVelocity(v);
-                removeReferenceFrom(body);
+                removeReferenceFrom(at<hkRigidBody*>(o, 4));
                 break;
             }
             case hkWorldOperation::RIGIDBODY_SET_ANGULAR_VELOCITY: {
-                hkRigidBody* body = at<hkRigidBody*>(o, 4);
                 hkVector4 v(at<float>(o, 8), at<float>(o, 12), at<float>(o, 16), 0.0f);
+                hkRigidBody* body = at<hkRigidBody*>(o, 4);
                 body->activate();
                 motionOf(body)->setAngularVelocity(v);
-                removeReferenceFrom(body);
+                removeReferenceFrom(at<hkRigidBody*>(o, 4));
                 break;
             }
             case hkWorldOperation::RIGIDBODY_APPLY_LINEAR_IMPULSE: {
-                hkRigidBody* body = at<hkRigidBody*>(o, 4);
                 hkVector4 v(at<float>(o, 8), at<float>(o, 12), at<float>(o, 16), 0.0f);
+                hkRigidBody* body = at<hkRigidBody*>(o, 4);
                 body->activate();
                 motionOf(body)->applyLinearImpulse(v);
-                removeReferenceFrom(body);
+                removeReferenceFrom(at<hkRigidBody*>(o, 4));
                 break;
             }
             case hkWorldOperation::RIGIDBODY_APPLY_POINT_IMPULSE: {
-                hkRigidBody* body = at<hkRigidBody*>(o, 4);
+                // the point and the impulse travel in one 0x20 byte block: point first, impulse second
                 hkVector4* pointAndImpulse = at<hkVector4*>(o, 8);
+                hkRigidBody* body = at<hkRigidBody*>(o, 4);
+                const hkVector4& impulse = pointAndImpulse[1];
                 body->activate();
-                motionOf(body)->applyPointImpulse(pointAndImpulse[1], pointAndImpulse[0]);
-                hkMemory::getInstance().deallocateChunk(pointAndImpulse, 0x20, 4);
-                removeReferenceFrom(body);
+                motionOf(body)->applyPointImpulse(impulse, pointAndImpulse[0]);
+                hkMemory::getInstance().deallocateChunk(at<hkVector4*>(o, 8), 0x20, 4);
+                removeReferenceFrom(at<hkRigidBody*>(o, 4));
                 break;
             }
             case hkWorldOperation::RIGIDBODY_APPLY_ANGULAR_IMPULSE: {
-                hkRigidBody* body = at<hkRigidBody*>(o, 4);
                 hkVector4 v(at<float>(o, 8), at<float>(o, 12), at<float>(o, 16), 0.0f);
+                hkRigidBody* body = at<hkRigidBody*>(o, 4);
                 body->activate();
                 motionOf(body)->applyAngularImpulse(v);
-                removeReferenceFrom(body);
+                removeReferenceFrom(at<hkRigidBody*>(o, 4));
                 break;
             }
             case hkWorldOperation::ACTIVATE_REGION: {
-                void* aabb = at<void*>(o, 4);
+                void*& aabb = at<void*>(o, 4);
                 m_world->activateRegion(static_cast<hkAabb*>(aabb));
                 hkMemory::getInstance().deallocateChunk(aabb, 0x20, 4);
                 break;
             }
             case hkWorldOperation::ACTIVATE_ENTITY: {
-                hkEntity* entity = at<hkEntity*>(o, 4);
+                hkEntity*& entity = at<hkEntity*>(o, 4);
                 entity->activate();
                 removeReferenceFrom(entity);
                 break;
             }
             case hkWorldOperation::DEACTIVATE_ENTITY: {
-                hkEntity* entity = at<hkEntity*>(o, 4);
+                hkEntity*& entity = at<hkEntity*>(o, 4);
                 if (entity->m_world == m_world) {
                     entity->deactivate();
                 }
@@ -461,22 +493,17 @@ void hkWorldOperationQueue::executeAllPending() {
                 break;
             }
             case hkWorldOperation::ENTITY_BATCH_REINTEGRATE_AND_RECOLLIDE: {
-                hkEntity** entities = at<hkEntity**>(o, 4);
-                int count = at<u16>(o, 8);
-                // HYPOTHESIS: world +8 is the simulation and its vtable 0x34 is reintegrateAndRecollideEntities
-                typedef void (*ReintegrateFn)(void*, hkEntity**, int, hkWorld*, int);
-                void* simulation = m_world->m_unk08;
-                reinterpret_cast<ReintegrateFn>((*reinterpret_cast<void***>(simulation))[0x34 / 4])(simulation, entities, count, m_world, at<u8>(o, 10));
-                for (hkEntity** e = entities; e < entities + count; e++) {
-                    removeReferenceFrom(*e);
-                }
-                freeBatch(entities, count);
+                hkWorldOperation::BatchOperation& batch = static_cast<hkWorldOperation::BatchOperation&>(op);
+                // HYPOTHESIS: world +8 is the simulation
+                reinterpret_cast<hkSimulationVirtuals*>(m_world->m_unk08)
+                    ->reintegrateAndRecollideEntities(reinterpret_cast<hkEntity**>(batch.m_objects), batch.m_count, m_world);
+                removeReferencesFrom(batch.m_objects, batch.m_count);
+                freeBatch(batch.m_objects, batch.m_count);
                 break;
             }
             case hkWorldOperation::USER_CALLBACK: {
-                void* callback = at<void*>(o, 4);
-                // HYPOTHESIS: the callback interface has one function after the destructor and calcStatistics (vtable 0x10)
-                vcall2<void, int, int>(callback, 0x10, at<int>(o, 8), 0);
+                void*& callback = at<void*>(o, 4);
+                reinterpret_cast<hkWorldOperationUserCallback*>(callback)->worldOperationUserCallback(at<int>(o, 8));
                 removeReferenceFrom(callback);
                 break;
             }
