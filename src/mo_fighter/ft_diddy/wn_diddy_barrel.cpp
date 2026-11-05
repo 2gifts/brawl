@@ -33,75 +33,97 @@ void wnDiddyBarrelStatusUniqProcess::initStatus(soModuleAccesser* moduleAccesser
     }
 }
 
-void wnDiddyBarrelStatusUniqProcess::execStatus(soModuleAccesser* moduleAccesser) {
-    soWorkManageModule& work = moduleAccesser->getWorkManageModule();
-    soParamAccesser* params = (soParamAccesser*)work.getParamAccesser();
-    work.getInt(0x20000000);
-    if (moduleAccesser->getStatusModule().getStatusKind() != 1) return;
+// HYPOTHESIS: the native speed stores expand this member setter.
+inline void soKineticEnergyNormal::setSpeed(Vec2f* speed) {
+    m_speed.m_x = speed->m_x;
+    m_speed.m_y = speed->m_y;
+}
 
-    soKineticModule& kinetic = moduleAccesser->getKineticModule();
-    soKineticEnergyNormal& normal = dynamic_cast<soKineticEnergyNormal&>(*kinetic.getEnergy(0));
-    wnKineticEnergyGravity& gravity = dynamic_cast<wnKineticEnergyGravity&>(*kinetic.getEnergy(1));
+void wnDiddyBarrelStatusUniqProcess::execStatus(soModuleAccesser* moduleAccesser) {
+    soParamAccesser* params = (soParamAccesser*)moduleAccesser->getWorkManageModule().getParamAccesser();
+    moduleAccesser->getWorkManageModule().getInt(0x20000000);
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 1: break;
+    default: return;
+    }
+
+    soKineticEnergyNormal& normal = dynamic_cast<soKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
+    wnKineticEnergyGravity& gravity = dynamic_cast<wnKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
     float lr = moduleAccesser->getPostureModule().getLr();
 
-    work.addInt(-1, 0x20000001);
-    int frame = work.getInt(0x20000001);
-    if (frame <= 0 || work.isFlag(0x22000000)) {
-        work.setFloat(360.0f * randf(), 0x21000001);
+    moduleAccesser->getWorkManageModule().addInt(-1, 0x20000001);
+    int frame = moduleAccesser->getWorkManageModule().getInt(0x20000001);
+    if (frame <= 0 || moduleAccesser->getWorkManageModule().isFlag(0x22000000)) {
+        float randomAngle = 360.0f * randf();
+        moduleAccesser->getWorkManageModule().setFloat(randomAngle, 0x21000001);
         int delay = params->getParamInt(moduleAccesser, 0x5DC2, 0);
         int randomDelay = params->getParamInt(moduleAccesser, 0x5DC3, 0);
         if (randomDelay > 0) {
             randomDelay = params->getParamInt(moduleAccesser, 0x5DC3, 0);
             delay += randi(randomDelay);
         }
-        work.setInt(delay, 0x20000001);
-        work.offFlag(0x22000000);
+        moduleAccesser->getWorkManageModule().setInt(delay, 0x20000001);
+        moduleAccesser->getWorkManageModule().offFlag(0x22000000);
     }
 
-    Vec2f speed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1));
-    Vec2f direction = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1));
+    Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
+    Vec2f direction = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
     direction.normalize();
-    float angle = atan2f(direction.m_x, direction.m_y) * 57.29578f;
-    if (!(angle >= 0.0f)) angle += 360.0f;
+    float angle = 57.29578f * atan2f(direction.m_x, direction.m_y);
+    if (angle < 0.0f) angle = 360.0f + angle;
 
-    float targetAngle = work.getFloat(0x21000001);
+    float targetAngle = moduleAccesser->getWorkManageModule().getFloat(0x21000001);
     float delta = targetAngle - angle;
-    float distance = fabsf(delta);
     float turnDirection;
-    if (!(delta <= 0.0f)) {
-        turnDirection = delta - 180.0f >= 0.0f ? -1.0f : 1.0f;
+    float distance = __fabsf(delta);
+    if (delta > 0.0f) {
+        if (delta - 180.0f < 0.0f) {
+            turnDirection = 1.0f;
+        } else {
+            turnDirection = -1.0f;
+        }
     } else {
-        turnDirection = distance - 180.0f >= 0.0f ? 1.0f : -1.0f;
+        if (distance - 180.0f < 0.0f) {
+            turnDirection = -1.0f;
+        } else {
+            turnDirection = 1.0f;
+        }
     }
 
-    int stepParam;
-    if (lr >= 0.0f) {
-        stepParam = turnDirection > 0.0f ? 0xFA3 : 0xFA2;
-    } else {
-        stepParam = turnDirection > 0.0f ? 0xFA2 : 0xFA3;
-    }
-    float stepLimit = params->getParamFloat(moduleAccesser, stepParam, 0);
     float step = distance;
-    if (!(distance <= stepLimit)) {
-        step = params->getParamFloat(moduleAccesser, stepParam, 0);
+    if (lr >= 0.0f) {
+        if (turnDirection > 0.0f) {
+            if (distance > params->getParamFloat(moduleAccesser, 0xFA3, 0))
+                step = params->getParamFloat(moduleAccesser, 0xFA3, 0);
+        } else {
+            if (distance > params->getParamFloat(moduleAccesser, 0xFA2, 0))
+                step = params->getParamFloat(moduleAccesser, 0xFA2, 0);
+        }
+    } else {
+        if (turnDirection > 0.0f) {
+            if (distance > params->getParamFloat(moduleAccesser, 0xFA2, 0))
+                step = params->getParamFloat(moduleAccesser, 0xFA2, 0);
+        } else {
+            if (distance > params->getParamFloat(moduleAccesser, 0xFA3, 0))
+                step = params->getParamFloat(moduleAccesser, 0xFA3, 0);
+        }
     }
-    if (step == distance) work.onFlag(0x22000000);
+    if (step == distance) moduleAccesser->getWorkManageModule().onFlag(0x22000000);
 
     step *= turnDirection;
     angle += step;
-    if (!(angle <= 360.0f)) angle -= 360.0f;
+    if (angle > 360.0f) angle -= 360.0f;
 
     float magnitude = speed.length();
-    if (work.getInt(0x20000002) > 0) {
-        work.addInt(-1, 0x20000002);
-        float minimum = work.getFloat(0x21000002);
-        if (!(magnitude >= minimum)) magnitude = work.getFloat(0x21000002);
+    if (moduleAccesser->getWorkManageModule().getInt(0x20000002) > 0) {
+        moduleAccesser->getWorkManageModule().addInt(-1, 0x20000002);
+        float minimum = moduleAccesser->getWorkManageModule().getFloat(0x21000002);
+        if (magnitude < minimum) magnitude = moduleAccesser->getWorkManageModule().getFloat(0x21000002);
     }
 
     Vec2f rotated(0.0f, magnitude);
-    rotated.rot((360.0f - angle) * 0.01745329238f, &rotated);
-    normal.m_speed.m_x = rotated.m_x;
-    normal.m_speed.m_y = 0.0f;
+    rotated.rot(0.01745329238f * (360.0f - angle), &rotated);
+    normal.setSpeed(&Vec2f(rotated.m_x, 0.0f));
     gravity.m_speedY = rotated.m_y;
 
     Vec3f rotation = moduleAccesser->getModelModule().getNodeRotate(3);
@@ -109,8 +131,9 @@ void wnDiddyBarrelStatusUniqProcess::execStatus(soModuleAccesser* moduleAccesser
     moduleAccesser->getModelModule().setNodeRotate(3, &rotation);
 
     float speedMul = params->getParamFloat(moduleAccesser, 0xFA7, 0);
-    float baseSpeed = params->getParamFloat(moduleAccesser, 0xFA6, 0);
-    moduleAccesser->getCollisionAttackModule().setPowerAddStatus(magnitude / baseSpeed * speedMul);
+    float speedRatio = magnitude / params->getParamFloat(moduleAccesser, 0xFA6, 0);
+    float power = speedRatio * speedMul;
+    moduleAccesser->getCollisionAttackModule().setPowerAddStatus(power);
 }
 
 void wnDiddyBarrelStatusUniqProcess::execStop(soModuleAccesser* moduleAccesser) {

@@ -7,6 +7,8 @@
 #include <ut/ut_list.h>
 
 class Vec3f;
+class Vec2f;
+class grCollisionLineWork;
 namespace nw4r { namespace g3d { class ScnProc; } }
 
 class stShadow : public gfTask {
@@ -62,6 +64,7 @@ public:
     char _0x9c[0x1f0];
 
     virtual void renderPre();
+    void calcAdvShadowPoints(grCollisionLineWork*, float, float, Vec2f*, u32*);
     virtual ~stShadow();
 
     void clearShadowObject();

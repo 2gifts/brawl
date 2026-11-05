@@ -3,37 +3,43 @@
 #include <havok/hkCollisionAgent.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
 
-// HYPOTHESIS: the child agent stored at 0x0C of hkTransformAgent. The transform agent forwards its
-// hooks to this child. Slots 0x08..0x1C are not identified yet (the first slot is the destructor).
-struct hkTransformChildAgent {
-    virtual void unkSlot08() = 0;
-    virtual void unkSlot0C() = 0;
-    virtual void unkSlot10() = 0;
-    virtual void unkSlot14() = 0;
-    virtual void unkSlot18() = 0;
-    virtual void unkSlot1C() = 0;
-    virtual void cleanupChild() = 0;                                  // 0x20 HYPOTHESIS
-    virtual void updateShapeCollectionFilterChild(void* a, void* b, void* c) = 0; // 0x24
-    virtual void invalidateTimChild(void* arg) = 0;                                  // 0x28
-    virtual void warpTimeChild(float t0, float t1, void* arg) = 0;                   // 0x2C
-    virtual void removePointChild(u16 key) = 0;                                      // 0x30
-    virtual void commitPotentialChild(u16 key) = 0;                                  // 0x34
-    virtual void createZombieChild(u16 key) = 0;                                     // 0x38
+#include <havok/hkShape.h>
+#include <havok/hkShapeContainer.h>
+#include <havok/hkQuaternion.h>
+#include <havok/hkTransform.h>
+
+struct hkCdBody;
+struct hkCollisionInput;
+
+// Shape that places a child shape with a fixed transform. No code of the shape itself is in the image (only the
+// agent), so the layout comes from the agent's accesses. HYPOTHESIS: the child container right after hkShape
+// (child pointer at 0x10, as in hkConvexTranslateShape one word later), the rotation as a quaternion at 0x20 (the
+// agent's processCollision rotates the swept rotations by it) and the full transform at 0x30.
+struct hkTransformShape : hkShape {
+    hkSingleShapeContainer m_childShape; // 0x0C
+    hkQuaternion m_rotation;             // 0x20
+    hkTransform m_transform;             // 0x30
 };
 
-// Transform agent: wraps a child agent (0x0C) and forwards the collision hooks to it. Object size 0x10.
+// Transform agent: wraps the agent of the child shape (0x0C) and forwards every call to it with a child body whose
+// motion is the body's transform composed with the shape's transform. Object size 0x10.
 struct hkCollisionDispatcher;
 
 struct hkTransformAgent : hkCollisionAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
-    hkTransformChildAgent* m_childAgent; // 0x0C
+    hkCollisionAgent* m_childAgent; // 0x0C
 
     // Registers the transform agent pairs (shape type 0x19) with the dispatcher.
     static void registerAgent(hkCollisionDispatcher* dispatcher);
-    // Create functions (not written yet). HYPOTHESIS: the parameters follow the dispatcher create signature.
-    static hkTransformAgent* createTransformAAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
-    static hkTransformAgent* createTransformBAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
+    // Creates the agent of the child shape for a body whose motion is A's motion state with the composed transform.
+    hkTransformAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* mgr);
+
+    // Create functions registered with the dispatcher (A: transform shape first; B: the symmetric agent, shapes swapped).
+    static hkTransformAgent* createTransformAAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                                   hkContactMgr* contactMgr);
+    static hkTransformAgent* createTransformBAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                                   hkContactMgr* contactMgr);
 
     virtual ~hkTransformAgent();
 
@@ -45,33 +51,43 @@ struct hkTransformAgent : hkCollisionAgent {
     virtual void commitPotential(u16 key);
     virtual void createZombie(u16 key);
 
-    // Not written yet (see hkTransformAgent.cpp): linear cast, closest points, penetrations, processCollision.
-    virtual void processCollision(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void linearCast(void* unk0, void* unk1, void* unk2, void* unk3, void* unk4);
-    static void staticLinearCast(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void updateShapeCollectionFilter(void* unk0, void* unk1, void* unk2);
+    virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, hkProcessCollisionInput& unk2, void* unk3);
+    virtual void linearCast(const hkCdBody& unk0, const hkCdBody& unk1, hkLinearCastCollisionInput& unk2, void* unk3, void* unk4);
+    static void staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, void* target,
+                                 void* startTarget);
+    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                       void* target);
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                      void* target);
+    virtual void updateShapeCollectionFilter(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2);
 };
 
 // HYPOTHESIS: the symmetric (shape-swapped) variant hkSymmetricAgent<hkTransformAgent> (map name
-// hkSymmetricAgent_16hkTransformAgent_). Only its destructor is written; its linearCast is not recovered.
+// hkSymmetricAgent_16hkTransformAgent_).
 struct hkSymmetricAgent_16hkTransformAgent_ : hkTransformAgent {
+    hkSymmetricAgent_16hkTransformAgent_(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                         hkContactMgr* mgr)
+        : hkTransformAgent(bodyB, bodyA, input, mgr) {}
     virtual ~hkSymmetricAgent_16hkTransformAgent_();
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };
 
 // HYPOTHESIS: hkSymmetricAgentLinearCast<hkTransformAgent>. The wrappers swap the two shapes and
 // replace the collector by a flipping collector on the stack (same scheme as hkSphereBoxAgent).
 struct hkSymmetricAgentLinearCast_16hkTransformAgent_ : hkSymmetricAgent_16hkTransformAgent_ {
+    hkSymmetricAgentLinearCast_16hkTransformAgent_(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                   hkCollisionInput& input, hkContactMgr* mgr)
+        : hkSymmetricAgent_16hkTransformAgent_(bodyA, bodyB, input, mgr) {}
     virtual ~hkSymmetricAgentLinearCast_16hkTransformAgent_();
 
-    virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void updateShapeCollectionFilter(void* unk0, void* unk1, void* unk2);
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    virtual void updateShapeCollectionFilter(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2);
 
-    static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticLinearCast(void* unk0, void* unk1, void* unk2, void* unk3); // not written yet
+    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticLinearCast(const hkCdBody& unk0, const hkCdBody& unk1, hkLinearCastCollisionInput& unk2, void* unk3, void* unk4);
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d);
 };

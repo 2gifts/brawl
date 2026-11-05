@@ -1,3 +1,4 @@
+// Local BrawlHeaders shadow: adds All-Star record fields in existing unions.
 #pragma once
 // Local BrawlHeaders shadow: names the record fields that the GameGlobal accessors return
 // (names from the sora map getters; sizes and element types are HYPOTHESIS).
@@ -314,10 +315,13 @@ struct gmGlobalRecord {
         char _9A[0x2];
         union {
             u8 unk9C[0x44];
+            // HYPOTHESIS: All-Star clear difficulty and score share this record.
             struct {
                 u16 : 8;
                 u16 unk9C_7 : 3;
                 u16 : 5;
+                u8 unk9E[6];
+                u32 unkA4;
             };
             struct {
                 u8 _pad9C_CC[0x30];
@@ -438,6 +442,21 @@ struct gmGlobalRecord {
     CharaNumData m_charaNumData[35];        // 0x1634
     union {
         u8 unk34D4[0x74];
+        // HYPOTHESIS: cooperative All-Star difficulty, score, characters and colors.
+        struct {
+            u16 : 5;
+            u16 unk34D4_10 : 3;
+            u16 : 6;
+            u16 unk34D4_1 : 1;
+            u16 : 1;
+            u8 unk34D6[2];
+            u32 unk34D8;
+            u8 unk34DCpad[0x48];
+            u8 unk3524;
+            u8 unk3525;
+            u8 unk3526;
+            u8 unk3527;
+        };
         struct {
             u8 _pad34D4_34FC[0x28];
             struct {

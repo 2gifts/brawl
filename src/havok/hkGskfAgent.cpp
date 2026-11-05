@@ -16,13 +16,14 @@ extern "C" void fn_8031830C(void* list, hkContactMgr* contactMgr);
 extern "C" void fn_8031590C(void* list, int index);
 
 #pragma dont_inline on
-hkGskfAgent::hkGskfAgent(hkCdBody* bodyA, hkCdBody* bodyB, hkContactMgr* contactMgr)
+hkGskfAgent::hkGskfAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkContactMgr* contactMgr)
     : hkGskBaseAgent(bodyA, bodyB, contactMgr) {
     unk30 = 0;
 }
 #pragma dont_inline reset
 
-hkGskBaseAgent* hkGskfAgent::createGskfAgent(hkCdBody* bodyA, hkCdBody* bodyB, void* unk2, hkContactMgr* contactMgr) {
+hkGskBaseAgent* hkGskfAgent::createGskfAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                             hkContactMgr* contactMgr) {
     hkGskBaseAgent* agent;
     if (contactMgr != 0) {
         agent = new hkGskfAgent(bodyA, bodyB, contactMgr);

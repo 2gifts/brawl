@@ -32,7 +32,8 @@ void hkSphereSphereAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     dispatcher->registerCollisionAgent(&funcs, HK_SHAPE_SPHERE, HK_SHAPE_SPHERE);
 }
 
-hkSphereSphereAgent* hkSphereSphereAgent::createSphereSphereAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr) {
+hkSphereSphereAgent* hkSphereSphereAgent::createSphereSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                               hkCollisionInput& input, hkContactMgr* contactMgr) {
     return new hkSphereSphereAgent(contactMgr);
 }
 
@@ -47,15 +48,15 @@ void hkSphereSphereAgent::cleanup() {
 
 hkSphereSphereAgent::~hkSphereSphereAgent() {}
 
-void hkSphereSphereAgent::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkSphereSphereAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     staticGetPenetrations(unk0, unk1, unk2, unk3);
 }
 
 // Reports the pair when the centres are closer than the sum of the radii.
-void hkSphereSphereAgent::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkSphereSphereAgent::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     HK_TIMER_BEGIN("SphereSphere");
-    const hkCdBody& bodyA = *(const hkCdBody*)unk0;
-    const hkCdBody& bodyB = *(const hkCdBody*)unk1;
+    const hkCdBody& bodyA = unk0;
+    const hkCdBody& bodyB = unk1;
     const hkVector4& posB = ((const hkTransform*)bodyB.m_motion)->m_translation;
     const hkVector4& posA = ((const hkTransform*)bodyA.m_motion)->m_translation;
     const hkSphereShape* sphereA = (const hkSphereShape*)bodyA.m_shape;

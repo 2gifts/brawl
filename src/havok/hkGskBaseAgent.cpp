@@ -13,6 +13,7 @@
 //   0x802B26C8   424  getClosestPoints   [map: hkGskBaseAgent__getClosestPoints]
 
 #include <havok/hkGskBaseAgent.h>
+#include <havok/hkCollidable.h>
 #include <havok/hkShape.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkTransform.h>
@@ -22,12 +23,12 @@
 extern "C" void fn_8031C8CC(void* self, void* shapeA, void* shapeB, void* relative);
 extern "C" void fn_8031CD64(void* self, void* shapeA, void* shapeB, void* relative);
 
-hkGskBaseAgent::hkGskBaseAgent(hkCdBody* bodyA, hkCdBody* bodyB, hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
+hkGskBaseAgent::hkGskBaseAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
     hkTransform relative;
-    hkShape* shapeA = bodyA->m_shape;
-    hkShape* shapeB = bodyB->m_shape;
+    hkShape* shapeA = bodyA.m_shape;
+    hkShape* shapeB = bodyB.m_shape;
     // a motion state starts with its hkTransform, so the pointers can be used as transforms directly
-    relative.setMulInverseMul(*(const hkTransform*)bodyA->m_motion, *(const hkTransform*)bodyB->m_motion);
+    relative.setMulInverseMul(*(const hkTransform*)bodyA.m_motion, *(const hkTransform*)bodyB.m_motion);
     if (shapeB->getType() == HK_SHAPE_TRIANGLE) {
         fn_8031C8CC(unkC, shapeA, shapeB, &relative);
     } else {
@@ -38,18 +39,13 @@ hkGskBaseAgent::hkGskBaseAgent(hkCdBody* bodyA, hkCdBody* bodyB, hkContactMgr* c
     unk20 = 0.0f;
     unk2C = -1.0f;
     unk18 = -1.0f;
-    while (bodyA->m_parent != 0) {
-        bodyA = bodyA->m_parent;
-    }
-    while (bodyB->m_parent != 0) {
-        bodyB = bodyB->m_parent;
-    }
-    float valueA = *(float*)((u8*)bodyA + 0x20);
-    float valueB = *(float*)((u8*)bodyB + 0x20);
+    // BYTES: the depths are read into hkSimdReal locals (propagation off, as in the target), each right after its walk.
+    hkSimdReal valueA = ((const hkCollidable*)bodyA.getRootCollidable())->m_allowedPenetrationDepth;
+    hkSimdReal valueB = ((const hkCollidable*)bodyB.getRootCollidable())->m_allowedPenetrationDepth;
     unk1C = valueA < valueB ? valueA : valueB;
 }
 
-void hkGskBaseAgent::processCollision(void* unk0, void* unk1, void* unk2, void* unk3) {}
+void hkGskBaseAgent::processCollision(const hkCdBody& unk0, const hkCdBody& unk1, hkProcessCollisionInput& unk2, void* unk3) {}
 
 void hkGskBaseAgent::invalidateTim(void* arg) {
     unk2C = 0.0f;

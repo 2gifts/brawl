@@ -430,5 +430,6 @@ public:
     void reset();
     void resetStatus();
     void setTargetCategory(soCollision::CategoryMask categoryMask);
+    void set(newCollision* collision);
 };
 static_assert(sizeof(soCollisionAttackPart) == 0x90, "Class is wrong size!");

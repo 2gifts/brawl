@@ -8,13 +8,47 @@
 //   0x802C2318   160  __dt   [map: hkSymmetricAgent_22hkShapeCollectionAgent_____dt]
 
 #include <havok/hkShapeCollectionAgent.h>
+#include <havok/hkCollisionInput.h>
+#include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkSymmetricAgentProcessCollision.h>
 #include <havok/hkBvAgent.h>
 
 // Symmetric wrapper of hkShapeCollectionAgent (map name hkSymmetricAgentLinearCast_22hkShapeCollectionAgent___
 // updateShapeCollectionFilter): swap the bodies and forward to the plain agent.
 template <class T>
-void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(void* a, void* b, void* c) {
+void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c) {
     T::updateShapeCollectionFilter(b, a, c);
 }
 
-template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::updateShapeCollectionFilter(void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::updateShapeCollectionFilter(const hkCdBody&, const hkCdBody&, hkCollisionInput&);
+template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::processCollision(const hkCdBody&, const hkCdBody&, hkProcessCollisionInput&, void*);
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    T::getPenetrations(b, a, c, &wrapped);
+}
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    T::getClosestPoints(b, a, c, &wrapped);
+}
+
+template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::getPenetrations(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::getClosestPoints(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkShapeCollectionAgentVariant::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkShapeCollectionAgent::linearCast(b, a, flippedInput, &flipped, &flippedStart);
+    } else {
+        hkShapeCollectionAgent::linearCast(b, a, flippedInput, &flipped, 0);
+    }
+}

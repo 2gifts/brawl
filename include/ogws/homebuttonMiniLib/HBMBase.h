@@ -182,6 +182,7 @@ private:
     void reset_battery();
 
     void init_sound();
+    void create_sound(nw4r::snd::SoundArchive* pArchive, bool loadGroup);
     void play_sound(int id);
     void fadeout_sound(f32 gain);
 

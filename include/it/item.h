@@ -419,12 +419,15 @@ public:
     Vec3f getPos();
     Vec3f getRot();
     void onUpdateAiMove(Vec2f*, Vec2f*, Vec2f*);
+    void onUpdateAiDir(Vec2f*, Vec2f*, Vec2f*, Vec2f*);
     void onUpdateKinetic();
     void onPreBound(Vec2f*, BoundMask);
     bool onPreDamageCheck(int damageStatusKind, soDamageLog*);
     bool isSafe();
     int getBullet();
     u32 shootBlanks(u32 count);
+    u32 shoot(u32 count, float lr, float speed);
+    static void removeModelConstraint(soModuleAccesser* accesser, int statusKind, bool adjustPosture);
     int getResult();
     void setHavedLog(int index, bool haved);
     int getTeamNo();

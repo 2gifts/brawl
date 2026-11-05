@@ -14,14 +14,19 @@ struct hkCdBody {
 
     hkCdBody() {}
     // Child body of a parent: same motion and shape key, the given shape (the agents wrap a sub-shape this way).
-    hkCdBody(const hkCdBody* parent) {
+    explicit hkCdBody(const hkCdBody* parent) {
         m_parent = (hkCdBody*)parent;
         m_motion = parent->m_motion;
     }
+    // Child body of a parent with its own motion (the transform agent passes the composed transform).
+    hkCdBody(const hkCdBody* parent, const void* motion) {
+        m_parent = (hkCdBody*)parent;
+        m_motion = (hkMotion*)motion;
+    }
 
     // Walks the m_parent chain up to the body without a parent (map name hkCdBody__getRootCollidable).
-    hkCdBody* getRootCollidable() {
-        hkCdBody* body = this;
+    const hkCdBody* getRootCollidable() const {
+        const hkCdBody* body = this;
         while (body->m_parent != 0) {
             body = body->m_parent;
         }

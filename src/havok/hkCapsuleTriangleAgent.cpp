@@ -20,29 +20,36 @@
 //   0x802AEE00    92  __dt   [map: hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_____dt]
 
 #include <havok/hkCapsuleTriangleAgent.h>
+#include <havok/hkCollisionInput.h>
+#include <havok/hkSymmetricAgentFlipCollectors.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkCollisionDispatcher.h>
+#include <havok/hkTriangleShape.h>
 
 // Stand-ins for the sub-object constructor and the symmetric linear cast of other units (not written yet).
 extern "C" void fn_80325334(void* src, void* dst);
-extern "C" void fn_802AE4F8();
-extern "C" void fn_802B7FD0();
+extern "C" void fn_802B7FD0(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target,
+                            void* d);
 
-hkCapsuleTriangleAgent::hkCapsuleTriangleAgent(hkContactMgr* contactMgr, void* src) : hkCollisionAgent((int)contactMgr) {
+hkCapsuleTriangleAgent::hkCapsuleTriangleAgent(const hkCdBody& triangleBody, hkContactMgr* contactMgr)
+    : hkCollisionAgent((int)contactMgr) {
     unkC[0] = 0xFFFF;
     unkC[1] = 0xFFFF;
     unkC[2] = 0xFFFF;
-    fn_80325334((u8*)src + 0x10, unk14);
+    const hkTriangleShape* triangle = (const hkTriangleShape*)triangleBody.m_shape;
+    fn_80325334((void*)&triangle->m_vertexA, unk14);
 }
 
-hkCapsuleTriangleAgent* hkCapsuleTriangleAgent::createTriangleCapsuleAgent(void* unk0, void* unk1, void* unk2,
+hkCapsuleTriangleAgent* hkCapsuleTriangleAgent::createTriangleCapsuleAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                                          hkCollisionInput& input,
                                                                           hkContactMgr* contactMgr) {
-    return new hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_(contactMgr, *(void**)unk0);
+    return new hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_(bodyA, contactMgr);
 }
 
-hkCapsuleTriangleAgent* hkCapsuleTriangleAgent::createCapsuleTriangleAgent(void* unk0, void* unk1, void* unk2,
+hkCapsuleTriangleAgent* hkCapsuleTriangleAgent::createCapsuleTriangleAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                                          hkCollisionInput& input,
                                                                           hkContactMgr* contactMgr) {
-    return new hkCapsuleTriangleAgent(contactMgr, *(void**)unk1);
+    return new hkCapsuleTriangleAgent(bodyB, contactMgr);
 }
 
 void hkCapsuleTriangleAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
@@ -50,7 +57,7 @@ void hkCapsuleTriangleAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     triangle.create = (hkAgentFunc)createTriangleCapsuleAgent;
     triangle.staticGetPenetrations = (hkAgentFunc)hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticGetPenetrations;
     triangle.staticGetClosestPoints = (hkAgentFunc)hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticGetClosestPoints;
-    triangle.staticLinearCast = (hkAgentFunc)fn_802AE4F8;
+    triangle.staticLinearCast = (hkAgentFunc)hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticLinearCast;
     triangle.symmetricA = 1;
     triangle.symmetricB = 0;
     dispatcher->registerCollisionAgent(&triangle, HK_SHAPE_TRIANGLE, HK_SHAPE_CAPSULE);
@@ -76,28 +83,43 @@ void hkCapsuleTriangleAgent::cleanup() {
 }
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
-void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::getPenetrations(void* unk0, void* unk1, void* unk2,
+void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2,
                                                                           void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkCapsuleTriangleAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticGetPenetrations(void* unk0, void* unk1, void* unk2,
+void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2,
                                                                                 void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkCapsuleTriangleAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::getClosestPoints(void* unk0, void* unk1, void* unk2,
+void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2,
                                                                            void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkCapsuleTriangleAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticGetClosestPoints(void* unk0, void* unk1, void* unk2,
+void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2,
                                                                                  void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkCapsuleTriangleAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
 }
 
 hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::~hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_() {}
+
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkSymmetricAgentLinearCast_22hkCapsuleTriangleAgent_::staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        fn_802B7FD0(b, a, flippedInput, &flipped, &flippedStart);
+    } else {
+        fn_802B7FD0(b, a, flippedInput, &flipped, 0);
+    }
+}

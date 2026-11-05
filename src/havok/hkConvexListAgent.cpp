@@ -51,17 +51,19 @@
 //   0x802B1894   164  __dt   [map: hkSymmetricAgent_11hkListAgent_____dt]
 
 #include <havok/hkConvexListAgent.h>
+#include <havok/hkCollisionInput.h>
+#include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkSymmetricAgentProcessCollision.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkBvAgent.h>
 #include <havok/hkListAgent.h>
+#include <havok/hkShapeCollectionAgent.h>
+#include <havok/hkCdBody.h>
 
 // Dispatcher registration entry point (not recovered yet; takes the dispatcher, a registration record
 // and the two shape type ids). Same routine as hkPhantomAgent and hkSphereSphereAgent use.
 // Stand-ins for the symmetric linear-cast agent functions (other classes, other units).
-extern "C" void fn_802B1454();
-extern "C" void fn_802B14E4();
-extern "C" void fn_802B152C();
 // Constructor of hkConvexListAgent (not recovered yet): this, first two pair arguments, pair pointer, flag.
 extern "C" void fn_802AF148(hkConvexListAgent* self, void* a, void* b, void* c, int flag);
 // hkListAgent constructor (hkListAgent.cpp): the fallback object of createConvexListAgent.
@@ -89,19 +91,19 @@ struct SubObjectHead {
 
 // Argument block handed to fn_802FEA54 by updateShapeCollectionFilter (lives on the stack there).
 struct FilterArgs {
-    void* a;      // 0x00
-    void* b;      // 0x04
-    u32 bValue;   // 0x08 first word of b
-    void* d;      // 0x0C
+    const hkCdBody* a;         // 0x00
+    const hkCdBody* b;         // 0x04
+    u32 bValue;                // 0x08 first word of b
+    hkCollisionInput* d; // 0x0C
     int unk8;     // 0x10
 };
 
 void hkConvexListAgent::registerAgent(void* dispatcher) {
     hkAgentFuncs convexList;
     convexList.create = (hkAgentFunc)createListConvexAgent;
-    convexList.staticGetPenetrations = (hkAgentFunc)fn_802B1454;
-    convexList.staticGetClosestPoints = (hkAgentFunc)fn_802B14E4;
-    convexList.staticLinearCast = (hkAgentFunc)fn_802B152C;
+    convexList.staticGetPenetrations = (hkAgentFunc)hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetPenetrations;
+    convexList.staticGetClosestPoints = (hkAgentFunc)hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetClosestPoints;
+    convexList.staticLinearCast = (hkAgentFunc)hkSymmetricAgentLinearCast_17hkConvexListAgent_::staticLinearCast;
     convexList.symmetricA = 1;
     convexList.symmetricB = 1;
     ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&convexList, HK_SHAPE_CONVEX_LIST, HK_SHAPE_CONVEX);
@@ -170,14 +172,14 @@ void hkConvexListAgent::createZombie(u16 key) {
 }
 
 #pragma dont_inline on
-void hkConvexListAgent::updateShapeCollectionFilter(void* a, void* b, void* d) {
+void hkConvexListAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& d) {
     if (m_streamMode == 0) {
         FilterArgs args;
-        args.a = a;
-        args.bValue = *(u32*)b;
-        args.b = b;
-        args.d = d;
+        args.a = &a;
+        args.b = &b;
+        args.d = &d;
         args.unk8 = unk8;
+        args.bValue = (u32)b.m_shape;
         fn_802FEA54(m_subObject, &args);
     }
 }
@@ -212,24 +214,145 @@ void hkConvexListAgent::cleanup() {
     delete this;
 }
 
-void hkConvexListAgent::getClosestPoints(void* a, void* b, void* c, void* d) {
+// BYTES: the symmetric wrappers call these forwarders; without the pragma they are inlined there.
+#pragma push
+#pragma auto_inline off
+void hkConvexListAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d) {
     staticGetClosestPoints(a, b, c, d);
 }
 
-void hkConvexListAgent::getPenetrations(void* a, void* b, void* c, void* d) {
+void hkConvexListAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d) {
     staticGetPenetrations(a, b, c, d);
 }
+#pragma pop
 
-void hkConvexListAgent::linearCast(void* a, void* b, void* c, void* d, void* e) {
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkSymmetricAgent_17hkConvexListAgent_::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkConvexListAgent::linearCast(b, a, flippedInput, &flipped, &flippedStart);
+    } else {
+        hkConvexListAgent::linearCast(b, a, flippedInput, &flipped, 0);
+    }
+}
+
+// BYTES: the symmetric linear cast calls this forwarder; without the pragma it is inlined there.
+#pragma push
+#pragma auto_inline off
+void hkConvexListAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* d, void* e) {
     staticLinearCast(a, b, c, d, e);
 }
+#pragma pop
 
 // Symmetric wrapper of hkListAgent and of this agent (map names hkSymmetricAgentLinearCast_11hkListAgent___
 // and hkSymmetricAgentLinearCast_17hkConvexListAgent___updateShapeCollectionFilter): swap the bodies, forward.
 template <class T>
-void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(void* a, void* b, void* c) {
+void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c) {
     T::updateShapeCollectionFilter(b, a, c);
 }
 
-template void hkSymmetricAgentLinearCast<hkListAgent>::updateShapeCollectionFilter(void*, void*, void*);
-template void hkSymmetricAgentLinearCast<hkConvexListAgent>::updateShapeCollectionFilter(void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkListAgent>::updateShapeCollectionFilter(const hkCdBody&, const hkCdBody&, hkCollisionInput&);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::updateShapeCollectionFilter(const hkCdBody&, const hkCdBody&, hkCollisionInput&);
+template void hkSymmetricAgentLinearCast<hkListAgent>::processCollision(const hkCdBody&, const hkCdBody&, hkProcessCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::processCollision(const hkCdBody&, const hkCdBody&, hkProcessCollisionInput&, void*);
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    T::getPenetrations(b, a, c, &wrapped);
+}
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    T::getClosestPoints(b, a, c, &wrapped);
+}
+
+template void hkSymmetricAgentLinearCast<hkListAgent>::getPenetrations(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkListAgent>::getClosestPoints(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkSymmetricAgent_11hkListAgent_::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkListAgent::linearCast(b, a, flippedInput, &flipped, &flippedStart);
+    } else {
+        hkListAgent::linearCast(b, a, flippedInput, &flipped, 0);
+    }
+}
+
+
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkSymmetricAgentLinearCast_17hkConvexListAgent_::staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkConvexListAgent::staticLinearCast(b, a, flippedInput, &flipped, &flippedStart);
+    } else {
+        hkConvexListAgent::staticLinearCast(b, a, flippedInput, &flipped, 0);
+    }
+}
+
+// Same for the shape collection agent (instantiated in this unit); its static cast takes the bodies by reference.
+template <>
+void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkShapeCollectionAgent::staticLinearCast(b, a, flippedInput, &flipped,
+                                                 &flippedStart);
+    } else {
+        hkShapeCollectionAgent::staticLinearCast(b, a, flippedInput, &flipped, 0);
+    }
+}
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, hkPenetrationTarget* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    T::staticGetPenetrations(b, a, c, (hkPenetrationTarget*)&wrapped);
+}
+
+template <class T>
+void hkSymmetricAgentLinearCast<T>::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, hkPenetrationTarget* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    T::staticGetClosestPoints(b, a, c, (hkPenetrationTarget*)&wrapped);
+}
+
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::getPenetrations(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetPenetrations(const hkCdBody&, const hkCdBody&, hkCollisionInput&, hkPenetrationTarget*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::getClosestPoints(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetClosestPoints(const hkCdBody&, const hkCdBody&, hkCollisionInput&, hkPenetrationTarget*);
+
+// The shape collection agent's static queries take the bodies by reference.
+template <>
+void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c,
+                                                                              hkPenetrationTarget* target) {
+    hkSymmetricAgentFlipBodyCollector wrapped(target);
+    hkShapeCollectionAgent::staticGetPenetrations(b, a, c,
+                                                  &wrapped);
+}
+
+template <>
+void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c,
+                                                                               hkPenetrationTarget* target) {
+    hkSymmetricAgentFlipCollector wrapped(target);
+    hkShapeCollectionAgent::staticGetClosestPoints(b, a, c,
+                                                   &wrapped);
+}

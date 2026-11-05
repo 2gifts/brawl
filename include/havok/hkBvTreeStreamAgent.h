@@ -7,6 +7,8 @@
 struct hkCollisionDispatcher;
 
 struct hkCdBody;
+struct hkCollisionInput;
+struct hkContactMgr;
 struct hkPenetrationTarget;
 
 // Collision agent that streams a bounding volume tree against another shape (0x40 bytes).
@@ -15,37 +17,40 @@ struct hkPenetrationTarget;
 // storage is the single inline entry at 0x3C.
 struct hkBvTreeStreamAgent : hkCollisionAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
-    static void* operator new(unsigned long, void* where) { return where; } // placement new for the factories
 
-    int unkC;                      // 0x0C copied from *src in the constructor
+    int unkC;                      // 0x0C the collision input's dispatcher (copied by the constructor)
     hkReal unk10[8];               // 0x10..0x2F zeroed by the constructor (HYPOTHESIS: two vectors)
-    hkArray<unsigned int> m_list;  // 0x30 HYPOTHESIS: list managed by hkAgent1nMachine (see cleanup)
-    unsigned int m_inlineEntry;    // 0x3C inline storage of m_list (capacity 1)
+    hkInplaceArray<unsigned int, 1> m_list; // 0x30 HYPOTHESIS: list managed by hkAgent1nMachine (see cleanup)
 
-    // HYPOTHESIS: the first two parameters are not used by the constructor.
-    hkBvTreeStreamAgent(void* unused0, void* unused1, const int* src, int unk8Value);
+    hkBvTreeStreamAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                        hkContactMgr* contactMgr);
     virtual ~hkBvTreeStreamAgent();
 
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d); // 0x1C not written yet
     virtual void cleanup();
-    virtual void updateShapeCollectionFilter(void* a, void* b, void* c); // 0x24
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c); // 0x24
     virtual void invalidateTim(void* arg);
     virtual void warpTime(float t0, float t1, void* arg);
 
-    static hkBvTreeStreamAgent* createBvTreeShapeAgent(void* a, void* b, const int* c, int d);
-    static hkBvTreeStreamAgent* createShapeBvAgent(void* a, void* b, const int* c, int d);
+    static hkBvTreeStreamAgent* createBvTreeShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                       hkCollisionInput& input, hkContactMgr* contactMgr);
+    static hkBvTreeStreamAgent* createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                   hkCollisionInput& input, hkContactMgr* contactMgr);
     static void registerAgent(void* dispatcher);
     static void registerConvexListAgent(void* dispatcher);
     static void registerMultiRayAgent(void* dispatcher);
 
     // Forwarders to the hkBvTreeAgent static query functions (tail calls in the original).
-    void getPenetrations(void* a, void* b, void* c, void* d);
-    void getClosestPoints(void* a, void* b, void* c, void* d);
-    void linearCast(void* a, void* b, void* c, void* d, void* e);
+    void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d);
+    void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d);
+    void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* d, void* e);
 };
 
 // HYPOTHESIS: agent variant created by createBvTreeShapeAgent. Its vtable (lbl_804868E8) is not
 // identified yet; the class adds no members and only replaces the vtable after the base constructor.
 struct hkBvTreeStreamAgentVariant : hkBvTreeStreamAgent {
-    hkBvTreeStreamAgentVariant(void* unused0, void* unused1, const int* src, int unk8Value)
-        : hkBvTreeStreamAgent(unused0, unused1, src, unk8Value) {}
+    hkBvTreeStreamAgentVariant(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                               hkContactMgr* contactMgr)
+        : hkBvTreeStreamAgent(bodyA, bodyB, input, contactMgr) {}
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };

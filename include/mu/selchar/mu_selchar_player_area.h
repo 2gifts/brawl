@@ -184,5 +184,6 @@ public:
     void createWifiModel(nw4r::g3d::ResFile* resFile, int priority);
     int getWifiStateByWifiCond();
     void wifiExitCpuPlayer();
+    void setTeamColor(int color, int teamSet);
 };
 static_assert(sizeof(muSelCharPlayerArea) == 0x448, "Wrong size for class!");

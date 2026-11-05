@@ -1,29 +1,38 @@
+#define WN_SNAKE_NIKITA_LAUNCHER_TU // this file is the launcher half of the original pair (the missile is wn_snake_nikita_missile.cpp)
+#define SO_ARRAY_LIST_CTOR_FLAG // BYTES: the native passes 0 to soArrayVector<Ul,2>'s constructor (sora_melee 0x1A7480, ignores it; its only caller is this one). Its symbols.txt name `...Fv` comes from a map without signatures, so the one-argument form is likely the real one
+#define FT_POOL_ROOT_NONPOLYMORPHIC // the missile pool's root has no vtable (the first pool level owns it)
+#define SO_COLLISION_SEARCH_OBSERVER_INLINE_CTOR // BYTES: the search observer's (manage id, priority) constructor is a weak copy in this unit
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS // BYTES: the missile destructor expands the rotation energy destructor
+#define WN_KINETIC_MEDIATOR_INLINE_DTOR
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define WN_KINETIC_GENERIC_BUILDER
+#define WN_KINETIC_NORMAL_EXTERN
+#define WN_KINETIC_GRAVITY_INLINE_DTOR // BYTES: the missile destructor expands the gravity energy destructor
+#define FT_REL_LINK_EXTERN
+#define MT_VEC2F_CTOR_NOINLINE
+#define MT_VEC3F_CTOR_NOINLINE
+#define MT_VEC3F_ASSIGN_NOINLINE
+#define MT_VEC3F_UNARY_MINUS // the launcher negates its rotation with the weak paired-single Vec3f::operator-()
+#include <wn/wn_module_accesser_builder.h>
 #include <wn/snake/wn_snake_nikita.h>
+#include <wn/snake/wn_snake_nikita_missile_status_uniq_process_fly.h>
 
 #include <so/kinetic/so_kinetic_module_impl.h>
 #include <wn/snake/so_kinetic_energy_local_normal.h>
 
 #include <gf/gf_task_scheduler.h>
+#include <wn/wn_activate_desc.h>
+#include <so/motion/so_motion_change_param.h>
 #include <so/article/so_article.h>
 #include <so/article/so_generate_article_manage_module.h>
 #include <so/link/so_link_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
 #include <so/so_external_value_accesser.h>
 
-class wnSnakeNikitaMissile
-    : public wnWeaponBuilder<wnSnakeNikitaMissileModuleAccesserBuildConfig>,
-      public soDamageEventObserver,
-      public soCollisionSearchEventObserver {
-public:
-    void setAutonomy();
-    virtual void processCollision();
-    virtual void notifyEventCollisionSearch(soCollisionLog* collisionLog,
-                                            soModuleAccesser* moduleAccesser);
-    virtual bool notifyEventCollisionSearchCheck();
-    virtual bool notifyEventCollisionAttackCheck(u32 flags);
-};
-static_assert(sizeof(wnSnakeNikitaMissile) == 0x2510,
-              "Snake Nikita missile builder and observer layout");
+// BYTES: the missile destructor expands the damage observer's (empty) destructor and calls only its base's.
+inline soDamageEventObserver::~soDamageEventObserver() { }
 
 namespace {
 soGenerateArticleManageModule& getArticleManage(soModuleAccesser& accesser) {
@@ -38,14 +47,118 @@ struct SnakeNikitaEndEvent : soLinkEventArgs {
 };
 }
 
-void wnSnakeNikitaMissile::setAutonomy() {
-    m_moduleAccesser->getWorkManageModule().onFlag(0x12000003);
+#pragma push
+#pragma pool_data off // BYTES: the native constructor addresses each module global and singleton guard with its own lis/addi (pool data off for this function)
+wnSnakeNikita::wnSnakeNikita(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeNikitaData* data) :
+    wnWeaponBuilder<wnSnakeNikitaModuleAccesserBuildConfig>(
+        "SnakeNikita", articleId, info,
+        wnModuleAccesserBuildData(0x1C, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1,
+                                  &g_soParamAccesserNull, 0, 0, 0, 0, 0, 0, 0)),
+    m_unkMissileTaskIds(0) {
+    Weapon::deactivate(false);
+}
+#pragma pop
 
-    if (m_moduleAccesser->getLinkModule().isLink(3)) {
-        // HYPOTHESIS: the enum names attribute 4 as unknown; its meaning is unverified.
-        m_moduleAccesser->getLinkModule().setAttribute(
-            3, soLinkConnection::Attribute_Reference_Parent_Unknown_4, false);
+// The article manage builder and the missile pool chain tear down out of line (native order).
+#pragma dont_inline on
+template <class W, int N> wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template <class M> wnSelectedArticleMediator<M>::~wnSelectedArticleMediator() { }
+template <class M, int N> wnArticleManageModuleBuilder<M, N>::~wnArticleManageModuleBuilder() { }
+template wnArticleManageModuleBuilder<wnSnakeNikitaMediator, 2>::~wnArticleManageModuleBuilder();
+template wnSelectedArticleMediator<wnSnakeNikitaMediator>::~wnSelectedArticleMediator();
+template wnArticleSubPool<wnSnakeNikitaMissile, 2>::~wnArticleSubPool();
+template wnArticleSubPool<wnSnakeNikitaMissile, 1>::~wnArticleSubPool();
+#pragma dont_inline off
+
+// The owner kind words Weapon construction copies from wnArticleBuildInfo (+0xC4 kind info, +0xC8 fighter kind).
+// HYPOTHESIS: view name.
+struct wnSnakeNikitaOwnerView {
+    u8 unk0[0xC4];
+    wnArticleKindInfo kindInfo;
+};
+// HYPOTHESIS: the lookup flags form this two-byte record; only the second byte's role is known (as for F.L.U.D.D.).
+struct wnSnakeNikitaMissileDataArgs {
+    bool unk0;
+    bool resourceGroup;
+    wnSnakeNikitaMissileDataArgs() : unk0(false), resourceGroup(false) { }
+};
+
+static inline wnSnakeNikitaOwnerView* ownerView(soModuleAccesser* acc) {
+    return reinterpret_cast<wnSnakeNikitaOwnerView*>(&dynamic_cast<Weapon&>(acc->getStageObject()));
+}
+// The owner's fighter kind (read right after the cast, as for F.L.U.D.D.'s waterOwnerKind).
+static inline ftKind ownerKind(soModuleAccesser* acc) {
+    return static_cast<ftKind>(ownerView(acc)->kindInfo.subKind);
+}
+struct wnSnakeNikitaMissileArgs {
+    wnArticleBuildInfo info;
+    wnSnakeNikitaMissileArgs(const wnArticleKindInfo& kind, soHeapModule* heap) {
+        info.kindInfo = &kind;
+        info.heapModule = heap;
     }
+};
+
+// One pooled missile (map: wnInstanceHolder<wnSnakeNikitaMissile, soKindInfoGeneric<2, 28>, soIntToType<0> > ctor):
+// built with the owner's kind info and heap module and Snake's weapon data 24.
+template <>
+wnArticleHolder<wnSnakeNikitaMissile>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(0, wnSnakeNikitaMissileArgs(ownerView(acc)->kindInfo, &acc->getHeapModule()).info,
+               static_cast<const wnSnakeNikitaMissileData*>(g_ftCommonDataAccesser.getWeaponData24(
+                   ownerKind(acc), &wnSnakeNikitaMissileDataArgs().resourceGroup))) { }
+
+// Shows the launcher in Snake's hands: link attribute 4 on node 3, motion 0. When both missile slots are taken the
+// oldest missile (first recorded task id) is made to fall (status 2) and dropped from the list.
+void wnSnakeNikita::activate(int founderTaskId, int resourceId, int team, float lr) {
+    Vec3f pos(0.0f, 0.0f, 0.0f);
+    soMotionChangeParam motion;
+    wnActivateDesc desc(founderTaskId, resourceId, resourceId, resourceId, -1, -1, 0, 0, pos, lr,
+                        team, 0, 2, 0x80, 0, 0x35F, 0);
+    desc.flagsHighPair = 3;
+    desc.flagsMidPair = 0;
+    desc.flagsBit3 = 1;
+    desc.flagsLow = 0;
+    desc.unk4DHigh = 0;
+    Weapon::activate(&desc);
+
+    m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(4), true);
+    motion.m_kind = 0;
+    motion.m_frame = 0.0f;
+    motion.m_rate = 1.0f;
+    motion._12 = 0;
+    motion._13 = 0;
+    motion._14 = 0;
+    motion._15 = 0;
+    m_moduleAccesser->getMotionModule().changeMotion(&motion);
+
+    if (m_unkMissileTaskIds.isFull() == true) {
+        unsigned long& oldestId = m_unkMissileTaskIds.at(0);
+        wnSnakeNikitaMissile* missile = dynamic_cast<wnSnakeNikitaMissile*>(gfTaskScheduler::getInstance()->getTask(oldestId));
+        if (missile != NULL) {
+            missile->changeStatus(2);
+        }
+        m_unkMissileTaskIds.shift();
+    }
+}
+
+// Launches a pooled missile from the launcher's node 3 (at the ground's depth). Its rotation is a 90 degree yaw,
+// mirrored when the owning fighter (work int 0x10000000, else the launcher itself) faces left.
+bool wnSnakeNikita::activeArticle(wnSnakeNikitaMissile* missile, soModuleAccesser* acc) {
+    Vec3f pos = acc->getModelModule().getNodeGlobalPosition(3, false);
+    pos.m_z = acc->getGroundModule().getZ();
+    Vec3f rot(0.0f, 90.0f, 0.0f);
+    StageObject* owner = dynamic_cast<StageObject*>(gfTaskScheduler::getInstance()->getTaskById(
+        gfTask::Category_Fighter, acc->getWorkManageModule().getInt(0x10000000)));
+    if (owner != NULL) {
+        if (soExternalValueAccesser::getLr(owner) < 0.0f) {
+            rot = -rot;
+        }
+    } else if (acc->getPostureModule().getLr() < 0.0f) {
+        rot = -rot;
+    }
+    missile->activate(acc->getStageObject().getTaskId(), acc->getResourceModule().getResourceIdAccesser()->getAnmResId(),
+                      acc->getTeamModule().getTeam()->getNo(), pos, rot);
+    return true;
 }
 
 void wnSnakeNikita::notifyArticleEventRemove(int unk1, int* unk2) {
@@ -79,140 +192,97 @@ void wnSnakeNikita::notifyEnd(int isEnd) {
     }
 }
 
+// Lets the current missile fly on by itself and remembers its task id (once).
 void wnSnakeNikita::onDeactivate() {
-    soArrayVector<soArticle*, 3> articles;
+    soArrayVector<soArticle*, 3> articles(0);
     getArticleManage(*m_moduleAccesser).getArticleList(&articles, 0, 2);
 
-    if (!articles.isNull()) {
-        wnSnakeNikitaMissile* missile =
-            dynamic_cast<wnSnakeNikitaMissile*>(articles.at(0));
-        if (missile != nullptr) {
-            missile->setAutonomy();
+    if (!articles.isEmpty()) {
+        wnSnakeNikitaMissile* missile = dynamic_cast<wnSnakeNikitaMissile*>(articles.at(0));
+        if (missile == NULL) {
+            return;
+        }
+        missile->setAutonomy();
 
-            const unsigned long taskId = *reinterpret_cast<u32*>(
-                reinterpret_cast<u8*>(missile) + 0x28);
-            bool alreadyTracked = false;
-            for (s32 index = 0; index < m_unkMissileTaskIds.size(); ++index) {
-                if (m_unkMissileTaskIds.at(index) == taskId) {
-                    alreadyTracked = true;
-                }
+        bool isNew = true;
+        for (s32 i = 0; i < m_unkMissileTaskIds.size(); i++) {
+            unsigned long taskId = m_unkMissileTaskIds.at(i);
+            if (taskId == missile->m_taskId) {
+                isNew = false;
             }
-            if (!alreadyTracked) {
-                m_unkMissileTaskIds.push(taskId);
-            }
+        }
+        if (isNew) {
+            m_unkMissileTaskIds.push(static_cast<unsigned long>(missile->m_taskId));
         }
     }
 }
 
+// Drops the current missile (status 1) while it is still in flight (status 0).
+// HYPOTHESIS: work flag 0x12000003 marks a missile that may not be dropped.
 void wnSnakeNikita::forceFallMissile() {
-    soArrayVector<soArticle*, 3> articles;
+    soArrayVector<soArticle*, 3> articles(0);
     getArticleManage(*m_moduleAccesser).getArticleList(&articles, 0, 2);
 
-    if (!articles.isNull()) {
-        wnSnakeNikitaMissile* missile =
-            dynamic_cast<wnSnakeNikitaMissile*>(articles.at(0));
-        if (missile != nullptr && soExternalValueAccesser::getStatusKind(missile) == 0 &&
+    if (!articles.isEmpty()) {
+        wnSnakeNikitaMissile* missile = dynamic_cast<wnSnakeNikitaMissile*>(articles.at(0));
+        if (missile == NULL) {
+            return;
+        }
+        if (soExternalValueAccesser::getStatusKind(missile) == 0 &&
             !soExternalValueAccesser::getWorkFlag(missile, 0x12000003)) {
             missile->changeStatus(1);
         }
     }
 }
 
-void wnSnakeNikitaMissile::processCollision() {
-    const int statusKind = m_moduleAccesser->getStatusModule().getStatusKind();
-    if (statusKind == 0) {
-        m_moduleAccesser->getWorkManageModule().offFlag(0x22000001);
-    } else if (statusKind == 1) {
-        m_moduleAccesser->getWorkManageModule().offFlag(0x22000000);
-    }
-    StageObject::processCollision();
-}
+// ---- the launcher's article mediator: article slot 0 is the pool of two missiles, slots 1-16 are unused ------------
 
-void wnSnakeNikitaMissile::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser*) {
-    if (collisionLog != nullptr) {
-        int statusKind = m_moduleAccesser->getStatusModule().getStatusKind();
-        if (statusKind == 0) {
-            if (collisionLog->m_kind == 3) {
-                if (collisionLog->m_teamNo != m_moduleAccesser->getTeamModule().getTeam()->getNo() &&
-                    m_moduleAccesser->getReflectModule().isReflect() == 1) {
-                    m_moduleAccesser->getWorkManageModule().onFlag(0x22000002);
-                }
-            } else {
-                m_moduleAccesser->getWorkManageModule().onFlag(0x22000001);
-            }
-        } else if (statusKind == 1) {
-            if (collisionLog->m_kind == 3) {
-                if (collisionLog->m_teamNo != m_moduleAccesser->getTeamModule().getTeam()->getNo()) {
-                    m_moduleAccesser->getWorkManageModule().onFlag(0x22000001);
-                }
-            } else {
-                m_moduleAccesser->getWorkManageModule().onFlag(0x22000000);
-            }
-        }
+// The pool activates a missile through its launcher.
+struct wnSnakeNikitaActivator {
+    static bool activate(wnSnakeNikitaMissile* missile, soModuleAccesser* acc) {
+        return wnSnakeNikita::activeArticle(missile, acc);
+    }
+};
+
+soArticle* wnSnakeNikitaMediator::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: return wnArticleSlotGenerate<wnSnakeNikitaActivator>(m_pools, acc, WN_ARTICLE_SLOT_TAGS);
+    WN_ARTICLE_UNUSED_SLOTS_FROM_1(wnGetNullArticle())
+    default: return wnGetNullArticle();
     }
 }
-
-bool wnSnakeNikitaMissile::notifyEventCollisionSearchCheck() {
-    soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
-    const int statusKind = m_moduleAccesser->getStatusModule().getStatusKind();
-    bool shouldReflect = false;
-    if (statusKind == 0) {
-        shouldReflect = work.isFlag(0x22000002);
-        if (shouldReflect) {
-            work.offFlag(0x22000002);
-        }
-    } else if (statusKind == 1) {
-        shouldReflect = work.isFlag(0x22000001);
-        if (shouldReflect) {
-            work.offFlag(0x22000001);
-        }
+bool wnSnakeNikitaMediator::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: return wnArticleSlotIsGeneratable<wnArticlePool<wnSnakeNikitaMissile, 2, soInstancePoolRoot> >(this, WN_ARTICLE_SLOT_TAGS);
+    WN_ARTICLE_UNUSED_SLOTS_FROM_1(false)
+    default: return false;
     }
-
-    if (shouldReflect) {
-        setAutonomy();
-        SnakeNikitaEndEvent event(0x839);
-        m_moduleAccesser->getLinkModule().sendEventParents(3, event);
-
-        const int team = m_moduleAccesser->getReflectModule().getTeam();
-        m_moduleAccesser->getTeamModule().setTeam(team, true);
-        m_moduleAccesser->getTeamModule().setHitTeam(team);
-
-        soKineticEnergyLocalNormal* energy = dynamic_cast<soKineticEnergyLocalNormal*>(
-            m_moduleAccesser->getKineticModule().getEnergy(2));
-        if (energy != nullptr) {
-            energy->unk34 -= 0.3846154f;
-            if (energy->unk34 < 0.0f) {
-                energy->unk34 += 360.0f;
-            }
-            Vec3f rotation(-energy->unk34, 90.0f, 0.0f);
-            m_moduleAccesser->getPostureModule().setRot(&rotation, 1);
-        }
-        return false;
-    }
-
-    // HYPOTHESIS: these two work flags represent the native status-specific
-    // collision transition gates; the flags themselves remain unnamed.
-    if (statusKind == 0 && work.isFlag(0x22000001)) {
-        m_moduleAccesser->getStatusModule().changeStatusRequest(2, m_moduleAccesser);
-        return true;
-    }
-    if (statusKind == 1 && work.isFlag(0x22000000)) {
-        m_moduleAccesser->getStatusModule().changeStatusRequest(2, m_moduleAccesser);
-        return true;
-    }
-    return false;
 }
-
-bool wnSnakeNikitaMissile::notifyEventCollisionAttackCheck(u32 flags) {
-    if (flags & 0x6) {
-        return false;
+s32 wnSnakeNikitaMediator::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: return wnArticleSlotActiveNum<wnArticlePool<wnSnakeNikitaMissile, 2, soInstancePoolRoot>, wnArticleSlotCounter>(this, WN_ARTICLE_SLOT_TAGS);
+    WN_ARTICLE_UNUSED_SLOTS_FROM_1(0)
+    default: return 0;
     }
-    Weapon::notifyEventCollisionAttackCheck(flags);
-    return false;
 }
-
-// Leaf functions shared with other fighter modules (same module-map names and bodies).
-extern "C" {
-int fn_122_24410(u8* p) { return *(int*)(p + 0x60); }
-void* fn_122_245DC(u8* p) { return *(void**)(*(u8**)(p + 0xd8) + 0x70); }
-} // extern "C"
+s32 wnSnakeNikitaMediator::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: return wnArticleSlotGenerateMaxNum(2, WN_ARTICLE_SLOT_TAGS);
+    WN_ARTICLE_UNUSED_SLOTS_FROM_1(0)
+    default: return 0;
+    }
+}
+bool wnSnakeNikitaMediator::shoot(soModuleAccesser*, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: return wnArticleSlotShoot<wnSnakeNikitaMissile>(article, WN_ARTICLE_SLOT_TAGS);
+    WN_ARTICLE_UNUSED_SLOTS_FROM_1(true)
+    default: return false;
+    }
+}
+void wnSnakeNikitaMediator::deactivate() {
+    for (s32 i = 0; i < 2; ++i) {
+        if (!static_cast<soArticle&>(*m_pools.getSub().getInstanceAt(i)).setDeactivateDescendant()) return;
+    }
+}
+s32 wnSnakeNikitaMediator::getMediateNum() { return 1; }
+void wnSnakeNikitaMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }

@@ -30,60 +30,35 @@ void hkPhantomAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     dispatcher->registerCollisionAgent(&reg, -1, HK_SHAPE_PHANTOM_CALLBACK);
 }
 
-hkPhantomAgent::hkPhantomAgent(hkCdBody* bodyA, hkCdBody* bodyB, int unk8Value) : hkCollisionAgent(unk8Value) {
-    hkCdBody* rootA = bodyA;
-    while (rootA->m_parent != 0) {
-        rootA = rootA->m_parent;
-    }
-    m_rootA = rootA;
-    hkCdBody* rootB = bodyB;
-    while (rootB->m_parent != 0) {
-        rootB = rootB->m_parent;
-    }
-    m_rootB = rootB;
-    m_shapeTypeA = bodyA->m_shape->getType();
-    m_shapeTypeB = bodyB->m_shape->getType();
+// BYTES: the constructor is out of line in the original (createPhantomAgent calls it with bl).
+#pragma push
+#pragma auto_inline off
+hkPhantomAgent::hkPhantomAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkContactMgr* contactMgr)
+    : hkCollisionAgent((int)contactMgr) {
+    m_rootA = bodyA.getRootCollidable();
+    m_rootB = bodyB.getRootCollidable();
+    m_shapeTypeA = bodyA.m_shape->getType();
+    m_shapeTypeB = bodyB.m_shape->getType();
 }
+#pragma pop
 
-// The constructor is out of line in the original: createPhantomAgent calls it with bl.
-#pragma dont_inline on
 // Creates the agent for a pair of bodies. When a side's shape is a phantom callback shape, that
 // shape is told about the pair (slot 0x28) and remembered in the agent.
-hkPhantomAgent* hkPhantomAgent::createPhantomAgent(hkCdBody* bodyA, hkCdBody* bodyB, int flags, int unk8Value) {
-    hkPhantomAgent* agent = (hkPhantomAgent*)hkMemory::getInstance().allocateChunk(sizeof(hkPhantomAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkPhantomAgent);
-    if (agent != 0) {
-        ::new (agent) hkPhantomAgent(bodyA, bodyB, unk8Value);
-    }
+hkPhantomAgent* hkPhantomAgent::createPhantomAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                   hkCollisionInput& input, hkContactMgr* contactMgr) {
+    hkPhantomAgent* agent = new hkPhantomAgent(bodyA, bodyB, contactMgr);
     if (agent->m_shapeTypeA == HK_SHAPE_PHANTOM_CALLBACK) {
-        hkCdBody* rootA = bodyA;
-        while (rootA->m_parent != 0) {
-            rootA = rootA->m_parent;
-        }
-        hkCdBody* rootB = bodyB;
-        while (rootB->m_parent != 0) {
-            rootB = rootB->m_parent;
-        }
-        hkPhantomCallbackShape* shape = (hkPhantomCallbackShape*)bodyA->m_shape;
-        shape->addPairRoots(rootA, rootB, flags);
+        hkPhantomCallbackShape* shape = (hkPhantomCallbackShape*)bodyA.m_shape;
+        shape->addPairRoots(bodyA.getRootCollidable(), bodyB.getRootCollidable(), input);
         agent->m_phantomA = shape;
     }
     if (agent->m_shapeTypeB == HK_SHAPE_PHANTOM_CALLBACK) {
-        hkCdBody* rootB = bodyB;
-        while (rootB->m_parent != 0) {
-            rootB = rootB->m_parent;
-        }
-        hkCdBody* rootA = bodyA;
-        while (rootA->m_parent != 0) {
-            rootA = rootA->m_parent;
-        }
-        hkPhantomCallbackShape* shape = (hkPhantomCallbackShape*)bodyB->m_shape;
-        shape->addPairRoots(rootB, rootA, flags);
+        hkPhantomCallbackShape* shape = (hkPhantomCallbackShape*)bodyB.m_shape;
+        shape->addPairRoots(bodyB.getRootCollidable(), bodyA.getRootCollidable(), input);
         agent->m_phantomB = shape;
     }
     return agent;
 }
-#pragma dont_inline reset
 
 void hkPhantomAgent::cleanup() {
     if (m_shapeTypeA == HK_SHAPE_PHANTOM_CALLBACK) {
@@ -97,17 +72,17 @@ void hkPhantomAgent::cleanup() {
 
 hkPhantomAgent::~hkPhantomAgent() {}
 
-void hkPhantomAgent::processCollision(void* a, void* b, void* c, void* d) {}
+void hkPhantomAgent::processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d) {}
 
-void hkPhantomAgent::getPenetrations(void* a, void* b, void* c, void* target) {
-    static_cast<hkPenetrationTarget*>(target)->forwardPenetrations(a, b, c);
+void hkPhantomAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
+    static_cast<hkPenetrationTarget*>(target)->forwardPenetrations(a, b, &c);
 }
 
-void hkPhantomAgent::staticGetPenetrations(void* a, void* b, void* c, hkPenetrationTarget* target) {
+void hkPhantomAgent::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, hkPenetrationTarget* target) {
     target->forwardPenetrations(a, b, target);
 }
 
-void hkPhantomAgent::getClosestPoints(void* a, void* b, void* c, void* target) {}
+void hkPhantomAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {}
 void hkPhantomAgent::staticGetClosestPoints() {}
-void hkPhantomAgent::linearCast(void* a, void* b, void* c, void* target, void* d) {}
+void hkPhantomAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {}
 void hkPhantomAgent::staticLinearCast() {}

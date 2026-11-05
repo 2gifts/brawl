@@ -131,6 +131,13 @@ struct hkVector4 {
         z = a.z < b.z ? a.z : b.z;
         w = a.w < b.w ? a.w : b.w;
     }
+    // Lane-wise maximum, a > b ? a : b per lane (hkBvTreeAgent's swept box).
+    void setMax4(const hkVector4& a, const hkVector4& b) {
+        x = a.x > b.x ? a.x : b.x;
+        y = a.y > b.y ? a.y : b.y;
+        z = a.z > b.z ? a.z : b.z;
+        w = a.w > b.w ? a.w : b.w;
+    }
     // Flips the sign of each lane of this where the lane of s is negative (integer xor of the sign bits).
     void setFlipSign4(const hkVector4& a, const hkVector4& s) {
         ((u32*)this)[0] = ((const u32*)&a)[0] ^ (((const u32*)&s)[0] & 0x80000000);
@@ -138,12 +145,27 @@ struct hkVector4 {
         ((u32*)this)[2] = ((const u32*)&a)[2] ^ (((const u32*)&s)[2] & 0x80000000);
         ((u32*)this)[3] = ((const u32*)&a)[3] ^ (((const u32*)&s)[3] & 0x80000000);
     }
+    // this += s * a, lane order x..w (hkQuaternion::setMul).
+    void addMul4(hkReal s, const hkVector4& a) {
+        x += s * a.x;
+        y += s * a.y;
+        z += s * a.z;
+        w += s * a.w;
+    }
     // this = a + s * b, lane order x..w (its weak out-of-line copy is in hkGsk).
     void setAddMul4(const hkVector4& a, const hkVector4& b, hkReal s) {
         x = a.x + s * b.x;
         y = a.y + s * b.y;
         z = a.z + s * b.z;
         w = a.w + s * b.w;
+    }
+    // this = (1 - t) * a + t * b (hkMultiRayConvexAgent's hit point).
+    void setInterpolate4(const hkVector4& a, const hkVector4& b, hkReal t) {
+        hkReal s = 1.0f - t;
+        x = s * a.x + t * b.x;
+        y = s * a.y + t * b.y;
+        z = s * a.z + t * b.z;
+        w = s * a.w + t * b.w;
     }
     // Component access by index (x, y, z, w).
     hkReal& operator[](int i) { return (&x)[i]; }

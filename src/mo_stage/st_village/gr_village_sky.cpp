@@ -26,13 +26,14 @@ void grVillageSky::update(float deltaFrame) {
 // The sky and the clouds get the colors of the time of day on their two tev colors each.
 void grVillageSky::changeColor() {
     if (m_scene != *m_sceneWork) {
-        nw4r::g3d::ResMatTevColor tevA;
-        nw4r::g3d::ResMatTevColor tevB;
+        nw4r::g3d::ResMdl model;
         nw4r::g3d::ResMat matA;
         nw4r::g3d::ResMat matB;
+        nw4r::g3d::ResMatTevColor tevA;
+        nw4r::g3d::ResMatTevColor tevB;
         nw4r::g3d::ScnMdl* scnMdl = *m_sceneModels;
         if (scnMdl != NULL) {
-            nw4r::g3d::ResMdl model = scnMdl->m_resMdl;
+            model = scnMdl->m_resMdl;
             if (model.IsValid()) {
                 matA = model.GetResMat("enkeiSky");
                 if (matA.IsValid()) {
@@ -45,60 +46,61 @@ void grVillageSky::changeColor() {
                             tevB = accessB.GetResMatTevColor(false);
                             if (tevB.IsValid()) {
                                 m_scene = *m_sceneWork;
+                                GXColor color;
                                 switch (m_scene) {
                                 case 0: {
-                                    GXColor color0 = { 0x30, 0x36, 0x66, 0xFF };
-                                    tevA.GXSetTevColor(GX_TEVREG0, color0);
-                                    GXColor color1 = { 0x00, 0x00, 0x32, 0xFF };
-                                    tevA.GXSetTevColor(GX_TEVREG1, color1);
-                                    GXColor color2 = { 0x00, 0x3C, 0x73, 0xFF };
-                                    tevB.GXSetTevColor(GX_TEVREG0, color2);
-                                    GXColor color3 = { 0x80, 0x80, 0x80, 0xFF };
-                                    tevB.GXSetTevColor(GX_TEVREG1, color3);
+                                    color = (GXColor){ 0x30, 0x36, 0x66, 0xFF };
+                                    tevA.GXSetTevColor(GX_TEVREG0, color);
+                                    color = (GXColor){ 0x00, 0x00, 0x32, 0xFF };
+                                    tevA.GXSetTevColor(GX_TEVREG1, color);
+                                    color = (GXColor){ 0x00, 0x3C, 0x73, 0xFF };
+                                    tevB.GXSetTevColor(GX_TEVREG0, color);
+                                    color = (GXColor){ 0x80, 0x80, 0x80, 0xFF };
+                                    tevB.GXSetTevColor(GX_TEVREG1, color);
                                     break;
                                 }
                                 case 1: {
-                                    GXColor color0 = { 0x00, 0x00, 0x78, 0xFF };
-                                    tevA.GXSetTevColor(GX_TEVREG0, color0);
-                                    GXColor color1 = { 0x00, 0x00, 0x1E, 0xFF };
-                                    tevA.GXSetTevColor(GX_TEVREG1, color1);
-                                    GXColor color2 = { 0x00, 0x32, 0x80, 0xFF };
-                                    tevB.GXSetTevColor(GX_TEVREG0, color2);
-                                    GXColor color3 = { 0x80, 0x80, 0x80, 0xFF };
-                                    tevB.GXSetTevColor(GX_TEVREG1, color3);
+                                    color = (GXColor){ 0x00, 0x00, 0x78, 0xFF };
+                                    tevA.GXSetTevColor(GX_TEVREG0, color);
+                                    color = (GXColor){ 0x00, 0x00, 0x1E, 0xFF };
+                                    tevA.GXSetTevColor(GX_TEVREG1, color);
+                                    color = (GXColor){ 0x00, 0x32, 0x80, 0xFF };
+                                    tevB.GXSetTevColor(GX_TEVREG0, color);
+                                    color = (GXColor){ 0x80, 0x80, 0x80, 0xFF };
+                                    tevB.GXSetTevColor(GX_TEVREG1, color);
                                     break;
                                 }
                                 case 2: {
-                                    GXColor color0 = { 0x7D, 0x44, 0x2D, 0xFF };
-                                    tevA.GXSetTevColor(GX_TEVREG0, color0);
-                                    GXColor color1 = { 0x14, 0x32, 0x6A, 0xFF };
-                                    tevA.GXSetTevColor(GX_TEVREG1, color1);
-                                    GXColor color2 = { 0x1A, 0x1D, 0x4F, 0xFF };
-                                    tevB.GXSetTevColor(GX_TEVREG0, color2);
-                                    GXColor color3 = { 0x74, 0x6E, 0x5A, 0xFF };
-                                    tevB.GXSetTevColor(GX_TEVREG1, color3);
+                                    color = (GXColor){ 0x7D, 0x44, 0x2D, 0xFF };
+                                    tevA.GXSetTevColor(GX_TEVREG0, color);
+                                    color = (GXColor){ 0x14, 0x32, 0x6A, 0xFF };
+                                    tevA.GXSetTevColor(GX_TEVREG1, color);
+                                    color = (GXColor){ 0x1A, 0x1D, 0x4F, 0xFF };
+                                    tevB.GXSetTevColor(GX_TEVREG0, color);
+                                    color = (GXColor){ 0x74, 0x6E, 0x5A, 0xFF };
+                                    tevB.GXSetTevColor(GX_TEVREG1, color);
                                     break;
                                 }
                                 case 3: {
-                                    GXColor color0 = { 0x00, 0x1E, 0x41, 0xFF };
-                                    tevA.GXSetTevColor(GX_TEVREG0, color0);
-                                    GXColor color1 = { 0x00, 0x00, 0x0F, 0xFF };
-                                    tevA.GXSetTevColor(GX_TEVREG1, color1);
-                                    GXColor color2 = { 0x00, 0x1E, 0x55, 0xFF };
-                                    tevB.GXSetTevColor(GX_TEVREG0, color2);
-                                    GXColor color3 = { 0x46, 0x50, 0x78, 0xFF };
-                                    tevB.GXSetTevColor(GX_TEVREG1, color3);
+                                    color = (GXColor){ 0x00, 0x1E, 0x41, 0xFF };
+                                    tevA.GXSetTevColor(GX_TEVREG0, color);
+                                    color = (GXColor){ 0x00, 0x00, 0x0F, 0xFF };
+                                    tevA.GXSetTevColor(GX_TEVREG1, color);
+                                    color = (GXColor){ 0x00, 0x1E, 0x55, 0xFF };
+                                    tevB.GXSetTevColor(GX_TEVREG0, color);
+                                    color = (GXColor){ 0x46, 0x50, 0x78, 0xFF };
+                                    tevB.GXSetTevColor(GX_TEVREG1, color);
                                     break;
                                 }
                                 case 4: {
-                                    GXColor color0 = { 0x00, 0x17, 0x32, 0xFF };
-                                    tevA.GXSetTevColor(GX_TEVREG0, color0);
-                                    GXColor color1 = { 0x00, 0x00, 0x0F, 0xFF };
-                                    tevA.GXSetTevColor(GX_TEVREG1, color1);
-                                    GXColor color2 = { 0x00, 0x1E, 0x55, 0xFF };
-                                    tevB.GXSetTevColor(GX_TEVREG0, color2);
-                                    GXColor color3 = { 0x46, 0x50, 0x78, 0xFF };
-                                    tevB.GXSetTevColor(GX_TEVREG1, color3);
+                                    color = (GXColor){ 0x00, 0x17, 0x32, 0xFF };
+                                    tevA.GXSetTevColor(GX_TEVREG0, color);
+                                    color = (GXColor){ 0x00, 0x00, 0x0F, 0xFF };
+                                    tevA.GXSetTevColor(GX_TEVREG1, color);
+                                    color = (GXColor){ 0x00, 0x1E, 0x55, 0xFF };
+                                    tevB.GXSetTevColor(GX_TEVREG0, color);
+                                    color = (GXColor){ 0x46, 0x50, 0x78, 0xFF };
+                                    tevB.GXSetTevColor(GX_TEVREG1, color);
                                     break;
                                 }
                                 }

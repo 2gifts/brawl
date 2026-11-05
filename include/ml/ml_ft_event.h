@@ -54,6 +54,7 @@ public:
     virtual void notifyEventSucceedHit(int entryId, u32 consecutiveHits, float totalDamage);
     virtual void notifyEventPikminMakeBloomAll(int entryId);
     virtual void notifyEventOnInput(int entryId);
+    virtual void notifyEventAppeal(int entryId, int appeal);
     virtual void notifyEventKnockout(int entryId);
     virtual void notifyEventHeartSwapStart(int entryId1, int entryId2);
     virtual void notifyEventHeartSwapEnd(int, int);

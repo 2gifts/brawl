@@ -1,5 +1,5 @@
 // Havok translation unit hkBvTreeAgent.o (main.dol 0x802A3A4C-0x802A8E1C).
-// Not yet decompiled. Functions in address order (method names from the Havok TU map; classes still to be identified):
+// Functions in address order (method names from the Havok TU map):
 //   0x802A3A4C    84  __ct   [map: hkBvTreeAgent____ct]
 //   0x802A3B30   248  registerAgent   [map: hkBvTreeAgent__registerAgent]
 //   0x802A3C28   120  createBvTreeShapeAgent   [map: hkBvTreeAgent__createBvTreeShapeAgent]
@@ -39,7 +39,17 @@
 //   0x802A8E08    20  __sinit_\hkBvTreeAgent_cpp   [map: hkBvTreeAgentcpp____sinit_]
 
 #include <havok/hkBvTreeAgent.h>
+#include <havok/hkCollisionInput.h>
+#include <havok/hkSymmetricAgentFlipCollectors.h>
+#include <havok/hkSymmetricAgentProcessCollision.h>
 #include <havok/hkCollisionDispatcher.h>
+#include <havok/hkBvTreeShape.h>
+#include <havok/hkAabb.h>
+#include <havok/hkTransform.h>
+#include <havok/hkMonitorStream.h>
+#include <havok/hkCdBody.h>
+#include <havok/hkMotionState.h>
+#include <havok/hkCdBodyPairCollector.h>
 
 hkBvTreeAgent::hkBvTreeAgent(hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
     unk30[0] = 0.0f;
@@ -74,56 +84,296 @@ void hkBvTreeAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     dispatcher->registerCollisionAgent(&funcs, 3, 3);
 }
 
-hkBvTreeAgent* hkBvTreeAgent::createBvTreeShapeAgent(void* a, void* b, void* c, hkContactMgr* contactMgr) {
-    hkBvTreeAgent* agent = (hkBvTreeAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkBvTreeAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkBvTreeAgent);
-    new (agent) hkSymmetricAgentLinearCast_13hkBvTreeAgent(contactMgr);
-    return agent;
+hkBvTreeAgent* hkBvTreeAgent::createBvTreeShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                     hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkSymmetricAgentLinearCast_13hkBvTreeAgent(contactMgr);
 }
 
-hkBvTreeAgent* hkBvTreeAgent::createShapeBvAgent(void* a, void* b, void* c, hkContactMgr* contactMgr) {
-    hkBvTreeAgent* agent = (hkBvTreeAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkBvTreeAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkBvTreeAgent);
-    new (agent) hkBvTreeAgent(contactMgr);
-    return agent;
+hkBvTreeAgent* hkBvTreeAgent::createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                 hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkBvTreeAgent(contactMgr);
 }
 
-hkBvTreeAgent* hkBvTreeAgent::createBvBvAgent(void* a, void* b, void* c, hkContactMgr* contactMgr) {
-    // HYPOTHESIS: the sort key is the float at 0xA0 of each body's motion (not identified yet).
-    float keyA = *(float*)((u8*)((hkCdBody*)a)->m_motion + 0xA0);
-    float keyB = *(float*)((u8*)((hkCdBody*)b)->m_motion + 0xA0);
-    if (keyA < keyB) {
-        hkBvTreeAgent* agent = (hkBvTreeAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkBvTreeAgent), 0x1d);
-        agent->m_memSizeAndFlags = sizeof(hkBvTreeAgent);
-        new (agent) hkBvTreeAgent(contactMgr);
-        return agent;
+// The tree with the smaller object radius is walked as the shape side.
+hkBvTreeAgent* hkBvTreeAgent::createBvBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                              hkContactMgr* contactMgr) {
+    hkReal radiusA = ((const hkMotionState*)bodyA.m_motion)->m_objectRadius;
+    hkReal radiusB = ((const hkMotionState*)bodyB.m_motion)->m_objectRadius;
+    if (radiusA < radiusB) {
+        return new hkBvTreeAgent(contactMgr);
     }
-    hkBvTreeAgent* agent = (hkBvTreeAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkBvTreeAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkBvTreeAgent);
-    new (agent) hkSymmetricAgentLinearCast_13hkBvTreeAgent(contactMgr);
-    return agent;
+    return new hkSymmetricAgentLinearCast_13hkBvTreeAgent(contactMgr);
 }
 
-void hkSymmetricAgentLinearCast_13hkBvTreeAgent::getPenetrations(void* a, void* b, void* c, void* target) {
-    hkSymmetricFlagTarget wrap((hkPenetrationTarget*)target);
+// The entries without an agent are skipped (the child was filtered out).
+void hkBvTreeAgent::cleanup() {
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    for (; entry != end; entry++) {
+        if (entry->m_collisionAgent != 0) {
+            entry->m_collisionAgent->cleanup();
+        }
+    }
+    delete this;
+}
+
+void hkBvTreeAgent::invalidateTim(void* arg) {
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    for (; entry != end; entry++) {
+        if (entry->m_collisionAgent != 0) {
+            entry->m_collisionAgent->invalidateTim(arg);
+        }
+    }
+}
+
+void hkBvTreeAgent::warpTime(float t0, float t1, void* arg) {
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    for (; entry != end; entry++) {
+        if (entry->m_collisionAgent != 0) {
+            entry->m_collisionAgent->warpTime(t0, t1, arg);
+        }
+    }
+}
+
+void hkSymmetricAgentLinearCast_13hkBvTreeAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
+    hkSymmetricAgentFlipBodyCollector wrap(target);
     hkBvTreeAgent::getPenetrations(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticGetPenetrations(void* a, void* b, void* c, void* target) {
-    hkSymmetricFlagTarget wrap((hkPenetrationTarget*)target);
+void hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
+    hkSymmetricAgentFlipBodyCollector wrap(target);
     hkBvTreeAgent::staticGetPenetrations(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_13hkBvTreeAgent::getClosestPoints(void* a, void* b, void* c, void* target) {
-    hkSymmetricClosestTarget wrap((hkPenetrationTarget*)target);
+void hkSymmetricAgentLinearCast_13hkBvTreeAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
+    hkSymmetricAgentFlipCollector wrap(target);
     hkBvTreeAgent::getClosestPoints(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticGetClosestPoints(void* a, void* b, void* c, void* target) {
-    hkSymmetricClosestTarget wrap((hkPenetrationTarget*)target);
+void hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
+    hkSymmetricAgentFlipCollector wrap(target);
     hkBvTreeAgent::staticGetClosestPoints(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_13hkBvTreeAgent::updateShapeCollectionFilter(void* a, void* b, void* c) {
+void hkSymmetricAgentLinearCast_13hkBvTreeAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c) {
     hkBvTreeAgent::updateShapeCollectionFilter(b, a, c);
+}
+
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkSymmetricAgent_13hkBvTreeAgent_::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkBvTreeAgent::linearCast(b, a, flippedInput, &flipped, &flippedStart);
+    } else {
+        hkBvTreeAgent::linearCast(b, a, flippedInput, &flipped, 0);
+    }
+}
+
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = c;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
+    if (d != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
+        hkBvTreeAgent::staticLinearCast(b, a, flippedInput, &flipped, &flippedStart);
+    } else {
+        hkBvTreeAgent::staticLinearCast(b, a, flippedInput, &flipped, 0);
+    }
+}
+
+void hkSymmetricAgentLinearCast_13hkBvTreeAgent::processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d) {
+    hkSymmetricAgent_processCollision<hkBvTreeAgent>(this, a, b, c, d);
+}
+
+// Static queries against a BV tree shape (B): A's bounding box, expressed in B's space, is queried against the tree and
+// the dispatcher's function for A against each hit child of B's collection runs (after the collection filter).
+// NONMATCHING (86-91%): register coloring only (the loop end and the collection swap r29/r30, the timer's scratch
+// registers), plus the child shape stored before the key reload; permuter 180 s found nothing valid.
+void hkBvTreeAgent::staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                           void* target) {
+    hkShapeContainer::ShapeBuffer shapeBuffer;
+    const u32* end;
+    HK_TIMER_BEGIN_LIST("BvTree", "QueryTree");
+    const hkTransform& ta = *(const hkTransform*)bodyA.m_motion;
+    const hkTransform& tb = *(const hkTransform*)bodyB.m_motion;
+    hkTransform bTa;
+    bTa.setMulInverseMul(tb, ta);
+    hkAabb aabb;
+    bodyA.m_shape->getAabb(bTa, input.unk8, aabb);
+    hkInplaceArray<u32, 128> hitList;
+    const hkBvTreeShape* bvTree = (const hkBvTreeShape*)bodyB.m_shape;
+    bvTree->queryAabb(aabb, hitList);
+    HK_TIMER_SPLIT_LIST("NarrowPhase");
+    int typeA = bodyA.m_shape->getType();
+    end = hitList.begin() + hitList.getSize();
+    hkCdBody childBody(&bodyB);
+    const hkShapeCollection* collection = bvTree->m_collection;
+    for (const u32* key = hitList.begin(); key != end; key++) {
+        if (input.m_filter->isCollisionEnabled(input, bodyA, bodyB, *collection, *key)) {
+            const hkShape* child = collection->m_container.getChildShape(*key, shapeBuffer);
+            u32 childKey = *key;
+            childBody.m_shape = (hkShape*)child;
+            childBody.m_shapeKey = childKey;
+            int typeB = child->getType();
+            typedef void (*QueryFunc)(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+            ((QueryFunc)input.m_dispatcher->getGetClosestPointsFunc(typeA, typeB))(bodyA, childBody, input, target);
+        }
+    }
+    HK_TIMER_END_LIST();
+}
+
+void hkBvTreeAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* startTarget) {
+    HK_TIMER_BEGIN_LIST("BvTree", "QueryTree");
+    prepareCollisionPartnersLinearCast(a, b, c);
+    HK_TIMER_SPLIT_LIST("NarrowPhase");
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    hkCdBody childBody(&b);
+    const hkBvTreeShape* bvTree = (const hkBvTreeShape*)b.m_shape;
+    const hkShapeCollection* collection = bvTree->m_collection;
+    hkShapeContainer::ShapeBuffer shapeBuffer;
+    for (; entry != end; entry++) {
+        const hkShape* child = collection->m_container.getChildShape(entry->m_key, shapeBuffer);
+        u32 key = entry->m_key;
+        childBody.m_shape = (hkShape*)child;
+        childBody.m_shapeKey = key;
+        entry->m_collisionAgent->linearCast(a, childBody, c, target, startTarget);
+    }
+    HK_TIMER_END_LIST();
+}
+
+void hkBvTreeAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
+    HK_TIMER_BEGIN_LIST("BvTree", "QueryTree");
+    prepareCollisionPartners(a, b, c);
+    HK_TIMER_SPLIT_LIST("NarrowPhase");
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    hkCdBody childBody(&b);
+    const hkBvTreeShape* bvTree = (const hkBvTreeShape*)b.m_shape;
+    const hkShapeCollection* collection = bvTree->m_collection;
+    hkShapeContainer::ShapeBuffer shapeBuffer;
+    for (; entry != end; entry++) {
+        const hkShape* child = collection->m_container.getChildShape(entry->m_key, shapeBuffer);
+        u32 key = entry->m_key;
+        childBody.m_shape = (hkShape*)child;
+        childBody.m_shapeKey = key;
+        entry->m_collisionAgent->getClosestPoints(a, childBody, c, target);
+    }
+    HK_TIMER_END_LIST();
+}
+
+// Brings the child agent list up to date with the tree, then asks each child's agent.
+void hkBvTreeAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
+    HK_TIMER_BEGIN_LIST("BvTree", "QueryTree");
+    prepareCollisionPartners(a, b, c);
+    HK_TIMER_SPLIT_LIST("NarrowPhase");
+    hkBvAgentEntryInfo* end = m_entries.begin() + m_entries.getSize();
+    hkBvAgentEntryInfo* entry = m_entries.begin();
+    hkCdBody childBody(&b);
+    const hkBvTreeShape* bvTree = (const hkBvTreeShape*)b.m_shape;
+    const hkShapeCollection* collection = bvTree->m_collection;
+    hkShapeContainer::ShapeBuffer shapeBuffer;
+    for (; entry != end; entry++) {
+        const hkShape* child = collection->m_container.getChildShape(entry->m_key, shapeBuffer);
+        u32 key = entry->m_key;
+        childBody.m_shape = (hkShape*)child;
+        childBody.m_shapeKey = key;
+        entry->m_collisionAgent->getPenetrations(a, childBody, c, target);
+        if (((hkCdBodyPairCollector*)target)->m_earlyOut) {
+            break;
+        }
+    }
+    HK_TIMER_END_LIST();
+}
+
+void hkBvTreeAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                          void* target) {
+    hkShapeContainer::ShapeBuffer shapeBuffer;
+    const u32* end;
+    HK_TIMER_BEGIN_LIST("BvTree", "QueryTree");
+    const hkTransform& ta = *(const hkTransform*)bodyA.m_motion;
+    const hkTransform& tb = *(const hkTransform*)bodyB.m_motion;
+    hkTransform bTa;
+    bTa.setMulInverseMul(tb, ta);
+    hkAabb aabb;
+    bodyA.m_shape->getAabb(bTa, input.unk8, aabb);
+    hkInplaceArray<u32, 128> hitList;
+    const hkBvTreeShape* bvTree = (const hkBvTreeShape*)bodyB.m_shape;
+    bvTree->queryAabb(aabb, hitList);
+    HK_TIMER_SPLIT_LIST("NarrowPhase");
+    int typeA = bodyA.m_shape->getType();
+    end = hitList.begin() + hitList.getSize();
+    hkCdBody childBody(&bodyB);
+    const hkShapeCollection* collection = bvTree->m_collection;
+    for (const u32* key = hitList.begin(); key != end; key++) {
+        if (input.m_filter->isCollisionEnabled(input, bodyA, bodyB, *collection, *key)) {
+            const hkShape* child = collection->m_container.getChildShape(*key, shapeBuffer);
+            u32 childKey = *key;
+            childBody.m_shape = (hkShape*)child;
+            childBody.m_shapeKey = childKey;
+            int typeB = child->getType();
+            typedef void (*QueryFunc)(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+            ((QueryFunc)input.m_dispatcher->getGetPenetrationsFunc(typeA, typeB))(bodyA, childBody, input, target);
+            if (((hkCdBodyPairCollector*)target)->m_earlyOut) {
+                break;
+            }
+        }
+    }
+    HK_TIMER_END_LIST();
+}
+
+// The linear cast queries the box swept along the cast path (the path turned into B's space).
+void hkBvTreeAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, hkLinearCastCollisionInput& input,
+                                     void* target, void* startTarget) {
+    hkShapeContainer::ShapeBuffer shapeBuffer;
+    const u32* end;
+    HK_TIMER_BEGIN_LIST("BvTree", "QueryTree");
+    const hkTransform& ta = *(const hkTransform*)bodyA.m_motion;
+    const hkTransform& tb = *(const hkTransform*)bodyB.m_motion;
+    hkTransform bTa;
+    bTa.setMulInverseMul(tb, ta);
+    hkAabb aabb;
+    bodyA.m_shape->getAabb(bTa, input.unk8, aabb);
+    {
+        hkVector4 pathB;
+        pathB.setRotatedInverseDir(((const hkTransform*)bodyB.m_motion)->m_rotation, input.m_path);
+        hkVector4 zero;
+        zero.setZero4();
+        hkVector4 pathMin;
+        pathMin.setMin4(zero, pathB);
+        hkVector4 pathMax;
+        pathMax.setMax4(zero, pathB);
+        aabb.m_min.add4(pathMin);
+        aabb.m_max.add4(pathMax);
+    }
+    hkInplaceArray<u32, 128> hitList;
+    const hkBvTreeShape* bvTree = (const hkBvTreeShape*)bodyB.m_shape;
+    bvTree->queryAabb(aabb, hitList);
+    HK_TIMER_SPLIT_LIST("NarrowPhase");
+    int typeA = bodyA.m_shape->getType();
+    end = hitList.begin() + hitList.getSize();
+    hkCdBody childBody(&bodyB);
+    const hkShapeCollection* collection = bvTree->m_collection;
+    for (const u32* key = hitList.begin(); key != end; key++) {
+        if (input.m_filter->isCollisionEnabled(input, bodyA, bodyB, *collection, *key)) {
+            const hkShape* child = collection->m_container.getChildShape(*key, shapeBuffer);
+            u32 childKey = *key;
+            childBody.m_shape = (hkShape*)child;
+            childBody.m_shapeKey = childKey;
+            int typeB = child->getType();
+            typedef void (*CastFunc)(const hkCdBody&, const hkCdBody&, hkLinearCastCollisionInput&, void*, void*);
+            ((CastFunc)input.m_dispatcher->getLinearCastFunc(typeA, typeB))(bodyA, childBody, input, target, startTarget);
+        }
+    }
+    HK_TIMER_END_LIST();
 }

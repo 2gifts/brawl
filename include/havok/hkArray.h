@@ -61,9 +61,11 @@ struct hkArray : hkArrayBase {
     bool mustDeallocate() const {
         return (m_capacityAndFlags & DONT_DEALLOCATE_FLAG) == 0;
     }
+    // The flag is tested in place and the size taken through getCapacity(), which reloads the word (hkBvTreeAgent's
+    // static queries, where copy propagation is off, keep the test as one clrrwi.).
     ~hkArray() {
-        if (mustDeallocate()) {
-            hkThreadMemory::s_instance->deallocateChunk(m_data, (m_capacityAndFlags & CAPACITY_MASK) * sizeof(T), 0x15);
+        if ((m_capacityAndFlags & DONT_DEALLOCATE_FLAG) == 0) {
+            hkThreadMemory::s_instance->deallocateChunk(m_data, getCapacity() * sizeof(T), 0x15);
         }
     }
 
@@ -135,7 +137,7 @@ struct hkArray : hkArrayBase {
     }
     // Appends an uninitialised element and returns it.
     T& expandOne() {
-        if (m_size == (m_capacityAndFlags & CAPACITY_MASK)) {
+        if (m_size == getCapacity()) {
             hkArrayUtil::_reserveMore(this, sizeof(T));
         }
         return ((T*)m_data)[m_size++];

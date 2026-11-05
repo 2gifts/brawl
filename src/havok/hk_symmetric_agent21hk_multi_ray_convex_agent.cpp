@@ -10,29 +10,68 @@
 //   0x802BAB20     4  updateShapeCollectionFilter   [map: hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent___updateShapeCollectionFilter]
 
 #include <havok/hkMultiRayConvexAgent.h>
+#include <havok/hkCollisionInput.h>
+
+// Stand-ins for hkIterativeLinearCastAgent::linearCast / staticLinearCast (hkCollisionAgent.o, not written yet;
+// the multi-ray agent inherits them).
+extern "C" void fn_802B7A14(void* self, const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& input,
+                            hkCdPointCollector* collector,
+                            hkCdPointCollector* startCollector);
+extern "C" void fn_802B7FD0(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& input,
+                            hkCdPointCollector* collector,
+                            hkCdPointCollector* startCollector);
+
+// The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
+// the points back.
+void hkSymmetricAgent_21hkMultiRayConvexAgent_::linearCast(const hkCdBody& unk0, const hkCdBody& unk1, hkLinearCastCollisionInput& unk2, void* unk3, void* unk4) {
+    const hkLinearCastCollisionInput& input = unk2;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, unk3);
+    if (unk4 != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, unk4);
+        fn_802B7A14(this, unk1, unk0, flippedInput, &flipped, &flippedStart);
+    } else {
+        fn_802B7A14(this, unk1, unk0, flippedInput, &flipped, 0);
+    }
+}
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
-void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkMultiRayConvexAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkMultiRayConvexAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkMultiRayConvexAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkMultiRayConvexAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::updateShapeCollectionFilter(void* unk0, void* unk1, void* unk2) {}
+void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::staticLinearCast(const hkCdBody& unk0, const hkCdBody& unk1, hkLinearCastCollisionInput& unk2, void* unk3,
+                                                                          void* unk4) {
+    const hkLinearCastCollisionInput& input = unk2;
+    hkLinearCastCollisionInput flippedInput = input;
+    flippedInput.m_path.setNeg4(input.m_path);
+    hkSymmetricAgentFlipCastCollector flipped(input.m_path, unk3);
+    if (unk4 != 0) {
+        hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, unk4);
+        fn_802B7FD0(unk1, unk0, flippedInput, &flipped, &flippedStart);
+    } else {
+        fn_802B7FD0(unk1, unk0, flippedInput, &flipped, 0);
+    }
+}
+
+void hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::updateShapeCollectionFilter(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2) {}
 
 hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_::~hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_() {}
 hkSymmetricAgent_21hkMultiRayConvexAgent_::~hkSymmetricAgent_21hkMultiRayConvexAgent_() {}

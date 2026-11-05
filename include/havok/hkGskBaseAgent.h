@@ -18,11 +18,11 @@ struct hkGskBaseAgent : hkCollisionAgent {
     float unk28;          // 0x28
     float unk2C;          // 0x2C
 
-    hkGskBaseAgent(hkCdBody* bodyA, hkCdBody* bodyB, hkContactMgr* contactMgr);
+    hkGskBaseAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkContactMgr* contactMgr);
     virtual ~hkGskBaseAgent();
 
     virtual void cleanup();
-    virtual void processCollision(void* unk0, void* unk1, void* unk2, void* unk3);
+    virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, hkProcessCollisionInput& unk2, void* unk3);
     virtual void invalidateTim(void* arg);
     virtual void warpTime(float oldTime, float newTime, void* arg);
 };

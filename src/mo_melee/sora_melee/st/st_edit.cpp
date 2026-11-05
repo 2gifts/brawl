@@ -3,6 +3,23 @@
 #include <string.h>
 #include <types.h>
 #include <st/st_area_manager.h>
+#include <snd/snd_system.h>
+
+grGimmickEditSpring::~grGimmickEditSpring() { }
+
+void grGimmickEditSpring::setMotionOn() {
+    m_motionRatio = 1.0f;
+    changeNodeAnim(1, 0);
+    m_state = 1;
+    m_animFrame = 0.0f;
+}
+
+void grGimmickEditSpring::setMotionOff() {
+    changeNodeAnim(0, 0);
+    g_sndSystem->playSE(static_cast<SndID>(0x1D9A), -1, 0, 0, -1);
+    m_state = 2;
+    m_animFrame = 0.0f;
+}
 
 // Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
 extern "C" {
@@ -249,6 +266,119 @@ void stEdit::createMoveController(u32 countA, u32 countB) {
         m_linkMaskB = static_cast<u32*>(gfHeapManager::alloc(Heaps::StageInstance, bytes, 0x20));
         if (m_linkMaskB != NULL) {
             memset(m_linkMaskB, 0, bytes);
+        }
+    }
+}
+
+// grCollision::removeLinkTarget (the map name); src/mo_stage/st_stageedit/st_stageedit.cpp calls it by this stand-in name.
+extern "C" void fn_801112FC(grCollision* collision, grCollision* target);
+// grCollision::updateLinkVirtual (the map name); src/mo_stage/st_stageedit/st_stageedit.cpp calls it by this stand-in name.
+extern "C" void fn_8011135C(grCollision* collision, grCollision* target);
+
+void stEdit::update(float deltaFrame) {
+    u8 fallCount = m_fallBlockCount;
+    if (fallCount != 0 && m_fallBlocks != NULL) {
+        for (u32 i = 0; i < fallCount; i++) {
+            ctrlFallBlock(deltaFrame, &m_fallBlocks[i]);
+        }
+    }
+    if (m_linkDelay > 0) {
+        m_linkDelay--;
+        if (m_linkDelay == 0) {
+            int count = m_blockCount;
+            stEditBlock* block = m_blocks;
+            grCollision* collision;
+            int i;
+            for (i = 0; i < count; i++, block++) {
+                collision = block->m_collision;
+                if (collision != NULL) {
+                    collision->setVLinkClearStatus(false);
+                    collision->setVLinkUpdateStatus(false);
+                }
+            }
+        }
+    } else {
+        grCollision** firstColl;
+        u32* pMask;
+        grCollision** qColl;
+        u32* qMask;
+        u32 countA;
+        u32 countB;
+        grCollision** collA = m_linkCollA;
+        countA = m_linkCountA;
+        countB = m_linkCountB;
+        grCollision** collB = m_linkCollB;
+        u32* maskA = m_linkMaskA;
+        u32* maskB = m_linkMaskB;
+        if (collA == NULL || maskA == NULL) {
+            countA = 0;
+        }
+        if (collB == NULL || maskB == NULL) {
+            countB = 0;
+        }
+        if (countA != 0) {
+            grCollision** pColl = collA;
+            for (u32 i = 0; i < countA; i++) {
+                if (*pColl != NULL) {
+                    (*pColl)->setVLinkUpdateStatus(true);
+                }
+                pColl++;
+            }
+            firstColl = collA;
+            pMask = maskA;
+            for (u32 i = 0; i < countA; i++) {
+                grCollision* first = *firstColl;
+                if (first != NULL) {
+                    u32 mask;
+                    u32 j = i + 1;
+                    mask = *pMask;
+                    qColl = collA + j;
+                    qMask = maskA + j;
+                    for (; j < countA; j++) {
+                        grCollision* second = *qColl;
+                        if (second != NULL && first != second && (mask & *qMask & 0x3FFFF) != 0 &&
+                            (mask & *qMask & 0xFFFC0000) != 0) {
+                            fn_801112FC(first, second);
+                            fn_801112FC(second, first);
+                            fn_8011135C(first, second);
+                            fn_8011135C(second, first);
+                        }
+                        qColl++;
+                        qMask++;
+                    }
+                }
+                firstColl++;
+                pMask++;
+            }
+            for (u32 i = 0; i < countB; i++) {
+                grCollision* first = *collB;
+                if (first != NULL) {
+                    first->setVLinkUpdateStatus(true);
+                    u32 mask = *maskB;
+                    qColl = collA;
+                    qMask = maskA;
+                    for (u32 j = 0; j < countA; j++) {
+                        grCollision* second = *qColl;
+                        if (second != NULL && (mask & *qMask & 0x3FFFF) != 0 && (mask & *qMask & 0xFFFC0000) != 0) {
+                            fn_801112FC(first, second);
+                            fn_801112FC(second, first);
+                            fn_8011135C(first, second);
+                            fn_8011135C(second, first);
+                        }
+                        qColl++;
+                        qMask++;
+                    }
+                    first->setVLinkUpdateStatus(false);
+                }
+                collB++;
+                maskB++;
+            }
+            for (u32 i = 0; i < countA; i++) {
+                if (*collA != NULL) {
+                    (*collA)->setVLinkUpdateStatus(false);
+                }
+                collA++;
+            }
         }
     }
 }

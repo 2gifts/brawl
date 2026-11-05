@@ -3,6 +3,7 @@
 #include <havok/hkGskBaseAgent.h>
 
 struct hkContactMgr;
+struct hkCollisionInput;
 
 // One entry of the point list of hkGskfAgent (8 bytes, array starts at 0x34). Key 0xFFFF marks a free entry.
 struct hkGskfPoint {
@@ -22,7 +23,7 @@ struct hkGskfAgent : hkGskBaseAgent {
     int unk30; // 0x30 list header (cleared by the constructor)
     u8 unk34[0x80 - 0x34]; // 0x34 point entries (see points()) and the rest of the object
 
-    hkGskfAgent(hkCdBody* bodyA, hkCdBody* bodyB, hkContactMgr* contactMgr);
+    hkGskfAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkContactMgr* contactMgr);
 
     u8 pointCount() {
         return ((u8*)this)[0x32];
@@ -33,7 +34,8 @@ struct hkGskfAgent : hkGskBaseAgent {
 
     // Allocates a hkGskfAgent (0x80 bytes) when contactMgr is set, otherwise a hkGskBaseAgent (0x30 bytes).
     // HYPOTHESIS: the third parameter is unused.
-    static hkGskBaseAgent* createGskfAgent(hkCdBody* bodyA, hkCdBody* bodyB, void* unk2, hkContactMgr* contactMgr);
+    static hkGskBaseAgent* createGskfAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                           hkContactMgr* contactMgr);
 
     virtual void cleanup();
     virtual void removePoint(u16 key);

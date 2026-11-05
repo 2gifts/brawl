@@ -222,5 +222,7 @@ public:
     void _createFriendMii(gfMiiCreateState* state);
     bool getFriendMiiTexture(u16 index, GXTexObj* texObj);
     void _drawBGTile_Pre(Mtx mtx);
+    void _clearZBuffer();
+    u16 _renderTexture(gfMiiModelArray* models, gfMiiTextureArray* textures, u16 count);
 };
 static_assert(sizeof(gfMii) == 0x16C, "Class is the wrong size!");

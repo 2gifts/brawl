@@ -1,13 +1,15 @@
 #pragma once
 
 #include <havok/hkCollisionAgent.h>
+#include <havok/hkCdBody.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
 
 struct hkCollisionDispatcher;
+struct hkCollisionInput;
 
-// Collision agent for triangle x sphere (triangle first in the pair). Object size 0x20: the 0x08 word is the
-// contact manager, 0x0C a 16-bit slot released by cleanup when it is not 0xFFFF, and 0x10 a 16-byte sub-object
-// that the constructor fills from the triangle argument (fn_80325184, not recovered yet).
+// Collision agent for sphere x triangle (sphere first; the triangle-first pairs use the symmetric variant). Object size
+// 0x20: the 0x08 word is the contact manager, 0x0C a 16-bit slot released by cleanup when it is not 0xFFFF, and 0x10 the
+// triangle's closest-point cache (hkCollideTriangleUtil::setupClosestPointTriangleCache).
 struct hkSphereTriangleAgent : hkCollisionAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
@@ -15,36 +17,39 @@ struct hkSphereTriangleAgent : hkCollisionAgent {
     u16 unkE;     // 0x0E padding
     u8 unk10[16]; // 0x10 HYPOTHESIS: sub-object, see the constructor
 
-    // src: the triangle data pointer (the sub-object is copied from src + 0x10).
-    hkSphereTriangleAgent(hkContactMgr* contactMgr, void* src);
+    // triangleBody: the body holding the triangle; the triangle closest-point cache at 0x10 is built from its vertices.
+    hkSphereTriangleAgent(const hkCdBody& triangleBody, hkContactMgr* contactMgr);
     virtual ~hkSphereTriangleAgent() {} // inline: the symmetric destructor calls it without a bl
 
     // Registers the triangle/sphere agent functions with the dispatcher (two pairs, see the .cpp).
     static void registerAgent(hkCollisionDispatcher* dispatcher);
-    // Triangle first: the triangle is the first argument (unk0).
-    static hkSphereTriangleAgent* createTriangleSphereAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
-    // Sphere first: the triangle is the second argument (unk1).
-    static hkSphereTriangleAgent* createSphereTriangleAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
+    // Triangle first: the triangle is bodyA; builds the symmetric variant.
+    static hkSphereTriangleAgent* createTriangleSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                            hkCollisionInput& input, hkContactMgr* contactMgr);
+    // Sphere first: the triangle is bodyB; builds the plain agent.
+    static hkSphereTriangleAgent* createSphereTriangleAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                            hkCollisionInput& input, hkContactMgr* contactMgr);
 
     virtual void cleanup();
-    virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
+    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
     // The first out-of-line virtual getPenetrations is the key function (vtable in this unit).
-    virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) __attribute__((never_inline));
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) __attribute__((never_inline));
     // Destructor of the symmetric triangle agent; defined in hkSphereTriangleAgent.cpp.
-    static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
 };
 
 // Flipped (symmetric) variant; the class name follows the Havok TU map (see hkSphereBoxAgent.h).
 struct hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_ : hkSphereTriangleAgent {
-    hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_(hkContactMgr* contactMgr, void* src)
-        : hkSphereTriangleAgent(contactMgr, src) {}
+    hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_(const hkCdBody& triangleBody, hkContactMgr* contactMgr)
+        : hkSphereTriangleAgent(triangleBody, contactMgr) {}
 
-    virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
     virtual void updateShapeCollectionFilter() {}
+    static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
     virtual ~hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_();
 
-    static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
+    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
 };

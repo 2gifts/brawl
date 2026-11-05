@@ -10,6 +10,7 @@ struct hkContactMgr;
 struct hkMoppAgent : hkBvTreeAgent {
     hkMoppAgent(hkContactMgr* contactMgr) __attribute__((never_inline));
     virtual ~hkMoppAgent() {}
+    static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d); // not written yet
 };
 
 // HYPOTHESIS: symmetric variant of hkMoppAgent. The class name is the map name (hkSymmetricAgentLinearCast<hkMoppAgent>).
@@ -17,9 +18,16 @@ struct hkMoppAgent : hkBvTreeAgent {
 struct hkSymmetricAgentLinearCast_11hkMoppAgent : hkMoppAgent {
     hkSymmetricAgentLinearCast_11hkMoppAgent(hkContactMgr* contactMgr) : hkMoppAgent(contactMgr) {}
 
-    virtual void getPenetrations(void* a, void* b, void* c, void* target);
-    static void staticGetPenetrations(void* a, void* b, void* c, void* target);
-    virtual void getClosestPoints(void* a, void* b, void* c, void* target);
-    static void staticGetClosestPoints(void* a, void* b, void* c, void* target);
-    virtual void updateShapeCollectionFilter(void* a, void* b, void* c);
+    virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    static void staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
+    virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c);
+    static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d);
+};
+
+// HYPOTHESIS: hkSymmetricAgent<hkMoppAgent> (map name); only its linear cast is written.
+struct hkSymmetricAgent_11hkMoppAgent_ : hkMoppAgent {
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };
