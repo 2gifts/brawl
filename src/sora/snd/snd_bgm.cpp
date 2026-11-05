@@ -42,7 +42,7 @@ sndBgmRateSystem* sndBgmRateSystem::create() {
 }
 
 void sndBgmRateSystem::setupBGMRate() {
-    m_rateData = g_GameGlobal->m_record->m_bgmRateData;
+    m_rateData = reinterpret_cast<sndBgmRateData*>(g_GameGlobal->m_record->_358C);  // HYPOTHESIS: the rate table of sndBgmRateSystem
     {
         utRelocate relocate(static_cast<u8*>(m_rateArchive), m_rateArchiveSize);
         sndBgmRateSource* source = static_cast<sndBgmRateSource*>(relocate.getPublicAddress("snd_bgmSysData"));
