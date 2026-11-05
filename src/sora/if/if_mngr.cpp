@@ -75,8 +75,6 @@ public:
 // HYPOTHESIS: map names IfMngr::realizeResource, freeResource
 extern "C" void fn_800DBB10(IfMngr* mngr);
 extern "C" void fn_800DBD3C(IfMngr* mngr);
-// HYPOTHESIS: map names IfCenter::main, IfPlayer::main, IfPlayer::arrowMain
-extern "C" void fn_800DE360(void* center);
 extern "C" void fn_800E244C(IfPlayer* player);
 // HYPOTHESIS: map names IfAdvBoss::main, IfPhoto::main, IfWifiIntrMenu::main
 extern "C" void fn_80108E5C(IfAdvBoss* boss);
@@ -92,8 +90,6 @@ extern "C" void fn_800F00D4(void* photo, int arg1, int arg2, int playerNo, bool 
 extern "C" void fn_800FBF90(void* menu);
 // HYPOTHESIS: map names muNoticeWndTask::dispSubMsg
 extern "C" void fn_800BF928(muNoticeWndTask* wnd, const char* text);
-// HYPOTHESIS: map names IfCenter::dispKumiteKills
-extern "C" void fn_800DF4AC(void* center, int kills);
 // HYPOTHESIS: map names IfAdvBoss::eraseBoss
 extern "C" void fn_80109540(IfAdvBoss* boss);
 // HYPOTHESIS: map names nteFileDataReplay::__ct, setData
@@ -185,7 +181,7 @@ void IfMngr::main() {
         paused = static_cast<IfPhoto*>(m_ifPhoto)->unk70 == 1;
     }
     if (!paused) {
-        fn_800DE360(m_ifCenter);
+        reinterpret_cast<IfCenter*>(m_ifCenter)->main();
         for (int i = 0; i < MAX_PLAYERS; i++) {
             if (m_ifPlayers[i] != NULL) {
                 fn_800E244C(m_ifPlayers[i]);
@@ -336,7 +332,7 @@ void IfMngr::eraseCorps() {
 }
 
 void IfMngr::dispKumiteKills(int kills) {
-    fn_800DF4AC(m_ifCenter, kills);
+    reinterpret_cast<IfCenter*>(m_ifCenter)->dispKumiteKills(kills);
 }
 
 void IfMngr::closeTrainingMenu() {

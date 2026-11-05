@@ -35,7 +35,6 @@ struct IfAdvDispInfo {
 };
 
 extern "C" s32 fn_80109C88(s32 state);
-extern "C" void fn_800DE360(s32 value);
 extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 
 extern "C" {
@@ -57,8 +56,6 @@ void fn_800E023C(IfPlayer* player, int arg1, int arg2, nw4r::g3d::ResFile* resFi
 void fn_800E244C(IfPlayer* player);
 void fn_800E26B8(IfPlayer* player);
 void fn_800DD6E4(IfCenter* center, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2, int arg1, int arg2);
-// HYPOTHESIS: the fourth parameter is a bool (its argument is loaded out of order like a narrower type).
-void fn_800DDA50(IfCenter* center, nw4r::g3d::ScnGroup* group, int arg1, bool arg2, int arg3, int arg4);
 void fn_8010BDD0(nw4r::g3d::ResFile* resFile);
 void fn_8010BF3C(nw4r::g3d::ResFile* resFile);
 IfAdvGauge* fn_8010B76C();
@@ -534,7 +531,7 @@ void IfAdvMngr::destroyModel() {
 
 void IfAdvMngr::startMelee() {
     unk4_80 = false;
-    fn_800DDA50(m_center, m_group, 0, 0, 0, 0);
+    m_center->startMelee(m_group, 0, 0, 0, 0);
     IfPlayer::startMelee(m_group);
     fn_8010C004(m_group);
     fn_80108E44(m_group);
@@ -570,7 +567,7 @@ s32 IfAdvMngr::main() {
         }
     } else {
         meleeMain();
-        fn_800DE360(reinterpret_cast<s32>(m_center));
+        m_center->main();
     }
     g_gfSceneRoot->remove(reinterpret_cast<nw4r::g3d::ScnMdl*>(m_choice));
     if (unk118 != 0) {
