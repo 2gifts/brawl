@@ -75,6 +75,12 @@ public:
     };
 
     ftDataTaskResource* searchTask(ftKind kind, int p2, int p3, int p4, u32 p5);
+    void remove(ftKind kind, int p2, int p3, int resourceType, u32 p5, bool cancel);
+    void removeMask(ftKind kind, int p2, int p3, u32 mask, u32 p5, bool cancel);
+    bool isFinish(ftKind kind, int p2, int p3, int resourceType, u32 p5, u32 checkSound);
+    bool isFinishMask(ftKind kind, int p2, int p3, u32 mask, u32 p5, u32 checkSound);
+    bool req(ftKind kind, int p2, int p3, int resourceType, u32 p5, srHeapType heap, bool p7, bool p8);
+    u32 reqMask(ftKind kind, int p2, int p3, u32 mask, u32 p5, srHeapType heap, bool p7, bool p8);
     void reqItem(ftKind kind);
     bool removeResourceTask(ftDataTask* task, bool cancel);
     // HYPOTHESIS: parameter meanings from the comparison against the task fields.

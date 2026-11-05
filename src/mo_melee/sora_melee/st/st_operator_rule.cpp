@@ -3,6 +3,7 @@
 #include <st/st_event_rule.h>
 #include <string.h>
 #include <types.h>
+#include <ft/ft_manager.h>
 
 struct stOperatorRuleCharacterKindEntry {
     u8 m_gmKind;
@@ -114,5 +115,78 @@ void stOperatorRule::notifyEventYoshiEgg() {
 void stOperatorRule::notifyEventPikminBloom() {
     if (unk54) {
         unk54->notifyEventPikminBloom();
+    }
+}
+
+void stOperatorRule::updateRealtimeHandi(gmResultInfo* result, float deltaFrame) {
+    if (m_condition->m_meleeInitData.m_0x5_5) {
+        if (0.0f < deltaFrame) {
+            unk78 = 0;
+            int highest;
+            int lowest;
+            int count = 0;
+            for (int player = 0; player < 4; player++) {
+                if (g_ftManager->isValidEntryId(g_ftManager->getEntryId(player))) {
+                    gmPlayerResultInfo* playerResult = &result->m_playersResultInfo[m_condition->m_playersInitData[player].m_playerNo];
+                    int score;
+                    if (m_condition->m_meleeInitData.m_isStamina) {
+                        score = 0;
+                    } else if (m_condition->m_meleeInitData.m_gameRule == 2) {
+                        score = playerResult->m_coins;
+                    } else if (m_condition->m_meleeInitData.m_gameRule == 1) {
+                        score = playerResult->m_startStockCount;
+                    } else {
+                        score = playerResult->m_rankCount;
+                    }
+                    if (!unk78) {
+                        highest = score;
+                        lowest = score;
+                    } else {
+                        highest = highest > score ? highest : score;
+                        lowest = lowest < score ? lowest : score;
+                    }
+                    unk7C[player] = score;
+                    unk78 |= 1 << player;
+                    count++;
+                }
+            }
+            int difference = highest - lowest;
+            float scale = 0.5f * difference;
+            float strength;
+            if (m_condition->m_meleeInitData.m_gameRule == 0) {
+                strength = difference < 5 ? 0.5f : 1.0f;
+            } else if (m_condition->m_meleeInitData.m_gameRule == 1) {
+                strength = difference < 2 ? 0.5f : 1.0f;
+            } else {
+                strength = 1.0f;
+            }
+            strength *= count / 4.0f;
+            float step = 0.04f * deltaFrame / 60.0f;
+            for (int player = 0; player < 4; player++) {
+                if (unk78 & (1 << player)) {
+                    float target = scale == 0.0f ? 0.0f : strength * ((unk7C[player] - lowest) / scale - 1.0f);
+                    unk9CValues[player] = target;
+                    float current = unk8C[player];
+                    if (current != target) {
+                        if (current < target) {
+                            current += step;
+                            if (current > target) current = target;
+                        } else {
+                            current -= step;
+                            if (current < target) current = target;
+                        }
+                        unk8C[player] = current;
+                    }
+                }
+            }
+        }
+        for (int player = 0; player < 4; player++) {
+            if (unk78 & (1 << player)) {
+                int entryId = g_ftManager->getEntryId(player);
+                if (g_ftManager->isValidEntryId(entryId)) {
+                    g_ftManager->getOwner(entryId)->setAutoHandi(unk8C[player]);
+                }
+            }
+        }
     }
 }

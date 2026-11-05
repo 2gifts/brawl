@@ -133,6 +133,9 @@ public:
     muAdvSelchrCTask();
     // HYPOTHESIS: the model descriptors share the type B menu layout.
     void createObjResFile(const void* modelData, int count, nw4r::g3d::ResFile* resFile);
+    // HYPOTHESIS: the parameter block is seven words; both heaps are passed to initialization.
+    static muAdvSelchrCTask* create(const u32* param, Heaps::HeapType instanceHeap, u32 resourceHeap);
+    void initProc();
 
     static void mainStepSelectedInit(muAdvSelchrCTask* task);
     static int mainStepAppearMain(muAdvSelchrCTask* task);

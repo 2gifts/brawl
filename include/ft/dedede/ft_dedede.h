@@ -93,6 +93,7 @@ public:
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
     virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnDededeStar* weapon, soModuleAccesser* acc);
     static bool activeArticle1(wnDededeJethammer* weapon, soModuleAccesser* acc);

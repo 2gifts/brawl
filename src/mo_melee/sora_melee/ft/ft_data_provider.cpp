@@ -7,6 +7,7 @@
 #include <so/so_archive_db.h>
 #include <types.h>
 #include <ut/ut_list.h>
+#include <gf/gf_module.h>
 
 extern "C" {
     s32 fn_27_70004(void* arg0);
@@ -215,4 +216,282 @@ void ftDataProvider::ftDataTaskResource::init(const char* path, long kind, u8 p3
         m_archiveItem.reqLoad(path, heap, p7, offset, p11, 0x1F, true);
     }
     m_ref.m_count++;
+}
+
+void ftDataProvider::removeMask(ftKind kind, int p2, int p3, u32 mask, u32 p5, bool cancel) {
+    if (mask & 0x1) {
+        remove(kind, p2, p3, 0, p5, cancel);
+    }
+    if (mask & 0x2) {
+        remove(kind, p2, p3, 1, p5, cancel);
+    }
+    if (mask & 0x4) {
+        remove(kind, p2, p3, 2, p5, cancel);
+    }
+    if (mask & 0x8) {
+        remove(kind, p2, p3, 3, p5, cancel);
+    }
+    if (mask & 0x10) {
+        remove(kind, p2, p3, 4, p5, cancel);
+    }
+    if (mask & 0x20) {
+        remove(kind, p2, p3, 5, p5, cancel);
+    }
+    if (mask & 0x40) {
+        remove(kind, p2, p3, 6, p5, cancel);
+    }
+    if (mask & 0x80) {
+        remove(kind, p2, p3, 7, p5, cancel);
+    }
+    if (mask & 0x100) {
+        remove(kind, p2, p3, 8, p5, cancel);
+    }
+    if (mask & 0x200) {
+        remove(kind, p2, p3, 9, p5, cancel);
+    }
+    if (mask & 0x400) {
+        remove(kind, p2, p3, 10, p5, cancel);
+    }
+    if (mask & 0x800) {
+        remove(kind, p2, p3, 11, p5, cancel);
+    }
+    if (mask & 0x1000) {
+        remove(kind, p2, p3, 12, p5, cancel);
+    }
+    if (mask & 0x2000) {
+        remove(kind, p2, p3, 13, p5, cancel);
+    }
+    if (mask & 0x4000) {
+        remove(kind, p2, p3, 14, p5, cancel);
+    }
+    if (mask & 0x8000) {
+        remove(kind, p2, p3, 15, p5, cancel);
+    }
+}
+
+bool ftDataProvider::isFinishMask(ftKind kind, int p2, int p3, u32 mask, u32 p5, u32 checkSound) {
+    if (mask & 0x1) {
+        if (!isFinish(kind, p2, p3, 0, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x2) {
+        if (!isFinish(kind, p2, p3, 1, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x4) {
+        if (!isFinish(kind, p2, p3, 2, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x8) {
+        if (!isFinish(kind, p2, p3, 3, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x10) {
+        if (!isFinish(kind, p2, p3, 4, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x20) {
+        if (!isFinish(kind, p2, p3, 5, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x40) {
+        if (!isFinish(kind, p2, p3, 6, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x80) {
+        if (!isFinish(kind, p2, p3, 7, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x100) {
+        if (!isFinish(kind, p2, p3, 8, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x200) {
+        if (!isFinish(kind, p2, p3, 9, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x400) {
+        if (!isFinish(kind, p2, p3, 10, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x800) {
+        if (!isFinish(kind, p2, p3, 11, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x1000) {
+        if (!isFinish(kind, p2, p3, 12, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x2000) {
+        if (!isFinish(kind, p2, p3, 13, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x4000) {
+        if (!isFinish(kind, p2, p3, 14, p5, checkSound)) {
+            return false;
+        }
+    }
+    if (mask & 0x8000) {
+        if (!isFinish(kind, p2, p3, 15, p5, checkSound)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+u32 ftDataProvider::reqMask(ftKind kind, int p2, int p3, u32 mask, u32 p5, srHeapType heap, bool p7, bool p8) {
+    u32 requested = 0;
+    if (mask & 0x1) {
+        if (req(kind, p2, p3, 0, p5, heap, p7, p8) == true) {
+            requested |= 0x1;
+        }
+    }
+    if (mask & 0x2) {
+        if (req(kind, p2, p3, 1, p5, heap, p7, p8) == true) {
+            requested |= 0x2;
+        }
+    }
+    if (mask & 0x4) {
+        if (req(kind, p2, p3, 2, p5, heap, p7, p8) == true) {
+            requested |= 0x4;
+        }
+    }
+    if (mask & 0x8) {
+        if (req(kind, p2, p3, 3, p5, heap, p7, p8) == true) {
+            requested |= 0x8;
+        }
+    }
+    if (mask & 0x10) {
+        if (req(kind, p2, p3, 4, p5, heap, p7, p8) == true) {
+            requested |= 0x10;
+        }
+    }
+    if (mask & 0x20) {
+        if (req(kind, p2, p3, 5, p5, heap, p7, p8) == true) {
+            requested |= 0x20;
+        }
+    }
+    if (mask & 0x40) {
+        if (req(kind, p2, p3, 6, p5, heap, p7, p8) == true) {
+            requested |= 0x40;
+        }
+    }
+    if (mask & 0x80) {
+        if (req(kind, p2, p3, 7, p5, heap, p7, p8) == true) {
+            requested |= 0x80;
+        }
+    }
+    if (mask & 0x100) {
+        if (req(kind, p2, p3, 8, p5, heap, p7, p8) == true) {
+            requested |= 0x100;
+        }
+    }
+    if (mask & 0x200) {
+        if (req(kind, p2, p3, 9, p5, heap, p7, p8) == true) {
+            requested |= 0x200;
+        }
+    }
+    if (mask & 0x400) {
+        if (req(kind, p2, p3, 10, p5, heap, p7, p8) == true) {
+            requested |= 0x400;
+        }
+    }
+    if (mask & 0x800) {
+        if (req(kind, p2, p3, 11, p5, heap, p7, p8) == true) {
+            requested |= 0x800;
+        }
+    }
+    if (mask & 0x1000) {
+        if (req(kind, p2, p3, 12, p5, heap, p7, p8) == true) {
+            requested |= 0x1000;
+        }
+    }
+    if (mask & 0x2000) {
+        if (req(kind, p2, p3, 13, p5, heap, p7, p8) == true) {
+            requested |= 0x2000;
+        }
+    }
+    if (mask & 0x4000) {
+        if (req(kind, p2, p3, 14, p5, heap, p7, p8) == true) {
+            requested |= 0x4000;
+        }
+    }
+    if (mask & 0x8000) {
+        if (req(kind, p2, p3, 15, p5, heap, p7, p8) == true) {
+            requested |= 0x8000;
+        }
+    }
+    return requested;
+}
+
+extern "C" const char* lbl_27_rodata_1320[0x53];
+
+bool ftDataProvider::isFinish(ftKind kind, int p2, int p3, int resourceType, u32 p5, u32 checkSound) {
+    switch (resourceType) {
+    case 0: {
+        const char* moduleName = lbl_27_rodata_1320[kind];
+        if (moduleName != NULL && !g_gfModuleManager->isLoaded(moduleName)) {
+            return false;
+        }
+        return true;
+    }
+    case 1: {
+        if (searchList(&m_compTaskList, kind, 0xFF, 0xFF, resourceType, p5) == NULL) {
+            return false;
+        }
+        ftData* data = g_ftCommonDataAccesser.getData(kind);
+        if (data->unk60 != NULL) {
+            for (int itemIndex = 0; itemIndex < data->unk60->m_count; itemIndex++) {
+                if (g_ftItemEnabled != 0) {
+                    if (!itManager::getInstance()->isCompItemKindArchive(data->unk60->m_items[itemIndex], 0, true)) {
+                        itManager::getInstance()->preloadItemKindArchive(data->unk60->m_items[itemIndex], 0, itArchive::Temp, true);
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    case 3:
+        if (checkSound == 1) {
+            return g_sndSystem->isFinishLoad1(lbl_27_rodata_1C60[kind]);
+        }
+        return true;
+    case 2:
+        if (checkSound == 1) {
+            return g_sndSystem->isFinishLoad1(lbl_27_rodata_1C60[0x1C]);
+        }
+        return true;
+    case 9:
+        if (checkSound == 1) {
+            return g_sndSystem->isFinishLoad1(lbl_27_rodata_1D3C[kind]);
+        }
+        return true;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+        return searchList(&m_compTaskList, kind, p2, p3, resourceType, p5) != NULL;
+    }
+    return false;
 }

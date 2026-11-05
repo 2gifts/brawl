@@ -246,3 +246,12 @@ void gfSceneRoot::drawFrameBufferReverse(int direction) {
 
 
 
+
+gfSceneRoot::Layer::~Layer() {
+    nw4r::g3d::ScnGroup* group = unk4;
+    while (!group->Empty()) {
+        group->PopBack();
+    }
+    unk4->Destroy();
+    unk0 = 0;
+}

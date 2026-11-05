@@ -17,6 +17,8 @@
 #include <so/status/so_status_module_impl.h>
 #include <wn/wn_kinetic_energy_normal.h>
 #include <so/so_value_accesser.h>
+#include <st/stage.h>
+#include <so/so_slow.h>
 
 // MATCH-ONLY: the unit's rodata starts with this word (HYPOTHESIS: the remains of a constant of an unreconstructed function).
 #pragma force_active on
@@ -37,6 +39,104 @@ wnPopoIceBerg::wnPopoIceBerg(s32 articleId, const wnArticleBuildInfo& info, cons
 void wnPopoIceBerg::onDeactivate() {
     wnPopoIceBergLinkEvent event(0x45c);
     m_moduleAccesser->getLinkModule().sendEventParents(3, event);
+}
+
+void wnPopoIceBerg::activate(int founderTaskId, int resourceId, int team, const Vec3f* position, float lr, int heap) {
+    wnActivateDesc desc(founderTaskId, resourceId, resourceId, resourceId, -1, -1, 0, 0,
+                        Vec3f(0.0f, 0.0f, 0.0f), lr, team, 0, 2, 0x80, 0, 0x35f, 0);
+    desc.flagsHigh = 1;
+    desc.flagsMidHigh = 0;
+    desc.flagsMidLow = 1;
+    desc.unk4DHigh = 0;
+    desc.flagsLowNibble = 0;
+    Weapon::activate(&desc);
+    m_moduleAccesser->getModelModule().setScaleZ(1.0f);
+    m_moduleAccesser->getEffectModule().ignoreScaleZ(true);
+    m_moduleAccesser->getWorkManageModule().onFlag(0x12000000);
+    float offset = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xfa2, 0);
+    Stage* stage = g_Stage;
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    if (stage && stage->m_stageParam) {
+        scaleX = stage->m_stageParam->m_iceClimbersFinalScale.m_x;
+        scaleY = stage->m_stageParam->m_iceClimbersFinalScale.m_y;
+    }
+    offset *= scaleY;
+    Vec3f pos(*position);
+    pos.m_y -= offset;
+    m_moduleAccesser->getPostureModule().setPos(&pos);
+    m_moduleAccesser->getWorkManageModule().setFloat(scaleX, 0x11000001);
+    m_moduleAccesser->getWorkManageModule().setFloat(scaleY, 0x11000002);
+    m_moduleAccesser->getPostureModule().setScale(scaleX);
+    m_moduleAccesser->getWorkManageModule().setFloat(position->m_x, 0x11000003);
+    m_moduleAccesser->getWorkManageModule().setFloat(position->m_y, 0x11000004);
+    m_moduleAccesser->getGroundModule().constructGrCollision(resourceId, 0, static_cast<Heaps::HeapType>(heap), 0, 0, 0);
+    m_moduleAccesser->getGroundModule().setGrCollisionFlagAll(1, 2);
+    // HYPOTHESIS: default compact stage attack parameters.
+    int attackData[6] = { 0, 0, 0, 0, 2, -1 };
+    attackData[0] = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc4, 0);
+    attackData[1] = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc5, 0);
+    attackData[2] = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc6, 0);
+    attackData[3] = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc7, 0);
+    attackData[5] = team;
+    g_Stage->setStageAttackData(attackData);
+    m_moduleAccesser->getGroundModule().setGrCollisionMode(true);
+    m_moduleAccesser->getStatusModule().changeStatusForce(0, m_moduleAccesser);
+    updateNodeSRT();
+    Vec3f top = m_moduleAccesser->getModelModule().getNodeGlobalPosition(9, false);
+    Vec3f bottom = m_moduleAccesser->getModelModule().getNodeGlobalPosition(7, false);
+    m_moduleAccesser->getGenerateArticleManageModule().removeExist(4, 0);
+    soArticle* article = m_moduleAccesser->getLinkModule().generateArticleLinkParents(3, 4, m_moduleAccesser);
+    m_moduleAccesser->getGenerateArticleManageModule().entry(article);
+}
+
+void wnPopoIceBerg::processFixPosition() {
+    Weapon::processFixPosition();
+    if (soSlow::getInstance()->isAdjust() == true && !m_moduleAccesser->getStopModule().isStop()) {
+        if (m_moduleAccesser->getWorkManageModule().isFlag(0x12000003) ||
+            m_moduleAccesser->getWorkManageModule().isFlag(0x12000004)) {
+            // HYPOTHESIS: default compact stage attack parameters.
+            int attackData[6] = { 0, 0, 0, 0, 2, -1 };
+            attackData[5] = m_moduleAccesser->getTeamModule().getTeam()->getNo();
+            if (m_moduleAccesser->getWorkManageModule().isFlag(0x12000004)) {
+                m_moduleAccesser->getWorkManageModule().offFlag(0x12000004);
+                attackData[0] = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc8, 0);
+                attackData[1] = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc9, 0);
+                attackData[2] = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dca, 0);
+                attackData[3] = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dcb, 0);
+            } else {
+                m_moduleAccesser->getWorkManageModule().offFlag(0x12000003);
+                attackData[0] = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc4, 0);
+                attackData[1] = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc5, 0);
+                attackData[2] = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc6, 0);
+                attackData[3] = soValueAccesser::getConstantInt(m_moduleAccesser, 0x5dc7, 0);
+            }
+            g_Stage->setStageAttackData(attackData);
+        } else if (m_moduleAccesser->getWorkManageModule().isFlag(0x12000006) == true) {
+            m_moduleAccesser->getWorkManageModule().offFlag(0x12000006);
+            float scale = m_moduleAccesser->getWorkManageModule().getFloat(0x11000001);
+            m_moduleAccesser->getWorkManageModule().getFloat(0x11000002);
+            Vec3f origin = m_moduleAccesser->getModelModule().getNodeGlobalPosition(9, false);
+            Vec3f upper = m_moduleAccesser->getModelModule().getNodeGlobalPosition(8, false) - origin;
+            Vec3f lower = m_moduleAccesser->getModelModule().getNodeGlobalPosition(5, false) - origin;
+            if (scale > 0.0f && scale != 1.0f) {
+                upper.m_x /= scale;
+                upper.m_y /= scale;
+                lower.m_x /= scale;
+                lower.m_y /= scale;
+            }
+            m_moduleAccesser->getCollisionAttackModule().setOffset(1, &upper);
+            m_moduleAccesser->getCollisionAttackModule().setOffset(3, &upper);
+            m_moduleAccesser->getCollisionAttackModule().setOffset(0, &lower);
+            m_moduleAccesser->getCollisionAttackModule().setOffset(2, &lower);
+        }
+        if (m_moduleAccesser->getWorkManageModule().isFlag(0x12000005) == true) {
+            m_moduleAccesser->getWorkManageModule().offFlag(0x12000005);
+            syncCapsuleSRT(4);
+            syncCapsuleSRT(5);
+            syncCapsuleSRT(6);
+        }
+    }
 }
 
 bool wnPopoIceBerg::notifyEventCollisionAttackCheck(u32 flags) {
