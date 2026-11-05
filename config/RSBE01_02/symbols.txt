@@ -5815,7 +5815,7 @@ testCollisionMoveSlatingLineMoveYDownRight__22grCollisionTestRhombusFP19grCollis
 testCollisionMoveSlatingLineMoveYDownLeft__22grCollisionTestRhombusFP19grCollisionLineWorkPf = .text:0x80131B50; // type:function size:0x4B0
 testCollisionCompound__22grCollisionTestRhombusFP19grCollisionLineWork = .text:0x80132000; // type:function size:0x4
 __ct__21grCollisionTestCircleFP12grCollStatus = .text:0x80132004; // type:function size:0x74
-fn_80132078 = .text:0x80132078; // type:function size:0x184
+resetWork__21grCollisionTestCircleFv = .text:0x80132078; // type:function size:0x184
 updateCurrent__21grCollisionTestCircleFf = .text:0x801321FC; // type:function size:0x14
 updateTarget__21grCollisionTestCircleFf = .text:0x80132210; // type:function size:0x14
 testStaticCorrectionSetup__21grCollisionTestCircleFv = .text:0x80132224; // type:function size:0x4
