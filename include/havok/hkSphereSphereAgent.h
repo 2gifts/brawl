@@ -4,6 +4,7 @@
 
 struct hkCdBody;
 struct hkCollisionDispatcher;
+struct hkCollisionInput;
 
 // Collision agent for two spheres. Object size 0x10. The 0x08 word (inherited from hkCollisionAgent) holds the
 // contact manager passed to the create function; 0x0C is a 16-bit slot that cleanup releases when it is not 0xFFFF.
@@ -12,8 +13,7 @@ struct hkSphereSphereAgent : hkCollisionAgent {
 
     u16 unkC; // 0x0C, set to 0xFFFF by the constructor
 
-    hkSphereSphereAgent(hkContactMgr* contactMgr) {
-        unk8 = (int)contactMgr;
+    hkSphereSphereAgent(hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
         unkC = 0xFFFF;
     }
     virtual ~hkSphereSphereAgent();
@@ -22,7 +22,8 @@ struct hkSphereSphereAgent : hkCollisionAgent {
     static void registerAgent(hkCollisionDispatcher* dispatcher);
     // HYPOTHESIS: the first three parameters are the two bodies and the collision input; only the
     // contact manager (last parameter) is stored.
-    static hkSphereSphereAgent* createSphereSphereAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
+    static hkSphereSphereAgent* createSphereSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+                                                        hkContactMgr* contactMgr);
 
     virtual void cleanup();
     virtual void processCollision(void* unk0, void* unk1, void* unk2, void* unk3);

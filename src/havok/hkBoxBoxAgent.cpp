@@ -17,16 +17,11 @@
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkGskfAgent.h>
 #include <havok/hkShapeType.h>
+#include <havok/hkCollisionInput.h>
+#include <havok/hkBoxShape.h>
 
 // Stand-in for hkIterativeLinearCastAgent::staticLinearCast (other unit).
 extern "C" void fn_802B7FD0();
-
-// Shape view for the box size test: the value at 0x1C of the shape (HYPOTHESIS: half extent w component).
-// Collision input view: tolerance at 0x08 (HYPOTHESIS).
-struct hkBoxBoxInput {
-    u8 unk0[8];
-    float tolerance; // 0x08
-};
 
 // Contact manager view with the feature-id removal slot used by cleanup (0x18). HYPOTHESIS: the other slots are unnamed.
 struct hkBoxBoxContactMgr : hkReferencedObject {
@@ -49,11 +44,12 @@ void hkBoxBoxAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     dispatcher->registerCollisionAgent(&funcs, HK_SHAPE_BOX, HK_SHAPE_BOX);
 }
 
-hkCollisionAgent* hkBoxBoxAgent::createBoxBoxAgent(hkCdBody* bodyA, hkCdBody* bodyB, const void* input, hkContactMgr* contactMgr) {
-    const hkBoxBoxInput* in = (const hkBoxBoxInput*)input;
-    if (in->tolerance >= kBoxSizeScale * *(float*)((u8*)bodyA->m_shape + 0x1C) ||
-        in->tolerance >= kBoxSizeScale * *(float*)((u8*)bodyB->m_shape + 0x1C)) {
-        return hkGskfAgent::createGskfAgent(bodyA, bodyB, (void*)input, contactMgr);
+hkCollisionAgent* hkBoxBoxAgent::createBoxBoxAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                   const hkCollisionInput& input, hkContactMgr* contactMgr) {
+    const hkBoxShape* boxA = (const hkBoxShape*)bodyA.m_shape;
+    const hkBoxShape* boxB = (const hkBoxShape*)bodyB.m_shape;
+    if (input.unk8 >= kBoxSizeScale * boxA->m_halfExtents.w || input.unk8 >= kBoxSizeScale * boxB->m_halfExtents.w) {
+        return hkGskfAgent::createGskfAgent((hkCdBody*)&bodyA, (hkCdBody*)&bodyB, (void*)&input, contactMgr);
     }
     return new hkBoxBoxAgent(contactMgr);
 }

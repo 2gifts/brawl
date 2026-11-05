@@ -32,7 +32,8 @@ void hkSphereSphereAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     dispatcher->registerCollisionAgent(&funcs, HK_SHAPE_SPHERE, HK_SHAPE_SPHERE);
 }
 
-hkSphereSphereAgent* hkSphereSphereAgent::createSphereSphereAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr) {
+hkSphereSphereAgent* hkSphereSphereAgent::createSphereSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                               const hkCollisionInput& input, hkContactMgr* contactMgr) {
     return new hkSphereSphereAgent(contactMgr);
 }
 
