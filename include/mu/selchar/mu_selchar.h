@@ -227,6 +227,10 @@ public:
     bool canWifiEntry();
     void wifiEntryPlayer();
     void dispKumiteRule(int type);
+    void assignTeam();
+    void dispHomerunRule(int rule);
+    bool isWifiMode();
+    void readyStateMain();
     // HYPOTHESIS: range classification shared by the character select menus.
     static inline bool isSelCharTypeIn(int type, int first, int end) {
         bool in;

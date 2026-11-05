@@ -862,3 +862,126 @@ void muSelCharTask::setReadyState(int state) {
     object->changeAnimN(animation, 0x18, play, false);
     m_readyState = state;
 }
+
+extern const u8 lbl_10_rodata_4F0[4][2];
+extern const u8 lbl_10_rodata_4E8[4][2];
+
+void muSelCharTask::assignTeam() {
+    int count = 0;
+    for (int area = 0; area < m_numPlayerAreas; area++) {
+        if (m_selCharPlayerAreas[area]->m_playerKind != 0) {
+            count++;
+        }
+    }
+    int* assignment;
+    int countAssigned;
+    int team;
+    int teamSize;
+    for (teamSize = count - 1; teamSize > 0; teamSize--) {
+        if (count % teamSize == 0) {
+            break;
+        }
+    }
+    if (teamSize <= 0) {
+        teamSize = 1;
+    }
+    int teams[4];
+    assignment = teams;
+    countAssigned = 0;
+    for (team = 0; team < 3 && countAssigned < 4; team++) {
+        for (int member = 0; member < teamSize && countAssigned < 4;) {
+            *assignment = team;
+            member++;
+            assignment++;
+            countAssigned++;
+        }
+    }
+    int* assignedTeam = teams;
+    for (int area = 0; area < m_numPlayerAreas; area++) {
+        muSelCharPlayerArea* player = m_selCharPlayerAreas[area];
+        if (player->m_playerKind != 0) {
+            player->setTeamColor(*assignedTeam, player->m_teamSet);
+            assignedTeam++;
+        }
+    }
+}
+
+void muSelCharTask::dispHomerunRule(int rule) {
+    int mode = 0;
+    int selCharType = getSelCharType();
+    int group;
+    if (isSelCharTypeIn(selCharType, 0, 4)) {
+        group = 0;
+    } else if (isSelCharTypeIn(selCharType, 4, 12)) {
+        group = 1;
+    } else {
+        bool inGroup = isSelCharTypeIn(selCharType, 12, 16);
+        group = 3;
+        if (inGroup) {
+            group = 2;
+        }
+    }
+    if (group == 2 && !isWifiGameMaster()) {
+        mode = 1;
+    }
+    m_objs[Obj_HomerunRule]->changeAnimN(rule == 0 ? lbl_10_rodata_4F0[mode][0] : lbl_10_rodata_4F0[mode][1], 0x10, false, false);
+}
+
+bool muSelCharTask::isWifiMode() {
+    int selCharType = getSelCharType();
+    int group;
+    if (isSelCharTypeIn(selCharType, 0, 4)) {
+        group = 0;
+    } else if (isSelCharTypeIn(selCharType, 4, 12)) {
+        group = 1;
+    } else {
+        bool inGroup = isSelCharTypeIn(selCharType, 12, 16);
+        group = 3;
+        if (inGroup) {
+            group = 2;
+        }
+    }
+    if (group == 0) goto offline;
+    selCharType = getSelCharType();
+    if (isSelCharTypeIn(selCharType, 0, 4)) {
+        group = 0;
+    } else if (isSelCharTypeIn(selCharType, 4, 12)) {
+        group = 1;
+    } else {
+        bool inGroup = isSelCharTypeIn(selCharType, 12, 16);
+        group = 3;
+        if (inGroup) {
+            group = 2;
+        }
+    }
+    if (group != 1) goto online;
+offline:
+    return false;
+online:
+    return true;
+}
+
+void muSelCharTask::readyStateMain() {
+    if (m_readyState == 1) {
+        MuObject* object = m_objs[Obj_ReadyButton];
+        if (object->isNodeAnimFinished()) {
+            m_readyState = 2;
+            object->changeAnimN(m_readyButtonPointed ? 2 : 1, 0x11, true, false);
+            object = m_objs[1];
+            int selCharType = getSelCharType();
+            int group;
+            if (isSelCharTypeIn(selCharType, 0, 4)) {
+                group = 0;
+            } else if (isSelCharTypeIn(selCharType, 4, 12)) {
+                group = 1;
+            } else {
+                bool inGroup = isSelCharTypeIn(selCharType, 12, 16);
+                group = 3;
+                if (inGroup) {
+                    group = 2;
+                }
+            }
+            object->changeAnimN(lbl_10_rodata_4E8[group][1], 0x18, true, false);
+        }
+    }
+}
