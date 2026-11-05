@@ -11,6 +11,24 @@
 #include <nw4r/g3d/g3d_scngroup.h>
 #include <types.h>
 
+// HYPOTHESIS: each photo state has initialization and update callbacks.
+extern const struct {
+    void (*unk0)(IfPhoto* photo);
+    s32 (*unk4)(IfPhoto* photo);
+} lbl_80408C08[4];
+
+void IfPhoto::main() {
+    s32 previousStep = m_step;
+    if (lbl_80408C08[previousStep].unk4 != NULL) {
+        m_step = lbl_80408C08[previousStep].unk4(this);
+    }
+    if (m_step != previousStep) {
+        if (lbl_80408C08[m_step].unk0 != NULL) {
+            lbl_80408C08[m_step].unk0(this);
+        }
+    }
+}
+
 // IfSnapSaveTask::getState (map name; still unnamed in if_snap_save.cpp)
 extern "C" s32 fn_800F2894(IfSnapSaveTask* task);
 
