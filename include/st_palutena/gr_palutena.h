@@ -18,8 +18,6 @@
 // Yakumono::getDamage (sora_melee, unnamed)
 extern "C" void fn_27_26399C(Yakumono* yakumono);
 
-// ecMgr::setEffect(EfID, const Vec3f*) (unnamed in the symbols; the code is the same as setEffect(EfID, Vec3f*))
-extern "C" u32 fn_8005F800(ecMgr* mgr, EfID effectID, Vec3f* pos);
 
 // The grounds make their own model animation (the file comes from the stage) instead of the shared ones: it is built word by
 // word and freed by the ground. HYPOTHESIS: layout of gfModelAnimation as in gf/gf_model.h (the first byte after the

@@ -280,7 +280,7 @@ void grPalutenaAshiba::updateToBuild(float deltaFrame) {
             Vec3f pos;
             getNodePosition(&pos, 0, 1);
             pos.m_y = pos.m_y - 2.5f;
-            fn_8005F800(g_ecMgr, static_cast<EfID>(0x4F0002), &pos);
+            g_ecMgr->setEffect(static_cast<EfID>(0x4F0002), reinterpret_cast<const Vec3f*>(&pos));
             m_state = 2;
         }
         break;

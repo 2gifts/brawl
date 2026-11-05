@@ -16,8 +16,6 @@
 
 // gfSceneRoot::setResAnmScn (main.dol 0x8000D2E0), still called by this name from mu_title_sunset.
 extern "C" void fn_8000D2E0(gfSceneRoot* root, nw4r::g3d::ResAnmScn* anmScn, int unk);
-// ecMgr::killEffectGroup (main.dol 0x80060E20, map name; parameters from the call).
-extern "C" void fn_80060E20(ecMgr* mgr, int group, int unk2, int unk3, int unk4, int unk5);
 
 // BYTES: g_grCollisionList is declared as a list of grCollisionHandle, but its nodes are the grCollision links at
 // +0x30 (same view as gr_collision.cpp).
@@ -145,7 +143,7 @@ void Stage::initializeStage() {
 
 void Stage::closeStage() {
     g_gfSceneRoot->removeResAnmScn();
-    fn_80060E20(g_ecMgr, 0, 0, 1, 1, 0);
+    g_ecMgr->killEffectGroup(0, 0, 1, 1, 0);
     if (m_pokeTrainerPos != NULL) {
         delete[] m_pokeTrainerPos;
         m_pokeTrainerPos = NULL;

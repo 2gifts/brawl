@@ -6,8 +6,6 @@
 #include <so/so_module_accesser.h>
 #include <types.h>
 
-// ecMgr::killEffectGroup (the map name); src/mo_melee/sora_melee/st/stage.cpp calls it by this stand-in name.
-extern "C" void fn_80060E20(ecMgr* mgr, int group, int unk2, int unk3, int unk4, int unk5);
 
 void soEffectModuleImpl::activate() {
     removeAllAfterImage(0, 0);
@@ -178,11 +176,11 @@ void soEffectModuleImpl::removeAll(u32 flags) {
 }
 
 void soEffectModuleImpl::killKind(int effectKind, bool p2, bool p3) {
-    fn_80060E20(g_ecMgr, m_groupId, 0xFFFF00, p2, p3, effectKind);
+    g_ecMgr->killEffectGroup(m_groupId, 0xFFFF00, p2, p3, effectKind);
 }
 
 void soEffectModuleImpl::killAll(u32 flags, bool p2, bool p3) {
-    fn_80060E20(g_ecMgr, m_groupId | flags, flags | 0xFFFF00, p2, p3, 0);
+    g_ecMgr->killEffectGroup(m_groupId | flags, flags | 0xFFFF00, p2, p3, 0);
 }
 
 bool soEffectModuleImpl::removeAfterImage(int id, int p2) {
