@@ -204,6 +204,21 @@ void hkBvTreeAgent::prepareCollisionPartners(const hkCdBody& bodyA, const hkCdBo
     }
 }
 
+// A's aabb grown along the cast path turned into B's space (both linear casts). HYPOTHESIS: an inline helper in the
+// original (its temporaries are laid out like an inlined function's, path first at the lowest address).
+static inline void hkBvTreeAgent_expandByPath(hkAabb& aabb, const hkRotation& rotation, const hkVector4& path) {
+    hkVector4 pathB;
+    pathB.setRotatedInverseDir(rotation, path);
+    hkVector4 zero;
+    zero.setZero4();
+    hkVector4 pathMin;
+    pathMin.setMin4(zero, pathB);
+    hkVector4 pathMax;
+    pathMax.setMax4(zero, pathB);
+    aabb.m_min.add4(pathMin);
+    aabb.m_max.add4(pathMax);
+}
+
 // The same for the linear cast: A's aabb grown along the cast path (turned into B's space) always replaces the cached
 // aabb, and the hits are sorted before either update (HYPOTHESIS: the first sort is redundant in the unsorted mode).
 void hkBvTreeAgent::prepareCollisionPartnersLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB,
@@ -212,18 +227,7 @@ void hkBvTreeAgent::prepareCollisionPartnersLinearCast(const hkCdBody& bodyA, co
     bTa.setMulInverseMul(*(const hkTransform*)bodyB.m_motion, *(const hkTransform*)bodyA.m_motion);
     hkAabb aabb;
     bodyA.m_shape->getAabb(bTa, input.unk8, aabb);
-    {
-        hkVector4 pathB;
-        pathB.setRotatedInverseDir(((const hkTransform*)bodyB.m_motion)->m_rotation, input.m_path);
-        hkVector4 zero;
-        zero.setZero4();
-        hkVector4 pathMin;
-        pathMin.setMin4(zero, pathB);
-        hkVector4 pathMax;
-        pathMax.setMax4(zero, pathB);
-        aabb.m_min.add4(pathMin);
-        aabb.m_max.add4(pathMax);
-    }
+    hkBvTreeAgent_expandByPath(aabb, ((const hkTransform*)bodyB.m_motion)->m_rotation, input.m_path);
     m_cachedAabb = aabb;
     hkInplaceArray<u32, 128> hitList;
     const hkBvTreeShape* bvTree = (const hkBvTreeShape*)bodyB.m_shape;
@@ -638,18 +642,7 @@ void hkBvTreeAgent::staticLinearCast(const hkCdBody& bodyA, const hkCdBody& body
     bTa.setMulInverseMul(tb, ta);
     hkAabb aabb;
     bodyA.m_shape->getAabb(bTa, input.unk8, aabb);
-    {
-        hkVector4 pathB;
-        pathB.setRotatedInverseDir(((const hkTransform*)bodyB.m_motion)->m_rotation, input.m_path);
-        hkVector4 zero;
-        zero.setZero4();
-        hkVector4 pathMin;
-        pathMin.setMin4(zero, pathB);
-        hkVector4 pathMax;
-        pathMax.setMax4(zero, pathB);
-        aabb.m_min.add4(pathMin);
-        aabb.m_max.add4(pathMax);
-    }
+    hkBvTreeAgent_expandByPath(aabb, ((const hkTransform*)bodyB.m_motion)->m_rotation, input.m_path);
     hkInplaceArray<u32, 128> hitList;
     const hkBvTreeShape* bvTree = (const hkBvTreeShape*)bodyB.m_shape;
     bvTree->queryAabb(aabb, hitList);
