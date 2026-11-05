@@ -27,4 +27,11 @@ struct hkSweptTransformUtil {
     // move the center of mass offset (in local space) without moving the body, so the swept
     // centers have to shift by the rotated difference
     static void setCentreOfRotationLocal(const hkVector4& newCenter, hkMotionState& ms);
+
+    // Time of impact information for a pair over the step: xyz is the relative linear motion of the two centers of mass
+    // over deltaTime (A's backwards, B's forwards), w the bound on the distance the angular motion can add (each body's
+    // delta angle times its object radius). Out of line in hkBvTreeAgent.o, its only user.
+    // HYPOTHESIS: parameter types (the map has none).
+    static void calcTimInfo(const hkMotionState& ms0, const hkMotionState& ms1, hkReal deltaTime, hkVector4& timInfo)
+        __attribute__((never_inline));
 };

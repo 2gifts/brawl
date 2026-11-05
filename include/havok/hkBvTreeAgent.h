@@ -9,6 +9,9 @@ struct hkCdBody;
 struct hkPenetrationTarget;
 struct hkCollisionInput;
 struct hkLinearCastCollisionInput;
+struct hkProcessCollisionInput;
+struct hkTransform;
+struct hkVector4;
 
 // Bounding-volume-tree collision agent (object size 0x40, memory class 0x1d). Derives from hkCollisionAgent: the
 // 0x08 word is the contact manager passed to the constructor. The constructor zeroes the entry list at 0x0C
@@ -62,6 +65,14 @@ struct hkBvTreeAgent : hkCollisionAgent {
                                        void* target);
     static void staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, hkLinearCastCollisionInput& input,
                                  void* target, void* startTarget);
+
+    // Queries the tree with A's aabb (in B's space, grown by the step's time of impact info) into hitList; returns
+    // non-zero when the cached aabb (cachedAabb, the agent's 0x20 when the global switch is set) still covers it and
+    // the entry list needs no update. Not written yet.
+    // HYPOTHESIS: parameter and return types, the cached aabb as floats (min 0x20, max 0x30 of the agent).
+    static int calcAabbAndQueryTree(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkTransform& bTa,
+                                    const hkVector4& timInfo, hkProcessCollisionInput& input, hkReal* cachedAabb,
+                                    hkArray<u32>& hitList);
 };
 
 // HYPOTHESIS: the symmetric variant is the object created by createBvTreeShapeAgent (its vtable is set after the base

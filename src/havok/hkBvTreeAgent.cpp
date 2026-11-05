@@ -51,6 +51,8 @@
 #include <havok/hkMotionState.h>
 #include <havok/hkCdBodyPairCollector.h>
 #include <havok/hkAgentDispatchUtil.h>
+#include <havok/hkAlgorithm.h>
+#include <havok/hkSweptTransformUtil.h>
 
 hkBvTreeAgent::hkBvTreeAgent(hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
     unk30[0] = 0.0f;
@@ -297,12 +299,6 @@ void hkBvTreeAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkColl
     HK_TIMER_END_LIST();
 }
 
-// Not written yet (out of line in this unit): hkSweptTransformUtil::calcTimInfo, calcAabbAndQueryTree and the hit list
-// sort.
-extern "C" void fn_802A6A38(const hkMotionState* a, const hkMotionState* b, hkReal deltaTime, hkVector4& timInfo);
-extern "C" int fn_802A6B94(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkTransform& bTa, const hkVector4& timInfo,
-                           hkProcessCollisionInput& input, hkReal* cachedAabb, hkArray<u32>& hitList);
-extern "C" void fn_802A4C14(u32* keys, int numKeys);
 
 // HYPOTHESIS: global hkBool switches read here (sda21): use the cached aabb at 0x20, and update the entry list
 // without sorting the hits first.
@@ -336,9 +332,10 @@ static inline void hkBvTreeAgent_updateEntries(hkBvTreeAgent* agent, const hkCdB
     hkTransform bTa;
     bTa.setMulInverseMul(*(const hkTransform*)bodyB.m_motion, *(const hkTransform*)bodyA.m_motion);
     hkVector4 timInfo;
-    fn_802A6A38((const hkMotionState*)bodyA.m_motion, (const hkMotionState*)bodyB.m_motion, input.unk18, timInfo);
+    hkSweptTransformUtil::calcTimInfo(*(const hkMotionState*)bodyA.m_motion, *(const hkMotionState*)bodyB.m_motion, input.unk18,
+                                      timInfo);
     hkReal* cachedAabb = lbl_805A0F14 ? agent->unk20 : 0;
-    if (fn_802A6B94(bodyA, bodyB, bTa, timInfo, input, cachedAabb, hitList) != 0) {
+    if (hkBvTreeAgent::calcAabbAndQueryTree(bodyA, bodyB, bTa, timInfo, input, cachedAabb, hitList) != 0) {
         return;
     }
     const hkShapeCollection* collection = ((const hkBvTreeShape*)bodyB.m_shape)->m_collection;
@@ -348,7 +345,7 @@ static inline void hkBvTreeAgent_updateEntries(hkBvTreeAgent* agent, const hkCdB
         hkBvTreeAgentDispatchUtil::fastUpdate(agent->m_entries, hitList, bodyA, bodyB, input, (hkContactMgr*)agent->unk8,
                                               helper);
     } else {
-        fn_802A4C14(hitList.begin(), hitList.getSize());
+        hkAlgorithm::quickSort(hitList.begin(), hitList.getSize());
         hkBvTreeAgentDispatchUtil::update(agent->m_entries, hitList, bodyA, bodyB, input, (hkContactMgr*)agent->unk8,
                                           helper);
     }
@@ -374,6 +371,28 @@ void hkBvTreeAgent::processCollision(const hkCdBody& bodyA, const hkCdBody& body
         entry->m_collisionAgent->processCollision(bodyA, childBody, input, output);
     }
     HK_TIMER_END_LIST();
+}
+
+// Out of line in this unit (an hkSweptTransformUtil inline; the map places it after processCollision). The two center
+// of mass differences are written lane by lane: the target stores them x first (set() would evaluate w first).
+void hkSweptTransformUtil::calcTimInfo(const hkMotionState& ms0, const hkMotionState& ms1, hkReal deltaTime,
+                                       hkVector4& timInfo) {
+    hkVector4 diff0;
+    diff0.x = ms0.m_sweptTransform.m_centerOfMass0.x - ms0.m_sweptTransform.m_centerOfMass1.x;
+    diff0.y = ms0.m_sweptTransform.m_centerOfMass0.y - ms0.m_sweptTransform.m_centerOfMass1.y;
+    diff0.z = ms0.m_sweptTransform.m_centerOfMass0.z - ms0.m_sweptTransform.m_centerOfMass1.z;
+    diff0.w = ms0.m_sweptTransform.m_centerOfMass0.w - ms0.m_sweptTransform.m_centerOfMass1.w;
+    hkVector4 diff1;
+    diff1.x = ms1.m_sweptTransform.m_centerOfMass1.x - ms1.m_sweptTransform.m_centerOfMass0.x;
+    diff1.y = ms1.m_sweptTransform.m_centerOfMass1.y - ms1.m_sweptTransform.m_centerOfMass0.y;
+    diff1.z = ms1.m_sweptTransform.m_centerOfMass1.z - ms1.m_sweptTransform.m_centerOfMass0.z;
+    diff1.w = ms1.m_sweptTransform.m_centerOfMass1.w - ms1.m_sweptTransform.m_centerOfMass0.w;
+    // HYPOTHESIS: the center of mass 1 w lane is the inverse step length (Havok's swept transform keeps it there).
+    hkReal f0 = deltaTime * ms0.m_sweptTransform.m_centerOfMass1.w;
+    hkReal f1 = deltaTime * ms1.m_sweptTransform.m_centerOfMass1.w;
+    timInfo.setMul4(f0, diff0);
+    timInfo.addMul4(f1, diff1);
+    timInfo.w = f0 * ms0.m_deltaAngle.w * ms0.m_objectRadius + f1 * ms1.m_deltaAngle.w * ms1.m_objectRadius;
 }
 
 void hkBvTreeAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
