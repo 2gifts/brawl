@@ -25,3 +25,20 @@
 void hkGsk::setFeatureChange(int value) {
     unk14 = value;
 }
+
+// The plane gives the normal and the distance (its w). The point: the single vertex of A, the single vertex of B
+// moved along the plane by the distance, or the point kept at 0x130 (weights 1, 0 and 0.5).
+void hkGsk::convertFeatureToClosestDistance(const hkVector4& plane, hkGskClosestDistance& out) const {
+    out.m_distance = plane.w;
+    out.m_normal = plane;
+    if (m_dimA == 1) {
+        out.m_position = vectorAt(0x20);
+        out.m_weight = 1.0f;
+    } else if (m_dimB == 1) {
+        out.m_position.setAddMul4(vectorAt(0xA0), plane, plane.w);
+        out.m_weight = 0.0f;
+    } else {
+        out.m_position = vectorAt(0x130);
+        out.m_weight = 0.5f;
+    }
+}

@@ -131,6 +131,13 @@ struct hkVector4 {
         ((u32*)this)[2] = ((const u32*)&a)[2] ^ (((const u32*)&s)[2] & 0x80000000);
         ((u32*)this)[3] = ((const u32*)&a)[3] ^ (((const u32*)&s)[3] & 0x80000000);
     }
+    // this = a + s * b, lane order x..w (its weak out-of-line copy is in hkGsk).
+    void setAddMul4(const hkVector4& a, const hkVector4& b, hkReal s) {
+        x = a.x + s * b.x;
+        y = a.y + s * b.y;
+        z = a.z + s * b.z;
+        w = a.w + s * b.w;
+    }
     // Component access by index (x, y, z, w).
     hkReal& operator[](int i) { return (&x)[i]; }
     hkReal getSimdAt(int i) const { return (&x)[i]; }
