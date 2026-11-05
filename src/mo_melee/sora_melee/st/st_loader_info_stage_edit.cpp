@@ -1,12 +1,10 @@
 #include <st/loader/st_loader_info_stage_edit.h>
 #include <st/loader/st_loader_sand_bag.h>
 #include <types.h>
+#include <if/if_stgedit_mngr.h>
 
 class IfStgeditMngr;
 
-// HYPOTHESIS: the stage-edit HUD manager instance and its loadResourceBody, isLoadResourceFinished, freeResource,
-// createModel, startMelee, setVisible, setVisibleZoomHelp and destroyModel (main.dol; the map entries of this
-// class are out of order), so they stay stand-ins here.
 extern IfStgeditMngr* lbl_805A0350;
 extern "C" {
 void fn_8010F4AC(IfStgeditMngr* mngr, int unk);
@@ -14,9 +12,6 @@ bool fn_8010F624(IfStgeditMngr* mngr);
 void fn_8010F754(IfStgeditMngr* mngr);
 void fn_8010F7EC(IfStgeditMngr* mngr);
 void fn_8010F8FC(IfStgeditMngr* mngr);
-void fn_8010F948(IfStgeditMngr* mngr, bool isVisible);
-void fn_8010F958(IfStgeditMngr* mngr, bool isVisible);
-void fn_8010F884(IfStgeditMngr* mngr);
 }
 
 static stLoaderSandBagMarker sMarkerA(0xFF, 0);
@@ -72,14 +67,14 @@ void stLoaderInfoStageEdit::entryEntity() {
             fn_8010F8FC(lbl_805A0350);
             m_isModelCreated = true;
         }
-        fn_8010F948(lbl_805A0350, m_isVisible);
-        fn_8010F958(lbl_805A0350, m_isVisibleZoomHelp);
+        lbl_805A0350->setVisible(m_isVisible);
+        lbl_805A0350->setVisibleZoomHelp(m_isVisibleZoomHelp);
     }
 }
 
 void stLoaderInfoStageEdit::removeEntity() {
     if (lbl_805A0350 != NULL && m_isModelCreated == true) {
-        fn_8010F884(lbl_805A0350);
+        lbl_805A0350->destroyModel();
         m_isModelCreated = false;
     }
 }
