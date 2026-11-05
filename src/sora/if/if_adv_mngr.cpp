@@ -161,7 +161,13 @@ bool IfFigureLoader::Entry::isReady() {
         m_state = 0;
         tyFigListData* data = lbl_805A0318[0]->m_listMgr->getFigDataId(m_figId);
         IfFigurePath path;
-        path = IfFigurePath("/toy/fig/") + data->name + ".brres";
+        const char* extension = ".brres";
+        IfFigurePath directory("/toy/fig/");
+        IfFigurePath filename = directory;
+        strcat(filename.m_str, data->name);
+        IfFigurePath resource = filename;
+        strcat(resource.m_str, extension);
+        path = resource;
         m_handle.readRequest(path.m_str, m_buffer, 0x400000, 0);
         m_resFile = nw4r::g3d::ResFile();
         return false;
