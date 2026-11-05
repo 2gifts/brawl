@@ -4,10 +4,7 @@
 #include <so/so_module_accesser.h>
 
 // main.dol cmSubject and CameraController helpers that are not named in symbols.txt yet (map names in comments).
-extern "C" cmSubject* fn_8009F474(HeapType heap, int, int); // cmSubjectGetStruct
 extern "C" void fn_8009CE3C(CameraController* controller, cmSubject* subject); // cancelZoomIn
-extern "C" void fn_8009EFCC(cmSubject* subject); // cmSubject::updateDispStatus
-extern "C" void fn_8009EF38(cmSubject* subject); // cmSubject::unRegist
 extern "C" void fn_8009CD94(CameraController* controller, cmSubject* subject, u16 frame, Vec2f pos, float zoom); // startZoomIn
 
 soCameraSubject::soCameraSubject() :
@@ -31,7 +28,7 @@ cmSubject* soCameraSubject::getInstance() {
 
 void soCameraSubject::construct(HeapType heap, soCameraRange* range, u32 activeState) {
     m_rangeData = range;
-    m_cmSubject = fn_8009F474(heap, 1, 0);
+    m_cmSubject = cmSubjectGetStruct(heap, 1, 0);
     m_activeState = activeState;
 }
 
@@ -39,8 +36,8 @@ void soCameraSubject::deactivate() {
     cmSubject* subject = m_cmSubject;
     fn_8009CE3C(CameraController::getInstance(), subject);
     subject->m_state = 1;
-    fn_8009EFCC(subject);
-    fn_8009EF38(subject);
+    subject->updateDispStatus();
+    subject->unRegist();
 }
 
 void soCameraSubject::reset() {
@@ -61,7 +58,7 @@ void soCameraSubject::sleep() {
 void soCameraSubject::unRegist() {
     cmSubject* subject = m_cmSubject;
     if (subject->m_isRegist == 1) {
-        fn_8009EF38(subject);
+        subject->unRegist();
     }
 }
 
