@@ -863,3 +863,42 @@ wchar_t* muWifiInterfaceTask::getGlobalPlayersOnamae(int index, wchar_t* name, u
     }
     return name;
 }
+
+extern u8 lbl_805A0415;
+
+bool NtBase::isParentInit() {
+    u8 initialized = lbl_805A0415;
+    lbl_805A0415 = 0;
+    return initialized != 0;
+}
+
+bool NtBase::isNetCondOnline() {
+    return gUnk805a03d8 >= 3 && gUnk805a03d8 <= 6;
+}
+
+bool NtBase::isParent() {
+    return lbl_8059E742 == lbl_8059E745 && lbl_8059E742 != 0xFF;
+}
+
+bool muWifiInterfaceTask::isStageSyncFlagSet(u32 flags) {
+    if (!testSendAIDInfoDone()) {
+        return false;
+    }
+    u8 combinedFlags = 0xFF;
+    for (u32 aid = 0; aid < 4; aid++) {
+        bool live;
+        if ((u8)aid >= 4) {
+            live = false;
+        } else {
+            live = getSafeParentAIDInfo()->unk68[(u8)aid] == 1;
+        }
+        u8 nodeFlags;
+        if (live) {
+            nodeFlags = m_aidInfos[(u8)aid].unk5A;
+        } else {
+            nodeFlags = 0xFF;
+        }
+        combinedFlags &= nodeFlags;
+    }
+    return (combinedFlags & flags) == flags;
+}

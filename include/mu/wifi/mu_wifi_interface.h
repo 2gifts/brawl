@@ -63,7 +63,10 @@ struct muWifiAIDInfo {
             char _pad57[2];
             u8 unk59_b4 : 4;
             u8 unk59_b0 : 4;
-            char _pad5A[0xE];
+            union {
+                char _pad5A[0xE];
+                struct { u8 unk5A; char _pad5B[0xD]; };
+            };
             u8 unk68[4];
         };
         struct {
@@ -257,6 +260,8 @@ public:
     bool isWifiPreloadCharacter();
     wchar_t* getGlobalPlayersOnamae(int index, wchar_t* name, u8* nameNo);
     wchar_t* getLocalPlayersOnamae(int index, wchar_t* name, u8* nameNo);
+    // HYPOTHESIS: the mask parameter is word-sized in the original comparisons.
+    bool isStageSyncFlagSet(u32 flags);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 
