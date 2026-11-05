@@ -253,7 +253,7 @@ void IfMinigameTraining::printStatusTotalDamage(int damage) {
 }
 
 void IfMinigameTraining::openMenu(int padNo, int playerNo) {
-    m_controller.setControllerID(padNo);
+    m_controller.setControllerID(static_cast<u8>(padNo));
     unk2F8 = playerNo;
     setCameraType(CameraType_Menu);
     unk2FC = false;
