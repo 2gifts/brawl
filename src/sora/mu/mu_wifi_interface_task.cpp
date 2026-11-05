@@ -686,3 +686,178 @@ u8 muWifiInterfaceTask::getAssignedPlayerKind(int index) {
     }
     return *kind;
 }
+
+u8 muWifiInterfaceTask::getGlobalLiveAIDBitmap() {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        info = NULL;
+    } else {
+        info = &m_aidInfos[aid];
+    }
+    if (info == NULL) {
+        return 0;
+    }
+    u8 bitmap = 0;
+    for (u32 index = 0; index < 4; index++) {
+        if ((int)getSafeParentAIDInfo()->unk68[(u8)index] == 1) {
+            bitmap |= 1 << (u8)index;
+        }
+    }
+    return bitmap;
+}
+
+u8 muWifiInterfaceTask::getGlobalConnectAIDBitmap() {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        info = NULL;
+    } else {
+        info = &m_aidInfos[aid];
+    }
+    if (info == NULL) {
+        return 0;
+    }
+    u8 bitmap = 0;
+    for (u32 index = 0; index < 4; index++) {
+        if (getSafeParentAIDInfo()->unk68[(u8)index] != 0) {
+            bitmap |= 1 << (u8)index;
+        }
+    }
+    return bitmap;
+}
+
+u8 muWifiInterfaceTask::getRuleMasterAID() {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        info = NULL;
+    } else {
+        info = &m_aidInfos[aid];
+    }
+    if (info == NULL) {
+        aid = Network::getMyAID();
+        if (aid == 0xFF) {
+            aid = 4;
+        }
+        info = &m_aidInfos[aid];
+    }
+    u8 master = info->unk79Data;
+    bool live;
+    if (master >= 4) {
+        live = false;
+    } else {
+        live = getSafeParentAIDInfo()->unk68[master] == 1;
+    }
+    if (!live) {
+        return 0xFF;
+    }
+    return info->unk79Data;
+}
+
+// HYPOTHESIS: these one-argument calls use the same exported names as sq_lib.cpp.
+extern "C" int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int kind);
+extern "C" int getNumCharColor__6muMenuFiii(int kind);
+extern const char lbl_804599B8[0x20];
+extern const char lbl_804599D8[0x38];
+
+u8 muWifiInterfaceTask::getFreeCharColor(int character, int count) {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        info = NULL;
+    } else {
+        info = &m_aidInfos[aid];
+    }
+    if (info == NULL) {
+        netReport(lbl_804599B8);
+        return 0;
+    }
+    __typeof__(info->unkE4[0])* players = info->unkE4;
+    int selection;
+    for (u32 color = 0; (int)(u8)color <
+         ((selection = exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(character)) == 0x28 ?
+          1 : getNumCharColor__6muMenuFiii(selection)); color++) {
+        int player;
+        for (player = 0; player < count; player++) {
+            if (character == players[player].unk3 && (u8)color == players[player].unk4) {
+                break;
+            }
+        }
+        if (player == count) {
+            return color;
+        }
+    }
+    netReport(lbl_804599D8, character);
+    return 0;
+}
+
+// muWifiInterfaceTask::exchangeDWCErrorCode (the map name); src/sora/mu/mu_wifi_interface_task.cpp calls it by this stand-in name.
+extern "C" s32 fn_800C9A4C(u32 arg0);
+
+extern s32 lbl_805A03E8;
+extern s32 lbl_805A03F0;
+
+int muWifiInterfaceTask::_getNetworkError(int* code) {
+    *code = 0;
+    if (m_appNetworkError[0] != 0) {
+        return m_appNetworkError[0];
+    }
+    if (&g_Network == NULL) {
+        return 0;
+    }
+    int error = lbl_805A03E8;
+    if (error == 0) {
+        return 0;
+    }
+    if (error == 1) {
+        *code = lbl_805A03F0;
+        return fn_800C9A4C(*code);
+    }
+    if (!unkFCB_b7) {
+        NtBase::setMatchingStatus(10);
+    }
+    if (error == 7) {
+        *code = lbl_805A03F0;
+        return fn_800C9A4C(*code);
+    }
+    switch (error) {
+    case 2:
+    case 3: return 13;
+    case 8: return 9;
+    case 4: return 10;
+    case 5: return 10;
+    case 6: return 13;
+    case 9: return 11;
+    case 10: return 12;
+    case 11: return 11;
+    case 12: return 11;
+    case 13: return 11;
+    case 14: return 13;
+    default: return 0;
+    }
+}
+
+// muWifiInterfaceTask::startMatchingCommon (the map name); src/sora/mu/mu_wifi_interface_task.cpp calls it by this stand-in name.
+extern "C" void fn_800CCF30(muWifiInterfaceTask* self, int arg1, int arg2, int arg3, int arg4);
+
+extern const char lbl_80457DC8[0x30];
+
+void muWifiInterfaceTask::startMatchingDaiRantou(int arg) {
+    netReport(lbl_80457DC8);
+    __typeof__(unk1000[0])* rule = &unk1000[1];
+    memset(rule, 0, sizeof(*rule));
+    rule->unk1 = 0;
+    rule->unk2 = 2;
+    rule->unk3 = 2;
+    rule->unk4 = 0;
+    rule->unk5 = 10;
+    rule->unk6 = 1;
+    rule->unk7 = 0;
+    rule->unk9 = 0;
+    rule->unk8 = 0;
+    rule->unkC = 0;
+    rule->unkA = 0;
+    unk1000[0] = unk1000[1];
+    fn_800CCF30(this, arg, 0, 2, -1);
+}

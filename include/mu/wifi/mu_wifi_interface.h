@@ -66,7 +66,7 @@ struct muWifiAIDInfo {
             u8 unk78_b3 : 4;
             u8 unk78_b2 : 1;
             u8 unk78_b0 : 2;
-            char unk79[0x4];
+            union { char unk79[0x4]; struct { u8 unk79Data; char _pad7A[3]; }; };
             u8 unk7D_b4 : 4;
             u8 unk7D_b2 : 2;
             u8 unk7D_b0 : 2;
@@ -78,7 +78,10 @@ struct muWifiAIDInfo {
             char _pad78[0x6C];
             struct {
                 u8 unk0;
-                u8 unk1[9];
+                union {
+                    u8 unk1[9];
+                    struct { u8 _pad1[2]; u8 unk3; u8 unk4; u8 _pad5[5]; };
+                };
             } unkE4[4];
             u8 unk10C;
             u8 unk10DData;
@@ -129,11 +132,46 @@ public:
     u8 m_playerLive[4];
     char unkFF3[0x1];
     u16 m_playerLiveTime[4];
-    char unkFFC[0x28];
-    u8 m_assignedMeleeRule[0xA];
-    u8 m_assignedHomerunRule;
-    u8 m_assignedKumiteType;
-    char unk1030[0x18];
+    // HYPOTHESIS: paired rule packets use the byte and halfword layout of their copy.
+    union {
+        struct {
+            char unkFFC[0x28];
+            u8 m_assignedMeleeRule[0xA];
+            u8 m_assignedHomerunRule;
+            u8 m_assignedKumiteType;
+            char unk1030[0x18];
+        };
+        struct {
+            char _padFFC[4];
+            struct {
+                u8 unk0;
+                u8 unk1;
+                u8 unk2;
+                u8 unk3;
+                u8 unk4;
+                u8 unk5;
+                u8 unk6;
+                u8 unk7;
+                u8 unk8;
+                u8 unk9;
+                u8 unkA;
+                u8 unkB;
+                u8 unkC;
+                u16 unkE;
+                u16 unk10;
+                u16 unk12;
+                u16 unk14;
+                u16 unk16;
+                u16 unk18;
+                u16 unk1A;
+                u16 unk1C;
+                u16 unk1E;
+                u8 unk20;
+                u8 unk21;
+                u16 unk22;
+            } unk1000[2];
+        };
+    };
     s32 m_appNetworkError[2];
     char unk1050[0x8];
 
@@ -218,6 +256,13 @@ public:
     u8 getAssignedStageKind(u8* substage, u32* music);
     void clearGlobalAIDStatusLive();
     u8 getAssignedPlayerKind(int index);
+    // HYPOTHESIS: accessor types follow byte results and word-sized input registers.
+    u8 getGlobalLiveAIDBitmap();
+    u8 getGlobalConnectAIDBitmap();
+    u8 getRuleMasterAID();
+    u8 getFreeCharColor(int character, int count);
+    int _getNetworkError(int* code);
+    void startMatchingDaiRantou(int arg);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 
