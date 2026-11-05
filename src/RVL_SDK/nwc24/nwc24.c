@@ -141,8 +141,8 @@ static inline int StrLen(const char *str) {
 }
 
 static inline void StrCat(char *dst, const char *src) {
-    int n = 0;
     const char *p = dst;
+    int n = 0;
     char *d;
 
     while (*p != 0) {
@@ -238,11 +238,11 @@ int Mail_vsprintf(char *buf, char *fmt, va_list args) {
     int isNumber;
     int isSigned;
     int base;
-    int hexOffset;
     int width;
+    char flag;
     char padCh;
     char ch;
-    char flag;
+    int hexOffset;
     char lenMod;
 
     *buf = 0;
@@ -309,10 +309,12 @@ int Mail_vsprintf(char *buf, char *fmt, va_list args) {
                 base = 16;
                 hexOffset = 'A' - 10;
                 break;
-            case 'c':
-                PutCharBack(buf++, va_arg(args, int));
+            case 'c': {
+                char value = va_arg(args, int);
+                PutCharBack(buf++, value);
                 total++;
                 break;
+            }
             case 's': {
                 char *str = va_arg(args, char *);
                 int len;
@@ -437,7 +439,7 @@ static NWC24Err CheckConfig(void);
 static inline NWC24Err GenerateUserId(NWC24UserId *idOut);
 static inline NWC24Err GenerateNewUserId_i(NWC24UserId *idOut);
 
-// HYPOTHESIS: checks the crc on a user id (returns 0 when good). body not drafted.
+// Checks the decoded user ID against the SDK CRC polynomial.
 extern NWC24Err NWC24iCheckUserIdCrc(NWC24UserId id);
 
 NWC24Err NWC24GetMyUserId(NWC24UserId *idOut) {
@@ -3083,10 +3085,9 @@ NWC24Err NWC24iMBoxCheck(NWC24MsgBoxId id, u32 size) {
 NWC24Err fn_8039C16C(NWC24MsgBoxId id, u32 msgId, BOOL checkAccess) {
     NWC24Err err;
     char *path;
-    u32 off;
+    u32 off = MBC_FIRST_ENTRY;
     NWC24File file;
-    u32 appId;
-    u32 count = 0;
+    u32 count;
     u32 foundOff = 0;
     NWC24Err removeErr;
     NWC24Err writeErr;
@@ -3117,7 +3118,8 @@ NWC24Err fn_8039C16C(NWC24MsgBoxId id, u32 msgId, BOOL checkAccess) {
     }
 
     result = NWC24_ERR_NOT_FOUND;
-    for (off = MBC_FIRST_ENTRY; off < hdr->fileSize; off += MBC_BLOCK_SIZE) {
+    count = 0;
+    for (; off < hdr->fileSize; off += MBC_BLOCK_SIZE) {
         writeErr = NWC24FSeek(&file, off, NWC24_SEEK_BEG);
         if (writeErr != NWC24_OK) {
             result = writeErr;
@@ -3193,11 +3195,11 @@ NWC24Err fn_8039C16C(NWC24MsgBoxId id, u32 msgId, BOOL checkAccess) {
 static NWC24Err fn_8039C60C(NWC24iMBCHeader *hdr, const NWC24iMsgObj *msg, NWC24File *file, NWC24MsgBoxId id) {
     NWC24Err result = NWC24_OK;
     u32 off;
-    u32 oldest = 0;
+    u32 visitedCount = 0;
     u32 differs;
-    u32 foundId = 0;
-    u32 count = 0;
-    u32 foundOff = 0;
+    u32 replacedId = 0;
+    u32 replacedOffset = 0;
+    u32 oldestId = 0;
     NWC24Err removeErr;
     NWC24iMBCEntry *entry;
 
@@ -3207,7 +3209,7 @@ static NWC24Err fn_8039C60C(NWC24iMBCHeader *hdr, const NWC24iMsgObj *msg, NWC24
 
     entry = &NWC24WorkP->mbcEntry;
     for (off = MBC_FIRST_ENTRY; off < hdr->fileSize; off += MBC_BLOCK_SIZE) {
-        if (count >= hdr->numMsgs) {
+        if (visitedCount >= hdr->numMsgs) {
             break;
         }
 
@@ -3225,7 +3227,7 @@ static NWC24Err fn_8039C60C(NWC24iMBCHeader *hdr, const NWC24iMsgObj *msg, NWC24
             continue;
         }
 
-        count++;
+        visitedCount++;
         differs = 1;
         if (entry->id == msg->id) {
             differs = 0;
@@ -3243,21 +3245,21 @@ static NWC24Err fn_8039C60C(NWC24iMBCHeader *hdr, const NWC24iMsgObj *msg, NWC24
 
         if (differs) {
             if ((msg->tag & 0xFFFF) != 0 && (entry->tag & 0xFFFF) == (msg->tag & 0xFFFF)) {
-                foundId = entry->id;
-                foundOff = off;
+                replacedId = entry->id;
+                replacedOffset = off;
                 continue;
             }
 
             if (msg->unk1C != 0 && entry->unk1C == msg->unk1C && entry->flags == msg->flags &&
                 entry->length == msg->length && entry->unk10 == msg->unk10 && entry->createTime == msg->createTime) {
-                foundId = entry->id;
-                foundOff = off;
+                replacedId = entry->id;
+                replacedOffset = off;
                 continue;
             }
         }
 
-        if (oldest == 0 || CompareMsgId(oldest, entry->id) > 0) {
-            oldest = entry->id;
+        if (oldestId == 0 || CompareMsgId(oldestId, entry->id) > 0) {
+            oldestId = entry->id;
         }
     }
 
@@ -3265,10 +3267,10 @@ static NWC24Err fn_8039C60C(NWC24iMBCHeader *hdr, const NWC24iMsgObj *msg, NWC24
         return result;
     }
 
-    hdr->oldestMsgId = oldest;
-    if (foundId != 0) {
-        removeErr = fn_8039CCC8(hdr, file, foundOff);
-        result = MBoxRemoveMsgFile_i(id, foundId);
+    hdr->oldestMsgId = oldestId;
+    if (replacedId != 0) {
+        removeErr = fn_8039CCC8(hdr, file, replacedOffset);
+        result = MBoxRemoveMsgFile_i(id, replacedId);
         if (removeErr != NWC24_OK) {
             result = removeErr;
         }
@@ -4544,14 +4546,16 @@ NWC24Err fn_8039FA54(NWC24iMsgObj *msg) {
 
 // base64 text, 57 bytes (76 chars) per line
 NWC24Err fn_8039FB14(const u8 *data, int size, u32 *written) {
+    const u8 *cursor = data;
+    int remaining = size;
     char *buf = NWC24WorkP->stringWork;
     u32 total = 0;
     NWC24Err result = NWC24_OK;
     u32 n;
 
-    while (size >= 57) {
+    while (remaining >= 57) {
         Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
-        result = NWC24Base64Encode(data, 57, buf, 0x4C, &n);
+        result = NWC24Base64Encode(cursor, 57, buf, 0x4C, &n);
         if (result != NWC24_OK) {
             break;
         }
@@ -4564,14 +4568,14 @@ NWC24Err fn_8039FB14(const u8 *data, int size, u32 *written) {
             break;
         }
 
-        data += 57;
-        size -= 57;
+        cursor += 57;
+        remaining -= 57;
         total += n;
     }
 
     if (result == NWC24_OK) {
         Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
-        result = NWC24Base64Encode(data, size, buf, 0x4C, &n);
+        result = NWC24Base64Encode(cursor, remaining, buf, 0x4C, &n);
         if (result == NWC24_OK) {
             buf[n++] = '\r';
             buf[n++] = '\n';
@@ -4591,14 +4595,17 @@ NWC24Err fn_8039FB14(const u8 *data, int size, u32 *written) {
 
 // quoted printable text, the soft line break has to go out between the chunks
 NWC24Err fn_8039FC78(const char *data, int size, u32 *written) {
+    int remaining = size;
+    const char *cursor = data;
     char *buf = NWC24WorkP->stringWork;
     NWC24Err result = NWC24_OK;
     u32 total = 0;
     u32 inN;
     u32 outN;
 
-    while (size > 0) {
-        if (total > 0) {
+    while (remaining > 0) {
+        // BYTES: the native soft-break guard tests the byte count as a signed word.
+        if ((s32)total > 0) {
             Mail_memcpy(buf, "=\r\n", 3);
             result = NWC24FWrite(buf, 3, OutFile);
             if (result != NWC24_OK) {
@@ -4609,7 +4616,7 @@ NWC24Err fn_8039FC78(const char *data, int size, u32 *written) {
         }
 
         Mail_memset(buf, 0, NWC24i_STRING_WORK_SIZE);
-        result = NWC24EncodeQuotedPrintable(buf, 0x400, &outN, (const u8 *)data, size, &inN);
+        result = NWC24EncodeQuotedPrintable(buf, 0x400, &outN, (const u8 *)cursor, remaining, &inN);
         if (result != NWC24_OK && result != NWC24_ERR_OVERFLOW) {
             break;
         }
@@ -4619,8 +4626,8 @@ NWC24Err fn_8039FC78(const char *data, int size, u32 *written) {
             break;
         }
 
-        data += inN;
-        size -= inN;
+        cursor += inN;
+        remaining -= inN;
         total += outN;
     }
 
