@@ -5164,7 +5164,9 @@ static inline NWC24Err MsgBoxOf_i(const NWC24iMsgObj *msg, NWC24MsgBoxId *id) {
 }
 
 // reads the subject of a committed message back out of its file
-NWC24Err fn_8039FD68(const NWC24iMsgObj *msg, char *buf, u32 size) {
+// NWC24ReadMsgSubject: truncate the committed subject and terminate a successful read.
+NWC24Err fn_8039FD68(const NWC24MsgObj *pMsg, char *buf, u32 size) {
+    NWC24iMsgObj *msg = (NWC24iMsgObj *)pMsg;
     NWC24File file;
     NWC24MsgBoxId id;
     NWC24Err result;
@@ -5208,13 +5210,16 @@ NWC24Err fn_8039FD68(const NWC24iMsgObj *msg, char *buf, u32 size) {
     }
 
     close = NWC24iMBoxCloseMsg(&file);
-    return result != NWC24_OK ? result : close;
+    if (result == NWC24_OK) { result = close; }
+    return result;
 }
 
 NWC24Err fn_803A001C(NWC24File *file, const NWC24Data *src, u8 *out, u32 outSize, u32 *written);
 
 // reads (and decodes) attachment number idx of a committed message
-NWC24Err fn_8039FEB0(const NWC24iMsgObj *msg, u32 idx, u8 *buf, u32 size) {
+// NWC24ReadMsgAttached: require the decoded length to match the stored attachment size.
+NWC24Err fn_8039FEB0(const NWC24MsgObj *pMsg, u32 idx, u8 *buf, u32 size) {
+    NWC24iMsgObj *msg = (NWC24iMsgObj *)pMsg;
     NWC24File file;
     NWC24MsgBoxId id;
     NWC24Err result;
@@ -5254,7 +5259,8 @@ NWC24Err fn_8039FEB0(const NWC24iMsgObj *msg, u32 idx, u8 *buf, u32 size) {
     }
 
     close = NWC24iMBoxCloseMsg(&file);
-    return result != NWC24_OK ? result : close;
+    if (result == NWC24_OK) { result = close; }
+    return result;
 }
 
 // decodes a base64 block out of the message file (up to the line that ends in "=" padding)
