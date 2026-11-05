@@ -592,3 +592,69 @@ void* fn_117_43A8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 void* fn_117_43E8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_117_4428(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+
+void ftDedede::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    switch (statusKind) {
+    case 0x115: {
+        soLinkEventArgs eventArgs(0x83a);
+        moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        break;
+    }
+    case 0x12f: {
+        soLinkEventArgs eventArgs(0x83b);
+        moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        break;
+    }
+    case 0x130: {
+        soLinkEventArgs eventArgs(0x83c);
+        moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        break;
+    }
+    case 0x131: {
+        soLinkEventArgs eventArgs(0x83d);
+        moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        break;
+    }
+    case 0x132: {
+        soLinkEventArgs eventArgs(0x83e);
+        moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        break;
+    }
+    case 0x133: {
+        soLinkEventArgs eventArgs(0x83f);
+        moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        break;
+    }
+    case 0x134: {
+        soLinkEventArgs eventArgs(0x840);
+        moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        break;
+    }
+    case 0x135: {
+        soLinkEventArgs eventArgs(0x841);
+        moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        break;
+    }
+    case 0x136: {
+        soLinkEventArgs eventArgs(0x842);
+        moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        break;
+    }
+    case 0x137: {
+        soLinkEventArgs eventArgs(0x843);
+        moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+        break;
+    }
+    }
+    switch (prevStatusKind) {
+    case 0x116:
+    case 0x138:
+    case 0x139:
+        if (statusKind != 0x138 && statusKind != 0x139) {
+            soLinkEventArgs eventArgs(0x83c);
+            moduleAccesser->getLinkModule().sendEventNodes(-1, eventArgs, 0);
+        }
+        break;
+    }
+    Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
+}
