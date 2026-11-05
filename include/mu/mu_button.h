@@ -52,7 +52,7 @@ public:
     // A cursor position of a controller and the positions the cursor moves to.
     struct CursorNode {
         u8 m_cursor;               // 0x0
-        int m_unk4;                // 0x4 the directions passed to fn_800BA364 when the cursor arrives here (0: none)
+        int m_unk4;
         u8 m_links[4];             // 0x8 HYPOTHESIS: the positions above, right, below, left
     };
 

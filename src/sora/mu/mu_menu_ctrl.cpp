@@ -1,6 +1,114 @@
 #include <gf/gf_pad_system.h>
 #include <mu/mu_menu_controller.h>
 #include <types.h>
+#include <gm/gm_global.h>
+#include <mt/mt_vector.h>
+
+extern const u32 lbl_80407BF8[4];
+
+void muMenuController::initRepeatCounter(int buttons) {
+    for (int direction = 0; direction < 4; direction++) {
+        if (buttons & lbl_80407BF8[direction]) {
+            unk2C[0][direction].unk0 = 1;
+            unk2C[0][direction].unk4 = 0;
+            unk2C[0][direction].unk5 = 0;
+        }
+    }
+}
+
+bool muMenuController::setAButtonPushedControllerData() {
+    gfPadStatus status;
+    for (int controller = 0; controller < 8; controller++) {
+        g_gfPadSystem->getSysPadStatus(controller, &status);
+        if (status.m_error == gfPadError::NONE &&
+            (status.m_buttonsPressedThisFrame.bits & 0x1100)) {
+            gmSetRule* rule = g_GameGlobal->m_setRule;
+            rule->m_ctrlNamePlayerNo = controller;
+            rule->unk20 = status.m_controllerType;
+            return true;
+        }
+    }
+    return false;
+}
+
+Vec2f muMenuController::exchangeDir8ToVec(int direction) {
+    Vec2f vector;
+    if (direction == 8) {
+        vector.m_y = 0.0f;
+        vector.m_x = 0.0f;
+        return vector;
+    } else {
+        float angle = 0.7853981852531433f * direction;
+        vector.m_x = sin(angle);
+        vector.m_y = cos(angle);
+    }
+    return vector;
+}
+
+void muMenuController::setControllerFlag(u32 mask) {
+    unk4 = mask;
+    unk2C[0][0].unk0 = 0;
+    unk2C[0][0].unk4 = 0;
+    unk2C[0][0].unk5 = 0;
+    unk2C[1][0].unk0 = 0;
+    unk2C[1][0].unk4 = 0;
+    unk2C[1][0].unk5 = 0;
+    unk2C[2][0].unk0 = 0;
+    unk2C[2][0].unk4 = 0;
+    unk2C[2][0].unk5 = 0;
+    unk2C[0][1].unk0 = 0;
+    unk2C[0][1].unk4 = 0;
+    unk2C[0][1].unk5 = 0;
+    unk2C[1][1].unk0 = 0;
+    unk2C[1][1].unk4 = 0;
+    unk2C[1][1].unk5 = 0;
+    unk2C[2][1].unk0 = 0;
+    unk2C[2][1].unk4 = 0;
+    unk2C[2][1].unk5 = 0;
+    unk2C[0][2].unk0 = 0;
+    unk2C[0][2].unk4 = 0;
+    unk2C[0][2].unk5 = 0;
+    unk2C[1][2].unk0 = 0;
+    unk2C[1][2].unk4 = 0;
+    unk2C[1][2].unk5 = 0;
+    unk2C[2][2].unk0 = 0;
+    unk2C[2][2].unk4 = 0;
+    unk2C[2][2].unk5 = 0;
+    unk2C[0][3].unk0 = 0;
+    unk2C[0][3].unk4 = 0;
+    unk2C[0][3].unk5 = 0;
+    unk2C[1][3].unk0 = 0;
+    unk2C[1][3].unk4 = 0;
+    unk2C[1][3].unk5 = 0;
+    unk2C[2][3].unk0 = 0;
+    unk2C[2][3].unk4 = 0;
+    unk2C[2][3].unk5 = 0;
+    unk98.unk0 = 0;
+    unk98.unk4 = 0;
+    unk98.unk5 = 0;
+}
+
+void muMenuController::setControllerID(u32 controller) {
+    if (controller != 0xFF) {
+        if (controller == 0xF0) {
+            unk4 = 0xFF;
+        } else {
+            unk4 = 1 << controller;
+        }
+    } else {
+        unk4 = 0;
+    }
+    for (int direction = 0; direction < 4; direction++) {
+        for (int group = 0; group < 3; group++) {
+            unk2C[group][direction].unk0 = 0;
+            unk2C[group][direction].unk4 = 0;
+            unk2C[group][direction].unk5 = 0;
+        }
+    }
+    unk98.unk0 = 0;
+    unk98.unk4 = 0;
+    unk98.unk5 = 0;
+}
 
 // muMenuController::getPadStatus (the map name); other files call it by this stand-in name.
 extern "C" gfPadStatus fn_800B9F90(muMenuController* self, int filterDirections) {

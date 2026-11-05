@@ -12,9 +12,6 @@
 // muMenuController::init(pad) and muMenuController::main()
 extern "C" void fn_800B96E8(muMenuController* controller, int pad);
 extern "C" void fn_800B9984(muMenuController* controller);
-// muMenuController::initRepeatCounter(buttons): the buttons of the mask repeat from the start again
-// muMenuController::setAButtonPushedControllerData(): remembers the controller that pressed A
-extern "C" void fn_800BA2E8(muProcMenu* menu);
 // muMenuMain: closes the menu with a code (in the module of the scene)
 extern "C" void fn_1_135E0(muMenuMain* scene, int code);
 
@@ -181,7 +178,7 @@ bool muProcMenu::selectProc(int dir) {
                 repeat |= GF_PAD_BUTTON_BIT_DPAD_RIGHT;
             }
             for (u32 i = 0; i < 9; i++) {
-                fn_800BA364(&m_ctrl[i], repeat);
+                m_ctrl[i].initRepeatCounter(repeat);
             }
         } else {
             moved = false;
@@ -192,7 +189,7 @@ bool muProcMenu::selectProc(int dir) {
 
 void muProcMenu::padRepeatClear(int buttons) {
     for (u32 i = 0; i < 9; i++) {
-        fn_800BA364(&m_ctrl[i], buttons);
+        m_ctrl[i].initRepeatCounter(buttons);
     }
 }
 
@@ -251,7 +248,7 @@ int muProcMenu::getSceneStartCode() {
 }
 
 void muProcMenu::exitScene(int code, bool force) {
-    fn_800BA2E8(this);
+    reinterpret_cast<muMenuController*>(this)->setAButtonPushedControllerData();
     if (force) {
         fn_1_135E0(getMenuMain(), code);
     } else {

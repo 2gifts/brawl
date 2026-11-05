@@ -9,16 +9,21 @@
 // its own copy of them.
 // main.dol functions that have no names yet: muMenuController::init(pad) and muMenuController::main()
 struct gfPadStatus;
+class Vec2f;
 class muMenuController;
 extern "C" void fn_800B96E8(muMenuController* controller, int pad);
 extern "C" void fn_800B9984(muMenuController* controller);
-extern "C" void fn_800BA364(muMenuController* controller, int buttons);
 
 class muMenuController {
 public:
     void init(int pad);
     static int exchangeButton2Dir8(u32 buttons);
     static int getButtonPushedControllerID(u32 buttons);
+    void initRepeatCounter(int buttons);
+    bool setAButtonPushedControllerData();
+    static Vec2f exchangeDir8ToVec(int direction);
+    void setControllerFlag(u32 mask);
+    void setControllerID(u32 controller);
     union {
         char _unk0[0x8];
         struct {
@@ -30,7 +35,26 @@ public:
     u32 m_held;         // 0x08 HYPOTHESIS: the buttons that are held (the name entry copies it to m_buttonsCurrentFrame2)
     u32 m_pressed;      // 0x0C HYPOTHESIS: the buttons that were just pressed (1 left, 2 right in the Yes/No windows)
     u32 m_trigger;      // 0x10 HYPOTHESIS: the buttons pressed in this frame, in the bits of gfPadButtons
-    char _unk14[0x94];
+    union {
+        char _unk14[0x94];
+        struct {
+            u8 unk14[0x18];
+            struct {
+                int unk0;
+                u8 unk4;
+                u8 unk5;
+                u8 unk6[2];
+            } unk2C[3][4];
+            u8 unk8C[0xC];
+            struct {
+                int unk0;
+                u8 unk4;
+                u8 unk5;
+                u8 unk6[2];
+            } unk98;
+            u8 unkA0[8];
+        };
+    };
 
     muMenuController() { fn_800B96E8(this, 0xFF); }
     ~muMenuController() { }
