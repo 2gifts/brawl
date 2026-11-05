@@ -6,6 +6,9 @@
 
 struct hkWorld;
 struct hkEntity;
+struct hkAgentNnEntry;
+struct hkProcessCollisionInput;
+struct hkProcessCollisionOutput;
 
 // Simulation driver owned by an hkWorld (layout partly recovered; tail not recovered yet).
 // Field offsets from the constructor (0x0C..0x24 region).
@@ -23,7 +26,22 @@ struct hkSimulation : hkReferencedObject {
         hkMemory::s_instance->deallocateChunk(p, ((hkReferencedObject*)p)->m_memSizeAndFlags, 0x13);
     }
 
+    // What processAgentsOfEntities does with each agent entry of the entities (called as (this->*func)(entry, input,
+    // output)). HYPOTHESIS: the parameter types beyond the call shape.
+    typedef void (hkSimulation::*AgentEntryProcessFunction)(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,
+                                                            hkProcessCollisionOutput& output);
+
     hkSimulation(hkWorld* world);
+    // HYPOTHESIS: the last parameter (an int-sized mode compared with 1; collideEntitiesNarrowPhaseDiscrete passes
+    // its own through, resetCollisionInformationForEntities passes 0)
+    void collideEntitiesNarrowPhaseDiscrete(hkEntity** entities, int numEntities, const hkProcessCollisionInput& input,
+                                            int mode);
+    void processAgentCollideDiscrete(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,
+                                     hkProcessCollisionOutput& output);
+    void processAgentResetCollisionInformation(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,
+                                               hkProcessCollisionOutput& output);
+    void processAgentsOfEntities(hkEntity** entities, int numEntities, const hkProcessCollisionInput& input,
+                                 AgentEntryProcessFunction func, int mode);
     hkReal snapSimulateTimeAndGetTimeToAdvanceTo();
     virtual ~hkSimulation(); // 0x08 (out of line in src/havok/hkSimulation.cpp)
     // Vtable slots from hkSimulation's vtable in the image (0x0C is hkReferencedObject::calcStatistics), names from

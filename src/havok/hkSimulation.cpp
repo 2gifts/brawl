@@ -68,6 +68,29 @@ hkReal hkSimulation::snapSimulateTimeAndGetTimeToAdvanceTo() {
     return m_unk1C;
 }
 
+// HYPOTHESIS: an agent-entry helper in hkLinkedCollidable.o (not written, no map name) that clears the collision
+// information of one agent entry
+extern "C" void fn_802FF3FC(hkAgentNnEntry* entry, const hkProcessCollisionInput& input);
+
+void hkSimulation::collideEntitiesNarrowPhaseDiscrete(hkEntity** entities, int numEntities,
+                                                      const hkProcessCollisionInput& input, int mode) {
+    processAgentsOfEntities(entities, numEntities, input, &hkSimulation::processAgentCollideDiscrete, mode);
+}
+
+void hkSimulation::resetCollisionInformationForEntities(hkEntity** entities, int numEntities, hkWorld* world,
+                                                        hkBool flag) {
+    if (flag) {
+        // HYPOTHESIS: world +0x68 is the world's collision input
+        processAgentsOfEntities(entities, numEntities, **(const hkProcessCollisionInput**)((char*)world + 0x68),
+                                &hkSimulation::processAgentResetCollisionInformation, 0);
+    }
+}
+
+void hkSimulation::processAgentResetCollisionInformation(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,
+                                                         hkProcessCollisionOutput& output) {
+    fn_802FF3FC(entry, input);
+}
+
 // Accessors (8 bytes each), emitted as out-of-line functions in this TU.
 hkLinkedCollidable* hkEntity::getLinkedCollidable() {
     return &m_collidable;
