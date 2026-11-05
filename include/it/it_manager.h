@@ -180,6 +180,8 @@ public:
     ItemKind getLotKirbyNormalItemKind();
     ItemKind getLotKirbyTabemonoItemKind();
 
+    itCustomizerInterface* getCustomizer(int kind);
+
     static itManager* getInstance();
 };
 static_assert(sizeof(itManager) == 0x14c0, "Class is wrong size!");

@@ -335,6 +335,27 @@ static inline bool isSelCharTypeIn(int type, int first, int end) {
     return in;
 }
 
+// muMenuController::init (the map name); include/mu/mu_menu_controller.h calls it by this stand-in name.
+extern "C" void fn_800B96E8(muMenuController* controller, int pad);
+
+muSelCharPlayerArea::muSelCharPlayerArea()
+    : _0(0), m_scnGroup(NULL), m_objProcTask(NULL), m_selCharHand(NULL), m_selCharCoin(NULL),
+      m_areaIdx(0), m_playerKind(0), m_charKind(static_cast<MuSelchkind>(0)), m_charColorNo(0),
+      m_teamColor(0), m_teamSet(0), m_nameId(-1), unk1CC(0), m_handi(0), m_cpLevel(0), unk1D8(0),
+      m_controllerKind(static_cast<gfPadType::PadType>(4)), unk1E4(0), m_selectedZelda(0),
+      m_selectedSamus(0), m_selectedPoke(0), m_selCharTask(NULL), m_charPicInter(false), m_unk1F9(false),
+      unk40CPad(NULL), unk410Value(0), unk414(0), unk418(1), unk41CPad(NULL), unk420Value(0),
+      unk424(false), unk425Pad(0), unk426Pad(0), unk428(0), unk42CPad(0), unk430Value(0),
+      unk434(0xFF), unk435(0xFF), m_charPicData(NULL), m_charPicRes(), unk440(0),
+      unk444(0xFF), unk445(0xFF), unk446(0xFF), unk447(0xFF) {
+    m_baseMdlGroup = NULL;
+    unk408Group = NULL;
+    for (int index = 0; index < Obj_Num; ++index) m_objs[index] = NULL;
+    fn_800B96E8(&m_menuController, 0);
+}
+
+
+
 // How the handicap of the area is shown: 0 not at all (the solo modes), 1 or 2 (the setting of the rules).
 // HYPOTHESIS: the groups of the kinds of the select screen and the meaning of the values.
 int muSelCharPlayerArea::getHandiDispMode() {

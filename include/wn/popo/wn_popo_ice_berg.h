@@ -130,6 +130,8 @@ public:
     wnPopoIceBergParamAccesser m_paramAccesser; // +0x2718
     wnPopoIceBerg(s32 articleId, const wnArticleBuildInfo& info, const wnPopoIceBergData* data);
     virtual ~wnPopoIceBerg() { }
+    void activate(int founderTaskId, int resourceId, int team, const Vec3f* position, float lr, int heap);
+    virtual void processFixPosition();
     virtual void onDeactivate();
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
     void syncCapsuleSRT(u32 index); // HYPOTHESIS: the argument is the attack index handed to the attack module.

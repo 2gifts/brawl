@@ -41,5 +41,6 @@ public:
     wnSheikNeedle(s32 articleId, const wnArticleBuildInfo& info, const wnSheikNeedleData* data);
     virtual ~wnSheikNeedle();
     virtual void updateNodeSRT();
+    virtual bool notifyEventCollisionAttackCheck(u32 flags);
 };
 static_assert(sizeof(wnSheikNeedle) == 0x1BD0, "Sheik needle article extent");

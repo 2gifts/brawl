@@ -275,6 +275,8 @@ public:
     bool registScnAnim(nw4r::g3d::ResFileData* scnData, u32 index);
     void initPosPokeTrainer(int unk1, int unk2);
     void setStageAttackData(grGimmickDamageFloor* attackData, u32 index);
+    // HYPOTHESIS: the compact overload consumes six integer attack parameters.
+    void setStageAttackData(int* attackData);
     void removeGround(Ground*);
     bool isPokemonTrainer();
     void clearShadow();

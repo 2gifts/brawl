@@ -1,3 +1,4 @@
+// Local BrawlHeaders shadow: adds typed initialization fields.
 #pragma once
 
 // Local shadow of the header of the shared headers (this directory comes first in the include paths): it adds the functions
@@ -58,10 +59,10 @@ public:
     union { char _0x1CC[0x4]; int unk1CC; };
     int m_handi;                        // 0x1D0 the handicap (the line of the list)
     int m_cpLevel;                      // 0x1D4 the level of the computer (the line of the list)
-    char _0x1D8[0x4];
+    union { char _0x1D8[0x4]; int unk1D8; };
     int m_controllerNo;
     gfPadType::PadType m_controllerKind;
-    char _0x1E4[0x4];
+    union { char _0x1E4[0x4]; int unk1E4; };
     int m_selectedZelda;
     int m_selectedSamus;
     int m_selectedPoke;
@@ -90,10 +91,29 @@ public:
             int unk42C;
             char unk430[8];
         };
+        // HYPOTHESIS: field types follow constructor stores and model group creation.
+        struct {
+            nw4r::g3d::ScnMdlExpand* unk408Group;
+            MuMsg* unk40CPad;
+            int unk410Value;
+            int unk414;
+            int unk418;
+            IfWifiprPlayer* unk41CPad;
+            int unk420Value;
+            bool unk424;
+            u8 unk425Pad;
+            u8 unk426Pad;
+            u8 unk427Byte;
+            int unk428;
+            int unk42CPad;
+            int unk430Value;
+            u8 unk434;
+            u8 unk435;
+        };
     };
     nw4r::g3d::ResFileData* m_charPicData;
     nw4r::g3d::ResFile m_charPicRes;
-    char _0x440[0x8];
+    union { char _0x440[0x8]; struct { int unk440; u8 unk444; u8 unk445; u8 unk446; u8 unk447; }; };
 
     void setCharPic(int charKind, int playerKind, int curCostume, bool isTeamBattle, int teamColor, int unk);
     nw4r::g3d::ResFile* getCharPicTexResFile(int charKind);

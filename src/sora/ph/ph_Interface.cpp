@@ -230,3 +230,75 @@ void phInterface::removeHavokSystem() {
     hkBaseSystem::quit();
     m_flags40[7] = 0;
 }
+
+void phInterface::processDefault() {
+    if (m_worldFlag) {
+        if (m_worldFlag) {
+            unk78 = 1;
+            if (m_2ndaryControllers.m_size == 0) {
+                if (m_2ndaryControllers.mustDeallocate()) {
+                    hkThreadMemory::s_instance->deallocateChunk(m_2ndaryControllers.m_data,
+                        m_2ndaryControllers.m_capacityAndFlags << 2, 0x15);
+                }
+                m_2ndaryControllers.m_data = nullptr;
+                m_2ndaryControllers.m_size = 0;
+                m_2ndaryControllers.m_capacityAndFlags =
+                    (m_2ndaryControllers.m_capacityAndFlags & hkArrayBase::FORCE_SIGN_FLAG) |
+                    hkArrayBase::DONT_DEALLOCATE_FLAG;
+            }
+            if (m_ikControllers.m_size == 0) {
+                if (m_ikControllers.mustDeallocate()) {
+                    hkThreadMemory::s_instance->deallocateChunk(m_ikControllers.m_data,
+                        m_ikControllers.m_capacityAndFlags << 2, 0x15);
+                }
+                m_ikControllers.m_data = nullptr;
+                m_ikControllers.m_size = 0;
+                m_ikControllers.m_capacityAndFlags =
+                    (m_ikControllers.m_capacityAndFlags & hkArrayBase::FORCE_SIGN_FLAG) |
+                    hkArrayBase::DONT_DEALLOCATE_FLAG;
+            }
+            delete2ndaryWorld();
+        } else if (unk78) {
+            if (unk54 != nullptr) {
+                unk54->removeReference();
+                unk54 = nullptr;
+            }
+            delete2ndaryWorld();
+            unk78 = 0;
+        }
+        initialize();
+        if (m_worldFlag) {
+            unk78 = 1;
+            if (m_2ndaryControllers.m_size == 0) {
+                if (m_2ndaryControllers.mustDeallocate()) {
+                    hkThreadMemory::s_instance->deallocateChunk(m_2ndaryControllers.m_data,
+                        m_2ndaryControllers.m_capacityAndFlags << 2, 0x15);
+                }
+                m_2ndaryControllers.m_data = nullptr;
+                m_2ndaryControllers.m_size = 0;
+                m_2ndaryControllers.m_capacityAndFlags =
+                    (m_2ndaryControllers.m_capacityAndFlags & hkArrayBase::FORCE_SIGN_FLAG) |
+                    hkArrayBase::DONT_DEALLOCATE_FLAG;
+            }
+            if (m_ikControllers.m_size == 0) {
+                if (m_ikControllers.mustDeallocate()) {
+                    hkThreadMemory::s_instance->deallocateChunk(m_ikControllers.m_data,
+                        m_ikControllers.m_capacityAndFlags << 2, 0x15);
+                }
+                m_ikControllers.m_data = nullptr;
+                m_ikControllers.m_size = 0;
+                m_ikControllers.m_capacityAndFlags =
+                    (m_ikControllers.m_capacityAndFlags & hkArrayBase::FORCE_SIGN_FLAG) |
+                    hkArrayBase::DONT_DEALLOCATE_FLAG;
+            }
+            delete2ndaryWorld();
+        } else if (unk78) {
+            if (unk54 != nullptr) {
+                unk54->removeReference();
+                unk54 = nullptr;
+            }
+            delete2ndaryWorld();
+            unk78 = 0;
+        }
+    }
+}
