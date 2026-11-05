@@ -26,24 +26,24 @@ struct hkSphereCapsuleAgent : hkCollisionAgent {
     static hkSphereCapsuleAgent* createSphereCapsuleAgent(void* unk0, void* unk1, void* unk2, hkContactMgr* contactMgr);
 
     virtual void cleanup();
-    virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) __attribute__((never_inline));
+    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) __attribute__((never_inline));
 
-    static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
 };
 
 // Flipped (symmetric) variant of the capsule agent; see hkSphereBoxAgent.h for the naming convention.
 // The destructor is defined in this translation unit.
 struct hkSymmetricAgentLinearCast_20hkSphereCapsuleAgent_ : hkSphereCapsuleAgent {
     hkSymmetricAgentLinearCast_20hkSphereCapsuleAgent_(hkContactMgr* contactMgr) : hkSphereCapsuleAgent(contactMgr) {}
-    static void staticLinearCast(void* a, void* b, void* c, void* target, void* d);
+    static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
     virtual ~hkSymmetricAgentLinearCast_20hkSphereCapsuleAgent_();
 
-    virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
     virtual void updateShapeCollectionFilter() {}
 
-    static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
+    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
 };

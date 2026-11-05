@@ -92,6 +92,7 @@ public:
     // HYPOTHESIS: the number of saves that are running (ntFriendInfo adds one when it starts one).
     static int s_savingCount;
 
+    bool startSave(Heaps::HeapType heap, bool exitWhenDone);
     ntFriendInfoSave();
     virtual ~ntFriendInfoSave();
     virtual void processDefault();

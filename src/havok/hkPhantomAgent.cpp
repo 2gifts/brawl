@@ -45,7 +45,7 @@ hkPhantomAgent::hkPhantomAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkC
 // Creates the agent for a pair of bodies. When a side's shape is a phantom callback shape, that
 // shape is told about the pair (slot 0x28) and remembered in the agent.
 hkPhantomAgent* hkPhantomAgent::createPhantomAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                   const hkCollisionInput& input, hkContactMgr* contactMgr) {
+                                                   hkCollisionInput& input, hkContactMgr* contactMgr) {
     hkPhantomAgent* agent = new hkPhantomAgent(bodyA, bodyB, contactMgr);
     if (agent->m_shapeTypeA == HK_SHAPE_PHANTOM_CALLBACK) {
         hkPhantomCallbackShape* shape = (hkPhantomCallbackShape*)bodyA.m_shape;
@@ -72,17 +72,17 @@ void hkPhantomAgent::cleanup() {
 
 hkPhantomAgent::~hkPhantomAgent() {}
 
-void hkPhantomAgent::processCollision(void* a, void* b, void* c, void* d) {}
+void hkPhantomAgent::processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d) {}
 
-void hkPhantomAgent::getPenetrations(void* a, void* b, void* c, void* target) {
-    static_cast<hkPenetrationTarget*>(target)->forwardPenetrations(a, b, c);
+void hkPhantomAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
+    static_cast<hkPenetrationTarget*>(target)->forwardPenetrations(a, b, &c);
 }
 
-void hkPhantomAgent::staticGetPenetrations(void* a, void* b, void* c, hkPenetrationTarget* target) {
+void hkPhantomAgent::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, hkPenetrationTarget* target) {
     target->forwardPenetrations(a, b, target);
 }
 
-void hkPhantomAgent::getClosestPoints(void* a, void* b, void* c, void* target) {}
+void hkPhantomAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {}
 void hkPhantomAgent::staticGetClosestPoints() {}
-void hkPhantomAgent::linearCast(void* a, void* b, void* c, void* target, void* d) {}
+void hkPhantomAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {}
 void hkPhantomAgent::staticLinearCast() {}

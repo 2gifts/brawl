@@ -30,13 +30,21 @@ public:
     u8 unk175[3];
     s32 unk178;                       // 0x178
     s32 unk17C;                       // 0x17C
-    u8 unk180[0x60];
+    union {
+        u8 unk180[0x60];
+        struct {
+            u32 unk180Nodes[4][2];
+            s32 unk1A0[4][2];
+            s32 unk1C0[4][2];
+        };
+    };
 
     IfCenter();
     void init();
     virtual ~IfCenter();
     void setTimePos(int index);
     void removeCenterTime();
+    void updateTimeInit();
     void destroyModel();
     void setCenterState(int state);
     void removeAllCenterObj();

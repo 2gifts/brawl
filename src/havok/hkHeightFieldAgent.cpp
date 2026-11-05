@@ -30,67 +30,67 @@
 #include <havok/hkBvTreeAgent.h>
 
 #pragma dont_inline on
-void hkHeightFieldAgent::getPenetrations(void* a, void* b, void* c, void* target) {
+void hkHeightFieldAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     staticGetPenetrations(a, b, c, target);
 }
 
-void hkHeightFieldAgent::getClosestPoints(void* a, void* b, void* c, void* target) {
+void hkHeightFieldAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     staticGetClosestPoints(a, b, c, target);
 }
 
-void hkHeightFieldAgent::linearCast(void* a, void* b, void* c, void* target, void* d) {
+void hkHeightFieldAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
     staticLinearCast(a, b, c, target, d);
 }
 #pragma dont_inline reset
 
-void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::getPenetrations(void* a, void* b, void* c, void* target) {
+void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrap(target);
     hkHeightFieldAgent::getPenetrations(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticGetPenetrations(void* a, void* b, void* c, void* target) {
+void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrap(target);
     hkHeightFieldAgent::staticGetPenetrations(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::getClosestPoints(void* a, void* b, void* c, void* target) {
+void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrap(target);
     hkHeightFieldAgent::getClosestPoints(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticGetClosestPoints(void* a, void* b, void* c, void* target) {
+void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrap(target);
     hkHeightFieldAgent::staticGetClosestPoints(b, a, c, &wrap);
 }
 
-void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::updateShapeCollectionFilter(void* a, void* b, void* c) {}
+void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c) {}
 
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
 // the points back.
-void hkSymmetricAgent_18hkHeightFieldAgent_::linearCast(void* a, void* b, void* c, void* target, void* d) {
-    const hkLinearCastCollisionInput& input = *(const hkLinearCastCollisionInput*)c;
+void hkSymmetricAgent_18hkHeightFieldAgent_::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = c;
     hkLinearCastCollisionInput flippedInput = input;
     flippedInput.m_path.setNeg4(input.m_path);
     hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
     if (d != 0) {
         hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
-        hkHeightFieldAgent::linearCast(b, a, &flippedInput, &flipped, &flippedStart);
+        hkHeightFieldAgent::linearCast(b, a, flippedInput, &flipped, &flippedStart);
     } else {
-        hkHeightFieldAgent::linearCast(b, a, &flippedInput, &flipped, 0);
+        hkHeightFieldAgent::linearCast(b, a, flippedInput, &flipped, 0);
     }
 }
 
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
 // the points back.
-void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticLinearCast(void* a, void* b, void* c, void* target, void* d) {
-    const hkLinearCastCollisionInput& input = *(const hkLinearCastCollisionInput*)c;
+void hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = c;
     hkLinearCastCollisionInput flippedInput = input;
     flippedInput.m_path.setNeg4(input.m_path);
     hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
     if (d != 0) {
         hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
-        hkHeightFieldAgent::staticLinearCast(b, a, &flippedInput, &flipped, &flippedStart);
+        hkHeightFieldAgent::staticLinearCast(b, a, flippedInput, &flipped, &flippedStart);
     } else {
-        hkHeightFieldAgent::staticLinearCast(b, a, &flippedInput, &flipped, 0);
+        hkHeightFieldAgent::staticLinearCast(b, a, flippedInput, &flipped, 0);
     }
 }

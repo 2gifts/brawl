@@ -51,11 +51,11 @@ struct hkCollisionDispatcher : hkReferencedObject {
     virtual ~hkCollisionDispatcher();
 
     // Creation function of a table entry (hkAgentFuncs::create).
-    typedef hkCollisionAgent* (*CreateFunc)(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& input,
+    typedef hkCollisionAgent* (*CreateFunc)(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& input,
                                             hkContactMgr* mgr);
 
     // Creates the agent registered for the shape types of the pair; the predictive table when the input asks for it.
-    hkCollisionAgent* getNewCollisionAgent(const hkCdBody& a, const hkCdBody& b, const hkCollisionInput& input,
+    hkCollisionAgent* getNewCollisionAgent(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& input,
                                            hkContactMgr* mgr) {
         int typeA = a.m_shape->getType();
         int typeB = b.m_shape->getType();

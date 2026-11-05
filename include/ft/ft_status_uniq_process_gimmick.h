@@ -117,7 +117,7 @@ public:
 static_assert(sizeof(ftStatusUniqProcessGimmickDoor) == 0x14, "Class is the wrong size!");
 
 class ftStatusUniqProcessGimmickBarrel : public ftStatusUniqProcessGimmick {
-    u8 unk14[0x4];
+    int unk14;
 public:
     ftStatusUniqProcessGimmickBarrel(soModuleAccesser* acc) : ftStatusUniqProcessGimmick(acc) { }
     virtual ~ftStatusUniqProcessGimmickBarrel() { }

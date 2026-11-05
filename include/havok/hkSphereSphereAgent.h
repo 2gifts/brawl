@@ -22,14 +22,14 @@ struct hkSphereSphereAgent : hkCollisionAgent {
     static void registerAgent(hkCollisionDispatcher* dispatcher);
     // HYPOTHESIS: the first three parameters are the two bodies and the collision input; only the
     // contact manager (last parameter) is stored.
-    static hkSphereSphereAgent* createSphereSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static hkSphereSphereAgent* createSphereSphereAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                                         hkContactMgr* contactMgr);
 
     virtual void cleanup();
-    virtual void processCollision(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
+    virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, hkProcessCollisionInput& unk2, void* unk3);
+    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
 
-    static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
 };

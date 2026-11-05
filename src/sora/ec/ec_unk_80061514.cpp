@@ -5,6 +5,7 @@
 #include <nw4r/g3d/g3d_scngroup.h>
 #include <types.h>
 #include <ut/ut_nw.h>
+#include <gf/gf_archive.h>
 
 void ScnMdl_SetNodeMtx(nw4r::g3d::ScnMdl* mdl, u32 nodeId, const Matrix* mtx);
 
@@ -328,5 +329,110 @@ void ecEffectWork::update_odd(float frames) {
             }
         }
         break;
+    }
+}
+
+void ecEffectWork::set_slow_rate(u32 rate) {
+    unk5B = rate > 1 ? rate : 1;
+}
+
+void ScnObj_DisableCallbackExecOp(nw4r::g3d::ScnObj*, u32);
+void ScnObj_DisableCallbackTiming(nw4r::g3d::ScnObj*, u32);
+
+ecScnObjCallback::~ecScnObjCallback() {
+    if (unk4 != NULL) {
+        if (unk4 != NULL) {
+            unk4->m_callback = NULL;
+            ScnObj_DisableCallbackExecOp(unk4, 1);
+            ScnObj_DisableCallbackExecOp(unk4, 4);
+            ScnObj_DisableCallbackTiming(unk4, 4);
+        }
+        unk4 = NULL;
+    }
+}
+
+void ecResource::set_file_img(void* image, int size, u32 id) {
+    unk0 = new (static_cast<HeapType>(g_ecMgr->unk44)) gfArchive;
+    if (unk0 == NULL) {
+        release(false);
+        return;
+    }
+    unk0->setFileImage(image, size, static_cast<HeapType>(g_ecMgr->unk44));
+    unk14 = 2;
+    regist(id);
+}
+
+void ecEffectWork::set_mdl_enable_update(bool enable, s8 flags) {
+    if (unk48 == NULL) {
+        return;
+    }
+    if ((u8)flags == 0xFF) {
+        if (enable) {
+            unk56 &= ~0x7E;
+        } else {
+            unk48->setUpdateRate(0.0f);
+            unk56 |= 0x7E;
+        }
+    } else {
+        if (flags & 1) {
+            if (unk48->m_anmObjChrRes != NULL) {
+                if (enable) {
+                    unk56 &= ~2;
+                } else {
+                    unk48->m_anmObjChrRes->SetUpdateRate(0.0f);
+                    unk56 |= 2;
+                }
+            }
+        }
+        if (flags & 2) {
+            if (unk48->m_anmObjVisRes != NULL) {
+                if (enable) {
+                    unk56 &= ~4;
+                } else {
+                    unk48->m_anmObjVisRes->SetUpdateRate(0.0f);
+                    unk56 |= 4;
+                }
+            }
+        }
+        if (flags & 4) {
+            if (unk48->m_anmObjTexPatRes != NULL) {
+                if (enable) {
+                    unk56 &= ~8;
+                } else {
+                    unk48->m_anmObjTexPatRes->SetUpdateRate(0.0f);
+                    unk56 |= 8;
+                }
+            }
+        }
+        if (flags & 8) {
+            if (unk48->m_anmObjTexSrtRes != NULL) {
+                if (enable) {
+                    unk56 &= ~16;
+                } else {
+                    unk48->m_anmObjTexSrtRes->SetUpdateRate(0.0f);
+                    unk56 |= 16;
+                }
+            }
+        }
+        if (flags & 16) {
+            if (unk48->m_anmObjMatClrRes != NULL) {
+                if (enable) {
+                    unk56 &= ~32;
+                } else {
+                    unk48->m_anmObjMatClrRes->SetUpdateRate(0.0f);
+                    unk56 |= 32;
+                }
+            }
+        }
+        if (flags & 32) {
+            if (unk48->m_anmObjShpRes != NULL) {
+                if (enable) {
+                    unk56 &= ~64;
+                } else {
+                    unk48->m_anmObjShpRes->SetUpdateRate(0.0f);
+                    unk56 |= 64;
+                }
+            }
+        }
     }
 }

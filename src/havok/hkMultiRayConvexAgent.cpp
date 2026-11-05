@@ -34,9 +34,9 @@ namespace {
 #pragma push
 #pragma auto_inline off
 // One contact point id per ray of the multi-ray shape (body A), none held yet.
-hkMultiRayConvexAgent::hkMultiRayConvexAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr)
+hkMultiRayConvexAgent::hkMultiRayConvexAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr)
     : hkCollisionAgent((int)contactMgr) {
-    const hkMultiRayShape* shape = (const hkMultiRayShape*)((const hkCdBody*)a0)->m_shape;
+    const hkMultiRayShape* shape = (const hkMultiRayShape*)bodyA.m_shape;
     int numRays = shape->m_rays.getSize();
     m_contactPointIds.setSize(numRays);
     for (int i = 0; i < numRays; i++) {
@@ -69,17 +69,12 @@ void hkMultiRayConvexAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
 
 // The allocation size is stored before the constructor runs; the convex x multi-ray agent is the
 // symmetric variant (its vtable is stored after the constructor).
-hkMultiRayConvexAgent* hkMultiRayConvexAgent::createConvexMultiRayAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr) {
-    hkMultiRayConvexAgent* agent = (hkMultiRayConvexAgent*)hkMemory::getInstance().allocateChunk(sizeof(hkMultiRayConvexAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkMultiRayConvexAgent);
-    return ::new (agent) hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_(a1, a0, a2, contactMgr);
+hkMultiRayConvexAgent* hkMultiRayConvexAgent::createConvexMultiRayAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkSymmetricAgentLinearCast_21hkMultiRayConvexAgent_(bodyB, bodyA, input, contactMgr);
 }
 
-hkMultiRayConvexAgent* hkMultiRayConvexAgent::createMultiRayConvexAgent(void* a0, void* a1, void* a2, hkContactMgr* contactMgr) {
-    hkMultiRayConvexAgent* agent = (hkMultiRayConvexAgent*)hkMemory::getInstance().allocateChunk(sizeof(hkMultiRayConvexAgent), 0x1d);
-    agent->m_memSizeAndFlags = sizeof(hkMultiRayConvexAgent);
-    ::new (agent) hkMultiRayConvexAgent(a0, a1, a2, contactMgr);
-    return agent;
+hkMultiRayConvexAgent* hkMultiRayConvexAgent::createMultiRayConvexAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkMultiRayConvexAgent(bodyA, bodyB, input, contactMgr);
 }
 
 void hkMultiRayConvexAgent::cleanup() {
@@ -97,9 +92,9 @@ void hkMultiRayConvexAgent::cleanup() {
 // in world space whose distance is the part of the ray beyond the hit, offset by the shape's penetration distance.
 // The agent slot and the static function have the same body.
 
-void hkMultiRayConvexAgent::getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
-    const hkCdBody& bodyA = *(const hkCdBody*)unk0;
-    const hkCdBody& bodyB = *(const hkCdBody*)unk1;
+void hkMultiRayConvexAgent::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
+    const hkCdBody& bodyA = unk0;
+    const hkCdBody& bodyB = unk1;
     HK_TIMER_BEGIN("multiRay-cvx");
     const hkMultiRayShape* shape = (const hkMultiRayShape*)bodyA.m_shape;
     const hkShape* convex = bodyB.m_shape;
@@ -134,9 +129,9 @@ void hkMultiRayConvexAgent::getClosestPoints(void* unk0, void* unk1, void* unk2,
     HK_TIMER_END();
 }
 
-void hkMultiRayConvexAgent::staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
-    const hkCdBody& bodyA = *(const hkCdBody*)unk0;
-    const hkCdBody& bodyB = *(const hkCdBody*)unk1;
+void hkMultiRayConvexAgent::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
+    const hkCdBody& bodyA = unk0;
+    const hkCdBody& bodyB = unk1;
     HK_TIMER_BEGIN("multiRay-cvx");
     const hkMultiRayShape* shape = (const hkMultiRayShape*)bodyA.m_shape;
     const hkShape* convex = bodyB.m_shape;
@@ -171,15 +166,15 @@ void hkMultiRayConvexAgent::staticGetClosestPoints(void* unk0, void* unk1, void*
     HK_TIMER_END();
 }
 
-void hkMultiRayConvexAgent::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkMultiRayConvexAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     staticGetPenetrations(unk0, unk1, unk2, unk3);
 }
 
 // Reports the pair once for every ray that hits the convex shape, until the collector has seen enough.
-void hkMultiRayConvexAgent::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkMultiRayConvexAgent::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkCdBodyPairCollector& collector = *(hkCdBodyPairCollector*)unk3;
-    const hkCdBody& bodyA = *(const hkCdBody*)unk0;
-    const hkCdBody& bodyB = *(const hkCdBody*)unk1;
+    const hkCdBody& bodyA = unk0;
+    const hkCdBody& bodyB = unk1;
     HK_TIMER_BEGIN("multiRay-cnvx-getPen");
     const hkMultiRayShape* shape = (const hkMultiRayShape*)bodyA.m_shape;
     const hkShape* convex = bodyB.m_shape;

@@ -70,15 +70,15 @@ void hkBvTreeStreamAgent::cleanup() {
 extern "C" void fn_802FEA54(void* subObject, void* args);
 
 struct FilterArgs {
-    void* a;
-    void* b;
+    const hkCdBody* a;
+    const hkCdBody* b;
     u32 bValue;
-    void* c;
+    hkCollisionInput* c;
     int unk8;
 };
 
-void hkBvTreeStreamAgent::updateShapeCollectionFilter(void* a, void* b, void* c) {
-    void* inner = *(void**)b;
+void hkBvTreeStreamAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c) {
+    const void* inner = b.m_shape;
     unk10[3] = 0.0f;
     unk10[2] = 0.0f;
     unk10[1] = 0.0f;
@@ -87,11 +87,11 @@ void hkBvTreeStreamAgent::updateShapeCollectionFilter(void* a, void* b, void* c)
     unk10[6] = 0.0f;
     unk10[5] = 0.0f;
     unk10[4] = 0.0f;
-    u32 bValue = *(u32*)((char*)inner + 0x10);
+    u32 bValue = *(const u32*)((const char*)inner + 0x10);
     FilterArgs args;
-    args.a = a;
-    args.b = b;
-    args.c = c;
+    args.a = &a;
+    args.b = &b;
+    args.c = &c;
     args.unk8 = unk8;
     args.bValue = bValue;
     fn_802FEA54(&m_list, &args);
@@ -109,35 +109,35 @@ void hkBvTreeStreamAgent::warpTime(float t0, float t1, void* arg) {
 // BYTES: the symmetric wrappers call these forwarders; without the pragma they are inlined there.
 #pragma push
 #pragma auto_inline off
-void hkBvTreeStreamAgent::getPenetrations(void* a, void* b, void* c, void* d) {
-    hkBvTreeAgent::staticGetPenetrations(*(const hkCdBody*)a, *(const hkCdBody*)b, *(const hkCollisionInput*)c, d);
+void hkBvTreeStreamAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d) {
+    hkBvTreeAgent::staticGetPenetrations(a, b, c, d);
 }
 
-void hkBvTreeStreamAgent::getClosestPoints(void* a, void* b, void* c, void* d) {
-    hkBvTreeAgent::staticGetClosestPoints(*(const hkCdBody*)a, *(const hkCdBody*)b, *(const hkCollisionInput*)c, d);
+void hkBvTreeStreamAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d) {
+    hkBvTreeAgent::staticGetClosestPoints(a, b, c, d);
 }
 #pragma pop
 
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
 // the points back.
-void hkBvTreeStreamAgentVariant::linearCast(void* a, void* b, void* c, void* target, void* d) {
-    const hkLinearCastCollisionInput& input = *(const hkLinearCastCollisionInput*)c;
+void hkBvTreeStreamAgentVariant::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = c;
     hkLinearCastCollisionInput flippedInput = input;
     flippedInput.m_path.setNeg4(input.m_path);
     hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
     if (d != 0) {
         hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
-        hkBvTreeStreamAgent::linearCast(b, a, &flippedInput, &flipped, &flippedStart);
+        hkBvTreeStreamAgent::linearCast(b, a, flippedInput, &flipped, &flippedStart);
     } else {
-        hkBvTreeStreamAgent::linearCast(b, a, &flippedInput, &flipped, 0);
+        hkBvTreeStreamAgent::linearCast(b, a, flippedInput, &flipped, 0);
     }
 }
 
 // BYTES: the symmetric linear cast calls this forwarder; without the pragma it is inlined there.
 #pragma push
 #pragma auto_inline off
-void hkBvTreeStreamAgent::linearCast(void* a, void* b, void* c, void* d, void* e) {
-    hkBvTreeAgent::staticLinearCast(*(const hkCdBody*)a, *(const hkCdBody*)b, *(const hkLinearCastCollisionInput*)c, d, e);
+void hkBvTreeStreamAgent::linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* d, void* e) {
+    hkBvTreeAgent::staticLinearCast(a, b, c, d, e);
 }
 #pragma pop
 
@@ -147,7 +147,7 @@ void hkBvTreeStreamAgent::linearCast(void* a, void* b, void* c, void* d, void* e
 // list stores (the no-dead-store mode, see TIPS; trigger not found here).
 #pragma push
 #pragma auto_inline off
-hkBvTreeStreamAgent::hkBvTreeStreamAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+hkBvTreeStreamAgent::hkBvTreeStreamAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                          hkContactMgr* contactMgr)
     : hkCollisionAgent((int)contactMgr) {
     unkC = (int)input.m_dispatcher;
@@ -164,12 +164,12 @@ hkBvTreeStreamAgent::hkBvTreeStreamAgent(const hkCdBody& bodyA, const hkCdBody& 
 #pragma pop
 
 hkBvTreeStreamAgent* hkBvTreeStreamAgent::createBvTreeShapeAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                                 const hkCollisionInput& input, hkContactMgr* contactMgr) {
+                                                                 hkCollisionInput& input, hkContactMgr* contactMgr) {
     return new hkBvTreeStreamAgentVariant(bodyB, bodyA, input, contactMgr);
 }
 
 hkBvTreeStreamAgent* hkBvTreeStreamAgent::createShapeBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                             const hkCollisionInput& input, hkContactMgr* contactMgr) {
+                                                             hkCollisionInput& input, hkContactMgr* contactMgr) {
     return new hkBvTreeStreamAgent(bodyA, bodyB, input, contactMgr);
 }
 
@@ -236,25 +236,25 @@ void hkBvTreeStreamAgent::registerMultiRayAgent(void* dispatcher) {
 // Symmetric wrapper of hkBvTreeStreamAgent (map name hkSymmetricAgentLinearCast_19hkBvTreeStreamAgent___
 // updateShapeCollectionFilter): swap the bodies and forward to the plain agent.
 template <class T>
-void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(void* a, void* b, void* c) {
+void hkSymmetricAgentLinearCast<T>::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c) {
     T::updateShapeCollectionFilter(b, a, c);
 }
 
-template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::updateShapeCollectionFilter(void*, void*, void*);
-template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::processCollision(void*, void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::updateShapeCollectionFilter(const hkCdBody&, const hkCdBody&, hkCollisionInput&);
+template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::processCollision(const hkCdBody&, const hkCdBody&, hkProcessCollisionInput&, void*);
 
 template <class T>
-void hkSymmetricAgentLinearCast<T>::getPenetrations(void* a, void* b, void* c, void* target) {
+void hkSymmetricAgentLinearCast<T>::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrapped(target);
     T::getPenetrations(b, a, c, &wrapped);
 }
 
 template <class T>
-void hkSymmetricAgentLinearCast<T>::getClosestPoints(void* a, void* b, void* c, void* target) {
+void hkSymmetricAgentLinearCast<T>::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipCollector wrapped(target);
     T::getClosestPoints(b, a, c, &wrapped);
 }
 
-template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::getPenetrations(void*, void*, void*, void*);
-template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::getClosestPoints(void*, void*, void*, void*);
+template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::getPenetrations(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
+template void hkSymmetricAgentLinearCast<hkBvTreeStreamAgent>::getClosestPoints(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
 

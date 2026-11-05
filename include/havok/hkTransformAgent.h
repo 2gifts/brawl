@@ -33,12 +33,12 @@ struct hkTransformAgent : hkCollisionAgent {
     // Registers the transform agent pairs (shape type 0x19) with the dispatcher.
     static void registerAgent(hkCollisionDispatcher* dispatcher);
     // Creates the agent of the child shape for a body whose motion is A's motion state with the composed transform.
-    hkTransformAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, hkContactMgr* mgr);
+    hkTransformAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, hkContactMgr* mgr);
 
     // Create functions registered with the dispatcher (A: transform shape first; B: the symmetric agent, shapes swapped).
-    static hkTransformAgent* createTransformAAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static hkTransformAgent* createTransformAAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                                    hkContactMgr* contactMgr);
-    static hkTransformAgent* createTransformBAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    static hkTransformAgent* createTransformBAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                                    hkContactMgr* contactMgr);
 
     virtual ~hkTransformAgent();
@@ -51,43 +51,43 @@ struct hkTransformAgent : hkCollisionAgent {
     virtual void commitPotential(u16 key);
     virtual void createZombie(u16 key);
 
-    virtual void processCollision(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void linearCast(void* unk0, void* unk1, void* unk2, void* unk3, void* unk4);
-    static void staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input, void* target,
+    virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, hkProcessCollisionInput& unk2, void* unk3);
+    virtual void linearCast(const hkCdBody& unk0, const hkCdBody& unk1, hkLinearCastCollisionInput& unk2, void* unk3, void* unk4);
+    static void staticLinearCast(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, void* target,
                                  void* startTarget);
-    virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                        void* target);
-    virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                       void* target);
-    virtual void updateShapeCollectionFilter(void* unk0, void* unk1, void* unk2);
+    virtual void updateShapeCollectionFilter(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2);
 };
 
 // HYPOTHESIS: the symmetric (shape-swapped) variant hkSymmetricAgent<hkTransformAgent> (map name
 // hkSymmetricAgent_16hkTransformAgent_).
 struct hkSymmetricAgent_16hkTransformAgent_ : hkTransformAgent {
-    hkSymmetricAgent_16hkTransformAgent_(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
+    hkSymmetricAgent_16hkTransformAgent_(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                          hkContactMgr* mgr)
         : hkTransformAgent(bodyB, bodyA, input, mgr) {}
     virtual ~hkSymmetricAgent_16hkTransformAgent_();
-    virtual void linearCast(void* a, void* b, void* c, void* target, void* d);
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };
 
 // HYPOTHESIS: hkSymmetricAgentLinearCast<hkTransformAgent>. The wrappers swap the two shapes and
 // replace the collector by a flipping collector on the stack (same scheme as hkSphereBoxAgent).
 struct hkSymmetricAgentLinearCast_16hkTransformAgent_ : hkSymmetricAgent_16hkTransformAgent_ {
     hkSymmetricAgentLinearCast_16hkTransformAgent_(const hkCdBody& bodyA, const hkCdBody& bodyB,
-                                                   const hkCollisionInput& input, hkContactMgr* mgr)
+                                                   hkCollisionInput& input, hkContactMgr* mgr)
         : hkSymmetricAgent_16hkTransformAgent_(bodyA, bodyB, input, mgr) {}
     virtual ~hkSymmetricAgentLinearCast_16hkTransformAgent_();
 
-    virtual void getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    virtual void updateShapeCollectionFilter(void* unk0, void* unk1, void* unk2);
+    virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    virtual void updateShapeCollectionFilter(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2);
 
-    static void staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3);
-    static void staticLinearCast(void* unk0, void* unk1, void* unk2, void* unk3, void* unk4);
-    virtual void processCollision(void* a, void* b, void* c, void* d);
+    static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
+    static void staticLinearCast(const hkCdBody& unk0, const hkCdBody& unk1, hkLinearCastCollisionInput& unk2, void* unk3, void* unk4);
+    virtual void processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d);
 };

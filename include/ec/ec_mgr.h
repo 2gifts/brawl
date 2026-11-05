@@ -48,6 +48,8 @@ public:
     ecResource();
     ~ecResource();
     void release(bool);
+    void set_file_img(void*, int, u32);
+    void regist(u32);
     // HYPOTHESIS: parameter types from the tail call in ecEffectWork::change_mdl_tex.
     void change_tex(nw4r::g3d::ScnMdl*, u32, const char*, const char*, nw4r::g3d::ResFile*, int);
 };
@@ -108,6 +110,8 @@ public:
     void set_parent(nw4r::g3d::ScnMdl*, u32, bool);
     void init_attach();
     void set_delay(int);
+    void set_slow_rate(u32);
+    void set_mdl_enable_update(bool, s8);
     void set_visible(bool);
     void set_rot(const Vec3f*);
     void set_scl(const Vec3f*);

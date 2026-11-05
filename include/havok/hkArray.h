@@ -137,7 +137,7 @@ struct hkArray : hkArrayBase {
     }
     // Appends an uninitialised element and returns it.
     T& expandOne() {
-        if (m_size == (m_capacityAndFlags & CAPACITY_MASK)) {
+        if (m_size == getCapacity()) {
             hkArrayUtil::_reserveMore(this, sizeof(T));
         }
         return ((T*)m_data)[m_size++];

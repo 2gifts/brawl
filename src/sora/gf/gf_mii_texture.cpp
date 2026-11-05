@@ -5,6 +5,13 @@
 #include <sr/sr_common.h>
 #include <string.h>
 #include <types.h>
+#include <mt/mt_matrix.h>
+#include <nw4r/g3d/g3d_camera.h>
+#include <nw4r/ut/ut_Color.h>
+
+namespace nw4r { namespace g3d { namespace G3DState {
+const GXRenderModeObj* GetRenderModeObj();
+} } }
 
 extern "C" {
 const char* fn_803CD478(void);
@@ -366,3 +373,63 @@ void gfMii::_drawBGTile_Pre(Mtx mtx) {
     GXSetZCompLoc(FALSE);
     GXSetCullMode(GX_CULL_BACK);
 }
+
+void gfMii::_clearZBuffer() {
+    int width = m_efbWidth;
+    int height = m_efbHeight;
+    nw4r::ut::Color color(0xFFFFFFFF);
+    nw4r::g3d::CameraData cameraData;
+    nw4r::g3d::Camera camera(&cameraData);
+    camera.Init();
+    camera.SetOrtho(0.0f, height, 0.0f, width, 0.0f, 1.0f);
+    camera.SetViewport(0.0f, 0.0f, width, height);
+    camera.SetViewportZRange(0.0f, 1.0f);
+    camera.GXSetViewport();
+    camera.GXSetProjection();
+    camera.GXSetScissor();
+    camera.GXSetScissorBoxOffset();
+    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+    GXInvalidateVtxCache();
+    GXSetCoPlanar(FALSE);
+    GXInvalidateTexAll();
+    GXSetZTexture(GX_ZT_DISABLE, GX_TF_Z8, 0);
+    GXSetTevSwapMode(GX_TEVSTAGE0, GX_TEV_SWAP0, GX_TEV_SWAP0);
+    GXSetTevSwapModeTable(GX_TEV_SWAP0, GX_CH_RED, GX_CH_GREEN, GX_CH_BLUE, GX_CH_ALPHA);
+    GXSetFogRangeAdj(FALSE, 0, NULL);
+    GXSetColorUpdate(TRUE);
+    GXSetAlphaUpdate(TRUE);
+    GXSetNumTexGens(0);
+    GXSetChanCtrl(GX_COLOR0A0, FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanCtrl(GX_COLOR1A1, FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanAmbColor(GX_COLOR0A0, color);
+    GXSetChanMatColor(GX_COLOR0A0, color);
+    GXSetNumChans(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevOp(GX_TEVSTAGE0, GX_BLEND);
+    GXSetNumTevStages(1);
+    GXSetTevDirect(GX_TEVSTAGE0);
+    GXSetNumIndStages(0);
+    GXSetBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_COPY);
+    GXSetZCompLoc(TRUE);
+    GXSetZMode(TRUE, GX_ALWAYS, TRUE);
+    GXSetColorUpdate(TRUE);
+    GXSetClipMode(GX_CLIP_DISABLE);
+    Matrix matrix;
+    GXLoadPosMtxImm(matrix.m, GX_PNMTX0);
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    float bottom = height;
+    float right = width;
+    GXSetCurrentMtx(GX_PNMTX0);
+    GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 4);
+    GXPosition3f32(0.0f, 0.0f, -0.99999f);
+    GXPosition3f32(right, 0.0f, -0.99999f);
+    GXPosition3f32(0.0f, bottom, -0.99999f);
+    GXPosition3f32(right, bottom, -0.99999f);
+    GXEnd();
+    const GXRenderModeObj* mode = nw4r::g3d::G3DState::GetRenderModeObj();
+    GXSetPixelFmt(GX_PF_RGB8_Z24, GX_ZC_LINEAR);
+    GXSetCopyFilter(mode->aa, const_cast<u8 (*)[2]>(mode->sample_pattern), TRUE, const_cast<u8*>(mode->vfilter));
+}
+

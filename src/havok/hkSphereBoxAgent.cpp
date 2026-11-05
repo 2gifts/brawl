@@ -32,7 +32,8 @@
 
 // Stand-in for the symmetric linear cast (staticLinearCast, not written yet).
 // Stand-in for hkIterativeLinearCastAgent::staticLinearCast (other unit).
-extern "C" void fn_802B7FD0(void* a, void* b, void* c, void* target, void* d);
+extern "C" void fn_802B7FD0(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target,
+                            void* d);
 
 void hkSphereBoxAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs box;
@@ -70,74 +71,74 @@ void hkSphereBoxAgent::cleanup() {
     delete this;
 }
 
-void hkSphereBoxAgent::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkSphereBoxAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     staticGetPenetrations(unk0, unk1, unk2, unk3);
 }
 
 // Symmetric wrappers: the shapes are swapped and the collector is replaced by a flipping collector on the stack.
-void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::getPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkSphereBoxAgent::getPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipBodyCollector flip(unk3);
     hkSphereBoxAgent::staticGetPenetrations(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::getClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkSphereBoxAgent::getClosestPoints(unk1, unk0, unk2, &flip);
 }
 
-void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetClosestPoints(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticGetClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     hkSymmetricAgentFlipCollector flip(unk3);
     hkSphereBoxAgent::staticGetClosestPoints(unk1, unk0, unk2, &flip);
 }
 
 // Reports the pair when the sphere centre is closer to the box than the sum of the two convex radii.
 // The centre is brought into box space, clamped to the half extents (keeping its signs) and moved back.
-void hkSphereBoxAgent::staticGetPenetrations(void* unk0, void* unk1, void* unk2, void* unk3) {
+void hkSphereBoxAgent::staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     HK_TIMER_BEGIN("SphereBox");
 
-    const hkSphereShape* sphere = (const hkSphereShape*)((const hkCdBody*)unk0)->m_shape;
-    const hkBoxShape* box = (const hkBoxShape*)((const hkCdBody*)unk1)->m_shape;
-    const hkVector4& centre = ((const hkTransform*)((const hkCdBody*)unk0)->m_motion)->m_translation;
+    const hkSphereShape* sphere = (const hkSphereShape*)(&unk0)->m_shape;
+    const hkBoxShape* box = (const hkBoxShape*)(&unk1)->m_shape;
+    const hkVector4& centre = ((const hkTransform*)(&unk0)->m_motion)->m_translation;
 
     hkVector4 local;
-    local.setTransformedInversePos(*(const hkTransform*)((const hkCdBody*)unk1)->m_motion, centre);
+    local.setTransformedInversePos(*(const hkTransform*)(&unk1)->m_motion, centre);
     hkVector4 clamped;
     clamped.setAbs4(local);
     clamped.setMin4(clamped, box->m_halfExtents);
     clamped.setFlipSign4(clamped, local);
 
     hkVector4 nearest;
-    nearest._setTransformedPos(*(const hkTransform*)((const hkCdBody*)unk1)->m_motion, clamped);
+    nearest._setTransformedPos(*(const hkTransform*)(&unk1)->m_motion, clamped);
     hkVector4 offset;
     offset.setSub4(nearest, centre);
     hkReal distSq = offset.lengthSquared3();
     hkReal radius = sphere->m_radius + box->m_radius;
     if (distSq < radius * radius) {
-        ((hkCdBodyPairCollector*)unk3)->addCdBodyPair(*(const hkCdBody*)unk0, *(const hkCdBody*)unk1);
+        ((hkCdBodyPairCollector*)unk3)->addCdBodyPair(unk0, unk1);
     }
     HK_TIMER_END();
 }
 
 // The linear cast with the bodies swapped: the path is negated and each collector is wrapped in one that turns
 // the points back.
-void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticLinearCast(void* a, void* b, void* c, void* target, void* d) {
-    const hkLinearCastCollisionInput& input = *(const hkLinearCastCollisionInput*)c;
+void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
+    const hkLinearCastCollisionInput& input = c;
     hkLinearCastCollisionInput flippedInput = input;
     flippedInput.m_path.setNeg4(input.m_path);
     hkSymmetricAgentFlipCastCollector flipped(input.m_path, target);
     if (d != 0) {
         hkSymmetricAgentFlipCastCollector flippedStart(input.m_path, d);
-        fn_802B7FD0(b, a, &flippedInput, &flipped, &flippedStart);
+        fn_802B7FD0(b, a, flippedInput, &flipped, &flippedStart);
     } else {
-        fn_802B7FD0(b, a, &flippedInput, &flipped, 0);
+        fn_802B7FD0(b, a, flippedInput, &flipped, 0);
     }
 }
 
-void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::processCollision(void* a, void* b, void* c, void* d) {
+void hkSymmetricAgentLinearCast_16hkSphereBoxAgent_::processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d) {
     hkSymmetricAgent_processCollision<hkSphereBoxAgent>(this, a, b, c, d);
 }

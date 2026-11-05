@@ -34,3 +34,7 @@ struct hkLinearCastCollisionInput : hkCollisionInput {
     hkReal unk24;     // 0x24
     u32 unk28;        // 0x28
 };
+
+// Input of processCollision (Havok's name; the Skyrim reference has it as a plain derived struct). HYPOTHESIS: no
+// members of its own are read by the agents written so far.
+struct hkProcessCollisionInput : hkCollisionInput {};
