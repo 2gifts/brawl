@@ -59,13 +59,16 @@ void hkWorldOperationQueue::queueOperation(const hkWorldOperation::BaseOperation
     hkWorldOperation::BiggestOperation& slot = m_operations0.expandOne();
     m_world->m_pendingOperationsCount++;
 
-    hkWorldOperation::BaseOperation& op = reinterpret_cast<hkWorldOperation::BaseOperation&>(slot);
+    // BYTES: the target has copy propagation off here (the m_unk1C hkBool test is materialized, the grow test reads
+    // the capacity word into its own register). HYPOTHESIS: an aligned local is the trigger (TIPS); which local the
+    // original has is unknown. It beats `#pragma opt_propagation off` (99.70) on this function.
+    hkWorldOperation::BaseOperation* opp __attribute__((aligned(4))) = reinterpret_cast<hkWorldOperation::BaseOperation*>(&slot);
+    hkWorldOperation::BaseOperation& op = *opp;
     hkString::memCpy(&op, &operation, sizeof(hkWorldOperation::BiggestOperation));
 
     switch (op.m_type) {
         QUEUE_SINGLE_CASE(ENTITY_ADD)
         QUEUE_SINGLE_CASE(ENTITY_REMOVE)
-        QUEUE_SINGLE_CASE(ENTITY_UPDATE_BROAD_PHASE)
         QUEUE_SINGLE_CASE(RIGIDBODY_SET_MOTION_TYPE)
 
         case hkWorldOperation::WORLD_OBJECT_SET_SHAPE: {
@@ -99,14 +102,15 @@ void hkWorldOperationQueue::queueOperation(const hkWorldOperation::BaseOperation
         QUEUE_SINGLE_CASE(PHANTOM_REMOVE)
         QUEUE_BATCH_CASE(PHANTOM_BATCH_ADD)
         QUEUE_BATCH_CASE(PHANTOM_BATCH_REMOVE)
+        // the target places this case here, next to the phantom one (jump table order)
+        QUEUE_SINGLE_CASE(ENTITY_UPDATE_BROAD_PHASE)
 
         case hkWorldOperation::PHANTOM_UPDATE_BROAD_PHASE: {
             hkWorldOperation::UpdatePhantomBP& cop = static_cast<hkWorldOperation::UpdatePhantomBP&>(op);
             const hkWorldOperation::UpdatePhantomBP& src = static_cast<const hkWorldOperation::UpdatePhantomBP&>(operation);
             addReferenceTo(cop.m_phantom);
-            // HYPOTHESIS: the queue keeps its own 0x20 byte copy of the aabb (5.1 does a `new hkAabb`)
-            cop.m_aabb = static_cast<hkAabb*>(hkMemory::getInstance().allocateChunk(0x20, 0x25));
-            hkString::memCpy(cop.m_aabb, src.m_aabb, 0x20);
+            // the queue keeps its own copy of the aabb (the target null-checks the allocation before the copy)
+            cop.m_aabb = new hkAabb(src.m_aabb->m_min, src.m_aabb->m_max);
             break;
         }
 
@@ -116,8 +120,8 @@ void hkWorldOperationQueue::queueOperation(const hkWorldOperation::BaseOperation
         case hkWorldOperation::UPDATE_FILTER_WORLD:
             break;
 
-        QUEUE_SINGLE_CASE(UPDATE_MOVED_BODY_INFO)
         QUEUE_BATCH_CASE(ENTITY_BATCH_REINTEGRATE_AND_RECOLLIDE)
+        QUEUE_SINGLE_CASE(UPDATE_MOVED_BODY_INFO)
         QUEUE_SINGLE_CASE(RIGIDBODY_SET_POSITION_AND_ROTATION)
         QUEUE_SINGLE_CASE(RIGIDBODY_SET_LINEAR_VELOCITY)
         QUEUE_SINGLE_CASE(RIGIDBODY_SET_ANGULAR_VELOCITY)

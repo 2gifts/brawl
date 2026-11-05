@@ -104,7 +104,7 @@ struct hkWorldOperationQueue {
     hkArray<hkWorldOperation::BiggestOperation> m_operations0; // 0x00
     hkWorld* m_world;                                          // 0x0C
     hkArray<hkWorldOperation::BiggestOperation> m_operations1; // 0x10
-    u8 m_unk1C;                                                // 0x1C
+    hkBool m_unk1C;                                            // 0x1C (tested signed: extsb)
 
     static void operator delete(void* p) {
         hkThreadMemory::s_instance->deallocateChunk(p, 0x20, 0x2d);
