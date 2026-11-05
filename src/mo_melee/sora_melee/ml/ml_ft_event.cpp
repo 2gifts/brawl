@@ -17,8 +17,6 @@
 #include <st/st_result.h>
 
 extern "C" u8 fn_27_111D70(ftOwner* owner);
-extern "C" void fn_800DD0CC(IfMngr* mngr, int areaNo1, int areaNo2);
-extern "C" void fn_800DD200(IfMngr* mngr);
 
 mlFtEvent::~mlFtEvent() {
 }
@@ -343,13 +341,13 @@ void mlFtEvent::notifyEventPikminMakeBloomAll(int entryId) {
 void mlFtEvent::notifyEventHeartSwapStart(int entryId1, int entryId2) {
     if (isInfoManager()) {
         int areaNo1 = getInfoAreaNo(g_ftManager->getPlayerNo(entryId1));
-        fn_800DD0CC(g_IfMngr, areaNo1, getInfoAreaNo(g_ftManager->getPlayerNo(entryId2)));
+        g_IfMngr->doHeartSwap(areaNo1, getInfoAreaNo(g_ftManager->getPlayerNo(entryId2)));
     }
 }
 
 void mlFtEvent::notifyEventHeartSwapEnd(int entryId1, int entryId2) {
     if (isInfoManager()) {
-        fn_800DD200(g_IfMngr);
+        g_IfMngr->initHeartSwap();
     }
 }
 

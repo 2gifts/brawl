@@ -211,6 +211,13 @@ public:
     void updateStock(u32 count, int animate);
     void receiveShareStock(Vec3f* pos);
     void setStockFace(int type, int characterKind);
+    // HYPOTHESIS: the inlined stock-face query optionally returns the character kind.
+    int getStockFace(int* characterKind) {
+        if (characterKind != NULL) {
+            *characterKind = m_stockFaceChar;
+        }
+        return m_stockFaceMode;
+    }
     void setStockMarkColor(int color, int markColor);
     bool giveShareStock(Vec3f* pos);
     void updateCoinScoreSub(u32 amount);

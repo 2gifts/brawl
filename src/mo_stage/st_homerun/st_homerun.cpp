@@ -36,11 +36,7 @@
 extern "C" u32 fn_800516F0();
 // CameraController::setStageParamPaused
 extern "C" void fn_8009D158(CameraController* camera, cmStageParamPaused* param);
-// IfMngr::setHomerunDistance, dispHomerunResult, isFinishedHomerunResultAnim, dispHomerunVersusResult, dispHomerunHistory
-extern "C" void fn_800DCD84(IfMngr* mngr, float distance);
-extern "C" void fn_800DCD8C(IfMngr* mngr, bool newRecord);
 extern "C" u32 fn_800DCD94(IfMngr* mngr);
-extern "C" void fn_800DCDB0(IfMngr* mngr, float a, float b, float c);
 extern "C" void fn_800DCDD4(IfMngr* mngr, int kind, float distance);
 // IfPlayer::updateDamageHP / setDamageState (the barrier shows its health on the damage gauge of the player)
 extern "C" void fn_800E14A4(IfPlayer* player, u32 value, int a);
@@ -756,7 +752,7 @@ void stHomerun::updateSandBag(float deltaFrame) {
                             m_sound[4] = g_sndSystem->playSE(snd_se_Audience_Kansei_l, 0x10000, 0, 0, -1);
                             g_sndSystem->playSE(snd_se_narration_NewRec, 0x10000, 0, 0, -1);
                         }
-                        fn_800DCD8C(g_IfMngr, newRecord);
+                        g_IfMngr->dispHomerunResult(newRecord);
                         if (isVs() == true) {
                             homerunShowHistory(melee, m_dist);
                         }
@@ -785,7 +781,7 @@ void stHomerun::updateSandBag(float deltaFrame) {
                     if (m_sound[1] == -1) {
                         m_sound[1] = g_sndSystem->playSE(snd_se_Audience_Zannen, 0x10000, 0, 0, -1);
                     }
-                    fn_800DCD8C(g_IfMngr, false);
+                    g_IfMngr->dispHomerunResult(false);
                     if (isVs() == true) {
                         homerunShowHistory(melee, m_dist);
                     }
@@ -834,7 +830,7 @@ void stHomerun::updateSandBag(float deltaFrame) {
                     result.m_y += 0.05f;
                     result.m_z += 0.05f;
                     m_sound[3] = g_sndSystem->playSE(snd_se_Audience_Hakusyu_l, 0x10000, 0, 0, -1);
-                    fn_800DCDB0(g_IfMngr, result.m_x, result.m_y, result.m_z);
+                    g_IfMngr->dispHomerunVersusResult(result.m_x, result.m_y, result.m_z);
                     m_phase = 9;
                 }
                 break;
@@ -956,7 +952,7 @@ void stHomerun::updateDist(float deltaFrame) {
         switch (m_phase) {
         case 3:
         case 4: {
-            fn_800DCD84(g_IfMngr, m_dist);
+            g_IfMngr->setHomerunDistance(m_dist);
             double integral;
             double lastIntegral;
             modf(m_dist, &integral);
