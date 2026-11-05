@@ -40,7 +40,13 @@ struct hkVector4 {
     // Inline helpers in the Havok style (HYPOTHESIS: semantics from the Havok names, not asm-verified yet).
     // Havok's FPU form: one chained assignment, which stores w first.
     void setZero4() { x = y = z = w = 0.0f; }
-    void setAbs4(const hkVector4& a) { set(fabsf(a.x), fabsf(a.y), fabsf(a.z), fabsf(a.w)); }
+    // Lane order x..w through the double fabs (fabs + frsp), like its weak copy in hkSimpleContactConstraintInfo.
+    void setAbs4(const hkVector4& a) {
+        x = (hkReal)fabs(a.x);
+        y = (hkReal)fabs(a.y);
+        z = (hkReal)fabs(a.z);
+        w = (hkReal)fabs(a.w);
+    }
     void setNeg3(const hkVector4& a) { set(-a.x, -a.y, -a.z, a.w); }
     // Lane order x..w, like its out-of-line weak copy in hkSimulation.
     void setNeg4(const hkVector4& a) {
@@ -88,6 +94,10 @@ struct hkVector4 {
     // Bit mask of the lanes that are negative: x -> 8, y -> 4, z -> 2, w -> 1.
     int compareLessThanZero4() const {
         return (x < 0.0f ? 8 : 0) | (y < 0.0f ? 4 : 0) | (z < 0.0f ? 2 : 0) | (w < 0.0f ? 1 : 0);
+    }
+    // Bit mask of the lanes where this < a: x -> 8, y -> 4, z -> 2, w -> 1 (weak copy in hkBoxBoxCollisionDetection).
+    int compareLessThan4(const hkVector4& a) const {
+        return ((x < a.x) << 3) | ((y < a.y) << 2) | ((z < a.z) << 1) | (w < a.w);
     }
     // Lane-wise reciprocal (out of line: defined in src/havok/hkRigidMotionUtil.cpp).
     void setReciprocal4(const hkVector4& a);

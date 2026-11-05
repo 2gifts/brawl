@@ -6,8 +6,9 @@
 // 3x3 rotation matrix: an hkMatrix3 (three columns) with no fields of its own.
 struct hkRotation : hkMatrix3 {
     void set(const hkQuaternion& q);
-    // tolerance is passed in f1 (HYPOTHESIS: a caller-supplied epsilon).
-    bool isOrthonormal(hkReal tolerance) const;
+    // Columns of unit length (within epsilon) and col0 x col1 == col2 lane-wise within epsilon. Returns hkBool
+    // (the result comes back in r3's top byte).
+    hkBool isOrthonormal(hkReal epsilon) const;
 };
 
 inline void hkVector4::_setRotatedDir(const hkRotation& r, const hkVector4& v) {

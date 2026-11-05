@@ -37,25 +37,22 @@ void hkRotation::set(const hkQuaternion& q) {
     m_col2.w = 0.0f;
 }
 
-bool hkRotation::isOrthonormal(hkReal tolerance) const {
-    const hkReal* m = &m_col0.x;
-    if (!((hkReal)fabs((m[2] * m[2] + m[0] * m[0] + m[1] * m[1]) - 1.0f) <= tolerance)) {
+hkBool hkRotation::isOrthonormal(hkReal epsilon) const {
+    if ((hkReal)fabs(m_col0.lengthSquared3() - 1.0f) > epsilon) {
         return false;
     }
-    if (!((hkReal)fabs((m[6] * m[6] + m[4] * m[4] + m[5] * m[5]) - 1.0f) <= tolerance)) {
+    if ((hkReal)fabs(m_col1.lengthSquared3() - 1.0f) > epsilon) {
         return false;
     }
-    if (!((hkReal)fabs((m[10] * m[10] + m[8] * m[8] + m[9] * m[9]) - 1.0f) <= tolerance)) {
+    if ((hkReal)fabs(m_col2.lengthSquared3() - 1.0f) > epsilon) {
         return false;
     }
-    if (tolerance < (hkReal)fabs((m[0] * m[5] - m[1] * m[4]) - m[10])) {
-        return false;
-    }
-    if (tolerance < (hkReal)fabs((m[1] * m[6] - m[2] * m[5]) - m[8])) {
-        return false;
-    }
-    if (tolerance < (hkReal)fabs((m[2] * m[4] - m[0] * m[6]) - m[9])) {
-        return false;
-    }
-    return true;
+    hkVector4 cross;
+    cross.setCross(m_col0, m_col1);
+    hkVector4 eps;
+    eps.setAll(epsilon);
+    hkVector4 diff;
+    diff.setSub4(cross, m_col2);
+    diff.setAbs4(diff);
+    return (eps.compareLessThan4(diff) & 0xE) == 0;
 }
