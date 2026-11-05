@@ -66,17 +66,39 @@ void hkTransformAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     dispatcher->registerCollisionAgent(&plain, HK_SHAPE_TRANSFORM, -1);
 }
 
-// NONMATCHING (create functions, ~55%): the target keeps the hkCollisionAgent vtable store, copies the motion state's
-// transform through a 0x40-byte temporary and materializes the predictive-table test, all signs of copy propagation
-// being off (the source of that is not found; hkGskBaseAgent's ctor shows the same vtable store).
+// HYPOTHESIS: the motion state assignment of the constructor copies the transform through one hkTransform temporary
+// (the target keeps its dead stack copy just below the motion state), then the rest member by member. Kept local to this
+// unit like hkMultiSphereAgent_copyMotionState (that unit's temporaries are four vectors instead).
+static inline void hkTransformAgent_copyMotionState(hkMotionState& dst, const hkMotionState& src) {
+    hkTransform transform = src.m_transform;
+    dst.m_transform = transform;
+    dst.m_sweptTransform = src.m_sweptTransform;
+    dst.m_deltaAngle = src.m_deltaAngle;
+    dst.m_objectRadius = src.m_objectRadius;
+    dst.m_maxLinearVelocity = src.m_maxLinearVelocity;
+    dst.m_maxAngularVelocity = src.m_maxAngularVelocity;
+    dst.m_linearDamping = src.m_linearDamping;
+    dst.m_angularDamping = src.m_angularDamping;
+    dst.m_deactivationClass = src.m_deactivationClass;
+    dst.m_deactivationCounter = src.m_deactivationCounter;
+}
+
+// The child body: A's motion state moved by the shape's transform, the shape's child shape and A's key.
+// The hkSimdReal motion state scalar (see hkMotionState.h) puts this function in the mode that keeps the hkCollisionAgent
+// vtable store and the dead transform temporary, as in the target.
+// NONMATCHING (create functions, ~87%): the target also keeps a dead copy of `this` (mr r30, r31) from the inlined
+// constructor, which costs it two more saved registers; the source of that copy is not found (hkSphereTriangleAgent's
+// create functions show the same copy).
 hkTransformAgent::hkTransformAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkCollisionInput& input,
                                    hkContactMgr* mgr)
     : hkCollisionAgent((int)mgr) {
     const hkTransformShape* shape = (const hkTransformShape*)bodyA.m_shape;
-    hkMotionState motion = *(const hkMotionState*)bodyA.m_motion;
-    motion.m_transform.setMul(*(const hkTransform*)bodyA.m_motion, shape->m_transform);
-    hkCdBody childBody(&bodyA, &motion);
     const hkShape* child = shape->m_childShape.m_childShape;
+    hkMotionState motion;
+    hkMotionState* childMotion = &motion;
+    hkTransformAgent_copyMotionState(motion, *(const hkMotionState*)bodyA.m_motion);
+    motion.m_transform.setMul(*(const hkTransform*)bodyA.m_motion, shape->m_transform);
+    hkCdBody childBody(&bodyA, childMotion);
     childBody.m_shapeKey = bodyA.m_shapeKey;
     childBody.m_shape = (hkShape*)child;
     m_childAgent = input.m_dispatcher->getNewCollisionAgent(childBody, bodyB, input, mgr);
