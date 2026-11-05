@@ -51,7 +51,7 @@ struct hkBvTreeAgent : hkCollisionAgent {
     static hkBvTreeAgent* createBvBvAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                          hkContactMgr* contactMgr);
 
-    virtual void calcStatistics(void* collector) const;
+    virtual void calcStatistics(hkStatisticsCollector* collector) const;
     virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
     virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
     virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
@@ -76,12 +76,22 @@ struct hkBvTreeAgent : hkCollisionAgent {
                                     hkArray<u32>& hitList);
 };
 
+// hkSymmetricAgent<hkBvTreeAgent> (map name): the base of the linear-cast variant below, as for hkMultiSphereAgent.
+// Evidence: the deleting dtor at 0x802A8D68 inlines three destructor levels (variant, this class, hkBvTreeAgent) before
+// the entry list; the map labels it hkSymmetricAgent's, but it is the variant's (one level more than this class's).
+// Only its linear cast is written.
+struct hkSymmetricAgent_13hkBvTreeAgent_ : hkBvTreeAgent {
+    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
+
+    hkSymmetricAgent_13hkBvTreeAgent_(hkContactMgr* contactMgr) : hkBvTreeAgent(contactMgr) {}
+};
+
 // HYPOTHESIS: the symmetric variant is the object created by createBvTreeShapeAgent (its vtable is set after the base
 // constructor). Declared here; the members are defined in hkBvTreeAgent.cpp.
 
 // HYPOTHESIS: symmetric variant of hkBvTreeAgent; the class name is the map name (hkSymmetricAgentLinearCast<hkBvTreeAgent>): each wrapper swaps the
 // first two pair arguments and forwards to the hkBvTreeAgent function.
-struct hkSymmetricAgentLinearCast_13hkBvTreeAgent : hkBvTreeAgent {
+struct hkSymmetricAgentLinearCast_13hkBvTreeAgent : hkSymmetricAgent_13hkBvTreeAgent_ {
     virtual void getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
     static void staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
     virtual void getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target);
@@ -90,10 +100,6 @@ struct hkSymmetricAgentLinearCast_13hkBvTreeAgent : hkBvTreeAgent {
     static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
     virtual void processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d);
 
-    hkSymmetricAgentLinearCast_13hkBvTreeAgent(hkContactMgr* contactMgr) : hkBvTreeAgent(contactMgr) {}
+    hkSymmetricAgentLinearCast_13hkBvTreeAgent(hkContactMgr* contactMgr) : hkSymmetricAgent_13hkBvTreeAgent_(contactMgr) {}
 };
 
-// HYPOTHESIS: hkSymmetricAgent<hkBvTreeAgent> (map name); only its linear cast is written.
-struct hkSymmetricAgent_13hkBvTreeAgent_ : hkBvTreeAgent {
-    virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
-};

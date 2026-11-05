@@ -11776,7 +11776,7 @@ getClosestPoints__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputPv = 
 staticGetClosestPoints__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputPv = .text:0x802A7F30; // type:function size:0x2D4
 getPenetrations__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputPv = .text:0x802A8204; // type:function size:0x1F4
 staticGetPenetrations__13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputPv = .text:0x802A83F8; // type:function size:0x2EC
-fn_802A86E4 = .text:0x802A86E4; // type:function size:0xF8
+calcStatistics__13hkBvTreeAgentCFP21hkStatisticsCollector = .text:0x802A86E4; // type:function size:0xF8
 linearCast__33hkSymmetricAgent_13hkBvTreeAgent_FRC8hkCdBodyRC8hkCdBodyR26hkLinearCastCollisionInputPvPv = .text:0x802A87DC; // type:function size:0x160
 getPenetrations__42hkSymmetricAgentLinearCast_13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputPv = .text:0x802A893C; // type:function size:0x48
 staticGetPenetrations__42hkSymmetricAgentLinearCast_13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputPv = .text:0x802A8984; // type:function size:0x48
@@ -11785,7 +11785,7 @@ staticGetClosestPoints__42hkSymmetricAgentLinearCast_13hkBvTreeAgentFRC8hkCdBody
 staticLinearCast__42hkSymmetricAgentLinearCast_13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR26hkLinearCastCollisionInputPvPv = .text:0x802A8A5C; // type:function size:0x160
 processCollision__42hkSymmetricAgentLinearCast_13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR23hkProcessCollisionInputPv = .text:0x802A8BBC; // type:function size:0x19C
 updateShapeCollectionFilter__42hkSymmetricAgentLinearCast_13hkBvTreeAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInput = .text:0x802A8D58; // type:function size:0x10
-fn_802A8D68 = .text:0x802A8D68; // type:function size:0xA0
+__dt__42hkSymmetricAgentLinearCast_13hkBvTreeAgentFv = .text:0x802A8D68; // type:function size:0xA0
 fn_802A8E08 = .text:0x802A8E08; // type:function size:0x14
 __ct__11hkMoppAgentFP12hkContactMgr = .text:0x802A8E1C; // type:function size:0x3C
 fn_802A8E58 = .text:0x802A8E58; // type:function size:0xF8
