@@ -37,3 +37,23 @@ public:
     u32 getDataFileSize();
 };
 static_assert(sizeof(nteFile) == 0xBC, "Class is the wrong size!");
+
+class nteFileDataStage {
+public:
+    u32 unk0;
+    Heaps::HeapType unk4;
+    virtual ~nteFileDataStage();
+    u8* unkC;
+    u32 unk10;
+
+    nteFileDataStage(Heaps::HeapType heap);
+    void setData(void* data, u32 size);
+};
+
+class nteFileDataSetting {
+public:
+    u32 unk0;
+    Heaps::HeapType unk4;
+    virtual ~nteFileDataSetting();
+    void* unkC;
+};
