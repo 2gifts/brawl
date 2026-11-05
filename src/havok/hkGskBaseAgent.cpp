@@ -13,6 +13,7 @@
 //   0x802B26C8   424  getClosestPoints   [map: hkGskBaseAgent__getClosestPoints]
 
 #include <havok/hkGskBaseAgent.h>
+#include <havok/hkCollidable.h>
 #include <havok/hkShape.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkTransform.h>
@@ -38,14 +39,15 @@ hkGskBaseAgent::hkGskBaseAgent(hkCdBody* bodyA, hkCdBody* bodyB, hkContactMgr* c
     unk20 = 0.0f;
     unk2C = -1.0f;
     unk18 = -1.0f;
+    // BYTES: the depths are read into hkSimdReal locals (propagation off, as in the target), each right after its walk.
     while (bodyA->m_parent != 0) {
         bodyA = bodyA->m_parent;
     }
+    hkSimdReal valueA = ((const hkCollidable*)bodyA)->m_allowedPenetrationDepth;
     while (bodyB->m_parent != 0) {
         bodyB = bodyB->m_parent;
     }
-    float valueA = *(float*)((u8*)bodyA + 0x20);
-    float valueB = *(float*)((u8*)bodyB + 0x20);
+    hkSimdReal valueB = ((const hkCollidable*)bodyB)->m_allowedPenetrationDepth;
     unk1C = valueA < valueB ? valueA : valueB;
 }
 
