@@ -437,3 +437,22 @@ bool soPhysicsModuleImpl::is2ndBothReverse() {
     }
     return false;
 }
+
+
+void soPhysicsModuleImpl::set2ndRewind(int rewind) {
+    if (m_2ndaryController != NULL) {
+        int winding = rewind;
+        fn_80095990(m_2ndaryController, &winding);
+    }
+}
+
+void soPhysicsModuleImpl::off2ndWind() {
+    set2ndWind(NULL);
+    unk44_10 = 1;
+}
+
+void soPhysicsModuleImpl::setToeAngleLimit(int ikId, float limit) {
+    if (unk30 != NULL) {
+        unk30->setToeAngle(m_ikHandles->at(ikId).unk0, limit);
+    }
+}
