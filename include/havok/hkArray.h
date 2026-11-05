@@ -122,6 +122,20 @@ struct hkArray : hkArrayBase {
         reserveSmart(n);
         m_size = n;
     }
+    // Opens a gap of numToInsert elements at index (the later elements move up) and returns its first element
+    // (contents are not initialised).
+    T* expandAt(int index, int numToInsert) {
+        int newSize = m_size + numToInsert;
+        int numToMove = m_size - index;
+        reserve(newSize);
+        T* dst = (T*)m_data + index + numToInsert;
+        T* src = (T*)m_data + index;
+        for (int k = numToMove - 1; k >= 0; k--) {
+            dst[k] = src[k];
+        }
+        m_size = newSize;
+        return (T*)m_data + index;
+    }
     // Same without the capacity check (the caller reserved the room).
     T* expandByUnchecked(int n) {
         int oldSize = m_size;

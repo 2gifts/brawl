@@ -50,6 +50,7 @@
 #include <havok/hkCdBody.h>
 #include <havok/hkMotionState.h>
 #include <havok/hkCdBodyPairCollector.h>
+#include <havok/hkAgentDispatchUtil.h>
 
 hkBvTreeAgent::hkBvTreeAgent(hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
     unk30[0] = 0.0f;
@@ -296,33 +297,36 @@ void hkBvTreeAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkColl
     HK_TIMER_END_LIST();
 }
 
-// Not written yet (out of line in this unit): hkSweptTransformUtil::calcTimInfo, calcAabbAndQueryTree, the hit list sort
-// and the two hkAgentDispatchUtil<u32, hkBvAgentEntryInfo, hkAgentDispatchUtilHelper> templates.
+// Not written yet (out of line in this unit): hkSweptTransformUtil::calcTimInfo, calcAabbAndQueryTree and the hit list
+// sort.
 extern "C" void fn_802A6A38(const hkMotionState* a, const hkMotionState* b, hkReal deltaTime, hkVector4& timInfo);
 extern "C" int fn_802A6B94(const hkCdBody& bodyA, const hkCdBody& bodyB, const hkTransform& bTa, const hkVector4& timInfo,
                            hkProcessCollisionInput& input, hkReal* cachedAabb, hkArray<u32>& hitList);
 extern "C" void fn_802A4C14(u32* keys, int numKeys);
-extern "C" void fn_802A4E34(hkArray<hkBvTreeAgent::hkBvAgentEntryInfo>& entries, hkArray<u32>& hitList,
-                            const hkCdBody& bodyA, const hkCdBody& bodyB, hkProcessCollisionInput& input,
-                            hkContactMgr* mgr, void* helper);
-extern "C" void fn_802A52F0(hkArray<hkBvTreeAgent::hkBvAgentEntryInfo>& entries, hkArray<u32>& hitList,
-                            const hkCdBody& bodyA, const hkCdBody& bodyB, hkProcessCollisionInput& input,
-                            hkContactMgr* mgr, void* helper);
 
 // HYPOTHESIS: global hkBool switches read here (sda21): use the cached aabb at 0x20, and update the entry list
 // without sorting the hits first.
 extern hkBool lbl_805A0F14;
 extern hkBool lbl_805A0F10;
 
-// Helper handed to the dispatch-util templates: the tree's collection and a child body of B.
-// HYPOTHESIS: layout (0x480 in the caller's frame: collection, then the body; the rest is the shape buffer).
-struct hkBvTreeAgentDispatchHelper {
-    const hkShapeCollection* m_collection; // 0x00
-    hkCdBody m_body;                       // 0x04
-    hkShapeContainer::ShapeBuffer m_buffer;
+// Helper handed to the dispatch-util templates (map name hkAgentDispatchUtilHelper): the tree's collection and a child
+// body of B pointed at the child for a key (the templates read the collection at 0x00, the body at 0x04 and the shape
+// buffer at 0x20).
+struct hkAgentDispatchUtilHelper {
+    const hkShapeCollection* m_collection;        // 0x00
+    hkCdBody m_bodyB;                             // 0x04
+    hkShapeContainer::ShapeBuffer m_shapeBuffer;  // 0x20
 
-    explicit hkBvTreeAgentDispatchHelper(const hkCdBody& body) : m_body(&body) {}
+    explicit hkAgentDispatchUtilHelper(const hkCdBody& body) : m_bodyB(&body) {}
+
+    const hkCdBody& getBodyB(u32 key) {
+        m_bodyB.m_shape = (hkShape*)m_collection->m_container.getChildShape(key, m_shapeBuffer);
+        m_bodyB.m_shapeKey = key;
+        return m_bodyB;
+    }
 };
+
+typedef hkAgentDispatchUtil<u32, hkBvTreeAgent::hkBvAgentEntryInfo, hkAgentDispatchUtilHelper> hkBvTreeAgentDispatchUtil;
 
 // Queries the tree with the aabb of A swept over the step and updates the entry list from the hits (one child agent
 // per hit key). Inlined into processCollision (the hit list is destroyed on both exits).
@@ -338,13 +342,15 @@ static inline void hkBvTreeAgent_updateEntries(hkBvTreeAgent* agent, const hkCdB
         return;
     }
     const hkShapeCollection* collection = ((const hkBvTreeShape*)bodyB.m_shape)->m_collection;
-    hkBvTreeAgentDispatchHelper helper(bodyB);
+    hkAgentDispatchUtilHelper helper(bodyB);
     helper.m_collection = collection;
     if (lbl_805A0F10) {
-        fn_802A4E34(agent->m_entries, hitList, bodyA, bodyB, input, (hkContactMgr*)agent->unk8, &helper);
+        hkBvTreeAgentDispatchUtil::fastUpdate(agent->m_entries, hitList, bodyA, bodyB, input, (hkContactMgr*)agent->unk8,
+                                              helper);
     } else {
         fn_802A4C14(hitList.begin(), hitList.getSize());
-        fn_802A52F0(agent->m_entries, hitList, bodyA, bodyB, input, (hkContactMgr*)agent->unk8, &helper);
+        hkBvTreeAgentDispatchUtil::update(agent->m_entries, hitList, bodyA, bodyB, input, (hkContactMgr*)agent->unk8,
+                                          helper);
     }
 }
 
