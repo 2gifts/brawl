@@ -50,6 +50,7 @@ class wnIkeSword;
 // HYPOTHESIS: final link-event payload types inferred from its constructor and notification handler.
 class soLinkEventIkeFinal : public soLinkEventArgs {
 public:
+    soLinkEventIkeFinal(int eventKind, int unk8);
     int unk8;
     int unkC;
     int unk10;
