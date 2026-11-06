@@ -17,6 +17,7 @@
 #include <string.h>
 #include <types.h>
 
+#include <ms/ms_tag_processor.h>
 #include <mu/menu.h>
 #include <mu/mu_name.h>
 #include <mu/mu_name_letter_table.h>
@@ -24,7 +25,6 @@
 
 // main.dol functions with names that the shared headers do not declare.
 // The number of letters of a text (it stops at the end of the text or after as many letters as the second argument).
-extern "C" int fn_8006CEEC(const char* text, int maxLetters);
 // Message::appendSubstr(destination, source, first letter, count): adds letters of a text
 extern "C" void appendSubstr__7MessageFPcPCcii(char* dst, const char* src, int skip, int count);
 // Message::writeTagClear(destination): writes the tag that clears the format of the text, returns the size of the tag
@@ -625,6 +625,9 @@ static char* sEnNoPrefix = "\357\274\256\357\274\257\357\274\216";
 static char* sEnCpuPrefix = "\357\274\243\357\274\260\357\274\265";
 
 // How many pairs of the mark key there are, and how many random names there are in Japanese and in the other languages.
+
+
+// How many pairs of the mark key there are, and how many random names there are in Japanese and in the other languages.
 static const int sCounts[3] = {41, 401, 150};
 
 // The sets of keys that the language uses, as indexes of the sets in g_muNameLetterTbl: hiragana, katakana, letters and digits
@@ -636,7 +639,7 @@ static const float sOne = 1.0f;
 
 // Whether the number of letters is counted in letters and not in bytes.
 static inline int msgLen(const char* text) {
-    return fn_8006CEEC(text, 0x7FFF);
+    return msTagProcessor::strlenUtf8(text, 0x7FFF);
 }
 
 static inline void playSE(int id) {
@@ -1091,15 +1094,27 @@ bool MuSelctChrNameEntry::changeLetter(char* out, const char* current) {
 }
 
 // Whether the name can be decided: a name needs a letter that is not a blank (an empty name is only allowed when the entry says so).
-static bool canDecideName(const char* name, bool allowEmpty) {
-    if (allowEmpty && msgLen(name) <= 0) {
+static bool canDecideName(MuSelctChrNameEntry* entry) {
+    if (entry->m_allowEmpty && msgLen(entry->m_name) <= 0) {
         return true;
     }
-    for (int i = 0; i < msgLen(name); i++) {
+    for (int i = 0; i < msgLen(entry->m_name); i++) {
         char letter[8];
         letter[0] = 0;
-        appendSubstr__7MessageFPcPCcii(letter, name, i, 1);
+        appendSubstr__7MessageFPcPCcii(letter, entry->m_name, i, 1);
         if (strcmp(letter, g_muNameBlank) != 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Whether any controller pressed the button of the random name.
+static bool anyPadPressedRandom() {
+    for (int i = 0; i < 8; i++) {
+        gfPadStatus status;
+        g_gfPadSystem->getSysPadStatus(i, &status);
+        if (status.m_error == 0 && (status.m_buttonsPressedThisFrame.bits & sRandomNameButtons[status.m_controllerType]) != 0) {
             return true;
         }
     }
@@ -1111,18 +1126,22 @@ static bool canDecideName(const char* name, bool allowEmpty) {
 int MuSelctChrNameEntry::decideButtonProc(gfPadStatus* pad, bool allowRandom) {
     int action = 0;
     if ((pad->m_buttonsPressedThisFrame.bits & GF_PAD_BUTTON_BIT_B) != 0) {
-        action = msgLen(m_name) > 0 ? 4 : 2;
+        action = msgLen(m_name) <= 0 ? 2 : 4;
     }
     if ((pad->m_buttonsPressedThisFrame.bits & GF_PAD_BUTTON_BIT_A) != 0) {
         switch (m_cursor) {
         case Cursor_Back:
-            action = msgLen(m_name) > 0 ? 4 : 2;
+            if (msgLen(m_name) <= 0) {
+                action = 2;
+            } else {
+                action = 4;
+            }
             break;
         case Cursor_Next:
             action = 5;
             break;
         case Cursor_Done:
-            if (canDecideName(m_name, m_allowEmpty)) {
+            if (canDecideName(this)) {
                 action = 1;
             }
             break;
@@ -1132,7 +1151,7 @@ int MuSelctChrNameEntry::decideButtonProc(gfPadStatus* pad, bool allowRandom) {
         }
     }
     if ((pad->m_buttonsPressedThisFrame.bits & GF_PAD_BUTTON_BIT_START) != 0 && m_cursor == Cursor_Done && action != 1) {
-        if (canDecideName(m_name, m_allowEmpty)) {
+        if (canDecideName(this)) {
             action = 1;
         }
     }
@@ -1147,15 +1166,7 @@ int MuSelctChrNameEntry::decideButtonProc(gfPadStatus* pad, bool allowRandom) {
     if (!m_allowEmpty) {
         bool pressed;
         if (allowRandom) {
-            pressed = false;
-            for (int i = 0; i < 8; i++) {
-                gfPadStatus status;
-                g_gfPadSystem->getSysPadStatus(i, &status);
-                if (status.m_error == 0 && (status.m_buttonsPressedThisFrame.bits & sRandomNameButtons[status.m_controllerType]) != 0) {
-                    pressed = true;
-                    break;
-                }
-            }
+            pressed = anyPadPressedRandom();
         } else {
             pressed = (pad->m_buttonsPressedThisFrame.bits & sRandomNameButtons[pad->m_controllerType]) != 0;
         }
@@ -1228,7 +1239,8 @@ bool MuSelctChrNameEntry::isNameValidNumeric(const char* name, const char* prefi
             if (wide[0] < 0xFF10 || wide[0] > 0xFF19) {
                 break;
             }
-            number = number * 10 + (wide[0] - 0xFF10);
+            number *= 10;
+            number += wide[0] - 0xFF10;
             i++;
         }
         if (i >= digits && number >= min && number <= max) {

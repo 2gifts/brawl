@@ -107,7 +107,19 @@ void Ground::setMotionRatio(float ratio) {
 #include <gm/gm_stage_data.h>
 #include <gr/collision/gr_collision_joint.h>
 #include <nw4r/g3d/g3d_resmdl.h>
+#include <mu/mu_mat_color.h>
 #include <nw4r/g3d/g3d_resnode.h>
+
+// HYPOTHESIS: MSL's std::type_info (no <typeinfo> in this tree); typeid() needs it, == compares the names with strcmp.
+namespace std {
+class type_info {
+public:
+    const char* tname;
+    int tid;
+    bool operator==(const type_info& other) const { return strcmp(tname, other.tname) == 0; }
+};
+}  // namespace std
+
 #include <revolution/OS.h>
 #include <string.h>
 #include <ut/ut_nw.h>
@@ -872,3 +884,91 @@ bool Ground::isCollisionStatusOwnerTask(grCollStatus* collStatus, int* categoryM
     return false;
 }
 
+
+// HYPOTHESIS: the material's TEV block (ResTev, byte 0xC is the stage count) and the copied material's gen mode, which the
+// shared g3d headers lack; declared by their symbols. Each wraps one data pointer.
+struct GroundResTevData {
+    char _0[0xC];
+    u8 m_numStages;
+};
+struct GroundResTev : public nw4r::g3d::ResCommon<GroundResTevData> {};
+struct GroundResGenMode {
+    nw4r::g3d::GenModeData* m_data;
+};
+extern "C" GroundResTev GetResTev__Q34nw4r3g3d6ResMatFv(nw4r::g3d::ResMat* mat);
+extern "C" GroundResGenMode GetResGenMode__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(nw4r::g3d::ScnMdl::CopiedMatAccess* access, bool markDirty);
+extern "C" void GXSetNumTevStages__Q34nw4r3g3d10ResGenModeFUc(GroundResGenMode* mode, u8 num);
+
+void Ground::setBlendColorDisable() {
+    if (m_isGr2) {
+        m_isEnableBlendColor = false;
+        if (m_sceneModels != NULL) {
+            u32 numModels = m_modelAnimNum;
+            for (u32 i = 0; i != numModels; i++) {
+                nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[i];
+                nw4r::g3d::ResMdl resMdl = scnMdl->m_resMdl;
+                GroundResGenMode genMode;
+                u32 numMats = resMdl.GetResMatNumEntries();
+                for (u32 j = 0; j < numMats; j++) {
+                    nw4r::g3d::ResMat resMat = resMdl.GetResMat(j);
+                    int numStages = GetResTev__Q34nw4r3g3d6ResMatFv(&resMat).ref().m_numStages;
+                    nw4r::g3d::ScnMdl::CopiedMatAccess access(scnMdl, j);
+                    genMode = GetResGenMode__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(&access, false);
+                    if (numStages > 1) {
+                        GXSetNumTevStages__Q34nw4r3g3d10ResGenModeFUc(&genMode, numStages - 1);
+                    }
+                }
+            }
+        }
+    }
+}
+
+extern "C" nw4r::g3d::ResMatChan GetResMatChan__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(nw4r::g3d::ScnMdl::CopiedMatAccess* access, bool sync);
+
+void Ground::setMatAlpha(u32 alpha, u32 sceneModelIndex) {
+    nw4r::g3d::ResMdl resMdl;
+    GXColor color = {0, 0, 0, 0};
+    color.a = alpha;
+    nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[sceneModelIndex];
+    if (scnMdl != NULL) {
+        u32 i = 0;
+        resMdl = scnMdl->m_resMdl;
+        u32 numMats = resMdl.GetResMatNumEntries();
+        for (; i != numMats; i++) {
+            nw4r::g3d::ResMatChan resMatChan;
+            if (typeid(nw4r::g3d::ScnMdl*) == typeid(nw4r::g3d::ScnMdlSimple*)) {
+                nw4r::g3d::ScnMdl::CopiedMatAccess access(scnMdl, i);
+                resMatChan = GetResMatChan__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(&access, true);
+            } else {
+                nw4r::g3d::ResMat resMat = resMdl.GetResMat(i);
+                // HYPOTHESIS: the material's channel block sits 0x3EC bytes in (ResMat::GetResMatChan).
+                *reinterpret_cast<char**>(&resMatChan) = reinterpret_cast<char*>(resMat.ptr()) + 0x3ec;
+            }
+            resMatChan.GXSetChanMatColor(GX_ALPHA0, color);
+        }
+    }
+}
+
+void Ground::setMatAlphaMul(u32 mul, u32 sceneModelIndex) {
+    nw4r::g3d::ResMdl resMdl;
+    GXColor color;
+    nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[sceneModelIndex];
+    if (scnMdl != NULL) {
+        u32 i = 0;
+        resMdl = scnMdl->m_resMdl;
+        u32 numMats = resMdl.GetResMatNumEntries();
+        for (; i != numMats; i++) {
+            nw4r::g3d::ResMatChan resMatChan;
+            if (typeid(nw4r::g3d::ScnMdl*) == typeid(nw4r::g3d::ScnMdlSimple*)) {
+                nw4r::g3d::ScnMdl::CopiedMatAccess access(scnMdl, i);
+                resMatChan = GetResMatChan__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(&access, true);
+            } else {
+                nw4r::g3d::ResMat resMat = resMdl.GetResMat(i);
+                *reinterpret_cast<char**>(&resMatChan) = reinterpret_cast<char*>(resMat.ptr()) + 0x3ec;
+            }
+            resMatChan.GXGetChanMatColor(GX_ALPHA0, &color);
+            color.a = (float)color.a * (float)mul / 255.0f;
+            resMatChan.GXSetChanMatColor(GX_ALPHA0, color);
+        }
+    }
+}
