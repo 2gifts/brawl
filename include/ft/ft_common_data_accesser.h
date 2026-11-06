@@ -116,6 +116,13 @@ struct wnMarioPumpWaterData;
 struct wnPokeFushigisouSeedData;
 struct wnPokeZenigameWaterData;
 struct ftLucarioAuraBallParam;
+struct wnLinkBowData;
+struct wnLinkBowArrowData;
+struct wnToonLinkBowData;
+struct wnToonLinkBowArrowData;
+struct wnYoshiTamagoData;
+struct wnSheikNeedleData;
+struct wnFoxLandMasterShellData;
 
 // HYPOTHESIS: leading flag word of a common fighter status's data (the bit with mask 0x8 marks statuses that cannot be trodden on).
 struct ftStatusFlagData {
@@ -134,6 +141,7 @@ public:
     const wnDummyFighterData* getDummyFighterData() const;
     const ftLucarioAuraBallParam* getLucarioAuraBallParam(int kind) const;
     float* getLinkBowParam(int kind) const;
+    float* getToonLinkBowParam(int kind) const;
     // HYPOTHESIS: the getWeaponData overload family specializes on the article data type.
     template <class Data> const Data* getWeaponData(int kind, bool* resourceGroup) const;
     // HYPOTHESIS: parameter types of the methods below follow the register use and callers (the module map has none).
@@ -220,6 +228,21 @@ template <>
 const wnPokeFushigisouSeedData* ftCommonDataAccesser::getWeaponData<wnPokeFushigisouSeedData>(int kind, bool* resourceGroup) const;
 template <>
 const wnPokeZenigameWaterData* ftCommonDataAccesser::getWeaponData<wnPokeZenigameWaterData>(int kind, bool* resourceGroup) const;
+
+template <>
+const wnLinkBowData* ftCommonDataAccesser::getWeaponData<wnLinkBowData>(int kind, bool* resourceGroup) const;
+template <>
+const wnLinkBowArrowData* ftCommonDataAccesser::getWeaponData<wnLinkBowArrowData>(int kind, bool* resourceGroup) const;
+template <>
+const wnToonLinkBowData* ftCommonDataAccesser::getWeaponData<wnToonLinkBowData>(int kind, bool* resourceGroup) const;
+template <>
+const wnToonLinkBowArrowData* ftCommonDataAccesser::getWeaponData<wnToonLinkBowArrowData>(int kind, bool* resourceGroup) const;
+template <>
+const wnYoshiTamagoData* ftCommonDataAccesser::getWeaponData<wnYoshiTamagoData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSheikNeedleData* ftCommonDataAccesser::getWeaponData<wnSheikNeedleData>(int kind, bool* resourceGroup) const;
+template <>
+const wnFoxLandMasterShellData* ftCommonDataAccesser::getWeaponData<wnFoxLandMasterShellData>(int kind, bool* resourceGroup) const;
 
 extern ftCommonData g_ftCommonData;
 extern ftCommonDataAccesser g_ftCommonDataAccesser;
