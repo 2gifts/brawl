@@ -261,3 +261,16 @@ void TMCC_JPEGENC_set_usr_parameters(TMCC_Encoder* enc, TMCC_UsrParam* usr) {
     usr->unk40 = enc->unk15C8 * usr->unk1C;
     usr->unk44 = enc->unk15C9 * usr->unk1E;
 }
+
+void fn_802692BC(TMCC_Bitstream* bs, u8 byte) {
+    u8* p = bs->cur;
+    *p = byte;
+    p++;
+    bs->cur = p;
+    if ((u32)(p - bs->start) >= (u32)bs->capacity) {
+        bs->overflow = 1;
+        bs->total += p - bs->start;
+        bs->cur = bs->start;
+    }
+    *bs->cur = 0;
+}
