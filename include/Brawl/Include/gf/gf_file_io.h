@@ -70,7 +70,10 @@ public:
     static int getFileNumVF(gfFileIORequest* request);
     static int getFileSize(const char* path);
     static int getFindFirstFileSD(gfFileIORequest* request);
+    // HYPOTHESIS: the real worker fills a name table: (search path, buffer, buffer size, max entry length)
+    static int getFindFirstFileSD(const char* path, char* buffer, u32 totalSize, u32 maxLen);
     static int getFindFirstFileVF(gfFileIORequest* request);
+    static int getFindFirstFileVF(const char* path, char* buffer, u32 totalSize, u32 maxLen);
     static int gfFACreateDir(const char* filepath);
     static int gfNandErrorCheck(unsigned int unk1); // TODO
     static int gfNandSetTmpPath(unsigned int unk1, const char* filepath);
