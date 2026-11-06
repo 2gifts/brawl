@@ -9,28 +9,13 @@
 #include <wn/weapon.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
 
-class Vec3f;
-struct wnLucarioAuraBallData;
-struct wnLucarioQigongData;
-
-// The aura ball (the class is in sora_melee). Opaque shell: the full class is a weapon builder that cannot coexist with this unit.
-class wnLucarioAuraBall : public Weapon {
-    u8 m_unreconstructed[0x2050 - sizeof(Weapon)];
-public:
-    wnLucarioAuraBall(s32 articleId, const wnArticleBuildInfo& info, const wnLucarioAuraBallData* data);
-    virtual ~wnLucarioAuraBall();
-};
-static_assert(sizeof(wnLucarioAuraBall) == 0x2050, "wnLucarioAuraBall layout is wrong!");
-
-// The Aura Sphere / force palm wave (wn/lucario/wn_lucario_qigong.h). Opaque shell for the same reason.
-class wnLucarioQigong : public Weapon {
-    u8 m_unreconstructed[0x1E3C - sizeof(Weapon)];
-public:
-    wnLucarioQigong(s32 articleId, const wnArticleBuildInfo& info, const wnLucarioQigongData* data);
-    virtual ~wnLucarioQigong();
-    void activate(int founderTaskId, int team, const Vec3f* position, float a, float b);
-};
-static_assert(sizeof(wnLucarioQigong) == 0x1E3C, "wnLucarioQigong layout is wrong!");
+// Full article types let the fighter own their pools and teardown.
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/lucario/wn_lucario_aura_ball.h>
+#include <wn/lucario/wn_lucario_qigong.h>
 
 typedef wnArticleHierarchy<wnLucarioQigong, 1, soInstancePoolRoot> ftLucarioQigongPool;
 typedef wnArticleHierarchy<wnLucarioAuraBall, 3, ftLucarioQigongPool> ftLucarioAuraBallPool;
