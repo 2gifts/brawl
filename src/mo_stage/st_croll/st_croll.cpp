@@ -2152,11 +2152,13 @@ void stCharacterRoll::ctrlScroll(float deltaFrame) {
     m_scroll.y = m_scroll.y + step;
 }
 
+#pragma dont_inline reset
 void stCharacterRoll::scnProcCallback(nw4r::g3d::ScnProc* proc, bool opa) {
     stCharacterRoll* stage = static_cast<stCharacterRoll*>(proc->GetUserData());
     stage->scnProc(proc, opa);
 }
 
+#pragma dont_inline on
 // Draws the roll (the pictures, the coins and the names) after the models of the stage.
 void stCharacterRoll::scnProc(nw4r::g3d::ScnProc* proc, bool opa) {
     if ((m_state == 2 || m_state == 3) && opa != true) {
