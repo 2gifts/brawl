@@ -101,6 +101,8 @@ void gfFileIO::server() {
     }
 }
 
+// the original callers call this out of line
+#pragma dont_inline on
 gfFileIO::FS_TYPE gfFileIO::checkFSType(const char* filepath) {
     if (strncmp(filepath, &lbl_8059C550, 4) == 0) {
         return MCS;
@@ -122,6 +124,7 @@ gfFileIO::FS_TYPE gfFileIO::checkFSType(const char* filepath) {
     }
     return lbl_8059C528;
 }
+#pragma dont_inline reset
 
 void gfFileIO::gfNandErrorCheck(s32 result, int quiet) {
     switch (result) {
@@ -172,6 +175,8 @@ void gfFileIO::gfNandErrorCheck(s32 result, int quiet) {
 void gfFileIO::gfVFErrorCheck(s32 error) { }
 #pragma dont_inline reset
 
+// the original callers call this out of line
+#pragma dont_inline on
 void gfFileIO::gfNANDSetTmpPath(char* buf, const char* filepath) {
     char* hex = buf + 5;
     strcpy(buf, &lbl_8059C570);
@@ -186,6 +191,7 @@ void gfFileIO::gfNANDSetTmpPath(char* buf, const char* filepath) {
     }
     hex[4] = 0;
 }
+#pragma dont_inline reset
 
 void gfFileIO::setSDMountStatusCallback(MountStatusCB cb) {
     lbl_8059FFE8 = cb;
@@ -832,3 +838,159 @@ int gfFileIO::readDirNAND(gfFileIORequest* request) {
     return result;
 }
 
+
+// HYPOTHESIS: checkFile(path) builds a bare request on the stack (no constructor run) with only the cached flags cleared
+int gfFileIO::checkFile(const char* filepath) {
+    bool result = false;
+    char buf[0x20];
+    ((gfFileIORequest*)buf)->m_pFilepath = (char*)filepath;
+    ((gfFileIORequest*)buf)->unk16_b7 = 0;
+    ((gfFileIORequest*)buf)->m_isCached = false;
+    if (checkFile((gfFileIORequest*)buf) == 0) {
+        result = true;
+    }
+    return result;
+}
+
+extern "C" int lbl_8059C530;
+
+// HYPOTHESIS: stand-in name; stores the language that selects the localized file name suffix
+extern "C" void fn_8001B784(int language) {
+    lbl_8059C530 = language;
+}
+
+// HYPOTHESIS: stack copy of the first 0x18 bytes of a request, as findfirst* and checkFile build it
+struct gfFileIORequestHead {
+    char* m_pFilepath;
+    int m_words[5];
+};
+
+// HYPOTHESIS: findfirstSD/findfirstVF are defined below under their fn_ names
+extern "C" int fn_8001FC98(gfFileIORequest* request);
+extern "C" int fn_8001F988(gfFileIORequest* request);
+
+int gfFileIO::findfirstFile(gfFileIORequest* request) {
+    char name[0x80];
+    int result;
+    FS_TYPE type = checkFSType(request->m_pFilepath);
+    char* filepath = request->m_pFilepath;
+    u32 len = strlen(filepath);
+    char* p = filepath;
+    for (u32 i = 0; i < len; i++) {
+        if (*p == ':') {
+            strncpy(name, p + 1, 0x80);
+            goto copied;
+        }
+        p++;
+    }
+    strncpy(name, filepath, 0x80);
+copied:
+    gfFileIORequestHead head;
+    gfFileIORequestHead* src = (gfFileIORequestHead*)request;
+    head.m_pFilepath = src->m_pFilepath;
+    head.m_words[0] = src->m_words[0];
+    head.m_words[1] = src->m_words[1];
+    head.m_words[2] = src->m_words[2];
+    head.m_words[3] = src->m_words[3];
+    head.m_words[4] = src->m_words[4];
+    result = 0x11;
+    head.m_pFilepath = name;
+    switch (type) {
+    case SD:
+        result = fn_8001FC98((gfFileIORequest*)&head);
+        break;
+    case VF:
+        ((gfFileIORequest*)&head)->m_vfUnk = request->m_pFilepath[2] - '0';
+        result = fn_8001F988((gfFileIORequest*)&head);
+        break;
+    }
+    request->m_dest = ((gfFileIORequest*)&head)->m_dest;
+    request->m_readLen = ((gfFileIORequest*)&head)->m_readLen;
+    request->m_returnStatus = result;
+    return result;
+}
+
+int gfFileIO::writeNandCacheFileCRC(gfFileIORequest* request) {
+    gfFileIORequestHead head;
+    gfFileIORequestHead* src = (gfFileIORequestHead*)request;
+    char tmpPath[0x80];
+    head.m_pFilepath = src->m_pFilepath;
+    head.m_words[0] = src->m_words[0];
+    head.m_words[1] = src->m_words[1];
+    head.m_words[2] = src->m_words[2];
+    head.m_words[3] = src->m_words[3];
+    head.m_words[4] = src->m_words[4];
+    gfNANDSetTmpPath(tmpPath, request->m_pFilepath);
+    head.m_pFilepath = tmpPath;
+    return writeNandCacheFile((gfFileIORequest*)&head);
+}
+
+extern "C" int fn_8001FC98(gfFileIORequest* request) {
+    gfFileIOLock lock(&lbl_80494910.m_mutex);
+    char path[0x80];
+    char* filepath = request->m_pFilepath;
+    int result = 0x11;
+
+    strcpy(path, &lbl_8059C598);
+    if (*filepath == '/') {
+        path[2] = 0;
+    }
+    strncat(path, filepath, 0x80);
+    int count = gfFileIO::getFileNumSD(path);
+    if (count >= 0) {
+        if (count == 0) {
+            result = 0;
+        } else {
+            char* buffer;
+            u32 size = count << 7;
+            buffer = (char*)gfMemoryPool::alloc(const_cast<void*>(request->m_heap), size, 32);
+            if (!buffer) {
+                OSReport(lbl_80421198[2], &lbl_8059C59C, request->m_pFilepath, size);
+                result = 4;
+            } else {
+                request->m_dest = buffer;
+                gfFileIO::getFindFirstFileSD(path, buffer, size, 0x80);
+                request->m_dest = buffer;
+                request->m_readLen = count;
+                result = 0;
+            }
+        }
+    }
+    return result;
+}
+
+extern "C" int fn_8001F988(gfFileIORequest* request) {
+    gfFileIOLock lock(&lbl_80494910.m_mutex);
+    char path[0x80];
+    u8 drive = request->m_vfUnk;
+    char* filepath = request->m_pFilepath;
+    int result = 0x11;
+
+    strcpy(path, &lbl_8059C58C);
+    path[0] = drive + 'B';
+    if (*filepath == '/') {
+        path[2] = 0;
+    }
+    strncat(path, filepath, 0x80);
+    int count = gfFileIO::getFileNumVF(path);
+    if (count >= 0) {
+        if (count == 0) {
+            result = 0;
+        } else {
+            char* buffer;
+            u32 size = count << 7;
+            buffer = (char*)gfMemoryPool::alloc(const_cast<void*>(request->m_heap), size, 32);
+            if (!buffer) {
+                OSReport(lbl_80421198[2], &lbl_8059C594, request->m_pFilepath, size);
+                result = 4;
+            } else {
+                request->m_dest = buffer;
+                gfFileIO::getFindFirstFileVF(path, buffer, size, 0x80);
+                request->m_dest = buffer;
+                request->m_readLen = count;
+                result = 0;
+            }
+        }
+    }
+    return result;
+}

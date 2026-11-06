@@ -74,7 +74,10 @@ public:
     static int getFileNumVF(const char* path);
     static int getFileSize(const char* path);
     static int getFindFirstFileSD(gfFileIORequest* request);
+    // HYPOTHESIS: the real worker fills a name table: (search path, buffer, buffer size, max entry length)
+    static int getFindFirstFileSD(const char* path, char* buffer, u32 totalSize, u32 maxLen);
     static int getFindFirstFileVF(gfFileIORequest* request);
+    static int getFindFirstFileVF(const char* path, char* buffer, u32 totalSize, u32 maxLen);
     static int gfFACreateDir(const char* filepath);
     // HYPOTHESIS: NAND result code plus a flag that suppresses the busy/alloc-failed error
     static void gfNandErrorCheck(s32 result, int quiet);
