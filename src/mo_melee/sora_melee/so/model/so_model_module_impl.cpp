@@ -36,6 +36,7 @@
 
 extern "C" char* strrchr(const char* str, int ch); // MSL, not in the project headers
 extern "C" void* GXGetTexObjData(const GXTexObj* texture); // as in mu_stage_edit_ui.cpp
+#include <ac/ac_anim_cmd_impl.h>
 #include <types.h>
 #include <ut/ut_nw.h>
 #include <gf/gf_scn_mdl_mod.h>
@@ -1244,3 +1245,8 @@ void soModelModuleImpl::setLoupeNo(s8 loupeNo) {
 s8 soModelModuleImpl::getLoupeNo() {
     return m_loupeNo;
 }
+
+// HYPOTHESIS: the original emits these empty observer defaults in this unit.
+void soModelEventObserver::notifyEventConstructInstance(bool, soModuleAccesser*) {}
+void soModelEventObserver::notifyEventDestructInstance(soModuleAccesser*) {}
+template class soArrayContractibleTable<const acCmdArgConv>;
