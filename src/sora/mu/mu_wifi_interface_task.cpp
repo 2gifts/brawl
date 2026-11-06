@@ -1725,3 +1725,90 @@ void muWifiInterfaceTask::sendAIDInfo(bool flag, u8 mask) {
     fn_800D0AE0(this);
     fn_80145B98(lbl_805A03A8, mask);
 }
+
+extern u8 lbl_805A02A8;
+
+// HYPOTHESIS: updatePreloadCharacterStatus stores its argument in a global status byte; stays under its fn_ name.
+extern "C" void fn_800DA0B4(u8 status) {
+    lbl_805A02A8 = status;
+}
+
+// HYPOTHESIS: bit 1 of the byte at 0x56 of the AID info is a homerun-share flag.
+struct FlagByteHomerun {
+    u8 unk0_b7 : 1;
+    u8 unk0_b6 : 1;
+    u8 unk0_b0 : 6;
+};
+
+// HYPOTHESIS: resetShareInfoForHomerun clears the homerun flag and the byte at 0x5A of the own AID info, then flags it for sending.
+extern "C" void fn_800CFE1C(muWifiInterfaceTask* self) {
+    u8 aid = Network::getMyAID();
+    if (aid == 0xFF) {
+        aid = 4;
+    }
+    u8* info = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
+    reinterpret_cast<FlagByteHomerun*>(&info[0x56])->unk0_b6 = 0;
+    info[0x5A] = 0;
+    aid = Network::getMyAID();
+    if (aid == 0xFF) {
+        aid = 4;
+    }
+    info = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
+    reinterpret_cast<FlagByte*>(&info[0x56])->unk0_b0 = 1;
+    fn_800D0AE0(self);
+    fn_80145B98(lbl_805A03A8, 0xFE);
+}
+
+struct Slot8 {
+    u8 unk0;
+    u8 pad1[7];
+};
+
+// HYPOTHESIS: setTeamColor looks up the slot owned by the own AID in the table at 0x4C and stores the color in the own AID info.
+extern "C" void fn_800CA5F8(muWifiInterfaceTask* self, int slot, u8 color) {
+    u8 aid = Network::getMyAID();
+    if (aid == 0xFF) {
+        aid = 4;
+    }
+    u8* entry = reinterpret_cast<u8*>(self) + slot * 8;
+    if (entry[0x4C] == aid) {
+        int index = entry[0x4D];
+        aid = Network::getMyAID();
+        if (aid == 0xFF) {
+            aid = 4;
+        }
+        reinterpret_cast<Slot8*>(reinterpret_cast<u8*>(&self->m_aidInfos[aid]) + 0x3C)[index].unk0 = color;
+        aid = Network::getMyAID();
+        if (aid == 0xFF) {
+            aid = 4;
+        }
+        u8* info = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
+        reinterpret_cast<FlagByte*>(&info[0x56])->unk0_b0 = 1;
+        fn_800D0AE0(self);
+        fn_80145B98(lbl_805A03A8, 0xFE);
+    }
+}
+
+// HYPOTHESIS: putFriendStatusName clears a friend record and copies a 5 character name into it; returns the source.
+extern "C" const u8* fn_800D26D0(muWifiInterfaceTask* self, int index, const u8* name) {
+    const u8* source;
+    int count;
+    u8* destination = &ntFriendInfo::getInstance()->unk0->unk450[0x131] + index * 0x89;
+    memset(destination, 0, 0x89);
+    source = name;
+    count = 5;
+    memset(destination, 0, 10);
+    while (--count >= 0) {
+        int character = source[0];
+        destination[0] = character;
+        character |= source[1];
+        destination[1] = source[1];
+        source += 2;
+        destination += 2;
+        if (character == 0) {
+            break;
+        }
+    }
+    ntFriendInfo::getInstance()->setDirtyFlag(true);
+    return name;
+}
