@@ -43,6 +43,8 @@
 #include <havok/hkWorld.h>
 #include <havok/hkSimulationIsland.h>
 #include <havok/hkAction.h>
+#include <havok/hkMath.h>
+#include <math.h>
 
 hkSimulation::hkSimulation(hkWorld* world) {
     m_world = world;
@@ -137,6 +139,30 @@ const hkCollidable* hkWorldObject::getCollidable() const {
 
 hkVector4& hkRigidBody::getCenterOfMassInWorld() {
     return *(hkVector4*)((u8*)this + 0x100);
+}
+
+hkReal hkMath::asin(hkReal r) {
+    if ((hkReal)fabs(r) >= 1.0f) {
+        return r > 0.0f ? 1.5707964f : -1.5707964f;
+    }
+    return (hkReal)::asin(r);
+}
+
+hkQuaternion::hkQuaternion(const hkVector4& axis, hkReal angle) {
+    setAxisAngle(axis, angle);
+}
+
+void hkQuaternion::setInverseMul(const hkQuaternion& q0, const hkQuaternion& q1) {
+    const hkVector4& a = q0.m_vec;
+    const hkVector4& b = q1.m_vec;
+    hkReal cx = b.y * a.z - b.z * a.y;
+    hkReal cy = b.z * a.x - b.x * a.z;
+    hkReal cz = b.x * a.y - b.y * a.x;
+    hkReal x = cx + a.w * b.x - b.w * a.x;
+    hkReal y = cy + a.w * b.y - b.w * a.y;
+    hkReal z = cz + a.w * b.z - b.w * a.z;
+    hkReal w = a.w * b.w + a.dot3(b);
+    m_vec.set(x, y, z, w);
 }
 
 hkProcessCollisionOutput::hkProcessCollisionOutput() {
