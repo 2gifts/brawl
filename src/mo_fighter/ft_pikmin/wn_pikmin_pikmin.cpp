@@ -1,3 +1,4 @@
+#define WN_PARAM_ACCESSER_INLINE_DTOR
 #define WN_PIKMIN_FULL_BUILDER
 #define WN_WEAPON_NO_COMMON_ENERGIES
 #define WN_WEAPON_BUILDER
@@ -14,6 +15,20 @@
 #define MT_VEC2F_SUB_NOINLINE
 #define MT_VEC3F_FROM_VEC2_CTOR_NOINLINE
 #define SO_SLOW_GET_INSTANCE_OUT_OF_LINE
+#include <so/so_array.h>
+struct acAnimCmdConv;
+// MATCH-ONLY: isEmpty is declared here and defined at the end of the file, because the table's vtable is sora_melee's
+// and would not emit it from the class body. Spelled before the builders instantiate this class.
+template <>
+class soArrayFixed<const acAnimCmdConv*> : public soNullableInterface {
+public:
+    virtual bool isNull() const { return false; }
+    virtual const acAnimCmdConv*& at(s32 index) = 0;
+    virtual const acAnimCmdConv* const& at(s32 index) const = 0;
+    virtual s32 size() const = 0;
+    virtual bool isEmpty() const;
+    virtual ~soArrayFixed() { }
+};
 #include <wn/wn_module_accesser_builder.h>
 #include <ft/ft_external_value_accesser.h>
 #include <so/so_module_accesser.h>
@@ -2571,4 +2586,38 @@ wnPikminPikmin::wnPikminPikmin(s32 articleId, const wnArticleBuildInfo& info, co
     uniqProcs[45] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessWaterFollow;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 0x34);
     Weapon::deactivate(false);
+}
+
+// The animation command table's constructor, destructor and vtable are sora_melee's (FT_DOL_CONTRACTIBLE_TABLE), so
+// nothing would emit these virtuals, yet this object keeps copies of them.
+// MATCH-ONLY: defined by hand, with the bodies of the primary template.
+void soArrayContractibleTable<const acAnimCmdConv*>::pop() {
+    if (this->m_link && !this->m_link->isEmpty()) {
+        this->m_link->pop();
+    } else if (m_size > 0) {
+        m_size--;
+    }
+}
+
+void soArrayContractibleTable<const acAnimCmdConv*>::clear() {
+    if (this->m_link) {
+        this->m_link->clear();
+    }
+    m_elements = nullptr;
+    m_size = 0;
+}
+
+s32 soArrayContractibleTable<const acAnimCmdConv*>::size() const {
+    s32 res = m_size;
+    if (!m_elements) {
+        res = 0;
+    }
+    if (this->m_link) {
+        return res + this->m_link->size();
+    }
+    return res;
+}
+
+bool soArrayFixed<const acAnimCmdConv*>::isEmpty() const {
+    return this->size() == 0;
 }
