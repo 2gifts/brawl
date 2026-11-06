@@ -23,6 +23,7 @@ class wnPopoBlizzard : public Weapon {
 public:
     wnPopoBlizzard(s32 articleId, const wnArticleBuildInfo& info, const wnPopoBlizzardData* data);
     virtual ~wnPopoBlizzard();
+    void activate(int founderTaskId, int team, const Vec3f* position, float lr);
 };
 static_assert(sizeof(wnPopoBlizzard) == 0x1F4C, "wnPopoBlizzard layout is wrong!");
 
@@ -42,6 +43,7 @@ class wnPopoIceBerg : public Weapon {
 public:
     wnPopoIceBerg(s32 articleId, const wnArticleBuildInfo& info, const wnPopoIceBergData* data);
     virtual ~wnPopoIceBerg();
+    void activate(int founderTaskId, int resourceId, int team, const Vec3f* position, float lr, int heap);
     static bool activeArticle(wnPopoIceBergWind* wind, soModuleAccesser* acc);
 };
 static_assert(sizeof(wnPopoIceBerg) == 0x277C, "wnPopoIceBerg layout is wrong!");
@@ -52,6 +54,7 @@ class wnPopoRubber : public Weapon {
 public:
     wnPopoRubber(s32 articleId, const wnArticleBuildInfo& info, const wnPopoRubberData* data);
     virtual ~wnPopoRubber();
+    void activate(int founderTaskId, u32 resourceId, int team, int parentTaskId); // HYPOTHESIS: parameter meaning
 };
 static_assert(sizeof(wnPopoRubber) == 0x210C, "wnPopoRubber layout is wrong!");
 

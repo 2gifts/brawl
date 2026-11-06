@@ -507,6 +507,10 @@ public:
         float zSq = m_z * m_z;
         return zSq + (xSq + ySq);
     }
+#elif defined(MT_VEC3F_LENGTH_SQ_NOINLINE)
+    __attribute__((never_inline)) { // BYTES: this unit keeps its own weak out-of-line copy (plain grouping).
+        return m_x * m_x + m_y * m_y + m_z * m_z;
+    }
 #elif defined(MT_VEC3F_LENGTH_SQ_PLAIN)
     { // BYTES: matches the plain left-to-right grouping mt_vector.cpp's own normalize/angle use.
         return m_x * m_x + m_y * m_y + m_z * m_z;
