@@ -17,6 +17,7 @@
 #include <mu/menu.h>
 #include <mu/mu_event.h>
 #include <sc/sc_sel_event.h>
+#include <sq/sq_event.h>
 
 // main.dol functions with names that the shared headers do not declare.
 extern "C" int fn_800BA3D8(muMenuController* controller);
@@ -37,7 +38,6 @@ extern "C" muEventNameWnd* fn_16_1CB0(void* group, int kind, nw4r::g3d::ResFile*
 // muMenu::exchangeGmCharacterKind2MuSelchkind: the symbol takes three integers, the menu gives one
 extern "C" int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int kind);
 // The module of the scenes: the setting of the fighter of the event (sequence, setting) and two functions that the event uses
-extern "C" void fn_1_33094(gfSequence* sequence, void* out, int a, int b, int c, int d, int e, int f, int g);
 extern "C" void fn_1_379C(int slot, int kind, int color);
 extern "C" bool fn_1_385C(int a);
 // The random numbers of main.dol: an integer from 0 up to the argument
@@ -969,7 +969,7 @@ void muEventTask::mainStepDecidedInit(muEventTask* task) {
     scEventFighters fighters;
     if (sequence != NULL) {
         muEventSetting setting = task->getScEventSetting();
-        fn_1_33094(sequence, &fighters, setting.m_eventNo, setting.m_level, setting.m_playerCount, setting.m_pad[0], setting.m_pad[1], setting.m_name[0], setting.m_name[1]);
+        static_cast<sqEvent*>(sequence)->checkEventSetting(setting.m_eventNo, setting.m_level, setting.m_playerCount, &fighters);
         scEventFighter* fighter = fighters.m_fighters;
         for (int i = 0; i < fighters.m_count; i++, fighter++) {
             u8 kind = fighter->m_kind;

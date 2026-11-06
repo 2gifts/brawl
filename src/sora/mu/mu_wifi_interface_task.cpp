@@ -14,7 +14,6 @@
 extern u32 g_NtAIDBitmap;
 
 extern "C" void fn_800CF22C(muWifiInterfaceTask* self);
-extern "C" void fn_801473C4(muWifiInterfaceTask* self);
 extern "C" void fn_80145D24(s32 arg0, void* arg1, s32 arg2, s32 arg3, s32 arg4);
 
 struct muWifiInterfaceTaskFields {
@@ -49,7 +48,7 @@ void muWifiInterfaceTask::connect(bool arg0) {
     fields->unk44 = 1;
     fields->unk1048 = 0;
     fields->unk104C = 0;
-    fn_801473C4(this);
+    reinterpret_cast<NtBase*>(this)->clearAppErrorStatus();
     network = &g_Network;
     fields->unkFCA &= 0xFFFFFFEF;
     network->create(true);
@@ -266,7 +265,7 @@ void muWifiInterfaceTask::connectMatchingBossBattle(int arg) {
 void muWifiInterfaceTask::clearAppError() {
     m_appNetworkError[0] = 0;
     m_appNetworkError[1] = 0;
-    fn_801473C4(this);
+    reinterpret_cast<NtBase*>(this)->clearAppErrorStatus();
 }
 
 bool muWifiInterfaceTask::isEndMatchingEnd() {

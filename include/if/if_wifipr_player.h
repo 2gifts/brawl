@@ -30,6 +30,7 @@ public:
     void createModel(nw4r::g3d::ResFile* res, int priority);
     void setWifiStatePlayerColor(int color);
     void setWifiDispState(int state);
+    void main();
 
     static void createPlayerLocator(nw4r::g3d::ResFile* res);
     static void destroyPlayerLocator();

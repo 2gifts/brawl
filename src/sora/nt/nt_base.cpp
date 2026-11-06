@@ -1,5 +1,7 @@
 #include <mt/mt_prng.h>
 #include <nt/nt_report.h>
+#include <nt/nt_match.h>
+#include <nt/nt_net_report.h>
 #include <revolution/OS/OSTime.h>
 #include <string.h>
 #include <types.h>
@@ -70,4 +72,11 @@ void NtBase::clearErrorStatus() {
     lbl_805A03EC = 0;
     lbl_805A03F0 = 0;
     lbl_805A03F4 = 0;
+}
+
+void NtBase::clearAppErrorStatus() {
+    if (lbl_805A03E8 != 0 && lbl_805A03E8 > 7 && !reinterpret_cast<NtMatching*>(this)->isNetShutdownErrorOccured()) {
+        lbl_805A03E8 = 0;
+        netReport("Clear App Error status\n");
+    }
 }

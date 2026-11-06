@@ -331,6 +331,8 @@ public:
     int getFriendAIDIndex(int index);
     wchar_t* getShortComment(unsigned int aid, int index, wchar_t* comment);
     u8 getAssignedPlayerContNum(int index);
+    int isPermittedEntry(int playerArea);
+    void exitNodePlayer(int playerArea);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 

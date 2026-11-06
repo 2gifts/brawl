@@ -2,6 +2,7 @@
 #include <so/so_module_accesser.h>
 #include <so/stageobject.h>
 #include <so/status/so_status_module_impl.h>
+#include <ft/ft_kinetic_energy.h>
 #include <types.h>
 
 class ftZeldaStatusUniqProcessSpecialN : public soStatusUniqProcess {
@@ -14,8 +15,19 @@ public:
 
 ftZeldaStatusUniqProcessSpecialN g_ftZeldaStatusUniqProcessSpecialN;
 
-// Initial shield-reflector setup (fn_27_33946C in the target) is not reconstructed yet.
-void ftZeldaStatusUniqProcessSpecialN::initStatus(soModuleAccesser* moduleAccesser) { }
+void ftZeldaStatusUniqProcessSpecialN::initStatus(soModuleAccesser* moduleAccesser) {
+    soKineticModule& kinetic = moduleAccesser->getKineticModule();
+    if (moduleAccesser->getSituationModule().getKind() != 0) {
+        float divisor = moduleAccesser->getConstantFloatKirby(0xfa1);
+        Vec2f speed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(0xffff));
+        kinetic.clearSpeedAll();
+        ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*kinetic.getEnergy(3));
+        speed.m_x /= divisor;
+        speed.m_y = 0.0f;
+        stop.m_speed = speed;
+        stop.enable();
+    }
+}
 
 void ftZeldaStatusUniqProcessSpecialN::exitStatus(soModuleAccesser* moduleAccesser, int) {
     moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);

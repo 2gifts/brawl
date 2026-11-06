@@ -1,6 +1,7 @@
 #include <cm/cm_camera_controller.h>
 #include <cm/cm_controller_demo.h>
 #include <cm/cm_controller_fig_disp1.h>
+#include <cm/cm_controller_fighter_target.h>
 #include <cm/cm_controller_photo.h>
 #include <cm/cm_controller_tech.h>
 #include <gf/gf_camera.h>
@@ -9,7 +10,6 @@
 extern "C" void fn_800A6BF0(gfCameraController* controller);
 extern "C" void fn_800A6B78(gfCameraController* controller);
 extern "C" void fn_800A6624(gfCameraController* controller);
-extern "C" void fn_800A3EE8(gfCameraController* controller);
 extern "C" void fn_800A59C4(gfCameraController* controller);
 extern "C" void fn_8009FCF4(gfCameraController* controller, float value);
 
@@ -65,7 +65,7 @@ void CameraController::changeInput(Kind cameraControllerKind)
     case AnimationLocked:
         break;
     case FighterTarget:
-        fn_800A3EE8(m_fighterTargetController);
+        static_cast<cmFighterTargetController*>(m_fighterTargetController)->resetTarget();
         break;
     case MenuPad:
         fn_800A6624(m_menuPadController);

@@ -24,6 +24,7 @@ ftCommonDataAccesser g_ftCommonDataAccesser;
 struct ftRobotBeamArticle {
     u8 unk0[0x10];
     void* unk10;
+    void* unk14; // HYPOTHESIS: second article pointer of the public address record
 };
 
 // HYPOTHESIS: ftData continues past extendParam; the pointer read for kind 5 sits at 0x10C
@@ -580,6 +581,129 @@ const wnPokeZenigameWaterData* ftCommonDataAccesser::getWeaponData<wnPokeZenigam
         return static_cast<const wnPokeZenigameWaterData*>(lbl_27_bss_3210[Fighter_PokeZenigame].data->extendParam[5]);
     case Fighter_Kirby:
         return static_cast<const wnPokeZenigameWaterData*>(lbl_27_bss_3210[Fighter_Kirby].data->extendParam[55]);
+    default:
+        return NULL;
+    }
+}
+
+float* ftCommonDataAccesser::getToonLinkBowParam(int kind) const
+{
+    switch (kind) {
+    case Fighter_ToonLink:
+        return static_cast<float*>(lbl_27_bss_3210[Fighter_ToonLink].data->extendParam[0]);
+    case Fighter_Kirby:
+        return static_cast<float*>(lbl_27_bss_3210[Fighter_Kirby].data->extendParam[34]);
+    default:
+        return NULL;
+    }
+}
+
+template <>
+const wnFoxLandMasterShellData* ftCommonDataAccesser::getWeaponData<wnFoxLandMasterShellData>(int kind, bool* resourceGroup) const
+{
+    switch (kind) {
+    case 6:
+        return static_cast<const wnFoxLandMasterShellData*>(lbl_27_bss_3210[6].data->extendParam[12]);
+    case 19:
+        return static_cast<const wnFoxLandMasterShellData*>(lbl_27_bss_3210[19].data->extendParam[10]);
+    case 44:
+        return static_cast<const wnFoxLandMasterShellData*>(lbl_27_bss_3210[44].data->extendParam[12]);
+    default:
+        return NULL;
+    }
+}
+
+template <>
+const wnLinkBowData* ftCommonDataAccesser::getWeaponData<wnLinkBowData>(int kind, bool* resourceGroup) const
+{
+    if (kind == Fighter_Kirby) {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, Fighter_Link);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<const wnLinkBowData*>(static_cast<ftRobotBeamArticle*>(address)->unk10);
+    }
+    switch (kind) {
+    case Fighter_Link:
+    return static_cast<const wnLinkBowData*>(lbl_27_bss_3210[Fighter_Link].data->extendParam[13]);
+    default:
+        return NULL;
+    }
+}
+
+template <>
+const wnLinkBowArrowData* ftCommonDataAccesser::getWeaponData<wnLinkBowArrowData>(int kind, bool* resourceGroup) const
+{
+    if (kind == Fighter_Kirby) {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, Fighter_Link);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<const wnLinkBowArrowData*>(static_cast<ftRobotBeamArticle*>(address)->unk14);
+    }
+    switch (kind) {
+    case Fighter_Link:
+    return static_cast<const wnLinkBowArrowData*>(lbl_27_bss_3210[Fighter_Link].data->extendParam[15]);
+    default:
+        return NULL;
+    }
+}
+
+template <>
+const wnToonLinkBowData* ftCommonDataAccesser::getWeaponData<wnToonLinkBowData>(int kind, bool* resourceGroup) const
+{
+    if (kind == Fighter_Kirby) {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, Fighter_ToonLink);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<const wnToonLinkBowData*>(static_cast<ftRobotBeamArticle*>(address)->unk10);
+    }
+    switch (kind) {
+    case Fighter_ToonLink:
+    return static_cast<const wnToonLinkBowData*>(lbl_27_bss_3210[Fighter_ToonLink].data->extendParam[13]);
+    default:
+        return NULL;
+    }
+}
+
+template <>
+const wnToonLinkBowArrowData* ftCommonDataAccesser::getWeaponData<wnToonLinkBowArrowData>(int kind, bool* resourceGroup) const
+{
+    if (kind == Fighter_Kirby) {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, Fighter_ToonLink);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<const wnToonLinkBowArrowData*>(static_cast<ftRobotBeamArticle*>(address)->unk14);
+    }
+    switch (kind) {
+    case Fighter_ToonLink:
+    return static_cast<const wnToonLinkBowArrowData*>(lbl_27_bss_3210[Fighter_ToonLink].data->extendParam[15]);
+    default:
+        return NULL;
+    }
+}
+
+template <>
+const wnYoshiTamagoData* ftCommonDataAccesser::getWeaponData<wnYoshiTamagoData>(int kind, bool* resourceGroup) const
+{
+    switch (kind) {
+    case 4:
+        return static_cast<const wnYoshiTamagoData*>(lbl_27_bss_3210[4].data->extendParam[6]);
+    case Fighter_Kirby: {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, 4);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<const wnYoshiTamagoData*>(static_cast<ftRobotBeamArticle*>(address)->unk10);
+    }
+    default:
+        return NULL;
+    }
+}
+
+template <>
+const wnSheikNeedleData* ftCommonDataAccesser::getWeaponData<wnSheikNeedleData>(int kind, bool* resourceGroup) const
+{
+    switch (kind) {
+    case 14:
+        return static_cast<const wnSheikNeedleData*>(lbl_27_bss_3210[14].data->extendParam[5]);
+    case Fighter_Kirby: {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, 14);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<const wnSheikNeedleData*>(static_cast<ftRobotBeamArticle*>(address)->unk10);
+    }
     default:
         return NULL;
     }

@@ -55,8 +55,6 @@ void fn_800E023C(IfPlayer* player, int arg1, int arg2, nw4r::g3d::ResFile* resFi
 void fn_800E244C(IfPlayer* player);
 void fn_800E26B8(IfPlayer* player);
 void fn_800DD6E4(IfCenter* center, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2, int arg1, int arg2);
-void fn_8010BDD0(nw4r::g3d::ResFile* resFile);
-void fn_8010BF3C(nw4r::g3d::ResFile* resFile);
 IfAdvGauge* fn_8010B76C();
 void fn_8010BC58(IfAdvGauge* gauge, nw4r::g3d::ResFile* resFile);
 void fn_8010BD28(IfAdvGauge* gauge, nw4r::g3d::ResFile* resFile);
@@ -68,11 +66,8 @@ void fn_8010C9D8(IfAdvGauge* gauge);
 void fn_8010BDCC(IfAdvGauge* gauge);
 void fn_8010C6C8(IfAdvGauge* gauge, s32 value);
 void fn_8010C0FC(IfAdvGauge* gauge, u32 value);
-void fn_8010C060(IfAdvGauge* gauge);
 void fn_8010C3D4(IfAdvGauge* gauge);
-void fn_8010C4D4(IfAdvGauge* gauge, s32 num);
 void fn_8010C52C(IfAdvGauge* gauge, s32 num);
-void fn_8010CA20(IfAdvGauge* gauge, int flag);
 void fn_8010CA94(IfAdvGauge* gauge, s32 num, u8* stock);
 void fn_8010CC80(IfAdvGauge* gauge);
 void fn_8010CCE0(IfAdvGauge* gauge, float scale, u8 count, IfPlayer* player, u8 arg);
@@ -439,8 +434,8 @@ void IfAdvMngr::createModel() {
     }
     m_center = new (Heaps::InfoInstance) IfCenter;
     fn_800DD6E4(m_center, &unk14, &unk34, 0, 5);
-    fn_8010BDD0(&unk18);
-    fn_8010BF3C(&unk14);
+    IfAdvGauge::createLocator(&unk18);
+    IfAdvGauge::createLocator2(&unk14);
     m_gauge = fn_8010B76C();
     fn_8010BC58(m_gauge, &unk18);
     fn_8010BD28(m_gauge, &unk14);
@@ -597,7 +592,7 @@ void IfAdvMngr::meleeMain() {
         fn_8010C0FC(m_gauge, score);
     }
     if (unk48_40 && m_gauge) {
-        fn_8010C060(m_gauge);
+        m_gauge->draw2PEnt();
     }
     if (m_corps >= 0 && m_gauge) {
         fn_8010C3D4(m_gauge);
@@ -751,7 +746,7 @@ extern "C" bool fn_80107914(IfAdvMngr* mngr, u8 kind, int arg) {
         return false;
     }
     if (mngr->m_gauge) {
-        fn_8010CA20(mngr->m_gauge, 1);
+        mngr->m_gauge->drawStockBase(1);
     }
     if (++mngr->m_stockNum >= 99) {
         return false;
@@ -774,7 +769,7 @@ bool IfAdvMngr::addStockSmb() {
         return false;
     }
     if (m_gauge) {
-        fn_8010CA20(m_gauge, 1);
+        m_gauge->drawStockBase(1);
     }
     if (++m_stockNum >= 99) {
         return false;
@@ -850,7 +845,7 @@ extern "C" int fn_80107A70(IfAdvMngr* mngr, int arg, bool flag) {
         mngr->m_stockNum--;
     }
     if (mngr->m_stockNum == 0 && mngr->m_gauge) {
-        fn_8010CA20(mngr->m_gauge, 0);
+        mngr->m_gauge->drawStockBase(0);
     }
     return kind;
 }
@@ -861,7 +856,7 @@ bool IfAdvMngr::addCorps() {
     }
     m_corps++;
     if (m_gauge) {
-        fn_8010C4D4(m_gauge, m_corps);
+        m_gauge->setCrowd(m_corps);
     }
     return true;
 }
