@@ -47,6 +47,13 @@ public:
     bool requestSuspendMatching(bool suspend, bool wait);
     static int calcWinningPercentage();
     bool startMatching(int mode, int rule, int players);
+    // HYPOTHESIS: small accessors on the matching manager.
+    u8 isShutdowned();
+    void resetWatchDogTimer();
+    void putPacketDelay(int, u16 delay);
+    void putPacketLost(int, u8 lost);
+    // HYPOTHESIS: finds the friend roster index of the player on the AID.
+    int searchFriendID(u32 aid);
 
     union {
         struct {
@@ -78,6 +85,14 @@ public:
             s8 unk3421;
             u8 unk3422[0x11A];
             void* unk353C;
+        };
+        struct {
+            u8 _padW0[0x3422];
+            u16 unk3422w;
+            u8 _padW1[0x11C];
+            u16 unk3540;
+            u8 _padW2[0xA];
+            u8 unk354C;
         };
         // HYPOTHESIS: typed state and thread fields occupy the existing padding.
         struct {

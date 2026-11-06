@@ -67,6 +67,7 @@ void netReport0(const char* fmt, ...) {
 extern "C" void DWC_CreateFriendKeyToken(UnkFriendInfo::FriendData* token, u64 friendKey);
 extern "C" int DWC_IsEqualFriendData(const UnkFriendInfo::FriendData* data1, const UnkFriendInfo::FriendData* data2);
 extern "C" int DWC_IsValidFriendData(const UnkFriendInfo::FriendData* data);
+extern "C" int DWC_GetGsProfileId(const void* userData, const UnkFriendInfo::FriendData* friendData);
 extern u8 lbl_805A03D0;
 extern OSMutex lbl_8049EC30;
 extern char lbl_8045FA50[];
@@ -344,4 +345,89 @@ bool NtMatching::startMatching(int mode, int rule, int players) {
     unk3430 = 0;
     NtBase::setMatchingStatus(6);
     return true;
+}
+
+u8 NtMatching::isShutdowned() {
+    return unk33CD;
+}
+
+void NtMatching::resetWatchDogTimer() {
+    unk3422w = 0x1C20;
+}
+
+void NtMatching::putPacketDelay(int, u16 delay) {
+    unk3540 = delay;
+}
+
+void NtMatching::putPacketLost(int, u8 lost) {
+    unk354C = lost;
+}
+
+void NtMatching::watchResetNodeMissMatch() {
+    unk342C = 0;
+}
+
+void NtMatching::thSaveUserDataNow() {
+    bool canSave = false;
+    int status = gUnk805a03d8;
+    if (status >= 3 && status <= 6) {
+        canSave = true;
+    }
+    if (canSave) {
+        ntFriendInfoSave* save = new ((Heaps::HeapType)6) ntFriendInfoSave;
+        if (save != nullptr) {
+            save->startSave((Heaps::HeapType)6, true);
+        }
+    }
+}
+
+bool NtMatching::retryMatching(int mode, int rule) {
+    if (g_NtMatchingStatus != 5) {
+        return false;
+    }
+    lbl_805A03FC = mode;
+    lbl_805A0404 = rule;
+    lbl_805A0400 = 0;
+    lbl_805A0434->unk33F4 = 0;
+    lbl_805A0434->unk33F5 = 0;
+    lbl_805A0434->unk33F6 = 0;
+    lbl_805A0434->unk34A4 = 0;
+    lbl_805A0434->unk34AA = 0;
+    lbl_805A0434->unk34AB = 0;
+    unk3428 = 0;
+    unk342C = 0;
+    if (unk34A4) {
+        unk34A4 = 0;
+        netReport(lbl_8045FF54);
+    }
+    unk3430 = 0;
+    NtBase::setMatchingStatus(6);
+    return true;
+}
+
+int NtMatching::searchFriendID(u32 aid) {
+    muWifiInterfaceTask* task = g_muWifiInterfaceTask;
+    UnkFriendInfo* info = ntFriendInfo::getInstance()->getFriendInfo();
+    if (aid > 4) {
+        return -1;
+    }
+    if (!(g_NtAIDBitmap & (1 << aid))) {
+        return -1;
+    }
+    muWifiAIDInfo* aidInfo = &task->m_aidInfos[aid];
+    s64 profileId = *reinterpret_cast<s64*>(&aidInfo->unk1D8[0]);
+    u8* userData = reinterpret_cast<u8*>(info) + 0x10;
+    UnkFriendInfo::FriendData* fd = info->m_friendData;
+    int index;
+    for (index = 0; index < 64; index++, fd++) {
+        s64 cur = DWC_GetGsProfileId(userData, fd);
+        if (cur == profileId) {
+            break;
+        }
+    }
+    if (index >= 64) {
+        index = -1;
+    }
+    aidInfo->m_friendAIDIndex = index;
+    return index;
 }
