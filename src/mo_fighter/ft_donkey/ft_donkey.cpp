@@ -1,3 +1,4 @@
+#define FT_SOUND_GENERATOR_DTOR_NOINLINE
 #define FT_POOL_ROOT_NONPOLYMORPHIC
 #define SO_GENERAL_WORK_BOUNDED_CLEAR
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
@@ -15,6 +16,7 @@
 #include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
 
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftDonkeyBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
