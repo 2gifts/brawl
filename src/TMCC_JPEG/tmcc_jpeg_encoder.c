@@ -146,3 +146,33 @@ void TMCC_JPEGENC_enc_restart_interval(TMCC_Encoder* enc) {
     enc->unk15D8 = 0;
     enc->unk160C = 0;
 }
+
+void TMCC_JPEGENC_PutWord(TMCC_Bitstream* bs, u16 word) {
+    *bs->cur++ = word >> 8;
+    if ((u32)(bs->cur - bs->start) >= (u32)bs->capacity) {
+        bs->overflow = 1;
+        bs->total += bs->cur - bs->start;
+        bs->cur = bs->start;
+    }
+    *bs->cur++ = word;
+    if ((u32)(bs->cur - bs->start) >= (u32)bs->capacity) {
+        bs->overflow = 1;
+        bs->total += bs->cur - bs->start;
+        bs->cur = bs->start;
+    }
+    *bs->cur = 0;
+}
+
+void TMCC_JPEGENC_PutString(TMCC_Bitstream* bs, const u8* str, int len) {
+    int i;
+    for (i = 0; i < len; i++) {
+        if ((u32)(bs->cur - bs->start) >= (u32)bs->capacity) {
+            bs->overflow = 1;
+            bs->total += bs->cur - bs->start;
+            bs->cur = bs->start;
+        }
+        *bs->cur = *str++;
+        bs->cur++;
+    }
+    *bs->cur = 0;
+}
