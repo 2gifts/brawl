@@ -1036,7 +1036,11 @@ class wnAnimCmdModuleSubBuilder {
     typename wnAnimCmdControlUnitSelect<BC::Unit2Enabled != 0, typename BC::Unit2Config>::Type m_unit2; // +0x258
     typename wnAnimCmdControlUnitSelect<BC::Unit3Enabled != 0, typename BC::Unit3Config>::Type m_unit3; // +0x384
     typename wnAnimCmdUniqSelect<BC::Unit4Enabled != 0, typename BC::Unit4Config>::Type m_unit4;       // +0x4B0
+#ifdef WN_ANIMCMD_UNIT5_SELECT // only a config that declares Unit5Config can use this
     typename wnAnimCmdControlUnitSelect<BC::Unit5Enabled != 0, typename BC::Unit5Config>::Type m_unit5;
+#else
+    soAnimCmdControlUnitBuilderNull<void> m_unit5;
+#endif
 public:
     wnAnimCmdModuleSubBuilder(soModuleAccesser* acc, const soModuleAccesserBuildData& bd) :
         m_unit0(acc, bd.getAnimCmdData(0, 0), bd.getAnimCmdData(0, 1), bd.getAnimCmdData(0, 2)),
