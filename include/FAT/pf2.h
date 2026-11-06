@@ -66,7 +66,28 @@ int fn_803EB9C8(const char* path);                           // pf_remove
 s32 fn_803EBA18(s8 drv_char);                                // pf_unmount
 
 // implementation layer
-int fn_803DC120(FAEntryInfo* dta);                           // PFDIR_fsnext
+// HYPOTHESIS: the search state of the directory-find calls (PrFile2's PF_DTA), as in fat_vf.h;
+// only the volume pointer is known here.
+typedef struct PF2_DTA {
+    u32 unk0;
+    u32 unk4;
+    struct PF2_VOLUME* p_vol;  // 0x8
+    u8 unkC[0x434];
+} PF2_DTA;
+
+PF2_VOLUME* PFPATH_GetVolumeFromPath(PF_STR* p_path);
+s32 PFVOL_CheckForRead(PF2_VOLUME* p_vol);
+void PFDIR_FinalizeAllDirs(PF2_VOLUME* p_vol);
+void PFFAT_FinalizeFFD(PF_FFD* p_ffd);
+s32 PFDIR_p_fsnext(PF2_DTA* dta);
+s32 PFDIR_p_fsfirst(PF2_VOLUME* p_vol, PF_STR* p_pattern, u8 attr, PF2_DTA* dta);
+s32 PFDIR_p_fstat(PF2_VOLUME* p_vol, PF_STR* p_path, void* p_stat);
+s32 PFDIR_p_opendir(PF2_VOLUME* p_vol, PF_STR* p_path, PF2_DIR** pp_dir);
+int PFDIR_fsnext(PF2_DTA* dta);
+int PFDIR_fsfirst(PF_STR* p_pattern, u8 attr, PF2_DTA* dta);
+int PFDIR_fstat(PF_STR* p_path, void* p_stat);
+int PFDIR_opendir(PF_STR* p_path, PF2_DIR** pp_dir);
+void PFCLUSTER_UpdateLastAccessCluster(PF_FILE* p_file, u32 sector);
 int fn_803DC358(PF2_DIR* dir);                               // PFDIR_closedir
 int fn_803DD390(PF_FFD* p_ffd, PF2_DIR_ENT* p_ent, u32 index, PF2_STR* pattern, u8 attr_required, u8 attr_unwanted, u32* p_lpos, u32* p_ppos);  // PFENT_findEntryPos
 int fn_803DD674(PF2_DIR_ENT* p_ent, u8 num_entries, PF_FFD* p_ffd, u32* p_next_chain, PF2_STR* p_filename, u32* p_pos);  // PFENT_allocateEntryPos
