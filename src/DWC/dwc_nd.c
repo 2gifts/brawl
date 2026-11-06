@@ -161,3 +161,139 @@ int DWC_SvlInit(void) {
 void DWC_SvlCleanup(void) {
     lbl_805A1030[0] = 0;
 }
+
+// HYPOTHESIS: layout of the Nd HTTP parameter block from the offsets the code shows.
+typedef struct NdHttpParam {
+    int type;
+    int unk4;
+    int unk8;
+    void* unkC;
+    int unk10;
+    void* unk14;
+    void* unk18;
+    void* unk1C;
+} NdHttpParam;
+
+void freeHttpParam(NdHttpParam* param) {
+    if (param != 0) {
+        switch (param->type) {
+        case 0:
+        case 1:
+            break;
+        case 2:
+            if (param->unk1C != 0) {
+                lbl_805A1024(param->unk1C);
+                param->unk1C = 0;
+            }
+            if (param->unk18 != 0) {
+                lbl_805A1024(param->unk18);
+                param->unk18 = 0;
+            }
+            lbl_805A1024(param->unk14);
+            param->unk14 = 0;
+            break;
+        case 3:
+            lbl_805A1024(param->unkC);
+            param->unkC = 0;
+            break;
+        }
+        lbl_805A1024(param);
+    }
+}
+
+void* memset(void*, int, unsigned long);
+int setupHttp(NdHttpParam**, int*, const char*, void*, int);
+int NHTTPStartConnection(int);
+int DWCi_NdGetFileListAsync(void*, int, int);
+int DWCi_NdGetFileAsync(void*, int, int);
+
+int DWCi_NdGetFileListNumAsync(int arg) {
+    NdHttpParam* param;
+    int request;
+    int connection;
+    int started;
+    if (!setupHttp(&param, &request, "Y291bnQ*", lbl_80534598, 0x80)) {
+        return 0;
+    }
+    param->type = 1;
+    param->unkC = (void*)arg;
+    connection = request;
+    OSLockMutex(&lbl_805344D8.mutex);
+    if (NHTTPStartConnection(connection)) {
+        DWCi_NdSetError(3, 0);
+        OSUnlockMutex(&lbl_805344D8.mutex);
+        started = 0;
+    } else {
+        lbl_805A1004 = connection;
+        OSUnlockMutex(&lbl_805344D8.mutex);
+        started = 1;
+    }
+    if (!started) {
+        return 0;
+    }
+    return 1;
+}
+
+int DWC_NdGetFileListNumAsync(int arg) {
+    if (DWCi_IsError()) {
+        return 0;
+    }
+    OSLockMutex(&lbl_805344B0);
+    if (lbl_805A0FEC != 1) {
+        DWCi_NdSetError(2, 0);
+        OSUnlockMutex(&lbl_805344B0);
+        return 0;
+    }
+    lbl_805A0FEC = 2;
+    OSUnlockMutex(&lbl_805344B0);
+    if (DWCi_NdGetFileListNumAsync(arg)) {
+        return 1;
+    }
+    OSLockMutex(&lbl_805344B0);
+    lbl_805A0FEC = 1;
+    OSUnlockMutex(&lbl_805344B0);
+    return 0;
+}
+
+int DWC_NdGetFileListAsync(void* list, int count, int arg) {
+    if (DWCi_IsError()) {
+        return 0;
+    }
+    OSLockMutex(&lbl_805344B0);
+    if (lbl_805A0FEC != 1) {
+        DWCi_NdSetError(2, 0);
+        OSUnlockMutex(&lbl_805344B0);
+        return 0;
+    }
+    lbl_805A0FEC = 2;
+    OSUnlockMutex(&lbl_805344B0);
+    memset(list, 0, arg * 0xb0);
+    if (DWCi_NdGetFileListAsync(list, count, arg)) {
+        return 1;
+    }
+    OSLockMutex(&lbl_805344B0);
+    lbl_805A0FEC = 1;
+    OSUnlockMutex(&lbl_805344B0);
+    return 0;
+}
+
+int DWC_NdGetFileAsync(void* buf, int size, int arg) {
+    if (DWCi_IsError()) {
+        return 0;
+    }
+    OSLockMutex(&lbl_805344B0);
+    if (lbl_805A0FEC != 1) {
+        DWCi_NdSetError(2, 0);
+        OSUnlockMutex(&lbl_805344B0);
+        return 0;
+    }
+    lbl_805A0FEC = 2;
+    OSUnlockMutex(&lbl_805344B0);
+    if (DWCi_NdGetFileAsync(buf, size, arg)) {
+        return 1;
+    }
+    OSLockMutex(&lbl_805344B0);
+    lbl_805A0FEC = 1;
+    OSUnlockMutex(&lbl_805344B0);
+    return 0;
+}
