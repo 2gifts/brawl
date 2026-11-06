@@ -1,3 +1,11 @@
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define FT_REL_LINK_EXTERN
+#define MT_VEC3F_CTOR_NOINLINE
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/ike/wn_ike_sword.h>
 #include <so/so_module_accesser.h>
 #include <types.h>
 #include <wn/ike/wn_ike_sword_status_uniq_process.h>
@@ -34,6 +42,8 @@ void wnIkeSwordStatusUniqProcess::initStatus(soModuleAccesser* moduleAccesser) {
     }
     }
 }
+
+void wnIkeSwordStatusUniqProcess::execFixPos(soModuleAccesser*) { }
 
 void wnIkeSwordStatusUniqProcess::execStop(soModuleAccesser* moduleAccesser) {
     Vec3f rot = moduleAccesser->getModelModule().getNodeRotate(3);
@@ -81,4 +91,49 @@ void wnIkeSwordStatusUniqProcess::execStatus(soModuleAccesser* moduleAccesser) {
         break;
     }
     }
+}
+
+bool wnIkeSword::notifyEventCollisionAttackCheck(u32) { return false; }
+
+// HYPOTHESIS: constants of the arc solver live in the unit's shared literal pool (0.0f, degenerate threshold, x spacing,
+// and the int-to-float magic double).
+extern const float lbl_119_rodata_90[];
+
+void wnIkeSword::toShoot(Vec3f* start, Vec3f* mid, Vec3f* end, int frames, float lr, float angle) {
+    const float* k = lbl_119_rodata_90;
+    m_moduleAccesser->getPostureModule().init(start, lr);
+    m_moduleAccesser->getLinkModule().removeModelConstraint(true);
+    m_moduleAccesser->getWorkManageModule().setFloat(end->m_x, 0x21000000);
+    m_moduleAccesser->getWorkManageModule().setFloat(end->m_y, 0x21000001);
+    m_moduleAccesser->getWorkManageModule().setFloat(angle, 0x21000007);
+    Vec3f p0;
+    Vec3f p1;
+    Vec3f p2;
+    p0 = *start;
+    p1 = *mid;
+    p2 = *end;
+    float det = (p0.m_x - p2.m_x) * (p0.m_x * p0.m_x - p1.m_x * p1.m_x)
+              - (p0.m_x - p1.m_x) * (p0.m_x * p0.m_x - p2.m_x * p2.m_x);
+    if (k[3] == det || __fabs(p0.m_x - p2.m_x) < k[5]) {
+        p1.m_x = k[6] + p0.m_x;
+        p2.m_x = k[6] + p1.m_x;
+        m_moduleAccesser->getWorkManageModule().onFlag(0x22000000);
+        m_moduleAccesser->getWorkManageModule().setFloat(p0.m_x, 0x21000006);
+    }
+    float step = (p2.m_x - p0.m_x) / (float)frames;
+    float quadratic = (p2.m_y * (p0.m_x - p1.m_x) + ((p0.m_y - p1.m_y) * (p0.m_x - p2.m_x) - p0.m_y * (p0.m_x - p1.m_x)))
+                    / ((p0.m_x - p2.m_x) * (p0.m_x * p0.m_x - p1.m_x * p1.m_x) - (p0.m_x - p1.m_x) * (p0.m_x * p0.m_x - p2.m_x * p2.m_x));
+    float linear = ((p0.m_y - p2.m_y) - quadratic * (p0.m_x * p0.m_x - p2.m_x * p2.m_x)) / (p0.m_x - p2.m_x);
+    float constant = p0.m_y - p0.m_x * (quadratic * p0.m_x) - linear * p0.m_x;
+    m_moduleAccesser->getStatusModule().changeStatusForce(3, m_moduleAccesser);
+    m_moduleAccesser->getWorkManageModule().setFloat(quadratic, 0x21000002);
+    m_moduleAccesser->getWorkManageModule().setFloat(linear, 0x21000003);
+    m_moduleAccesser->getWorkManageModule().setFloat(constant, 0x21000004);
+    m_moduleAccesser->getWorkManageModule().setFloat(step, 0x21000005);
+}
+
+// HYPOTHESIS: the original unit also instantiates the weapon builder (it emits the shared module vtables and thunks).
+void wnIkeSwordInstantiateBuilder(const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd) {
+    wnWeaponBuilder<wnIkeSwordModuleAccesserBuildConfig> builder("wnIkeSword", 0, info, bd);
+    wnIkeSwordParamAccesser paramAccesser(0);
 }

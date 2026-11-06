@@ -74,4 +74,7 @@ private:
 public:
     wnIkeSword(s32 articleId, const wnArticleBuildInfo& info, const wnIkeSwordData* data);
     virtual ~wnIkeSword() { }
+    // HYPOTHESIS: signature of toShoot (three points of the sword's arc, a frame count and the spin angle).
+    void toShoot(Vec3f* start, Vec3f* mid, Vec3f* end, int frames, float lr, float angle);
+    virtual bool notifyEventCollisionAttackCheck(u32 flags);
 };
