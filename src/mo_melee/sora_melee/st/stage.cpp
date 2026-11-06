@@ -1025,3 +1025,93 @@ int StSeUtil::playSe(int sndId, float pan) {
     g_sndSystem->startSE(handle, 0, 0);
     return handle;
 }
+
+// HYPOTHESIS: grPokeTrainer's trivial setters are emitted in this object
+void grPokeTrainer::setPosWork(Vec3f* posWork) { m_posWork = posWork; }
+void grPokeTrainer::setPosDstWork(Vec3f* posDstWork) { m_posDstWork = posDstWork; }
+
+// HYPOTHESIS: the three-argument playFrame stores unk1C and tail-calls the two-argument one
+void StSeUtil::SeSeq::playFrame(s32 unk2, float frame, float unk1) {
+    unk1C = unk1;
+    playFrame(unk2, frame);
+}
+
+// HYPOTHESIS: clears every UnkStruct3 slot, filling ids from the given array while it lasts
+void StSeUtil::SeSeq::registId(SndID* ids, size_t n) {
+    for (size_t i = 0; i < unk10; ids++, i++) {
+        if (i < n) {
+            unkC[i].id = *ids;
+        } else {
+            unkC[i].id = snd_se_invalid;
+        }
+        unkC[i].unk4 = -1;
+        unkC[i].unk8 = 0;
+        unkC[i].unkC = 0;
+    }
+    mapping();
+}
+
+// HYPOTHESIS: maps each registered UnkStruct id to the index of the matching UnkStruct3 slot (-1 if none)
+void StSeUtil::SeSeq::mapping() {
+    for (size_t i = 0; i < unk8; i++) {
+        UnkStruct2* entry = &unk4[i];
+        if (entry->unk8 != 0) {
+            for (size_t j = 0; j < entry->unk4; j++) {
+                u32 id = entry->unk0[j].id;
+                entry->unk8[j] = -1;
+                for (size_t k = 0; k < unk10; k++) {
+                    if (id == (u32)unkC[k].id) {
+                        entry->unk8[j] = k;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// HYPOTHESIS: allocates the index map for slot unk1 and records the UnkStruct array
+void StSeUtil::SeSeq::registSeq(int unk1, UnkStruct* ID, size_t unk2, Heaps::HeapType heapType) {
+    if (unk1 >= 0 && unk1 < unk8) {
+        UnkStruct2* entry = &unk4[unk1];
+        entry->unk8 = new (heapType) size_t[unk2];
+        if (entry->unk8 != 0) {
+            entry->unk0 = ID;
+            entry->unk4 = unk2;
+        }
+    }
+    mapping();
+}
+
+// HYPOTHESIS: constructor clears both tables
+StSeUtil::SeSeq::SeSeq(UnkStruct2* a2, size_t n2, UnkStruct3* a3, size_t n3) {
+    unk4 = a2;
+    unk8 = n2;
+    unkC = a3;
+    unk10 = n3;
+    m_sndGenerator = 0;
+    unk18 = -1;
+    unk1C = -1.0f;
+    for (size_t i = 0; i < n2; i++) {
+        unk4[i].unk0 = 0;
+        unk4[i].unk4 = 0;
+        unk4[i].unk8 = 0;
+    }
+    for (size_t i = 0; i < unk10; i++) {
+        unkC[i].id = snd_se_invalid;
+        unkC[i].unk4 = -1;
+        unkC[i].unk8 = 0;
+        unkC[i].unkC = 0;
+    }
+}
+
+// HYPOTHESIS: destructor frees the per-slot index maps
+StSeUtil::SeSeq::~SeSeq() {
+    for (size_t i = 0; i < unk8; i++) {
+        UnkStruct2* entry = &unk4[i];
+        if (entry->unk8 != 0) {
+            delete[] entry->unk8;
+            entry->unk8 = 0;
+        }
+    }
+}
