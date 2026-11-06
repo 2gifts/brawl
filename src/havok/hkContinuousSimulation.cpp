@@ -77,7 +77,7 @@ int hkContinuousSimulation::handleAllToisTill(hkReal minTime) {
         m_toiEvents.removeAt(earliest);
         m_unk10 = event.unk00;
         hkStepInfo stepInfo(m_unk10, m_unk14);
-        m_world->m_dynamicsStepInfo = stepInfo;
+        m_world->m_dynamicsStepInfo.m_stepInfo = stepInfo;
         m_world->m_collisionInput->m_stepInfo = stepInfo;
         m_world->m_lockCount++;
         simulateToi(m_world, event, m_unk18);

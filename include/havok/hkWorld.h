@@ -4,6 +4,7 @@
 #include <havok/hkArray.h>
 #include <havok/hkVector4.h>
 #include <havok/hkStepInfo.h>
+#include <havok/hkSolverInfo.h>
 #include <havok/hkWorldMaintenanceMgr.h>
 
 struct hkWorldOperationQueue;
@@ -23,6 +24,13 @@ struct hkTypedBroadPhaseDispatcher;
 
 // The simulation world (layout partly recovered from hkWorld.cpp asm; the tail after 0x114 is not
 // recovered). Fields marked unk are written by the constructor and not read by the code matched so far.
+// The world's current step and its solver settings (0x150 bytes). Evidence for the pair: integrateInternal hands
+// hkConstraintSolverSetup::solve the address of the step and the address 0x10 past it.
+struct hkWorldDynamicsStepInfo {
+    hkStepInfo m_stepInfo;     // 0x00
+    hkSolverInfo m_solverInfo; // 0x10
+};
+
 struct hkWorld : hkReferencedObject {
     void* m_unk08;                                  // 0x08 HYPOTHESIS: broadphase-like object (vtable slot 0x10 queried)
     hkVector4 m_gravity;                            // 0x10
@@ -59,23 +67,18 @@ struct hkWorld : hkReferencedObject {
     u8 m_unk114[0x0C];                              // 0x114 .. 0x11F not recovered
     // listener arrays (hkWorldCallbackUtil reads them at these offsets; element types there)
     hkArrayBase m_postSimulationListeners;          // 0x120
-    hkArrayBase m_unk12C;                           // 0x12C not recovered
+    // tested before hkWorldCallbackUtil::firePostIntegrateCallback (hkSimulation::integrateInternal)
+    hkArrayBase m_postIntegrateListeners;           // 0x12C HYPOTHESIS: name, from the callback it guards
     hkArrayBase m_postCollideListeners;             // 0x138
-    u8 m_unk144[0x0C];                              // 0x144 .. 0x14F not recovered
+    // tested before hkWorldCallbackUtil::fireIslandPostIntegrateCallback (hkSimulation::integrateInternal)
+    hkArrayBase m_islandPostIntegrateListeners;     // 0x144 HYPOTHESIS: name, from the callback it guards
     // tested before hkWorldCallbackUtil::fireIslandPostCollideCallback (hkSimulation::collideInternal)
     hkArrayBase m_islandPostCollideListeners;       // 0x150 HYPOTHESIS: name, from the callback it guards
     u8 m_unk15C[0x14];                              // 0x15C .. 0x16F not recovered
-    // the current step (hkSimulation::integrate copies it here; actions get it in applyActions)
-    hkStepInfo m_dynamicsStepInfo;                  // 0x170 HYPOTHESIS: name
-    u8 m_unk180[0x2A4 - 0x180];                     // 0x180 .. 0x2A3 not recovered
-    // set by hkSimulation::collideInternal from the step: m_unk2A4 = delta time * m_unk2B8,
-    // m_unk2A8 = inverse delta time * m_unk2AC (an int). HYPOTHESIS: solver step settings.
-    hkReal m_unk2A4;                                // 0x2A4
-    hkReal m_unk2A8;                                // 0x2A8
-    int m_unk2AC;                                   // 0x2AC
-    u8 m_unk2B0[0x08];                              // 0x2B0 .. 0x2B7 not recovered
-    hkReal m_unk2B8;                                // 0x2B8
-    u8 m_unk2BC[0x2E4 - 0x2BC];                     // 0x2BC .. 0x2E3 not recovered
+    // the current step and the solver settings (hkSimulation::integrate copies the step in; actions get it in
+    // applyActions)
+    hkWorldDynamicsStepInfo m_dynamicsStepInfo;     // 0x170 HYPOTHESIS: name
+    u8 m_unk2C0[0x2E4 - 0x2C0];                     // 0x2C0 .. 0x2E3 not recovered
     int m_unk2E4;                                   // 0x2E4 capacity of hkWorldOperationUtil's local pair arrays
     int m_unk2E8;                                   // 0x2E8 capacity of collideEntitiesBroadPhaseDiscrete's pair arrays
 

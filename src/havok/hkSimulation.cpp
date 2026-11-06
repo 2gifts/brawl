@@ -61,6 +61,10 @@
 #include <havok/hkCollisionFilter.h>
 #include <havok/hkShape.h>
 #include <havok/hkAabb.h>
+#include <havok/hkSolver.h>
+#include <havok/hkRigidMotionUtil.h>
+#include <havok/hkConstraintSolverSetup.h>
+#include <havok/hkWorldOperationUtil.h>
 
 hkSimulation::hkSimulation(hkWorld* world) {
     m_world = world;
@@ -87,7 +91,7 @@ int hkSimulation::integrate(hkReal physicsDeltaTime) {
         return 1;
     }
     hkStepInfo stepInfo(m_unk14, m_unk14 + m_unk18);
-    m_world->m_dynamicsStepInfo = stepInfo;
+    m_world->m_dynamicsStepInfo.m_stepInfo = stepInfo;
     m_world->m_collisionInput->m_stepInfo = stepInfo;
     m_world->m_maintenanceMgr->performMaintenance(m_world, stepInfo);
     integrateInternal(stepInfo);
@@ -270,12 +274,11 @@ inline void collideIslandNarrowPhaseDiscrete(hkSimulationIsland* island, hkProce
 // post-collide callbacks after their narrow phase. Running the heap dry stops the step.
 void hkSimulation::collideInternal(const hkStepInfo& stepInfo) {
     HK_TIME_CODE_BLOCK("Collide");
-    m_world->m_dynamicsStepInfo = stepInfo;
+    m_world->m_dynamicsStepInfo.m_stepInfo = stepInfo;
     m_world->m_collisionInput->m_stepInfo = stepInfo;
-    // BYTES: the target reads m_world once for these two stores (the rest of the function reloads it)
-    hkWorld* world = m_world;
-    world->m_unk2A4 = stepInfo.m_deltaTime * world->m_unk2B8;
-    world->m_unk2A8 = stepInfo.m_invDeltaTime * world->m_unk2AC;
+    hkSolverInfo& solverInfo = m_world->m_dynamicsStepInfo.m_solverInfo;
+    solverInfo.m_unk124 = stepInfo.m_deltaTime * solverInfo.m_unk138;
+    solverInfo.m_unk128 = stepInfo.m_invDeltaTime * solverInfo.m_unk12C;
     m_world->m_lockCount++;
     for (int i = 0; i < m_world->m_unk28.m_size; i++) {
         hkArray<hkEntity*>& entities = ((hkSimulationIsland**)m_world->m_unk28.m_data)[i]->m_entities;
@@ -304,6 +307,82 @@ void hkSimulation::collideInternal(const hkStepInfo& stepInfo) {
     m_world->unlockAndAttemptToExecutePendingOperations();
 }
 
+// Integrates one island: through the constraint solver when it has constraints, otherwise its motions are stepped
+// on their own with gravity over the step.
+// BYTES: an inline function; its timer literals are its own weak objects ("TtSingleObj" in .data, "Et" in .sdata).
+// HYPOTHESIS: the name; the motion offset is hkEntity::m_motion.
+inline void integrateIsland(hkSimulationIsland* island, hkWorldDynamicsStepInfo& info,
+                            const hkSolverStepValues& values) {
+    if (island->m_constraintInfo.m_sizeOfJacobians == 0) {
+        HK_TIMER_BEGIN("SingleObj");
+        hkRigidMotionUtil::hkRigidMotionUtilApplyForcesAndStep(info.m_stepInfo, info.m_solverInfo.m_unk20,
+                                                               island->m_entities.begin(),
+                                                               island->m_entities.getSize(), 0xA0);
+        HK_TIMER_END();
+    } else {
+        hkConstraintSolverSetup::solve(info.m_stepInfo, info.m_solverInfo, values, island,
+                                       island->m_entities.begin(), island->m_entities.getSize());
+    }
+}
+
+// Integrates one step: the step goes into the world and the solver's per-step values are derived from it, the
+// actions run, then every active island is integrated (through the constraint solver when it has constraints) and
+// gets its post-integrate callbacks; the world's post-integrate callbacks run last.
+// HYPOTHESIS: what the world's 0x80 counter means (it is lowered around applyActions).
+void hkSimulation::integrateInternal(const hkStepInfo& stepInfo) {
+    HK_TIMER_BEGIN_LIST("Integrate", "Init");
+    m_world->m_dynamicsStepInfo.m_stepInfo = stepInfo;
+    hkSolverInfo& solverInfo = m_world->m_dynamicsStepInfo.m_solverInfo;
+    solverInfo.m_unk124 = stepInfo.m_deltaTime * solverInfo.m_unk138;
+    solverInfo.m_unk128 = stepInfo.m_invDeltaTime * solverInfo.m_unk12C;
+    solverInfo.m_unk10.setMul4(solverInfo.m_unk124, m_world->m_gravity);
+    solverInfo.m_unk20.setMul4(stepInfo.m_deltaTime, m_world->m_gravity);
+    hkSolver::hkSolveUpload();
+    hkWorldOperationUtil::cleanupDirtyIslands(m_world);
+
+    m_world->m_lockCount++;
+    m_world->m_unk80--;
+    HK_TIMER_SPLIT_LIST("Actions");
+    applyActions();
+    m_world->m_unk80++;
+    m_world->unlockAndAttemptToExecutePendingOperations();
+
+    m_world->m_lockCount++;
+    hkSolverStepValues values;
+    {
+        hkSolverInfo& si = m_world->m_dynamicsStepInfo.m_solverInfo;
+        values.m_unk00 = si.m_unk124;
+        values.m_unk04 = si.m_unk124 * si.m_unk130;
+        values.m_unk08 = si.m_unk128;
+        values.m_unk14 = si.m_unk138;
+        values.m_unk18 = si.m_unk138 * si.m_unk134;
+        values.m_unk38 = si.m_unk04;
+        values.m_unk3C = si.m_unk08;
+        values.m_unk1C = si.m_unk54 * si.m_unk128;
+        values.m_unk20 = si.m_unk08;
+        values.m_unk24 = si.m_unk5C * si.m_unk128;
+        values.m_deltaTime = stepInfo.m_deltaTime;
+        values.m_invDeltaTime = stepInfo.m_invDeltaTime;
+    }
+    HK_TIMER_SPLIT_LIST("Integrate");
+    for (int i = m_world->m_unk28.m_size - 1; i >= 0; i--) {
+        hkSimulationIsland* island = ((hkSimulationIsland**)m_world->m_unk28.m_data)[i];
+        integrateIsland(island, m_world->m_dynamicsStepInfo, values);
+        if (m_world->m_islandPostIntegrateListeners.m_size != 0) {
+            HK_TIMER_SPLIT_LIST("PostIntegrateCb");
+            hkWorldCallbackUtil::fireIslandPostIntegrateCallback(m_world, island, (void*)&stepInfo);
+        }
+    }
+    m_world->unlockAndAttemptToExecutePendingOperations();
+
+    if (m_world->m_postIntegrateListeners.m_size != 0) {
+        HK_TIMER_BEGIN("PostIntegrateCb");
+        hkWorldCallbackUtil::firePostIntegrateCallback(m_world, (void*)&stepInfo);
+        HK_TIMER_END();
+    }
+    HK_TIMER_END_LIST();
+}
+
 // Lets every action of every active island act for this step.
 // HYPOTHESIS: world +0x28 holds the active islands.
 void hkSimulation::applyActions() {
@@ -311,7 +390,7 @@ void hkSimulation::applyActions() {
         hkSimulationIsland* island = ((hkSimulationIsland**)m_world->m_unk28.m_data)[i];
         hkArray<hkAction*>& actions = island->m_actions;
         for (int j = 0; j < actions.getSize(); j++) {
-            actions[j]->applyAction(m_world->m_dynamicsStepInfo);
+            actions[j]->applyAction(m_world->m_dynamicsStepInfo.m_stepInfo);
         }
     }
 }
