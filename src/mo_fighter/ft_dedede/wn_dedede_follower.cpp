@@ -1,5 +1,12 @@
 #define WN_DAMAGE_ACTOR_INTERFACE
+#define WN_WEAPON_BUILDER
+#define WN_DAMAGE_EFFECTOR_NULL_EXTERN
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define FT_REL_LINK_EXTERN
 #define WN_KINETIC_GENERIC_BUILDER
+#include <wn/wn_module_accesser_builder.h>
 #include <ft/builder/ft_builder_kinetic.h>
 #include <mt/mt_prng.h>
 #include <so/damage/so_damage_value_accesser.h>
@@ -49,9 +56,11 @@ template class soInstancePool<wnDededeFollowerEnergy4Info, soLineInvertHierarchy
 template class soLineInvertHierarchy<soTypeList<wnDededeFollowerEnergy0Info, soTypeList<wnDededeFollowerEnergy1Info, soTypeList<wnDededeFollowerEnergy2Info, soTypeList<wnDededeFollowerEnergy3Info, soTypeList<wnDededeFollowerEnergy4Info, soTypeListNullType> > > > >, soInstancePool, soInstancePoolRoot>;
 #pragma dont_inline off
 
-template class soKineticMediatorImpl<wnDededeFollowerKineticEnergyTypeList, wnDededeFollowerKineticTransactorInfo>;
+
 
 wnDededeFollowerStatusUniqProcess g_wnDededeFollowerStatusUniqProcess;
+
+wnDededeFollowerStatusUniqProcess* wnDededeFollowerStatusUniqProcess::getInstance() { return &g_wnDededeFollowerStatusUniqProcess; }
 
 void wnDededeFollowerStatusUniqProcess::initStatus(soModuleAccesser* moduleAccesser) {
     soParamAccesser* params = (soParamAccesser*)moduleAccesser->getWorkManageModule().getParamAccesser();
@@ -226,6 +235,8 @@ void wnDededeFollowerStatusUniqProcess::setChangeStatusCount(soModuleAccesser* m
 }
 
 wnDededeFollowerStatusUniqProcessFinal g_wnDededeFollowerStatusUniqProcessFinal;
+
+wnDededeFollowerStatusUniqProcessFinal* wnDededeFollowerStatusUniqProcessFinal::getInstance() { return &g_wnDededeFollowerStatusUniqProcessFinal; }
 
 void wnDededeFollowerStatusUniqProcessFinal::execStatus(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getWorkManageModule().getInt(0x20000004) != 2) {
@@ -489,4 +500,42 @@ void wnDededeFollowerStatusUniqProcessFinal::initStatus(soModuleAccesser* module
         }
         break;
     }
+}
+
+inline wnWeaponBuilder<wnDededeFollowerModuleAccesserBuildConfig>::wnWeaponBuilder(
+    const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd) :
+    Weapon(name, bd.m_kind, bd.m_data, articleId, &info, m_modules.getModuleAccesser(), true), m_modules(this, bd) {
+    Weapon::initialize();
+}
+
+template <>
+soArrayFixedNull<const acAnimCmdConv*>* soSingletonConcrete<soArrayFixedNull<const acAnimCmdConv*> >::getInstance() {
+    return (soArrayFixedNull<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull;
+}
+
+// HYPOTHESIS: slot 0x44 of the animation command module registers the address pack list of a group.
+typedef void (*wnDededeFollowerSetPackFn)(soAnimCmdModule*, int, soAnimCmdAddressPackArraySeparate*);
+static inline void wnDededeFollowerSetPack(soAnimCmdModule* module, int group, soAnimCmdAddressPackArraySeparate* pack) {
+    ((wnDededeFollowerSetPackFn)(*(void***)module)[0x44 / 4])(module, group, pack);
+}
+
+wnDededeFollower::wnDededeFollower(s32 articleId, const wnArticleBuildInfo& info, const wnDededeFollowerData* data) :
+    wnWeaponBuilder<wnDededeFollowerModuleAccesserBuildConfig>(
+        "DededeFollower", articleId, info,
+        wnModuleAccesserBuildData(0x33, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWModelInstanceHeap(), static_cast<u8>(data->m_resGroupNo), -1, &m_paramAccesser,
+                                  0, 0, 0, 0, 0, 0, 0)),
+    m_data(data), m_common(data->m_common), m_param(data->m_param), m_paramAccesser(data->m_param, data->m_common),
+    m_animCmdTable0(), m_animCmdPack0(&m_animCmdTable0, (soArrayFixed<const acAnimCmdConv*>*)soSingletonConcrete<soArrayFixedNull<const acAnimCmdConv*> >::getInstance(), (soArrayFixed<const acAnimCmdConv*>*)soSingletonConcrete<soArrayFixedNull<const acAnimCmdConv*> >::getInstance()),
+    m_animCmdTable1(), m_animCmdPack1(&m_animCmdTable1, (soArrayFixed<const acAnimCmdConv*>*)soSingletonConcrete<soArrayFixedNull<const acAnimCmdConv*> >::getInstance(), (soArrayFixed<const acAnimCmdConv*>*)soSingletonConcrete<soArrayFixedNull<const acAnimCmdConv*> >::getInstance()),
+    m_animCmdTable2(), m_animCmdPack2(&m_animCmdTable2, (soArrayFixed<const acAnimCmdConv*>*)soSingletonConcrete<soArrayFixedNull<const acAnimCmdConv*> >::getInstance(), (soArrayFixed<const acAnimCmdConv*>*)soSingletonConcrete<soArrayFixedNull<const acAnimCmdConv*> >::getInstance()) {
+    soStatusUniqProcess* uniqProcs[26];
+    for (int i = 0; i < 18; i++) uniqProcs[i] = wnDededeFollowerStatusUniqProcess::getInstance();
+    for (int i = 18; i < 26; i++) uniqProcs[i] = wnDededeFollowerStatusUniqProcessFinal::getInstance();
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 26);
+    m_moduleAccesser->getCollisionHitModule().add((soSet<soCollisionHitData>*)&data->m_hitDataStorage, 0);
+    wnDededeFollowerSetPack(&m_moduleAccesser->getAnimCmdModule(), 1, &m_animCmdPack0);
+    wnDededeFollowerSetPack(&m_moduleAccesser->getAnimCmdModule(), 2, &m_animCmdPack1);
+    wnDededeFollowerSetPack(&m_moduleAccesser->getAnimCmdModule(), 3, &m_animCmdPack2);
+    Weapon::deactivate(false);
 }

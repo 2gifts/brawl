@@ -6,6 +6,7 @@ class soModuleAccesser;
 
 class wnDededeFollowerStatusUniqProcess : public soStatusUniqProcess {
 public:
+    static wnDededeFollowerStatusUniqProcess* getInstance();
     virtual ~wnDededeFollowerStatusUniqProcess() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
     virtual void execStatus(soModuleAccesser* moduleAccesser);
@@ -22,6 +23,7 @@ extern wnDededeFollowerStatusUniqProcess g_wnDededeFollowerStatusUniqProcess;
 
 class wnDededeFollowerStatusUniqProcessFinal : public soStatusUniqProcess {
 public:
+    static wnDededeFollowerStatusUniqProcessFinal* getInstance();
     virtual ~wnDededeFollowerStatusUniqProcessFinal() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
     virtual void execStatus(soModuleAccesser* moduleAccesser);
