@@ -4,6 +4,8 @@
 #include <gf/gf_scene.h>
 #include <types.h>
 
+struct scEventFighters;
+
 class sqEvent : public gfSequence {
 public:
     s32 unk8;
@@ -15,6 +17,7 @@ public:
     static sqEvent* create();
     sqEvent(const char* name) : gfSequence(name), unk8(0), unk24(0) { }
     void setupSelCharSetting();
+    void checkEventSetting(int eventNo, int level, int playerCount, scEventFighters* fighters);
     virtual void start();
     virtual void setNext();
     virtual void exit();
