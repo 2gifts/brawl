@@ -1,5 +1,6 @@
 #include <ec/ec_mgr.h>
 #include <so/effect/so_effect_continual.h>
+#include <so/effect/so_effect_screen.h>
 #include <so/effect/so_effect_module_impl.h>
 #include <so/effect/so_effect_time.h>
 #include <so/so_array.h>
@@ -199,4 +200,17 @@ void soEffectModuleImpl::pushGroupIgnoreScaleZ(u32 group) {
 void soEffectModuleImpl::pushGroupScaleZ(u32 group) {
     g_ecMgr->pushsetCurrentGroup(group);
     g_ecMgr->setFlatMode(true);
+}
+
+void soEffectModuleImpl::setScale(int handle, Vec3f* scale) {
+    g_ecMgr->setScl(handle, scale);
+}
+
+bool soEffectModuleImpl::isExistEffect(int handle) {
+    return g_ecMgr->isExistEffect(handle);
+}
+
+void soEffectModuleImpl::clearScreen(int index, u32 frames) {
+    // HYPOTHESIS: the soEffectScreen member lives at 0x124 (inside unk78)
+    ((soEffectScreen*)&unk78[0xAC])->clear(index, frames);
 }
