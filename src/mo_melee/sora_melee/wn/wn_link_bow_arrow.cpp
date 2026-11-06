@@ -1,3 +1,4 @@
+#define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
 #ifndef FT_MODULE_BUILDER
 #define FT_MODULE_BUILDER // normally -DFT_MODULE_BUILDER from configure.py; repeated so the kit cache agrees
 #endif
