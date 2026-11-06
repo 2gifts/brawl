@@ -1,3 +1,5 @@
+#define IP_NULL_INPUT_CONT_NO // IpNull inherits Input::getContNo in this REL
+#define YK_STAGE_FULL // the original emits the StageObject/Yakumono inline virtuals and the null input in this REL
 #define SO_EVENT_OBSERVER_INLINE // emit the stage-local event registration callbacks
 #define YK_STAGE_INLINE // inline members of the shared SO headers that the stage RELs emit themselves
 #define YK_CLTARGET_4_FIRST // the clTarget constructor writes the second member first in this REL
@@ -227,16 +229,7 @@ void grDxOnettCar::updateMove(float deltaFrame) {
 // Yakumono::setGlobalOffset(u8, u32): forwards to the hit module (HYPOTHESIS: the arguments are a flag and a group index).
 extern "C" void fn_27_263800(Yakumono* yakumono, u8 flag, u32 groupIndex);
 
-grDxOnettAttack* grDxOnettAttack::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
-    grDxOnettAttack* ground = new (Heaps::StageInstance) grDxOnettAttack(taskName);
-    if (ground != NULL) {
-        ground->setMdlIndex(mdlIndex);
-        ground->setTgtNode(tgtNodeName);
-    }
-    return ground;
-}
-
-grDxOnettAttack::grDxOnettAttack(const char* taskName) : grDxOnett(taskName) {
+inline grDxOnettAttack::grDxOnettAttack(const char* taskName) : grDxOnett(taskName) {
     m_curWork = NULL;
     m_stateWork = NULL;
     m_hasYakumono = 0;
@@ -249,6 +242,15 @@ grDxOnettAttack::grDxOnettAttack(const char* taskName) : grDxOnett(taskName) {
     callback->m_numNodeCallbackData = 1;
     callback->initialize(false, Heaps::StageInstance);
     callback->m_nodeCallbackDatas[0].m_flags |= 1;
+}
+
+grDxOnettAttack* grDxOnettAttack::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
+    grDxOnettAttack* ground = new (Heaps::StageInstance) grDxOnettAttack(taskName);
+    if (ground != NULL) {
+        ground->setMdlIndex(mdlIndex);
+        ground->setTgtNode(tgtNodeName);
+    }
+    return ground;
 }
 
 grDxOnettAttack::~grDxOnettAttack() {
