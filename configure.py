@@ -1715,7 +1715,7 @@ config.libs = [
             Object(NonMatching, "havok/hkWorld.cpp", extra_cflags=["-str noreadonly"]),
             Object(NonMatching, "havok/hkWorldCinfo.cpp"),
             Object(NonMatching, "havok/hkWorldObject.cpp"),
-            Object(NonMatching, "havok/hkSimulation.cpp"),
+            Object(NonMatching, "havok/hkSimulation.cpp", extra_cflags=["-inline noauto"]),
             Object(NonMatching, "havok/hk_array_q218hk_linked_collidable14_collision_entry.cpp"),
             Object(NonMatching, "havok/hkWorldAgentUtil.cpp"),
             Object(NonMatching, "havok/hkWorldOperationQueue.cpp", extra_cflags=["-inline noauto"]),

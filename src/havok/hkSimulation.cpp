@@ -46,6 +46,9 @@
 #include <havok/hkMath.h>
 #include <math.h>
 #include <havok/hkMonitorStream.h>
+#include <havok/hkThreadMemory.h>
+#include <havok/hkWorldCallbackUtil.h>
+#include <havok/hkCollisionInput.h>
 
 hkSimulation::hkSimulation(hkWorld* world) {
     m_world = world;
@@ -58,6 +61,80 @@ hkSimulation::hkSimulation(hkWorld* world) {
 }
 
 hkSimulation::~hkSimulation() {}
+
+// Integrates one step of physicsDeltaTime. When neither the thread stack nor the heap has room for the
+// integration, the memory system is flagged and the step stops with result 1 (integrate again).
+// HYPOTHESIS: the stack test (the free stack minus 16 bytes) as an hkThreadMemory query, and the meaning of
+// hkMemory::unk4 (set to 1 = out of memory; collide tests it after the narrow phase).
+int hkSimulation::integrate(hkReal physicsDeltaTime) {
+    m_unk18 = physicsDeltaTime;
+    int memUsage = m_world->getMemUsageForIntegration();
+    if (memUsage > hkThreadMemory::s_instance->getAvailableStackSize() && memUsage > hkMemory::getAvailableMemory()) {
+        hkMemory::getInstance().unk4 = 1;
+        m_unk24 = 1;
+        return 1;
+    }
+    hkStepInfo stepInfo(m_unk14, m_unk14 + m_unk18);
+    m_world->m_dynamicsStepInfo = stepInfo;
+    m_world->m_collisionInput->m_stepInfo = stepInfo;
+    m_world->m_maintenanceMgr->performMaintenance(m_world, stepInfo);
+    integrateInternal(stepInfo);
+    m_unk0C = 0;
+    m_unk24 = 0;
+    return 0;
+}
+
+// Collides the step integrate prepared (a failed earlier step goes through reCollideAfterStepFailure), then moves
+// the step start on and runs the post-collide callbacks. Running out of memory stops with result 2.
+int hkSimulation::collide() {
+    if (m_unk24 != 0) {
+        return reCollideAfterStepFailure();
+    }
+    hkStepInfo stepInfo(m_unk14, m_unk14 + m_unk18);
+    collideInternal(stepInfo);
+    if (hkMemory::getInstance().unk4 == 1) {
+        m_unk24 = 2;
+        return 2;
+    }
+    m_unk14 += m_unk18;
+    if (m_world->m_postCollideListeners.m_size != 0) {
+        HK_TIMER_BEGIN("PostCollideCB");
+        hkWorldCallbackUtil::firePostCollideCallback(m_world, &stepInfo);
+        HK_TIMER_END();
+    }
+    m_unk0C = 1;
+    m_unk24 = 0;
+    return 0;
+}
+
+// Collides again after a failed step: the filters are rerun over the whole world, then the failed step (after a
+// failed time advance: the span from the time advanced to up to the step start) is collided.
+// HYPOTHESIS: the two arguments of updateCollisionFilterOnWorld (0 and 1).
+int hkSimulation::reCollideAfterStepFailure() {
+    m_world->updateCollisionFilterOnWorld(0, 1);
+    hkStepInfo stepInfo;
+    if (m_unk24 == 3) {
+        stepInfo.set(m_unk10, m_unk14);
+    } else {
+        stepInfo.set(m_unk14, m_unk14 + m_unk18);
+    }
+    collideInternal(stepInfo);
+    if (hkMemory::getInstance().unk4 == 1) {
+        HK_TIMER_END();
+        return m_unk24;
+    }
+    if (m_unk24 == 2) {
+        m_unk14 += m_unk18;
+        if (m_world->m_postCollideListeners.m_size != 0) {
+            HK_TIMER_BEGIN("PostCollideCB");
+            hkWorldCallbackUtil::firePostCollideCallback(m_world, &stepInfo);
+            HK_TIMER_END();
+        }
+        m_unk0C = 1;
+    }
+    m_unk24 = 0;
+    return 0;
+}
 
 // Snaps the current time to the step end when it is close enough, then returns the time to advance to.
 hkReal hkSimulation::snapSimulateTimeAndGetTimeToAdvanceTo() {
@@ -76,13 +153,39 @@ hkReal hkSimulation::snapSimulateTimeAndGetTimeToAdvanceTo() {
     return m_unk1C;
 }
 
-// HYPOTHESIS: a scoped timer helper (its destructor ends the current timer section); no members are touched.
-struct hkTimeFunctionHelper {
-    ~hkTimeFunctionHelper();
-};
+// Advances the time to the snapped step end; once it reaches the frame marker at 0x1C the post-simulation
+// callbacks run.
+int hkSimulation::advanceTime() {
+    m_unk10 = snapSimulateTimeAndGetTimeToAdvanceTo();
+    if (m_unk10 >= m_unk1C) {
+        if (m_world->m_postSimulationListeners.m_size != 0) {
+            HK_TIMER_BEGIN("PostSimulateCb");
+            hkWorldCallbackUtil::firePostSimulationCallback(m_world);
+            HK_TIMER_END();
+        }
+    }
+    m_unk24 = 0;
+    return 0;
+}
 
-hkTimeFunctionHelper::~hkTimeFunctionHelper() {
-    HK_TIMER_END();
+// One simulation step: integrate and collide inside the "Simulate" timer, then advance the time. Each part runs
+// only in the step states that need it (m_unk24 is the previous step's result).
+// HYPOTHESIS: the meaning of the state values (0 = done, 1 = integrate pending, 2 = collide pending, 3 = advance
+// pending), inferred from which parts each value runs.
+int hkSimulation::stepDeltaTime(hkReal physicsDeltaTime) {
+    {
+        HK_TIME_CODE_BLOCK("Simulate");
+        if (m_unk24 == 0 || m_unk24 == 1) {
+            integrate(physicsDeltaTime);
+        }
+        if (m_unk24 == 0 || m_unk24 == 2) {
+            collide();
+        }
+    }
+    if (m_unk24 == 0 || m_unk24 == 3) {
+        advanceTime();
+    }
+    return m_unk24;
 }
 
 // Lets every action of every active island act for this step.

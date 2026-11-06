@@ -2,6 +2,7 @@
 
 #include <havok/hkBase.h>
 #include <havok/hkVector4.h>
+#include <havok/hkStepInfo.h>
 
 struct hkCdBody;
 struct hkShapeCollection;
@@ -44,12 +45,10 @@ struct hkLinearCastCollisionInput : hkCollisionInput {
 };
 
 // Input of processCollision (Havok's name; the Skyrim reference has it as a plain derived struct).
-// HYPOTHESIS: step times; hkBvTreeAgent::processCollision passes unk18 to hkSweptTransformUtil::calcTimInfo.
+// The step at 0x10 is the world's current step (hkSimulation::integrate copies it in); hkBvTreeAgent::processCollision
+// passes its delta time to hkSweptTransformUtil::calcTimInfo.
 struct hkProcessCollisionInput : hkCollisionInput {
-    hkReal unk10; // 0x10
-    hkReal unk14; // 0x14
-    hkReal unk18; // 0x18
-    u32 unk1C;    // 0x1C
+    hkStepInfo m_stepInfo; // 0x10
     u32 unk20;    // 0x20
     u32 unk24;    // 0x24
     // 0x28 HYPOTHESIS: per-pair quality settings; hkBvTreeAgent::calcAabbAndQueryTree grows A's aabb by its motion

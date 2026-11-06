@@ -3,6 +3,8 @@
 #include <havok/hkBase.h>
 #include <havok/hkArray.h>
 #include <havok/hkVector4.h>
+#include <havok/hkStepInfo.h>
+#include <havok/hkWorldMaintenanceMgr.h>
 
 struct hkWorldOperationQueue;
 struct hkWorldDeletionListener;
@@ -15,6 +17,7 @@ struct hkPhysicsSystem;
 struct hkCollisionFilter;
 struct hkStatisticsCollector;
 struct hkAabb;
+struct hkProcessCollisionInput;
 
 // The simulation world (layout partly recovered from hkWorld.cpp asm; the tail after 0x114 is not
 // recovered). Fields marked unk are written by the constructor and not read by the code matched so far.
@@ -25,7 +28,10 @@ struct hkWorld : hkReferencedObject {
     hkArrayBase m_unk28;                            // 0x28 array of hkWorldMemoryEntry* (HYPOTHESIS: islands), see getMemUsageForIntegration
     hkArrayBase m_unk34;                            // 0x34 not recovered
     hkArrayBase m_unk40;                            // 0x40 not recovered
-    u8 m_unk4C[0x28];                               // 0x4C .. 0x73 not recovered
+    hkWorldMaintenanceMgr* m_maintenanceMgr;        // 0x4C (hkSimulation::integrate calls performMaintenance)
+    u8 m_unk50[0x18];                               // 0x50 .. 0x67 not recovered
+    hkProcessCollisionInput* m_collisionInput;      // 0x68 HYPOTHESIS: name; integrate copies the step info into it
+    u8 m_unk6C[0x08];                               // 0x6C .. 0x73 not recovered
     hkWorldOperationQueue* m_operationQueue;        // 0x74 (allocated 0x20 bytes in the constructor)
     int m_pendingOperationsCount;                                    // 0x78 how many world operations are sitting in the queue
     int m_lockCount;                                // 0x7C incremented around add/remove calls
@@ -44,6 +50,14 @@ struct hkWorld : hkReferencedObject {
     hkArray<hkPhantom*> m_phantoms;                 // 0xCC
     u8 m_unkD8[0x30];                               // 0xD8 .. 0x107 not recovered
     hkArray<hkWorldDeletionListener*> m_worldDeletionListeners; // 0x108
+    u8 m_unk114[0x0C];                              // 0x114 .. 0x11F not recovered
+    // listener arrays (hkWorldCallbackUtil reads them at these offsets; element types there)
+    hkArrayBase m_postSimulationListeners;          // 0x120
+    hkArrayBase m_unk12C;                           // 0x12C not recovered
+    hkArrayBase m_postCollideListeners;             // 0x138
+    u8 m_unk144[0x2C];                              // 0x144 .. 0x16F not recovered
+    // the current step (hkSimulation::integrate copies it here; actions get it in applyActions)
+    hkStepInfo m_dynamicsStepInfo;                  // 0x170 HYPOTHESIS: name
 
     int getMemUsageForIntegration();
     void setGravity(const hkVector4& gravity);

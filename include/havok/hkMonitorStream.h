@@ -85,3 +85,16 @@ inline u32 hkMonitorStream_getTicks() {
     }
 #define HK_TIMER_SPLIT_LIST(NAME) HK_MONITOR_TIMER_COMMAND("St" NAME)
 #define HK_TIMER_END_LIST() HK_MONITOR_TIMER_COMMAND("lt")
+
+// Scoped timer: begins a timer on construction and ends it when it goes out of scope. Its out-of-line destructor
+// sits in hkSimulation.o (map: hkTimeFunctionHelper::__dt), and hkContinuousSimulation's exception tables name it
+// as a cleanup action, so it is an inline member shared by several units. The "Et" literal of the inline
+// destructor is the weak .sdata object @STRING@__dt__20hkTimeFunctionHelperFv (MWCC names the literals of inline
+// functions after the function and the linker merges the copies), which is why hkSimulation and
+// hkContinuousSimulation load the same "Et" while plain HK_TIMER_END sites use their unit's string pool.
+// The begin is the plain macro at the call site, not a constructor taking the name: hkSimulation::stepDeltaTime
+// materializes the name inside the room test, which an argument evaluated before an inlined body would not give.
+struct hkTimeFunctionHelper {
+    ~hkTimeFunctionHelper() { HK_TIMER_END(); }
+};
+#define HK_TIME_CODE_BLOCK(NAME)                                                                 HK_TIMER_BEGIN(NAME);                                                                        hkTimeFunctionHelper timeFunctionHelper

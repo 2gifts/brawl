@@ -447,7 +447,7 @@ static inline void hkBvTreeAgent_updateEntries(hkBvTreeAgent* agent, const hkCdB
     hkTransform bTa;
     bTa.setMulInverseMul(*(const hkTransform*)bodyB.m_motion, *(const hkTransform*)bodyA.m_motion);
     hkVector4 timInfo;
-    hkSweptTransformUtil::calcTimInfo(*(const hkMotionState*)bodyA.m_motion, *(const hkMotionState*)bodyB.m_motion, input.unk18,
+    hkSweptTransformUtil::calcTimInfo(*(const hkMotionState*)bodyA.m_motion, *(const hkMotionState*)bodyB.m_motion, input.m_stepInfo.m_deltaTime,
                                       timInfo);
     hkAabb* cachedAabb = lbl_805A0F14 ? &agent->m_cachedAabb : 0;
     if (hkBvTreeAgent::calcAabbAndQueryTree(bodyA, bodyB, bTa, timInfo, input, cachedAabb, hitList) != 0) {
@@ -548,7 +548,7 @@ int hkBvTreeAgent::calcAabbAndQueryTree(const hkCdBody& bodyA, const hkCdBody& b
             arm.setSub4(center, msB->m_sweptTransform.m_centerOfMassLocal);
             hkVector4 rotation;
             rotation.setCross(arm, msB->m_deltaAngle);
-            linearTimInfo.addMul4(input.unk18 * msB->m_sweptTransform.m_centerOfMass1.w, rotation);
+            linearTimInfo.addMul4(input.m_stepInfo.m_deltaTime * msB->m_sweptTransform.m_centerOfMass1.w, rotation);
         }
         hkVector4 zero;
         zero.setZero4();

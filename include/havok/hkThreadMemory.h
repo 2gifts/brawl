@@ -29,6 +29,10 @@ struct hkThreadMemory {
 
     hkThreadMemory(hkMemory* memory, int maxFreeListSize);
 
+    // Bytes the stack area can still hand out, less 16 for the rounding of a request.
+    // HYPOTHESIS: the name and the reason for the 16 (hkSimulation::integrate compares its memory need with it).
+    int getAvailableStackSize() const { return (int)(m_stackEnd - m_stackTop) - 16; }
+
     void addReference();
     void removeReference();
     // Stack allocation from the chained stack area (16 byte granularity).
