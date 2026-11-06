@@ -4,6 +4,7 @@
 #define FT_SOUND_GENERATOR_DTOR_NOINLINE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_PIKACHU_ARTICLE_POOLS
+#define WN_ARTICLE_BUILDER_DTORS
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #define FT_TEAM_TYPED_INTERFACE
@@ -28,6 +29,7 @@ int soValueAccesser::getValueVariation() { return g_soValueVariation; }
 #pragma dont_inline off
 
 #define FT_BC ftPikachuBuildConfig
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #include <ft/builder/ft_builder_noinline.h>
 
 // Status teardown destroys its owned change-request queue before observers.
@@ -169,6 +171,20 @@ template wnSelectedArticleMediator<ftPikachuArticleMediator>::~wnSelectedArticle
 template wnArticleManageModuleBuilder<ftPikachuArticleMediator, 5>::~wnArticleManageModuleBuilder();
 template wnArticleManageModuleBuilder<ftPikachuArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
 ftPikachuArticleMediator::~ftPikachuArticleMediator() { }
+// The module accesser builders of the articles are destroyed out of line by the article destructors.
+soSlowModuleBuilder<soSlowModuleBuildConfig<soSlowModuleSimple> >::~soSlowModuleBuilder() { }
+soGlowModuleBuilder<soGlowModuleBuildConfig<soGlowModuleSimple> >::~soGlowModuleBuilder() { }
+template <class T> void ftBuilderDtorUse(T* p) { p->~T(); }
+typedef soStopModuleBuilder<soStopModuleBuildConfig<soStopModuleImpl> > ftPikachuArticleStopBuilder;
+template void ftBuilderDtorUse<ftPikachuArticleStopBuilder>(ftPikachuArticleStopBuilder*);
+typedef soReflectModuleBuilder<soReflectModuleBuildConfig<0, soReflectModuleImpl> > ftPikachuArticleReflectBuilder;
+template void ftBuilderDtorUse<ftPikachuArticleReflectBuilder>(ftPikachuArticleReflectBuilder*);
+typedef soEffectModuleBuilder<wnEffectModuleBuildConfig<1, 1, 0, 1, -1, soEffectModuleImpl> > ftPikachuArticleEffectBuilder;
+template void ftBuilderDtorUse<ftPikachuArticleEffectBuilder>(ftPikachuArticleEffectBuilder*);
+typedef wnAnimCmdModuleSubBuilder<wnAnimCmdModuleSubBuildConfigDefault<1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0> > ftPikachuArticleAnimCmdSubBuilder;
+template void ftBuilderDtorUse<ftPikachuArticleAnimCmdSubBuilder>(ftPikachuArticleAnimCmdSubBuilder*);
+typedef soAnimCmdControlUnitBuilder<soAnimCmdControlUnitBuildConfigUniq<4, 8> > ftPikachuArticleAnimCmdUniqBuilder;
+template void ftBuilderDtorUse<ftPikachuArticleAnimCmdUniqBuilder>(ftPikachuArticleAnimCmdUniqBuilder*);
 #pragma dont_inline off
 
 s32 ftPikachuArticleMediator::getMediateNum() { return 4; }
