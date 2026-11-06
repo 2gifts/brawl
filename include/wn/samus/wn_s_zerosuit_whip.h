@@ -7,7 +7,7 @@
 #include <wn/wn_extend_param_accesser.h>
 
 FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 4);
-WN_STATUS_PROC_VECTOR_ARG_CTOR(9);
+WN_STATUS_PROC_VECTOR_DEFAULT_CTOR(9);
 
 // HYPOTHESIS: meaning of the three parameters (ids 4000..).
 struct wnSZerosuitWhipParam {
@@ -48,7 +48,7 @@ struct wnSZerosuitWhipModuleAccesserBuildConfig : wnCommonBuildConfig {
     typedef soInsideEventManageModuleBuildConfig<16, 32, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 1, 1, 0, 0, 0, wnInsideEventManageModuleTypes>
         InsideEventManageModuleBuildConfig;
     typedef soModelModuleBuildConfig<5, 0, soModelModuleImpl> ModelModuleBuildConfig;
-    typedef soMotionModuleBuildConfig<15, soMotionModuleImpl, 0, 0, soTransitionModuleBuildConfig<wnMotionTransitionTypeList>,
+    typedef soMotionModuleBuildConfig<15, soMotionModuleImpl, 0, 0, soTransitionModuleBuildConfigNull,
                                       soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> >
         MotionModuleBuildConfig;
     typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 4, 0, soCollisionAttackModuleImpl, 1, false, true>
@@ -60,7 +60,8 @@ struct wnSZerosuitWhipModuleAccesserBuildConfig : wnCommonBuildConfig {
     typedef soLinkModuleBuildConfigCap<5, soLinkModuleImpl> LinkModuleBuildConfig;
     typedef soPhysicsModuleBuildConfigCap<0, soPhysicsModuleImpl> PhysicsModuleBuildConfig;
     typedef soGeneralWorkBuildConfig<14, 9, 1> GeneralWorkBuildConfig;
-    typedef wnStatusModuleBuildConfig<9, soGeneralWorkBuildConfig<3, 3, 1>, 9, soTransitionModuleBuildConfig<wnStatusTransitionTypeList> >
+    typedef wnStatusModuleBuildConfig<9, soGeneralWorkBuildConfig<3, 3, 1>, 9,
+                                      soTransitionModuleBuildConfig<soTypeList<soIntToType<2>, soTypeListNullType> > >
         StatusModuleBuildConfig;
     typedef wnAnimCmdModuleSubBuildConfigFullProperty<1, 9, 0, 0, 2, 1, 15, 0, 0, 2, 1, 15, 0, 0, 2, 1, 15, 0, 0, 2>
         AnimCmdModuleSubBuildConfig;
