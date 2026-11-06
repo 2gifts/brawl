@@ -26,15 +26,11 @@ struct ftSnakeArticleDataTag {
     ftSnakeArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
 };
 
-// BYTES: sora_melee ftCommonDataAccesser::getWeaponData20 (map name; the symbol is still unnamed in sora_melee's
-// symbols.txt): the Cypher's article data, also used by ft_snake.cpp's Cypher holder.
-extern "C" void* fn_27_147F88(ftCommonDataAccesser* accesser, int kind, bool* resourceGroup);
-
 // The Cypher data of the fighter kind that owns this status.
 static inline const wnSnakeCypherData* getCypherData(soModuleAccesser* moduleAccesser) {
     ftSnakeArticleDataTag tag;
     int ownerKind = moduleAccesser->getStageObject().soGetSubKind();
-    return static_cast<const wnSnakeCypherData*>(fn_27_147F88(&g_ftCommonDataAccesser, ownerKind, &tag.m_resourceGroup));
+    return g_ftCommonDataAccesser.getWeaponData<wnSnakeCypherData>(ownerKind, &tag.m_resourceGroup);
 }
 
 void ftSnakeStatusUniqProcessCypherHang::initStatus(soModuleAccesser* moduleAccesser) {

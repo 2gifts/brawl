@@ -222,8 +222,6 @@ struct ftIkeArticleBuildInfo : wnArticleBuildInfo {
     }
 };
 
-// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
-extern "C" void* fn_27_148A88(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 template <class W> struct ftIkeArticleTraits;
 #define FT_IKE_TRAITS(W, DATA, ID, GETTER) \
@@ -231,11 +229,11 @@ template <class W> struct ftIkeArticleTraits;
         enum { ArticleId = ID }; \
         static const DATA* getData() { \
             ftIkeArticleDataTag tag; \
-            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Ike, &tag.m_resourceGroup)); \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Ike, &tag.m_resourceGroup)); \
         } \
     };
 
-FT_IKE_TRAITS(wnIkeSword, wnIkeSwordData, 0, fn_27_148A88)
+FT_IKE_TRAITS(wnIkeSword, wnIkeSwordData, 0, getWeaponData<wnIkeSwordData>)
 
 // Every article of the fighter is built by this constructor from the data of the fighter kind.
 template <class W>

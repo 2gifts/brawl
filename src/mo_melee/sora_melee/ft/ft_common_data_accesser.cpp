@@ -200,6 +200,20 @@ void* ftCommonDataAccesser::getPokeLizardonBreathParam(ftKind kind) const
     }
 }
 
+template <>
+const wnPokeLizardonRockData* ftCommonDataAccesser::getWeaponData<wnPokeLizardonRockData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x94)
+    return static_cast<const wnPokeLizardonRockData*>(lbl_27_bss_3210[Fighter_PokeLizardon].data->extendParam[6]);
+}
+
+template <>
+const wnPokeLizardonRockStoneData* ftCommonDataAccesser::getWeaponData<wnPokeLizardonRockStoneData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x98)
+    return static_cast<const wnPokeLizardonRockStoneData*>(lbl_27_bss_3210[Fighter_PokeLizardon].data->extendParam[7]);
+}
+
 void* ftRobotArticleDataAccesser::getGyroData(ftKind kind, bool* resourceGroup) const
 {
     // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x94)
@@ -238,6 +252,13 @@ void* ftCommonDataAccesser::getSZerosuitArmorData() const
 {
     // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x98)
     return lbl_27_bss_3210[Fighter_SZeroSuit].data->extendParam[7];
+}
+
+template <>
+const wnSZerosuitArmorData* ftCommonDataAccesser::getWeaponData<wnSZerosuitArmorData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x98)
+    return static_cast<const wnSZerosuitArmorData*>(lbl_27_bss_3210[Fighter_SZeroSuit].data->extendParam[7]);
 }
 
 void* ftCommonDataAccesser::getWeaponData0(ftKind kind, bool* resourceGroup) const
@@ -285,9 +306,57 @@ void* ftCommonDataAccesser::getWeaponData15(ftKind kind, bool* resourceGroup) co
     }
 }
 
+template <>
+const wnSnakeMineData* ftCommonDataAccesser::getWeaponData<wnSnakeMineData>(int kind, bool* resourceGroup) const
+{
+    return static_cast<const wnSnakeMineData*>(lbl_27_bss_3210[Fighter_Snake].data->extendParam[5]);
+}
+
+template <>
+const wnSnakeTrenchMortarData* ftCommonDataAccesser::getWeaponData<wnSnakeTrenchMortarData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x94)
+    return static_cast<const wnSnakeTrenchMortarData*>(lbl_27_bss_3210[Fighter_Snake].data->extendParam[6]);
+}
+
 void* ftCommonDataAccesser::getWeaponData18(ftKind kind, bool* resourceGroup) const
 {
     return lbl_27_bss_3210[Fighter_Snake].data->extendParam[7];
+}
+
+template <>
+const wnSnakeRpg7Data* ftCommonDataAccesser::getWeaponData<wnSnakeRpg7Data>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x9C)
+    return static_cast<const wnSnakeRpg7Data*>(lbl_27_bss_3210[Fighter_Snake].data->extendParam[8]);
+}
+
+template <>
+const wnSnakeCypherData* ftCommonDataAccesser::getWeaponData<wnSnakeCypherData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA0)
+    return static_cast<const wnSnakeCypherData*>(lbl_27_bss_3210[Fighter_Snake].data->extendParam[9]);
+}
+
+template <>
+const wnSnakeC4Data* ftCommonDataAccesser::getWeaponData<wnSnakeC4Data>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA4)
+    return static_cast<const wnSnakeC4Data*>(lbl_27_bss_3210[Fighter_Snake].data->extendParam[10]);
+}
+
+template <>
+const wnSnakeC4SwitchData* ftCommonDataAccesser::getWeaponData<wnSnakeC4SwitchData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA8)
+    return static_cast<const wnSnakeC4SwitchData*>(lbl_27_bss_3210[Fighter_Snake].data->extendParam[11]);
+}
+
+template <>
+const wnSnakeNikitaData* ftCommonDataAccesser::getWeaponData<wnSnakeNikitaData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xAC)
+    return static_cast<const wnSnakeNikitaData*>(lbl_27_bss_3210[Fighter_Snake].data->extendParam[12]);
 }
 
 void* ftCommonDataAccesser::getWeaponData24(ftKind kind, bool* resourceGroup) const
@@ -295,9 +364,58 @@ void* ftCommonDataAccesser::getWeaponData24(ftKind kind, bool* resourceGroup) co
     return lbl_27_bss_3210[Fighter_Snake].data->extendParam[13];
 }
 
+template <>
+const wnSnakeLadderData* ftCommonDataAccesser::getWeaponData<wnSnakeLadderData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xB4)
+    return static_cast<const wnSnakeLadderData*>(lbl_27_bss_3210[Fighter_Snake].data->extendParam[14]);
+}
+
+template <>
+const wnSnakeRgb6Data* ftCommonDataAccesser::getWeaponData<wnSnakeRgb6Data>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xB8)
+    return static_cast<const wnSnakeRgb6Data*>(lbl_27_bss_3210[Fighter_Snake].data->extendParam[15]);
+}
+
+template <>
+const wnSnakeRgb6SightData* ftCommonDataAccesser::getWeaponData<wnSnakeRgb6SightData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xBC)
+    return static_cast<const wnSnakeRgb6SightData*>(lbl_27_bss_3210[Fighter_Snake].data->extendParam[16]);
+}
+
+template <>
+const wnSnakeRgb6ClipData* ftCommonDataAccesser::getWeaponData<wnSnakeRgb6ClipData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xC0)
+    return static_cast<const wnSnakeRgb6ClipData*>(lbl_27_bss_3210[Fighter_Snake].data->extendParam[17]);
+}
+
+template <>
+const wnSnakeRgb6BulletData* ftCommonDataAccesser::getWeaponData<wnSnakeRgb6BulletData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xC4)
+    return static_cast<const wnSnakeRgb6BulletData*>(lbl_27_bss_3210[Fighter_Snake].data->extendParam[18]);
+}
+
 void* ftCommonDataAccesser::getWeaponData32(ftKind kind, bool* resourceGroup) const
 {
     return lbl_27_bss_3210[Fighter_Pikachu].data->extendParam[7];
+}
+
+template <>
+const wnPikachuCloudData* ftCommonDataAccesser::getWeaponData<wnPikachuCloudData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x9C)
+    return static_cast<const wnPikachuCloudData*>(lbl_27_bss_3210[Fighter_Pikachu].data->extendParam[8]);
+}
+
+template <>
+const wnPikachuVortexData* ftCommonDataAccesser::getWeaponData<wnPikachuVortexData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA0)
+    return static_cast<const wnPikachuVortexData*>(lbl_27_bss_3210[Fighter_Pikachu].data->extendParam[9]);
 }
 
 void* ftCommonDataAccesser::getWeaponData38(ftKind kind, bool* resourceGroup) const
@@ -318,6 +436,41 @@ void* ftCommonDataAccesser::getWeaponData42(ftKind kind, bool* resourceGroup) co
 void* ftCommonDataAccesser::getWeaponData43(ftKind kind, bool* resourceGroup) const
 {
     return lbl_27_bss_3210[Fighter_PokeTrainer].data->extendParam[5];
+}
+
+template <>
+const wnZeldaDeinData* ftCommonDataAccesser::getWeaponData<wnZeldaDeinData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x94)
+    return static_cast<const wnZeldaDeinData*>(lbl_27_bss_3210[Fighter_Zelda].data->extendParam[6]);
+}
+
+template <>
+const wnZeldaDeinSData* ftCommonDataAccesser::getWeaponData<wnZeldaDeinSData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x98)
+    return static_cast<const wnZeldaDeinSData*>(lbl_27_bss_3210[Fighter_Zelda].data->extendParam[7]);
+}
+
+template <>
+const wnZeldaLightingBowData* ftCommonDataAccesser::getWeaponData<wnZeldaLightingBowData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x9C)
+    return static_cast<const wnZeldaLightingBowData*>(lbl_27_bss_3210[Fighter_Zelda].data->extendParam[8]);
+}
+
+template <>
+const wnZeldaLightingBowArrowData* ftCommonDataAccesser::getWeaponData<wnZeldaLightingBowArrowData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA0)
+    return static_cast<const wnZeldaLightingBowArrowData*>(lbl_27_bss_3210[Fighter_Zelda].data->extendParam[9]);
+}
+
+template <>
+const wnFoxIllusionData* ftCommonDataAccesser::getWeaponData<wnFoxIllusionData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA4)
+    return static_cast<const wnFoxIllusionData*>(lbl_27_bss_3210[Fighter_Fox].data->extendParam[10]);
 }
 
 void* ftCommonDataAccesser::getWeaponData91(ftKind kind, bool* resourceGroup) const
@@ -388,6 +541,13 @@ void* ftCommonDataAccesser::getParamSamusSpecialLw(ftKind kind) const
     }
 }
 
+template <>
+const wnSamusBombData* ftCommonDataAccesser::getWeaponData<wnSamusBombData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA4)
+    return static_cast<const wnSamusBombData*>(lbl_27_bss_3210[Fighter_Samus].data->extendParam[10]);
+}
+
 void* ftCommonDataAccesser::getParamSamusSpecialS(ftKind kind) const
 {
     switch (kind) {
@@ -398,6 +558,20 @@ void* ftCommonDataAccesser::getParamSamusSpecialS(ftKind kind) const
     }
 }
 
+template <>
+const wnSamusMissileData* ftCommonDataAccesser::getWeaponData<wnSamusMissileData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xAC)
+    return static_cast<const wnSamusMissileData*>(lbl_27_bss_3210[Fighter_Samus].data->extendParam[12]);
+}
+
+template <>
+const wnSamusSuperMissileData* ftCommonDataAccesser::getWeaponData<wnSamusSuperMissileData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xCC)
+    return static_cast<const wnSamusSuperMissileData*>(lbl_27_bss_3210[Fighter_Samus].data->extendParam[20]);
+}
+
 void* ftCommonDataAccesser::getParamSamusFinal(ftKind kind) const
 {
     switch (kind) {
@@ -406,6 +580,27 @@ void* ftCommonDataAccesser::getParamSamusFinal(ftKind kind) const
     default:
         return NULL;
     }
+}
+
+template <>
+const wnSamusLaserData* ftCommonDataAccesser::getWeaponData<wnSamusLaserData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xB4)
+    return static_cast<const wnSamusLaserData*>(lbl_27_bss_3210[Fighter_Samus].data->extendParam[14]);
+}
+
+template <>
+const wnSamusLaser2Data* ftCommonDataAccesser::getWeaponData<wnSamusLaser2Data>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xBC)
+    return static_cast<const wnSamusLaser2Data*>(lbl_27_bss_3210[Fighter_Samus].data->extendParam[16]);
+}
+
+template <>
+const wnSamusGunData* ftCommonDataAccesser::getWeaponData<wnSamusGunData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xC4)
+    return static_cast<const wnSamusGunData*>(lbl_27_bss_3210[Fighter_Samus].data->extendParam[18]);
 }
 
 void* ftCommonDataAccesser::getWeaponData121(ftKind kind, bool* resourceGroup) const
@@ -494,7 +689,62 @@ void* ftCommonDataAccesser::getGKoopaBreathParam(ftKind kind) const
     }
 }
 
+template <>
+const wnDonkeyBarrelCongaData* ftCommonDataAccesser::getWeaponData<wnDonkeyBarrelCongaData>(int kind, bool* resourceGroup) const
+{
+    return static_cast<const wnDonkeyBarrelCongaData*>(lbl_27_bss_3210[Fighter_Donkey].data->extendParam[5]);
+}
+
+template <>
+const wnDonkeySoundEffectData* ftCommonDataAccesser::getWeaponData<wnDonkeySoundEffectData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x94)
+    return static_cast<const wnDonkeySoundEffectData*>(lbl_27_bss_3210[Fighter_Donkey].data->extendParam[6]);
+}
+
+template <>
+const wnGameWatchRescueData* ftCommonDataAccesser::getWeaponData<wnGameWatchRescueData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x98)
+    return static_cast<const wnGameWatchRescueData*>(lbl_27_bss_3210[Fighter_GameWatch].data->extendParam[7]);
+}
+
+template <>
+const wnGameWatchParachuteData* ftCommonDataAccesser::getWeaponData<wnGameWatchParachuteData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x9C)
+    return static_cast<const wnGameWatchParachuteData*>(lbl_27_bss_3210[Fighter_GameWatch].data->extendParam[8]);
+}
+
+template <>
+const wnGameWatchPanelData* ftCommonDataAccesser::getWeaponData<wnGameWatchPanelData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA0)
+    return static_cast<const wnGameWatchPanelData*>(lbl_27_bss_3210[Fighter_GameWatch].data->extendParam[9]);
+}
+
+template <>
+const wnGameWatchOilData* ftCommonDataAccesser::getWeaponData<wnGameWatchOilData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA4)
+    return static_cast<const wnGameWatchOilData*>(lbl_27_bss_3210[Fighter_GameWatch].data->extendParam[10]);
+}
+
+template <>
+const wnGameWatchOctopusData* ftCommonDataAccesser::getWeaponData<wnGameWatchOctopusData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA8)
+    return static_cast<const wnGameWatchOctopusData*>(lbl_27_bss_3210[Fighter_GameWatch].data->extendParam[11]);
+}
+
 const wnGameWatchNormalWeaponData* ftCommonDataAccesser::getGameWatchNormalWeaponData() const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xAC)
+    return static_cast<const wnGameWatchNormalWeaponData*>(lbl_27_bss_3210[Fighter_GameWatch].data->extendParam[12]);
+}
+
+template <>
+const wnGameWatchNormalWeaponData* ftCommonDataAccesser::getWeaponData<wnGameWatchNormalWeaponData>(int kind, bool* resourceGroup) const
 {
     // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xAC)
     return static_cast<const wnGameWatchNormalWeaponData*>(lbl_27_bss_3210[Fighter_GameWatch].data->extendParam[12]);
@@ -546,6 +796,13 @@ const ftLucarioAuraBallParam* ftCommonDataAccesser::getLucarioAuraBallParam(int 
     case Fighter_Kirby:
         return static_cast<const ftLucarioAuraBallParam*>(lbl_27_bss_3210[Fighter_Kirby].data->extendParam[35]);
     }
+}
+
+template <>
+const wnLucarioQigongData* ftCommonDataAccesser::getWeaponData<wnLucarioQigongData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA4)
+    return static_cast<const wnLucarioQigongData*>(lbl_27_bss_3210[Fighter_Lucario].data->extendParam[10]);
 }
 
 float* ftCommonDataAccesser::getLinkBowParam(int kind) const
@@ -614,6 +871,76 @@ const wnFoxLandMasterShellData* ftCommonDataAccesser::getWeaponData<wnFoxLandMas
 }
 
 template <>
+const wnFalcoIllusionData* ftCommonDataAccesser::getWeaponData<wnFalcoIllusionData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x9C)
+    return static_cast<const wnFalcoIllusionData*>(lbl_27_bss_3210[Fighter_Falco].data->extendParam[8]);
+}
+
+template <>
+const wnWolfIllusionData* ftCommonDataAccesser::getWeaponData<wnWolfIllusionData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA4)
+    return static_cast<const wnWolfIllusionData*>(lbl_27_bss_3210[Fighter_Wolf].data->extendParam[10]);
+}
+
+template <>
+const wnDededeStarData* ftCommonDataAccesser::getWeaponData<wnDededeStarData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x9C)
+    return static_cast<const wnDededeStarData*>(lbl_27_bss_3210[Fighter_Dedede].data->extendParam[8]);
+}
+
+template <>
+const wnDededeJethammerData* ftCommonDataAccesser::getWeaponData<wnDededeJethammerData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA4)
+    return static_cast<const wnDededeJethammerData*>(lbl_27_bss_3210[Fighter_Dedede].data->extendParam[10]);
+}
+
+template <>
+const wnDededeWaddledooBeamData* ftCommonDataAccesser::getWeaponData<wnDededeWaddledooBeamData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x94)
+    return static_cast<const wnDededeWaddledooBeamData*>(lbl_27_bss_3210[Fighter_Dedede].data->extendParam[6]);
+}
+
+template <>
+const wnDededeFollowerData* ftCommonDataAccesser::getWeaponData<wnDededeFollowerData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xB4)
+    return static_cast<const wnDededeFollowerData*>(lbl_27_bss_3210[Fighter_Dedede].data->extendParam[14]);
+}
+
+template <>
+const wnDiddyBarrelData* ftCommonDataAccesser::getWeaponData<wnDiddyBarrelData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x9C)
+    return static_cast<const wnDiddyBarrelData*>(lbl_27_bss_3210[Fighter_Diddy].data->extendParam[8]);
+}
+
+template <>
+const wnDiddyPeanutsData* ftCommonDataAccesser::getWeaponData<wnDiddyPeanutsData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA4)
+    return static_cast<const wnDiddyPeanutsData*>(lbl_27_bss_3210[Fighter_Diddy].data->extendParam[10]);
+}
+
+template <>
+const wnDiddyExplosionData* ftCommonDataAccesser::getWeaponData<wnDiddyExplosionData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xAC)
+    return static_cast<const wnDiddyExplosionData*>(lbl_27_bss_3210[Fighter_Diddy].data->extendParam[12]);
+}
+
+template <>
+const wnIkeSwordData* ftCommonDataAccesser::getWeaponData<wnIkeSwordData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x98)
+    return static_cast<const wnIkeSwordData*>(lbl_27_bss_3210[Fighter_Ike].data->extendParam[7]);
+}
+
+template <>
 const wnLinkBowData* ftCommonDataAccesser::getWeaponData<wnLinkBowData>(int kind, bool* resourceGroup) const
 {
     if (kind == Fighter_Kirby) {
@@ -678,6 +1005,20 @@ const wnToonLinkBowArrowData* ftCommonDataAccesser::getWeaponData<wnToonLinkBowA
 }
 
 template <>
+const wnCaptainBlueFalconData* ftCommonDataAccesser::getWeaponData<wnCaptainBlueFalconData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x94)
+    return static_cast<const wnCaptainBlueFalconData*>(lbl_27_bss_3210[Fighter_Captain].data->extendParam[6]);
+}
+
+template <>
+const wnCaptainFinalBgData* ftCommonDataAccesser::getWeaponData<wnCaptainFinalBgData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x98)
+    return static_cast<const wnCaptainFinalBgData*>(lbl_27_bss_3210[Fighter_Captain].data->extendParam[7]);
+}
+
+template <>
 const wnYoshiTamagoData* ftCommonDataAccesser::getWeaponData<wnYoshiTamagoData>(int kind, bool* resourceGroup) const
 {
     switch (kind) {
@@ -691,6 +1032,40 @@ const wnYoshiTamagoData* ftCommonDataAccesser::getWeaponData<wnYoshiTamagoData>(
     default:
         return NULL;
     }
+}
+
+template <>
+const wnPikminPikminData* ftCommonDataAccesser::getWeaponData<wnPikminPikminData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA4)
+    return static_cast<const wnPikminPikminData*>(lbl_27_bss_3210[Fighter_Pikmin].data->extendParam[10]);
+}
+
+template <>
+const wnPikminDolfinData* ftCommonDataAccesser::getWeaponData<wnPikminDolfinData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xA8)
+    return static_cast<const wnPikminDolfinData*>(lbl_27_bss_3210[Fighter_Pikmin].data->extendParam[11]);
+}
+
+template <>
+const wnPikminChainData* ftCommonDataAccesser::getWeaponData<wnPikminChainData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0xAC)
+    return static_cast<const wnPikminChainData*>(lbl_27_bss_3210[Fighter_Pikmin].data->extendParam[12]);
+}
+
+template <>
+const wnSZerosuitParalyzerData* ftCommonDataAccesser::getWeaponData<wnSZerosuitParalyzerData>(int kind, bool* resourceGroup) const
+{
+    return static_cast<const wnSZerosuitParalyzerData*>(lbl_27_bss_3210[Fighter_SZeroSuit].data->extendParam[4]);
+}
+
+template <>
+const wnSZerosuitWhipData* ftCommonDataAccesser::getWeaponData<wnSZerosuitWhipData>(int kind, bool* resourceGroup) const
+{
+    // HYPOTHESIS: ftData's declared extendParam array is shorter than the slot read here (0x94)
+    return static_cast<const wnSZerosuitWhipData*>(lbl_27_bss_3210[Fighter_SZeroSuit].data->extendParam[6]);
 }
 
 template <>

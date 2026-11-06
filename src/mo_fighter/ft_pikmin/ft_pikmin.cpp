@@ -140,10 +140,6 @@ struct ftPikminArticleBuildInfo : wnArticleBuildInfo {
     }
 };
 
-// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
-extern "C" void* fn_27_148B80(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148B94(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148BA8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 template <class W> struct ftPikminArticleTraits;
 #define FT_PIKMIN_TRAITS(W, DATA, ID, GETTER) \
@@ -151,13 +147,13 @@ template <class W> struct ftPikminArticleTraits;
         enum { ArticleId = ID }; \
         static const DATA* getData() { \
             ftPikminArticleDataTag tag; \
-            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Pikmin, &tag.m_resourceGroup)); \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Pikmin, &tag.m_resourceGroup)); \
         } \
     };
 
-FT_PIKMIN_TRAITS(wnPikminPikmin, wnPikminPikminData, 0, fn_27_148B80)
-FT_PIKMIN_TRAITS(wnPikminDolfin, wnPikminDolfinData, 1, fn_27_148B94)
-FT_PIKMIN_TRAITS(wnPikminChain, wnPikminChainData, 2, fn_27_148BA8)
+FT_PIKMIN_TRAITS(wnPikminPikmin, wnPikminPikminData, 0, getWeaponData<wnPikminPikminData>)
+FT_PIKMIN_TRAITS(wnPikminDolfin, wnPikminDolfinData, 1, getWeaponData<wnPikminDolfinData>)
+FT_PIKMIN_TRAITS(wnPikminChain, wnPikminChainData, 2, getWeaponData<wnPikminChainData>)
 
 // Every article of the fighter is built by this constructor from the data of the fighter kind.
 template <class W>

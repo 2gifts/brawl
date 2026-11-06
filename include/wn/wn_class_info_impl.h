@@ -18,7 +18,6 @@ extern "C" void* fn_27_148620(const ftCommonDataAccesser* accesser, s32 subKind,
 extern "C" void* fn_27_1486C8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1492F8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1490FC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148BBC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_149844(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_14959C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148E54(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
@@ -107,7 +106,7 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
     return g_ftCommonDataAccesser.getWeaponData<wnToonLinkBowArrowData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnSZerosuitParalyzer*) {
-    return fn_27_148BBC(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnSZerosuitParalyzerData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnSheikNeedle*) {
     return g_ftCommonDataAccesser.getWeaponData<wnSheikNeedleData>(subKind, resourceGroup);

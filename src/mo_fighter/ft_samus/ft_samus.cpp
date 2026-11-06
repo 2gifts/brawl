@@ -133,12 +133,6 @@ struct ftSamusArticleBuildInfo : wnArticleBuildInfo {
 
 // The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
 extern "C" void* fn_27_1492F8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_14939C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1493D8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_149428(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_14943C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_149450(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1493EC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_149464(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 template <class W> struct ftSamusArticleTraits;
@@ -150,14 +144,22 @@ template <class W> struct ftSamusArticleTraits;
             return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Samus, &tag.m_resourceGroup)); \
         } \
     };
+#define FT_SAMUS_TRAITS_MEMBER(W, DATA, ID, GETTER) \
+    template <> struct ftSamusArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftSamusArticleDataTag tag; \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Samus, &tag.m_resourceGroup)); \
+        } \
+    };
 
 FT_SAMUS_TRAITS(wnSamusCShot, wnSamusCShotData, 0, fn_27_1492F8)
-FT_SAMUS_TRAITS(wnSamusBomb, wnSamusBombData, 1, fn_27_14939C)
-FT_SAMUS_TRAITS(wnSamusMissile, wnSamusMissileData, 2, fn_27_1493D8)
-FT_SAMUS_TRAITS(wnSamusLaser, wnSamusLaserData, 3, fn_27_149428)
-FT_SAMUS_TRAITS(wnSamusLaser2, wnSamusLaser2Data, 4, fn_27_14943C)
-FT_SAMUS_TRAITS(wnSamusGun, wnSamusGunData, 5, fn_27_149450)
-FT_SAMUS_TRAITS(wnSamusSuperMissile, wnSamusSuperMissileData, 6, fn_27_1493EC)
+FT_SAMUS_TRAITS_MEMBER(wnSamusBomb, wnSamusBombData, 1, getWeaponData<wnSamusBombData>)
+FT_SAMUS_TRAITS_MEMBER(wnSamusMissile, wnSamusMissileData, 2, getWeaponData<wnSamusMissileData>)
+FT_SAMUS_TRAITS_MEMBER(wnSamusLaser, wnSamusLaserData, 3, getWeaponData<wnSamusLaserData>)
+FT_SAMUS_TRAITS_MEMBER(wnSamusLaser2, wnSamusLaser2Data, 4, getWeaponData<wnSamusLaser2Data>)
+FT_SAMUS_TRAITS_MEMBER(wnSamusGun, wnSamusGunData, 5, getWeaponData<wnSamusGunData>)
+FT_SAMUS_TRAITS_MEMBER(wnSamusSuperMissile, wnSamusSuperMissileData, 6, getWeaponData<wnSamusSuperMissileData>)
 FT_SAMUS_TRAITS(wnSamusGBeam, wnSamusGBeamData, 7, fn_27_149464)
 
 // Every article of the fighter is built by this constructor from the data of the fighter kind.

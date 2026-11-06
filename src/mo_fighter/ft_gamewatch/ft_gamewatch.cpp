@@ -367,12 +367,6 @@ struct ftGameWatchArticleBuildInfo : wnArticleBuildInfo {
 
 // The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
 extern "C" void* fn_27_149844(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1498D8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1498EC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_149900(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_149914(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_149928(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_149950(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 template <class W> struct ftGameWatchArticleTraits;
 #define FT_GAMEWATCH_TRAITS(W, DATA, ID, GETTER) \
@@ -383,14 +377,22 @@ template <class W> struct ftGameWatchArticleTraits;
             return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_GameWatch, &tag.m_resourceGroup)); \
         } \
     };
+#define FT_GAMEWATCH_TRAITS_MEMBER(W, DATA, ID, GETTER) \
+    template <> struct ftGameWatchArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftGameWatchArticleDataTag tag; \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_GameWatch, &tag.m_resourceGroup)); \
+        } \
+    };
 
 FT_GAMEWATCH_TRAITS(wnGameWatchSausage, wnGameWatchSausageData, 0, fn_27_149844)
-FT_GAMEWATCH_TRAITS(wnGameWatchRescue, wnGameWatchRescueData, 1, fn_27_1498D8)
-FT_GAMEWATCH_TRAITS(wnGameWatchParachute, wnGameWatchParachuteData, 2, fn_27_1498EC)
-FT_GAMEWATCH_TRAITS(wnGameWatchPanel, wnGameWatchPanelData, 3, fn_27_149900)
-FT_GAMEWATCH_TRAITS(wnGameWatchOil, wnGameWatchOilData, 4, fn_27_149914)
-FT_GAMEWATCH_TRAITS(wnGameWatchOctopus, wnGameWatchOctopusData, 5, fn_27_149928)
-FT_GAMEWATCH_TRAITS(wnGameWatchNormalWeapon, wnGameWatchNormalWeaponData, 6, fn_27_149950)
+FT_GAMEWATCH_TRAITS_MEMBER(wnGameWatchRescue, wnGameWatchRescueData, 1, getWeaponData<wnGameWatchRescueData>)
+FT_GAMEWATCH_TRAITS_MEMBER(wnGameWatchParachute, wnGameWatchParachuteData, 2, getWeaponData<wnGameWatchParachuteData>)
+FT_GAMEWATCH_TRAITS_MEMBER(wnGameWatchPanel, wnGameWatchPanelData, 3, getWeaponData<wnGameWatchPanelData>)
+FT_GAMEWATCH_TRAITS_MEMBER(wnGameWatchOil, wnGameWatchOilData, 4, getWeaponData<wnGameWatchOilData>)
+FT_GAMEWATCH_TRAITS_MEMBER(wnGameWatchOctopus, wnGameWatchOctopusData, 5, getWeaponData<wnGameWatchOctopusData>)
+FT_GAMEWATCH_TRAITS_MEMBER(wnGameWatchNormalWeapon, wnGameWatchNormalWeaponData, 6, getWeaponData<wnGameWatchNormalWeaponData>)
 
 // Every article of the fighter is built by this constructor from the data of the fighter kind.
 template <class W>

@@ -123,6 +123,59 @@ struct wnToonLinkBowArrowData;
 struct wnYoshiTamagoData;
 struct wnSheikNeedleData;
 struct wnFoxLandMasterShellData;
+struct wnSnakeMineData;
+struct wnSnakeTrenchMortarData;
+struct wnSnakeRpg7Data;
+struct wnSnakeCypherData;
+struct wnSnakeC4Data;
+struct wnSnakeC4SwitchData;
+struct wnSnakeNikitaData;
+struct wnSnakeLadderData;
+struct wnSnakeRgb6Data;
+struct wnSnakeRgb6SightData;
+struct wnSnakeRgb6ClipData;
+struct wnSnakeRgb6BulletData;
+struct wnPikachuCloudData;
+struct wnPikachuVortexData;
+struct wnPokeLizardonRockData;
+struct wnPokeLizardonRockStoneData;
+struct wnZeldaDeinData;
+struct wnZeldaDeinSData;
+struct wnZeldaLightingBowData;
+struct wnZeldaLightingBowArrowData;
+struct wnFoxIllusionData;
+struct wnFalcoIllusionData;
+struct wnWolfIllusionData;
+struct wnDededeStarData;
+struct wnDededeJethammerData;
+struct wnDededeWaddledooBeamData;
+struct wnDededeFollowerData;
+struct wnDiddyBarrelData;
+struct wnDiddyPeanutsData;
+struct wnDiddyExplosionData;
+struct wnIkeSwordData;
+struct wnPikminPikminData;
+struct wnPikminDolfinData;
+struct wnPikminChainData;
+struct wnSZerosuitParalyzerData;
+struct wnSZerosuitWhipData;
+struct wnSZerosuitArmorData;
+struct wnSamusBombData;
+struct wnSamusMissileData;
+struct wnSamusSuperMissileData;
+struct wnSamusLaserData;
+struct wnSamusLaser2Data;
+struct wnSamusGunData;
+struct wnLucarioQigongData;
+struct wnDonkeyBarrelCongaData;
+struct wnDonkeySoundEffectData;
+struct wnGameWatchRescueData;
+struct wnGameWatchParachuteData;
+struct wnGameWatchPanelData;
+struct wnGameWatchOilData;
+struct wnGameWatchOctopusData;
+struct wnCaptainBlueFalconData;
+struct wnCaptainFinalBgData;
 
 // HYPOTHESIS: leading flag word of a common fighter status's data (the bit with mask 0x8 marks statuses that cannot be trodden on).
 struct ftStatusFlagData {
@@ -243,6 +296,115 @@ template <>
 const wnSheikNeedleData* ftCommonDataAccesser::getWeaponData<wnSheikNeedleData>(int kind, bool* resourceGroup) const;
 template <>
 const wnFoxLandMasterShellData* ftCommonDataAccesser::getWeaponData<wnFoxLandMasterShellData>(int kind, bool* resourceGroup) const;
+
+template <>
+const wnSnakeMineData* ftCommonDataAccesser::getWeaponData<wnSnakeMineData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSnakeTrenchMortarData* ftCommonDataAccesser::getWeaponData<wnSnakeTrenchMortarData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSnakeRpg7Data* ftCommonDataAccesser::getWeaponData<wnSnakeRpg7Data>(int kind, bool* resourceGroup) const;
+template <>
+const wnSnakeCypherData* ftCommonDataAccesser::getWeaponData<wnSnakeCypherData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSnakeC4Data* ftCommonDataAccesser::getWeaponData<wnSnakeC4Data>(int kind, bool* resourceGroup) const;
+template <>
+const wnSnakeC4SwitchData* ftCommonDataAccesser::getWeaponData<wnSnakeC4SwitchData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSnakeNikitaData* ftCommonDataAccesser::getWeaponData<wnSnakeNikitaData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSnakeLadderData* ftCommonDataAccesser::getWeaponData<wnSnakeLadderData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSnakeRgb6Data* ftCommonDataAccesser::getWeaponData<wnSnakeRgb6Data>(int kind, bool* resourceGroup) const;
+template <>
+const wnSnakeRgb6SightData* ftCommonDataAccesser::getWeaponData<wnSnakeRgb6SightData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSnakeRgb6ClipData* ftCommonDataAccesser::getWeaponData<wnSnakeRgb6ClipData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSnakeRgb6BulletData* ftCommonDataAccesser::getWeaponData<wnSnakeRgb6BulletData>(int kind, bool* resourceGroup) const;
+template <>
+const wnPikachuCloudData* ftCommonDataAccesser::getWeaponData<wnPikachuCloudData>(int kind, bool* resourceGroup) const;
+template <>
+const wnPikachuVortexData* ftCommonDataAccesser::getWeaponData<wnPikachuVortexData>(int kind, bool* resourceGroup) const;
+template <>
+const wnPokeLizardonRockData* ftCommonDataAccesser::getWeaponData<wnPokeLizardonRockData>(int kind, bool* resourceGroup) const;
+template <>
+const wnPokeLizardonRockStoneData* ftCommonDataAccesser::getWeaponData<wnPokeLizardonRockStoneData>(int kind, bool* resourceGroup) const;
+template <>
+const wnZeldaDeinData* ftCommonDataAccesser::getWeaponData<wnZeldaDeinData>(int kind, bool* resourceGroup) const;
+template <>
+const wnZeldaDeinSData* ftCommonDataAccesser::getWeaponData<wnZeldaDeinSData>(int kind, bool* resourceGroup) const;
+template <>
+const wnZeldaLightingBowData* ftCommonDataAccesser::getWeaponData<wnZeldaLightingBowData>(int kind, bool* resourceGroup) const;
+template <>
+const wnZeldaLightingBowArrowData* ftCommonDataAccesser::getWeaponData<wnZeldaLightingBowArrowData>(int kind, bool* resourceGroup) const;
+template <>
+const wnFoxIllusionData* ftCommonDataAccesser::getWeaponData<wnFoxIllusionData>(int kind, bool* resourceGroup) const;
+template <>
+const wnFalcoIllusionData* ftCommonDataAccesser::getWeaponData<wnFalcoIllusionData>(int kind, bool* resourceGroup) const;
+template <>
+const wnWolfIllusionData* ftCommonDataAccesser::getWeaponData<wnWolfIllusionData>(int kind, bool* resourceGroup) const;
+template <>
+const wnDededeStarData* ftCommonDataAccesser::getWeaponData<wnDededeStarData>(int kind, bool* resourceGroup) const;
+template <>
+const wnDededeJethammerData* ftCommonDataAccesser::getWeaponData<wnDededeJethammerData>(int kind, bool* resourceGroup) const;
+template <>
+const wnDededeWaddledooBeamData* ftCommonDataAccesser::getWeaponData<wnDededeWaddledooBeamData>(int kind, bool* resourceGroup) const;
+template <>
+const wnDededeFollowerData* ftCommonDataAccesser::getWeaponData<wnDededeFollowerData>(int kind, bool* resourceGroup) const;
+template <>
+const wnDiddyBarrelData* ftCommonDataAccesser::getWeaponData<wnDiddyBarrelData>(int kind, bool* resourceGroup) const;
+template <>
+const wnDiddyPeanutsData* ftCommonDataAccesser::getWeaponData<wnDiddyPeanutsData>(int kind, bool* resourceGroup) const;
+template <>
+const wnDiddyExplosionData* ftCommonDataAccesser::getWeaponData<wnDiddyExplosionData>(int kind, bool* resourceGroup) const;
+template <>
+const wnIkeSwordData* ftCommonDataAccesser::getWeaponData<wnIkeSwordData>(int kind, bool* resourceGroup) const;
+template <>
+const wnPikminPikminData* ftCommonDataAccesser::getWeaponData<wnPikminPikminData>(int kind, bool* resourceGroup) const;
+template <>
+const wnPikminDolfinData* ftCommonDataAccesser::getWeaponData<wnPikminDolfinData>(int kind, bool* resourceGroup) const;
+template <>
+const wnPikminChainData* ftCommonDataAccesser::getWeaponData<wnPikminChainData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSZerosuitParalyzerData* ftCommonDataAccesser::getWeaponData<wnSZerosuitParalyzerData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSZerosuitWhipData* ftCommonDataAccesser::getWeaponData<wnSZerosuitWhipData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSZerosuitArmorData* ftCommonDataAccesser::getWeaponData<wnSZerosuitArmorData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSamusBombData* ftCommonDataAccesser::getWeaponData<wnSamusBombData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSamusMissileData* ftCommonDataAccesser::getWeaponData<wnSamusMissileData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSamusSuperMissileData* ftCommonDataAccesser::getWeaponData<wnSamusSuperMissileData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSamusLaserData* ftCommonDataAccesser::getWeaponData<wnSamusLaserData>(int kind, bool* resourceGroup) const;
+template <>
+const wnSamusLaser2Data* ftCommonDataAccesser::getWeaponData<wnSamusLaser2Data>(int kind, bool* resourceGroup) const;
+template <>
+const wnSamusGunData* ftCommonDataAccesser::getWeaponData<wnSamusGunData>(int kind, bool* resourceGroup) const;
+template <>
+const wnLucarioQigongData* ftCommonDataAccesser::getWeaponData<wnLucarioQigongData>(int kind, bool* resourceGroup) const;
+template <>
+const wnDonkeyBarrelCongaData* ftCommonDataAccesser::getWeaponData<wnDonkeyBarrelCongaData>(int kind, bool* resourceGroup) const;
+template <>
+const wnDonkeySoundEffectData* ftCommonDataAccesser::getWeaponData<wnDonkeySoundEffectData>(int kind, bool* resourceGroup) const;
+template <>
+const wnGameWatchRescueData* ftCommonDataAccesser::getWeaponData<wnGameWatchRescueData>(int kind, bool* resourceGroup) const;
+template <>
+const wnGameWatchParachuteData* ftCommonDataAccesser::getWeaponData<wnGameWatchParachuteData>(int kind, bool* resourceGroup) const;
+template <>
+const wnGameWatchPanelData* ftCommonDataAccesser::getWeaponData<wnGameWatchPanelData>(int kind, bool* resourceGroup) const;
+template <>
+const wnGameWatchOilData* ftCommonDataAccesser::getWeaponData<wnGameWatchOilData>(int kind, bool* resourceGroup) const;
+template <>
+const wnGameWatchOctopusData* ftCommonDataAccesser::getWeaponData<wnGameWatchOctopusData>(int kind, bool* resourceGroup) const;
+template <>
+const wnGameWatchNormalWeaponData* ftCommonDataAccesser::getWeaponData<wnGameWatchNormalWeaponData>(int kind, bool* resourceGroup) const;
+template <>
+const wnCaptainBlueFalconData* ftCommonDataAccesser::getWeaponData<wnCaptainBlueFalconData>(int kind, bool* resourceGroup) const;
+template <>
+const wnCaptainFinalBgData* ftCommonDataAccesser::getWeaponData<wnCaptainFinalBgData>(int kind, bool* resourceGroup) const;
 
 extern ftCommonData g_ftCommonData;
 extern ftCommonDataAccesser g_ftCommonDataAccesser;
