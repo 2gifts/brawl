@@ -39,6 +39,9 @@
 #include <havok/hkContinuousSimulation.h>
 #include <havok/hkDefaultToiResourceMgr.h>
 #include <havok/hkWorld.h>
+#include <havok/hkWorldCallbackUtil.h>
+#include <havok/hkMonitorStream.h>
+#include <havok/hkCollisionInput.h>
 
 hkContinuousSimulation::hkContinuousSimulation(hkWorld* world) : hkSimulation(world) {
     m_unk0C = 1;
@@ -51,6 +54,72 @@ hkContinuousSimulation::~hkContinuousSimulation() {
     if (m_toiResourceMgr != 0) {
         delete m_toiResourceMgr;
     }
+}
+
+// Handles the pending time-of-impact events in time order, up to minTime: each step takes the earliest event out
+// of the list, moves the time to it and simulates it with the world locked. Stops with result 3 when the memory
+// system ran out during an event.
+// HYPOTHESIS: the meaning of result 3 (the step failed inside the TOI pass); m_unk38 counts the handled events.
+int hkContinuousSimulation::handleAllToisTill(hkReal minTime) {
+    while (true) {
+        hkReal earliestTime = minTime;
+        int earliest = -1;
+        for (int i = 0; i < m_toiEvents.getSize(); i++) {
+            if (m_toiEvents[i].unk00 < earliestTime) {
+                earliest = i;
+                earliestTime = m_toiEvents[i].unk00;
+            }
+        }
+        if (earliest < 0) {
+            return 0;
+        }
+        hkToiEvent event = m_toiEvents[earliest];
+        m_toiEvents.removeAt(earliest);
+        m_unk10 = event.unk00;
+        hkStepInfo stepInfo(m_unk10, m_unk14);
+        m_world->m_dynamicsStepInfo = stepInfo;
+        m_world->m_collisionInput->m_stepInfo = stepInfo;
+        m_world->m_lockCount++;
+        simulateToi(m_world, event, m_unk18);
+        m_world->unlockAndAttemptToExecutePendingOperations();
+        m_unk38++;
+        if (hkMemory::getInstance().unk4 == 1) {
+            return 3;
+        }
+    }
+}
+
+// Advances the time like hkSimulation::advanceTime, after re-colliding a failed step and handling the pending
+// time-of-impact events up to the time to advance to (both inside the "Simulate" timer). A failure in either
+// returns its result; a failed TOI pass is also kept as the step result.
+int hkContinuousSimulation::advanceTime() {
+    {
+        HK_TIME_CODE_BLOCK("Simulate");
+        if (m_unk24 != 0) {
+            int result = reCollideAfterStepFailure();
+            if (result != 0) {
+                return result;
+            }
+        }
+        hkReal timeToAdvanceTo = snapSimulateTimeAndGetTimeToAdvanceTo();
+        if (m_toiEvents.getSize() != 0) {
+            int result = handleAllToisTill(timeToAdvanceTo);
+            if (result != 0) {
+                m_unk24 = result;
+                return result;
+            }
+        }
+        m_unk10 = timeToAdvanceTo;
+    }
+    if (m_unk10 >= m_unk1C) {
+        if (m_world->m_postSimulationListeners.m_size != 0) {
+            HK_TIMER_BEGIN("PostSimCb");
+            hkWorldCallbackUtil::firePostSimulationCallback(m_world);
+            HK_TIMER_END();
+        }
+    }
+    m_unk24 = 0;
+    return 0;
 }
 
 // Debug-only consistency checks: empty in this build.
@@ -73,7 +142,7 @@ void hkContinuousSimulation::removeCollisionInformationForAgent(const void* agen
         hkToiEvent* events = m_toiEvents.begin();
         if (events[i].unk18 == ((const u32*)agent)[4]) {
             m_toiEvents.m_size--;
-            events[i].copyFrom(events[m_toiEvents.m_size]);
+            events[i] = events[m_toiEvents.m_size];
         }
     }
 }

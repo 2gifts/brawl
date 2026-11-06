@@ -10,27 +10,12 @@ struct hkEntity;
 // Layout from addToiEvent and the removal code. The copy below moves the fields one by one; 0x1C is not copied.
 struct hkToiEvent {
     hkReal unk00;            // 0x00
-    int unk04;               // 0x04
-    int unk08;               // 0x08
+    int unk04[2];            // 0x04
     hkReal unk0C;            // 0x0C
-    int unk10;               // 0x10
-    int unk14;               // 0x14
+    int unk10[2];            // 0x10
     u32 unk18;               // 0x18 (matched against the agent key at 0x10 when an agent's events are removed)
-    int unk1C;               // 0x1C (not copied by copyFrom)
-    hkReal unk20[8];         // 0x20 .. 0x3C (two vectors, copied as floats)
-
-    void copyFrom(const hkToiEvent& src) {
-        unk00 = src.unk00;
-        unk04 = src.unk04;
-        unk08 = src.unk08;
-        unk0C = src.unk0C;
-        unk10 = src.unk10;
-        unk14 = src.unk14;
-        unk18 = src.unk18;
-        for (int i = 0; i < 8; i++) {
-            unk20[i] = src.unk20[i];
-        }
-    }
+    hkVector4 unk20;         // 0x20 (0x1C is alignment padding)
+    hkVector4 unk30;         // 0x30
 };
 
 // Continuous (time-of-impact) simulation (layout partly recovered; tail not recovered yet).
@@ -42,8 +27,16 @@ struct hkContinuousSimulation : hkSimulation {
 
     hkContinuousSimulation(hkWorld* world);
     virtual ~hkContinuousSimulation(); // 0x08
+    virtual int advanceTime(); // 0x1C
+    // Steps the world through one time-of-impact event (vtable 0x40, map: simulateToi, fn_80328124).
+    // HYPOTHESIS: the parameter types (handleAllToisTill passes the world, its stack copy of the event and the
+    // step's delta time).
+    virtual void simulateToi(hkWorld* world, hkToiEvent& event, hkReal physicsDeltaTime); // 0x40
+    // Processes the pending time-of-impact events up to the given time; a non-zero result is a failed step.
+    // HYPOTHESIS: the parameter (advanceTime passes the snapped time to advance to).
+    int handleAllToisTill(hkReal minTime);
 
-    // Debug-only consistency checks; empty in this build. Argument types are HYPOTHESIS (unused).
+    // Debug-only consistency checks (vtable 0x28, 0x30); empty in this build. Argument types are HYPOTHESIS (unused).
     void assertThereIsNoCollisionInformationForEntities(const void* entities);
     void assertThereIsNoCollisionInformationForAgent(const void* agent);
     void warpTime(hkReal dt);

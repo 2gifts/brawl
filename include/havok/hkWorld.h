@@ -36,7 +36,7 @@ struct hkWorld : hkReferencedObject {
     int m_pendingOperationsCount;                                    // 0x78 how many world operations are sitting in the queue
     int m_lockCount;                                // 0x7C incremented around add/remove calls
     int m_unk80;                                    // 0x80 summed with m_lockCount in removePhantom
-    u8 m_unk84;                                     // 0x84 flag: operations are being executed
+    hkBool m_unk84;                                 // 0x84 flag: operations are being executed
     u8 m_unk85;                                     // 0x85 (initialised to 1)
     int m_unk88;                                    // 0x88
     int m_pendingOperationQueueCount;               // 0x8C how many executeAllPending calls are on the stack (starts at 1)
@@ -91,8 +91,10 @@ struct hkWorld : hkReferencedObject {
     // Runs the queued world operations (map name hkWorld__internal_executePendingOperations, fn_802EFE70).
     void internal_executePendingOperations();
     // drop one lock and, if that was the last one and something got queued meanwhile, run the queue
+    // BYTES: the flag goes through hkBool's bool conversion before the negation (hkBool::operator! builds a second
+    // hkBool); in the propagation-off hkContinuousSimulation::handleAllToisTill that gives extsb; neg; or; srwi.
     void unlockAndAttemptToExecutePendingOperations() {
-        if (--m_lockCount == 0 && m_pendingOperationsCount != 0 && !m_unk84) {
+        if (--m_lockCount == 0 && m_pendingOperationsCount != 0 && !(bool)m_unk84) {
             internal_executePendingOperations();
         }
     }

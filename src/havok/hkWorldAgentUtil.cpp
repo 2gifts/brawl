@@ -197,7 +197,7 @@ void hkWorldCallbackUtil::fireIslandActivated(hkWorld* world, hkSimulationIsland
         removeNullListeners(entityList);
     }
     world->m_lockCount--;
-    if (world->m_lockCount == 0 && world->m_pendingOperationsCount != 0 && (s8)world->m_unk84 == 0) {
+    if (world->m_lockCount == 0 && world->m_pendingOperationsCount != 0 && !(bool)world->m_unk84) {
         world->internal_executePendingOperations();
     }
 }
@@ -224,7 +224,7 @@ void hkWorldCallbackUtil::fireIslandDeactivated(hkWorld* world, hkSimulationIsla
         removeNullListeners(entityList);
     }
     world->m_lockCount--;
-    if (world->m_lockCount == 0 && world->m_pendingOperationsCount != 0 && (s8)world->m_unk84 == 0) {
+    if (world->m_lockCount == 0 && world->m_pendingOperationsCount != 0 && !(bool)world->m_unk84) {
         world->internal_executePendingOperations();
     }
 }

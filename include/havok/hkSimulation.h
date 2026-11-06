@@ -62,9 +62,11 @@ struct hkSimulation : hkReferencedObject {
     // the hkBool goes by value (the callers pass the address of a one-byte copy)
     virtual void resetCollisionInformationForEntities(hkEntity** entities, int numEntities, hkWorld* world,
                                                       hkBool flag); // 0x24
-    virtual void unk28();
-    virtual void unk2C();
-    virtual void unk30();
+    // 0x28-0x30 from hkContinuousSimulation's vtable (lbl_80488CF4), which overrides them with its own named
+    // functions. HYPOTHESIS: the argument types (unused, the checks are empty in this build).
+    virtual void assertThereIsNoCollisionInformationForEntities(const void* entities); // 0x28
+    virtual void removeCollisionInformationForAgent(const void* agent);                // 0x2C
+    virtual void assertThereIsNoCollisionInformationForAgent(const void* agent);       // 0x30
     // HYPOTHESIS: the name (hkWorldOperationQueue calls it for the reintegrate-and-recollide batch)
     virtual void reintegrateAndRecollideEntities(hkEntity** entities, int numEntities, hkWorld* world); // 0x34
     virtual void collideInternal(const hkStepInfo& stepInfo); // 0x38
