@@ -171,3 +171,98 @@ void grGimmick::setMaterialAlpha(const char* name, u32 alpha) {
         }
     }
 }
+
+void grGimmick::setPos(Vec3f* pos) {
+    grNodeCallbackData* data = m_calcWorldCallBack.m_nodeCallbackDatas;
+    if (data != NULL) {
+        float x = pos->m_x;
+        float y = pos->m_y;
+        data->m_pos.m_x = x;
+        float z = pos->m_z;
+        data->m_pos.m_y = y;
+        data->m_pos.m_z = z;
+    }
+}
+
+void grGimmick::setRot(Vec3f* rot) {
+    grNodeCallbackData* data = m_calcWorldCallBack.m_nodeCallbackDatas;
+    if (data != NULL) {
+        float x = rot->m_x;
+        float y = rot->m_y;
+        data->m_rot.m_x = x;
+        float z = rot->m_z;
+        data->m_rot.m_y = y;
+        data->m_rot.m_z = z;
+    }
+}
+
+void grGimmick::setScale(Vec3f* scale) {
+    grNodeCallbackData* data = m_calcWorldCallBack.m_nodeCallbackDatas;
+    if (data != NULL) {
+        float x = scale->m_x;
+        float y = scale->m_y;
+        data->m_scale.m_x = x;
+        float z = scale->m_z;
+        data->m_scale.m_y = y;
+        data->m_scale.m_z = z;
+    }
+}
+
+void grGimmick::startup(gfArchive* archive, u32 unk1, gfSceneRoot::LayerType layerType) {
+    Ground::startup(archive, unk1, layerType);
+}
+
+Vec3f grGimmick::getPos() {
+    grNodeCallbackData* data = m_calcWorldCallBack.m_nodeCallbackDatas;
+    if (data != NULL) {
+        if (data->m_flags & 8) {
+            float z = data->m_matrix.m[2][3];
+            float y = data->m_matrix.m[1][3];
+            float x = data->m_matrix.m[0][3];
+            data->m_pos.m_x = x;
+            data->m_pos.m_y = y;
+            data->m_pos.m_z = z;
+        }
+        return m_calcWorldCallBack.m_nodeCallbackDatas->m_pos;
+    }
+    return Vec3f(0.0f, 0.0f, 0.0f);
+}
+
+void grGimmick::setCalcuCallbackRoot(u32 index) {
+    if ((int)m_calcWorldCallBack.m_numNodeCallbackData > 0) {
+        m_calcWorldCallBack.m_nodeCallbackDatas->m_nodeIndex = 0;
+        m_calcWorldCallBack.m_nodeCallbackDatas->m_flags = index;
+    }
+}
+
+void grGimmick::fixedPosition(float deltaFrame) {
+    updataGimmickSE(deltaFrame);
+    updataGimmickEffect(deltaFrame);
+}
+
+void grGimmick::setMatrix(Matrix* matrix) {
+    grNodeCallbackData* data = m_calcWorldCallBack.m_nodeCallbackDatas;
+    if (data != NULL) {
+        data->m_matrix = *matrix;
+    }
+}
+
+void grGimmick::createSimpleEffectData(SimpleEffectData* simpleEffectData, int effectId, const char* nodeName) {
+    u32 nodeIndex = getNodeIndex(0, nodeName);
+    simpleEffectData->m_id = effectId;
+    simpleEffectData->m_repeatFrame = 0;
+    simpleEffectData->m_nodeIndex = nodeIndex;
+    simpleEffectData->m_endFrame = 0;
+    simpleEffectData->m_0xc = 0;
+}
+
+void grGimmick::renderDebug() {
+    gfCameraManager::getManager()->m_cameras[0].setGX();
+}
+
+void grGimmick::startGimmickEffect(u32 index) {
+    if (m_effects[index].m_id != 0) {
+        *(short*)&m_effects[index] = Effect_Info::State_Start; // HYPOTHESIS: halfword store
+        m_effects[index].m_framesActive = 0.0f;
+    }
+}
