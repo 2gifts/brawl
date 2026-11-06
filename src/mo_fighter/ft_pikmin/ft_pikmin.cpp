@@ -791,8 +791,6 @@ void ftPikmin::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* mod
     Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
 }
 
-// Stand-ins for the helpers behind the unit split.
-extern "C" void fn_113_BF8C(Vec2f* a, Vec2f* b, Vec2f* out); // Vec2f::add, out of line in this unit
 
 // Every frame Olimar leaves a new owner info behind him: his position, the way he faces, the condition for the speed he moves
 // with and an option byte. The older infos drift with the movement of the frame (the Pikmin of the line walk to them), the
@@ -805,7 +803,7 @@ void ftPikmin::updatePikmin() {
     Vec2f speed = m_moduleAccesser->getKineticModule().getEnergy(6)->getSpeed();
     Vec2f shift = m_moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(7));
     if (speed.lengthSq() != 0.0f) {
-        fn_113_BF8C(&shift, &(speed - m_moduleAccesser->getGroundModule().getDownMovementSpeed(0)), &shift);
+        shift.add(&(speed - m_moduleAccesser->getGroundModule().getDownMovementSpeed(0)), &shift);
     }
     int condition = ftPikminUtility::getPikminOwnerCondition(m_moduleAccesser, shift.length());
     u8 option = 0;
@@ -822,7 +820,7 @@ void ftPikmin::updatePikmin() {
     if (speed.lengthSq() != 0.0f) {
         int num = getOwnersVector().size();
         for (int i = 1; i < num; i++) {
-            fn_113_BF8C(reinterpret_cast<Vec2f*>(&getOwnersVector().at(i)), &speed, reinterpret_cast<Vec2f*>(&getOwnersVector().at(i)));
+            reinterpret_cast<Vec2f*>(&getOwnersVector().at(i))->add(&speed, reinterpret_cast<Vec2f*>(&getOwnersVector().at(i)));
         }
     }
     m_troops.update(&getOwners());
@@ -870,7 +868,7 @@ extern "C" void __ct__5Vec2fFff(Vec2f* self, float x, float y) {
 
 static inline Vec2f addVec2f(Vec2f& a, Vec2f& b) {
     Vec2f sum;
-    fn_113_BF8C(&a, &b, &sum);
+    a.add(&b, &sum);
     return sum;
 }
 
@@ -1112,9 +1110,9 @@ s32 fn_113_D0AC() { return g_soValueVariation; }
 #define PIKMIN_TROOPS(p) reinterpret_cast<wnPikminPikminTroopsManager*>((p) + 0x1FD08)
 
 // ftPikmin::setTeam: base Fighter::setTeam first, then the troops manager
-void fn_113_C4E0(u8* p, int team, int teamOwner) {
-    reinterpret_cast<Fighter*>(p)->Fighter::setTeam(team, teamOwner);
-    PIKMIN_TROOPS(p)->setTeamAll(team, teamOwner, 0);
+void ftPikmin::setTeam(int team, int teamOwner) {
+    Fighter::setTeam(team, teamOwner);
+    m_troops.setTeamAll(team, teamOwner, 0);
 }
 
 // ftPikmin overrides that forward to StageObject (direct tail calls, not virtual)
@@ -1234,9 +1232,9 @@ void fn_113_FFC8(u8* p, int a1, int a2, int a3) { fn_113_C6B4(p - 0x40, a1, a2, 
 
 // Vec2f helpers (stored as two floats)
 
-void fn_113_BF8C(Vec2f* a, Vec2f* b, Vec2f* out) {
-    out->m_x = a->m_x + b->m_x;
-    out->m_y = a->m_y + b->m_y;
+void Vec2f::add(Vec2f* other, Vec2f* out) {
+    out->m_x = m_x + other->m_x;
+    out->m_y = m_y + other->m_y;
 }
 
 }
