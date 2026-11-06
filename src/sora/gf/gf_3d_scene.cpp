@@ -292,3 +292,124 @@ gfSceneRoot::Layer::~Layer() {
 void gfSceneRoot::layerUpdateFrame(int layer) {
     unk38C[layer].unk4->G3dProc(8, 0, 0);
 }
+
+void gfSceneRoot::renderOpa() {
+}
+
+void gfSceneRoot::renderDebug() {
+}
+
+void gfSceneRoot::updateZoneLightSet(u8 p1, u8 p2) {
+    LightSlot* slot = &m_lightSlots[p1];
+    if (slot->m_unk7 != p2) {
+        slot->m_unk8 = slot->m_unk7;
+        slot->m_unk7 = p2;
+        slot->m_unk9 = 0;
+    }
+}
+
+// HYPOTHESIS: the ScnRoot keeps its LightObj array (0x44 bytes each, first 0x12 reserved) at 0x287C.
+nw4r::g3d::LightObj* gfSceneRoot::getLightObj(u8 p1) {
+    char* lights = *reinterpret_cast<char**>(reinterpret_cast<char*>(unk40) + 0x287C);
+    return reinterpret_cast<nw4r::g3d::LightObj*>(lights + (p1 + 0x12) * 0x44);
+}
+
+// HYPOTHESIS: bytes 0x500 and 0x506 are two copies of the use-copy-FB flag.
+void gfSceneRoot::setUseCopyFB(u8 p1) {
+    struct Byte {
+        u8 m_value : 8;
+    };
+    reinterpret_cast<Byte*>(reinterpret_cast<u8*>(this) + 0x500)->m_value = p1;
+    reinterpret_cast<Byte*>(reinterpret_cast<u8*>(this) + 0x506)->m_value = p1;
+}
+
+void gfSceneRoot::removeInfoCamResAnm() {
+    if (unk5C != NULL) {
+        RemoveAnmScn__Q34nw4r3g3d7ScnRootFv(unk44);
+        unk5C->Destroy();
+    }
+    if (unk50 != 0) {
+        unk50 = 0;
+    }
+    unk5C = NULL;
+}
+
+#include <gf/gf_memory_pool.h>
+#include <gf/gf_loupe.h>
+
+void gfSceneRoot::setInfoCamResAnm(nw4r::g3d::ResAnmScn* anmScn) {
+    if (unk50 != 0) {
+        removeInfoCamResAnm();
+    }
+    if (anmScn->IsValid()) {
+        unk50 = *reinterpret_cast<u32*>(anmScn);
+        MEMAllocator* allocator;
+        if (g_HeapInfos[Heaps::InfoInstance].m_name == NULL) {
+            allocator = gfHeapManager::getMEMAllocator(Heaps::MenuInstance);
+        } else {
+            allocator = gfHeapManager::getMEMAllocator(Heaps::InfoInstance);
+        }
+        u32 size;
+        unk5C = nw4r::g3d::AnmScnRes::Construct(allocator, &size, *anmScn, false);
+        unk44->SetAnmScn(unk5C);
+    }
+}
+
+// HYPOTHESIS: the callee is a helper in this unit that resets the lights and fogs of a ScnRoot.
+extern "C" void fn_8000E5A8(nw4r::g3d::ScnRoot* scnRoot);
+
+void gfSceneRoot::resetScene() {
+    fn_8000E5A8(unk40);
+}
+
+extern "C" nw4r::g3d::ScnGroup* fn_801AB6CC(MEMAllocator* allocator, u32* size, u32 capacity);
+
+gfSceneRoot::Layer::Layer() {
+    unk0 = 0;
+    *reinterpret_cast<u32*>(&unkC) &= 0x00FFFFFF;
+    unk4 = NULL;
+    unkD_7 = 1;
+    unkD_6 = 0;
+    unkD_4 = 0;
+    unk8 = NULL;
+    unkE = 0;
+    unk10 = 0;
+    unk14 = 0;
+    u32 size;
+    unk4 = fn_801AB6CC(gfHeapManager::getMEMAllocator(Heaps::System), &size, 0x140);
+}
+
+// HYPOTHESIS: the LightObj shadow here is empty, so the two LightObj color calls are declared by symbol.
+extern "C" void GetLightColor__Q34nw4r3g3d8LightObjCFP8_GXColor(nw4r::g3d::LightObj* obj, GXColor* color);
+extern "C" void InitLightColor__Q34nw4r3g3d8LightObjF8_GXColor(nw4r::g3d::LightObj* obj, GXColor color);
+
+// HYPOTHESIS: out = from + (to - from) * ratio per color channel (paired singles, u8 quantized).
+void gfSceneRoot::blendLightColor(f32 ratio, nw4r::g3d::LightObj* from, nw4r::g3d::LightObj* to, nw4r::g3d::LightObj* out) {
+    GXColor colorFrom;
+    GXColor colorTo;
+    GXColor colorOut;
+    GetLightColor__Q34nw4r3g3d8LightObjCFP8_GXColor(from, &colorFrom);
+    GetLightColor__Q34nw4r3g3d8LightObjCFP8_GXColor(to, &colorTo);
+    register f32 fr0, fr1, fr2, fr3;
+    register f32 r = ratio;
+    register GXColor* pFrom = &colorFrom;
+    register GXColor* pTo = &colorTo;
+    register GXColor* pOut = &colorOut;
+    asm {
+        psq_l  fr2, 0(pFrom), 0, 2
+        psq_l  fr0, 0(pTo), 0, 2
+        psq_l  fr3, 2(pFrom), 0, 2
+        psq_l  fr1, 2(pTo), 0, 2
+        ps_sub fr0, fr0, fr2
+        ps_sub fr1, fr1, fr3
+        ps_madds0 fr2, fr0, r, fr2
+        ps_madds0 fr3, fr1, r, fr3
+        psq_st fr2, 0(pOut), 0, 2
+        psq_st fr3, 2(pOut), 0, 2
+    }
+    InitLightColor__Q34nw4r3g3d8LightObjF8_GXColor(out, colorOut);
+}
+
+void gfSceneRoot::processFixCamera() {
+    gfLoupe::setup();
+}

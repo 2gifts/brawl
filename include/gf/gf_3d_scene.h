@@ -100,6 +100,7 @@ public:
 
     // HYPOTHESIS: per-layer record (layout from the layer functions; the name is not from the map).
     struct Layer {
+        Layer();
         ~Layer();
         u32 unk0;
         nw4r::g3d::ScnGroup* unk4;
@@ -107,7 +108,8 @@ public:
         u8 unkC;
         u8 unkD_7 : 1;
         u8 unkD_6 : 1;
-        u8 unkD_0 : 6;
+        u8 unkD_4 : 2;
+        u8 unkD_0 : 4;
         u16 unkE;
         u32 unk10;
         u32 unk14;
@@ -192,6 +194,8 @@ public:
     bool add(gfSceneRoot::LayerType lt, nw4r::g3d::ScnMdl* scnMdl);
     bool remove(nw4r::g3d::ScnMdl* scnMdl);
     void layerUpdateFrame(int layer);
+    void resetScene();
+    void blendLightColor(f32 ratio, nw4r::g3d::LightObj* from, nw4r::g3d::LightObj* to, nw4r::g3d::LightObj* out);
 };
 static_assert(sizeof(gfSceneRoot) == 1292, "Class is wrong size!");
 
