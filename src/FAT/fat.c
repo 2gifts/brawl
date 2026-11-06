@@ -2687,3 +2687,144 @@ s32 fn_803C8014(s32 i_handle_idx, int i_setLastDeviceError) {
     }
     return err;
 }
+
+void VFFinalize(void) {
+    if (lbl_805A120C != 0) {
+        OSLockMutex(&lbl_80563200);
+    }
+    if (lbl_805A1208 != 0) {
+        VFSysFinalize();
+        lbl_805A1208 = 0;
+    }
+    if (lbl_805A120C != 0) {
+        OSUnlockMutex(&lbl_80563200);
+    }
+}
+
+s32 fn_803C3ED8(void* info) {
+    s32 err;
+    if (lbl_805A120C != 0) {
+        OSLockMutex(&lbl_80563200);
+    }
+    err = VFSysFileSearchNext(info);
+    VFSysSetLastError(err);
+    if (lbl_805A120C != 0) {
+        OSUnlockMutex(&lbl_80563200);
+    }
+    return err;
+}
+
+s32 fn_803C4054(const s8* i_drive) {
+    s32 err;
+    if (lbl_805A120C != 0) {
+        OSLockMutex(&lbl_80563200);
+    }
+    err = VFSysFormatDrive(dHash_GetArg(i_drive));
+    VFSysSetLastError(err);
+    if (lbl_805A120C != 0) {
+        OSUnlockMutex(&lbl_80563200);
+    }
+    return err;
+}
+
+s32 fn_803C3048(const s8* i_path, u32 i_size) {
+    s32 err;
+    if (lbl_805A120C != 0) {
+        OSLockMutex(&lbl_80563200);
+    }
+    err = VFSysCreatePrfFileNANDFlash(i_path, i_size);
+    if (lbl_805A120C != 0) {
+        OSUnlockMutex(&lbl_80563200);
+    }
+    return err;
+}
+
+s32 fn_803C3B18(const s8* i_path) {
+    s32 handle_idx = -1;
+    s8* path;
+    s32 err;
+
+    if (lbl_805A120C != 0) {
+        OSLockMutex(&lbl_80563200);
+    }
+
+    path = VF_path2handleidx(&handle_idx, i_path);
+    if (path == NULL) {
+        VFSysSetLastError(0xB003);
+        if (lbl_805A120C != 0) {
+            OSUnlockMutex(&lbl_80563200);
+        }
+        return 0xB003;
+    }
+
+    if (handle_idx != -1) {
+        err = VFSysCreateDir(handle_idx, path);
+    } else {
+        err = VFSysCreateDir_current(path);
+    }
+
+    VFSysSetLastError(err);
+    if (lbl_805A120C != 0) {
+        OSUnlockMutex(&lbl_80563200);
+    }
+    return err;
+}
+
+s32 fn_803C3BE8(const s8* i_path) {
+    s32 handle_idx = -1;
+    s8* path;
+    s32 err;
+
+    if (lbl_805A120C != 0) {
+        OSLockMutex(&lbl_80563200);
+    }
+
+    path = VF_path2handleidx(&handle_idx, i_path);
+    if (path == NULL) {
+        VFSysSetLastError(0xB003);
+        if (lbl_805A120C != 0) {
+            OSUnlockMutex(&lbl_80563200);
+        }
+        return 0xB003;
+    }
+
+    if (handle_idx != -1) {
+        err = VFSysChangeDir(handle_idx, path);
+    } else {
+        err = VFSysChangeDir_current(path);
+    }
+
+    VFSysSetLastError(err);
+    if (lbl_805A120C != 0) {
+        OSUnlockMutex(&lbl_80563200);
+    }
+    return err;
+}
+
+void VFipdm_part_set_change_media_state(PDM_DISK* p_disk, u32 event) {
+    u16 i;
+
+    for (i = 0; i < 26; i++) {
+        if ((lbl_8053A6E0.partition[i].status & 1) && lbl_8053A6E0.partition[i].p_disk == p_disk) {
+            if (event == 0) {
+                lbl_8053A6E0.partition[i].status &= ~4;
+            } else {
+                lbl_8053A6E0.partition[i].status |= 4;
+            }
+            lbl_8053A6E0.partition[i].status |= 8;
+        }
+    }
+}
+
+s32 VFipf2_fsfirst(const s8* path, u32 attr, PF_DTA* p_dta) {
+    PF_STR str;
+    s32 err;
+
+    err = VFiPFSTR_InitStr(&str, path, 1);
+    if (err == 0) {
+        err = VFiPFDIR_fsfirst(&str, attr, p_dta);
+    } else {
+        lbl_8053B248.last_error = err;
+    }
+    return VFiPFAPI_convertReturnValue(err);
+}
