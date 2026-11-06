@@ -9,29 +9,13 @@
 #include <wn/weapon.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
 
-class Vec3f;
-struct wnCaptainBlueFalconData;
-struct wnCaptainFinalBgData;
-
-// The Falcon of the Final Smash (wn/captain/wn_captain_blue_falcon.h). Opaque shell: the full class is a weapon builder that cannot coexist with this unit.
-class wnCaptainBlueFalcon : public Weapon {
-    u8 m_unreconstructed[0x2110 - sizeof(Weapon)];
-public:
-    wnCaptainBlueFalcon(s32 articleId, const wnArticleBuildInfo& info, const wnCaptainBlueFalconData* data);
-    virtual ~wnCaptainBlueFalcon();
-    void activate(int founderTaskId, int resourceId, int team, const Vec3f* position, float lr, float scale, bool attached);
-};
-static_assert(sizeof(wnCaptainBlueFalcon) == 0x2110, "wnCaptainBlueFalcon layout is wrong!");
-
-// The background of the Final Smash (wn/captain/wn_captain_final_bg.h). Opaque shell for the same reason.
-class wnCaptainFinalBg : public Weapon {
-    u8 m_unreconstructed[0x1F28 - sizeof(Weapon)];
-public:
-    wnCaptainFinalBg(s32 articleId, const wnArticleBuildInfo& info, const wnCaptainFinalBgData* data);
-    virtual ~wnCaptainFinalBg();
-    void activate(int founderTaskId, int resourceId, int team);
-};
-static_assert(sizeof(wnCaptainFinalBg) == 0x1F28, "wnCaptainFinalBg layout is wrong!");
+// Full article types let the fighter own their pools and teardown.
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/captain/wn_captain_blue_falcon.h>
+#include <wn/captain/wn_captain_final_bg.h>
 
 typedef wnArticleHierarchy<wnCaptainFinalBg, 1, soInstancePoolRoot> ftCaptainFinalBgPool;
 typedef wnArticleHierarchy<wnCaptainBlueFalcon, 1, ftCaptainFinalBgPool> ftCaptainBlueFalconPool;
