@@ -30,7 +30,11 @@ struct hkBroadPhase : hkReferencedObject {
     virtual void removeObject(hkBroadPhaseHandle* object, hkArray<hkBroadPhaseHandlePair>& pairsOut); // 0x18
     virtual void unk1C();
     virtual void unk20();
-    virtual void unk24();
+    // the batch update of hkSimulation::collideEntitiesBroadPhaseDiscrete (map: hk3AxisSweep::updateAabbs in this
+    // slot). HYPOTHESIS: the parameter types beyond the call shape (handles, their aabbs, count, new and old pairs)
+    virtual void updateAabbs(hkBroadPhaseHandle** objects, const hkAabb* aabbs, int numObjects,
+                             hkArray<hkBroadPhaseHandlePair>& addedPairs,
+                             hkArray<hkBroadPhaseHandlePair>& removedPairs); // 0x24
     virtual void unk28();
     virtual void unk2C();
     virtual void unk30();

@@ -3,6 +3,7 @@
 #include <havok/hkBase.h>
 #include <havok/hkArray.h>
 #include <havok/hkConstraintData.h>
+#include <havok/hkAgentNnMachine.h>
 
 struct hkEntity;
 struct hkAction; // include/havok/hkAction.h; the island stores itself in the action at 0x0C
@@ -19,7 +20,8 @@ struct hkSimulationIsland : hkReferencedObject {
     u8 m_flags26;                    // 0x26 bit field, see above
     u8 m_unk27[0x11];                // 0x27 (not recovered)
     hkArray<hkEntity*> m_entities;   // 0x38
-    u8 m_unk44[0x1C];                // 0x44 (not recovered)
+    u8 m_unk44[0x04];                // 0x44 (not recovered)
+    hkAgentNnTrack m_agentTrack;     // 0x48 the island's agent entries (hkSimulation::collideInternal processes it)
     hkArray<hkAction*> m_actions;    // 0x60
 
     void internalAddEntity(hkEntity* entity);

@@ -17,6 +17,7 @@
 #include <havok/hkPhantom.h>
 #include <havok/hkSimulation.h>
 #include <havok/hkShape.h>
+#include <havok/hkTypedBroadPhaseDispatcher.h>
 
 // HYPOTHESIS: the top two bits of the byte at island+0x26/+0x27 hold the activity state, written as a 2-bit field.
 // Local view only; hkSimulationIsland.h does not declare these bytes yet.
@@ -31,9 +32,6 @@ static inline T& at(void* p, int offset) {
     return *reinterpret_cast<T*>(reinterpret_cast<char*>(p) + offset);
 }
 
-// stand-ins for the broadphase dispatcher: it turns new / removed broadphase pairs into collision agents
-extern "C" void fn_802CAEE8(void* dispatcher, hkBroadPhaseHandlePair* pairs, int numPairs, void* collisionFilter);
-extern "C" void fn_802CAFC0(void* dispatcher, hkBroadPhaseHandlePair* pairs, int numPairs);
 
 // puts the phantom in the broadphase, then lets the dispatcher react to every pair that showed up
 void hkWorldOperationUtil::addPhantomBP(hkWorld* world, hkPhantom* phantom) {
@@ -50,7 +48,8 @@ void hkWorldOperationUtil::addPhantomBP(hkWorld* world, hkPhantom* phantom) {
         if (filter != NULL) {
             filter = reinterpret_cast<char*>(filter) + 8; // the collision filter interface sits 8 bytes in
         }
-        fn_802CAEE8(at<void*>(world, 0x58), newPairs.begin(), newPairs.getSize(), filter);
+        at<hkTypedBroadPhaseDispatcher*>(world, 0x58)
+            ->addPairs(newPairs.begin(), newPairs.getSize(), (const hkCollisionFilterInterface0*)filter);
     }
 }
 
@@ -61,7 +60,7 @@ void hkWorldOperationUtil::removePhantomBP(hkWorld* world, hkPhantom* phantom) {
     at<hkBroadPhase*>(world, 0x54)->removeObject(&phantom->m_collidable.m_broadPhaseHandle, removedPairs);
 
     if (removedPairs.m_size != 0) {
-        fn_802CAFC0(at<void*>(world, 0x58), &removedPairs[0], removedPairs.m_size);
+        at<hkTypedBroadPhaseDispatcher*>(world, 0x58)->removePairs(&removedPairs[0], removedPairs.m_size);
     }
 }
 
@@ -87,7 +86,8 @@ void hkWorldOperationUtil::addEntityBP(hkWorld* world, hkEntity* entity) {
         if (filter != NULL) {
             filter = reinterpret_cast<char*>(filter) + 8;
         }
-        fn_802CAEE8(at<void*>(world, 0x58), newPairs.begin(), newPairs.getSize(), filter);
+        at<hkTypedBroadPhaseDispatcher*>(world, 0x58)
+            ->addPairs(newPairs.begin(), newPairs.getSize(), (const hkCollisionFilterInterface0*)filter);
     }
 }
 
@@ -105,7 +105,7 @@ void hkWorldOperationUtil::removeEntityBP(hkWorld* world, hkEntity* entity) {
     at<hkBroadPhase*>(world, 0x54)->removeObject(&entity->m_collidable.m_broadPhaseHandle, removedPairs);
 
     if (removedPairs.m_size > 0) {
-        fn_802CAFC0(at<void*>(world, 0x58), &removedPairs[0], removedPairs.m_size);
+        at<hkTypedBroadPhaseDispatcher*>(world, 0x58)->removePairs(&removedPairs[0], removedPairs.m_size);
     }
 }
 

@@ -18,6 +18,8 @@ struct hkCollisionFilter;
 struct hkStatisticsCollector;
 struct hkAabb;
 struct hkProcessCollisionInput;
+struct hkBroadPhase;
+struct hkTypedBroadPhaseDispatcher;
 
 // The simulation world (layout partly recovered from hkWorld.cpp asm; the tail after 0x114 is not
 // recovered). Fields marked unk are written by the constructor and not read by the code matched so far.
@@ -29,9 +31,13 @@ struct hkWorld : hkReferencedObject {
     hkArrayBase m_unk34;                            // 0x34 not recovered
     hkArrayBase m_unk40;                            // 0x40 not recovered
     hkWorldMaintenanceMgr* m_maintenanceMgr;        // 0x4C (hkSimulation::integrate calls performMaintenance)
-    u8 m_unk50[0x18];                               // 0x50 .. 0x67 not recovered
+    u8 m_unk50[0x04];                               // 0x50 not recovered
+    hkBroadPhase* m_broadPhase;                     // 0x54 (hkSimulation::collideEntitiesBroadPhaseDiscrete updates it)
+    hkTypedBroadPhaseDispatcher* m_broadPhaseDispatcher; // 0x58 gets the pairs the broad phase reports
+    u8 m_unk5C[0x0C];                               // 0x5C .. 0x67 not recovered
     hkProcessCollisionInput* m_collisionInput;      // 0x68 HYPOTHESIS: name; integrate copies the step info into it
-    u8 m_unk6C[0x08];                               // 0x6C .. 0x73 not recovered
+    hkCollisionFilter* m_collisionFilter;           // 0x6C handed to the dispatcher with the new pairs
+    u8 m_unk70[0x04];                               // 0x70 not recovered
     hkWorldOperationQueue* m_operationQueue;        // 0x74 (allocated 0x20 bytes in the constructor)
     int m_pendingOperationsCount;                                    // 0x78 how many world operations are sitting in the queue
     int m_lockCount;                                // 0x7C incremented around add/remove calls
@@ -55,9 +61,23 @@ struct hkWorld : hkReferencedObject {
     hkArrayBase m_postSimulationListeners;          // 0x120
     hkArrayBase m_unk12C;                           // 0x12C not recovered
     hkArrayBase m_postCollideListeners;             // 0x138
-    u8 m_unk144[0x2C];                              // 0x144 .. 0x16F not recovered
+    u8 m_unk144[0x0C];                              // 0x144 .. 0x14F not recovered
+    // tested before hkWorldCallbackUtil::fireIslandPostCollideCallback (hkSimulation::collideInternal)
+    hkArrayBase m_islandPostCollideListeners;       // 0x150 HYPOTHESIS: name, from the callback it guards
+    u8 m_unk15C[0x14];                              // 0x15C .. 0x16F not recovered
     // the current step (hkSimulation::integrate copies it here; actions get it in applyActions)
     hkStepInfo m_dynamicsStepInfo;                  // 0x170 HYPOTHESIS: name
+    u8 m_unk180[0x2A4 - 0x180];                     // 0x180 .. 0x2A3 not recovered
+    // set by hkSimulation::collideInternal from the step: m_unk2A4 = delta time * m_unk2B8,
+    // m_unk2A8 = inverse delta time * m_unk2AC (an int). HYPOTHESIS: solver step settings.
+    hkReal m_unk2A4;                                // 0x2A4
+    hkReal m_unk2A8;                                // 0x2A8
+    int m_unk2AC;                                   // 0x2AC
+    u8 m_unk2B0[0x08];                              // 0x2B0 .. 0x2B7 not recovered
+    hkReal m_unk2B8;                                // 0x2B8
+    u8 m_unk2BC[0x2E4 - 0x2BC];                     // 0x2BC .. 0x2E3 not recovered
+    int m_unk2E4;                                   // 0x2E4 capacity of hkWorldOperationUtil's local pair arrays
+    int m_unk2E8;                                   // 0x2E8 capacity of collideEntitiesBroadPhaseDiscrete's pair arrays
 
     int getMemUsageForIntegration();
     void setGravity(const hkVector4& gravity);

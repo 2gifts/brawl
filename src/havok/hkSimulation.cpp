@@ -54,6 +54,13 @@
 #include <havok/hkAgentNnMachine.h>
 #include <havok/hkLinkedCollidable.h>
 #include <havok/hkPointerMapBase.h>
+#include <havok/hkLocalArray.h>
+#include <havok/hkUnionFind.h>
+#include <havok/hkBroadPhase.h>
+#include <havok/hkTypedBroadPhaseDispatcher.h>
+#include <havok/hkCollisionFilter.h>
+#include <havok/hkShape.h>
+#include <havok/hkAabb.h>
 
 hkSimulation::hkSimulation(hkWorld* world) {
     m_world = world;
@@ -191,6 +198,110 @@ int hkSimulation::stepDeltaTime(hkReal physicsDeltaTime) {
         advanceTime();
     }
     return m_unk24;
+}
+
+// The broad phase for a batch of entities: their aabbs (grown by half the collision tolerance) go into the broad
+// phase in one update; the pairs that stopped overlapping lose their agents and the new pairs get agents, unless
+// the heap may not hold the new agents (then the memory system is flagged and nothing is added).
+void hkSimulation::collideEntitiesBroadPhaseDiscrete(hkEntity** entities, int numEntities, hkWorld* world) {
+    HK_TIMER_BEGIN_LIST("BroadPhase", "InitMem");
+    hkLocalArray<hkBroadPhaseHandlePair> newPairs(world->m_unk2E8);
+    hkLocalArray<hkBroadPhaseHandlePair> delPairs(world->m_unk2E8);
+    {
+        hkAabb* aabbs = (hkAabb*)hkThreadMemory::s_instance->allocateStack(numEntities * sizeof(hkAabb));
+        hkBroadPhaseHandle** handles =
+            (hkBroadPhaseHandle**)hkThreadMemory::s_instance->allocateStack(numEntities * sizeof(hkBroadPhaseHandle*));
+        hkReal tolerance = 0.5f * world->m_collisionInput->unk8;
+        HK_TIMER_SPLIT_LIST("CalcAabbs");
+        {
+            // BYTES: the target walks the three arrays with pointers and counts down (an indexed loop gives
+            // lwzx/stwx and a counter that goes up)
+            hkAabb* aabb = aabbs;
+            hkBroadPhaseHandle** handle = handles;
+            for (int i = numEntities - 1; i >= 0; i--) {
+                hkEntity* entity = *entities;
+                *handle = &entity->m_collidable.m_broadPhaseHandle;
+                // HYPOTHESIS: the collidable's motion field points at the entity's transform (as in addEntityBP)
+                entity->m_collidable.m_shape->getAabb(*(const hkTransform*)entity->m_collidable.m_motion, tolerance,
+                                                      *aabb);
+                aabb++;
+                handle++;
+                entities++;
+            }
+        }
+        HK_TIMER_SPLIT_LIST("3AxisSweep");
+        world->m_broadPhase->updateAabbs(handles, aabbs, numEntities, newPairs, delPairs);
+        hkThreadMemory::s_instance->deallocateStack(handles);
+        hkThreadMemory::s_instance->deallocateStack(aabbs);
+    }
+    if (newPairs.getSize() + delPairs.getSize() > 0) {
+        HK_TIMER_SPLIT_LIST("RemoveDup");
+        hkTypedBroadPhaseDispatcher::removeDuplicates(newPairs, delPairs);
+        HK_TIMER_SPLIT_LIST("RemoveAgt");
+        world->m_broadPhaseDispatcher->removePairs(delPairs.begin(), delPairs.getSize());
+        // HYPOTHESIS: 0x280 as the heap needed per new pair. BYTES: the target keeps the constant in a register
+        int available = hkMemory::getAvailableMemory();
+        int bytesPerPair = 0x280;
+        if (newPairs.getSize() * bytesPerPair > available) {
+            hkMemory::getInstance().unk4 = 1;
+            HK_TIMER_END_LIST();
+            return;
+        }
+        HK_TIMER_SPLIT_LIST("AddAgt");
+        world->m_broadPhaseDispatcher->addPairs(newPairs.begin(), newPairs.getSize(), world->m_collisionFilter);
+    }
+    HK_TIMER_END_LIST();
+}
+
+// The narrow phase of one island: every agent entry of the island's track runs with the default quality settings.
+// BYTES: an inline function; its timer literals are its own weak objects ("TtNarrowPhase" in .data, "Et" in .sdata,
+// see hkTimeFunctionHelper in hkMonitorStream.h). HYPOTHESIS: the name, and the table entry 1 for the quality
+// pointer (as processAgentCollideDiscrete does).
+inline void collideIslandNarrowPhaseDiscrete(hkSimulationIsland* island, hkProcessCollisionInput& input) {
+    HK_TIMER_BEGIN("NarrowPhase");
+    input.m_collisionQualityInfo = &input.m_dispatcher->m_collisionQualityInfo[1];
+    input.m_createPredictiveAgents = false;
+    hkAgentNnMachine_ProcessTrack(island, island->m_agentTrack, input);
+    HK_TIMER_END();
+}
+
+// Collides one step: the step goes into the world and its collision input, then the broad phase runs over every
+// active island and after it the narrow phase, each with the world's critical operations locked. Islands get their
+// post-collide callbacks after their narrow phase. Running the heap dry stops the step.
+void hkSimulation::collideInternal(const hkStepInfo& stepInfo) {
+    HK_TIME_CODE_BLOCK("Collide");
+    m_world->m_dynamicsStepInfo = stepInfo;
+    m_world->m_collisionInput->m_stepInfo = stepInfo;
+    // BYTES: the target reads m_world once for these two stores (the rest of the function reloads it)
+    hkWorld* world = m_world;
+    world->m_unk2A4 = stepInfo.m_deltaTime * world->m_unk2B8;
+    world->m_unk2A8 = stepInfo.m_invDeltaTime * world->m_unk2AC;
+    m_world->m_lockCount++;
+    for (int i = 0; i < m_world->m_unk28.m_size; i++) {
+        hkArray<hkEntity*>& entities = ((hkSimulationIsland**)m_world->m_unk28.m_data)[i]->m_entities;
+        collideEntitiesBroadPhaseDiscrete(entities.begin(), entities.getSize(), m_world);
+        if (hkMemory::getInstance().unk4 == 1) {
+            m_world->unlockAndAttemptToExecutePendingOperations();
+            return;
+        }
+    }
+    m_world->unlockAndAttemptToExecutePendingOperations();
+
+    m_world->m_lockCount++;
+    for (int i = 0; i < m_world->m_unk28.m_size; i++) {
+        hkSimulationIsland* island = ((hkSimulationIsland**)m_world->m_unk28.m_data)[i];
+        collideIslandNarrowPhaseDiscrete(island, *m_world->m_collisionInput);
+        if (hkMemory::getInstance().unk4 == 1) {
+            m_world->unlockAndAttemptToExecutePendingOperations();
+            return;
+        }
+        if (m_world->m_islandPostCollideListeners.m_size != 0) {
+            HK_TIMER_BEGIN("IslandPostCollideCb");
+            hkWorldCallbackUtil::fireIslandPostCollideCallback(m_world, island, (void*)&stepInfo);
+            HK_TIMER_END();
+        }
+    }
+    m_world->unlockAndAttemptToExecutePendingOperations();
 }
 
 // Lets every action of every active island act for this step.
