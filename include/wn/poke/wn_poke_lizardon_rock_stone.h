@@ -121,6 +121,8 @@ public:
     virtual ~wnPokeLizardonRockStone() { }
     virtual void updateNodeSRT();
     virtual bool notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* acc, int index);
+    // Same declaration as the opaque shell in ft/poke/ft_poke_lizardon_article_pools.h (wnPokeLizardonRock calls it).
+    void activate(int founderTaskId, int resourceId, int team, const Vec3f* position, float lr, float angle, float speed, int life, int variant);
 };
 static_assert(sizeof(wnPokeLizardonRockStone) == 0x16DC, "wnPokeLizardonRockStone layout is wrong!");
 #endif
