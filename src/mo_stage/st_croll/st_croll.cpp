@@ -29,6 +29,26 @@
 
 #include <st_croll/st_croll.h>
 
+#pragma dont_inline on
+inline bool gfPadStatus::bitcheckEdgeOn(u32 mask) const {
+    u32 bits = m_buttonsPressedThisFrame.bits & mask;
+    return ((-bits) | bits) >> 31;
+}
+
+inline bool SoraCharacterRoll::TargetCursor::isShoot() const {
+    return (m_flags >> 1) & 1;
+}
+
+inline const nw4r::math::VEC2& SoraCharacterRoll::TargetCursor::getScreenPosition() const {
+    return m_screenPos;
+}
+
+inline int SoraCharacterRoll::ResultInfo::getGameCoinNum() const {
+    return m_coinNum;
+}
+#pragma dont_inline reset
+
+
 // ----- things of main.dol that have no name yet (the address is the one of main.dol) -----
 
 // gfCamera::init(): the default values of a camera
@@ -457,7 +477,7 @@ void SoraCharacterRoll::TargetCursor::update(float deltaFrame, gfPadStatus& pad)
 }
 
 // Plays a motion of the cursor model once (loop == false) or for ever (loop == true), unless it plays already.
-void SoraCharacterRoll::TargetCursor::playMotion(int index, bool loop) {
+inline void SoraCharacterRoll::TargetCursor::playMotion(int index, bool loop) {
     if (m_cursor != NULL && (m_motion != index || (m_flags & Flag_Motion) == 0)) {
         m_motion = index;
         m_flags |= Flag_Motion;
@@ -472,7 +492,7 @@ void SoraCharacterRoll::TargetCursor::playMotion(int index, bool loop) {
 
 // ----- the result of the minigame -----
 
-SoraCharacterRoll::ResultInfo::ResultInfo(grMadein* model, int numEntries)
+inline SoraCharacterRoll::ResultInfo::ResultInfo(grMadein* model, int numEntries)
     : m_model(model), m_flags(0), m_numEntries(numEntries), m_hits(0), m_score(0), m_coinNum(0), m_state(0), m_timer(0.0f) {
     for (int i = 0; i < 10; i++) {
         m_matTex[i] = NULL;
@@ -488,7 +508,7 @@ SoraCharacterRoll::ResultInfo::ResultInfo(grMadein* model, int numEntries)
 }
 
 // Shows the digits (0 - 9, 10 = nothing, 11 = the empty slot) in the ten digit slots of the result screen.
-void SoraCharacterRoll::ResultInfo::setDigits(const int* digits) {
+inline void SoraCharacterRoll::ResultInfo::setDigits(const int* digits) {
     for (int i = 0; i < 10; i++) {
         u32* tex = static_cast<u32*>(m_matTex[i]);
         u32* clr = static_cast<u32*>(m_matClr[i]);
@@ -551,7 +571,7 @@ void SoraCharacterRoll::ResultInfo::on() {
     }
 }
 
-SoraCharacterRoll::ResultInfo::Coin* SoraCharacterRoll::ResultInfo::allocCoin() {
+inline SoraCharacterRoll::ResultInfo::Coin* SoraCharacterRoll::ResultInfo::allocCoin() {
     if (m_coinCount < CoinMax) {
         for (int word = 0; word < 16; word++) {
             u32 free = ~m_coinUsed[word];
@@ -569,7 +589,7 @@ SoraCharacterRoll::ResultInfo::Coin* SoraCharacterRoll::ResultInfo::allocCoin() 
     return NULL;
 }
 
-void SoraCharacterRoll::ResultInfo::freeCoin(int index) {
+inline void SoraCharacterRoll::ResultInfo::freeCoin(int index) {
     if (index < CoinMax && m_coinCount > 0) {
         int word = index / 32;
         u32 bit = 1 << (index & 31);
@@ -581,7 +601,7 @@ void SoraCharacterRoll::ResultInfo::freeCoin(int index) {
 }
 
 // Throws a coin: it flies up in a random direction from a place near `base`, spins, and fades away.
-void SoraCharacterRoll::ResultInfo::spawnCoin(const Vec3f& base, float scale) {
+inline void SoraCharacterRoll::ResultInfo::spawnCoin(const Vec3f& base, float scale) {
     Coin* coin = allocCoin();
     if (coin != NULL) {
         coin->m_age = 0.0f;
@@ -1701,6 +1721,7 @@ bool stCharacterRoll::isResTexEnable(int kind, int index) {
 
 // Sets up the bit set of the entries that are shown: an entry is shown when it has a picture and a name, and when the
 // player has unlocked the fighter / assist trophy / trophy. Returns how many entries there are.
+#pragma dont_inline on
 int stCharacterRoll::initResTexFlags() {
     int total = 0;
     int bit = 0;
@@ -1917,6 +1938,7 @@ void stCharacterRoll::setupPanel(SoraCharacterRoll::CharacterPanel* pictures, So
     gen.clearBuffer();
 }
 
+#pragma dont_inline reset
 // MATCH-ONLY: the original calls these three instead of inlining them.
 #pragma dont_inline on
 // Which fighter picture belongs to a character of the player's selection (0 for the characters outside the table).
@@ -2103,6 +2125,7 @@ void stCharacterRoll::setSceneCamera() {
 }
 
 // The speed of the roll depends on where it is: it is faster in the later lists (the speed between two lists is blended).
+#pragma dont_inline on
 void stCharacterRoll::ctrlScroll(float deltaFrame) {
     float pos = m_scroll.y;
     int list = 5;
@@ -2238,6 +2261,7 @@ void stCharacterRoll::update(float deltaFrame) {
     }
 }
 
+#pragma dont_inline reset
 // Builds the stage: the models (background, cursor, beams, result screen), the camera, the cursor, the panels and the draw
 // object that draws the roll.
 void stCharacterRoll::createObj() {
@@ -2406,23 +2430,6 @@ stClassInfoImpl<Stages::CharacterRoll, stCharacterRoll> stCharacterRoll::bss_loc
 // The pad of the system (a copy of what the pad system has read).
 int gfPadStatus::gfPadGetSysStatus(int index, gfPadStatus* dest) {
     return g_gfPadSystem->getSysPadStatus(index, dest);
-}
-
-inline bool gfPadStatus::bitcheckEdgeOn(u32 mask) const {
-    u32 bits = m_buttonsPressedThisFrame.bits & mask;
-    return ((-bits) | bits) >> 31;
-}
-
-inline bool SoraCharacterRoll::TargetCursor::isShoot() const {
-    return (m_flags >> 1) & 1;
-}
-
-inline const nw4r::math::VEC2& SoraCharacterRoll::TargetCursor::getScreenPosition() const {
-    return m_screenPos;
-}
-
-inline int SoraCharacterRoll::ResultInfo::getGameCoinNum() const {
-    return m_coinNum;
 }
 
 // The input of the camera controller (the kind of the camera that is on).
