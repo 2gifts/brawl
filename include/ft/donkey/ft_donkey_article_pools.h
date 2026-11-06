@@ -9,29 +9,14 @@
 #include <wn/weapon.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
 
-class Vec3f;
-struct wnDonkeyBarrelCongaData;
-struct wnDonkeySoundEffectData;
-
-// The Final Smash article (the class is in the REL, wn_donkey_barrel_conga). Opaque shell: it cannot coexist with this unit.
-class wnDonkeyBarrelConga : public Weapon {
-    u8 m_unreconstructed[0x2088 - sizeof(Weapon)];
-public:
-    wnDonkeyBarrelConga(s32 articleId, const wnArticleBuildInfo& info, const wnDonkeyBarrelCongaData* data);
-    virtual ~wnDonkeyBarrelConga();
-    void activate(int founderTaskId, int resourceId, int team);
-};
-static_assert(sizeof(wnDonkeyBarrelConga) == 0x2088, "wnDonkeyBarrelConga layout is wrong!");
-
-// The conga drum sound article. Opaque shell for the same reason.
-class wnDonkeySoundEffect : public Weapon {
-    u8 m_unreconstructed[0x1FCC - sizeof(Weapon)];
-public:
-    wnDonkeySoundEffect(s32 articleId, const wnArticleBuildInfo& info, const wnDonkeySoundEffectData* data);
-    virtual ~wnDonkeySoundEffect();
-    void activate(int founderTaskId, int team, Vec3f* position, float a, float b, float c, float d, bool flag);
-};
-static_assert(sizeof(wnDonkeySoundEffect) == 0x1FCC, "wnDonkeySoundEffect layout is wrong!");
+// Full article types let the fighter own their pools and teardown.
+#define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/donkey/wn_donkey_barrel_conga.h>
+#include <wn/donkey/wn_donkey_sound_effect.h>
 
 typedef wnArticleHierarchy<wnDonkeySoundEffect, 4, soInstancePoolRoot> ftDonkeySoundEffectPool;
 typedef wnArticleHierarchy<wnDonkeyBarrelConga, 1, ftDonkeySoundEffectPool> ftDonkeyBarrelCongaPool;
