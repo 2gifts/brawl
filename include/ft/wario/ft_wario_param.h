@@ -49,8 +49,14 @@ struct ftWarioManParam {
     float damageToGauge;   // 0x08 a hit takes this much per percent of damage off the gauge
     float unkC;            // 0x0C the gauge level below which the end warning plays
 };
-// The parameter accessor of Wario-Man reached through the fighter (its other tables belong to the builder).
+// The data record of Wario-Man reached through the fighter (its other tables belong to the builder).
+// FT_WARIO_MAN_REAL_ACCESSER (opt-in): the unit that defines the real ftWarioManExtendParamAccesser class names this
+// view ftWarioManDataView instead.
+#ifdef FT_WARIO_MAN_REAL_ACCESSER
+struct ftWarioManDataView {
+#else
 struct ftWarioManExtendParamAccesser {
+#endif
     u8 unk0[0x7C];
     ftWarioExtendParam m_param; // 0x7C
     ftWarioManParam* m_manParam; // 0x8C
