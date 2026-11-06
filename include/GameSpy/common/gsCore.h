@@ -59,6 +59,7 @@ void fn_8035D254(GSICriticalSection* theCrit);       // gsiDeleteCriticalSection
 int atexit(void (*func)(void));                 // atexit
 void ghttpStartup(void);                              // ghttpStartup
 
+void gsCoreThink(unsigned int theMS);                // gsCoreThink
 void fn_8035E380(void);                              // gsiCoreAtExitShutdown
 void fn_8035E390(void);                              // gsCoreInitialize
 int fn_8035E848(void);                               // gsCoreIsShutdown
