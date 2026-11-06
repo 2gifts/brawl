@@ -1,3 +1,4 @@
+#define SO_NULLABLE_INLINE_CTOR
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
 #define WN_WEAPON_BUILDER
 #define WN_ARTICLE_NATIVE_BUILDERS

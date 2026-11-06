@@ -580,7 +580,7 @@ __dt__150soLineHierarchy<49soTypeList<14soIntToType<6>,18soTypeListNullType>,11s
 __dt__55soGeneralWorkBuilder<31soGeneralWorkBuildConfig<2,2,1>>Fv = .text:0x00010AD4; // type:function size:0x60
 __dt__86soVisibilityModuleBuilder<57soVisibilityModuleBuildConfig<22soVisibilityModuleImpl,1>>Fv = .text:0x00010B34; // type:function size:0x5C
 __dt__104soSoundModuleBuilder<80wnSoundModuleBuildConfig<0,30soSound3dGeneratorAccesserImpl,17soSoundModuleImpl>>Fv = .text:0x00010B90; // type:function size:0x6C
-fn_109_10BFC = .text:0x00010BFC; // type:function size:0x40
+__dt__30soSound3dGeneratorAccesserImplFv = .text:0x00010BFC; // type:function size:0x40
 __dt__66soStopModuleBuilder<43soStopModuleBuildConfig<16soStopModuleImpl>>Fv = .text:0x00010C3C; // type:function size:0x5C
 __dt__165soDamageModuleBuilder<139wnDamageModuleBuildConfig<18soDamageModuleImpl,1,43soSingletonHolder<22soDamageTransactorNull>,41soSingletonHolder<20soDamageEffectorNull>>>Fv = .text:0x00010C98; // type:function size:0x74
 __dt__111soCollisionAttackModuleBuilder<77soCollisionAttackModuleBuildConfig<0,4,0,27soCollisionAttackModuleImpl,2,0,1>>Fv = .text:0x00010D0C; // type:function size:0x84
