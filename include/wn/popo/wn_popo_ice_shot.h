@@ -112,6 +112,7 @@ class wnPopoIceShot : public wnWeaponBuilder<wnPopoIceShotModuleAccesserBuildCon
 public:
     const wnPopoIceShotParam* m_param;           // +0x235C
     wnPopoIceShotParamAccesser m_paramAccesser;  // +0x2360
+    u8 unk23CC[4]; // HYPOTHESIS: tail word whose owner is unknown; keeps the original 0x23D0 extent
     wnPopoIceShot(s32 articleId, const wnArticleBuildInfo& info, const wnPopoIceShotData* data);
     virtual ~wnPopoIceShot() { }
     // HYPOTHESIS: the parameter order and types follow the Popo transactor's call (founder task, resource, team,
@@ -125,4 +126,4 @@ public:
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual void updatePosture(bool);
 };
-// HYPOTHESIS: the build config is still 4 bytes short of the original extent (0x23D0); some module config differs.
+static_assert(sizeof(wnPopoIceShot) == 0x23D0, "Popo ice shot article extent");
