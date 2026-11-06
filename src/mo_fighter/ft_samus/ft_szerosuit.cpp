@@ -81,10 +81,7 @@ struct ftSZerosuitArticleBuildInfo : wnArticleBuildInfo {
 };
 
 // The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
-extern "C" void* fn_27_148BBC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148BD0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148C18(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148C40(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 template <class W> struct ftSZerosuitArticleTraits;
 #define FT_SZEROSUIT_TRAITS(W, DATA, ID, GETTER) \
@@ -95,11 +92,19 @@ template <class W> struct ftSZerosuitArticleTraits;
             return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_SZeroSuit, &tag.m_resourceGroup)); \
         } \
     };
+#define FT_SZEROSUIT_TRAITS_MEMBER(W, DATA, ID, GETTER) \
+    template <> struct ftSZerosuitArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftSZerosuitArticleDataTag tag; \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_SZeroSuit, &tag.m_resourceGroup)); \
+        } \
+    };
 
-FT_SZEROSUIT_TRAITS(wnSZerosuitParalyzer, wnSZerosuitParalyzerData, 0, fn_27_148BBC)
+FT_SZEROSUIT_TRAITS_MEMBER(wnSZerosuitParalyzer, wnSZerosuitParalyzerData, 0, getWeaponData<wnSZerosuitParalyzerData>)
 FT_SZEROSUIT_TRAITS(wnSZerosuitParalyzerBullet, wnSZerosuitParalyzerBulletData, 1, fn_27_148BD0)
-FT_SZEROSUIT_TRAITS(wnSZerosuitWhip, wnSZerosuitWhipData, 2, fn_27_148C18)
-FT_SZEROSUIT_TRAITS(wnSZerosuitArmor, wnSZerosuitArmorData, 3, fn_27_148C40)
+FT_SZEROSUIT_TRAITS_MEMBER(wnSZerosuitWhip, wnSZerosuitWhipData, 2, getWeaponData<wnSZerosuitWhipData>)
+FT_SZEROSUIT_TRAITS_MEMBER(wnSZerosuitArmor, wnSZerosuitArmorData, 3, getWeaponData<wnSZerosuitArmorData>)
 
 // Every article of the fighter is built by this constructor from the data of the fighter kind.
 template <class W>

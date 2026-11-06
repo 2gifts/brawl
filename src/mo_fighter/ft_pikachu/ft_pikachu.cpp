@@ -113,8 +113,6 @@ struct ftPikachuArticleBuildInfo : wnArticleBuildInfo {
 
 // The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
 extern "C" void* fn_27_148050(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148170(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148184(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1480CC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 template <class W> struct ftPikachuArticleTraits;
@@ -126,10 +124,18 @@ template <class W> struct ftPikachuArticleTraits;
             return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Pikachu, &tag.m_resourceGroup)); \
         } \
     };
+#define FT_PIKACHU_TRAITS_MEMBER(W, DATA, ID, GETTER) \
+    template <> struct ftPikachuArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftPikachuArticleDataTag tag; \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Pikachu, &tag.m_resourceGroup)); \
+        } \
+    };
 
 FT_PIKACHU_TRAITS(wnPikachuThunderJolt, wnPikachuThunderJoltData, 0, fn_27_148050)
-FT_PIKACHU_TRAITS(wnPikachuCloud, wnPikachuCloudData, 1, fn_27_148170)
-FT_PIKACHU_TRAITS(wnPikachuVortex, wnPikachuVortexData, 2, fn_27_148184)
+FT_PIKACHU_TRAITS_MEMBER(wnPikachuCloud, wnPikachuCloudData, 1, getWeaponData<wnPikachuCloudData>)
+FT_PIKACHU_TRAITS_MEMBER(wnPikachuVortex, wnPikachuVortexData, 2, getWeaponData<wnPikachuVortexData>)
 FT_PIKACHU_TRAITS(wnPikachuThunder, wnPikachuThunderData, 3, fn_27_1480CC)
 
 // Every article of the fighter is built by this constructor from the data of the fighter kind.

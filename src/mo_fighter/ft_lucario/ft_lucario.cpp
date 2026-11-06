@@ -123,7 +123,6 @@ struct ftLucarioArticleBuildInfo : wnArticleBuildInfo {
 
 // The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
 extern "C" void* fn_27_1494D0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_149588(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 template <class W> struct ftLucarioArticleTraits;
 #define FT_LUCARIO_TRAITS(W, DATA, ID, GETTER) \
@@ -134,9 +133,17 @@ template <class W> struct ftLucarioArticleTraits;
             return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Lucario, &tag.m_resourceGroup)); \
         } \
     };
+#define FT_LUCARIO_TRAITS_MEMBER(W, DATA, ID, GETTER) \
+    template <> struct ftLucarioArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftLucarioArticleDataTag tag; \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Lucario, &tag.m_resourceGroup)); \
+        } \
+    };
 
 FT_LUCARIO_TRAITS(wnLucarioAuraBall, wnLucarioAuraBallData, 0, fn_27_1494D0)
-FT_LUCARIO_TRAITS(wnLucarioQigong, wnLucarioQigongData, 1, fn_27_149588)
+FT_LUCARIO_TRAITS_MEMBER(wnLucarioQigong, wnLucarioQigongData, 1, getWeaponData<wnLucarioQigongData>)
 
 // Every article of the fighter is built by this constructor from the data of the fighter kind.
 template <class W>

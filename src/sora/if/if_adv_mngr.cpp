@@ -55,21 +55,11 @@ void fn_800E023C(IfPlayer* player, int arg1, int arg2, nw4r::g3d::ResFile* resFi
 void fn_800E244C(IfPlayer* player);
 void fn_800E26B8(IfPlayer* player);
 void fn_800DD6E4(IfCenter* center, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2, int arg1, int arg2);
-IfAdvGauge* fn_8010B76C();
-void fn_8010BC58(IfAdvGauge* gauge, nw4r::g3d::ResFile* resFile);
-void fn_8010BD28(IfAdvGauge* gauge, nw4r::g3d::ResFile* resFile);
-void fn_8010BD74(IfAdvGauge* gauge, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2);
-void fn_8010B9E4(IfAdvGauge* gauge, int flag);
-void fn_8010BE98();
 void fn_8010C004(nw4r::g3d::ScnGroup* group);
-void fn_8010C9D8(IfAdvGauge* gauge);
 void fn_8010BDCC(IfAdvGauge* gauge);
 void fn_8010C6C8(IfAdvGauge* gauge, s32 value);
 void fn_8010C0FC(IfAdvGauge* gauge, u32 value);
-void fn_8010C3D4(IfAdvGauge* gauge);
-void fn_8010C52C(IfAdvGauge* gauge, s32 num);
 void fn_8010CA94(IfAdvGauge* gauge, s32 num, u8* stock);
-void fn_8010CC80(IfAdvGauge* gauge);
 void fn_8010CCE0(IfAdvGauge* gauge, float scale, u8 count, IfPlayer* player, u8 arg);
 void fn_80108D1C(nw4r::g3d::ResFile* resFile);
 void* fn_8010890C(void* data);
@@ -436,10 +426,10 @@ void IfAdvMngr::createModel() {
     fn_800DD6E4(m_center, &unk14, &unk34, 0, 5);
     IfAdvGauge::createLocator(&unk18);
     IfAdvGauge::createLocator2(&unk14);
-    m_gauge = fn_8010B76C();
-    fn_8010BC58(m_gauge, &unk18);
-    fn_8010BD28(m_gauge, &unk14);
-    fn_8010BD74(m_gauge, &unk18, &unk2C);
+    m_gauge = IfAdvGauge::create();
+    m_gauge->createModel(&unk18);
+    m_gauge->createModel2(&unk14);
+    m_gauge->createModelStRes(&unk18, &unk2C);
     fn_80108D1C(&unk18);
     m_boss = fn_8010890C(unk58);
     fn_80108AE0(m_boss, &unk18);
@@ -468,7 +458,7 @@ void IfAdvMngr::destroyModel() {
         m_gauge->removePressStart(IfPlayer::getPlayerLocator());
     }
     if (m_gauge) {
-        fn_8010C9D8(m_gauge);
+        m_gauge->removeCountTime();
     }
     if (m_center) {
         delete m_center;
@@ -482,10 +472,10 @@ void IfAdvMngr::destroyModel() {
     }
     IfPlayer::destroyPlayerLocator();
     if (m_gauge) {
-        fn_8010B9E4(m_gauge, 1);
+        delete m_gauge;
         m_gauge = NULL;
     }
-    fn_8010BE98();
+    IfAdvGauge::destroyLocator();
     if (m_boss) {
         fn_80108A04(m_boss, 1);
         m_boss = NULL;
@@ -595,7 +585,7 @@ void IfAdvMngr::meleeMain() {
         m_gauge->draw2PEnt();
     }
     if (m_corps >= 0 && m_gauge) {
-        fn_8010C3D4(m_gauge);
+        m_gauge->drawCrowd();
     }
     if (unk48_20) {
         if (++unk54 == 0x10) {
@@ -616,7 +606,7 @@ void IfAdvMngr::meleeMain() {
             }
         }
         if (unk57 != 0 && unk57 < 10 && m_gauge) {
-            fn_8010CC80(m_gauge);
+            m_gauge->deleteStockSlotFirstIcon();
         }
         if (m_gauge) {
             m_gauge->drawStockSlotAnime(unk57);
@@ -811,7 +801,7 @@ extern "C" int fn_80107A70(IfAdvMngr* mngr, int arg, bool flag) {
                 }
             }
             if (mngr->unk57 != 0 && mngr->unk57 < 10 && mngr->m_gauge) {
-                fn_8010CC80(mngr->m_gauge);
+                mngr->m_gauge->deleteStockSlotFirstIcon();
             }
             if (mngr->m_gauge) {
                 mngr->m_gauge->drawStockSlotAnime(mngr->unk57);
@@ -867,7 +857,7 @@ bool IfAdvMngr::removeCorps() {
     }
     m_corps--;
     if (m_gauge) {
-        fn_8010C52C(m_gauge, m_corps);
+        m_gauge->setCrowdDelAnimeNum(m_corps);
     }
     return true;
 }

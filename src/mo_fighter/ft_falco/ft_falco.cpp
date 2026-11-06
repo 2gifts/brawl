@@ -249,7 +249,6 @@ struct ftFalcoArticleBuildInfo : wnArticleBuildInfo {
 extern "C" void* fn_27_1484BC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_14858C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148620(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1486B4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 template <class W> struct ftFalcoArticleTraits;
 #define FT_FALCO_TRAITS(W, DATA, ID, GETTER) \
@@ -260,10 +259,18 @@ template <class W> struct ftFalcoArticleTraits;
             return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Falco, &tag.m_resourceGroup)); \
         } \
     };
+#define FT_FALCO_TRAITS_MEMBER(W, DATA, ID, GETTER) \
+    template <> struct ftFalcoArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftFalcoArticleDataTag tag; \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Falco, &tag.m_resourceGroup)); \
+        } \
+    };
 
 FT_FALCO_TRAITS(wnFalcoBlaster, wnFalcoBlasterData, 0, fn_27_14858C)
 FT_FALCO_TRAITS(wnFalcoBlasterBullet, wnFalcoBlasterBulletData, 1, fn_27_148620)
-FT_FALCO_TRAITS(wnFalcoIllusion, wnFalcoIllusionData, 2, fn_27_1486B4)
+FT_FALCO_TRAITS_MEMBER(wnFalcoIllusion, wnFalcoIllusionData, 2, getWeaponData<wnFalcoIllusionData>)
 FT_FALCO_TRAITS(wnFoxLandMaster, wnFoxLandMasterData, 3, fn_27_1484BC)
 
 // Every article of the fighter is built by this constructor from the data of the fighter kind.

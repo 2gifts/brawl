@@ -7,6 +7,7 @@
 #include <string.h>
 #include <types.h>
 #include <gm/gm_global.h>
+#include <gf/gf_3d_scene.h>
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
 MuObject* lbl_805A0338 = NULL;
@@ -28,6 +29,67 @@ struct IfAdvZakoScnMdlInfo {
     u8 m_objectNo;
     u8 m_capacity;
 };
+
+
+static const IfAdvZakoModelInfo lbl_804093B0[7] = {
+    { "InfAdvPos_TopN", 0, 0, 1 },
+    { "InfAdvScore0000_TopN", 1, 1, 2 },
+    { "InfAdvScore0001_TopN", 2, 11, 3 },
+    { "InfAdvCrowd0000_TopN", 12, 12, 4 },
+    { "InfAdvCrowd0001_TopN", 13, 63, 5 },
+    { "InfAdvPsta0000_TopN", 64, 64, 6 },
+    { "InfAdvStock0000_TopN", 65, 65, 7 },
+};
+
+static const IfAdvZakoScnMdlInfo lbl_804093E8[3] = {
+    { 0, 0, 0, 8 },
+    { 1, 1, 1, 9 },
+    { 2, 2, 12, 50 },
+};
+
+void IfAdvGauge::createModel(nw4r::g3d::ResFile* resFile) {
+    MuObject* object;
+    createObjResFile(lbl_804093B0, 7, resFile);
+    createExpMdl(lbl_804093E8, 3);
+    int objectNos[5] = { 0, 1, 12, 64, 65 };
+    int* nos = objectNos;
+    for (int index = 0; index < 5; index++, nos++) {
+        object = unk0[*nos];
+        object->enableSkipMatrix(true);
+        object->enableSkipMaterial(true);
+    }
+}
+
+static const IfAdvZakoModelInfo lbl_80409408[3] = {
+    { "InfPos_TopN", 0x54, 0x54, 9 },
+    { "InfTime_TopN", 0x4b, 0x4b, 8 },
+    { "InfTimenum_TopN", 0x4c, 0x52, 8 },
+};
+
+static const IfAdvZakoScnMdlInfo lbl_805A2878[2] = {
+    { 6, 6, 0x54, 4 },
+    { 5, 5, 0x4b, 8 },
+};
+
+static const IfAdvZakoModelInfo lbl_805A2880[1] = {
+    { "InfAdvStock0001_TopN", 0x43, 0x4a, 7 },
+};
+
+static const IfAdvZakoScnMdlInfo lbl_805A2888[2] = {
+    { 4, 4, 0x4a, 1 },
+    { 3, 3, 0x41, 10 },
+};
+
+void IfAdvGauge::createModel2(nw4r::g3d::ResFile* resFile) {
+    createObjResFile(lbl_80409408, 3, resFile);
+    createExpMdl(lbl_805A2878, 2);
+}
+
+void IfAdvGauge::createModelStRes(nw4r::g3d::ResFile* resFile, nw4r::g3d::ResFile* stResFile) {
+    createObjResFile(lbl_805A2880, 1, resFile);
+    unk238 = stResFile;
+    createExpMdl(lbl_805A2888, 2);
+}
 
 void IfAdvGauge::createObjResFile(const void* nodeInfo, s32 nodeCount, nw4r::g3d::ResFile* resFile) {
     int count;
@@ -164,4 +226,74 @@ void IfAdvGauge::createLocator2(nw4r::g3d::ResFile* resFile) {
         lbl_805A0340->setFrameNode(1.0f);
     }
     lbl_805A0344 = nw4r::g3d::ScnMdlExpand::Construct(gfHeapManager::getMEMAllocator(Heaps::InfoInstance), NULL, 0x20, lbl_805A0340->m_sceneModel);
+}
+
+IfAdvGauge* IfAdvGauge::create() {
+    return new (Heaps::InfoInstance) IfAdvGauge();
+}
+
+IfAdvGauge::~IfAdvGauge() {
+    for (int index = 0; index < 7; index++) {
+        if (unk154[index] != NULL) {
+            unk154[index]->Destroy();
+        }
+    }
+    for (int index = 0; index < 0x55; index++) {
+        delete unk0[index];
+    }
+    g_gfSceneRoot->removeInfoCamResAnm();
+}
+
+void IfAdvGauge::destroyLocator() {
+    if (lbl_805A033C != NULL) {
+        lbl_805A033C->Destroy();
+        lbl_805A033C = NULL;
+    }
+    if (lbl_805A0338 != NULL) {
+        delete lbl_805A0338;
+        lbl_805A0338 = NULL;
+    }
+    if (lbl_805A0344 != NULL) {
+        lbl_805A0344->Destroy();
+        lbl_805A0344 = NULL;
+    }
+    if (lbl_805A0340 != NULL) {
+        delete lbl_805A0340;
+        lbl_805A0340 = NULL;
+    }
+}
+
+void IfAdvGauge::removeScore() {
+    lbl_805A033C->Remove(unk154[1]);
+    unk361 = 0;
+}
+
+void IfAdvGauge::removeCountTime() {
+    lbl_805A033C->Remove(unk154[5]);
+    unk362 = 0;
+}
+
+void IfAdvGauge::setCrowdDelAnimeNum(s32 num) {
+    unk30C = num;
+    unk310[num] = 1;
+}
+
+void IfAdvGauge::deleteStockSlotFirstIcon() {
+    unk154[3]->Remove(unk0[0x43]->m_sceneModel);
+}
+
+void IfAdvGauge::drawCrowd() {
+    int index;
+    char nodeName[6] = {};
+    nw4r::g3d::ScnMdlExpand* model = unk154[2];
+    lbl_805A033C->Remove(model);
+    lbl_805A033C->PushBack(model, "pos03");
+    for (index = 0; index < 50; index++) {
+        model->Remove(unk0[13 + index]->m_sceneModel);
+    }
+    for (index = 0; index < unk308; index++) {
+        sprintf(nodeName, "pos%02d", index);
+        model->PushBack(unk0[13 + index]->m_sceneModel, nodeName);
+    }
+    unk0[12]->setFrameNode(0.0f);
 }

@@ -289,9 +289,6 @@ struct ftDiddyArticleBuildInfo : wnArticleBuildInfo {
 
 // The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
 extern "C" void* fn_27_1489B8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148A4C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148A60(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148A74(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 template <class W> struct ftDiddyArticleTraits;
 #define FT_DIDDY_TRAITS(W, DATA, ID, GETTER) \
@@ -302,11 +299,19 @@ template <class W> struct ftDiddyArticleTraits;
             return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Diddy, &tag.m_resourceGroup)); \
         } \
     };
+#define FT_DIDDY_TRAITS_MEMBER(W, DATA, ID, GETTER) \
+    template <> struct ftDiddyArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftDiddyArticleDataTag tag; \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Diddy, &tag.m_resourceGroup)); \
+        } \
+    };
 
 FT_DIDDY_TRAITS(wnDiddyGun, wnDiddyGunData, 0, fn_27_1489B8)
-FT_DIDDY_TRAITS(wnDiddyBarrel, wnDiddyBarrelData, 1, fn_27_148A4C)
-FT_DIDDY_TRAITS(wnDiddyPeanuts, wnDiddyPeanutsData, 2, fn_27_148A60)
-FT_DIDDY_TRAITS(wnDiddyExplosion, wnDiddyExplosionData, 3, fn_27_148A74)
+FT_DIDDY_TRAITS_MEMBER(wnDiddyBarrel, wnDiddyBarrelData, 1, getWeaponData<wnDiddyBarrelData>)
+FT_DIDDY_TRAITS_MEMBER(wnDiddyPeanuts, wnDiddyPeanutsData, 2, getWeaponData<wnDiddyPeanutsData>)
+FT_DIDDY_TRAITS_MEMBER(wnDiddyExplosion, wnDiddyExplosionData, 3, getWeaponData<wnDiddyExplosionData>)
 
 // Every article of the fighter is built by this constructor from the data of the fighter kind.
 template <class W>
