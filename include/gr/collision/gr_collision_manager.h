@@ -82,6 +82,7 @@ public:
     void collisionUpdate(bool dynamic); // HYPOTHESIS: parameter type
     void calcFloorRange(); // HYPOTHESIS: fills m_floorRange from the floor lines of the enabled static collisions
     void regist(grCollision* collision);
+    void release(grCollision* collision);
     grCollision* getCollision(int index); // HYPOTHESIS: index type
     bool checkCliffOverlap(grCollStatus* status, const u32& lineId); // HYPOTHESIS: lineId type
     void addCliffHangInfo(grCollStatus* status, const u32& lineId); // HYPOTHESIS: lineId type

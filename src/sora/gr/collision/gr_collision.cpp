@@ -36,7 +36,6 @@ extern "C" {
 void fn_80112EBC(grCollisionJoint* joint, grCollision* collision, grCollData::JointData* jointData); // grCollisionJoint::grCollisionJoint
 void fn_80113824(grCollisionJoint* joint); // grCollisionJoint::clearVLink
 void fn_801361F0(grCollStatus* status, grCollision* collision); // HYPOTHESIS: the status lets go of a collision that is being disabled
-void fn_80112D64(grCollisionManager* manager, grCollision* collision); // grCollisionManager::release
 // nw4r::ut::detail::LinkListImpl::Erase(LinkListNode*) (private in the header)
 void* Erase__Q44nw4r2ut6detail12LinkListImplFPQ34nw4r2ut12LinkListNode(void*, void*);
 }
@@ -105,7 +104,7 @@ grCollisionLine* grCollision::createLine(u16 count, grCollData::LineData* lineDa
 grCollision::~grCollision() {
     m_isDestroying = true;
     setDisableForce();
-    fn_80112D64(lbl_805A0360, this);
+    lbl_805A0360->release(this);
     Erase__Q44nw4r2ut6detail12LinkListImplFPQ34nw4r2ut12LinkListNode(&g_grCollisionList, &m_next);
     gfHeapManager::free(m_vtxPositions);
     m_vtxPositions = NULL;
