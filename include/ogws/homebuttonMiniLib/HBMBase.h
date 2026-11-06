@@ -11,6 +11,8 @@
 #include <revolution/AXFX.h>
 #include <revolution/WPAD.h>
 
+#include <homebuttonMiniLib/HBMApi.h>
+
 #define HBM_MAX_VOLUME 10
 
 namespace homebutton {
@@ -182,7 +184,6 @@ private:
     void reset_battery();
 
     void init_sound();
-    void create_sound(nw4r::snd::SoundArchive* pArchive, bool loadGroup);
     void play_sound(int id);
     void fadeout_sound(f32 gain);
 
@@ -206,10 +207,14 @@ private:
 
 public:
     void update_sound();
+    void delete_sound();
+    friend void ::HBMCreateMemorySound(const void* pArchive, void* pMem, u32 size);
+    void create_sound(nw4r::snd::SoundArchive* pArchive, bool loadGroup);
+
+    static OSMutex sMutex;
 
 private:
     static HomeButton* spHomeButtonObj;
-    static OSMutex sMutex;
 
     // TODO(kiwi) Document states
     eSeq mSequence;                                            // at 0x0

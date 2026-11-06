@@ -27,7 +27,6 @@ bool fn_27_77A88(soGeneralTermDisideModuleImpl* module, int termId, soGeneralTer
 acCmdArg fn_27_778CC(soGeneralTerm* term, int index);
 
 // Rotates the vector by the rotation part of the matrix (main binary).
-void fn_8003E3BC(const Matrix* mtx, const Vec3f* in, Vec3f* out);
 
 }
 
@@ -378,7 +377,7 @@ bool emGeneralTermDisideModuleImpl::checkEstablishSub(int termId, soGeneralTerm*
         } else if (termId == 10038 || termId == 10041 || termId == 10044 || termId == 10047) {
             axis = Vec3f(0.0f, 0.0f, -1.0f);
         }
-        fn_8003E3BC(&nodeMtx, &axis, &axis);
+        nodeMtx.mulVec(&axis, &axis);
         int p2;
         READ_INT_VAR_FROM_FLOAT(arg1, moduleAccesser, p2);
         Vec2f range;

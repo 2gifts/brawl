@@ -91,13 +91,11 @@ struct ftPokeLizardonArticleKind : wnArticleKindInfo {
 
 // The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
 extern "C" void* fn_27_148198(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148228(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_14823C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 // Keep explicit holder bodies where the pool calls them out of line.
 FT_DEFINE_ARTICLE_HOLDER(, wnPokeLizardonBreath, wnPokeLizardonBreathData, 0, ftPokeLizardonArticleKind, fn_27_148198)
-FT_DEFINE_ARTICLE_HOLDER(, wnPokeLizardonRock, wnPokeLizardonRockData, 1, ftPokeLizardonArticleKind, fn_27_148228)
-FT_DEFINE_ARTICLE_HOLDER(, wnPokeLizardonRockStone, wnPokeLizardonRockStoneData, 2, ftPokeLizardonArticleKind, fn_27_14823C)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(, wnPokeLizardonRock, const wnPokeLizardonRockData, 1, ftPokeLizardonArticleKind, getWeaponData<wnPokeLizardonRockData>)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(, wnPokeLizardonRockStone, const wnPokeLizardonRockStoneData, 2, ftPokeLizardonArticleKind, getWeaponData<wnPokeLizardonRockStoneData>)
 
 // ---- the articles and their mediator --------------------------------------------------------------------------------
 

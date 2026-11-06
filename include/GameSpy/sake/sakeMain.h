@@ -76,7 +76,9 @@ extern char lbl_80490DF4[0x47];    // upload url format
 extern char lbl_80490E3C[0x12];
 extern char lbl_80490E50[0xE];
 extern char lbl_8059FBD8[4];       // "%d"
-extern char lbl_80491088[9];       // "recordid"
+extern char lbl_8059FC00[4];       // "ns1"
+extern char lbl_8059FC20[8];       // "tableid"
+extern char lbl_80491088[9];      // "recordid"
 extern SAKEIRequestInfo lbl_80491104;  // create record request info
 
 
@@ -95,6 +97,14 @@ int fn_8038DD48(SAKERequest request, SAKEIRequestInfo* info);          // sakeiS
 int fn_8038E268(SAKERequest request);                                  // create record: read the record id
 int fn_8038E2AC(SAKERequest request);                                  // sakeiStartCreateRecordRequest
 int fn_8038E370(SAKERequest request);                                  // validate input
+int sakeGetStartRequestResult(SAKE sake);
+void sakeSetGame(SAKE sake, const char* gameName, int gameId, const char* secretKey);
+int sakeiCreateRecordFillSoapRequest(SAKERequest request);
+int sakeiUpdateRecordValidateInput(SAKERequest request);
+int sakeiUpdateRecordFillSoapRequest(SAKERequest request);
+int sakeiDeleteRecordFillSoapRequest(SAKERequest request);
+int sakeiValidateRequestFields(void* fields, int numFields);
+int sakeiFillSoapRequestFieldValues(SAKERequest request, void* fields, int numFields);
 
 #ifdef __cplusplus
 }

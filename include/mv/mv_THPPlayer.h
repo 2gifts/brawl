@@ -85,6 +85,7 @@ BOOL ProperTimingForGettingNextFrame();
 s32 THPPlayerDrawCurrentFrame(int width, int height, int x, int y, int polygonWidth, int polygonHeight);
 extern "C" BOOL THPInit();
 extern "C" BOOL DVDOpen(const char* path, DVDFileInfo* fileInfo);
+extern "C" BOOL DVDClose(DVDFileInfo* fileInfo);
 extern "C" u32 VIGetNextField();
 
 void SetTHPPlayerWork(void* work);
@@ -104,3 +105,11 @@ void THPPlayerDrawDone();
 u32 GetAudioSample(s16* right, s16* left, u32 count, s32* status);
 void FillStreamBuffer(s16* right, s16* left, u32 count);
 void THPPlayerGetStreamAXPB(_AXVPB** right, _AXVPB** left);
+
+u32 GetSizeTHPPlayerWork();
+void FreeTHPPlayerWork();
+s32 THPPlayerGetState();
+BOOL THPPlayerClose();
+BOOL THPPlayerPause();
+BOOL THPPlayerPlay();
+void StreamReInit();

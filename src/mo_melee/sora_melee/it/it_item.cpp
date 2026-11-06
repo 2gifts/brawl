@@ -879,6 +879,20 @@ BaseItem* BaseItem::getCreaterItem() {
     return item;
 }
 
+// HYPOTHESIS: the item's motion module sits at 0xC08.
+void BaseItem::changeMotion(int motionKind, bool keepFrame) {
+    soMotionChangeParam param;
+    float frame = keepFrame == true ? embedded<soMotionModule>(this, 0xC08).getFrame() : 0.0f;
+    param.m_kind = motionKind;
+    param.m_frame = frame;
+    param.m_rate = 1.0f;
+    param._12 = 0;
+    param._13 = 0;
+    param._14 = keepFrame;
+    param._15 = 0;
+    embedded<soMotionModule>(this, 0xC08).changeMotionRequest(&param);
+}
+
 // Hides or shows the item; the effects follow it unless the "sync visibility" flag is off. The Force variant also
 // pauses the effects while the item is hidden.
 void BaseItem::setVisibilityWhole(u8 visible) {

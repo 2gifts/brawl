@@ -96,7 +96,7 @@ ftWolf::ftWolf(s32 entryId,
     ftReflectorGroupDraft reflectorGroup;
     void* reflectorRecord = *reinterpret_cast<void**>(reinterpret_cast<u8*>(m_commonData) + 0x90);
     FT_REFLECTOR_GROUP_CLEAR(reflectorGroup);
-    fn_27_195B34(reflectorRecord, reflectorShape, &reflectorGroup);
+    ftUtil::convertReflectorData(reflectorRecord, reflectorShape, &reflectorGroup);
     m_moduleAccesser->getCollisionReflectorModule().add(reinterpret_cast<soCollisionReflectorGroupData*>(&reflectorGroup), 2);
     m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
     getPhysicsModule(m_moduleAccesser).unk54(0);
@@ -263,12 +263,11 @@ struct ftWolfArticleKind : wnArticleKindInfo {
 extern "C" void* fn_27_1484BC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1486C8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_14875C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1487F0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 // Keep explicit holder bodies where the pool calls them out of line.
 FT_DEFINE_ARTICLE_HOLDER(inline, wnWolfBlaster, wnWolfBlasterData, 0, ftWolfArticleKind, fn_27_1486C8)
 FT_DEFINE_ARTICLE_HOLDER(, wnWolfBlasterBullet, wnWolfBlasterBulletData, 1, ftWolfArticleKind, fn_27_14875C)
-FT_DEFINE_ARTICLE_HOLDER(, wnWolfIllusion, wnWolfIllusionData, 2, ftWolfArticleKind, fn_27_1487F0)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(, wnWolfIllusion, const wnWolfIllusionData, 2, ftWolfArticleKind, getWeaponData<wnWolfIllusionData>)
 FT_DEFINE_ARTICLE_HOLDER(inline, wnFoxLandMaster, wnFoxLandMasterData, 3, ftWolfArticleKind, fn_27_1484BC)
 
 // ---- the articles of Wolf and their mediator -----------------------------------------------------------------------

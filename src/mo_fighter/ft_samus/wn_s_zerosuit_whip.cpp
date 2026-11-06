@@ -1,5 +1,46 @@
+#define WN_WEAPON_NO_COMMON_ENERGIES
+#define MT_VEC3F_IMPLICIT_ASSIGN
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define FT_REL_LINK_EXTERN
 #include <types.h>
+#include <wn/wn_module_accesser_builder.h>
 #include <wn/samus/wn_s_zerosuit_whip.h>
+#include <so/so_module_accesser.h>
+#include <so/status/so_status_module_impl.h>
+#include <wn/wn_activate_desc.h>
+
+extern soStatusUniqProcess g_wnLassoStatusUniqProcessMotionShoot;
+extern soStatusUniqProcess g_wnLassoStatusUniqProcessExhaust;
+extern soStatusUniqProcess g_wnLassoStatusUniqProcessRewind;
+extern soStatusUniqProcess g_wnLassoStatusUniqProcessMotionPull;
+extern soStatusUniqProcess g_wnLassoStatusUniqProcessHang;
+extern soStatusUniqProcess g_wnLassoStatusUniqProcessHangRewind;
+extern soStatusUniqProcess g_wnLassoStatusUniqProcessReach;
+extern soStatusUniqProcess g_wnLassoStatusUniqProcessFailure;
+
+wnSZerosuitWhip::wnSZerosuitWhip(s32 articleId, const wnArticleBuildInfo& info, const wnSZerosuitWhipData* data) :
+    wnWeaponBuilder<wnSZerosuitWhipModuleAccesserBuildConfig>(
+        "SZerosuitWhip", articleId, info,
+        wnModuleAccesserBuildData(0x41, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
+                                  0, 0, 0, 0, 0, 0, 0)),
+    m_param(data->m_param), m_paramAccesser(data->m_param) {
+    soStatusUniqProcess* uniqProcs[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    uniqProcs[1] = &g_wnLassoStatusUniqProcessMotionShoot;
+    uniqProcs[2] = &g_wnLassoStatusUniqProcessExhaust;
+    uniqProcs[3] = &g_wnLassoStatusUniqProcessRewind;
+    uniqProcs[4] = &g_wnLassoStatusUniqProcessMotionPull;
+    uniqProcs[5] = &g_wnLassoStatusUniqProcessHang;
+    uniqProcs[6] = &g_wnLassoStatusUniqProcessHangRewind;
+    uniqProcs[7] = &g_wnLassoStatusUniqProcessReach;
+    uniqProcs[8] = &g_wnLassoStatusUniqProcessFailure;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 9);
+    m_moduleAccesser->getWorkManageModule().setInt(-1, 0x10000007);
+    Weapon::deactivate(false);
+}
 
 // Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
 extern "C" {

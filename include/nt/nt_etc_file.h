@@ -60,3 +60,16 @@ public:
     virtual ~nteFileDataSetting();
     void* unkC;
 };
+
+// HYPOTHESIS: the replay data object, same layout as nteFileDataStage.
+class nteFileDataReplay {
+public:
+    u32 unk0;
+    Heaps::HeapType unk4;
+    virtual ~nteFileDataReplay();
+    u8* unkC;
+    u32 unk10;
+
+    nteFileDataReplay(Heaps::HeapType heap);
+    void setData(void* data, u32 size);
+};

@@ -121,6 +121,8 @@ public:
     itArchive* preloadItemKindArchive(itKind kind, u32 variation, itArchive::Type archiveType, bool);
     itGenSheetKind getRandBasicItemSheet();
     int lotCreateItem(soArray<BaseItem*>* items, itGenSheetKind sheet, itGenId genId, Vec3f* pos, int createOwnerTaskId, int ownerTaskId, itKind kind);
+    bool isSmashPlate(u32 taskId);
+    int lotCreateItem(itGenSheetKind sheet, itGenId genId, Vec3f* pos, int createOwnerTaskId, int ownerTaskId, itKind kind);
     int safeLotCreateItem(itGenSheetKind sheet, itGenId genId, Vec3f* safePos, Vec3f* pos, int createOwnerTaskId, int ownerTaskId, itKind kind);
     int safeLotCreateItem(soArray<BaseItem*>* items, itGenSheetKind sheet, itGenId genId, Vec3f* safePos, Vec3f* pos, int createOwnerTaskId, int ownerTaskId, itKind kind);
     ItemKind getLotOneItemKind(itGenSheetKind* sheetKind, itGenId genKind, ItemSwitch* itemSwitch = NULL, bool unk = false);

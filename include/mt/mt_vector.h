@@ -116,6 +116,7 @@ public:
 
     // HYPOTHESIS: native calls pass vector addresses; original reference qualifiers are unresolved.
     float mtVecAngle(Vec2f& other);
+    void add(Vec2f* other, Vec2f* out);
 
     // MATCH-ONLY: const only for mt_vector.cpp, whose const members call it; the other units were matched against the
     // non-const declaration, and the const one changes their float register allocation (clCircle2D::checkIntersect,

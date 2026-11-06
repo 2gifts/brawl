@@ -712,40 +712,27 @@ struct ftSnakeArticleBuildInfo : wnArticleBuildInfo {
     }
 };
 
-// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
-extern "C" void* fn_27_147F38(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_147F4C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_147F74(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_147F88(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_147F9C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_147FB0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_147FC4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_147FEC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148000(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148014(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148028(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_14803C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 // Every article of the fighter is built from the data of the fighter kind; the data lookup is called in the argument
 // list, after the descriptor (the inline holder constructors are spliced into the article manage builder).
 #define FT_SNAKE_ARTICLE_HOLDER(W, DATA, ID, GETTER) \
     template <> inline wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc), \
         m_instance(ID, ftSnakeArticleBuildInfo(ftSnakeArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), \
-                   static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, ftSnakeArticleKind().getSubKind(), \
+                   static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(ftSnakeArticleKind().getSubKind(), \
                                                    &ftSnakeArticleDataTag().get().m_resourceGroup))) { }
 
-FT_SNAKE_ARTICLE_HOLDER(wnSnakeMine, wnSnakeMineData, 0, fn_27_147F38)
-FT_SNAKE_ARTICLE_HOLDER(wnSnakeTrenchMortar, wnSnakeTrenchMortarData, 1, fn_27_147F4C)
-FT_SNAKE_ARTICLE_HOLDER(wnSnakeRpg7, wnSnakeRpg7Data, 2, fn_27_147F74)
-FT_SNAKE_ARTICLE_HOLDER(wnSnakeCypher, wnSnakeCypherData, 3, fn_27_147F88)
-FT_SNAKE_ARTICLE_HOLDER(wnSnakeC4, wnSnakeC4Data, 4, fn_27_147F9C)
-FT_SNAKE_ARTICLE_HOLDER(wnSnakeC4Switch, wnSnakeC4SwitchData, 5, fn_27_147FB0)
-FT_SNAKE_ARTICLE_HOLDER(wnSnakeNikita, wnSnakeNikitaData, 6, fn_27_147FC4)
-FT_SNAKE_ARTICLE_HOLDER(wnSnakeLadder, wnSnakeLadderData, 7, fn_27_147FEC)
-FT_SNAKE_ARTICLE_HOLDER(wnSnakeRgb6, wnSnakeRgb6Data, 8, fn_27_148000)
-FT_SNAKE_ARTICLE_HOLDER(wnSnakeRgb6Sight, wnSnakeRgb6SightData, 9, fn_27_148014)
-FT_SNAKE_ARTICLE_HOLDER(wnSnakeRgb6Clip, wnSnakeRgb6ClipData, 10, fn_27_148028)
-FT_SNAKE_ARTICLE_HOLDER(wnSnakeRgb6Bullet, wnSnakeRgb6BulletData, 11, fn_27_14803C)
+FT_SNAKE_ARTICLE_HOLDER(wnSnakeMine, wnSnakeMineData, 0, getWeaponData<wnSnakeMineData>)
+FT_SNAKE_ARTICLE_HOLDER(wnSnakeTrenchMortar, wnSnakeTrenchMortarData, 1, getWeaponData<wnSnakeTrenchMortarData>)
+FT_SNAKE_ARTICLE_HOLDER(wnSnakeRpg7, wnSnakeRpg7Data, 2, getWeaponData<wnSnakeRpg7Data>)
+FT_SNAKE_ARTICLE_HOLDER(wnSnakeCypher, wnSnakeCypherData, 3, getWeaponData<wnSnakeCypherData>)
+FT_SNAKE_ARTICLE_HOLDER(wnSnakeC4, wnSnakeC4Data, 4, getWeaponData<wnSnakeC4Data>)
+FT_SNAKE_ARTICLE_HOLDER(wnSnakeC4Switch, wnSnakeC4SwitchData, 5, getWeaponData<wnSnakeC4SwitchData>)
+FT_SNAKE_ARTICLE_HOLDER(wnSnakeNikita, wnSnakeNikitaData, 6, getWeaponData<wnSnakeNikitaData>)
+FT_SNAKE_ARTICLE_HOLDER(wnSnakeLadder, wnSnakeLadderData, 7, getWeaponData<wnSnakeLadderData>)
+FT_SNAKE_ARTICLE_HOLDER(wnSnakeRgb6, wnSnakeRgb6Data, 8, getWeaponData<wnSnakeRgb6Data>)
+FT_SNAKE_ARTICLE_HOLDER(wnSnakeRgb6Sight, wnSnakeRgb6SightData, 9, getWeaponData<wnSnakeRgb6SightData>)
+FT_SNAKE_ARTICLE_HOLDER(wnSnakeRgb6Clip, wnSnakeRgb6ClipData, 10, getWeaponData<wnSnakeRgb6ClipData>)
+FT_SNAKE_ARTICLE_HOLDER(wnSnakeRgb6Bullet, wnSnakeRgb6BulletData, 11, getWeaponData<wnSnakeRgb6BulletData>)
 
 
 // The two simple articles (the shared generic article) are built from the simple data of the fighter kind.

@@ -74,7 +74,7 @@ ftZelda::ftZelda(s32 entryId,
     u8 shape[0x20];
     ftReflectorGroupDraft group;
     FT_REFLECTOR_GROUP_CLEAR(group);
-    fn_27_195B34(reflectorRecord, shape, &group);
+    ftUtil::convertReflectorData(reflectorRecord, shape, &group);
     m_moduleAccesser->getCollisionReflectorModule().add(reinterpret_cast<soCollisionReflectorGroupData*>(&group), 2);
     m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
     getPhysicsModule(m_moduleAccesser).unk6C(0x4B);
@@ -131,17 +131,12 @@ struct ftZeldaArticleKind : wnArticleKindInfo {
     }
 };
 
-// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
-extern "C" void* fn_27_148330(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148344(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148358(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_14836C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 // Keep explicit holder bodies where the pool calls them out of line.
-FT_DEFINE_ARTICLE_HOLDER(, wnZeldaDein, wnZeldaDeinData, 0, ftZeldaArticleKind, fn_27_148330)
-FT_DEFINE_ARTICLE_HOLDER(, wnZeldaDeinS, wnZeldaDeinSData, 1, ftZeldaArticleKind, fn_27_148344)
-FT_DEFINE_ARTICLE_HOLDER(inline, wnZeldaLightingBow, wnZeldaLightingBowData, 2, ftZeldaArticleKind, fn_27_148358)
-FT_DEFINE_ARTICLE_HOLDER(inline, wnZeldaLightingBowArrow, wnZeldaLightingBowArrowData, 3, ftZeldaArticleKind, fn_27_14836C)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(, wnZeldaDein, const wnZeldaDeinData, 0, ftZeldaArticleKind, getWeaponData<wnZeldaDeinData>)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(, wnZeldaDeinS, const wnZeldaDeinSData, 1, ftZeldaArticleKind, getWeaponData<wnZeldaDeinSData>)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(inline, wnZeldaLightingBow, const wnZeldaLightingBowData, 2, ftZeldaArticleKind, getWeaponData<wnZeldaLightingBowData>)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(inline, wnZeldaLightingBowArrow, const wnZeldaLightingBowArrowData, 3, ftZeldaArticleKind, getWeaponData<wnZeldaLightingBowArrowData>)
 
 // ---- the articles and their mediator --------------------------------------------------------------------------------
 

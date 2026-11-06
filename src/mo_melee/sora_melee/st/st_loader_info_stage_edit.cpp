@@ -11,7 +11,6 @@ void fn_8010F4AC(IfStgeditMngr* mngr, int unk);
 bool fn_8010F624(IfStgeditMngr* mngr);
 void fn_8010F754(IfStgeditMngr* mngr);
 void fn_8010F7EC(IfStgeditMngr* mngr);
-void fn_8010F8FC(IfStgeditMngr* mngr);
 }
 
 static stLoaderSandBagMarker sMarkerA(0xFF, 0);
@@ -64,7 +63,7 @@ void stLoaderInfoStageEdit::entryEntity() {
     if (lbl_805A0350 != NULL) {
         if (!m_isModelCreated) {
             fn_8010F7EC(lbl_805A0350);
-            fn_8010F8FC(lbl_805A0350);
+            lbl_805A0350->startMelee();
             m_isModelCreated = true;
         }
         lbl_805A0350->setVisible(m_isVisible);

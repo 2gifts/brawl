@@ -3,7 +3,6 @@
 #include <sora_adv_stage/gr_adventure_mine_manager.h>
 
 // Matrix::copy (the map name); mt_matrix.cpp defines it by this stand-in name.
-extern "C" void fn_8003E388(const Matrix* src, Matrix* dst);
 
 void grAdventureMineManager::update(float deltaFrame) {
     grGimmick::update(deltaFrame);
@@ -19,7 +18,7 @@ void grAdventureMineManager::update(float deltaFrame) {
             Matrix copied(true);
             Matrix matrix(true);
             m_sceneModels[0]->GetScnMtxPos(&matrix, nw4r::g3d::ScnObj::MTX_WORLD, i + 1);
-            fn_8003E388(&matrix, &copied);
+            matrix.copy(&copied);
             unk174[static_cast<int>(i)]->setMatrix(&copied);
         }
         (this->*flows[unk174[i]->unk15C])(i, deltaFrame);

@@ -5,6 +5,7 @@
 #include <types.h>
 
 class IfSnapSaveTask;
+class gfTask;
 class MuObject;
 namespace nw4r { namespace g3d { class ScnGroup; } }
 
@@ -33,7 +34,7 @@ public:
     IfSnapSaveTask* unk12C;
     s32 unk130;
     u8 unk134;
-    s32 unk138;
+    gfTask* unk138;
     void* unk13C;
     s32 unk140;
     u8 unk144;
@@ -43,10 +44,12 @@ public:
 
     // HYPOTHESIS: parameter types follow the manager's create call and register use.
     IfAdvPause(int arg1, int arg2);
+    ~IfAdvPause();
     static IfAdvPause* create(int arg1, int arg2);
     void exitPause();
     void destroyModel();
     void drawCameraGuide(int visible);
+    void createModel(nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2);
     void createObjResFile(const void* nodeInfo, s32 nodeCount, nw4r::g3d::ResFile* resFile);
     void photoStepNoneInit();
     void photoStepCameraMoveInit();

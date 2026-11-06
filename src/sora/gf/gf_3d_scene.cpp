@@ -286,3 +286,9 @@ gfSceneRoot::Layer::~Layer() {
     unk4->Destroy();
     unk0 = 0;
 }
+
+#include <nw4r/g3d/g3d_scngroup.h>
+
+void gfSceneRoot::layerUpdateFrame(int layer) {
+    unk38C[layer].unk4->G3dProc(8, 0, 0);
+}

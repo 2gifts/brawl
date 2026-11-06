@@ -669,7 +669,7 @@ struct ftReflectorShape {
     u32 m_enable : 1;
     u32 m_rest : 22;
 };
-extern "C" void fn_27_195B34(const void* record, void* shapeOut, void* groupOut) {
+void ftUtil::convertReflectorData(const void* record, void* shapeOut, void* groupOut) {
     const ftReflectorRecord* rec = static_cast<const ftReflectorRecord*>(record);
     ftReflectorShape* shape = static_cast<ftReflectorShape*>(shapeOut);
     ftReflectorGroupDraft* group = static_cast<ftReflectorGroupDraft*>(groupOut);

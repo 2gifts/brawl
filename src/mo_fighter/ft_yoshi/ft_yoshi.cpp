@@ -29,7 +29,6 @@
 
 namespace ftyoshi { template <class T> T ABS(T); }
 // Existing rotate-only matrix transform; unlike mulPos, it omits translation.
-extern "C" void fn_8003E3BC(const Matrix*, const Vec3f*, Vec3f*);
 
 #define FT_BC ftYoshiBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -270,7 +269,7 @@ bool ftYoshi::activeArticle(wnYoshiFireBreath* article, soModuleAccesser* acc) {
     Vec3f mouthOffset(0.0f, param->unk44, param->unk40);
     Matrix mouthMatrix(true);
     acc->getModelModule().getNodeGlobalMtx(0x26, &mouthMatrix, false);
-    fn_8003E3BC(&mouthMatrix, &mouthOffset, &position);
+    mouthMatrix.mulVec(&mouthOffset, &position);
     Vec3f mouthPosition = acc->getModelModule().getNodeGlobalPosition(0x26, false);
     Vec3fAdd(&position, &position, &mouthPosition);
     soWorkManageModule& work = acc->getWorkManageModule();

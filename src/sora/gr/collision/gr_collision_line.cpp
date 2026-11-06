@@ -4,11 +4,9 @@
 #include <types.h>
 
 extern grCollisionManager* lbl_805A0360;
-// HYPOTHESIS: grCollision::getJointByLineId (gr_collision.o).
 // HYPOTHESIS: grCollision::getLine1(u16) (gr_collision.o). Kept as a stand-in: the original callers pass the s16 line id
 // without the clrlwi that a call through the u16 member would add.
 extern "C" grCollisionLine* fn_80111B60(grCollision* collision, int index);
-extern "C" grCollisionJoint* fn_80111BF0(grCollision* collision, int lineId);
 // HYPOTHESIS: grCollision::getLineId (gr_collision.o).
 extern "C" u32 fn_80111C70(grCollision* collision, grCollisionLine* line);
 
@@ -41,7 +39,7 @@ bool grCollisionLineWork::getPrevVirtual(grCollisionLineWork* out) const {
     if (lineId != -1) {
         grCollision* collision = lbl_805A0360->getCollision(m_collisionLine->m_unk8);
         if (collision != NULL) {
-            grCollisionJoint* joint = fn_80111BF0(collision, lineId);
+            grCollisionJoint* joint = collision->getJointByLineId(lineId);
             if (joint != NULL) {
                 out->m_collisionLine = fn_80111B60(collision, lineId);
                 out->m_collisionJoint = joint;
@@ -68,7 +66,7 @@ bool grCollisionLineWork::getNextVirtual(grCollisionLineWork* out) const {
     if (lineId != -1) {
         grCollision* collision = lbl_805A0360->getCollision(m_collisionLine->m_unk9);
         if (collision != NULL) {
-            grCollisionJoint* joint = fn_80111BF0(collision, lineId);
+            grCollisionJoint* joint = collision->getJointByLineId(lineId);
             if (joint != NULL) {
                 out->m_collisionLine = fn_80111B60(collision, lineId);
                 out->m_collisionJoint = joint;

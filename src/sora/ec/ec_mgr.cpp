@@ -222,3 +222,25 @@ void ecMgr::killEffectGroup(u32 group, u32 mask, bool immediate, bool release, i
         }
     }
 }
+
+bool ecMgr::isExistEffect(u32 handleId) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    return work != 0;
+}

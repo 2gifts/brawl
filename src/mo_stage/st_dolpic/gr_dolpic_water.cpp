@@ -4,7 +4,6 @@
 #include <st_dolpic/gr_dolpic.h>
 
 // scale(in, scale, out) of main: scales the rotation part of a matrix
-extern "C" void fn_8003E828(Matrix* in, Vec3f* scale, Matrix* out);
 
 inline grDolpicWater::grDolpicWater(const char* taskName) : grDolpic(taskName) {
     m_mtxWork = NULL;
@@ -48,7 +47,7 @@ void grDolpicWater::updateCallBack(float deltaFrame) {
             Matrix mtx = *m_mtxWork;
             Vec3f scale;
             scale = m_scaleBase * 0.9f;
-            fn_8003E828(&mtx, &scale, &mtx);
+            mtx.scale(&scale, &mtx);
             calcWorldCallBack->m_nodeCallbackDatas->m_matrix = mtx;
         }
     }

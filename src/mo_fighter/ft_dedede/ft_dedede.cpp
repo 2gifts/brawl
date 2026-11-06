@@ -232,11 +232,7 @@ struct ftDededeArticleBuildInfo : wnArticleBuildInfo {
 };
 
 // The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
-extern "C" void* fn_27_1488D4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1488E8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148910(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1488FC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1489A4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 template <class W> struct ftDededeArticleTraits;
 #define FT_DEDEDE_TRAITS(W, DATA, ID, GETTER) \
@@ -247,12 +243,20 @@ template <class W> struct ftDededeArticleTraits;
             return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Dedede, &tag.m_resourceGroup)); \
         } \
     };
+#define FT_DEDEDE_TRAITS_MEMBER(W, DATA, ID, GETTER) \
+    template <> struct ftDededeArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftDededeArticleDataTag tag; \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Dedede, &tag.m_resourceGroup)); \
+        } \
+    };
 
-FT_DEDEDE_TRAITS(wnDededeStar, wnDededeStarData, 0, fn_27_1488D4)
-FT_DEDEDE_TRAITS(wnDededeJethammer, wnDededeJethammerData, 1, fn_27_1488E8)
+FT_DEDEDE_TRAITS_MEMBER(wnDededeStar, wnDededeStarData, 0, getWeaponData<wnDededeStarData>)
+FT_DEDEDE_TRAITS_MEMBER(wnDededeJethammer, wnDededeJethammerData, 1, getWeaponData<wnDededeJethammerData>)
 FT_DEDEDE_TRAITS(wnDededeStarmissile, wnDededeStarmissileData, 2, fn_27_148910)
-FT_DEDEDE_TRAITS(wnDededeWaddledooBeam, wnDededeWaddledooBeamData, 3, fn_27_1488FC)
-FT_DEDEDE_TRAITS(wnDededeFollower, wnDededeFollowerData, 4, fn_27_1489A4)
+FT_DEDEDE_TRAITS_MEMBER(wnDededeWaddledooBeam, wnDededeWaddledooBeamData, 3, getWeaponData<wnDededeWaddledooBeamData>)
+FT_DEDEDE_TRAITS_MEMBER(wnDededeFollower, wnDededeFollowerData, 4, getWeaponData<wnDededeFollowerData>)
 
 // Every article of the fighter is built by this constructor from the data of the fighter kind.
 template <class W>

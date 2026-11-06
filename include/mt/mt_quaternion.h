@@ -10,6 +10,8 @@ public:
     float m_z;
     float m_w;
 
+    void mul(const Quat* other, Quat* out) const;
+
     Quat() { }
     Quat(const Quat& orig) {
         m_x = orig.m_x;

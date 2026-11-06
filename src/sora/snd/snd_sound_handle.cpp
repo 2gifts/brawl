@@ -116,3 +116,7 @@ void Doubutsugo::StartDirect(const s16* words) {
         unk38 = 0;
     }
 }
+
+bool Doubutsugo::IsAvailable() {
+    return unk0 != 0;
+}

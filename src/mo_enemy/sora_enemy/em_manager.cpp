@@ -20,8 +20,6 @@ void fn_27_6FDE0(u32 index);
 int fn_27_8CC68(StageObject* object, int areaId);
 // HYPOTHESIS: utArchiveManager's registration of an archive; returns its resource id.
 u32 fn_800455E0(utArchiveManager* manager, gfArchive* archive);
-// The load state of a resource id (0: not loaded), as in itGenArchive::isComp.
-s32 fn_80045DC0(utArchiveManager* manager, u32 resourceId, s32 flag);
 // HYPOTHESIS: utArchiveManager's release of a resource id.
 void fn_80045E64(utArchiveManager* manager, u32 resourceId);
 
@@ -499,25 +497,25 @@ emArchive::~emArchive() {
 bool emArchive::checkLoadFiles() {
     if (paramResourceId != InvalidResourceId) {
         utArchiveManager* manager = soArchiveDb::getManager(1);
-        if (fn_80045DC0(manager, paramResourceId, 0) == 0) {
+        if (manager->getLoadResult(paramResourceId, nullptr) == 0) {
             return false;
         }
     }
     if (brresResourceId != InvalidResourceId) {
         utArchiveManager* manager = soArchiveDb::getManager(1);
-        if (fn_80045DC0(manager, brresResourceId, 0) == 0) {
+        if (manager->getLoadResult(brresResourceId, nullptr) == 0) {
             return false;
         }
     }
     if (enmCommonResourceId != InvalidResourceId) {
         utArchiveManager* manager = soArchiveDb::getManager(1);
-        if (fn_80045DC0(manager, enmCommonResourceId, 0) == 0) {
+        if (manager->getLoadResult(enmCommonResourceId, nullptr) == 0) {
             return false;
         }
     }
     if (extendBrresResourceId != InvalidResourceId) {
         utArchiveManager* manager = soArchiveDb::getManager(1);
-        if (fn_80045DC0(manager, extendBrresResourceId, 0) == 0) {
+        if (manager->getLoadResult(extendBrresResourceId, nullptr) == 0) {
             return false;
         }
     }

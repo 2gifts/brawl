@@ -109,7 +109,7 @@ ftFox::ftFox(s32 entryId,
     ftReflectorGroupDraft reflectorGroup;
     void* reflectorRecord = *reinterpret_cast<void**>(reinterpret_cast<u8*>(m_commonData) + 0x90);
     FT_REFLECTOR_GROUP_CLEAR(reflectorGroup);
-    fn_27_195B34(reflectorRecord, reflectorShape, &reflectorGroup);
+    ftUtil::convertReflectorData(reflectorRecord, reflectorShape, &reflectorGroup);
     m_moduleAccesser->getCollisionReflectorModule().add(reinterpret_cast<soCollisionReflectorGroupData*>(&reflectorGroup), 2);
     m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
     getPhysicsModule(m_moduleAccesser).unk54(0);
@@ -290,7 +290,6 @@ struct ftFoxArticleBuildInfo : wnArticleBuildInfo {
 extern "C" void* fn_27_1484BC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148380(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148414(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1484A8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 template <class W> struct ftFoxArticleTraits;
 #define FT_FOX_TRAITS(W, DATA, ID, GETTER) \
@@ -301,10 +300,18 @@ template <class W> struct ftFoxArticleTraits;
             return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Fox, &tag.m_resourceGroup)); \
         } \
     };
+#define FT_FOX_TRAITS_MEMBER(W, DATA, ID, GETTER) \
+    template <> struct ftFoxArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftFoxArticleDataTag tag; \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Fox, &tag.m_resourceGroup)); \
+        } \
+    };
 
 FT_FOX_TRAITS(wnFoxBlaster, wnFoxBlasterData, 0, fn_27_148380)
 FT_FOX_TRAITS(wnFoxBlasterBullet, wnFoxBlasterBulletData, 1, fn_27_148414)
-FT_FOX_TRAITS(wnFoxIllusion, wnFoxIllusionData, 2, fn_27_1484A8)
+FT_FOX_TRAITS_MEMBER(wnFoxIllusion, wnFoxIllusionData, 2, getWeaponData<wnFoxIllusionData>)
 FT_FOX_TRAITS(wnFoxLandMaster, wnFoxLandMasterData, 3, fn_27_1484BC)
 
 // Every article of the fighter is built by this constructor from the data of the fighter kind.

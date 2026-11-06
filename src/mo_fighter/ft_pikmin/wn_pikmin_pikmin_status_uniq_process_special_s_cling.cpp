@@ -13,7 +13,6 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
-extern "C" void fn_8003E3BC(const Matrix*, const Vec3f*, Vec3f*);
 
 // HYPOTHESIS: the Pikmin article that clings to a fighter (Special S, the thrown Pikmin that holds on to the victim): the exit
 // takes the model constraint off, faces the Pikmin the way the node it hung on pointed and links it back to its owner (the
@@ -47,7 +46,7 @@ void wnPikminPikminStatusUniqProcessSpecialSCling::exitStatus(soModuleAccesser* 
         pos.m_z = moduleAccesser->getGroundModule().getZ();
         moduleAccesser->getPostureModule().setPos(&pos);
         Vec3f dir(0.0f, 0.0f, 1.0f);
-        fn_8003E3BC(&mtx, &dir, &dir);
+        mtx.mulVec(&dir, &dir);
         float dirX = dir.m_x;
         float dirZ = dir.m_z;
         float angle = soRotUtility::clampRad((float)atan2(dirZ, dirX));

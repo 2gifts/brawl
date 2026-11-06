@@ -1,6 +1,7 @@
 #include <types.h>
 #include <FAT/pf2.h>
 #include <revolution/FA/FA.h>
+#include <FAT/fa_api.h>
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
 unsigned char lbl_80597FB0[0x68] __attribute__((aligned(8))) = { 0 };
@@ -21,7 +22,7 @@ FAHandle* FAFopen(const char* filepath, const char* mode) {
     return handle;
 }
 
-int fn_803EC094(s8 arg0) {
+int FAIsWriteProtected(s8 arg0) {
     int result = fn_803EB8B4(arg0);
     if (result != 0 && result != 1) {
         result = -1;
@@ -40,7 +41,7 @@ int FAClosedir(FAHandle* handle) {
     return 0;
 }
 
-int fn_803EBE4C(void) {
+int FAErrnum(void) {
     int err = fn_803EB5FC();
 
     if (err == 5) {
@@ -97,7 +98,7 @@ int FAFstat(const char* filepath, FAStat* st) {
     return 0;
 }
 
-int fn_803EBF9C(s8 drv_char) {
+int FAGetdev(s8 drv_char) {
     int err = fn_803EB84C(drv_char);
 
     if (err != 0) {
@@ -106,7 +107,7 @@ int fn_803EBF9C(s8 drv_char) {
     return 0;
 }
 
-int fn_803EC0CC(const char* path) {
+int FAMkdir(const char* path) {
     int err = fn_803EB8F8(path);
 
     if (err != 0) {
@@ -115,7 +116,7 @@ int fn_803EC0CC(const char* path) {
     return 0;
 }
 
-int fn_803EC0F8(s8 drv_char) {
+int FAMount(s8 drv_char) {
     int err = fn_803EB948(drv_char);
 
     if (err != 0) {
@@ -133,13 +134,28 @@ FAHandle* FAOpendir(const char* path) {
     return dir;
 }
 
-void fn_803EC1BC(s8 drv_char) {
+int FARegistCB(int mode, void (*insert_cb)(s8 drv_char), void (*eject_cb)(s8 drv_char)) {
+    int result;
+
+    switch (mode) {
+    case 0:
+        lbl_80598080.unk0 = insert_cb;
+        lbl_80598080.unk4 = eject_cb;
+        result = pfd_sddrv_registar_callback(FANotifySDInsert, FANotifySDEject);
+        break;
+    default:
+        return -2;
+    }
+    return -(int)((u32)(-result | result) >> 31);
+}
+
+void FANotifySDInsert(s8 drv_char) {
     if (lbl_80598080.unk0) {
         lbl_80598080.unk0(drv_char);
     }
 }
 
-void fn_803EC1DC(s8 drv_char) {
+void FANotifySDEject(s8 drv_char) {
     if (lbl_80598080.unk4 == NULL) {
         return;
     }

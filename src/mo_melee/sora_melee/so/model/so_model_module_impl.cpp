@@ -48,7 +48,6 @@ extern "C" bool fn_80047C0C(s8* flags, u32 nodeId);
 extern "C" void fn_8004765C(nw4r::g3d::ScnMdl* shadowMdl, nw4r::g3d::ScnMdl* mdl, void* shadowNode, u32 numNodes);
 extern "C" void fn_80047FCC();
 extern "C" void fn_801B0A28();
-extern "C" void fn_8003E828(const Matrix* mtx, const Vec3f* scale, Matrix* out); // HYPOTHESIS: scales the matrix
 extern "C" void fn_8001A194(int, const Vec3f* axes, const Vec3f* pos); // HYPOTHESIS: debug axis render
 extern "C" void* fn_8018D310(const nw4r::g3d::ResFile* resFile, const char* name); // ResPltt lookup (st_croll.cpp)
 extern "C" void* fn_801AFF94(nw4r::g3d::ScnMdl::CopiedMatAccess* acc, bool);
@@ -954,7 +953,7 @@ void soModelModuleImpl::getNodeGlobalMtx(u32 nodeId, Matrix* outMtx, bool isSetU
         if (scale.m_x != 1.0f || scale.m_y != 1.0f || scale.m_z != 1.0f) {
             Vec3f scaleCopy;
             scaleCopy = scale;
-            fn_8003E828(outMtx, &scaleCopy, outMtx);
+            outMtx->scale(&scaleCopy, outMtx);
         }
     }
 }
@@ -997,7 +996,7 @@ Vec3f soModelModuleImpl::getNodeGlobalPosition(u32 nodeId, const Vec3f* offset, 
             scale.m_x = 1.0f / scale.m_x;
             scale.m_y = 1.0f / scale.m_y;
             scale.m_z = 1.0f / scale.m_z;
-            fn_8003E828(&mtx, &scale, &mtx);
+            mtx.scale(&scale, &mtx);
         }
     }
     if (offset->m_x != 0.0f || offset->m_y != 0.0f || offset->m_z != 0.0f) {

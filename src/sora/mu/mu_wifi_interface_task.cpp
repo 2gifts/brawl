@@ -4,6 +4,7 @@
 #include <nt/nt_net_report.h>
 #include <nt/network.h>
 #include <nt/nt_offline.h>
+#include <nt/nt_tr.h>
 #include <nt/nt_report.h>
 #include <string.h>
 #include <nt/nt_match.h>
@@ -14,7 +15,6 @@
 extern u32 g_NtAIDBitmap;
 
 extern "C" void fn_800CF22C(muWifiInterfaceTask* self);
-extern "C" void fn_80145D24(s32 arg0, void* arg1, s32 arg2, s32 arg3, s32 arg4);
 
 struct muWifiInterfaceTaskFields {
     char pad0[0x44];
@@ -63,7 +63,7 @@ void muWifiInterfaceTask::connect(bool arg0) {
         i += 1;
         offset += 0x89;
     } while (i < 0x40);
-    fn_80145D24(reinterpret_cast<NetworkFields*>(network)->unk38, fields->unk70, 0x218, 0x138, 4);
+    reinterpret_cast<NtTr*>(reinterpret_cast<NetworkFields*>(network)->unk38)->defineBroadcastArea(fields->unk70, 0x218, 0x138, 4);
     fn_800CF22C(this);
 }
 
@@ -104,7 +104,6 @@ extern "C" bool fn_8014592C(void* tr);
 extern "C" u64 fn_80052250();
 
 extern void* lbl_805A02A0;
-extern void* lbl_805A03A8;
 extern const muWifiErrorMsg lbl_80408488[];
 
 void muWifiInterfaceTask::destroy() {

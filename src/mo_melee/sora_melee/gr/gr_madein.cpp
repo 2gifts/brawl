@@ -1,6 +1,9 @@
 #include <gr/gr_madein.h>
 #include <types.h>
 
+// normalize/[Matrix]/(mt_matrix.o) (the map name); other files call it by this stand-in name.
+extern "C" void fn_8003E5B4(Matrix* mtx);
+
 void grMadein::setTgtNode(const char* unk1) { }
 
 char* grMadein::getTgtNode() {
@@ -33,4 +36,12 @@ void grMadein::pauseEntity(bool isPause) {
     } else {
         m_motionRatio = 1.0f;
     }
+}
+
+void grMadein::setMatrix(Matrix* matrix, bool followAttack) {
+    m_calcWorldCallBack.m_nodeCallbackDatas->m_matrix = *matrix;
+    if (!followAttack) {
+        fn_8003E5B4(&m_calcWorldCallBack.m_nodeCallbackDatas->m_matrix);
+    }
+    setPos(matrix);
 }

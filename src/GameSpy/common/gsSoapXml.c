@@ -2,6 +2,7 @@
 #include <string.h>
 #include <GameSpy/common/gsXML.h>
 #include <GameSpy/ghttp/ghttpConnection.h>
+#include "src/GameSpy/common/gsStringUtil.h"
 
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own. HYPOTHESIS: this unit spans
@@ -10,7 +11,7 @@
 // Checked: without this pragma 1 function in this unit stop matching.
 #pragma auto_inline off
 
-void fn_80362DD4(GSXmlStreamWriter stream) {
+void gsXmlFreeWriter(GSXmlStreamWriter stream) {
     GSIXmlStreamWriter* writer = stream;
 
     gsifree(writer->mBuffer);
@@ -42,11 +43,11 @@ GSSoapTask* fn_803621B8(const char* URL, const char* service, GSXmlStreamWriter 
         gsifree(aSoapTask);
         return NULL;
     }
-    aCoreTask->mCallbackFunc = fn_80362488;
+    aCoreTask->mCallbackFunc = gsiSoapTaskCallback;
     aCoreTask->mExecuteFunc = fn_80362384;
-    aCoreTask->mThinkFunc = fn_80362348;
-    aCoreTask->mCleanupFunc = fn_803624A8;
-    aCoreTask->mCancelFunc = fn_80362434;
+    aCoreTask->mThinkFunc = gsiSoapTaskThink;
+    aCoreTask->mCleanupFunc = gsiSoapTaskCleanup;
+    aCoreTask->mCancelFunc = gsiSoapTaskCancel;
     aCoreTask->mTaskData = aSoapTask;
     aSoapTask->mCoreTask = aCoreTask;
     fn_8035E87C(aCoreTask, 0);
@@ -65,14 +66,14 @@ int fn_803622B0(int request, int result, char* buffer, int bufferLen, void* para
         aSoapTask->mResponseSoap = reader;
         if (reader == NULL) {
             aSoapTask->mRequestResult = 1;
-        } else if (!fn_80362D50(reader, buffer, bufferLen)) {
+        } else if (!gsXmlParseBuffer(reader, buffer, bufferLen)) {
             aSoapTask->mRequestResult = 7;
         }
     }
     return 0;
 }
 
-int fn_80362348(void* taskData) {
+int gsiSoapTaskThink(void* taskData) {
     GSSoapTask* aSoapTask = taskData;
 
     if (aSoapTask->mCompleted) {
@@ -102,7 +103,7 @@ void fn_80362384(void* taskData) {
                                         fn_803622B0, aSoapTask);
 }
 
-void fn_80362434(void* taskData) {
+void gsiSoapTaskCancel(void* taskData) {
     GSSoapTask* aSoapTask = taskData;
 
     if (!aSoapTask->mCompleted) {
@@ -114,7 +115,7 @@ void fn_80362434(void* taskData) {
     }
 }
 
-void fn_80362488(void* taskData, int result) {
+void gsiSoapTaskCallback(void* taskData, int result) {
     GSSoapTask* aSoapTask = taskData;
 
     aSoapTask->mCallbackFunc(aSoapTask->mRequestResult, aSoapTask->mRequestSoap, aSoapTask->mResponseSoap, aSoapTask->mUserData);
@@ -143,7 +144,7 @@ GSXmlStreamReader fn_80362C98(void) {
     return newStream;
 }
 
-int fn_80362D50(GSXmlStreamReader stream, char* data, int len) {
+int gsXmlParseBuffer(GSXmlStreamReader stream, char* data, int len) {
     int readPos = 0;
     GSIXmlStreamReader* reader = stream;
     int length = len;
@@ -157,7 +158,7 @@ int fn_80362D50(GSXmlStreamReader stream, char* data, int len) {
     return 1;
 }
 
-void fn_80362E0C(GSXmlStreamReader stream) {
+void gsXmlFreeReader(GSXmlStreamReader stream) {
     GSIXmlStreamReader* reader = stream;
 
     ArrayFree(reader->mAttributeArray);
@@ -165,7 +166,7 @@ void fn_80362E0C(GSXmlStreamReader stream) {
     gsifree(reader);
 }
 
-int fn_80367838(GSXmlStreamReader stream) {
+int gsXmlMoveToStart(GSXmlStreamReader stream) {
     GSIXmlStreamReader* reader = stream;
 
     reader->mElemReadIndex = -1;
@@ -173,7 +174,7 @@ int fn_80367838(GSXmlStreamReader stream) {
     return 1;
 }
 
-int fn_8036784C(GSXmlStreamReader stream, const char* matchtag) {
+int gsXmlMoveToNext(GSXmlStreamReader stream, const char* matchtag) {
     GSIXmlStreamReader* reader = stream;
     int i;
 
@@ -198,4 +199,48 @@ int fn_803679BC(GSXmlStreamReader stream, const char* matchtag, char* valueOut, 
     strncpy(valueOut, strValue, maxLen < strLen ? maxLen : strLen);
     valueOut[maxLen - 1 < strLen ? maxLen - 1 : strLen] = '\0';
     return 1;
+}
+
+const char* gsXmlWriterGetData(GSXmlStreamWriter stream) {
+    GSIXmlStreamWriter* writer = (GSIXmlStreamWriter*)stream;
+
+    return writer->mBuffer;
+}
+
+int gsXmlWriterGetDataLength(GSXmlStreamWriter stream) {
+    GSIXmlStreamWriter* writer = (GSIXmlStreamWriter*)stream;
+
+    return writer->mLen;
+}
+
+int gsiSoapTaskCleanup(void* taskData) {
+    GSSoapTask* aSoapTask = (GSSoapTask*)taskData;
+
+    if (aSoapTask->mResponseSoap != NULL) {
+        gsXmlFreeReader(aSoapTask->mResponseSoap);
+    }
+    if (aSoapTask->mResponseBuffer != NULL) {
+        gsifree(aSoapTask->mResponseBuffer);
+    }
+    if (aSoapTask->mPostData != NULL) {
+        ghttpFreePost(aSoapTask->mPostData);
+    }
+    gsifree(aSoapTask);
+    return 1;
+}
+
+int _UCS2CharToUTF8String(UCS2Char theUCS2Char, UTF8String theUTF8String) {
+    if (theUCS2Char <= 0x7F) {
+        theUTF8String[0] = (char)theUCS2Char;
+        return 1;
+    }
+    if (theUCS2Char <= 0x7FF) {
+        theUTF8String[0] = (char)(UTF8_TWO_BYTE_TAG | (theUCS2Char >> 6));
+        theUTF8String[1] = (char)(UTF8_FOLLOW_BYTE_TAG | (theUCS2Char & UTF8_FOLLOW_BYTE_MASK));
+        return 2;
+    }
+    theUTF8String[0] = (char)(UTF8_THREE_BYTE_TAG | (theUCS2Char >> 12));
+    theUTF8String[1] = (char)(UTF8_FOLLOW_BYTE_TAG | ((theUCS2Char >> 6) & UTF8_FOLLOW_BYTE_MASK));
+    theUTF8String[2] = (char)(UTF8_FOLLOW_BYTE_TAG | (theUCS2Char & UTF8_FOLLOW_BYTE_MASK));
+    return 3;
 }

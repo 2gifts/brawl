@@ -26,7 +26,6 @@ extern "C" nw4r::g3d::G3dObj* Construct__Q34nw4r3g3d12ScnMdlExpandFP12MEMAllocat
                                                                                                     void* scnMdl);
 extern "C" void PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(void* scnMdl, void* object, const char* name);
 // gfSceneRoot::layerUpdateFrame(layer) and gfSceneRoot::removeInfoCamResAnm()
-extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 // nw4r::g3d::ScnRoot::UpdateFrame()
 extern "C" void UpdateFrame__Q34nw4r3g3d7ScnRootFv(void* scnRoot);
 
@@ -287,7 +286,7 @@ void muAdvNameTask::processDefault() {
     controllProc();
     gfSceneRoot* root = g_gfSceneRoot;
     UpdateFrame__Q34nw4r3g3d7ScnRootFv(*reinterpret_cast<void**>(reinterpret_cast<u8*>(g_gfSceneRoot) + 0x44));
-    fn_8000DB40(root, 8);
+    root->layerUpdateFrame(8);
 }
 
 // Reads the pads: the lists are moved with up and down, A decides and B goes back; a pad that presses start joins as the

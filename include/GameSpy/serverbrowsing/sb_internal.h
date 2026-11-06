@@ -83,7 +83,6 @@ char* SOInetNtoA(gs_in_addr in);
 // the availability result (__GSIACResult)
 extern int lbl_805A1048;
 
-char* fn_8035D654(const char* s);  // goastrdup
 
 int FIFORemove(SBServerFIFO* fifo, SBServer server);                              // FIFORemove
 void QEStartQuery(SBQueryEngine* engine, SBServer server);                          // QEStartQuery

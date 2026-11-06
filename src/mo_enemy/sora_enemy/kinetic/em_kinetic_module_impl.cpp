@@ -37,7 +37,6 @@ template bool soInstanceManagerFixed<soKineticEnergy*>::isEmpty() const;
 
 
 extern "C" {
-void fn_8003E3BC(const Matrix*, const Vec3f*, Vec3f*); // HYPOTHESIS: the matrix-vector product (map: unnamed)
 }
 
 // HYPOTHESIS: reverseEnergy calls MSL's fabs, which the SDK's math.h provides as an inline function (double fabs(double)
@@ -990,7 +989,7 @@ bool emKineticModuleImpl::isOverTurn(soModuleAccesser* moduleAccesser, int nodeI
         dir = Vec3f(0.0f, 0.0f, -1.0f);
         break;
     }
-    fn_8003E3BC(&mtx, &dir, &dir);
+    mtx.mulVec(&dir, &dir);
     Vec3f up(0.0f, 1.0f, 0.0f);
     return 57.29578f * up.angle(&dir) <= limit;
 }

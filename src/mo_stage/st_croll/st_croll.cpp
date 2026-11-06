@@ -51,7 +51,6 @@ extern "C" void* fn_801AB6CC(MEMAllocator* allocator, u32* size, u32 capacity);
 // GXInvalidateTexAll() and GXSetColorUpdate()
 extern "C" void fn_801F3194();
 extern "C" void fn_801F471C(int enable);
-extern "C" void fn_27_279FC8(grMadein* ground, Mtx matrix, int unk);
 
 namespace nw4r {
 namespace math {
@@ -178,7 +177,7 @@ static void crollPlaceInFrontOfCamera(grMadein* model) {
     result[0][3] = target.m_x;
     result[1][3] = target.m_y;
     result[2][3] = target.m_z;
-    fn_27_279FC8(model, result, 1);
+    model->setMatrix(reinterpret_cast<Matrix*>(result), true);
 }
 
 // The rotation that turns the vector `from` to the vector `to` (both are normalized here). HYPOTHESIS: this is
@@ -375,7 +374,7 @@ void SoraCharacterRoll::TargetCursor::update(float deltaFrame, gfPadStatus& pad)
         PSMTXScaleApply(scale, scale, 0.5f, 0.5f, 0.5f);
         PSMTXConcat(rotation, scale, rotation);
         PSMTXTransApply(rotation, rotation, target.m_x, target.m_y, target.m_z);
-        fn_27_279FC8(m_cursor, rotation, 1);
+        m_cursor->setMatrix(reinterpret_cast<Matrix*>(rotation), true);
     }
 
     // The two beams shoot one after the other.
@@ -451,7 +450,7 @@ void SoraCharacterRoll::TargetCursor::update(float deltaFrame, gfPadStatus& pad)
                 PSMTXQuat(rotation, reinterpret_cast<const Quaternion*>(&quat));
                 PSMTXConcat(rotation, beamScale, rotation);
                 PSMTXTransApply(rotation, rotation, source.m_x, source.m_y, source.m_z);
-                fn_27_279FC8(beams[i], rotation, 1);
+                beams[i]->setMatrix(reinterpret_cast<Matrix*>(rotation), true);
             }
         }
     }

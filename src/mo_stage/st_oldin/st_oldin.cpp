@@ -27,12 +27,9 @@
 #include <st_oldin/st_oldin.h>
 
 // Unnamed helpers the stage calls directly (see st_dxcorneria.cpp for the grMadein ones).
-// grMadein::setMatrix(Matrix*, bool): lets the ground (and optionally its attack) follow the matrix.
-extern "C" void fn_27_279FC8(grMadein* ground, Matrix* matrix, bool followAttack);
 // efScreen: ends a fill requested with requestFill (HYPOTHESIS: fades it out over `frames`).
 extern "C" void fn_8005E3C8(efScreen* screen, efScreenHandle* handle, float frames);
 // Matrix helpers of sora/mt (see mt_matrix.cpp).
-extern "C" void fn_8003E918(Matrix* mtx, float angle);
 extern "C" void fn_8003F074(Matrix* mtx, float x, float y, float z);
 
 stClassInfoImpl<Stages::Oldin, stOldin> stOldin::bss_loc_14;
@@ -404,8 +401,8 @@ void stOldin::createObj() {
     m_bridge->setMotionRatio(0.0f);
     m_bridgeShadow->setVisibility(1);
     Matrix identity;
-    fn_27_279FC8(m_bridge, &identity, true);
-    fn_27_279FC8(m_bridgeCrash, &identity, true);
+    m_bridge->setMatrix(&identity, true);
+    m_bridgeCrash->setMatrix(&identity, true);
     m_portalSubject.m_state = 1;
     m_bridgeSubject.m_state = 1;
     loadStageAttrParam(m_fileData, 30);
@@ -442,7 +439,7 @@ void stOldin::LordBullboStart(Matrix* matrix, bool full) {
     }
     m_lordNodeMtx = m_lordMtx = *matrix;
     m_lordBullbo->setVisibility(1);
-    fn_27_279FC8(m_lordBullbo, &m_lordMtx, false);
+    m_lordBullbo->setMatrix(&m_lordMtx, false);
     gfModelAnimation* anim = m_lordBullbo->m_modelAnims[0];
     if (anim != NULL) {
         anim->setFrame(0.0f);
@@ -450,12 +447,12 @@ void stOldin::LordBullboStart(Matrix* matrix, bool full) {
     }
     Matrix lordHitMtx = m_lordMtx;
     fn_8003F074(&lordHitMtx, m_lordHitOffset.m_x, m_lordHitOffset.m_y, m_lordHitOffset.m_z);
-    fn_27_279FC8(m_lordBullboHit, &lordHitMtx, false);
+    m_lordBullboHit->setMatrix(&lordHitMtx, false);
     m_kingBulblin->setVisibility(1);
-    fn_27_279FC8(m_kingBulblin, &m_lordMtx, false);
+    m_kingBulblin->setMatrix(&m_lordMtx, false);
     Matrix kingHitMtx = m_lordMtx;
     fn_8003F074(&kingHitMtx, m_kingHitOffset.m_x, m_kingHitOffset.m_y, m_kingHitOffset.m_z);
-    fn_27_279FC8(m_kingBulblinHit, &kingHitMtx, false);
+    m_kingBulblinHit->setMatrix(&kingHitMtx, false);
     if (full) {
         m_lordHits = 0;
         m_kingBulblin->setMotion(0);
@@ -513,7 +510,7 @@ void stOldin::LordBullboUpdate(float deltaFrame) {
 
                 Matrix lordHitMtx = m_lordNodeMtx;
                 fn_8003F074(&lordHitMtx, m_lordHitOffset.m_x, m_lordHitOffset.m_y, m_lordHitOffset.m_z);
-                fn_27_279FC8(m_lordBullboHit, &lordHitMtx, false);
+                m_lordBullboHit->setMatrix(&lordHitMtx, false);
 
                 // King Bulblin throws a barrel when he is about to pass the middle of the stage.
                 if (m_barrel == 1 && m_taruActive == 0) {
@@ -528,16 +525,16 @@ void stOldin::LordBullboUpdate(float deltaFrame) {
                         taruMtx.m[0][3] = taruPos.m_x;
                         taruMtx.m[1][3] = taruPos.m_y;
                         taruMtx.m[2][3] = taruPos.m_z;
-                        fn_27_279FC8(m_taru, &taruMtx, false);
+                        m_taru->setMatrix(&taruMtx, false);
                         OLDIN_SET_FRAME(m_taru, 0.0f);
                         m_barrel = 0;
                     }
                 }
 
-                fn_27_279FC8(m_kingBulblin, &m_lordNodeMtx, false);
+                m_kingBulblin->setMatrix(&m_lordNodeMtx, false);
                 Matrix kingHitMtx = m_lordNodeMtx;
                 fn_8003F074(&kingHitMtx, m_kingHitOffset.m_x, m_kingHitOffset.m_y, m_kingHitOffset.m_z);
-                fn_27_279FC8(m_kingBulblinHit, &kingHitMtx, false);
+                m_kingBulblinHit->setMatrix(&kingHitMtx, false);
 
                 if (m_kingBulblinHit->isHit() || m_lordBullboHit->isHit()) {
                     // A fighter hit King Bulblin: he falls off Lord Bullbo.
@@ -705,7 +702,7 @@ void stOldin::KingBlublinUpdate(float deltaFrame) {
                 }
                 m_kingMtx.setIdentity();
                 if (m_kingSide) {
-                    fn_8003E918(&m_kingMtx, 3.1415927f);
+                    m_kingMtx.setRotateY(3.1415927f);
                     m_lordBullboHit->setYakumonoLr(-1.0f);
                 } else {
                     m_lordBullboHit->setYakumonoLr(1.0f);
@@ -724,10 +721,10 @@ void stOldin::KingBlublinUpdate(float deltaFrame) {
                     m_bulblin->startEntity();
                     m_bulblin->setVisibility(1);
                     m_bulblinHit->startEntity();
-                    fn_27_279FC8(m_bulblin, &m_bulblinMtx, false);
+                    m_bulblin->setMatrix(&m_bulblinMtx, false);
                     m_bulblin->setMotion(0);
                     OLDIN_SET_FRAME(m_bulblin, 0.0f);
-                    fn_27_279FC8(m_bulblinHit, &m_bulblinMtx, false);
+                    m_bulblinHit->setMatrix(&m_bulblinMtx, false);
                 }
                 m_bulblinSwayTimer = 60.0f;
                 // FALL-THROUGH
@@ -803,7 +800,7 @@ void stOldin::BulblinUpdate(float deltaFrame) {
                         }
                     }
                 }
-                fn_27_279FC8(m_bulblinHit, &m_bulblinNodeMtx, false);
+                m_bulblinHit->setMatrix(&m_bulblinNodeMtx, false);
                 {
                     OLDIN_VEC3F_FROM_MTX(pos, m_bulblinNodeMtx);
                     if (__fabsf(pos.m_x) < 455.0f) {
@@ -813,10 +810,10 @@ void stOldin::BulblinUpdate(float deltaFrame) {
                             if (anim->getFrame() >= last) {
                                 m_bulblinMtx = m_bulblinNodeMtx;
                                 m_bulblinHit->startEntity();
-                                fn_27_279FC8(m_bulblin, &m_bulblinMtx, false);
+                                m_bulblin->setMatrix(&m_bulblinMtx, false);
                                 m_bulblin->setMotion(0);
                                 OLDIN_SET_FRAME(m_bulblin, 0.0f);
-                                fn_27_279FC8(m_bulblinHit, &m_bulblinMtx, false);
+                                m_bulblinHit->setMatrix(&m_bulblinMtx, false);
                             }
                         }
                         OLDIN_SAVE(m_bulblinSeq, 0x52A, 1);
@@ -840,7 +837,7 @@ void stOldin::BulblinUpdate(float deltaFrame) {
                     return;
                 }
                 m_bulblin->pauseEntity(0);
-                fn_27_279FC8(m_bulblin, &m_bulblinNodeMtx, false);
+                m_bulblin->setMatrix(&m_bulblinNodeMtx, false);
                 m_bulblin->setMotion(2);
                 OLDIN_SET_FRAME(m_bulblin, 0.0f);
                 OLDIN_SAVE(m_bulblinSeq, 0x54F, 1);
@@ -853,10 +850,10 @@ void stOldin::BulblinUpdate(float deltaFrame) {
                     if (anim->getFrame() >= last) {
                         m_bulblinMtx = m_bulblinNodeMtx;
                         m_bulblinHit->startEntity();
-                        fn_27_279FC8(m_bulblin, &m_bulblinMtx, false);
+                        m_bulblin->setMatrix(&m_bulblinMtx, false);
                         m_bulblin->setMotion(0);
                         OLDIN_SET_FRAME(m_bulblin, 0.0f);
-                        fn_27_279FC8(m_bulblinHit, &m_bulblinMtx, false);
+                        m_bulblinHit->setMatrix(&m_bulblinMtx, false);
                         goto walk;
                     }
                 }
@@ -886,12 +883,12 @@ void stOldin::BulblinUpdate(float deltaFrame) {
                     float angle = (index & 1) ? 1.5707964f : -1.5707964f;
                     angle += 0.7853982f * (1.0f - 2.0f * randf());
                     Matrix rotation;
-                    fn_8003E918(&rotation, angle);
+                    rotation.setRotateY(angle);
                     m_bulblinNodeMtx.mul(&rotation, &m_bulblinNodeMtx);
                 }
             flung:
                 m_bulblinHit->endEntity();
-                fn_27_279FC8(m_bulblin, &m_bulblinNodeMtx, false);
+                m_bulblin->setMatrix(&m_bulblinNodeMtx, false);
                 m_bulblin->setMotion(3);
                 OLDIN_SET_FRAME(m_bulblin, 0.0f);
                 OLDIN_SAVE(m_bulblinSeq, 0x58E, 1);
@@ -902,7 +899,7 @@ void stOldin::BulblinUpdate(float deltaFrame) {
                 fn_8003F074(&m_bulblinNodeMtx, step.m_x, step.m_y, step.m_z);
                 m_bulblinSpeed.m_x = m_bulblinSpeed.m_x * (0.98f * deltaFrame);
                 m_bulblinSpeed.m_z = m_bulblinSpeed.m_z - 0.1f * deltaFrame;
-                fn_27_279FC8(m_bulblin, &m_bulblinNodeMtx, false);
+                m_bulblin->setMatrix(&m_bulblinNodeMtx, false);
                 gfModelAnimation* anim = m_bulblin->m_modelAnims[0];
                 if (anim != NULL) {
                     float last = (float)anim->getFrameCount();
@@ -917,7 +914,7 @@ void stOldin::BulblinUpdate(float deltaFrame) {
                 fn_8003F074(&m_bulblinNodeMtx, step2.m_x, step2.m_y, step2.m_z);
                 m_bulblinSpeed.m_x = m_bulblinSpeed.m_x * (0.98f * deltaFrame);
                 m_bulblinSpeed.m_z = m_bulblinSpeed.m_z - 0.1f * deltaFrame;
-                fn_27_279FC8(m_bulblin, &m_bulblinNodeMtx, false);
+                m_bulblin->setMatrix(&m_bulblinNodeMtx, false);
                 m_bulblin->setMotion(4);
                 OLDIN_SET_FRAME(m_bulblin, 0.0f);
                 m_bulblin->startEntityAutoLoop();
@@ -934,7 +931,7 @@ void stOldin::BulblinUpdate(float deltaFrame) {
                 fn_8003F074(&m_bulblinNodeMtx, step.m_x, step.m_y, step.m_z);
                 m_bulblinSpeed.m_x = m_bulblinSpeed.m_x * (0.98f * deltaFrame);
                 m_bulblinSpeed.m_z = m_bulblinSpeed.m_z - 0.1f * deltaFrame;
-                fn_27_279FC8(m_bulblin, &m_bulblinNodeMtx, false);
+                m_bulblin->setMatrix(&m_bulblinNodeMtx, false);
                 OLDIN_SAVE(m_bulblinSeq, 0x5CD, 1);
                 return;
             }
@@ -1027,7 +1024,7 @@ void stOldin::TaruUpdate(float deltaFrame) {
                     m_taruSubject.setPos(&pos);
                     g_ecMgr->killEffect(m_taruEffect, 1, 1);
                     mtx.m[1][3] = mtx.m[1][3] - 10.0f;
-                    fn_27_279FC8(m_taruAttack, &mtx, false);
+                    m_taruAttack->setMatrix(&mtx, false);
                     m_taru->setVisibility(0);
                     OLDIN_PARK(m_taru);
                     m_bridgeActive = 1;
@@ -1223,8 +1220,8 @@ void stOldin::BridgeUpdate(float deltaFrame) {
                 m_bridgeShadow->setVisibility(1);
                 {
                     Matrix identity;
-                    fn_27_279FC8(m_bridge, &identity, true);
-                    fn_27_279FC8(m_bridgeCrash, &identity, true);
+                    m_bridge->setMatrix(&identity, true);
+                    m_bridgeCrash->setMatrix(&identity, true);
                 }
                 m_portalSubject.m_state = 1;
                 m_bridgeSubject.m_state = 1;

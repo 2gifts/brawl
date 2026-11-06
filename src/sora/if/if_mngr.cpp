@@ -10,6 +10,7 @@
 #include <nw4r/g3d/g3d_obj.h>
 #include <nw4r/g3d/g3d_resfile.h>
 #include <mu/mu_notice_wnd.h>
+#include <nt/nt_etc_file.h>
 #include <sr/sr_common.h>
 #include <stdio.h>
 #include <string.h>
@@ -62,17 +63,6 @@ public:
     virtual void processDefault();
 };
 
-class nteFileDataReplayBase {
-public:
-    u8 unk0[0x8];
-};
-
-class nteFileDataReplay : public nteFileDataReplayBase {
-public:
-    virtual ~nteFileDataReplay();
-    u8 unkC[0x8];
-};
-
 // HYPOTHESIS: map names IfMngr::realizeResource, freeResource
 extern "C" void fn_800DBB10(IfMngr* mngr);
 extern "C" void fn_800DBD3C(IfMngr* mngr);
@@ -89,9 +79,6 @@ extern "C" void fn_800DF4AC(void* center, int kills);
 extern "C" void fn_800BF928(muNoticeWndTask* wnd, const char* text);
 // HYPOTHESIS: map names IfAdvBoss::eraseBoss
 extern "C" void fn_80109540(IfAdvBoss* boss);
-// HYPOTHESIS: map names nteFileDataReplay::__ct, setData
-extern "C" nteFileDataReplay* fn_80152B5C(void* mem, Heaps::HeapType heap);
-extern "C" void fn_80152C4C(nteFileDataReplay* data, void* buffer, u32 size);
 // HYPOTHESIS: map names IfSnapSaveTask::create, getState
 extern "C" gfTask* fn_800F18C4(nw4r::g3d::ResFile* arg1, nw4r::g3d::ResFile* resFile, void* msgData, u32 scnRoot, int arg5,
                                nteFileDataReplay* data, int arg7, int heap, int heap2, int heap3);
@@ -419,16 +406,11 @@ bool IfMngr::saveReplay() {
     if (unk9C != NULL) {
         return false;
     }
-    // MATCH-ONLY: the nteFileDataReplay constructor is still an unnamed stand-in.
-    void* mem = operator new(sizeof(nteFileDataReplay), Heaps::MenuInstance);
-    if (mem != NULL) {
-        mem = fn_80152B5C(mem, Heaps::MenuInstance);
-    }
-    unkB8 = static_cast<nteFileDataReplay*>(mem);
+    unkB8 = new (Heaps::MenuInstance) nteFileDataReplay(Heaps::MenuInstance);
     void* buffer;
     u32 size;
     ipSwitch::getInstance()->m_keyRecorder->getBufferData(&buffer, &size);
-    fn_80152C4C(unkB8, buffer, size);
+    unkB8->setData(buffer, size);
     unk9C = fn_800F18C4(reinterpret_cast<nw4r::g3d::ResFile*>(&unk1C[5]), reinterpret_cast<nw4r::g3d::ResFile*>(&unk1C[8]), unk90, unk8, 0x60, unkB8, 0, Heaps::MenuInstance, Heaps::MenuInstance,
                         Heaps::MenuInstance);
     return true;

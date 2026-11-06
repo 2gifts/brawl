@@ -176,10 +176,12 @@ public:
 class soShakeModuleSimple : public soShakeModule {
     soModuleAccesser* m_accesser;
 public:
+    soShakeModuleSimple(soModuleAccesser*, soArray<soShakeTerm>*, void*);
     virtual ~soShakeModuleSimple();
 };
 template <> class soShakeModuleBuilder<soShakeModuleBuildConfig<0,soShakeModuleSimple> > : public soArraySelectHolder<0,soArrayVector<soShakeTerm,0>,soArrayNull<soShakeTerm> > {
 public: soShakeModuleSimple m_module;
+    soShakeModuleBuilder(soModuleAccesser*, void*);
 };
 #endif
 static_assert(sizeof(soShakeModuleBuilder<soShakeModuleBuildConfig<0,soShakeModuleSimple> >)==0xC,"WN shake extent");

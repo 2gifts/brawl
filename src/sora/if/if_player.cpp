@@ -57,8 +57,6 @@ void ScnObj_EnableCallbackTiming(nw4r::g3d::ScnObj* obj, u32 timing);
 
 extern "C" void fn_800DB444();
 extern "C" void fn_800DB674(const nw4r::math::VEC3* pos, Matrix* mtx);
-extern "C" void fn_8003E388(const Matrix* src, Matrix* dst);
-extern "C" void fn_8003E9B4(Matrix* mtx, float angle);
 // nw4r::g3d::ScnMdl::CopiedMatAccess::GetResMatChan(sync): main.dol has it, the shared header does not.
 extern "C" nw4r::g3d::ResMatChan GetResMatChan__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(
     nw4r::g3d::ScnMdl::CopiedMatAccess* access, bool sync);
@@ -205,7 +203,7 @@ void IfPlayerObjCallback::updateMatrix() {
         float angle;
         Vec3f pos;
         pos = calcLoupePosFast(&angle, &m_pos);
-        fn_8003E9B4(&m_matrix, angle);
+        m_matrix.setRotateZ(angle);
         m_matrix.m[0][3] = pos.m_x;
         m_matrix.m[1][3] = pos.m_y;
         m_matrix.m[2][3] = pos.m_z;
@@ -214,7 +212,7 @@ void IfPlayerObjCallback::updateMatrix() {
     case 2: {
         Vec3f pos;
         pos = calcLoupePosFast(NULL, &m_pos);
-        fn_8003E388(reinterpret_cast<const Matrix*>(lbl_8049E0A0), &m_matrix);
+        reinterpret_cast<const Matrix*>(lbl_8049E0A0)->copy(&m_matrix);
         m_matrix.m[0][3] = pos.m_x;
         m_matrix.m[1][3] = pos.m_y;
         m_matrix.m[2][3] = pos.m_z;

@@ -65,6 +65,7 @@ public:
     };
     f32 unkC4;             // 0xC4
 
+    bool IsAvailable();
     void Init();
     void SetVolume(f32 volume);
     bool Setup(nw4r::snd::SoundArchivePlayer* player);

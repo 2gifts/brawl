@@ -97,8 +97,6 @@ stClassInfoImpl<Stages::Madein, stMadein> stMadein::bss_loc_14;
 
 // The stage that is played (sora_melee .bss), asked for the frames that are left of the match.
 extern "C" Stage* lbl_27_bss_5668;
-// itManager::lotCreateItem
-extern "C" void fn_27_2AA7AC(itManager* manager, ItemKind kind, int a, Vec3f* pos, int b, int c, int d);
 // sndSystem::getRemEnable, and the call that plays a sound on the speaker of a Wii remote
 
 #define MADEIN(index) static_cast<grMadein*>(getGround(index))
@@ -2336,7 +2334,7 @@ void stMadein::update(float deltaFrame) {
                                             kind.m_kind = static_cast<itKind>(0x1C);
                                             kind.m_variation = 0;
                                             pos.m_y = pos.m_y + up;
-                                            fn_27_2AA7AC(itManager::getInstance(), kind, 0x2710, &pos, -1, -1, -1);
+                                            itManager::getInstance()->lotCreateItem(reinterpret_cast<itGenSheetKind&>(kind), static_cast<itGenId>(0x2710), &pos, -1, -1, static_cast<itKind>(-1));
                                             break;
                                         }
                                     } else {

@@ -24,7 +24,6 @@ extern "C" nw4r::g3d::G3dObj* Construct__Q34nw4r3g3d12ScnMdlExpandFP12MEMAllocat
                                                                                                          int capacity, void* scnMdl);
 extern "C" void PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(void* expand, void* object, const char* name);
 // gfSceneRoot::layerUpdateFrame(layer), gfSceneRoot::removeInfoCamResAnm() and gfSceneRoot::setInfoCamResAnm(animation)
-extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 // gfArchive::readFileRequest(path, heap, offset, size, archive id)
 extern "C" void fn_800151FC(gfArchive* archive, const char* path, Heaps::HeapType heap, int offset, int size, u32 id);
 // nw4r::g3d::ResFile::GetResTex(name), GetResAnmScn(index) and ResAnmScn::Bind(animation)
@@ -154,7 +153,7 @@ void muFigureGetTask::processDefault() {
     if (sStepFuncs[m_step].m_main != NULL) {
         m_step = sStepFuncs[m_step].m_main(this);
     }
-    fn_8000DB40(g_gfSceneRoot, 8);
+    g_gfSceneRoot->layerUpdateFrame(8);
 }
 
 // Creates the models of the table; they are stored in the slots of the task and start with the animation "__0".

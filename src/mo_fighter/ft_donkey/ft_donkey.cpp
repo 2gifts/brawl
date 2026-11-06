@@ -170,9 +170,6 @@ struct ftDonkeyArticleBuildInfo : wnArticleBuildInfo {
     }
 };
 
-// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
-extern "C" void* fn_27_14981C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_149830(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 template <class W> struct ftDonkeyArticleTraits;
 #define FT_DONKEY_TRAITS(W, DATA, ID, GETTER) \
@@ -180,12 +177,12 @@ template <class W> struct ftDonkeyArticleTraits;
         enum { ArticleId = ID }; \
         static const DATA* getData() { \
             ftDonkeyArticleDataTag tag; \
-            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Donkey, &tag.m_resourceGroup)); \
+            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Donkey, &tag.m_resourceGroup)); \
         } \
     };
 
-FT_DONKEY_TRAITS(wnDonkeyBarrelConga, wnDonkeyBarrelCongaData, 0, fn_27_14981C)
-FT_DONKEY_TRAITS(wnDonkeySoundEffect, wnDonkeySoundEffectData, 1, fn_27_149830)
+FT_DONKEY_TRAITS(wnDonkeyBarrelConga, wnDonkeyBarrelCongaData, 0, getWeaponData<wnDonkeyBarrelCongaData>)
+FT_DONKEY_TRAITS(wnDonkeySoundEffect, wnDonkeySoundEffectData, 1, getWeaponData<wnDonkeySoundEffectData>)
 
 // Every article of the fighter is built by this constructor from the data of the fighter kind.
 template <class W>

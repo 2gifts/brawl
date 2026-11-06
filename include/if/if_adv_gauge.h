@@ -16,10 +16,30 @@ public:
     int unk23C;
     u8 unk240[0x308 - 0x240];
     int unk308;
+    // HYPOTHESIS: the tail of the object, from the stores of setCrowdDelAnimeNum, removeScore and removeCountTime; size from the allocation in create.
+    int unk30C;
+    u8 unk310[0x50];
+    u8 unk360;
+    u8 unk361;
+    u8 unk362;
+    u8 unk363;
+
+    IfAdvGauge();
+    ~IfAdvGauge();
+    static IfAdvGauge* create();
+    static void destroyLocator();
+    void createModel(nw4r::g3d::ResFile* resFile);
+    void createModel2(nw4r::g3d::ResFile* resFile);
+    void createModelStRes(nw4r::g3d::ResFile* resFile, nw4r::g3d::ResFile* stResFile);
+    void removeScore();
+    void drawCrowd();
+    void setCrowdDelAnimeNum(s32 num);
+    void removeCountTime();
+    void deleteStockSlotFirstIcon();
 
     // HYPOTHESIS: table parameter types follow the equivalent adventure HUD methods.
     void createObjResFile(const void* nodeInfo, s32 nodeCount, nw4r::g3d::ResFile* resFile);
-    void createExpMdl(const void* nodeInfo, s32 nodeCount);
+    void createExpMdl(const void* nodeInfo, s32 nodeCount) __attribute__((never_inline));
     void addPressStart(nw4r::g3d::ScnMdlExpand* model);
     void removePressStart(nw4r::g3d::ScnMdlExpand* model);
     void drawStockSlotAnime(int count);

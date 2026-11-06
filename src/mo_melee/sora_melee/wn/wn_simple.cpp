@@ -1,4 +1,6 @@
 #define FT_MODULE_BUILDER
+#define WN_SIMPLE_INLINE_TEAM
+#define SO_NULLABLE_INLINE_CTOR
 #include <ft/ft_fighter_builder.h>
 #include <wn/wn_simple.h>
 #include <ft/ft_common_data_accesser.h>
@@ -34,3 +36,16 @@ void wnClassInfoImpl<133, wnSimple, wnSimpleData>::createArray(s32 count, s32 he
 }
 
 wnClassInfoImpl<133, wnSimple, wnSimpleData> g_wnSimpleClassInfo;
+
+soTeamModuleBuilder<wnSimpleTeamBuildConfig>::soTeamModuleBuilder(s32 no, soModuleAccesser* acc) :
+    m_primary(no), m_secondary(no), m_module(&m_primary, &m_secondary, &m_primary, acc, g_soTeamModuleNullArg) { }
+
+soPostureModuleBuilder<soPostureModuleBuildConfig<0, soPostureModuleSimple> >::soPostureModuleBuilder(
+    soModuleAccesser* accesser, soEventObserverRegistrationDesc* desc) :
+    m_module(accesser, get(), desc) {
+    m_module.initRot();
+}
+
+soShakeModuleBuilder<soShakeModuleBuildConfig<0, soShakeModuleSimple> >::soShakeModuleBuilder(soModuleAccesser* accesser, void* data) :
+    m_module(accesser, get(), data) { }
+

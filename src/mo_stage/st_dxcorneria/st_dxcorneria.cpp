@@ -25,14 +25,10 @@
 #include <st_dxcorneria/st_dxcorneria.h>
 
 // Unnamed helpers the stage calls directly (see st_newpork.cpp for the grMadein ones).
-// grMadein::setMatrix(Matrix*, bool): lets the ground (and optionally its attack) follow the matrix.
-extern "C" void fn_27_279FC8(grMadein* ground, Matrix* matrix, bool followAttack);
 // Stage: HYPOTHESIS: true while the stage is the active one (not the one used for the menu preview).
 extern "C" int fn_27_2249E0(Stage* stage);
 // Matrix helpers of sora/mt (see mt_matrix.cpp).
 extern "C" void fn_8003E5B4(Matrix* mtx);
-extern "C" void fn_8003E3BC(const Matrix* mtx, const Vec3f* src, Vec3f* dst);
-extern "C" void fn_8003E87C(Matrix* mtx, float angle);
 extern "C" void fn_8003EBF4(Matrix* mtx, float angle);
 extern "C" void fn_8003F074(Matrix* mtx, float x, float y, float z);
 
@@ -700,14 +696,14 @@ void stDxCorneria::ArwingAttackUpdate(float deltaFrame) {
                 }
                 Matrix rotation(true);
                 rotation.setIdentity();
-                fn_8003E87C(&rotation, m_arwingRoll);
+                rotation.setRotateX(m_arwingRoll);
                 nodeMtx.mul(&rotation, &nodeMtx);
                 m_arwingTimer = (float)m_param->m_arwingFlightTime;
                 m_arwingActive->setEnableCollisionStatus(false);
             } else {
                 m_arwingActive->setEnableCollisionStatus(m_arwingKind == 0);
             }
-            fn_27_279FC8(m_arwingActive, &nodeMtx, false);
+            m_arwingActive->setMatrix(&nodeMtx, false);
             if (m_arwingRoll == 0.0f && m_arwingTimer <= 0.0f) {
                 m_arwingTimer = (float)m_param->m_arwingFlightTime;
                 int shots = m_param->m_arwingShotChance - 1;
@@ -762,7 +758,7 @@ bool stDxCorneria::GetArwingTarget(Vec3f* target) {
     Vec3f forward(-1.0f, 0.0f, 0.0f);
     fn_8003E5B4(&mtx);
     Vec3f local;
-    fn_8003E3BC(&mtx, &forward, &local);
+    mtx.mulVec(&forward, &local);
     bool found = false;
     float bestDot = 0.99f;
     for (u32 i = 0; i < 4; i++) {
@@ -892,7 +888,7 @@ void stDxCorneriaBeam::update(float deltaFrame, grMadein* source) {
                 if (source != NULL) {
                     Matrix mtx(true);
                     source->getNodeMatrix(&mtx, 0, m_node);
-                    fn_27_279FC8(m_ground, &mtx, false);
+                    m_ground->setMatrix(&mtx, false);
                     if (m_fromArwing) {
                         mtx.m[2][3] = 0.0f;
                     }
@@ -901,7 +897,7 @@ void stDxCorneriaBeam::update(float deltaFrame, grMadein* source) {
                         m_hit->getOverwriteAttackData()->m_power = power;
                         m_hit->startEntity();
                     }
-                    fn_27_279FC8(m_hit, &mtx, false);
+                    m_hit->setMatrix(&mtx, false);
                 }
                 break;
             }
@@ -918,7 +914,7 @@ void stDxCorneriaBeam::update(float deltaFrame, grMadein* source) {
                     Matrix inverse = data->m_matrix;
                     fn_8003E5B4(&inverse);
                     Vec3f direction;
-                    fn_8003E3BC(&inverse, &sBeamAPos, &direction);
+                    inverse.mulVec(&sBeamAPos, &direction);
                     Vec3f hitPos;
                     Vec3f hitNormal;
                     if (stRayCheck(&pos, &direction, &hitPos, &hitNormal, false, NULL, false, 1)) {
@@ -984,13 +980,13 @@ void stDxCorneriaBeam::update(float deltaFrame, grMadein* source) {
                             inverse = data->m_matrix;
                             fn_8003E5B4(&inverse);
                             Vec3f forward(-6.0f, 0.0f, 0.0f);
-                            fn_8003E3BC(&inverse, &forward, &m_direction);
+                            inverse.mulVec(&forward, &m_direction);
                         }
                     } else {
                         inverse = data->m_matrix;
                         fn_8003E5B4(&inverse);
                         Vec3f forward(-6.0f, 0.0f, 0.0f);
-                        fn_8003E3BC(&inverse, &forward, &m_direction);
+                        inverse.mulVec(&forward, &m_direction);
                     }
                 }
                 Vec3f step(m_direction.m_x, m_direction.m_y, m_direction.m_z);

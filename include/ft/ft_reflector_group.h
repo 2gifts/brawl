@@ -1,10 +1,8 @@
 #pragma once
 
 #include <types.h>
+#include <ft/ft_util.h>
 
-// HYPOTHESIS: ftUtil::convertReflectorData(record, shapeOut, groupOut) in sora_melee turns the reflector record of a fighter's common
-// data into a one-shape reflector group (the shape is written to shapeOut, the group descriptor to groupOut).
-extern "C" void fn_27_195B34(const void* record, void* shapeOut, void* groupOut);
 
 // HYPOTHESIS: reflector group descriptor as filled by convertReflectorData (shape array pointer, shape count, four floats, high flag
 // bit). The fighter constructors clear it member by member before the conversion.

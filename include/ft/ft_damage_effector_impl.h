@@ -20,11 +20,10 @@ public:
     virtual void reqTipEffect(soModuleAccesser* moduleAccesser, soCollisionLog* collisionLog);
 };
 
-// HYPOTHESIS: the fighter override of reqShake (fn_27_151140) reads a float argument that the soDamageEffector
-// interface does not declare, so it is not declared here.
 class ftDamageEffectorImpl : public soDamageEffectorImpl {
 public:
     virtual ~ftDamageEffectorImpl();
+    virtual void reqShake(soModuleAccesser* moduleAccesser, int situation, Vec2f* normal, soCollisionAttackData* attackData, int hitStopFrame);
     virtual void reqCommonEffect(float power, float reaction, float lr, soModuleAccesser* moduleAccesser, soCollisionAttackData* attackData, soCollisionLog* collisionLog);
     virtual void reqUniqEffect(soModuleAccesser* moduleAccesser, int level, soCollisionAttackData* attackData);
     // HYPOTHESIS: the module map names this slot reqEffectScreen.
