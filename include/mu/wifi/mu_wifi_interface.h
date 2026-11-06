@@ -335,6 +335,8 @@ public:
     // HYPOTHESIS: parameter types follow the original register accesses.
     bool isRequestedExchangeFriendKey(int index);
     bool getWifiPlayerInfo(int index, int* character, u8* color, bool* connected);
+    int isPermittedEntry(int playerArea);
+    void exitNodePlayer(int playerArea);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 

@@ -9,6 +9,8 @@
 #include <NHTTP.h>
 #include <types.h>
 
+struct NetworkUserData;
+
 class NtShared {
 public:
     typedef void (*ntPutProductDataCallback_t)(void**, u32*);
@@ -21,13 +23,14 @@ public:
     // HYPOTHESIS: the parameter lists come from the nt_sync call sites of the stored pointers;
     // the storage names follow NtConsumedDataCallback.
     typedef void (*ntStopCallback_t)(u16, u8);
-    static void ntSetStopCallback(ntStopCallback_t cb) {
-        NtStopCallback = cb;
-    }
+    // HYPOTHESIS: the original calls the setters out of line.
+    static void ntSetStopCallback(ntStopCallback_t cb) __attribute__((never_inline));
     typedef void (*ntExitCallback_t)(u8, u16, u8);
-    static void ntSetExitCallback(ntExitCallback_t cb) {
-        NtExitCallback = cb;
-    }
+    static void ntSetExitCallback(ntExitCallback_t cb) __attribute__((never_inline));
+    // HYPOTHESIS: the parameter lists come from the register use in st_operator_network.
+    static void ntStartSync(NetworkUserData* data);
+    static bool ntRequestStop(NetworkUserData* data, u8 arg);
+    static bool ntRequestExit(NetworkUserData* data, u8 arg);
 private:
     static ntPutProductDataCallback_t NtPutProductDataCallback;
     static ntConsumedDataCallback_t NtConsumedDataCallback;
@@ -56,7 +59,15 @@ extern u8 lbl_8059E745;
 
 // HYPOTHESIS: per-session DWC user data; only the user id is known.
 struct NetworkUserData {
-    char unk0[0x3440];
+    union {
+        char unk0[0x3440];
+        struct {
+            char _padA8[0xA8];
+            int unkA8;
+            char _padAC[0x134];
+            int unk1E0;
+        };
+    };
     u64 m_userId;
 };
 
@@ -92,8 +103,14 @@ private:
 public:
     NetworkUserData* m_userData;
 
-private:
-    char _0x34[0xC];
+    // HYPOTHESIS: a second pointer to the per-session data, read by the stop, exit and sync requests.
+    union {
+        char _0x34[0xC];
+        struct {
+            NetworkUserData* unk34;
+            char _0x38[8];
+        };
+    };
 };
 
 inline u8 Network::getMyAID() {

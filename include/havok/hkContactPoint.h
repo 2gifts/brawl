@@ -10,6 +10,8 @@ struct hkContactPoint {
 
     hkVector4* getPosition();
     hkVector4* getNormal();
+    // HYPOTHESIS: return type and const (map name only); returns the normal at 0x10
+    const hkVector4& getSeparatingNormal() const;
     hkReal getDistance();
     // Added by the hkCollideCapsuleUtil unit: writes the w component of the normal (the contact distance).
     void setDistance(hkReal distance);

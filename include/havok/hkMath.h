@@ -9,4 +9,6 @@ struct hkMathTypes {
 
 struct hkMath {
     static int hkFloatToInt(hkReal f);
+    // Clamped arc sine: +-pi/2 at and beyond +-1, the C library's asin otherwise (out of line in hkSimulation.o).
+    static hkReal asin(hkReal r);
 };

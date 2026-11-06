@@ -1,3 +1,4 @@
+#include <ft/captain/ft_captain_status_uniq_process_falcon_kick.h>
 #include <ft/ft_kinetic_energy.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/so_module_accesser.h>
@@ -6,13 +7,6 @@
 
 
 // Skeleton: methods without bodies are stubs (not yet reconstructed).
-
-class ftCaptainStatusUniqProcessFalconKick : public soStatusUniqProcess {
-public:
-    virtual ~ftCaptainStatusUniqProcessFalconKick() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-};
 
 class ftCaptainStatusUniqProcessFalconKickEnd : public soStatusUniqProcess {
 public:
@@ -25,6 +19,35 @@ void ftCaptainStatusUniqProcessFalconKick::initStatus(soModuleAccesser* moduleAc
 }
 
 void ftCaptainStatusUniqProcessFalconKick::execStatus(soModuleAccesser* moduleAccesser) {
+}
+
+// ftCaptain::getFalconKickParam (the map name); ft_captain.cpp calls it by this stand-in name.
+extern "C" float* fn_100_8C4C();
+
+void ftCaptainStatusUniqProcessFalconKick::setEventCollisionAttack(soModuleAccesser* moduleAccesser) {
+    soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
+    soStatusModule& status = moduleAccesser->getStatusModule();
+    int variant = workManage.getInt(0x20000000);
+    moduleAccesser->getSituationModule().getKind();
+    switch (status.getStatusKind()) {
+    case 0x115:
+        if (variant == 0) {
+            int frame = workManage.getInt(0x20000001);
+            if (frame >= 1) {
+                float* param = fn_100_8C4C();
+                float posture = workManage.getFloat(0x21000004);
+                float speed = posture * param[1];
+                ftKineticEnergyMotion& motion =
+                    dynamic_cast<ftKineticEnergyMotion&>(*moduleAccesser->getKineticModule().getEnergy(0));
+                motion.m_speedMul = speed;
+                workManage.setFloat(speed, 0x21000004);
+                workManage.setInt(frame - 1, 0x20000001);
+            }
+        }
+        break;
+    case 0x11b:
+        break;
+    }
 }
 
 void ftCaptainStatusUniqProcessFalconKickEnd::initStatus(soModuleAccesser* moduleAccesser) {

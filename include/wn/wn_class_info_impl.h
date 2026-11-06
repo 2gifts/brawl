@@ -16,21 +16,16 @@ extern "C" void* fn_27_148380(const ftCommonDataAccesser* accesser, s32 subKind,
 extern "C" void* fn_27_14858C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148620(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1486C8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_147E6C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1492F8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1490FC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_149A64(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148BBC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148C54(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_149844(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148AB0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_14959C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148E54(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148910(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1489B8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148DA4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148BD0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_148524(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1480CC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148CE8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1491DC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
@@ -38,8 +33,6 @@ extern "C" void* fn_27_1494D0(const ftCommonDataAccesser* accesser, s32 subKind,
 extern "C" void* fn_27_148F64(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_147C9C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148050(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_147DDC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1499D4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_149064(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
 // The article classes the dispatch below selects on; the instantiating unit includes its article
@@ -102,7 +95,7 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
     return fn_27_1486C8(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnLinkBowArrow*) {
-    return fn_27_147E6C(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnLinkBowArrowData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnSamusCShot*) {
     return fn_27_1492F8(&g_ftCommonDataAccesser, subKind, resourceGroup);
@@ -111,19 +104,19 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
     return fn_27_1490FC(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnToonLinkBowArrow*) {
-    return fn_27_149A64(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnToonLinkBowArrowData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnSZerosuitParalyzer*) {
     return fn_27_148BBC(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnSheikNeedle*) {
-    return fn_27_148C54(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnSheikNeedleData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnGameWatchSausage*) {
     return fn_27_149844(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnYoshiTamago*) {
-    return fn_27_148AB0(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnYoshiTamagoData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnKirbyPikmin*) {
     return g_ftCommonDataAccesser.getWeaponData<wnKirbyPikminData>(subKind, resourceGroup);
@@ -151,7 +144,7 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
     return fn_27_148BD0(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnFoxLandMasterShell*) {
-    return fn_27_148524(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnFoxLandMasterShellData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnPikachuThunderJolt2*) {
     return fn_27_1480CC(&g_ftCommonDataAccesser, subKind, resourceGroup);
@@ -181,10 +174,10 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
     return fn_27_148F64(&g_ftCommonDataAccesser, subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnLinkBow*) {
-    return fn_27_147DDC(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnLinkBowData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnToonLinkBow*) {
-    return fn_27_1499D4(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnToonLinkBowData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnPitBow*) {
     return fn_27_149064(&g_ftCommonDataAccesser, subKind, resourceGroup);

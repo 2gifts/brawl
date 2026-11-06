@@ -15,6 +15,8 @@
 #include <havok/hkLocalArray.h>
 #include <havok/hkBroadPhase.h>
 #include <havok/hkPhantom.h>
+#include <havok/hkSimulation.h>
+#include <havok/hkShape.h>
 
 // HYPOTHESIS: the top two bits of the byte at island+0x26/+0x27 hold the activity state, written as a 2-bit field.
 // Local view only; hkSimulationIsland.h does not declare these bytes yet.
@@ -37,32 +39,26 @@ extern "C" void fn_802CAFC0(void* dispatcher, hkBroadPhaseHandlePair* pairs, int
 void hkWorldOperationUtil::addPhantomBP(hkWorld* world, hkPhantom* phantom) {
     hkLocalArray<hkBroadPhaseHandlePair> newPairs(at<int>(world, 0x2E4)); // world's broadphase query size
 
-    // HYPOTHESIS: vtable 0x1C is calcAabb here, hkPhantom.h has its slots in a different order
-    typedef void (*CalcAabbFn)(hkPhantom*, hkAabb*);
     hkAabb aabb;
-    reinterpret_cast<CalcAabbFn>((*reinterpret_cast<void***>(phantom))[0x1C / 4])(phantom, &aabb);
+    phantom->calcAabb(&aabb);
 
-    // world +0x54 is the broadphase, vtable 0x10 adds an object (handle is at +0x30 in the phantom)
-    void* broadPhase = at<void*>(world, 0x54);
-    typedef void (*AddObjectFn)(void*, void*, hkAabb*, hkArray<hkBroadPhaseHandlePair>*);
-    reinterpret_cast<AddObjectFn>((*reinterpret_cast<void***>(broadPhase))[0x10 / 4])(broadPhase, reinterpret_cast<char*>(phantom) + 0x30, &aabb, &newPairs);
+    // world +0x54 is the broadphase
+    at<hkBroadPhase*>(world, 0x54)->addObject(&phantom->m_collidable.m_broadPhaseHandle, aabb, newPairs);
 
     if (newPairs.m_size != 0) {
         void* filter = at<void*>(world, 0x6C);
         if (filter != NULL) {
             filter = reinterpret_cast<char*>(filter) + 8; // the collision filter interface sits 8 bytes in
         }
-        fn_802CAEE8(at<void*>(world, 0x58), &newPairs[0], newPairs.m_size, filter);
+        fn_802CAEE8(at<void*>(world, 0x58), newPairs.begin(), newPairs.getSize(), filter);
     }
 }
 
 void hkWorldOperationUtil::removePhantomBP(hkWorld* world, hkPhantom* phantom) {
     hkLocalArray<hkBroadPhaseHandlePair> removedPairs(at<int>(world, 0x2E4));
 
-    // vtable 0x18 on the broadphase takes an object out and reports the pairs that went with it
-    void* broadPhase = at<void*>(world, 0x54);
-    typedef void (*RemoveObjectFn)(void*, void*, hkArray<hkBroadPhaseHandlePair>*);
-    reinterpret_cast<RemoveObjectFn>((*reinterpret_cast<void***>(broadPhase))[0x18 / 4])(broadPhase, reinterpret_cast<char*>(phantom) + 0x30, &removedPairs);
+    // the broadphase takes the object out and reports the pairs that went with it
+    at<hkBroadPhase*>(world, 0x54)->removeObject(&phantom->m_collidable.m_broadPhaseHandle, removedPairs);
 
     if (removedPairs.m_size != 0) {
         fn_802CAFC0(at<void*>(world, 0x58), &removedPairs[0], removedPairs.m_size);
@@ -72,49 +68,41 @@ void hkWorldOperationUtil::removePhantomBP(hkWorld* world, hkPhantom* phantom) {
 // the entity version of addPhantomBP: same broadphase dance, but the box comes from the entity's shape,
 // pushed out a bit by half of the world's collision tolerance
 void hkWorldOperationUtil::addEntityBP(hkWorld* world, hkEntity* entity) {
-    void* shape = at<void*>(entity, 0x1C);
-    if (shape == NULL) {
+    if (entity->m_collidable.m_shape == NULL) {
         return;
     }
 
     hkLocalArray<hkBroadPhaseHandlePair> newPairs(at<int>(world, 0x2E4));
 
-    // HYPOTHESIS: world +0x68 holds the collision settings and +8 in there is the tolerance
-    float expansion = 0.5f * at<float>(at<void*>(world, 0x68), 8);
+    // HYPOTHESIS: world +0x68 holds the collision settings and +8 in there is the tolerance; the collidable's
+    // motion field points at the entity's transform
     hkAabb aabb;
-    typedef void (*GetAabbFn)(void*, void*, float, hkAabb*);
-    reinterpret_cast<GetAabbFn>((*reinterpret_cast<void***>(shape))[0x14 / 4])(shape, at<void*>(entity, 0x24), expansion, &aabb);
+    entity->m_collidable.m_shape->getAabb(*reinterpret_cast<const hkTransform*>(entity->m_collidable.m_motion),
+                                          0.5f * at<float>(at<void*>(world, 0x68), 8), aabb);
 
-    void* broadPhase = at<void*>(world, 0x54);
-    typedef void (*AddObjectFn)(void*, void*, hkAabb*, hkArray<hkBroadPhaseHandlePair>*);
-    reinterpret_cast<AddObjectFn>((*reinterpret_cast<void***>(broadPhase))[0x10 / 4])(broadPhase, reinterpret_cast<char*>(entity) + 0x30, &aabb, &newPairs);
+    at<hkBroadPhase*>(world, 0x54)->addObject(&entity->m_collidable.m_broadPhaseHandle, aabb, newPairs);
 
     if (newPairs.m_size > 0) {
         void* filter = at<void*>(world, 0x6C);
         if (filter != NULL) {
             filter = reinterpret_cast<char*>(filter) + 8;
         }
-        fn_802CAEE8(at<void*>(world, 0x58), &newPairs[0], newPairs.m_size, filter);
+        fn_802CAEE8(at<void*>(world, 0x58), newPairs.begin(), newPairs.getSize(), filter);
     }
 }
 
 // takes the entity out of the broadphase. the simulation gets to throw away this entity's collision info first
 void hkWorldOperationUtil::removeEntityBP(hkWorld* world, hkEntity* entity) {
-    if (at<void*>(entity, 0x1C) == NULL) {
+    hkEntity* entities[1] = {entity};
+    if (entity->m_collidable.m_shape == NULL) {
         return;
     }
 
-    // HYPOTHESIS: world +8 is the simulation and its vtable 0x24 drops collision info for a list of entities
-    hkEntity* entities[1] = {entity};
-    u8 flag = 1;
-    void* simulation = at<void*>(world, 8);
-    typedef void (*DropInfoFn)(void*, hkEntity**, int, hkWorld*, u8*);
-    reinterpret_cast<DropInfoFn>((*reinterpret_cast<void***>(simulation))[0x24 / 4])(simulation, entities, 1, world, &flag);
+    // HYPOTHESIS: world +8 is the simulation
+    reinterpret_cast<hkSimulation*>(world->m_unk08)->resetCollisionInformationForEntities(entities, 1, world, true);
 
     hkLocalArray<hkBroadPhaseHandlePair> removedPairs(at<int>(world, 0x2E4));
-    void* broadPhase = at<void*>(world, 0x54);
-    typedef void (*RemoveObjectFn)(void*, void*, hkArray<hkBroadPhaseHandlePair>*);
-    reinterpret_cast<RemoveObjectFn>((*reinterpret_cast<void***>(broadPhase))[0x18 / 4])(broadPhase, reinterpret_cast<char*>(entity) + 0x30, &removedPairs);
+    at<hkBroadPhase*>(world, 0x54)->removeObject(&entity->m_collidable.m_broadPhaseHandle, removedPairs);
 
     if (removedPairs.m_size > 0) {
         fn_802CAFC0(at<void*>(world, 0x58), &removedPairs[0], removedPairs.m_size);
@@ -213,7 +201,7 @@ void hkWorldOperationUtil::mergeIslands(hkWorld* world, hkEntity* entityA, hkEnt
     hkSimulationIsland* islandB = entityB->m_simulationIsland;
     if (world->m_lockCount != 0) {
         hkWorldOperation::BiggestOperation operation;
-        operation.m_kind = 0x0C;
+        operation.m_type = 0x0C;
         operation.m_entityA = entityA;
         operation.m_entityB = entityB;
         world->queueOperation(&operation);

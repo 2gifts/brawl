@@ -295,18 +295,23 @@ void hk3AxisSweep::setBitsBasedOnXInterval(int count, int minKey, const hkBpNode
 
 void hk3AxisSweep::reQuerySingleObject(const hkBroadPhaseHandle* handle,
                                       hkArray<hkBroadPhaseHandlePair>& pairs) {
+    u32* bits;
+    const u32* word;
+    const hkBpNode* query;
+    const hkBpNode* block;
     int count = m_numNodes;
-    u32* bits = (u32*)hkThreadMemory::s_instance->allocateStack(((count >> 5) + 8) * sizeof(u32));
-    const hkBpNode* query = &m_nodes[handle->m_id];
-    setBitsBasedOnXInterval(count, m_axes[0].begin()[query->m_index[4]].m_value,
+    bits = (u32*)hkThreadMemory::s_instance->allocateStack(((count >> 5) + 8) * sizeof(u32));
+    word = bits;
+    query = &m_nodes[handle->m_id];
+    setBitsBasedOnXInterval(count, m_axes[0][query->m_index[4]].m_value,
                            *query, (u16)handle->m_id, bits);
     hkBroadPhaseHandlePair pair;
     pair.m_a = (hkTypedBroadPhaseHandle*)handle;
     const u32* end = bits + (m_numNodes >> 5) + 1;
-    const hkBpNode* block = m_nodes;
-    for (const u32* word = bits; word < end; ++word, block += 32) {
-        u32 candidates = *word;
+    block = m_nodes;
+    for (; word < end; block += 32, ++word) {
         const hkBpNode* candidate = block;
+        u32 candidates = *word;
         while (candidates != 0) {
             if ((candidates & 0xFF) == 0) {
                 candidates >>= 8;
@@ -316,9 +321,9 @@ void hk3AxisSweep::reQuerySingleObject(const hkBroadPhaseHandle* handle,
             if (candidates & 1) {
                 // Two packed 16-bit comparisons reject disjoint Y/Z intervals.
                 u32 candidateMin = candidate->m_minYZ;
-                u32 candidateMax = candidate->m_maxYZ;
-                u32 queryMin = query->m_minYZ;
                 u32 queryMax = query->m_maxYZ;
+                u32 queryMin = query->m_minYZ;
+                u32 candidateMax = candidate->m_maxYZ;
                 if ((((candidateMax - queryMin) | (queryMax - candidateMin)) & 0x80008000u) == 0 &&
                     ((u32)candidate->m_handle & 1) == 0) {
                     pair.m_b = candidate->m_handle;

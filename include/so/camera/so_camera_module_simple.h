@@ -28,7 +28,7 @@ public:
         Quake_Small_Hf = 4,
     };
 
-    virtual ~soCameraModule();
+    virtual ~soCameraModule() { }
     virtual u32 getSubjectsSize() = 0;
     virtual void setup() = 0;
     virtual void setup(soSet<soCameraRange>* cameraRangeSet) = 0;

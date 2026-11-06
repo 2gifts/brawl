@@ -33,7 +33,11 @@ struct hkWorldObject : hkReferencedObject {
     hkWorldObject(hkFinishLoadedObjectFlag flag);
 
     void calcStatistics(hkStatisticsCollector* collector) const;
-    bool setShape(hkShape* shape);
+    // Vtable (hkWorldObject's own, in the image): 0x08 dtor, 0x0C calcStatistics, 0x10 setShape. hkRigidBody
+    // overrides setShape; entities and phantoms add their own virtuals from 0x14.
+    virtual bool setShape(hkShape* shape);
     void addReference();
     void removeReference();
+    // HYPOTHESIS: return type and const (map name only)
+    const hkCollidable* getCollidable() const;
 };

@@ -162,7 +162,7 @@ void* hkThreadMemory::onStackOverflow(int nbytes) {
     return base;
 }
 
-void hkThreadMemory::onStackUnderflow() {
+void hkThreadMemory::onStackUnderflow(void* p) {
     char* base = m_stackBase;
     char* block = base - 0x10;
     int total = m_stackEnd - base + 0x10;

@@ -5,6 +5,10 @@
 #include <havok/hkMemory.h>
 
 struct hkWorld;
+struct hkEntity;
+struct hkAgentNnEntry;
+struct hkProcessCollisionInput;
+struct hkProcessCollisionOutput;
 
 // Simulation driver owned by an hkWorld (layout partly recovered; tail not recovered yet).
 // Field offsets from the constructor (0x0C..0x24 region).
@@ -22,7 +26,38 @@ struct hkSimulation : hkReferencedObject {
         hkMemory::s_instance->deallocateChunk(p, ((hkReferencedObject*)p)->m_memSizeAndFlags, 0x13);
     }
 
+    // What processAgentsOfEntities does with each agent entry of the entities (called as (this->*func)(entry, input,
+    // output)). HYPOTHESIS: the parameter types beyond the call shape.
+    typedef void (hkSimulation::*AgentEntryProcessFunction)(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,
+                                                            hkProcessCollisionOutput& output);
+
     hkSimulation(hkWorld* world);
+    void applyActions();
+    // HYPOTHESIS: the last parameter (an int-sized mode compared with 1; collideEntitiesNarrowPhaseDiscrete passes
+    // its own through, resetCollisionInformationForEntities passes 0)
+    void collideEntitiesNarrowPhaseDiscrete(hkEntity** entities, int numEntities, const hkProcessCollisionInput& input,
+                                            int mode);
+    void processAgentCollideDiscrete(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,
+                                     hkProcessCollisionOutput& output);
+    void processAgentResetCollisionInformation(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,
+                                               hkProcessCollisionOutput& output);
+    void processAgentsOfEntities(hkEntity** entities, int numEntities, const hkProcessCollisionInput& input,
+                                 AgentEntryProcessFunction func, int mode);
     hkReal snapSimulateTimeAndGetTimeToAdvanceTo();
     virtual ~hkSimulation(); // 0x08 (out of line in src/havok/hkSimulation.cpp)
+    // Vtable slots from hkSimulation's vtable in the image (0x0C is hkReferencedObject::calcStatistics), names from
+    // the map. HYPOTHESIS: the signatures of the slots nothing calls yet (declared without parameters).
+    virtual int stepDeltaTime(hkReal physicsDeltaTime); // 0x10 (hkWorld::stepDeltaTime calls it)
+    virtual void integrate();               // 0x14
+    virtual void collide();                 // 0x18
+    virtual void advanceTime();             // 0x1C
+    virtual void collideEntitiesDiscrete(); // 0x20
+    // the hkBool goes by value (the callers pass the address of a one-byte copy)
+    virtual void resetCollisionInformationForEntities(hkEntity** entities, int numEntities, hkWorld* world,
+                                                      hkBool flag); // 0x24
+    virtual void unk28();
+    virtual void unk2C();
+    virtual void unk30();
+    // HYPOTHESIS: the name (hkWorldOperationQueue calls it for the reintegrate-and-recollide batch)
+    virtual void reintegrateAndRecollideEntities(hkEntity** entities, int numEntities, hkWorld* world); // 0x34
 };

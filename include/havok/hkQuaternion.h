@@ -8,11 +8,15 @@ struct hkQuaternion {
 
     hkQuaternion() {}
     hkQuaternion(hkReal x, hkReal y, hkReal z, hkReal w) { m_vec.set(x, y, z, w); }
+    // Out of line (hkSimulation.o): rotation by angle around axis.
+    hkQuaternion(const hkVector4& axis, hkReal angle);
 
     void setAxisAngle(const hkVector4& axis, hkReal angle);
     // Builds the quaternion from a rotation matrix (calls hkQuadReal::quaternionFromRotatation).
     void set(const hkRotation& r);
     void setFlippedRotation(const hkQuaternion& q);
+    // this = conjugate(q0) * q1 (out of line in hkSimulation.o).
+    void setInverseMul(const hkQuaternion& q0, const hkQuaternion& q1);
     // Scales to unit length; defined in src/havok/hkFootPlacementIkSolver.cpp.
     void normalize();
     // Quaternion product this = q0 * q1: imaginary part q0 x q1 + q0.w * q1 + q1.w * q0, real part

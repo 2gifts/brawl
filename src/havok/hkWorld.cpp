@@ -61,6 +61,7 @@
 #include <havok/hkString.h>
 #include <havok/hkMonitorStream.h>
 #include <havok/hkEntity.h>
+#include <havok/hkBroadPhase.h>
 
 // Operation record queued while the world is locked (8 bytes). HYPOTHESIS: field names; the
 // type byte selects the deferred operation, the object pointer is its argument.
@@ -98,14 +99,6 @@ void hkWorld::removeWorldDeletionListener(hkWorldDeletionListener* listener) {
     m_worldDeletionListeners[index] = NULL;
 }
 
-// the phantom vtable calls below go through raw slot numbers. hkPhantom.h's slot order doesn't line up with
-// what the asm calls here (it wants 0x14 for the motion state and 0x34 for deallocateInternalArrays), so
-// HYPOTHESIS: that header's slot guesses are a bit off. leaving it alone until a second caller shows up
-typedef hkMotion* (*PhantomGetMotionFn)(hkPhantom*);
-typedef void (*PhantomVoidFn)(hkPhantom*);
-static inline void* phantomSlot(hkPhantom* p, int offset) {
-    return (*(void***)p)[offset / 4];
-}
 
 // returns NULL when the add got queued because the world was locked
 hkPhantom* hkWorld::addPhantom(hkPhantom* phantom) {
@@ -121,7 +114,7 @@ hkPhantom* hkWorld::addPhantom(hkPhantom* phantom) {
 
     // a phantom that came out of a packfile may not have its collidable pointed at a motion state yet
     if (phantom->m_collidable.m_motion == NULL) {
-        phantom->m_collidable.m_motion = ((PhantomGetMotionFn)phantomSlot(phantom, 0x14))(phantom);
+        phantom->m_collidable.m_motion = phantom->getMotionState();
     }
 
     phantom->m_world = this;
@@ -159,7 +152,7 @@ void hkWorld::removePhantom(hkPhantom* phantom) {
 
     // loaded from a packfile (memSize 0) means it might still own empty arrays that need freeing
     if (phantom->m_memSizeAndFlags == 0) {
-        ((PhantomVoidFn)phantomSlot(phantom, 0x34))(phantom);
+        phantom->deallocateInternalArrays();
     }
     phantom->removeReference();
 
@@ -172,11 +165,6 @@ static inline T& worldField(void* w, int offset) {
     return *reinterpret_cast<T*>(reinterpret_cast<char*>(w) + offset);
 }
 
-// what the broadphase hands back for an aabb query: the two handles of an overlapping pair
-struct hkRegionHit {
-    void* m_a; // 0x00
-    void* m_b; // 0x04 the one that actually lives in the region
-};
 
 // wakes up every entity in the box. while the world is locked the box is copied and queued instead
 void hkWorld::activateRegion(hkAabb* aabb) {
@@ -189,15 +177,13 @@ void hkWorld::activateRegion(hkAabb* aabb) {
         return;
     }
 
-    hkArray<hkRegionHit> hits;
-    // HYPOTHESIS: world +0x54 is the broadphase and its vtable 0x34 is "query this aabb into that list"
-    void* broadPhase = worldField<void*>(this, 0x54);
-    typedef void (*QueryFn)(void*, hkAabb*, hkArray<hkRegionHit>*);
-    reinterpret_cast<QueryFn>((*reinterpret_cast<void***>(broadPhase))[0x34 / 4])(broadPhase, aabb, &hits);
+    hkArray<hkBroadPhaseHandlePair> hits;
+    // HYPOTHESIS: world +0x54 is the broadphase
+    worldField<hkBroadPhase*>(this, 0x54)->querySingleAabb(*aabb, hits);
 
     for (int i = 0; i < hits.m_size; i++) {
         // handle -> collidable (a signed byte offset stored in the handle) -> owner, only if it is an entity (type 1)
-        char* handle = static_cast<char*>(hits[i].m_b);
+        char* handle = reinterpret_cast<char*>(hits[i].m_b);
         char* collidable = handle + static_cast<s8>(handle[5]);
         hkEntity* entity = NULL;
         if (collidable[0x18] == 1) {

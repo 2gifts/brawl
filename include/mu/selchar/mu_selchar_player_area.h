@@ -132,7 +132,7 @@ public:
     int getNumCharColor(int charKind);
     void rumbleController();
     void addObj(int obj);
-    void removeObj(int obj);
+    void removeObj(int obj) __attribute__((never_inline));
     gfPadType::PadType getControllerKind();
     void removeFromBaseMdl(int obj);
     void closeHandiList();
@@ -206,5 +206,9 @@ public:
     int getWifiStateByWifiCond();
     void wifiExitCpuPlayer();
     void setTeamColor(int color, int teamSet);
+    void wifiFriendMain();
+    void dispNumStar(int unk, int playerKind);
+    void initDispSelect();
+    void setPlayerKind(int playerKind);
 };
 static_assert(sizeof(muSelCharPlayerArea) == 0x448, "Wrong size for class!");

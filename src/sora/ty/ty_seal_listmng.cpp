@@ -1,6 +1,19 @@
 #include <ty/ty_seal_listmng.h>
 #include <types.h>
 
+tySealListDataManager::tySealListDataManager(bool load) {
+    unk3EA8 = false;
+    unk3EAC.m_request = NULL;
+    unk3EB0 = true;
+    if (load) {
+        if (!unk3EAC.m_request) {
+            unk3EA8 = false;
+            unk3EB0 = false;
+            unk3EAC.readRequest("/toy/seal/ty_seal_data.dat", Heaps::MenuResource, 0, 0);
+        }
+    }
+}
+
 bool tySealListDataManager::isLoadFinish() {
     if (!unk3EA8) {
         if (!unk3EAC.isReady()) {

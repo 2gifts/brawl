@@ -24,6 +24,21 @@ template <class T> bool stAreaManager::search(T* areas, u32 areaId, u32* index) 
 
 stAreaManager::~stAreaManager() { }
 
+void stAreaManager::eraseAll() {
+    for (u32 i = 0; i < m_size; i++) {
+        m_windAreas[i].m_areaId = 0;
+    }
+    for (u32 i = 0; i < m_size; i++) {
+        m_beltAreas[i].m_areaId = 0;
+    }
+    for (u32 i = 0; i < m_size; i++) {
+        m_waterAreas[i].m_areaId = 0;
+    }
+    for (u32 i = 0; i < m_size; i++) {
+        m_hitPointEffectAreas[i].m_areaId = 0;
+    }
+}
+
 void stAreaManager::clearAll() {
     m_size = 0;
     if (m_windAreas) {

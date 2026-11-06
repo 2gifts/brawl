@@ -25,10 +25,15 @@ void quickSort(T* pArr, int numElem) __attribute__((never_inline));
 // Hoare partition around the middle element; recurses into the left part and loops on the right part.
 template <typename T, typename L>
 void quickSortRecursive(T* pArr, int d, int h, L cmpLess) {
+    // BYTES: the pivot is constructed once, before the loop (a type with a default ctor stores it there), and the
+    // swap temporary default-constructs and then assigns (BiggestOperation: zero type byte, then the copy).
+    T pivot __attribute__((aligned(16)));
     for (;;) {
-        int i = d;
+        // BYTES: j is set before i; the pivot's alignment attribute (above) turns copy propagation off (the target
+        // materializes each less<> hkBool and keeps j as a byte offset shared with the swap).
         int j = h;
-        T pivot = pArr[(d + h) >> 1];
+        int i = d;
+        pivot = pArr[(d + h) >> 1];
         do {
             while (cmpLess(pArr[i], pivot)) {
                 i++;
@@ -36,14 +41,16 @@ void quickSortRecursive(T* pArr, int d, int h, L cmpLess) {
             while (cmpLess(pivot, pArr[j])) {
                 j--;
             }
-            if (i <= j) {
-                if (i != j) {
-                    T t = pArr[i];
-                    pArr[i] = pArr[j];
-                    pArr[j] = t;
+            if (j >= i) {
+                if (j != i) {
+                    T t;
+                    T* pj = pArr + j; // BYTES: the element address is formed before the byte load
+                    t = *pj;
+                    *pj = pArr[i];
+                    pArr[i] = t;
                 }
-                i++;
                 j--;
+                i++;
             }
         } while (i <= j);
         if (d < j) {

@@ -37,7 +37,6 @@ void fn_27_232C18(stTriggerMng* mng);
 void fn_27_232374(stTriggerMng* mng, void* trigger);
 // stAreaManager: the singleton, its constructor, initMng and eraseAll
 extern stAreaManager* lbl_27_bss_5780;
-void fn_27_22AB74(stAreaManager* manager);
 }
 
 static inline void stEditSetStartPos(Vec3f& dst, float x, float y) {
@@ -296,7 +295,7 @@ stEdit::~stEdit() {
         }
         m_blockCount = 0;
         fn_27_232C18(m_triggerMng);
-        fn_27_22AB74(stEditAreaManager());
+        stEditAreaManager()->eraseAll();
     }
     snd3DGenerator* snd = m_snd;
     int* handle = m_seHandle;
@@ -1252,7 +1251,7 @@ void stEdit::createStageBlocks(u32 count, u32* blocks) {
         }
         m_blockCount = 0;
         fn_27_232C18(m_triggerMng);
-        fn_27_22AB74(stEditAreaManager());
+        stEditAreaManager()->eraseAll();
     }
     for (int i = 0; i < m_seCount; i++) {
         m_snd[i].stopSE(m_seHandle[i], 0);
