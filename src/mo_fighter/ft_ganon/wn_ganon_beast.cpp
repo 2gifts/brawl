@@ -1,3 +1,4 @@
+#define SO_BUILDER_HELPERS_WEAK
 #define IP_INPUT_BUTTON_RAW // BYTES: IpNull::getButton returns the raw button mask (8 bytes, not a struct copy)
 #define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR // the two-entry status process vector is default-constructed
 #define WN_WEAPON_BUILDER

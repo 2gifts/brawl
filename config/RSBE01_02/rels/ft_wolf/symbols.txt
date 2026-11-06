@@ -619,7 +619,7 @@ removeRumble__6IpNullFv = .text:0x00010C1C; // type:function size:0x4
 stopRumble__6IpNullFv = .text:0x00010C20; // type:function size:0x4
 setRumble__6IpNullFUlUllUc = .text:0x00010C24; // type:function size:0x4
 getTrigger__6IpNullCFv = .text:0x00010C28; // type:function size:0x1C
-fn_125_10C44 = .text:0x00010C44; // type:function size:0x8
+getButton__6IpNullCFv = .text:0x00010C44; // type:function size:0x8
 getStickSub__6IpNullCFv = .text:0x00010C4C; // type:function size:0x24
 getStickMain__6IpNullCFv = .text:0x00010C70; // type:function size:0x24
 update__6IpNullFv = .text:0x00010C94; // type:function size:0x4
@@ -634,7 +634,7 @@ deactivateDescendantForce__58wnWeaponBuilder<39wnWolfIllusionModuleAccesserBuild
 @144@__dt__58wnWeaponBuilder<39wnWolfIllusionModuleAccesserBuildConfig>Fv = .text:0x00010DBC; // type:function size:0x8
 @136@__dt__58wnWeaponBuilder<39wnWolfIllusionModuleAccesserBuildConfig>Fv = .text:0x00010DC4; // type:function size:0x8
 @64@__dt__14wnWolfIllusionFv = .text:0x00010DCC; // type:function size:0x8
-fn_125_10DD4 = .text:0x00010DD4; // type:function size:0x8
+@72@notifyEventAnimCmd__6WeaponFP9acAnimCmdP16soModuleAccesseri = .text:0x00010DD4; // type:function size:0x8
 @72@isObserv__6WeaponFc = .text:0x00010DDC; // type:function size:0x8
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x00010DE4; // type:function size:0x8
 @100@notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser = .text:0x00010DEC; // type:function size:0x8

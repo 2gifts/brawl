@@ -614,7 +614,7 @@ __dt__79soAnimCmdControlUnitBuilder<48soAnimCmdControlUnitBuildConfig<0,1,1,0,0,
 __dt__67soModuleAccesserBuilder<40wnLucarioQigongModuleAccesserBuildConfig>Fv = .text:0x00013250; // type:function size:0x174
 __dt__55soGeneralWorkBuilder<31soGeneralWorkBuildConfig<5,1,1>>Fv = .text:0x000133C4; // type:function size:0x60
 __dt__175soStatusModuleBuilder<149wnStatusModuleBuildConfig<1,31soGeneralWorkBuildConfig<2,2,1>,1,82soTransitionModuleBuildConfig<49soTypeList<14soIntToType<6>,18soTypeListNullType>>>>Fv = .text:0x00013424; // type:function size:0x9C
-fn_118_134C0 = .text:0x000134C0; // type:function size:0x5C
+__dt__123soArraySelectHolder<1,39soArrayVector<P19soStatusUniqProcess,1>,56soSingletonHolder<35soArrayNull<P19soStatusUniqProcess>>>Fv = .text:0x000134C0; // type:function size:0x5C
 __dt__111soCollisionAttackModuleBuilder<77soCollisionAttackModuleBuildConfig<0,3,0,27soCollisionAttackModuleImpl,1,0,1>>Fv = .text:0x0001351C; // type:function size:0x84
 __dt__10soTeamImplFv = .text:0x000135A0; // type:function size:0x5C scope:weak
 __dt__24soResourceIdAccesserImplFv = .text:0x000135FC; // type:function size:0x5C

@@ -634,7 +634,7 @@ deactivateDescendantForce__57wnWeaponBuilder<38wnFoxIllusionModuleAccesserBuildC
 @144@__dt__57wnWeaponBuilder<38wnFoxIllusionModuleAccesserBuildConfig>Fv = .text:0x00010EA4; // type:function size:0x8
 @136@__dt__57wnWeaponBuilder<38wnFoxIllusionModuleAccesserBuildConfig>Fv = .text:0x00010EAC; // type:function size:0x8
 @64@__dt__13wnFoxIllusionFv = .text:0x00010EB4; // type:function size:0x8
-fn_97_10EBC = .text:0x00010EBC; // type:function size:0x8
+@72@notifyEventAnimCmd__6WeaponFP9acAnimCmdP16soModuleAccesseri = .text:0x00010EBC; // type:function size:0x8
 @72@isObserv__6WeaponFc = .text:0x00010EC4; // type:function size:0x8
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x00010ECC; // type:function size:0x8
 @100@notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser = .text:0x00010ED4; // type:function size:0x8
