@@ -118,7 +118,6 @@ int PFFILE_p_fopen(PF2_VOLUME* p_vol, PF_STR* p_path_str, s32 mode, PF2_FILE** p
 int PFFILE_p_remove(PF2_VOLUME* p_vol, PF_STR* p_path_str);
 int PFFAT_CountAllocatedClusters(PF_FFD* p_ffd, u32 size, u32* p_num_alloc_clusters);
 int PFFAT_FinalizeFFD(PF_FFD* p_ffd);
-int PFVOL_CheckForRead(PF2_VOLUME* p_vol);
 int PFFILE_p_fwrite(PF2_VOLUME* p_vol, u8* p_buf, u32 size, u32 count, PF2_FILE* p_file, u32* p_count_written);
 void PFENT_getcurrentDateTimeForEnt(u16* p_date, u16* p_time);
 void PFCLUSTER_UpdateLastAccessCluster(PF2_FILE* p_file, u32 sector);
