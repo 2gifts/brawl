@@ -6,6 +6,7 @@
 #include <st/loader/st_loader_info_adventure.h>
 #include <st/loader/st_loader_sand_bag.h>
 #include <types.h>
+#include <if/if_adv_gauge.h>
 
 // HYPOTHESIS: IfAdvMngr members (main.dol), the scene module's scResourceLoader read/isLoaded (sora_scene) and
 // stLoaderStageAdventureCommon::getAdvRadarRes (sora_melee 0x23B44C, map); their names belong to other units, so
@@ -16,7 +17,6 @@ bool fn_80106E40(IfAdvMngr* mngr);
 void fn_80106A64(IfAdvMngr* mngr, void* res1, void* res2, void* res3, void* res4);
 void fn_80106D10(IfAdvMngr* mngr);
 void fn_80106E48(IfAdvMngr* mngr);
-void fn_8010C38C(void* unk);
 void fn_1_3C68(scResourceLoader* loader, int heap, const char* path, gfArchive* archive, int size);
 bool fn_1_3E50(scResourceLoader* loader);
 void fn_27_23B44C(stLoader* loader, void** res1, void** res2, void** res3, void** res4);
@@ -138,7 +138,7 @@ void stLoaderInfoAdventure::entryEntity() {
         g_IfAdvMngr->setNumPlayer(count);
         fn_80106E48(g_IfAdvMngr);
         if (getAdvMode(advData) == 2) {
-            fn_8010C38C(reinterpret_cast<stLoaderInfoAdventureIfView*>(g_IfAdvMngr)->unk104);
+            reinterpret_cast<IfAdvGauge*>(reinterpret_cast<stLoaderInfoAdventureIfView*>(g_IfAdvMngr)->unk104)->removeScore();
         }
         reinterpret_cast<stLoaderInfoAdventureIfView*>(g_IfAdvMngr)->unk48_7 = false;
         g_IfAdvMngr->startMelee();
