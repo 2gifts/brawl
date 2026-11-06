@@ -310,11 +310,9 @@ inline utArchiveManager::LoadTask* utArchiveManager::getListTask(utList* list, u
     return nullptr;
 }
 
-// HYPOTHESIS: utArchiveManager::getLoadResult(u32, s32*); em_manager.cpp and it_gen_archive.cpp
-// still call it by this name.
-extern "C" s32 fn_80045DC0(utArchiveManager* manager, u32 resourceId, s32* status) {
+s32 utArchiveManager::getLoadResult(u32 resourceId, s32* status) {
     if (resourceId != 0xFFFF) {
-        utArchiveManager::LoadTask* task = manager->getListTask(&manager->m_loadedList, resourceId);
+        utArchiveManager::LoadTask* task = getListTask(&m_loadedList, resourceId);
         if (task != nullptr) {
             s32 result = fn_80015DAC(task->m_archive);
             if (status != nullptr) {
@@ -328,6 +326,14 @@ extern "C" s32 fn_80045DC0(utArchiveManager* manager, u32 resourceId, s32* statu
         }
     }
     return 0;
+}
+
+bool utArchiveManager::isExistRemoveTask() {
+    return m_removeList.getLength() != 0;
+}
+
+bool utArchiveManager::isExistCancelTask() {
+    return m_cancelList.getLength() != 0;
 }
 
 // HYPOTHESIS: inline lookup of a task slot by resource id.

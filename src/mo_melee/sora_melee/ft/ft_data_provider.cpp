@@ -13,9 +13,6 @@ extern "C" {
     s32 fn_27_70004(void* arg0);
     void fn_27_143EFC(ftDataProvider* arg0, utListNode* arg1);
 
-    u32 fn_80046998();
-    // HYPOTHESIS: takes the archive manager returned by getManager(0)
-    u32 fn_800469AC(utArchiveManager* arg0);
     // soArchiveDb::release (the map name); em_manager.cpp calls it by this stand-in name.
     void fn_27_6FDE0(u32 index);
     extern const int lbl_27_rodata_1C60[];
@@ -119,7 +116,7 @@ void ftDataProvider::process() {
 
 bool ftDataProvider::isReady() {
     utArchiveManager* arcManager = soArchiveDb::getManager(0);
-    if (fn_80046998() == 1U || fn_800469AC(arcManager) == 1U) {
+    if (arcManager->isExistRemoveTask() || arcManager->isExistCancelTask()) {
         return false;
     }
     return true;
