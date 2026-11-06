@@ -417,7 +417,6 @@ extern "C" muWifiCntWndTask* fn_800DA15C(int kind, nw4r::g3d::ResFile* resFile, 
 extern "C" void fn_800D1ADC(muWifiInterfaceTask* task, bool next);
 extern "C" bool fn_800D1BC8(muWifiInterfaceTask* task);
 extern "C" int fn_800F2894(IfSnapSaveTask* task);
-extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 
 // HYPOTHESIS: the heap object of the replay save, only its virtual destructor (vptr at 0x8) is used here.
 class nteFileDataReplayBase {
@@ -876,7 +875,7 @@ void ifVsResultTask::processAnim() {
             }
         }
     }
-    fn_8000DB40(g_gfSceneRoot, 8);
+    g_gfSceneRoot->layerUpdateFrame(8);
 }
 
 // ---- 0x800E7BD0-0x800E9878 ----

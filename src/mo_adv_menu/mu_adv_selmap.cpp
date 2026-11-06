@@ -26,7 +26,6 @@ extern "C" int fn_800BA3D8(muMenuController* controller);
 extern "C" void fn_8003DBA8(Vec2f* vec);
 // GameGlobal::getNameCount() and GameGlobal::getName(number, buffer): the names that were saved
 // gfSceneRoot::layerUpdateFrame(layer), gfSceneRoot::removeInfoCamResAnm() and gfSceneRoot::setInfoCamResAnm(animation)
-extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 // The scene module: the loader of the pack (load(heap, path, archive, size) and isLoaded())
 extern "C" void fn_1_3D44(scResourceLoader* loader, int heap, const char* path, gfArchive* archive, int size);
 extern "C" bool fn_1_3E50(scResourceLoader* loader);
@@ -298,7 +297,7 @@ void muAdvSelmapTask::processDefault() {
         mainProc();
     }
     if (m_result != 2 && m_result != 3 && m_result != 4 && m_result != 5 && m_result != 6) {
-        fn_8000DB40(g_gfSceneRoot, 8);
+        g_gfSceneRoot->layerUpdateFrame(8);
     }
 }
 

@@ -80,7 +80,6 @@ extern "C" muWifiCntWndTask* fn_800DA15C(int kind, nw4r::g3d::ResFile* resFile, 
 extern "C" void fn_800FD448(s32 unk);
 extern "C" void fn_800FD8E0(s32 unk);
 extern "C" s32 fn_800FBFDC();
-extern "C" void fn_8000DB40(gfSceneRoot* root, s32 layer);
 // muNoticeWndTask::create (the map name); mu_notice_wnd.h calls it by this stand-in name.
 extern "C" muNoticeWndTask* fn_800BF048(int kind, const char* text, int size, nw4r::g3d::ResFile* resFile, void* scnRoot, int unk14,
                                        int defaultButton, int heap, int heap2, int unk0, int unk1, int unk2);
@@ -98,7 +97,7 @@ void IfWifiprMngr::main() {
     if (unk38->unk1C != 0 && fn_800FBFDC() == 4) {
         unk50 = 1;
     }
-    fn_8000DB40(g_gfSceneRoot, 8);
+    g_gfSceneRoot->layerUpdateFrame(8);
 }
 
 IfWifiprMngr* IfWifiprMngr::create() {

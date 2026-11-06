@@ -38,7 +38,6 @@ struct IfAdvDispInfo {
 };
 
 extern "C" s32 fn_80109C88(s32 state);
-extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 
 extern "C" {
 void fn_80109774(IfAdvPause* pause, int flag);
@@ -560,7 +559,7 @@ s32 IfAdvMngr::main() {
         g_gfSceneRoot->add(gfSceneRoot::Layer_Info, reinterpret_cast<nw4r::g3d::ScnMdl*>(m_choice));
     }
     if (unk118 == 1) {
-        fn_8000DB40(g_gfSceneRoot, 8);
+        g_gfSceneRoot->layerUpdateFrame(8);
     }
     return result;
 }

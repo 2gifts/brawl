@@ -23,7 +23,6 @@ extern "C" u32 GetResMat__Q34nw4r3g3d6ResMdlCFPCc(nw4r::g3d::ResMdl* mdl, const 
 extern "C" u32 GetResAnmScn__Q34nw4r3g3d7ResFileCFi(nw4r::g3d::ResFile* resFile, int index);
 extern "C" void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(void* self, void* anm);
 // gfSceneRoot::removeInfoCamResAnm(), setInfoCamResAnm(animation) and layerUpdateFrame(layer)
-extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 // gfFileIOHandle::gfFileIOHandle()
 extern "C" void __ct__14gfFileIOHandleFv(gfFileIOHandle* handle);
 
@@ -203,7 +202,7 @@ void muWifiTimeResultTask::processDefault() {
         object->m_modelAnim->setUpdateRate(1.0f);
     }
     MuObject* object = m_object;
-    fn_8000DB40(g_gfSceneRoot, 8);
+    g_gfSceneRoot->layerUpdateFrame(8);
     if (!m_animChanged && object->m_modelAnim->getFrame() == 60.0f) {
         object->changeAnimN("MenWifiTime0000_TopN__1");
         m_animChanged = true;

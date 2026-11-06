@@ -31,7 +31,6 @@ extern "C" bool fn_800FA740(muAdvResultListDisp* disp);
 extern "C" void fn_1_3C68(scResourceLoader* loader, int heap, const char* path, gfArchive* archive, int size);
 extern "C" bool scResourceLoaderIsLoaded(scResourceLoader* loader);
 // gfSceneRoot::layerUpdateFrame(layer), gfSceneRoot::removeInfoCamResAnm() and gfSceneRoot::setInfoCamResAnm(animation)
-extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 extern "C" bool fn_8000D10C(gfSceneRoot* root, int layer, void* scnMdl);
 // nw4r::g3d::ResFile::GetResAnmScn(index) and ResAnmScn::Bind(animation)
 extern "C" void* GetResAnmScn__Q34nw4r3g3d7ResFileCFi(const nw4r::g3d::ResFile* resFile, int index);
@@ -246,7 +245,7 @@ void muAdvResultTask::processDefault() {
     if (sStepFuncs[m_step].m_main != NULL) {
         m_step = sStepFuncs[m_step].m_main(this);
     }
-    fn_8000DB40(g_gfSceneRoot, 8);
+    g_gfSceneRoot->layerUpdateFrame(8);
 }
 
 // A button skips the animation of the list to its end, and when it is over it leaves the screen.
