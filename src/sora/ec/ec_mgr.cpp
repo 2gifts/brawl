@@ -244,3 +244,379 @@ bool ecMgr::isExistEffect(u32 handleId) {
 workFound:
     return work != 0;
 }
+
+extern "C" void fn_8005F660(ecMgr* mgr) {}
+
+extern "C" void fn_8005F664(ecMgr* mgr) {}
+
+extern "C" void fn_8005F704(ecMgr* mgr) {}
+
+void ecMgr::setFlatMode(bool flat) {
+    unk43 = flat;
+}
+
+extern "C" u8 fn_8005F79C(ecMgr* mgr) {
+    return mgr->unk43;
+}
+
+void ecMgr::setDrawPrio(int prio) {
+    if (prio <= 0) {
+        unk80 = 0;
+    } else {
+        unk80 = 1;
+    }
+}
+
+void ecMgr::pushsetCurrentGroup(u32 group) {
+    u8 depth = unk81;
+    if (depth < 2) {
+        depth++;
+        unk81 = depth;
+        (&unk84)[depth] = group;
+    }
+}
+
+void ecMgr::popCurrentGroup() {
+    u32 depth = unk81;
+    if (depth != 0) {
+        depth--;
+        unk81 = depth;
+        if ((depth & 0xFF) == 0) {
+            unk80 = 0;
+            unk43 = 0;
+        }
+    }
+}
+
+u32 ecMgr::setEffect(EfID effectID) {
+    return setEffect(effectID, static_cast<int>(effectID) >> 16, 0, 0, 0);
+}
+
+u32 ecMgr::setEffect(EfID effectID, Vec3f* pos) {
+    return setEffect(effectID, static_cast<int>(effectID) >> 16, pos, 0, 0);
+}
+
+u32 ecMgr::setEffect(EfID effectID, const Vec3f* pos, const Vec3f* rot, const Vec3f* scale) {
+    return setEffect(effectID, static_cast<int>(effectID) >> 16, pos, rot, scale);
+}
+
+void ecMgr::setVisible(u32 handleId, bool isVisible) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        work->set_visible(isVisible);
+    }
+}
+
+void ecMgr::setRot(u32 handleId, Vec3f* rot) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        work->set_rot(rot);
+    }
+}
+
+void ecMgr::setScl(u32 handleId, Vec3f* scale) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        work->set_scl(scale);
+    }
+}
+
+void ecMgr::setMdlTexpat(u32 handleId, u32 texpat) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        work->set_mdl_texpat(texpat);
+    }
+}
+
+void ecMgr::setSlowRate(u32 handleId, u32 rate) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        work->set_slow_rate(rate);
+    }
+}
+
+extern "C" void fn_80062D08(ecEffectWork* work, grCollisionLineWork* lineWork);
+
+void ecMgr::endEffect(u32 handleId) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        work->end(false, false);
+    }
+}
+
+void ecMgr::setGroundAttach(u32 handleId, grCollisionLineWork* lineWork) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        fn_80062D08(work, lineWork);
+    }
+}
+
+void ecMgr::endEffectGroup(u32 group, u32 mask) {
+    if (unk6C) {
+        u32 index = unk70;
+        ecEffectWork* work = &unk60[index];
+        if (group & 0xFF000000) {
+            mask |= 0xFF000000;
+        }
+        group &= mask;
+        for (; index <= unk74; ++index, ++work) {
+            if (work->unk7C && group == (work->unk78 & mask)) {
+                work->end(false, false);
+            }
+        }
+    }
+}
+
+void ecMgr::pauseEffectGroup(u32 group, u32 mask) {
+    if (unk6C) {
+        u32 index = unk70;
+        ecEffectWork* work = &unk60[index];
+        if (group & 0xFF000000) {
+            mask |= 0xFF000000;
+        }
+        group &= mask;
+        for (; index <= unk74; ++index, ++work) {
+            if (work->unk7C && group == (work->unk78 & mask)) {
+                work->pause();
+            }
+        }
+    }
+}
+
+void ecMgr::playEffectGroup(u32 group, u32 mask) {
+    if (unk6C) {
+        u32 index = unk70;
+        ecEffectWork* work = &unk60[index];
+        if (group & 0xFF000000) {
+            mask |= 0xFF000000;
+        }
+        group &= mask;
+        for (; index <= unk74; ++index, ++work) {
+            if (work->unk7C && group == (work->unk78 & mask)) {
+                work->play();
+            }
+        }
+    }
+}
+
+extern "C" void fn_800610BC(ecMgr* mgr, u32 group, u32 mask, u32 rate) {
+    if (mgr->unk6C) {
+        u32 index = mgr->unk70;
+        ecEffectWork* work = &mgr->unk60[index];
+        if (group & 0xFF000000) {
+            mask |= 0xFF000000;
+        }
+        group &= mask;
+        for (; index <= mgr->unk74; ++index, ++work) {
+            if (work->unk7C && group == (work->unk78 & mask)) {
+                work->set_slow_rate(rate);
+            }
+        }
+    }
+}
+
+// HYPOTHESIS: ecMgr::exit under its stand-in name, forwarding to the gfTask exit.
+extern "C" void fn_8005E6C0() {
+    g_ecMgr->exit();
+}
+
+void ecMgr::preSetAnmIdx(int chrIndex, int visIndex, int patIndex, int srtIndex, int clrIndex, int shpIndex) {
+    *(int*)lbl_805A014C = chrIndex;
+    *(int*)lbl_805A0150 = visIndex;
+    *(int*)lbl_805A0154 = patIndex;
+    *(int*)lbl_805A0158 = srtIndex;
+    *(int*)lbl_805A015C = clrIndex;
+    *(int*)lbl_805A0160 = shpIndex;
+}
+
+void ecMgr::setParent(u32 handleId, nw4r::g3d::ScnMdl* model, const char* nodeName, bool flag) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        work->set_parent(model, nodeName, flag);
+    }
+}
+
+void ecMgr::setParent(u32 handleId, nw4r::g3d::ScnMdl* model, u32 nodeIndex, bool flag) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        work->set_parent(model, nodeIndex, flag);
+    }
+}
+
+// HYPOTHESIS: ecMgr::changeMdlTex under its stand-in name, forwarding to the effect work.
+extern "C" void fn_8006097C(ecMgr* mgr, u32 handleId, const char* a, const char* b, nw4r::g3d::ResFile* file, int flag) {
+    ecEffectWork* work;
+    if (handleId && mgr->unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &mgr->unk60[mgr->unk70];
+            for (u32 index = mgr->unk70; index <= mgr->unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        work->change_mdl_tex(a, b, file, flag);
+    }
+}
