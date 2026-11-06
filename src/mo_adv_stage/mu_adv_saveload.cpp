@@ -84,3 +84,14 @@ bool muAdvSaveLoadTask::loading(bool advance) {
     }
     return true;
 }
+
+muRecorder::Data muRecorder::getAdvData() {
+    Data data;
+    void* buffer = unk108;
+    unk108 = 0;
+    data.reset(buffer);
+    return data;
+}
+
+bool utility::StandardTask::preLoad() { return true; }
+bool utility::StandardTask::checkLoadFinish() const { return true; }
