@@ -186,7 +186,9 @@ struct ftStatusFlagData {
     u32 : 3;
     u32 : 8;
     u32 unk4_8 : 1; // HYPOTHESIS: in these statuses Fighter::processUpdate skips the shield regeneration
-    u32 : 23;
+    u32 : 9;
+    u32 unk4_18 : 1; // HYPOTHESIS: in these statuses Fighter::checkTransitionStatus consults the stop module
+    u32 : 13;
 };
 
 class ftCommonDataAccesser {
