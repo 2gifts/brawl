@@ -68,3 +68,68 @@ s32 fn_803D78CC(void* p_disk, u32 block, u32 num_block, u16 bps, u32* p_sector, 
     }
     return err;
 }
+
+// HYPOTHESIS: layout of the disk and partition handles of this build, from the offsets the code uses.
+typedef struct PF2_PDM_CALLBACK {
+    u32 func;
+    u32 arg;
+} PF2_PDM_CALLBACK;
+
+typedef struct PF2_PDM_PARTITION {
+    u32 status;
+    struct PF2_PDM_DISK* p_disk;
+    u32 unk8;
+    u32 unkC;
+    u32 unk10;
+    s32 driver_last_error;
+    u32 unk18;
+    u32 unk1C;
+    PF2_PDM_CALLBACK callback;
+} PF2_PDM_PARTITION;
+
+typedef struct PF2_PDM_DISK {
+    u32 status;
+    u32 unk4[5];
+    PDM_DISK_INFO media_attribute;
+    struct PF2_PDM_PARTITION* p_cur_part;
+} PF2_PDM_DISK;
+
+void pdm_part_set_driver_error_code(PF2_PDM_PARTITION* p_part, s32 error_code) {
+    p_part->driver_last_error = error_code;
+}
+
+s32 pdm_part_get_driver_error_code(PF2_PDM_PARTITION* p_part) {
+    return p_part->driver_last_error;
+}
+
+s32 pdm_disk_set_disk(PF2_PDM_DISK* p_disk, PF2_PDM_PARTITION* p_part) {
+    p_disk->p_cur_part = p_part;
+    return 0;
+}
+
+s32 pdm_part_register_callback(PF2_PDM_PARTITION* p_part, PF2_PDM_CALLBACK* p_callback) {
+    p_part->callback.func = p_callback->func;
+    p_part->callback.arg = p_callback->arg;
+    return 0;
+}
+
+s32 pdm_part_unregister_callback(PF2_PDM_PARTITION* p_part) {
+    p_part->callback.func = 0;
+    p_part->callback.arg = 0;
+    return 0;
+}
+
+s32 pdm_disk_get_media_bps(PF2_PDM_DISK* p_disk, u16* p_bps) {
+    *p_bps = p_disk->media_attribute.bytes_per_sector;
+    return 0;
+}
+
+s32 pdm_disk_get_media_attribute(PF2_PDM_DISK* p_disk, PDM_DISK_INFO* p_attribute) {
+    *p_attribute = p_disk->media_attribute;
+    return 0;
+}
+
+s32 pdm_disk_init_disk_manager(void) {
+    VFipf_memset(lbl_805639C0, 0, 0xa2c);
+    return 0;
+}
