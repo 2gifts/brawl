@@ -30,6 +30,7 @@ struct IfPhoto {
     u8 unk0[0x70];
     int unk70;
     void exitPause();
+    void main();
 };
 
 struct IfAdvBoss {
@@ -76,9 +77,7 @@ public:
 extern "C" void fn_800DBB10(IfMngr* mngr);
 extern "C" void fn_800DBD3C(IfMngr* mngr);
 extern "C" void fn_800E244C(IfPlayer* player);
-// HYPOTHESIS: map names IfAdvBoss::main, IfPhoto::main, IfWifiIntrMenu::main
 extern "C" void fn_80108E5C(IfAdvBoss* boss);
-extern "C" void fn_800F0F84(void* photo);
 extern "C" int fn_800FBFDC(void* menu);
 // HYPOTHESIS: map names IfPlayer::receiveShareStock, addDragoonParts
 extern "C" void fn_800E1D78(IfPlayer* player, Vec3f* pos);
@@ -197,7 +196,7 @@ void IfMngr::main() {
         fn_80108E5C(static_cast<IfAdvBoss*>(m_ifAdvBoss));
     }
     if (m_isPauseMenuActive) {
-        fn_800F0F84(m_ifPhoto);
+        reinterpret_cast<IfPhoto*>(m_ifPhoto)->main();
     }
     if (getIntrMenuState() == 1) {
         switch (fn_800FBFDC(m_ifWifiIntrMenu)) {

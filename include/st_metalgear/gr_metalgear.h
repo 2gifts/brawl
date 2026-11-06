@@ -19,9 +19,6 @@
 // Yakumono::getDamage (sora_melee, unnamed)
 extern "C" void fn_27_26399C(Yakumono* yakumono);
 
-// sora_melee, unnamed: plays a sound effect of the stage, with a position on the screen (-1 left, 1 right)
-extern "C" void fn_27_224DB8(int sndId, float pan);
-
 // The base ground of the stage. It has only the state and the timer that most of the grounds use.
 class grMetalgear : public grYakumono {
 protected:

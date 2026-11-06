@@ -54,7 +54,7 @@ void muBootNetworkTask::processDefault() {
             task = fn_8015820C(task, Heaps::MenuInstance);
         }
         m_task = task;
-        fn_80158334(task);
+        task->startTask();
         m_step = 3;
         m_frame = 0;
         break;
