@@ -261,3 +261,101 @@ void TMCC_JPEGDEC_fillerBlankTileRGB565(TMCC_JPEGDEC_Image* image) {
         }
     }
 }
+
+void TMCC_JPEGDEC_IdctBlock2x2(s32* block, u8* out, s32 stride) {
+    s32 flag = 0;
+    s32 v;
+    s32 a;
+    s32 b;
+    s32 c;
+    s32 d;
+    s32 sum0;
+    s32 diff0;
+    s32 sum1;
+    s32 diff1;
+
+    a = block[0] + 0x40000;
+    b = block[1];
+    sum0 = a + b;
+    diff0 = a - b;
+    c = block[8];
+    d = block[9];
+    sum1 = c + d;
+    diff1 = c - d;
+
+    v = (sum0 + sum1) >> 11;
+    if (v < 0x100 && v > -1) {
+        flag = 1;
+    }
+    out[0] = flag ? v : (v < 0 ? 0 : 255);
+
+    v = (sum0 - sum1) >> 11;
+    flag = 0;
+    if (v < 0x100 && v > -1) {
+        flag = 1;
+    }
+    out[stride] = flag ? v : (v < 0 ? 0 : 255);
+
+    v = (diff0 + diff1) >> 11;
+    flag = 0;
+    if (v < 0x100 && v > -1) {
+        flag = 1;
+    }
+    out[1] = flag ? v : (v < 0 ? 0 : 255);
+
+    v = (diff0 - diff1) >> 11;
+    flag = 0;
+    if (v < 0x100 && v > -1) {
+        flag = 1;
+    }
+    out[stride + 1] = flag ? v : (v < 0 ? 0 : 255);
+}
+
+void TMCC_JPEGDEC_IdctBlock2x2_Col(s32* block, s8* out) {
+    s32 flag = 0;
+    s32 v;
+    s32 a;
+    s32 b;
+    s32 c;
+    s32 d;
+    s32 sum0;
+    s32 diff0;
+    s32 sum1;
+    s32 diff1;
+
+    a = block[0];
+    b = block[1];
+    c = block[8];
+    d = block[9];
+    sum0 = a + b;
+    diff0 = a - b;
+    sum1 = c + d;
+    diff1 = c - d;
+
+    v = (sum0 + sum1) >> 11;
+    if (v < 128 && v > -129) {
+        flag = 1;
+    }
+    out[0] = flag ? v : (v > 0 ? 127 : -128);
+
+    v = (sum0 - sum1) >> 11;
+    flag = 0;
+    if (v < 128 && v > -129) {
+        flag = 1;
+    }
+    out[8] = flag ? v : (v > 0 ? 127 : -128);
+
+    v = (diff0 + diff1) >> 11;
+    flag = 0;
+    if (v < 128 && v > -129) {
+        flag = 1;
+    }
+    out[1] = flag ? v : (v > 0 ? 127 : -128);
+
+    v = (diff0 - diff1) >> 11;
+    flag = 0;
+    if (v < 128 && v > -129) {
+        flag = 1;
+    }
+    out[9] = flag ? v : (v > 0 ? 127 : -128);
+}
