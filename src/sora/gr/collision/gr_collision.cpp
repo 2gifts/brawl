@@ -266,18 +266,21 @@ void grCollision::update() {
 
 void grCollision::updateClippingRange(clAABBox2D* range) {
     if (m_aabBox.checkIntersect1(*range)) {
-        for (u32 i = 0; i < m_jointLen; i++) {
-            grCollisionJoint* joint = &m_joints[i];
+        grCollisionJoint* joint; u32 off; u32 i;
+        for (i = 0, off = 0; i < m_jointLen; off += 0x60, i++) {
+            joint = (grCollisionJoint*)((char*)m_joints + off);
             if (joint->m_0x54_6) {
                 if (!range->checkIntersect1(joint->m_aabBox)) {
-                    joint->m_0x55_6 = false;
+                    joint->m_0x55_7 = false;
                 }
             }
         }
     } else {
+        u32 off; u32 i; grCollisionJoint* joint;
         m_unk2D_5 = false;
-        for (u32 i = 0; i < m_jointLen; i++) {
-            m_joints[i].m_0x55_6 = false;
+        for (i = 0, off = 0; i < m_jointLen; i++, off += 0x60) {
+            joint = (grCollisionJoint*)((char*)m_joints + off);
+            joint->m_0x55_7 = false;
         }
     }
 }
@@ -342,40 +345,36 @@ void grCollision::updateLinkVirtual() {
 }
 
 void grCollision::removeLink() {
-    for (u32 i = 0; i < m_lineLen; i++) {
-        grCollisionLine* line = lineAt(m_lines, i);
-        if (line->m_unkA != -1) {
-            line->m_unkA = -1;
-            line->m_unk8 = 0;
-        }
-        if (line->m_unkC != -1) {
-            line->m_unkC = -1;
-            line->m_unk9 = 0;
+    {
+        u32 off; u32 i; grCollisionLine* line;
+        for (i = 0, off = 0; i < m_lineLen; off += 18, i++) {
+            line = (grCollisionLine*)((char*)m_lines + off);
+            if (line->m_unkA != -1) { line->m_unkA = -1; line->m_unk8 = 0; }
+            if (line->m_unkC != -1) { line->m_unkC = -1; line->m_unk9 = 0; }
         }
     }
-    u16 index = m_index;
+    {
+        u16 index = m_index; grCollisionLine* line; u32 i; u32 off;
     typedef nw4r::ut::LinkList<grCollision, 0x30> grCollisionNodeList;
     grCollisionNodeList& list = (grCollisionNodeList&)g_grCollisionList;
     for (grCollisionNodeList::Iterator it = list.GetBeginIter(); it != list.GetEndIter(); it++) {
         grCollision* other = &*it;
-        for (u32 i = 0; i < other->m_lineLen; i++) {
-            grCollisionLine* line = lineAt(other->m_lines, i);
-            if (line->m_unk8 == index) {
-                line->m_unkA = -1;
-                line->m_unk8 = 0;
-            }
-            if (line->m_unk9 == index) {
-                line->m_unkC = -1;
-                line->m_unk9 = 0;
-            }
+        for (i = 0, off = 0; i < other->m_lineLen; off += 18, i++) {
+            line = (grCollisionLine*)((char*)other->m_lines + off);
+            if (line->m_unk8 == index) { line->m_unkA = -1; line->m_unk8 = 0; }
+            if (line->m_unk9 == index) { line->m_unkC = -1; line->m_unk9 = 0; }
         }
+    }
     }
 }
 
 void grCollision::removeLinkTarget(grCollision* target) {
     u16 index = target->m_index;
-    for (u32 i = 0; i < m_lineLen; i++) {
-        grCollisionLine* line = lineAt(m_lines, i);
+    grCollisionLine* line;
+    u32 i;
+    u32 off;
+    for (i = 0, off = 0; i < m_lineLen; off += 18, i++) {
+        line = (grCollisionLine*)((char*)m_lines + off);
         if (line->m_unk8 == index) {
             line->m_unkA = -1;
             line->m_unk8 = 0;
@@ -650,11 +649,12 @@ Vec2f* grCollision::getDstVtx(grCollisionJoint* joint, int index) {
 }
 
 grCollisionJoint* grCollision::getJointByLineId(u32 lineIndex) {
-    grCollisionJoint* found = NULL;
-    for (u32 i = 0; i < m_jointLen; i++) {
-        grCollisionJoint* joint = &m_joints[i];
-        bool inside = false;
-        if (joint->m_lineStart <= lineIndex && lineIndex < joint->m_lineStart + joint->m_lineLen) {
+grCollisionJoint* joint; u32 off; u32 start; u32 i; bool inside; grCollisionJoint* found = NULL;
+    for (i = 0, off = 0; i < m_jointLen; off += 0x60, i++) {
+        joint = (grCollisionJoint*)((char*)m_joints + off);
+        start = joint->m_lineStart;
+        inside = false;
+        if (start <= lineIndex && lineIndex < start + joint->m_lineLen) {
             inside = true;
         }
         if (inside) {

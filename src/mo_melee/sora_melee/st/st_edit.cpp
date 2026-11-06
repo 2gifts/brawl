@@ -270,8 +270,6 @@ void stEdit::createMoveController(u32 countA, u32 countB) {
     }
 }
 
-// grCollision::removeLinkTarget (the map name); src/mo_stage/st_stageedit/st_stageedit.cpp calls it by this stand-in name.
-extern "C" void fn_801112FC(grCollision* collision, grCollision* target);
 // grCollision::updateLinkVirtual (the map name); src/mo_stage/st_stageedit/st_stageedit.cpp calls it by this stand-in name.
 extern "C" void fn_8011135C(grCollision* collision, grCollision* target);
 
@@ -338,8 +336,8 @@ void stEdit::update(float deltaFrame) {
                         grCollision* second = *qColl;
                         if (second != NULL && first != second && (mask & *qMask & 0x3FFFF) != 0 &&
                             (mask & *qMask & 0xFFFC0000) != 0) {
-                            fn_801112FC(first, second);
-                            fn_801112FC(second, first);
+                            first->removeLinkTarget(second);
+                            second->removeLinkTarget(first);
                             fn_8011135C(first, second);
                             fn_8011135C(second, first);
                         }
@@ -360,8 +358,8 @@ void stEdit::update(float deltaFrame) {
                     for (u32 j = 0; j < countA; j++) {
                         grCollision* second = *qColl;
                         if (second != NULL && (mask & *qMask & 0x3FFFF) != 0 && (mask & *qMask & 0xFFFC0000) != 0) {
-                            fn_801112FC(first, second);
-                            fn_801112FC(second, first);
+                            first->removeLinkTarget(second);
+                            second->removeLinkTarget(first);
                             fn_8011135C(first, second);
                             fn_8011135C(second, first);
                         }
