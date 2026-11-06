@@ -9,6 +9,8 @@ struct hkContactPoint {
     hkVector4 m_normal;   // 0x10 (w = distance)
 
     hkVector4* getPosition();
+    // second overload (map: hkContactPoint::getPosition1, out of line in hkSimulation.o). HYPOTHESIS: const form.
+    const hkVector4& getPosition() const;
     hkVector4* getNormal();
     // HYPOTHESIS: return type and const (map name only); returns the normal at 0x10
     const hkVector4& getSeparatingNormal() const;

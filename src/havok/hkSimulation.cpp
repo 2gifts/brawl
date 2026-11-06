@@ -193,13 +193,13 @@ int hkSimulation::stepDeltaTime(hkReal physicsDeltaTime) {
 }
 
 // Lets every action of every active island act for this step.
-// HYPOTHESIS: world +0x28 holds the active islands and +0x170 the step info.
+// HYPOTHESIS: world +0x28 holds the active islands.
 void hkSimulation::applyActions() {
     for (int i = 0; i < m_world->m_unk28.m_size; i++) {
         hkSimulationIsland* island = ((hkSimulationIsland**)m_world->m_unk28.m_data)[i];
         hkArray<hkAction*>& actions = island->m_actions;
         for (int j = 0; j < actions.getSize(); j++) {
-            actions[j]->applyAction(*(const hkStepInfo*)((char*)m_world + 0x170));
+            actions[j]->applyAction(m_world->m_dynamicsStepInfo);
         }
     }
 }
@@ -258,7 +258,7 @@ hkMotion* hkRigidBody::getRigidMotion() {
 }
 
 hkTransform& hkRigidBody::getTransform() {
-    return *(hkTransform*)((u8*)this + 0xB0);
+    return getMotion()->m_motionState.m_transform;
 }
 
 const hkQuaternion& hkMotion::getRotation() const {
@@ -274,7 +274,11 @@ const hkCollidable* hkWorldObject::getCollidable() const {
 }
 
 hkVector4& hkRigidBody::getCenterOfMassInWorld() {
-    return *(hkVector4*)((u8*)this + 0x100);
+    return getMotion()->m_motionState.m_sweptTransform.m_centerOfMass1;
+}
+
+const hkVector4& hkContactPoint::getPosition() const {
+    return m_position;
 }
 
 hkReal hkMath::asin(hkReal r) {
@@ -286,6 +290,15 @@ hkReal hkMath::asin(hkReal r) {
 
 hkQuaternion::hkQuaternion(const hkVector4& axis, hkReal angle) {
     setAxisAngle(axis, angle);
+}
+
+// The translation is moved so that the centre of mass stays put: translation = centre of mass - R * local centre.
+void hkRigidBody::setRotationAroundCentreOfMass(const hkQuaternion& newRotation) {
+    hkTransform& trans = getMotion()->m_motionState.m_transform;
+    trans.m_rotation.set(newRotation);
+    hkVector4 centerShift;
+    centerShift._setRotatedDir(trans.m_rotation, getMotion()->m_motionState.m_sweptTransform.m_centerOfMassLocal);
+    trans.m_translation.setSub4(getMotion()->m_motionState.m_sweptTransform.m_centerOfMass1, centerShift);
 }
 
 void hkQuaternion::setInverseMul(const hkQuaternion& q0, const hkQuaternion& q1) {

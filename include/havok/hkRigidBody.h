@@ -30,6 +30,8 @@ struct hkRigidBody : hkEntity {
     void setPosition(const hkVector4& position);
     void setPositionAndRotation(const hkVector4& position, const hkQuaternion& rotation);
     void setTransform(const hkTransform& transform);
+    // Turns the body to the new rotation about its centre of mass (the centre of mass stays where it is).
+    void setRotationAroundCentreOfMass(const hkQuaternion& newRotation);
     // HYPOTHESIS: refreshes the broadphase entry and collision information after the body is warped.
     void updateBroadphaseAndResetCollisionInformationOfWarpedBody();
 };
