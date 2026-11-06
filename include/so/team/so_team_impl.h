@@ -8,7 +8,7 @@ class soTeamImpl : public soTeam {
     int m_no;  // +0x08
     int m_2nd; // +0x0C
 public:
-#ifdef EM_ENEMY_BUILDER
+#if defined(EM_ENEMY_BUILDER) || defined(WN_SIMPLE_INLINE_TEAM)
     // The Enemy constructor expands it.
     soTeamImpl(int no) : soTeam(false), m_no(no), m_2nd(-1) { }
 #else
