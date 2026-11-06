@@ -40,7 +40,7 @@ void* lbl_805A1018;
 void* lbl_805A101C;
 unsigned char lbl_805A1020[0x4] __attribute__((aligned(4))) = { 0 };
 void (*lbl_805A1024)(void*);
-unsigned char lbl_805A1028[0x8] __attribute__((aligned(4))) = { 0 };
+void* (*lbl_805A1028[2])(int, int);
 void* lbl_805A1030[2];
 
 // Function bodies below are taken from https://github.com/jj-link/brawl.
@@ -295,5 +295,31 @@ int DWC_NdGetFileAsync(void* buf, int size, int arg) {
     OSLockMutex(&lbl_805344B0);
     lbl_805A0FEC = 1;
     OSUnlockMutex(&lbl_805344B0);
+    return 0;
+}
+
+int setAttr(int, const char*);
+
+int DWCi_NdSetAttr(const char* attr0, const char* attr1, const char* attr2) {
+    int i;
+    void** slot;
+    OSLockMutex(&lbl_805344D8.mutex);
+    for (i = 0, slot = lbl_805344C8; i < 3; i++, slot++) {
+        if (*slot != 0) {
+            lbl_805A1024(*slot);
+            *slot = 0;
+        }
+    }
+    if (setAttr(0, attr0) && setAttr(1, attr1) && setAttr(2, attr2)) {
+        OSUnlockMutex(&lbl_805344D8.mutex);
+        return 1;
+    }
+    for (i = 0, slot = lbl_805344C8; i < 3; i++, slot++) {
+        if (*slot != 0) {
+            lbl_805A1024(*slot);
+            *slot = 0;
+        }
+    }
+    OSUnlockMutex(&lbl_805344D8.mutex);
     return 0;
 }
