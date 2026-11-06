@@ -29,8 +29,6 @@
 #include <st_tbreak/st_tbreak.h>
 
 // Unnamed helpers of sora_melee the stage calls directly (see st_newpork.cpp).
-// grMadein::setMatrix(Matrix*, bool): lets the ground (and optionally its attack) follow the matrix.
-extern "C" void fn_27_279FC8(grMadein* ground, Matrix* matrix, bool followAttack);
 
 // The level table: a first word that the coroutine tag starts with, then the five levels (the last number of the
 // belts, 100, is the same everywhere). HYPOTHESIS: only the use of the leading fields is known.
@@ -487,13 +485,13 @@ void stTargetBreak::update(float deltaFrame) {
                     Matrix nodeMtx(true);
                     m_movingTargetNodes[i]->getNodeMatrix(&nodeMtx, 0, nodeName);
                     nodeMtx(2, 3) = -10.0f;
-                    fn_27_279FC8(m_targets[i], &nodeMtx, true);
+                    m_targets[i]->setMatrix(&nodeMtx, true);
                 }
             } else if (m_nodeModel != NULL) {
                 Matrix nodeMtx(true);
                 m_nodeModel->getNodeMatrix(&nodeMtx, 0, nodeName);
                 nodeMtx(2, 3) = -10.0f;
-                fn_27_279FC8(m_targets[i], &nodeMtx, true);
+                m_targets[i]->setMatrix(&nodeMtx, true);
             }
         }
     }
@@ -503,7 +501,7 @@ void stTargetBreak::update(float deltaFrame) {
         if (m_stepLocators[i] != NULL) {
             Matrix locatorMtx(true);
             m_stepLocators[i]->getNodeMatrix(&locatorMtx, 0, m_stepLocatorNode[i]);
-            fn_27_279FC8(m_steps[i], &locatorMtx, true);
+            m_steps[i]->setMatrix(&locatorMtx, true);
         }
     }
 

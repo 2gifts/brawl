@@ -24,8 +24,6 @@
 #include <st_newpork/st_newpork.h>
 
 // Unnamed helpers of other units that the stage calls directly.
-// HYPOTHESIS: grMadein::setMatrix(Matrix*, bool): lets the ground (and optionally its attack) follow the matrix.
-extern "C" void fn_27_279FC8(grMadein* ground, Matrix* matrix, bool followAttack);
 // grSeqYakumono::createSeSeqWork(int bankCount)
 extern "C" void fn_27_27C150(grSeqYakumono* ground, int bankCount);
 // grSeqYakumono::registSeSeq(bank, table, entryCount)
@@ -264,7 +262,7 @@ void stNewpork::createObj() {
         m_chimera->initializeEntity();
         m_chimera->switchToMatrix();
         Matrix identity;
-        fn_27_279FC8(m_chimera, &identity, true);
+        m_chimera->setMatrix(&identity, true);
 
         m_chimeraAttack = grNewpork::create(grNewpork::Part_UltimateChimeraArea, "", "");
         if (m_chimeraAttack != NULL) {
@@ -275,7 +273,7 @@ void stNewpork::createObj() {
             m_chimeraAttack->thisIsUltimateChimera(4.75f, &bodyOffset, 0, false);
             m_chimeraAttack->initializeEntity();
             m_chimeraAttack->switchToMatrix();
-            fn_27_279FC8(m_chimeraAttack, &identity, true);
+            m_chimeraAttack->setMatrix(&identity, true);
         }
     }
 
@@ -344,7 +342,7 @@ void stNewpork::update(float deltaFrame) {
     if (m_chikei != NULL && m_viking != NULL) {
         Matrix vikingMtx(true);
         m_chikei->getNodeMatrix(&vikingMtx, 0, m_nodeVikingMove);
-        fn_27_279FC8(m_viking, &vikingMtx, true);
+        m_viking->setMatrix(&vikingMtx, true);
     }
 
     // The breaking plank of the Viking boat. The plank starts with m_param[0] of strength; every hit takes some of it
@@ -352,7 +350,7 @@ void stNewpork::update(float deltaFrame) {
     if (m_chikei != NULL && m_kowareIta != NULL) {
         Matrix plankMtx(true);
         m_chikei->getNodeMatrix(&plankMtx, 0, m_nodeKowareItaPos);
-        fn_27_279FC8(m_kowareIta, &plankMtx, true);
+        m_kowareIta->setMatrix(&plankMtx, true);
         switch (m_seqPlank.m_line) {
             case 0:
                 NEWPORK_SAVE(m_seqPlank, 0x1d5);
@@ -524,7 +522,7 @@ plankEnd:
             limousineFollow: {
                 Matrix attachMtx(true);
                 m_limousineMove->getNodeMatrix(&attachMtx, 0, m_nodeLimousineAttach);
-                fn_27_279FC8(m_limousineActive, &attachMtx, true);
+                m_limousineActive->setMatrix(&attachMtx, true);
                 NEWPORK_SAVE(m_seqLimousine, 0x298);
                 goto limousineEnd;
             }
@@ -630,8 +628,8 @@ limousineEnd:
                 }
                 m_chimeraMotion = motion;
                 Matrix idMtx;
-                fn_27_279FC8(m_chimera, &idMtx, true);
-                fn_27_279FC8(m_chimeraAttack, &idMtx, true);
+                m_chimera->setMatrix(&idMtx, true);
+                m_chimeraAttack->setMatrix(&idMtx, true);
                 m_chimera->setMotion((u8)m_chimeraMotion);
                 m_chimera->startEntityAutoLoop();
                 m_chimera->setSleepAttack(true);
@@ -660,10 +658,10 @@ limousineEnd:
                 m_chimera->setMotion(5);
                 m_chimera->startEntity();
                 m_chimera->setSleepAttack(true);
-                fn_27_279FC8(m_chimera, &m_chimeraMtx, true);
+                m_chimera->setMatrix(&m_chimeraMtx, true);
                 m_chimeraAttack->startEntity();
                 m_chimeraAttack->setSleepAttack(true);
-                fn_27_279FC8(m_chimeraAttack, &m_chimeraMtx, true);
+                m_chimeraAttack->setMatrix(&m_chimeraMtx, true);
                 GXColor fill = nw4r::ut::Color(0, 0, 0, 0x70);
                 m_chimeraReady = false;
                 newporkDisableSubject(&m_subject);
@@ -693,8 +691,8 @@ limousineEnd:
                     }
                     fn_27_27C470(m_chimera, m_chimeraFrame, m_chimeraFrame, m_chimeraMotion);
                     Matrix idMtx;
-                    fn_27_279FC8(m_chimera, &idMtx, true);
-                    fn_27_279FC8(m_chimeraAttack, &idMtx, true);
+                    m_chimera->setMatrix(&idMtx, true);
+                    m_chimeraAttack->setMatrix(&idMtx, true);
                     m_chimeraReady = true;
                     m_chimeraStay = m_param[17];
                 }
@@ -771,13 +769,13 @@ limousineEnd:
                         }
                         m_chimera->setMotion(4);
                         m_chimera->startEntity();
-                        fn_27_279FC8(m_chimera, &m_chimeraMtx, true);
+                        m_chimera->setMatrix(&m_chimeraMtx, true);
                         m_chimera->setSleepAttack(true);
                         m_chimeraReady = false;
                         m_chimera->seAttackUltimateChimera();
                         m_chimeraAttack->startEntity();
                         m_chimeraAttack->setSleepAttack(true);
-                        fn_27_279FC8(m_chimeraAttack, &m_chimeraMtx, true);
+                        m_chimeraAttack->setMatrix(&m_chimeraMtx, true);
                         NEWPORK_SAVE(m_seqChimera, 0x3fc);
                         goto chimeraEnd;
                     }
@@ -870,8 +868,8 @@ limousineEnd:
                     anim->setFrame(m_chimeraFrame);
                 }
                 Matrix idMtx;
-                fn_27_279FC8(m_chimera, &idMtx, true);
-                fn_27_279FC8(m_chimeraAttack, &idMtx, true);
+                m_chimera->setMatrix(&idMtx, true);
+                m_chimeraAttack->setMatrix(&idMtx, true);
                 m_chimeraReady = true;
             }
             chimeraStayTick:
@@ -912,8 +910,8 @@ limousineEnd:
                 m_chimeraAttack->startEntity();
                 m_chimeraAttack->setSleepAttack(true);
                 if (m_chimeraReady) {
-                    fn_27_279FC8(m_chimera, &m_chimeraMtx, true);
-                    fn_27_279FC8(m_chimeraAttack, &m_chimeraMtx, true);
+                    m_chimera->setMatrix(&m_chimeraMtx, true);
+                    m_chimeraAttack->setMatrix(&m_chimeraMtx, true);
                     m_chimeraReady = false;
                 }
                 m_chimera->seAttackStopUltimateChimera();
@@ -935,8 +933,8 @@ limousineEnd:
                 m_chimeraMtx(0, 3) = m_chimeraPos.m_x;
                 m_chimeraMtx(1, 3) = m_chimeraPos.m_y;
                 m_chimeraMtx(2, 3) = m_chimeraPos.m_z;
-                fn_27_279FC8(m_chimera, &m_chimeraMtx, true);
-                fn_27_279FC8(m_chimeraAttack, &m_chimeraMtx, true);
+                m_chimera->setMatrix(&m_chimeraMtx, true);
+                m_chimeraAttack->setMatrix(&m_chimeraMtx, true);
                 NEWPORK_SAVE(m_seqChimera, 0x4a8);
                 goto chimeraEnd;
             }
