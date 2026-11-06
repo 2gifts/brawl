@@ -45,6 +45,7 @@
 #include <havok/hkAction.h>
 #include <havok/hkMath.h>
 #include <math.h>
+#include <havok/hkMonitorStream.h>
 
 hkSimulation::hkSimulation(hkWorld* world) {
     m_world = world;
@@ -73,6 +74,15 @@ hkReal hkSimulation::snapSimulateTimeAndGetTimeToAdvanceTo() {
         return m_unk14;
     }
     return m_unk1C;
+}
+
+// HYPOTHESIS: a scoped timer helper (its destructor ends the current timer section); no members are touched.
+struct hkTimeFunctionHelper {
+    ~hkTimeFunctionHelper();
+};
+
+hkTimeFunctionHelper::~hkTimeFunctionHelper() {
+    HK_TIMER_END();
 }
 
 // Lets every action of every active island act for this step.
