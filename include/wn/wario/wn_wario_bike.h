@@ -43,6 +43,7 @@ struct wnWarioBikeParam {
 
 // RTTI5FB4 and constructor10318 establish the primary Weapon builder base.
 struct wnWarioBikeModuleAccesserBuildConfig;
+#ifndef WN_WEAPON_BUILDER
 template <>
 class wnWeaponBuilder<wnWarioBikeModuleAccesserBuildConfig> : public Weapon {
     u8 unkD0[0x2980 - sizeof(Weapon)];
@@ -50,12 +51,99 @@ public:
     virtual ~wnWeaponBuilder();
     virtual void deactivateDescendantForce();
 };
+#else
+#include <wn/wn_extend_param_accesser.h>
+#include <wn/wn_kinetic_mediator_impl.h>
+#include <wn/wn_damage_transactor_actor.h>
+#include <so/controller/so_controller_module_link_ref.h>
+#include <wn/wario/wn_wario_bike_kinetic_transactor.h>
+#include <wn/wario/wn_wario_bike_damage_transactor.h>
+
+// The static data block of the article (read by its wnModuleAccesserBuildData).
+// HYPOTHESIS: layout of the untouched part.
+struct wnWarioBikeData {
+    s32 m_resGroupNo;
+    u8 unk4[0x30];
+    const wnWarioBikeParam* m_param; // +0x34
+    const void* m_hitData;           // +0x38, the hit data set
+};
+
+class wnWarioBikeParamAccesser : public wnExtendParamAccesser<3999, 34, 23999, 5, 0, 0> {
+public:
+    explicit wnWarioBikeParamAccesser(const wnWarioBikeParam* param) __attribute__((never_inline));
+    virtual ~wnWarioBikeParamAccesser() { }
+};
+
+typedef soTypeList<wnWarioBikeNormal0Info,
+        soTypeList<wnWarioBikeGravityInfo,
+        soTypeList<wnWarioBikeNormal2Info, soTypeListNullType> > > wnWarioBikeKineticEnergyTypeList;
+typedef soKineticTransactorInfo<wnWarioBikeKineticTransactor, wnKineticTransactor,
+                                wnKineticTransactor, soKineticTransactHelper>
+    wnWarioBikeKineticTransactorInfo;
+
+struct wnWarioBikeModuleAccesserBuildConfig : wnCommonBuildConfig {
+    typedef soKineticModuleBuildConfig<soKineticModuleGenericImpl,
+                                       soKineticMediatorImpl<wnWarioBikeKineticEnergyTypeList,
+                                                             wnWarioBikeKineticTransactorInfo> >
+        KineticModuleBuildConfig;
+    typedef soInsideEventManageModuleBuildConfig<16, 32, 4, 2, 4, 4, 4, 5, 2, 4, 4, 4, 4, 4, 1, 1, 0, 0, 0,
+                                                 wnInsideEventManageModuleTypes>
+        InsideEventManageModuleBuildConfig;
+    typedef soModelModuleBuildConfig<5, 0, soModelModuleImpl> ModelModuleBuildConfig;
+    typedef soMotionModuleBuildConfig<22, soMotionModuleImpl, 0, 0,
+                                      soTransitionModuleBuildConfig<wnMotionTransitionTypeList>,
+                                      soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> >
+        MotionModuleBuildConfig;
+    // HYPOTHESIS: the trailing arguments of the attack module configuration.
+    typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 4, 1, soCollisionAttackModuleImpl, 1, true, true>
+        CollisionAttackModuleBuildConfig;
+    typedef soCollisionHitModuleBuildConfig<soCollision::Category_Fighter, 4, 1, soCollisionHitModuleImpl, 0x3ff, true>
+        CollisionHitModuleBuildConfig;
+    typedef wnDamageModuleBuildConfig<soDamageModuleActor, 1,
+                                      soSingletonHolder<wnWarioBikeDamageTransactorImpl>,
+                                      soSingletonHolder<soDamageEffectorNull> >
+        DamageModuleBuildConfig;
+    typedef soTurnModuleBuildConfig<soTurnModuleImpl> TurnModuleBuildConfig;
+    typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> LinkModuleBuildConfig;
+    typedef soVisibilityModuleBuildConfig<soVisibilityModuleImpl, 2> VisibilityModuleBuildConfig;
+    typedef wnControllerModuleBuildConfig<soControllerModuleLinkRef, 0, 0> ControllerModuleBuildConfig;
+    typedef wnStatusModuleBuildConfig<19, soGeneralWorkBuildConfig<8, 10, 1>, 19,
+                                      soTransitionModuleBuildConfig<wnStatusTransitionTypeList> >
+        StatusModuleBuildConfig;
+    typedef wnAnimCmdModuleSubBuildConfigDefault<1, 19, 0, 0, 1, 22, 0, 0, 1, 22, 0, 0, 1, 22, 0, 0>
+        AnimCmdModuleSubBuildConfig;
+    typedef soGeneralWorkBuildConfig<8, 2, 1> GeneralWorkBuildConfig;
+    typedef soShadowModuleBuildConfig<soShadowModuleImpl> ShadowModuleBuildConfig;
+    typedef soColorBlendModuleBuildConfig<-1, 0, soColorBlendModuleImpl> ColorBlendModuleBuildConfig;
+};
+
+template <>
+class wnWeaponBuilder<wnWarioBikeModuleAccesserBuildConfig> : public Weapon {
+protected:
+    wnModuleAccesserBuilder<wnWarioBikeModuleAccesserBuildConfig> m_modules;
+    u32 m_modulesPad; // HYPOTHESIS: as WN_WEAPON_NO_COMMON_ENERGIES, the native module storage ends one word later
+public:
+    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info,
+                    const wnModuleAccesserBuildData& bd)
+        : Weapon(name, bd.m_kind, bd.m_data, articleId, &info, m_modules.getModuleAccesser(), true),
+          m_modules(this, bd) {
+        Weapon::initialize();
+    }
+    virtual ~wnWeaponBuilder() { }
+    virtual void deactivateDescendantForce() {
+        soSingletonHolder<soArticleMediatorNull>::getInstance()->deactivate();
+    }
+};
+#endif
+
 // Proved prefix only: complete allocation size remains HYPOTHESIS.
-// No allocation or by-value construction relies on this incomplete field map.
 // ConstructorF17C stores the same parameter pointer passed to the accessor at2984.
 // The parameter accessor10054 indexes this storage through offset98.
 class wnWarioBike : public wnWeaponBuilder<wnWarioBikeModuleAccesserBuildConfig> {
 public:
+#ifdef WN_WEAPON_BUILDER
+    wnWarioBike(s32 articleId, const wnArticleBuildInfo& info, const wnWarioBikeData* data);
+#endif
     void activate(int founderTaskId, int riderTaskId, int resourceId, int team, Vec3f* position, float lr);
     virtual void processUpdate();
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
@@ -63,5 +151,9 @@ public:
     virtual void notifyEventLink(soLinkEventArgs*, soModuleAccesser*, StageObject*, int);
     wnWarioBikeParam* m_param;
 private:
+#ifdef WN_WEAPON_BUILDER
+    wnWarioBikeParamAccesser m_paramAccesser;
+#else
     u8 unk2984[0xBC]; // Native parameter accessor; detailed fields remain opaque.
+#endif
 };
