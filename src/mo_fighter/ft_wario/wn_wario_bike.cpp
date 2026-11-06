@@ -1,3 +1,5 @@
+#define SO_BUILDER_HELPERS_WEAK
+#define IP_INPUT_BUTTON_RAW
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
 // MATCH-ONLY: retain native vector assignment calls.
 #define MT_VEC2F_ASSIGN_NOINLINE

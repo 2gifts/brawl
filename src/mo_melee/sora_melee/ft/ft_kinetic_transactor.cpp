@@ -1,6 +1,8 @@
 #include <ft/builder/ft_builder_kinetic.h>
 #include <ft/ft_kinetic_energy.h>
 #include <so/so_kinetic_utility.h>
+#include <ft/ft_common_data_accesser.h>
+#include <so/stageobject.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <so/controller/so_controller_module_impl.h>
@@ -417,4 +419,43 @@ void ftKineticTransactor::changeKineticSub9(bool*, void*, Vec2f* speed, soModule
     velocity.m_y *= soValueAccesser::getConstantFloat(moduleAccesser, 0xD8F, 0);
     soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, velocity.m_y), &Vec3f(0.0f, 0.0f, 0.0f));
     soKineticUtility::resetEnableEnergy(2, moduleAccesser, 0, &Vec2f(velocity.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+
+// HYPOTHESIS: bit 9 of the status's second flag word keeps the kinetic energy 0 untouched.
+struct ftStatusKineticFlagData {
+    u32 unk0;
+    u32 : 9;
+    u32 unk4_9 : 1;
+    u32 : 22;
+};
+
+void ftKineticTransactor::notifyEventChangeStatus(void* a, void* b, void* c, void* d) {
+    soModuleAccesser* moduleAccesser = static_cast<soModuleAccesser*>(d);
+    int status = reinterpret_cast<int>(b);
+    ftKind kind = static_cast<ftKind>(moduleAccesser->m_stageObject->soGetSubKind());
+    if (reinterpret_cast<const ftStatusKineticFlagData*>(g_ftCommonDataAccesser.getFtStatusData(kind, status))->unk4_9 == 1) {
+        moduleAccesser->getKineticModule().getEnergy(0)->clearSpeed();
+    }
+}
+
+void ftKineticTransactor::enableOutsideEnergy(soModuleAccesser* moduleAccesser) {
+    if (moduleAccesser->getWorkManageModule().isFlag(0x2200000d) == 1) {
+        moduleAccesser->getKineticModule().getEnergy(5)->disable();
+        moduleAccesser->getKineticModule().getEnergy(7)->disable();
+    } else {
+        moduleAccesser->getKineticModule().getEnergy(5)->enable();
+        moduleAccesser->getKineticModule().getEnergy(7)->enable();
+    }
+}
+
+void ftKineticTransactor::changeKineticSub51(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    float x = soValueAccesser::getConstantFloat(moduleAccesser, 0xC0A, 0) * moduleAccesser->getPostureModule().getLr() * soValueAccesser::getConstantFloat(moduleAccesser, 0xC99, 0);
+    soKineticUtility::resetEnableEnergy(2, moduleAccesser, 3, &Vec2f(x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+    float y = soValueAccesser::getConstantFloat(moduleAccesser, 0xC0B, 0);
+    if (moduleAccesser->getWorkManageModule().getInt(0x10000003) - 1 > 0) {
+        float decay = soValueAccesser::getConstantFloat(moduleAccesser, 0xC98, 0);
+        y *= (float)pow(decay, (float)(moduleAccesser->getWorkManageModule().getInt(0x10000003) - 1));
+    }
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, y), &Vec3f(0.0f, 0.0f, 0.0f));
 }

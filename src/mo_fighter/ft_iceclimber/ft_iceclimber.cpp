@@ -6,6 +6,9 @@
 #define FT_FIGHTER_ANIMCMD_LONG // MATCH-ONLY: Fighter::notifyEventAnimCmd(long) overrides the StageObject slot (as in ft_marth.cpp)
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_POPO_ARTICLE_POOLS
+#define MT_VEC3F_OPERATORS_NOINLINE
+#define MT_VEC3F_SUB_NATIVE_ORDER
+#define MT_VEC3F_LENGTH_SQ_NOINLINE
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #include <ft/builder/ft_dol_array_list.h>
@@ -23,6 +26,7 @@
 #include <ft/builder/ft_builder_noinline.h>
 #include <ft/ft_owner.h>
 #include <so/so_external_value_accesser.h>
+#include <ai/ai_mgr.h>
 
 // HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt); the repeated ones are the null placeholders of the
 // unused status ranges.
@@ -926,6 +930,38 @@ void ftPopo::onDeadEnd() {
         ftPopoLinkKindEventArgs event(0x45e);
         m_moduleAccesser->getLinkModule().sendEventNodes(6, event, 0);
     }
+}
+
+// HYPOTHESIS: the rubber starts with the task id of the fighter, the effect resource, the team and the task id of the link 6 parent.
+bool ftPopo::activeArticle2(wnPopoRubber* weapon, soModuleAccesser* acc) {
+    int parentTaskId = acc->getLinkModule().getParentTaskId(6);
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    int team = acc->getTeamModule().getTeam()->getNo();
+    u32 resId = resources.getResourceIdAccesser()->getEtcResId();
+    weapon->activate(founderTaskId, resId, team, parentTaskId);
+    return true;
+}
+
+// HYPOTHESIS: the blizzard starts at model node 0x27 moved by the parameter offsets (x follows the facing).
+bool ftPopo::activeArticle(wnPopoBlizzard* weapon, soModuleAccesser* acc) {
+    Vec3f position = acc->getModelModule().getNodeGlobalPosition(0x27, false);
+    float lr = acc->getPostureModule().getLr() < 0.0f ? -1 : 1;
+    position.m_x += soValueAccesser::getConstantFloat(acc, 0xfa4, 0) * lr;
+    position.m_y += soValueAccesser::getConstantFloat(acc, 0xfa5, 0);
+    position.m_z = 0.0f;
+    soTeamModule& teamModule = acc->getTeamModule();
+    int founderTaskId = acc->getStageObject().m_taskId;
+    weapon->activate(founderTaskId, teamModule.getTeam()->getNo(), &position, acc->getPostureModule().getLr());
+    return false;
+}
+
+// HYPOTHESIS: whether the partner is within the AI follow distance (the first float of the AI system parameters).
+bool ftPopo::isApproachPartner(StageObject* partner) {
+    Vec3f partnerPos = soExternalValueAccesser::getPos(partner);
+    Vec3f diff = m_moduleAccesser->getPostureModule().getPos() - partnerPos;
+    float dist = *static_cast<float*>(aiMgr::getAiSystemPar());
+    return diff.lengthSq() <= dist * dist;
 }
 
 bool ftPopo::checkTransitionStatus(u32 statusKind) {
