@@ -215,11 +215,10 @@ void grCollisionManager::regist(grCollision* collision) {
     m_collisions[index] = collision;
 }
 
-// HYPOTHESIS: grCollisionManager::release in the map; it keeps the fn_ name that gr_collision.cpp calls.
-extern "C" void fn_80112D64(grCollisionManager* manager, grCollision* collision) {
+void grCollisionManager::release(grCollision* collision) {
     u16 index = collision->m_index;
-    manager->m_collisions[index] = NULL;
-    manager->m_indexBits.m_bits[(int)index >> 5] &= ~(1 << (index & 31));
+    m_collisions[index] = NULL;
+    m_indexBits.m_bits[(int)index >> 5] &= ~(1 << (index & 31));
     collision->m_index = 0xFFFF;
 }
 
