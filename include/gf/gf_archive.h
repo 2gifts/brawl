@@ -84,7 +84,7 @@ public:
     // 40
     char m_archiveFilePath[64];
     // 104
-    int* m_entries;
+    gfArchiveEntryArray* m_entries;
     // 108
     gfFileIOHandle* m_requestHandle;
     // 112
@@ -109,6 +109,9 @@ public:
     bool enumEffectResourceId(int unk1, u32* unk2);
     bool isExistEffect();
     void setupEntry(gfArchiveEntryArray* array, gfArchiveFileHeader* header);
+    bool cancelRequest();
+    bool isCanceled();
+    int getReturnStatus();
     ~gfArchive();
 
     // 124
