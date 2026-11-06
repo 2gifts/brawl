@@ -73,7 +73,23 @@ int fn_803DD674(PF2_DIR_ENT* p_ent, u8 num_entries, PF_FFD* p_ffd, u32* p_next_c
 int fn_803DE800(PF2_ENT_ITER* iter, PF2_DIR_ENT* ent, PF2_VOLUME* vol, PF2_STR* path, u32 wildcard, u32 no_look_last_token);
 u32 fn_803E12B4(PF_FFD* p_ffd, u32 index, u32 mode, u32 size, u32* p_cluster);  // PFFAT_GetClusterInChain
 int fn_803E3610(void);                                       // PFFATFS_initializeFATFS
-int fn_803E5774(PF2_FILE* file);                             // PFFILE_fclose
+void PFFILE_Cursor_MoveToEnd(PF2_FILE* p_file);
+void PFFILE_Cursor_MoveToClusterEnd(PF2_FILE* p_file, u32 size);
+int PFFILE_p_fread(PF2_VOLUME* p_vol, u8* p_buf, u32 size, u32 count, PF2_FILE* p_file, u32* p_count_read);
+void PFFILE_FinalizeAllFiles(PF2_VOLUME* p_vol);
+int PFFILE_remove(PF_STR* p_path_str);
+int PFFILE_fopen(PF_STR* p_path_str, s32 mode, PF2_FILE** pp_file);
+int PFFILE_Cursor_Read(PF2_FILE* p_file, u8* p_buf, u32 size, u32* p_size_read);
+int PFFILE_p_fopen(PF2_VOLUME* p_vol, PF_STR* p_path_str, s32 mode, PF2_FILE** pp_file);
+int PFFILE_p_remove(PF2_VOLUME* p_vol, PF_STR* p_path_str);
+int PFFAT_CountAllocatedClusters(PF_FFD* p_ffd, u32 size, u32* p_num_alloc_clusters);
+int PFFAT_FinalizeFFD(PF_FFD* p_ffd);
+int PFVOL_CheckForWrite(PF2_VOLUME* p_vol);
+int PFCACHE_FlushFATCache(PF2_VOLUME* p_vol);
+PF2_VOLUME* PFPATH_GetVolumeFromPath(PF_STR* p_path);
+void PF_enterCritical(void* unk);
+void PF_exitCritical(void* unk);
+int fn_803E5774(PF2_FILE* file);                           // PFFILE_fclose
 int fn_803E5A50(void* buf, u32 size, u32 count, PF2_FILE* file, u32* count_read);   // PFFILE_fread
 int fn_803E5B8C(void* buf, u32 size, u32 count, PF2_FILE* file, u32* count_written);  // PFFILE_fwrite
 int fn_803E5D00(PF2_FILE* file, s32 offset, s32 origin);    // PFFILE_fseek
