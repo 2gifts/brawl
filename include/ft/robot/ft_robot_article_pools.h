@@ -21,6 +21,9 @@ static_assert(sizeof(ftRobotArticleConstructionInfo) == 8, "Article construction
 
 #include <so/article/so_article_mediator.h>
 
+#ifdef WN_WEAPON_BUILDER
+#include <wn/robot/wn_robot_article_builders.h>
+#else
 // Weapon implementation storage is still opaque. Sizes follow adjacent holder
 // offsets in the article builder; each destructor is an existing REL entry point.
 class wnRobotGyro : public Weapon {
@@ -60,6 +63,7 @@ public:
     void activate(s32 founderTaskId, u32 resourceId, s32 team, const Vec3f* position, float lr,
                   s32 count, s32 selection);
 };
+#endif
 static_assert(sizeof(wnRobotGyro) == 0x2030, "Gyro layout is wrong!");
 static_assert(sizeof(wnRobotGyroHolder) == 0x1bfc, "Gyro holder layout is wrong!");
 static_assert(sizeof(wnRobotFinalBeam) == 0x220c, "Final beam layout is wrong!");
