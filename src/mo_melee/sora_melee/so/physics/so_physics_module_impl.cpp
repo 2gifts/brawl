@@ -467,3 +467,65 @@ const char* soPhysicsModuleImpl::getIKEndNodeName(int ikId, int index) {
     soPhysicsIKNodeTable* table = static_cast<soPhysicsIKNodeTable*>(m_ikData);
     return table[ikId].m_names[table[ikId].m_count - (index + 1)];
 }
+
+// HYPOTHESIS: the handle stores the normal as three floats at +0x10.
+void soPhysicsModuleImpl::setIKNormal(int ikId, const Vec3f* normal) {
+    if (unk30 != NULL) {
+        *(Vec3f*)&m_ikHandles->at(ikId).unk10 = *normal;
+    }
+}
+
+// HYPOTHESIS: three vectors, stored at +0x4, +0x1c and +0x28 of the IK handle.
+void soPhysicsModuleImpl::setIKTargetPos(int ikId, const Vec3f* pos, const Vec3f* pos2, const Vec3f* pos3) {
+    if (unk30 != NULL) {
+        *(Vec3f*)&m_ikHandles->at(ikId).unk4 = *pos;
+        *(Vec3f*)&m_ikHandles->at(ikId).unk1c = *pos2;
+        *(Vec3f*)&m_ikHandles->at(ikId).unk28 = *pos3;
+    }
+}
+
+// HYPOTHESIS: setIK takes the IK weight (compared with and stored to unk34).
+void soPhysicsModuleImpl::setIK(int ikId, float value) {
+    if (unk30 != NULL) {
+        if (value != m_ikHandles->at(ikId).unk34) {
+            bool wasIK = isIK(ikId);
+            m_ikHandles->at(ikId).unk34 = value;
+            bool nowIK = isIK(ikId);
+            if (nowIK != wasIK) {
+                if (!nowIK) {
+                    soPhysicsIKHandle& h0 = m_ikHandles->at(ikId);
+                    soPhysicsIKHandle& h1 = m_ikHandles->at(ikId);
+                    soPhysicsIKHandle& h2 = m_ikHandles->at(ikId);
+                    *(float*)&h0.unk18 = 0.0f;
+                    *(float*)&h1.unk10.unk4 = 0.0f;
+                    *(float*)&h2.unk10.unk0 = 0.0f;
+                }
+                if (unk30 != NULL) {
+                    unk30->setEnable(m_ikHandles->at(ikId).unk0, nowIK);
+                }
+            }
+        }
+    }
+}
+
+void soPhysicsModuleImpl::deactivate() {
+    set2nd(0);
+    set2ndBothStatus(3);
+    int count = m_ikHandles->size();
+    for (int i = 0; i < count; i++) {
+        setIK(i, 0.0f);
+    }
+}
+
+// HYPOTHESIS: activate clears the two high flags and sets unk44_20.
+void soPhysicsModuleImpl::activate() {
+    set2nd(1);
+    set2ndBothStatus(3);
+    unk44_80 = 0;
+    m_2ndSleep = 0;
+    unk44_20 = 1;
+    int count = m_ikHandles->size();
+    for (int i = 0; i < count; i++) {
+        setIK(i, 0.0f);
+    }
+}
