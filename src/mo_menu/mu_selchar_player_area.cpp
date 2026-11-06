@@ -384,12 +384,62 @@ bool muSelCharPlayerArea::isTeamBattle() {
     return m_selCharTask->m_isTeamBattle;
 }
 
+extern "C" int fn_800AF6F0(int stock);
 extern void* lbl_10_bss_8[2];
 extern const u8 lbl_10_rodata_648[0x40];
 extern const u8 lbl_10_rodata_688[0x8];
 
 void muSelCharPlayerArea::clearCharPicTexResArchive() {
     lbl_10_bss_8[0] = nullptr;
+}
+
+void muSelCharPlayerArea::setCharPicTexResArchive(void* archive) {
+    lbl_10_bss_8[0] = archive;
+}
+
+// Leaves the entry mode: the area gets the pad that pressed, and the hand goes back to where it started.
+void muSelCharPlayerArea::changeEntryModeToNormalMode(int controllerNo) {
+    removeObj(0x23);
+    setControllerNo(controllerNo);
+    m_menuController.setControllerID((u8)controllerNo);
+    initDispSelect();
+    muSelCharHand* hand = m_selCharHand;
+    hand->m_pos.m_x = hand->m_startPos.m_x;
+    hand->m_pos.m_y = hand->m_startPos.m_y;
+    hand->m_pos.m_z = hand->m_startPos.m_z;
+    _0 = 0;
+}
+
+// The number of the color of the coin and of the hand (see the header).
+int muSelCharPlayerArea::getColorNo(bool asKind1) {
+    int kind = asKind1 ? 1 : m_playerKind;
+    switch (kind) {
+    case 0:
+        return 6;
+    case 2:
+        return 5;
+    }
+    if (m_selCharTask->m_isTeamBattle) {
+        return sTeamColorAnim[m_teamColor] + 1;
+    }
+    return m_areaIdx + 1;
+}
+
+// The mark of the character on the base of the area: the two special marks, or the number of the stock kind.
+void muSelCharPlayerArea::dispMarkKind(MuSelchkind charKind) {
+    float frame;
+    switch (charKind) {
+    case 0x28:
+        frame = 0.0f;
+        break;
+    case 0x29:
+        frame = 30.0f;
+        break;
+    default:
+        frame = (float)(fn_800AF6F0(muMenu::exchangeMuSelchkind2MuStockchkind(charKind)) + 1);
+        break;
+    }
+    m_objs[Obj_FranchiseIcon]->setFrameTex(frame);
 }
 
 void muSelCharPlayerArea::submitFriendCertify() {
@@ -818,4 +868,11 @@ void muSelCharPlayerArea::wifiFriendMain() {
             }
         }
     }
+}
+
+extern const u32 lbl_10_rodata_798[8];
+
+bool muSelCharPlayerArea::isColorDecButtonPushed() {
+    gfPadStatus pad = getPadStatus();
+    return (pad.m_buttonsPressedThisFrame.bits & lbl_10_rodata_798[pad.m_controllerType]) != 0;
 }

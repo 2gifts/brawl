@@ -129,7 +129,7 @@ public:
     // Lights up the picture of the character while a coin is held over it (the coin is on the hand).
     // HYPOTHESIS: what the flag means, from the coin that passes whether it is on a hand.
     void setCharPicInter(bool inter);
-    int getNumCharColor(int charKind);
+    int getNumCharColor(int charKind) __attribute__((never_inline));
     void rumbleController();
     void addObj(int obj);
     void removeObj(int obj) __attribute__((never_inline));
@@ -165,6 +165,7 @@ public:
     void closeNameEntry();
     void sendSystemCharKind();
     static void clearCharPicTexResArchive();
+    static void setCharPicTexResArchive(void* archive); // HYPOTHESIS: the archive is an opaque pointer
     void submitFriendCertify();
     void submitFriendApply();
     void createNameModel(nw4r::g3d::ResFile* resFile, int priority);
@@ -185,13 +186,14 @@ public:
     void wifiFriendCommandButtonPointed(int hand);
     void handiButtonPointed(int hand);
     bool isColorIncButtonPushed();
+    bool isColorDecButtonPushed();
     // HYPOTHESIS: an inline accessor returns the area controller status by value.
     gfPadStatus getPadStatus();
     int getCollKind(Vec2f* pos, int* arg, float* rect);
     void openHandiList();
     void forceCloseList();
     void setNameNo(int name);
-    void setControllerNo(int controller);
+    void setControllerNo(int controller) __attribute__((never_inline));
     void dispName(int name, int playerKind, bool teamBattle, int teamColor);
     u8 getWifiAID(u8* localPlayer);
     muSelCharPlayerArea();
@@ -209,6 +211,7 @@ public:
     void wifiFriendMain();
     void dispNumStar(int unk, int playerKind);
     void initDispSelect();
+    void changeEntryModeToNormalMode(int controllerNo);
     void setPlayerKind(int playerKind);
 };
 static_assert(sizeof(muSelCharPlayerArea) == 0x448, "Wrong size for class!");
