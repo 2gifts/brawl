@@ -234,8 +234,14 @@ public:
     soGimmickEventObserver(short unitID) : soEventObserver<soGimmickEventObserver>(unitID) {};
     soGimmickEventObserver(short manageId, s8 p2) : soEventObserver<soGimmickEventObserver>(0x3) { initialize(manageId, p2); }
 
+#ifdef SO_GIMMICK_EVENT_OBSERVER_INLINE
+    // BYTES: the Sonic spring unit emits its own weak copies of these two.
+    virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); }
+    virtual void notifyEventGimmick(soGimmickEventArgs* eventInfo, int* taskId) { }
+#else
     virtual void addObserver(short param1, s8 param2);
     virtual void notifyEventGimmick(soGimmickEventArgs* eventInfo, int* taskId);
+#endif
 };
 static_assert(sizeof(soGimmickEventObserver) == 12, "Class is wrong size!");
 

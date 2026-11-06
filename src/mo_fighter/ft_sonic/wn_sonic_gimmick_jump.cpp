@@ -9,9 +9,25 @@
 #define MT_VEC3F_FROM_VEC2_CTOR_NOINLINE
 // MATCH-ONLY: retain the original named zero-rotation constructor in reset.
 #define MT_VEC3F_CTOR_NOINLINE
+// MATCH-ONLY: retain the native one-word null-input result (as in the Snake C4 unit).
+#define IP_INPUT_BUTTON_RAW
+// MATCH-ONLY: the null input answers its sticks with inline stores although Vec2f's constructor is out of line here.
+#define IP_NULL_STICK_ZERO_FIELDS
+#define WN_WEAPON_BUILDER
+#define WN_SHARED_ARRAYS_1
+#define SO_EVENT_OBSERVER_CTOR_EXTERN
+#define SO_GIMMICK_EVENT_OBSERVER_INLINE
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_ARTICLE_ANIMCMD_INT
+#define FT_REL_LINK_EXTERN
+#include <wn/wn_module_accesser_builder.h>
+// The sora_melee array instances the spring's builders call.
+WN_STATUS_PROC_VECTOR_DEFAULT_CTOR(4);
+FT_DOL_ARRAY_VECTOR(soAreaContactLog, 4);
 #include <wn/sonic/wn_sonic_gimmick_jump.h>
 #include <wn/wn_activate_desc.h>
 #include <so/so_module_accesser.h>
+#include <wn/wn_kinetic_module_impl.h>
 #include <so/so_value_accesser.h>
 #include <so/so_kinetic_energy_normal.h>
 #include <so/so_kinetic_energy_rot_normal.h>
@@ -20,6 +36,21 @@
 soGimmickEventPresenter::soGimmickEventPresenter(int manageID, int sendID)
     : soEventPresenter<soGimmickEventObserver>(manageID, static_cast<short>(3)), m_sendID(sendID) { }
 soGimmickEventPresenter::~soGimmickEventPresenter() { }
+
+// HYPOTHESIS: article kind 0x70 and the observer arguments.
+wnSonicGimmickJump::wnSonicGimmickJump(s32 articleId, const wnArticleBuildInfo& info, const wnSonicGimmickJumpData* data) :
+    wnWeaponBuilder<wnSonicGimmickJumpModuleAccesserBuildConfig>(
+        "SonicGimmickJump", articleId, info,
+        wnModuleAccesserBuildData(0x70, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
+                                  0, 0, 0, 0, 0, 0, 0)),
+    soGimmickEventObserver(-1, -1), m_param(data->m_param), m_paramAccesser(data->m_param), m_groundMovement() {
+    soEventManageModule& events = m_moduleAccesser->getEventManageModule();
+    soGimmickEventObserver::addObserver(static_cast<soEventManager&>(events).getManageId(), -1);
+    m_moduleAccesser->getKineticModule().addEnergy(&m_groundMovement, 2, soKineticEnergy::AttributeFlag(8), -1);
+    wnKineticModuleImpl::setOutsideMovementGroundEnergyId(&m_moduleAccesser->getKineticModule(), 2);
+    Weapon::deactivate(false);
+}
 
 void wnSonicGimmickJump::activate(int founderTaskId, int resourceId, int team,
                                  Vec2f* pos, float lr, bool unk) {
@@ -43,9 +74,11 @@ void wnSonicGimmickJump::activate(int founderTaskId, int resourceId, int team,
 }
 
 void wnSonicGimmickJump::onDeactivate() {
+    int sender;
     soEventManageModule& events = m_moduleAccesser->getEventManageModule();
-    int sender = static_cast<s16>(soGimmickEventObserver::getObserverId());
-    soGimmickEventPresenter presenter(static_cast<soEventManager&>(events).getManageId(), sender);
+    sender = static_cast<s16>(soGimmickEventObserver::getObserverId());
+    s16 manageId = static_cast<soEventManager&>(events).getManageId();
+    soGimmickEventPresenter presenter(manageId, sender);
     soModuleAccesser* acc = m_moduleAccesser;
     soGimmickEventArgs_Disable args;
     presenter.presentEventGimmick(&args, acc, -1);
