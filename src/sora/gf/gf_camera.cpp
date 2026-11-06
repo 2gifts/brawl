@@ -11,15 +11,10 @@
 
 // Existing matrix helpers, verified against mt_matrix.cpp. Their source declarations remain unresolved.
 extern "C" {
-void fn_8003E918(Matrix*, float);
-void fn_8003E87C(Matrix*, float);
 void fn_8003EA9C(Matrix*, float);
 void fn_8003EBF4(Matrix*, float);
-void fn_8003F03C(Matrix*, float, float, float);
 void fn_8003F074(Matrix*, float, float, float);
 void fn_8003ECA0(Matrix*, float, float, float);
-void fn_8003E3BC(const Matrix*, const Vec3f*, Vec3f*);
-void fn_8003E46C(const Matrix*, const void*, void*);
 void fn_8003F898(const void*, void*);
 }
 
@@ -72,9 +67,9 @@ void gfCamera::calc() {
         if (flags & 0x20) {
             Vec3f forward(0.0f, 0.0f, -1.0f);
             Matrix rotation(true);
-            fn_8003E918(&rotation, m_rot.m_y);
+            rotation.setRotateY(m_rot.m_y);
             fn_8003EA9C(&rotation, m_rot.m_x);
-            fn_8003E3BC(&rotation, &forward, &m_direction);
+            rotation.mulVec(&forward, &m_direction);
             flags |= 4;
         } else if ((flags & 2) && (flags & 1)) {
             m_direction = m_targetPos - m_centerPos;
@@ -101,10 +96,10 @@ void gfCamera::calc() {
         } else if (flags & 0x40) {
             Vec3f right(1.0f, 0.0f, 0.0f);
             Matrix rotation(true);
-            fn_8003E918(&rotation, m_rot.m_y);
+            rotation.setRotateY(m_rot.m_y);
             fn_8003EA9C(&rotation, m_rot.m_x);
             fn_8003EBF4(&rotation, -m_rot.m_z);
-            fn_8003E3BC(&rotation, &right, &m_0x90);
+            rotation.mulVec(&right, &m_0x90);
             m_0x90.normalize();
         }
     }
@@ -116,9 +111,9 @@ void gfCamera::calc() {
     if (!(flags & 0x40)) {
         Vec3f right(1.0f, 0.0f, 0.0f);
         Matrix rotation(true);
-        fn_8003E87C(&rotation, -m_rot.m_x);
+        rotation.setRotateX(-m_rot.m_x);
         rotation.rotY(-m_rot.m_y);
-        fn_8003E3BC(&rotation, &m_0x90, &right);
+        rotation.mulVec(&m_0x90, &right);
         m_rot.m_z = -float(atan2(right.m_y, right.m_x));
     }
     // FSelect retains the native saturation, including unordered inputs.
@@ -133,7 +128,7 @@ void gfCamera::calc() {
     float roll = m_rot.m_z;
     float yaw = m_rot.m_y + m_rotationOffset.m_y;
     Matrix view(true);
-    if (unkFC == 1) fn_8003F03C(&view, m_0x9C.m_x, m_0x9C.m_y, m_0x9C.m_z);
+    if (unkFC == 1) view.setTrans(m_0x9C.m_x, m_0x9C.m_y, m_0x9C.m_z);
     else view.setIdentity();
     fn_8003EBF4(&view, roll);
     fn_8003EA9C(&view, -pitch);
@@ -212,8 +207,8 @@ void gfCamera::setFromNwCamera(nw4r::g3d::Camera* camera) {
         Vec3f direction(0.0f, 0.0f, -1.0f), up(0.0f, 1.0f, 0.0f);
         Matrix rotation(true);
         fn_8003ECA0(&rotation, angles.m_x, angles.m_y, angles.m_z);
-        fn_8003E3BC(&rotation, &direction, &direction);
-        fn_8003E3BC(&rotation, &up, &up);
+        rotation.mulVec(&direction, &direction);
+        rotation.mulVec(&up, &up);
         m_direction = direction; unkFA.m_mask |= 4;
         m_up.normalize(&up); unkFA.m_mask |= 1;
         // Preserve native degree-valued roll storage; converting it here changes the original behavior.
@@ -253,7 +248,7 @@ void gfCamera::calcProjection3Dto2D(Vec3f* world, Vec2f* screen) {
     fn_8003F898(projection, transposed);
     Matrix view(reinterpret_cast<Matrix*>(m_view));
     struct Position4 { float x, y, z, w; } position = {world->m_x, world->m_y, world->m_z, 1.0f};
-    fn_8003E46C(&view, &position, &position);
+    view.mulPos(reinterpret_cast<const Vec3f*>(&position), reinterpret_cast<Vec3f*>(&position));
     float invW = 1.0f / (transposed[0][3] * position.x + transposed[1][3] * position.y + transposed[2][3] * position.z + transposed[3][3]);
     screen->m_x = ((transposed[0][0] * position.x + transposed[1][0] * position.y + transposed[2][0] * position.z + transposed[3][0]) * invW + 1.0f) * 0.5f * m_viewportWidth;
     screen->m_y = (1.0f - (transposed[0][1] * position.x + transposed[1][1] * position.y + transposed[2][1] * position.z + transposed[3][1]) * invW) * 0.5f * m_viewportHeight;
@@ -323,7 +318,7 @@ void gfCamera::getScreenPosition2WorldVector(Vec3f* direction, float x, float y)
     float height = m_viewportHeight;
     direction->m_z = -1.0f;
     direction->m_y = -((2.0f * tangent * (y - 0.5f * height)) / height);
-    fn_8003E3BC(reinterpret_cast<Matrix*>(m_inverseView), direction, direction);
+    reinterpret_cast<Matrix*>(m_inverseView)->mulVec(direction, direction);
     direction->normalize();
 }
 

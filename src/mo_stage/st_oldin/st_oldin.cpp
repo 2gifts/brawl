@@ -32,7 +32,6 @@ extern "C" void fn_27_279FC8(grMadein* ground, Matrix* matrix, bool followAttack
 // efScreen: ends a fill requested with requestFill (HYPOTHESIS: fades it out over `frames`).
 extern "C" void fn_8005E3C8(efScreen* screen, efScreenHandle* handle, float frames);
 // Matrix helpers of sora/mt (see mt_matrix.cpp).
-extern "C" void fn_8003E918(Matrix* mtx, float angle);
 extern "C" void fn_8003F074(Matrix* mtx, float x, float y, float z);
 
 stClassInfoImpl<Stages::Oldin, stOldin> stOldin::bss_loc_14;
@@ -705,7 +704,7 @@ void stOldin::KingBlublinUpdate(float deltaFrame) {
                 }
                 m_kingMtx.setIdentity();
                 if (m_kingSide) {
-                    fn_8003E918(&m_kingMtx, 3.1415927f);
+                    m_kingMtx.setRotateY(3.1415927f);
                     m_lordBullboHit->setYakumonoLr(-1.0f);
                 } else {
                     m_lordBullboHit->setYakumonoLr(1.0f);
@@ -886,7 +885,7 @@ void stOldin::BulblinUpdate(float deltaFrame) {
                     float angle = (index & 1) ? 1.5707964f : -1.5707964f;
                     angle += 0.7853982f * (1.0f - 2.0f * randf());
                     Matrix rotation;
-                    fn_8003E918(&rotation, angle);
+                    rotation.setRotateY(angle);
                     m_bulblinNodeMtx.mul(&rotation, &m_bulblinNodeMtx);
                 }
             flung:

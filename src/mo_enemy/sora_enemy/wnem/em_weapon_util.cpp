@@ -27,7 +27,6 @@ emShotParam lbl_41_bss_488;
 wnemSimple_Data lbl_41_bss_504(&lbl_41_bss_488);
 
 // sora_melee: the Matrix * Vec3f product of the SDK (the matrix, the vector and the result).
-extern "C" void fn_8003E3BC(const Matrix* mtx, const Vec3f* src, Vec3f* dst);
 
 Vec3f mtConvRadToDeg(const Vec3f& rad);
 
@@ -101,7 +100,7 @@ void calcWeaponRotation(u32 nodeId, emShotParam* param, soModuleAccesser* acc, b
         Vec3f out;
         Vec3f dir(0.0f, 0.0f, 1.0f);
         dir = getModelVector(axis);
-        fn_8003E3BC(&mtx, &dir, &out);
+        mtx.mulVec(&dir, &out);
         out.normalize();
         lbl_41_bss_504.m_rotation = out;
         // BUG: the original calls the conversion, drops its result and copies the stored vector back into the
@@ -138,7 +137,7 @@ void calcWeaponForwordVector(u32 nodeId, emShotParam* param, soModuleAccesser* a
         Vec3f dir(0.0f, 0.0f, 1.0f);
         dir = getModelVector(axis);
         lbl_41_bss_504.m_rotation = acc->getModelModule().getNodeGlobalRotation(nodeId, false);
-        fn_8003E3BC(&mtx, &dir, &out);
+        mtx.mulVec(&dir, &out);
         out.normalize();
         float speed = Enemy::getValueRndFloat(param->m_speedRange, acc);
         lbl_41_bss_504.m_speedX = out.m_x * speed;

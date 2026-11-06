@@ -122,7 +122,6 @@ void fn_27_2330C4(u32 id, int kind);
 u32 fn_27_2331C4(stTriggerMng* manager, int triggerId);
 // mt_matrix (DOL): sets a matrix to a rotation by Euler angles (radians), and rotates a matrix by them.
 void fn_8003ECA0(Matrix* mtx, float x, float y, float z);
-void fn_8003EA50(Matrix* mtx, const Vec3f* angles);
 bool fn_27_233208(stTriggerMng* manager, int triggerId, u32 index);
 int fn_27_233264(stTriggerMng* manager, int triggerId, void* desc, int index);
 }
@@ -1363,7 +1362,7 @@ Vec3f Enemy::getEmTopNRot(float rotYLr, int front) {
     Vec3f lrRotRad;
     lrRotRad = lrRot;
     lrRotRad.scale(0.017453294f);
-    fn_8003EA50(&rotation, &lrRotRad);
+    rotation.rot(&lrRotRad);
     rotation.getRotate(&angles);
     Vec3f result = angles;
     result.scale(57.295776f);

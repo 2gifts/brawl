@@ -25,11 +25,9 @@ struct grHalberdWork {
 };
 
 // Matrix helpers of the main binary that have no name yet.
-extern "C" void fn_8003F03C(Matrix* mtx, float x, float y, float z); // HYPOTHESIS: sets the translation
 extern "C" void fn_8003F074(Matrix* mtx, float x, float y, float z); // HYPOTHESIS: adds a translation
 extern "C" void fn_8003EA9C(Matrix* mtx, float angle);               // HYPOTHESIS: rotation around X (radians)
 extern "C" void fn_8003EBF4(Matrix* mtx, float angle);               // HYPOTHESIS: rotation around Z (radians)
-extern "C" void fn_8003E828(Matrix* mtx, Vec3f* scale, Matrix* out); // HYPOTHESIS: scales the matrix
 
 // The length of a vector, written out like the original does (the operands are given in the order of the sum).
 static inline float grHalberdLength(float a, float b, float c) {

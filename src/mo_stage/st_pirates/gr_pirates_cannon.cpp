@@ -191,7 +191,7 @@ void grPiratesCannon::updateCallBack(float deltaFrame) {
                 Vec3f scale(1.1764706f, 1.1764706f, 1.1764706f);
                 Matrix mtx = *m_mtxWork;
                 mtx.rotY(unk1A0 * 0.017453292f);
-                fn_8003E828(&mtx, &scale, &mtx);
+                mtx.scale(&scale, &mtx);
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix = mtx;
             }
         }

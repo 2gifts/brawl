@@ -26,7 +26,6 @@
 extern "C" {
 // HYPOTHESIS: DOL Matrix helpers (map names wrong or missing): rotation from Euler angles, matrix-vector product.
 void fn_8003ECA0(Matrix* mtx, float x, float y, float z);
-void fn_8003E3BC(const Matrix* mtx, const Vec3f* in, Vec3f* out);
 }
 #include <so/stop/so_stop_module_impl.h>
 #include <so/article/so_article.h>
@@ -159,7 +158,7 @@ void wnSnakeNikitaMissile::activate(int founderTaskId, int resourceId, int team,
         Vec3f dir(0.0f, 0.0f, 1.0f);
         Matrix mtx; // the default constructor sets the identity
         fn_8003ECA0(&mtx, 0.017453292f * rot.m_x, 0.017453292f * rot.m_y, 0.017453292f * rot.m_z);
-        fn_8003E3BC(&mtx, &dir, &dir);
+        mtx.mulVec(&dir, &dir);
         const float angle = 57.29578f * atan2f(dir.m_y, dir.m_x);
         energy->unk34 = angle;
         Vec3f rotation;

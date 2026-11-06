@@ -36,8 +36,6 @@ extern "C" void fn_27_27C208(grSeqYakumono* ground, float frame, int bank);
 extern "C" void fn_27_27C470(grSeqYakumono* ground, float frame, float frameEnd, int bank);
 // Matrix::normalize / setRotateX / setRotateY / rotZ
 extern "C" void fn_8003E5B4(Matrix* matrix);
-extern "C" void fn_8003E87C(Matrix* matrix, float angle);
-extern "C" void fn_8003E918(Matrix* matrix, float angle);
 extern "C" void fn_8003EBF4(Matrix* matrix, float angle);
 // cmSubject::clear() / setPos(Vec3f*)
 extern "C" void fn_8009EF8C(cmSubject* subject, Vec3f* pos);
@@ -759,7 +757,7 @@ limousineEnd:
                             m_areaCooldown = 0.0f;
                             m_areaCooldown2 = 60.0f;
                             Matrix turn;
-                            fn_8003E918(&turn, 3.1415927f);
+                            turn.setRotateY(3.1415927f);
                             m_chimeraMtx.mul(&turn, &m_chimeraMtx);
                         } else {
                             m_areaCooldown = 60.0f;
@@ -926,7 +924,7 @@ limousineEnd:
             chimeraFly: {
                 m_chimeraStay += deltaFrame;
                 Matrix spin;
-                fn_8003E87C(&spin, 0.025132744f * deltaFrame);
+                spin.setRotateX(0.025132744f * deltaFrame);
                 fn_8003EBF4(&spin, 0.003141593f * deltaFrame);
                 m_chimeraMtx.mul(&spin, &m_chimeraMtx);
                 m_chimeraSpeed.m_y -= 0.0392f * deltaFrame;

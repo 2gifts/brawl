@@ -11,15 +11,12 @@
 
 // Matrix functions of the main binary without names
 // Matrix::setTrans (sets the translation of a matrix to the three numbers)
-extern "C" void fn_8003F03C(Matrix* mtx, float x, float y, float z);
 // Matrix::getScalingFactor
 void getScalingFactor(Matrix* mtx, Vec3f* scale); // main binary, name unknown (as in cl_collision.cpp)
 // the matrix of a translation
 extern "C" void fn_8003F074(Matrix* mtx, float x, float y, float z);
 // the matrix of a rotation of the three angles
-extern "C" void fn_8003EA50(Matrix* mtx, const Vec3f* angles);
 // the matrix scaled by the three factors
-extern "C" void fn_8003E828(const Matrix* mtx, const Vec3f* scale, Matrix* out);
 
 // HYPOTHESIS: two small constant objects (an 0xFF marker with an index) that the unit's headers instantiate.
 struct grEarthPelletMarker {
@@ -61,7 +58,7 @@ void grEarthPellet::updatePos(float deltaFrame) {
     if (pellet != NULL) {
         Matrix mtx = pellet->m_mtx;
         Matrix offset;
-        fn_8003F03C(&offset, 0.0f, -1.0f, 0.0f);
+        offset.setTrans(0.0f, -1.0f, 0.0f);
         mtx.mul(&offset, &mtx);
         Vec3f pos;
         pos.m_x = mtx.m[0][3];
@@ -73,13 +70,13 @@ void grEarthPellet::updatePos(float deltaFrame) {
         getScalingFactor(&mtx, &scale);
         mtx.setIdentity();
         fn_8003F074(&mtx, pos.m_x, pos.m_y, pos.m_z);
-        fn_8003EA50(&mtx, &rot);
+        mtx.rot(&rot);
         if (m_state != 0x13) {
             scale.m_x = 1.0f;
             scale.m_y = 1.0f;
             scale.m_z = 1.0f;
         }
-        fn_8003E828(&mtx, &scale, &mtx);
+        mtx.scale(&scale, &mtx);
         mtx.rotY(3.1415927f);
         m_mtx = mtx;
     }

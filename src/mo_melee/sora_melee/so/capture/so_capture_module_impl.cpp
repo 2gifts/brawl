@@ -10,7 +10,6 @@
 extern const float lbl_27_rodata_910[4];
 
 // Matrix::mulVec (the map name); em_kinetic_energy.cpp calls it by this stand-in name.
-extern "C" void fn_8003E3BC(const Matrix* mtx, const Vec3f* in, Vec3f* out);
 
 soCaptureModule::~soCaptureModule() { }
 
@@ -196,7 +195,7 @@ void soCaptureModuleImpl::updateLRThrown() {
         axis.m_x = zero;
         axis.m_y = zero;
         axis.m_z = one;
-        fn_8003E3BC(&matrix, &axis, &direction);
+        matrix.mulVec(&axis, &direction);
         float rightY;
         float rightX;
         float facingX;
