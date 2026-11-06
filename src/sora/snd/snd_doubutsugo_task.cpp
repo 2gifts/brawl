@@ -10,7 +10,6 @@
 // HYPOTHESIS: stand-ins for Doubutsugo (Doubutsugo.o) and sndSystem::getBalanceSE, which are still fn_.
 extern "C" Doubutsugo* fn_803EEFCC(void* doubutsugo);
 extern "C" void fn_803EF044(Doubutsugo* doubutsugo, s32 deleteSelf);
-extern "C" bool fn_803EF174(Doubutsugo* doubutsugo);
 extern "C" void fn_803EF188(Doubutsugo* doubutsugo);
 extern "C" void fn_803EF1D0(Doubutsugo* doubutsugo);
 
@@ -30,7 +29,7 @@ sndDoubutsugoTask::sndDoubutsugoTask(const void* archiveData, Heaps::HeapType he
         mem = fn_803EEFCC(mem);
     }
     m_doubutsugo = static_cast<Doubutsugo*>(mem);
-    if (!fn_803EF174(m_doubutsugo)) {
+    if (!m_doubutsugo->IsAvailable()) {
         m_doubutsugo->Setup(m_player);
     }
     sndSystem* system = g_sndSystem;
@@ -43,7 +42,7 @@ sndDoubutsugoTask::sndDoubutsugoTask(const void* archiveData, Heaps::HeapType he
 }
 
 sndDoubutsugoTask::~sndDoubutsugoTask() {
-    if (fn_803EF174(m_doubutsugo)) {
+    if (m_doubutsugo->IsAvailable()) {
         fn_803EF044(m_doubutsugo, 1);
         m_doubutsugo = NULL;
     }
