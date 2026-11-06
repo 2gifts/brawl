@@ -771,7 +771,7 @@ void grEarthChappy::makeItemInMouth() {
             ItemKind kind;
             kind.m_kind = static_cast<itKind>(*reinterpret_cast<int*>(reinterpret_cast<u8*>(lbl_27_bss_5668) + 0x44));
             kind.m_variation = 0;
-            fn_27_2AA7AC(items, kind, 2, &pos, -1, -1, -1);
+            items->lotCreateItem(reinterpret_cast<itGenSheetKind&>(kind), static_cast<itGenId>(2), &pos, -1, -1, static_cast<itKind>(-1));
         }
     }
 }
