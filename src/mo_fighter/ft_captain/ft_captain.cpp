@@ -15,6 +15,7 @@
 #include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
 
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftCaptainBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
