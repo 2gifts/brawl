@@ -1,3 +1,4 @@
+#define FT_ZELDA_ARTICLES_FULL
 #define FT_POOL_ROOT_NONPOLYMORPHIC
 #define SO_GENERAL_WORK_BOUNDED_CLEAR
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
@@ -18,6 +19,7 @@
 #include <ft/ft_resource_id_accesser_impl.h>
 #include <so/so_value_accesser.h>
 
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftZeldaBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 #include <ft/ft_change_succeed_work.h>
@@ -570,3 +572,10 @@ void ftZelda::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleA
     }
     work.setInt(count, 0x20000000);
 }
+
+ftKineticEnergyController::~ftKineticEnergyController() { }
+// ftManager::setParamPattern selects the shared parameter-table variation.
+extern int g_soValueVariation;
+#pragma dont_inline on
+int soValueAccesser::getValueVariation() { return g_soValueVariation; }
+#pragma dont_inline off

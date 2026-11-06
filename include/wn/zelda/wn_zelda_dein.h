@@ -101,5 +101,6 @@ public:
     wnZeldaDeinParamAccesser m_paramAccesser; // +0x2080
     wnZeldaDein(s32 articleId, const wnArticleBuildInfo& info, const wnZeldaDeinData* data);
     virtual ~wnZeldaDein() { }
+    void activate(int founderTaskId, int team, const Vec3f* position, float lr);
 };
 static_assert(sizeof(wnZeldaDein) == 0x20D8, "Zelda Din's Fire extent");

@@ -1,5 +1,88 @@
 #pragma once
 
+// ft_zelda.cpp builds the real articles; every other unit that includes this keeps the opaque shells.
+#ifdef FT_ZELDA_ARTICLES_FULL
+
+// The articles Zelda owns and the mediator that hands them out. The pools are chained base first (see
+// include/wn/wn_article_pool.h).
+// HYPOTHESIS: all class names that are not in the module map.
+
+#include <wn/wn_article_pool.h>
+#include <wn/wn_article_build_info.h>
+#include <wn/weapon.h>
+// Full article types let the fighter own their pools and teardown.
+#define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/zelda/wn_zelda_dein.h>
+#include <wn/zelda/wn_zelda_dein_s.h>
+#pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
+
+class Vec3f;
+struct wnZeldaLightingBowData;
+struct wnZeldaLightingBowArrowData;
+
+// The light bow of the Final Smash (the class is in sora_melee).
+class wnZeldaLightingBow : public Weapon {
+    u8 m_unreconstructed[0x1F28 - sizeof(Weapon)];
+public:
+    wnZeldaLightingBow(s32 articleId, const wnArticleBuildInfo& info, const wnZeldaLightingBowData* data);
+    virtual ~wnZeldaLightingBow();
+    void activate(int founderTaskId, int resourceId, int team, int kind);
+};
+static_assert(sizeof(wnZeldaLightingBow) == 0x1F28, "wnZeldaLightingBow layout is wrong!");
+
+// The light arrow of the Final Smash (the class is in sora_melee).
+class wnZeldaLightingBowArrow : public Weapon {
+public:
+    union {
+        u8 m_unreconstructed[0x1F30 - sizeof(Weapon)];
+        struct {
+            u8 _pad[0x1EF8 - sizeof(Weapon)];
+            // HYPOTHESIS: the arrow's data record pointer sits right after the Weapon base state.
+            const wnZeldaLightingBowArrowData* m_data;
+        };
+    };
+public:
+    wnZeldaLightingBowArrow(s32 articleId, const wnArticleBuildInfo& info, const wnZeldaLightingBowArrowData* data);
+    virtual ~wnZeldaLightingBowArrow();
+    void activate(int founderTaskId, int resourceId, int team, int kind);
+};
+static_assert(sizeof(wnZeldaLightingBowArrow) == 0x1F30, "wnZeldaLightingBowArrow layout is wrong!");
+
+typedef wnArticleHierarchy<wnZeldaLightingBowArrow, 1, soInstancePoolRoot> ftZeldaLightingBowArrowPool;
+typedef wnArticleHierarchy<wnZeldaLightingBow, 1, ftZeldaLightingBowArrowPool> ftZeldaLightingBowPool;
+typedef wnArticleHierarchy<wnZeldaDeinS, 3, ftZeldaLightingBowPool> ftZeldaDeinSPool;
+typedef wnArticleHierarchy<wnZeldaDein, 3, ftZeldaDeinSPool> ftZeldaDeinPool;
+
+class ftZeldaArticleMediator : public soArticleMediator {
+    ftZeldaDeinPool m_pools;
+    u8 m_autoRecycle;
+    // The slot members (wnArticleSlot*, wn/wn_article_pool.h) read the pool chain.
+    WN_ARTICLE_SLOT_FRIENDS
+public:
+    ftZeldaArticleMediator(soModuleAccesser* acc) : soArticleMediator(acc), m_pools(acc), m_autoRecycle(false) { }
+    virtual ~ftZeldaArticleMediator();
+    virtual soArticle* generate(s32 articleId, soModuleAccesser* acc);
+    virtual bool shoot(soModuleAccesser* acc, soArticle* article);
+    virtual s32 getMediateNum();
+    virtual void setAutoRecycle(bool enabled);
+    virtual void deactivate();
+    virtual s32 getGenerateMaxNum(s32 articleId);
+    virtual s32 getActiveNum(soModuleAccesser* acc, s32 articleId);
+    virtual bool isGeneratable(soModuleAccesser* acc, s32 articleId);
+};
+
+// The lists of the module live in sora_melee (only declared here).
+FT_DOL_ARRAY_VECTOR(soArticle*, 5);
+
+typedef wnArticleManageModuleBuilder<ftZeldaArticleMediator, 5> ftZeldaArticleManageModuleBuilder;
+static_assert(sizeof(ftZeldaArticleManageModuleBuilder) == 0xFF40, "Zelda article manage builder layout is wrong!");
+
+#else
+
 // The articles Zelda owns and the mediator that hands them out. The pools are chained base first (see
 // include/wn/wn_article_pool.h).
 // HYPOTHESIS: all class names that are not in the module map.
@@ -91,3 +174,5 @@ FT_DOL_ARRAY_VECTOR(soArticle*, 5);
 
 typedef wnArticleManageModuleBuilder<ftZeldaArticleMediator, 5> ftZeldaArticleManageModuleBuilder;
 static_assert(sizeof(ftZeldaArticleManageModuleBuilder) == 0xFF40, "Zelda article manage builder layout is wrong!");
+
+#endif
