@@ -4705,7 +4705,7 @@ RVL_SDK/nwc24/NWC24Parser.c:
 RVL_SDK/nwc24/NWC24MsgCommit.c:
 	.text       start:0x8039DC18 end:0x8039FD68
 	.data       start:0x80492048 end:0x804922F0
-	.bss        start:0x805372C0 end:0x80537300
+	.bss        start:0x805372C0 end:0x805372E8
 	.sdata      start:0x8059FD40 end:0x8059FDD8
 	.sbss       start:0x805A1190 end:0x805A1198
 

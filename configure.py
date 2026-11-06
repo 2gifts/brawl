@@ -1021,7 +1021,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/nwc24/NWC24MBoxCtrl.c", mw_version="GC/3.0a5.2"),
             Object(Matching, "RVL_SDK/nwc24/NWC24Mime.c", mw_version="GC/3.0a5.2"),
             Object(Matching, "RVL_SDK/nwc24/NWC24Parser.c", mw_version="GC/3.0a5.2", cflags=["-ipa function" if flag == "-ipa file" else flag for flag in cflags_sib_sdk]),
-            Object(NonMatching, "RVL_SDK/nwc24/NWC24MsgCommit.c", mw_version="GC/3.0a5.2"),
+            Object(Matching, "RVL_SDK/nwc24/NWC24MsgCommit.c", mw_version="GC/3.0a5.2"),
             Object(NonMatching, "RVL_SDK/nwc24/NWC24MsgRead.c", mw_version="GC/3.0a5.2"),
             Object(Matching, "RVL_SDK/nwc24/NWC24Schedule.c"),
             Object(Matching, "RVL_SDK/nwc24/NWC24DateParser.c"),
