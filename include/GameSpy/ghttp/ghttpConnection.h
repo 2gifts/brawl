@@ -187,10 +187,7 @@ extern u8 lbl_80490638[0x31];       // SSL MAC pad 2
 extern u8 lbl_8059FA6C[4];          // SSL record content type
 
 // platform helpers
-char* fn_8035D654(const char* s);                          // goastrdup
-u32 fn_8035C620(const char* name);                         // inet_addr
 int fn_8035D364(const char* hostname, void** handle);      // gsiStartResolvingHostname
-int fn_8035C384(int s, const void* addr, int len);         // connect
 int fn_8035CD04(int s, int blocking);                      // SetSockBlocking
 void SetReceiveBufferSize(int s, int size);                         // SetReceiveBufferSize
 

@@ -17,9 +17,9 @@ void fn_8035E390(void) {
     GSCoreMgr* aCore = &lbl_805348E0;
 
     while (aCore->mIsShuttingDown) {
-        fn_8035D774(100);
+        msleep(100);
     }
-    if (fn_8035D1B8(&aCore->mRefCount) == 1) {
+    if (gsiInterlockedIncrement(&aCore->mRefCount) == 1) {
         if (!aCore->mIsStaticInitComplete) {
             fn_8035D248(&aCore->mQueueCrit);
             atexit(fn_8035E380);
@@ -28,7 +28,7 @@ void fn_8035E390(void) {
         fn_8035D24C(&aCore->mQueueCrit);
         fn_8035D250(&aCore->mQueueCrit);
         while (aCore->mIsShuttingDown) {
-            fn_8035D774(100);
+            msleep(100);
         }
         memset(aCore->mTaskArray, 0, sizeof(aCore->mTaskArray));
         ghttpStartup();
@@ -36,12 +36,12 @@ void fn_8035E390(void) {
         return;
     }
     while (!aCore->mIsStaticInitComplete) {
-        fn_8035D774(100);
+        msleep(100);
     }
     fn_8035D24C(&aCore->mQueueCrit);
     fn_8035D250(&aCore->mQueueCrit);
     while (!aCore->mIsInitialized) {
-        fn_8035D774(100);
+        msleep(100);
     }
 }
 

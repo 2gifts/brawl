@@ -2,6 +2,7 @@
 #include <revolution/OS/OSInterrupt.h>
 #include <revolution/OS/OSTime.h>
 #include <string.h>
+#include <ctype.h>
 #include <GameSpy/common/gsPlatform.h>
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
@@ -16,18 +17,18 @@ int lbl_805A1044 = 0;
 
 // Function bodies below are derived from https://github.com/jj-link/brawl.
 
-extern int SOInetAtoN(int a, int* b);
+extern int SOInetAtoN(const char* name, u32* addr);
 
-int fn_8035C620(int arg) {
-    int local;
-    int result = SOInetAtoN(arg, &local);
+u32 inet_addr(const char* name) {
+    u32 local;
+    int result = SOInetAtoN(name, &local);
     if (result == 0) {
         return -1;
     }
     return local;
 }
 
-s32 fn_8035D200(s32 *arg0)
+s32 gsiInterlockedDecrement(s32 *arg0)
 {
     BOOL enabled = OSDisableInterrupts();
     s32 old = *arg0;
@@ -111,6 +112,58 @@ int sendto(int s, const char* buf, int len, int flags, const void* to, int tolen
     return -1;
 }
 
+int connect(int s, const void* to, int tolen) {
+    u8 addr[8];
+    int result;
+
+    memcpy(addr, to, 8);
+    addr[0] = tolen;
+    result = SOConnect(s, addr);
+    if (result >= 0) {
+        return result;
+    }
+    lbl_805A1044 = result;
+    return -1;
+}
+
+int GetReceiveBufferSize(int sock) {
+    int size;
+    int len = 4;
+    int result = SOGetSockOpt(sock, 0xFFFF, 0x1002, &size, &len);
+
+    int status;
+
+    if (result >= 0) {
+        status = result;
+    } else {
+        lbl_805A1044 = result;
+        status = -1;
+    }
+    if (status == -1) {
+        return -1;
+    }
+    return size;
+}
+
+int GetSendBufferSize(int sock) {
+    int size;
+    int len = 4;
+    int result = SOGetSockOpt(sock, 0xFFFF, 0x1001, &size, &len);
+
+    int status;
+
+    if (result >= 0) {
+        status = result;
+    } else {
+        lbl_805A1044 = result;
+        status = -1;
+    }
+    if (status == -1) {
+        return -1;
+    }
+    return size;
+}
+
 int GOAGetLastError(int s) {
     return lbl_805A1044;
 }
@@ -133,7 +186,7 @@ int CanSendOnSocket(int sock) {
     return 0;
 }
 
-u32 fn_8035D1B8(u32* value) {
+u32 gsiInterlockedIncrement(u32* value) {
     BOOL enabled = OSDisableInterrupts();
     u32 result = *value + 1;
 
@@ -142,7 +195,7 @@ u32 fn_8035D1B8(u32* value) {
     return result;
 }
 
-void fn_8035D258(s64* t) {
+void gsiTimeInSec(s64* t) {
     s64 seconds = OS_TICKS_TO_SEC(OSGetTime());
 
     if (t != NULL) {
@@ -181,11 +234,40 @@ u32 current_time(void) {
     return OS_TICKS_TO_MSEC(OSGetTime());
 }
 
-void fn_8035D774(u32 msec) {
+char* goastrdup(const char* str) {
+    char* copy;
+
+    if (str == NULL) {
+        return NULL;
+    }
+    copy = (char*)lbl_80534638.mallocCB(strlen(str) + 1);
+    if (copy != NULL) {
+        strcpy(copy, str);
+    }
+    return copy;
+}
+
+char* _strlwr(char* str) {
+    char* start = str;
+
+    while (*str != 0) {
+        *str = tolower(*str);
+        str++;
+    }
+    return start;
+}
+
+void B64InitEncodeStream(B64StreamData* stream, int data, int length, int type) {
+    stream->unk0 = data;
+    stream->unk4 = length;
+    stream->unk8 = type;
+}
+
+void msleep(u32 msec) {
     OSSleepTicks(OS_MSEC_TO_TICKS((s64)msec));
 }
 
-void fn_8035DA18(int seed) {
+void Util_RandSeed(int seed) {
     int value = 1;
 
     if (seed != 0) {
