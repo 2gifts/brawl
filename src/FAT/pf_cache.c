@@ -19,7 +19,10 @@ struct PF_CACHE_PAGE {
 };
 
 struct PF_VOLUME {
-    u8 _pad0[8];
+    union {
+        u8 _pad0[8];
+        u16 bytes_per_sector;
+    };
     u32 total_sectors;
     union {
         u8 _padC[0x1628 - 0xC];
@@ -38,6 +41,8 @@ struct PF_VOLUME {
     u8 (*buffers)[512];
     u32 fat_buff_size;
     u32 data_buff_size;
+    // HYPOTHESIS: signature value stored into pages written with set_sig.
+    void* signature;
 };
 
 s32 PFCACHE_DoWritePage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, struct PF_CACHE_PAGE* p_page, u32 set_sig);
@@ -159,6 +164,7 @@ s32 PFCACHE_DoAllocatePage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_he
 s32 PFCACHE_DoWriteNumSectorAndFreeIfNeeded(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, const u8* p_buf, u32 sector, u32 num_sector, u32* p_num_success);
 s32 PFCACHE_FlushPageIfNeeded(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_page);
 void* VFipf_memset(void* dst, s32 c, u32 length);
+void* VFipf_memcpy(void* dst, const void* src, u32 length);
 
 struct PF_CACHE_PAGE* PFCACHE_SearchForPage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_head, u32 sector) {
     struct PF_CACHE_PAGE* p_page;
@@ -390,6 +396,81 @@ s32 PFCACHE_WriteDataNumSectorAndFreeIfNeeded(struct PF_VOLUME* p_vol, const u8*
     err = PFCACHE_DoWriteNumSectorAndFreeIfNeeded(p_vol, &p_vol->p_current_data, p_buf, sector, num_sector, p_num_success);
     if (err != 0) {
         return err;
+    }
+    return 0;
+}
+
+s32 PFCACHE_DoWritePage(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, struct PF_CACHE_PAGE* p_page, u32 set_sig) {
+    struct PF_CACHE_PAGE* p_head;
+    s32 err;
+
+    p_head = *pp_head;
+    if (p_page != p_head) {
+        if (p_page == p_head->p_prev) {
+            *pp_head = p_page;
+        } else {
+            p_page->p_prev->p_next = p_page->p_next;
+            p_page->p_next->p_prev = p_page->p_prev;
+            p_head = *pp_head;
+            p_page->p_next = p_head;
+            p_page->p_prev = (*pp_head)->p_prev;
+            p_head->p_prev = p_page;
+            p_page->p_prev->p_next = p_page;
+            *pp_head = p_page;
+        }
+    }
+    p_page->stat |= 2;
+    if (p_page->p_mod_sbuf == 0) {
+        p_page->p_mod_sbuf = p_page->p_buf;
+        p_page->p_mod_ebuf = p_page->p_buf;
+    } else if (p_page->p_buf < p_page->p_mod_sbuf) {
+        p_page->p_mod_sbuf = p_page->p_buf;
+    } else if (p_page->p_buf > p_page->p_mod_ebuf) {
+        p_page->p_mod_ebuf = p_page->p_buf;
+    }
+    if (set_sig != 0) {
+        p_page->signature = p_vol->signature;
+    } else {
+        p_page->signature = 0;
+    }
+    if ((p_vol->cache_mode & 1) || ((p_vol->cache_mode & 4) && (p_page->stat & 4))) {
+        err = PFCACHE_FlushPageIfNeeded(p_vol, p_page);
+        if (err != 0) {
+            return err;
+        }
+    }
+    return 0;
+}
+
+s32 PFCACHE_DoWriteSector(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, const u8* p_buf, u32 sector) {
+    struct PF_CACHE_PAGE* p_page;
+    u32 num_success;
+    s32 err;
+
+    p_page = PFCACHE_SearchForPage(p_vol, *pp_head, sector);
+    if (p_page != 0) {
+        VFipf_memcpy(p_page->p_buf, p_buf, p_vol->bytes_per_sector);
+        p_page->stat |= 2;
+        if (p_page->p_mod_sbuf == 0) {
+            p_page->p_mod_sbuf = p_page->p_buf;
+            p_page->p_mod_ebuf = p_page->p_buf;
+        } else if (p_page->p_buf < p_page->p_mod_sbuf) {
+            p_page->p_mod_sbuf = p_page->p_buf;
+        } else if (p_page->p_buf > p_page->p_mod_ebuf) {
+            p_page->p_mod_ebuf = p_page->p_buf;
+        }
+        err = PFCACHE_FlushPageIfNeeded(p_vol, p_page);
+        if (err != 0) {
+            return err;
+        }
+    } else {
+        err = PFDRV_lwrite(p_vol, p_buf, sector, 1, &num_success);
+        if (err != 0) {
+            return err;
+        }
+        if (num_success != 1) {
+            return 0x11;
+        }
     }
     return 0;
 }
