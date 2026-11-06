@@ -1,5 +1,8 @@
 #include <types.h>
 
+// The original calls local helpers out of line (e.g. move_ptr from rewind_ptr).
+#pragma auto_inline off
+
 // Function bodies below are taken from https://github.com/jj-link/brawl.
 
 void fn_80265AE0(int *arg0, signed char *arg1)
@@ -52,7 +55,44 @@ s32 TMCC_JPEGDEC_set_thumbnaildata(TMCC_JPEGDEC_Stream* stream, u8* data, s32 si
     return 0;
 }
 
-s32 TMCC_JPEGDEC_load_buff(TMCC_JPEGDEC_Stream* stream);
+s32 TMCC_JPEGDEC_load_buff(TMCC_JPEGDEC_Stream* stream) {
+    u32 word;
+    s32 shift;
+    u8 byte;
+    u8* cur;
+    cur = stream->cur;
+
+    if (cur < stream->limit) {
+        word = stream->unk0;
+        shift = stream->unk4;
+        do {
+            byte = *cur++;
+            word = (word << 8) + byte;
+            shift += 8;
+            if (byte == 0xFF) {
+                cur++;
+            }
+        } while (shift <= 0x18);
+        stream->unk0 = word;
+        stream->unk4 = shift;
+        stream->cur = cur;
+    } else {
+        do {
+            if (stream->end <= stream->cur) {
+                break;
+            }
+            cur = stream->cur;
+            byte = *cur++;
+            stream->cur = cur;
+            stream->unk0 = (stream->unk0 << 8) + byte;
+            stream->unk4 += 8;
+            if (byte == 0xFF) {
+                stream->cur = cur + 1;
+            }
+        } while (stream->unk4 <= 0x18);
+    }
+    return 0;
+}
 
 s32 TMCC_JPEGDEC_init_buff(TMCC_JPEGDEC_Stream* stream) {
     stream->unk0 = 0;
@@ -358,4 +398,145 @@ void TMCC_JPEGDEC_IdctBlock2x2_Col(s32* block, s8* out) {
         flag = 1;
     }
     out[9] = flag ? v : (v > 0 ? 127 : -128);
+}
+
+s32 TMCC_JPEGDEC_move_ptr(s32 offset, TMCC_JPEGDEC_Stream* stream);
+
+s32 fn_80261274(TMCC_JPEGDEC_Stream* stream) {
+    u32 word = stream->unk0;
+    s32 shift = stream->unk4;
+    s32 result;
+
+    shift -= 8;
+    while (shift >= 0) {
+        result = TMCC_JPEGDEC_move_ptr(-1, stream);
+        if (result < 0) {
+            return result;
+        }
+        if ((word & 0xFF) == 0xFF) {
+            result = TMCC_JPEGDEC_move_ptr(-1, stream);
+            if (result < 0) {
+                return result;
+            }
+        }
+        word >>= 8;
+        shift -= 8;
+    }
+    stream->unk4 = 0;
+    stream->unk0 = 0;
+    return 0;
+}
+
+// HYPOTHESIS: the context starts with the stream; unk19D0 points at a status block.
+typedef struct TMCC_JPEGDEC_Status {
+    u8 pad0[4];
+    s32 error;
+    u8 pad8[0x25];
+    u8 mode;
+} TMCC_JPEGDEC_Status;
+
+typedef struct TMCC_JPEGDEC_Ctx2 {
+    TMCC_JPEGDEC_Stream stream;
+    u8 pad18[0x17F0];
+    u8 unk1808;
+    u8 pad1809[0x1C7];
+    TMCC_JPEGDEC_Status* status;
+} TMCC_JPEGDEC_Ctx2;
+
+s32 fn_80261004(u16* out, TMCC_JPEGDEC_Stream* stream);
+
+s32 fn_80262CF0(TMCC_JPEGDEC_Ctx2* context) {
+    u16 marker;
+    s32 result;
+
+    if (context->status->mode == 1) {
+        return 0;
+    }
+    if (context->unk1808 == 0) {
+        result = fn_80261274(&context->stream);
+        if (result < 0) {
+            return result;
+        }
+        result = fn_80261004(&marker, &context->stream);
+        if (result < 0) {
+            if (result != -0x90) {
+                return result;
+            }
+        }
+        if (marker != 0xFFD9 && marker != 0xFFDC) {
+            context->status->error = -0x21;
+            return 0;
+        }
+    }
+    return 0;
+}
+
+// HYPOTHESIS: EXIF thumbnail check; layouts inferred from the offsets used.
+typedef struct TMCC_JPEGDEC_ExifInfo {
+    u8 pad0[4];
+    u8 kind;
+    u8 pad5[3];
+    u32 limit;
+    u8 pad0C[0x10];
+    u8 unk1C;
+    u8 unk1D;
+} TMCC_JPEGDEC_ExifInfo;
+
+typedef struct TMCC_JPEGDEC_ExifStatus {
+    u8 pad0[8];
+    s32 kind;
+    u8 pad0C[0x20];
+    u8 unk2C;
+    u8 unk2D;
+    u8 pad2E[0x68E];
+    u16 unk6BC;
+    u8 pad6BE[0x16];
+    u32 offset;
+    u32 length;
+    u32 base;
+} TMCC_JPEGDEC_ExifStatus;
+
+typedef struct TMCC_JPEGDEC_ExifCtx {
+    TMCC_JPEGDEC_Stream stream;
+    u8 pad18[0x19B8];
+    TMCC_JPEGDEC_ExifStatus* status;
+} TMCC_JPEGDEC_ExifCtx;
+
+s32 fn_80265310(TMCC_JPEGDEC_ExifInfo* info, TMCC_JPEGDEC_ExifCtx* context, u32 arg2, u32 arg3) {
+    TMCC_JPEGDEC_ExifStatus* status = context->status;
+    u32 end;
+    u32 size;
+    s32 result;
+
+    if (status->offset == 0) {
+        return -0xA0;
+    }
+    if (status->length == 0) {
+        return -0xA0;
+    }
+    if (status->unk6BC != 6) {
+        return -0xA0;
+    }
+    end = status->base - arg3 + (status->length + status->offset);
+    if (end > info->limit) {
+        return -0xA0;
+    }
+    size = status->length - (end - arg2);
+    if (end <= arg2) {
+        size = status->length;
+    }
+    if (info->unk1C != 1) {
+        return -1;
+    }
+    if (info->kind != 4 && info->kind != 6) {
+        return -4;
+    }
+    if (info->unk1D != 1) {
+        return -1;
+    }
+    status->unk2D = 0;
+    status->unk2C = info->unk1D;
+    status->kind = info->kind;
+    result = TMCC_JPEGDEC_set_thumbnaildata(&context->stream, (u8*)(status->base + status->offset), size);
+    return result < 0 ? result : 0;
 }
