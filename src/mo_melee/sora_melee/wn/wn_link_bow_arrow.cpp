@@ -1,6 +1,20 @@
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
+#ifndef FT_MODULE_BUILDER
+#define FT_MODULE_BUILDER // normally -DFT_MODULE_BUILDER from configure.py; repeated so the kit cache agrees
+#endif
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define FT_REL_LINK_EXTERN
+#define SO_NULLABLE_INLINE_CTOR
+#define WN_LINK_BOW_ARROW_FULL_BUILDER
+#include <wn/wn_module_accesser_builder.h>
 #include <wn/link/wn_link_bow_arrow.h>
 #include <wn/wn_class_info_impl.h>
+#include <ft/ft_kinetic_energy.h>
+#include <wn/wn_kinetic_module_impl.h>
+#include <so/kinetic/so_kinetic_module_impl.h>
 #include <wn/wn_activate_desc.h>
 #include <wn/wn_kinetic_energy_normal.h>
 #include <so/so_module_accesser.h>
@@ -11,6 +25,29 @@
 
 // Registers the Link bow arrow article class (kind 5) in the class info table during static initialization.
 wnClassInfoImpl<5, wnLinkBowArrow, wnLinkBowArrowData> g_wnLinkBowArrowClassInfo;
+
+// The status unique process of the arrow (wn_link_bow_arrow_status_uniq_process.cpp).
+extern soStatusUniqProcess g_wnLinkBowArrowStatusUniqProcess;
+
+wnLinkBowArrow::wnLinkBowArrow(s32 articleId, const wnArticleBuildInfo& info, const wnLinkBowArrowData* data)
+    : wnWeaponBuilder<wnLinkBowArrowModuleAccesserBuildConfig>(
+          "LinkBowArrow", articleId, info,
+          wnModuleAccesserBuildData(5, data,
+              info.getHeapModule()->getInstanceHeap(),
+              info.getHeapModule()->getNWModelInstanceHeap(),
+              info.getHeapModule()->getNWMotionInstanceHeap(),
+              static_cast<u8>(data->m_resGroupNo), 0, &g_soParamAccesserNull,
+              0, 0, 0, 0, 0, 0, 0)),
+      m_energyGround() {
+    soStatusUniqProcess* uniqProcs[3];
+    uniqProcs[0] = &g_wnLinkBowArrowStatusUniqProcess;
+    uniqProcs[1] = &g_wnLinkBowArrowStatusUniqProcess;
+    uniqProcs[2] = &g_wnLinkBowArrowStatusUniqProcess;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 3);
+    m_moduleAccesser->getKineticModule().addEnergy(&m_energyGround, 2, soKineticEnergy::AttributeFlag(8), -1);
+    wnKineticModuleImpl::setOutsideMovementGroundEnergyId(&m_moduleAccesser->getKineticModule(), 2);
+    Weapon::deactivate(false);
+}
 
 void wnLinkBowArrow::activate(int founderTaskId, int resourceId, int team, float lr) {
     Vec3f pos(0.0f, 0.0f, 0.0f);
