@@ -153,6 +153,15 @@ int fn_803EBB58(PF_FILE* p_file);                            // PFSYS_finalizeFi
 int fn_803D79B0(PF2_VOLUME* p_vol);                          // PFDRV_mount
 int fn_803D8878(PF2_VOLUME* p_vol, const u8* param);         // PFDRV_format
 
+typedef struct PDM_CALLBACKS PDM_CALLBACKS;
+void PFDRV_MediaInsert(u32 part);
+void PFDRV_MediaEject(u32 part);
+int pdm_part_unmount(void* p_part, u32 mode);
+s32 pdm_part_get_driver_error_code(void* p_part);
+int pdm_part_register_callback(void* p_part, PDM_CALLBACKS* callbacks);
+int pdm_part_init(void* p_part);
+int pdm_part_unregister_callback(void* p_part);
+
 // pf_code / pf_str
 s32 fn_803EAEAC(const s8* src, u16* dst);                    // CP932_OEM2Unicode
 s32 fn_803EB068(const u16* src, s8* dst);                    // CP932_Unicode2OEM
