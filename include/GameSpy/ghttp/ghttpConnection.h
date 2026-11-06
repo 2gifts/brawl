@@ -188,7 +188,6 @@ extern u8 lbl_8059FA6C[4];          // SSL record content type
 
 // platform helpers
 int fn_8035D364(const char* hostname, void** handle);      // gsiStartResolvingHostname
-int fn_8035CD04(int s, int blocking);                      // SetSockBlocking
 void SetReceiveBufferSize(int s, int size);                         // SetReceiveBufferSize
 
 // MSL stdio of this build (ftell comes from <stdio.h>)

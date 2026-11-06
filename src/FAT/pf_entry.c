@@ -153,3 +153,84 @@ s32 PFENT_ITER_IteratorInitialize(PF2_ENT_ITER* p_iter, u32 index_start_from) {
 
     return err;
 }
+
+// HYPOTHESIS: layout of the PrFile2 volume fields this unit touches.
+struct PF2_VOLUME {
+    PF_BPB bpb;
+};
+
+// HYPOTHESIS: the PrFile2 volume set; only the critical section is known here.
+extern struct PF2_VOLUME_SET {
+    u8 _0[0x64];
+    PF_CRITICAL critical;
+} lbl_805644C0;
+
+u8 lbl_80492FD8[12] = "NO NAME    ";
+
+s32 PFENT_MakeRootDir(PF2_VOLUME* p_vol) {
+    PF_CACHE_PAGE* p_page;
+    u32 written;
+    u32 unused;
+    u32 sector;
+    s32 err;
+
+    switch (p_vol->bpb.fat_type) {
+    case 2:
+        PFFAT_MakeRootDir(p_vol);
+        break;
+    case 0:
+    case 1:
+        err = PFCACHE_AllocateDataPage((PF_VOLUME*)p_vol, 0xFFFFFFFF, &p_page, &unused);
+        if (err != 0) {
+            return err;
+        }
+        VFipf_memset(p_page->p_buf, 0, p_vol->bpb.bytes_per_sector);
+        for (sector = p_vol->bpb.first_root_dir_sector; sector < p_vol->bpb.first_data_sector; sector++) {
+            err = PFSEC_WriteData((PF_VOLUME*)p_vol, p_page->p_buf, sector, 0, p_vol->bpb.bytes_per_sector, &written, 0);
+            if (err != 0) {
+                PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+                return err;
+            }
+            if (written != p_vol->bpb.bytes_per_sector) {
+                PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+                return 17;
+            }
+        }
+        PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+        break;
+    default:
+        return 7;
+    }
+    PF_enterCritical(&lbl_805644C0.critical);
+    PFDRV_LoadVolumeLabelFromBuf(p_vol, lbl_80492FD8);
+    PF_exitCritical(&lbl_805644C0.critical);
+    return 0;
+}
+
+s32 PFENT_ITER_FindEntry(PF2_ENT_ITER* p_iter, PF2_DIR_ENT* p_ent, PF_STR* p_path, u32 wildcard, u32 no_look_last_token, u32* p_pos) {
+    s32 err;
+
+    *p_pos = 0;
+    if (wildcard & no_look_last_token) {
+        return 10;
+    }
+    if (PFSTR_StrNCmp(p_path, (const s8*)":", 1, 1, 1) == 0) {
+        PFSTR_MoveStrPos(p_path, 2);
+    }
+    if (PFSTR_StrNCmp(p_path, (const s8*)"\\", 1, 0, 1) == 0 || PFSTR_StrNCmp(p_path, (const s8*)"/", 1, 0, 1) == 0) {
+        err = PFENT_GetRootDir((PF2_VOLUME*)p_iter->p_vol, p_ent);
+        if (err != 0) {
+            return err;
+        }
+        if (PFSTR_StrNumChar(p_path, 1) == 1 && PFSTR_StrNCmp(p_path, (const s8*)"", 2, 0, 1) == 0) {
+            return 0;
+        }
+    } else {
+        err = PFVOL_GetCurrentDir((PF2_VOLUME*)p_iter->p_vol, p_ent);
+        if (err != 0) {
+            return err;
+        }
+    }
+    err = PFENT_ITER_DoFindEntry(p_iter, p_ent, p_path, wildcard, no_look_last_token, p_pos);
+    return err != 0 ? err : 0;
+}

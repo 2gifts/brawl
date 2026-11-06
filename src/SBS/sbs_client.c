@@ -16,11 +16,20 @@ typedef struct SBSClientState {
     int result;
     unsigned char _08[0x28];
     void* buffer;
-    unsigned char _34[0x24];
+    union {
+        unsigned char _34[0x24];
+        struct {
+            unsigned char _34a[0x14];
+            void* encKey;
+        };
+    };
 } SBSClientState;
 
 extern SBSClientState lbl_8048E680;
 extern const char lbl_80415790[0x578];
+
+// HYPOTHESIS: dwc_auth_interface.h is not reachable from this unit's include path, so the auth server query is declared locally.
+int DWCi_Auth_GetServer(void);
 
 void HandleEncResponse(void);
 int DWC_ProcessGHTTP(void);
@@ -91,6 +100,41 @@ void EncSessionProcess(void) {
         DWCi_EncSessionShutdown();
         break;
     }
+}
+
+int EncSessionRequest(const char* request, void* data, int size) {
+    int status;
+    switch (DWCi_Auth_GetServer()) {
+    case 0:
+        DWCi_EncSessionInitialize(1, lbl_80415790 + 0x102);
+        break;
+    case 1:
+        DWCi_EncSessionInitialize(0, lbl_80415790 + 0x102);
+        break;
+    }
+    status = DWCi_EncSessionGetAsync(request, lbl_8048E680.encKey, data, size, 0);
+    switch (status) {
+    case 0:
+        lbl_8048E680.state = 3;
+        status = 1;
+        break;
+    case 1:
+        DWCi_SetError(9, -99009);
+        status = 0;
+        break;
+    case 2:
+        DWC_Printf(8, lbl_80415790 + 0x144);
+        DWCi_SetError(9, -99001);
+        lbl_8048E680.state = 5;
+        lbl_8048E680.result = 3;
+        status = 0;
+        break;
+    case 3:
+        DWCi_SetError(9, -99009);
+        status = 0;
+        break;
+    }
+    return status;
 }
 
 // Function bodies below are taken from https://github.com/jj-link/brawl.

@@ -93,7 +93,6 @@ typedef void (*NatDetectionResultsFunc)(int success, NAT nat);
 extern DArray lbl_805A10F0;
 
 gs_hostent* fn_8035CF8C(void);        // getlocalhost
-int fn_8035D140(u32* addr);           // IsPrivateIP
 
 u32 GetLocalIP(void);                                       // GetLocalIP (natneg.c)
 void NNFreeNegotiateList(void);                                      // NNFreeNegotiateList

@@ -51,7 +51,7 @@ int PFAPI_convertReturnValue(int err) {
 }
 
 int fn_803EB5D8(PF2_DIR* dir) {
-    return PFAPI_convertReturnValue(fn_803DC358(dir));
+    return PFAPI_convertReturnValue(PFDIR_closedir(dir));
 }
 
 int fn_803EB5FC(void) {

@@ -209,6 +209,91 @@ static inline void gsiFreeThreadMemory(void* ptr) {
     }
 }
 
+
+// HYPOTHESIS: the state of a hostname lookup thread.
+typedef struct GSIResolveHostnameInfo {
+    char* mHostname;      // 0x0
+    u32 mIP;              // 0x4
+    int mFinished;        // 0x8
+    GSIThread mThread;    // 0xC
+} GSIResolveHostnameInfo;
+
+void gsiCancelResolvingHostname(GSIResolveHostnameInfo* info) {
+    GSIThread copy = info->mThread;
+
+    OSCancelThread(&copy.mThread);
+    if (copy.mStack != NULL) {
+        gsiFreeThreadMemory(copy.mStack);
+        copy.mStack = NULL;
+    }
+    gsiFreeThreadMemory(info->mHostname);
+    info->mHostname = NULL;
+    gsiFreeThreadMemory(info);
+}
+
+// HYPOTHESIS: the Wii socket fcntl, variadic like the SO library's.
+int SOFcntl(int s, int cmd, ...);
+u32 SONtoHl(u32 netlong);
+
+int SetSockBlocking(int s, int blocking) {
+    int flags = SOFcntl(s, 3, 0);
+
+    if (blocking != 0) {
+        flags &= ~4;
+    } else {
+        flags |= 4;
+    }
+    if (SOFcntl(s, 4, flags) == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int IsPrivateIP(u32* addr) {
+    u32 ip = SONtoHl(*addr);
+    int first = ip >> 24;
+    int second = (ip >> 16) & 0xFF;
+
+    if (first == 10) {
+        return 1;
+    }
+    if (first == 172 && second >= 16 && second <= 31) {
+        return 1;
+    }
+    if (first == 192 && second == 168) {
+        return 1;
+    }
+    return 0;
+}
+
+int Util_RandInt(int low, int high) {
+    u32 range = high - low;
+    u32 seed;
+    u32 hi;
+    u32 lo;
+    u32 a;
+    u32 b;
+
+    if (range == 0) {
+        return low;
+    }
+    seed = lbl_8059F598;
+    hi = seed >> 16;
+    lo = seed & 0xFFFF;
+    a = hi * 16807;
+    b = lo * 16807;
+    seed = b + ((a & 0x7FFF) << 16);
+    if (seed > 0x7FFFFFFF) {
+        seed = (seed & 0x7FFFFFFF) + 1;
+    }
+    seed += a >> 15;
+    if (seed > 0x7FFFFFFF) {
+        seed = (seed & 0x7FFFFFFF) + 1;
+    }
+    lbl_8059F598 = seed;
+    return low + seed % range;
+}
+
 int fn_8035D560(GSIThreadID* thread) {
     GSIThread copy;
     int result;

@@ -213,6 +213,17 @@ s32 nanddrv_finalize(struct PDM_DISK* p_disk);
 s32 nanddrv_get_disk_info(struct PDM_DISK* p_disk, struct PDM_DISK_INFO* p_disk_info);
 s32 dCommon_FlushFromVol(struct PF_VOLUME* p_vol, int i_setLastDeviceError);
 
+// Callees of the d_vf wrappers; real names from the map.
+void VFSysFinalize(void);
+s32 VFSysFileSearchNext(void* info);
+s32 VFSysFormatDrive(s32 handle_idx);
+s32 VFSysCreatePrfFileNANDFlash(const s8* i_path, u32 i_size);
+s32 VFSysCreateDir(s32 handle_idx, const s8* path);
+s32 VFSysCreateDir_current(const s8* path);
+s32 VFSysChangeDir(s32 handle_idx, const s8* path);
+s32 VFSysChangeDir_current(const s8* path);
+s32 VFiPFDIR_fsfirst(struct PF_STR* p_path, u32 attr, PF_DTA* p_dta);
+
 #ifdef __cplusplus
 }
 #endif
