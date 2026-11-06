@@ -77,7 +77,7 @@ ftFalco::ftFalco(s32 entryId,
     ftReflectorGroupDraft reflectorGroup;
     void* reflectorRecord = *reinterpret_cast<void**>(reinterpret_cast<u8*>(m_commonData) + 0x90);
     FT_REFLECTOR_GROUP_CLEAR(reflectorGroup);
-    fn_27_195B34(reflectorRecord, reflectorShape, &reflectorGroup);
+    ftUtil::convertReflectorData(reflectorRecord, reflectorShape, &reflectorGroup);
     m_moduleAccesser->getCollisionReflectorModule().add(reinterpret_cast<soCollisionReflectorGroupData*>(&reflectorGroup), 2);
     m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
 }

@@ -20,6 +20,8 @@ public:
     static bool isSlipDamage(float chance, soModuleAccesser* acc, int kind);
     // Bit 3 of the common status data of the status (HYPOTHESIS: marks the damage statuses).
     static bool isDamageStatus(soModuleAccesser* acc, int status);
+    // HYPOTHESIS: converts a fighter common-data reflector record into a one-shape reflector group.
+    static void convertReflectorData(const void* record, void* shapeOut, void* groupOut);
     // The point where the fighter's swim segment crosses the water surface line below pos (writes x and the y of pos).
     static bool calcWaterSurfacePos(soModuleAccesser* acc, Vec3f* pos, Vec2f* out);
 

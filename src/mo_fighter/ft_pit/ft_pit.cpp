@@ -105,7 +105,7 @@ ftPit::ftPit(s32 entryId,
     u8 shape[0x20];
     ftReflectorGroupDraft group;
     FT_REFLECTOR_GROUP_CLEAR(group);
-    fn_27_195B34(*reinterpret_cast<void**>(reinterpret_cast<u8*>(m_data) + 0x9c), shape, &group);
+    ftUtil::convertReflectorData(*reinterpret_cast<void**>(reinterpret_cast<u8*>(m_data) + 0x9c), shape, &group);
     m_moduleAccesser->getCollisionReflectorModule().add(reinterpret_cast<soCollisionReflectorGroupData*>(&group), 2);
     m_moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
 }
