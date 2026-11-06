@@ -9,9 +9,6 @@ extern const char g_greenhillCheckBallNode[];         // "ball"
 extern const char g_greenhillCheckBallPositionNode[]; // "ballPosition"
 extern const float g_greenhillCheckDangerHalfExtent;  // 20.0f
 
-// HYPOTHESIS: reports whether an effect handle is still alive (unnamed function in the main binary).
-extern "C" u32 fn_80060F3C(ecMgr* mgr, u32 handle);
-
 // The four values the stage's Check parameter block holds (read through getStageData()).
 struct GreenhillCheckParams {
     float unk0;     // timer set when the ball starts rolling
@@ -191,7 +188,7 @@ void grGreenhillCheck::updateActive(float deltaFrame) {
                 disableAttack(0);
                 m_attackEnabled = 0;
             }
-            if (fn_80060F3C(g_ecMgr, m_effectId) == 1) {
+            if (g_ecMgr->isExistEffect(m_effectId) == 1) {
                 g_ecMgr->endEffect(m_effectId);
                 m_effectId = 0;
             }
