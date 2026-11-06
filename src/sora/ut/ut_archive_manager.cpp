@@ -40,7 +40,6 @@ u32 fn_800151FC(gfArchive* archive, const char* path, Heaps::HeapType heap, int 
 u32 fn_8001583C(gfArchive* archive);
 u32 fn_8001588C(gfArchive* archive);
 s32 fn_80015DAC(gfArchive* archive);
-bool fn_8001440C(gfArchive* archive);
 }
 
 utArchiveManager::utArchiveManager(u32 taskCount) : m_database(nullptr), m_taskCount(taskCount) {
@@ -422,7 +421,7 @@ bool utArchiveManager::isExistEffect(u32 resourceId) {
     if (resourceId != 0xFFFF) {
         gfArchive* archive = m_database->get(resourceId);
         if (archive != nullptr) {
-            return fn_8001440C(archive);
+            return archive->isExistEffect();
         }
     }
     return false;

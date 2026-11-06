@@ -107,6 +107,7 @@ public:
     void registEffect();
     void releaseEffect();
     bool enumEffectResourceId(int unk1, u32* unk2);
+    bool isExistEffect();
     void setupEntry(gfArchiveEntryArray* array, gfArchiveFileHeader* header);
     ~gfArchive();
 
