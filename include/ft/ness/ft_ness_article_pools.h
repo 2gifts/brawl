@@ -9,63 +9,19 @@
 #include <wn/wn_article_build_info.h>
 #include <wn/weapon.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
-#include <wn/ness/wn_ness_pk_flash.h>
 
-// The fighter unit only builds the articles into its pools; their definitions live in the article units (see
-// src/mo_fighter/ft_ness/wn_ness_*.cpp). Like R.O.B.'s pools this header declares them as opaque shells of the right size,
-// so the native-builder macros of the article units do not leak into the fighter unit.
-struct wnNessPKFireData;
-struct wnNessPKThunderData;
-struct wnNessPKStarStormData;
-struct wnNessYoyoData;
-struct wnNessYoyoHeadData;
-class Vec2f;
-class Vec3f;
-
-class wnNessPKFire : public Weapon {
-    u8 m_unreconstructed[0x2408 - sizeof(Weapon)];
-public:
-    wnNessPKFire(s32 articleId, const wnArticleBuildInfo& info, const wnNessPKFireData* data);
-    virtual ~wnNessPKFire();
-    void activate(int founderTaskId, int team, Vec3f* pos, Vec2f* speed, float lr, float rot);
-};
-static_assert(sizeof(wnNessPKFire) == 0x2408, "PK Fire layout is wrong!");
-
-class wnNessPKThunder : public Weapon {
-    u8 m_unreconstructed[0xDE10 - sizeof(Weapon)];
-public:
-    wnNessPKThunder(s32 articleId, const wnArticleBuildInfo& info, const wnNessPKThunderData* data);
-    virtual ~wnNessPKThunder();
-    void activate(int founderTaskId, int team, Vec3f* pos, float lr);
-};
-static_assert(sizeof(wnNessPKThunder) == 0xDE10, "PK Thunder layout is wrong!");
-
-class wnNessPKStarStorm : public Weapon {
-    u8 m_unreconstructed[0x1C10 - sizeof(Weapon)];
-public:
-    wnNessPKStarStorm(s32 articleId, const wnArticleBuildInfo& info, const wnNessPKStarStormData* data);
-    virtual ~wnNessPKStarStorm();
-    void activate(int founderTaskId, int team, Vec3f* pos, float lr);
-};
-static_assert(sizeof(wnNessPKStarStorm) == 0x1C10, "PK Starstorm layout is wrong!");
-
-class wnNessYoyo : public Weapon {
-    u8 m_unreconstructed[0x2138 - sizeof(Weapon)];
-public:
-    wnNessYoyo(s32 articleId, const wnArticleBuildInfo& info, const wnNessYoyoData* data);
-    virtual ~wnNessYoyo();
-    void activate(int founderTaskId, int kind, int team, bool flag);
-};
-static_assert(sizeof(wnNessYoyo) == 0x2138, "Yo-Yo layout is wrong!");
-
-class wnNessYoyoHead : public Weapon {
-    u8 m_unreconstructed[0x21B8 - sizeof(Weapon)];
-public:
-    wnNessYoyoHead(s32 articleId, const wnArticleBuildInfo& info, const wnNessYoyoHeadData* data);
-    virtual ~wnNessYoyoHead();
-    void activate(int founderTaskId, int kind, int team, Vec3f* pos, float lr, bool flag);
-};
-static_assert(sizeof(wnNessYoyoHead) == 0x21B8, "Yo-Yo head layout is wrong!");
+// Full article types let the fighter own their pools and teardown.
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/ness/wn_ness_pkflash.h>
+#include <wn/ness/wn_ness_pk_fire.h>
+#include <wn/ness/wn_ness_pk_thunder.h>
+#include <wn/ness/wn_ness_pk_star_storm.h>
+#include <wn/ness/wn_ness_yoyo.h>
+#include <wn/ness/wn_ness_yoyo_head.h>
+#undef WN_ARTICLE_NATIVE_BUILDERS // the fighter defines the shared kinetic destructor out of line (ft_builder_noinline.h)
 
 typedef wnArticleHierarchy<wnNessYoyoHead, 1, soInstancePoolRoot> ftNessYoyoHeadPool;
 typedef wnArticleHierarchy<wnNessYoyo, 1, ftNessYoyoHeadPool> ftNessYoyoPool;

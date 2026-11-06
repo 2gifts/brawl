@@ -267,7 +267,7 @@ struct ftNessArticleKind : wnArticleKindInfo {
 };
 
 // Keep explicit holder bodies where the pool calls them out of line.
-FT_DEFINE_ARTICLE_HOLDER_MEMBER(inline, wnNessPKFlash, void, 0, ftNessArticleKind, getWeaponData121)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(inline, wnNessPKFlash, const wnNessPKFlashData, 0, ftNessArticleKind, getWeaponData121)
 FT_DEFINE_ARTICLE_HOLDER_MEMBER(inline, wnNessPKFire, const wnNessPKFireData, 1, ftNessArticleKind, getWeaponData122)
 FT_DEFINE_ARTICLE_HOLDER_MEMBER(inline, wnNessPKThunder, const wnNessPKThunderData, 2, ftNessArticleKind, getWeaponData123)
 FT_DEFINE_ARTICLE_HOLDER_MEMBER(inline, wnNessPKStarStorm, const wnNessPKStarStormData, 3, ftNessArticleKind, getWeaponData125)
@@ -879,4 +879,10 @@ void ftNess::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* modul
 // The holders and sub pools of the article pools (soKindInfoGeneric<0, 10>); the mediator destroys them out of line.
 #pragma dont_inline on
 template wnInstanceHolder<wnNessPKFire, soKindInfoGeneric<0, 10>, soIntToType<1> >::~wnInstanceHolder();
+#pragma dont_inline off
+
+// ftManager::setParamPattern selects the shared parameter-table variation.
+extern int g_soValueVariation;
+#pragma dont_inline on
+int soValueAccesser::getValueVariation() { return g_soValueVariation; }
 #pragma dont_inline off
