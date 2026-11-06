@@ -92,6 +92,12 @@ int fn_803DD390(PF_FFD* p_ffd, PF2_DIR_ENT* p_ent, u32 index, PF2_STR* pattern, 
 int fn_803DD674(PF2_DIR_ENT* p_ent, u8 num_entries, PF_FFD* p_ffd, u32* p_next_chain, PF2_STR* p_filename, u32* p_pos);  // PFENT_allocateEntryPos
 int fn_803DE800(PF2_ENT_ITER* iter, PF2_DIR_ENT* ent, PF2_VOLUME* vol, PF2_STR* path, u32 wildcard, u32 no_look_last_token);
 u32 fn_803E12B4(PF_FFD* p_ffd, u32 index, u32 mode, u32 size, u32* p_cluster);  // PFFAT_GetClusterInChain
+u32 PFFAT_GetSectorSpecified(PF_FFD* p_ffd, u32 index, u32 may_allocate, u32* p_cluster);
+int PFFAT_GetSectorAllocated(PF_FFD* p_ffd, u32 index, u32 size, u32* p_cluster);
+void PFFAT_InitHint(PF_FAT_HINT* p_hint);
+int PFFAT_ResetFFD(PF_FFD* p_ffd, u32* p_start_cluster);
+int PFFAT_InitFFD(PF_FFD* p_ffd, PF_FAT_HINT* p_hint, PF_VOLUME* p_vol, u32* p_start_cluster);
+int PFFAT_FinalizeFFD(PF_FFD* p_ffd);
 int fn_803E3610(void);                                       // PFFATFS_initializeFATFS
 int fn_803E5774(PF2_FILE* file);                             // PFFILE_fclose
 int fn_803E5A50(void* buf, u32 size, u32 count, PF2_FILE* file, u32* count_read);   // PFFILE_fread
