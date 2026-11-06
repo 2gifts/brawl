@@ -28,7 +28,9 @@ struct hkSimulationIsland : hkReferencedObject {
     hkConstraintInfo m_constraintInfo; // 0x08 merged constraint info (see mergeConstraintInfo)
     hkWorld* m_world;                // 0x18 (hkWorldAgentUtil::removeAgentAndItsToiEvents reads the simulation off it)
     u8 m_unk1C[0x04];                // 0x1C (not recovered)
-    u8 m_unk20[0x06];                // 0x20 (not recovered; u16 index at 0x20, u16 dirty-list index at 0x22)
+    u16 m_storageIndex;              // 0x20 index in the world's island list; 0xFFFF for the fixed island
+                                     // HYPOTHESIS: name (hkWorldAgentUtil::addAgent never puts agents there)
+    u8 m_unk22[0x04];                // 0x22 (not recovered; u16 dirty-list index at 0x22)
     union {
         u8 m_flags26;                    // 0x26 bit field, see above
         hkSimulationIslandFlags m_flags; // 0x26 the same byte as bit fields
@@ -39,6 +41,7 @@ struct hkSimulationIsland : hkReferencedObject {
     hkAgentNnTrack m_agentTrack;     // 0x48 the island's agent entries (hkSimulation::collideInternal processes it)
     hkArray<hkAction*> m_actions;    // 0x60
 
+    hkBool isFixed() const { return m_storageIndex == 0xFFFF; }
     void internalAddEntity(hkEntity* entity);
     void internalRemoveEntity(hkEntity* entity);
     void addAction(hkAction* action);

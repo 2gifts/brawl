@@ -6,10 +6,15 @@ struct hkSimulationIsland;
 struct hkProcessCollisionInput;
 struct hkAgentNnEntry;
 struct hkEntity;
+struct hkLinkedCollidable;
 
 // Agent helpers of the world (hkWorldAgentUtil.o, map names). HYPOTHESIS: the parameter types where noted.
 struct hkWorldAgentUtil {
-    // Destroys the agent entry and unlinks it from both collidables (not written yet).
+    // Merges the two entities' islands when needed and creates the agent of the pair in the island that keeps it.
+    // HYPOTHESIS: the parameter types.
+    static hkAgentNnEntry* addAgent(hkLinkedCollidable* collA, hkLinkedCollidable* collB,
+                                    const hkProcessCollisionInput& input);
+    // Destroys the agent entry and its contact manager.
     static void removeAgent(hkAgentNnEntry* entry);
     // Drops the simulation's pending time-of-impact events of the agent, then removes it.
     static void removeAgentAndItsToiEvents(hkAgentNnEntry* entry);

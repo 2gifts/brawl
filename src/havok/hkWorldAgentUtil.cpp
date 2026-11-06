@@ -1,6 +1,6 @@
 // Havok translation unit hkWorldAgentUtil.o (main.dol 0x802F34F0-0x802F5D5C).
 // Work in progress. Functions in address order (map names in brackets).
-//   0x802F34F0   addAgent (not written), removeAgent
+//   0x802F34F0   addAgent, removeAgent
 //   0x802F377C   removeAgentAndItsToiEvents, getIslandFromAgentEntry, invalidateTim, warpTime
 //   0x802F39A0   fireActionAdded, fireActionRemoved, fireEntityAdded, fireEntityRemoved, fireEntityShapeSet,
 //   firePhantomAdded, firePhantomRemoved, fireConstraintAdded, fireConstraintRemoved (248 bytes each)
@@ -14,8 +14,47 @@
 #include <havok/hkWorld.h>
 #include <havok/hkSimulation.h>
 #include <havok/hkCollisionAgent.h>
+#include <havok/hkCollisionDispatcher.h>
+#include <havok/hkWorldOperationUtil.h>
 
 typedef hkArray<hkLinkedCollidable::CollisionEntry> CollisionEntryArray;
+
+hkAgentNnEntry* hkWorldAgentUtil::addAgent(hkLinkedCollidable* collA, hkLinkedCollidable* collB,
+                                           const hkProcessCollisionInput& input) {
+    hkEntity* entityA = (hkEntity*)((char*)collA + collA->m_ownerOffset);
+    hkEntity* entityB = (hkEntity*)((char*)collB + collB->m_ownerOffset);
+    int needMerge = 0;
+    int bothMovable = entityA->isFixed() == false && entityB->isFixed() == false;
+    if (bothMovable && entityA->m_simulationIsland != entityB->m_simulationIsland) {
+        needMerge = 1;
+    }
+    if (needMerge) {
+        hkWorldOperationUtil::mergeIslands(entityA->m_world, entityA, entityB);
+    }
+    // the agent goes to an island that is not the fixed one when there is one
+    hkSimulationIsland* islandA = entityA->m_simulationIsland;
+    hkSimulationIsland* islandB = entityB->m_simulationIsland;
+    hkSimulationIsland* island;
+    if (islandA->isFixed() == false) {
+        island = islandA;
+    } else if (islandB->isFixed() == false) {
+        island = islandB;
+    } else {
+        island = islandA;
+    }
+    int agentType;
+    int isFlipped;
+    hkAgentNnMachine_GetAgentType(collA, collB, input, &agentType, &isFlipped);
+    if (isFlipped) {
+        hkLinkedCollidable* tmp = collA;
+        collA = collB;
+        collB = tmp;
+    }
+    hkContactMgr* mgr = input.m_dispatcher
+                            ->m_contactMgrFactory[entityA->m_material.m_responseType][entityB->m_material.m_responseType]
+                            ->createContactMgr(*collA, *collB, input);
+    return hkAgentNnMachine_CreateAgent(island->m_agentTrack, collA, collB, agentType, input, mgr);
+}
 
 void hkWorldAgentUtil::removeAgent(hkAgentNnEntry* entry) {
     hkLinkedCollidable* collidableA = entry->m_collidable[0];

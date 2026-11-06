@@ -67,3 +67,10 @@ struct hkContactMgr : hkReferencedObject {
     // 0x20: hkWorldAgentUtil::removeAgent calls it after the agent entry is destroyed.
     virtual void cleanup();
 };
+
+// Makes the contact manager of a new agent (hkCollisionDispatcher holds one per pair of material response types).
+// HYPOTHESIS: the parameter types (hkWorldAgentUtil::addAgent passes the two collidables and the input).
+struct hkContactMgrFactory : hkReferencedObject {
+    virtual hkContactMgr* createContactMgr(const hkCollidable& a, const hkCollidable& b,
+                                           const hkCollisionInput& input); // 0x10
+};

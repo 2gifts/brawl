@@ -35,8 +35,9 @@ struct hkCollisionDispatcher : hkReferencedObject {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
     int unk8; // 0x08 set by the constructor from its argument (HYPOTHESIS: a shared-object parameter)
-    // 0x0C: 8 x 8 reference counted entries, released by the destructor (HYPOTHESIS: indexed by shape type).
-    hkReferencedObject* m_refTable[8][8];
+    // 0x0C: 8 x 8 contact manager factories indexed by the two entities' material response types
+    // (hkWorldAgentUtil::addAgent); reference counted, released by the destructor.
+    hkContactMgrFactory* m_contactMgrFactory[8][8];
     // 0x10C: flags indexed by shape type (HYPOTHESIS).
     u32 m_typeFlags[32];
     int m_numAgents; // 0x18C number of registered agent functions (index of the next table entry)
