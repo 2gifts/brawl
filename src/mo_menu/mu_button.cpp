@@ -679,9 +679,8 @@ void muButtonTask::openActionList(int title, int frame, const int* actions, int 
         num = 0;
     }
     int i;
-    for (i = 0; i < num; i++) {
+    for (i = 0; i < num; i++, actions++) {
         m_work->m_msg->printIndex(i + 0x12, sActionMsgs[*actions].m_name, NULL);
-        actions++;
     }
     for (; i < ListMax; i++) {
         m_work->m_msg->printf(i + 0x12, "");
@@ -1254,8 +1253,9 @@ void muButtonTask::mainStepButtonSelect(muButtonTask* task) {
 
 // The place of an action in an action list (-1: not in it).
 static inline int findAction(const u8* list, int action) {
-    for (int i = 0; list[i] != muButtonTask::ActionNum; i++) {
-        if (list[i] == action) {
+    int i = 0;
+    for (; *list != muButtonTask::ActionNum; list++, i++) {
+        if (*list == action) {
             return i;
         }
     }
@@ -1265,8 +1265,7 @@ static inline int findAction(const u8* list, int action) {
 // The number of actions in an action list.
 static inline int countActions(const u8* list) {
     int num = 0;
-    while (list[num] != muButtonTask::ActionNum) {
-        num++;
+    for (; *list != muButtonTask::ActionNum; list++, num++) {
     }
     return num;
 }
@@ -1275,19 +1274,21 @@ void muButtonTask::initStepButtonAssign(muButtonTask* task) {
     Work* work = task->m_work;
     int padKind = work->m_padKind;
     int cursor = work->m_cursor;
-    int index = findAction(sPadInfos[padKind].m_actionLists[cursor], work->m_edit.m_buttons[cursor]);
+    const PadInfo* info = &sPadInfos[padKind];
+    int index = findAction(info->m_actionLists[cursor], work->m_edit.m_buttons[cursor]);
     if (index < 0) {
         index = 0;
     }
     work->m_listIndex = index;
     int action = task->m_work->m_edit.m_buttons[cursor];
     task->printButton(padKind, cursor, cursor + 5, action, true);
-    task->m_work->m_msg->printIndex(1, sActionMsgs[action].m_expl, NULL);
+    const ActionMsg* actionMsg = &sActionMsgs[action];
+    task->m_work->m_msg->printIndex(1, actionMsg->m_expl, NULL);
     int arrows = 0;
     if (index > 0) {
         arrows |= 1;
     }
-    if (index < countActions(sPadInfos[padKind].m_actionLists[cursor]) - 1) {
+    if (index < countActions(info->m_actionLists[cursor]) - 1) {
         arrows |= 2;
     }
     task->m_work->m_objs[22]->setFrameVisible(arrows);
