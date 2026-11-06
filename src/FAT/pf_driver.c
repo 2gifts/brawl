@@ -133,3 +133,33 @@ s32 pdm_disk_init_disk_manager(void) {
     VFipf_memset(lbl_805639C0, 0, 0xa2c);
     return 0;
 }
+
+s32 pdm_part_is_boot_sector(const u8* buf) {
+    s32 is_boot = 1;
+    u16 bps;
+
+    if (!((buf[0] == 0xEB && buf[2] == 0x90) || buf[0] == 0xE9)) {
+        is_boot = 0;
+    }
+    if (!(buf[0x1FE] == 0x55 && buf[0x1FF] == 0xAA)) {
+        is_boot = 0;
+    }
+    if (((u32)(buf + 0xB)) & 1) {
+        bps = buf[0xB] | (buf[0xC] << 8);
+    } else {
+        u16 raw = *(const u16*)(buf + 0xC);
+        bps = ((raw >> 8) & 0xFF) | ((raw << 8) & 0xFF00);
+    }
+    if (!(bps == 0x200 || bps == 0x400 || bps == 0x800 || bps == 0x1000)) {
+        is_boot = 0;
+    }
+    if (!(buf[0xD] == 1 || buf[0xD] == 2 || buf[0xD] == 4 || buf[0xD] == 8 || buf[0xD] == 0x10 || buf[0xD] == 0x20 ||
+          buf[0xD] == 0x40 || buf[0xD] == 0x80)) {
+        is_boot = 0;
+    }
+    if (!(buf[0x15] == 0xF0 || buf[0x15] == 0xF8 || buf[0x15] == 0xF9 || buf[0x15] == 0xFA || buf[0x15] == 0xFB ||
+          buf[0x15] == 0xFC || buf[0x15] == 0xFD || buf[0x15] == 0xFE || buf[0x15] == 0xFF)) {
+        is_boot = 0;
+    }
+    return is_boot;
+}
