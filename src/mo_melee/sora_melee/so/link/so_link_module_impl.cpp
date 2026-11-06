@@ -1,3 +1,4 @@
+#define SO_GLOW_MODULE_ATTACK_API
 #define SO_LINK_MODULE_IMPL_FULL
 #include <so/link/so_link_module_impl.h>
 #include <so/item/so_item_manage_module_impl.h>
@@ -13,6 +14,12 @@
 #include <so/resource/so_resource_module_impl.h>
 #include <so/article/so_generate_article_manage_module.h>
 #include <so/ground/so_ground_module_impl.h>
+#include <so/glow/so_glow_module_simple.h>
+#include <so/kinetic/so_kinetic_module_impl.h>
+#include <so/shake/so_shake_module_simple.h>
+#include <so/slow/so_slow_module_impl.h>
+#include <so/camera/so_camera_module_impl.h>
+#include <so/slope/so_slope_module_impl.h>
 
 soLinkModule::~soLinkModule() {
 }
@@ -522,4 +529,174 @@ bool soLinkModuleImpl::getParentShapeCenterPosTaskId(int taskId, Vec2f* outCente
         }
     }
     return false;
+}
+
+// HYPOTHESIS: glow module slots past isGlow, named from the soLinkModuleImpl callers.
+class soGlowModuleLinkView : public soGlowModule {
+public:
+    virtual int getWeaponGlowDefense();    // 0x24
+    virtual int unk28();
+    virtual int unk2C();
+    virtual float getWeaponGlowEff();      // 0x30
+    virtual float getWeaponGlowDamageMin(); // 0x34
+    virtual float getWeaponGlowDamageMax(); // 0x38
+    virtual int unk3C();
+    virtual int unk40();
+    virtual int unk44();
+    virtual int unk48();
+    virtual int unk4C();
+    virtual int unk50();
+    virtual int unk54();
+    virtual int getGlowAttackAdd(soCollisionAttackData* data); // 0x58
+    virtual int getGlowAttackData(soCollisionAttackData* data); // 0x5C
+    virtual int unk60();
+    virtual int getWeaponGlowAttack();     // 0x64
+};
+
+#define SO_PARENT_GLOW(index) (*reinterpret_cast<soGlowModuleLinkView*>(m_connections->at(index).m_parent.getLinkModule()->m_moduleAccesser->m_enumerationStart->m_glowModule))
+
+bool soLinkModuleImpl::isParentGlow(u32 index) {
+    return SO_PARENT_GLOW(index).isGlow();
+}
+
+int soLinkModuleImpl::getParentWeaponGlowDefense(u32 index) {
+    return SO_PARENT_GLOW(index).getWeaponGlowDefense();
+}
+
+int soLinkModuleImpl::getParentWeaponGlowAttack(u32 index) {
+    return SO_PARENT_GLOW(index).getWeaponGlowAttack();
+}
+
+float soLinkModuleImpl::getParentWeaponGlowEff(u32 index) {
+    return SO_PARENT_GLOW(index).getWeaponGlowEff();
+}
+
+float soLinkModuleImpl::getParentWeaponGlowDamageMin(u32 index) {
+    return SO_PARENT_GLOW(index).getWeaponGlowDamageMin();
+}
+
+float soLinkModuleImpl::getParentWeaponGlowDamageMax(u32 index) {
+    return SO_PARENT_GLOW(index).getWeaponGlowDamageMax();
+}
+
+Vec2f soLinkModuleImpl::getParentSumSpeed(u32 index) {
+    soLinkConnection& connection = m_connections->at(index);
+    soKineticEnergy::AttributeFlag flag(1);
+    return connection.m_parent.getLinkModule()->m_moduleAccesser->getKineticModule().getSumSpeed(flag);
+}
+
+int soLinkModuleImpl::getParentTexResourceId(u32 index) {
+    return m_connections->at(index).m_parent.getLinkModule()->m_moduleAccesser->getResourceModule().getResourceIdAccesser()->getTexResId();
+}
+
+bool soLinkModuleImpl::chkLinkShake(Vec2f* offset) {
+    if (isLink(-1)) {
+        for (soLinkNode* node = static_cast<soLinkNode*>(m_parents.getNode(0)); node != NULL; node = static_cast<soLinkNode*>(node->m_next)) {
+            if (node->m_connection->m_attribute & (1 << soLinkConnection::Attribute_Reference_Parent_Shake)) {
+                return reinterpret_cast<soShakeModule*>(node->getLinkModule()->m_moduleAccesser->m_enumerationStart->m_shakeModule)->getOffset(offset);
+            }
+        }
+    }
+    return false;
+}
+
+void soLinkModuleImpl::setParentHitStopFrame(u32 index, u32 frame, bool unk) {
+    m_connections->at(index).m_parent.getLinkModule()->m_moduleAccesser->getStopModule().setHitStop(static_cast<s32>(frame), unk);
+}
+
+void soLinkModuleImpl::setParentAttackerInfo(u32 index, StageObject* attacker) {
+    soLinkConnection& connection = m_connections->at(index);
+    soDamageAttackerInfo info;
+    info.clear();
+    connection.m_parent.getLinkModule()->m_moduleAccesser->getDamageModule().getAttackerInfo(&info);
+    info.set(connection.m_parent.m_taskId, attacker);
+    connection.m_parent.getLinkModule()->m_moduleAccesser->getDamageModule().restoreAttackerInfo(&info);
+}
+
+bool soLinkModuleImpl::chkAttribute(int index, soLinkConnection::Attribute attribute) {
+    if (index >= 0) {
+        u32 bit = 1 << attribute;
+        u32 attr = m_connections->at(index).m_attribute;
+        return (attr & bit) != 0;
+    }
+    if (isLink(-1)) {
+        for (soLinkNode* node = static_cast<soLinkNode*>(m_parents.getNode(0)); node != NULL; node = static_cast<soLinkNode*>(node->m_next)) {
+            if (node->m_connection->m_attribute & (1 << attribute)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+soSlopeStatusParam::Status soLinkModuleImpl::getLinkSlopeStatus(int index) {
+    if (index >= 0) {
+        return static_cast<soSlopeModule*>(m_connections->at(index).m_parent.getLinkModule()->m_moduleAccesser->m_enumerationStart->m_slopeModule)->getStatus();
+    }
+    if (isLink(-1)) {
+        for (soLinkNode* node = static_cast<soLinkNode*>(m_parents.getNode(0)); node != NULL; node = static_cast<soLinkNode*>(node->m_next)) {
+            if (node->m_connection->m_attribute & (1 << soLinkConnection::Attribute_Reference_Parent_Slope)) {
+                return static_cast<soSlopeModule*>(node->getLinkModule()->m_moduleAccesser->m_enumerationStart->m_slopeModule)->getStatus();
+            }
+        }
+    }
+    return static_cast<soSlopeStatusParam::Status>(0);
+}
+
+Vec3f soLinkModuleImpl::getModelConstraintNodeGlobalPosition(u32 nodeIndex) {
+    return m_connections->at(m_modelConstraintNo).m_parent.getLinkModule()->m_moduleAccesser->getModelModule().getNodeGlobalPosition(nodeIndex, false);
+}
+
+void soLinkModuleImpl::getModelConstraintTargetNodeWorldMtx(Matrix* mtx, bool unk) {
+    m_connections->at(m_modelConstraintNo).m_parent.getLinkModule()->m_moduleAccesser->getModelModule().getNodeGlobalMtx(m_modelConstraintTargetNode, mtx, unk);
+}
+
+// HYPOTHESIS: attribute 0xD is the slow-motion reference (no other query tests it).
+bool soLinkModuleImpl::isLinkParentSlow(int index) {
+    if (index >= 0) {
+        return m_connections->at(index).m_parent.getLinkModule()->m_moduleAccesser->getSlowModule().isSlow();
+    }
+    if (isLink(-1)) {
+        for (soLinkNode* node = static_cast<soLinkNode*>(m_parents.getNode(0)); node != NULL; node = static_cast<soLinkNode*>(node->m_next)) {
+            if (node->m_connection->m_attribute & (1 << 13)) {
+                return node->getLinkModule()->m_moduleAccesser->getSlowModule().isSlow();
+            }
+        }
+    }
+    return false;
+}
+
+bool soLinkModuleImpl::getLinkParentSlowInfo(float* rate, bool* isSkip, int index) {
+    if (index >= 0) {
+        soLinkConnection& connection = m_connections->at(index);
+        *rate = connection.m_parent.getLinkModule()->m_moduleAccesser->getSlowModule().getRate();
+        *isSkip = connection.m_parent.getLinkModule()->m_moduleAccesser->getSlowModule().isSkip();
+        return true;
+    }
+    if (isLink(-1)) {
+        for (soLinkNode* node = static_cast<soLinkNode*>(m_parents.getNode(0)); node != NULL; node = static_cast<soLinkNode*>(node->m_next)) {
+            if (node->m_connection->m_attribute & (1 << 13)) {
+                *rate = node->getLinkModule()->m_moduleAccesser->getSlowModule().getRate();
+                *isSkip = node->getLinkModule()->m_moduleAccesser->getSlowModule().isSkip();
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+Vec3f soLinkModuleImpl::getModelConstraintNodeGlobalPositionRecursive(u32 nodeIndex) {
+    soModuleAccesser* accesser = m_connections->at(m_modelConstraintNo).m_parent.getLinkModule()->m_moduleAccesser;
+    soLinkModule& link = accesser->getLinkModule();
+    if (link.isModelConstraint() == true && !link.isModelConstraintMutual()) {
+        return link.getModelConstraintNodeGlobalPositionRecursive(nodeIndex);
+    }
+    return accesser->getModelModule().getNodeGlobalPosition(nodeIndex, false);
+}
+
+void soLinkModuleImpl::setModelConstraintPosOrt(u32 modelConstraintNo, int modelConstraintNode, const char* modelConstraintTargetNode, u16 modelConstraintFlag, bool modelConstraintAttribute) {
+    u32 nodeId = m_connections->at(modelConstraintNo).m_parent.getLinkModule()->m_moduleAccesser->getModelModule().getNodeId(modelConstraintTargetNode);
+    if (nodeId != 0xFFFFFFFF) {
+        setModelConstraintPosOrt(modelConstraintNo, modelConstraintNode, nodeId, modelConstraintFlag, modelConstraintAttribute);
+    }
 }
