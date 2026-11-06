@@ -117,7 +117,7 @@ __dt__35wnArticleHolder<16wnLucasPKThunder>Fv = .text:0x000052CC; // type:functi
 __dt__16wnLucasPKThunderFv = .text:0x0000532C; // type:function size:0x354
 __dt__98wnAnimCmdModuleSubBuilder<69wnAnimCmdModuleSubBuildConfigDefault<1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0>>Fv = .text:0x00005680; // type:function size:0x160
 fn_114_57E0 = .text:0x000057E0; // type:function size:0x258
-fn_114_5A38 = .text:0x00005A38; // type:function size:0x5C
+__dt__102soArraySelectHolder<1,39soArrayVector<P19soStatusUniqProcess,1>,35soArrayNull<P19soStatusUniqProcess>>Fv = .text:0x00005A38; // type:function size:0x5C
 __dt__240soMotionModuleBuilder<214soMotionModuleBuildConfig<1,18soMotionModuleImpl,0,0,82soTransitionModuleBuildConfig<49soTypeList<14soIntToType<4>,18soTypeListNullType>>,73soMotionAnimObjCacheModuleBuildConfig<0,30soMotionAnimObjCacheModuleNull>>>Fv = .text:0x00005A94; // type:function size:0x78
 __dt__75soArrayContractible<52soInstanceUnitFullProperty<P21soStatusEventObserver>>Fv = .text:0x00005B0C; // type:function size:0x40
 __dt__63soArray<52soInstanceUnitFullProperty<P21soStatusEventObserver>>Fv = .text:0x00005B4C; // type:function size:0x40
@@ -239,7 +239,7 @@ __ct__72soCameraModuleBuilder<47soCameraModuleBuildConfig<18soCameraModuleImpl>>
 __ct__78soAnimCmdModuleBuilder<52soAnimCmdModuleBuildConfig<11,19soAnimCmdModuleImpl>>Fs = .text:0x000099D8; // type:function size:0x44
 __ct__794soStatusModuleBuilder<768soStatusModuleBuildConfig<290,33soGeneralWorkBuildConfig<18,14,2>,274,71,691soTransitionModuleBuildConfig<657soTypeList<15soIntToType<25>,624soTypeList<14soIntToType<6>,592soTypeList<14soIntToType<2>,560soTypeList<14soIntToType<1>,528soTypeList<15soIntToType<17>,495soTypeList<14soIntToType<3>,463soTypeList<14soIntToType<1>,431soTypeList<14soIntToType<2>,399soTypeList<14soIntToType<8>,367soTypeList<14soIntToType<2>,335soTypeList<14soIntToType<1>,303soTypeList<14soIntToType<6>,271soTypeList<14soIntToType<3>,239soTypeList<14soIntToType<1>,207soTypeList<14soIntToType<1>,175soTypeList<14soIntToType<2>,143soTypeList<14soIntToType<3>,111soTypeList<14soIntToType<2>,80soTypeList<14soIntToType<6>,49soTypeList<14soIntToType<1>,18soTypeListNullType>>>>>>>>>>>>>>>>>>>>>>>FP16soModuleAccesserPC12soStatusDataPv = .text:0x00009A1C; // type:function size:0x388
 __ct__19soGeneralWorkSimpleFPlUlPfUlPUlUl = .text:0x00009DA4; // type:function size:0x80
-fn_114_9E24 = .text:0x00009E24; // type:function size:0xB0
+clearWorkAll__19soGeneralWorkSimpleFv = .text:0x00009E24; // type:function size:0xB0
 __ct__166soKineticModuleBuilder<139soKineticModuleBuildConfigMediator<26soKineticModuleGenericImpl,72ftKineticMediatorImplT<24ftLucasKineticTransactor,19ftKineticTransactor>>>FP16soModuleAccesser = .text:0x00009ED4; // type:function size:0x3D0
 __ct__57soGeneralWorkBuilder<33soGeneralWorkBuildConfig<77,32,3>>Fv = .text:0x0000A2A4; // type:function size:0x60
 __ct__56wnArticleManageModuleBuilder<22ftLucasArticleMediator,5>FP16soModuleAccesser = .text:0x0000A304; // type:function size:0x418

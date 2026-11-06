@@ -55,7 +55,7 @@ public:
     // module calls it with these two arguments.
     soKineticModuleImpl(soModuleAccesser* acc, soInstanceManagerFullProperty<soKineticEnergy*>* energies);
 #endif
-#ifdef WN_ARTICLE_NATIVE_BUILDERS
+#if defined(WN_ARTICLE_NATIVE_BUILDERS) && !defined(FT_KINETIC_IMPL_DTOR_OUT_OF_LINE) // opt-in: a fighter unit that links the articles inline but keeps this out of line
     ~soKineticModuleImpl() { }
 #elif defined(FT_MODULE_BUILDER)
     // BYTES: the fighter RELs call this destructor out of line from soKineticModuleGenericImpl's (defined in ft_builder_noinline.h)
