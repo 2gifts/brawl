@@ -98,7 +98,7 @@ void hkMotorBuildJacobian::hk1dLinearVelocityMotorCommitJacobian(const hkVector4
     sch[2] = unk08 * vy;
     sch[3] = unk0C * vy;
     sch[4] = unk04;
-    sch[1] = 0.0f; // HYPOTHESIS: constant value
+    sch[1] = 1.0f;
     sch[5] = unk10;
     sch[6] = unk14;
     *(u32*)sch = 0x0609001C;

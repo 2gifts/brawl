@@ -55,14 +55,14 @@
 #include <havok/hkSweptTransformUtil.h>
 
 hkBvTreeAgent::hkBvTreeAgent(hkContactMgr* contactMgr) : hkCollisionAgent((int)contactMgr) {
-    m_cachedAabb.m_max.x = 0.0f;
-    m_cachedAabb.m_max.y = 0.0f;
-    m_cachedAabb.m_max.z = 0.0f;
-    m_cachedAabb.m_max.w = 0.0f;
-    m_cachedAabb.m_min.x = 0.0f;
-    m_cachedAabb.m_min.y = 0.0f;
-    m_cachedAabb.m_min.z = 0.0f;
-    m_cachedAabb.m_min.w = 0.0f;
+    m_cachedAabb.m_max.x = HK_REAL_MAX;
+    m_cachedAabb.m_max.y = HK_REAL_MAX;
+    m_cachedAabb.m_max.z = HK_REAL_MAX;
+    m_cachedAabb.m_max.w = HK_REAL_MAX;
+    m_cachedAabb.m_min.x = HK_REAL_MAX;
+    m_cachedAabb.m_min.y = HK_REAL_MAX;
+    m_cachedAabb.m_min.z = HK_REAL_MAX;
+    m_cachedAabb.m_min.w = HK_REAL_MAX;
 }
 
 void hkBvTreeAgent::registerAgent(hkCollisionDispatcher* dispatcher) {

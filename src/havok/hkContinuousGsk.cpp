@@ -27,7 +27,7 @@ hkGsk::hkGsk() {
 }
 
 hk4dGskVertexCollidePointsOutput::hk4dGskVertexCollidePointsOutput() {
-    unk0 = 0.0f;
+    unk0 = 1.0f;
 }
 
 void hkGsk::checkForChangesAndUpdateCache(void* arg) {

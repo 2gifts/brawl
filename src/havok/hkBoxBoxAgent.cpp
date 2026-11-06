@@ -29,7 +29,7 @@ struct hkBoxBoxContactMgr : hkReferencedObject {
 };
 
 // HYPOTHESIS: the size scale that the box test multiplies the shape size with.
-static const float kBoxSizeScale = 2.0f;
+static const float kBoxSizeScale = 1.999f;
 
 void hkBoxBoxAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs funcs;

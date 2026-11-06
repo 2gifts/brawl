@@ -32,7 +32,7 @@ void hkQuaternion::normalize() {
     } else {
         // Hardware reciprocal square root estimate refined by one Newton step.
         hkReal y0 = (hkReal)__frsqrte(len2);
-        inv = (0.5f * y0) * (1.5f - y0 * (len2 * y0));
+        inv = (0.5f * y0) * (3.0f - y0 * (len2 * y0));
     }
     m_vec.x *= inv;
     m_vec.y *= inv;

@@ -74,7 +74,7 @@ struct hkStatisticsCollectorIface {
 };
 
 void hkWorldObject::calcStatistics(hkStatisticsCollector* collector) const {
-    ((hkStatisticsCollectorIface*)collector)->unk14("shape", 1, m_collidable.m_shape);
+    ((hkStatisticsCollectorIface*)collector)->unk14("Shape", 1, m_collidable.m_shape);
     if ((m_collidable.m_collisionEntries.m_capacityAndFlags & hkArrayBase::DONT_DEALLOCATE_FLAG) == 0) {
         ((hkStatisticsCollectorIface*)collector)->unk10("collidable", 8, m_collidable.m_collisionEntries.m_data,
                          m_collidable.m_collisionEntries.m_size * 8,

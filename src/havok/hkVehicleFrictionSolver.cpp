@@ -40,7 +40,7 @@ float hkMath::sqrt(float x) {
         y = inf.f;
     } else {
         float y0 = (float)__frsqrte((double)x);
-        y = 0.5f * y0 * (1.5f - y0 * (x * y0));
+        y = 0.5f * y0 * (3.0f - y0 * (x * y0));
     }
     return 1.0f / y;
 }

@@ -7,5 +7,5 @@
 struct hk4dGskVertexCollidePointsOutput {
     float unk0; // 0x00
 
-    hk4dGskVertexCollidePointsOutput(); // stores 0.0f (HYPOTHESIS: constant not verified)
+    hk4dGskVertexCollidePointsOutput(); // stores 1.0f
 };

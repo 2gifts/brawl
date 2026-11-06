@@ -19,8 +19,8 @@ struct hkSimulation : hkReferencedObject {
     hkReal m_unk10;       // 0x10 (set to 0 by the constructor) the time advanced to (advanceTime)
     hkReal m_unk14;       // 0x14 (set to 0 by the constructor) start of the next step (collide adds the delta)
     hkReal m_unk18;       // 0x18 the delta time of the current step (integrate's argument)
-    hkReal m_unk1C;       // 0x1C (constructor constant)
-    hkReal m_unk20;       // 0x20 (constructor constant)
+    hkReal m_unk1C;       // 0x1C the frame end time, -1 when none is set (the constructor sets -1)
+    hkReal m_unk20;       // 0x20 the snap distance to the frame end (the constructor sets 0.0001)
     // 0x24 (set to 0 by the constructor) the last step result: 0 when the step finished, otherwise the part that
     // ran out of memory (1 integrate, 2 collide); stepDeltaTime also tests 3 before advancing the time.
     int m_unk24;

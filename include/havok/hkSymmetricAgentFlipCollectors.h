@@ -24,9 +24,10 @@ struct hkSymmetricAgentFlipBodyCollector : hkSymmetricAgentFlipBodyCollectorBase
     virtual void addCdBodyPair(void* bodyA, void* bodyB);
 };
 
-// HYPOTHESIS: base of the point collectors; the constructor sets the early-out distance to 0.
+// HYPOTHESIS: base of the point collectors; the constructor sets the early-out distance to HK_REAL_MAX (the value
+// the wrappers store; the bytes do not show it, the literal does).
 struct hkSymmetricAgentFlipPointCollectorBase {
-    hkSymmetricAgentFlipPointCollectorBase() : unk4(0.0f) {}
+    hkSymmetricAgentFlipPointCollectorBase() : unk4(HK_REAL_MAX) {}
     virtual void addCdPoint(void* point) = 0; // 0x0C HYPOTHESIS (the dtor is slot 0x08)
     float unk4; // 0x04 HYPOTHESIS: early-out distance
 };
