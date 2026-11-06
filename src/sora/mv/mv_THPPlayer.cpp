@@ -3,6 +3,7 @@
 #include <mv/mv_THPPlayer.h>
 #include <mv/mv_THPRead.h>
 #include <mv/mv_THPVideoDecode.h>
+#include <revolution/AX/AXVPB.h>
 #include <revolution/GX/GXMisc.h>
 #include <revolution/OS/OSCache.h>
 #include <revolution/VI/vi.h>
@@ -195,4 +196,61 @@ void FillStreamBuffer(s16* right, s16* left, u32 count) {
 void THPPlayerGetStreamAXPB(_AXVPB** right, _AXVPB** left) {
     *right = lbl_805A01F8[0].unk0Typed->unk7F8Typed;
     *left = lbl_805A01F8[0].unk0Typed->unk7FCTyped;
+}
+
+u32 GetSizeTHPPlayerWork() {
+    return 0x860;
+}
+
+void FreeTHPPlayerWork() {
+    lbl_805A01F8[0].unk0 = 0;
+}
+
+s32 THPPlayerGetState() {
+    return g_thpObject.unkA4;
+}
+
+BOOL THPPlayerClose() {
+    if (g_thpObject.unkA0 && !g_thpObject.unkA4) {
+        g_thpObject.unkA0 = 0;
+        DVDClose(&g_thpObject.m_fInfo);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+BOOL THPPlayerPause() {
+    if (g_thpObject.unkA0 && g_thpObject.unkA4 == 2) {
+        g_thpObject.unkA5 = 4;
+        g_thpObject.unkA4 = 4;
+        if (g_thpObject.unkA7Flag) {
+            if (lbl_805A01F8[0].unk0Typed->unk7F8Typed) {
+                AXSetVoiceState(lbl_805A01F8[0].unk0Typed->unk7F8Typed, 0);
+            }
+            if (lbl_805A01F8[0].unk0Typed->unk7FCTyped) {
+                AXSetVoiceState(lbl_805A01F8[0].unk0Typed->unk7FCTyped, 0);
+            }
+        }
+        return TRUE;
+    }
+    return FALSE;
+}
+
+BOOL THPPlayerPlay() {
+    if (g_thpObject.unkA0) {
+        u8 state = g_thpObject.unkA4;
+        if (state == 1 || state == 4) {
+            if (state == 4) {
+                if (g_thpObject.unkA7Flag) {
+                    StreamReInit();
+                }
+            }
+            g_thpObject.unkA4 = 2;
+            g_thpObject.unkD0 = 0;
+            g_thpObject.unkD4 = 0;
+            g_thpObject.unkC8 = -1;
+            return TRUE;
+        }
+    }
+    return FALSE;
 }

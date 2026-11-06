@@ -119,6 +119,40 @@ BOOL HBMIsReassignedControllers() {
     return homebutton::HomeButton::getInstance()->getReassignedFlag();
 }
 
+void HBMDelete() {
+    const HBMDataInfo* pDataInfo = homebutton::HomeButton::getInstance()->getHBMDataInfo();
+
+    homebutton::HomeButton::deleteInstance();
+
+    if (getAllocatorType(pDataInfo) == HBM_ALLOCATOR_LOCAL) {
+        MEMDestroyExpHeap(spAllocator->heap);
+    }
+}
+
+void HBMCreateMemorySound(const void* pArchive, void* pMem, u32 size) {
+    MEMiHeapHead* hFrmHeap = MEMCreateFrmHeapEx(pMem, size, 0);
+    MEMInitAllocatorForFrmHeap(&sAllocator, hFrmHeap, 32);
+
+    homebutton::HomeButton* pHBObj = homebutton::HomeButton::getInstance();
+    nw4r::ut::detail::AutoLock<OSMutex> lock(homebutton::HomeButton::sMutex);
+
+    void* pMemory = MEMAllocFromAllocator(&sAllocator, sizeof(nw4r::snd::MemorySoundArchive));
+    if (pMemory != NULL) {
+        pHBObj->mpMemorySoundArchive = new (pMemory) nw4r::snd::MemorySoundArchive();
+    }
+    pHBObj->mpMemorySoundArchive->Setup(pArchive);
+    pHBObj->create_sound(pHBObj->mpMemorySoundArchive, false);
+}
+
+void HBMDeleteSound() {
+    homebutton::HomeButton::getInstance()->delete_sound();
+    MEMDestroyFrmHeap(sAllocator.heap);
+}
+
+void HBMUpdateSound() {
+    homebutton::HomeButton::getInstance()->update_sound();
+}
+
 /******************************************************************************
  *
  * Implementation details

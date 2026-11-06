@@ -48,6 +48,10 @@ s32 PFSTR_InitStr(PF_STR* p_str, const char* s, u32 code_mode);
 int fn_803EB5D8(PF2_DIR* dir);                               // pf_closedir
 int fn_803EB5FC(void);                                       // pf_errnum
 u16 fn_803D68B8(PF_STR* p_str);                              // PFSTR_StrLen
+s32 PFSTR_StrCmp(const PF_STR* p_str, const s8* s);
+u32 PFSTR_StrNumChar(PF_STR* p_str, u32 target);
+void PFSTR_MoveStrPos(PF_STR* p_str, s16 num_s8);
+void PFSTR_ToUpperNStr(PF_STR* p_str, u16 num, s8* dest);
 int fn_803EB620(PF2_FILE* file);                             // pf_fclose
 u32 fn_803EB6E0(void* buf, u32 size, u32 count, PF2_FILE* file);  // pf_fread
 int fn_803EB708(PF2_FILE* file, s32 offset, s32 origin);     // pf_fseek
@@ -98,7 +102,23 @@ int PFFAT_ResetFFD(PF_FFD* p_ffd, u32* p_start_cluster);
 int PFFAT_InitFFD(PF_FFD* p_ffd, PF_FAT_HINT* p_hint, PF_VOLUME* p_vol, u32* p_start_cluster);
 int PFFAT_FinalizeFFD(PF_FFD* p_ffd);
 int fn_803E3610(void);                                       // PFFATFS_initializeFATFS
-int fn_803E5774(PF2_FILE* file);                             // PFFILE_fclose
+void PFFILE_Cursor_MoveToEnd(PF2_FILE* p_file);
+void PFFILE_Cursor_MoveToClusterEnd(PF2_FILE* p_file, u32 size);
+int PFFILE_p_fread(PF2_VOLUME* p_vol, u8* p_buf, u32 size, u32 count, PF2_FILE* p_file, u32* p_count_read);
+void PFFILE_FinalizeAllFiles(PF2_VOLUME* p_vol);
+int PFFILE_remove(PF_STR* p_path_str);
+int PFFILE_fopen(PF_STR* p_path_str, s32 mode, PF2_FILE** pp_file);
+int PFFILE_Cursor_Read(PF2_FILE* p_file, u8* p_buf, u32 size, u32* p_size_read);
+int PFFILE_p_fopen(PF2_VOLUME* p_vol, PF_STR* p_path_str, s32 mode, PF2_FILE** pp_file);
+int PFFILE_p_remove(PF2_VOLUME* p_vol, PF_STR* p_path_str);
+int PFFAT_CountAllocatedClusters(PF_FFD* p_ffd, u32 size, u32* p_num_alloc_clusters);
+int PFFAT_FinalizeFFD(PF_FFD* p_ffd);
+int PFVOL_CheckForWrite(PF2_VOLUME* p_vol);
+int PFCACHE_FlushFATCache(PF2_VOLUME* p_vol);
+PF2_VOLUME* PFPATH_GetVolumeFromPath(PF_STR* p_path);
+void PF_enterCritical(void* unk);
+void PF_exitCritical(void* unk);
+int fn_803E5774(PF2_FILE* file);                           // PFFILE_fclose
 int fn_803E5A50(void* buf, u32 size, u32 count, PF2_FILE* file, u32* count_read);   // PFFILE_fread
 int fn_803E5B8C(void* buf, u32 size, u32 count, PF2_FILE* file, u32* count_written);  // PFFILE_fwrite
 int fn_803E5D00(PF2_FILE* file, s32 offset, s32 origin);    // PFFILE_fseek
@@ -125,6 +145,7 @@ int fn_803EC418(s32 resource);                               // unlock
 
 // PrFile2 file-lock bookkeeping (pf_system): the number of file locks in use
 extern u32 lbl_805A1260;
+void fn_803EBA40(PF_CRITICAL* critical);                      // PF_initCritical
 void fn_803EBB4C(void);                                      // PFSYS_initFileLock
 int fn_803EBB58(PF_FILE* p_file);                            // PFSYS_finalizeFileLock
 

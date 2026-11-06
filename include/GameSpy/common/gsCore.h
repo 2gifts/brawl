@@ -58,13 +58,15 @@ void fn_8035D254(GSICriticalSection* theCrit);       // gsiDeleteCriticalSection
 
 int atexit(void (*func)(void));                 // atexit
 void ghttpStartup(void);                              // ghttpStartup
+void ghttpCleanup(void);                              // ghttpCleanup
 
-void gsCoreThink(unsigned int theMS);                // gsCoreThink
 void fn_8035E380(void);                              // gsiCoreAtExitShutdown
 void fn_8035E390(void);                              // gsCoreInitialize
 int fn_8035E848(void);                               // gsCoreIsShutdown
 void fn_8035E87C(GSTask* task, u32 timeoutMs);       // gsiCoreExecuteTask
 GSTask* fn_8035EA18(void);                           // gsiCoreCreateTask
+void gsCoreTaskThink(GSTask* task);
+void gsCoreThink(u32 timeoutMs);
 
 #ifdef __cplusplus
 }
