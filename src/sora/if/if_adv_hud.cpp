@@ -6,12 +6,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <types.h>
+#include <gm/gm_global.h>
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
-unsigned char lbl_805A0338[0x4] __attribute__((aligned(4))) = { 0 };
+MuObject* lbl_805A0338 = NULL;
 nw4r::g3d::ScnMdlExpand* lbl_805A033C = NULL;
-unsigned char lbl_805A0340[0x4] __attribute__((aligned(4))) = { 0 };
-unsigned char lbl_805A0344[0x4] __attribute__((aligned(4))) = { 0 };
+MuObject* lbl_805A0340 = NULL;
+nw4r::g3d::ScnMdlExpand* lbl_805A0344 = NULL;
 
 // HYPOTHESIS: table layouts are shared with the adventure enemy HUD.
 struct IfAdvZakoModelInfo {
@@ -107,4 +108,60 @@ void IfAdvGauge::removePressStart(nw4r::g3d::ScnMdlExpand* model) {
 
 void IfAdvGauge::drawStockSlotAnime(int count) {
     unk0[0x41]->setFrameNode(count);
+}
+
+void IfAdvGauge::setCrowd(int crowd) {
+    unk308 = crowd;
+    unk0[13 + crowd]->setFrameNode(0.0f);
+    unk0[13 + unk308]->setFrameMatCol(0.0f);
+}
+
+void IfAdvGauge::draw2PEnt() {
+    MuObject* object = unk0[0x40];
+    if (++unk23C == 30) {
+        unk23C = 0;
+    }
+    object->setFrameMatCol(unk23C);
+}
+
+void IfAdvGauge::drawStockBase(int show) {
+    nw4r::g3d::ScnMdlExpand* model = unk154[3];
+    if (show != 0) {
+        lbl_805A033C->Remove(model);
+        lbl_805A033C->PushBack(model, "pos07");
+    } else {
+        lbl_805A033C->Remove(model);
+    }
+}
+
+void IfAdvGauge::createLocator(nw4r::g3d::ResFile* resFile) {
+    char animName[0x40];
+    const char* name = "InfAdvPos_TopN";
+    lbl_805A0338 = MuObject::create(resFile, name, 1, NULL, Heaps::InfoInstance);
+    strcpy(animName, name);
+    strcat(animName, "__0");
+    lbl_805A0338->changeAnimN(animName);
+    lbl_805A0338->m_modelAnim->setUpdateRate(0.0f);
+    if (!g_GameGlobal->getGlobalRecordMenuDatap()->m_isWidescreen) {
+        lbl_805A0338->setFrameNode(0.0f);
+    } else {
+        lbl_805A0338->setFrameNode(1.0f);
+    }
+    lbl_805A033C = nw4r::g3d::ScnMdlExpand::Construct(gfHeapManager::getMEMAllocator(Heaps::InfoInstance), NULL, 0x20, lbl_805A0338->m_sceneModel);
+}
+
+void IfAdvGauge::createLocator2(nw4r::g3d::ResFile* resFile) {
+    char animName[0x40];
+    const char* name = "InfPos_TopN";
+    lbl_805A0340 = MuObject::create(resFile, name, 9, NULL, Heaps::InfoInstance);
+    strcpy(animName, name);
+    strcat(animName, "__0");
+    lbl_805A0340->changeAnimN(animName);
+    lbl_805A0340->m_modelAnim->setUpdateRate(0.0f);
+    if (!g_GameGlobal->getGlobalRecordMenuDatap()->m_isWidescreen) {
+        lbl_805A0340->setFrameNode(0.0f);
+    } else {
+        lbl_805A0340->setFrameNode(1.0f);
+    }
+    lbl_805A0344 = nw4r::g3d::ScnMdlExpand::Construct(gfHeapManager::getMEMAllocator(Heaps::InfoInstance), NULL, 0x20, lbl_805A0340->m_sceneModel);
 }
