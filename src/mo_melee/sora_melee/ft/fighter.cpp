@@ -235,6 +235,21 @@ void ftEntryEventObserver::addObserver(short manageId, s8 priority) {
     addObserverSub(manageId, this, priority);
 }
 
+void ftEntryEventObserver::notifyEventPokemonDamage() { }
+void ftEntryEventObserver::notifyEventPokemonInflict() { }
+void ftEntryEventObserver::notifyEventPokemonAttack() { }
+void ftEntryEventObserver::notifyEventPokemonRebirthEnd() { }
+void ftEntryEventObserver::notifyEventStopRumble(int) { }
+void ftEntryEventObserver::notifyEventSetRumble(int, int) { }
+void ftEntryEventObserver::notifyEventPokemonAppeal() { }
+void ftEntryEventObserver::notifyEventPokemonSpecial(int, int) { }
+void ftEntryEventObserver::notifyEventPokemonChangeCancel() { }
+void ftEntryEventObserver::notifyEventPokemonCollect() { }
+void ftEntryEventObserver::notifyEventPokemonTrainerUpdate() { }
+bool ftEntryEventObserver::notifyEventPokemonRequestChange(Vec3f*, float*) { return false; } // HYPOTHESIS: bool, matches header
+void ftEntryEventObserver::notifyEventPokemonStart(int) { }
+void ftEntryEventObserver::notifyEventWarp() { }
+
 // Fighter::setFlower (the map name); src/mo_melee/sora_melee/ft/ft_damage_transactor_impl.cpp calls it by this stand-in name.
 extern "C" void fn_27_1392D4(Fighter* fighter, bool setStatus, float rate, float size, int unk4, bool unk5);
 
@@ -678,4 +693,66 @@ void Fighter::setHeartSwap(int givingPlayerEntryID, int givingPlayerEntryId, boo
             }
         }
     }
+}
+
+void Fighter::setTeam(int team, int team2nd) {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    moduleAccesser->getTeamModule().setTeam(team, false);
+    moduleAccesser->getTeamModule().set2nd(team2nd);
+    if (moduleAccesser->getItemManageModule().isHaveItem(0) == true) {
+        moduleAccesser->getItemManageModule().setHaveItemTeam(team, 0);
+    }
+}
+
+void Fighter::notifyEventChangeAdvUnit() {
+    ftOwner* owner = getOwner();
+    if (owner->getAdventureUnitKind() == 0) {
+        m_moduleAccesser->getCameraModule().setAdvPri(5, -1);
+    } else {
+        m_moduleAccesser->getCameraModule().setAdvPri(4, -1);
+    }
+}
+
+// HYPOTHESIS: map name unknown; takes the module accesser and the owner.
+extern "C" void fn_27_1D6E58(soModuleAccesser* moduleAccesser, ftOwner* owner);
+
+void Fighter::notifyEventCollisionReflectorSearch(soCollisionSearchModule* searchModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser) {
+    if ((int)groupIndex == 1) {
+        unk138_1 = true;
+    }
+    soModuleAccesser* acc = m_moduleAccesser;
+    fn_27_1D6E58(acc, getOwner());
+}
+
+bool Fighter::notifyEventCollisionReflectorCheck() {
+    if (unk138_1 == true) {
+        m_moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1f67), false, false, 0);
+    } else if (unk138_2 == true) {
+        m_moduleAccesser->getCollisionReflectorModule().clearAll(1);
+        m_moduleAccesser->getWorkManageModule().setInt(1, 0x1000003a);
+    }
+    return false;
+}
+
+void Fighter::notifyEventCollisionReflector(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float, soModuleAccesser* moduleAccesser) {
+    if (groupIndex == 1) {
+        if (power >= m_moduleAccesser->getCollisionReflectorModule().getAttackLimit(groupIndex)) {
+            unk138_2 = true;
+            return;
+        } else {
+            unk138_1 = true;
+        }
+    }
+    soModuleAccesser* acc = m_moduleAccesser;
+    fn_27_1D6E58(acc, getOwner());
+}
+
+bool Fighter::checkTransitionStatus(u32 status) {
+    if (g_ftCommonDataAccesser.getFtStatusData(getFtKind(), status)->unk4_18) {
+        bool isStopped = m_moduleAccesser->getStopModule().isStop();
+        if (isStopped == true) {
+            return false;
+        }
+    }
+    return true;
 }

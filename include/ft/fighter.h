@@ -1382,7 +1382,10 @@ public:
         char _272[44];
         struct {
             u8 unk110[0x28];
-            u8 : 7;
+            u8 : 1;
+            u8 unk138_1 : 1; // HYPOTHESIS: set by the reflector search/collision events
+            u8 unk138_2 : 1; // HYPOTHESIS: set by the reflector collision event
+            u8 : 4;
             u8 unk138_7 : 1;
             u8 unk139[3];
         };
