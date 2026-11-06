@@ -45,8 +45,6 @@ static inline float grEarthVecLength(Vec3f* v) {
 }
 
 // sora_melee functions that have no names yet.
-// itManager::lotCreateItem
-extern "C" void fn_27_2AA7AC(itManager* manager, ItemKind kind, int lotId, Vec3f* pos, int a, int b, int c);
 // gmCheckGlobalItemSwitch (main, unnamed): whether the item may appear in the match
 extern "C" bool fn_8005136C(int itemKind);
 // itManager::getItemVariationNum (sora_melee, unnamed)

@@ -9,7 +9,6 @@
 #include <mt/mt_ps_minmax.h>
 
 extern "C" void fn_80110A40(grCollision* collision);
-extern "C" void fn_80110EA0(grCollision* collision, clAABBox2D* range);
 extern "C" void fn_80110F7C(grCollision* collision);
 extern "C" void fn_8011135C(grCollision* collision, grCollision* target);
 
@@ -62,7 +61,7 @@ void grCollisionManager::collisionUpdate(bool dynamic) {
         if (collision->m_isEnabled && dynamic == collision->m_isDynamic) {
             collision->update();
             if (m_flags.m_useClipRange) {
-                fn_80110EA0(collision, &range);
+                collision->updateClippingRange(&range);
             }
             fn_80110F7C(collision);
         }

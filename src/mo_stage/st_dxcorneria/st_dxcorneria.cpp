@@ -25,8 +25,6 @@
 #include <st_dxcorneria/st_dxcorneria.h>
 
 // Unnamed helpers the stage calls directly (see st_newpork.cpp for the grMadein ones).
-// grMadein::setMatrix(Matrix*, bool): lets the ground (and optionally its attack) follow the matrix.
-extern "C" void fn_27_279FC8(grMadein* ground, Matrix* matrix, bool followAttack);
 // Stage: HYPOTHESIS: true while the stage is the active one (not the one used for the menu preview).
 extern "C" int fn_27_2249E0(Stage* stage);
 // Matrix helpers of sora/mt (see mt_matrix.cpp).
@@ -705,7 +703,7 @@ void stDxCorneria::ArwingAttackUpdate(float deltaFrame) {
             } else {
                 m_arwingActive->setEnableCollisionStatus(m_arwingKind == 0);
             }
-            fn_27_279FC8(m_arwingActive, &nodeMtx, false);
+            m_arwingActive->setMatrix(&nodeMtx, false);
             if (m_arwingRoll == 0.0f && m_arwingTimer <= 0.0f) {
                 m_arwingTimer = (float)m_param->m_arwingFlightTime;
                 int shots = m_param->m_arwingShotChance - 1;
@@ -890,7 +888,7 @@ void stDxCorneriaBeam::update(float deltaFrame, grMadein* source) {
                 if (source != NULL) {
                     Matrix mtx(true);
                     source->getNodeMatrix(&mtx, 0, m_node);
-                    fn_27_279FC8(m_ground, &mtx, false);
+                    m_ground->setMatrix(&mtx, false);
                     if (m_fromArwing) {
                         mtx.m[2][3] = 0.0f;
                     }
@@ -899,7 +897,7 @@ void stDxCorneriaBeam::update(float deltaFrame, grMadein* source) {
                         m_hit->getOverwriteAttackData()->m_power = power;
                         m_hit->startEntity();
                     }
-                    fn_27_279FC8(m_hit, &mtx, false);
+                    m_hit->setMatrix(&mtx, false);
                 }
                 break;
             }

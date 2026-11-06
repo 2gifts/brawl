@@ -24,9 +24,7 @@
 
 // Unnamed helpers of other modules the stage calls directly.
 extern "C" {
-// grCollision members (main): removeLink, removeLinkTarget, updateLinkVirtual1, getLine1.
-void fn_80111224(grCollision* collision);
-void fn_801112FC(grCollision* collision, grCollision* target);
+// grCollision members (main): updateLinkVirtual1, getLine1.
 void fn_8011135C(grCollision* collision, grCollision* target);
 grCollisionLine* fn_80111B60(grCollision* collision, u16 index);
 
@@ -372,7 +370,7 @@ void stEdit::createObj() {
         setCollision(collision);
         collision->setVLinkClearStatus(false);
         collision->setVLinkUpdateStatus(false);
-        fn_80111224(collision);
+        collision->removeLink();
         collision->setDisable();
         delete collData;
     }
@@ -1607,8 +1605,8 @@ void stEdit::update(float deltaFrame) {
                         grCollision* second = *qColl;
                         if (second != NULL && first != second && (mask & *qMask & 0x3FFFF) != 0 &&
                             (mask & *qMask & 0xFFFC0000) != 0) {
-                            fn_801112FC(first, second);
-                            fn_801112FC(second, first);
+                            first->removeLinkTarget(second);
+                            second->removeLinkTarget(first);
                             fn_8011135C(first, second);
                             fn_8011135C(second, first);
                         }
@@ -1629,8 +1627,8 @@ void stEdit::update(float deltaFrame) {
                     for (u32 j = 0; j < countA; j++) {
                         grCollision* second = *qColl;
                         if (second != NULL && (mask & *qMask & 0x3FFFF) != 0 && (mask & *qMask & 0xFFFC0000) != 0) {
-                            fn_801112FC(first, second);
-                            fn_801112FC(second, first);
+                            first->removeLinkTarget(second);
+                            second->removeLinkTarget(first);
                             fn_8011135C(first, second);
                             fn_8011135C(second, first);
                         }

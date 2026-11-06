@@ -100,6 +100,7 @@ public:
     void setAttack(float size, Vec3f* offsetPos);
     void setHitPoint(float size, Vec3f* startOffsetPos, Vec3f* endOffsetPos, bool, int nodeIndex);
     void setMatrix(Matrix matrix, void* unk1);
+    void setMatrix(Matrix* matrix, bool followAttack);
     void setMotion(u32 anmIndex);
     void setMotionDetails(u32 anmChrIndex, u32 anmVisIndex, u32 anmTexPatIndex, u32 anmTexSrtIndex, u32 anmClrIndex);
     void setupYakumonoClass();

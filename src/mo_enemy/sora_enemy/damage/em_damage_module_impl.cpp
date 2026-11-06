@@ -116,8 +116,6 @@ bool fn_27_5F8A4(soDamageModuleImpl* module, acAnimCmd* acmd, soModuleAccesser* 
 // stTriggerMng notifications of an enemy (by create id).
 void fn_27_2330C4(u32 createId, int kind);
 void fn_27_23313C(u32 createId, u32 attackerTaskId, u32 taskId, u8 attackerCategory);
-// HYPOTHESIS: tells whether a task id is a held item (an itManager member).
-bool fn_27_2AC210(itManager* manager, u32 taskId);
 }
 
 // The kinetic energies of the enemy that a hit drives (HYPOTHESIS: roles from the code that sets them).
@@ -1005,7 +1003,7 @@ void emDamageModuleImpl::notifyEventCollisionHit(float power, soCollisionAttackD
     }
     u32 attackerTaskId = collisionLog->m_taskId;
     if (attackerTaskId != 0xFFFFFFFF) {
-        if (fn_27_2AC210(itManager::getInstance(), attackerTaskId) == true) {
+        if (itManager::getInstance()->isSmashPlate(attackerTaskId) == true) {
             work.onFlag(WorkFlag_FigureOnDefeat);
             gfTask* task = gfTaskScheduler::getInstance()->getTaskById((gfTask::Category)collisionLog->m_taskCategory, attackerTaskId);
             if (task != NULL && task->m_taskCategory == gfTask::Category_Item) {

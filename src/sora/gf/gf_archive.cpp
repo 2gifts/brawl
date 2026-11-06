@@ -2,6 +2,7 @@
 #include <gf/gf_heap_manager.h>
 #include <revolution/BASE/PPCArch.h>
 #include <types.h>
+#include <ec/ec_mgr.h>
 
 void* gfArchive::getData(ARCNodeType nodeType, int fileIndex, u16 archiveId) {
     int nodeSize;
@@ -42,4 +43,19 @@ void gfArchive::setFileImageInternalSub(void* data, int nodeSize, void* heap) {
             registEffect();
         }
     }
+}
+
+bool gfArchive::isExistEffect() {
+    int index = 0;
+    u32 resourceId;
+    for (;;) {
+        if (!enumEffectResourceId(index, &resourceId)) {
+            break;
+        }
+        if (g_ecMgr->isExistEffectResource(resourceId)) {
+            return true;
+        }
+        index++;
+    }
+    return false;
 }

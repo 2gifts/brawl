@@ -70,6 +70,8 @@ public:
     // The hook the article mediator calls to start the Aura Sphere (HYPOTHESIS: the name follows the module map).
     static bool activeArticle(wnLucarioQigong* weapon, soModuleAccesser* acc);
     static void setMachValidity(soModuleAccesser* moduleAccesser, bool valid);
+    void effect_suspend();
+    void effect_resume();
     float calcAuraScale();
     void setAuraScale(float scale);
     virtual void notifyEventOnDamage(soDamage* damage, bool isDamage, soModuleAccesser* moduleAccesser);

@@ -21,8 +21,6 @@
 #include <st_norfair/gr_norfair.h>
 #include <st_norfair/st_norfair.h>
 
-// itManager::lotCreateItem (sora_melee, unnamed)
-extern "C" void fn_27_2AA7AC(itManager* manager, ItemKind kind, int lotId, Vec3f* pos, int a, int b, int c);
 // cmSetQuakeScale (main, unnamed)
 extern "C" void fn_8009E090(float scale);
 // the stage that is played (sora_melee .bss)
@@ -761,7 +759,7 @@ void stNorfair::updateEvent(float deltaFrame) {
                     ItemKind kind;
                     kind.m_kind = static_cast<itKind>(*reinterpret_cast<int*>(reinterpret_cast<u8*>(lbl_27_bss_5668) + 0x44));
                     kind.m_variation = 0;
-                    fn_27_2AA7AC(itManager::getInstance(), kind, 1, &dropPos, -1, -1, -1);
+                    itManager::getInstance()->lotCreateItem(reinterpret_cast<itGenSheetKind&>(kind), static_cast<itGenId>(1), &dropPos, -1, -1, static_cast<itKind>(-1));
                 }
                 m_eventWave.setPhase(1);
                 m_bgState = 3;

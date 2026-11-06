@@ -120,6 +120,7 @@ public:
     virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    virtual void setTeam(int team, int teamOwner);
     void addPikmin(wnPikminPikmin* pikmin);
     void reducePikminAll();
     wnPikminPikminTroopsManager& getTroops() { return m_troops; }

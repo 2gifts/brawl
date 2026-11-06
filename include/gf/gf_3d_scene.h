@@ -191,6 +191,7 @@ public:
 
     bool add(gfSceneRoot::LayerType lt, nw4r::g3d::ScnMdl* scnMdl);
     bool remove(nw4r::g3d::ScnMdl* scnMdl);
+    void layerUpdateFrame(int layer);
 };
 static_assert(sizeof(gfSceneRoot) == 1292, "Class is wrong size!");
 

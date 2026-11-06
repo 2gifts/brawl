@@ -418,7 +418,6 @@ extern "C" muWifiCntWndTask* fn_800DA15C(int kind, nw4r::g3d::ResFile* resFile, 
 extern "C" void fn_800D1ADC(muWifiInterfaceTask* task, bool next);
 extern "C" bool fn_800D1BC8(muWifiInterfaceTask* task);
 extern "C" int fn_800F2894(IfSnapSaveTask* task);
-extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 
 // The frame of the animation that colors the mark of a player's row: the number of the player for a human, 9 for a CPU,
 // the team color in the team battles (+10 for a CPU).
@@ -866,7 +865,7 @@ void ifVsResultTask::processAnim() {
             }
         }
     }
-    fn_8000DB40(g_gfSceneRoot, 8);
+    g_gfSceneRoot->layerUpdateFrame(8);
 }
 
 // ---- 0x800E7BD0-0x800E9878 ----

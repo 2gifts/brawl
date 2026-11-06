@@ -23,8 +23,6 @@ struct muAdvSelchrBDirVec {
     float m_y;
 
 };
-// gfSceneRoot::layerUpdateFrame(layer)
-extern "C" void fn_8000DB40(gfSceneRoot* root, int layer);
 // nw4r::g3d::ScnRoot::UpdateFrame()
 extern "C" void UpdateFrame__Q34nw4r3g3d7ScnRootFv(void* scnRoot);
 
@@ -361,7 +359,7 @@ void muAdvSelchrBTask::processDefault() {
     }
     gfSceneRoot* root = g_gfSceneRoot;
     UpdateFrame__Q34nw4r3g3d7ScnRootFv(*reinterpret_cast<void**>(reinterpret_cast<u8*>(g_gfSceneRoot) + 0x44));
-    fn_8000DB40(root, 8);
+    root->layerUpdateFrame(8);
 }
 
 #pragma inline_max_size(1000)

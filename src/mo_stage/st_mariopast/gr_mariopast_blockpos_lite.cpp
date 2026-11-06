@@ -26,8 +26,6 @@
 
 // Yakumono::getDamage (sora_melee, unnamed)
 extern "C" void fn_27_26399C(Yakumono* yakumono);
-// itManager::lotCreateItem (sora_melee, unnamed)
-extern "C" void fn_27_2AA7AC(itManager* manager, ItemKind kind, int lotId, Vec3f* pos, int a, int b, int c);
 // the stage that is played (sora_melee .bss)
 extern "C" Stage* lbl_27_bss_5668;
 // Matrix::setTrans (main, unnamed)
@@ -503,7 +501,7 @@ void grMarioPastBlockPosLite::makeItem(stMarioPastBlockDt* block) {
     ItemKind kind;
     kind.m_kind = static_cast<itKind>(*reinterpret_cast<int*>(reinterpret_cast<u8*>(lbl_27_bss_5668) + 0x44));
     kind.m_variation = 0;
-    fn_27_2AA7AC(itManager::getInstance(), kind, lotId, &pos, -1, -1, -1);
+    itManager::getInstance()->lotCreateItem(reinterpret_cast<itGenSheetKind&>(kind), static_cast<itGenId>(lotId), &pos, -1, -1, static_cast<itKind>(-1));
 }
 
 // A ? block that is hidden has no collision on the lines until it was hit; this switches the lines of the block on or off.

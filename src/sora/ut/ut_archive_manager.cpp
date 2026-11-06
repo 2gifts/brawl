@@ -40,7 +40,6 @@ u32 fn_800151FC(gfArchive* archive, const char* path, Heaps::HeapType heap, int 
 u32 fn_8001583C(gfArchive* archive);
 u32 fn_8001588C(gfArchive* archive);
 s32 fn_80015DAC(gfArchive* archive);
-bool fn_8001440C(gfArchive* archive);
 }
 
 utArchiveManager::utArchiveManager(u32 taskCount) : m_database(nullptr), m_taskCount(taskCount) {
@@ -310,11 +309,9 @@ inline utArchiveManager::LoadTask* utArchiveManager::getListTask(utList* list, u
     return nullptr;
 }
 
-// HYPOTHESIS: utArchiveManager::getLoadResult(u32, s32*); em_manager.cpp and it_gen_archive.cpp
-// still call it by this name.
-extern "C" s32 fn_80045DC0(utArchiveManager* manager, u32 resourceId, s32* status) {
+s32 utArchiveManager::getLoadResult(u32 resourceId, s32* status) {
     if (resourceId != 0xFFFF) {
-        utArchiveManager::LoadTask* task = manager->getListTask(&manager->m_loadedList, resourceId);
+        utArchiveManager::LoadTask* task = getListTask(&m_loadedList, resourceId);
         if (task != nullptr) {
             s32 result = fn_80015DAC(task->m_archive);
             if (status != nullptr) {
@@ -328,6 +325,14 @@ extern "C" s32 fn_80045DC0(utArchiveManager* manager, u32 resourceId, s32* statu
         }
     }
     return 0;
+}
+
+u32 utArchiveManager::isExistRemoveTask() {
+    return m_removeList.getLength() != 0;
+}
+
+u32 utArchiveManager::isExistCancelTask() {
+    return m_cancelList.getLength() != 0;
 }
 
 // HYPOTHESIS: inline lookup of a task slot by resource id.
@@ -416,7 +421,7 @@ bool utArchiveManager::isExistEffect(u32 resourceId) {
     if (resourceId != 0xFFFF) {
         gfArchive* archive = m_database->get(resourceId);
         if (archive != nullptr) {
-            return fn_8001440C(archive);
+            return archive->isExistEffect();
         }
     }
     return false;
