@@ -25,18 +25,6 @@
 #include <wn/wario/wn_wario_bike_status_uniq_process.h>
 #include <it/it_manager.h>
 
-wnWeaponBuilder<wnWarioBikeModuleAccesserBuildConfig>::wnWeaponBuilder(
-    const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd) :
-    Weapon(name, bd.m_kind, bd.m_data, articleId, &info, m_modules.getModuleAccesser(), true), m_modules(this, bd) {
-    Weapon::initialize();
-}
-
-wnWeaponBuilder<wnWarioBikeModuleAccesserBuildConfig>::~wnWeaponBuilder() { }
-
-void wnWeaponBuilder<wnWarioBikeModuleAccesserBuildConfig>::deactivateDescendantForce() {
-    soSingletonHolder<soArticleMediatorNull>::getInstance()->deactivate();
-}
-
 wnWarioBikeParamAccesser::wnWarioBikeParamAccesser(const wnWarioBikeParam* param) :
     wnExtendParamAccesser<3999, 34, 23999, 5, 0, 0>(0x60) {
     const u8* p = reinterpret_cast<const u8*>(param);
@@ -49,6 +37,7 @@ wnWarioBikeParamAccesser::wnWarioBikeParamAccesser(const wnWarioBikeParam* param
     for (int i = 0; i < 5; i++) m_ints[i] = reinterpret_cast<const s32*>(p + intOffsets[i]);
 }
 
+#pragma dont_inline on // BYTES: the native constructor calls its helpers out of line
 wnWarioBike::wnWarioBike(s32 articleId, const wnArticleBuildInfo& info, const wnWarioBikeData* data) :
     wnWeaponBuilder<wnWarioBikeModuleAccesserBuildConfig>(
         "WarioBike", articleId, info,
@@ -56,7 +45,7 @@ wnWarioBike::wnWarioBike(s32 articleId, const wnArticleBuildInfo& info, const wn
                                   info.getHeapModule()->getNWModelInstanceHeap(), info.getHeapModule()->getNWMotionInstanceHeap(),
                                   data->m_resGroupNo, -1, &m_paramAccesser, 0, 0, 0, 0, 0, 0, 0)),
     m_param(const_cast<wnWarioBikeParam*>(data->m_param)), m_paramAccesser(data->m_param) {
-    soStatusUniqProcess* uniqProcs[19] = { 0 };
+    soStatusUniqProcess* uniqProcs[19] = {};
     uniqProcs[1] = wnWarioBikeStatusUniqProcessStart::getInstance();
     uniqProcs[2] = wnWarioBikeStatusUniqProcessStart::getInstance();
     uniqProcs[3] = wnWarioBikeStatusUniqProcessDrive::getInstance();
@@ -71,12 +60,13 @@ wnWarioBike::wnWarioBike(s32 articleId, const wnArticleBuildInfo& info, const wn
     uniqProcs[12] = wnWarioBikeStatusUniqProcessDown::getInstance();
     uniqProcs[14] = wnWarioBikeStatusUniqProcessItem::getInstance();
     uniqProcs[15] = wnWarioBikeStatusUniqProcessAppeal::getInstance();
-    m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 19);
-    m_moduleAccesser->getCollisionHitModule().add((soSet<soCollisionHitData>*)&data->m_hitDataStorage, 0);
+    getModuleAccesser()->getStatusModule().addRangeUniqProc(uniqProcs, 19);
+    getModuleAccesser()->getCollisionHitModule().add((soSet<soCollisionHitData::Simple>*)data->m_hitData, 0);
     if (!itManager::getInstance()->isCompItemKindArchive(static_cast<itKind>(0x5C), 0, true))
         itManager::getInstance()->preloadItemKindArchive(static_cast<itKind>(0x5C), 0, static_cast<itArchive::Type>(0), true);
     Weapon::deactivate(false);
 }
+#pragma dont_inline off
 
 void wnWarioBikeKineticTransactor::changeKinetic(
     int kineticType, wnWarioBikeKineticPools* pools, soModuleAccesser* accesser) {

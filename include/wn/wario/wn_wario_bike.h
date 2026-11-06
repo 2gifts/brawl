@@ -65,7 +65,7 @@ struct wnWarioBikeData {
     s32 m_resGroupNo;
     u8 unk4[0x30];
     const wnWarioBikeParam* m_param; // +0x34
-    u32 m_hitDataStorage;            // +0x38, start of an opaque set
+    const void* m_hitData;           // +0x38, the hit data set
 };
 
 class wnWarioBikeParamAccesser : public wnExtendParamAccesser<3999, 34, 23999, 5, 0, 0> {
@@ -95,7 +95,7 @@ struct wnWarioBikeModuleAccesserBuildConfig : wnCommonBuildConfig {
                                       soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> >
         MotionModuleBuildConfig;
     // HYPOTHESIS: the trailing arguments of the attack module configuration.
-    typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 4, 1, soCollisionAttackModuleImpl, 4, true, true>
+    typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 4, 1, soCollisionAttackModuleImpl, 1, true, true>
         CollisionAttackModuleBuildConfig;
     typedef soCollisionHitModuleBuildConfig<soCollision::Category_Fighter, 4, 1, soCollisionHitModuleImpl, 0x3ff, true>
         CollisionHitModuleBuildConfig;
@@ -103,6 +103,7 @@ struct wnWarioBikeModuleAccesserBuildConfig : wnCommonBuildConfig {
                                       soSingletonHolder<wnWarioBikeDamageTransactorImpl>,
                                       soSingletonHolder<soDamageEffectorNull> >
         DamageModuleBuildConfig;
+    typedef soTurnModuleBuildConfig<soTurnModuleImpl> TurnModuleBuildConfig;
     typedef soLinkModuleBuildConfigCap<6, soLinkModuleImpl> LinkModuleBuildConfig;
     typedef soVisibilityModuleBuildConfig<soVisibilityModuleImpl, 2> VisibilityModuleBuildConfig;
     typedef wnControllerModuleBuildConfig<soControllerModuleLinkRef, 0, 0> ControllerModuleBuildConfig;
@@ -120,11 +121,18 @@ template <>
 class wnWeaponBuilder<wnWarioBikeModuleAccesserBuildConfig> : public Weapon {
 protected:
     wnModuleAccesserBuilder<wnWarioBikeModuleAccesserBuildConfig> m_modules;
+    u32 m_modulesPad; // HYPOTHESIS: as WN_WEAPON_NO_COMMON_ENERGIES, the native module storage ends one word later
 public:
     wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info,
-                    const wnModuleAccesserBuildData& bd);
-    virtual ~wnWeaponBuilder();
-    virtual void deactivateDescendantForce();
+                    const wnModuleAccesserBuildData& bd)
+        : Weapon(name, bd.m_kind, bd.m_data, articleId, &info, m_modules.getModuleAccesser(), true),
+          m_modules(this, bd) {
+        Weapon::initialize();
+    }
+    virtual ~wnWeaponBuilder() { }
+    virtual void deactivateDescendantForce() {
+        soSingletonHolder<soArticleMediatorNull>::getInstance()->deactivate();
+    }
 };
 #endif
 
