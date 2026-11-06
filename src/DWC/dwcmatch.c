@@ -6,7 +6,8 @@ void DWC_Printf(u32 level, const char* format, ...);
 // HYPOTHESIS: layout of the match control block, only the fields these functions touch.
 typedef struct DWCMatchControl {
     void* gpConnection;
-    u8 _04[9];
+    void** gt2Holder; // HYPOTHESIS: points at a struct whose first word is the GT2 socket
+    u8 _08[5];
     u8 unkD;
     u8 unkE;
     u8 unkF;
@@ -41,7 +42,9 @@ typedef struct DWCMatchControl {
     int unk19C;
     u8 _1A0[0x14];
     int unk1B4;
-    u8 _1B8[4];
+    u8 _1B8[2];
+    u8 unk1BA;
+    u8 _1BB;
     u8 unk1BC;
     u8 unk1BD;
     u8 _1BE[4];
@@ -56,7 +59,9 @@ typedef struct DWCMatchControl {
     u8 aidList[1];
     u8 _2E9[0x1F];
     u32 unk308;
-    u8 _30C[0xDC];
+    u32 unk30C;
+    u32 unk310;
+    u8 _314[0xD4];
     u8 unk3E8;
     u8 _3E9[0x97];
     int unk480;
@@ -65,9 +70,18 @@ typedef struct DWCMatchControl {
     u8 unk4A5;
     u8 _4A6[0xA];
     u8 unk4B0;
-    u8 _4B1[0xA7];
+    u8 _4B1[0xF];
+    s64 unk4C0;
+    u8 _4C8[0x90];
     u32 unk558;
 } DWCMatchControl;
+
+// HYPOTHESIS: names and meanings of the .sdata words are guesses from use.
+int lbl_8059F0B0 = -1;
+int lbl_8059F0B4 = -1;
+int lbl_8059F0B8 = 86000000;
+int lbl_8059F0BC = 86000000;
+int lbl_8059F0C0 = 500;
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
 typedef struct DWCMatchEntry {
@@ -490,4 +504,138 @@ int DWCi_StartMatching(void) {
         return 0;
     }
     return 1;
+}
+
+void fn_8034C4DC(void) {
+}
+
+DWCMatchControl* DWCi_GetLoginTimeView(void) {
+    return lbl_805A0FA8[0];
+}
+
+void DWCi_NNFreeNegotiateList(void) {
+    if (lbl_805A0FA0 == 0) {
+        NNFreeNegotiateList();
+        return;
+    }
+    lbl_805A0FA4 = 1;
+}
+
+void fn_8034C4E0(void) {
+}
+
+void qr2_send_statechanged(void* qr2Obj);
+
+void fn_80341454(void) {
+    if (lbl_805A0FA8[0]->unk15 != 2) {
+        lbl_805A0FA8[0]->_14 = 0;
+        lbl_805A0FA8[0]->unk18 = 0;
+        qr2_send_statechanged(lbl_805A0FA8[0]->qr2Obj);
+    }
+}
+
+void DWCi_ShutdownMatch(void) {
+    int i;
+    DWCMatchEntry* entry;
+    lbl_805A0FA8[0] = 0;
+    if (lbl_805A0F90 != 0) {
+        DWC_Free(4, lbl_805A0F90, 0);
+        lbl_805A0F90 = 0;
+    }
+    entry = lbl_805338B0;
+    for (i = 0; i < 0x9A; i++, entry++) {
+        if (entry->unk4 != 0) {
+            DWC_Free(4, entry->unk4, 0);
+        }
+    }
+    memset(lbl_805338B0, 0, 0x738);
+}
+
+int fn_8033CAC0(int a, int b) {
+    if (b < a) {
+        return 0;
+    }
+    lbl_8059F0B8 = a;
+    lbl_8059F0BC = b;
+    return 1;
+}
+
+void fn_8033CAE0(int* a, int* b) {
+    if (a != 0) {
+        *a = lbl_8059F0B8;
+    }
+    if (b != 0) {
+        *b = lbl_8059F0BC;
+    }
+}
+
+int DWCi_GetLatencyLevel(void) {
+    s64 ms = lbl_805A0FA8[0]->unk4C0 / (s64)(*(u32*)0x800000F8 / 4 / 1000);
+    int level;
+    if (lbl_8059F0B0 != -1) {
+        return lbl_8059F0B0;
+    }
+    level = ((int)ms + 4999) / 5000;
+    if (level > 10) {
+        level = 10;
+    }
+    return level;
+}
+
+int snprintf(char* buffer, u32 size, const char* format, ...);
+void DWC_SetCommonKeyValueString(const char* key, const char* value, char* buffer, int size);
+void DWC_AddCommonKeyValueString(const char* key, const char* value, char* buffer, int size);
+void DWCi_SetGPStatus(int status, const char* statusString, const char* locationString);
+
+void DWCi_GPSetServerStatus(int status) {
+    char value[12];
+    char buffer[0x2F];
+    const char* modifier;
+    const char* key;
+    snprintf(value, 12, "%u", lbl_805A0FA8[0]->unk19 + 1);
+    DWC_SetCommonKeyValueString("SCM", value, buffer, 0x2F);
+    snprintf(value, 12, "%u", lbl_805A0FA8[0]->unkD + 1);
+    DWC_AddCommonKeyValueString("SCN", value, buffer, 0x2F);
+    key = "MDF";
+    modifier = "N";
+    if (lbl_805A0FA8[0]->unk1BA != 0) {
+        modifier = "Y";
+    }
+    DWC_AddCommonKeyValueString(key, modifier, buffer, 0x2F);
+    snprintf(value, 12, "%u", 11);
+    DWC_AddCommonKeyValueString("VER", value, buffer, 0x2F);
+    snprintf(value, 12, "%u", DWCi_GetLatencyLevel());
+    DWC_AddCommonKeyValueString("LLV", value, buffer, 0x2F);
+    DWCi_SetGPStatus(status, buffer, 0);
+}
+
+
+void fn_8034DE58(void);
+
+void fn_8033CB04(void) {
+    fn_8034DE58();
+}
+
+void fn_8034C6E0(int cookie) {
+    DWCMatchControl* control;
+    DWC_Printf(0x40, "Got NN request, cookie = %x.\n", cookie);
+    if (lbl_805A0FA8[0]->unk1B4 == 1) {
+        lbl_805A0FA8[0]->unk1B4 = 5;
+    } else if (lbl_805A0FA8[0]->unk1B4 != 5 && lbl_805A0FA8[0]->unk1B4 != 0x10) {
+        DWC_Printf(0x40, "But already canceled reservation.\n");
+        return;
+    }
+    if (cookie == lbl_805A0FA8[0]->unk194) {
+        lbl_805A0FA8[0]->unk190++;
+    } else {
+        lbl_805A0FA8[0]->unk190 = 0;
+        lbl_805A0FA8[0]->unk194 = cookie;
+    }
+    control = lbl_805A0FA8[0];
+    control->unk19C = 0;
+    control->unk198 = 0;
+    DWCi_NNStartupAsync(1, cookie, 0);
+    if (DWCi_HandleNNError() == 0) {
+        lbl_805A0FA8[0]->unk3E8 = 0xFF;
+    }
 }
