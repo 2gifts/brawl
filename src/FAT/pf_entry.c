@@ -180,23 +180,23 @@ s32 PFENT_MakeRootDir(PF2_VOLUME* p_vol) {
         break;
     case 0:
     case 1:
-        err = PFCACHE_AllocateDataPage(p_vol, 0xFFFFFFFF, &p_page, &unused);
+        err = PFCACHE_AllocateDataPage((PF_VOLUME*)p_vol, 0xFFFFFFFF, &p_page, &unused);
         if (err != 0) {
             return err;
         }
         VFipf_memset(p_page->p_buf, 0, p_vol->bpb.bytes_per_sector);
         for (sector = p_vol->bpb.first_root_dir_sector; sector < p_vol->bpb.first_data_sector; sector++) {
-            err = PFSEC_WriteData(p_vol, p_page->p_buf, sector, 0, p_vol->bpb.bytes_per_sector, &written, 0);
+            err = PFSEC_WriteData((PF_VOLUME*)p_vol, p_page->p_buf, sector, 0, p_vol->bpb.bytes_per_sector, &written, 0);
             if (err != 0) {
-                PFCACHE_FreeDataPage(p_vol, p_page);
+                PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
                 return err;
             }
             if (written != p_vol->bpb.bytes_per_sector) {
-                PFCACHE_FreeDataPage(p_vol, p_page);
+                PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
                 return 17;
             }
         }
-        PFCACHE_FreeDataPage(p_vol, p_page);
+        PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
         break;
     default:
         return 7;

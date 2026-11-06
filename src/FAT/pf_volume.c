@@ -1,5 +1,10 @@
 #include <types.h>
 #include <FAT/pf2.h>
+s32 pdm_part_get_driver_error_code(void* p_part);
+int pdm_part_unmount(void* p_part, u32 mode);
+int pdm_part_register_callback(void* p_part, PDM_CALLBACKS* callbacks);
+int pdm_part_init(void* p_part);
+int pdm_part_unregister_callback(void* p_part);
 
 // HYPOTHESIS: layout of the PrFile2 volume fields these functions touch.
 struct PF2_VOLUME {

@@ -117,13 +117,9 @@ int PFFILE_Cursor_Read(PF2_FILE* p_file, u8* p_buf, u32 size, u32* p_size_read);
 int PFFILE_p_fopen(PF2_VOLUME* p_vol, PF_STR* p_path_str, s32 mode, PF2_FILE** pp_file);
 int PFFILE_p_remove(PF2_VOLUME* p_vol, PF_STR* p_path_str);
 int PFFAT_CountAllocatedClusters(PF_FFD* p_ffd, u32 size, u32* p_num_alloc_clusters);
-int PFFAT_FinalizeFFD(PF_FFD* p_ffd);
 int PFFILE_p_fwrite(PF2_VOLUME* p_vol, u8* p_buf, u32 size, u32 count, PF2_FILE* p_file, u32* p_count_written);
-void PFENT_getcurrentDateTimeForEnt(u16* p_date, u16* p_time);
-void PFCLUSTER_UpdateLastAccessCluster(PF2_FILE* p_file, u32 sector);
+u8 PFENT_getcurrentDateTimeForEnt(s16* p_date, s16* p_time);
 u32 PFFILE_Cursor_AdvanceToRead(PF2_FILE* p_file, u32 n, u32 sector);
-int PFVOL_CheckForWrite(PF2_VOLUME* p_vol);
-int PFCACHE_FlushFATCache(PF2_VOLUME* p_vol);
 PF2_VOLUME* PFPATH_GetVolumeFromPath(PF_STR* p_path);
 void PF_enterCritical(void* unk);
 void PF_exitCritical(void* unk);
@@ -165,11 +161,6 @@ int fn_803D8878(PF2_VOLUME* p_vol, const u8* param);         // PFDRV_format
 typedef struct PDM_CALLBACKS PDM_CALLBACKS;
 void PFDRV_MediaInsert(u32 part);
 void PFDRV_MediaEject(u32 part);
-int pdm_part_unmount(void* p_part, u32 mode);
-s32 pdm_part_get_driver_error_code(void* p_part);
-int pdm_part_register_callback(void* p_part, PDM_CALLBACKS* callbacks);
-int pdm_part_init(void* p_part);
-int pdm_part_unregister_callback(void* p_part);
 
 // pf_code / pf_str
 s32 fn_803EAEAC(const s8* src, u16* dst);                    // CP932_OEM2Unicode
@@ -193,13 +184,11 @@ s32 PFENT_MakeRootDir(PF2_VOLUME* p_vol);
 s32 PFENT_ITER_FindEntry(PF2_ENT_ITER* p_iter, PF2_DIR_ENT* p_ent, PF_STR* p_path, u32 wildcard, u32 no_look_last_token, u32* p_pos);
 s32 PFENT_ITER_DoFindEntry(PF2_ENT_ITER* p_iter, PF2_DIR_ENT* p_ent, PF_STR* p_path, u32 wildcard, u32 no_look_last_token, u32* p_pos);
 int PFSTR_StrNCmp(PF_STR* p_str, const s8* s, u32 a, u32 b, u32 c);
-void PFSTR_MoveStrPos(PF_STR* p_str, u32 num);
-u16 PFSTR_StrNumChar(PF_STR* p_str, u32 target);
 s32 PFVOL_GetCurrentDir(PF2_VOLUME* p_vol, PF2_DIR_ENT* p_ent);
 s32 PFFAT_MakeRootDir(PF2_VOLUME* p_vol);
-s32 PFCACHE_AllocateDataPage(PF2_VOLUME* p_vol, u32 sector, PF_CACHE_PAGE** pp_page, u32* p_unused);
-void PFCACHE_FreeDataPage(PF2_VOLUME* p_vol, PF_CACHE_PAGE* p_page);
-s32 PFSEC_WriteData(PF2_VOLUME* p_vol, const u8* p_buf, u32 sector, u16 offset, u32 size, u32* p_success_size, u32 set_sig);
+s32 PFCACHE_AllocateDataPage(PF_VOLUME* p_vol, u32 sector, PF_CACHE_PAGE** pp_page, u32* p_is_hit);
+void PFCACHE_FreeDataPage(PF_VOLUME* p_vol, PF_CACHE_PAGE* p_page);
+s32 PFSEC_WriteData(PF_VOLUME* p_vol, const u8* p_buf, u32 sector, u16 offset, u32 size, u32* p_success_size, u32 set_sig);
 s32 PFPATH_getShortName(s8* short_name, const u8* pDirEntry, u8 attr);
 s32 PFPATH_putShortName(u8* pDirEntry, const s8* short_name, u8 attr);
 s32 PFSEC_ReadData(PF_VOLUME* p_vol, u8* p_buf, u32 sector, u16 offset, u32 size, u32* p_success_size, u32 set_sig);
@@ -213,9 +202,6 @@ s32 PFFAT32_WriteFATEntryWithBuf(PF2_VOLUME* p_vol, u32 cluster, u32 value, PF_C
 s32 PFFAT_GetClusterInChain(PF_FFD* p_ffd, u32 chain_index, u32 mode, u32 num_cluster, u32* p_start, u32* p_end);
 s32 PFFAT_ReadCluster(PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32* p_next_cluster, u32* p_chk_clstlnk);
 s32 PFFAT_ResetCluster(PF_VOLUME* p_vol, u32 cluster);
-s32 PFCACHE_AllocateDataPage(PF_VOLUME* p_vol, u32 sector, PF_CACHE_PAGE** pp_page, u32* p_is_hit);
-void PFCACHE_FreeDataPage(PF_VOLUME* p_vol, PF_CACHE_PAGE* p_page);
-s32 PFSEC_WriteData(PF_VOLUME* p_vol, const u8* p_buf, u32 sector, u16 offset, u32 size, u32* p_success_size, u32 set_sig);
 void* VFipf_memset(void* dst, int c, u32 length);
 s32 PFFAT_ReadFATSector(PF2_VOLUME* p_vol, PF_CACHE_PAGE* p_page, u32 cluster);
 s32 PFFAT_getContinuousSector(PF_FFD* p_ffd, u32 file_sector_index, u32 size, u32* p_sector, u32* p_num_sector);

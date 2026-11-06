@@ -237,7 +237,7 @@ u32 PFFILE_Cursor_AdvanceToRead(PF2_FILE* p_file, u32 n, u32 sector) {
     }
     p_file->cursor.file_sector_index = p_file->cursor.position >> p_vol_end->bpb.log2_bytes_per_sector;
     p_file->cursor.offset_in_sector = p_file->cursor.position & (p_vol_end->bpb.bytes_per_sector - 1);
-    PFCLUSTER_UpdateLastAccessCluster(p_file, new_sector);
+    PFCLUSTER_UpdateLastAccessCluster((PF_FILE*)p_file, new_sector);
     return ok;
 }
 
@@ -306,7 +306,7 @@ int fn_803E5B8C(void* buf, u32 size, u32 count, PF2_FILE* file, u32* count_writt
         file->last_error = err;
     }
     if (size_written != 0) {
-        PFENT_getcurrentDateTimeForEnt(&file->p_sfd->date, &file->p_sfd->time);
+        PFENT_getcurrentDateTimeForEnt((s16*)&file->p_sfd->date, (s16*)&file->p_sfd->time);
         file->p_sfd->last_access_date = file->p_sfd->date;
         file->p_sfd->stat |= 4;
     }

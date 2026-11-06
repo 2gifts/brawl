@@ -21,8 +21,8 @@ const s8* VFiPFSTR_GetStrPos(PF_STR* p_str, u32 target);
 s8* VFipf_strcpy(s8* dst, const s8* src);
 u16* VFipf_w_strcpy(u16* dst, const u16* src);
 s32 VFipf_w_strncmp(const u16* s1, const u16* s2, u32 length);
-void PF_enterCritical(PF_CRITICAL* critical);
-void PF_exitCritical(PF_CRITICAL* critical);
+void PF_enterCritical(void* unk);
+void PF_exitCritical(void* unk);
 int PFSTR_StrNCmp(PF_STR* p_str, const s8* s, u32 a, u32 b, u32 c);
 int fn_803E72B4(int a, int b, int c);
 
@@ -94,7 +94,6 @@ s32 PFPATH_transformInUnicode(u16* dst, const s8* src) {
 // HYPOTHESIS: argument layouts from register use
 s32 PFPATH_CheckExtShortName(PF_STR* p_str, u32 target, u32 is_long);
 s32 PFPATH_cmpNameImpl(const s8* name, const s8* pattern, u32* p_is_end);
-int PFSTR_StrCmp(PF_STR* p_str, const char* s);
 
 s32 PFPATH_transformFromUnicodeToNormal(s8* dst, const u16* src) {
     const u16* cur;
@@ -143,7 +142,7 @@ void PFPATH_SetSearchPattern(s8* short_pattern, u16* long_pattern, PF_STR* p_pat
             VFipf_strcpy(short_pattern, (const s8*)p_pattern->p_head);
         }
     } else {
-        if (PFSTR_StrCmp(p_pattern, "*.*") == 0) {
+        if (PFSTR_StrCmp(p_pattern, (const s8*)"*.*") == 0) {
             star[0] = '*';
             star[1] = 0;
             VFipf_w_strcpy(long_pattern, star);
