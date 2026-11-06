@@ -119,6 +119,7 @@ class wnPokeLizardonRockStone : public wnWeaponBuilder<wnPokeLizardonRockStoneMo
 public:
     wnPokeLizardonRockStone(s32 articleId, const wnArticleBuildInfo& info, const wnPokeLizardonRockStoneData* data);
     virtual ~wnPokeLizardonRockStone() { }
+    void activate(int founderTaskId, int resourceId, int team, const Vec3f* position, float lr, float angle, float speed, int life, int variant);
     virtual void updateNodeSRT();
     virtual bool notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* acc, int index);
 };
