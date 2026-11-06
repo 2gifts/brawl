@@ -10,7 +10,7 @@ VFNandFuncs lbl_80563798[26] = { 0 };
 
 void fn_803C9168(int, int, int, int, int);
 
-void fn_803C9ECC(int a, int b, int c) {
+void NAND_CreatePrfFile(int a, int b, int c) {
     fn_803C9168(a, b, c, 3, -10);
 }
 
@@ -39,7 +39,7 @@ s32 nanddrv_init(PDM_DISK* p_disk) {
     return 0;
 }
 
-s32 fn_803CAA94(PDM_DISK* p_disk, const u8* p_buf, u32 block, u32 num_blocks, u32* p_num_success) {
+s32 nanddrv_pwrite(PDM_DISK* p_disk, const u8* p_buf, u32 block, u32 num_blocks, u32* p_num_success) {
     *p_num_success = 0;
     if (p_disk == NULL || p_buf == NULL || num_blocks == 0 || p_num_success == NULL) {
         return -20;
@@ -47,7 +47,7 @@ s32 fn_803CAA94(PDM_DISK* p_disk, const u8* p_buf, u32 block, u32 num_blocks, u3
     return nanddrv_physical_write(num_blocks, p_buf, block, 0x200, p_num_success, p_disk);
 }
 
-s32 fn_803CABD4(PDM_DISK* p_disk) {
+s32 nanddrv_finalize(PDM_DISK* p_disk) {
     if (p_disk == NULL) {
         return -0x14;
     }
@@ -55,7 +55,7 @@ s32 fn_803CABD4(PDM_DISK* p_disk) {
     return 0;
 }
 
-s32 fn_803CAC0C(PDM_DISK* p_disk, PDM_DISK_INFO* p_disk_info) {
+s32 nanddrv_get_disk_info(PDM_DISK* p_disk, PDM_DISK_INFO* p_disk_info) {
     u32 total;
 
     if (p_disk == NULL || p_disk_info == NULL) {
@@ -72,12 +72,54 @@ s32 fn_803CAC0C(PDM_DISK* p_disk, PDM_DISK_INFO* p_disk_info) {
     return 0;
 }
 
-s32 fn_803C8210(const char* path) {
+s32 VFi_NandDelete(const char* path) {
     s32 count = lbl_805A1228;
     s32 result = 0;
 
     while (count-- > 0) {
         result = NANDDelete(path);
+        if (result != -3 && result != -2) {
+            return result;
+        }
+        OSSleepTicks(OS_MSEC_TO_TICKS((s64)lbl_805A122C));
+    }
+    return result;
+}
+
+s32 VFi_NandCreate(const char* path, u8 perm, u8 attr) {
+    s32 count = lbl_805A1228;
+    s32 result = 0;
+
+    while (count-- > 0) {
+        result = NANDCreate(path, perm, attr);
+        if (result != -3 && result != -2) {
+            return result;
+        }
+        OSSleepTicks(OS_MSEC_TO_TICKS((s64)lbl_805A122C));
+    }
+    return result;
+}
+
+s32 VFi_NandOpen(const char* path, NANDFileInfo* info, u8 accType) {
+    s32 count = lbl_805A1228;
+    s32 result = 0;
+
+    while (count-- > 0) {
+        result = NANDOpen(path, info, accType);
+        if (result != -3 && result != -2) {
+            return result;
+        }
+        OSSleepTicks(OS_MSEC_TO_TICKS((s64)lbl_805A122C));
+    }
+    return result;
+}
+
+s32 VFi_NandCreateDir(const char* path, u8 perm, u8 attr) {
+    s32 count = lbl_805A1228;
+    s32 result = 0;
+
+    while (count-- > 0) {
+        result = NANDCreateDir(path, perm, attr);
         if (result != -3 && result != -2) {
             return result;
         }
@@ -130,10 +172,10 @@ s32 VFi_NandGetLength(NANDFileInfo* info, u32* length) {
 
 void VFi_NandSetNANDFuncNormal(u32 i_handleIdx) {
     if (i_handleIdx < 26) {
-        lbl_80563798[i_handleIdx].create = fn_803C8090;
-        lbl_80563798[i_handleIdx].open = fn_803C8420;
-        lbl_80563798[i_handleIdx].createDir = fn_803C8660;
-        lbl_80563798[i_handleIdx].remove = fn_803C8210;
+        lbl_80563798[i_handleIdx].create = VFi_NandCreate;
+        lbl_80563798[i_handleIdx].open = VFi_NandOpen;
+        lbl_80563798[i_handleIdx].createDir = VFi_NandCreateDir;
+        lbl_80563798[i_handleIdx].remove = VFi_NandDelete;
     }
 }
 
@@ -146,7 +188,7 @@ void VFi_NandSetNANDFuncEx(u32 i_handleIdx) {
     }
 }
 
-s32 fn_803CACB4(PDM_DISK_TBL* p_disk_tbl, u32 ui_ext) {
+s32 VFi_nanddrv_init_drv_tbl(PDM_DISK_TBL* p_disk_tbl, u32 ui_ext) {
     p_disk_tbl->ui_ext = ui_ext;
     p_disk_tbl->p_func = &lbl_8041AC68;
     return 0;

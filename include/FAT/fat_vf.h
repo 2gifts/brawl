@@ -197,20 +197,20 @@ extern VFNandFuncs lbl_80563798[26];
 extern s32 lbl_805A1228;
 extern s32 lbl_805A122C;
 extern struct PDM_FUNCTBL lbl_8041AC68;  // nanddrv function table
-s32 fn_803CACB4(PDM_DISK_TBL* p_disk_tbl, u32 ui_ext);  // VFi_nanddrv_init_drv_tbl
+s32 VFi_nanddrv_init_drv_tbl(PDM_DISK_TBL* p_disk_tbl, u32 ui_ext);
 
-s32 fn_803C8090(const char* path, u8 perm, u8 attr);                    // VFi_NandCreate
+s32 VFi_NandCreate(const char* path, u8 perm, u8 attr);
 s32 VFi_NandPrivateCreate(const char* path, u8 perm, u8 attr);
-s32 fn_803C8210(const char* path);                                      // VFi_NandDelete
+s32 VFi_NandDelete(const char* path);
 s32 VFi_NandPrivateDelete(const char* path);
-s32 fn_803C8420(const char* path, struct NANDFileInfo* info, u8 accType);  // VFi_NandOpen
+s32 VFi_NandOpen(const char* path, struct NANDFileInfo* info, u8 accType);
 s32 VFi_NandPrivateOpen(const char* path, struct NANDFileInfo* info, u8 accType);
-s32 fn_803C8660(const char* path, u8 perm, u8 attr);                    // VFi_NandCreateDir
+s32 VFi_NandCreateDir(const char* path, u8 perm, u8 attr);
 s32 VFi_NandPrivateCreateDir(const char* path, u8 perm, u8 attr);
 s32 fn_803CACCC(u32 num_blocks, u8* buf, u32 block, u32 bps, u32* p_num_success, struct PDM_DISK* p_disk);  // nanddrv_physical_read
-s32 fn_803CAA94(struct PDM_DISK* p_disk, const u8* p_buf, u32 block, u32 num_blocks, u32* p_num_success);  // nanddrv_pwrite
-s32 fn_803CABD4(struct PDM_DISK* p_disk);  // nanddrv_unmount
-s32 fn_803CAC0C(struct PDM_DISK* p_disk, struct PDM_DISK_INFO* p_disk_info);  // nanddrv_get_disk_info
+s32 nanddrv_pwrite(struct PDM_DISK* p_disk, const u8* p_buf, u32 block, u32 num_blocks, u32* p_num_success);
+s32 nanddrv_finalize(struct PDM_DISK* p_disk);
+s32 nanddrv_get_disk_info(struct PDM_DISK* p_disk, struct PDM_DISK_INFO* p_disk_info);
 s32 dCommon_FlushFromVol(struct PF_VOLUME* p_vol, int i_setLastDeviceError);
 
 #ifdef __cplusplus
