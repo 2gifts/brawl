@@ -15,6 +15,7 @@ class wnPokeLizardonRockStone;
 struct wnPokeLizardonRockData;
 struct wnPokeLizardonRockStoneData;
 
+#ifndef WN_POKE_LIZARDON_ROCK_DEFINED
 // The rock of the down special (wn_poke_lizardon_rock). Opaque shell for the same reason.
 class wnPokeLizardonRock : public Weapon {
     u8 m_unreconstructed[0x18EC - sizeof(Weapon)];
@@ -31,6 +32,7 @@ public:
     static bool activeArticle(wnPokeLizardonRockStone* stone, soModuleAccesser* acc);
 };
 static_assert(sizeof(wnPokeLizardonRock) == 0x18EC, "wnPokeLizardonRock layout is wrong!");
+#endif
 
 // The stones the rock breaks into (wn_poke_lizardon_rock_stone). Opaque shell for the same reason.
 class wnPokeLizardonRockStone : public Weapon {
@@ -40,6 +42,8 @@ public:
     virtual ~wnPokeLizardonRockStone();
     virtual void updateNodeSRT();
     virtual bool notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* acc, int index);
+    // HYPOTHESIS: parameter names and types, from the call in wnPokeLizardonRock::activeArticle.
+    void activate(int founderTaskId, int resourceId, int team, const Vec3f* position, float lr, float angle, float speed, int life, int variant);
 };
 static_assert(sizeof(wnPokeLizardonRockStone) == 0x16DC, "wnPokeLizardonRockStone layout is wrong!");
 

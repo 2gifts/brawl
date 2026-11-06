@@ -203,7 +203,7 @@ public:
         m_table((const acAnimCmdConv**)data0, BC::Capacity),
         m_stack(),
         m_pack(&m_table.m_member, (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull, (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull),
-        m_interpreter(ftGetManageId(acc), &m_stack.m_array, BC::UnitId, BC::InterpMode, 1.0f, ftAddressOf((u8)0)) {
+        m_interpreter(ftGetManageId(acc), (soArrayVector<acCmdInterpreterStackData, 8>*)&m_stack.m_array, BC::UnitId, BC::InterpMode, 1.0f, ftAddressOf((u8)0)) {
         soAttributeFlag attr(BC::AttrMask);
         soAnimCmdControlUnit unit = { &m_interpreter, &m_pack };
         acc->getAnimCmdModule().registInterpreter(unit, attr);
@@ -290,7 +290,7 @@ public:
         m_list1(),
         m_stack(),
         m_pack(&m_list0.m_member, &m_list1.m_array, soAnimCmdNullArrayHolder::getInstance()),
-        m_interpreter(ftGetManageId(acc), &m_stack.m_array, BC::UnitId, BC::InterpMode, 1.0f, ftAddressOf((u8)0)) {
+        m_interpreter(ftGetManageId(acc), (soArrayVector<acCmdInterpreterStackData, 8>*)&m_stack.m_array, BC::UnitId, BC::InterpMode, 1.0f, ftAddressOf((u8)0)) {
         soArrayUtility::pushRange<const acAnimCmdConv*>(&m_list0.m_member, (const acAnimCmdConv* const*)0, BC::Capacity);
         soArrayUtility::pushRange<const acAnimCmdConv*>(&m_list1.m_array, (const acAnimCmdConv* const*)0, BC::Capacity);
         soArrayUtility::pushRange<const acAnimCmdConv*>(soAnimCmdNullArrayHolder::getInstance(), (const acAnimCmdConv* const*)0, 0);
