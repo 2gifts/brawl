@@ -110,3 +110,50 @@ s32 fa_nanddrv_RelateNANDFileToDsk(void* p_disk, FaNandDskFile* file, int create
     }
     return result;
 }
+
+void* VFipf_memset(void* dst, int ch, size_t n);
+
+s32 fa_nanddrv_BuildUpFSInfoSector(u8* buf) {
+    VFipf_memset(buf, 0, 0x200);
+    if ((u32)buf & 3) {
+        buf[0] = 0x52;
+        buf[0x1] = 0x52;
+        buf[0x2] = 0x61;
+        buf[0x3] = 0x41;
+    } else {
+        *(u32*)buf = 0x52526141;
+    }
+    if ((u32)(buf + 0x1e4) & 3) {
+        buf[0x1e4] = 0x72;
+        buf[0x1e5] = 0x72;
+        buf[0x1e6] = 0x41;
+        buf[0x1e7] = 0x61;
+    } else {
+        *(u32*)(buf + 0x1e4) = 0x72724161;
+    }
+    if ((u32)(buf + 0x1e8) & 3) {
+        buf[0x1e8] = 0xff;
+        buf[0x1e9] = 0xff;
+        buf[0x1ea] = 0xff;
+        buf[0x1eb] = 0xff;
+    } else {
+        *(u32*)(buf + 0x1e8) = 0xffffffff;
+    }
+    if ((u32)(buf + 0x1ec) & 3) {
+        buf[0x1ec] = 0xff;
+        buf[0x1ed] = 0xff;
+        buf[0x1ee] = 0xff;
+        buf[0x1ef] = 0xff;
+    } else {
+        *(u32*)(buf + 0x1ec) = 0xffffffff;
+    }
+    if ((u32)(buf + 0x1fc) & 3) {
+        buf[0x1fc] = 0x0;
+        buf[0x1fd] = 0x0;
+        buf[0x1fe] = 0x55;
+        buf[0x1ff] = 0xaa;
+    } else {
+        *(u32*)(buf + 0x1fc) = 0x55aa;
+    }
+    return 0;
+}
