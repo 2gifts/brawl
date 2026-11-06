@@ -16,6 +16,8 @@
 #include <ft/lucario/ft_lucario_transactor.h>
 #include <so/article/so_article_mediator.h>
 
+// The fighter owns the shared out-of-line kinetic teardown.
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftLucarioBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
