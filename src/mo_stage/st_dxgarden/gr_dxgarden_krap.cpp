@@ -1,3 +1,5 @@
+#define IP_NULL_INPUT_CONT_NO // the REL emits Input::getContNo inline
+#define YK_STAGE_FULL // inline the StageObject/Yakumono/Input members this REL emits itself
 #define SO_EVENT_OBSERVER_INLINE // emit the stage-local event registration callbacks
 #define YK_STAGE_INLINE // inline members of the shared SO headers that the stage RELs emit themselves
 #define YK_CLTARGET_4_FIRST // the clTarget constructor writes the second member first in this REL
