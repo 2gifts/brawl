@@ -123,7 +123,7 @@ int fn_8038DC08(SAKERequest request) {
     fn_803646CC(request->mSoapRequest, lbl_8059FBF0, lbl_80490F9C, request->mSake->mLoginTicket);
     result = info->mFillSoapRequestFunc(request);
     if (result != 0) {
-        fn_80362DD4(request->mSoapRequest);
+        gsXmlFreeWriter(request->mSoapRequest);
         request->mSoapRequest = NULL;
         if (info->mFreeDataFunc) {
             info->mFreeDataFunc(request);

@@ -55,16 +55,9 @@ extern char lbl_8048E9C0[0x25];
 
 GSSoapTask* fn_803621B8(const char* URL, const char* service, GSXmlStreamWriter request, GSSoapCallbackFunc callback, void* userData);  // gsiExecuteSoap
 int fn_803622B0(int request, int result, char* buffer, int bufferLen, void* param);  // gsiSoapTaskHttpCompletedCallback
-int fn_80362348(void* taskData);        // gsiSoapTaskThink
 void fn_80362384(void* taskData);       // gsiSoapTaskExecute
-void fn_80362434(void* taskData);       // gsiSoapTaskCancel
-void fn_80362488(void* taskData, int result);  // gsiSoapTaskCallback
-int fn_803624A8(void* taskData);        // gsiSoapTaskCleanup
 GSXmlStreamWriter fn_80362578(const char** namespaces, int count);                              // gsXmlCreateStreamWriter
 GSXmlStreamReader fn_80362C98(void);    // gsXmlCreateStreamReader
-int fn_80362D50(GSXmlStreamReader stream, char* data, int len);  // gsXmlParseBuffer
-void fn_80362DD4(GSXmlStreamWriter stream);  // gsXmlFreeWriter
-void fn_80362E0C(GSXmlStreamReader stream);  // gsXmlFreeReader
 int fn_80362E4C(GSXmlStreamWriter stream);   // gsXmlCloseWriter
 void fn_80362F4C(void* elem);           // gsiXmlUtilElementFree
 void fn_80362F50(void* elem);           // gsiXmlUtilAttributeFree
@@ -73,12 +66,21 @@ int fn_80364034(GSXmlStreamWriter stream, const char* ns, const char* tag);     
 int fn_80364340(GSXmlStreamWriter stream, const char* ns, const char* tag);                    // gsXmlWriteCloseTag
 int fn_803646CC(GSXmlStreamWriter stream, const char* ns, const char* tag, const char* value); // gsXmlWriteStringElement
 int fn_80365548(GSXmlStreamWriter stream, const char* ns, const char* tag, int value);         // gsXmlWriteIntElement
-int fn_80367838(GSXmlStreamReader stream);   // gsXmlMoveToStart
-int fn_8036784C(GSXmlStreamReader stream, const char* matchtag);  // gsXmlMoveToNext
 int fn_803678E0(GSXmlStreamReader stream, const char* matchtag, const char** valueOut, int* lenOut);  // gsXmlReadChildAsString
 int fn_803679BC(GSXmlStreamReader stream, const char* matchtag, char* valueOut, int maxLen);  // gsXmlReadChildAsStringNT
 int fn_80367A60(GSXmlStreamReader stream, const char* matchtag, int* valueOut);  // gsXmlReadChildAsInt
 int fn_80367B44(const char* matchtag, void* elem);  // gsiXmlUtilTagMatches
+int gsiSoapTaskThink(void* taskData);
+void gsiSoapTaskCancel(void* taskData);
+void gsiSoapTaskCallback(void* taskData, int result);
+int gsiSoapTaskCleanup(void* taskData);
+int gsXmlParseBuffer(GSXmlStreamReader stream, char* data, int len);
+void gsXmlFreeWriter(GSXmlStreamWriter stream);
+void gsXmlFreeReader(GSXmlStreamReader stream);
+int gsXmlMoveToStart(GSXmlStreamReader stream);
+int gsXmlMoveToNext(GSXmlStreamReader stream, const char* matchtag);
+const char* gsXmlWriterGetData(GSXmlStreamWriter stream);
+int gsXmlWriterGetDataLength(GSXmlStreamWriter stream);
 
 #ifdef __cplusplus
 }
