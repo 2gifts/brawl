@@ -183,6 +183,23 @@ s32 PFENT_RecalcEntryIterator(PF2_ENT_ITER* p_iter, u32 may_allocate);
 s32 PFPATH_getShortName(s8* short_name, const u8* pDirEntry, u8 attr);
 s32 PFPATH_putShortName(u8* pDirEntry, const s8* short_name, u8 attr);
 s32 PFSEC_ReadData(PF_VOLUME* p_vol, u8* p_buf, u32 sector, u16 offset, u32 size, u32* p_success_size, u32 set_sig);
+s32 PFSEC_ReadFAT(PF2_VOLUME* p_vol, u8* p_buf, u32 sector, u16 offset, u16 size);
+s32 PFSEC_WriteFAT(PF2_VOLUME* p_vol, const u8* p_buf, u32 sector, u16 offset, u16 size);
+s32 PFFAT16_WriteFATEntryWithBuf(PF2_VOLUME* p_vol, u32 cluster, u32 value, PF_CACHE_PAGE* p_page);
+s32 PFFAT32_WriteFATEntry(PF2_VOLUME* p_vol, u32 cluster, u32 value);
+s32 PFFAT16_ReadFATEntry(PF2_VOLUME* p_vol, u32 cluster, u32* p_value);
+s32 PFFAT32_ReadFATEntry(PF2_VOLUME* p_vol, u32 cluster, u32* p_value);
+s32 PFFAT32_WriteFATEntryWithBuf(PF2_VOLUME* p_vol, u32 cluster, u32 value, PF_CACHE_PAGE* p_page);
+s32 PFFAT_GetClusterInChain(PF_FFD* p_ffd, u32 chain_index, u32 mode, u32 num_cluster, u32* p_start, u32* p_end);
+s32 PFFAT_ReadCluster(PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32* p_next_cluster, u32* p_chk_clstlnk);
+s32 PFFAT_ResetCluster(PF_VOLUME* p_vol, u32 cluster);
+s32 PFCACHE_AllocateDataPage(PF_VOLUME* p_vol, u32 sector, PF_CACHE_PAGE** pp_page, u32* p_is_hit);
+void PFCACHE_FreeDataPage(PF_VOLUME* p_vol, PF_CACHE_PAGE* p_page);
+s32 PFSEC_WriteData(PF_VOLUME* p_vol, const u8* p_buf, u32 sector, u16 offset, u32 size, u32* p_success_size, u32 set_sig);
+void* VFipf_memset(void* dst, int c, u32 length);
+s32 PFFAT_ReadFATSector(PF2_VOLUME* p_vol, PF_CACHE_PAGE* p_page, u32 cluster);
+s32 PFFAT_getContinuousSector(PF_FFD* p_ffd, u32 file_sector_index, u32 size, u32* p_sector, u32* p_num_sector);
+s32 PFFAT_GetClusterContinuousSectorInChain(PF_FFD* p_ffd, u32 initial_cluster, u32 chain_index, u32 size, u32* p_num_sector);
 
 #ifdef __cplusplus
 }
