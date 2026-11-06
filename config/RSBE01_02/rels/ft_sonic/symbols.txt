@@ -735,7 +735,7 @@ deactivateDescendantForce__62wnWeaponBuilder<43wnSonicGimmickJumpModuleAccesserB
 __ct__17wnSonicSuperSonicFlRC18wnArticleBuildInfoPC21wnSonicSuperSonicData = .text:0x00014430; // type:function size:0x188
 fn_123_145B8 = .text:0x000145B8; // type:function size:0x8
 __dt__61wnWeaponBuilder<42wnSonicSuperSonicModuleAccesserBuildConfig>Fv = .text:0x000145C0; // type:function size:0x70
-fn_123_14630 = .text:0x00014630; // type:function size:0x70
+__dt__69wnModuleAccesserBuilder<42wnSonicSuperSonicModuleAccesserBuildConfig>Fv = .text:0x00014630; // type:function size:0x70
 fn_123_146A0 = .text:0x000146A0; // type:function size:0x9C
 __dt__79soAnimCmdControlUnitBuilder<48soAnimCmdControlUnitBuildConfig<0,1,4,0,0,0,0,8>>Fv = .text:0x0001473C; // type:function size:0x8C
 __dt__80soAnimCmdControlUnitBuilder<49soAnimCmdControlUnitBuildConfig<1,2,10,0,0,1,0,8>>Fv = .text:0x000147C8; // type:function size:0x8C
@@ -751,8 +751,8 @@ __dt__241soMotionModuleBuilder<215soMotionModuleBuildConfig<10,18soMotionModuleI
 __dt__180soInsideEventManageModuleBuilder<110soInsideEventManageModuleBuildConfig<17,33,4,2,4,4,4,5,2,4,4,4,4,4,1,1,0,0,0,30wnInsideEventManageModuleTypes>,30wnInsideEventManageModuleTypes>Fv = .text:0x00014DC8; // type:function size:0x12C
 __ct__30wnSonicSuperSonicParamAccesserFPC22wnSonicSuperSonicParam = .text:0x00014EF4; // type:function size:0xD0
 fn_123_14FC4 = .text:0x00014FC4; // type:function size:0x60
-fn_123_15024 = .text:0x00015024; // type:function size:0xC
-fn_123_15030 = .text:0x00015030; // type:function size:0x8
+getCollisionHitModule__16soModuleAccesserCFv = .text:0x00015024; // type:function size:0xC
+getModuleAccesser__11StageObjectCFv = .text:0x00015030; // type:function size:0x8
 fn_123_15038 = .text:0x00015038; // type:function size:0x1928
 activate__17wnSonicSuperSonicFiiiP5Vec2ff13SituationKindP27wnSonicSuperSonicEffectList = .text:0x00016960; // type:function size:0x380
 processUpdate__17wnSonicSuperSonicFv = .text:0x00016CE0; // type:function size:0x148
@@ -797,13 +797,13 @@ __ct__71soKineticUpdateEnergyHolderHelper<34wnSonicSuperSonicKineticTransactor>F
 @64@__dt__61wnWeaponBuilder<42wnSonicSuperSonicModuleAccesserBuildConfig>Fv = .text:0x00017AF8; // type:function size:0x8
 @144@__dt__61wnWeaponBuilder<42wnSonicSuperSonicModuleAccesserBuildConfig>Fv = .text:0x00017B00; // type:function size:0x8
 @136@__dt__61wnWeaponBuilder<42wnSonicSuperSonicModuleAccesserBuildConfig>Fv = .text:0x00017B08; // type:function size:0x8
-fn_123_17B10 = .text:0x00017B10; // type:function size:0x8
+@64@__dt__17wnSonicSuperSonicFv = .text:0x00017B10; // type:function size:0x8
 @100@notifyEventChangeStatus__17wnSonicSuperSonicFiiP12soStatusDataP16soModuleAccesser = .text:0x00017B18; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__17wnSonicSuperSonicFUl = .text:0x00017B20; // type:function size:0x8
 @112@notifyEventCollisionAttack__17wnSonicSuperSonicFfP14soCollisionLogP16soModuleAccesser = .text:0x00017B28; // type:function size:0x8
-fn_123_17B30 = .text:0x00017B30; // type:function size:0x8
+@144@__dt__17wnSonicSuperSonicFv = .text:0x00017B30; // type:function size:0x8
 @136@deactivateDescendantForce__61wnWeaponBuilder<42wnSonicSuperSonicModuleAccesserBuildConfig>Fv = .text:0x00017B38; // type:function size:0x8
-fn_123_17B40 = .text:0x00017B40; // type:function size:0x8
+@136@__dt__17wnSonicSuperSonicFv = .text:0x00017B40; // type:function size:0x8
 changeKinetic__34wnSonicSuperSonicKineticTransactorFiP343soLineInvertHierarchy<256soTypeList<100soInstancePoolInfo<21soKineticEnergyNormal,1,21soKineticEnergyHolder,28soKineticEnergyInitInfo<0,1>>,137soTypeList<101soInstancePoolInfo<22wnKineticEnergyGravity,1,21soKineticEnergyHolder,28soKineticEnergyInitInfo<1,1>>,18soTypeListNullType>>,14soInstancePool,18soInstancePoolRoot,18soTypeListNullType,1>P16soModuleAccesser = .text:0x00017B48; // type:function size:0x6C
 changeKineticFinalMoveCommon__34wnSonicSuperSonicKineticTransactorFP343soLineInvertHierarchy<256soTypeList<100soInstancePoolInfo<21soKineticEnergyNormal,1,21soKineticEnergyHolder,28soKineticEnergyInitInfo<0,1>>,137soTypeList<101soInstancePoolInfo<22wnKineticEnergyGravity,1,21soKineticEnergyHolder,28soKineticEnergyInitInfo<1,1>>,18soTypeListNullType>>,14soInstancePool,18soInstancePoolRoot,18soTypeListNullType,1>P16soModuleAccesser = .text:0x00017BB4; // type:function size:0x2A4
 changeKineticSub__34wnSonicSuperSonicKineticTransactorFP343soLineInvertHierarchy<256soTypeList<100soInstancePoolInfo<21soKineticEnergyNormal,1,21soKineticEnergyHolder,28soKineticEnergyInitInfo<0,1>>,137soTypeList<101soInstancePoolInfo<22wnKineticEnergyGravity,1,21soKineticEnergyHolder,28soKineticEnergyInitInfo<1,1>>,18soTypeListNullType>>,14soInstancePool,18soInstancePoolRoot,18soTypeListNullType,1>P16soModuleAccesser = .text:0x00017E58; // type:function size:0x80

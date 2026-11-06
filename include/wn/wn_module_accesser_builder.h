@@ -1003,7 +1003,9 @@ public:
     typedef soAnimCmdControlUnitBuildConfig<2, 2, C2, A2, B2, 1, 0, 8> Unit2Config;
     typedef soAnimCmdControlUnitBuildConfig<3, 2, C3, A3, B3, 1, 0, 8> Unit3Config;
     typedef soAnimCmdControlUnitBuildConfigUniq<4, 8> Unit4Config;
-    enum { Unit0Enabled = E0, Unit1Enabled = E1, Unit2Enabled = E2, Unit3Enabled = E3, Unit4Enabled = 1 };
+    // HYPOTHESIS: thread 5 (attribute 0x10, one command table entry) is off unless a configuration enables it.
+    typedef soAnimCmdControlUnitBuildConfig<5, 0x10, 1, 0, 0, 1, 0, 8> Unit5Config;
+    enum { Unit0Enabled = E0, Unit1Enabled = E1, Unit2Enabled = E2, Unit3Enabled = E3, Unit4Enabled = 1, Unit5Enabled = 0 };
 };
 
 // The same four command threads without the uniq interpreter thread 4 (the Kirby hammer builds only thread 0).
@@ -1034,7 +1036,7 @@ class wnAnimCmdModuleSubBuilder {
     typename wnAnimCmdControlUnitSelect<BC::Unit2Enabled != 0, typename BC::Unit2Config>::Type m_unit2; // +0x258
     typename wnAnimCmdControlUnitSelect<BC::Unit3Enabled != 0, typename BC::Unit3Config>::Type m_unit3; // +0x384
     typename wnAnimCmdUniqSelect<BC::Unit4Enabled != 0, typename BC::Unit4Config>::Type m_unit4;       // +0x4B0
-    soAnimCmdControlUnitBuilderNull<void> m_unit5;
+    typename wnAnimCmdControlUnitSelect<BC::Unit5Enabled != 0, typename BC::Unit5Config>::Type m_unit5;
 public:
     wnAnimCmdModuleSubBuilder(soModuleAccesser* acc, const soModuleAccesserBuildData& bd) :
         m_unit0(acc, bd.getAnimCmdData(0, 0), bd.getAnimCmdData(0, 1), bd.getAnimCmdData(0, 2)),
