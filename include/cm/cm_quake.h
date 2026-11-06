@@ -24,6 +24,8 @@ public:
         Amplitude_More_Large = 0x5,
     };
 
+    // HYPOTHESIS: quake request.
+    void reqQuake(Amplitude amplitude, Vec3f* offset);
     void init();
     bool loadResource(const void* resource, u32 size, Heaps::HeapType heap);
 

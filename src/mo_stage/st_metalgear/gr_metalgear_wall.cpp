@@ -222,7 +222,7 @@ void grMetalgearWall::updateBreak(float deltaFrame) {
                 break;
             }
             if (sndId != -1) {
-                fn_27_224DB8(sndId, pan);
+                StSeUtil::playSe(sndId, pan);
             }
             u32 handle;
             switch (m_type) {
@@ -269,11 +269,11 @@ void grMetalgearWall::updateBreak(float deltaFrame) {
                 switch (m_type) {
                 case 0:
                 case 1:
-                    fn_27_224DB8(snd_se_stage_Metalgear_wall_clack, -0.75f);
+                    StSeUtil::playSe(snd_se_stage_Metalgear_wall_clack, -0.75f);
                     break;
                 case 2:
                 case 3:
-                    fn_27_224DB8(snd_se_stage_Metalgear_wall_clack, 0.75f);
+                    StSeUtil::playSe(snd_se_stage_Metalgear_wall_clack, 0.75f);
                     break;
                 }
             }
@@ -303,11 +303,11 @@ void grMetalgearWall::updateBreak(float deltaFrame) {
             switch (m_type) {
             case 0:
             case 1:
-                fn_27_224DB8(snd_se_stage_Metalgear_02, -0.75f);
+                StSeUtil::playSe(snd_se_stage_Metalgear_02, -0.75f);
                 break;
             case 2:
             case 3:
-                fn_27_224DB8(snd_se_stage_Metalgear_02, 0.75f);
+                StSeUtil::playSe(snd_se_stage_Metalgear_02, 0.75f);
                 break;
             }
             setVisibility(1);
@@ -625,8 +625,8 @@ void grMetalgearWall::onDamage(int index, soDamage* damage, soDamageAttackerInfo
         m_effectTimer = randf() * 5.0f + 10.0f;
     }
     if (m_type < 2) {
-        fn_27_224DB8(snd_se_stage_Metalgear_wall_dmg, -0.75f);
+        StSeUtil::playSe(snd_se_stage_Metalgear_wall_dmg, -0.75f);
     } else if (m_type < 4) {
-        fn_27_224DB8(snd_se_stage_Metalgear_wall_dmg, 0.75f);
+        StSeUtil::playSe(snd_se_stage_Metalgear_wall_dmg, 0.75f);
     }
 }

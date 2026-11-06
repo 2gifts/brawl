@@ -42,6 +42,8 @@ public:
 
     // HYPOTHESIS: the unused last parameter; create passes Heaps::MenuResource.
     MenuRoot(const char* name, int scnSize, gfArchive* archive, int index, Heaps::HeapType heap);
+    // HYPOTHESIS: the constructor that loads the scene file from a path.
+    MenuRoot(const char* name, int scnSize, const char* cameraPath, Heaps::HeapType heap);
     void initOverwriteBuf();
     // HYPOTHESIS: parameter types of the two overloads (a pending file handle, and the data of an archive file).
     void attachScnAnm(gfFileIOHandle* handle);

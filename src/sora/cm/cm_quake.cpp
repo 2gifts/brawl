@@ -61,3 +61,44 @@ bool cmQuake::loadResource(const void* resource, u32 size, Heaps::HeapType heap)
     }
     return true;
 }
+
+void cmQuake::reqQuake(Amplitude amplitude, Vec3f* offset) {
+    switch (amplitude) {
+    case Amplitude_M:
+        if (!(unk270 & 1)) unk26C = 0.0f;
+        unk258 = 0.0f;
+        unk270 |= 1;
+        break;
+    case Amplitude_S_Half:
+        if ((unk270 & 2) && unk25C < 6.0f) break;
+        unk25C = 0.0f;
+        unk270 |= 2;
+        break;
+    case Amplitude_S:
+        if ((unk270 & 4) && unk260 < 6.0f) break;
+        unk260 = 0.0f;
+        unk270 |= 4;
+        break;
+    case Amplitude_L:
+        if ((unk270 & 8) && unk264 < 7.0f) break;
+        unk264 = 0.0f;
+        unk270 |= 8;
+        break;
+    case Amplitude_XL:
+        if ((unk270 & 0x10) && unk268 < 11.0f) break;
+        unk268 = 0.0f;
+        unk270 |= 0x10;
+        break;
+    }
+    for (int index = 0; index < 16; ++index) {
+        if (unk2C[index].unkC == 0) {
+            unk2C[index].unkC = amplitude;
+            float x = offset->m_x;
+            float y = offset->m_y;
+            unk2C[index].unk0 = x;
+            float z = offset->m_z;
+            unk2C[index].unk4 = y;
+            unk2C[index].unk8 = z;
+        }
+    }
+}

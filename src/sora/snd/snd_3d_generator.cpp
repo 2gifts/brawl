@@ -48,3 +48,7 @@ snd3DGenerator::snd3DGenerator() {
     pos.m_z = zero;
     SetPosition__Q34nw4r3snd12Sound3DActorFRCQ34nw4r4math4VEC3(m_sndActor, &pos);
 }
+
+void snd3DGenerator::stopGroupId(int tag, SndID sndID, int fade) {
+    g_sndSystem->stopGroupId(tag, sndID, fade);
+}

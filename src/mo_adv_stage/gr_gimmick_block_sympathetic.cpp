@@ -4,7 +4,6 @@
 
 // HYPOTHESIS: getInstance/[cmQuake] and reqQuake/[cmQuake] (main.dol map), not decompiled yet.
 extern "C" cmQuake* fn_8009D2DC();
-extern "C" void fn_8009D564(cmQuake* quake, cmQuake::Amplitude amplitude, Vec3f* pos);
 
 grGimmickBlockSympathetic* grGimmickBlockSympathetic::create(int mdlIndex, const char* taskName) {
     grGimmickBlockSympathetic* ground = new (Heaps::StageInstance) grGimmickBlockSympathetic(taskName);
@@ -22,7 +21,7 @@ void grGimmickBlockSympathetic::requestBreak() {
     startGimmickSE(0);
     startGimmickEffect(0);
     Vec3f pos = getPos();
-    fn_8009D564(fn_8009D2DC(), cmQuake::Amplitude_S, &pos);
+    fn_8009D2DC()->reqQuake(cmQuake::Amplitude_S, &pos);
 }
 
 void grGimmickBlockSympathetic::invalidatedByCameraClipping() { }

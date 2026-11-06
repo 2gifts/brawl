@@ -32,5 +32,6 @@ public:
     void createModel(nw4r::g3d::ResFile* res, void* msgData);
     void startMelee(nw4r::g3d::ScnGroup* group);
     void startMenu(int padNo, int kind);
+    void endMenu();
 };
 static_assert(sizeof(IfWifiIntrMenu) == 0xD0, "Class is the wrong size!");

@@ -12,14 +12,13 @@
 class gfMemoryPool {
 public:
     static void* alloc(void* heapAddr, size_t size, int align);
+    void free(void* ptr);
 };
 
 struct OSMutex;
 extern "C" void OSLockMutex(OSMutex* mutex);
 extern "C" void OSUnlockMutex(OSMutex* mutex);
 extern OSMutex lbl_8049EC78;
-
-extern "C" void fn_80025F2C(void* heap, void* ptr);
 
 extern NtMatching* lbl_805A0434;
 
@@ -56,7 +55,7 @@ void* DWCAllocType::ntAlloc(int arg0, u32 size, u32 arg2) {
 void DWCAllocType::ntFree(int arg0, void* arg1) {
     if (arg1 != 0) {
         OSLockMutex(&lbl_8049EC78);
-        fn_80025F2C(lbl_805A0434->unk353C, arg1);
+        reinterpret_cast<gfMemoryPool*>(lbl_805A0434->unk353C)->free(arg1);
         OSUnlockMutex(&lbl_8049EC78);
     }
 }

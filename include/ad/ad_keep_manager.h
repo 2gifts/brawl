@@ -64,6 +64,8 @@ public:
     void useQuitAdventureTiming();
     void useReturnMapTiming();
     void useGameEndingTiming();
+    // HYPOTHESIS: the stage-coin flag comes from callers.
+    void calculateCoin(bool addStageCoin);
     bool isLoadFinishSeal();
     void getSealInfoFromGameGlobal();
     void getFighterSealInfo(u32 index, u32* num, u32* info);

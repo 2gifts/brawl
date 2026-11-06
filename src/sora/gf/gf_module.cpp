@@ -10,14 +10,13 @@ struct OSImportInfo {
     u32 offset;
 };
 
-extern "C" void fn_800260B4(void* block);
 extern "C" void fn_801DDC4C(gfModuleHeader* header, void* bss);
 
 gfModule* gfModule::create(void* heap, void* buffer, size_t size) {
     u32 bufSize = static_cast<gfModuleHeader*>(buffer)->bssSize + static_cast<gfModuleHeader*>(buffer)->commandOffset + 0x40;
     gfModule* module = static_cast<gfModule*>(gfMemoryPool::alloc(heap, bufSize + 0x8C, 0x20));
     if (module == NULL) {
-        fn_800260B4(heap);
+        reinterpret_cast<gfMemoryPool*>(heap)->dump();
         OSReport("gfModule::create Error : Can't Alloc Heap Buffer %08x %08x %08x\n", bufSize + 0x8C, bufSize, size);
         PPCHalt();
     }

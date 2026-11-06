@@ -13,6 +13,8 @@
 #include <st/st_area_manager.h>
 #include <st/stage.h>
 #include <types.h>
+#include <snd/snd_system.h>
+#include <st/se_util.h>
 
 // ecMgr::killEffectGroup (main.dol 0x80060E20, map name; parameters from the call).
 extern "C" void fn_80060E20(ecMgr* mgr, int group, int unk2, int unk3, int unk4, int unk5);
@@ -1012,4 +1014,14 @@ grGimmickWindData2nd* Stage::getWind2ndOnlyData() {
 
 bool Stage::createWind2ndOnly() {
     return false;
+}
+
+int StSeUtil::playSe(int sndId, float pan) {
+    s32 handle = g_sndSystem->prepareSE(static_cast<SndID>(sndId), -1, -1);
+    if (handle == -1) {
+        return -1;
+    }
+    g_sndSystem->setPan(handle, pan);
+    g_sndSystem->startSE(handle, 0, 0);
+    return handle;
 }

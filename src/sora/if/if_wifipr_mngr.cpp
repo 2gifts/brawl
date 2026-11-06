@@ -77,8 +77,6 @@ static_assert(sizeof(IfWifiprMngr) == 0x68, "Class is the wrong size!");
 // muWifiCntWndTask::create (the map name); if_vs_result_task.cpp calls it by this stand-in name.
 extern "C" muWifiCntWndTask* fn_800DA15C(int kind, nw4r::g3d::ResFile* resFile, nw4r::g3d::ScnMdlExpand* expand, const char* node,
                                          int priority, int heap, int heap2);
-// muWifiCntWndTask::setCounter (the map name); if_vs_result_task.cpp calls it by this stand-in name.
-extern "C" void fn_800DA6EC(muWifiCntWndTask* task, int seconds, int unk);
 extern "C" void fn_800FD448(s32 unk);
 extern "C" void fn_800FD8E0(s32 unk);
 extern "C" s32 fn_800FBFDC();
@@ -194,11 +192,11 @@ void IfWifiprMngr::setPlayerWiFiStateMelee(int playerNo) {
 
 void IfWifiprMngr::setCntWndTime(int frames) {
     int seconds = (frames + 59) / 60;
-    fn_800DA6EC(m_cntWnd, seconds, 0);
+    m_cntWnd->setCounter(seconds, 0);
     if (m_cntWnd->unk64 == 1) {
-        fn_800DA6EC(m_cntWnd, seconds / 60, seconds % 60);
+        m_cntWnd->setCounter(seconds / 60, seconds % 60);
     } else {
-        fn_800DA6EC(m_cntWnd, seconds, 0);
+        m_cntWnd->setCounter(seconds, 0);
     }
 }
 

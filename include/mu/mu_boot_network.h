@@ -10,26 +10,42 @@
 #include <types.h>
 
 class muEndCameraTask;
+class nteExchange;
 
 // The task of the network check at the start of the game (it asks the server whether there is something new).
 // HYPOTHESIS: the names of the fields follow how muBootNetworkTask uses them.
 class nteBootTask : public gfTask {
 public:
-    u8 m_unk40[0xC];
+    union {
+        u8 m_unk40[0xC];
+        struct {
+            u32 unk40;
+            Heaps::HeapType unk44;
+            nteExchange* unk48;
+        };
+    };
     bool m_finished;            // 0x4C the check is over
     u8 m_unk4D[3];
     int m_errorState;           // 0x50 how the check failed (0: it did not)
     u16 m_countA;               // 0x54 the counts that the server sent
     u16 m_countB;               // 0x56
-    u16 m_countC;               // 0x58
-    u8 m_unk5A[6];
+    union {
+        struct {
+            u16 m_countC;               // 0x58
+            u8 m_unk5A[6];
+        };
+        struct {
+            u16 unk58;
+            u16 unk5A;
+            int unk5C;
+        };
+    };
 
+    void startTask();
     virtual void notify_Error(int kind, int unk, int code);
 };
 static_assert(sizeof(nteBootTask) == 0x60, "Class is wrong size!");
-// nteBootTask::nteBootTask(heap) and nteBootTask::startTask()
 extern "C" nteBootTask* fn_8015820C(nteBootTask* task, int heap);
-extern "C" void fn_80158334(nteBootTask* task);
 
 // The start of the game when it can use the network: it asks the server whether there is a message or a new download
 // and tells the player how many there are.

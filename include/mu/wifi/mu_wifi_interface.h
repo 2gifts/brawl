@@ -105,6 +105,7 @@ struct muWifiAIDInfo {
                     struct { u8 _pad3[3]; u8 unk3; u8 unk4; u8 _pad5[5]; };
                     struct { u8 _pad0[8]; u16 unk8; };
                     struct { u8 _pad2[2]; u8 unk2Data; };
+                    struct { u8 _pad1[1]; u8 unk1Data; };
                 };
             } unkE4[4];
             u8 unk10C;
@@ -333,6 +334,9 @@ public:
     u8 getAssignedPlayerContNum(int index);
     int isPermittedEntry(int playerArea);
     void exitNodePlayer(int playerArea);
+    // HYPOTHESIS: parameter types follow the original register accesses.
+    bool isRequestedExchangeFriendKey(int index);
+    bool getWifiPlayerInfo(int index, int* character, u8* color, bool* connected);
 };
 static_assert(sizeof(muWifiInterfaceTask) == 0x1058, "Class is wrong size!");
 

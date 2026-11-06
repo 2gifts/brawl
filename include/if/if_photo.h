@@ -39,6 +39,7 @@ public:
 
     IfPhoto();
     void init();
+    void main();
     // HYPOTHESIS: parameter types follow resource copies and model table accesses.
     void createModel(nw4r::g3d::ResFile* modelFile, nw4r::g3d::ResFile* resFile,
                      void* msgData, nw4r::g3d::ResFile* resFile2, u32 helpFlags);
