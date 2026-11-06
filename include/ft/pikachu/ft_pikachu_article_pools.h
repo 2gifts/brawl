@@ -14,7 +14,6 @@ class ftPikachu;
 class soCollisionAttackModule;
 struct wnPikachuThunderJoltData;
 struct wnPikachuCloudData;
-struct wnPikachuVortexData;
 struct wnPikachuThunderData;
 
 // The Thunder Jolt (the class is in the REL). Opaque shell: the full class is a weapon builder that cannot coexist with this unit.
@@ -42,16 +41,6 @@ public:
 };
 static_assert(sizeof(wnPikachuCloud) == 0xA5FC, "wnPikachuCloud layout is wrong!");
 
-// The Final Smash vortex. Opaque shell for the same reason.
-class wnPikachuVortex : public Weapon {
-    u8 m_unreconstructed[0x1FC8 - sizeof(Weapon)];
-public:
-    wnPikachuVortex(s32 articleId, const wnArticleBuildInfo& info, const wnPikachuVortexData* data);
-    virtual ~wnPikachuVortex();
-    void activate(int founderTaskId, int finalResId, int team, const Vec3f* position);
-};
-static_assert(sizeof(wnPikachuVortex) == 0x1FC8, "wnPikachuVortex layout is wrong!");
-
 // The Thunder bolt (the class is in sora_melee). Opaque shell for the same reason.
 class wnPikachuThunder : public Weapon {
     u8 m_unreconstructed[0x1FC4 - sizeof(Weapon)];
@@ -61,6 +50,14 @@ public:
     bool activeArticle(soModuleAccesser* acc);
 };
 static_assert(sizeof(wnPikachuThunder) == 0x1FC4, "wnPikachuThunder layout is wrong!");
+
+// The fighter owns the vortex teardown and needs its complete type.
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/pikachu/wn_pikachu_vortex.h>
+static_assert(sizeof(wnPikachuVortex) == 0x1FC8, "wnPikachuVortex layout is wrong!");
 
 typedef wnArticleHierarchy<wnPikachuThunder, 3, soInstancePoolRoot> ftPikachuThunderPool;
 typedef wnArticleHierarchy<wnPikachuVortex, 1, ftPikachuThunderPool> ftPikachuVortexPool;
