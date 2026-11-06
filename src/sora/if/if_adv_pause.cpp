@@ -179,3 +179,35 @@ void IfAdvPause::createObjResFile(const void* nodeInfo, s32 nodeCount, nw4r::g3d
         }
     }
 }
+
+extern const UnkModelNodeInfo lbl_805A2868[1];
+extern const UnkModelNodeInfo lbl_80409378[5];
+// nw4r::g3d::ScnGroup::Construct (the map name); other files call it by this stand-in name.
+extern "C" nw4r::g3d::ScnGroup* fn_801AB6CC(MEMAllocator* allocator, u32* size, int capacity);
+
+void IfAdvPause::createModel(nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2) {
+    createObjResFile(lbl_805A2868, 1, resFile1);
+    createObjResFile(lbl_80409378, 5, resFile2);
+    unk110 = fn_801AB6CC(gfHeapManager::getMEMAllocator(Heaps::InfoInstance), NULL, 7);
+}
+
+IfAdvPause::~IfAdvPause() {
+    for (int i = 0; i < 7; i++) {
+        if (unkE8[i] != NULL) {
+            delete unkE8[i];
+            unkE8[i] = NULL;
+        }
+    }
+    if (unk110 != NULL) {
+        unk110->Destroy();
+        unk110 = NULL;
+    }
+    if (unk12C != NULL) {
+        unk12C->exit();
+        unk12C = NULL;
+    }
+    if (unk138 != NULL) {
+        unk138->exit();
+        unk138 = NULL;
+    }
+}

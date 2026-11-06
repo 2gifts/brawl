@@ -40,9 +40,7 @@ struct IfAdvDispInfo {
 extern "C" s32 fn_80109C88(s32 state);
 
 extern "C" {
-void fn_80109774(IfAdvPause* pause, int flag);
 void fn_80109850(IfAdvPause* pause);
-void fn_8010A800(IfAdvPause* pause, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2);
 IfAdvRadarData* fn_8010CF44(IfAdvRadarData* data, void* arg1, void* arg2, void* arg3, void* arg4);
 void fn_8010CF88(IfAdvRadarData* data, int arg);
 void fn_8010D00C();
@@ -304,7 +302,7 @@ void IfAdvMngr::create(int arg1, int arg2) {
 
 inline IfAdvMngr::~IfAdvMngr() {
     destroyModel();
-    fn_80109774(m_pause, 1);
+    delete m_pause;
     freeResource();
 }
 
@@ -445,7 +443,7 @@ void IfAdvMngr::createModel() {
     fn_80108404(&unk18);
     m_zako = fn_80108014(0, unk58);
     fn_801081C8(m_zako, &unk18);
-    fn_8010A800(m_pause, &unk1C, &unk20);
+    m_pause->createModel(&unk1C, &unk20);
     reinterpret_cast<IfAdvPauseView*>(m_pause)->unk104 = unk28.ptr();
     reinterpret_cast<IfAdvPauseView*>(m_pause)->unk108 = unk40;
     reinterpret_cast<IfAdvPauseView*>(m_pause)->unk10C = unk24.ptr();
