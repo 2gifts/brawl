@@ -90,7 +90,12 @@ int PFDIR_fsfirst(PF_STR* p_pattern, u8 attr, PF2_DTA* dta);
 int PFDIR_fstat(PF_STR* p_path, void* p_stat);
 int PFDIR_opendir(PF_STR* p_path, PF2_DIR** pp_dir);
 void PFCLUSTER_UpdateLastAccessCluster(PF_FILE* p_file, u32 sector);
-int fn_803DC358(PF2_DIR* dir);                               // PFDIR_closedir
+int PFDIR_closedir(PF2_DIR* dir);
+s32 PFVOL_CheckForWrite(PF2_VOLUME* p_vol);
+s32 PFDIR_p_mkdir(PF2_VOLUME* p_vol, PF_STR* p_path, u32 unk2, u32 unk3);
+s32 PFCACHE_FlushFATCache(PF2_VOLUME* p_vol);
+s32 PFCACHE_FlushDataCacheSpecific(PF2_VOLUME* p_vol, void* signature);
+int PFDIR_mkdir(PF_STR* p_path);
 int fn_803DD390(PF_FFD* p_ffd, PF2_DIR_ENT* p_ent, u32 index, PF2_STR* pattern, u8 attr_required, u8 attr_unwanted, u32* p_lpos, u32* p_ppos);  // PFENT_findEntryPos
 int fn_803DD674(PF2_DIR_ENT* p_ent, u8 num_entries, PF_FFD* p_ffd, u32* p_next_chain, PF2_STR* p_filename, u32* p_pos);  // PFENT_allocateEntryPos
 int fn_803DE800(PF2_ENT_ITER* iter, PF2_DIR_ENT* ent, PF2_VOLUME* vol, PF2_STR* path, u32 wildcard, u32 no_look_last_token);
