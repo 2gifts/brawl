@@ -1392,3 +1392,336 @@ bool muWifiInterfaceTask::getWifiPlayerInfo(int index, int* character, u8* color
     if (count < 2) { *connected = false; }
     return own;
 }
+
+extern NtMatching* lbl_805A0434;
+extern "C" bool fn_801474A0(NtMatching* matching, int index);
+
+// HYPOTHESIS: testFriendKey forwards its argument to the matching manager.
+extern "C" bool fn_800D1F04(muWifiInterfaceTask* self, int index) {
+    return fn_801474A0(lbl_805A0434, index);
+}
+
+// HYPOTHESIS: getFriendStatusFriendCode forwards the friend index to the matching manager.
+extern "C" u64 fn_800D2120(muWifiInterfaceTask* self, int index) {
+    return lbl_805A0434->getRegisterFriendCode(index);
+}
+
+// HYPOTHESIS: isCloseMatching reads the close flag of the matching manager.
+extern "C" u8 fn_800CCEB8(muWifiInterfaceTask* self) {
+    return lbl_805A0434->unk33F6;
+}
+
+// HYPOTHESIS: endMatching stays under its fn_ name; it is not a member in the map.
+extern "C" void fn_800CCEC4(muWifiInterfaceTask* self) {
+    // HYPOTHESIS: the original passes the result register of disconnectAll on to clearAppErrorStatus.
+    NtBase* base = reinterpret_cast<NtBase*>(g_Network.disconnectAll(false));
+    muWifiInterfaceTaskFields* fields = reinterpret_cast<muWifiInterfaceTaskFields*>(self);
+    fields->unk1048 = 0;
+    fields->unk104C = 0;
+    base->clearAppErrorStatus();
+}
+
+// HYPOTHESIS: putMyFriendStatusIcon stores the icon in the own friend record.
+extern "C" void fn_800D24CC(muWifiInterfaceTask* self, u8 icon) {
+    ntFriendInfo::getInstance()->unk0->unk450[0xDA] = icon;
+    g_Network.m_userData->unk0[0x33F4] = 1;
+    ntFriendInfo::getInstance()->setDirtyFlag(true);
+}
+
+extern "C" const u8* fn_800D2088(muWifiInterfaceTask* self, int index, u8* out) {
+    ntFriendInfo* info = ntFriendInfo::getInstance();
+    memcpy(out, &info->unk0->unk5B3[index].unk8[1], 0x4C);
+    return out;
+}
+
+extern "C" void fn_800D2520(muWifiInterfaceTask* self, const u8* mii) {
+    memcpy(&ntFriendInfo::getInstance()->unk0->unk450[0xDB], mii, 0x4C);
+    g_Network.m_userData->unk0[0x33F4] = 1;
+    ntFriendInfo::getInstance()->setDirtyFlag(true);
+}
+
+extern "C" void fn_800D2164(muWifiInterfaceTask* self, int index, u8 time) {
+    ntFriendInfo::getInstance()->unk0->unk350[index].unk2[1] = time;
+    ntFriendInfo::getInstance()->setDirtyFlag(true);
+    netReport("友達%dの通信状態:%d\n", index, time);
+}
+
+// HYPOTHESIS: putMyFriendStatusComment copies a 20 character comment into the own friend record.
+extern "C" void fn_800D2428(muWifiInterfaceTask* self, const u8* source) {
+    u8* destination = &ntFriendInfo::getInstance()->unk0->unk450[0xAA];
+    int count = 20;
+    memset(destination, 0, 40);
+    while (--count >= 0) {
+        int character = source[0];
+        destination[0] = character;
+        character |= source[1];
+        destination[1] = source[1];
+        source += 2;
+        destination += 2;
+        if (character == 0) {
+            break;
+        }
+    }
+    g_Network.m_userData->unk0[0x33F4] = 1;
+    ntFriendInfo::getInstance()->setDirtyFlag(true);
+}
+
+// HYPOTHESIS: getAssignedPlayerAID reads one byte of the assigned player entry of the parent.
+extern "C" u8 fn_800CB194(muWifiInterfaceTask* self, int index) {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        info = NULL;
+    } else {
+        info = &self->m_aidInfos[aid];
+    }
+    u8* entry;
+    if (info == NULL) {
+        netReport(lbl_80457A48);
+        entry = NULL;
+    } else if (!((info->unk78_b3 >> 2) & 1)) {
+        netReport(lbl_80457A74);
+        entry = NULL;
+    } else {
+        entry = &info->unkE4[index].unk0;
+    }
+    if (entry == NULL) {
+        return 0xFF;
+    }
+    return entry[1];
+}
+
+// HYPOTHESIS: getAssignedPlayerCharKind reads one byte of the assigned player entry of the parent.
+extern "C" u8 fn_800CB4AC(muWifiInterfaceTask* self, int index) {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        info = NULL;
+    } else {
+        info = &self->m_aidInfos[aid];
+    }
+    u8* entry;
+    if (info == NULL) {
+        netReport(lbl_80457A48);
+        entry = NULL;
+    } else if (!((info->unk78_b3 >> 2) & 1)) {
+        netReport(lbl_80457A74);
+        entry = NULL;
+    } else {
+        entry = &info->unkE4[index].unk0;
+    }
+    return entry != NULL ? entry[3] : 0x3E;
+}
+
+// HYPOTHESIS: getAssignedPlayerColor reads one byte of the assigned player entry of the parent.
+extern "C" u8 fn_800CB568(muWifiInterfaceTask* self, int index) {
+    muWifiAIDInfo* info;
+    u8 aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        info = NULL;
+    } else {
+        info = &self->m_aidInfos[aid];
+    }
+    u8* entry;
+    if (info == NULL) {
+        netReport(lbl_80457A48);
+        entry = NULL;
+    } else if (!((info->unk78_b3 >> 2) & 1)) {
+        netReport(lbl_80457A74);
+        entry = NULL;
+    } else {
+        entry = &info->unkE4[index].unk0;
+    }
+    return entry != NULL ? entry[4] : 0;
+}
+
+extern "C" void fn_8010F960(u8 stage, u8* arg1, u8* arg2, int arg3);
+extern "C" void fn_80145B98(NtTr* tr, int arg1);
+extern "C" void fn_800D0AE0(muWifiInterfaceTask* self);
+
+// HYPOTHESIS: the low bit of the byte at 0x56 of the AID info marks the stage as not yet sent.
+struct FlagByte {
+    u8 unk0_b7 : 7;
+    u8 unk0_b0 : 1;
+};
+
+// HYPOTHESIS: setStageKind stores the stage of the own AID and flags the info for sending.
+extern "C" void fn_800CA73C(muWifiInterfaceTask* self, int stage) {
+    u8 aid = Network::getMyAID();
+    if (aid == 0xFF) {
+        aid = 4;
+    }
+    u8* info = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
+    info[0x52] = stage;
+    fn_8010F960(stage, info + 0x53, info + 0xC, 0);
+    aid = Network::getMyAID();
+    if (aid == 0xFF) {
+        aid = 4;
+    }
+    info = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
+    reinterpret_cast<FlagByte*>(&info[0x56])->unk0_b0 = 0;
+    fn_800D0AE0(self);
+    fn_80145B98(lbl_805A03A8, 0xFE);
+}
+
+extern const char lbl_804587CC[0x28];
+
+// HYPOTHESIS: setStageSyncFlag stores the stage sync flag of the own AID and flags the info for sending.
+extern "C" void fn_800D1E58(muWifiInterfaceTask* self, int flag) {
+    u8 aid = Network::getMyAID();
+    if (aid == 0xFF) {
+        aid = 4;
+    }
+    u8* info = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
+    info[0x5A] = flag;
+    netReport(lbl_804587CC, flag);
+    aid = Network::getMyAID();
+    if (aid == 0xFF) {
+        aid = 4;
+    }
+    info = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
+    reinterpret_cast<FlagByte*>(&info[0x56])->unk0_b0 = 0;
+    fn_800D0AE0(self);
+    fn_80145B98(lbl_805A03A8, 0xFE);
+}
+
+extern const char lbl_80457928[0x2C];
+
+int muWifiInterfaceTask::getDisconnectResult(int* errorIndex) {
+    bool connected;
+    *errorIndex = 0;
+    if (g_muWifiInterfaceTask != NULL && g_muWifiInterfaceTask->unk40 == 0) {
+        connected = true;
+    } else {
+        connected = false;
+    }
+    if (!connected) {
+        netReport(lbl_80457928);
+        return 2;
+    }
+    if (&g_Network != NULL && gUnk805a03d8 != 0) {
+        return 1;
+    }
+    unk40 = 1;
+    return 2;
+}
+
+extern "C" int fn_800CBCB0(muWifiInterfaceTask* task, int* detail);
+
+int muWifiInterfaceTask::getConnectResult(int* errorIndex, int* errorCode, bool* isNewUser) {
+    if (errorCode) { *errorCode = 0; }
+    if (errorIndex) { *errorIndex = 0; }
+    if (isNewUser) {
+        *reinterpret_cast<u8*>(isNewUser) = *(reinterpret_cast<u8*>(lbl_805A0434) + 0x343C);
+    }
+    if (gUnk805a03d8 == 0) {
+        return 0;
+    }
+    int error = fn_800CBCB0(this, errorCode);
+    if (error != 0) {
+        *errorIndex = error;
+        return 3;
+    }
+    int status = gUnk805a03d8;
+    int connecting = 0;
+    if (status >= 1 && status < 3) {
+        connecting = 1;
+    }
+    if (connecting) {
+        return 1;
+    }
+    if (lbl_805A03F0 != 0) {
+        if (errorCode) { *errorCode = lbl_805A03F0; }
+        if (errorIndex) { *errorIndex = fn_800C9A4C(*errorCode); }
+        return 3;
+    }
+    if (isNewUser) {
+        *reinterpret_cast<u8*>(isNewUser) = *(reinterpret_cast<u8*>(lbl_805A0434) + 0x343C);
+    }
+    unk40 = 0;
+    fn_800CF22C(this);
+    return 2;
+}
+
+extern const char lbl_8045879C[0x30];
+
+// HYPOTHESIS: setContinueNextGame either ends the matching or flags the own AID as ready for the next game.
+extern "C" void fn_800D1ADC(muWifiInterfaceTask* self, bool next) {
+    if (!next) {
+        // HYPOTHESIS: the original passes the result register of disconnectAll on to clearAppErrorStatus.
+        NtBase* base = reinterpret_cast<NtBase*>(g_Network.disconnectAll(false));
+        muWifiInterfaceTaskFields* fields = reinterpret_cast<muWifiInterfaceTaskFields*>(self);
+        fields->unk1048 = 0;
+        fields->unk104C = 0;
+        base->clearAppErrorStatus();
+    } else {
+        u8 aid = Network::getMyAID();
+        if (aid == 0xFF) {
+            aid = 4;
+        }
+        u8* info = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
+        info[0x56] |= 0x20;
+        aid = Network::getMyAID();
+        if (aid == 0xFF) {
+            aid = 4;
+        }
+        info = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
+        reinterpret_cast<FlagByte*>(&info[0x56])->unk0_b0 = 0;
+        fn_800D0AE0(self);
+        fn_80145B98(lbl_805A03A8, 0xFE);
+        aid = Network::getMyAID();
+        if (aid == 0xFF) {
+            aid = 4;
+        }
+        netReport(lbl_8045879C, aid);
+    }
+}
+
+extern const char lbl_8045726C[0x14];
+extern "C" void fn_800C8F68(const char* fmt, ...);
+
+// HYPOTHESIS: the top five bits of the word at 0x7C of the AID info hold the wifi status.
+struct WifiStatusWord {
+    u32 unk0_b27 : 5;
+    u32 unk0_b0 : 27;
+};
+
+// HYPOTHESIS: putMyWifiStatus sends the given wifi status of the own AID.
+extern "C" void fn_800D221C(muWifiInterfaceTask* self, u8 status) {
+    ntFriendInfo::getInstance()->unk0->unk450[0x127] = status;
+    g_Network.m_userData->unk0[0x33F4] = 1;
+    netReport(lbl_8045726C, status);
+    fn_800C8F68(lbl_8045726C, status);
+    if (NtBase::isParent()) {
+        muWifiAIDInfo* info;
+        u8 aid = Network::getParentAID();
+        if (aid == 0xFF) {
+            info = NULL;
+        } else {
+            info = &self->m_aidInfos[aid];
+        }
+        if (info != NULL) {
+            reinterpret_cast<WifiStatusWord*>(reinterpret_cast<u8*>(info) + 0x7C)->unk0_b27 = status;
+            aid = Network::getMyAID();
+            if (aid == 0xFF) {
+                aid = 4;
+            }
+            u8* own = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
+            reinterpret_cast<FlagByte*>(&own[0x56])->unk0_b0 = 0;
+            fn_800D0AE0(self);
+            fn_80145B98(lbl_805A03A8, 0xFE);
+        }
+    }
+}
+
+// HYPOTHESIS: sendAIDInfo sets the sent flag of the own AID info and asks for a send.
+void muWifiInterfaceTask::sendAIDInfo(bool flag, u8 mask) {
+    u8 aid = Network::getMyAID();
+    if (aid == 0xFF) {
+        aid = 4;
+    }
+    u8* info = reinterpret_cast<u8*>(&m_aidInfos[aid]);
+    reinterpret_cast<FlagByte*>(&info[0x56])->unk0_b0 = flag;
+    fn_800D0AE0(this);
+    fn_80145B98(lbl_805A03A8, mask);
+}
