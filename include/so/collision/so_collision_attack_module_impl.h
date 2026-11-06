@@ -229,11 +229,19 @@ struct soCollisionAbsoluteArray<0> {
 };
 #endif
 
+// Opt-in (off by default): the number of collision groups of the build config follows the number of parts (the mine group of
+// sora_adv_stage holds 13 groups for 13 parts although its config names one group).
+#ifdef YK_ATTACK_GROUPS_PER_PART
+#define SO_ATTACK_GROUP_COUNT(parts, groups) (parts)
+#else
+#define SO_ATTACK_GROUP_COUNT(parts, groups) (groups)
+#endif
+
 template <soCollision::Category TCategory, u32 TNumParts, u32 TNumAbsolutes, class TCollisionAttackModule, u32 TNumGroups, bool TBool1, bool TBool2>
 class soCollisionAttackModuleBuildConfig {
 public: // the stage-side builder (ykNoHitNormal) reaches the members through soCollisionAttackModuleBuilder::getModule()
     soArrayVector<soCollisionAttackPart, TNumParts> m_attackPartArrayVector;
-    soArrayVector<soCollisionGroup, TNumGroups> m_collisionGroupArrayVector;
+    soArrayVector<soCollisionGroup, SO_ATTACK_GROUP_COUNT(TNumParts, TNumGroups)> m_collisionGroupArrayVector;
 #ifdef YK_STAGE_INLINE // HYPOTHESIS: the stage RELs' zero-absolute configs hold an soArrayNull (its default element is a temporary of the call)
     typename soCollisionAbsoluteArray<TNumAbsolutes>::Type m_attackAbsoluteArrayVector;
 #else
@@ -246,7 +254,7 @@ public:
                                        gfTask::Category taskCategory,
                                        soEventObserverRegistrationDesc* registrationDesc) :
                                        m_attackPartArrayVector(TNumParts, soCollisionAttackPart(TCategory, TBool1), 0),
-                                       m_collisionGroupArrayVector(TNumGroups, 0),
+                                       m_collisionGroupArrayVector(SO_ATTACK_GROUP_COUNT(TNumParts, TNumGroups), 0),
 #ifdef YK_STAGE_INLINE
                                        m_attackAbsoluteArrayVector(TNumAbsolutes, soCollisionAttackAbsolute(), 0),
 #else

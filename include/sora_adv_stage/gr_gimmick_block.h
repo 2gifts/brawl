@@ -6,7 +6,10 @@
 
 // HYPOTHESIS: The breakable block of the Subspace stages (sora_adv_stage gr_gimmick_block.o). The block manager and the
 // block record are not described yet.
+class grAdventureMineManager;
+
 class grGimmickBlock : public grGimmick {
+    friend class grAdventureMineManager; // HYPOTHESIS: the mine group numbers its mines through unk14C
 protected:
     u8 unk14C;            // 0x14C
     u8 m_isBroken;        // 0x14D, set by breakBlock
