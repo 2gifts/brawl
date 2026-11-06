@@ -8,34 +8,16 @@
 #include <wn/wn_article_build_info.h>
 #include <wn/weapon.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
+
+// Full article types let the fighter own their pools and teardown.
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/fox/wn_fox_illusion.h>
+#include <wn/fox/wn_fox_blaster_bullet.h>
 #include <wn/fox/wn_fox_blaster.h>
 #include <wn/fox/wn_fox_land_master.h>
-
-class Vec2f;
-class Vec3f;
-struct wnFoxIllusionData;
-
-// The Phantasm afterimage. The full class lives in wn/fox/wn_fox_illusion.h, whose builder specializations cannot coexist
-// with this Fighter-based builder unit, so the fighter unit sees an opaque shell of the right size.
-class wnFoxIllusion : public Weapon {
-    u8 m_unreconstructed[0x1DE4 - sizeof(Weapon)];
-public:
-    wnFoxIllusion(s32 articleId, const wnArticleBuildInfo& info, const wnFoxIllusionData* data);
-    virtual ~wnFoxIllusion();
-    void activate(s32 founderTaskId, s32 unk1, s32 team, float lr, s32 unk2, s32 unk3);
-};
-static_assert(sizeof(wnFoxIllusion) == 0x1DE4, "Fox Illusion layout is wrong!");
-
-// The blaster bullet. The full class lives in wn/fox/wn_fox_blaster_bullet.h (a weapon builder specialization that cannot coexist
-// with this Fighter-based builder unit), so the fighter unit sees an opaque shell of the right size.
-struct wnFoxBlasterBulletData;
-class wnFoxBlasterBullet : public Weapon {
-    u8 m_unreconstructed[0x2178 - sizeof(Weapon)];
-public:
-    wnFoxBlasterBullet(s32 articleId, const wnArticleBuildInfo& info, const wnFoxBlasterBulletData* data);
-    virtual ~wnFoxBlasterBullet();
-};
-static_assert(sizeof(wnFoxBlasterBullet) == 0x2178, "Fox blaster bullet layout is wrong!");
 
 typedef wnArticleHierarchy<wnFoxLandMaster, 1, soInstancePoolRoot> ftFoxLandMasterPool;
 typedef wnArticleHierarchy<wnFoxIllusion, 2, ftFoxLandMasterPool> ftFoxIllusionPool;

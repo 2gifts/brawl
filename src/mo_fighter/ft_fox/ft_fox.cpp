@@ -27,6 +27,8 @@
 #include <so/team/so_team.h>
 #include <so/param/so_param_customize_module_impl.h>
 
+// The fighter owns the shared out-of-line kinetic teardown.
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftFoxBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
@@ -716,14 +718,4 @@ soTeam::~soTeam() { }
 #pragma dont_inline on
 soResourceIdAccesser::~soResourceIdAccesser() { }
 #pragma dont_inline off
-// Article specialization also declared by the weapon-builder header, which
-// cannot coexist with this Fighter-based builder translation unit.
-template <>
-class soParamCustomizeModuleBuilder<soParamCustomizeModuleBuildConfig<soParamCustomizeModuleImpl> > {
-    soParamCustomizeModuleImpl m_paramCustomizeModule;
-public:
-    soParamCustomizeModuleBuilder(soModuleAccesser*) { }
-    ~soParamCustomizeModuleBuilder();
-};
-soParamCustomizeModuleBuilder<soParamCustomizeModuleBuildConfig<soParamCustomizeModuleImpl> >::~soParamCustomizeModuleBuilder() { }
 soArticleMediator::~soArticleMediator() { }
