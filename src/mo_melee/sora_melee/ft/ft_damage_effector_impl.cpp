@@ -2,6 +2,7 @@
 #include <ft/ft_common_data_accesser.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
+#include <so/so_module_hyp.h>
 #include <types.h>
 
 // HYPOTHESIS: map name soDamageEffectorImpl::reqCommonEffectParam (static); it stays unnamed in sora_melee.
@@ -93,6 +94,32 @@ void ftDamageEffectorImpl::reqQuake(float frameReaction, soModuleAccesser* modul
             kind = soCameraModule::Quake_L;
         }
         moduleAccesser->getCameraModule().reqQuake(kind, moduleAccesser);
+    }
+}
+
+void ftDamageEffectorImpl::reqShake(soModuleAccesser* moduleAccesser, int situation, Vec2f* normal, soCollisionAttackData* attackData, int hitStopFrame) {
+    // HYPOTHESIS: shake kind 1 on the ground, 2 for electric attacks in status 0x54, none for ice or status 0xCA.
+    int kind = -1;
+    if (attackData->m_attribute != soCollisionAttackData::Attribute_Ice) {
+        int statusKind = moduleAccesser->getStatusModule().getStatusKind();
+        if (statusKind != 0xCA) {
+            if (attackData->m_attribute == soCollisionAttackData::Attribute_Electric) {
+                if (statusKind == 0x54) {
+                    kind = 2;
+                }
+            } else {
+                kind = situation == 0;
+            }
+        }
+    }
+    if (kind != -1) {
+        int frame;
+        if (attackData->m_attribute == soCollisionAttackData::Attribute_Paralyze) {
+            frame = hitStopFrame;
+        } else {
+            frame = soValueAccesser::getConstantFloat(moduleAccesser, 0x7E6, 0) + hitStopFrame * soValueAccesser::getConstantFloat(moduleAccesser, 0x7E5, 0);
+        }
+        getShakeModule(moduleAccesser).req(kind, frame, situation == 0, normal);
     }
 }
 
