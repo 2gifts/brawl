@@ -9,11 +9,20 @@
 #include <wn/wn_article_build_info.h>
 #include <wn/weapon.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
+#ifndef FT_LUCAS_ARTICLES_FULL
 #include <wn/lucas/wn_lucas_pk_flash.h>
+#endif
 
 // The fighter unit only builds the articles into its pools; their definitions live in the article units (see
 // src/mo_fighter/ft_lucas/wn_lucas_*.cpp). Like R.O.B.'s pools this header declares them as opaque shells of the right size,
 // so the native-builder macros of the article units do not leak into the fighter unit.
+#ifdef FT_LUCAS_ARTICLES_FULL // the weak article destructors of the unit need the whole classes
+#include <wn/lucas/wn_lucas_pkflash.h>
+#include <wn/lucas/wn_lucas_pk_fire.h>
+#include <wn/lucas/wn_lucas_pk_thunder.h>
+#include <wn/lucas/wn_lucas_pk_star_storm.h>
+#include <wn/lucas/wn_lucas_himohebi.h>
+#else
 struct wnLucasPKFireData;
 struct wnLucasPKThunderData;
 struct wnLucasPKStarStormData;
@@ -56,6 +65,8 @@ public:
     void activate(int founderTaskId, int kind, int team, float lr, int attach, int plain);
 };
 static_assert(sizeof(wnLucasHimohebi) == 0x2104, "Rope Snake layout is wrong!");
+
+#endif
 
 typedef wnArticleHierarchy<wnLucasHimohebi, 1, soInstancePoolRoot> ftLucasHimohebiPool;
 typedef wnArticleHierarchy<wnLucasPKStarStorm, 16, ftLucasHimohebiPool> ftLucasStarStormPool;

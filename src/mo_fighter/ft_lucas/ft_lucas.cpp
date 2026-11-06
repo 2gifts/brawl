@@ -1,3 +1,10 @@
+#define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR
+#define FT_LUCAS_ARTICLES_FULL
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define WN_STATUS_PLAIN_NULL_ARRAY
 #define FT_POOL_ROOT_NONPOLYMORPHIC
 #define SO_GENERAL_WORK_BOUNDED_CLEAR
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
@@ -6,6 +13,7 @@
 #define FT_LUCAS_ARTICLE_POOLS
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #include <ft/builder/ft_dol_array_list.h>
+FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 4); // the status process vector of PK Flash lives in sora_melee
 #include <ft/ft_reflector_group.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/lucas/ft_lucas.h>
@@ -35,6 +43,11 @@ soStatusModuleImpl::~soStatusModuleImpl() { }
 #pragma dont_inline on
 template soCollisionShieldModuleBuilder<ftLucasCollisionReflectorBaseModuleBuildConfig>::soCollisionShieldModuleBuilder(soModuleAccesser*, int, gfTask::Category);
 template soCollisionShieldModuleBuilder<ftLucasCollisionAbsorberModuleBuildConfig>::soCollisionShieldModuleBuilder(soModuleAccesser*, int, gfTask::Category);
+#pragma dont_inline off
+
+extern int g_soValueVariation;
+#pragma dont_inline on
+int soValueAccesser::getValueVariation() { return g_soValueVariation; }
 #pragma dont_inline off
 
 ftLucasExtendParamAccesser g_ftLucasExtendParamAccesser;
@@ -266,7 +279,7 @@ template <class W> struct ftLucasArticleTraits;
         } \
     };
 
-FT_LUCAS_TRAITS(wnLucasPKFlash, void, 0, getWeaponData91)
+FT_LUCAS_TRAITS(wnLucasPKFlash, const wnLucasPKFlashData, 0, getWeaponData91)
 FT_LUCAS_TRAITS(wnLucasPKFire, const wnLucasPKFireData, 1, getWeaponData92)
 FT_LUCAS_TRAITS(wnLucasPKThunder, const wnLucasPKThunderData, 2, getWeaponData93)
 FT_LUCAS_TRAITS(wnLucasPKStarStorm, const wnLucasPKStarStormData, 3, getWeaponData95)
@@ -285,8 +298,10 @@ template <class W>
 wnArticleHolder<W>::~wnArticleHolder() { }
 template <class W, int N>
 wnArticleSubPool<W, N>::~wnArticleSubPool() { }
+template class wnArticleHolder<wnLucasPKFire>;
+template wnArticleHolder<wnLucasPKThunder>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnLucasPKStarStorm>::wnArticleHolder(soModuleAccesser*);
 template wnArticleHolder<wnLucasPKFlash>::~wnArticleHolder();
-template wnArticleHolder<wnLucasPKFire>::~wnArticleHolder();
 template wnArticleHolder<wnLucasPKThunder>::~wnArticleHolder();
 template wnArticleHolder<wnLucasPKStarStorm>::~wnArticleHolder();
 template wnArticleHolder<wnLucasHimohebi>::~wnArticleHolder();
