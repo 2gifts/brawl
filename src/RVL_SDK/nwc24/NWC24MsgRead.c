@@ -368,7 +368,8 @@ NWC24Err fn_8039FEB0(const NWC24MsgObj *pMsg, u32 idx, u8 *buf, u32 size) {
 
     got = 0;
     result = fn_803A001C(&file, &msg->attached[idx], buf, size, &got);
-    if (result == NWC24_OK && got != msg->attachedSize[idx]) {
+    // BYTES: refresh the const private view for the post-decode size check.
+    if (result == NWC24_OK && got != ((const NWC24iMsgObj *)pMsg)->attachedSize[idx]) {
         result = NWC24_ERR_FORMAT;
     }
 
