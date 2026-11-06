@@ -64,4 +64,6 @@ struct hkContactMgr : hkReferencedObject {
     // with the entry's two collidables). HYPOTHESIS: the parameter types beyond the call shape.
     virtual void processContact(const hkCollidable& a, const hkCollidable& b, const hkProcessCollisionInput& input,
                                 hkProcessCollisionOutput& output);
+    // 0x20: hkWorldAgentUtil::removeAgent calls it after the agent entry is destroyed.
+    virtual void cleanup();
 };

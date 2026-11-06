@@ -44,6 +44,7 @@ struct hkEntity : hkWorldObject {
     static const void* getVtablehkEntity();
 
     hkMotion* getMotion() { return (hkMotion*)m_motion; }
+    hkBool isFixed() { return getMotion()->m_type == hkMotion::MOTION_FIXED; }
     hkLinkedCollidable* getLinkedCollidable(); // out of line in src/havok/hkSimulation.cpp (fn_802F2E3C)
 
     virtual hkMotionState* getMotionState();

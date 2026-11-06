@@ -1,5 +1,7 @@
 // Havok translation unit hkWorldAgentUtil.o (main.dol 0x802F34F0-0x802F5D5C).
-// Work in progress: hkWorldCallbackUtil part. Functions in address order (map names in brackets).
+// Work in progress. Functions in address order (map names in brackets).
+//   0x802F34F0   addAgent (not written), removeAgent
+//   0x802F377C   removeAgentAndItsToiEvents, getIslandFromAgentEntry, invalidateTim, warpTime
 //   0x802F39A0   fireActionAdded, fireActionRemoved, fireEntityAdded, fireEntityRemoved, fireEntityShapeSet,
 //   firePhantomAdded, firePhantomRemoved, fireConstraintAdded, fireConstraintRemoved (248 bytes each)
 
@@ -7,6 +9,83 @@
 #include <havok/hkWorldConstraintUtil.h>
 #include <havok/hkEntity.h>
 #include <havok/hkSimulationIsland.h>
+#include <havok/hkWorldAgentUtil.h>
+#include <havok/hkAgentNnMachine.h>
+#include <havok/hkWorld.h>
+#include <havok/hkSimulation.h>
+#include <havok/hkCollisionAgent.h>
+
+typedef hkArray<hkLinkedCollidable::CollisionEntry> CollisionEntryArray;
+
+void hkWorldAgentUtil::removeAgent(hkAgentNnEntry* entry) {
+    hkLinkedCollidable* collidableA = entry->m_collidable[0];
+    hkLinkedCollidable* collidableB = entry->m_collidable[1];
+    hkEntity* entityA = (hkEntity*)((char*)collidableA + collidableA->m_ownerOffset);
+    hkEntity* entityB = (hkEntity*)((char*)collidableB + collidableB->m_ownerOffset);
+    hkSimulationIsland* island;
+    if (entityA->m_simulationIsland == entityB->m_simulationIsland) {
+        island = entityA->m_simulationIsland;
+        island->m_flags.m_stateA = 1;
+    } else if (entityA->isFixed()) {
+        island = entityB->m_simulationIsland;
+    } else if (entityB->isFixed()) {
+        island = entityA->m_simulationIsland;
+    } else {
+        island = getIslandFromAgentEntry(entry, entityA->m_simulationIsland, entityB->m_simulationIsland);
+        entityA->m_simulationIsland->m_flags.m_stateA = 1;
+        entityB->m_simulationIsland->m_flags.m_stateA = 1;
+    }
+    hkContactMgr* mgr = entry->m_contactMgr;
+    hkAgentNnMachine_DestroyAgent(island->m_agentTrack, entry, island->m_world->m_collisionDispatcher);
+    mgr->cleanup();
+}
+
+void hkWorldAgentUtil::removeAgentAndItsToiEvents(hkAgentNnEntry* entry) {
+    hkLinkedCollidable* collidable = entry->m_collidable[0];
+    hkEntity* entity = (hkEntity*)((char*)collidable + collidable->m_ownerOffset);
+    entity->m_simulationIsland->m_world->m_simulation->removeCollisionInformationForAgent(entry);
+    removeAgent(entry);
+}
+
+hkSimulationIsland* hkWorldAgentUtil::getIslandFromAgentEntry(hkAgentNnEntry* entry, hkSimulationIsland* candidateA,
+                                                              hkSimulationIsland* candidateB) {
+    hkBool searchA = candidateA->m_agentTrack.getNumSectors() <= candidateB->m_agentTrack.getNumSectors();
+    hkSimulationIsland* island = searchA ? candidateA : candidateB;
+    hkBool found = false;
+    for (int i = 0; i < island->m_agentTrack.getNumSectors(); i++) {
+        hkAgentNnSector* sector = island->m_agentTrack.getSector(i);
+        if ((void*)sector <= (void*)entry && (void*)entry < (void*)((char*)sector + island->m_agentTrack.m_sectorSize)) {
+            found = true;
+            break;
+        }
+    }
+    if (searchA ^ found) {
+        return candidateB;
+    }
+    return candidateA;
+}
+
+void hkWorldAgentUtil::invalidateTim(hkEntity* entity, hkProcessCollisionInput& input) {
+    hkLinkedCollidable* collidable = &entity->m_collidable;
+    for (int i = 0; i < ((const CollisionEntryArray&)collidable->m_collisionEntries).getSize(); i++) {
+        hkAgentNnMachine_InvalidateTimInAgent(
+            ((const CollisionEntryArray&)collidable->m_collisionEntries)[i].m_agentEntry, input);
+    }
+}
+
+void hkWorldAgentUtil::warpTime(hkSimulationIsland* island, hkReal oldTime, hkReal newTime,
+                                hkProcessCollisionInput& input) {
+    for (int i = 0; i < island->m_agentTrack.getNumSectors();) {
+        hkAgentNnEntry* entry = (hkAgentNnEntry*)island->m_agentTrack.getSector(i);
+        i++;
+        hkAgentNnEntry* end = (i == island->m_agentTrack.getNumSectors())
+                                  ? (hkAgentNnEntry*)((char*)entry + island->m_agentTrack.m_bytesUsedInLastSector)
+                                  : (hkAgentNnEntry*)((char*)entry + island->m_agentTrack.m_sectorSize);
+        for (; entry < end; entry = (hkAgentNnEntry*)((char*)entry + entry->m_size)) {
+            hkAgentNnMachine_WarpTimeInAgent(entry, oldTime, newTime, input);
+        }
+    }
+}
 
 template <typename T>
 void hkWorldCallbackUtil::removeNullListeners(hkArray<T*>& list) {

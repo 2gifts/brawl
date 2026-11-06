@@ -16,6 +16,7 @@ struct hkEntity;
 struct hkConstraintInstance;
 struct hkPhysicsSystem;
 struct hkCollisionFilter;
+struct hkCollisionDispatcher;
 struct hkStatisticsCollector;
 struct hkAabb;
 struct hkProcessCollisionInput;
@@ -46,7 +47,8 @@ struct hkWorld : hkReferencedObject {
     u8 m_unk5C[0x0C];                               // 0x5C .. 0x67 not recovered
     hkProcessCollisionInput* m_collisionInput;      // 0x68 HYPOTHESIS: name; integrate copies the step info into it
     hkCollisionFilter* m_collisionFilter;           // 0x6C handed to the dispatcher with the new pairs
-    u8 m_unk70[0x04];                               // 0x70 not recovered
+    hkCollisionDispatcher* m_collisionDispatcher;   // 0x70 HYPOTHESIS: name; hkWorldAgentUtil::removeAgent hands it to
+                                                    // hkAgentNnMachine_DestroyAgent
     hkWorldOperationQueue* m_operationQueue;        // 0x74 (allocated 0x20 bytes in the constructor)
     int m_pendingOperationsCount;                                    // 0x78 how many world operations are sitting in the queue
     int m_lockCount;                                // 0x7C incremented around add/remove calls

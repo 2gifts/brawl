@@ -46,11 +46,6 @@ void hkSimulationIsland::addAction(hkAction* action) {
 }
 
 // Clears the matching action slot (nulls are compacted later) and the action's island pointer.
-struct hkSimulationIslandFlags {
-    unsigned char m_stateA : 2;
-    unsigned char m_stateB : 2;
-    unsigned char m_rest : 4;
-};
 
 static int findActionIndex(const hkArray<hkAction*>& actions, hkAction* action) {
     for (int i = 0; i < actions.getSize(); i++) {
