@@ -91,6 +91,7 @@ public:
     soInstancePool(soModuleAccesser* acc) : Parent(acc), m_sub(acc) { }
     // HYPOTHESIS: the tag selects the energy at this hierarchy level.
     typename Info::Type* getEnergy(const soIntToType<Index>&) { return m_sub.getEnergy(); }
+    soInstancePoolSub<Info, Next>& getSub() { return m_sub; }
     void clearSpeed() {
         for (int i = 0; i < Info::Count; i++)
             soKineticTransactHelper::checkClearSpeed(m_sub.getInstanceAt(i));
