@@ -70,7 +70,7 @@ void grAdventureMineManager::startup(gfArchive* data, u32 unk1, gfSceneRoot::Lay
         Matrix copied(true);
         Matrix matrix(true);
         m_sceneModels[0]->GetScnMtxPos(&matrix, nw4r::g3d::ScnObj::MTX_WORLD, idx + 1);
-        fn_8003E388(&matrix, &copied);
+        matrix.copy(&copied);
         unk174[idx]->setMatrix(&copied);
         unk174[idx]->updateG3dProcCalcWorld();
         unk174[idx]->unk164 = unk1AC->m_mineParam;
