@@ -94,3 +94,11 @@ void grGimmickSpring::presentPosEvent() {
 
 grGimmickSpring::~grGimmickSpring() {
 }
+
+void grGimmickSpring::presentShootEvent() {
+    grGimmickSpringEventArgs args(Gimmick::Spring_Event_Shoot, 0);
+    getTopNode(&args.m_topPos);
+    args.m_bounce = m_springData->m_bounce;
+    args.m_rot = m_springData->m_rot;
+    m_yakumono->presentEventGimmick(&args, -1);
+}

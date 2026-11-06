@@ -9,8 +9,6 @@
 #include <st_gw/gr_gw_fire_spring.h>
 #include <st_gw/gr_gw_item.h>
 
-// grGimmickSpring::presentShootEvent (sora_melee, unnamed)
-extern "C" void fn_27_2704CC(grGimmickSpring* spring);
 
 static grGWMarker sMarkerA(0xFF, 0);
 static grGWMarker sMarkerB(0xFF, 1);
@@ -219,7 +217,7 @@ void grGWFireSpring::onGimmickEvent(soGimmickEventArgs* eventInfo, int* taskId) 
     switch (kind) {
     case Gimmick::Spring_Event_On:
         getTopNode(&static_cast<soGimmickSpringEventArgs*>(eventInfo)->m_topPos);
-        fn_27_2704CC(this);
+        presentShootEvent();
         m_snd.playSE(static_cast<SndID>(0x1C91), 0, 0, -1);
         m_snd.setPos(m_posWork);
         break;

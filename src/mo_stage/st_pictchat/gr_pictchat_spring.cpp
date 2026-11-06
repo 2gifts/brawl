@@ -6,8 +6,6 @@
 
 #include <st_pictchat/gr_pictchat.h>
 
-// grGimmickSpring::presentShootEvent (sora_melee, unnamed)
-extern "C" void fn_27_2704CC(grGimmickSpring* spring);
 
 // The spring of the picture (it is there only while the picture is).
 grPictchatSpring::grPictchatSpring(const char* taskName) : grGimmickSpring(taskName) {
@@ -108,7 +106,7 @@ void grPictchatSpring::updateActive(float deltaFrame) {
         if (*m_pictIDWork != m_pictID && *m_stateWork == 5) {
             m_state = 0;
         } else if (*m_stateWork == 2) {
-            fn_27_2704CC(this);
+            presentShootEvent();
             *m_stateWork = 3;
         } else {
             presentPosEvent();
