@@ -31,6 +31,7 @@ public:
     gfFileIOHandle unk3EAC;
     bool unk3EB0;
 
+    tySealListDataManager(bool load);
     bool isLoadFinish();
     ~tySealListDataManager();
     void setData(u8* data, u32 size);

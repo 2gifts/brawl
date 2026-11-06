@@ -2,9 +2,7 @@
 #include <ad/ad_seal_info.h>
 #include <ty/ty_seal_listmng.h>
 #include <memory.h>
-
-// tySealListDataManager::__ct (the map name); src/mo_adv_menu/mu_adv_result.cpp calls it by this stand-in name.
-extern "C" void* fn_800AD808(void* memory, int load);
+#include <new>
 
 const u8 lbl_80409798[48] = {
     0, 1, 2, 3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 13,
@@ -19,11 +17,12 @@ adSealInfoResult::~adSealInfoResult() {
 }
 
 void adSealInfoResult::getSealInfoPrepare() {
-    void* manager = operator new(sizeof(tySealListDataManager), Heaps::MenuInstance);
-    if (manager) {
-        manager = fn_800AD808(manager, 1);
+    void* memory = operator new(sizeof(tySealListDataManager), Heaps::MenuInstance);
+    tySealListDataManager* manager = NULL;
+    if (memory) {
+        manager = new (memory) tySealListDataManager(true);
     }
-    unk0 = static_cast<tySealListDataManager*>(manager);
+    unk0 = manager;
 }
 
 bool adSealInfoResult::isLoadFinish() {
