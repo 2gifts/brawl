@@ -7,33 +7,19 @@
 #include <wn/wn_article_pool.h>
 #include <wn/wn_article_build_info.h>
 #include <wn/weapon.h>
+// Full article types let the fighter own their pools and teardown.
+#define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/zelda/wn_zelda_dein.h>
+#include <wn/zelda/wn_zelda_dein_s.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
 
 class Vec3f;
-struct wnZeldaDeinData;
-struct wnZeldaDeinSData;
 struct wnZeldaLightingBowData;
 struct wnZeldaLightingBowArrowData;
-
-// Din's Fire (the class is in the REL). Opaque shell: the full class is a weapon builder that cannot coexist with this unit.
-class wnZeldaDein : public Weapon {
-    u8 m_unreconstructed[0x20D8 - sizeof(Weapon)];
-public:
-    wnZeldaDein(s32 articleId, const wnArticleBuildInfo& info, const wnZeldaDeinData* data);
-    virtual ~wnZeldaDein();
-    void activate(int founderTaskId, int team, const Vec3f* position, float lr);
-};
-static_assert(sizeof(wnZeldaDein) == 0x20D8, "wnZeldaDein layout is wrong!");
-
-// The small Din's Fire (wn/zelda/wn_zelda_dein_s.h). Opaque shell for the same reason.
-class wnZeldaDeinS : public Weapon {
-    u8 m_unreconstructed[0x1F18 - sizeof(Weapon)];
-public:
-    wnZeldaDeinS(s32 articleId, const wnArticleBuildInfo& info, const wnZeldaDeinSData* data);
-    virtual ~wnZeldaDeinS();
-    bool activeArticle(soModuleAccesser* acc);
-};
-static_assert(sizeof(wnZeldaDeinS) == 0x1F18, "wnZeldaDeinS layout is wrong!");
 
 // The light bow of the Final Smash (the class is in sora_melee).
 class wnZeldaLightingBow : public Weapon {

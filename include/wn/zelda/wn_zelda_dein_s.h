@@ -48,4 +48,5 @@ public:
     virtual ~wnZeldaDeinS() { }
     // HYPOTHESIS: the last parameter is the value of the work float 0x21000001.
     void activate(int founderTaskId, int team, const Vec3f* position, float lr, float unk);
+    bool activeArticle(soModuleAccesser* acc);
 };
