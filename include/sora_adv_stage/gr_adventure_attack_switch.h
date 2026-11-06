@@ -2,6 +2,7 @@
 
 #include <StaticAssert.h>
 #include <gr/gr_yakumono.h>
+#include <so/collision/so_collision_hit_part.h>
 #include <types.h>
 
 // HYPOTHESIS: The switch base of the Subspace switches (sora_melee gr_yakumono_switch.o, not decompiled yet). Only the
@@ -27,8 +28,10 @@ static_assert(sizeof(grYakumonoSwitch) == 0x160, "Class is wrong size!");
 // HYPOTHESIS: The type name is from the sora_adv_stage map (createGimmickFunc<25grGimmickAttackSwitchData, ...>); only the
 // word whose address onDamage passes on is placed.
 struct grGimmickAttackSwitchData {
-    u8 unk0[0x70];
-    u32 unk70;
+    u8 unk0[0xC];
+    float m_onTime; // 0xC, HYPOTHESIS: seconds the switch stays on (0 keeps it on)
+    u8 unk10[0x60];
+    soCollisionHitData::Simple m_hit; // 0x70
 };
 
 class grAdventureAttackSwitch : public grYakumonoSwitch {
