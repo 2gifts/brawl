@@ -1,9 +1,25 @@
 #define MT_VEC2F_ASSIGN_NOINLINE
-#include <wn/yoshi/wn_yoshi_star.h>
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define FT_REL_LINK_EXTERN
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/yoshi/wn_yoshi_star_build.h>
 #include <wn/wn_activate_desc.h>
 #include <wn/wn_kinetic_energy_normal.h>
 #include <so/so_module_accesser.h>
 #include <ac/ac_anim_cmd_impl.h>
+
+wnYoshiStar::wnYoshiStar(s32 articleId, const wnArticleBuildInfo& info, const wnYoshiStarData* data) :
+    wnWeaponBuilder<wnYoshiStarModuleAccesserBuildConfig>(
+        "YoshiStar", articleId, info,
+        wnModuleAccesserBuildData(0x3b, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), static_cast<u8>(data->m_resGroupNo), -1, &m_paramAccesser,
+                                  0, 0, 0, 0, 0, 0, 0)),
+    m_param(data->m_param), m_paramAccesser(data->m_param) {
+    Weapon::deactivate(false);
+}
 
 void wnYoshiStar::activate(int founderTaskId, int team, Vec3f* pos, float lr) {
     wnActivateDesc desc(founderTaskId, 0xFFFF, 0xFFFF, 0xFFFF, -1, -1, 0, 0, *pos, lr, team, 0, 2, 0x80, 0, 0x35F, 0);
