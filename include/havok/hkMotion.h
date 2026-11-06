@@ -6,6 +6,7 @@
 #include <havok/hkMotionState.h>
 #include <havok/hkRegistry.h>
 #include <havok/hkWorldCinfo.h> // hkFinishLoadedObjectFlag (int m_finishing)
+#include <havok/hkThreadMemory.h>
 
 struct hkTransform;
 struct hkMatrix3;
@@ -37,6 +38,12 @@ struct hkMotion : hkReferencedObject {
         MOTION_THIN_BOX_INERTIA = 8,
         MOTION_MAX_ID = 9,
     };
+
+    // The deleting destructors of the motions in hkEntity.o free through the thread memory (class 0x2c), as
+    // hkKeyframedRigidMotion's. No class operator new here: it would hide the placement new hkEntity uses.
+    static void operator delete(void* p) {
+        hkThreadMemory::s_instance->deallocateChunk(p, ((hkReferencedObject*)p)->m_memSizeAndFlags, 0x2c);
+    }
 
     u8 m_type;                     // 0x08 (MotionType)
     hkMotionState m_motionState;   // 0x10

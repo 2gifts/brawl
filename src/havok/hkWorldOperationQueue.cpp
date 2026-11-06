@@ -175,7 +175,7 @@ struct hkWorldOperationUserCallback : hkReferencedObject {
     virtual void worldOperationUserCallback(int userData); // 0x10
 };
 
-static inline hkMotion* motionOf(hkRigidBody* body) { return reinterpret_cast<hkMotion*>(body->m_motion); }
+static inline hkMotion* motionOf(hkRigidBody* body) { return body->getMotion(); }
 
 // the pointer lists the batch ops carry get freed the same way they were allocated: count * 4 bytes, class 4
 // motion type 7 is fixed. HYPOTHESIS: an inline hkBool query on the entity's motion (byte 0xA8)

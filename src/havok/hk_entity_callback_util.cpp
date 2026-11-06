@@ -6,6 +6,7 @@
 
 #include <havok/hkEntity.h>
 #include <havok/hkBase.h>
+#include <havok/hkEntityCallbackUtil.h>
 
 // HYPOTHESIS: collision listener interface as used by the entity callbacks (vtable slots 3, 4, 5).
 struct hkCollisionListener : hkBaseObject {
@@ -25,11 +26,6 @@ struct hkCollisionEventRemoved {
     hkEntity* m_entity; // 0x10
 };
 
-struct hkEntityCallbackUtil {
-    static void fireContactPointConfirmedInternal(hkEntity* entity, hkCollisionEventConfirmed* ev);
-    static void fireContactPointRemovedInternal(hkEntity* entity, hkCollisionEventRemoved* ev);
-    static void fireContactProcessInternal(hkEntity* entity, hkCollisionEventConfirmed* ev);
-};
 
 // compacts a listener list by dropping its null entries (the same shape as hkWorldCallbackUtil's)
 template <typename T>

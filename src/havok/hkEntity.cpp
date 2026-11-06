@@ -30,6 +30,14 @@
 #include <new>
 #include <havok/hkEntity.h>
 #include <havok/hkWorldOperationUtil.h>
+#include <havok/hkSphereMotion.h>
+#include <havok/hkStabilizedSphereMotion.h>
+#include <havok/hkBoxMotion.h>
+#include <havok/hkStabilizedBoxMotion.h>
+#include <havok/hkFixedRigidMotion.h>
+#include <havok/hkThinBoxMotion.h>
+#include <havok/hkEntityCallbackUtil.h>
+#include <havok/hkEntityDeactivator.h>
 
 
 void hkEntity::finishLoadedObjecthkEntity(void* p) {
@@ -48,6 +56,43 @@ const void* hkEntity::getVtablehkEntity() {
     hkVector4 buf[31]; // 0x1F0 bytes of 16-byte-aligned storage for the placed object
     new (buf) hkEntity(flag);
     return *(const void**)buf;
+}
+
+// The motion is loaded as raw bytes: rebuild the object of its type in place so it gets its vtable back.
+// Dynamic (type 1) motions are not rebuilt.
+hkEntity::hkEntity(hkFinishLoadedObjectFlag flag) : hkWorldObject(flag), m_motion(flag) {
+    if (flag.m_finishing) {
+        switch (m_motion.m_type) {
+        case hkMotion::MOTION_SPHERE_INERTIA:
+            new (&m_motion) hkSphereMotion(flag);
+            break;
+        case hkMotion::MOTION_STABILIZED_SPHERE_INERTIA:
+            new (&m_motion) hkStabilizedSphereMotion(flag);
+            break;
+        case hkMotion::MOTION_BOX_INERTIA:
+            new (&m_motion) hkBoxMotion(flag);
+            break;
+        case hkMotion::MOTION_STABILIZED_BOX_INERTIA:
+            new (&m_motion) hkStabilizedBoxMotion(flag);
+            break;
+        case hkMotion::MOTION_KEYFRAMED:
+            new (&m_motion) hkKeyframedRigidMotion(flag);
+            break;
+        case hkMotion::MOTION_FIXED:
+            new (&m_motion) hkFixedRigidMotion(flag);
+            break;
+        case hkMotion::MOTION_THIN_BOX_INERTIA:
+            new (&m_motion) hkThinBoxMotion(flag);
+            break;
+        }
+    }
+}
+
+hkEntity::~hkEntity() {
+    hkEntityCallbackUtil::fireEntityDeleted(this);
+    if (m_deactivator) {
+        m_deactivator->removeReference();
+    }
 }
 
 // Replaces the deactivator; reference counts are kept on both objects.
