@@ -49,7 +49,7 @@ void grAdventureAttackSwitchOnce::onDamage(int index, soDamage* damage, soDamage
     float damageAdd = damage->m_damageAdd;
     m_damaged = 1;
     if (damageAdd > 0.0f) {
-        if (grYakumono::isEnableAttackPersonAttacked((u32)damage, (u32)attackerInfo, (u32)&m_data->unk70)) {
+        if (grYakumono::isEnableAttackPersonAttacked((u32)damage, (u32)attackerInfo, (u32)&m_data->m_hit)) {
             startGimmickSE(0);
             setVisibility(0);
             setEnableCollisionStatus(false);
