@@ -7,6 +7,7 @@
 #include <wn/wn_article_pool.h>
 #include <wn/wn_article_build_info.h>
 #include <wn/poke/wn_poke_lizardon_breath.h>
+#include <wn/poke/wn_poke_lizardon_rock_stone.h>
 #include <wn/weapon.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
 
@@ -32,7 +33,8 @@ public:
 };
 static_assert(sizeof(wnPokeLizardonRock) == 0x18EC, "wnPokeLizardonRock layout is wrong!");
 
-// The stones the rock breaks into (wn_poke_lizardon_rock_stone). Opaque shell for the same reason.
+// The stones the rock breaks into (wn_poke_lizardon_rock_stone). Opaque shell outside its own unit.
+#ifndef WN_WEAPON_BUILDER
 class wnPokeLizardonRockStone : public Weapon {
     u8 m_unreconstructed[0x16DC - sizeof(Weapon)];
 public:
@@ -42,6 +44,7 @@ public:
     virtual bool notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* acc, int index);
 };
 static_assert(sizeof(wnPokeLizardonRockStone) == 0x16DC, "wnPokeLizardonRockStone layout is wrong!");
+#endif
 
 typedef wnArticleHierarchy<wnPokeLizardonRockStone, 4, soInstancePoolRoot> ftPokeLizardonRockStonePool;
 typedef wnArticleHierarchy<wnPokeLizardonRock, 2, ftPokeLizardonRockStonePool> ftPokeLizardonRockPool;
@@ -69,4 +72,6 @@ public:
 FT_DOL_ARRAY_VECTOR(soArticle*, 5);
 
 typedef wnArticleManageModuleBuilder<ftPokeLizardonArticleMediator, 5> ftPokeLizardonArticleManageModuleBuilder;
+#ifndef WN_WEAPON_BUILDER
 static_assert(sizeof(ftPokeLizardonArticleManageModuleBuilder) == 0xFDF0, "PokeLizardon article manage builder layout is wrong!");
+#endif

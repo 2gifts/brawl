@@ -1,5 +1,18 @@
+#define MT_VEC3F_ASSIGN_NOINLINE
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define FT_REL_LINK_EXTERN
+#define MT_VEC2F_CTOR_NOINLINE
+#define MT_VEC3F_CTOR_NOINLINE
+#include <wn/wn_module_accesser_builder.h>
 #include <types.h>
 #include <ft/poke/ft_poke_lizardon_article_pools.h>
+#include <wn/poke/wn_poke_lizardon_rock_stone.h>
+#include <so/kinetic/so_kinetic_module_impl.h>
+#include <so/status/so_status_module_impl.h>
+#include <wn/wn_activate_desc.h>
 #include <so/so_module_accesser.h>
 #include <ac/ac_anim_cmd_impl.h>
 
@@ -7,6 +20,15 @@
 extern "C" {
 
 } // extern "C"
+
+wnPokeLizardonRockStone::wnPokeLizardonRockStone(s32 articleId, const wnArticleBuildInfo& info, const wnPokeLizardonRockStoneData* data) :
+    wnWeaponBuilder<wnPokeLizardonRockStoneModuleAccesserBuildConfig>(
+        "PokeLizardonRockStone", articleId, info,
+        wnModuleAccesserBuildData(0xF, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &g_soParamAccesserNull,
+                                  0, 0, 0, 0, 0, 0, 0)) {
+    Weapon::deactivate(false);
+}
 
 void wnPokeLizardonRockStone::updateNodeSRT() {
     Vec3f scale;
