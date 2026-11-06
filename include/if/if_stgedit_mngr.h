@@ -33,4 +33,5 @@ public:
     void setVisible(bool isVisible);
     void setVisibleZoomHelp(bool isVisible);
     void destroyModel();
+    void startMelee();
 };

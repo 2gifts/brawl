@@ -26,3 +26,8 @@ void IfStgeditMngr::destroyModel() {
     }
     g_gfSceneRoot->removeInfoCamResAnm();
 }
+
+void IfStgeditMngr::startMelee() {
+    unk10->startMelee(unk4);
+    g_gfSceneRoot->add(gfSceneRoot::Layer_Info, reinterpret_cast<nw4r::g3d::ScnMdl*>(unk4));
+}
