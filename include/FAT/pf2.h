@@ -119,6 +119,7 @@ int fn_803EC418(s32 resource);                               // unlock
 
 // PrFile2 file-lock bookkeeping (pf_system): the number of file locks in use
 extern u32 lbl_805A1260;
+void fn_803EBA40(PF_CRITICAL* critical);                      // PF_initCritical
 void fn_803EBB4C(void);                                      // PFSYS_initFileLock
 int fn_803EBB58(PF_FILE* p_file);                            // PFSYS_finalizeFileLock
 
