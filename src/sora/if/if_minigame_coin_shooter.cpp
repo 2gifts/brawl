@@ -1,6 +1,8 @@
 #include <types.h>
 #include <stdarg.h>
 #include <if/if_minigame_coin_shooter.h>
+#include <if/if_figure_loader.h>
+#include <if/if_reward_list_task.h>
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
 unsigned char lbl_8049E560[0x10] __attribute__((aligned(8))) = { 0 };
@@ -48,3 +50,18 @@ IfCoinShooterLabel::~IfCoinShooterLabel() {
     reset();
 }
 
+
+// HYPOTHESIS: the loader checks are defined by the stand-in of a list task function.
+extern "C" bool fn_800FA740(IfRewardListTask* task);
+
+// HYPOTHESIS: start raises a flag in the unrecovered members.
+void IfCoinShooter::start() {
+    unk1AC[9] = 1;
+}
+
+void IfCoinShooterLabelImpl::update() {
+}
+
+IfCoinShooterLabel::IfCoinShooterLabel() {
+    unk0 = NULL;
+}

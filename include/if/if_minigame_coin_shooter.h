@@ -19,6 +19,7 @@ public:
     static void destroy();
     bool isQuit();
     bool isLoadFinish();
+    void start();
     virtual void loadResource();
     virtual void createModel();
     virtual void update();
@@ -27,6 +28,7 @@ public:
 class IfCoinShooterLabel {
 public:
     IfCoinShooterLabelImpl* unk0;
+    IfCoinShooterLabel();
     ~IfCoinShooterLabel();
     void reset();
     void setPos(const Vec3f* position);
