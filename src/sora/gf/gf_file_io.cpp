@@ -10,11 +10,8 @@
 #include <revolution/VF/d_vf.h>
 #include <string.h>
 #include <types.h>
+#include <FAT/fa_api.h>
 
-extern "C" int fn_803EC0CC(const char* path);
-extern "C" int fn_803EBE4C();
-extern "C" int fn_803EC094(int drive);
-extern "C" int fn_803EC0F8(int drive);
 extern "C" int fn_803EC22C(int drive, int force);
 extern "C" s32 fn_803C3B18(const char* path);
 extern "C" s32 fn_803C3BE8(const char* path);
@@ -199,7 +196,7 @@ void gfFileIO::FAInsertCallback() {
     lbl_8059C52C = 1;
     lbl_8059FFDC = true;
     bool isProtected = false;
-    if (fn_803EC094('A') == 1) {
+    if (FAIsWriteProtected('A') == 1) {
         isProtected = true;
     }
     if (isProtected) {
@@ -220,7 +217,7 @@ void gfFileIO::FAEjectCallback() {
 
 bool gfFileIO::checkSDWriteProtected() {
     bool isProtected = false;
-    if (fn_803EC094('A') == 1) {
+    if (FAIsWriteProtected('A') == 1) {
         isProtected = true;
     }
     return isProtected;
@@ -276,9 +273,9 @@ int gfFileIO::gfFACreateDir(const char* filepath)
     u32 j;
 
     if (strlen(filepath) < 0x7F) {
-        result = fn_803EC0CC(filepath);
+        result = FAMkdir(filepath);
         if (result != 0) {
-            result = fn_803EBE4C();
+            result = FAErrnum();
             if (result != 0x11) {
                 end = strlen(filepath);
                 if (filepath[end - 1] == '/') {
@@ -294,9 +291,9 @@ int gfFileIO::gfFACreateDir(const char* filepath)
                             break;
                         }
                     }
-                    result = fn_803EC0CC(dir);
+                    result = FAMkdir(dir);
                     if (result != 0) {
-                        result = fn_803EBE4C();
+                        result = FAErrnum();
                         if (result != 0x11) {
                             break;
                         }
@@ -367,8 +364,8 @@ int gfFileIO::createDirSD(gfFileIORequest* request) {
         path[2] = 0;
     }
     strncat(path, filepath, 0x80);
-    if (gfFACreateDir(path) != 0 && fn_803EBE4C() != 0x11) {
-        fn_803EBE4C();
+    if (gfFACreateDir(path) != 0 && FAErrnum() != 0x11) {
+        FAErrnum();
         OSReport("SD Create Dir: (%s)", path);
     } else {
         result = 0;
@@ -420,8 +417,8 @@ int gfFileIO::checkDirSD(gfFileIORequest* request) {
     bool isOpen = false;
     dir = FAOpendir(path);
     if (dir == NULL) {
-        if (fn_803EBE4C() != 2) {
-            fn_803EBE4C();
+        if (FAErrnum() != 2) {
+            FAErrnum();
             OSReport("SD check Dir: (%s)", request->m_pFilepath);
         }
     } else {
@@ -549,11 +546,11 @@ int gfFileIO::formatVFSystemFile(gfFileIORequest* request) {
 
 int gfFileIO::mountSD(gfFileIORequest* request) {
     int result;
-    int ret = fn_803EC0F8('A');
+    int ret = FAMount('A');
     if (ret != 0) {
-        fn_803EBE4C();
+        FAErrnum();
         result = 0xD;
-        int code = fn_803EBE4C();
+        int code = FAErrnum();
         if (code == 5) {
             result = 0xE;
         }
@@ -569,7 +566,7 @@ int gfFileIO::unmountSD(gfFileIORequest* request) {
     int result;
     int ret = fn_803EC22C('A', 0);
     if (ret != 0) {
-        fn_803EBE4C();
+        FAErrnum();
         result = 0xF;
         OSReport("unmountSD() Error! err=%d", ret);
     } else {
@@ -650,8 +647,8 @@ int gfFileIO::checkFileSD(gfFileIORequest* request) {
     }
     strncat(path, filepath, 0x80);
     if (FAFstat(path, &stat) != 0) {
-        if (fn_803EBE4C() != 2) {
-            fn_803EBE4C();
+        if (FAErrnum() != 2) {
+            FAErrnum();
         }
     } else {
         result = 0;
@@ -691,16 +688,16 @@ int gfFileIO::getFileNumSD(const char* path) {
     int count = -1;
     int result = FAFsfirst(path, 0x20, (FAEntryInfo*)info);
     if (result != 0) {
-        if (fn_803EBE4C() != 2) {
-            fn_803EBE4C();
+        if (FAErrnum() != 2) {
+            FAErrnum();
         }
     } else {
         count = 1;
         while (result == 0) {
             result = FAFsnext((FAEntryInfo*)info);
             if (result != 0) {
-                if (fn_803EBE4C() != 2) {
-                    fn_803EBE4C();
+                if (FAErrnum() != 2) {
+                    FAErrnum();
                 }
                 break;
             }

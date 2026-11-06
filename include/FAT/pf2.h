@@ -47,7 +47,6 @@ int PFAPI_convertReturnValue(int err);
 s32 PFSTR_InitStr(PF_STR* p_str, const char* s, u32 code_mode);
 int fn_803EB5D8(PF2_DIR* dir);                               // pf_closedir
 int fn_803EB5FC(void);                                       // pf_errnum
-int fn_803EBE4C(void);                                       // FAErrnum
 u16 fn_803D68B8(PF_STR* p_str);                              // PFSTR_StrLen
 int fn_803EB620(PF2_FILE* file);                             // pf_fclose
 u32 fn_803EB6E0(void* buf, u32 size, u32 count, PF2_FILE* file);  // pf_fread
@@ -104,6 +103,7 @@ int fn_803EA198(s8 drv_char);                                // PFVOL_format
 int fn_803EA788(s8 drv_char);                                // PFVOL_detach
 int fn_803EAE34(s8 drv_char, int* result);                   // PFVOL_mount
 void fn_803EBBD8(void);                                      // PFSYS_initializeSYS
+int pfd_sddrv_registar_callback(void (*insert_cb)(s8 drv_char), void (*eject_cb)(s8 drv_char));
 // pfk: the kernel shim over RVL OS threads and semaphores; a semaphore
 // resource is the address of its OSSemaphore.
 typedef struct PFK_SEMAPHORE_INFO {
