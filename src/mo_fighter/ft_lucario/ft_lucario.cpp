@@ -333,41 +333,30 @@ extern int g_soValueVariation;
 int soValueAccesser::getValueVariation() { return g_soValueVariation; }
 #pragma dont_inline off
 
-// soModuleAccesser::set_visible: looks up the visibility node for the id through the visibility module and forwards the flag.
-// HYPOTHESIS: field meanings of the visibility module (0x64 node source, 0x88 apply target).
-extern "C" {
-
-void fn_118_99DC(u8* acc, u32 id, u32 visible) {
-    u8* mod = *(u8**)(acc + 0xD8);
-    u8* obj = *(u8**)(mod + 0x64);
-    u8* sub = *(u8**)(mod + 0x88);
-    void* node = ((void* (*)(u8*, u32))((void**)*(void**)obj)[6])(obj, id);
-    if (node != 0) {
-        ((void (*)(u8*, void*, u32))((void**)*(void**)sub)[34])(sub, node, visible);
+// HYPOTHESIS: the work manage module maps the id to an effect handle, which the effect module then shows or hides.
+void soModuleAccesser::set_visible(unsigned long id, bool visible) {
+    soWorkManageModule& workManageModule = getWorkManageModule();
+    soEffectModule& effectModule = getEffectModule();
+    int handle = workManageModule.getInt(id);
+    if (handle != 0) {
+        effectModule.setVisible(handle, visible);
     }
 }
 
+void ftLucario::effect_suspend() {
+    soModuleAccesser* acc = m_moduleAccesser;
+    acc->set_visible(0x10000047, false);
+    acc->set_visible(0x10000048, false);
+    acc->set_visible(0x10000043, false);
+    acc->set_visible(0x10000044, false);
 }
 
-// Effect suspend / resume for the four aura visibility ids (map: ftLucario__effect_suspend / effect_resume).
-extern "C" {
-
-void fn_118_98F4(u8* p) {
-    u8* acc = *(u8**)(p + 0x60);
-    fn_118_99DC(acc, 0x10000047, 0);
-    fn_118_99DC(acc, 0x10000048, 0);
-    fn_118_99DC(acc, 0x10000043, 0);
-    fn_118_99DC(acc, 0x10000044, 0);
-}
-
-void fn_118_9968(u8* p) {
-    u8* acc = *(u8**)(p + 0x60);
-    fn_118_99DC(acc, 0x10000047, 1);
-    fn_118_99DC(acc, 0x10000048, 1);
-    fn_118_99DC(acc, 0x10000043, 1);
-    fn_118_99DC(acc, 0x10000044, 1);
-}
-
+void ftLucario::effect_resume() {
+    soModuleAccesser* acc = m_moduleAccesser;
+    acc->set_visible(0x10000047, true);
+    acc->set_visible(0x10000048, true);
+    acc->set_visible(0x10000043, true);
+    acc->set_visible(0x10000044, true);
 }
 
 // Placeholders for weak inline methods of library classes (their names exist in sora_melee, so the REL copies cannot be renamed): the shim calls the inline method.
@@ -419,9 +408,6 @@ void ftLucario::setMachValidity(soModuleAccesser* moduleAccesser, bool valid) {
     ftLucario& fighter = dynamic_cast<ftLucario&>(moduleAccesser->getStageObject());
     fighter.m_moduleAccesser->getWorkManageModule().setFlag(valid, 0x1200003F);
 }
-
-// soModuleAccesser::set_visible (the map name); src/mo_fighter/ft_lucario/ft_lucario.cpp calls it by this stand-in name.
-extern "C" void fn_118_99DC(u8* acc, u32 id, u32 visible);
 
 void ftLucario::notifyEventOnDamage(soDamage* damage, bool isDamage, soModuleAccesser* moduleAccesser) {
     m_moduleAccesser->getWorkManageModule().setFlag(true, 0x1200003F);
