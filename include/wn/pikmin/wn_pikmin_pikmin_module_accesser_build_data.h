@@ -16,5 +16,13 @@ public:
         wnModuleAccesserBuildData(kind, data, instHeap, nwModelInstHeap, nwMotionInstHeap, resGroupNo, unk10,
                                   paramAccesser, unk18, unk1C, unk2C, unk30, unk34, unk38, unk3C),
         m_animCmdData(reinterpret_cast<const void*>(unk10)) { }
+    // The article constructor's form: twelve arguments, the rest default to zero.
+    wnPikminPikminModuleAccesserBuildData(s32 kind, const void* data, Heaps::HeapType instHeap,
+                                          Heaps::HeapType nwModelInstHeap, Heaps::HeapType nwMotionInstHeap,
+                                          u8 resGroupNo, const void* animCmdData, s32 unk10, soParamAccesser* paramAccesser,
+                                          s32 unk18, s32 unk1C, s32 unk2C) __attribute__((never_inline)) :
+        wnModuleAccesserBuildData(kind, data, instHeap, nwModelInstHeap, nwMotionInstHeap, resGroupNo, unk10,
+                                  paramAccesser, unk18, unk1C, unk2C, 0, 0, 0, 0),
+        m_animCmdData(animCmdData) { }
     virtual void* getAnimCmdData(u32 eventThread, s32 p2) const;
 };
