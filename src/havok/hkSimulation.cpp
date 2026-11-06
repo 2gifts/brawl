@@ -40,6 +40,9 @@
 #include <havok/hkRigidBody.h>
 #include <havok/hkProcessCollisionOutput.h>
 #include <havok/hkCdPoint.h>
+#include <havok/hkWorld.h>
+#include <havok/hkSimulationIsland.h>
+#include <havok/hkAction.h>
 
 hkSimulation::hkSimulation(hkWorld* world) {
     m_world = world;
@@ -68,6 +71,18 @@ hkReal hkSimulation::snapSimulateTimeAndGetTimeToAdvanceTo() {
         return m_unk14;
     }
     return m_unk1C;
+}
+
+// Lets every action of every active island act for this step.
+// HYPOTHESIS: world +0x28 holds the active islands and +0x170 the step info.
+void hkSimulation::applyActions() {
+    for (int i = 0; i < m_world->m_unk28.m_size; i++) {
+        hkSimulationIsland* island = ((hkSimulationIsland**)m_world->m_unk28.m_data)[i];
+        hkArray<hkAction*>& actions = island->m_actions;
+        for (int j = 0; j < actions.getSize(); j++) {
+            actions[j]->applyAction(*(const hkStepInfo*)((char*)m_world + 0x170));
+        }
+    }
 }
 
 // HYPOTHESIS: an agent-entry helper in hkLinkedCollidable.o (not written, no map name) that clears the collision

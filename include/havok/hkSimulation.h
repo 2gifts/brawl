@@ -32,6 +32,7 @@ struct hkSimulation : hkReferencedObject {
                                                             hkProcessCollisionOutput& output);
 
     hkSimulation(hkWorld* world);
+    void applyActions();
     // HYPOTHESIS: the last parameter (an int-sized mode compared with 1; collideEntitiesNarrowPhaseDiscrete passes
     // its own through, resetCollisionInformationForEntities passes 0)
     void collideEntitiesNarrowPhaseDiscrete(hkEntity** entities, int numEntities, const hkProcessCollisionInput& input,

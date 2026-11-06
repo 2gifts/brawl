@@ -19,6 +19,7 @@
 #include <havok/hkPhantom.h>
 #include <havok/hkMotion.h>
 #include <havok/hkSimulation.h>
+#include <havok/hkAction.h>
 
 #include <havok/hkAlgorithm.h>
 
@@ -173,10 +174,6 @@ static inline T& at(void* p, int offset) {
 struct hkWorldObjectVirtuals : hkReferencedObject {
     virtual void setShape(hkShape* shape); // 0x10
 };
-struct hkActionVirtuals : hkReferencedObject {
-    virtual void unk10();
-    virtual void getEntities(hkArray<hkEntity*>* entities); // 0x14 fills the array with the entities it touches
-};
 struct hkWorldOperationUserCallback : hkReferencedObject {
     virtual void worldOperationUserCallback(int userData); // 0x10
 };
@@ -296,7 +293,7 @@ void hkWorldOperationQueue::executeAllPending() {
                     // an action can only go in once every entity it touches is already in this world
                     hkArray<hkEntity*> actionEntities;
                     hkBool allInWorld = true;
-                    reinterpret_cast<hkActionVirtuals*>(action)->getEntities(&actionEntities);
+                    static_cast<hkAction*>(action)->getEntities(actionEntities);
                     for (int k = 0; k < actionEntities.m_size; k++) {
                         if (actionEntities[k]->m_world != m_world) {
                             allInWorld = false;
