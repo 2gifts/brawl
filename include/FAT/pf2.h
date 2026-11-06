@@ -77,7 +77,6 @@ typedef struct PF2_DTA {
 PF2_VOLUME* PFPATH_GetVolumeFromPath(PF_STR* p_path);
 s32 PFVOL_CheckForRead(PF2_VOLUME* p_vol);
 void PFDIR_FinalizeAllDirs(PF2_VOLUME* p_vol);
-void PFFAT_FinalizeFFD(PF_FFD* p_ffd);
 s32 PFDIR_p_fsnext(PF2_DTA* dta);
 s32 PFDIR_p_fsfirst(PF2_VOLUME* p_vol, PF_STR* p_pattern, u8 attr, PF2_DTA* dta);
 s32 PFDIR_p_fstat(PF2_VOLUME* p_vol, PF_STR* p_path, void* p_stat);
