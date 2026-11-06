@@ -823,8 +823,8 @@ getParamFloat__40ftExtendParamAccesserEx<3999,40,23999,5>FP16soModuleAccesserll 
 getParamInt__40ftExtendParamAccesserEx<3999,40,23999,5>FP16soModuleAccesserll = .text:0x0001898C; // type:function size:0x5C
 __dt__91ftKineticMediatorImplT<31ftPokeZenigameKineticTransactor,31ftPokeZenigameKineticTransactor>Fv = .text:0x000189E8; // type:function size:0x60
 generate__29ftPokeZenigameArticleMediatorFlP16soModuleAccesser = .text:0x00018A48; // type:function size:0x3FC
-getActiveNum__29ftPokeZenigameArticleMediatorFP16soModuleAccesserl = .text:0x00018E44; // type:function size:0x1F0
-isGeneratable__29ftPokeZenigameArticleMediatorFP16soModuleAccesserl = .text:0x00019034; // type:function size:0x210
+isGeneratable__29ftPokeZenigameArticleMediatorFP16soModuleAccesserl = .text:0x00018E44; // type:function size:0x1F0
+getActiveNum__29ftPokeZenigameArticleMediatorFP16soModuleAccesserl = .text:0x00019034; // type:function size:0x210
 getGenerateMaxNum__29ftPokeZenigameArticleMediatorFl = .text:0x00019244; // type:function size:0x184
 shoot__29ftPokeZenigameArticleMediatorFP16soModuleAccesserP9soArticle = .text:0x000193C8; // type:function size:0x1D8
 deactivate__29ftPokeZenigameArticleMediatorFv = .text:0x000195A0; // type:function size:0x60

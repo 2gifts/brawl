@@ -117,10 +117,9 @@ ftPokeZenigameTransactor* ftPokeZenigameTransactor::getInstance() {
 #pragma pool_data reset
 
 void ftPokeZenigame::change(void* work, int kind) {
-    soModuleAccesser* acc = m_moduleAccesser;
     ftPokemonChangeWork* changeWork = static_cast<ftPokemonChangeWork*>(work);
-    acc->getPostureModule().init(&changeWork->m_pos, changeWork->m_lr);
-    acc->getDamageModule().initDamage(changeWork->m_damage);
+    m_moduleAccesser->getPostureModule().init(&changeWork->m_pos, changeWork->m_lr);
+    m_moduleAccesser->getDamageModule().initDamage(changeWork->m_damage);
     onStart(kind);
     fn_27_37794C(m_moduleAccesser, kind, 0x11e);
     if (kind == 6) {
@@ -181,7 +180,6 @@ void ftPokeZenigame::notifyEventChangeStatus(int statusKind, int prevStatusKind,
 // HYPOTHESIS: the event 6 a grab sends; in the Withdraw statuses (0x113 to 0x119) the shell is not grabbable, and the
 // sender is handed a node of the model instead.
 struct ftPokeZenigameCatchEvent : soLinkEventArgs {
-    bool unk4;
     bool unk5;
     int unk8;
 };
@@ -193,13 +191,16 @@ void ftPokeZenigame::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesse
         endFinal(true, true, false);
         break;
     case 0x6: {
-        int statusKind = m_moduleAccesser->getStatusModule().getStatusKind();
-        if (statusKind >= 0x113 && statusKind <= 0x119) {
+        switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+        case 0x113:
+        case 0x119: {
             ftPokeZenigameCatchEvent* event = static_cast<ftPokeZenigameCatchEvent*>(eventInfo);
-            event->unk4 = true;
+            event->_0x4 = true;
             event->unk5 = true;
             event->unk8 = m_moduleAccesser->getModelModule().getCorrectNodeId(0x133);
             m_moduleAccesser->getStatusModule().changeStatusRequest(0x11b, m_moduleAccesser);
+            return;
+        }
         }
         break;
     }
@@ -355,6 +356,14 @@ bool ftPokeZenigameArticleMediator::shoot(soModuleAccesser* acc, soArticle* arti
 // ---- the kinetic transactor -----------------------------------------------------------------------------------------
 // HYPOTHESIS: the sub names follow the numbering of the other fighters' transactors (the module map is not available here).
 
+// The sora_melee setup really takes the mode, the pools, the speed and the accesser (its own dispatcher passes all four);
+// the shared declaration only names the mode.
+typedef void (*ftKineticImplFull)(int mode, void* pools, Vec2f* speed, soModuleAccesser* acc);
+// MATCH-ONLY: the four-argument call goes through the one-argument declaration; mode 0x64 is the plain setup 6.
+inline void changeKineticSubImpl6(volatile bool*, void* pools, Vec2f* speed, soModuleAccesser* acc) {
+    reinterpret_cast<ftKineticImplFull>(&ftKineticTransactor::changeKineticImpl)(6, pools, speed, acc);
+}
+
 // BYTES: retain the shared preprocessing flag copy in the native dispatcher (as in the other fighters' transactors).
 #pragma push
 #pragma opt_propagation off
@@ -368,10 +377,9 @@ void ftPokeZenigameKineticTransactor::changeKinetic(int mode, void* pools, soMod
     Vec2f speed = ftKineticTransactHelper::preHelpProcess(processAccesser, process, process);
     switch (mode) {
     case 0x64: {
-        bool result = false;
-        // HYPOTHESIS: the native call passes the pools, the speed and the accesser on to the sora_melee setup, whose
-        // shared declaration only takes the mode.
-        ftKineticTransactor::changeKineticImpl(6);
+        // MATCH-ONLY: volatile keeps the result byte the inlined sub never reads (the other cases pass it to their sub).
+        volatile bool result = false;
+        changeKineticSubImpl6(&result, pools, &speed, acc);
         break;
     }
     case 0x65: {
@@ -430,7 +438,7 @@ void ftPokeZenigameKineticTransactor::changeKineticSub(bool*, void*, Vec2f*, soM
 void ftPokeZenigameKineticTransactor::changeKineticSub1(bool*, void*, Vec2f*, soModuleAccesser* acc) {
     ftKineticTransactor::changeKineticImpl(6);
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*acc->getKineticModule().getEnergy(3));
-    if (acc->getWorkManageModule().isFlag(0x22000010)) {
+    if (!acc->getWorkManageModule().isFlag(0x22000010)) {
         Vec2f speed = stop.getSpeed();
         float base;
         if (acc->getWorkManageModule().isFlag(0x22000011)) {
@@ -447,7 +455,7 @@ void ftPokeZenigameKineticTransactor::changeKineticSub1(bool*, void*, Vec2f*, so
 void ftPokeZenigameKineticTransactor::changeKineticSub2(bool*, void*, Vec2f*, soModuleAccesser* acc) {
     ftKineticTransactor::changeKineticImpl(10);
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*acc->getKineticModule().getEnergy(3));
-    if (acc->getWorkManageModule().isFlag(0x22000010)) {
+    if (!acc->getWorkManageModule().isFlag(0x22000010)) {
         Vec2f speed = stop.getSpeed();
         float base;
         if (acc->getWorkManageModule().isFlag(0x22000011)) {
@@ -462,7 +470,7 @@ void ftPokeZenigameKineticTransactor::changeKineticSub2(bool*, void*, Vec2f*, so
 
 void ftPokeZenigameKineticTransactor::changeKineticSub3(bool*, void*, Vec2f*, soModuleAccesser* acc) {
     ftKineticTransactor::changeKineticImpl(6);
-    if (acc->getWorkManageModule().isFlag(0x22000010)) {
+    if (!acc->getWorkManageModule().isFlag(0x22000010)) {
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*acc->getKineticModule().getEnergy(3));
         Vec2f speed = stop.getSpeed();
         speed.m_x *= soValueAccesser::getConstantFloat(acc, 0xfbc, 0);
@@ -472,7 +480,7 @@ void ftPokeZenigameKineticTransactor::changeKineticSub3(bool*, void*, Vec2f*, so
 
 void ftPokeZenigameKineticTransactor::changeKineticSub4(bool*, void*, Vec2f*, soModuleAccesser* acc) {
     ftKineticTransactor::changeKineticImpl(10);
-    if (acc->getWorkManageModule().isFlag(0x22000010)) {
+    if (!acc->getWorkManageModule().isFlag(0x22000010)) {
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*acc->getKineticModule().getEnergy(3));
         Vec2f speed = stop.getSpeed();
         speed.m_x *= soValueAccesser::getConstantFloat(acc, 0xfbd, 0);
@@ -480,18 +488,22 @@ void ftPokeZenigameKineticTransactor::changeKineticSub4(bool*, void*, Vec2f*, so
     }
 }
 
+// The native holder walk calls this one out of line.
+#pragma dont_inline on
 template <>
 void ftPokeZenigameKineticTransactor::updateEnergy<ftKineticEnergyGravity>(ftKineticEnergyGravity* energy, soModuleAccesser* acc) {
     energy->updateEnergy(acc);
 }
+#pragma dont_inline off
 
-// The Withdraw slide (kinetic type 0x66): the shell bounces off a wall, keeps a low speed on flat ground and accelerates
-// down a slope in proportion to its angle.
+// The Withdraw slide (kinetic types 0x66 and 0x67): the shell bounces off a wall, is pushed back up to a minimum speed
+// on flat ground and in the air, and accelerates down a slope in proportion to its angle.
 template <>
 void ftPokeZenigameKineticTransactor::updateEnergy<ftKineticEnergyStop>(ftKineticEnergyStop* energy, soModuleAccesser* acc) {
     if (energy->isEnable()) {
         switch (acc->getKineticModule().getKineticType()) {
-        case 0x66: {
+        case 0x66:
+        case 0x67: {
             Vec2f speed = energy->getSpeed();
             // HYPOTHESIS: touch 6 is the wall in the direction of travel.
             if (acc->getGroundModule().isTouch(6, 0) == true) {
@@ -503,21 +515,20 @@ void ftPokeZenigameKineticTransactor::updateEnergy<ftKineticEnergyStop>(ftKineti
             // HYPOTHESIS: touch 8 is the floor.
             if (acc->getGroundModule().isTouch(8, 0) == true) {
                 Vec2f normal = acc->getGroundModule().getTouchNormal(8, 0);
-                Vec2f up(0.0f, 1.0f);
-                int degrees = up.angle(&normal) * 57.29578f;
+                int degrees = Vec2f(0.0f, 1.0f).angle(&normal) * 57.29578f;
                 if (degrees == 0) {
                     float threshold = soValueAccesser::getConstantFloat(acc, 0xfae, 0);
-                    if (fabsf(speed.m_x) > threshold) {
+                    if ((float)__fabs(speed.m_x) < threshold) {
                         accel.m_x = soValueAccesser::getConstantFloat(acc, 0xfb0, 0);
-                        if (speed.m_x > 0.0f) {
+                        if (speed.m_x < 0.0f) {
                             accel.m_x = -accel.m_x;
                         }
                     }
                     target.m_x = threshold;
                 } else {
-                    float side = normal.m_x > 0.0f ? -1.0f : 1.0f;
+                    float side = normal.m_x < 0.0f ? -1.0f : 1.0f;
                     float rate;
-                    if (normal.m_x * speed.m_x > 0.0f) {
+                    if (normal.m_x * speed.m_x < 0.0f) {
                         rate = soValueAccesser::getConstantFloat(acc, 0xfb7, 0);
                     } else {
                         rate = soValueAccesser::getConstantFloat(acc, 0xfb8, 0);
@@ -527,9 +538,9 @@ void ftPokeZenigameKineticTransactor::updateEnergy<ftKineticEnergyStop>(ftKineti
                 }
             } else {
                 float threshold = soValueAccesser::getConstantFloat(acc, 0xfaf, 0);
-                if (fabsf(speed.m_x) > threshold) {
+                if ((float)__fabs(speed.m_x) < threshold) {
                     accel.m_x = soValueAccesser::getConstantFloat(acc, 0xfb1, 0);
-                    if (speed.m_x > 0.0f) {
+                    if (speed.m_x < 0.0f) {
                         accel.m_x = -accel.m_x;
                     }
                 }
@@ -539,8 +550,6 @@ void ftPokeZenigameKineticTransactor::updateEnergy<ftKineticEnergyStop>(ftKineti
             energy->m_speedTarget = target;
             break;
         }
-        case 0x68:
-            break;
         }
     }
     energy->updateEnergy(acc);
