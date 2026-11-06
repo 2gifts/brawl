@@ -620,3 +620,56 @@ workFound:
         work->change_mdl_tex(a, b, file, flag);
     }
 }
+
+extern "C" void fn_80063084(ecEffectWork* work, Vec3f* pos);
+
+void ecMgr::setPos(u32 handleId, Vec3f* pos) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        fn_80063084(work, pos);
+    }
+}
+
+// HYPOTHESIS: grCollStatus::getTouchLine (main.dol 0x80134524), as declared in gr_collision_body.cpp.
+extern "C" grCollisionLineWork* fn_80134524(grCollStatus* status, int touchId);
+
+void ecMgr::setGroundAttach(u32 handleId, soGroundModule* groundModule) {
+    ecEffectWork* work;
+    if (handleId && unk6C) {
+        if (lbl_805A0164 && lbl_805A0164->unk7C == handleId) {
+            work = lbl_805A0164;
+            goto workFound;
+        } else {
+            ecEffectWork* current = &unk60[unk70];
+            for (u32 index = unk70; index <= unk74; ++index, ++current) {
+                if (current->unk7C == handleId) {
+                    lbl_805A0164 = current;
+                    work = current;
+                    goto workFound;
+                }
+            }
+        }
+    }
+    work = 0;
+workFound:
+    if (work) {
+        fn_80062D08(work, fn_80134524(groundModule->getCollStatus(0), 3));
+    }
+}
