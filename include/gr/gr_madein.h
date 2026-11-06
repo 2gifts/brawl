@@ -7,6 +7,7 @@
 #include <so/collision/so_collision_log.h>
 #include <so/damage/so_damage.h>
 #include <so/damage/so_damage_attacker_info.h>
+#include <yk/yakumono.h>
 
 class grMadein : public grSeqYakumono {
 public:
@@ -22,7 +23,10 @@ public:
     public:
         float m_size;
         Vec3f m_offsetPos;
-        char _spacer[0x18];
+        Vec3f m_hitRelPos;   // HYPOTHESIS: where the hit fighter is relative to the attack
+        bool m_playerHit[4]; // HYPOTHESIS: per player flags of the fighters that were hit
+        float m_power;
+        int m_playerNo;
         AttackPreset m_preset;
     };
 
@@ -30,30 +34,28 @@ public:
     public:
         Vec3f m_startOffsetPos;
         Vec3f m_endOffsetPos;
-        char _spacer[12];
+        Vec3f m_hitPos;
         float m_size;
         float m_lastDamageTaken;
         float m_lastSide;
-        char _spacer2[8];
+        Vec2f m_lastSpeed;
         int m_lastPlayerHit;
         int m_nodeIndex;
     };
 
     class StageHitData {
+    public:
         Vec3f m_startOffsetPos;
         Vec3f m_endOffsetPos;
         float m_size;
-        char _spacer[8];
+        bool m_300_7 : 1;
+        char _spacer[3];
+        int m_20;
         int m_nodeIndex;
-        union {
-            char _spacer2[20];
-            struct {
-                char _spacer2a[8];
-                int m_30;
-                int m_34;
-                int m_38;
-            };
-        };
+        // HYPOTHESIS: the hit data set the Yakumono's work area points at: this object is its only element
+        StageHitData* m_hitDataArray;
+        int m_hitDataCount;
+        ykDataGroup m_dataGroup;
 
         // HYPOTHESIS: map names this class tagStageHitData
         StageHitData();
@@ -70,6 +72,21 @@ protected:
     HitPointInfo* m_hitPointInfo;
     soCollisionAttackData* m_overwriteAttackData;
     StageHitData* m_stageHitData;
+#ifdef GR_MADEIN_NAMED_FLAGS // the unit that defines grMadein writes the flags through these names
+    union {
+        struct {
+            bool m_300_7 : 1;                 // | 0x80
+            bool m_hasAttack : 1;             // | 0x40
+            bool m_hasHitPoint : 1;           // | 0x20
+            bool m_isHit : 1;                 // | 0x10
+            bool m_hitEnemy : 1;              // | 0x8 (hit category Enemy)
+            bool m_hitWall : 1;               // | 0x4 (hit category Wall)
+            bool m_isLandedOn : 1;            // | 0x2
+            bool m_useLandCheck : 1;          // | 0x1
+        };
+        u8 m_flags : 8; // HYPOTHESIS: the constructor clears all the flags together
+    };
+#else
     bool m_300_7 : 1;                 // | 0x80
     bool m_hasAttack : 1;             // | 0x40
     bool m_hasHitPoint : 1;           // | 0x20
@@ -77,14 +94,15 @@ protected:
     HitCategory m_hitCategory : 2; // | 0x4, 0x8
     bool m_isLandedOn : 1;            // | 0x2
     bool m_useLandCheck : 1;          // | 0x1
+#endif
     char _301[3];
     float m_304;
-    char _308[4];
+    int m_attackPower;
     int m_landerTaskId;
-    char _316[38];
+    u32 m_anmVals[9];
+    int m_loopCount;
 
 public:
-    void createAttackPoint();
     void createAttackPointNormal(soCollisionAttackData* attackData);
     void deleteAttackPoint();
     void deleteHitPoint();
@@ -104,6 +122,7 @@ public:
     void setMotion(u32 anmIndex);
     void setMotionDetails(u32 anmChrIndex, u32 anmVisIndex, u32 anmTexPatIndex, u32 anmTexSrtIndex, u32 anmClrIndex);
     void setupYakumonoClass();
+    void createAttackPoint();
     void startEntity();
     void startEntityAutoLoop();
     void startEntityLoop(int unk1);
