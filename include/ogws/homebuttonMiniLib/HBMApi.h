@@ -8,6 +8,10 @@ extern "C" {
 
 void HBMCreate(const HBMDataInfo* pHBInfo);
 void HBMInit();
+void HBMDelete();
+void HBMCreateMemorySound(const void* pArchive, void* pMem, u32 size);
+void HBMDeleteSound();
+void HBMUpdateSound();
 
 HBMSelectBtnNum HBMCalc(const HBMControllerData* pController);
 void HBMDraw();
