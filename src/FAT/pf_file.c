@@ -5,8 +5,22 @@
 typedef struct PF2_SFD PF2_SFD;
 struct PF2_SFD {
     u32 stat;
-    PF_FFD ffd;
-    u8 unk3C[0x228];
+    union {
+        PF_FFD ffd;
+        struct {
+            u8 _ffd_pad[0x34];
+            PF2_VOLUME* ffd_p_vol;  // HYPOTHESIS: PF_FFD::p_vol seen as the PF2 volume
+        };
+    };
+    union {
+        u8 unk3C[0x228];
+        struct {
+            u8 _entry_pad[0x222];
+            u16 last_access_date;  // HYPOTHESIS: 0x25E
+            u16 time;              // HYPOTHESIS: 0x260
+            u16 date;              // HYPOTHESIS: 0x262
+        };
+    };
     u32 file_size;       // 0x264
     PF2_VOLUME* p_vol;   // 0x268
     u8 unk26C[0x10];
@@ -185,4 +199,117 @@ void PFFILE_Cursor_MoveToClusterEnd(PF2_FILE* p_file, u32 size) {
         p_file->cursor.file_sector_index = p_file->cursor.position >> p_vol->bpb.log2_bytes_per_sector;
         p_file->cursor.offset_in_sector = p_file->cursor.position & (p_vol->bpb.bytes_per_sector - 1);
     }
+}
+
+u32 PFFILE_Cursor_AdvanceToRead(PF2_FILE* p_file, u32 n, u32 sector) {
+    u32 new_sector;
+    u32 sector_offset;
+    u32 ok;
+    PF2_VOLUME* p_vol;
+    PF2_VOLUME* p_vol_end;
+
+    ok = 1;
+    p_vol = (p_file == NULL) ? NULL : p_file->p_sfd->p_vol;
+    sector_offset = p_file->cursor.offset_in_sector + n;
+    new_sector = sector + (sector_offset >> p_vol->bpb.log2_bytes_per_sector);
+    if (p_file->cursor.position + n < p_file->p_sfd->file_size) {
+        if (((p_vol->bpb.bytes_per_sector - 1) & sector_offset) != 0) {
+            p_file->cursor.sector = new_sector;
+        } else {
+            p_file->cursor.sector = 0xFFFFFFFF;
+        }
+        p_file->cursor.position = p_file->cursor.position + n;
+    } else if (p_file->p_sfd->file_size == 0) {
+        p_file->cursor.sector = 0xFFFFFFFF;
+        p_file->cursor.position = 0;
+        if (n != 0) {
+            ok = 0;
+        }
+    } else {
+        ok = 0;
+        p_file->cursor.sector = 0xFFFFFFFF;
+        p_file->cursor.position = p_file->p_sfd->file_size;
+    }
+    if (p_file == NULL) {
+        p_vol_end = NULL;
+    } else {
+        p_vol_end = p_file->p_sfd->p_vol;
+    }
+    p_file->cursor.file_sector_index = p_file->cursor.position >> p_vol_end->bpb.log2_bytes_per_sector;
+    p_file->cursor.offset_in_sector = p_file->cursor.position & (p_vol_end->bpb.bytes_per_sector - 1);
+    PFCLUSTER_UpdateLastAccessCluster(p_file, new_sector);
+    return ok;
+}
+
+int fn_803E5A50(void* buf, u32 size, u32 count, PF2_FILE* file, u32* count_read) {
+    int err;
+    PF2_VOLUME* p_vol;
+    u32 size_read;
+
+    *count_read = 0;
+    p_vol = (file == NULL) ? NULL : file->p_sfd->p_vol;
+    PF_enterCritical(&p_vol->critical);
+    err = PFVOL_CheckForRead(p_vol);
+    if (err != 0) {
+        PF_exitCritical(&p_vol->critical);
+        lbl_805644C0.last_error = err;
+        p_vol->last_error = err;
+        return err;
+    }
+    if ((file->p_sfd->stat & 1) == 0 || (file->p_sfd->stat & 2) == 0) {
+        PF_exitCritical(&p_vol->critical);
+        lbl_805644C0.last_error = 0x26;
+        p_vol->last_error = 0x26;
+        return 0x26;
+    }
+    p_vol->unk1644 = (s32)file;
+    err = PFFILE_p_fread(p_vol, (u8*)buf, size, count, file, &size_read);
+    *count_read = size_read;
+    p_vol->unk1644 = 0;
+    if (err != 0) {
+        lbl_805644C0.last_error = err;
+        file->p_sfd->ffd_p_vol->last_error = err;
+        file->last_error = err;
+    }
+    PF_exitCritical(&p_vol->critical);
+    return err;
+}
+
+int fn_803E5B8C(void* buf, u32 size, u32 count, PF2_FILE* file, u32* count_written) {
+    int err;
+    PF2_VOLUME* p_vol;
+    u32 size_written;
+
+    *count_written = 0;
+    p_vol = (file == NULL) ? NULL : file->p_sfd->p_vol;
+    PF_enterCritical(&p_vol->critical);
+    err = PFVOL_CheckForWrite(p_vol);
+    if (err != 0) {
+        PF_exitCritical(&p_vol->critical);
+        lbl_805644C0.last_error = err;
+        p_vol->last_error = err;
+        return err;
+    }
+    if ((file->p_sfd->stat & 1) == 0 || (file->p_sfd->stat & 2) == 0) {
+        PF_exitCritical(&p_vol->critical);
+        lbl_805644C0.last_error = 0x26;
+        p_vol->last_error = 0x26;
+        return 0x26;
+    }
+    p_vol->unk1644 = (s32)file;
+    err = PFFILE_p_fwrite(p_vol, (u8*)buf, size, count, file, &size_written);
+    *count_written = size_written;
+    p_vol->unk1644 = 0;
+    if (err != 0) {
+        lbl_805644C0.last_error = err;
+        file->p_sfd->ffd_p_vol->last_error = err;
+        file->last_error = err;
+    }
+    if (size_written != 0) {
+        PFENT_getcurrentDateTimeForEnt(&file->p_sfd->date, &file->p_sfd->time);
+        file->p_sfd->last_access_date = file->p_sfd->date;
+        file->p_sfd->stat |= 4;
+    }
+    PF_exitCritical(&p_vol->critical);
+    return err;
 }
