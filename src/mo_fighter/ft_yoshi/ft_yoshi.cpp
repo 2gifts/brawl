@@ -303,6 +303,264 @@ bool ftYoshi::activeArticle(wnYoshiFireCannon* article, soModuleAccesser* acc) {
     return false;
 }
 
+// ---- the article holders --------------------------------------------------------------------------------------------
+// ---- the article holders --------------------------------------------------------------------------------------------
+// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Yoshi, copied into the
+// descriptor), the heap module and the data block of the fighter kind.
+// HYPOTHESIS: the original builds these in the holder constructor itself.
+struct ftYoshiArticleDataTag {
+    bool m_unused;
+    bool m_resourceGroup;
+    ftYoshiArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
+};
+
+struct ftYoshiArticleKind : wnArticleKindInfo {
+    ftYoshiArticleKind() {
+        kind = 0;
+        subKind = Fighter_Yoshi;
+    }
+};
+
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+struct ftYoshiArticleBuildInfo : wnArticleBuildInfo {
+    ftYoshiArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+extern "C" void* fn_27_148A9C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148B44(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148B58(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+extern "C" void* fn_27_148B6C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
+
+template <class W> struct ftYoshiArticleTraits;
+#define FT_YOSHI_TRAITS(W, DATA, ID, GETTER) \
+    template <> struct ftYoshiArticleTraits<W> { \
+        enum { ArticleId = ID }; \
+        static const DATA* getData() { \
+            ftYoshiArticleDataTag tag; \
+            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Yoshi, &tag.m_resourceGroup)); \
+        } \
+    };
+
+FT_YOSHI_TRAITS(wnYoshiStar, wnYoshiStarData, 0, fn_27_148A9C)
+FT_YOSHI_TRAITS(wnYoshiWing, wnYoshiWingData, 2, fn_27_148B44)
+FT_YOSHI_TRAITS(wnYoshiFireBreath, wnYoshiFireBreathData, 3, fn_27_148B58)
+FT_YOSHI_TRAITS(wnYoshiFireCannon, wnYoshiFireCannonData, 4, fn_27_148B6C)
+template <> struct ftYoshiArticleTraits<wnYoshiTamago> {
+    enum { ArticleId = 1 };
+    static const wnYoshiTamagoData* getData() {
+        ftYoshiArticleDataTag tag;
+        return g_ftCommonDataAccesser.getWeaponData<wnYoshiTamagoData>(Fighter_Yoshi, &tag.m_resourceGroup);
+    }
+};
+
+// Every article of the fighter is built by this constructor from the data of the fighter kind.
+template <class T, class KindInfo, class Id>
+wnInstanceHolder<T, KindInfo, Id>::wnInstanceHolder(soModuleAccesser* acc) :
+    m_instance(ftYoshiArticleTraits<T>::ArticleId, ftYoshiArticleBuildInfo(ftYoshiArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftYoshiArticleTraits<T>::getData()) { }
+
+// ---- the articles and their mediator --------------------------------------------------------------------------------
+
+// The native ownership chain calls these constructors out of line (the wing's is inlined into the builder).
+#pragma dont_inline on
+template wnInstanceHolder<wnYoshiStar, soKindInfoGeneric<0, 4>, soIntToType<0> >::wnInstanceHolder(soModuleAccesser*);
+template wnInstanceHolder<wnYoshiTamago, soKindInfoGeneric<0, 4>, soIntToType<1> >::wnInstanceHolder(soModuleAccesser*);
+template wnInstanceHolder<wnYoshiFireBreath, soKindInfoGeneric<0, 4>, soIntToType<3> >::wnInstanceHolder(soModuleAccesser*);
+template wnInstanceHolder<wnYoshiFireCannon, soKindInfoGeneric<0, 4>, soIntToType<4> >::wnInstanceHolder(soModuleAccesser*);
+template <class Mediator>
+wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+template <class Mediator, int N>
+soGenerateArticleManageModuleBuilder<Mediator, N>::~soGenerateArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+soGenerateArticleManageModuleBuilder<Mediator, N>::soGenerateArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template wnSelectedArticleMediator<ftYoshiArticleMediator>::~wnSelectedArticleMediator();
+template soGenerateArticleManageModuleBuilder<ftYoshiArticleMediator, 5>::~soGenerateArticleManageModuleBuilder();
+template soGenerateArticleManageModuleBuilder<ftYoshiArticleMediator, 5>::soGenerateArticleManageModuleBuilder(soModuleAccesser*);
+template <class PoolList, class Founder>
+soArticleMediatorImpl<PoolList, Founder>::~soArticleMediatorImpl() { }
+#pragma dont_inline off
+
+template <class PoolList, class Founder>
+s32 soArticleMediatorImpl<PoolList, Founder>::getMediateNum() { return 5; }
+template <class PoolList, class Founder>
+void soArticleMediatorImpl<PoolList, Founder>::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+
+// ---- the article mediator -------------------------------------------------------------------------------------------
+// Slots: 0 Star, 1 Egg, 2 Wing, 3 Fire breath, 4 Fire cannon (the rest are unused).
+// HYPOTHESIS: the slot members of wn/wn_article_pool.h, over the pools of the fighter (the level and the number of
+// instances are template arguments).
+template <class Level, class W, int N, class Mediator, int S, int L>
+inline s32 ftYoshiSlotActiveNum(Mediator* mediator, const soIntToType<S>&, const soIntToType<L>&) {
+    wnArticleSlotCounter counter;
+    counter.m_isActive = wnArticleIsActive;
+    counter.m_activeNum = 0;
+    counter.m_inactiveNum = 0;
+    for (s32 i = 0; i < N; ++i) {
+        wnArticleSlotCounter* c = &counter;
+        if (c->m_isActive(&static_cast<soArticle&>(*static_cast<Level&>(mediator->getPools()).getSub().getInstanceAt(i))) == true) {
+            ++c->m_activeNum;
+        } else {
+            ++c->m_inactiveNum;
+        }
+    }
+    return counter.m_activeNum;
+}
+
+template <class Level, int N, class Mediator, int S, int L>
+inline bool ftYoshiSlotIsGeneratable(Mediator* mediator, const soIntToType<S>&, const soIntToType<L>&) {
+    bool allActive;
+    s32 i;
+    for (i = 0; i < N; ++i) {
+        if (static_cast<soArticle&>(*static_cast<Level&>(mediator->getPools()).getSub().getInstanceAt(i)).isActiveArticle() == false) {
+            allActive = false;
+            goto done;
+        }
+    }
+    allActive = true;
+done:
+    return allActive == false;
+}
+
+template <class Founder, class W, class Level, int S, int L>
+inline soArticle* ftYoshiSlotGenerate(Level& pool, soModuleAccesser* acc, const soIntToType<S>&, const soIntToType<L>&) {
+    soArticleDeactivateChecker checker;
+    W* weapon = pool.getSub().find(checker);
+    if (weapon == NULL) {
+        weapon = static_cast<W*>(checker.getCandidate());
+        if (weapon == NULL) {
+            return wnGetNullArticle();
+        }
+        weapon->deactivateArticle();
+    }
+    if (Founder::activeArticle(weapon, acc) == true) {
+        return &static_cast<soArticle&>(*weapon);
+    }
+    return wnGetNullArticle();
+}
+
+#define FT_YOSHI_POOL_STAR static_cast<ftYoshiStarPool&>(m_pools).getSub()
+#define FT_YOSHI_POOL_TAMAGO static_cast<ftYoshiTamagoPool&>(m_pools).getSub()
+#define FT_YOSHI_POOL_WING static_cast<ftYoshiWingPool&>(m_pools).getSub()
+#define FT_YOSHI_POOL_BREATH static_cast<ftYoshiFireBreathPool&>(m_pools).getSub()
+#define FT_YOSHI_POOL_CANNON static_cast<ftYoshiFireCannonPool&>(m_pools).getSub()
+
+#define FT_YOSHI_UNUSED_SLOTS(value) \
+    WN_ARTICLE_UNUSED_SLOT(5, value) WN_ARTICLE_UNUSED_SLOT(6, value) \
+    WN_ARTICLE_UNUSED_SLOT(7, value) WN_ARTICLE_UNUSED_SLOT(8, value) WN_ARTICLE_UNUSED_SLOT(9, value) \
+    WN_ARTICLE_UNUSED_SLOT(10, value) WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) \
+    WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) \
+    WN_ARTICLE_UNUSED_SLOT(16, value)
+
+template <class PoolList, class Founder>
+void soArticleMediatorImpl<PoolList, Founder>::deactivate() {
+    for (s32 i = 0; i < 2; ++i) {
+        wnYoshiStar* weapon = FT_YOSHI_POOL_STAR.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 4; ++i) {
+        wnYoshiTamago* weapon = FT_YOSHI_POOL_TAMAGO.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 1; ++i) {
+        wnYoshiWing* weapon = FT_YOSHI_POOL_WING.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 4; ++i) {
+        wnYoshiFireBreath* weapon = FT_YOSHI_POOL_BREATH.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+    for (s32 i = 0; i < 2; ++i) {
+        wnYoshiFireCannon* weapon = FT_YOSHI_POOL_CANNON.getInstanceAt(i);
+        if (!static_cast<soArticle&>(*weapon).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
+template <class PoolList, class Founder>
+s32 soArticleMediatorImpl<PoolList, Founder>::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: return wnArticleSlotGenerateMaxNum(2, WN_ARTICLE_SLOT_TAGS);
+    case 1: return wnArticleSlotGenerateMaxNum(4, WN_ARTICLE_SLOT_TAGS);
+    case 2: return wnArticleSlotGenerateMaxNum(1, WN_ARTICLE_SLOT_TAGS);
+    case 3: return wnArticleSlotGenerateMaxNum(4, WN_ARTICLE_SLOT_TAGS);
+    case 4: return wnArticleSlotGenerateMaxNum(2, WN_ARTICLE_SLOT_TAGS);
+    FT_YOSHI_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+template <class PoolList, class Founder>
+s32 soArticleMediatorImpl<PoolList, Founder>::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: return ftYoshiSlotActiveNum<ftYoshiStarPool, wnYoshiStar, 2>(this, WN_ARTICLE_SLOT_TAGS);
+    case 1: return ftYoshiSlotActiveNum<ftYoshiTamagoPool, wnYoshiTamago, 4>(this, WN_ARTICLE_SLOT_TAGS);
+    case 2: return ftYoshiSlotActiveNum<ftYoshiWingPool, wnYoshiWing, 1>(this, WN_ARTICLE_SLOT_TAGS);
+    case 3: return ftYoshiSlotActiveNum<ftYoshiFireBreathPool, wnYoshiFireBreath, 4>(this, WN_ARTICLE_SLOT_TAGS);
+    case 4: return ftYoshiSlotActiveNum<ftYoshiFireCannonPool, wnYoshiFireCannon, 2>(this, WN_ARTICLE_SLOT_TAGS);
+    FT_YOSHI_UNUSED_SLOTS(0)
+    default: return 0;
+    }
+}
+
+template <class PoolList, class Founder>
+bool soArticleMediatorImpl<PoolList, Founder>::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: return ftYoshiSlotIsGeneratable<ftYoshiStarPool, 2>(this, WN_ARTICLE_SLOT_TAGS);
+    case 1: return ftYoshiSlotIsGeneratable<ftYoshiTamagoPool, 4>(this, WN_ARTICLE_SLOT_TAGS);
+    case 2: return ftYoshiSlotIsGeneratable<ftYoshiWingPool, 1>(this, WN_ARTICLE_SLOT_TAGS);
+    case 3: return ftYoshiSlotIsGeneratable<ftYoshiFireBreathPool, 4>(this, WN_ARTICLE_SLOT_TAGS);
+    case 4: return ftYoshiSlotIsGeneratable<ftYoshiFireCannonPool, 2>(this, WN_ARTICLE_SLOT_TAGS);
+    FT_YOSHI_UNUSED_SLOTS(false)
+    default: return false;
+    }
+}
+
+// The egg is generated through activeArticle1 (activeArticle is the throw).
+struct ftYoshiEggActivator {
+    static bool activeArticle(wnYoshiTamago* weapon, soModuleAccesser* acc) { return ftYoshi::activeArticle1(weapon, acc); }
+};
+
+template <class PoolList, class Founder>
+soArticle* soArticleMediatorImpl<PoolList, Founder>::generate(s32 articleId, soModuleAccesser* acc) {
+    switch (articleId) {
+    case 0: return ftYoshiSlotGenerate<Founder, wnYoshiStar>(static_cast<ftYoshiStarPool&>(m_pools), acc, WN_ARTICLE_SLOT_TAGS);
+    case 1: return ftYoshiSlotGenerate<ftYoshiEggActivator, wnYoshiTamago>(static_cast<ftYoshiTamagoPool&>(m_pools), acc, WN_ARTICLE_SLOT_TAGS);
+    case 2: return ftYoshiSlotGenerate<Founder, wnYoshiWing>(static_cast<ftYoshiWingPool&>(m_pools), acc, WN_ARTICLE_SLOT_TAGS);
+    case 3: return ftYoshiSlotGenerate<Founder, wnYoshiFireBreath>(static_cast<ftYoshiFireBreathPool&>(m_pools), acc, WN_ARTICLE_SLOT_TAGS);
+    case 4: return ftYoshiSlotGenerate<Founder, wnYoshiFireCannon>(static_cast<ftYoshiFireCannonPool&>(m_pools), acc, WN_ARTICLE_SLOT_TAGS);
+    FT_YOSHI_UNUSED_SLOTS(wnGetNullArticle())
+    default: return wnGetNullArticle();
+    }
+}
+
+template <class PoolList, class Founder>
+bool soArticleMediatorImpl<PoolList, Founder>::shoot(soModuleAccesser* acc, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: return wnArticleSlotShoot<wnYoshiStar>(article, WN_ARTICLE_SLOT_TAGS);
+    case 1: return wnArticleSlotShoot<wnYoshiTamago>(article, WN_ARTICLE_SLOT_TAGS);
+    case 2: return wnArticleSlotShoot<wnYoshiWing>(article, WN_ARTICLE_SLOT_TAGS);
+    case 3: return wnArticleSlotShoot<wnYoshiFireBreath>(article, WN_ARTICLE_SLOT_TAGS);
+    case 4: return wnArticleSlotShoot<wnYoshiFireCannon>(article, WN_ARTICLE_SLOT_TAGS);
+    FT_YOSHI_UNUSED_SLOTS(true)
+    default: return false;
+    }
+}
+
+template class soArticleMediatorImpl<ftYoshiArticleList, ftYoshi>;
+
 // Guard statuses create this animation once and remove it on exit. The work
 // flag is kept separate from the bundle's own resource-ownership flags.
 void ftYoshi::createGuardColorAnim() {
@@ -678,4 +936,12 @@ template class soInstancePoolSub<soInstancePoolInfo<wnYoshiTamago, 3, wnInstance
 template class soInstancePoolSub<soInstancePoolInfo<wnYoshiTamago, 4, wnInstanceHolder, soIntToType<1> >, soKindInfoGeneric<0, 4> >;
 template wnInstanceHolder<wnYoshiWing, soKindInfoGeneric<0, 4>, soIntToType<2> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnYoshiWing, 1, wnInstanceHolder, soIntToType<2> >, soKindInfoGeneric<0, 4> >;
+template wnInstanceHolder<wnYoshiFireBreath, soKindInfoGeneric<0, 4>, soIntToType<3> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnYoshiFireBreath, 1, wnInstanceHolder, soIntToType<3> >, soKindInfoGeneric<0, 4> >;
+template class soInstancePoolSub<soInstancePoolInfo<wnYoshiFireBreath, 2, wnInstanceHolder, soIntToType<3> >, soKindInfoGeneric<0, 4> >;
+template class soInstancePoolSub<soInstancePoolInfo<wnYoshiFireBreath, 3, wnInstanceHolder, soIntToType<3> >, soKindInfoGeneric<0, 4> >;
+template class soInstancePoolSub<soInstancePoolInfo<wnYoshiFireBreath, 4, wnInstanceHolder, soIntToType<3> >, soKindInfoGeneric<0, 4> >;
+template wnInstanceHolder<wnYoshiFireCannon, soKindInfoGeneric<0, 4>, soIntToType<4> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnYoshiFireCannon, 1, wnInstanceHolder, soIntToType<4> >, soKindInfoGeneric<0, 4> >;
+template class soInstancePoolSub<soInstancePoolInfo<wnYoshiFireCannon, 2, wnInstanceHolder, soIntToType<4> >, soKindInfoGeneric<0, 4> >;
 #pragma dont_inline off

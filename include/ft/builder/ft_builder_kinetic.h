@@ -271,9 +271,13 @@ class ftKineticMediatorImpl;
 #include <wn/wn_kinetic_mediator_impl.h>
 #else
 
+class soArticle;
 template <typename E>
 class soInstancePoolSubNull {
 public:
+    // The newest-first search of the article pools ends here.
+    template <typename Predicate>
+    E* find(Predicate&) { return 0; }
     template <typename Helper>
     int forEachHolderModuleAccesser(Helper helper, soModuleAccesser* acc) {
         return 0;
@@ -295,6 +299,14 @@ public:
             return m_holder.getEnergy();
         }
         return m_next.getInstanceAt(index);
+    }
+    // HYPOTHESIS: source name of the native newest-first predicate traversal (articles only).
+    template <typename Predicate>
+    typename Info::Type* find(Predicate& predicate) {
+        if (predicate(&static_cast<soArticle&>(*m_holder.getEnergy())) == true) {
+            return m_holder.getEnergy();
+        }
+        return m_next.find(predicate);
     }
 };
 
@@ -318,6 +330,13 @@ public:
 #endif
     E* getInstanceAt(int index) {
         if (index == 0) {
+            return m_holder.getEnergy();
+        }
+        return 0;
+    }
+    template <typename Predicate>
+    E* find(Predicate& predicate) {
+        if (predicate(&static_cast<soArticle&>(*m_holder.getEnergy())) == true) {
             return m_holder.getEnergy();
         }
         return 0;

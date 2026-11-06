@@ -30,8 +30,9 @@ typedef soStatusModuleBuildConfig<293, soGeneralWorkBuildConfig<18, 14, 2>, 274,
 // Yoshi dispatches his own kinetic modes but updates energies through the shared fighter transactor.
 typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKineticMediatorImplT<ftYoshiKineticTransactor, ftKineticTransactor> > ftYoshiKineticModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnYoshiStar pools), not reconstructed yet
-typedef ftOpaqueGenerateArticleManageModuleBuilder<0x19E5C, Fighter_Yoshi> ftYoshiGenerateArticleManageModuleBuilder;
+// HYPOTHESIS: soGenerateArticleManageModuleBuilder: the article pools of Yoshi and their mediator.
+#include <ft/yoshi/ft_yoshi_article_pools.h>
+typedef ftYoshiArticleManageModuleBuilder ftYoshiGenerateArticleManageModuleBuilder;
 
 class ftYoshiBuildConfig : public ftCommonBuildConfig {
 public:
