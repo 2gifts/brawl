@@ -77,8 +77,8 @@ public:
     virtual void sync2ndSavedPosition() = 0;
     virtual bool isIK(int ikId) = 0;
     virtual bool isIK() = 0;
-    virtual void setIK(int ikId, bool on) = 0;
-    virtual void setIKTargetPos(int ikId, const Vec3f* pos) = 0;
+    virtual void setIK(int ikId, float value) = 0;
+    virtual void setIKTargetPos(int ikId, const Vec3f* pos, const Vec3f* pos2, const Vec3f* pos3) = 0;
     virtual void setIKNormal(int ikId, const Vec3f* normal) = 0;
     virtual const char* getIKEndNodeName(int ikId, int index) = 0;
     virtual void setToeAngleLimit(int ikId, float limit) = 0;
@@ -160,8 +160,8 @@ public:
     virtual void sync2ndSavedPosition();
     virtual bool isIK(int ikId);
     virtual bool isIK();
-    virtual void setIK(int ikId, bool on);
-    virtual void setIKTargetPos(int ikId, const Vec3f* pos);
+    virtual void setIK(int ikId, float value);
+    virtual void setIKTargetPos(int ikId, const Vec3f* pos, const Vec3f* pos2, const Vec3f* pos3);
     virtual void setIKNormal(int ikId, const Vec3f* normal);
     virtual const char* getIKEndNodeName(int ikId, int index);
     virtual void setToeAngleLimit(int ikId, float limit);
