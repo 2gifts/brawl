@@ -72,6 +72,7 @@ protected:
     HitPointInfo* m_hitPointInfo;
     soCollisionAttackData* m_overwriteAttackData;
     StageHitData* m_stageHitData;
+#ifdef GR_MADEIN_NAMED_FLAGS // the unit that defines grMadein writes the flags through these names
     union {
         struct {
             bool m_300_7 : 1;                 // | 0x80
@@ -85,6 +86,15 @@ protected:
         };
         u8 m_flags : 8; // HYPOTHESIS: the constructor clears all the flags together
     };
+#else
+    bool m_300_7 : 1;                 // | 0x80
+    bool m_hasAttack : 1;             // | 0x40
+    bool m_hasHitPoint : 1;           // | 0x20
+    bool m_isHit : 1;                 // | 0x10
+    HitCategory m_hitCategory : 2; // | 0x4, 0x8
+    bool m_isLandedOn : 1;            // | 0x2
+    bool m_useLandCheck : 1;          // | 0x1
+#endif
     char _301[3];
     float m_304;
     int m_attackPower;

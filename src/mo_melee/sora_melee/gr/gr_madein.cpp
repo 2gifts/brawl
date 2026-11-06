@@ -1,3 +1,4 @@
+#define GR_MADEIN_NAMED_FLAGS
 #define YK_STAGE_INLINE // inline members of the shared SO headers that the stage RELs emit themselves
 #define YK_STAGE_FULL
 #define YK_DATA_INLINE_CTOR
