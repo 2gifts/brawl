@@ -241,35 +241,11 @@ bool ftPokeLizardonArticleMediator::shoot(soModuleAccesser* acc, soArticle* arti
 }
 
 
-// HYPOTHESIS: parameter types of the sora_melee Pokemon helpers (unnamed there; the trailing names are the module map's).
+// HYPOTHESIS: parameter types of the sora_melee Lizardon transactor helpers (unnamed there; the trailing names are the module map's).
 extern "C" {
-float fn_27_112BEC(ftOwner* owner);                                                                   // ftOwner::getStaminaMaxAdd
-void fn_27_368988(ftPokemonStaminaModule* stamina, float staminaMaxAdd);                              // ftPokemonStaminaModule::activate
-void fn_27_3689A4(ftPokemonStaminaModule* stamina);                                                   // ftPokemonStaminaModule::initStamina
-void fn_27_368AAC(ftPokemonStaminaModule* stamina);                                                   // ftPokemonStaminaModule::decStaminaAttack
-void fn_27_368AE8(ftPokemonStaminaModule* stamina);                                                   // ftPokemonStaminaModule::incStaminaDead
-void fn_27_368B30(ftPokemonStaminaModule* stamina);                                                   // ftPokemonStaminaModule::update
 void fn_27_368D00(ftPokeLizardonTransactor* transactor, soModuleAccesser* moduleAccesser);            // ftPokeLizardonTransactor::initTransact
 void fn_27_368DAC(ftPokeLizardonTransactor* transactor, soModuleAccesser* moduleAccesser);            // ftPokeLizardonTransactor::processUpdateTransact
-void fn_27_3769FC(ftPokemonEventManageModule* eventManage);                                           // ftPokemonEventManageModule::activate
-void fn_27_376A58(ftPokemonEventManageModule* eventManage);                                           // ftPokemonEventManageModule::deactivate
-void fn_27_376A80(ftPokemonEventManageModule* eventManage, int statusKind, int prevStatusKind, soStatusData* statusData); // ::onChangeStatus
-void fn_27_377094(ftPokemonEventManageModule* eventManage);                                           // ftPokemonEventManageModule::onAttack
-void fn_27_3772A8(ftPokemonEventManageModule* eventManage);                                           // ftPokemonEventManageModule::onInflict
-void fn_27_3774AC(ftPokemonEventManageModule* eventManage);                                           // ftPokemonEventManageModule::onDamage
-void fn_27_3776C0(ftPokemonEventManageModule* eventManage);                                           // ::notifyEventPokemonTrainerUpdate
-bool fn_27_3776C8(ftPokemonEventManageModule* eventManage, Vec3f* pos, float* lr);                    // ::notifyEventPokemonRequestChange
-void fn_27_37794C(soModuleAccesser* moduleAccesser, int kind, int statusKind);                        // ftPokemonUtil::changeCommon
-void fn_27_377B30(soModuleAccesser* moduleAccesser, void* eventArg);                                  // ftPokemonUtil::finalEndCommon
 }
-
-// HYPOTHESIS: the block the change hands over from the previous Pokemon (position, facing and damage).
-struct ftPokeLizardonChangeWork {
-    Vec3f m_pos;
-    float m_lr;
-    u8 unk10[0x5C - 0x10];
-    float m_damage;
-};
 
 // HYPOTHESIS: the motion data of the motion change; bit 3 of its second byte asks for the wing partial animations.
 struct ftPokeLizardonMotionDataView {
@@ -309,7 +285,7 @@ void ftPokeLizardon::onStart(int startKind) {
 
 void ftPokeLizardon::change(void* work, int kind) {
     soModuleAccesser* acc = m_moduleAccesser;
-    ftPokeLizardonChangeWork* changeWork = static_cast<ftPokeLizardonChangeWork*>(work);
+    ftPokemonChangeWork* changeWork = static_cast<ftPokemonChangeWork*>(work);
     acc->getPostureModule().init(&changeWork->m_pos, changeWork->m_lr);
     acc->getDamageModule().initDamage(changeWork->m_damage);
     onStart(kind);

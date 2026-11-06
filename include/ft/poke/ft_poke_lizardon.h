@@ -2,7 +2,7 @@
 
 #include <ft/ft_fighter_builder.h>
 #include <sr/sr_common.h>
-#include <so/event/so_event_presenter.h>
+#include <ft/poke/ft_pokemon.h>
 #include <types.h>
 
 ////////////////////////////////////////
@@ -47,45 +47,6 @@ public:
     typedef ftPokeLizardonLinkModuleBuildConfig LinkModuleBuildConfig;
     typedef ftPokeLizardonStatusModuleBuildConfig StatusModuleBuildConfig;
     typedef ftPokeLizardonGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
-};
-
-// HYPOTHESIS: the Pokemon Trainer's party state; both modules are constructed in sora_melee from the first extend parameter block.
-class ftPokemonStaminaModule {
-    u8 unk0[0xC];
-public:
-    // HYPOTHESIS: unkC / unk14 are copied into the work floats 0x11000013 / 0x11000014 at the start.
-    float unkC;
-    float unk10;
-    float unk14;
-    ftPokemonStaminaModule(const void* extendParam, soModuleAccesser* moduleAccesser);
-    ~ftPokemonStaminaModule() { }
-};
-
-// HYPOTHESIS: the entry event presenter is the first base (the fighter walks the observer list at the address of the module).
-class ftPokemonEventManageModule : public soEventPresenter<ftEntryEventObserver> {
-    u8 unkC[0x1C - 0xC];
-public:
-    ftPokemonEventManageModule(s32 entryId, soModuleAccesser* moduleAccesser, ftPokemonStaminaModule* stamina);
-    virtual ~ftPokemonEventManageModule() { }
-    // HYPOTHESIS: inline presenter helpers in the style of the trainer's ftEntryEventPresenter: each tells every observer.
-    void notifyEventPokemonStart(int taskId) {
-        soInstanceManagerFullProperty<ftEntryEventObserver*>* list = getObserverList();
-        for (int i = 0; i < (s32)list->size(); i++) {
-            list->atIndex(i)->notifyEventPokemonStart(taskId);
-        }
-    }
-    void notifyEventPokemonCollect() {
-        soInstanceManagerFullProperty<ftEntryEventObserver*>* list = getObserverList();
-        for (int i = 0; i < (s32)list->size(); i++) {
-            list->atIndex(i)->notifyEventPokemonCollect();
-        }
-    }
-    void notifyEventPokemonChangeCancel() {
-        soInstanceManagerFullProperty<ftEntryEventObserver*>* list = getObserverList();
-        for (int i = 0; i < (s32)list->size(); i++) {
-            list->atIndex(i)->notifyEventPokemonChangeCancel();
-        }
-    }
 };
 
 class wnPokeLizardonBreath;
