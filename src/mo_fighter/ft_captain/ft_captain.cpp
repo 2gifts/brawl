@@ -9,6 +9,7 @@
 #include <ft/ft_class_info_impl.h>
 #include <ft/captain/ft_captain.h>
 #include <ft/captain/ft_captain_extend_param_accesser.h>
+#include <ft/captain/ft_captain_status_uniq_process_falcon_kick.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_resource_id_accesser_impl.h>
 #include <so/article/so_article_mediator.h>
@@ -92,7 +93,6 @@ extern ftCaptainStatusUniqProcessFalconKnuckle g_ftCaptainStatusUniqProcessFalco
 // HYPOTHESIS: members of the other special status processes, only declared here (unnamed in the module map).
 extern "C" {
 void fn_100_F3D0(soModuleAccesser* moduleAccesser);
-void fn_100_D880(soStatusUniqProcess* process, soModuleAccesser* moduleAccesser);
 void fn_100_DFF0(soStatusUniqProcess* process, float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
 bool fn_100_E1A0(soStatusUniqProcess* process, u32 flags, soModuleAccesser* moduleAccesser);
 }
@@ -123,7 +123,7 @@ void ftCaptain::notifyEventCollisionAttack(float power, soCollisionLog* collisio
         g_ftCaptainStatusUniqProcessFalconKnuckle.checkHitValidFlag(moduleAccesser);
         break;
     case 0x115:
-        fn_100_D880(&lbl_100_bss_1A4, moduleAccesser);
+        reinterpret_cast<ftCaptainStatusUniqProcessFalconKick*>(&lbl_100_bss_1A4)->setEventCollisionAttack(moduleAccesser);
         break;
     case 0x116:
         fn_100_DFF0(&lbl_100_bss_1F4, power, collisionLog, moduleAccesser);
