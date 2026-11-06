@@ -206,6 +206,7 @@ public:
     void disableGimmickBlocks();
     void startGimmickSE();
     void loadStageEditData();
+    void deleteStageBlocks();
     void initStageBlocks();
     void enableBg(bool enableTrainer);
     void disableBg();
