@@ -4681,11 +4681,37 @@ RVL_SDK/nhttp/nhttp.c:
 	.sbss       start:0x805A1148 end:0x805A1158
 
 RVL_SDK/nwc24/nwc24.c:
-	.text       start:0x80397610 end:0x803A072C
-	.data       start:0x80491A78 end:0x804922F0
-	.bss        start:0x805372C0 end:0x805373C0
-	.sdata      start:0x8059FCC0 end:0x8059FDD8
-	.sbss       start:0x805A1158 end:0x805A1198
+	.text       start:0x80397610 end:0x8039B1C0
+	.data       start:0x80491A78 end:0x80491CA8
+	.sdata      start:0x8059FCC0 end:0x8059FCE8
+	.sbss       start:0x805A1158 end:0x805A1188
+
+RVL_SDK/nwc24/NWC24MBoxCtrl.c:
+	.text       start:0x8039B1C0 end:0x8039D30C
+	.data       start:0x80491CA8 end:0x80491D50
+	.sdata      start:0x8059FCE8 end:0x8059FCF8
+	.sbss       start:0x805A1188 end:0x805A1190
+
+RVL_SDK/nwc24/NWC24Mime.c:
+	.text       start:0x8039D30C end:0x8039DAF8
+	.data       start:0x80491D50 end:0x80491D98
+	.sdata      start:0x8059FCF8 end:0x8059FD00
+
+RVL_SDK/nwc24/NWC24Parser.c:
+	.text       start:0x8039DAF8 end:0x8039DC18
+	.data       start:0x80491D98 end:0x80492048
+	.sdata      start:0x8059FD00 end:0x8059FD40
+
+RVL_SDK/nwc24/NWC24MsgCommit.c:
+	.text       start:0x8039DC18 end:0x8039FD68
+	.data       start:0x80492048 end:0x804922F0
+	.bss        start:0x805372C0 end:0x80537300
+	.sdata      start:0x8059FD40 end:0x8059FDD8
+	.sbss       start:0x805A1190 end:0x805A1198
+
+RVL_SDK/nwc24/NWC24MsgRead.c:
+	.text       start:0x8039FD68 end:0x803A072C
+	.bss        start:0x80537300 end:0x805373C0
 
 RVL_SDK/nwc24/NWC24Schedule.c:
 	.text       start:0x803A072C end:0x803A129C
