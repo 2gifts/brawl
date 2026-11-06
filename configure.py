@@ -1364,6 +1364,7 @@ config.libs = [
             Object(Matching, "sora/st/st_data_container_multi.cpp"),
             Object(Matching, "sora/st/st_data_container_magic.cpp"),
             Object(NonMatching, "sora/mu/mu_menu_ctrl.cpp"),
+            Object(NonMatching, "sora/mu/mu_clear_get_data.cpp"),
             Object(NonMatching, "sora/mu/mu_clear_get.cpp"),
             Object(NonMatching, "sora/mu/mu_notice_wnd.cpp"),
             Object(NonMatching, "sora/mu/mu_prize_wnd.cpp"),
