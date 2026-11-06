@@ -20,6 +20,7 @@ public:
     static bool isSendQueueEmpty();
     void broadcastMyShortComment();
     void broadcastMyName();
+    void defineBroadcastArea(void* area, u32 size0, u32 size1, u32 size2);
 
     u8 unk8[0x10];
     u32 unk18;

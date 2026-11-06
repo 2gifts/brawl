@@ -106,3 +106,10 @@ bool NtTr::ntTrRecvQue::stock(u8 aid, u8 type, const void* command, u32 size) {
         unk4 = packet;
     return true;
 }
+
+void NtTr::defineBroadcastArea(void* area, u32 size0, u32 size1, u32 size2) {
+    unk20 = reinterpret_cast<u32>(area);
+    unk24 = size0;
+    unk28 = size1;
+    unk2C = size2;
+}
