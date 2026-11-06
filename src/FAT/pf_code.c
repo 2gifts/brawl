@@ -36,3 +36,7 @@ s16 fn_803EB380(const u16* buf) {
     fn_803D65A4(fn_803EB068(buf, oem), &oem_width, &uni_width);
     return uni_width;
 }
+
+s32 PFCODE_CP932_isUnicodeMBchar() {
+    return 0;
+}
