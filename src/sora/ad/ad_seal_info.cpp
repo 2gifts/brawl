@@ -2,7 +2,6 @@
 #include <ad/ad_seal_info.h>
 #include <ty/ty_seal_listmng.h>
 #include <memory.h>
-#include <new>
 
 const u8 lbl_80409798[48] = {
     0, 1, 2, 3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 13,
@@ -17,12 +16,7 @@ adSealInfoResult::~adSealInfoResult() {
 }
 
 void adSealInfoResult::getSealInfoPrepare() {
-    void* memory = operator new(sizeof(tySealListDataManager), Heaps::MenuInstance);
-    tySealListDataManager* manager = NULL;
-    if (memory) {
-        manager = new (memory) tySealListDataManager(true);
-    }
-    unk0 = manager;
+    unk0 = new (Heaps::MenuInstance) tySealListDataManager(true);
 }
 
 bool adSealInfoResult::isLoadFinish() {
