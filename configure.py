@@ -1017,6 +1017,7 @@ config.libs = [
             Object(NonMatching, "RVL_SDK/net/net_time.c"),
             Object(Matching, "RVL_SDK/net/net_util.c"),
             Object(NonMatching, "RVL_SDK/thp/THPAudio.cpp"),
+            Object(Matching, "RVL_SDK/nwc24/NWC24StdAPI.c", mw_version="GC/3.0a5.2"),
             Object(NonMatching, "RVL_SDK/nwc24/nwc24.c", mw_version="GC/3.0a5.2"),
             Object(Matching, "RVL_SDK/nwc24/NWC24MBoxCtrl.c", mw_version="GC/3.0a5.2"),
             Object(Matching, "RVL_SDK/nwc24/NWC24Mime.c", mw_version="GC/3.0a5.2"),
