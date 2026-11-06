@@ -77,6 +77,8 @@ public:
             Heaps::HeapType nwMotionInstHeap);
     virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObject, int unk4);
     virtual void processHit();
+    virtual void onDeactivate();
+    void* getExtendParam();
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     // The hooks the article mediator calls to start an article of the pool (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnGameWatchSausage* weapon, soModuleAccesser* acc);

@@ -608,17 +608,15 @@ soInsideEventManageModuleBuilder<ftGameWatchInsideEventManageModuleBuildConfig, 
 
 
 
+void ftGameWatch::onDeactivate() {
+    m_animObj.remove();
+    m_animObj.destroy();
+}
+
+void* ftGameWatch::getExtendParam() { return reinterpret_cast<u8*>(m_data) + 0x7C; }
+
 // Trivial functions of this translation unit (empty virtuals, constant returns, field accessors) under their placeholder names.
 extern "C" {
-
-// ftGameWatch::getExtendParam: pointer loaded from the object tail, plus 0x7C.
-u8* fn_107_A8C4(u8* p) { return *(u8**)(p + 0x1FDB8) + 0x7C; }
-
-// ftGameWatch::onDeactivate: two sub-object teardown calls on the same member.
-void fn_107_AB10(u8* p) {
-    reinterpret_cast<soAnimObj*>(p + 0x1FDBC)->remove();
-    reinterpret_cast<soAnimObj*>(p + 0x1FDBC)->destroy();
-}
 
 u8 fn_107_8720(u8* p) { return *(u8*)(p + 0x4); }
 void fn_107_A810() {}
