@@ -2,6 +2,7 @@
 
 #include <havok/hkContactPoint.h>
 #include <havok/hkGskCache.h>
+#include <havok/hkCdPoint.h>
 
 // Contact point written by an agent's processCollision (0x30 bytes, the stride of the symmetric wrappers' loop).
 // HYPOTHESIS: the name; only m_contact is touched by the code written so far.
@@ -26,6 +27,16 @@ struct hkProcessCollisionOutput {
     hkProcessCdPoint* m_firstFreeContactPoint; // 0x0000
     hkProcessCdPoint m_contactPoints[256];     // 0x0010
     ToiInfo m_toi;                             // 0x3010
+    void* unk3050;                             // 0x3050 cleared by reset (HYPOTHESIS: a pointer, from the word store)
+
+    // Empties the output before an agent runs: no contact points, no time of impact.
+    // HYPOTHESIS: the names of reset and isEmpty (hkSimulation::processAgentCollideDiscrete inlines both).
+    void reset() {
+        m_firstFreeContactPoint = m_contactPoints;
+        m_toi.m_time = HK_REAL_MAX;
+        unk3050 = 0;
+    }
+    hkBool isEmpty() const { return m_firstFreeContactPoint == m_contactPoints; }
 
     // Out of line (processAgentsOfEntities calls it): only the time of impact is initialised, to the largest float.
     hkProcessCollisionOutput();

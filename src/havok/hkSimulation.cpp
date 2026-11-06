@@ -49,6 +49,10 @@
 #include <havok/hkThreadMemory.h>
 #include <havok/hkWorldCallbackUtil.h>
 #include <havok/hkCollisionInput.h>
+#include <havok/hkCollisionDispatcher.h>
+#include <havok/hkCollisionAgent.h>
+#include <havok/hkAgentNnMachine.h>
+#include <havok/hkLinkedCollidable.h>
 
 hkSimulation::hkSimulation(hkWorld* world) {
     m_world = world;
@@ -200,13 +204,33 @@ void hkSimulation::applyActions() {
     }
 }
 
-// HYPOTHESIS: an agent-entry helper in hkLinkedCollidable.o (not written, no map name) that clears the collision
-// information of one agent entry
-extern "C" void fn_802FF3FC(hkAgentNnEntry* entry, const hkProcessCollisionInput& input);
-
 void hkSimulation::collideEntitiesNarrowPhaseDiscrete(hkEntity** entities, int numEntities,
-                                                      const hkProcessCollisionInput& input, int mode) {
+                                                      hkProcessCollisionInput& input, int mode) {
     processAgentsOfEntities(entities, numEntities, input, &hkSimulation::processAgentCollideDiscrete, mode);
+}
+
+// Runs one agent entry for the step and hands its new contact points to the entry's contact manager. The input
+// takes the pair's quality settings first; when the step ran the heap dry the memory system is flagged and the
+// points are dropped.
+// HYPOTHESIS: the fixed table entry 1 for the input's quality pointer (as the asm does it).
+void hkSimulation::processAgentCollideDiscrete(hkAgentNnEntry* entry, hkProcessCollisionInput& input,
+                                               hkProcessCollisionOutput& output) {
+    output.reset();
+    input.m_collisionQualityInfo = &input.m_dispatcher->m_collisionQualityInfo[1];
+    input.m_createPredictiveAgents = input.m_dispatcher->m_collisionQualityInfo[entry->m_collisionQualityIndex].unk10;
+    hkAgentNnMachine_ProcessAgent(entry, input, output);
+    if (hkMemory::getAvailableMemory() == 0) {
+        hkMemory::getInstance().unk4 = 1;
+    }
+    if (hkMemory::getInstance().unk4 != 1) {
+        if (output.isEmpty() == false) {
+            entry->m_contactMgr->processContact(*entry->m_collidable[0], *entry->m_collidable[1], input, output);
+        }
+    }
+}
+
+hkLinkedCollidable* hkAgentNnEntry::getCollidableA() {
+    return m_collidable[0];
 }
 
 void hkSimulation::resetCollisionInformationForEntities(hkEntity** entities, int numEntities, hkWorld* world,
@@ -215,14 +239,13 @@ void hkSimulation::resetCollisionInformationForEntities(hkEntity** entities, int
     if (flag) {
         return;
     }
-    // HYPOTHESIS: world +0x68 is the world's collision input
-    processAgentsOfEntities(entities, numEntities, **(const hkProcessCollisionInput**)((char*)world + 0x68),
+    processAgentsOfEntities(entities, numEntities, *world->m_collisionInput,
                             &hkSimulation::processAgentResetCollisionInformation, 0);
 }
 
-void hkSimulation::processAgentResetCollisionInformation(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,
+void hkSimulation::processAgentResetCollisionInformation(hkAgentNnEntry* entry, hkProcessCollisionInput& input,
                                                          hkProcessCollisionOutput& output) {
-    fn_802FF3FC(entry, input);
+    hkAgentNnMachine_InvalidateTimInAgent(entry, input);
 }
 
 // Accessors (8 bytes each), emitted as out-of-line functions in this TU.

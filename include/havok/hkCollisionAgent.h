@@ -5,6 +5,8 @@
 
 struct hkCdBody;
 struct hkPenetrationTarget;
+struct hkCollidable;
+struct hkProcessCollisionOutput;
 
 // Base of the Havok collision agents. Agents are reference counted (hkReferencedObject) and
 // allocated with memory class 0x1d.
@@ -49,11 +51,17 @@ struct hkCollisionAgent : hkReferencedObject {
 };
 
 // Contact manager that agents store in their 0x08 word (passed as the last argument of the create functions).
-// Only the virtual slots used by the sphere agents are declared; names are HYPOTHESIS until the class is recovered.
+// Slot names from hkNullContactMgr's vtable in the image (lbl_80488348: 0x10 addContactPoint, 0x14
+// reserveContactPoints, 0x18 removeContactPoint, 0x1C processContact, 0x20 cleanup, 0x24 addToi, 0x28 removeToi,
+// 0x2C processToi). HYPOTHESIS: the parameters of the slots nothing here calls yet (declared without any).
 struct hkContactMgr : hkReferencedObject {
-    virtual void unk10(); // 0x10 HYPOTHESIS
-    virtual void unk14(); // 0x14 HYPOTHESIS
+    virtual void addContactPoint();      // 0x10
+    virtual void reserveContactPoints(); // 0x14
     // 0x18 HYPOTHESIS: Havok's hkContactMgr::removeContactPoint(hkContactPointId), the id being 16 bits; the agents' cleanup
     // calls it once for every contact point they still hold (key != 0xFFFF).
     virtual void removeContactPoint(u16 contactPointId);
+    // 0x1C: hands an agent's new contact points to the manager (hkSimulation::processAgentCollideDiscrete calls it
+    // with the entry's two collidables). HYPOTHESIS: the parameter types beyond the call shape.
+    virtual void processContact(const hkCollidable& a, const hkCollidable& b, const hkProcessCollisionInput& input,
+                                hkProcessCollisionOutput& output);
 };

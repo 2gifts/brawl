@@ -19,6 +19,8 @@ struct hkShapeCollectionFilter {
 };
 
 // Collision input handed to every agent call (the third argument of the agent slots).
+struct hkCollisionQualityInfo;
+
 struct hkCollisionInput {
     hkCollisionDispatcher* m_dispatcher; // 0x00 (hkBvAgent's static functions read it too)
     hkShapeCollectionFilter* m_filter;   // 0x04
@@ -51,10 +53,8 @@ struct hkProcessCollisionInput : hkCollisionInput {
     hkStepInfo m_stepInfo; // 0x10
     u32 unk20;    // 0x20
     u32 unk24;    // 0x24
-    // 0x28 HYPOTHESIS: per-pair quality settings; hkBvTreeAgent::calcAabbAndQueryTree grows A's aabb by its motion
-    // over the step only when unk28->unk10 is set.
-    struct Unk28 {
-        u32 unk0[4];  // 0x00
-        hkBool unk10; // 0x10
-    }* unk28;
+    // 0x28 the quality settings of the pair being processed (one entry of the dispatcher's table, see
+    // hkCollisionDispatcher::m_collisionQualityInfo); hkBvTreeAgent::calcAabbAndQueryTree grows A's aabb by its motion
+    // over the step only when its unk10 is set.
+    hkCollisionQualityInfo* m_collisionQualityInfo;
 };

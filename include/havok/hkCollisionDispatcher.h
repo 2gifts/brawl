@@ -20,6 +20,17 @@ struct hkAgentFuncs {
 
 // Collision dispatcher: reference counted, owns an 8 x 8 table of reference counted entries and the agent registration
 // tables filled by registerCollisionAgent. Only the members used by the matched functions are named so far.
+// One collision quality's settings (0x3C bytes; layout from hkCollisionDispatcher::initCollisionQualityInfo's stores:
+// floats, one byte at 0x10, a halfword at 0x38). HYPOTHESIS: the struct name, from the map name of the init function.
+struct hkCollisionQualityInfo {
+    hkReal unk0[4];  // 0x00
+    // 0x10 copied into the input's m_createPredictiveAgents (processAgentCollideDiscrete); hkBvTreeAgent grows A's
+    // aabb by its motion when it is set
+    hkBool unk10;
+    hkReal unk14[9]; // 0x14
+    u16 unk38;       // 0x38
+};
+
 struct hkCollisionDispatcher : hkReferencedObject {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
@@ -36,7 +47,10 @@ struct hkCollisionDispatcher : hkReferencedObject {
     u8 unkE90[0xE94 - 0xE90];
     u8 m_lookupE94[0x400]; // 0xE94 lookup table for the (typeA, typeB) pair with value 1
     u8 m_lookup1294[0x400]; // 0x1294 lookup table for the reverse pair with value 1
-    u8 unk1694[0x1C08 - 0x1694];
+    u8 unk1694[0x1A28 - 0x1694];
+    // 0x1A28 quality settings, stride 0x3C (initCollisionQualityInfo fills entries 1 to 5, entry 0 is not written).
+    hkCollisionQualityInfo m_collisionQualityInfo[6];
+    u8 unk1B90[0x1C08 - 0x1B90];
 
     u8 m_flagA; // 0x1C08 set to 1 by internalRegisterCollisionAgent
     u8 unk1C09[0x1C14 - 0x1C09];

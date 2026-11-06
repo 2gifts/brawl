@@ -528,7 +528,7 @@ int hkBvTreeAgent::calcAabbAndQueryTree(const hkCdBody& bodyA, const hkCdBody& b
     linearTimInfo._setRotatedInverseDir(msB->m_transform.m_rotation, timInfo);
     msA = (const hkMotionState*)bodyA.m_motion;
     hkVector4 extent;
-    if (input.unk28->unk10) {
+    if (input.m_collisionQualityInfo->unk10) {
         hkReal angularA = msA->m_objectRadius * (msA->m_deltaAngle.w + msB->m_deltaAngle.w);
         hkReal angularB = msB->m_objectRadius * (msB->m_deltaAngle.w * msB->m_deltaAngle.w);
         bodyA.m_shape->getAabb(bTa, 0.5f * input.unk8 + (angularA + angularB), aabb);

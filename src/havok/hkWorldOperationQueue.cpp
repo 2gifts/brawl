@@ -169,11 +169,8 @@ static inline T& at(void* p, int offset) {
     return *reinterpret_cast<T*>(reinterpret_cast<char*>(p) + offset);
 }
 
-// Views of virtual slots whose classes have no virtuals declared yet (MWCC: hkReferencedObject's dtor is 0x08,
-// calcStatistics 0x0C). Every call here passes one argument. HYPOTHESIS: the names, from what each case does.
-struct hkWorldObjectVirtuals : hkReferencedObject {
-    virtual void setShape(hkShape* shape); // 0x10
-};
+// View of the user callback's slot (its class has no virtuals declared yet; MWCC: hkReferencedObject's dtor is
+// 0x08, calcStatistics 0x0C). HYPOTHESIS: the name, from what the case does.
 struct hkWorldOperationUserCallback : hkReferencedObject {
     virtual void worldOperationUserCallback(int userData); // 0x10
 };
@@ -248,7 +245,7 @@ void hkWorldOperationQueue::executeAllPending() {
             }
             case hkWorldOperation::WORLD_OBJECT_SET_SHAPE: {
                 hkWorldObject*& object = at<hkWorldObject*>(o, 4);
-                reinterpret_cast<hkWorldObjectVirtuals*>(object)->setShape(at<hkShape*>(o, 8));
+                object->setShape(at<hkShape*>(o, 8));
                 removeReferenceFrom(object);
                 removeReferenceFrom(at<hkShape*>(o, 8));
                 break;

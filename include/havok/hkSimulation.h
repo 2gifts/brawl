@@ -30,21 +30,23 @@ struct hkSimulation : hkReferencedObject {
     }
 
     // What processAgentsOfEntities does with each agent entry of the entities (called as (this->*func)(entry, input,
-    // output)). HYPOTHESIS: the parameter types beyond the call shape.
-    typedef void (hkSimulation::*AgentEntryProcessFunction)(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,
+    // output)). The input is not const: processAgentCollideDiscrete writes the pair's quality settings into it and its
+    // load of the dispatcher stays behind the output stores (a pointer-to-const parameter would let it move up).
+    // HYPOTHESIS: the parameter types beyond that.
+    typedef void (hkSimulation::*AgentEntryProcessFunction)(hkAgentNnEntry* entry, hkProcessCollisionInput& input,
                                                             hkProcessCollisionOutput& output);
 
     hkSimulation(hkWorld* world);
     void applyActions();
     // HYPOTHESIS: the last parameter (an int-sized mode compared with 1; collideEntitiesNarrowPhaseDiscrete passes
     // its own through, resetCollisionInformationForEntities passes 0)
-    void collideEntitiesNarrowPhaseDiscrete(hkEntity** entities, int numEntities, const hkProcessCollisionInput& input,
+    void collideEntitiesNarrowPhaseDiscrete(hkEntity** entities, int numEntities, hkProcessCollisionInput& input,
                                             int mode);
-    void processAgentCollideDiscrete(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,
+    void processAgentCollideDiscrete(hkAgentNnEntry* entry, hkProcessCollisionInput& input,
                                      hkProcessCollisionOutput& output);
-    void processAgentResetCollisionInformation(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,
+    void processAgentResetCollisionInformation(hkAgentNnEntry* entry, hkProcessCollisionInput& input,
                                                hkProcessCollisionOutput& output);
-    void processAgentsOfEntities(hkEntity** entities, int numEntities, const hkProcessCollisionInput& input,
+    void processAgentsOfEntities(hkEntity** entities, int numEntities, hkProcessCollisionInput& input,
                                  AgentEntryProcessFunction func, int mode);
     hkReal snapSimulateTimeAndGetTimeToAdvanceTo();
     int reCollideAfterStepFailure();
