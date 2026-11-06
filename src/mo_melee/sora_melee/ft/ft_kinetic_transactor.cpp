@@ -77,7 +77,8 @@ void ftKineticTransactor::changeKineticSub13(bool*, void*, Vec2f* speed, soModul
 }
 
 void ftKineticTransactor::changeKineticSub14(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
-    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 7, &Vec2f(0.0f, speed->m_y), &Vec3f(0.0f, 0.0f, 0.0f));
+    float y = speed->m_y;
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 7, &Vec2f(0.0f, y), &Vec3f(0.0f, 0.0f, 0.0f));
     soKineticUtility::resetEnableEnergy(3, moduleAccesser, 19, &Vec2f(speed->m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
 }
 
@@ -153,15 +154,19 @@ void ftKineticTransactor::changeKineticSub33(bool*, void*, Vec2f* speed, soModul
 }
 
 void ftKineticTransactor::changeKineticSub34(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
-    soKineticUtility::resetEnableEnergy(0, moduleAccesser, 12, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+    Vec2f zero(0.0f, 0.0f);
+    Vec3f rot(0.0f, 0.0f, 0.0f);
+    soKineticUtility::resetEnableEnergy(0, moduleAccesser, 12, &zero, &rot);
     moduleAccesser->getKineticModule().getEnergy(4)->disable();
-    moduleAccesser->getWorkManageModule().offFlag(0x2200000d);
+    moduleAccesser->getWorkManageModule().onFlag(0x2200000d);
 }
 
 void ftKineticTransactor::changeKineticSub35(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
-    soKineticUtility::resetEnableEnergy(0, moduleAccesser, 13, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+    Vec2f zero(0.0f, 0.0f);
+    Vec3f rot(0.0f, 0.0f, 0.0f);
+    soKineticUtility::resetEnableEnergy(0, moduleAccesser, 13, &zero, &rot);
     moduleAccesser->getKineticModule().getEnergy(4)->disable();
-    moduleAccesser->getWorkManageModule().offFlag(0x2200000d);
+    moduleAccesser->getWorkManageModule().onFlag(0x2200000d);
 }
 
 void ftKineticTransactor::changeKineticSub36(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
@@ -182,7 +187,9 @@ void ftKineticTransactor::changeKineticSub39(bool*, void*, Vec2f* speed, soModul
 
 void ftKineticTransactor::changeKineticSub41(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
     soKineticUtility::resetEnableEnergy(2, moduleAccesser, 8, speed, &Vec3f(0.0f, 0.0f, 0.0f));
-    soKineticUtility::resetEnableEnergy(0, moduleAccesser, 2, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+    Vec2f zero(0.0f, 0.0f);
+    Vec3f rot(0.0f, 0.0f, 0.0f);
+    soKineticUtility::resetEnableEnergy(0, moduleAccesser, 2, &zero, &rot);
 }
 
 void ftKineticTransactor::changeKineticSub57(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
@@ -254,4 +261,160 @@ void ftKineticTransactor::changeKineticSub78(bool*, void*, Vec2f* speed, soModul
 }
 
 void ftKineticTransactor::changeKineticSub79(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+}
+
+void ftKineticTransactor::changeKineticSub30(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, speed->m_y), &Vec3f(0.0f, 0.0f, 0.0f));
+    soKineticUtility::resetEnableEnergy(2, moduleAccesser, 0, &Vec2f(speed->m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+    soKineticUtility::resetEnableEnergy(0, moduleAccesser, 4, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub45(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec3f rot(0.0f, 0.0f, 0.0f);
+    float y = soValueAccesser::getConstantFloat(moduleAccesser, 0xBE7, 0);
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, y), &rot);
+}
+
+void ftKineticTransactor::changeKineticSub56(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    soKineticUtility::resetEnableEnergy(3, moduleAccesser, 12, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+    moduleAccesser->getKineticModule().getEnergy(4)->disable();
+}
+
+void ftKineticTransactor::changeKineticSub62(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    moduleAccesser->getKineticModule().getEnergy(4)->disable();
+    moduleAccesser->getWorkManageModule().onFlag(0x2200000d);
+}
+
+void ftKineticTransactor::changeKineticSub70(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec2f velocity(speed->m_x, 0.0f);
+    float limit = soValueAccesser::getConstantFloat(moduleAccesser, 0xBD5, 0);
+    if ((float)__fabs((double)velocity.m_x) > limit) {
+        velocity.m_x = velocity.m_x < 0.0f ? -limit : limit;
+    }
+    soKineticUtility::resetEnableEnergy(2, moduleAccesser, 15, &velocity, &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub76(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    float scale = moduleAccesser->getWorkManageModule().getFloat(0x21000007);
+    soKineticUtility::resetEnableEnergy(3, moduleAccesser, 7, &Vec2f(speed->m_x * scale, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 5, &Vec2f(0.0f, speed->m_y), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub81(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    float y = -soValueAccesser::getConstantFloat(moduleAccesser, 0xDA2, 0);
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, y), &Vec3f(0.0f, 0.0f, 0.0f));
+    soKineticUtility::resetEnableEnergy(3, moduleAccesser, 6, &Vec2f(speed->m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub48(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec3f rot(0.0f, 0.0f, 0.0f);
+    float x = soValueAccesser::getConstantFloat(moduleAccesser, 0xC0C, 0) * moduleAccesser->getControllerModule().getStickX();
+    soKineticUtility::resetEnableEnergy(3, moduleAccesser, 6, &Vec2f(x, 0.0f), &rot);
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub49(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec3f rot(0.0f, 0.0f, 0.0f);
+    float x = soValueAccesser::getConstantFloat(moduleAccesser, 0xC09, 0) * moduleAccesser->getPostureModule().getLr();
+    soKineticUtility::resetEnableEnergy(3, moduleAccesser, 6, &Vec2f(x, 0.0f), &rot);
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub50(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec3f rot(0.0f, 0.0f, 0.0f);
+    float x = soValueAccesser::getConstantFloat(moduleAccesser, 0xC0A, 0) * moduleAccesser->getPostureModule().getLr();
+    soKineticUtility::resetEnableEnergy(3, moduleAccesser, 6, &Vec2f(x, 0.0f), &rot);
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, soValueAccesser::getConstantFloat(moduleAccesser, 0xC0B, 0)), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub53(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec2f velocity = *speed;
+    float scale = soValueAccesser::getConstantFloat(moduleAccesser, 0xBD5, 0);
+    velocity.m_x = scale * moduleAccesser->getPostureModule().getLr();
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, velocity.m_y), &Vec3f(0.0f, 0.0f, 0.0f));
+    soKineticUtility::resetEnableEnergy(2, moduleAccesser, 0, &Vec2f(velocity.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub54(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec2f velocity = *speed;
+    float scale = soValueAccesser::getConstantFloat(moduleAccesser, 0xC09, 0);
+    velocity.m_x = scale * moduleAccesser->getPostureModule().getLr();
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, velocity.m_y), &Vec3f(0.0f, 0.0f, 0.0f));
+    soKineticUtility::resetEnableEnergy(2, moduleAccesser, 0, &Vec2f(velocity.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub55(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec2f velocity = *speed;
+    velocity.m_x *= soValueAccesser::getConstantFloat(moduleAccesser, 0xC94, 0);
+    velocity.m_y *= soValueAccesser::getConstantFloat(moduleAccesser, 0xC95, 0);
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, velocity.m_y), &Vec3f(0.0f, 0.0f, 0.0f));
+    soKineticUtility::resetEnableEnergy(2, moduleAccesser, 2, &Vec2f(velocity.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub58(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec3f rot(0.0f, 0.0f, 0.0f);
+    float x = soValueAccesser::getConstantFloat(moduleAccesser, 0xCC6, 0) * -moduleAccesser->getPostureModule().getLr();
+    soKineticUtility::resetEnableEnergy(3, moduleAccesser, 6, &Vec2f(x, 0.0f), &rot);
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, soValueAccesser::getConstantFloat(moduleAccesser, 0xCC7, 0)), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub11(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec2f velocity;
+    velocity.m_y = soValueAccesser::getConstantFloat(moduleAccesser, 0xC27, 0);
+    float stick = moduleAccesser->getControllerModule().getStickX();
+    velocity.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xC28, 0) * stick;
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, velocity.m_y), &Vec3f(0.0f, 0.0f, 0.0f));
+    soKineticUtility::resetEnableEnergy(2, moduleAccesser, 0, &Vec2f(velocity.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+    moduleAccesser->getKineticModule().getEnergy(4)->disable();
+}
+
+void ftKineticTransactor::changeKineticSub52(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec2f velocity = *speed;
+    float a = soValueAccesser::getConstantFloat(moduleAccesser, 0xBD5, 0);
+    float b = soValueAccesser::getConstantFloat(moduleAccesser, 0xC9F, 0);
+    velocity.m_x = a * b * moduleAccesser->getPostureModule().getLr();
+    float c = soValueAccesser::getConstantFloat(moduleAccesser, 0xBC5, 0);
+    velocity.m_y = c * soValueAccesser::getConstantFloat(moduleAccesser, 0xBC9, 0);
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, velocity.m_y), &Vec3f(0.0f, 0.0f, 0.0f));
+    soKineticUtility::resetEnableEnergy(2, moduleAccesser, 0, &Vec2f(velocity.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub68(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec2f velocity = *speed;
+    velocity.m_x *= soValueAccesser::getConstantFloat(moduleAccesser, 0xD1B, 0);
+    float limitX = soValueAccesser::getConstantFloat(moduleAccesser, 0xBD5, 0);
+    if ((float)__fabs((double)velocity.m_x) > limitX) {
+        velocity.m_x = velocity.m_x < 0.0f ? -limitX : limitX;
+    }
+    float limitY = soValueAccesser::getConstantFloat(moduleAccesser, 0xBD0, 0);
+    if ((float)__fabs((double)velocity.m_y) > limitY) {
+        velocity.m_y = velocity.m_y < 0.0f ? -limitY : limitY;
+    }
+    soKineticUtility::resetEnableEnergy(2, moduleAccesser, 15, &Vec2f(velocity.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 2, &Vec2f(0.0f, velocity.m_y), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub80(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    soWorkManageModule* workManage = &moduleAccesser->getWorkManageModule();
+    float base = soValueAccesser::getConstantFloat(moduleAccesser, 0x7F8, 0);
+    float x = workManage->getFloat(0x21000001) * base;
+    x = soValueAccesser::getConstantFloat(moduleAccesser, 0x7F9, 0) + x;
+    x = x * -moduleAccesser->getWorkManageModule().getFloat(0x21000002);
+    soKineticUtility::resetEnableEnergy(3, moduleAccesser, 0, &Vec2f(x, speed->m_y), &Vec3f(0.0f, 0.0f, 0.0f));
+}
+
+void ftKineticTransactor::changeKineticSub9(bool*, void*, Vec2f* speed, soModuleAccesser* moduleAccesser) {
+    Vec2f velocity = *speed;
+    float stickScale = soValueAccesser::getConstantFloat(moduleAccesser, 0xBC4, 0);
+    stickScale = stickScale * moduleAccesser->getControllerModule().getStickX();
+    velocity.m_x = velocity.m_x * soValueAccesser::getConstantFloat(moduleAccesser, 0xBC6, 0) + stickScale;
+    float offsetY = soValueAccesser::getConstantFloat(moduleAccesser, 0xBC5, 0);
+    velocity.m_y = velocity.m_y * soValueAccesser::getConstantFloat(moduleAccesser, 0xC46, 0) + offsetY;
+    float limit = soValueAccesser::getConstantFloat(moduleAccesser, 0xBC7, 0);
+    if ((float)__fabs((double)velocity.m_x) > limit) {
+        velocity.m_x = velocity.m_x < 0.0f ? -limit : limit;
+    }
+    velocity.m_y *= soValueAccesser::getConstantFloat(moduleAccesser, 0xD8F, 0);
+    soKineticUtility::resetEnableEnergy(1, moduleAccesser, 0, &Vec2f(0.0f, velocity.m_y), &Vec3f(0.0f, 0.0f, 0.0f));
+    soKineticUtility::resetEnableEnergy(2, moduleAccesser, 0, &Vec2f(velocity.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
 }
