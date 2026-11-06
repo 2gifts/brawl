@@ -208,7 +208,7 @@ struct hkWorldFreeMemoryWatchDog : hkReferencedObject {
 // Runs the simulation for one step. When that succeeded and the memory in use (hkMemory 0x28 + 0x14) is over
 // the watchdog's limit, the watchdog is asked to free memory, bracketed by a timer.
 int hkWorld::stepDeltaTime(hkReal physicsDeltaTime) {
-    int result = ((hkWorldStepSimulation*)m_unk08)->stepDeltaTime(physicsDeltaTime);
+    int result = ((hkWorldStepSimulation*)m_simulation)->stepDeltaTime(physicsDeltaTime);
     if (result == 0) {
         hkWorldFreeMemoryWatchDog* watchDog = worldField<hkWorldFreeMemoryWatchDog*>(this, 0x50);
         if (watchDog != NULL) {

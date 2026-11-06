@@ -129,7 +129,7 @@ void hkContinuousSimulation::assertThereIsNoCollisionInformationForAgent(const v
 
 // Adds dt to the time of every pending TOI event of the continuous simulation owned by the world.
 void hkContinuousSimulation::warpTime(hkReal dt) {
-    hkContinuousSimulation* sim = (hkContinuousSimulation*)m_world->m_unk08; // HYPOTHESIS: world field holds the simulation
+    hkContinuousSimulation* sim = (hkContinuousSimulation*)m_world->m_simulation;
     for (int i = 0; i < sim->m_toiEvents.m_size; i++) {
         sim->m_toiEvents.begin()[i].unk00 += dt;
     }

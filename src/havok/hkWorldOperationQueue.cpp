@@ -478,7 +478,7 @@ void hkWorldOperationQueue::executeAllPending() {
             case hkWorldOperation::ENTITY_BATCH_REINTEGRATE_AND_RECOLLIDE: {
                 hkWorldOperation::BatchOperation& batch = static_cast<hkWorldOperation::BatchOperation&>(op);
                 // HYPOTHESIS: world +8 is the simulation
-                reinterpret_cast<hkSimulation*>(m_world->m_unk08)
+                m_world->m_simulation
                     ->reintegrateAndRecollideEntities(reinterpret_cast<hkEntity**>(batch.m_objects), batch.m_count, m_world);
                 removeReferencesFrom(batch.m_objects, batch.m_count);
                 freeBatch(batch.m_objects, batch.m_count);

@@ -9,6 +9,7 @@ struct hkEntity;
 struct hkAction; // include/havok/hkAction.h; the island stores itself in the action at 0x0C
 struct hkStatisticsCollector;
 struct hkConstraintInstance;
+struct hkStepInfo;
 
 // Simulation island (layout partly recovered; base and tail not recovered). Fields used by the island code:
 // 0x26 bit field (bits 0xC0 and 0x30, written as flags by internalRemoveEntity/removeAction),
@@ -32,4 +33,7 @@ struct hkSimulationIsland : hkReferencedObject {
     void removeConstraintFromCriticalLockedIsland(hkConstraintInstance* constraint);
     void mergeConstraintInfo(const hkSimulationIsland* other);
     void markForWrite();
+    // whether the island can go to sleep after this step (map name; hkDefaultWorldMaintenanceMgr asks it)
+    // HYPOTHESIS: the parameter type
+    hkBool shouldDeactivate(const hkStepInfo& stepInfo);
 };

@@ -20,6 +20,7 @@ struct hkStatisticsCollector;
 struct hkAabb;
 struct hkProcessCollisionInput;
 struct hkBroadPhase;
+struct hkSimulation;
 struct hkTypedBroadPhaseDispatcher;
 
 // The simulation world (layout partly recovered from hkWorld.cpp asm; the tail after 0x114 is not
@@ -32,7 +33,7 @@ struct hkWorldDynamicsStepInfo {
 };
 
 struct hkWorld : hkReferencedObject {
-    void* m_unk08;                                  // 0x08 HYPOTHESIS: broadphase-like object (vtable slot 0x10 queried)
+    hkSimulation* m_simulation;                     // 0x08 (hkWorld::stepDeltaTime calls its slot 0x10, stepDeltaTime)
     hkVector4 m_gravity;                            // 0x10
     u8 m_unk20[0x08];                               // 0x20 .. 0x27 not recovered
     hkArrayBase m_unk28;                            // 0x28 array of hkWorldMemoryEntry* (HYPOTHESIS: islands), see getMemUsageForIntegration
@@ -59,7 +60,10 @@ struct hkWorld : hkReferencedObject {
     int m_unk9C;                                    // 0x9C
     int m_unkA0;                                    // 0xA0
     int m_unkA4;                                    // 0xA4
-    u8 m_unkA8[0x20];                               // 0xA8 .. 0xC7 not recovered
+    u8 m_unkA8[0x0D];                               // 0xA8 .. 0xB4 not recovered
+    // hkDefaultWorldMaintenanceMgr::performMaintenance only looks for islands to deactivate when it is set
+    hkBool m_unkB5;                                 // 0xB5 HYPOTHESIS: a deactivation switch
+    u8 m_unkB6[0x12];                               // 0xB6 .. 0xC7 not recovered
     int m_unkC8;                                    // 0xC8 (initialised to -1)
     hkArray<hkPhantom*> m_phantoms;                 // 0xCC
     u8 m_unkD8[0x30];                               // 0xD8 .. 0x107 not recovered

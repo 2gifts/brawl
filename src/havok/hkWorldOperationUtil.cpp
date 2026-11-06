@@ -98,8 +98,7 @@ void hkWorldOperationUtil::removeEntityBP(hkWorld* world, hkEntity* entity) {
         return;
     }
 
-    // HYPOTHESIS: world +8 is the simulation
-    reinterpret_cast<hkSimulation*>(world->m_unk08)->resetCollisionInformationForEntities(entities, 1, world, true);
+    world->m_simulation->resetCollisionInformationForEntities(entities, 1, world, true);
 
     hkLocalArray<hkBroadPhaseHandlePair> removedPairs(at<int>(world, 0x2E4));
     at<hkBroadPhase*>(world, 0x54)->removeObject(&entity->m_collidable.m_broadPhaseHandle, removedPairs);
