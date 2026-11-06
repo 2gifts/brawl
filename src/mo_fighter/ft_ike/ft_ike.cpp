@@ -410,14 +410,30 @@ int fn_119_C524() { return 0; }
 
 }
 
-// Status-change override: entering status 0x126 first sends the final-finish event (fn_119_8FFC, defined elsewhere), then forwards to Fighter.
-extern "C" void fn_119_8FFC(Fighter* p, soModuleAccesser* moduleAccesser);
+void ftIke::sendFinalFinishEvent(soModuleAccesser* moduleAccesser) {
+    int i = 0;
+    gfTask* task = gfTaskScheduler::getInstance()->getTask(gfTask::Category_Fighter, 0);
+    soLinkEventIkeFinal message(0x2a, -1);
+    while (task != NULL) {
+        StageObject* object = dynamic_cast<StageObject*>(task);
+        if (object != NULL && object->isActive() == true && task->m_taskId != -1 && task->m_taskId != m_taskId) {
+            if (moduleAccesser->getLinkModule().link(6, task->m_taskId)) {
+                moduleAccesser->getLinkModule().sendEventParents(6, message);
+                moduleAccesser->getLinkModule().unlink(6);
+            }
+        }
+        i++;
+        task = gfTaskScheduler::getInstance()->getTask(gfTask::Category_Fighter, i);
+    }
+}
+
+// Status-change override: entering status 0x126 first sends the final-finish event, then forwards to Fighter.
 extern "C" {
 
 void fn_119_8F90(Fighter* p, int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
     switch (statusKind) {
     case 0x126:
-        fn_119_8FFC(p, moduleAccesser);
+        static_cast<ftIke*>(p)->sendFinalFinishEvent(moduleAccesser);
         break;
     }
     p->Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);

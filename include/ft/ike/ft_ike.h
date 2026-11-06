@@ -82,6 +82,7 @@ public:
     virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
     virtual void notifyEventCollisionAttackFighter(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     static Vec3f getFinalTargetPosBase(soModuleAccesser* moduleAccesser);
+    void sendFinalFinishEvent(soModuleAccesser* moduleAccesser);
     // The hooks the article mediator calls to start and to throw the sword (HYPOTHESIS: names follow the module map).
     static bool activeArticle(wnIkeSword* weapon, soModuleAccesser* acc);
     static bool shootArticle(wnIkeSword* weapon, soModuleAccesser* acc);
