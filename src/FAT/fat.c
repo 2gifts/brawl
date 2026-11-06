@@ -3346,3 +3346,363 @@ s32 VFipf2_fsfirst(const s8* path, u32 attr, PF_DTA* p_dta) {
     }
     return VFiPFAPI_convertReturnValue(err);
 }
+
+// ---------------------------------------------------------------- trivial stubs and thunks
+
+#include <ogws/revolution/VF/pf_filelock.h>
+
+void VFi_NandSetNANDFuncEx(u32 i_handleIdx);
+
+s32 VFGetLastError(void) {
+    return VFSysGetLastError();
+}
+
+void VFSysSetNandFuncEx(u32 i_handle_idx) {
+    VFi_NandSetNANDFuncEx(i_handle_idx);
+}
+
+u32 VFiPFCODE_CP932_isUnicodeMBchar(u16 uc_src, u32 num) {
+    return 0;
+}
+
+s32 VFiPF_UnLockFile(PF_FILE* p_file) {
+    return -1;
+}
+
+void VFiPFSYS_initializeSYS(void) {
+}
+
+void dCommon_PrintSignature(struct PR_BINHEADER* i_header_p) {
+}
+
+s32 dCommon_getHandleIdxFromDisk(PDM_DISK* p_disk) {
+    return VFSysPDMDisk2HandleIdx(p_disk);
+}
+
+u16 VFiPFSTR_StrNumChar(PF_STR* p_str, u32 target) {
+    const s8* p;
+    u16 count;
+    if (target == 1) {
+        p = p_str->p_head;
+    } else {
+        p = p_str->p_tail;
+    }
+    if (p_str->code_mode == 1) {
+        count = 0;
+        while (*p != 0) {
+            if (lbl_8053B248.codeset.is_oem_mb_char(*p, 1)) {
+                p++;
+            }
+            p++;
+            count++;
+        }
+    } else {
+        count = 0;
+        while (p[0] != 0 || p[1] != 0) {
+            p += lbl_8053B248.codeset.unicode_char_width((const u16*)p);
+            count++;
+        }
+    }
+    return count;
+}
+
+// ---------------------------------------------------------------- pf_cache (adapted from PFCACHE_*)
+
+PF_CACHE_PAGE* VFiPFCACHE_SearchForPage(PF_VOLUME* p_vol, PF_CACHE_PAGE* p_head, u32 sector) {
+    PF_CACHE_PAGE* p_page;
+
+    if (sector == 0xFFFFFFFF) {
+        return 0;
+    }
+    if (!(p_head->stat & 1)) {
+        return 0;
+    }
+    if (p_head->sector <= sector && p_head->sector + p_head->size - 1 >= sector) {
+        p_head->p_buf = p_head->buffer + ((sector - p_head->sector) << p_vol->bpb.log2_bytes_per_sector);
+        return p_head;
+    }
+    for (p_page = p_head->p_next; p_page != p_head; p_page = p_page->p_next) {
+        if (!(p_page->stat & 1)) {
+            return 0;
+        }
+        if (p_page->sector <= sector && p_page->sector + p_page->size - 1 >= sector) {
+            p_page->p_buf = p_page->buffer + ((sector - p_page->sector) << p_vol->bpb.log2_bytes_per_sector);
+            return p_page;
+        }
+    }
+    return 0;
+}
+
+s32 VFiPFCACHE_ReadDataPageAndFlushIfNeeded(PF_VOLUME* p_vol, u32 sector, PF_CACHE_PAGE** pp_page, u32 set_sig) {
+    s32 err = VFiPFCACHE_DoReadPageAndFlushIfNeeded(p_vol, &p_vol->cache.p_current_data, sector, pp_page, set_sig);
+    if (err != 0) {
+        return err;
+    }
+    return 0;
+}
+
+s32 VFiPFCACHE_ReadDataNumSector(PF_VOLUME* p_vol, u8* p_buf, u32 sector, u32 num_sector, u32* p_num_success) {
+    s32 err;
+
+    if (sector >= p_vol->bpb.total_sectors) {
+        return 0x10;
+    }
+
+    err = VFiPFCACHE_DoReadNumSector(p_vol, &p_vol->cache.p_current_data, p_buf, sector, num_sector, p_num_success);
+    if (err != 0) {
+        return err;
+    }
+    return 0;
+}
+
+s32 VFiPFCACHE_WriteDataNumSectorAndFreeIfNeeded(PF_VOLUME* p_vol, const u8* p_buf, u32 sector, u32 num_sector, u32* p_num_success) {
+    s32 err;
+
+    if (sector >= p_vol->bpb.total_sectors) {
+        return 0x10;
+    }
+    err = VFiPFCACHE_DoWriteNumSectorAndFreeIfNeeded(p_vol, &p_vol->cache.p_current_data, p_buf, sector, num_sector, p_num_success);
+    if (err != 0) {
+        return err;
+    }
+    return 0;
+}
+
+// ---- pf_cache cont.
+s32 VFiPFCACHE_InitCaches(PF_VOLUME* p_vol) {
+    s32 err;
+
+    p_vol->cache.mode = ((p_vol->cache.mode & ~1) | 2) & ~4;
+    fn_803A976C(p_vol->cache.buffers, 0, (p_vol->cache.num_fat_pages + p_vol->cache.num_data_pages) << 9);
+    err = VFiPFCACHE_InitPageList(p_vol, &p_vol->cache.p_current_fat, p_vol->cache.pages, p_vol->cache.buffers, p_vol->cache.num_fat_pages, p_vol->cache.fat_buff_size, 1);
+    if (err != 0) {
+        return err;
+    }
+    err = VFiPFCACHE_InitPageList(p_vol, &p_vol->cache.p_current_data, p_vol->cache.pages + p_vol->cache.num_fat_pages, p_vol->cache.buffers + p_vol->cache.num_fat_pages, p_vol->cache.num_data_pages, p_vol->cache.data_buff_size, 0);
+    if (err != 0) {
+        return err;
+    }
+    return 0;
+}
+
+s32 VFiPFCACHE_DoWritePage(PF_VOLUME* p_vol, PF_CACHE_PAGE** pp_head, PF_CACHE_PAGE* p_page, u32 set_sig) {
+    PF_CACHE_PAGE* p_head;
+    s32 err;
+    // HYPOTHESIS: set when a dirty page was written, requests a device flush.
+    u32 need_flush = 0;
+
+    p_head = *pp_head;
+    if (p_page != p_head) {
+        if (p_page == p_head->p_prev) {
+            *pp_head = p_page;
+        } else {
+            p_page->p_prev->p_next = p_page->p_next;
+            p_page->p_next->p_prev = p_page->p_prev;
+            p_head = *pp_head;
+            p_page->p_next = p_head;
+            p_page->p_prev = (*pp_head)->p_prev;
+            p_head->p_prev = p_page;
+            p_page->p_prev->p_next = p_page;
+            *pp_head = p_page;
+        }
+    }
+    if (p_page->p_mod_sbuf == 0) {
+        p_page->stat |= 2;
+        p_page->p_mod_sbuf = p_page->p_buf;
+        p_page->p_mod_ebuf = p_page->p_buf;
+    } else if (p_page->p_buf < p_page->p_mod_sbuf) {
+        p_page->p_mod_sbuf = p_page->p_buf;
+    } else if (p_page->p_buf > p_page->p_mod_ebuf) {
+        p_page->p_mod_ebuf = p_page->p_buf;
+    }
+    if (set_sig != 0) {
+        p_page->signature = p_vol->cache.signature;
+    } else {
+        p_page->signature = 0;
+    }
+    if ((p_vol->cache.mode & 1) || ((p_vol->cache.mode & 4) && (p_page->stat & 4))) {
+        if (p_page != 0 && (p_page->stat & 2) && p_page->sector != 0xFFFFFFFF) {
+            need_flush = 1;
+        }
+        err = VFiPFCACHE_FlushPageIfNeeded(p_vol, p_page);
+        if (err != 0) {
+            return err;
+        }
+        if (need_flush != 0) {
+            if (dCommon_FlushFromVol(p_vol, 1) != 0) {
+                return 0x11;
+            }
+        }
+    }
+    return 0;
+}
+
+s32 VFiPFCACHE_DoWriteSector(PF_VOLUME* p_vol, PF_CACHE_PAGE** pp_head, const u8* p_buf, u32 sector) {
+    PF_CACHE_PAGE* p_page;
+    u32 num_success;
+    s32 err;
+    // HYPOTHESIS: set when a dirty page was written, requests a device flush.
+    u32 need_flush = 0;
+
+    p_page = VFiPFCACHE_SearchForPage(p_vol, *pp_head, sector);
+    if (p_page != 0) {
+        fn_803A9644(p_page->p_buf, p_buf, p_vol->bpb.bytes_per_sector);
+        if (p_page->p_mod_sbuf == 0) {
+            p_page->stat |= 2;
+            p_page->p_mod_sbuf = p_page->p_buf;
+            p_page->p_mod_ebuf = p_page->p_buf;
+        } else if (p_page->p_buf < p_page->p_mod_sbuf) {
+            p_page->p_mod_sbuf = p_page->p_buf;
+        } else if (p_page->p_buf > p_page->p_mod_ebuf) {
+            p_page->p_mod_ebuf = p_page->p_buf;
+        }
+        if (p_page != 0 && (p_page->stat & 2) && p_page->sector != 0xFFFFFFFF) {
+            need_flush = 1;
+        }
+        err = VFiPFCACHE_FlushPageIfNeeded(p_vol, p_page);
+        if (err != 0) {
+            return err;
+        }
+        if (need_flush != 0) {
+            if (dCommon_FlushFromVol(p_vol, 1) != 0) {
+                return 0x11;
+            }
+        }
+    } else {
+        err = VFiPFDRV_lwrite(p_vol, p_buf, sector, 1, &num_success);
+        if (err != 0) {
+            return err;
+        }
+        if (num_success != 1) {
+            return 0x11;
+        }
+        if (dCommon_FlushFromVol(p_vol, 1) != 0) {
+            return 0x11;
+        }
+    }
+    return 0;
+}
+
+// ---------------------------------------------------------------- pf_path (adapted from PFPATH_*)
+
+extern s8 lbl_8059FE88;
+extern s8 lbl_8059FE89;
+
+u32 VFiPFPATH_CheckExtShortNameSignature(PF_STR* p_str) {
+    s32 result = 0;
+    s8 signature[2];
+    signature[0] = lbl_8059FE88;
+    signature[1] = lbl_8059FE89;
+    if (p_str == NULL) {
+        return 10;
+    }
+    if (VFiPFSTR_StrNCmp(p_str, signature, 1, 0, 2) == 0) {
+        result = 1;
+    }
+    return result;
+}
+
+u32 VFiPFPATH_GetLengthFromUnicode(const u16* str) {
+    s32 index = 0;
+    s32 length = 0;
+    s16 oem_width;
+    s16 uni_width;
+    s8 buf[2];
+    while (str[index] != 0) {
+        s32 width = lbl_8053B248.codeset.unicode2oem(str + index, buf);
+        VFiPFCODE_Divide_Width(width, &oem_width, &uni_width);
+        length += oem_width;
+        index += uni_width >> 1;
+    }
+    return length;
+}
+
+// ---------------------------------------------------------------- pf_file / pf_cluster (adapted)
+
+s32 VFiPFFILE_p_fread(PF_VOLUME* p_vol, u8* p_buf, u32 size, u32 count, PF_FILE* p_file, u32* p_count_read) {
+    u32 size_read;
+    s32 err;
+
+    size_read = 0;
+    *p_count_read = 0;
+    if ((p_file->open_mode & 8) == 0 && ((p_file->open_mode & 1) != 0 || (p_file->open_mode & 4) != 0)) {
+        return 10;
+    }
+    if ((p_file->p_sfd->lock.mode & 3) != 0 && p_file->lock_count == 0) {
+        return 25;
+    }
+    if (p_file->cursor.position >= p_file->p_sfd->dir_entry.file_size) {
+        return 28;
+    }
+    err = VFiPFFILE_Cursor_Read(p_file, p_buf, size * count, &size_read);
+    *p_count_read = size_read / size;
+    if (err != 0) {
+        return err;
+    }
+    return 0;
+}
+
+void VFiPFCLUSTER_UpdateLastAccessCluster(PF_FILE* p_file, u32 sector) {
+    PF_BPB* bpb;
+    u32 index;
+
+    if (p_file->cursor.position == 0) {
+        p_file->p_sfd->ffd.last_access_cluster.cluster = 0;
+        p_file->p_sfd->ffd.last_access_cluster.chain_index = 0;
+        return;
+    }
+    if (p_file == 0) {
+        bpb = 0;
+    } else {
+        bpb = &p_file->p_sfd->dir_entry.p_vol->bpb;
+    }
+    if ((p_file->cursor.position & (bpb->bytes_per_sector - 1)) == 0) {
+        index = p_file->cursor.file_sector_index;
+        if ((index & (bpb->sectors_per_cluster - 1)) == 0) {
+            if (index == 0) {
+                return;
+            }
+            index--;
+            p_file->p_sfd->ffd.last_access_cluster.chain_index = index >> bpb->log2_sectors_per_cluster;
+            p_file->p_sfd->ffd.last_access_cluster.cluster = ((sector - 1 - bpb->first_data_sector) >> bpb->log2_sectors_per_cluster) + 2;
+            return;
+        }
+    }
+    p_file->p_sfd->ffd.last_access_cluster.chain_index = p_file->cursor.file_sector_index >> bpb->log2_sectors_per_cluster;
+    p_file->p_sfd->ffd.last_access_cluster.cluster = ((sector - bpb->first_data_sector) >> bpb->log2_sectors_per_cluster) + 2;
+}
+
+s32 fn_803B1420(PF_VOLUME* p_vol, PF_STR* p_path, void* p_stat);
+
+s32 fn_803B1D30(PF_STR* p_path, void* p_stat) { // VFiPFDIR_fstat
+    PF_VOLUME* p_vol;
+    s32 err;
+
+    if (p_path == NULL) {
+        lbl_8053B248.last_error = 10;
+        return 10;
+    }
+    p_vol = VFiPFPATH_GetVolumeFromPath(p_path);
+    if (p_vol == NULL) {
+        lbl_8053B248.last_error = 9;
+        return 9;
+    }
+    if (p_stat == NULL) {
+        lbl_8053B248.last_error = 10;
+        p_vol->last_error = 10;
+        return 10;
+    }
+    err = VFiPFVOL_CheckForRead(p_vol);
+    if (err != 0) {
+        lbl_8053B248.last_error = err;
+        p_vol->last_error = err;
+        return err;
+    }
+    err = fn_803B1420(p_vol, p_path, p_stat);
+    if (err != 0) {
+        lbl_8053B248.last_error = err;
+        p_vol->last_error = err;
+    }
+    return err;
+}
+
