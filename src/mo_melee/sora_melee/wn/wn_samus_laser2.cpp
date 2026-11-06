@@ -60,3 +60,7 @@ bool wnSamusLaser2::notifyEventCollisionAttackCheck(u32 flags) {
     }
     return Weapon::notifyEventCollisionAttackCheck(flags);
 }
+
+const wnSamusLaser2Data* wnSamusLaser2::getData() {
+    return static_cast<const wnSamusLaser2Data*>(m_data);
+}

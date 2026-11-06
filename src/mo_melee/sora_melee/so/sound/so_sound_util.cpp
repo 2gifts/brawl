@@ -3,9 +3,6 @@
 #include <so/sound/so_sound_util.h>
 #include <types.h>
 
-// HYPOTHESIS: parameter list of the unnamed main.dol snd3DGenerator::stopGroupId (sora map).
-extern "C" void fn_8007979C(snd3DGenerator* generator, int groupId, int unk, int unk2);
-
 int soSoundUtil::playSE(soSound3dGeneratorAccesser* accesser, int index, SndID sndID, int groupId, int soundGroup) {
     snd3DGenerator* generator = accesser->getInstance(index)->m_soundGenerator;
     if (generator != NULL) {
@@ -17,7 +14,7 @@ int soSoundUtil::playSE(soSound3dGeneratorAccesser* accesser, int index, SndID s
 void soSoundUtil::stopSE(soSound3dGeneratorAccesser* accesser, int index, int unk, int groupId) {
     snd3DGenerator* generator = accesser->getInstance(index)->m_soundGenerator;
     if (generator != NULL) {
-        fn_8007979C(generator, groupId, unk, 0);
+        generator->stopGroupId(groupId, static_cast<SndID>(unk), 0);
     }
 }
 

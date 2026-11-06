@@ -662,9 +662,7 @@ void GameGlobal::setRumbleSetting(int player, u8 value) {
 
 
 // HYPOTHESIS: stand-ins for callees that are not named yet. fn_8001B784 (8 bytes) hands the language to the file system
-// code (map: gfFileIO::setLanguage), fn_80078768 is
-// sndBgmRateSystem::setupBGMRate.
-extern "C" void fn_80078768(sndBgmRateSystem* system);
+// code (map: gfFileIO::setLanguage).
 void addMaxCheck(u32* dst, u32 add, u32 max);
 u32 gmSetCoinNum(u32 num);
 void gmRecFigureAllInit();
@@ -897,7 +895,7 @@ void GameGlobal::InitAllRecord() {
     for (int i = 0; i < 34; i++) {
         softFlags[i] = 0;
     }
-    fn_80078768(lbl_805A01D8);
+    lbl_805A01D8->setupBGMRate();
 
     // default rules: time match, 2 minutes, 3 stocks, 100% damage, pause on, damage gauge shown
     gmSetRule* rule = m_setRule;

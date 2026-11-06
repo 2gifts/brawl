@@ -6,6 +6,7 @@
 #include <sr/sr_common.h>
 #include <types.h>
 #include <ut/ut_relocate.h>
+#include <gm/gm_global.h>
 
 sndBgmRateSystem* lbl_805A01D8;
 
@@ -38,6 +39,39 @@ sndBgmRateSystem* sndBgmRateSystem::create() {
         lbl_805A01D8 = new (Heaps::Sound) sndBgmRateSystem;
     }
     return lbl_805A01D8;
+}
+
+void sndBgmRateSystem::setupBGMRate() {
+    m_rateData = reinterpret_cast<sndBgmRateData*>(g_GameGlobal->m_record->_358C);  // HYPOTHESIS: the rate table of sndBgmRateSystem
+    {
+        utRelocate relocate(static_cast<u8*>(m_rateArchive), m_rateArchiveSize);
+        sndBgmRateSource* source = static_cast<sndBgmRateSource*>(relocate.getPublicAddress("snd_bgmSysData"));
+        u32 count = 0;
+        for (; source->m_category != 0xFF; source++, count++) {
+            m_rateData[count].m_category = source->m_category;
+            m_rateData[count].m_bgmId = source->m_bgmId;
+            m_rateData[count].m_rate = source->m_rate;
+            m_rateData[count].m_playTiming = source->m_playTiming;
+        }
+        m_rateData[count].m_category = 0xFF;
+    }
+    u32 category = m_rateData[0].m_category;
+    int index = 0;
+    int i;
+    for (i = 0; i < 45; i++) {
+        m_categoryCount[i] = 0;
+        m_categoryStart[i] = 0;
+    }
+    i = 0;
+    for (; m_rateData[i].m_category != 0xFF; i++) {
+        if (category != m_rateData[i].m_category) {
+            m_categoryStart[index + 1] = i;
+            index++;
+            category = index;
+        }
+        m_categoryCount[index]++;
+        m_rateCount++;
+    }
 }
 
 // Only the clear loop's register allocation differs.

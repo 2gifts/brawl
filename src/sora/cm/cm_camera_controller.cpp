@@ -1,4 +1,6 @@
 #include <cm/cm_camera_controller.h>
+#include <cm/cm_controller_adventure.h>
+#include <cm/cm_controller_menu_pad.h>
 #include <cm/cm_controller_demo.h>
 #include <cm/cm_controller_fig_disp1.h>
 #include <cm/cm_controller_fighter_target.h>
@@ -9,8 +11,6 @@
 
 extern "C" void fn_800A6BF0(gfCameraController* controller);
 extern "C" void fn_800A6B78(gfCameraController* controller);
-extern "C" void fn_800A6624(gfCameraController* controller);
-extern "C" void fn_800A59C4(gfCameraController* controller);
 extern "C" void fn_8009FCF4(gfCameraController* controller, float value);
 
 class cmMenuFixedController : public gfCameraController {
@@ -59,7 +59,7 @@ void CameraController::changeInput(Kind cameraControllerKind)
     case AI:
         break;
     case Adventure:
-        fn_800A59C4(m_adventureController);
+        static_cast<cmAdventureController*>(m_adventureController)->initialize();
         break;
     case AdventureFree:
     case AnimationLocked:
@@ -68,7 +68,7 @@ void CameraController::changeInput(Kind cameraControllerKind)
         static_cast<cmFighterTargetController*>(m_fighterTargetController)->resetTarget();
         break;
     case MenuPad:
-        fn_800A6624(m_menuPadController);
+        static_cast<cmMenuPadController*>(m_menuPadController)->init();
         break;
     case MenuFixed:
         static_cast<cmMenuFixedController*>(m_menuFixedController)->init();

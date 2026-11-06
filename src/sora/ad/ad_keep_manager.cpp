@@ -13,7 +13,6 @@ extern "C" void fn_8004FB48(u32 id);
 extern "C" void fn_80051440(int coins);
 extern "C" void fn_8015A7DC(adKeepManager* keepManager, float rate);
 extern "C" void fn_8015AAA4(adKeepManager* keepManager);
-extern "C" void fn_8015AE80(adKeepManager* keepManager, bool addStageCoin);
 
 // HYPOTHESIS: the global instance keeps its placeholder name; no map name is known.
 adKeepManager lbl_8049ED30;
@@ -218,7 +217,31 @@ void adKeepManager::useGameOverInTiming() {
     }
     fn_8015A7DC(this, 0.5f);
     fn_8015AAA4(this);
-    fn_8015AE80(this, false);
+    calculateCoin(false);
+}
+
+void adKeepManager::calculateCoin(bool addStageCoin) {
+    gmAdvData* advData = getAdvData();
+    // HYPOTHESIS: coin multiplier and bonus tables indexed by difficulty level / 3.
+    float multiplier[5] = {0.0003f, 0.0004f, 0.0005f, 0.00065f, 0.0008f};
+    float bonus[5] = {2.0f, 3.0f, 5.0f, 8.0f, 12.0f};
+    int tier = advData->m_difficultyLevel / 3;
+    float rate = 1.0f - 0.05f * advData->unk4916;
+    if (rate <= 0.5f) {
+        rate = 0.5f;
+    }
+    float coins = 0.0f;
+    if (addStageCoin) {
+        coins += rate * (advData->unk4910 * multiplier[tier]) + bonus[tier];
+    }
+    float scale = 0.5f;
+    if (advData->unk491C != 0) {
+        scale = 0.4f;
+    }
+    float total = coins + 0.08f * (scale * (advData->unk491C + advData->unk4918 + 1));
+    advData->m_stageCoin += (u32)total;
+    advData->unk4918 = 0;
+    advData->unk491C = 0;
 }
 
 void adKeepManager::useGameOverOutTimingContinue() {
@@ -240,7 +263,7 @@ void adKeepManager::useStageClearInTiming() {
         getAdvData()->unk60C = 999999999;
     }
     fn_8015AAA4(this);
-    fn_8015AE80(this, true);
+    calculateCoin(true);
 }
 
 void adKeepManager::useStageClearOutTiming() {
@@ -250,14 +273,14 @@ void adKeepManager::useStageClearOutTiming() {
 
 void adKeepManager::useSavePointTiming() {
     fn_8015AAA4(this);
-    fn_8015AE80(this, false);
+    calculateCoin(false);
     setResultOfTotaling(false, true);
     resetGlobalFlag(0, 0x400);
 }
 
 void adKeepManager::useQuitAdventureTiming() {
     fn_8015AAA4(this);
-    fn_8015AE80(this, false);
+    calculateCoin(false);
     setResultOfTotaling(true, false);
     m_gotRareItemNum = 0;
     memset(m_gotRareItems, 0, sizeof(adKeepRareItem) * 0xFF);
@@ -266,7 +289,7 @@ void adKeepManager::useQuitAdventureTiming() {
 
 void adKeepManager::useReturnMapTiming() {
     fn_8015AAA4(this);
-    fn_8015AE80(this, false);
+    calculateCoin(false);
     setResultOfTotaling(false, true);
     resetGlobalFlag(0, 0x400);
 }

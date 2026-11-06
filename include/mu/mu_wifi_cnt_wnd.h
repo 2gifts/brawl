@@ -22,6 +22,7 @@ public:
     virtual ~muWifiCntWndTask();
     void createObjResFile(const void* nodeInfo, int count, nw4r::g3d::ResFile* resFile, int priority, HeapType heap);
     void setWndStyle(int style, int digits);
+    void setCounter(int primary, int secondary);
     int dispNum(int value, int digits, int trim, int position, int object);
     void setVisible(bool visible);
 };

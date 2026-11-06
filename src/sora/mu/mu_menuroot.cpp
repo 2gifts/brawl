@@ -11,6 +11,7 @@
 #include <nw4r/g3d/g3d_scnroot.h>
 #include <sr/sr_common.h>
 #include <types.h>
+#include <string.h>
 
 class cmMenuPadController : public gfCameraController {
 public:
@@ -29,15 +30,9 @@ extern "C" void fn_800A65E8(cmMenuPadController* controller);
 extern "C" void fn_800B05A0(MenuRoot* root);
 void G3DState_Invalidate(u32 flags);
 
-// HYPOTHESIS: MenuRoot::MenuRoot(name, scnSize, cameraPath, heap) (map name; register allocation still differs).
-extern "C" MenuRoot* fn_800AFC74(MenuRoot* obj, const char* name, int scnSize, const char* cameraPath, Heaps::HeapType heap);
 
 MenuRoot* MenuRoot::create(const char* name, int scnSize, const char* cameraPath) {
-    MenuRoot* obj = (MenuRoot*)operator new(sizeof(MenuRoot), Heaps::MenuInstance);
-    if (obj != NULL) {
-        obj = fn_800AFC74(obj, name, scnSize, cameraPath, Heaps::MenuResource);
-    }
-    return obj;
+    return new (Heaps::MenuInstance) MenuRoot(name, scnSize, cameraPath, Heaps::MenuResource);
 }
 
 // HYPOTHESIS: MenuRoot::create(name, scnSize, archive, index); it keeps its fn_ name while the boot menus call it by that name.
@@ -58,6 +53,37 @@ MenuRoot::MenuRoot(const char* name, int scnSize, gfArchive* archive, int index,
             index++;
         }
         attachScnAnm(archive->getData(0, Data_Type_Misc, index, 0xFFFE));
+    }
+    initOverwriteBuf();
+}
+
+MenuRoot::MenuRoot(const char* name, int scnSize, const char* cameraPath, Heaps::HeapType heap)
+    : gfTask(name, Category_Menu, 0xF, 8, true), unk40(0), m_resFile(), scene(NULL), m_anmScn(NULL), m_objects(NULL),
+      m_objectCount(0), m_isLoaded(false), m_handle() {
+    u32 size;
+    scene = nw4r::g3d::ScnRoot::Construct(gfHeapManager::getMEMAllocator(Heaps::MenuInstance), &size, scnSize, scnSize,
+                                          0x80, 0x80);
+    m_taskName = name;
+    unk2C_b1 = false;
+    if (cameraPath != NULL) {
+        if (g_GameGlobal->getGlobalRecordMenuDatap()->m_isWidescreen) {
+            char widePath[0x40];
+            strcpy(widePath, cameraPath);
+            int length = strlen(widePath) - 1;
+            char* dot = &widePath[length];
+            for (; length >= 0; dot--, length--) {
+                if (*dot == '.') {
+                    break;
+                }
+            }
+            widePath[length] = 0;
+            strcat(widePath, "Wide.brres");
+            cameraPath = widePath;
+        }
+        m_handle.read(cameraPath, heap, 0);
+        attachScnAnm(&m_handle);
+        m_isLoaded = true;
+        m_handle.release();
     }
     initOverwriteBuf();
 }

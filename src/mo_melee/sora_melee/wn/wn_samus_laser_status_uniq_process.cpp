@@ -7,6 +7,7 @@
 #include <gf/gf_task_scheduler.h>
 #include <so/so_external_value_accesser.h>
 #include <ft/samus/ft_samus_status_uniq_process.h>
+#include <wn/samus/wn_samus_laser.h>
 
 extern "C" char __RTTI__6gfTask[];
 
@@ -15,8 +16,6 @@ extern "C" {
 extern char lbl_27_data_7ED88[];
 extern char __RTTI__11StageObject[];
 void* __dynamic_cast(void* ptr, long vtblOffset, const void* target, const void* source, int isRef);
-// wnSamusLaser getter (sora_melee REL); no declaration exists in the headers yet.
-void* fn_27_2F2104(void* weapon);
 }
 
 // Weapon data as returned by the getter: the value pointer sits at +0x34.
@@ -45,7 +44,7 @@ void wnSamusLaserStatusUniqProcess::initStatus(soModuleAccesser* moduleAccesser)
     switch (kind) {
     case 0: {
         void* weapon = __dynamic_cast(moduleAccesser->m_stageObject, 0x3c, lbl_27_data_7ED88, __RTTI__11StageObject, 1);
-        workManage->setInt(*static_cast<wnSamusLaserData*>(fn_27_2F2104(weapon))->m_value, 0x10000005);
+        workManage->setInt(*static_cast<wnSamusLaser*>(weapon)->getData()->m_value, 0x10000005);
         // HYPOTHESIS: constant from lbl_27_rodata_64C8 (value not verified).
         workManage->setFloat(1.0f, 0x11000001);
         break;

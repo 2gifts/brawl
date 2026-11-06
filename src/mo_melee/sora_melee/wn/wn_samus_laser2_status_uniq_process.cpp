@@ -6,6 +6,7 @@
 #include <ft/ft_common_data_accesser.h>
 #include <gf/gf_task_scheduler.h>
 #include <so/so_external_value_accesser.h>
+#include <wn/samus/wn_samus_laser2.h>
 
 extern "C" {
 // Typeinfo of the Samus laser2 weapon class (its name is not recovered yet).
@@ -13,8 +14,6 @@ extern char lbl_27_data_7F450[];
 extern char __RTTI__11StageObject[];
 extern char __RTTI__6gfTask[];
 void* __dynamic_cast(void* ptr, long vtblOffset, const void* target, const void* source, int isRef);
-// wnSamusLaser2::getData (sora_melee REL); no declaration exists in the headers yet.
-void* fn_27_2F3AA4(void* weapon);
 }
 
 // Weapon data as returned by getData: the value pointer sits at +0x34.
@@ -39,7 +38,7 @@ wnSamusLaser2StatusUniqProcess g_wnSamusLaser2StatusUniqProcess;
 void wnSamusLaser2StatusUniqProcess::initStatus(soModuleAccesser* moduleAccesser) {
     soWorkManageModule* workManage = &moduleAccesser->getWorkManageModule();
     void* weapon = __dynamic_cast(moduleAccesser->m_stageObject, 0x3c, lbl_27_data_7F450, __RTTI__11StageObject, 1);
-    wnSamusLaser2Data* data = static_cast<wnSamusLaser2Data*>(fn_27_2F3AA4(weapon));
+    wnSamusLaser2Data* data = const_cast<wnSamusLaser2Data*>(static_cast<wnSamusLaser2*>(weapon)->getData());
     moduleAccesser->getWorkManageModule().setInt(*data->m_value, 0x10000005);
     workManage->setFloat(1.0f, 0x11000002);
 }

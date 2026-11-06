@@ -58,3 +58,8 @@ bool wnSamusLaser::notifyEventCollisionAttackCheck(u32 flags) {
     }
     return Weapon::notifyEventCollisionAttackCheck(flags);
 }
+
+// HYPOTHESIS: the article data block of the build data is a wnSamusLaserData.
+const wnSamusLaserData* wnSamusLaser::getData() {
+    return static_cast<const wnSamusLaserData*>(m_data);
+}
