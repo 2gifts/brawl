@@ -142,6 +142,19 @@ s32 VFipf_w_strlen(const u16* s);                               // pf_wcslen
 s32 VFipf_strcmp(const char* s1, const char* s2);             // pf_strcmp
 void* VFipf_memcpy(void* dst, void* src, u32 length);         // pf_memcpy
 
+// pf_entry
+int PFENT_findEntry(PF_FFD* p_ffd, PF2_DIR_ENT* p_ent, u32 index, PF2_STR* pattern, u8 attr_required, u8 attr_unwanted);
+int PFENT_allocateEntry(PF2_DIR_ENT* p_ent, u8 num_entries, PF_FFD* p_ffd, u32* p_next_chain, PF2_STR* p_filename);
+int PFENT_ITER_GetEntryOfPattern(PF2_ENT_ITER* iter, PF2_DIR_ENT* ent, PF2_VOLUME* vol, PF2_STR* path);
+void PFENT_LoadShortNameFromBuf(PF2_DIR_ENT* p_ent, const u8* buf);
+u8 PFENT_CalcCheckSum(PF2_DIR_ENT* p_ent);
+s32 PFENT_GetRootDir(PF2_VOLUME* p_vol, PF2_DIR_ENT* p_ent);
+s32 PFENT_ITER_IteratorInitialize(PF2_ENT_ITER* p_iter, u32 index_start_from);
+s32 PFENT_RecalcEntryIterator(PF2_ENT_ITER* p_iter, u32 may_allocate);
+s32 PFPATH_getShortName(s8* short_name, const u8* pDirEntry, u8 attr);
+s32 PFPATH_putShortName(u8* pDirEntry, const s8* short_name, u8 attr);
+s32 PFSEC_ReadData(PF_VOLUME* p_vol, u8* p_buf, u32 sector, u16 offset, u32 size, u32* p_success_size, u32 set_sig);
+
 #ifdef __cplusplus
 }
 #endif
