@@ -137,7 +137,33 @@ s32 TMCC_JPEGDEC_move_ptr(s32 offset, TMCC_JPEGDEC_Stream* stream) {
 
 // HYPOTHESIS: decoder context; only the fields the code touches are named.
 typedef struct TMCC_JPEGDEC_Context {
-    u8 pad0[0x17DC];
+    union {
+        u8 pad0[0x17DC];
+        struct {
+            u8 pad0_440[0x440];
+            u8* dcTable;
+            u8* dcSizes;
+            u8* dcCodes;
+            u8 pad44C[4];
+            u8* acTable;
+            u8* acSizes;
+            u8* acCodes;
+            u8 pad45C[4];
+            u8 dcTable0[0x400];
+            u8 dcTable1[0x400];
+            u8 acTable0[0x400];
+            u8 acTable1[0x400];
+            u8 dcSizes0[0x44];
+            u8 dcSizes1[0x44];
+            u8 acSizes0[0x44];
+            u8 acSizes1[0x44];
+            u8 dcCodes0[0x10];
+            u8 dcCodes1[0x10];
+            u8 acCodes0[0x10];
+            u8 pad15A0[0xF0];
+            u8 acCodes1[0x14C];
+        };
+    };
     u16 unk17DC;
     u8 pad17DE[2];
     s32 unk17E0;
@@ -178,4 +204,60 @@ s32 TMCC_JPEGDEC_HeaderAnalyze(TMCC_JPEGDEC_Context* context) {
         context->unk17E4 = context->unk17EA * context->unk17EE;
     }
     return result;
+}
+
+void TMCC_JPEGDEC_set_entropytbl(TMCC_JPEGDEC_Context* context, s32 dcSelect, s32 acSelect) {
+    switch (dcSelect) {
+    case 0:
+        context->dcTable = context->dcTable0;
+        context->dcCodes = context->dcCodes0;
+        context->dcSizes = context->dcSizes0;
+        break;
+    case 1:
+        context->dcTable = context->dcTable1;
+        context->dcCodes = context->dcCodes1;
+        context->dcSizes = context->dcSizes1;
+        break;
+    }
+    switch (acSelect) {
+    case 0:
+        context->acTable = context->acTable0;
+        context->acCodes = context->acCodes0;
+        context->acSizes = context->acSizes0;
+        break;
+    case 1:
+        context->acTable = context->acTable1;
+        context->acCodes = context->acCodes1;
+        context->acSizes = context->acSizes1;
+        break;
+    }
+}
+
+// HYPOTHESIS: image state used by the RGB565 tile functions; only touched fields are named.
+typedef struct TMCC_JPEGDEC_Image {
+    u8 pad0[0x30];
+    u16 validWidth;
+    u16 validHeight;
+    u8 pad34[0x14];
+    u32 width;
+    u32 height;
+    u8 pad50[0x14];
+    u16* pixels;
+} TMCC_JPEGDEC_Image;
+
+void TMCC_JPEGDEC_fillerBlankTileRGB565(TMCC_JPEGDEC_Image* image) {
+    u16* pixels = image->pixels;
+    u32 tilesPerRow = image->width >> 2;
+    u32 x;
+    u32 y;
+    for (y = 0; y < image->validHeight; y++) {
+        for (x = image->validWidth; x < image->width; x++) {
+            pixels[(((y >> 2) * tilesPerRow + (x >> 2)) << 4) + ((y & 3) << 2) + (x & 3)] = 0xFFFF;
+        }
+    }
+    for (y = image->validHeight; y < image->height; y++) {
+        for (x = 0; x < image->width; x++) {
+            pixels[(((y >> 2) * tilesPerRow + (x >> 2)) << 4) + ((y & 3) << 2) + (x & 3)] = 0xFFFF;
+        }
+    }
 }
