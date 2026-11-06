@@ -9,8 +9,14 @@ public:
     IpNull() : Input(true) { }
     virtual ~IpNull() { }
     virtual void update() { }
+#ifdef IP_NULL_STICK_ZERO_FIELDS
+    // BYTES: a unit whose Vec2f constructor is out of line still answers the null sticks with two inline stores.
+    virtual Vec2f getStickMain() const { Vec2f stick; stick.m_x = 0.0f; stick.m_y = 0.0f; return stick; }
+    virtual Vec2f getStickSub() const { Vec2f stick; stick.m_x = 0.0f; stick.m_y = 0.0f; return stick; }
+#else
     virtual Vec2f getStickMain() const { return Vec2f(0.0f, 0.0f); }
     virtual Vec2f getStickSub() const { return Vec2f(0.0f, 0.0f); }
+#endif
 #ifdef IP_INPUT_BUTTON_RAW
     virtual ipPadButton::Mask getButton() const { return 0; }
 #else
