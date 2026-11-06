@@ -52,7 +52,7 @@ struct NtBase {
     virtual ~NtBase() { }
     static bool isMatchStatusOnline();
     static bool isNetCondOnline();
-    static bool isParent();
+    static bool isParent() __attribute__((never_inline));
     static bool isParentInit();
     static void setSIDPlayer(u8 station, u8 count);
     const char* getErrorStr(s32 error);

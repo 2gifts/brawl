@@ -89,3 +89,95 @@ void stOperatorNetworkMelee::setNullPadForNetworkOut(bool isNull) {
 bool NtBase::isParent() {
     return lbl_8059E742 == lbl_8059E745 && lbl_8059E742 != 0xFF;
 }
+
+bool stOperatorNetworkMelee::isSync() {
+    if (m_isOnline) {
+        if (NtBase::isParent()) {
+            NtShared::ntStartSync(g_Network.unk34);
+            return true;
+        }
+        bool result = false;
+        NetworkUserData* data = g_Network.unk34;
+        if (data->unkA8 == 6) {
+            if (data->unk1E0 == 0) {
+                result = true;
+            }
+        }
+        return result;
+    }
+    return true;
+}
+
+void stOperatorNetworkMelee::startController() {
+    if (m_isOnline) {
+        ipSwitch::getInstance()->setSource(1);
+        unk_bss_operator = this;
+        NtShared::ntSetStopCallback(stNetworkOperatorStopCallback);
+        NtShared::ntSetExitCallback(stNetworkOperatorAbortCallback);
+    }
+}
+
+void stOperatorNetworkMelee::stopControllerAsync(int arg) {
+    if (m_isOnline) {
+        if (unk_bss_operator != NULL) {
+            unk54 = arg;
+            if (!NtShared::ntRequestStop(g_Network.unk34, arg)) {
+                unk5C = arg;
+                unk4A = true;
+                NtShared::ntSetStopCallback(NULL);
+            }
+        }
+    }
+}
+
+bool stOperatorNetworkMelee::isStopControllerComplete() {
+    if (m_isOnline) {
+        if (unk_bss_operator != NULL) {
+            if (!unk4A) {
+                return false;
+            }
+            NtShared::ntSetStopCallback(NULL);
+            unk48 = false;
+            m_isOnline = false;
+        }
+    }
+    ipSwitch::getInstance()->setSource(0);
+    return true;
+}
+
+void stOperatorNetworkMelee::abortControllerAsync(int arg) {
+    if (m_isOnline) {
+        if (unk_bss_operator != NULL) {
+            unk58 = arg;
+            if (!NtShared::ntRequestExit(g_Network.unk34, arg)) {
+                unk58 = arg;
+                unk4B = true;
+                NtShared::ntSetExitCallback(NULL);
+            }
+        }
+    }
+}
+
+bool stOperatorNetworkMelee::isAbortControllerComplete() {
+    if (m_isOnline) {
+        if (unk_bss_operator != NULL) {
+            checkNoContest();
+            if (!unk4B && !m_isNoContest) {
+                return false;
+            }
+            NtShared::ntSetExitCallback(NULL);
+            unk48 = false;
+            m_isOnline = false;
+        }
+    }
+    ipSwitch::getInstance()->setSource(0);
+    return true;
+}
+
+void NtShared::ntSetStopCallback(ntStopCallback_t cb) {
+    NtStopCallback = cb;
+}
+
+void NtShared::ntSetExitCallback(ntExitCallback_t cb) {
+    NtExitCallback = cb;
+}
