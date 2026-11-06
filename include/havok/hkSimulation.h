@@ -38,6 +38,8 @@ struct hkSimulation : hkReferencedObject {
 
     hkSimulation(hkWorld* world);
     void applyActions();
+    // Not written yet (0x802F1480).
+    static void collideEntitiesBroadPhaseDiscrete(hkEntity** entities, int numEntities, hkWorld* world);
     // HYPOTHESIS: the last parameter (an int-sized mode compared with 1; collideEntitiesNarrowPhaseDiscrete passes
     // its own through, resetCollisionInformationForEntities passes 0)
     void collideEntitiesNarrowPhaseDiscrete(hkEntity** entities, int numEntities, hkProcessCollisionInput& input,
@@ -58,7 +60,10 @@ struct hkSimulation : hkReferencedObject {
     virtual int integrate(hkReal physicsDeltaTime); // 0x14
     virtual int collide();                          // 0x18
     virtual int advanceTime();                      // 0x1C
-    virtual void collideEntitiesDiscrete(); // 0x20
+    // Broad phase then narrow phase for the entities, with the world's critical operations locked.
+    // HYPOTHESIS: the last parameter (passed through to collideEntitiesNarrowPhaseDiscrete as its mode)
+    virtual void collideEntitiesDiscrete(hkEntity** entities, int numEntities, hkWorld* world,
+                                         const hkStepInfo& stepInfo, int mode); // 0x20
     // the hkBool goes by value (the callers pass the address of a one-byte copy)
     virtual void resetCollisionInformationForEntities(hkEntity** entities, int numEntities, hkWorld* world,
                                                       hkBool flag); // 0x24

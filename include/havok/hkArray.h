@@ -56,6 +56,11 @@ struct hkArray : hkArrayBase {
     T* begin() const {
         return (T*)m_data;
     }
+    // Same as hkArrayBase::getSize; a member of each hkArray<T> (its out-of-line copies carry the element type,
+    // e.g. hk_array_q218hk_linked_collidable14_collision_entry.o).
+    int getSize() const {
+        return m_size;
+    }
     // The flag test lives in its own inline function: this keeps the capacity load from being
     // shared with the size computation, as in the original code (hkVersionUtil, hkVersionRegistry).
     bool mustDeallocate() const {

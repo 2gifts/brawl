@@ -53,6 +53,7 @@
 #include <havok/hkCollisionAgent.h>
 #include <havok/hkAgentNnMachine.h>
 #include <havok/hkLinkedCollidable.h>
+#include <havok/hkPointerMapBase.h>
 
 hkSimulation::hkSimulation(hkWorld* world) {
     m_world = world;
@@ -204,6 +205,23 @@ void hkSimulation::applyActions() {
     }
 }
 
+// Collides the entities over the given step: the step goes into the world's collision input, then the broad phase
+// and the narrow phase run with the world's critical operations locked. The step is written into the input again
+// from a local copy at the end.
+// HYPOTHESIS: why it is written again (something in between, e.g. a pending operation run by the unlock, may change
+// the input's step).
+void hkSimulation::collideEntitiesDiscrete(hkEntity** entities, int numEntities, hkWorld* world,
+                                           const hkStepInfo& stepInfo, int mode) {
+    hkProcessCollisionInput* input = world->m_collisionInput;
+    hkStepInfo savedStepInfo = stepInfo;
+    input->m_stepInfo = stepInfo;
+    world->m_lockCount++;
+    collideEntitiesBroadPhaseDiscrete(entities, numEntities, world);
+    collideEntitiesNarrowPhaseDiscrete(entities, numEntities, *input, mode);
+    world->unlockAndAttemptToExecutePendingOperations();
+    input->m_stepInfo = savedStepInfo;
+}
+
 void hkSimulation::collideEntitiesNarrowPhaseDiscrete(hkEntity** entities, int numEntities,
                                                       hkProcessCollisionInput& input, int mode) {
     processAgentsOfEntities(entities, numEntities, input, &hkSimulation::processAgentCollideDiscrete, mode);
@@ -247,6 +265,104 @@ void hkSimulation::processAgentResetCollisionInformation(hkAgentNnEntry* entry, 
                                                          hkProcessCollisionOutput& output) {
     hkAgentNnMachine_InvalidateTimInAgent(entry, input);
 }
+
+// Runs func once on every agent entry of the entities' collidables; a pair whose partner was one of the entities
+// already done is skipped, so each pair between two of the entities runs once. In mode 1 an entry that comes back
+// with a contact point is collided again with the body turned about the axis between the contact normal and the
+// arm from the contact to the centre of mass (forward, then back with the inverse turn, with a 20 times larger
+// tolerance), and finally once more at the original transform. Stops early when the step ran the heap dry.
+// HYPOTHESIS: the meaning of mode 1 and of the turned collisions (they look like a probe that refreshes the
+// contacts' manifold), and the names of the quality settings (0x04/0x08) the larger tolerance goes into.
+// BYTES: the target calls every inline helper out of line in this function only.
+// HYPOTHESIS: m_collisionEntries is an hkArray<CollisionEntry> in the original (see hkLinkedCollidable.h); the
+// accesses below go through this typed view.
+typedef hkArray<hkLinkedCollidable::CollisionEntry> CollisionEntryArray;
+
+#pragma push
+#pragma dont_inline on
+void hkSimulation::processAgentsOfEntities(hkEntity** entities, int numEntities, hkProcessCollisionInput& input,
+                                           AgentEntryProcessFunction func, int mode) {
+    hkPointerMapBase<hkUlong> entitiesDone;
+    entitiesDone.reserve(numEntities);
+    hkProcessCollisionOutput output;
+    for (int i = 0; i < numEntities; i++) {
+        hkEntity* entity = entities[i];
+        hkLinkedCollidable* collidable = entity->getLinkedCollidable();
+        hkRigidBody* body = static_cast<hkRigidBody*>(entity);
+        entitiesDone.insert((hkUlong)collidable, 0);
+        for (int j = 0; j < ((const CollisionEntryArray&)collidable->m_collisionEntries).getSize(); j++) {
+            const hkLinkedCollidable::CollisionEntry& collisionEntry =
+                ((const CollisionEntryArray&)collidable->m_collisionEntries)[j];
+            if (entitiesDone.isValid(entitiesDone.findKey((hkUlong)collisionEntry.m_partner))) {
+                continue;
+            }
+            hkAgentNnEntry* entry = collisionEntry.m_agentEntry;
+            hkAgentNnMachine_InvalidateTimInAgent(entry, input);
+            (this->*func)(entry, input, output);
+            if (mode == 1 && output.m_firstFreeContactPoint != output.m_contactPoints) {
+                hkQuaternion oldRotation(body->getRigidMotion()->getRotation());
+                hkTransform oldTransform(body->getTransform());
+                hkVector4 normal(output.m_contactPoints[0].m_contact.getSeparatingNormal());
+                if (collisionEntry.m_agentEntry->getCollidableA() != body->getCollidable()) {
+                    normal.setNeg4(normal);
+                }
+                hkVector4 arm;
+                const hkContactPoint& contact = output.m_contactPoints[0].m_contact;
+                arm.setSub4(body->getCenterOfMassInWorld(), contact.getPosition());
+                hkVector4 axis;
+                axis.setCross(normal, arm);
+                hkReal sinAngle = axis.length3();
+                hkReal projected = normal.dot3(arm);
+                hkReal armLength = arm.length3();
+                hkReal cosAngle = projected / armLength;
+                if (sinAngle > 1e-5f && cosAngle < 0.9999f) {
+                    hkReal savedTolerance = input.unk8;
+                    hkReal tolerance = 20.0f * savedTolerance;
+                    input.unk8 = tolerance;
+                    hkReal savedQuality4 = input.m_collisionQualityInfo->unk0[1];
+                    hkReal savedQuality8 = input.m_collisionQualityInfo->unk0[2];
+                    input.m_collisionQualityInfo->unk0[1] = tolerance;
+                    input.m_collisionQualityInfo->unk0[2] = tolerance;
+                    hkReal limitAngle = hkMath::asin(hkMath::max2f((projected - 0.05f * tolerance) / armLength, 0.0f));
+                    hkReal angle = hkMath::asin(cosAngle) - limitAngle;
+                    axis.mul4(1.0f / sinAngle);
+                    hkQuaternion turn(axis, angle);
+                    hkQuaternion rotation;
+                    rotation.setMul(turn, body->getRigidMotion()->getRotation());
+                    body->setRotationAroundCentreOfMass(rotation);
+                    hkAgentNnMachine_InvalidateTimInAgent(entry, input);
+                    (this->*func)(entry, input, output);
+
+                    hkVector4 axis2;
+                    axis2.setCross(axis, normal);
+                    axis2.normalize3();
+                    hkQuaternion turn2(axis2, angle);
+                    hkQuaternion rotation2;
+                    rotation2.setMul(turn2, oldRotation);
+                    body->setRotationAroundCentreOfMass(rotation2);
+                    hkAgentNnMachine_InvalidateTimInAgent(entry, input);
+                    (this->*func)(entry, input, output);
+
+                    rotation2.setInverseMul(turn2, oldRotation);
+                    body->setRotationAroundCentreOfMass(rotation2);
+                    hkAgentNnMachine_InvalidateTimInAgent(entry, input);
+                    (this->*func)(entry, input, output);
+
+                    input.unk8 = savedTolerance;
+                    input.m_collisionQualityInfo->unk0[1] = savedQuality4;
+                    input.m_collisionQualityInfo->unk0[2] = savedQuality8;
+                    body->getRigidMotion()->setTransform(oldTransform);
+                    hkAgentNnMachine_InvalidateTimInAgent(entry, input);
+                    (this->*func)(entry, input, output);
+                }
+            }
+            if (hkMemory::getInstance().unk4 == 1) {
+                return;
+            }
+        }
+    }
+}
+#pragma pop
 
 // Accessors (8 bytes each), emitted as out-of-line functions in this TU.
 hkLinkedCollidable* hkEntity::getLinkedCollidable() {

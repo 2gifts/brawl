@@ -3,6 +3,8 @@
 #include <havok/hkCollidable.h>
 #include <havok/hkArray.h>
 
+struct hkAgentNnEntry;
+
 // Collidable with a list of collision entries (0x30 bytes). Layout from hkLinkedCollidableClass.cpp.
 struct hkLinkedCollidable : hkCollidable {
     // hkArray<hkLinkedCollidableCollisionEntry> in the original (8-byte entries, see the array helper
@@ -10,9 +12,11 @@ struct hkLinkedCollidable : hkCollidable {
     // do not construct it implicitly; the owners write its three words.
     hkArrayBase m_collisionEntries; // 0x24
 
-    // Element type of m_collisionEntries (8 bytes). HYPOTHESIS: two words, names not recovered.
+    // Element type of m_collisionEntries (8 bytes): one agent entry per collision partner.
+    // HYPOTHESIS: the names, from hkSimulation::processAgentsOfEntities (it runs the agent entry and looks the
+    // partner up among the linked collidables it has already done).
     struct CollisionEntry {
-        u32 m_unk00; // 0x00
-        u32 m_unk04; // 0x04
+        hkAgentNnEntry* m_agentEntry;  // 0x00
+        hkLinkedCollidable* m_partner; // 0x04
     };
 };
