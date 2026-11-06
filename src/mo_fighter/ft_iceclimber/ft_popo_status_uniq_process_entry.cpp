@@ -27,9 +27,8 @@ public:
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
 };
 
-// Base entry process bodies (sora_melee), called directly by their fn_27 names.
+// Base entry process body (sora_melee), called directly by its fn_27 name.
 extern "C" void fn_27_18C2FC(ftStatusUniqProcessEntry* self, soModuleAccesser* moduleAccesser);
-extern "C" void fn_27_18C9B0(ftStatusUniqProcessEntry* self, soModuleAccesser* moduleAccesser, int nextStatus);
 
 // HYPOTHESIS: work flag 0x1200003e marks the popo's entry mode (the cliff-pull partner path when set).
 void ftPopoStatusUniqProcessEntry::initStatus(soModuleAccesser* moduleAccesser) {
@@ -46,7 +45,7 @@ void ftPopoStatusUniqProcessEntry::initStatus(soModuleAccesser* moduleAccesser) 
 
 void ftPopoStatusUniqProcessEntry::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
     if (!moduleAccesser->getWorkManageModule().isFlag(0x1200003e)) {
-        fn_27_18C9B0(this, moduleAccesser, nextStatus);
+        ftStatusUniqProcessEntry::exitStatus(moduleAccesser, nextStatus);
         if (moduleAccesser->getLinkModule().isLink(6) == true) {
             ftPopoEntryLinkEvent event(0x455, nextStatus);
             moduleAccesser->getLinkModule().sendEventNodes(6, event, 0);

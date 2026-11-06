@@ -15,10 +15,11 @@
 #include <mu/menu.h>
 #include <mu/mu_adv_result.h>
 #include <mu/mu_menu_controller.h>
+#include <new>
+#include <ty/ty_seal_listmng.h>
 
 // main.dol functions with names that the shared headers do not declare.
-// The manager of the sticker list: the constructor (memory, load) and the destructor (with a flag)
-extern "C" void* fn_800AD808(void* memory, int load);
+// The manager of the sticker list: the destructor (with a flag)
 extern "C" void fn_800AD87C(void* manager, int flag);
 // The list of names that the screen shows: create(description, heap, heap), add(...), show() and isLoadFinish()
 struct muAdvResultListDesc;
@@ -94,7 +95,7 @@ muAdvResultTask* muAdvResultTask::create(const muAdvResultTaskParam* param) {
     void* memory = operator new(0x3EB4, Heaps::MenuInstance);
     void* sealMng = NULL;
     if (memory != NULL) {
-        sealMng = fn_800AD808(memory, 1);
+        sealMng = new (memory) tySealListDataManager(true);
     }
     task->m_sealMng = sealMng;
     task->m_inputWait = 0x3C;

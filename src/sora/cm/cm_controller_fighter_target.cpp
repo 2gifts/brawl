@@ -1,6 +1,7 @@
 #include <cm/cm_controller_fighter_target.h>
 #include <cm/cm_subject.h>
 #include <nw4r/ut.h>
+#include <gf/gf_pad_system.h>
 #include <types.h>
 
 extern nw4r::ut::LinkList<cmSubject, 0> lbl_8049DEDC;
@@ -56,4 +57,18 @@ Vec3f cmFighterTargetController::getFighterPos() {
         return first->m_pos;
     }
     return Vec3f(0.0f, 0.0f, 0.0f);
+}
+
+void cmFighterTargetController::resetTarget() {
+    for (int padNum = 0; padNum < 8; padNum++) {
+        gfPadStatus status;
+        g_gfPadSystem->getDebugPadStatus(padNum, &status);
+        if (status.m_buttonsCurrentFrame2.bits & GF_PAD_BUTTON_BIT_DPAD_UP) {
+            m_targetIndex = padNum;
+            break;
+        }
+    }
+    gfCamera* camera = m_cameraManager->m_cameras;
+    camera->unkCC = unk10[m_targetIndex].unk1C;
+    camera->unkFA.m_mask |= 0x80;
 }

@@ -11,6 +11,7 @@
 #include <if/if_wifipr_player.h>
 #include <revolution/CX/CXCompression.h>
 #include <revolution/OS/OSCache.h>
+#include <snd/snd_system.h>
 
 // The menu helpers take three integers; this caller passes only the first one (see TIPS.md).
 extern "C" int getNumCharColor__6muMenuFiii(int charKind);
@@ -762,4 +763,59 @@ inline gfPadStatus muSelCharPlayerArea::getPadStatus() {
 bool muSelCharPlayerArea::isColorIncButtonPushed() {
     gfPadStatus pad = getPadStatus();
     return (pad.m_buttonsPressedThisFrame.bits & lbl_10_rodata_788[pad.m_controllerType]) != 0;
+}
+
+extern const int lbl_10_rodata_590[12];
+
+void muSelCharPlayerArea::wifiFriendMain() {
+    muWifiInterfaceTask* wifi = g_muWifiInterfaceTask;
+    if (unk428 > 0 && --unk428 > 0) {
+        return;
+    }
+    if (unk426Flag) {
+        int permitted = wifi->isPermittedEntry(m_areaIdx);
+        if (permitted == 1 || permitted == 2) {
+            if (permitted == 1) {
+                int entry = unk42C;
+                unk41C->setWifiDispState(0);
+                unk420Value = 0;
+                removeObj(0x25);
+                removeObj(0x26);
+                removeObj(0x27);
+                m_controllerNo = entry;
+                if (entry >= 0) {
+                    m_menuController.setControllerID(static_cast<u8>(entry));
+                }
+                initDispSelect();
+                if (entry >= 0) {
+                    muSelCharHand* hand = m_selCharHand;
+                    hand->m_pos = hand->m_startPos;
+                }
+                _0 = 0;
+                setPlayerKind(1);
+                unk1D8 = 0;
+                dispNumStar(0, m_playerKind);
+                g_sndSystem->playSE(static_cast<SndID>(0x26), -1, 0, 0, -1);
+            } else {
+                dispWifiDispState(3);
+                unk428 = 0x78;
+                wifi->exitNodePlayer(m_areaIdx);
+            }
+            unk426Flag = false;
+        }
+    } else {
+        int state = lbl_10_rodata_590[getWifiStateByWifiCond()];
+        if (state == 0) {
+            int type = g_GameGlobal->m_selCharData->m_selCharType;
+            if (static_cast<u32>(type - 13) > 2 && m_selCharTask->isWifiGameMaster()) {
+                state = 1;
+            }
+        }
+        if (state != unk430Value) {
+            dispWifiDispState(state);
+            if (state == 1) {
+                g_sndSystem->playSE(static_cast<SndID>(0x2052), -1, 0, 0, -1);
+            }
+        }
+    }
 }

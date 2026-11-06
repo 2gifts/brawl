@@ -365,3 +365,17 @@ void IfWifiprPlayer::wifiDispStateMeleeInit(IfWifiprPlayer* player) {
     object->m_modelAnim->m_anmObjTexPatRes->SetUpdateRate(0.0f);
     player->unk10 = 10;
 }
+
+void IfWifiprPlayer::main() {
+    int oldState = m_state;
+    int (*mainFunc)(IfWifiprPlayer*) = s_dispState[oldState].m_main;
+    if (mainFunc != NULL) {
+        m_state = mainFunc(this);
+    }
+    if (m_state != oldState) {
+        void (*init)(IfWifiprPlayer*) = s_dispState[m_state].m_init;
+        if (init != NULL) {
+            init(this);
+        }
+    }
+}
