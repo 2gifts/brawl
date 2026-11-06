@@ -12,6 +12,8 @@
 #include <wn/sonic/wn_sonic_super_sonic_kinetic_transactor.h>
 #include <so/controller/so_controller_module_link_ref.h>
 
+WN_STATUS_PROC_VECTOR_DEFAULT_CTOR(4);
+
 // HYPOTHESIS: parameter names; ten floats and two ints, ids 4000.. and 24000..
 struct wnSonicSuperSonicParam {
     float unk0;
@@ -95,6 +97,12 @@ typedef soKineticTransactorInfo<wnSonicSuperSonicKineticTransactor, wnSonicSuper
 
 // HYPOTHESIS: configuration values other than those the module map names (motion, inside event, anim cmd, effect, color
 // blend, controller, kinetic).
+class wnSonicSuperSonicAnimCmdModuleSubBuildConfig :
+    public wnAnimCmdModuleSubBuildConfigDefault<1, 4, 0, 0, 1, 10, 0, 0, 1, 10, 0, 0, 1, 10, 0, 0> {
+public:
+    enum { Unit5Enabled = 1 };
+};
+
 struct wnSonicSuperSonicModuleAccesserBuildConfig : public wnCommonBuildConfig {
     typedef soKineticModuleBuildConfig<soKineticModuleGenericImpl,
                                        soKineticMediatorImpl<wnSonicSuperSonicKineticEnergyTypeList,
@@ -108,17 +116,19 @@ struct wnSonicSuperSonicModuleAccesserBuildConfig : public wnCommonBuildConfig {
         soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> > MotionModuleBuildConfig;
     typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 1, 0, soCollisionAttackModuleImpl, 1, false, true>
         CollisionAttackModuleBuildConfig;
-    typedef soCollisionHitModuleBuildConfig<soCollision::Category_Fighter, 1, 1, soCollisionHitModuleImpl, 0x3ff, true>
+    typedef soCollisionHitModuleBuildConfig<soCollision::Category_Fighter, 20, 1, soCollisionHitModuleImpl, 0x3ff, true>
         CollisionHitModuleBuildConfig;
     typedef soDamageModuleBuildConfigNull DamageModuleBuildConfig;
     typedef soLinkModuleBuildConfigCap<5, soLinkModuleImpl> LinkModuleBuildConfig;
     typedef wnControllerModuleBuildConfig<soControllerModuleLinkRef, 0, 0> ControllerModuleBuildConfig;
     typedef soCameraModuleBuildConfig<soCameraModuleImpl> CameraModuleBuildConfig;
-    typedef wnStatusModuleBuildConfig<2, soGeneralWorkBuildConfig<2, 2, 1>, 2,
+    typedef wnStatusModuleBuildConfig<4, soGeneralWorkBuildConfig<2, 2, 1>, 2,
         soTransitionModuleBuildConfig<wnStatusTransitionTypeList> > StatusModuleBuildConfig;
-    typedef wnAnimCmdModuleSubBuildConfigDefault<1, 4, 0, 0, 1, 10, 0, 0, 1, 10, 0, 0, 1, 10, 0, 0> AnimCmdModuleSubBuildConfig;
+    typedef wnSonicSuperSonicAnimCmdModuleSubBuildConfig AnimCmdModuleSubBuildConfig;
     typedef wnEffectModuleBuildConfig<1, 1, 0, 1, 5, soEffectModuleImpl> EffectModuleBuildConfig;
     typedef soColorBlendModuleBuildConfig<5, 0, soColorBlendModuleImpl> ColorBlendModuleBuildConfig;
+    typedef soShadowModuleBuildConfig<soShadowModuleImpl> ShadowModuleBuildConfig;
+    typedef soGlowModuleBuildConfigNull GlowModuleBuildConfig;
 };
 
 // The native builder constructor is out of line (the article constructor calls it).
@@ -126,6 +136,7 @@ template <>
 class wnWeaponBuilder<wnSonicSuperSonicModuleAccesserBuildConfig> : public Weapon {
 protected:
     wnModuleAccesserBuilder<wnSonicSuperSonicModuleAccesserBuildConfig> m_modules;
+    u32 unk2CD0; // HYPOTHESIS: unread tail word of the builder (the article starts at 0x2CD4)
 public:
     wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd)
         __attribute__((never_inline)) :
@@ -137,7 +148,7 @@ public:
         soSingletonHolder<soArticleMediatorNull>::getInstance()->deactivate();
     }
 };
-//static_assert(sizeof(wnWeaponBuilder<wnSonicSuperSonicModuleAccesserBuildConfig>) == 0x2CD4, "Sonic weapon builder size");
+static_assert(sizeof(wnWeaponBuilder<wnSonicSuperSonicModuleAccesserBuildConfig>) == 0x2CD4, "Sonic weapon builder size");
 
 #else
 struct wnSonicSuperSonicModuleAccesserBuildConfig;
@@ -180,7 +191,11 @@ class wnSonicSuperSonic : public wnWeaponBuilder<wnSonicSuperSonicModuleAccesser
 public:
     // Built by the article pool of the fighter (the constructor lives in the article unit).
     wnSonicSuperSonic(s32 articleId, const wnArticleBuildInfo& info, const wnSonicSuperSonicData* data);
+#ifdef WN_WEAPON_BUILDER
+    virtual ~wnSonicSuperSonic() { }
+#else
     virtual ~wnSonicSuperSonic();
+#endif
     // HYPOTHESIS: relative source ordering of lr; f1 and integer registers
     // follow the original caller independently of this ordering.
     void activate(int founderTaskId, int resourceId, int team, Vec2f* pos,

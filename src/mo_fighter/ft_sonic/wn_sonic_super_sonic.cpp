@@ -1,3 +1,4 @@
+#define WN_ANIMCMD_UNIT5_SELECT
 #define MT_VEC3F_CTOR_NOINLINE
 #define WN_WEAPON_NO_COMMON_ENERGIES
 #define WN_WEAPON_BUILDER
@@ -15,6 +16,7 @@
 #include <so/so_value_accesser.h>
 #include <cm/cm_camera_controller.h>
 
+#pragma dont_inline on
 wnSonicSuperSonic::wnSonicSuperSonic(s32 articleId, const wnArticleBuildInfo& info, const wnSonicSuperSonicData* data) :
     wnWeaponBuilder<wnSonicSuperSonicModuleAccesserBuildConfig>(
         "SuperSonic", articleId, info,
@@ -22,19 +24,26 @@ wnSonicSuperSonic::wnSonicSuperSonic(s32 articleId, const wnArticleBuildInfo& in
                                   info.getHeapModule()->getNWMotionInstanceHeap(), static_cast<u8>(data->m_resGroupNo), -1,
                                   &m_paramAccesser, reinterpret_cast<s32>(data->unk40), 0, 0, 0, 0, data->unk48, data->unk4C)),
     m_param(data->m_param), m_paramAccesser(data->m_param) {
-    m_moduleAccesser->getCollisionHitModule().add(reinterpret_cast<soSet<soCollisionHitData>*>(const_cast<u32*>(&data->m_hitDataStorage)), 0);
+    getModuleAccesser()->getCollisionHitModule().add(reinterpret_cast<soSet<soCollisionHitData>*>(const_cast<u32*>(&data->m_hitDataStorage)), 0);
     Weapon::deactivate(false);
 }
+
+#pragma dont_inline off
 
 void wnSonicSuperSonic::activate(int founderTaskId, int resourceId, int team, Vec2f* pos,
                                float lr, SituationKind situation, wnSonicSuperSonicEffectList* effects) {
     Vec3f position(pos->m_x, pos->m_y, 0.0f);
     wnActivateDesc desc(founderTaskId, resourceId, resourceId, resourceId, -1, -1, 0, 0, position, lr, team, 0, 2, 0x80,
                         0, 0x35F, 0);
-    // HYPOTHESIS: original named bitfields and the unused low six bits of 4D.
-    // Only the activation bits consumed by Weapon::activate are reconstructed.
-    desc.flags = 0xA0;
-    desc.unk4D = 0;
+    // HYPOTHESIS: flag grouping follows the other articles' activators; only the bits Weapon::activate consumes are known.
+    desc.flagsHigh = 1;
+    desc.flagsMidHigh = 0;
+    desc.flagsMidLow = 1;
+    desc.flagsLow = 0;
+    desc.unk4DHigh = 0;
+    desc.unk44 = 0x35F; // HYPOTHESIS: the original rewrites this word after the constructor (matches its store order)
+    desc.flagBit5 = 1;
+    desc.flagBit3 = 0;
     Weapon::activate(&desc);
     m_moduleAccesser->getWorkManageModule().onFlag(0x12000000);
     m_moduleAccesser->getCollisionHitModule().setWhole(3, 0);
@@ -43,13 +52,13 @@ void wnSonicSuperSonic::activate(int founderTaskId, int resourceId, int team, Ve
     }
     m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Reference_Parent_Unknown_4, true);
     for (u32 i = 0; i < effects->size; ++i) {
-        int node = convertSonicNode(effects->entries[i].nodeId);
-        if (node != -1) {
-            Vec3f pos = effects->entries[i].pos;
-            Vec3f rot(0.0f, 0.0f, 0.0f);
-            m_moduleAccesser->getEffectModule().reqFollow(static_cast<EfID>(0x1020002), node,
-                                                       &pos, &rot, effects->entries[i].scale,
-                                                       true, 0x10, 0, -1);
+        u32 node = convertSonicNode(effects->entries[i].nodeId);
+        if (node != static_cast<u32>(-1)) {
+            Vec3f pos;
+            pos = effects->entries[i].pos;
+            soEffectModule& effect = m_moduleAccesser->getEffectModule();
+            effect.reqFollow(static_cast<EfID>(0x1020002), node, &pos, &Vec3f(0.0f, 0.0f, 0.0f), effects->entries[i].scale,
+                             true, 0x10, 0, -1);
         }
     }
     m_moduleAccesser->getLinkModule().setAttribute(3, soLinkConnection::Attribute_Reference_Parent_Scale, true);
