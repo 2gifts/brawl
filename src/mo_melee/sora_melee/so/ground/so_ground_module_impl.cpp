@@ -728,3 +728,91 @@ bool soGroundModuleImpl::rayCheckTarget(StageObject* stageObject, bool p1) {
     Vec3f dir = to - from;
     return soGroundUtil::rayCheck(m_moduleAccesser, &from, &dir, p1);
 }
+
+// HYPOTHESIS: grCollision lines are 0x12-byte entries whose u16 at +0xE holds the flags.
+struct soGroundLineFlagEntry {
+    char _spacer[0xE];
+    u16 m_flags;
+    char _spacer2[2];
+};
+
+void soGroundModuleImpl::setGrCollisionFlagAll(u16 value, int mask) {
+    if (m_collision == NULL) {
+        return;
+    }
+    u16 count = m_collision->m_lineLen;
+    soGroundLineFlagEntry* entry = (soGroundLineFlagEntry*)m_collision->m_lines;
+    if (count == 0 || entry == NULL) {
+        return;
+    }
+    for (int i = count; i > 0; i--, entry++) {
+        if (mask == -1 || (mask & entry->m_flags) == 0) {
+            entry->m_flags = value | (entry->m_flags & ~0xF);
+        }
+    }
+}
+
+// HYPOTHESIS: m_cliffHangData points at {entries, count}; each 0x10-byte entry holds two Vec2f (cliff range a, b).
+struct soGroundCliffHangEntry {
+    Vec2f m_a;
+    Vec2f m_b;
+};
+struct soGroundCliffHangData {
+    soGroundCliffHangEntry* m_entries;
+    u32 m_count;
+};
+
+void soGroundModuleImpl::selectCliffHangData(u32 i, u32 index) {
+    soGroundCliffHangData* data = (soGroundCliffHangData*)m_cliffHangData;
+    soGroundCliffHangEntry* entries;
+    if (data == NULL || (entries = data->m_entries) == NULL) {
+        return;
+    }
+    if (i >= data->m_count) {
+        return;
+    }
+    soGroundCliffHangEntry* entry = &entries[i];
+    float scale = m_moduleAccesser->getPostureModule().getScale();
+    Vec2f a(entry->m_a.m_x * scale, entry->m_a.m_y * scale);
+    Vec2f b(entry->m_b.m_x * scale, entry->m_b.m_y * scale);
+    m_groundShapeArray->at(index).m_collStatus->setCliffRange(&a, &b, b.m_x * m_cliffBackRangeXMul);
+}
+
+void soGroundModuleImpl::renderDebug() {
+    int n = m_groundShapeArray->size();
+    for (int i = 0; i < n; i++) {
+        if (m_groundShapeArray->at(i).m_collStatus->m_cliffCheckOn) {
+            m_groundShapeArray->at(i).m_collStatus->drawDebugCliff();
+        }
+        if (m_groundShapeArray->at(i).m_collStatus->m_enabled) {
+            m_groundShapeArray->at(i).m_collStatus->drawDebug();
+        }
+    }
+}
+
+bool soGroundModuleImpl::isDiveDown(u32 index) {
+    u32 id = getDownLineId(index);
+    if (id == 0xFFFF) {
+        return true;
+    }
+    bool valid = false;
+    u32 lineId = id;
+    grCollisionLineWork work;
+    if (grCollision::getLineWork(&lineId, &work) == false) {
+        return true;
+    }
+    if (work.m_collisionLine != NULL && work.m_collisionJoint != NULL && work.m_collision != NULL) {
+        valid = true;
+    }
+    bool ok;
+    if (valid && work.m_collisionJoint->m_0x54_4 && work.m_collision->m_isEnabled) {
+        ok = true;
+    } else {
+        ok = false;
+    }
+    if (!ok) {
+        return true;
+    }
+    // MATCH-ONLY: the original reloads the line pointer from the work after the null checks.
+    return (*(grCollisionLine* volatile*)&work.m_collisionLine)->m_isDive;
+}
