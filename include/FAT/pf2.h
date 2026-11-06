@@ -113,6 +113,7 @@ void fn_803D65A4(unsigned int width, short* oem_width, short* uni_width);  // PF
 u32 VFipf_strlen(const char* s);                              // pf_strlen
 s32 VFipf_w_strlen(const u16* s);                               // pf_wcslen
 s32 VFipf_strcmp(const char* s1, const char* s2);             // pf_strcmp
+void* VFipf_memcpy(void* dst, void* src, u32 length);         // pf_memcpy
 
 #ifdef __cplusplus
 }
