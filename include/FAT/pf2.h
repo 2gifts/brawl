@@ -49,6 +49,10 @@ int fn_803EB5D8(PF2_DIR* dir);                               // pf_closedir
 int fn_803EB5FC(void);                                       // pf_errnum
 int fn_803EBE4C(void);                                       // FAErrnum
 u16 fn_803D68B8(PF_STR* p_str);                              // PFSTR_StrLen
+s32 PFSTR_StrCmp(const PF_STR* p_str, const s8* s);
+u32 PFSTR_StrNumChar(PF_STR* p_str, u32 target);
+void PFSTR_MoveStrPos(PF_STR* p_str, s16 num_s8);
+void PFSTR_ToUpperNStr(PF_STR* p_str, u16 num, s8* dest);
 int fn_803EB620(PF2_FILE* file);                             // pf_fclose
 u32 fn_803EB6E0(void* buf, u32 size, u32 count, PF2_FILE* file);  // pf_fread
 int fn_803EB708(PF2_FILE* file, s32 offset, s32 origin);     // pf_fseek
