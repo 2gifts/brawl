@@ -95,3 +95,34 @@ GSTask* fn_8035EA18(void) {
     aTask->mAutoThink = 1;
     return aTask;
 }
+
+void gsCoreThink(u32 timeoutMs) {
+    GSCoreMgr* aCore = &lbl_805348E0;
+    u32 startTime;
+    int i;
+    int allTasksDone = 1;
+
+    if (aCore->mIsInitialized) {
+        fn_8035D24C(&aCore->mQueueCrit);
+        startTime = current_time();
+        for (i = 0; i < GSICORE_MAXTASKS; i++) {
+            GSTask* task = aCore->mTaskArray[i];
+            if (task != NULL) {
+                allTasksDone = 0;
+                if (task->mAutoThink == 1) {
+                    gsCoreTaskThink(task);
+                }
+            }
+            if (timeoutMs != 0 && current_time() - startTime > timeoutMs) {
+                break;
+            }
+        }
+        if (aCore->mIsShuttingDown) {
+            if (allTasksDone) {
+                ghttpCleanup();
+                aCore->mIsShuttingDown = 0;
+            }
+        }
+        fn_8035D250(&aCore->mQueueCrit);
+    }
+}
