@@ -1,10 +1,30 @@
 #define MT_VEC3F_CTOR_NOINLINE
+#define WN_WEAPON_NO_COMMON_ENERGIES
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define FT_REL_LINK_EXTERN
+#define WN_KINETIC_GENERIC_BUILDER
+#define WN_KINETIC_NORMAL_HOLDER_DEFAULT
+#define WN_KINETIC_NORMAL_EXTERN
+#include <wn/wn_module_accesser_builder.h>
 #include <wn/sonic/wn_sonic_super_sonic.h>
 #include <wn/wn_activate_desc.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <cm/cm_camera_controller.h>
 
+wnSonicSuperSonic::wnSonicSuperSonic(s32 articleId, const wnArticleBuildInfo& info, const wnSonicSuperSonicData* data) :
+    wnWeaponBuilder<wnSonicSuperSonicModuleAccesserBuildConfig>(
+        "SuperSonic", articleId, info,
+        wnModuleAccesserBuildData(0x7C, data, info.getHeapModule()->getInstanceHeap(), static_cast<Heaps::HeapType>(0x1F),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), static_cast<u8>(data->m_resGroupNo), -1,
+                                  &m_paramAccesser, reinterpret_cast<s32>(data->unk40), 0, 0, 0, 0, data->unk48, data->unk4C)),
+    m_param(data->m_param), m_paramAccesser(data->m_param) {
+    m_moduleAccesser->getCollisionHitModule().add(reinterpret_cast<soSet<soCollisionHitData>*>(const_cast<u32*>(&data->m_hitDataStorage)), 0);
+    Weapon::deactivate(false);
+}
 
 void wnSonicSuperSonic::activate(int founderTaskId, int resourceId, int team, Vec2f* pos,
                                float lr, SituationKind situation, wnSonicSuperSonicEffectList* effects) {
