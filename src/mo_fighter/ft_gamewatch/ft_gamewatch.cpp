@@ -25,6 +25,8 @@
 #include <so/collision/so_collision_log.h>
 
 #define FT_NO_REFLECTOR_INSTANTIATION
+// The fighter owns the shared out-of-line kinetic teardown.
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftGameWatchBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 #include <wn/gamewatch/wn_game_watch_octopus_link_event_collision.h>
@@ -745,22 +747,18 @@ extern "C" {
 void* fn_107_3DC4(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_107_4158(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+ftKineticEnergyController::~ftKineticEnergyController() { }
+// ftManager::setParamPattern selects the shared parameter-table variation.
+extern int g_soValueVariation;
+#pragma dont_inline on
+int soValueAccesser::getValueVariation() { return g_soValueVariation; }
+#pragma dont_inline off
 #pragma dont_inline on
 soTeam::~soTeam() { }
 #pragma dont_inline off
 #pragma dont_inline on
 soResourceIdAccesser::~soResourceIdAccesser() { }
 #pragma dont_inline off
-// Article specialization also declared by the weapon-builder header, which
-// cannot coexist with this Fighter-based builder translation unit.
-template <>
-class soParamCustomizeModuleBuilder<soParamCustomizeModuleBuildConfig<soParamCustomizeModuleImpl> > {
-    soParamCustomizeModuleImpl m_paramCustomizeModule;
-public:
-    soParamCustomizeModuleBuilder(soModuleAccesser*) { }
-    ~soParamCustomizeModuleBuilder();
-};
-soParamCustomizeModuleBuilder<soParamCustomizeModuleBuildConfig<soParamCustomizeModuleImpl> >::~soParamCustomizeModuleBuilder() { }
 soArticleMediator::~soArticleMediator() { }
 extern "C" {
 void* fn_107_6800(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
