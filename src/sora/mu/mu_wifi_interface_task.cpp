@@ -104,7 +104,6 @@ extern "C" bool fn_8014592C(void* tr);
 extern "C" u64 fn_80052250();
 
 extern void* lbl_805A02A0;
-extern void* lbl_805A03A8;
 extern const muWifiErrorMsg lbl_80408488[];
 
 void muWifiInterfaceTask::destroy() {
