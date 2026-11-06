@@ -327,11 +327,11 @@ s32 utArchiveManager::getLoadResult(u32 resourceId, s32* status) {
     return 0;
 }
 
-bool utArchiveManager::isExistRemoveTask() {
+u32 utArchiveManager::isExistRemoveTask() {
     return m_removeList.getLength() != 0;
 }
 
-bool utArchiveManager::isExistCancelTask() {
+u32 utArchiveManager::isExistCancelTask() {
     return m_cancelList.getLength() != 0;
 }
 

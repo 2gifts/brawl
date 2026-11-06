@@ -74,8 +74,8 @@ public:
     u32 addNoManageArchive(void* data, int size, Heaps::HeapType heap);
     void process();
     s32 getLoadResult(u32 resourceId, s32* status);
-    bool isExistRemoveTask();
-    bool isExistCancelTask();
+    u32 isExistRemoveTask();
+    u32 isExistCancelTask();
     void cancel(u32 resourceId);
     // HYPOTHESIS: parameter types from the gfArchive::getData call.
     void* getData(u32 resourceId, ARCNodeType type, int fileIndex, int* size, int groupID, s32 archiveId);

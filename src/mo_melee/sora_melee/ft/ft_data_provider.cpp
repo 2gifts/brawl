@@ -116,7 +116,7 @@ void ftDataProvider::process() {
 
 bool ftDataProvider::isReady() {
     utArchiveManager* arcManager = soArchiveDb::getManager(0);
-    if (arcManager->isExistRemoveTask() || arcManager->isExistCancelTask()) {
+    if (arcManager->isExistRemoveTask() == 1U || arcManager->isExistCancelTask() == 1U) {
         return false;
     }
     return true;
