@@ -1,3 +1,17 @@
+#define FT_MODULE_BUILDER
+#define WN_WEAPON_NO_COMMON_ENERGIES
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define SO_NULLABLE_INLINE_CTOR
+#define FT_REL_LINK_EXTERN
+#define WN_KINETIC_GENERIC_BUILDER
+#define WN_KINETIC_NORMAL_HOLDER_DEFAULT
+#define WN_KINETIC_NORMAL_EXTERN
+#define MT_VEC2F_ASSIGN_NOINLINE
+#define MT_VEC3F_CTOR_NOINLINE
+#include <wn/wn_module_accesser_builder.h>
 #include <wn/popo/wn_popo_ice_shot.h>
 #include <wn/wn_activate_desc.h>
 #include <wn/wn_class_info_impl.h>
@@ -9,6 +23,40 @@
 #include <so/posture/so_posture_module_simple.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
+
+// MATCH-ONLY: the original keeps these five module builders out of line.
+typedef wnPopoIceShotModuleAccesserBuildConfig IceShotBC;
+// MATCH-ONLY: instantiate the helpers the out-of-line builders call inline before inlining is switched off.
+static void warmInlineHelpers() {
+    ftKineticEnergyManager manager(false);
+    soNullable nullable(false);
+}
+#pragma dont_inline on
+template soInsideEventManageModuleBuilder<IceShotBC::InsideEventManageModuleBuildConfig, wnInsideEventManageModuleTypes>::soInsideEventManageModuleBuilder();
+template soDamageModuleBuilder<IceShotBC::DamageModuleBuildConfig>::soDamageModuleBuilder(soModuleAccesser*, soEventObserverRegistrationDesc*);
+template soCollisionHitModuleBuilder<IceShotBC::CollisionHitModuleBuildConfig>::soCollisionHitModuleBuilder(soModuleAccesser*, int, u8, soEventObserverRegistrationDesc*);
+template soKineticModuleBuilder<IceShotBC::KineticModuleBuildConfig>::soKineticModuleBuilder(soModuleAccesser*);
+template soSlopeModuleBuilder<IceShotBC::SlopeModuleBuildConfig>::soSlopeModuleBuilder(soModuleAccesser*, float);
+template soEventManageModuleImpl* soInsideEventManageModuleBuilder<IceShotBC::InsideEventManageModuleBuildConfig, wnInsideEventManageModuleTypes>::getModule();
+template soCollisionHitModule* soCollisionHitModuleBuilder<IceShotBC::CollisionHitModuleBuildConfig>::getModule();
+template soDamageModuleImpl* soDamageModuleBuilder<IceShotBC::DamageModuleBuildConfig>::getModule();
+template soKineticModule* soKineticModuleBuilder<IceShotBC::KineticModuleBuildConfig>::getModule();
+template soSlopeModuleImpl* soSlopeModuleBuilder<IceShotBC::SlopeModuleBuildConfig>::getModule();
+template soModuleAccesser* soModuleAccesserBuilder<IceShotBC>::getModuleAccesser();
+#pragma dont_inline off
+
+wnPopoIceShot::wnPopoIceShot(s32 articleId, const wnArticleBuildInfo& info, const wnPopoIceShotData* data) :
+    wnWeaponBuilder<wnPopoIceShotModuleAccesserBuildConfig>(
+        "PopoIceShot", articleId, info,
+        wnModuleAccesserBuildData(0x6d, data, info.getHeapModule()->getInstanceHeap(),
+                                  info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), static_cast<u8>(data->m_resGroupNo), -1,
+                                  &m_paramAccesser, 0, 0, 0, 0, 0, 0, 0)),
+    soDamageEventObserver(ftGetManageId(m_moduleAccesser), -1),
+    soCollisionAttackEventObserver(ftGetManageId(m_moduleAccesser), -1), m_param(data->m_param), m_paramAccesser(data->m_param) {
+    m_moduleAccesser->getCollisionHitModule().add(reinterpret_cast<soSet<soCollisionHitData>*>(const_cast<u8*>(data->unk38)), 0);
+    Weapon::deactivate(false);
+}
 
 void wnPopoIceShot::activate(int founderTaskId, int resourceId, int team, const Vec3f* pos, float lr, int unk40) {
     wnActivateDesc desc;
