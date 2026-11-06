@@ -1,3 +1,10 @@
+#define WN_PIKMIN_FULL_BUILDER
+#define WN_WEAPON_NO_COMMON_ENERGIES
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define FT_REL_LINK_EXTERN
+#define WN_BUILD_DATA_INLINE_QUERIES
 #define WN_ARTICLE_ANIMCMD_INT
 #define WN_KINETIC_GENERIC_BUILDER
 #define WN_EXTEND_PARAM_ACCESSER_NOINLINE
@@ -7,6 +14,7 @@
 #define MT_VEC2F_SUB_NOINLINE
 #define MT_VEC3F_FROM_VEC2_CTOR_NOINLINE
 #define SO_SLOW_GET_INSTANCE_OUT_OF_LINE
+#include <wn/wn_module_accesser_builder.h>
 #include <ft/ft_external_value_accesser.h>
 #include <so/so_module_accesser.h>
 #include <so/so_slow.h>
@@ -17,6 +25,7 @@
 #include <so/catch/so_catch_module.h>
 #include <so/team/so_team.h>
 #include <wn/pikmin/wn_pikmin_pikmin.h>
+#include <wn/pikmin/wn_pikmin_pikmin_module_accesser_build_data.h>
 #include <wn/pikmin/wn_pikmin_pikmin_kinetic_transactor.h>
 #include <so/so_kinetic_energy_normal.h>
 #include <so/so_kinetic_utility.h>
@@ -2501,4 +2510,65 @@ s32 wnPikminPikminParamAccesser::getParamInt(soModuleAccesser* acc, s32 id, s32 
         }
     }
     return result;
+}
+
+
+// sora_melee instances the article's builders call (declared only).
+
+extern char lbl_27_bss_8B4[];
+extern char lbl_27_bss_DAC[];
+extern char g_wnPikminPikminStatusUniqProcessTurn[];
+extern char g_wnPikminPikminStatusUniqProcessGroundFollow[];
+extern char g_wnPikminPikminStatusUniqProcessAirFollow[];
+extern char g_wnPikminPikminStatusUniqProcessJump[];
+extern char g_wnPikminPikminStatusUniqProcessSpecialSCling[];
+extern char g_wnPikminPikminStatusUniqProcessSpecialLwComp[];
+extern char g_wnPikminPikminStatusUniqProcessCatchCommon[];
+extern char g_wnPikminPikminStatusUniqProcessWaterFollow[];
+
+typedef void (soAnimCmdModule::*PikminSetAddressPackFn)(int, soAnimCmdAddressPackArraySeparate*);
+
+wnPikminPikmin::wnPikminPikmin(s32 articleId, const wnArticleBuildInfo& info, const wnPikminPikminData* data) :
+    wnWeaponBuilder<wnPikminPikminModuleAccesserBuildConfig>(
+        "PikminPikmin", articleId, info,
+        wnPikminPikminModuleAccesserBuildData(0x43, data, info.getHeapModule()->getInstanceHeap(),
+                                              info.getHeapModule()->getNWModelInstanceHeap(),
+                                              info.getHeapModule()->getNWMotionInstanceHeap(), static_cast<u8>(data->m_resGroupNoWord),
+                                              (const void*)data->unk34, -1, &m_paramAccesser, data->unk84, data->unk90,
+                                              data->unk94)),
+    soDamageEventObserver(ftGetManageId(m_moduleAccesser), -1),
+    soCollisionSearchEventObserver(ftGetManageId(m_moduleAccesser), -1),
+    soSituationEventObserver(ftGetManageId(m_moduleAccesser), -1), m_data(data), m_waitAnimTable(data->m_waitAnimTable74),
+    m_param(data->m_param78), m_paramAccesser(data->m_param78, data->m_particular7C),
+    m_animCmdPack0(&m_animCmdTable0, (soArrayFixed<const acAnimCmdConv*>*)lbl_27_bss_8B4,
+                   (soArrayFixed<const acAnimCmdConv*>*)lbl_27_bss_8B4),
+    m_animCmdPack1(&m_animCmdTable1, (soArrayFixed<const acAnimCmdConv*>*)lbl_27_bss_8B4,
+                   (soArrayFixed<const acAnimCmdConv*>*)lbl_27_bss_8B4),
+    m_animCmdPack2(&m_animCmdTable2, (soArrayFixed<const acAnimCmdConv*>*)lbl_27_bss_8B4,
+                   (soArrayFixed<const acAnimCmdConv*>*)lbl_27_bss_8B4),
+    m_hitStatusTable((soCollisionHitStatus*)data->m_hitStatusData, 0x34) {
+    PikminSetAddressPackFn setPack = reinterpret_cast<PikminSetAddressPackFn>(&soAnimCmdModule::unk44);
+    (&m_moduleAccesser->getAnimCmdModule()->*setPack)(1, &m_animCmdPack0);
+    (&m_moduleAccesser->getAnimCmdModule()->*setPack)(2, &m_animCmdPack1);
+    (&m_moduleAccesser->getAnimCmdModule()->*setPack)(3, &m_animCmdPack2);
+    m_moduleAccesser->getCollisionHitModule().add((soSet<soCollisionHitData>*)data->m_hitData, 0);
+    soStatusUniqProcess* uniqProcs[0x34];
+    for (int i = 0; i < 0x34; i++) uniqProcs[i] = (soStatusUniqProcess*)lbl_27_bss_DAC;
+    uniqProcs[1] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessTurn;
+    uniqProcs[6] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessGroundFollow;
+    uniqProcs[8] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessAirFollow;
+    uniqProcs[12] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessJump;
+    uniqProcs[13] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessJump;
+    uniqProcs[23] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessSpecialSCling;
+    uniqProcs[26] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessSpecialLwComp;
+    uniqProcs[34] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessCatchCommon;
+    uniqProcs[35] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessCatchCommon;
+    uniqProcs[37] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessCatchCommon;
+    uniqProcs[38] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessCatchCommon;
+    uniqProcs[39] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessCatchCommon;
+    uniqProcs[40] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessCatchCommon;
+    uniqProcs[41] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessCatchCommon;
+    uniqProcs[45] = (soStatusUniqProcess*)g_wnPikminPikminStatusUniqProcessWaterFollow;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 0x34);
+    Weapon::deactivate(false);
 }

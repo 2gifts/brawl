@@ -106,11 +106,21 @@ public:
 
 // The article data block: three tables of animation command lists, one entry for each of the five colour variations.
 struct wnPikminPikminData {
-    u8 unk0[0x1C];
+    s32 m_resGroupNoWord;                      // 0x0: the low byte is the resource group
+    u8 unk4[0x18];
     int unk1C;                                 // 0x1C
     const void* waitAnimTable;                 // 0x74 of the data block of the original; kept as a pointer here
-    u8 unk24[0x14];
+    u8 unk24[0x10];
+    s32 unk34;                                 // 0x34: the animation command data of the sixth thread
     const acAnimCmdConv** animCmdTable[3][5];  // 0x38 / 0x4C / 0x60: lists for the three animation command groups
+    const void* m_waitAnimTable74;             // 0x74
+    const struct wnPikminPikminParam* m_param78; // 0x78
+    const struct wnPikminPikminParamParticular* m_particular7C; // 0x7C
+    const void* m_hitStatusData;               // 0x80
+    s32 unk84;                                 // 0x84
+    u8 m_hitData[8];                           // 0x88: opaque collision hit set
+    s32 unk90;                                 // 0x90
+    s32 unk94;                                 // 0x94
 };
 
 // Link events between the article and its leader (Olimar) and the thrown article. HYPOTHESIS: values are the sub kinds of
@@ -158,6 +168,121 @@ public:
     void setStopSpeed(float speed);
 };
 
+#ifdef WN_PIKMIN_FULL_BUILDER
+// The full builder (the Pikmin unit itself; the other units only see the opaque storage below).
+#include <wn/pikmin/wn_pikmin_pikmin_kinetic_transactor.h>
+#include <so/controller/so_controller_module_link_ref.h>
+#include <wn/wn_kinetic_energy_gravity.h>
+#include <wn/wn_kinetic_transactor.h>
+#include <ft/ft_kinetic_energy.h>
+
+// The controller of the Pikmin reads its owner's controller through the link (one controller and one clatter slot).
+// HYPOTHESIS: same builder as Snake's C4 charge.
+template <>
+class soControllerModuleBuilder<wnControllerModuleBuildConfig<soControllerModuleLinkRef, 1, 1> > :
+    public soArraySelectHolder<1, soArrayVector<soControllerImpl, 1>, soArrayNull<soControllerImpl> > {
+    soArraySelectHolder<1, soArrayVector<soControllerClatter, 1>, soSingletonHolder<soArrayNull<soControllerClatter> > > m_clatters;
+    soControllerModuleLinkRef m_controllerModule;
+public:
+    soControllerModuleBuilder(soModuleAccesser* acc, s16 manageId) :
+        soArraySelectHolder<1, soArrayVector<soControllerImpl, 1>, soArrayNull<soControllerImpl> >(1, 0), m_clatters(1, 0),
+        m_controllerModule(acc, manageId, this->get(), &clatters()) { }
+    soArray<soControllerClatter>& clatters() { return m_clatters.m_array; }
+    soControllerModuleLinkRef* getModule() { return &m_controllerModule; }
+};
+
+// The effect module of the article: like the fighters' builder (own time array), with 5 where the other articles pass -1.
+// HYPOTHESIS: layout follows the fighter builder; the 5 is the module's unknown constructor argument.
+template <typename T>
+class soEffectModuleBuilder<wnEffectModuleBuildConfig<1, 1, 0, 1, 5, T> > :
+    public soArraySelectHolder<1, soArrayVector<soEffectContinual, 1>, soArrayNull<soEffectContinual> > {
+    soArraySelectHolder<1, soArrayVector<soEffectTime, 1>, soArrayNull<soEffectTime> > m_times;
+    typedef soArrayNull<efScreenHandle> ScreenNullHolder;
+    soArraySelectHolder<1, soArrayVector<efScreenHandle, 1>, ScreenNullHolder> m_screens;
+    soArrayVector<u32, 1> m_u32s;
+    T m_effectModule;
+public:
+    soEffectModuleBuilder(soModuleAccesser* acc, void* nodeData, void* emitData, void* commonData, void* screenData,
+                          soEventObserverRegistrationDesc* regDesc) :
+        soArraySelectHolder<1, soArrayVector<soEffectContinual, 1>, soArrayNull<soEffectContinual> >(1, 0), m_times(1, 0),
+        m_screens(1, 0), m_u32s(1, 0, 0),
+        m_effectModule(acc, this->get(), nodeData, &m_u32s, m_times.get(), emitData, regDesc, commonData, 5, screenData, m_screens.get()) { }
+    T* getModule() { return &m_effectModule; }
+};
+
+// The six energies of the article: normal, gravity, ground movement, wind, jostle and stop.
+// HYPOTHESIS: the init info numbers of ground movement and wind (the others are in the module map).
+typedef soTypeList<soInstancePoolInfo<soKineticEnergyNormal, 1, soKineticEnergyHolder, soKineticEnergyInitInfo<0, 1> >,
+        soTypeList<soInstancePoolInfo<wnKineticEnergyGravity, 1, soKineticEnergyHolder, soKineticEnergyInitInfo<1, 1> >,
+        soTypeList<soInstancePoolInfo<soKineticEnergyGroundMovement, 1, soKineticEnergyHolder, soKineticEnergyInitInfo<2, 8> >,
+        soTypeList<soInstancePoolInfo<soKineticEnergyWindNormal, 1, soKineticEnergyHolder, soKineticEnergyInitInfo<3, 4> >,
+        soTypeList<soInstancePoolInfo<soKineticEnergyJostle, 1, soKineticEnergyHolder, soKineticEnergyInitInfo<4, 4> >,
+        soTypeList<soInstancePoolInfo<soKineticEnergyStop, 1, soKineticEnergyHolder, soKineticEnergyInitInfo<5, 2> >,
+        soTypeListNullType> > > > > > wnPikminPikminKineticEnergyTypeList;
+typedef soKineticTransactorInfo<wnPikminPikminKineticTransactor, wnKineticTransactor, wnPikminPikminKineticTransactor,
+                                soKineticTransactHelper>
+    wnPikminPikminKineticTransactorInfo;
+
+// The sixth animation command thread of the article is real (16 entries), unlike the shared builder's.
+template <int E0, int C0, int A0, int B0, int E1, int C1, int A1, int B1, int E2, int C2, int A2, int B2, int E3, int C3, int A3, int B3>
+class wnPikminAnimCmdModuleSubBuildConfig : public wnAnimCmdModuleSubBuildConfigDefault<E0, C0, A0, B0, E1, C1, A1, B1, E2, C2, A2, B2, E3, C3, A3, B3> {
+public:
+    typedef soAnimCmdControlUnitBuildConfig<5, 16, 1, 0, 0, 1, 0, 8> Unit5Config;
+};
+template <int E0, int C0, int A0, int B0, int E1, int C1, int A1, int B1, int E2, int C2, int A2, int B2, int E3, int C3, int A3, int B3>
+class wnAnimCmdModuleSubBuilder<wnPikminAnimCmdModuleSubBuildConfig<E0, C0, A0, B0, E1, C1, A1, B1, E2, C2, A2, B2, E3, C3, A3, B3> > {
+    typedef wnPikminAnimCmdModuleSubBuildConfig<E0, C0, A0, B0, E1, C1, A1, B1, E2, C2, A2, B2, E3, C3, A3, B3> BC;
+    typename wnAnimCmdControlUnitSelect<BC::Unit0Enabled != 0, typename BC::Unit0Config>::Type m_unit0;
+    typename wnAnimCmdControlUnitSelect<BC::Unit1Enabled != 0, typename BC::Unit1Config>::Type m_unit1;
+    typename wnAnimCmdControlUnitSelect<BC::Unit2Enabled != 0, typename BC::Unit2Config>::Type m_unit2;
+    typename wnAnimCmdControlUnitSelect<BC::Unit3Enabled != 0, typename BC::Unit3Config>::Type m_unit3;
+    typename wnAnimCmdUniqSelect<BC::Unit4Enabled != 0, typename BC::Unit4Config>::Type m_unit4;
+    soAnimCmdControlUnitBuilder<typename BC::Unit5Config> m_unit5;
+public:
+    wnAnimCmdModuleSubBuilder(soModuleAccesser* acc, const soModuleAccesserBuildData& bd) :
+        m_unit0(acc, bd.getAnimCmdData(0, 0), bd.getAnimCmdData(0, 1), bd.getAnimCmdData(0, 2)),
+        m_unit1(acc, bd.getAnimCmdData(1, 0), bd.getAnimCmdData(1, 1), bd.getAnimCmdData(1, 2)),
+        m_unit2(acc, bd.getAnimCmdData(2, 0), bd.getAnimCmdData(2, 1), bd.getAnimCmdData(2, 2)),
+        m_unit3(acc, bd.getAnimCmdData(3, 0), bd.getAnimCmdData(3, 1), bd.getAnimCmdData(3, 2)),
+        m_unit4(acc),
+        m_unit5(acc, bd.getAnimCmdData(5, 0), bd.getAnimCmdData(5, 1), bd.getAnimCmdData(5, 2)) { }
+    ~wnAnimCmdModuleSubBuilder() { }
+};
+
+struct wnPikminPikminModuleAccesserBuildConfig : wnCommonBuildConfig {
+    typedef soKineticModuleBuildConfig<soKineticModuleGenericImpl,
+                                       soKineticMediatorImpl<wnPikminPikminKineticEnergyTypeList, wnPikminPikminKineticTransactorInfo> >
+        KineticModuleBuildConfig;
+    typedef soInsideEventManageModuleBuildConfig<18, 33, 4, 2, 4, 4, 5, 5, 2, 4, 4, 4, 4, 4, 1, 1, 0, 0, 0,
+                                                 wnInsideEventManageModuleTypes>
+        InsideEventManageModuleBuildConfig;
+    typedef soModelModuleBuildConfig<5, 0, soModelModuleImpl> ModelModuleBuildConfig;
+    typedef soMotionModuleBuildConfig<59, soMotionModuleImpl, 0, 1, soTransitionModuleBuildConfig<wnMotionTransitionTypeList>,
+                                      soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> >
+        MotionModuleBuildConfig;
+    typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 3, 2, soCollisionAttackModuleImpl, 1, false, true>
+        CollisionAttackModuleBuildConfig;
+    typedef soCollisionHitModuleBuildConfig<soCollision::Category_Fighter, 2, 1, soCollisionHitModuleImpl, 0x3ff, true>
+        CollisionHitModuleBuildConfig;
+    typedef soCollisionCatchModuleBuildConfig<soCollisionCatchModuleImpl> CollisionCatchModuleBuildConfig;
+    typedef soCollisionSearchModuleBuilder<soCollisionSearchModuleBuildConfig<soCollisionSearchModuleImpl> > CollisionSearchModuleBuilder;
+    typedef wnDamageModuleBuildConfig<soDamageModuleImpl, 1, soSingletonHolder<soDamageTransactorNull>,
+                                      soSingletonHolder<soDamageEffectorNull> >
+        DamageModuleBuildConfig;
+    typedef soLinkModuleBuildConfigCap<5, soLinkModuleImpl> LinkModuleBuildConfig;
+    typedef soVisibilityModuleBuildConfig<soVisibilityModuleImpl, 1> VisibilityModuleBuildConfig;
+    typedef wnControllerModuleBuildConfig<soControllerModuleLinkRef, 1, 1> ControllerModuleBuildConfig;
+    typedef wnStatusModuleBuildConfig<52, soGeneralWorkBuildConfig<5, 2, 1>, 52, soTransitionModuleBuildConfig<wnStatusTransitionTypeList> >
+        StatusModuleBuildConfig;
+    typedef soGeneralWorkBuildConfig<21, 14, 1> GeneralWorkBuildConfig;
+    typedef wnEffectModuleBuildConfig<1, 1, 0, 1, 5, soEffectModuleImpl> EffectModuleBuildConfig;
+    typedef soAreaModuleBuildConfigWeapon<1, 4> AreaModuleBuildConfig;
+    typedef soColorBlendModuleBuildConfig<5, 0, soColorBlendModuleImpl> ColorBlendModuleBuildConfig;
+    typedef soJostleModuleBuildConfig<0, 0, soJostleModuleImpl> JostleModuleBuildConfig;
+    typedef soReflectModuleBuildConfig<1, soReflectModuleImpl> ReflectModuleBuildConfig;
+    typedef wnPikminAnimCmdModuleSubBuildConfig<1, 52, 52, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0> AnimCmdModuleSubBuildConfig;
+};
+#else
 struct wnPikminPikminModuleAccesserBuildConfig;
 template <>
 class wnWeaponBuilder<wnPikminPikminModuleAccesserBuildConfig> : public Weapon {
@@ -168,6 +293,7 @@ public:
     virtual void deactivateDescendantForce();
 };
 static_assert(sizeof(wnWeaponBuilder<wnPikminPikminModuleAccesserBuildConfig>) == 0x3118, "Pikmin builder extent");
+#endif
 
 class wnPikminPikmin : public wnWeaponBuilder<wnPikminPikminModuleAccesserBuildConfig>,
                        public soDamageEventObserver,
@@ -177,7 +303,11 @@ public:
     const wnPikminPikminData* m_data;     // 0x313C
     const void* m_waitAnimTable;          // 0x3140
     const wnPikminPikminParam* m_param;   // 0x3144
+#ifdef WN_PIKMIN_FULL_BUILDER
+    wnPikminPikminParamAccesser m_paramAccesser; // 0x3148
+#else
     u8 unk3148[0x168];                    // the parameter accesser
+#endif
     // The animation command lists of the colour in use, one table and one address pack for each animation command group.
     soArrayContractibleTable<const acAnimCmdConv*> m_animCmdTable0; // 0x32B0
     soAnimCmdAddressPackArraySeparate m_animCmdPack0;               // 0x32C0
@@ -187,6 +317,10 @@ public:
     soAnimCmdAddressPackArraySeparate m_animCmdPack2;               // 0x3318
     soArrayContractibleTable<soCollisionHitStatus> m_hitStatusTable; // 0x3334
 
+#ifdef WN_PIKMIN_FULL_BUILDER
+    wnPikminPikmin(s32 articleId, const wnArticleBuildInfo& info, const wnPikminPikminData* data);
+    virtual ~wnPikminPikmin() { }
+#endif
     void activate(float lr, float unk2, float unk3, int unk18, Vec3f* pos, int founderTaskId, int resourceId, int team,
                   int initStatus, bool unk10, int unk11);
     virtual void onDeactivate();

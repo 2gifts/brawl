@@ -15,6 +15,13 @@ public:
     static void addSpeed(float* speed, void* pools, soModuleAccesser* moduleAccesser);
     static void addSpeedOutside(int type, float* speed, void* pools, soModuleAccesser* moduleAccesser);
     static void changeKinetic(int mode, void* pools, soModuleAccesser* moduleAccesser);
+    // The mediator hands the speed over untyped.
+    static void addSpeed(void* speed, void* pools, soModuleAccesser* moduleAccesser) {
+        addSpeed(static_cast<float*>(speed), pools, moduleAccesser);
+    }
+    static void addSpeedOutside(int type, void* speed, void* pools, soModuleAccesser* moduleAccesser) {
+        addSpeedOutside(type, static_cast<float*>(speed), pools, moduleAccesser);
+    }
 
     void changeKineticSub(void* pools, soModuleAccesser* moduleAccesser);
     void changeKineticSub1(void* pools, soModuleAccesser* moduleAccesser);
