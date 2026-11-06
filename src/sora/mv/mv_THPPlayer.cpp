@@ -206,7 +206,7 @@ void FreeTHPPlayerWork() {
     lbl_805A01F8[0].unk0 = 0;
 }
 
-u8 THPPlayerGetState() {
+s32 THPPlayerGetState() {
     return g_thpObject.unkA4;
 }
 

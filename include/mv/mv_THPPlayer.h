@@ -108,7 +108,7 @@ void THPPlayerGetStreamAXPB(_AXVPB** right, _AXVPB** left);
 
 u32 GetSizeTHPPlayerWork();
 void FreeTHPPlayerWork();
-u8 THPPlayerGetState();
+s32 THPPlayerGetState();
 BOOL THPPlayerClose();
 BOOL THPPlayerPause();
 BOOL THPPlayerPlay();
