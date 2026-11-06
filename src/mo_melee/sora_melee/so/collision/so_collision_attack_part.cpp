@@ -62,3 +62,25 @@ void soCollisionAttackPart::set(newCollision* collision) {
     collision->m_targets = &m_clTargetArrayVector;
     collision->m_isInfinite = false;
 }
+
+clTarget::clTarget() { m_4 = -1; m_0 = -1; }
+clTarget::~clTarget() { }
+
+template class soArrayVector<clTarget, 7>;
+template class soArrayVectorAbstract<clTarget>;
+
+soCollisionAttackPart::~soCollisionAttackPart() { }
+
+
+soCollisionAttackPart::soCollisionAttackPart(soCollision::Category category, bool isTeam) : m_status(Status_Inactive), m_attackData(), m_clTargetArrayVector(isTeam == true ? 7 : 6, 0) {
+    clTarget& t0 = m_clTargetArrayVector.at(0);
+    t0.m_0 = 1;
+    clTarget& t1 = m_clTargetArrayVector.at(1);
+    t1.m_0 = 1 << category;
+    clTarget& t2 = m_clTargetArrayVector.at(2);
+    t2.m_0 = 0;
+    m_attackData.m_size = -1.0f;
+    if (isTeam == true) {
+        m_clTargetArrayVector.at(6).m_4 = 1;
+    }
+}
