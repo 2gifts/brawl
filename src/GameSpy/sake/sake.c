@@ -172,3 +172,73 @@ int fn_8038E370(SAKERequest request) {
     }
     return result;
 }
+
+int sakeGetStartRequestResult(SAKE sake) {
+    return sake->mStartRequestResult;
+}
+
+void sakeSetGame(SAKE sake, const char* gameName, int gameId, const char* secretKey) {
+    strcpy(sake->mGameName, gameName);
+    strcpy(sake->mSecretKey, secretKey);
+    sake->mGameId = gameId;
+    sake->mIsGameAuthenticated = 1;
+}
+
+// HYPOTHESIS: input layouts follow the GameSpy SDK's create, update and delete record inputs.
+typedef struct CreateRecordInput {
+    const char* mTableId;
+    void* mFields;
+    int mNumFields;
+} CreateRecordInput;
+
+typedef struct UpdateRecordInput {
+    const char* mTableId;
+    int mRecordId;
+    void* mFields;
+    int mNumFields;
+} UpdateRecordInput;
+
+typedef struct DeleteRecordInput {
+    const char* mTableId;
+    int mRecordId;
+} DeleteRecordInput;
+
+int sakeiCreateRecordFillSoapRequest(SAKERequest request) {
+    CreateRecordInput* input = (CreateRecordInput*)request->mInput;
+
+    fn_803646CC(request->mSoapRequest, lbl_8059FC00, lbl_8059FC20, input->mTableId);
+    sakeiFillSoapRequestFieldValues(request, input->mFields, input->mNumFields);
+    return 0;
+}
+
+int sakeiUpdateRecordValidateInput(SAKERequest request) {
+    UpdateRecordInput* input = (UpdateRecordInput*)request->mInput;
+
+    if (input->mTableId == NULL) {
+        return 4;
+    }
+    if (input->mNumFields <= 0) {
+        return 6;
+    }
+    if (input->mFields != NULL) {
+        return sakeiValidateRequestFields(input->mFields, input->mNumFields);
+    }
+    return 5;
+}
+
+int sakeiUpdateRecordFillSoapRequest(SAKERequest request) {
+    UpdateRecordInput* input = (UpdateRecordInput*)request->mInput;
+
+    fn_803646CC(request->mSoapRequest, lbl_8059FC00, lbl_8059FC20, input->mTableId);
+    fn_80365548(request->mSoapRequest, lbl_8059FC00, lbl_80491088, input->mRecordId);
+    sakeiFillSoapRequestFieldValues(request, input->mFields, input->mNumFields);
+    return 0;
+}
+
+int sakeiDeleteRecordFillSoapRequest(SAKERequest request) {
+    DeleteRecordInput* input = (DeleteRecordInput*)request->mInput;
+
+    fn_803646CC(request->mSoapRequest, lbl_8059FC00, lbl_8059FC20, input->mTableId);
+    fn_80365548(request->mSoapRequest, lbl_8059FC00, lbl_80491088, input->mRecordId);
+    return 0;
+}

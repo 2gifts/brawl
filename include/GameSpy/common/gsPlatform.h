@@ -13,6 +13,8 @@ extern "C" {
 
 // The SO calls as this build links them. OpenRVL's SOBasic.h declares a
 // SOSendTo with an extra length argument, so the wrappers use these instead.
+int SOConnect(int s, const void* to);
+int SOGetSockOpt(int s, int level, int optname, void* optval, int* optlen);
 int SOSocket(int domain, int type, int protocol);
 int SOClose(int s);
 int SOListen(int s, int backlog);
@@ -75,6 +77,13 @@ typedef struct GSIThreadID {
     GSIThread mThread;  // 0x10
 } GSIThreadID;
 
+// HYPOTHESIS: the base64 encode stream starts with three words.
+typedef struct B64StreamData {
+    int unk0;
+    int unk4;
+    int unk8;
+} B64StreamData;
+
 int socket(int domain, int type, int protocol);
 int closesocket(int s);
 int shutdown(int s, int how);                 // shutdown
@@ -84,16 +93,24 @@ int listen(int s, int backlog);
 int recv(int s, char* buf, int len, int flags);
 int send(int s, const char* buf, int len, int flags);
 int sendto(int s, const char* buf, int len, int flags, const void* to, int tolen);
+u32 inet_addr(const char* name);
+int connect(int s, const void* to, int tolen);
+int GetReceiveBufferSize(int sock);
+int GetSendBufferSize(int sock);
+char* goastrdup(const char* str);
+char* _strlwr(char* str);
+void B64InitEncodeStream(B64StreamData* stream, int data, int length, int type);
 int GOAGetLastError(int s);                          // GOAGetLastError
 int fn_8035C660(int s, int* readFlag, int* writeFlag, int* exceptFlag);  // GSISocketSelect
 int CanReceiveOnSocket(int sock);
 int CanSendOnSocket(int sock);
-u32 fn_8035D1B8(u32* value);                     // gsiInterlockedIncrement
-void fn_8035D258(s64* t);                        // time
+u32 gsiInterlockedIncrement(u32* value);
+s32 gsiInterlockedDecrement(s32* value);
+void gsiTimeInSec(s64* t);
 int fn_8035D560(GSIThreadID* thread);            // gsiCleanupThread
 u32 current_time(void);                           // current_time
-void fn_8035D774(u32 msec);                      // msleep
-void fn_8035DA18(int seed);                      // Util_RandSeed
+void msleep(u32 msec);
+void Util_RandSeed(int seed);
 void gsiMemoryCallbacksSet(gsMallocCB p_malloc, gsFreeCB p_free, gsReallocCB p_realloc, gsMemalignCB p_memalign);  // gsiMemoryCallbacksSet
 void* gsimalloc(u32 size);                     // gsimalloc
 void* gsirealloc(void* ptr, u32 size);          // gsirealloc

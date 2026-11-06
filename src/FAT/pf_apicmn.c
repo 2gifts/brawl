@@ -74,7 +74,7 @@ int fn_803EB708(PF2_FILE* file, s32 offset, s32 origin) {
 }
 
 int fn_803EB7A0(FAEntryInfo* dta) {
-    return PFAPI_convertReturnValue(fn_803DC120(dta));
+    return PFAPI_convertReturnValue(PFDIR_fsnext((PF2_DTA*)dta));
 }
 
 u32 fn_803EB824(void* buf, u32 size, u32 count, PF2_FILE* file) {
