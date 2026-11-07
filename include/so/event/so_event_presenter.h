@@ -25,7 +25,12 @@ class soEventObserver {
     }
 
 public:
+#ifdef SO_EFFECT_OBSERVER_ADD_EXTERN
+    // BYTES: soEffectModuleImpl emits the shield-observer base addObserver out of line.
+    virtual void addObserver(s16 param1, s8 param2);
+#else
     virtual void addObserver(s16 param1, s8 param2) { }
+#endif
     s16 m_manageID;
     s16 m_unitID;
     s16 m_sendID;

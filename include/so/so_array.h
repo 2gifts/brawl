@@ -46,7 +46,12 @@ public:
     virtual const T& at(s32 index) const = 0;
     virtual s32 size() const = 0;
     virtual bool isEmpty() const { return this->size() == 0; }
+#ifdef SO_EFFECT_ARRAY_DTOR_EXTERN
+    // BYTES: soEffectModuleImpl emits this destructor out of line and still inlines it into the list destructor.
+    virtual ~soArrayFixed();
+#else
     virtual ~soArrayFixed() { };
+#endif
 };
 
 template<typename T>
@@ -68,7 +73,10 @@ public:
 template <class T>
 class soArrayContractible : public soArrayFixed<T> {
 public:
-#ifdef SO_ARRAY_CONTRACTIBLE_DTORS_NOINLINE
+#ifdef SO_EFFECT_ARRAY_DTOR_EXTERN
+    // BYTES: soEffectModuleImpl emits this destructor out of line and still inlines it into the list destructor.
+    virtual ~soArrayContractible();
+#elif defined(SO_ARRAY_CONTRACTIBLE_DTORS_NOINLINE)
     // BYTES: preserve the native out-of-line teardown chain in the owning unit.
     virtual ~soArrayContractible() __attribute__((never_inline)) { }
 #else
@@ -207,7 +215,12 @@ public:
 template <class T>
 class soArray : public soArrayContractible<T> {
 public:
+#ifdef SO_EFFECT_ARRAY_DTOR_EXTERN
+    // BYTES: soEffectModuleImpl emits this destructor out of line and still inlines it into the list destructor.
+    virtual ~soArray();
+#else
     virtual ~soArray() {};
+#endif
 
     virtual void unshift(const T&) = 0;
     virtual void push(const T&) = 0;
@@ -296,7 +309,12 @@ struct soArrayListUnit {
 
     static const s32 End = -1;
 
+#ifdef SO_EFFECT_LIST_UNIT_CTOR_EXTERN
+    // BYTES: soEffectModuleImpl emits the list-unit constructor out of line.
+    soArrayListUnit();
+#else
     soArrayListUnit() : m_inUse(false), m_prev(End), m_next(End) { }
+#endif
     ~soArrayListUnit() { }
 
     void setNext(IndexTy n) { m_next = n; }
@@ -309,7 +327,10 @@ public:
     virtual bool hasNext() const = 0;
     virtual bool isEnd() const = 0;
     virtual T& getCurrent() const = 0;
-#ifdef SO_ARRAY_LIST_CTOR_FLAG
+#ifdef SO_EFFECT_ENUMERATOR_DTOR
+    // BYTES: soEffectModuleImpl emits an empty enumerator destructor and inlines it into the derived one.
+    virtual ~soEnumerator() { }
+#elif defined(SO_ARRAY_LIST_CTOR_FLAG)
     // BYTES: the Pikmin troops manager unit emits the enumerator base destructor and calls it out of line.
     virtual ~soEnumerator() __attribute__((never_inline)) = 0;
 #else
@@ -484,9 +505,16 @@ public:
     virtual void set(s32 pos, const T& elm, s32 count);
 
     // TODO: check implicit generation by <wnPikminPikmin*, 10> for these two
+#ifdef SO_EFFECT_ENUMERATOR_OUT_OF_LINE
+    // BYTES: soEffectModuleImpl calls this out of line (removeCommonPreserver).
+    soArrayListEnumerator<T, IndexTy> getEnumerator() __attribute__((never_inline)) {
+        return soArrayListEnumerator<T, IndexTy>(m_units, m_topIndex);
+    }
+#else
     soArrayListEnumerator<T, IndexTy> getEnumerator() {
         return soArrayListEnumerator<T, IndexTy>(m_units, m_topIndex);
     }
+#endif
 
     // Erase the element at position enm.getNext()
 #ifdef SO_ARRAY_LIST_CTOR_FLAG
