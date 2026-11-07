@@ -273,6 +273,13 @@ extern char lbl_27_bss_DBC[];  // null motion anim obj cache module
 // empty and get no manage id).
 ////////////////////////////////////////
 
+#ifdef WN_INSIDE_EVENT_NULL_TAIL
+// HYPOTHESIS: the three zero-capacity units are built by the shared one-instruction constructors.
+extern "C" void fn_27_1E1070(void* unit, int unused, int eventId);
+extern "C" void fn_27_1E1074(void* unit, int unused, int eventId);
+extern "C" void fn_27_1E1078(void* unit, int unused, int eventId);
+#endif
+
 template <typename B>
 class soInsideEventManageModuleBuilder<B, wnInsideEventManageModuleTypes> {
     typedef wnInsideEventManageModuleTypes T;
@@ -296,7 +303,13 @@ public:
         m_collisionAbsorber(m_module.getManageId(), B::CollisionAbsorberEvtId),
         m_collisionSearch(m_module.getManageId(), B::CollisionSearchEvtId),
         m_itemManage(m_module.getManageId(), B::ItemManageEvtId),
-        m_motion(m_module.getManageId(), B::MotionEvtId) { }
+        m_motion(m_module.getManageId(), B::MotionEvtId) {
+#ifdef WN_INSIDE_EVENT_NULL_TAIL
+        fn_27_1E1070(&m_gimmick, -1, B::GimmickEvtId);
+        fn_27_1E1074(&m_turn, -1, B::TurnEvtId);
+        fn_27_1E1078(&m_collisionCatch, -1, B::CollisionCatchEvtId);
+#endif
+    }
     ~soInsideEventManageModuleBuilder() { }
     soEventManageModuleImpl* getModule() { return &m_module; }
 };
@@ -1054,7 +1067,11 @@ class wnAnimCmdModuleSubBuilder {
     soAnimCmdControlUnitBuilderNull<void> m_unit5;
 #endif
 public:
-    wnAnimCmdModuleSubBuilder(soModuleAccesser* acc, const soModuleAccesserBuildData& bd) :
+    wnAnimCmdModuleSubBuilder(soModuleAccesser* acc, const soModuleAccesserBuildData& bd)
+#ifdef WN_ACCESSER_CTOR_INLINE
+        __attribute__((always_inline))
+#endif
+        :
         m_unit0(acc, bd.getAnimCmdData(0, 0), bd.getAnimCmdData(0, 1), bd.getAnimCmdData(0, 2)),
         m_unit1(acc, bd.getAnimCmdData(1, 0), bd.getAnimCmdData(1, 1), bd.getAnimCmdData(1, 2)),
         m_unit2(acc, bd.getAnimCmdData(2, 0), bd.getAnimCmdData(2, 1), bd.getAnimCmdData(2, 2)),
@@ -1236,7 +1253,11 @@ template <class BC>
 class wnModuleAccesserBuilder : public soModuleAccesserBuilder<BC> {
     wnAnimCmdModuleSubBuilder<typename BC::AnimCmdModuleSubBuildConfig> m_animCmdSubBuilder;
 public:
-    wnModuleAccesserBuilder(StageObject* owner, const wnModuleAccesserBuildData& bd) :
+    wnModuleAccesserBuilder(StageObject* owner, const wnModuleAccesserBuildData& bd)
+#ifdef WN_ACCESSER_CTOR_INLINE
+        __attribute__((always_inline))
+#endif
+        :
         soModuleAccesserBuilder<BC>(owner, bd), m_animCmdSubBuilder(&this->m_moduleAccsr, bd) { }
     ~wnModuleAccesserBuilder() { }
 };

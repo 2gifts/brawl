@@ -20,17 +20,47 @@ class soEventObserverRegistrationDesc;
     }
 
 FT_OPAQUE_STRUCT(soPartialAnim, 0x48);
+#ifdef SO_OTHER_ANIM_CTOR
+class soOtherAnim {
+    u8 m_opaque[0x28];
+public:
+    soOtherAnim();
+    virtual ~soOtherAnim();
+};
+static_assert(sizeof(soOtherAnim) == 0x2C, "soOtherAnim");
+#else
 FT_OPAQUE_STRUCT(soOtherAnim, 0x2C);
+#endif
 FT_OPAQUE_STRUCT(soTransitionTermPack, 0x14);
 FT_OPAQUE_STRUCT(soMotionAnimObjCacheUnitChrRes, 0x8);
 
 
+#ifdef SO_SHAKE_TERM_CTOR
+class soShakeTerm {
+    u8 m_opaque[0x18];
+public:
+    soShakeTerm();
+    virtual ~soShakeTerm();
+};
+static_assert(sizeof(soShakeTerm) == 0x1C, "soShakeTerm");
+#else
 FT_OPAQUE_STRUCT(soShakeTerm, 0x1C);
+#endif
 #ifndef SO_CONTROLLER_CLATTER_DEFINED
 #define SO_CONTROLLER_CLATTER_DEFINED
 FT_OPAQUE_STRUCT(soControllerClatter, 0x14);
 #endif
+#ifdef SO_EFFECT_CONTINUAL_CTOR
+class soEffectContinual {
+    u8 m_opaque[0x28];
+public:
+    soEffectContinual();
+    virtual ~soEffectContinual();
+};
+static_assert(sizeof(soEffectContinual) == 0x2C, "soEffectContinual");
+#else
 FT_OPAQUE_STRUCT(soEffectContinual, 0x2C);
+#endif
 FT_OPAQUE_STRUCT(soEffectTime, 0xC);
 FT_OPAQUE_STRUCT(soPhysicsIKHandle, 0x38);
 

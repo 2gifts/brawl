@@ -391,6 +391,9 @@ struct soCollisionAttackAbsolute {
 #ifdef YK_STAGE_INLINE // emitted inline in the stage RELs (default element of soArrayNull<soCollisionAttackAbsolute>)
     soCollisionAttackAbsolute() : m_attackData() { }
     ~soCollisionAttackAbsolute() { }
+#elif defined(WN_ATTACK_ABSOLUTE_DTOR_INLINE)
+    soCollisionAttackAbsolute() : m_attackData() { }
+    ~soCollisionAttackAbsolute() { }
 #elif defined(WN_WEAPON_BUILDER) // the article RELs inline the constructor and call the (weak) destructor
     soCollisionAttackAbsolute() : m_attackData() { }
     ~soCollisionAttackAbsolute() __attribute__((never_inline)) { }
