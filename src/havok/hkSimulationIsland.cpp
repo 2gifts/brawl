@@ -24,7 +24,7 @@
 // The agent track takes its sizes from the world's collision dispatcher. HYPOTHESIS: the meaning of the scalar
 // fields (only their initial values are known).
 hkSimulationIsland::hkSimulationIsland(hkWorld* world)
-    : m_world(world), m_dirtyListIndex(0xFFFF), m_unk24(0), m_unk25(0), m_unk28(-47), m_unk2C(0),
+    : m_world(world), m_dirtyListIndex(0xFFFF), m_unk24(0), m_unk25(0),
       m_unk30(0.0f), m_unk34(0.0f),
       m_agentTrack(world->m_collisionDispatcher->m_agentEntrySize, world->m_collisionDispatcher->m_agentSectorSize) {
     m_unk6C = -10.0f;

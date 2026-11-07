@@ -5,6 +5,7 @@
 #include <havok/hkConstraintData.h>
 #include <havok/hkAgentNnMachine.h>
 #include <havok/hkMemory.h>
+#include <havok/hkMultiThreadLock.h>
 
 struct hkEntity;
 struct hkWorld;
@@ -61,8 +62,7 @@ struct hkSimulationIsland : hkConstraintOwner {
     u8 m_unk25;                      // 0x25
     hkSimulationIslandFlags m_flags;     // 0x26 bit fields, see above
     hkSimulationIslandFlags27 m_flags27; // 0x27
-    int m_unk28;                     // 0x28 (-47 from the constructor)
-    u16 m_unk2C;                     // 0x2C
+    hkMultiThreadLock m_multithreadLock; // 0x28
     float m_unk30;                   // 0x30
     float m_unk34;                   // 0x34
     hkInplaceArray<hkEntity*, 1> m_entities; // 0x38 (inline storage at 0x44)
