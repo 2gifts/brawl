@@ -71,9 +71,10 @@ public:
         _unk08 = 0;
     }
     soTransitionInfo() {
-#if (defined(FT_MARTH_RUNTIME_HELPERS) || defined(WN_TRANSITION_CTOR_INLINE)) && !defined(WN_MARIO_FIREBALL_UNIT)
+#if (defined(FT_MARTH_RUNTIME_HELPERS) || defined(WN_TRANSITION_CTOR_INLINE)) && !defined(WN_TRANSITION_INFO_BARE) && !defined(WN_MARIO_FIREBALL_UNIT)
         // MATCH-ONLY: retain the native zeroed temporary before the field stores (Marth, and the articles that expand the
-        // transition module constructor in their own constructor).
+        // transition module constructor in their own constructor). WN_TRANSITION_INFO_BARE is the articles whose
+        // expanded constructor stores the three fields and nothing else.
         volatile u32 initialReturnWord = 0;
 #endif
         m_groupId = -1;
@@ -147,9 +148,7 @@ public:
 
 #ifdef FT_MODULE_BUILDER
     // constructor / destructor live in sora_melee
-#ifdef WN_MARIO_FIREBALL_UNIT
     soTransitionTermGroup();
-#endif
     soTransitionTermGroup(soArray<soInstanceUnitFullProperty<soTransitionTerm> >* terms);
     ~soTransitionTermGroup();
 #endif

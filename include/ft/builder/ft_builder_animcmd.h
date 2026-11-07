@@ -209,11 +209,33 @@ class soAnimCmdControlUnitBuilder {
     soAnimCmdAddressPackArraySeparate m_pack;                                                               // +0xC0
     soAnimCmdInterpreter m_interpreter;                                                                     // +0xDC
 public:
-    soAnimCmdControlUnitBuilder(soModuleAccesser* acc, void* data0, void* data1, void* data2) :
+    soAnimCmdControlUnitBuilder(soModuleAccesser* acc, void* data0, void* data1, void* data2
+#ifdef WN_ANIMCMD_UNIT_FLOAT_ARG
+                                ,
+                                float step = 1.0f
+#endif
+                                )
+#ifdef WN_ANIMCMD_UNIT_CTOR_OUTLINE
+        __attribute__((never_inline))
+#endif
+        :
         m_table((const acAnimCmdConv**)data0, BC::Capacity),
         m_stack(),
         m_pack(&m_table.m_member, (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull, (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull),
-        m_interpreter(ftGetManageId(acc), (soArrayVector<acCmdInterpreterStackData, 8>*)&m_stack.m_array, BC::UnitId, BC::InterpMode, 1.0f, ftAddressOf((u8)0)) {
+        m_interpreter(ftGetManageId(acc),
+#ifdef WN_ANIMCMD_STACK_PTR
+                      // MATCH-ONLY: a pointer return stays in a callee-saved register across getManageId.
+                      m_stack.get(),
+#else
+                      (soArrayVector<acCmdInterpreterStackData, 8>*)&m_stack.m_array,
+#endif
+                      BC::UnitId, BC::InterpMode,
+#ifdef WN_ANIMCMD_UNIT_FLOAT_ARG
+                      step,
+#else
+                      1.0f,
+#endif
+                      ftAddressOf((u8)0)) {
         soAttributeFlag attr(BC::AttrMask);
         soAnimCmdControlUnit unit = { &m_interpreter, &m_pack };
         acc->getAnimCmdModule().registInterpreter(unit, attr);
@@ -234,7 +256,16 @@ class soAnimCmdControlUnitBuilderUniq {
     soAnimCmdInterpreter m_interpreter;                                                                     // +0
     soArraySelectHolder<1, soArrayVector<acCmdInterpreterStackData, BC::StackCapacity>, soSingletonHolder<soArrayNull<acCmdInterpreterStackData> > > m_stack; // +0x50
 public:
-    soAnimCmdControlUnitBuilderUniq(soModuleAccesser* acc) :
+    soAnimCmdControlUnitBuilderUniq(soModuleAccesser* acc
+#ifdef WN_ANIMCMD_UNIT_FLOAT_ARG
+                                    ,
+                                    void* = 0, void* = 0, void* = 0, float = 1.0f
+#endif
+                                    )
+#ifdef WN_ANIMCMD_UNIT_CTOR_OUTLINE
+        __attribute__((never_inline))
+#endif
+        :
         m_interpreter(ftGetManageId(acc), (soArrayVector<acCmdInterpreterStackData, 8>*)&m_stack.m_array, BC::UnitId, 1, 1.0f, ftAddressOf((u8)1)),
         m_stack() {
         soAttributeFlag attr(4);
