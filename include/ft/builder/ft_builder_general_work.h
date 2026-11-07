@@ -21,7 +21,11 @@ class soGeneralWorkBuilder {
     u32 m_flags[BC::FlagCap];
     typename BC::ModuleType m_module;
 public:
-    soGeneralWorkBuilder() : m_module(m_ints, BC::IntCap, m_floats, BC::FloatCap, m_flags, BC::FlagCap) {
+    soGeneralWorkBuilder()
+#ifdef WN_SIMPLE_UNIT
+        __attribute__((never_inline))
+#endif
+        : m_module(m_ints, BC::IntCap, m_floats, BC::FloatCap, m_flags, BC::FlagCap) {
         soGeneralWorkAbstract* work = &m_module;
         work->clearWorkAll();
     }
