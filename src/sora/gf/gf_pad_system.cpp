@@ -122,7 +122,13 @@ struct KpadStatusRaw {
     };
 };
 
-class Network;
+class Network {
+public:
+    static void alarmCallback(Network* network);
+
+    // Only the object's address is used here; a full-size object stays out of small data.
+    char m_storage[0x10];
+};
 extern Network g_Network;
 
 // Unnamed SDK functions (PAD / WPAD / KPAD) and Brawl helpers
@@ -145,7 +151,6 @@ void fn_802162A4(int, int);
 void WPADControlMotor(int, int);
 void fn_80228138(int);
 void fn_80228154(int);
-void fn_80146B80(Network*);
 void WPADDisconnect(int);
 int WPADStartSimpleSync();
 void WPADSetSimpleSyncCallback(void (*)(int));
@@ -323,7 +328,7 @@ void gfPadSystem::_alarmCallback(OSAlarm* alarm, OSContext* ctx) {
         thread->resume();
     }
     if (&g_Network) {
-        fn_80146B80(&g_Network);
+        Network::alarmCallback(&g_Network);
     }
 }
 
