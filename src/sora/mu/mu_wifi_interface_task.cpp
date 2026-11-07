@@ -72,7 +72,7 @@ void netReport(const char* fmt, ...) {
 
 // Function bodies below are taken from https://github.com/jj-link/brawl.
 
-extern "C" s32 fn_800C9A4C(u32 arg0) {
+s32 muWifiInterfaceTask::exchangeDWCErrorCode(u32 arg0) {
     if ((arg0 >= 0x4E86U && arg0 <= 0x4E8DU) || (arg0 >= 0x4E8FU && arg0 <= 0x5207U)) {
         return 1;
     }
@@ -1064,9 +1064,6 @@ u8 muWifiInterfaceTask::getFreeCharColor(int character, int count) {
     return 0;
 }
 
-// muWifiInterfaceTask::exchangeDWCErrorCode (the map name); src/sora/mu/mu_wifi_interface_task.cpp calls it by this stand-in name.
-extern "C" s32 fn_800C9A4C(u32 arg0);
-
 extern s32 lbl_805A03F0;
 
 int muWifiInterfaceTask::_getNetworkError(int* code) {
@@ -1083,14 +1080,14 @@ int muWifiInterfaceTask::_getNetworkError(int* code) {
     }
     if (error == 1) {
         *code = lbl_805A03F0;
-        return fn_800C9A4C(*code);
+        return exchangeDWCErrorCode(*code);
     }
     if (!unkFCB_b7) {
         NtBase::setMatchingStatus(10);
     }
     if (error == 7) {
         *code = lbl_805A03F0;
-        return fn_800C9A4C(*code);
+        return exchangeDWCErrorCode(*code);
     }
     switch (error) {
     case 2:
