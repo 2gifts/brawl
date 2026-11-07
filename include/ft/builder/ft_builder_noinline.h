@@ -17,6 +17,9 @@ soTransitionModuleImpl::soTransitionModuleImpl(soArray<soTransitionTermGroup>* g
 
 // MATCH-ONLY: the original REL emits the vtables of these observers (their addObserver is a REL function); the code that
 // needs them is not reconstructed yet, so keep them alive with a dummy user.
+#ifdef FT_OBSERVER_VTABLE_ANCHOR_WEAK
+__declspec(weak)
+#endif
 void ftKeepObserverVtables(s16 id) {
     soAnimCmdEventObserver animCmd(id);
     soSituationEventObserver situation(id);
