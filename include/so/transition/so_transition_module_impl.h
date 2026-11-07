@@ -71,7 +71,7 @@ public:
         _unk08 = 0;
     }
     soTransitionInfo() {
-#if defined(FT_MARTH_RUNTIME_HELPERS) || defined(WN_TRANSITION_CTOR_INLINE)
+#if (defined(FT_MARTH_RUNTIME_HELPERS) || defined(WN_TRANSITION_CTOR_INLINE)) && !defined(WN_MARIO_FIREBALL_UNIT)
         // MATCH-ONLY: retain the native zeroed temporary before the field stores (Marth, and the articles that expand the
         // transition module constructor in their own constructor).
         volatile u32 initialReturnWord = 0;
@@ -82,6 +82,8 @@ public:
     }
 #ifdef SO_BUILDER_HELPERS_WEAK
     ~soTransitionInfo() __attribute__((never_inline)) { } // BYTES: a weak copy of the Enemy unit
+#elif defined(WN_MARIO_FIREBALL_UNIT)
+    ~soTransitionInfo() { }
 #else
     ~soTransitionInfo(); // BYTES: out of line in the fighter RELs (ft_builder_noinline.h)
 #endif
@@ -145,6 +147,9 @@ public:
 
 #ifdef FT_MODULE_BUILDER
     // constructor / destructor live in sora_melee
+#ifdef WN_MARIO_FIREBALL_UNIT
+    soTransitionTermGroup();
+#endif
     soTransitionTermGroup(soArray<soInstanceUnitFullProperty<soTransitionTerm> >* terms);
     ~soTransitionTermGroup();
 #endif

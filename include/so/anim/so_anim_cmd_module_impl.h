@@ -53,7 +53,11 @@ public:
 
     soAnimCmdInterpreter(s16 manageId, soArrayVector<acCmdInterpreterStackData, 8>* stack, int kind, int mode, float fixedTimeStep, const u8* resetMode) :
         acCmdInterpreter(stack, mode, nullptr, resetMode, fixedTimeStep),
+#ifdef WN_MARIO_FIREBALL_UNIT
+        soEventPresenter<soAnimCmdEventObserver>(manageId, 5),
+#else
         soEventPresenter<soAnimCmdEventObserver>(manageId, 5, soEventPresenterLocalStore),
+#endif
         m_kind(kind), m_moduleAccesser(nullptr), unk48(0), unk4C(0) { }
     ~soAnimCmdInterpreter() { }
     virtual bool dispatchCmdIf(const acAnimCmd* cmd);

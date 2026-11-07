@@ -18,8 +18,9 @@
 
 #include <ft/builder/ft_dol_instances.h>
 
-FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soAnimCmdControlUnit>, 11);
 typedef const acAnimCmdConv* acAnimCmdConvPtr;
+#ifndef WN_MARIO_FIREBALL_UNIT
+FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soAnimCmdControlUnit>, 11);
 FT_DOL_ARRAY_VECTOR(acAnimCmdConvPtr, 289);
 FT_DOL_ARRAY_VECTOR(acAnimCmdConvPtr, 288);
 FT_DOL_ARRAY_VECTOR(acCmdInterpreterStackData, 8);
@@ -96,6 +97,7 @@ public:
     virtual bool isFull() const;
     virtual void set(s32 startingIndex, const acAnimCmdConv* const& element, s32 numIndicesToSet);
 };
+#endif
 
 // Null objects of sora_melee used as the unused slots of the address packs.
 extern char g_soAnimCmdAddrArrayNull[];        // soArrayNull<const acAnimCmdConv*>
