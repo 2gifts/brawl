@@ -22,6 +22,7 @@
 extern "C" int exchangeMuSelchkindToMuCharKind__6muMenuFiii(int selchKind);
 extern "C" int isCharUsable__6muMenuFiii(int charKind);
 extern "C" int isCharRefered__6muMenuFiii(int charKind);
+extern "C" void setCharRefered__6muMenuFiii(int charKind);
 
 muSelCharCBCalcWorld::muSelCharCBCalcWorld() {
     m_calcWorldDone = false;
@@ -169,15 +170,21 @@ void muSelCharTask::eraseAllHighScore() {
     }
 }
 
+// Called out of line from the total high-score screen.
+#pragma dont_inline on
 void muSelCharTask::eraseHighScore(u32 msgIndex) {
     m_highScoreMsg->printf(msgIndex, "");
 }
+#pragma dont_inline reset
 
 // Takes the picture of one of the two characters of a pair off the high score.
+// Called out of line from the pair high-score screens.
+#pragma dont_inline on
 void muSelCharTask::eraseHighScorePairChar(int pairIdx) {
     static const int sPairCharObj[] = { 178, 179 };
     m_highScoreExpand->Remove(m_objs[sPairCharObj[pairIdx]]->m_sceneModel);
 }
+#pragma dont_inline reset
 
 void muSelCharTask::addObj(int obj) {
     m_scnGroup->Insert(m_scnGroup->sceneItemsCount, m_objs[obj]->m_sceneModel);
@@ -559,6 +566,8 @@ void muSelCharTask::dispHighScoreDiffLevel(int level) {
 
 extern char lbl_10_data_6E8[8];
 
+// Called out of line from the pair high-score screens.
+#pragma dont_inline on
 void muSelCharTask::setHighScoreStyle(int style) {
     MuObject* object;
     nw4r::g3d::ScnMdlExpand* expand = m_highScoreExpand;
@@ -571,6 +580,7 @@ void muSelCharTask::setHighScoreStyle(int style) {
         m_scnGroup->Insert(m_scnGroup->sceneItemsCount, expand);
     }
 }
+#pragma dont_inline reset
 
 void muSelCharTask::dispNumStock(int count, bool enabled) {
     int index;
@@ -1038,6 +1048,219 @@ offline:
     return false;
 online:
     return true;
+}
+
+// HYPOTHESIS: kind 4 keeps the stock in the three bits of the select data. Otherwise rule byte 2
+// chooses the stock count (1) or the time in minutes.
+void muSelCharTask::setRuleNumToGlobal() {
+    gmSelCharData* sel = g_GameGlobal->m_selCharData;
+    gmSetRule* rule = g_GameGlobal->m_setRule;
+    int type = sel->m_selCharType;
+    if (type == 4) {
+        sel->unk2E_b4 = m_ruleNumStock;
+        return;
+    }
+    int ruleKind = reinterpret_cast<u8*>(rule)[2];
+    if (ruleKind == 1) {
+        rule->m_stockCount = m_ruleNumStock;
+    } else {
+        rule->m_timeMinutes = unk5D8;
+    }
+}
+
+int muSelCharTask::isWifiGameMaster() {
+    u8 aid;
+    muWifiInterfaceTask& wifi = *g_muWifiInterfaceTask;
+    int master = wifi.unkFCA_b5;
+    if (!master) {
+        aid = Network::getMyAID();
+        if (aid == 0xFF) {
+            aid = 4;
+        }
+        u8 masterAid = wifi.getRuleMasterAID();
+        master = masterAid == aid;
+    }
+    return master;
+}
+
+extern const u8 lbl_10_rodata_2F4[16];
+void ScnObj_EnableCallbackTiming(nw4r::g3d::ScnObj* obj, u32 timing);
+void ScnObj_EnableCallbackExecOp(nw4r::g3d::ScnObj* obj, u32 op);
+
+// Puts the world-matrix callback in front of the callback on each listed model.
+void muSelCharTask::bindCalcWorldFlag() {
+    nw4r::g3d::ScnMdl* model;
+    for (int index = 0; index < 15; ++index) {
+        int obj;
+        if (index >= 0 && index < 15) {
+            obj = lbl_10_rodata_2F4[index];
+        } else {
+            obj = Obj_Num;
+        }
+        MuObject* object = m_objs[obj];
+        if (object) {
+            model = object->getSceneModel();
+            m_calcWorldCBs[index].m_next = model->m_callback;
+            model->m_callback = &m_calcWorldCBs[index];
+            ScnObj_EnableCallbackExecOp(model, 4);
+            ScnObj_EnableCallbackTiming(model, 1);
+        }
+    }
+}
+
+int muSelCharTask::dispTargetTotalHighScore() {
+    int style = 1;
+    int index = 0;
+    int allClear = 0;
+    do {
+        if (isCharHighScoreCleared(index) == 0) {
+            break;
+        }
+        index++;
+    } while (index < 0x23);
+    if (index >= 0x23) {
+        allClear = 1;
+    }
+    if (allClear != 0) {
+        style = 2;
+    }
+    setHighScoreStyle(style);
+    if (allClear != 0) {
+        int sum = 0;
+        for (int c = 0; c < 0x23; c++) {
+            sum += getCharHighScore(c, m_difficulty, 0, 0);
+        }
+        dispHighScore(3, sum, 1);
+    } else {
+        eraseHighScore(3);
+    }
+    return allClear;
+}
+
+// HYPOTHESIS: byte flag, then each character as a word and its color as a byte.
+struct muSelCharScorePair {
+    u8 m_valid;
+    char _pad1[3];
+    int m_charKind0;
+    u8 m_color0;
+    char _pad2[3];
+    int m_charKind1;
+    u8 m_color1;
+};
+
+void muSelCharTask::dispOnlinePairHighScore() {
+    setHighScoreStyle(3);
+    muSelCharScorePair chars;
+    int style;
+    int level;
+    int score = getOnlinePairHighScore(&style, &level, &chars);
+    dispHighScore(4, score, style);
+    dispHighScoreDiffLevel(level);
+    int valid = chars.m_valid;
+    if (valid != 0) {
+        dispHighScorePairChar(0, chars.m_charKind0, chars.m_color0);
+        dispHighScorePairChar(1, chars.m_charKind1, chars.m_color1);
+    } else {
+        eraseHighScorePairChar(0);
+        eraseHighScorePairChar(1);
+    }
+}
+
+void muSelCharTask::dispPairHighScore() {
+    setHighScoreStyle(3);
+    muSelCharScorePair chars;
+    int style;
+    int level;
+    int score = getPairHighScore(m_difficulty, &style, &level, &chars);
+    dispHighScore(4, score, style);
+    int valid = chars.m_valid;
+    if (valid != 0) {
+        dispHighScorePairChar(0, chars.m_charKind0, chars.m_color0);
+        dispHighScorePairChar(1, chars.m_charKind1, chars.m_color1);
+    } else {
+        eraseHighScorePairChar(0);
+        eraseHighScorePairChar(1);
+    }
+    if (getSelCharType() != 7) {
+        dispHighScoreDiffLevel(level);
+    }
+}
+
+// Marks a character as seen and takes the "not seen" picture off its icon.
+void muSelCharTask::setReferFlag(int selchKind) {
+    int referred = isCharRefered__6muMenuFiii(exchangeMuSelchkindToMuCharKind__6muMenuFiii(selchKind));
+    int state = 1;
+    if (referred != 0) {
+        state = 2;
+    }
+    if (state != 2) {
+        setCharRefered__6muMenuFiii(exchangeMuSelchkindToMuCharKind__6muMenuFiii(selchKind));
+        int idx = getCharListIdx(selchKind);
+        // HYPOTHESIS: 0x70 is the first "not seen" picture; expand 1 holds those pictures.
+        m_expands[1]->Remove(m_objs[idx + 0x70]->m_sceneModel);
+    }
+}
+
+bool muSelCharTask::closeWifiDlg() {
+    if (unk60C != nullptr) {
+        unk60C->exit();
+        unk60C = nullptr;
+        setRuleControlEnable(1);
+        if (m_ruleTaskState == 0) {
+            for (int i = 0; i < m_numPlayerAreas; i++) {
+                m_selCharPlayerAreas[i]->m_selCharHand->setBanVisible(false);
+            }
+            for (int i = 0; i < m_numPlayerAreas; i++) {
+                m_selCharPlayerAreas[i]->m_selCharCoin->setBanVisible(false);
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+void muSelCharTask::faceIconMain() {
+    // BYTES: a cursor stepped by one pointer keeps the picture in r31 and the cursor in r30.
+    MuObject* icon;
+    muSelCharTask* cursor = this;
+    int i = 0;
+    while (i < m_charListNum) {
+        icon = cursor->m_objs[Obj_FaceBase];
+        if (icon->m_modelAnim->m_anmObjChrRes->GetUpdateRate() <= 0.0f) {
+            icon->m_scnMdl->SetPriorityDrawOpa(i + 0x17);
+            icon->m_scnMdl->SetPriorityDrawXlu(i + 0x17);
+        }
+        cursor = reinterpret_cast<muSelCharTask*>(reinterpret_cast<char*>(cursor) + 4);
+        i++;
+    }
+}
+
+sndSystem* sndSystem::getInstance() {
+    return g_sndSystem;
+}
+
+MuSelchkind muSelCharPlayerArea::getCharKind() {
+    return m_charKind;
+}
+
+int muSelCharPlayerArea::getDirRepeat() {
+    return m_menuController.m_trigger;
+}
+
+int gfPadStatus::isButtonAOn() {
+    return (m_buttonsCurrentFrame2.bits >> 8) & 1;
+}
+
+int gfPadStatus::isButtonAOnEdge() {
+    return (m_buttonsPressedThisFrame.bits >> 8) & 1;
+}
+
+int gfPadStatus::isButtonAOnRepeat() {
+    return (m_buttonsPressedThisFrame2.bits >> 8) & 1;
+}
+
+void muSelCharTask::removeCursor(MuObject* cursor) {
+    cursor->m_sceneModel->DetachFromParent();
 }
 
 void muSelCharTask::readyStateMain() {
