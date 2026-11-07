@@ -145,7 +145,6 @@ void fn_802162A4(int, int);
 void WPADControlMotor(int, int);
 void fn_80228138(int);
 void fn_80228154(int);
-void fn_80146B80(Network*);
 void WPADDisconnect(int);
 int WPADStartSimpleSync();
 void WPADSetSimpleSyncCallback(void (*)(int));
@@ -323,7 +322,7 @@ void gfPadSystem::_alarmCallback(OSAlarm* alarm, OSContext* ctx) {
         thread->resume();
     }
     if (&g_Network) {
-        fn_80146B80(&g_Network);
+        Network::alarmCallback(&g_Network);
     }
 }
 

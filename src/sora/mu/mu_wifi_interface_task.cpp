@@ -98,7 +98,6 @@ s32 muWifiInterfaceTask::exchangeDWCErrorCode(u32 arg0) {
 }
 
 extern "C" void fn_80146574(Network* network);
-extern "C" void fn_8014652C(Network* network);
 extern "C" void fn_800CCF30(muWifiInterfaceTask* self, int arg1, int arg2, int arg3, int arg4);
 extern "C" bool fn_8014592C(void* tr);
 extern "C" u64 fn_80052250();
@@ -153,7 +152,7 @@ bool muWifiInterfaceTask::disconnect() {
         return false;
     }
     netReport("muWifiInterfaceTask::disconnect\n");
-    fn_8014652C(&g_Network);
+    g_Network.shutdown();
     unk40 = 1;
     return true;
 }

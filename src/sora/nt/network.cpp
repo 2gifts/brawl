@@ -19,6 +19,7 @@ extern const char lbl_8045F280[];
 extern const char lbl_8045F490[];
 extern u8 lbl_805A0414;
 extern NtMatching* lbl_805A0434;
+extern u8 lbl_805A03E4;
 
 Network::~Network() {
 }
@@ -74,4 +75,16 @@ bool ntReturnStatusCallback::returnStatus() {
         network->unk14 = 2;
     }
     return true;
+}
+
+void Network::alarmCallback(Network* network) {
+    if (gUnk805a03d8 != 0 && lbl_805A03E4 == 1) {
+        OSResumeThread(&lbl_805A0434->unkA0);
+    }
+}
+
+void Network::shutdown() {
+    netReport("Network::shutdown\n");
+    gUnk805a03d8 = 7;
+    m_matching->shutdown();
 }
