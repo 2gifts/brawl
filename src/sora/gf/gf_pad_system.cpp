@@ -122,7 +122,10 @@ struct KpadStatusRaw {
     };
 };
 
-class Network;
+class Network {
+public:
+    static void alarmCallback(Network* network);
+};
 extern Network g_Network;
 
 // Unnamed SDK functions (PAD / WPAD / KPAD) and Brawl helpers
