@@ -239,7 +239,7 @@ public:
     virtual T& at(s32 index);
     virtual const T& at(s32 index) const;
     virtual s32 size() const;
-#ifdef WN_WEAPON_BUILDER // BYTES: the article RELs call the sora_melee instances
+#if defined(WN_WEAPON_BUILDER) && !defined(WN_MARIO_FIREBALL_UNIT) // BYTES: the article RELs call the sora_melee instances
     virtual ~soArrayNull();
 #else
     virtual ~soArrayNull() { }
@@ -255,13 +255,17 @@ public:
     virtual bool isFull() const;
     virtual void set(s32 startingIndex, const T& element, s32 numIndicesToSet);
 
-#ifdef WN_WEAPON_BUILDER
+#if defined(WN_WEAPON_BUILDER) && !defined(WN_MARIO_FIREBALL_UNIT)
     soArrayNull();
 #else
     soArrayNull() { }
 #endif
     soArrayNull(s32 size, s32 = 0) { }
+#ifdef WN_MARIO_FIREBALL_UNIT
+    soArrayNull(s32 size, const T& element, s32 = 0) { }
+#else
     soArrayNull(s32 size, const T& element, s32) { }
+#endif
 };
 
 // Out-of-class definitions so individual members can be instantiated (and linked) on their own.
@@ -976,7 +980,7 @@ public:
         soArrayVectorCalculator::postInitialize(*this, size, C);
     }
 #endif
-#ifdef YK_STAGE_INLINE
+#if defined(YK_STAGE_INLINE) || defined(WN_MARIO_FIREBALL_UNIT)
     soArrayVector(s32 size, const T& element, s32) : m_topIndex(0), m_lastIndex(0), m_size(0), m_isFull(false) {
 #else
     soArrayVector(s32 size, const T& element, s32) {
@@ -986,7 +990,7 @@ public:
         m_isFull = false;
 #endif
         size = soArrayVectorCalculator::resize(*this, size, this->isEmpty(), this->isFull(), this->capacity(), this->getTopIndex(), this->getLastIndex());
-#ifdef YK_STAGE_INLINE
+#if defined(YK_STAGE_INLINE) || defined(WN_MARIO_FIREBALL_UNIT)
         for (s32 i = 0; i < size; i++) {
 #else
         for (u32 i = 0; i < size; i++) {

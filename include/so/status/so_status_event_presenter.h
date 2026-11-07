@@ -7,7 +7,7 @@
 
 class soModuleAccesser;
 
-#ifdef FT_MODULE_BUILDER
+#if defined(FT_MODULE_BUILDER) && !defined(WN_MARIO_FIREBALL_UNIT)
 // BYTES: the destructor of this base is an out-of-line function in sora_melee (fighter RELs call it), so the
 // class is specialized with the destructor declared only.
 class soStatusEventObserver;
@@ -43,7 +43,7 @@ public:
     // NOTE: shadows the BrawlHeaders copy; (manageId, p2) constructor added by agent/damage
     soStatusEventObserver(short manageId, s8 p2) : soEventObserver<soStatusEventObserver>(0x4) { initialize(manageId, p2); }
 
-#ifdef FT_MODULE_BUILDER
+#if defined(FT_MODULE_BUILDER) && !defined(WN_MARIO_FIREBALL_UNIT)
     virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); } // BYTES: the owning unit's weak copy; the #else units call the sora_melee instance
 #else
     virtual void addObserver(short param1, s8 param2);

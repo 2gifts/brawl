@@ -100,7 +100,12 @@ private:
     wnLinkBoomerangParamAccesser m_paramAccesser;  // +0x20E8
 public:
     wnLinkBoomerang(s32 articleId, const wnArticleBuildInfo& info, const wnLinkBoomerangData* data);
+#ifdef FT_LINK_BOOMERANG_DTOR_EXTERNAL
+    // The fighter pool calls this; the body stays in wn_link_boomerang.cpp.
+    virtual ~wnLinkBoomerang();
+#else
     virtual ~wnLinkBoomerang() { }
+#endif
     virtual void updateNodeSRT();
     virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);

@@ -29,6 +29,7 @@ class BaseItem;
 class acAnimCmdConv;
 typedef const acAnimCmdConv* ftAnimCmdConvPtr; // the macro spells `const T&`, which needs a non-const-qualified spelling of the pointer type
 
+#ifndef WN_MARIO_FIREBALL_UNIT
 FT_DOL_ARRAY_VECTOR(soInterpolation<Vec3f>, 1);
 FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 5);
 FT_DOL_ARRAY_VECTOR(soCollisionGroup, 5);
@@ -184,9 +185,11 @@ public:
     virtual bool isNull() const;
     virtual const soStatusData& atSub(s32 index) const;
 };
+#endif
 
 // ---- kinetic energy manager (constructor in sora_melee) -----------------------------------------------------
 #include <so/kinetic/so_kinetic_module_impl.h>
+#ifndef WN_MARIO_FIREBALL_UNIT
 FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soKineticEnergy*>, 12);
 
 template <>
@@ -257,3 +260,4 @@ public:
     virtual void set(s32 startingIndex, const soAreaWind& element, s32 numIndicesToSet);
     soArrayNull();
 };
+#endif
