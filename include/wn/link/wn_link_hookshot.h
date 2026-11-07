@@ -164,7 +164,12 @@ class wnLinkHookshot : public wnWeaponBuilder<wnLinkHookshotModuleAccesserBuildC
     wnLinkHookshotParamAccesser m_paramAccesser;
 public:
     wnLinkHookshot(s32 articleId, const wnArticleBuildInfo& info, const wnLinkHookshotData* data);
+#ifdef FT_LINK_HOOKSHOT_DTOR_OUT_OF_LINE
+    // ft_link.o owns the plain destructor; the hookshot unit keeps the inline one.
+    virtual ~wnLinkHookshot();
+#else
     virtual ~wnLinkHookshot() { }
+#endif
     void activate(int founderTaskId, int resourceId, int team, float lr, const Vec3f& position, bool unk);
     static bool activeArticle(wnSimple* weapon, soModuleAccesser* acc);
 };
