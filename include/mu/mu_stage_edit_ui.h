@@ -61,9 +61,11 @@ public:
     MuObject* m_paletteCursor;
     u8 unk7D5B0[0x9C];
     MuObject* m_paletteCursorVisible;
-    u8 unk7D650[4];
+    MuObject* m_testModel;       // 7D650 HYPOTHESIS: a model attached when a test of the stage ends
     MuObject* m_thumbnail;       // 7D654 HYPOTHESIS: the model with the "thumbnail_mat" material
-    u8 unk7D658[0x2C];
+    u8 unk7D658[0x24];
+    nw4r::g3d::ScnMdl* m_infoModel; // 7D67C HYPOTHESIS: a model attached to the info layer
+    u8 unk7D680[4];
     nw4r::g3d::ScnMdlExpand* m_paletteGroup;
     nw4r::g3d::ScnMdlExpand* m_gridGroup;
     u8 unk7D68C[0xC4398 - 0x7D68C];
@@ -88,6 +90,7 @@ public:
     void setGridScroll(int direction, int clearOpposite);
     void setGridPartsCursor(int show);
     void ctrlSetup(gfPadStatus* output, int repeat);
+    void setSaveProcess();
     s16 getSettingDataNum();
     // HYPOTHESIS: the parameter type follows the material and texture calls it is passed to.
     void setStageThumbnail(_GXTexObj* texture);
@@ -165,23 +168,25 @@ public:
         int m_exitMode;                 // 0x1D40 HYPOTHESIS: negative while browsing, 3 when cancelled
         int m_unk1D44;
         int m_unk1D48;
+        int m_unk1D4C;                  // 0x1D4C HYPOTHESIS: cleared when a stage file is chosen
+        u8 m_unk1D50[0x1D68 - 0x1D50];
+        int m_pad;                      // 0x1D68 HYPOTHESIS: the controller the pad icon reads
     };
 
     virtual ~muStageEditSelectTask();
     virtual bool preLoad();
     virtual void getMineLabel(muCollectionMsgBuf* buf);
-    virtual u32 getCurFileID();
     virtual muCollectionFileName getFileHandle(int index);
     virtual void addObjCore(void* obj);
     virtual void removeObjCore(void* obj);
     virtual int getNumPic(int media);
-    virtual int getNumPanel(int media);
     virtual int dispThumbnail(MuObject* object, void* summary);
     virtual void erasePreviewCore();
     virtual void* getScnRoot();
     virtual void cancelAndExit();
     virtual void controlExit();
     virtual void controlLoadFinish();
+    virtual void onPreCheckFinished();
     virtual void onLoadFailed();
     virtual void controlBrowsing();
     virtual void controlBrowsingLoading();
@@ -195,7 +200,14 @@ public:
     virtual int showNoFreeBlock();
 
     void playBGM();
+    // HYPOTHESIS: the message index is the label for a new stage, and the buffer is the one getMineLabel fills.
+    void getNewLabel(muCollectionMsgBuf* buf);
+    // HYPOTHESIS: stored as the pad the icon reads when the browser has no stage files.
+    void onDecided(int pad);
 
     Work* getWork() const { return static_cast<Work*>(m_work); }
 };
 static_assert(offsetof(muStageEditSelectTask::Work, m_scene) == 0x1D3C, "Browser scene offset");
+static_assert(offsetof(muStageEditSelectTask::Work, m_pad) == 0x1D68, "Browser pad offset");
+static_assert(offsetof(muStageEditUI, m_testModel) == 0x7D650, "Editor test model offset");
+static_assert(offsetof(muStageEditUI, m_infoModel) == 0x7D67C, "Editor info model offset");

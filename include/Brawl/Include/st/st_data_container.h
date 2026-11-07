@@ -29,6 +29,9 @@ public:
     virtual stDataContainerData* getData(u32 index);
     virtual void* getDataAddressHead();
 
+    // HYPOTHESIS: a four-character resource id, read as one big-endian word.
+    static u32 createResId(const char* name);
+
     u32 m_headerSize;
     stDataContainerData* m_filedata;
     static const u32 HeaderSize = 8;
