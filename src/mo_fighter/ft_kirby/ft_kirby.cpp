@@ -2,6 +2,7 @@
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
 #define FT_TEAM_TYPED_INTERFACE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_KIRBY_ARTICLE_POOLS
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_manager.h>
 #include <ft/ft_reflector_group.h>
@@ -26,8 +27,12 @@
 #include <wn/wn_simple.h>
 
 #define FT_NOINLINE_SEARCH_BUILDER
+// The fighter owns the shared out-of-line kinetic teardown. The keeper and the abstract work destructor are not in this object.
+#define FT_WEAK_KEPT_OBSERVERS
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftKirbyBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
+#include <ft/builder/ft_builder_article.h>
 
 // Status teardown destroys its owned change-request queue before observers.
 #pragma dont_inline on
@@ -284,8 +289,9 @@ ftKirby::ftKirby(s32 entryId,
     m_moduleAccesser->getAreaModule().enableArea(11, false, -1);
 }
 
-// FIXME: Test code present only to emit the shared builder functions; delete once ftKirby is done
-void testBuilder() {
+// FIXME: Test code present only to emit the shared builder functions; delete once ftKirby is done.
+// The original object does not define this helper.
+__declspec(weak) void testBuilder() {
     soInsideEventManageModuleBuilder<ftKirbyInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> insideBuilder;
     soResourceIdAccesserImpl idAccImpl(0, 1, 2);
 }
@@ -294,19 +300,20 @@ soInsideEventManageModuleBuilder<ftKirbyInsideEventManageModuleBuildConfig, ftIn
 // Trivial functions of this translation unit (empty virtuals, constant returns, field accessors) under their placeholder names.
 extern "C" {
 
-u8 fn_96_28D0(u8* p) { return *(u8*)(p + 0x4); }
-int fn_96_BC6C(u8* p) { return *(int*)(p + 0x28); }
+// These names are not in the original object. Kept weak so they do not become a second strong definition.
+__declspec(weak) u8 fn_96_28D0(u8* p) { return *(u8*)(p + 0x4); }
+__declspec(weak) int fn_96_BC6C(u8* p) { return *(int*)(p + 0x28); }
 int fn_96_C17C(u8* p) { return *(int*)(p + 0xc0); }
 int fn_96_F3AC(u8* p) { return *(int*)(p + 0x20); }
 int fn_96_F488(u8* p) { return *(int*)(p + 0x18); }
 int fn_96_115E8() { return 12; }
 void fn_96_12530() {}
-void fn_96_12C28() {}
-void fn_96_12CAC() {}
-void fn_96_12FA4() {}
-void fn_96_1308C() {}
-void fn_96_13174() {}
-void fn_96_1325C() {}
+__declspec(weak) void fn_96_12C28() {}
+__declspec(weak) void fn_96_12CAC() {}
+__declspec(weak) void fn_96_12FA4() {}
+__declspec(weak) void fn_96_1308C() {}
+__declspec(weak) void fn_96_13174() {}
+__declspec(weak) void fn_96_1325C() {}
 
 #pragma dont_inline on
 
@@ -921,8 +928,88 @@ void ftKirby::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* modu
     Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObject, unk4);
 }
 
+// The kind record of the owner (kind 0, sub kind Kirby) and the heap the articles are built from.
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument.
+struct ftKirbyArticleKind : wnArticleKindInfo {
+    ftKirbyArticleKind() {
+        kind = 0;
+        subKind = Fighter_Kirby;
+    }
+};
+struct ftKirbyArticleBuildInfo : wnArticleBuildInfo {
+    ftKirbyArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// Explicit specializations are strong. The original inlines these into the builder, so the out-of-line copy stays weak.
+#define FT_KIRBY_SIMPLE_HOLDER(ID)                                                                                      \
+    template <>                                                                                                         \
+    __declspec(weak)                                                                                                    \
+    wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<ID> >::wnInstanceHolder(soModuleAccesser* acc) :   \
+        m_instance(ID, wnSimpleConstructionInfo(wnSimpleKindInfo(Fighter_Kirby), acc->m_enumerationStart->m_heapModule), \
+                   g_ftCommonDataAccesser.getSimpleData(Fighter_Kirby, &ftArticleDataFlags().get().resourceGroup),     \
+                   false) { }
+
+FT_KIRBY_SIMPLE_HOLDER(10)
+FT_KIRBY_SIMPLE_HOLDER(9)
+FT_KIRBY_SIMPLE_HOLDER(8)
+FT_KIRBY_SIMPLE_HOLDER(7)
+FT_KIRBY_SIMPLE_HOLDER(6)
+#undef FT_KIRBY_SIMPLE_HOLDER
+
+#define FT_KIRBY_WEAPON_HOLDER(WEAPON, DATA, ID, GETTER)                                                                \
+    template <>                                                                                                         \
+    __declspec(weak)                                                                                                    \
+    wnInstanceHolder<WEAPON, soKindInfoGeneric<0, 5>, soIntToType<ID> >::wnInstanceHolder(soModuleAccesser* acc) :     \
+        m_instance(ID,                                                                                                  \
+                   ftKirbyArticleBuildInfo(ftKirbyArticleKind(),                                                        \
+                                           static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)),         \
+                   static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Kirby,                               \
+                                                                          &ftArticleDataFlags().get().resourceGroup))) { }
+
+FT_KIRBY_WEAPON_HOLDER(wnKirbyCookHat, wnKirbyCookHatData, 5, getWeaponData5)
+FT_KIRBY_WEAPON_HOLDER(wnKirbyNabe, wnKirbyNabeData, 4, getWeaponData4)
+FT_KIRBY_WEAPON_HOLDER(wnKirbyStone, wnKirbyStoneData, 3, getWeaponData3)
+FT_KIRBY_WEAPON_HOLDER(wnKirbyStarmissile, wnKirbyStarmissileData, 2, getWeaponData2)
+FT_KIRBY_WEAPON_HOLDER(wnKirbyFinalCutter, wnKirbyFinalCutterData, 1, getWeaponData1)
+FT_KIRBY_WEAPON_HOLDER(wnKirbyHammer, wnKirbyHammerData, 0, getWeaponData0)
+#undef FT_KIRBY_WEAPON_HOLDER
+
 // The holders and sub pools of the article pools (soKindInfoGeneric<0, 5>); the mediator destroys them out of line.
 #pragma dont_inline on
+template <class Mediator>
+soSelectInstanceHolder<Mediator, soArticleMediatorNull>::~soSelectInstanceHolder() { }
+template <class Mediator, int N>
+soGenerateArticleManageModuleBuilder<Mediator, N>::~soGenerateArticleManageModuleBuilder() { }
+template <class Mediator, int N>
+soGenerateArticleManageModuleBuilder<Mediator, N>::soGenerateArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template soSelectInstanceHolder<ftKirbyArticleMediator, soArticleMediatorNull>::~soSelectInstanceHolder();
+template soGenerateArticleManageModuleBuilder<ftKirbyArticleMediator, 12>::~soGenerateArticleManageModuleBuilder();
+template soGenerateArticleManageModuleBuilder<ftKirbyArticleMediator, 12>::soGenerateArticleManageModuleBuilder(soModuleAccesser*);
+template <class PoolList, class Founder>
+soArticleMediatorImpl<PoolList, Founder>::~soArticleMediatorImpl() { }
+template soArticleMediatorImpl<ftKirbyArticleList, ftKirby>::~soArticleMediatorImpl();
+// The flag sits at mediator+0x12828 (builder+0x12930): addis r3, r3, 1; stb r4, 0x2828(r3).
+template <class PoolList, class Founder>
+void soArticleMediatorImpl<PoolList, Founder>::setAutoRecycle(bool enabled) {
+    m_autoRecycle = enabled;
+}
+template void soArticleMediatorImpl<ftKirbyArticleList, ftKirby>::setAutoRecycle(bool);
+template wnInstanceHolder<wnKirbyCookHat, soKindInfoGeneric<0, 5>, soIntToType<5> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnKirbyCookHat, 1, wnInstanceHolder, soIntToType<5> >, soKindInfoGeneric<0, 5> >;
+template wnInstanceHolder<wnKirbyNabe, soKindInfoGeneric<0, 5>, soIntToType<4> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnKirbyNabe, 1, wnInstanceHolder, soIntToType<4> >, soKindInfoGeneric<0, 5> >;
+template wnInstanceHolder<wnKirbyStone, soKindInfoGeneric<0, 5>, soIntToType<3> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnKirbyStone, 1, wnInstanceHolder, soIntToType<3> >, soKindInfoGeneric<0, 5> >;
+template wnInstanceHolder<wnKirbyStarmissile, soKindInfoGeneric<0, 5>, soIntToType<2> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnKirbyStarmissile, 1, wnInstanceHolder, soIntToType<2> >, soKindInfoGeneric<0, 5> >;
+template wnInstanceHolder<wnKirbyFinalCutter, soKindInfoGeneric<0, 5>, soIntToType<1> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnKirbyFinalCutter, 1, wnInstanceHolder, soIntToType<1> >, soKindInfoGeneric<0, 5> >;
+template wnInstanceHolder<wnKirbyHammer, soKindInfoGeneric<0, 5>, soIntToType<0> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnKirbyHammer, 1, wnInstanceHolder, soIntToType<0> >, soKindInfoGeneric<0, 5> >;
 template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<6> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<6> >, soKindInfoGeneric<0, 5> >;
 template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<7> >::~wnInstanceHolder();
@@ -935,3 +1022,6 @@ template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 5>, soIntToType<10> >::
 template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<10> >, soKindInfoGeneric<0, 5> >;
 template class soInstancePool<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<10> >, soInstancePoolRoot, soKindInfoGeneric<0, 5>, 10>;
 #pragma dont_inline off
+// The simple article's teardown is a copy in each fighter that pools one. Weak until the animcmd sub-builder
+// teardown matches the original: this copy destroys that builder in one call and runs long.
+__declspec(weak) wnSimple::~wnSimple() { }

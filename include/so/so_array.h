@@ -976,7 +976,11 @@ public:
     soArrayVector(s32 size);
     soArrayVector(s32 size, s32);
 #else
-    soArrayVector(s32 size, s32 = 0) : m_topIndex(0), m_lastIndex(0), m_size(size), m_isFull(false) {
+    soArrayVector(s32 size, s32 = 0)
+#ifdef WN_SIMPLE_UNIT
+        __attribute__((always_inline))
+#endif
+        : m_topIndex(0), m_lastIndex(0), m_size(size), m_isFull(false) {
         soArrayVectorCalculator::postInitialize(*this, size, C);
     }
 #endif

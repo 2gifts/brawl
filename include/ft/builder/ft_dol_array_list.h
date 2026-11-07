@@ -217,7 +217,9 @@ public:
     virtual void getPriorityArray(soArray<soKineticEnergy**>& arr);
 };
 
-// soArrayNull<soPhysicsIKHandle>: constructor and destructor are calls into sora_melee (used for the shared null array)
+// soArrayNull<soPhysicsIKHandle>: constructor and destructor are calls into sora_melee (used for the shared null array).
+// WN_SIMPLE_UNIT inlines the null array into its physics builder, so it keeps the primary template.
+#ifndef WN_SIMPLE_UNIT
 template <>
 class soArrayNull<soPhysicsIKHandle> : public soArray<soPhysicsIKHandle> {
 public:
@@ -238,6 +240,7 @@ public:
     virtual void set(s32 startingIndex, const soPhysicsIKHandle& element, s32 numIndicesToSet);
     soArrayNull();
 };
+#endif
 
 // soArrayNull<soAreaWind>: constructor and destructor are calls into sora_melee (the null wind array of the area builder)
 template <>

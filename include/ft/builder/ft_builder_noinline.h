@@ -27,7 +27,8 @@ void ftKeepObserverVtables(s16 id) {
 template void ftKeepObserverVtables<0>(s16);
 #pragma dont_inline off
 #else
-#ifdef FT_OBSERVER_VTABLE_ANCHOR_WEAK
+// FT_WEAK_KEPT_OBSERVERS: this translation unit's original object does not define the keeper (Kirby).
+#if defined(FT_WEAK_KEPT_OBSERVERS) || defined(FT_OBSERVER_VTABLE_ANCHOR_WEAK)
 __declspec(weak)
 #endif
 void ftKeepObserverVtables(s16 id) {
@@ -68,6 +69,9 @@ ftSound3dGeneratorAccesserImpl::~ftSound3dGeneratorAccesserImpl() { } // BYTES: 
 soTransitionInfo::~soTransitionInfo() { } // BYTES: out of line in the REL
 soNullable::soNullable(bool isNull) { m_isNull = isNull; } // BYTES: out of line in the REL
 soKineticEnergy::~soKineticEnergy() { } // BYTES: out of line in the REL
+#ifdef FT_WEAK_KEPT_OBSERVERS
+__declspec(weak)
+#endif
 soGeneralWorkAbstract::~soGeneralWorkAbstract() { } // BYTES: out of line in the REL
 #pragma dont_inline off
 

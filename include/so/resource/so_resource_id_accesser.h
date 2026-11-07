@@ -13,6 +13,8 @@ public:
     // BYTES: soResourceIdAccesserImpl's destructor calls this one, a weak copy of the Enemy unit (the fighter units
     // define it in their .cpp).
     virtual ~soResourceIdAccesser() __attribute__((never_inline)) { }
+#elif defined(WN_SIMPLE_UNIT)
+    virtual ~soResourceIdAccesser() { }
 #else
     virtual ~soResourceIdAccesser() = 0;
 #endif
