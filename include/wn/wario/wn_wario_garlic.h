@@ -68,12 +68,18 @@ static_assert(sizeof(wnWeaponBuilder<wnWarioGarlicModuleAccesserBuildConfig>) ==
 class wnWarioGarlic : public wnWeaponBuilder<wnWarioGarlicModuleAccesserBuildConfig> {
     const wnWarioGarlicParam* m_param; // +0x2070
     wnWarioGarlicParamAccesser m_paramAccesser; // +0x2074
+#ifndef FT_WARIO_ARTICLE_POOLS
     u8 unk20A0[0xC0];
+#endif
 public:
     wnWarioGarlic(s32 articleId, const wnArticleBuildInfo& info, const wnWarioGarlicData* data);
     virtual ~wnWarioGarlic() { }
     // HYPOTHESIS: the names of the arguments follow what activate stores them in.
     void activate(int founderTaskId, int resourceId, int team);
 };
+#ifdef FT_WARIO_ARTICLE_POOLS
+static_assert(sizeof(wnWarioGarlic) == 0x20A0, "Wario garlic article extent");
+#else
 static_assert(sizeof(wnWarioGarlic) == 0x2160, "Wario garlic article extent");
+#endif
 #endif
