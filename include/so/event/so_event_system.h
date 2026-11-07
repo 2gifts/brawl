@@ -72,8 +72,14 @@ public:
 template <typename T>
 class soEventUnitNull {
 public:
+#ifdef WN_SIMPLE_UNIT
+    // The simple article calls the three disabled units out of line.
+    soEventUnitNull() __attribute__((never_inline)) { }
+    soEventUnitNull(s16, s16) __attribute__((never_inline)) { }
+#else
     soEventUnitNull() { }
     soEventUnitNull(s16, s16) { }
+#endif
 };
 static_assert(sizeof(soEventUnitNull<void>) == 1, "Disabled event unit extent");
 

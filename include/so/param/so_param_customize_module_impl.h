@@ -33,12 +33,18 @@ public:
 };
 static_assert(sizeof(soParamCustomizeModule) == 8, "Class is wrong size!");
 
+class soModuleAccesser;
+
 class soParamCustomizeModuleImpl : public soParamCustomizeModule {
     float m_attackPowerMulPattern;
     float m_attackPowerMulScale;
 
 public:
     soParamCustomizeModuleImpl() : m_attackPowerMulPattern(1.0f), m_attackPowerMulScale(1.0f) { }
+#ifdef WN_SIMPLE_UNIT
+    // The shared builder passes the module accesser; this module does not store it.
+    soParamCustomizeModuleImpl(soModuleAccesser*) : m_attackPowerMulPattern(1.0f), m_attackPowerMulScale(1.0f) { }
+#endif
     virtual ~soParamCustomizeModuleImpl() { }
     virtual void activate() { m_attackPowerMulPattern = m_attackPowerMulScale = 1.0f; }
     virtual void setDefault() { }

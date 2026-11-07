@@ -76,9 +76,11 @@ typedef soInsideEventManageModuleBuildConfig<16,32,4,2,4,4,4,5,2,4,4,4,4,4,1,1,0
 static_assert(sizeof(soInsideEventManageModuleBuilder<wnSimpleInsideEventManageModuleBuildConfig,wnInsideEventManageModuleTypes>) == 0x804, "WN events");
 
 #ifndef WN_SIMPLE_AFTER_ARTICLE_BUILDERS
+#ifndef WN_SIMPLE_UNIT
 FT_DOL_ARRAY_VECTOR(soModelNodeSetUp,5);
-FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soTransitionTerm>,4);
 FT_DOL_ARRAY_VECTOR(soLinkConnection,5);
+#endif
+FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soTransitionTerm>,4);
 FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soAnimCmdControlUnit>,6);
 
 // Six-unit weapon manager retains its trailing flag.
@@ -88,7 +90,6 @@ class soInstanceManagerFullPropertyVector<soAnimCmdControlUnit, 6> : public soIn
     bool m_unk1;
 public:
     soInstanceManagerFullPropertyVector(bool p1);
-    ~soInstanceManagerFullPropertyVector() { }
     virtual soAnimCmdControlUnit& at(s32 id);
     virtual soAnimCmdControlUnit& atIndex(s32 idx);
     virtual s32 getId(s32 idx);
@@ -105,6 +106,11 @@ public:
     virtual void getAttributeArray(soAttributeFlag targetAttr, soArray<soAnimCmdControlUnit*>& arr);
     virtual soAttributeFlag getAttribute(s32 id) const;
     virtual void getPriorityArray(soArray<soAnimCmdControlUnit*>& arr);
+#ifdef WN_SIMPLE_UNIT
+    ~soInstanceManagerFullPropertyVector() __attribute__((never_inline)) { }
+#else
+    ~soInstanceManagerFullPropertyVector() { }
+#endif
 };
 #endif
 
@@ -181,18 +187,30 @@ public:
 };
 template <> class soShakeModuleBuilder<soShakeModuleBuildConfig<0,soShakeModuleSimple> > : public soArraySelectHolder<0,soArrayVector<soShakeTerm,0>,soArrayNull<soShakeTerm> > {
 public: soShakeModuleSimple m_module;
+#ifdef WN_SIMPLE_UNIT
+    soShakeModuleBuilder(soModuleAccesser*, void*) __attribute__((never_inline));
+#else
     soShakeModuleBuilder(soModuleAccesser*, void*);
+#endif
 };
 #endif
 static_assert(sizeof(soShakeModuleBuilder<soShakeModuleBuildConfig<0,soShakeModuleSimple> >)==0xC,"WN shake extent");
 // HYPOTHESIS: visibility config's node-selection parameter is still unresolved.
 struct wnSimpleVisibilityBuilder {
     soVisibilityModuleSimple m_module;
+#ifdef WN_SIMPLE_UNIT
+    wnSimpleVisibilityBuilder(soModuleAccesser* acc, soVisibilityData* data) : m_module(acc, data, 1) { }
+#endif
 };
 static_assert(sizeof(wnSimpleVisibilityBuilder)==0x14,"WN visibility extent");
 #ifndef WN_SIMPLE_AFTER_ARTICLE_BUILDERS
 template <> class soSlowModuleBuilder<soSlowModuleBuildConfig<soSlowModuleSimple> > {
-public: soSlowModuleSimple m_module;
+public:
+    soSlowModuleSimple m_module;
+#ifdef WN_SIMPLE_UNIT
+    soSlowModuleBuilder(soModuleAccesser* acc) : m_module(acc) { }
+    ~soSlowModuleBuilder() __attribute__((never_inline)) { }
+#endif
 };
 #endif
 static_assert(sizeof(soSlowModuleBuilder<soSlowModuleBuildConfig<soSlowModuleSimple> >)==0x18,"WN slow extent");
@@ -205,6 +223,31 @@ struct wnSimpleEffectBuilder {
     soEffectModuleImpl m_module;
 };
 static_assert(sizeof(wnSimpleEffectBuilder)==0x19C,"WN effect extent");
+#ifdef WN_SIMPLE_UNIT
+// Map name is soEffectModuleBuilder<soEffectModuleBuildConfig<1, 1, 1, 0, -1, soEffectModuleImpl>>.
+// The fighter header owns the one-argument soEffectModuleBuildConfig, so the article spelling is separate.
+template <s32 Continual, s32 Screen, s32 Time, s32 U32, s32 Num, typename T>
+class wnEffectModuleBuildConfig {
+public:
+    typedef T ModuleType;
+};
+template <typename T>
+class soEffectModuleBuilder<wnEffectModuleBuildConfig<1, 1, 1, 0, -1, T> > {
+public:
+    soAnimCmdFirstMember<soArrayVector<soEffectContinual, 1> > m_continual;
+    soArraySelectHolder<1, soArrayVector<soEffectTime, 1>, soArrayNull<soEffectTime> > m_times;
+    soArraySelectHolder<0, soArrayVector<efScreenHandle, 0>, soArrayNull<efScreenHandle> > m_screens;
+    soArrayVector<u32, 1> m_u32s;
+    T m_module;
+    soEffectModuleBuilder(soModuleAccesser* acc, void* nodeData, void* emitData, void* commonData, void* screenData,
+                          soEventObserverRegistrationDesc* regDesc) __attribute__((never_inline)) :
+        m_continual(1), m_times(1, 0), m_u32s(1, 0),
+        m_module(acc, (soArray<soEffectContinual>*)&m_continual.m_member, nodeData, &m_u32s, m_times.get(), emitData,
+                 regDesc, commonData, -1, screenData, m_screens.get()) { }
+    T* getModule() { return &m_module; }
+};
+static_assert(sizeof(soEffectModuleBuilder<wnEffectModuleBuildConfig<1, 1, 1, 0, -1, soEffectModuleImpl> >) == 0x19C, "WN effect extent");
+#endif
 static_assert(sizeof(soGeneralWorkBuilder<soGeneralWorkBuildConfig<7,6,1> >)==0x5C,"WN work extent");
 // HYPOTHESIS: the four thread-selection configs are still unnamed.
 // Native construction enables only thread2, with command table capacity2.
@@ -212,6 +255,10 @@ struct wnSimpleAnimCmdSubBuilder {
     wnDisabledModuleBuilder m_unit0,m_unit1;
     soAnimCmdControlUnitBuilder<soAnimCmdControlUnitBuildConfig<2,2,2,0,0,1,0,8> > m_unit2;
     wnDisabledModuleBuilder m_unit3;
+#ifdef WN_SIMPLE_UNIT
+    wnSimpleAnimCmdSubBuilder(soModuleAccesser* acc, void* data0, void* data1, void* data2) :
+        m_unit2(acc, data0, data1, data2) { }
+#endif
     ~wnSimpleAnimCmdSubBuilder() { }
 };
 static_assert(sizeof(wnSimpleAnimCmdSubBuilder)==0x134,"WN ACMD subbuilder extent");
@@ -222,6 +269,33 @@ class wnSimpleModuleAccesserBuildConfig { };
 #endif
 #ifndef WN_SIMPLE_COLOR_BLEND_BUILD_CONFIG
 #define WN_SIMPLE_COLOR_BLEND_BUILD_CONFIG soColorBlendModuleBuildConfig<1,1,soColorBlendModuleImpl>
+#endif
+#ifdef WN_SIMPLE_UNIT
+#include <wn/wn_module_accesser_build_data.h>
+extern char lbl_27_bss_344[];
+extern char lbl_27_bss_35C[];
+extern char lbl_27_bss_384[];
+extern char lbl_27_bss_398[];
+extern char lbl_27_bss_3BC[];
+extern char lbl_27_bss_3DC[];
+extern char lbl_27_bss_3F4[];
+extern char lbl_27_bss_404[];
+extern char lbl_27_bss_414[];
+extern char lbl_27_bss_424[];
+extern char lbl_27_bss_444[];
+extern char lbl_27_bss_47C[];
+extern char lbl_27_bss_48C[];
+extern char lbl_27_bss_4E8[];
+extern char lbl_27_bss_530[];
+extern char lbl_27_bss_584[];
+extern char lbl_27_bss_598[];
+extern char lbl_27_bss_604[];
+extern char lbl_27_bss_654[];
+extern char lbl_27_bss_66C[];
+extern char lbl_27_bss_6E8[];
+extern char lbl_27_bss_9BC[];
+extern char lbl_27_bss_DBC[];
+extern char g_soItemManageModuleNull[];
 #endif
 template <> class soModuleAccesserBuilder<wnSimpleModuleAccesserBuildConfig> {
 public:
@@ -248,7 +322,11 @@ public:
     wnDisabledModuleBuilder m_status,m_kinetic;
     soGeneralWorkBuilder<soGeneralWorkBuildConfig<7,6,1> > m_generalWork;
     wnDisabledModuleBuilder m_article;
+#ifdef WN_SIMPLE_UNIT
+    soEffectModuleBuilder<wnEffectModuleBuildConfig<1, 1, 1, 0, -1, soEffectModuleImpl> > m_effect;
+#else
     wnSimpleEffectBuilder m_effect;
+#endif
     wnDisabledModuleBuilder m_combo,m_area;
     soPhysicsModuleBuilder<soPhysicsModuleBuildConfigCap<0,soPhysicsModuleImpl> > m_physics;
     wnDisabledModuleBuilder m_slope;
@@ -258,12 +336,92 @@ public:
     wnDisabledModuleBuilder m_jostle,m_abnormal;
     soSlowModuleBuilder<soSlowModuleBuildConfig<soSlowModuleSimple> > m_slow;
     wnDisabledModuleBuilder m_glow;
+#ifdef WN_SIMPLE_UNIT
+    soModuleAccesserBuilder(StageObject* owner, const wnModuleAccesserBuildData& bd) :
+        m_event(),
+        m_accesser(
+            owner,
+            soResourceModuleBuilder<soResourceModuleBuildConfig<0, soResourceIdAccesserImpl, soResourceModuleImpl> >::getModule(&m_resource),
+            soModelModuleBuilder<soModelModuleBuildConfig<5, 0, soModelModuleImpl> >::getModule(&m_model),
+            (soMotionModule*)&m_motion.m_module,
+            (soPostureModule*)&m_posture.m_module,
+            (soGroundModule*)lbl_27_bss_344,
+            (soSituationModule*)lbl_27_bss_35C,
+            (soTeamModule*)&m_team.m_module,
+            (soCollisionAttackModule*)lbl_27_bss_384,
+            (soCollisionHitModule*)lbl_27_bss_398,
+            (soCollisionShieldModule*)lbl_27_bss_3BC,
+            (soCollisionShieldModule*)g_soCollisionAbsorberModuleNull,
+            (soCollisionShieldModule*)g_soCollisionAbsorberModuleNull,
+            (void*)lbl_27_bss_3DC,
+            (soCollisionSearchModule*)g_soCollisionSearchModuleNull,
+            (soDamageModule*)lbl_27_bss_3F4,
+            (void*)lbl_27_bss_404,
+            (void*)lbl_27_bss_414,
+            (soStopModule*)lbl_27_bss_424,
+            (void*)lbl_27_bss_444,
+            (void*)&m_shake.m_module,
+            (soSoundModule*)lbl_27_bss_47C,
+            m_link.getModule(),
+            (soVisibilityModule*)&m_visibility.m_module,
+            (soControllerModule*)lbl_27_bss_48C,
+            (soCameraModule*)lbl_27_bss_4E8,
+            m_workManage.getModule(),
+            (void*)g_soDebugModuleNull,
+            m_animCmd.getModule(),
+            (soStatusModule*)lbl_27_bss_4E8,
+            (void*)g_soGeneralTermDecideModuleNull,
+            (void*)g_soSwitchDecideModuleNull,
+            (soKineticModule*)lbl_27_bss_530,
+            m_event.getModule(),
+            (void*)g_soGenerateArticleManageModuleNull,
+            m_effect.getModule(),
+            (void*)lbl_27_bss_584,
+            (soAreaModule*)lbl_27_bss_598,
+            (void*)g_soTerritoryModuleNull,
+            (void*)g_soTargetSearchModuleNull,
+            m_physics.getModule(),
+            (void*)lbl_27_bss_604,
+            m_shadow.getModule(),
+            (soItemManageModule*)g_soItemManageModuleNull,
+            m_color.getModule(),
+            (void*)lbl_27_bss_654,
+            (void*)lbl_27_bss_66C,
+            (soSlowModule*)&m_slow.m_module,
+            (void*)g_soReflectModuleNull,
+            (void*)&m_heap,
+            (soParamCustomizeModule*)&m_param,
+            (void*)lbl_27_bss_6E8),
+        m_heap(bd.getInstanceHeap(), bd.getNWModelInstanceHeap(), bd.getNWMotionInstanceHeap(), bd.getHeapSlotNo()),
+        m_param(&m_accesser),
+        m_resource(bd.getMdlResId(), bd.getAnmResId(), bd.getResGroupNo(), &m_accesser),
+        m_model(&m_accesser, bd.getModelScale(), bd.getModelExtendNodeTable(), FT_NULL_OBSERVER_DESC),
+        m_motion(&m_accesser, bd.getMotionData()),
+        m_posture(&m_accesser, FT_NULL_OBSERVER_DESC),
+        m_team(bd.getTeam(), &m_accesser),
+        m_shake(&m_accesser, bd.getShakeData()),
+        m_link(&m_accesser),
+        m_visibility(&m_accesser, bd.getVisibilityData()),
+        m_workManage(&m_accesser, bd.getParamAccesser()),
+        m_animCmd(ftGetManageId(&m_accesser)),
+        m_generalWork(),
+        m_effect(&m_accesser, bd.getEffectNodeData(), bd.getEffectEmitData(), bd.getEffectCommonData(), bd.getEffectScreenData(), FT_NULL_OBSERVER_DESC),
+        m_physics(&m_accesser, bd.getIkData()),
+        m_shadow(&m_accesser),
+        m_color(&m_accesser),
+        m_slow(&m_accesser) { }
+#endif
     ~soModuleAccesserBuilder() { }
 };
 template <class BC> class wnModuleAccesserBuilder;
 template <> class wnModuleAccesserBuilder<wnSimpleModuleAccesserBuildConfig> : public soModuleAccesserBuilder<wnSimpleModuleAccesserBuildConfig> {
 public:
     wnSimpleAnimCmdSubBuilder m_animCmdSub;
+#ifdef WN_SIMPLE_UNIT
+    wnModuleAccesserBuilder(StageObject* owner, const wnModuleAccesserBuildData& bd) :
+        soModuleAccesserBuilder<wnSimpleModuleAccesserBuildConfig>(owner, bd),
+        m_animCmdSub(&m_accesser, bd.getAnimCmdData(2, 2), bd.getAnimCmdData(2, 1), bd.getAnimCmdData(2, 0)) { }
+#endif
     ~wnModuleAccesserBuilder() { }
 };
 template <class BC> class wnWeaponBuilder;
@@ -274,6 +432,13 @@ public:
     u16 unk1698;
     bool unk169A;
     u8 unk169B;
+#ifdef WN_SIMPLE_UNIT
+    wnWeaponBuilder(const char* name, s32 subKind, const void* data, s32 articleId, const void* kindInfo,
+                    int unkA4Bits, const wnModuleAccesserBuildData& bd, bool flag) :
+        Weapon(name, subKind, data, articleId, kindInfo, &m_modules.m_accesser, unkA4Bits),
+        m_modules(this, bd),
+        unk1698(0), unk169A(flag), unk169B(0) { }
+#endif
     virtual ~wnWeaponBuilder() { }
     // HYPOTHESIS: no own article generator; the descendants resolve to the shared null mediator.
     virtual void deactivateDescendantForce() {
@@ -283,3 +448,5 @@ public:
 static_assert(sizeof(wnWeaponBuilder<wnSimpleModuleAccesserBuildConfig>)==0x169C,"WN weapon builder extent");
 
 static_assert(sizeof(soModuleAccesserBuilder<wnSimpleModuleAccesserBuildConfig>)==0x1498,"Simple weapon module storage");
+
+

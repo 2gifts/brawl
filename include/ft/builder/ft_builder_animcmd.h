@@ -173,8 +173,16 @@ class soAnimCmdModuleBuilder {
     typename BC::ModuleType m_module; // +0
     soInstanceManagerFullPropertyVector<soAnimCmdControlUnit, BC::ControlUnitNum> m_controlUnits; // +0x24
 public:
+#ifdef WN_SIMPLE_UNIT
+    ~soAnimCmdModuleBuilder() __attribute__((never_inline)) { }
+#else
     ~soAnimCmdModuleBuilder() { }
-    soAnimCmdModuleBuilder(s16 unitId) : m_module(unitId, &m_controlUnits), m_controlUnits(false) { }
+#endif
+    soAnimCmdModuleBuilder(s16 unitId)
+#ifdef WN_SIMPLE_UNIT
+        __attribute__((never_inline))
+#endif
+        : m_module(unitId, &m_controlUnits), m_controlUnits(false) { }
     typename BC::ModuleType* getModule() { return &m_module; }
 };
 

@@ -33,6 +33,9 @@ public:
     // before the builder address); the overload above is kept for the other users.
     soHeapModuleBuilder(Heaps::HeapType instHeap, Heaps::HeapType nwModelInstHeap, Heaps::HeapType nwMotionInstHeap, s32 slotNo) :
         m_heapModule(instHeap, nwModelInstHeap, nwMotionInstHeap, slotNo) { }
+#ifdef WN_SIMPLE_UNIT
+    ~soHeapModuleBuilder() __attribute__((never_inline)) { }
+#endif
 };
 
 ////////////////////////////////////////
@@ -97,7 +100,11 @@ public:
         return &b->m_resourceModule;
     }
 
-    soResourceModuleBuilder(u32 mdlResId, u32 anmResId, u8 resGrpNo, soModuleAccesser* accsr) :
+    soResourceModuleBuilder(u32 mdlResId, u32 anmResId, u8 resGrpNo, soModuleAccesser* accsr)
+#ifdef WN_SIMPLE_UNIT
+        __attribute__((never_inline))
+#endif
+        :
         m_idAccsr(mdlResId, mdlResId, anmResId), m_resourceModule(M, &m_idAccsr, resGrpNo) { }
 };
 
@@ -168,7 +175,11 @@ public:
         return &b->m_modelModule;
     }
 
-    soModelModuleBuilder(soModuleAccesser* acc, float modelScale, void* extendNodeTbl, soEventObserverRegistrationDesc* regDesc) :
+    soModelModuleBuilder(soModuleAccesser* acc, float modelScale, void* extendNodeTbl, soEventObserverRegistrationDesc* regDesc)
+#ifdef WN_SIMPLE_UNIT
+        __attribute__((never_inline))
+#endif
+        :
         m_nodeSetUps(S, 0),
         m_modelModule(acc, &m_nodeSetUps, modelScale, extendNodeTbl,
                       NullNodesHolder::getInstance(), regDesc) { }
