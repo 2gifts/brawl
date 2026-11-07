@@ -27,6 +27,10 @@ void ftKeepObserverVtables(s16 id) {
 template void ftKeepObserverVtables<0>(s16);
 #pragma dont_inline off
 #else
+// FT_WEAK_KEPT_OBSERVERS: this translation unit's original object does not define the keeper (Kirby).
+#ifdef FT_WEAK_KEPT_OBSERVERS
+__declspec(weak)
+#endif
 void ftKeepObserverVtables(s16 id) {
     soAnimCmdEventObserver animCmd(id);
     soSituationEventObserver situation(id);
@@ -72,6 +76,9 @@ soTransitionInfo::~soTransitionInfo() { } // BYTES: out of line in the REL
 soNullable::soNullable(bool isNull) { m_isNull = isNull; } // BYTES: out of line in the REL
 soKineticEnergy::~soKineticEnergy() { } // BYTES: out of line in the REL
 #ifndef FT_GENERAL_WORK_ABSTRACT_DTOR_INLINE
+#ifdef FT_WEAK_KEPT_OBSERVERS
+__declspec(weak)
+#endif
 soGeneralWorkAbstract::~soGeneralWorkAbstract() { } // BYTES: out of line in the REL
 #endif
 #pragma dont_inline off

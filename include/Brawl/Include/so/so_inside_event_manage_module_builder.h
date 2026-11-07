@@ -172,7 +172,11 @@ template<typename B, typename T>
 class soInsideEventManageModuleBuilder {
     soInsideEventManageModuleBuilder_MEMBER_LIST
 public:
-    soInsideEventManageModuleBuilder() :
+    soInsideEventManageModuleBuilder()
+#ifdef WN_SIMPLE_UNIT
+        __attribute__((never_inline))
+#endif
+        :
         m_entity(),
         m_module(this),
         m_status(m_module.getManageId(), B::StatusEvtId),

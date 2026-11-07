@@ -444,7 +444,11 @@ class soLinkModuleBuilder {
     soArrayVector<soLinkConnection, BC::ConnectionCap> m_connections;
     typename BC::ModuleType m_linkModule;
 public:
-    soLinkModuleBuilder(soModuleAccesser* acc) : m_connections(BC::ConnectionCap, 0), m_linkModule(acc, &m_connections) { }
+    soLinkModuleBuilder(soModuleAccesser* acc)
+#ifdef WN_SIMPLE_UNIT
+        __attribute__((never_inline))
+#endif
+        : m_connections(BC::ConnectionCap, 0), m_linkModule(acc, &m_connections) { }
     typename BC::ModuleType* getModule() { return &m_linkModule; }
 };
 
@@ -491,7 +495,11 @@ class soPhysicsModuleBuilder<soPhysicsModuleBuildConfigCap<0, T> > {
     u32 m_unk0;
     T m_physicsModule;
 public:
-    soPhysicsModuleBuilder(soModuleAccesser* acc, void* ikData) :
+    soPhysicsModuleBuilder(soModuleAccesser* acc, void* ikData)
+#ifdef WN_SIMPLE_UNIT
+        __attribute__((never_inline))
+#endif
+        :
         m_physicsModule(acc, ikData, &getNullArray<soPhysicsIKHandle>(), 1) { }
     T* getModule() { return &m_physicsModule; }
 };
@@ -721,6 +729,9 @@ class soWorkManageModuleBuilder {
     typename BC::ModuleType m_module;
 public:
     soWorkManageModuleBuilder(soModuleAccesser* acc, void* paramAccesser) : m_module(acc, paramAccesser) { }
+#ifdef WN_SIMPLE_UNIT
+    ~soWorkManageModuleBuilder() __attribute__((never_inline)) { }
+#endif
     typename BC::ModuleType* getModule() { return &m_module; }
 };
 
@@ -751,5 +762,8 @@ class soShadowModuleBuilder {
 public:
     // HYPOTHESIS: 10.0f is the shared float argument of the shadow module (the first float literal of every fighter REL).
     soShadowModuleBuilder(soModuleAccesser* acc) : m_module(acc, 10.0f, 0) { }
+#ifdef WN_SIMPLE_UNIT
+    ~soShadowModuleBuilder() __attribute__((never_inline)) { }
+#endif
     typename BC::ModuleType* getModule() { return &m_module; }
 };
