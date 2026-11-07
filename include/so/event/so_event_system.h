@@ -76,6 +76,10 @@ public:
     // The simple article calls the three disabled units out of line.
     soEventUnitNull() __attribute__((never_inline)) { }
     soEventUnitNull(s16, s16) __attribute__((never_inline)) { }
+#elif defined(WN_MARIO_FIREBALL_UNIT)
+    soEventUnitNull();
+    soEventUnitNull(s16, s16);
+    ~soEventUnitNull();
 #else
     soEventUnitNull() { }
     soEventUnitNull(s16, s16) { }

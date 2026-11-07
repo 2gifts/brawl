@@ -36,6 +36,9 @@ public:
 #ifdef WN_SIMPLE_UNIT
     ~soHeapModuleBuilder() __attribute__((never_inline)) { }
 #endif
+#ifdef WN_MARIO_FIREBALL_UNIT
+    typename BC::ModuleType* getModule() { return &m_heapModule; }
+#endif
 };
 
 ////////////////////////////////////////
@@ -54,6 +57,9 @@ class soParamCustomizeModuleBuilder {
 public:
     soParamCustomizeModuleBuilder(soModuleAccesser* accsr) :
         m_paramCustomizeModule(accsr) { }
+#ifdef WN_MARIO_FIREBALL_UNIT
+    typename BC::ModuleType* getModule() { return &m_paramCustomizeModule; }
+#endif
 };
 
 ////////////////////////////////////////
@@ -99,6 +105,11 @@ public:
     static T* getModule(soResourceModuleBuilder* b) {
         return &b->m_resourceModule;
     }
+#ifdef WN_MARIO_FIREBALL_UNIT
+    T* getModule() {
+        return &m_resourceModule;
+    }
+#endif
 
     soResourceModuleBuilder(u32 mdlResId, u32 anmResId, u8 resGrpNo, soModuleAccesser* accsr)
 #ifdef WN_SIMPLE_UNIT
@@ -174,6 +185,11 @@ public:
     static T* getModule(soModelModuleBuilder* b) {
         return &b->m_modelModule;
     }
+#ifdef WN_MARIO_FIREBALL_UNIT
+    T* getModule() {
+        return &m_modelModule;
+    }
+#endif
 
     soModelModuleBuilder(soModuleAccesser* acc, float modelScale, void* extendNodeTbl, soEventObserverRegistrationDesc* regDesc)
 #ifdef WN_SIMPLE_UNIT

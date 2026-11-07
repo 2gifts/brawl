@@ -122,6 +122,7 @@ public:
     u8 exchangeCharKindDetail(MuSelchkind selCharKind);
     void dispMarkKind(MuSelchkind charKind);
     void setCharKind(MuSelchkind charKind);
+    MuSelchkind getCharKind();
     // The number of the color of the coin and of the hand: the number of the area, or the color of the team in a team battle,
     // counted from 1. Player kind 0 gets 6 and kind 2 gets 5; the flag asks for the color of kind 1 whatever the kind is.
     // HYPOTHESIS: the meaning of the flag.
@@ -189,6 +190,8 @@ public:
     bool isColorDecButtonPushed();
     // HYPOTHESIS: an inline accessor returns the area controller status by value.
     gfPadStatus getPadStatus();
+    // The direction that the controller repeats (the trigger word of the menu controller).
+    int getDirRepeat();
     int getCollKind(Vec2f* pos, int* arg, float* rect);
     void openHandiList();
     void forceCloseList();

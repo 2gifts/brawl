@@ -1083,3 +1083,385 @@ const wnSheikNeedleData* ftCommonDataAccesser::getWeaponData<wnSheikNeedleData>(
         return NULL;
     }
 }
+
+// HYPOTHESIS: ftData's declared extendParam array is shorter than the slots read below.
+
+extern "C" void* fn_27_147D34(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    return lbl_27_bss_3210[kind].data->extendParam[5];
+}
+
+extern "C" void* fn_27_147D4C(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    return lbl_27_bss_3210[kind].data->extendParam[7];
+}
+
+extern "C" void* fn_27_147D7C(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    return lbl_27_bss_3210[kind].data->extendParam[9];
+}
+
+extern "C" void* fn_27_148A9C(const ftCommonDataAccesser*, s32, bool*)
+{
+    return lbl_27_bss_3210[Fighter_Yoshi].data->extendParam[5];
+}
+
+extern "C" void* fn_27_148B44(const ftCommonDataAccesser*, s32, bool*)
+{
+    return lbl_27_bss_3210[Fighter_Yoshi].data->extendParam[7];
+}
+
+extern "C" void* fn_27_148B58(const ftCommonDataAccesser*, s32, bool*)
+{
+    return lbl_27_bss_3210[Fighter_Yoshi].data->extendParam[8];
+}
+
+extern "C" void* fn_27_148B6C(const ftCommonDataAccesser*, s32, bool*)
+{
+    return lbl_27_bss_3210[Fighter_Yoshi].data->extendParam[9];
+}
+
+extern "C" void* fn_27_148D7C(const ftCommonDataAccesser*, s32, bool*)
+{
+    return lbl_27_bss_3210[Fighter_Sheik].data->extendParam[7];
+}
+
+extern "C" void* fn_27_148D90(const ftCommonDataAccesser*, s32, bool*)
+{
+    return lbl_27_bss_3210[Fighter_Sheik].data->extendParam[8];
+}
+
+extern "C" void* fn_27_148E3C(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    return lbl_27_bss_3210[kind].data->extendParam[7];
+}
+
+extern "C" void* fn_27_148F4C(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    return lbl_27_bss_3210[kind].data->extendParam[11];
+}
+
+extern "C" void* fn_27_149194(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    return lbl_27_bss_3210[kind].data->extendParam[11];
+}
+
+extern "C" void* fn_27_1491AC(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    return lbl_27_bss_3210[kind].data->extendParam[12];
+}
+
+extern "C" void* fn_27_1491C4(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    return lbl_27_bss_3210[kind].data->extendParam[12];
+}
+
+extern "C" void* fn_27_14925C(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    return lbl_27_bss_3210[kind].data->extendParam[14];
+}
+
+extern "C" void* fn_27_149274(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    return lbl_27_bss_3210[kind].data->extendParam[15];
+}
+
+extern "C" void* fn_27_14928C(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    return lbl_27_bss_3210[kind].data->extendParam[16];
+}
+
+extern "C" void* fn_27_1494BC(const ftCommonDataAccesser*, s32, bool*)
+{
+    return lbl_27_bss_3210[Fighter_Wario].data->extendParam[5];
+}
+
+extern "C" void* fn_27_149978(const ftCommonDataAccesser*, s32, bool*)
+{
+    return lbl_27_bss_3210[Fighter_Ganon].data->extendParam[4];
+}
+
+extern "C" void* fn_27_149AF4(const ftCommonDataAccesser*, s32, bool*)
+{
+    return lbl_27_bss_3210[Fighter_ToonLink].data->extendParam[11];
+}
+
+void* ftCommonDataAccesser::getWeaponData128(ftKind kind, bool* resourceGroup) const
+{
+    return lbl_27_bss_3210[kind].data->extendParam[4];
+}
+
+extern "C" void* fn_27_149464(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    switch (kind) {
+    case Fighter_Samus:
+        return lbl_27_bss_3210[Fighter_Samus].data->extendParam[21];
+    default:
+        return NULL;
+    }
+}
+
+extern "C" void* fn_27_1497CC(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    switch (kind) {
+    case Fighter_GKoopa:
+        return lbl_27_bss_3210[Fighter_GKoopa].data->extendParam[5];
+    default:
+        return NULL;
+    }
+}
+
+extern "C" void* fn_27_149B08(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    switch (kind) {
+    case Fighter_ToonLink:
+        return lbl_27_bss_3210[Fighter_ToonLink].data->extendParam[16];
+    default:
+        return NULL;
+    }
+}
+
+extern "C" void* fn_27_14948C(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    if (kind == Fighter_Wario) {
+        return lbl_27_bss_3210[Fighter_Wario].data->extendParam[4];
+    }
+    return lbl_27_bss_3210[Fighter_WarioMan].data->extendParam[5];
+}
+
+extern "C" void* fn_27_148198(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    switch (kind) {
+    case Fighter_PokeLizardon:
+        return lbl_27_bss_3210[Fighter_PokeLizardon].data->extendParam[5];
+    case Fighter_Kirby:
+        return lbl_27_bss_3210[Fighter_Kirby].data->extendParam[53];
+    default:
+        return NULL;
+    }
+}
+
+extern "C" void* fn_27_148BD0(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    switch (kind) {
+    case Fighter_SZeroSuit:
+        return lbl_27_bss_3210[Fighter_SZeroSuit].data->extendParam[5];
+    case Fighter_Kirby:
+        return lbl_27_bss_3210[Fighter_Kirby].data->extendParam[59];
+    default:
+        return NULL;
+    }
+}
+
+extern "C" void* fn_27_1484BC(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    switch (kind) {
+    case Fighter_Fox:
+        return lbl_27_bss_3210[Fighter_Fox].data->extendParam[11];
+    case Fighter_Falco:
+        return lbl_27_bss_3210[Fighter_Falco].data->extendParam[9];
+    case Fighter_Wolf:
+        return lbl_27_bss_3210[Fighter_Wolf].data->extendParam[11];
+    default:
+        return NULL;
+    }
+}
+
+// Owner's extendParam slot, or Kirby's copy from that fighter's public "data" archive.
+#define FT_OWNER_OR_KIRBY(owner, index, field)                                                         \
+    switch (kind) {                                                                                    \
+    case owner:                                                                                        \
+        return lbl_27_bss_3210[owner].data->extendParam[index];                                        \
+    case Fighter_Kirby: {                                                                              \
+        u32 slot = fn_27_1222C8(g_ftSlotManager, owner);                                               \
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U); \
+        return static_cast<ftRobotBeamArticle*>(address)->field;                                       \
+    }                                                                                                  \
+    default:                                                                                           \
+        return NULL;                                                                                   \
+    }
+
+#define FT_KIND_OR_KIRBY(owner, index, field)                                                          \
+    switch (kind) {                                                                                    \
+    case owner:                                                                                        \
+        return lbl_27_bss_3210[kind].data->extendParam[index];                                         \
+    case Fighter_Kirby: {                                                                              \
+        u32 slot = fn_27_1222C8(g_ftSlotManager, owner);                                               \
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U); \
+        return static_cast<ftRobotBeamArticle*>(address)->field;                                       \
+    }                                                                                                  \
+    default:                                                                                           \
+        return NULL;                                                                                   \
+    }
+
+extern "C" void* fn_27_147C9C(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_KIND_OR_KIRBY(Fighter_Mario, 6, unk10)
+}
+
+extern "C" void* fn_27_148050(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    if (kind == Fighter_Kirby) {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, Fighter_Pikachu);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<ftRobotBeamArticle*>(address)->unk10;
+    }
+    return lbl_27_bss_3210[Fighter_Pikachu].data->extendParam[5];
+}
+
+extern "C" void* fn_27_1480CC(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    if (kind == Fighter_Kirby) {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, Fighter_Pikachu);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<ftRobotBeamArticle*>(address)->unk14;
+    }
+    return lbl_27_bss_3210[Fighter_Pikachu].data->extendParam[6];
+}
+
+extern "C" void* fn_27_148380(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_OWNER_OR_KIRBY(Fighter_Fox, 8, unk10)
+}
+
+extern "C" void* fn_27_148414(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_OWNER_OR_KIRBY(Fighter_Fox, 9, unk14)
+}
+
+extern "C" void* fn_27_14858C(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_OWNER_OR_KIRBY(Fighter_Falco, 6, unk10)
+}
+
+extern "C" void* fn_27_148620(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_OWNER_OR_KIRBY(Fighter_Falco, 7, unk14)
+}
+
+extern "C" void* fn_27_1486C8(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_OWNER_OR_KIRBY(Fighter_Wolf, 8, unk10)
+}
+
+extern "C" void* fn_27_14875C(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_OWNER_OR_KIRBY(Fighter_Wolf, 9, unk14)
+}
+
+extern "C" void* fn_27_148910(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_OWNER_OR_KIRBY(Fighter_Dedede, 12, unk10)
+}
+
+extern "C" void* fn_27_1489B8(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_OWNER_OR_KIRBY(Fighter_Diddy, 6, unk10)
+}
+
+extern "C" void* fn_27_148CE8(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_OWNER_OR_KIRBY(Fighter_Sheik, 6, unk14)
+}
+
+extern "C" void* fn_27_148DA4(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_KIND_OR_KIRBY(Fighter_Luigi, 6, unk10)
+}
+
+extern "C" void* fn_27_148F64(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    if (kind == Fighter_Kirby) {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, Fighter_Peach);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<ftRobotBeamArticle*>(address)->unk10;
+    }
+    return lbl_27_bss_3210[kind].data->extendParam[12];
+}
+
+extern "C" void* fn_27_148FE4(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    if (kind == Fighter_Kirby) {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, Fighter_Peach);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<ftRobotBeamArticle*>(address)->unk14;
+    }
+    return lbl_27_bss_3210[kind].data->extendParam[13];
+}
+
+extern "C" void* fn_27_149064(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_KIND_OR_KIRBY(Fighter_Pit, 9, unk10)
+}
+
+extern "C" void* fn_27_1490FC(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_KIND_OR_KIRBY(Fighter_Pit, 10, unk14)
+}
+
+extern "C" void* fn_27_1491DC(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    if (kind == Fighter_Kirby) {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, Fighter_Popo);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<ftRobotBeamArticle*>(address)->unk10;
+    }
+    return lbl_27_bss_3210[kind].data->extendParam[13];
+}
+
+extern "C" void* fn_27_1492F8(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    if (kind == Fighter_Kirby) {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, Fighter_Samus);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<ftRobotBeamArticle*>(address)->unk10;
+    }
+    return lbl_27_bss_3210[Fighter_Samus].data->extendParam[8];
+}
+
+extern "C" void* fn_27_1494D0(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    if (kind == Fighter_Kirby) {
+        u32 slot = fn_27_1222C8(g_ftSlotManager, Fighter_Lucario);
+        void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
+        return static_cast<ftRobotBeamArticle*>(address)->unk10;
+    }
+    return lbl_27_bss_3210[Fighter_Lucario].data->extendParam[9];
+}
+
+extern "C" void* fn_27_1496F0(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_OWNER_OR_KIRBY(Fighter_Koopa, 4, unk10)
+}
+
+extern "C" void* fn_27_149844(const ftCommonDataAccesser*, s32 kind, bool*)
+{
+    FT_OWNER_OR_KIRBY(Fighter_GameWatch, 6, unk10)
+}
+
+#undef FT_OWNER_OR_KIRBY
+#undef FT_KIND_OR_KIRBY
+
+// HYPOTHESIS: ftData + 0x1C is the common status-flag table, eight bytes per status. Nana shares Popo's.
+struct ftDataStatusFlags {
+    u8 unk0[0x1C];
+    const ftStatusFlagData* statusFlags;
+};
+
+const ftStatusFlagData* ftCommonDataAccesser::getFtStatusData(ftKind kind, int status) const
+{
+    if (kind == Fighter_Nana) {
+        kind = Fighter_Popo;
+    }
+    return reinterpret_cast<ftDataStatusFlags*>(lbl_27_bss_3210[kind].data)->statusFlags + status;
+}
+
+extern int g_soValueVariation;
+
+// Defined in this file; dont_inline keeps the out-of-line call in getParam / getParamCommon.
+#pragma dont_inline on
+extern "C" s32 fn_27_1454C0()
+{
+    return g_soValueVariation;
+}
+#pragma dont_inline reset

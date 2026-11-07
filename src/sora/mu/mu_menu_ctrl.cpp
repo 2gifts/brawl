@@ -184,3 +184,21 @@ int muMenuController::getButtonPushedControllerID(u32 buttons) {
     }
     return -1;
 }
+
+// muMenuController::getControllerID (the map name); other files call it by this stand-in name.
+extern "C" int fn_800BA3D8(muMenuController* self) {
+    u8 mask = self->unk4;
+    if (mask == 0xFF) {
+        return 0xF0;
+    }
+    int controller;
+    for (controller = 0; controller < 8; controller++) {
+        if (mask & (1 << controller)) {
+            break;
+        }
+    }
+    if (controller < 8) {
+        return controller;
+    }
+    return -1;
+}

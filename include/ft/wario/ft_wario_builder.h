@@ -41,8 +41,13 @@ typedef soStatusModuleBuildConfig<305, soGeneralWorkBuildConfig<18, 14, 2>, 274,
 typedef soCollisionSearchModuleBuilder<soCollisionSearchModuleBuildConfig<soCollisionSearchModuleImpl> > ftWarioCollisionSearchModuleBuilder;
 typedef soKineticModuleBuildConfigMediator<soKineticModuleGenericImpl, ftKineticMediatorImplT<ftWarioKineticTransactor, ftKineticTransactor> > ftWarioKineticModuleBuildConfig;
 
+#ifdef FT_WARIO_ARTICLE_POOLS
+#include <ft/wario/ft_wario_article_pools.h>
+typedef ftWarioArticleManageModuleBuilder ftWarioGenerateArticleManageModuleBuilder;
+#else
 // HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnWarioBike pools), not reconstructed yet
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x4BC8, Fighter_Wario> ftWarioGenerateArticleManageModuleBuilder;
+#endif
 
 // HYPOTHESIS: Chomp uses the four additional primary item slots.
 // Native builder construction selects seven primary slots and four auxiliary
