@@ -41,7 +41,7 @@ public:
         : ftExtendParamAccesser(kind) { }
 #ifdef FT_EXTEND_PARAM_EX_DTOR_OUT_OF_LINE
     // sora_melee emits this deleting destructor on its own; fighter RELs inline the empty body.
-    virtual ~ftExtendParamAccesserEx() __attribute__((never_inline));
+    virtual ~ftExtendParamAccesserEx();
 #else
     virtual ~ftExtendParamAccesserEx() { }
 #endif
