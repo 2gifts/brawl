@@ -125,6 +125,9 @@ struct KpadStatusRaw {
 class Network {
 public:
     static void alarmCallback(Network* network);
+
+    // Only the object's address is used here; a full-size object stays out of small data.
+    char m_storage[0x10];
 };
 extern Network g_Network;
 
