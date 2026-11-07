@@ -33,6 +33,9 @@ public:
     // before the builder address); the overload above is kept for the other users.
     soHeapModuleBuilder(Heaps::HeapType instHeap, Heaps::HeapType nwModelInstHeap, Heaps::HeapType nwMotionInstHeap, s32 slotNo) :
         m_heapModule(instHeap, nwModelInstHeap, nwMotionInstHeap, slotNo) { }
+#ifdef WN_MARIO_FIREBALL_UNIT
+    typename BC::ModuleType* getModule() { return &m_heapModule; }
+#endif
 };
 
 ////////////////////////////////////////
@@ -51,6 +54,9 @@ class soParamCustomizeModuleBuilder {
 public:
     soParamCustomizeModuleBuilder(soModuleAccesser* accsr) :
         m_paramCustomizeModule(accsr) { }
+#ifdef WN_MARIO_FIREBALL_UNIT
+    typename BC::ModuleType* getModule() { return &m_paramCustomizeModule; }
+#endif
 };
 
 ////////////////////////////////////////
@@ -96,6 +102,11 @@ public:
     static T* getModule(soResourceModuleBuilder* b) {
         return &b->m_resourceModule;
     }
+#ifdef WN_MARIO_FIREBALL_UNIT
+    T* getModule() {
+        return &m_resourceModule;
+    }
+#endif
 
     soResourceModuleBuilder(u32 mdlResId, u32 anmResId, u8 resGrpNo, soModuleAccesser* accsr) :
         m_idAccsr(mdlResId, mdlResId, anmResId), m_resourceModule(M, &m_idAccsr, resGrpNo) { }
@@ -167,6 +178,11 @@ public:
     static T* getModule(soModelModuleBuilder* b) {
         return &b->m_modelModule;
     }
+#ifdef WN_MARIO_FIREBALL_UNIT
+    T* getModule() {
+        return &m_modelModule;
+    }
+#endif
 
     soModelModuleBuilder(soModuleAccesser* acc, float modelScale, void* extendNodeTbl, soEventObserverRegistrationDesc* regDesc) :
         m_nodeSetUps(S, 0),

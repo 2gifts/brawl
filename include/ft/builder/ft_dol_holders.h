@@ -10,7 +10,11 @@ template <s32 I, typename V, typename Null>
 class soArraySelectHolder {
 public:
     V m_array;
+#ifdef WN_MARIO_FIREBALL_UNIT
+    soArraySelectHolder() : m_array() { }
+#else
     soArraySelectHolder() : m_array(0) { }
+#endif
     soArraySelectHolder(s32 size, s32 unk) : m_array(size, unk) { }
     explicit soArraySelectHolder(s32 size) : m_array(size) { }
     ~soArraySelectHolder() { }

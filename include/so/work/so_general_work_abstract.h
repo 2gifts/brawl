@@ -12,7 +12,7 @@ public:
     soGeneralWorkAbstract(bool isNull) : soNullable(isNull) { }
 #if defined(SO_BUILDER_HELPERS_WEAK)
     ~soGeneralWorkAbstract() __attribute__((never_inline)) { } // BYTES: a weak copy of the Enemy unit
-#elif defined(FT_MODULE_BUILDER)
+#elif defined(FT_MODULE_BUILDER) && !defined(WN_MARIO_FIREBALL_UNIT)
     ~soGeneralWorkAbstract(); // BYTES: out of line in the fighter RELs (defined in ft_builder_noinline.h)
 #else
     ~soGeneralWorkAbstract() { }

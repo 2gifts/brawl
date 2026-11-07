@@ -72,8 +72,14 @@ public:
 template <typename T>
 class soEventUnitNull {
 public:
+#ifdef WN_MARIO_FIREBALL_UNIT
+    soEventUnitNull();
+    soEventUnitNull(s16, s16);
+    ~soEventUnitNull();
+#else
     soEventUnitNull() { }
     soEventUnitNull(s16, s16) { }
+#endif
 };
 static_assert(sizeof(soEventUnitNull<void>) == 1, "Disabled event unit extent");
 
