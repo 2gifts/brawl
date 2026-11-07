@@ -1331,7 +1331,7 @@ s32 VFiPFCACHE_FlushAllCaches(PF_VOLUME* p_vol) {
 
 // ---------------------------------------------------------------- pf_dir
 
-s32 fn_803B19A0(PF_VOLUME* p_vol, PF_STR* p_path, s8 attr, PF_DTA* p_dta) {
+s32 VFiPFDIR_p_fsfirst(PF_VOLUME* p_vol, PF_STR* p_path, s8 attr, PF_DTA* p_dta) {
     PF_DIR_ENT ent;
     PF_ENT_ITER iter;
     PF_STR dir_path;
@@ -1383,7 +1383,7 @@ void VFiPFDIR_FinalizeAllDirs(PF_VOLUME* p_vol) {
     p_vol->num_opened_directories = 0;
 }
 
-s32 fn_803B1C78(PF_DTA* p_dta) {
+s32 VFiPFDIR_fsnext(PF_DTA* p_dta) {
     PF_VOLUME* p_vol;
     s32 err;
 
@@ -1410,7 +1410,7 @@ s32 fn_803B1C78(PF_DTA* p_dta) {
     return err;
 }
 
-s32 fn_803B1F80(PF_STR* p_path) {
+s32 VFiPFDIR_chdir(PF_STR* p_path) {
     PF_VOLUME* p_vol;
     s32 err;
 
@@ -1728,6 +1728,25 @@ s32 VFiPFFAT_UpdateFATEntry(PF_VOLUME* p_vol, PF_CACHE_PAGE* p_page) {
         err = VFiPFCACHE_WriteFATPage(p_vol, p_page);
     }
 
+    return err;
+}
+
+// HYPOTHESIS: fsi_flag bit 1 means an FSINFO sector exists, bit 2 means its free count is stale.
+s32 fn_803B80F0(PF_VOLUME* p_vol) { // VFiPFFAT_RefreshFSINFO
+    u16 flag;
+    s32 err;
+
+    err = 0;
+    if (p_vol->bpb.fat_type != FAT_32) {
+        return 0xC;
+    }
+    flag = p_vol->fsi_flag;
+    if ((flag & 2) == 0) {
+        return 0x24;
+    }
+    if ((flag & 4) != 0) {
+        err = VFiPFDRV_StoreFreeCountToFSINFO(p_vol);
+    }
     return err;
 }
 
@@ -2342,20 +2361,20 @@ int VFipf2_attach(PF_DRV_TBL** drv_tbl) {
     return VFiPFAPI_convertReturnValue(err);
 }
 
-s32 fn_803C29DC(const s8* path) {
+s32 VFipf2_chdir(const s8* path) {
     PF_STR str;
     s32 err;
 
     err = VFiPFSTR_InitStr(&str, path, 1);
     if (err == 0) {
-        err = fn_803B1F80(&str);
+        err = VFiPFDIR_chdir(&str);
     } else {
         lbl_8053B248.last_error = err;
     }
     return VFiPFAPI_convertReturnValue(err);
 }
 
-PF_FILE* fn_803C2A2C(const s8* path) {
+PF_FILE* VFipf2_create(const s8* path) {
     PF_STR str;
     PF_FILE* p_file;
     s32 err;
@@ -2405,7 +2424,7 @@ PF_FILE* VFipf2_fopen(const s8* path, const s8* mode) {
     return VFiPFAPI_convertReturnValue2NULL(err, p_file);
 }
 
-s32 fn_803C2BB8(s8 drv_char) {
+s32 VFipf2_format(s8 drv_char) {
     return VFiPFAPI_convertReturnValue(fn_803C1F84(drv_char));
 }
 
@@ -2420,8 +2439,23 @@ s32 VFipf2_fseek(PF_FILE* p_file, s32 offset, s32 origin) {
     return VFiPFAPI_convertReturnValue(VFiPFFILE_fseek(p_file, offset, origin));
 }
 
-s32 fn_803C2CA0(PF_DTA* p_dta) {
-    return VFiPFAPI_convertReturnValue(fn_803B1C78(p_dta));
+s32 VFipf2_fsnext(PF_DTA* p_dta) {
+    return VFiPFAPI_convertReturnValue(VFiPFDIR_fsnext(p_dta));
+}
+
+s32 fn_803B1D30(PF_STR* p_path, void* p_stat);
+
+s32 fn_803C2CC4(const s8* path, void* p_stat) { // VFipf2_fstat
+    PF_STR str;
+    s32 err;
+
+    err = VFiPFSTR_InitStr(&str, path, 1);
+    if (err == 0) {
+        err = fn_803B1D30(&str, p_stat);
+    } else {
+        lbl_8053B248.last_error = err;
+    }
+    return VFiPFAPI_convertReturnValue(err);
 }
 
 u32 VFipf2_fwrite(void* p_buf, u32 size, u32 count, PF_FILE* p_file) {
@@ -2451,7 +2485,7 @@ s32 VFipf2_init_prfile2(u32 config, void* param) {
     return VFiPFAPI_convertReturnValue(err);
 }
 
-s32 fn_803C2DB4(const s8* path) {
+s32 VFipf2_mkdir(const s8* path) {
     PF_STR str;
     s32 err;
 
@@ -2490,6 +2524,20 @@ void VFiPF_InitLockFile(void) {
 s32 VFiPFSYS_GetCurrentContextID(s32* context_id) {
     *context_id = 0;
     return 0;
+}
+
+void dTM_GetNowTime(PF_SYS_DATE* sdate, PF_SYS_TIME* stime);
+
+void VFiPFSYS_TimeStamp(PF_SYS_DATE* sdate, PF_SYS_TIME* stime) {
+    sdate->sys_year = 2000;
+    sdate->sys_month = 4;
+    sdate->sys_day = 1;
+    stime->sys_hour = 0;
+    stime->sys_min = 0;
+    stime->sys_sec = 0;
+    stime->sys_ms = 1;
+    dTM_GetNowTime(sdate, stime);
+    stime->sys_ms = 1;
 }
 
 // ---------------------------------------------------------------- d_vf
@@ -2533,7 +2581,7 @@ s32 VF_activate_drive_common(s32 i_handle_idx, const s8* i_sys_file_name_p, void
     return 0;
 }
 
-s32 fn_803C31B4(const s8* i_drive, const s8* i_sys_file_name_p) {
+s32 VFMountDriveNANDFlash(const s8* i_drive, const s8* i_sys_file_name_p) {
     s32 handle_idx;
     s32 err;
     s32 result;
@@ -2636,6 +2684,20 @@ s32 VFWriteFile(void* i_file_p, void* i_buf_p, u32 i_size) {
     return err;
 }
 
+s32 VFCloseFile(void* i_file_p) {
+    s32 err;
+
+    if (lbl_805A120C != 0) {
+        OSLockMutex(&lbl_80563200);
+    }
+    err = VFSysCloseFile(i_file_p);
+    VFSysSetLastError(err);
+    if (lbl_805A120C != 0) {
+        OSUnlockMutex(&lbl_80563200);
+    }
+    return err;
+}
+
 s32 VFGetFileSizeByFd(void* i_file_p) {
     s32 size = -1;
     s32 err = VFSysGetFileSizeByFd(&size, i_file_p);
@@ -2645,7 +2707,7 @@ s32 VFGetFileSizeByFd(void* i_file_p) {
     return size;
 }
 
-s32 fn_803C3DE0(void* unk0, const s8* i_path_p, u32 unk2) {
+s32 VFFileSearchFirst(void* unk0, const s8* i_path_p, u32 unk2) {
     s32 handle_idx = -1;
     s8* path;
     s32 err;
@@ -2765,6 +2827,80 @@ VF_HANDLE_DRIVE* VFSysGetDriveP(s32 i_idx) {
         return &handle_p->drive;
     }
     return NULL;
+}
+
+s32 VFSysHandleP2Idx(VF_HANDLE_TYPE* i_handle_p) {
+    VF_HANDLE_TYPE* handle;
+    VF_HANDLE_TYPE* end;
+    s32 index;
+    u32 count;
+
+    if (i_handle_p != NULL) {
+        count = lbl_805A1210;
+        if (count != 0 && lbl_805A1220 != NULL) {
+            handle = lbl_805A1220;
+        } else {
+            handle = NULL;
+        }
+        end = handle + count;
+        index = 0;
+        for (; handle != end; handle++, index++) {
+            if (i_handle_p == handle) {
+                return index;
+            }
+        }
+    }
+    return -1;
+}
+
+VF_HANDLE_TYPE* VFSysVol2HandleP(PF_VOLUME* i_vol_p) {
+    VF_HANDLE_TYPE* handle;
+    VF_HANDLE_TYPE* end;
+    u32 count;
+
+    if (i_vol_p != NULL) {
+        count = lbl_805A1210;
+        if (count != 0 && lbl_805A1220 != NULL) {
+            handle = lbl_805A1220;
+        } else {
+            handle = NULL;
+        }
+        end = handle + count;
+        for (; handle != end; handle++) {
+            if (handle->device_p != NULL && handle->drive.pf_drv.drive == i_vol_p->drv_char) {
+                return handle;
+            }
+        }
+    }
+    return NULL;
+}
+
+VF_HANDLE_DRIVE* VFSysPDMDisk2DriveP(PDM_DISK* disk_p) {
+    VF_HANDLE_TYPE* handle_p;
+
+    if (disk_p != NULL) {
+        handle_p = vfsys_get_handle(dCommon_getHandleIdxFromDisk(disk_p));
+        if (handle_p != NULL) {
+            return &handle_p->drive;
+        }
+        return NULL;
+    }
+    return NULL;
+}
+
+s32 VFSysSetSyncMode(s32 i_handle_idx, u32 i_mode) {
+    VF_HANDLE_TYPE* handle_p;
+    VF_HANDLE_DEVICE* device_p;
+
+    handle_p = vfsys_get_handle(i_handle_idx);
+    if (handle_p == NULL || handle_p->drive.pf_disk_p == NULL || (device_p = handle_p->device_p) == NULL) {
+        return 0xB003;
+    }
+    if (i_mode <= 1) {
+        device_p->sync_mode = i_mode;
+        return 0;
+    }
+    return -1;
 }
 
 s32 VFSysCheckExistPrfFile_nandflash(VF_HANDLE_DEVICE* i_device_p, const s8* i_prf_file_name_p, void* i_memory_p, u32 i_handle_idx) {
@@ -2934,7 +3070,88 @@ void dHash_InitHashTable(void) {
     }
 }
 
+// HYPOTHESIS: _MakeWStr writes the wide name into lbl_80563350, and the byte
+// dHash_InitHashTable clears is the value GetArg returns.
+int dHash_GetArg(const s8* i_Name) {
+    s32 index;
+
+    if (_MakeWStr(i_Name) != 0) {
+        index = dHash_SearchHashW((const u16*)lbl_80563350);
+        if (index == -1) {
+            return -1;
+        }
+        return lbl_80563360[index].used;
+    }
+    return -1;
+}
+
+int dHash_DeleteData(const s8* i_Name) {
+    s32 index;
+    dHashEntry* entry;
+
+    if (_MakeWStr(i_Name) != 0) {
+        index = dHash_SearchHashW((const u16*)lbl_80563350);
+        if (index != -1) {
+            if (index >= 0 && index < 31) {
+                entry = &lbl_80563360[index];
+                entry->key = 0;
+                entry->used = 0;
+            }
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
+}
+
 // ---------------------------------------------------------------- d_common
+
+// HYPOTHESIS: splits [buf, buf+size) into a head up to the next 32-byte
+// boundary, a 32-byte-aligned middle, and a tail of the original misalignment.
+// A middle of exactly zero bytes (size 32, unaligned) is reported as empty.
+void dCommon_DevideBuff32(void* i_buf, u32 i_size, u32* i_1st_size_p, void* i_2nd_pp, u32* i_2nd_size_p,
+                          void* i_3rd_pp, u32* i_3rd_size_p) {
+    u32 off;
+    u32 head;
+
+    *(void**)i_3rd_pp = NULL;
+    *(void**)i_2nd_pp = NULL;
+    *i_3rd_size_p = 0;
+    *i_2nd_size_p = 0;
+    *i_1st_size_p = 0;
+    off = (u32)i_buf & 0x1F;
+    if (off == 0) {
+        *i_1st_size_p = 0;
+        *(void**)i_2nd_pp = i_buf;
+        *i_2nd_size_p = i_size;
+        *(void**)i_3rd_pp = NULL;
+        *i_3rd_size_p = 0;
+        return;
+    }
+    head = 0x20 - off;
+    {
+        u32 mid = i_size;
+        mid -= 0x20;
+
+        *i_1st_size_p = head;
+        if (mid != 0) {
+            *(void**)i_2nd_pp = (u8*)i_buf + head;
+            *i_2nd_size_p = mid;
+        }
+    }
+    *i_3rd_size_p = off;
+    *(void**)i_3rd_pp = (u8*)i_buf + i_size - off;
+}
+
+int dCommon_IsPrfFile(void* i_buff_p) {
+    s8 buf[0x20];
+
+    fn_803A9644(buf, i_buff_p, 0x20);
+    if (!(buf[0] == 'V' && buf[1] == 'F' && buf[2] == 'F' && buf[3] == ' ')) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 dCommon_MakeFsInfoSec(u8* buf, u32 fsInfoSize) {
     PDM_FSINFO fsinfo;
@@ -3185,7 +3402,7 @@ s32 dCommon_FlushFromVol(PF_VOLUME* p_vol, int i_setLastDeviceError) {
     return err;
 }
 
-s32 fn_803C8014(s32 i_handle_idx, int i_setLastDeviceError) {
+s32 dCommon_FlushFromHandleIdx(s32 i_handle_idx, int i_setLastDeviceError) {
     s32 err;
     VF_HANDLE_TYPE* handle_p = VFSysGetHandleP(i_handle_idx);
 
@@ -3219,7 +3436,7 @@ void VFFinalize(void) {
     }
 }
 
-s32 fn_803C3ED8(void* info) {
+s32 VFFileSearchNext(void* info) {
     s32 err;
     if (lbl_805A120C != 0) {
         OSLockMutex(&lbl_80563200);
@@ -3232,7 +3449,7 @@ s32 fn_803C3ED8(void* info) {
     return err;
 }
 
-s32 fn_803C4054(const s8* i_drive) {
+s32 VFFormatDrive(const s8* i_drive) {
     s32 err;
     if (lbl_805A120C != 0) {
         OSLockMutex(&lbl_80563200);
@@ -3245,7 +3462,7 @@ s32 fn_803C4054(const s8* i_drive) {
     return err;
 }
 
-s32 fn_803C3048(const s8* i_path, u32 i_size) {
+s32 VFCreateSystemFileNANDFlash(const s8* i_path, u32 i_size) {
     s32 err;
     if (lbl_805A120C != 0) {
         OSLockMutex(&lbl_80563200);
@@ -3257,7 +3474,7 @@ s32 fn_803C3048(const s8* i_path, u32 i_size) {
     return err;
 }
 
-s32 fn_803C3B18(const s8* i_path) {
+s32 VFCreateDir(const s8* i_path) {
     s32 handle_idx = -1;
     s8* path;
     s32 err;
@@ -3288,7 +3505,7 @@ s32 fn_803C3B18(const s8* i_path) {
     return err;
 }
 
-s32 fn_803C3BE8(const s8* i_path) {
+s32 VFChangeDir(const s8* i_path) {
     s32 handle_idx = -1;
     s8* path;
     s32 err;
@@ -3672,7 +3889,7 @@ void VFiPFCLUSTER_UpdateLastAccessCluster(PF_FILE* p_file, u32 sector) {
     p_file->p_sfd->ffd.last_access_cluster.cluster = ((sector - bpb->first_data_sector) >> bpb->log2_sectors_per_cluster) + 2;
 }
 
-s32 fn_803B1420(PF_VOLUME* p_vol, PF_STR* p_path, void* p_stat);
+s32 VFiPFDIR_p_fstat(PF_VOLUME* p_vol, PF_STR* p_path, void* p_stat);
 
 s32 fn_803B1D30(PF_STR* p_path, void* p_stat) { // VFiPFDIR_fstat
     PF_VOLUME* p_vol;
@@ -3698,7 +3915,7 @@ s32 fn_803B1D30(PF_STR* p_path, void* p_stat) { // VFiPFDIR_fstat
         p_vol->last_error = err;
         return err;
     }
-    err = fn_803B1420(p_vol, p_path, p_stat);
+    err = VFiPFDIR_p_fstat(p_vol, p_path, p_stat);
     if (err != 0) {
         lbl_8053B248.last_error = err;
         p_vol->last_error = err;

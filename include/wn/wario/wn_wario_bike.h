@@ -123,12 +123,17 @@ protected:
     wnModuleAccesserBuilder<wnWarioBikeModuleAccesserBuildConfig> m_modules;
     u32 m_modulesPad; // HYPOTHESIS: as WN_WEAPON_NO_COMMON_ENERGIES, the native module storage ends one word later
 public:
+#ifdef FT_WARIO_ARTICLE_POOLS
+    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info,
+                    const wnModuleAccesserBuildData& bd);
+#else
     wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info,
                     const wnModuleAccesserBuildData& bd)
         : Weapon(name, bd.m_kind, bd.m_data, articleId, &info, m_modules.getModuleAccesser(), true),
           m_modules(this, bd) {
         Weapon::initialize();
     }
+#endif
     virtual ~wnWeaponBuilder() { }
     virtual void deactivateDescendantForce() {
         soSingletonHolder<soArticleMediatorNull>::getInstance()->deactivate();

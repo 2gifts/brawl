@@ -1,4 +1,4 @@
-// Local BrawlHeaders shadow: adds soEffectScreen friendship.
+// Local BrawlHeaders shadow: adds soEffectScreen and efScreen friendship.
 #pragma once
 
 #include <StaticAssert.h>
@@ -7,6 +7,7 @@
 class efScreenHandle {
     s8 unk0;
     friend class soEffectScreen;
+    friend class efScreen;
 public:
     bool isValid() const;
 };

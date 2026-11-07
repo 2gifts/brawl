@@ -186,7 +186,12 @@ public:
     virtual void isInterpreterAnimCmd();
     virtual void skipNextMotionGroup();
     virtual bool isAnimCmdEnd();
+#ifdef SO_ANIM_CMD_GET_FRAME_TAKES_INDEX
+    // BYTES: soEffectModuleImpl::isEndCommon tail-calls this with the stored group in r4 and returns r3 unchanged.
+    virtual bool getAnimCmdFrame(int group);
+#else
     virtual int getAnimCmdFrame();
+#endif
     virtual void getCmdAddressPack();
     virtual void setAddressPackList();
     virtual void unk44(); // HYPOTHESIS: unnamed slot; the article initialize reads the interpreter count one slot later (0x48)

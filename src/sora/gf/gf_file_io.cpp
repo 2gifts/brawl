@@ -13,15 +13,15 @@
 #include <FAT/fa_api.h>
 
 extern "C" int fn_803EC22C(int drive, int force);
-extern "C" s32 fn_803C3B18(const char* path);
-extern "C" s32 fn_803C3BE8(const char* path);
+extern "C" s32 VFCreateDir(const char* path);
+extern "C" s32 VFChangeDir(const char* path);
 extern "C" s32 fn_803C3CF8(const char* path);
 // HYPOTHESIS: the VF find-first/find-next calls fill the same find entry as FAFsfirst
-extern "C" s32 fn_803C3DE0(FAEntryInfo* info, const char* pattern, int filter);
-extern "C" s32 fn_803C3ED8(FAEntryInfo* info);
-extern "C" s32 fn_803C4054(const char* drive);
-extern "C" s32 fn_803C3048(const char* path, u32 size);
-extern "C" s32 fn_803C31B4(const char* drive, const char* path);
+extern "C" s32 VFFileSearchFirst(FAEntryInfo* info, const char* pattern, int filter);
+extern "C" s32 VFFileSearchNext(FAEntryInfo* info);
+extern "C" s32 VFFormatDrive(const char* drive);
+extern "C" s32 VFCreateSystemFileNANDFlash(const char* path, u32 size);
+extern "C" s32 VFMountDriveNANDFlash(const char* drive, const char* path);
 extern "C" s32 NANDCreateDir(const char* path, u8 perm, u8 attr);
 extern "C" DVDDiskID lbl_80494938;
 extern "C" const char* lbl_80421198[];
@@ -242,7 +242,7 @@ int gfFileIO::gfVFCreateDir(const char* filepath)
     u32 j;
 
     if (strlen(filepath) < 0x7F) {
-        result = fn_803C3B18(filepath);
+        result = VFCreateDir(filepath);
         if (result != 0 && result != 0x11) {
             end = strlen(filepath);
             if (filepath[end - 1] == '/') {
@@ -258,7 +258,7 @@ int gfFileIO::gfVFCreateDir(const char* filepath)
                         break;
                     }
                 }
-                result = fn_803C3B18(dir);
+                result = VFCreateDir(dir);
                 if (result != 0) {
                     if (result != 0x11) {
                         break;
@@ -395,14 +395,14 @@ int gfFileIO::checkDirVF(gfFileIORequest* request) {
     strncat(path, filepath, 0x80);
     strcpy(current, &lbl_8059C5B0);
     current[0] += request->m_vfUnk;
-    s32 ret = fn_803C3BE8(path);
+    s32 ret = VFChangeDir(path);
     if (ret != 0) {
         if (ret != 2) {
             gfVFErrorCheck(ret);
             OSReport("VF check Dir: (%s)", request->m_pFilepath);
         }
     } else {
-        fn_803C3BE8(current);
+        VFChangeDir(current);
         result = 0;
     }
     return result;
@@ -462,7 +462,7 @@ copied:
         strncpy(path, home, 0x40);
         strcat(path, name);
     }
-    s32 ret = fn_803C3048(path, request->m_readLen);
+    s32 ret = VFCreateSystemFileNANDFlash(path, request->m_readLen);
     if (ret != 0) {
         OSReport("createVFSystemFile() Error! path(%s) size(%d) err=%d", path, request->m_readLen, ret);
         gfVFErrorCheck(ret);
@@ -501,7 +501,7 @@ copied:
         strcat(path, name);
     }
     drive[0] += request->m_vfUnk;
-    s32 ret = fn_803C31B4(drive, path);
+    s32 ret = VFMountDriveNANDFlash(drive, path);
     if (ret != 0) {
         OSReport("mountVFSystemFile() Error! drive(%s) path(%s) err=%d", drive, path, ret);
         gfVFErrorCheck(ret);
@@ -538,7 +538,7 @@ int gfFileIO::formatVFSystemFile(gfFileIORequest* request) {
     int result;
     char drive[] = "B";
     drive[0] += request->m_vfUnk;
-    s32 ret = fn_803C4054(drive);
+    s32 ret = VFFormatDrive(drive);
     if (ret != 0) {
         OSReport("formatVFSystemFile() Error! drive(%s) err=%d", drive, ret);
         gfVFErrorCheck(ret);
@@ -667,7 +667,7 @@ int gfFileIO::getFileNumVF(const char* path) {
     // HYPOTHESIS: the find entry is 0x450 bytes (frame size); OpenRVL's FAEntryInfo is 0x454
     char info[0x450];
     int count = -1;
-    s32 result = fn_803C3DE0((FAEntryInfo*)info, path, 0x20);
+    s32 result = VFFileSearchFirst((FAEntryInfo*)info, path, 0x20);
     if (result != 0) {
         if (result != 2) {
             gfVFErrorCheck(result);
@@ -675,7 +675,7 @@ int gfFileIO::getFileNumVF(const char* path) {
     } else {
         count = 1;
         while (result == 0) {
-            result = fn_803C3ED8((FAEntryInfo*)info);
+            result = VFFileSearchNext((FAEntryInfo*)info);
             if (result != 0) {
                 if (result != 2) {
                     gfVFErrorCheck(result);
