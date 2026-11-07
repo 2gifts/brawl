@@ -15,7 +15,7 @@ public:
 #elif defined(FT_GENERAL_WORK_ABSTRACT_DTOR_INLINE)
     // sora_melee inlines this empty base into the work builder.
     ~soGeneralWorkAbstract() { }
-#elif defined(FT_MODULE_BUILDER)
+#elif defined(FT_MODULE_BUILDER) && !defined(WN_MARIO_FIREBALL_UNIT)
     ~soGeneralWorkAbstract(); // BYTES: out of line in the fighter RELs (defined in ft_builder_noinline.h)
 #else
     ~soGeneralWorkAbstract() { }

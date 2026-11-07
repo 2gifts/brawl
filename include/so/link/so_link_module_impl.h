@@ -332,6 +332,9 @@ public:
     soModuleAccesser* m_moduleAccesser;         // 0x44
     u8 m_unk48[0x4C - 0x48];
     int m_modelConstraintNode;                  // 0x4C
+#ifdef WN_MARIO_FIREBALL_UNIT
+    int m_modelConstraintTargetNode;            // 0x50
+#endif
 #endif
 #if defined(SO_LINK_MODULE_IMPL_FULL) && !defined(FT_MODULE_BUILDER)
     soLinkModuleImpl(soModuleAccesser* moduleAccesser, soArray<soLinkConnection>* connections);

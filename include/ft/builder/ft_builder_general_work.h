@@ -26,4 +26,7 @@ public:
         work->clearWorkAll();
     }
     typename BC::ModuleType* getModule() { return &m_module; }
+#ifdef WN_MARIO_FIREBALL_UNIT
+    soGeneralWorkAbstract* getWork() { return &m_module; }
+#endif
 };

@@ -17,10 +17,21 @@ soTransitionModuleImpl::soTransitionModuleImpl(soArray<soTransitionTermGroup>* g
 
 // MATCH-ONLY: the original REL emits the vtables of these observers (their addObserver is a REL function); the code that
 // needs them is not reconstructed yet, so keep them alive with a dummy user.
+#ifdef FT_KEEP_OBSERVER_VTABLES_WEAK
+#pragma dont_inline on
+template <int Dummy>
 void ftKeepObserverVtables(s16 id) {
     soAnimCmdEventObserver animCmd(id);
     soSituationEventObserver situation(id);
 }
+template void ftKeepObserverVtables<0>(s16);
+#pragma dont_inline off
+#else
+void ftKeepObserverVtables(s16 id) {
+    soAnimCmdEventObserver animCmd(id);
+    soSituationEventObserver situation(id);
+}
+#endif
 
 #pragma dont_inline on
 #ifndef FT_GIMMICK_POOL_INLINE_DTOR

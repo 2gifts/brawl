@@ -18,6 +18,8 @@ class muSelCharCoin;
 class muSelCharHand;
 class muRuleTask;
 class muNoticeWndTask;
+// HYPOTHESIS: the two characters of a pair high score, as getOnlinePairHighScore writes them.
+struct muSelCharScorePair;
 
 enum TeamBattleType { // custom
     Team_Battle_None = 0,
@@ -94,7 +96,8 @@ public:
     nw4r::g3d::ScnMdlExpand* m_diffExpand;      // 0x500 the level of the computers and its arrows
     nw4r::g3d::ScnMdlExpand* m_stockExpand;     // 0x504 the number of stocks and its arrows
     nw4r::g3d::ScnMdlExpand* m_highScoreExpand; // 0x508 the high score and the pictures of the characters of a pair
-    char _0x50c[0xB8];
+    muSelCharCBCalcWorld m_calcWorldCBs[15];    // 0x50C
+    char _0x5c0[4];
     MuMsg* m_highScoreMsg;                      // 0x5C4 the text of the high scores
     bool m_isTeamBattle;                        // 0x5C8
     u8 m_teamBattleTouch;                       // 0x5C9 HYPOTHESIS: the team button was touched
@@ -193,11 +196,12 @@ public:
     void initProc(void* data);
     void wifiMain();
     void mainRule();
-    void faceIconMain();
+    void faceIconMain() __attribute__((never_inline));
     void selectingMain();
     void setToGlobal();
     void setState(int state, int argument, int extra);
-    void closeWifiDlg();
+    // Closes the Wi-Fi dialog when one is open. Returns whether a dialog was closed.
+    bool closeWifiDlg() __attribute__((never_inline));
     // HYPOTHESIS: classification shared by the menu-mode checks.
     static inline int getSelCharTypeGroup(int type) {
         if (isSelCharTypeIn(type, 0, 4)) return 0;
@@ -251,7 +255,8 @@ public:
     void eraseHighScorePairChar(int pairIdx);
     void addObj(int obj);
     void removeObj(int obj);
-    void setRuleControlEnable(u8 enable);
+    void removeCursor(MuObject* cursor);
+    void setRuleControlEnable(u8 enable) __attribute__((never_inline));
     int findRuleNumHoldPlayer();
     int getCharListIdx(int charKind);
     bool getFacePos(Vec2f* pos, int charKind);
@@ -273,15 +278,28 @@ public:
     int getRuleTimeMax();
     int getRuleTimeMin();
     void dispHighScore(int, int, int);
+    void dispHighScorePairChar(int pairIdx, int charKind, int color);
+    int getOnlinePairHighScore(int* style, int* level, muSelCharScorePair* pair);
+    int isCharHighScoreCleared(int charKind);
+    int getCharHighScore(int charKind, int difficulty, int a, int b);
+    int dispTargetTotalHighScore();
+    int getPairHighScore(int difficulty, int* style, int* level, muSelCharScorePair* pair);
+    void dispOnlinePairHighScore();
+    void dispPairHighScore();
     int getRuleDispType();
-    bool isWifiGameMaster();
+    // An integer: a bool return normalizes the 0/1 result a second time.
+    int isWifiGameMaster() __attribute__((never_inline));
+    void setRuleNumToGlobal();
+    void setReferFlag(int selchKind);
+    void bindCalcWorldFlag();
     int getCollKindPlayerArea(Vec2f* pos, int* areaIdx, int* arg, float* rect);
     void setRuleNumHoldCursorVisible(bool visible);
     void setFaceIconMotion(int faceIdx, int motion);
     int findFreeWiiControllerNo();
     void dispWifiPrompt(u32 message);
     int getCollCharKind(Vec2f* pos);
-    void dispHighScoreDiffLevel(int level);
+    // Out of line on the pair high-score screens. The body still inlines getSelCharType.
+    void dispHighScoreDiffLevel(int level) __attribute__((never_inline));
     int isPushedUnusedControllerStartButton();
     bool canWifiEntry();
     void wifiEntryPlayer();

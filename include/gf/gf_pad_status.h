@@ -107,9 +107,10 @@ struct gfPadStatus {
     void init();
     void clamp();
     void update(gfPadStatus* previousPad);
-    bool isButtonAOn();
-    bool isButtonAOnEdge();
-    bool isButtonAOnRepeat();
+    // The A button as 0 or 1. These are integers: a bool return normalizes the bit a second time.
+    int isButtonAOn();
+    int isButtonAOnEdge();
+    int isButtonAOnRepeat();
     bool isButtonStartOnEdge();
 
     void convSysStatusToMenuStatus(gfPadStatus* destination);

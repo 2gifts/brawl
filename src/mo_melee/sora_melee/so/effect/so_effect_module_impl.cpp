@@ -1,10 +1,25 @@
+#define SO_ANIM_CMD_GET_FRAME_TAKES_INDEX
+#define SO_EFFECT_ENUMERATOR_DTOR
+#define SO_EFFECT_ENUMERATOR_OUT_OF_LINE
+#define SO_ARRAY_LIST_DTOR_EXTERN
+#define SO_EFFECT_ARRAY_DTOR_EXTERN
+#define SO_EFFECT_LIST_UNIT_CTOR_EXTERN
+#define SO_EFFECT_OBSERVER_ADD_EXTERN
+#define SO_EFFECT_COMMON_LIST
 #include <ec/ec_mgr.h>
 #include <so/effect/so_effect_continual.h>
 #include <so/effect/so_effect_module_impl.h>
+#include <so/effect/so_effect_screen.h>
 #include <so/effect/so_effect_time.h>
 #include <so/so_array.h>
 #include <so/so_module_accesser.h>
 #include <types.h>
+
+// The common-effect queue is an embedded soArrayList at this+0x78. Virtual calls stay virtual
+// when the static type is the abstract array base.
+static inline soArray<soEffectModuleImpl::soEffectCommonPreserver>& commonEffects(soEffectModuleImpl* module) {
+    return *reinterpret_cast<soArray<soEffectModuleImpl::soEffectCommonPreserver>*>(reinterpret_cast<char*>(module) + 0x78);
+}
 
 
 void soEffectModuleImpl::activate() {
@@ -93,6 +108,14 @@ void soEffectModuleImpl::setRot(int handle, Vec3f* rot) {
 
 void soEffectModuleImpl::setVisible(int handle, bool isVisible) {
     g_ecMgr->setVisible(handle, isVisible);
+}
+
+void soEffectModuleImpl::setScale(int handle, Vec3f* scale) {
+    g_ecMgr->setScl(handle, scale);
+}
+
+bool soEffectModuleImpl::isExistEffect(int handle) {
+    return g_ecMgr->isExistEffect(handle);
 }
 
 bool soEffectModuleImpl::isObserv(char unk1) {
@@ -200,3 +223,95 @@ void soEffectModuleImpl::pushGroupScaleZ(u32 group) {
     g_ecMgr->pushsetCurrentGroup(group);
     g_ecMgr->setFlatMode(true);
 }
+
+void soEffectModuleImpl::clearScreen(int index, u32 frames) {
+    reinterpret_cast<soEffectScreen*>(reinterpret_cast<char*>(this) + 0x124)->clear(index, frames);
+}
+
+bool soEffectModuleImpl::isEndCommon() {
+    if (unk70 >= 0) {
+        return m_moduleAccesser->getAnimCmdModule().getAnimCmdFrame(unk70);
+    }
+    return false;
+}
+
+void soEffectModuleImpl::resetCommon() {
+    if (unk70 >= 0) {
+        m_moduleAccesser->getAnimCmdModule().resetInterpreter3(unk70, 0, m_moduleAccesser);
+    }
+    commonEffects(this).clear();
+    unk74 = -1;
+}
+
+bool soEffectModuleImpl::isExistCommon(int index) {
+    if (unk74 != -1) {
+        if (unk74 == index) {
+            return true;
+        }
+    }
+    for (s32 i = 0; i < static_cast<soArray<soEffectCommonPreserver>&>(m_commonEffects).size(); i++) {
+        if (static_cast<soArray<soEffectCommonPreserver>&>(m_commonEffects).at(i).m_index == index) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool soEffectModuleImpl::removeCommonPreserver(int index) {
+    soArrayListEnumerator<soEffectCommonPreserver, s8> enumerator;
+    enumerator = m_commonEffects.getEnumerator();
+    do {
+        if (enumerator.getCurrent().m_index == index) {
+            m_commonEffects.erase(enumerator);
+            return true;
+        }
+    } while (enumerator.next());
+    return false;
+}
+
+void soEffectModuleImpl::removeCommon(int index) {
+    if (index == unk74) {
+        m_moduleAccesser->getAnimCmdModule().resetInterpreter3(unk70, 0, m_moduleAccesser);
+        unk74 = -1;
+    }
+    while (removeCommonPreserver(index)) {
+    }
+}
+
+template s32 soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::size() const;
+template s32 soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::capacity() const;
+template bool soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::isFull() const;
+template bool soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::isNull() const;
+template soEffectModuleImpl::soEffectCommonPreserver& soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::at(s32);
+template const soEffectModuleImpl::soEffectCommonPreserver& soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::at(s32) const;
+template void soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::shift();
+template void soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::pop();
+template void soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::clear();
+template void soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::unshift(soEffectModuleImpl::soEffectCommonPreserver const&);
+template void soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::push(soEffectModuleImpl::soEffectCommonPreserver const&);
+template void soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::insert(s32, soEffectModuleImpl::soEffectCommonPreserver const&);
+template void soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::erase(s32);
+template void soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::set(s32, soEffectModuleImpl::soEffectCommonPreserver const&, s32);
+template s32 soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::shiftFreeArrayIndex(s32);
+template s32 soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::getArrayIndex(s32) const;
+template s32 soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::insertSub(s32, s32);
+template void soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::eraseSub(s32);
+template <typename T>
+inline soArray<T>::~soArray() { }
+template <typename T>
+inline soArrayContractible<T>::~soArrayContractible() { }
+template <typename T>
+inline soArrayFixed<T>::~soArrayFixed() { }
+template soArray<soEffectModuleImpl::soEffectCommonPreserver>::~soArray();
+template soArrayContractible<soEffectModuleImpl::soEffectCommonPreserver>::~soArrayContractible();
+template soArrayFixed<soEffectModuleImpl::soEffectCommonPreserver>::~soArrayFixed();
+template <typename ElementTy, typename IndexTy>
+soArrayListUnit<ElementTy, IndexTy>::soArrayListUnit() : m_inUse(false), m_prev(End), m_next(End) { }
+template soArrayListUnit<soEffectModuleImpl::soEffectCommonPreserver, s8>::soArrayListUnit();
+template <typename T>
+void soEventObserver<T>::addObserver(s16, s8) { }
+template void soEventObserver<soCollisionShieldEventObserver>::addObserver(s16, s8);
+template <typename T, s32 C>
+soArrayList<T, C>::~soArrayList() { }
+template soArrayList<soEffectModuleImpl::soEffectCommonPreserver, 10>::~soArrayList();
+template class soArrayListEnumerator<soEffectModuleImpl::soEffectCommonPreserver, s8>;

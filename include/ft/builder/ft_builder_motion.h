@@ -23,16 +23,18 @@ class AnmObjChrRes;
 }
 }
 
+typedef soMotionAnimObjCacheUnit<nw4r::g3d::AnmObjChrRes> ftMotionAnimObjCacheUnitChrRes;
+typedef const soMotionData soMotionDataConst;
+#ifndef WN_MARIO_FIREBALL_UNIT
 FT_DOL_ARRAY_VECTOR(soTransitionTermGroup, 1);
 FT_DOL_ARRAY_VECTOR(soPartialAnim, 2);
 FT_DOL_ARRAY_VECTOR(soOtherAnim, 1);
 FT_DOL_ARRAY_VECTOR(soOtherAnim, 2);
 FT_DOL_ARRAY_VECTOR(soTransitionTermPack, 1);
 FT_DOL_ARRAY_VECTOR(u32, 5);
-typedef soMotionAnimObjCacheUnit<nw4r::g3d::AnmObjChrRes> ftMotionAnimObjCacheUnitChrRes;
 FT_DOL_ARRAY_VECTOR(ftMotionAnimObjCacheUnitChrRes, 5);
-typedef const soMotionData soMotionDataConst;
 FT_DOL_CONTRACTIBLE_TABLE(soMotionDataConst);
+#endif
 
 // The type list of the transition term groups of the motion module (a single group of 8 terms).
 typedef soTypeList<soIntToType<8>, soTypeListNullType> ftMotionTransitionTypeList;

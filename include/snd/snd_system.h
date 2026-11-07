@@ -210,6 +210,7 @@ public:
 
     // fn_80072968: creates g_sndSystem (0xBD0 bytes, Heaps::Sound) once
     static sndSystem* create();
+    static sndSystem* getInstance();
     sndSystem();                  // fn_800729B0 (0x624 bytes)
     // HYPOTHESIS: the map calls it startLoadThread, it resumes m_initThread (0xB94).
     void startLoadThread();       // fn_80073184

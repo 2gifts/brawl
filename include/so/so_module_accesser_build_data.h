@@ -37,7 +37,11 @@ public:
     virtual s32 getModelLayerType() const { return 2; }
     virtual float getModelScale() const { return 1.0f; }
     virtual soParamAccesser* getParamAccesser() const = 0;
+#ifdef WN_MARIO_FIREBALL_UNIT
+    virtual u8 getAreaCategory() const = 0;
+#else
     virtual s32 getAreaCategory() const = 0;
+#endif
     virtual void* getCameraRangeSet() const = 0;
     virtual void* getCameraClipSphereSet() const = 0;
     virtual void* getItemNodeData() const = 0;

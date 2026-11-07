@@ -30,7 +30,15 @@ FT_OPAQUE_STRUCT(soShakeTerm, 0x1C);
 #define SO_CONTROLLER_CLATTER_DEFINED
 FT_OPAQUE_STRUCT(soControllerClatter, 0x14);
 #endif
+#ifdef WN_MARIO_FIREBALL_UNIT
+struct soEffectContinual {
+    u32 m_opaque[0x2C / 4];
+    soEffectContinual();
+    ~soEffectContinual();
+};
+#else
 FT_OPAQUE_STRUCT(soEffectContinual, 0x2C);
+#endif
 FT_OPAQUE_STRUCT(soEffectTime, 0xC);
 FT_OPAQUE_STRUCT(soPhysicsIKHandle, 0x38);
 

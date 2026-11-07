@@ -4,6 +4,7 @@
 #define FT_TEAM_TYPED_INTERFACE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_NOINLINE_SEARCH_BUILDER
+#define FT_LINK_ARTICLE_POOLS
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/link/ft_link.h>
@@ -16,9 +17,11 @@
 #include <ft/ft_owner.h>
 #include <ft/ft_util.h>
 #include <ft/ft_resource_id_accesser_impl.h>
+#include <ft/builder/ft_builder_article.h>
 #include <so/article/so_generate_article_manage_module.h>
 #include <wn/wn_article_pool.h>
 
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftLinkBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
@@ -372,14 +375,6 @@ bool ftLink::notifyEventCollisionSearchCheck() {
     return result;
 }
 
-// The members of the boomerang article that the fighter calls (the article itself is in wn_link_boomerang.cpp, whose header needs
-// the article builder macros).
-class wnLinkBoomerang {
-public:
-    void activate(int founderTaskId, int resourceId, int team);
-    void shoot(float lr, float angle, u32 kind);
-};
-
 // The boomerang starts with the team of the fighter and the model resource.
 bool ftLink::activeArticle(wnLinkBoomerang* weapon, soModuleAccesser* acc) {
     dynamic_cast<soResourceModuleImpl&>(acc->getResourceModule());
@@ -554,7 +549,7 @@ int fn_93_AFE8() { return 0; }
 int fn_93_AFF8() { return 0; }
 int fn_93_B000() { return 0; }
 int fn_93_B3C4() { return 0; }
-int fn_93_CBB0() { return 7; }
+
 
 // Field accessors.
 u8 fn_93_22F8(u8* p) { return *(u8*)(p + 0x4); }
@@ -584,7 +579,6 @@ int fn_93_B304(u8* p) { return *(int*)(p + 0x10); }
 u8* fn_93_CBC4(u8* p) { return p + 0x19DAC; }
 u8* fn_93_CBE4(u8* p) { return p + 0x19DE8; }
 u8* fn_93_CBF0(u8* p) { return p + 0x1A2A0; }
-void fn_93_CBB8(u8* p, u8 v) { *(u8*)(p + 0x11BEC) = v; }
 u8* fn_93_CCA0(u8* p, int x) { return x == 0 ? p + 0xC : 0; }
 u8* fn_93_CCB8(u8* p, int x) { return x == 0 ? p + 0xC : 0; }
 u8* fn_93_CCD0(u8* p, int x) { return x == 0 ? p + 0xC : 0; }
@@ -790,8 +784,42 @@ extern "C" {
 void* fn_93_1AD8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
 
+// The kind record of the owner (kind 0, sub kind Link) and the heap the articles are built from.
+// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument, so the caller's temporary and that
+// argument are both live across the article constructor.
+struct ftLinkArticleKind : wnArticleKindInfo {
+    ftLinkArticleKind() {
+        kind = 0;
+        subKind = Fighter_Link;
+    }
+};
+struct ftLinkArticleBuildInfo : wnArticleBuildInfo {
+    ftLinkArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+        kindInfo = &kindArg;
+        heapModule = heap;
+    }
+};
+
+// The bow-arrow holder is the one constructor the builder calls out of line (four arrows).
+template <>
+wnInstanceHolder<wnLinkBowArrow, soKindInfoGeneric<0, 2>, soIntToType<1> >::wnInstanceHolder(soModuleAccesser* acc);
+
 // The holders and sub pools of the article pools (soKindInfoGeneric<0, 2>); the mediator destroys them out of line.
 #pragma dont_inline on
+template <class Mediator>
+soSelectInstanceHolder<Mediator, soArticleMediatorNull>::~soSelectInstanceHolder() { }
+template <class Mediator, int N>
+soGenerateArticleManageModuleBuilder<Mediator, N>::soGenerateArticleManageModuleBuilder(soModuleAccesser* acc) :
+    m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+template soSelectInstanceHolder<ftLinkArticleMediator, soArticleMediatorNull>::~soSelectInstanceHolder();
+template soGenerateArticleManageModuleBuilder<ftLinkArticleMediator, 5>::soGenerateArticleManageModuleBuilder(soModuleAccesser*);
+template <class PoolList, class Founder>
+soArticleMediatorImpl<PoolList, Founder>::~soArticleMediatorImpl() { }
+template soArticleMediatorImpl<ftLinkArticleList, ftLink>::~soArticleMediatorImpl();
+template wnInstanceHolder<wnLinkBow, soKindInfoGeneric<0, 2>, soIntToType<0> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnLinkBow, 1, wnInstanceHolder, soIntToType<0> >, soKindInfoGeneric<0, 2> >;
+template wnInstanceHolder<wnLinkBowArrow, soKindInfoGeneric<0, 2>, soIntToType<1> >::~wnInstanceHolder();
+template class soInstancePoolSub<soInstancePoolInfo<wnLinkBowArrow, 4, wnInstanceHolder, soIntToType<1> >, soKindInfoGeneric<0, 2> >;
 template wnInstanceHolder<wnLinkBoomerang, soKindInfoGeneric<0, 2>, soIntToType<2> >::~wnInstanceHolder();
 template class soInstancePoolSub<soInstancePoolInfo<wnLinkBoomerang, 1, wnInstanceHolder, soIntToType<2> >, soKindInfoGeneric<0, 2> >;
 template wnInstanceHolder<wnLinkHookshot, soKindInfoGeneric<0, 2>, soIntToType<3> >::~wnInstanceHolder();
@@ -802,3 +830,27 @@ template wnInstanceHolder<wnSimple, soKindInfoGeneric<0, 2>, soIntToType<5> >::~
 template class soInstancePoolSub<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<5> >, soKindInfoGeneric<0, 2> >;
 template class soInstancePool<soInstancePoolInfo<wnSimple, 1, wnInstanceHolder, soIntToType<5> >, soInstancePoolRoot, soKindInfoGeneric<0, 2>, 5>;
 #pragma dont_inline off
+
+// The bow-arrow holder stays out of line. Its kind, flag and build-info temporaries are inlined.
+// Weak: an explicit specialization is strong, and this copy is only a candidate for fn_93_7814.
+template <>
+__declspec(weak)
+wnInstanceHolder<wnLinkBowArrow, soKindInfoGeneric<0, 2>, soIntToType<1> >::wnInstanceHolder(soModuleAccesser* acc) :
+    m_instance(1, ftLinkArticleBuildInfo(ftLinkArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)),
+               g_ftCommonDataAccesser.getWeaponData<wnLinkBowArrowData>(Fighter_Link, &ftArticleDataFlags().get().resourceGroup)) { }
+
+// The REL spells this destructor with the opaque name. Its body is the real builder's member teardown.
+template <class Mediator, int N>
+__attribute__((always_inline))
+soGenerateArticleManageModuleBuilder<Mediator, N>::~soGenerateArticleManageModuleBuilder() { }
+ftOpaqueGenerateArticleManageModuleBuilder<0x11CA8, Fighter_Link>::~ftOpaqueGenerateArticleManageModuleBuilder() {
+    reinterpret_cast<ftLinkArticleManageModuleBuilder*>(this)->~ftLinkArticleManageModuleBuilder();
+}
+
+// HYPOTHESIS: the original returns 7. The type list has six pools.
+template <class PoolList, class Founder>
+s32 soArticleMediatorImpl<PoolList, Founder>::getMediateNum() { return 7; }
+template <class PoolList, class Founder>
+void soArticleMediatorImpl<PoolList, Founder>::setAutoRecycle(bool enabled) { m_autoRecycle = enabled; }
+template s32 soArticleMediatorImpl<ftLinkArticleList, ftLink>::getMediateNum();
+template void soArticleMediatorImpl<ftLinkArticleList, ftLink>::setAutoRecycle(bool);

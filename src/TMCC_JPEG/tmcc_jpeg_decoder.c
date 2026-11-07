@@ -5,7 +5,7 @@
 
 // Function bodies below are taken from https://github.com/jj-link/brawl.
 
-void fn_80265AE0(int *arg0, signed char *arg1)
+void TMCC_JPEGDEC_IdctBlock1x1(int *arg0, signed char *arg1)
 {
     int flag = 0;
     int v = (*arg0 >> 11) + 0x80;
@@ -17,7 +17,7 @@ void fn_80265AE0(int *arg0, signed char *arg1)
     *arg1 = flag ? v : (v < 0 ? 0 : 255);
 }
 
-void fn_80265E6C(s32 *arg0, s8 *arg1) {
+void TMCC_JPEGDEC_IdctBlock1x1_Col(s32 *arg0, s8 *arg1) {
     s32 value;
     s32 valid;
 
@@ -402,7 +402,7 @@ void TMCC_JPEGDEC_IdctBlock2x2_Col(s32* block, s8* out) {
 
 s32 TMCC_JPEGDEC_move_ptr(s32 offset, TMCC_JPEGDEC_Stream* stream);
 
-s32 fn_80261274(TMCC_JPEGDEC_Stream* stream) {
+s32 TMCC_JPEGDEC_rewind_ptr(TMCC_JPEGDEC_Stream* stream) {
     u32 word = stream->unk0;
     s32 shift = stream->unk4;
     s32 result;
@@ -443,9 +443,9 @@ typedef struct TMCC_JPEGDEC_Ctx2 {
     TMCC_JPEGDEC_Status* status;
 } TMCC_JPEGDEC_Ctx2;
 
-s32 fn_80261004(u16* out, TMCC_JPEGDEC_Stream* stream);
+s32 TMCC_JPEGDEC_get_wbyte(u16* out, TMCC_JPEGDEC_Stream* stream);
 
-s32 fn_80262CF0(TMCC_JPEGDEC_Ctx2* context) {
+s32 TMCC_JPEGDEC_imageend(TMCC_JPEGDEC_Ctx2* context) {
     u16 marker;
     s32 result;
 
@@ -453,11 +453,11 @@ s32 fn_80262CF0(TMCC_JPEGDEC_Ctx2* context) {
         return 0;
     }
     if (context->unk1808 == 0) {
-        result = fn_80261274(&context->stream);
+        result = TMCC_JPEGDEC_rewind_ptr(&context->stream);
         if (result < 0) {
             return result;
         }
-        result = fn_80261004(&marker, &context->stream);
+        result = TMCC_JPEGDEC_get_wbyte(&marker, &context->stream);
         if (result < 0) {
             if (result != -0x90) {
                 return result;
@@ -502,7 +502,7 @@ typedef struct TMCC_JPEGDEC_ExifCtx {
     TMCC_JPEGDEC_ExifStatus* status;
 } TMCC_JPEGDEC_ExifCtx;
 
-s32 fn_80265310(TMCC_JPEGDEC_ExifInfo* info, TMCC_JPEGDEC_ExifCtx* context, u32 arg2, u32 arg3) {
+s32 TMCC_JPEGDEC_ThumbnailCheck(TMCC_JPEGDEC_ExifInfo* info, TMCC_JPEGDEC_ExifCtx* context, u32 arg2, u32 arg3) {
     TMCC_JPEGDEC_ExifStatus* status = context->status;
     u32 end;
     u32 size;
@@ -539,4 +539,95 @@ s32 fn_80265310(TMCC_JPEGDEC_ExifInfo* info, TMCC_JPEGDEC_ExifCtx* context, u32 
     status->kind = info->kind;
     result = TMCC_JPEGDEC_set_thumbnaildata(&context->stream, (u8*)(status->base + status->offset), size);
     return result < 0 ? result : 0;
+}
+
+s32 TMCC_JPEGDEC_get_wbyte(u16* out, TMCC_JPEGDEC_Stream* stream) {
+    u8* next;
+    u8* end;
+    u8* cur;
+    u8 byte;
+    u32 acc;
+    s32 result;
+
+    end = stream->end;
+    cur = stream->cur;
+    if (cur >= end) {
+        result = -0x90;
+    } else {
+        next = cur + 1;
+        stream->cur = next;
+        byte = *cur;
+        result = (next >= end) ? -0x90 : 0;
+        cur = next;
+    }
+    acc = byte << 8;
+    if (result < 0) {
+        return result;
+    }
+    if (cur >= end) {
+        result = -0x90;
+    } else {
+        u8* p = stream->cur;
+        end = stream->end;
+        next = p + 1;
+        stream->cur = next;
+        byte = *p;
+        result = (next >= end) ? -0x90 : 0;
+    }
+    *out = acc + byte;
+    return result < 0 ? result : 0;
+}
+
+// HYPOTHESIS: one Huffman code-length slot, two big-endian halfwords.
+typedef struct TMCC_JPEGDEC_HuffPair {
+    u16 maxcode;
+    u16 offset;
+} TMCC_JPEGDEC_HuffPair;
+
+s32 TMCC_JPEGDEC_vl_decode_rc(u8* table, u8* vals, TMCC_JPEGDEC_Stream* stream) {
+    TMCC_JPEGDEC_HuffPair* entry;
+    TMCC_JPEGDEC_HuffPair pair;
+    u32 word;
+    u16 maxcode;
+    u32 bits;
+    u32 code;
+    u32 len;
+    u32 bit;
+    u32 index;
+    s32 result;
+
+    if (stream->unk4 <= 0x11) {
+        result = TMCC_JPEGDEC_load_buff(stream);
+        if (result < 0) {
+            return result;
+        }
+    }
+    entry = (TMCC_JPEGDEC_HuffPair*)(table + 0x24);
+    bits = (u32)stream->unk4 - 9;
+    code = (*(u32*)&stream->unk0 >> bits) & 0x1FF;
+    stream->unk4 = (s32)bits;
+    len = 9;
+    goto check;
+    for (;;) {
+        len += 1;
+        entry += 1;
+        if (len > 0x10) {
+            return -0x64;
+        }
+        bits = (u32)stream->unk4 - 1;
+        bit = *(u32*)&stream->unk0 >> bits;
+        bit &= 1;
+        code <<= 1;
+        code |= bit;
+        stream->unk4 = (s32)bits;
+    check:
+        pair = *entry;
+        word = *(u32*)&pair;
+        maxcode = *(u16*)&word;
+        if (code <= maxcode) {
+            index = code - pair.maxcode;
+            index = index + pair.offset;
+            return vals[index];
+        }
+    }
 }
