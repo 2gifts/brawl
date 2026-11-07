@@ -1628,7 +1628,7 @@ int muWifiInterfaceTask::getConnectResult(int* errorIndex, int* errorCode, bool*
     }
     if (lbl_805A03F0 != 0) {
         if (errorCode) { *errorCode = lbl_805A03F0; }
-        if (errorIndex) { *errorIndex = fn_800C9A4C(*errorCode); }
+        if (errorIndex) { *errorIndex = exchangeDWCErrorCode(*errorCode); }
         return 3;
     }
     if (isNewUser) {
