@@ -93,8 +93,14 @@ typedef soAreaModuleBuildConfigSized<0x3E0, soAreaModuleImpl> ftKirbyAreaModuleB
 typedef soPhysicsModuleBuildConfigCap<0, soPhysicsModuleImpl> ftKirbyPhysicsModuleBuildConfig;
 typedef soItemManageModuleBuildConfigCaps<7, 4, soItemManageModuleImpl> ftKirbyItemManageModuleBuildConfig;
 
-// HYPOTHESIS: soGenerateArticleManageModuleBuilder (wnKirbyHammer and the copy ability pools), not reconstructed yet
+// soGenerateArticleManageModuleBuilder (hammer, the other owned articles, and five simple articles). Only the fighter
+// unit builds the real pools; the other units of the REL see an opaque block of the same size.
+#ifdef FT_KIRBY_ARTICLE_POOLS
+#include <ft/kirby/ft_kirby_article_pools.h>
+typedef ftKirbyArticleManageModuleBuilder ftKirbyGenerateArticleManageModuleBuilder;
+#else
 typedef ftOpaqueGenerateArticleManageModuleBuilder<0x12970, Fighter_Kirby> ftKirbyGenerateArticleManageModuleBuilder;
+#endif
 
 class ftKirbyBuildConfig : public ftCommonBuildConfig {
 public:
