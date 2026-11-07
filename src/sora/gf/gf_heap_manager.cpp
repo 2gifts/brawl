@@ -77,12 +77,16 @@ extern "C" void fn_800244C4(const gfHeapCreateInfo* infos) {
 
 extern "C" void fn_80024790(const gfHeapCreateInfo* infos) {
     const gfHeapCreateInfo* info = infos;
-    while (info->m_name != NULL) {
+    for (;;) {
+        if (info->m_name == NULL) {
+            break;
+        }
         info++;
     }
     do {
+        int heapId = info[-1].m_heapId;
         info--;
-        if (g_HeapInfos[info->m_heapId].m_size != 0) {
+        if (g_HeapInfos[heapId].m_size != 0) {
             gfHeapManager::destroyHeap(info->m_heapId);
         }
     } while (info != infos);

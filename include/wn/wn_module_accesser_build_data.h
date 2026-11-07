@@ -54,7 +54,11 @@ public:
     virtual void* getEffectEmitData() const;
     virtual soEffectCommonData* getEffectCommonData() const;
     virtual soParamAccesser* getParamAccesser() const;
+#ifdef WN_MARIO_FIREBALL_UNIT
+    virtual u8 getAreaCategory() const;
+#else
     virtual s32 getAreaCategory() const;
+#endif
     virtual void* getCameraRangeSet() const;
     virtual void* getCameraClipSphereSet() const;
 #ifdef WN_BUILD_DATA_INLINE_QUERIES

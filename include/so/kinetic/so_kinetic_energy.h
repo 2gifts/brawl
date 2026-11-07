@@ -110,7 +110,7 @@ public:
     virtual void onConsiderGroundFriction();
     virtual void offConsiderGroundFriction();
 #endif
-#ifdef FT_MODULE_BUILDER
+#if defined(FT_MODULE_BUILDER) && !defined(WN_MARIO_FIREBALL_UNIT)
     virtual ~soKineticEnergy(); // BYTES: out of line in the fighter RELs (ft_builder_noinline.h)
 #elif defined(SO_KINETIC_ENERGY_DTOR_NEVER_INLINE)
     // BYTES: the enemy kinetic units call this destructor out of line (a weak copy of the module unit).

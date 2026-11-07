@@ -19,6 +19,9 @@ class efScreenHandle;
 #include <so/anim/so_anim_cmd_event_presenter.h>
 #include <so/so_null.h>
 #include <types.h>
+#ifdef SO_EFFECT_COMMON_LIST
+#include <so/so_array.h>
+#endif
 
 class soModuleAccesser;
 
@@ -86,6 +89,14 @@ public:
 private:
 #endif
 public:
+    // HYPOTHESIS: one queued common-effect request. The list unit is 16 bytes with the element at offset 4,
+    // and the queue stores this index beside the frame an anim-command reset returned.
+    struct soEffectCommonPreserver {
+        s32 m_index;
+        float m_frame;
+    };
+
+
     soModuleAccesser* m_moduleAccesser;
     u32 m_groupId; // HYPOTHESIS: the ecMgr group of this module's effects
     soArray<soEffectContinual>* m_continuals;
@@ -104,7 +115,13 @@ public:
         };
     };
     s32 unk74;
+#ifdef SO_EFFECT_COMMON_LIST
+    // HYPOTHESIS: the common-effect queue occupies this+0x78. The following bytes stay opaque.
+    soArrayList<soEffectCommonPreserver, 10> m_commonEffects;
+    u8 unk120[0x14];
+#else
     u8 unk78[0xBC];
+#endif
     u8 unk134;
     u8 unk135_0 : 1;
     u8 unk135_1 : 1;
@@ -115,6 +132,8 @@ public:
     u8 unk135_6 : 2;
     u8 unk136[0x2];
 
+    // HYPOTHESIS: erases one queued common-effect request with this index. Returns whether one was erased.
+    bool removeCommonPreserver(int index) __attribute__((never_inline));
     void pushGroup(u32 group); // HYPOTHESIS: parameter type from ecMgr::pushsetCurrentGroup
     void pushGroupIgnoreScaleZ(u32 group); // HYPOTHESIS: pushGroup followed by ecMgr::setFlatMode(false)
     void pushGroupScaleZ(u32 group); // HYPOTHESIS: pushGroup followed by ecMgr::setFlatMode(true)
