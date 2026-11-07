@@ -58,6 +58,12 @@ public:
     virtual ~soEffectContinual();
 };
 static_assert(sizeof(soEffectContinual) == 0x2C, "soEffectContinual");
+#elif defined(WN_MARIO_FIREBALL_UNIT)
+struct soEffectContinual {
+    u32 m_opaque[0x2C / 4];
+    soEffectContinual();
+    ~soEffectContinual();
+};
 #else
 FT_OPAQUE_STRUCT(soEffectContinual, 0x2C);
 #endif

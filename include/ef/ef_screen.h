@@ -6,8 +6,26 @@
 
 class efScreenHandle;
 
+// HYPOTHESIS: one fill slot of the screen, 0x20 bytes, starting at efScreen+0xA4.
+struct efScreenFillSlot {
+    u8 m_active : 8;
+    u8 _1[3];
+    float m_frames;
+    float m_progress;
+    u8 m_current[4];
+    u8 m_from[4];
+    u8 m_to[4];
+    u8 _18[8];
+};
+
 class efScreen {
-    char _spacer[0x1DC];
+    union {
+        char _spacer[0x1DC];
+        struct {
+            char _pad[0xA4];
+            efScreenFillSlot m_fills[9];
+        };
+    };
 
 public:
     // HYPOTHESIS: the screen-fill listener; stMelee installs its StageScreenNotify here and Stage::closeStage clears it.
@@ -23,6 +41,7 @@ public:
     void reset();
     static void create();
     static void destroy();
+    void cancelFill(efScreenHandle* handle, float frames);
     int requestFill(float, int, int, GXColor*);
     void requestFill(efScreenHandle handle, float frames, GXColor* color);
     int requestFlash(float frames, int layer, u8 alpha, u32 cycles, GXColor* color);

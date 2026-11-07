@@ -117,7 +117,7 @@ public:
 };
 static_assert(sizeof(soStatusModule) == 8, "Class is wrong size!");
 
-#if defined(FT_MODULE_BUILDER) && defined(FT_REL_LINK_EXTERN)
+#if defined(FT_MODULE_BUILDER) && defined(FT_REL_LINK_EXTERN) && !defined(WN_MARIO_FIREBALL_UNIT)
 // BYTES: the fighter RELs call the sora_melee constructor/destructor of the change request queue.
 #include <ft/builder/ft_dol_instances.h>
 FT_DOL_ARRAY_VECTOR(s32, 8);
@@ -186,7 +186,11 @@ public:
     virtual void changeStatusForce(int status, soModuleAccesser* moduleAccesser);
     virtual void unableTransitionTerm(int, int);
     virtual void setUniqProc(u32 index, soStatusUniqProcess* uniqProc);
+#ifdef WN_MARIO_FIREBALL_UNIT
+    virtual ~soStatusModuleImpl() { }
+#else
     virtual ~soStatusModuleImpl();
+#endif
     virtual void changeStatus(int status, soModuleAccesser* moduleAccesser);
 
     virtual bool isObserv(char unk1);

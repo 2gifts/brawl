@@ -38,6 +38,7 @@
 // sora_melee instances used by the article builders (declared only: the REL calls them)
 ////////////////////////////////////////
 
+#ifndef WN_MARIO_FIREBALL_UNIT
 FT_DOL_ARRAY_VECTOR(soModelNodeSetUp, 5);
 FT_DOL_ARRAY_VECTOR(soModelNodeSetUp, 2);
 FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soTransitionTerm>, 4);
@@ -174,6 +175,7 @@ static_assert(sizeof(soArrayVector<soStatusUniqProcess*, 4>) == 0x1C, "Octopus s
 // The null arrays (soArrayNull<T>) are sora_melee instances: with WN_WEAPON_BUILDER so/so_array.h declares their
 // constructor and destructor only.
 
+#ifndef WN_MARIO_FIREBALL_UNIT
 // The zero-capacity absolute attack array: constructed from a default element (the sora_melee constructor ignores it).
 template <>
 class soArrayNull<soCollisionAttackAbsolute> : public soArray<soCollisionAttackAbsolute> {
@@ -195,6 +197,7 @@ public:
     virtual bool isFull() const;
     virtual void set(s32 startingIndex, const soCollisionAttackAbsolute& element, s32 numIndicesToSet);
 };
+#endif
 
 // Instance managers constructed in sora_melee.
 #define WN_DOL_INSTANCE_MANAGER(T, C)                                                                  \
@@ -227,6 +230,7 @@ WN_DOL_INSTANCE_MANAGER(soAnimCmdControlUnit, 6);
 typedef soKineticEnergy* wnKineticEnergyPtr;
 WN_DOL_INSTANCE_MANAGER(wnKineticEnergyPtr, 8);
 WN_DOL_INSTANCE_MANAGER(wnKineticEnergyPtr, 2);
+#endif
 
 // sora_melee modules of the articles (constructor and destructor in sora_melee; the REL only needs size and calls).
 FT_DOL_POLY_BEGIN(soReflectModuleImpl, 0x40);
@@ -303,7 +307,13 @@ public:
         m_collisionAbsorber(m_module.getManageId(), B::CollisionAbsorberEvtId),
         m_collisionSearch(m_module.getManageId(), B::CollisionSearchEvtId),
         m_itemManage(m_module.getManageId(), B::ItemManageEvtId),
-        m_motion(m_module.getManageId(), B::MotionEvtId) {
+        m_motion(m_module.getManageId(), B::MotionEvtId)
+#ifdef WN_MARIO_FIREBALL_UNIT
+        , m_gimmick(-1, B::GimmickEvtId)
+        , m_turn(-1, B::TurnEvtId)
+        , m_collisionCatch(-1, B::CollisionCatchEvtId)
+#endif
+    {
 #ifdef WN_INSIDE_EVENT_NULL_TAIL
         fn_27_1E1070(&m_gimmick, -1, B::GimmickEvtId);
         fn_27_1E1074(&m_turn, -1, B::TurnEvtId);
@@ -419,7 +429,11 @@ struct ftReflectorBase<soCollisionReflectorModuleBuildConfigNull> {
 template <>
 class soCollisionCatchModuleBuilder<soCollisionCatchModuleBuildConfigNull> {
 public:
+#ifdef WN_MARIO_FIREBALL_UNIT
+    soCollisionCatchModuleBuilder(soModuleAccesser*, int, u8) { }
+#else
     soCollisionCatchModuleBuilder(soModuleAccesser*, int, gfTask::Category, soEventObserverRegistrationDesc*) { }
+#endif
     void* getModule() { return lbl_27_bss_3BC; }
 };
 // These shared instances are selected directly by the article enumeration.
@@ -512,10 +526,12 @@ public:
 };
 template <>
 class soAreaModuleBuilder<soAreaModuleBuildConfigNull> {
+#ifndef WN_MARIO_FIREBALL_UNIT
     // HYPOTHESIS: the null territory and target search builders (which use the shared null modules) follow the area builder;
     // only their storage (one byte each) is visible in the layout.
     u8 unkTerritory;
     u8 unkTargetSearch;
+#endif
 public:
     soAreaModuleBuilder(soModuleAccesser*, u8, soEventObserverRegistrationDesc*) { }
     void* getModule() { return lbl_27_bss_598; }
@@ -561,7 +577,11 @@ extern char lbl_27_bss_46C[]; // visibility
 template <>
 class soSituationModuleBuilder<soSituationModuleBuildConfigNull> {
 public:
+#ifdef WN_MARIO_FIREBALL_UNIT
+    soSituationModuleBuilder(soModuleAccesser*, s16, soEventObserverRegistrationDesc*) { }
+#else
     soSituationModuleBuilder(s16, soModuleAccesser*, soEventObserverRegistrationDesc*) { }
+#endif
     soSituationModule* getModule() { return (soSituationModule*)lbl_27_bss_35C; }
 };
 
@@ -608,7 +628,9 @@ public:
 };
 template <>
 class soVisibilityModuleBuilder<soVisibilityModuleBuildConfigNull> {
+#ifndef WN_MARIO_FIREBALL_UNIT
     u8 unk0[4]; // HYPOTHESIS: the null selection owns a few bytes (the next builder starts a word later)
+#endif
 public:
     soVisibilityModuleBuilder(soModuleAccesser*, soVisibilityData*) { }
     soVisibilityModule* getModule() { return (soVisibilityModule*)lbl_27_bss_46C; }
@@ -646,6 +668,9 @@ class soParamCustomizeModuleBuilder<soParamCustomizeModuleBuildConfig<soParamCus
     soParamCustomizeModuleImpl m_paramCustomizeModule;
 public:
     soParamCustomizeModuleBuilder(soModuleAccesser*) { }
+#ifdef WN_MARIO_FIREBALL_UNIT
+    soParamCustomizeModule* getModule() { return &m_paramCustomizeModule; }
+#endif
 };
 
 // A motion module without transitions uses the shared null transition module of sora_melee.
@@ -661,6 +686,10 @@ public:
 // module is sora_melee's.
 class soMotionAnimObjCacheModuleNull;
 
+#ifdef WN_MARIO_FIREBALL_UNIT
+#pragma push
+#pragma pool_data off
+#endif
 template <u32 DataNum, typename T, typename TransitionConfig>
 class soMotionModuleBuilder<soMotionModuleBuildConfig<DataNum, T, 0, 0, TransitionConfig,
                                                       soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> > > {
@@ -686,6 +715,9 @@ public:
     ~soMotionModuleBuilder() { }
     soMotionModule* getModule() { return &m_module; }
 };
+#ifdef WN_MARIO_FIREBALL_UNIT
+#pragma pop
+#endif
 
 // Articles with one other-animation slot still use the shared null cache.
 template <u32 DataNum, typename T, typename TransitionConfig>
@@ -1070,6 +1102,9 @@ public:
     wnAnimCmdModuleSubBuilder(soModuleAccesser* acc, const soModuleAccesserBuildData& bd)
 #ifdef WN_ACCESSER_CTOR_INLINE
         __attribute__((always_inline))
+#elif defined(WN_MARIO_FIREBALL_UNIT)
+        // BYTES: emitted as a standalone weak constructor in sora_melee rather than inlining into wnModuleAccesserBuilder.
+        __attribute__((never_inline))
 #endif
         :
         m_unit0(acc, bd.getAnimCmdData(0, 0), bd.getAnimCmdData(0, 1), bd.getAnimCmdData(0, 2)),
@@ -1301,7 +1336,16 @@ public:
         m_moduleAccesser->getKineticModule().addEnergy(&m_energyRotNormal, 1, soKineticEnergy::AttributeFlag(1), -1);
     }
 #endif
+#ifdef WN_MARIO_FIREBALL_UNIT
+#pragma push
+#pragma inline_max_size(10000)
+#pragma inline_max_total_size(20000)
+#pragma inline_depth(8)
+#endif
     virtual ~wnWeaponBuilder() { }
+#ifdef WN_MARIO_FIREBALL_UNIT
+#pragma pop
+#endif
 #ifdef WN_OCTOPUS_ARRAYS
     virtual void deactivateDescendantForce();
 #else

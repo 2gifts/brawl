@@ -1,4 +1,5 @@
 #define FT_FIGHTER_ANIMCMD_LONG // MATCH-ONLY: Fighter::notifyEventAnimCmd(long) overrides the StageObject slot
+#define FT_FIGHTER_ONINHALED_BOOL // MATCH-ONLY: Fighter::onInhaled returns true after the flag write
 #include <ft/fighter.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_manager.h>
@@ -755,4 +756,158 @@ bool Fighter::checkTransitionStatus(u32 status) {
         }
     }
     return true;
+}
+
+// The map names this ftOwner::setOperationCpu. The original call passes a Fighter, and the body is the controller log.
+void ftOwner::setOperationCpu(bool isCpu) {
+    reinterpret_cast<Fighter*>(this)->m_moduleAccesser->getControllerModule().setLogActive(isCpu);
+}
+
+void Fighter::notifyVisibilityItem(BaseItem* item, int nodeIndex, bool visible, u8 visibility) {
+    if (visible != true) {
+        return;
+    }
+    // MATCH-ONLY: the hold-anim flag is the raw visibility byte, not a normalized bool.
+    bool enabled;
+    reinterpret_cast<u8&>(enabled) = visibility;
+    setItemHoldAnim(item, nodeIndex, enabled);
+}
+
+// HYPOTHESIS: capture-module slot 0x24 takes the task id and the two trailing ints.
+struct ftFighterCaptureStatusView {
+    virtual void unk08();
+    virtual void unk0C();
+    virtual void unk10();
+    virtual void unk14();
+    virtual void unk18();
+    virtual void unk1C();
+    virtual void unk20();
+    virtual bool unk24(int taskId, int unk2, int unk3);
+};
+
+bool Fighter::notifyEventCaptureStatus(soModuleAccesser* moduleAccesser, int taskId, int unk2, int unk3) {
+    return reinterpret_cast<ftFighterCaptureStatusView*>(moduleAccesser->m_enumerationStart->m_captureModule)->unk24(taskId, unk2, unk3);
+}
+
+bool Fighter::onInhaled() {
+    m_moduleAccesser->getWorkManageModule().onFlag(0x12000036);
+    return true;
+}
+
+// HYPOTHESIS: these manager flags are unsigned-char bits. Returning one as bool
+// keeps the normalizing conversion the direct bool bitfield compare folds away.
+struct FtManagerStartedView {
+    char pad[0x6c];
+    u8 : 1;
+    u8 m_isGameStarted : 1;
+    u8 : 6;
+    bool isGameStarted() const { return m_isGameStarted; }
+};
+
+struct FtManagerCursorView {
+    char pad[0x6f];
+    u8 : 3;
+    u8 unk6f_10 : 1;
+    u8 : 4;
+    bool isUnk6f10() const { return unk6f_10; }
+};
+
+void Fighter::setLoupeDamage(bool enable) {
+    if (enable == true && reinterpret_cast<FtManagerStartedView*>(g_ftManager)->isGameStarted() == true) {
+        if (unk138_loupeDamage == false) {
+            unk138_loupeDamage = true;
+        }
+    } else if (unk138_loupeDamage == true) {
+        unk138_loupeDamage = false;
+    }
+}
+
+void Fighter::detachInstance() {
+    m_moduleAccesser->activate();
+    getPhysicsModule(m_moduleAccesser).unk1C();
+    m_moduleAccesser->getModelModule().destructInstance();
+}
+
+void Fighter::eatItem(soLinkTouchItemEventArgs* args) {
+    switch (args->m_item->soGetSubKind()) {
+    case Item_Spring:
+        return;
+    default:
+        touchItem(args);
+        break;
+    }
+}
+
+bool Fighter::notifyHaveItemPreCheck(BaseItem* item, bool* result) {
+    if (*reinterpret_cast<int*>(result) == 2) {
+        if ((item->getParam(itValueAccesser::Work_Param_Int_Trait) & itParam::TRAIT_MASK_QUICK) == 0) {
+            *reinterpret_cast<int*>(result) = 0;
+        }
+    }
+    switch (item->soGetSubKind()) {
+    case Item_WarpStar:
+        *reinterpret_cast<int*>(result) = 1;
+        break;
+    }
+    return true;
+}
+
+void Fighter::detachItemHoldAnim(bool detachItem) {
+    m_moduleAccesser->getMotionModule().removePartialAnimChr(0);
+    m_moduleAccesser->getMotionModule().enablePartialCancelNode(false);
+    if (detachItem == true) {
+        m_moduleAccesser->getItemManageModule().setHaveItemHoldAnim(false, 0);
+    }
+}
+
+void Fighter::setLoupe(bool enable) {
+    if (enable == true && reinterpret_cast<FtManagerStartedView*>(g_ftManager)->isGameStarted() == true) {
+        if (unk138_loupe == false) {
+            m_outsideEventPresenter.notifyOutsideEventSetLoupe(1);
+            unk138_loupe = true;
+        }
+    } else if (unk138_loupe == true) {
+        m_outsideEventPresenter.notifyOutsideEventSetLoupe(0);
+        unk138_loupe = false;
+    }
+}
+
+void Fighter::setCursor(bool enable) {
+    if (enable == true && reinterpret_cast<FtManagerCursorView*>(g_ftManager)->isUnk6f10() == true) {
+        if (unk138_cursor == false) {
+            m_outsideEventPresenter.notifyOutsideEventSetCursor(1);
+            unk138_cursor = true;
+        }
+    } else if (unk138_cursor == true) {
+        m_outsideEventPresenter.notifyOutsideEventSetCursor(0);
+        unk138_cursor = false;
+    }
+}
+
+void Fighter::setNameCursor(bool enable) {
+    if (enable == true && reinterpret_cast<FtManagerCursorView*>(g_ftManager)->isUnk6f10() == true) {
+        if (unk138_nameCursor == false) {
+            m_outsideEventPresenter.notifyOutsideEventSetNameCursor(1);
+            unk138_nameCursor = true;
+        }
+    } else if (unk138_nameCursor == true) {
+        m_outsideEventPresenter.notifyOutsideEventSetNameCursor(0);
+        unk138_nameCursor = false;
+    }
+}
+
+void Fighter::notifyEventSetDamage(float damage) {
+    ftOwner* owner = getOwner();
+    m_moduleAccesser->getDamageModule().initDamage(damage);
+    if (owner->isSubOwner() == false) {
+        m_outsideEventPresenter.notifyOutsideEventSetDamage(0.0f, false, false);
+    }
+}
+
+// HYPOTHESIS: 0x12d is the node id whose world position becomes the rough position.
+void Fighter::updateRoughPos() {
+    int nodeId = m_moduleAccesser->getModelModule().getCorrectNodeId(0x12d);
+    soPostureModule& posture = m_moduleAccesser->getPostureModule();
+    Vec3f pos = m_moduleAccesser->getModelModule().getNodeGlobalPosition(nodeId, false);
+    posture.setPrevRoughPos(&pos);
 }

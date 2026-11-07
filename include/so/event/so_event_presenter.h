@@ -25,7 +25,12 @@ class soEventObserver {
     }
 
 public:
+#ifdef SO_EFFECT_OBSERVER_ADD_EXTERN
+    // BYTES: soEffectModuleImpl emits the shield-observer base addObserver out of line.
+    virtual void addObserver(s16 param1, s8 param2);
+#else
     virtual void addObserver(s16 param1, s8 param2) { }
+#endif
     s16 m_manageID;
     s16 m_unitID;
     s16 m_sendID;
@@ -62,7 +67,7 @@ public:
         m_manageID = -1;
     }
 
-#if defined(FT_MODULE_BUILDER) || defined(SO_EVENT_OBSERVER_DTOR_EXTERN)
+#if (defined(FT_MODULE_BUILDER) && !defined(WN_MARIO_FIREBALL_UNIT)) || defined(SO_EVENT_OBSERVER_DTOR_EXTERN)
     // BYTES: the fighter RELs (and the enemy turn module unit, SO_EVENT_OBSERVER_DTOR_EXTERN) call the sora_melee
     // instance; an inline body would also emit weak copies of the template's vtable and addObserver.
     ~soEventObserver();
@@ -459,6 +464,7 @@ public:
     virtual bool checkCollisionAbsorber() { return true; }
     virtual bool checkCollisionSearch() { return true; }
     virtual bool checkTurn() { return true; }
+    static soEventObserverRegistrationDesc* getNullInstance();
 };
 
 extern soEventObserverRegistrationDescNull g_soEventObserverRegistrationDescNull;

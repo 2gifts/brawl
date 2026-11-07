@@ -388,7 +388,7 @@ struct soCollisionAttackAbsolute {
     bool m_isAttack;
     char _0x65[3];
 
-#ifdef YK_STAGE_INLINE // emitted inline in the stage RELs (default element of soArrayNull<soCollisionAttackAbsolute>)
+#if defined(YK_STAGE_INLINE) || defined(WN_MARIO_FIREBALL_UNIT) // emitted inline in the stage RELs (default element of soArrayNull<soCollisionAttackAbsolute>)
     soCollisionAttackAbsolute() : m_attackData() { }
     ~soCollisionAttackAbsolute() { }
 #elif defined(WN_ATTACK_ABSOLUTE_DTOR_INLINE)

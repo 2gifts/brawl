@@ -9,6 +9,7 @@
 #include <so/stageobject.h>
 #include <so/so_external_value_accesser.h>
 #include <so/so_module_accesser.h>
+#include <gf/gf_task_scheduler.h>
 #include <math.h>
 
 void soGroundModuleImpl::begin() {
@@ -815,4 +816,46 @@ bool soGroundModuleImpl::isDiveDown(u32 index) {
     }
     // MATCH-ONLY: the original reloads the line pointer from the work after the null checks.
     return (*(grCollisionLine* volatile*)&work.m_collisionLine)->m_isDive;
+}
+
+soGroundModule::~soGroundModule() {
+}
+
+// HYPOTHESIS: the status record's word at +0xC packs the shape settings, most significant bits first.
+struct soStatusGroundBits {
+    u32 : 4;
+    u32 correctKind : 4;
+    u32 cliffCheck : 3;
+    u32 : 21;
+};
+
+void soGroundModuleImpl::notifyEventChangeStatus(int, int, soStatusData* statusData, soModuleAccesser*) {
+    for (int i = 0; i < m_groundShapeArray->size(); i++) {
+        m_groundShapeArray->at(i).clearSetting();
+        if (m_detachChangeStatus) {
+            m_groundShapeArray->at(i).detach();
+        }
+        if (i != 0) {
+            m_groundShapeArray->at(i).unable();
+        } else {
+            soStatusGroundBits* bits = (soStatusGroundBits*)((u8*)statusData + 0xC);
+            setCorrect((soGroundShapeImpl::CorrectKind)bits->correctKind, i);
+            setCliffCheck((soGroundShapeImpl::CliffCheckKind)bits->cliffCheck, i);
+            selectCliffHangData(0, i);
+            setCorrectIgnoreSlope(false, i);
+        }
+    }
+}
+
+void soGroundModuleImpl::receive(int, bool flag) {
+    if (static_cast<int>(flag) == 1) {
+        if (m_collision != NULL) {
+            updateGrCollisionMatrix();
+        }
+    } else if (flag == false) {
+        if (gfTaskScheduler::getInstance()->getProcessType() <= gfTask::Process_Begin
+            || gfTaskScheduler::getInstance()->getProcessType() >= gfTask::Process_FixPosition) {
+            m_moduleAccesser->m_stageObject->notifyLostGround(m_moduleAccesser);
+        }
+    }
 }

@@ -39,7 +39,12 @@ class wnLinkBowArrow : public wnWeaponBuilder<wnLinkBowArrowModuleAccesserBuildC
 public:
     soKineticEnergyGroundMovement m_energyGround; // +0x1FA8: kinetic energy 2, the outside ground movement
     wnLinkBowArrow(s32 articleId, const wnArticleBuildInfo& info, const wnLinkBowArrowData* data);
+#ifdef FT_LINK_BOW_ARROW_DTOR_EXTERNAL
+    // The fighter holder calls this. This object does not emit the destructor.
+    virtual ~wnLinkBowArrow();
+#else
     virtual ~wnLinkBowArrow() { }
+#endif
     void activate(int founderTaskId, int resourceId, int team, float lr);
     virtual void deactivate(bool force);
     const wnLinkBowArrowData* getData();

@@ -50,6 +50,10 @@ public:
         __attribute__((never_inline))
         : soGeneralWorkAbstract(false), m_intWorks(ints), m_intWorkSize(numInts), m_floatWorks(floats),
           m_floatWorkSize(numFloats), m_flagWorks(flags), m_flagWorkSize(numFlags) { }
+#elif defined(WN_MARIO_FIREBALL_UNIT)
+    soGeneralWorkSimple(s32* ints, u32 numInts, float* floats, u32 numFloats, u32* flags, u32 numFlags)
+        : soGeneralWorkAbstract(false), m_intWorks(ints), m_intWorkSize(numInts), m_floatWorks(floats),
+          m_floatWorkSize(numFloats), m_flagWorks(flags), m_flagWorkSize(numFlags) { }
 #else
     soGeneralWorkSimple(s32* ints, u32 numInts, float* floats, u32 numFloats, u32* flags, u32 numFlags);
 #endif

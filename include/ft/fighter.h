@@ -1385,7 +1385,10 @@ public:
             u8 : 1;
             u8 unk138_1 : 1; // HYPOTHESIS: set by the reflector search/collision events
             u8 unk138_2 : 1; // HYPOTHESIS: set by the reflector collision event
-            u8 : 4;
+            u8 unk138_loupe : 1; // HYPOTHESIS: setLoupe
+            u8 unk138_loupeDamage : 1; // HYPOTHESIS: setLoupeDamage
+            u8 unk138_cursor : 1; // HYPOTHESIS: setCursor
+            u8 unk138_nameCursor : 1; // HYPOTHESIS: setNameCursor
             u8 unk138_7 : 1;
             u8 unk139[3];
         };
@@ -1590,7 +1593,12 @@ public:
 #else
     virtual void playEatSE();
 #endif
+#ifdef FT_FIGHTER_ONINHALED_BOOL
+    // MATCH-ONLY: the sora_melee body returns true after setting the inhaled flag.
+    virtual bool onInhaled();
+#else
     virtual void onInhaled();
+#endif
     virtual bool isInhaled();
     virtual void offInhaled();
     virtual void notifyEventPikminFinalAttack(float, int);

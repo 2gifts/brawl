@@ -24,7 +24,11 @@ class soArrayPool : public Base {
     soArrayVector<typename Base::ElementType, N::value> m_array;
 public:
     enum { Depth = Base::Depth + 1 };
+#ifdef WN_MARIO_FIREBALL_UNIT
+    soArrayPool() : m_array() { }
+#else
     soArrayPool() : m_array(0) { }
+#endif
     soArray<typename Base::ElementType>* getArray(int index, int total) {
         if (index == total - Depth) {
             return &m_array;
@@ -70,7 +74,11 @@ class soTransitionModuleBuilder {
     soJagArray<soInstanceUnitFullProperty<soTransitionTerm>, typename BC::TypeList> m_termArrays;
     soTransitionModuleImpl m_module;
 public:
+#ifdef WN_MARIO_FIREBALL_UNIT
+    soTransitionModuleBuilder() : m_groups(), m_termArrays(), m_module(&m_groups) {
+#else
     soTransitionModuleBuilder() : m_groups(0), m_termArrays(), m_module(&m_groups) {
+#endif
         for (int i = 0; i < BC::GroupCount; i++) {
             soTransitionTermGroup group(m_termArrays.getArrayAt(i));
             soArray<soTransitionTermGroup>* groups = &m_groups;

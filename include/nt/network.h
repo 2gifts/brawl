@@ -11,6 +11,8 @@
 
 struct NetworkUserData;
 
+class NtMatching;
+
 class NtShared {
 public:
     typedef void (*ntPutProductDataCallback_t)(void**, u32*);
@@ -78,6 +80,8 @@ public:
     // HYPOTHESIS: matching arguments are word-sized integers in the menu callers.
     bool retryMatching(int, int);
     bool disconnectAll(bool);
+    static void alarmCallback(Network* network);
+    void shutdown();
     void setLocalDataSize(u16 size);
     // HYPOTHESIS: the original calls these out of line; their weak copies are
     // emitted in mu_wifi_interface.o.
@@ -101,7 +105,11 @@ private:
     };
 
 public:
-    NetworkUserData* m_userData;
+    // HYPOTHESIS: the field is the NtMatching manager, whose leading bytes hold the user data.
+    union {
+        NetworkUserData* m_userData;
+        NtMatching* m_matching;
+    };
 
     // HYPOTHESIS: a second pointer to the per-session data, read by the stop, exit and sync requests.
     union {
