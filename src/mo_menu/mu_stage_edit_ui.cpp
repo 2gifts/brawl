@@ -1,11 +1,15 @@
 // MATCH-ONLY: the editor inlines its native paired-single vector multiplication.
 #define MT_VEC3F_MUL_INLINE
+#include <gf/gf_3d_scene.h>
 #include <gf/gf_heap_manager.h>
+#include <gf/gf_keep_fb.h>
 #include <gf/gf_pad_system.h>
 #include <gf/gf_scene.h>
+#include <gm/gm_global.h>
 #include <math.h>
 #include <ms/ms_message.h>
 #include <mu/mu_stage_edit_ui.h>
+#include <nw4r/g3d/g3d_resfile.h>
 #include <nw4r/g3d/g3d_scngroup.h>
 #include <snd/snd_bgm.h>
 #include <snd/snd_system.h>
@@ -16,6 +20,9 @@
 extern "C" void* GXGetTexObjData(const _GXTexObj* texture);
 extern "C" muCollectionFileName fn_800C3538(const char* names, int index);
 extern "C" int fn_800C39D8(void* collection);
+extern "C" int fn_6_308C(muCollectionViewer* viewer, int* cursor);
+extern "C" void fn_5_B43C(muStageEditUI* ui);
+extern gfKeepFrameBuffer* lbl_805A0008;
 
 // HYPOTHESIS: descriptive table names inferred from the grid readers.
 // Parameter tables indexed by stage size, then zoom level. Their native storage
@@ -512,4 +519,69 @@ void muStageEditSelectTask::getMineLabel(muCollectionMsgBuf* buf) {
     int used = buf->m_size;
     memcpy(buf->m_data + used, text, length);
     buf->m_size = used + length;
+}
+
+u32 stDataContainer::createResId(const char* name) {
+    return *reinterpret_cast<const u32*>(name);
+}
+
+// HYPOTHESIS: clears the first word of one file handle. The editor constructor
+// builds an array of handles through this.
+extern "C" void fn_5_918(int* word) {
+    *word = 0;
+}
+
+void muStageEditSelectTask::getNewLabel(muCollectionMsgBuf* buf) {
+    void* data = m_work->m_msgFile[0].m_handle.getBuffer();
+    u32 size;
+    char* text;
+    Message::getPrintIndexData(data, 7, &text, &size);
+    u32 length = size;
+    int used = buf->m_size;
+    memcpy(buf->m_data + used, text, length);
+    buf->m_size = used + length;
+}
+
+void muStageEditSelectTask::onPreCheckFinished() {
+    // HYPOTHESIS: the stage-edit record keeps the collection cursor at 0x24A0.
+    gmStageEditData* data = g_GameGlobal->m_stageEditData;
+    int count = fn_6_308C(this, &data->m_cursor);
+    if (count >= 0) {
+        m_work->m_curMedia = data->m_cursor;
+        m_work->m_numFiles = m_work->m_extraPanel + count;
+    }
+    if ((u32)g_sndSystem->getBGMId() != 0x270F) {
+        g_sndSystem->playBGM(0x270F, 0, true);
+    }
+}
+
+void muStageEditSelectTask::onDecided(int pad) {
+    if (m_work->m_numFiles > 0) {
+        getWork()->m_unk1D4C = 0;
+        m_work->m_state = 0x17;
+    } else {
+        getWork()->m_pad = pad;
+        getWork()->m_exitMode = -1;
+        getWork()->m_unk1D44 = 0x1B;
+        getWork()->m_unk1D48 = 0;
+        m_work->m_state = 0x19;
+    }
+    g_sndSystem->playSE(static_cast<SndID>(1), -1, 0, 0, -1);
+}
+
+void muStageEditUI::setSaveProcess() {
+    // HYPOTHESIS: word 0x44 is a sub-state, and the scene animation lives in the resource file at 0x7D69C.
+    int state = 13;
+    m_state = state;
+    *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x44) = 0;
+    nw4r::g3d::ResFile* sceneRes = reinterpret_cast<nw4r::g3d::ResFile*>(reinterpret_cast<char*>(this) + 0x7D69C);
+    gfSceneRoot* root = g_gfSceneRoot;
+    nw4r::g3d::ResAnmScn anm;
+    anm = sceneRes->GetResAnmScn(0);
+    anm.Bind(anm);
+    root->setUseCameraAnim(true);
+    root->setResAnmScn(&anm, 0x2A);
+    root->setInfoCamResAnm(&anm);
+    fn_5_B43C(this);
+    lbl_805A0008->endKeepScreen();
 }
