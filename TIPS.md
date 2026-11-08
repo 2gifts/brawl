@@ -1058,3 +1058,21 @@ Method used for `soModelModuleImpl` (sora_melee 0x77DC-0xE268, `include/so/model
   conversion of a constant in the original needs the variable (tag it `MATCH-ONLY`).
 - **A struct returned by hidden pointer and then assigned** (`Vec3f p; p = obj->get();`) gives the extra lfs/stfs copy
   that constructing it in place does not.
+
+## Adventure loaders, operators and menus (st_loader_local_adventure, st_operator_adv_bgm, sc_adv_gameover, mu_adv_comer)
+
+- **An exact sora_melee unit whose source defines a vtable fails the `.plf` link with a multiply-defined `__vt__`** until
+  its splits entry has a `.data` range (and `.bss` for its statics). `missing_syms.py` does not catch this. Take the ranges
+  from the asm object's labels, then compare our object's section sizes with the original's: a larger `.data` is weak
+  base RTTI that the original keeps elsewhere. Name those records (`__RTTI__15stLoaderSandBag`, `__RTTI__13stOperatorBgm`)
+  and the vtable label (`__vt__16stOperatorAdvBgm`) in `symbols.txt`, and mwld drops our copies. **HIGH**
+- **Weak inline getters with float constants** (`Stage::getBgmVolume`) make our `.text` and `.rodata` larger than the
+  original's; when the getters are already named elsewhere in the module, the link drops the copies and their
+  constants, and the hashes match. Judge by the REL hash, not by the object sizes.
+- **A `bool` function returning `cond ? false : intFn()`** gives a plain truthiness test; `intFn() != 0` reproduces the
+  original's neg/or/srwi normalisation (mu_adv_comer `isAnimEnd`).
+- **A local filled and then struct-assigned (`PadInfo none; ...; info = none;`)** reproduces a larger stack frame and a
+  byte-store/word-load pair that a direct field fill does not (mu_adv_comer, as in sc_adv_result).
+- **When the build lock is held by a long link, compile one unit directly:** take `ninja -t commands <obj>`, point `-o`
+  at a scratch path, then diff the function with `dtk elf disasm`. A sora_melee `.plf` link can take 30 minutes under
+  load, so parallel workers should not each run a full `ninja`.
