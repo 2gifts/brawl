@@ -978,7 +978,9 @@ public:
         m_effectModule(acc, this->get(), nodeData, &m_u32s, soSingletonHolder<soArrayNull<soEffectTime> >::getInstance(), emitData,
                        regDesc, commonData, -1, screenData, m_screens.get()) { }
     T* getModule() { return &m_effectModule; }
-#ifdef WN_ARTICLE_BUILDER_DTORS // MATCH-ONLY: the fighter REL calls these builder destructors out of line
+#ifdef FT_ARTICLE_BUILDER_DTOR_OUTLINE
+    ~soEffectModuleBuilder();
+#elif defined(WN_ARTICLE_BUILDER_DTORS) // MATCH-ONLY: the fighter REL calls these builder destructors out of line
     ~soEffectModuleBuilder() { }
 #endif
 };
@@ -1017,7 +1019,9 @@ class soReflectModuleBuilder<soReflectModuleBuildConfig<Kind, T> > {
     T m_module;
 public:
     soReflectModuleBuilder(soModuleAccesser* acc) : m_module(acc, Kind) { }
-#ifdef WN_ARTICLE_BUILDER_DTORS // MATCH-ONLY: the fighter REL calls these builder destructors out of line
+#ifdef FT_ARTICLE_BUILDER_DTOR_OUTLINE
+    ~soReflectModuleBuilder();
+#elif defined(WN_ARTICLE_BUILDER_DTORS) // MATCH-ONLY: the fighter REL calls these builder destructors out of line
     ~soReflectModuleBuilder() { }
 #endif
     T* getModule() { return &m_module; }

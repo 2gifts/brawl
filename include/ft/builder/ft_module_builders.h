@@ -683,7 +683,9 @@ class soStopModuleBuilder {
     typename BC::ModuleType m_module;
 public:
     soStopModuleBuilder(soModuleAccesser* acc) : m_module(acc) { }
-#ifdef WN_ARTICLE_BUILDER_DTORS // MATCH-ONLY: the fighter REL calls these builder destructors out of line
+#ifdef FT_ARTICLE_BUILDER_DTOR_OUTLINE
+    ~soStopModuleBuilder();
+#elif defined(WN_ARTICLE_BUILDER_DTORS) // MATCH-ONLY: the fighter REL calls these builder destructors out of line
     ~soStopModuleBuilder() { }
 #endif
     typename BC::ModuleType* getModule() { return &m_module; }

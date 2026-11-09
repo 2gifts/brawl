@@ -272,7 +272,11 @@ public:
         acc->getAnimCmdModule().registInterpreter(unit, attr);
     }
     // MATCH-ONLY: MWCC needs an explicit definition for selected weak instantiations.
+#ifdef FT_ANIMCMD_UNIT_DTOR_OUTLINE
+    ~soAnimCmdControlUnitBuilder();
+#else
     ~soAnimCmdControlUnitBuilder() { }
+#endif
 };
 
 // Unit 9: no command table / address pack of its own (uses the null pack), a deeper interpreter stack.
@@ -305,6 +309,9 @@ public:
         unit.m_animCmdAddressPackArraySeparate = (soAnimCmdAddressPackArraySeparate*)g_soAnimCmdAddressPackArrayNull;
         acc->getAnimCmdModule().registInterpreter(unit, attr);
     }
+#ifdef FT_ANIMCMD_UNIT_DTOR_OUTLINE
+    ~soAnimCmdControlUnitBuilderUniq();
+#endif
 };
 
 // Unit 0: the two disguise lists (Cap entries each) instead of a command table.

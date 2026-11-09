@@ -74,6 +74,9 @@ ftSound3dGeneratorAccesserImpl::~ftSound3dGeneratorAccesserImpl() { } // BYTES: 
 #endif
 soTransitionInfo::~soTransitionInfo() { } // BYTES: out of line in the REL
 soNullable::soNullable(bool isNull) { m_isNull = isNull; } // BYTES: out of line in the REL
+#ifdef FT_WEAK_KINETIC_ENERGY_DTOR
+__declspec(weak)
+#endif
 soKineticEnergy::~soKineticEnergy() { } // BYTES: out of line in the REL
 #ifndef FT_GENERAL_WORK_ABSTRACT_DTOR_INLINE
 #ifdef FT_WEAK_KEPT_OBSERVERS
