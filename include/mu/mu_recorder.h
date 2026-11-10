@@ -74,7 +74,6 @@ public:
                    int drawPriority, u8 wndUnk0, u8 wndUnk2, void* scnRoot)
         : m_heap(heap), m_heap2(heap2), m_msgRes(msgRes), m_msgData(msgData), m_drawPriority(drawPriority),
           m_wndUnk0(wndUnk0), m_wndUnk2(wndUnk2), m_scnRoot(scnRoot) {}
-    ~muRecorderBase() {}
 };
 static_assert(sizeof(muRecorderBase) == 0x20, "Class is wrong size!");
 
@@ -154,8 +153,8 @@ public:
         struct {
             // HYPOTHESIS: the flags are set by the check: usable (7) and (6); muCollection reads them. The slot is
             // small, so these bits (the top bits of the word) do not collide with it.
-            u8 m_flag7 : 1;
-            u8 m_flag6 : 1;
+            bool m_flag7 : 1;
+            bool m_flag6 : 1;
             u8 m_flagRest : 6;
             u8 m_padFlags[3];
         };

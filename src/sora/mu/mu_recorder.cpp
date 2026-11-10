@@ -10,9 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 
-extern const char lbl_8059E148[1];
-extern const char lbl_8059E14C[1];
-
 void muRecorder::saveAdv(u32 slot) {
     m_slot = slot;
     m_request = Request_SaveAdv;
@@ -55,25 +52,25 @@ muRecorder::muRecorder(int kind, nw4r::g3d::ResFile modelRes, nw4r::g3d::ResFile
     }
 }
 
-muRecorder::~muRecorder() {
-}
+muRecorder::~muRecorder() {}
 
 void muRecorder::check() {
     m_request = Request_Check;
 }
 
 // The locals of a subroutine of processDefault: they live on the stack of the script (see muScriptState).
+// HYPOTHESIS: the first and the last word are guards; the last one is set to the first one before the frame is pushed.
 struct muRecorderFrame3 {
-    int unk0;
+    int m_head;
     int m_slot;
-    int unk8;
+    int m_tail;
 };
 
 struct muRecorderFrame4 {
-    int unk0;
+    int m_head;
     int m_slot;
     int m_result;
-    int unkC;
+    int m_tail;
 };
 
 // A text that is put together for a notice window.
@@ -87,15 +84,49 @@ struct muRecorderSlice {
     u32 m_size;
 };
 
+// The text of the message with the number id of the message data. BYTES: the result is returned by value (the stack
+// holds the local of this function and the returned structure).
+static inline muRecorderSlice getText(void* msgData, u32 id) {
+    muRecorderSlice slice;
+    Message::getPrintIndexData(msgData, id, &slice.m_data, &slice.m_size);
+    return slice;
+}
+
 static inline void appendText(muRecorderText& text, muRecorderSlice slice) {
-    memcpy(text.m_data + text.m_size, slice.m_data, slice.m_size);
-    text.m_size += slice.m_size;
+    int size = text.m_size;
+    memcpy(text.m_data + size, slice.m_data, slice.m_size);
+    text.m_size = size + slice.m_size;
 }
 
 static inline void appendText(muRecorderText& text, const char* data, int size) {
-    memcpy(text.m_data + text.m_size, data, size);
-    text.m_size += size;
+    int used = text.m_size;
+    memcpy(text.m_data + used, data, size);
+    text.m_size = used + size;
 }
+
+// The text of the message for a number of blocks: the first part, the number and the last part.
+// BYTES: the head is a by-value parameter and the tail a reference (one copy of each, as on the stack of the original),
+// and the arguments are evaluated from the right (the tail is fetched first).
+static inline void appendBlocksText(muRecorderText& text, muRecorderSlice head, int blocks, const muRecorderSlice& tail) {
+    appendText(text, head.m_data, head.m_size);
+    muRecorderText number;
+    number.m_data[0] = 0;
+    sprintf(number.m_data + strlen(number.m_data), "%d", blocks);
+    appendText(text, number.m_data, strlen(number.m_data));
+    appendText(text, tail.m_data, tail.m_size);
+}
+
+// BYTES: the position is set by a function that owns the vector (this puts it below the frames of the script).
+static inline void setObjectTrans(std::auto_ptr<MuObject>& object, float x, float y, float z) {
+    Vec3f trans(x, y, z);
+    object->setTrans(&trans);
+}
+
+#define MU_WAIT_SYSREC(ret)                         \
+    do {                                            \
+        muRecorderFrame3 waitFrame = {-1, 0, 0};    \
+        MU_CALL(muRecorderFrame3, waitFrame, State_WaitSysRec, ret); \
+    } while (0)
 
 #define MU_POP()                                    \
     do {                                            \
@@ -111,8 +142,8 @@ static inline void appendText(muRecorderText& text, const char* data, int size) 
 
 #define MU_CALL(FrameType, frame, callee, ret)      \
     do {                                            \
-        FrameType local = (frame);                  \
-        *reinterpret_cast<FrameType*>(m_script.m_sp) = local; \
+        (frame).m_tail = (frame).m_head;            \
+        *reinterpret_cast<FrameType*>(m_script.m_sp) = (frame); \
         m_script.m_sp += sizeof(FrameType) / 4;     \
         *m_script.m_sp++ = (ret);                   \
         m_script.m_state = (callee);                \
@@ -120,7 +151,6 @@ static inline void appendText(muRecorderText& text, const char* data, int size) 
 
 void muRecorder::processDefault() {
     muRecorderText text;
-    nw4r::g3d::ScnGroup* scnGroup = static_cast<nw4r::g3d::ScnGroup*>(m_scnRoot);
 
     switch (m_script.m_state) {
     case State_Init:
@@ -141,30 +171,41 @@ void muRecorder::processDefault() {
         if (!gfSysRecorder2::isEnable(m_recKind)) goto error;
         if (m_sysRecorder->requestCheck(m_heap2, m_recKind)) {
             m_sysRecorderUsed = true;
-            MU_CALL(muRecorderFrame3, muRecorderFrame3(), State_WaitSysRec, State_CheckDone);
+            MU_WAIT_SYSREC(State_CheckDone);
+            break;
+        case State_CheckDone:
+            m_script.m_sp -= 3;
         } else {
-            MU_POP();
-        }
-        break;
-
-    case State_CheckDone:
-        m_script.m_sp -= 3;
-        if (m_sysRecorder->m_result != 0) {
             MU_POP();
             break;
         }
+        // BYTES: the pop of a result that is not 0 is placed in front of the cases of the switch.
+        if (m_sysRecorder->m_result != 0) goto checkDonePop;
         switch (m_sysRecorder->m_checkResult) {
+        checkDonePop:
+            MU_POP();
+            break;
+        case 0:
+        default:
+            m_flag7 = true;
+            MU_POP();
+            break;
         case 1: {
             text.m_size = 0;
-            muRecorderSlice slice;
-            if (m_kind <= 1 || m_kind >= 5) {
-                Message::getPrintIndexData(m_msgData, 0x27, &slice.m_data, &slice.m_size);
-            } else {
-                Message::getPrintIndexData(m_msgData, 0x28, &slice.m_data, &slice.m_size);
+            switch (m_kind) {
+            case 1:
+            default: {
+                appendText(text, getText(m_msgData, 0x27));
+                break;
             }
-            appendText(text, slice);
-            Message::getPrintIndexData(m_msgData, 0x2C, &slice.m_data, &slice.m_size);
-            appendText(text, slice);
+            case 2:
+            case 3:
+            case 4: {
+                appendText(text, getText(m_msgData, 0x28));
+                break;
+            }
+            }
+            appendText(text, getText(m_msgData, 0x2C));
             m_wnd = fn_800BF048(1, text.m_data, text.m_size, &m_msgRes, m_scnRoot, m_drawPriority, 0, m_heap, m_heap2,
                                 m_wndUnk0, 1, m_wndUnk2);
             MU_PUSH_RET(State_WaitWnd, State_RenewStart);
@@ -172,10 +213,6 @@ void muRecorder::processDefault() {
         }
         case 2:
             goto error;
-        default:
-            m_flag7 = true;
-            MU_POP();
-            break;
         }
         break;
 
@@ -184,39 +221,35 @@ void muRecorder::processDefault() {
         m_wnd = fn_800BEEB8(3, m_msgData, 0x26, &m_msgRes, m_scnRoot, m_drawPriority, 0, m_heap, m_heap2, m_wndUnk0, 1,
                             m_wndUnk2);
         if (m_obj.get()) {
+            nw4r::g3d::ScnGroup* scnGroup = static_cast<nw4r::g3d::ScnGroup*>(m_scnRoot);
             scnGroup->Insert(scnGroup->Size(), m_obj->m_sceneModel);
             m_obj->setFrameNode(0.0f);
             m_obj->setFrameTexSrt(0.0f);
-            Vec3f trans(0.0f, -7.0f, 0.0f);
-            m_obj->setTrans(&trans);
+            setObjectTrans(m_obj, 0.0f, -7.0f, 0.0f);
         }
         if (m_sysRecorder->requestRenew(m_heap2, m_recKind)) {
             m_sysRecorderUsed = true;
-            MU_CALL(muRecorderFrame3, muRecorderFrame3(), State_WaitSysRec, State_RenewWait);
+            MU_WAIT_SYSREC(State_RenewWait);
+            break;
+        case State_RenewWait:
+            m_script.m_sp -= 3;
         } else {
             MU_POP();
+            break;
         }
-        break;
-
-    case State_RenewWait:
-        m_script.m_sp -= 3;
         if (m_wnd) {
             m_wnd->setStep(2);
             MU_PUSH_RET(State_WaitWnd, State_RenewDone);
             break;
+        case State_RenewDone:;
         }
-        // fall through
-    case State_RenewDone:
         if (m_obj.get()) m_obj->m_scnMdl->DetachFromParent();
         {
             u8 flags = g_GameGlobal->getEnableSaveLoad();
             u8 bit = 1 << m_recKind;
-            if (m_sysRecorder->m_result == 0) {
-                flags |= bit;
-            } else {
-                flags &= ~bit;
-            }
-            g_GameGlobal->setEnableSaveLoad(flags);
+            u8 enabled = flags & ~bit;
+            if (m_sysRecorder->m_result == 0) enabled = flags | bit;
+            g_GameGlobal->setEnableSaveLoad(enabled);
         }
         switch (m_sysRecorder->m_result) {
         case 3:
@@ -234,26 +267,21 @@ void muRecorder::processDefault() {
             MU_PUSH_RET(State_WaitWnd, State_ErrorWnd);
             break;
         case 2: {
+            gfSysRecorder2Require* require = m_sysRecorder->m_require;
             int blocks = 0;
-            for (int i = 0; m_sysRecorder->m_require[i].m_kind != 6; i++) {
-                if (m_recKind == m_sysRecorder->m_require[i].m_kind) {
-                    blocks = m_sysRecorder->m_require[i].m_unk8;
+            gfSysRecorder2Require* entry = require;
+            int i = 0;
+            while (entry->m_kind != 6) {
+                if (m_recKind == entry->m_kind) {
+                    blocks = require[i].m_unk8;
                     break;
                 }
+                entry++;
+                i++;
             }
             muRecorderText message;
             message.m_size = 0;
-            muRecorderSlice slice1;
-            muRecorderSlice slice2;
-            Message::getPrintIndexData(m_msgData, 0x2F, &slice1.m_data, &slice1.m_size);
-            muRecorderSlice tail = slice1;
-            Message::getPrintIndexData(m_msgData, 0x2E, &slice2.m_data, &slice2.m_size);
-            appendText(message, slice2);
-            char number[0x100];
-            number[0] = 0;
-            sprintf(number + strlen(number), "%d", blocks);
-            appendText(message, number, strlen(number));
-            appendText(message, tail);
+            appendBlocksText(message, getText(m_msgData, 0x2E), blocks, getText(m_msgData, 0x2F));
             m_wnd = fn_800BF048(0, message.m_data, message.m_size, &m_msgRes, m_scnRoot, m_drawPriority, 0, m_heap,
                                 m_heap2, m_wndUnk0, 1, m_wndUnk2);
             MU_PUSH_RET(State_WaitWnd, State_ErrorWnd2);
@@ -287,39 +315,37 @@ void muRecorder::processDefault() {
         }
         g_GameGlobal->getAdventureSaveData(buffer);
         if (m_sysRecorder->saveAdventure(
-                static_cast<u8>(reinterpret_cast<muRecorderFrame3*>(m_script.m_sp - 4)[-1].m_slot))) {
+                static_cast<u8>(reinterpret_cast<muRecorderFrame3*>(m_script.m_sp - 4)->m_slot))) {
             m_sysRecorderUsed = true;
-            MU_CALL(muRecorderFrame3, muRecorderFrame3(), State_WaitSysRec, State_SaveAdvDone);
+            MU_WAIT_SYSREC(State_SaveAdvDone);
+            break;
+        case State_SaveAdvDone:
+            m_script.m_sp -= 3;
         } else {
             MU_POP();
+            break;
         }
+        MU_POP();
         break;
     }
 
-    case State_SaveAdvDone:
-        m_script.m_sp -= 3;
-        MU_POP();
-        break;
-
     case State_LoadAdv: {
-        muRecorderFrame4* frame = reinterpret_cast<muRecorderFrame4*>(m_script.m_sp - 5);
-        frame->m_result = 0;
+        reinterpret_cast<muRecorderFrame4*>(m_script.m_sp - 5)->m_result = 0;
         m_advData.reset(0);
         if (!gfSysRecorder2::isEnable(1)) {
             MU_POP();
             break;
         }
-        if (m_sysRecorder->loadAdventure(m_heap2, static_cast<u8>(frame->m_slot))) {
+        if (m_sysRecorder->loadAdventure(m_heap2, static_cast<u8>(reinterpret_cast<muRecorderFrame4*>(m_script.m_sp - 5)->m_slot))) {
             m_sysRecorderUsed = true;
-            MU_CALL(muRecorderFrame3, muRecorderFrame3(), State_WaitSysRec, State_LoadAdvDone);
+            MU_WAIT_SYSREC(State_LoadAdvDone);
+            break;
+        case State_LoadAdvDone:
+            m_script.m_sp -= 3;
         } else {
             MU_POP();
+            break;
         }
-        break;
-    }
-
-    case State_LoadAdvDone: {
-        m_script.m_sp -= 3;
         if (m_sysRecorder->m_result == 0) {
             m_advData.reset(m_sysRecorder->m_handle.getBuffer());
         } else {
@@ -341,10 +367,11 @@ void muRecorder::processDefault() {
             MU_PUSH_RET(State_Check, State_CheckRet);
             break;
         case State_CheckRet:
-            m_failed = !m_flag7;
+            m_failed = m_flag7 ^ 1; // BYTES: xori of the extracted flag (the not operator compiles to cntlzw)
         } else if (m_request == Request_SaveAdv) {
             {
-                muRecorderFrame3 frame = {-1, static_cast<int>(m_slot), 0};
+                muRecorderFrame3 frame = {-1, 0, 0};
+                frame.m_slot = m_slot;
                 MU_CALL(muRecorderFrame3, frame, State_SaveAdv, State_SaveAdvRet);
             }
             break;
@@ -353,7 +380,8 @@ void muRecorder::processDefault() {
             m_script.m_sp -= 3;
         } else if (m_request == Request_LoadAdv) {
             {
-                muRecorderFrame4 frame = {-1, static_cast<int>(m_slot), 0, 0};
+                muRecorderFrame4 frame = {-1, 0, 0, 0};
+                frame.m_slot = m_slot;
                 MU_CALL(muRecorderFrame4, frame, State_LoadAdv, State_LoadAdvRet);
             }
             break;

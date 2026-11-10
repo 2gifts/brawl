@@ -25,8 +25,8 @@ public:
     class FileInfo {
     public:
         // HYPOTHESIS: field types follow constructor stores and filename-copy accesses.
-        u8 unk0;            // 0x00 HYPOTHESIS: the drive is there (drive 0: bit 7 of m_flags; drive 1: the SD status)
-        u8 unk1;            // 0x01 HYPOTHESIS: the drive can be written
+        bool unk0;          // 0x00 HYPOTHESIS: the drive is there (drive 0: bit 7 of m_flags; drive 1: the SD status)
+        bool unk1;          // 0x01 HYPOTHESIS: the drive can be written
         u16 unk2;
         s32 m_state;        // 0x04 HYPOTHESIS: 0 and 1 fine, 2 and 3 the error messages of the media
         u32 m_count;        // 0x08 the number of the file names in m_names
@@ -82,6 +82,16 @@ public:
             muRecorder::Data m_pixels;  // 0x00
             u32 m_width;                // 0x04
             u32 m_height;               // 0x08
+
+            Decoded& operator=(const Decoded& other) {
+                Decoded& source = const_cast<Decoded&>(other);
+                void* pixels = source.m_pixels.unk0;
+                source.m_pixels.unk0 = 0;
+                m_pixels.reset(pixels);
+                m_width = other.m_width;
+                m_height = other.m_height;
+                return *this;
+            }
         };
 
         Decoded m_decoded;                              // 0x00 (0x1EC) made by decodeJpeg
