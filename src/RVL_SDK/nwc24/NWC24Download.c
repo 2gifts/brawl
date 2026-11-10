@@ -42,10 +42,14 @@ static inline NWC24iDlEntry *DlEntry_i(u16 i) {
     return &DlHeader_i()->entries[i];
 }
 
-// Writes allow the current app ID with its low byte masked, an enabled group share, or tool mode.
-static inline NWC24Err CheckDlTask_i(const NWC24iDlTask *task, BOOL wantWrite) {
-    NWC24iDlHeader *hdr = DlHeader_i();
+// App ownership ignores the low byte of the application ID.
+static inline BOOL IsOwnDlTask_i(const NWC24iDlTask *task) {
+    u32 appId = task->appId;
+    return (NWC24GetAppId() & ~0xFF) == (appId & ~0xFF);
+}
 
+// Writes allow owner/group/tool access before checking the assigned slot bounds.
+static inline NWC24Err CheckDlTaskInHeader_i(const NWC24iDlTask *task, BOOL wantWrite, NWC24iDlHeader *hdr) {
     if (task == NULL) {
         return NWC24_ERR_INVALID_VALUE;
     }
@@ -55,8 +59,7 @@ static inline NWC24Err CheckDlTask_i(const NWC24iDlTask *task, BOOL wantWrite) {
     }
 
     if (wantWrite && !NWC24IsMsgLibOpenedByTool()) {
-        u32 appId = task->appId;
-        BOOL same = (NWC24GetAppId() & ~0xFF) == (appId & ~0xFF);
+        BOOL same = IsOwnDlTask_i(task);
 
         if (!same) {
             u32 group = task->groupId;
@@ -77,6 +80,10 @@ static inline NWC24Err CheckDlTask_i(const NWC24iDlTask *task, BOOL wantWrite) {
     }
 
     return NWC24_OK;
+}
+
+static inline NWC24Err CheckDlTask_i(const NWC24iDlTask *task, BOOL wantWrite) {
+    return CheckDlTaskInHeader_i(task, wantWrite, DlHeader_i());
 }
 
 NWC24Err NWC24CheckDlTask(const NWC24DlTask *pTask, BOOL wantWrite) {
@@ -516,7 +523,10 @@ NWC24Err fn_803A3540(u16 *idx, BOOL first) {
         return NWC24_ERR_DONE;
     }
 
-    for (i = *idx; i < DlHeader_i()->maxTasks; i++) {
+    // BYTES: selecting the nullable header here preserves the native loop branch layout.
+    for (i = *idx;
+         i < ((NWC24iDlHeader *)(NWC24WorkP == NULL ? NULL : NWC24WorkP->dlHeader))->maxTasks;
+         i++) {
         if (CheckDlEntryAvailable_i(i) >= 0) {
             *idx = i;
             return NWC24_OK;
@@ -526,7 +536,8 @@ NWC24Err fn_803A3540(u16 *idx, BOOL first) {
     return NWC24_ERR_DONE;
 }
 
-static inline NWC24Err DeleteDlTaskForced_i(NWC24iDlTask *task) {
+static inline NWC24Err DeleteDlTaskForced_i(NWC24DlTask *pTask) {
+    NWC24iDlTask *task = (NWC24iDlTask *)pTask;
     NWC24Err result;
 
     result = CheckDlTask_i(task, FALSE);
@@ -544,10 +555,11 @@ static inline NWC24Err DeleteDlTaskForced_i(NWC24iDlTask *task) {
 }
 
 NWC24Err NWC24DeleteDlTaskForced(NWC24DlTask *pTask) {
-    return DeleteDlTaskForced_i((NWC24iDlTask *)pTask);
+    return DeleteDlTaskForced_i(pTask);
 }
 
-static inline NWC24Err GetDlTask_i(NWC24iDlTask *pTask, u16 id) {
+static inline NWC24Err GetDlTask_i(NWC24DlTask *pTask, u16 id) {
+    NWC24iDlTask *task = (NWC24iDlTask *)pTask;
     NWC24File file;
     NWC24Err result;
     NWC24Err close;
@@ -577,7 +589,7 @@ static inline NWC24Err GetDlTask_i(NWC24iDlTask *pTask, u16 id) {
     if (result < 0) {
         close = result;
     } else {
-        result = NWC24FRead(pTask, DL_TASK_SIZE, &file);
+        result = NWC24FRead(task, DL_TASK_SIZE, &file);
         close = NWC24_OK;
         if (result < 0) {
             close = result;
@@ -722,86 +734,58 @@ NWC24Err fn_803A367C(DlWalkState *state, u16 *out) {
     return NWC24_ERR_DONE;
 }
 
-// throws the least recently used task out of the list to make space
+// Initializes an ascending or descending ordered walk.
+static inline NWC24Err InitDlWalk_i(DlWalkState *state, u32 order) {
+    memset(state, 0, sizeof(*state));
+    if (!(order & 0x80000000)) {
+        state->best = 0x7FFFFFFF;
+        state->last = 0x80000001;
+    } else {
+        state->best = 0x80000001;
+        state->last = 0x7FFFFFFF;
+    }
+    state->order = order;
+    state->lastIdx = -1;
+    state->firstPass = TRUE;
+    state->valid = TRUE;
+    return NWC24_OK;
+}
+
+// Evicts the least recently used public task, preserving read/delete failures.
 NWC24Err fn_803A4110(void) {
     DlWalkState state;
-    NWC24iDlTask task;
+    NWC24DlTask task;
     u16 idx;
     NWC24Err result;
-    NWC24Err close;
-    NWC24File file;
-    u16 max;
-
-    memset(&state, 0, sizeof(state));
-    state.best = 0x7FFFFFFF;
-    state.last = 0x80000001;
-    state.order = 0;
-    state.lastIdx = -1;
-    state.firstPass = 1;
-    state.valid = 1;
-
-    do {
-        result = fn_803A367C(&state, &idx);
-    } while (result == NWC24_OK && idx < DlHeader_i()->privateTasks);
-
-    if (result >= 0) {
-        u16 id = idx;
-
-        if (DlHeader_i() == NULL) {
-            result = NWC24_ERR_LIB_NOT_OPENED;
-        } else {
-            result = CheckDlEntryAvailable_i(id);
-            if (result >= 0) {
-                result = NWC24FOpen(&file, DLFilePath, NWC24_OPEN_NAND_RBUFF);
-                if (result >= 0) {
-                    max = DlHeader_i()->maxTasks;
-                    if (max > NWC24i_DL_TASK_MAX || id >= max) {
-                        result = NWC24_ERR_INVALID_VALUE;
-                    } else {
-                        result = NWC24FSeek(&file, DL_HEADER_SIZE + id * DL_TASK_SIZE, NWC24_SEEK_BEG);
-                    }
-
-                    if (result < 0) {
-                        close = result;
-                    } else {
-                        result = NWC24FRead(&task, DL_TASK_SIZE, &file);
-                        close = NWC24_OK;
-                        if (result < 0) {
-                            close = result;
-                        }
-                    }
-
-                    result = NWC24FClose(&file);
-                    if (close != NWC24_OK) {
-                        result = close;
-                    }
-                }
-            }
-        }
-
-        if (result >= 0) {
-            result = CheckDlTask_i(&task, FALSE);
-            if (result == NWC24_OK) {
-                result = fn_803A58C8(&task);
-                if (result >= 0) {
-                    task.id = 0xFFFF;
-                }
-            }
-        }
-
+    result = InitDlWalk_i(&state, 0);
+    if (result < 0) {
         return result;
     }
-
-    if (result == NWC24_ERR_DONE) {
-        return NWC24_ERR_FAILED;
+    while ((result = fn_803A367C(&state, &idx)) == NWC24_OK) {
+        if (idx >= DlHeader_i()->privateTasks) {
+            break;
+        }
     }
-
+    if (result >= 0) {
+        result = GetDlTask_i(&task, idx);
+        if (result < 0) {
+            return result;
+        }
+        result = DeleteDlTaskForced_i(&task);
+        if (result < 0) {
+            return result;
+        }
+    } else if (result == NWC24_ERR_DONE) {
+        result = NWC24_ERR_FAILED;
+    }
     return result;
 }
 
 // is the sub task counter pointing at a sub task that is switched on? (-39 says "no, try the next one")
 static inline NWC24Err SubTaskStatus_i(const NWC24iDlTask *task, u8 counter) {
-    NWC24Err check = CheckDlTask_i(task, FALSE);
+    // BYTES: the loop validator selects its header here rather than expanding the accessor.
+    NWC24Err check = CheckDlTaskInHeader_i(
+        task, FALSE, (NWC24iDlHeader *)(NWC24WorkP == NULL ? NULL : NWC24WorkP->dlHeader));
     if (check != NWC24_OK) {
         return check;
     }
@@ -852,7 +836,9 @@ static inline NWC24Err StampDlTask_i(const NWC24iDlTask *task) {
 }
 
 static inline void ClearDlTaskError_i(NWC24iDlTask *task) {
-    if (CheckDlTask_i(task, TRUE) == NWC24_OK) {
+    // BYTES: keep this header selection within the error-reset stage when update is inlined.
+    if (CheckDlTaskInHeader_i(
+            task, TRUE, (NWC24iDlHeader *)(NWC24WorkP != NULL ? NWC24WorkP->dlHeader : NULL)) == NWC24_OK) {
         task->lastError = 0;
         task->errorCount = 0;
     }
@@ -903,6 +889,41 @@ NWC24Err fn_803A38C0(NWC24iDlTask *task) {
 // takes a task for the list: gets a slot for it when it has none yet (kicking the oldest one out when the
 // list is full), then saves it
 // BYTES: keep the public update entrypoint while also expanding it in slot allocation.
+static inline const char *DlTaskUrl_i(const NWC24iDlTask *task) {
+    return task->url;
+}
+
+// Checks the slot assignment and URL before allocation mutates the task.
+static inline NWC24Err CheckDlTaskParam_i(NWC24iDlTask *task) {
+    const char *url;
+    NWC24Err result;
+    if (task->id >= DlHeader_i()->maxTasks && task->id != 0xFFFF) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+    url = DlTaskUrl_i(task);
+    result = CheckDlUrl_i(url);
+    if (result < 0) {
+        return result;
+    }
+    return NWC24_OK;
+}
+
+// Assigns the first unused slot in the half-open range [first, last).
+static inline NWC24Err FindFreeDlId_i(NWC24iDlTask *task, u32 first, u32 last) {
+    NWC24iDlHeader *hdr = DlHeader_i();
+    u16 i;
+    if (task == NULL || first > last || first >= hdr->maxTasks || last > hdr->maxTasks) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+    for (i = first; i < last; i++) {
+        if (DlEntry_i(i)->app == 0) {
+            task->id = i;
+            return NWC24_OK;
+        }
+    }
+    return NWC24_ERR_FULL;
+}
+
 #pragma push
 #pragma auto_inline on
 NWC24Err fn_803A5284(NWC24iDlTask *task, u16 first, u16 last) {
@@ -913,11 +934,7 @@ NWC24Err fn_803A5284(NWC24iDlTask *task, u16 first, u16 last) {
         return result;
     }
 
-    if (task->id >= DlHeader_i()->maxTasks && task->id != 0xFFFF) {
-        result = NWC24_ERR_INVALID_VALUE;
-    } else {
-        result = CheckDlUrl_i(task->url);
-    }
+    result = CheckDlTaskParam_i(task);
 
     if (result < 0) {
         return result;
@@ -928,20 +945,7 @@ NWC24Err fn_803A5284(NWC24iDlTask *task, u16 first, u16 last) {
             return fn_803A38C0(task);
         }
 
-        if (task == NULL || first > last || first >= DlHeader_i()->maxTasks || last > DlHeader_i()->maxTasks) {
-            result = NWC24_ERR_INVALID_VALUE;
-        } else {
-            u16 i;
-
-            result = NWC24_ERR_FULL;
-            for (i = first; i < last; i++) {
-                if (DlEntry_i(i)->app == 0) {
-                    task->id = i;
-                    result = NWC24_OK;
-                    break;
-                }
-            }
-        }
+        result = FindFreeDlId_i(task, first, last);
 
         if (result == NWC24_ERR_FULL) {
             result = fn_803A4110();
@@ -1071,15 +1075,14 @@ NWC24Err fn_803A4D00(void) {
 // walks the list and drops tasks that cannot be read back or that have run out of runs
 NWC24Err fn_803A49B0(NWC24iDlHeader *hdr, BOOL clear) {
     NWC24iDlTask storage;
-    NWC24iDlTask *task = &storage;
     u16 i;
 
     for (i = 0; i < hdr->maxTasks; i++) {
         if (CheckDlEntryAvailable_i(i) == NWC24_OK && clear) {
-            if (GetDlTask_i(task, i) < 0) {
-                DeleteDlTaskForced_i(task);
-            } else if (i >= DlHeader_i()->privateTasks && task->count == 0) {
-                DeleteDlTaskForced_i(task);
+            if (GetDlTask_i((NWC24DlTask *)&storage, i) < 0) {
+                DeleteDlTaskForced_i((NWC24DlTask *)&storage);
+            } else if (i >= DlHeader_i()->privateTasks && storage.count == 0) {
+                DeleteDlTaskForced_i((NWC24DlTask *)&storage);
             }
         }
     }
@@ -1188,19 +1191,14 @@ found:
         return result;
     }
 
-    return GetDlTask_i(out, idx);
+    return GetDlTask_i((NWC24DlTask *)out, idx);
 }
 
 
-// Builds the owning title's data directory; callers append the file name.
-
-
-
-
-// stores the 256 byte public key of the task's server
 // BYTES: the shared directory format precedes the filename literal in the live data pool.
 static char DlDataDirFormat[] = "/title/%08x/%08x/data";
 
+// Builds the owning title's data directory; callers append the file name.
 static inline NWC24Err DlTaskDataDir_i(const NWC24DlTask *pTask, char *path, u32 capacity) {
     const NWC24iDlTask *task = (const NWC24iDlTask *)pTask;
     NWC24Err result = CheckDlTask_i(task, FALSE);
@@ -1237,6 +1235,7 @@ static inline NWC24Err DlTaskFilePath_i(const NWC24iDlTask *task, char *path, u3
     return NWC24_OK;
 }
 
+// Stores the task server's 256-byte public key.
 NWC24Err fn_803A43D0(const NWC24iDlTask *task, const void *key) {
     NWC24Err result;
 
