@@ -203,7 +203,13 @@ public:
     virtual int getAnimCmdFrame();
 #endif
     virtual void getCmdAddressPack();
+#ifdef SO_ANIM_CMD_ADDRESS_PACK_ARGS
+    // BYTES: soLinkModuleImpl::getCmdAddressPackParents forwards the address pack, the motion kind and an out id list
+    // through the slot after getCmdAddressPack. Off by default so other units keep the no-argument declaration.
+    virtual void setAddressPackList(soArray<soAnimCmdAddressPack>* pack, int motionKind, short* ids);
+#else
     virtual void setAddressPackList();
+#endif
     virtual void unk44(); // HYPOTHESIS: unnamed slot; the article initialize reads the interpreter count one slot later (0x48)
     virtual int getInterpreterNum();
 #ifdef FT_MODULE_BUILDER

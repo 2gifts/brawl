@@ -299,7 +299,12 @@ class soEventPresenter {
 
     bool updateObserverList() {
         const s16 manageId = m_manageID;
+#ifdef FT_PRESENTER_RELOAD_MANAGE_ID
+        // The contain test reloads the member. The earlier compare still uses manageId.
+        if (manageId <= -1 || !soEventSystem::getInstance()->getInstanceManager().isContain(m_manageID))
+#else
         if (manageId <= -1 || !soEventSystem::getInstance()->getInstanceManager().isContain(manageId))
+#endif
             return false;
         if (soEventSystem::getInstance()->getManager(m_manageID)->getObserverCapacity(m_unitID) == 0) {
             m_obsrvrList = nullptr;
