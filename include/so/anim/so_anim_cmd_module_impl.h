@@ -140,10 +140,16 @@ public:
 
     virtual bool isNull() const { return false; }
 
+#ifdef IT_ANIM_PACK_CTOR_OOL
+    soAnimCmdAddressPackArraySeparate(soArrayFixed<const acAnimCmdConv*>* addrs1,
+                                      soArrayFixed<const acAnimCmdConv*>* addrs2,
+                                      soArrayFixed<const acAnimCmdConv*>* addrs3);
+#else
     soAnimCmdAddressPackArraySeparate(soArrayFixed<const acAnimCmdConv*>* addrs1,
                                       soArrayFixed<const acAnimCmdConv*>* addrs2,
                                       soArrayFixed<const acAnimCmdConv*>* addrs3) :
         m_addrArr1(addrs1), m_addrArr2(addrs2), m_addrArr3(addrs3) { }
+#endif
 
     virtual ~soAnimCmdAddressPackArraySeparate() { }
 };

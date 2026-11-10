@@ -1,3 +1,12 @@
+#define IT_VEC2F_DEFAULT_OUT_OF_LINE
+#define IT_GENERAL_FLAG_OOL
+#define IT_GENERAL_FLAG_DEFAULT
+#define IT_SET_MANAGE_ID_OOL
+#define IT_ITEM_OBSERVER_CTORS
+#define IT_PARAM_CUSTOMIZE_CTOR_OOL
+#define IT_CONTROLLER_LINK_CTOR_OOL
+#define IT_ANIM_PACK_CTOR_OOL
+#define IT_RESOURCE_ACCESSER_DTOR_INLINE
 #define MT_VEC3F_SCALE_FRESH_REGS
 #define MT_VEC2F_MEMBER_COPY // MATCH-ONLY: see mt_vector.h.
 // BaseItem: the base class of every item (food, bombs, capsules, trophies' stand-ins, Pokeballs, ...). It is a
@@ -35,9 +44,19 @@
 #include <so/event/so_event_manage_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
 #include <so/param/so_param_customize_module_impl.h>
+#include <so/controller/so_controller_module_link_ref.h>
+#include <so/team/so_team_impl.h>
+#include <so/model/so_model_virtual_node.h>
+#include <so/templates/so_array_value_soPartialAnim.h>
+#include <so/templates/so_array_value_soTransitionTermPack.h>
+#include <so/templates/so_array_value_soEffectTime.h>
+#include <so/templates/so_array_value_soPhysicsIKHandle.h>
 #include <it/it_resource_id_accesser_impl.h>
 #include <it/it_status_uniq_process.h>
 #include <so/resource/so_resource_module_ref.h>
+#include <so/article/so_generate_article_manage_module.h>
+#include <so/color/so_color_blend_module_impl.h>
+#include <so/shadow/so_shadow_module_impl.h>
 
 // MATCH-ONLY: it_manager.h cannot be included here (its customizer declarations disagree with the bool hooks of
 // itCustomizerInterface below), so the two itManager members BaseItem uses are declared on their own.
@@ -2235,6 +2254,311 @@ soSituationEventObserver::soSituationEventObserver(short manageId, s8 priority)
 
 gfTask::Category gfTask::getCategory() {
     return m_taskCategory;
+}
+
+int gfTask::getId() {
+    return m_taskId;
+}
+
+int itArchive::getBrresId() const {
+    return m_brresId;
+}
+
+void StageObject::setModuleAccesser(soModuleAccesser* moduleAccesser) {
+    m_moduleAccesser = moduleAccesser;
+}
+
+void soResourceModuleRef::setReference(soResourceModule* resource) {
+    unk24 = resource;
+}
+
+void soResourceModuleRef::clearReference() {
+    unk24 = &unkC;
+}
+
+void* soModuleAccesser::getPhysicsModule() const {
+    return m_enumerationStart->m_physicsModule;
+}
+
+void* BaseItem::getIndefinite(u32 id) {
+    return soValueAccesser::getConstantIndefinite(&moduleAccesser, id, 0);
+}
+
+// The resource reference lives at 0x920: its embedded module is at 0x92C and the active pointer at 0x944.
+// Outer when that pointer does not address the embedded module.
+bool BaseItem::isUseOuterRes() {
+    soResourceModule* active = *reinterpret_cast<soResourceModule**>(reinterpret_cast<u8*>(this) + 0x944);
+    soResourceModule* embeddedRes = reinterpret_cast<soResourceModule*>(reinterpret_cast<u8*>(this) + 0x92C);
+    return active != embeddedRes;
+}
+
+extern char g_soCollisionAbsorberModuleNull[];
+extern char g_soDebugModuleNull[];
+extern char g_soGenerateArticleManageModuleNull[];
+extern char g_soTerritoryModuleNull[];
+extern char g_soTargetSearchModuleNull[];
+extern char g_soItemManageModuleNull[];
+extern char g_soTeamModuleNullArg[];
+
+class soCollisionShieldModuleNull {
+public:
+    static void* getNullInstance();
+};
+void* soCollisionShieldModuleNull::getNullInstance() {
+    return g_soCollisionAbsorberModuleNull;
+}
+
+class soDebugModuleNull {
+public:
+    static void* getNullInstance();
+};
+void* soDebugModuleNull::getNullInstance() {
+    return g_soDebugModuleNull;
+}
+
+soGenerateArticleManageModuleNull* soGenerateArticleManageModuleNull::getNullInstance() {
+    return reinterpret_cast<soGenerateArticleManageModuleNull*>(g_soGenerateArticleManageModuleNull);
+}
+
+class soTerritoryModuleNull {
+public:
+    static void* getNullInstance();
+};
+void* soTerritoryModuleNull::getNullInstance() {
+    return g_soTerritoryModuleNull;
+}
+
+class soTargetSearchModuleNull {
+public:
+    static void* getNullInstance();
+};
+void* soTargetSearchModuleNull::getNullInstance() {
+    return g_soTargetSearchModuleNull;
+}
+
+class soItemManageModuleNull {
+public:
+    static void* getNullInstance();
+};
+void* soItemManageModuleNull::getNullInstance() {
+    return g_soItemManageModuleNull;
+}
+
+soEventObserverRegistrationDesc* soEventObserverRegistrationDescNull::getNullInstance() {
+    return reinterpret_cast<soEventObserverRegistrationDesc*>(g_soTeamModuleNullArg);
+}
+
+soSoundIdExchangerNull* soSoundIdExchangerNull::getNullInstance() {
+    return &g_soSoundIdExchangerNull;
+}
+
+soParamAccesserNull* soParamAccesserNull::getNullInstance() {
+    return &g_soParamAccesserNull;
+}
+
+extern char lbl_27_bss_404[];
+extern char lbl_27_bss_584[];
+extern char lbl_27_bss_604[];
+extern char lbl_27_bss_614[];
+extern char lbl_27_bss_640[];
+extern char lbl_27_bss_66C[];
+extern char lbl_27_bss_DBC[];
+extern char lbl_27_bss_6414[];
+extern char lbl_27_bss_714C[];
+extern char lbl_27_bss_7164[];
+extern char lbl_27_bss_6404[];
+extern char lbl_27_bss_63F4[];
+extern char lbl_27_bss_6430[];
+
+class soCaptureModuleNull {
+public:
+    static void* getNullInstance();
+};
+void* soCaptureModuleNull::getNullInstance() { return lbl_27_bss_404; }
+
+class soComboModuleNull {
+public:
+    static void* getNullInstance();
+};
+void* soComboModuleNull::getNullInstance() { return lbl_27_bss_584; }
+
+class soSlopeModuleNull {
+public:
+    static void* getNullInstance();
+};
+void* soSlopeModuleNull::getNullInstance() { return lbl_27_bss_604; }
+
+soShadowModuleNull* soShadowModuleNull::getNullInstance() {
+    return reinterpret_cast<soShadowModuleNull*>(lbl_27_bss_614);
+}
+
+soColorBlendModuleNull* soColorBlendModuleNull::getNullInstance() {
+    return reinterpret_cast<soColorBlendModuleNull*>(lbl_27_bss_640);
+}
+
+class soAbnormalModuleNull {
+public:
+    static void* getNullInstance();
+};
+void* soAbnormalModuleNull::getNullInstance() { return lbl_27_bss_66C; }
+
+class soMotionAnimObjCacheModuleNull {
+public:
+    static void* getNullInstance();
+};
+void* soMotionAnimObjCacheModuleNull::getNullInstance() { return lbl_27_bss_DBC; }
+
+itGroundConditionCheckerImpl* itGroundConditionCheckerImpl::getInstance() {
+    return reinterpret_cast<itGroundConditionCheckerImpl*>(lbl_27_bss_6414);
+}
+
+class itDamageEffectorImpl {
+public:
+    static void* getInstance();
+};
+void* itDamageEffectorImpl::getInstance() { return lbl_27_bss_714C; }
+
+class itDamageTransactorImpl {
+public:
+    static void* getInstance();
+};
+void* itDamageTransactorImpl::getInstance() { return lbl_27_bss_7164; }
+
+itStatusUniqProcessStandby* itStatusUniqProcessStandby::getInstance() {
+    return reinterpret_cast<itStatusUniqProcessStandby*>(lbl_27_bss_6404);
+}
+
+itStatusUniqProcessHave* itStatusUniqProcessHave::getInstance() {
+    return reinterpret_cast<itStatusUniqProcessHave*>(lbl_27_bss_63F4);
+}
+
+template<>
+itNullCustomizer* itCustomizer<itNullCustomizer>::getInstance() {
+    return reinterpret_cast<itNullCustomizer*>(lbl_27_bss_6430);
+}
+
+Vec2f::Vec2f() { }
+
+// HYPOTHESIS: gfSlowHandle's constructor stores 0xFF in its first byte (an invalid slow-request id).
+class gfSlowHandle {
+    u8 m_id;
+public:
+    gfSlowHandle();
+};
+gfSlowHandle::gfSlowHandle() : m_id(0xFF) { }
+
+template <typename T>
+soGeneralFlag<T>::soGeneralFlag(T init) : flag(init) { }
+
+template <typename T>
+soGeneralFlag<T>::soGeneralFlag() : flag(0) { }
+
+template soGeneralFlag<long>::soGeneralFlag(long);
+template soGeneralFlag<long>::soGeneralFlag();
+template soGeneralFlag<short>::soGeneralFlag(short);
+template soGeneralFlag<unsigned char>::soGeneralFlag(unsigned char);
+
+template <typename T>
+void soEventPresenter<T>::setManageId(s16 id) {
+    if (m_manageID != id) {
+        m_manageID = id;
+        if (id > -1)
+            m_obsrvrList = nullptr;
+    }
+}
+template void soEventPresenter<soArticleEventObserver>::setManageId(s16);
+
+// Call sites keep the inline body. Returning the address emits the out-of-line copy.
+__declspec(weak) soCameraModule& (soModuleAccesser::*itItemCameraModule())() const {
+    return &soModuleAccesser::getCameraModule;
+}
+
+soAnimCmdAddressPackArraySeparate::soAnimCmdAddressPackArraySeparate(soArrayFixed<const acAnimCmdConv*>* addrs1,
+                                                                     soArrayFixed<const acAnimCmdConv*>* addrs2,
+                                                                     soArrayFixed<const acAnimCmdConv*>* addrs3)
+    : m_addrArr1(addrs1), m_addrArr2(addrs2), m_addrArr3(addrs3) { }
+
+__declspec(weak) void itItemDeleteResource(itResourceIdAccesserImpl* accesser) {
+    delete accesser;
+}
+
+soStatusEventObserver::soStatusEventObserver(short manageId, s8 p2)
+    : soEventObserver<soStatusEventObserver>(0x4) {
+    initialize(manageId, p2);
+}
+
+soCollisionAttackEventObserver::soCollisionAttackEventObserver(short manageId, s8 p2)
+    : soEventObserver<soCollisionAttackEventObserver>(0x1) {
+    initialize(manageId, p2);
+}
+
+soCollisionSearchEventObserver::soCollisionSearchEventObserver(short manageId, s8 p2)
+    : soEventObserver<soCollisionSearchEventObserver>(0x11) {
+    initialize(manageId, p2);
+}
+
+soGimmickEventObserver::soGimmickEventObserver(short manageId, s8 p2)
+    : soEventObserver<soGimmickEventObserver>(0x3) {
+    initialize(manageId, p2);
+}
+
+soParamCustomizeModuleImpl::soParamCustomizeModuleImpl()
+    : m_attackPowerMulPattern(1.0f), m_attackPowerMulScale(1.0f) { }
+
+soControllerModuleLinkRef::soControllerModuleLinkRef(soModuleAccesser* acc, s16 manageID, soArray<soControllerImpl>* controllers, soArray<soControllerClatter>* clatters)
+    : soControllerModuleImpl(manageID, (int)controllers, clatters), m_moAccessor(acc), m_lkController(0) { }
+
+// HYPOTHESIS: each null array lives in this unit's bss, and the singleton accessor returns that object.
+template <typename T>
+class soSingletonConcrete {
+public:
+    static T* getInstance();
+};
+
+extern char lbl_27_bss_91C[];
+extern char lbl_27_bss_A14[];
+extern char lbl_27_bss_9BC[];
+extern char g_u32ArrayNull[];
+extern char lbl_27_bss_9E4[];
+extern char lbl_27_bss_8B4[];
+extern char lbl_27_bss_99C[];
+extern char lbl_27_bss_A6C[];
+
+template<>
+soArrayNull<soModelVirtualNode>* soSingletonConcrete<soArrayNull<soModelVirtualNode> >::getInstance() {
+    return reinterpret_cast<soArrayNull<soModelVirtualNode>*>(lbl_27_bss_91C);
+}
+template<>
+soArrayNull<soPartialAnim>* soSingletonConcrete<soArrayNull<soPartialAnim> >::getInstance() {
+    return reinterpret_cast<soArrayNull<soPartialAnim>*>(lbl_27_bss_A14);
+}
+template<>
+soArrayNull<soTransitionTermPack>* soSingletonConcrete<soArrayNull<soTransitionTermPack> >::getInstance() {
+    return reinterpret_cast<soArrayNull<soTransitionTermPack>*>(lbl_27_bss_9BC);
+}
+template<>
+soArrayNull<unsigned long>* soSingletonConcrete<soArrayNull<unsigned long> >::getInstance() {
+    return reinterpret_cast<soArrayNull<unsigned long>*>(g_u32ArrayNull);
+}
+template<>
+soArrayNull<soControllerImpl>* soSingletonConcrete<soArrayNull<soControllerImpl> >::getInstance() {
+    return reinterpret_cast<soArrayNull<soControllerImpl>*>(lbl_27_bss_9E4);
+}
+template<>
+soArrayFixedNull<const acAnimCmdConv*>* soSingletonConcrete<soArrayFixedNull<const acAnimCmdConv*> >::getInstance() {
+    return reinterpret_cast<soArrayFixedNull<const acAnimCmdConv*>*>(lbl_27_bss_8B4);
+}
+template<>
+soArrayNull<soEffectTime>* soSingletonConcrete<soArrayNull<soEffectTime> >::getInstance() {
+    return reinterpret_cast<soArrayNull<soEffectTime>*>(lbl_27_bss_99C);
+}
+template<>
+soArrayNull<soPhysicsIKHandle>* soSingletonConcrete<soArrayNull<soPhysicsIKHandle> >::getInstance() {
+    return reinterpret_cast<soArrayNull<soPhysicsIKHandle>*>(lbl_27_bss_A6C);
+}
+
+__declspec(weak) void itItemEmitTeamImpl(soTeamImpl* team, int no) {
+    new (team) soTeamImpl(no);
 }
 
 soResourceIdAccesser* soResourceModuleRef::getResourceIdAccesser() {

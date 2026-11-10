@@ -408,6 +408,9 @@ public:
     s16 m_unitID;
     soInstanceManagerFullProperty<T*>* m_obsrvrList;
 
+#ifdef IT_SET_MANAGE_ID_OOL
+    void setManageId(s16 id);
+#else
     void setManageId(s16 id) {
         if (m_manageID != id) {
             m_manageID = id;
@@ -415,6 +418,7 @@ public:
                 m_obsrvrList = nullptr;
         }
     }
+#endif
 
     soInstanceManagerFullProperty<T*>* getObserverList() {
         if (m_manageID <= -1)
