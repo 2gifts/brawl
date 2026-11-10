@@ -1113,7 +1113,12 @@ public:
         m_unit3(acc, bd.getAnimCmdData(3, 0), bd.getAnimCmdData(3, 1), bd.getAnimCmdData(3, 2)),
         m_unit4(acc),
         m_unit5(acc, bd.getAnimCmdData(5, 0), bd.getAnimCmdData(5, 1), bd.getAnimCmdData(5, 2)) { }
+#ifdef FT_ANIMCMD_SUB_DTOR_NOINLINE
+    // The fighter unit calls this teardown out of line (the cloud article's command builder).
+    ~wnAnimCmdModuleSubBuilder() __attribute__((never_inline)) { }
+#else
     ~wnAnimCmdModuleSubBuilder() { }
+#endif
 };
 
 ////////////////////////////////////////
