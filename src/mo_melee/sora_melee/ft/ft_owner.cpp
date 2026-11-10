@@ -1,6 +1,8 @@
 #include <types.h>
 #include <ft/ft_owner.h>
 #include <ft/ft_owner_impl.h>
+#include <ft/ft_input.h>
+#include <ft/ft_entry.h>
 #include <it/it_manager.h>
 #include <mt/mt_prng.h>
 #include <ft/ft_external_value_accesser.h>
@@ -144,6 +146,12 @@ int ftOwner::getPointTeam() {
     return m_data->m_pointTeam;
 }
 
+// HYPOTHESIS: the object names this ftInput::setType. The body sets the operation-cpu bit of an ftOwner.
+void ftInput::setType(s8 type) {
+    ftOwnerData* data = *reinterpret_cast<ftOwnerData**>(this);
+    data->m_operationCpu = type;
+}
+
 bool ftOwner::isOperationCpu() {
     return m_data->m_operationCpu;
 }
@@ -211,12 +219,23 @@ void ftOwner::setFighterColor(u8 color) {
     m_data->m_fighterColor = color;
 }
 
+u8 ftOwner::getFighterColor() {
+    return m_data->m_fighterColor & 0xF;
+}
+
 u8 ftOwner::getFighterSubColor() {
     return m_data->m_fighterSubColor;
 }
 
 void ftOwner::setFighterSubColor(u8 color) {
     m_data->m_fighterSubColor = color;
+}
+
+void ftOwner::setDeadCount(int deadCount) {
+    if (unkA == 1) {
+        m_data->m_deadCount = deadCount;
+    }
+    m_data->m_lastDeadSuicide = false;
 }
 
 int ftOwner::getDeadCount() {
@@ -232,6 +251,11 @@ void ftOwner::setBeatCount(s32 playerIndex, s32 beatCount) {
 
 int ftOwner::getBeatCount(int playerIndex) {
     return m_data->m_beatCount[playerIndex];
+}
+
+int ftOwner::getBeatCountTotal() {
+    return m_data->m_beatCount[0] + m_data->m_beatCount[1] + m_data->m_beatCount[2] + m_data->m_beatCount[3]
+        + m_data->m_beatCount[4] + m_data->m_beatCount[5] + m_data->m_beatCount[6];
 }
 
 void ftOwner::setSuicideCount(u16 suicideCount) {
@@ -530,6 +554,21 @@ bool ftOwner::isSlipInterval() {
     return m_data->m_slipInterval;
 }
 
+void ftOwner::setController(int kind, u64* buttons0, u64* buttons1) {
+    ftOwnerButtonsFloats* stick0 = reinterpret_cast<ftOwnerButtonsFloats*>(buttons0);
+    ftOwnerButtonsFloats* stick1 = reinterpret_cast<ftOwnerButtonsFloats*>(buttons1);
+    ftOwnerData* data = m_data;
+    float stick0X = stick0->unk0;
+    data->m_controllerKind = kind;
+    float stick1X = stick1->unk0;
+    float stick0Y = stick0->unk4;
+    m_data->m_controllerStick[0] = stick0X;
+    float stick1Y = stick1->unk4;
+    m_data->m_controllerStick[1] = stick0Y;
+    m_data->m_controllerStick[2] = stick1X;
+    m_data->m_controllerStick[3] = stick1Y;
+}
+
 bool ftOwner::sameCheckController(int kind, u64* buttons0, u64* buttons1) {
     bool result = false;
     ftOwnerButtonsFloats* stick0 = reinterpret_cast<ftOwnerButtonsFloats*>(buttons0);
@@ -586,6 +625,57 @@ int ftOwner::getAdventureUnitKind() {
     return m_data->m_adventureUnitKind;
 }
 
+void ftEntryEventObserver::notifyEventSetDamage(float) {
+}
+
+void ftEntryEventObserver::notifyEventChangeAdvUnit() {
+}
+
+// HYPOTHESIS: map names below are shifted one slot from the fields. Each body is the code at that map entry.
+void ftOwner::getAttackRatio(float value) {
+    m_data->m_attackRatio = value;
+}
+
+float ftOwner::setDamageRatio() {
+    return m_data->m_attackRatio;
+}
+
+void ftOwner::getDamageRatio(float value) {
+    m_data->m_damageRatio = value;
+}
+
+float ftOwner::setAttackReactionMul() {
+    return m_data->m_damageRatio;
+}
+
+void ftOwner::getAttackReactionMul(float value) {
+    m_data->m_attackReactionMul = value;
+}
+
+float ftOwner::getAttackReactionMulSeal() {
+    return m_data->m_attackReactionMul;
+}
+
+float ftOwner::setDamageReactionMul() {
+    return m_data->unk7FC;
+}
+
+void ftOwner::getDamageReactionMul(float value) {
+    m_data->m_damageReactionMul = value;
+}
+
+float ftOwner::getDamageReactionMulSeal() {
+    return m_data->m_damageReactionMul;
+}
+
+float ftOwner::getSpecialGlowAttack() {
+    return m_data->unk800;
+}
+
+int ftOwner::getSpecialWeaponGlowAttack() {
+    return m_data->unk804;
+}
+
 void ftOwner::clearSeal() {
     m_data->m_sealCount = 0;
     m_data->unk7FC = 1.0f;
@@ -609,21 +699,34 @@ int ftOwner::getSealCount() {
     return m_data->m_sealCount;
 }
 
-void ftOwner::getSeal(int index, ftOwnerSeal* seal) {
-    *seal = m_data->m_seals[index];
+__declspec(weak) void ftOwner::getSeal(int index, ftOwnerSeal* seal) {
+    ftOwnerSeal* src = &m_data->m_seals[index];
+    seal->m_kind = src->m_kind;
+    u32 value = *reinterpret_cast<u32*>(&src->m_value);
+    u32 unk = src->unk8;
+    *reinterpret_cast<u32*>(&seal->m_value) = value;
+    seal->unk8 = unk;
 }
 
-int ftOwner::lotSealItem() {
+__declspec(weak) int ftOwner::lotSealItem() {
     int items[64];
+    int* slot = items;
+    int limit = m_data->m_sealCount;
+    int byteOff = 0;
     int count = 0;
-    for (int i = 0; i < m_data->m_sealCount; i++) {
-        ftOwnerSeal* seal = &m_data->m_seals[i];
-        if (seal->m_kind >= 0x46 && seal->m_kind <= 0x59) {
-            items[count++] = seal->m_value;
+    for (int i = limit; i > 0; --i) {
+        char* base = reinterpret_cast<char*>(m_data) + byteOff;
+        int kind = *reinterpret_cast<int*>(base + 0x4F8);
+        if (kind >= 0x46 && kind <= 0x59) {
+            float value = *reinterpret_cast<float*>(base + 0x4FC);
+            count += 1;
+            *slot = static_cast<int>(value);
+            slot += 1;
             if (count >= 64) {
                 break;
             }
         }
+        byteOff += 0xC;
     }
     if (count > 0) {
         return items[randi(count)];
@@ -657,6 +760,10 @@ float ftOwner::getHeartHealAdd() {
 
 int ftOwner::getSwimDrownFrameAdd() {
     return m_data->m_swimDrownFrameAdd;
+}
+
+float ftOwner::getStaminaMaxAdd() {
+    return m_data->m_staminaMaxAdd;
 }
 
 float ftOwner::getResultWinRotY() {

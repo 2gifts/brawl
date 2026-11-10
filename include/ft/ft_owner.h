@@ -189,7 +189,7 @@ public:
     u8 getStartPointIndex(); // map name ftOwner::getStartPointIndex
     u8 getFighterColor();
     void setPointTeam(int pointTeam);
-    int setDeadCount(int deadCount);
+    void setDeadCount(int deadCount);
     void setStockCount(int stockCount);
     int getDeadCount();
     void addLostCoin(int numCoinsToAdd);
@@ -285,6 +285,19 @@ public:
     float getMaximTomatoHealAdd();
     float getHeartHealAdd();
     int getSwimDrownFrameAdd();
+    // HYPOTHESIS: the linker map names these one slot off from the fields the code reads and writes.
+    void getAttackRatio(float value);
+    float setDamageRatio();
+    void getDamageRatio(float value);
+    float setAttackReactionMul();
+    void getAttackReactionMul(float value);
+    float getAttackReactionMulSeal();
+    float setDamageReactionMul();
+    void getDamageReactionMul(float value);
+    float getDamageReactionMulSeal();
+    float getSpecialGlowAttack();
+    int getSpecialWeaponGlowAttack();
+    float getStaminaMaxAdd();
     int getGenerateCoin();
     int getLostCoin();
     void setCoinDropRate(float rate);
