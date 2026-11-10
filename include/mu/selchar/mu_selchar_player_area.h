@@ -196,6 +196,7 @@ public:
     int getCollKind(Vec2f* pos, int* arg, float* rect);
     void openHandiList();
     void forceCloseList();
+    void charPicEffectMain();
     void setNameNo(int name);
     void setControllerNo(int controller) __attribute__((never_inline));
     void dispName(int name, int playerKind, bool teamBattle, int teamColor);

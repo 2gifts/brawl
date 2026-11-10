@@ -162,15 +162,19 @@ void muSelCharPlayerArea::dispNameEntryButtonColor(bool isTeamBattle, int teamCo
 }
 
 void muSelCharPlayerArea::openCpLevelList() {
+    int level = m_cpLevel;
+    MuSelctChrList* list = &m_chrList;
     Vec3f pos;
     pos.m_x = pos.m_y = pos.m_z = 0.0f;
-    m_chrList.open(MuSelctChrList::Kind_CpLevel, m_cpLevel, &pos);
+    list->open(MuSelctChrList::Kind_CpLevel, level, &pos);
 }
 
 void muSelCharPlayerArea::openNameList() {
+    int name = m_nameId;
+    MuSelctChrList* list = &m_chrList;
     Vec3f pos;
     pos.m_x = pos.m_y = pos.m_z = 0.0f;
-    m_chrList.open(MuSelctChrList::Kind_Name, m_nameId, &pos);
+    list->open(MuSelctChrList::Kind_Name, name, &pos);
 }
 
 void muSelCharPlayerArea::closeNameList() {
@@ -245,6 +249,11 @@ void muSelCharPlayerArea::setHandiVisible(bool visible) {
     }
 }
 
+// Widens an index and adds one. Both branches of the color switches share this conversion.
+static inline float onePlusIndex(int index) {
+    return 1.0f + index;
+}
+
 // The color of the mark of the series of the character.
 void muSelCharPlayerArea::dispMarkColor(int playerKind, bool isTeamBattle, int teamColor) {
     float frame;
@@ -257,9 +266,9 @@ void muSelCharPlayerArea::dispMarkColor(int playerKind, bool isTeamBattle, int t
         break;
     case 1:
         if (isTeamBattle) {
-            frame = 1.0f + sTeamColorAnim[teamColor];
+            frame = onePlusIndex(sTeamColorAnim[teamColor]);
         } else {
-            frame = 1.0f + m_areaIdx;
+            frame = onePlusIndex(m_areaIdx);
         }
         break;
     }
@@ -269,14 +278,14 @@ void muSelCharPlayerArea::dispMarkColor(int playerKind, bool isTeamBattle, int t
 // The kind of the controller of the player (and its number, for a Wii Remote) on the button of the player kind.
 void muSelCharPlayerArea::dispControllerKind(int playerKind, int controllerKind, int controllerNo) {
     // The frame of the button of each kind of controller.
-    static const u8 kindFrame[] = { 2, 1, 3, 4, 0 };
+    static const u8 sControllerKindFrame[] = { 2, 1, 3, 4, 0 };
     MuObject* obj = m_objs[Obj_Nameplate];
     int number = 0;
     if (controllerKind != 4) {
         number = controllerNo % 4;
     }
     obj->setFrameTex(number);
-    float frame = kindFrame[controllerKind];
+    float frame = sControllerKindFrame[controllerKind];
     if (playerKind == 2) {
         frame += 5.0f;
     }
@@ -315,9 +324,9 @@ void muSelCharPlayerArea::dispBaseMdlColor(int playerKind, bool isTeamBattle, in
         break;
     case 1:
         if (isTeamBattle) {
-            frame = 1.0f + sTeamColorAnim[teamColor];
+            frame = onePlusIndex(sTeamColorAnim[teamColor]);
         } else {
-            frame = 1.0f + m_areaIdx;
+            frame = onePlusIndex(m_areaIdx);
         }
         break;
     }
@@ -413,15 +422,15 @@ muSelCharPlayerArea::muSelCharPlayerArea()
 int muSelCharPlayerArea::getHandiDispMode() {
     int type = g_GameGlobal->m_selCharData->m_selCharType;
     int group;
-    if (isSelCharTypeIn(type, 0, 4)) {
-        group = 0;
-    } else if (isSelCharTypeIn(type, 4, 12)) {
-        group = 1;
-    } else if (isSelCharTypeIn(type, 12, 16)) {
-        group = 2;
-    } else {
+    if (isSelCharTypeIn(type, 0, 4)) { group = 0; goto groupSelected; }
+    if (isSelCharTypeIn(type, 4, 12)) { group = 1; goto groupSelected; }
+    {
+        bool inGroup = isSelCharTypeIn(type, 12, 16);
         group = 3;
+        if (!inGroup) goto groupSelected;
+        group = 2;
     }
+    groupSelected:
     if (group == 1) {
         return 0;
     }
@@ -974,4 +983,90 @@ muSelCharPlayerArea::~muSelCharPlayerArea() {
         gfHeapManager::free(m_charPicData);
         m_charPicData = NULL;
     }
+}
+
+// The hand stores the mode through a pointer. Defined after the caller so the check stays.
+static int readHandMode(muSelCharHand* hand, int* arg);
+
+// Closes a list the hand of this area still has open, then puts that hand back to moving.
+void muSelCharPlayerArea::forceCloseList() {
+    int modeArg;
+    int closed = 0;
+    for (int index = 0; index < m_selCharTask->m_numPlayerAreas; ++index) {
+        muSelCharHand* hand = m_selCharTask->getHand(index);
+        int mode = readHandMode(hand, &modeArg);
+        switch (mode) {
+        case 5:
+            if (modeArg == m_areaIdx) {
+                m_chrList.close();
+                closed = 1;
+            }
+            break;
+        case 6:
+            if (modeArg == m_areaIdx) {
+                m_chrList.close();
+                closed = 1;
+            }
+            break;
+        case 7:
+            if (modeArg == m_areaIdx) {
+                m_chrList.clearDisableName();
+                m_chrList.close();
+                closed = 1;
+            }
+            break;
+        case 8:
+            if (modeArg == m_areaIdx) {
+                m_nameEntry.close();
+                closed = 1;
+            }
+            break;
+        }
+        if (closed) {
+            hand->setMode(0, 0);
+            break;
+        }
+    }
+}
+
+// The picture flash reads 0, 1 and 20 from one pool. The leading bytes are the common-model table.
+struct PicPool {
+    u8 head[0xE8];
+    float zero;
+    u8 gap[0xC];
+    float one;
+    u8 gap2[0x84];
+    float twenty;
+};
+static const PicPool sPicPool = {
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x00 },
+    0.0f,
+    {},
+    1.0f,
+    {},
+    20.0f,
+};
+
+// Finishes the flash of the character picture once its color animation has played out.
+void muSelCharPlayerArea::charPicEffectMain() {
+    const PicPool* pool = &sPicPool;
+    MuObject* charPic = m_objs[Obj_CharPic];
+    if (!m_unk1F9) {
+        return;
+    }
+    float frame = m_objs[Obj_Unk5]->m_modelAnim->m_anmObjMatClrRes->GetFrame();
+    if (frame >= pool->twenty) {
+        charPic->changeAnimN(0, 0x10, false, false);
+        float col = m_charPicInter ? pool->one : pool->zero;
+        charPic->setFrameMatCol(col);
+        m_objs[Obj_Unk5]->m_modelAnim->m_anmObjMatClrRes->SetUpdateRate(pool->zero);
+        m_unk1F9 = false;
+    }
+}
+
+static int readHandMode(muSelCharHand* hand, int* arg) {
+    if (arg) {
+        *arg = hand->m_modeArg;
+    }
+    return hand->m_mode;
 }
