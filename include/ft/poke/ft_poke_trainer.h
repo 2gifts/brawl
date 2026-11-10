@@ -33,7 +33,10 @@ public:
     typedef ftPokeTrainerMotionModuleBuildConfig MotionModuleBuildConfig;
     typedef ftPokeTrainerStatusModuleBuildConfig StatusModuleBuildConfig;
     typedef ftPokeTrainerGeneralWorkBuildConfig GeneralWorkBuildConfig;
-    typedef ftNullGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
+    // HYPOTHESIS: article storage is 0x168. The null builder occupies 4 bytes, and 0x164 is the gap
+    // between this fighter's cancel module and the original. The ctor and dtor stay in the original
+    // and are not defined here.
+    typedef ftOpaqueGenerateArticleManageModuleBuilder<0x168, Fighter_PokeTrainer> GenerateArticleManageModuleBuilder;
 };
 
 class ftPokeTrainer;
