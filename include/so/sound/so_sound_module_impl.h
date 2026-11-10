@@ -33,6 +33,7 @@ public:
     virtual SndID getId(SndID sndID, soModuleAccesser* moduleAccesser);
     virtual int getStepId(int stepId, soModuleAccesser* moduleAccesser);
     virtual int getLandingId(int landingId, soModuleAccesser* moduleAccesser);
+    static soSoundIdExchangerNull* getNullInstance();
 };
 
 extern soSoundIdExchangerNull g_soSoundIdExchangerNull;

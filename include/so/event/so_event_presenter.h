@@ -250,6 +250,14 @@ class soEventPresenter {
 
         if (mgr->getObserverCapacity(uid) == 0)
             return false;
+#ifdef FT_OWNER_EVENT_SLOTS
+        // HYPOTHESIS: a failed cast leaves the list untouched (it was stored as null) and falls through.
+        soEventUnitWrapper<T>* evtUnitWrapper =
+            dynamic_cast<soEventUnitWrapper<T>*>(mgr->getEventUnit(uid));
+        if (evtUnitWrapper)
+            m_obsrvrList = evtUnitWrapper->getObserverListSub();
+        return m_obsrvrList;
+#else
         soEventUnitWrapper<T>* evtUnitWrapper =
             dynamic_cast<soEventUnitWrapper<T>* >(mgr->getEventUnit(uid));
 #ifdef SO_EVENT_PRESENTER_STORE_NULL_LIST
@@ -268,6 +276,7 @@ class soEventPresenter {
         m_obsrvrList = evtUnitWrapper->getObserverListSub();
         return m_obsrvrList;
 #endif
+#endif
     }
 
     // HYPOTHESIS: the lookup that getObserverList inlines; a failed lookup also clears the cached list.
@@ -277,9 +286,15 @@ class soEventPresenter {
 
         if (mgr->getObserverCapacity(uid) == 0)
             return nullptr;
+#ifdef FT_OWNER_EVENT_SLOTS
+        soEventUnitWrapper<T>* evtUnitWrapper =
+            dynamic_cast<soEventUnitWrapper<T>*>(mgr->getEventUnit(uid));
+        return (!evtUnitWrapper) ? NULL : evtUnitWrapper->getObserverListSub();
+#else
         soEventUnitWrapper<T>* evtUnitWrapper =
             dynamic_cast<soEventUnitWrapper<T>* >(mgr->getEventUnit(uid));
         return (!evtUnitWrapper) ? NULL : evtUnitWrapper->getObserverListSub();
+#endif
     }
 
     bool updateObserverList() {
@@ -393,6 +408,9 @@ public:
     s16 m_unitID;
     soInstanceManagerFullProperty<T*>* m_obsrvrList;
 
+#ifdef IT_SET_MANAGE_ID_OOL
+    void setManageId(s16 id);
+#else
     void setManageId(s16 id) {
         if (m_manageID != id) {
             m_manageID = id;
@@ -400,6 +418,7 @@ public:
                 m_obsrvrList = nullptr;
         }
     }
+#endif
 
     soInstanceManagerFullProperty<T*>* getObserverList() {
         if (m_manageID <= -1)
