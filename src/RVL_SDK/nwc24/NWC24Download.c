@@ -27,6 +27,9 @@ static BOOL DlIgnoreLimits;
 
 extern int snprintf(char *, size_t, const char *, ...);
 extern unsigned long strtoul(const char *, char **, int);
+extern void *memset(void *, int, size_t);
+extern NWC24Err fn_80399EE0(const char *, u32, u32);
+extern int fn_80399F5C(char *, const char *, int);
 
 typedef struct DlWalkState {
     u32 order;
@@ -81,9 +84,15 @@ static inline NWC24iDlEntry *DlEntry_i(u16 i) {
     return &DlHeader_i()->entries[i];
 }
 
+// HYPOTHESIS: ownership checks read the application ID through a task accessor.
+// BYTES: its return boundary preserves the native ownership temporary lifetime.
+static inline u32 DlTaskAppId_i(const NWC24iDlTask *task) {
+    return task->appId;
+}
+
 // App ownership ignores the low byte of the application ID.
 static inline BOOL IsOwnDlTask_i(const NWC24iDlTask *task) {
-    u32 appId = task->appId;
+    u32 appId = DlTaskAppId_i(task);
     return (NWC24GetAppId() & ~0xFF) == (appId & ~0xFF);
 }
 

@@ -1175,6 +1175,8 @@ Method used for `soModelModuleImpl` (sora_melee 0x77DC-0xE268, `include/so/model
 
 - **Per-function matches do not establish physical function or literal order:** before enabling a whole SDK unit, check emitted function offsets, every live data section and relocated operands. Definition order and the point where used format arrays are emitted can matter even when every normalized function reports exact. **HIGH**
 
+- **Check inline field-accessor boundaries when only an imported caller differs:** a typed application-ID getter removes two saved-register operand differences from NWC24 task allocation while preserving the already-exact standalone update routine. A group-ID getter changes other callers, so verify every use and the whole report before adopting one. Same-width integer types and equivalent getter bodies can produce different MWCC temporary lifetimes; an improvement remains partial until every operand matches. **MED**
+
 ## Order, pooling and stack-slot control (batch 3: Mario fireball, Toad spore, Fox Landmaster, Samus grapple beam)
 
 - **Hoisted `...bss.0`/`...rodata` anchor in a template member with function-local statics** (one more saved GPR than the
