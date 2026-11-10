@@ -15,6 +15,11 @@
 #define WN_WEAPON_ANIMCMD_LONG
 #define IP_NULL_INPUT_CONT_NO
 #define SO_ARTICLE_DTOR_INLINE // the holder emits the article base destructor as a weak copy
+#define WN_WEAPON_BUILDER
+#define WN_EM_SIMPLE_UNIT
+#define FT_REL_LINK_EXTERN
+#define WN_SOUND_GENERATOR_HELPERS
+#include <wn/wn_module_accesser_builder.h>
 #include <em/em_weapon_manager.h>
 #include <em/wnem/wn_em_report.h>
 #include <so/so_value_accesser.h>
@@ -33,6 +38,8 @@
 #include <math.h>
 #include <wn/wn_em_simple.h>
 #include <wn/wn_em_sw_holder.h>
+#include <wn/wn_module_accesser_build_data.h>
+#include <em/wnem/wn_em_heap_module_impl.h>
 
 // stTriggerMng notification (sora_melee) of a hit by an enemy article; see damage/em_damage_module_impl.cpp.
 extern "C" void fn_27_23313C(u32 createId, u32 attackerTaskId, u32 taskId, u8 attackerCategory);
@@ -430,9 +437,74 @@ extern "C" float fn_41_33B6C(emScaledValue* value, soModuleAccesser* acc) {
     return result;
 }
 
-// TODO(nonmatching): the constructor and the destructor run the module builders of the wnWeaponBuilder base (0x2D510-0x30254,
-// the 4.8 kB base constructor and the thirty destructors of its module builders): the base is not reconstructed yet, so
-// the wnemSimple vtable, its constructors and the weak thunk tail are not emitted.
+// Same layout as em/em_article_mediator.h. That header cannot be included here: its pool templates clash with the
+// fighter builder's soInstancePoolInfo.
+struct soArticleKindInfo {
+    s32 m_category;
+    s32 m_kind;
+    soArticleKindInfo(s32 category, s32 kind) : m_category(category), m_kind(kind) { }
+};
+struct soArticleConstructInfo {
+    const soArticleKindInfo* m_kindInfo;
+    void* m_heapModule;
+    soArticleConstructInfo(const soArticleKindInfo& kindInfo, void* heapModule) : m_kindInfo(&kindInfo), m_heapModule(heapModule) { }
+};
+
+// HYPOTHESIS: kind 0, resource group 0, team -1 and the null parameter accesser. The heaps come from the owner's heap
+// module (the same three queries Mario's fireball makes). The member block starts clear.
+#pragma auto_inline off
+wnemSimple::wnemSimple(s32 articleId, s16 manageId, const soArticleConstructInfo& info, const wnemDummy_Param* param) :
+    utWeaponObjectBase(),
+    wnWeaponBuilder<wnemSimple_ModuleAccesserBuildConfig>(
+        "wnemSimple", articleId, reinterpret_cast<const wnArticleBuildInfo&>(info),
+        wnModuleAccesserBuildData(0, param,
+            static_cast<wnemHeapModuleImpl*>(info.m_heapModule)->getInstanceHeap(),
+            static_cast<wnemHeapModuleImpl*>(info.m_heapModule)->getNWModelInstanceHeap(),
+            static_cast<wnemHeapModuleImpl*>(info.m_heapModule)->getNWMotionInstanceHeap(),
+            0, -1, &g_soParamAccesserNull, 0, 0, 0, 0, 0, 0, 0)),
+    soDamageEventObserver(),
+    soCollisionSearchEventObserver(),
+    m_shotWork(),
+    unk21B8(false),
+    unk21B9(false),
+    unk21BA(),
+    unk21BB(false),
+    m_procFncHpZero(NULL),
+    m_procFncLifeZero(NULL),
+    m_procFncTouchGround(NULL),
+    m_procFncHitShell(NULL),
+    m_linkId(0),
+    m_lifeLimit(0),
+    unk21D4(0.0f),
+    unk21D8(0.0f),
+    m_weaponType(0),
+    m_maxHitPower(0.0f),
+    m_attackStopMax(0.0f),
+    unk21E8(0),
+    unk21EC(0),
+    unk21F0(),
+    m_speed(),
+    m_accel(),
+    m_holder(NULL),
+    m_procFnc(NULL),
+    m_weaponKind(0),
+    unk2214(false),
+    unk2215(false),
+    unk2216(0),
+    unk2217(false),
+    unk2218(false),
+    m_requestDeactive(false),
+    m_isManaged(false),
+    m_isFromPool(false),
+    unk2234(NULL),
+    m_intParams(),
+    m_floatParams(),
+    unk226C() {
+    (void)manageId;
+    Weapon::deactivate(false);
+}
+#pragma auto_inline on
+
 wnemSimple::~wnemSimple() { }
 
 void wnemSimple::initialize() {

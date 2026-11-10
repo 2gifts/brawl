@@ -9,7 +9,7 @@
 #include <so/anim/so_anim_cmd_event_presenter.h>
 #include <so/status/so_status_event_presenter.h>
 #include <so/so_instance_manager.h>
-#ifdef FT_MODULE_BUILDER
+#if defined(FT_MODULE_BUILDER) || defined(WN_EM_SIMPLE_UNIT)
 #include <ac/ac_cmd_interpreter.h>
 #endif
 
@@ -29,7 +29,7 @@ struct soAnimCmdAddressPackConv;
  *
  * I'm leaving it like this for now, since it is still somewhat useful/usable.
  */
-#ifndef FT_MODULE_BUILDER
+#if !defined(FT_MODULE_BUILDER) && !defined(WN_EM_SIMPLE_UNIT)
 class soAnimCmdInterpreter /*: soEventPresenter<soAnimCmdEventObserver> */ {
 public:
     char _inheritance_data[8]; // 0x0; not sure what this is.
@@ -231,9 +231,12 @@ class soAnimCmdModuleImpl:
     public soStatusEventObserver,
     public soAnimCmdEventObserver
 {
-#ifdef FT_MODULE_BUILDER
+#if defined(FT_MODULE_BUILDER) || defined(WN_EM_SIMPLE_UNIT)
 public:
     soAnimCmdModuleImpl(short unitId, void* controlUnits);
+#endif
+#ifdef FT_MODULE_BUILDER
+public:
     // MATCH-ONLY: the vtable lives in sora_melee; a non-inline override (key function) keeps this TU from emitting a copy.
     virtual void registInterpreter(const soAnimCmdControlUnit& unit, const soAttributeFlag& attr);
     virtual ~soAnimCmdModuleImpl() { }
