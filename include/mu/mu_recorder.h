@@ -6,6 +6,7 @@
 #include <sr/sr_common.h>
 #include <std/auto_ptr.h>
 #include <types.h>
+#include <mu/mu_notice_wnd.h>
 
 class MuObject;
 class muNoticeWndTask;
@@ -21,9 +22,35 @@ struct muScriptState {
     int m_state;                    // 0x00
     int m_stack[N];                 // 0x04
     int* m_sp;                      // 0x04 + N * 4
+
+    muScriptState() : m_state(0), m_sp(m_stack) {}
 };
 static_assert(sizeof(muScriptState<32>) == 0x88, "Class is wrong size!");
 static_assert(sizeof(muScriptState<64>) == 0x108, "Class is wrong size!");
+
+// HYPOTHESIS: the window that a task has open; a new window ends the old one (exit), and so does the destructor.
+class muNoticeWndPtr {
+public:
+    muNoticeWndPtr() : m_task(0) {}
+    ~muNoticeWndPtr() {
+        if (m_task) m_task->exit();
+        m_task = 0;
+    }
+    void reset(muNoticeWndTask* task) {
+        if (m_task) m_task->exit();
+        m_task = task;
+    }
+    muNoticeWndPtr& operator=(muNoticeWndTask* task) {
+        reset(task);
+        return *this;
+    }
+    muNoticeWndTask* get() const { return m_task; }
+    muNoticeWndTask* operator->() const { return m_task; }
+    operator bool() const { return m_task != 0; }
+
+private:
+    muNoticeWndTask* m_task;
+};
 
 // The first base class after gfTask: the notice window (muNoticeWndTask) that the task shows, and what it needs to open
 // one. RTTI: "muRecorderBase" is a base of muRecorder at offset 0x40 and has no vtable; its constructor is inlined into
@@ -33,7 +60,7 @@ class muRecorderBase {
 public:
     Heaps::HeapType m_heap;         // 0x40 (the heap of the windows: argument 8 of create; argument 1 of MuObject::create)
     Heaps::HeapType m_heap2;        // 0x44 (argument 9 of create; the heap of the sys recorder and of the collection io)
-    muNoticeWndTask* m_wnd;         // 0x48 the window that is open (exit() when replaced; step 0x104 is waited for)
+    muNoticeWndPtr m_wnd;           // 0x48 the window that is open (exit() when replaced; step 0x104 is waited for)
     nw4r::g3d::ResFile m_msgRes;    // 0x4C the resource file of the windows (passed as &m_msgRes)
     void* m_msgData;                // 0x50 the message data (passed to Message::getPrintIndexData and create)
     int m_drawPriority;             // 0x54 argument 6 of create (and drawPriority + 1 of the object of the task)
@@ -41,6 +68,13 @@ public:
     u8 m_wndUnk2;                   // 0x59 argument 12 of create (unk2, 0xF0 for the collection)
     u8 m_pad5A[2];
     void* m_scnRoot;                // 0x5C the scene the window is added to
+
+    // HYPOTHESIS: the constructor and destructor are inline (they are part of those of muRecorder).
+    muRecorderBase(Heaps::HeapType heap, Heaps::HeapType heap2, nw4r::g3d::ResFile msgRes, void* msgData,
+                   int drawPriority, u8 wndUnk0, u8 wndUnk2, void* scnRoot)
+        : m_heap(heap), m_heap2(heap2), m_msgRes(msgRes), m_msgData(msgData), m_drawPriority(drawPriority),
+          m_wndUnk0(wndUnk0), m_wndUnk2(wndUnk2), m_scnRoot(scnRoot) {}
+    ~muRecorderBase() {}
 };
 static_assert(sizeof(muRecorderBase) == 0x20, "Class is wrong size!");
 
@@ -113,10 +147,7 @@ public:
         int m_failed;                   // 0x104 set when the last save or load did not go through
         int unk104;
     };
-    union {
-        void* m_advData;                // 0x108 the loaded adventure data, taken by getAdvData (a Data)
-        void* unk108;
-    };
+    Data m_advData;                     // 0x108 the loaded adventure data, taken by getAdvData
     union {
         u32 m_slot;                     // 0x10C the adventure slot of saveAdv/loadAdv
         u32 unk10C;

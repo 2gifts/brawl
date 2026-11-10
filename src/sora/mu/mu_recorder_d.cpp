@@ -1,18 +1,34 @@
+#include <gf/gf_heap_manager.h>
 #include <mu/mu_collection.h>
 #include <mu/mu_recorder.h>
+#include <revolution/GX/GXTexture.h>
+#include <revolution/OS/OSCache.h>
 #include <string.h>
 
 extern const char lbl_8059E148[1];
 extern const char lbl_8059E14C[1];
 
-muCollection::FileHandle::FileHandle(const char* name) {
-    m_name[0] = 0;
-    strcat(m_name, lbl_8059E148);
-    m_name[0] = 0;
-    strcat(m_name, name);
-}
+// HYPOTHESIS: the jpeg decoder (stand-ins; the context is the stack of the decoder).
+struct muJpegSize {
+    u32 m_width;
+    u32 m_height;
+    u32 m_size;
+};
+struct muJpegInfo {
+    u32 unk0;
+    u32 m_jpegSize;     // HYPOTHESIS
+    u32 m_jpegData;     // HYPOTHESIS
+};
+extern "C" void fn_80260730(void* context, u32 jpegData, u32 jpegSize, int format, int unk, int unk2, muJpegSize* out);
+extern "C" void fn_802608BC(void* context, u32 jpegData, u32 jpegSize, void* pixels, u32 size, int format, int unk,
+                            int unk2);
 
-muCollection::FileInfo::FileInfo() : unk0(0), unk1(0), m_count(0), m_free(0), m_names(0) {
+// TEMP: part A (mu_recorder.cpp) owns the definition of Data::reset; here only so that this part inlines it.
+void muRecorder::Data::reset(void* data) {
+    if (unk0) {
+        gfHeapManager::free(unk0);
+    }
+    unk0 = data;
 }
 
 void* muCollection::lock() {
@@ -32,11 +48,11 @@ void muCollection::write(void* data, int size, int unk) {
 
 void muCollection::overwriteIf1000(FileKey key, int size, int unk) {
     s32 id = key.m_drive;
-    m_keyName[0] = 0;
-    strcat(m_keyName, key.m_name);
+    m_keyName.m_name[0] = 0;
+    strcat(m_keyName.m_name, key.m_name);
     m_argFlag = 1;
     m_argId = id;
-    m_writeName = m_keyName;
+    m_writeName = m_keyName.m_name;
     m_argSize = size;
     m_argUnk = unk;
     m_busy = 4;
@@ -67,8 +83,6 @@ void muCollection::erase(int drive, FileName name) {
     if (differs) {
         FileName fileName;
         fileName.m_name[0] = 0;
-        strcat(fileName.m_name, lbl_8059E148);
-        fileName.m_name[0] = 0;
         strcat(fileName.m_name, name.m_name);
         m_readName = fileName;
         m_argDrive = drive;
@@ -80,8 +94,6 @@ void muCollection::erase(int drive, FileName name) {
 void muCollection::erase(const FileKey& key) {
     s32 id = key.m_drive;
     FileName fileName;
-    fileName.m_name[0] = 0;
-    strcat(fileName.m_name, lbl_8059E148);
     fileName.m_name[0] = 0;
     strcat(fileName.m_name, key.m_name);
     m_readName = fileName;
@@ -129,4 +141,27 @@ void muCollection::scan(int drive, int unk, int unk2) {
     m_scanFlagA = unk;
     m_scanFlagB = unk2;
     m_busy = 2;
+}
+
+void muCollection::unlock() {
+    m_busy = 0;
+}
+
+muCollection::Summary::Decoded muCollection::Summary::decodeJpeg(Heaps::HeapType heap, int unk) const {
+    const muJpegInfo* info = static_cast<const muJpegInfo*>(m_jpegInfo);
+    u32 jpegData = info->m_jpegData;
+    u32 jpegSize = info->m_jpegSize;
+    u8 context[0x1C00];
+    muJpegSize jpeg;
+    fn_80260730(context, jpegData, jpegSize, 6, unk, 0, &jpeg);
+    Decoded result;
+    u32 size = jpeg.m_size;
+    result.m_pixels.reset(gfHeapManager::alloc(heap, size, 0x20));
+    result.m_width = jpeg.m_width;
+    result.m_height = jpeg.m_height;
+    DCInvalidateRange(result.m_pixels.unk0, size);
+    fn_802608BC(context, jpegData, jpegSize, result.m_pixels.unk0, size, 6, unk, 0);
+    DCStoreRange(result.m_pixels.unk0, size);
+    GXInvalidateTexAll();
+    return result;
 }

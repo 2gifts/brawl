@@ -87,8 +87,8 @@ bool muAdvSaveLoadTask::loading(bool advance) {
 
 muRecorder::Data muRecorder::getAdvData() {
     Data data;
-    void* buffer = unk108;
-    unk108 = 0;
+    void* buffer = m_advData.unk0;
+    m_advData.unk0 = 0;
     data.reset(buffer);
     return data;
 }

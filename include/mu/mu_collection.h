@@ -6,11 +6,12 @@
 // moved here from if_snap_save.h, which includes this header.
 
 #include <StaticAssert.h>
+#include <gf/gf_collection_io.h>
 #include <mu/mu_recorder.h>
 #include <std/auto_ptr.h>
+#include <string.h>
 #include <types.h>
 
-class gfCollectionIO;
 class gfCollSummaryCommon;
 
 // The task that lists, reads, writes, copies, moves and erases the files of a collection (the snapshots, replays and
@@ -30,7 +31,7 @@ public:
         s32 m_state;        // 0x04 HYPOTHESIS: 0 and 1 fine, 2 and 3 the error messages of the media
         u32 m_count;        // 0x08 the number of the file names in m_names
         u32 m_free;         // 0x0C HYPOTHESIS: free blocks (from lbl_80423690 of gf_collection_io.cpp)
-        char* m_names;      // 0x10 the names of the files, one after the other, each ends with a 0 (freed in ~FileInfo)
+        muRecorder::Data m_names;   // 0x10 the names of the files, one after the other, each ends with a 0 (freed with it)
 
         FileInfo();
         ~FileInfo();        // fn_800C37CC: frees m_names (the deleting destructor)
@@ -46,6 +47,10 @@ public:
         // HYPOTHESIS: the collection filename occupies 0x41 bytes.
         char m_name[0x41];
 
+        FileHandle() {
+            m_name[0] = 0;
+            strcat(m_name, "");
+        }
         FileHandle(const char* name);                   // 0x800C34D8
         // fn_800C3538 = __ct__Q212muCollection10FileHandleFPCci: the index-th name of the names that FileInfo holds.
         FileHandle(const char* names, int index);
@@ -54,6 +59,11 @@ public:
     // HYPOTHESIS: a plain 0x41 byte file name, copied around as a structure.
     struct FileName {
         char m_name[0x41];
+
+        FileName() {
+            m_name[0] = 0;
+            strcat(m_name, "");
+        }
     };
 
     // HYPOTHESIS: a request key: a drive and a file name.
@@ -78,6 +88,13 @@ public:
         std::auto_ptr<gfCollSummaryCommon> m_info;      // 0x0C (0x1F8) the object of the io (gfCollSummary*), deleted with it
         void* m_jpegInfo;                               // 0x10 (0x1FC) the picture inside m_info (+0x54 or +0x78)
         u32 m_size;                                     // 0x14 (0x200) the size of the summary (io->unkE8)
+
+        Summary() {
+            m_info.reset(0);
+            m_decoded.m_pixels.reset(0);
+            m_jpegInfo = 0;
+            m_size = 0;
+        }
 
         // fn_800C7324 (0xEC bytes): hidden result, decodes the jpeg of m_jpegInfo into a block of `heap`
         Decoded decodeJpeg(Heaps::HeapType heap, int unk) const;
@@ -188,7 +205,13 @@ public:
         State_ReadSummaryRet = 0x776,
     };
 
-    typedef muScriptState<64> Script;
+    // HYPOTHESIS: the constructor of the script state (stack pointer, then state) is part of the one of muCollection.
+    struct Script : muScriptState<64> {
+        Script() {
+            m_sp = m_stack;
+            m_state = 0;
+        }
+    };
 
     // HYPOTHESIS: argument types and order from if_snap_save.cpp and the registers; the constructor of muRecorder gets
     // the kind 0 -> 0, 1 -> 2, 2 -> 3, 3 -> 4, otherwise 0; m_fileType is the kind itself.
@@ -198,7 +221,27 @@ public:
     virtual ~muCollection();            // fn_800C383C (vtable 0x80457030)
     virtual void processDefault();      // fn_800C3A24, 0x33EC bytes; calls muRecorder::processDefault first
 
-    gfCollectionIO* m_io;               // 0x110 the io task (a gfTask 4 bytes into the object; exit() when replaced)
+    // HYPOTHESIS: the io task is held in an object that exits it when it is destroyed (inline in ~muCollection).
+    class IoPtr {
+    public:
+        IoPtr(gfCollectionIO* ptr) : m_ptr(ptr) {}
+        ~IoPtr() {
+            if (m_ptr) {
+                static_cast<gfTask*>(m_ptr)->exit();
+            }
+            m_ptr = 0;
+        }
+        IoPtr& operator=(gfCollectionIO* ptr) {
+            m_ptr = ptr;
+            return *this;
+        }
+        operator gfCollectionIO*() const { return m_ptr; }
+        gfCollectionIO* operator->() const { return m_ptr; }
+    private:
+        gfCollectionIO* m_ptr;
+    };
+
+    IoPtr m_io;                         // 0x110 the io task (a gfTask 4 bytes into the object; exit() when replaced)
     bool m_ioPending;                   // 0x114 set when a request was handed to the io
     u8 m_pad115[3];
     int m_fileType;                     // 0x118 the kind of the files (gfCollectionIO file type: 1, 2, 3 the same as the constructor argument)
@@ -210,7 +253,7 @@ public:
     FileName m_summaryName;             // 0x1A8 the file of readSummary
     u8 m_pad1E9[3];
     Summary m_summary;                  // 0x1EC the summary that readSummary got
-    char m_keyName[0x41];               // 0x204 the file name of overwriteIf1000
+    FileName m_keyName;                 // 0x204 the file name of overwriteIf1000
     u8 m_pad245[3];
     Script m_script;                    // 0x248 state, 0x24C stack[64], 0x34C stack pointer
     s32 m_busy;                         // 0x350 a Busy: non-zero while a request runs
