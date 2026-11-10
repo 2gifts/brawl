@@ -4,6 +4,7 @@
 #include <types.h>
 #include <mu/wifi/mu_wifi_interface.h>
 #include <mu/mu_msg.h>
+#include <gf/gf_heap_manager.h>
 #include <gf/gf_pad_system.h>
 #include <stdio.h>
 #include <string.h>
@@ -17,13 +18,61 @@
 extern "C" int getNumCharColor__6muMenuFiii(int charKind);
 extern "C" void startRumbleController__6muMenuFiii(int controller, int strength, int nameId);
 
-// The animation of the colors of each team color.
-static const u8 sTeamColorAnim[] = { 0, 1, 3 };
+// The pool ahead of the form tables. The form lookup addresses that pool and then these tables.
+// HYPOTHESIS: these leading bytes are the constants the earlier missing functions emit; kept here so the
+// form tables stay at the original offsets from the start of the pool.
+// HYPOTHESIS: these leading bytes belong to functions that are still missing. They keep the form
+// tables at the original offsets from the start of the pool.
+#pragma force_active on
+extern const u8 sFormPoolHead[0x18] = {
+    0x00, 0x00, 0x00, 0x00, 0x3D, 0x80, 0x00, 0x00, 0x41, 0xE0, 0x00, 0x00, 0x01, 0x02, 0x05, 0x06,
+    0x3F, 0x80, 0x00, 0x00, 0x01, 0x02, 0x05, 0x06,
+};
+#pragma force_active reset
 
 // The two forms of Zelda and of Samus, and the Pokemon Trainer with his three Pokemon.
 static const u8 sZeldaKinds[] = { 0x0E, 0x0F };
 static const u8 sSamusKinds[] = { 0x03, 0x04 };
 static const u8 sPokeKinds[] = { 0x1B, 0x1C, 0x1D, 0x1E };
+
+// The animation of the colors of each team color.
+static const u8 sTeamColorAnim[] = { 0, 1, 3 };
+
+#pragma dont_inline on
+// Reads the pad again and, after a short wait, shows the controller that is actually plugged in.
+void muSelCharPlayerArea::updateController() {
+    int read = 0;
+    int nextKind = 4;
+    int updated = 0;
+    if (m_controllerNo >= 0) {
+        gfPadStatus pad;
+        g_gfPadSystem->getSysPadStatus(m_controllerNo, &pad);
+        if (pad.m_error == gfPadError::NONE) {
+            nextKind = pad.m_controllerType;
+            read = 1;
+        }
+    }
+    if (getControllerKind() != 4) {
+        if (read == 0) {
+            if (--unk1E4 <= 0) {
+                m_controllerKind = static_cast<gfPadType::PadType>(4);
+                // The pad-read flag is finished, so the player kind stays in that register across the call.
+                read = *(volatile int*)&m_playerKind;
+                dispControllerKind(read, getControllerKind(), m_controllerNo);
+            }
+            updated = 1;
+        }
+    }
+    if (updated == 0) {
+        if (m_controllerKind != nextKind) {
+            m_controllerKind = static_cast<gfPadType::PadType>(nextKind);
+            read = *(volatile int*)&m_playerKind;
+            dispControllerKind(read, getControllerKind(), m_controllerNo);
+        }
+        unk1E4 = 0xF;
+    }
+}
+#pragma dont_inline reset
 
 int muSelCharPlayerArea::getNumCharColor(int charKind) {
     return getNumCharColor__6muMenuFiii(charKind);
@@ -113,12 +162,14 @@ void muSelCharPlayerArea::dispNameEntryButtonColor(bool isTeamBattle, int teamCo
 }
 
 void muSelCharPlayerArea::openCpLevelList() {
-    Vec3f pos(0.0f, 0.0f, 0.0f);
+    Vec3f pos;
+    pos.m_x = pos.m_y = pos.m_z = 0.0f;
     m_chrList.open(MuSelctChrList::Kind_CpLevel, m_cpLevel, &pos);
 }
 
 void muSelCharPlayerArea::openNameList() {
-    Vec3f pos(0.0f, 0.0f, 0.0f);
+    Vec3f pos;
+    pos.m_x = pos.m_y = pos.m_z = 0.0f;
     m_chrList.open(MuSelctChrList::Kind_Name, m_nameId, &pos);
 }
 
@@ -237,7 +288,7 @@ u8 muSelCharPlayerArea::exchangePoke3ToGmCharKind(int poke) {
 }
 
 // The character that is picked: the form of Zelda or Samus, or the Pokemon, that the area has chosen.
-u8 muSelCharPlayerArea::exchangeCharKindDetail(MuSelchkind charKind) {
+MuSelchkind muSelCharPlayerArea::exchangeCharKindDetail(MuSelchkind charKind) {
     switch (charKind) {
     case 14:
         charKind = static_cast<MuSelchkind>(sZeldaKinds[m_selectedZelda]);
@@ -875,4 +926,52 @@ extern const u32 lbl_10_rodata_798[8];
 bool muSelCharPlayerArea::isColorDecButtonPushed() {
     gfPadStatus pad = getPadStatus();
     return (pad.m_buttonsPressedThisFrame.bits & lbl_10_rodata_798[pad.m_controllerType]) != 0;
+}
+
+// A computer takes the area over wifi: the entry models go away and the area becomes a computer.
+void muSelCharPlayerArea::wifiCPUPlayerEntry() {
+    g_muWifiInterfaceTask->setCpuPlayerArea(m_areaIdx, 1);
+    unk41C->setWifiDispState(0);
+    unk420Value = 0;
+    removeObj(0x25);
+    removeObj(0x26);
+    removeObj(0x27);
+    m_controllerNo = -1;
+    initDispSelect();
+    _0 = 0;
+    setPlayerKind(2);
+}
+
+muSelCharPlayerArea::~muSelCharPlayerArea() {
+    if (m_selCharCoin) {
+        delete m_selCharCoin;
+    }
+    if (m_selCharHand) {
+        m_selCharHand->exit();
+    }
+    if (m_objProcTask) {
+        static_cast<gfTask*>(m_objProcTask)->exit();
+        m_objProcTask = NULL;
+    }
+    for (int index = 0; index < 2; ++index) {
+        nw4r::g3d::ScnMdlExpand* group = (&m_baseMdlGroup)[index];
+        if (group) {
+            group->Destroy();
+        }
+    }
+    for (int index = 0; index < Obj_Num; ++index) {
+        if (m_objs[index]) {
+            delete m_objs[index];
+        }
+    }
+    if (unk41C) {
+        delete unk41C;
+    }
+    if (unk40C) {
+        delete unk40C;
+    }
+    if (m_charPicData) {
+        gfHeapManager::free(m_charPicData);
+        m_charPicData = NULL;
+    }
 }

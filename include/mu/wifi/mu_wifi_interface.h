@@ -334,6 +334,8 @@ public:
     u8 getAssignedPlayerContNum(int index);
     int isPermittedEntry(int playerArea);
     void exitNodePlayer(int playerArea);
+    // HYPOTHESIS: the second argument is the computer flag the select screen passes as 1.
+    void setCpuPlayerArea(int playerArea, int cpu);
     // HYPOTHESIS: parameter types follow the original register accesses.
     bool isRequestedExchangeFriendKey(int index);
     bool getWifiPlayerInfo(int index, int* character, u8* color, bool* connected);
