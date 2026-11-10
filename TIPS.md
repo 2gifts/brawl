@@ -1158,3 +1158,19 @@ Method used for `soModelModuleImpl` (sora_melee 0x77DC-0xE268, `include/so/model
 - **A fighter unit that needs a sora_melee article's full class must not include `wn/mario/wn_mario_fireball.h`:** its
   inline constructor instantiates the fighter ground builder constructor before `ft_builder_noinline.h` instantiates it
   explicitly (error 10333).
+
+- **Bind file-operation resources after the guards that permit the operation:** NWC24's two task key/hash writers validate ownership and the input first, then enter a block holding the path buffer and filename. Keeping the filename in that operation's scope restores the native saved-register reuse in both callers. The directory and filename builders are separate SDK stages, each preserving its own validation contract. **HIGH**
+
+- **A normalized instruction match can still hide a swapped string pool:** the task path builders need their used directory-format array before the filename literal in the live data section. Restoring the shared static format array matches every live data/small-data byte and the relocated operands; neither function percentages nor mocked filesystem traces alone establish that layout. **HIGH**
+
+- **Share the real public SDK pipeline when it is also inlined into allocation:** scoped auto-inlining on the update entrypoint and its allocation caller preserves the standalone definition and expands the same implementation at the call site. This recovers timestamp/error/subtask/persistence stages without a second private update body. The ownership/context lesson below resolves the public update routine's remaining cached-header layout. **MED**
+
+- **An opaque SDK task handle and its internal typed view have different inline lifetimes:** passing the public handle through the read/delete helpers keeps the stack buffer pointer in its native saved register across I/O. The eviction routine then matches with real iterator initialization and existing read/delete stages. In cleanup, using the stack object directly instead of a second pointer alias restores the three-instruction prologue order. **HIGH**
+
+- **Loop header selection and ownership validation are separate compiler boundaries:** NWC24's scanner and subtask loop need the nullable header expression at the validation point. Pass that context into one shared validator rather than cloning it; the app-ownership predicate remains a separate inline stage. This preserves permission-before-slot error precedence and matches both loops and the public update routine. **HIGH**
+
+- **Keep parsed title IDs whole across initialization stages:** NWC24 parses the two home-directory components into word locals, returns a 64-bit ID, and passes that ID into record initialization. A wide accumulator and a flattened initializer had equivalent behavior but different saved-register lifetimes. The component parser plus record-default stage matches the constructor without artificial copies. **HIGH**
+
+- **A caller can intentionally ignore a meaningful helper status:** NWC24's message collector propagates count/path/open failures, but publishes partial results after scan/read failures. A scan-and-close helper returns its real status; the file transaction ignores that status and publishes the count. Caller-owned expected-count, matched-count and cursor values recover the original lifetimes while retaining that behavior. Empty conditionals are unnecessary. **HIGH**
+
+- **Per-function matches do not establish physical function or literal order:** before enabling a whole SDK unit, check emitted function offsets, every live data section and relocated operands. Definition order and the point where used format arrays are emitted can matter even when every normalized function reports exact. **HIGH**
