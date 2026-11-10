@@ -833,21 +833,12 @@ sora/mu/mu_prize_wnd.cpp:
 	.sdata      start:0x8059E0F8 end:0x8059E118
 	.sdata2     start:0x805A22D0 end:0x805A2300
 
-sora/mu/mu_recorder.cpp:
-	.text       start:0x800C1B3C end:0x800C2C00
+sora/mu/mu_collection.cpp:
+	.text       start:0x800C1B3C end:0x800C7410
 	.rodata     start:0x804080F8 end:0x80408478
 	.data       start:0x80456FE0 end:0x80457158
 	.sdata      start:0x8059E118 end:0x8059E150
 	.sdata2     start:0x805A2300 end:0x805A2310
-
-sora/mu/mu_recorder_b.cpp:
-	.text       start:0x800C2C00 end:0x800C3A24
-
-sora/mu/mu_recorder_c.cpp:
-	.text       start:0x800C3A24 end:0x800C6E10
-
-sora/mu/mu_recorder_d.cpp:
-	.text       start:0x800C6E10 end:0x800C7410
 
 sora/mu/mu_wifi_interface_task.cpp:
 	.text       start:0x800C7410 end:0x800DA15C

@@ -82,7 +82,7 @@ static_assert(sizeof(muRecorderBase) == 0x20, "Class is wrong size!");
 class muRecorder : public gfTask, public muRecorderBase {
 public:
     // The buffer that holds the loaded adventure data; the destructor gives it back with gfHeapManager::free
-    // (inline in the destructors; muRecorder::Data::reset is the out of line function fn_800C2BB4, 0x4C bytes).
+    // (inline in the destructors; muRecorder::Data::reset is the out of line function, 0x4C bytes).
     class Data {
     public:
         void* unk0;
