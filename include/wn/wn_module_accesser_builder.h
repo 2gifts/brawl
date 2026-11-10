@@ -712,7 +712,11 @@ public:
                  (soMotionAnimObjCacheModule*)lbl_27_bss_DBC) {
         acc->getModelModule().isNull();
     }
+#ifdef FT_PIKACHU_WEAPON_MOTION_DTOR
+    ~soMotionModuleBuilder() __attribute__((never_inline));
+#else
     ~soMotionModuleBuilder() { }
+#endif
     soMotionModule* getModule() { return &m_module; }
 };
 #ifdef WN_MARIO_FIREBALL_UNIT

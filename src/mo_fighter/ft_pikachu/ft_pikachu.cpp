@@ -1,9 +1,14 @@
+#define SO_KINETIC_ROTATION_FIELDWISE_ZERO
+#define FT_ARTICLE_MEDIATOR_DTOR_INLINE
 #define FT_POOL_ROOT_NONPOLYMORPHIC
 #define SO_GENERAL_WORK_BOUNDED_CLEAR
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
 #define FT_SOUND_GENERATOR_DTOR_NOINLINE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_PIKACHU_ARTICLE_POOLS
+#define FT_PIKACHU_SELECT_HOLDER_NAME
+#define WN_KINETIC_MEDIATOR_INLINE_DTOR
+#define FT_PIKACHU_WEAPON_MOTION_DTOR
 #define WN_ARTICLE_BUILDER_DTORS
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_PARAM_ACCESSER_TYPED_DTOR
@@ -28,6 +33,14 @@
 #include <ft/ft_common_data_accesser.h>
 #include <wn/pikachu/wn_pikachu_thunder_jolt2.h>
 #include <ft/ft_kinetic_energy_controller.h>
+
+// Quick Attack aim: the controller energy takes the stick speed. The other modes keep a dead flag and update normally.
+// Defined before the builder instantiations so the call inlines into updateEnergy.
+inline void ftPikachuEnergyModeUpdate<0x64, ftKineticEnergyController>::update(ftKineticEnergyController* energy, soModuleAccesser* acc) {
+    volatile bool dead = false;
+    bool passed = false;
+    ftPikachuKineticTransactor::updateEnergySub(energy, &passed, acc);
+}
 
 // ftManager::setParamPattern selects the shared parameter-table variation (same accessor as ft_marth.cpp).
 extern int g_soValueVariation;
@@ -83,6 +96,9 @@ ftPikachu::ftPikachu(s32 entryId,
     processes[13] = &g_ftPikachuStatusUniqProcessSpecialVortexEnd;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 14);
 }
+
+// The status-data table lives past the builder tail; its destructor is the sora_melee function.
+ftPikachu::~ftPikachu() { }
 
 // The Thunder Jolt starts through the transactor of the fighter with the effect resource of the fighter.
 // BYTES: the native function addresses the local static's guard, object and destructor registration separately
@@ -164,20 +180,16 @@ template wnArticleHolder<wnPikachuThunderJolt>::~wnArticleHolder();
 template wnArticleHolder<wnPikachuCloud>::~wnArticleHolder();
 template wnArticleHolder<wnPikachuVortex>::~wnArticleHolder();
 template wnArticleHolder<wnPikachuThunder>::~wnArticleHolder();
-template wnArticleHolder<wnPikachuThunderJolt>::wnArticleHolder(soModuleAccesser*);
-template wnArticleHolder<wnPikachuCloud>::wnArticleHolder(soModuleAccesser*);
-template wnArticleHolder<wnPikachuThunder>::wnArticleHolder(soModuleAccesser*);
 template <class Mediator>
-wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
+soSelectInstanceHolderArticle<Mediator>::~soSelectInstanceHolderArticle() { }
 template <class Mediator, int N>
 wnArticleManageModuleBuilder<Mediator, N>::~wnArticleManageModuleBuilder() { }
 template <class Mediator, int N>
 wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModuleAccesser* acc) :
     m_articles(0), m_observers(N, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
-template wnSelectedArticleMediator<ftPikachuArticleMediator>::~wnSelectedArticleMediator();
+template soSelectInstanceHolderArticle<ftPikachuArticleMediator>::~soSelectInstanceHolderArticle();
 template wnArticleManageModuleBuilder<ftPikachuArticleMediator, 5>::~wnArticleManageModuleBuilder();
 template wnArticleManageModuleBuilder<ftPikachuArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
-ftPikachuArticleMediator::~ftPikachuArticleMediator() { }
 // The module accesser builders of the articles are destroyed out of line by the article destructors.
 soSlowModuleBuilder<soSlowModuleBuildConfig<soSlowModuleSimple> >::~soSlowModuleBuilder() { }
 soGlowModuleBuilder<soGlowModuleBuildConfig<soGlowModuleSimple> >::~soGlowModuleBuilder() { }
@@ -192,7 +204,69 @@ typedef wnAnimCmdModuleSubBuilder<wnAnimCmdModuleSubBuildConfigDefault<1, 1, 0, 
 template void ftBuilderDtorUse<ftPikachuArticleAnimCmdSubBuilder>(ftPikachuArticleAnimCmdSubBuilder*);
 typedef soAnimCmdControlUnitBuilder<soAnimCmdControlUnitBuildConfigUniq<4, 8> > ftPikachuArticleAnimCmdUniqBuilder;
 template void ftBuilderDtorUse<ftPikachuArticleAnimCmdUniqBuilder>(ftPikachuArticleAnimCmdUniqBuilder*);
+// Weapon-module teardowns the thunder article calls out of line.
+typedef soGeneralWorkBuilder<soGeneralWorkBuildConfig<2, 2, 1> > ftPikachuWeaponWorkBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponWorkBuilder>(ftPikachuWeaponWorkBuilder*);
+typedef soVisibilityModuleBuilder<soVisibilityModuleBuildConfig<soVisibilityModuleSimple, 1> > ftPikachuWeaponVisibilityBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponVisibilityBuilder>(ftPikachuWeaponVisibilityBuilder*);
+typedef soShakeModuleBuilder<soShakeModuleBuildConfig<0, soShakeModuleSimple> > ftPikachuWeaponShakeBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponShakeBuilder>(ftPikachuWeaponShakeBuilder*);
+typedef soTeamModuleBuilder<soTeamModuleBuildConfig<soTeamImpl, soTeamModuleImpl> > ftPikachuWeaponTeamBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponTeamBuilder>(ftPikachuWeaponTeamBuilder*);
+typedef soAnimCmdModuleBuilder<soAnimCmdModuleBuildConfig<6, soAnimCmdModuleImpl> > ftPikachuWeaponAnimCmdBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponAnimCmdBuilder>(ftPikachuWeaponAnimCmdBuilder*);
+typedef soModelModuleBuilder<soModelModuleBuildConfig<5, 0, soModelModuleImpl> > ftPikachuWeaponModelBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponModelBuilder>(ftPikachuWeaponModelBuilder*);
+typedef soLinkModuleBuilder<soLinkModuleBuildConfigCap<5, soLinkModuleImpl> > ftPikachuWeaponLinkBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponLinkBuilder>(ftPikachuWeaponLinkBuilder*);
+typedef soKineticModuleBuilder<soKineticModuleBuildConfigMediator<wnKineticModuleImpl, soKineticMediatorNull> > ftPikachuWeaponKineticBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponKineticBuilder>(ftPikachuWeaponKineticBuilder*);
+typedef soSoundModuleBuilder<wnSoundModuleBuildConfig<0, soSound3dGeneratorAccesserImpl, soSoundModuleImpl> > ftPikachuWeaponSoundBuilder;
+typedef soTransitionModuleBuilder<soTransitionModuleBuildConfig<wnStatusTransitionTypeList> > ftPikachuWeaponStatusTransitionBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponStatusTransitionBuilder>(ftPikachuWeaponStatusTransitionBuilder*);
+typedef soTransitionModuleBuilder<soTransitionModuleBuildConfig<wnMotionTransitionTypeList> > ftPikachuWeaponMotionTransitionBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponMotionTransitionBuilder>(ftPikachuWeaponMotionTransitionBuilder*);
+// The one-status article builder's teardown is its own function. The primary template inlines it into the caller.
+template <>
+class soStatusModuleBuilder<wnStatusModuleBuildConfig<1, soGeneralWorkBuildConfig<2, 2, 1>, 1, soTransitionModuleBuildConfig<wnStatusTransitionTypeList> > > {
+    soArrayContractibleTable<const soStatusData> m_statusTable;
+    soGeneralWorkBuilder<soGeneralWorkBuildConfig<2, 2, 1> > m_generalWorkBuilder;
+    soTransitionModuleBuilder<soTransitionModuleBuildConfig<wnStatusTransitionTypeList> > m_transitionBuilder;
+    soArraySelectHolder<1, soArrayVector<soStatusUniqProcess*, 1>, soArrayNull<soStatusUniqProcess*> > m_uniqProcs;
+    soArrayQueueImpl<soArrayVector<s32, 1> > m_changeRequests;
+    soStatusModuleImpl m_module;
+public:
+    ~soStatusModuleBuilder();
+};
+typedef soStatusModuleBuilder<wnStatusModuleBuildConfig<1, soGeneralWorkBuildConfig<2, 2, 1>, 1, soTransitionModuleBuildConfig<wnStatusTransitionTypeList> > > ftPikachuWeaponStatusBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponStatusBuilder>(ftPikachuWeaponStatusBuilder*);
+typedef soMotionModuleBuilder<soMotionModuleBuildConfig<1, soMotionModuleImpl, 0, 0, soTransitionModuleBuildConfig<wnMotionTransitionTypeList>, soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> > > ftPikachuWeaponMotionBuilder;
+template <u32 DataNum, typename T, typename TransitionConfig>
+__declspec(weak) soMotionModuleBuilder<soMotionModuleBuildConfig<DataNum, T, 0, 0, TransitionConfig, soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> > >::~soMotionModuleBuilder() { }
+template void ftBuilderDtorUse<ftPikachuWeaponMotionBuilder>(ftPikachuWeaponMotionBuilder*);
+typedef soResourceModuleBuilder<soResourceModuleBuildConfig<0, soResourceIdAccesserImpl, soResourceModuleImpl> > ftPikachuWeaponResourceBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponResourceBuilder>(ftPikachuWeaponResourceBuilder*);
+typedef soCollisionAttackModuleBuilder<soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 1, 0, soCollisionAttackModuleImpl, 1, false, true> > ftPikachuWeaponAttackBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponAttackBuilder>(ftPikachuWeaponAttackBuilder*);
+typedef soInsideEventManageModuleBuilder<soInsideEventManageModuleBuildConfig<16, 32, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 1, 1, 0, 0, 0, wnInsideEventManageModuleTypes>, wnInsideEventManageModuleTypes> ftPikachuWeaponInsideEventBuilder;
+template void ftBuilderDtorUse<ftPikachuWeaponInsideEventBuilder>(ftPikachuWeaponInsideEventBuilder*);
 #pragma dont_inline off
+
+// Instantiated with inlining enabled so the kind record is stored before the article data call.
+template wnArticleHolder<wnPikachuThunderJolt>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnPikachuCloud>::wnArticleHolder(soModuleAccesser*);
+template wnArticleHolder<wnPikachuThunder>::wnArticleHolder(soModuleAccesser*);
+
+// The article sound builder destroys only the module. The generator teardown is empty and has to inline.
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+template void ftBuilderDtorUse<ftPikachuWeaponSoundBuilder>(ftPikachuWeaponSoundBuilder*);
+
+// Outside dont_inline so the process-array holder inlines and leaves the vector teardown call.
+template <>
+__declspec(weak) soStatusModuleBuilder<wnStatusModuleBuildConfig<1, soGeneralWorkBuildConfig<2, 2, 1>, 1, soTransitionModuleBuildConfig<wnStatusTransitionTypeList> > >::~soStatusModuleBuilder() { }
+
+// Outside dont_inline so the empty soArticleMediator base inlines and the pool base inlines to wnArticlePool.
+ftPikachuArticleMediator::~ftPikachuArticleMediator() { }
 
 // The original names these on soArticleMediatorImpl. Keep the bodies, and keep them weak so they are not a second global.
 __declspec(weak) s32 ftPikachuArticleMediator::getMediateNum() { return 4; }
@@ -254,12 +328,13 @@ private:
     soInstancePoolSub<ftPikachuJolt2Info3, ftPikachuJolt2Kind> m_sub;
 };
 
+// Weak: the primary pool templates also emit these teardowns. A strong copy here is a second global.
 #pragma force_active on
-wnInstanceHolder<wnPikachuThunderJolt2, ftPikachuJolt2Kind, ftPikachuJolt2Index>::~wnInstanceHolder() { }
-soInstancePoolSub<ftPikachuJolt2Info1, ftPikachuJolt2Kind>::~soInstancePoolSub() { }
-soInstancePoolSub<ftPikachuJolt2Info2, ftPikachuJolt2Kind>::~soInstancePoolSub() { }
-soInstancePoolSub<ftPikachuJolt2Info3, ftPikachuJolt2Kind>::~soInstancePoolSub() { }
-soInstancePool<ftPikachuJolt2Info3, soInstancePoolRoot, ftPikachuJolt2Kind, 3>::~soInstancePool() { }
+__declspec(weak) wnInstanceHolder<wnPikachuThunderJolt2, ftPikachuJolt2Kind, ftPikachuJolt2Index>::~wnInstanceHolder() { }
+__declspec(weak) soInstancePoolSub<ftPikachuJolt2Info1, ftPikachuJolt2Kind>::~soInstancePoolSub() { }
+__declspec(weak) soInstancePoolSub<ftPikachuJolt2Info2, ftPikachuJolt2Kind>::~soInstancePoolSub() { }
+__declspec(weak) soInstancePoolSub<ftPikachuJolt2Info3, ftPikachuJolt2Kind>::~soInstancePoolSub() { }
+__declspec(weak) soInstancePool<ftPikachuJolt2Info3, soInstancePoolRoot, ftPikachuJolt2Kind, 3>::~soInstancePool() { }
 #pragma force_active reset
 
 // ---- the article mediator -------------------------------------------------------------------------------------------
@@ -494,9 +569,11 @@ bool ftPikachu::activeArticle1(wnPikachuCloud* weapon, soModuleAccesser* acc) {
 
 // The Final Smash vortex: the fighter's work area keeps the article's task, the vortex starts at the fighter.
 bool ftPikachu::activeArticle2(wnPikachuVortex* weapon, soModuleAccesser* acc) {
+    // BYTES: the task id is declared before the cast so it keeps r30 and the fighter keeps r29.
+    s32 founderTaskId;
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
     acc->getWorkManageModule().setInt(weapon->m_taskId, 0x20000003);
-    s32 founderTaskId = fighter.m_taskId;
+    founderTaskId = fighter.m_taskId;
     int finalResId = dynamic_cast<ftResourceIdAccesserImpl&>(*acc->getResourceModule().getResourceIdAccesser()).getFinalResId();
     int team = fighter.getOwner()->getTeam();
     Vec3f position;
