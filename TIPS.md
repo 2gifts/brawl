@@ -1076,3 +1076,85 @@ Method used for `soModelModuleImpl` (sora_melee 0x77DC-0xE268, `include/so/model
 - **When the build lock is held by a long link, compile one unit directly:** take `ninja -t commands <obj>`, point `-o`
   at a scratch path, then diff the function with `dtk elf disasm`. A sora_melee `.plf` link can take 30 minutes under
   load, so parallel workers should not each run a full `ninja`.
+
+## Linking fighter neutral-special status units (Ike Eruption, Sheik needle statuses)
+
+- **When dtk refuses a carve with "ends within symbol",** an 8-byte float label in `symbols.txt` straddles the carve
+  end because its second float belongs to the next unit. Shrink the label to 4 bytes, and add a 4-byte label for the
+  second word if the next unit needs one. Do not widen the carve. Seen at `lbl_27_rodata_7E90` (Ike start) and
+  `7770` / `77E0` / `7878` (Sheik needles). **HIGH**
+- **If a carved unit with exact functions links to a REL whose vtable relocations point at the wrong functions, check
+  the definition order before the carve.** Sheik's drop and jump needle statuses defined `exitStatus` before
+  `execFixPos`; the original's `symbols.txt` order is `initStatus`, `execFixPos`, `exitStatus`, `__dt`. **HIGH**
+- **A small per-step ID table the code reads by label from `.data` (not `.rodata`) is a file-local non-const array:**
+  Ike's charge sound IDs are `static s32 s_chargeSoundIds[7]` and Kirby's copy table follows it, both before the
+  vtable. Take the values from the original REL bytes; objdiff does not compare them. **MED**
+- **`a + (q / 30) * f()` with the call written last** gives `mullw rD, rQuot, rCall`; caching `f()` in a local first, or
+  writing the product the other way round, swaps the operands (Ike Eruption end `execFixPos`). **MED**
+- The weak `soStatusUniqProcess` and kinetic-energy RTTI/vtables/destructors these units emit are dropped at link
+  without naming, because their owners are already linked; only the unit's own derived-chain RTTI
+  (`__RTTI__35ftIkeStatusUniqProcessSpecialNStart`, `__RTTI__33ftIkeStatusUniqProcessSpecialNEnd`) needed a name.
+
+## Peach module (ft_peach, wn_peach_kassar, wn_peach_kinopio)
+
+- **Weak names on the wrong twin:** a module's `symbols.txt` can give a weak name to a code-identical function at the
+  wrong address. objdiff then reports a false exact match, and the REL can never link. Compare the module map's name at
+  each address with the names our object emits, and rename only where the result has no duplicates. In ft_peach this
+  fixed about 100 names. **HIGH**
+- **Empty base destructors that the original expands to nothing** (soTeam, the sound generator accesser, the resource id
+  accesser, param customize, `soArrayVector<soArticleEventObserver, N>`) need an inline definition in the article's unit:
+  `inline X::~X() { }` in the `.cpp`, or an explicit inline member specialization for a template. This moved the Toad and
+  weapon-builder destructors from about 19% to 100%.
+- **`#pragma dont_inline on` around a definition keeps it out of line for every later caller.** A destructor defined
+  before the `ft_builder_noinline.h` region still inlines its bases.
+- **An explicit instantiation of a template builder destructor (`template X<...>::~X();`) crashes mwcceppc silently:**
+  no object file and no error message.
+- **Weak copies are emitted right after the function that first references them, callees first.** Out-of-class template
+  members come in a declaration-order batch triggered by the vtable reference, wherever their definitions sit. Compiler
+  version (GC 3.0a3 to Wii 1.5) and the inline/ipa flags do not change this. The original emits a status class's
+  destructor before the `soArrayVector` members it calls, which no source placement reproduced, so the ten fighter
+  status units with a `soArrayVector` local (Peach's down special, Pikmin's side special, ...) stay unlinked. Template
+  members are auto-inlined even under `-inline on,noauto`.
+- **`li rB,0` then `mr rC,rB` for two zero arguments comes from a 0 converted late to a bool or u8 parameter.** When the
+  callee takes ints and is a DOL symbol you cannot redeclare, no argument spelling, default argument, wrapper, flag or
+  compiler version reproduced it (IfPeachFinalTask::initProc). An enum local gives the copy but hoists its `li`. MWCC
+  evaluates call arguments right to left.
+- **`#pragma opt_propagation off` on a static inline helper does not carry into the caller it is inlined into.** The
+  kinetic transactors' shared `li r4,1; mr r5,r4` flag pair comes from the pragma over the whole function, which
+  Peach's changeKinetic float block (compiled with propagation on) cannot take.
+
+## Linking sora_melee fighter articles (Zelda Light Bow, Peach transactor, Toad spore)
+
+- **objdiff "exact" does not check function order inside a unit.** Before flipping, compare our object's `.fn` order
+  (`dtk elf disasm` on a direct compile) with the original unit's asm. MWCC emits inline and weak bodies in the order they
+  are defined, counting a template from where it is instantiated; a function does not pull its callees in after itself.
+  Move each inline body (in-class ones included: declare in the class, define `inline` later in the `.cpp`) to where the
+  original order needs it. This linked both Light Bow units. **HIGH**
+- **An exact weapon article whose object carries hundreds of weak template copies grows the REL** when the original copies
+  only have `fn_27_`/`lbl_27_` names: the linker keeps ours. Pair them using the original asm objects' own relocations
+  (each reloc target in the unit's functions is the original copy of a callee), RTTI by class-name string, vtables by the
+  RTTI pointer in their first word, and remaining code by masked bytes plus a unique map name, then rename them in
+  `symbols.txt`. Link sora_melee in scratch with your objects swapped in: the section-size difference breaks down exactly
+  into the leftover weak copies.
+- **A sora_melee article with a function-local static** (`deactivateDescendantForce`'s 12-byte guard) needs its own `.bss`
+  split; otherwise the linker moves the static and every later `.bss` address shifts, failing many fighter RELs.
+- **Exact objects can hide a different call target:** two blr-only functions with the same bytes score as exact, but the
+  link needs the original's address. Add a `type:label` alias in `symbols.txt` for the name our code calls.
+- **Builder destructors that inline everything:** declare `~soModuleAccesserBuilder();` in the explicit specialization and
+  define it `inline` in the `.cpp` inside the `#pragma dont_inline on ... reset` region of the hand-written builder ctor.
+  The original's is "compact" (the big builder dtors stay calls), and the weapon builder and article dtors then match
+  (22% to 100% for the Light Bow, the Toad and the spore).
+- **A non-const `T*` parameter whose loads the original hoists above stack stores:** `T* __restrict` gives the same
+  freedom as a pointer to const and keeps the mangled name; casts, const aliases, const helper parameters and by-value
+  copies do not. This fixed `wnPeachKinopioSpore::activate` (75% to 100%); Wolf's blaster bullet, Fox's Landmaster and
+  Samus's grapple beam activates take a non-const `Vec3f*` the same way and are the unmatched ones of that family.
+- **Mirrored 8-byte temporaries in a switch arm** (an `operator*` result and its copy in swapped slots): move the arm into a
+  static inline tag-dispatched helper (`updateEnergySub(soIntToType<N>(), ...)`); a named local adds a copy instead.
+- **A register swap between a callee-saved module and a task id** came from reading `m_taskId` directly; the accessor
+  (`acc->getStageObject().getTaskId()`) fixes it (ftPeachTransactor::activeArticle).
+- **A base-register float pool declared as one large object in `symbols.txt`** shows as a relocation-name mismatch; split
+  it into one 4-byte `data:float` label per constant.
+- **A sora_melee copy of a fighter-module kinetic transactor needs `cflags=cflags_fighter`** in `configure.py`.
+- **A fighter unit that needs a sora_melee article's full class must not include `wn/mario/wn_mario_fireball.h`:** its
+  inline constructor instantiates the fighter ground builder constructor before `ft_builder_noinline.h` instantiates it
+  explicitly (error 10333).
