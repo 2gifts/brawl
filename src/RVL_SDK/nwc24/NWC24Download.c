@@ -17,7 +17,7 @@
 
 #define DL_HEADER_SIZE 0x800
 #define DL_TASK_SIZE 0x200
-#define DL_TASK_FLAG_ANYONE 0x40
+#define DL_TASK_FLAG_GROUP_WRITABLE 0x40
 #define DL_TASK_FLAG_NO_LIMITS 0x40000000
 
 static const char *DLFilePath = "/shared2/wc24/nwc24dl.bin";
@@ -42,7 +42,7 @@ static inline NWC24iDlEntry *DlEntry_i(u16 i) {
     return &DlHeader_i()->entries[i];
 }
 
-// the app that owns a task, or one with the same group, may change it
+// Writes allow the current app ID with its low byte masked, an enabled group share, or tool mode.
 static inline NWC24Err CheckDlTask_i(const NWC24iDlTask *task, BOOL wantWrite) {
     NWC24iDlHeader *hdr = DlHeader_i();
 
@@ -62,7 +62,7 @@ static inline NWC24Err CheckDlTask_i(const NWC24iDlTask *task, BOOL wantWrite) {
             u32 group = task->groupId;
             BOOL ok = FALSE;
 
-            if ((task->flags & DL_TASK_FLAG_ANYONE) && group == NWC24GetGroupId()) {
+            if ((task->flags & DL_TASK_FLAG_GROUP_WRITABLE) && group == NWC24GetGroupId()) {
                 ok = TRUE;
             }
 
@@ -99,7 +99,7 @@ NWC24Err NWC24CheckDlTask(const NWC24DlTask *pTask, BOOL wantWrite) {
             u32 group = task->groupId;
             BOOL ok = FALSE;
 
-            if ((task->flags & DL_TASK_FLAG_ANYONE) && group == NWC24GetGroupId()) {
+            if ((task->flags & DL_TASK_FLAG_GROUP_WRITABLE) && group == NWC24GetGroupId()) {
                 ok = TRUE;
             }
 
@@ -802,29 +802,83 @@ NWC24Err fn_803A4110(void) {
 // is the sub task counter pointing at a sub task that is switched on? (-39 says "no, try the next one")
 static inline NWC24Err SubTaskStatus_i(const NWC24iDlTask *task, u8 counter) {
     NWC24Err check = CheckDlTask_i(task, FALSE);
-
-    if (check == NWC24_OK) {
-        if (task->subTaskType == 0) {
-            check = -40;
-        } else if (task->subTaskMask == 0) {
-            check = NWC24_ERR_FATAL;
-        } else if (counter > 31) {
-            check = NWC24_ERR_INVALID_VALUE;
-        } else if (!((1 << counter) & task->subTaskMask)) {
-            check = -39;
-        } else {
-            check = NWC24_OK;
-        }
+    if (check != NWC24_OK) {
+        return check;
     }
-
+    if (task->subTaskType == 0) {
+        return NWC24_ERR_INVALID_OPERATION;
+    }
+    if (task->subTaskMask == 0) {
+        return NWC24_ERR_FATAL;
+    }
+    if (counter > 31) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+    check = NWC24_OK;
+    if (!((1 << counter) & task->subTaskMask)) {
+        check = NWC24_ERR_DISABLED;
+    }
     return check;
 }
 
 // marks a task as just used: stamps the time, clears the errors, moves on to the next sub task and saves
-static inline NWC24Err UpdateDlTask_i(NWC24iDlTask *task) {
-    NWC24Err result;
-    NWC24Err check;
+// HYPOTHESIS: these inline stage boundaries follow the shared SDK update pipeline.
+// Timestamping, error clearing, subtask selection and persistence retain separate status handling.
+static inline NWC24Err SetDlLastAccess_i(const NWC24iDlTask *task, s64 when) {
+    NWC24Err result = CheckDlTask_i(task, FALSE);
+    u16 id;
+
+    if (result != NWC24_OK) {
+        return result;
+    }
+    id = task->id;
+    if (id == 0xFFFF) {
+        return NWC24_ERR_FAILED;
+    }
+    DlEntry_i(id)->lastAccess = when / 60;
+    return NWC24_OK;
+}
+
+static inline NWC24Err StampDlTask_i(const NWC24iDlTask *task) {
     s64 now;
+    NWC24Err result = NWC24iGetUniversalTime(&now);
+    if (result >= 0) {
+        result = SetDlLastAccess_i(task, now);
+        if (result < 0) {
+            return result;
+        }
+    }
+    return result;
+}
+
+static inline void ClearDlTaskError_i(NWC24iDlTask *task) {
+    if (CheckDlTask_i(task, TRUE) == NWC24_OK) {
+        task->lastError = 0;
+        task->errorCount = 0;
+    }
+}
+
+static inline NWC24Err AdvanceDlSubTask_i(NWC24iDlTask *task) {
+    NWC24Err result;
+    while ((result = SubTaskStatus_i(task, task->subTaskCounter)) == NWC24_ERR_DISABLED) {
+        task->subTaskCounter = (task->subTaskCounter + 1) & 0x1F;
+    }
+    return result;
+}
+
+static inline NWC24Err CommitDlTask_i(NWC24iDlTask *task) {
+    NWC24Err result;
+    if (task->subTaskType == NWC24_DL_STTYPE_INCREMENT && (result = AdvanceDlSubTask_i(task)) < 0) {
+        return result;
+    }
+    return fn_803A50EC(task);
+}
+
+// BYTES: keep the public update entrypoint while also expanding it in slot allocation.
+#pragma push
+#pragma auto_inline on
+NWC24Err fn_803A38C0(NWC24iDlTask *task) {
+    NWC24Err result;
 
     result = CheckDlTask_i(task, TRUE);
     if (result != NWC24_OK) {
@@ -835,56 +889,24 @@ static inline NWC24Err UpdateDlTask_i(NWC24iDlTask *task) {
         return NWC24_ERR_INVALID_VALUE;
     }
 
-    result = NWC24iGetUniversalTime(&now);
-    if (result >= 0) {
-        s64 minutes = now;
-        u16 id;
-
-        check = CheckDlTask_i(task, FALSE);
-        if (check == NWC24_OK) {
-            id = task->id;
-            if (id == 0xFFFF) {
-                check = NWC24_ERR_FAILED;
-            } else {
-                DlEntry_i(id)->lastAccess = minutes / 60;
-                check = NWC24_OK;
-            }
-        }
-
-        result = check;
-    }
+    result = StampDlTask_i(task);
 
     if (result < 0) {
         return result;
     }
 
-    if (CheckDlTask_i(task, TRUE) == NWC24_OK) {
-        task->lastError = 0;
-        task->errorCount = 0;
-    }
-
-    if (task->subTaskType == 1) {
-        while ((check = SubTaskStatus_i(task, task->subTaskCounter)) == -39) {
-            task->subTaskCounter = (task->subTaskCounter + 1) & 0x1F;
-        }
-
-        if (check < 0) {
-            return check;
-        }
-    }
-
-    return fn_803A50EC(task);
+    ClearDlTaskError_i(task);
+    return CommitDlTask_i(task);
 }
-
-NWC24Err fn_803A38C0(NWC24iDlTask *task) {
-    return UpdateDlTask_i(task);
-}
+#pragma pop
 
 // takes a task for the list: gets a slot for it when it has none yet (kicking the oldest one out when the
 // list is full), then saves it
+// BYTES: keep the public update entrypoint while also expanding it in slot allocation.
+#pragma push
+#pragma auto_inline on
 NWC24Err fn_803A5284(NWC24iDlTask *task, u16 first, u16 last) {
     NWC24Err result;
-    int url;
 
     result = CheckDlTask_i(task, TRUE);
     if (result != NWC24_OK) {
@@ -903,7 +925,7 @@ NWC24Err fn_803A5284(NWC24iDlTask *task, u16 first, u16 last) {
 
     for (;;) {
         if (task->id != 0xFFFF) {
-            return UpdateDlTask_i(task);
+            return fn_803A38C0(task);
         }
 
         if (task == NULL || first > last || first >= DlHeader_i()->maxTasks || last > DlHeader_i()->maxTasks) {
@@ -931,6 +953,7 @@ NWC24Err fn_803A5284(NWC24iDlTask *task, u16 first, u16 last) {
         }
     }
 }
+#pragma pop
 
 // Checks the task counts carried by a repaired or current-format header.
 static inline NWC24Err CheckDlHeaderLimits_i(const NWC24iDlHeader *hdr) {
@@ -1170,42 +1193,52 @@ found:
 
 
 // Builds the owning title's data directory; callers append the file name.
-static inline NWC24Err DlTaskCheckApp_i(const NWC24iDlTask *task) {
-    NWC24Err result = CheckDlTask_i(task, FALSE);
 
+
+
+
+// stores the 256 byte public key of the task's server
+// BYTES: the shared directory format precedes the filename literal in the live data pool.
+static char DlDataDirFormat[] = "/title/%08x/%08x/data";
+
+static inline NWC24Err DlTaskDataDir_i(const NWC24DlTask *pTask, char *path, u32 capacity) {
+    const NWC24iDlTask *task = (const NWC24iDlTask *)pTask;
+    NWC24Err result = CheckDlTask_i(task, FALSE);
     if (result != NWC24_OK) {
         return result;
     }
-
     if (task->appId == 0) {
         return NWC24_ERR_INVALID_VALUE;
     }
-
-    return result;
-}
-
-static inline NWC24Err DlTaskDataPath_i(const NWC24iDlTask *task, char *path) {
-    NWC24Err result = DlTaskCheckApp_i(task);
-
-    if (result != NWC24_OK) {
-        return result;
+    if (capacity < 30) {
+        return NWC24_ERR_NOMEM;
     }
-
-    result = DlTaskCheckApp_i(task);
-    if (result != NWC24_OK) {
-        return result;
-    }
-
-    snprintf(path, 0x40, "/title/%08x/%08x/data", task->titleIdHi, task->titleIdLo);
+    snprintf(path, capacity, DlDataDirFormat, task->titleIdHi, task->titleIdLo);
     return NWC24_OK;
 }
 
-// stores the 256 byte public key of the task's server
-NWC24Err fn_803A43D0(const NWC24iDlTask *task, const void *key) {
-    char path[64];
+static inline NWC24Err DlTaskFilePath_i(const NWC24iDlTask *task, char *path, u32 capacity, const char *file) {
     NWC24Err result;
-    const char *file = "wc24pubk.mod";
-    int len;
+    u32 len;
+
+    result = CheckDlTask_i(task, FALSE);
+    if (result != NWC24_OK) {
+        return result;
+    }
+    if (task->appId == 0) {
+        return NWC24_ERR_INVALID_VALUE;
+    }
+    result = DlTaskDataDir_i((const NWC24DlTask *)task, path, capacity);
+    if (result < 0) {
+        return result;
+    }
+    len = strlen(path);
+    snprintf(path + len, capacity - len, "/%s", file);
+    return NWC24_OK;
+}
+
+NWC24Err fn_803A43D0(const NWC24iDlTask *task, const void *key) {
+    NWC24Err result;
 
     result = CheckDlTask_i(task, TRUE);
     if (result != NWC24_OK) {
@@ -1216,31 +1249,28 @@ NWC24Err fn_803A43D0(const NWC24iDlTask *task, const void *key) {
         return NWC24_ERR_INVALID_VALUE;
     }
 
-    result = DlTaskDataPath_i(task, path);
-    if (result >= 0) {
-        len = strlen(path);
-        snprintf(path + len, 0x40 - len, "/%s", file);
-        result = NWC24_OK;
-    }
+    {
+        char path[64];
+        const char *file = "wc24pubk.mod";
 
-    if (result < 0) {
-        return result;
-    }
+        result = DlTaskFilePath_i(task, path, sizeof(path), file);
 
-    result = NANDCreate(path, 0x3D, 0);
-    if (result != 0 && result != NAND_RESULT_EXISTS) {
-        return -21;
-    }
+        if (result < 0) {
+            return result;
+        }
 
-    return fn_803A5A8C(path, 0, key, 0x100, 0);
+        result = NANDCreate(path, 0x3D, 0);
+        if (result != 0 && result != NAND_RESULT_EXISTS) {
+            return -21;
+        }
+
+        return fn_803A5A8C(path, 0, key, 0x100, 0);
+    }
 }
 
 // stores the 16 byte hash that belongs to the public key
 NWC24Err fn_803A4684(const NWC24iDlTask *task, const void *hash) {
-    char path[64];
     NWC24Err result;
-    const char *file = "wc24pubk.mod";
-    int len;
 
     result = CheckDlTask_i(task, TRUE);
     if (result != NWC24_OK) {
@@ -1251,21 +1281,21 @@ NWC24Err fn_803A4684(const NWC24iDlTask *task, const void *hash) {
         return NWC24_ERR_INVALID_VALUE;
     }
 
-    result = DlTaskDataPath_i(task, path);
-    if (result >= 0) {
-        len = strlen(path);
-        snprintf(path + len, 0x40 - len, "/%s", file);
-        result = NWC24_OK;
-    }
+    {
+        char path[64];
+        const char *file = "wc24pubk.mod";
 
-    if (result < 0) {
-        return result;
-    }
+        result = DlTaskFilePath_i(task, path, sizeof(path), file);
 
-    if (fn_803A5B84(path, 0, NULL, 0) < 0) {
-        return -40;
-    }
+        if (result < 0) {
+            return result;
+        }
 
-    fn_803A5A8C(path, 0x100, NULL, 0, 0x100);
-    return fn_803A5A8C(path, 0x200, hash, 0x10, 0);
+        if (fn_803A5B84(path, 0, NULL, 0) < 0) {
+            return -40;
+        }
+
+        fn_803A5A8C(path, 0x100, NULL, 0, 0x100);
+        return fn_803A5A8C(path, 0x200, hash, 0x10, 0);
+    }
 }
