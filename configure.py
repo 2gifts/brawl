@@ -1372,7 +1372,7 @@ config.libs = [
             Object(NonMatching, "sora/mu/mu_clear_get.cpp"),
             Object(NonMatching, "sora/mu/mu_notice_wnd.cpp"),
             Object(NonMatching, "sora/mu/mu_prize_wnd.cpp"),
-            Object(NonMatching, "sora/mu/mu_recorder.cpp"),
+            Object(NonMatching, "sora/mu/mu_collection.cpp"),
             Object(NonMatching, "sora/mu/mu_wifi_interface_task.cpp"),
             Object(NonMatching, "sora/mu/mu_wifi_cnt_wnd.cpp"),
             Object(NonMatching, "sora/mu/mu_wifi_data_load.cpp"),
