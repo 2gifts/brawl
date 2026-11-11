@@ -164,6 +164,10 @@ public:
     soAnimCmdInterpreter* m_animCmdInterpreter; // 0x0
     soAnimCmdAddressPackArraySeparate* m_animCmdAddressPackArraySeparate; // 0x4
     // The id/attribute fields that used to be listed here belong to soInstanceUnitFullProperty<soAnimCmdControlUnit> (0x10 bytes).
+#ifdef IT_ANIM_CMD_CONTROL_UNIT_CTOR_OOL
+    // BYTES: item.cpp emits the two-pointer constructor out of line.
+    soAnimCmdControlUnit(soAnimCmdInterpreter* interpreter, soAnimCmdAddressPackArraySeparate* pack);
+#endif
 };
 static_assert(sizeof(soAnimCmdControlUnit) == 0x8, "Class is the wrong size!");
 
