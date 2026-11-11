@@ -1177,6 +1177,8 @@ Method used for `soModelModuleImpl` (sora_melee 0x77DC-0xE268, `include/so/model
 
 - **Check inline field-accessor boundaries when only an imported caller differs:** a typed application-ID getter removes two saved-register operand differences from NWC24 task allocation while preserving the already-exact standalone update routine. A group-ID getter changes other callers, so verify every use and the whole report before adopting one. Same-width integer types and equivalent getter bodies can produce different MWCC temporary lifetimes; an improvement remains partial until every operand matches. **MED**
 
+- **Equal live ranges can still produce different saved registers:** MWCC virtual-register numbering affects allocation order. In NWC24, a getter variant has the same intermediate operations, control flow and mapped interference edges as the nearer match, but renumbers the group value and rotates several saved registers. Compare allocation order as well as lifetimes before widening types or adding helpers. Compiler-graph inspection must use the exact compiler version and reproduce the ordinary compiled object hash; the public [mwcc-debugger](https://github.com/cadmic/mwcc-debugger) describes the approach for older GC versions, whose internal layouts are not interchangeable with GC/3.0. This diagnosis does not make the remaining allocator exact. **MED**
+
 ## Order, pooling and stack-slot control (batch 3: Mario fireball, Toad spore, Fox Landmaster, Samus grapple beam)
 
 - **Hoisted `...bss.0`/`...rodata` anchor in a template member with function-local statics** (one more saved GPR than the
