@@ -51,7 +51,11 @@ public:
     u32 unk48;
     u32 unk4C;
 
-    soAnimCmdInterpreter(s16 manageId, soArrayVector<acCmdInterpreterStackData, 8>* stack, int kind, int mode, float fixedTimeStep, const u8* resetMode) :
+    soAnimCmdInterpreter(s16 manageId, soArrayVector<acCmdInterpreterStackData, 8>* stack, int kind, int mode, float fixedTimeStep, const u8* resetMode)
+#ifdef WN_EM_SIMPLE_UNIT
+        __attribute__((never_inline))
+#endif
+        :
         acCmdInterpreter(stack, mode, nullptr, resetMode, fixedTimeStep),
 #if defined(WN_MARIO_FIREBALL_UNIT) && !defined(WN_ANIMCMD_PRESENTER_LOCAL_STORE) // the Mario fireball opts back in
         soEventPresenter<soAnimCmdEventObserver>(manageId, 5),
@@ -160,6 +164,10 @@ public:
     soAnimCmdInterpreter* m_animCmdInterpreter; // 0x0
     soAnimCmdAddressPackArraySeparate* m_animCmdAddressPackArraySeparate; // 0x4
     // The id/attribute fields that used to be listed here belong to soInstanceUnitFullProperty<soAnimCmdControlUnit> (0x10 bytes).
+#ifdef IT_ANIM_CMD_CONTROL_UNIT_CTOR_OOL
+    // BYTES: item.cpp emits the two-pointer constructor out of line.
+    soAnimCmdControlUnit(soAnimCmdInterpreter* interpreter, soAnimCmdAddressPackArraySeparate* pack);
+#endif
 };
 static_assert(sizeof(soAnimCmdControlUnit) == 0x8, "Class is the wrong size!");
 

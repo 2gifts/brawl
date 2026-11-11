@@ -19,6 +19,8 @@
 #define WN_EM_SIMPLE_UNIT
 #define FT_REL_LINK_EXTERN
 #define WN_SOUND_GENERATOR_HELPERS
+#define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
+#define SO_DAMAGE_EVENT_OBSERVER_WEAK_NOTIFY
 #include <wn/wn_module_accesser_builder.h>
 #include <em/em_weapon_manager.h>
 #include <em/wnem/wn_em_report.h>
@@ -38,6 +40,8 @@
 #include <math.h>
 #include <wn/wn_em_simple.h>
 #include <wn/wn_em_sw_holder.h>
+#include <so/article/so_article_mediator.h>
+#include <it/it_gen_archive.h>
 #include <wn/wn_module_accesser_build_data.h>
 #include <em/wnem/wn_em_heap_module_impl.h>
 
@@ -360,7 +364,8 @@ bool wnemSimple::changeProcFnc1(void* proc, s32 isForce) {
 }
 
 void wnemSimple::SetLifeLimit(s32 frames) {
-    m_lifeLimit = static_cast<s32>(getFrameCounter(0)) + frames;
+    s32 now = static_cast<s32>(getFrameCounter(0));
+    m_lifeLimit = now + frames;
     if (m_lifeLimit > 0) {
         if (!unk21B9) {
             unk21B9 = true;
@@ -462,8 +467,8 @@ wnemSimple::wnemSimple(s32 articleId, s16 manageId, const soArticleConstructInfo
             static_cast<wnemHeapModuleImpl*>(info.m_heapModule)->getNWModelInstanceHeap(),
             static_cast<wnemHeapModuleImpl*>(info.m_heapModule)->getNWMotionInstanceHeap(),
             0, -1, &g_soParamAccesserNull, 0, 0, 0, 0, 0, 0, 0)),
-    soDamageEventObserver(),
-    soCollisionSearchEventObserver(),
+    soDamageEventObserver(ftGetManageId(m_moduleAccesser), -1),
+    soCollisionSearchEventObserver(ftGetManageId(m_moduleAccesser), -1),
     m_shotWork(),
     unk21B8(false),
     unk21B9(false),
@@ -497,13 +502,39 @@ wnemSimple::wnemSimple(s32 articleId, s16 manageId, const soArticleConstructInfo
     m_isManaged(false),
     m_isFromPool(false),
     unk2234(NULL),
-    m_intParams(),
-    m_floatParams(),
-    unk226C() {
+    m_intParams(2, 0),
+    m_floatParams(5, 0),
+    m_cmdInterpreter(ftGetManageId(m_moduleAccesser), &m_cmdStack, 6, 1, 1.0f, ftAddressOf((u8)0)),
+    m_cmdStack(0) {
     (void)manageId;
     Weapon::deactivate(false);
 }
 #pragma auto_inline on
+
+// Defined after wnemSimple's constructor so the manage-id constructor stays a call.
+soDamageEventObserver::soDamageEventObserver(short param1, s8 param2)
+    : soEventObserver<soDamageEventObserver>(0x6) {
+    initialize(param1, param2);
+}
+
+void soDamageEventObserver::addObserver(short param1, s8 param2) {
+    addObserverSub(param1, this, param2);
+}
+
+soDamageEventObserver::~soDamageEventObserver() { }
+
+soCollisionSearchEventObserver::soCollisionSearchEventObserver(short manageId, s8 param2)
+    : soEventObserver<soCollisionSearchEventObserver>(0x11) {
+    initialize(manageId, param2);
+}
+
+void utWeaponObjectBase::setDeactivate(bool) { }
+
+gfGameFrameCounter::gfGameFrameCounter() : m_startFrame(0xFFFFFFFF), m_latestStopFrame(0), m_stoppedFrames(0) { }
+
+wnemSimple_Data::wnemSimple_Data() : m_param(NULL) { }
+
+soArticleMediator::~soArticleMediator() { }
 
 wnemSimple::~wnemSimple() { }
 
@@ -553,7 +584,8 @@ void wnemSimple::notifyEventCollisionHit2nd(soCollisionAttackModule* attackModul
                                             float posX, float collisionLr, soModuleAccesser* moduleAccesser, bool flag) {
     Weapon::notifyEventCollisionHit2nd(attackModule, collisionLog, groupIndex, posX, collisionLr, moduleAccesser, flag);
     if (!flag && g_stTriggerMng != NULL) {
-        fn_27_23313C(m_moduleAccesser->getWorkManageModule().getInt(0x10000005), collisionLog->m_taskId, m_taskId, 0x28);
+        const int& taskId = m_taskId;
+        fn_27_23313C(m_moduleAccesser->getWorkManageModule().getInt(0x10000005), collisionLog->m_taskId, taskId, 0x28);
     }
 }
 
@@ -606,23 +638,22 @@ void wnemSimple::updatePosture(bool isUpdate) {
 // Binds the weapon's model to a node of its owner (link connection 3). The weapon type 2 (parts) also references the
 // owner's facing.
 void wnemSimple::constraint() {
-    soModuleAccesser* acc = m_moduleAccesser;
-    int ownerId = acc->getWorkManageModule().getInt(0x10000005);
-    s32 nodeId = m_shotWork.m_nodeId;
-    if (ownerId == -1 || reinterpret_cast<wnemShotParamView*>(m_shotWork.m_param)->m_constraintNode == -1 || nodeId == -1) {
+    u32 ownerId = m_moduleAccesser->getWorkManageModule().getInt(0x10000005);
+    u32 nodeId = m_shotWork.m_nodeId;
+    if (ownerId == 0xFFFFFFFFu || static_cast<u32>(reinterpret_cast<wnemShotParamView*>(m_shotWork.m_param)->m_constraintNode) == 0xFFFFFFFFu || nodeId == 0xFFFFFFFFu) {
         wnemReport("wnemSimple::constraint : constraint failure \n");
         return;
     }
     if (m_weaponType == 2) {
-        acc->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(9), true);
+        m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(9), true);
     }
-    acc->getLinkModule().setModelConstraintPosOrt(3, reinterpret_cast<wnemShotParamView*>(m_shotWork.m_param)->m_constraintNode,
+    m_moduleAccesser->getLinkModule().setModelConstraintPosOrt(3, reinterpret_cast<wnemShotParamView*>(m_shotWork.m_param)->m_constraintNode,
                                                   nodeId, 0xb, true);
     if (m_weaponType == 2) {
-        acc->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(9), true);
+        m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(9), true);
         wnemReport("wnemSimple::constraint : setAttribute SO_LINK_ATTRIBUTE_REFERENCE_PARENT_LR \n");
     }
-    acc->getGroundModule().setCorrect(soGroundShapeImpl::Correct_None, 0);
+    m_moduleAccesser->getGroundModule().setCorrect(soGroundShapeImpl::Correct_None, 0);
 }
 
 extern "C" void fn_41_31B34(wnemSimple* wnem);
@@ -727,3 +758,19 @@ void wnemSimple::onDeactivate() {
         m_moduleAccesser->getEffectModule().removeAll(0);
     }
 }
+
+// HYPOTHESIS: the two generation sheets of no stage, then the article kind (category 2, kind 0). The 0x18 bytes between
+// them are not constructed.
+struct soKindInfo {
+    s32 m_category;
+    s32 m_kind;
+#pragma push
+#pragma dont_inline on
+    soKindInfo(s32 category, s32 kind) : m_category(category), m_kind(kind) { }
+#pragma pop
+};
+
+static itGenSheetKind s_genSheetKindLevel0(Stages::srStageKind(0xff), 0);
+static itGenSheetKind s_genSheetKindLevel1(Stages::srStageKind(0xff), 1);
+static u8 s_genSheetKindPad[0x18];
+static soKindInfo s_kindInfo(2, 0);
