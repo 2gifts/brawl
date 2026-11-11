@@ -203,7 +203,14 @@ public:
     // Built by the constructor; the weapon procs read them as their int and float parameters.
     soArrayVector<s32, 2> m_intParams;     // 0x2238
     soArrayVector<float, 5> m_floatParams; // 0x224C
+#ifdef WN_EM_SIMPLE_UNIT
+    // The tail the destructor tears down: an interpreter (kind 6) and its stack, then 0xC bytes with no destructor.
+    soAnimCmdInterpreter m_cmdInterpreter;
+    soArrayVector<acCmdInterpreterStackData, 8> m_cmdStack;
+    u8 unk2368[0xC];
+#else
     u8 unk226C[0x108];
+#endif
 
     wnemSimple();
     u32 getOwnerID();

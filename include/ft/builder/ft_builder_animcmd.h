@@ -217,8 +217,13 @@ template <class BC>
 class soAnimCmdControlUnitBuilder {
     typedef soArrayContractibleTable<const acAnimCmdConv*> TableT;
     typedef soArrayVector<acCmdInterpreterStackData, BC::StackCapacity> StackT;
+#ifdef WN_EM_SIMPLE_UNIT
+    // BYTES: the enabled threads leave the first word unused. The stack, the null address pack and the interpreter follow.
+    u32 unk0;
+#else
     soAnimCmdFirstMember<TableT> m_table;                                                                   // +0
     u32 unk10;                                                                                              // +0x10
+#endif
     soArraySelectHolder<1, StackT, soSingletonHolder<soArrayNull<acCmdInterpreterStackData> > > m_stack;   // +0x14
     soAnimCmdAddressPackArraySeparate m_pack;                                                               // +0xC0
     soAnimCmdInterpreter m_interpreter;                                                                     // +0xDC
@@ -233,9 +238,16 @@ public:
         __attribute__((never_inline))
 #endif
         :
+#ifdef WN_EM_SIMPLE_UNIT
+        m_stack(),
+        m_pack((soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull,
+               (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull,
+               (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull),
+#else
         m_table((const acAnimCmdConv**)data0, BC::Capacity),
         m_stack(),
         m_pack(&m_table.m_member, (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull, (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull),
+#endif
         m_interpreter(ftGetManageId(acc),
 #ifdef WN_ANIMCMD_STACK_PTR
                       // MATCH-ONLY: a pointer return stays in a callee-saved register across getManageId.
@@ -250,6 +262,11 @@ public:
                       1.0f,
 #endif
                       ftAddressOf((u8)0)) {
+#ifdef WN_EM_SIMPLE_UNIT
+        (void)data0;
+        (void)data1;
+        (void)data2;
+#endif
         soAttributeFlag attr(BC::AttrMask);
         soAnimCmdControlUnit unit = { &m_interpreter, &m_pack };
         acc->getAnimCmdModule().registInterpreter(unit, attr);

@@ -1296,6 +1296,10 @@ inline soModuleAccesserBuilder<BC>::soModuleAccesserBuilder(StageObject* owner, 
 template <class BC>
 class wnModuleAccesserBuilder : public soModuleAccesserBuilder<BC> {
     wnAnimCmdModuleSubBuilder<typename BC::AnimCmdModuleSubBuildConfig> m_animCmdSubBuilder;
+#ifdef WN_EM_SIMPLE_UNIT
+    // The enabled anim-cmd threads omit their command tables. This keeps the accesser the same size.
+    u8 m_wnemAnimCmdPad[0x20];
+#endif
 public:
     wnModuleAccesserBuilder(StageObject* owner, const wnModuleAccesserBuildData& bd)
 #ifdef WN_ACCESSER_CTOR_INLINE
@@ -1325,17 +1329,34 @@ protected:
     // HYPOTHESIS: the article keeps its only energy in its own kinetic mediator; the native module storage ends one word
     // later than the generic builder (padding of its last animation command unit), the word is kept here.
     u32 m_modulesPad;
+#elif defined(WN_EM_SIMPLE_UNIT)
+    // BYTES: the energies are constructed and then left alive. A raw buffer keeps their storage without a destructor call.
+    u8 m_energyNormalBytes[sizeof(wnKineticEnergyNormal)];
+    u8 m_energyRotBytes[sizeof(soKineticEnergyRotNormal)];
 #else
     wnKineticEnergyNormal m_energyNormal;       // the main movement energy (index 0)
     soKineticEnergyRotNormal m_energyRotNormal; // the rotation energy (index 1)
 #endif
 public:
     wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd,
-                    bool weaponFlag = true) :
+                    bool weaponFlag = true)
+#ifdef WN_EM_SIMPLE_UNIT
+        __attribute__((never_inline))
+#endif
+        :
 #ifdef WN_WEAPON_NO_COMMON_ENERGIES
         Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), weaponFlag),
         m_modules(this, bd) {
         Weapon::initialize();
+    }
+#elif defined(WN_EM_SIMPLE_UNIT)
+        Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), weaponFlag),
+        m_modules(this, bd) {
+        wnKineticEnergyNormal* energyNormal = new (m_energyNormalBytes) wnKineticEnergyNormal();
+        soKineticEnergyRotNormal* energyRot = new (m_energyRotBytes) soKineticEnergyRotNormal();
+        Weapon::initialize();
+        m_moduleAccesser->getKineticModule().addEnergy(energyNormal, 0, soKineticEnergy::AttributeFlag(1), -1);
+        m_moduleAccesser->getKineticModule().addEnergy(energyRot, 1, soKineticEnergy::AttributeFlag(1), -1);
     }
 #else
         Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), weaponFlag),

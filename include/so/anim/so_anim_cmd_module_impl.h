@@ -51,7 +51,11 @@ public:
     u32 unk48;
     u32 unk4C;
 
-    soAnimCmdInterpreter(s16 manageId, soArrayVector<acCmdInterpreterStackData, 8>* stack, int kind, int mode, float fixedTimeStep, const u8* resetMode) :
+    soAnimCmdInterpreter(s16 manageId, soArrayVector<acCmdInterpreterStackData, 8>* stack, int kind, int mode, float fixedTimeStep, const u8* resetMode)
+#ifdef WN_EM_SIMPLE_UNIT
+        __attribute__((never_inline))
+#endif
+        :
         acCmdInterpreter(stack, mode, nullptr, resetMode, fixedTimeStep),
 #if defined(WN_MARIO_FIREBALL_UNIT) && !defined(WN_ANIMCMD_PRESENTER_LOCAL_STORE) // the Mario fireball opts back in
         soEventPresenter<soAnimCmdEventObserver>(manageId, 5),
