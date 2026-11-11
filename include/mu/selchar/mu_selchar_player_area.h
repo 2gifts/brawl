@@ -119,7 +119,8 @@ public:
     void setCharPic(int charKind, int playerKind, int curCostume, bool isTeamBattle, int teamColor, int unk);
     nw4r::g3d::ResFile* getCharPicTexResFile(int charKind);
     bool isTeamBattle() __attribute__((never_inline)); // BYTES: the area calls it out of line, MWCC would inline it
-    u8 exchangeCharKindDetail(MuSelchkind selCharKind);
+    // The form is a full word: the original returns the table byte in r3 with no extra clear.
+    MuSelchkind exchangeCharKindDetail(MuSelchkind selCharKind);
     void dispMarkKind(MuSelchkind charKind);
     void setCharKind(MuSelchkind charKind);
     MuSelchkind getCharKind();
@@ -195,6 +196,7 @@ public:
     int getCollKind(Vec2f* pos, int* arg, float* rect);
     void openHandiList();
     void forceCloseList();
+    void charPicEffectMain();
     void setNameNo(int name);
     void setControllerNo(int controller) __attribute__((never_inline));
     void dispName(int name, int playerKind, bool teamBattle, int teamColor);
@@ -216,5 +218,8 @@ public:
     void initDispSelect();
     void changeEntryModeToNormalMode(int controllerNo);
     void setPlayerKind(int playerKind);
+    void wifiCPUPlayerEntry();
+    void updateController();
+    ~muSelCharPlayerArea();
 };
 static_assert(sizeof(muSelCharPlayerArea) == 0x448, "Wrong size for class!");

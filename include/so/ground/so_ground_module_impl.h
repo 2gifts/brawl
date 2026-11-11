@@ -195,10 +195,12 @@ public:
 static_assert(sizeof(soGroundModule) == 12, "Class is wrong size!");
 
 class soGroundModuleImpl : public soGroundModule, public soStatusEventObserver, public soAnimCmdEventObserver, public grCollStatusEventReceiver {
-#ifdef FT_MODULE_BUILDER
+#if defined(FT_MODULE_BUILDER) || defined(WN_EM_SIMPLE_UNIT)
 public:
     soGroundModuleImpl(soModuleAccesser* acc, soArray<soGroundShapeImpl>* shapes, soGroundConditionChecker* checker, soEventObserverRegistrationDesc* regDesc);
+#ifdef FT_MODULE_BUILDER
 private:
+#endif
 #endif
 public:
     soArray<soGroundShapeImpl>* m_groundShapeArray;

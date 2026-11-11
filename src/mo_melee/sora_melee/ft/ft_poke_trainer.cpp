@@ -1,6 +1,7 @@
 // The trainer's long animation-command override puts an extra Fighter virtual before getOwner.
 #define FT_FIGHTER_ANIMCMD_LONG
 #define SO_EVENT_PRESENTER_STORE_NULL_LIST
+#define FT_PRESENTER_RELOAD_MANAGE_ID
 #define FT_NULL_TAIL_MODULES
 #define FT_SOUND_GENERATOR_DTOR_INLINE
 #define FT_GIMMICK_POOL_INLINE_DTOR
@@ -46,6 +47,9 @@ ftExtendParamAccesserEx<T1, NumFloats, T3, NumInts>::~ftExtendParamAccesserEx() 
 template void ftExtendParamAccesserEx<3999, 9, 23999, 4>::setup(const u8*);
 template ftExtendParamAccesserEx<3999, 9, 23999, 4>::~ftExtendParamAccesserEx();
 #pragma force_active off
+
+// The third argument is passed as the raw int. The declared bool would normalize it.
+extern "C" void toChange__9ftManagerFiibb(ftManager*, int, int, int, int);
 
 // The original names this constructor only as fn_27_377C48. A differing strong copy is a non-weak extra.
 __declspec(weak) ftPokeTrainer::ftPokeTrainer(s32 entryId, Heaps::HeapType instHeap, Heaps::HeapType nwModelInstHeap, Heaps::HeapType nwMotionInstHeap) :
@@ -176,10 +180,24 @@ void ftPokeTrainer::detachInstance() {
     Fighter::detachInstance();
 }
 
+// Same slots as soVisibilityModule. Whole is a full register here: the caller does not mask it.
+class ftPokeTrainerVisibilityView {
+public:
+    virtual void activate();
+    virtual void setData(void*);
+    virtual void set(u32, int);
+    virtual void setStatusDefault(u32, int, bool);
+    virtual void setDefaultAll();
+    virtual void update();
+    virtual void hideAll();
+    virtual void setWhole(int);
+    virtual unsigned int getWhole();
+};
+
 void ftPokeTrainer::setVisibility(int visibility) {
     soModuleAccesser* acc = m_moduleAccesser;
-    if (acc->getVisibilityModule().getWhole() != visibility) {
-        acc->getVisibilityModule().setWhole(visibility);
+    if (reinterpret_cast<ftPokeTrainerVisibilityView&>(acc->getVisibilityModule()).getWhole() != visibility) {
+        reinterpret_cast<ftPokeTrainerVisibilityView&>(acc->getVisibilityModule()).setWhole(visibility);
         struct {
             Vec3f rotRange;
             Vec3f posRange;
@@ -629,7 +647,6 @@ void ftPokeTrainer::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser
         break;
     case 0x458: {
         ftPokeTrainerPosEvent forward(0x455);
-        // MATCH-ONLY: the original copies the position words as a plain struct.
         *reinterpret_cast<ftPokeTrainerRawPos*>(&forward.m_pos) = *reinterpret_cast<ftPokeTrainerRawPos*>(&posEvent->m_pos);
         moduleAccesser->getLinkModule().sendEventParents(6, forward);
         break;
@@ -719,7 +736,14 @@ void ftPokeTrainer::notifyEventDeadPartner(int index) {
             acc->getWorkManageModule().onFlag(Work_Flag_NoPartnerLeft);
             return;
         }
-        if (g_ftManager->isGameSet() == true) {
+        // A bool bitfield folds the normalizing conversion away. An unsigned bit does not.
+        struct FtPokeTrainerGameSetView {
+            char pad[0x6C];
+            u8 : 2;
+            u8 m_isGameSet : 1;
+            bool isGameSet() const { return m_isGameSet; }
+        };
+        if (reinterpret_cast<FtPokeTrainerGameSetView*>(g_ftManager)->isGameSet() == true) {
             return;
         }
     }
@@ -899,7 +923,8 @@ void ftPokeTrainer::notifyEventBeat() {
     if (acc->getSituationModule().getKind() != Situation_Outfield) {
         switch (acc->getStatusModule().getStatusKind()) {
         case 0x122:
-            if (acc->getMotionModule().getKind() == 0x1EB || acc->getMotionModule().getKind() == 0x1E9) {
+            if (acc->getMotionModule().getKind() == 0x1EB) {
+            } else if (acc->getMotionModule().getKind() == 0x1E9) {
             } else {
             }
             break;
@@ -935,7 +960,7 @@ void ftPokeTrainer::setChange(int changeKind) {
             }
             tries++;
         } while (tries < 3);
-        g_ftManager->toChange(m_entryId, (u8)next, changeKind, 0);
+        toChange__9ftManagerFiibb(g_ftManager, m_entryId, (u8)next, changeKind, 0);
     }
     acc->getWorkManageModule().offFlag(Work_Flag_ChangeRequested);
 }
