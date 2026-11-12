@@ -21,6 +21,9 @@ struct hkGskBaseAgent : hkIterativeLinearCastAgent {
     float unk2C;          // 0x2C
 
     hkGskBaseAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkContactMgr* contactMgr);
+    // hkGskBaseAgent.o, not written yet; the collector is an hkCdBodyPairCollector.
+    static void staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                      void* collector);
     // Inline: the derived agents' destructors (hkGskfAgent, hkPredGskfAgent, hkConvexListAgent) call no base
     // destructor; the out-of-line copy in hkGskBaseAgent.o comes from the vtable there.
     virtual ~hkGskBaseAgent() {}

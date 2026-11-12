@@ -62,6 +62,8 @@
 #include <havok/hkCdBody.h>
 #include <havok/hkTransform.h>
 #include <havok/hkCdPoint.h>
+#include <havok/hkFlagCdBodyPairCollector.h>
+#include <havok/hkMonitorStream.h>
 
 // Dispatcher registration entry point (not recovered yet; takes the dispatcher, a registration record
 // and the two shape type ids). Same routine as hkPhantomAgent and hkSphereSphereAgent use.
@@ -131,13 +133,14 @@ struct hkConvexListBody : hkCdBody {
     hkConvexListBody(const hkCdBody& listBody)
         : hkCdBody(&listBody) {
         const hkConvexListShapeView* list = (const hkConvexListShapeView*)listBody.m_shape;
+        u32 key = listBody.m_shapeKey;
         const hkConvexListChildInfo* children = list->m_childInfo;
         hkReal radius = children[0].m_shape->m_radius;
         m_convexShape.m_childInfo = children;
         m_convexShape.m_numChildren = list->m_numChildren;
         m_convexShape.m_radius = radius;
         m_shape = &m_convexShape;
-        m_shapeKey = listBody.m_shapeKey;
+        m_shapeKey = key;
     }
     static void operator delete(void* p, unsigned long nbytes) {
         hkMemory::getInstance().deallocateChunk(p, nbytes, 0x1d);
@@ -350,6 +353,22 @@ void hkConvexListAgent::cleanup() {
     delete this;
 }
 
+// The whole list is first tested as one convex hull; only when the hull penetrates are the children queried (through
+// the shape collection path).
+void hkConvexListAgent::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d) {
+    HK_TIMER_BEGIN_LIST("CvxList", "checkHull");
+    {
+        hkConvexListBody hull(b);
+        hkFlagCdBodyPairCollector checker;
+        hkGskBaseAgent::staticGetPenetrations(a, hull, c, &checker);
+        if (checker.m_hit) {
+            HK_TIMER_SPLIT_LIST("children");
+            hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetPenetrations(a, b, c, (hkPenetrationTarget*)d);
+        }
+    }
+    HK_TIMER_END_LIST();
+}
+
 // BYTES: the symmetric wrappers call these forwarders; without the pragma they are inlined there.
 #pragma push
 #pragma auto_inline off
@@ -476,7 +495,10 @@ template void hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetPenetratio
 template void hkSymmetricAgentLinearCast<hkConvexListAgent>::getClosestPoints(const hkCdBody&, const hkCdBody&, hkCollisionInput&, void*);
 template void hkSymmetricAgentLinearCast<hkConvexListAgent>::staticGetClosestPoints(const hkCdBody&, const hkCdBody&, hkCollisionInput&, hkPenetrationTarget*);
 
-// The shape collection agent's static queries take the bodies by reference.
+// The shape collection agent's static queries take the bodies by reference. BYTES: the convex list queries call
+// them; without the pragma they are inlined there.
+#pragma push
+#pragma auto_inline off
 template <>
 void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c,
                                                                               hkPenetrationTarget* target) {
@@ -492,3 +514,4 @@ void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetClosestPoints(
     hkShapeCollectionAgent::staticGetClosestPoints(b, a, c,
                                                    &wrapped);
 }
+#pragma pop
