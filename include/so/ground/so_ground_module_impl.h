@@ -195,7 +195,7 @@ public:
 static_assert(sizeof(soGroundModule) == 12, "Class is wrong size!");
 
 class soGroundModuleImpl : public soGroundModule, public soStatusEventObserver, public soAnimCmdEventObserver, public grCollStatusEventReceiver {
-#if defined(FT_MODULE_BUILDER) || defined(WN_EM_SIMPLE_UNIT)
+#if defined(FT_MODULE_BUILDER) || defined(WN_EM_SIMPLE_UNIT) || defined(SO_GROUND_MODULE_IMPL_CTOR)
 public:
     soGroundModuleImpl(soModuleAccesser* acc, soArray<soGroundShapeImpl>* shapes, soGroundConditionChecker* checker, soEventObserverRegistrationDesc* regDesc);
 #ifdef FT_MODULE_BUILDER
@@ -208,8 +208,13 @@ public:
     grCollision* m_collision;
     u8* m_matrixData; // HYPOTHESIS: Matrix[], allocated as raw bytes (no array cookie)
     bool m_56_0 : 1;
+#ifdef SO_GROUND_MODULE_IMPL_CTOR
+    bool m_56_1 : 1; // HYPOTHESIS: named so the constructor clears the four leading flags in one store
+    bool m_56_2 : 1;
+#else
     bool : 1;
     bool : 1;
+#endif
     bool m_collisionOn : 1;
     bool : 4;
     char _57[3];

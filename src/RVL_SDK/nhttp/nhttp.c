@@ -265,17 +265,17 @@ int fn_80391888(void*, void*);
 int fn_80391960(void*, void*);
 int fn_80391AE4(void*);
 int fn_80391B8C(void*, int);
-int fn_80391D8C(void*, const char*, char**);
-int fn_80392344();
+int fn_80391D8C(u8*, const char*, char**);
+int NHTTPi_SocRecv();
 int fn_80392744(const char*, const char*, int);
 int fn_80392CD4(const char*, const char*);
 int fn_80392E18(const char*, int, const char*, int);
-int fn_803A8E70(int, void*, unsigned int);
-int fn_803A9130(int);
-int fn_80390520(void*, void*, const char*, const char*);
-int fn_80391784(void*, int);
-void fn_8039632C();
-int fn_80395CBC();
+int SSLWrite(int, void*, unsigned int);
+int SSLShutdown(int);
+int NHTTP_AddPostDataAscii(void*, void*, const char*, const char*);
+void fn_80391784(void*, int);
+void NHTTPi_TemplateConnectionCallback();
+int NHTTPCreateConnection();
 int fn_803974A4(void*, void*);
 
 void* NHTTPi_memcpy(void* dst, const void* src, int n) {
@@ -643,7 +643,7 @@ int fn_80391160(void* a, void* req, void* c, unsigned int offset, int extra) {
     u8* inner = *(u8**)((u8*)req + 0x2c);
     unsigned int pos = *(unsigned int*)(inner + 0x28);
     unsigned int cap = *(unsigned int*)(inner + 0x1c);
-    return fn_80392344(a, req, c, pos + offset, cap - offset, extra);
+    return NHTTPi_SocRecv(a, req, c, pos + offset, cap - offset, extra);
 }
 
 // NHTTPi_RecvBufN
@@ -663,7 +663,7 @@ int fn_80391180(void* a, void* req, void* c, unsigned int offset, int len) {
     if (len > remain) {
         len = remain;
     }
-    return fn_80392344(a, req, c, at, len);
+    return NHTTPi_SocRecv(a, req, c, at, len);
 }
 
 // NHTTPi_SocOpen
@@ -687,7 +687,7 @@ void fn_80391F5C(void* mutex, u8* req, int sock) {
     NHTTPi_lockReqList((OSMutex*)mutex);
     ssl = *(s32*)(req + 0xac);
     if (ssl > 0) {
-        fn_803A9130(ssl);
+        SSLShutdown(ssl);
         *(s32*)(req + 0xac) = -1;
     }
     NHTTPi_unlockReqList((OSMutex*)mutex);
@@ -699,7 +699,7 @@ int fn_803925B8(u8* obj, int sock, char* buf, unsigned int len, int flags) {
     int ssl = *(s32*)(obj + 0xac);
     int r;
     if (ssl > 0) {
-        r = fn_803A8E70(ssl, buf, len);
+        r = SSLWrite(ssl, buf, len);
     } else {
         r = NHTTPi_SocSend_sub(sock, buf, len, flags);
     }
@@ -1199,7 +1199,7 @@ int NHTTPStartup(NHTTPAlloc alloc, NHTTPFree free, u32 priority) {
 
 // NHTTPCreateRequestEx
 NHTTPRequestHandle* fn_8039651C(const char* url, NHTTPReqMethod method, char* buffer, size_t bufferSize, NHTTPReqCallback callback, void* userContext, int responseCb, int cleanup) {
-    void* conn = (void*)fn_80395CBC(url, (int)method, buffer, (unsigned int)bufferSize, (void*)fn_8039632C, userContext);
+    void* conn = (void*)NHTTPCreateConnection(url, (int)method, buffer, (unsigned int)bufferSize, (void*)NHTTPi_TemplateConnectionCallback, userContext);
     void* sys;
     void* mutex;
     u8* req;
@@ -1254,7 +1254,7 @@ int NHTTPAddPostDataAscii(void* id, const char* name, const char* value) {
         printf("%s can be called before NHTTPStartConnection()\n", "NHTTPAddPostDataAscii");
         return -1;
     }
-    return fn_80390520(req, bgn, name, value) ? 0 : -1;
+    return NHTTP_AddPostDataAscii(req, bgn, name, value) ? 0 : -1;
 }
 
 void NHTTPDestroyResponse(NHTTPResponseHandle id) {
@@ -1474,4 +1474,496 @@ int fn_803931A8(u8* buf, int len) {
         return 1;
     }
     return 0;
+}
+
+int fn_80393270(s32*, u8*, int, s32*, u8*, int);
+
+// NHTTPi_SendData
+int fn_803936B0(u8* obj, void* buf, int len) {
+    void* sys = NHTTPi_GetSystemInfoP();
+    NHTTPBgnEndInfo* bgn = (NHTTPBgnEndInfo*)NHTTPi_GetBgnEndInfoP(sys);
+    u8* thr = (u8*)NHTTPi_GetThreadInfoP(sys);
+    s32** req = (s32**)NHTTPi_GetReqInfoP(sys);
+    void* q = (void*)(*req)[3];
+    void* t = thr + 0x360;
+    int r;
+    if (len == 0) {
+        return 0;
+    }
+    r = fn_80393270(q, t, bgn->unk_7d0, (s32*)(obj + 0x324), buf, len);
+    if (r < 0) {
+        return 1;
+    }
+    if (r == 0) {
+        return 2;
+    }
+    return 0;
+}
+
+// NHTTPi_ThreadExecReqQueue
+int fn_80394664(s32* out) {
+    void* sys = NHTTPi_GetSystemInfoP();
+    OSMutex* mutex = (OSMutex*)NHTTPi_GetMutexInfoP(sys);
+    NHTTPLink* link;
+    NHTTPi_lockReqList(mutex);
+    link = NHTTPi_getReqFromReqQueue((NHTTPLink**)NHTTPi_GetListInfoP(sys));
+    if (link != 0) {
+        NHTTPLink** req = (NHTTPLink**)NHTTPi_GetReqInfoP(sys);
+        *out = (s32)link->data;
+        *req = link;
+    } else {
+        *out = -1;
+    }
+    NHTTPi_unlockReqList(mutex);
+    if (*out < 0) {
+        NHTTPi_idleCommThread((OSMessageQueue*)NHTTPi_GetThreadInfoP(sys));
+        return 0;
+    }
+    return 1;
+}
+
+int fn_803906BC(void*, void*);
+
+// NHTTP_SendRequestAsync
+int fn_80391960(void* sys, void* reqv) {
+    NHTTPBgnEndInfo* bgn = (NHTTPBgnEndInfo*)NHTTPi_GetBgnEndInfoP(sys);
+    void* thr = NHTTPi_GetThreadInfoP(sys);
+    OSMutex* mutex = (OSMutex*)NHTTPi_GetMutexInfoP(sys);
+    int r;
+    if (((s32*)reqv)[1] != 0) {
+        NHTTPi_SetError(bgn, 0xb);
+        return -1;
+    }
+    NHTTPi_lockReqList(mutex);
+    r = fn_803906BC(NHTTPi_GetListInfoP(sys), reqv);
+    if (r >= 0) {
+        ((s32*)reqv)[1] = 1;
+        NHTTPi_kickCommThread((OSMessageQueue*)thr);
+    } else {
+        NHTTPi_SetError(bgn, 1);
+    }
+    NHTTPi_unlockReqList(mutex);
+    return r;
+}
+
+int SOConnect(int, void*);
+unsigned short SOHtoNs(unsigned short);
+int NHTTPi_SocSSLConnect(void*, void*, void*, int);
+
+// NHTTPi_SocConnect
+int fn_80391FC8(void* a, void* b, s32* c, int sock, int addr, int port) {
+    u8 sa[8];
+    sa[0] = 8;
+    sa[1] = 2;
+    *(u16*)(sa + 2) = SOHtoNs(port);
+    *(s32*)(sa + 4) = addr;
+    if (SOConnect(sock, sa) < 0) {
+        int e = -0x3e9;
+        if (c[0] != 0) {
+            e = -0x3ea;
+        }
+        return e;
+    }
+    if (c[2] != 0 && c[3] == 0) {
+        return NHTTPi_SocSSLConnect(a, b, c, sock);
+    }
+    return 0;
+}
+
+int NHTTPi_BufferFullCallback(int, void*);
+
+// NHTTPi_BufFull
+int fn_803935E4(int a, u32* b) {
+    int r = 0;
+    int full = fn_80391144(b, b[1]);
+    if (b[7] == 0 || b[10] == 0 || full != 0) {
+        void* resp = NHTTPi_Response2Connection(a, (int)b);
+        if (resp != 0) {
+            NHTTPi_BufferFullCallback(a, resp);
+            if (b[10] != 0 && b[7] != 0) {
+                if (fn_80391144(b, b[1]) == 0) {
+                    r = 1;
+                }
+            }
+        }
+    } else if (full == 0) {
+        r = 1;
+    }
+    return r;
+}
+
+// NHTTPi_destroyRequestObject
+int fn_80391888(void* sysv, void* reqv) {
+    int sys = (int)sysv;
+    u8* conn = (u8*)NHTTPi_Request2Connection(sys, (int)reqv);
+    if (conn != 0) {
+        *(s32*)(conn + 0x10) = 0;
+    }
+    {
+        NHTTPLink* n = *(NHTTPLink**)((u8*)reqv + 0x30);
+        while (n != 0) {
+            NHTTPLink* head = n->next;
+            if (n != head) {
+                NHTTPLink* nxt = head->next;
+                NHTTPi_free(head);
+                n->next = nxt;
+            } else {
+                NHTTPi_free(n);
+                n = 0;
+            }
+        }
+    }
+    {
+        NHTTPLink* m = *(NHTTPLink**)((u8*)reqv + 0x34);
+        while (m != 0) {
+            NHTTPLink* head = m->next;
+            if (m != head) {
+                NHTTPLink* nx = head->next;
+                NHTTPi_free(head);
+                m->next = nx;
+            } else {
+                NHTTPi_free(m);
+                m = 0;
+            }
+        }
+    }
+    NHTTPi_free(*(void**)((u8*)reqv + 0x24));
+    NHTTPi_free(*(void**)((u8*)reqv + 0x28));
+    NHTTPi_free(reqv);
+    return 1;
+}
+
+// NHTTPi_SaveBuf
+int fn_80393270(s32* a, u8* buf, int sock, s32* fill, u8* src, int len) {
+    int n;
+    int rem = len;
+    while (rem > 0) {
+        int sent;
+        if (*a != 0) {
+            return -1;
+        }
+        n = rem;
+        if (n > 0x100 - *fill) {
+            n = 0x100 - *fill;
+        }
+        NHTTPi_memcpy(buf + *fill, src, n);
+        src += n;
+        rem -= n;
+        *fill = *fill + n;
+        if (*fill == 0x100) {
+            sent = fn_803925B8((u8*)a, sock, (char*)buf, 0x100, 0);
+            if (sent <= 0) {
+                return sent;
+            }
+            *fill = *fill - sent;
+        }
+    }
+    return len;
+}
+
+// NHTTPi_SendHeaderList
+int fn_80393BFC(u8* obj) {
+    u8* req = (u8*)*(s32**)NHTTPi_GetReqInfoP(NHTTPi_GetSystemInfoP());
+    u8* conn = *(u8**)(req + 0xc);
+    NHTTPHdrNode* node = (NHTTPHdrNode*)NHTTPi_getHdrFromList((NHTTPLink**)(conn + 0x30));
+    int r;
+    while (node != 0) {
+        r = fn_803936B0(obj, (void*)node->name, NHTTPi_strlen(node->name));
+        if (r != 0) {
+            return r;
+        }
+        r = fn_803936B0(obj, ": ", 2);
+        if (r != 0) {
+            return r;
+        }
+        r = fn_803936B0(obj, (void*)node->value, NHTTPi_strlen(node->value));
+        if (r != 0) {
+            return r;
+        }
+        r = fn_803936B0(obj, "\r\n", 2);
+        if (r != 0) {
+            return r;
+        }
+        NHTTPi_free(node);
+        node = (NHTTPHdrNode*)NHTTPi_getHdrFromList((NHTTPLink**)(conn + 0x30));
+    }
+    return 0;
+}
+
+// HYPOTHESIS: header receive buffer; 0x400 inline bytes at +0x38, then a chain of 0x200-byte blocks (next pointer at +0, data at +4) starting at +0x34.
+typedef struct NHTTPHdrBlock {
+    struct NHTTPHdrBlock* next;
+    s8 data[0x200];
+} NHTTPHdrBlock;
+
+typedef struct NHTTPHdrRecvBuf {
+    u8 pad[0x34];
+    NHTTPHdrBlock* blocks;
+    s8 inl[0x400];
+} NHTTPHdrRecvBuf;
+
+// NHTTPi_skipSpaceHdrRecvBuf
+int fn_80390D18(NHTTPHdrRecvBuf* buf, int pos, int end) {
+    int off;
+    NHTTPHdrBlock* blk;
+    int i;
+    int c;
+    if (pos < end) {
+        if (pos < 0x400) {
+            off = pos;
+            blk = 0;
+        } else {
+            int n = (pos - 0x400) >> 9;
+            blk = buf->blocks;
+            while (n != 0) {
+                blk = blk->next;
+                n--;
+            }
+            off = (pos - 0x400) & 0x1ff;
+        }
+        for (i = pos; i < end; i++) {
+            if (blk == 0) {
+                if (off < 0x400) {
+                    c = buf->inl[off++];
+                    goto check;
+                }
+                blk = buf->blocks;
+                off = 0;
+            } else if (off == 0x200) {
+                off = 0;
+                blk = blk->next;
+            }
+            c = (u8)blk->data[off++];
+check:
+            if ((s8)c != 0x20) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+// NHTTP_DestroyRequest
+void fn_80391784(void* sysv, int reqi) {
+    u8* req = (u8*)reqi;
+    NHTTPLink* n;
+    NHTTPLink* nxt;
+    void* m = NHTTPi_GetMutexInfoP(sysv);
+    u8* conn = (u8*)NHTTPi_Request2Connection((int)m, reqi);
+    if (conn != 0) {
+        *(s32*)(conn + 0x14) = 0;
+    }
+    NHTTPi_free(*(void**)(req + 0x2c));
+    conn = (u8*)NHTTPi_Request2Connection((int)m, reqi);
+    if (conn != 0) {
+        *(s32*)(conn + 0x10) = 0;
+    }
+    n = *(NHTTPLink**)(req + 0x30);
+    while (n != 0) {
+        NHTTPLink* head = n->next;
+        if (n != head) {
+            nxt = head->next;
+            NHTTPi_free(head);
+            n->next = nxt;
+        } else {
+            NHTTPi_free(n);
+            n = 0;
+        }
+    }
+    {
+        NHTTPLink* k = *(NHTTPLink**)(req + 0x34);
+        while (k != 0) {
+            NHTTPLink* head = k->next;
+            if (k != head) {
+                NHTTPLink* nx = head->next;
+                NHTTPi_free(head);
+                k->next = nx;
+            } else {
+                NHTTPi_free(k);
+                k = 0;
+            }
+        }
+    }
+    NHTTPi_free(*(void**)(req + 0x24));
+    NHTTPi_free(*(void**)(req + 0x28));
+    NHTTPi_free(req);
+}
+
+int NHTTPi_PostSendCallback(int, void*, void*, int);
+
+// NHTTPi_strToHex
+s32 fn_80392994(u8* s, s32 len) {
+    s8 raw;
+    int t;
+    s32 val;
+    s32 seen;
+    s32 i;
+    s8 c;
+    if (len > 8) {
+        return -1;
+    }
+    if ((len == 8) & ((s8)*s > 0x37)) {
+        return -1;
+    }
+    val = 0;
+    seen = 0;
+    for (i = len; i > 0; i--, s++) {
+        raw = (s8)*s;
+        t = raw;
+        if ((raw >= 0x41) & (raw <= 0x5a)) {
+            t += 0x20;
+        }
+        c = (s8)t;
+        if (c >= 0x30 && c <= 0x39) {
+            val = (c + val * 0x10) - 0x30;
+            seen = 1;
+        } else if (c >= 0x61 && c <= 0x66) {
+            val = (c + val * 0x10) - 0x57;
+            seen = 1;
+        } else {
+            if (seen != 0) {
+                if (c == 0x20 || c == 0) {
+                    break;
+                }
+            }
+            if (seen != 0 || c != 0x20) {
+                return -1;
+            }
+        }
+    }
+    return val;
+}
+
+int fn_80393350(int, s32*, void*, int*, int);
+int NHTTPi_intToStr(char*, u32);
+int NHTTPi_SendPostData(int, s32*, u8*, void*, int, s32*, int);
+
+// NHTTPi_SendProcPostDataRaw
+int fn_80393CF4(u8* obj) {
+    void* sys = NHTTPi_GetSystemInfoP();
+    int mutex = (int)NHTTPi_GetMutexInfoP(sys);
+    u8* conn = (u8*)((s32**)NHTTPi_GetReqInfoP(sys))[0][3];
+    u8* thr = (u8*)NHTTPi_GetThreadInfoP(sys);
+    NHTTPBgnEndInfo* bgn = (NHTTPBgnEndInfo*)NHTTPi_GetBgnEndInfoP(sys);
+    int len = 0;
+    void* t = thr + 0x360;
+    char tmp[12];
+    int n;
+    int r;
+    if (*(s32*)(conn + 0x248) == 0) {
+        if (fn_80393350(mutex, (s32*)conn, 0, &len, 0) == 0) {
+            return 3;
+        }
+    } else {
+        len = *(s32*)(conn + 0x24c);
+    }
+    n = NHTTPi_intToStr(tmp, len);
+    r = fn_803936B0(obj, "Content-Length: ", 0x10);
+    if (r != 0) {
+        return r;
+    }
+    r = fn_803936B0(obj, tmp, n);
+    if (r != 0) {
+        return r;
+    }
+    r = fn_803936B0(obj, "\r\n", 2);
+    if (r != 0) {
+        return r;
+    }
+    r = fn_803936B0(obj, "\r\n", 2);
+    if (r != 0) {
+        return r;
+    }
+    if (*(s32*)(conn + 0x248) == 0) {
+        r = NHTTPi_SendPostData(mutex, (s32*)conn, (u8*)t, 0, bgn->unk_7d0, (s32*)(obj + 0x324), 0);
+        if (r != 0) {
+            return r;
+        }
+    } else {
+        r = fn_803936B0(obj, *(void**)(conn + 0x248), *(s32*)(conn + 0x24c));
+        if (r != 0) {
+            return r;
+        }
+    }
+    return 0;
+}
+
+// NHTTPi_GetPostContentlength
+int fn_80393350(int a, s32* obj, void* data, int* out, int mode) {
+    int total = 0;
+    u8* req = (u8*)NHTTPi_Request2Connection(a, (int)obj);
+    if (req == 0) {
+        return 0;
+    }
+    *(s32*)(req + 0x24) = 0;
+    for (;;) {
+        int len;
+        u8* p;
+        if (*obj != 0) {
+            return 0;
+        }
+        *(s32*)(req + 0x28) = 0;
+        if (NHTTPi_PostSendCallback(a, req, data, total) < 0) {
+            return 0;
+        }
+        len = *(s32*)(req + 0x28);
+        p = *(u8**)(req + 0x24);
+        if (len == 0) {
+            break;
+        }
+        if (p == 0) {
+            return 0;
+        }
+        total += len;
+        switch (mode) {
+        case 0:
+        case 1:
+            *out += len;
+            break;
+        case 2:
+            *out += fn_80392880((const char*)p, len);
+            break;
+        }
+    }
+    return 1;
+}
+
+int NHTTPi_getHeaderValue(void*, const char*, int*);
+void NHTTPi_loadFromHdrRecvBuf(void*, void*, int, int);
+
+// NHTTP_GetHeaderField
+int fn_80391D8C(u8* resp, const char* name, char** out) {
+    int start;
+    int n;
+    if (*(s32*)(resp + 0x14) == 0) {
+        return -1;
+    }
+    if (*(void**)(resp + 0x24) != 0) {
+        NHTTPi_free(*(void**)(resp + 0x24));
+        *(void**)(resp + 0x24) = 0;
+    }
+    n = NHTTPi_getHeaderValue(resp, name, &start);
+    if (n >= 0) {
+        char* p = (char*)NHTTPi_alloc(n + 1, 4);
+        *(char**)(resp + 0x24) = p;
+        if (p == 0) {
+            return -1;
+        }
+        p[n] = 0;
+        NHTTPi_loadFromHdrRecvBuf(resp, *(char**)(resp + 0x24), start, n);
+        *out = *(char**)(resp + 0x24);
+        return n;
+    }
+    if (NHTTPi_strcmp("HTTPSTATUSCODE", name) == 0) {
+        char* p = (char*)NHTTPi_alloc(4, 4);
+        *(char**)(resp + 0x24) = p;
+        if (p == 0) {
+            return -1;
+        }
+        p[3] = 0;
+        NHTTPi_loadFromHdrRecvBuf(resp, *(char**)(resp + 0x24), 9, 3);
+        *out = *(char**)(resp + 0x24);
+        return 3;
+    }
+    return -1;
 }
