@@ -96,32 +96,42 @@ hkBool hkAabbPhantom::isOverlappingCollidableAdded(hkCollidable* collidable) con
     return hkBool(false);
 }
 
-void hkAabbPhantom::addOverlappingCollidable(hkCollidable* collidable) {
+// The listener loops are inline helpers (HYPOTHESIS: hkPhantom's fireCollidableAdded/Removed): written in the callers
+// the loop counter and the element offset swap registers.
+static inline int hkAabbPhantom_fireCollidableAdded(hkAabbPhantom* phantom, hkCollidable* collidable) {
     hkCollidableAddedEvent event;
     event.m_collidable = collidable;
-    event.m_phantom = this;
+    event.m_phantom = phantom;
     event.m_collidableResult = 0;
-    for (int i = m_overlapListeners.getSize() - 1; i >= 0; i--) {
-        if (m_overlapListeners[i] != 0) {
-            m_overlapListeners[i]->collidableAddedCallback(&event);
+    for (int i = phantom->m_overlapListeners.getSize() - 1; i >= 0; i--) {
+        if (phantom->m_overlapListeners[i] != 0) {
+            phantom->m_overlapListeners[i]->collidableAddedCallback(&event);
         }
     }
-    if (event.m_collidableResult == 0) {
+    return event.m_collidableResult;
+}
+
+static inline void hkAabbPhantom_fireCollidableRemoved(hkAabbPhantom* phantom, hkCollidable* collidable, bool wasAdded) {
+    hkCollidableRemovedEvent event;
+    event.m_collidable = collidable;
+    event.m_phantom = phantom;
+    event.m_collidableWasAdded = wasAdded;
+    for (int i = phantom->m_overlapListeners.getSize() - 1; i >= 0; i--) {
+        if (phantom->m_overlapListeners[i] != 0) {
+            phantom->m_overlapListeners[i]->collidableRemovedCallback(&event);
+        }
+    }
+}
+
+void hkAabbPhantom::addOverlappingCollidable(hkCollidable* collidable) {
+    if (hkAabbPhantom_fireCollidableAdded(this, collidable) == 0) {
         m_overlappingCollidables.pushBack(collidable);
     }
 }
 
 void hkAabbPhantom::removeOverlappingCollidable(hkCollidable* collidable) {
     int found = m_overlappingCollidables.indexOf(collidable);
-    hkCollidableRemovedEvent event;
-    event.m_collidable = collidable;
-    event.m_phantom = this;
-    event.m_collidableWasAdded = found >= 0;
-    for (int i = m_overlapListeners.getSize() - 1; i >= 0; i--) {
-        if (m_overlapListeners[i] != 0) {
-            m_overlapListeners[i]->collidableRemovedCallback(&event);
-        }
-    }
+    hkAabbPhantom_fireCollidableRemoved(this, collidable, found >= 0);
     if (found >= 0) {
         m_overlappingCollidables.removeAt(found);
     }
