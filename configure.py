@@ -7070,6 +7070,12 @@ config.libs = [
             Object(NonMatching, "mo_scene/sora_scene/sq_button.cpp"),
             Object(NonMatching, "mo_scene/sora_scene/sq_lib.cpp"),
             Object(Matching, "mo_scene/mo_scene.cpp"),
+            Object(NonMatching, "mo_scene/sora_scene/sc_adv_name.cpp"),
+            Object(NonMatching, "mo_scene/sora_scene/sc_adv_map.cpp"),
+            Object(NonMatching, "mo_scene/sora_scene/sc_adv_visual.cpp"),
+            Object(NonMatching, "mo_scene/sora_scene/sc_adv_ending.cpp"),
+            Object(NonMatching, "mo_scene/sora_scene/sq_sequence_init.cpp"),
+            Object(NonMatching, "mo_scene/sora_scene/sq_challenger.cpp"),
         ],
     },
     {
