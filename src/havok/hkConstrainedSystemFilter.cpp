@@ -106,6 +106,6 @@ hkBool hkConstrainedSystemFilter::isCollisionEnabled(const hkWorldRayCastInput& 
     return enabled;
 }
 
-static hkCollisionFilterTypeInfo hkConstrainedSystemFilterTypeInfo("hkConstrainedSystemFilter", hkConstrainedSystemFilter::finishLoadedObjecthkConstrainedSystemFilter,
+static hkStaticTypeInfo hkConstrainedSystemFilterTypeInfo("hkConstrainedSystemFilter", hkConstrainedSystemFilter::finishLoadedObjecthkConstrainedSystemFilter,
                                                     hkConstrainedSystemFilter::cleanupLoadedObjecthkConstrainedSystemFilter,
                                                     hkConstrainedSystemFilter::getVtablehkConstrainedSystemFilter());

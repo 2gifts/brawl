@@ -56,6 +56,6 @@ hkBool hkNullCollisionFilter::isCollisionEnabled(const hkCollidable& a, const hk
     return true;
 }
 
-static hkCollisionFilterTypeInfo hkNullCollisionFilterTypeInfo("hkNullCollisionFilter", hkNullCollisionFilter::finishLoadedObjecthkNullCollisionFilter,
+static hkStaticTypeInfo hkNullCollisionFilterTypeInfo("hkNullCollisionFilter", hkNullCollisionFilter::finishLoadedObjecthkNullCollisionFilter,
                                                     hkNullCollisionFilter::cleanupLoadedObjecthkNullCollisionFilter,
                                                     hkNullCollisionFilter::getVtablehkNullCollisionFilter());

@@ -18,6 +18,7 @@
 //   0x802D14CC    84  __sinit_\hkConvexTranslateShape_cpp   [map: hkConvexTranslateShapecpp____sinit_]
 
 #include <havok/hkConvexTranslateShape.h>
+#include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkCdBody.h>
 
@@ -37,6 +38,8 @@ void hkConvexTranslateShape::cleanupLoadedObjecthkConvexTranslateShape(void* p) 
 hkConvexTranslateShape::~hkConvexTranslateShape() {
 }
 
+#pragma push
+#pragma auto_inline off
 const void* hkConvexTranslateShape::getVtablehkConvexTranslateShape() {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
@@ -44,6 +47,7 @@ const void* hkConvexTranslateShape::getVtablehkConvexTranslateShape() {
     hkConvexTranslateShape* p = ::new (buf) hkConvexTranslateShape(flag);
     return *(const void**)p;
 }
+#pragma pop
 
 int hkConvexTranslateShape::getType() const {
     return HK_SHAPE_CONVEX_TRANSLATE;
@@ -166,3 +170,6 @@ void hkConvexTranslateShape::calcStatistics(hkStatisticsCollector* collector) co
 //   0x802D1314    68  getCollisionSpheresInfo   [map: hkConvexTranslateShape__getCollisionSpheresInfo]
 //   0x802D1358   220  getCollisionSpheres   [map: hkConvexTranslateShape__getCollisionSpheres]
 //   0x802D1434   152  calcStatistics   [map: hkConvexTranslateShape__calcStatistics]
+
+static hkStaticTypeInfo hkConvexTranslateShapeTypeInfo("hkConvexTranslateShape", hkConvexTranslateShape::finishLoadedObjecthkConvexTranslateShape, hkConvexTranslateShape::cleanupLoadedObjecthkConvexTranslateShape,
+                                      hkConvexTranslateShape::getVtablehkConvexTranslateShape());

@@ -20,6 +20,7 @@
 //   0x802D45D0   100  calcStatistics   [map: hkCylinderShape__calcStatistics]
 
 #include <havok/hkCylinderShape.h>
+#include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
 
 void hkCylinderShape::finishLoadedObjecthkCylinderShape(void* p) {
@@ -35,6 +36,8 @@ void hkCylinderShape::cleanupLoadedObjecthkCylinderShape(void* p) {
 hkCylinderShape::~hkCylinderShape() {
 }
 
+#pragma push
+#pragma auto_inline off
 const void* hkCylinderShape::getVtablehkCylinderShape() {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
@@ -42,6 +45,7 @@ const void* hkCylinderShape::getVtablehkCylinderShape() {
     ::new (buf) hkCylinderShape(flag);
     return *(const void**)buf;
 }
+#pragma pop
 
 hkReal hkCylinderShape::getCylinderRadius() const {
     return m_cylRadius;
@@ -92,3 +96,6 @@ void hkCylinderShape::calcStatistics(hkStatisticsCollector* collector) const {
 //   0x802D3478  1720  getAabb   [map: hkCylinderShape__getAabb]
 //   0x802D3B30  2712  castRay   [map: hkCylinderShape__castRay]
 //   0x802D45D0   100  calcStatistics   [map: hkCylinderShape__calcStatistics]
+
+static hkStaticTypeInfo hkCylinderShapeTypeInfo("hkCylinderShape", hkCylinderShape::finishLoadedObjecthkCylinderShape, hkCylinderShape::cleanupLoadedObjecthkCylinderShape,
+                                      hkCylinderShape::getVtablehkCylinderShape());

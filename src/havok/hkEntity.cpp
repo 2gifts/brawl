@@ -29,6 +29,7 @@
 
 #include <new>
 #include <havok/hkEntity.h>
+#include <havok/hkRegistry.h>
 #include <havok/hkWorldOperationUtil.h>
 #include <havok/hkSphereMotion.h>
 #include <havok/hkStabilizedSphereMotion.h>
@@ -50,6 +51,8 @@ void hkEntity::cleanupLoadedObjecthkEntity(void* p) {
     ((hkEntity*)p)->~hkEntity();
 }
 
+#pragma push
+#pragma auto_inline off
 const void* hkEntity::getVtablehkEntity() {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
@@ -57,6 +60,7 @@ const void* hkEntity::getVtablehkEntity() {
     new (buf) hkEntity(flag);
     return *(const void**)buf;
 }
+#pragma pop
 
 // The motion is loaded as raw bytes: rebuild the object of its type in place so it gets its vtable back.
 // Dynamic (type 1) motions are not rebuilt.
@@ -167,3 +171,6 @@ hkConstraintInstance* hkEntity::getConstraint(int index) const {
 hkMotionState* hkEntity::getMotionState() {
     return 0;
 }
+
+static hkStaticTypeInfo hkEntityTypeInfo("hkEntity", hkEntity::finishLoadedObjecthkEntity, hkEntity::cleanupLoadedObjecthkEntity,
+                                      hkEntity::getVtablehkEntity());

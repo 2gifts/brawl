@@ -16,6 +16,7 @@
 //   0x802D2518    84  __sinit_\hkConvexVerticesShape_cpp   [map: hkConvexVerticesShapecpp____sinit_]
 
 #include <havok/hkConvexVerticesShape.h>
+#include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
 
 void hkConvexVerticesShape::finishLoadedObjecthkConvexVerticesShape(void* p) {
@@ -31,6 +32,8 @@ void hkConvexVerticesShape::cleanupLoadedObjecthkConvexVerticesShape(void* p) {
 hkConvexVerticesShape::~hkConvexVerticesShape() {
 }
 
+#pragma push
+#pragma auto_inline off
 const void* hkConvexVerticesShape::getVtablehkConvexVerticesShape() {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
@@ -38,6 +41,7 @@ const void* hkConvexVerticesShape::getVtablehkConvexVerticesShape() {
     hkConvexVerticesShape* p = ::new (buf) hkConvexVerticesShape(flag);
     return *(const void**)p;
 }
+#pragma pop
 
 int hkConvexVerticesShape::getType() const {
     return HK_SHAPE_CONVEX_VERTICES;
@@ -63,3 +67,6 @@ void hkConvexVerticesShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out)
 //   0x802D1FD8   324  convertVertexIdsToVertices   [map: hkConvexVerticesShape__convertVertexIdsToVertices]
 //   0x802D211C   776  castRay   [map: hkConvexVerticesShape__castRay]
 //   0x802D2424   244  calcStatistics   [map: hkConvexVerticesShape__calcStatistics]
+
+static hkStaticTypeInfo hkConvexVerticesShapeTypeInfo("hkConvexVerticesShape", hkConvexVerticesShape::finishLoadedObjecthkConvexVerticesShape, hkConvexVerticesShape::cleanupLoadedObjecthkConvexVerticesShape,
+                                      hkConvexVerticesShape::getVtablehkConvexVerticesShape());

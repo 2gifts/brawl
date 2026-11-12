@@ -144,6 +144,28 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
   `__ct__6hkBoolFRC6hkBool`), so no user copy constructor is needed. `!b` on an `hkBool` calls our `operator!`;
   where the target calls `operator bool` and branches, write `!(bool)b`. Seen: `hkBoxBoxCollisionDetection`
   `checkIntersection`/`calcManifold` (`src/havok/hkBoxBoxCollisionDetection.cpp`). **HIGH**
+- **Unnamed 8-byte `subi r3, r3, N; b <fn>` functions right after a unit (or split off as a unit of their own) are the
+  class's `@N@` this-adjusting thunks:** they appear once the class really overrides a virtual of a secondary base. Check
+  the DebugMode `RSBE01.map` (it names the object file of every function) before trusting a split from
+  `havok_map.csv`: the csv had the hkConstrainedSystemFilter thunks as two fake units (hkGeometryUtility,
+  hk_constrained_system_filter) and the hkGroupFilter / hkNullCollisionFilter thunks outside any unit. Inside each
+  secondary vtable MWCC emits the thunks in reverse slot order (`@8@isCollisionEnabled` before `@8@__dt__`, but
+  `@12@__dt__` before `@12@isCollisionEnabled` when that interface declares the destructor second), so the thunk order
+  also gives the interface's declaration order. Name them `@<N>@<mangled target>` in `symbols.txt`. Seen:
+  `include/havok/hkCollisionFilter.h` (the four Havok filter interfaces, +32 exact). (2026-11-12) **HIGH**
+- **Havok `__sinit_\<unit>_cpp` that calls `getVtable<Class>` and then stores four words into a 16-byte .bss record:**
+  the class's `hkTypeInfo` static built by a constructor (`hkStaticTypeInfo` in `include/havok/hkRegistry.h`), not an
+  aggregate initialiser (that only stores the vtable word). Keep `getVtable<Class>` out of line with `#pragma push` /
+  `#pragma auto_inline off` / `#pragma pop` around its definition, or `-ipa file` inlines it into the `__sinit`. When the
+  target adds an offset to the string pool base (`addi r0, r8, 0x14`), the class name sits after timer strings of
+  functions not written yet; the `__sinit` scores 94-99.95 until those exist (the name itself is right). (2026-11-12)
+  **HIGH**
+- **`extrwi rX, rY, 1, N` + `extsb.` on a table word (one bit tested through an `hkBool`):** an inline `hkBool`
+  helper, e.g. `hkCollisionDispatcher::hasAlternateType(type, alt)` = `(m_hasAlternateType[type] & (1 << alt)) != 0`;
+  a plain `if (flags & 4)` gives `rlwinm.`. The table load stays inside the loop because it goes through
+  `input.m_dispatcher` each time. Several early `return f(x, infoB)` in the original are one `infoA` variable and a single
+  call at the end (the target has one `bl`). Seen: `hkGroupFilter::isCollisionEnabled` (shape collection overload).
+  **MED**
 - **Dead stack copies of a transform in reverse column order (col0 at the highest address) right before an inline
   constructor's member stores: the member's copy goes through four `hkVector4` temporaries** (`r0..r3 = columns`, then
   assigned). Seen only in propagation-off callers. Put the copy in a member-local type (`hkBoxBoxTransform` in

@@ -33,6 +33,7 @@
 //   0x802DD520    80  __sinit_\hkGenericConstraintData_cpp   [map: hkGenericConstraintDatacpp____sinit_]
 
 #include <havok/hkGenericConstraintData.h>
+#include <havok/hkRegistry.h>
 #include <havok/hkMath.h>
 
 // Stand-in for a helper in another TU (not yet named).
@@ -48,6 +49,8 @@ void hkGenericConstraintData::cleanupLoadedObjecthkGenericConstraintData(void* p
     ((hkBaseObject*)p)->~hkBaseObject();
 }
 
+#pragma push
+#pragma auto_inline off
 const void* hkGenericConstraintData::getVtablehkGenericConstraintData() {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
@@ -55,6 +58,7 @@ const void* hkGenericConstraintData::getVtablehkGenericConstraintData() {
     ::new (buf) hkGenericConstraintData(flag);
     return *(const void**)buf;
 }
+#pragma pop
 
 hkGenericConstraintData::hkGenericConstraintData(hkFinishLoadedObjectFlag flag)
     : hkConstraintData(flag), m_scheme(flag) {
@@ -122,3 +126,6 @@ hkBool hkGenericConstraintData::isValid() const {
 int hkGenericConstraintData::getType() const {
     return 10;
 }
+
+static hkStaticTypeInfo hkGenericConstraintDataTypeInfo("hkGenericConstraintData", hkGenericConstraintData::finishLoadedObjecthkGenericConstraintData, hkGenericConstraintData::cleanupLoadedObjecthkGenericConstraintData,
+                                      hkGenericConstraintData::getVtablehkGenericConstraintData());

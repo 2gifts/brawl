@@ -9,17 +9,6 @@
 struct hkShapeRayCastInput;
 struct hkWorldRayCastInput;
 
-// Type info of the filter classes, filled at static-init time through a constructor (the __sinit stores the four
-// words one by one, after the getVtable call).
-struct hkCollisionFilterTypeInfo : hkTypeInfo {
-    hkCollisionFilterTypeInfo(const char* name, void (*finish)(void*), void (*cleanup)(void*), const void* vtable) {
-        m_name = name;
-        m_finish = finish;
-        m_cleanup = cleanup;
-        m_vtable = vtable;
-    }
-};
-
 // The four filter interfaces of hkCollisionFilter (0x18 bytes: hkReferencedObject plus the interface vptrs at 0x08,
 // 0x0C, 0x10 and 0x14; layout from hkCollisionFilterClass.cpp). Each interface vtable is 0x10 bytes. The filters'
 // vtables put the destructor first in the first and last interface and second in the middle two (the thunk tables

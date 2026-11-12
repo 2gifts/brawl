@@ -16,6 +16,7 @@
 //   0x802CE534    84  __sinit_\hkBoxShape_cpp   [map: hkBoxShapecpp____sinit_]
 
 #include <havok/hkBoxShape.h>
+#include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
 
 void hkBoxShape::finishLoadedObjecthkBoxShape(void* p) {
@@ -31,6 +32,8 @@ void hkBoxShape::cleanupLoadedObjecthkBoxShape(void* p) {
 hkBoxShape::~hkBoxShape() {
 }
 
+#pragma push
+#pragma auto_inline off
 const void* hkBoxShape::getVtablehkBoxShape() {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
@@ -38,6 +41,7 @@ const void* hkBoxShape::getVtablehkBoxShape() {
     hkBoxShape* p = ::new (buf) hkBoxShape(flag);
     return *(const void**)p;
 }
+#pragma pop
 
 int hkBoxShape::getType() const {
     return HK_SHAPE_BOX;
@@ -61,3 +65,6 @@ void hkBoxShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const {
 //   0x802CDD94   300  convertVertexIdsToVertices   [map: hkBoxShape__convertVertexIdsToVertices]
 //   0x802CDED4   448  getCollisionSpheres   [map: hkBoxShape__getCollisionSpheres]
 //   0x802CE094  1184  castRay   [map: hkBoxShape__castRay]
+
+static hkStaticTypeInfo hkBoxShapeTypeInfo("hkBoxShape", hkBoxShape::finishLoadedObjecthkBoxShape, hkBoxShape::cleanupLoadedObjecthkBoxShape,
+                                      hkBoxShape::getVtablehkBoxShape());

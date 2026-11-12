@@ -25,6 +25,7 @@
 
 #include <new>
 #include <havok/hkRigidBody.h>
+#include <havok/hkRegistry.h>
 #include <havok/hkWorldOperationUtil.h>
 
 void hkRigidBody::finishLoadedObjecthkRigidBody(void* p) {
@@ -37,6 +38,8 @@ void hkRigidBody::cleanupLoadedObjecthkRigidBody(void* p) {
     ((hkRigidBody*)p)->~hkRigidBody();
 }
 
+#pragma push
+#pragma auto_inline off
 const void* hkRigidBody::getVtablehkRigidBody() {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
@@ -44,6 +47,7 @@ const void* hkRigidBody::getVtablehkRigidBody() {
     new (buf) hkRigidBody(flag);
     return *(const void**)buf;
 }
+#pragma pop
 
 hkMotionState* hkRigidBody::getMotionState() {
     return &getMotion()->m_motionState;
@@ -99,3 +103,6 @@ void hkRigidBody::setCenterOfMassLocal(const hkVector4& com) {
     hkVector4 info;
     updateCachedShapeInfo(m_collidable.m_shape, &info);
 }
+
+static hkStaticTypeInfo hkRigidBodyTypeInfo("hkRigidBody", hkRigidBody::finishLoadedObjecthkRigidBody, hkRigidBody::cleanupLoadedObjecthkRigidBody,
+                                      hkRigidBody::getVtablehkRigidBody());

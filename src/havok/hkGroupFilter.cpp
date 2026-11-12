@@ -163,6 +163,6 @@ hkBool hkGroupFilter::dummyUnused() const {
     return false;
 }
 
-static hkCollisionFilterTypeInfo hkGroupFilterTypeInfo("hkGroupFilter", hkGroupFilter::finishLoadedObjecthkGroupFilter,
+static hkStaticTypeInfo hkGroupFilterTypeInfo("hkGroupFilter", hkGroupFilter::finishLoadedObjecthkGroupFilter,
                                                     hkGroupFilter::cleanupLoadedObjecthkGroupFilter,
                                                     hkGroupFilter::getVtablehkGroupFilter());

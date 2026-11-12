@@ -58,9 +58,5 @@ hkPhysicsSystem::~hkPhysicsSystem() {
     }
 }
 
-static hkTypeInfo hkPhysicsSystemTypeInfo = {
-    "hkPhysicsSystem",
-    hkPhysicsSystem::finishLoadedObjecthkPhysicsSystem,
-    hkPhysicsSystem::cleanupLoadedObjecthkPhysicsSystem,
-    hkPhysicsSystem::getVtablehkPhysicsSystem(),
-};
+static hkStaticTypeInfo hkPhysicsSystemTypeInfo("hkPhysicsSystem", hkPhysicsSystem::finishLoadedObjecthkPhysicsSystem, hkPhysicsSystem::cleanupLoadedObjecthkPhysicsSystem,
+                                      hkPhysicsSystem::getVtablehkPhysicsSystem());

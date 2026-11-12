@@ -17,6 +17,7 @@
 //   0x802D6400    84  __sinit_\hkSphereShape_cpp   [map: hkSphereShapecpp____sinit_]
 
 #include <havok/hkSphereShape.h>
+#include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkWorldCinfo.h>
 
@@ -30,6 +31,8 @@ void hkSphereShape::cleanupLoadedObjecthkSphereShape(void* p) {
     ((hkBaseObject*)p)->~hkBaseObject();
 }
 
+#pragma push
+#pragma auto_inline off
 const void* hkSphereShape::getVtablehkSphereShape() {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
@@ -37,6 +40,7 @@ const void* hkSphereShape::getVtablehkSphereShape() {
     hkSphereShape* p = ::new (buf) hkSphereShape(flag);
     return *(const void**)p;
 }
+#pragma pop
 
 hkSphereShape::hkSphereShape(hkReal radius) : hkConvexShape(radius) {}
 
@@ -110,3 +114,6 @@ void hkSphereShape::calcStatistics(hkStatisticsCollector* collector) const {
 // Not yet decompiled in this unit:
 //   0x802D6004   920  castRay   [map: hkSphereShape__castRay]
 //   0x802D639C   100  calcStatistics   [map: hkSphereShape__calcStatistics]
+
+static hkStaticTypeInfo hkSphereShapeTypeInfo("hkSphereShape", hkSphereShape::finishLoadedObjecthkSphereShape, hkSphereShape::cleanupLoadedObjecthkSphereShape,
+                                      hkSphereShape::getVtablehkSphereShape());

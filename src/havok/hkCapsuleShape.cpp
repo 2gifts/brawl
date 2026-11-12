@@ -20,6 +20,7 @@
 //   0x802D00F0    84  __sinit_\hkCapsuleShape_cpp   [map: hkCapsuleShapecpp____sinit_]
 
 #include <havok/hkCapsuleShape.h>
+#include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
 
 void hkCapsuleShape::finishLoadedObjecthkCapsuleShape(void* p) {
@@ -35,6 +36,8 @@ void hkCapsuleShape::cleanupLoadedObjecthkCapsuleShape(void* p) {
 hkCapsuleShape::~hkCapsuleShape() {
 }
 
+#pragma push
+#pragma auto_inline off
 const void* hkCapsuleShape::getVtablehkCapsuleShape() {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
@@ -42,6 +45,7 @@ const void* hkCapsuleShape::getVtablehkCapsuleShape() {
     hkCapsuleShape* p = ::new (buf) hkCapsuleShape(flag);
     return *(const void**)p;
 }
+#pragma pop
 
 #pragma scheduling off
 void hkCapsuleShape::getFirstVertex(hkVector4& out) const {
@@ -85,3 +89,6 @@ int hkCapsuleShape::getType() const {
 //   0x802CF5D4   352  closestPointLineSeg   [map: hkCapsuleShape__closestPointLineSeg]
 //   0x802CF734  2384  castRay   [map: hkCapsuleShape__castRay]
 //   0x802D008C   100  calcStatistics   [map: hkCapsuleShape__calcStatistics]
+
+static hkStaticTypeInfo hkCapsuleShapeTypeInfo("hkCapsuleShape", hkCapsuleShape::finishLoadedObjecthkCapsuleShape, hkCapsuleShape::cleanupLoadedObjecthkCapsuleShape,
+                                      hkCapsuleShape::getVtablehkCapsuleShape());

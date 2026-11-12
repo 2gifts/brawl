@@ -16,6 +16,7 @@
 //   0x802D5C58    84  __sinit_\hkMeshShape_cpp   [map: hkMeshShapecpp____sinit_]
 
 #include <havok/hkMeshShape.h>
+#include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
 
 void hkMeshShape::finishLoadedObjecthkMeshShape(void* p) {
@@ -31,6 +32,8 @@ void hkMeshShape::cleanupLoadedObjecthkMeshShape(void* p) {
 hkMeshShape::~hkMeshShape() {
 }
 
+#pragma push
+#pragma auto_inline off
 const void* hkMeshShape::getVtablehkMeshShape() {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
@@ -38,6 +41,7 @@ const void* hkMeshShape::getVtablehkMeshShape() {
     hkMeshShape* p = ::new (buf) hkMeshShape(flag);
     return *(const void**)p;
 }
+#pragma pop
 
 hkMeshShape::hkMeshShape(const hkFinishLoadedObjectFlag& flag) {
     if (flag.m_finishing == 0) {
@@ -67,3 +71,6 @@ int hkMeshShape::getType() const {
 //   0x802D5890   544  getAabb   [map: hkMeshShape__getAabb]
 //   0x802D5AB0   244  addSubpart   [map: hkMeshShape__addSubpart]
 //   0x802D5BA4   180  calcStatistics   [map: hkMeshShape__calcStatistics]
+
+static hkStaticTypeInfo hkMeshShapeTypeInfo("hkMeshShape", hkMeshShape::finishLoadedObjecthkMeshShape, hkMeshShape::cleanupLoadedObjecthkMeshShape,
+                                      hkMeshShape::getVtablehkMeshShape());

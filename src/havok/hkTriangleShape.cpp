@@ -17,6 +17,7 @@
 //   0x802D720C    84  __sinit_\hkTriangleShape_cpp   [map: hkTriangleShapecpp____sinit_]
 
 #include <havok/hkTriangleShape.h>
+#include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
 
 void hkTriangleShape::finishLoadedObjecthkTriangleShape(void* p) {
@@ -32,6 +33,8 @@ void hkTriangleShape::cleanupLoadedObjecthkTriangleShape(void* p) {
 hkTriangleShape::~hkTriangleShape() {
 }
 
+#pragma push
+#pragma auto_inline off
 const void* hkTriangleShape::getVtablehkTriangleShape() {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
@@ -39,6 +42,7 @@ const void* hkTriangleShape::getVtablehkTriangleShape() {
     hkTriangleShape* p = ::new (buf) hkTriangleShape(flag);
     return *(const void**)p;
 }
+#pragma pop
 
 int hkTriangleShape::getType() const {
     return HK_SHAPE_TRIANGLE;
@@ -69,3 +73,6 @@ void hkTriangleShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const
 //   0x802D6ADC   128  getCollisionSpheres   [map: hkTriangleShape__getCollisionSpheres]
 //   0x802D6B5C  1612  castRay   [map: hkTriangleShape__castRay]
 //   0x802D71A8   100  calcStatistics   [map: hkTriangleShape__calcStatistics]
+
+static hkStaticTypeInfo hkTriangleShapeTypeInfo("hkTriangleShape", hkTriangleShape::finishLoadedObjecthkTriangleShape, hkTriangleShape::cleanupLoadedObjecthkTriangleShape,
+                                      hkTriangleShape::getVtablehkTriangleShape());
