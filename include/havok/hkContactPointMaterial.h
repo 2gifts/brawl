@@ -9,7 +9,7 @@ struct hkContactPointMaterial {
     u8 m_restitution; // 0x06 HYPOTHESIS: name
     u8 m_flags;       // 0x07 bit 1 (value 2): the point is solved together with the previous one (pair contact)
 
-    u16 getFriction8_8();
+    int getFriction8_8();
 };
 
 // Per contact point solver properties (0x14 bytes; hkSimpleContactConstraintDataBuildJacobian walks them in

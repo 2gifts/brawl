@@ -52,6 +52,19 @@
 #include <havok/hkConstraintQueryIn.h>
 #include <havok/hkTransform.h>
 
+// MATCH-ONLY: the target builds this function's vector locals without calling the empty hkVector4 constructor,
+// which every other Havok function compiled without inlining does call; untyped aligned storage reproduces it.
+// The original declaration of these locals is unknown. Inside the function each name below stands for its storage.
+struct hkVector4Storage {
+    hkReal v[4];
+} __attribute__((aligned(16)));
+#define posSum (*(hkVector4*)&posSumStorage)
+#define normalSum (*(hkVector4*)&normalSumStorage)
+#define axis (*(hkVector4*)&axisStorage)
+#define perp (*(hkVector4*)&perpStorage)
+#define absNormal (*(hkVector4*)&absNormalStorage)
+#define arm (*(hkVector4*)&armStorage)
+
 // Builds the Jacobians of a simple contact atom: one row per contact point (pairs of points flagged in their
 // material share a pair schema), then, when the summed friction is positive, two linear friction rows through the
 // centre of the points and, for more than one point, an angular friction row around the averaged normal.
@@ -71,9 +84,9 @@ void hkSimpleContactConstraintDataBuildJacobian(hkSimpleContactConstraintAtom* a
     numPoints = atom->m_numContactPoints;
     props = atom->getContactPointProperties();
 
-    hkVector4 posSum;
+    hkVector4Storage posSumStorage;
     posSum.setZero4();
-    hkVector4 normalSum;
+    hkVector4Storage normalSumStorage;
     normalSum.setZero4();
     hkReal invNumPoints = 1.0f / numPoints;
     hkReal impulseSum = 0.0f;
@@ -91,8 +104,9 @@ void hkSimpleContactConstraintDataBuildJacobian(hkSimpleContactConstraintAtom* a
     hkJacobianBuilder* jac = ((hkJacobianElement*)out.m_jacobians)->as1Lin2Ang();
     const hkContactPoint* cp = contactPoints;
     int frictionSum = 0;
+    hkReal pairCoupling = 0.99f; // HYPOTHESIS: name (kept in a register across the loop)
     {
-        for (int i = numPoints - 1; i >= 0; i--, props++, cp++) {
+        for (int i = numPoints - 1; i >= 0; cp++, i--, props++) {
             hkJacobianBuilder::buildLinearBegin(bodyA, bodyB, cp->getPosition(), cp->getNormal(), jac, in.m_tau);
             frictionSum += props->m_material.getFriction8_8();
             impulseSum += props->m_impulseApplied;
@@ -108,7 +122,7 @@ void hkSimpleContactConstraintDataBuildJacobian(hkSimpleContactConstraintAtom* a
                 // The previous point's single schema becomes a pair schema.
                 hkJacobianPairContactSchema* pair =
                     (hkJacobianPairContactSchema*)(schema - sizeof(hkJacobianSingleContactSchema));
-                pair->initPairContact(hkJacobianBuilder::getInvJac01Optimized(bodyA, bodyB, jac - 1, in.m_tau, 0.99f));
+                pair->initPairContact(hkJacobianBuilder::getInvJac01Optimized(bodyA, bodyB, jac - 1, in.m_tau, pairCoupling));
                 schema = (u8*)(pair + 1);
                 jac++;
             }
@@ -119,9 +133,10 @@ void hkSimpleContactConstraintDataBuildJacobian(hkSimpleContactConstraintAtom* a
     hkReal maxFriction = invNumPoints * (impulseSum * ((1.0f / 256.0f) * frictionSum));
     if (maxFriction > 0.0f) {
         hkReal invNumPoints2 = invNumPoints * invNumPoints;
-        if (normalSum.lengthSquared3() * invNumPoints2 > 0.9999f) {
+        hkSimdReal lenSq = normalSum.lengthSquared3();
+        if (lenSq * invNumPoints2 > 0.9999f) {
             normalSum = contactPoints->getNormal();
-        } else if (normalSum.lengthSquared3() > 0.1f) {
+        } else if (lenSq > 0.1f) {
             normalSum.normalize3();
         } else {
             normalSum = contactPoints->getNormal();
@@ -132,17 +147,18 @@ void hkSimpleContactConstraintDataBuildJacobian(hkSimpleContactConstraintAtom* a
             }
         }
 
-        hkVector4 axis;
-        hkVector4 perp;
+        hkVector4Storage axisStorage;
+        hkVector4Storage perpStorage;
         for (;;) {
             axis = hkTransform::getIdentity().getColumn(atom->m_info.m_index);
             perp.setCross(axis, normalSum);
-            if (perp.dot3(perp) > 0.1f) {
+            bool ok = perp.dot3(perp) > 0.1f;
+            if (ok) {
                 perp.normalize3();
                 break;
             }
             // The axis is (nearly) parallel to the normal: switch to the axis of the smallest normal component.
-            hkVector4 absNormal;
+            hkVector4Storage absNormalStorage;
             absNormal.setAbs4(normalSum);
             if (absNormal(0) < absNormal(1)) {
                 atom->m_info.m_index = absNormal(0) < absNormal(2) ? 0 : 2;
@@ -157,12 +173,14 @@ void hkSimpleContactConstraintDataBuildJacobian(hkSimpleContactConstraintAtom* a
 
         hkJacobianBuilder* frictionJac = ((hkJacobianElement*)out.m_jacobians)->as1Lin2Ang();
         hkJacobianBuilder::buildLinearBegin(bodyA, bodyB, posSum, axis, frictionJac, in.m_tau);
-        frictionJac->buildLinearEnd(atom->m_info.m_frictionRhs0, in.m_frictionRhsScale);
+        hkReal rhs0 = atom->m_info.m_frictionRhs0;
+        frictionJac->buildLinearEnd(rhs0, in.m_frictionRhsScale);
         hkJacobianBuilder::copyJacRegToJac1Reg();
         hkJacobianBuilder::buildLinearBegin(bodyA, bodyB, posSum, perp, frictionJac + 1, in.m_tau);
-        (frictionJac + 1)->buildLinearEnd(atom->m_info.m_frictionRhs1, in.m_frictionRhsScale);
-        hkJacobian2dFrictionSchema* friction = (hkJacobian2dFrictionSchema*)schema;
+        hkReal rhs1 = atom->m_info.m_frictionRhs1;
+        (frictionJac + 1)->buildLinearEnd(rhs1, in.m_frictionRhsScale);
         frictionJac += 2;
+        hkJacobian2dFrictionSchema* friction = (hkJacobian2dFrictionSchema*)schema;
         hkReal invJac = hkJacobianBuilder::getInvJac01Optimized(bodyA, bodyB, frictionJac - 2, in.m_tau, 1.0f);
         friction->init2dFriction((u32)&atom->m_info.m_data0C, 8, maxFriction * in.m_frictionScale, invJac);
         schema += sizeof(hkJacobian2dFrictionSchema);
@@ -184,7 +202,7 @@ void hkSimpleContactConstraintDataBuildJacobian(hkSimpleContactConstraintAtom* a
                 {
                     const hkContactPoint* cp = contactPoints;
                     for (int i = numPoints - 1; i >= 0; i--, cp++) {
-                        hkVector4 arm;
+                        hkVector4Storage armStorage;
                         arm.setSub4(cp->getPosition(), posSum);
                         atom->m_info.m_contactRadius += arm.length3();
                     }
@@ -203,6 +221,12 @@ void hkSimpleContactConstraintDataBuildJacobian(hkSimpleContactConstraintAtom* a
     hkJacobianBuilder::exitBuilder();
 }
 #pragma pop
+#undef posSum
+#undef normalSum
+#undef axis
+#undef perp
+#undef absNormal
+#undef arm
 
 hkContactPoint* hkSimpleContactConstraintAtom::getContactPoints() {
     return (hkContactPoint*)(((u32)this + 0x37) & ~0xF);
@@ -242,7 +266,7 @@ const hkVector4& hkContactPoint::getNormal() const {
 
 void hkJacobianBuilder::exitBuilder() {}
 
-u16 hkContactPointMaterial::getFriction8_8() {
+int hkContactPointMaterial::getFriction8_8() {
     return m_friction;
 }
 
