@@ -2290,3 +2290,60 @@ extern "C" bool fn_800D54DC(muWifiInterfaceTask* self) {
     fn_80145B98(lbl_805A03A8, 0xFE);
     return true;
 }
+
+bool muWifiInterfaceTask::isCancelApprovalCalled(u8* aid, int* player) {
+    muWifiAIDInfo* parent;
+    u8 parentAID = Network::getParentAID();
+    if (parentAID == 0xFF) {
+        parent = NULL;
+    } else {
+        parent = &m_aidInfos[parentAID];
+    }
+    if (parent == NULL) {
+        return true;
+    }
+    u8 myAID = Network::getMyAID();
+    if (myAID == 0xFF) {
+        myAID = 4;
+    }
+    u8* self = reinterpret_cast<u8*>(this);
+    u8* mine;
+    mine = self + myAID * 0x218;
+    if (mine[0xD2] == 0xFF) {
+        return false;
+    }
+    u8* p = reinterpret_cast<u8*>(parent);
+    u8 a = p[0x6C];
+    u8 b = p[0x6D];
+    u8 cur;
+    u8 c = p[0x6E];
+    if (a == 0xFF || ((cur = self[0xFCD]), cur != a) || self[0xFCE] != b) {
+        if (*reinterpret_cast<s32*>(mine + 0xCC) != 0) {
+            *reinterpret_cast<s32*>(mine + 0xCC) = 0;
+            mine[0xD0] = 0xFF;
+            mine[0xD1] = 0;
+            mine[0xD2] = 0;
+            myAID = Network::getMyAID();
+            if (myAID == 0xFF) {
+                myAID = 4;
+            }
+            mine = reinterpret_cast<u8*>(this) + myAID * 0x218;
+            reinterpret_cast<s8*>(mine)[0xC6] &= ~1;
+            fn_800D0AE0(this);
+            fn_80145B98(lbl_805A03A8, 0xFE);
+        }
+        *aid = self[0xFCD];
+        *player = self[0xFCE];
+        self[0xFCD] = a;
+        self[0xFCE] = b;
+        return true;
+    }
+    if (mine[0xD0] == a && mine[0xD1] == b && mine[0xD2] == c) {
+        return false;
+    }
+    *aid = cur;
+    *player = self[0xFCE];
+    self[0xFCD] = a;
+    self[0xFCE] = b;
+    return true;
+}
