@@ -345,3 +345,7 @@ extern "C" float fn_80297B40(float* table, int index)
 extern "C" int fn_802997F4(int arg0, int arg1) {
     return arg0 + arg1;
 }
+
+// Unnamed static flag (lbl_805A0EF8); initialised through hkBool(bool) so the TU gets a __sinit.
+// HYPOTHESIS: a debug/config switch of the unit; nothing in the written code reads it yet.
+static hkBool s_hkSolver_unk(false);

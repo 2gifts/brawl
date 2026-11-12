@@ -12,3 +12,9 @@
 //   0x8032117C  5140  queryRayOnTree   [map: hkMoppAabbCastVirtualMachine__queryRayOnTree]
 //   0x80322590   600  aabbCast   [map: hkMoppAabbCastVirtualMachine__aabbCast]
 //   0x803227E8    12  __sinit_\hkMoppAabbCastVirtualMachine_cpp   [map: hkMoppAabbCastVirtualMachinecpp____sinit_]
+
+#include <havok/hkBase.h>
+
+// Unnamed static flag (lbl_805A0F28); initialised through hkBool(bool) so the TU gets a __sinit.
+// HYPOTHESIS: a debug/config switch of the unit; nothing in the written code reads it yet.
+static hkBool s_hkMoppAabbCastVirtualMachine_unk(false);

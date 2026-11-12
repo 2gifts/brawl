@@ -341,3 +341,18 @@ void hk3AxisSweep::reQuerySingleObject(const hkBroadPhaseHandle* handle,
 hkBroadPhase* hk3AxisSweep16CreateBroadPhase(const hkVector4& worldMin, const hkVector4& worldMax, int numMarkers) {
     return new hk3AxisSweep(worldMin, worldMax, numMarkers);
 }
+
+// Six words filled by the __sinit (lbl_805332B0, 16-aligned .bss); read by three functions of the unit through a
+// base pointer. HYPOTHESIS: a constructed table of per-axis offsets; the meaning of the values is not recovered.
+struct hk3AxisSweepStaticTable {
+    int m_values[6];
+    hk3AxisSweepStaticTable() {
+        m_values[0] = 8;
+        m_values[1] = 10;
+        m_values[2] = 0;
+        m_values[3] = 4;
+        m_values[4] = 2;
+        m_values[5] = 6;
+    }
+};
+static hk3AxisSweepStaticTable s_hk3AxisSweepStaticTable;

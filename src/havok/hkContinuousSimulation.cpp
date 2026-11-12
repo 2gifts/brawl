@@ -144,3 +144,7 @@ void hkContinuousSimulation::removeCollisionInformationForAgent(const void* agen
         }
     }
 }
+
+// Unnamed static flag (lbl_805A0F30); initialised through hkBool(bool) so the TU gets a __sinit.
+// HYPOTHESIS: a debug/config switch of the unit; nothing in the written code reads it yet.
+static hkBool s_hkContinuousSimulation_unk(false);

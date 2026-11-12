@@ -353,3 +353,7 @@ void hkNullContactMgr::removeContactPoint() {}
 bool hkNullContactMgr::addContactPoint() {
     return false;
 }
+
+// Unnamed static flag (lbl_805A0F20); initialised through hkBool(bool) so the TU gets a __sinit.
+// HYPOTHESIS: a debug/config switch of the unit; nothing in the written code reads it yet.
+static hkBool s_hkWorld_unk(false);

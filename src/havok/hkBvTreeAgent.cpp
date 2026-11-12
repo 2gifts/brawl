@@ -674,3 +674,8 @@ void hkBvTreeAgent::calcStatistics(hkStatisticsCollector* collector) const {
         }
     }
 }
+
+// Two unnamed static flags (lbl_805A0F10 = false, lbl_805A0F14 = true) set by the __sinit.
+// HYPOTHESIS: debug/config switches; nothing in the written code reads them yet.
+static hkBool s_hkBvTreeAgent_unk0(false);
+static hkBool s_hkBvTreeAgent_unk1(true);
