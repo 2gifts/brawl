@@ -1794,6 +1794,9 @@ config.libs = [
             Object(Matching, "mo_fighter/ft_captain/ft_captain_status_uniq_process_special_hi_cling.cpp"),
             Object(NonMatching, "mo_fighter/ft_captain/ft_captain_status_uniq_process_special_hi_throw.cpp"),
             Object(NonMatching, "mo_fighter/ft_captain/ft_captain.cpp"),
+            Object(NonMatching, "mo_fighter/ft_captain/ft_captain_kinetic_transactor.cpp"),
+            Object(NonMatching, "mo_fighter/ft_captain/ft_captain_status_uniq_process_final.cpp"),
+            Object(NonMatching, "mo_fighter/ft_captain/ft_captain_final_sub_routine.cpp"),
         ],
     },
     {
@@ -1917,6 +1920,8 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_turn_run.cpp"),
             Object(Matching, "mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_landing.cpp"),
             Object(NonMatching, "mo_fighter/ft_gamewatch/ft_gamewatch.cpp"),
+            Object(NonMatching, "mo_fighter/ft_gamewatch/ft_gamewatch_kinetic_transactor.cpp"),
+            Object(NonMatching, "mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_swim.cpp"),
         ],
     },
     {
