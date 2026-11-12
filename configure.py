@@ -6771,6 +6771,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/st/st_class_info.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/catch/so_catch_manager.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_log_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_air_lasso_common.cpp"),
         ],
     },
     {
