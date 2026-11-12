@@ -472,6 +472,10 @@ mo_melee/sora_melee/so/so_heap_module_impl.cpp:
 	.text       start:0x000649FC end:0x00064A90
 	.data       start:0x00007328 end:0x000073A8
 
+mo_melee/sora_melee/so/catch/so_catch_manager.cpp:
+	.text       start:0x00064A90 end:0x00064C8C
+	.data       start:0x000073A8 end:0x00007438
+
 mo_melee/sora_melee/so/catch/so_catch_module_impl.cpp:
 	.text       start:0x00064C8C end:0x00065EE4
 	.rodata     start:0x000008F8 end:0x00000910
@@ -10740,6 +10744,11 @@ mo_melee/sora_melee/st/stage.cpp:
 	.rodata     start:0x000033D0 end:0x000034C0
 	.data       start:0x0004A158 end:0x0004A408
 	.bss        start:0x00005668 end:0x00005670
+
+mo_melee/sora_melee/st/st_class_info.cpp:
+	.text       start:0x002257BC end:0x00225910
+	.data       start:0x0004A408 end:0x0004A430
+	.bss        start:0x00005670 end:0x00005780
 
 mo_melee/sora_melee/st/st_positions.cpp:
 	.text       start:0x00225910 end:0x00227BEC
