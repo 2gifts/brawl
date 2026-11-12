@@ -242,7 +242,7 @@ void ftEntryEventObserver::notifyEventPokemonInflict() { }
 void ftEntryEventObserver::notifyEventPokemonAttack() { }
 void ftEntryEventObserver::notifyEventPokemonRebirthEnd() { }
 void ftEntryEventObserver::notifyEventStopRumble(int) { }
-void ftEntryEventObserver::notifyEventSetRumble(int, int) { }
+void ftEntryEventObserver::notifyEventSetRumble(int, bool) { }
 void ftEntryEventObserver::notifyEventPokemonAppeal() { }
 void ftEntryEventObserver::notifyEventPokemonSpecial(int, int) { }
 void ftEntryEventObserver::notifyEventPokemonChangeCancel() { }
