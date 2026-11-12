@@ -54,11 +54,20 @@ mo_melee/sora_melee/so/physics/so_physics_module_impl.cpp:
 	.rodata     start:0x00000320 end:0x00000340
 	.data       start:0x00000DE8 end:0x00001190
 
+mo_melee/sora_melee/so/motion/so_motion_module_impl.cpp:
+	.text       start:0x00013700 end:0x0001B5E0
+
 mo_melee/sora_melee/so/so_array_base_soArrayFixed_20soAnimCmdAddressPack_1B5E0.cpp:
 	.text       start:0x0001B5E0 end:0x0001B614
 
+mo_melee/sora_melee/so/motion/so_motion_module_impl_part2.cpp:
+	.text       start:0x0001B614 end:0x0001C400
+
 mo_melee/sora_melee/so/so_array_base_soArrayFixed_19soMotionChangeParam_1C400.cpp:
 	.text       start:0x0001C400 end:0x0001C434
+
+mo_melee/sora_melee/so/motion/so_motion_module_impl_part3.cpp:
+	.text       start:0x0001C434 end:0x0001CC8C
 
 mo_melee/sora_melee/so/so_array_vector_destructor_Vec3f_1.cpp:
 	.text       start:0x0001CC8C end:0x0001CCCC
@@ -226,7 +235,7 @@ mo_melee/sora_melee/so/collision/so_collision_hit_group.cpp:
 	.rodata     start:0x000004B8 end:0x000004C0
 
 mo_melee/sora_melee/so/collision/so_collision_hit_module_impl.cpp:
-	.text       start:0x00045510 end:0x00046588
+	.text       start:0x00042AA4 end:0x00046588
 	.data       start:0x00003BC0 end:0x00003CC0
 
 mo_melee/sora_melee/so/so_collision_shield_part.cpp:
@@ -257,6 +266,9 @@ mo_melee/sora_melee/so/collision/so_collision_shield_module_impl.cpp:
 mo_melee/sora_melee/so/collision/so_collision_catch_part.cpp:
 	.text       start:0x0004AC40 end:0x0004B184
 	.rodata     start:0x000004F8 end:0x00000508
+
+mo_melee/sora_melee/so/collision/so_collision_catch_module_impl.cpp:
+	.text       start:0x0004B184 end:0x0004CB08
 
 mo_melee/sora_melee/so/so_array_vector_accessors_soCollisionGroup_1.cpp:
 	.text       start:0x0004CB08 end:0x0004CBD0
@@ -470,6 +482,9 @@ mo_melee/sora_melee/so/capture/so_capture_module_impl.cpp:
 	.rodata     start:0x00000910 end:0x00000920
 	.data       start:0x000075C8 end:0x00007788
 
+mo_melee/sora_melee/so/stop/so_stop_module_impl.cpp:
+	.text       start:0x00067260 end:0x0006821C
+
 mo_melee/sora_melee/so/so_module_accesser.cpp:
 	.text       start:0x0006821C end:0x000687F8
 	.data       start:0x00007898 end:0x000078D0
@@ -515,6 +530,9 @@ mo_melee/sora_melee/so/anim/so_anim_cmd_interpreter.cpp:
 
 mo_melee/sora_melee/so/so_instance_unit_full_property_soAnimCmdControlUnit_part1.cpp:
 	.text       start:0x000714A4 end:0x000714B0
+
+mo_melee/sora_melee/so/anim/so_anim_cmd_module_impl.cpp:
+	.text       start:0x000714B0 end:0x00072D70
 
 mo_melee/sora_melee/so/so_array_vector_destructor_soAnimCmdControlUnit_20.cpp:
 	.text       start:0x00072D70 end:0x00072DB0
@@ -1328,6 +1346,9 @@ mo_melee/sora_melee/so/so_instance_manager_thunks_Null_soLogEventObserver.cpp:
 
 mo_melee/sora_melee/so/so_instance_unit_full_property_soKineticEnergy_part1.cpp:
 	.text       start:0x0008754C end:0x00087558
+
+mo_melee/sora_melee/so/kinetic/so_kinetic_module_impl.cpp:
+	.text       start:0x00087558 end:0x00088C84
 
 mo_melee/sora_melee/so/so_array_vector_destructor_ptr_ptr_soKineticEnergy_24.cpp:
 	.text       start:0x00088C84 end:0x00088CC4
@@ -5114,6 +5135,9 @@ mo_melee/sora_melee/so/so_instance_manager_thunks_Null_ftEntryEventObserver.cpp:
 mo_melee/sora_melee/ft/ft_team.cpp:
 	.text       start:0x0014033C end:0x001404D4
 	.data       start:0x0002AB90 end:0x0002AC40
+
+mo_melee/sora_melee/ft/ft_cancel_module_impl.cpp:
+	.text       start:0x001404D4 end:0x00141448
 
 mo_melee/sora_melee/ft/ft_data_provider.cpp:
 	.text       start:0x00141448 end:0x00145478
@@ -11713,6 +11737,9 @@ mo_melee/sora_melee/wn/wn_link_bow_arrow_status_uniq_process.cpp:
 	.text       start:0x002E5024 end:0x002E53A0
 	.ctors      start:0x00000368 end:0x0000036C
 
+mo_melee/sora_melee/wn/wn_samus_bomb.cpp:
+	.text       start:0x002E53A0 end:0x002EA26C
+
 mo_melee/sora_melee/so/so_event_unit_work_area_soCollisionSearchEventObserver_3_2EA26C.cpp:
 	.text       start:0x002EA26C end:0x002EA42C
 
@@ -12544,6 +12571,9 @@ mo_melee/sora_melee/wn/wn_snake_rgb6sight.cpp:
 	.rodata     start:0x00007FA0 end:0x00007FD0
 	.data       start:0x0009FCC8 end:0x000A0268
 	.bss        start:0x00008B78 end:0x00008BA0
+
+mo_melee/sora_melee/wn/wn_snake_rgb6clip.cpp:
+	.text       start:0x003B3280 end:0x003B48BC
 
 mo_melee/sora_melee/wn/wn_snake_rgb6bullet.cpp:
 	.text       start:0x003B48BC end:0x003B6680
