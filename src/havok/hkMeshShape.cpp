@@ -39,7 +39,6 @@ const void* hkMeshShape::getVtablehkMeshShape() {
     return *(const void**)p;
 }
 
-#pragma dont_inline on
 hkMeshShape::hkMeshShape(const hkFinishLoadedObjectFlag& flag) {
     if (flag.m_finishing == 0) {
         return;
@@ -53,7 +52,6 @@ hkMeshShape::hkMeshShape(const hkFinishLoadedObjectFlag& flag) {
     }
 }
 
-#pragma dont_inline reset
 
 int hkMeshShape::getType() const {
     return HK_SHAPE_TRIANGLE_COLLECTION;

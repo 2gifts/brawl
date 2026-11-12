@@ -63,8 +63,9 @@ struct hkCollisionDispatcher : hkReferencedObject {
     // 0x0C: 8 x 8 contact manager factories indexed by the two entities' material response types
     // (hkWorldAgentUtil::addAgent); reference counted, released by the destructor.
     hkContactMgrFactory* m_contactMgrFactory[8][8];
-    // 0x10C: flags indexed by shape type (HYPOTHESIS).
-    u32 m_typeFlags[32];
+    // 0x10C: per shape type, one bit for every type it can also be treated as (the alternate types registered with
+    // registerAlternateShapeType; hkGroupFilter tests the collection, bv tree and multi-sphere bits).
+    u32 m_hasAlternateType[32];
     int m_numAgents; // 0x18C number of registered agent functions (index of the next table entry)
 
     u8 m_lookup190[0x400]; // 0x190 lookup table of registration indices, filled for the (typeA, typeB) pair
@@ -77,6 +78,10 @@ struct hkCollisionDispatcher : hkReferencedObject {
     // 0x1A28 quality settings, stride 0x3C (initCollisionQualityInfo fills entries 1 to 5, entry 0 is not written).
     hkCollisionQualityInfo m_collisionQualityInfo[6];
     u8 unk1B90[0x1C08 - 0x1B90];
+
+    hkBool hasAlternateType(int type, int alternateType) const {
+        return (m_hasAlternateType[type] & (1 << alternateType)) != 0;
+    }
 
     u8 m_flagA; // 0x1C08 set to 1 by internalRegisterCollisionAgent
     u8 unk1C09[0x1C0C - 0x1C09];

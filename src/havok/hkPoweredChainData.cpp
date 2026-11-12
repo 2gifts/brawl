@@ -37,7 +37,7 @@
 #include <havok/hkPoweredChainData.h>
 #include <types.h>
 
-u32 hkPoweredChainData::getType() const {
+int hkPoweredChainData::getType() const {
     return 102;
 }
 

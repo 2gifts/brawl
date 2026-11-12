@@ -142,7 +142,7 @@ hkBool hkRagdollConstraintData::isValid() const {
     return okG;
 }
 
-u32 hkRagdollConstraintData::getType() const {
+int hkRagdollConstraintData::getType() const {
     return 7; // CONSTRAINT_TYPE_RAGDOLL
 }
 

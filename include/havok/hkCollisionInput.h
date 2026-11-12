@@ -16,6 +16,7 @@ struct hkCollisionInput;
 struct hkShapeCollectionFilter {
     virtual hkBool isCollisionEnabled(const hkCollisionInput& input, const hkCdBody& a, const hkCdBody& b,
                                       const hkShapeCollection& collection, u32 key) const = 0;
+    virtual ~hkShapeCollectionFilter() {}
 };
 
 // Collision input handed to every agent call (the third argument of the agent slots).

@@ -119,6 +119,6 @@ hkBool hkGenericConstraintData::isValid() const {
     return hkBool(true);
 }
 
-u32 hkGenericConstraintData::getType() const {
+int hkGenericConstraintData::getType() const {
     return 10;
 }

@@ -35,4 +35,8 @@ struct hkConstraintInstance : hkReferencedObject {
     const char* m_name;                              // 0x20
     u32 m_userData;                                  // 0x24
     void* m_internal;                                // 0x28
+
+    hkConstraintData* getData() const { return m_data; }
+    hkEntity* getEntityA() const { return m_entities[0]; }
+    hkEntity* getEntityB() const { return m_entities[1]; }
 };

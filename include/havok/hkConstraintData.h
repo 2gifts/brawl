@@ -29,7 +29,8 @@ struct hkConstraintInfoWithAtoms : hkConstraintInfo {
 
 // Base constraint description. Reflection layout: hkConstraintDataClass.cpp (size 0xC, userData at 0x8).
 // Virtual slot numbers follow the target vtable: slot 2 dtor, slot 3 calcStatistics (hkReferencedObject),
-// slots 4..8 are not yet identified, slot 9 is buildJacobian (checked against the bridge atom call thunk).
+// slot 4 isValid and slot 5 getType (the derived data vtables), slots 6..8 are not yet identified, slot 9 is
+// buildJacobian (checked against the bridge atom call thunk).
 struct hkConstraintData : hkReferencedObject {
     u32 m_userData; // 0x08
 
@@ -37,8 +38,8 @@ struct hkConstraintData : hkReferencedObject {
     hkConstraintData(hkFinishLoadedObjectFlag flag) {} // finish-loading ctor: the base ctors set refcount
     virtual ~hkConstraintData() {} // empty in the target (no base dtor call in the derived dtors)
 
-    virtual void unk04();
-    virtual void unk05();
+    virtual hkBool isValid() const;
+    virtual int getType() const; // 11 = the contact constraint (hkConstrainedSystemFilter skips those)
     virtual void unk06();
     virtual void unk07();
     virtual void unk08();

@@ -1750,8 +1750,6 @@ config.libs = [
             Object(NonMatching, "havok/hkContinuousSimulation.cpp", extra_cflags=["-Cpp_exceptions on"]),
             Object(NonMatching, "havok/hkDefaultToiResourceMgr.cpp", extra_cflags=["-Cpp_exceptions on"]),
             Object(NonMatching, "havok/hkConstrainedSystemFilter.cpp", extra_cflags=["-Cpp_exceptions on"]),
-            Object(NonMatching, "havok/hkGeometryUtility.cpp"),
-            Object(NonMatching, "havok/hk_constrained_system_filter.cpp"),
             Object(NonMatching, "havok/hkInertiaTensorComputer.cpp", extra_cflags=["-inline noauto"]),
             Object(NonMatching, "havok/hkFootPlacementIkSolver.cpp", extra_cflags=["-Cpp_exceptions on"]),
             Object(NonMatching, "havok/hkLookAtIkSolver.cpp", extra_cflags=["-Cpp_exceptions on"]),

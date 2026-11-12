@@ -49,7 +49,7 @@ void hkWorldOperationUtil::addPhantomBP(hkWorld* world, hkPhantom* phantom) {
             filter = reinterpret_cast<char*>(filter) + 8; // the collision filter interface sits 8 bytes in
         }
         at<hkTypedBroadPhaseDispatcher*>(world, 0x58)
-            ->addPairs(newPairs.begin(), newPairs.getSize(), (const hkCollisionFilterInterface0*)filter);
+            ->addPairs(newPairs.begin(), newPairs.getSize(), (const hkCollidableCollidableFilter*)filter);
     }
 }
 
@@ -87,7 +87,7 @@ void hkWorldOperationUtil::addEntityBP(hkWorld* world, hkEntity* entity) {
             filter = reinterpret_cast<char*>(filter) + 8;
         }
         at<hkTypedBroadPhaseDispatcher*>(world, 0x58)
-            ->addPairs(newPairs.begin(), newPairs.getSize(), (const hkCollisionFilterInterface0*)filter);
+            ->addPairs(newPairs.begin(), newPairs.getSize(), (const hkCollidableCollidableFilter*)filter);
     }
 }
 

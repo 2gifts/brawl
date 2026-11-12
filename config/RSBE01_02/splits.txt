@@ -3407,7 +3407,7 @@ havok/hkCollisionDispatcher.cpp:
 havok/hkGroupFilter.cpp:
 	extab       start:0x80008288 end:0x800082B0
 	extabindex  start:0x8000AF54 end:0x8000AF90
-	.text       start:0x802CD000 end:0x802CD568
+	.text       start:0x802CD000 end:0x802CD5A8
 	.ctors      start:0x80406638 end:0x8040663C
 
 havok/hkGroupFilterClass.cpp:
@@ -3429,7 +3429,7 @@ havok/hkCollisionFilterClass.cpp:
 havok/hkNullCollisionFilter.cpp:
 	extab       start:0x800082C0 end:0x800082D8
 	extabindex  start:0x8000AFA8 end:0x8000AFCC
-	.text       start:0x802CD66C end:0x802CD7E8
+	.text       start:0x802CD66C end:0x802CD828
 	.ctors      start:0x80406644 end:0x80406648
 
 havok/hkNullCollisionFilterClass.cpp:
@@ -4058,17 +4058,11 @@ havok/hkDefaultToiResourceMgr.cpp:
 havok/hkConstrainedSystemFilter.cpp:
 	extab       start:0x80009128 end:0x80009130
 	extabindex  start:0x8000BF8C end:0x8000BF98
-	.text       start:0x8032BD74 end:0x8032C304
+	.text       start:0x8032BD74 end:0x8032C35C
 	.ctors      start:0x80406764 end:0x80406768
 
-havok/hkGeometryUtility.cpp:
-	.text       start:0x8032C304 end:0x8032C344
-
-havok/hk_constrained_system_filter.cpp:
-	.text       start:0x8032C344 end:0x8032C42C
-
 havok/hkInertiaTensorComputer.cpp:
-	.text       start:0x8032C42C end:0x8032D42C
+	.text       start:0x8032C35C end:0x8032D42C
 
 havok/hkPhysicsDataClass.cpp:
 	.text       start:0x8032D42C end:0x8032D494
