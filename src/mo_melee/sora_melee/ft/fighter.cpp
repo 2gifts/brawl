@@ -1,3 +1,4 @@
+#define FT_FIGHTER_REFLECTOR_DTOR // BYTES: fighter.o holds the out-of-line soCollisionReflectorEventObserver destructor
 #define FT_FIGHTER_ANIMCMD_LONG // MATCH-ONLY: Fighter::notifyEventAnimCmd(long) overrides the StageObject slot
 #define FT_FIGHTER_ONINHALED_BOOL // MATCH-ONLY: Fighter::onInhaled returns true after the flag write
 #include <ft/fighter.h>
@@ -916,3 +917,5 @@ template class soEventObserver<soTurnEventObserver>;
 template class soEventObserver<soMotionEventObserver>;
 template class soEventObserver<soItemManageEventObserver>;
 template class soEventObserver<ftEntryEventObserver>;
+
+soCollisionReflectorEventObserver::~soCollisionReflectorEventObserver() {}
