@@ -42,6 +42,8 @@ void hkCollisionDispatcher::setEnableChecks(const hkBool& enable) {
     m_enableChecks = enable.m_bool;
 }
 
+#pragma push
+#pragma auto_inline off
 void hkCollisionDispatcher::disableDebugging() {
     if (m_buffers[0] != 0) {
         hkMemory::getInstance().deallocate(m_buffers[0]);
@@ -54,6 +56,19 @@ void hkCollisionDispatcher::disableDebugging() {
         m_buffers[3] = 0;
     }
 }
+#pragma pop
+
+// Releases the debug buffers and the contact manager factories; the shape inheritance array frees itself.
+hkCollisionDispatcher::~hkCollisionDispatcher() {
+    disableDebugging();
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (m_contactMgrFactory[i][j] != 0) {
+                m_contactMgrFactory[i][j]->removeReference();
+            }
+        }
+    }
+}
 
 void hkCollisionDispatcher::registerCollisionAgent(const hkAgentFuncs* funcs, int typeA, int typeB) {
     m_agentFuncs[m_numAgents] = *funcs;
@@ -64,4 +79,31 @@ void hkCollisionDispatcher::registerCollisionAgent(const hkAgentFuncs* funcs, in
         internalRegisterCollisionAgent(m_lookup590, m_numAgents, typeA, typeB, typeA, typeB, m_buffers[1], 0);
     }
     m_numAgents++;
+}
+
+#pragma push
+#pragma auto_inline off
+void hkCollisionDispatcher::updateHasAlternateType(hkShapeType primaryType, hkShapeType alternateType, int depth) {
+    m_hasAlternateType[primaryType] |= m_hasAlternateType[alternateType];
+    for (int i = 0; i < m_shapeInheritance.getSize(); i++) {
+        ShapeInheritance& si = m_shapeInheritance[i];
+        if (si.m_alternateType == primaryType) {
+            updateHasAlternateType(si.m_primaryType, si.m_alternateType, depth + 1);
+        }
+    }
+}
+#pragma pop
+
+void hkCollisionDispatcher::registerAlternateShapeType(hkShapeType primaryType, hkShapeType alternateType) {
+    for (int i = 0; i < m_shapeInheritance.getSize(); i++) {
+        const ShapeInheritance& si = m_shapeInheritance[i];
+        if (si.m_primaryType == primaryType && si.m_alternateType == alternateType) {
+            m_shapeInheritance.removeAtAndCopy(i);
+            i--;
+        }
+    }
+    updateHasAlternateType(primaryType, alternateType, 0);
+    ShapeInheritance& si = m_shapeInheritance.expandOne();
+    si.m_primaryType = primaryType;
+    si.m_alternateType = alternateType;
 }

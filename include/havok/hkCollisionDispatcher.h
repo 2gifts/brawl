@@ -1,5 +1,6 @@
 #pragma once
 
+#include <havok/hkArray.h>
 #include <havok/hkCollisionAgent.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkCdBody.h>
@@ -57,7 +58,7 @@ struct hkCollisionQualityInfo {
 };
 
 struct hkCollisionDispatcher : hkReferencedObject {
-    HK_DECLARE_REF_ALLOCATOR(0x1d)
+    HK_DECLARE_REF_ALLOCATOR(0x25) // hkWorld's constructor allocates 0x1C3C bytes as class 0x25; the dtor frees as 0x25
 
     int unk8; // 0x08 set by the constructor from its argument (HYPOTHESIS: a shared-object parameter)
     // 0x0C: 8 x 8 contact manager factories indexed by the two entities' material response types
@@ -92,9 +93,12 @@ struct hkCollisionDispatcher : hkReferencedObject {
 
     u8 m_enableChecks; // 0x1C14 set by setEnableChecks
     u8 unk1C15[0x1C18 - 0x1C15];
-    void* m_pairs;      // 0x1C18 pair table (8 bytes per entry), released by the destructor
-    int m_pairCount;    // 0x1C1C
-    u32 m_pairCapacity; // 0x1C20 HYPOTHESIS: bit 31 marks the pair table as not owned
+    // One entry per registerAlternateShapeType call: primaryType can also be handled as alternateType.
+    struct ShapeInheritance {
+        hkShapeType m_primaryType;   // 0x00
+        hkShapeType m_alternateType; // 0x04
+    };
+    hkArray<ShapeInheritance> m_shapeInheritance; // 0x1C18, released by the destructor
     void* m_buffers[4]; // 0x1C24..0x1C30 lookup buffers from the memory allocator; released by disableDebugging
 
     hkCollisionDispatcher(int unk8Value);
@@ -126,6 +130,12 @@ struct hkCollisionDispatcher : hkReferencedObject {
     }
 
     void setEnableChecks(const hkBool& enable);
+
+    // Ors the alternate type's bits into the primary type's mask, then repeats for every type that has the primary
+    // type as an alternate (depth is the recursion level).
+    void updateHasAlternateType(hkShapeType primaryType, hkShapeType alternateType, int depth);
+    // Records that primaryType can be treated as alternateType (a previous identical entry is removed first).
+    void registerAlternateShapeType(hkShapeType primaryType, hkShapeType alternateType);
     void disableDebugging();
 
     // Adds one agent registration for the shape type pair (typeA, typeB); symmetric entries are added when
