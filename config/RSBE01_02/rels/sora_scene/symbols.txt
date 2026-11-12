@@ -1,11 +1,11 @@
 __register_global_object = .text:0x00000000; // type:function size:0x1C scope:global
 __destroy_global_chain = .text:0x0000001C; // type:function size:0x54 scope:global
 scSystemRegisterScene__Fv = .text:0x00000070; // type:function size:0x39C
-fn_1_40C = .text:0x0000040C; // type:function size:0x58
-fn_1_464 = .text:0x00000464; // type:function size:0xC
-fn_1_470 = .text:0x00000470; // type:function size:0x200
-fn_1_670 = .text:0x00000670; // type:function size:0x8
-fn_1_678 = .text:0x00000678; // type:function size:0x10
+create__6scBootFv = .text:0x0000040C; // type:function size:0x58
+start__6scBootFv = .text:0x00000464; // type:function size:0xC
+process__6scBootFv = .text:0x00000470; // type:function size:0x200
+exit__6scBootFv = .text:0x00000670; // type:function size:0x8
+setModule__6scBootFv = .text:0x00000678; // type:function size:0x10
 setModule__7gfSceneFv = .text:0x00000688; // type:function size:0x4
 create__6scDemoFv = .text:0x0000068C; // type:function size:0x48
 start__6scDemoFv = .text:0x000006D4; // type:function size:0x10

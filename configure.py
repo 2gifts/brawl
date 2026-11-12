@@ -7052,6 +7052,7 @@ config.libs = [
         "cflags": cflags_rel,
         "host": False,
         "objects": [
+            Object(Matching, "mo_scene/sora_scene/sc_boot.cpp"),
             Object(Matching, "mo_scene/sora_scene/sc_demo.cpp"),
             Object(Matching, "mo_scene/sora_scene/sc_tutorial.cpp"),
             Object(Matching, "mo_scene/sora_scene/sc_staffroll.cpp"),
