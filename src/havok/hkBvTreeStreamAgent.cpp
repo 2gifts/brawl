@@ -184,19 +184,19 @@ void hkBvTreeStreamAgent::registerAgent(void* dispatcher) {
     reg.symmetricA = true;
     reg.symmetricB = true;
     ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&reg, HK_SHAPE_BV_TREE, HK_SHAPE_CONVEX);
-    reg.create = (hkAgentFunc)&hkBvTreeStreamAgent::createShapeBvAgent;
-    reg.staticGetPenetrations = (hkAgentFunc)hkBvTreeAgent::staticGetPenetrations;
-    reg.staticGetClosestPoints = (hkAgentFunc)hkBvTreeAgent::staticGetClosestPoints;
-    reg.staticLinearCast = (hkAgentFunc)hkBvTreeAgent::staticLinearCast;
-    reg.symmetricA = false;
-    reg.symmetricB = true;
-    ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&reg, HK_SHAPE_CONVEX, HK_SHAPE_BV_TREE);
+    hkAgentFuncs rev;
+    rev.create = (hkAgentFunc)&hkBvTreeStreamAgent::createShapeBvAgent;
+    rev.staticGetPenetrations = (hkAgentFunc)hkBvTreeAgent::staticGetPenetrations;
+    rev.staticGetClosestPoints = (hkAgentFunc)hkBvTreeAgent::staticGetClosestPoints;
+    rev.staticLinearCast = (hkAgentFunc)hkBvTreeAgent::staticLinearCast;
+    rev.symmetricA = false;
+    rev.symmetricB = true;
+    ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&rev, HK_SHAPE_CONVEX, HK_SHAPE_BV_TREE);
 }
 
 // Registers the agent for BV tree x convex list pairs in both orders.
 void hkBvTreeStreamAgent::registerConvexListAgent(void* dispatcher) {
     hkAgentFuncs reg;
-    hkAgentFuncs reverseReg;
     reg.create = (hkAgentFunc)&hkBvTreeStreamAgent::createBvTreeShapeAgent;
     reg.staticGetPenetrations = (hkAgentFunc)hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticGetPenetrations;
     reg.staticGetClosestPoints = (hkAgentFunc)hkSymmetricAgentLinearCast_13hkBvTreeAgent::staticGetClosestPoints;
@@ -204,6 +204,7 @@ void hkBvTreeStreamAgent::registerConvexListAgent(void* dispatcher) {
     reg.symmetricA = true;
     reg.symmetricB = true;
     ((hkCollisionDispatcher*)dispatcher)->registerCollisionAgent(&reg, HK_SHAPE_BV_TREE, HK_SHAPE_CONVEX_LIST);
+    hkAgentFuncs reverseReg;
     reverseReg.create = (hkAgentFunc)&hkBvTreeStreamAgent::createShapeBvAgent;
     reverseReg.staticGetPenetrations = (hkAgentFunc)hkBvTreeAgent::staticGetPenetrations;
     reverseReg.staticGetClosestPoints = (hkAgentFunc)hkBvTreeAgent::staticGetClosestPoints;

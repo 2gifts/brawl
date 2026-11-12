@@ -10,12 +10,12 @@
 
 void hkPredGskfAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs funcs;
-    funcs.symmetricA = 0;
-    funcs.symmetricB = 1;
     funcs.create = (hkAgentFunc)createPredGskfAgent;
     funcs.staticGetPenetrations = (hkAgentFunc)hkGskBaseAgent::staticGetPenetrations;
     funcs.staticGetClosestPoints = (hkAgentFunc)hkGskBaseAgent::staticGetClosestPoints;
     funcs.staticLinearCast = (hkAgentFunc)hkIterativeLinearCastAgent::staticLinearCast;
+    funcs.symmetricA = 0;
+    funcs.symmetricB = 1;
     dispatcher->registerCollisionAgent(&funcs, HK_SHAPE_CONVEX, HK_SHAPE_CONVEX);
 }
 

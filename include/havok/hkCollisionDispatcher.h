@@ -10,6 +10,8 @@
 // two symmetry flags. registerCollisionAgent copies it into the dispatcher's table (0x14 bytes per entry).
 typedef void (*hkAgentFunc)();
 struct hkAgentFuncs {
+    // HYPOTHESIS: a constructor clearing both flags; the dead clears fix the constant order of every registerAgent.
+    hkAgentFuncs() : symmetricA(false), symmetricB(false) {}
     hkAgentFunc create;                 // 0x00
     hkAgentFunc staticGetPenetrations;  // 0x04
     hkAgentFunc staticGetClosestPoints; // 0x08
