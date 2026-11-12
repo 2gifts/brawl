@@ -14,6 +14,8 @@
 #include <so/article/so_generate_article_manage_module.h>
 #include <so/item/so_item_manage_module_impl.h>
 #include <so/so_module_hyp.h>
+#include <so/turn/so_turn_module.h>
+#include <ft/ft_kinetic_energy.h>
 
 template <>
 inline void soEventObserver<soCollisionAbsorberEventObserver>::addObserverSub(s32 manageId, soCollisionAbsorberEventObserver* observer, s8 priority) {
@@ -919,3 +921,35 @@ template class soEventObserver<soItemManageEventObserver>;
 template class soEventObserver<ftEntryEventObserver>;
 
 soCollisionReflectorEventObserver::~soCollisionReflectorEventObserver() {}
+
+void Fighter::notifyEventTurn(float lr, float prevLr, soModuleAccesser* moduleAccesser) {
+    moduleAccesser->getStatusModule().onChangeLr(moduleAccesser, lr, prevLr);
+    if (static_cast<soTurnModule*>(moduleAccesser->m_enumerationStart->m_turnModule)->isExtern() == true) {
+        Vec3f reflection(-1.0f, 0.0f, 0.0f);
+        moduleAccesser->getKineticModule().reflectSpeed(&reflection, soKineticEnergy::AttributeFlag(1));
+        ftKineticEnergyMotion& motion = dynamic_cast<ftKineticEnergyMotion&>(*moduleAccesser->getKineticModule().getEnergy(0));
+        if (prevLr != motion.m_facing) {
+            motion.m_prevMotionSpeed.m_x = -motion.m_prevMotionSpeed.m_x;
+            motion.m_facing = prevLr;
+        }
+    }
+}
+
+void Fighter::notifyEventBeat() {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (moduleAccesser->getItemManageModule().getHaveItemKind(0) == 0x1b) {
+        int count = moduleAccesser->getWorkManageModule().getInt(0x1000001b);
+        if (count > 0) {
+            int remain = count - soValueAccesser::getConstantInt(moduleAccesser, 0x5a73, 0);
+            if (remain < 0) {
+                remain = 0;
+            }
+            moduleAccesser->getWorkManageModule().setInt(remain, 0x1000001b);
+        }
+    }
+    if (moduleAccesser->getWorkManageModule().isFlag(0x12000028) == true) {
+        int frame = moduleAccesser->getSlowModule().getWholeFrame();
+        int decrement = soValueAccesser::getConstantInt(moduleAccesser, 0x5a81, 0);
+        moduleAccesser->getSlowModule().setWholeFrame(frame - decrement);
+    }
+}
