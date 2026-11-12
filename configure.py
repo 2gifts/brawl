@@ -1820,6 +1820,8 @@ config.libs = [
             Object(Matching, "mo_fighter/ft_dedede/ft_dedede_status_uniq_process_special_waddledee_throw_pickup.cpp"),
             Object(NonMatching, "mo_fighter/ft_dedede/ft_dedede_status_uniq_process_final.cpp"),
             Object(NonMatching, "mo_fighter/ft_dedede/ft_dedede.cpp"),
+            Object(NonMatching, "mo_fighter/ft_dedede/ft_dedede_waddledee_search_impl.cpp"),
+            Object(NonMatching, "mo_fighter/ft_dedede/ft_dedede_waddledee_pick_transactor_impl.cpp"),
         ],
     },
     {
@@ -1844,6 +1846,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy_status_uniq_process_special_s_throw.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy_status_uniq_process_final.cpp"),
             Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy.cpp"),
+            Object(NonMatching, "mo_fighter/ft_diddy/ft_diddy_damage_transactor_impl.cpp"),
         ],
     },
     {
@@ -1936,6 +1939,8 @@ config.libs = [
             Object(Matching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_s.cpp"),
             Object(NonMatching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_ganon_kick.cpp"),
             Object(NonMatching, "mo_fighter/ft_ganon/ft_ganon.cpp"),
+            Object(NonMatching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_final.cpp"),
+            Object(NonMatching, "mo_fighter/ft_ganon/ft_ganon_kinetic_transactor.cpp"),
         ],
     },
     {
@@ -2001,6 +2006,8 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n_drink.cpp"),
             Object(NonMatching, "mo_fighter/ft_kirby/ft_kirby_status_uniq_process_final.cpp"),
             Object(NonMatching, "mo_fighter/ft_kirby/ft_kirby.cpp"),
+            Object(NonMatching, "mo_fighter/ft_kirby/ft_kirby_status_uniq_process_stone.cpp"),
+            Object(NonMatching, "mo_fighter/ft_kirby/ft_kirby_copy_ability_module.cpp"),
         ],
     },
     {
@@ -2212,6 +2219,8 @@ config.libs = [
             Object(Matching, "mo_fighter/ft_pikachu/ft_pikachu_status_uniq_process_skull_bash.cpp"),
             Object(Matching, "mo_fighter/ft_pikachu/ft_pikachu_status_uniq_process_thunder.cpp"),
             Object(Matching, "mo_fighter/ft_pikachu/ft_pikachu_status_uniq_process_vortex.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikachu/wn_pikachu_thunder.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikachu/wn_pikachu_cloud.cpp"),
         ],
     },
     {
@@ -2251,6 +2260,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_pikmin/ft_pikmin_status_uniq_process_special_hi.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/ft_pikmin_status_uniq_process_catch.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/ft_pikmin_status_uniq_process_catch_wait.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_damage_effector_impl.cpp"),
         ],
     },
     {
@@ -2336,6 +2346,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_samus/ft_samus_status_uniq_process_special_screw_attack.cpp"),
             Object(NonMatching, "mo_fighter/ft_samus/ft_samus_status_uniq_process_special_lw.cpp"),
             Object(NonMatching, "mo_fighter/ft_samus/ft_samus.cpp"),
+            Object(NonMatching, "mo_fighter/ft_samus/wn_szerosuit_armor.cpp"),
         ],
     },
     {
