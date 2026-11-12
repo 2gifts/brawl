@@ -67,7 +67,7 @@ void hkAabbPhantom::addOverlappingCollidable(hkCollidable* collidable) {
     event.m_collidable = collidable;
     event.m_handled = false;
     for (int i = m_overlapListeners.getSize() - 1; i >= 0; i--) {
-        m_overlapListeners[i]->overlapAdded(&event);
+        m_overlapListeners[i]->collidableAddedCallback(&event);
     }
     if (!event.m_handled) {
         m_overlappingCollidables.pushBack(collidable);
@@ -81,7 +81,7 @@ void hkAabbPhantom::removeOverlappingCollidable(hkCollidable* collidable) {
     event.m_collidable = collidable;
     event.m_handled = found >= 0;
     for (int i = m_overlapListeners.getSize() - 1; i >= 0; i--) {
-        m_overlapListeners[i]->overlapRemoved(&event);
+        m_overlapListeners[i]->collidableRemovedCallback(&event);
     }
     if (found >= 0) {
         m_overlappingCollidables.removeAt(found);

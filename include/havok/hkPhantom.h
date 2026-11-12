@@ -30,10 +30,12 @@ struct hkPhantomOverlapEvent {
     bool m_handled;             // 0x08
 };
 
-// Overlap listener interface (no virtual dtor: first virtual is at 0x08). HYPOTHESIS: names.
+// Overlap listener interface: the callbacks come first (0x08, 0x0C) and the virtual destructor last (0x10), as in
+// hkBroadPhaseBorder's secondary vtable (callback names from its map entries).
 struct hkPhantomOverlapListener {
-    virtual void overlapAdded(hkPhantomOverlapEvent* event) = 0;   // 0x08
-    virtual void overlapRemoved(hkPhantomOverlapEvent* event) = 0; // 0x0C
+    virtual void collidableAddedCallback(hkPhantomOverlapEvent* event) = 0;   // 0x08
+    virtual void collidableRemovedCallback(hkPhantomOverlapEvent* event) = 0; // 0x0C
+    virtual ~hkPhantomOverlapListener() {}                                    // 0x10
 };
 
 // Phantom (0x70 bytes). Layout from hkPhantomClass.cpp. Vtable slots from hkPhantom's and hkAabbPhantom's

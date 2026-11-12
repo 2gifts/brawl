@@ -13,6 +13,8 @@ struct hkPredGskfAgent : hkGskfAgent {
 
     // Registers the create/static-query functions for the convex x convex pair with the dispatcher.
     static void registerAgent(hkCollisionDispatcher* dispatcher);
-    // HYPOTHESIS: the third parameter is unused (as in hkGskfAgent::createGskfAgent).
-    static hkGskBaseAgent* createPredGskfAgent(hkCdBody* bodyA, hkCdBody* bodyB, void* unk2, hkContactMgr* contactMgr);
+    // Allocates a hkPredGskfAgent (0x80 bytes) when contactMgr is set, otherwise a hkGskBaseAgent (0x30 bytes).
+    // HYPOTHESIS: the input is unused (as in hkGskfAgent::createGskfAgent).
+    static hkGskBaseAgent* createPredGskfAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                               hkContactMgr* contactMgr);
 };

@@ -8,7 +8,13 @@
 #include <havok/hkWorldMaintenanceMgr.h>
 
 struct hkWorldOperationQueue;
-struct hkWorldDeletionListener;
+struct hkWorld;
+// Listener told when its world is deleted (virtual destructor first, then the callback: hkBroadPhaseBorder's
+// secondary vtable).
+struct hkWorldDeletionListener {
+    virtual ~hkWorldDeletionListener() {}
+    virtual void worldDeletedCallback(hkWorld* world) = 0;
+};
 struct hkWorldMemoryWatchDog;
 struct hkPhantom;
 struct hkAction;

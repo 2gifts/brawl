@@ -21,3 +21,11 @@ void hkPredGskfAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     funcs.staticLinearCast = (hkAgentFunc)hkIterativeLinearCastAgent::staticLinearCast;
     dispatcher->registerCollisionAgent(&funcs, HK_SHAPE_CONVEX, HK_SHAPE_CONVEX);
 }
+
+hkGskBaseAgent* hkPredGskfAgent::createPredGskfAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                     hkCollisionInput& input, hkContactMgr* contactMgr) {
+    if (contactMgr != 0) {
+        return new hkPredGskfAgent(bodyA, bodyB, contactMgr);
+    }
+    return new hkGskBaseAgent(bodyA, bodyB, contactMgr);
+}
