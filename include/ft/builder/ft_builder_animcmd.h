@@ -80,7 +80,12 @@ FT_DOL_CONTRACTIBLE_TABLE(acAnimCmdConvPtr);
 template <>
 class soArrayNull<const acAnimCmdConv*> : public soArray<const acAnimCmdConv*> {
 public:
+#ifdef FT_ANIMCMD_ARRAY_NULL_INLINE_CTOR
+    // The unit whose original inlines the constructor (it only stores the vtable pointer) defines the macro.
+    soArrayNull() { }
+#else
     soArrayNull();
+#endif
     virtual ~soArrayNull();
     virtual bool isNull() const;
     virtual const acAnimCmdConv*& at(s32 index);

@@ -22,6 +22,10 @@ typedef soMotionModuleBuildConfig<515, soMotionModuleImpl, 0, 1, soTransitionMod
 typedef soStatusModuleBuildConfig<299, soGeneralWorkBuildConfig<18, 14, 2>, 274, 13, soTransitionModuleBuildConfig<ftStatusTransitionTypeList> > ftPokeTrainerStatusModuleBuildConfig;
 typedef soGeneralWorkBuildConfig<76, 35, 3> ftPokeTrainerGeneralWorkBuildConfig;
 
+// HYPOTHESIS: the real builder is 0x3A68 bytes (ftPokeTrainerArticleManageModuleBuilder); the fighter keeps this stand-in because
+// the module sizes of the other builders are not exact yet and the fighter's own layout would no longer fit.
+typedef ftOpaqueGenerateArticleManageModuleBuilder<0x168, Fighter_PokeTrainer> ftPokeTrainerGenerateArticleManageModuleBuilder;
+
 class ftPokeTrainerBuildConfig : public ftCommonBuildConfig {
 public:
     typedef ftPokeTrainerInsideEventManageModuleBuildConfig InsideEventManageModuleBuildConfig;
@@ -36,10 +40,13 @@ public:
     // HYPOTHESIS: article storage is 0x168. The null builder occupies 4 bytes, and 0x164 is the gap
     // between this fighter's cancel module and the original. The ctor and dtor stay in the original
     // and are not defined here.
-    typedef ftOpaqueGenerateArticleManageModuleBuilder<0x168, Fighter_PokeTrainer> GenerateArticleManageModuleBuilder;
+    typedef ftPokeTrainerGenerateArticleManageModuleBuilder GenerateArticleManageModuleBuilder;
 };
 
 class ftPokeTrainer;
+#ifdef FT_POKETRAINER_ARTICLE_POOLS
+#include <ft/poke/ft_poke_trainer_article_pools.h>
+#else
 class wnPokeTrainerMBall;
 
 // The Final Smash article of the trainer (wn_poke_trainer_final.cpp). HYPOTHESIS: only the position query is known here.
@@ -47,6 +54,7 @@ class wnPokeTrainerFinal : public StageObject {
 public:
     Vec3f getFinalPokemonPos(int index);
 };
+#endif
 
 // Sends the entry events (a Pokemon dies, a Pokemon starts, ...) to the observers of the entry. The trainer owns one for the
 // Pokemon it tells about its own update.
@@ -140,6 +148,7 @@ public:
 
     Fighter* getPartner();
     static bool activeArticle(wnPokeTrainerMBall* weapon, soModuleAccesser* acc);
+    static bool shootArticle(wnPokeTrainerMBall* weapon, soModuleAccesser* acc);
     void setChange(int changeKind);
     void sendPartnerPosEvents();
     void reqAdvFollowEffect(Vec2f* pos);
