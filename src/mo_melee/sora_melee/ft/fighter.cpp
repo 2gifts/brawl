@@ -911,3 +911,8 @@ void Fighter::updateRoughPos() {
     Vec3f pos = m_moduleAccesser->getModelModule().getNodeGlobalPosition(nodeId, false);
     posture.setPrevRoughPos(&pos);
 }
+
+template class soEventObserver<soTurnEventObserver>;
+template class soEventObserver<soMotionEventObserver>;
+template class soEventObserver<soItemManageEventObserver>;
+template class soEventObserver<ftEntryEventObserver>;
