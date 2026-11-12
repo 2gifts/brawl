@@ -23,12 +23,7 @@ hkAgentNnEntry* hkWorldAgentUtil::addAgent(hkLinkedCollidable* collA, hkLinkedCo
                                            const hkProcessCollisionInput& input) {
     hkEntity* entityA = (hkEntity*)((char*)collA + collA->m_ownerOffset);
     hkEntity* entityB = (hkEntity*)((char*)collB + collB->m_ownerOffset);
-    int needMerge = 0;
-    int bothMovable = entityA->isFixed() == false && entityB->isFixed() == false;
-    if (bothMovable && entityA->m_simulationIsland != entityB->m_simulationIsland) {
-        needMerge = 1;
-    }
-    if (needMerge) {
+    if (entityA->isFixed() == false && entityB->isFixed() == false && entityA->m_simulationIsland != entityB->m_simulationIsland) {
         hkWorldOperationUtil::mergeIslands(entityA->m_world, entityA, entityB);
     }
     // the agent goes to an island that is not the fixed one when there is one
