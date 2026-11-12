@@ -116,8 +116,8 @@ void ftPeachKineticTransactor::changeKineticSub(const soIntToType<0x64>&, void* 
     gravity->m_gravity = -soValueAccesser::getConstantFloat(acc, 0xfb8, 0);
 }
 
-void ftPeachKineticTransactor::changeKineticSub1(const soIntToType<0x65>&, void* pools, Vec2f*, soModuleAccesser* acc) {
-    ftKineticTransactor::changeKineticImpl(0x12);
+void ftPeachKineticTransactor::changeKineticSub1(const soIntToType<0x65>&, void* pools, Vec2f* speed, soModuleAccesser* acc) {
+    ftKineticTransactor::changeKineticImpl(0x12, pools, speed, acc);
     ftKineticEnergyMotion* motion = getEnergy(pools, soIntToType<0>());
     motion->m_speedMul = soValueAccesser::getConstantFloat(acc, 0xfb6, 0);
 }
