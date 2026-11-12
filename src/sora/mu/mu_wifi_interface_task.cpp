@@ -13,6 +13,7 @@
 #include <nt/nt_report.h>
 #include <string.h>
 #include <nt/nt_match.h>
+#include <nt/nt_etc_global.h>
 #include <ip/ip_switch.h>
 #include <gm/gm_global.h>
 #include <mt/mt_prng.h>
@@ -2144,4 +2145,148 @@ void netMinReport(const char* fmt, ...) {
     va_start(args, fmt);
     OSVReport(fmt, args);
     OSUnlockMutex(&NtReport::s_ReportMutex);
+}
+
+// HYPOTHESIS: isPermitUploadWatching takes no arguments
+extern "C" bool fn_800D99D8() {
+    char* base = lbl_80457158;
+    if (!NtBase::isParent()) {
+        return false;
+    }
+    if (!nteGlobal::isWatchingEnableTime()) {
+        netReport(base + 0x28E4);
+        return false;
+    }
+    if (!nteGlobal::isPermitWatchingGlobal()) {
+        netReport(base + 0x290C);
+        return false;
+    }
+    netReport(base + 0x294C);
+    return true;
+}
+
+// muWifiInterfaceTask::isReadyNextGame (the map name); kept under the stand-in name.
+extern "C" bool fn_800D1BC8(muWifiInterfaceTask* self) {
+    int detail;
+    if (fn_800CBCB0(self, &detail)) { return true; }
+    if (!fn_8014592C(lbl_805A03A8)) { return false; }
+    for (u8 aid = 0; aid < 4; aid++) {
+        bool live;
+        if (aid >= 4) {
+            live = false;
+        } else {
+            live = self->getSafeParentAIDInfo()->unk68[aid] == 1;
+        }
+        if (live && (s8)self->m_aidInfos[aid].unk55 == 4 && !((self->m_aidInfos[aid].unk56_b3 >> 2) & 1)) { return false; }
+    }
+    return true;
+}
+
+void muWifiInterfaceTask::setSelCharGameRule(const void* rule, bool send) {
+    const u8* bytes = static_cast<const u8*>(rule);
+    u8 aid = Network::getMyAID();
+    if (aid == 0xFF) {
+        aid = 4;
+    }
+    muWifiAIDInfo* own = &m_aidInfos[aid];
+    own->unk64[0] = bytes[0];
+    own->unk64[1] = bytes[1];
+    own->unk64[2] = bytes[2];
+    own->unk64[3] = bytes[3];
+    own->unk7DData[0] = bytes[0];
+    own->unk7DData[1] = bytes[1];
+    own->unk7DData[2] = bytes[2];
+    own->unk7DData[3] = bytes[3];
+    muWifiAIDInfo* parent;
+    aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        parent = NULL;
+    } else {
+        parent = &m_aidInfos[aid];
+    }
+    if (parent != NULL) {
+        parent->unk7DData[0] = bytes[0];
+        parent->unk7DData[1] = bytes[1];
+        parent->unk7DData[2] = bytes[2];
+        parent->unk7DData[3] = bytes[3];
+    }
+    if (send) {
+        aid = Network::getMyAID();
+        if (aid == 0xFF) {
+            aid = 4;
+        }
+        reinterpret_cast<u8*>(&m_aidInfos[aid])[0x56] |= 1;
+        fn_800D0AE0(this);
+        fn_80145B98(lbl_805A03A8, 0xFE);
+    }
+}
+
+extern const char lbl_80458C74[];
+extern const char lbl_80458CA0[];
+
+// muWifiInterfaceTask::sendInitialAIDInfo (the map name); kept under the stand-in name.
+extern "C" void fn_800D53D4(muWifiInterfaceTask* self, u32 aid) {
+    if (self->unkFCC_b24 == 4) {
+        if (NtBase::isParent()) {
+            netReport(lbl_80458C74);
+            if (aid < 4) {
+                u8 parentAid = Network::getParentAID();
+                muWifiAIDInfo* parent;
+                if (parentAid == 0xFF) {
+                    u8 myAid = Network::getMyAID();
+                    if (myAid == 0xFF) {
+                        myAid = 4;
+                    }
+                    parent = &self->m_aidInfos[myAid];
+                } else {
+                    parent = &self->m_aidInfos[parentAid];
+                    if (!parent->unk78_b7) {
+                        u8 myAid = Network::getMyAID();
+                        if (myAid == 0xFF) {
+                            myAid = 4;
+                        }
+                        parent = &self->m_aidInfos[myAid];
+                    }
+                }
+                parent->unk68[aid] = 3;
+            }
+        } else {
+            netReport(lbl_80458CA0);
+        }
+        fn_80145B98(lbl_805A03A8, aid);
+    }
+}
+
+// muWifiInterfaceTask::requestConnection (the map name); kept under the stand-in name.
+extern "C" bool fn_800D54DC(muWifiInterfaceTask* self) {
+    char* base = lbl_80457158;
+    u8 aid = Network::getMyAID();
+    if (aid == 0xFF) {
+        aid = 4;
+    }
+    if (aid == 4) {
+        netReport(base + 0x1B78);
+        return false;
+    }
+    muWifiAIDInfo* parent;
+    aid = Network::getParentAID();
+    if (aid == 0xFF) {
+        parent = NULL;
+    } else {
+        parent = &self->m_aidInfos[aid];
+    }
+    if (parent == NULL) {
+        netReport(base + 0x1B90);
+        return false;
+    }
+    self->unkFCC_b24 = 1;
+    netReport(base + 0x1BB0);
+    aid = Network::getMyAID();
+    if (aid == 0xFF) {
+        aid = 4;
+    }
+    reinterpret_cast<u8*>(&self->m_aidInfos[aid])[0x56] |= 1;
+    fn_800D0AE0(self);
+    fn_80145B98(lbl_805A03A8, 0xFE);
+    return true;
 }
