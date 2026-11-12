@@ -16,10 +16,13 @@ struct hkContactPoint {
     hkVector4& getPosition();
     // 0x802947F0 (map: hkContactPoint::getPosition, hkSimpleContactConstraintInfo.o). HYPOTHESIS: the const overload.
     const hkVector4& getPosition() const;
-    hkVector4* getNormal();
+    const hkVector4& getNormal() const;
     // Returns the normal at 0x10; hkCollideCapsuleUtilCapsVsTri writes through it (non-const).
     hkVector4& getSeparatingNormal();
-    hkReal getDistance();
+    hkReal getDistance() const;
+    // Out-of-line copy in hkSimpleContactConstraintInfo.o (0x80294804, not written yet): updates props'
+    // m_internalDataA from the distance and returns the contact rhs. HYPOTHESIS: the parameter meanings.
+    hkReal calculateRhs(struct hkContactPointProperties* props, int* unused, hkReal distance, hkReal deltaTime) const;
     // Added by the hkCollideCapsuleUtil unit: writes the w component of the normal (the contact distance).
     void setDistance(hkReal distance);
 };

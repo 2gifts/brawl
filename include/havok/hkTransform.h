@@ -29,7 +29,18 @@ struct hkTransform {
 
     // Out-of-line copy (a bare blr) in hkPoweredChainData.o.
     const hkRotation& getRotation() const { return m_rotation; }
+    // Column i of the rotation (out-of-line copy in hkSimpleContactConstraintInfo.o).
+    const hkVector4& getColumn(int i) const { return (&m_rotation.m_col0)[i]; }
+    // The identity transform in .data (out-of-line copy in hkSimpleContactConstraintInfo.o).
+    static inline const hkTransform& getIdentity();
 };
+
+// The identity transform (unnamed in .data; hkMathUtil reads its rotation as an hkMatrix3).
+extern hkMatrix3 lbl_804864F0;
+
+inline const hkTransform& hkTransform::getIdentity() {
+    return (const hkTransform&)lbl_804864F0;
+}
 
 inline void hkVector4::_setTransformedPos(const hkTransform& t, const hkVector4& v) {
     const hkRotation& r = t.m_rotation;

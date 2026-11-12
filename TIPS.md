@@ -118,6 +118,18 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
   Seen: `hkPredGskAgent3::process`, `hkPredGskCylinderAgent3::process` (unit fully exact),
   `hkRigidMotionUtilApplyForcesAndStep` / `ApplyAccumulators` (the `hkEnum<MotionType, u8>` conversion and
   `hkAddByteOffset<hkMotion>` copies). (2026-11-11) **HIGH**
+- **More notes on writing `dont_inline` Havok functions (2026-11-12):**
+  a float literal that the target keeps in a saved register for several calls (`lfs f26, lit` once, then `fmr f1, f26`
+  before each call) is a plain non-const local (`hkReal realMax = HK_REAL_MAX;`); a literal or a `const` local is
+  re-loaded at every call. A loop that walks several arrays with separate saved pointers in the target (`mr r24, r23`,
+  `addi r22, r1, 0xf0`, `addi r21, r1, 0x10`, each bumped at the bottom) was written with pointers; the index form
+  shares one offset register between arrays of the same stride. Which saved register each pointer gets follows the
+  declaration order (first declared = highest). The accessor copies name const-ness: a copy the function writes through
+  is the non-const overload, so check the callers before trusting a map-derived `CFv`/`Fv` label (hkContactPoint:
+  getPosition at 0x802F2ECC is the non-const one). Seen: `hkCollideCapsuleUtilCapsVsTri`. **MED**
+- **`bge body; bge body; b exit` in front of a long block (where `blt exit` would be the obvious form) is an early return
+  folded into an earlier test:** `if ((mask0 & mask1) || (a < -m && b < -m)) return;` gave the target's branches; the two
+  float tests as their own `if (...) return;` give `blt`. Seen: `hkCollideCapsuleUtilCapsVsTri`. **MED**
 - **A callee-saved register order that puts a walking pointer after the loop counter although it is a parameter:**
   copy the parameter into a local just before the loop (`hkVelocityAccumulator* accumulator = accumulators;`); the
   copy is coloured after the parameters and before the counter declared in the `for`. Seen:

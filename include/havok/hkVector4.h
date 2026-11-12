@@ -17,6 +17,17 @@ struct hkRotation;
 struct hkQuaternion;
 struct hkTransform;
 
+// Reciprocal square root: the hardware estimate refined by one Newton step, +infinity for x <= 0 (the form
+// inlined by hkVector4::length3 and normalize3).
+static inline hkReal hkVector4_sqrtInverse(hkReal x) {
+    if (x <= 0.0f) {
+        u32 bits = 0x7f800000;
+        return *(hkReal*)&bits;
+    }
+    hkReal r = (hkReal)__frsqrte(x);
+    return (0.5f * r) * -(r * (x * r) - 3.0f);
+}
+
 // 16-byte aligned 4-float vector (x, y, z, w). Layout from the hk*Class reflection units.
 // Member names are the usual Havok names for x/y/z/w (HYPOTHESIS: the original names are not in the image).
 struct hkVector4 {
@@ -181,10 +192,16 @@ struct hkVector4 {
     hkReal& operator()(int i) { return (&x)[i]; }
     hkSimdReal lengthSquared3() const { return x * x + y * y + z * z; }
     hkSimdReal lengthSquared4() const { return dot3(*this) + w * w; }
-    hkSimdReal length3() const { return sqrtf(lengthSquared3()); }
+    // 1 / (approximate reciprocal square root): the out-of-line copy in hkSimpleContactConstraintInfo.o.
+    hkSimdReal length3() const { return 1.0f / hkVector4_sqrtInverse(lengthSquared3()); }
+    // All four lanes are scaled; a zero vector stays zero (out-of-line copy in hkSimpleContactConstraintInfo.o).
     void normalize3() {
-        hkReal inv = 1.0f / sqrtf(dot3(*this));
-        set(x * inv, y * inv, z * inv, w);
+        hkReal lenSq = lengthSquared3();
+        hkReal inv = 0.0f;
+        if (0.0f != lenSq) {
+            inv = hkVector4_sqrtInverse(lenSq);
+        }
+        mul4(inv);
     }
 
     // Transforms by a rigid transform / rotation. Asm-verified in src/havok/hkVector4.cpp (once matched).

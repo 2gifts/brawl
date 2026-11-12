@@ -137,7 +137,7 @@ void hkCollideCapsuleUtilCapsVsTri(const hkVector4* capsAPoints, hkReal capsARad
                         hkVector4 cp;
                         cp.setInterpolate4(capsAPoints[0], capsAPoints[1], f);
                         hkReal d = -(hkMath::sqrt)(distSq);
-                        points->getPosition().setAddMul4(cp, *points->getNormal(), triBRadius - d);
+                        points->getPosition().setAddMul4(cp, points->getNormal(), triBRadius - d);
                         points->setDistance(d - radiusSum);
                     }
                 }
