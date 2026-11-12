@@ -58,6 +58,85 @@ void hkBoxBoxUtils::selectIfGT3(hkVector4& dst, const hkReal& value, const hkVec
     dst.z = (cond.z > threshold) ? value : dst.z;
 }
 
+// The 12 box edges keep a 2-bit count each in an int (edge e at bits 2e, 2e+1); a count stops at 2.
+static inline void addEdge(int& edgeMask, int edge) {
+    int bit = 1 << (edge * 2);
+    if (!((bit << 1) & edgeMask)) {
+        edgeMask += bit;
+    }
+}
+
+// Axis of the face plane bit (0x80, 0x40, 0x20) of getMaxPlaneMask3.
+static inline int getAxisFromPlaneMask(int planeMask) {
+    int bits = planeMask >> 4;
+    if (bits & 8) {
+        return 0;
+    }
+    return (bits & 4) ? 1 : 2;
+}
+
+// The edges of a box vertex (bits 0x80/0x40/0x20 of the feature id give the signs) that do not lie in the face
+// orthogonal to axis.
+static inline void addVertexEdges(int& edgeMask, int featureId, int axis) {
+    int bits = featureId >> 4;
+    int x = !(bits & 8);
+    int y = !(bits & 4);
+    int z = !(bits & 2);
+    if (axis != 0) {
+        addEdge(edgeMask, y + z * 2);
+    }
+    if (axis != 1) {
+        addEdge(edgeMask, x + z * 2 + 4);
+    }
+    if (axis != 2) {
+        addEdge(edgeMask, x + y * 2 + 8);
+    }
+}
+
+// The edge feature id: direction in the low nibble, the signs of the other two axes in 0x80/0x40/0x20.
+static inline void addEdgeFeature(int& edgeMask, int featureId) {
+    int dir = featureId & 0xf;
+    int bits = featureId >> 4;
+    int x = !(bits & 8);
+    int y = !(bits & 4);
+    int z = !(bits & 2);
+    if (dir == 0) {
+        addEdge(edgeMask, y + z * 2);
+    } else if (dir == 1) {
+        addEdge(edgeMask, x + z * 2 + 4);
+    } else {
+        addEdge(edgeMask, x + y * 2 + 8);
+    }
+}
+
+void hkBoxBoxCollisionDetection::checkCompleteness(hkBoxBoxManifold& manifold, int planeMaskA, int planeMaskB) {
+    int numPoints = manifold.getNumPoints();
+    if (numPoints < 3) {
+        return;
+    }
+    if (manifold.unk20 >= 4) {
+        manifold.m_complete = true;
+        return;
+    }
+    int axisA = getAxisFromPlaneMask(planeMaskA);
+    int axisB = getAxisFromPlaneMask(planeMaskB);
+    int edgesA = 0;
+    int edgesB = 0;
+    for (int i = 0; i < numPoints; i++) {
+        const hkBoxBoxManifold::Point& point = manifold.m_points[i];
+        if (point.unk0 <= 2) {
+            addVertexEdges(edgesB, point.unk1, axisB);
+        } else if (point.unk0 <= 6) {
+            addVertexEdges(edgesA, point.unk1, axisA);
+        } else {
+            addEdgeFeature(edgesA, point.unk0);
+            addEdgeFeature(edgesB, point.unk1);
+        }
+    }
+    int open = (edgesA & 0x555555) > 0 || (edgesB & 0x555555) > 0;
+    manifold.m_complete = open == 0;
+}
+
 int hkBoxBoxManifold::getNumPoints() const {
     return m_numPoints;
 }
@@ -70,6 +149,31 @@ hkBool hkBoxBoxManifold::isComplete() const {
     return m_complete;
 }
 
+void hkBoxBoxCollisionDetection::tryToAddPointOnEdge(hkBoxBoxManifold& manifold, int edgeA, int edgeB, int nextA,
+                                                     int nextB, const hkVector4& normalA, const hkVector4& normalB,
+                                                     hkReal minDist) {
+    hkVector4 dirB;
+    hkVector4 dirA;
+    dirA = normalA;
+    dirA(edgeA) = 1.0f;
+    dirB = normalB;
+    hkFeatureContactPoint fcp;
+    dirB(edgeB) = 1.0f;
+    int maskA = dirA.compareLessThanZero4() & 0xe;
+    int maskB = dirB.compareLessThanZero4() & 0xe;
+    fcp.m_featureIdA = edgeA | 0x10 | (maskA << 4);
+    fcp.m_featureIdB = edgeB + ((maskB ^ 0xe) << 4);
+    addAdditionalEdgeHelper(manifold, fcp, minDist);
+    int bitA = 1 << (4 + (nextA == 0 ? 3 : (nextA == 1 ? 2 : (nextA == 2 ? 1 : 0))));
+    int bitB = 1 << (4 + (nextB == 0 ? 3 : (nextB == 1 ? 2 : (nextB == 2 ? 1 : 0))));
+    fcp.m_featureIdA ^= bitA;
+    addAdditionalEdgeHelper(manifold, fcp, minDist);
+    fcp.m_featureIdB ^= bitB;
+    addAdditionalEdgeHelper(manifold, fcp, minDist);
+    fcp.m_featureIdA ^= bitA;
+    addAdditionalEdgeHelper(manifold, fcp, minDist);
+}
+
 void hkBoxBoxCollisionDetection::setvdProj(const hkRotation& bRa, int i, int j, hkVector4& out) {
     hkVector4 a;
     a.setMul4(m_dinA(j), bRa.getColumn(i));
@@ -77,6 +181,41 @@ void hkBoxBoxCollisionDetection::setvdProj(const hkRotation& bRa, int i, int j, 
     b.setMul4(m_dinA(i), bRa.getColumn(j));
     out.setSub4(a, b);
     out.setAbs4(out);
+}
+
+hkBool hkBoxBoxCollisionDetection::calculateClosestPoint(hkContactPoint& contact) {
+    hkBoxBoxManifold manifold;
+    hkFeatureContactPoint fcp;
+    hkBool found = false;
+    initWorkVariables();
+    if (!checkIntersection(m_tolerance4)) {
+        hkFeaturePointCache cache;
+        if (findClosestPoint(manifold, fcp, cache) == 2) {
+            found = true;
+            hkProcessCdPoint point;
+            if (cache.m_featureIndex <= 2) {
+                point.m_contact.m_position._setTransformedPos(*m_wTb, cache.unk10);
+                point.m_contact.m_normal.setMul4(-cache.m_normalScale, m_wTa->getColumn(fcp.m_featureIdA));
+                point.m_contact.m_normal.w = cache.m_distance;
+                point.m_contactPointId = fcp.m_contactPointId;
+            } else if (cache.m_featureIndex <= 6) {
+                point.m_contact.m_position._setTransformedPos(*m_wTa, cache.unk0);
+                point.m_contact.m_normal.setMul4(-cache.m_normalScale, m_wTb->getColumn(fcp.m_featureIdA - 4));
+                point.m_contact.m_normal.w = cache.m_distance;
+                point.m_contactPointId = fcp.m_contactPointId;
+            } else {
+                point.m_contact.m_position._setTransformedPos(*m_wTa, cache.unk0);
+                point.m_contact.m_normal._setRotatedDir(m_wTa->getRotation(), cache.m_normal);
+                point.m_contact.m_normal.w = cache.m_distance;
+                point.m_contactPointId = fcp.m_contactPointId;
+            }
+            if (fcp.m_featureIdA > 2) {
+                point.m_contact.m_position.addMul4(-point.m_contact.m_normal.w, point.m_contact.m_normal);
+            }
+            contact = point.m_contact;
+        }
+    }
+    return found;
 }
 
 void hkBoxBoxCollisionDetection::initWorkVariables() {
@@ -89,10 +228,10 @@ void hkBoxBoxCollisionDetection::calcManifoldNormal(hkVector4& normal, const hkF
     hkSimdReal dist;
     if (cache.m_featureIndex <= 2) {
         normal.setZero4();
-        dist = cache.m_distance;
+        dist = cache.m_normalScale;
         normal(fcp.m_featureIdA) = -dist;
     } else if (cache.m_featureIndex <= 6) {
-        dist = cache.m_distance;
+        dist = cache.m_normalScale;
         normal.setMul4(-dist, m_aTb.getRotation().getColumn(fcp.m_featureIdA - 4));
     } else {
         normal = cache.m_normal;
@@ -358,3 +497,9 @@ void hkBoxBoxCollisionDetection::findAdditionalManifoldPoints(hkBoxBoxManifold& 
 }
 
 #pragma pop
+
+// Function bodies below are taken from https://github.com/jj-link/brawl.
+
+extern "C" void fn_80305AD4(unsigned char* r3, unsigned char* r4) {
+    *r3 = *r4;
+}

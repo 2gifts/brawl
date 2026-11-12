@@ -5,6 +5,7 @@
 #include <havok/hkCollisionAgent.h>
 
 struct hkProcessCollisionOutput;
+struct hkContactPoint;
 
 // Box-box collision detector (hkBoxBoxCollisionDetection.o). A stack object built by the box agents.
 // Layout from the unit's functions (asm); HYPOTHESIS: the member names (Havok style).
@@ -15,8 +16,8 @@ struct hkBoxBoxCollisionDetection {
         hkVector4 unk0;        // 0x00 not identified
         hkVector4 unk10;       // 0x10 not identified
         hkVector4 m_normal;    // 0x20 separating normal (edge-edge case)
-        hkReal m_distance;     // 0x30 distance along the separating axis
-        hkReal unk34;          // 0x34 not identified
+        hkReal m_normalScale;  // 0x30 the face normal is the face axis scaled by -m_normalScale
+        hkReal m_distance;     // 0x34 contact distance (the w of the contact normal)
         int m_featureIndex;    // 0x38 0..2 face of A, 3..6 face of B, above: edge-edge
         int unk3C;             // 0x3C not identified
 
@@ -56,5 +57,7 @@ struct hkBoxBoxCollisionDetection {
     void tryToAddPointFaceB(hkBoxBoxManifold& manifold, hkFeatureContactPoint fcp, u16 planeMask, hkReal minDist);
     void tryToAddPointOnEdge(hkBoxBoxManifold& manifold, int edgeA, int edgeB, int nextA, int nextB,
                              const hkVector4& normalA, const hkVector4& normalB, hkReal minDist);
+    void addAdditionalEdgeHelper(hkBoxBoxManifold& manifold, hkFeatureContactPoint& fcp, hkReal minDist);
+    hkBool calculateClosestPoint(hkContactPoint& contact);
     void checkCompleteness(hkBoxBoxManifold& manifold, int planeMaskA, int planeMaskB);
 };

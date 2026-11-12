@@ -45,8 +45,9 @@ struct hkBoxBoxManifold {
     void setComplete(const hkBool& complete);
     hkBool isComplete() const;
 
-    // Adds a point unless a point with the same feature bytes exists. Returns the new index, or -1.
+    // Adds a point unless a point with the same feature bytes exists. Returns the new index, or -1. key is not
+    // const: the copy into m_points keeps its loads and stores in source order (they may alias).
     // HYPOTHESIS: the two leading parameters are unused by the original code (they are passed but never read).
-    int addPoint(int unk4, int unk8, const Point* key);
+    int addPoint(int unk4, int unk8, Point* key);
     void removePoint(int index);
 };

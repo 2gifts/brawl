@@ -135,6 +135,25 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
   propagation-off mode first: an `hkSimdReal` local (the normal's `lengthSquared3()`, reused for two tests) lined up all
   saved registers there, and an `extrwi.` test of a compare is a `bool` local in that mode. Seen:
   `hkSimpleContactConstraintDataBuildJacobian` (`src/havok/hkSimpleContactConstraintInfo.cpp`). **MED**
+- **Reading a `dont_inline` function's call order back into source (2026-11-12):** with out-of-line accessors in
+  both operands, MWCC evaluates the right operand of a binary operator first when both sides weigh the same, and the
+  heavier side first otherwise; `set()` takes its arguments right to left. A target that calls `r(2)` then `M(1,2)`,
+  then `r(1)`, `M(2,2)`, then `M(0,1)`/`r(0)` and `M(0,0)`/`r(1)` is `M(2,2)*r(1) + M(1,2)*r(2) + M(0,1)*r(0) +
+  M(0,0)*r(1)` (the asm operand order of each `fmuls`/`fmadds` is the source order). Such functions also emit the
+  implicit copy constructors of `hkVector4` and `hkBool` as weak copies (`__ct__9hkVector4FRC9hkVector4`,
+  `__ct__6hkBoolFRC6hkBool`), so no user copy constructor is needed. `!b` on an `hkBool` calls our `operator!`;
+  where the target calls `operator bool` and branches, write `!(bool)b`. Seen: `hkBoxBoxCollisionDetection`
+  `checkIntersection`/`calcManifold` (`src/havok/hkBoxBoxCollisionDetection.cpp`). **HIGH**
+- **Loads kept after stores they could be hoisted over (a 4-float copy that alternates `lfs`/`stfs`, or a member read
+  after a `setZero4`): the source operand is reached through a non-const reference or pointer.** MWCC treats data read
+  through a `const` reference as not aliased by stores through other pointers and schedules those loads early; a
+  non-const parameter keeps source order. Seen: `hkBoxBoxCollisionDetection::calcManifoldNormal` (non-const
+  `hkFeaturePointCache&`, plus an `hkSimdReal` local for the column offset), `hkBoxBoxManifold::addPoint` (non-const
+  key). **MED**
+- **A flag set to 1 on a loop's break path and to 0 only after the loop falls through, then tested with `extsb.`:**
+  an inline helper that returns `hkBool` from inside the loop (`return true;` / `return false;` after it). A local flag
+  initialised before the loop gives `li rX, 0` up front and `cmpwi`. Seen: `findFeaturePair` in
+  `src/havok/hkBoxBoxManifold.cpp`; the same inlined search shows up in the box-box `tryToAddPoint*` functions. **MED**
 - **A u16 accessor result added to an int without `clrlwi rX, rY, 16` in the target: the accessor returns `int`**
   (its `lhz; blr` body is the same). Seen: `hkContactPointMaterial::getFriction8_8`. **MED**
 - **Before changing a widely inlined header body for one out-of-line copy, compile every Havok unit with the variant
