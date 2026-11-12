@@ -144,6 +144,13 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
   `__ct__6hkBoolFRC6hkBool`), so no user copy constructor is needed. `!b` on an `hkBool` calls our `operator!`;
   where the target calls `operator bool` and branches, write `!(bool)b`. Seen: `hkBoxBoxCollisionDetection`
   `checkIntersection`/`calcManifold` (`src/havok/hkBoxBoxCollisionDetection.cpp`). **HIGH**
+- **Dead stack copies of a transform in reverse column order (col0 at the highest address) right before an inline
+  constructor's member stores: the member's copy goes through four `hkVector4` temporaries** (`r0..r3 = columns`, then
+  assigned). Seen only in propagation-off callers. Put the copy in a member-local type (`hkBoxBoxTransform` in
+  `include/havok/hkBoxBoxCollisionDetection.h`); as a global `hkTransform` copy constructor it breaks other units
+  (hkTransformAgent create functions). An `extrwi rX, rY, 8, 19` after `cntlzw` (the `== 0` result masked to a byte)
+  is an `hkBool` returned by value from an inline function. Seen: `hkBoxBoxAgent::processCollision` and the static
+  queries. (2026-11-12) **MED**
 - **Loads kept after stores they could be hoisted over (a 4-float copy that alternates `lfs`/`stfs`, or a member read
   after a `setZero4`): the source operand is reached through a non-const reference or pointer.** MWCC treats data read
   through a `const` reference as not aliased by stores through other pointers and schedules those loads early; a
