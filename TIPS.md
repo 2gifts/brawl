@@ -109,6 +109,26 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
   then comes out as a weak copy identical to the unnamed `fn_` functions after it; name those in `symbols.txt` and each
   counts as an exact function (hkBvTreeStreamAgent::processCollision gave 18). The calls to `hkBool::operator bool` go
   to the copy at 0x802A0BD8 (`__opb__6hkBoolCFv`). **HIGH**
+- **More functions of that kind, and what to check when writing one:** find them by grepping the unit asm for calls
+  to `__opb__6hkBoolCFv`, `memoryAvailable__15hkMonitorStreamCFv` or `__ct__9hkVector4Fv`. The static helpers next to
+  such a function are often compiled with inlining (only the big function sits in the `dont_inline` region), so read
+  each helper separately. A `clrlwi r11, r1, 28` prologue means a 16-byte aligned local (an hkVector4, or a scratch
+  struct that needs `} __attribute__((aligned(16)));`). The member `hkMath::fabs` becomes `__fabs` because MSL's
+  math.h defines `fabs(x)` as a macro: declare it `static float(fabs)(float x);` and call `(hkMath::fabs)(x)`.
+  Seen: `hkPredGskAgent3::process`, `hkPredGskCylinderAgent3::process` (unit fully exact),
+  `hkRigidMotionUtilApplyForcesAndStep` / `ApplyAccumulators` (the `hkEnum<MotionType, u8>` conversion and
+  `hkAddByteOffset<hkMotion>` copies). (2026-11-11) **HIGH**
+- **A callee-saved register order that puts a walking pointer after the loop counter although it is a parameter:**
+  copy the parameter into a local just before the loop (`hkVelocityAccumulator* accumulator = accumulators;`); the
+  copy is coloured after the parameters and before the counter declared in the `for`. Seen:
+  `hkRigidMotionUtilApplyAccumulators`. **MED**
+- **A member load that sits between an allocation and an out-of-line call it is added to** (`lfs f30, m_radius` after
+  the `new`'s null test, before `bl getCylinderRadius`; a plain sum loads it after the call): the sum came from an
+  inline helper that reads the member into a local first. Seen: `getCapsuleRadius` in
+  `src/havok/hkPredGskCylinderAgent3.cpp`. **MED**
+- **A word field passed to a halfword parameter without `clrlwi rX, rY, 16`:** the parameter is a full int (the
+  callee's `sth` is the same either way); retype it and rename the symbol (`hkMotion::setDeactivationCounter(int)`).
+  **MED**
 - **objdiff ignores relocation-name differences when the target symbol is an auto name (`fn_`, `lbl_`):** a function
   whose only diff is `bl fn_802B87B8` vs `bl __ct__11hkListAgentFPvPvPvi`, or a vtable `lbl_` vs `__vt__...`, already
   scores 100. Named targets do not get this, so rename an unnamed callee only when you know its signature. **MED**

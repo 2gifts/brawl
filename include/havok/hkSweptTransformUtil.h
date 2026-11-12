@@ -2,6 +2,8 @@
 
 #include <havok/hkMotionState.h>
 
+struct hkStepInfo;
+
 // helpers that move a body's hkMotionState around (the swept transform lives inside it).
 // signatures are from the asm. most match havok 5.1 but setTimeInformation takes the motion state FIRST here,
 // 5.1 has it last. so this build is a bit older, don't assume the rest line up either
@@ -13,6 +15,10 @@ struct hkSweptTransformUtil {
 
     // rewind the end of the step back to time (only touches the end pose + the transform)
     static void backStepMotionState(hkReal time, hkMotionState& ms);
+    // Moves the motion state over the step with the velocities (map name hkSweptTransformUtil::_stepMotionState;
+    // its out-of-line copy in hkRigidMotionUtil.o is not written yet). HYPOTHESIS: the parameter list.
+    static void _stepMotionState(const hkStepInfo& info, hkVector4& linearVelocity, hkVector4& angularVelocity,
+                                 hkMotionState& motionState);
     // pin the body at time: start and end pose become the same and invDeltaTime goes to 0
     static void freezeMotionState(hkReal time, hkMotionState& ms);
 

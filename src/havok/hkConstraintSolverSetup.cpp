@@ -16,7 +16,9 @@
 #include <havok/hkEntity.h>
 
 void hkConstraintSolverSetup::integrate(void* a, void* b, void* c) {
-    hkRigidMotionUtil::hkRigidMotionUtilApplyAccumulators(this, (u8*)c + 0x80, a, (u32)b, 0xa0, a);
+    hkRigidMotionUtil::hkRigidMotionUtilApplyAccumulators(*(const hkStepInfo*)this,
+                                                          (hkVelocityAccumulator*)((u8*)c + 0x80), (hkEntity**)a,
+                                                          (int)b, 0xa0, a);
 }
 
 void hkConstraintSolverSetup::oneStepIntegrate(hkEntity** entities, int count, u8* base) {
@@ -35,7 +37,8 @@ void hkConstraintSolverSetup::oneStepIntegrate(hkEntity** entities, int count, u
         dst[7] = src[7];
         void* record[2];
         record[0] = (u8*)entity + 0xa0;
-        hkRigidMotionUtil::hkRigidMotionUtilApplyAccumulators(this, state, record, 1, 0, (u8*)entity + 0xa0);
+        hkRigidMotionUtil::hkRigidMotionUtilApplyAccumulators(*(const hkStepInfo*)this, (hkVelocityAccumulator*)state,
+                                                              (hkEntity**)record, 1, 0, (u8*)entity + 0xa0);
     }
 }
 

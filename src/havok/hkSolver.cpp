@@ -318,12 +318,12 @@ void hkSolver::applyVelField(hkVector4* vel, u8* rec) {
 }
 
 void hkSolver::applyAngularImpulse(hkReal impulse, hkVector8* jac, hkVelocityAccumulator* a, hkVelocityAccumulator* b, hkReal* sum) {
-    a->unk20.x += impulse * a->unk30.x * jac->m_v[0];
-    a->unk20.y += impulse * a->unk30.y * jac->m_v[1];
-    a->unk20.z += impulse * a->unk30.z * jac->m_v[2];
-    b->unk20.x += impulse * b->unk30.x * jac->m_v[4];
-    b->unk20.y += impulse * b->unk30.y * jac->m_v[5];
-    b->unk20.z += impulse * b->unk30.z * jac->m_v[6];
+    a->m_angularVel.x += impulse * a->unk30.x * jac->m_v[0];
+    a->m_angularVel.y += impulse * a->unk30.y * jac->m_v[1];
+    a->m_angularVel.z += impulse * a->unk30.z * jac->m_v[2];
+    b->m_angularVel.x += impulse * b->unk30.x * jac->m_v[4];
+    b->m_angularVel.y += impulse * b->unk30.y * jac->m_v[5];
+    b->m_angularVel.z += impulse * b->unk30.z * jac->m_v[6];
     *sum += impulse;
 }
 
