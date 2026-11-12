@@ -61,8 +61,6 @@ void hkGskBaseAgent::cleanup() {
     delete this;
 }
 
-hkGskBaseAgent::~hkGskBaseAgent() {}
-
 void hkGskBaseAgent::warpTime(float oldTime, float newTime, void* arg) {
     if (unk18 == oldTime) {
         unk18 = newTime;

@@ -103,7 +103,7 @@ void hkConvexTranslateShape::getSupportingVertex(const hkVector4& direction, hkV
     out.z += m_translation.z;
 }
 
-void hkConvexTranslateShape::convertVertexIdsToVertices(const void* ids, int numIds, hkVector4* out) const {
+void hkConvexTranslateShape::convertVertexIdsToVertices(const u16* ids, int numIds, hkVector4* out) const {
     static_cast<hkConvexShape*>(m_childShape.m_childShape)->convertVertexIdsToVertices(ids, numIds, out);
     for (int i = 0; i < numIds; i++) {
         out->x += m_translation.x;

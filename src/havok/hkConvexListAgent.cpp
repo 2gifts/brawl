@@ -60,12 +60,12 @@
 #include <havok/hkListAgent.h>
 #include <havok/hkShapeCollectionAgent.h>
 #include <havok/hkCdBody.h>
+#include <havok/hkTransform.h>
+#include <havok/hkCdPoint.h>
 
 // Dispatcher registration entry point (not recovered yet; takes the dispatcher, a registration record
 // and the two shape type ids). Same routine as hkPhantomAgent and hkSphereSphereAgent use.
 // Stand-ins for the symmetric linear-cast agent functions (other classes, other units).
-// Constructor of hkConvexListAgent (not recovered yet): this, first two pair arguments, pair pointer, flag.
-extern "C" void fn_802AF148(hkConvexListAgent* self, void* a, void* b, void* c, int flag);
 // hkListAgent constructor (hkListAgent.cpp): the fallback object of createConvexListAgent.
 extern "C" void fn_802B87B8(void* self, void* a, void* b, void* c, int flag);
 // Stream-mode and GSK-mode helpers (other units). fn_802FC824/fn_802FC988 act on the 0x30 sub-object.
@@ -81,6 +81,146 @@ extern "C" void fn_802FC6AC(void* subObject, void* pairData, int unk8);
 extern "C" void fn_802FEA54(void* subObject, void* args);
 extern "C" void fn_802FCB14(void* subObject);
 
+
+// Stand-in for hkGskCache::init (hkGskCache.o, not recovered yet): fills the cache at 0x0C from the two shapes and
+// the transform of B in A's frame.
+extern "C" void fn_8031CD64(void* cache, const void* shapeA, const void* shapeB, const hkTransform* aTb);
+
+// Default convex radius of the convex shapes (Havok's hkConvexShapeDefaultRadius, 0.05).
+extern hkReal hkConvexShapeDefaultRadius;
+
+// HYPOTHESIS: the list shape's child array (hkListShape::m_childInfo at 0x14 data / 0x18 size, 8 bytes per child; the
+// second word of an entry is not read here).
+struct hkConvexListChildInfo {
+    const hkConvexShape* m_shape; // 0x00
+    u32 unk4;                     // 0x04
+};
+struct hkConvexListShapeView : hkShape {
+    u8 unkC[0x14 - 0x0C];
+    const hkConvexListChildInfo* m_childInfo; // 0x14
+    int m_numChildren;                        // 0x18
+};
+
+// The children of a list shape seen as one convex shape (map name hkConvexListConvexShape, vtable 0x80486AA8): the
+// supporting vertex is the best child's, with the child index in the high 24 bits of its id word. Only built on the
+// stack by this unit (0x18 bytes).
+struct hkConvexListConvexShape : hkConvexShape {
+    const hkConvexListChildInfo* m_childInfo; // 0x10
+    int m_numChildren;                        // 0x14
+
+    hkConvexListConvexShape() : hkConvexShape(hkConvexShapeDefaultRadius) {}
+    hkConvexListConvexShape(const hkConvexListChildInfo* childInfo, int numChildren, hkReal radius)
+        : hkConvexShape(radius), m_childInfo(childInfo), m_numChildren(numChildren) {}
+
+    virtual void getAabb(const hkTransform& xf, hkReal expansion, hkAabb& out) const {}
+    virtual hkBool castRay(const hkShapeRayCastInput& input, hkShapeRayCastOutput& results) const {
+        return false;
+    }
+    virtual void getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const;
+    virtual hkVector4* getCollisionSpheres(hkVector4* out) const;
+    virtual void getSupportingVertex(const hkVector4& direction, hkVector4& out) const;
+    virtual void convertVertexIdsToVertices(const u16* ids, int numIds, hkVector4* out) const;
+    virtual void getFirstVertex(hkVector4& out) const;
+};
+
+// The second body of the GSK base: the list body with the convex list shape in place of the list (0x28 bytes, a
+// stack temporary of the constructor; deleted as class 0x1d with its static size).
+struct hkConvexListBody : hkCdBody {
+    hkConvexListConvexShape m_convexShape; // 0x10
+
+    hkConvexListBody(const hkCdBody& listBody)
+        : hkCdBody(&listBody) {
+        const hkConvexListShapeView* list = (const hkConvexListShapeView*)listBody.m_shape;
+        const hkConvexListChildInfo* children = list->m_childInfo;
+        hkReal radius = children[0].m_shape->m_radius;
+        m_convexShape.m_childInfo = children;
+        m_convexShape.m_numChildren = list->m_numChildren;
+        m_convexShape.m_radius = radius;
+        m_shape = &m_convexShape;
+        m_shapeKey = listBody.m_shapeKey;
+    }
+    static void operator delete(void* p, unsigned long nbytes) {
+        hkMemory::getInstance().deallocateChunk(p, nbytes, 0x1d);
+    }
+};
+
+// The w word of a supporting vertex holds its vertex id as an integer.
+static inline int& vertexIdWord(hkVector4& v) {
+    return *(int*)&v.w;
+}
+
+void hkConvexListConvexShape::getSupportingVertex(const hkVector4& direction, hkVector4& out) const {
+    hkReal maxDot = -HK_REAL_MAX;
+    int best = 0;
+    for (int i = 0; i < m_numChildren; i++) {
+        hkVector4 support;
+        m_childInfo[i].m_shape->getSupportingVertex(direction, support);
+        hkReal dot = support.dot3(direction);
+        if (dot > maxDot) {
+            maxDot = dot;
+            out = support;
+            best = i;
+        }
+    }
+    vertexIdWord(out) += best << 8;
+}
+
+void hkConvexListConvexShape::convertVertexIdsToVertices(const u16* ids, int numIds, hkVector4* out) const {
+    for (int i = 0; i < numIds; i++) {
+        u16 childId = *ids & 0xFF;
+        int child = *ids >> 8;
+        m_childInfo[child].m_shape->convertVertexIdsToVertices(&childId, 1, out);
+        vertexIdWord(*out) += child << 8;
+        ids++;
+        out++;
+    }
+}
+
+void hkConvexListConvexShape::getFirstVertex(hkVector4& out) const {
+    m_childInfo[0].m_shape->getFirstVertex(out);
+}
+
+void hkConvexListConvexShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const {
+    out->m_numSpheres = 0;
+    out->m_flag = 1;
+    for (int i = 0; i < m_numChildren; i++) {
+        hkCollisionSpheresInfo childInfo;
+        m_childInfo[i].m_shape->getCollisionSpheresInfo(&childInfo);
+        out->m_numSpheres += childInfo.m_numSpheres;
+    }
+}
+
+hkVector4* hkConvexListConvexShape::getCollisionSpheres(hkVector4* out) const {
+    hkVector4* spheres = out;
+    for (int i = 0; i < m_numChildren; i++) {
+        const hkConvexShape* child = m_childInfo[i].m_shape;
+        child->getCollisionSpheres(spheres);
+        hkCollisionSpheresInfo childInfo;
+        child->getCollisionSpheresInfo(&childInfo);
+        spheres += childInfo.m_numSpheres;
+    }
+    return out;
+}
+
+// The GSK base is built against the whole list as one convex shape; the cache is then filled again from a second
+// convex list shape. HYPOTHESIS: the separating-normal w and the 0x18 time are reset to -1 as in hkGskBaseAgent.
+hkConvexListAgent::hkConvexListAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                     hkContactMgr* contactMgr)
+    : hkPredGskfAgent(bodyA, hkConvexListBody(bodyB), contactMgr) {
+    const hkShape* shapeA = bodyA.m_shape;
+    m_pairData = input.m_dispatcher;
+    m_streamMode = 1;
+    unk79 = 0;
+    {
+        const hkConvexListShapeView* list = (const hkConvexListShapeView*)bodyB.m_shape;
+        hkConvexListConvexShape shape(list->m_childInfo, list->m_numChildren, list->m_childInfo[0].m_shape->m_radius);
+        hkTransform aTb;
+        aTb.setMulInverseMul(*(const hkTransform*)bodyA.m_motion, *(const hkTransform*)bodyB.m_motion);
+        fn_8031CD64(unkC, shapeA, &shape, &aTb);
+    }
+    unk2C = -1.0f;
+    unk18 = -1.0f;
+}
 
 // Head of the 0x30 sub-object: an empty list whose head points at the inline buffer after it.
 struct SubObjectHead {
@@ -120,12 +260,8 @@ void hkConvexListAgent::registerAgent(void* dispatcher) {
 
 hkCollisionAgent* hkConvexListAgent::createConvexListAgent(void* a, void* b, void* c, int flag) {
     if (flag != 0) {
-        hkConvexListAgent* agent = (hkConvexListAgent*)hkMemory::getInstance().allocateChunk(sizeof(hkConvexListAgent), 0x1d);
-        agent->m_memSizeAndFlags = sizeof(hkConvexListAgent);
-        if (agent != 0) {
-            fn_802AF148(agent, a, b, c, flag);
-        }
-        return agent;
+        return new hkConvexListAgent(*(const hkCdBody*)a, *(const hkCdBody*)b, *(hkCollisionInput*)c,
+                                     (hkContactMgr*)flag);
     }
     hkCollisionAgent* agent = (hkCollisionAgent*)hkMemory::getInstance().allocateChunk(0x20, 0x1d);
     agent->m_memSizeAndFlags = 0x20;
@@ -141,7 +277,7 @@ void hkConvexListAgent::invalidateTim(void* arg) {
     if (m_streamMode != 0) {
         fn_802B1A6C(this);
     } else {
-        fn_802FC824(m_subObject);
+        fn_802FC824(subObject());
     }
 }
 
@@ -149,7 +285,7 @@ void hkConvexListAgent::warpTime(float t0, float t1, void* arg) {
     if (m_streamMode != 0) {
         fn_802B1B08(this);
     } else {
-        fn_802FC988(m_subObject);
+        fn_802FC988(subObject());
     }
 }
 
@@ -180,36 +316,36 @@ void hkConvexListAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkC
         args.d = &d;
         args.unk8 = unk8;
         args.bValue = (u32)b.m_shape;
-        fn_802FEA54(m_subObject, &args);
+        fn_802FEA54(&unk30, &args);
     }
 }
 #pragma dont_inline reset
 
 void hkConvexListAgent::switchToStreamMode() {
-    fn_8031830C(m_subObject, unk8);
+    fn_8031830C(subObject(), unk8);
     m_streamMode = 0;
-    SubObjectHead* sub = (SubObjectHead*)m_subObject;
+    SubObjectHead* sub = (SubObjectHead*)subObject();
     if (sub != 0) {
         sub->head = (u8*)sub + 0xC;
         sub->count = 0;
         sub->flags = 0x80000001;
     }
-    fn_802FCB14(m_subObject);
+    fn_802FCB14(subObject());
     m_unk7A = 0x19;
-    m_unk40 = 0.0f; // HYPOTHESIS: constant loaded from lbl_805A3F24 (value not recovered)
+    streamUnk40() = 0.0f; // HYPOTHESIS: constant loaded from lbl_805A3F24 (value not recovered)
 }
 
 void hkConvexListAgent::switchToGskMode() {
-    fn_802FC6AC(m_subObject, m_pairData, unk8);
-    ((SubObjectHead*)m_subObject)->head = 0;
+    fn_802FC6AC(subObject(), m_pairData, unk8);
+    ((SubObjectHead*)subObject())->head = 0;
     m_streamMode = 1;
 }
 
 void hkConvexListAgent::cleanup() {
     if (m_streamMode != 0) {
-        fn_8031830C(m_subObject, unk8);
+        fn_8031830C(subObject(), unk8);
     } else {
-        fn_802FC6AC(m_subObject, m_pairData, unk8);
+        fn_802FC6AC(subObject(), m_pairData, unk8);
     }
     delete this;
 }

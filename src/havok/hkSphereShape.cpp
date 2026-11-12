@@ -49,7 +49,7 @@ void hkSphereShape::getSupportingVertex(const hkVector4& direction, hkVector4& o
 }
 
 // Every requested vertex is the sphere centre (the origin). The asm is an unrolled zero fill of numIds vectors.
-void hkSphereShape::convertVertexIdsToVertices(const void* ids, int numIds, hkVector4* out) const {
+void hkSphereShape::convertVertexIdsToVertices(const u16* ids, int numIds, hkVector4* out) const {
     for (int i = 0; i < numIds; i++) {
         out->w = 0.0f;
         out->z = 0.0f;
