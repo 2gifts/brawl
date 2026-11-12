@@ -33,7 +33,7 @@ struct hkBroadPhaseBorder : hkReferencedObject, hkWorldDeletionListener, hkPhant
     virtual void maxPositionExceededCallback(hkEntity* entity);            // 0x34
     // Removes the phantoms from the world and stops listening (called with the world still set).
     virtual void deactivate();                                             // 0x38
-    virtual void collidableAddedCallback(hkPhantomOverlapEvent* event);    // 0x3C
-    virtual void collidableRemovedCallback(hkPhantomOverlapEvent* event);  // 0x40
+    virtual void collidableAddedCallback(hkCollidableAddedEvent* event);    // 0x3C
+    virtual void collidableRemovedCallback(hkCollidableRemovedEvent* event);  // 0x40
     virtual void worldDeletedCallback(hkWorld* world);                     // 0x44
 };

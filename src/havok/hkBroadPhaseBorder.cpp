@@ -48,7 +48,7 @@ hkBroadPhaseBorder::~hkBroadPhaseBorder() {
 }
 
 // Only overlaps with entities count: the owner of an entity collidable is found through its owner offset.
-void hkBroadPhaseBorder::collidableAddedCallback(hkPhantomOverlapEvent* event) {
+void hkBroadPhaseBorder::collidableAddedCallback(hkCollidableAddedEvent* event) {
     hkCollidable* collidable = event->m_collidable;
     hkEntity* entity;
     if (collidable->m_broadPhaseHandle.m_type == 1) {
@@ -61,7 +61,7 @@ void hkBroadPhaseBorder::collidableAddedCallback(hkPhantomOverlapEvent* event) {
     }
 }
 
-void hkBroadPhaseBorder::collidableRemovedCallback(hkPhantomOverlapEvent* event) {}
+void hkBroadPhaseBorder::collidableRemovedCallback(hkCollidableRemovedEvent* event) {}
 
 // BYTES: the case order (assert, remove, fix) follows the target's block order.
 void hkBroadPhaseBorder::maxPositionExceededCallback(hkEntity* entity) {

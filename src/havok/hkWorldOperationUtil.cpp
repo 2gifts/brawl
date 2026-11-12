@@ -38,7 +38,7 @@ void hkWorldOperationUtil::addPhantomBP(hkWorld* world, hkPhantom* phantom) {
     hkLocalArray<hkBroadPhaseHandlePair> newPairs(at<int>(world, 0x2E4)); // world's broadphase query size
 
     hkAabb aabb;
-    phantom->calcAabb(&aabb);
+    phantom->calcAabb(aabb);
 
     // world +0x54 is the broadphase
     at<hkBroadPhase*>(world, 0x54)->addObject(&phantom->m_collidable.m_broadPhaseHandle, aabb, newPairs);

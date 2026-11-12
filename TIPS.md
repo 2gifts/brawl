@@ -146,6 +146,33 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
 - **A derived virtual call is one slot too late:** compare the exact base and derived formal types in the translation unit. MWCC treats `int` and `long` as different overloads even when both occupy one register. Puff's `Weapon::notifyEventAnimCmd` used `int` while its `StageObject` base used `s32` (`long`), adding a virtual slot and shifting `deactivateArticle`. An opt-in matching declaration repaired the call without changing other translation units. Verify the native vtable and all affected call sites before changing shared declarations. Seen: `include/wn/weapon.h`, `src/mo_fighter/ft_purin/ft_purin.cpp`. **HIGH**
 - **An inline destructor on a base class can win the linker's weak-symbol dedup and shift every address behind your unit:** `~wnClassInfo() { }` made `wn_class_info.o` emit a weak `__dt__11wnClassInfoFv`; the module's named copy sits in an object that is later in link order, so the unit's own copy won, appended its 0x40 and shifted the destructor behind it plus every importer (the per-function scores stayed 100%, only the 127 hashes failed). Declare the destructor (`~wnClassInfo();`) removes the body but a user-declared base destructor also makes MWCC emit a base-dtor call in EVERY derived destructor (`wnClassInfoImpl` overshoots its native body by 0xC), while the `g_wnClassInfoNull` static initializer needs the declaration visible for its registration form. Gate the declaration behind an opt-in macro (`WN_CLASS_INFO_BASE_DTOR`) defined only by the registering unit; layout and vtable are identical under both views (same pattern as `MT_VEC2F_CTOR_OUT_OF_LINE`). Seen: `include/wn/wn_class_info.h`, `src/mo_melee/sora_melee/wn/wn_class_info.cpp`. **HIGH**
 
+- **MWCC reuses a base class's tail padding:** a derived class's first member can sit inside the base's `sizeof` when the
+  base is padded by alignment (a 16-aligned base with data ending at 0x74 is 0x80 bytes, and the derived members start
+  at 0x74). If a create function allocates the same size for base and derived and the derived fields overlap the base's
+  last bytes, give the base its real alignment (`__attribute__((aligned(16)))`, or the hkVector4 member that causes it)
+  and shrink its padding array to the real data end. Seen: `hkConvexListAgent : hkPredGskfAgent` (`include/havok/hkGskBaseAgent.h`). **HIGH**
+- **Multiple inheritance vtable order:** the combined vtable is the primary base part, then each secondary base's vtable
+  (each with its own 8-byte header, holding the `@N@` this-adjusting thunks), and only then the class's own new virtuals.
+  So a call through slot 0x34 of a class with two secondary bases can be the class's first own virtual. The thunks
+  (`@8@method`, `@12@__dt`) are emitted automatically once the class and its overrides exist; name them in symbols.txt
+  like any function. Seen: `hkBroadPhaseBorder` (`include/havok/hkBroadPhaseBorder.h`). **HIGH**
+- **The vtables of a base whose ctor is inlined somewhere are emitted (weak) in every unit that needs them, and the linker
+  keeps the first copy:** a weak destructor that the map puts in an unexpected unit (`~hkGskfAgent` in hkConvexListAgent.o)
+  is that unit's copy, kept because the unit links first. Check which vtable in the data section points at it (the
+  vtable may sit in a later unit's data). An extab `DESTROYBASE` action names the direct base's destructor, which tells
+  you the real parent class (hkPredGskfAgent, not hkCollisionAgent). Seen: `src/havok/hkConvexListAgent.cpp`. **HIGH**
+- **A `__attribute__((never_inline))` constructor keeps its own inline helpers; `#pragma dont_inline on` around it does not:**
+  the pragma also stops the base and member constructors from inlining into it (they become `bl`s to out-of-line copies).
+  Use the attribute when a create function must call the constructor but the constructor's body must inline its parts. **HIGH**
+- **Stack slots of block-scoped locals are not shared:** six `{ hkAabb aabb; ... }` blocks get six frame slots; one
+  `hkAabb` declared once and refilled gives the single slot the target reuses (the frame size tells you). Seen:
+  `hkBroadPhaseBorder` constructor. **HIGH**
+- **A wrong symbols.txt name can hide a real function:** a 40-50% "match" whose target has a different parameter use
+  (here a loaded-object constructor against a code path that copies an aabb and a filter word) is a misnamed address;
+  rename it to the real signature and write the real function. Seen: 0x802E7988 `hkAabbPhantom(const hkAabb&, u32)`. **MED**
+- **A virtual `const` method's loads move above its stores; a non-const one keeps strict `lfs/stfs` pairs:** `this` behaves
+  like a pointer-to-const parameter. Strict pairs into an out reference meant `calcAabb(hkAabb&)` without `const`. **MED**
+
 ## 5. Integers and bools
 - **An all-energy mask emits `lis/subi` for 65535 instead of `li -1`:** audit the callee before changing temporaries. Native kinetic speed sums use signed halfword loads and compare against the -1 sentinel; that path sums every enabled energy in reverse order. Correcting `soKineticEnergy::AttributeMask` to `s16` matched Yoshi Egg Roll exit/power callers. Seen: `so/kinetic/so_kinetic_energy.h`, `ft_yoshi_status_uniq_process_special_s_{end,utility}.cpp`. **HIGH**
 - The source type decides extension: `u8` gives `clrlwi r,r,24`, `s8` gives `extsb`, `s16` gives `extsh`, `bool` gives `clrlwi 24`. Many "mysterious" extra instructions are a wrong type (often `s8` that should be `int`, or `u8` that should be `s32`). **HIGH**
@@ -1210,3 +1237,5 @@ Method used for `soModelModuleImpl` (sora_melee 0x77DC-0xE268, `include/so/model
   exact (Fox Landmaster went from 35% to 70% with no source change). **HIGH**
 - **`-I<scratch>` header overrides do nothing with this compile command (`-nosyspath`).** Experiment with a partial
   specialization in the unit's own header, or a scratch copy of the whole tree path. **MEDIUM**
+  A `-i <scratch>` (lower-case, user path) inserted *before* the command's `-i include` does shadow headers (edit the
+  `ninja -t commands` line), so header experiments can be compiled to a scratch object while a gate runs. **MEDIUM**

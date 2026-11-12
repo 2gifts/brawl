@@ -62,9 +62,8 @@ int hkAabbPhantom::getType() const {
     return 0;
 }
 
-void hkAabbPhantom::calcAabb(hkAabb* out) const {
-    out->m_min = m_aabb.m_min;
-    out->m_max = m_aabb.m_max;
+void hkAabbPhantom::calcAabb(hkAabb& out) {
+    out = m_aabb;
 }
 
 hkBool hkAabbPhantom::isOverlappingCollidableAdded(hkCollidable* collidable) const {
@@ -77,30 +76,57 @@ hkBool hkAabbPhantom::isOverlappingCollidableAdded(hkCollidable* collidable) con
 }
 
 void hkAabbPhantom::addOverlappingCollidable(hkCollidable* collidable) {
-    hkPhantomOverlapEvent event;
-    event.m_phantom = this;
+    hkCollidableAddedEvent event;
     event.m_collidable = collidable;
-    event.m_handled = false;
+    event.m_phantom = this;
+    event.m_collidableResult = 0;
     for (int i = m_overlapListeners.getSize() - 1; i >= 0; i--) {
-        m_overlapListeners[i]->collidableAddedCallback(&event);
+        if (m_overlapListeners[i] != 0) {
+            m_overlapListeners[i]->collidableAddedCallback(&event);
+        }
     }
-    if (!event.m_handled) {
+    if (event.m_collidableResult == 0) {
         m_overlappingCollidables.pushBack(collidable);
     }
 }
 
 void hkAabbPhantom::removeOverlappingCollidable(hkCollidable* collidable) {
     int found = m_overlappingCollidables.indexOf(collidable);
-    hkPhantomOverlapEvent event;
-    event.m_phantom = this;
+    hkCollidableRemovedEvent event;
     event.m_collidable = collidable;
-    event.m_handled = found >= 0;
+    event.m_phantom = this;
+    event.m_collidableWasAdded = found >= 0;
     for (int i = m_overlapListeners.getSize() - 1; i >= 0; i--) {
-        m_overlapListeners[i]->collidableRemovedCallback(&event);
+        if (m_overlapListeners[i] != 0) {
+            m_overlapListeners[i]->collidableRemovedCallback(&event);
+        }
     }
     if (found >= 0) {
         m_overlappingCollidables.removeAt(found);
     }
+}
+
+// Statistics collector slots used here (local view, as in hkBvTreeAgent.cpp). HYPOTHESIS: names.
+struct hkAabbPhantomStatisticsCollector {
+    virtual void unk08();
+    virtual void beginObject(const char* name, int type, const void* object);                    // 0x0C
+    virtual void addArray(const char* name, int type, const void* data, int size, int capacity); // 0x10
+    virtual void unk14();
+    virtual void unk18();
+    virtual void unk1C();
+    virtual void endObject();                                                                     // 0x20
+};
+
+void hkAabbPhantom::calcStatistics(hkStatisticsCollector* collector) const {
+    hkAabbPhantomStatisticsCollector* c = (hkAabbPhantomStatisticsCollector*)collector;
+    c->beginObject("AabbPhantom", 2, this);
+    hkPhantom::calcStatistics(collector);
+    const char* name = "OvrlpCollPtr";
+    if (m_overlappingCollidables.mustDeallocate()) {
+        c->addArray(name, 8, m_overlappingCollidables.m_data, m_overlappingCollidables.m_size * 4,
+                    m_overlappingCollidables.getCapacity() * 4);
+    }
+    c->endObject();
 }
 
 void hkAabbPhantom::deallocateInternalArrays() {

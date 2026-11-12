@@ -18,7 +18,7 @@ struct hkAabbPhantom : hkPhantom {
     static void finishLoadedObjecthkAabbPhantom(void* p);
     static const void* getVtablehkAabbPhantom() __attribute__((never_inline)); // called by the static initializer
     virtual int getType() const;
-    virtual void calcAabb(hkAabb* out) const;
+    virtual void calcAabb(hkAabb& out);
     virtual void addOverlappingCollidable(hkCollidable* collidable);
     virtual hkBool isOverlappingCollidableAdded(hkCollidable* collidable) const;
     virtual hkPhantom* clone() const; // not written yet

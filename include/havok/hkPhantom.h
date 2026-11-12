@@ -22,19 +22,25 @@ struct hkPhantomListener {
     virtual void phantomDeleted(hkPhantom* phantom) = 0;   // 0x18
 };
 
-// Event passed to overlap listeners (0x0C bytes). HYPOTHESIS: field names.
-// m_handled is set by the listener to veto the change (add) or is preset to "already present" (remove).
-struct hkPhantomOverlapEvent {
+// Events passed to the overlap listeners (0x0C bytes): the phantom, the collidable and the listeners' answer.
+// HYPOTHESIS: names. On add, a listener sets m_collidableResult to reject the collidable (a word); on remove,
+// m_collidableWasAdded tells whether the phantom held it (a byte).
+struct hkCollidableAddedEvent {
     hkPhantom* m_phantom;       // 0x00
     hkCollidable* m_collidable; // 0x04
-    bool m_handled;             // 0x08
+    int m_collidableResult;     // 0x08 0 = accept
+};
+struct hkCollidableRemovedEvent {
+    hkPhantom* m_phantom;       // 0x00
+    hkCollidable* m_collidable; // 0x04
+    bool m_collidableWasAdded;  // 0x08
 };
 
 // Overlap listener interface: the callbacks come first (0x08, 0x0C) and the virtual destructor last (0x10), as in
 // hkBroadPhaseBorder's secondary vtable (callback names from its map entries).
 struct hkPhantomOverlapListener {
-    virtual void collidableAddedCallback(hkPhantomOverlapEvent* event) = 0;   // 0x08
-    virtual void collidableRemovedCallback(hkPhantomOverlapEvent* event) = 0; // 0x0C
+    virtual void collidableAddedCallback(hkCollidableAddedEvent* event) = 0;    // 0x08
+    virtual void collidableRemovedCallback(hkCollidableRemovedEvent* event) = 0; // 0x0C
     virtual ~hkPhantomOverlapListener() {}                                    // 0x10
 };
 
@@ -60,7 +66,7 @@ struct hkPhantom : hkWorldObject {
     virtual void calcStatistics(hkStatisticsCollector* collector) const;
     virtual hkMotion* getMotionState() const = 0;                              // 0x14
     virtual int getType() const = 0;                                           // 0x18
-    virtual void calcAabb(hkAabb* out) const = 0;                              // 0x1C
+    virtual void calcAabb(hkAabb& out) = 0;                              // 0x1C
     virtual void addOverlappingCollidable(hkCollidable* collidable) = 0;      // 0x20
     virtual hkBool isOverlappingCollidableAdded(hkCollidable* collidable) const = 0; // 0x24
     virtual void removeOverlappingCollidable(hkCollidable* collidable) = 0;   // 0x28
