@@ -62,10 +62,6 @@ extern "C" void fn_802FCB14(void* list);
 extern "C" void fn_802FC6AC(void* list, int a, int b);
 extern "C" void fn_802FC824(void* list);
 extern "C" void fn_802FC988(void* list);
-// HYPOTHESIS: hkAgent1nMachine_Process (map name): runs the track's agents on the sorted hit keys (all kept agents
-// when hitList is null) and adds/removes agents for keys that appeared/disappeared.
-extern "C" void fn_802FCCF0(hkAgent1nTrack* track, hkAgent3ProcessInput* input, const hkShapeCollection* collection,
-                            const u32* hitList, int numHits, void* output);
 // HYPOTHESIS: the invalid shape key (0xFFFFFFFF), appended as the end marker of the sorted hit list.
 extern "C" const u32 lbl_8059EF58;
 // Dispatcher registration (map name hkCollisionDispatcher registration, not recovered yet).

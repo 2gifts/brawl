@@ -7,6 +7,7 @@
 struct hkCdBody;
 struct hkContactMgr;
 struct hkProcessCollisionInput;
+struct hkShapeCollection;
 
 // Track of the child agents of a 1-n agent (0x10 bytes), managed by the hkAgent1nMachine functions: a directory of
 // agent sectors with room for one entry in place. The deleting destructor frees 0x10 bytes in class 0x25.
@@ -20,6 +21,7 @@ struct hkAgent1nTrack {
     hkInplaceArray<SectorDirEntry, 1> m_sectors; // 0x00
 
     ~hkAgent1nTrack() {}
+    static void* operator new(unsigned long, void* where) { return where; }
 };
 
 // Input of the agent3 (stream) functions: the bodies, the collision input, the contact manager and A's transform in
@@ -40,3 +42,8 @@ struct hkAgent3ProcessInput : hkAgent3Input {
 
     hkAgent3ProcessInput() {}
 };
+
+// HYPOTHESIS: hkAgent1nMachine_Process (map name): runs the track's agents on the sorted hit keys (all kept agents
+// when hitList is null) and adds/removes agents for keys that appeared/disappeared.
+extern "C" void fn_802FCCF0(hkAgent1nTrack* track, hkAgent3ProcessInput* input, const hkShapeCollection* collection,
+                            const u32* hitList, int numHits, void* output);
