@@ -172,6 +172,21 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
   rename it to the real signature and write the real function. Seen: 0x802E7988 `hkAabbPhantom(const hkAabb&, u32)`. **MED**
 - **A virtual `const` method's loads move above its stores; a non-const one keeps strict `lfs/stfs` pairs:** `this` behaves
   like a pointer-to-const parameter. Strict pairs into an out reference meant `calcAabb(hkAabb&)` without `const`. **MED**
+- **A unit's string pool can start with literals that no function in the image uses: the function was dead-stripped by
+  the linker.** Write it back (in source order before the functions whose strings follow) and the later string
+  offsets line up. hkAabbPhantom's pool starts with "TtrcPhantom"/"Et" from the stripped `setAabb` timer; writing it
+  made `calcStatistics` and `__sinit_` exact. Mark the body HYPOTHESIS, since only its literals are evidence. **HIGH**
+- **`#pragma auto_inline off` around a callee's definition is what stops MWCC from inlining a function defined later in
+  the unit (deferred inlining):** `__attribute__((never_inline))` on a declaration of an explicit specialization is
+  ignored, and a `dont_inline` helper wrapper did not stop it either. Seen: the hkShapeCollectionAgent symmetric
+  queries called by `hkConvexListAgent`'s static queries. **HIGH**
+- **The Havok collision collectors are freed with their static size as class 0x1d** (`li r5,<sizeof>; li r6,0x1d` in
+  the weak deleting dtor): `HK_DECLARE_SIZED_DELETE(0x1d)` (`include/havok/hkMemory.h`) on hkCdPointCollector,
+  hkFlagCdBodyPairCollector and hkSimpleClosestContactCollector; then name the `dtor_` copies in symbols.txt. **HIGH**
+- **`hkArray::operator=` copies through a helper `copy(dst, src, n)` called as `copy(m_data, other.m_data, m_size)`
+  after `m_size = other.m_size`** (arguments right to left: the size reload, then src, then dst). Writing the loop
+  inline loads src before the size store. Exact: `hkPackfileData::getImportsExports`; `hkAabbPhantom::clone` 97.5 (a
+  flags/size load order swap in the capacity update remains). **MED**
 
 ## 5. Integers and bools
 - **An all-energy mask emits `lis/subi` for 65535 instead of `li -1`:** audit the callee before changing temporaries. Native kinetic speed sums use signed halfword loads and compare against the -1 sentinel; that path sums every enabled energy in reverse order. Correcting `soKineticEnergy::AttributeMask` to `s16` matched Yoshi Egg Roll exit/power callers. Seen: `so/kinetic/so_kinetic_energy.h`, `ft_yoshi_status_uniq_process_special_s_{end,utility}.cpp`. **HIGH**

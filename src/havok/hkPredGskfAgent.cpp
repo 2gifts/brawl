@@ -8,15 +8,13 @@
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkShapeType.h>
 
-// Stand-in for the static closest-points query of hkIterativeLinearCastAgent (other unit, not recovered).
-extern "C" void fn_802B1C3C();
 void hkPredGskfAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs funcs;
     funcs.symmetricA = 0;
     funcs.symmetricB = 1;
     funcs.create = (hkAgentFunc)createPredGskfAgent;
     funcs.staticGetPenetrations = (hkAgentFunc)hkGskBaseAgent::staticGetPenetrations;
-    funcs.staticGetClosestPoints = (hkAgentFunc)fn_802B1C3C;
+    funcs.staticGetClosestPoints = (hkAgentFunc)hkGskBaseAgent::staticGetClosestPoints;
     funcs.staticLinearCast = (hkAgentFunc)hkIterativeLinearCastAgent::staticLinearCast;
     dispatcher->registerCollisionAgent(&funcs, HK_SHAPE_CONVEX, HK_SHAPE_CONVEX);
 }

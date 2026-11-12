@@ -63,6 +63,8 @@
 #include <havok/hkTransform.h>
 #include <havok/hkCdPoint.h>
 #include <havok/hkFlagCdBodyPairCollector.h>
+#include <havok/hkClosestCdPointCollector.h>
+#include <havok/hkSimpleClosestContactCollector.h>
 #include <havok/hkMonitorStream.h>
 
 // Dispatcher registration entry point (not recovered yet; takes the dispatcher, a registration record
@@ -101,6 +103,10 @@ struct hkConvexListShapeView : hkShape {
     u8 unkC[0x14 - 0x0C];
     const hkConvexListChildInfo* m_childInfo; // 0x14
     int m_numChildren;                        // 0x18
+    u8 unk1C[0x20 - 0x1C];
+    // HYPOTHESIS: Havok's m_minDistanceToUseConvexHullForGetClosestPoints: a hull point farther away than this is
+    // reported as is; nearer, the children are queried.
+    hkReal m_minDistanceToUseConvexHullForGetClosestPoints; // 0x20
 };
 
 // The children of a list shape seen as one convex shape (map name hkConvexListConvexShape, vtable 0x80486AA8): the
@@ -353,6 +359,59 @@ void hkConvexListAgent::cleanup() {
     delete this;
 }
 
+// The closest point is first taken from the list as one convex hull: when the hull penetrates, or its point is
+// nearer than the shape's threshold, the children are queried instead.
+void hkConvexListAgent::staticGetClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d) {
+    HK_TIMER_BEGIN_LIST("CvxList", "checkHull");
+    {
+        hkConvexListBody hull(b);
+        hkFlagCdBodyPairCollector checker;
+        hkGskBaseAgent::staticGetPenetrations(a, hull, c, &checker);
+        if (checker.m_hit) {
+            HK_TIMER_SPLIT_LIST("children");
+            hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetClosestPoints(a, b, c, (hkPenetrationTarget*)d);
+        } else {
+            hkClosestCdPointCollector closest;
+            hkGskBaseAgent::staticGetClosestPoints(a, hull, c, &closest);
+            if (closest.hasHit()) {
+                const hkConvexListShapeView* list = (const hkConvexListShapeView*)b.m_shape;
+                hkReal dist = closest.m_point.m_normal.w;
+                if (dist > list->m_minDistanceToUseConvexHullForGetClosestPoints) {
+                    hkCdPoint point;
+                    point.m_cdBodyA = &a;
+                    point.m_cdBodyB = &b;
+                    point.m_contact.m_position = closest.m_point.m_position;
+                    point.m_contact.m_normal = closest.m_point.m_normal;
+                    point.m_contact.m_normal.w = dist;
+                    ((hkCdPointCollector*)d)->addCdPoint(&point);
+                } else {
+                    HK_TIMER_SPLIT_LIST("children");
+                    hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticGetClosestPoints(a, b, c,
+                                                                                              (hkPenetrationTarget*)d);
+                }
+            }
+        }
+    }
+    HK_TIMER_END_LIST();
+}
+
+// The cast is first made against the list as one convex hull; only when the hull is hit are the children cast
+// against.
+void hkConvexListAgent::staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* d,
+                                         void* e) {
+    HK_TIMER_BEGIN_LIST("CvsListAgent", "checkHull");
+    {
+        hkConvexListBody hull(b);
+        hkSimpleClosestContactCollector checker;
+        hkIterativeLinearCastAgent::staticLinearCast(a, hull, c, &checker, &checker);
+        if (checker.m_hit) {
+            HK_TIMER_SPLIT_LIST("child");
+            hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticLinearCast(a, b, c, d, e);
+        }
+    }
+    HK_TIMER_END_LIST();
+}
+
 // The whole list is first tested as one convex hull; only when the hull penetrates are the children queried (through
 // the shape collection path).
 void hkConvexListAgent::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* d) {
@@ -463,6 +522,9 @@ void hkSymmetricAgentLinearCast_17hkConvexListAgent_::staticLinearCast(const hkC
 }
 
 // Same for the shape collection agent (instantiated in this unit); its static cast takes the bodies by reference.
+// BYTES: called, not inlined, by hkConvexListAgent::staticLinearCast (the pragma).
+#pragma push
+#pragma auto_inline off
 template <>
 void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d) {
     const hkLinearCastCollisionInput& input = c;
@@ -477,6 +539,7 @@ void hkSymmetricAgentLinearCast<hkShapeCollectionAgent>::staticLinearCast(const 
         hkShapeCollectionAgent::staticLinearCast(b, a, flippedInput, &flipped, 0);
     }
 }
+#pragma pop
 
 template <class T>
 void hkSymmetricAgentLinearCast<T>::staticGetPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, hkPenetrationTarget* target) {
