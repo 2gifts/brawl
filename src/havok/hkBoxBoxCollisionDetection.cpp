@@ -266,18 +266,18 @@ hkBool hkBoxBoxCollisionDetection::calculateClosestPoint(hkContactPoint& contact
             found = true;
             hkProcessCdPoint point;
             if (cache.m_featureIndex <= 2) {
-                point.m_contact.m_position._setTransformedPos(*m_wTb, cache.unk10);
-                point.m_contact.m_normal.setMul4(-cache.m_normalScale, m_wTa->getColumn(fcp.m_featureIdA));
+                point.m_contact.m_position._setTransformedPos(m_wTb, cache.unk10);
+                point.m_contact.m_normal.setMul4(-cache.m_normalScale, m_wTa.getColumn(fcp.m_featureIdA));
                 point.m_contact.m_normal.w = cache.m_distance;
                 point.m_contactPointId = fcp.m_contactPointId;
             } else if (cache.m_featureIndex <= 6) {
-                point.m_contact.m_position._setTransformedPos(*m_wTa, cache.unk0);
-                point.m_contact.m_normal.setMul4(-cache.m_normalScale, m_wTb->getColumn(fcp.m_featureIdA - 4));
+                point.m_contact.m_position._setTransformedPos(m_wTa, cache.unk0);
+                point.m_contact.m_normal.setMul4(-cache.m_normalScale, m_wTb.getColumn(fcp.m_featureIdA - 4));
                 point.m_contact.m_normal.w = cache.m_distance;
                 point.m_contactPointId = fcp.m_contactPointId;
             } else {
-                point.m_contact.m_position._setTransformedPos(*m_wTa, cache.unk0);
-                point.m_contact.m_normal._setRotatedDir(m_wTa->getRotation(), cache.m_normal);
+                point.m_contact.m_position._setTransformedPos(m_wTa, cache.unk0);
+                point.m_contact.m_normal._setRotatedDir(m_wTa.getRotation(), cache.m_normal);
                 point.m_contact.m_normal.w = cache.m_distance;
                 point.m_contactPointId = fcp.m_contactPointId;
             }
@@ -288,11 +288,6 @@ hkBool hkBoxBoxCollisionDetection::calculateClosestPoint(hkContactPoint& contact
         }
     }
     return found;
-}
-
-void hkBoxBoxCollisionDetection::initWorkVariables() {
-    m_dinA = m_aTb.m_translation;
-    m_dinB._setRotatedInverseDir(m_aTb.getRotation(), m_aTb.m_translation);
 }
 
 void hkBoxBoxCollisionDetection::calcManifoldNormal(hkVector4& normal, const hkFeatureContactPoint& fcp,
@@ -327,7 +322,7 @@ hkBool hkBoxBoxCollisionDetection::queryManifoldNormalConsistency(hkBoxBoxManifo
 
 void hkBoxBoxCollisionDetection::checkManifoldNormalConsistency(hkBoxBoxManifold& manifold) {
     hkVector4 normal;
-    normal.setRotatedDir(m_wTa->getRotation(), manifold.m_manifoldNormal);
+    normal.setRotatedDir(m_wTa.getRotation(), manifold.m_manifoldNormal);
     int pointIndex = m_result->getNumContactPoints() - manifold.getNumPoints();
     hkReal minDot = 0.95f;
     for (int i = 0; i < manifold.getNumPoints();) {
@@ -516,8 +511,8 @@ void hkBoxBoxCollisionDetection::findAdditionalManifoldPoints(hkBoxBoxManifold& 
     hkVector4 absA;
     hkVector4 absB;
     const hkVector4& normal = m_result->m_contactPoints[firstIndex].m_contact.getNormal();
-    dirA._setRotatedInverseDir(m_wTa->getRotation(), normal);
-    dirB._setRotatedInverseDir(m_wTb->getRotation(), normal);
+    dirA._setRotatedInverseDir(m_wTa.getRotation(), normal);
+    dirB._setRotatedInverseDir(m_wTb.getRotation(), normal);
     dirA.setNeg4(dirA);
     absA.setAbs4(dirA);
     absB.setAbs4(dirB);

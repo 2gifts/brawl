@@ -7,7 +7,7 @@
 //   0x802FB418    68  commitPotential   [map: hkBoxBoxAgent3__commitPotential]
 //   0x802FB45C     4  createZombie   [map: hkBoxBoxAgent3__createZombie]
 //   0x802FB460     4  destroy   [map: hkBoxBoxAgent3__destroy]
-//   0x802FB464  1072  process   [map: hkBoxBoxAgent3__process] (not written yet)
+//   0x802FB464  1072  process   [map: hkBoxBoxAgent3__process]
 
 #include <havok/hkBoxBoxAgent3.h>
 #include <havok/hkBoxBoxManifold.h>
@@ -15,6 +15,9 @@
 #include <havok/hkCollisionAgent.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkShapeType.h>
+#include <havok/hkBoxBoxCollisionDetection.h>
+#include <havok/hkBoxShape.h>
+#include <havok/hkMonitorStream.h>
 
 // Box x box only, not predictive, no separating-normal function.
 void hkBoxBoxAgent3::registerAgent3(hkCollisionDispatcher* dispatcher) {
@@ -74,4 +77,27 @@ void hkBoxBoxAgent3::createZombie(hkAgentEntry* entry, void* agentData, u16 key)
 
 void hkBoxBoxAgent3::destroy(hkAgentEntry* entry, void* agentData, hkContactMgr* contactMgr) {
     cleanup(entry, agentData, contactMgr);
+}
+
+void* hkBoxBoxAgent3::process(const hkAgent3ProcessInput& input, hkAgentEntry* entry, void* agentData,
+                              hkVector4* separatingNormal, hkProcessCollisionOutput& result) {
+    HK_TIMER_BEGIN("BoxBox3");
+    hkBoxBoxManifold* manifold = (hkBoxBoxManifold*)agentData;
+    const hkBoxShape* boxA = (const hkBoxShape*)input.m_bodyA->getShape();
+    const hkBoxShape* boxB = (const hkBoxShape*)input.m_bodyB->getShape();
+    hkVector4 rA4;
+    rA4.setAll(boxA->m_radius);
+    hkVector4 rA;
+    rA.setAdd4(boxA->m_halfExtents, rA4);
+    hkVector4 rB4;
+    rB4.setAll(boxB->m_radius);
+    hkVector4 rB;
+    rB.setAdd4(boxB->m_halfExtents, rB4);
+    hkBoxBoxCollisionDetection detector(*input.m_bodyA, *input.m_bodyB, input.m_input, input.m_contactMgr, &result,
+                                        input.m_aTb, input.m_bodyA->getTransform(), rA, input.m_bodyB->getTransform(),
+                                        rB, input.m_input->getTolerance());
+    detector.calcManifold(*manifold);
+    entry->m_numContactPoints = manifold->m_numPoints;
+    HK_TIMER_END();
+    return hkAddByteOffset(agentData, 0x50);
 }

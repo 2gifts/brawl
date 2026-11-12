@@ -6,6 +6,7 @@ struct hkCollisionDispatcher;
 struct hkAgent3Input;
 struct hkAgentEntry;
 struct hkContactMgr;
+struct hkVector4;
 
 // Box x box agent of the agent3 (stream) machine. Its functions are static: the agent data in the track sector
 // starts with an hkBoxBoxManifold (0x50 bytes of agent data).
@@ -21,5 +22,7 @@ struct hkBoxBoxAgent3 {
     // Empty in the original (0x802FB45C).
     static void createZombie(hkAgentEntry* entry, void* agentData, u16 key);
     static void destroy(hkAgentEntry* entry, void* agentData, hkContactMgr* contactMgr);
-    static void process(); // not written yet. HYPOTHESIS: the parameters (as hkPredGskAgent3::process)
+    // Builds the box-box detector on the stack and refreshes the manifold; returns the end of the agent data.
+    static void* process(const struct hkAgent3ProcessInput& input, hkAgentEntry* entry, void* agentData,
+                         hkVector4* separatingNormal, struct hkProcessCollisionOutput& result);
 };

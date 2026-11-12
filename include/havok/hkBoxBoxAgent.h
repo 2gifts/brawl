@@ -32,7 +32,7 @@ struct hkBoxBoxAgent : hkIterativeLinearCastAgent {
     static hkBool getAttemptToFindAllEdges() { return m_attemptToFindAllEdges; }
 
     virtual void cleanup();
-    virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, hkProcessCollisionInput& unk2, void* unk3); // 0x1C, not written yet
+    virtual void processCollision(const hkCdBody& bodyA, const hkCdBody& bodyB, hkProcessCollisionInput& input, void* result); // 0x1C
     virtual void getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
     virtual void getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
 };
