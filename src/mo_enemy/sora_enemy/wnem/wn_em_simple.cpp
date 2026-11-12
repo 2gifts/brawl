@@ -17,6 +17,8 @@
 #define SO_ARTICLE_DTOR_INLINE // the holder emits the article base destructor as a weak copy
 #define WN_WEAPON_BUILDER
 #define WN_EM_SIMPLE_UNIT
+#define WN_EM_SIMPLE_PROPERTY_COPY
+#define WN_EM_SIMPLE_HEAP_DTOR
 #define FT_REL_LINK_EXTERN
 #define WN_SOUND_GENERATOR_HELPERS
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
@@ -44,6 +46,21 @@
 #include <it/it_gen_archive.h>
 #include <wn/wn_module_accesser_build_data.h>
 #include <em/wnem/wn_em_heap_module_impl.h>
+
+// This shared constant is owned by the original unit's read-only pool.
+extern const float lbl_41_rodata_E54;
+
+template <>
+inline soAttributeFlag soInstanceUnitFullProperty<soAnimCmdControlUnit>::getAttribute() const {
+    return soAttributeFlag(m_attribute.m_mask);
+}
+
+template <>
+inline soInstanceUnit<soAnimCmdControlUnit>::soInstanceUnit(soAnimCmdControlUnit& elm, s32 id) {
+    m_element.m_animCmdInterpreter = elm.m_animCmdInterpreter;
+    m_element.m_animCmdAddressPackArraySeparate = elm.m_animCmdAddressPackArraySeparate;
+    m_id = id;
+}
 
 // stTriggerMng notification (sora_melee) of a hit by an enemy article; see damage/em_damage_module_impl.cpp.
 extern "C" void fn_27_23313C(u32 createId, u32 attackerTaskId, u32 taskId, u8 attackerCategory);
@@ -393,9 +410,9 @@ u32 wnemSimple::getFrameCounter(s32 index) {
 
 // Reduces the hit points; the weapon dies when they run out.
 void wnemSimple::setDamage(float damage) {
-    if (unk21D4 > 0.00001f) {
+    if (unk21D4 > lbl_41_rodata_E54) {
         unk21D4 -= damage;
-        if (unk21D4 <= 0.00001f) {
+        if (unk21D4 <= lbl_41_rodata_E54) {
             OnDead();
         }
     }
@@ -405,7 +422,7 @@ void wnemSimple::OnDead() {
     wnemReport("wnemSimple::notifyEventOnDamage OnDead \n");
     m_moduleAccesser->getCollisionAttackModule().clearAll();
     m_moduleAccesser->getCollisionHitModule().setXluGlobal(0);
-    if (unk21D4 <= 0.00001f) {
+    if (unk21D4 <= lbl_41_rodata_E54) {
         unk21D4 = 0.0f;
     }
     if (m_procFncHpZero == NULL) {
@@ -561,7 +578,7 @@ void wnemSimple::processHit() {
             if (soGroundUtil::checkDeadArea(&pos, 0.0f, 0.0f) != -1) {
                 setNotifyArticleEventRemove(m_moduleAccesser);
                 if (isActive() == 1) {
-                    wnemReport(" wnemSimple::processHit : Dead OutScreen -- call deactivate \n");
+                    wnemReport("wnemSimple::processHit : Dead OutScreen -- call deactivate \n");
                     deactivate(false);
                 }
             }
@@ -607,30 +624,30 @@ bool wnemSimple::notifyEventAnimCmd(acAnimCmd* animCmd, soModuleAccesser* module
 // direction, rotates it around z by the angle of the speed (flipped around y while it flies to the left).
 void wnemSimple::updatePosture(bool isUpdate) {
     if (isUpdate) {
-        soPostureModule& posture = m_moduleAccesser->getPostureModule();
-        Vec3f pos = posture.getPos();
+        Vec3f pos = m_moduleAccesser->getPostureModule().getPos();
         pos.m_x += m_speed.m_x;
         pos.m_y += m_speed.m_y;
         m_speed.m_x += m_accel.m_x;
         m_speed.m_y += m_accel.m_y;
-        posture.setPos(&pos);
+        m_moduleAccesser->getPostureModule().setPos(&pos);
         // TODO: the flag at 0x21B7 lies inside the 0x34-byte emShot work block of the header (unk2C[7]); the block is
         // really 0x30 bytes (wnemSimple's constructor writes the flags 0x21B4-0x21B7 itself).
         if (m_shotWork.unk2C[7]) {
             Vec3f rot(0.0f, 0.0f, 0.0f);
             bool isLeft = false;
-            if (m_speed.m_x < 0.0f) {
+            float speedX = m_speed.m_x;
+            if (speedX < 0.0f) {
                 isLeft = true;
             }
-            rot.m_z = atan2(m_speed.m_y, m_speed.m_x) * 57.29578f;
-            if (posture.getRotYLr() <= -90.0f) {
+            rot.m_z = static_cast<float>(atan2(m_speed.m_y, speedX)) * 57.29578f;
+            if (m_moduleAccesser->getPostureModule().getRotYLr() <= -90.0f) {
                 rot.m_y = 180.0f;
             }
             if (isLeft == true) {
                 rot.m_z = rot.m_z + 180.0f;
                 rot.m_y = rot.m_y - 180.0f;
             }
-            posture.setRot(&rot, 0);
+            m_moduleAccesser->getPostureModule().setRot(&rot, 0);
         }
     }
 }
@@ -659,23 +676,22 @@ void wnemSimple::constraint() {
 extern "C" void fn_41_31B34(wnemSimple* wnem);
 // Map name wnemSimple::removeConstraint.
 extern "C" void fn_41_31B34(wnemSimple* wnem) {
-    soModuleAccesser* acc = wnem->m_moduleAccesser;
     wnemReport("wnemSimple::removeConstraint \n");
-    if (!acc->getLinkModule().isModelConstraint()) {
+    if (!wnem->m_moduleAccesser->getLinkModule().isModelConstraint()) {
         wnemReport("[warning]wnemSimple::removeConstraint : isModelConstraint false \n");
         return;
     }
-    acc->getLinkModule().adjustModelConstraintPosture(&Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
-    acc->getLinkModule().removeModelConstraint(true);
-    acc->getLinkModule().unlink(3);
+    wnem->m_moduleAccesser->getLinkModule().adjustModelConstraintPosture(&Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
+    wnem->m_moduleAccesser->getLinkModule().removeModelConstraint(true);
+    wnem->m_moduleAccesser->getLinkModule().unlink(3);
     wnem->updateNodeSRT();
     if (reinterpret_cast<wnemShotParamView*>(wnem->m_shotWork.m_param)->m_groundData != NULL) {
-        if (acc->getSituationModule().getKind() == Situation_Air) {
-            if (acc->getGroundModule().getCorrect(0) != soGroundShapeImpl::Correct_Air_Passable) {
-                acc->getGroundModule().setCorrect(soGroundShapeImpl::Correct_Air, 0);
+        if (wnem->m_moduleAccesser->getSituationModule().getKind() == Situation_Air) {
+            if (static_cast<u8>(wnem->m_moduleAccesser->getGroundModule().getCorrect(0)) != soGroundShapeImpl::Correct_Air_Passable) {
+                wnem->m_moduleAccesser->getGroundModule().setCorrect(soGroundShapeImpl::Correct_Air, 0);
             }
         } else {
-            acc->getGroundModule().setCorrect(soGroundShapeImpl::Correct_Ground, 0);
+            wnem->m_moduleAccesser->getGroundModule().setCorrect(soGroundShapeImpl::Correct_Ground, 0);
         }
     }
 }
@@ -711,7 +727,9 @@ void wnemSimple::processFixPositionPreAnimCmd() {
     // TODO(nonmatching): ~97%, the original keeps the accesser in a saved register across the first branch's two calls and
     // loads 1.0f before the address of the second branch's attribute (register allocation).
     if (m_moduleAccesser->getStopModule().isStop() == false) {
-        m_moduleAccesser->getAnimCmdModule().interpretCmd(m_moduleAccesser, soAttributeFlag(0x1d), m_moduleAccesser->getSlowModule().getRate());
+        soAttributeFlag attr(0x1d);
+        soModuleAccesser* acc = m_moduleAccesser;
+        acc->getAnimCmdModule().interpretCmd(acc, attr, acc->getSlowModule().getRate());
     } else {
         m_moduleAccesser->getAnimCmdModule().interpretCmd(m_moduleAccesser, soAttributeFlag(0x10), 1.0f);
     }
