@@ -544,7 +544,7 @@ changeKineticSub3__28ftGameWatchKineticTransactorFPbPvP5Vec2fP16soModuleAccesser
 changeKineticSub4__28ftGameWatchKineticTransactorFPbPvP5Vec2fP16soModuleAccesser = .text:0x00010A14; // type:function size:0x134
 changeKineticSub5__28ftGameWatchKineticTransactorFPbPvP5Vec2fP16soModuleAccesser = .text:0x00010B48; // type:function size:0x1D4
 changeKineticSub6__28ftGameWatchKineticTransactorFPbPvP5Vec2fP16soModuleAccesser = .text:0x00010D1C; // type:function size:0x138
-fn_107_10E54 = .text:0x00010E54; // type:function size:0x14
+clampf__Ffff = .text:0x00010E54; // type:function size:0x14
 changeKineticSub7__28ftGameWatchKineticTransactorFPbPvP5Vec2fP16soModuleAccesser = .text:0x00010E68; // type:function size:0x2B4
 changeKineticSub8__28ftGameWatchKineticTransactorFPbPvP5Vec2fP16soModuleAccesser = .text:0x0001111C; // type:function size:0x20C
 changeKineticSub9__28ftGameWatchKineticTransactorFPbPvP5Vec2fP16soModuleAccesser = .text:0x00011328; // type:function size:0x1BC
