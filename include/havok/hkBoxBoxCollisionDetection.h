@@ -18,8 +18,8 @@ struct hkBoxBoxCollisionDetection {
         hkVector4 m_normal;    // 0x20 separating normal (edge-edge case)
         hkReal m_normalScale;  // 0x30 the face normal is the face axis scaled by -m_normalScale
         hkReal m_distance;     // 0x34 contact distance (the w of the contact normal)
-        int m_featureIndex;    // 0x38 0..2 face of A, 3..6 face of B, above: edge-edge
-        int unk3C;             // 0x3C not identified
+        int m_featureIndex;    // 0x38 0..2 face of A, 3..6 face of B, above: edge-edge (then A's edge feature id)
+        int m_featureIndexB;   // 0x3C B's edge feature id (edge-edge)
 
         hkFeaturePointCache() {}
     };
@@ -36,6 +36,7 @@ struct hkBoxBoxCollisionDetection {
     hkVector4 m_tolerance4;              // 0x80 tolerance in all lanes
     u8 unk90[0xB0 - 0x90];               // 0x90 not identified
     hkReal m_boundaryTolerance;          // 0xB0 limit of the edge-edge separations (only x is read)
+    hkReal m_minEdgeNormalLength;        // 0xB4 isValidEdgeEdge rejects edge pairs whose cross product is shorter
     hkVector4 m_dinA;                    // 0xC0 translation of B in A (copy of m_aTb's translation)
     hkVector4 m_dinB;                    // 0xD0 translation of A in B, rotated (initWorkVariables)
     hkVector4 m_sepDist[5];              // 0xE0 separations of the face axes of A, B and the edge axes
@@ -59,5 +60,6 @@ struct hkBoxBoxCollisionDetection {
                              const hkVector4& normalA, const hkVector4& normalB, hkReal minDist);
     void addAdditionalEdgeHelper(hkBoxBoxManifold& manifold, hkFeatureContactPoint& fcp, hkReal minDist);
     hkBool calculateClosestPoint(hkContactPoint& contact);
+    hkBool isValidEdgeEdge(hkFeaturePointCache& cache);
     void checkCompleteness(hkBoxBoxManifold& manifold, int planeMaskA, int planeMaskB);
 };

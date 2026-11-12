@@ -183,6 +183,78 @@ void hkBoxBoxCollisionDetection::setvdProj(const hkRotation& bRa, int i, int j, 
     out.setAbs4(out);
 }
 
+// Box vertex signs indexed by the 0x80/0x40/0x20 bits of a feature id (bit set: negative lane).
+static const hkReal s_vertexSigns[8][4] __attribute__((aligned(16))) = {
+    {1.0f, 1.0f, 1.0f, 0.0f},   {1.0f, 1.0f, -1.0f, 0.0f},   {1.0f, -1.0f, 1.0f, 0.0f},   {1.0f, -1.0f, -1.0f, 0.0f},
+    {-1.0f, 1.0f, 1.0f, 0.0f},  {-1.0f, 1.0f, -1.0f, 0.0f},  {-1.0f, -1.0f, 1.0f, 0.0f},  {-1.0f, -1.0f, -1.0f, 0.0f},
+};
+
+static inline const hkVector4& getVertexSigns(int featureId) {
+    return *(const hkVector4*)s_vertexSigns[(featureId >> 5) & 7];
+}
+
+hkBool hkBoxBoxCollisionDetection::isValidEdgeEdge(hkFeaturePointCache& cache) {
+    hkVector4 vertexA;
+    hkVector4 edgeB;
+    hkVector4 diff;
+    hkVector4 vertexB;
+    hkVector4 normal;
+    hkVector4 halfEdgeA;
+
+    int featureB = cache.m_featureIndexB;
+    int featureA = cache.m_featureIndex;
+    int dirB = featureB & 0xf;
+    int dirA = featureA & 0xf;
+    const hkVector4& signsA = getVertexSigns(featureA);
+    const hkVector4& signsB = getVertexSigns(featureB);
+
+    vertexA.setMul4(signsA, m_radiusA);
+    vertexB.setMul4(signsB, m_radiusB);
+    edgeB.setMul4(2.0f * m_radiusB(dirB), m_aTb.getColumn(dirB));
+    vertexB._setTransformedPos(m_aTb, vertexB);
+    diff.setSub4(vertexB, vertexA);
+
+    hkReal lenA = -2.0f * m_radiusA(dirA);
+    hkReal dotAB = lenA * edgeB(dirA);
+    hkReal lenSqB = 4.0f * (m_radiusB(dirB) * m_radiusB(dirB));
+    hkReal lenSqA = lenA * lenA;
+    hkReal dotDB = edgeB.dot3(diff);
+    hkReal dotDA = lenA * diff(dirA);
+    hkReal det = lenSqA * lenSqB - dotAB * dotAB;
+    hkReal sNum = dotDA * lenSqB - dotDB * dotAB;
+    hkReal absDet = (hkReal)fabs(det);
+    if (sNum <= 1.1920929e-7f * absDet || sNum >= 0.9999999f * absDet) {
+        return false;
+    }
+    hkReal s = sNum / absDet;
+    hkReal tNum = s * dotAB - dotDB;
+    if (tNum <= 1.1920929e-7f * lenSqB || tNum >= 0.9999999f * lenSqB) {
+        return false;
+    }
+
+    halfEdgeA.setZero4();
+    halfEdgeA(dirA) = 0.5f * lenA;
+    vertexA(dirA) += lenA * s;
+
+    normal.setCross(halfEdgeA, edgeB);
+    hkSimdReal len = normal.length3();
+    normal.mul4(1.0f / len);
+    if (len < m_minEdgeNormalLength) {
+        return false;
+    }
+    if (normal.dot3(signsA) < 0.0f) {
+        normal.setNeg4(normal);
+    }
+    hkReal dist = normal.dot3(diff);
+    if (dist > m_boundaryTolerance) {
+        return false;
+    }
+    cache.unk0 = vertexA;
+    cache.m_normal.setNeg4(normal);
+    cache.m_distance = dist;
+    return true;
+}
+
 hkBool hkBoxBoxCollisionDetection::calculateClosestPoint(hkContactPoint& contact) {
     hkBoxBoxManifold manifold;
     hkFeatureContactPoint fcp;
