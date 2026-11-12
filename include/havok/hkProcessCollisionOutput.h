@@ -24,17 +24,24 @@ struct hkProcessCollisionOutput {
         hkGskCache m_gskCache;    // 0x3038
     };
 
+    // Potential contacts (0x3050). HYPOTHESIS: the names; the agent3 process functions append the first of the
+    // points they just added to the representative list at 0x04.
+    struct PotentialInfo {
+        hkProcessCdPoint* m_firstFreePotentialContact;       // 0x00
+        hkProcessCdPoint** m_firstFreeRepresentativeContact; // 0x04
+    };
+
     hkProcessCdPoint* m_firstFreeContactPoint; // 0x0000
     hkProcessCdPoint m_contactPoints[256];     // 0x0010
     ToiInfo m_toi;                             // 0x3010
-    void* unk3050;                             // 0x3050 cleared by reset (HYPOTHESIS: a pointer, from the word store)
+    PotentialInfo* m_potentialContacts;        // 0x3050 cleared by reset
 
     // Empties the output before an agent runs: no contact points, no time of impact.
     // HYPOTHESIS: the names of reset and isEmpty (hkSimulation::processAgentCollideDiscrete inlines both).
     void reset() {
         m_firstFreeContactPoint = m_contactPoints;
         m_toi.m_time = HK_REAL_MAX;
-        unk3050 = 0;
+        m_potentialContacts = 0;
     }
     hkBool isEmpty() const { return m_firstFreeContactPoint == m_contactPoints; }
 

@@ -101,6 +101,8 @@ inline void hkMonitorStream::TimerCommand::setTime() {
     }
 #define HK_TIMER_SPLIT_LIST_ACCESSORS(NAME) HK_TIMER_COMMAND_ACCESSORS("St" NAME)
 #define HK_TIMER_END_LIST_ACCESSORS() HK_TIMER_COMMAND_ACCESSORS("lt")
+#define HK_TIMER_BEGIN_ACCESSORS(NAME) HK_TIMER_COMMAND_ACCESSORS("Tt" NAME)
+#define HK_TIMER_END_ACCESSORS() HK_TIMER_COMMAND_ACCESSORS("Et")
 
 // Timer lists: the begin command (0x10 bytes) carries the name of the first split at 0x0C, the splits and the end
 // are ordinary 0x0C-byte commands ("St" + split name, "lt"). Store order from hkBvAgent::processCollision.

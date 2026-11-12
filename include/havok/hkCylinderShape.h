@@ -23,6 +23,8 @@ struct hkCylinderShape : hkConvexShape {
     static const void* getVtablehkCylinderShape();
 
     hkReal getCylinderRadius() const;
+    // The two ends of the axis, vertexA and vertexB (map name hkCylinderShape__getVertex).
+    const hkVector4& getVertex(int i) const { return (&m_vertexA)[i]; }
 
     virtual void calcStatistics(hkStatisticsCollector* collector) const;     // 0x0C
     virtual int getType() const;                                             // 0x10

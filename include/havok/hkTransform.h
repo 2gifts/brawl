@@ -22,6 +22,9 @@ struct hkTransform {
     void setInverse(const hkTransform& t);
     void setMul(const hkTransform& a, const hkTransform& b);
     void setMulInverseMul(const hkTransform& a, const hkTransform& b);
+
+    // Out-of-line copy (a bare blr) in hkPoweredChainData.o.
+    const hkRotation& getRotation() const { return m_rotation; }
 };
 
 inline void hkVector4::_setTransformedPos(const hkTransform& t, const hkVector4& v) {

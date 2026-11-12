@@ -24,11 +24,22 @@ struct hkAgent1nTrack {
     static void* operator new(unsigned long, void* where) { return where; }
 };
 
-// Header of one agent in an agent track sector. HYPOTHESIS: only the 0x04 word is known (the cylinder agent keeps its
-// "body is a cylinder" bits there: 1 for A, 2 for B).
+// Pointer plus a byte offset (Havok's hkAddByteOffset; its out-of-line hkAddByteOffset<void> copy is in
+// hkPredGskAgent3.o). The agent3 functions return the end of their agent data with it.
+template <class T>
+T* hkAddByteOffset(T* base, int offset) {
+    return (T*)((char*)base + offset);
+}
+
+// Header of one agent in an agent track sector. The cylinder agent keeps its flags in the 0x04 word: "body is a
+// cylinder" (1 for A, 2 for B) and "the cylinder runs as a capsule" (4 for A, 8 for B).
+// HYPOTHESIS: m_numContactPoints (the agent3 process functions copy the manifold's point count there).
 struct hkAgentEntry {
-    u32 unk0;  // 0x00
-    u32 unk4;  // 0x04
+    u8 unk0;               // 0x00
+    u8 unk1;               // 0x01
+    u8 m_numContactPoints; // 0x02
+    u8 unk3;               // 0x03
+    u32 unk4;              // 0x04
 };
 
 // Input of the agent3 (stream) functions: the bodies, the collision input, the contact manager and A's transform in
@@ -42,9 +53,11 @@ struct hkAgent3Input {
 };
 
 // The process input adds the linear time-of-impact info of the step (0x70 bytes).
-// HYPOTHESIS: unk50 (not written by hkBvTreeStreamAgent::processCollision).
+// HYPOTHESIS: m_distAtT1 (not written by hkBvTreeStreamAgent::processCollision; the cylinder agent compares it with
+// the separation limits and stores it as the separating plane's distance).
 struct hkAgent3ProcessInput : hkAgent3Input {
-    hkVector4 unk50;           // 0x50
+    hkReal m_distAtT1;         // 0x50
+    u8 unk54[0xC];             // 0x54
     hkVector4 m_linearTimInfo; // 0x60
 
     hkAgent3ProcessInput() {}

@@ -177,6 +177,8 @@ struct hkVector4 {
     hkReal& operator[](int i) { return (&x)[i]; }
     hkReal getSimdAt(int i) const { return (&x)[i]; }
     hkReal dot3(const hkVector4& a) const { return x * a.x + y * a.y + z * a.z; }
+    // Element access (out of line at 0x800966A4, __cl__9hkVector4Fi).
+    hkReal& operator()(int i) { return (&x)[i]; }
     hkSimdReal lengthSquared3() const { return x * x + y * y + z * z; }
     hkSimdReal lengthSquared4() const { return dot3(*this) + w * w; }
     hkSimdReal length3() const { return sqrtf(lengthSquared3()); }

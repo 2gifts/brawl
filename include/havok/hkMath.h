@@ -13,4 +13,9 @@ struct hkMath {
     static hkReal asin(hkReal r);
     // The larger of a and b (out of line in hkPoweredChainSolverUtil.o).
     static hkReal max2f(hkReal a, hkReal b);
+    // Out of line in hkVehicleFrictionSolver.o (map names hkMath__fabs, hkMath__min2_f_); the functions compiled
+    // without inlining call them.
+    // The name is parenthesized because the MSL math.h defines fabs(x) as a macro.
+    static float(fabs)(float x);
+    static float min2(float a, float b);
 };

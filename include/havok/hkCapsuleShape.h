@@ -17,8 +17,10 @@ struct hkCapsuleShape : hkConvexShape {
     hkVector4 m_vertexB; // 0x20
 
     hkCapsuleShape(hkFinishLoadedObjectFlag flag) {} // finish-loading ctor: only the vtable is written
+    // Out of line at 0x802CEBE0 (not written yet). HYPOTHESIS: the parameters (the cylinder agent passes the
+    // cylinder's axis ends and the radius).
+    hkCapsuleShape(const hkVector4& vertexA, const hkVector4& vertexB, hkReal radius);
     virtual ~hkCapsuleShape();
-    HK_DECLARE_REF_ALLOCATOR(0x25)
 
     static void finishLoadedObjecthkCapsuleShape(void* p);
     static void cleanupLoadedObjecthkCapsuleShape(void* p);
