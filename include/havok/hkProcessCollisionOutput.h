@@ -8,13 +8,15 @@
 // HYPOTHESIS: the name; only m_contact is touched by the code written so far.
 struct hkProcessCdPoint {
     hkContactPoint m_contact; // 0x00 (distance in m_contact.m_normal.w)
-    u8 unk20[0x10];           // 0x20 not identified
+    u16 m_contactPointId;     // 0x20 HYPOTHESIS: the name (copied as a halfword when a point is moved)
+    u8 unk22[0x0E];           // 0x22 not identified (copied bytewise)
 };
 
 // Output of processCollision. Layout from the symmetric processCollision wrappers: the agent appends contact points
 // at m_firstFreeContactPoint (0x00) into the inline array (0x10..0x300F), and may record a time of impact in m_toi
 // (0x3010). HYPOTHESIS: the array length (256 = (0x3010 - 0x10) / 0x30) and the member names.
-struct hkProcessCollisionOutput {
+// The data members sit in the base hkProcessCollisionData (map name hkProcessCollisionData::getNumContactPoints).
+struct hkProcessCollisionData {
     // Time-of-impact record (0x3010). A wrapper that ran the agent with the bodies swapped turns it back when the agent
     // changed m_time: it negates the contact normal and flips m_gskCache.
     struct ToiInfo {
@@ -44,7 +46,11 @@ struct hkProcessCollisionOutput {
         m_potentialContacts = 0;
     }
     hkBool isEmpty() const { return m_firstFreeContactPoint == m_contactPoints; }
+    // Out-of-line copy in hkBoxBoxCollisionDetection.o.
+    int getNumContactPoints() const { return m_firstFreeContactPoint - m_contactPoints; }
+};
 
+struct hkProcessCollisionOutput : hkProcessCollisionData {
     // Out of line (processAgentsOfEntities calls it): only the time of impact is initialised, to the largest float.
     hkProcessCollisionOutput();
 };

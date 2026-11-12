@@ -138,8 +138,12 @@ struct hkVector4 {
     // Lane-wise product in place: this *= a (out of line: defined in src/havok/hkRigidMotionUtil.cpp).
     void mul4(const hkVector4& a);
     // Lane-wise product: this = a * b.
+    // Lane order x..w, like its out-of-line weak copy in hkBoxBoxCollisionDetection.o.
     void setMul4(const hkVector4& a, const hkVector4& b) {
-        set(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
+        x = a.x * b.x;
+        y = a.y * b.y;
+        z = a.z * b.z;
+        w = a.w * b.w;
     }
     // Lane-wise minimum, a < b ? a : b per lane (sphere/box agent).
     void setMin4(const hkVector4& a, const hkVector4& b) {
@@ -190,6 +194,40 @@ struct hkVector4 {
     hkReal dot3(const hkVector4& a) const { return x * a.x + y * a.y + z * a.z; }
     // Element access (out of line at 0x800966A4, __cl__9hkVector4Fi).
     hkReal& operator()(int i) { return (&x)[i]; }
+    // Const element access (out-of-line copy in hkSolver.o, map name hkVector4::operator() 1).
+    const hkReal& operator()(int i) const { return (&x)[i]; }
+    // All four lanes = v (map name setAll3; its out-of-line copy in hkBoxBoxCollisionDetection.o stores x..w).
+    void setAll3(hkReal v) {
+        x = v;
+        y = v;
+        z = v;
+        w = v;
+    }
+    // Face feature bits of a box from a direction: x/y/z lanes that are negative give 0x80/0x40/0x20, and the
+    // sign of s gives 0x08. Weak copy in hkBoxBoxCollisionDetection.o. HYPOTHESIS: the meaning of the bits.
+    int calcFaceFeatureBitSetFromAxisMap(hkReal s) const {
+        int mask = compareLessThanZero4() & 0xe;
+        return (mask << 4) | ((*(u32*)&s >> 28) & 8);
+    }
+    // Index of the largest of x, y, z (returned in index) and its plane bit (0x80, 0x40, 0x20). The direction is not
+    // read (weak copy in hkBoxBoxCollisionDetection.o).
+    int getMaxPlaneMask3(const hkVector4& dir, int& index) const {
+        int i;
+        int mask;
+        if (x > y) {
+            i = 0;
+            mask = 0x80;
+        } else {
+            i = 1;
+            mask = 0x40;
+        }
+        if (z > (&x)[i]) {
+            i = 2;
+            mask = 0x20;
+        }
+        index = i;
+        return mask;
+    }
     hkSimdReal lengthSquared3() const { return x * x + y * y + z * z; }
     hkSimdReal lengthSquared4() const { return dot3(*this) + w * w; }
     // 1 / (approximate reciprocal square root): the out-of-line copy in hkSimpleContactConstraintInfo.o.
