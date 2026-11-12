@@ -127,6 +127,21 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
   declaration order (first declared = highest). The accessor copies name const-ness: a copy the function writes through
   is the non-const overload, so check the callers before trusting a map-derived `CFv`/`Fv` label (hkContactPoint:
   getPosition at 0x802F2ECC is the non-const one). Seen: `hkCollideCapsuleUtilCapsVsTri`. **MED**
+- **A `dont_inline` function whose vector locals are never constructed (no `bl __ct__9hkVector4Fv` for stack vectors
+  that `setZero4`/`__as` are called on), while its other accessors are out-of-line calls:** no pragma or flag reproduces
+  that (dont_inline, always_inline, inline_depth/auto_inline, `-inline off`, exceptions on/off all call the empty
+  constructor). Untyped 16-aligned storage plus a `(*(hkVector4*)&storage)` alias per name (scoped `#define`s, MATCH-ONLY)
+  gave the exact function; a reference alias does not (it takes a saved register). Also check the function for the
+  propagation-off mode first: an `hkSimdReal` local (the normal's `lengthSquared3()`, reused for two tests) lined up all
+  saved registers there, and an `extrwi.` test of a compare is a `bool` local in that mode. Seen:
+  `hkSimpleContactConstraintDataBuildJacobian` (`src/havok/hkSimpleContactConstraintInfo.cpp`). **MED**
+- **A u16 accessor result added to an int without `clrlwi rX, rY, 16` in the target: the accessor returns `int`**
+  (its `lhz; blr` body is the same). Seen: `hkContactPointMaterial::getFriction8_8`. **MED**
+- **Before changing a widely inlined header body for one out-of-line copy, compile every Havok unit with the variant
+  header in a shadow include dir and compare per-function objdiff scores:** `hvtools/xu.sh INC unit...` (unit totals)
+  and `hvtools/out/xvar.py` (per function); about 3 minutes for all 251 units. hkVector4::setCross in lane form makes the
+  hkSimpleContactConstraintInfo copy exact but drops hkMatrix3::invertSymmetric and two others, so it stays on `set()`.
+  **MED**
 - **`bge body; bge body; b exit` in front of a long block (where `blt exit` would be the obvious form) is an early return
   folded into an earlier test:** `if ((mask0 & mask1) || (a < -m && b < -m)) return;` gave the target's branches; the two
   float tests as their own `if (...) return;` give `blt`. Seen: `hkCollideCapsuleUtilCapsVsTri`. **MED**
