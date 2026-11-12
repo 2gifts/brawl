@@ -169,7 +169,7 @@ struct hkArray : hkArrayBase {
         ((T*)m_data)[m_size++] = t;
     }
     void pushBack(const T& t) {
-        if (m_size == (m_capacityAndFlags & CAPACITY_MASK)) {
+        if (m_size == getCapacity()) {
             hkArrayUtil::_reserveMore(this, sizeof(T));
         }
         ((T*)m_data)[m_size++] = t;

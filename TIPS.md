@@ -166,6 +166,22 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
   `input.m_dispatcher` each time. Several early `return f(x, infoB)` in the original are one `infoA` variable and a single
   call at the end (the target has one `bl`). Seen: `hkGroupFilter::isCollisionEnabled` (shape collection overload).
   **MED**
+- **Small Havok recipes found while sweeping unwritten functions (2026-11-12):** (a) a recursive member that MWCC
+  inlines one level into itself: `#pragma push` / `#pragma auto_inline off` / `#pragma pop` around its definition
+  (`hkCollisionDispatcher::updateHasAlternateType`); (b) `cmpw rField, rParam` where ours gives `cmpw rParam, rField`
+  for `a[i].f == p`: take a `const T& e = a[i];` local first (`registerAlternateShapeType`); (c) a destructor that
+  calls a sibling member with `bl` although it is defined earlier in the file: the same pragma around the sibling
+  (`~hkCollisionDispatcher` -> `disableDebugging`); (d) a `pushBack` whose capacity load lands in the other register
+  pair: `m_size == getCapacity()` instead of the masked field (hkArray.h; made `hkWorldOperationQueue::queueOperation`
+  exact, checked over every unit with `hvtools/xu.sh`); (e) a 4-float copy back into `this` that alternates `lfs`/
+  `stfs` while the rest of the function is scheduled: the source object came in through a non-const pointer parameter
+  (`hkSpatialRigidBodyDeactivator::shouldDeactivate*Frequency(hkEntity*)`); (f) unnamed weak deleting dtors with
+  `li r6, <class>` name the class allocator id: `hkWorldObject` 0x13, `hkCollisionDispatcher` 0x25 (its constructor
+  call site in hkWorld allocates with the same id), `hkPhantomBroadPhaseListener` 0x1f. **MED**
+- **Before writing a function, check whether it is already written under our name:** a function can sit in our object
+  with a real mangled name while `symbols.txt` still calls the target `fn_...` (hkBoxMotion's inertia getters, the
+  world island callbacks). `hvtools/out/unnamed.py` pairs our-only functions with unnamed target functions by the
+  DebugMode map's method/class name. **MED**
 - **Dead stack copies of a transform in reverse column order (col0 at the highest address) right before an inline
   constructor's member stores: the member's copy goes through four `hkVector4` temporaries** (`r0..r3 = columns`, then
   assigned). Seen only in propagation-off callers. Put the copy in a member-local type (`hkBoxBoxTransform` in
