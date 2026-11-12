@@ -7,6 +7,10 @@ struct hkTransform {
     hkRotation m_rotation;     // 0x00
     hkVector4 m_translation;   // 0x30
 
+    // Empty default constructor (map name hkTransform::hkTransform; its out-of-line copy in hkBvTreeStreamAgent.o is a
+    // bare blr).
+    hkTransform() {}
+
     // Out-of-line members defined in src/havok/hkInertiaTensorComputer.cpp.
     void setRotation(const hkQuaternion& q);
     void setIdentity();

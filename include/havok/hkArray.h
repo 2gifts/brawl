@@ -164,6 +164,10 @@ struct hkArray : hkArrayBase {
         return ((T*)m_data)[m_size++];
     }
 
+    // Appends without checking the capacity (the caller has reserved it).
+    void pushBackUnchecked(const T& t) {
+        ((T*)m_data)[m_size++] = t;
+    }
     void pushBack(const T& t) {
         if (m_size == (m_capacityAndFlags & CAPACITY_MASK)) {
             hkArrayUtil::_reserveMore(this, sizeof(T));
@@ -239,5 +243,5 @@ template <typename T, int N>
 struct hkInplaceArray : hkArray<T> {
     T m_storage[N];
 
-    hkInplaceArray() : hkArray<T>(m_storage, 0, N) {}
+    hkInplaceArray(int size = 0) : hkArray<T>(m_storage, size, N) {}
 };

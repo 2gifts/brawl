@@ -34,4 +34,7 @@ struct hkCdBody {
     }
     // Returns the motion of the body (map name hkCdBody__getTransform; the function reads the 0x08 word).
     hkMotion* getTransform() const { return m_motion; }
+    // The same word seen as the body's motion state (map name hkCdBody__getMotionState).
+    const struct hkMotionState* getMotionState() const { return (const struct hkMotionState*)m_motion; }
+    const hkShape* getShape() const { return m_shape; }
 };

@@ -62,10 +62,17 @@ struct hkConvexListAgent : hkPredGskfAgent {
 
 // HYPOTHESIS: hkSymmetricAgent<hkConvexListAgent> (map name); only its linear cast is written.
 struct hkSymmetricAgent_17hkConvexListAgent_ : hkConvexListAgent {
+    hkSymmetricAgent_17hkConvexListAgent_(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                          hkContactMgr* contactMgr)
+        : hkConvexListAgent(bodyA, bodyB, input, contactMgr) {}
     virtual void linearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };
 
-// HYPOTHESIS: hkSymmetricAgentLinearCast<hkConvexListAgent> (map name); only its static linear cast is written.
+// HYPOTHESIS: hkSymmetricAgentLinearCast<hkConvexListAgent> (map name); its static linear cast is written.
+// Created by createListConvexAgent (vtable 0x80486A6C).
 struct hkSymmetricAgentLinearCast_17hkConvexListAgent_ : hkSymmetricAgent_17hkConvexListAgent_ {
+    hkSymmetricAgentLinearCast_17hkConvexListAgent_(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                    hkCollisionInput& input, hkContactMgr* contactMgr)
+        : hkSymmetricAgent_17hkConvexListAgent_(bodyA, bodyB, input, contactMgr) {}
     static void staticLinearCast(const hkCdBody& a, const hkCdBody& b, hkLinearCastCollisionInput& c, void* target, void* d);
 };

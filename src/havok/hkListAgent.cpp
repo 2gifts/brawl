@@ -21,7 +21,7 @@
 hkListAgent* hkListAgent::createListAAgent(void* a, void* b, void* c, int d) {
     hkListAgent* agent = (hkListAgent*)hkMemory::s_instance->allocateChunk(sizeof(hkListAgent), 0x1d);
     agent->m_memSizeAndFlags = sizeof(hkListAgent);
-    return new (agent) hkListAgentVariant(b, a, c, d);
+    return new (agent) hkSymmetricAgent_11hkListAgent_(b, a, c, d);
 }
 
 hkListAgent* hkListAgent::createListBAgent(void* a, void* b, void* c, int d) {
@@ -47,7 +47,7 @@ struct FilterArgs {
 };
 
 void hkListAgent::cleanup() {
-    fn_802FC6AC(m_subObject, unkC, unk8);
+    fn_802FC6AC(&m_agentTrack, unkC, unk8);
     delete this;
 }
 
@@ -58,15 +58,15 @@ void hkListAgent::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody&
     args.d = &d;
     args.unk8 = unk8;
     args.bValue = (u32)b.m_shape;
-    fn_802FEA54(m_subObject, &args);
+    fn_802FEA54(&m_agentTrack, &args);
 }
 
 void hkListAgent::invalidateTim(void* arg) {
-    fn_802FC824((char*)this + 0x10, arg);
+    fn_802FC824(&m_agentTrack, arg);
 }
 
 void hkListAgent::warpTime(float t0, float t1, void* arg) {
-    fn_802FC988((char*)this + 0x10, t0, t1, arg);
+    fn_802FC988(&m_agentTrack, t0, t1, arg);
 }
 
 void hkListAgent::getClosestPoints(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {

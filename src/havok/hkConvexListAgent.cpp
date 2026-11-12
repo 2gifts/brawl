@@ -70,8 +70,6 @@
 // Dispatcher registration entry point (not recovered yet; takes the dispatcher, a registration record
 // and the two shape type ids). Same routine as hkPhantomAgent and hkSphereSphereAgent use.
 // Stand-ins for the symmetric linear-cast agent functions (other classes, other units).
-// hkListAgent constructor (hkListAgent.cpp): the fallback object of createConvexListAgent.
-extern "C" void fn_802B87B8(void* self, void* a, void* b, void* c, int flag);
 // Stream-mode and GSK-mode helpers (other units). fn_802FC824/fn_802FC988 act on the 0x30 sub-object.
 extern "C" void fn_802B1A6C(hkConvexListAgent* self);
 extern "C" void fn_802B1B08(hkConvexListAgent* self);
@@ -272,12 +270,22 @@ hkCollisionAgent* hkConvexListAgent::createConvexListAgent(void* a, void* b, voi
         return new hkConvexListAgent(*(const hkCdBody*)a, *(const hkCdBody*)b, *(hkCollisionInput*)c,
                                      (hkContactMgr*)flag);
     }
-    hkCollisionAgent* agent = (hkCollisionAgent*)hkMemory::getInstance().allocateChunk(0x20, 0x1d);
-    agent->m_memSizeAndFlags = 0x20;
-    if (agent != 0) {
-        fn_802B87B8(agent, a, b, c, flag);
-    }
+    hkListAgent* agent = (hkListAgent*)hkMemory::getInstance().allocateChunk(sizeof(hkListAgent), 0x1d);
+    agent->m_memSizeAndFlags = sizeof(hkListAgent);
+    new (agent) hkListAgent(a, b, c, flag);
     return agent;
+}
+
+// The mirror of createConvexListAgent for the list in A: the symmetric agent (or the symmetric list agent when there
+// is no contact manager) with the bodies swapped.
+hkCollisionAgent* hkConvexListAgent::createListConvexAgent(void* a, void* b, void* c, int flag) {
+    if (flag != 0) {
+        return new hkSymmetricAgentLinearCast_17hkConvexListAgent_(*(const hkCdBody*)b, *(const hkCdBody*)a,
+                                                                   *(hkCollisionInput*)c, (hkContactMgr*)flag);
+    }
+    hkListAgent* agent = (hkListAgent*)hkMemory::getInstance().allocateChunk(sizeof(hkListAgent), 0x1d);
+    agent->m_memSizeAndFlags = sizeof(hkListAgent);
+    return new (agent) hkSymmetricAgent_11hkListAgent_(b, a, c, flag);
 }
 
 hkConvexListAgent::~hkConvexListAgent() {}
