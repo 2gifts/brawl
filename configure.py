@@ -2510,6 +2510,9 @@ config.libs = [
             Object(Matching, "mo_fighter/ft_zelda/ft_sheik_status_uniq_process_special_hi_end.cpp"),
             Object(NonMatching, "mo_fighter/ft_zelda/ft_sheik_status_uniq_process_special_lw.cpp"),
             Object(NonMatching, "mo_fighter/ft_zelda/ft_zelda.cpp"),
+            Object(NonMatching, "mo_fighter/ft_zelda/ft_zelda_cut_in_transactor_final.cpp"),
+            Object(NonMatching, "mo_fighter/ft_zelda/ft_sheik.cpp"),
+            Object(NonMatching, "mo_fighter/ft_zelda/ft_sheik_kinetic_transactor.cpp"),
         ],
     },
     {
