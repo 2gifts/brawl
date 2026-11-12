@@ -11708,7 +11708,7 @@ staticGetClosestPoints__13hkBoxBoxAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInpu
 getClosestPoints__13hkBoxBoxAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputPv = .text:0x802A1844; // type:function size:0x14
 staticGetPenetrations__13hkBoxBoxAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputPv = .text:0x802A1858; // type:function size:0x50C
 getPenetrations__13hkBoxBoxAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputPv = .text:0x802A1D64; // type:function size:0x14
-fn_802A1D78 = .text:0x802A1D78; // type:function size:0x4
+updateShapeCollectionFilter__16hkCollisionAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInput = .text:0x802A1D78; // type:function size:0x4
 fn_802A1D7C = .text:0x802A1D7C; // type:function size:0xC
 __ct__16hkBoxBoxManifoldFv = .text:0x802A1D88; // type:function size:0x4C
 addPoint__16hkBoxBoxManifoldFiiPCQ216hkBoxBoxManifold5Point = .text:0x802A1DD4; // type:function size:0xB8
@@ -12039,7 +12039,7 @@ getClosestPoints__48hkSymmetricAgentLinearCast_18hkMultiSphereAgent_FRC8hkCdBody
 staticGetClosestPoints__48hkSymmetricAgentLinearCast_18hkMultiSphereAgent_FRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputPv = .text:0x802BD350; // type:function size:0x48
 staticLinearCast__48hkSymmetricAgentLinearCast_18hkMultiSphereAgent_FRC8hkCdBodyRC8hkCdBodyR26hkLinearCastCollisionInputPvPv = .text:0x802BD398; // type:function size:0x160
 processCollision__48hkSymmetricAgentLinearCast_18hkMultiSphereAgent_FRC8hkCdBodyRC8hkCdBodyR23hkProcessCollisionInputPv = .text:0x802BD4F8; // type:function size:0x19C
-fn_802BD694 = .text:0x802BD694; // type:function size:0x4
+updateShapeCollectionFilter__48hkSymmetricAgentLinearCast_18hkMultiSphereAgent_FRC8hkCdBodyRC8hkCdBodyR16hkCollisionInput = .text:0x802BD694; // type:function size:0x4
 __dt__38hkSymmetricAgent_18hkMultiSphereAgent_Fv = .text:0x802BD698; // type:function size:0xA0
 registerAgent__26hkMultiSphereTriangleAgentFP21hkCollisionDispatcher = .text:0x802BD738; // type:function size:0xCC
 createTriangleMultiSphereAgent__26hkMultiSphereTriangleAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputP12hkContactMgr = .text:0x802BD804; // type:function size:0xD4
@@ -12057,7 +12057,7 @@ getClosestPoints__56hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_FRC8
 staticGetClosestPoints__56hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_FRC8hkCdBodyRC8hkCdBodyR16hkCollisionInputPv = .text:0x802BFB08; // type:function size:0x48
 staticLinearCast__56hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_FRC8hkCdBodyRC8hkCdBodyR26hkLinearCastCollisionInputPvPv = .text:0x802BFB50; // type:function size:0x160
 fn_802BFCB0 = .text:0x802BFCB0; // type:function size:0x880
-fn_802C0530 = .text:0x802C0530; // type:function size:0x4
+updateShapeCollectionFilter__56hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_FRC8hkCdBodyRC8hkCdBodyR16hkCollisionInput = .text:0x802C0530; // type:function size:0x4
 __dt__56hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_Fv = .text:0x802C0534; // type:function size:0x5C
 __ct__11hkNullAgentFv = .text:0x802C0590; // type:function size:0x20
 staticGetClosestPoints__11hkNullAgentFv = .text:0x802C05B0; // type:function size:0x4

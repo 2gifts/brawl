@@ -393,6 +393,10 @@ void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::processCollision(const hk
     hkSymmetricAgent_processCollision<hkMultiSphereAgent>(this, a, b, c, d);
 }
 
+// The multi-sphere agent keeps no filtered children, so the swapped forward is empty.
+void hkSymmetricAgentLinearCast_18hkMultiSphereAgent_::updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b,
+                                                                                   hkCollisionInput& c) {}
+
 void hkMultiSphereTriangleAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs triangle;
     triangle.create = (hkAgentFunc)createTriangleMultiSphereAgent;
@@ -496,3 +500,8 @@ void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::staticGetClosestP
     hkSymmetricAgentFlipCollector wrapped(target);
     hkMultiSphereTriangleAgent::staticGetClosestPoints(b, a, c, &wrapped);
 }
+
+// The triangle agent keeps no filtered children either (empty swapped forward).
+void hkSymmetricAgentLinearCast_26hkMultiSphereTriangleAgent_::updateShapeCollectionFilter(const hkCdBody& a,
+                                                                                           const hkCdBody& b,
+                                                                                           hkCollisionInput& c) {}
