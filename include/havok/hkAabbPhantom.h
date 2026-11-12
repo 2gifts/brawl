@@ -10,7 +10,7 @@ struct hkAabbPhantom : hkPhantom {
     hkArray<hkCollidable*> m_overlappingCollidables;  // 0x90
 
     // HYPOTHESIS: the second parameter is the collidable's collision filter info.
-    hkAabbPhantom(const hkAabb& aabb, u32 collisionFilterInfo = 0);
+    hkAabbPhantom(const hkAabb& aabb, u32 collisionFilterInfo = 0) __attribute__((never_inline)); // clone calls it
     hkAabbPhantom(hkFinishLoadedObjectFlag flag);
     virtual ~hkAabbPhantom();
 
@@ -21,12 +21,13 @@ struct hkAabbPhantom : hkPhantom {
     virtual void calcAabb(hkAabb& out);
     virtual void addOverlappingCollidable(hkCollidable* collidable);
     virtual hkBool isOverlappingCollidableAdded(hkCollidable* collidable) const;
-    virtual hkPhantom* clone() const; // not written yet
+    virtual hkPhantom* clone() const;
     virtual void removeOverlappingCollidable(hkCollidable* collidable);
     virtual void calcStatistics(hkStatisticsCollector* collector) const;
     virtual void updateShapeCollectionFilter();
     virtual hkMotion* getMotionState() const;
     void deallocateInternalArrays();
+    void setAabb(const hkAabb& aabb);
 };
 
 // Static type registration record for phantoms (same layout as hkTypeInfo; see hkMotion.h).

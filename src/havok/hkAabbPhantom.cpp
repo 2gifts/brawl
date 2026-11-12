@@ -20,6 +20,7 @@
 #include <havok/hkAabbPhantom.h>
 #include <havok/hkCollidable.h>
 #include <havok/hkThreadMemory.h>
+#include <havok/hkMonitorStream.h>
 
 hkAabbPhantom::hkAabbPhantom(const hkAabb& aabb, u32 collisionFilterInfo) : hkPhantom(0) {
     m_aabb = aabb;
@@ -55,6 +56,26 @@ const void* hkAabbPhantom::getVtablehkAabbPhantom() {
 
 
 hkAabbPhantom::~hkAabbPhantom() {
+}
+
+// Not in main.dol (the linker stripped it); only its timer literals ("TtrcPhantom", "Et") remain, at the start of
+// this unit's string pool. HYPOTHESIS: body (Havok's setAabb moves the broad-phase entry when in a world).
+void hkAabbPhantom::setAabb(const hkAabb& aabb) {
+    HK_TIMER_BEGIN("rcPhantom");
+    if (m_world) {
+        updateBroadPhase((void*)&aabb);
+    }
+    m_aabb = aabb;
+    HK_TIMER_END();
+}
+
+// The listener arrays (hkPhantom) and the property array (hkWorldObject) are copied with hkArray::operator=.
+hkPhantom* hkAabbPhantom::clone() const {
+    hkAabbPhantom* phantom = new hkAabbPhantom(m_aabb, m_collidable.m_broadPhaseHandle.m_collisionFilterInfo);
+    phantom->m_overlapListeners = m_overlapListeners;
+    phantom->m_phantomListeners = m_phantomListeners;
+    phantom->m_properties = m_properties;
+    return phantom;
 }
 
 // HYPOTHESIS: type id 0 (same as hkShape's invalid type).
