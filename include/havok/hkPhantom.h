@@ -84,9 +84,12 @@ struct hkPhantom : hkWorldObject {
 };
 
 // Broad-phase listener that forwards pair add/remove to the phantom owning each side.
-// HYPOTHESIS: base class (hkBroadPhaseListener) not recovered; slots not identified.
+// Vtable (lbl_80488290): dtor, calcStatistics, addCollisionPair, removeCollisionPair. HYPOTHESIS: the two pair
+// callbacks come from an hkBroadPhaseListener interface that is not modelled separately. Freed as class 0x1f.
 struct hkPhantomBroadPhaseListener : hkReferencedObject {
+    HK_DECLARE_REF_ALLOCATOR(0x1f)
+
     virtual ~hkPhantomBroadPhaseListener() {}
-    void addCollisionPair(hkBroadPhaseHandlePair* pair);
-    void removeCollisionPair(hkBroadPhaseHandlePair* pair);
+    virtual void addCollisionPair(hkBroadPhaseHandlePair* pair);
+    virtual void removeCollisionPair(hkBroadPhaseHandlePair* pair);
 };

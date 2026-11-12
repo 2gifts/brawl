@@ -35,23 +35,10 @@ hkBoxMotion::hkBoxMotion(const hkVector4& position, const hkQuaternion& rotation
 
 
 void hkBoxMotion::getInertiaLocal(hkMatrix3& out) const {
-    // Three diagonal entries (1 / inverse inertia) on zeroed off-diagonal lanes.
-    float* m = matrixElements(out);
-    float ix = 1.0f / m_inertiaAndMassInv.x;
-    float iy = 1.0f / m_inertiaAndMassInv.y;
-    float iz = 1.0f / m_inertiaAndMassInv.z;
-    m[0] = ix;
-    m[1] = 0.0f;
-    m[2] = 0.0f;
-    m[3] = 0.0f;
-    m[4] = 0.0f;
-    m[5] = iy;
-    m[6] = 0.0f;
-    m[7] = 0.0f;
-    m[8] = 0.0f;
-    m[9] = 0.0f;
-    m[10] = iz;
-    m[11] = 0.0f;
+    hkReal ix = 1.0f / m_inertiaAndMassInv.x;
+    hkReal iy = 1.0f / m_inertiaAndMassInv.y;
+    hkReal iz = 1.0f / m_inertiaAndMassInv.z;
+    out.setDiagonal(ix, iy, iz);
 }
 
 void hkBoxMotion::setInertiaLocal(const hkMatrix3& in) {
@@ -61,19 +48,10 @@ void hkBoxMotion::setInertiaLocal(const hkMatrix3& in) {
 }
 
 void hkBoxMotion::getInertiaInvLocal(hkMatrix3& out) const {
-    float* m = matrixElements(out);
-    m[0] = m_inertiaAndMassInv.x;
-    m[1] = 0.0f;
-    m[2] = 0.0f;
-    m[3] = 0.0f;
-    m[4] = 0.0f;
-    m[5] = m_inertiaAndMassInv.y;
-    m[6] = 0.0f;
-    m[7] = 0.0f;
-    m[8] = 0.0f;
-    m[9] = 0.0f;
-    m[10] = m_inertiaAndMassInv.z;
-    m[11] = 0.0f;
+    hkReal ix = m_inertiaAndMassInv.x;
+    hkReal iy = m_inertiaAndMassInv.y;
+    hkReal iz = m_inertiaAndMassInv.z;
+    out.setDiagonal(ix, iy, iz);
 }
 
 void hkBoxMotion::setInertiaInvLocal(const hkMatrix3& in) {

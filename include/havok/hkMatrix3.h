@@ -58,6 +58,14 @@ struct hkMatrix3 {
         m_col1.y = one;
         m_col2.z = one;
     }
+    // Zero matrix with the three given diagonal entries (hkBoxMotion's inertia getters: the dead stores of the zero
+    // temporary stay on the stack).
+    void setDiagonal(hkReal m00, hkReal m11, hkReal m22) {
+        setZero();
+        m_col0.x = m00;
+        m_col1.y = m11;
+        m_col2.z = m22;
+    }
     // Element (row, column) (out-of-line copy at 0x80291270).
     hkReal& operator()(int row, int column) { return (&m_col0.x)[column * 4 + row]; }
     // Column i (out-of-line copies: non-const in hkPoweredChainData.o, const in hkBoxBoxCollisionDetection.o).
