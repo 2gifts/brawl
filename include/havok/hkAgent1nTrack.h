@@ -24,6 +24,13 @@ struct hkAgent1nTrack {
     static void* operator new(unsigned long, void* where) { return where; }
 };
 
+// Header of one agent in an agent track sector. HYPOTHESIS: only the 0x04 word is known (the cylinder agent keeps its
+// "body is a cylinder" bits there: 1 for A, 2 for B).
+struct hkAgentEntry {
+    u32 unk0;  // 0x00
+    u32 unk4;  // 0x04
+};
+
 // Input of the agent3 (stream) functions: the bodies, the collision input, the contact manager and A's transform in
 // B's space.
 struct hkAgent3Input {

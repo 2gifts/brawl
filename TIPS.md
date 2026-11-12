@@ -103,6 +103,22 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
 - **Two stack temporaries in the reverse order and declaration order changes nothing: they were locals of an inlined function.** At function scope MWCC gives the first-declared local the higher address; locals of an inlined callee come out the other way round. Move the temporaries into a small `static inline` helper (or the header inline they came from). Seen: `hkRotation::isOrthonormal` (its tail is `hkVector4::equals3`), the path box in both `hkBvTreeAgent` linear casts (`hkBvTreeAgent_expandByPath`). **MED**
 - **Havok interpolation is `(1 - t) * a + t * b`** (`fmuls t*b`, then `fmadds (1-t)*a + that`; `1 - t` computed once), not `a + (b - a) * t`. In `hkSweptTransformUtil` this, plus the quaternion normalize as a guarded `__frsqrte` + one Newton step (0 gives 0, negative gives +inf), took lerp2/lerp2Ha/backStep/freeze from 62-75 to 87-95 objdiff. **HIGH**
 - **Which class owns a deleting destructor:** count the `beq` that follow the `this` null test before the first member's destruction; each one is an inlined destructor level. 0x802A8D68 has three (linear-cast variant, `hkSymmetricAgent`, `hkBvTreeAgent`), so it is `hkSymmetricAgentLinearCast<hkBvTreeAgent>`'s dtor although the map labels it `hkSymmetricAgent<..>`'s. **MED**
+- **A Havok function that calls tiny accessors out of line (`getSize`, `getShape`, `memoryAvailable`, `setTime`, a 4-byte
+  `blr` constructor) was compiled without inlining:** wrap it in `#pragma push` / `#pragma dont_inline on` / `#pragma pop`
+  and spell it with the accessors (the Havok macro forms: `HK_TIMER_*_ACCESSORS` in hkMonitorStream.h). Every accessor
+  then comes out as a weak copy identical to the unnamed `fn_` functions after it; name those in `symbols.txt` and each
+  counts as an exact function (hkBvTreeStreamAgent::processCollision gave 18). The calls to `hkBool::operator bool` go
+  to the copy at 0x802A0BD8 (`__opb__6hkBoolCFv`). **HIGH**
+- **objdiff ignores relocation-name differences when the target symbol is an auto name (`fn_`, `lbl_`):** a function
+  whose only diff is `bl fn_802B87B8` vs `bl __ct__11hkListAgentFPvPvPvi`, or a vtable `lbl_` vs `__vt__...`, already
+  scores 100. Named targets do not get this, so rename an unnamed callee only when you know its signature. **MED**
+- **Unnamed 32-byte `mr r4,r3; lwz s_instance__8hkMemory; lhz r5,4(r4); li r6,<class>; ... bctr` functions are class
+  `operator delete` copies,** emitted for the `DELETEPOINTER` cleanup of a `new X(...)` in an exceptions-on unit; name
+  them `__dl__<class>FPv` (`hvtools/fnmatch.py` finds the ones the unit already emits). **MED**
+- **Explicit class instantiations (`template struct X<T>;`) instantiate every member, constructors included:** a
+  forwarding constructor added to `hkSymmetricAgentLinearCast<T>` broke hkBvAgent.cpp. Write it as a member template
+  (`template <class A, class B, class C, class D> X(A& a, B& b, C& c, D d) : T(a, b, c, d) {}`); member templates are not
+  instantiated by the explicit class instantiation. **HIGH**
 - **Check Havok near-misses with objdiff, not only `tools/havok/cmp.py`:** after a shared vector-header change cmp's ratio said six functions went up while objdiff's fuzzy score (the one the report and the best-ever rule use) said they went down. `objdiff-cli report generate` on a small objdiff.json that pairs your compiled objects with the target ones takes about a second for all Havok units. **MED**
 - **Havok class layouts come from main.dol's reflection:** `python tools/havok_reflect.py dump <class>` prints a reflected class's size and member offsets, `seed <class>` prints a starting declaration, and `check` rewrites `tests/havok_layout/` (sizeof/offsetof asserts that the build compiles). Member names are the reflection's with `m_` in front. Run `check` after adding or moving a Havok header so the new class is covered. **HIGH**
 - **`__attribute__((aligned(16)))` between `struct` and the name does nothing in MWCC:** put it after the closing brace (`} __attribute__((aligned(16)));`, as `hkVector4` does). `hkMatrix3` had the prefix form and was 4-aligned; the layout check's `__alignof__` assert (from the DOL's `TYPE_PROPERTIES`) now catches it. Seen: `hkMatrix3`, the mass-changer and soft-contact atoms. **HIGH**

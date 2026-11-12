@@ -336,3 +336,8 @@ void hk3AxisSweep::reQuerySingleObject(const hkBroadPhaseHandle* handle,
     }
     hkThreadMemory::s_instance->deallocateStack(bits);
 }
+
+// Factory of the 3-axis sweep broadphase (map name hk3AxisSweep16CreateBroadPhase).
+hkBroadPhase* hk3AxisSweep16CreateBroadPhase(const hkVector4& worldMin, const hkVector4& worldMax, int numMarkers) {
+    return new hk3AxisSweep(worldMin, worldMax, numMarkers);
+}

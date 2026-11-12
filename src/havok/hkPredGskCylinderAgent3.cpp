@@ -16,6 +16,36 @@
 #include <havok/hkPredGskCylinderAgent3.h>
 #include <havok/hkGskManifoldUtil.h>
 #include <havok/hkGskCache.h>
+#include <havok/hkCollisionDispatcher.h>
+#include <havok/hkAgent1nTrack.h>
+
+// The predictive GSK agent's functions with this agent's create and process, for cylinder x convex in both orders.
+void hkPredGskCylinderAgent3::registerAgent3(hkCollisionDispatcher* dispatcher) {
+    hkAgent3Funcs f;
+    f.m_createFunc = (hkAgentFunc)create;
+    f.m_processFunc = (hkAgentFunc)process;
+    f.m_sepNormalFunc = (hkAgentFunc)hkPredGskAgent3::sepNormal;
+    f.m_cleanupFunc = (hkAgentFunc)hkPredGskAgent3::cleanup;
+    f.m_removePointFunc = (hkAgentFunc)hkPredGskAgent3::removePoint;
+    f.m_commitPotentialFunc = (hkAgentFunc)hkPredGskAgent3::commitPotential;
+    f.m_createZombieFunc = (hkAgentFunc)hkPredGskAgent3::createZombie;
+    f.m_destroyFunc = (hkAgentFunc)hkPredGskAgent3::destroy;
+    f.m_isPredictive = true;
+    f.m_ignoreSymmetricVersion = true;
+    dispatcher->registerAgent3(f, HK_SHAPE_CYLINDER, HK_SHAPE_CONVEX);
+    dispatcher->registerAgent3(f, HK_SHAPE_CONVEX, HK_SHAPE_CYLINDER);
+}
+
+void* hkPredGskCylinderAgent3::create(const hkAgent3Input& input, hkAgentEntry* entry, void* agentData) {
+    entry->unk4 = 0;
+    if (input.m_bodyA->getShape()->getType() == HK_SHAPE_CYLINDER) {
+        entry->unk4 |= 1;
+    }
+    if (input.m_bodyB->getShape()->getType() == HK_SHAPE_CYLINDER) {
+        entry->unk4 |= 2;
+    }
+    return hkPredGskAgent3::create(input, entry, agentData);
+}
 
 void hkGskManifold::resetGskManifold(hkGskManifold* manifold, hkGskManifold* dst, void* arg) {
     hkGskManifoldUtil::hkGskManifold_cleanup(manifold, arg);

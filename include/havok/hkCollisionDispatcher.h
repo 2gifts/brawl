@@ -20,6 +20,29 @@ struct hkAgentFuncs {
     hkBool symmetricB;                    // 0x11 HYPOTHESIS: when set, the (typeB, typeA) lookup tables are filled too
 };
 
+// Registration record of an agent3 (stream) agent (0x30 bytes, map name hkCollisionDispatcher::Agent3Funcs); the agent
+// functions take the stream input and the agent's data block, so they are plain function pointers here.
+// HYPOTHESIS: the member names (Havok's Agent3Funcs; the slot order is from the registerAgent3 stores).
+struct hkAgent3Funcs {
+    // HYPOTHESIS: a constructor clearing the optional slots and flags (as hkAgentFuncs; the zero is created first).
+    hkAgent3Funcs()
+        : m_updateFilterFunc(0), m_invalidateTimFunc(0), m_warpTimeFunc(0), m_isPredictive(false),
+          m_ignoreSymmetricVersion(false) {}
+    hkAgentFunc m_createFunc;           // 0x00
+    hkAgentFunc m_destroyFunc;          // 0x04
+    hkAgentFunc m_cleanupFunc;          // 0x08
+    hkAgentFunc m_removePointFunc;      // 0x0C
+    hkAgentFunc m_commitPotentialFunc;  // 0x10
+    hkAgentFunc m_createZombieFunc;     // 0x14
+    hkAgentFunc m_updateFilterFunc;     // 0x18
+    hkAgentFunc m_invalidateTimFunc;    // 0x1C
+    hkAgentFunc m_warpTimeFunc;         // 0x20
+    hkAgentFunc m_sepNormalFunc;        // 0x24
+    hkAgentFunc m_processFunc;          // 0x28
+    hkBool m_isPredictive;              // 0x2C
+    hkBool m_ignoreSymmetricVersion;    // 0x2D
+};
+
 // Collision dispatcher: reference counted, owns an 8 x 8 table of reference counted entries and the agent registration
 // tables filled by registerCollisionAgent. Only the members used by the matched functions are named so far.
 // One collision quality's settings (0x3C bytes; layout from hkCollisionDispatcher::initCollisionQualityInfo's stores:
@@ -103,6 +126,8 @@ struct hkCollisionDispatcher : hkReferencedObject {
     // Adds one agent registration for the shape type pair (typeA, typeB); symmetric entries are added when
     // funcs->symmetricB is set.
     void registerCollisionAgent(const hkAgentFuncs* funcs, int typeA, int typeB);
+    // Adds an agent3 registration for the shape type pair (map name hkCollisionDispatcher::registerAgent3).
+    void registerAgent3(const hkAgent3Funcs& funcs, int typeA, int typeB);
     // HYPOTHESIS: fills the entries of one lookup table for the shape type pair. depth is the recursion level used when
     // a type is -1 (all types).
     void internalRegisterCollisionAgent(u8* table, int value, int typeA, int typeB, int typeA2, int typeB2, void* buffer,

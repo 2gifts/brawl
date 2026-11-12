@@ -20,6 +20,22 @@
 #include <havok/hkPredGskAgent3.h>
 #include <havok/hkGskManifoldUtil.h>
 #include <types.h>
+#include <havok/hkCollisionDispatcher.h>
+
+// The agent3 functions of the predictive GSK agent; predictive, with a symmetric version.
+void hkPredGskAgent3::registerAgent3(hkCollisionDispatcher* dispatcher, int typeA, int typeB) {
+    hkAgent3Funcs f;
+    f.m_createFunc = (hkAgentFunc)create;
+    f.m_processFunc = (hkAgentFunc)process;
+    f.m_sepNormalFunc = (hkAgentFunc)sepNormal;
+    f.m_cleanupFunc = (hkAgentFunc)cleanup;
+    f.m_removePointFunc = (hkAgentFunc)removePoint;
+    f.m_commitPotentialFunc = (hkAgentFunc)commitPotential;
+    f.m_createZombieFunc = (hkAgentFunc)createZombie;
+    f.m_destroyFunc = (hkAgentFunc)destroy;
+    f.m_isPredictive = true;
+    dispatcher->registerAgent3(f, typeA, typeB);
+}
 
 
 void* hkPredGskAgent3::cleanup(hkGskManifold* dst, hkPredGskAgent3* agent, void* arg) {

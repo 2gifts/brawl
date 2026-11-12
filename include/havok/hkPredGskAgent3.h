@@ -12,7 +12,13 @@ struct hkPredGskAgent3 : hkCollisionAgent {
     hkGskManifold m_manifold; // 0x0C
 
     // Registers the create/static-query functions for the predictive GSK agent with the dispatcher.
-    static void registerAgent3(hkCollisionDispatcher* dispatcher);
+    // HYPOTHESIS: the shape types default to convex x convex (the dispatcher setup passes them).
+    static void registerAgent3(hkCollisionDispatcher* dispatcher, int typeA, int typeB);
+
+    // Agent3 entry points (not written yet). HYPOTHESIS: the parameter lists (stream input, agent entry, agent data).
+    static void* create(const struct hkAgent3Input& input, struct hkAgentEntry* entry, void* agentData);
+    static void sepNormal();
+    static void process();
 
     // Point-list operations used by the collision dispatcher (HYPOTHESIS: the first argument is a context pointer
     // that is unused, or is a destination manifold in cleanup).
