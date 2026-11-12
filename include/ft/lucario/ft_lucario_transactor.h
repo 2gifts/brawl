@@ -11,6 +11,8 @@ class ftLucarioTransactor : public ftTransactor {
 public:
     ftLucarioTransactor();
     virtual ~ftLucarioTransactor();
+    virtual void exit(soModuleAccesser* moduleAccesser);
+    virtual void processUpdate(soModuleAccesser* moduleAccesser);
     // Local declaration of the REL singleton-holder entry point.
     static ftLucarioTransactor* getInstance();
     bool activeArticle1(wnLucarioAuraBall* weapon, soModuleAccesser* acc);

@@ -11,6 +11,9 @@ class ftKoopaTransactor : public ftTransactor {
 public:
     ftKoopaTransactor();
     virtual ~ftKoopaTransactor();
+    virtual void exit(soModuleAccesser* moduleAccesser);
+    virtual void processUpdate(soModuleAccesser* moduleAccesser);
+    void processUpdateSpecialNTransact(soModuleAccesser* moduleAccesser);
     bool activeArticle(wnKoopaBreath* weapon, soModuleAccesser* acc);
 };
 static_assert(sizeof(ftKoopaTransactor) == 4, "Transactor singleton layout is wrong!");
