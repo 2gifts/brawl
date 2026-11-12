@@ -233,6 +233,8 @@ public:
     void constraint();
     void removeConstraint();
     void setupCollisionHitStatus();
+    void setupGroundData();
+    void setupGlowModule();
     void reqCommonEffect(s32 id);
     void updateStatusProcFunc();
     bool changeProcFnc1(void* proc, s32 p2);

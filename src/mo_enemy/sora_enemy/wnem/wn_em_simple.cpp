@@ -19,6 +19,8 @@
 #define WN_EM_SIMPLE_UNIT
 #define WN_EM_SIMPLE_PROPERTY_COPY
 #define WN_EM_SIMPLE_HEAP_DTOR
+#define SO_GLOW_MODULE_ATTACK_API
+#define WN_EM_SIMPLE_GLOW_API
 #define FT_REL_LINK_EXTERN
 #define WN_SOUND_GENERATOR_HELPERS
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
@@ -39,6 +41,7 @@
 #include <so/collision/so_collision_hit_module_impl.h>
 #include <so/collision/so_collision_log.h>
 #include <st/st_trigger.h>
+#include <gf/gf_task_scheduler.h>
 #include <math.h>
 #include <wn/wn_em_simple.h>
 #include <wn/wn_em_sw_holder.h>
@@ -227,11 +230,68 @@ struct wnemShotParamView {
     wnemAnimCmdSet* m_animCmdSet; // 0x70
 };
 
+// HYPOTHESIS: the ground shape data of a weapon description (emShotParam 0x34): the shape kind (1: rhombus, 2: rhombus that
+// follows a model node) and its measurements.
+struct wnemGroundShapeData {
+    u8 m_kind;
+    union {
+        struct {
+            float m_up;
+            float m_down;
+            float m_width;
+        } m_rhombus;     // 0x4, kind 1
+        struct {
+            s32 m_node;
+            float m_up;
+            float m_down;
+            float m_width;
+        } m_followNode;  // 0x4, kind 2
+    };
+};
+
+// Shapes the weapon's ground module after the ground data of its shot description.
+void wnemSimple::setupGroundData() {
+    soGroundModuleImpl& ground = dynamic_cast<soGroundModuleImpl&>(m_moduleAccesser->getGroundModule());
+    wnemGroundShapeData* data = static_cast<wnemGroundShapeData*>(reinterpret_cast<wnemShotParamView*>(m_shotWork.m_param)->m_groundData);
+    ground.setShapeKind(static_cast<soGroundShapeImpl::ShapeKind>(static_cast<u8>(data->m_kind)), 0);
+    data = static_cast<wnemGroundShapeData*>(reinterpret_cast<wnemShotParamView*>(m_shotWork.m_param)->m_groundData);
+    s32 kind = data->m_kind;
+    if (kind == 2) {
+        ground.modifyRhombusFollowNode(data->m_followNode.m_up, data->m_followNode.m_down, data->m_followNode.m_width,
+                                       data->m_followNode.m_node, 0);
+        wnemReport("--- SO_GROUND_CORRECT_SHAPE_RHOMBUS_FOLLOW_NODE ----------- \n");
+    } else if (kind == 1) {
+        ground.modifyRhombus(data->m_rhombus.m_up, data->m_rhombus.m_down, data->m_rhombus.m_width, 0);
+    }
+}
+
 void wnemSimple::RequestDeactive() {
     m_requestDeactive = true;
 }
 
 extern "C" void fn_41_31708(wnemSimple* wnem);
+
+// The glow module of the accesser (the accesser has no accessor for it).
+static inline soGlowModule& wnemGlowModule(soModuleAccesser* moduleAccesser) {
+    return *static_cast<soGlowModule*>(moduleAccesser->m_enumerationStart->m_glowModule);
+}
+
+// A weapon linked to a glowing owner (link connection 3) takes over the owner's glow values.
+void wnemSimple::setupGlowModule() {
+    if (m_moduleAccesser->getLinkModule().isParentGlow(3) == 1) {
+        s32 attack = m_moduleAccesser->getLinkModule().getParentWeaponGlowAttack(3);
+        wnemGlowModule(m_moduleAccesser).setGlowAttack(attack);
+        s32 defense = m_moduleAccesser->getLinkModule().getParentWeaponGlowDefense(3);
+        wnemGlowModule(m_moduleAccesser).setGlowDefense(defense);
+        float eff = m_moduleAccesser->getLinkModule().getParentWeaponGlowEff(3);
+        float damageMin = m_moduleAccesser->getLinkModule().getParentWeaponGlowDamageMin(3);
+        float damageMax = m_moduleAccesser->getLinkModule().getParentWeaponGlowDamageMax(3);
+        wnemGlowModule(m_moduleAccesser).setGlowEffect(eff, damageMin, damageMax);
+        wnemReport("wnemSimple::setupGlowModule : atk( %d ), def( %d ), eff,min,max( %f, %f, %f ) \n", wnemGlowModule(m_moduleAccesser).getGlowAttack(),
+                   wnemGlowModule(m_moduleAccesser).getGlowDefense(), eff, damageMin, damageMax);
+    }
+}
+
 // Map name wnemSimple::resetAnimCmd: clears the interpreters of the three sub groups.
 extern "C" void fn_41_31708(wnemSimple* wnem) {
     soAnimCmdModule& animCmd = wnem->m_moduleAccesser->getAnimCmdModule();
@@ -792,3 +852,63 @@ static itGenSheetKind s_genSheetKindLevel0(Stages::srStageKind(0xff), 0);
 static itGenSheetKind s_genSheetKindLevel1(Stages::srStageKind(0xff), 1);
 static u8 s_genSheetKindPad[0x18];
 static soKindInfo s_kindInfo(2, 0);
+
+// A search hit by a reflecting reflector (kind 3) turns the weapon to its team; a weapon that did not reflect flags itself.
+void wnemSimple::notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    if (collisionLog != NULL) {
+        bool reflected = false;
+        if (collisionLog->m_kind == 3 && moduleAccesser->getReflectModule().isReflect() == 1) {
+            reflectSettingTeam();
+            reflected = reflect();
+        }
+        if (reflected == false) {
+            unk2218 = true;
+        }
+    }
+}
+
+// The weapon's model root node follows its posture (scale, rotation and position), unless the flag at 0x21B5 hands the
+// node update to the stage object.
+void wnemSimple::updateNodeSRT() {
+    // TODO: the flag at 0x21B5 lies inside the emShot work block of the header (unk2C[5]); see updatePosture.
+    if (m_shotWork.unk2C[5]) {
+        StageObject::updateNodeSRT();
+    } else {
+        soModuleAccesser* moduleAccesser = m_moduleAccesser;
+        float scaleValue = moduleAccesser->getPostureModule().getScale();
+        Vec3f scale;
+        scale.m_x = scale.m_y = scale.m_z = scaleValue;
+        Vec3f rotation;
+        Vec3f position;
+        position = moduleAccesser->getPostureModule().getPos();
+        rotation = moduleAccesser->getPostureModule().getRot(0);
+        moduleAccesser->getModelModule().setNodeSRT(0, &scale, &rotation, &position);
+    }
+}
+
+
+// A part weapon (type 2) remembers the strongest hit of the frame and the hit stop it asked for.
+void wnemSimple::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    if (collisionLog != NULL) {
+        gfTask* task = gfTaskScheduler::getInstance()->getTaskById(static_cast<gfTask::Category>(collisionLog->m_taskCategory),
+                                                                  collisionLog->m_taskId);
+        switch (m_weaponType) {
+        case 0:
+        case 1:
+            break;
+        case 2:
+            if (power > m_maxHitPower) {
+                m_maxHitPower = power;
+            }
+            if (m_attackStopMax < power) {
+                wnemReport(" wnemSimple::notifyEventCollisionAttack(TypeParts) : getCollisionAttackModule().getData( (int)pLog->_noSelf, false )->_noStop = %d \n",
+                           m_moduleAccesser->getCollisionAttackModule().getData(collisionLog->m_damageIndex, false)->m_noHitStop);
+                if (m_moduleAccesser->getCollisionAttackModule().getData(collisionLog->m_damageIndex, false)->m_noHitStop == 0) {
+                    wnemReport(" wnemSimple::notifyEventCollisionAttack(TypeParts) : set _attackStopMax (%d) \n", m_attackStopMax);
+                    m_attackStopMax = power;
+                }
+            }
+            break;
+        }
+    }
+}
