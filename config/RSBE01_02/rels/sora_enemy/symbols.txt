@@ -1190,7 +1190,7 @@ __dt__240soMotionModuleBuilder<214soMotionModuleBuildConfig<0,18soMotionModuleIm
 __dt__77soPostureModuleBuilder<51soPostureModuleBuildConfig<3,19soPostureModuleImpl>>Fv = .text:0x0002F2F4; // type:function size:0x74
 __dt__74soGroundModuleBuilder<49soGroundModuleBuildConfig<1,18soGroundModuleImpl>>Fv = .text:0x0002F368; // type:function size:0x6C
 __dt__81soSituationModuleBuilder<53soSituationModuleBuildConfig<21soSituationModuleImpl>>Fv = .text:0x0002F3D4; // type:function size:0x5C
-fn_41_2F430 = .text:0x0002F430; // type:function size:0x58
+__ct__10soTeamImplFi = .text:0x0002F430; // type:function size:0x58
 __dt__79soTeamModuleBuilder<56soTeamModuleBuildConfig<10soTeamImpl,16soTeamModuleImpl>>Fv = .text:0x0002F488; // type:function size:0x84
 __dt__25soCollisionAttackAbsoluteFv = .text:0x0002F50C; // type:function size:0x40
 fn_41_2F54C = .text:0x0002F54C; // type:function size:0x84
@@ -1198,7 +1198,7 @@ __dt__103soCollisionHitModuleBuilder<72soCollisionHitModuleBuildConfig<1,2,1,24s
 __dt__105soCollisionSearchModuleBuilder<71soCollisionSearchModuleBuildConfigWeapon<27soCollisionSearchModuleImpl>>Fv = .text:0x0002F654; // type:function size:0x78
 __dt__131soDamageModuleBuilder<105wnDamageModuleBuildConfig<18soDamageModuleImpl,1,26wnemDamageTransactorHolder,24wnemDamageEffectorHolder>>Fv = .text:0x0002F6CC; // type:function size:0x74
 __dt__66soStopModuleBuilder<43soStopModuleBuildConfig<16soStopModuleImpl>>Fv = .text:0x0002F740; // type:function size:0x5C
-fn_41_2F79C = .text:0x0002F79C; // type:function size:0x74
+__dt__71soShakeModuleBuilder<47soShakeModuleBuildConfig<1,17soShakeModuleImpl>>Fv = .text:0x0002F79C; // type:function size:0x74
 fn_41_2F810 = .text:0x0002F810; // type:function size:0x6C
 __dt__71soLinkModuleBuilder<48soLinkModuleBuildConfigCap<5,16soLinkModuleImpl>>Fv = .text:0x0002F87C; // type:function size:0x6C
 __dt__88soVisibilityModuleBuilder<59soVisibilityModuleBuildConfig<24soVisibilityModuleSimple,1>>Fv = .text:0x0002F8E8; // type:function size:0x5C
@@ -1343,7 +1343,7 @@ __ct__10soKindInfoFll = .text:0x00034784; // type:function size:0xC
 @4@shoot__21soArticleMediatorNullFP16soModuleAccesserP9soArticle = .text:0x000347B0; // type:function size:0x8
 @4@__dt__21soArticleMediatorNullFv = .text:0x000347B8; // type:function size:0x8
 @64@__dt__55wnWeaponBuilder<36wnemSimple_ModuleAccesserBuildConfig>Fv = .text:0x000347C0; // type:function size:0x8
-fn_41_347C8 = .text:0x000347C8; // type:function size:0x8
+@72@notifyEventAnimCmd__6WeaponFP9acAnimCmdP16soModuleAccesseri = .text:0x000347C8; // type:function size:0x8
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x000347D0; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__6WeaponFUl = .text:0x000347D8; // type:function size:0x8
 @112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x000347E0; // type:function size:0x8
