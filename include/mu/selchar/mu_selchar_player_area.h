@@ -151,6 +151,8 @@ public:
     void dispNameEntryButtonColor(bool isTeamBattle, int teamColor);
     void dispPlayerNum(int playerKind);
     void dispPlayerKindButtonColor(int playerKind, bool isTeamBattle, int teamColor);
+    void incCharColorNo();
+    void decCharColorNo();
     void dispCpLevelVisible(int playerKind);
     void dispNameEntryButtonVisible(int playerKind, int unk);
     void dispHandi(int handi);

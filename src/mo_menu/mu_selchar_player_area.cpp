@@ -296,6 +296,84 @@ u8 muSelCharPlayerArea::exchangePoke3ToGmCharKind(int poke) {
     return sPokeKinds[poke];
 }
 
+// The two functions below keep the call to exchangeCharKindDetail out of line (the original has them in another object).
+extern "C" int exchangeCharKindDetail__19muSelCharPlayerAreaF11MuSelchkind(muSelCharPlayerArea* self, int charKind);
+
+// Whether another area with a player on it already uses this color of this character.
+static inline int isCharColorUsed(muSelCharPlayerArea* self, muSelCharTask* task, int charKind, int color) {
+    muSelCharPlayerArea* other;
+    for (int i = 0; i < task->m_numPlayerAreas; i++) {
+        if (i == self->m_areaIdx) {
+            continue;
+        }
+        other = task->m_selCharPlayerAreas[i];
+        if (other->m_playerKind != 0 && charKind == other->m_charKind && color == other->m_charColorNo) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// Steps to the next color of the character that no other area already uses.
+void muSelCharPlayerArea::incCharColorNo() {
+    int charKind = m_charKind;
+    if ((unsigned int)(charKind - 0x28) > 1) {
+        int teamSet;
+        int teamColor;
+        int playerKind;
+        bool isTeamBattle;
+        int color;
+        int numColor = getNumCharColor(charKind);
+        muSelCharTask* task = m_selCharTask;
+        color = m_charColorNo;
+        do {
+            color++;
+            if (color >= numColor) {
+                color = 0;
+            }
+        } while (isCharColorUsed(this, task, charKind, color));
+        isTeamBattle = task->m_isTeamBattle;
+        if (!isTeamBattle) {
+            teamSet = m_teamSet;
+            teamColor = m_teamColor;
+            playerKind = m_playerKind;
+            int kind = exchangeCharKindDetail__19muSelCharPlayerAreaF11MuSelchkind(this, m_charKind);
+            setCharPic(kind, playerKind, color, isTeamBattle, teamColor, teamSet);
+        }
+        m_charColorNo = color;
+    }
+}
+
+// Steps to the previous color of the character that no other area already uses.
+void muSelCharPlayerArea::decCharColorNo() {
+    int charKind = m_charKind;
+    if ((unsigned int)(charKind - 0x28) > 1) {
+        int teamSet;
+        int teamColor;
+        int playerKind;
+        bool isTeamBattle;
+        int color;
+        int numColor = getNumCharColor(charKind);
+        muSelCharTask* task = m_selCharTask;
+        color = m_charColorNo;
+        do {
+            color--;
+            if (color < 0) {
+                color = numColor - 1;
+            }
+        } while (isCharColorUsed(this, task, charKind, color));
+        isTeamBattle = task->m_isTeamBattle;
+        if (!isTeamBattle) {
+            teamSet = m_teamSet;
+            teamColor = m_teamColor;
+            playerKind = m_playerKind;
+            int kind = exchangeCharKindDetail__19muSelCharPlayerAreaF11MuSelchkind(this, m_charKind);
+            setCharPic(kind, playerKind, color, isTeamBattle, teamColor, teamSet);
+        }
+        m_charColorNo = color;
+    }
+}
+
 // The character that is picked: the form of Zelda or Samus, or the Pokemon, that the area has chosen.
 MuSelchkind muSelCharPlayerArea::exchangeCharKindDetail(MuSelchkind charKind) {
     switch (charKind) {
@@ -1069,4 +1147,57 @@ static int readHandMode(muSelCharHand* hand, int* arg) {
         *arg = hand->m_modeArg;
     }
     return hand->m_mode;
+}
+
+// HYPOTHESIS: only the count of the friends held by the matching manager is used here.
+struct SelCharMatchingHyp {
+    char _pad[0x3408];
+    int m_friendCount;
+};
+extern SelCharMatchingHyp* lbl_805A0434;
+extern "C" int fn_800C9F14(muWifiInterfaceTask* self, int index);
+
+// The state that the wifi conditions give to the area (0 when the select screen is not the wifi one).
+// HYPOTHESIS: the values are the states that dispWifiDispState shows.
+int muSelCharPlayerArea::getWifiStateByWifiCond() {
+    int type = g_GameGlobal->m_selCharData->m_selCharType;
+    int group;
+    if (isSelCharTypeIn(type, 0, 4)) { group = 0; goto groupSelected; }
+    if (isSelCharTypeIn(type, 4, 12)) { group = 1; goto groupSelected; }
+    {
+        bool inGroup = isSelCharTypeIn(type, 12, 16);
+        group = 3;
+        if (!inGroup) goto groupSelected;
+        group = 2;
+    }
+    groupSelected:
+    if (group != 2) {
+        return 0;
+    }
+    if (unk428 > 0) {
+        return 2;
+    }
+    if (unk426Flag) {
+        return 1;
+    }
+    muWifiInterfaceTask* wifi = g_muWifiInterfaceTask;
+    if (!fn_800C9F14(wifi, m_areaIdx)) {
+        return 0;
+    }
+    if (wifi->isExchangingFriendKey(m_areaIdx)) {
+        return 5;
+    }
+    if (wifi->getFriendAIDIndex(m_areaIdx) >= 0) {
+        return 5;
+    }
+    if (unk425) {
+        return 4;
+    }
+    if (wifi->isRequestedExchangeFriendKey(m_areaIdx)) {
+        return 7;
+    }
+    if (!wifi->isEnoughRoomForFriendList(m_areaIdx) || lbl_805A0434->m_friendCount >= 0x40) {
+        return 6;
+    }
+    return 3;
 }
