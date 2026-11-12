@@ -10335,6 +10335,10 @@ mo_melee/sora_melee/so/so_array_base_soArrayVectorAbstract_15soLogAttackInfo_1D6
 mo_melee/sora_melee/ft/ft_log_empty.cpp:
 	.text       start:0x001D6078 end:0x001D61CC
 
+mo_melee/sora_melee/ft/ft_log_transactor.cpp:
+	.text       start:0x001D61CC end:0x001D71A4
+	.rodata     start:0x00002720 end:0x00002738
+
 mo_melee/sora_melee/ft/ft_log_attack_info_module.cpp:
 	.text       start:0x001D71A4 end:0x001D72F4
 

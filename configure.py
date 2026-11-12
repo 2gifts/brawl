@@ -6770,6 +6770,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/so/damage/so_damage_no_reaction_module.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_class_info.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/catch/so_catch_manager.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_log_transactor.cpp"),
         ],
     },
     {

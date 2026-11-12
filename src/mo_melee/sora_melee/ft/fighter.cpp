@@ -4,6 +4,7 @@
 #include <ft/fighter.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_manager.h>
+#include <ft/ft_log_transactor.h>
 #include <ft/ft_owner.h>
 #include <so/so_external_value_accesser.h>
 #include <so/so_slow.h>
@@ -717,15 +718,12 @@ void Fighter::notifyEventChangeAdvUnit() {
     }
 }
 
-// HYPOTHESIS: map name unknown; takes the module accesser and the owner.
-extern "C" void fn_27_1D6E58(soModuleAccesser* moduleAccesser, ftOwner* owner);
-
 void Fighter::notifyEventCollisionReflectorSearch(soCollisionSearchModule* searchModule, soCollisionLog* collisionLog, u32 groupIndex, soModuleAccesser* moduleAccesser) {
     if ((int)groupIndex == 1) {
         unk138_1 = true;
     }
     soModuleAccesser* acc = m_moduleAccesser;
-    fn_27_1D6E58(acc, getOwner());
+    ftLogTransactor::notifyEventCollisionReflector(acc, getOwner());
 }
 
 bool Fighter::notifyEventCollisionReflectorCheck() {
@@ -748,7 +746,7 @@ void Fighter::notifyEventCollisionReflector(soCollisionAttackModule* attackModul
         }
     }
     soModuleAccesser* acc = m_moduleAccesser;
-    fn_27_1D6E58(acc, getOwner());
+    ftLogTransactor::notifyEventCollisionReflector(acc, getOwner());
 }
 
 bool Fighter::checkTransitionStatus(u32 status) {
