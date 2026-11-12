@@ -1929,7 +1929,7 @@ int fn_80393350(int a, s32* obj, void* data, int* out, int mode) {
 }
 
 int NHTTPi_getHeaderValue(void*, const char*, int*);
-void NHTTPi_loadFromHdrRecvBuf(void*, void*, int, int);
+int NHTTPi_loadFromHdrRecvBuf(void*, void*, int, int);
 
 // NHTTP_GetHeaderField
 int fn_80391D8C(u8* resp, const char* name, char** out) {
@@ -1967,3 +1967,254 @@ int fn_80391D8C(u8* resp, const char* name, char** out) {
     }
     return -1;
 }
+
+// HYPOTHESIS: singly linked list head in lbl_805A1150, next at 0x20; op selects the match key.
+int NHTTPi_ControlConnectionList(int sys, int key, int op) {
+    u8* found = 0;
+    u8* n;
+    u8** pp;
+    NHTTPi_lockReqList((OSMutex*)sys);
+    if ((u32)op == 3) {
+        *(u8**)(key + 0x20) = *(u8**)lbl_805A1150;
+        *(u8**)lbl_805A1150 = (u8*)key;
+        found = (u8*)key;
+    } else {
+        for (pp = (u8**)lbl_805A1150; (n = *pp) != 0; pp = (u8**)(*pp + 0x20)) {
+            switch (op) {
+            case 0:
+                if ((u32)n == (u32)key) found = n;
+                break;
+            case 1:
+                if (*(u32*)(n + 0x10) == (u32)key) found = n;
+                break;
+            case 2:
+                if (*(u32*)(n + 0x14) == (u32)key) found = n;
+                break;
+            case 4:
+                if ((u32)n == (u32)key) { *pp = *(u8**)(n + 0x20); found = n; }
+                break;
+            }
+            if (found != 0) break;
+        }
+    }
+    NHTTPi_unlockReqList((OSMutex*)sys);
+    return (int)found;
+}
+
+// NHTTPi_findNextLineHdrRecvBuf
+int fn_80390B20(NHTTPHdrRecvBuf* buf, int pos, int end, int* colon, int* kind) {
+    int c;
+    NHTTPHdrBlock* blk;
+    int off;
+    int i;
+    int ret;
+    int cr;
+    if (colon != 0) {
+        *colon = -1;
+    }
+    if (pos < end) {
+        ret = -1;
+        cr = 0;
+        if (pos < 0x400) {
+            off = pos;
+            blk = 0;
+        } else {
+            int n = (pos - 0x400) >> 9;
+            blk = buf->blocks;
+            while (n != 0) {
+                blk = blk->next;
+                n--;
+            }
+            off = (pos - 0x400) & 0x1ff;
+        }
+        for (i = pos; i < end; i++) {
+            if (blk == 0) {
+                if (off < 0x400) {
+                    c = (s8)(u8)buf->inl[off++];
+                    goto check;
+                }
+                blk = buf->blocks;
+                off = 0;
+            } else if (off == 0x200) {
+                off = 0;
+                blk = blk->next;
+            }
+            c = (u8)blk->data[off++];
+check:
+            if ((s8)c == ':') {
+                if (colon != 0 && *colon < 0) {
+                    *colon = i;
+                }
+            }
+            if (cr) {
+                if ((s8)c == '\n') {
+                    ret = (i == end - 1) ? 0 : i + 1;
+                    if (kind != 0) {
+                        *kind = 2;
+                    }
+                }
+                return ret;
+            }
+            if ((s8)c == '\r') {
+                ret = (i == end - 1) ? 0 : i + 1;
+                cr = 1;
+                if (kind != 0) {
+                    *kind = 1;
+                }
+            }
+            if ((s8)c == '\n') {
+                ret = (i == end - 1) ? 0 : i + 1;
+                if (kind != 0) {
+                    *kind = 1;
+                }
+                return ret;
+            }
+        }
+    }
+    return -1;
+}
+
+// HYPOTHESIS: first word of the header receive buffer is the number of valid bytes.
+int NHTTPi_loadFromHdrRecvBuf(void* bufv, void* dstv, int pos, int len) {
+    NHTTPHdrBlock* blk = (NHTTPHdrBlock*)bufv;
+    int n;
+    if (pos + len <= *(int*)blk) {
+        if (len != 0) {
+            if (pos < 0x400) {
+                n = len > 0x400 - pos ? 0x400 - pos : len;
+                NHTTPi_memcpy(dstv, ((NHTTPHdrRecvBuf*)blk)->inl + pos, n);
+                pos += n;
+                len -= n;
+                dstv = (u8*)dstv + n;
+            }
+            if (len != 0) {
+                int k;
+                pos -= 0x400;
+                blk = ((NHTTPHdrRecvBuf*)blk)->blocks;
+                k = pos >> 9;
+                pos &= 0x1ff;
+                while (k != 0) {
+                    blk = blk->next;
+                    k--;
+                }
+                while (len != 0) {
+                    n = len > 0x200 - pos ? 0x200 - pos : len;
+                    NHTTPi_memcpy(dstv, blk->data + pos, n);
+                    pos += n;
+                    blk = blk->next;
+                    pos &= 0x1ff;
+                    len -= n;
+                    dstv = (u8*)dstv + n;
+                }
+            }
+        }
+        return 1;
+    }
+    return 0;
+}
+
+int fn_803911C8(void*, int, int, int, int, int, int, int);
+
+// HYPOTHESIS: connection record is 0x8060 bytes: request at +0x10, response at +0x14, callback at +0x1c.
+int NHTTPCreateConnection(int url, int method, int buffer, int size, int cb, int ctx) {
+    u8* conn;
+    void* sys;
+    void* bgn;
+    void* mutex;
+    u8* req;
+    sys = NHTTPi_GetSystemInfoP();
+    bgn = NHTTPi_GetBgnEndInfoP(sys);
+    mutex = NHTTPi_GetMutexInfoP(sys);
+    conn = (u8*)NHTTPi_alloc(0x8060, 0x20);
+    if (conn == 0) {
+        NHTTPi_SetError((NHTTPBgnEndInfo*)bgn, 1);
+        return 0;
+    }
+    NHTTPi_memclr(conn, 0x8060);
+    req = (u8*)fn_803911C8(bgn, url, method, buffer, size, ctx, 0, 0);
+    *(u8**)(conn + 0x10) = req;
+    if (req == 0) {
+        NHTTPi_free(conn);
+        return 0;
+    }
+    *(s32*)(conn + 0x14) = *(s32*)(req + 0x2c);
+    *(s32*)(conn + 0) = 0;
+    *(s32*)(conn + 0x1c) = cb;
+    *(s32*)(conn + 0x24) = 0;
+    *(s32*)(conn + 0x28) = 0;
+    *(s32*)(conn + 0x18) = -1;
+    NHTTPi_CommitConnectionList((int)mutex, (int)conn);
+    *(s32*)(conn + 4) = 0xf;
+    *(s32*)(conn + 8) = 0;
+    *(s32*)(conn + 0xc) = 1;
+    NHTTPi_SetVirtualContentLength((NHTTPVirtLen*)conn, 0);
+    *(s32*)(conn + 0x30) = 0;
+    *(s32*)(conn + 0x8040) = 0;
+    *(s32*)(conn + 0x8044) = 0;
+    NHTTPi_memclr(conn + 0x40, 0x8000);
+    return (int)conn;
+}
+
+int fn_803A88D4(int, int);
+int fn_803A9558(int, int);
+int fn_803A91DC(int, int, int, int, int);
+int fn_803A9348(int, int, int);
+int fn_803A9490(int, int);
+int fn_803A8A2C(int, int);
+int fn_803A8AF4(int);
+
+// HYPOTHESIS: SSL connect step; the SSL handle is at +0xac of the connection record and its options at +0xb0..+0xdc.
+#define CF(o) (*(int*)((u8*)connv + (o)))
+int NHTTPi_SocSSLConnect(void* sysv, void* av, void* connv, int sock) {
+    int done = 0;
+    int err;
+    u8* req;
+    CF(0xac) = fn_803A88D4(CF(0xcc), CF(0x28));
+    if (*(void**)((u8*)sysv + 0x7e4) != 0 && CF(0xd4) != 0) {
+        ((void (*)(int, int))*(void**)((u8*)sysv + 0x7e4))(CF(0xac), CF(0xd4));
+    }
+    if (CF(0xc8) == 1) {
+        if (fn_803A9558(CF(0xac), CF(0xdc)) != 0) {
+            return -0x3ed;
+        }
+    } else {
+        if (CF(0xb0) != 0 && CF(0xb8) != 0) {
+            if (fn_803A91DC(CF(0xac), CF(0xb0), CF(0xb4), CF(0xb8), CF(0xbc)) != 0) {
+                return -0x3ed;
+            }
+        }
+    }
+    if (CF(0xc0) != 0) {
+        if (fn_803A9348(CF(0xac), CF(0xc0), CF(0xc4)) != 0) {
+            return -0x3ec;
+        }
+    } else {
+        if (fn_803A9490(CF(0xac), CF(0xd8)) != 0) {
+            return -0x3ec;
+        }
+    }
+    if (fn_803A8A2C(CF(0xac), sock) < -1) {
+        return -0x3e9;
+    }
+    while (done == 0) {
+        req = (u8*)NHTTPi_Request2Connection((int)av, (int)connv);
+        err = fn_803A8AF4(CF(0xac));
+        NHTTPi_SetSSLError((NHTTPBgnEndInfo*)sysv, err);
+        if (req != 0) {
+            *(int*)(req + 8) = err;
+        }
+        switch (err) {
+        case 0:
+            done = 1;
+            break;
+        case -2:
+        case -3:
+        case -7:
+            break;
+        default:
+            return -0x3e9;
+        }
+    }
+    return 0;
+}
+#undef CF
