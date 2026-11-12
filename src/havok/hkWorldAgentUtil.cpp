@@ -304,7 +304,7 @@ void hkWorldCallbackUtil::fireIslandActivated(hkWorld* world, hkSimulationIsland
         for (int j = entityList.m_size - 1; j >= 0; j--) {
             EntityActivationListener* listener = entityList.begin()[j];
             if (listener != 0) {
-                listener->entityActivated(entity);
+                listener->entityActivated(island->m_entities[i]);
             }
         }
         removeNullListeners(entityList);
@@ -331,7 +331,7 @@ void hkWorldCallbackUtil::fireIslandDeactivated(hkWorld* world, hkSimulationIsla
         for (int j = entityList.m_size - 1; j >= 0; j--) {
             EntityActivationListener* listener = entityList.begin()[j];
             if (listener != 0) {
-                listener->entityDeactivated(entity);
+                listener->entityDeactivated(island->m_entities[i]);
             }
         }
         removeNullListeners(entityList);
