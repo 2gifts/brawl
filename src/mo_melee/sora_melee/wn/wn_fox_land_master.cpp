@@ -396,4 +396,85 @@ void wnFoxLandMaster::notifyEventChangeStatus(int statusKind, int prevStatusKind
     m_moduleAccesser->getLinkModule().sendEventParents(3, event);
 }
 
+// HYPOTHESIS: the slot loops reach the shell through the sub pool's index lookup (as the generic sub pool's getInstanceAt).
+template <class Sub>
+inline wnFoxLandMasterShell* wnFoxLandMasterShellAt(Sub& sub, s32 index) {
+    if (index == 0) {
+        return sub.getEnergy();
+    }
+    return 0;
+}
+
+// HYPOTHESIS: the mediator of the one shell (articles 1..16 are unused slots), as the Kinopio spore mediator.
+template <class PoolTL, class AssignTL, class KindInfo, class Extra>
+bool soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::isGeneratable(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: {
+        bool allActive;
+        s32 i;
+        for (i = 0; i < 1; ++i) {
+            if (static_cast<soArticle&>(*wnFoxLandMasterShellAt(m_pools.getSub(), i)).isActiveArticle() == false) {
+                allActive = false;
+                goto done;
+            }
+        }
+        allActive = true;
+    done:
+        return allActive == false;
+    }
+    WN_ARTICLE_UNUSED_SLOTS_FROM_1(false)
+    default: return false;
+    }
+}
+
+template <class PoolTL, class AssignTL, class KindInfo, class Extra>
+s32 soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::getActiveNum(soModuleAccesser*, s32 articleId) {
+    switch (articleId) {
+    case 0: {
+        wnArticleSlotCounter counter;
+        counter.m_isActive = wnArticleIsActive;
+        counter.m_activeNum = 0;
+        counter.m_inactiveNum = 0;
+        for (s32 i = 0; i < 1; ++i) {
+            wnArticleSlotCounter* c = &counter;
+            if (c->m_isActive(&static_cast<soArticle&>(*wnFoxLandMasterShellAt(m_pools.getSub(), i))) == true) {
+                ++c->m_activeNum;
+            } else {
+                ++c->m_inactiveNum;
+            }
+        }
+        return counter.m_activeNum;
+    }
+    WN_ARTICLE_UNUSED_SLOTS_FROM_1(0)
+    default: return 0;
+    }
+}
+
+template <class PoolTL, class AssignTL, class KindInfo, class Extra>
+s32 soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::getGenerateMaxNum(s32 articleId) {
+    switch (articleId) {
+    case 0: return wnArticleSlotGenerateMaxNum(1, WN_ARTICLE_SLOT_TAGS);
+    WN_ARTICLE_UNUSED_SLOTS_FROM_1(0)
+    default: return 0;
+    }
+}
+
+template <class PoolTL, class AssignTL, class KindInfo, class Extra>
+bool soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::shoot(soModuleAccesser*, soArticle* article) {
+    switch (article->getArticleId()) {
+    case 0: return wnArticleSlotShoot<wnFoxLandMasterShell>(article, WN_ARTICLE_SLOT_TAGS);
+    WN_ARTICLE_UNUSED_SLOTS_FROM_1(true)
+    default: return false;
+    }
+}
+
+template <class PoolTL, class AssignTL, class KindInfo, class Extra>
+void soArticleMediatorImpl<PoolTL, AssignTL, KindInfo, Extra>::deactivate() {
+    for (s32 i = 0; i < 1; ++i) {
+        if (!static_cast<soArticle&>(*wnFoxLandMasterShellAt(m_pools.getSub(), i)).setDeactivateDescendant()) {
+            return;
+        }
+    }
+}
+
 template class wnExtendParamAccesser<3999, 45, 23999, 5, 0, 0>;
