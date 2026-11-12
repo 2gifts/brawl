@@ -19,5 +19,7 @@ struct hkMath {
     // without inlining call them.
     // The name is parenthesized because the MSL math.h defines fabs(x) as a macro.
     static float(fabs)(float x);
+    // Out of line in hkVehicleFrictionSolver.o (map name hkMath__sqrt); parenthesized like fabs.
+    static float(sqrt)(float x);
     static float min2(float a, float b);
 };

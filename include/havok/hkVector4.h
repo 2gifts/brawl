@@ -100,7 +100,7 @@ struct hkVector4 {
     void setAll(hkReal v) { set(v, v, v, v); }
     // Bit mask of the lanes that are negative: x -> 8, y -> 4, z -> 2, w -> 1.
     int compareLessThanZero4() const {
-        return (x < 0.0f ? 8 : 0) | (y < 0.0f ? 4 : 0) | (z < 0.0f ? 2 : 0) | (w < 0.0f ? 1 : 0);
+        return ((x < 0.0f) << 3) | ((y < 0.0f) << 2) | ((z < 0.0f) << 1) | (w < 0.0f);
     }
     // Bit mask of the lanes where this < a: x -> 8, y -> 4, z -> 2, w -> 1 (weak copy in hkBoxBoxCollisionDetection).
     int compareLessThan4(const hkVector4& a) const {

@@ -60,6 +60,10 @@ struct hkMatrix3 {
     }
     // Element (row, column) (out-of-line copy at 0x80291270).
     hkReal& operator()(int row, int column) { return (&m_col0.x)[column * 4 + row]; }
+    // Row `row` of the matrix, w = 0 (out-of-line copy in hkCollideCapsuleUtil.o).
+    void getRow(int row, hkVector4& r) const {
+        r.set(m_col0.getSimdAt(row), m_col1.getSimdAt(row), m_col2.getSimdAt(row), 0.0f);
+    }
 
     void transpose();
     void setTranspose(const hkMatrix3& other);

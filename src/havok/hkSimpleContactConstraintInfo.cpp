@@ -75,8 +75,8 @@ void hkJacobianBuilder::initBuilder() {}
 
 void hkJacobianElement::as1Lin2Ang() {}
 
-hkVector4* hkContactPoint::getPosition() {
-    return &m_position;
+const hkVector4& hkContactPoint::getPosition() const {
+    return m_position;
 }
 
 hkVector4* hkContactPoint::getNormal() {
