@@ -56,9 +56,23 @@ mo_scene/sora_scene/sc_clear_getter.cpp:
 	.text       start:0x000074B4 end:0x00007834
 	.ctors      start:0x00000004 end:0x00000008
 
+mo_scene/sora_scene/sc_snap_shot.cpp:
+	.text       start:0x00007834 end:0x00007AA8
+	.data       start:0x00001A10 end:0x00001B30
+
 mo_scene/sora_scene/sc_button.cpp:
 	.text       start:0x00007AA8 end:0x00007FD4
 	.ctors      start:0x00000008 end:0x0000000C
+
+mo_scene/sora_scene/sc_edit_select.cpp:
+	.text       start:0x00007FD4 end:0x00008340
+	.rodata     start:0x00000028 end:0x00000030
+	.data       start:0x00001C48 end:0x00001D70
+
+mo_scene/sora_scene/sc_edit_menu.cpp:
+	.text       start:0x00008340 end:0x00008514
+	.data       start:0x00001D70 end:0x00001DD0
+	.bss        start:0x00000048 end:0x00000050
 
 mo_scene/sora_scene/sc_edit.cpp:
 	.text       start:0x00008514 end:0x00008BC8

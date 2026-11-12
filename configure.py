@@ -7111,6 +7111,9 @@ config.libs = [
             Object(NonMatching, "mo_scene/sora_scene/sc_melee.cpp"),
             Object(NonMatching, "mo_scene/sora_scene/sc_vs_result.cpp"),
             Object(NonMatching, "mo_scene/sora_scene/sc_character_roll.cpp"),
+            Object(NonMatching, "mo_scene/sora_scene/sc_snap_shot.cpp"),
+            Object(NonMatching, "mo_scene/sora_scene/sc_edit_select.cpp"),
+            Object(NonMatching, "mo_scene/sora_scene/sc_edit_menu.cpp"),
         ],
     },
     {
