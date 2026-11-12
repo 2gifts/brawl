@@ -13,7 +13,11 @@ struct hkTransform {
 
     // Out-of-line members defined in src/havok/hkInertiaTensorComputer.cpp.
     void setRotation(const hkQuaternion& q);
-    void setIdentity();
+    // Identity rotation, zero translation (out-of-line copy in hkInertiaTensorComputer.o).
+    void setIdentity() {
+        m_rotation.setIdentity();
+        m_translation.setZero4();
+    }
     void setTranslation(const hkVector4& t);
     hkVector4& getTranslation();
 

@@ -50,6 +50,17 @@ struct hkMatrix3 {
         }
     }
 
+    // Zero matrix with ones on the diagonal (inlined into hkTransform::setIdentity; out-of-line copy at 0x8032BD74).
+    void setIdentity() {
+        setZero();
+        hkReal one = 1.0f;
+        m_col0.x = one;
+        m_col1.y = one;
+        m_col2.z = one;
+    }
+    // Element (row, column) (out-of-line copy at 0x80291270).
+    hkReal& operator()(int row, int column) { return (&m_col0.x)[column * 4 + row]; }
+
     void transpose();
     void setTranspose(const hkMatrix3& other);
     void setMul(const hkMatrix3& lhs, const hkMatrix3& rhs);
