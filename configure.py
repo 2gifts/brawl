@@ -2009,6 +2009,11 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_koopa/ft_gkoopa_status_uniq_process_breath.cpp"),
             Object(NonMatching, "mo_fighter/ft_koopa/ft_gkoopa_status_uniq_process_special_s.cpp"),
             Object(NonMatching, "mo_fighter/ft_koopa/ft_koopa.cpp"),
+            Object(NonMatching, "mo_fighter/ft_koopa/ft_koopa_status_uniq_process_special_hi.cpp"),
+            Object(NonMatching, "mo_fighter/ft_koopa/ft_koopa_status_uniq_process_special_lw.cpp"),
+            Object(NonMatching, "mo_fighter/ft_koopa/ft_gkoopa.cpp"),
+            Object(NonMatching, "mo_fighter/ft_koopa/ft_gkoopa_status_uniq_process_special_hi.cpp"),
+            Object(NonMatching, "mo_fighter/ft_koopa/ft_gkoopa_status_uniq_process_special_lw.cpp"),
         ],
     },
     {
