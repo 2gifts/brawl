@@ -26,6 +26,8 @@ struct hkBroadPhaseBorder : hkReferencedObject, hkWorldDeletionListener, hkPhant
     hkPhantom* m_phantoms[6];  // 0x14
     int m_type;                // 0x2C
 
+    // Puts a flat phantom on each of the six faces of the world's broadphase extents and adds them to the world.
+    hkBroadPhaseBorder(hkWorld* world, Type type);
     virtual ~hkBroadPhaseBorder();
 
     virtual void maxPositionExceededCallback(hkEntity* entity);            // 0x34

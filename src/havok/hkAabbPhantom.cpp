@@ -21,23 +21,38 @@
 #include <havok/hkCollidable.h>
 #include <havok/hkThreadMemory.h>
 
-hkAabbPhantom::hkAabbPhantom(hkFinishLoadedObjectFlag flag) : hkPhantom(flag) {
-    // Empty arrays with the "do not deallocate" flag set (the default state of an hkArray).
-    m_overlapListeners.m_data = 0;
-    m_overlapListeners.m_size = 0;
-    m_overlapListeners.m_capacityAndFlags = hkArrayBase::DONT_DEALLOCATE_FLAG;
-    m_phantomListeners.m_data = 0;
-    m_phantomListeners.m_size = 0;
-    m_phantomListeners.m_capacityAndFlags = hkArrayBase::DONT_DEALLOCATE_FLAG;
-    m_overlappingCollidables.m_data = 0;
-    m_overlappingCollidables.m_size = 0;
-    m_overlappingCollidables.m_capacityAndFlags = hkArrayBase::DONT_DEALLOCATE_FLAG;
+hkAabbPhantom::hkAabbPhantom(const hkAabb& aabb, u32 collisionFilterInfo) : hkPhantom(0) {
+    m_aabb = aabb;
+    m_collidable.m_broadPhaseHandle.m_collisionFilterInfo = collisionFilterInfo;
 }
 
+// The arrays are rebuilt empty by their default constructors (hkPhantom's two, then this class's one after the vtable
+// store).
+hkAabbPhantom::hkAabbPhantom(hkFinishLoadedObjectFlag flag) : hkPhantom(flag) {}
+
 // Calls the deleting destructor through the vtable with flag -1 (object is not freed).
+void hkAabbPhantom::finishLoadedObjecthkAabbPhantom(void* p) {
+    hkFinishLoadedObjectFlag flag;
+    flag.m_finishing = 1;
+    new (p) hkAabbPhantom(flag);
+}
+
 void hkAabbPhantom::cleanupLoadedObjecthkAabbPhantom(void* p) {
     ((hkAabbPhantom*)p)->~hkAabbPhantom();
 }
+
+static hkPhantomTypeInfo s_hkAabbPhantomTypeInfo("hkAabbPhantom", hkAabbPhantom::finishLoadedObjecthkAabbPhantom,
+                                                 hkAabbPhantom::cleanupLoadedObjecthkAabbPhantom,
+                                                 hkAabbPhantom::getVtablehkAabbPhantom());
+
+const void* hkAabbPhantom::getVtablehkAabbPhantom() {
+    hkFinishLoadedObjectFlag flag;
+    flag.m_finishing = 0;
+    hkVector4 buf[10]; // 0xA0 bytes of 16-byte-aligned storage for the placed object
+    new (buf) hkAabbPhantom(flag);
+    return *(const void**)buf;
+}
+
 
 hkAabbPhantom::~hkAabbPhantom() {
 }

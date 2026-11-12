@@ -48,9 +48,14 @@ struct hkPhantom : hkWorldObject {
     hkArray<hkPhantomListener*> m_phantomListeners;        // 0x64
 
     hkPhantom(hkFinishLoadedObjectFlag flag) : hkWorldObject(flag) {}
+    // A new phantom owns its collidable (owner offset back to the phantom).
+    hkPhantom(hkShape* shape) : hkWorldObject(shape, BROAD_PHASE_PHANTOM) {
+        m_collidable.m_ownerOffset = (u8*)this - (u8*)&m_collidable;
+    }
 
     // Phantoms are freed as class 0x2F (the deleting destructor).
     HK_DECLARE_REF_ALLOCATOR(0x2F)
+    static void* operator new(unsigned long, void* p) { return p; } // the loaded-object constructors
     virtual ~hkPhantom();
     virtual void calcStatistics(hkStatisticsCollector* collector) const;
     virtual hkMotion* getMotionState() const = 0;                              // 0x14
@@ -59,7 +64,7 @@ struct hkPhantom : hkWorldObject {
     virtual void addOverlappingCollidable(hkCollidable* collidable) = 0;      // 0x20
     virtual hkBool isOverlappingCollidableAdded(hkCollidable* collidable) const = 0; // 0x24
     virtual void removeOverlappingCollidable(hkCollidable* collidable) = 0;   // 0x28
-    virtual void unk2C() = 0;                                                  // 0x2C
+    virtual hkPhantom* clone() const = 0;                                      // 0x2C (map name)
     virtual void updateShapeCollectionFilter() = 0;                            // 0x30
     virtual void deallocateInternalArrays();                                   // 0x34
 

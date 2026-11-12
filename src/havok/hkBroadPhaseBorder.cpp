@@ -16,6 +16,27 @@
 #include <havok/hkBroadPhaseBorder.h>
 #include <havok/hkCollidable.h>
 #include <havok/hkRigidBody.h>
+#include <havok/hkAabbPhantom.h>
+
+// One phantom on the box in `aabb`: a border collidable that reports overlaps to this listener.
+#define HK_BORDER_PHANTOM(INDEX, MIN_X, MIN_Y, MIN_Z, MAX_X, MAX_Y, MAX_Z)                    {                                                                                               aabb.m_min.set(MIN_X, MIN_Y, MIN_Z, 0.0f);                                                  aabb.m_max.set(MAX_X, MAX_Y, MAX_Z, 0.0f);                                                  hkAabbPhantom* phantom = new hkAabbPhantom(aabb);                                           phantom->m_collidable.m_broadPhaseHandle.m_type = hkWorldObject::BROAD_PHASE_BORDER;         phantom->addPhantomOverlapListener(this);                                                   m_phantoms[INDEX] = phantom;                                                                world->addPhantom(phantom);                                                             }
+
+hkBroadPhaseBorder::hkBroadPhaseBorder(hkWorld* world, Type type) {
+    m_world = world;
+    m_type = type;
+    addReference();
+    m_world->addWorldDeletionListener(this);
+
+    hkVector4 worldMin = *(const hkVector4*)m_world->m_broadPhaseExtents[0];
+    hkVector4 worldMax = *(const hkVector4*)m_world->m_broadPhaseExtents[1];
+    hkAabb aabb; // one box reused for all six phantoms
+    HK_BORDER_PHANTOM(0, worldMax.x, worldMin.y, worldMin.z, worldMax.x, worldMax.y, worldMax.z)
+    HK_BORDER_PHANTOM(1, worldMin.x, worldMin.y, worldMin.z, worldMin.x, worldMax.y, worldMax.z)
+    HK_BORDER_PHANTOM(2, worldMin.x, worldMax.y, worldMin.z, worldMax.x, worldMax.y, worldMax.z)
+    HK_BORDER_PHANTOM(3, worldMin.x, worldMin.y, worldMin.z, worldMax.x, worldMin.y, worldMax.z)
+    HK_BORDER_PHANTOM(4, worldMin.x, worldMin.y, worldMax.z, worldMax.x, worldMax.y, worldMax.z)
+    HK_BORDER_PHANTOM(5, worldMin.x, worldMin.y, worldMin.z, worldMax.x, worldMax.y, worldMin.z)
+}
 
 hkBroadPhaseBorder::~hkBroadPhaseBorder() {
     for (int i = 0; i < 6; i++) {
