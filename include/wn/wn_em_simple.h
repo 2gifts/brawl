@@ -183,7 +183,11 @@ public:
     float m_attackStopMax; // 0x21E4, the hit stop frames the weapon asked for
     s32 unk21E8;
     s32 unk21EC;
+#ifdef WN_EM_SIMPLE_UNIT
+    Vec2f m_baseSpeed;     // 0x21F0, HYPOTHESIS: the launch speed of the shot (setupParam)
+#else
     u8 unk21F0[0x8];
+#endif
     Vec2f m_speed;         // 0x21F8, HYPOTHESIS: the article's speed
     Vec2f m_accel;         // 0x2200, HYPOTHESIS: the article's acceleration
     class wnemSwHolder* m_holder; // 0x2208, the holder that activated it (wnemSwHolder::active / deactivate)
@@ -233,6 +237,9 @@ public:
     void constraint();
     void removeConstraint();
     void setupCollisionHitStatus();
+#ifdef WN_EM_SIMPLE_UNIT
+    bool setupParam(struct emShotParam* param, struct emWeaponParamWork* work, float lr);
+#endif
     void setupGroundData();
     void setupGlowModule();
     void reqCommonEffect(s32 id);

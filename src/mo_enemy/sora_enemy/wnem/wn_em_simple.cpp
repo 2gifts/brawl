@@ -223,7 +223,11 @@ struct wnemAnimCmdSet {
 struct wnemShotParamView {
     u8 unk0[0x20];
     s32 m_constraintNode; // 0x20, the model node of the owner the weapon is constrained to (-1: none)
-    u8 unk24[0xC];
+    u8 m_flag24;          // 0x24, HYPOTHESIS: four flag bytes the weapon copies (setupParam)
+    u8 m_flag25;
+    u8 m_flag26;
+    u8 m_flag27;
+    u8 unk28[0x8];
     s32 m_resetHitStatus; // 0x30, HYPOTHESIS: nonzero when the weapon keeps the hit status of its hit module
     void* m_groundData;   // 0x34, the ground shape data of the weapon (setupGroundData); null: no ground collision
     u8 unk38[0x38];
@@ -249,6 +253,64 @@ struct wnemGroundShapeData {
     };
 };
 
+// HYPOTHESIS: a plain view of the work block's int-sized fields at the offsets the unit's functions read (the block the
+// header declares inside m_shotWork is shorter in names than in use).
+static inline u8& wnemByteAt(wnemSimple* wnem, int offset) {
+    return *(reinterpret_cast<u8*>(wnem) + offset);
+}
+static inline Vec2f& wnemVec2At(void* base, int offset) {
+    return *reinterpret_cast<Vec2f*>(reinterpret_cast<u8*>(base) + offset);
+}
+
+// Copies the shot description and the work block into the weapon's own state.
+// HYPOTHESIS: the second argument is the emWeaponParamWork of the shot (its launch speed and acceleration).
+bool wnemSimple::setupParam(emShotParam* param, emWeaponParamWork* work, float lr) {
+    unk21B9 = false;
+    unk21B8 = false;
+    unk2215 = false;
+    unk2216 = false;
+    unk2217 = false;
+    unk2218 = false;
+    m_requestDeactive = false;
+    m_isManaged = false;
+    m_isFromPool = false;
+    m_linkId = param->m_shotKind;
+    m_lifeLimit = param->m_life;
+    unk21D4 = static_cast<u32>(param->m_constantValue);
+    unk21D8 = static_cast<u32>(param->m_constantValue);
+    m_weaponType = param->m_type;
+    unk21E8 = -1;
+    unk21EC = 0;
+    unk21BA[0] = reinterpret_cast<wnemShotParamView*>(param)->m_flag24;
+    wnemByteAt(this, 0x21BB) = reinterpret_cast<wnemShotParamView*>(param)->m_flag25;
+    wnemByteAt(this, 0x21B6) = reinterpret_cast<wnemShotParamView*>(param)->m_flag26;
+    wnemByteAt(this, 0x21B7) = reinterpret_cast<wnemShotParamView*>(param)->m_flag27;
+    m_procFncHpZero = NULL;
+    m_procFncLifeZero = NULL;
+    m_procFncTouchGround = NULL;
+    m_procFncHitShell = NULL;
+    m_holder = NULL;
+    unk2234 = NULL;
+    wnemByteAt(this, 0x21B5) = work->unk2;
+    m_baseSpeed = wnemVec2At(work, 0x14);
+    m_speed = m_baseSpeed;
+    m_accel = wnemVec2At(work, 0x1C);
+    m_accel.m_y += param->m_flySpeedY;
+    resetFrameCounter(0);
+    m_frameCounters[0].stop();
+    if (m_lifeLimit > 0) {
+        unk21B9 = true;
+        m_frameCounters[0].start();
+    }
+    if (unk21D8 > 0.0f) {
+        unk21B8 = true;
+    }
+    if (work->unk24 != 0) {
+        unk2234 = reinterpret_cast<s32*>(work->unk24);
+    }
+    return true;
+}
+
 // Shapes the weapon's ground module after the ground data of its shot description.
 void wnemSimple::setupGroundData() {
     soGroundModuleImpl& ground = dynamic_cast<soGroundModuleImpl&>(m_moduleAccesser->getGroundModule());
@@ -263,6 +325,47 @@ void wnemSimple::setupGroundData() {
     } else if (kind == 1) {
         ground.modifyRhombus(data->m_rhombus.m_up, data->m_rhombus.m_down, data->m_rhombus.m_width, 0);
     }
+}
+
+// HYPOTHESIS: the item shot description (the Botron ball's item block, wnemSimple::unk2234 + 4): the model node of the
+// item's start and its offset from that node.
+struct wnemItemShootParam {
+    u8 unk0[0x14];
+    u32 m_nodeId;   // 0x14 of the block (0x18 of the ball's parameters)
+    Vec3f m_offset;
+};
+
+// Map name wnemSimple::ShootItem: creates the item at the node of the weapon's model (the first call only preloads its
+// archive), as the Enemy's emShootItem does.
+extern "C" bool fn_41_320F8(wnemSimple* wnem, int kind, int variation, s32* param) {
+    if (kind == -1) {
+        return false;
+    }
+    if (itManager::getInstance()->isCompItemKindArchive(static_cast<itKind>(kind), 0, true) == false) {
+        itManager::getInstance()->preloadItemKindArchive(static_cast<itKind>(kind), 0, itArchive::Temp, true);
+        return true;
+    }
+    itManager* items;
+    int ownerTaskId = wnem->m_moduleAccesser->getStageObject().m_taskId;
+    items = itManager::getInstance();
+    BaseItem* item = items->createItem(static_cast<itKind>(kind), variation, ownerTaskId);
+    if (item != NULL) {
+        wnemItemShootParam* shootParam = reinterpret_cast<wnemItemShootParam*>(reinterpret_cast<u8*>(param) + 4);
+        soModelModule& model = wnem->m_moduleAccesser->getModelModule();
+        Vec3f pos;
+        Vec3f offset;
+        offset.m_x = shootParam->m_offset.m_x;
+        offset.m_y = shootParam->m_offset.m_y;
+        offset.m_z = shootParam->m_offset.m_z;
+        pos = model.getNodeGlobalPosition(shootParam->m_nodeId, &offset, false, false);
+        item->warp(&pos);
+        item->updateNodeSRT();
+    } else {
+        wnemReport("wnemSimple::ShootItem : --- field!! -------------- \n");
+        return false;
+    }
+    wnemReport("wnemSimple::ShootItem : --- success!! -------------- \n");
+    return true;
 }
 
 void wnemSimple::RequestDeactive() {
@@ -497,6 +600,8 @@ void wnemSimple::OnDead() {
 // 0x1100000c; the weapon's accesser reads the first float of the same group, Weapon's Float_Active_Global_Frame).
 static const u32 WeaponValueFloat_Scale = 0x11000000;
 
+
+
 // Map name wnemSimple::getValueInt / getValueFloat: the scaled value for the enemy of the accesser, as the Enemy's own
 // helpers compute it (they keep address names because other units call them).
 extern "C" s32 fn_41_33AD0(emScaledValue* value, soModuleAccesser* acc);
@@ -564,7 +669,11 @@ wnemSimple::wnemSimple(s32 articleId, s16 manageId, const soArticleConstructInfo
     m_attackStopMax(0.0f),
     unk21E8(0),
     unk21EC(0),
+#ifdef WN_EM_SIMPLE_UNIT
+    m_baseSpeed(),
+#else
     unk21F0(),
+#endif
     m_speed(),
     m_accel(),
     m_holder(NULL),
@@ -885,6 +994,7 @@ void wnemSimple::updateNodeSRT() {
         moduleAccesser->getModelModule().setNodeSRT(0, &scale, &rotation, &position);
     }
 }
+
 
 
 // A part weapon (type 2) remembers the strongest hit of the frame and the hit stop it asked for.

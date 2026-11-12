@@ -1732,6 +1732,53 @@ PF_CACHE_PAGE* VFiPFCACHE_SearchDataCache(PF_VOLUME* p_vol, u32 sector) {
     return VFiPFCACHE_SearchForPage(p_vol, p_vol->cache.p_current_data, sector);
 }
 
+s32 VFiPFCACHE_FlushDataCacheSpecific(PF_VOLUME* p_vol, void* signature) {
+    s32 err;
+    PF_CACHE_PAGE* p_head;
+    PF_CACHE_PAGE* p_page;
+    u32 is_modified;
+    u32 is_flushed;
+
+    err = 0;
+    is_flushed = 0;
+    if ((p_vol->cache.mode & 7) != 0) {
+        p_head = p_vol->cache.p_current_data;
+        if (p_head->signature == NULL || p_head->signature == signature) {
+            if (p_head != NULL && (p_head->stat & 2) && p_head->sector != 0xFFFFFFFF) {
+                is_flushed = 1;
+            }
+            err = VFiPFCACHE_FlushPageIfNeeded(p_vol, p_head);
+            if (err != 0) {
+                return err;
+            }
+        }
+        for (p_page = p_head->p_next; p_page != p_head; p_page = p_page->p_next) {
+            if (p_page->signature == NULL || p_page->signature == signature) {
+                is_modified = 0;
+                if (p_page != NULL && (p_page->stat & 2) && p_page->sector != 0xFFFFFFFF) {
+                    is_modified = 1;
+                }
+                err = VFiPFCACHE_FlushPageIfNeeded(p_vol, p_page);
+                if (err != 0) {
+                    if (is_flushed != 0) {
+                        dCommon_FlushFromVol(p_vol, 0);
+                    }
+                    return err;
+                }
+                if (is_modified != 0) {
+                    is_flushed = 1;
+                }
+            }
+        }
+        if (is_flushed != 0) {
+            if (dCommon_FlushFromVol(p_vol, 1) != 0) {
+                return 0x11;
+            }
+        }
+    }
+    return err;
+}
+
 s32 VFiPFCACHE_FlushFATCache(PF_VOLUME* p_vol) {
     s32 err = VFiPFCACHE_DoFlushCache(p_vol, p_vol->cache.p_current_fat);
     if (err != 0) {
@@ -3617,9 +3664,37 @@ void VFInitEx(void* i_heap_start_address_p, u32 i_size) {
     }
 }
 
+s8* VF_path2handleidx(s32* o_handle_idx_p, const s8* i_path_p) {
+    s8 name[8];
+    const s8* src = i_path_p;
+    s32 len = 0;
+    s8* result = (s8*)i_path_p;
+
+    *o_handle_idx_p = -1;
+    fn_803A976C(name, 0, 8);
+    for (; *src != 0; src++, len++) {
+        if (*src == '\\' || *src == '/') {
+            break;
+        }
+        if (*src == ':') {
+            *o_handle_idx_p = dHash_GetArg(name);
+            if (*o_handle_idx_p == -1 || len > 7) {
+                result = NULL;
+            } else {
+                result = (s8*)(src + 1);
+            }
+            break;
+        }
+        if (len < 7) {
+            name[len] = *src;
+        }
+    }
+    return result;
+}
+
 // HYPOTHESIS: callee prototypes local to this unit (no shared header declares them).
-s32 VFSysCreateFile_current(const s8* i_path_p);
-s32 VFSysCreateFile(s32 i_handle_idx, const s8* i_path_p);
+struct PF_FILE* VFSysCreateFile_current(const s8* i_path_p);
+struct PF_FILE* VFSysCreateFile(s32 i_handle_idx, const s8* i_path_p);
 s32 VFSysDeleteFile_current(const s8* i_path_p);
 s32 VFSysDeleteFile(s32 i_handle_idx, const s8* i_path_p);
 
@@ -3672,9 +3747,9 @@ s32 VFCreateFile(const s8* i_path_p) {
     }
 
     if (handle_idx != -1) {
-        result = VFSysCreateFile(handle_idx, path);
+        result = (s32)VFSysCreateFile(handle_idx, path);
     } else {
-        result = VFSysCreateFile_current(path);
+        result = (s32)VFSysCreateFile_current(path);
     }
 
     if (lbl_805A120C != 0) {
@@ -4389,7 +4464,7 @@ PF_FILE* VFSysOpenFile(s32 i_handle_idx, const s8* i_path_p, const s8* i_mode) {
 s32 VFipf2_fsfirst(const s8* path, u32 attr, PF_DTA* p_dta);
 
 // HYPOTHESIS: VFSysCreateFile; the original also passes a zero second argument to VFipf2_create.
-PF_FILE* fn_803C5428(s32 i_handle_idx, const s8* i_path_p) {
+PF_FILE* VFSysCreateFile(s32 i_handle_idx, const s8* i_path_p) {
     s32 err = vfsys_select_volume(i_handle_idx);
     VF_HANDLE_TYPE* handle_p;
     PF_FILE* file_p;
@@ -4479,7 +4554,7 @@ PF_FILE* VFSysOpenFile_current(const s8* i_path_p, const s8* i_mode) {
 }
 
 // HYPOTHESIS: VFSysCreateFile_current; the original also passes a zero second argument to VFipf2_create.
-PF_FILE* fn_803C5348(const s8* i_path_p) {
+PF_FILE* VFSysCreateFile_current(const s8* i_path_p) {
     VF_HANDLE_TYPE* handle_p = vfsys_vol_to_handle(VFiPFVOL_GetCurrentVolume());
     PF_FILE* file_p;
     s32 err;
@@ -5669,6 +5744,229 @@ s32 VFiPFFAT_ReadFATSector(PF_VOLUME* p_vol, PF_CACHE_PAGE** p_page, u32 cluster
     return err;
 }
 
+s32 VFiPFFAT_GetBeforeChain(PF_VOLUME* p_vol, u32 start_cluster, u32 lActive, u32* p_cluster) {
+    u32 next_cluster;
+    PF_CACHE_PAGE* p_page;
+    u32 limit;
+    s32 err;
+
+    if (p_vol == NULL) {
+        *p_cluster = 0xFFFFFFFF;
+        return 10;
+    }
+    if (start_cluster < 2 || start_cluster >= p_vol->bpb.num_clusters + 2) {
+        *p_cluster = 0xFFFFFFFF;
+        return 10;
+    }
+    limit = lbl_804169B0[p_vol->bpb.fat_type].unk4;
+    *p_cluster = 0xFFFFFFFF;
+    err = VFiPFFAT_ReadFATSector(p_vol, &p_page, start_cluster);
+    if (err != 0) {
+        return err;
+    }
+    p_page->option = 0;
+    while (start_cluster < limit) {
+        switch (p_vol->bpb.fat_type) {
+        case FAT_12:
+            err = VFiPFFAT12_ReadFATEntryPage(p_vol, (u16)start_cluster, &next_cluster, &p_page);
+            break;
+        case FAT_16:
+            err = VFiPFFAT16_ReadFATEntryPage(p_vol, start_cluster, &next_cluster, &p_page);
+            break;
+        case FAT_32:
+            err = VFiPFFAT32_ReadFATEntryPage(p_vol, start_cluster, &next_cluster, &p_page);
+            break;
+        default:
+            err = 0xF;
+            break;
+        }
+        if (err != 0) {
+            return err;
+        }
+        if (lActive == next_cluster) {
+            *p_cluster = start_cluster;
+            return 0;
+        }
+        start_cluster--;
+        if (start_cluster < 2 || start_cluster >= p_vol->bpb.num_clusters + 2) {
+            if (start_cluster < limit) {
+                *p_cluster = lActive;
+                return 0;
+            }
+        }
+    }
+    return 0xD;
+}
+
+s32 VFiPFFAT_TraceClustersChain(PF_FFD* p_ffd, u32 start_clst, u32 size, u32* p_target_clst, u32* p_next_clst) {
+    PF_VOLUME* p_vol;
+    u32 last_cluster;
+    u32 chain_index;
+    u32 num_clusters;
+    u32 bytes_per_cluster;
+    u32 next_cluster;
+    u32 chk_clstlnk;
+    PF_CACHE_PAGE* p_page;
+    u32 i;
+    s32 err;
+
+    *p_target_clst = 0;
+    *p_next_clst = 0;
+    last_cluster = start_clst;
+    if (p_ffd == NULL) {
+        return 10;
+    }
+    if (p_ffd->p_hint == NULL) {
+        return 10;
+    }
+    if (p_ffd->file_version == 0) {
+        return 10;
+    }
+    if (p_ffd->p_hint->file_version > p_ffd->file_version) {
+        return 10;
+    }
+    p_vol = p_ffd->p_vol;
+    if (p_vol->drv_char < 'A' || p_vol->drv_char > 'Z') {
+        return 0x23;
+    }
+    if (p_vol == NULL) {
+        return 10;
+    }
+    if (*p_ffd->p_start_cluster < 2) {
+        return 0;
+    }
+    if (start_clst < 2) {
+        return 0;
+    }
+    if (size == 0) {
+        return 0;
+    }
+    if (size == 0xFFFFFFFF) {
+        if (p_ffd->last_cluster.num_last_cluster != 0) {
+            *p_target_clst = p_ffd->last_cluster.num_last_cluster;
+            *p_next_clst = lbl_804169B0[p_vol->bpb.fat_type].eoc2;
+            return 0;
+        }
+    }
+    bytes_per_cluster = p_vol->bpb.bytes_per_sector << p_vol->bpb.log2_sectors_per_cluster;
+    num_clusters = size / bytes_per_cluster;
+    if (size % bytes_per_cluster != 0) {
+        num_clusters++;
+    }
+    if (*p_ffd->p_start_cluster == start_clst) {
+        chain_index = 1;
+    } else {
+        chain_index = p_ffd->p_hint->chain_index + 1;
+    }
+    next_cluster = 0xFFFFFFFF;
+    chk_clstlnk = 1;
+    err = VFiPFFAT_ReadFATSector(p_vol, &p_page, start_clst);
+    if (err != 0) {
+        return err;
+    }
+    for (i = 0; i < num_clusters; i++) {
+        err = VFiPFFAT_ReadClusterPage(p_ffd, start_clst, chain_index, &next_cluster, &chk_clstlnk, &p_page);
+        if (err != 0) {
+            return err;
+        }
+        last_cluster = start_clst;
+        if (next_cluster == lbl_804169B0[p_vol->bpb.fat_type].eoc2) {
+            p_ffd->last_cluster.num_last_cluster = start_clst;
+            p_ffd->last_cluster.max_chain_index = chain_index - 1;
+            break;
+        }
+        start_clst = next_cluster;
+        chain_index++;
+    }
+    p_ffd->p_hint->chain_index = chain_index - 1;
+    *p_target_clst = last_cluster;
+    *p_next_clst = next_cluster;
+    return 0;
+}
+
+static inline s32 vffat_refresh_fsinfo(PF_VOLUME* p_vol) {
+    u16 flag;
+    s32 err;
+
+    err = 0;
+    if (p_vol->bpb.fat_type != FAT_32) {
+        return 0xC;
+    }
+    flag = p_vol->fsi_flag;
+    if ((flag & 2) == 0) {
+        return 0x24;
+    }
+    if ((flag & 4) != 0) {
+        err = VFiPFDRV_StoreFreeCountToFSINFO(p_vol);
+    }
+    return err;
+}
+
+s32 VFiPFFAT_CountFreeClusters(PF_VOLUME* p_vol, u32* p_num_free_clusters) {
+    s32 err;
+    u32 cluster;
+    u32 value;
+    PF_CACHE_PAGE* p_page;
+
+    if (p_vol == NULL) {
+        return 10;
+    }
+    if (p_vol->bpb.fat_type != FAT_12 && p_vol->bpb.fat_type != FAT_16 && p_vol->bpb.fat_type != FAT_32) {
+        return 0xF;
+    }
+    if ((p_vol->fsi_flag & 4) != 0 && p_vol->num_free_clusters != 0xFFFFFFFF) {
+        *p_num_free_clusters = p_vol->num_free_clusters;
+        return 0;
+    }
+    *p_num_free_clusters = 0xFFFFFFFF;
+    cluster = 2;
+    if ((p_vol->fsi_flag & 1) != 0 && p_vol->bpb.fat_type == FAT_32) {
+        err = VFiPFDRV_GetFSINFOInformation(p_vol);
+        if (err != 0) {
+            return err;
+        }
+        *p_num_free_clusters = p_vol->num_free_clusters;
+    }
+    if (*p_num_free_clusters == 0xFFFFFFFF) {
+        err = VFiPFFAT_ReadFATSector(p_vol, &p_page, 2);
+        if (err != 0) {
+            return err;
+        }
+        p_page->option = 0;
+        for (; cluster >= 2 && cluster < p_vol->bpb.num_clusters + 2; cluster++) {
+            switch (p_vol->bpb.fat_type) {
+            case FAT_12:
+                err = VFiPFFAT12_ReadFATEntryPage(p_vol, (u16)cluster, &value, &p_page);
+                break;
+            case FAT_16:
+                err = VFiPFFAT16_ReadFATEntryPage(p_vol, cluster, &value, &p_page);
+                break;
+            case FAT_32:
+                err = VFiPFFAT32_ReadFATEntryPage(p_vol, cluster, &value, &p_page);
+                break;
+            default:
+                err = 0xF;
+                break;
+            }
+            if (err != 0) {
+                return err;
+            }
+            if (value == 0) {
+                (*p_num_free_clusters)++;
+            }
+        }
+        p_vol->num_free_clusters = *p_num_free_clusters;
+        if (p_vol->bpb.fat_type == FAT_32 && (p_vol->fsi_flag & 2) != 0) {
+            if (vffat_refresh_fsinfo(p_vol) != 0) {
+                p_vol->num_free_clusters = 0xFFFFFFFF;
+                p_vol->fsi_flag &= ~4;
+            }
+        }
+    }
+    p_vol->fsi_flag |= 4;
+    return 0;
+}
+
 s32 VFiPFFAT_GetClusterAllocatedInChain(PF_FFD* p_ffd, u32 initial_cluster, u32 chain_index, u32 size, u32* p_num_clusters) {
     PF_VOLUME* p_vol;
     u32 next_cluster;
@@ -5704,6 +6002,57 @@ s32 VFiPFFAT_GetClusterAllocatedInChain(PF_FFD* p_ffd, u32 initial_cluster, u32 
         }
         cluster = next_cluster;
         chain_index++;
+    }
+    return 0;
+}
+
+s32 VFiPFFAT_CountAllocatedClusters(PF_FFD* p_ffd, u32 size, u32* p_num_alloc_clusters) {
+    PF_VOLUME* p_vol;
+    s32 err;
+    u32 cluster;
+    u32 chain_index;
+
+    *p_num_alloc_clusters = 0;
+    if (p_ffd == NULL) {
+        return 10;
+    }
+    if (p_ffd->p_hint == NULL) {
+        return 10;
+    }
+    if (p_ffd->file_version == 0) {
+        return 10;
+    }
+    if (p_ffd->p_hint->file_version > p_ffd->file_version) {
+        return 10;
+    }
+    p_vol = p_ffd->p_vol;
+    if (p_vol->drv_char < 'A' || p_vol->drv_char > 'Z') {
+        return 0x23;
+    }
+    if (*p_ffd->p_start_cluster < 2) {
+        return 0;
+    }
+    if (p_ffd->last_cluster.num_last_cluster != 0) {
+        *p_num_alloc_clusters = p_ffd->last_cluster.max_chain_index + 1;
+        return 0;
+    }
+    if (p_ffd->p_hint->cluster != 0) {
+        if (size <= ((p_ffd->p_hint->chain_index + 1) << (p_vol->bpb.log2_bytes_per_sector + p_vol->bpb.log2_sectors_per_cluster))) {
+            *p_num_alloc_clusters = p_ffd->p_hint->chain_index + 1;
+            return 0;
+        }
+        *p_num_alloc_clusters = p_ffd->p_hint->chain_index;
+        p_vol = p_ffd->p_vol;
+        size -= p_ffd->p_hint->chain_index << (p_vol->bpb.log2_bytes_per_sector + p_vol->bpb.log2_sectors_per_cluster);
+        cluster = p_ffd->p_hint->cluster;
+        chain_index = p_ffd->p_hint->chain_index + 1;
+    } else {
+        cluster = *p_ffd->p_start_cluster;
+        chain_index = 1;
+    }
+    err = VFiPFFAT_GetClusterAllocatedInChain(p_ffd, cluster, chain_index, size, p_num_alloc_clusters);
+    if (err != 0) {
+        return err;
     }
     return 0;
 }
