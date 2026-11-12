@@ -19,9 +19,25 @@ mo_scene/sora_scene/sc_tutorial.cpp:
 	.text       start:0x00000768 end:0x00000810
 	.data       start:0x000000E0 end:0x00000128
 
+mo_scene/sora_scene/sc_memory_change.cpp:
+	.text       start:0x00000810 end:0x00004EB4
+	.ctors      start:0x00000000 end:0x00000004
+
+mo_scene/sora_scene/sc_intro.cpp:
+	.text       start:0x00004EB4 end:0x000061A4
+
 mo_scene/sora_scene/sc_staffroll.cpp:
 	.text       start:0x000061A4 end:0x0000624C
 	.data       start:0x00001400 end:0x00001448
+
+mo_scene/sora_scene/sc_gameover.cpp:
+	.text       start:0x0000624C end:0x000067D8
+
+mo_scene/sora_scene/sc_ty_fig_disp.cpp:
+	.text       start:0x000067D8 end:0x00006B08
+
+mo_scene/sora_scene/sc_ty_fig_disp2.cpp:
+	.text       start:0x00006B08 end:0x00007070
 
 mo_scene/sora_scene/sc_seal_list.cpp:
 	.text       start:0x00007070 end:0x00007230
@@ -32,9 +48,33 @@ mo_scene/sora_scene/sc_seal_disp.cpp:
 	.rodata     start:0x00000018 end:0x00000020
 	.data       start:0x000018D8 end:0x00001920
 
+mo_scene/sora_scene/sc_clear_getter.cpp:
+	.text       start:0x000074B4 end:0x00007834
+	.ctors      start:0x00000004 end:0x00000008
+
+mo_scene/sora_scene/sc_button.cpp:
+	.text       start:0x00007AA8 end:0x00007FD4
+	.ctors      start:0x00000008 end:0x0000000C
+
+mo_scene/sora_scene/sc_edit.cpp:
+	.text       start:0x00008514 end:0x00008BC8
+	.ctors      start:0x0000000C end:0x00000010
+
 mo_scene/sora_scene/sc_net_time_result.cpp:
 	.text       start:0x0000C824 end:0x0000C9C4
 	.data       start:0x000040D0 end:0x00004140
+
+mo_scene/sora_scene/sc_melee.cpp:
+	.text       start:0x00013884 end:0x0001AFE4
+	.ctors      start:0x00000014 end:0x00000018
+
+mo_scene/sora_scene/sc_vs_result.cpp:
+	.text       start:0x0001B144 end:0x0001B750
+	.ctors      start:0x00000018 end:0x0000001C
+
+mo_scene/sora_scene/sc_character_roll.cpp:
+	.text       start:0x0001B750 end:0x0001BCB4
+	.ctors      start:0x0000001C end:0x00000020
 
 mo_scene/sora_scene/sc_adv_selchar.cpp:
 	.text       start:0x0001BFDC end:0x0001C084
