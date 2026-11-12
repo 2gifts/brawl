@@ -3,6 +3,7 @@
 #include <ft/ft_transactor.h>
 #include <types.h>
 
+class soArticle;
 class soModuleAccesser;
 class wnLucarioAuraBall;
 
@@ -15,6 +16,7 @@ public:
     virtual void processUpdate(soModuleAccesser* moduleAccesser);
     // Local declaration of the REL singleton-holder entry point.
     static ftLucarioTransactor* getInstance();
+    virtual bool shootArticle(soArticle* article, soModuleAccesser* acc);
     bool activeArticle1(wnLucarioAuraBall* weapon, soModuleAccesser* acc);
     bool shootArticle(wnLucarioAuraBall* weapon, soModuleAccesser* acc);
 };

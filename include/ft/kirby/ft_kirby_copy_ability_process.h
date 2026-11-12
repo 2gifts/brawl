@@ -25,7 +25,7 @@ public:
     virtual void notifyEventCollisionSearch(soCollisionLog* log, soModuleAccesser* moduleAccesser);
     virtual bool unk11(soModuleAccesser* moduleAccesser);
     virtual bool activeArticle(class soArticle* article, soModuleAccesser* moduleAccesser);
-    virtual bool unk13(soModuleAccesser* moduleAccesser);
+    virtual bool shootArticle(class soArticle* article, soModuleAccesser* moduleAccesser);
     virtual void unk14(soModuleAccesser* moduleAccesser);
     virtual void unk15(soModuleAccesser* moduleAccesser);
     virtual bool unk16(soModuleAccesser* moduleAccesser);

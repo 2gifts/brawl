@@ -23,6 +23,17 @@ bool ftNessTransactor::activeArticle(soArticle* article, soModuleAccesser* acc) 
     }
 }
 
+bool ftNessTransactor::shootArticle(soArticle* article, soModuleAccesser* acc) {
+    switch (article->getArticleId()) {
+    case 0xd: {
+        wnNessPKFlash* weapon = dynamic_cast<wnNessPKFlash*>(article);
+        return shootArticle1(weapon, acc);
+    }
+    default:
+        return false;
+    }
+}
+
 // PK Flash: starts at the head node (Kirby's copy uses its own node), raised by 3 units scaled with the fighter.
 bool ftNessTransactor::activeArticle1(wnNessPKFlash* weapon, soModuleAccesser* acc) {
     int node = acc->getStageObject().soGetSubKind() == Fighter_Kirby ? 0x198 : 0x2a;
