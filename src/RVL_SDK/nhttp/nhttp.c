@@ -239,7 +239,7 @@ typedef struct NHTTPConnNode {
 
 void* NHTTPi_GetSystemInfoP(void);
 void NHTTPi_CleanupAsync(void* sys, void* callback);
-void* NHTTPi_CommThreadProcMain(void* arg);
+void NHTTPi_CommThreadProcMain(void* arg);
 int addHdrList(void* list, void* bgn, const char* name, const char* value);
 struct NHTTPLink* NHTTPi_getHdrFromList(struct NHTTPLink** list);
 
@@ -256,11 +256,11 @@ int NCDGetCurrentIpConfig(void*);
 extern const char* lbl_8059FCB8;
 
 int fn_803900FC(void*, void*, void*, int);
-int fn_80390954(void*, int, void*);
+int fn_80390954(NHTTPCommThread*, int, void*);
 void fn_80390A64(void*, int);
 int fn_80391144(void*, unsigned int);
 int fn_80391160(void*, void*, void*, unsigned int, int);
-int fn_80391180(void*, void*, void*, unsigned int, int);
+int fn_80391180(void*, void*, void*, unsigned int, int, int);
 int fn_80391888(void*, void*);
 int fn_80391960(void*, void*);
 int fn_80391AE4(void*);
@@ -647,7 +647,7 @@ int fn_80391160(void* a, void* req, void* c, unsigned int offset, int extra) {
 }
 
 // NHTTPi_RecvBufN
-int fn_80391180(void* a, void* req, void* c, unsigned int offset, int len) {
+int fn_80391180(void* a, void* req, void* c, unsigned int offset, int len, int flags) {
     u8* inner = *(u8**)((u8*)req + 0x2c);
     unsigned int cap = *(volatile unsigned int*)(inner + 0x1c);
     unsigned int pos;
@@ -663,7 +663,7 @@ int fn_80391180(void* a, void* req, void* c, unsigned int offset, int len) {
     if (len > remain) {
         len = remain;
     }
-    return NHTTPi_SocRecv(a, req, c, at, len);
+    return NHTTPi_SocRecv(a, req, c, at, len, flags);
 }
 
 // NHTTPi_SocOpen
@@ -795,18 +795,14 @@ int fn_80392810(const char* s) {
 int fn_80392880(const char* s, int len) {
     s8 c = (s8)*s++;
     int n = 0;
-    if (len <= 0) {
-        return n;
-    }
-    do {
+    for (; len > 0; len--) {
         if ((c >= 0x30 && c <= 0x39) || (c >= 0x41 && c <= 0x5a) || (c >= 0x61 && c <= 0x7a) || c == 0x20) {
             n += 1;
         } else {
             n += 3;
         }
         c = (s8)*s++;
-        len -= 1;
-    } while (len != 0);
+    }
     return n;
 }
 
@@ -862,16 +858,13 @@ int fn_80392E18(const char* hay, int hayLen, const char* needle, int needleLen) 
 }
 
 // NHTTPi_createCommThread
-int fn_80390954(void* info, int priority, void* stack) {
-    void* stackTop = stack;
-    int prio = priority;
-    void* thread = info;
+int fn_80390954(NHTTPCommThread* thread, int priority, void* stack) {
     if (NHTTPi_IsCreateCommThreadMessageQueue((NHTTPThreadInfo*)thread) == 0) {
         OSInitMessageQueue((OSMessageQueue*)thread, (OSMessage*)((u8*)thread + 0x20), 3);
         NHTTPi_IsCreateCommThreadMessageQueueOn((NHTTPThreadInfo*)thread);
     }
-    OSCreateThread((OSThread*)((u8*)thread + 0x30), NHTTPi_CommThreadProc, 0, (u8*)stackTop + 0x2000, 0x2000, prio, 0);
-    OSResumeThread((OSThread*)((u8*)thread + 0x30));
+    OSCreateThread(&thread->thread, NHTTPi_CommThreadProc, 0, (u8*)stack + 0x2000, 0x2000, priority, 0);
+    OSResumeThread(&thread->thread);
     return 1;
 }
 
@@ -1004,13 +997,11 @@ void NHTTPi_CleanupAsync(void* sys, void* callback) {
 
 int addHdrList(void* list, void* bgn, const char* name, const char* value) {
     NHTTPHdrNode** headp = (NHTTPHdrNode**)list;
-    NHTTPHdrNode* node = *headp;
     int found = 0;
+    NHTTPHdrNode* node = *headp;
     NHTTPHdrNode* neu;
     if (node != 0) {
-        if (fn_80392CD4(name, node->name) == 0) {
-            found = 1;
-        } else {
+        if (fn_80392CD4(name, node->name) != 0) {
             node = node->prev;
             while (node != *headp) {
                 if (fn_80392CD4(name, node->name) == 0) {
@@ -1019,31 +1010,33 @@ int addHdrList(void* list, void* bgn, const char* name, const char* value) {
                 }
                 node = node->prev;
             }
+        } else {
+            found = 1;
         }
     }
     if (found != 0) {
         node->value = value;
-        return 1;
-    }
-    neu = (NHTTPHdrNode*)NHTTPi_alloc(0x18, 4);
-    if (neu == 0) {
-        printf("failed to allocate memory\n");
-        NHTTPi_SetError((NHTTPBgnEndInfo*)bgn, 1);
-        return 0;
-    }
-    neu->name = name;
-    neu->value = value;
-    neu->extra = 0;
-    neu->extra2 = 0;
-    if (*headp != 0) {
-        neu->next = (*headp)->next;
-        neu->prev = *headp;
-        (*headp)->next->prev = neu;
-        (*headp)->next = neu;
     } else {
-        neu->prev = neu;
-        neu->next = neu;
-        *headp = neu;
+        neu = (NHTTPHdrNode*)NHTTPi_alloc(0x18, 4);
+        if (neu == 0) {
+            printf("failed to allocate memory\n");
+            NHTTPi_SetError((NHTTPBgnEndInfo*)bgn, 1);
+            return 0;
+        }
+        neu->name = name;
+        neu->value = value;
+        neu->extra = 0;
+        neu->extra2 = 0;
+        if (*headp != 0) {
+            neu->next = (*headp)->next;
+            neu->prev = *headp;
+            (*headp)->next->prev = neu;
+            (*headp)->next = neu;
+        } else {
+            neu->prev = neu;
+            neu->next = neu;
+            *headp = neu;
+        }
     }
     return 1;
 }
@@ -1080,15 +1073,17 @@ int fn_803906BC(void* list, void* data) {
 }
 
 int NHTTPi_freeReqQueue(NHTTPLink** list, int arg, void* data) {
-    NHTTPLink* head = *list;
-    NHTTPLink* found = 0;
+    NHTTPLink* n;
+    NHTTPLink* head;
     int ret = 0;
+    NHTTPLink* found = 0;
     s32 id = (s32)data;
+    head = *list;
     if (head != 0) {
         if ((s32)head->data == id) {
             found = head;
         } else {
-            NHTTPLink* n = head->prev;
+            n = head->prev;
             while (n != head) {
                 if ((s32)n->data == id) {
                     found = n;
@@ -1100,19 +1095,17 @@ int NHTTPi_freeReqQueue(NHTTPLink** list, int arg, void* data) {
     }
     if (found != 0) {
         void* conn;
-        void* req;
-        if (head == head->next) {
-            *list = 0;
-        } else {
+        if (head != head->next) {
             found->next->prev = found->prev;
             found->prev->next = found->next;
             if (*list == found) {
                 *list = found->prev;
             }
+        } else {
+            *list = 0;
         }
-        req = *(void**)((u8*)found + 0xc);
-        conn = NHTTPi_Request2Connection(arg, (int)req);
-        fn_80391888((void*)arg, req);
+        conn = NHTTPi_Request2Connection(arg, *(int*)((u8*)found + 0xc));
+        fn_80391888((void*)arg, *(void**)((u8*)found + 0xc));
         NHTTPi_free(found);
         if (conn != 0) {
             *(s32*)((u8*)conn + 4) = 8;
@@ -1160,32 +1153,25 @@ int fn_8039602C(int id) {
 int NHTTPGetBodyBuffer(void* conn, void* out, int* local) {
     void* mutex = NHTTPi_GetMutexInfoP(NHTTPi_GetSystemInfoP());
     void* found = NHTTPi_GetConnection((int)mutex, (int)conn);
-    u8* resp;
-    if (found == 0) {
-        return -1;
-    }
-    resp = (u8*)NHTTPi_Connection2Response((int)mutex, (int)found);
-    if (resp == 0) {
-        return -1;
-    }
-    *(void**)out = *(void**)(resp + 0x28);
-    *local = *(s32*)(resp + 0x1c);
-    return *(s32*)(resp + 4);
+    if (found != 0) {
+        u8* resp = (u8*)NHTTPi_Connection2Response((int)mutex, (int)found);
+        if (resp != 0) {
+            *(void**)out = *(void**)(resp + 0x28);
+            *local = *(s32*)(resp + 0x1c);
+            return *(s32*)(resp + 4);
+        } else return -1;
+    } else return -1;
 }
 
 // NHTTPGetUserParam
 void* fn_80396188(int id) {
     void* mutex = NHTTPi_GetMutexInfoP(NHTTPi_GetSystemInfoP());
     void* conn = NHTTPi_GetConnection((int)mutex, id);
-    u8* resp;
-    if (conn == 0) {
-        return 0;
-    }
-    resp = (u8*)NHTTPi_Connection2Response((int)mutex, (int)conn);
-    if (resp == 0) {
-        return 0;
-    }
-    return *(void**)(resp + 0x438);
+    if (conn != 0) {
+        u8* resp = (u8*)NHTTPi_Connection2Response((int)mutex, (int)conn);
+        if (resp != 0) return *(void**)(resp + 0x438);
+        else return 0;
+    } else return 0;
 }
 
 int NHTTPStartup(NHTTPAlloc alloc, NHTTPFree free, u32 priority) {
@@ -1194,7 +1180,7 @@ int NHTTPStartup(NHTTPAlloc alloc, NHTTPFree free, u32 priority) {
         OSRegisterVersion(lbl_8059FCB8);
         *(s32*)lbl_805A1148 = 1;
     }
-    return fn_803900FC(sys, (void*)alloc, (void*)free, (int)priority) ? 0 : -1;
+    return -!fn_803900FC(sys, (void*)alloc, (void*)free, (int)priority);
 }
 
 // NHTTPCreateRequestEx
@@ -1317,7 +1303,7 @@ int fn_80396D78(int id) {
 // NHTTPi_WaitForCompletion. The condvar lives in the unit's .bss block.
 void fn_80396DE8(u8* obj) {
     u8* base = lbl_805365E0;
-    if (*(s32*)base == 0) {
+    if (*(s32*)lbl_805365E0 == 0) {
         OSInitMutex((OSMutex*)(base + 4));
         OSInitCond((OSCond*)(base + 0x1c));
         *(s32*)base = 1;
@@ -1332,7 +1318,7 @@ void fn_80396DE8(u8* obj) {
 // NHTTPi_NotifyCompletion
 void fn_80396E70(u8* obj) {
     u8* base = lbl_805365E0;
-    if (*(s32*)base == 0) {
+    if (*(s32*)lbl_805365E0 == 0) {
         OSInitMutex((OSMutex*)(base + 4));
         OSInitCond((OSCond*)(base + 0x1c));
         *(s32*)base = 1;
@@ -1355,10 +1341,10 @@ int fn_803974A4(void* sys, void* conn) {
 }
 
 int NHTTP_CancelRequestAsync(void* sys, int id) {
+    int ret = 0;
     void* reqInfo = NHTTPi_GetReqInfoP(sys);
     void* mutex = NHTTPi_GetMutexInfoP(sys);
     u8* head = *(u8**)reqInfo;
-    int ret = 0;
     NHTTPi_lockReqList((OSMutex*)mutex);
     if (head != 0 && *(s32*)(head + 8) == id && *(s32*)(*(u8* volatile*)(head + 0xc)) == 0) {
         *(s32*)(*(u8* volatile*)(head + 0xc)) = 1;
@@ -1397,8 +1383,9 @@ int NHTTP_GetProgress(void* sys, int received, int total) {
     NHTTPi_lockReqList((OSMutex*)mutex);
     if (head != 0) {
         if (*(s32*)(*(u8* volatile*)(*(u8* volatile*)(head + 0xc) + 0x2c) + 0xc) != 0) {
-            s32 len = *(s32*)(*(u8* volatile*)(*(u8* volatile*)(head + 0xc) + 0x2c) + 0xc);
+            s32 len;
             *outR = *(s32*)(*(u8* volatile*)(*(u8* volatile*)(head + 0xc) + 0x2c) + 4);
+            len = *(s32*)(*(u8* volatile*)(*(u8* volatile*)(head + 0xc) + 0x2c) + 0xc);
             if ((unsigned)(len + 0x10000) == 0xFFFFu) {
                 len = 0;
             } else {
@@ -1570,7 +1557,7 @@ int fn_80391FC8(void* a, void* b, s32* c, int sock, int addr, int port) {
     return 0;
 }
 
-int NHTTPi_BufferFullCallback(int, void*);
+void NHTTPi_BufferFullCallback(int, void*);
 
 // NHTTPi_BufFull
 int fn_803935E4(int a, u32* b) {
@@ -2236,7 +2223,9 @@ typedef struct NHTTPThreadRequest {
     NHTTPHdrNode* headers;
     NHTTPHdrNode* postData;
     char boundary[0x15];
-    u8 unk4d[0x93];
+    u8 unk4d[0x5f];
+    s32 sslHandle;
+    u8 unkB0[0x30];
     char proxyHost[0x100];
     s32 proxyPort;
     char proxyAuth[0x5c];
@@ -2279,7 +2268,8 @@ typedef struct NHTTPThreadState {
 // HYPOTHESIS: response completion and body ownership fields used at request end.
 typedef struct NHTTPThreadResponse {
     s32 headerLength;
-    u8 unk4[8];
+    s32 received;
+    u8 unk8[4];
     s32 contentLength;
     s32 completed;
     s32 headerParsed;
@@ -2846,4 +2836,237 @@ int fn_80395E04(int id) {
     NHTTPi_OmitConnectionList(mutex, (int)conn);
     NHTTPi_free(conn);
     return 0;
+}
+
+int fn_803A8BA0(int, void*, unsigned int);
+int fn_80392238(void*, int, void*, unsigned int, int);
+
+int NHTTPi_SocRecv(int mutex, NHTTPThreadRequest* req, int socket, void* buffer, unsigned int length, int flags) {
+    int result;
+    if (req->sslHandle > 0) {
+        result = fn_803A8BA0(req->sslHandle, buffer, length);
+    } else {
+        void* conn = NHTTPi_Request2Connection(mutex, (int)req);
+        if (conn != 0) {
+            result = fn_80392238(conn, socket, buffer, length, flags);
+        } else {
+            return -1001;
+        }
+    }
+    if (result < 0) {
+        if (req->cancelled != 0) return -1002;
+        if (req->sslHandle > 0) {
+            if (result == -7 || result == -6) return 0;
+        } else if (result == -56) return 0;
+        return -1001;
+    }
+    return result;
+}
+
+int NHTTPi_PostSendCallback(int mutex, void* connection, void* body, int offset) {
+    void* postData;
+    int postLength;
+    int result = -1;
+    NHTTPConnectionStatus* conn = connection;
+    if (NHTTPi_ControlConnectionList(mutex, (int)conn, 0) != 0) {
+        NHTTPConnectionStatus* found = (void*)NHTTPi_ControlConnectionList(mutex, (int)conn, 0);
+        NHTTPThreadResponse* response = found != 0 ? found->response : 0;
+        if (response != 0 && conn->callback != 0) {
+            NHTTPCallbackData data;
+            data.body = body;
+            data.length = (int)conn->postData;
+            data.unk8 = conn->postLength;
+            data.offset = offset;
+            result = ((int (*)(void*, int, void*))conn->callback)(conn, 1, &data);
+            postLength = data.unk8;
+            postData = (void*)data.length;
+            found = (void*)NHTTPi_ControlConnectionList(mutex, (int)conn, 0);
+            if (found != 0) {
+                found->postData = postData;
+                found->postLength = postLength;
+            }
+        }
+    }
+    return result;
+}
+
+void NHTTPi_BufferFullCallback(int mutex, void* connection) {
+    void* body;
+    int length;
+    int received;
+    NHTTPConnectionStatus* conn = connection;
+    if (NHTTPi_ControlConnectionList(mutex, (int)conn, 0) != 0) {
+        NHTTPConnectionStatus* found = (void*)NHTTPi_ControlConnectionList(mutex, (int)conn, 0);
+        NHTTPThreadResponse* response = found != 0 ? found->response : 0;
+        if (response != 0 && conn->callback != 0) {
+            NHTTPCallbackData data;
+            data.body = response->body;
+            data.length = response->capacity;
+            data.unk8 = response->received;
+            ((int (*)(void*, int, void*))conn->callback)(conn, 2, &data);
+            received = data.unk8;
+            length = data.length;
+            body = data.body;
+            found = (void*)NHTTPi_ControlConnectionList(mutex, (int)conn, 0);
+            if (found != 0) {
+                found = (void*)NHTTPi_ControlConnectionList(mutex, (int)found, 0);
+                response = found != 0 ? found->response : 0;
+                if (response != 0) {
+                    response->body = body;
+                    response->capacity = length;
+                    response->received = received;
+                }
+            }
+        }
+    }
+}
+
+void fn_8039738C(int mutex, void* connection) {
+    void* body;
+    int length;
+    int received;
+    NHTTPConnectionStatus* conn = connection;
+    if (NHTTPi_ControlConnectionList(mutex, (int)conn, 0) != 0) {
+        NHTTPConnectionStatus* found = (void*)NHTTPi_ControlConnectionList(mutex, (int)conn, 0);
+        NHTTPThreadResponse* response = found != 0 ? found->response : 0;
+        if (response != 0 && conn->callback != 0) {
+            NHTTPCallbackData data;
+            data.body = response->body;
+            data.length = response->capacity;
+            data.unk8 = response->received;
+            ((int (*)(void*, int, void*))conn->callback)(conn, 3, &data);
+            received = data.unk8;
+            length = data.length;
+            body = data.body;
+            found = (void*)NHTTPi_ControlConnectionList(mutex, (int)conn, 0);
+            if (found != 0) {
+                found = (void*)NHTTPi_ControlConnectionList(mutex, (int)found, 0);
+                response = found != 0 ? found->response : 0;
+                if (response != 0) {
+                    response->body = body;
+                    response->capacity = length;
+                    response->received = received;
+                }
+            }
+        }
+    }
+}
+
+int NHTTPi_intToStr(char* out, u32 value) {
+    u32 powers[9] = {1000000000, 100000000, 10000000, 1000000, 100000, 10000, 1000, 100, 10};
+    u32* power = powers;
+    int i;
+    int started;
+    int count;
+    count = 0;
+    started = 0;
+    for (i = 0; i < 9; power++, i++) {
+        if (value >= *power) {
+            u32 digit = value / *power;
+            value %= *power;
+            started = 1;
+            out[count++] = digit + '0';
+        } else if (started != 0) {
+            out[count++] = '0';
+        }
+    }
+    out[count] = value + '0';
+    return count + 1;
+}
+
+int fn_80392EC4(char* out, const char* input) {
+    const char* table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    char* dest = out;
+    int length = strlen(input);
+    int i;
+    for (i = 0; i < length; i += 3) {
+        dest[0] = table[input[0] >> 2];
+        dest[1] = table[((input[0] & 3) << 4) + (input[1] >> 4)];
+        dest[2] = table[((input[1] & 15) << 2) + (input[2] >> 6)];
+        dest[3] = table[input[2] & 63];
+        input += 3;
+        dest += 4;
+    }
+    if (i == length + 1) dest[-1] = '=';
+    else if (i == length + 2) {
+        dest[-2] = '=';
+        dest[-1] = '=';
+    }
+    *dest = 0;
+    return strlen(out);
+}
+
+int fn_80394B44(NHTTPThreadState*);
+int fn_80394FE0(NHTTPThreadState*);
+int fn_803951CC(NHTTPThreadState*);
+int fn_803954C8(NHTTPThreadState*);
+void NHTTPi_CommThreadProcMain(void* arg) {
+    void* sys = NHTTPi_GetSystemInfoP();
+    NHTTPBgnEndInfo* bgn = NHTTPi_GetBgnEndInfoP(sys);
+    NHTTPActiveRequest** active = NHTTPi_GetReqInfoP(sys);
+    NHTTPThreadState thread;
+    thread.unk0 = -1;
+    NHTTPi_memclr(thread.host, 0x100);
+    NHTTPi_memclr(thread.unk104, 0x200);
+    thread.address = -1;
+    thread.previousAddress = -1;
+    thread.sent = 0;
+    thread.reuseConnection = 0;
+    thread.chunked = 0;
+    thread.unk334 = 0;
+    thread.contentLength = 0;
+    thread.error = 0;
+    while (!bgn->shutdown) {
+        if (thread.unk334 == 0) {
+            if (!fn_80394664((s32*)&thread)) continue;
+            if ((*active)->request->cancelled) {
+                fn_803944E4(&thread);
+                continue;
+            }
+            if (!fn_8039471C(&thread)) {
+                fn_803944E4(&thread);
+                continue;
+            }
+        }
+        if (thread.unk334 == 1) thread.unk334 = 0;
+        if (!fn_80394870(&thread)) {
+            fn_803944E4(&thread);
+            continue;
+        }
+        switch (fn_803949F0(&thread)) {
+        case 0:
+            break;
+        case 2:
+            thread.unk334 = 1;
+            continue;
+        case 1:
+            fn_803944E4(&thread);
+            continue;
+        }
+        switch (fn_80394B44(&thread)) {
+        case 0:
+            break;
+        case 2:
+            thread.unk334 = 1;
+            continue;
+        case 1:
+        case 3:
+            fn_803944E4(&thread);
+            continue;
+        }
+        if ((*active)->request->cancelled) {
+            fn_803944E4(&thread);
+            continue;
+        }
+        if (!fn_80394FE0(&thread)) {
+            fn_803944E4(&thread);
+            continue;
+        }
+        if (!fn_803951CC(&thread)) {
+            fn_803944E4(&thread);
+            continue;
+        }
+        fn_803954C8(&thread);
+        fn_803944E4(&thread);
+    }
 }
