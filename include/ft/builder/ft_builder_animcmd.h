@@ -314,7 +314,7 @@ public:
         unit.m_animCmdAddressPackArraySeparate = (soAnimCmdAddressPackArraySeparate*)g_soAnimCmdAddressPackArrayNull;
         acc->getAnimCmdModule().registInterpreter(unit, attr);
     }
-#ifdef FT_ANIMCMD_UNIT_DTOR_OUTLINE
+#if defined(FT_ANIMCMD_UNIT_DTOR_OUTLINE) || defined(FT_ANIMCMD_UNIQ_DTOR_OUTLINE)
     ~soAnimCmdControlUnitBuilderUniq();
 #endif
 };

@@ -668,6 +668,9 @@ class soParamCustomizeModuleBuilder<soParamCustomizeModuleBuildConfig<soParamCus
     soParamCustomizeModuleImpl m_paramCustomizeModule;
 public:
     soParamCustomizeModuleBuilder(soModuleAccesser*) { }
+#ifdef FT_PARAM_CUSTOMIZE_BUILDER_DTOR_NOINLINE
+    ~soParamCustomizeModuleBuilder() __attribute__((never_inline)) { }
+#endif
 #ifdef WN_MARIO_FIREBALL_UNIT
     soParamCustomizeModule* getModule() { return &m_paramCustomizeModule; }
 #endif
