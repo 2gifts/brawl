@@ -412,8 +412,8 @@ Vec2f soGroundModuleImpl::getTouchPos(int touchMask, u32 index) {
 
 void soGroundModuleImpl::ignoreTouchLine(grCollStatus::TouchMask p0, u32 index) {
     if (isTouch(p0, 0)) {
-        u32 bit = 1;
-        for (u32 i = 0; bit <= 0xFF; bit <<= 1, i++) {
+        u32 i = 0;
+        for (u32 bit = 1; bit <= 0xFF; bit <<= 1, i++) {
             if (p0 & bit) {
                 if (m_groundShapeArray->at(index).m_collStatus->isTouch((grCollStatus::TouchId)i)) {
                     u32 lineId = m_groundShapeArray->at(index).m_collStatus->getTouchLineId((grCollStatus::TouchId)i);
