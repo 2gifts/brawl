@@ -134,10 +134,9 @@ void muSnapShotTask::onPreCheckFinished() { }
 
 void muSnapShotTask::getMineLabel(muCollectionMsgBuf* buf) {
     void* data = m_work->m_msgFile[0].m_handle.getBuffer();
-    u32 size;
-    char* text;
-    getPrintIndexData__7MessageFPvUlPPcPUl(data, 3, &text, &size);
-    buf->append(text, size);
+    muSnapShotLabel label;
+    getPrintIndexData__7MessageFPvUlPPcPUl(data, 3, &label.m_text, &label.m_size);
+    buf->append(label.m_text, label.m_size);
 }
 
 void muSnapShotTask::addObjCore(void* obj) {
