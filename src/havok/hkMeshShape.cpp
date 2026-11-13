@@ -107,3 +107,60 @@ extern "C" void fn_802D5BA4(Data* d, Obj* o) {
     o->v6();
 }
 } // namespace jj_fn_802D5BA4
+
+// fn_802D5AB0: body from https://github.com/jj-link/brawl src/havok/fn_802D5AB0.cpp (namespaced; memory singletons rebound to our names).
+#include <types.h>
+#include <havok/hkMemory.h>
+#include <havok/hkThreadMemory.h>
+#include <havok/hkArray.h>
+namespace jj_fn_802D5AB0 {
+struct Entry {
+    int a, b, c, d;
+    unsigned char e, f;
+    int g, h;
+    float* p;
+    int i;
+    float* q;
+    int j, k;
+};
+
+struct Vec {
+    Entry* data;
+    int size;
+    unsigned int capacity;
+};
+
+struct Object {
+    unsigned char pad[0x34];
+    Vec vec;
+};
+
+extern "C" float lbl_80532550[4];
+
+extern "C" void fn_802D5AB0(Object* self, const Entry* src) {
+    if (self->vec.size == (int)(self->vec.capacity & 0x3FFFFFFF)) {
+        hkArrayUtil::_reserveMore((hkArrayBase*)(&self->vec), 0x30);
+    }
+
+    Entry* dst = &self->vec.data[self->vec.size++];
+    dst->a = src->a;
+    dst->b = src->b;
+    dst->c = src->c;
+    dst->d = src->d;
+    dst->e = src->e;
+    dst->f = src->f;
+    dst->g = src->g;
+    dst->h = src->h;
+    dst->p = src->p;
+    dst->i = src->i;
+    dst->q = src->q;
+    dst->j = src->j;
+    dst->k = src->k;
+
+    if (dst->p == 0) {
+        dst->k = 1;
+        dst->q = lbl_80532550;
+        dst->p = lbl_80532550;
+    }
+}
+} // namespace jj_fn_802D5AB0

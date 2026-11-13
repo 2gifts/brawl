@@ -76,3 +76,31 @@ extern "C" void fn_803144D4(const Data* a, const Data* b, float* outA, float* ou
     outB[3] = tb * b->w;
 }
 } // namespace jj_fn_803144D4
+
+// fn_8031574C: body from https://github.com/jj-link/brawl src/havok/fn_8031574C.cpp (namespaced; memory singletons rebound to our names).
+#include <types.h>
+#include <havok/hkMemory.h>
+#include <havok/hkThreadMemory.h>
+#include <havok/hkArray.h>
+namespace jj_fn_8031574C {
+struct FnObj {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4(u32 val);
+    char pad[0x10 - 4];
+    u32 m10;
+    char pad2[4];
+    u32 m18;
+};
+
+
+extern "C" void fn_8031574C(u32 val) {
+    FnObj* obj = ((FnObj*)hkThreadMemory::s_instance);
+    obj->m10 = val;
+    if (val == obj->m18) {
+        obj->v4(val);
+    }
+}
+} // namespace jj_fn_8031574C

@@ -140,3 +140,104 @@ extern "C" void fn_802B4A60(Outer* self) {
     }
 }
 } // namespace jj_fn_802B4A60
+
+// fn_802B49CC: body from https://github.com/jj-link/brawl src/havok/fn_802B49CC.cpp (namespaced; memory singletons rebound to our names).
+#include <types.h>
+#include <havok/hkMemory.h>
+#include <havok/hkThreadMemory.h>
+#include <havok/hkArray.h>
+namespace jj_fn_802B49CC {
+typedef unsigned int u32;
+
+
+class SoHeapAllocator {
+public:
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void free(void*, unsigned short, int);
+};
+
+
+struct Obj {
+    void* vtable;
+    unsigned short type;
+    char pad[6];
+    void* data;
+    u32 size;
+    u32 raw;
+
+    bool isOwned() const {
+        return (raw & 0x80000000) == 0;
+    }
+
+    void dealloc() {
+        hkThreadMemory::s_instance->deallocateChunk(data, (raw & 0x3FFFFFFF) * 2, 0x15);
+    }
+};
+
+extern "C" Obj* fn_802B49CC(Obj* self, int flag) {
+    if (self) {
+        if ((u32)self + 0xC != 0 && self->isOwned()) {
+            self->dealloc();
+        }
+        if (flag > 0) {
+            ((SoHeapAllocator*)hkMemory::s_instance)->free(self, self->type, 0x1d);
+        }
+    }
+    return self;
+}
+} // namespace jj_fn_802B49CC
+
+// fn_802B7898: body from https://github.com/jj-link/brawl src/havok/fn_802B7898.cpp (namespaced; memory singletons rebound to our names).
+#include <types.h>
+#include <havok/hkMemory.h>
+#include <havok/hkThreadMemory.h>
+#include <havok/hkArray.h>
+namespace jj_fn_802B7898 {
+typedef unsigned int u32;
+
+
+class SoHeapAllocator {
+public:
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void free(void*, unsigned short, int);
+};
+
+
+struct Object {
+    void* vtable;
+    unsigned short type;
+    unsigned short pad;
+    u32 _pad;
+    void* data;
+    u32 size;
+    u32 raw;
+
+    bool isOwned() const {
+        return (raw & 0x80000000) == 0;
+    }
+
+    void dealloc() {
+        hkThreadMemory::s_instance->deallocateChunk(data, (raw * 2) & 0x7FFFFFFE, 0x15);
+    }
+};
+
+extern "C" Object* fn_802B7898(Object* self, int flag) {
+    if (self) {
+        if (self && self && (u32)self + 0xC && self->isOwned()) {
+            self->dealloc();
+        }
+        if (flag > 0) {
+            ((SoHeapAllocator*)hkMemory::s_instance)->free(self, self->type, 0x1D);
+        }
+    }
+    return self;
+}
+} // namespace jj_fn_802B7898

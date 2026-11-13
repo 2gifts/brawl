@@ -172,3 +172,28 @@ done:
     return;
 }
 } // namespace jj_fn_802FC988
+
+// fn_802FCB14: body from https://github.com/jj-link/brawl src/havok/fn_802FCB14.cpp (namespaced; memory singletons rebound to our names).
+#include <types.h>
+#include <havok/hkMemory.h>
+#include <havok/hkThreadMemory.h>
+#include <havok/hkArray.h>
+namespace jj_fn_802FCB14 {
+
+extern "C" void fn_802FCB14(char* self) {
+    *(int*)(self + 0x4) = 0;
+    if (*(int*)(self + 0x4) == (int)(*(unsigned int*)(self + 0x8) & 0x3FFFFFFF)) {
+        hkArrayUtil::_reserveMore((hkArrayBase*)(self), 4);
+    }
+    *(int*)(self + 0x4) = *(int*)(self + 0x4) + 1;
+    char* p = (char*)hkThreadMemory::s_instance->allocateChunk(0x200, 0x1D);
+    if (p != 0) {
+        *(int*)p = 0;
+    }
+    **(void***)self = p;
+    p[0x13] = 0x10;
+    p[0x10] = 1;
+    *(int*)(p + 0x18) = -1;
+    *(int*)p = 0x10;
+}
+} // namespace jj_fn_802FCB14

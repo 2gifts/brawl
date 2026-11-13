@@ -157,21 +157,6 @@ extern "C" void fn_802DB910(hkFloat4A_802DB910* a, hkFloat4A_802DB910* b) {
     *b = temp;
 }
 
-// Shape from https://github.com/jj-link/brawl src/havok/fn_802DB8B4.cpp.
-// hk1dAngularVelocityMotorCommitJacobianInMotorInfo (map name)
-extern "C" void fn_802DB8B4(float* a, float* b, float** c, float* d) {
-    const float s = b[1];
-    const float s2 = b[2];
-    float* const p = *c;
-    d[1] = a[2] * s;
-    d[2] = a[3] * s;
-    d[3] = a[1];
-    d[4] = a[4];
-    d[5] = a[5];
-    d[0] = 1.0f;
-    p[7] = a[0] * s2;
-    *c = p + 8;
-}
 
 // fn_802DB8B4: body from https://github.com/jj-link/brawl src/havok/fn_802DB8B4.cpp (namespaced; labels as in our symbols).
 #include <types.h>

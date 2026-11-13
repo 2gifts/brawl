@@ -80,3 +80,58 @@ void hkSymmetricAgentLinearCast_11hkMoppAgent::staticLinearCast(const hkCdBody& 
 void hkSymmetricAgentLinearCast_11hkMoppAgent::processCollision(const hkCdBody& a, const hkCdBody& b, hkProcessCollisionInput& c, void* d) {
     hkSymmetricAgent_processCollision<hkMoppAgent>(this, a, b, c, d);
 }
+
+// fn_802A990C: body from https://github.com/jj-link/brawl src/havok/fn_802A990C.cpp (namespaced; memory singletons rebound to our names).
+#include <types.h>
+#include <havok/hkMemory.h>
+#include <havok/hkThreadMemory.h>
+#include <havok/hkArray.h>
+namespace jj_fn_802A990C {
+class SoHeapAllocator {
+public:
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void free(void*, unsigned short, int);
+};
+
+
+struct Array {
+    void* data;
+    int size;
+    unsigned int raw;
+
+    bool isOwned() const {
+        return (raw & 0x80000000) == 0;
+    }
+
+    void dealloc() {
+        hkThreadMemory::s_instance->deallocateChunk(data, (raw & 0x3FFFFFFF) * 0xC, 0x15);
+    }
+};
+
+struct Obj {
+    void* vtable;
+    unsigned short type;
+    unsigned short pad;
+    int f8;
+    Array array;
+};
+
+extern "C" Obj* fn_802A990C(Obj* self, int flag) {
+    if (self) {
+        if (self && self && self && (unsigned)self + 0xC != 0 &&
+            self->array.isOwned()) {
+            self->array.dealloc();
+        }
+
+        if (flag > 0) {
+            ((SoHeapAllocator*)hkMemory::s_instance)->free(self, self->type, 0x1D);
+        }
+    }
+
+    return self;
+}
+} // namespace jj_fn_802A990C

@@ -147,3 +147,32 @@ extern "C" int fn_80320008(Context* ctx, Node* node, Vec4* point, int* count, Li
     return result;
 }
 } // namespace jj_fn_80320008
+
+// fn_803201D8: body from https://github.com/jj-link/brawl src/havok/fn_803201D8.cpp (namespaced; memory singletons rebound to our names).
+#include <types.h>
+#include <havok/hkMemory.h>
+#include <havok/hkThreadMemory.h>
+#include <havok/hkArray.h>
+namespace jj_fn_803201D8 {
+extern "C" {
+void fn_80320288(int, void*, int, int);
+}
+
+struct V {
+    void* p; int n; unsigned int c;
+    bool isOwned() const { return (c & 0x80000000) == 0; }
+    void dealloc() { hkThreadMemory::s_instance->deallocateChunk(p, c * 4, 0x15); }
+};
+extern "C" int fn_80320500(int, V*, int, int, int*);
+
+extern "C" int fn_803201D8(int a0, int a1, int a2, int a3) {
+    int sp8 = a3;
+    char buf[0x190];
+    V v;
+    v.p = buf; v.n = 0; v.c = 0x80000064;
+    fn_80320288(a0, &v, a1, a3);
+    int r = fn_80320500(a0, &v, a1, a2, &sp8);
+    if (v.isOwned()) v.dealloc();
+    return r;
+}
+} // namespace jj_fn_803201D8
