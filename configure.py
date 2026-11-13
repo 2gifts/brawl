@@ -2059,6 +2059,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_lucario/ft_lucario_status_uniq_process_special_lw.cpp"),
             Object(NonMatching, "mo_fighter/ft_lucario/ft_lucario_status_uniq_process_final.cpp"),
             Object(NonMatching, "mo_fighter/ft_lucario/ft_lucario.cpp"),
+            Object(NonMatching, "mo_fighter/ft_lucario/ft_lucario_param_customize_module.cpp"),
         ],
     },
     {
@@ -2452,7 +2453,6 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "mo_fighter/ft_wolf/wn_wolf_illusion.cpp"),
-            Object(Matching, "mo_fighter/ft_wolf/ft_wolf_status_uniq_process_reflector.cpp"),
             Object(NonMatching, "mo_fighter/ft_wolf/ft_wolf.cpp"),
         ],
     },

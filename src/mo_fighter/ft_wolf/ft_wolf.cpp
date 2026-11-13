@@ -56,11 +56,19 @@ ftWolfExtendParamAccesser g_ftWolfExtendParamAccesser;
 
 ftClassInfoImpl<Fighter_Wolf, ftWolf> g_ftClassInfoWolf;
 
-// Wolf's reflector process: the shared one with Wolf's own turn (setTurn is in ft_wolf_status_uniq_process_reflector.cpp).
+// Wolf's reflector process: the shared one with Wolf's own turn .
 ftWolfStatusUniqProcessReflectorImpl::ftWolfStatusUniqProcessReflectorImpl() { }
 #pragma dont_inline on
 __declspec(weak) ftWolfStatusUniqProcessReflectorImpl::~ftWolfStatusUniqProcessReflectorImpl() { }
 #pragma dont_inline off
+void ftWolfStatusUniqProcessReflectorImpl::setTurn(soModuleAccesser* moduleAccesser) {
+    ftWolfData* data = dynamic_cast<ftWolf&>(moduleAccesser->getStageObject()).m_commonData;
+    const soModuleEnumeration& modules = *moduleAccesser->m_enumerationStart;
+    soTurnModule& turn = *static_cast<soTurnModule*>(modules.m_turnModule);
+    // The shared process requests this when the stick opposes Wolf's facing.
+    // Start his reflector rotation using the current facing and character turn data.
+    turn.set(&data->reflectorTurnData, true, false, modules.m_postureModule->getLr());
+}
 ftWolfStatusUniqProcessReflectorImpl g_ftWolfStatusUniqProcessReflector;
 
 // BYTES: the trail's constructor is called out of line (the copy sora_melee owns).
