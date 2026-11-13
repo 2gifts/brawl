@@ -66,14 +66,6 @@
 #include <havok/hkAction.h>
 #include <havok/hkSimulationIsland.h>
 
-// Operation record queued while the world is locked (8 bytes). HYPOTHESIS: field names; the
-// type byte selects the deferred operation, the object pointer is its argument.
-struct hkWorldOperationRecord {
-    u8 m_type;      // 0x00
-    void* m_object; // 0x04
-};
-
-
 void hkWorld::lock() {}
 
 void hkWorld::unlock() {}

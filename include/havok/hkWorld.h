@@ -74,7 +74,9 @@ struct hkWorld : hkReferencedObject {
     hkBool m_wantSimulationIslands;                 // 0xB4 empty islands are removed only when set
     // hkDefaultWorldMaintenanceMgr::performMaintenance only looks for islands to deactivate when it is set
     hkBool m_unkB5;                                 // 0xB5 HYPOTHESIS: a deactivation switch
-    u8 m_unkB6[0x02];                               // 0xB6
+    // HYPOTHESIS: an inactive body that is moved by hand gets activated when this is set (and it is not fixed)
+    hkBool m_unkB6;                                 // 0xB6
+    u8 m_unkB7;                                     // 0xB7
     hkReal m_highFrequencyDeactivationPeriod;       // 0xB8
     hkReal m_lowFrequencyDeactivationPeriod;        // 0xBC
     u8 m_unkC0[0x08];                               // 0xC0 .. 0xC7 not recovered

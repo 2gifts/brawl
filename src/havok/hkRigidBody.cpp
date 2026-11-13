@@ -27,6 +27,9 @@
 #include <havok/hkRigidBody.h>
 #include <havok/hkRegistry.h>
 #include <havok/hkWorldOperationUtil.h>
+#include <havok/hkWorldOperationQueue.h>
+#include <havok/hkWorldCallbackUtil.h>
+#include <havok/hkSimulation.h>
 
 void hkRigidBody::finishLoadedObjecthkRigidBody(void* p) {
     hkFinishLoadedObjectFlag flag;
@@ -59,6 +62,34 @@ void hkRigidBody::setDeactivator(hkEntityDeactivator* deactivator) {
     hkEntity::setDeactivator(deactivator);
 }
 #pragma pop
+
+// After a teleport: the body's agents are reset and it is put through the broad phase again; an inactive body
+// either wakes up or tells the world listeners that it moved.
+void hkRigidBody::updateBroadphaseAndResetCollisionInformationOfWarpedBody() {
+    hkWorld* world = m_world;
+    if (world) {
+        if (world->areCriticalOperationsLocked()) {
+            hkWorldOperationRecord op;
+            op.m_type = hkWorldOperation::UPDATE_MOVED_BODY_INFO;
+            op.m_object = this;
+            world->queueOperation(&op);
+            return;
+        }
+        world->lockCriticalOperations();
+        hkEntity* entity = this;
+        world->m_simulation->resetCollisionInformationForEntities(&entity, 1, world, false);
+        if (m_collidable.m_shape) {
+            hkSimulation::collideEntitiesBroadPhaseDiscrete(&entity, 1, world);
+        }
+        if (!(bool)isActive()) {
+            if ((bool)world->m_unkB6 && !(bool)isFixed()) {
+                activate();
+            }
+            hkWorldCallbackUtil::fireInactiveEntityMoved(world, this);
+        }
+        world->unlockAndAttemptToExecutePendingOperations();
+    }
+}
 
 void hkRigidBody::setPosition(const hkVector4& position) {
     getMotion()->setPosition(position);
