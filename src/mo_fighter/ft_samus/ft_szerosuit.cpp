@@ -1,4 +1,5 @@
 #define FT_SZEROSUIT_ARTICLE_DTORS
+#define FT_ANIMCMD_UNIT_DTOR_OUTLINE
 #define FT_PARAM_CUSTOMIZE_BUILDER_DTOR_NOINLINE
 #define FT_SZEROSUIT_ARMOR_SHOOT_FLOAT_FIRST
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
@@ -125,8 +126,9 @@ template soGeneralWorkBuilder<soGeneralWorkBuildConfig<7, 6, 1> >::~soGeneralWor
 template soModelModuleBuilder<soModelModuleBuildConfig<1, 0, soModelModuleImpl> >::~soModelModuleBuilder();
 template soArraySelectHolder<1, soArrayVector<acCmdInterpreterStackData, 1>, soSingletonHolder<soArrayNull<acCmdInterpreterStackData> > >::~soArraySelectHolder();
 soParamAccesser::~soParamAccesser() { }
-template <>
-__declspec(weak) soAnimCmdControlUnitBuilder<soAnimCmdControlUnitBuildConfig<0, 1, 1, 0, 0, 0, 0, 2> >::~soAnimCmdControlUnitBuilder() { }
+template <class BC>
+soAnimCmdControlUnitBuilder<BC>::~soAnimCmdControlUnitBuilder() { }
+template soAnimCmdControlUnitBuilder<soAnimCmdControlUnitBuildConfig<0, 1, 1, 0, 0, 0, 0, 2> >::~soAnimCmdControlUnitBuilder();
 template <class BC>
 soAnimCmdControlUnitBuilderUniq<BC>::~soAnimCmdControlUnitBuilderUniq() { }
 template soAnimCmdControlUnitBuilderUniq<soAnimCmdControlUnitBuildConfigUniq<4, 2> >::~soAnimCmdControlUnitBuilderUniq();
@@ -501,30 +503,42 @@ void ftSZerosuit::change(void* work, int mode) {
 // ---- the whip and the armor ------------------------------------------------------------------------------------------
 // The whip starts at the hip node with the facing direction, the attack state and a fresh collision log group.
 // HYPOTHESIS: status kinds 0x113 and 0x114 are the first whip attacks, and 0x34/0x36/0x38 the tilts that link the whip to the model.
+// MATCH-ONLY: inline helpers retain the native callback register lifetimes.
+static inline int checkWhipSpecial(int statusKind) {
+    int isSpecial = 1;
+    if (statusKind != 0x113 && statusKind != 0x114) {
+        isSpecial = 0;
+    }
+    return isSpecial;
+}
+static inline int checkWhipTilt(int statusKind) {
+    int isTilt = 0;
+    if (static_cast<u32>(statusKind - 0x34) <= 4 && ((1 << (statusKind - 0x34)) & 0x15)) {
+        isTilt = 1;
+    }
+    return isTilt;
+}
+static inline int getFighterTaskId(Fighter& fighter) {
+    return fighter.m_taskId;
+}
+static inline void activateWhipCall(wnSZerosuitWhip* weapon, soModuleAccesser* acc, Fighter& fighter, Vec3f& pos, float lr, int isSpecial, int isTilt, int logGroup) {
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = getFighterTaskId(fighter);
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam(), lr, &pos, isSpecial, isTilt, logGroup);
+}
 bool ftSZerosuit::activeArticle(wnSZerosuitWhip* weapon, soModuleAccesser* acc) {
-    int isSpecial;
-    int isTilt;
-    int founderTaskId;
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
     Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x36, false);
     float lr = acc->getPostureModule().getLr();
     int statusKind = acc->getStatusModule().getStatusKind();
-    isSpecial = 1;
-    if (statusKind != 0x113 && statusKind != 0x114) {
-        isSpecial = 0;
-    }
-    isTilt = 0;
-    if (static_cast<u32>(statusKind - 0x34) <= 4 && ((1 << (statusKind - 0x34)) & 0x15)) {
-        isTilt = 1;
-    }
+    int isSpecial = checkWhipSpecial(statusKind);
+    int isTilt = checkWhipTilt(statusKind);
     int logGroup = soCollisionManager::getInstance()->allocateLogGroup();
     acc->getWorkManageModule().setInt(logGroup, 0x10000041);
     if (logGroup != -1) {
         acc->getCollisionAttackModule().refLogGroup(0, logGroup);
     }
-    soResourceModule& resources = acc->getResourceModule();
-    founderTaskId = fighter.m_taskId;
-    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam(), lr, &pos, isSpecial, isTilt, logGroup);
+    activateWhipCall(weapon, acc, fighter, pos, lr, isSpecial, isTilt, logGroup);
     soLinkModule& link = acc->getLinkModule();
     if (isTilt) {
         if (link.link(3, weapon->getTaskId())) {
@@ -539,9 +553,14 @@ bool ftSZerosuit::activeArticle(wnSZerosuitWhip* weapon, soModuleAccesser* acc) 
 }
 
 // One of the armor pieces flies off: the work counter picks the piece and its parameters.
+// MATCH-ONLY: the inline helper retains the native callback register lifetimes.
+static inline void activateArmorCall(wnSZerosuitArmor* weapon, soModuleAccesser* acc, Fighter& fighter, int index, u32* entry) {
+    soResourceModule& resources = acc->getResourceModule();
+    int founderTaskId = fighter.m_taskId;
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), index, resources.getResourceIdAccesser()->getTexResId(), entry[0], entry[1], fighter.getOwner()->getTeam());
+}
 bool ftSZerosuit::activeArticle1(wnSZerosuitArmor* weapon, soModuleAccesser* acc) {
     int index;
-    int founderTaskId;
     u32* entry;
     ftData* data;
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
@@ -550,9 +569,7 @@ bool ftSZerosuit::activeArticle1(wnSZerosuitArmor* weapon, soModuleAccesser* acc
     acc->getPostureModule().getLr();
     index = acc->getWorkManageModule().getInt(0x10000040);
     entry = reinterpret_cast<u32*>(*reinterpret_cast<u8**>(reinterpret_cast<u8*>(data) + 0xa4) + index * 16);
-    soResourceModule& resources = acc->getResourceModule();
-    founderTaskId = fighter.m_taskId;
-    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), index, resources.getResourceIdAccesser()->getTexResId(), entry[0], entry[1], fighter.getOwner()->getTeam());
+    activateArmorCall(weapon, acc, fighter, index, entry);
     return true;
 }
 
