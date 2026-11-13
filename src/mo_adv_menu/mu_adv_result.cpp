@@ -484,15 +484,15 @@ void muAdvResultTask::dropCoinStartOne(muAdvResultCoin* coin) {
     position.m_z = -8.0f;
     object->setTrans(&position);
     coin->m_speedY = 0.0f;
-    coin->m_speedX = randf() - 0.5f;
+    coin->m_speedX = -0.5f + randf();
     Vec3f rotation;
     rotation.m_x = randf() * 3.1415927f * 2.0f - 3.1415927f;
     rotation.m_y = randf() * 3.1415927f * 2.0f - 3.1415927f;
     rotation.m_z = randf() * 3.1415927f * 2.0f - 3.1415927f;
     object->setObjRotate(&rotation);
-    coin->m_spinX = randf() * 0.6981317f - 0.34906584f;
-    coin->m_spinY = randf() * 0.6981317f - 0.34906584f;
-    coin->m_spinZ = randf() * 0.6981317f - 0.34906584f;
+    coin->m_spinX = -0.34906584f + randf() * 0.6981317f;
+    coin->m_spinY = -0.34906584f + randf() * 0.6981317f;
+    coin->m_spinZ = -0.34906584f + randf() * 0.6981317f;
 }
 
 // Lets a coin fall one frame; it returns whether the coin is still on the screen. The sound of the coins stops when the
