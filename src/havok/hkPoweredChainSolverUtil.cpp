@@ -139,3 +139,59 @@ extern "C" void fn_80292F3C(Context* ctx, Block* out)
     }
 }
 } // namespace jj_fn_80292F3C
+
+// TODO: cleanup (shape from jj-link/brawl fn_80291DE8)
+// fn_80291DE8: body from https://github.com/jj-link/brawl src/havok/fn_80291DE8.cpp (namespaced; callees rebound to our C++ names).
+#include <types.h>
+namespace jj_fn_80291DE8 {
+extern "C" void fn_80291DE8(float *dst, const float *src) {
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+    dst[3] = src[3];
+    dst[4] = src[4];
+    dst[5] = src[5];
+    dst[6] = src[6];
+    dst[7] = src[7];
+    dst[8] = src[8];
+    dst[9] = src[9];
+    dst[10] = src[10];
+    dst[11] = src[11];
+    dst[12] = src[12];
+    dst[13] = src[13];
+    dst[14] = src[14];
+    dst[15] = src[15];
+    dst[16] = src[16];
+    dst[17] = src[17];
+    dst[18] = src[18];
+    dst[19] = src[19];
+    dst[20] = src[20];
+    dst[21] = src[21];
+    dst[22] = src[22];
+    dst[23] = src[23];
+    dst[24] = src[24];
+    dst[25] = src[25];
+    dst[26] = src[26];
+    dst[27] = src[27];
+    dst[28] = src[28];
+    dst[29] = src[29];
+    dst[30] = src[30];
+    dst[31] = src[31];
+    dst[32] = src[32];
+    dst[33] = src[33];
+    dst[34] = src[34];
+    dst[35] = src[35];
+    dst[36] = src[36];
+    dst[37] = src[37];
+    dst[38] = src[38];
+    dst[39] = src[39];
+    dst[40] = src[40];
+    dst[41] = src[41];
+    dst[42] = src[42];
+    dst[43] = src[43];
+    dst[44] = src[44];
+    dst[45] = src[45];
+    dst[46] = src[46];
+    dst[47] = src[47];
+}
+} // namespace jj_fn_80291DE8
