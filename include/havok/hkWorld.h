@@ -39,10 +39,12 @@ struct hkWorldDynamicsStepInfo {
     hkSolverInfo m_solverInfo; // 0x10
 };
 
+struct hkSimulationIsland;
 struct hkWorld : hkReferencedObject {
     hkSimulation* m_simulation;                     // 0x08 (hkWorld::stepDeltaTime calls its slot 0x10, stepDeltaTime)
     hkVector4 m_gravity;                            // 0x10
-    u8 m_unk20[0x08];                               // 0x20 .. 0x27 not recovered
+    hkSimulationIsland* m_fixedIsland;              // 0x20 holds the fixed entities (and actions on fixed entities only)
+    u8 m_unk24[0x04];                               // 0x24 not recovered
     hkArrayBase m_unk28;                            // 0x28 array of hkWorldMemoryEntry* (HYPOTHESIS: islands), see getMemUsageForIntegration
     hkArrayBase m_unk34;                            // 0x34 not recovered
     hkArrayBase m_unk40;                            // 0x40 not recovered
@@ -68,7 +70,8 @@ struct hkWorld : hkReferencedObject {
     int m_unk9C;                                    // 0x9C
     int m_unkA0;                                    // 0xA0
     int m_unkA4;                                    // 0xA4
-    u8 m_unkA8[0x0D];                               // 0xA8 .. 0xB4 not recovered
+    u8 m_unkA8[0x0C];                               // 0xA8 .. 0xB3 not recovered
+    hkBool m_wantSimulationIslands;                 // 0xB4 empty islands are removed only when set
     // hkDefaultWorldMaintenanceMgr::performMaintenance only looks for islands to deactivate when it is set
     hkBool m_unkB5;                                 // 0xB5 HYPOTHESIS: a deactivation switch
     u8 m_unkB6[0x02];                               // 0xB6
