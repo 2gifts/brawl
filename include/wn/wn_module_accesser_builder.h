@@ -1345,19 +1345,11 @@ protected:
     soKineticEnergyRotNormal m_energyRotNormal; // the rotation energy (index 1)
 #endif
 public:
-    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd,
-                    bool weaponFlag = true)
 #ifdef WN_EM_SIMPLE_UNIT
+    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd)
         __attribute__((never_inline))
-#endif
         :
-#ifdef WN_WEAPON_NO_COMMON_ENERGIES
-        Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), weaponFlag),
-        m_modules(this, bd) {
-        Weapon::initialize();
-    }
-#elif defined(WN_EM_SIMPLE_UNIT)
-        Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), weaponFlag),
+        Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), true),
         m_modules(this, bd) {
         wnKineticEnergyNormal* energyNormal = new (m_energyNormalBytes) wnKineticEnergyNormal();
         soKineticEnergyRotNormal* energyRot = new (m_energyRotBytes) soKineticEnergyRotNormal();
@@ -1366,12 +1358,21 @@ public:
         m_moduleAccesser->getKineticModule().addEnergy(energyRot, 1, soKineticEnergy::AttributeFlag(1), -1);
     }
 #else
+    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd,
+                    bool weaponFlag = true) :
+#ifdef WN_WEAPON_NO_COMMON_ENERGIES
+        Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), weaponFlag),
+        m_modules(this, bd) {
+        Weapon::initialize();
+    }
+#else
         Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), weaponFlag),
         m_modules(this, bd), m_energyNormal(), m_energyRotNormal() {
         Weapon::initialize();
         m_moduleAccesser->getKineticModule().addEnergy(&m_energyNormal, 0, soKineticEnergy::AttributeFlag(1), -1);
         m_moduleAccesser->getKineticModule().addEnergy(&m_energyRotNormal, 1, soKineticEnergy::AttributeFlag(1), -1);
     }
+#endif
 #endif
 #ifdef WN_MARIO_FIREBALL_UNIT
 #pragma push
