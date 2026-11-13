@@ -84,10 +84,16 @@ bool soGroundModuleImpl::isCloudThrough(u32 index) {
 }
 bool soGroundModuleImpl::isCloudThroughOut(Vec2f* out, u32 index) { return m_groundShapeArray->at(index).isCloudThroughOut(out); }
 void soGroundModuleImpl::setCorrectIgnoreSlope(bool correctIgnoreSlope, u32 index) { m_groundShapeArray->at(index).setCorrectIgnoreSlope(correctIgnoreSlope); }
-void soGroundModuleImpl::setCliffCheck(soGroundShapeImpl::CliffCheckKind cliffCheck, u32 index) { m_groundShapeArray->at(index).m_cliffCheck = cliffCheck; }
+void soGroundModuleImpl::setCliffCheck(soGroundShapeImpl::CliffCheckKind cliffCheck, u32 index) {
+    soGroundShapeImpl& shape = m_groundShapeArray->at(index);
+    shape.m_cliffCheck = cliffCheck;
+}
 void soGroundModuleImpl::setCliffHangData(void* p0) { m_cliffHangData = p0; }
 void soGroundModuleImpl::setCliffBackRangeXMul(float cliffBackRangeXMul) { m_cliffBackRangeXMul = cliffBackRangeXMul; }
-void soGroundModuleImpl::setCliffTeam(u8 cliffTeam, u32 index) { m_groundShapeArray->at(index).m_collStatus->m_cliffTeam = cliffTeam; }
+void soGroundModuleImpl::setCliffTeam(u8 cliffTeam, u32 index) {
+    grCollStatus* status = m_groundShapeArray->at(index).m_collStatus;
+    status->m_cliffTeam = cliffTeam;
+}
 void soGroundModuleImpl::entryCliff(u32 index) { m_groundShapeArray->at(index).m_collStatus->entryCliffHang(); }
 void soGroundModuleImpl::leaveCliff(u32 index) { m_groundShapeArray->at(index).m_collStatus->leaveCliffHang(); }
 void soGroundModuleImpl::setStGroundForce(u32 index) { m_groundShapeArray->at(index).m_collStatus->setStGround(); }
@@ -108,7 +114,12 @@ bool soGroundModuleImpl::isOttotto(float p0, u32 index) {
     return status->isOttotto(p0, status->m_unkB);
 }
 bool soGroundModuleImpl::isNearCliff(float p0, float p1, u32 index) {
-    return m_groundShapeArray->at(index).m_collStatus->isOttotto(p1, p0 == 1.0f ? 1 : 0);
+    // HYPOTHESIS: direction is an enum with left = 0 and right = 1.
+    enum Direction { Left, Right };
+    Direction dir;
+    if (p0 == 1.0f) dir = Right;
+    else dir = Left;
+    return m_groundShapeArray->at(index).m_collStatus->isOttotto(p1, dir);
 }
 bool soGroundModuleImpl::isMissStepR(u32 index) { return m_groundShapeArray->at(index).m_collStatus->m_missStepR; }
 bool soGroundModuleImpl::isMissStepL(u32 index) { return m_groundShapeArray->at(index).m_collStatus->m_missStepL; }
@@ -573,6 +584,29 @@ u32 soGroundModuleImpl::getCliffId(u32 index) {
     return work.getLineId();
 }
 
+bool soGroundModuleImpl::isSameJoint(int* __restrict first, int* second) {
+    grCollisionLineWork firstWork;
+    grCollisionLineWork secondWork;
+    u32 firstId = *first;
+    bool found = false;
+    if (grCollision::getLineWork(&firstId, &firstWork) == true) {
+        u32 secondId = *second;
+        if (grCollision::getLineWork(&secondId, &secondWork) == true) {
+            found = true;
+        }
+    }
+    if (found) {
+        bool firstValid = false;
+        if (firstWork.m_collisionLine && firstWork.m_collisionJoint && firstWork.m_collision) firstValid = true;
+        if (firstValid) {
+            bool secondValid = false;
+            if (secondWork.m_collisionLine && secondWork.m_collisionJoint && secondWork.m_collision) secondValid = true;
+            if (secondValid) return firstWork.m_collisionJoint == secondWork.m_collisionJoint;
+        }
+    }
+    return false;
+}
+
 Vec2f soGroundModuleImpl::getDownMovementSpeed(u32 index) {
     Vec2f result(0.0f, 0.0f);
     if (m_groundShapeArray->at(index).m_collStatus->isTouch(grCollStatus::Touch_Down)) {
@@ -586,9 +620,9 @@ Vec2f soGroundModuleImpl::getTouchSpeed(grCollStatus::TouchMask p0, u32 index) {
     for (u32 i = 0, bit = 1; bit <= 0xFF; bit <<= 1, i++) {
         if (p0 & bit) {
             if (m_groundShapeArray->at(index).m_collStatus->isTouch((grCollStatus::TouchId)i)) {
-                u32 lineId = m_groundShapeArray->at(index).m_collStatus->getTouchLineId((grCollStatus::TouchId)i);
-                Vec2f pos = getTouchPos(bit, 0);
+                int lineId = m_groundShapeArray->at(index).m_collStatus->getTouchLineId((grCollStatus::TouchId)i);
                 Vec2f speed;
+                Vec2f pos = getTouchPos(bit, 0);
                 grCollision::calcLineVector(lineId, pos, &speed);
                 total.m_x = total.m_x + speed.m_x;
                 total.m_y = total.m_y + speed.m_y;
