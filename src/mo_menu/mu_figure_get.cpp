@@ -207,11 +207,10 @@ void muFigureGetTask::mainStepRequestInit(muFigureGetTask* task) {
     sprintf(path, "/toy/fig/%s.brres", task->m_figMng->getFigDataId(task->m_figId)->name);
     task->m_handles[400].readRequest(path, Heaps::MenuResource, 0, 0);
     task->m_handles[200].readRequest("/toy/fig/Stand.brres", Heaps::MenuResource, 0, 0);
-    // HYPOTHESIS: the high bit of the byte at 0x28 of the menu data says that the screen is wide
-    if ((reinterpret_cast<u8*>(g_GameGlobal->getGlobalRecordMenuDatap())[0x28] >> 7) != 0) {
-        task->m_handles[500].readRequest("/menu/defaultcamera/FigureGetWide_0.brres", Heaps::MenuResource, 0, 0);
-    } else {
+    if (!g_GameGlobal->getGlobalRecordMenuDatap()->m_isWidescreen) {
         task->m_handles[500].readRequest("/menu/defaultcamera/FigureGet_0.brres", Heaps::MenuResource, 0, 0);
+    } else {
+        task->m_handles[500].readRequest("/menu/defaultcamera/FigureGetWide_0.brres", Heaps::MenuResource, 0, 0);
     }
     task->m_archive = new (Heaps::MenuInstance) gfArchive();
     fn_800151FC(task->m_archive, "toy/figdisp/figdisp.pac", Heaps::MenuResource, 0, 0, 0xFF);
