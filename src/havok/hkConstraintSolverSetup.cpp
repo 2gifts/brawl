@@ -46,6 +46,7 @@ void hkConstraintSolverSetup::shutdownSolver() {}
 
 // Function body below is taken from https://github.com/jj-link/brawl (src/havok/fn_802E09D8.cpp).
 // hkConstraintSolverSetup::internalIsMemoryOkForNewAccumulators
+// TODO: cleanup (shape from jj-link/brawl fn_802E09D8)
 extern "C" int fn_802E09D8(const char* o, int, int n) {
     unsigned int a = *(const unsigned int*)(o + 0x4C);
     unsigned int b = *(const unsigned int*)(o + 0xC);
@@ -85,6 +86,7 @@ struct Fn802E0D84Obj {
     f32* unk58;
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802E0D84)
 extern "C" void fn_802E0D84(Fn802E0D84Obj* self, s32 arg1) {
     f32* p;
     f32* end;

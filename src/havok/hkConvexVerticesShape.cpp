@@ -99,6 +99,7 @@ struct Visitor {
 
 extern "C" char lbl_80410618[];
 
+// TODO: cleanup (shape from jj-link/brawl fn_802D2424)
 extern "C" void fn_802D2424(Holder* self, Visitor* visitor) {
     visitor->object(lbl_80410618 + 0x12, 1, self);
 

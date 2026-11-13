@@ -41,7 +41,9 @@ hk4dGskVertexCollidePointsInput::hk4dGskVertexCollidePointsInput() {}
 // Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
 // instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
 // hkTransform::getRotation (bare blr), hkMotionState::getSweptTransform (+0x40)
+// TODO: cleanup (shape from jj-link/brawl fn_8031351C)
 extern "C" void* fn_8031351C(void* t) { return t; }
+// TODO: cleanup (shape from jj-link/brawl fn_80313514)
 extern "C" char* fn_80313514(char* p) { return p + 0x40; }
 
 // fn_803144D4: body from https://github.com/jj-link/brawl src/havok/fn_803144D4.cpp (namespaced; labels as in our symbols).
@@ -59,6 +61,7 @@ struct Data {
     float w;
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_803144D4)
 extern "C" void fn_803144D4(const Data* a, const Data* b, float* outA, float* outB, float scale) {
     float sa = a->scale;
     float sb = b->scale;
@@ -96,6 +99,7 @@ struct FnObj {
 };
 
 
+// TODO: cleanup (shape from jj-link/brawl fn_8031574C)
 extern "C" void fn_8031574C(u32 val) {
     FnObj* obj = ((FnObj*)hkThreadMemory::s_instance);
     obj->m10 = val;
@@ -132,6 +136,7 @@ struct State {
 extern "C" void fn_803198C8(State*, Vec4*, Vec4*, Matrix*, Vec4*);
 extern "C" const float lbl_805A4650;
 
+// TODO: cleanup (shape from jj-link/brawl fn_803154E4)
 extern "C" void fn_803154E4(
     Matrix* a, Matrix* b, Vec4* sa, Vec4* sb, State* s, Vec4* out, Vec4* out2)
 {

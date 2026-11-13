@@ -90,6 +90,7 @@ struct Obj {
     }
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802C2318)
 extern "C" void* fn_802C2318(Obj* self, int flag) {
     if (self) {
         if ((u32)self && (u32)self && (u32)self + 0xc && (u32)self + 0xc && self->isOwned()) {

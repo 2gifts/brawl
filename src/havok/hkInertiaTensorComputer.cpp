@@ -233,6 +233,7 @@ extern "C" const float lbl_805A484C;
 extern "C" const float lbl_805A4854;
 }
 static inline float multiply(float a, float b) { return a * b; }
+// TODO: cleanup (shape from jj-link/brawl fn_8032C35C)
 extern "C" int fn_8032C35C(float* p, float radius, float mass) {
     float arr[4] __attribute__((aligned(16)));
     float zero = lbl_805A4848;

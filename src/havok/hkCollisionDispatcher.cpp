@@ -118,6 +118,7 @@ public:
     short m06;
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802CC8DC)
 extern "C" void fn_802CC8DC(char* self, Class_80487298* value, int index) {
     char* column = self + index * 4;
     char* row = self + (index << 5);
@@ -166,6 +167,7 @@ public:
 
 extern "C" char lbl_80410050[];
 
+// TODO: cleanup (shape from jj-link/brawl fn_802CC9FC)
 extern "C" void fn_802CC9FC(void* arg0, Object_vptr_0* obj) {
     obj->slot1(0, 2, arg0);
     void* data = *(void**)((char*)arg0 + 0x1C24);

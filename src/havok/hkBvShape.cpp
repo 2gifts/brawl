@@ -94,6 +94,7 @@ struct hkStatisticsCollectorIface {
     virtual void unk20();                                                         // 0x20
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802CEA00)
 void hkBvShape::calcStatistics(hkStatisticsCollector* collector) const {
     ((hkStatisticsCollectorIface*)collector)->addObject("BvShape", 1, this);
     ((hkStatisticsCollectorIface*)collector)->addChildObject("Child", 1, m_childContainer.m_childShape);

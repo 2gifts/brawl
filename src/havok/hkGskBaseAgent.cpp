@@ -96,6 +96,7 @@ struct Object {
 extern "C" void fn_803198C8(void*, Vec4*, Vec4*, Matrix*, Vec4*);
 extern "C" const float lbl_805A3F38;
 
+// TODO: cleanup (shape from jj-link/brawl fn_802B1B3C)
 extern "C" void fn_802B1B3C(Object* a, Object* b, void* c, Vec4* out) {
     Matrix matrix;
     Vec4 v;

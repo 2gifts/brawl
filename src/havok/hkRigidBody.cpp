@@ -109,6 +109,7 @@ static hkStaticTypeInfo hkRigidBodyTypeInfo("hkRigidBody", hkRigidBody::finishLo
 
 // Shape from https://github.com/jj-link/brawl src/havok/fn_802E2378.cpp.
 // hkCollidable::estimateAllowedPenetrationDepth (inline copy): 0.2 * the smallest extent below 0.5, else 0.1.
+// TODO: cleanup (shape from jj-link/brawl fn_802E2378)
 extern "C" void fn_802E2378(char* collidable, const float* extents) {
     float a = extents[1];
     float c = extents[2];

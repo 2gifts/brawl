@@ -212,6 +212,7 @@ public:
 extern "C" {
 
 
+// TODO: cleanup (shape from jj-link/brawl fn_802E13DC)
 void fn_802E13DC(Entity* arg0, Visitor* arg1) {
     arg1->slot1(lbl_804129D0, 2, arg0);
     ((const hkWorldObject*)(arg0))->hkWorldObject::calcStatistics((hkStatisticsCollector*)(arg1));

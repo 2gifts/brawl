@@ -117,6 +117,7 @@ extern "C" {
 extern "C" const float lbl_805A4840;
 extern "C" const float lbl_805A4844;
 }
+// TODO: cleanup (shape from jj-link/brawl fn_8032BD74)
 extern "C" void fn_8032BD74(float *p)
 {
     float arr[4] __attribute__((aligned(16)));

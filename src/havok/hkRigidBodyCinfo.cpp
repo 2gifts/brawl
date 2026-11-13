@@ -28,6 +28,7 @@ struct Obj {
     unsigned char e4;
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802E3604)
 extern "C" void fn_802E3604(Obj* o)
 {
     float t[4] __attribute__((aligned(16)));

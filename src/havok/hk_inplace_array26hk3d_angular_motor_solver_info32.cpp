@@ -11,6 +11,7 @@ struct hkInplaceArrayHeader_802DB9BC {
     int m_size;
     int m_capacityAndFlags;
 };
+// TODO: cleanup (shape from jj-link/brawl fn_802DB9BC)
 extern "C" void fn_802DB9BC(hkInplaceArrayHeader_802DB9BC* a, int size) {
     a->m_data = (char*)a + 0xC;
     a->m_size = size;
@@ -53,6 +54,7 @@ struct Array {
     }
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802DB9D8)
 extern "C" Array* fn_802DB9D8(Array* self, int flag) {
     if (self) {
         self->~Array();

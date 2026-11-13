@@ -21,6 +21,7 @@
 // hkAgent1nMachine_UpdateShapeCollectionFilter = VisitAllAgents(track, input, UpdateShapeCollectionFilterVisitor)
 extern "C" void fn_802FE5C0(void*, void*, void*);
 extern "C" void fn_802FE97C(void);
+// TODO: cleanup (shape from jj-link/brawl fn_802FEA54)
 extern "C" void fn_802FEA54(void* a, void* b) {
     fn_802FE5C0(a, b, (void*)&fn_802FE97C);
 }
@@ -28,6 +29,7 @@ extern "C" void fn_802FEA54(void* a, void* b) {
 
 // Shape from https://github.com/jj-link/brawl src/havok/fn_802FCC94.cpp.
 // hkAgent1nMachine_flipInput (map name)
+// TODO: cleanup (shape from jj-link/brawl fn_802FCC94)
 extern "C" void fn_802FCC94(hkAgent3ProcessInput& in, hkAgent3ProcessInput& out) {
     out.m_bodyA = in.m_bodyB;
     out.m_bodyB = in.m_bodyA;
@@ -48,6 +50,7 @@ public:
     virtual u32 vf0(void* a, void* b, void* c, void* d, void* e);
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802FE97C)
 extern "C" void* fn_802FE97C(u8* self, u8* rec, u32 arg2) {
     Class_802FE97C_Vf* sub = *(Class_802FE97C_Vf**)(*(u8**)(self + 0xC) + 4);
     u32 ret = sub->vf0(*(void**)(self + 0xC), *(void**)self, *(void**)(self + 4), *(void**)(self + 8), *(void**)(rec + 8));
@@ -76,6 +79,7 @@ public:
  virtual void slot2(const char*, s32, void*, s32, s32, void*);
  virtual void slot3(const char*, s32, void*);
 };
+// TODO: cleanup (shape from jj-link/brawl fn_802FEA60)
 extern "C" void fn_802FEA60(void* arg0, Object_vptr_0* arg1) {
  u8* entry;
  u8* end;
@@ -116,6 +120,7 @@ extern "C" const float lbl_805A4560;
 
 typedef void (*EntryFunc)(void*, void*, void*, float, float);
 
+// TODO: cleanup (shape from jj-link/brawl fn_802FC988)
 extern "C" void fn_802FC988(void*** arg0, void** arg1, float farg1, float farg2) {
     float neg = lbl_805A4560;
     int idx = 4;
@@ -180,6 +185,7 @@ done:
 #include <havok/hkArray.h>
 namespace jj_fn_802FCB14 {
 
+// TODO: cleanup (shape from jj-link/brawl fn_802FCB14)
 extern "C" void fn_802FCB14(char* self) {
     *(int*)(self + 0x4) = 0;
     if (*(int*)(self + 0x4) == (int)(*(unsigned int*)(self + 0x8) & 0x3FFFFFFF)) {

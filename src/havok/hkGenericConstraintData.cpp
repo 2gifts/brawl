@@ -133,12 +133,16 @@ static hkStaticTypeInfo hkGenericConstraintDataTypeInfo("hkGenericConstraintData
 // Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
 // instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
 // hkArray<int>::begin, hkArray<hkVector4>::begin, hkArray<hkConstraintModifier*>::begin
+// TODO: cleanup (shape from jj-link/brawl fn_802DD4F8)
 extern "C" void* fn_802DD4F8(void* const* p) { return *p; }
+// TODO: cleanup (shape from jj-link/brawl fn_802DD500)
 extern "C" void* fn_802DD500(void* const* p) { return *p; }
+// TODO: cleanup (shape from jj-link/brawl fn_802DD508)
 extern "C" void* fn_802DD508(void* const* p) { return *p; }
 
 // Shape from https://github.com/jj-link/brawl src/havok/fn_802DC834.cpp.
 // hkRotation::operator=
+// TODO: cleanup (shape from jj-link/brawl fn_802DC834)
 extern "C" void fn_802DC834(float* d, const float* s) {
     d[0] = s[0];
     d[1] = s[1];
@@ -156,6 +160,7 @@ extern "C" void fn_802DC834(float* d, const float* s) {
 
 // Shape from https://github.com/jj-link/brawl src/havok/fn_802DC6F8.cpp.
 // hkVector4::_setRotatedDir(const hkRotation&, const hkVector4&)
+// TODO: cleanup (shape from jj-link/brawl fn_802DC6F8)
 extern "C" void fn_802DC6F8(float* out, const float* m, const float* v) {
     float a, b, c;
     float y = v[1];
@@ -187,6 +192,7 @@ extern "C" {
 void fn_8028E4A4(void*, int, int);
 }
 
+// TODO: cleanup (shape from jj-link/brawl fn_802DC764)
 extern "C" void fn_802DC764(void* a, void** cur, int b, int c, Context* ctx, int d, int e) {
     Work work __attribute__((aligned(16)));
     void* t;
@@ -234,6 +240,7 @@ struct Work {
 
 extern "C" void fn_8028ED40(Work* w, int a, int b, void* d, void* e);
 
+// TODO: cleanup (shape from jj-link/brawl fn_802DCBD8)
 extern "C" void fn_802DCBD8(void* a, void** arg1, void** arg2, void* unused, Context* ctx, int arg5, int arg6) {
     Work work __attribute__((aligned(16)));
     void* t;
@@ -291,6 +298,7 @@ struct Work {
     float values[12];
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802DBFD0)
 extern "C" void fn_802DBFD0(
     void*, void*, void*, void*, Context* ctx, int a, int b)
 {
@@ -330,6 +338,7 @@ extern "C" {
 extern "C" int lbl_80487A68[];
 void fn_8028D8C0(float*, int, int, void*, void*, void*, int, void*);
 }
+// TODO: cleanup (shape from jj-link/brawl fn_802DC898)
 extern "C" void fn_802DC898(void*, int** p, void*, void*, char* base, int i, int j) {
     float v[12] __attribute__((aligned(16)));
     ++*p;
@@ -376,6 +385,7 @@ struct Context {
 };
 struct Work { Vec a,b,c; };
 extern "C" void fn_8028D8C0(Work*, int, int);
+// TODO: cleanup (shape from jj-link/brawl fn_802DCA2C)
 extern "C" void fn_802DCA2C(void*, void*, void*, void*, Context* ctx, int a, int b) {
     Work first __attribute__((aligned(16)));
     Work second __attribute__((aligned(16)));

@@ -229,6 +229,7 @@ void hkWorldOperationUtil::removeConstraintImmediately(hkWorld* world, hkConstra
 // Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
 // instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
 // 12-byte swap (unnamed in the map)
+// TODO: cleanup (shape from jj-link/brawl fn_802FB210)
 extern "C" void fn_802FB210(int* a, int* b) {
     int t;
     t = a[0]; a[0] = b[0]; b[0] = t;

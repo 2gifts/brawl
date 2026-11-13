@@ -32,6 +32,7 @@ struct Obj {
 struct Matrix { float m[4][4]; } __attribute__((aligned(16)));
 extern "C" void fn_8031CF54(Obj*, void*, void*, Matrix*, float*);
 extern "C" void fn_8031D8FC(Obj*, const Matrix*);
+// TODO: cleanup (shape from jj-link/brawl fn_8031D6C0)
 extern "C" int fn_8031D6C0(Obj* self, void* arg) {
     Matrix matrix;
     float value;
@@ -47,6 +48,7 @@ extern "C" int fn_8031D6C0(Obj* self, void* arg) {
 namespace jj_fn_8031EA8C {
 extern "C" float fn_8031EA40(int*);
 
+// TODO: cleanup (shape from jj-link/brawl fn_8031EA8C)
 extern "C" void fn_8031EA8C(int arg0, float* arg1, float farg0, float farg1) {
     int sp8 = arg0;
     arg1[0] = (farg1 - farg0) * (farg0 + fn_8031EA40(&sp8));
@@ -74,6 +76,7 @@ struct Matrix {
     float m[3][4];
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_8031D8FC)
 extern "C" void fn_8031D8FC(Obj* self, const Matrix* src) {
     Vec4* e = &self->c[*self->index];
     e->x = src->m[0][0];
@@ -118,6 +121,7 @@ struct Obj {
 extern "C" void fn_8031D730(Obj* self, const Vec4* in, Matrix* out);
 extern "C" void fn_8031D8FC(Obj* self, const Matrix* src);
 
+// TODO: cleanup (shape from jj-link/brawl fn_8031D2B0)
 extern "C" void fn_8031D2B0(Obj* self) {
     Matrix a;
     Matrix b;
@@ -164,6 +168,7 @@ struct Shape { unsigned char pad[0x14]; Vec4* first; unsigned char pad2[0x0C]; V
 struct Obj { unsigned char pad[0x0C]; int a; int b; };
 extern "C" int fn_8031FEFC(void*, Shape*, Vec4*, int*, int*);
 extern "C" int fn_803201D8(void*, int, int, Vec4*);
+// TODO: cleanup (shape from jj-link/brawl fn_8031D9AC)
 extern "C" int fn_8031D9AC(Bounds* bounds, Obj* object, Shape* shape, Vec4* point, int* result) {
  float transformed[4] __attribute__((aligned(16)));
  float d[3][4];
@@ -248,6 +253,7 @@ struct Frame {
 } __attribute__((aligned(16)));
 
 
+// TODO: cleanup (shape from jj-link/brawl fn_8031CD64)
 extern "C" void fn_8031CD64(Out* arg0, Iface* arg1, Iface* arg2, int arg3) {
     Frame f;
 

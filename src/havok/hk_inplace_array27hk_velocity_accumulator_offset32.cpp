@@ -38,6 +38,7 @@ struct Array {
     }
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802DAA68)
 extern "C" Array* fn_802DAA68(Array* arg1, int arg2) {
     if (arg1) {
         if (arg1) {

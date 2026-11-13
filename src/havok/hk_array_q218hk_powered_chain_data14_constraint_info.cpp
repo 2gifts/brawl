@@ -5,4 +5,5 @@
 // Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
 // instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
 // hkArray<hkPoweredChainData::ConstraintInfo>::operator[] (element size 0x50)
+// TODO: cleanup (shape from jj-link/brawl fn_802DAD64)
 extern "C" char* fn_802DAD64(char* const* a, int i) { return *a + i * 0x50; }

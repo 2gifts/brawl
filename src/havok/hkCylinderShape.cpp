@@ -103,6 +103,7 @@ static hkStaticTypeInfo hkCylinderShapeTypeInfo("hkCylinderShape", hkCylinderSha
 // Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
 // instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
 // hkCylinderShape::assertRoundUpThreshold (empty)
+// TODO: cleanup (shape from jj-link/brawl fn_802D2798)
 extern "C" void fn_802D2798(void) {}
 
 // fn_802D2714: body from https://github.com/jj-link/brawl src/havok/fn_802D2714.cpp (namespaced; callee rebound to our C++ name).
@@ -116,6 +117,7 @@ extern const float lbl_805A40E0;
 extern const float lbl_805A40E4;
 }
 
+// TODO: cleanup (shape from jj-link/brawl fn_802D2714)
 extern "C" float fn_802D2714(void) {
     float x = lbl_805A40D8;
     while (x < lbl_805A40E0) {

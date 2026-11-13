@@ -152,6 +152,7 @@ static hkBool s_hkContinuousSimulation_unk(false);
 // Shape from https://github.com/jj-link/brawl src/havok/fn_8032BB7C.cpp.
 // hkArray<hkEntity*> wrapping a single caller-owned entity pointer (map: insertAt1); the dtor frees only owned storage.
 extern "C" void fn_8032B8DC(int, int, hkArray<hkEntity*>*);
+// TODO: cleanup (shape from jj-link/brawl fn_8032BB7C)
 extern "C" void fn_8032BB7C(int arg0, int arg1, hkEntity** entity) {
     hkArray<hkEntity*> entities(entity, 1, 1);
     fn_8032B8DC(arg0, arg1, &entities);
@@ -160,6 +161,7 @@ extern "C" void fn_8032BB7C(int arg0, int arg1, hkEntity** entity) {
 // Shape from https://github.com/jj-link/brawl src/havok/fn_803295B0.cpp.
 // hkLs_areVelocitiesOk (map name, owner hkConstraintSchemaInfo): index of the largest |value| * scale above the
 // limit m_8 * dispatcher table entry, or -1.
+// TODO: cleanup (shape from jj-link/brawl fn_803295B0)
 extern "C" int fn_803295B0(const char* self, const float* values, int count, char* const* data, float scale) {
     int result = -1;
     float max = *(const float*)(self + 8) *
@@ -189,6 +191,7 @@ struct Pair { char pad[4]; Object* a; Object* b; bool valid() const { return a->
 struct Item { char pad[0x28]; Pair* pair; };
 struct Entry { Item* item; int x; float y; };
 struct Array { Entry* entries; int count; };
+// TODO: cleanup (shape from jj-link/brawl fn_80329E20)
 extern "C" void fn_80329E20(Array* self, int* out, int n) {
     Entry* e;
     for (int i = self->count - n; i < self->count; i++) {
@@ -229,6 +232,7 @@ struct Arr { Entry* data; int count,cap; };
 struct Inner { unsigned char pad[8]; float f8; };
 struct Ctx { Inner* inner; int a4,a8,aC,a10,a14,a18,a1C; };
 struct Result { unsigned char value; Result(int v) : value(v) {} };
+// TODO: cleanup (shape from jj-link/brawl fn_8032A36C)
 extern "C" Result fn_8032A36C(Ctx* arg0, List* arg1, int arg2, Arr* arg3) {
  char sp8[0x400];
  Entry* out;
@@ -273,6 +277,7 @@ struct Data { Vec4 a,b,c,d,e,f,g,h,i; };
 struct Entry { char pad[0xb0]; Data data; };
 struct Container { char pad[0x38]; Entry** entries; int count; };
 struct Flags { unsigned char* values; };
+// TODO: cleanup (shape from jj-link/brawl fn_8032A22C)
 extern "C" void fn_8032A22C(Container* self, Flags* flags) {
     float zero = lbl_805A4800;
     int offset;

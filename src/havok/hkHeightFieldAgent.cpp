@@ -120,6 +120,7 @@ public:
     int m_count;
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802B4A60)
 extern "C" void fn_802B4A60(Outer* self) {
     if (self->m_inner != 0) {
         int off;
@@ -178,6 +179,7 @@ struct Obj {
     }
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802B49CC)
 extern "C" Obj* fn_802B49CC(Obj* self, int flag) {
     if (self) {
         if ((u32)self + 0xC != 0 && self->isOwned()) {
@@ -229,6 +231,7 @@ struct Object {
     }
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802B7898)
 extern "C" Object* fn_802B7898(Object* self, int flag) {
     if (self) {
         if (self && self && (u32)self + 0xC && self->isOwned()) {

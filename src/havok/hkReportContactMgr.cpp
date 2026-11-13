@@ -66,6 +66,7 @@ struct Arg {
     float unkC;
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802D7BD0)
 extern "C" void fn_802D7BD0(int, Arg* p, float f) {
     Ctx c;
     int b = (int)p->unk8 + 0x1c;
@@ -104,6 +105,7 @@ struct Ctx {
 };
 extern "C" void fn_802E3F48(void*, Ctx*);
 
+// TODO: cleanup (shape from jj-link/brawl fn_802D7A54)
 extern "C" int fn_802D7A54(Obj* self, int a, int b, int, int d, int e, float* p, Out* out, float h) {
     Ctx x;
     out->s = 0;
@@ -173,6 +175,7 @@ public:
 };
 
 
+// TODO: cleanup (shape from jj-link/brawl fn_802D7C78)
 extern "C" void fn_802D7C78(Self* self, u16 arg1) {
     Root* root1 = self->root1;
     Root* root2 = self->root2;
@@ -214,6 +217,7 @@ struct Manager;
 struct Root { char pad0[8]; Manager* manager; char padC[0x1AC]; int count; };
 struct Input { char pad0[0x10]; int offset; char pad14[4]; unsigned char type; };
 struct Context { u16 flag; char pad2[2]; int value; Root* root1; Root* root2; int pad14; void* owner; };
+// TODO: cleanup (shape from jj-link/brawl fn_802D7B10)
 extern "C" void fn_802D7B10(void* owner, Input* a, Input* b, int value) {
     Root* root1;
     Root* root2;

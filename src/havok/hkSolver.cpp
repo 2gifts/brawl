@@ -353,29 +353,47 @@ static hkBool s_hkSolver_unk(false);
 // Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
 // instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
 // hkPadSpu<int>::operator int
+// TODO: cleanup (shape from jj-link/brawl fn_80298258)
 extern "C" int fn_80298258(const int* p) { return *p; }
 // hkPadSpu<T>::operator=(T) for int, float, hk1Lin2AngJacobian*, hk2AngJacobian*, hkVelocityAccumulatorOffset*,
 // hkVelocityAccumulator*, hkConstraintChainMatrix6Triple*, hk3dAngularMotorSolverInfo*, hkVector8*
+// TODO: cleanup (shape from jj-link/brawl fn_80298734)
 extern "C" void fn_80298734(int* p, int v) { *p = v; }
+// TODO: cleanup (shape from jj-link/brawl fn_8029873C)
 extern "C" void fn_8029873C(float* p, float v) { *p = v; }
+// TODO: cleanup (shape from jj-link/brawl fn_80298744)
 extern "C" void fn_80298744(void** p, void* v) { *p = v; }
+// TODO: cleanup (shape from jj-link/brawl fn_8029874C)
 extern "C" void fn_8029874C(void** p, void* v) { *p = v; }
+// TODO: cleanup (shape from jj-link/brawl fn_80298754)
 extern "C" void fn_80298754(void** p, void* v) { *p = v; }
+// TODO: cleanup (shape from jj-link/brawl fn_8029875C)
 extern "C" void fn_8029875C(void** p, void* v) { *p = v; }
+// TODO: cleanup (shape from jj-link/brawl fn_80298764)
 extern "C" void fn_80298764(void** p, void* v) { *p = v; }
+// TODO: cleanup (shape from jj-link/brawl fn_8029876C)
 extern "C" void fn_8029876C(void** p, void* v) { *p = v; }
+// TODO: cleanup (shape from jj-link/brawl fn_80298774)
 extern "C" void fn_80298774(void** p, void* v) { *p = v; }
 // hkPadSpu<T>::operator T for hk2AngJacobian*, hk3dAngularMotorSolverInfo*, hkVector8*,
 // hkConstraintChainMatrix6Triple*, hkVelocityAccumulatorOffset*, hk1Lin2AngJacobian*
+// TODO: cleanup (shape from jj-link/brawl fn_8029877C)
 extern "C" void* fn_8029877C(void* const* p) { return *p; }
+// TODO: cleanup (shape from jj-link/brawl fn_80298784)
 extern "C" void* fn_80298784(void* const* p) { return *p; }
+// TODO: cleanup (shape from jj-link/brawl fn_8029878C)
 extern "C" void* fn_8029878C(void* const* p) { return *p; }
+// TODO: cleanup (shape from jj-link/brawl fn_80298794)
 extern "C" void* fn_80298794(void* const* p) { return *p; }
+// TODO: cleanup (shape from jj-link/brawl fn_8029879C)
 extern "C" void* fn_8029879C(void* const* p) { return *p; }
+// TODO: cleanup (shape from jj-link/brawl fn_802987A4)
 extern "C" void* fn_802987A4(void* const* p) { return *p; }
 // hkAddByteOffset<hkJacobianGotoSchema>
+// TODO: cleanup (shape from jj-link/brawl fn_8029E670)
 extern "C" char* fn_8029E670(char* p, int offset) { return p + offset; }
 // hkVector4::setMul4(hkSimdReal, const hkVector4&)
+// TODO: cleanup (shape from jj-link/brawl fn_80297720)
 extern "C" void fn_80297720(float* out, const float* v, float s) {
     out[0] = s * v[0];
     out[1] = s * v[1];
@@ -383,6 +401,7 @@ extern "C" void fn_80297720(float* out, const float* v, float s) {
     out[3] = s * v[3];
 }
 // hkVector4::add4
+// TODO: cleanup (shape from jj-link/brawl fn_80297444)
 extern "C" void fn_80297444(float* a, const float* b) {
     a[0] += b[0];
     a[1] += b[1];

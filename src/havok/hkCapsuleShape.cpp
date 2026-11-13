@@ -104,6 +104,7 @@ struct hkStatisticsCollectorIface {
     virtual void unk20();                                                    // 0x20
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802D008C)
 void hkCapsuleShape::calcStatistics(hkStatisticsCollector* collector) const {
     ((hkStatisticsCollectorIface*)collector)->addObject("CapsuleShape", 1, this);
     ((hkStatisticsCollectorIface*)collector)->unk20();
@@ -136,6 +137,7 @@ struct Out {
     };
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802CEC68)
 void fn_802CEC68(Seg* s, Vec4* dir, Out* out) {
     __declspec(align(16)) Vec4 d;
     d.x = s->b.x - s->a.x;
@@ -174,6 +176,7 @@ static inline float dot3(const V4& a, const V4& b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
+// TODO: cleanup (shape from jj-link/brawl fn_802CF5D4)
 extern "C" void fn_802CF5D4(const V4* a, const V4* b, const V4* c, V4* out) {
     V4 d, e;
     d.x = b->x - a->x; d.y = b->y - a->y; d.z = b->z - a->z; d.w = b->w - a->w;

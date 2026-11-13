@@ -40,6 +40,7 @@ struct Plane {
     V4* c;
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_80320AB8)
 extern "C" void fn_80320AB8(Plane* p) {
     V4* a = p->a;
     V4* b = p->b;
@@ -103,6 +104,7 @@ struct Context {
     char pad2[0xdd0];
     Node* nodes[1];
 };
+// TODO: cleanup (shape from jj-link/brawl fn_80320008)
 extern "C" int fn_80320008(Context* ctx, Node* node, Vec4* point, int* count, Link** output) {
     float epsilon = lbl_805A4748;
     int result = 0;
@@ -165,6 +167,7 @@ struct V {
 };
 extern "C" int fn_80320500(int, V*, int, int, int*);
 
+// TODO: cleanup (shape from jj-link/brawl fn_803201D8)
 extern "C" int fn_803201D8(int a0, int a1, int a2, int a3) {
     int sp8 = a3;
     char buf[0x190];

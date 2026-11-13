@@ -97,6 +97,7 @@ struct Data {
     unsigned c;
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802D5BA4)
 extern "C" void fn_802D5BA4(Data* d, Obj* o) {
     o->v1(lbl_80410C88, 1, d);
     unsigned c = d->c;
@@ -137,6 +138,7 @@ struct Object {
 
 extern "C" float lbl_80532550[4];
 
+// TODO: cleanup (shape from jj-link/brawl fn_802D5AB0)
 extern "C" void fn_802D5AB0(Object* self, const Entry* src) {
     if (self->vec.size == (int)(self->vec.capacity & 0x3FFFFFFF)) {
         hkArrayUtil::_reserveMore((hkArrayBase*)(&self->vec), 0x30);

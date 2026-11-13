@@ -361,6 +361,7 @@ static hkBool s_hkWorld_unk(false);
 // Deleting destructors of the two broad-phase listeners hkWorld creates (classes not modelled yet; sized delete,
 // allocation class 0x1f). Shape from https://github.com/jj-link/brawl src/havok/fn_802EB0E8.cpp / fn_802EB144.cpp.
 // hkEntityEntityBroadPhaseListener::~hkEntityEntityBroadPhaseListener
+// TODO: cleanup (shape from jj-link/brawl fn_802EB0E8)
 extern "C" hkReferencedObject* fn_802EB0E8(hkReferencedObject* self, int deleting) {
     if (self != 0 && deleting > 0) {
         hkMemory::s_instance->deallocateChunk(self, self->m_memSizeAndFlags, 0x1f);
@@ -368,6 +369,7 @@ extern "C" hkReferencedObject* fn_802EB0E8(hkReferencedObject* self, int deletin
     return self;
 }
 // hkBroadPhaseBorderListener::~hkBroadPhaseBorderListener
+// TODO: cleanup (shape from jj-link/brawl fn_802EB144)
 extern "C" hkReferencedObject* fn_802EB144(hkReferencedObject* self, int deleting) {
     if (self != 0 && deleting > 0) {
         hkMemory::s_instance->deallocateChunk(self, self->m_memSizeAndFlags, 0x1f);
@@ -431,6 +433,7 @@ struct ObjB {
     virtual unsigned int v18(void*, Param*);
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802EB810)
 extern "C" void fn_802EB810(Obj* a, Param* p, ObjB* b) {
     unsigned int c1 = a->v7() >> 24;
     void* field = (char*)a + 0x1c;

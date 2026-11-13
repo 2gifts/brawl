@@ -48,6 +48,7 @@ struct hkPoweredChainMotorOutput_80292B24 {
     unsigned char pad[16];
     float values[4];
 };
+// TODO: cleanup (shape from jj-link/brawl fn_80292B24)
 extern "C" void fn_80292B24(int index, int channel, hkPoweredChainMotorInput_80292B24* input,
                             hkPoweredChainMotorOutput_80292B24* output) {
     float value;
@@ -66,6 +67,7 @@ namespace jj_fn_802921B0 {
 extern "C" {
 extern "C" float lbl_805A3E00;
 
+// TODO: cleanup (shape from jj-link/brawl fn_802921B0)
 void fn_802921B0(unsigned char* arg0, float* arg1) {
     int flags = *arg0;
     if (flags != 0) {
@@ -107,6 +109,7 @@ struct Context {
 
 extern "C" const float lbl_805A3E00;
 
+// TODO: cleanup (shape from jj-link/brawl fn_80292F3C)
 extern "C" void fn_80292F3C(Context* ctx, Block* out)
 {
     Block tmp __attribute__((aligned(16)));

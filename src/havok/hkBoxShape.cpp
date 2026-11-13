@@ -80,6 +80,7 @@ struct hkStatisticsCollectorIface {
     virtual void unk20();                                                    // 0x20
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802CD950)
 void hkBoxShape::calcStatistics(hkStatisticsCollector* collector) const {
     ((hkStatisticsCollectorIface*)collector)->addObject("BoxShape", 1, this);
     ((hkStatisticsCollectorIface*)collector)->unk20();

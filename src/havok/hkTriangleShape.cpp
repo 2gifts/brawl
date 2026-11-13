@@ -88,6 +88,7 @@ struct hkStatisticsCollectorIface {
     virtual void unk20();                                                    // 0x20
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802D71A8)
 void hkTriangleShape::calcStatistics(hkStatisticsCollector* collector) const {
     ((hkStatisticsCollectorIface*)collector)->addObject("TriangleShp", 1, this);
     ((hkStatisticsCollectorIface*)collector)->unk20();
@@ -96,6 +97,7 @@ void hkTriangleShape::calcStatistics(hkStatisticsCollector* collector) const {
 // fn_802D6ADC: body from https://github.com/jj-link/brawl src/havok/fn_802D6ADC.cpp (namespaced; labels as in our symbols).
 #include <types.h>
 namespace jj_fn_802D6ADC {
+// TODO: cleanup (shape from jj-link/brawl fn_802D6ADC)
 extern "C" void* fn_802D6ADC(void* src, void* dst)
 {
     float* in = (float*)src;

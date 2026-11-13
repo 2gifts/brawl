@@ -6,6 +6,8 @@
 // Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
 // instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
 // hkPadSpu<hkJacobianSchema*>::operator hkJacobianSchema*
+// TODO: cleanup (shape from jj-link/brawl fn_80295108)
 extern "C" void* fn_80295108(void* const* p) { return *p; }
 // hkPadSpu<hkVelocityAccumulator*>::operator hkVelocityAccumulator*
+// TODO: cleanup (shape from jj-link/brawl fn_80295110)
 extern "C" void* fn_80295110(void* const* p) { return *p; }

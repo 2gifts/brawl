@@ -364,12 +364,14 @@ extern "C" void fn_8030CEEC(void* a, int lo, int hi, unsigned char* cmp);
 extern "C" void fn_8031041C(void* a, int lo, int hi, unsigned char* cmp);
 extern "C" void fn_8030CEB0(void* a, int n, unsigned char* cmp);
 extern "C" void fn_803103E0(void* a, int n, unsigned char* cmp);
+// TODO: cleanup (shape from jj-link/brawl fn_8030CE84)
 extern "C" void fn_8030CE84(void* a, int n) {
     unsigned char c = 0;
     fn_8030CEB0(a, n, &c);
 }
 #pragma push
 #pragma dont_inline on
+// TODO: cleanup (shape from jj-link/brawl fn_8030CEB0)
 extern "C" void fn_8030CEB0(void* a, int n, unsigned char* cmp) {
     if (n > 1) {
         unsigned char c = *cmp;
@@ -377,12 +379,14 @@ extern "C" void fn_8030CEB0(void* a, int n, unsigned char* cmp) {
     }
 }
 #pragma pop
+// TODO: cleanup (shape from jj-link/brawl fn_803103B4)
 extern "C" void fn_803103B4(void* a, int n) {
     unsigned char c = 0;
     fn_803103E0(a, n, &c);
 }
 #pragma push
 #pragma dont_inline on
+// TODO: cleanup (shape from jj-link/brawl fn_803103E0)
 extern "C" void fn_803103E0(void* a, int n, unsigned char* cmp) {
     if (n > 1) {
         unsigned char c = *cmp;
@@ -399,6 +403,7 @@ struct Flag { signed char value; Flag(bool b) : value(b) {} operator bool() cons
 struct Comp {
     Flag operator()(const Pair& a, const Pair& b) const { return (int)a.key - (int)b.key < 0; }
 };
+// TODO: cleanup (shape from jj-link/brawl fn_8030CEEC)
 extern "C" void fn_8030CEEC(Pair* arr, int lo, int hi, Comp comp) {
 top:
     Pair pivot __attribute__((aligned(16)));
@@ -435,6 +440,7 @@ struct Comp {
     Flag operator()(const Pair& a, const Pair& b) const { return (int)a.key - (int)b.key < 0; }
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_8031041C)
 extern "C" void fn_8031041C(Pair* arr, int lo, int hi, Comp comp) {
 top:
     Pair pivot __attribute__((aligned(16)));
@@ -499,6 +505,7 @@ u32 fa0; char padA4[4]; Ent* paa8;
 inline void start(Self* self, Object_vptr_0* r, char* name, int size) {
 r->slot1(name,size,self);
 }
+// TODO: cleanup (shape from jj-link/brawl fn_80312920)
 extern "C" void fn_80312920(Self* self,Object_vptr_0* r) {
 char* base=lbl_80414360;
 start(self,r,base+0x3D,4);

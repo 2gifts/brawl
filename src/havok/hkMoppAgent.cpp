@@ -120,6 +120,7 @@ struct Obj {
     Array array;
 };
 
+// TODO: cleanup (shape from jj-link/brawl fn_802A990C)
 extern "C" Obj* fn_802A990C(Obj* self, int flag) {
     if (self) {
         if (self && self && self && (unsigned)self + 0xC != 0 &&

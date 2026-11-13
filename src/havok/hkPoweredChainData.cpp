@@ -100,41 +100,56 @@ extern "C" void fn_802DB984(int* destination, const int* source)
 }
 
 // hkTransform::getRotation / hkRotation ctor (bare blr)
+// TODO: cleanup (shape from jj-link/brawl fn_802DB624)
 extern "C" void* fn_802DB624(void* t) { return t; }
+// TODO: cleanup (shape from jj-link/brawl fn_802DB878)
 extern "C" void fn_802DB878(void*) {}
 // hkConstraintInstance::getEntityA, hkArray<hkEntity*>::getSize, hkEntity::getMotion, hkMotion::getTransform,
 // hkPadSpu<hkJacobianElement*>::val, hkPadSpuLong<hkConstraintInstance*> ctor
+// TODO: cleanup (shape from jj-link/brawl fn_802DB55C)
 extern "C" void* fn_802DB55C(const char* p) { return *(void* const*)(p + 0x14); }
+// TODO: cleanup (shape from jj-link/brawl fn_802DB56C)
 extern "C" int fn_802DB56C(const char* p) { return *(const int*)(p + 0x4); }
+// TODO: cleanup (shape from jj-link/brawl fn_802DB574)
 extern "C" char* fn_802DB574(char* p) { return p + 0xA0; }
+// TODO: cleanup (shape from jj-link/brawl fn_802DB588)
 extern "C" char* fn_802DB588(char* p) { return p + 0x10; }
+// TODO: cleanup (shape from jj-link/brawl fn_802DB590)
 extern "C" void* fn_802DB590(void* const* p) { return *p; }
+// TODO: cleanup (shape from jj-link/brawl fn_802DB97C)
 extern "C" void fn_802DB97C(void** p, void* v) { *p = v; }
 // hkConstraintInstance::getRuntime (m_internal->m_runtime), hkMatrix3::getColumn
+// TODO: cleanup (shape from jj-link/brawl fn_802DAE54)
 extern "C" void* fn_802DAE54(const char* p) { return *(void* const*)(*(const char* const*)(p + 0x28) + 0x20); }
+// TODO: cleanup (shape from jj-link/brawl fn_802DB8A0)
 extern "C" char* fn_802DB8A0(char* p, int i) { return p + i * 16; }
 // hkVector4::set, hkQuaternion::operator=, hkVector4::lengthSquared4, setNeg3, sub4
+// TODO: cleanup (shape from jj-link/brawl fn_802DB6D0)
 extern "C" void fn_802DB6D0(float* p, float a, float b, float c, float d) {
     p[0] = a;
     p[1] = b;
     p[2] = c;
     p[3] = d;
 }
+// TODO: cleanup (shape from jj-link/brawl fn_802DAD7C)
 extern "C" void fn_802DAD7C(float* d, const float* s) {
     d[0] = s[0];
     d[1] = s[1];
     d[2] = s[2];
     d[3] = s[3];
 }
+// TODO: cleanup (shape from jj-link/brawl fn_802DB704)
 extern "C" float fn_802DB704(const float* v) {
     return v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3];
 }
+// TODO: cleanup (shape from jj-link/brawl fn_802DB848)
 extern "C" void fn_802DB848(float* d, const float* s) {
     d[0] = -s[0];
     d[1] = -s[1];
     d[2] = -s[2];
     d[3] = s[3];
 }
+// TODO: cleanup (shape from jj-link/brawl fn_802DB804)
 extern "C" void fn_802DB804(float* a, const float* b) {
     a[0] = a[0] - b[0];
     a[1] = a[1] - b[1];
@@ -147,6 +162,7 @@ extern "C" void fn_802DB804(float* a, const float* b) {
 struct hkFloat4A_802DB910 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
+// TODO: cleanup (shape from jj-link/brawl fn_802DB910)
 extern "C" void fn_802DB910(hkFloat4A_802DB910* a, hkFloat4A_802DB910* b) {
     hkFloat4A_802DB910 temp;
     temp.x = a->x;
@@ -161,6 +177,7 @@ extern "C" void fn_802DB910(hkFloat4A_802DB910* a, hkFloat4A_802DB910* b) {
 // fn_802DB8B4: body from https://github.com/jj-link/brawl src/havok/fn_802DB8B4.cpp (namespaced; labels as in our symbols).
 #include <types.h>
 namespace jj_fn_802DB8B4 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DB8B4)
 extern "C" void fn_802DB8B4(float* a, const float* b, float** c, float* d) {
     const float s = b[1];
     const float s2 = b[2];
@@ -185,6 +202,7 @@ extern "C" {
 
 extern "C" const float lbl_805A426C;
 
+// TODO: cleanup (shape from jj-link/brawl fn_802DB59C)
 void fn_802DB59C(float *out, float *m, float *v)
 {
     float a, b, c;
