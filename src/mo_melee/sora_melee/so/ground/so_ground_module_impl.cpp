@@ -608,8 +608,9 @@ bool soGroundModuleImpl::isSameJoint(int* __restrict first, int* second) {
 }
 
 Vec2f soGroundModuleImpl::getDownMovementSpeed(u32 index) {
+    soArray<soGroundShapeImpl>* shapes = m_groundShapeArray;
     Vec2f result(0.0f, 0.0f);
-    if (m_groundShapeArray->at(index).m_collStatus->isTouch(grCollStatus::Touch_Down)) {
+    if (shapes->at(index).m_collStatus->isTouch(grCollStatus::Touch_Down)) {
         grCollision::calcLineVector(m_groundShapeArray->at(index).m_collStatus->getTouchLineId(grCollStatus::Touch_Down), getDownPos(index), &result);
     }
     return result;
@@ -633,8 +634,9 @@ Vec2f soGroundModuleImpl::getTouchSpeed(grCollStatus::TouchMask p0, u32 index) {
 }
 
 Vec2f soGroundModuleImpl::getAttachMovementSpeed(u32 index) {
+    soArray<soGroundShapeImpl>* shapes = m_groundShapeArray;
     Vec2f result(0.0f, 0.0f);
-    u8 attachKind = m_groundShapeArray->at(index).m_collStatus->m_unk6D;
+    u8 attachKind = shapes->at(index).m_collStatus->m_unk6D;
     if (attachKind & grCollStatus::TOUCH_MASK_DOWN) {
         grCollision::calcLineVector(m_groundShapeArray->at(index).m_collStatus->getTouchLineId(grCollStatus::Touch_Down), getDownPos(index), &result);
     } else if (attachKind & grCollStatus::TOUCH_MASK_UP) {
