@@ -87,3 +87,52 @@ void fn_802921B0(unsigned char* arg0, float* arg1) {
 }
 }
 } // namespace jj_fn_802921B0
+
+// fn_80292F3C: body from https://github.com/jj-link/brawl src/havok/fn_80292F3C.cpp (namespaced; callees rebound to our C++ names).
+#include <types.h>
+#include <havok/hkMatrix6.h>
+namespace jj_fn_80292F3C {
+struct Block {
+    float v[8];
+};
+
+struct Context {
+    int unk0;
+    int count;
+    char pad8[0x18];
+    char* matrices;
+    char pad24[8];
+    Block* values;
+};
+
+extern "C" const float lbl_805A3E00;
+
+extern "C" void fn_80292F3C(Context* ctx, Block* out)
+{
+    Block tmp __attribute__((aligned(16)));
+    int m, v;
+    Block* base = out + 1;
+    int i;
+
+    base[-1].v[0] = base[-1].v[1] = base[-1].v[2] = base[-1].v[3] = lbl_805A3E00;
+    base[-1].v[4] = base[-1].v[5] = base[-1].v[6] = base[-1].v[7] = lbl_805A3E00;
+
+    for (i = 0, m = 0, v = 0; i < ctx->count;
+         m += 0x3c0, v += 0x20, ++i) {
+        const Block* p = (const Block*)((const char*)ctx->values + v);
+        hkMatrix6SetMulV(*(hkVector8*)(&tmp), *(const hkMatrix6*)(ctx->matrices + m), *(const hkVector8*)(base + (i - 1)));
+
+        const void* matrix = ctx->matrices + m + 0xc0;
+        tmp.v[0] = p->v[0] - tmp.v[0];
+        tmp.v[1] = p->v[1] - tmp.v[1];
+        tmp.v[2] = p->v[2] - tmp.v[2];
+        tmp.v[3] = p->v[3] - tmp.v[3];
+        tmp.v[4] = p->v[4] - tmp.v[4];
+        tmp.v[5] = p->v[5] - tmp.v[5];
+        tmp.v[6] = p->v[6] - tmp.v[6];
+        tmp.v[7] = p->v[7] - tmp.v[7];
+
+        hkMatrix6SetMulV(*(hkVector8*)((Block*)((char*)base + v)), *(const hkMatrix6*)(matrix), *(const hkVector8*)(&tmp));
+    }
+}
+} // namespace jj_fn_80292F3C
