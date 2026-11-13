@@ -71,7 +71,10 @@ struct hkWorld : hkReferencedObject {
     u8 m_unkA8[0x0D];                               // 0xA8 .. 0xB4 not recovered
     // hkDefaultWorldMaintenanceMgr::performMaintenance only looks for islands to deactivate when it is set
     hkBool m_unkB5;                                 // 0xB5 HYPOTHESIS: a deactivation switch
-    u8 m_unkB6[0x12];                               // 0xB6 .. 0xC7 not recovered
+    u8 m_unkB6[0x02];                               // 0xB6
+    hkReal m_highFrequencyDeactivationPeriod;       // 0xB8
+    hkReal m_lowFrequencyDeactivationPeriod;        // 0xBC
+    u8 m_unkC0[0x08];                               // 0xC0 .. 0xC7 not recovered
     int m_unkC8;                                    // 0xC8 (initialised to -1)
     hkArray<hkPhantom*> m_phantoms;                 // 0xCC
     u8 m_unkD8[0x30];                               // 0xD8 .. 0x107 not recovered
