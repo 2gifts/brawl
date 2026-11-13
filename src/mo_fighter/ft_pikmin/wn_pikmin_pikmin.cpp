@@ -1280,6 +1280,10 @@ static void scale(Vec2f* vec, float factor) {
 }
 #pragma dont_inline reset
 
+static inline void pkSetSpeed(soKineticEnergyNormal* normal, const Vec2f& speed) {
+    normal->m_speed = speed;
+}
+
 void wnPikminPikminKineticTransactor::addSpeed(float* speed, void* pools, soModuleAccesser* acc) {
     float speedX = speed[0] * acc->getPostureModule().getLr();
     float speedY = speed[1];
@@ -1288,10 +1292,10 @@ void wnPikminPikminKineticTransactor::addSpeed(float* speed, void* pools, soModu
     if (gravity->isEnable() == true) {
         gravity->m_speedY = speedY + gravity->getSpeed().m_y;
     } else if (normal->isEnable() == true) {
-        normal->m_speed = Vec2f(normal->getSpeed().m_x, speedY + normal->getSpeed().m_y);
+        pkSetSpeed(normal, Vec2f(normal->getSpeed().m_x, speedY + normal->getSpeed().m_y));
     }
     if (normal->isEnable() == true) {
-        normal->m_speed = Vec2f(speedX + normal->getSpeed().m_x, normal->getSpeed().m_y);
+        pkSetSpeed(normal, Vec2f(speedX + normal->getSpeed().m_x, normal->getSpeed().m_y));
     }
 }
 
