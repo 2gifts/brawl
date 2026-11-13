@@ -227,16 +227,18 @@ void muEventTask::createObjResFile(const muEventModel* models, int count, nw4r::
 // MATCH-ONLY: the game does not inline this function into the one that creates the models.
 #pragma dont_inline on
 void muEventTask::createPanelExpMdl() {
+    MuObject* wnd;
+    MuObject* bg;
     nw4r::g3d::G3dObj* panel = Construct__Q34nw4r3g3d12ScnMdlExpandFP12MEMAllocatorPUliPQ34nw4r3g3d6ScnMdl(
         gfHeapManager::getMEMAllocator(Heaps::MenuResource), NULL, 0x51, m_objects[1]->m_sceneModel);
     PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(panel, m_objects[0x52]->m_sceneModel, "pos98");
     PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(panel, m_objects[0x53]->m_sceneModel, "pos99");
     if (m_mode == 1) {
-        MuObject* wnd = m_objects[0x53];
+        wnd = m_objects[0x53];
         wnd->changeNodeAnimNIf("MenEvent0021_TopN__1");
         wnd->changeClrAnimNIf("MenEvent0021_TopN__1");
         wnd->setFrameNode(50.0f);
-        MuObject* bg = m_objects[0];
+        bg = m_objects[0];
         bg->changeNodeAnimNIf("MenEventBg_TopN__1");
         bg->changeClrAnimNIf("MenEventBg_TopN__1");
         m_group->Insert(m_group->sceneItemsCount, reinterpret_cast<nw4r::g3d::ScnObj*>(m_objects[0x55]->m_sceneModel));
