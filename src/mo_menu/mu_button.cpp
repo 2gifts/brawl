@@ -883,6 +883,15 @@ static inline nw4r::g3d::ResFile takeResFile(gfFileIOHandle* handle) {
     return resFile;
 }
 
+// Binds the scene file's camera animation to the button scene.
+static inline void bindCamAnm(muButtonTask* task) {
+    nw4r::g3d::ResFile* resScene = &task->m_work->m_resScene;
+    nw4r::g3d::ResAnmScn anmScn;
+    anmScn = resScene->GetResAnmScn(0);
+    anmScn.Bind(anmScn);
+    task->m_work->m_scene->setCamAnm(&anmScn);
+}
+
 void muButtonTask::mainStepLoading(muButtonTask* task) {
     for (int i = 0; i < 3; i++) {
         if (!task->m_handles[i].isReady()) {
@@ -895,10 +904,7 @@ void muButtonTask::mainStepLoading(muButtonTask* task) {
     task->m_work->m_resButton = takeResFile(&task->m_handles[0]);
     task->createModel(&task->m_work->m_resButton);
     task->m_work->m_resScene = takeResFile(&task->m_handles[1]);
-    nw4r::g3d::ResAnmScn anmScn;
-    anmScn = task->m_work->m_resScene.GetResAnmScn(0);
-    anmScn.Bind(anmScn);
-    task->m_work->m_scene->setCamAnm(&anmScn);
+    bindCamAnm(task);
     task->m_work->m_msgData = takeBuffer(&task->m_handles[2]);
     task->initMsg(task->m_work->m_msgData);
     const Step* step = &sSteps[1];
