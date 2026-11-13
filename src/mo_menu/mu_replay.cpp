@@ -236,9 +236,9 @@ void muReplayTask::setPanelStateCore(int state, int unk) {
     static const char* sPanelName = "MenReplayPanel_TopN__0";
     static const char* sCursorName = "MenReplayCursor_TopN__0";
     static muCollectionViewer::PanelMotionTable sTable(sPanelName, sCursorName);
-    m_work->m_objs[1]->setAnimName(&sTable.m_anim[sTable.m_index[state]], false);
+    m_work->m_objs[1]->setAnimName(&sTable.m_anim[0][sTable.m_index[state]], false);
     if (unk != 0) {
-        m_work->m_objs[23]->setAnimName(&sTable.m_anim[sTable.m_index[state]] + 11, false);
+        m_work->m_objs[23]->setAnimName(&sTable.m_anim[1][sTable.m_index[state]], false);
     }
     m_work->m_panelState = state;
 }
