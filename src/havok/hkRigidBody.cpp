@@ -106,3 +106,18 @@ void hkRigidBody::setCenterOfMassLocal(const hkVector4& com) {
 
 static hkStaticTypeInfo hkRigidBodyTypeInfo("hkRigidBody", hkRigidBody::finishLoadedObjecthkRigidBody, hkRigidBody::cleanupLoadedObjecthkRigidBody,
                                       hkRigidBody::getVtablehkRigidBody());
+
+// Shape from https://github.com/jj-link/brawl src/havok/fn_802E2378.cpp.
+// hkCollidable::estimateAllowedPenetrationDepth (inline copy): 0.2 * the smallest extent below 0.5, else 0.1.
+extern "C" void fn_802E2378(char* collidable, const float* extents) {
+    float a = extents[1];
+    float c = extents[2];
+    float b = extents[0];
+    b = (b < a) ? b : a;
+    b = (b < c) ? b : c;
+    if (b < 0.5f) {
+        *(float*)(collidable + 0x20) = 0.2f * b;
+        return;
+    }
+    *(float*)(collidable + 0x20) = 0.1f;
+}

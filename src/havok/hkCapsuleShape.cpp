@@ -88,7 +88,23 @@ int hkCapsuleShape::getType() const {
 //   0x802CF338   668  closestInfLineSegInfLineSeg   [map: hkCapsuleShape__closestInfLineSegInfLineSeg]
 //   0x802CF5D4   352  closestPointLineSeg   [map: hkCapsuleShape__closestPointLineSeg]
 //   0x802CF734  2384  castRay   [map: hkCapsuleShape__castRay]
-//   0x802D008C   100  calcStatistics   [map: hkCapsuleShape__calcStatistics]
 
 static hkStaticTypeInfo hkCapsuleShapeTypeInfo("hkCapsuleShape", hkCapsuleShape::finishLoadedObjecthkCapsuleShape, hkCapsuleShape::cleanupLoadedObjecthkCapsuleShape,
                                       hkCapsuleShape::getVtablehkCapsuleShape());
+
+// Statistics collector slots used by calcStatistics (vtable offsets 0x0C and 0x20); see hkCylinderShape.cpp.
+// Shape from https://github.com/jj-link/brawl src/havok/fn_802D008C.cpp.
+struct hkStatisticsCollectorIface {
+    virtual void unk00();
+    virtual void addObject(const char* name, int count, const void* object); // 0x0C
+    virtual void unk10();
+    virtual void unk14();
+    virtual void unk18();
+    virtual void unk1C();
+    virtual void unk20();                                                    // 0x20
+};
+
+void hkCapsuleShape::calcStatistics(hkStatisticsCollector* collector) const {
+    ((hkStatisticsCollectorIface*)collector)->addObject("CapsuleShape", 1, this);
+    ((hkStatisticsCollectorIface*)collector)->unk20();
+}

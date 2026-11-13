@@ -99,3 +99,8 @@ void hkCylinderShape::calcStatistics(hkStatisticsCollector* collector) const {
 
 static hkStaticTypeInfo hkCylinderShapeTypeInfo("hkCylinderShape", hkCylinderShape::finishLoadedObjecthkCylinderShape, hkCylinderShape::cleanupLoadedObjecthkCylinderShape,
                                       hkCylinderShape::getVtablehkCylinderShape());
+
+// Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
+// instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
+// hkCylinderShape::assertRoundUpThreshold (empty)
+extern "C" void fn_802D2798(void) {}

@@ -98,3 +98,77 @@ extern "C" void fn_802DB984(int* destination, const int* source)
 {
     *destination = *source;
 }
+
+// hkTransform::getRotation / hkRotation ctor (bare blr)
+extern "C" void* fn_802DB624(void* t) { return t; }
+extern "C" void fn_802DB878(void*) {}
+// hkConstraintInstance::getEntityA, hkArray<hkEntity*>::getSize, hkEntity::getMotion, hkMotion::getTransform,
+// hkPadSpu<hkJacobianElement*>::val, hkPadSpuLong<hkConstraintInstance*> ctor
+extern "C" void* fn_802DB55C(const char* p) { return *(void* const*)(p + 0x14); }
+extern "C" int fn_802DB56C(const char* p) { return *(const int*)(p + 0x4); }
+extern "C" char* fn_802DB574(char* p) { return p + 0xA0; }
+extern "C" char* fn_802DB588(char* p) { return p + 0x10; }
+extern "C" void* fn_802DB590(void* const* p) { return *p; }
+extern "C" void fn_802DB97C(void** p, void* v) { *p = v; }
+// hkConstraintInstance::getRuntime (m_internal->m_runtime), hkMatrix3::getColumn
+extern "C" void* fn_802DAE54(const char* p) { return *(void* const*)(*(const char* const*)(p + 0x28) + 0x20); }
+extern "C" char* fn_802DB8A0(char* p, int i) { return p + i * 16; }
+// hkVector4::set, hkQuaternion::operator=, hkVector4::lengthSquared4, setNeg3, sub4
+extern "C" void fn_802DB6D0(float* p, float a, float b, float c, float d) {
+    p[0] = a;
+    p[1] = b;
+    p[2] = c;
+    p[3] = d;
+}
+extern "C" void fn_802DAD7C(float* d, const float* s) {
+    d[0] = s[0];
+    d[1] = s[1];
+    d[2] = s[2];
+    d[3] = s[3];
+}
+extern "C" float fn_802DB704(const float* v) {
+    return v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3];
+}
+extern "C" void fn_802DB848(float* d, const float* s) {
+    d[0] = -s[0];
+    d[1] = -s[1];
+    d[2] = -s[2];
+    d[3] = s[3];
+}
+extern "C" void fn_802DB804(float* a, const float* b) {
+    a[0] = a[0] - b[0];
+    a[1] = a[1] - b[1];
+    a[2] = a[2] - b[2];
+    a[3] = a[3] - b[3];
+}
+
+// Shape from https://github.com/jj-link/brawl src/havok/fn_802DB910.cpp.
+// hkAlgorithm::swap<hkQuaternion>
+struct hkFloat4A_802DB910 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+extern "C" void fn_802DB910(hkFloat4A_802DB910* a, hkFloat4A_802DB910* b) {
+    hkFloat4A_802DB910 temp;
+    temp.x = a->x;
+    temp.y = a->y;
+    temp.z = a->z;
+    temp.w = a->w;
+    *a = *b;
+    *b = temp;
+}
+
+// Shape from https://github.com/jj-link/brawl src/havok/fn_802DB8B4.cpp.
+// hk1dAngularVelocityMotorCommitJacobianInMotorInfo (map name)
+extern "C" void fn_802DB8B4(float* a, float* b, float** c, float* d) {
+    const float s = b[1];
+    const float s2 = b[2];
+    float* const p = *c;
+    d[1] = a[2] * s;
+    d[2] = a[3] * s;
+    d[3] = a[1];
+    d[4] = a[4];
+    d[5] = a[5];
+    d[0] = 1.0f;
+    p[7] = a[0] * s2;
+    *c = p + 8;
+}

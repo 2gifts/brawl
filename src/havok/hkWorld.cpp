@@ -357,3 +357,20 @@ bool hkNullContactMgr::addContactPoint() {
 // Unnamed static flag (lbl_805A0F20); initialised through hkBool(bool) so the TU gets a __sinit.
 // HYPOTHESIS: a debug/config switch of the unit; nothing in the written code reads it yet.
 static hkBool s_hkWorld_unk(false);
+
+// Deleting destructors of the two broad-phase listeners hkWorld creates (classes not modelled yet; sized delete,
+// allocation class 0x1f). Shape from https://github.com/jj-link/brawl src/havok/fn_802EB0E8.cpp / fn_802EB144.cpp.
+// hkEntityEntityBroadPhaseListener::~hkEntityEntityBroadPhaseListener
+extern "C" hkReferencedObject* fn_802EB0E8(hkReferencedObject* self, int deleting) {
+    if (self != 0 && deleting > 0) {
+        hkMemory::s_instance->deallocateChunk(self, self->m_memSizeAndFlags, 0x1f);
+    }
+    return self;
+}
+// hkBroadPhaseBorderListener::~hkBroadPhaseBorderListener
+extern "C" hkReferencedObject* fn_802EB144(hkReferencedObject* self, int deleting) {
+    if (self != 0 && deleting > 0) {
+        hkMemory::s_instance->deallocateChunk(self, self->m_memSizeAndFlags, 0x1f);
+    }
+    return self;
+}

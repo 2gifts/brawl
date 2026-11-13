@@ -14,3 +14,28 @@
 //   0x802FEA60   232  calc1nStatistics   [map: hkAgentMachineUtil__calc1nStatistics]
 //   0x802FEB48   392  calcNnStatistics   [map: hkAgentMachineUtil__calcNnStatistics]
 //   0x802FECD0   208  calcNnStatisticsContactMgrsOnly   [map: hkAgentMachineUtil__calcNnStatisticsContactMgrsOnly]
+
+#include <havok/hkAgent1nTrack.h>
+
+// Function body below is taken from https://github.com/jj-link/brawl (src/havok/fn_802FEA54.cpp).
+// hkAgent1nMachine_UpdateShapeCollectionFilter = VisitAllAgents(track, input, UpdateShapeCollectionFilterVisitor)
+extern "C" void fn_802FE5C0(void*, void*, void*);
+extern "C" void fn_802FE97C(void);
+extern "C" void fn_802FEA54(void* a, void* b) {
+    fn_802FE5C0(a, b, (void*)&fn_802FE97C);
+}
+
+
+// Shape from https://github.com/jj-link/brawl src/havok/fn_802FCC94.cpp.
+// hkAgent1nMachine_flipInput (map name)
+extern "C" void fn_802FCC94(hkAgent3ProcessInput& in, hkAgent3ProcessInput& out) {
+    out.m_bodyA = in.m_bodyB;
+    out.m_bodyB = in.m_bodyA;
+    out.m_input = in.m_input;
+    out.m_contactMgr = in.m_contactMgr;
+    out.m_linearTimInfo(0) = -in.m_linearTimInfo(0);
+    out.m_linearTimInfo(1) = -in.m_linearTimInfo(1);
+    out.m_linearTimInfo(2) = -in.m_linearTimInfo(2);
+    out.m_linearTimInfo(3) = in.m_linearTimInfo(3);
+    out.m_aTb.setInverse(in.m_aTb);
+}

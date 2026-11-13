@@ -33,3 +33,29 @@ float max2f(float a, float b) {
     return b;
 }
 }
+
+// Shape from https://github.com/jj-link/brawl src/havok/fn_80292B24.cpp.
+// hkPoweredChain_OverwriteVelocityWithExplicitImpulse
+struct hkPoweredChainMotorEntry_80292B24 {
+    float x, a, b, c, d, e;
+};
+struct hkPoweredChainMotorInput_80292B24 {
+    unsigned char flags;
+    unsigned char pad[3];
+    hkPoweredChainMotorEntry_80292B24 entries[3];
+};
+struct hkPoweredChainMotorOutput_80292B24 {
+    unsigned char pad[16];
+    float values[4];
+};
+extern "C" void fn_80292B24(int index, int channel, hkPoweredChainMotorInput_80292B24* input,
+                            hkPoweredChainMotorOutput_80292B24* output) {
+    float value;
+    hkPoweredChainMotorInput_80292B24* in = &input[index];
+    hkPoweredChainMotorOutput_80292B24* out = &output[index];
+    if ((((int)in->flags >> (channel * 2)) & 3) == 1)
+        value = in->entries[channel].a;
+    else
+        value = in->entries[channel].b;
+    out->values[channel] = value;
+}

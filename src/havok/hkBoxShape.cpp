@@ -59,7 +59,6 @@ void hkBoxShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const {
 }
 
 // Not yet decompiled in this unit:
-//   0x802CD950    96  calcStatistics   [map: hkBoxShape__calcStatistics]
 //   0x802CD9DC   748  getAabb   [map: hkBoxShape__getAabb]
 //   0x802CDCC8   204  getSupportingVertex   [map: hkBoxShape__getSupportingVertex]
 //   0x802CDD94   300  convertVertexIdsToVertices   [map: hkBoxShape__convertVertexIdsToVertices]
@@ -68,3 +67,20 @@ void hkBoxShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const {
 
 static hkStaticTypeInfo hkBoxShapeTypeInfo("hkBoxShape", hkBoxShape::finishLoadedObjecthkBoxShape, hkBoxShape::cleanupLoadedObjecthkBoxShape,
                                       hkBoxShape::getVtablehkBoxShape());
+
+// Statistics collector slots used by calcStatistics (vtable offsets 0x0C and 0x20); see hkCylinderShape.cpp.
+// Shape from https://github.com/jj-link/brawl src/havok/fn_802CD950.cpp.
+struct hkStatisticsCollectorIface {
+    virtual void unk00();
+    virtual void addObject(const char* name, int count, const void* object); // 0x0C
+    virtual void unk10();
+    virtual void unk14();
+    virtual void unk18();
+    virtual void unk1C();
+    virtual void unk20();                                                    // 0x20
+};
+
+void hkBoxShape::calcStatistics(hkStatisticsCollector* collector) const {
+    ((hkStatisticsCollectorIface*)collector)->addObject("BoxShape", 1, this);
+    ((hkStatisticsCollectorIface*)collector)->unk20();
+}

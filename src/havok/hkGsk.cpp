@@ -42,3 +42,22 @@ void hkGsk::convertFeatureToClosestDistance(const hkVector4& plane, hkGskClosest
         out.m_weight = 0.5f;
     }
 }
+
+// Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
+// instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
+// hkCdVertex::operator=
+extern "C" void fn_8031AAA0(float* d, const float* s) {
+    d[0] = s[0];
+    d[1] = s[1];
+    d[2] = s[2];
+    d[3] = s[3];
+}
+
+// Shape from https://github.com/jj-link/brawl src/havok/fn_80318BB4.cpp.
+// hkMath::isNegative-style sign mask (returns 8 for a negative value).
+extern "C" int fn_80318BB4(float f) {
+    if (f < 0.0f) {
+        return 8;
+    }
+    return 0;
+}

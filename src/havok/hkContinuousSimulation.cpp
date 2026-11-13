@@ -148,3 +148,29 @@ void hkContinuousSimulation::removeCollisionInformationForAgent(const void* agen
 // Unnamed static flag (lbl_805A0F30); initialised through hkBool(bool) so the TU gets a __sinit.
 // HYPOTHESIS: a debug/config switch of the unit; nothing in the written code reads it yet.
 static hkBool s_hkContinuousSimulation_unk(false);
+
+// Shape from https://github.com/jj-link/brawl src/havok/fn_8032BB7C.cpp.
+// hkArray<hkEntity*> wrapping a single caller-owned entity pointer (map: insertAt1); the dtor frees only owned storage.
+extern "C" void fn_8032B8DC(int, int, hkArray<hkEntity*>*);
+extern "C" void fn_8032BB7C(int arg0, int arg1, hkEntity** entity) {
+    hkArray<hkEntity*> entities(entity, 1, 1);
+    fn_8032B8DC(arg0, arg1, &entities);
+}
+
+// Shape from https://github.com/jj-link/brawl src/havok/fn_803295B0.cpp.
+// hkLs_areVelocitiesOk (map name, owner hkConstraintSchemaInfo): index of the largest |value| * scale above the
+// limit m_8 * dispatcher table entry, or -1.
+extern "C" int fn_803295B0(const char* self, const float* values, int count, char* const* data, float scale) {
+    int result = -1;
+    float max = *(const float*)(self + 8) *
+                *(const float*)(*data + *(const signed char*)(*(const char* const*)self + 0x1c) * 0x3c + 0x1a58);
+    for (int i = 0; i < count; i++) {
+        float value = scale * (float)__fabs(*values);
+        if (value > max) {
+            max = value;
+            result = i;
+        }
+        values++;
+    }
+    return result;
+}

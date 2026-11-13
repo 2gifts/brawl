@@ -37,3 +37,9 @@ void hkGsk::checkForChangesAndUpdateCache(void* arg) {
 }
 
 hk4dGskVertexCollidePointsInput::hk4dGskVertexCollidePointsInput() {}
+
+// Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
+// instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
+// hkTransform::getRotation (bare blr), hkMotionState::getSweptTransform (+0x40)
+extern "C" void* fn_8031351C(void* t) { return t; }
+extern "C" char* fn_80313514(char* p) { return p + 0x40; }

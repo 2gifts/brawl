@@ -72,7 +72,23 @@ void hkTriangleShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const
 //   0x802D6804   708  getAabb   [map: hkTriangleShape__getAabb]
 //   0x802D6ADC   128  getCollisionSpheres   [map: hkTriangleShape__getCollisionSpheres]
 //   0x802D6B5C  1612  castRay   [map: hkTriangleShape__castRay]
-//   0x802D71A8   100  calcStatistics   [map: hkTriangleShape__calcStatistics]
 
 static hkStaticTypeInfo hkTriangleShapeTypeInfo("hkTriangleShape", hkTriangleShape::finishLoadedObjecthkTriangleShape, hkTriangleShape::cleanupLoadedObjecthkTriangleShape,
                                       hkTriangleShape::getVtablehkTriangleShape());
+
+// Statistics collector slots used by calcStatistics (vtable offsets 0x0C and 0x20); see hkCylinderShape.cpp.
+// Shape from https://github.com/jj-link/brawl src/havok/fn_802D71A8.cpp.
+struct hkStatisticsCollectorIface {
+    virtual void unk00();
+    virtual void addObject(const char* name, int count, const void* object); // 0x0C
+    virtual void unk10();
+    virtual void unk14();
+    virtual void unk18();
+    virtual void unk1C();
+    virtual void unk20();                                                    // 0x20
+};
+
+void hkTriangleShape::calcStatistics(hkStatisticsCollector* collector) const {
+    ((hkStatisticsCollectorIface*)collector)->addObject("TriangleShp", 1, this);
+    ((hkStatisticsCollectorIface*)collector)->unk20();
+}

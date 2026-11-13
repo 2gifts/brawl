@@ -356,3 +356,37 @@ struct hk3AxisSweepStaticTable {
     }
 };
 static hk3AxisSweepStaticTable s_hk3AxisSweepStaticTable;
+
+// Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
+// instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
+// hkAlgorithm::quickSort<hk3AxisSweep::hkBpEndPoint> / <hk3AxisSweep::ValueIntPair> and their less<> overloads
+extern "C" void fn_8030CEEC(void* a, int lo, int hi, unsigned char* cmp);
+extern "C" void fn_8031041C(void* a, int lo, int hi, unsigned char* cmp);
+extern "C" void fn_8030CEB0(void* a, int n, unsigned char* cmp);
+extern "C" void fn_803103E0(void* a, int n, unsigned char* cmp);
+extern "C" void fn_8030CE84(void* a, int n) {
+    unsigned char c = 0;
+    fn_8030CEB0(a, n, &c);
+}
+#pragma push
+#pragma dont_inline on
+extern "C" void fn_8030CEB0(void* a, int n, unsigned char* cmp) {
+    if (n > 1) {
+        unsigned char c = *cmp;
+        fn_8030CEEC(a, 0, n - 1, &c);
+    }
+}
+#pragma pop
+extern "C" void fn_803103B4(void* a, int n) {
+    unsigned char c = 0;
+    fn_803103E0(a, n, &c);
+}
+#pragma push
+#pragma dont_inline on
+extern "C" void fn_803103E0(void* a, int n, unsigned char* cmp) {
+    if (n > 1) {
+        unsigned char c = *cmp;
+        fn_8031041C(a, 0, n - 1, &c);
+    }
+}
+#pragma pop

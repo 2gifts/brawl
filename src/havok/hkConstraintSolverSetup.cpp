@@ -43,3 +43,14 @@ void hkConstraintSolverSetup::oneStepIntegrate(hkEntity** entities, int count, u
 }
 
 void hkConstraintSolverSetup::shutdownSolver() {}
+
+// Function body below is taken from https://github.com/jj-link/brawl (src/havok/fn_802E09D8.cpp).
+// hkConstraintSolverSetup::internalIsMemoryOkForNewAccumulators
+extern "C" int fn_802E09D8(const char* o, int, int n) {
+    unsigned int a = *(const unsigned int*)(o + 0x4C);
+    unsigned int b = *(const unsigned int*)(o + 0xC);
+    int d = *(const int*)(o + 0x10) - (int)a;
+    if (a == b) n++;
+    if ((n << 7) > d - 0x10) return 0;
+    return 0x1000000;
+}

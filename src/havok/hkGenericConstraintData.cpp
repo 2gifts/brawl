@@ -129,3 +129,43 @@ int hkGenericConstraintData::getType() const {
 
 static hkStaticTypeInfo hkGenericConstraintDataTypeInfo("hkGenericConstraintData", hkGenericConstraintData::finishLoadedObjecthkGenericConstraintData, hkGenericConstraintData::cleanupLoadedObjecthkGenericConstraintData,
                                       hkGenericConstraintData::getVtablehkGenericConstraintData());
+
+// Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
+// instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
+// hkArray<int>::begin, hkArray<hkVector4>::begin, hkArray<hkConstraintModifier*>::begin
+extern "C" void* fn_802DD4F8(void* const* p) { return *p; }
+extern "C" void* fn_802DD500(void* const* p) { return *p; }
+extern "C" void* fn_802DD508(void* const* p) { return *p; }
+
+// Shape from https://github.com/jj-link/brawl src/havok/fn_802DC834.cpp.
+// hkRotation::operator=
+extern "C" void fn_802DC834(float* d, const float* s) {
+    d[0] = s[0];
+    d[1] = s[1];
+    d[2] = s[2];
+    d[3] = s[3];
+    d[4] = s[4];
+    d[5] = s[5];
+    d[6] = s[6];
+    d[7] = s[7];
+    d[8] = s[8];
+    d[9] = s[9];
+    d[10] = s[10];
+    d[11] = s[11];
+}
+
+// Shape from https://github.com/jj-link/brawl src/havok/fn_802DC6F8.cpp.
+// hkVector4::_setRotatedDir(const hkRotation&, const hkVector4&)
+extern "C" void fn_802DC6F8(float* out, const float* m, const float* v) {
+    float a, b, c;
+    float y = v[1];
+    float z = v[2];
+    float x = v[0];
+    a = (z * m[8]) + ((x * m[0]) + (y * m[4]));
+    b = (z * m[9]) + ((x * m[1]) + (y * m[5]));
+    c = (z * m[10]) + ((x * m[2]) + (y * m[6]));
+    out[0] = a;
+    out[1] = b;
+    out[2] = c;
+    out[3] = 0.0f;
+}
