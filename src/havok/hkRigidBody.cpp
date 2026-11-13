@@ -53,9 +53,12 @@ hkMotionState* hkRigidBody::getMotionState() {
     return &getMotion()->m_motionState;
 }
 
+#pragma push
+#pragma auto_inline off // MATCH-ONLY: kept out of line for fn_802E3284, which calls it
 void hkRigidBody::setDeactivator(hkEntityDeactivator* deactivator) {
     hkEntity::setDeactivator(deactivator);
 }
+#pragma pop
 
 void hkRigidBody::setPosition(const hkVector4& position) {
     getMotion()->setPosition(position);
@@ -122,3 +125,51 @@ extern "C" void fn_802E2378(char* collidable, const float* extents) {
     }
     *(float*)(collidable + 0x20) = 0.1f;
 }
+
+// TODO: cleanup (shape from jj-link/brawl fn_802E3284)
+// fn_802E3284: body from https://github.com/jj-link/brawl src/havok/fn_802E3284.cpp (namespaced; callees rebound to our C++ names).
+#include <types.h>
+#include <havok/hkRigidBody.h>
+#include <havok/hkSpatialRigidBodyDeactivator.h>
+namespace jj_fn_802E3284 {
+class Class_80487F38 {
+public:
+    virtual void fn_802E3814(int);
+    virtual void fn_80080A64();
+    virtual void fn_802E3958();
+    virtual void fn_802E3A90();
+    virtual int fn_802E3950();
+    unsigned short size;
+    short refs;
+};
+class SoHeapAllocator {
+public:
+    virtual void f0();
+    virtual void f1();
+    virtual void f2();
+    virtual void f3();
+    virtual Class_80487F38* alloc(int, int);
+};
+struct Owner {
+    char pad[0x68];
+    Class_80487F38* object;
+};
+extern "C" char lbl_80532FF0[16];
+extern "C" void fn_802E3284(Owner* self, int kind) {
+    if (self->object == 0 || kind != self->object->fn_802E3950()) {
+        switch (kind) {
+        case 1:
+            ((hkRigidBody*)(self))->setDeactivator((hkEntityDeactivator*)((Class_80487F38*)lbl_80532FF0));
+            break;
+        case 2:
+            Class_80487F38* p = (Class_80487F38*)new hkSpatialRigidBodyDeactivator();
+            ((hkRigidBody*)(self))->setDeactivator((hkEntityDeactivator*)(p));
+            if (p->size != 0) {
+                if (--p->refs == 0 && p != 0)
+                    p->fn_802E3814(1);
+            }
+            break;
+        }
+    }
+}
+} // namespace jj_fn_802E3284

@@ -23,6 +23,35 @@
 
 hkMoppAgent::hkMoppAgent(hkContactMgr* contactMgr) : hkBvTreeAgent(contactMgr) {}
 
+// TODO: cleanup (shape from jj-link/brawl fn_802A8E58)
+// MOPP x anything in both orders, and MOPP x MOPP (shape type 24; -1 is every type).
+void hkMoppAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
+    hkAgentFuncs af;
+    af.create = (hkAgentFunc)&hkBvTreeAgent::createBvTreeShapeAgent;
+    af.staticGetPenetrations = (hkAgentFunc)hkSymmetricAgentLinearCast_11hkMoppAgent::staticGetPenetrations;
+    af.staticGetClosestPoints = (hkAgentFunc)hkSymmetricAgentLinearCast_11hkMoppAgent::staticGetClosestPoints;
+    af.staticLinearCast = (hkAgentFunc)hkSymmetricAgentLinearCast_11hkMoppAgent::staticLinearCast;
+    af.symmetricA = true;
+    af.symmetricB = false;
+    dispatcher->registerCollisionAgent(&af, 0x18, -1);
+    hkAgentFuncs bf;
+    bf.create = (hkAgentFunc)&hkBvTreeAgent::createShapeBvAgent;
+    bf.staticGetPenetrations = (hkAgentFunc)hkBvTreeAgent::staticGetPenetrations;
+    bf.staticGetClosestPoints = (hkAgentFunc)hkBvTreeAgent::staticGetClosestPoints;
+    bf.staticLinearCast = (hkAgentFunc)hkMoppAgent::staticLinearCast;
+    bf.symmetricA = false;
+    bf.symmetricB = false;
+    dispatcher->registerCollisionAgent(&bf, -1, 0x18);
+    hkAgentFuncs cf;
+    cf.create = (hkAgentFunc)&hkMoppAgent::createBvBvAgent;
+    cf.staticGetPenetrations = (hkAgentFunc)hkBvTreeAgent::staticGetPenetrations;
+    cf.staticGetClosestPoints = (hkAgentFunc)hkBvTreeAgent::staticGetClosestPoints;
+    cf.staticLinearCast = (hkAgentFunc)hkMoppAgent::staticLinearCast;
+    cf.symmetricA = false;
+    cf.symmetricB = true;
+    dispatcher->registerCollisionAgent(&cf, 0x18, 0x18);
+}
+
 void hkSymmetricAgentLinearCast_11hkMoppAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     hkSymmetricAgentFlipBodyCollector wrap(target);
     hkMoppAgent::getPenetrations(b, a, c, &wrap);

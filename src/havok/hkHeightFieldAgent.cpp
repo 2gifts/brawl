@@ -29,6 +29,40 @@
 #include <havok/hkSymmetricAgentFlipCollectors.h>
 #include <havok/hkBvTreeAgent.h>
 
+#include <havok/hkCollisionDispatcher.h>
+
+// Height field x convex pairs in both orders (shape types 18 and 21).
+void hkHeightFieldAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
+    hkAgentFuncs af;
+    af.create = (hkAgentFunc)&hkHeightFieldAgent::createHeightFieldAAgent;
+    af.staticGetPenetrations = (hkAgentFunc)hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticGetPenetrations;
+    af.staticGetClosestPoints = (hkAgentFunc)hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticGetClosestPoints;
+    af.staticLinearCast = (hkAgentFunc)hkSymmetricAgentLinearCast_18hkHeightFieldAgent::staticLinearCast;
+    af.symmetricA = true;
+    af.symmetricB = true;
+    dispatcher->registerCollisionAgent(&af, 0x12, 0x15);
+    hkAgentFuncs bf;
+    bf.create = (hkAgentFunc)&hkHeightFieldAgent::createHeightFieldBAgent;
+    bf.staticGetPenetrations = (hkAgentFunc)hkHeightFieldAgent::staticGetPenetrations;
+    bf.staticGetClosestPoints = (hkAgentFunc)hkHeightFieldAgent::staticGetClosestPoints;
+    bf.staticLinearCast = (hkAgentFunc)hkHeightFieldAgent::staticLinearCast;
+    bf.symmetricA = false;
+    bf.symmetricB = true;
+    dispatcher->registerCollisionAgent(&bf, 0x15, 0x12);
+}
+
+// TODO: cleanup (shape from jj-link/brawl fn_802B48CC)
+hkCollisionAgent* hkHeightFieldAgent::createHeightFieldBAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                              hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkHeightFieldAgent(bodyA, bodyB, input, contactMgr);
+}
+
+// TODO: cleanup (shape from jj-link/brawl fn_802B4948)
+hkCollisionAgent* hkHeightFieldAgent::createHeightFieldAAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
+                                                              hkCollisionInput& input, hkContactMgr* contactMgr) {
+    return new hkSymmetricAgent_18hkHeightFieldAgent_(bodyB, bodyA, input, contactMgr);
+}
+
 #pragma dont_inline on
 void hkHeightFieldAgent::getPenetrations(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c, void* target) {
     staticGetPenetrations(a, b, c, target);

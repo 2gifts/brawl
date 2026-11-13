@@ -459,3 +459,126 @@ extern "C" void fn_802EB810(Obj* a, Param* p, ObjB* b) {
     }
 }
 } // namespace jj_fn_802EB810
+
+// TODO: cleanup (shape from jj-link/brawl fn_802EFD3C)
+// fn_802EFD3C: body from https://github.com/jj-link/brawl src/havok/fn_802EFD3C.cpp (namespaced; callees rebound to our C++ names).
+#include <types.h>
+#include <havok/hkWorld.h>
+namespace jj_fn_802EFD3C {
+#pragma use_lmw_stmw on
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef short s16;
+class SoHeapAllocator {
+public:
+ virtual void vf0();
+ virtual void vf1();
+ virtual void vf2();
+ virtual void vf3();
+ virtual void* alloc(int, int);
+};
+extern "C" char lbl_80487320[];
+struct Ref {
+ virtual void destroy(int);
+ u16 active;
+ s16 refs;
+ void* a;
+ void* b;
+ void* c;
+ void* d;
+};
+struct Other { void* a; void* b; };
+struct Self { u8 pad[0x68]; Other* other; Ref* ref; };
+extern "C" void fn_802EFD3C(Self* self, Ref* arg, char* flag, u8 x, u8 y) {
+ if (!arg) {
+  Ref* p = (Ref*)((SoHeapAllocator*)hkMemory::s_instance)->alloc(0x18, 0x25);
+  p->active = 0x18;
+  arg = p;
+  if (p) {
+   p->refs = 1;
+   *(void**)p = lbl_80487320;
+   p->a = lbl_80487320 + 0x10;
+   p->b = lbl_80487320 + 0x20;
+   p->c = lbl_80487320 + 0x30;
+   p->d = lbl_80487320 + 0x40;
+  }
+ } else if (arg->active) {
+  arg->refs = arg->refs + 1;
+ }
+ Ref* p = self->ref;
+ if (p->active) {
+  p->refs = p->refs - 1;
+  if (p->refs == 0 && p != 0) p->destroy(1);
+ }
+ self->ref = arg;
+ void* ptr = arg;
+ if (arg) ptr = (char*)arg + 0xc;
+ char f = *flag;
+ self->other->b = ptr;
+ if (f) ((hkWorld*)(self))->updateCollisionFilterOnWorld(x, y);
+}
+} // namespace jj_fn_802EFD3C
+
+// TODO: cleanup (shape from jj-link/brawl fn_802EB1A0)
+// fn_802EB1A0: body from https://github.com/jj-link/brawl src/havok/fn_802EB1A0.cpp (namespaced; callees rebound to our C++ names).
+#include <types.h>
+#include <havok/hkWorld.h>
+#include <havok/hkSimpleConstraintContactMgr.h>
+#include <havok/hkReportContactMgr.h>
+#include <havok/hkMemory.h>
+namespace jj_fn_802EB1A0 {
+class Alloc {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void* alloc(int size, int align);
+};
+class Object_vptr_0 {
+public:
+    virtual void slot0(int);
+    virtual void slot1();
+    virtual void slot2();
+    virtual void slot3();
+    virtual void slot4();
+    unsigned short size;
+    short refs;
+    void* unk8;
+    short pad12;
+    short unkE;
+};
+extern "C" char lbl_80488330[];
+extern "C" char lbl_80488348[];
+extern "C" void fn_802CC8DC(void*, void*, int);
+extern "C" void fn_802EB1A0(int arg0, void* arg1) {
+    Object_vptr_0* p1 = (Object_vptr_0*)new hkSimpleConstraintContactMgr::Factory((hkWorld*)arg0);
+    Object_vptr_0* p2 = (Object_vptr_0*)new hkReportContactMgr::Factory((hkWorld*)arg0);
+    Object_vptr_0* p3 = (Object_vptr_0*)((Alloc*)hkMemory::s_instance)->alloc(0x10, 4);
+    p3->size = 0x10;
+    if (p3 != 0) {
+        p3->refs = 1;
+        *(void**)p3 = lbl_80488330;
+        p3->unkE = 1;
+        p3->unk8 = lbl_80488348;
+    }
+    fn_802CC8DC(arg1, p1, 1);
+    fn_802CC8DC(arg1, p2, 2);
+    fn_802CC8DC(arg1, p3, 3);
+    if (p1->size != 0) {
+        if (--p1->refs == 0 && p1 != 0) {
+            p1->slot0(1);
+        }
+    }
+    if (p2->size != 0) {
+        if (--p2->refs == 0 && p2 != 0) {
+            p2->slot0(1);
+        }
+    }
+    if (p3->size != 0) {
+        if (--p3->refs == 0 && p3 != 0) {
+            p3->slot0(1);
+        }
+    }
+}
+} // namespace jj_fn_802EB1A0

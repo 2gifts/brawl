@@ -302,3 +302,42 @@ extern "C" void fn_8032A22C(Container* self, Flags* flags) {
     }
 }
 } // namespace jj_fn_8032A22C
+
+// TODO: cleanup (shape from jj-link/brawl fn_80326920)
+// fn_80326920: body from https://github.com/jj-link/brawl src/havok/fn_80326920.cpp (namespaced; callees rebound to our C++ names).
+#include <types.h>
+#include <havok/hkSimulation.h>
+namespace jj_fn_80326920 {
+extern "C" {
+void fn_80327DEC(s32, s32, s32);
+void fn_80327FE0(s32, s32);
+
+void fn_80326920(s32 arg0, s32 *arg1, s32 arg2, unsigned char *arg3, const unsigned char *arg4) {
+    s8 flag = *arg4;
+    ((hkSimulation*)(arg0))->hkSimulation::resetCollisionInformationForEntities((hkEntity**)((s32)arg1), (int)(arg2), (hkWorld*)(arg3), *(hkBool*)(&flag));
+    if (arg2 != 1) {
+        fn_80327DEC(arg0, (s32)arg1, arg2);
+    } else {
+        fn_80327FE0(arg0, *arg1);
+    }
+}
+}
+} // namespace jj_fn_80326920
+
+// TODO: cleanup (shape from jj-link/brawl fn_80327B5C)
+// fn_80327B5C: body from https://github.com/jj-link/brawl src/havok/fn_80327B5C.cpp (namespaced; callees rebound to our C++ names).
+#include <types.h>
+#include <havok/hkSimulation.h>
+namespace jj_fn_80327B5C {
+typedef struct {
+    int a;
+    int b;
+    int c;
+} Tmp;
+
+extern "C" Tmp lbl_80488CE8;
+
+extern "C" void fn_80327B5C(int p1, int p2, int p3, int p4) {
+    ((hkSimulation*)(p1))->processAgentsOfEntities((hkEntity**)(p2), (int)(p3), *(hkProcessCollisionInput*)(p4), *(hkSimulation::AgentEntryProcessFunction*)(&lbl_80488CE8), 0);
+}
+} // namespace jj_fn_80327B5C

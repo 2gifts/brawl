@@ -105,6 +105,8 @@ void hkVector4::setRotatedDir(const hkRotation& r, const hkVector4& v) {
 }
 
 // HYPOTHESIS: the two axis indices come from a lookup table (values unknown); the result is atan2 of two dot products.
+#pragma push
+#pragma auto_inline off // MATCH-ONLY: kept out of line for fn_802DCCC8, which calls it
 float hkGenericConstraintDataParameters::calcDeltaAngleAroundAxis(int axis, const u8* base) {
     static const int s_axisTable[] = {1, 2, 0, 1, 2};
     const u8* e1 = base + s_axisTable[axis + 1] * 0x10;
@@ -115,6 +117,7 @@ float hkGenericConstraintDataParameters::calcDeltaAngleAroundAxis(int axis, cons
               *(float*)(e1 + 0x88) * *(float*)(e1 + 0x58);
     return hkMathTypes::hkMath_atan2fApproximation(a, b);
 }
+#pragma pop
 
 hkGenericConstraintDataParameters::hkGenericConstraintDataParameters() {
 }
@@ -404,3 +407,36 @@ extern "C" void fn_802DCA2C(void*, void*, void*, void*, Context* ctx, int a, int
     ctx->count += 3;
 }
 } // namespace jj_fn_802DCA2C
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DCCC8)
+// fn_802DCCC8: body from https://github.com/jj-link/brawl src/havok/fn_802DCCC8.cpp (namespaced; callees rebound to our C++ names).
+#include <types.h>
+#include <havok/hkGenericConstraintData.h>
+namespace jj_fn_802DCCC8 {
+struct Vec { float x,y,z,w; };
+struct Context { char pad[0x50]; Vec values[6]; char pad2[8]; int count; };
+struct Work { Vec a,b; };
+extern "C" {
+extern const float lbl_805A4270, lbl_805A4278, lbl_805A427C, lbl_805A4280;
+void fn_80287FE8(void*, void*, void*);
+void fn_802DCCC8(void*, int** indices, Vec** data, void*, Context* ctx, void* a, void* b) {
+    Work work __attribute__((aligned(16)));
+    ++*indices;
+    int index = **indices;
+    work.b.w = lbl_805A4278;
+    work.a = ctx->values[index];
+    work.b.z = hkGenericConstraintDataParameters::calcDeltaAngleAroundAxis(index, (const u8*)(ctx));
+    Vec* v = *data;
+    ++*data;
+    work.b.x = v->x;
+    work.b.y = v->y;
+    if (work.b.z < lbl_805A4270 && v->z > lbl_805A4270 && v->z - work.b.z > lbl_805A427C)
+        work.b.z += lbl_805A4280;
+    if (work.b.z > lbl_805A4270 && v->z < lbl_805A4270 && work.b.z - v->z > lbl_805A427C)
+        work.b.z -= lbl_805A4280;
+    v->z = work.b.z;
+    fn_80287FE8(&work, a, b);
+    ctx->count++;
+}
+}
+} // namespace jj_fn_802DCCC8
