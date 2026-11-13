@@ -42,6 +42,8 @@ struct hkConstraintInstance : hkReferencedObject {
     // calcStatistics                                          0x0C (inherited)
     virtual void entityAddedCallback(hkEntity* entity);   // 0x10
     virtual void entityRemovedCallback(hkEntity* entity); // 0x14 (detaches the constraint, see fireEntityRemoved)
+    virtual void entityDeletedCallback(hkEntity* entity); // 0x18
+    virtual InstanceType getType() const;                 // 0x1C (TYPE_CHAIN for hkConstraintChainInstance)
     void setPriority(ConstraintPriority priority);
 
     hkConstraintData* getData() const { return m_data; }

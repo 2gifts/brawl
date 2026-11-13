@@ -190,10 +190,10 @@ struct hkArray : hkArrayBase {
         m_size--;
         ((T*)m_data)[index] = ((T*)m_data)[m_size];
     }
-    // Removes the element at index, moving the later elements down one place (order kept).
     void popBack() {
         m_size--;
     }
+    // Removes the element at index, moving the later elements down one place (order kept).
     void removeAtAndCopy(int index) {
         m_size--;
         for (int i = index; i < m_size; i++) {

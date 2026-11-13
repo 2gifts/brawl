@@ -118,9 +118,9 @@ struct hkWorld : hkReferencedObject {
     void updateCollisionFilterOnEntity(hkEntity* entity, u8 updateMode, u8 updateShapeCollections);
     void updateCollisionFilterOnPhantom(hkPhantom* phantom, u8 updateShapeCollections);
     void updateCollisionFilterOnWorld(u8 updateMode, u8 updateShapeCollections);
-    void addAction(hkAction* action);
+    hkAction* addAction(hkAction* action);
     hkConstraintInstance* addConstraint(hkConstraintInstance* constraint);
-    void removeConstraint(hkConstraintInstance* constraint);
+    hkBool removeConstraint(hkConstraintInstance* constraint);
     void addPhantomBatch(hkPhantom** phantoms, int count);
     void removePhantomBatch(hkPhantom** phantoms, int count);
     void addPhysicsSystem(hkPhysicsSystem* system);
@@ -134,6 +134,12 @@ struct hkWorld : hkReferencedObject {
     // drop one lock and, if that was the last one and something got queued meanwhile, run the queue
     // BYTES: the flag goes through hkBool's bool conversion before the negation (hkBool::operator! builds a second
     // hkBool); in the propagation-off hkContinuousSimulation::handleAllToisTill that gives extsb; neg; or; srwi.
+    bool areCriticalOperationsLocked() const {
+        return m_lockCount != 0;
+    }
+    void lockCriticalOperations() {
+        m_lockCount++;
+    }
     void unlockAndAttemptToExecutePendingOperations() {
         if (--m_lockCount == 0 && m_pendingOperationsCount != 0 && !(bool)m_unk84) {
             internal_executePendingOperations();
