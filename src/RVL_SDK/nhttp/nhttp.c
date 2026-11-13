@@ -465,7 +465,7 @@ int NHTTP_AddHeaderField(NHTTPReqHeader* req, void* bgn, const char* name, const
     return addHdrList((u8*)req + 0x30, bgn, name, value);
 }
 
-void NHTTPi_free(void* ptr) {
+static inline void nhttpFree(void* ptr) {
     NHTTPBgnEndInfo* info = (NHTTPBgnEndInfo*)NHTTPi_GetSystemInfoP();
     void (*freeFn)(void*) = info->freeFn;
     if (freeFn != 0) {
@@ -473,7 +473,7 @@ void NHTTPi_free(void* ptr) {
     }
 }
 
-void* NHTTPi_alloc(u32 size, s32 align) {
+static inline void* nhttpAlloc(u32 size, s32 align) {
     NHTTPBgnEndInfo* info = (NHTTPBgnEndInfo*)NHTTPi_GetSystemInfoP();
     void* (*alloc)(u32, s32) = info->alloc;
     if (alloc != 0) {
@@ -481,6 +481,10 @@ void* NHTTPi_alloc(u32 size, s32 align) {
     }
     return 0;
 }
+
+void NHTTPi_free(void* ptr) { nhttpFree(ptr); }
+
+void* NHTTPi_alloc(u32 size, s32 align) { return nhttpAlloc(size, align); }
 
 NHTTPLink* NHTTPi_getHdrFromList(NHTTPLink** list) {
     NHTTPLink* node = *list;
@@ -891,15 +895,12 @@ static const char nhttpStartupName[] = "NCDGetCurrentIpConfig";
 
 // NHTTPi_Startup
 int fn_803900FC(void* sys, void* alloc, void* freeFn, int priority) {
-    void* block;
     void* stack;
     NHTTPBgnEndInfo* info = (NHTTPBgnEndInfo*)NHTTPi_GetBgnEndInfoP(sys);
     void* list = NHTTPi_GetListInfoP(sys);
     int* req = (int*)NHTTPi_GetReqInfoP(sys);
     NHTTPReqListLock* mutex = (NHTTPReqListLock*)NHTTPi_GetMutexInfoP(sys);
     void* thread = NHTTPi_GetThreadInfoP(sys);
-    void* (*allocFn)(u32, s32);
-    stack = 0;
     info->alloc = alloc;
     info->freeFn = freeFn;
     info->error = 0;
@@ -910,10 +911,7 @@ int fn_803900FC(void* sys, void* alloc, void* freeFn, int priority) {
     NHTTPi_initLockReqList(mutex);
     NHTTPi_InitConnectionList();
     info->unk_7d0 = -1;
-    allocFn = (void* (*)(u32, s32))((NHTTPBgnEndInfo*)NHTTPi_GetSystemInfoP())->alloc;
-    if (allocFn != 0) {
-        stack = allocFn(0x2000, 8);
-    }
+    stack = nhttpAlloc(0x2000, 8);
     info->unk_7e0 = (s32)stack;
     if (stack == 0) {
         info->error = 1;
@@ -921,13 +919,8 @@ int fn_803900FC(void* sys, void* alloc, void* freeFn, int priority) {
         return 0;
     }
     if (fn_80390954(thread, priority, stack) == 0) {
-        void (*freeCb)(void*);
         info->error = 9;
-        block = (void*)info->unk_7e0;
-        freeCb = (void (*)(void*))((NHTTPBgnEndInfo*)NHTTPi_GetSystemInfoP())->freeFn;
-        if (freeCb != 0) {
-            freeCb(block);
-        }
+        nhttpFree((void*)info->unk_7e0);
         info->unk_7e0 = 0;
         NHTTPi_exitLockReqList();
         return 0;
@@ -3588,10 +3581,10 @@ static inline int nhttpSendAuthorization(NHTTPThreadState* thread) {
 }
 
 static inline int nhttpPostUsesMultipart(NHTTPThreadRequest* req) {
+    NHTTPHdrNode* node;
     int mode = req->postMode;
     int binary;
     if (mode == 0) {
-        NHTTPHdrNode* node;
         NHTTPHdrNode* first = req->postData;
         binary = 0;
         node = first;
@@ -4027,6 +4020,7 @@ NHTTPRequestHandle* fn_8039651C(const char* url, NHTTPReqMethod method, char* bu
                 *(void**)((u8*)conn + 0x30) = (void*)callback;
                 req->response->bufferCallback = (void*)responseCb;
                 req->response->cleanupCallback = (void*)cleanup;
+                return (NHTTPRequestHandle*)req;
             } else {
                 fn_80391784(sys, (int)req);
                 NHTTPi_OmitConnectionList((int)mutex, (int)conn);
