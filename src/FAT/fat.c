@@ -55,6 +55,32 @@ VFTimeStampCallback lbl_805A1224 = NULL;
 // Checked: without this pragma 53 functions in this unit stop matching.
 #pragma auto_inline off
 
+s32 VFiPFAPI_ParseOpenModeString(const s8* mode_str) {
+    s32 mode;
+    u32 index;
+    if (mode_str == NULL)
+        return 10;
+    index = 1;
+    switch (mode_str[0]) {
+    case 'r': mode = 2; break;
+    case 'w': mode = 1; break;
+    case 'a': mode = 4; break;
+    default: return 0;
+    }
+    if (mode_str[1] == 'b')
+        index = 2;
+    switch (mode_str[index++]) {
+    case 0: return mode;
+    case '+': break;
+    case 't':
+    default: return 0;
+    }
+    switch (mode_str[index]) {
+    case 0: return mode | 8;
+    default: return 0;
+    }
+}
+
 // ---------------------------------------------------------------- pf_clib
 
 void* fn_803A9644(void* dst, const void* src, u32 length) { // VFipf_memcpy
@@ -2101,12 +2127,11 @@ u32 VFiPFENT_compareAttr(u8 attr, u8 attr_required, u8 attr_unwanted) {
         attr = 0x40;
     }
     if (attr_required & 0x80) {
-        u8 required = attr_required & 0x7F;
-        u8 unwanted = attr_unwanted & 0x7F;
+        s32 unwanted = attr_unwanted & 0x7F;
+        s32 required = attr_required & 0x7F;
 
-        if (required != 0 && (attr & required) != required) {
-            match = 0;
-        } else if (unwanted != 0 && (attr & unwanted) == unwanted) {
+        if ((required != 0 && (attr & required) != required) ||
+            (unwanted != 0 && (attr & unwanted) == unwanted)) {
             match = 0;
         }
     } else if (attr_required != 0x7F && attr != attr_required &&
@@ -2953,9 +2978,9 @@ s32 VFiPFFAT16_WriteFATEntry(PF_VOLUME* p_vol, u32 cluster, u32 value) {
         }
     }
     offset = cluster << 1;
-    entry = vf_bswap16((u16)value);
     sector = (u16)(p_vol->bpb.active_FAT_sector + (offset >> p_vol->bpb.log2_bytes_per_sector));
     pos = (u16)(offset & (p_vol->bpb.bytes_per_sector - 1));
+    entry = ((value << 8) & 0xFF00) | ((value >> 8) & 0xFF);
     return VFiPFSEC_WriteFAT(p_vol, (const u8*)&entry, sector, pos, 2);
 }
 
@@ -2963,25 +2988,24 @@ s32 VFiPFFAT_UpdateAlternateFATEntry(PF_VOLUME* p_vol, u8* p_buf, u32 sector, u3
     u32 sectors_per_fat;
     u32 diff;
     u32 quot;
-    u32 fat_sector;
-    u32 fat_index;
     u32 num_success;
     s32 err;
     s32 result;
+    u32 fat_index;
 
     sectors_per_fat = p_vol->bpb.sectors_per_FAT;
     diff = sector - p_vol->bpb.num_reserved_sectors;
     quot = diff / sectors_per_fat;
     result = 0;
     if (quot != 0) {
-        fat_sector = diff - quot * sectors_per_fat;
+        sector = diff - quot * sectors_per_fat;
         fat_index = 0;
     } else {
-        fat_sector = sector + sectors_per_fat;
+        sector = sector + sectors_per_fat;
         fat_index = 1;
     }
     while (fat_index < p_vol->bpb.num_active_FATs) {
-        err = VFiPFDRV_lwrite(p_vol, p_buf, fat_sector, size, &num_success);
+        err = VFiPFDRV_lwrite(p_vol, p_buf, sector, size, &num_success);
         if (err != 0 && result == 0) {
             result = err;
         }
@@ -2989,7 +3013,7 @@ s32 VFiPFFAT_UpdateAlternateFATEntry(PF_VOLUME* p_vol, u8* p_buf, u32 sector, u3
             result = 0x11;
         }
         fat_index++;
-        fat_sector += p_vol->bpb.sectors_per_FAT;
+        sector += p_vol->bpb.sectors_per_FAT;
     }
     return result;
 }
@@ -4489,16 +4513,15 @@ static inline VF_HANDLE_TYPE* vfsys_file_to_handle(PF_FILE* i_file_p) {
 
 s32 VFSysGetFileSizeByFd(s32* o_size_p, PF_FILE* i_file_p) {
     PF_INFO info;
-
     *o_size_p = -1;
-    if (i_file_p == NULL) {
-        return -1;
-    }
-    if (VFipf2_finfo(i_file_p, &info) != 0) {
+    if (i_file_p != NULL) {
+        if (VFipf2_finfo(i_file_p, &info) == 0) {
+            *o_size_p = info.file_size;
+            return 0;
+        }
         return VFipf2_errnum();
     }
-    *o_size_p = info.file_size;
-    return 0;
+    return -1;
 }
 
 s32 VFSysSeekFile(PF_FILE* i_file_p, s32 i_offset, s32 i_origin) {
@@ -5694,15 +5717,14 @@ u32 VFiPFPATH_CheckExtShortNameSignature(PF_STR* p_str) {
 u32 VFiPFPATH_GetLengthFromShortname(const s8* sSrc) {
     s32 i;
     u32 length;
-    s8 c;
 
     i = 0;
     length = 0;
-    while ((c = sSrc[i]) != 0) {
-        if (i == 8 && (c != ' ' || sSrc[i + 1] != ' ' || sSrc[i + 2] != ' ')) {
+    while (sSrc[i] != 0) {
+        if (i == 8 && (sSrc[i] != ' ' || sSrc[i + 1] != ' ' || sSrc[i + 2] != ' ')) {
             length++;
         }
-        if (c != ' ') {
+        if (sSrc[i] != ' ') {
             length++;
         }
         i++;
@@ -6909,4 +6931,21 @@ s32 dHash_SearchHashW(const u16* i_Name) {
         }
     }
     return -1;
+}
+
+
+s32 VFiPFFAT_GetSectorSpecified(PF_FFD* p_ffd, u32 file_sector_index, u32 may_allocate, u32* p_sector) {
+    PF_VOLUME* p_vol;
+    s32 err;
+    u32 num_sector;
+    if (p_ffd == NULL) return 10;
+    if (p_ffd->p_hint == NULL) return 10;
+    if (p_ffd->file_version == 0) return 10;
+    if (p_ffd->p_hint->file_version > p_ffd->file_version) return 10;
+    p_vol = p_ffd->p_vol;
+    if (p_vol->drv_char < 'A' || p_vol->drv_char > 'Z') return 0x23;
+    if (file_sector_index >= ((0xFFFFFFFF >> p_vol->bpb.log2_bytes_per_sector) + 1)) return 0x25;
+    err = VFiPFFAT_GetSector(p_ffd, file_sector_index, may_allocate ? 1 : 0, 0, p_sector, &num_sector);
+    if (err != 0) return err;
+    return 0;
 }
