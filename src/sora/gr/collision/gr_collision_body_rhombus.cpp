@@ -1810,20 +1810,20 @@ int grCollisionTestRhombus::testRight(grCollisionLineWork* lineWork, float* rate
 // Snaps each corner of m_shape2 onto the one of m_shape1 when it moves less than 1e-5 (rounding noise of the interpolation),
 // then records which corners of m_shape1 and m_shape2 are identical in m_unmovedMask.
 void grCollisionTestRhombus::testCollisionSetup() {
-    Vec2f upMove = m_shape2.m_rhombus.m_upPos - m_shape1.m_rhombus.m_upPos;
-    if (upMove.length() < 0.00001f) {
+    Vec2f move = m_shape2.m_rhombus.m_upPos - m_shape1.m_rhombus.m_upPos;
+    if (move.length() < 0.00001f) {
         m_shape2.m_rhombus.m_upPos = m_shape1.m_rhombus.m_upPos;
     }
-    Vec2f downMove = m_shape2.m_rhombus.m_downPos - m_shape1.m_rhombus.m_downPos;
-    if (downMove.length() < 0.00001f) {
+    move = m_shape2.m_rhombus.m_downPos - m_shape1.m_rhombus.m_downPos;
+    if (move.length() < 0.00001f) {
         m_shape2.m_rhombus.m_downPos = m_shape1.m_rhombus.m_downPos;
     }
-    Vec2f leftMove = m_shape2.m_rhombus.m_leftPos - m_shape1.m_rhombus.m_leftPos;
-    if (leftMove.length() < 0.00001f) {
+    move = m_shape2.m_rhombus.m_leftPos - m_shape1.m_rhombus.m_leftPos;
+    if (move.length() < 0.00001f) {
         m_shape2.m_rhombus.m_leftPos = m_shape1.m_rhombus.m_leftPos;
     }
-    Vec2f rightMove = m_shape2.m_rhombus.m_rightPos - m_shape1.m_rhombus.m_rightPos;
-    if (rightMove.length() < 0.00001f) {
+    move = m_shape2.m_rhombus.m_rightPos - m_shape1.m_rhombus.m_rightPos;
+    if (move.length() < 0.00001f) {
         m_shape2.m_rhombus.m_rightPos = m_shape1.m_rhombus.m_rightPos;
     }
     m_unmovedMask = 0;
