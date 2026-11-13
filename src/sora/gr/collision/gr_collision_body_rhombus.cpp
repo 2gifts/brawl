@@ -396,20 +396,23 @@ void grCollisionTestRhombus::ajustShape() {
     float height = m_cornerOffsetUp.m_y - m_cornerOffsetDown.m_y;
     float curWidth = m_unk2bc->getWidth();
     float curHeight = m_unk2bc->getHeight();
-    if (m_unk2E4.m_x <= m_shape1.m_rhombus.m_leftPos.m_x) {
-        m_unk2E4.m_x = m_shape1.m_rhombus.m_leftPos.m_x + 0.1f;
-    } else if (m_shape1.m_rhombus.m_rightPos.m_x <= m_unk2E4.m_x) {
-        m_unk2E4.m_x = m_shape1.m_rhombus.m_rightPos.m_x - 0.1f;
+    float leftX = m_shape1.m_rhombus.m_leftPos.m_x;
+    float rightX = m_shape1.m_rhombus.m_rightPos.m_x;
+    float upY = m_shape1.m_rhombus.m_upPos.m_y;
+    float downY = m_shape1.m_rhombus.m_downPos.m_y;
+    if (m_unk2E4.m_x <= leftX) {
+        m_unk2E4.m_x = leftX + 0.1f;
+    } else if (rightX <= m_unk2E4.m_x) {
+        m_unk2E4.m_x = rightX - 0.1f;
     }
-    if (m_unk2E4.m_y <= m_shape1.m_rhombus.m_downPos.m_y) {
-        m_unk2E4.m_y = m_shape1.m_rhombus.m_downPos.m_y + 0.1f;
-    } else if (m_shape1.m_rhombus.m_upPos.m_y <= m_unk2E4.m_y) {
-        m_unk2E4.m_y = m_shape1.m_rhombus.m_upPos.m_y - 0.1f;
+    if (m_unk2E4.m_y <= downY) {
+        m_unk2E4.m_y = downY + 0.1f;
+    } else if (upY <= m_unk2E4.m_y) {
+        m_unk2E4.m_y = upY - 0.1f;
     }
     clRhombus2D* rhombus = &m_shape1.m_rhombus;
-    Vec2f center = m_unk2bc->getCenterPos();
     Vec2f space;
-    calcSpace(&center, &space);
+    calcSpace(&m_unk2bc->getCenterPos(), &space);
     // BUG: both branches of this comparison are identical in the original (one branch alone does not match).
     if (curWidth < width) {
         if (width <= space.m_x - 0.02f) {
@@ -429,24 +432,30 @@ void grCollisionTestRhombus::ajustShape() {
     if (curHeight < height) {
         if (height <= space.m_y - 0.02f) {
             if (m_collStatus->m_setting == grCollStatus::Setting_Ground) {
-                float y = rhombus->m_downPos.m_y - m_cornerOffsetDown.m_y;
+                float downOffset = m_cornerOffsetDown.m_y;
+                float y = rhombus->m_downPos.m_y - downOffset;
+                float upOffset = m_cornerOffsetUp.m_y;
                 rhombus->m_centerPos.m_y = y;
                 rhombus->m_rightPos.m_y = y;
-                rhombus->m_upPos.m_y = y + m_cornerOffsetUp.m_y;
+                rhombus->m_upPos.m_y = y + upOffset;
                 rhombus->m_leftPos.m_y = y;
             } else {
                 float y = rhombus->m_centerPos.m_y;
+                float upOffset = m_cornerOffsetUp.m_y;
+                float downOffset = m_cornerOffsetDown.m_y;
                 rhombus->m_rightPos.m_y = y;
                 rhombus->m_leftPos.m_y = y;
-                rhombus->m_downPos.m_y = y + m_cornerOffsetDown.m_y;
-                rhombus->m_upPos.m_y = y + m_cornerOffsetUp.m_y;
+                rhombus->m_downPos.m_y = y + downOffset;
+                rhombus->m_upPos.m_y = y + upOffset;
             }
         }
     } else {
-        float y = rhombus->m_downPos.m_y - m_cornerOffsetDown.m_y;
+        float downOffset = m_cornerOffsetDown.m_y;
+        float y = rhombus->m_downPos.m_y - downOffset;
+        float upOffset = m_cornerOffsetUp.m_y;
         rhombus->m_centerPos.m_y = y;
         rhombus->m_rightPos.m_y = y;
-        rhombus->m_upPos.m_y = y + m_cornerOffsetUp.m_y;
+        rhombus->m_upPos.m_y = y + upOffset;
         rhombus->m_leftPos.m_y = y;
     }
 }
