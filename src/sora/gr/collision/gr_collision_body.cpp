@@ -928,13 +928,14 @@ static inline void getSegmentCompat(grCollision* collision, clSegment2D* out, gr
 
 // MATCH-ONLY: the original inlines this into the ground, wall and ceiling tests; it has to be defined before its first use.
 // Records the hit of the shape against lineWork on side touchId when it is nearer than the one already stored for that side.
-void grCollisionTest::updateTouchLine(int touchId, grCollisionLineWork* lineWork, float rate) {
+// BYTES: the independent source permits loading the next member before storing the previous one.
+void grCollisionTest::updateTouchLine(int touchId, grCollisionLineWork* __restrict lineWork, float rate) {
     grCollTouchRecord* record = &m_touch[touchId];
     if (record->m_rate >= rate) {
         record->m_id = touchId;
         record->m_rate = rate;
         record->m_lineWork = *lineWork;
-        m_touchMask |= 1 << touchId;
+        m_touchMask |= 1 << (u8)touchId;
         if (m_hit.m_rate >= rate) {
             m_hit = *record;
         }
