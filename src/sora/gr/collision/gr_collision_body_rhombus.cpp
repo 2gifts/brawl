@@ -1463,11 +1463,6 @@ static inline bool isActiveGiven(grCollisionLineWork* lw, bool valid) {
     return active;
 }
 
-// Bytes 16 and 17 of a line (the m_noAttach.. flags and the material) as one halfword; masked with m_exclusiveLineAttr.
-static inline u16 getLineAttr(grCollisionLine* line) {
-    return *(u16*)((u8*)line + 0x10);
-}
-
 // Does the rhombus' upper corner, moving from m_shape1 to m_shape2, hit the line (a floor-less line seen from below)?
 // rate = in/out: the lowest rate of a hit so far. The corner itself is swept against the line; then the neighbour lines
 // that continue to the left / right are tested with the point where the line ends above the corner.
@@ -1673,7 +1668,7 @@ int grCollisionTestRhombus::testLeft(grCollisionLineWork* lineWork, float* rate)
         grCollisionLineWork next;
         Vec2f onLine;
         lineWork->getNext(&next);
-        if (isEnabledLineWork(&next) && lineIsUnder(&next) && (getLineAttr(next.m_collisionLine) & m_exclusiveLineAttr) == 0 &&
+        if (isEnabledLineWork(&next) && lineIsUnder(&next) && (*(u16*)((u8*)next.m_collisionLine + 0x10) & m_exclusiveLineAttr) == 0 &&
             !fn_80137114(m_collStatus, &next)) {
             from = cur->m_downPos;
             to = m_shape2.m_rhombus.m_downPos;
@@ -1773,7 +1768,7 @@ int grCollisionTestRhombus::testRight(grCollisionLineWork* lineWork, float* rate
         grCollisionLineWork prev;
         Vec2f onLine;
         lineWork->getPrev(&prev);
-        if (isEnabledLineWork(&prev) && lineIsUnder(&prev) && (getLineAttr(prev.m_collisionLine) & m_exclusiveLineAttr) == 0 &&
+        if (isEnabledLineWork(&prev) && lineIsUnder(&prev) && (*(u16*)((u8*)prev.m_collisionLine + 0x10) & m_exclusiveLineAttr) == 0 &&
             !fn_80137114(m_collStatus, &prev)) {
             from = cur->m_downPos;
             to = m_shape2.m_rhombus.m_downPos;
@@ -2148,7 +2143,7 @@ int grCollisionTestRhombus::testCollisionMoveSlatingLineMoveXLeft(grCollisionLin
 
 // 0x8012D39C: sweeps the down/right corner pair; the neighbour line is next.
 void grCollisionTestRhombus::testCollisionMoveSlatingLineMoveXRightDown(grCollisionLineWork* lineWork, float* rate) {
-    bool hit = false;
+    int hit = false;
     clRhombus2D* rhombus2 = &m_shape2.m_rhombus;
     clQuad2D quad;
     grCollSegmentEx seg;
