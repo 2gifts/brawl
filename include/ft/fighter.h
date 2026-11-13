@@ -1650,6 +1650,7 @@ public:
     void warp(Vec3f* pos, float lr, u32 showEffect);
     void setupEquipment();
 #ifdef FT_FIGHTER_FIELDS
+    void setAvailableFinal(bool isDiscretion);
     // HYPOTHESIS: zoom kind and interpolation argument follow the camera module call.
     void setZoom(bool enable, short kind, float frames);
 #endif

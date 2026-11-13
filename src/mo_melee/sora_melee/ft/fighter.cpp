@@ -20,6 +20,42 @@
 #include <ft/ft_kinetic_energy.h>
 #include <so/event/so_log_event_presenter.h>
 #include <ft/ft_util.h>
+#include <ft/robot/ft_robot_unk8.h>
+#include <st/stage.h>
+#include <nw4r/ut/ut_Color.h>
+
+void Fighter::setAvailableFinal(bool isDiscretion) {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    moduleAccesser->getWorkManageModule().onFlag(0x12000006);
+    moduleAccesser->getWorkManageModule().onFlag(0x12000008);
+    moduleAccesser->getWorkManageModule().setFlag(isDiscretion, 0x1200001e);
+    if (!moduleAccesser->getWorkManageModule().isFlag(0x1200000a) || getOwner()->getCurry() == true) {
+        moduleAccesser->getEffectModule().removeAll(8);
+        moduleAccesser->getEffectModule().reqEmit(static_cast<EfID>(0x48), 8);
+    }
+    moduleAccesser->getVisibilityModule().setStatusDefault(0, 0, true);
+    Stage* stage = g_Stage;
+    if (stage != 0) {
+        u32 color = stage->getFinalTechniqColor(getFtKind());
+        int frames = soValueAccesser::getConstantInt(moduleAccesser, 0x5a19, 0);
+        moduleAccesser->getEffectModule().fillScreen(0, frames, &nw4r::ut::Color(color), 0, 0x80);
+    }
+    moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1f71), false, false, 0);
+    if (!isDiscretion) {
+        getOwner()->addLogInt(1, 0x1e, 0);
+    }
+}
+
+// HYPOTHESIS: the same shared item-header tags emitted in the fighter article units.
+extern ftRobotUnk8 lbl_27_bss_3138;
+extern ftRobotUnk8 lbl_27_bss_3140;
+
+extern "C" void fn_27_13F1D8() {
+    lbl_27_bss_3138.unk0 = 0xff;
+    lbl_27_bss_3138.unk4 = 0;
+    lbl_27_bss_3140.unk0 = 0xff;
+    lbl_27_bss_3140.unk4 = 1;
+}
 
 void Fighter::activate() {
     StageObject::activate(&Vec3f(0.0f, 0.0f, 0.0f), 1.0f, 0.0f, false);
