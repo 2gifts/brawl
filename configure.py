@@ -1568,7 +1568,6 @@ config.libs = [
             Object(Matching, "havok/hkActionClass.cpp"),
             Object(Matching, "havok/hkMaterialClass.cpp"),
             Object(Matching, "havok/hkPropertyClass.cpp"),
-            Object(NonMatching, "havok/hk_weak_802D9AD8.cpp"),
             Object(Matching, "havok/hkConstraintAtomClasses.cpp"),
             Object(Matching, "havok/hkGenericConstraintDataClass.cpp"),
             Object(Matching, "havok/hkGenericConstraintSchemeClass.cpp"),

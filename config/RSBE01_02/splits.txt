@@ -3688,11 +3688,8 @@ havok/hkPropertyClass.cpp:
 	.sdata2     start:0x805A41E8 end:0x805A4200
 
 havok/hkConstraintAtom.cpp:
-	.text       start:0x802D95D0 end:0x802D9AD8
+	.text       start:0x802D95D0 end:0x802D9ADC
 	.ctors      start:0x804066B4 end:0x804066B8
-
-havok/hk_weak_802D9AD8.cpp:
-	.text       start:0x802D9AD8 end:0x802D9ADC
 
 havok/hkConstraintAtomClasses.cpp:
 	.text       start:0x802D9ADC end:0x802DA104
