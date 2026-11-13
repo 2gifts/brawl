@@ -450,16 +450,36 @@ void grPictchatPict007::updatePictLoopDetails(float deltaFrame) {
         Vec2f max;
         Vec2f min;
         getNodePosition(&pos, 0, "P007damage02");
-        min.m_y = pos.m_y + 45.0f;
-        max.m_y = pos.m_y - 45.0f;
-        min.m_x = pos.m_x - 40.0f;
-        max.m_x = pos.m_x + 40.0f;
+        {
+            float left;
+            float top;
+            float right;
+            float bottom;
+            top = pos.m_y + 45.0f;
+            bottom = pos.m_y - 45.0f;
+            left = pos.m_x - 40.0f;
+            right = pos.m_x + 40.0f;
+            min.m_y = top;
+            min.m_x = left;
+            max.m_x = right;
+            max.m_y = bottom;
+        }
         m_dangerZone0 = g_aiMgr->setDangerZone(&min, &max, m_dangerZone0, false, false);
         getNodePosition(&pos, 0, "P007damage05");
-        min.m_y = pos.m_y + 45.0f;
-        max.m_y = pos.m_y - 45.0f;
-        min.m_x = pos.m_x - 40.0f;
-        max.m_x = pos.m_x + 40.0f;
+        {
+            float left;
+            float top;
+            float right;
+            float bottom;
+            top = pos.m_y + 45.0f;
+            bottom = pos.m_y - 45.0f;
+            left = pos.m_x - 40.0f;
+            right = pos.m_x + 40.0f;
+            min.m_y = top;
+            min.m_x = left;
+            max.m_x = right;
+            max.m_y = bottom;
+        }
         m_dangerZone1 = g_aiMgr->setDangerZone(&min, &max, m_dangerZone1, false, false);
     }
 }
@@ -962,10 +982,12 @@ void grPictchatPict013::updatePictLoopDetails(float deltaFrame) {
     Vec2f max;
     Vec2f min;
     getNodePosition(&pos, 0, "P013damage01");
-    min.m_y = pos.m_y + 40.0f;
-    max.m_y = pos.m_y - 40.0f;
+    float top = pos.m_y + 40.0f;
+    float bottom = pos.m_y - 40.0f;
+    min.m_y = top;
     min.m_x = pos.m_x - 30.0f;
     max.m_x = pos.m_x + 60.0f;
+    max.m_y = bottom;
     m_dangerZone = g_aiMgr->setDangerZone(&min, &max, m_dangerZone, false, false);
 }
 
@@ -1278,16 +1300,36 @@ void grPictchatPict025::updatePictLoopDetails(float deltaFrame) {
             Vec2f max;
             Vec2f min;
             getNodePosition(&pos, 0, "P025damage01");
-            min.m_y = pos.m_y + 35.0f;
-            min.m_x = pos.m_x - 35.0f;
-            max.m_y = pos.m_y - 35.0f;
-            max.m_x = pos.m_x + 35.0f;
+            {
+                float left;
+                float top;
+                float right;
+                float bottom;
+                top = pos.m_y + 35.0f;
+                left = pos.m_x - 35.0f;
+                bottom = pos.m_y - 35.0f;
+                right = pos.m_x + 35.0f;
+                min.m_x = left;
+                min.m_y = top;
+                max.m_x = right;
+                max.m_y = bottom;
+            }
             m_dangerZone0 = g_aiMgr->setDangerZone(&min, &max, m_dangerZone0, false, false);
             getNodePosition(&pos, 0, "P025damage02");
-            min.m_y = pos.m_y + 35.0f;
-            min.m_x = pos.m_x - 35.0f;
-            max.m_y = pos.m_y - 35.0f;
-            max.m_x = pos.m_x + 35.0f;
+            {
+                float left;
+                float top;
+                float right;
+                float bottom;
+                top = pos.m_y + 35.0f;
+                left = pos.m_x - 35.0f;
+                bottom = pos.m_y - 35.0f;
+                right = pos.m_x + 35.0f;
+                min.m_x = left;
+                min.m_y = top;
+                max.m_x = right;
+                max.m_y = bottom;
+            }
             m_dangerZone1 = g_aiMgr->setDangerZone(&min, &max, m_dangerZone1, false, false);
         }
         break;
@@ -1385,28 +1427,68 @@ void grPictchatPict027::updatePictLoopDetails(float deltaFrame) {
         Vec2f max;
         Vec2f min;
         getNodePosition(&pos, 0, "P027damage01");
-        min.m_y = pos.m_y + 20.0f;
-        min.m_x = pos.m_x - 20.0f;
-        max.m_y = pos.m_y - 20.0f;
-        max.m_x = pos.m_x + 20.0f;
+        {
+            float left;
+            float top;
+            float right;
+            float bottom;
+            top = pos.m_y + 20.0f;
+            left = pos.m_x - 20.0f;
+            bottom = pos.m_y - 20.0f;
+            right = pos.m_x + 20.0f;
+            min.m_x = left;
+            min.m_y = top;
+            max.m_x = right;
+            max.m_y = bottom;
+        }
         m_dangerZone[0] = g_aiMgr->setDangerZone(&min, &max, m_dangerZone[0], false, false);
         getNodePosition(&pos, 0, "P027damage02");
-        min.m_y = pos.m_y + 20.0f;
-        min.m_x = pos.m_x - 20.0f;
-        max.m_y = pos.m_y - 20.0f;
-        max.m_x = pos.m_x + 20.0f;
+        {
+            float left;
+            float top;
+            float right;
+            float bottom;
+            top = pos.m_y + 20.0f;
+            left = pos.m_x - 20.0f;
+            bottom = pos.m_y - 20.0f;
+            right = pos.m_x + 20.0f;
+            min.m_x = left;
+            min.m_y = top;
+            max.m_x = right;
+            max.m_y = bottom;
+        }
         m_dangerZone[1] = g_aiMgr->setDangerZone(&min, &max, m_dangerZone[1], false, false);
         getNodePosition(&pos, 0, "P027damage03");
-        min.m_y = pos.m_y + 20.0f;
-        min.m_x = pos.m_x - 20.0f;
-        max.m_y = pos.m_y - 20.0f;
-        max.m_x = pos.m_x + 20.0f;
+        {
+            float left;
+            float top;
+            float right;
+            float bottom;
+            top = pos.m_y + 20.0f;
+            left = pos.m_x - 20.0f;
+            bottom = pos.m_y - 20.0f;
+            right = pos.m_x + 20.0f;
+            min.m_x = left;
+            min.m_y = top;
+            max.m_x = right;
+            max.m_y = bottom;
+        }
         m_dangerZone[2] = g_aiMgr->setDangerZone(&min, &max, m_dangerZone[2], false, false);
         getNodePosition(&pos, 0, "P027damage04");
-        min.m_y = pos.m_y + 20.0f;
-        min.m_x = pos.m_x - 20.0f;
-        max.m_y = pos.m_y - 20.0f;
-        max.m_x = pos.m_x + 20.0f;
+        {
+            float left;
+            float top;
+            float right;
+            float bottom;
+            top = pos.m_y + 20.0f;
+            left = pos.m_x - 20.0f;
+            bottom = pos.m_y - 20.0f;
+            right = pos.m_x + 20.0f;
+            min.m_x = left;
+            min.m_y = top;
+            max.m_x = right;
+            max.m_y = bottom;
+        }
         m_dangerZone[3] = g_aiMgr->setDangerZone(&min, &max, m_dangerZone[3], false, false);
     }
 }
