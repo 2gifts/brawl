@@ -535,44 +535,44 @@ void grPictchatPict007::setAttack1(int index) {
             switch (index) {
             case 0:
                 vector = 0;
-                offset.m_y = 0.0f;
                 offset.m_x = -20.0f;
+                offset.m_y = 0.0f;
                 offset.m_z = 0.0f;
                 break;
             case 1:
                 vector = 0;
-                offset.m_y = 0.0f;
                 offset.m_x = -20.0f;
+                offset.m_y = 0.0f;
                 offset.m_z = 0.0f;
                 break;
             case 2:
                 vector = 0;
-                offset.m_y = 0.0f;
                 offset.m_x = -20.0f;
+                offset.m_y = 0.0f;
                 offset.m_z = 0.0f;
                 break;
             case 3:
                 vector = 180;
-                offset.m_y = 0.0f;
                 offset.m_x = 20.0f;
+                offset.m_y = 0.0f;
                 offset.m_z = 0.0f;
                 break;
             case 4:
                 vector = 180;
-                offset.m_y = 0.0f;
                 offset.m_x = 20.0f;
+                offset.m_y = 0.0f;
                 offset.m_z = 0.0f;
                 break;
             case 5:
                 vector = 180;
-                offset.m_y = 0.0f;
                 offset.m_x = 20.0f;
+                offset.m_y = 0.0f;
                 offset.m_z = 0.0f;
                 break;
             default:
                 vector = 0;
-                offset.m_y = 0.0f;
                 offset.m_x = 0.0f;
+                offset.m_y = 0.0f;
                 offset.m_z = 0.0f;
                 break;
             }
@@ -698,7 +698,7 @@ void grPictchatPict009::updatePictDraw(float deltaFrame) {
 
 // The clock stops when its animation is over: the picture is erased, without waiting for the end.
 void grPictchatPict009::updatePictLoop(float deltaFrame) {
-    if (m_frameCount > getMotionFrame(0)) {
+    if (getMotionFrame(0) < m_frameCount) {
         return;
     }
     *m_pictIDWork = 0x1D;
@@ -709,7 +709,13 @@ void grPictchatPict009::updatePictLoop(float deltaFrame) {
         m_seHandle = -1;
     }
     g_sndSystem->playSE(static_cast<SndID>(0x1D1F), 0, 0, 0, -1);
-    clearJoints();
+    if (m_joints != NULL) {
+        u8 count = m_jointNum;
+        for (u32 i = 0; i != count; i++) {
+            grCollisionJoint* joint = m_joints[i];
+            joint->m_0x54_6 = joint->m_0x54_4 = joint->m_0x54_7 = false;
+        }
+    }
     (*m_pictCountWork)--;
     m_state = 4;
 }
@@ -1032,8 +1038,8 @@ void grPictchatPict013::setAttack() {
         sprintf(name, "%sdamage01", m_nodeHeader);
         if (getNodeIndex(&nodeIndex, 0, name)) {
             Vec3f offset;
-            offset.m_y = 0.0f;
             offset.m_x = 20.0f;
+            offset.m_y = 0.0f;
             offset.m_z = 0.0f;
             PICTCHAT_ATTACK(attack, 15.0f, 25, 361, 100, 75, 70, nodeIndex, soCollisionAttackData::Attribute_Fire,
                             soCollisionAttackData::Sound_Level_Large, soCollisionAttackData::Sound_Attribute_Fire,
