@@ -4037,7 +4037,7 @@ havok/hk3AxisSweep.cpp:
 	.text       start:0x8030880C end:0x80312F7C
 	.ctors      start:0x80406750 end:0x80406754
 
-havok/hk_weak_80312F7C.cpp:
+havok/hkBroadPhase.cpp:
 	extab       start:0x80008B18 end:0x80008B3C
 	extabindex  start:0x8000B9F8 end:0x8000BA10
 	.text       start:0x80312F7C end:0x80313088
@@ -4051,15 +4051,10 @@ havok/hkBroadPhaseHandleClass.cpp:
 	.bss        start:0x805332C8 end:0x805332F0
 	.sdata2     start:0x805A4648 end:0x805A4650
 
-havok/hkBroadPhase.cpp:
-	extab       start:0x80008B44 end:0x80008B4C
-	extabindex  start:0x8000BA1C end:0x8000BA28
-	.text       start:0x803130EC end:0x80313514
-
 havok/hkContinuousGsk.cpp:
-	extab       start:0x80008B4C end:0x80008B94
-	extabindex  start:0x8000BA28 end:0x8000BA94
-	.text       start:0x80313514 end:0x80315780
+	extab       start:0x80008B44 end:0x80008B94
+	extabindex  start:0x8000BA1C end:0x8000BA94
+	.text       start:0x803130EC end:0x80315780
 
 havok/hkGskManifoldUtil.cpp:
 	extab       start:0x80008B94 end:0x80008BEC
