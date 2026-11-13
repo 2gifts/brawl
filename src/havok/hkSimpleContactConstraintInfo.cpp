@@ -228,14 +228,6 @@ void hkSimpleContactConstraintDataBuildJacobian(hkSimpleContactConstraintAtom* a
 #undef absNormal
 #undef arm
 
-hkContactPoint* hkSimpleContactConstraintAtom::getContactPoints() {
-    return (hkContactPoint*)(((u32)this + 0x37) & ~0xF);
-}
-
-hkContactPointProperties* hkSimpleContactConstraintAtom::getContactPointProperties() {
-    return (hkContactPointProperties*)((u8*)getContactPoints() + (m_numReservedContactPoints << 5));
-}
-
 void hkJacobianHeaderSchema::initHeader(u32 a, u32 b, u32 c, u32 d, u32 e) {
     m_tag = 0x01010018;
     unk04 = c;

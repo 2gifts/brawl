@@ -3718,7 +3718,7 @@ havok/hkGenericConstraintSchemeClass.cpp:
 
 havok/hkSimpleContactConstraintData.cpp:
 	.text       start:0x802DD63C end:0x802DE624
-	.data       start:0x80487B48 end:0x80487BB4
+	.data       start:0x80487B10 end:0x80487BB4
 	.sdata2     start:0x805A42B8 end:0x805A42E0
 
 havok/hkConstraintDataClass.cpp:

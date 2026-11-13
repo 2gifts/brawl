@@ -21,12 +21,18 @@ struct hkSimpleContactConstraintDataInfo {
 // Simple contact constraint atom. Contact points start at the first 16-byte aligned address after 0x37;
 // the property records (0x14 bytes each) follow the reserved contact points (0x20 bytes each).
 struct hkSimpleContactConstraintAtom {
-    u8 unk00[0x04];
+    u16 m_type;                     // 0x00 (hkConstraintAtom::TYPE_CONTACT)
+    u16 m_sizeOfAllAtoms;           // 0x02 byte size of the atom with its points and properties
     u16 m_numContactPoints;         // 0x04
     u16 m_numReservedContactPoints; // 0x06
     hkSimpleContactConstraintDataInfo m_info; // 0x08
     u8 unk28[0x37 - 0x28];
 
-    hkContactPoint* getContactPoints();
-    hkContactPointProperties* getContactPointProperties();
+    // Weak copies in hkSimpleContactConstraintInfo.o (its dont_inline region); inlined everywhere else.
+    hkContactPoint* getContactPoints() {
+        return (hkContactPoint*)(((u32)this + 0x37) & ~0xF);
+    }
+    hkContactPointProperties* getContactPointProperties() {
+        return (hkContactPointProperties*)((u8*)getContactPoints() + (m_numReservedContactPoints << 5));
+    }
 };

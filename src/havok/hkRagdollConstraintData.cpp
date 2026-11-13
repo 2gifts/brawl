@@ -15,7 +15,6 @@
 #include <havok/hkRegistry.h>
 
 // Constraint info block copied from the data at 0x10 (0x12A bytes). Helper lives in another TU.
-extern "C" void fn_802DE264(void* begin, u32 size, hkConstraintInfo* info);
 
 void hkRagdollConstraintData::finishLoadedObjecthkRagdollConstraintData(void* p) {
     hkFinishLoadedObjectFlag flag;
@@ -49,7 +48,7 @@ void cleanupLoadedObjecthkRagdollConstraintData(hkRagdollConstraintData* self) {
 
 void hkRagdollConstraintData::getConstraintInfo(hkConstraintInfo* info) {
     u8* end = (u8*)this + 0x13A;
-    fn_802DE264(m_unk10, (u32)(end - m_unk10), info);
+    getConstraintInfoUtil((const hkConstraintAtom*)m_unk10, (u32)(end - m_unk10), *(ConstraintInfo*)info);
 }
 
 void hkRagdollConstraintData::getRuntimeInfo(void* unusedA, hkConstraintRuntimeInfo* out) {

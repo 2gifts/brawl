@@ -37,6 +37,6 @@ hkReportContactMgr* hkReportContactMgr::Factory::createContactMgr(const hkCollid
     return mgr;
 }
 
-void* hkDynamicsContactMgr::getConstraintInstance() {
+hkConstraintInstance* hkDynamicsContactMgr::getConstraintInstance() {
     return 0;
 }

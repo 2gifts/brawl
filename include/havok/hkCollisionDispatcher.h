@@ -54,7 +54,7 @@ struct hkCollisionQualityInfo {
     // aabb by its motion when it is set
     hkBool unk10;
     hkReal unk14[9]; // 0x14
-    u16 unk38;       // 0x38
+    u16 unk38;       // 0x38 constraint priority of the contact constraints (HYPOTHESIS: name m_constraintPriority)
 };
 
 struct hkCollisionDispatcher : hkReferencedObject {
@@ -75,10 +75,21 @@ struct hkCollisionDispatcher : hkReferencedObject {
     u8 unkE90[0xE94 - 0xE90];
     u8 m_lookupE94[0x400]; // 0xE94 lookup table for the (typeA, typeB) pair with value 1
     u8 m_lookup1294[0x400]; // 0x1294 lookup table for the reverse pair with value 1
-    u8 unk1694[0x1A28 - 0x1694];
+    u8 unk1694[0x19D4 - 0x1694];
+    // 0x19D4 collision quality index for each pair of object quality types (hkSimpleConstraintContactMgr's constructor
+    // reads [qualityA][qualityB] and takes the constraint priority from that m_collisionQualityInfo entry).
+    s8 m_collisionQualityIndex[9][9];
+    u8 unk1A25[0x1A28 - 0x1A25];
     // 0x1A28 quality settings, stride 0x3C (initCollisionQualityInfo fills entries 1 to 5, entry 0 is not written).
     hkCollisionQualityInfo m_collisionQualityInfo[6];
     u8 unk1B90[0x1C08 - 0x1B90];
+
+    int getCollisionQualityIndex(int qualityA, int qualityB) const {
+        return m_collisionQualityIndex[qualityA][qualityB];
+    }
+    hkCollisionQualityInfo* getCollisionQualityInfo(int index) {
+        return &m_collisionQualityInfo[index];
+    }
 
     hkBool hasAlternateType(int type, int alternateType) const {
         return (m_hasAlternateType[type] & (1 << alternateType)) != 0;
