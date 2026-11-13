@@ -421,6 +421,10 @@ mo_melee/sora_melee/so/controller/so_controller_impl.cpp:
 	.rodata     start:0x00000750 end:0x000007B8
 	.data       start:0x00006050 end:0x00006168
 
+mo_melee/sora_melee/so/controller/so_controller_clatter.cpp:
+	.text       start:0x0005AB60 end:0x0005AD88
+	.rodata     start:0x000007B8 end:0x000007C0
+
 mo_melee/sora_melee/so/visibility/so_visibility_module_simple.cpp:
 	.text       start:0x0005AD88 end:0x0005B248
 	.data       start:0x00006168 end:0x00006248
@@ -462,6 +466,10 @@ mo_melee/sora_melee/so/damage/so_damage_transactor_actor.cpp:
 	.text       start:0x00061EE8 end:0x00063438
 	.rodata     start:0x000008B8 end:0x000008DC
 	.data       start:0x00007100 end:0x000071A0
+
+mo_melee/sora_melee/so/damage/so_damage_util_actor.cpp:
+	.text       start:0x00063438 end:0x00063B94
+	.rodata     start:0x000008E0 end:0x000008F0
 
 mo_melee/sora_melee/so/reflect/so_reflect_module_impl.cpp:
 	.text       start:0x00063B94 end:0x000649FC
@@ -5270,6 +5278,10 @@ mo_melee/sora_melee/ft/ft_kinetic_transactor.cpp:
 	.text       start:0x0015FA20 end:0x00164BF0
 	.rodata     start:0x00001FC0 end:0x00001FF0
 	.data       start:0x0002E600 end:0x0002E748
+
+mo_melee/sora_melee/ft/ft_status_uniq_process_walk_util.cpp:
+	.text       start:0x00164BF0 end:0x0016567C
+	.rodata     start:0x00001FF0 end:0x00002018
 
 mo_melee/sora_melee/ft/ft_status_uniq_process_walk.cpp:
 	.text       start:0x0016567C end:0x00165918

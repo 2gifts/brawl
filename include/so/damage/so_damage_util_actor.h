@@ -18,4 +18,5 @@ public:
     static int calcHitStopFrame(soModuleAccesser* moduleAccesser, float power, float mul, float add, soCollisionAttackData*, int);
     // The factor comes before the flag: every caller loads the float argument before the bool.
     static int getDamageHitStopFrame(soModuleAccesser* moduleAccesser, soDamage* damage, float mul, bool unk);
+    static int getHitStopFrame(soModuleAccesser* moduleAccesser, float power, float mul);
 };
