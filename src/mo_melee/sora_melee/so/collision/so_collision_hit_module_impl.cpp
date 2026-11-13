@@ -1,3 +1,4 @@
+#define SO_COLLISION_HIT_PRESENTER_LOOKUP
 #define SO_COLLISION_HIT_MODULE_IMPL_FIELDS
 #define SO_GLOW_MODULE_ATTACK_API
 #define WN_EM_SIMPLE_GLOW_API
@@ -413,5 +414,161 @@ bool soCollisionHitModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAcces
     }
     default:
         return false;
+    }
+}
+
+static inline soCollisionHitGroup& getHitGroup(soArray<soCollisionHitGroup>* groups, u32 index) {
+    return groups->at(index);
+}
+
+int soCollisionHitModuleImpl::getWhole(u32 collisionHitGroupIndex) {
+    return getHitGroup(m_collisionHitGroupArray, collisionHitGroupIndex).getWhole();
+}
+
+int soCollisionHitModuleImpl::getGlobal(u32 collisionHitGroupIndex) {
+    return getHitGroup(m_collisionHitGroupArray, collisionHitGroupIndex).getGlobal();
+}
+
+int soCollisionHitModuleImpl::getInvincibleFrameGlobal(u32 collisionHitGroupIndex) {
+    return getHitGroup(m_collisionHitGroupArray, collisionHitGroupIndex).m_invincibleFrameGlobal;
+}
+
+
+
+
+void soCollisionHitModuleImpl::setWhole(int whole, u32 collisionHitGroupIndex) {
+    m_collisionHitGroupArray->at(collisionHitGroupIndex).setWhole(whole);
+    int totalStatus = getTotalStatus(0);
+    if (totalStatus != m_prevTotalStatus) {
+        soInstanceManagerFullProperty<soCollisionHitEventObserver*>* observerList = soEventPresenter<soCollisionHitEventObserver>::getObserverList(true);
+        for (int i = 0; i < (int)observerList->size(); i++) {
+            observerList->atIndex(i)->notifyEventChangeCollisionHit(m_prevTotalStatus, m_moduleAccesser);
+        }
+        m_prevTotalStatus = totalStatus;
+    }
+}
+
+void soCollisionHitModuleImpl::begin() {
+    if (!m_isSleep) {
+        int num = m_collisionHitGroupArray->size();
+        for (int i = 0; i < num; i++) {
+            m_collisionHitGroupArray->at(i).updateStatusGlobal();
+        }
+    }
+    unk66_0 = 0;
+    int totalStatus = getTotalStatus(0);
+    if (totalStatus != m_prevTotalStatus) {
+        soInstanceManagerFullProperty<soCollisionHitEventObserver*>* observerList = soEventPresenter<soCollisionHitEventObserver>::getObserverList(true);
+        for (int i = 0; i < (int)observerList->size(); i++) {
+            observerList->atIndex(i)->notifyEventChangeCollisionHit(m_prevTotalStatus, m_moduleAccesser);
+        }
+        m_prevTotalStatus = totalStatus;
+    }
+}
+
+void soCollisionHitModuleImpl::resetStatusGlobal(u32 collisionHitGroupIndex) {
+    m_collisionHitGroupArray->at(collisionHitGroupIndex).resetStatusGlobal();
+    int totalStatus = getTotalStatus(0);
+    if (totalStatus != m_prevTotalStatus) {
+        soInstanceManagerFullProperty<soCollisionHitEventObserver*>* observerList = soEventPresenter<soCollisionHitEventObserver>::getObserverList(true);
+        for (int i = 0; i < (int)observerList->size(); i++) {
+            observerList->atIndex(i)->notifyEventChangeCollisionHit(m_prevTotalStatus, m_moduleAccesser);
+        }
+        m_prevTotalStatus = totalStatus;
+    }
+}
+
+soCollisionHitModuleImpl::soCollisionHitModuleImpl(
+    soModuleAccesser* moduleAccesser,
+    int taskId,
+    gfTask::Category taskCategory,
+    soArray<soCollisionHitPart>* collisionHitPartArray,
+    soArray<soCollisionGroup>* collisionGroupArray,
+    soArray<soCollisionHitGroup>* collisionHitGroupArray,
+    soEventObserverRegistrationDesc* registrationDesc,
+    bool unk8) :
+    soStatusEventObserver(registrationDesc->checkStatus() == true ? static_cast<soEventManager&>(moduleAccesser->getEventManageModule()).getManageId() : (s16)-1, (s8)-1),
+    soAnimCmdEventObserver(registrationDesc->checkAnimCmd() == true ? static_cast<soEventManager&>(moduleAccesser->getEventManageModule()).getManageId() : (s16)-1, (s8)-1),
+    soEventPresenter<soCollisionHitEventObserver>(registrationDesc->checkCollisionHit() == true ? static_cast<soEventManager&>(moduleAccesser->getEventManageModule()).getManageId() : (s16)-1, 0, soEventPresenterLocalStore),
+    m_moduleAccesser(moduleAccesser),
+    m_collisionHitPartArray(collisionHitPartArray),
+    m_hitPartCount(0),
+    m_collision(taskId, taskCategory, (int)moduleAccesser->getTeamModule().getHitTeam(), 1, collisionGroupArray, false),
+    m_collisionHitGroupArray(collisionHitGroupArray) {
+    m_reactionFrame = -1;
+    m_isSleep = false;
+    unk66_2 = unk8;
+}
+
+
+void soCollisionHitModuleImpl::setXluGlobal(u32 collisionHitGroupIndex) {
+    m_collisionHitGroupArray->at(collisionHitGroupIndex).setXluGlobal();
+    int totalStatus = getTotalStatus(0);
+    if (totalStatus != m_prevTotalStatus) {
+        soInstanceManagerFullProperty<soCollisionHitEventObserver*>* observerList = soEventPresenter<soCollisionHitEventObserver>::getObserverList(true);
+        for (int i = 0; i < (int)observerList->size(); i++) {
+            observerList->atIndex(i)->notifyEventChangeCollisionHit(m_prevTotalStatus, m_moduleAccesser);
+        }
+        m_prevTotalStatus = totalStatus;
+    }
+}
+
+void soCollisionHitModuleImpl::cancelXluGlobal(u32 collisionHitGroupIndex) {
+    m_collisionHitGroupArray->at(collisionHitGroupIndex).cancelXluGlobal();
+    int totalStatus = getTotalStatus(0);
+    if (totalStatus != m_prevTotalStatus) {
+        soInstanceManagerFullProperty<soCollisionHitEventObserver*>* observerList = soEventPresenter<soCollisionHitEventObserver>::getObserverList(true);
+        for (int i = 0; i < (int)observerList->size(); i++) {
+            observerList->atIndex(i)->notifyEventChangeCollisionHit(m_prevTotalStatus, m_moduleAccesser);
+        }
+        m_prevTotalStatus = totalStatus;
+    }
+}
+
+void soCollisionHitModuleImpl::setXluFrameGlobal(int xluFrameGlobal, u32 collisionHitGroupIndex) {
+    m_collisionHitGroupArray->at(collisionHitGroupIndex).setXluFrameGlobal(xluFrameGlobal);
+    int totalStatus = getTotalStatus(0);
+    if (totalStatus != m_prevTotalStatus) {
+        soInstanceManagerFullProperty<soCollisionHitEventObserver*>* observerList = soEventPresenter<soCollisionHitEventObserver>::getObserverList(true);
+        for (int i = 0; i < (int)observerList->size(); i++) {
+            observerList->atIndex(i)->notifyEventChangeCollisionHit(m_prevTotalStatus, m_moduleAccesser);
+        }
+        m_prevTotalStatus = totalStatus;
+    }
+}
+
+void soCollisionHitModuleImpl::setInvincibleGlobal(u32 collisionHitGroupIndex) {
+    m_collisionHitGroupArray->at(collisionHitGroupIndex).setInvincibleGlobal();
+    int totalStatus = getTotalStatus(0);
+    if (totalStatus != m_prevTotalStatus) {
+        soInstanceManagerFullProperty<soCollisionHitEventObserver*>* observerList = soEventPresenter<soCollisionHitEventObserver>::getObserverList(true);
+        for (int i = 0; i < (int)observerList->size(); i++) {
+            observerList->atIndex(i)->notifyEventChangeCollisionHit(m_prevTotalStatus, m_moduleAccesser);
+        }
+        m_prevTotalStatus = totalStatus;
+    }
+}
+
+void soCollisionHitModuleImpl::cancelInvincibleGlobal(u32 collisionHitGroupIndex) {
+    m_collisionHitGroupArray->at(collisionHitGroupIndex).cancelInvincibleGlobal();
+    int totalStatus = getTotalStatus(0);
+    if (totalStatus != m_prevTotalStatus) {
+        soInstanceManagerFullProperty<soCollisionHitEventObserver*>* observerList = soEventPresenter<soCollisionHitEventObserver>::getObserverList(true);
+        for (int i = 0; i < (int)observerList->size(); i++) {
+            observerList->atIndex(i)->notifyEventChangeCollisionHit(m_prevTotalStatus, m_moduleAccesser);
+        }
+        m_prevTotalStatus = totalStatus;
+    }
+}
+
+void soCollisionHitModuleImpl::setInvincibleFrameGlobal(int invincibleFrameGlobal, bool override, u32 collisionHitGroupIndex) {
+    m_collisionHitGroupArray->at(collisionHitGroupIndex).setInvincibleFrameGlobal(invincibleFrameGlobal, override);
+    int totalStatus = getTotalStatus(0);
+    if (totalStatus != m_prevTotalStatus) {
+        soInstanceManagerFullProperty<soCollisionHitEventObserver*>* observerList = soEventPresenter<soCollisionHitEventObserver>::getObserverList(true);
+        for (int i = 0; i < (int)observerList->size(); i++) {
+            observerList->atIndex(i)->notifyEventChangeCollisionHit(m_prevTotalStatus, m_moduleAccesser);
+        }
+        m_prevTotalStatus = totalStatus;
     }
 }
