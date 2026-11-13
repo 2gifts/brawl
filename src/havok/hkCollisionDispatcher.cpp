@@ -107,3 +107,74 @@ void hkCollisionDispatcher::registerAlternateShapeType(hkShapeType primaryType, 
     si.m_primaryType = primaryType;
     si.m_alternateType = alternateType;
 }
+
+// fn_802CC8DC: body from https://github.com/jj-link/brawl src/havok/fn_802CC8DC.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_802CC8DC {
+class Class_80487298 {
+public:
+    virtual void fn_802CAD00(int);
+    unsigned short m04;
+    short m06;
+};
+
+extern "C" void fn_802CC8DC(char* self, Class_80487298* value, int index) {
+    char* column = self + index * 4;
+    char* row = self + (index << 5);
+    int i = 0;
+    do {
+        if (value->m04 != 0) {
+            value->m06++;
+        }
+        Class_80487298* old = *(Class_80487298**)(column + 0xC);
+        if (old->m04 != 0) {
+            if (--old->m06 == 0 && old != 0) {
+                old->fn_802CAD00(1);
+            }
+        }
+        *(Class_80487298**)(column + 0xC) = value;
+        if (value->m04 != 0) {
+            value->m06++;
+        }
+        old = *(Class_80487298**)(row + 0xC);
+        if (old->m04 != 0) {
+            if (--old->m06 == 0 && old != 0) {
+                old->fn_802CAD00(1);
+            }
+        }
+        i++;
+        *(Class_80487298**)(row + 0xC) = value;
+        column += 0x20;
+        row += 4;
+    } while (i < 8);
+}
+} // namespace jj_fn_802CC8DC
+
+// fn_802CC9FC: body from https://github.com/jj-link/brawl src/havok/fn_802CC9FC.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_802CC9FC {
+class Object_vptr_0 {
+public:
+    virtual void slot0();
+    virtual void slot1(int a, int b, void* c);
+    virtual void slot2(char* name, int size, void* data, unsigned int count, unsigned int flags);
+    virtual void slot3();
+    virtual void slot4();
+    virtual void slot5();
+    virtual void slot6();
+};
+
+extern "C" char lbl_80410050[];
+
+extern "C" void fn_802CC9FC(void* arg0, Object_vptr_0* obj) {
+    obj->slot1(0, 2, arg0);
+    void* data = *(void**)((char*)arg0 + 0x1C24);
+    if (data != 0) {
+        obj->slot2(lbl_80410050 + 0x147, 4, data, 0xC00, 0);
+        obj->slot2(lbl_80410050 + 0x147, 4, *(void**)((char*)arg0 + 0x1C28), 0xC00, 0);
+        obj->slot2(lbl_80410050 + 0x147, 4, *(void**)((char*)arg0 + 0x1C2C), 0xC00, 0);
+        obj->slot2(lbl_80410050 + 0x147, 4, *(void**)((char*)arg0 + 0x1C30), 0xC00, 0);
+    }
+    obj->slot6();
+}
+} // namespace jj_fn_802CC9FC

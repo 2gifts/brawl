@@ -39,3 +39,136 @@ extern "C" void fn_802FCC94(hkAgent3ProcessInput& in, hkAgent3ProcessInput& out)
     out.m_linearTimInfo(3) = in.m_linearTimInfo(3);
     out.m_aTb.setInverse(in.m_aTb);
 }
+
+// fn_802FE97C: body from https://github.com/jj-link/brawl src/havok/fn_802FE97C.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_802FE97C {
+class Class_802FE97C_Vf {
+public:
+    virtual u32 vf0(void* a, void* b, void* c, void* d, void* e);
+};
+
+extern "C" void* fn_802FE97C(u8* self, u8* rec, u32 arg2) {
+    Class_802FE97C_Vf* sub = *(Class_802FE97C_Vf**)(*(u8**)(self + 0xC) + 4);
+    u32 ret = sub->vf0(*(void**)(self + 0xC), *(void**)self, *(void**)(self + 4), *(void**)(self + 8), *(void**)(rec + 8));
+    if ((s8)(ret >> 24) != 0 && rec[0] != 0) {
+        return rec + rec[3];
+    }
+    if (rec[0] == 0) {
+        return rec + rec[3];
+    }
+    u8* base = *(u8**)(*(u8**)(self + 0xC));
+    void (*fp)(void*, u32, u32) = *(void (**)(void*, u32, u32))(base + rec[1] * 0x34 + 0x1698);
+    fp(rec, arg2, *(u32*)(self + 0x10));
+    return rec;
+}
+} // namespace jj_fn_802FE97C
+
+// fn_802FEA60: body from https://github.com/jj-link/brawl src/havok/fn_802FEA60.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_802FEA60 {
+#pragma use_lmw_stmw on
+extern "C" char lbl_80414180[];
+class Object_vptr_0 {
+public:
+ virtual void slot0();
+ virtual void slot1();
+ virtual void slot2(const char*, s32, void*, s32, s32, void*);
+ virtual void slot3(const char*, s32, void*);
+};
+extern "C" void fn_802FEA60(void* arg0, Object_vptr_0* arg1) {
+ u8* entry;
+ u8* end;
+ s32 offset = 0;
+ u8* cursor;
+ s32 size;
+ goto setup;
+scan:
+ switch (*cursor) {
+ case 1: goto finish;
+ case 6:
+  arg1->slot3(lbl_80414180, 8, *(void**)(cursor + 4));
+  cursor += cursor[3];
+  break;
+ case 0: case 2: case 3: case 4: case 5:
+  cursor += cursor[3];
+  break;
+ }
+ if (cursor < end) goto scan;
+setup:
+ entry = *(u8**)(*(u8**)arg0 + offset);
+ size = *(s32*)entry;
+ cursor = entry + 0x10;
+ end = entry + size + 0x10;
+ arg1->slot2(lbl_80414180 + 6, 8, entry, size + 0x10, 0x200, entry + size);
+ offset += 4;
+ goto scan;
+finish:;
+}
+} // namespace jj_fn_802FEA60
+
+// fn_802FC988: body from https://github.com/jj-link/brawl src/havok/fn_802FC988.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_802FC988 {
+extern "C" {
+extern "C" const float lbl_805A4560;
+}
+
+typedef void (*EntryFunc)(void*, void*, void*, float, float);
+
+extern "C" void fn_802FC988(void*** arg0, void** arg1, float farg1, float farg2) {
+    float neg = lbl_805A4560;
+    int idx = 4;
+    unsigned char* blk = (unsigned char*)**arg0;
+    unsigned char* entry = blk + 0x10;
+    unsigned char* end = (unsigned char*)((int)blk + *(int*)blk + 0x10);
+
+    for (;;) {
+        unsigned char* e = entry;
+        unsigned char* dat;
+        EntryFunc fn;
+
+        switch (e[0]) {
+        case 2:
+        case 3:
+        case 6:
+            dat = entry + 0x10;
+            entry += e[3];
+            fn = *(EntryFunc*)((char*)*arg1 + e[1] * 0x34 + 0x16b4);
+            if (fn != 0) {
+                fn(e, dat, arg1, farg1, farg2);
+            }
+            break;
+        case 4:
+        case 5:
+            dat = entry + 0x20;
+            if (*(float*)(e + 0xc) == farg1) {
+                *(float*)(e + 0xc) = farg2;
+            } else {
+                *(float*)(e + 0xc) = neg;
+            }
+            entry += e[3];
+            fn = *(EntryFunc*)((char*)*arg1 + e[1] * 0x34 + 0x16b4);
+            if (fn != 0) {
+                fn(e, dat, arg1, farg1, farg2);
+            }
+            break;
+        case 1:
+            goto done;
+        case 0:
+            entry += e[3];
+            break;
+        }
+
+        if (entry >= end) {
+            blk = (unsigned char*)*(void**)((char*)*arg0 + idx);
+            idx += 4;
+            entry = blk + 0x10;
+            blk += *(int*)blk;
+            end = blk + 0x10;
+        }
+    }
+done:
+    return;
+}
+} // namespace jj_fn_802FC988

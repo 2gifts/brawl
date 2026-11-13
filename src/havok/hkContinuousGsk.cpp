@@ -43,3 +43,36 @@ hk4dGskVertexCollidePointsInput::hk4dGskVertexCollidePointsInput() {}
 // hkTransform::getRotation (bare blr), hkMotionState::getSweptTransform (+0x40)
 extern "C" void* fn_8031351C(void* t) { return t; }
 extern "C" char* fn_80313514(char* p) { return p + 0x40; }
+
+// fn_803144D4: body from https://github.com/jj-link/brawl src/havok/fn_803144D4.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_803144D4 {
+#pragma fp_contract on
+
+struct Data {
+    char pad0[0x5c];
+    float scale;
+    char pad60[0x30];
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
+extern "C" void fn_803144D4(const Data* a, const Data* b, float* outA, float* outB, float scale) {
+    float sa = a->scale;
+    float sb = b->scale;
+    float ta = scale * sa;
+    float tb = scale * sb;
+
+    outA[0] = ta * a->x;
+    outA[1] = ta * a->y;
+    outA[2] = ta * a->z;
+    outA[3] = ta * a->w;
+
+    outB[0] = tb * b->x;
+    outB[1] = tb * b->y;
+    outB[2] = tb * b->z;
+    outB[3] = tb * b->w;
+}
+} // namespace jj_fn_803144D4

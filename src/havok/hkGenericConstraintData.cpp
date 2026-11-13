@@ -169,3 +169,228 @@ extern "C" void fn_802DC6F8(float* out, const float* m, const float* v) {
     out[2] = c;
     out[3] = 0.0f;
 }
+
+// fn_802DC764: body from https://github.com/jj-link/brawl src/havok/fn_802DC764.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_802DC764 {
+struct Context {
+    float values[8];
+    float table[0x98 / 4];
+    int count;
+};
+
+struct Work {
+    float values[12];
+};
+
+extern "C" {
+void fn_8028E4A4(void*, int, int);
+}
+
+extern "C" void fn_802DC764(void* a, void** cur, int b, int c, Context* ctx, int d, int e) {
+    Work work __attribute__((aligned(16)));
+    void* t;
+    int idx;
+    float* row;
+
+    t = *cur;
+    *cur = (char*)t + 4;
+    idx = *(int*)*cur;
+
+    row = (float*)((char*)ctx + idx * 16);
+    work.values[8] = row[8];
+    work.values[9] = row[9];
+    work.values[10] = row[10];
+    work.values[11] = row[11];
+
+    work.values[0] = ctx->values[0];
+    work.values[1] = ctx->values[1];
+    work.values[2] = ctx->values[2];
+    work.values[3] = ctx->values[3];
+    work.values[4] = ctx->values[4];
+    work.values[5] = ctx->values[5];
+    work.values[6] = ctx->values[6];
+    work.values[7] = ctx->values[7];
+
+    fn_8028E4A4(&work, d, e);
+    ctx->count += 1;
+}
+} // namespace jj_fn_802DC764
+
+// fn_802DCBD8: body from https://github.com/jj-link/brawl src/havok/fn_802DCBD8.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_802DCBD8 {
+struct Context {
+    float values[8];
+    float table[0x98 / 4];
+    int count;
+};
+
+struct Work {
+    float a[8];
+    float b[4];
+    float c[2];
+};
+
+extern "C" void fn_8028ED40(Work* w, int a, int b, void* d, void* e);
+
+extern "C" void fn_802DCBD8(void* a, void** arg1, void** arg2, void* unused, Context* ctx, int arg5, int arg6) {
+    Work work __attribute__((aligned(16)));
+    void* t;
+    void* n;
+    void* t2;
+    int idx;
+    float* row;
+
+    t = *arg1;
+    n = (char*)t + 4;
+    *arg1 = n;
+    idx = *(int*)n;
+
+    row = (float*)((char*)ctx + idx * 16);
+    work.b[0] = row[8];
+    work.b[1] = row[9];
+    work.b[2] = row[10];
+    work.b[3] = row[11];
+
+    work.a[0] = ctx->values[0];
+    work.a[1] = ctx->values[1];
+    work.a[2] = ctx->values[2];
+    work.a[3] = ctx->values[3];
+    work.a[4] = ctx->values[4];
+    work.a[5] = ctx->values[5];
+    work.a[6] = ctx->values[6];
+    work.a[7] = ctx->values[7];
+
+    t2 = *arg2;
+    *arg2 = (char*)t2 + 0x10;
+    work.c[0] = ((float*)t2)[0];
+    work.c[1] = ((float*)t2)[1];
+
+    fn_8028ED40(&work, arg5, arg6, t2, ctx);
+    ctx->count += 1;
+}
+} // namespace jj_fn_802DCBD8
+
+// fn_802DBFD0: body from https://github.com/jj-link/brawl src/havok/fn_802DBFD0.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_802DBFD0 {
+extern "C" {
+extern "C" const float lbl_805A4270;
+extern "C" const float lbl_805A4274;
+void fn_8028E4A4(void*, int, int);
+}
+
+struct Context {
+    float values[8];
+    char pad[0x98];
+    int count;
+};
+
+struct Work {
+    float values[12];
+};
+
+extern "C" void fn_802DBFD0(
+    void*, void*, void*, void*, Context* ctx, int a, int b)
+{
+    Work work __attribute__((aligned(16)));
+
+    work.values[0] = ctx->values[0];
+    work.values[1] = ctx->values[1];
+    work.values[2] = ctx->values[2];
+    work.values[3] = ctx->values[3];
+    work.values[4] = ctx->values[4];
+    work.values[5] = ctx->values[5];
+    work.values[6] = ctx->values[6];
+    work.values[7] = ctx->values[7];
+
+    work.values[11] = lbl_805A4270;
+    work.values[10] = lbl_805A4270;
+    work.values[9] = lbl_805A4270;
+    work.values[8] = lbl_805A4274;
+    fn_8028E4A4(&work, a, b);
+
+    work.values[8] = lbl_805A4270;
+    work.values[9] = lbl_805A4274;
+    fn_8028E4A4(&work, a, b);
+
+    work.values[9] = lbl_805A4270;
+    work.values[10] = lbl_805A4274;
+    fn_8028E4A4(&work, a, b);
+
+    ctx->count += 3;
+}
+} // namespace jj_fn_802DBFD0
+
+// fn_802DC898: body from https://github.com/jj-link/brawl src/havok/fn_802DC898.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_802DC898 {
+extern "C" {
+extern "C" int lbl_80487A68[];
+void fn_8028D8C0(float*, int, int, void*, void*, void*, int, void*);
+}
+extern "C" void fn_802DC898(void*, int** p, void*, void*, char* base, int i, int j) {
+    float v[12] __attribute__((aligned(16)));
+    ++*p;
+    int k = **p;
+    int a = lbl_80487A68[k + 1];
+    int b = lbl_80487A68[k + 2];
+    char* r6 = base + k * 0x10;
+    char* r7 = base + b * 0x10;
+    char* r8 = base + a * 0x10;
+    v[4] = *(float*)(r8 + 0x50);
+    v[5] = *(float*)(r8 + 0x54);
+    v[6] = *(float*)(r8 + 0x58);
+    v[7] = *(float*)(r8 + 0x5C);
+    v[0] = *(float*)(r7 + 0x50);
+    v[1] = *(float*)(r7 + 0x54);
+    v[2] = *(float*)(r7 + 0x58);
+    v[3] = *(float*)(r7 + 0x5C);
+    v[8] = *(float*)(r6 + 0x80);
+    v[9] = *(float*)(r6 + 0x84);
+    v[10] = *(float*)(r6 + 0x88);
+    v[11] = *(float*)(r6 + 0x8C);
+    fn_8028D8C0(v, i, j, r6, r7, r8, b, &lbl_80487A68);
+    float t[4] __attribute__((aligned(16)));
+    t[0] = -v[4];
+    t[1] = -v[5];
+    t[2] = -v[6];
+    t[3] = -v[7];
+    v[4] = v[0]; v[5] = v[1]; v[6] = v[2]; v[7] = v[3];
+    v[0] = t[0]; v[1] = t[1]; v[2] = t[2]; v[3] = t[3];
+    ((void (*)(float*, int, int))fn_8028D8C0)(v, i, j);
+    *(int*)(base + 0xB8) += 2;
+}
+} // namespace jj_fn_802DC898
+
+// fn_802DCA2C: body from https://github.com/jj-link/brawl src/havok/fn_802DCA2C.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_802DCA2C {
+struct Vec { float x,y,z,w; };
+struct Context {
+    char pad[0x50];
+    Vec a,b,c,d,e,f;
+    char pad2[8];
+    int count;
+};
+struct Work { Vec a,b,c; };
+extern "C" void fn_8028D8C0(Work*, int, int);
+extern "C" void fn_802DCA2C(void*, void*, void*, void*, Context* ctx, int a, int b) {
+    Work first __attribute__((aligned(16)));
+    Work second __attribute__((aligned(16)));
+    first.a = ctx->a;
+    first.c = ctx->e;
+    first.b = ctx->c;
+    fn_8028D8C0(&first, a, b);
+    second.a = ctx->b;
+    second.c = ctx->f;
+    second.b = first.a;
+    fn_8028D8C0(&second, a, b);
+    second.c = ctx->d;
+    second.b = second.a;
+    second.a = first.b;
+    fn_8028D8C0(&second, a, b);
+    ctx->count += 3;
+}
+} // namespace jj_fn_802DCA2C

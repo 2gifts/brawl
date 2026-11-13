@@ -390,3 +390,74 @@ extern "C" void fn_803103E0(void* a, int n, unsigned char* cmp) {
     }
 }
 #pragma pop
+
+// fn_8030CEEC: body from https://github.com/jj-link/brawl src/havok/fn_8030CEEC.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_8030CEEC {
+struct Pair { unsigned short key; unsigned short val; };
+struct Flag { signed char value; Flag(bool b) : value(b) {} operator bool() const { return value != 0; } };
+struct Comp {
+    Flag operator()(const Pair& a, const Pair& b) const { return (int)a.key - (int)b.key < 0; }
+};
+extern "C" void fn_8030CEEC(Pair* arr, int lo, int hi, Comp comp) {
+top:
+    Pair pivot __attribute__((aligned(16)));
+    pivot = arr[(unsigned int)(lo + hi) >> 1];
+    int j = hi;
+    int i = lo;
+    do {
+        while (comp(arr[i], pivot)) { ++i; }
+        while (comp(pivot, arr[j])) { --j; }
+        if (j >= i) {
+            if (j != i) {
+                Pair temp __attribute__((aligned(16)));
+                temp = arr[j];
+                arr[j] = arr[i];
+                arr[i] = temp;
+            }
+            --j;
+            ++i;
+        }
+    } while (i <= j);
+    if (lo < j) {
+        fn_8030CEEC(arr, lo, j, comp);
+    }
+    if (i < hi) { lo = i; goto top; }
+}
+} // namespace jj_fn_8030CEEC
+
+// fn_8031041C: body from https://github.com/jj-link/brawl src/havok/fn_8031041C.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_8031041C {
+struct Pair { unsigned short key; unsigned short val; };
+struct Flag { signed char value; Flag(bool b) : value(b) {} operator bool() const { return value != 0; } };
+struct Comp {
+    Flag operator()(const Pair& a, const Pair& b) const { return (int)a.key - (int)b.key < 0; }
+};
+
+extern "C" void fn_8031041C(Pair* arr, int lo, int hi, Comp comp) {
+top:
+    Pair pivot __attribute__((aligned(16)));
+    pivot = arr[(unsigned int)(lo + hi) >> 1];
+    int j = hi;
+    int i = lo;
+    do {
+        while (comp(arr[i], pivot)) { ++i; }
+        while (comp(pivot, arr[j])) { --j; }
+        if (j >= i) {
+            if (j != i) {
+                Pair temp __attribute__((aligned(16)));
+                temp = arr[j];
+                arr[j] = arr[i];
+                arr[i] = temp;
+            }
+            --j;
+            ++i;
+        }
+    } while (i <= j);
+    if (lo < j) {
+        fn_8031041C(arr, lo, j, comp);
+    }
+    if (i < hi) { lo = i; goto top; }
+}
+} // namespace jj_fn_8031041C

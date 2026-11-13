@@ -172,3 +172,50 @@ extern "C" void fn_802DB8B4(float* a, float* b, float** c, float* d) {
     p[7] = a[0] * s2;
     *c = p + 8;
 }
+
+// fn_802DB8B4: body from https://github.com/jj-link/brawl src/havok/fn_802DB8B4.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_802DB8B4 {
+extern "C" void fn_802DB8B4(float* a, const float* b, float** c, float* d) {
+    const float s = b[1];
+    const float s2 = b[2];
+    float* const p = *c;
+    d[1] = a[2] * s;
+    d[2] = a[3] * s;
+    d[3] = a[1];
+    d[4] = a[4];
+    d[5] = a[5];
+    d[0] = 1.0f;
+    p[7] = a[0] * s2;
+    *c = p + 8;
+}
+} // namespace jj_fn_802DB8B4
+
+// fn_802DB59C: body from https://github.com/jj-link/brawl src/havok/fn_802DB59C.cpp (namespaced; labels as in our symbols).
+#include <types.h>
+namespace jj_fn_802DB59C {
+#pragma fp_contract on
+
+extern "C" {
+
+extern "C" const float lbl_805A426C;
+
+void fn_802DB59C(float *out, float *m, float *v)
+{
+    float a, b, c;
+    float x = v[0];
+    float y = v[1];
+    float z = v[2];
+
+    a = m[12] + ((z * m[8]) + ((x * m[0]) + (y * m[4])));
+    b = m[13] + ((z * m[9]) + ((x * m[1]) + (y * m[5])));
+    c = m[14] + ((z * m[10]) + ((x * m[2]) + (y * m[6])));
+
+    out[3] = lbl_805A426C;
+    out[0] = a;
+    out[1] = b;
+    out[2] = c;
+}
+
+}
+} // namespace jj_fn_802DB59C
