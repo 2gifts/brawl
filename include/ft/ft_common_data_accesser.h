@@ -33,7 +33,13 @@ struct ftData {
     void* subactionGfxScripts;   // 0x34: threads 2 and 6
     void* subactionSfxScripts;   // 0x38: threads 3 and 7
     void* subactionOtherScripts; // 0x3C: threads 4 and 8
+#ifdef FT_FIGHTER_FIELDS
+    u8 unk40[0xC];
+    // HYPOTHESIS: node sets indexed by item hold kind, used by Fighter::attachItemHoldAnim.
+    int* itemHoldNodeSets;
+#else
     u8 unk40[0x10]; // HYPOTHESIS: possibly two bone-float tables and two bone-reference tables (0x40..0x4C in the moveset header order)
+#endif
     soAnimCmdDisguiseList* entryActionOverrides; // 0x50: per-action replacement entry scripts
     soAnimCmdDisguiseList* exitActionOverrides;  // 0x54: per-action replacement exit scripts
     union {
