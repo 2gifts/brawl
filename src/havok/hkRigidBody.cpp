@@ -27,6 +27,7 @@
 #include <havok/hkRigidBody.h>
 #include <havok/hkRegistry.h>
 #include <havok/hkWorldOperationUtil.h>
+#include <havok/hkFixedRigidMotion.h>
 #include <havok/hkWorldOperationQueue.h>
 #include <havok/hkWorldCallbackUtil.h>
 #include <havok/hkSimulation.h>
@@ -144,6 +145,8 @@ static hkStaticTypeInfo hkRigidBodyTypeInfo("hkRigidBody", hkRigidBody::finishLo
 // Shape from https://github.com/jj-link/brawl src/havok/fn_802E2378.cpp.
 // hkCollidable::estimateAllowedPenetrationDepth (inline copy): 0.2 * the smallest extent below 0.5, else 0.1.
 // TODO: cleanup (shape from jj-link/brawl fn_802E2378)
+#pragma push
+#pragma auto_inline off
 extern "C" void fn_802E2378(char* collidable, const float* extents) {
     float a = extents[1];
     float c = extents[2];
@@ -155,6 +158,66 @@ extern "C" void fn_802E2378(char* collidable, const float* extents) {
         return;
     }
     *(float*)(collidable + 0x20) = 0.1f;
+}
+#pragma pop
+
+// HYPOTHESIS: names and parameters of three unsplit helpers of this unit (createDynamicRigidMotion,
+// setDeactivator(int) and hkCollidable::estimateAllowedPenetrationDepth).
+extern "C" void fn_802E25A8(int motionType, const hkVector4& position, const hkQuaternion& rotation, hkReal mass,
+                            hkReal maxLinearVelocity, hkReal maxAngularVelocity, const hkMatrix3& inertiaTensor,
+                            const hkVector4& centerOfMass, hkMotion* motionOut);
+
+hkRigidBody::hkRigidBody(const hkRigidBodyCinfo& info) : hkEntity(info.m_shape) {
+    m_material.m_responseType = info.m_collisionResponse;
+    m_processContactCallbackDelay = info.m_processContactCallbackDelay;
+    m_collidable.m_broadPhaseHandle.m_collisionFilterInfo = info.m_collisionFilterInfo;
+
+    if (info.m_motionType == hkMotion::MOTION_FIXED) {
+        hkMotion* motion = new (&m_motion) hkFixedRigidMotion(info.m_position, info.m_rotation);
+        motion->m_motionState.m_maxLinearVelocity = info.m_maxLinearVelocity;
+        motion->m_motionState.m_maxAngularVelocity = info.m_maxAngularVelocity;
+        motion->setDeactivationClass(1);
+        m_collidable.m_motion = (hkMotion*)&m_motion.m_motionState;
+        if (info.m_allowedPenetrationDepth <= 0.0f) {
+            m_collidable.m_allowedPenetrationDepth = 3.40282e38f;
+        } else {
+            m_collidable.m_allowedPenetrationDepth = info.m_allowedPenetrationDepth;
+        }
+    } else {
+        fn_802E25A8(info.m_motionType, info.m_position, info.m_rotation, info.m_mass, info.m_maxLinearVelocity,
+                    info.m_maxAngularVelocity, info.m_inertiaTensor, info.m_centerOfMass, &m_motion);
+        m_motion.setDeactivationClass(info.m_solverDeactivation);
+        setLinearVelocity(info.m_linearVelocity);
+        setAngularVelocity(info.m_angularVelocity);
+        m_collidable.m_motion = (hkMotion*)&m_motion.m_motionState;
+        setDeactivator(info.m_rigidBodyDeactivatorType);
+        m_collidable.m_allowedPenetrationDepth = info.m_allowedPenetrationDepth;
+    }
+
+    m_motion.m_motionState.m_linearDamping = info.m_linearDamping;
+    m_motion.m_motionState.m_angularDamping = info.m_angularDamping;
+
+    if (m_collidable.m_shape) {
+        hkVector4 extents;
+        updateCachedShapeInfo(m_collidable.m_shape, &extents);
+        if (m_collidable.m_allowedPenetrationDepth <= 0.0f) {
+            fn_802E2378((char*)&m_collidable, &extents.x);
+        }
+    }
+
+    if (info.m_qualityType != hkRigidBodyCinfo::QUALITY_INVALID) {
+        m_collidable.m_broadPhaseHandle.m_objectQualityType = info.m_qualityType;
+    } else if (isFixed()) {
+        m_collidable.m_broadPhaseHandle.m_objectQualityType = 1;
+    } else if (info.m_motionType == hkMotion::MOTION_KEYFRAMED) {
+        m_collidable.m_broadPhaseHandle.m_objectQualityType = 2;
+    } else {
+        m_collidable.m_broadPhaseHandle.m_objectQualityType = 3;
+    }
+
+    m_autoRemoveLevel = info.m_autoRemoveLevel;
+    m_material.m_friction = info.m_friction;
+    m_material.m_restitution = info.m_restitution;
 }
 
 // TODO: cleanup (shape from jj-link/brawl fn_802E3284)
