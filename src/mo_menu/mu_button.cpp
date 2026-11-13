@@ -160,6 +160,7 @@ muButtonTask* muButtonTask::create(scButton* scene, Heaps::HeapType heap) {
 }
 
 muButtonTask::~muButtonTask() {
+    int i;
     if (m_work != NULL) {
         m_work->m_scene->removeAllObj();
         for (int i = 0; i < GroupNum; i++) {
@@ -171,7 +172,7 @@ muButtonTask::~muButtonTask() {
                 m_work->m_groups[i]->Destroy();
             }
         }
-        for (int i = 0; i < ObjNum; i++) {
+        for (i = 0; i < ObjNum; i++) {
             delete m_work->m_objs[i];
         }
         if (m_work->m_resButton.ptr() != NULL) {
@@ -188,7 +189,7 @@ muButtonTask::~muButtonTask() {
         }
         gfHeapManager::free(m_work);
         m_work = NULL;
-        for (int i = 0; i < 3; i++) {
+        for (i = 0; i < 3; i++) {
             m_handles[i].cancelRequest();
         }
     }
