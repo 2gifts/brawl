@@ -279,13 +279,12 @@ void grPictchatPict::updateCollision(float deltaFrame) {
             if ((ctrl = reinterpret_cast<grPictchatCollCtrl*>(m_collCtrlTbl->getData(0))) != NULL) {
                 u32 index = m_jointIndex;
                 u8 count = m_jointNum;
-                float* frame = reinterpret_cast<float*>(ctrl) + index;
+                float* frame = reinterpret_cast<float*>(ctrl);
                 while (index != count) {
-                    if (!(frame[1] < getMotionFrame(0))) {
+                    if (!(frame[index + 1] < getMotionFrame(0))) {
                         break;
                     }
                     grCollisionJoint* joint = m_joints[index];
-                    frame++;
                     index++;
                     joint->m_0x54_6 = joint->m_0x54_4 = true;
                     m_jointIndex++;
