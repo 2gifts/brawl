@@ -152,3 +152,135 @@ extern "C" void fn_8031D2B0(Obj* self) {
     }
 }
 } // namespace jj_fn_8031D2B0
+
+// fn_8031D9AC: body from https://github.com/jj-link/brawl src/havok/fn_8031D9AC.cpp (namespaced; callee rebound to our C++ name).
+#include <types.h>
+#include <havok/hkRotation.h>
+namespace jj_fn_8031D9AC {
+#pragma fp_contract on
+struct Vec4 { float x, y, z, w; };
+struct Bounds { unsigned char pad[0x40]; float v[4]; };
+struct Shape { unsigned char pad[0x14]; Vec4* first; unsigned char pad2[0x0C]; Vec4* second; unsigned char pad3[0x0C]; Vec4* third; };
+struct Obj { unsigned char pad[0x0C]; int a; int b; };
+extern "C" int fn_8031FEFC(void*, Shape*, Vec4*, int*, int*);
+extern "C" int fn_803201D8(void*, int, int, Vec4*);
+extern "C" int fn_8031D9AC(Bounds* bounds, Obj* object, Shape* shape, Vec4* point, int* result) {
+ float transformed[4] __attribute__((aligned(16)));
+ float d[3][4];
+ int first;
+ int second;
+ Vec4* p0 = shape->first;
+ d[0][0] = point->x - p0->x;
+ d[0][1] = point->y - p0->y;
+ d[0][2] = point->z - p0->z;
+ d[0][3] = point->w - p0->w;
+ Vec4* p1 = shape->second;
+ d[1][0] = point->x - p1->x;
+ d[1][1] = point->y - p1->y;
+ d[1][2] = point->z - p1->z;
+ d[1][3] = point->w - p1->w;
+ Vec4* p2 = shape->third;
+ d[2][0] = point->x - p2->x;
+ d[2][1] = point->y - p2->y;
+ d[2][2] = point->z - p2->z;
+ d[2][3] = point->w - p2->w;
+ ((hkVector4*)(transformed))->setRotatedInverseDir(*(const hkRotation*)(d[0]), *(const hkVector4*)(shape));
+ if (((transformed[0] < bounds->v[0]) << 3 | (transformed[1] < bounds->v[1]) << 2 |
+     (transformed[2] < bounds->v[2]) << 1 | (transformed[3] < bounds->v[3])) & 0xe) {
+  *result = 0; return 1;
+ }
+ first = 0;
+ if (fn_8031FEFC(object, shape, point, &first, &second)) { *result = 3; return 1; }
+ if (0x37 - object->b + object->a < first) { *result = 2; return 1; }
+ if (fn_803201D8(object, first, second, point)) { *result = 3; return 1; }
+ return 0;
+}
+} // namespace jj_fn_8031D9AC
+
+// fn_8031CD64: body from https://github.com/jj-link/brawl src/havok/fn_8031CD64.cpp (namespaced; callee rebound to our C++ name).
+#include <types.h>
+#include <havok/hkRotation.h>
+#include <havok/hkTransform.h>
+namespace jj_fn_8031CD64 {
+struct V4 {
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
+struct Out {
+    short a;
+    short b;
+    unsigned short c;
+    unsigned short d;
+    unsigned char e;
+    unsigned char f;
+    unsigned char g;
+    unsigned char h;
+};
+
+struct Iface {
+    virtual void s0() = 0;
+    virtual void s1() = 0;
+    virtual void s2() = 0;
+    virtual void s3() = 0;
+    virtual void s4() = 0;
+    virtual void s5() = 0;
+    virtual void s6() = 0;
+    virtual void s7() = 0;
+    virtual void s8() = 0;
+    virtual void s9() = 0;
+    virtual void get2(V4* a, V4* b) = 0;
+    virtual void s11() = 0;
+    virtual void get1(V4* a) = 0;
+    virtual int get0() = 0;
+};
+
+struct Frame {
+    V4 v10;
+    V4 v20;
+    V4 v30;
+    V4 v40;
+    V4 v50;
+    V4 v60;
+    V4 v70;
+} __attribute__((aligned(16)));
+
+
+extern "C" void fn_8031CD64(Out* arg0, Iface* arg1, Iface* arg2, int arg3) {
+    Frame f;
+
+    arg1->get1(&f.v70);
+    arg2->get1(&f.v60);
+    ((hkVector4*)(&f.v50))->setTransformedPos(*(const hkTransform*)(arg3), *(const hkVector4*)(&f.v60));
+
+    f.v40.x = f.v50.x - f.v70.x;
+    f.v40.y = f.v50.y - f.v70.y;
+    f.v40.z = f.v50.z - f.v70.z;
+    f.v40.w = f.v50.w - f.v70.w;
+
+    arg1->get2(&f.v40, &f.v30);
+    arg0->a = (short)*(int*)&f.v30.w;
+
+    f.v40.x = f.v50.x - f.v30.x;
+    f.v40.y = f.v50.y - f.v30.y;
+    f.v40.z = f.v50.z - f.v30.z;
+    f.v40.w = f.v50.w - f.v30.w;
+    ((hkVector4*)(&f.v20))->setRotatedInverseDir(*(const hkRotation*)(arg3), *(const hkVector4*)(&f.v40));
+
+    f.v20.x = -f.v20.x;
+    f.v20.y = -f.v20.y;
+    f.v20.z = -f.v20.z;
+    f.v20.w = -f.v20.w;
+
+    arg2->get2(&f.v20, &f.v10);
+    arg0->b = (short)*(int*)&f.v10.w;
+    arg0->c = 0xFFFF;
+    arg0->d = 0xFFFF;
+    arg0->e = 1;
+    arg0->f = 1;
+    arg0->g = (unsigned char)arg1->get0();
+    arg0->h = (unsigned char)arg2->get0();
+}
+} // namespace jj_fn_8031CD64
