@@ -1662,9 +1662,9 @@ void muNameTask::makeNameList() {
 
 // Takes the line of the name with the number out of the list.
 bool muNameTask::deleteNameID(int nameNo) {
-    muNameSlot* slot = m_slots;
-    for (int i = 0; i < m_slotCount; i++, slot++) {
-        int id = static_cast<u16>(slot->m_nameNo + 2) > 1 ? static_cast<int>(slot->m_nameNo) : -1;
+    muNameSlot* slots = m_slots;
+    for (int i = 0; i < m_slotCount; i++) {
+        int id = static_cast<u16>(slots[i].m_nameNo + 2) > 1 ? static_cast<int>(slots[i].m_nameNo) : -1;
         if (nameNo == id) {
             deleteName(i);
             updateAll();
