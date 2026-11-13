@@ -3842,11 +3842,8 @@ havok/hkSpatialRigidBodyDeactivatorClass.cpp:
 	.rodata     start:0x80412DC8 end:0x80412F78
 	.bss        start:0x80533068 end:0x805330B0
 
-havok/hk_entity_callback_util_part0.cpp:
-	.text       start:0x802E3CD4 end:0x802E4044
-
-havok/hk_entity_callback_util.cpp:
-	.text       start:0x802E4044 end:0x802E4338
+havok/hkEntityCallbackUtil.cpp:
+	.text       start:0x802E3CD4 end:0x802E4338
 
 havok/hkMotion.cpp:
 	.text       start:0x802E4338 end:0x802E46B0
