@@ -50,7 +50,7 @@ extern "C" void fn_6_1ECC(muCollectionViewer* viewer);
 extern "C" void fn_6_1CC0(muCollectionViewer* viewer, const u8* table, int count);
 extern "C" int fn_6_308C(muCollectionViewer* viewer, int* cursor);
 // muCollectionViewer::createNoticeWindow(text), controlLoadStart() and controlLoading()
-extern "C" void fn_6_535C(muCollectionViewer* viewer, void* text);
+extern "C" void fn_6_535C(muCollectionViewer* viewer, const char* text, int size);
 extern "C" void fn_6_5F24(muCollectionViewer* viewer);
 extern "C" void fn_6_5F9C(muCollectionViewer* viewer);
 // the summary of a file of the collection
@@ -257,7 +257,7 @@ void muReplayTask::onDecided() {
             void* data = m_work->m_msgFile[2].m_handle.getBuffer();
             getPrintIndexData__7MessageFPvUlPPcPUl(data, 0x3A, &label.m_text, &label.m_size);
             notice.append(label.m_text, label.m_size);
-            fn_6_535C(this, &notice);
+            fn_6_535C(this, notice.m_data, notice.m_size);
         } else {
             m_work->m_state = 4;
             MuObject* object = m_work->m_objs[24];
