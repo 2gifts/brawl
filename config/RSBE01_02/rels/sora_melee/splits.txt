@@ -5663,6 +5663,10 @@ mo_melee/sora_melee/ft/ft_status_uniq_process_item_swing.cpp:
 	.data       start:0x00030558 end:0x000305D0
 	.bss        start:0x00004BD0 end:0x00004BE0
 
+mo_melee/sora_melee/ft/ft_status_uniq_process_shoot.cpp:
+	.text       start:0x0017DE50 end:0x0017F598
+	.rodata     start:0x000023B0 end:0x000023D8
+
 mo_melee/sora_melee/ft/ft_status_uniq_process_test_motion.cpp:
 	.text       start:0x0017F598 end:0x0017F608
 	.ctors      start:0x00000168 end:0x0000016C
@@ -12289,7 +12293,7 @@ mo_melee/sora_melee/ft/ft_metaknight_status_uniq_process_special_nspin.cpp:
 	.ctors      start:0x0000045C end:0x00000460
 
 mo_melee/sora_melee/wn/wn_pit_bow.cpp:
-	.text       start:0x0035AD08 end:0x0035C5E0
+	.text       start:0x0035AD08 end:0x0035D9F8
 	.ctors      start:0x00000460 end:0x00000464
 
 mo_melee/sora_melee/wn/wn_pit_bow_arrow.cpp:
