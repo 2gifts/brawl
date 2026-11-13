@@ -134,7 +134,7 @@ void grPictchatPict::updateJoint(float deltaFrame) {
                                     u32 nodeIndex;
                                     strcpy(name, "");
                                     if (m_pictID == 0x14) {
-                                        sprintf(name, "%s%s%.2d", m_nodeHeader, "collision", static_cast<int>(0.5 * n) + 1);
+                                        sprintf(name, "%s%s%.2d", m_nodeHeader, "collision", static_cast<int>(0.5f * n) + 1);
                                     } else {
                                         sprintf(name, "%s%s%.2d", m_nodeHeader, "collision", n + 1);
                                     }
@@ -901,17 +901,19 @@ void grPictchatPict013::updateYakumono(float deltaFrame) {
 void grPictchatPict013::updatePictWait(float deltaFrame) {
     if (*m_pictIDWork == m_pictID) {
         *m_pictCountWork = m_pictCount;
-        u8 type = m_type;
-        if (type == 3) {
-            m_posBombWork->m_x = -75.0f - randf() * 25.0f;
-            m_posBombWork->m_y = randf() * 15.0f + 40.0f;
-            m_rot.m_y = 180.0f;
-            m_speedX = randf() * 0.15f + 0.1f;
-        } else if (type < 3 && type > 1) {
+        switch (m_type) {
+        case 2:
             m_posBombWork->m_x = randf() * 25.0f + 75.0f;
             m_posBombWork->m_y = randf() * 20.0f + 10.0f;
             m_rot.m_y = 0.0f;
             m_speedX = -0.1f - randf() * 0.15f;
+            break;
+        case 3:
+            m_posBombWork->m_x = -75.0f - randf() * 25.0f;
+            m_posBombWork->m_y = randf() * 15.0f + 40.0f;
+            m_rot.m_y = 180.0f;
+            m_speedX = randf() * 0.15f + 0.1f;
+            break;
         }
         setMotion(0, false, true, &m_frameCount);
         setVisibility(1);
