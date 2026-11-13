@@ -139,9 +139,11 @@ void hkEntity::addCollisionListener(hkCollisionListener* listener) {
     }
 }
 
-// HYPOTHESIS: the activity bits are returned in the top byte.
-u32 hkEntity::isActive() const {
-    return (u32)getActivationState() << 24;
+// HYPOTHESIS: the activity bits are returned as the hkBool (not normalised to 0/1).
+hkBool hkEntity::isActive() const {
+    hkBool active;
+    active.m_bool = getActivationState();
+    return active;
 }
 
 void hkEntity::activate() {

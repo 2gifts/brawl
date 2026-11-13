@@ -73,7 +73,7 @@ struct hkEntity : hkWorldObject {
     void setDeactivator(hkEntityDeactivator* deactivator);
     void addEntityListener(hkEntityListener* listener);
     void addCollisionListener(hkCollisionListener* listener);
-    u32 isActive() const;
+    hkBool isActive() const;
     void activate();
     void deactivate();
     int getNumConstraints() const;
