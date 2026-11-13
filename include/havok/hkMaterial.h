@@ -16,4 +16,8 @@ struct hkMaterial {
     s8 m_responseType;    // 0x00 (ResponseType)
     hkReal m_friction;    // 0x04
     hkReal m_restitution; // 0x08
+
+    // The response type is left unset.
+    hkMaterial() : m_friction(0.5f), m_restitution(0.4f) {}
+    hkMaterial(hkFinishLoadedObjectFlag) {}
 };

@@ -62,9 +62,17 @@ const void* hkEntity::getVtablehkEntity() {
 }
 #pragma pop
 
+hkEntity::hkEntity(hkShape* shape) : hkWorldObject(shape, BROAD_PHASE_ENTITY) {
+    m_storageIndex = 0xFFFF;
+    m_simulationIsland = NULL;
+    m_deactivator = NULL;
+    m_uid = 0xFFFFFFFF;
+    m_solverData = 0;
+}
+
 // The motion is loaded as raw bytes: rebuild the object of its type in place so it gets its vtable back.
 // Dynamic (type 1) motions are not rebuilt.
-hkEntity::hkEntity(hkFinishLoadedObjectFlag flag) : hkWorldObject(flag), m_motion(flag) {
+hkEntity::hkEntity(hkFinishLoadedObjectFlag flag) : hkWorldObject(flag), m_material(flag), m_motion(flag) {
     if (flag.m_finishing) {
         switch (m_motion.m_type) {
         case hkMotion::MOTION_SPHERE_INERTIA:
