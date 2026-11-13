@@ -233,7 +233,13 @@ void grPictchatPict::updatePictLoop(float deltaFrame) {
         g_sndSystem->playSE(static_cast<SndID>(0x1D1F), 0, 0, 0, -1);
         clearAttackAll();
         setEnableCollisionStatus(false);
-        clearJoints();
+        if (m_joints != NULL) {
+            u8 count = m_jointNum;
+            for (u32 i = 0; i != count; i++) {
+                grCollisionJoint* joint = m_joints[i];
+                joint->m_0x54_6 = joint->m_0x54_4 = joint->m_0x54_7 = false;
+            }
+        }
         (*m_pictCountWork)--;
         m_state = 4;
     } else {
@@ -639,24 +645,27 @@ void grPictchatPict008::updatePictDraw(float deltaFrame) {
 
 // The spring goes down and up on the stage state (0 start the push, 1 wait, 2 on, 3 up again).
 void grPictchatPict008::updatePictLoop(float deltaFrame) {
-    u8 state = *m_stateWork;
-    if (state != 2) {
-        if (state < 2) {
-            if (state == 0) {
-                setMotion(1, false, false, &m_frameCount);
-                *m_stateWork = 1;
-            } else if (!(getMotionFrame(0) < m_frameCount - 5.0f)) {
-                setEnableCollisionStatus(false);
-                m_snd.playSE(static_cast<SndID>(0x1D20), 0, 0, -1);
-                m_snd.setPos(m_posSpringWork);
-                *m_stateWork = 2;
-            }
-        } else if (state < 4 && !(getMotionFrame(0) < m_frameCount)) {
+    switch (*m_stateWork) {
+    case 0:
+        setMotion(1, false, false, &m_frameCount);
+        *m_stateWork = 1;
+        break;
+    case 1:
+        if (getMotionFrame(0) >= m_frameCount - 5.0f) {
+            setEnableCollisionStatus(false);
+            m_snd.playSE(static_cast<SndID>(0x1D20), 0, 0, -1);
+            m_snd.setPos(m_posSpringWork);
+            *m_stateWork = 2;
+        }
+        break;
+    case 3:
+        if (getMotionFrame(0) >= m_frameCount) {
             setMotion(0, false, true, &m_frameCount);
             setMotionFrame(m_frameCount, 0);
             setEnableCollisionStatus(true);
             *m_stateWork = 5;
         }
+        break;
     }
     if (*m_pictIDWork == 0x1D && *m_stateWork == 5) {
         setMotion(2, false, true, &m_frameCount);
