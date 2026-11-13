@@ -7540,3 +7540,398 @@ s32 VFiPFFAT_WriteCluster(PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32 next_
     }
     return 0;
 }
+
+s32 VFipdm_disk_get_handle(PDM_INIT_DISK* p_init_disk_tbl, PDM_DISK** pp_disk, u16* p_disk_no, u16* p_handle_no) {
+    u16 handle_no;
+    u16 free_no;
+    PDM_DISK* free_disk;
+    u16 disk_no;
+
+    *pp_disk = NULL;
+    free_disk = NULL;
+    free_no = 0;
+    for (handle_no = 0; handle_no < 26; handle_no++) {
+        if (lbl_8053A6E0.disk_handle[handle_no].handle == NULL) break;
+    }
+    if (handle_no >= 26) return 8;
+    *p_handle_no = handle_no;
+    for (disk_no = 0; disk_no < 26; disk_no++) {
+        if (!(lbl_8053A6E0.disk[disk_no].status & 1)) {
+            if (free_disk == NULL) {
+                free_disk = &lbl_8053A6E0.disk[disk_no];
+                free_no = disk_no;
+            }
+        } else if (lbl_8053A6E0.disk[disk_no].p_init_disk_tbl->p_func == p_init_disk_tbl->p_func &&
+                   p_init_disk_tbl->ui_ext == lbl_8053A6E0.disk[disk_no].p_init_disk_tbl->ui_ext) {
+            *pp_disk = &lbl_8053A6E0.disk[disk_no];
+            *p_disk_no = disk_no;
+            return 0;
+        }
+    }
+    if (free_disk == NULL) return 8;
+    p_init_disk_tbl->p_func(&free_disk->disk_tbl, p_init_disk_tbl->ui_ext);
+    free_disk->p_init_disk_tbl = p_init_disk_tbl;
+    free_disk->status |= 1;
+    lbl_8053A6E0.num_allocated_disk++;
+    *pp_disk = free_disk;
+    *p_disk_no = free_no;
+    return 0;
+}
+
+s32 VFipdm_part_release_permission(PDM_PARTITION* p_part, u32 mode) {
+    u32 index;
+    s32 err;
+    PDM_PARTITION* p_entry;
+    s32 result = 0;
+
+    if (p_part == NULL) return 1;
+    index = (u32)p_part & 0xFF;
+    err = pdm_part_check_handle((u32)p_part);
+    if (err != 0) return err;
+    p_entry = &lbl_8053A6E0.partition[index];
+    if (!(p_entry->status & 2)) return 14;
+    err = VFipdm_disk_set_disk(p_entry->p_disk, p_part);
+    if (err != 0) return err;
+    err = VFipdm_disk_release_part_permission(p_entry->p_disk, mode);
+    if (err != 0) result = err;
+    if (result == 0 || mode == 1) {
+        p_entry->status &= ~2;
+        p_entry->status &= ~0x18;
+    }
+    return result;
+}
+
+s32 VFipdm_part_get_permission(PDM_PARTITION* p_part) {
+    u32 index;
+    PDM_PARTITION* p_entry;
+    PDM_DISK_INFO info;
+    s32 err;
+
+    if (p_part == NULL) return 1;
+    index = (u32)p_part & 0xFF;
+    err = pdm_part_check_handle((u32)p_part);
+    if (err != 0) return err;
+    p_entry = &lbl_8053A6E0.partition[index];
+    if (!(p_entry->status & 2)) {
+        err = VFipdm_disk_set_disk(p_entry->p_disk, p_part);
+        if (err != 0) return err;
+        err = VFipdm_disk_get_part_permission(p_entry->p_disk);
+        if (err != 0) return err;
+        err = VFipdm_disk_get_media_information(p_entry->p_disk, &info);
+        if (err != 0) {
+            VFipdm_disk_release_part_permission(p_entry->p_disk, 1);
+            return err;
+        }
+        if (info.media_attr & 1) p_entry->status |= 0x10;
+        else p_entry->status &= ~0x10;
+        err = VFipdm_part_get_start_sector(p_entry);
+        if (err != 0) {
+            VFipdm_disk_release_part_permission(p_entry->p_disk, 1);
+            return err;
+        }
+    } else return 13;
+    p_entry->status |= 2;
+    p_entry->status &= ~8;
+    return 0;
+}
+
+static inline s32 pdm_disk_find_handle(u32 handle, PDM_DISK* p_disk, u16* p_handle_no) {
+    u16 i;
+    for (i = 0; i < 26; i++) {
+        if (lbl_8053A6E0.disk_handle[i].handle == p_disk && (handle >> 16) == lbl_8053A6E0.disk_handle[i].signature) break;
+    }
+    if (i >= 26) return 1;
+    *p_handle_no = i;
+    return 0;
+}
+
+s32 fn_803ABA30(PDM_DISK* p_disk) {
+    u32 index;
+    s32 err;
+    u16 handle_no;
+    PDM_DISK* p_entry;
+    u32 status;
+
+    if (p_disk == NULL) return 1;
+    index = (u32)p_disk & 0xFF;
+    err = pdm_disk_check_handle((u32)p_disk);
+    if (err != 0) return err;
+    p_entry = &lbl_8053A6E0.disk[index];
+    status = p_entry->status;
+    if (!(status & 1)) return 13;
+    if ((status & 2) == 2) return 13;
+    err = pdm_disk_find_handle((u32)p_disk, p_entry, &handle_no);
+    if (err != 0) return err;
+    if (p_entry->open_disk_cnt == 1) {
+        err = p_entry->disk_tbl.p_func->finalize(p_disk);
+        if (err != 0) {
+            if (p_entry->p_cur_part != NULL) VFipdm_part_set_driver_error_code(p_entry->p_cur_part, err);
+            return 21;
+        }
+    }
+    if (p_entry->open_disk_cnt == 1) {
+        p_entry->status &= ~1;
+        lbl_8053A6E0.num_allocated_disk--;
+    }
+    p_entry->open_disk_cnt--;
+    lbl_8053A6E0.disk_handle[handle_no].handle = NULL;
+    return 0;
+}
+
+s32 VFiPFCACHE_DoReadPageAndFlushIfNeeded(PF_VOLUME* p_vol, PF_CACHE_PAGE** pp_head, u32 sector, PF_CACHE_PAGE** pp_page, u32 set_sig) {
+    u32 num_success;
+    u32 is_hit;
+    s32 err;
+    PF_CACHE_PAGE* p_page;
+    u32 is_modified = 1;
+
+    err = VFiPFCACHE_DoAllocatePage(p_vol, pp_head, sector, pp_page, &is_hit);
+    if (err != 0) {
+        return err;
+    }
+    if (is_hit == 0) {
+        p_page = *pp_page;
+        err = VFiPFDRV_lread(p_vol, p_page->buffer, p_page->sector, p_page->size, &num_success);
+        if (err != 0) {
+            pfcache_free_page(pp_head, *pp_page);
+            return err;
+        }
+        p_page = *pp_page;
+        if (num_success != p_page->size && p_vol->bpb.total_sectors != p_page->sector + num_success) {
+            pfcache_free_page(pp_head, p_page);
+            return 0x11;
+        }
+        p_page->stat = p_page->stat & ~2;
+        (*pp_page)->p_mod_sbuf = NULL;
+        (*pp_page)->p_mod_ebuf = NULL;
+        if (set_sig != 0) {
+            (*pp_page)->signature = p_vol->cache.signature;
+        } else {
+            (*pp_page)->signature = NULL;
+        }
+    } else if (set_sig != 0 && ((*pp_page)->stat & 2) && (p_vol->cache.mode & 2) &&
+               (*pp_page)->signature != p_vol->cache.signature) {
+        p_page = *pp_page;
+        if (p_page != NULL && (p_page->stat & 2) && p_page->sector != 0xFFFFFFFF) is_modified = 1;
+        err = VFiPFCACHE_FlushPageIfNeeded(p_vol, p_page);
+        if (err != 0) {
+            *pp_page = NULL;
+            return err;
+        }
+        if (is_modified != 0) {
+            if (dCommon_FlushFromVol(p_vol, 1) != 0) return 17;
+        }
+    }
+    return 0;
+}
+
+static inline s32 pfvol_mount_if_needed(PF_VOLUME* p_vol) {
+    s32 err;
+    if (!(p_vol->flags & 2)) {
+        err = VFiPFVOL_DoMountVolume(p_vol);
+        if (err != 0) return err;
+        p_vol->fsi_flag &= ~7;
+        lbl_8053B248.num_mounted_volumes++;
+    }
+    return 0;
+}
+
+static inline void pfvol_discard_media(PF_VOLUME* p_vol) {
+    VFiPFFILE_FinalizeAllFiles(p_vol);
+    VFiPFDIR_FinalizeAllDirs(p_vol);
+    VFiPFCACHE_FreeAllCaches(p_vol);
+    pfvol_release_driver(p_vol, 1);
+    lbl_8053B248.num_mounted_volumes--;
+}
+
+static inline s32 pfvol_check_media(PF_VOLUME* p_vol) {
+    s32 err;
+    if (VFiPFDRV_IsInserted(p_vol)) {
+        if (VFiPFDRV_IsDetected(p_vol)) {
+            if (p_vol->flags & 2) pfvol_discard_media(p_vol);
+            err = pfvol_mount_if_needed(p_vol);
+            if (err != 0) return err;
+        }
+    } else if (p_vol->flags & 2) {
+        if (VFiPFDRV_IsDetected(p_vol)) pfvol_discard_media(p_vol);
+        p_vol->flags &= ~2;
+    }
+    return 0;
+}
+
+s32 VFiPFVOL_CheckForRead(PF_VOLUME* p_vol) {
+    s32 err;
+    if (p_vol == NULL) return 10;
+    err = pfvol_check_media(p_vol);
+    if (err != 0) return err;
+    return (p_vol->flags & 2) ? 0 : 9;
+}
+
+s32 VFiPFVOL_CheckForWrite(PF_VOLUME* p_vol) {
+    s32 err;
+    if (p_vol == NULL) return 10;
+    err = pfvol_check_media(p_vol);
+    if (err != 0) return err;
+    if (!(p_vol->flags & 2)) return 9;
+    return VFiPFDRV_IsWProtected(p_vol) ? 11 : 0;
+}
+
+// HYPOTHESIS: slot zero is the fallback context; this build has no additional slots.
+static inline u32 pfvol_context_active(s32 context_id) {
+    u32 i;
+    for (i = 1; i < 1; i++) {
+        if ((lbl_8053B248.context[i].stat &= 1) && context_id == lbl_8053B248.context[i].context_id) return 1;
+    }
+    return 0;
+}
+
+void VFiPFVOL_SetCurrentVolume(PF_VOLUME* p_vol) {
+    s32 context_id;
+    u32 i;
+    VFiPFSYS_GetCurrentContextID(&context_id);
+    for (i = 1; i < 1; i++) {
+        if ((lbl_8053B248.current_vol[i].stat & 1) && context_id == lbl_8053B248.current_vol[i].context_id) {
+            lbl_8053B248.current_vol[i].p_vol = p_vol;
+            break;
+        }
+    }
+    if (i == 1 && pfvol_context_active(context_id)) {
+        for (i = 1; i < 1; i++) {
+            if (!(lbl_8053B248.current_vol[i].stat & 1)) {
+                lbl_8053B248.current_vol[i].stat |= 1;
+                lbl_8053B248.current_vol[i].context_id = context_id;
+                lbl_8053B248.current_vol[i].p_vol = p_vol;
+                break;
+            }
+        }
+    }
+    lbl_8053B248.current_vol[0].p_vol = p_vol;
+}
+
+PF_VOLUME* VFiPFVOL_GetCurrentVolume(void) {
+    PF_VOLUME* p_vol = NULL;
+    s32 context_id;
+    u32 i;
+    VFiPFSYS_GetCurrentContextID(&context_id);
+    for (i = 1; i < 1; i++) {
+        if ((lbl_8053B248.current_vol[i].stat & 1) && context_id == lbl_8053B248.current_vol[i].context_id) {
+            p_vol = lbl_8053B248.current_vol[i].p_vol;
+            break;
+        }
+    }
+    if (i == 1) {
+        if (pfvol_context_active(context_id)) {
+            for (i = 1; i < 1; i++) {
+                if (!(lbl_8053B248.current_vol[i].stat & 1)) {
+                    lbl_8053B248.current_vol[i].stat |= 1;
+                    lbl_8053B248.current_vol[i].context_id = context_id;
+                    p_vol = lbl_8053B248.current_vol[i].p_vol;
+                    break;
+                }
+            }
+        } else p_vol = lbl_8053B248.current_vol[0].p_vol;
+    }
+    return p_vol;
+}
+
+s32 VFiPFVOL_GetCurrentDir(PF_VOLUME* p_vol, PF_DIR_ENT* p_current_dir) {
+    s32 context_id;
+    u32 i;
+    if (p_vol == NULL) return 10;
+    if (!(p_vol->flags & 2)) return 9;
+    VFiPFSYS_GetCurrentContextID(&context_id);
+    for (i = 1; i < 1; i++) {
+        if ((p_vol->current_dir[i].stat & 1) && context_id == p_vol->current_dir[i].context_id) {
+            *p_current_dir = p_vol->current_dir[i].directory;
+            break;
+        }
+    }
+    if (i == 1) {
+        if (pfvol_context_active(context_id)) {
+            for (i = 1; i < 1; i++) {
+                if (!(p_vol->current_dir[i].stat & 1)) {
+                    p_vol->current_dir[i].stat |= 1;
+                    p_vol->current_dir[i].context_id = context_id;
+                    *p_current_dir = p_vol->current_dir[i].directory;
+                    break;
+                }
+            }
+        } else *p_current_dir = p_vol->current_dir[0].directory;
+    }
+    return 0;
+}
+
+s32 fn_803C1054(PF_VOLUME* p_vol, PF_DIR_ENT* p_current_dir) {
+    s32 context_id;
+    u32 i;
+    if (p_vol == NULL) return 10;
+    if (!(p_vol->flags & 2)) return 9;
+    VFiPFSYS_GetCurrentContextID(&context_id);
+    for (i = 1; i < 1; i++) {
+        if ((p_vol->current_dir[i].stat & 1) && context_id == p_vol->current_dir[i].context_id) {
+            p_vol->current_dir[i].directory = *p_current_dir;
+            break;
+        }
+    }
+    if (i == 1 && pfvol_context_active(context_id)) {
+        for (i = 1; i < 1; i++) {
+            if (!(p_vol->current_dir[i].stat & 1)) {
+                p_vol->current_dir[i].stat |= 1;
+                p_vol->current_dir[i].context_id = context_id;
+                p_vol->current_dir[i].directory = *p_current_dir;
+                break;
+            }
+        }
+    }
+    p_vol->current_dir[0].directory = *p_current_dir;
+    return 0;
+}
+
+s32 fn_803C093C(PF_VOLUME* p_vol, const u8* param) {
+    s32 err;
+    u32 mounted = 0;
+    u32 cache_mode = 0;
+    u16 fsi_flag = 0;
+    u32 num_free;
+
+    if (p_vol == NULL) return 10;
+    if (VFiPFDRV_IsWProtected(p_vol)) return 11;
+    err = VFiPFDRV_format(p_vol, param);
+    if (err != 0) return err;
+    if (p_vol->flags & 2) {
+        cache_mode = p_vol->cache.mode;
+        fsi_flag = p_vol->fsi_flag;
+        mounted = 1;
+        VFiPFCACHE_FreeAllCaches(p_vol);
+        err = VFiPFVOL_p_unmount(p_vol, 0);
+        if (err != 0) return err;
+    }
+    err = pfvol_mount_if_needed(p_vol);
+    if (err != 0) return err;
+    if (mounted == 1) {
+        p_vol->cache.mode = cache_mode;
+        p_vol->fsi_flag = fsi_flag;
+    }
+    if (p_vol->flags & 0x20) {
+        if (p_vol->bpb.fat_type == FAT_32 && (p_vol->fsi_flag & 2)) {
+            p_vol->fsi_flag |= 4;
+            fn_803B80F0(p_vol);
+        } else {
+            p_vol->fsi_flag &= ~4;
+            if (p_vol->bpb.fat_type != FAT_32) p_vol->fsi_flag &= ~3;
+            err = VFiPFFAT_CountFreeClusters(p_vol, &num_free);
+            if (err != 0) return err;
+        }
+        return 0;
+    }
+    err = VFiPFFAT_InitFATRegion(p_vol);
+    if (err != 0) return err;
+    err = VFiPFENT_MakeRootDir(p_vol);
+    if (err != 0) return err;
+    if (p_vol->bpb.fat_type != FAT_32) p_vol->fsi_flag &= ~3;
+    if (p_vol->bpb.fat_type == FAT_32 && (p_vol->fsi_flag & 2)) {
+        err = fn_803B80F0(p_vol);
+        if (err != 0) return err;
+    }
+    return 0;
+}
