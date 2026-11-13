@@ -819,7 +819,7 @@ void stMetalgear::selectSnow() {
     stMetalgearData* data = static_cast<stMetalgearData*>(m_stageData);
     m_snow = 3;
     if (data != NULL) {
-        float total = data->unk0C + data->unk08 + data->unk00 + data->unk04;
+        float total = data->unk0C + (data->unk08 + (data->unk00 + data->unk04));
         float chance3 = data->unk0C / total;
         float chance2 = data->unk08 / total;
         float chance1 = data->unk04 / total;
