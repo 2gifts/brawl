@@ -1279,8 +1279,10 @@ void BaseItem::throwAttack(float lr, Vec3f* velocity, float powerMulStatus) {
         if (v->workManage.isFlag(0x22000000) &&
             (v->intWork.at(8) & 0x4C00) == 0) {
             Vec2f arg;
-            arg.m_y = speed.m_y;
-            arg.m_x = speed.m_x;
+            float y = speed.m_y;
+            float x = speed.m_x;
+            arg.m_y = y;
+            arg.m_x = x;
             v->attack.setSpeed(&arg);
             v->attack.setSpeedPowerAdd(itValueAccesserGlobal.getFloat(&moduleAccesser, 0xD6F, 0));
             v->attack.setSpeedPowerMul(itValueAccesserGlobal.getFloat(&moduleAccesser, 0xD70, 0));
