@@ -6776,6 +6776,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/so/damage/so_damage_util_actor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_walk_util.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_status_uniq_process_shoot.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/wn/wn_snake_trenchmortar_bullet_status_uniq_process_fly.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/so/kinetic/so_kinetic_module_generic_impl.cpp"),
         ],
     },
     {

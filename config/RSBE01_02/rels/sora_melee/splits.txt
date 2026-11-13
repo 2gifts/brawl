@@ -1719,6 +1719,10 @@ mo_melee/sora_melee/so/shadow/so_shadow_module_impl.cpp:
 	.rodata     start:0x00000E00 end:0x00000E28
 	.data       start:0x000171D8 end:0x000172C0
 
+mo_melee/sora_melee/so/kinetic/so_kinetic_module_generic_impl.cpp:
+	.text       start:0x000B6DBC end:0x000B7148
+	.data       start:0x000172C0 end:0x0001735C
+
 mo_melee/sora_melee/so/so_kinetic_energy_ground_movement.cpp:
 	.text       start:0x000B7148 end:0x000B7634
 	.rodata     start:0x00000E28 end:0x00000E40
@@ -12641,6 +12645,10 @@ mo_melee/sora_melee/wn/wn_snake_trenchmortar_bullet.cpp:
 	.rodata     start:0x00007F78 end:0x00007F90
 	.data       start:0x0009F730 end:0x0009FC40
 	.bss        start:0x00008B58 end:0x00008B78
+
+mo_melee/sora_melee/wn/wn_snake_trenchmortar_bullet_status_uniq_process_fly.cpp:
+	.text       start:0x003B0DC4 end:0x003B1050
+	.rodata     start:0x00007F90 end:0x00007FA0
 
 mo_melee/sora_melee/wn/wn_snake_rgb6sight.cpp:
 	.text       start:0x003B1050 end:0x003B3280

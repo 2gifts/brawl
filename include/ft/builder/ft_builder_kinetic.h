@@ -24,7 +24,16 @@ typedef soInstanceManagerFullPropertyVector<soKineticEnergy*, 12> ftKineticEnerg
 class soKineticModuleGenericImpl : public soKineticModuleImpl, public soStatusEventObserver {
 public:
     soKineticModuleGenericImpl(soModuleAccesser* acc, ftKineticEnergyManager* manager, void* mediator);
-    void* m_mediator; // +0x2c (HYPOTHESIS)
+    // The overrides forward to the mediator first (so_kinetic_module_generic_impl.cpp).
+    virtual void eraseEnergy(int index);
+    virtual void eraseEnergyAll();
+    virtual void updateEnergy(soModuleAccesser* moduleAccesser, soKineticEnergy::AttributeFlag flag);
+    virtual void changeKinetic(int kineticType, soModuleAccesser* moduleAccesser);
+    virtual void addSpeed(Vec3f* speed, soModuleAccesser* moduleAccesser);
+    virtual void addSpeedOutside(soKineticEnergy::OutsideType type, Vec3f* speed);
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData,
+                                         soModuleAccesser* moduleAccesser);
+    soKineticMediator* m_mediator; // +0x2c
 };
 
 // sora_melee: the fighter specific part of the mediator work. HYPOTHESIS: parameter types.
