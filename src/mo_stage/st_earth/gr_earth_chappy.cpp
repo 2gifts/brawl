@@ -768,10 +768,7 @@ void grEarthChappy::makeItemInMouth() {
         pos.m_y += 10.0f;
         itManager* items = itManager::getInstance();
         if (items != NULL) {
-            ItemKind kind;
-            kind.m_kind = static_cast<itKind>(*reinterpret_cast<int*>(reinterpret_cast<u8*>(lbl_27_bss_5668) + 0x44));
-            kind.m_variation = 0;
-            items->lotCreateItem(reinterpret_cast<itGenSheetKind&>(kind), static_cast<itGenId>(2), &pos, -1, -1, static_cast<itKind>(-1));
+            grEarthLotCreateStageItem(items, static_cast<itGenId>(2), &pos);
         }
     }
 }
