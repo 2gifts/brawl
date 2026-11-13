@@ -1391,24 +1391,26 @@ void grCollisionTest::testAttached() {
 int grCollisionTest::checkCloud() {
     int result = 0;
     bool valid = isValidLineWork(m_hit.m_lineWork);
-    grCollStatus* status = m_collStatus;
-    if (valid && m_hit.m_lineWork.m_collisionLine->m_isCloud) {
-        switch (m_hit.m_id) {
-        case 0:
-            status->m_unk = m_unk2bc->getTopPos();
-            break;
-        case 1:
-            status->m_unk = m_unk2bc->getLeftPos();
-            break;
-        case 2:
-            status->m_unk = m_unk2bc->getRightPos();
-            break;
-        case 3:
-        default:
-            status->m_unk = m_unk2bc->getDownPos();
-            break;
+    if (valid) {
+        grCollStatus* status = m_collStatus;
+        if (m_hit.m_lineWork.m_collisionLine->m_isCloud) {
+            switch (m_hit.m_id) {
+            case 0:
+                status->m_unk = m_unk2bc->getTopPos();
+                break;
+            case 1:
+                status->m_unk = m_unk2bc->getLeftPos();
+                break;
+            case 2:
+                status->m_unk = m_unk2bc->getRightPos();
+                break;
+            case 3:
+            default:
+                status->m_unk = m_unk2bc->getDownPos();
+                break;
+            }
+            result = 1;
         }
-        result = 1;
     }
     return result;
 }
@@ -3599,9 +3601,10 @@ int grCollisionTest::testCollisionMainAir() {
     m_preIgnoreNum = 0;
     m_unk8 = 1.0f;
     m_unkC_3 = false;
+    int remaining;
     int result = testCollisionMainAirSub();
     u8 id = m_hit.m_id;
-    int remaining = 2;
+    remaining = 2;
     while (id != 0xFF) {
         if ((m_touchMask & 0xC0) == 0xC0) {
             // both lower corners: narrow the shape around its center and test again
@@ -3637,8 +3640,9 @@ int grCollisionTest::testCollisionMainAir() {
         m_unk2c4->set(*m_unk2c0);
     }
     if (m_touch[3].m_id == 0xFF) {
+        grCollisionLineWork* lineWork;
         u16 num = m_preIgnoreNum;
-        grCollisionLineWork* lineWork = m_preIgnoreLines;
+        lineWork = m_preIgnoreLines;
         for (u32 i = 0; i < num; i++) {
             fn_80137074(m_collStatus, lineWork);
             lineWork++;
