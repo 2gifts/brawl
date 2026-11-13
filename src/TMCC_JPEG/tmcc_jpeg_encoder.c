@@ -1264,3 +1264,235 @@ int fn_8026B3D8(TMCC_UsrParam* usr, u8* outBuf, int unused, TMCC_InitParam* para
 
 
 
+
+void TMCC_JPEGENC_PutStreamWithCheck(TMCC_Bitstream* bs, int bits, int len) {
+    const u8* masks = sBitMasks;
+    int val = *bs->cur;
+    int rem = bs->unk8;
+    while (len > rem) {
+        val |= (bits >> (len - rem)) & masks[rem];
+        *bs->cur++ = val;
+        if ((u32)(bs->cur - bs->start) >= (u32)bs->capacity) {
+            bs->overflow = 1;
+            bs->total += bs->cur - bs->start;
+            bs->cur = bs->start;
+        }
+        if (val == 0xFF) {
+            *bs->cur++ = 0;
+            if ((u32)(bs->cur - bs->start) >= (u32)bs->capacity) {
+                bs->overflow = 1;
+                bs->total += bs->cur - bs->start;
+                bs->cur = bs->start;
+            }
+        }
+        len -= rem;
+        rem = 8;
+        val = 0;
+    }
+    if (len == rem) {
+        val |= bits & sBitMasks[len];
+        bs->unk8 = 8;
+        *bs->cur++ = val;
+        if ((u32)(bs->cur - bs->start) >= (u32)bs->capacity) {
+            bs->overflow = 1;
+            bs->total += bs->cur - bs->start;
+            bs->cur = bs->start;
+        }
+        if (val == 0xFF) {
+            *bs->cur++ = 0;
+            if ((u32)(bs->cur - bs->start) >= (u32)bs->capacity) {
+                bs->overflow = 1;
+                bs->total += bs->cur - bs->start;
+                bs->cur = bs->start;
+            }
+        }
+        *bs->cur = 0;
+    } else {
+        rem -= len;
+        *bs->cur = val | ((bits & sBitMasks[len]) << rem);
+        bs->unk8 = rem;
+    }
+}
+
+int fn_80269C98(TMCC_Encoder* enc, TMCC_UsrParam* usr, int count) {
+    TMCC_ImageInfo* img = &enc->img;
+    int x;
+    int y;
+    int w;
+    int h;
+    int total;
+    int done = 0;
+    int rst;
+    int ret;
+
+    w = img->width - 1;
+    rst = enc->unk14;
+    h = img->height - 1;
+    y = img->unk6;
+    total = img->width * img->height;
+    x = img->unk4;
+
+    while (y < h && done < count) {
+        while (x < w && done < count) {
+            ret = enc->compFn(x, y, img);
+            if (ret < 0) {
+                return ret;
+            }
+            done--;
+            x++;
+            if (--rst == 0) {
+                TMCC_JPEGENC_enc_restart_interval(enc);
+                rst = enc->unk10;
+            }
+        }
+        if (done < count) {
+            ret = enc->edgeFn(x, y, 0, img);
+            if (ret < 0) {
+                return ret;
+            }
+            x = 0;
+            done--;
+            y++;
+            if (--rst == 0) {
+                TMCC_JPEGENC_enc_restart_interval(enc);
+                rst = enc->unk10;
+            }
+        }
+    }
+    while (x < w && done < count) {
+        ret = enc->edgeFn(x, y, 1, img);
+        if (ret < 0) {
+            return ret;
+        }
+        done--;
+        x++;
+        if (--rst == 0) {
+            TMCC_JPEGENC_enc_restart_interval(enc);
+            rst = enc->unk10;
+        }
+    }
+    if (done < count) {
+        ret = enc->edgeFn(x, y, 2, img);
+        if (ret < 0) {
+            return ret;
+        }
+        x = 0;
+        y++;
+        if (--rst == 0) {
+            TMCC_JPEGENC_enc_restart_interval(enc);
+            rst = enc->unk10;
+        }
+        fn_80269508(&enc->outStream);
+        if (enc->outStream.overflow != 0) {
+            TMCC_JPEGENC_Get_bitstream(&enc->outStream, &usr->unk10);
+            return -3;
+        }
+    }
+    img->unk4 = x;
+    usr->unkC = x;
+    img->unk6 = y;
+    usr->unkE = y;
+    enc->unk14 = rst;
+    TMCC_JPEGENC_Get_bitstream(&enc->outStream, &usr->unk10);
+    return total - x - y * img->width;
+}
+
+int fn_8026D53C(TMCC_Encoder* enc, TMCC_UsrParam* usr, int count, int limit) {
+    TMCC_ImageInfo* img = &enc->img;
+    int x;
+    int y;
+    int w;
+    int h;
+    int total;
+    int done = 0;
+    int rst;
+    int skip = 0;
+    int ret;
+
+    w = img->width - 1;
+    rst = enc->unk14;
+    h = img->height - 1;
+    y = img->unk6;
+    total = img->width * img->height;
+    x = img->unk4;
+
+    while (y < h && done < count) {
+        while (x < w && done < count) {
+            if (++skip >= limit) {
+                ret = enc->compFn(x, y, img);
+                if (ret < 0) {
+                    return ret;
+                }
+                skip = 0;
+                fn_8026D514(&enc->outStream, &usr->unk10);
+            }
+            done--;
+            x++;
+            if (--rst == 0) {
+                TMCC_JPEGENC_PutRstMarkerRC(enc);
+                rst = enc->unk10;
+            }
+        }
+        if (done < count) {
+            if (++skip >= limit) {
+                ret = enc->edgeFn(x, y, 0, img);
+                if (ret < 0) {
+                    return ret;
+                }
+                skip = 0;
+                fn_8026D514(&enc->outStream, &usr->unk10);
+            }
+            x = 0;
+            done--;
+            y++;
+            if (--rst == 0) {
+                TMCC_JPEGENC_PutRstMarkerRC(enc);
+                rst = enc->unk10;
+            }
+        }
+    }
+    while (x < w && done < count) {
+        if (++skip >= limit) {
+            ret = enc->edgeFn(x, y, 1, img);
+            if (ret < 0) {
+                return ret;
+            }
+            skip = 0;
+            fn_8026D514(&enc->outStream, &usr->unk10);
+        }
+        done--;
+        x++;
+        if (--rst == 0) {
+            TMCC_JPEGENC_PutRstMarkerRC(enc);
+            rst = enc->unk10;
+        }
+    }
+    if (done < count) {
+        if (++skip >= limit) {
+            ret = enc->edgeFn(x, y, 2, img);
+            if (ret < 0) {
+                return ret;
+            }
+            skip = 0;
+            fn_8026D514(&enc->outStream, &usr->unk10);
+        }
+        x = 0;
+        y++;
+        if (--rst == 0) {
+            TMCC_JPEGENC_PutRstMarkerRC(enc);
+            rst = enc->unk10;
+        }
+        TMCC_JPEGENC_CountMarker(enc);
+        if (enc->outStream.overflow != 0) {
+            fn_8026D514(&enc->outStream, &usr->unk10);
+            return -3;
+        }
+    }
+    img->unk4 = x;
+    usr->unkC = x;
+    img->unk6 = y;
+    usr->unkE = y;
+    enc->unk14 = rst;
+    fn_8026D514(&enc->outStream, &usr->unk10);
+    return total - x - y * img->width;
+}
