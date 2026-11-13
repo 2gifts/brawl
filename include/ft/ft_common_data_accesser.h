@@ -41,6 +41,9 @@ struct ftData {
         struct {
             u8 unk58_pad[0x8];
             ftDataItemList* unk60; // HYPOTHESIS: fighter item preload list
+#ifdef FT_KIRBY_ARTICLE_POOLS
+            struct wnSimpleData** unk64;
+#endif
         };
     };
     void* extendParam[6];
@@ -48,6 +51,11 @@ struct ftData {
     u8 unk94[0x34];
     // HYPOTHESIS: the fighter's simple-article data (ftSnake::activeArticle12 passes it to the copy-ability process).
     const struct wnSimpleData* simpleArticleData; // 0xC8
+#endif
+#ifdef FT_KIRBY_ARTICLE_POOLS
+    u8 unk94_kirby[0xB8]; // 0x94..0x14C
+    // HYPOTHESIS: copy-kind integer parameter table read by Kirby's simple article 10 activator.
+    const s32* unk14C;
 #endif
 };
 
@@ -57,8 +65,18 @@ struct ftData {
 struct ftParam {
     u8 unk0[0xB4]; // HYPOTHESIS: possibly the walk, dash, run, jump, air-drift and gravity attributes plus weight at 0xB0
     float modelScale;
+#ifdef FT_KIRBY_ARTICLE_POOLS
+    u8 unkB8[0xEC];
+    float unk1A4;
+    s32 unk1A8;
+    u8 unk1AC[0xEC];
+#else
     u8 unkB8[0x1E0]; // HYPOTHESIS: possibly shield size at 0xC4, edge jump speed at 0xF8/0xFC, item throw strength at 0x118, landing lag at 0x13C..0x150, wall jump speed at 0x164/0x168
+#endif
     float slopeAngleLimit;
+#ifdef FT_KIRBY_ARTICLE_POOLS
+    u8 unk29C[0x48]; // tail of the 0x2E4-byte fighter attribute block copied onto the stack in Starmissile
+#endif
 };
 
 // HYPOTHESIS: per-fighter extra parameters; unk3C points at floats used by the squat walk (status 0x13 / 0x14 speed limits).
