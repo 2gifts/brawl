@@ -282,14 +282,18 @@ void muAdvResultTask::controllProc() {
 
 // Creates the models of the table; they are stored in the slots of the task and start with the animation "__0".
 void muAdvResultTask::createObjResFile(const muAdvResultModel* models, int count, nw4r::g3d::ResFile* resFile) {
-    for (int i = 0; i < count; i++) {
-        const muAdvResultModel* model = &models[i];
-        int num = 1;
+    int num;
+    int i;
+    int j;
+    const muAdvResultModel* model = models;
+    MuObject* object;
+    for (i = 0; i < count; i++, model++) {
+        num = 1;
         if (model->m_start < model->m_end) {
             num = model->m_end - model->m_start;
         }
-        for (int j = 0; j < num; j++) {
-            MuObject* object = MuObject::create(resFile, model->m_name, model->m_priority, NULL, Heaps::MenuInstance);
+        for (j = 0; j < num; j++) {
+            object = MuObject::create(resFile, model->m_name, model->m_priority, NULL, Heaps::MenuInstance);
             m_objects[model->m_start + j] = object;
             char animName[0x40];
             strcpy(animName, model->m_name);

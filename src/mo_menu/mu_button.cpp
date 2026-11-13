@@ -449,16 +449,21 @@ void muButtonTask::createModel(nw4r::g3d::ResFile* resFile) {
 
 // Makes the objects of a list of models; each one starts on its first animation ("<node>__0"), stopped.
 void muButtonTask::createObjResFile(const ObjData* data, int count, nw4r::g3d::ResFile* resFile) {
-    for (int i = 0; i < count; i++) {
-        int num = 1;
-        if (data[i].m_first < data[i].m_last) {
-            num = data[i].m_last - data[i].m_first;
+    int num;
+    int i;
+    int j;
+    const ObjData* model = data;
+    MuObject* obj;
+    for (i = 0; i < count; i++, model++) {
+        num = 1;
+        if (model->m_first < model->m_last) {
+            num = model->m_last - model->m_first;
         }
-        for (int j = 0; j < num; j++) {
-            MuObject* obj = MuObject::create(resFile, data[i].m_name, data[i].m_priority, NULL, Heaps::MenuInstance);
-            m_work->m_objs[data[i].m_first + j] = obj;
+        for (j = 0; j < num; j++) {
+            obj = MuObject::create(resFile, model->m_name, model->m_priority, NULL, Heaps::MenuInstance);
+            m_work->m_objs[model->m_first + j] = obj;
             char animName[64];
-            strcpy(animName, data[i].m_name);
+            strcpy(animName, model->m_name);
             strcat(animName, "__0");
             obj->changeAnimN(animName);
             if (obj->m_modelAnim != NULL) {
