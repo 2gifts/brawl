@@ -29,6 +29,11 @@
 #include <havok/hkCollidable.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkWorldOperationUtil.h>
+#include <havok/hkWorldCallbackUtil.h>
+#include <havok/hkEntityCallbackUtil.h>
+#include <havok/hkSimulationIsland.h>
+#include <havok/hkMath.h>
+#include <havok/hkVector4.h>
 
 hkSimpleConstraintContactMgr::hkSimpleConstraintContactMgr(hkWorld* world, hkRigidBody* bodyA, hkRigidBody* bodyB)
     : m_contactConstraintData(&m_constraint), m_constraint(hkConstraintInstance::PRIORITY_PSI) {
@@ -115,3 +120,212 @@ void hkSimpleConstraintContactMgr::calcStatistics(hkStatisticsCollector* collect
     c->endObject();
 }
 
+// Event handed to the world and entity contact-removed callbacks (0x18 bytes on the stack). HYPOTHESIS: layout
+// beyond the stores made here; the callback symbols type it as ContactPointEvent / hkCollisionEventRemoved.
+struct hkSimpleContactPointRemovedEvent {
+    hkContactPointId m_contactPointId;      // 0x00
+    hkContactPointMaterial* m_material;     // 0x04
+    hkEntity* m_entityA;                    // 0x08
+    hkEntity* m_entityB;                    // 0x0C
+    void* unk10;                            // 0x10
+    hkContactMgr* m_contactMgr;             // 0x14
+
+    hkSimpleContactPointRemovedEvent(hkContactPointId id, hkContactPointMaterial* material, hkEntity* a, hkEntity* b,
+                                     hkContactMgr* mgr)
+        : m_contactPointId(id), m_material(material), m_entityA(a), m_entityB(b), m_contactMgr(mgr) {}
+};
+
+void hkSimpleConstraintContactMgr::removeContactPoint(u16 contactPointId) {
+    hkContactPointProperties* props =
+        &m_contactConstraintData.m_atom->getContactPointProperties()[m_contactConstraintData.m_idMgrA.m_values[contactPointId]];
+    hkEntity* entityA = m_constraint.m_entities[0];
+    hkEntity* entityB = m_constraint.m_entities[1];
+    hkSimpleContactPointRemovedEvent event(contactPointId, props, entityA, entityB, this);
+    if (contactPointId != 0xFFFF) {
+        event.m_material = getContactPointProperties(contactPointId);
+    }
+    hkWorldCallbackUtil::fireContactPointRemoved(m_world, (hkWorldCallbackUtil::ContactPointEvent*)&event);
+    if (entityA->m_collisionListeners.m_size != 0) {
+        hkEntityCallbackUtil::fireContactPointRemovedInternal(entityA, (hkCollisionEventRemoved*)&event);
+    }
+    if (entityB->m_collisionListeners.m_size != 0) {
+        hkEntityCallbackUtil::fireContactPointRemovedInternal(entityB, (hkCollisionEventRemoved*)&event);
+    }
+
+    m_contactConstraintData.freeContactPoint(contactPointId);
+    if (m_contactConstraintData.m_atom->m_numContactPoints == 0) {
+        if (m_world->m_unk9C == 0) {
+            hkWorldOperationUtil::removeConstraintFromCriticalLockedIsland(m_world, &m_constraint);
+        } else {
+            entityA->m_simulationIsland->markForWrite();
+            entityB->m_simulationIsland->markForWrite();
+            hkWorldOperationUtil::removeConstraintFromCriticalLockedIsland(m_world, &m_constraint);
+        }
+    }
+}
+
+// Entity owning a collidable, or 0 for other owner types (broad phase type 1 = entity). HYPOTHESIS: name.
+static inline hkEntity* hkGetEntityOfCollidable(const hkCollidable& c) {
+    if (c.m_broadPhaseHandle.m_type == 1) {
+        return (hkEntity*)((const char*)&c + c.m_ownerOffset);
+    }
+    return 0;
+}
+
+void hkSimpleConstraintContactMgr::removeToi(const hkCollidable& a, const hkCollidable& b,
+                                             hkContactPointMaterial& material) {
+    hkEntity* entityA = hkGetEntityOfCollidable(a);
+    hkEntity* entityB = hkGetEntityOfCollidable(b);
+    hkWorld* world = entityA->m_world;
+    hkSimpleContactPointRemovedEvent event(0xFFFF, &material, entityA, entityB, this);
+    hkWorldCallbackUtil::fireContactPointRemoved(world, (hkWorldCallbackUtil::ContactPointEvent*)&event);
+    if (entityA->m_collisionListeners.m_size != 0) {
+        hkEntityCallbackUtil::fireContactPointRemovedInternal(entityA, (hkCollisionEventRemoved*)&event);
+    }
+    if (entityB->m_collisionListeners.m_size != 0) {
+        hkEntityCallbackUtil::fireContactPointRemovedInternal(entityB, (hkCollisionEventRemoved*)&event);
+    }
+}
+
+// Event handed to the contact-confirmed callbacks (0x24 bytes on the stack). HYPOTHESIS: layout beyond the stores.
+struct hkSimpleContactPointConfirmedEvent {
+    const hkCollidable* m_collidableA;     // 0x00
+    const hkCollidable* m_collidableB;     // 0x04
+    void* unk08;                           // 0x08
+    const hkContactPoint* m_contactPoint;  // 0x0C
+    hkContactPointMaterial* m_material;    // 0x10
+    hkReal m_rotateNormal;                 // 0x14
+    hkReal m_projectedVelocity;            // 0x18
+    void* unk1C;                           // 0x1C
+    void* unk20;                           // 0x20
+
+    hkSimpleContactPointConfirmedEvent(const hkCollidable* a, const hkCollidable* b, const hkContactPoint* cp,
+                                       hkContactPointMaterial* material, hkReal rotateNormal, hkReal projectedVelocity)
+        : m_collidableA(a), m_collidableB(b), m_contactPoint(cp), m_material(material), m_rotateNormal(rotateNormal),
+          m_projectedVelocity(projectedVelocity), unk1C(0), unk20(0) {}
+};
+
+// View of the continuous simulation's toi record as read here (0x40 bytes). HYPOTHESIS: names.
+struct hkSimpleToiEventView {
+    hkReal m_time;                       // 0x00
+    hkEntity* m_entities[2];             // 0x04
+    hkReal m_seperatingVelocity;         // 0x0C
+    hkContactPointMaterial m_material;   // 0x10
+    void* unk18;                         // 0x18
+    hkContactPoint m_contactPoint;       // 0x20
+};
+
+// hkWorld simple collision response (hkContinuousSimulation.o, map name hkLs_doSimpleCollisionResponse).
+// HYPOTHESIS: parameters.
+extern "C" void fn_80328E50(hkWorld* world, const void* toiEvent, hkReal rotateNormal, void* entitiesOut);
+
+static inline hkBool isKeyframedMotion(hkEntity* entity) {
+    return entity->getMotion()->m_type == hkMotion::MOTION_KEYFRAMED;
+}
+
+static inline hkBool isFixedOrKeyframed(hkEntity* entity) {
+    return entity->isFixed() || isKeyframedMotion(entity);
+}
+
+static inline bool needsCollisionResponse(hkEntity* a, hkEntity* b) {
+    bool respond = true;
+    if (isFixedOrKeyframed(a)) {
+        if (isFixedOrKeyframed(b)) {
+            respond = false;
+        }
+    }
+    return respond;
+}
+
+void hkSimpleConstraintContactMgr::processToi(const void* toiEvent, hkReal rotateNormal, void* entitiesOut) {
+    const hkSimpleToiEventView& ev = *(const hkSimpleToiEventView*)toiEvent;
+    hkEntity* a = ev.m_entities[0];
+    hkEntity* b = ev.m_entities[1];
+    hkWorld* world = a->m_world;
+    hkSimpleContactPointConfirmedEvent event(&a->m_collidable, &b->m_collidable,
+                                             &ev.m_contactPoint, (hkContactPointMaterial*)&ev.m_material, rotateNormal,
+                                             ev.m_seperatingVelocity);
+    hkWorldCallbackUtil::fireContactPointConfirmed(world, (hkWorldCallbackUtil::ContactPointEvent*)&event);
+    if (ev.m_entities[0]->m_collisionListeners.m_size != 0) {
+        hkEntityCallbackUtil::fireContactPointConfirmedInternal(ev.m_entities[0], (hkCollisionEventConfirmed*)&event);
+    }
+    if (ev.m_entities[1]->m_collisionListeners.m_size != 0) {
+        hkEntityCallbackUtil::fireContactPointConfirmedInternal(ev.m_entities[1], (hkCollisionEventConfirmed*)&event);
+    }
+    hkEntity* entityA = ev.m_entities[0];
+    hkReal rotate = event.m_rotateNormal;
+    hkEntity* entityB = ev.m_entities[1];
+    if (needsCollisionResponse(entityA, entityB)) {
+        fn_80328E50(world, toiEvent, rotate, entitiesOut);
+    }
+}
+
+// Event handed to the contact-added callbacks (0x2C bytes on the stack). HYPOTHESIS: layout beyond the stores; the
+// callbacks may change the projected velocity and set the status returned by addToi.
+struct hkSimpleContactPointAddedEvent {
+    const hkCdBody* m_bodyA;               // 0x00
+    const hkCdBody* m_bodyB;               // 0x04
+    void* unk08;                           // 0x08
+    void* unk0C;                           // 0x0C
+    hkProcessCollisionOutput* m_output;    // 0x10
+    hkContactPoint* m_contactPoint;        // 0x14
+    hkContactPointMaterial* m_material;    // 0x18
+    hkReal m_projectedVelocity;            // 0x1C
+    int m_status;                          // 0x20
+    hkContactMgr* m_contactMgr;            // 0x24
+    hkReal m_toi;                          // 0x28
+};
+
+// hkEntityCallbackUtil::fireContactPointAddedInternal (unnamed in the map). HYPOTHESIS: name.
+extern "C" void fn_802E3F48(hkEntity* entity, hkSimpleContactPointAddedEvent* event);
+
+// Square root as 1 / (refined reciprocal square root estimate) (0 for x <= 0). HYPOTHESIS: the inline's shape.
+static inline hkReal hkSimpleSqrt(hkReal x) {
+    hkReal inv;
+    if (x <= 0.0f) {
+        u32 bits = 0x7f800000;
+        inv = *(hkReal*)&bits;
+    } else {
+        double estimate = __frsqrte(x);
+        hkReal r = (hkReal)estimate;
+        inv = (0.5f * r) * -(r * (x * r) - 3.0f);
+    }
+    return 1.0f / inv;
+}
+
+static inline hkEntity* hkGetEntityOfBody(const hkCdBody& body) {
+    const hkCdBody* root = body.getRootCollidable();
+    return (hkEntity*)((const char*)root + ((const hkCollidable*)root)->m_ownerOffset);
+}
+
+int hkSimpleConstraintContactMgr::addToi(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& input,
+                                         hkProcessCollisionOutput& output, hkReal toi, hkContactPoint& cp,
+                                         hkReal& projectedVelocity, hkContactPointMaterial& materialOut) {
+    hkEntity* entityA = hkGetEntityOfBody(a);
+    hkEntity* entityB = hkGetEntityOfBody(b);
+    hkReal friction = hkSimpleSqrt(entityA->m_material.m_friction * entityB->m_material.m_friction);
+    materialOut.m_friction = hkMath::hkFloatToInt(256.0f * friction);
+    hkReal restitution = hkSimpleSqrt(entityA->m_material.m_restitution * entityB->m_material.m_restitution);
+    materialOut.m_restitution = hkMath::hkFloatToInt(128.0f * restitution);
+
+    hkSimpleContactPointAddedEvent event;
+    event.m_bodyA = &a;
+    event.m_bodyB = &b;
+    event.unk08 = 0;
+    event.m_output = &output;
+    event.m_contactPoint = &cp;
+    event.m_material = &materialOut;
+    event.m_projectedVelocity = projectedVelocity;
+    event.m_contactMgr = this;
+    event.m_status = 0;
+    event.m_toi = toi;
+    hkWorldCallbackUtil::fireContactPointAdded(m_world, (hkWorldCallbackUtil::ContactPointEvent*)&event);
+    if (entityA->m_collisionListeners.m_size != 0) {
+        fn_802E3F48(entityA, &event);
+    }
+    if (entityB->m_collisionListeners.m_size != 0) {
+        fn_802E3F48(entityB, &event);
+    }
+    projectedVelocity = event.m_projectedVelocity;
+    return event.m_status;
+}

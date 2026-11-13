@@ -87,9 +87,9 @@ int hkSimpleContactConstraintData::allocateContactPoint(hkContactPoint*& cpOut, 
     hkContactPointProperties* props = &m_atom->getContactPointProperties()[index];
     props->m_impulseApplied = 0.0f;
     props->m_internalSolverData = 0.0f;
-    props->m_material.m_flags = 1;
-    if (index > 0 && (props[-1].m_material.m_flags & 2) == 0) {
-        props->m_material.m_flags |= 2;
+    props->m_flags = 1;
+    if (index > 0 && (props[-1].m_flags & 2) == 0) {
+        props->m_flags |= 2;
     }
     cpOut = cp;
     cpPropsOut = props;
@@ -139,7 +139,7 @@ void hkSimpleContactConstraintData::freeContactPoint(u16 id) {
         extra.m_numSolverResults = 1;
     }
     fn_802DA368(oldAtom, index);
-    index[m_atom->getContactPointProperties()].m_material.m_flags &= ~2;
+    index[m_atom->getContactPointProperties()].m_flags &= ~2;
     m_atom = fn_802DA430(m_atom, 1);
 
     for (int i = m_idMgrA.m_values.m_size - 1; i >= 0; i--) {

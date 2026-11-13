@@ -81,10 +81,12 @@ struct hkContactMgr : hkReferencedObject {
     // 0x24..0x2C time-of-impact events. HYPOTHESIS: the parameter lists (register use of
     // hkSimpleConstraintContactMgr's overrides).
     virtual int addToi(const hkCdBody& a, const hkCdBody& b, const hkProcessCollisionInput& input,
-                       hkProcessCollisionOutput& output, hkReal toi, hkContactPoint& cp, const hkReal& projectedVelocity,
+                       hkProcessCollisionOutput& output, hkReal toi, hkContactPoint& cp, hkReal& projectedVelocity,
                        hkContactPointMaterial& materialOut);
-    virtual void removeToi(hkCollisionConstraintOwner& owner, hkContactPointProperties& properties);
-    virtual void processToi(); // HYPOTHESIS: parameters unknown
+    virtual void removeToi(const hkCollidable& a, const hkCollidable& b, hkContactPointMaterial& material);
+    // HYPOTHESIS: the event is the continuous simulation's toi record (entities at 0x04/0x08, separating velocity at
+    // 0x0C, contact point at 0x10, properties at 0x20); the other two arguments go to the simple collision response.
+    virtual void processToi(const void* toiEvent, hkReal rotateNormal, void* entitiesOut);
 };
 
 // Makes the contact manager of a new agent (hkCollisionDispatcher holds one per pair of material response types).

@@ -14,9 +14,12 @@ struct hkContactPointMaterial {
 
 // Per contact point solver properties (0x14 bytes; hkSimpleContactConstraintDataBuildJacobian walks them in
 // step with the contact points). HYPOTHESIS: the names of the words around the material.
-struct hkContactPointProperties {
+// The material is a base (hkSimpleConstraintContactMgr::removeContactPoint converts with a null check, +8).
+struct hkSolverResults {
     hkReal m_impulseApplied;      // 0x00
     hkReal m_internalSolverData;  // 0x04
-    hkContactPointMaterial m_material; // 0x08
+};
+
+struct hkContactPointProperties : hkSolverResults, hkContactPointMaterial {
     hkReal m_internalDataA;       // 0x10
 };

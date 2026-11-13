@@ -108,12 +108,12 @@ void hkSimpleContactConstraintDataBuildJacobian(hkSimpleContactConstraintAtom* a
     {
         for (int i = numPoints - 1; i >= 0; cp++, i--, props++) {
             hkJacobianBuilder::buildLinearBegin(bodyA, bodyB, cp->getPosition(), cp->getNormal(), jac, in.m_tau);
-            frictionSum += props->m_material.getFriction8_8();
+            frictionSum += props->getFriction8_8();
             impulseSum += props->m_impulseApplied;
             hkReal rhs = -cp->calculateRhs(props, &unused, cp->getDistance(), in.m_rhsParam);
             jac->buildLinearEnd(rhs, in.m_contactRhsScale);
             hkJacobianBuilder::addLastPosition(&cp->getPosition(), &cp->getNormal(), &posSum, &normalSum);
-            if (!(props->m_material.m_flags & 2)) {
+            if (!(props->m_flags & 2)) {
                 hkJacobianBuilder::copyJacRegToJac1Reg();
                 ((hkJacobianSingleContactSchema*)schema)->initSingleContact();
                 schema += sizeof(hkJacobianSingleContactSchema);
