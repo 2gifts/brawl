@@ -87,7 +87,7 @@ mo_fighter/ft_dedede/wn_dedede_jethammer_status_uniq_process.cpp:
 	.ctors      start:0x00000030 end:0x00000034
 
 mo_fighter/ft_dedede/wn_dedede_follower.cpp:
-	.text       start:0x0001C984 end:0x00023E58
+	.text       start:0x0001C984 end:0x00023E68
 	.ctors      start:0x00000034 end:0x00000040
 
 mo_fighter/mo_fighter.cpp:

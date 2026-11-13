@@ -11228,6 +11228,10 @@ mo_melee/sora_melee/gr/gr_gimmick_catapult.cpp:
 	.text       start:0x00274650 end:0x00275344
 	.ctors      start:0x00000314 end:0x00000318
 
+mo_melee/sora_melee/gr/gr_collision_create.cpp:
+	.text       start:0x00275344 end:0x00275778
+	.rodata     start:0x00004518 end:0x00004520
+
 mo_melee/sora_melee/gr/gr_madein.cpp:
 	.text       start:0x00275778 end:0x0027A8DC
 	.rodata     start:0x00004520 end:0x00004548
