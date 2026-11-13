@@ -530,9 +530,7 @@ void ftPikmin::notifyEventChangeStatus(int statusKind, int prevStatusKind, soSta
         stage->getKirifudaPos(&center, 2);
         m_moduleAccesser->getCameraModule().setWhole(true);
         Vec3f focus = center;
-        Vec3f focusRest = center;
-        Vec3f focusAgain = center;
-        m_moduleAccesser->getCameraModule().updateForce(0, &focusAgain, &focusRest);
+        m_moduleAccesser->getCameraModule().updateForce(0, &Vec3f(focus), &Vec3f(focus));
         m_moduleAccesser->getCameraModule().setEnableUpdatePos(false, -1);
         break;
     }

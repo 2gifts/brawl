@@ -235,8 +235,8 @@ void stMetalgear::createObjEtc(int index) {
 
 void stMetalgear::createObjWall(int index) {
     grMetalgearWall* ground;
-    float* rotZ;
     u8* state;
+    float* rotZ;
     u8 type;
     switch (index) {
     case 3:
@@ -323,8 +323,8 @@ void stMetalgear::createObjAttack(int index) {
     Vec3f* pos;
     float* rotZ;
     u8* state;
-    stCollisionWork* collision;
     u8 type;
+    stCollisionWork* collision;
     switch (index) {
     case 9:
         ground = grMetalgearAttack::create(0x5A, "nodeIndex", "grMetalgearAttackLeft");
