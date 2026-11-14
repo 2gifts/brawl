@@ -11766,6 +11766,31 @@ mo_melee/sora_melee/so/so_array_list_members_ptr_itFigureArchive_64_part3.cpp:
 mo_melee/sora_melee/so/so_array_list_archive_ptr_itFigureArchive_64_part4.cpp:
 	.text       start:0x002C27F8 end:0x002C299C
 
+mo_melee/sora_melee/if/if_resetsan.cpp:
+	.text       start:0x002C2D24 end:0x002C3FE4
+	.rodata     start:0x00006008 end:0x00006078
+	.data       start:0x0007AC98 end:0x0007B298
+
+mo_melee/sora_melee/mu/mu_adv_seal.cpp:
+	.text       start:0x002C3FE4 end:0x002D6974
+	.rodata     start:0x00006078 end:0x00006300
+	.data       start:0x0007B298 end:0x0007B708
+	.bss        start:0x00007328 end:0x00007340
+
+mo_melee/sora_melee/mu/mu_adv_seal_list.cpp:
+	.text       start:0x002D6974 end:0x002D7564
+	.rodata     start:0x00006300 end:0x00006330
+
+mo_melee/sora_melee/mu/mu_seal_figure_status.cpp:
+	.text       start:0x002D7564 end:0x002D7B7C
+	.rodata     start:0x00006330 end:0x00006338
+	.data       start:0x0007B708 end:0x0007B718
+
+mo_melee/sora_melee/ad/ad_ft_event.cpp:
+	.text       start:0x002D7B7C end:0x002D903C
+	.rodata     start:0x00006338 end:0x00006370
+	.data       start:0x0007B718 end:0x0007B8B0
+
 mo_melee/sora_melee/ft/ft_mario_status_uniq_process_special_hi.cpp:
 	.text       start:0x002D903C end:0x002D90B0
 	.ctors      start:0x00000350 end:0x00000354
