@@ -67,6 +67,10 @@ public:
         Weapon::deactivate(false);
     }
     virtual ~wnPikachuThunderJolt() { }
+    // HYPOTHESIS: argument types; kind is 3, or 0xe for Kirby's copy.
+    void activate(int founderTaskId, u32 resId, Vec3f* pos, int teamNo, int kind, float lr);
+    // Starts the second stage from the jolt that owns the accesser (its position and direction).
+    static bool activeArticle(class wnPikachuThunderJolt2* jolt2, soModuleAccesser* acc);
 };
 
 static_assert(sizeof(soModuleAccesserBuilder<wnPikachuThunderJoltModuleAccesserBuildConfig>) == 0x1898,

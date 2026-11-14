@@ -11796,7 +11796,7 @@ mo_melee/sora_melee/ft/ft_mario_status_uniq_process_special_hi.cpp:
 	.ctors      start:0x00000350 end:0x00000354
 
 mo_melee/sora_melee/wn/wn_mario_fireball.cpp:
-	.text       start:0x002D935C end:0x002DE130
+	.text       start:0x002D935C end:0x002DE170
 	.ctors      start:0x00000354 end:0x00000358
 
 mo_melee/sora_melee/ft/ft_donkey_status_uniq_process_special_nattack.cpp:
@@ -12087,11 +12087,22 @@ mo_melee/sora_melee/wn/wn_fox_blaster.cpp:
 	.ctors      start:0x000003C0 end:0x000003C4
 
 mo_melee/sora_melee/wn/wn_fox_blaster_bullet.cpp:
-	.text       start:0x003223A8 end:0x0032448C
+	.text       start:0x003223A8 end:0x003244C4
 	.ctors      start:0x000003C4 end:0x000003C8
 
+mo_melee/sora_melee/ft/ft_pikachu_transactor.cpp:
+	.text       start:0x003244C4 end:0x00324808
+	.rodata     start:0x00007580 end:0x00007588
+	.data       start:0x00086CD8 end:0x00086D50
+
+mo_melee/sora_melee/ft/ft_pikachu_status_uniq_process_thunder_jolt.cpp:
+	.text       start:0x00324808 end:0x00324900
+	.ctors      start:0x000003C8 end:0x000003CC
+	.rodata     start:0x00007588 end:0x00007590
+	.data       start:0x00086D50 end:0x00086DD8
+
 mo_melee/sora_melee/wn/wn_pikachu_thunder_jolt.cpp:
-	.text       start:0x00324900 end:0x00326984
+	.text       start:0x00324900 end:0x003269C4
 	.ctors      start:0x000003CC end:0x000003D0
 
 mo_melee/sora_melee/wn/wn_pikachu_thunder_jolt2.cpp:
@@ -12236,7 +12247,7 @@ mo_melee/sora_melee/wn/wn_sheik_needle_have.cpp:
 	.ctors      start:0x0000041C end:0x00000420
 
 mo_melee/sora_melee/wn/wn_popo_ice_shot.cpp:
-	.text       start:0x00348538 end:0x0034CEB8
+	.text       start:0x00348538 end:0x0034CF20
 	.ctors      start:0x00000420 end:0x00000424
 
 mo_melee/sora_melee/ft/ft_marth_status_uniq_process_special_n_start.cpp:
@@ -12599,7 +12610,7 @@ mo_melee/sora_melee/ft/ft_lucario_status_uniq_process_special_n.cpp:
 	.ctors      start:0x000004CC end:0x000004D0
 
 mo_melee/sora_melee/wn/wn_lucario_aura_ball.cpp:
-	.text       start:0x0039BDA8 end:0x003A064C
+	.text       start:0x0039BDA8 end:0x003A0694
 	.ctors      start:0x000004D0 end:0x000004D4
 
 mo_melee/sora_melee/ft/ft_ike_status_uniq_process_special_nstart.cpp:
