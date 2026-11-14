@@ -21,7 +21,8 @@ struct hkConstraintQueryIn {
     hkPadSpu<hkReal> m_frictionRhsScale; // 0x24 second argument of the friction rows' build*End
     hkPadSpu<const hkVelocityAccumulator*> m_bodyA; // 0x28
     hkPadSpu<const hkVelocityAccumulator*> m_bodyB; // 0x2C
-    u8 unk30[0x48 - 0x30];
+    u8 unk30[0x44 - 0x30];
+    hkPadSpu<void*> unk44;             // 0x44 handed to the angular friction rows (HYPOTHESIS: their solver results)
     hkPadSpu<u32> m_accumulatorAOffset; // 0x48 first offset written into the Jacobian header
     hkPadSpu<u32> m_accumulatorBOffset; // 0x4C
 };

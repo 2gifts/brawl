@@ -32,6 +32,7 @@
 #include <havok/hkLinSoftConstraintAtom.h>
 #include <havok/hkConstraintQueryIn.h>
 #include <havok/hkJacobianSchema.h>
+#include <havok/hkRotation.h>
 
 // Schema that makes the solver step over solver results nobody writes (8 bytes).
 // HYPOTHESIS: the names; 0x13 is the schema type and 2 a flag of the header word.
@@ -48,6 +49,35 @@ void hkSkipSolverResults(int numSolverResults, hkConstraintQueryOut& out) {
     schema->m_tag = HK_JACOBIAN_SKIP_SCHEMA_TAG;
     schema->m_numSolverResults = numSolverResults;
     out.m_jacobianSchemas = (hkJacobianSchema*)(schema + 1);
+}
+
+// Input of the angular friction rows (built on the stack by the atom builder).
+// HYPOTHESIS: the names.
+struct hk1dAngularFrictionInfo {
+    const hkVector4* m_constrainedDofW; // 0x00 first friction axis (a column of base A)
+    void* m_solverResults;              // 0x04 from the query input
+    hkReal m_maxFrictionTorque;         // 0x08
+    int m_numFriction;                  // 0x0C
+};
+
+// Builds the friction rows of the angular friction axes (fn_8028DC9C). HYPOTHESIS: the name.
+void hk1dAngularFrictionBuildJacobian(const hk1dAngularFrictionInfo& info, const hkConstraintQueryIn& in,
+                                      hkConstraintQueryOut& out);
+
+// Without friction the atom's solver results are skipped.
+void hkAngFrictionConstraintAtom::buildJacobianFromAngFrictionAtom(const hkConstraintQueryIn& in,
+                                                                   const hkRotation& baseA, const hkRotation& baseB,
+                                                                   hkConstraintQueryOut& out) const {
+    if (m_isEnabled && m_maxFrictionTorque != 0.0f) {
+        hk1dAngularFrictionInfo info;
+        info.m_constrainedDofW = &(&baseA.m_col0)[m_firstFrictionAxis];
+        info.m_maxFrictionTorque = m_maxFrictionTorque;
+        info.m_numFriction = m_numFrictionAxes;
+        info.m_solverResults = in.unk44;
+        hk1dAngularFrictionBuildJacobian(info, in, out);
+    } else {
+        hkSkipSolverResults(m_numFrictionAxes, out);
+    }
 }
 
 int hkLinSoftConstraintAtom::numSolverResults() const {

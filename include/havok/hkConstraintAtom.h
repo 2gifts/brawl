@@ -207,6 +207,8 @@ struct hkAngFrictionConstraintAtom : hkConstraintAtom {
     hkReal m_maxFrictionTorque; // 0x08
 
     int numSolverResults() const;
+    void buildJacobianFromAngFrictionAtom(const struct hkConstraintQueryIn& in, const struct hkRotation& baseA,
+                                          const struct hkRotation& baseB, struct hkConstraintQueryOut& out) const;
 };
 
 // Size 0x14.
