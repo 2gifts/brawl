@@ -1452,3 +1452,231 @@ err:
 }
 
 #pragma use_lmw_stmw off
+
+// HYPOTHESIS: status view for restart interval handling.
+typedef struct TMCC_JPEGDEC_RstStatus {
+    u8 pad0[0x1C];
+    u16 mcusPerRow;
+    u16 mcusPerCol;
+    u8 mcuW;
+    u8 mcuH;
+} TMCC_JPEGDEC_RstStatus;
+
+// HYPOTHESIS: context view for restart interval handling.
+typedef struct TMCC_JPEGDEC_RstContext {
+    TMCC_JPEGDEC_Stream stream;
+    u8 pad18[4];
+    s32 dcPred[4];
+    u8 pad2C[0x10];
+    u16 unk3C;
+    u16 unk3E;
+    u32 unk40;
+    u8 pad44[0x17C2];
+    u16 unk1806;
+    u8 unk1808;
+    u8 pad1809[0x1C7];
+    TMCC_JPEGDEC_RstStatus* status;
+} TMCC_JPEGDEC_RstContext;
+
+s32 fn_80263180(TMCC_JPEGDEC_RstContext* ctx, u32 x, u32 y) {
+    TMCC_JPEGDEC_RstStatus* status = ctx->status;
+    u16 marker;
+    s32 result = 0;
+
+    ctx->unk3C++;
+    if (ctx->unk3C == ctx->unk1806) {
+        result = TMCC_JPEGDEC_rewind_ptr(&ctx->stream);
+        if (result < 0) {
+            return result;
+        }
+
+        result = TMCC_JPEGDEC_get_wbyte(&marker, &ctx->stream);
+        if (marker == 0xFFD9) {
+            ctx->unk1808 = 1;
+        }
+        if (result < 0) {
+            return result;
+        }
+
+        if (marker >= 0xFFC0 && (marker < 0xFFD0 || marker > 0xFFD7)) {
+            result = TMCC_JPEGDEC_move_ptr(-2, &ctx->stream);
+            if (result < 0) {
+                return result;
+            }
+        } else {
+            if (marker != ctx->unk3E + 0xFFD0) {
+                return -0x23;
+            }
+        }
+        ctx->unk3E = (ctx->unk3E + 1) & 7;
+
+        {
+            u16 mcusPerRow = status->mcusPerRow;
+            u16 mcuY = y / status->mcuH;
+            u16 mcuX = x / status->mcuW;
+            u16 next = mcuY * mcusPerRow + mcuX + 1;
+            ctx->dcPred[0] = 0;
+            ctx->dcPred[1] = 0;
+            ctx->dcPred[2] = 0;
+            ctx->dcPred[3] = 0;
+            ctx->unk3C = 0;
+            ctx->unk40 = ((next % mcusPerRow) << 16) + (next / mcusPerRow);
+        }
+
+        result = TMCC_JPEGDEC_init_buff(&ctx->stream);
+    }
+    return result;
+}
+
+// HYPOTHESIS: context/status views for TMCC_JPEG_InitDecoder.
+typedef struct TMCC_JPEGDEC_InitContext {
+    TMCC_JPEGDEC_Stream stream;
+    u8 pad18[0x17C4];
+    u16 unk17DC;
+    u16 unk17DE;
+    s32 unk17E0;
+    s32 unk17E4;
+    u8 pad17E8;
+    u8 unk17E9;
+    u8 unk17EA;
+    u8 pad17EB;
+    u16 unk17EC;
+    u16 unk17EE;
+    u8 pad17F0[0x18];
+    u8 unk1808;
+    u8 pad1809[0x1C7];
+    void* status;
+} TMCC_JPEGDEC_InitContext;
+
+typedef struct TMCC_JPEGDEC_InitInfo {
+    TMCC_JPEGDEC_InitContext* ctx;
+    u8 kind;
+    u8 pad5[3];
+    u32 limit;
+    u8 padC[0x10];
+    u8 unk1C;
+    u8 unk1D;
+} TMCC_JPEGDEC_InitInfo;
+
+typedef struct TMCC_JPEGDEC_InitStatus {
+    TMCC_JPEGDEC_InitContext* ctx;
+    u8 pad4[4];
+    s32 kind;
+    u8 padC[4];
+    s32 unk10;
+    u8 pad14[4];
+    s32 unk18;
+    u8 pad1C[0x10];
+    u8 unk2C;
+    u8 unk2D;
+    u8 pad2E[0x6CE];
+} TMCC_JPEGDEC_InitStatus;
+
+static inline s32 check_init_info(TMCC_JPEGDEC_InitInfo* info, TMCC_JPEGDEC_InitStatus* status) {
+    if (info->unk1C != 0) {
+        return -1;
+    }
+    if (info->kind != 4 && info->kind != 6) {
+        return -4;
+    }
+    if (info->unk1D != 1 && info->unk1D != 2 && info->unk1D != 4 && info->unk1D != 8) {
+        return -1;
+    }
+    status->unk2D = info->unk1C;
+    status->unk2C = info->unk1D;
+    status->kind = info->kind;
+    return 0;
+}
+
+static inline s32 inline_header_analyze(TMCC_JPEGDEC_InitContext* ctx) {
+    s32 result = TMCC_JPEGDEC_imagestart((TMCC_JPEGDEC_Context*)ctx);
+    if (result < 0) {
+        return result;
+    }
+    if (ctx->unk17DC == 0) {
+        result = -0x50;
+    } else {
+        ctx->unk17E0 = ctx->unk17E9 * ctx->unk17EC;
+        ctx->unk17E4 = ctx->unk17EA * ctx->unk17EE;
+    }
+    return result;
+}
+
+static inline s32 inline_decompscan(TMCC_JPEGDEC_InitContext* ctx) {
+    s32 result = TMCC_JPEGDEC_scanstart((TMCC_JPEGDEC_Context*)ctx);
+    if (result < 0) {
+        return result;
+    }
+    if (ctx->unk1808 == 1) {
+        return 0;
+    }
+    return result;
+}
+
+s32 fn_80262218(TMCC_JPEGDEC_InitStatus* status, u8* data, TMCC_JPEGDEC_InitInfo* info) {
+    TMCC_JPEGDEC_InitContext* ctx = info->ctx;
+    s32 result;
+
+    if (ctx == 0) {
+        return -1;
+    }
+
+    memset(status, 0, sizeof(TMCC_JPEGDEC_InitStatus));
+    memset(ctx, 0, sizeof(TMCC_JPEGDEC_InitContext));
+    ctx->status = status;
+    status->ctx = ctx;
+
+    result = check_init_info(info, status);
+    if (result < 0) {
+        goto err;
+    }
+
+    result = TMCC_JPEGDEC_init_stream(&ctx->stream, data, info->limit);
+    if (result < 0) {
+        return result;
+    }
+
+    result = inline_header_analyze(ctx);
+    if (result < 0) {
+        goto err;
+    }
+
+    result = inline_decompscan(ctx);
+    if (result < 0) {
+        goto err;
+    }
+
+    if (ctx->unk1808 != 0) {
+        goto err;
+    }
+
+    result = fn_8026260C((TMCC_JPEGDEC_ExifCtx*)ctx);
+    if (result < 0) {
+        goto err;
+    }
+
+    switch (status->kind) {
+    case 4:
+        result = fn_80267980((TMCC_JPEGDEC_ExifCtx*)ctx);
+        if (result < 0) {
+            goto err;
+        }
+        break;
+    case 5:
+        break;
+    case 6:
+        result = fn_80265EB0((TMCC_JPEGDEC_ExifCtx*)ctx);
+        if (result < 0) {
+            goto err;
+        }
+        break;
+    default:
+        break;
+    }
+
+    status->unk10 = TMCC_JPEGDEC_get_position(&ctx->stream);
+    return status->unk18;
+
+err:
+    return result < 0 ? result : -2;
+}
