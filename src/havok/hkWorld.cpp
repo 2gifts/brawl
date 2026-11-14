@@ -65,6 +65,11 @@
 #include <havok/hkConstraintChainInstance.h>
 #include <havok/hkAction.h>
 #include <havok/hkSimulationIsland.h>
+#include <havok/hkAgentNnMachine.h>
+#include <havok/hkWorldAgentUtil.h>
+#include <havok/hkCollisionDispatcher.h>
+#include <havok/hkCollisionFilter.h>
+#include <havok/hkLinkedCollidable.h>
 
 void hkWorld::lock() {}
 
@@ -73,6 +78,99 @@ void hkWorld::unlock() {}
 void hkWorld::lockIslandForConstraintUpdate() {}
 
 void hkWorld::unlockIslandForConstraintUpdate() {}
+
+// Shape collection mode of the filter updates: also re-filter the children of shape collections.
+enum hkUpdateCollectionFilterMode {
+    HK_UPDATE_COLLECTION_FILTER_IGNORE_SHAPE_COLLECTIONS = 0,
+    HK_UPDATE_COLLECTION_FILTER_PROCESS_SHAPE_COLLECTIONS = 1,
+};
+
+// Re-runs the collision filter over the whole world. A full check re-filters every entity, then every phantom;
+// otherwise each existing agent is checked: agents the filter (or the collision quality table) now rejects are
+// removed and their island is marked for a split check, the others refresh their shape collection filter if asked.
+void hkWorld::updateCollisionFilterOnWorld(u8 updateMode, u8 updateShapeCollections) {
+    if (areCriticalOperationsLocked()) {
+        struct {
+            u8 m_type;
+            u8 m_updateMode;
+            u8 m_updateShapeCollections;
+        } op;
+        op.m_type = hkWorldOperation::UPDATE_FILTER_WORLD;
+        op.m_updateMode = updateMode;
+        op.m_updateShapeCollections = updateShapeCollections;
+        queueOperation(&op);
+        return;
+    }
+    m_unk84 = true;
+    HK_TIMER_BEGIN("UpdateFilterOnWorld");
+    if (updateMode == 0) {
+        hkArray<hkSimulationIsland*>& activeIslands = *(hkArray<hkSimulationIsland*>*)&m_unk28;
+        for (int i = 0; i < activeIslands.getSize(); i++) {
+            hkSimulationIsland* island = activeIslands[i];
+            for (int j = 0; j < island->m_entities.getSize(); j++) {
+                updateCollisionFilterOnEntity(island->m_entities[j], 0, updateShapeCollections);
+            }
+        }
+        hkArray<hkSimulationIsland*>& inactiveIslands = *(hkArray<hkSimulationIsland*>*)&m_unk34;
+        for (int i = 0; i < inactiveIslands.getSize(); i++) {
+            hkSimulationIsland* island = inactiveIslands[i];
+            for (int j = 0; j < island->m_entities.getSize(); j++) {
+                updateCollisionFilterOnEntity(island->m_entities[j], 0, updateShapeCollections);
+            }
+        }
+    } else {
+        lockCriticalOperations();
+        hkArray<hkSimulationIsland*>* islandArrays[2];
+        islandArrays[0] = (hkArray<hkSimulationIsland*>*)&m_unk28;
+        islandArrays[1] = (hkArray<hkSimulationIsland*>*)&m_unk34;
+        for (int a = 0; a < 2; a++) {
+            hkInplaceArray<hkAgentNnEntry*, 32> agentsToRemove;
+            for (int i = 0; i < islandArrays[a]->getSize(); i++) {
+                hkSimulationIsland* island = (*islandArrays[a])[i];
+                agentsToRemove.m_size = 0;
+                hkAgentNnTrack& track = island->m_agentTrack;
+                for (int s = 0; s < track.getNumSectors();) {
+                    hkAgentNnEntry* entry = (hkAgentNnEntry*)track.getSector(s);
+                    s++;
+                    hkAgentNnEntry* end = (s == track.getNumSectors())
+                                              ? (hkAgentNnEntry*)((char*)entry + track.m_bytesUsedInLastSector)
+                                              : (hkAgentNnEntry*)((char*)entry + track.m_sectorSize);
+                    for (; entry < end; entry = (hkAgentNnEntry*)((char*)entry + entry->m_size)) {
+                        if (m_collisionFilter->isCollisionEnabled(*entry->m_collidable[0], *entry->m_collidable[1])) {
+                            if (m_collisionDispatcher->getCollisionQualityIndex(
+                                    entry->m_collidable[0]->m_broadPhaseHandle.m_objectQualityType,
+                                    entry->m_collidable[1]->m_broadPhaseHandle.m_objectQualityType)) {
+                                if ((hkUpdateCollectionFilterMode)updateShapeCollections ==
+                                    HK_UPDATE_COLLECTION_FILTER_PROCESS_SHAPE_COLLECTIONS) {
+                                    hkAgentNnMachine_UpdateShapeCollectionFilter(entry, *m_collisionInput);
+                                }
+                                continue;
+                            }
+                        }
+                        agentsToRemove.pushBack(entry);
+                        island->m_flags.m_stateA = 1;
+                    }
+                }
+                while (agentsToRemove.getSize()) {
+                    hkAgentNnEntry* entry = (agentsToRemove.begin() + agentsToRemove.getSize())[-1];
+                    agentsToRemove.m_size--;
+                    hkWorldAgentUtil::removeAgentAndItsToiEvents(entry);
+                }
+            }
+        }
+        m_lockCount--;
+    }
+    if (updateMode == 0) {
+        for (int i = 0; i < m_phantoms.getSize(); i++) {
+            updateCollisionFilterOnPhantom(m_phantoms[i], updateShapeCollections);
+        }
+    }
+    m_unk84 = false;
+    if (m_lockCount == 0 && m_pendingOperationsCount != 0 && !(bool)m_unk84) {
+        internal_executePendingOperations();
+    }
+    HK_TIMER_END();
+}
 
 void hkWorld::setGravity(const hkVector4& gravity) {
     m_gravity = gravity;
@@ -273,6 +371,11 @@ struct hkWorldFreeMemoryWatchDog : hkReferencedObject {
 
 // Runs the simulation for one step. When that succeeded and the memory in use (hkMemory 0x28 + 0x14) is over
 // the watchdog's limit, the watchdog is asked to free memory, bracketed by a timer.
+// MATCH-ONLY: the watchdog timer strings are writable data in the original (the data and small data sections),
+// not part of the unit's read-only string pool.
+static char s_watchDogTimerBegin[] = "TtWatchDog:FreeMem";
+static char s_watchDogTimerEnd[] = "Et";
+
 int hkWorld::stepDeltaTime(hkReal physicsDeltaTime) {
     int result = ((hkWorldStepSimulation*)m_simulation)->stepDeltaTime(physicsDeltaTime);
     if (result == 0) {
@@ -280,9 +383,9 @@ int hkWorld::stepDeltaTime(hkReal physicsDeltaTime) {
         if (watchDog != NULL) {
             hkMemory& memory = hkMemory::getInstance();
             if (worldField<int>(&memory, 0x28) + worldField<int>(&memory, 0x14) > watchDog->m_memoryLimit) {
-                HK_TIMER_BEGIN("WatchDog:FreeMem");
+                HK_MONITOR_TIMER_COMMAND(s_watchDogTimerBegin);
                 watchDog->freeMemory(this);
-                HK_TIMER_END();
+                HK_MONITOR_TIMER_COMMAND(s_watchDogTimerEnd);
             }
         }
     }

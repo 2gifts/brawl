@@ -1714,7 +1714,7 @@ config.libs = [
             Object(NonMatching, "havok/hkBroadPhaseBorder.cpp"),
             Object(NonMatching, "havok/hkPhysicsSystem.cpp"),
             Object(NonMatching, "havok/hkSimulationIsland.cpp"),
-            Object(NonMatching, "havok/hkWorld.cpp", extra_cflags=["-str noreadonly"]),
+            Object(NonMatching, "havok/hkWorld.cpp"),
             Object(NonMatching, "havok/hkWorldCinfo.cpp"),
             Object(NonMatching, "havok/hkWorldObject.cpp"),
             Object(NonMatching, "havok/hkSimulation.cpp", extra_cflags=["-inline noauto"]),
