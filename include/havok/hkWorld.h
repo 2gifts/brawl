@@ -116,7 +116,7 @@ struct hkWorld : hkReferencedObject {
     void removeAction(hkAction* action);
     void removeActionImmediately(hkAction* action);
     void addEntityBatch(hkEntity** entities, int count, bool active);
-    void removeEntity(hkEntity* entity);
+    hkBool removeEntity(hkEntity* entity);
     void removeEntityBatch(hkEntity** entities, int count);
     hkEntity* addEntity(hkEntity* entity, int activation);
     void activateRegion(hkAabb* aabb);

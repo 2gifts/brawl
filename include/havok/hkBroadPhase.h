@@ -37,7 +37,8 @@ struct hkBroadPhase : hkReferencedObject {
 
     virtual void addObject(hkBroadPhaseHandle* object, const hkAabb& aabb,
                            hkArray<hkBroadPhaseHandlePair>& pairsOut);                    // 0x10
-    virtual void addObjectBatch();                                                         // 0x14 (signature unknown)
+    virtual void addObjectBatch(hkArray<hkBroadPhaseHandle*>& addObjectList, hkArray<hkAabb>& addAabbList,
+                                hkArray<hkBroadPhaseHandlePair>& newPairs); // 0x14
     virtual void removeObject(hkBroadPhaseHandle* object, hkArray<hkBroadPhaseHandlePair>& pairsOut); // 0x18
     virtual void unk1C();
     virtual void unk20();

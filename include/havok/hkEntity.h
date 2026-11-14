@@ -60,6 +60,8 @@ struct hkEntity : hkWorldObject {
     hkLinkedCollidable* getLinkedCollidable(); // out of line in src/havok/hkSimulation.cpp (fn_802F2E3C)
 
     virtual hkMotionState* getMotionState();
+    // Frees the arrays of an entity loaded from a packfile (hkWorld::removeEntity calls it for memory size 0).
+    virtual void deallocateInternalArrays(); // 0x18
 
     // Top two bits of the island's byte at 0x27 (activity state), 0 without an island. HYPOTHESIS: meaning.
     u8 getActivationState() const {
