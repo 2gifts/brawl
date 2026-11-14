@@ -3,11 +3,14 @@
 #include <gf/gf_model.h>
 #include <mt/mt_vector.h>
 #include <mu/adv/mu_adv_seal_win_notice.h>
+#include <mu/adv/mu_seal_figure_status.h>
 #include <mu/mu_msg.h>
 #include <nw4r/g3d/g3d_scnmdlsmpl.h>
 #include <snd/snd_system.h>
 #include <mu/adv/mu_adv_seal.h>
 #include <mu/adv/mu_adv_seal_tex_mgr.h>
+#include <nw4r/g3d/g3d_resfile.h>
+#include <stdio.h>
 #include <types.h>
 
 // ecMgr::getMdl / getMdlAnim (main, unnamed): the scene model and the animation of an effect model
@@ -30,7 +33,6 @@ void muAdvSealTask::getResourcePackData(const char** ppath, u32* psize) {
 }
 
 muAdvSealTexMgr::muAdvSealTexMgr() {
-    unk514 = 0;
     for (int i = 0; i < 65; i++) {
         m_entries[i].m_index = i;
         m_entries[i].m_refCount = 0;
@@ -46,12 +48,54 @@ muAdvSealTexMgr::muAdvSealTexMgr() {
     m_loading = NULL;
 }
 
-int muAdvSealTexMgr::regist(const s32* key) {
+bool muAdvSealTexMgr::update(bool cancel) {
+    if (!cancel && m_fileHandle.m_request == NULL && m_loading == NULL) {
+        int i = 0;
+        Entry* entry = m_entries;
+        for (; i < 65; i++, entry++) {
+            if (entry->m_key != NULL && entry->m_refCount != 0 && entry->m_tex == NULL) {
+                m_loading = entry;
+                break;
+            }
+        }
+        if (m_loading == NULL) {
+            entry = m_entries;
+            for (int i = 0; i < 65; i++, entry++) {
+                if (entry->m_key != NULL && entry->m_tex == NULL) {
+                    m_loading = entry;
+                    break;
+                }
+            }
+        }
+        if (m_loading != NULL) {
+            char path[0x80];
+            sprintf(path, "/toy/seal/%s", m_loading->m_key->m_name);
+            m_fileHandle.readRequest(path, static_cast<Heaps::HeapType>(0x2B), 0, 0);
+        }
+    }
+    if (m_fileHandle.m_request != NULL) {
+        if (m_fileHandle.isReady()) {
+            if (m_loading == NULL || cancel) {
+                gfHeapManager::free(m_fileHandle.getBuffer());
+            } else {
+                m_loading->m_tex = m_fileHandle.getBuffer();
+                nw4r::g3d::ResFile::Init(reinterpret_cast<nw4r::g3d::ResFile*>(&m_loading->m_tex));
+                m_loading = NULL;
+            }
+            m_fileHandle.release();
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
+int muAdvSealTexMgr::regist(const Key* key) {
     if (key != NULL) {
         u32 i;
         Entry* entry = m_entries;
         for (i = 0; i < 65; i++, entry++) {
-            if (entry->m_key != NULL && *entry->m_key == *key) {
+            if (entry->m_key != NULL && entry->m_key->m_id == key->m_id) {
                 break;
             }
         }
@@ -120,6 +164,16 @@ void muAdvSealTexMgr::un_regist(int* handle) {
         }
     }
     *handle = -1;
+}
+
+void muSealFigureWork::calcEff() {
+    clearEff();
+    Entry* entry = m_entries;
+    for (int i = 0; i < 64; i++, entry++) {
+        if (!(m_slotFlags[i] & 0x80) && entry->m_seal != NULL) {
+            applyEff(entry->m_seal);
+        }
+    }
 }
 
 void muAdvSealWinNotice::init(int priority, MuMsg* msg, u32 msgBase) {
