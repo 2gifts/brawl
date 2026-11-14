@@ -1,14 +1,14 @@
 // Brawl physics wrapper translation unit ph_container.o (main.dol 0x800800D8-0x80080B40).
 // Not yet decompiled. Functions in address order with their map names:
-//   0x800800D8    64  __ct   [map: phContainer____ct]
-//   0x80080118  1780  applyData   [map: phContainer__applyData]
-//   0x8008080C    92  __dt   [map: hkReferencedObject____dt]
-//   0x80080868   212  __dt   [map: phContainer____dt]
-//   0x8008093C   296  relAll   [map: phContainer__relAll]
-//   0x80080A64     4  calcStatistics   [map: hkReferencedObject__calcStatistics]
-//   0x80080A68    20  isOk   [map: phStreamReader__isOk]
-//   0x80080A7C   104  read   [map: phStreamReader__read]
-//   0x80080AE4    92  __dt   [map: phStreamReader____dt]
+//   0x800800D8    64  __ct
+//   0x80080118  1780  applyData
+//   0x8008080C    92  __dt
+//   0x80080868   212  __dt
+//   0x8008093C   296  relAll
+//   0x80080A64     4  calcStatistics
+//   0x80080A68    20  isOk
+//   0x80080A7C   104  read
+//   0x80080AE4    92  __dt
 #include <ph/ph_container.h>
 
 #include <havok/hkString.h>
