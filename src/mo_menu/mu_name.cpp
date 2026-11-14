@@ -8,6 +8,7 @@
 #include <gf/gf_scene.h>
 #include <gf/gf_shutdown_manager.h>
 #include <gm/gm_global.h>
+#include <ip/ip_padconfig.h>
 #include <memory.h>
 #include <mt/mt_prng.h>
 #include <nw4r/g3d/g3d_anmchr.h>
@@ -630,7 +631,9 @@ extern char* sEnCpuPrefix;
 
 
 // How many pairs of the mark key there are, and how many random names there are in Japanese and in the other languages.
-static const int sCounts[3] = {41, 401, 150};
+extern int sCountDakuten;
+extern int sCountRandomJp;
+extern int sCountRandomEn;
 
 // The sets of keys that the language uses, as indexes of the sets in g_muNameLetterTbl: hiragana, katakana, letters and digits
 // in Japanese; letters, letters of Europe and digits in the other languages.
@@ -752,9 +755,10 @@ void MuSelctChrNameEntry::open(const char* initial, char* buf, int maxLen) {
     char posName[12];
     sprintf(posName, "cpos%d", m_posNo + 1);
     PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(m_scnMdl, m_base->m_sceneModel, posName);
+    MuObject* setObj;
     int setNo = m_setList[m_curSet];
     detachSet();
-    MuObject* setObj = m_setObj[setNo];
+    setObj = m_setObj[setNo];
     sprintf(setPosName, "cpos%d", m_posNo + 1);
     PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(m_scnMdl, setObj->m_sceneModel, setPosName);
     m_curSetObj = setObj;
@@ -1068,12 +1072,15 @@ int MuSelctChrNameEntry::abButtonMain(gfPadStatus* pad, bool allowRandom) {
 
 // Turns a letter into the next letter of its pair of the mark key (for example from the plain letter to the one with the marks).
 bool MuSelctChrNameEntry::changeLetter(char* out, const char* current) {
-    bool found = false;
-    int i = 0;
-    int j = 0;
-    char* pair;
+    int count = sCountDakuten;
+    int i;
+    int j;
     int len;
-    while (i < sCounts[0]) {
+    char* pair;
+    bool found;
+    found = false;
+    i = 0;
+    while (i < count) {
         pair = g_muNameDakutenTbl[i];
         len = msgLen(pair);
         j = 0;
@@ -1185,9 +1192,9 @@ int MuSelctChrNameEntry::decideButtonProc(gfPadStatus* pad, bool allowRandom) {
             playSE(0x204C);
             const char* name;
             if (g_GameGlobal->getLanguage() == 0) {
-                name = sRandomNamesJp[randi(sCounts[1])];
+                name = sRandomNamesJp[randi(sCountRandomJp)];
             } else {
-                name = sRandomNamesEn[randi(sCounts[2])];
+                name = sRandomNamesEn[randi(sCountRandomEn)];
             }
             strcpy(m_name, name);
             if (m_msg != NULL) {
@@ -1260,6 +1267,11 @@ bool MuSelctChrNameEntry::isNameValidNumeric(const char* name, const char* prefi
     }
     return true;
 }
+
+// BYTES: defined as non-const after callers so MWCC loads them via extern instead of constant-folding.
+int sCountDakuten = 41;
+int sCountRandomJp = 401;
+int sCountRandomEn = 150;
 
 char* sJpCpuName = "\357\274\243\357\274\260";
 char* sJpPlayerNames[5] = {"\357\274\221\357\274\260", "\357\274\222\357\274\260", "\357\274\223\357\274\260", "\357\274\224\357\274\260", 0};
@@ -1358,11 +1370,12 @@ void muNameTask::updateAll() {
     dispUpdate(m_cursor, m_scroll);
     m_objects[Obj_List]->setFrameNode(static_cast<float>(m_cursor));
     MuObject* list = m_objects[Obj_List];
+    int pos = m_cursor + m_scroll;
     int visible = 0;
-    if (m_cursor + m_scroll > 0) {
+    if (pos > 0) {
         visible |= 2;
     }
-    if (m_cursor + m_scroll < m_slotCount - 1) {
+    if (pos < m_slotCount - 1) {
         visible |= 1;
     }
     list->setFrameVisible(static_cast<float>(visible));
@@ -1595,7 +1608,8 @@ static const u8 sRemoteItemBones[4] = {1, 2, 4, 0};
 void muNameTask::initMsg() {
     m_msg = MuMsg::create(3, Heaps::MenuInstance, 0x2B);
     m_msg->allocMsgBuf(0x100, 0xC);
-    for (int i = 0; i < 5; i++) {
+    int i;
+    for (i = 0; i < 5; i++) {
         m_msg->attachScnMdlSimple(i, reinterpret_cast<nw4r::g3d::ScnMdlSimple*>(m_objects[Obj_List]->m_sceneModel), i, 1.0f / 12.0f);
         m_msg->setFontType(i, 1);
         m_msg->setAlignMode(i, MuMsg::Align_Center);
@@ -1609,7 +1623,7 @@ void muNameTask::initMsg() {
         m_msg->attachScnMdlSimple(6, reinterpret_cast<nw4r::g3d::ScnMdlSimple*>(m_objects[Obj_RemoteWindow]->m_sceneModel), 0,
                                   1.0f / 16.0f);
         m_msg->getWScale(6, 48.0f);
-        for (int i = 0; i < 3; i++) {
+        for (i = 0; i < 3; i++) {
             m_msg->attachScnMdlSimple(7 + i, reinterpret_cast<nw4r::g3d::ScnMdlSimple*>(m_objects[Obj_RemoteIcon + i]->m_sceneModel),
                                       sRemoteItemBones[i], 1.0f / 16.0f);
         }
@@ -1699,28 +1713,30 @@ bool muNameTask::deleteNameID(int nameNo) {
 // and the list is scrolled back when it gets too short.
 void muNameTask::deleteName(int index) {
     GameGlobal* global = g_GameGlobal;
-    int nameNo = m_slots[index].m_nameNo;
-    if (nameNo == -2 || nameNo == -1) {
-        nameNo = -1;
+    int nameNo = -1;
+    s16 rawNameNo = m_slots[index].m_nameNo;
+    if (static_cast<u16>(rawNameNo + 2) > 1) {
+        nameNo = rawNameNo;
     }
     int count = global->getNumName();
+    gmGlobalRecord::NameData* dst;
     for (int i = nameNo; i < count - 1; i++) {
-        char* dst = reinterpret_cast<char*>(global->getGlobalRecordNameDatap(i));
-        char* src = reinterpret_cast<char*>(global->getGlobalRecordNameDatap(i + 1));
-        memcpy(dst, src, 0x124);
+        dst = global->getGlobalRecordNameDatap(i);
+        *dst = *global->getGlobalRecordNameDatap(i + 1);
     }
     global->delName(count - 1);
     for (int i = index; i < m_slotCount - 1; i++) {
         m_slots[i] = m_slots[i + 1];
     }
     m_slotCount--;
-    for (int i = 0; i < m_slotCount; i++) {
-        int id = m_slots[i].m_nameNo;
+    muNameSlot* slot = m_slots;
+    for (int i = 0; i < m_slotCount; i++, slot++) {
+        int id = slot->m_nameNo;
         if (id != -1 && id != -2 && id > nameNo) {
-            m_slots[i].m_nameNo = id - 1;
+            slot->m_nameNo = id - 1;
         }
     }
-    if (m_slotCount >= 1 && m_slotCount < 7 && m_slots[m_slotCount - 1].m_nameNo == -2) {
+    if (m_slotCount >= 1 && m_slotCount < 7 && (&m_slots[m_slotCount])[-1].m_nameNo == -2) {
         m_slotCount--;
     }
     if (m_scroll + 5 >= m_slotCount) {
@@ -1729,7 +1745,11 @@ void muNameTask::deleteName(int index) {
         }
         if (m_scroll + m_cursor >= m_slotCount) {
             int last = m_slotCount - m_scroll - 1;
-            m_cursor = last >= 0 ? last : 0;
+            if (last >= 0) {
+                m_cursor = last;
+            } else {
+                m_cursor = 0;
+            }
         }
     }
 }
@@ -1749,9 +1769,11 @@ int muNameTask::getCurNameIndex() {
 // and whether a new name can still be made).
 void muNameTask::dispUpdate(int cursor, int scroll) {
     const muNameSlot* slot = &m_slots[static_cast<u16>(scroll)];
+    int i;
+    int s = scroll;
     int count = m_slotCount;
-    for (int i = 0; i < 5; i++, scroll++, slot++) {
-        if (scroll < count) {
+    for (i = 0; i < 5; i++, slot++, s++) {
+        if (s < count) {
             int nameNo = static_cast<u16>(slot->m_nameNo + 2) > 1 ? static_cast<int>(slot->m_nameNo) : -1;
             int colorKind;
             if (nameNo != -1) {
@@ -1870,7 +1892,8 @@ void muNameTask::mainStepSelectNameInit(muNameTask* task) {
 
 // The list of the names: A picks the name (the line of the new name opens the keyboard), B leaves, the directions move the cursor.
 int muNameTask::mainStepSelectNameMain(muNameTask* task) {
-    int count = task->m_slotCount;
+    int count = 0;
+    count = count + task->m_slotCount;
     bool moved = false;
     bool scrolled = false;
     gfPadStatus pad;
@@ -2072,10 +2095,11 @@ void muNameTask::mainStepNameEntryLeaveInit(muNameTask* task) {
 }
 
 int muNameTask::mainStepNameEntryLeaveMain(muNameTask* task) {
+    MuObject* window;
     bool windowDone = true;
     bool nameWindowDone = true;
     if (task->m_kind != Kind_Event) {
-        MuObject* window = task->m_objects[Obj_Window];
+        window = task->m_objects[Obj_Window];
         if (CHR_ANIM(window)->GetUpdateRate() > 0.0f) {
             float endFrame = 29.0f;
             if (CHR_ANIM(window)->GetFrame() >= endFrame) {
@@ -2208,7 +2232,11 @@ void muNameTask::printBaseNameHelp(int msgIndexA, const u16* name, int msgIndexB
 
 // Shows which button of the menu of the Wii Remote is selected (the buttons that cannot be used look different).
 void muNameTask::dispRemoteCursor(int selected) {
-    int disabled[3] = {!m_remoteFlags[0], !m_remoteFlags[1], !m_remoteFlags[2]};
+    int disabled[3];
+    int* p = disabled;
+    for (int i = 0; i < 3; i++) {
+        *p++ = !m_remoteFlags[i];
+    }
     for (int i = 0; i < 3; i++) {
         // HYPOTHESIS: sRemoteModels places the three MenRemote0001_TopN buttons at indices 13..15 (Obj_RemoteIcon + i).
         m_objects[Obj_RemoteIcon + i]->changeAnimN(i == selected ? 2 : disabled[i], 0x11, true, false);
@@ -2217,6 +2245,7 @@ void muNameTask::dispRemoteCursor(int selected) {
 
 // Saves the name that was read from the Wii Remote in the record of the game. The result is the number of the name, -1 when
 // there already is a name with that text (and overwrite is not set) and -2 when there is no room.
+#pragma dont_inline on
 int muNameTask::registRimoName(const u16* name, bool flag, const u8* data, bool overwrite) {
     char nameUtf8[0x18];
     Message::utf16to8(nameUtf8, reinterpret_cast<const wchar_t*>(name));
@@ -2243,6 +2272,7 @@ int muNameTask::registRimoName(const u16* name, bool flag, const u8* data, bool 
     updateAll();
     return index;
 }
+#pragma dont_inline reset
 
 // Sound of the Wii Remote that starts to connect: the pads that are asked for the Wii Remote are the ones before the first Wii Remote.
 void muNameTask::mainStepRemoteSimpleSyncInit(muNameTask* task) {
@@ -2466,7 +2496,8 @@ void muNameTask::mainStepRemoteMenuAppearInit(muNameTask* task) {
         task->m_msg->printf(11, name);
     }
     for (int i = 0; i < 3; i++) {
-        int objIdx = Obj_RemoteIcon + i;
+        int objIdx = Obj_RemoteIcon;
+        objIdx += i;
         char posName[8];
         sprintf(posName, "pos%02d", sRemoteItems[i][1]);
         // HYPOTHESIS: sRemoteModels places the three MenRemote0001_TopN buttons at indices 13..15 (Obj_RemoteIcon + i).
@@ -2528,7 +2559,7 @@ int muNameTask::mainStepRemoteMenuMain(muNameTask* task) {
             selected = i;
         }
     }
-    if (selected != task->m_remoteMenuSel) {
+    if (selected != static_cast<const muNameTask*>(task)->m_remoteMenuSel) {
         playSE(0);
         task->m_remoteMenuSel = selected;
         task->dispRemoteCursor(selected);
@@ -2685,7 +2716,7 @@ void muNameTask::mainStepRemoteStoreWriteInit(muNameTask* task) {
     memset(&data, 0, sizeof(data));
     global->getNameUTF16(task->m_remoteNameNo, reinterpret_cast<wchar_t*>(data.m_name));
     data.m_flag = global->getNameRumbleSwitch(task->m_remoteNameNo);
-    memcpy(data.m_data, global->getButtonConfig(static_cast<u8>(task->m_remoteNameNo)), sizeof(data.m_data));
+    *reinterpret_cast<ipButtonConfig*>(data.m_data) = *global->getButtonConfig(static_cast<u8>(task->m_remoteNameNo));
     task->m_returnCallback.m_canReturn = false;
     task->m_remote->write(&data);
     task->m_objects[Obj_RemoteWindow]->changeAnimN(3, 0x11, true, false);
@@ -2866,8 +2897,9 @@ int muNameRemoteTask::getReadStatus() {
             return Status_Unknown3;
         case -6:
             return Status_Unknown4;
+        default:
+            return Status_NoRemote;
         }
-        return Status_NoRemote;
     }
     const u16* ownerName;
     if (fn_802253B4(m_pad, &ownerName) != 0) {
@@ -2881,8 +2913,8 @@ int muNameRemoteTask::getReadStatus() {
     if (isBufZero(m_readBuf)) {
         return Status_BadData;
     }
-    u32 sum = 0;
     const u8* q = m_readBuf;
+    u32 sum = 0;
     for (int i = 0; i < 0x3C; i++, q++) {
         sum += *q;
     }
@@ -2920,12 +2952,13 @@ void muNameRemoteTask::readProcess() {
 
 // Starts to write the name to the Wii Remote (the sum of the bytes is added to the data).
 void muNameRemoteTask::write(const muNameRemoteData* data) {
-    memcpy(m_writeBuf, data, 0x3C);
     m_writeRetries = 0;
     m_verifying = false;
+    *reinterpret_cast<muNameRemoteData*>(m_writeBuf) = *data;
     u32 sum = 0;
-    for (int i = 0; i < 0x3C; i++) {
-        sum += m_writeBuf[i];
+    const u8* p = m_writeBuf;
+    for (int i = 0; i < 0x3C; i++, p++) {
+        sum += *p;
     }
     *reinterpret_cast<u32*>(&m_writeBuf[0x3C]) = sum;
     g_gfPadSystem->writeGameDataRequest(m_pad & 0xFF, reinterpret_cast<int>(m_writeBuf), sGameDataSize, 0);
