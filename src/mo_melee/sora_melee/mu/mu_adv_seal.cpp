@@ -1,6 +1,7 @@
 #include <ec/ec_mgr.h>
 #include <gf/gf_heap_manager.h>
 #include <gf/gf_model.h>
+#include <gf/gf_pad_status.h>
 #include <mt/mt_vector.h>
 #include <mu/adv/mu_adv_seal_win_notice.h>
 #include <mu/adv/mu_seal_figure_status.h>
@@ -30,6 +31,99 @@ inline void setScnObjHidden(nw4r::g3d::ScnMdlSimple* obj, u32 hidden) {
 void muAdvSealTask::getResourcePackData(const char** ppath, u32* psize) {
     *ppath = "/menu2/sc_adv_seal.pac";
     *psize = 0x344000;
+}
+
+namespace {
+
+// The buttons of the menu actions for the current controller (written by set_pad_type).
+u32 s_padButtons[4] = { 0x400, 0x10, 0x40, 0x20 };
+
+} // namespace
+
+static u8 s_isPadSideways;
+
+void muAdvSealTask::set_pad_type(const gfPadStatus* pad) {
+    u32* buttons = s_padButtons;
+    if (pad->m_error != 0) {
+        return;
+    }
+    s_isPadSideways = false;
+    buttons[0] = 0x400;
+    buttons[1] = 0x10;
+    buttons[2] = 0x40;
+    buttons[3] = 0x20;
+    switch (pad->m_controllerType) {
+    case 2:
+        buttons[0] = 0x200000;
+        buttons[1] = 0x40;
+        buttons[2] = 0x200000;
+        buttons[3] = 0x80000;
+        break;
+    case 3:
+        buttons[0] = 0x80000;
+        buttons[2] = 0x10000;
+        buttons[3] = 0x20000;
+        if (m_padKind != 1) {
+            s_isPadSideways = true;
+        }
+        break;
+    }
+}
+
+void muAdvSealWinList::list_sort(int kind, int order) {
+    switch (kind) {
+    case 0:
+        m_sortKind = 6;
+        break;
+    case 1:
+        m_sortKind = 1;
+        break;
+    case 2:
+        m_sortKind = 0;
+        break;
+    case 3:
+        m_sortKind = 5;
+        break;
+    }
+    switch (order) {
+    case 0:
+        m_sortOrder = 4;
+        break;
+    case 1:
+        m_sortOrder = 0;
+        break;
+    case 2:
+        m_sortOrder = 1;
+        break;
+    case 3:
+        m_sortOrder = 2;
+        break;
+    case 4:
+        m_sortOrder = 3;
+        break;
+    }
+    list_sort_kind(m_sortKind, m_sortOrder);
+}
+
+bool muAdvSealWinList::add_seal_num(u32 id, int num) {
+    if (num != 0) {
+        Item* item = m_items;
+        int i;
+        for (i = 0; i < m_numItems; i++, item++) {
+            if (id == *item->m_data) {
+                break;
+            }
+        }
+        if (i < m_numItems) {
+            int count = num + m_items[i].m_count;
+            if (count >= 0) {
+                m_items[i].m_count = count;
+                m_flags |= 0xC;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 muAdvSealTexMgr::muAdvSealTexMgr() {
