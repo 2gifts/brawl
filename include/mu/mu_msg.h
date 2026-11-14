@@ -65,6 +65,8 @@ public:
     // void FUN_800b9448(u32 msgIndex, bool);
     // void FUN_800b9460(u32 msgIndex, u8, u8, u8, float);
     void beginPrint(u32 msgIndex);
+    void endPrint();
+    int getTag(u32 msgIndex, char** tagOut);
     void printf(u32 msgIndex, const char* format, ...);
     bool printIndex(u32 msgIndex, u32 lineIndex, void* msgBinData = NULL);
     // Shows a text of bytes that is not one of the messages of the file (length: in bytes).

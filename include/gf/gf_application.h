@@ -30,6 +30,11 @@ public:
             u8 unkEE[0xA];
         };
         struct {
+            u8 _padEE[0x6];
+            u8 unkEE_80 : 1; // HYPOTHESIS: a pause request bit (the Resetti window waits while it is set)
+            u8 : 7;
+        };
+        struct {
             u8 _padE8[0x4];
             u32 m_pauseState : 5; // HYPOTHESIS: the pause bits above this field's neighbor; IfCoinShooter::update tests it for non-zero
             // HYPOTHESIS: one requested-pause bit per index.
