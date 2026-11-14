@@ -23,11 +23,7 @@
 #include <havok/hkEntity.h>
 #include <havok/hkWorld.h>
 
-// hkSimpleContactConstraintAtomUtil (unsplit, 0x802DA104-0x802DA49C). HYPOTHESIS: names and parameters.
-extern "C" hkSimpleContactConstraintAtom* fn_802DA104(int numReservedContactPoints); // allocateAtom
-extern "C" hkSimpleContactConstraintAtom* fn_802DA2C8(hkSimpleContactConstraintAtom* atom); // expandOne
-extern "C" void fn_802DA368(hkSimpleContactConstraintAtom* atom, int index);               // removeAtAndCopy
-extern "C" hkSimpleContactConstraintAtom* fn_802DA430(hkSimpleContactConstraintAtom* atom, int numFreeElemsLeft); // optimizeCapacity
+
 // hkWorldAgentUtil.o: repoints the constraint's master entry at a moved atom. HYPOTHESIS: name and parameters.
 extern "C" void fn_802F58CC(hkConstraintInstance* constraint, hkSimpleContactConstraintAtom* oldAtom,
                             hkSimpleContactConstraintAtom* newAtom, int sizeOfNewAtom);
@@ -81,7 +77,7 @@ int hkSimpleContactConstraintData::allocateContactPoint(hkContactPoint*& cpOut, 
 
     hkSimpleContactConstraintAtom* oldAtom = m_atom;
     int index = oldAtom->m_numContactPoints;
-    m_atom = fn_802DA2C8(oldAtom);
+    m_atom = hkSimpleContactConstraintAtomUtil::expandOne(oldAtom);
 
     hkContactPoint* cp = &m_atom->getContactPoints()[index];
     hkContactPointProperties* props = &m_atom->getContactPointProperties()[index];
@@ -138,9 +134,9 @@ void hkSimpleContactConstraintData::freeContactPoint(u16 id) {
         extra.m_sizeOfJacobians = 0x20;
         extra.m_numSolverResults = 1;
     }
-    fn_802DA368(oldAtom, index);
+    hkSimpleContactConstraintAtomUtil::removeAtAndCopy(oldAtom, index);
     index[m_atom->getContactPointProperties()].m_flags &= ~2;
-    m_atom = fn_802DA430(m_atom, 1);
+    m_atom = hkSimpleContactConstraintAtomUtil::optimizeCapacity(m_atom, 1);
 
     for (int i = m_idMgrA.m_values.m_size - 1; i >= 0; i--) {
         u8 v = m_idMgrA.m_values[i];
@@ -164,19 +160,9 @@ void hkSimpleContactConstraintData::freeContactPoint(u16 id) {
 
 hkSimpleContactConstraintData::hkSimpleContactConstraintData(hkConstraintInstance* constraint) {
     m_constraint = constraint;
-    hkSimpleContactConstraintAtom* atom = fn_802DA104(0);
+    hkSimpleContactConstraintAtom* atom = hkSimpleContactConstraintAtomUtil::allocateAtom(0);
     m_atom = atom;
-    atom->m_info.m_flags = 0;
-    atom->m_info.m_index = 3;
-    // MATCH-ONLY: the seven solver words are cleared as integers (stw of a zero register).
-    u32* data = (u32*)&atom->m_info.m_data0C;
-    data[0] = 0;
-    data[1] = 0;
-    data[2] = 0;
-    data[3] = 0;
-    data[4] = 0;
-    data[5] = 0;
-    data[6] = 0;
+    atom->m_info.init();
 }
 
 void hkSimpleContactConstraintData::getConstraintInfo(ConstraintInfo& infoOut) const {

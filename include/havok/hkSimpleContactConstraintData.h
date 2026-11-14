@@ -10,9 +10,6 @@ struct hkBodyVelocity;
 
 struct hkConstraintInstance;
 
-// hkSimpleContactConstraintAtomUtil::deallocateAtom (unsplit, 0x802DA2B4). HYPOTHESIS: name.
-extern "C" void fn_802DA2B4(hkSimpleContactConstraintAtom* atom);
-
 // Maps contact point ids to point indices in the atom (0xFF = free id). The wrapper adds the third destructor level
 // the target's inlined destructor shows (three null-check branches). HYPOTHESIS: name.
 struct hkDynamicsCpIdMgr {
@@ -35,7 +32,7 @@ struct hkSimpleContactConstraintData : hkConstraintData {
     // Weak: the out-of-line copy sits in hkSimpleConstraintContactMgr.o, whose destructor also inlines it.
     virtual ~hkSimpleContactConstraintData() {
         if (m_atom) {
-            fn_802DA2B4(m_atom);
+            hkSimpleContactConstraintAtomUtil::deallocateAtom(m_atom);
         }
     }
 

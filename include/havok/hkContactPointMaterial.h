@@ -4,7 +4,7 @@
 
 // Per-contact material properties, stored right after the contact point array.
 struct hkContactPointMaterial {
-    u8 unk00[0x04];
+    u32 m_userData; // 0x00 HYPOTHESIS: name (copied as a word with the properties)
     u16 m_friction; // 0x04 (8.8 fixed point friction)
     u8 m_restitution; // 0x06 HYPOTHESIS: name
     u8 m_flags;       // 0x07 bit 1 (value 2): the point is solved together with the previous one (pair contact)
