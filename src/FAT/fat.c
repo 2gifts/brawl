@@ -56,6 +56,98 @@ VFTimeStampCallback lbl_805A1224 = NULL;
 // Checked: without this pragma 53 functions in this unit stop matching.
 #pragma auto_inline off
 
+// HYPOTHESIS: config and param are unused; the manager only clears the disk set
+// and the per-disk and per-partition lock handles.
+s32 VFipdm_init_diskmanager(u32 config, void* param) {
+    s32 i;
+
+    fn_803A976C(&lbl_8053A6E0, 0, sizeof(lbl_8053A6E0));
+    for (i = 0; i < 26; i++) {
+        lbl_8053A6E0.disk[i].disk_lock_handle = NULL;
+    }
+    for (i = 0; i < 26; i++) {
+        lbl_8053A6E0.partition[i].part_lock_handle = NULL;
+    }
+    return 0;
+}
+
+s32 VFiPFFILE_remove(PF_STR* p_path_str) {
+    PF_DIR_ENT* p_open;
+    PF_ENT_ITER iter;
+    PF_DIR_ENT ent;
+    PF_DIR_ENT* p_ent;
+    PF_VOLUME* p_vol;
+    s32 err;
+    u32 start_cluster;
+
+    if (p_path_str == NULL) {
+        lbl_8053B248.last_error = 10;
+        return 10;
+    }
+    p_vol = VFiPFPATH_GetVolumeFromPath(p_path_str);
+    if (p_vol == NULL) {
+        lbl_8053B248.last_error = 10;
+        return 10;
+    }
+    err = VFiPFVOL_CheckForWrite(p_vol);
+    if (err != 0) {
+        lbl_8053B248.last_error = err;
+        p_vol->last_error = err;
+        return err;
+    }
+    p_vol->cache.signature = NULL;
+    err = VFiPFENT_ITER_GetEntryOfPath(&iter, &ent, p_vol, p_path_str, 0);
+    switch (err) {
+    case 0:
+        break;
+    default:
+        goto after_free;
+    }
+    // HYPOTHESIS: 0x19 is the directory, volume, and read-only attributes.
+    if ((ent.attr & 0x19) != 0) {
+        err = 11;
+        goto after_free;
+    }
+    p_ent = &ent;
+    p_open = NULL;
+    {
+        u32 opened;
+
+        if (p_ent == NULL) {
+            opened = 0;
+        } else {
+            VFiPFFILE_GetOpenedFile(p_ent, &p_open);
+            // HYPOTHESIS: the opened test is a 0/1 value, not a direct pointer compare.
+            opened = (-(u32)p_open | (u32)p_open) >> 31;
+        }
+        if (opened != 0) {
+            err = 0x13;
+            goto after_free;
+        }
+    }
+    start_cluster = ent.start_cluster;
+    err = VFiPFENT_RemoveEntry(&ent, &iter);
+    switch (err) {
+    case 0:
+        break;
+    default:
+        goto after_free;
+    }
+    err = VFiPFFAT_FreeChain(&iter.ffd, start_cluster, (u32)-1, ent.file_size);
+after_free:
+    if (err != 0) {
+        lbl_8053B248.last_error = err;
+        p_vol->last_error = err;
+        return err;
+    }
+    err = VFiPFCACHE_FlushFATCache(p_vol);
+    if (err != 0) {
+        lbl_8053B248.last_error = err;
+        p_vol->last_error = err;
+    }
+    return err;
+}
+
 // HYPOTHESIS: NAND's creation entry takes the requested size, normalized path,
 // and path buffer capacity, as used by the VF system-file wrapper.
 s32 NAND_CreatePrfFile(u32 size, const s8* path, u32 capacity);
@@ -3719,6 +3811,57 @@ void VFiPF_InitLockFile(void) {
     lbl_805A1200.flock_count = 0;
 }
 
+u32 VFiPFCODE_CP932_isUnicodeMBchar(u16 uc_src, u32 num);
+
+// HYPOTHESIS: bits outside 0x00030000 are rejected, and setting both of those bits is rejected.
+// The 0x00010000 test is applied to the volume-set config twice.
+s32 VFiPFVOL_InitModule(u32 config, void* param) {
+    PF_VOLUME* p_vol;
+    s32 i;
+
+    if ((config & ~0x00030000u) != 0) {
+        lbl_8053B248.last_error = 10;
+        return 10;
+    }
+    if ((config & 0x00030000u) == 0x00030000u) {
+        lbl_8053B248.last_error = 10;
+        return 10;
+    }
+    if ((config & 0x00010000u) != 0) {
+        lbl_8053B248.config |= 0x00010000u;
+    } else {
+        lbl_8053B248.config &= ~0x00010000u;
+    }
+    lbl_8053B248.current_vol[0].p_vol = &lbl_8053B248.volumes[0];
+    lbl_8053B248.current_vol[0].stat |= 1;
+    lbl_8053B248.num_attached_drives = 0;
+    lbl_8053B248.num_mounted_volumes = 0;
+    if ((config & 0x00010000u) != 0) {
+        lbl_8053B248.config |= 0x00010000u;
+    } else {
+        lbl_8053B248.config &= ~0x00010000u;
+    }
+    lbl_8053B248.param = param;
+    lbl_8053B248.last_error = 0;
+    lbl_8053B248.last_driver_error = 0;
+    lbl_8053B248.setting = 1;
+    lbl_8053B248.codeset.oem2unicode = VFiPFCODE_CP932_OEM2Unicode;
+    lbl_8053B248.codeset.unicode2oem = VFiPFCODE_CP932_Unicode2OEM;
+    lbl_8053B248.codeset.oem_char_width = VFiPFCODE_CP932_OEMCharWidth;
+    lbl_8053B248.codeset.is_oem_mb_char = (u32 (*)(const s8, u32))VFiPFCODE_CP932_isOEMMBchar;
+    lbl_8053B248.codeset.unicode_char_width = VFiPFCODE_CP932_UnicodeCharWidth;
+    lbl_8053B248.codeset.is_unicode_mb_char = VFiPFCODE_CP932_isUnicodeMBchar;
+    p_vol = &lbl_8053B248.volumes[0];
+    i = 0;
+    do {
+        fn_803A976C(p_vol, 0, sizeof(*p_vol));
+        i += 1;
+        p_vol += 1;
+    } while (i < 26);
+    VFiPF_InitLockFile();
+    return 0;
+}
+
 // ---------------------------------------------------------------- pf_system
 
 s32 VFiPFSYS_GetCurrentContextID(s32* context_id) {
@@ -3869,7 +4012,6 @@ s32 VFUnmountDrive(const s8* i_drive) {
 // HYPOTHESIS: callee prototypes local to this unit (not declared by a shared header).
 VFTimeStampCallback VFSysSetTimeStampCallback(VFTimeStampCallback callback);
 void VFSysInit(void* i_heap_start_address_p, u32 i_size);
-s32 VFipdm_init_diskmanager(u32 a, void* b);
 
 void VFInitEx(void* i_heap_start_address_p, u32 i_size) {
     if (lbl_805A120C == 0) {
