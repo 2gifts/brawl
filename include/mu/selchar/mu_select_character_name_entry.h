@@ -67,7 +67,11 @@ public:
 #endif
     void cursorMain(gfPadStatus* pad);
     int abButtonMain(gfPadStatus* pad, bool allowRandom);
+#ifdef MU_NAME_CPP
+    bool changeLetter(char* out, const char* current);
+#else
     static bool changeLetter(char* out, const char* current);
+#endif
     int decideButtonProc(gfPadStatus* pad, bool allowRandom);
     static bool isNameValid(const char* name);
     static bool isNameValidNumeric(const char* name, const char* prefix, int digits, int min, int max);

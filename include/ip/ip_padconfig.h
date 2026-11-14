@@ -29,10 +29,19 @@ struct ipWiiButtonConfig {
     ipNunchukConfig nunchuk;
     ipClassicConfig classic;
 };
+#ifdef MU_NAME_CPP
+struct ipButtonConfig {
+    u8 gc[12];
+    u8 core[8];
+    u8 nunchuk[12];
+    u8 classic[13];
+};
+#else
 struct ipButtonConfig {
     ipGcButtonConfig gc;
     ipWiiButtonConfig wii;
 };
+#endif
 
 struct ipCorePadState {
     u8 attackHistory;

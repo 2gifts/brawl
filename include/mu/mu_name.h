@@ -40,6 +40,14 @@ struct muNameSlot {
 #endif
 
 // The Wii Remote can keep a name: this is what is read from it and written to it.
+#ifdef MU_NAME_CPP
+struct muNameRemoteData {
+    u8 m_flag : 1;              // 0x00 the flag of the name in the record of the game
+    u8 m_unk : 7;
+    u16 m_name[6];              // 0x02 the name in UTF-16
+    u8 m_data[0x2D];            // 0x0E what the record of the game keeps next to the name
+};
+#else
 struct muNameRemoteData {
     u8 m_flag : 1;              // 0x00 the flag of the name in the record of the game
     u8 m_unk : 7;
@@ -48,6 +56,7 @@ struct muNameRemoteData {
     u8 m_data[0x2D];            // 0x0E what the record of the game keeps next to the name
     u8 m_pad3B;                 // 0x3B
 };
+#endif
 
 // The task that reads and writes the name that a Wii Remote keeps.
 // HYPOTHESIS: the fields follow how the functions use them.
