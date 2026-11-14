@@ -2311,6 +2311,105 @@ s32 VFiPFENT_allocateEntry(PF_DIR_ENT* p_ent, u8 num_entries, PF_FFD* p_ffd, u32
     return VFiPFENT_allocateEntryPos(p_ent, num_entries, p_ffd, p_next_chain, p_filename, &pos);
 }
 
+s32 VFiPFCLUSTER_GetAppendSize(PF_FILE* p_file, u32* p_size) {
+    const u8* base;
+    u32 rem;
+    u32 max_chain;
+    PF_SFD* p_sfd;
+    PF_VOLUME* p_vol;
+    u32 cluster_size;
+    u32 aligned;
+    u32 start_cluster;
+    u32 file_size;
+    u32 total;
+    u32 num;
+    u32 target;
+    u32 cluster;
+    u32 next;
+    u32 eoc;
+    u32 bit0;
+    s32 err;
+
+    base = (const u8*)&lbl_8053B248;
+    *p_size = 0;
+    if (base > (const u8*)p_file || base + sizeof(lbl_8053B248) < (const u8*)p_file) {
+        return 10;
+    }
+    if (p_file == NULL) {
+        goto bad26;
+    }
+    p_sfd = p_file->p_sfd;
+    if (p_sfd == NULL) {
+        goto bad26;
+    }
+    if ((p_file->stat & 1) == 0) {
+        goto bad26;
+    }
+    bit0 = p_sfd->stat & 1;
+    if (bit0 == 0) {
+        goto bad26;
+    }
+    if ((p_sfd->stat & 2) != 0) {
+        goto check_sfd_again;
+    }
+bad26:
+    return 0x26;
+check_sfd_again:
+    if (bit0 == 0) {
+        goto bad26b;
+    }
+    if ((p_sfd->stat & 2) != 0) {
+        goto sfd_ok;
+    }
+bad26b:
+    return 0x26;
+sfd_ok:
+    if (p_file == NULL) {
+        p_vol = NULL;
+    } else {
+        p_vol = p_sfd->dir_entry.p_vol;
+    }
+    if (p_vol == NULL) {
+        return 0x26;
+    }
+    start_cluster = p_sfd->dir_entry.start_cluster;
+    cluster_size = (u32)p_vol->bpb.bytes_per_sector << p_vol->bpb.log2_sectors_per_cluster;
+    if (start_cluster == 0) {
+        goto done;
+    }
+    file_size = p_sfd->dir_entry.file_size;
+    max_chain = p_sfd->ffd.last_cluster.max_chain_index;
+    rem = file_size % cluster_size;
+    aligned = file_size + (rem != 0 ? cluster_size - rem : 0);
+    if (max_chain != 0) {
+        total = (max_chain + 1) * cluster_size;
+        goto store;
+    }
+    if (file_size != 0) {
+        err = VFiPFFAT_TraceClustersChain(&p_sfd->ffd, start_cluster, file_size, &target, &cluster);
+        if (err != 0) {
+            return err;
+        }
+    } else {
+        cluster = start_cluster;
+    }
+    eoc = VFiPFFAT_GetValueOfEOC2(p_vol);
+    num = 0;
+    while (cluster != eoc) {
+        num++;
+        err = VFiPFFAT_ReadValueToSpecifiedCluster(p_vol, cluster, &next);
+        if (err != 0) {
+            return err;
+        }
+        cluster = next;
+    }
+    total = aligned + num * cluster_size;
+store:
+    *p_size = total - aligned;
+done:
+    return 0;
+}
+
 s32 VFiPFFILE_p_finfo(PF_FILE* p_file, PF_INFO* p_info) {
     PF_VOLUME* p_vol;
     u32 cluster_size;
