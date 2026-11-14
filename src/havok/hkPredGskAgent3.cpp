@@ -27,6 +27,9 @@
 #include <havok/hkProcessCollisionOutput.h>
 #include <havok/hkMonitorStream.h>
 #include <havok/hkMath.h>
+#include <havok/hkConvexShape.h>
+#include <havok/hkShapeType.h>
+#include <havok/hkGskCache.h>
 
 // The agent3 functions of the predictive GSK agent; predictive, with a symmetric version.
 void hkPredGskAgent3::registerAgent3(hkCollisionDispatcher* dispatcher, int typeA, int typeB) {
@@ -43,6 +46,22 @@ void hkPredGskAgent3::registerAgent3(hkCollisionDispatcher* dispatcher, int type
     dispatcher->registerAgent3(f, typeA, typeB);
 }
 
+
+// The agent data is the GSK cache followed by an empty manifold; a triangle as shape B has its own cache setup.
+void* hkPredGskAgent3::create(const hkAgent3Input& input, hkAgentEntry* entry, void* agentData) {
+    const hkConvexShape* shapeA = (const hkConvexShape*)input.m_bodyA->m_shape;
+    const hkConvexShape* shapeB = (const hkConvexShape*)input.m_bodyB->m_shape;
+    hkGskCache* gskCache = (hkGskCache*)agentData;
+    if (shapeB->getType() == HK_SHAPE_TRIANGLE) {
+        gskCache->initTriangle(shapeA, shapeB, input.m_aTb);
+    } else {
+        gskCache->init(shapeA, shapeB, input.m_aTb);
+    }
+    hkGskManifold* gskManifold = (hkGskManifold*)(gskCache + 1);
+    entry->m_numContactPoints = 0;
+    *(u32*)gskManifold = 0; // the four header counts
+    return hkAddByteOffset(agentData, (gskManifold->getTotalSizeInBytes() + sizeof(hkGskCache) + 15) & ~15);
+}
 
 void* hkPredGskAgent3::cleanup(hkGskManifold* dst, hkPredGskAgent3* agent, void* arg) {
     hkGskManifold* manifold = &agent->m_manifold;

@@ -17,11 +17,8 @@
 #include <havok/hkShape.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkTransform.h>
+#include <havok/hkGskCache.h>
 
-// Stand-ins for the GSK setup helpers (other units, not recovered yet). fn_8031C8CC / fn_8031CD64 initialise the
-// sub-object at 0x0C for a triangle / other shape pair.
-extern "C" void fn_8031C8CC(void* self, void* shapeA, void* shapeB, void* relative);
-extern "C" void fn_8031CD64(void* self, void* shapeA, void* shapeB, void* relative);
 
 hkGskBaseAgent::hkGskBaseAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkContactMgr* contactMgr) : hkIterativeLinearCastAgent((int)contactMgr) {
     hkTransform relative;
@@ -32,9 +29,9 @@ hkGskBaseAgent::hkGskBaseAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkC
     const hkTransform& ta = *(const hkTransform*)bodyA.m_motion;
     relative.setMulInverseMul(ta, tb);
     if (shapeB->getType() == HK_SHAPE_TRIANGLE) {
-        fn_8031C8CC(unkC, shapeA, shapeB, &relative);
+        ((hkGskCache*)unkC)->initTriangle((const hkConvexShape*)shapeA, (const hkConvexShape*)shapeB, relative);
     } else {
-        fn_8031CD64(unkC, shapeA, shapeB, &relative);
+        ((hkGskCache*)unkC)->init((const hkConvexShape*)shapeA, (const hkConvexShape*)shapeB, relative);
     }
     unk28 = 0.0f;
     unk24 = 0.0f;

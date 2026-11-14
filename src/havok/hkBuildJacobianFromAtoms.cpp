@@ -30,6 +30,25 @@
 
 #include <havok/hkConstraintAtom.h>
 #include <havok/hkLinSoftConstraintAtom.h>
+#include <havok/hkConstraintQueryIn.h>
+#include <havok/hkJacobianSchema.h>
+
+// Schema that makes the solver step over solver results nobody writes (8 bytes).
+// HYPOTHESIS: the names; 0x13 is the schema type and 2 a flag of the header word.
+struct hkJacobianSkipSchema : hkJacobianSchema {
+    u8 m_numSolverResults; // 0x04
+};
+
+enum {
+    HK_JACOBIAN_SKIP_SCHEMA_TAG = 0x13020008,
+};
+
+void hkSkipSolverResults(int numSolverResults, hkConstraintQueryOut& out) {
+    hkJacobianSkipSchema* schema = (hkJacobianSkipSchema*)(hkJacobianSchema*)out.m_jacobianSchemas;
+    schema->m_tag = HK_JACOBIAN_SKIP_SCHEMA_TAG;
+    schema->m_numSolverResults = numSolverResults;
+    out.m_jacobianSchemas = (hkJacobianSchema*)(schema + 1);
+}
 
 int hkLinSoftConstraintAtom::numSolverResults() const {
     return 1;

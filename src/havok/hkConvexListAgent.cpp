@@ -50,6 +50,7 @@
 //   0x802B1838    92  __dt   [map: hkSymmetricAgent_17hkConvexListAgent_____dt]
 //   0x802B1894   164  __dt   [map: hkSymmetricAgent_11hkListAgent_____dt]
 
+#include <havok/hkGskCache.h>
 #include <havok/hkConvexListAgent.h>
 #include <havok/hkCollisionInput.h>
 #include <havok/hkSymmetricAgentFlipCollectors.h>
@@ -84,9 +85,6 @@ extern "C" void fn_802FEA54(void* subObject, void* args);
 extern "C" void fn_802FCB14(void* subObject);
 
 
-// Stand-in for hkGskCache::init (hkGskCache.o, not recovered yet): fills the cache at 0x0C from the two shapes and
-// the transform of B in A's frame.
-extern "C" void fn_8031CD64(void* cache, const void* shapeA, const void* shapeB, const hkTransform* aTb);
 
 // Default convex radius of the convex shapes (Havok's hkConvexShapeDefaultRadius, 0.05).
 extern hkReal hkConvexShapeDefaultRadius;
@@ -223,7 +221,7 @@ hkConvexListAgent::hkConvexListAgent(const hkCdBody& bodyA, const hkCdBody& body
         hkConvexListConvexShape shape(list->m_childInfo, list->m_numChildren, list->m_childInfo[0].m_shape->m_radius);
         hkTransform aTb;
         aTb.setMulInverseMul(*(const hkTransform*)bodyA.m_motion, *(const hkTransform*)bodyB.m_motion);
-        fn_8031CD64(unkC, shapeA, &shape, &aTb);
+        ((hkGskCache*)unkC)->init((const hkConvexShape*)shapeA, (const hkConvexShape*)&shape, aTb);
     }
     unk2C = -1.0f;
     unk18 = -1.0f;

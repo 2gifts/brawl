@@ -220,6 +220,7 @@ extern "C" int fn_8031D9AC(Bounds* bounds, Obj* object, Shape* shape, Vec4* poin
 #include <types.h>
 #include <havok/hkRotation.h>
 #include <havok/hkTransform.h>
+#include <havok/hkGskCache.h>
 namespace jj_fn_8031CD64 {
 struct V4 {
     float x;
@@ -267,8 +268,15 @@ struct Frame {
 } __attribute__((aligned(16)));
 
 
+} // namespace jj_fn_8031CD64
+
 // TODO: cleanup (shape from jj-link/brawl fn_8031CD64)
-extern "C" void fn_8031CD64(Out* arg0, Iface* arg1, Iface* arg2, int arg3) {
+void hkGskCache::init(const hkConvexShape* shapeA, const hkConvexShape* shapeB, const hkTransform& aTb) {
+    using namespace jj_fn_8031CD64;
+    int arg3 = (int)&aTb;
+    Iface* arg2 = (Iface*)shapeB;
+    Iface* arg1 = (Iface*)shapeA;
+    Out* arg0 = (Out*)this;
     Frame f;
 
     arg1->get1(&f.v70);
@@ -303,4 +311,3 @@ extern "C" void fn_8031CD64(Out* arg0, Iface* arg1, Iface* arg2, int arg3) {
     arg0->g = (unsigned char)arg1->get0();
     arg0->h = (unsigned char)arg2->get0();
 }
-} // namespace jj_fn_8031CD64

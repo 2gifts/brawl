@@ -2,6 +2,9 @@
 
 #include <havok/hkBase.h>
 
+struct hkConvexShape;
+struct hkTransform;
+
 // GSK cache entry (12 bytes, map name hkGskCache). From the symmetric processCollision wrappers, which flip a cache to
 // the swapped body order: m_dimA + m_dimB vertex ids are stored A first, so the flip swaps the two counts, swaps
 // unkA/unkB and reverses the first m_dimA + m_dimB ids. HYPOTHESIS: the names; the counts are signed bytes (extsb).
@@ -30,6 +33,10 @@ struct hkGskCache {
             m_vertices[2] = id;
         }
     }
+
+    // Fills the cache for a new pair (aTb: B in A's frame); a triangle as shape B gets its own setup (map names).
+    void init(const hkConvexShape* shapeA, const hkConvexShape* shapeB, const hkTransform& aTb);
+    void initTriangle(const hkConvexShape* shapeA, const hkConvexShape* shapeB, const hkTransform& aTb);
 
     // Copies the 12 bytes of other (map name hkGskCache____as).
     void operator=(const hkGskCache& other);
