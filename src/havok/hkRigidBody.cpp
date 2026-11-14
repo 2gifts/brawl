@@ -28,6 +28,7 @@
 #include <havok/hkRegistry.h>
 #include <havok/hkWorldOperationUtil.h>
 #include <havok/hkFixedRigidMotion.h>
+#include <havok/hkAabb.h>
 #include <havok/hkEntityCallbackUtil.h>
 #include <havok/hkRigidBodyDeactivator.h>
 #include <havok/hkWorldOperationQueue.h>
@@ -169,6 +170,41 @@ extern "C" void fn_802E2378(char* collidable, hkReal currentDepth, const float* 
 extern "C" void fn_802E25A8(int motionType, const hkVector4& position, const hkQuaternion& rotation, hkReal mass,
                             hkReal maxLinearVelocity, hkReal maxAngularVelocity, const hkMatrix3& inertiaTensor,
                             const hkVector4& centerOfMass, hkMotion* motionOut);
+
+// BYTES: the square root estimate goes through a double here (the hkVector4::length3 form gives other registers).
+static inline hkReal hkRigidBody_length3(const hkVector4& v) {
+    hkReal x = v.lengthSquared3();
+    hkReal inv;
+    if (x <= 0.0f) {
+        u32 bits = 0x7f800000;
+        inv = *(hkReal*)&bits;
+    } else {
+        double estimate = __frsqrte(x);
+        hkReal r = (hkReal)estimate;
+        inv = (0.5f * r) * -(r * (x * r) - 3.0f);
+    }
+    return 1.0f / inv;
+}
+
+// Caches the shape's extent and the body's bounding radius around the center of mass.
+// BYTES: not an inline candidate (its three callers call it).
+#pragma push
+#pragma auto_inline off
+void hkRigidBody::updateCachedShapeInfo(hkShape* shape, hkVector4* extentOut) {
+    hkAabb aabb;
+    shape->getAabb(hkTransform::getIdentity(), 0.0f, aabb);
+    extentOut->setSub4(aabb.m_max, aabb.m_min);
+    hkReal radius = 0.5f * hkRigidBody_length3(*extentOut);
+
+    hkVector4 centerShapeSpace;
+    centerShapeSpace.setAdd4(aabb.m_min, aabb.m_max);
+    centerShapeSpace.mul4(0.5f);
+    hkVector4 massCenterToAabbCenter;
+    massCenterToAabbCenter.setSub4(centerShapeSpace, m_motion.m_motionState.m_sweptTransform.m_centerOfMassLocal);
+    radius += hkRigidBody_length3(massCenterToAabbCenter);
+    m_motion.m_motionState.m_objectRadius = radius;
+}
+#pragma pop
 
 hkRigidBody::hkRigidBody(const hkRigidBodyCinfo& info) : hkEntity(info.m_shape) {
     m_material.setResponseType(info.m_collisionResponse);
