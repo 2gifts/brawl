@@ -19,6 +19,8 @@
 #include <havok/hkTriangleShape.h>
 #include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
+#include <havok/hkShapeRayCastInput.h>
+#include <havok/hkMonitorStream.h>
 
 void hkTriangleShape::finishLoadedObjecthkTriangleShape(void* p) {
     hkFinishLoadedObjectFlag flag;
@@ -66,12 +68,72 @@ void hkTriangleShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const
     out->m_flag = 1;
 }
 
+// Ray against the triangle's plane, then the hit point against the three edges (each edge with the hit point must
+// wind the same way as the triangle, up to a small tolerance scaled by the normal's length). The reported normal
+// faces the ray's start.
+hkBool hkTriangleShape::castRay(const hkShapeRayCastInput& input, hkShapeRayCastOutput& results) const {
+    HK_TIMER_BEGIN("rcTriangle");
+    hkVector4 edge1;
+    edge1.setSub4(m_vertexB, m_vertexA);
+    hkVector4 edge2;
+    edge2.setSub4(m_vertexC, m_vertexA);
+    hkVector4 normal;
+    normal.setCross(edge1, edge2);
+    hkReal planeDist = m_vertexA.dot3(normal);
+    hkReal distFrom = normal.dot3(input.m_from) - planeDist;
+    hkReal distTo = normal.dot3(input.m_to) - planeDist;
+    if (distFrom * distTo >= 0.0f) {
+        // both ends on one side; a ray starting in the plane may still leave it
+        if (0.0f != distFrom || 0.0f == distTo) {
+            HK_TIMER_END();
+            return false;
+        }
+    }
+    {
+        hkReal t = distFrom / (distFrom - distTo);
+        if (t < results.m_hitFraction) {
+            hkVector4 hit;
+            hit.setInterpolate4(input.m_from, input.m_to, t);
+            hkReal tolerance = normal.lengthSquared3() * -0.0001f;
+            hkVector4 toA;
+            toA.setSub4(m_vertexA, hit);
+            hkVector4 toB;
+            toB.setSub4(m_vertexB, hit);
+            hkVector4 sideAB;
+            sideAB.setCross(toA, toB);
+            if (sideAB.dot3(normal) >= tolerance) {
+                hkVector4 toC;
+                toC.setSub4(m_vertexC, hit);
+                hkVector4 sideBC;
+                sideBC.setCross(toB, toC);
+                if (sideBC.dot3(normal) >= tolerance) {
+                    hkVector4 sideCA;
+                    sideCA.setCross(toC, toA);
+                    if (sideCA.dot3(normal) >= tolerance) {
+                        results.m_hitFraction = t;
+                        if (distFrom > 0.0f) {
+                            results.m_normal = normal;
+                        } else {
+                            results.m_normal.setNeg4(normal);
+                        }
+                        results.m_normal.normalize3();
+                        results.unk18[results.unk38] = 0xFFFFFFFF;
+                        HK_TIMER_END();
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    HK_TIMER_END();
+    return false;
+}
+
 // Not yet decompiled in this unit:
 //   0x802D65E0   216  getSupportingVertex   [map: hkTriangleShape__getSupportingVertex]
 //   0x802D66B8   288  convertVertexIdsToVertices   [map: hkTriangleShape__convertVertexIdsToVertices]
 //   0x802D6804   708  getAabb   [map: hkTriangleShape__getAabb]
 //   0x802D6ADC   128  getCollisionSpheres   [map: hkTriangleShape__getCollisionSpheres]
-//   0x802D6B5C  1612  castRay   [map: hkTriangleShape__castRay]
 
 static hkStaticTypeInfo hkTriangleShapeTypeInfo("hkTriangleShape", hkTriangleShape::finishLoadedObjecthkTriangleShape, hkTriangleShape::cleanupLoadedObjecthkTriangleShape,
                                       hkTriangleShape::getVtablehkTriangleShape());
