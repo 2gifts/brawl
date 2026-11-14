@@ -28,6 +28,7 @@
 #include <havok/hkRegistry.h>
 #include <havok/hkWorldOperationUtil.h>
 #include <havok/hkFixedRigidMotion.h>
+#include <havok/hkRigidBodyDeactivator.h>
 #include <havok/hkWorldOperationQueue.h>
 #include <havok/hkWorldCallbackUtil.h>
 #include <havok/hkSimulation.h>
@@ -224,6 +225,34 @@ hkRigidBody::hkRigidBody(const hkRigidBodyCinfo& info) : hkEntity(info.m_shape) 
     restitution = info.m_restitution;
     m_material.m_friction = friction;
     m_material.m_restitution = restitution;
+}
+
+void hkRigidBody::getCinfo(hkRigidBodyCinfo& info) const {
+    info.m_autoRemoveLevel = m_autoRemoveLevel;
+    info.m_processContactCallbackDelay = m_processContactCallbackDelay;
+    info.m_rigidBodyDeactivatorType = m_deactivator
+                                          ? ((hkRigidBodyDeactivator*)m_deactivator)->getRigidBodyDeactivatorType()
+                                          : hkRigidBodyDeactivator::DEACTIVATOR_NEVER;
+    info.m_friction = m_material.m_friction;
+    info.m_collisionResponse = (hkMaterial::ResponseType)m_material.m_responseType;
+    info.m_restitution = m_material.m_restitution;
+    info.m_linearDamping = m_motion.m_motionState.m_linearDamping;
+    info.m_angularDamping = m_motion.m_motionState.m_angularDamping;
+    info.m_linearVelocity = m_motion.m_linearVelocity;
+    info.m_angularVelocity = m_motion.m_angularVelocity;
+    info.m_mass = m_motion.getMass();
+    m_motion.getInertiaLocal(info.m_inertiaTensor);
+    info.m_motionType = (hkMotion::MotionType)m_motion.m_type;
+    info.m_solverDeactivation = (hkRigidBodyCinfo::SolverDeactivation)m_motion.m_motionState.m_deactivationClass;
+    info.m_maxLinearVelocity = m_motion.m_motionState.m_maxLinearVelocity;
+    info.m_maxAngularVelocity = m_motion.m_motionState.m_maxAngularVelocity;
+    info.m_position = m_motion.m_motionState.m_transform.m_translation;
+    info.m_rotation = m_motion.m_motionState.m_sweptTransform.m_rotation1;
+    info.m_centerOfMass = m_motion.m_motionState.m_sweptTransform.m_centerOfMassLocal;
+    info.m_shape = m_collidable.m_shape;
+    info.m_collisionFilterInfo = m_collidable.m_broadPhaseHandle.m_collisionFilterInfo;
+    info.m_allowedPenetrationDepth = m_collidable.m_allowedPenetrationDepth;
+    info.m_qualityType = (hkRigidBodyCinfo::QualityType)m_collidable.m_broadPhaseHandle.m_objectQualityType;
 }
 
 // TODO: cleanup (shape from jj-link/brawl fn_802E3284)

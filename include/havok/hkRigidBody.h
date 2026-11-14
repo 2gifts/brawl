@@ -10,6 +10,8 @@ struct hkRigidBody : hkEntity {
     hkRigidBody(const hkRigidBodyCinfo& info);
     // phShape's view of the same constructor (it hands its construction info over as an int).
     hkRigidBody(int flag);
+    // Fills info with the body's current construction values.
+    void getCinfo(hkRigidBodyCinfo& info) const;
 
     // Loaded-object support (static init registration).
     static void finishLoadedObjecthkRigidBody(void* p);
