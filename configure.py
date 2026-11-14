@@ -1946,6 +1946,7 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "mo_fighter/ft_ganon/wn_ganon_beast.cpp"),
+            Object(NonMatching, "mo_fighter/ft_ganon/wn_ganon_beast_status_uniq_process.cpp"),
             Object(NonMatching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_hi_cling.cpp"),
             Object(Matching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_hi_throw.cpp"),
             Object(Matching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_s.cpp"),
@@ -2421,6 +2422,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_toonlink/ft_toonlink_status_uniq_process_final.cpp"),
             Object(Matching, "mo_fighter/ft_toonlink/ft_toonlink_status_uniq_process_wait.cpp"),
             Object(NonMatching, "mo_fighter/ft_toonlink/ft_toonlink.cpp"),
+            Object(NonMatching, "mo_fighter/ft_toonlink/ft_toonlink_kinetic_transactor.cpp"),
         ],
     },
     {

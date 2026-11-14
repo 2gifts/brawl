@@ -143,6 +143,8 @@ struct ftLucarioAuraBallParam;
 struct wnLinkBowData;
 struct wnLinkBowArrowData;
 struct wnToonLinkBowData;
+struct wnToonLinkBoomerangData;
+struct wnToonLinkHookShotData;
 struct wnToonLinkBowArrowData;
 struct wnYoshiTamagoData;
 struct wnSheikNeedleData;
@@ -199,6 +201,7 @@ struct wnGameWatchPanelData;
 struct wnGameWatchOilData;
 struct wnGameWatchOctopusData;
 struct wnCaptainBlueFalconData;
+struct wnGanonBeastData;
 struct wnCaptainFinalBgData;
 
 // HYPOTHESIS: leading flag word of a common fighter status's data (the bit with mask 0x8 marks statuses that cannot be trodden on).
@@ -315,6 +318,10 @@ const wnLinkBowArrowData* ftCommonDataAccesser::getWeaponData<wnLinkBowArrowData
 template <>
 const wnToonLinkBowData* ftCommonDataAccesser::getWeaponData<wnToonLinkBowData>(int kind, bool* resourceGroup) const;
 template <>
+const wnToonLinkBoomerangData* ftCommonDataAccesser::getWeaponData<wnToonLinkBoomerangData>(int kind, bool* resourceGroup) const;
+template <>
+const wnToonLinkHookShotData* ftCommonDataAccesser::getWeaponData<wnToonLinkHookShotData>(int kind, bool* resourceGroup) const;
+template <>
 const wnToonLinkBowArrowData* ftCommonDataAccesser::getWeaponData<wnToonLinkBowArrowData>(int kind, bool* resourceGroup) const;
 template <>
 const wnYoshiTamagoData* ftCommonDataAccesser::getWeaponData<wnYoshiTamagoData>(int kind, bool* resourceGroup) const;
@@ -429,6 +436,8 @@ template <>
 const wnGameWatchNormalWeaponData* ftCommonDataAccesser::getWeaponData<wnGameWatchNormalWeaponData>(int kind, bool* resourceGroup) const;
 template <>
 const wnCaptainBlueFalconData* ftCommonDataAccesser::getWeaponData<wnCaptainBlueFalconData>(int kind, bool* resourceGroup) const;
+template <>
+const wnGanonBeastData* ftCommonDataAccesser::getWeaponData<wnGanonBeastData>(int kind, bool* resourceGroup) const;
 template <>
 const wnCaptainFinalBgData* ftCommonDataAccesser::getWeaponData<wnCaptainFinalBgData>(int kind, bool* resourceGroup) const;
 
