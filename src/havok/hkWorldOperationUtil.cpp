@@ -18,6 +18,7 @@
 #include <havok/hkLinkedCollidable.h>
 #include <havok/hkConstraintInstance.h>
 #include <havok/hkLocalArray.h>
+#include <havok/hkCollisionInput.h>
 #include <havok/hkBroadPhase.h>
 #include <havok/hkPhantom.h>
 #include <havok/hkSimulation.h>
@@ -37,6 +38,41 @@ static inline T& at(void* p, int offset) {
     return *reinterpret_cast<T*>(reinterpret_cast<char*>(p) + offset);
 }
 
+
+// Moves the entity's broad-phase box to where its shape is now and hands the pairs that appeared and disappeared
+// to the dispatcher (pairs in both lists cancel out). Queued while the world is locked.
+void hkWorldOperationUtil::updateEntityBP(hkWorld* world, hkEntity* entity) {
+    if (world->m_lockCount != 0) {
+        hkWorldOperation::SingleObjectOperation op;
+        op.m_type = hkWorldOperation::ENTITY_UPDATE_BROAD_PHASE;
+        op.m_object = entity;
+        world->queueOperation(&op);
+        return;
+    }
+    world->lockCriticalOperations();
+    if (entity->m_collidable.m_shape != NULL) {
+        hkLocalArray<hkBroadPhaseHandlePair> newPairs(world->m_unk2E4);
+        hkLocalArray<hkBroadPhaseHandlePair> delPairs(world->m_unk2E4);
+
+        hkAabb aabb;
+        entity->m_collidable.m_shape->getAabb(*reinterpret_cast<const hkTransform*>(entity->m_collidable.m_motion),
+                                              0.5f * world->m_collisionInput->getTolerance(), aabb);
+        hkBroadPhaseHandle* handle = &entity->m_collidable.m_broadPhaseHandle;
+        world->m_broadPhase->updateAabbs(&handle, &aabb, 1, newPairs, delPairs);
+
+        if (newPairs.getSize() + delPairs.getSize() > 0) {
+            hkTypedBroadPhaseDispatcher::removeDuplicates(newPairs, delPairs);
+            world->m_broadPhaseDispatcher->removePairs(delPairs.begin(), delPairs.getSize());
+            void* filter = world->m_collisionFilter;
+            if (filter != NULL) {
+                filter = reinterpret_cast<char*>(filter) + 8;
+            }
+            world->m_broadPhaseDispatcher->addPairs(newPairs.begin(), newPairs.getSize(),
+                                                    (const hkCollidableCollidableFilter*)filter);
+        }
+    }
+    world->unlockAndAttemptToExecutePendingOperations();
+}
 
 // puts the phantom in the broadphase, then lets the dispatcher react to every pair that showed up
 void hkWorldOperationUtil::addPhantomBP(hkWorld* world, hkPhantom* phantom) {
