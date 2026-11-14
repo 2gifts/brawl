@@ -35,4 +35,13 @@ struct hkCapsuleShape : hkConvexShape {
     virtual void convertVertexIdsToVertices(const u16* ids, int numIds, hkVector4* out) const; // 0x34
     virtual void getFirstVertex(hkVector4& out) const;                       // 0x38
     virtual int getNumVertices() const;                                      // 0x3C
+
+    // Closest point of the segment a..b to p (never inlined: castRay calls it out of line).
+    static void closestPointLineSeg(const hkVector4& p, const hkVector4& a, const hkVector4& b, hkVector4& out)
+        __attribute__((never_inline));
+    // Closest points of the lines a + s*dA and b + t*dB: the squared distance (in: the largest accepted), the two
+    // parameters and the two points. HYPOTHESIS: the parameter meanings beyond the call shape.
+    static void closestInfLineSegInfLineSeg(const hkVector4& a, const hkVector4& dA, const hkVector4& b,
+                                            const hkVector4& dB, hkReal& distSquared, hkReal& tA, hkReal& tB,
+                                            hkVector4& pointA, hkVector4& pointB);
 };

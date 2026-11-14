@@ -14,7 +14,6 @@
 //   0x802CEED8  1120  getAabb   [map: hkCapsuleShape__getAabb]
 //   0x802CF338   668  closestInfLineSegInfLineSeg   [map: hkCapsuleShape__closestInfLineSegInfLineSeg]
 //   0x802CF5D4   352  closestPointLineSeg   [map: hkCapsuleShape__closestPointLineSeg]
-//   0x802CF734  2384  castRay   [map: hkCapsuleShape__castRay]
 //   0x802D0084     8  getType   [map: hkCapsuleShape__getType]
 //   0x802D008C   100  calcStatistics   [map: hkCapsuleShape__calcStatistics]
 //   0x802D00F0    84  __sinit_\hkCapsuleShape_cpp   [map: hkCapsuleShapecpp____sinit_]
@@ -22,6 +21,10 @@
 #include <havok/hkCapsuleShape.h>
 #include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
+#include <havok/hkShapeRayCastInput.h>
+#include <havok/hkMonitorStream.h>
+#include <havok/hkSphereShape.h>
+#include <havok/hkCdPoint.h>
 
 
 void hkCapsuleShape::finishLoadedObjecthkCapsuleShape(void* p) {
@@ -109,6 +112,112 @@ int hkCapsuleShape::getType() const {
 static hkStaticTypeInfo hkCapsuleShapeTypeInfo("hkCapsuleShape", hkCapsuleShape::finishLoadedObjecthkCapsuleShape, hkCapsuleShape::cleanupLoadedObjecthkCapsuleShape,
                                       hkCapsuleShape::getVtablehkCapsuleShape());
 
+// BYTES: the ray code is compiled with fused multiply-add contraction (as the rest of the unit after it).
+#pragma fp_contract on
+
+// A ray starting inside the capsule misses. Otherwise the ray is tested against the infinite cylinder around the
+// axis: a hit between the end points is a body hit; anything else goes to the sphere of the nearer end.
+hkBool hkCapsuleShape::castRay(const hkShapeRayCastInput& input, hkShapeRayCastOutput& results) const {
+    HK_TIMER_BEGIN("rcCapsule");
+    {
+        hkVector4 closest;
+        closestPointLineSeg(input.m_from, m_vertexA, m_vertexB, closest);
+        hkVector4 fromToAxis;
+        fromToAxis.setSub4(input.m_from, closest);
+        if (fromToAxis.length3() < m_radius) {
+            goto rayMissed;
+        }
+    }
+    {
+        hkVector4 rayDir;
+        rayDir.setSub4(input.m_to, input.m_from);
+        hkVector4 axis;
+        axis.setSub4(m_vertexB, m_vertexA);
+        hkReal distSquared = HK_REAL_MAX;
+        hkReal rayT;
+        hkReal axisT;
+        hkVector4 rayPoint;
+        hkVector4 axisPoint;
+        closestInfLineSegInfLineSeg(input.m_from, rayDir, m_vertexA, axis, distSquared, rayT, axisT, rayPoint,
+                                    axisPoint);
+        if (distSquared > m_radius * m_radius) {
+            goto rayMissed;
+        }
+
+        hkVector4 axisDir = axis;
+        hkReal axisLength = 0.0f;
+        if (axisDir.lengthSquared3() > 1.1920929e-07f) {
+            axisLength = axisDir.length3();
+            axisDir.setMul4(1.0f / axisLength, axisDir);
+        } else {
+            axisDir.setZero4();
+        }
+
+        // back from the closest approach to where the ray enters the cylinder
+        hkVector4 perpendicular;
+        perpendicular.setAddMul4(rayDir, axisDir, -rayDir.dot3(axisDir));
+        hkReal halfChord = 1.0f / hkVector4_sqrtInverse(m_radius * m_radius - distSquared);
+        hkReal perpLengthInv = 0.0f;
+        hkReal perpLengthSq = perpendicular.lengthSquared3();
+        if (0.0f != perpLengthSq) {
+            perpLengthInv = hkVector4_sqrtInverse(perpLengthSq);
+        }
+        hkReal t = rayT - halfChord * perpLengthInv;
+        if (t >= results.m_hitFraction) {
+            goto rayMissed;
+        }
+
+        hkVector4 hit;
+        hit.setInterpolate4(input.m_from, input.m_to, t);
+        hkReal axisStart = m_vertexA.dot3(axisDir);
+        hkReal hitAlong = hit.dot3(axisDir) - axisStart;
+        if (t >= 0.0f && hitAlong > 0.0f && hitAlong < axisLength) {
+            hkVector4 onAxis;
+            onAxis.setInterpolate4(m_vertexA, m_vertexB, hitAlong / axisLength);
+            hkVector4 normal;
+            normal.setSub4(hit, onAxis);
+            normal.normalize3();
+            results.m_normal = normal;
+            results.m_hitFraction = t;
+            results.unk14 = HIT_BODY;
+            results.unk18[results.unk38] = 0xFFFFFFFF;
+            HK_TIMER_END();
+            return true;
+        }
+
+        {
+            hkReal fromAlong = input.m_from.dot3(axisDir) - axisStart;
+            hkVector4 fromOnAxis;
+            fromOnAxis.setInterpolate4(m_vertexA, m_vertexB, fromAlong / axisLength);
+            hkVector4 fromToAxis;
+            fromToAxis.setSub4(input.m_from, fromOnAxis);
+            if (fromToAxis.length3() > m_radius && t < 0.0f) {
+                goto rayMissed;
+            }
+        }
+
+        // the end sphere on the side of the hit
+        int cap = (hitAlong <= 0.0f) ? HIT_CAP0 : HIT_CAP1;
+        const hkVector4& capCenter = (&m_vertexA)[cap];
+        hkShapeRayCastInput sphereInput;
+        sphereInput.m_from.setSub4(input.m_from, capCenter);
+        sphereInput.m_to.setSub4(input.m_to, capCenter);
+        sphereInput.unk20 = 0;
+        sphereInput.unk24 = 0;
+        hkSphereShape sphere(m_radius);
+        HK_TIMER_END();
+        if (sphere.castRay(sphereInput, results)) {
+            results.unk14 = cap;
+            return true;
+        }
+        return false;
+    }
+
+rayMissed:
+    HK_TIMER_END();
+    return false;
+}
+
 // Statistics collector slots used by calcStatistics (vtable offsets 0x0C and 0x20); see hkCylinderShape.cpp.
 // Shape from https://github.com/jj-link/brawl src/havok/fn_802D008C.cpp.
 struct hkStatisticsCollectorIface {
@@ -193,8 +302,16 @@ static inline float dot3(const V4& a, const V4& b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
+} // namespace jj_fn_802CF5D4
+
 // TODO: cleanup (shape from jj-link/brawl fn_802CF5D4)
-extern "C" void fn_802CF5D4(const V4* a, const V4* b, const V4* c, V4* out) {
+void hkCapsuleShape::closestPointLineSeg(const hkVector4& point, const hkVector4& segA, const hkVector4& segB,
+                                         hkVector4& closest) {
+    using namespace jj_fn_802CF5D4;
+    const V4* a = (const V4*)&point;
+    const V4* b = (const V4*)&segA;
+    const V4* c = (const V4*)&segB;
+    V4* out = (V4*)&closest;
     V4 d, e;
     d.x = b->x - a->x; d.y = b->y - a->y; d.z = b->z - a->z; d.w = b->w - a->w;
     e.x = c->x - b->x; e.y = c->y - b->y; e.z = c->z - b->z; e.w = c->w - b->w;
@@ -211,4 +328,3 @@ extern "C" void fn_802CF5D4(const V4* a, const V4* b, const V4* c, V4* out) {
         out->z = p * e.z + b->z; out->w = p * e.w + b->w;
     }
 }
-} // namespace jj_fn_802CF5D4
