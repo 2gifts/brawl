@@ -44,6 +44,11 @@ template soArrayVector<s32, 8>::~soArrayVector();
 #pragma dont_inline off
 soStatusModuleImpl::~soStatusModuleImpl() { }
 
+// The map keeps this empty destructor. The first pool level does not inherit it, so nothing else references it.
+#pragma force_active on
+soInstancePoolRoot::~soInstancePoolRoot() { }
+#pragma force_active reset
+
 ftKirbyExtendParamAccesser g_ftKirbyExtendParamAccesser;
 
 ftClassInfoImpl<Fighter_Kirby, ftKirby> g_ftClassInfoKirby;
