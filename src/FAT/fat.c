@@ -2,7 +2,15 @@
 // The combined unit exports the entry helpers. Keep its declarations local:
 // the sibling pf_entry.h gives those helpers internal linkage.
 #define RVL_SDK_VF_PF_ENTRY_H
+// The header prototype has one argument. The body also reads the format
+// parameter in r4, which its caller leaves untouched. Hide that prototype
+// so the call and the definition can disagree the way the two original
+// files did.
+#define fn_803C1F84 fn_803C1F84_decl
 #include <FAT/fat_vf.h>
+#undef fn_803C1F84
+s32 fn_803C1F84(s8 drv_char, const u8* param);
+s32 fn_803C093C(PF_VOLUME* p_vol, const u8* param);
 #include <revolution/OS/OSTime.h>
 
 u32 VFiPFENT_compareAttr(u8, u8, u8);
@@ -3717,7 +3725,57 @@ PF_FILE* VFipf2_fopen(const s8* path, const s8* mode) {
 }
 
 s32 VFipf2_format(s8 drv_char) {
-    return VFiPFAPI_convertReturnValue(fn_803C1F84(drv_char));
+    // The wrapper passes only the drive. The callee still reads r4.
+    return VFiPFAPI_convertReturnValue(((s32 (*)(s8))fn_803C1F84)(drv_char));
+}
+
+// HYPOTHESIS: VFiPFVOL_format. The second argument is the format parameter
+// forwarded to the mount helper; the public wrapper does not pass one.
+s32 fn_803C1F84(s8 drv_char, const u8* param) {
+    s16 index;
+    PF_VOLUME* p_vol;
+    s32 err;
+
+    index = fn_803A962C(drv_char) - 'A';
+    if (index < 0 || index >= 26) {
+        p_vol = NULL;
+    } else {
+        p_vol = &lbl_8053B248.volumes[index];
+    }
+    if (p_vol == NULL) {
+        lbl_8053B248.last_error = 10;
+        return 10;
+    }
+    if (!(p_vol->flags & 1)) {
+        lbl_8053B248.last_error = 10;
+        p_vol->last_error = 10;
+        return 10;
+    }
+    if (VFiPFDRV_IsInserted(p_vol) == 0) {
+        lbl_8053B248.last_error = 10;
+        p_vol->last_error = 10;
+        return 10;
+    }
+    if (p_vol->num_opened_files != 0) {
+        VFiPFFILE_FinalizeAllFiles(p_vol);
+        VFiPFCACHE_FreeAllCaches(p_vol);
+    }
+    if (p_vol->num_opened_directories != 0) {
+        VFiPFDIR_FinalizeAllDirs(p_vol);
+    }
+    err = fn_803C093C(p_vol, param);
+    if (err != 0) {
+        lbl_8053B248.last_error = err;
+        p_vol->last_error = err;
+        return err;
+    }
+    p_vol->fsi_flag |= 4;
+    if (p_vol->bpb.fat_type == FAT_32) {
+        p_vol->num_free_clusters = p_vol->bpb.num_clusters - 1;
+    } else {
+        p_vol->num_free_clusters = p_vol->bpb.num_clusters;
+    }
+    return 0;
 }
 
 u32 VFipf2_fread(void* p_buf, u32 size, u32 count, PF_FILE* p_file) {
@@ -5878,6 +5936,60 @@ u32 VFiPFPATH_CheckExtShortNameSignature(PF_STR* p_str) {
     }
     if (VFiPFSTR_StrNCmp(p_str, signature, 1, 0, 2) == 0) {
         result = 1;
+    }
+    return result;
+}
+
+extern s8 lbl_805A49E0;
+extern s8 lbl_805A49E1;
+extern s8 lbl_8059FE64[4];
+extern s8 lbl_8059FE74[2];
+extern s8 lbl_8059FE78[2];
+
+u32 VFiPFPATH_GetExtShortNameIndex(PF_STR* p_str, u32* p_index) {
+    s8 signature[2];
+    s32 wide_off;
+    u32 result;
+    s16 pos;
+    s32 value;
+    s32 found;
+
+    signature[0] = lbl_805A49E0;
+    signature[1] = lbl_805A49E1;
+    result = 0;
+    if (p_str == NULL || p_index == NULL) {
+        return 10;
+    }
+    if (VFiPFSTR_StrNCmp(p_str, signature, 1, 0, 2) == 0) {
+        value = 0;
+        pos = 2;
+        wide_off = 4;
+        while (pos < 8 || VFiPFSTR_StrNCmp(p_str, lbl_8059FE64, 1, pos, 1) != 0) {
+            s16 digit;
+            if (fn_803A9A78(p_str) == 1) {
+                digit = (s8)(fn_803A9AA8(p_str, 1)[pos]) - '0';
+            } else {
+                digit = *(const u16*)(fn_803A9AA8(p_str, 1) + wide_off) - '0';
+            }
+            if (digit < 0 || digit > 9) {
+                break;
+            }
+            value *= 10;
+            value += digit;
+            wide_off += 2;
+            pos++;
+        }
+        if (pos == 8) {
+            found = 0;
+            if (VFiPFSTR_StrNCmp(p_str, lbl_8059FE74, 1, pos, 1) == 0
+                || VFiPFSTR_StrNCmp(p_str, lbl_8059FE78, 1, pos, 1) == 0) {
+                found = 1;
+            }
+            if (found == 0 || VFiPFSTR_StrNCmp(p_str, (const s8*)0, 1, pos, 1) == 0) {
+                *p_index = value;
+                result = 1;
+            }
+        }
     }
     return result;
 }
@@ -8402,9 +8514,11 @@ int _MakeWStr(const s8* i_Name) {
             if (skip) skip = 0;
             else {
                 if (lbl_8053B248.codeset.is_oem_mb_char(i_Name[i], 1)) {
-                    u32 low = (u16)i_Name[i + 1];
-                    *dst = (i_Name[i] << 8) | low;
+                    s8 next = i_Name[i + 1];
+                    s8 cur = i_Name[i];
+                    u32 low = (u16)next;
                     skip = 1;
+                    *dst = (cur << 8) | low;
                 } else *dst = i_Name[i];
                 dst++;
             }
