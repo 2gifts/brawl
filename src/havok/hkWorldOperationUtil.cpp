@@ -762,9 +762,10 @@ void hkWorldOperationUtil::replaceMotionObject(hkRigidBody* body, hkMotion::Moti
 hkSimulationIsland* hkWorldOperationUtil::internalMergeTwoIslands(hkWorld* world, hkSimulationIsland* islandA,
                                                                   hkSimulationIsland* islandB) {
     HK_TIMER_BEGIN("MergeIsle");
-    if (islandA->m_entities.getSize() <= islandB->m_entities.getSize()) {
-        if (islandA->m_entities.getSize() < islandB->m_entities.getSize() ||
-            islandA->m_storageIndex > islandB->m_storageIndex) {
+    int sizeB = islandB->m_entities.getSize();
+    int sizeA = islandA->m_entities.getSize();
+    if (sizeA <= sizeB) {
+        if (sizeA < sizeB || islandA->m_storageIndex > islandB->m_storageIndex) {
             hkSimulationIsland* tmp = islandA;
             islandA = islandB;
             islandB = tmp;
@@ -773,7 +774,7 @@ hkSimulationIsland* hkWorldOperationUtil::internalMergeTwoIslands(hkWorld* world
     world->lockCriticalOperations();
 
     bool anyActive = islandA->m_flags.m_stateD || islandB->m_flags.m_stateD;
-    hkBool anyMarked = (char)islandA->m_flags27.m_active || (char)islandB->m_flags27.m_active;
+    bool anyMarked = (char)islandA->m_flags27.m_active || (char)islandB->m_flags27.m_active;
     if (anyActive) {
         if (!islandA->m_flags.m_stateD) {
             islandA->m_flags27.m_active = 1;
@@ -856,7 +857,7 @@ hkSimulationIsland* hkWorldOperationUtil::internalMergeTwoIslands(hkWorld* world
 
     islandA->m_flags.m_stateA = islandA->m_flags.m_stateA || islandB->m_flags.m_stateA;
     islandA->m_flags.m_stateB = islandA->m_flags.m_stateB || islandB->m_flags.m_stateB;
-    islandA->m_flags27.m_active = anyMarked;
+    islandA->m_flags27.m_active = hkBool(anyMarked);
 
     if (islandB->m_dirtyListIndex != 0xFFFF && islandA->m_dirtyListIndex == 0xFFFF) {
         islandA->m_dirtyListIndex = world->m_unk40.m_size;
