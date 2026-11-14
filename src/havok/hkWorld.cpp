@@ -249,9 +249,11 @@ void hkWorld::activateRegion(hkAabb* aabb) {
         // handle -> collidable (a signed byte offset stored in the handle) -> owner, only if it is an entity (type 1)
         char* handle = reinterpret_cast<char*>(hits[i].m_b);
         char* collidable = handle + static_cast<s8>(handle[5]);
-        hkEntity* entity = NULL;
+        hkEntity* entity;
         if (collidable[0x18] == 1) {
             entity = reinterpret_cast<hkEntity*>(collidable + *reinterpret_cast<int*>(collidable + 0x10));
+        } else {
+            entity = NULL;
         }
         if (entity != NULL) {
             entity->activate();
