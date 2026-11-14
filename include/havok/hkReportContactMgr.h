@@ -20,13 +20,13 @@ struct hkReportContactMgr : hkDynamicsContactMgr {
     virtual ~hkReportContactMgr();
 
     // Factory that creates a hkReportContactMgr for a pair of collidables (0x0C bytes).
-    struct Factory : hkReferencedObject {
+    struct Factory : hkContactMgrFactory {
         HK_DECLARE_REF_ALLOCATOR(0x20)
 
         hkWorld* m_factoryWorld; // 0x08
 
         Factory(hkWorld* world);
-        virtual hkReportContactMgr* createContactMgr(const hkCollidable& a, const hkCollidable& b,
-                                                     const void* input);
+        virtual hkContactMgr* createContactMgr(const hkCollidable& a, const hkCollidable& b,
+                                               const hkCollisionInput& input);
     };
 };

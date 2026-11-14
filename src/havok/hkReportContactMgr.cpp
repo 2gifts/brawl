@@ -9,6 +9,9 @@
 
 #include <havok/hkReportContactMgr.h>
 
+// BYTES: not an inline candidate (the factory calls it out of line).
+#pragma push
+#pragma auto_inline off
 hkReportContactMgr::hkReportContactMgr(hkWorld* world, const void* ownerA, const void* ownerB) {
     // HYPOTHESIS: the limit is the smaller of the two owners' u16 fields at 0x92.
     u16 limitB = *(const u16*)((const char*)ownerB + 0x92);
@@ -18,6 +21,7 @@ hkReportContactMgr::hkReportContactMgr(hkWorld* world, const void* ownerA, const
     m_ownerA = ownerA;
     m_ownerB = ownerB;
 }
+#pragma pop
 
 hkReportContactMgr::~hkReportContactMgr() {}
 
@@ -25,16 +29,11 @@ hkReportContactMgr::Factory::Factory(hkWorld* world) {
     m_factoryWorld = world;
 }
 
-hkReportContactMgr* hkReportContactMgr::Factory::createContactMgr(const hkCollidable& a, const hkCollidable& b,
-                                                                  const void* input) {
+hkContactMgr* hkReportContactMgr::Factory::createContactMgr(const hkCollidable& a, const hkCollidable& b,
+                                                            const hkCollisionInput& input) {
     const void* ownerA = (const char*)&a + a.m_ownerOffset;
     const void* ownerB = (const char*)&b + b.m_ownerOffset;
-    hkReportContactMgr* mgr = (hkReportContactMgr*)hkMemory::getInstance().allocateChunk(0x18, 0x20);
-    if (mgr != 0) {
-        mgr->m_memSizeAndFlags = 0x18;
-        ::new (mgr) hkReportContactMgr(m_factoryWorld, ownerA, ownerB);
-    }
-    return mgr;
+    return new hkReportContactMgr(m_factoryWorld, ownerA, ownerB);
 }
 
 hkConstraintInstance* hkDynamicsContactMgr::getConstraintInstance() {
