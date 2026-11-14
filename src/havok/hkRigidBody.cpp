@@ -28,6 +28,7 @@
 #include <havok/hkRegistry.h>
 #include <havok/hkWorldOperationUtil.h>
 #include <havok/hkFixedRigidMotion.h>
+#include <havok/hkEntityCallbackUtil.h>
 #include <havok/hkRigidBodyDeactivator.h>
 #include <havok/hkWorldOperationQueue.h>
 #include <havok/hkWorldCallbackUtil.h>
@@ -145,10 +146,11 @@ static hkStaticTypeInfo hkRigidBodyTypeInfo("hkRigidBody", hkRigidBody::finishLo
 
 // Shape from https://github.com/jj-link/brawl src/havok/fn_802E2378.cpp.
 // hkCollidable::estimateAllowedPenetrationDepth (inline copy): 0.2 * the smallest extent below 0.5, else 0.1.
+// HYPOTHESIS: the unused float argument is the current depth (both callers pass it in f1).
 // TODO: cleanup (shape from jj-link/brawl fn_802E2378)
 #pragma push
 #pragma auto_inline off
-extern "C" void fn_802E2378(char* collidable, const float* extents) {
+extern "C" void fn_802E2378(char* collidable, hkReal currentDepth, const float* extents) {
     float a = extents[1];
     float c = extents[2];
     float b = extents[0];
@@ -205,7 +207,7 @@ hkRigidBody::hkRigidBody(const hkRigidBodyCinfo& info) : hkEntity(info.m_shape) 
         hkVector4 extents;
         updateCachedShapeInfo(m_collidable.m_shape, &extents);
         if (m_collidable.m_allowedPenetrationDepth <= 0.0f) {
-            fn_802E2378((char*)&m_collidable, &extents.x);
+            fn_802E2378((char*)&m_collidable, m_collidable.m_allowedPenetrationDepth, &extents.x);
         }
     }
 
@@ -227,6 +229,10 @@ hkRigidBody::hkRigidBody(const hkRigidBodyCinfo& info) : hkEntity(info.m_shape) 
     m_material.m_restitution = restitution;
 }
 
+// MATCH-ONLY: the original keeps each field's load next to its store (scheduling off reproduces that, apart from
+// the prologue order).
+#pragma push
+#pragma scheduling off
 void hkRigidBody::getCinfo(hkRigidBodyCinfo& info) const {
     info.m_autoRemoveLevel = m_autoRemoveLevel;
     info.m_processContactCallbackDelay = m_processContactCallbackDelay;
@@ -253,6 +259,55 @@ void hkRigidBody::getCinfo(hkRigidBodyCinfo& info) const {
     info.m_collisionFilterInfo = m_collidable.m_broadPhaseHandle.m_collisionFilterInfo;
     info.m_allowedPenetrationDepth = m_collidable.m_allowedPenetrationDepth;
     info.m_qualityType = (hkRigidBodyCinfo::QualityType)m_collidable.m_broadPhaseHandle.m_objectQualityType;
+}
+#pragma pop
+
+bool hkRigidBody::setShape(hkShape* shape) {
+    if (m_world && m_world->areCriticalOperationsLocked()) {
+        struct {
+            u8 m_type;            // 0x00 HYPOTHESIS: the record of the queued shape change
+            hkRigidBody* m_body;  // 0x04
+            hkShape* m_shape;     // 0x08
+        } op;
+        op.m_type = hkWorldOperation::WORLD_OBJECT_SET_SHAPE;
+        op.m_body = this;
+        op.m_shape = shape;
+        m_world->queueOperation(&op);
+        return false;
+    }
+
+    if (m_world) {
+        m_world->lockCriticalOperations();
+        hkWorldOperationUtil::removeEntityBP(m_world, this);
+    }
+
+    hkBool hadShape = m_collidable.m_shape != NULL;
+    if (m_collidable.m_shape) {
+        m_collidable.m_shape->removeReference();
+    }
+    m_collidable.m_shape = shape;
+    shape->addReference();
+
+    hkVector4 extents;
+    updateCachedShapeInfo(shape, &extents);
+    // an estimated penetration depth is estimated again for the new shape
+    if (hadShape && m_collidable.m_allowedPenetrationDepth != 3.40282e38f) {
+        m_collidable.m_allowedPenetrationDepth = -1.0f;
+    }
+    if (m_collidable.m_allowedPenetrationDepth <= 0.0f) {
+        fn_802E2378((char*)&m_collidable, m_collidable.m_allowedPenetrationDepth, &extents.x);
+    }
+
+    if (m_world) {
+        hkWorldCallbackUtil::fireEntityShapeSet(m_world, this);
+    }
+    hkEntityCallbackUtil::fireEntityShapeSet(this);
+
+    if (m_world) {
+        hkWorldOperationUtil::addEntityBP(m_world, this);
+        m_world->unlockAndAttemptToExecutePendingOperations();
+    }
+    return true;
 }
 
 // TODO: cleanup (shape from jj-link/brawl fn_802E3284)

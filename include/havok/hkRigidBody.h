@@ -19,6 +19,8 @@ struct hkRigidBody : hkEntity {
     static const void* getVtablehkRigidBody();
 
     virtual hkMotionState* getMotionState();
+    // Replaces the shape: the body leaves the broad phase while its cached shape data is rebuilt.
+    virtual bool setShape(hkShape* shape);
     // Accessors into the body's motion block (out of line in src/havok/hkSimulation.cpp).
     hkMotion* getRigidMotion();
     hkTransform& getTransform();
