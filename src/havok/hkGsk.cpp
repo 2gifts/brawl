@@ -20,6 +20,7 @@
 //   0x8031B9FC   932  reduceDimensionExtended   [map: hkGsk__reduceDimensionExtended]
 //   0x8031BDA0  2860  hkGskRecalcContactInternal   [map: hkGsk__hkGskRecalcContactInternal]
 
+#include <havok/hkMath.h>
 #include <havok/hkGsk.h>
 
 void hkGsk::setFeatureChange(int value) {
@@ -41,6 +42,15 @@ void hkGsk::convertFeatureToClosestDistance(const hkVector4& plane, hkGskClosest
         out.m_position = vectorAt(0x130);
         out.m_weight = 0.5f;
     }
+}
+
+// Signed squared distance of the support point difference a - b along the direction.
+hkReal hkGskCalcSupportDistSquared(const hkVector4& direction, const hkVector4& a, const hkVector4& b) {
+    hkVector4 diff;
+    diff.setSub4(a, b);
+    hkReal dist = diff.dot3(direction);
+    hkReal absDist = (hkReal)__fabs(dist);
+    return dist * absDist;
 }
 
 // Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
