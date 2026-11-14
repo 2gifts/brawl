@@ -17,6 +17,9 @@ void hkBallSocketChainData::finishLoadedObjecthkBallSocketChainData(void* p) {
     ::new (p) hkBallSocketChainData(flag);
 }
 
+// Called out of line by the class registration at the end of the unit.
+#pragma push
+#pragma auto_inline off
 const void* hkBallSocketChainData::getVtablehkBallSocketChainData() {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
@@ -24,6 +27,7 @@ const void* hkBallSocketChainData::getVtablehkBallSocketChainData() {
     ::new (buf) hkBallSocketChainData(flag);
     return *(const void**)buf;
 }
+#pragma pop
 
 hkBallSocketChainData::hkBallSocketChainData(hkFinishLoadedObjectFlag flag) : hkConstraintData(flag), m_chain(flag) {
     m_bridgeAtom.init(m_bridgeAtom.m_constraintData);
