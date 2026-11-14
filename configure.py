@@ -2235,6 +2235,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_jump.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_turn.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_catch_common.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_follow_common.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_ground_follow.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_air_follow.cpp"),
             Object(NonMatching, "mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_water_follow.cpp"),
@@ -6780,6 +6781,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_snake_trenchmortar_bullet_status_uniq_process_fly.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/kinetic/so_kinetic_module_generic_impl.cpp"),
             Object(Matching, "mo_melee/sora_melee/gr/gr_collision_create.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_pikachu_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_pikachu_status_uniq_process_thunder_jolt.cpp"),
         ],
     },
     {
