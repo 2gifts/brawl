@@ -11795,9 +11795,15 @@ mo_melee/sora_melee/ft/ft_mario_status_uniq_process_special_hi.cpp:
 	.text       start:0x002D903C end:0x002D90B0
 	.ctors      start:0x00000350 end:0x00000354
 
+mo_melee/sora_melee/ft/ft_mario_transactor.cpp:
+	.text       start:0x002D90B0 end:0x002D935C
+
 mo_melee/sora_melee/wn/wn_mario_fireball.cpp:
 	.text       start:0x002D935C end:0x002DE170
 	.ctors      start:0x00000354 end:0x00000358
+
+mo_melee/sora_melee/ft/ft_donkey_transactor.cpp:
+	.text       start:0x002DE170 end:0x002DE5CC
 
 mo_melee/sora_melee/ft/ft_donkey_status_uniq_process_special_nattack.cpp:
 	.text       start:0x002DE5CC end:0x002DE758
@@ -12108,6 +12114,9 @@ mo_melee/sora_melee/wn/wn_pikachu_thunder_jolt.cpp:
 mo_melee/sora_melee/wn/wn_pikachu_thunder_jolt2.cpp:
 	.text       start:0x003269C4 end:0x00328704
 	.ctors      start:0x000003D0 end:0x000003D4
+
+mo_melee/sora_melee/ft/ft_luigi_transactor.cpp:
+	.text       start:0x00328A0C end:0x00328BA8
 
 mo_melee/sora_melee/wn/wn_luigi_fireball.cpp:
 	.text       start:0x00328BA8 end:0x00328E98

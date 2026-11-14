@@ -3,6 +3,7 @@
 #include <ft/ft_transactor.h>
 #include <types.h>
 
+class soArticle;
 class soModuleAccesser;
 class wnMarioFireball;
 
@@ -12,7 +13,8 @@ class ftMarioTransactor : public ftTransactor {
 public:
     ftMarioTransactor();
     virtual ~ftMarioTransactor();
-    // HYPOTHESIS: the id is the effect resource of the fighter and the kind (0x1b) selects the fireball variant.
-    virtual bool activeArticle1(wnMarioFireball* weapon, soModuleAccesser* acc, u32 etcResId, int kind);
+    virtual bool activeArticle(soArticle* article, soModuleAccesser* acc);
+    // Starts the fireball at the given model node (0x1b for Mario, 0x1b1 for Kirby's copy) with the effect resource.
+    virtual bool activeArticle1(wnMarioFireball* weapon, soModuleAccesser* acc, u32 etcResId, int nodeId);
 };
 static_assert(sizeof(ftMarioTransactor) == 4, "Transactor singleton layout is wrong!");
