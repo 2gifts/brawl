@@ -27,6 +27,9 @@
 #include <havok/hkRigidBody.h>
 #include <havok/hkAgentNnMachine.h>
 #include <havok/hkCollisionDispatcher.h>
+#include <havok/hkKeyframedRigidMotion.h>
+#include <havok/hkFixedRigidMotion.h>
+#include <havok/hkString.h>
 
 // HYPOTHESIS: the top two bits of the byte at island+0x26/+0x27 hold the activity state, written as a 2-bit field.
 // Local view only; hkSimulationIsland.h does not declare these bytes yet.
@@ -670,4 +673,83 @@ void hkWorldOperationUtil::setRigidBodyMotionType(hkRigidBody* body, u8 newMotio
         }
     }
     body->removeReference();
+}
+
+// The motion's current rotation (the end rotation of its swept transform).
+static inline const hkQuaternion& rotationOf(const hkMotion& motion) {
+    return motion.m_motionState.m_sweptTransform.m_rotation1;
+}
+
+// Swaps the body's motion in place. Becoming movable again restores the saved dynamic motion (with the current
+// state) and, for a dynamic type other than the saved one, rebuilds it as that type. Becoming fixed or keyframed
+// builds the new motion over the old one; a movable body keeps a copy of its old motion to come back to.
+void hkWorldOperationUtil::replaceMotionObject(hkRigidBody* body, hkMotion::MotionType newType, hkBool newIsMovable,
+                                               hkBool oldIsMovable, hkWorld* world) {
+    if (newIsMovable) {
+        if (!(bool)oldIsMovable) {
+            hkKeyframedRigidMotion* motion = &body->m_motion;
+            hkMaxSizeMotion* saved = motion->m_savedMotion;
+            motion->getMotionStateAndVelocities(saved);
+            body->m_collidable.m_broadPhaseHandle.m_objectQualityType = motion->m_savedQualityTypeIndex;
+            hkString::memCpy16(motion, saved, sizeof(hkMaxSizeMotion) / 16);
+            delete saved;
+        }
+        if (newType != body->m_motion.m_type && newType != hkMotion::MOTION_DYNAMIC) {
+            hkMaxSizeMotion oldMotion;
+            hkString::memCpy16(&oldMotion, &body->m_motion, sizeof(hkMaxSizeMotion) / 16);
+            hkMatrix3 inertia;
+            body->m_motion.getInertiaLocal(inertia);
+            hkMotionState& ms = oldMotion.m_motionState;
+            const hkVector4& position = ms.m_transform.m_translation;
+            hkSimdReal mass = oldMotion.getMass();
+            hkRigidBody::createDynamicRigidMotion(newType, position, ms.m_sweptTransform.m_rotation1,
+                                                  mass, ms.m_maxLinearVelocity, ms.m_maxAngularVelocity,
+                                                  inertia, ms.m_sweptTransform.m_centerOfMassLocal, &body->m_motion);
+            hkMotion* motion = &body->m_motion;
+            oldMotion.getMotionStateAndVelocities(motion);
+            motion->m_motionState.m_linearDamping = ms.m_linearDamping;
+            motion->m_motionState.m_angularDamping = ms.m_angularDamping;
+        }
+    } else {
+        hkMaxSizeMotion oldMotion;
+        hkString::memCpy16(&oldMotion, &body->m_motion, sizeof(hkMaxSizeMotion) / 16);
+        hkKeyframedRigidMotion* motion;
+        if (newType == hkMotion::MOTION_FIXED) {
+            motion = new (&body->m_motion) hkFixedRigidMotion(body->m_motion.m_motionState.m_transform.m_translation, rotationOf(body->m_motion));
+        } else {
+            motion = new (&body->m_motion) hkKeyframedRigidMotion(body->m_motion.m_motionState.m_transform.m_translation, rotationOf(body->m_motion));
+        }
+        if (newType == hkMotion::MOTION_FIXED) {
+            motion->m_motionState = oldMotion.m_motionState;
+            hkSweptTransform& st = oldMotion.m_motionState.m_sweptTransform;
+            hkReal invDeltaTime = st.m_centerOfMass1(3);
+            if (invDeltaTime != 0.0f) {
+                hkReal time;
+                if (world != 0) {
+                    time = world->m_simulation->m_unk10;
+                } else {
+                    time = st.m_centerOfMass0(3) + 1.0f / invDeltaTime;
+                }
+                hkSweptTransformUtil::freezeMotionState(time, motion->m_motionState);
+            }
+        } else {
+            oldMotion.getMotionStateAndVelocities(motion);
+        }
+        if (oldIsMovable) {
+            hkMaxSizeMotion* saved = new hkMaxSizeMotion();
+            u16 memSize = saved->m_memSizeAndFlags;
+            hkString::memCpy16(saved, &oldMotion, sizeof(hkMaxSizeMotion) / 16);
+            saved->m_memSizeAndFlags = memSize;
+            saved->m_referenceCount = 1;
+            motion->m_savedMotion = saved;
+            motion->m_savedQualityTypeIndex = body->m_collidable.m_broadPhaseHandle.m_objectQualityType;
+        } else {
+            motion->setStoredMotion(oldMotion.m_savedMotion);
+            motion->m_savedQualityTypeIndex = oldMotion.m_savedQualityTypeIndex;
+        }
+        body->m_solverData = 0;
+        body->m_collidable.m_broadPhaseHandle.m_objectQualityType =
+            (newType == hkMotion::MOTION_FIXED) ? 1 : 2; // fixed / keyframed collidable quality
+    }
+    body->m_collidable.m_motion = (hkMotion*)&body->m_motion.m_motionState;
 }

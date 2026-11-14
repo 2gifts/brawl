@@ -51,7 +51,7 @@ struct hkKeyframedRigidMotion : hkMotion {
     virtual void applyTorque(hkReal timestep, const hkVector4& torque); // 0x60 HYPOTHESIS
     virtual void setStepPosition(hkReal stepPosition);                  // HYPOTHESIS: parameter unused
 
-    void setStoredMotion(hkMaxSizeMotion* motion);
+    virtual void setStoredMotion(hkMaxSizeMotion* motion);              // 0x6C
 };
 
 // Keyframed motion with the largest storage size (same layout and dtor as hkKeyframedRigidMotion).
