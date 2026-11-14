@@ -1643,9 +1643,10 @@ static int compareNameSlots(const void* a, const void* b) {
 // Makes the list of the names: the line of the new name and then a line for each name that was saved (a blank line is added when
 // the list needs to scroll).
 void muNameTask::makeNameList() {
-    m_slots[0].m_nameNo = -1;
+    muNameSlot* slot = m_slots;
+    slot->m_nameNo = -1;
     m_slotCount = 1;
-    muNameSlot* slot = &m_slots[1];
+    slot++;
     int count = g_GameGlobal->getNumName();
     for (int i = 0; i < count; i++, slot++) {
         slot->m_nameNo = i;
