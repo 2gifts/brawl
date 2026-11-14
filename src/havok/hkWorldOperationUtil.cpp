@@ -13,6 +13,9 @@
 #include <havok/hkSimulationIsland.h>
 #include <havok/hkEntity.h>
 #include <havok/hkAction.h>
+#include <havok/hkWorldAgentUtil.h>
+#include <havok/hkLinkedCollidable.h>
+#include <havok/hkConstraintInstance.h>
 #include <havok/hkLocalArray.h>
 #include <havok/hkBroadPhase.h>
 #include <havok/hkPhantom.h>
@@ -225,6 +228,56 @@ void hkWorldOperationUtil::removeAttachedActionsFromDynamicIsland(hkWorld* world
     }
 }
 
+// Detaches every constraint of the entity (with a reference each, without callbacks) into removedConstraints.
+void hkWorldOperationUtil::removeAttachedConstraints(hkEntity* entity, hkArray<hkConstraintInstance*>& removedConstraints) {
+    hkWorld* world = entity->m_world;
+    {
+        hkArray<hkConstraintInternal>& constraints = entity->m_constraintsMaster;
+        for (int i = constraints.getSize() - 1; i >= 0; i--) {
+            hkConstraintInstance* constraint = (hkConstraintInstance*)constraints[i].m_unk00;
+            constraint->addReference();
+            removeConstraintImmediately(world, constraint, false);
+            removedConstraints.pushBack(constraint);
+        }
+    }
+    {
+        hkArray<hkConstraintInstance*>& constraints = entity->m_constraintsSlave;
+        for (int i = constraints.getSize() - 1; i >= 0; i--) {
+            hkConstraintInstance* constraint = constraints[i];
+            constraint->addReference();
+            removeConstraintImmediately(world, constraint, false);
+            removedConstraints.pushBack(constraint);
+        }
+    }
+}
+
+// HYPOTHESIS: names of two hkAgentNnMachine helpers (hkAgent1nMachine.o).
+extern "C" void fn_802FF684(hkAgentNnTrack& track, hkAgentNnEntry* entry); // CopyAndRelinkAgentEntry
+extern "C" void fn_802FF278(hkAgentNnTrack& track, hkAgentNnEntry* entry); // InternalDeallocateEntry
+
+// Agents to fixed partners move with the entity into agentsRemoved; when the entity becomes fixed, agents that
+// sit in its island move to the partner's island.
+void hkWorldOperationUtil::removeAttachedAgentsConnectingTheEntityAndAFixedPartnerEntityPlus(
+    hkAgentNnTrack& trackToScan, hkEntity* entity, hkAgentNnTrack& agentsRemoved, hkMotion::MotionType newMotionType) {
+    for (int i = 0; i < entity->m_collidable.m_collisionEntries.getSize(); i++) {
+        hkLinkedCollidable::CollisionEntry& entry = entity->m_collidable.m_collisionEntries[i];
+        hkEntity* otherBody = (hkEntity*)((char*)entry.m_partner + entry.m_partner->m_ownerOffset);
+        if (otherBody->isFixed()) {
+            hkAgentNnEntry* oldAgentEntry = entry.m_agentEntry;
+            fn_802FF684(agentsRemoved, oldAgentEntry);
+            fn_802FF278(trackToScan, oldAgentEntry);
+        } else if (newMotionType == hkMotion::MOTION_FIXED) {
+            hkSimulationIsland* islandOfAgent = hkWorldAgentUtil::getIslandFromAgentEntry(
+                entry.m_agentEntry, entity->m_simulationIsland, otherBody->m_simulationIsland);
+            if (islandOfAgent == entity->m_simulationIsland) {
+                hkAgentNnEntry* oldAgentEntry = entry.m_agentEntry;
+                fn_802FF684(otherBody->m_simulationIsland->m_agentTrack, oldAgentEntry);
+                fn_802FF278(trackToScan, oldAgentEntry);
+            }
+        }
+    }
+}
+
 // Processes the islands queued on the world's dirty list (last first; callbacks may add more): removed actions
 // are compacted out of the action lists, and islands whose activity changed are moved between the active and
 // inactive island arrays.
@@ -318,6 +371,9 @@ void hkWorldOperationUtil::mergeIslands(hkWorld* world, hkEntity* entityA, hkEnt
     }
 }
 
+// BYTES: not an inline candidate (removeAttachedConstraints calls it out of line).
+#pragma push
+#pragma auto_inline off
 void hkWorldOperationUtil::removeConstraintImmediately(hkWorld* world, hkConstraintInstance* constraint, bool fireCallback) {
     // HYPOTHESIS: the constraint's word at 0x08 is the island whose activity state (bits 0xC0 of 0x26) is set.
     hkSimulationIsland* island = *(hkSimulationIsland**)((u8*)constraint + 0x08);
@@ -336,6 +392,7 @@ void hkWorldOperationUtil::removeConstraintImmediately(hkWorld* world, hkConstra
         world->unlockAndAttemptToExecutePendingOperations();
     }
 }
+#pragma pop
 
 // Weak inline copies emitted in this unit; extern "C" placeholders under their fn_ names until the
 // instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).

@@ -2,6 +2,7 @@
 
 #include <havok/hkBase.h>
 #include <havok/hkWorld.h>
+#include <havok/hkMotion.h>
 #include <havok/hkWorldOperationQueue.h>
 
 struct hkSimulationIsland;
@@ -10,6 +11,7 @@ struct hkEntity;
 struct hkRigidBody;
 struct hkPhantom;
 struct hkAction;
+struct hkAgentNnTrack;
 
 // Operations on the world's islands, entities, phantoms and constraints, run while the world is locked
 // or when queued operations are executed.
@@ -23,6 +25,11 @@ struct hkWorldOperationUtil {
     static void removeConstraintFromCriticalLockedIsland(hkWorld* world, hkConstraintInstance* constraint);
     static void splitSimulationIslands(hkWorld* world);
     // (map name; hkSimulation::integrateInternal runs it before the actions). HYPOTHESIS: what it cleans up.
+    static void removeAttachedConstraints(hkEntity* entity, hkArray<hkConstraintInstance*>& removedConstraints);
+    static void removeAttachedAgentsConnectingTheEntityAndAFixedPartnerEntityPlus(hkAgentNnTrack& trackToScan,
+                                                                                hkEntity* entity,
+                                                                                hkAgentNnTrack& agentsRemoved,
+                                                                                hkMotion::MotionType newMotionType);
     static void cleanupDirtyIslands(hkWorld* world);
     static void internalActivateIsland(hkWorld* world, hkSimulationIsland* island);
     static void internalDeactivateIsland(hkWorld* world, hkSimulationIsland* island);
