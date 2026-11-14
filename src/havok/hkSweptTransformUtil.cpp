@@ -1,7 +1,6 @@
 // hkSweptTransformUtil.o (main.dol 0x80285DA4-0x802871F4)
 // stuff that moves a body's pose around, using the swept transform stored in its hkMotionState.
-// drafted from the havok 5.1 source, which has most of these. HYPOTHESIS: this build is older so
-// argument orders / details can differ. every signature here was checked against the asm though
+// every signature here was checked against the asm
 //   0x80285DA4   876  lerp2
 //   0x80286110   880  lerp2Ha
 //   0x80286480   960  backStepMotionState
@@ -223,7 +222,7 @@ void hkSweptTransformUtil::warpToRotation(const hkQuaternion& rotation, hkMotion
     warpTo(ms.m_transform.m_translation, rotation, ms);
 }
 
-// 5.1 doesn't have this one so it's straight from the asm: new local center goes in, and since the
+// straight from the asm: new local center goes in, and since the
 // body isn't supposed to move, both swept centers shift by (rotated difference between old and new)
 void hkSweptTransformUtil::setCentreOfRotationLocal(const hkVector4& newCenter, hkMotionState& ms) {
     hkSweptTransform& st = ms.m_sweptTransform;

@@ -5,8 +5,7 @@
 struct hkStepInfo;
 
 // helpers that move a body's hkMotionState around (the swept transform lives inside it).
-// signatures are from the asm. most match havok 5.1 but setTimeInformation takes the motion state FIRST here,
-// 5.1 has it last. so this build is a bit older, don't assume the rest line up either
+// signatures are from the asm; setTimeInformation takes the motion state first.
 struct hkSweptTransformUtil {
     // pose at time t, blended between the start and end of the step. result goes in out
     static void lerp2(const hkSweptTransform& st, hkReal t, hkTransform& out);
