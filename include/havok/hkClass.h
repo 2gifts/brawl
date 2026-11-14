@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-// Havok reflection class descriptor (reconstructed from asm; Havok 3.x/4.0-era layout).
+// Havok reflection class descriptor (layout from the asm).
 struct hkClass;
 struct hkClassEnum;
 

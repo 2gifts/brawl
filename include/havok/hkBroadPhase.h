@@ -37,7 +37,8 @@ struct hkBroadPhase : hkReferencedObject {
 
     virtual void addObject(hkBroadPhaseHandle* object, const hkAabb& aabb,
                            hkArray<hkBroadPhaseHandlePair>& pairsOut);                    // 0x10
-    virtual void addObjectBatch();                                                         // 0x14 (signature unknown)
+    virtual void addObjectBatch(hkArray<hkBroadPhaseHandle*>& addObjectList, hkArray<hkAabb>& addAabbList,
+                                hkArray<hkBroadPhaseHandlePair>& newPairs); // 0x14
     virtual void removeObject(hkBroadPhaseHandle* object, hkArray<hkBroadPhaseHandlePair>& pairsOut); // 0x18
     virtual void unk1C();
     virtual void unk20();
@@ -51,6 +52,8 @@ struct hkBroadPhase : hkReferencedObject {
     virtual void unk30();
     // HYPOTHESIS: the name (hkWorld::activateRegion collects the pairs overlapping a box with it)
     virtual void querySingleAabb(const hkAabb& aabb, hkArray<hkBroadPhaseHandlePair>& pairsOut) const; // 0x34
+    // The pairs overlapping one object already in the broad phase (hkWorld::updateCollisionFilterOnPhantom).
+    virtual void reQuerySingleObject(const hkBroadPhaseHandle* object, hkArray<hkBroadPhaseHandlePair>& pairsOut); // 0x38
 
     // HYPOTHESIS: the two empty out-of-line members after the destructor (no caller, no vtable slot).
     void lockImplementation();

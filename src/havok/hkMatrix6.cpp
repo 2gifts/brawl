@@ -1,7 +1,6 @@
 // hkMatrix6.o (main.dol 0x80283EB4-0x80284DB0)
 // 6x6 matrix helpers, which is just a 2x2 grid of hkMatrix3 blocks. the solver uses these.
-// the havok 5.1 source we have lines up w/ this really well (same function names even) but this
-// dol is an older build so i'm checking everything against the asm instead of trusting it
+// everything here is checked against the asm
 //   0x80283EB4   908  hkMatrix6Sub
 //   0x80284240   360  hkMatrix6SetMul
 //   0x802843A8   620  hkMatrix6SetMulV
@@ -84,7 +83,7 @@ void hkMatrix6::setMul(const hkMatrix6& a, const hkMatrix6& b) {
 
 // gauss-jordan on the columns: scale a column so its diagonal is 1, then use it to wipe that row out
 // of every other column. do the same moves on the identity and you end up with the inverse.
-// 5.1 asserts if a diagonal is zero, i didn't see anything like that in the asm so no check here
+// there is no check for a zero diagonal in the asm, so none here
 void hkMatrix6::setInvert(const hkMatrix6& tmpIn) {
     hkMatrix6& out = *this;
     hkMatrix6 in = tmpIn;

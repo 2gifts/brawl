@@ -18,8 +18,8 @@ struct hkVector4;
 // Nested operation record (20 bytes). The queue sorts these with islandLess.
 // Field offsets from the sort and comparison code; only 0x00, 0x04 and 0x08 are used so far.
 struct hkWorldOperation {
-    // what a queued operation does. numbers line up with the havok 5.1 enum (and with what hkWorld.cpp
-    // was already using as bare numbers, like 0x0B for removeAction)
+    // what a queued operation does. the numbers are the type bytes the world queues (hkWorld.cpp
+    // was already using some as bare numbers, like 0x0B for removeAction)
     enum Type {
         OPERATION_ID_INVALID = 0,
         ENTITY_ADD,                              // 0x01
@@ -59,7 +59,7 @@ struct hkWorldOperation {
     };
 
     // every operation starts with its type byte, then the payload from 0x04. these are the ones
-    // queueOperation touches (the rest of the 5.1 list has the same shape, add as needed)
+    // queueOperation touches (the others have the same shape, add as needed)
     struct BaseOperation {
         u8 m_type; // 0x00
         BaseOperation() : m_type(0) {}

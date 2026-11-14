@@ -16,7 +16,7 @@ struct hkAgentNnTrack;
 // Operations on the world's islands, entities, phantoms and constraints, run while the world is locked
 // or when queued operations are executed.
 // Activation argument of the entity add functions.
-enum {
+enum hkEntityActivation {
     HK_ENTITY_ACTIVATION_DO_NOT_ACTIVATE = 0,
     HK_ENTITY_ACTIVATION_DO_ACTIVATE = 1,
 };
