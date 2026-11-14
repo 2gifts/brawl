@@ -2,9 +2,11 @@
 
 #include <wn/wn_weapon_builder.h>
 
-// HYPOTHESIS: the article data type the class info fetches for kind 139; only passed as a pointer, the
+// HYPOTHESIS: the article data type the class info fetches for kind 4; only passed as a pointer, the
 // layout is unreconstructed (mirror of the blaster family's data role).
-struct wnToonLinkBowData;
+struct wnToonLinkBowData {
+    s32 m_resGroupNo; // HYPOTHESIS: as the other articles' data blocks; the rest is uninterpreted.
+};
 struct wnArticleBuildInfo;
 
 #ifdef WN_TOON_LINK_BOW_FULL_BUILDER // only the fighter TU owns the bow's builder (its weak teardown is emitted there)
@@ -33,7 +35,23 @@ public:
     typedef wnAnimCmdModuleSubBuildConfigNoUniq<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0> AnimCmdModuleSubBuildConfig;
     typedef soGlowModuleBuildConfigNull GlowModuleBuildConfig;
     typedef soColorBlendModuleBuildConfig<-1, 0, soColorBlendModuleImpl> ColorBlendModuleBuildConfig;
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
+    typedef soGenerateArticleManageModuleBuilder<soGenerateArticleManageModuleBuildConfigNull> GenerateArticleManageModuleBuilder;
+#endif
 };
+
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
+template <>
+class soModuleAccesserBuilder<wnToonLinkBowModuleAccesserBuildConfig> : public utUnCopyable {
+public:
+    typedef wnToonLinkBowModuleAccesserBuildConfig BC;
+    WN_ZELDA_LIGHTING_BOW_BUILDER_MEMBERS
+
+    soModuleAccesserBuilder(StageObject* owner, const wnModuleAccesserBuildData& bd);
+    ~soModuleAccesserBuilder();
+    soModuleAccesser* getModuleAccesser();
+};
+#endif
 
 // No common energies, as Pit's bow.
 template <>
@@ -43,7 +61,10 @@ protected:
     // HYPOTHESIS: trailing alignment of the animation-command storage, as in Pit's bow builder.
     u32 m_modulesPad;
 public:
+    // Defined in wn_toon_link_bow.cpp (sora_melee), where the article is built.
+    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd);
     virtual ~wnWeaponBuilder() { }
+    virtual void deactivateDescendantForce() { wnDeactivateArticleDescendants(m_modules.m_generateArticleBuilder); }
 };
 
 class wnToonLinkBow : public wnWeaponBuilder<wnToonLinkBowModuleAccesserBuildConfig> {

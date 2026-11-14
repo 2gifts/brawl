@@ -1,16 +1,66 @@
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructors expand the empty param customize module destructor
+#define WN_PARAM_ACCESSER_INLINE_DTOR // BYTES: the empty soParamAccesser base destructor is inlined in sora_melee
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
+#define FT_MODULE_BUILDER
+#define WN_MARIO_FIREBALL_UNIT // the sora_melee article unit mode shared with the Mario fireball (builders out of line)
+#define WN_ZELDA_LIGHTING_BOW_UNIT // the member layout and constructor of the module builder of this unit mode (wn/zelda/wn_zelda_lighting_bow.h)
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_STATUS_NO_TAIL
+#define WN_ARTICLE_ANIMCMD_INT // BYTES: the builder vtable takes Weapon's int-index notifyEventAnimCmd thunk (@72@), as in the original
+#define FT_REL_LINK_EXTERN
+#define SO_NULLABLE_INLINE_CTOR
+#define WN_TOON_LINK_BOW_ARROW_FULL_BUILDER
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/zelda/wn_zelda_lighting_bow.h>
 #include <wn/toon_link/wn_toon_link_bow_arrow.h>
 #include <wn/wn_class_info_impl.h>
+#include <ft/ft_kinetic_energy.h>
+#include <wn/wn_kinetic_module_impl.h>
+#include <so/kinetic/so_kinetic_module_impl.h>
 #include <wn/wn_activate_desc.h>
 #include <wn/wn_kinetic_energy_normal.h>
 #include <so/so_module_accesser.h>
+#include <so/model/so_model_module_impl.h>
 #include <so/status/so_status_module_impl.h>
+#include <gf/gf_task_scheduler.h>
 #include <math.h>
 #include <memory.h>
 #include <mt/mt_prng.h>
 
+// BYTES: the empty base destructors that sora_melee always expands (they have no out-of-line copy there).
+inline soTeam::~soTeam() { }
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+inline soResourceIdAccesser::~soResourceIdAccesser() { }
+
 // Registers the Toon Link bow arrow article class (kind 140) in the class info table during static initialization.
 wnClassInfoImpl<140, wnToonLinkBowArrow, wnToonLinkBowArrowData> g_wnToonLinkBowArrowClassInfo;
+
+// The status unique process of the arrow (wn_toon_link_bow_arrow_status_uniq_process.cpp).
+extern soStatusUniqProcess g_wnToonLinkBowArrowStatusUniqProcess;
+
+wnToonLinkBowArrow::wnToonLinkBowArrow(s32 articleId, const wnArticleBuildInfo& info, const wnToonLinkBowArrowData* data)
+    : wnWeaponBuilder<wnToonLinkBowArrowModuleAccesserBuildConfig>(
+          "ToonLinkBowArrow", articleId, info,
+          wnModuleAccesserBuildData(140, data,
+              info.getHeapModule()->getInstanceHeap(),
+              info.getHeapModule()->getNWModelInstanceHeap(),
+              info.getHeapModule()->getNWMotionInstanceHeap(),
+              static_cast<u8>(data->m_resGroupNo), 0, &g_soParamAccesserNull,
+              0, 0, 0, 0, 0, 0, 0)),
+      m_energyGround() {
+    soStatusUniqProcess* uniqProcs[3];
+    uniqProcs[0] = &g_wnToonLinkBowArrowStatusUniqProcess;
+    uniqProcs[1] = &g_wnToonLinkBowArrowStatusUniqProcess;
+    uniqProcs[2] = &g_wnToonLinkBowArrowStatusUniqProcess;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 3);
+    m_moduleAccesser->getKineticModule().addEnergy(&m_energyGround, 2, soKineticEnergy::AttributeFlag(8), -1);
+    wnKineticModuleImpl::setOutsideMovementGroundEnergyId(&m_moduleAccesser->getKineticModule(), 2);
+    Weapon::deactivate(false);
+}
+
+#define WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG wnToonLinkBowArrowModuleAccesserBuildConfig
+#include <wn/zelda/wn_zelda_lighting_bow_builder_ctor.h>
 
 void wnToonLinkBowArrow::activate(int founderTaskId, int resourceId, int team, float lr) {
     Vec3f pos(0.0f, 0.0f, 0.0f);

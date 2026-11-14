@@ -76,7 +76,7 @@ public:
     // The simple article calls the three disabled units out of line.
     soEventUnitNull() __attribute__((never_inline)) { }
     soEventUnitNull(s16, s16) __attribute__((never_inline)) { }
-#elif defined(WN_MARIO_FIREBALL_UNIT)
+#elif defined(WN_MARIO_FIREBALL_UNIT) && !defined(WN_ARTICLE_BUILDER_CTOR_INLINE) // the bow units expand the empty units
     soEventUnitNull();
     soEventUnitNull(s16, s16);
     ~soEventUnitNull();
