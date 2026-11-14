@@ -143,19 +143,19 @@ typedef struct
  */
 
 // bounces onto a stack of its own, see os
-extern void fn_801D81C4(void *a, UINT32 b, UINT32 c, UINT32 d, void *func, void *stack_top);
+extern void OSSwitchFiberEx(void *a, UINT32 b, UINT32 c, UINT32 d, void *func, void *stack_top);
 
 extern int IPCCltInit(void);
 
-// usb.c, no names for any of these yet
+// usb.c
 extern int IUSB_OpenLib(void);
 extern void IUSB_CloseLib(void);
 extern int IUSB_OpenDeviceIds(char *name, UINT16 vid, UINT16 pid);
 extern int IUSB_CloseDeviceAsync(int fd, void (*p_cback)(int), void *ctx);
-extern int fn_802291D4(int fd, int ep, int len, void *p_data, tUSB_CBACK *p_cback, void *ctx);
-extern int fn_80229248(int fd, int ep, int len, void *p_data, tUSB_CBACK *p_cback, void *ctx);
-extern int fn_802292BC(int fd, int ep, int len, void *p_data, tUSB_CBACK *p_cback, void *ctx);
-extern int fn_802298D4(int fd, int req_type, int req, int value, int index, int len, void *p_data, tUSB_CBACK *p_cback, void *ctx);
+extern int IUSB_ReadIntrMsgAsync(int fd, int ep, int len, void *p_data, tUSB_CBACK *p_cback, void *ctx);
+extern int IUSB_ReadBlkMsgAsync(int fd, int ep, int len, void *p_data, tUSB_CBACK *p_cback, void *ctx);
+extern int IUSB_WriteBlkMsgAsync(int fd, int ep, int len, void *p_data, tUSB_CBACK *p_cback, void *ctx);
+extern int IUSB_WriteCtrlMsgAsync(int fd, int req_type, int req, int value, int index, int len, void *p_data, tUSB_CBACK *p_cback, void *ctx);
 
 extern void bta_ci_hci_msg_handler(void *p_data);
 
@@ -571,7 +571,7 @@ static void hcisu_usb_evt_read_cback(int result, void *ctx)
 
 				memcpy(p_msg, p_buf, ((p_buf->len + p_buf->offset + 8) & ~3) + 4);
 
-				fn_801D81C4(p_msg, 0, 0, 0, bta_ci_hci_msg_handler,
+				OSSwitchFiberEx(p_msg, 0, 0, 0, bta_ci_hci_msg_handler,
 				            hcisu_evt_stack + sizeof hcisu_evt_stack);
 
 				GKI_freebuf(p_buf);
@@ -619,7 +619,7 @@ static void hcisu_usb_acl_read_cback(int result, void *ctx)
 
 			if (p_new != NULL && l2cap_link_chk_pkt_end())
 			{
-				fn_801D81C4(p_new, 0, 0, 0, bta_ci_hci_msg_handler,
+				OSSwitchFiberEx(p_new, 0, 0, 0, bta_ci_hci_msg_handler,
 				            hcisu_acl_stack + sizeof hcisu_acl_stack);
 			}
 
@@ -639,7 +639,7 @@ static void hcisu_usb_acl_read_cback(int result, void *ctx)
 	p_data = (UINT8 *)(((UINT32)p_buf + 0x27) & ~0x1f);
 	p_buf->offset = p_data - (UINT8 *)(p_buf + 1);
 
-	if (fn_80229248(hcisu_usb_cb.fd, hcisu_usb_cb.ep_bulk_in,
+	if (IUSB_ReadBlkMsgAsync(hcisu_usb_cb.fd, hcisu_usb_cb.ep_bulk_in,
 	                GKI_get_buf_size(p_buf) - 0x28 - p_buf->offset, p_data,
 	                hcisu_usb_acl_read_cback, p_buf) != 0)
 	{
@@ -663,7 +663,7 @@ static void hcisu_usb_post_evt_read(void)
 	p_data = (UINT8 *)(((UINT32)p_buf + 0x27) & ~0x1f);
 	p_buf->offset = p_data - (UINT8 *)(p_buf + 1);
 
-	if (fn_802291D4(hcisu_usb_cb.fd, hcisu_usb_cb.ep_intr_in,
+	if (IUSB_ReadIntrMsgAsync(hcisu_usb_cb.fd, hcisu_usb_cb.ep_intr_in,
 	                GKI_get_buf_size(p_buf) - 0x28 - p_buf->offset, p_data,
 	                hcisu_usb_evt_read_cback, p_buf) != 0)
 	{
@@ -691,7 +691,7 @@ static void hcisu_usb_cmd_write_cback(int result, void *ctx)
 	{
 		p_next = GKI_dequeue(&hcisu_usb_cb.cmd_write_q);
 
-		if (fn_802298D4(hcisu_usb_cb.fd, 0x20, 0, 0, 0, p_next->len,
+		if (IUSB_WriteCtrlMsgAsync(hcisu_usb_cb.fd, 0x20, 0, 0, 0, p_next->len,
 		                (UINT8 *)(p_next + 1) + p_next->offset,
 		                hcisu_usb_cmd_write_cback, p_next) < 0)
 		{
@@ -724,7 +724,7 @@ static void hcisu_usb_acl_write_cback(int result, void *ctx)
 	{
 		p_next = GKI_dequeue(&hcisu_usb_cb.acl_write_q);
 
-		if (fn_802292BC(hcisu_usb_cb.fd, hcisu_usb_cb.ep_bulk_out, p_next->len,
+		if (IUSB_WriteBlkMsgAsync(hcisu_usb_cb.fd, hcisu_usb_cb.ep_bulk_out, p_next->len,
 		                (UINT8 *)(p_next + 1) + p_next->offset,
 		                hcisu_usb_acl_write_cback, p_next) < 0)
 		{
@@ -836,9 +836,10 @@ static void hcisu_usb_open(tHCISU_USB_ARGS *p_args,
 	UINT8 *p_data;
 	HC_BT_HDR *p_buf;
 
-	if (hcisu_usb_cb.state == USB_STATE_READY
-	    && hcisu_usb_cb.pool_evt != GKI_INVALID_POOL
-	    && hcisu_usb_cb.pool_acl != GKI_INVALID_POOL)
+	if (hcisu_usb_cb.state != USB_STATE_READY
+	    || hcisu_usb_cb.pool_evt == GKI_INVALID_POOL
+	    || hcisu_usb_cb.pool_acl == GKI_INVALID_POOL)
+		return;
 	{
 		GKI_disable();
 		hcisu_usb_cb.p_state_cback = p_cback;
@@ -858,7 +859,7 @@ static void hcisu_usb_open(tHCISU_USB_ARGS *p_args,
 		p_data = (UINT8 *)(((UINT32)p_buf + 0x27) & ~0x1f);
 		p_buf->offset = p_data - (UINT8 *)(p_buf + 1);
 
-		if (fn_80229248(hcisu_usb_cb.fd, hcisu_usb_cb.ep_bulk_in,
+		if (IUSB_ReadBlkMsgAsync(hcisu_usb_cb.fd, hcisu_usb_cb.ep_bulk_in,
 		                GKI_get_buf_size(p_buf) - 0x28 - p_buf->offset, p_data,
 		                hcisu_usb_acl_read_cback, p_buf) != 0)
 		{
@@ -905,7 +906,7 @@ static UINT16 hcisu_usb_write(int type, UINT8 *p_data, UINT16 len, HC_BT_HDR *p_
 		if (hcisu_usb_cb.cmd_writing < USB_MAX_PENDING_WRITES
 		    && hcisu_usb_cb.cmd_write_q.count == 0)
 		{
-			ret = fn_802298D4(hcisu_usb_cb.fd, 0x20, 0, 0, 0, len, p_dst,
+			ret = IUSB_WriteCtrlMsgAsync(hcisu_usb_cb.fd, 0x20, 0, 0, 0, len, p_dst,
 			                  hcisu_usb_cmd_write_cback, p_buf);
 		}
 		else
@@ -947,7 +948,7 @@ static UINT16 hcisu_usb_write(int type, UINT8 *p_data, UINT16 len, HC_BT_HDR *p_
 		if (hcisu_usb_cb.acl_writing < USB_MAX_PENDING_WRITES
 		    && hcisu_usb_cb.acl_write_q.count == 0)
 		{
-			ret = fn_802292BC(hcisu_usb_cb.fd, hcisu_usb_cb.ep_bulk_out, len, p_dst,
+			ret = IUSB_WriteBlkMsgAsync(hcisu_usb_cb.fd, hcisu_usb_cb.ep_bulk_out, len, p_dst,
 			                  hcisu_usb_acl_write_cback, p_buf);
 		}
 		else
