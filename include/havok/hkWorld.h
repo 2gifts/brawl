@@ -40,11 +40,12 @@ struct hkWorldDynamicsStepInfo {
 };
 
 struct hkSimulationIsland;
+struct hkRigidBody;
 struct hkWorld : hkReferencedObject {
     hkSimulation* m_simulation;                     // 0x08 (hkWorld::stepDeltaTime calls its slot 0x10, stepDeltaTime)
     hkVector4 m_gravity;                            // 0x10
     hkSimulationIsland* m_fixedIsland;              // 0x20 holds the fixed entities (and actions on fixed entities only)
-    u8 m_unk24[0x04];                               // 0x24 not recovered
+    hkRigidBody* m_fixedRigidBody;                  // 0x24 the body null constraint sides attach to
     hkArrayBase m_unk28;                            // 0x28 array of hkWorldMemoryEntry* (HYPOTHESIS: islands), see getMemUsageForIntegration
     hkArrayBase m_unk34;                            // 0x34 not recovered
     hkArrayBase m_unk40;                            // 0x40 not recovered

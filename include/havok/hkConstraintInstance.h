@@ -1,6 +1,7 @@
 #pragma once
 
 #include <havok/hkBase.h>
+#include <havok/hkMemory.h>
 
 struct hkConstraintData;
 struct hkModifierConstraintAtom;
@@ -36,8 +37,12 @@ struct hkConstraintInstance : hkReferencedObject {
     u32 m_userData;                                  // 0x24
     void* m_internal;                                // 0x28
 
-    // Out of line in the (unsplit) hkConstraintInstance unit: 0x802DE764 / 0x802DE7E0 / 0x802DE79C.
+    // Freed as class 0x2A (the deleting destructor).
+    HK_DECLARE_REF_ALLOCATOR(0x2a)
+    static void* operator new(unsigned long, void* p) { return p; } // the loaded-object constructors
+
     hkConstraintInstance(ConstraintPriority priority);
+    hkConstraintInstance(hkFinishLoadedObjectFlag flag) {}
     virtual ~hkConstraintInstance();
     // calcStatistics                                          0x0C (inherited)
     virtual void entityAddedCallback(hkEntity* entity);   // 0x10
@@ -45,6 +50,12 @@ struct hkConstraintInstance : hkReferencedObject {
     virtual void entityDeletedCallback(hkEntity* entity); // 0x18
     virtual InstanceType getType() const;                 // 0x1C (TYPE_CHAIN for hkConstraintChainInstance)
     void setPriority(ConstraintPriority priority);
+    void pointNullsToFixedRigidBody();
+
+    // Loaded-object support (static init registration, see src/havok/hkConstraintInstance_part0.cpp).
+    static void finishLoadedObjecthkConstraintInstance(void* p);
+    static void cleanupLoadedObjecthkConstraintInstance(void* p);
+    static const void* getVtablehkConstraintInstance();
 
     hkConstraintData* getData() const { return m_data; }
     hkEntity* getEntityA() const { return m_entities[0]; }

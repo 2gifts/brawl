@@ -3768,6 +3768,9 @@ havok/hkConstraintInfoClass.cpp:
 havok/hkConstraintInstance_part0.cpp:
 	.text       start:0x802DE6F4 end:0x802DE99C
 	.ctors      start:0x804066D8 end:0x804066DC
+	.rodata     start:0x804126F0 end:0x80412708
+	.data       start:0x80487BB8 end:0x80487BD8
+	.bss        start:0x80532F10 end:0x80532F20
 
 havok/hkConstraintInstanceClass.cpp:
 	.text       start:0x802DE99C end:0x802DEA10

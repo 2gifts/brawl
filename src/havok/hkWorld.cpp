@@ -96,8 +96,6 @@ void hkWorld::removeWorldDeletionListener(hkWorldDeletionListener* listener) {
 
 
 // returns NULL when the add got queued because the world was locked
-// hkConstraintInstance::pointNullsToFixedRigidBody (unsplit hkConstraintInstance code). HYPOTHESIS: name.
-extern "C" void fn_802DE8BC(hkConstraintInstance* constraint);
 
 hkConstraintInstance* hkWorld::addConstraint(hkConstraintInstance* constraint) {
     if (areCriticalOperationsLocked()) {
@@ -122,7 +120,7 @@ hkConstraintInstance* hkWorld::addConstraint(hkConstraintInstance* constraint) {
     hkConstraintInstance* result;
     m_unk84 = true;
     {
-        fn_802DE8BC(constraint);
+        constraint->pointNullsToFixedRigidBody();
         result = hkWorldOperationUtil::addConstraintImmediately(this, constraint, true);
         if (constraint->getType() == hkConstraintInstance::TYPE_CHAIN) {
             hkConstraintChainInstance* chain = static_cast<hkConstraintChainInstance*>(constraint);
