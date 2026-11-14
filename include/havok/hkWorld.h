@@ -145,8 +145,8 @@ struct hkWorld : hkReferencedObject {
         return m_lockCount;
     }
     // Phantom operations are also queued while the phantom-specific lock (0x80) is held.
-    bool areCriticalOperationsLockedForPhantoms() const {
-        return m_lockCount + m_unk80 != 0;
+    int areCriticalOperationsLockedForPhantoms() const {
+        return m_lockCount + m_unk80;
     }
     void lockCriticalOperations() {
         m_lockCount++;
