@@ -143,9 +143,10 @@ int lbl_8059F0C0 = 500;
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
 typedef struct DWCMatchEntry {
     u8 unk0;
-    u8 _1[3];
+    u8 unk1; // HYPOTHESIS: 0 when the value is an int, 1 when it is a string
+    u16 unk2;
     void* unk4;
-    int unk8;
+    void* unk8; // HYPOTHESIS: points at the caller's value
 } DWCMatchEntry;
 // HYPOTHESIS: 0x9A entries of 0xC bytes.
 DWCMatchEntry lbl_805338B0[0x9A] __attribute__((aligned(8))) = { 0 };
@@ -1207,4 +1208,60 @@ int fn_8034A790(int result) {
         DWCi_StopMatchingInlined(err, -87000 + code);
     }
     return result;
+}
+
+int fn_80342BA8(int arg);
+int fn_80346D80(int a0, int a1, int a2);
+
+void fn_80348ACC(int level) {
+    int isServer;
+    int isSelf;
+    DWCMatchControl* control;
+    if (level == 0) {
+        if (fn_80349C88(DWCi_GPSetServerStatus(1)) != 0) {
+            return;
+        }
+        DWCi_CloseMatching();
+        control = lbl_805A0FA8[0];
+        {
+            u32 pid = control->unk224;
+            isServer = (pid != 0) ? 1 : (control->unk15 == 2);
+            isSelf = (pid == 0);
+            ((void (*)(int, int, int, int, int, int))control->unk480)(
+                0, 1, isSelf, isServer,
+                DWCi_GetFriendListIndex(control->unk224), control->unk484);
+        }
+        lbl_805A0FA8[0]->unk1BD = 0;
+    } else {
+        DWCi_ResetMatchParam(level);
+        control = lbl_805A0FA8[0];
+        if (control->unk16 == 2 || control->unk16 == 3) {
+            int isSelf;
+            DWCMatchControl* c = lbl_805A0FA8[0];
+            isSelf = (c->unk224 == 0);
+            ((void (*)(int, int, int, int, int, int))control->unk480)(
+                0, 1, isSelf, 0,
+                DWCi_GetFriendListIndex(c->unk224), c->unk484);
+        } else if (control->unk16 == 0) {
+            int isSelf = (control->unk224 == 0);
+            ((void (*)(int, int, int, int, int, int))control->unk480)(
+                0, 1, isSelf, 0,
+                DWCi_GetFriendListIndex(control->unk224), control->unk484);
+            if (level == 1) {
+                if (fn_80349F28(fn_80342BA8(0)) == 0) {
+                    return;
+                }
+            }
+        } else if (control->unk16 == 1) {
+            int isSelf = (control->unk224 == 0);
+            ((void (*)(int, int, int, int, int, int))control->unk480)(
+                0, 1, isSelf, 0,
+                DWCi_GetFriendListIndex(control->unk224), control->unk484);
+            if (level == 1) {
+                fn_80346D80(0, 0, 0);
+            }
+        } else {
+            DWC_Printf(2, "ERROR - DWCi_RestartFromCancel : matchType %d, level %d\n", control->unk15, level);
+        }
+    }
 }
