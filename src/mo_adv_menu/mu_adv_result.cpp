@@ -423,51 +423,45 @@ void muAdvResultTask::initDropCoinList() {
     m_seHandle = g_sndSystem->playSE(static_cast<SndID>(0x1EF8), -1, 0, 0, -1);
 }
 
+static inline void unlinkCoin(muAdvResultCoin*& head, muAdvResultCoin* coin) {
+    muAdvResultCoin* prev = coin->m_prev;
+    muAdvResultCoin* next = coin->m_next;
+    if (prev != NULL) {
+        prev->m_next = next;
+    } else {
+        head = next;
+    }
+    if (next != NULL) {
+        next->m_prev = prev;
+    }
+}
+
+static inline void pushCoin(muAdvResultCoin*& head, muAdvResultCoin* coin) {
+    if (head != NULL) {
+        head->m_prev = coin;
+    }
+    coin->m_prev = NULL;
+    coin->m_next = head;
+    head = coin;
+}
+
 // Moves the coins that fall, puts the ones that left the screen back, and lets a new one fall at random.
 void muAdvResultTask::dropCoinMain() {
-    muAdvResultCoin* next = m_coinActive;
-    muAdvResultCoin* coin;
-    while ((coin = next) != NULL) {
-        next = coin->m_next;
+    muAdvResultCoin* coin = m_coinActive;
+    while (coin != NULL) {
+        muAdvResultCoin* next = coin->m_next;
         if (!dropCoinMainOne(coin)) {
-            muAdvResultCoin* prev = coin->m_prev;
-            muAdvResultCoin* following = coin->m_next;
-            if (prev == NULL) {
-                m_coinActive = following;
-            } else {
-                prev->m_next = following;
-            }
-            if (following != NULL) {
-                following->m_prev = prev;
-            }
-            if (m_coinFree != NULL) {
-                m_coinFree->m_prev = coin;
-            }
-            coin->m_prev = NULL;
-            coin->m_next = m_coinFree;
-            m_coinFree = coin;
+            unlinkCoin(m_coinActive, coin);
+            pushCoin(m_coinFree, coin);
             g_gfSceneRoot->remove(reinterpret_cast<nw4r::g3d::ScnMdl*>(m_objects[coin->m_objectNo]->m_sceneModel));
         }
+        coin = next;
     }
     if (m_coinsLeft > 0 && randi(1) == 0) {
         coin = m_coinFree;
         if (coin != NULL) {
-            muAdvResultCoin* prev = coin->m_prev;
-            muAdvResultCoin* following = coin->m_next;
-            if (prev == NULL) {
-                m_coinFree = following;
-            } else {
-                prev->m_next = following;
-            }
-            if (following != NULL) {
-                following->m_prev = prev;
-            }
-            if (m_coinActive != NULL) {
-                m_coinActive->m_prev = coin;
-            }
-            coin->m_prev = NULL;
-            coin->m_next = m_coinActive;
-            m_coinActive = coin;
+            unlinkCoin(m_coinFree, coin);
+            pushCoin(m_coinActive, coin);
             dropCoinStartOne(coin);
             g_gfSceneRoot->add(gfSceneRoot::Layer_Info, reinterpret_cast<nw4r::g3d::ScnMdl*>(m_objects[coin->m_objectNo]->m_sceneModel));
             m_coinsLeft--;
