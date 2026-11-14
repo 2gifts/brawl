@@ -32,6 +32,7 @@
 #include <havok/hkString.h>
 #include <havok/hkMonitorStream.h>
 #include <havok/hkConstraintInternal.h>
+#include <havok/hkUnionFind.h>
 
 // HYPOTHESIS: the top two bits of the byte at island+0x26/+0x27 hold the activity state, written as a 2-bit field.
 // Local view only; hkSimulationIsland.h does not declare these bytes yet.
@@ -176,6 +177,9 @@ void hkWorldOperationUtil::splitSimulationIslands(hkWorld* world) {
 
 
 // Islands whose state changes are queued in the world's dirty list (hkWorld::m_unk40, an hkArray of islands).
+// Called out of line by the island split below.
+#pragma push
+#pragma auto_inline off
 void hkWorldOperationUtil::markIslandInactive(hkWorld* world, hkSimulationIsland* island) {
     // Activity state (top two bits of the byte at 0x27) cleared; see hkEntity::getActivationState.
     ((hkIslandActivityByte*)((u8*)island + 0x27))->activity = 0;
@@ -187,6 +191,7 @@ void hkWorldOperationUtil::markIslandInactive(hkWorld* world, hkSimulationIsland
         ((hkSimulationIsland**)world->m_unk40.m_data)[world->m_unk40.m_size++] = island;
     }
 }
+#pragma pop
 
 void hkWorldOperationUtil::markIslandActive(hkWorld* world, hkSimulationIsland* island) {
     u32 activity = 1;
@@ -547,12 +552,15 @@ void hkWorldOperationUtil::removeConstraintImmediately(hkWorld* world, hkConstra
 // instantiating callers are written (shape from https://github.com/jj-link/brawl src/havok/fn_<addr>.cpp).
 // 12-byte swap (unnamed in the map)
 // TODO: cleanup (shape from jj-link/brawl fn_802FB210)
+#pragma push
+#pragma auto_inline off
 extern "C" void fn_802FB210(int* a, int* b) {
     int t;
     t = a[0]; a[0] = b[0]; b[0] = t;
     t = a[1]; a[1] = b[1]; b[1] = t;
     t = a[2]; a[2] = b[2]; b[2] = t;
 }
+#pragma pop
 
 // Puts a new entity on an island: fixed entities share the fixed island; with simulation islands every other entity
 // starts on an island of its own (active or inactive as asked), otherwise active entities join the one active island.
@@ -882,4 +890,205 @@ hkSimulationIsland* hkWorldOperationUtil::internalMergeTwoIslands(hkWorld* world
     HK_TIMER_END();
     world->unlockAndAttemptToExecutePendingOperations();
     return islandA;
+}
+
+// Grows the array's storage to exactly n elements when it is smaller.
+template <typename T>
+static inline void reserveExactly(hkArray<T>& array, int n) {
+    if (array.getCapacity() < n) {
+        hkArrayUtil::_reserve(&array, n, sizeof(T));
+    }
+}
+
+// Gives heap storage back once an in-place array has shrunk to at most half of it.
+template <typename T, int N>
+static inline void optimizeCapacity(hkInplaceArray<T, N>& array) {
+    if (!(array.m_capacityAndFlags & hkArrayBase::DONT_DEALLOCATE_FLAG)) {
+        if (array.m_size < 1 || array.m_size * 2 < array.getCapacity()) {
+            hkArrayUtil::_reduce(&array, sizeof(T), array.m_storage, N);
+        }
+    }
+}
+
+// hkSimulationIsland's connectivity check (fn_802EA2D0, isFullyConnected in hkSimulationIsland.o): fills the union
+// find with the island's entity graph and reports whether it is one group.
+extern "C" hkBool fn_802EA2D0(hkSimulationIsland* island, hkUnionFind& checkConnectivity);
+
+// The island an agent entry belongs to: the first body's island, or the second one's when the first is fixed.
+static inline hkSimulationIsland* islandOfAgentEntry(hkAgentNnEntry* entry) {
+    hkLinkedCollidable* collA = entry->m_collidable[0];
+    hkSimulationIsland* island = ((hkEntity*)((char*)collA + collA->m_ownerOffset))->m_simulationIsland;
+    if (island->isFixed()) {
+        hkLinkedCollidable* collB = entry->m_collidable[1];
+        island = ((hkEntity*)((char*)collB + collB->m_ownerOffset))->m_simulationIsland;
+    }
+    return island;
+}
+
+// Splits every island of the active (or inactive) list that is marked for a split check and is no longer connected:
+// each further group of entities gets a new island, and the entities, constraints, actions and agents follow their
+// group. Called by hkWorld::addPhysicsSystem with the system's active flag.
+extern "C" void fn_802F9098(hkWorld* world, hkBool active) {
+    if (world->m_wantSimulationIslands) {
+    hkArray<hkSimulationIsland*>& islands = active ? *(hkArray<hkSimulationIsland*>*)&world->m_unk28
+                                                   : *(hkArray<hkSimulationIsland*>*)&world->m_unk34;
+    for (int i = islands.getSize() - 1; i >= 0; i--) {
+        hkSimulationIsland* island = islands[i];
+        if (!island->m_flags.m_stateA) {
+            continue;
+        }
+        island->m_flags.m_stateA = 0;
+
+        int numEntities = island->m_entities.getSize();
+        hkLocalArray<int> entityInfo(numEntities);
+        hkUnionFind checkConnectivity(entityInfo, island->m_entities.getSize());
+        if (fn_802EA2D0(island, checkConnectivity)) {
+            continue;
+        }
+        numEntities = island->m_entities.getSize();
+
+        hkInplaceArray<int, 32> sizeOfIslands;
+        checkConnectivity.assignGroups(sizeOfIslands);
+        int sizeOfFirstIsland = sizeOfIslands[0];
+
+        hkInplaceArray<hkSimulationIsland*, 32> newIslands;
+        u8 wasActive = island->m_flags27.m_active;
+        newIslands.pushBackUnchecked(island);
+        for (int g = 1; g < sizeOfIslands.getSize(); g++) {
+            hkSimulationIsland* newIsland = new hkSimulationIsland(world);
+            newIsland->m_flags27.m_active = active;
+            newIsland->m_flags.m_stateD = active;
+            islands.pushBack(newIsland);
+            newIsland->m_storageIndex = islands.getSize() - 1;
+            if (active && !(char)wasActive) {
+                hkWorldOperationUtil::markIslandInactive(world, newIsland);
+            }
+            newIslands.pushBack(newIsland);
+            reserveExactly(newIsland->m_entities, sizeOfIslands[g]);
+        }
+
+        // entities, and the constraints they own
+        {
+            hkEntity** oldEntities = island->m_entities.begin();
+            int oldNum = island->m_entities.getSize();
+            island->m_entities.m_size = 0;
+            for (int e = 0; e < oldNum; e++) {
+                hkEntity* entity = oldEntities[e];
+                hkSimulationIsland* newIsland = newIslands[entityInfo[e]];
+                entity->m_simulationIsland = newIsland;
+                entity->m_storageIndex = newIsland->m_entities.getSize();
+                newIsland->m_entities.pushBack(entity);
+                if (newIsland != island) {
+                    hkConstraintInternal* ci = entity->m_constraintsMaster.begin();
+                    for (int c = 0; c < entity->m_constraintsMaster.getSize(); c++, ci++) {
+                        hkConstraintInfo info;
+                        info.m_maxSizeOfJacobians = ci->m_unk14;
+                        info.m_sizeOfJacobians = ci->m_unk14;
+                        info.m_sizeOfSchemas = ci->m_unk16;
+                        info.m_numSolverResults = ci->m_unk18;
+                        island->m_unk1C--;
+                        island->m_constraintInfo.m_sizeOfJacobians -= info.m_sizeOfJacobians;
+                        island->m_constraintInfo.m_sizeOfSchemas -= info.m_sizeOfSchemas;
+                        island->m_constraintInfo.m_numSolverResults -= info.m_numSolverResults;
+                        info.m_maxSizeOfJacobians = island->m_constraintInfo.m_maxSizeOfJacobians;
+                        hkConstraintInternal* internal =
+                            (hkConstraintInternal*)((hkConstraintInstance*)ci->m_unk00)->m_internal;
+                        if (internal != NULL) {
+                            internal->m_unk14 -= info.m_sizeOfJacobians;
+                            internal->m_unk16 -= info.m_sizeOfSchemas;
+                            internal->m_unk18 -= info.m_numSolverResults;
+                        }
+                        newIsland->m_unk1C++;
+                        ((hkConstraintInstance*)ci->m_unk00)->m_owner = newIsland;
+                        newIsland->m_constraintInfo.add(info);
+                        internal = (hkConstraintInternal*)((hkConstraintInstance*)ci->m_unk00)->m_internal;
+                        if (internal != NULL) {
+                            internal->m_unk14 += info.m_sizeOfJacobians;
+                            internal->m_unk16 += info.m_sizeOfSchemas;
+                            internal->m_unk18 += info.m_numSolverResults;
+                        }
+                    }
+                }
+            }
+        }
+
+        // actions go to the island of their first movable entity
+        {
+            hkSimulationIsland* fixedIsland = world->m_fixedIsland;
+            hkAction** oldActions = island->m_actions.begin();
+            int numActions = island->m_actions.getSize();
+            island->m_actions.m_size = 0;
+            for (int a = 0; a < numActions; a++) {
+                hkAction* action = oldActions[a];
+                if (action == NULL) {
+                    continue;
+                }
+                hkSimulationIsland* newIsland = NULL;
+                {
+                    hkInplaceArray<hkEntity*, 16> actionEntities;
+                    action->getEntities(actionEntities);
+                    for (int k = 0; k < actionEntities.getSize(); k++) {
+                        newIsland = actionEntities[k]->m_simulationIsland;
+                        if (newIsland != fixedIsland) {
+                            break;
+                        }
+                    }
+                }
+                *(hkSimulationIsland**)((u8*)action + 0x0C) = newIsland;
+                newIsland->m_actions.pushBack(action);
+            }
+        }
+
+        // agents: move the few that changed island, or rebuild every track when many entities moved
+        if ((numEntities - sizeOfFirstIsland) * 8 < numEntities) {
+            hkAgentNnTrack& track = island->m_agentTrack;
+            for (int s = 0; s < track.m_sectors.getSize(); s++) {
+                hkAgentNnSector* sector = track.getSector(s);
+                hkAgentNnEntry* entry = (hkAgentNnEntry*)sector;
+                while (entry < (hkAgentNnEntry*)((char*)sector + (s + 1 == track.m_sectors.getSize()
+                                                                       ? track.m_bytesUsedInLastSector
+                                                                       : track.m_sectorSize))) {
+                    hkSimulationIsland* entryIsland = islandOfAgentEntry(entry);
+                    if (entryIsland == island) {
+                        entry = (hkAgentNnEntry*)((char*)entry + entry->m_size);
+                        continue;
+                    }
+                    fn_802FF684(entryIsland->m_agentTrack, entry);
+                    fn_802FF278(track, entry);
+                    if (s >= track.m_sectors.getSize()) {
+                        break;
+                    }
+                }
+            }
+        } else {
+            hkCollisionDispatcher* dispatcher = world->m_collisionDispatcher;
+            hkAgentNnTrack oldTrack(dispatcher->m_agentEntrySize, dispatcher->m_agentSectorSize);
+            hkAgentNnTrack& track = island->m_agentTrack;
+            if (track.m_sectors.getSize() == 1) {
+                oldTrack.m_sectors.begin()[0] = track.m_sectors.begin()[0];
+                oldTrack.m_sectors.m_size = 1;
+                track.m_sectors.m_size = 0;
+            } else if (track.m_sectors.getSize() > 1) {
+                reserveExactly(oldTrack.m_sectors, 2);
+                fn_802FB210((int*)&oldTrack.m_sectors, (int*)&track.m_sectors);
+            }
+            int bytesUsed = oldTrack.m_bytesUsedInLastSector;
+            oldTrack.m_bytesUsedInLastSector = track.m_bytesUsedInLastSector;
+            track.m_bytesUsedInLastSector = bytesUsed;
+            for (int s = 0; s < oldTrack.m_sectors.getSize(); s++) {
+                hkAgentNnSector* sector = oldTrack.getSector(s);
+                hkAgentNnEntry* entry = (hkAgentNnEntry*)sector;
+                hkAgentNnEntry* end = (hkAgentNnEntry*)((char*)sector + (s + 1 == oldTrack.m_sectors.getSize()
+                                                                              ? oldTrack.m_bytesUsedInLastSector
+                                                                              : oldTrack.m_sectorSize));
+                for (; entry < end; entry = (hkAgentNnEntry*)((char*)entry + entry->m_size)) {
+                    fn_802FF684(islandOfAgentEntry(entry)->m_agentTrack, entry);
+                }
+                hkThreadMemory::s_instance->deallocateChunk(sector, oldTrack.m_sectorSize, 0x25);
+            }
+            oldTrack.m_sectors.m_size = 0;
+        }
+        optimizeCapacity(island->m_agentTrack.m_sectors);
+    }
+    }
 }
