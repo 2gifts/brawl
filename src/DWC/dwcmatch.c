@@ -23,47 +23,69 @@ typedef struct DWCMatchControl {
     u8 unk1A;
     u8 _1B;
     u32 unk1C;
-    u32 unk20;
-    u32 unk24;
+    s64 unk20; // HYPOTHESIS: an OSTime. The following word is its high half.
     int unk28;
     u8 unk2C;
     u8 _2D;
     u16 unk2E;
     u32 unk30;
     u32 unk34;
-    u8 _38[0xC0];
+    u32 unk38;
+    u8 _3C[0x7C];
+    u16 unkB8;
+    u8 _BA[0x3E];
     void* unkF8;
-    u8 _FC[0xC];
-    int unk108;
-    int profiles1[0x1F]; // HYPOTHESIS: profile ids of the other members, index 1 onward.
+    u32 unkFC;
+    s64 unk100;
+    int profiles[0x20]; // HYPOTHESIS: index 0 is this player. Same storage as the old word at 0x108 plus the following list.
     s64 unk188; // HYPOTHESIS: cleared at init as a pair of words
     u8 unk190;
     u8 unk191;
-    u8 _192[2];
+    u16 unk192;
     int unk194;
     int unk198;
     int unk19C;
-    u8 _1A0[0x14];
+    int unk1A0;
+    int unk1A4;
+    u8 unk1A8;
+    u8 unk1A9;
+    u16 unk1AA;
+    u32 unk1AC;
+    int unk1B0;
     int unk1B4;
-    u8 _1B8[2];
+    u8 unk1B8;
+    u8 unk1B9;
     u8 unk1BA;
     u8 _1BB;
     u8 unk1BC;
     u8 unk1BD;
-    u8 _1BE[3];
+    u8 unk1BE;
+    u8 unk1BF;
+    u8 unk1C0;
     u8 unk1C1;
     u16 unk1C2;
-    u8 _1C4[0x2C];
+    s16 unk1C4;
+    u16 unk1C6;
+    u32 unk1C8;
+    u32 unk1CC;
+    s64 unk1D0;
+    u32 unk1D8;
+    u32 _1DC;
+    s64 unk1E0;
+    u32 unk1E8;
+    u32 unk1EC;
     u32 unk1F0; // HYPOTHESIS: cleared at init
     u8 _1F4[4];
     s64 unk1F8;
-    u8 _200[0x10];
+    s64 unk200;
+    s64 unk208;
     s64 unk210;
     u32 unk218;
     int unk21C;
     void* unk220;
     u32 unk224;
-    u8 _228[0xC0];
+    u32 unk228[0x20];
+    u16 unk2A8[0x20];
     u8 aidList[1];
     u8 _2E9[0x1F];
     u32 unk308;
@@ -71,11 +93,19 @@ typedef struct DWCMatchControl {
     u32 unk310;
     u32 unk314; // HYPOTHESIS: init argument
     u32 unk318; // HYPOTHESIS: init argument
-    u8 _31C[0x40];
+    u8 unk31C[0x40];
     u32 unk35C; // HYPOTHESIS: cleared at init
-    u8 _360[0x88];
+    u32 unk360;
+    u32 unk364;
+    u32 unk368[0x20];
     u8 unk3E8;
-    u8 _3E9[0x97];
+    u8 unk3E9;
+    u16 unk3EA;
+    u32 unk3EC;
+    u32 unk3F0[0x20];
+    u32 unk470;
+    int unk474;
+    s64 unk478;
     int unk480;
     int unk484;
     void* unk488;
@@ -87,16 +117,20 @@ typedef struct DWCMatchControl {
     u32 unk4A0;
     u8 unk4A4;
     u8 unk4A5;
-    u8 _4A6[0xA];
+    u8 unk4A6;
+    u8 unk4A7;
+    s64 unk4A8;
     u8 unk4B0;
     u8 _4B1[7];
     s64 unk4B8; // HYPOTHESIS: cleared at init
     s64 unk4C0;
     void* unk4C8;
     u8 unk4CC[4];
-    u8 _4D0[0x84];
+    u8 unk4D0[4];
+    u32 unk4D4[0x20]; // HYPOTHESIS: 4-byte reservation copy followed by a 0x80-byte block.
     void* unk554;
     u32 unk558;
+    u32 unk55C;
 } DWCMatchControl;
 
 // HYPOTHESIS: names and meanings of the .sdata words are guesses from use.
@@ -175,7 +209,7 @@ int fn_80342270(u8** aidList) {
     return lbl_805A0FA8[0]->unkE + 1;
 }
 
-void DWCi_HandleQR2Error(int error);
+int DWCi_HandleQR2Error(int error);
 
 void DWCi_QR2AddErrorCallback(int error, const char* errorMessage) {
     DWC_Printf(2, "QR2 Failed query addition to master server %d\n", error);
@@ -532,9 +566,9 @@ int DWCi_StartMatching(void) {
         }
         return 1;
     } else {
-        if (gpIsBuddy(lbl_805A0FA8[0]->gpConnection, lbl_805A0FA8[0]->unk108)) {
+        if (gpIsBuddy(lbl_805A0FA8[0]->gpConnection, lbl_805A0FA8[0]->profiles[0])) {
             lbl_805A0FA8[0]->unk1B4 = 3;
-            result = DWCi_SendResvCommand((void*)lbl_805A0FA8[0]->unk108, 0);
+            result = DWCi_SendResvCommand((void*)lbl_805A0FA8[0]->profiles[0], 0);
             if (lbl_805A0FA8[0]->unk16 == 0) {
                 result = DWCi_HandleSBError(result);
             } else {
@@ -545,7 +579,7 @@ int DWCi_StartMatching(void) {
             }
         } else {
             lbl_805A0FA8[0]->unk1B4 = 0xD;
-            DWCi_SBUpdateAsync(lbl_805A0FA8[0]->unk108);
+            DWCi_SBUpdateAsync(lbl_805A0FA8[0]->profiles[0]);
         }
         return 1;
     }
@@ -636,12 +670,12 @@ int DWCi_GetLatencyLevel(void) {
 int snprintf(char* buffer, u32 size, const char* format, ...);
 void DWC_SetCommonKeyValueString(const char* key, const char* value, char* buffer, int size);
 void DWC_AddCommonKeyValueString(const char* key, const char* value, char* buffer, int size);
-void DWCi_SetGPStatus(int status, const char* statusString, const char* locationString);
+int DWCi_SetGPStatus(int status, const char* statusString, const char* locationString);
 void gt2CloseAllConnectionsHard(void* socket);
 void DWCi_SetError(int error, int errorCode);
 int DWCi_GetFriendListIndex(u32 pid);
 
-void DWCi_GPSetServerStatus(int status) {
+int DWCi_GPSetServerStatus(int status) {
     char value[12];
     char buffer[0x2C];
     const char* modifier;
@@ -660,7 +694,7 @@ void DWCi_GPSetServerStatus(int status) {
     DWC_AddCommonKeyValueString("VER", value, buffer, 0x2F);
     snprintf(value, 12, "%u", DWCi_GetLatencyLevel());
     DWC_AddCommonKeyValueString("LLV", value, buffer, 0x2F);
-    DWCi_SetGPStatus(status, buffer, 0);
+    return DWCi_SetGPStatus(status, buffer, 0);
 }
 
 
@@ -930,4 +964,247 @@ void fn_8034B67C(void) {
     }
     SBServerAddIntKeyValue(ServerBrowserGetServer(lbl_805A0FA8[0]->unkF8, j), "dwc_eval", maxEval);
     ServerBrowserSortA(lbl_805A0FA8[0]->unkF8, 0, "dwc_eval", 0);
+}
+
+void DWCi_StopLogin(int error, int errorCode);
+void DWCi_StopFriendProcess(int error, int errorCode);
+
+// HYPOTHESIS: same body as fn_80341220. Declared in the order that matches
+// once this copy is inlined into the error handlers; the out-of-line
+// fn_80341220 keeps the declaration order that matches on its own.
+static void DWCi_StopMatchingInlined(int error, int errorCode) {
+    if (lbl_805A0FA8[0] == 0 || error == 0) {
+        return;
+    }
+    lbl_805A0FA8[0]->unk1BC = 2;
+    gt2CloseAllConnectionsHard(*lbl_805A0FA8[0]->gt2Holder);
+    lbl_805A0FA8[0]->unk1BC = 0;
+    DWCi_SetError(error, errorCode);
+    DWCi_GPSetServerStatus(1);
+    {
+        DWCMatchControl* control = lbl_805A0FA8[0];
+        int isSelf;
+        int isServer;
+        isServer = (control->unk15 == 2);
+        isSelf = (control->unk224 == 0);
+        ((void (*)(int, int, int, int, int, int))control->unk480)(
+            error, 0, isSelf, isServer,
+            DWCi_GetFriendListIndex(control->unk224), control->unk484);
+    }
+    DWCi_CloseMatching();
+}
+
+void fn_8033D4C0(u8 a0, int a1, int a2, void* a3, void* a4, void* a5, const void* a6, void* a7) {
+    DWCMatchControl* control;
+    u32 groupId;
+    fn_8034296C(2, a0, a1, a2);
+    lbl_805A0FA8[0]->unk488 = a3;
+    lbl_805A0FA8[0]->unk48C = a4;
+    lbl_805A0FA8[0]->unk4C8 = a5;
+    if (a6 != 0) {
+        memcpy(lbl_805A0FA8[0]->unk4CC, a6, 4);
+    } else {
+        memset(lbl_805A0FA8[0]->unk4CC, 0, 4);
+    }
+    lbl_805A0FA8[0]->unk554 = a7;
+    memcpy(lbl_805A0FA8[0]->unk4D4, lbl_805A0FA8[0]->unk4CC, 4);
+    lbl_805A0FA8[0]->profiles[0] = lbl_805A0FA8[0]->unk218;
+    lbl_805A0FA8[0]->unk308 = 1;
+    lbl_805A0FA8[0]->unkE = 0;
+    lbl_805A0FA8[0]->unk1B4 = 0xF;
+    if (fn_80349C88(DWCi_GPSetServerStatus(6)) != 0) {
+        return;
+    }
+    lbl_805A0FA8[0]->unk17 = 2;
+    if (lbl_805A0FA8[0]->qr2Obj == 0) {
+        DWCi_QR2Startup(lbl_805A0FA8[0]->unk218);
+    }
+    control = lbl_805A0FA8[0];
+    groupId = (DWCi_GetMathRand32(10000000) + control->unk218) + 100000000;
+    DWC_Printf(0x200001, "Create New Group ID:%u\n", groupId);
+    lbl_805A0FA8[0]->unk4A0 = groupId;
+    control = lbl_805A0FA8[0];
+    if (control->unkF8 == 0) {
+        u32 gamename = control->unk30C;
+        control->unkF8 = ServerBrowserNewA(gamename, gamename, control->unk310, 0, 0x14, 1, 0, (void*)fn_8034AA48, 0);
+    }
+    qr2_send_statechanged(lbl_805A0FA8[0]->qr2Obj);
+}
+
+int fn_80349C88(int result) {
+    int code;
+    int err;
+    if (result == 0) {
+        return 0;
+    }
+    DWC_Printf(2, "Match, GP error %d\n", result);
+    switch (result) {
+    case 1:
+        err = 9;
+        code = -1;
+        break;
+    case 2:
+        err = 9;
+        code = -2;
+        break;
+    case 3:
+        err = 6;
+        code = -10;
+        break;
+    case 4:
+        err = 6;
+        code = -20;
+        break;
+    }
+    DWCi_StopMatchingInlined(err, -81000 + code);
+    return result;
+}
+
+int fn_80349F28(int result) {
+    int code;
+    int err;
+    if (result == 0) {
+        return 0;
+    }
+    DWC_Printf(2, "Match, SB error %d\n", result);
+    switch (result) {
+    case 1:
+        err = 6;
+        code = -50;
+        break;
+    case 2:
+        err = 6;
+        code = -30;
+        break;
+    case 3:
+        err = 6;
+        code = -20;
+        break;
+    case 4:
+        err = 6;
+        code = -40;
+        break;
+    case 5:
+        err = 9;
+        code = -1;
+        break;
+    case 6:
+        err = 9;
+        code = -2;
+        break;
+    }
+    DWCi_StopMatchingInlined(err, -85000 + code);
+    return result;
+}
+
+int DWCi_HandleQR2Error(int result) {
+    int code;
+    int err;
+    if (result == 0) {
+        return 0;
+    }
+    DWC_Printf(2, "Match, QR2 error %d\n", result);
+    switch (result) {
+    case 1:
+        err = 6;
+        code = -50;
+        break;
+    case 2:
+        err = 6;
+        code = -60;
+        break;
+    case 3:
+        err = 6;
+        code = -30;
+        break;
+    case 4:
+        err = 6;
+        code = -80;
+        break;
+    case 5:
+        err = 6;
+        code = -20;
+        break;
+    }
+    switch (DWC_GetState()) {
+    case 2:
+        DWCi_StopLogin(err, -64000 + code);
+        break;
+    case 4:
+        DWCi_StopFriendProcess(err, -74000 + code);
+        break;
+    case 5:
+        DWCi_StopMatchingInlined(err, -84000 + code);
+        break;
+    default:
+        DWCi_SetError(err, -94000 + code);
+        break;
+    }
+    return result;
+}
+
+int fn_8034A500(int result) {
+    int code;
+    int err;
+    if (result == 0) {
+        return 0;
+    }
+    DWC_Printf(2, "Match, NN error %d\n", result);
+    switch (result) {
+    case 1:
+        err = 9;
+        code = -1;
+        break;
+    case 2:
+        err = 6;
+        code = -50;
+        break;
+    case 3:
+        err = 6;
+        code = -30;
+        break;
+    }
+    DWCi_StopMatchingInlined(err, -86000 + code);
+    return result;
+}
+
+int fn_8034A790(int result) {
+    int code;
+    int err;
+    if (result == 0) {
+        return 0;
+    }
+    DWC_Printf(2, "Match, GT2 error %d\n", result);
+    switch (result) {
+    case 1:
+        err = 9;
+        code = -1;
+        break;
+    case 2:
+    case 5:
+        err = 0;
+        code = 0;
+        result = 0;
+        break;
+    case 3:
+        err = 6;
+        code = -10;
+        break;
+    case 4:
+        err = 6;
+        code = -30;
+        break;
+    case 6:
+        err = 6;
+        code = -70;
+        break;
+    case 7:
+        err = 6;
+        code = -80;
+        break;
+    }
+    if (err != 0) {
+        DWCi_StopMatchingInlined(err, -87000 + code);
+    }
+    return result;
 }
