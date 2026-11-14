@@ -43,17 +43,31 @@ extern "C" int fn_8031D6C0(Obj* self, void* arg) {
 }
 } // namespace jj_fn_8031D6C0
 
+#include <havok/hkVector4.h>
+
+// Penetration depth helpers (only the random number source is written so far).
+struct hkConvexPenetrationUtil {
+    // (never inlined: randomVector calls it out of line)
+    static hkReal rand01(int* seed) __attribute__((never_inline));
+};
+
+// Linear congruential step; returns the new 31-bit seed scaled to [0, 1].
+hkReal hkConvexPenetrationUtil::rand01(int* seed) {
+    int next = (*seed * 1103515245 + 12345) & 0x7fffffff;
+    *seed = next;
+    return (hkReal)next / (hkReal)0x7fffffff;
+}
+
 // fn_8031EA8C: body from https://github.com/jj-link/brawl src/havok/fn_8031EA8C.cpp (namespaced; labels as in our symbols).
 #include <types.h>
 namespace jj_fn_8031EA8C {
-extern "C" float fn_8031EA40(int*);
 
 // TODO: cleanup (shape from jj-link/brawl fn_8031EA8C)
 extern "C" void fn_8031EA8C(int arg0, float* arg1, float farg0, float farg1) {
     int sp8 = arg0;
-    arg1[0] = (farg1 - farg0) * (farg0 + fn_8031EA40(&sp8));
-    arg1[1] = (farg1 - farg0) * (farg0 + fn_8031EA40(&sp8));
-    arg1[2] = (farg1 - farg0) * (farg0 + fn_8031EA40(&sp8));
+    arg1[0] = (farg1 - farg0) * (farg0 + hkConvexPenetrationUtil::rand01(&sp8));
+    arg1[1] = (farg1 - farg0) * (farg0 + hkConvexPenetrationUtil::rand01(&sp8));
+    arg1[2] = (farg1 - farg0) * (farg0 + hkConvexPenetrationUtil::rand01(&sp8));
 }
 } // namespace jj_fn_8031EA8C
 
