@@ -3152,30 +3152,10 @@ havok/hkVector4.cpp:
 	.text       start:0x802878F0 end:0x80287B04
 	.ctors      start:0x80406614 end:0x80406618
 
-havok/hk_set_local_translations_constraint_atom.cpp:
-	extab       start:0x80006518 end:0x80006528
-	extabindex  start:0x800097B4 end:0x800097CC
-	.text       start:0x80289D0C end:0x8028A52C
-
-havok/hk_lin_soft_constraint_atom.cpp:
-	extab       start:0x80006538 end:0x80006540
-	extabindex  start:0x800097E4 end:0x800097F0
-	.text       start:0x8028A7A8 end:0x8028A860
-
 havok/hkBuildJacobianFromAtoms.cpp:
-	extab       start:0x80006540 end:0x800065A8
-	extabindex  start:0x800097F0 end:0x8000988C
-	.text       start:0x8028A860 end:0x8028D184
-
-havok/hk_soft_contact_modifier_constraint_atom.cpp:
-	extab       start:0x800065A8 end:0x800065B0
-	extabindex  start:0x8000988C end:0x80009898
-	.text       start:0x8028D184 end:0x8028D46C
-
-havok/hk_mass_changer_modifier_constraint_atom.cpp:
-	extab       start:0x800065B0 end:0x800065C0
-	extabindex  start:0x80009898 end:0x800098B0
-	.text       start:0x8028D46C end:0x8028D8A0
+	extab       start:0x80006518 end:0x800065C0
+	extabindex  start:0x800097B4 end:0x800098B0
+	.text       start:0x80289D0C end:0x8028D8A0
 
 havok/hkChainBuildJacobian.cpp:
 	extab       start:0x80006600 end:0x80006608
@@ -3322,14 +3302,9 @@ havok/hkListAgent.cpp:
 	.text       start:0x802B85EC end:0x802B8E78
 
 havok/hkMultiRayConvexAgent.cpp:
-	extab       start:0x80007704 end:0x8000779C
-	extabindex  start:0x8000A648 end:0x8000A6CC
-	.text       start:0x802B8E78 end:0x802BA204
-
-havok/hk_symmetric_agent21hk_multi_ray_convex_agent.cpp:
-	extab       start:0x8000779C end:0x80007854
-	extabindex  start:0x8000A6CC end:0x8000A720
-	.text       start:0x802BA204 end:0x802BAB24
+	extab       start:0x80007704 end:0x80007854
+	extabindex  start:0x8000A648 end:0x8000A720
+	.text       start:0x802B8E78 end:0x802BAB24
 
 havok/hkMultiSphereAgent.cpp:
 	extab       start:0x8000785C end:0x80007B74
@@ -3348,14 +3323,9 @@ havok/hkPhantomAgent.cpp:
 	.text       start:0x802C068C end:0x802C0A38
 
 havok/hkShapeCollectionAgent.cpp:
-	extab       start:0x80007BD0 end:0x80007C98
-	extabindex  start:0x8000A960 end:0x8000AA2C
-	.text       start:0x802C0A38 end:0x802C1F7C
-
-havok/hk_symmetric_agent22hk_shape_collection_agent.cpp:
-	extab       start:0x80007C98 end:0x80007D00
-	extabindex  start:0x8000AA2C end:0x8000AA68
-	.text       start:0x802C1F7C end:0x802C23B8
+	extab       start:0x80007BD0 end:0x80007D00
+	extabindex  start:0x8000A960 end:0x8000AA68
+	.text       start:0x802C0A38 end:0x802C23B8
 
 havok/hkSphereBoxAgent.cpp:
 	extab       start:0x80007D00 end:0x80007DD8
@@ -3940,10 +3910,7 @@ havok/hkWorldAgentUtil.cpp:
 	.text       start:0x802F34F0 end:0x802F5D5C
 
 havok/hkWorldOperationQueue.cpp:
-	.text       start:0x802F5D5C end:0x802F7910
-
-havok/hk_array_q216hk_world_operation16_biggest_operation.cpp:
-	.text       start:0x802F7910 end:0x802F7E24
+	.text       start:0x802F5D5C end:0x802F7E24
 
 havok/hkWorldOperationUtil.cpp:
 	.text       start:0x802F7E24 end:0x802FB244
@@ -4044,7 +4011,7 @@ havok/hkCollideCapsuleUtil.cpp:
 	extabindex  start:0x8000BD10 end:0x8000BD70
 	.text       start:0x803227F4 end:0x80325184
 
-havok/hk_collide_triangle_util.cpp:
+havok/hkCollideTriangleUtil.cpp:
 	extab       start:0x80008DAC end:0x80008DC4
 	extabindex  start:0x8000BD70 end:0x8000BD94
 	.text       start:0x80325184 end:0x80325BB0

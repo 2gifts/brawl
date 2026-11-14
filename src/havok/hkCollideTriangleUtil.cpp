@@ -1,4 +1,4 @@
-// Havok translation unit hk_collide_triangle_util.o (main.dol 0x80325184-0x80325BB0).
+// Havok translation unit hkCollideTriangleUtil.o (main.dol 0x80325184-0x80325BB0).
 // Not yet decompiled. Functions in address order:
 //   0x80325184   432  setupClosestPointTriangleCache
 //   0x80325334   744  setupPointTriangleDistanceCache

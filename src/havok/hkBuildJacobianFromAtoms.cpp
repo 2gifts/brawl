@@ -1,5 +1,16 @@
-// Havok translation unit hkBuildJacobianFromAtoms.o (main.dol 0x8028A860-0x8028D184).
+// Havok translation unit hkBuildJacobianFromAtoms.o (main.dol 0x80289D0C-0x8028D8A0): the jacobian builders of the
+// constraint atoms, each after its atom's numSolverResults.
 // Not yet decompiled. Functions in address order:
+//   0x80289D0C     8  numSolverResults (hkSetLocalTranslationsConstraintAtom)
+//   0x80289D14   812  setLocalRotationsFromAtom
+//   0x8028A040     8  numSolverResults (hkSetLocalRotationsConstraintAtom)
+//   0x8028A048  1252  buildJacobianFromBallSocketAtom
+//   0x8028A52C     8  numSolverResults
+//   0x8028A534   444  fn_8028A534
+//   0x8028A6F0     8  numSolverResults
+//   0x8028A6F8   168  fn_8028A6F8
+//   0x8028A7A0     8  numSolverResults
+//   0x8028A7A8   184  buildJacobianFromLinSoftAtom
 //   0x8028A860     8  numSolverResults
 //   0x8028A868   172  buildJacobianFromLinLimitAtom
 //   0x8028A914     8  numSolverResults
@@ -27,12 +38,50 @@
 //   0x8028C680  2340  buildJacobianFromPulleyAtom
 //   0x8028CFA4     8  numSolverResults
 //   0x8028CFAC   472  buildJacobianFromSoftContactModifier
+//   0x8028D184     8  numSolverResults (hkSoftContactModifierConstraintAtom)
+//   0x8028D18C   736  fn_8028D18C
+//   0x8028D46C     8  numSolverResults (hkMassChangerModifierConstraintAtom)
+//   0x8028D474   340  fn_8028D474
+//   0x8028D5C8     8  fn_8028D5C8
+//   0x8028D5D0   712  fn_8028D5D0
+//   0x8028D898     8  fn_8028D898
 
-#include <havok/hkConstraintAtom.h>
+#include <havok/hkSetLocalTranslationsConstraintAtom.h>
+#include <havok/hkSetLocalRotationsConstraintAtom.h>
 #include <havok/hkLinSoftConstraintAtom.h>
+#include <havok/hkConstraintAtom.h>
 #include <havok/hkConstraintQueryIn.h>
 #include <havok/hkJacobianSchema.h>
 #include <havok/hkRotation.h>
+
+int hkSetLocalTranslationsConstraintAtom::numSolverResults() const {
+    return 0;
+}
+
+int hkSetLocalRotationsConstraintAtom::numSolverResults() const {
+    return 0;
+}
+
+// Helper in another TU (not yet named): takes the scratch block, the caller's context and a pass-through pointer.
+extern "C" void fn_8028E8E8(void* scratch, void* ctx, void* pass);
+
+struct hkLinSoftAtomScratch {
+    hkVector4 m_a; // 0x00
+    hkVector4 m_b; // 0x10
+    hkVector4 m_c; // 0x20
+    float m_d;     // 0x30
+    float m_e;     // 0x34
+};
+
+void hkLinSoftConstraintAtom::buildJacobianFromLinSoftAtom(void* a, const hkVector4* b, const hkVector4* table, void* d) {
+    hkLinSoftAtomScratch s;
+    s.m_a = b[3];
+    s.m_b = table[3];
+    s.m_c = table[m_axisIndex];
+    s.m_d = m_tau;
+    s.m_e = m_damping;
+    fn_8028E8E8(&s, a, d);
+}
 
 // Schema that makes the solver step over solver results nobody writes (8 bytes).
 // HYPOTHESIS: the names; 0x13 is the schema type and 2 a flag of the header word.
@@ -130,4 +179,12 @@ int hkRagdollMotorConstraintAtom::numSolverResults() const {
 
 int hkPulleyConstraintAtom::numSolverResults() const {
     return 1;
+}
+
+int hkSoftContactModifierConstraintAtom::numSolverResults() const {
+    return 0;
+}
+
+int hkMassChangerModifierConstraintAtom::numSolverResults() const {
+    return 0;
 }

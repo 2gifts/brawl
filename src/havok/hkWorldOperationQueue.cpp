@@ -1,4 +1,4 @@
-// Havok translation unit hkWorldOperationQueue.o (main.dol 0x802F5D5C-0x802F7910).
+// Havok translation unit hkWorldOperationQueue.o (main.dol 0x802F5D5C-0x802F7E24).
 // Not yet decompiled. Functions in address order:
 //   0x802F5D5C    44  __ct
 //   0x802F5D88   188  __dt
