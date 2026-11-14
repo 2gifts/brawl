@@ -1321,3 +1321,84 @@ extern "C" void fn_802EB1A0(int arg0, void* arg1) {
     }
 }
 } // namespace jj_fn_802EB1A0
+
+// Blocks of the world freed with this helper (memory class 0x13). HYPOTHESIS: what they hold.
+static inline void freeWorldBlock(void* block) {
+    if (block != 0) {
+        hkMemory::getInstance().deallocateChunk(block, 1, 0x13);
+    }
+}
+
+// Removes everything still in the world (phantoms, entities, the fixed body and the fixed island), tells the
+// deletion listeners, then releases the broad phase, the dispatchers, the filter, the collision input, the simulation
+// and the operation queue.
+hkWorld::~hkWorld() {
+    m_maintenanceMgr->removeReference();
+    m_maintenanceMgr = NULL;
+    if (m_unk9C != NULL) {
+        freeWorldBlock(m_unk9C);
+        m_unk9C = NULL;
+    }
+    if (m_unkA4 != NULL) {
+        freeWorldBlock(m_unkA4);
+        m_unkA4 = NULL;
+        for (int i = 0; i < m_unkA8.getSize(); i++) {
+            void* block = m_unkA8[i].m_unk0C;
+            if (block != NULL) {
+                hkMemory::getInstance().deallocateChunk(block, 1, 0x13);
+            }
+        }
+    }
+    m_unkA8.clear();
+    if (m_unkA0 != NULL) {
+        freeWorldBlock(m_unkA0);
+        m_unkA0 = NULL;
+    }
+    hkReferencedObject*& watchDog = worldField<hkReferencedObject*>(this, 0x50);
+    if (watchDog != NULL) {
+        watchDog->removeReference();
+        watchDog = NULL;
+    }
+
+    while (m_phantoms.getSize() > 0) {
+        removePhantom(m_phantoms[0]);
+    }
+    while (m_unk28.getSize() > 0 && m_unk28[0]->m_entities.getSize() != 0) {
+        removeEntity(m_unk28[0]->m_entities[0]);
+    }
+    while (m_unk34.getSize() > 0) {
+        removeEntity(m_unk34[0]->m_entities[0]);
+    }
+    if (!(bool)m_wantSimulationIslands) {
+        hkWorldOperationUtil::removeIslandFromDirtyList(this, m_unk28[m_unk28.getSize() - 1]);
+        delete m_unk28[m_unk28.getSize() - 1];
+        m_unk28.m_size--;
+    }
+    removeEntity((hkEntity*)m_fixedRigidBody);
+    m_fixedRigidBody = NULL;
+    while (m_fixedIsland->m_entities.getSize() > 0) {
+        removeEntity(m_fixedIsland->m_entities[0]);
+    }
+    hkWorldOperationUtil::removeIslandFromDirtyList(this, m_fixedIsland);
+    delete m_fixedIsland;
+    m_fixedIsland = NULL;
+
+    hkWorldCallbackUtil::fireWorldDeleted(this);
+
+    m_broadPhase->removeReference();
+    m_broadPhase = NULL;
+    m_collisionDispatcher->removeReference();
+    m_collisionDispatcher = NULL;
+    delete m_broadPhaseDispatcher;
+    if (m_unk168 != NULL) {
+        m_unk168->removeReference();
+    }
+    delete m_unk5C;
+    delete m_unk60;
+    delete m_unk64;
+    m_collisionFilter->removeReference();
+    hkMemory::getInstance().deallocateChunk(*(void**)((char*)m_collisionInput + 0x20), 8, 0x1d);
+    hkMemory::getInstance().deallocateChunk(m_collisionInput, 0x30, 0x1d);
+    m_simulation->removeReference();
+    delete m_operationQueue;
+}
