@@ -241,7 +241,7 @@ void ftLuigiArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enab
     WN_ARTICLE_UNUSED_SLOT(11, value) WN_ARTICLE_UNUSED_SLOT(12, value) WN_ARTICLE_UNUSED_SLOT(13, value) \
     WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) WN_ARTICLE_UNUSED_SLOT(16, value)
 
-// The fireball starts through the transactor with the effect resource of the fighter (the kind 0x1a selects the variant).
+// The fireball starts through the transactor at model node 0x1a with the effect resource of the fighter.
 // BYTES: the native function addresses the local static's guard, object and destructor registration separately
 // instead of from one pooled BSS base. The setting is per function: unit-wide it breaks the pooled constructor and
 // __sinit, and an in-class inline definition makes the static weak and moves it to the end of .bss.
@@ -250,7 +250,8 @@ bool ftLuigi::activeArticle(wnLuigiFireball* weapon, soModuleAccesser* acc) {
     static ftLuigiTransactor instance;
     ftLuigiTransactor* transactor = &instance;
     u32 etcResId = acc->getResourceModule().getResourceIdAccesser()->getEtcResId();
-    return transactor->activeArticle1(weapon, acc, etcResId, 0x1a);
+    // The fighter's article shell is opaque; the sora_melee class derives from wnMarioFireball.
+    return transactor->activeArticle1(reinterpret_cast<wnMarioFireball*>(weapon), acc, etcResId, 0x1a);
 }
 #pragma pool_data reset
 

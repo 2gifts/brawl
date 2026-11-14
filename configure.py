@@ -6783,6 +6783,9 @@ config.libs = [
             Object(Matching, "mo_melee/sora_melee/gr/gr_collision_create.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_pikachu_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_pikachu_status_uniq_process_thunder_jolt.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_mario_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_luigi_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_donkey_transactor.cpp"),
         ],
     },
     {

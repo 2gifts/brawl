@@ -300,7 +300,7 @@ void ftMarioArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enab
     WN_ARTICLE_UNUSED_SLOT(13, value) WN_ARTICLE_UNUSED_SLOT(14, value) WN_ARTICLE_UNUSED_SLOT(15, value) \
     WN_ARTICLE_UNUSED_SLOT(16, value)
 
-// The fireball starts through the transactor with the effect resource of the fighter (the kind 0x1b selects the variant).
+// The fireball starts through the transactor with the effect resource of the fighter at model node 0x1b.
 // BYTES: the native function addresses the local static's guard, object and destructor registration separately
 // instead of from one pooled BSS base. The setting is per function: unit-wide it breaks the pooled constructor and
 // __sinit, and an in-class inline definition makes the static weak and moves it to the end of .bss.
