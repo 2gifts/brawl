@@ -13156,7 +13156,7 @@ hkAgentNnMachine_GetAgentType__FP18hkLinkedCollidableP18hkLinkedCollidableRC23hk
 hkAgentNnMachine_CreateAgent__FR14hkAgentNnTrackP18hkLinkedCollidableP18hkLinkedCollidableiRC23hkProcessCollisionInputP12hkContactMgr = .text:0x802FEEBC; // type:function size:0x25C
 hkAgentNnMachine_DestroyAgent__FR14hkAgentNnTrackP14hkAgentNnEntryP21hkCollisionDispatcher = .text:0x802FF118; // type:function size:0x160
 fn_802FF278 = .text:0x802FF278; // type:function size:0x11C
-fn_802FF394 = .text:0x802FF394; // type:function size:0x68
+hkAgentNnMachine_UpdateShapeCollectionFilter__FP14hkAgentNnEntryRC16hkCollisionInput = .text:0x802FF394; // type:function size:0x68
 hkAgentNnMachine_InvalidateTimInAgent__FP14hkAgentNnEntryRC23hkProcessCollisionInput = .text:0x802FF3FC; // type:function size:0xA0
 hkAgentNnMachine_WarpTimeInAgent__FP14hkAgentNnEntryffRC23hkProcessCollisionInput = .text:0x802FF49C; // type:function size:0xA0
 hkAgentNnMachine_AppendTrack__FR14hkAgentNnTrackR14hkAgentNnTrack = .text:0x802FF53C; // type:function size:0x148

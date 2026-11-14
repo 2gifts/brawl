@@ -75,7 +75,12 @@ struct hkCollisionDispatcher : hkReferencedObject {
     u8 unkE90[0xE94 - 0xE90];
     u8 m_lookupE94[0x400]; // 0xE94 lookup table for the (typeA, typeB) pair with value 1
     u8 m_lookup1294[0x400]; // 0x1294 lookup table for the reverse pair with value 1
-    u8 unk1694[0x19D4 - 0x1694];
+    // 0x1694 the agent3 registrations, indexed by an agent entry's type (stride 0x34).
+    // HYPOTHESIS: the word after the functions.
+    struct Agent3FuncsIntern : hkAgent3Funcs {
+        u32 unk30; // 0x30
+    };
+    Agent3FuncsIntern m_agent3Func[16];
     // 0x19D4 collision quality index for each pair of object quality types (hkSimpleConstraintContactMgr's constructor
     // reads [qualityA][qualityB] and takes the constraint priority from that m_collisionQualityInfo entry).
     s8 m_collisionQualityIndex[9][9];

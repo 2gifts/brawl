@@ -2,16 +2,20 @@
 
 #include <havok/hkBase.h>
 #include <havok/hkArray.h>
+#include <havok/hkVector4.h>
 
 struct hkContactMgr;
 struct hkLinkedCollidable;
 struct hkProcessCollisionInput;
+struct hkCollisionInput;
 struct hkProcessCollisionOutput;
 
 // One agent entry of a collidable pair (layout from hkSimulation's agent loops).
 // HYPOTHESIS: the member names; m_collisionQualityIndex indexes hkCollisionDispatcher::m_collisionQualityInfo.
 struct hkAgentNnEntry {
-    u8 unk0[0x03];                       // 0x00 not identified
+    u8 m_streamCommand;                  // 0x00 how the agent data after the entry is run (see below)
+    u8 m_agentType;                      // 0x01 index of the dispatcher's agent3 registration
+    u8 m_numContactPoints;               // 0x02 HYPOTHESIS: name (as hkAgentEntry)
     u8 m_size;                           // 0x03 bytes of this entry (the track walks add it to step to the next)
     u8 unk4[0x08 - 0x04];                // 0x04 not identified
     s8 m_collisionQualityIndex;          // 0x08
@@ -21,6 +25,25 @@ struct hkAgentNnEntry {
 
     // out of line in hkSimulation.o (map: hkAgentNnEntry::getCollidableA)
     hkLinkedCollidable* getCollidableA();
+};
+
+// Stream commands of the agent entries. The agent data follows the entry (0x20); an entry with time-of-impact
+// information keeps the separating plane first and its agent data at 0x30. The flipped commands carry no agent
+// data of their own. HYPOTHESIS: the names.
+enum hkAgentNnStreamCommand {
+    HK_AGENT_STREAM_NULL = 0,
+    HK_AGENT_STREAM_END = 1,
+    HK_AGENT_STREAM_CALL = 2,
+    HK_AGENT_STREAM_CALL_FLIP = 3,
+    HK_AGENT_STREAM_CALL_WITH_TIM = 4,
+    HK_AGENT_STREAM_CALL_WITH_TIM_FLIP = 5,
+    HK_AGENT_STREAM_CALL_AGENT = 6,
+};
+
+// An agent entry with time-of-impact information (0x30 bytes before its agent data).
+struct hkAgentNnTimEntry : hkAgentNnEntry {
+    hkReal m_timeOfSeparatingNormal; // 0x1C
+    hkVector4 m_separatingNormal;    // 0x20
 };
 
 // A block of agent entries (opaque: the entries start at its address).
@@ -76,6 +99,9 @@ void hkAgentNnMachine_DestroyAgent(hkAgentNnTrack& track, hkAgentNnEntry* entry,
 hkAgentNnEntry* hkAgentNnMachine_FindAgent(const hkLinkedCollidable* collA, const hkLinkedCollidable* collB);
 // Clears the entry's time-of-impact information.
 void hkAgentNnMachine_InvalidateTimInAgent(hkAgentNnEntry* entry, const hkProcessCollisionInput& input);
+// Lets the entry's agent refilter its shape collection children (hkWorld's collision filter updates).
+// HYPOTHESIS: the name.
+void hkAgentNnMachine_UpdateShapeCollectionFilter(hkAgentNnEntry* entry, const hkCollisionInput& input);
 // Moves the entry's time-of-impact information from oldTime to newTime (map name).
 // HYPOTHESIS: the parameter types (hkWorldAgentUtil::warpTime passes its own arguments through).
 void hkAgentNnMachine_WarpTimeInAgent(hkAgentNnEntry* entry, float oldTime, float newTime,
