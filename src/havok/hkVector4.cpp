@@ -7,9 +7,10 @@
 //   0x80287AD0    52  __sinit_\hkVector4_cpp   [map: hkVector4cpp____sinit_]
 #include <havok/hkTransform.h>
 
-// HYPOTHESIS: two static vectors; the second is copied from the first during static initialisation.
+// The zero vector: a local zero-initialised source copied into the global during static initialisation.
+// HYPOTHESIS: the names.
 static hkVector4 s_zeroVector;
-static hkVector4 s_zeroVectorCopy = s_zeroVector;
+hkVector4 hkVector4Zero = s_zeroVector;
 
 void hkVector4::setTransformedPos(const hkTransform& t, const hkVector4& v) {
     const hkRotation& r = t.m_rotation;

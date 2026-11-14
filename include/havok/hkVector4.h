@@ -272,3 +272,6 @@ struct hkVector4 {
     inline void _setMul3(const hkRotation& m, const hkVector4& v);
 #endif
 } __attribute__((aligned(16)));
+
+// The zero vector (hkVector4.cpp); setLinearVelocity(hkVector4::getZero()) style callers read it directly.
+extern hkVector4 hkVector4Zero;

@@ -13,6 +13,7 @@
 #include <havok/hkSimulationIsland.h>
 #include <havok/hkEntity.h>
 #include <havok/hkAction.h>
+#include <havok/hkSweptTransformUtil.h>
 #include <havok/hkWorldAgentUtil.h>
 #include <havok/hkLinkedCollidable.h>
 #include <havok/hkConstraintInstance.h>
@@ -321,6 +322,62 @@ void hkWorldOperationUtil::cleanupDirtyIslands(hkWorld* world) {
         }
     }
 }
+
+// BYTES: not inline candidates (cleanupDirtyIslands calls both out of line).
+#pragma push
+#pragma auto_inline off
+// Moves the island to the active array (the biggest active island is kept first), restarts its deactivation
+// timers and its bodies' time information, and warps its agents from the time of deactivation to now.
+void hkWorldOperationUtil::internalActivateIsland(hkWorld* world, hkSimulationIsland* island) {
+    removeIslandFromArray(*(hkArray<hkSimulationIsland*>*)&world->m_unk34, island);
+    (*(hkArray<hkSimulationIsland*>*)&world->m_unk28).pushBack(island);
+    island->m_storageIndex = world->m_unk28.m_size - 1;
+    island->m_flags.m_stateD = 1;
+    island->m_timeSinceLastHighFrequencyCheck = 0.0f;
+    island->m_timeSinceLastLowFrequencyCheck = 0.0f;
+
+    for (int e = 0; e < island->m_entities.getSize(); e++) {
+        hkEntity* body = island->m_entities[e];
+        hkSweptTransformUtil::setTimeInformation(body->m_motion.m_motionState, 0.0f, 0.0f);
+    }
+
+    hkWorldAgentUtil::warpTime(island, island->m_unk6C, world->m_dynamicsStepInfo.m_stepInfo.m_startTime,
+                               *world->m_collisionInput);
+
+    // sort the big island to the front
+    if (island->m_storageIndex != 0) {
+        hkArray<hkSimulationIsland*>& activeIslands = *(hkArray<hkSimulationIsland*>*)&world->m_unk28;
+        hkSimulationIsland* first = activeIslands[0];
+        if (island->m_entities.getSize() > first->m_entities.getSize()) {
+            int index = island->m_storageIndex;
+            island->m_storageIndex = 0;
+            first->m_storageIndex = index;
+            activeIslands[0] = island;
+            activeIslands[index] = first;
+        }
+    }
+
+    hkWorldCallbackUtil::fireIslandActivated(world, island);
+}
+
+// Moves the island to the inactive array, freezes its bodies at the time of deactivation and stops them.
+void hkWorldOperationUtil::internalDeactivateIsland(hkWorld* world, hkSimulationIsland* island) {
+    (*(hkArray<hkSimulationIsland*>*)&world->m_unk34).pushBack(island);
+    removeIslandFromArray(*(hkArray<hkSimulationIsland*>*)&world->m_unk28, island);
+    island->m_storageIndex = world->m_unk34.m_size - 1;
+    island->m_flags.m_stateD = 0;
+
+    // HYPOTHESIS: m_unk6C is the time of deactivation (validates the agents' time information on reactivation)
+    island->m_unk6C = world->m_dynamicsStepInfo.m_stepInfo.m_startTime;
+    for (int e = 0; e < island->m_entities.getSize(); e++) {
+        hkEntity* body = island->m_entities[e];
+        hkSweptTransformUtil::freezeMotionState(island->m_unk6C, body->m_motion.m_motionState);
+        body->m_motion.setLinearVelocity(hkVector4Zero);
+        body->m_motion.setAngularVelocity(hkVector4Zero);
+    }
+    hkWorldCallbackUtil::fireIslandDeactivated(world, island);
+}
+#pragma pop
 
 #pragma dont_inline on
 void hkWorldOperationUtil::removeIslandFromDirtyList(hkWorld* world, hkSimulationIsland* island) {
