@@ -18,6 +18,8 @@
 #include <havok/hkConvexVerticesShape.h>
 #include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
+#include <havok/hkShapeRayCastInput.h>
+#include <havok/hkMonitorStream.h>
 
 void hkConvexVerticesShape::finishLoadedObjecthkConvexVerticesShape(void* p) {
     hkFinishLoadedObjectFlag flag;
@@ -60,63 +62,88 @@ void hkConvexVerticesShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out)
     out->m_flag = 1;
 }
 
+// Ray against the convex hull through its plane equations: the parameter where the ray enters the last front
+// plane is the hit, unless the ray leaves a back plane first.
+hkBool hkConvexVerticesShape::castRay(const hkShapeRayCastInput& input, hkShapeRayCastOutput& results) const {
+    HK_TIMER_BEGIN("rcConvexVert");
+    {
+        hkReal enter = -1.0f;
+        hkReal leave = results.m_hitFraction;
+        hkVector4 normal;
+        for (int i = m_planeEquations.getSize() - 1; i >= 0; i--) {
+            const hkVector4& plane = m_planeEquations[i];
+            hkReal distFrom = plane.dot3(input.m_from) + plane.w;
+            hkReal distTo = plane.dot3(input.m_to) + plane.w;
+            if (distFrom >= 0.0f) {
+                if (distTo >= 0.0f) {
+                    goto rayMissed;
+                }
+                hkReal t = distFrom / (distFrom - distTo);
+                if (enter <= t) {
+                    enter = t;
+                    normal = plane;
+                }
+            } else {
+                if (distTo < 0.0f) {
+                    continue;
+                }
+                hkReal t = distFrom / (distFrom - distTo);
+                if (leave >= t) {
+                    leave = t;
+                }
+            }
+            if (leave < enter) {
+                goto rayMissed;
+            }
+        }
+        if (enter < 0.0f) {
+            goto rayMissed;
+        }
+        results.m_normal = normal;
+        results.m_hitFraction = enter;
+        results.unk18[results.unk38] = 0xFFFFFFFF;
+    }
+    HK_TIMER_END();
+    return true;
+
+rayMissed:
+    HK_TIMER_END();
+    return false;
+}
+
+// Statistics collector slots used here (vtable offsets 0x0C, 0x10 and 0x20).
+struct hkStatisticsCollectorIface {
+    virtual void unk00();
+    virtual void addObject(const char* name, int count, const void* object);                     // 0x0C
+    virtual void addArrayBytes(const char* name, int type, const void* data, int used, int allocated); // 0x10
+    virtual void unk14();
+    virtual void unk18();
+    virtual void unk1C();
+    virtual void endObject();                                                                    // 0x20
+
+    // Arrays that own their storage report their used and allocated bytes.
+    template <typename T>
+    void addArray(const char* name, int type, const hkArray<T>& array) {
+        if ((array.m_capacityAndFlags & hkArrayBase::DONT_DEALLOCATE_FLAG) == 0) {
+            addArrayBytes(name, type, array.m_data, array.m_size * sizeof(T), array.getCapacity() * sizeof(T));
+        }
+    }
+};
+
+void hkConvexVerticesShape::calcStatistics(hkStatisticsCollector* collector) const {
+    hkStatisticsCollectorIface* c = (hkStatisticsCollectorIface*)collector;
+    c->addObject("CvxVerts", 1, this);
+    c->addArray("Verts", 1, m_rotatedVertices);
+    c->addArray("Verts", 1, m_planeEquations);
+    c->endObject();
+}
+
 // Not yet decompiled in this unit:
 //   0x802D1708   452  getCollisionSpheres   [map: hkConvexVerticesShape__getCollisionSpheres]
 //   0x802D18CC  1004  getAabb   [map: hkConvexVerticesShape__getAabb]
 //   0x802D1CB8   800  getSupportingVertex   [map: hkConvexVerticesShape__getSupportingVertex]
 //   0x802D1FD8   324  convertVertexIdsToVertices   [map: hkConvexVerticesShape__convertVertexIdsToVertices]
-//   0x802D211C   776  castRay   [map: hkConvexVerticesShape__castRay]
-//   0x802D2424   244  calcStatistics   [map: hkConvexVerticesShape__calcStatistics]
 
 static hkStaticTypeInfo hkConvexVerticesShapeTypeInfo("hkConvexVerticesShape", hkConvexVerticesShape::finishLoadedObjecthkConvexVerticesShape, hkConvexVerticesShape::cleanupLoadedObjecthkConvexVerticesShape,
                                       hkConvexVerticesShape::getVtablehkConvexVerticesShape());
 
-// fn_802D2424: body from https://github.com/jj-link/brawl src/havok/fn_802D2424.cpp (namespaced; labels as in our symbols).
-#include <types.h>
-namespace jj_fn_802D2424 {
-typedef unsigned int u32;
-
-struct Holder {
-    char pad[0x30];
-    void* data1;
-    u32 count1;
-    u32 flags1;
-    u32 unk3C;
-    void* data2;
-    u32 count2;
-    u32 flags2;
-};
-
-struct Visitor {
-    virtual void unused();
-    virtual void object(const char*, int, void*);
-    virtual void array(const char*, int, void*, u32, u32);
-    virtual void unused2();
-    virtual void unused3();
-    virtual void unused4();
-    virtual void finish();
-};
-
-extern "C" char lbl_80410618[];
-
-// TODO: cleanup (shape from jj-link/brawl fn_802D2424)
-extern "C" void fn_802D2424(Holder* self, Visitor* visitor) {
-    visitor->object(lbl_80410618 + 0x12, 1, self);
-
-    const char* name1 = lbl_80410618 + 0x1B;
-    if (!(self->flags1 & 0x80000000)) {
-        visitor->array(name1, 1, self->data1,
-                       self->count1 * 0x30,
-                       (self->flags1 & 0x3FFFFFFF) * 0x30);
-    }
-
-    const char* name2 = lbl_80410618 + 0x1B;
-    if (!(self->flags2 & 0x80000000)) {
-        visitor->array(name2, 1, self->data2,
-                       self->count2 * 0x10,
-                       (self->flags2 & 0x3FFFFFFF) * 0x10);
-    }
-
-    visitor->finish();
-}
-} // namespace jj_fn_802D2424
