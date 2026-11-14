@@ -5,6 +5,9 @@
 #include <nw4r/g3d/g3d_obj.h>
 #include <nw4r/g3d/g3d_resfile.h>
 #include <nw4r/g3d/g3d_scngroup.h>
+#include <ms/ms_message.h>
+#include <mu/mu_msg.h>
+#include <string.h>
 #include <types.h>
 
 class BaseItem;
@@ -44,14 +47,14 @@ public:
     u8 unk64;                       // 0x64
     float unk68;                    // 0x68
     float unk6C;                    // 0x6C
-    char _70[0x100];
-    u32 unk170;                     // 0x170
-    int unk174;                     // 0x174
-    int unk178;                     // 0x178
-    u32 unk17C;                     // 0x17C
-    u32 unk180;                     // 0x180
-    u32 unk184;                     // 0x184
-    u32 unk188;                     // 0x188
+    char m_text[0x100];             // 0x70 the line being composed (tags, texts and names)
+    int m_textLen;                  // 0x170
+    int m_nameKind1;                // 0x174 HYPOTHESIS: -1 when the name is not set
+    int m_nameKind2;                // 0x178
+    const char* m_nameStr1;         // 0x17C a full-width name
+    const char* m_nameStr2;         // 0x180
+    const wchar_t* m_nameWStr1;     // 0x184 a UTF-16 name (wins when not empty)
+    const wchar_t* m_nameWStr2;     // 0x188
     gfTask* m_voiceTask;            // 0x18C sndDoubutsugoTask
     void* m_pageFrame;              // 0x190
     u32 unk194;                     // 0x194
@@ -63,5 +66,26 @@ public:
     void initMsg(void* msgData);
     void destroyModel();
     virtual void processDefault();
+    void setMessage(int msgId, float delay1, float delay3, float delay4, float delay2, float wait, float posY);
+
+    inline void appendText(u32 msgIndex) {
+        int len;
+        const char* text = m_msg->getMsgData(msgIndex, &len);
+        memcpy(&m_text[m_textLen], text, len);
+        m_textLen += len;
+    }
+    inline void appendName(char* text, int kind, const char* str, const wchar_t* wstr) {
+        if (wstr != NULL && wstr[0] != 0) {
+            char buf[0x18];
+            Message::utf16to8(buf, wstr);
+            int len = strlen(buf);
+            memcpy(&text[m_textLen], buf, len);
+            m_textLen += len;
+        } else if (kind == -1 || str == NULL) {
+            appendText(0);
+        } else {
+            m_textLen += strlen(Message::fullToHalf(&text[m_textLen], str));
+        }
+    }
 };
 static_assert(sizeof(IfResetsanTask) == 0x198, "Class is wrong size!");

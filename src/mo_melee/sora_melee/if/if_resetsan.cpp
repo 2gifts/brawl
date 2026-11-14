@@ -10,7 +10,10 @@
 #include <gm/gm_global.h>
 #include <it/item.h>
 #include <snd/snd_doubutsugo_task.h>
+#include <mt/mt_vector.h>
 #include <types.h>
+
+extern "C" void fn_8007B0A4(sndDoubutsugoTask* task, const void* script);
 
 extern "C" int fn_8004D9E8(GameGlobal* global);
 // itArchive::getPublicData / getResFileFromId / getData (unnamed)
@@ -94,7 +97,7 @@ VoiceLabel s_voiceLabels[231] = {
 
 } // namespace
 
-s16 utf8charToVoiceLabel(const char* c) {
+static s16 utf8charToVoiceLabel(const char* c) {
     if (c == NULL || *c == 0) {
         return 0xD3;
     }
@@ -197,8 +200,8 @@ IfResetsanTask* IfResetsanTask::create(BaseItem* item, itArchive* archive, int p
 
 IfResetsanTask::IfResetsanTask(BaseItem* item, gfArchive* archive, void* resData, void* pageFrame) :
     gfTask("IfResetsan", Category_Info, 0xE, 6, true),
-    m_item(item), m_archive(archive), m_resFile(resData), m_state(0), unk170(0), unk174(-1), unk178(-1), unk17C(0),
-    unk180(0), unk184(0), unk188(0), m_voiceTask(NULL), m_pageFrame(pageFrame), unk194(0) {
+    m_item(item), m_archive(archive), m_resFile(resData), m_state(0), m_textLen(0), m_nameKind1(-1), m_nameKind2(-1), m_nameStr1(NULL),
+    m_nameStr2(NULL), m_nameWStr1(NULL), m_nameWStr2(NULL), m_voiceTask(NULL), m_pageFrame(pageFrame), unk194(0) {
     unk60 = -1;
     unk64 = 0;
     unk68 = 0.0f;
@@ -305,7 +308,7 @@ void IfResetsanTask::processDefault() {
             m_state = 4;
         }
     } else if (m_state == 1 || m_state == 2) {
-        if (unk60 >= 0 && unk170 != 0 && m_voiceTask != NULL) {
+        if (unk60 >= 0 && m_textLen != 0 && m_voiceTask != NULL) {
             char* tag;
             if (m_msg->getTag(1, &tag)) {
                 s16 label = utf8charToVoiceLabel(tag);
@@ -328,7 +331,7 @@ void IfResetsanTask::processDefault() {
                     unk68 = 0.0f;
                     unk6C = 0.0f;
                     unk64 = true;
-                    unk170 = 0;
+                    m_textLen = 0;
                     if (m_item != NULL) {
                         m_item->notifyEventInfoWindow(unk60);
                     }
@@ -336,4 +339,107 @@ void IfResetsanTask::processDefault() {
             }
         }
     }
+}
+
+void IfResetsanTask::setMessage(int msgId, float delay1, float delay3, float delay4, float delay2, float wait, float posY) {
+    if (delay1 == 0.0f) {
+        delay1 = 2.0f;
+    }
+    if (delay2 == 0.0f) {
+        delay2 = 6.0f;
+    }
+    unk68 = wait;
+    unk6C = wait;
+    if (unk60 < 0) {
+        m_state = 1;
+        m_objects[0]->changeAnimN(0, 3, false, false);
+        m_objects[0]->m_modelAnim->setUpdateRate(1.0f);
+        m_msg->printIndex(0, 0, NULL);
+        m_msg->endPrint();
+    }
+    unk60 = msgId;
+    unk64 = false;
+    unk194 = 0;
+    if (!fn_8004D9E8(g_GameGlobal)) {
+        delay1 *= 0.5f;
+        delay3 *= 0.5f;
+        delay2 *= 0.5f;
+    }
+    float frameRate = g_gfApplication->m_frameRate;
+    if (!(frameRate <= 60.0f)) {
+        float scale = 60.0f / frameRate;
+        delay1 *= scale;
+        delay3 *= scale;
+        delay2 *= scale;
+    }
+    if (unk60 < 0) {
+        m_state = 3;
+        m_objects[0]->changeAnimN(1, 3, false, false);
+        m_objects[0]->m_modelAnim->setUpdateRate(1.0f);
+        return;
+    }
+    m_state = 2;
+    if (m_voiceTask != NULL && m_archive != NULL) {
+        static_cast<sndDoubutsugoTask*>(m_voiceTask)->playPageSE();
+        int fileId;
+        int voiceId = 0;
+        if (msgId >= 4 && msgId <= 0x1B) {
+            voiceId = msgId + 0x128;
+        } else if (msgId >= 0x1C && msgId <= 0x3D) {
+            voiceId = msgId - 0x1C;
+        } else if (msgId >= 0x3E && msgId <= 0x5F) {
+            voiceId = msgId + 0x26;
+        } else if (msgId >= 0x63 && msgId <= 0x82) {
+            voiceId = msgId + 0x65;
+        } else if (msgId >= 0x85 && msgId <= 0xB9) {
+            voiceId = msgId + 0x10A;
+        } else if (msgId >= 1 && msgId <= 3) {
+            voiceId = msgId + 0x1F3;
+        }
+        fileId = 0x32;
+        if (!fn_8004D9E8(g_GameGlobal)) {
+            fileId = 0x33;
+        }
+        void* script = fn_27_2B2764(reinterpret_cast<itArchive*>(m_archive), 1, 1, voiceId, fileId);
+        if (script != NULL && !fn_8004D9E8(g_GameGlobal)) {
+            fn_8007B0A4(static_cast<sndDoubutsugoTask*>(m_voiceTask), script);
+        }
+    }
+    Vec3f trans;
+    Vec3f* src = &m_objects[0]->m_trans;
+    trans.m_x = src->m_x;
+    trans.m_y = src->m_y;
+    trans.m_z = src->m_z;
+    trans.m_y = posY;
+    m_objects[0]->setTrans(&trans);
+    m_msg->setDelayPrint(1, delay1, delay2, delay3, delay4);
+    char* text;
+    switch (msgId) {
+    case 0x4F:
+        text = m_text;
+        m_textLen = 0;
+        m_textLen += Message::writeTagClear(text);
+        appendText(0x60);
+        appendName(text, m_nameKind1, m_nameStr1, m_nameWStr1);
+        appendText(0x61);
+        appendName(m_text, m_nameKind2, m_nameStr2, m_nameWStr2);
+        appendText(0x62);
+        text[m_textLen] = 0;
+        m_msg->printData(1, m_text, m_textLen);
+        break;
+    case 0x6F:
+        text = m_text;
+        m_textLen = 0;
+        m_textLen += Message::writeTagClear(text);
+        appendText(0x83);
+        appendName(text, m_nameKind1, m_nameStr1, m_nameWStr1);
+        appendText(0x84);
+        text[m_textLen] = 0;
+        m_msg->printData(1, m_text, m_textLen);
+        break;
+    default:
+        m_msg->printIndex(1, msgId, NULL);
+        break;
+    }
+    m_msg->endPrint();
 }
