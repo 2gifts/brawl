@@ -9,7 +9,7 @@ struct hkCollisionInput;
 
 // Collision agent for triangle x capsule pairs. Object size 0x28: the 0x08 word (inherited) is the contact manager,
 // 0x0C three 16-bit slots (set to 0xFFFF by the constructor), and 0x14 a 0x14-byte sub-object that the constructor
-// fills from the triangle's vertices (fn_80325334, not recovered yet).
+// fills from the triangle's vertices (hkCollideTriangleUtil::setupPointTriangleDistanceCache).
 struct hkCapsuleTriangleAgent : hkIterativeLinearCastAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 

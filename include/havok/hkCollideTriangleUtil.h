@@ -39,5 +39,8 @@ struct hkCollideTriangleUtil {
     // Cache for the closest point of a triangle (tri: three vertices, 16 bytes apart; the edges are taken from
     // vertex 1). cache.x, y, z: |a|^2, |c|^2, a.c divided by the Gram determinant; cache.w: |a x c|.
     static void setupClosestPointTriangleCache(const hkVector4* tri, hkVector4* cache);
+    // Fills the distance cache of a triangle (three vertices, 16 bytes apart) for the point-triangle queries
+    // (map name; the agents keep one per triangle).
+    static void setupPointTriangleDistanceCache(const hkVector4* triangle, PointTriangleDistanceCache& cache);
     static int closestPointLineSeg(const hkVector4& p, const hkVector4& a, const hkVector4& b, hkVector4& out);
 };

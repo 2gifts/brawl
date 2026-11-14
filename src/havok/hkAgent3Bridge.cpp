@@ -13,6 +13,7 @@
 #include <havok/hkBvTreeStreamAgent.h>
 #include <havok/hkCapsuleCapsuleAgent.h>
 #include <havok/hkCapsuleTriangleAgent.h>
+#include <havok/hkCapsuleTriangleAgent3.h>
 #include <havok/hkConvexListAgent.h>
 #include <havok/hkHeightFieldAgent.h>
 #include <havok/hkListAgent.h>
@@ -33,7 +34,6 @@ namespace jj_fn_802CB484 {
 union ByteSlot { unsigned char b; int align; };
 extern "C" {
 void fn_802D4EC0(void*);
-void fn_802FB894(void*);
 void fn_802CB484(void* p) {
  ByteSlot a,b,c,d,e,f;
  fn_802D4EC0(p);
@@ -53,7 +53,7 @@ void fn_802CB484(void* p) {
  hkPredGskAgent3::registerAgent3((hkCollisionDispatcher*)(p), 1, 1); hkPredGskCylinderAgent3::registerAgent3((hkCollisionDispatcher*)(p)); hkBoxBoxAgent::registerAgent((hkCollisionDispatcher*)(p)); hkBoxBoxAgent3::registerAgent3((hkCollisionDispatcher*)(p));
  hkSphereSphereAgent::registerAgent((hkCollisionDispatcher*)(p)); hkSphereCapsuleAgent::registerAgent((hkCollisionDispatcher*)(p)); hkSphereTriangleAgent::registerAgent((hkCollisionDispatcher*)(p));
  hkPredGskAgent3::registerAgent3((hkCollisionDispatcher*)(p), 6, 4); hkPredGskAgent3::registerAgent3((hkCollisionDispatcher*)(p), 4, 6);
- hkSphereBoxAgent::registerAgent((hkCollisionDispatcher*)(p)); hkCapsuleCapsuleAgent::registerAgent((hkCollisionDispatcher*)(p)); hkCapsuleTriangleAgent::registerAgent((hkCollisionDispatcher*)(p)); fn_802FB894(p);
+ hkSphereBoxAgent::registerAgent((hkCollisionDispatcher*)(p)); hkCapsuleCapsuleAgent::registerAgent((hkCollisionDispatcher*)(p)); hkCapsuleTriangleAgent::registerAgent((hkCollisionDispatcher*)(p)); hkCapsuleTriangleAgent3::registerAgent3((hkCollisionDispatcher*)(p));
  hkMultiSphereTriangleAgent::registerAgent((hkCollisionDispatcher*)(p)); hkMultiRayConvexAgent::registerAgent((hkCollisionDispatcher*)(p)); hkBvTreeStreamAgent::registerMultiRayAgent((void*)(p));
 }
 }

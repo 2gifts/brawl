@@ -25,16 +25,16 @@
 #include <havok/hkShapeType.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkTriangleShape.h>
+#include <havok/hkCollideTriangleUtil.h>
 
-// Stand-ins for the sub-object constructor and the symmetric linear cast of other units (not written yet).
-extern "C" void fn_80325334(void* src, void* dst);
 hkCapsuleTriangleAgent::hkCapsuleTriangleAgent(const hkCdBody& triangleBody, hkContactMgr* contactMgr)
     : hkIterativeLinearCastAgent((int)contactMgr) {
     unkC[0] = 0xFFFF;
     unkC[1] = 0xFFFF;
     unkC[2] = 0xFFFF;
     const hkTriangleShape* triangle = (const hkTriangleShape*)triangleBody.m_shape;
-    fn_80325334((void*)&triangle->m_vertexA, unk14);
+    hkCollideTriangleUtil::setupPointTriangleDistanceCache(&triangle->m_vertexA,
+                                                           *(hkCollideTriangleUtil::PointTriangleDistanceCache*)unk14);
 }
 
 hkCapsuleTriangleAgent* hkCapsuleTriangleAgent::createTriangleCapsuleAgent(const hkCdBody& bodyA, const hkCdBody& bodyB,
