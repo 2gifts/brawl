@@ -45,7 +45,7 @@ struct hkWorldOperationUtil {
     static void removeIslandFromDirtyList(hkWorld* world, hkSimulationIsland* island);
     static void removeIsland(hkWorld* world, hkSimulationIsland* island);
     static void mergeIslands(hkWorld* world, hkEntity* entityA, hkEntity* entityB);
-    static void internalMergeTwoIslands(hkWorld* world, hkSimulationIsland* islandA, hkSimulationIsland* islandB);
+    static hkSimulationIsland* internalMergeTwoIslands(hkWorld* world, hkSimulationIsland* islandA, hkSimulationIsland* islandB);
     static void removeConstraintImmediately(hkWorld* world, hkConstraintInstance* constraint, bool fireCallback);
     static hkConstraintInstance* addConstraintImmediately(hkWorld* world, hkConstraintInstance* constraint, bool fireCallback);
     static void markIslandInactive(hkWorld* world, hkSimulationIsland* island);

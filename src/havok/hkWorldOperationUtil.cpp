@@ -30,6 +30,8 @@
 #include <havok/hkKeyframedRigidMotion.h>
 #include <havok/hkFixedRigidMotion.h>
 #include <havok/hkString.h>
+#include <havok/hkMonitorStream.h>
+#include <havok/hkConstraintInternal.h>
 
 // HYPOTHESIS: the top two bits of the byte at island+0x26/+0x27 hold the activity state, written as a 2-bit field.
 // Local view only; hkSimulationIsland.h does not declare these bytes yet.
@@ -752,4 +754,131 @@ void hkWorldOperationUtil::replaceMotionObject(hkRigidBody* body, hkMotion::Moti
             (newType == hkMotion::MOTION_FIXED) ? 1 : 2; // fixed / keyframed collidable quality
     }
     body->m_collidable.m_motion = (hkMotion*)&body->m_motion.m_motionState;
+}
+
+// Merges two islands into the bigger one (on a tie, the one earlier in the world's list) and deletes the other:
+// its entities, agents, actions and constraints move over, the activity and dirty-list state is combined, and the
+// surviving island is moved to the front of the active list when it is now the biggest.
+hkSimulationIsland* hkWorldOperationUtil::internalMergeTwoIslands(hkWorld* world, hkSimulationIsland* islandA,
+                                                                  hkSimulationIsland* islandB) {
+    HK_TIMER_BEGIN("MergeIsle");
+    if (islandA->m_entities.getSize() <= islandB->m_entities.getSize()) {
+        if (islandA->m_entities.getSize() < islandB->m_entities.getSize() ||
+            islandA->m_storageIndex > islandB->m_storageIndex) {
+            hkSimulationIsland* tmp = islandA;
+            islandA = islandB;
+            islandB = tmp;
+        }
+    }
+    world->lockCriticalOperations();
+
+    bool anyActive = islandA->m_flags.m_stateD || islandB->m_flags.m_stateD;
+    hkBool anyMarked = (char)islandA->m_flags27.m_active || (char)islandB->m_flags27.m_active;
+    if (anyActive) {
+        if (!islandA->m_flags.m_stateD) {
+            islandA->m_flags27.m_active = 1;
+            internalActivateIsland(world, islandA);
+            islandA->m_highFrequencyDeactivationCounter = islandB->m_highFrequencyDeactivationCounter;
+            islandA->m_lowFrequencyDeactivationCounter = islandB->m_lowFrequencyDeactivationCounter;
+        } else if (!islandB->m_flags.m_stateD) {
+            islandB->m_flags27.m_active = 1;
+            internalActivateIsland(world, islandB);
+        } else {
+            u8 high = islandB->m_highFrequencyDeactivationCounter;
+            if (islandA->m_highFrequencyDeactivationCounter < high) {
+                high = islandA->m_highFrequencyDeactivationCounter;
+            }
+            islandA->m_highFrequencyDeactivationCounter = high;
+            u8 low = islandB->m_lowFrequencyDeactivationCounter;
+            if (islandA->m_lowFrequencyDeactivationCounter < low) {
+                low = islandA->m_lowFrequencyDeactivationCounter;
+            }
+            islandA->m_lowFrequencyDeactivationCounter = low;
+        }
+    }
+
+    hkAgentNnMachine_AppendTrack(islandA->m_agentTrack, islandB->m_agentTrack);
+
+    // entities
+    {
+        int oldSize = islandA->m_entities.getSize();
+        u16 index = (u16)oldSize;
+        islandA->m_entities.setSize(oldSize + islandB->m_entities.getSize());
+        for (int i = 0; i < islandB->m_entities.getSize(); i++) {
+            islandA->m_entities[index] = islandB->m_entities[i];
+            islandB->m_entities[i]->m_simulationIsland = islandA;
+            islandB->m_entities[i]->m_storageIndex = index;
+            index++;
+        }
+    }
+
+    // actions (empty slots are dropped)
+    {
+        int numActions = islandA->m_actions.getSize();
+        islandA->m_actions.setSize(numActions + islandB->m_actions.getSize());
+        for (int i = 0; i < islandB->m_actions.getSize(); i++) {
+            hkAction* action = islandB->m_actions[i];
+            if (action != NULL) {
+                islandA->m_actions[numActions] = action;
+                *(hkSimulationIsland**)((u8*)islandA->m_actions[numActions] + 0x0C) = islandA;
+                numActions++;
+            }
+        }
+        islandA->m_actions.setSize(numActions);
+    }
+
+    // constraints owned by the moved entities
+    for (int i = 0; i < islandB->m_entities.getSize(); i++) {
+        hkEntity* entity = islandB->m_entities[i];
+        hkConstraintInternal* c = entity->m_constraintsMaster.begin();
+        for (int j = entity->m_constraintsMaster.getSize() - 1; j >= 0; j--) {
+            ((hkConstraintInstance*)c->m_unk00)->m_owner = islandA;
+            c++;
+        }
+    }
+
+    islandA->mergeConstraintInfo(islandB);
+    islandA->m_unk1C += islandB->m_unk1C;
+    islandB->m_unk1C = 0;
+
+    // take islandB out of its list
+    {
+        u16 index = islandB->m_storageIndex;
+        hkArray<hkSimulationIsland*>& islands = islandB->m_flags.m_stateD
+                                                    ? *(hkArray<hkSimulationIsland*>*)&world->m_unk28
+                                                    : *(hkArray<hkSimulationIsland*>*)&world->m_unk34;
+        if (index < islands.getSize() - 1) {
+            islands[index] = islands[islands.getSize() - 1];
+            islands[index]->m_storageIndex = index;
+        }
+        islands.m_size--;
+    }
+
+    islandA->m_flags.m_stateA = islandA->m_flags.m_stateA || islandB->m_flags.m_stateA;
+    islandA->m_flags.m_stateB = islandA->m_flags.m_stateB || islandB->m_flags.m_stateB;
+    islandA->m_flags27.m_active = anyMarked;
+
+    if (islandB->m_dirtyListIndex != 0xFFFF && islandA->m_dirtyListIndex == 0xFFFF) {
+        islandA->m_dirtyListIndex = world->m_unk40.m_size;
+        ((hkArray<hkSimulationIsland*>&)world->m_unk40).pushBack(islandA);
+    }
+    removeIslandFromDirtyList(world, islandB);
+    delete islandB;
+
+    // sort the big island to the front
+    if (islandA->m_flags.m_stateD && islandA->m_storageIndex != 0) {
+        hkArray<hkSimulationIsland*>& activeIslands = *(hkArray<hkSimulationIsland*>*)&world->m_unk28;
+        hkSimulationIsland* first = activeIslands[0];
+        if (islandA->m_entities.getSize() > first->m_entities.getSize()) {
+            int oldIndex = islandA->m_storageIndex;
+            islandA->m_storageIndex = 0;
+            first->m_storageIndex = oldIndex;
+            activeIslands[0] = islandA;
+            activeIslands[oldIndex] = first;
+        }
+    }
+
+    HK_TIMER_END();
+    world->unlockAndAttemptToExecutePendingOperations();
+    return islandA;
 }
