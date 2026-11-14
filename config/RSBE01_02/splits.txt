@@ -3392,6 +3392,7 @@ havok/hkTypedBroadPhaseDispatcher.cpp:
 	extab       start:0x800081A0 end:0x800081F8
 	extabindex  start:0x8000AE40 end:0x8000AEAC
 	.text       start:0x802CAA50 end:0x802CB41C
+	.data       start:0x80487290 end:0x804872A8
 
 havok/hkTypedBroadPhaseHandleClass.cpp:
 	extab       start:0x800081F8 end:0x80008200
