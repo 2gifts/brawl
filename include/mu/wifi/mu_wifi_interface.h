@@ -103,6 +103,7 @@ struct muWifiAIDInfo {
                 s32 unk0_b24 : 8;
                 u32 _pad0 : 24;
             };
+            u32 unk0_word;
         };
     };
     union {
@@ -312,6 +313,7 @@ struct muWifiAIDInfo {
                     struct { u8 _pad0[8]; u16 unk8; };
                     struct { u8 _pad2[2]; u8 unk2Data; };
                     struct { u8 _pad1[1]; u8 unk1Data; };
+                    struct { u8 _pad5_2[5]; u8 unk5; u8 _pad6_2[4]; };
                 };
             } unkE4[4];
             u8 unk10C;
@@ -433,7 +435,7 @@ public:
     union {
         char unkFD0[0xA];
         struct { char _padFD0[8]; u8 unkFD8; u8 _padFD9; };
-        struct { char _padFD0_2[2]; u8 unkFD2; char _padFD3[2]; u8 unkFD5; char _padFD6[4]; };
+        struct { char _padFD0_2; u8 unkFD1; u8 unkFD2; char _padFD3[2]; u8 unkFD5; u8 unkFD6; char _padFD7[3]; };
     };
 #else
     union { char unkFD0[0xA]; struct { char _padFD0[8]; u8 unkFD8; u8 _padFD9; }; };
