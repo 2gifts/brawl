@@ -21,9 +21,10 @@ void ftCaptainStatusUniqProcessFalconKnuckle::initStatus(soModuleAccesser* modul
 }
 
 void ftCaptainStatusUniqProcessFalconKnuckle::execStatus(soModuleAccesser* moduleAccesser) {
-    if (moduleAccesser->getStatusModule().getStatusKind() == 0x118) {
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x118:
         if (moduleAccesser->getWorkManageModule().getInt(0x20000000) == 0) {
-            soKineticEnergyNormal& energy = dynamic_cast<soKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(3));
+            ftKineticEnergyStop& energy = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
             Vec2f speed = energy.getSpeed();
             float scale = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa5, 0);
             Vec2f scaled;
@@ -33,6 +34,7 @@ void ftCaptainStatusUniqProcessFalconKnuckle::execStatus(soModuleAccesser* modul
             energy.m_speed.m_x = copy.m_x;
             energy.m_speed.m_y = copy.m_y;
         }
+        break;
     }
 }
 
