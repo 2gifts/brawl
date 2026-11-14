@@ -166,7 +166,7 @@ hkBool hkWorld::removeConstraint(hkConstraintInstance* constraint) {
 #pragma pop
 
 hkPhantom* hkWorld::addPhantom(hkPhantom* phantom) {
-    if (m_lockCount + m_unk80 != 0) {
+    if (areCriticalOperationsLockedForPhantoms()) {
         hkWorldOperationRecord op;
         op.m_type = hkWorldOperation::PHANTOM_ADD;
         op.m_object = phantom;
@@ -174,7 +174,7 @@ hkPhantom* hkWorld::addPhantom(hkPhantom* phantom) {
         return NULL;
     }
 
-    m_lockCount++;
+    lockCriticalOperations();
 
     // a phantom that came out of a packfile may not have its collidable pointed at a motion state yet
     if (phantom->m_collidable.m_motion == NULL) {
@@ -195,7 +195,7 @@ hkPhantom* hkWorld::addPhantom(hkPhantom* phantom) {
 }
 
 void hkWorld::removePhantom(hkPhantom* phantom) {
-    if (m_lockCount + m_unk80 != 0) {
+    if (areCriticalOperationsLockedForPhantoms()) {
         hkWorldOperationRecord op;
         op.m_type = hkWorldOperation::PHANTOM_REMOVE;
         op.m_object = phantom;
@@ -203,7 +203,7 @@ void hkWorld::removePhantom(hkPhantom* phantom) {
         return;
     }
 
-    m_lockCount++;
+    lockCriticalOperations();
 
     hkWorldCallbackUtil::firePhantomRemoved(this, phantom);
     phantom->firePhantomRemoved();
