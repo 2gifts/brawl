@@ -67,6 +67,7 @@ public:
     void flush();
     void setCurIdx(int index);
     u32 setBarMode(bool barMode, bool barMode2);
+    bool input(u32 buttons, u32 trigger, s8 stick);
     void update();
 };
 static_assert(sizeof(muAdvSealList) == 0x54, "Class is wrong size!");
