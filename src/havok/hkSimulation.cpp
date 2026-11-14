@@ -1,4 +1,4 @@
-// Havok translation unit hkSimulation.o (main.dol 0x802F0BA8-0x802F30BC).
+// Havok translation unit hkSimulation.o (main.dol 0x802F0BA8-0x802F3290).
 // Not yet decompiled. Functions in address order (method names from the Havok TU map; classes still to be identified):
 //   0x802F0BA8    68  __ct   [map: hkSimulation____ct]
 //   0x802F0BEC    92  __dt   [map: hkSimulation____dt]
@@ -65,6 +65,10 @@
 #include <havok/hkRigidMotionUtil.h>
 #include <havok/hkConstraintSolverSetup.h>
 #include <havok/hkWorldOperationUtil.h>
+#include <havok/hkStepInfo.h>
+#include <havok/hkWorldAgentUtil.h>
+#include <havok/hkWorldOperationQueue.h>
+#include <havok/hkSweptTransformUtil.h>
 
 hkSimulation::hkSimulation(hkWorld* world) {
     m_world = world;
@@ -624,3 +628,38 @@ void hkQuaternion::setInverseMul(const hkQuaternion& q0, const hkQuaternion& q1)
 hkProcessCollisionOutput::hkProcessCollisionOutput() {
     m_toi.m_time = HK_REAL_MAX;
 }
+
+
+// Moves the entities back to the simulation time, re-integrates them over the current step and collides them again
+// (broad phase, then the narrow phase with fresh time-of-impact information). Queued while the world is locked.
+void hkSimulation::reintegrateAndRecollideEntities(hkEntity** entities, int numEntities, hkWorld* world) {
+    if (world->m_lockCount != 0) {
+        hkWorldOperation::BatchOperation op;
+        op.m_type = hkWorldOperation::ENTITY_BATCH_REINTEGRATE_AND_RECOLLIDE;
+        op.m_objects = (void**)entities;
+        op.m_count = numEntities;
+        world->queueOperation(&op);
+        return;
+    }
+    world->lockCriticalOperations();
+    hkStepInfo stepInfo(world->m_simulation->m_unk10, world->m_simulation->m_unk14);
+    world->m_collisionInput->m_stepInfo = stepInfo;
+    for (int i = 0; i < numEntities; i++) {
+        hkSweptTransformUtil::backStepMotionState(world->m_simulation->m_unk10,
+                                                  entities[i]->m_motion.m_motionState);
+    }
+    hkRigidMotionUtil::hkRigidMotionUtilStep(stepInfo, entities, numEntities, HK_OFFSET_OF(hkEntity, m_motion));
+    collideEntitiesBroadPhaseDiscrete(entities, numEntities, world);
+    for (int i = 0; i < numEntities; i++) {
+        hkWorldAgentUtil::invalidateTim(entities[i], *world->m_collisionInput);
+    }
+    collideEntitiesNarrowPhaseDiscrete(entities, numEntities, *world->m_collisionInput, 0);
+    world->unlockAndAttemptToExecutePendingOperations();
+}
+
+// The collision-information checks are empty in this build (hkContinuousSimulation overrides them).
+void hkSimulation::assertThereIsNoCollisionInformationForAgent(const void* agent) {}
+
+void hkSimulation::removeCollisionInformationForAgent(const void* agent) {}
+
+void hkSimulation::assertThereIsNoCollisionInformationForEntities(const void* entities) {}

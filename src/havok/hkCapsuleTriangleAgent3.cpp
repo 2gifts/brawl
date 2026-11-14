@@ -1,4 +1,4 @@
-// Havok translation unit hk_weak_802FB894.o (main.dol 0x802FB894-0x802FC6AC): the capsule x triangle agent of the
+// Havok translation unit hkCapsuleTriangleAgent3.o (main.dol 0x802FB894-0x802FC6AC): the capsule x triangle agent of the
 // agent3 (stream) machine. Its agent data holds three contact point ids and the triangle's distance cache (0x20
 // bytes). Functions in address order: registerAgent3, create, sepNormal (0x802FB9A4, not written yet), cleanup,
 // removePoint, commitPotential, createZombie, destroy, process (0x802FBF78, not written yet).
