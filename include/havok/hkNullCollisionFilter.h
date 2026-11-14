@@ -15,7 +15,7 @@ struct hkNullCollisionFilter : hkCollisionFilter {
     static void cleanupLoadedObjecthkNullCollisionFilter(void* p);
     static const void* getVtablehkNullCollisionFilter();
 
-    // The four overloads of the Havok map (hkNullCollisionFilter__isCollisionEnabled, ...1 to ...3). The
+    // The four overloads in the symbol names (hkNullCollisionFilter__isCollisionEnabled, ...1 to ...3). The
     // arguments are never read, so their types are not recovered; they are pointers here.
     virtual hkBool isCollisionEnabled(const hkCollidable& a, const hkCollidable& b) const;
     virtual hkBool isCollisionEnabled(const hkCollisionInput& input, const hkCdBody& a, const hkCdBody& b,

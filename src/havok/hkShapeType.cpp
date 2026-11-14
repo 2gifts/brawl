@@ -1,6 +1,6 @@
 // Havok translation unit hkShapeType.o (main.dol 0x802D4FE4-0x802D51F4).
 // Functions in address order:
-//   0x802D4FE4   528  hkGetShapeTypeName   [map: hkShapeType__hkGetShapeTypeName]
+//   0x802D4FE4   528  hkGetShapeTypeName
 
 #include <havok/hkShapeType.h>
 

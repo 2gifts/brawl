@@ -33,7 +33,7 @@ struct hkQuaternion {
     }
 };
 
-// Helper class from the Havok TU map (hkQuadReal__quaternionFromRotatation).
+// Helper class from the symbol names (hkQuadReal__quaternionFromRotatation).
 struct hkQuadReal {
     static void quaternionFromRotatation(hkQuaternion* out, const hkRotation& r);
 };

@@ -1,13 +1,13 @@
 // Havok translation unit hkEntityCallbackUtil.o (main.dol 0x802E3CD4-0x802E4338).
-// Functions in address order (method names from the Havok TU map where it has them):
+// Functions in address order:
 //   0x802E3CD4   124  fireEntityAdded
 //   0x802E3D50   256  fireEntityRemoved
 //   0x802E3E50   124  fireEntityShapeSet
 //   0x802E3ECC   124  fireEntityDeleted
 //   0x802E3F48   252  fireContactPointAddedInternal
-//   0x802E4044   252  fireContactPointConfirmedInternal   [map: hkEntityCallbackUtil__fireContactPointConfirmedInternal]
-//   0x802E4140   252  fireContactPointRemovedInternal   [map: hkEntityCallbackUtil__fireContactPointRemovedInternal]
-//   0x802E423C   252  fireContactProcessInternal   [map: hkEntityCallbackUtil__fireContactProcessInternal]
+//   0x802E4044   252  fireContactPointConfirmedInternal
+//   0x802E4140   252  fireContactPointRemovedInternal
+//   0x802E423C   252  fireContactProcessInternal
 // HYPOTHESIS: the names of the first five (unnamed in the map; the listener slot each one calls, and
 // fireEntityRemoved detaching the entity's constraints and actions).
 

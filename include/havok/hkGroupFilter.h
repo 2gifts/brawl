@@ -21,7 +21,7 @@ struct hkGroupFilter : hkCollisionFilter {
     static const void* getVtablehkGroupFilter();
 
     hkBool isCollisionEnabled(u32 infoA, u32 infoB) const;
-    // Overloads 1-4 keep the numbering of the Havok map names (hkGroupFilter__isCollisionEnabledN).
+    // Overloads 1-4 keep the numbering of the symbol names (hkGroupFilter__isCollisionEnabledN).
     virtual hkBool isCollisionEnabled(const hkCollidable& a, const hkCollidable& b) const;
     virtual hkBool isCollisionEnabled(const hkCollisionInput& input, const hkCdBody& a, const hkCdBody& b,
                                       const hkShapeCollection& bContainer, u32 bKey) const;

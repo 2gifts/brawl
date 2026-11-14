@@ -110,5 +110,5 @@ void hkBoxMotion::applyTorque(hkReal timestep, const hkVector4& torque) {
 }
 
 // Not yet decompiled in this unit:
-//   0x802E4BE0   804  applyPointImpulse   [map: hkBoxMotion__applyPointImpulse]
-//   0x802E4F04   420  applyAngularImpulse   [map: hkBoxMotion__applyAngularImpulse]
+//   0x802E4BE0   804  applyPointImpulse
+//   0x802E4F04   420  applyAngularImpulse

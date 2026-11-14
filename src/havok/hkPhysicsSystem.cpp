@@ -1,10 +1,10 @@
 // Havok translation unit hkPhysicsSystem.o (main.dol 0x802E9890-0x802E9B90).
 // Functions in address order:
-//   0x802E9890    32  finishLoadedObjecthkPhysicsSystem   [map: hkPhysicsSystem__finishLoadedObjecthkPhysicsSystem]
-//   0x802E98B0    20  cleanupLoadedObjecthkPhysicsSystem   [map: hkPhysicsSystem__cleanupLoadedObjecthkPhysicsSystem]
-//   0x802E98C4    60  getVtablehkPhysicsSystem   [map: hkPhysicsSystem__getVtablehkPhysicsSystem]
-//   0x802E9900   576  __dt   [map: hkPhysicsSystem____dt]
-//   0x802E9B40    80  __sinit_\hkPhysicsSystem_cpp   [map: hkPhysicsSystemcpp____sinit_]
+//   0x802E9890    32  finishLoadedObjecthkPhysicsSystem
+//   0x802E98B0    20  cleanupLoadedObjecthkPhysicsSystem
+//   0x802E98C4    60  getVtablehkPhysicsSystem
+//   0x802E9900   576  __dt
+//   0x802E9B40    80  __sinit_\hkPhysicsSystem_cpp
 
 #include <havok/hkPhysicsSystem.h>
 #include <havok/hkRegistry.h>

@@ -50,7 +50,7 @@ struct hkLinearCastCollisionInput : hkCollisionInput {
     hkLinearCastAgentConfig* unk28; // 0x28
 };
 
-// Input of processCollision (Havok's name; the Skyrim reference has it as a plain derived struct).
+// Input of processCollision.
 // The step at 0x10 is the world's current step (hkSimulation::integrate copies it in); hkBvTreeAgent::processCollision
 // passes its delta time to hkSweptTransformUtil::calcTimInfo.
 struct hkProcessCollisionInput : hkCollisionInput {

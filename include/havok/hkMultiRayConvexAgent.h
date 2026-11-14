@@ -7,7 +7,7 @@
 #include <havok/hkVector4.h>
 
 // Shape made of rays (HK_SHAPE_MULTI_RAY). HYPOTHESIS: only the ray array is known, from the agents (no reflection
-// class for it in this build). Each ray is two points; the first point's w holds the ray length (Halo donor).
+// class for it in this build). Each ray is two points; the first point's w holds the ray length.
 struct hkMultiRayShape : hkShape {
     struct Ray {
         hkVector4 m_start; // 0x00

@@ -1,6 +1,6 @@
 // Havok translation unit hkShape.o (main.dol 0x802D4AB4-0x802D4C7C).
 // Functions in address order:
-//   0x802D4AB4   456  getMaximumProjection   [map: hkShape__getMaximumProjection]
+//   0x802D4AB4   456  getMaximumProjection
 
 #include <havok/hkShape.h>
 

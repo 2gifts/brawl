@@ -39,7 +39,7 @@ struct hkSphereTriangleAgent : hkIterativeLinearCastAgent {
     static void staticGetPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3);
 };
 
-// Flipped (symmetric) variant; the class name follows the Havok TU map (see hkSphereBoxAgent.h).
+// Flipped (symmetric) variant; the class name follows the symbol names (see hkSphereBoxAgent.h).
 struct hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_ : hkSphereTriangleAgent {
     hkSymmetricAgentLinearCast_21hkSphereTriangleAgent_(const hkCdBody& triangleBody, hkContactMgr* contactMgr)
         : hkSphereTriangleAgent(triangleBody, contactMgr) {}

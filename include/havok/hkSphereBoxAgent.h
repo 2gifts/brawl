@@ -35,7 +35,7 @@ struct hkSphereBoxAgent : hkIterativeLinearCastAgent {
 };
 
 // Flipped (symmetric) variant of the box agent: the shapes are swapped and the collector is wrapped
-// (see hkSymmetricAgentFlipCollectors.h). The class name follows the Havok TU map, which flattens the
+// (see hkSymmetricAgentFlipCollectors.h). The class name follows the symbol names, which flattens the
 // template argument (hkSymmetricAgentLinearCast<hkSphereBoxAgent>). HYPOTHESIS: the base is the box agent.
 // processCollision, staticLinearCast and the destructor are not written yet.
 struct hkSymmetricAgentLinearCast_16hkSphereBoxAgent_ : hkSphereBoxAgent {

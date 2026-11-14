@@ -1,5 +1,5 @@
 // Havok translation unit hkWorldOperationUtil.o (main.dol 0x802F7E24-0x802FB244).
-// Work in progress. Functions in address order (method names from the Havok TU map):
+// Work in progress. Functions in address order:
 //   0x802F7E24  updateEntityBP, addEntityBP, addPhantomBP, addEntitySI, removeEntityBP, removePhantomBP,
 //   removeEntitySI, removeAttachedActionsFromFixedIsland, removeAttachedActionsFromDynamicIsland,
 //   addActionsToEntitysIsland, removeIsland, addConstraintToCriticalLockedIsland,
