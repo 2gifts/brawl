@@ -16,6 +16,7 @@ void VFiPFENT_loadEntryNumericFieldsFromBuf(PF_DIR_ENT*, const u8*);
 s32 VFiPFENT_LoadLFNEntryFieldsFromBuf(PF_DIR_ENT*, const u8*);
 void VFiPFENT_storeLFNEntryFieldsToBuf(u8*, PF_DIR_ENT*, u8, u8, u32);
 s32 VFiPFENT_findEntryPos(PF_FFD*, PF_DIR_ENT*, u32, PF_STR*, u8, u8, u32*, u32*);
+
 s32 VFiPFENT_findEntry(PF_FFD*, PF_DIR_ENT*, u32, PF_STR*, u8, u8);
 s32 VFiPFENT_allocateEntryPos(PF_DIR_ENT*, u8, PF_FFD*, u32*, PF_STR*, u32*);
 s32 VFiPFENT_allocateEntry(PF_DIR_ENT*, u8, PF_FFD*, u32*, PF_STR*);
@@ -54,6 +55,26 @@ VFTimeStampCallback lbl_805A1224 = NULL;
 // another; helpers the original inlined are marked inline.
 // Checked: without this pragma 53 functions in this unit stop matching.
 #pragma auto_inline off
+
+// HYPOTHESIS: NAND's creation entry takes the requested size, normalized path,
+// and path buffer capacity, as used by the VF system-file wrapper.
+s32 NAND_CreatePrfFile(u32 size, const s8* path, u32 capacity);
+
+s32 VFSysCreatePrfFileNANDFlash(const s8* i_path, u32 i_size) {
+    s8 path[256];
+    s32 i;
+    s8* dst = path;
+    const s8* src = i_path;
+    u32 size = i_size;
+    fn_803A976C(dst, 0, 255);
+    for (i = 0; i < 255 && *src; src++, dst++, i++) {
+        if (*src == '\\') *dst = '/';
+        else *dst = *src;
+    }
+    if (VFSysCheckExistPrfFile_nandflash_sub(path, -10) == 0xB001)
+        return NAND_CreatePrfFile(size, path, 256);
+    return 0;
+}
 
 s32 VFiPFAPI_ParseOpenModeString(const s8* mode_str) {
     s32 mode;
@@ -2155,21 +2176,26 @@ void VFiPFENT_loadEntryNumericFieldsFromBuf(PF_DIR_ENT* p_ent, const u8* buf) {
                            vf_bswap16(*(const u16*)(buf + 0x1A));
 }
 
-void fn_803B2B3C(u8* buf, const PF_DIR_ENT* p_ent) { // VFiPFENT_StoreEntryNumericFieldsToBuf
-    u32 cluster;
+static inline void pfent_store_half(u8* dst, u32 value) {
+    __sthbrx(value, dst, 0);
+}
 
+static inline void pfent_store_numeric(u8* buf, const PF_DIR_ENT* p_ent) {
     buf[0x0B] = p_ent->attr;
     buf[0x0C] = p_ent->small_letter_flag;
     buf[0x0D] = p_ent->create_time_ms;
-    *(u16*)(buf + 0x0E) = vf_bswap16(p_ent->create_time);
-    *(u16*)(buf + 0x10) = vf_bswap16(p_ent->create_date);
-    *(u16*)(buf + 0x12) = vf_bswap16(p_ent->access_date);
-    *(u16*)(buf + 0x16) = vf_bswap16(p_ent->modify_time);
-    *(u16*)(buf + 0x18) = vf_bswap16(p_ent->modify_date);
-    *(u32*)(buf + 0x1C) = vf_bswap32(p_ent->file_size);
-    cluster = p_ent->start_cluster;
-    *(u16*)(buf + 0x14) = vf_bswap16((u16)(cluster >> 16));
-    *(u16*)(buf + 0x1A) = vf_bswap16((u16)cluster);
+    pfent_store_half(buf + 0x0E, p_ent->create_time);
+    pfent_store_half(buf + 0x10, p_ent->create_date);
+    pfent_store_half(buf + 0x12, p_ent->access_date);
+    pfent_store_half(buf + 0x16, p_ent->modify_time);
+    pfent_store_half(buf + 0x18, p_ent->modify_date);
+    pfent_store_half(buf + 0x14, p_ent->start_cluster >> 16);
+    pfent_store_half(buf + 0x1A, p_ent->start_cluster);
+    *(u32*)(buf + 0x1C) = ((p_ent->file_size << 24) | ((p_ent->file_size << 8) & 0x00FF0000)) | (((p_ent->file_size >> 8) & 0x0000FF00) | (p_ent->file_size >> 24));
+}
+
+void fn_803B2B3C(u8* buf, const PF_DIR_ENT* p_ent) {
+    pfent_store_numeric(buf, p_ent);
 }
 
 s32 VFiPFENT_findEntry(PF_FFD* p_ffd, PF_DIR_ENT* p_ent, u32 index_search_from, PF_STR* p_pattern, u8 attr_required, u8 attr_unwanted) {
@@ -8314,4 +8340,230 @@ s32 VFiPFVOL_DoMountVolume(PF_VOLUME* p_vol) {
     }
     if (err) p_vol->flags &= ~2;
     return err;
+}
+
+s32 fn_803B1E20(PF_STR* p_path) {
+    PF_VOLUME* p_vol;
+    s32 err;
+    if (p_path == NULL) {
+        lbl_8053B248.last_error = 10;
+        return 10;
+    }
+    if (VFiPFSTR_StrNCmp(p_path, lbl_8059FE30, 1, 0, 1) == 0) {
+        lbl_8053B248.last_error = 10;
+        return 10;
+    }
+    p_vol = VFiPFPATH_GetVolumeFromPath(p_path);
+    if (p_vol == NULL) {
+        lbl_8053B248.last_error = 9;
+        return 9;
+    }
+    err = VFiPFVOL_CheckForWrite(p_vol);
+    if (err != 0) {
+        lbl_8053B248.last_error = err;
+        p_vol->last_error = err;
+        return err;
+    }
+    p_vol->cache.signature = NULL;
+    err = fn_803B0920(p_vol, p_path, 0, 0);
+    if (err != 0) {
+        lbl_8053B248.last_error = err;
+        p_vol->last_error = err;
+    } else {
+        err = VFiPFCACHE_FlushFATCache(p_vol);
+        if (err != 0) {
+            lbl_8053B248.last_error = err;
+            p_vol->last_error = err;
+        } else {
+            err = VFiPFCACHE_FlushDataCacheSpecific(p_vol, NULL);
+            if (err != 0) {
+                lbl_8053B248.last_error = err;
+                p_vol->last_error = err;
+            }
+        }
+    }
+    p_vol->cache.signature = NULL;
+    return err;
+}
+
+void VFiPFPATH_getLongNameformShortName(s8* short_name, s8* long_name, u8 flag) {
+    s32 i;
+    s32 end;
+    for (i = 0; i < 8; i++) {
+        if (!short_name[i] || short_name[i] == '.') break;
+        if ((flag & 8) && short_name[i] >= 'A' && short_name[i] <= 'Z')
+            long_name[i] = short_name[i] + 32;
+        else long_name[i] = short_name[i];
+    }
+    if (short_name[i] == '.') long_name[i++] = '.';
+    end = i + 3;
+    for (; i < end; i++) {
+        if (!short_name[i]) break;
+        if ((flag & 16) && short_name[i] >= 'A' && short_name[i] <= 'Z')
+            long_name[i] = short_name[i] + 32;
+        else long_name[i] = short_name[i];
+    }
+    long_name[i] = 0;
+}
+
+s32 VFiPFENT_updateEntry(PF_DIR_ENT* p_ent, u32 is_archive) {
+    u8 buf[32];
+    u32 written;
+    PF_VOLUME* p_vol;
+    s32 err;
+    if (p_ent == NULL) return 10;
+    p_vol = p_ent->p_vol;
+    if (p_vol == NULL) return 10;
+    if (p_ent->entry_sector < p_vol->bpb.first_data_sector - p_vol->bpb.num_root_dir_sectors) return 28;
+    if (p_ent->entry_sector >= p_vol->bpb.total_sectors) return 16;
+    if (p_ent->start_cluster == 1) return 14;
+    if (is_archive == 1) p_ent->attr |= 32;
+    VFiPFPATH_putShortName(buf, p_ent->short_name, p_ent->attr);
+    if (buf[0] == 0xE5) buf[0] = 5;
+    pfent_store_numeric(buf, p_ent);
+    err = VFiPFSEC_WriteData(p_vol, buf, p_ent->entry_sector, p_ent->entry_offset, 32, &written, 0);
+    if (err) return err;
+    return written != 32 ? 17 : 0;
+}
+
+s32 VFiPFFAT16_WriteFATEntryPage(PF_VOLUME* p_vol, u32 cluster, u32 value, PF_CACHE_PAGE** pp_page) {
+    s32 err = 0;
+    u32 sector;
+    u32 pos;
+    u32 fat_index;
+    s32 action;
+    u32 offset;
+    if (p_vol == NULL) return 10;
+    if (!(cluster >= 2 && cluster < p_vol->bpb.num_clusters + 2) && cluster != 0 && cluster != 1) return 14;
+    offset = cluster * 2;
+    sector = (u16)(p_vol->bpb.active_FAT_sector + (offset >> p_vol->bpb.log2_bytes_per_sector));
+    pos = (u16)(offset & (p_vol->bpb.bytes_per_sector - 1));
+    if ((*pp_page)->sector > sector || (*pp_page)->sector + p_vol->cache.fat_buff_size <= sector) {
+        err = VFiPFFAT_UpdateFATEntry(p_vol, *pp_page);
+        if (err) return err;
+        fat_index = 1;
+        if (p_vol->bpb.ext_flags & 0x80) fat_index = p_vol->bpb.ext_flags & 7;
+        do {
+            err = VFiPFCACHE_ReadFATPage(p_vol, sector, pp_page);
+            if (err == 0x1000 && p_vol->p_callback != NULL) {
+                action = ((s32 (*)(s32))p_vol->p_callback)(p_vol->last_driver_error);
+                if (action == 0) continue;
+                if (action == 1 && p_vol->bpb.num_active_FATs >= 2 && fat_index < p_vol->bpb.num_active_FATs) {
+                    fat_index++;
+                    sector += p_vol->bpb.sectors_per_FAT;
+                    continue;
+                }
+            }
+            if (err) return err;
+        } while (err);
+    } else if (sector != (*pp_page)->sector + (((*pp_page)->p_buf - (*pp_page)->buffer) >> p_vol->bpb.log2_bytes_per_sector)) {
+        (*pp_page)->p_buf += p_vol->bpb.bytes_per_sector;
+    }
+    (*pp_page)->p_buf[pos] = value;
+    (*pp_page)->p_buf[pos + 1] = value >> 8;
+    VFiPFCACHE_UpdateModifiedSector(*pp_page);
+    return err;
+}
+
+static inline void pffile_move_cursor(PF_FILE* p_file, u32 position) {
+    PF_VOLUME* p_vol = p_file == NULL ? NULL : p_file->p_sfd->dir_entry.p_vol;
+    if (((p_file->cursor.position >> p_vol->bpb.log2_bytes_per_sector) +
+        ((p_file->cursor.position & (p_vol->bpb.bytes_per_sector - 1)) != 0)) !=
+        ((position >> p_vol->bpb.log2_bytes_per_sector) +
+        ((position & (p_vol->bpb.bytes_per_sector - 1)) != 0)))
+        p_file->cursor.sector = 0xFFFFFFFF;
+    p_file->cursor.position = position;
+    p_vol = p_file == NULL ? NULL : p_file->p_sfd->dir_entry.p_vol;
+    p_file->cursor.file_sector_index = p_file->cursor.position >> p_vol->bpb.log2_bytes_per_sector;
+    p_file->cursor.offset_in_sector = p_file->cursor.position & (p_vol->bpb.bytes_per_sector - 1);
+}
+
+void VFiPFFILE_Cursor_MoveToClusterEnd(PF_FILE* p_file, u32 size) {
+    PF_VOLUME* p_vol;
+    u32 num_alloc_clusters;
+    p_vol = p_file == NULL ? NULL : p_file->p_sfd->dir_entry.p_vol;
+    VFiPFFAT_CountAllocatedClusters(&p_file->p_sfd->ffd, size, &num_alloc_clusters);
+    if (num_alloc_clusters > (0xFFFFFFFF >> (p_vol->bpb.log2_bytes_per_sector + p_vol->bpb.log2_sectors_per_cluster)))
+        pffile_move_cursor(p_file, 0xFFFFFFFF);
+    else pffile_move_cursor(p_file, num_alloc_clusters << (p_vol->bpb.log2_bytes_per_sector + p_vol->bpb.log2_sectors_per_cluster));
+}
+
+s32 VFiPFPATH_getShortName(s8* short_name, const u8* pDirEntry, u8 attr) {
+    s32 i;
+    s32 last = -1;
+    s8* dst;
+    for (i = 0; i < 8; i++) {
+        short_name[i] = pDirEntry[i];
+        if (pDirEntry[i] != ' ') last = i;
+    }
+    last++;
+    dst = short_name + last;
+    if (!last) return 10;
+    last = 7;
+    for (i = 8; i < 11; i++) {
+        if (pDirEntry[i] != ' ') last = i;
+    }
+    if (last > 7) {
+        if (!(attr & 8)) *dst++ = '.';
+        for (i = 8; i <= last; i++) *dst++ = pDirEntry[i];
+    }
+    *dst = 0;
+    return 0;
+}
+
+s32 VFiPFCACHE_DoAllocatePage(PF_VOLUME* p_vol, PF_CACHE_PAGE** pp_head, u32 sector, PF_CACHE_PAGE** pp_page, u32* p_is_hit) {
+    s32 err;
+    u32 is_modified = 0;
+    PF_CACHE_PAGE* p_page;
+    PF_CACHE_PAGE* p_head;
+    *pp_page = VFiPFCACHE_SearchForPage(p_vol, *pp_head, sector);
+    if (*pp_page) *p_is_hit = 1;
+    else {
+        *p_is_hit = 0;
+        if (!VFiPFCACHE_SearchForFreePage(*pp_head, pp_page)) {
+            if (*pp_page == NULL) {
+                *pp_page = NULL;
+                return 30;
+            }
+            p_page = *pp_page;
+            if (p_page != NULL && (p_page->stat & 2) && p_page->sector != 0xFFFFFFFF) is_modified = 1;
+            err = VFiPFCACHE_FlushPageIfNeeded(p_vol, p_page);
+            if (err) { *pp_page = NULL; return err; }
+            (*pp_page)->p_mod_sbuf = NULL;
+            (*pp_page)->p_mod_ebuf = NULL;
+            if (is_modified && dCommon_FlushFromVol(p_vol, 1)) return 17;
+        }
+        if (sector != 0xFFFFFFFF) {
+            if ((*pp_page)->stat & 4) {
+                (*pp_page)->sector = sector - sector % (*pp_page)->size;
+                (*pp_page)->p_buf = (*pp_page)->buffer + ((sector % (*pp_page)->size) << p_vol->bpb.log2_bytes_per_sector);
+            } else {
+                if (p_vol->bpb.fat_type == 2 &&
+                    (sector < p_vol->bpb.first_data_sector || sector >= p_vol->bpb.total_sectors) &&
+                    sector == p_vol->bpb.fs_info_sector) (*pp_page)->size = 1;
+                (*pp_page)->sector = sector - sector % (*pp_page)->size;
+                (*pp_page)->p_buf = (*pp_page)->buffer + ((sector % (*pp_page)->size) << p_vol->bpb.log2_bytes_per_sector);
+            }
+        } else {
+            (*pp_page)->sector = sector;
+            (*pp_page)->p_buf = (*pp_page)->buffer;
+        }
+        (*pp_page)->stat |= 1;
+    }
+    p_page = *pp_page;
+    p_head = *pp_head;
+    if (p_page != p_head) {
+        if (p_page == p_head->p_prev) *pp_head = p_page;
+        else {
+            p_page->p_prev->p_next = p_page->p_next;
+            p_page->p_next->p_prev = p_page->p_prev;
+            p_head = *pp_head;
+            p_page->p_next = p_head;
+            p_page->p_prev = (*pp_head)->p_prev;
+            p_head->p_prev = p_page;
+            p_page->p_prev->p_next = p_page;
+            *pp_head = p_page;
+        }
+    }
+    return 0;
 }
