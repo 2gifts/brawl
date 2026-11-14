@@ -20,6 +20,8 @@
 #include <havok/hkBvShape.h>
 #include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
+#include <havok/hkShapeRayCastInput.h>
+#include <havok/hkMonitorStream.h>
 
 void hkBvShape::finishLoadedObjecthkBvShape(void* p) {
     hkFinishLoadedObjectFlag flag;
@@ -74,10 +76,32 @@ int hkSingleShapeContainer::getNumChildShapes() const {
     return 1;
 }
 
+hkBool hkBvShape::castRay(const hkShapeRayCastInput& input, hkShapeRayCastOutput& results) const {
+    HK_TIMER_BEGIN("rcBvShape");
+    results.unk38++;
+    hkShape* child = m_childContainer.m_childShape;
+    hkBool hit = child->castRay(input, results);
+    results.unk38--;
+    if (hit) {
+        results.unk18[results.unk38] = 0;
+    }
+    HK_TIMER_END();
+    return hit;
+}
+
+void hkBvShape::castRayWithCollector(const hkShapeRayCastInput& input, const hkCdBody& body,
+                                     hkShapeRayCastCollector& collector) const {
+    HK_TIMER_BEGIN("rcBvShape");
+    hkCdBody childBody(&body);
+    hkShape* child = m_childContainer.m_childShape;
+    childBody.m_shape = child;
+    childBody.m_shapeKey = 0;
+    child->castRayWithCollector(input, childBody, collector);
+    HK_TIMER_END();
+}
+
 // Not yet decompiled in this unit:
 //   0x802CE61C   132  __dt   [map: hkSingleShapeContainer____dt]
-//   0x802CE824   260  castRay   [map: hkBvShape__castRay]
-//   0x802CE928   216  castRayWithCollector   [map: hkBvShape__castRayWithCollector]
 
 static hkStaticTypeInfo hkBvShapeTypeInfo("hkBvShape", hkBvShape::finishLoadedObjecthkBvShape, hkBvShape::cleanupLoadedObjecthkBvShape,
                                       hkBvShape::getVtablehkBvShape());

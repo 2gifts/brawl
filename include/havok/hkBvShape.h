@@ -20,5 +20,9 @@ struct hkBvShape : hkShape {
     virtual void calcStatistics(hkStatisticsCollector* collector) const;     // 0x0C
     virtual int getType() const;                                             // 0x10
     virtual void getAabb(const hkTransform& xf, hkReal expansion, hkAabb& out) const; // 0x14
+    // Rays go straight to the child shape (key 0); the bounding volume only matters to the agents.
+    virtual hkBool castRay(const hkShapeRayCastInput& input, hkShapeRayCastOutput& results) const; // 0x1C
+    virtual void castRayWithCollector(const hkShapeRayCastInput& input, const hkCdBody& body,
+                                      hkShapeRayCastCollector& collector) const; // 0x20
     virtual hkShapeContainer* getContainer() const;                          // 0x24
 };

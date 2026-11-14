@@ -20,6 +20,8 @@
 #include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
 #include <havok/hkWorldCinfo.h>
+#include <havok/hkShapeRayCastInput.h>
+#include <havok/hkMonitorStream.h>
 
 void hkSphereShape::finishLoadedObjecthkSphereShape(void* p) {
     hkFinishLoadedObjectFlag flag;
@@ -95,6 +97,62 @@ hkVector4* hkSphereShape::getCollisionSpheres(hkVector4* out) const {
 }
 #pragma scheduling reset
 
+// Ray against the sphere around the origin: solves |from + t * dir|^2 = r^2 for the first t in [0, hitFraction).
+// A start point far away (B^2 > 1000 A r^2) is first moved onto the closest point of the ray, for precision.
+hkBool hkSphereShape::castRay(const hkShapeRayCastInput& input, hkShapeRayCastOutput& results) const {
+    HK_TIMER_BEGIN("rcSphere");
+    {
+        hkReal radius2 = m_radius * m_radius;
+        hkVector4 dir;
+        dir.setSub4(input.m_to, input.m_from);
+        hkReal B = dir.dot3(input.m_from);
+        if (B >= 0.0f) {
+            goto rayMissed;
+        }
+        hkReal A = dir.lengthSquared3();
+
+        hkVector4 from;
+        hkReal offset;
+        if (B * B > 1000.0f * (A * radius2)) {
+            if (A < radius2) {
+                goto rayMissed;
+            }
+            offset = -B;
+            hkReal t = offset / A;
+            from.setInterpolate4(input.m_from, input.m_to, t);
+            B = 0.0f;
+        } else {
+            offset = 0.0f;
+            from = input.m_from;
+        }
+
+        hkReal C = from.lengthSquared3() - radius2;
+        hkReal det = B * B - A * C;
+        if (det <= 0.0f) {
+            goto rayMissed;
+        }
+        hkReal t = -B - hkSimdReal(1.0f / hkVector4_sqrtInverse(det));
+        t += offset;
+        if (t >= results.m_hitFraction * A) {
+            goto rayMissed;
+        }
+        if (t < 0.0f) {
+            goto rayMissed;
+        }
+        t = t / A;
+        results.m_hitFraction = t;
+        results.m_normal.setInterpolate4(input.m_from, input.m_to, t);
+        results.unk18[results.unk38] = 0xFFFFFFFF;
+        results.m_normal.mul4(1.0f / m_radius);
+    }
+    HK_TIMER_END();
+    return true;
+
+rayMissed:
+    HK_TIMER_END();
+    return false;
+}
+
 // Statistics collector slots used by calcStatistics (vtable offsets 0x0C and 0x20).
 struct hkStatisticsCollectorIface {
     virtual void unk00();
@@ -110,10 +168,6 @@ void hkSphereShape::calcStatistics(hkStatisticsCollector* collector) const {
     ((hkStatisticsCollectorIface*)collector)->addObject("SphereShape", 1, this);
     ((hkStatisticsCollectorIface*)collector)->unk20();
 }
-
-// Not yet decompiled in this unit:
-//   0x802D6004   920  castRay   [map: hkSphereShape__castRay]
-//   0x802D639C   100  calcStatistics   [map: hkSphereShape__calcStatistics]
 
 static hkStaticTypeInfo hkSphereShapeTypeInfo("hkSphereShape", hkSphereShape::finishLoadedObjecthkSphereShape, hkSphereShape::cleanupLoadedObjecthkSphereShape,
                                       hkSphereShape::getVtablehkSphereShape());
