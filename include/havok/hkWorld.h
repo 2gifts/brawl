@@ -117,6 +117,7 @@ struct hkWorld : hkReferencedObject {
     void removeActionImmediately(hkAction* action);
     void addEntityBatch(hkEntity** entities, int count, bool active);
     hkBool removeEntity(hkEntity* entity);
+    virtual void calcStatistics(hkStatisticsCollector* collector) const;
     void removeEntityBatch(hkEntity** entities, int count);
     hkEntity* addEntity(hkEntity* entity, int activation);
     void activateRegion(hkAabb* aabb);

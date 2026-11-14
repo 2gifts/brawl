@@ -74,6 +74,7 @@
 #include <havok/hkTypedBroadPhaseDispatcher.h>
 #include <havok/hkSweptTransformUtil.h>
 #include <havok/hkEntityCallbackUtil.h>
+#include <havok/hkSimulation.h>
 
 void hkWorld::lock() {}
 
@@ -464,6 +465,131 @@ hkBool hkWorld::removeEntity(hkEntity* entity) {
     unlockAndAttemptToExecutePendingOperations();
     HK_TIMER_END_LIST();
     return true;
+}
+
+// Removes a batch of entities: their collision information is reset, they leave the broad phase together (the
+// lost pairs' agents are deleted), then each gets the removed callbacks, leaves its island and is released.
+void hkWorld::removeEntityBatch(hkEntity** entities, int count) {
+    if (count < 1) {
+        return;
+    }
+    if (areCriticalOperationsLocked()) {
+        struct {
+            u8 m_type;
+            hkEntity** m_entities;
+            u16 m_count;
+        } op;
+        op.m_type = hkWorldOperation::ENTITY_BATCH_REMOVE;
+        op.m_entities = entities;
+        op.m_count = count;
+        queueOperation(&op);
+        return;
+    }
+    lockCriticalOperations();
+    HK_TIMER_BEGIN_LIST("RemEntities", "Init+CallBck");
+    m_simulation->resetCollisionInformationForEntities(entities, count, this, true);
+    {
+        hkLocalArray<hkBroadPhaseHandle*> collidablesForBroadphase(count);
+        for (hkEntity **e = entities, **end = entities + count; e != end; e++) {
+            hkEntity* entity = *e;
+            if (entity->m_collidable.m_shape != NULL) {
+                collidablesForBroadphase.pushBackUnchecked(&entity->m_collidable.m_broadPhaseHandle);
+            }
+        }
+        HK_TIMER_SPLIT_LIST("BroadPhase");
+        hkLocalArray<hkBroadPhaseHandlePair> pairsOut(m_unk2E4);
+        m_broadPhase->removeObjectBatch(collidablesForBroadphase, pairsOut);
+        HK_TIMER_SPLIT_LIST("DelAgents");
+        m_broadPhaseDispatcher->removePairs(pairsOut.begin(), pairsOut.getSize());
+    }
+    HK_TIMER_SPLIT_LIST("RemoveCb");
+    hkEntity** end = entities + count;
+    for (hkEntity** e = entities; e != end; e++) {
+        hkWorldCallbackUtil::fireEntityRemoved(this, *e);
+        hkEntityCallbackUtil::fireEntityRemoved(*e);
+        hkWorldOperationUtil::removeEntitySI(this, *e);
+        if ((*e)->m_memSizeAndFlags == 0) {
+            (*e)->deallocateInternalArrays();
+        }
+        (*e)->removeReference();
+    }
+    HK_TIMER_END_LIST();
+    unlockAndAttemptToExecutePendingOperations();
+}
+
+// Statistics collector slots the world reports through (local view). HYPOTHESIS: the names.
+struct hkWorldStatisticsCollector {
+    virtual void unk08();
+    virtual void beginObject(const char* name, int type, const void* object);                    // 0x0C
+    virtual void addArray(const char* name, int type, const void* data, int size, int capacity); // 0x10
+    virtual void addChildObject(const char* name, int type, const void* object);                 // 0x14
+    virtual void pushDir(const char* name);                                                      // 0x18
+    virtual void popDir();                                                                       // 0x1C
+    virtual void endObject();                                                                    // 0x20
+
+    // An array's storage counts only when the array owns it.
+    void addArrayStorage(const char* name, int type, const hkArrayBase& array, int elemSize) {
+        if (!(array.m_capacityAndFlags & hkArrayBase::DONT_DEALLOCATE_FLAG)) {
+            addArray(name, type, array.m_data, array.m_size * elemSize,
+                     (array.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * elemSize);
+        }
+    }
+};
+
+// The world's listener arrays and pieces not laid out in hkWorld.h, by offset.
+static inline const hkArrayBase& worldArrayAt(const hkWorld* world, int offset) {
+    return *(const hkArrayBase*)((const char*)world + offset);
+}
+static inline const void* worldPointerAt(const hkWorld* world, int offset) {
+    return *(void* const*)((const char*)world + offset);
+}
+
+void hkWorld::calcStatistics(hkStatisticsCollector* collector) const {
+    hkWorldStatisticsCollector* c = (hkWorldStatisticsCollector*)collector;
+    c->beginObject("hkWorld", 2, this);
+    for (int i = m_unk28.m_size - 1; i >= 0; i--) {
+        c->addChildObject("Active", 8, ((hkSimulationIsland**)m_unk28.m_data)[i]);
+    }
+    for (int i = m_unk34.m_size - 1; i >= 0; i--) {
+        c->addChildObject("Inactive", 8, ((hkSimulationIsland**)m_unk34.m_data)[i]);
+    }
+    c->addChildObject("Fixed", 8, m_fixedIsland);
+    c->addArrayStorage("PhantomPtrs", 4, m_phantoms, 4);
+    for (int i = 0; i < m_phantoms.getSize(); i++) {
+        c->addChildObject("Phantoms", 2, m_phantoms[i]);
+    }
+    c->pushDir("Internal");
+    c->addChildObject("Simulation", 4, m_simulation);
+    c->addArrayStorage("DirtyIslPtr", 8, m_unk40, 4);
+    c->addChildObject("MaintnceMgr", 4, m_maintenanceMgr);
+    c->addArray("OpQueue", 4, m_operationQueue, 0x20, 0);
+    c->pushDir("OpQueue");
+    c->addArrayStorage("Operations", 8, m_operationQueue->m_operations0, sizeof(hkWorldOperation::BiggestOperation));
+    c->popDir();
+    c->pushDir("Collide");
+    c->addChildObject("Broadphase", 4, m_broadPhase);
+    c->addArray("BpDispatch", 4, m_broadPhaseDispatcher, 0x104, 0);
+    c->addArray("BpDispatch", 4, worldPointerAt(this, 0x60), 0xC, 0);
+    c->addArray("BpDispatch", 4, worldPointerAt(this, 0x5C), 8, 0);
+    c->addArray("BpDispatch", 4, worldPointerAt(this, 0x64), 8, 0);
+    c->addArray("CollInput", 4, m_collisionInput, 0x30, 0);
+    c->addChildObject("Filter", 1, m_collisionFilter);
+    c->addChildObject("Dispatcher", 4, m_collisionDispatcher);
+    c->popDir();
+    c->popDir();
+    c->pushDir("Listeners");
+    c->addArrayStorage("EntLisPtr", 4, worldArrayAt(this, 0xE4), 4);
+    c->addArrayStorage("PhantLisPtr", 4, worldArrayAt(this, 0xF0), 4);
+    c->addArrayStorage("ConstrLisPtr", 4, worldArrayAt(this, 0xFC), 4);
+    c->addArrayStorage("WldDelLisPtr", 4, m_worldDeletionListeners, 4);
+    c->addArrayStorage("IslActLisPtr", 4, worldArrayAt(this, 0x114), 4);
+    c->addArrayStorage("PstSimLisPtr", 4, m_postSimulationListeners, 4);
+    c->addArrayStorage("PstIntLisPtr", 4, m_postIntegrateListeners, 4);
+    c->addArrayStorage("PstColLisPtr", 4, m_postCollideListeners, 4);
+    c->addArrayStorage("PstIntLisPtr", 4, m_islandPostIntegrateListeners, 4);
+    c->addArrayStorage("CollLisPtr", 4, worldArrayAt(this, 0x15C), 4);
+    c->popDir();
+    c->endObject();
 }
 
 void hkWorld::setGravity(const hkVector4& gravity) {
