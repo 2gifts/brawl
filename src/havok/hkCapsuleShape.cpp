@@ -23,6 +23,7 @@
 #include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
 
+
 void hkCapsuleShape::finishLoadedObjecthkCapsuleShape(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;
@@ -46,6 +47,25 @@ const void* hkCapsuleShape::getVtablehkCapsuleShape() {
     return *(const void**)p;
 }
 #pragma pop
+
+hkCapsuleShape::hkCapsuleShape(const hkVector4& vertexA, const hkVector4& vertexB, hkReal radius)
+    : hkConvexShape(radius) {
+    m_vertexA = vertexA;
+    m_vertexB = vertexB;
+    m_vertexA.w = radius;
+    m_vertexB.w = radius;
+}
+
+void hkCapsuleShape::convertVertexIdsToVertices(const u16* ids, int numIds, hkVector4* out) const {
+    const hkVector4* vertices = &m_vertexA;
+    while (--numIds >= 0) {
+        u16 id = *ids;
+        *out = *(const hkVector4*)((const char*)vertices + id);
+        out->setIntW(id);
+        out++;
+        ids++;
+    }
+}
 
 #pragma scheduling off
 void hkCapsuleShape::getFirstVertex(hkVector4& out) const {
@@ -80,9 +100,6 @@ int hkCapsuleShape::getType() const {
 }
 
 // Not yet decompiled in this unit:
-//   0x802CEBE0   136  __ct (vertexA, vertexB, radius)   [map: hkCapsuleShape____ct]
-//   0x802CEC68   200  getSupportingVertex   [map: hkCapsuleShape__getSupportingVertex]
-//   0x802CED30   288  convertVertexIdsToVertices   [map: hkCapsuleShape__convertVertexIdsToVertices]
 //   0x802CEE90    72  getCollisionSpheres   [map: hkCapsuleShape__getCollisionSpheres]
 //   0x802CEED8  1120  getAabb   [map: hkCapsuleShape__getAabb]
 //   0x802CF338   668  closestInfLineSegInfLineSeg   [map: hkCapsuleShape__closestInfLineSegInfLineSeg]

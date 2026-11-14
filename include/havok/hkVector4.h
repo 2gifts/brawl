@@ -58,6 +58,8 @@ struct hkVector4 {
     // Inline helpers in the Havok style (HYPOTHESIS: semantics from the Havok names, not asm-verified yet).
     // Havok's FPU form: one chained assignment, which stores w first.
     void setZero4() { x = y = z = w = 0.0f; }
+    // The w word holds an integer (the convex shapes keep vertex ids there).
+    void setIntW(int value) { *(int*)&w = value; }
     void setXYZ0(const hkVector4& a) {
         x = a.x;
         y = a.y;
