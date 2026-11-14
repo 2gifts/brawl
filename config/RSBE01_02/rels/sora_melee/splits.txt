@@ -12010,6 +12010,9 @@ mo_melee/sora_melee/wn/wn_samus_cshot_status_uniq_process.cpp:
 	.text       start:0x002FFF50 end:0x00300614
 	.ctors      start:0x00000388 end:0x0000038C
 
+mo_melee/sora_melee/ft/ft_szerosuit_transactor.cpp:
+	.text       start:0x00300614 end:0x00300B3C
+
 mo_melee/sora_melee/wn/wn_szerosuit_paralyzer.cpp:
 	.text       start:0x00300B3C end:0x0030424C
 	.ctors      start:0x0000038C end:0x00000390
@@ -12261,6 +12264,9 @@ mo_melee/sora_melee/wn/wn_sheik_needle_have.cpp:
 mo_melee/sora_melee/wn/wn_popo_ice_shot.cpp:
 	.text       start:0x00348538 end:0x0034CF20
 	.ctors      start:0x00000420 end:0x00000424
+
+mo_melee/sora_melee/ft/ft_marth_transactor.cpp:
+	.text       start:0x0034D904 end:0x0034DACC
 
 mo_melee/sora_melee/ft/ft_marth_status_uniq_process_special_n_start.cpp:
 	.text       start:0x0034DACC end:0x0034E174
