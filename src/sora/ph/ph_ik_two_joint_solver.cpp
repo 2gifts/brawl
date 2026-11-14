@@ -1,15 +1,15 @@
 // Brawl physics wrapper translation unit ph_ik_two_joint_solver.o (main.dol 0x800985D8-0x80099978).
 // Not yet decompiled. Functions in address order with their map names:
-//   0x800985D8   208  init   [map: phIkTwoJointSolver9SetupInfoFv__init]
-//   0x800986A8     4  init   [map: phIkTwoJointSolver__init]
-//   0x800986AC   576  update   [map: phIkTwoJointSolver__update]
-//   0x800988EC  1320  updateToeInsideCurve   [map: phIkTwoJointSolver__updateToeInsideCurve]
-//   0x80098E14  2336  updateToeCurve   [map: phIkTwoJointSolver__updateToeCurve]
-//   0x80099734   156  setSolverParamData   [map: phIkTwoJointSolver__setSolverParamData]
-//   0x800997D0    64  isHaveNodeFromhkIndex   [map: phIkTwoJointSolver__isHaveNodeFromhkIndex]
-//   0x80099810    20  savedParam   [map: phIkTwoJointSolver__savedParam]
-//   0x80099824    20  applyParam   [map: phIkTwoJointSolver__applyParam]
-//   0x80099838   320  updateInsideStepDir   [map: phIkTwoJointSolver__updateInsideStepDir]
+//   0x800985D8   208  init
+//   0x800986A8     4  init
+//   0x800986AC   576  update
+//   0x800988EC  1320  updateToeInsideCurve
+//   0x80098E14  2336  updateToeCurve
+//   0x80099734   156  setSolverParamData
+//   0x800997D0    64  isHaveNodeFromhkIndex
+//   0x80099810    20  savedParam
+//   0x80099824    20  applyParam
+//   0x80099838   320  updateInsideStepDir
 #include <math.h>
 #include <ph/phIkTwoJointSolver.h>
 

@@ -1,9 +1,9 @@
 // Brawl physics wrapper translation unit ph_world.o (main.dol 0x8009A048-0x8009A104).
 // Not yet decompiled. Functions in address order with their map names:
-//   0x8009A048    24  __ct   [map: phWorld____ct]
-//   0x8009A060    64  __dt   [map: phWorld____dt]
-//   0x8009A0A0    92  __dt   [map: hkWorldCinfo____dt]
-//   0x8009A0FC     8  stepTime   [map: phWorld__stepTime]
+//   0x8009A048    24  __ct
+//   0x8009A060    64  __dt
+//   0x8009A0A0    92  __dt
+//   0x8009A0FC     8  stepTime
 #include <ph/ph_world.h>
 #include <havok/hkWorldCinfo.h>
 #include <havok/hkMemory.h>

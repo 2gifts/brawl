@@ -712,6 +712,86 @@ hkPhantom* hkWorld::addPhantom(hkPhantom* phantom) {
     return phantom;
 }
 
+// Adds a batch of phantoms: each gets its motion state pointer, world and reference, joins the world's list and
+// gets the added callbacks; then they enter the broad phase together and the new pairs get agents.
+void hkWorld::addPhantomBatch(hkPhantom** phantoms, int count) {
+    if (areCriticalOperationsLockedForPhantoms()) {
+        struct {
+            u8 m_type;
+            hkPhantom** m_phantoms;
+            u16 m_count;
+        } op;
+        op.m_type = hkWorldOperation::PHANTOM_BATCH_ADD;
+        op.m_phantoms = phantoms;
+        op.m_count = count;
+        queueOperation(&op);
+        return;
+    }
+    lockCriticalOperations();
+    hkLocalArray<hkBroadPhaseHandle*> collidablesForBroadphase(count);
+    hkLocalArray<hkAabb> aabbsForBroadphase(count);
+    aabbsForBroadphase.m_size = count;
+    collidablesForBroadphase.m_size = count;
+    for (int i = 0; i < count; i++) {
+        hkPhantom* phantom = phantoms[i];
+        if (phantom->m_collidable.m_motion == NULL) {
+            phantom->m_collidable.m_motion = phantom->getMotionState();
+        }
+        phantom->m_world = this;
+        collidablesForBroadphase[i] = &phantom->m_collidable.m_broadPhaseHandle;
+        phantom->calcAabb(aabbsForBroadphase[i]);
+        phantom->addReference();
+        m_phantoms.pushBack(phantom);
+        hkWorldCallbackUtil::firePhantomAdded(this, phantom);
+        phantom->firePhantomAdded();
+    }
+    hkLocalArray<hkBroadPhaseHandlePair> newPairs(m_unk2E4);
+    m_broadPhase->addObjectBatch(collidablesForBroadphase, aabbsForBroadphase, newPairs);
+    const hkCollidableCollidableFilter* filter = m_collisionFilter;
+    m_broadPhaseDispatcher->addPairs(newPairs.begin(), newPairs.getSize(), filter);
+    unlockAndAttemptToExecutePendingOperations();
+}
+
+// Removes a batch of phantoms: the removed callbacks run first, then they leave the broad phase together (the lost
+// pairs' agents are deleted) and finally each leaves the world's list and is released.
+void hkWorld::removePhantomBatch(hkPhantom** phantoms, int count) {
+    if (areCriticalOperationsLockedForPhantoms()) {
+        struct {
+            u8 m_type;
+            hkPhantom** m_phantoms;
+            u16 m_count;
+        } op;
+        op.m_type = hkWorldOperation::PHANTOM_BATCH_REMOVE;
+        op.m_phantoms = phantoms;
+        op.m_count = count;
+        queueOperation(&op);
+        return;
+    }
+    lockCriticalOperations();
+    hkLocalArray<hkBroadPhaseHandle*> collidablesForBroadphase(count);
+    for (int i = 0; i < count; i++) {
+        hkPhantom* phantom = phantoms[i];
+        collidablesForBroadphase.pushBackUnchecked(&phantom->m_collidable.m_broadPhaseHandle);
+        hkWorldCallbackUtil::firePhantomRemoved(this, phantom);
+        phantom->firePhantomRemoved();
+    }
+    {
+        hkLocalArray<hkBroadPhaseHandlePair> pairsOut(m_unk2E4);
+        m_broadPhase->removeObjectBatch(collidablesForBroadphase, pairsOut);
+        m_broadPhaseDispatcher->removePairs(pairsOut.begin(), pairsOut.getSize());
+    }
+    for (int i = 0; i < count; i++) {
+        hkPhantom* phantom = phantoms[i];
+        phantom->m_world = NULL;
+        m_phantoms.removeAt(m_phantoms.indexOf(phantom));
+        if (phantom->m_memSizeAndFlags == 0) {
+            phantom->deallocateInternalArrays();
+        }
+        phantom->removeReference();
+    }
+    unlockAndAttemptToExecutePendingOperations();
+}
+
 void hkWorld::removePhantom(hkPhantom* phantom) {
     if (areCriticalOperationsLockedForPhantoms()) {
         hkWorldOperationRecord op;
