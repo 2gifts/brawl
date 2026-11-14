@@ -40,8 +40,15 @@ struct hkRigidBody : hkEntity {
     void setMotionType(u8 motionType, u8 a, u8 b);
     void setMass(hkReal mass);
     void setCenterOfMassLocal(const hkVector4& com);
-    // Writes the shape's extent to out and caches the bounding radius around the center of mass.
+    // HYPOTHESIS: computes the shape bounds and a normalized direction into out (0x10 bytes).
+    // Out of line at 0x802E23CC (hkRigidBody__updateCachedShapeInfo), not written yet.
     void updateCachedShapeInfo(hkShape* shape, hkVector4* out);
+    // Builds the motion of the given type in motionBuffer; dynamic motions pick sphere, box or thin box inertia
+    // from the spread of the inertia diagonal.
+    static void createDynamicRigidMotion(hkMotion::MotionType motionType, const hkVector4& position,
+                                         const hkQuaternion& rotation, hkReal mass, hkReal maxLinearVelocity,
+                                         hkReal maxAngularVelocity, const hkMatrix3& inertiaLocal,
+                                         const hkVector4& centerOfMassLocal, hkMotion* motionBuffer);
     void setPosition(const hkVector4& position);
     void setPositionAndRotation(const hkVector4& position, const hkQuaternion& rotation);
     void setTransform(const hkTransform& transform);

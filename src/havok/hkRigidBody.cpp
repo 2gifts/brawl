@@ -28,6 +28,11 @@
 #include <havok/hkRegistry.h>
 #include <havok/hkWorldOperationUtil.h>
 #include <havok/hkFixedRigidMotion.h>
+#include <havok/hkStabilizedBoxMotion.h>
+#include <havok/hkThinBoxMotion.h>
+#include <havok/hkBoxMotion.h>
+#include <havok/hkStabilizedSphereMotion.h>
+#include <havok/hkSphereMotion.h>
 #include <havok/hkAabb.h>
 #include <havok/hkEntityCallbackUtil.h>
 #include <havok/hkRigidBodyDeactivator.h>
@@ -165,11 +170,6 @@ extern "C" void fn_802E2378(char* collidable, hkReal currentDepth, const float* 
 }
 #pragma pop
 
-// HYPOTHESIS: names and parameters of three unsplit helpers of this unit (createDynamicRigidMotion,
-// setDeactivator(int) and hkCollidable::estimateAllowedPenetrationDepth).
-extern "C" void fn_802E25A8(int motionType, const hkVector4& position, const hkQuaternion& rotation, hkReal mass,
-                            hkReal maxLinearVelocity, hkReal maxAngularVelocity, const hkMatrix3& inertiaTensor,
-                            const hkVector4& centerOfMass, hkMotion* motionOut);
 
 // BYTES: the square root estimate goes through a double here (the hkVector4::length3 form gives other registers).
 static inline hkReal hkRigidBody_length3(const hkVector4& v) {
@@ -206,6 +206,65 @@ void hkRigidBody::updateCachedShapeInfo(hkShape* shape, hkVector4* extentOut) {
 }
 #pragma pop
 
+void hkRigidBody::createDynamicRigidMotion(hkMotion::MotionType motionType, const hkVector4& position,
+                                           const hkQuaternion& rotation, hkReal mass, hkReal maxLinearVelocity,
+                                           hkReal maxAngularVelocity, const hkMatrix3& inertiaLocal,
+                                           const hkVector4& centerOfMassLocal, hkMotion* motionBuffer) {
+    hkMotion* motion = motionBuffer;
+    switch (motionType) {
+    case hkMotion::MOTION_SPHERE_INERTIA:
+        motion = new (motion) hkSphereMotion(position, rotation);
+        break;
+    case hkMotion::MOTION_BOX_INERTIA:
+        motion = new (motion) hkBoxMotion(position, rotation);
+        break;
+    case hkMotion::MOTION_THIN_BOX_INERTIA:
+        motion = new (motion) hkThinBoxMotion(position, rotation);
+        break;
+    case hkMotion::MOTION_STABILIZED_SPHERE_INERTIA:
+        motion = new (motion) hkStabilizedSphereMotion(position, rotation);
+        break;
+    case hkMotion::MOTION_STABILIZED_BOX_INERTIA:
+        motion = new (motion) hkStabilizedBoxMotion(position, rotation);
+        break;
+    case hkMotion::MOTION_DYNAMIC: {
+        // Nearly isotropic inertia gives a sphere, a moderate spread a box, a large one a thin box.
+        hkReal i0 = inertiaLocal.m_col0.x;
+        hkReal i1 = inertiaLocal.m_col1.y;
+        hkReal i2 = inertiaLocal.m_col2.z;
+        hkReal maxI = i1 > i2 ? i1 : i2;
+        maxI = i0 > maxI ? i0 : maxI;
+        hkReal minI = i1 < i2 ? i1 : i2;
+        minI = i0 < minI ? i0 : minI;
+        if (minI > 0.8f * maxI) {
+            motion = new (motion) hkSphereMotion(position, rotation);
+        } else if (minI > 0.1f * maxI) {
+            motion = new (motion) hkBoxMotion(position, rotation);
+        } else {
+            motion = new (motion) hkThinBoxMotion(position, rotation);
+        }
+        break;
+    }
+    case hkMotion::MOTION_KEYFRAMED:
+        maxLinearVelocity = 1000000.0f;
+        maxAngularVelocity = 1000000.0f;
+        motion = new (motion) hkKeyframedRigidMotion(position, rotation);
+        break;
+    default:
+        motion = new (motion) hkFixedRigidMotion(position, rotation);
+        break;
+    }
+
+    if (motionType != hkMotion::MOTION_KEYFRAMED) {
+        motion->setInertiaLocal(inertiaLocal);
+        motion->setCenterOfMassInLocal(centerOfMassLocal);
+        motion->setMass(mass);
+    }
+    motion->m_motionState.m_maxLinearVelocity = maxLinearVelocity;
+    motion->m_motionState.m_deactivationCounter = 20;
+    motion->m_motionState.m_maxAngularVelocity = maxAngularVelocity;
+}
+
 hkRigidBody::hkRigidBody(const hkRigidBodyCinfo& info) : hkEntity(info.m_shape) {
     m_material.setResponseType(info.m_collisionResponse);
     m_processContactCallbackDelay = info.m_processContactCallbackDelay;
@@ -223,7 +282,7 @@ hkRigidBody::hkRigidBody(const hkRigidBodyCinfo& info) : hkEntity(info.m_shape) 
             m_collidable.m_allowedPenetrationDepth = info.m_allowedPenetrationDepth;
         }
     } else {
-        fn_802E25A8(info.m_motionType, info.m_position, info.m_rotation, info.m_mass, info.m_maxLinearVelocity,
+        createDynamicRigidMotion(info.m_motionType, info.m_position, info.m_rotation, info.m_mass, info.m_maxLinearVelocity,
                     info.m_maxAngularVelocity, info.m_inertiaTensor, info.m_centerOfMass, &m_motion);
         m_motion.setDeactivationClass(info.m_solverDeactivation);
         setLinearVelocity(info.m_linearVelocity);
