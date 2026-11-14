@@ -20,6 +20,7 @@
 //   0x8031577C     4  __ct   [map: hk4dGskVertexCollidePointsInput____ct]
 
 #include <havok/hkGsk.h>
+#include <havok/hkConvexShape.h>
 #include <havok/hk4dGskVertexCollidePointsInput.h>
 #include <havok/hk4dGskVertexCollidePointsOutput.h>
 
@@ -29,6 +30,16 @@ hkGsk::hkGsk() {
 
 hk4dGskVertexCollidePointsOutput::hk4dGskVertexCollidePointsOutput() {
     unk0 = 1.0f;
+}
+
+void hkGsk::init(const hkConvexShape* shapeA, const hkConvexShape* shapeB, const hkGskCache& cache) {
+    m_dimA = cache.m_dimA;
+    m_dimB = cache.m_dimB;
+    unk8 = cache.unkA;
+    unkC = cache.unkB;
+    unk14 = 0;
+    shapeA->convertVertexIdsToVertices(&cache.m_vertices[0], m_dimA, verticesA());
+    shapeB->convertVertexIdsToVertices(&cache.m_vertices[m_dimA], m_dimB, verticesB());
 }
 
 void hkGsk::checkForChangesAndUpdateCache(void* arg) {

@@ -12,12 +12,12 @@ struct hkGskCache {
     u16 m_vertices[4]; // 0x00
     s8 m_dimA;         // 0x08
     s8 m_dimB;         // 0x09
-    u8 unkA;           // 0x0A
-    u8 unkB;           // 0x0B
+    s8 unkA;           // 0x0A
+    s8 unkB;           // 0x0B
 
     // Turns the cache to the swapped body order (inlined into the symmetric processCollision wrappers).
     void flip() {
-        u8 t = unkB;
+        s8 t = unkB;
         unkB = unkA;
         unkA = t;
         s8 dim = m_dimA;
