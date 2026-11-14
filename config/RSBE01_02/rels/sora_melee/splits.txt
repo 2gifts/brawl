@@ -12084,6 +12084,9 @@ mo_melee/sora_melee/wn/wn_fox_land_master_shell.cpp:
 	.text       start:0x0031E5B8 end:0x0031E784
 	.ctors      start:0x000003B8 end:0x000003BC
 
+mo_melee/sora_melee/ft/ft_fox_transactor.cpp:
+	.text       start:0x0031E7BC end:0x0031EE78
+
 mo_melee/sora_melee/ft/ft_fox_status_uniq_process_blaster.cpp:
 	.text       start:0x0031EE78 end:0x0031EEEC
 	.ctors      start:0x000003BC end:0x000003C0
