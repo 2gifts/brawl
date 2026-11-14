@@ -140,8 +140,8 @@ struct hkWorld : hkReferencedObject {
     // drop one lock and, if that was the last one and something got queued meanwhile, run the queue
     // BYTES: the flag goes through hkBool's bool conversion before the negation (hkBool::operator! builds a second
     // hkBool); in the propagation-off hkContinuousSimulation::handleAllToisTill that gives extsb; neg; or; srwi.
-    bool areCriticalOperationsLocked() const {
-        return m_lockCount != 0;
+    int areCriticalOperationsLocked() const {
+        return m_lockCount;
     }
     // Phantom operations are also queued while the phantom-specific lock (0x80) is held.
     bool areCriticalOperationsLockedForPhantoms() const {

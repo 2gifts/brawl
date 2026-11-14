@@ -70,6 +70,8 @@
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkCollisionFilter.h>
 #include <havok/hkLinkedCollidable.h>
+#include <havok/hkLocalArray.h>
+#include <havok/hkTypedBroadPhaseDispatcher.h>
 
 void hkWorld::lock() {}
 
@@ -170,6 +172,136 @@ void hkWorld::updateCollisionFilterOnWorld(u8 updateMode, u8 updateShapeCollecti
         internal_executePendingOperations();
     }
     HK_TIMER_END();
+}
+
+// Single-phantom filter update (hkWorld_updateFilterOnSinglePhantom), defined further down.
+struct Obj;
+struct Param;
+struct ObjB;
+extern "C" void fn_802EB810(Obj* a, Param* p, ObjB* b);
+
+// Re-filters one phantom against everything its broad-phase handle overlaps, then optionally its shape collections.
+void hkWorld::updateCollisionFilterOnPhantom(hkPhantom* phantom, u8 updateShapeCollections) {
+    if (areCriticalOperationsLocked()) {
+        struct {
+            u8 m_type;
+            hkPhantom* m_phantom;
+            u8 m_updateShapeCollections;
+        } op;
+        op.m_type = hkWorldOperation::UPDATE_FILTER_PHANTOM;
+        op.m_phantom = phantom;
+        op.m_updateShapeCollections = updateShapeCollections;
+        queueOperation(&op);
+        return;
+    }
+    lockCriticalOperations();
+    HK_TIMER_BEGIN_LIST("UpdateFilterOnPhantom", "broadphase");
+    hkLocalArray<hkBroadPhaseHandlePair> pairsOut(m_unk2E4);
+    m_broadPhase->reQuerySingleObject(&phantom->m_collidable.m_broadPhaseHandle, pairsOut);
+    HK_TIMER_SPLIT_LIST("UpdateOverlaps");
+    hkTypedBroadPhaseHandle* thisHandle = &phantom->m_collidable.m_broadPhaseHandle;
+    for (int i = 0; i < pairsOut.getSize(); i++) {
+        hkTypedBroadPhaseHandle* other = (hkTypedBroadPhaseHandle*)pairsOut[i].m_b;
+        if (other == thisHandle) {
+            continue;
+        }
+        hkCollidable* collidable = (hkCollidable*)((char*)other + other->m_ownerOffset);
+        fn_802EB810((Obj*)phantom, (Param*)collidable, (ObjB*)m_collisionFilter);
+    }
+    if (updateShapeCollections) {
+        HK_TIMER_SPLIT_LIST("collectionFilter");
+        phantom->updateShapeCollectionFilter();
+    }
+    unlockAndAttemptToExecutePendingOperations();
+    HK_TIMER_END_LIST();
+}
+
+// Broad-phase type of a collidable owned by a phantom.
+enum { HK_BROAD_PHASE_PHANTOM = 2 };
+
+// Re-filters one entity. A full check queries the broad phase again: phantoms in the result are updated directly,
+// pairs that already have an agent are dropped, and the rest get new agents. Every existing agent is then checked
+// against the filter and the collision quality table; rejected agents are removed and the island marked for a
+// split check.
+void hkWorld::updateCollisionFilterOnEntity(hkEntity* entity, u8 updateMode, u8 updateShapeCollections) {
+    if (areCriticalOperationsLocked()) {
+        struct {
+            u8 m_type;
+            hkEntity* m_entity;
+            u8 m_updateMode;
+            u8 m_updateShapeCollections;
+        } op;
+        op.m_type = hkWorldOperation::UPDATE_FILTER_ENTITY;
+        op.m_entity = entity;
+        op.m_updateMode = updateMode;
+        op.m_updateShapeCollections = updateShapeCollections;
+        queueOperation(&op);
+        return;
+    }
+    HK_TIMER_BEGIN_LIST("UpdateFilterOnEntity", "init");
+    lockCriticalOperations();
+    {
+    hkInplaceArray<hkBroadPhaseHandlePair, 128> newPairs;
+    if (updateMode == 0) {
+        HK_TIMER_SPLIT_LIST("broadphase");
+        m_broadPhase->reQuerySingleObject(&entity->m_collidable.m_broadPhaseHandle, newPairs);
+        HK_TIMER_SPLIT_LIST("phantom");
+        for (int i = 0; i < newPairs.getSize(); i++) {
+            hkTypedBroadPhaseHandle* handle = newPairs[i].m_b;
+            hkCollidable* collidable = (hkCollidable*)((char*)handle + handle->m_ownerOffset);
+            hkPhantom* phantom;
+            if (collidable->m_broadPhaseHandle.m_type == HK_BROAD_PHASE_PHANTOM) {
+                phantom = (hkPhantom*)((char*)collidable + collidable->m_ownerOffset);
+            } else {
+                phantom = NULL;
+            }
+            if (phantom != NULL) {
+                fn_802EB810((Obj*)phantom, (Param*)&entity->m_collidable, (ObjB*)m_collisionFilter);
+                if (updateShapeCollections) {
+                    phantom->updateShapeCollectionFilter();
+                }
+                newPairs.removeAt(i);
+                i--;
+            }
+        }
+        {
+            hkInplaceArray<hkBroadPhaseHandlePair, 128> existingPairs;
+            for (int i = 0; i < entity->m_collidable.m_collisionEntries.getSize(); i++) {
+                hkBroadPhaseHandlePair& pair = existingPairs.expandOne();
+                pair.m_a = &entity->m_collidable.m_collisionEntries[i].m_agentEntry->m_collidable[0]->m_broadPhaseHandle;
+                pair.m_b = &entity->m_collidable.m_collisionEntries[i].m_agentEntry->m_collidable[1]->m_broadPhaseHandle;
+            }
+            hkTypedBroadPhaseDispatcher::removeDuplicates(existingPairs, newPairs);
+        }
+    }
+    HK_TIMER_SPLIT_LIST("checkAgts");
+    {
+        int entityQuality = entity->m_collidable.m_broadPhaseHandle.m_objectQualityType;
+        for (int i = 0; i < entity->m_collidable.m_collisionEntries.getSize(); i++) {
+            hkLinkedCollidable::CollisionEntry& entry = entity->m_collidable.m_collisionEntries[i];
+            if (m_collisionFilter->isCollisionEnabled(entity->m_collidable, *entry.m_partner)) {
+                if (m_collisionDispatcher->m_collisionQualityIndex[entityQuality]
+                                                                  [entry.m_partner->m_broadPhaseHandle.m_objectQualityType]) {
+                    if ((hkUpdateCollectionFilterMode)updateShapeCollections ==
+                        HK_UPDATE_COLLECTION_FILTER_PROCESS_SHAPE_COLLECTIONS) {
+                        hkAgentNnMachine_UpdateShapeCollectionFilter(entry.m_agentEntry, *m_collisionInput);
+                    }
+                    continue;
+                }
+            }
+            hkWorldAgentUtil::removeAgentAndItsToiEvents(entry.m_agentEntry);
+            entity->m_simulationIsland->m_flags.m_stateA = 1;
+            i--;
+        }
+    }
+    if (newPairs.getSize() > 0) {
+        HK_TIMER_SPLIT_LIST("addAgts");
+        const hkCollidableCollidableFilter* filter = m_collisionFilter;
+        m_broadPhaseDispatcher->addPairs(newPairs.begin(), newPairs.getSize(), filter);
+    }
+    unlockAndAttemptToExecutePendingOperations();
+    }
+    HK_TIMER_END_LIST();
 }
 
 void hkWorld::setGravity(const hkVector4& gravity) {
