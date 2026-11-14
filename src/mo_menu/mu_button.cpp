@@ -681,9 +681,13 @@ void muButtonTask::openActionList(int title, int frame, const int* actions, int 
     m_work->m_scene->addObj(list->m_sceneModel);
     m_work->m_msg->printIndex(0x11, title, NULL);
     m_work->m_objs[24]->setFrameTex(frame);
-    if (actions == NULL || num <= 0) {
-        num = 0;
+    int count;
+    if (actions != NULL && num > 0) {
+        count = num;
+    } else {
+        count = 0;
     }
+    num = count;
     int i;
     for (i = 0; i < num; i++, actions++) {
         m_work->m_msg->printIndex(i + 0x12, sActionMsgs[*actions].m_name, NULL);
