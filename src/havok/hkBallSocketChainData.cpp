@@ -73,3 +73,104 @@ void hkBallSocketChainData::getRuntimeInfo(const hkBool* hasChain, hkConstraintR
 //   0x802DA52C    88  __ct   [map: hkBallSocketChainData____ct]
 //   0x802DA584   148  __dt   [map: hkBallSocketChainData____dt]
 //   0x802DA6BC   940  buildJacobian   [map: hkBallSocketChainData__buildJacobian]
+
+#include <types.h>
+#include <havok/hkMemory.h>
+#include <havok/hkThreadMemory.h>
+#include <havok/hkArray.h>
+namespace jj_fn_802DAA68 {
+class SoHeapAllocator {
+public:
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void free(void*, unsigned short, int);
+};
+
+
+struct Array {
+    void* data;
+    int size;
+    unsigned int raw;
+
+    bool isOwned() const {
+        return (raw & 0x80000000) == 0;
+    }
+
+    void dealloc() {
+        hkThreadMemory::s_instance->deallocateChunk(data, raw << 2, 0x15);
+    }
+
+    ~Array() {
+        if (isOwned())
+            dealloc();
+    }
+};
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DAA68)
+extern "C" Array* fn_802DAA68(Array* arg1, int arg2) {
+    if (arg1) {
+        if (arg1) {
+            if (arg1->isOwned())
+                arg1->dealloc();
+        }
+        if (arg2 > 0)
+            ((SoHeapAllocator*)hkMemory::s_instance)->free(arg1, 0x8C, 0x15);
+    }
+    return arg1;
+}
+} // namespace jj_fn_802DAA68
+
+#include <types.h>
+#include <havok/hkBallSocketChainData.h>
+void cleanupLoadedObjecthkBallSocketChainData(hkBallSocketChainData* self);
+#include <havok/hkConstraintAtom.h>
+
+// fn_802DAAF8: body from https://github.com/jj-link/brawl src/havok/fn_802DAAF8.cpp (namespaced).
+namespace jj_fn_802DAAF8 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DAAF8)
+extern "C" u32 fn_802DAAF8(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x1c);
+}
+} // namespace jj_fn_802DAAF8
+
+// fn_802DAB00: body from https://github.com/jj-link/brawl src/havok/fn_802DAB00.cpp (namespaced).
+namespace jj_fn_802DAB00 {
+typedef signed long s32;
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DAB00)
+extern "C" s32 fn_802DAB00(void) {
+    return 0x01000000;
+}
+} // namespace jj_fn_802DAB00
+
+// fn_802DAB08: body from https://github.com/jj-link/brawl src/havok/fn_802DAB08.cpp (namespaced).
+namespace jj_fn_802DAB08 {
+extern "C" {
+    extern char lbl_804121D8[];
+}
+
+struct Holder {
+    void* unk0;
+    void* unk4;
+    void* unk8;
+    int unkC;
+};
+
+extern "C" Holder lbl_80532E40;
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DAB08)
+extern "C" void fn_802DAB08() {
+    int temp_r3;
+
+    temp_r3 = (int)hkBallSocketChainData::getVtablehkBallSocketChainData();
+    lbl_80532E40.unk0 = lbl_804121D8;
+    lbl_80532E40.unk4 = (void*)hkBallSocketChainData::finishLoadedObjecthkBallSocketChainData;
+    lbl_80532E40.unk8 = (void*)::cleanupLoadedObjecthkBallSocketChainData;
+    lbl_80532E40.unkC = temp_r3;
+}
+
+__declspec(section ".ctors") extern void* const fn_802DAB08_ctor = (void*)fn_802DAB08;
+} // namespace jj_fn_802DAB08

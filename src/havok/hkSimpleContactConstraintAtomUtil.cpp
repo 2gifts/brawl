@@ -1,6 +1,6 @@
-// Havok translation unit hk_weak_802DA104.o (main.dol 0x802DA104-0x802DA49C): the helpers that allocate, grow,
+// Havok translation unit hkSimpleContactConstraintAtomUtil.o (main.dol 0x802DA104-0x802DA49C): the helpers that allocate, grow,
 // shrink and edit a simple contact constraint atom (the contact points and their properties live in the atom).
-// HYPOTHESIS: the unit name; the functions are hkSimpleContactConstraintData's atom helpers.
+
 
 #include <types.h>
 #include <havok/hkString.h>

@@ -221,3 +221,440 @@ void fn_802DB59C(float *out, float *m, float *v)
 
 }
 } // namespace jj_fn_802DB59C
+
+#include <types.h>
+#include <havok/hkBallSocketChainData.h>
+void cleanupLoadedObjecthkBallSocketChainData(hkBallSocketChainData* self);
+#include <havok/hkConstraintAtom.h>
+
+// fn_802DAB58: body from https://github.com/jj-link/brawl src/havok/fn_802DAB58.cpp (namespaced).
+namespace jj_fn_802DAB58 {
+struct Value { s32 value; };
+
+extern "C" void fn_802DABE8(s32, Value*);
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DAB58)
+extern "C" void fn_802DAB58(s32 arg0) {
+    Value value;
+    value.value = 1;
+    if (arg0 != 0) {
+        Value copy = value;
+        fn_802DABE8(arg0, &copy);
+    }
+}
+} // namespace jj_fn_802DAB58
+
+// fn_802DAB8C: body from https://github.com/jj-link/brawl src/havok/fn_802DAB8C.cpp (namespaced).
+namespace jj_fn_802DAB8C {
+class Object {
+public:
+    virtual void slot0(int);
+};
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DAB8C)
+extern "C" void fn_802DAB8C(Object* self) {
+    self->slot0(-1);
+}
+} // namespace jj_fn_802DAB8C
+
+// fn_802DABA0: body from https://github.com/jj-link/brawl src/havok/fn_802DABA0.cpp (namespaced).
+namespace jj_fn_802DABA0 {
+struct Result {
+    int value;
+    char rest[60];
+};
+extern "C" void fn_802DABE8(Result*, int*);
+// TODO: cleanup (shape from jj-link/brawl fn_802DABA0)
+extern "C" int fn_802DABA0() {
+    __attribute__((aligned(16))) Result out;
+    int zero = 0;
+    if (&out != 0) {
+        int in = zero;
+        fn_802DABE8(&out, &in);
+    }
+    return out.value;
+}
+} // namespace jj_fn_802DABA0
+
+// fn_802DABE8: body from https://github.com/jj-link/brawl src/havok/fn_802DABE8.cpp (namespaced).
+namespace jj_fn_802DABE8 {
+extern "C" {
+extern char lbl_80487A38[];
+void fn_802D95E4(void* self, void* v);
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DABE8)
+extern "C" void* fn_802DABE8(void* p) {
+    u8* self = (u8*)p;
+    void* saved = *(void**)(self + 0x14);
+    *(s16*)(self + 6) = 1;
+    *(void**)self = (void*)lbl_80487A38;
+    ((hkBridgeConstraintAtom*)(self + 0xC))->init((hkConstraintData*)saved);
+    ((hkBridgeConstraintAtom*)(self + 0xC))->init((hkConstraintData*)self);
+    return p;
+}
+}
+} // namespace jj_fn_802DABE8
+
+// fn_802DAC40: body from https://github.com/jj-link/brawl src/havok/fn_802DAC40.cpp (namespaced).
+#include <havok/hkMemory.h>
+#include <havok/hkThreadMemory.h>
+namespace jj_fn_802DAC40 {
+#pragma use_lmw_stmw on
+extern "C" void fn_8027EABC(void*, void*, unsigned int, int);
+extern "C" char lbl_80487A38[];
+class SoHeapAllocator {
+public:
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void free(void*, unsigned short, int);
+};
+class Elem {
+public:
+    virtual void vf0(int);
+    unsigned short m04;
+    short m06;
+};
+struct Entry {
+    char pad[0x40];
+    Elem* e[3];
+    char pad2[4];
+};
+struct Array {
+    Entry* data;
+    int count;
+    unsigned int raw;
+    bool isOwned() const { return (raw & 0x80000000) == 0; }
+    void dealloc() { hkThreadMemory::s_instance->deallocateChunk(data, (raw & 0x3fffffff) * 0x50, 0x15); }
+};
+struct Obj {
+    void* vtable;
+    unsigned short type;
+    char pad[0x12];
+    Array array;
+};
+// TODO: cleanup (shape from jj-link/brawl fn_802DAC40)
+extern "C" Obj* fn_802DAC40(Obj* self, int flag) {
+    if (self) {
+        self->vtable = lbl_80487A38;
+        for (int i = 0; i < self->array.count; i++) {
+            for (int j = 0; j < 3; j++) {
+                Elem* e = self->array.data[i].e[j];
+                if (e && e->m04 != 0) {
+                    if (--e->m06 == 0 && e != 0) {
+                        e->vf0(1);
+                    }
+                }
+            }
+        }
+        if ((char*)&self->array != 0 && self->array.isOwned())
+            self->array.dealloc();
+        if (flag > 0)
+            ((SoHeapAllocator*)hkMemory::s_instance)->free(self, self->type, 0x2a);
+    }
+    return self;
+}
+} // namespace jj_fn_802DAC40
+
+extern "C" char* fn_802DAD64(char* const* a, int i) { return *a + i * 0x50; }
+
+#include <types.h>
+
+// fn_802DB990: body from https://github.com/jj-link/brawl src/havok/fn_802DB990.cpp (namespaced).
+namespace jj_fn_802DB990 {
+struct fn_802DB990_work {
+    void* m0;
+    void* m4;
+    unsigned int m8;
+};
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DB990)
+extern "C" void fn_802DB990(fn_802DB990_work* self, void* value)
+{
+    self->m0 = (char*)self + 0xc;
+    self->m4 = value;
+    self->m8 = 0x80000020;
+}
+} // namespace jj_fn_802DB990
+
+// fn_802DB9AC: body from https://github.com/jj-link/brawl src/havok/fn_802DB9AC.cpp (namespaced).
+namespace jj_fn_802DB9AC {
+// TODO: cleanup (shape from jj-link/brawl fn_802DB9AC)
+extern "C" u32 fn_802DB9AC(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x0);
+}
+} // namespace jj_fn_802DB9AC
+
+// fn_802DB9B4: body from https://github.com/jj-link/brawl src/havok/fn_802DB9B4.cpp (namespaced).
+namespace jj_fn_802DB9B4 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DB9B4)
+extern "C" u32 fn_802DB9B4(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x0);
+}
+} // namespace jj_fn_802DB9B4
+
+struct hkInplaceArrayHeader_802DB9BC {
+    void* m_data;
+    int m_size;
+    int m_capacityAndFlags;
+};
+// TODO: cleanup (shape from jj-link/brawl fn_802DB9BC)
+extern "C" void fn_802DB9BC(hkInplaceArrayHeader_802DB9BC* a, int size) {
+    a->m_data = (char*)a + 0xC;
+    a->m_size = size;
+    a->m_capacityAndFlags = 0x80000020;
+}
+
+// fn_802DB9D8: body from https://github.com/jj-link/brawl src/havok/fn_802DB9D8.cpp (namespaced; memory singletons rebound to our names).
+#include <types.h>
+#include <havok/hkMemory.h>
+#include <havok/hkThreadMemory.h>
+#include <havok/hkArray.h>
+namespace jj_fn_802DB9D8 {
+class SoHeapAllocator {
+public:
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void free(void*, unsigned int, int);
+};
+
+
+struct Array {
+    void* data;
+    int size;
+    unsigned int raw;
+
+    bool isOwned() const {
+        return (raw & 0x80000000) == 0;
+    }
+
+    void dealloc() {
+        hkThreadMemory::s_instance->deallocateChunk(data, (raw & 0x3FFFFFFF) * 0x4C, 0x15);
+    }
+
+    ~Array() {
+        if (isOwned())
+            dealloc();
+    }
+};
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DB9D8)
+extern "C" Array* fn_802DB9D8(Array* self, int flag) {
+    if (self) {
+        self->~Array();
+        if (flag > 0)
+            ((SoHeapAllocator*)hkMemory::s_instance)->free(self, 0x98c, 0x15);
+    }
+    return self;
+}
+} // namespace jj_fn_802DB9D8
+
+#include <types.h>
+#include <havok/hkArray.h>
+
+// fn_802DBA6C: body from https://github.com/jj-link/brawl src/havok/fn_802DBA6C.cpp (namespaced).
+namespace jj_fn_802DBA6C {
+extern "C" void fn_8027CD94(void* a, s32 b, s32 c);
+
+struct Fn802DBA6C_Class {
+    s32 m_unk0;
+    s32 m_unk4;
+    s32 m_unk8;
+};
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DBA6C)
+extern "C" void fn_802DBA6C(Fn802DBA6C_Class* self, s32 arg1) {
+    s32 val = self->m_unk8 & 0x3FFFFFFF;
+    if (val < arg1) {
+        s32 doubled = val * 2;
+        hkArrayUtil::_reserve((hkArrayBase*)self, (arg1 < doubled) ? doubled : arg1, 0x4C);
+    }
+    self->m_unk4 = arg1;
+}
+} // namespace jj_fn_802DBA6C
+
+// fn_802DBAD4: body from https://github.com/jj-link/brawl src/havok/fn_802DBAD4.cpp (namespaced).
+namespace jj_fn_802DBAD4 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBAD4)
+extern "C" void* fn_802DBAD4(void** p, int index) {
+    return (char*)*p + index * 4;
+}
+} // namespace jj_fn_802DBAD4
+
+// fn_802DBB04: body from https://github.com/jj-link/brawl src/havok/fn_802DBB04.cpp (namespaced).
+namespace jj_fn_802DBB04 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBB04)
+extern "C" void fn_802DBB04(void* self, u32 value) {
+    *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x0) = value;
+}
+} // namespace jj_fn_802DBB04
+
+// fn_802DBB0C: body from https://github.com/jj-link/brawl src/havok/fn_802DBB0C.cpp (namespaced).
+namespace jj_fn_802DBB0C {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBB0C)
+extern "C" void fn_802DBB0C(unsigned int* dst, const unsigned int* src)
+{
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+}
+} // namespace jj_fn_802DBB0C
+
+// fn_802DBB28: body from https://github.com/jj-link/brawl src/havok/fn_802DBB28.cpp (namespaced).
+namespace jj_fn_802DBB28 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBB28)
+extern "C" void fn_802DBB28(float* dst, float* src) {
+    dst[0] = src[0];
+}
+} // namespace jj_fn_802DBB28
+
+// fn_802DBB34: body from https://github.com/jj-link/brawl src/havok/fn_802DBB34.cpp (namespaced).
+namespace jj_fn_802DBB34 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBB34)
+extern "C" void fn_802DBB34(int* destination, const int* source)
+{
+    *destination = *source;
+}
+} // namespace jj_fn_802DBB34
+
+// fn_802DBB40: body from https://github.com/jj-link/brawl src/havok/fn_802DBB40.cpp (namespaced).
+namespace jj_fn_802DBB40 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBB40)
+extern "C" void fn_802DBB40(int* destination, const int* source)
+{
+    *destination = *source;
+}
+} // namespace jj_fn_802DBB40
+
+// fn_802DBBB8: body from https://github.com/jj-link/brawl src/havok/fn_802DBBB8.cpp (namespaced).
+namespace jj_fn_802DBBB8 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBBB8)
+extern "C" u32 fn_802DBBB8(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x0);
+}
+} // namespace jj_fn_802DBBB8
+
+// fn_802DBBC0: body from https://github.com/jj-link/brawl src/havok/fn_802DBBC0.cpp (namespaced).
+namespace jj_fn_802DBBC0 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBBC0)
+extern "C" u32 fn_802DBBC0(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x0);
+}
+} // namespace jj_fn_802DBBC0
+
+// fn_802DBBC8: body from https://github.com/jj-link/brawl src/havok/fn_802DBBC8.cpp (namespaced).
+namespace jj_fn_802DBBC8 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBBC8)
+extern "C" u32 fn_802DBBC8(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x0);
+}
+} // namespace jj_fn_802DBBC8
+
+// fn_802DBBD0: body from https://github.com/jj-link/brawl src/havok/fn_802DBBD0.cpp (namespaced).
+namespace jj_fn_802DBBD0 {
+extern "C" {
+extern const float lbl_805A426C;
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DBBD0)
+extern "C" void fn_802DBBD0(void* p) {
+    float x = lbl_805A426C;
+    *(float*)((char*)p + 8) = x;
+    *(float*)((char*)p + 12) = x;
+}
+}
+} // namespace jj_fn_802DBBD0
+
+// fn_802DBBE0: body from https://github.com/jj-link/brawl src/havok/fn_802DBBE0.cpp (namespaced).
+namespace jj_fn_802DBBE0 {
+typedef struct Vec2f {
+    float x;
+    float y;
+} Vec2f;
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DBBE0)
+extern "C" void fn_802DBBE0(Vec2f *dst, const Vec2f *src)
+{
+    dst->x = src->x;
+    dst->y = src->y;
+}
+} // namespace jj_fn_802DBBE0
+
+// fn_802DBBF4: body from https://github.com/jj-link/brawl src/havok/fn_802DBBF4.cpp (namespaced).
+namespace jj_fn_802DBBF4 {
+extern "C" {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBBF4)
+extern "C" void *fn_802DBBF4(void *self, int index)
+{
+    char *base = *(char **)self;
+    return base + index * 0x4c;
+}
+}
+} // namespace jj_fn_802DBBF4
+
+// fn_802DBC04: body from https://github.com/jj-link/brawl src/havok/fn_802DBC04.cpp (namespaced).
+namespace jj_fn_802DBC04 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBC04)
+extern "C" void fn_802DBC04(int* destination, const int* source)
+{
+    *destination = *source;
+}
+} // namespace jj_fn_802DBC04
+
+// fn_802DBC10: body from https://github.com/jj-link/brawl src/havok/fn_802DBC10.cpp (namespaced).
+namespace jj_fn_802DBC10 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBC10)
+extern "C" u32 fn_802DBC10(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x0);
+}
+} // namespace jj_fn_802DBC10
+
+// fn_802DBC18: body from https://github.com/jj-link/brawl src/havok/fn_802DBC18.cpp (namespaced).
+namespace jj_fn_802DBC18 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBC18)
+extern "C" u32 fn_802DBC18(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x0);
+}
+} // namespace jj_fn_802DBC18
+
+// fn_802DBC20: body from https://github.com/jj-link/brawl src/havok/fn_802DBC20.cpp (namespaced).
+namespace jj_fn_802DBC20 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBC20)
+extern "C" u32 fn_802DBC20(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x1c);
+}
+} // namespace jj_fn_802DBC20
+
+// fn_802DBC28: body from https://github.com/jj-link/brawl src/havok/fn_802DBC28.cpp (namespaced).
+namespace jj_fn_802DBC28 {
+// TODO: cleanup (shape from jj-link/brawl fn_802DBC28)
+extern "C" unsigned int fn_802DBC28(void) {
+    return 0x01000000;
+}
+} // namespace jj_fn_802DBC28
+
+// fn_802DBC30: body from https://github.com/jj-link/brawl src/havok/fn_802DBC30.cpp (namespaced).
+namespace jj_fn_802DBC30 {
+extern "C" {
+int fn_802DABA0(void);
+void fn_802DAB58(void);
+void fn_802DAB8C(void);
+extern char lbl_804121F0[];
+extern unsigned int lbl_80532E50[4];
+}
+
+// TODO: cleanup (shape from jj-link/brawl fn_802DBC30)
+extern "C" void fn_802DBC30(void) {
+    int temp_r3 = fn_802DABA0();
+    lbl_80532E50[0] = (unsigned int)lbl_804121F0;
+    lbl_80532E50[1] = (unsigned int)fn_802DAB58;
+    lbl_80532E50[2] = (unsigned int)fn_802DAB8C;
+    lbl_80532E50[3] = (unsigned int)temp_r3;
+}
+
+__declspec(section ".ctors") extern void* const fn_802DBC30_ctor = (void*)fn_802DBC30;
+} // namespace jj_fn_802DBC30

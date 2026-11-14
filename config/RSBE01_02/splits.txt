@@ -3190,13 +3190,7 @@ havok/hkPoweredChainSolverUtil.cpp:
 havok/hkSimpleContactConstraintInfo.cpp:
 	extab       start:0x80006678 end:0x800066A8
 	extabindex  start:0x800099C4 end:0x80009A0C
-	.text       start:0x80293CBC end:0x80295108
-
-havok/hk_pad_spu_p16hk_jacobian_schema.cpp:
-	.text       start:0x80295108 end:0x80295118
-
-havok/hk_weak_80295118.cpp:
-	.text       start:0x80295118 end:0x802951A0
+	.text       start:0x80293CBC end:0x802951A0
 
 havok/hkMotorBuildJacobian.cpp:
 	extab       start:0x800066A8 end:0x800066B0
@@ -3556,11 +3550,8 @@ havok/hkCylinderShapeClass.cpp:
 havok/hkFastMeshShape.cpp:
 	extab       start:0x80008524 end:0x8000854C
 	extabindex  start:0x8000B308 end:0x8000B344
-	.text       start:0x802D46F4 end:0x802D4A94
+	.text       start:0x802D46F4 end:0x802D4AB4
 	.ctors      start:0x80406680 end:0x80406684
-
-havok/hk_weak_802D4A94.cpp:
-	.text       start:0x802D4A94 end:0x802D4AB4
 
 havok/hkShape.cpp:
 	extab       start:0x8000854C end:0x80008554
@@ -3595,11 +3586,8 @@ havok/hkShapeType.cpp:
 havok/hkMeshShape.cpp:
 	extab       start:0x80008584 end:0x800085D4
 	extabindex  start:0x8000B398 end:0x8000B410
-	.text       start:0x802D51F4 end:0x802D5CAC
+	.text       start:0x802D51F4 end:0x802D5CBC
 	.ctors      start:0x80406690 end:0x80406694
-
-havok/hk_weak_802D5CAC.cpp:
-	.text       start:0x802D5CAC end:0x802D5CBC
 
 havok/hkMeshShapeClass.cpp:
 	extab       start:0x800085D4 end:0x800085DC
@@ -3659,13 +3647,7 @@ havok/hkContactUpdater.cpp:
 	.text       start:0x802D766C end:0x802D7708
 
 havok/hkReportContactMgr.cpp:
-	.text       start:0x802D7708 end:0x802D7FC8
-
-havok/hk_dynamics_contact_mgr.cpp:
-	.text       start:0x802D7FC8 end:0x802D7FD0
-
-havok/hk_weak_802D7FD0.cpp:
-	.text       start:0x802D7FD0 end:0x802D8064
+	.text       start:0x802D7708 end:0x802D8064
 
 havok/hkSimpleConstraintContactMgr.cpp:
 	.text       start:0x802D8064 end:0x802D94A8
@@ -3701,33 +3683,15 @@ havok/hkConstraintAtomClasses.cpp:
 	.sdata      start:0x8059EFD8 end:0x8059EFE0
 	.sdata2     start:0x805A4208 end:0x805A4260
 
-havok/hk_weak_802DA104.cpp:
+havok/hkSimpleContactConstraintAtomUtil.cpp:
 	.text       start:0x802DA104 end:0x802DA49C
 
 havok/hkBallSocketChainData.cpp:
-	.text       start:0x802DA49C end:0x802DAA68
-
-havok/hk_inplace_array27hk_velocity_accumulator_offset32.cpp:
-	.text       start:0x802DAA68 end:0x802DAAF8
-
-havok/hk_weak_802DAAF8.cpp:
-	.text       start:0x802DAAF8 end:0x802DAD64
+	.text       start:0x802DA49C end:0x802DAB58
 	.ctors      start:0x804066BC end:0x804066C0
 
-havok/hk_array_q218hk_powered_chain_data14_constraint_info.cpp:
-	.text       start:0x802DAD64 end:0x802DAD74
-
 havok/hkPoweredChainData.cpp:
-	.text       start:0x802DAD74 end:0x802DB990
-
-havok/hk_weak_802DB990.cpp:
-	.text       start:0x802DB990 end:0x802DB9BC
-
-havok/hk_inplace_array26hk3d_angular_motor_solver_info32.cpp:
-	.text       start:0x802DB9BC end:0x802DBA6C
-
-havok/hk_weak_802DBA6C.cpp:
-	.text       start:0x802DBA6C end:0x802DBC80
+	.text       start:0x802DAB58 end:0x802DBC80
 	.ctors      start:0x804066C0 end:0x804066C4
 
 havok/hkGenericConstraintData.cpp:
@@ -3964,13 +3928,13 @@ havok/hkWorldMemoryWatchDogClass.cpp:
 	.bss        start:0x80533260 end:0x80533288
 
 havok/hkSimulation.cpp:
-	.text       start:0x802F0BA8 end:0x802F30BC
+	.text       start:0x802F0BA8 end:0x802F3290
 
-havok/hk_array_q218hk_linked_collidable14_collision_entry.cpp:
-	.text       start:0x802F30BC end:0x802F30D4
+havok/hkBroadPhaseBorderListener.cpp:
+	.text       start:0x802F3290 end:0x802F3420
 
-havok/hk_weak_802F30D4.cpp:
-	.text       start:0x802F30D4 end:0x802F34F0
+havok/hkEntityEntityBroadPhaseListener.cpp:
+	.text       start:0x802F3420 end:0x802F34F0
 
 havok/hkWorldAgentUtil.cpp:
 	.text       start:0x802F34F0 end:0x802F5D5C
@@ -3989,7 +3953,7 @@ havok/hkBoxBoxAgent3.cpp:
 	extabindex  start:0x8000B4DC end:0x8000B518
 	.text       start:0x802FB244 end:0x802FB894
 
-havok/hk_weak_802FB894.cpp:
+havok/hkCapsuleTriangleAgent3.cpp:
 	extab       start:0x80008684 end:0x800086AC
 	extabindex  start:0x8000B518 end:0x8000B554
 	.text       start:0x802FB894 end:0x802FC6AC
