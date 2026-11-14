@@ -21,6 +21,7 @@ struct hkWorldOperationUtil {
                                                        hkArray<hkAction*>& actionsToBeMoved);
     static void removeAttachedActionsFromDynamicIsland(hkWorld* world, hkEntity* entity,
                                                        hkArray<hkAction*>& actionsToBeMoved);
+    static void addActionsToEntitysIsland(hkWorld* world, hkEntity* entity, hkArray<hkAction*>& actions);
     static void addConstraintToCriticalLockedIsland(hkWorld* world, hkConstraintInstance* constraint);
     static void removeConstraintFromCriticalLockedIsland(hkWorld* world, hkConstraintInstance* constraint);
     static void splitSimulationIslands(hkWorld* world);

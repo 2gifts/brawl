@@ -124,6 +124,10 @@ struct hkArray : hkArrayBase {
         m_size = newSize;
         return (T*)m_data + oldSize;
     }
+    // Drops the elements, keeping the storage.
+    void clear() {
+        m_size = 0;
+    }
     // Sets the element count, growing the storage first when needed (new elements are not initialised).
     void setSize(int n) {
         reserveSmart(n);

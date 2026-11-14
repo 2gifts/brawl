@@ -229,6 +229,34 @@ void hkWorldOperationUtil::removeAttachedActionsFromDynamicIsland(hkWorld* world
     }
 }
 
+// Puts the actions back on the entity's island (they hold a reference while they are moved) and merges the island
+// with the islands of the other movable entities of each action. On the fixed island nothing is merged.
+void hkWorldOperationUtil::addActionsToEntitysIsland(hkWorld* world, hkEntity* entity, hkArray<hkAction*>& actions) {
+    hkSimulationIsland* island = entity->m_simulationIsland;
+    hkInplaceArray<hkEntity*, 16> actionEntities;
+    for (int i = 0; i < actions.getSize(); i++) {
+        hkAction* action = actions[i];
+        if (island != world->m_fixedIsland) {
+            island->addAction(action);
+            action->removeReference();
+            actionEntities.clear();
+            action->getEntities(actionEntities);
+            for (int j = 0; j < actionEntities.getSize(); j++) {
+                if (!(bool)actionEntities[j]->isFixed() && actionEntities[j] != entity) {
+                    hkEntity* other = actionEntities[j];
+                    if (!(bool)other->isFixed() && !(bool)entity->isFixed() &&
+                        other->m_simulationIsland != entity->m_simulationIsland) {
+                        mergeIslands(other->m_world, other, entity);
+                    }
+                }
+            }
+        } else {
+            world->m_fixedIsland->addAction(action);
+            action->removeReference();
+        }
+    }
+}
+
 // Detaches every constraint of the entity (with a reference each, without callbacks) into removedConstraints.
 void hkWorldOperationUtil::removeAttachedConstraints(hkEntity* entity, hkArray<hkConstraintInstance*>& removedConstraints) {
     hkWorld* world = entity->m_world;
@@ -414,6 +442,9 @@ hkConstraintInstance* hkWorldOperationUtil::addConstraintImmediately(hkWorld* wo
     return constraint;
 }
 
+// BYTES: not an inline candidate (addActionsToEntitysIsland calls it out of line).
+#pragma push
+#pragma auto_inline off
 void hkWorldOperationUtil::mergeIslands(hkWorld* world, hkEntity* entityA, hkEntity* entityB) {
     hkSimulationIsland* islandA = entityA->m_simulationIsland;
     hkSimulationIsland* islandB = entityB->m_simulationIsland;
@@ -427,6 +458,7 @@ void hkWorldOperationUtil::mergeIslands(hkWorld* world, hkEntity* entityA, hkEnt
         internalMergeTwoIslands(world, islandA, islandB);
     }
 }
+#pragma pop
 
 // BYTES: not an inline candidate (removeAttachedConstraints calls it out of line).
 #pragma push
