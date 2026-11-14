@@ -525,13 +525,13 @@ void hkWorldOperationUtil::removeConstraintImmediately(hkWorld* world, hkConstra
     // HYPOTHESIS: the constraint's word at 0x08 is the island whose activity state (bits 0xC0 of 0x26) is set.
     hkSimulationIsland* island = *(hkSimulationIsland**)((u8*)constraint + 0x08);
     ((hkIslandActivityByte*)((u8*)island + 0x26))->activity = 1;
-    if (world->m_lockCount != 0) {
+    if (world->areCriticalOperationsLocked()) {
         if (fireCallback && hkWorldCallbackUtil::listenersAt<hkWorldCallbackUtil::ConstraintListener>(world, 0xFC).m_size != 0) {
             hkWorldCallbackUtil::fireConstraintRemoved(world, constraint);
         }
         hkWorldConstraintUtil::removeConstraint(constraint);
     } else {
-        world->m_lockCount++;
+        world->lockCriticalOperations();
         if (fireCallback && hkWorldCallbackUtil::listenersAt<hkWorldCallbackUtil::ConstraintListener>(world, 0xFC).m_size != 0) {
             hkWorldCallbackUtil::fireConstraintRemoved(world, constraint);
         }
