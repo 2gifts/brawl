@@ -168,7 +168,7 @@ extern "C" void fn_802E25A8(int motionType, const hkVector4& position, const hkQ
                             const hkVector4& centerOfMass, hkMotion* motionOut);
 
 hkRigidBody::hkRigidBody(const hkRigidBodyCinfo& info) : hkEntity(info.m_shape) {
-    m_material.m_responseType = info.m_collisionResponse;
+    m_material.setResponseType(info.m_collisionResponse);
     m_processContactCallbackDelay = info.m_processContactCallbackDelay;
     m_collidable.m_broadPhaseHandle.m_collisionFilterInfo = info.m_collisionFilterInfo;
 
@@ -194,8 +194,11 @@ hkRigidBody::hkRigidBody(const hkRigidBodyCinfo& info) : hkEntity(info.m_shape) 
         m_collidable.m_allowedPenetrationDepth = info.m_allowedPenetrationDepth;
     }
 
-    m_motion.m_motionState.m_linearDamping = info.m_linearDamping;
-    m_motion.m_motionState.m_angularDamping = info.m_angularDamping;
+    hkReal linearDamping, angularDamping;
+    linearDamping = info.m_linearDamping;
+    angularDamping = info.m_angularDamping;
+    m_motion.m_motionState.m_linearDamping = linearDamping;
+    m_motion.m_motionState.m_angularDamping = angularDamping;
 
     if (m_collidable.m_shape) {
         hkVector4 extents;
@@ -216,8 +219,11 @@ hkRigidBody::hkRigidBody(const hkRigidBodyCinfo& info) : hkEntity(info.m_shape) 
     }
 
     m_autoRemoveLevel = info.m_autoRemoveLevel;
-    m_material.m_friction = info.m_friction;
-    m_material.m_restitution = info.m_restitution;
+    hkReal friction, restitution;
+    friction = info.m_friction;
+    restitution = info.m_restitution;
+    m_material.m_friction = friction;
+    m_material.m_restitution = restitution;
 }
 
 // TODO: cleanup (shape from jj-link/brawl fn_802E3284)

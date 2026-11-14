@@ -225,6 +225,50 @@ void hkWorldOperationUtil::removeAttachedActionsFromDynamicIsland(hkWorld* world
     }
 }
 
+// Processes the islands queued on the world's dirty list (last first; callbacks may add more): removed actions
+// are compacted out of the action lists, and islands whose activity changed are moved between the active and
+// inactive island arrays.
+void hkWorldOperationUtil::cleanupDirtyIslands(hkWorld* world) {
+    hkArray<hkSimulationIsland*>& dirtyIslands = (hkArray<hkSimulationIsland*>&)world->m_unk40;
+    while (dirtyIslands.getSize()) {
+        hkSimulationIsland* island = dirtyIslands[dirtyIslands.getSize() - 1];
+        dirtyIslands.popBack();
+        if (island) {
+            island->m_dirtyListIndex = 0xFFFF;
+
+            if (island->m_flags.m_stateB) {
+                hkArray<hkAction*>& actions = island->m_actions;
+                int freeSlot = -1;
+                int a = 0;
+                for (; a < actions.getSize(); a++) {
+                    if (actions[a] == NULL) {
+                        freeSlot = a;
+                        a++;
+                        break;
+                    }
+                }
+                for (; a < actions.getSize(); a++) {
+                    if (actions[a] != NULL) {
+                        actions[freeSlot++] = actions[a];
+                    }
+                }
+                if (freeSlot != -1) {
+                    actions.setSize(freeSlot);
+                }
+                island->m_flags.m_stateB = 0;
+            }
+
+            if (island->m_flags27.m_active != island->m_flags.m_stateD) {
+                if (island->m_flags27.m_active) {
+                    internalActivateIsland(world, island);
+                } else {
+                    internalDeactivateIsland(world, island);
+                }
+            }
+        }
+    }
+}
+
 #pragma dont_inline on
 void hkWorldOperationUtil::removeIslandFromDirtyList(hkWorld* world, hkSimulationIsland* island) {
     // Dirty-list index of the island: u16 at 0x22 (not recovered in hkSimulationIsland.h).

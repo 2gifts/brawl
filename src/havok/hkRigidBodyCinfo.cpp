@@ -22,7 +22,7 @@ hkRigidBodyCinfo::hkRigidBodyCinfo() {
     m_rigidBodyDeactivatorType = 2;
     m_solverDeactivation = SOLVER_DEACTIVATION_LOW;
     m_qualityType = QUALITY_INVALID;
-    m_collisionResponse = 1;
+    m_collisionResponse = hkMaterial::RESPONSE_SIMPLE_CONTACT;
     m_processContactCallbackDelay = 0xFFFF;
     m_collisionFilterInfo = 0;
     m_shape = NULL;

@@ -150,7 +150,7 @@ void hkEntity::activate() {
     bool wantActivate = false;
     bool notFixed = false;
     if ((s8)(u8)getActivationState() == 0) {
-        notFixed = !(getMotion()->m_type == hkMotion::MOTION_FIXED);
+        notFixed = !(bool)(getMotion()->m_type == hkMotion::MOTION_FIXED);
     }
     if (notFixed && m_world != 0) {
         wantActivate = true;

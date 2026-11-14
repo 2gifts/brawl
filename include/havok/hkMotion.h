@@ -84,7 +84,7 @@ struct hkMotion : hkReferencedObject {
     hkReal getMass() const;
     // The transform of the motion state (map name hkMotion__getTransform; out-of-line copy in hkPoweredChainData.o).
     const hkTransform& getTransform() const { return m_motionState.getTransform(); }
-    void setDeactivationClass(u16 deactivationClass);
+    void setDeactivationClass(int deactivationClass);
     // Defined in src/havok/hkRigidMotionUtil.cpp. The parameter is a full word: hkRigidMotionUtilApplyAccumulators
     // passes the accumulator's word without truncating it; the store is a halfword.
     void setDeactivationCounter(int deactivationCounter);

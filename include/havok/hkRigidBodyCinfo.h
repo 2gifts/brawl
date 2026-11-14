@@ -4,6 +4,7 @@
 #include <havok/hkQuaternion.h>
 #include <havok/hkMatrix3.h>
 #include <havok/hkMotion.h>
+#include <havok/hkMaterial.h>
 
 struct hkShape;
 
@@ -26,7 +27,7 @@ struct hkRigidBodyCinfo {
 
     u32 m_collisionFilterInfo;         // 0x00
     hkShape* m_shape;                  // 0x04
-    s8 m_collisionResponse;            // 0x08 (hkMaterial::ResponseType)
+    hkEnum<hkMaterial::ResponseType, s8> m_collisionResponse; // 0x08
     u16 m_processContactCallbackDelay; // 0x0A
     hkVector4 m_position;              // 0x10
     hkQuaternion m_rotation;           // 0x20

@@ -24,6 +24,8 @@ struct hkWorldOperationUtil {
     static void splitSimulationIslands(hkWorld* world);
     // (map name; hkSimulation::integrateInternal runs it before the actions). HYPOTHESIS: what it cleans up.
     static void cleanupDirtyIslands(hkWorld* world);
+    static void internalActivateIsland(hkWorld* world, hkSimulationIsland* island);
+    static void internalDeactivateIsland(hkWorld* world, hkSimulationIsland* island);
     static void splitSimulationIslands1(hkWorld* world, u8* flag);
     static void removeIslandFromDirtyList(hkWorld* world, hkSimulationIsland* island);
     static void removeIsland(hkWorld* world, hkSimulationIsland* island);
