@@ -1384,7 +1384,45 @@ typedef struct TMCC_JPEGDEC_DecStatus {
     void* pixels;
 } TMCC_JPEGDEC_DecStatus;
 
-s32 fn_802629B8(s32 x, s32 y, TMCC_JPEGDEC_Context* ctx, void* block);
+// HYPOTHESIS: MCU decode status view.
+typedef struct TMCC_JPEGDEC_McuStatus {
+    u8 pad0[0x24];
+    u32 edgeX;
+    u32 edgeY;
+} TMCC_JPEGDEC_McuStatus;
+
+// HYPOTHESIS: MCU decode context view.
+typedef struct TMCC_JPEGDEC_McuCtx {
+    u8 pad0[0x18];
+    u8 scanCompIdx[4];
+    s32 dcPred[4];
+    u8 pad2C[4];
+    u8 compQIdx[4];
+    u8 compDcSel[4];
+    u8 compAcSel[4];
+    u8 pad3C[8];
+    u8 qtable[0x1798];
+    u8 pad17DC[0x1B];
+    u8 scanNumComps;
+    u8 compBlocks[4];
+    u8 pad17FC[0xA];
+    u16 unk1806;
+    u8 pad1808[4];
+    void (*idctLumi)(s32*, u8*, s32, s32);
+    void (*idctCol)(s32*, s8*, s32, s32);
+    s32 (*decodeIquant)(s32*, s32*, s32*, struct TMCC_JPEGDEC_McuCtx*);
+    void (*convNormal)(struct TMCC_JPEGDEC_McuCtx*, s32, s32);
+    void (*convEdge)(struct TMCC_JPEGDEC_McuCtx*, s32, s32);
+    u8 pad1820[8];
+    u8* yBufs[4];
+    s8* cBufs[4];
+    u8 pad1848[0x182];
+    u16 unk19CA;
+    u8 pad19CC[4];
+    TMCC_JPEGDEC_McuStatus* status;
+} TMCC_JPEGDEC_McuCtx;
+
+s32 fn_802629B8(s32 x, s32 y, TMCC_JPEGDEC_McuCtx* ctx, void* block);
 s32 fn_80263E18(TMCC_JPEGDEC_Context* ctx);
 
 s32 fn_80262444(TMCC_JPEGDEC_DecStatus* status, s32 maxMcus, void* buf) {
@@ -1419,7 +1457,7 @@ s32 fn_80262444(TMCC_JPEGDEC_DecStatus* status, s32 maxMcus, void* buf) {
     while (y < mcusPerCol && count < maxMcus) {
         s32 py = y * mcuH;
         while (x < mcusPerRow && count < maxMcus) {
-            result = fn_802629B8(x * mcuW, py, ctx, block);
+            result = fn_802629B8(x * mcuW, py, (TMCC_JPEGDEC_McuCtx*)ctx, block);
             if (result < 0) {
                 goto err;
             }
@@ -1680,3 +1718,77 @@ s32 fn_80262218(TMCC_JPEGDEC_InitStatus* status, u8* data, TMCC_JPEGDEC_InitInfo
 err:
     return result < 0 ? result : -2;
 }
+
+#pragma use_lmw_stmw on
+
+s32 fn_802629B8(s32 x, s32 y, TMCC_JPEGDEC_McuCtx* ctx, void* unused) {
+    u8* scanCompPtr;
+    s32* dcPredPtr;
+    u8** yPtr;
+    s8** cPtr;
+    u8* blkInfo;
+    s32* qt;
+    s32 i;
+    s32 comp;
+    s32 j;
+    u16 stride;
+    u8* sub = (u8*)ctx + 0x17DC;
+    u8* tblBase = (u8*)ctx + 0x18;
+    u8* qtable = ctx->qtable;
+    u8** yBufs = ctx->yBufs;
+    TMCC_JPEGDEC_McuStatus* status = ctx->status;
+    void (*idctLumi)(s32*, u8*, s32, s32);
+    void (*idctCol)(s32*, s8*, s32, s32);
+    s32 (*decodeIquant)(s32*, s32*, s32*, TMCC_JPEGDEC_McuCtx*) = ctx->decodeIquant;
+    void (*conv)(TMCC_JPEGDEC_McuCtx*, s32, s32);
+    s32 result;
+    s32 block[64];
+    u8* compInfo;
+
+    idctLumi = ctx->idctLumi;
+    idctCol = ctx->idctCol;
+
+    if (x != status->edgeX && y != status->edgeY) {
+        conv = ctx->convNormal;
+    } else {
+        conv = ctx->convEdge;
+    }
+
+    stride = ctx->unk19CA;
+    scanCompPtr = tblBase;
+    dcPredPtr = (s32*)(tblBase + 4);
+
+    for (i = 0; i < sub[0x1B]; i++, scanCompPtr++) {
+        comp = *scanCompPtr;
+        compInfo = tblBase + comp;
+        qt = (s32*)(qtable + (compInfo[0x18] << 8));
+        TMCC_JPEGDEC_set_entropytbl((TMCC_JPEGDEC_Context*)qtable, compInfo[0x1C], compInfo[0x20]);
+        yPtr = yBufs;
+        cPtr = (s8**)((u8*)yBufs + (comp << 2));
+        blkInfo = sub + i;
+        for (j = 0; j < blkInfo[0x1C]; j++) {
+            result = decodeIquant(block, qt, dcPredPtr, ctx);
+            if (result < 0) {
+                return result;
+            }
+            if (comp == 0) {
+                idctLumi(block, *yPtr, stride, result);
+            } else {
+                idctCol(block, cPtr[4], stride, result);
+            }
+            yPtr++;
+        }
+        dcPredPtr++;
+    }
+
+    conv(ctx, x, y);
+    if (*(u16*)(sub + 0x2A) != 0) {
+        result = fn_80263180((TMCC_JPEGDEC_RstContext*)ctx, x, y);
+        if (result < 0) {
+            return result;
+        }
+    }
+    return 0;
+}
+
+#pragma use_lmw_stmw off
