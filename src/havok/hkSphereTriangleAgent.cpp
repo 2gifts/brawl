@@ -179,3 +179,29 @@ void hkSymmetricAgentFlipBodyCollector::addCdBodyPair(void* bodyA, void* bodyB) 
     collector->addCdBodyPair(*(const hkCdBody*)bodyB, *(const hkCdBody*)bodyA);
     unk4 = ((hkCdBodyPairCollector*)unk8)->m_earlyOut.m_bool;
 }
+
+void hkSymmetricAgentFlipCollector::addCdPoint(hkCdPoint* point) {
+    hkCdPoint flipped;
+    hkReal dist = point->m_contact.m_normal.w;
+    hkVector4 distance;
+    distance.setAll(dist);
+    flipped.m_contact.m_position.x = point->m_contact.m_normal.x * distance.x + point->m_contact.m_position.x;
+    flipped.m_contact.m_position.y = point->m_contact.m_normal.y * distance.y + point->m_contact.m_position.y;
+    flipped.m_contact.m_position.z = point->m_contact.m_normal.z * distance.z + point->m_contact.m_position.z;
+    flipped.m_contact.m_position.w = point->m_contact.m_normal.w * distance.w + point->m_contact.m_position.w;
+    flipped.m_contact.m_normal.setNeg3(point->m_contact.m_normal);
+    flipped.m_cdBodyA = point->m_cdBodyB;
+    flipped.m_cdBodyB = point->m_cdBodyA;
+    unk8->addCdPoint(&flipped);
+    unk4 = unk8->m_earlyOutDistance;
+}
+
+void hkSymmetricAgentFlipCastCollector::addCdPoint(hkCdPoint* point) {
+    hkCdPoint flipped;
+    flipped.m_cdBodyA = point->m_cdBodyB;
+    flipped.m_cdBodyB = point->m_cdBodyA;
+    flipped.m_contact.m_position.setAddMul4(point->m_contact.m_position, m_path, point->m_contact.m_normal.w);
+    flipped.m_contact.m_normal.setNeg3(point->m_contact.m_normal);
+    m_collector->addCdPoint(&flipped);
+    m_earlyOutDistance = m_collector->m_earlyOutDistance;
+}

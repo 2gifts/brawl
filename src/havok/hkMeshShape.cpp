@@ -8,7 +8,6 @@
 //   0x802D52FC   168  getFirstKey   [map: hkMeshShape__getFirstKey]
 //   0x802D53A4   252  getNextKey   [map: hkMeshShape__getNextKey]
 //   0x802D54A0   508  getChildShape   [map: hkMeshShape__getChildShape]
-//   0x802D569C   152  getCollisionFilterInfo   [map: hkMeshShape__getCollisionFilterInfo]
 //   0x802D5734   348  addToAabb   [map: hkAabb__addToAabb]
 //   0x802D5890   544  getAabb   [map: hkMeshShape__getAabb]
 //   0x802D5AB0   244  addSubpart   [map: hkMeshShape__addSubpart]
@@ -61,12 +60,34 @@ int hkMeshShape::getType() const {
     return HK_SHAPE_TRIANGLE_COLLECTION;
 }
 
+// A key holds the subpart index in its top m_numBitsForSubpartIndex bits and the triangle index below them.
+u32 hkMeshShape::getCollisionFilterInfo(u32 key) const {
+    int subpartIndex = key >> (32 - m_numBitsForSubpartIndex);
+    int triangleIndex = key & (0xffffffff >> m_numBitsForSubpartIndex);
+    const hkMeshShapeSubpart& part = m_subparts[subpartIndex];
+    const u32* material;
+    if (part.m_materialIndexBase != NULL) {
+        int materialIndex;
+        if (part.m_materialIndexStridingType == hkMeshShapeSubpart::MATERIAL_INDICES_INT8) {
+            materialIndex = ((const u8*)part.m_materialIndexBase)[triangleIndex * part.m_materialIndexStriding];
+        } else {
+            materialIndex = *(const u16*)((const u8*)part.m_materialIndexBase + triangleIndex * part.m_materialIndexStriding);
+        }
+        material = (const u32*)((const u8*)part.m_materialBase + materialIndex * part.m_materialStriding);
+    } else {
+        material = NULL;
+    }
+    if (material != NULL) {
+        return *material;
+    }
+    return 0;
+}
+
 // Not yet decompiled in this unit:
 //   0x802D5284   112  __ct   [map: hkMeshShape____ct]
 //   0x802D52FC   168  getFirstKey   [map: hkMeshShape__getFirstKey]
 //   0x802D53A4   252  getNextKey   [map: hkMeshShape__getNextKey]
 //   0x802D54A0   508  getChildShape   [map: hkMeshShape__getChildShape]
-//   0x802D569C   152  getCollisionFilterInfo   [map: hkMeshShape__getCollisionFilterInfo]
 //   0x802D5734   348  addToAabb   [map: hkAabb__addToAabb]
 //   0x802D5890   544  getAabb   [map: hkMeshShape__getAabb]
 //   0x802D5AB0   244  addSubpart   [map: hkMeshShape__addSubpart]

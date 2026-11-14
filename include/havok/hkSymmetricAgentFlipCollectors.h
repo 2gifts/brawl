@@ -33,28 +33,32 @@ struct hkSymmetricAgentFlipPointCollectorBase {
     HK_DECLARE_SIZED_DELETE(0x1d)
     hkSymmetricAgentFlipPointCollectorBase() : unk4(HK_REAL_MAX) {}
     virtual ~hkSymmetricAgentFlipPointCollectorBase() {}
-    virtual void addCdPoint(void* point) = 0; // 0x0C HYPOTHESIS (the dtor is slot 0x08)
+    virtual void addCdPoint(hkCdPoint* point) = 0; // 0x0C HYPOTHESIS (the dtor is slot 0x08)
     float unk4; // 0x04 HYPOTHESIS: early-out distance
 };
 
 // Closest-point queries. Vtable lbl_80487198.
 struct hkSymmetricAgentFlipCollector : hkSymmetricAgentFlipPointCollectorBase {
-    void* unk8; // 0x08 wrapped collector
-    hkSymmetricAgentFlipCollector(void* collector) : unk8(collector) {}
+    hkCdPointCollector* unk8; // 0x08 wrapped collector
+    hkSymmetricAgentFlipCollector(void* collector) : unk8((hkCdPointCollector*)collector) {}
     // HYPOTHESIS: the deleting destructor (0x802A38DC) frees 8 bytes although the object is 0xC: the original's
     // allocator names the base's size (a non-virtual class allocator macro given the wrong class).
     static void operator delete(void* p) {
         hkMemory::getInstance().deallocateChunk(p, sizeof(hkSymmetricAgentFlipPointCollectorBase), 0x1d);
     }
-    virtual void addCdPoint(void* point);
+    // Hands the point on as seen from the other body: moved along the normal by the distance, normal reversed,
+    // bodies swapped; then takes over the wrapped collector's early-out distance.
+    virtual void addCdPoint(hkCdPoint* point);
 };
 
 // Linear casts (0x30 bytes). Layout from the symmetric linearCast wrappers: the early-out distance starts at
 // HK_REAL_MAX, then the cast path of the unswapped query and the wrapped collector.
 struct hkSymmetricAgentFlipCastCollector : hkCdPointCollector {
-    hkSymmetricAgentFlipCastCollector(const hkVector4& path, void* collector) : m_path(path), m_collector(collector) {}
+    hkSymmetricAgentFlipCastCollector(const hkVector4& path, void* collector)
+        : m_path(path), m_collector((hkCdPointCollector*)collector) {}
+    // As the closest-point flip, the point moved along the cast path by the distance.
     virtual void addCdPoint(hkCdPoint* point);
 
-    hkVector4 m_path;  // 0x10
-    void* m_collector; // 0x20
+    hkVector4 m_path;                // 0x10
+    hkCdPointCollector* m_collector; // 0x20
 };
