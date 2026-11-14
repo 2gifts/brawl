@@ -51,6 +51,9 @@ struct hkAgentNnTrack {
 struct hkSimulationIsland;
 struct hkCollisionDispatcher;
 
+// Moves the agent entries of appendee to the end of track (map name). HYPOTHESIS: the parameter types.
+void hkAgentNnMachine_AppendTrack(hkAgentNnTrack& track, hkAgentNnTrack& appendee);
+
 // Free functions of hkAgentNnMachine.o (names from the map). HYPOTHESIS: the parameter types beyond the call shape.
 // Runs the entry's agent for one step and appends its contact points to the output.
 void hkAgentNnMachine_ProcessAgent(hkAgentNnEntry* entry, const hkProcessCollisionInput& input,

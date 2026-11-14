@@ -24,6 +24,9 @@
 #include <havok/hkSimulation.h>
 #include <havok/hkShape.h>
 #include <havok/hkTypedBroadPhaseDispatcher.h>
+#include <havok/hkRigidBody.h>
+#include <havok/hkAgentNnMachine.h>
+#include <havok/hkCollisionDispatcher.h>
 
 // HYPOTHESIS: the top two bits of the byte at island+0x26/+0x27 hold the activity state, written as a 2-bit field.
 // Local view only; hkSimulationIsland.h does not declare these bytes yet.
@@ -203,6 +206,9 @@ static void removeIslandFromArray(hkArray<hkSimulationIsland*>& islands, hkSimul
     islands.m_size--;
 }
 
+// BYTES: not an inline candidate (setRigidBodyMotionType calls it out of line).
+#pragma push
+#pragma auto_inline off
 void hkWorldOperationUtil::removeEntitySI(hkWorld* world, hkEntity* entity) {
     entity->m_world = NULL;
     hkSimulationIsland* island = entity->m_simulationIsland;
@@ -213,9 +219,13 @@ void hkWorldOperationUtil::removeEntitySI(hkWorld* world, hkEntity* entity) {
         delete island;
     }
 }
+#pragma pop
 
 // Actions of the entity that sit on the fixed island are collected (with a reference) to move them to the
 // entity's new dynamic island.
+// BYTES: not an inline candidate (setRigidBodyMotionType calls it out of line).
+#pragma push
+#pragma auto_inline off
 void hkWorldOperationUtil::removeAttachedActionsFromFixedIsland(hkWorld* world, hkEntity* entity,
                                                                 hkArray<hkAction*>& actionsToBeMoved) {
     for (int i = 0; i < entity->m_actions.getSize(); i++) {
@@ -233,9 +243,13 @@ void hkWorldOperationUtil::removeAttachedActionsFromFixedIsland(hkWorld* world, 
         }
     }
 }
+#pragma pop
 
 // Actions whose other entities are all fixed follow the entity to the fixed island: they are collected (with a
 // reference) and taken off the entity's dynamic island.
+// BYTES: not an inline candidate (setRigidBodyMotionType calls it out of line).
+#pragma push
+#pragma auto_inline off
 void hkWorldOperationUtil::removeAttachedActionsFromDynamicIsland(hkWorld* world, hkEntity* entity,
                                                                   hkArray<hkAction*>& actionsToBeMoved) {
     hkSimulationIsland* island = entity->m_simulationIsland;
@@ -264,6 +278,7 @@ void hkWorldOperationUtil::removeAttachedActionsFromDynamicIsland(hkWorld* world
         }
     }
 }
+#pragma pop
 
 // Puts the actions back on the entity's island (they hold a reference while they are moved) and merges the island
 // with the islands of the other movable entities of each action. On the fixed island nothing is merged.
@@ -468,6 +483,9 @@ void hkWorldOperationUtil::removeIsland(hkWorld* world, hkSimulationIsland* isla
 }
 #pragma pop
 
+// BYTES: not an inline candidate (setRigidBodyMotionType calls it out of line).
+#pragma push
+#pragma auto_inline off
 hkConstraintInstance* hkWorldOperationUtil::addConstraintImmediately(hkWorld* world, hkConstraintInstance* constraint, bool fireCallback) {
     world->m_lockCount++;
     hkWorldConstraintUtil::addConstraint(world, constraint);
@@ -477,6 +495,7 @@ hkConstraintInstance* hkWorldOperationUtil::addConstraintImmediately(hkWorld* wo
     world->unlockAndAttemptToExecutePendingOperations();
     return constraint;
 }
+#pragma pop
 
 // BYTES: not an inline candidate (addActionsToEntitysIsland calls it out of line).
 #pragma push
@@ -530,94 +549,125 @@ extern "C" void fn_802FB210(int* a, int* b) {
     t = a[2]; a[2] = b[2]; b[2] = t;
 }
 
-// TODO: cleanup (shape from jj-link/brawl fn_802F83E8)
-// fn_802F83E8: body from https://github.com/jj-link/brawl src/havok/fn_802F83E8.cpp (namespaced; callees rebound to our C++ names).
-#include <types.h>
-#include <havok/hkSimulationIsland.h>
-#include <havok/hkWorld.h>
-namespace jj_fn_802F83E8 {
-class Object_vptr_0 {
-public:
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void* slot4(u32 size, s32 align);
-};
-
-struct Node {
-    u8 pad0[4];
-    s16 size;
-    u8 pad6[0x20 - 6];
-    s16 index;
-    u8 pad22[4];
-    u8 pad26a : 6;
-    u8 b : 2;
-    u8 a : 2;
-    u8 pad27a : 6;
-};
-
-struct Owner {
-    u8 pad0[0x20];
-    Node* node;
-    u8 pad24[4];
-    Node** data1;
-    s32 size1;
-    u32 cap1;
-    Node** data2;
-    s32 size2;
-    u32 cap2;
-    u8 pad40[0xb4 - 0x40];
-    signed char flag;
-};
-
-struct Flag {
-    signed char v;
-};
-
-struct Target {
-    u8 pad0[8];
-    Owner* owner;
-    u8 padc[0xa8 - 0xc];
-    u8 kind;
-    Flag isKind7() {
-        Flag f;
-        f.v = kind == 7;
-        return f;
-    }
-};
-
-
-extern "C" void fn_802F83E8(Owner* owner, Target* target, int mode) {
-    target->owner = owner;
-    if (target->isKind7().v) {
-        ((hkSimulationIsland*)(owner->node))->internalAddEntity((hkEntity*)(target));
+// Puts a new entity on an island: fixed entities share the fixed island; with simulation islands every other entity
+// starts on an island of its own (active or inactive as asked), otherwise active entities join the one active island.
+// BYTES: not an inline candidate (setRigidBodyMotionType calls it out of line).
+#pragma push
+#pragma auto_inline off
+void hkWorldOperationUtil::addEntitySI(hkWorld* world, hkEntity* entity, int activation) {
+    entity->m_world = world;
+    if (entity->isFixed()) {
+        world->m_fixedIsland->internalAddEntity(entity);
         return;
     }
-    if (owner->flag) {
-        Node* n = (Node*)new hkSimulationIsland((hkWorld*)owner);
-        if (mode == 1) {
-            n->a = 1;
-            n->b = 1;
-            n->index = owner->size1;
-            if (owner->size1 == (s32)(owner->cap1 & 0x3FFFFFFF)) {
-                hkArrayUtil::_reserveMore((hkArrayBase*)(&owner->data1), 4);
-            }
-            owner->data1[owner->size1++] = n;
+    if (world->m_wantSimulationIslands) {
+        hkSimulationIsland* island = new hkSimulationIsland(world);
+        if (activation == HK_ENTITY_ACTIVATION_DO_ACTIVATE) {
+            island->m_flags27.m_active = 1;
+            island->m_flags.m_stateD = 1;
+            island->m_storageIndex = world->m_unk28.m_size;
+            (*(hkArray<hkSimulationIsland*>*)&world->m_unk28).pushBack(island);
         } else {
-            n->a = 0;
-            n->b = 0;
-            n->index = owner->size2;
-            if (owner->size2 == (s32)(owner->cap2 & 0x3FFFFFFF)) {
-                hkArrayUtil::_reserveMore((hkArrayBase*)(&owner->data2), 4);
-            }
-            owner->data2[owner->size2++] = n;
+            island->m_flags27.m_active = 0;
+            island->m_flags.m_stateD = 0;
+            island->m_storageIndex = world->m_unk34.m_size;
+            (*(hkArray<hkSimulationIsland*>*)&world->m_unk34).pushBack(island);
         }
-        ((hkSimulationIsland*)(n))->internalAddEntity((hkEntity*)(target));
+        island->internalAddEntity(entity);
         return;
     }
-    if (mode == 1) {
-        ((hkSimulationIsland*)(owner->data1[0]))->internalAddEntity((hkEntity*)(target));
+    if (activation == HK_ENTITY_ACTIVATION_DO_ACTIVATE) {
+        (*(hkArray<hkSimulationIsland*>*)&world->m_unk28)[0]->internalAddEntity(entity);
     }
 }
-} // namespace jj_fn_802F83E8
+#pragma pop
+
+// Changes the body's motion type. Moving into or out of the fixed state takes the body off its island first: its
+// constraints, actions and agents with fixed partners are detached, the motion is replaced, and everything is put
+// back (the islands of movable partners merged again). Becoming movable needs the motion saved when the body was
+// fixed or keyframed.
+void hkWorldOperationUtil::setRigidBodyMotionType(hkRigidBody* body, u8 newMotionType, u8 activation,
+                                                  u8 collisionFilterUpdateMode) {
+    hkMotion::MotionType newType = (hkMotion::MotionType)newMotionType;
+    hkMotion::MotionType oldType = (hkMotion::MotionType)(int)body->m_motion.m_type;
+    if (oldType == newType) {
+        return;
+    }
+    bool newIsMovable = newType != hkMotion::MOTION_FIXED && newType != hkMotion::MOTION_KEYFRAMED;
+    bool oldIsMovable = oldType != hkMotion::MOTION_FIXED && oldType != hkMotion::MOTION_KEYFRAMED;
+    if (newIsMovable && !oldIsMovable && body->m_motion.m_savedMotion == NULL) {
+        return;
+    }
+
+    body->addReference();
+    hkWorld* world = body->m_world;
+    bool fixedStateChanges = (oldType == hkMotion::MOTION_FIXED) != (newType == hkMotion::MOTION_FIXED);
+    if (world != NULL && fixedStateChanges) {
+        hkInplaceArray<hkConstraintInstance*, 16> constraints;
+        hkInplaceArray<hkAction*, 16> actions;
+        hkAgentNnTrack agentsRemoved(world->m_collisionDispatcher->m_agentEntrySize,
+                                     world->m_collisionDispatcher->m_agentSectorSize);
+        world->m_unk84 = true;
+        world->m_unk85 = false;
+
+        removeAttachedConstraints(body, constraints);
+        if (newType != hkMotion::MOTION_FIXED) {
+            removeAttachedActionsFromFixedIsland(world, body, actions);
+        } else {
+            removeAttachedActionsFromDynamicIsland(world, body, actions);
+        }
+        removeAttachedAgentsConnectingTheEntityAndAFixedPartnerEntityPlus(
+            body->m_simulationIsland->m_agentTrack, body, agentsRemoved, newType);
+        if (oldType != hkMotion::MOTION_FIXED) {
+            hkSimulationIsland* island = body->m_simulationIsland;
+            if (island->m_entities.getSize() > 2) {
+                island->m_flags.m_stateA = 1; // the island may split now
+            }
+        }
+        removeEntitySI(world, body);
+        replaceMotionObject(body, newType, newIsMovable, oldIsMovable, world);
+        addEntitySI(world, body, activation);
+        addActionsToEntitysIsland(world, body, actions);
+        world->m_unk85 = true;
+
+        for (int i = 0; i < constraints.getSize(); i++) {
+            hkConstraintInstance* constraint = constraints[i];
+            addConstraintImmediately(world, constraint, false);
+            constraint->removeReference();
+        }
+
+        if (newType != hkMotion::MOTION_FIXED) {
+            hkArray<hkLinkedCollidable::CollisionEntry>& entries = body->m_collidable.m_collisionEntries;
+            for (int i = 0; i < entries.getSize(); i++) {
+                hkLinkedCollidable* partnerCollidable = entries[i].m_partner;
+                hkEntity* partner = (hkEntity*)((char*)partnerCollidable + partnerCollidable->m_ownerOffset);
+                if (!(bool)body->isFixed() && !(bool)partner->isFixed() &&
+                    body->m_simulationIsland != partner->m_simulationIsland) {
+                    mergeIslands(body->m_world, body, partner);
+                }
+            }
+        }
+        hkAgentNnMachine_AppendTrack(body->m_simulationIsland->m_agentTrack, agentsRemoved);
+
+        if (newType == hkMotion::MOTION_FIXED) {
+            hkSweptTransformUtil::freezeMotionState(world->m_dynamicsStepInfo.m_stepInfo.m_startTime,
+                                                    body->m_motion.m_motionState);
+            world->lockCriticalOperations();
+            world->m_simulation->resetCollisionInformationForEntities((hkEntity**)&body, 1, world, false);
+            hkSimulation::collideEntitiesBroadPhaseDiscrete((hkEntity**)&body, 1, world);
+            hkWorldCallbackUtil::fireInactiveEntityMoved(body->m_world, body);
+            world->m_lockCount--;
+        }
+        world->updateCollisionFilterOnEntity(body, collisionFilterUpdateMode, 1);
+        world->m_unk84 = false;
+        if (world->m_lockCount == 0 && world->m_pendingOperationsCount != 0 && !(bool)world->m_unk84) {
+            world->internal_executePendingOperations();
+        }
+    } else {
+        replaceMotionObject(body, newType, newIsMovable, oldIsMovable, world);
+        if (world != NULL) {
+            world->updateCollisionFilterOnEntity(body, collisionFilterUpdateMode, 1);
+        }
+    }
+    body->removeReference();
+}

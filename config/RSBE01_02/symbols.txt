@@ -13094,7 +13094,7 @@ swap__47hkArray<Q216hkWorldOperation16BiggestOperation>FR47hkArray<Q216hkWorldOp
 updateEntityBP__20hkWorldOperationUtilFP7hkWorldP8hkEntity = .text:0x802F7E24; // type:function size:0x2D4
 addEntityBP__20hkWorldOperationUtilFP7hkWorldP8hkEntity = .text:0x802F80F8; // type:function size:0x184
 addPhantomBP__20hkWorldOperationUtilFP7hkWorldP9hkPhantom = .text:0x802F827C; // type:function size:0x16C
-fn_802F83E8 = .text:0x802F83E8; // type:function size:0x19C
+addEntitySI__20hkWorldOperationUtilFP7hkWorldP8hkEntityi = .text:0x802F83E8; // type:function size:0x19C
 removeEntityBP__20hkWorldOperationUtilFP7hkWorldP8hkEntity = .text:0x802F8584; // type:function size:0x160
 removePhantomBP__20hkWorldOperationUtilFP7hkWorldP9hkPhantom = .text:0x802F86E4; // type:function size:0x128
 removeEntitySI__20hkWorldOperationUtilFP7hkWorldP8hkEntity = .text:0x802F880C; // type:function size:0xC0
@@ -13119,7 +13119,7 @@ internalDeactivateIsland__20hkWorldOperationUtilFP7hkWorldP18hkSimulationIsland 
 markIslandInactive__20hkWorldOperationUtilFP7hkWorldP18hkSimulationIsland = .text:0x802FABFC; // type:function size:0x8C
 markIslandActive__20hkWorldOperationUtilFP7hkWorldP18hkSimulationIsland = .text:0x802FAC88; // type:function size:0x9C
 removeIslandFromDirtyList__20hkWorldOperationUtilFP7hkWorldP18hkSimulationIsland = .text:0x802FAD24; // type:function size:0x2C
-fn_802FAD50 = .text:0x802FAD50; // type:function size:0x4C0
+replaceMotionObject__20hkWorldOperationUtilFP11hkRigidBodyQ28hkMotion10MotionType6hkBool6hkBoolP7hkWorld = .text:0x802FAD50; // type:function size:0x4C0
 fn_802FB210 = .text:0x802FB210; // type:function size:0x34
 registerAgent3__14hkBoxBoxAgent3FP21hkCollisionDispatcher = .text:0x802FB244; // type:function size:0xA4
 create__14hkBoxBoxAgent3FRC13hkAgent3InputP12hkAgentEntryPv = .text:0x802FB2E8; // type:function size:0x3C
@@ -13159,7 +13159,7 @@ fn_802FF278 = .text:0x802FF278; // type:function size:0x11C
 fn_802FF394 = .text:0x802FF394; // type:function size:0x68
 hkAgentNnMachine_InvalidateTimInAgent__FP14hkAgentNnEntryRC23hkProcessCollisionInput = .text:0x802FF3FC; // type:function size:0xA0
 hkAgentNnMachine_WarpTimeInAgent__FP14hkAgentNnEntryffRC23hkProcessCollisionInput = .text:0x802FF49C; // type:function size:0xA0
-fn_802FF53C = .text:0x802FF53C; // type:function size:0x148
+hkAgentNnMachine_AppendTrack__FR14hkAgentNnTrackR14hkAgentNnTrack = .text:0x802FF53C; // type:function size:0x148
 fn_802FF684 = .text:0x802FF684; // type:function size:0x100
 hkAgentNnMachine_ProcessAgent__FP14hkAgentNnEntryRC23hkProcessCollisionInputR24hkProcessCollisionOutput = .text:0x802FF784; // type:function size:0x5A0
 hkAgentNnMachine_ProcessTrack__FP18hkSimulationIslandR14hkAgentNnTrackRC23hkProcessCollisionInput = .text:0x802FFD24; // type:function size:0x764
