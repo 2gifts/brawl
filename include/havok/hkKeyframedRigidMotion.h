@@ -9,7 +9,7 @@ struct hkMaxSizeMotion;
 // Layout from hkKeyframedRigidMotionClass.cpp. Inertia and impulses are ignored (keyframed bodies).
 struct hkKeyframedRigidMotion : hkMotion {
     static void* operator new(unsigned long nbytes) {
-        hkReferencedObject* p = (hkReferencedObject*)hkMemory::getInstance().allocateChunk(nbytes, 0x2c);
+        hkReferencedObject* p = (hkReferencedObject*)hkThreadMemory::s_instance->allocateChunk(nbytes, 0x2c);
         p->m_memSizeAndFlags = nbytes;
         return p;
     }

@@ -34,6 +34,7 @@
 #include <havok/hkStabilizedSphereMotion.h>
 #include <havok/hkSphereMotion.h>
 #include <havok/hkAabb.h>
+#include <havok/hkString.h>
 #include <havok/hkEntityCallbackUtil.h>
 #include <havok/hkRigidBodyDeactivator.h>
 #include <havok/hkWorldOperationQueue.h>
@@ -403,6 +404,24 @@ bool hkRigidBody::setShape(hkShape* shape) {
         m_world->unlockAndAttemptToExecutePendingOperations();
     }
     return true;
+}
+
+hkRigidBody* hkRigidBody::clone() const {
+    hkRigidBodyCinfo info;
+    getCinfo(info);
+    hkRigidBody* body = new hkRigidBody(info);
+
+    // the motion state, velocities and deactivation data come along as raw bytes
+    hkString::memCpy16(&body->m_motion, &m_motion, sizeof(hkMaxSizeMotion) / 16);
+    if (m_motion.m_savedMotion) {
+        body->m_motion.m_savedMotion = new hkMaxSizeMotion();
+        hkString::memCpy16(body->m_motion.m_savedMotion, m_motion.m_savedMotion, sizeof(hkMaxSizeMotion) / 16);
+    }
+    body->m_collidable.m_motion = (hkMotion*)body->getMotionState();
+    body->m_properties = m_properties;
+    body->m_name = m_name;
+    body->m_userData = m_userData;
+    return body;
 }
 
 // TODO: cleanup (shape from jj-link/brawl fn_802E3284)

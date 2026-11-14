@@ -12,6 +12,8 @@ struct hkRigidBody : hkEntity {
     hkRigidBody(int flag);
     // Fills info with the body's current construction values.
     void getCinfo(hkRigidBodyCinfo& info) const;
+    // A new body with this one's construction info, motion (and saved motion), properties, user data and name.
+    hkRigidBody* clone() const;
 
     // Loaded-object support (static init registration).
     static void finishLoadedObjecthkRigidBody(void* p);
