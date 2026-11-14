@@ -660,7 +660,8 @@ struct gmAdvData {
         struct {
             char _605b;
             u8 unk606_7 : 1;
-            u8 : 7;
+            u8 unk606_6 : 1;
+            u8 : 6;
             char _607[5];
         };
     };
