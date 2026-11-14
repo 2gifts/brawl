@@ -20,7 +20,6 @@
 #include <havok/hkRegistry.h>
 
 // The 12 floats of the three columns: entry (row r, column c) is [c * 4 + r].
-static float* matrixElements(hkMatrix3& m) { return &m.m_col0.x; }
 static const float* matrixElements(const hkMatrix3& m) { return &m.m_col0.x; }
 
 static hkMotionTypeInfo s_hkSphereMotionTypeInfo("hkSphereMotion", hkSphereMotion::finishLoadedObjecthkSphereMotion,
@@ -43,38 +42,14 @@ const void* hkSphereMotion::getVtablehkSphereMotion() {
 
 // Inertia is the reciprocal of the isotropic inverse inertia (m_inertiaAndMassInv.x).
 void hkSphereMotion::getInertiaLocal(hkMatrix3& out) const {
-    float inertia = 1.0f / m_inertiaAndMassInv.x;
-    float* m = matrixElements(out);
-    m[1] = 0.0f;
-    m[2] = 0.0f;
-    m[3] = 0.0f;
-    m[4] = 0.0f;
-    m[6] = 0.0f;
-    m[7] = 0.0f;
-    m[8] = 0.0f;
-    m[9] = 0.0f;
-    m[11] = 0.0f;
-    m[0] = inertia;
-    m[5] = inertia;
-    m[10] = inertia;
+    hkReal inertia = 1.0f / m_inertiaAndMassInv.x;
+    out.setDiagonal(inertia, inertia, inertia);
 }
 
 // Same body as getInertiaLocal (the world and local inertia of an isotropic sphere are equal).
 void hkSphereMotion::getInertiaWorld(hkMatrix3& out) const {
-    float inertia = 1.0f / m_inertiaAndMassInv.x;
-    float* m = matrixElements(out);
-    m[1] = 0.0f;
-    m[2] = 0.0f;
-    m[3] = 0.0f;
-    m[4] = 0.0f;
-    m[6] = 0.0f;
-    m[7] = 0.0f;
-    m[8] = 0.0f;
-    m[9] = 0.0f;
-    m[11] = 0.0f;
-    m[0] = inertia;
-    m[5] = inertia;
-    m[10] = inertia;
+    hkReal inertia = 1.0f / m_inertiaAndMassInv.x;
+    out.setDiagonal(inertia, inertia, inertia);
 }
 
 // The inverse inertia is the reciprocal of the largest diagonal entry (zero when that entry is not positive).
@@ -109,23 +84,13 @@ void hkSphereMotion::setInertiaInvLocal(const hkMatrix3& in) {
 }
 
 void hkSphereMotion::getInertiaInvLocal(hkMatrix3& out) const {
-    float* m = matrixElements(out);
-    m[1] = 0.0f;
-    m[2] = 0.0f;
-    m[3] = 0.0f;
-    m[4] = 0.0f;
-    m[6] = 0.0f;
-    m[7] = 0.0f;
-    m[8] = 0.0f;
-    m[9] = 0.0f;
-    m[11] = 0.0f;
-    m[0] = m_inertiaAndMassInv.x;
-    m[5] = m_inertiaAndMassInv.x;
-    m[10] = m_inertiaAndMassInv.x;
+    hkReal invInertia = m_inertiaAndMassInv.x;
+    out.setDiagonal(invInertia, invInertia, invInertia);
 }
 
 void hkSphereMotion::getInertiaInvWorld(hkMatrix3& out) const {
-    getInertiaInvLocal(out);
+    hkReal invInertia = m_inertiaAndMassInv.x;
+    out.setDiagonal(invInertia, invInertia, invInertia);
 }
 
 // The torque about the center of mass (point - centerOfMass) x impulse is applied to the angular velocity.
