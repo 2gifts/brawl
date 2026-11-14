@@ -282,6 +282,13 @@ struct gmGlobalRecord {
         u16 m_fallTotal;             // 0x02 times the name tag was KO'd
         gmDiagramResult m_diagram;   // 0x04
         u32 m_charPlayTime[35];      // 0x54 seconds played with each character (MuCharKind)
+#ifdef MU_NAME_CPP
+        wchar_t m_name[6];        // 0xE0 UTF-16 text of the name tag; a zero first character marks an unused slot
+        u8 m_rumble;              // 0xEC rumble switch of the name tag (1 = on)
+        u16 m_handicap;           // 0xEE handicap kept for the tag (see getVsModeAutoHandiPlayerVal)
+        u32 m_date;               // 0xF0 gmGetDateCount() at the moment the tag was made
+        u8 m_buttonConfig[0x2D];  // 0xF4 the ipButtonConfig of the tag
+#else
         union {
             struct {
                 u16 unkE0;
@@ -301,6 +308,7 @@ struct gmGlobalRecord {
                 char _121[3];
             };
         };
+#endif
     };
     static_assert(sizeof(NameData) == 0x124, "Class is wrong size!");
 

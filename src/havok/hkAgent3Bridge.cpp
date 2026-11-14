@@ -1,6 +1,6 @@
 // Havok translation unit hkAgent3Bridge.o (main.dol 0x802CB484-0x802CB630).
-// Not yet decompiled. Functions in address order (method names from the Havok TU map; classes still to be identified):
-//   0x802CB484   428  registerAllAgents   [map: hkAgentRegisterUtil__registerAllAgents]
+// Not yet decompiled. Functions in address order:
+//   0x802CB484   428  registerAllAgents
 
 // TODO: cleanup (shape from jj-link/brawl fn_802CB484)
 // fn_802CB484: body from https://github.com/jj-link/brawl src/havok/fn_802CB484.cpp (namespaced; callees rebound to our C++ names).

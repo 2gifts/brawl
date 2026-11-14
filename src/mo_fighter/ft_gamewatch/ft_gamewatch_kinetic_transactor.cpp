@@ -88,17 +88,12 @@ float clampf(float value, float min, float max);
 
 // Mr. Game & Watch's kinetic modes 0x64..0x72; the lower modes go to the common transactor.
 // HYPOTHESIS: which statuses use these modes.
-// MATCH-ONLY: the accesser copy and the shared flag local order the argument setup (as in the other fighters' transactors).
-#pragma push
-#pragma opt_propagation off
 void ftGameWatchKineticTransactor::changeKinetic(int mode, void* pools, soModuleAccesser* acc) {
     if (mode <= 0x63) {
         ftKineticTransactor::changeKinetic(mode, pools, acc);
         return;
     }
-    soModuleAccesser* processAccesser = acc;
-    int process = 1;
-    Vec2f speed = ftKineticTransactHelper::preHelpProcess(processAccesser, process, process);
+    Vec2f speed = ftKineticTransactHelper::preHelpProcess(acc, true, true);
     switch (mode) {
 #define FT_GAMEWATCH_KINETIC_CASE(Mode, Name) \
     case Mode: {                              \
@@ -127,7 +122,6 @@ void ftGameWatchKineticTransactor::changeKinetic(int mode, void* pools, soModule
     }
     ftKineticTransactor::enableOutsideEnergy(acc);
 }
-#pragma pop
 
 // Gravity keeps the vertical speed of the entry and the stop energy (mode 9) its horizontal speed, with the brake of extend
 // block A.
@@ -241,7 +235,9 @@ void ftGameWatchKineticTransactor::changeKineticSub6(bool*, void*, Vec2f* speed,
     stop.m_speedLimit = Vec2f(param->unk24, 0.0f);
 }
 
-// MATCH-ONLY: the fighter units are built without inlining of the nw4r FSelect helper.
+// Clamps value to [min, max] with two floating selects. The link map lists it as this file's own clampf.
+// HYPOTHESIS: written as an asm block. Tried and not equal: nw4r::math::FSelect twice (an asm inline that is not
+// expanded at the fighter units' -O2, also not under always_inline) and the __fsel intrinsic (adds two frsp).
 float clampf(register float value, register float min, register float max) {
     register float t;
     register float result;

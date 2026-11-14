@@ -1,8 +1,8 @@
 // Havok translation unit hkConvexShape.o (main.dol 0x802D0890-0x802D0A2C).
 // Functions in address order:
-//   0x802D0890   132  getMaximumProjection   [map: hkConvexShape__getMaximumProjection]
-//   0x802D0914   272  castRayWithCollector   [map: hkConvexShape__castRayWithCollector]
-//   0x802D0A24     8  getType   [map: hkConvexShape__getType]
+//   0x802D0890   132  getMaximumProjection
+//   0x802D0914   272  castRayWithCollector
+//   0x802D0A24     8  getType
 
 #include <havok/hkConvexShape.h>
 #include <havok/hkShapeType.h>
@@ -18,7 +18,7 @@ int hkConvexShape::getType() const {
 }
 
 // Not yet decompiled in this unit:
-//   0x802D0914   272  castRayWithCollector   [map: hkConvexShape__castRayWithCollector]
+//   0x802D0914   272  castRayWithCollector
 
 // TODO: cleanup (shape from jj-link/brawl fn_802D0914)
 // fn_802D0914: body from https://github.com/jj-link/brawl src/havok/fn_802D0914.cpp (namespaced; callees rebound to our C++ names).

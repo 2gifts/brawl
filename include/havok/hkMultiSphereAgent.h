@@ -57,7 +57,7 @@ struct hkSymmetricAgentLinearCast_18hkMultiSphereAgent_ : hkMultiSphereAgent {
     virtual void updateShapeCollectionFilter(const hkCdBody& a, const hkCdBody& b, hkCollisionInput& c);
 };
 
-// Flipped (symmetric) variant created by createListBAgent; the class name follows the Havok TU map.
+// Flipped (symmetric) variant created by createListBAgent; the class name follows the symbol names.
 struct hkSymmetricAgent_18hkMultiSphereAgent_ : hkSymmetricAgentLinearCast_18hkMultiSphereAgent_ {
     hkSymmetricAgent_18hkMultiSphereAgent_(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                            hkContactMgr* contactMgr)

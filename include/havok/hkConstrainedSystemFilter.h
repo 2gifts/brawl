@@ -12,7 +12,7 @@ struct hkConstraintListenerInterface {
 };
 
 // Collision filter that forwards to a wrapped filter and listens for constraint events (0x20 bytes).
-// Layout from the Havok TU map (hkConstrainedSystemFilter__*). Six vptrs: the four hkCollisionFilter
+// Layout from the symbol names (hkConstrainedSystemFilter__*). Six vptrs: the four hkCollisionFilter
 // interfaces, the constraint listener, and the primary vtable at offset 0.
 struct hkConstrainedSystemFilter : hkCollisionFilter, hkConstraintListenerInterface {
     HK_DECLARE_REF_ALLOCATOR(0x25)

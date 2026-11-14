@@ -146,8 +146,8 @@ Adapted from [decomp-triage](https://github.com/KakarottoCake/decomp-triage/tree
   `checkIntersection`/`calcManifold` (`src/havok/hkBoxBoxCollisionDetection.cpp`). **HIGH**
 - **Unnamed 8-byte `subi r3, r3, N; b <fn>` functions right after a unit (or split off as a unit of their own) are the
   class's `@N@` this-adjusting thunks:** they appear once the class really overrides a virtual of a secondary base. Check
-  the DebugMode `RSBE01.map` (it names the object file of every function) before trusting a split from
-  `havok_map.csv`: the csv had the hkConstrainedSystemFilter thunks as two fake units (hkGeometryUtility,
+  the DebugMode `RSBE01.map` (it names the object file of every function) before trusting a split carved
+  from function names alone: such carving had the hkConstrainedSystemFilter thunks as two fake units (hkGeometryUtility,
   hk_constrained_system_filter) and the hkGroupFilter / hkNullCollisionFilter thunks outside any unit. Inside each
   secondary vtable MWCC emits the thunks in reverse slot order (`@8@isCollisionEnabled` before `@8@__dt__`, but
   `@12@__dt__` before `@12@isCollisionEnabled` when that interface declares the destructor second), so the thunk order

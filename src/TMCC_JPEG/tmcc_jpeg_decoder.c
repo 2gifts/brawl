@@ -1360,4 +1360,95 @@ err:
     return result < 0 ? result : -2;
 }
 
+typedef struct TMCC_JPEGDEC_DecStatus {
+    TMCC_JPEGDEC_Context* ctx;
+    s32 error;
+    u8 pad8[4];
+    u16 mcuX;
+    u16 mcuY;
+    s32 unk10;
+    u8 pad14[4];
+    s32 unk18;
+    u16 mcusPerRow;
+    u16 mcusPerCol;
+    u8 mcuW;
+    u8 mcuH;
+    u8 pad22[0x26];
+    u32 width;
+    u32 height;
+    u32 cWidth;
+    u32 cHeight;
+    void* buf0;
+    void* buf1;
+    void* buf2;
+    void* pixels;
+} TMCC_JPEGDEC_DecStatus;
+
+s32 fn_802629B8(s32 x, s32 y, TMCC_JPEGDEC_Context* ctx, void* block);
+s32 fn_80263E18(TMCC_JPEGDEC_Context* ctx);
+
+s32 fn_80262444(TMCC_JPEGDEC_DecStatus* status, s32 maxMcus, void* buf) {
+    TMCC_JPEGDEC_Context* ctx = status->ctx;
+    u16 x;
+    u16 mcusPerRow;
+    u16 y;
+    u16 mcusPerCol;
+    u8 mcuW;
+    u8 mcuH;
+    s32 count;
+    s32 result;
+    u8 block[0x180];
+
+    if (ctx == 0) {
+        return -1;
+    }
+
+    count = 0;
+    status->buf0 = buf;
+    status->pixels = buf;
+    status->buf1 = (u8*)buf + status->width * status->height;
+    status->buf2 = (u8*)status->buf1 + status->cWidth * status->cHeight;
+
+    x = status->mcuX;
+    y = status->mcuY;
+    mcusPerRow = status->mcusPerRow;
+    mcusPerCol = status->mcusPerCol;
+    mcuW = status->mcuW;
+    mcuH = status->mcuH;
+
+    while (y < mcusPerCol && count < maxMcus) {
+        s32 py = y * mcuH;
+        while (x < mcusPerRow && count < maxMcus) {
+            result = fn_802629B8(x * mcuW, py, ctx, block);
+            if (result < 0) {
+                goto err;
+            }
+            x++;
+            count++;
+        }
+        if (mcusPerRow == x) {
+            x = 0;
+            y++;
+        }
+    }
+
+    if (mcusPerCol == y && x == 0) {
+        result = TMCC_JPEGDEC_imageend((TMCC_JPEGDEC_Ctx2*)ctx);
+        if (result < 0) {
+            return result;
+        }
+    }
+    status->mcuX = x;
+    status->mcuY = y;
+    status->unk10 = TMCC_JPEGDEC_get_position(&ctx->stream);
+    return status->unk18 - y * mcusPerRow - x;
+
+err:
+    if (ctx->unk1806 != 0 && result != -0xF0) {
+        status->error = result;
+        return fn_80263E18(ctx);
+    }
+    return result;
+}
+
 #pragma use_lmw_stmw off

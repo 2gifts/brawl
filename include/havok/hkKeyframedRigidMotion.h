@@ -30,7 +30,7 @@ struct hkKeyframedRigidMotion : hkMotion {
     static void finishLoadedObjecthkKeyframedRigidMotion(void* p);
     static void cleanupLoadedObjecthkKeyframedRigidMotion(void* p);
     static const void* getVtablehkKeyframedRigidMotion() __attribute__((never_inline));
-    // The max-size variant is listed under this class in the Havok TU map (see hkMaxSizeMotion below).
+    // The max-size variant is listed under this class in the symbol names (see hkMaxSizeMotion below).
     static void finishLoadedObjecthkMaxSizeMotion(void* p);
     static void cleanupLoadedObjecthkMaxSizeMotion(void* p);
     static const void* getVtablehkMaxSizeMotion() __attribute__((never_inline));

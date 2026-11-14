@@ -1,6 +1,6 @@
 // Havok translation unit hk_lin_soft_constraint_atom.o (main.dol 0x8028A7A8-0x8028A860).
-// Functions in address order (method names from the Havok TU map):
-//   0x8028A7A8   184  buildJacobianFromLinSoftAtom   [map: hkLinSoftConstraintAtom__buildJacobianFromLinSoftAtom]
+// Functions in address order:
+//   0x8028A7A8   184  buildJacobianFromLinSoftAtom
 #include <havok/hkLinSoftConstraintAtom.h>
 
 // Helper in another TU (not yet named): takes the scratch block, the caller's context and a pass-through pointer.

@@ -1,11 +1,11 @@
 // Havok translation unit hkReportContactMgr.o (main.dol 0x802D7708-0x802D7FC8).
-// Functions in address order (method names from the Havok TU map). Only the functions listed below are
+// Functions in address order. Only the functions listed below are
 // written so far; the contact point, TOI and processing functions are not done yet.
-//   0x802D7708    60  __ct   [map: hkReportContactMgr____ct]
-//   0x802D7744    92  __dt   [map: hkReportContactMgr____dt]
-//   0x802D7F20    28  __ct   [map: hkReportContactMgr7FactoryFP7hkWorld____ct]
-//   0x802D7F3C   132  createContactMgr   [map: hkReportContactMgr7FactoryFRC12hkCollidableRC12hkCollidableRC16hkCollisionInput__createContactMgr]
-//   0x802D7FC0     8  getConstraintInstance   [map: hkDynamicsContactMgr__getConstraintInstance]
+//   0x802D7708    60  __ct
+//   0x802D7744    92  __dt
+//   0x802D7F20    28  __ct
+//   0x802D7F3C   132  createContactMgr
+//   0x802D7FC0     8  getConstraintInstance
 
 #include <havok/hkReportContactMgr.h>
 

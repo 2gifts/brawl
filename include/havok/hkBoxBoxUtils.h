@@ -2,7 +2,7 @@
 
 #include <havok/hkVector4.h>
 
-// Vector helpers of the box-box collision detector (hkBoxBoxUtils in the Havok TU map). Static functions, no state.
+// Vector helpers of the box-box collision detector (hkBoxBoxUtils in the symbol names). Static functions, no state.
 struct hkBoxBoxUtils {
     // Writes 1 to out when any of the x, y, z lanes of a is greater than b, otherwise 0.
     // The scalars are references: checkIntersection passes a member and sdata2 literals by address.

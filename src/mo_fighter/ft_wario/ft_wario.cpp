@@ -1,8 +1,6 @@
 #define FT_POOL_ROOT_NONPOLYMORPHIC
 #define SO_GENERAL_WORK_BOUNDED_CLEAR
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
-// MATCH-ONLY: the custom kinetic helper calls the shared vector constructor.
-#define MT_VEC3F_CTOR_NOINLINE
 #define FT_NOINLINE_SEARCH_BUILDER
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_WARIO_ARTICLE_POOLS
@@ -155,7 +153,8 @@ ftWario::ftWario(s32 entryId,
 
 // The common implementation keeps Waft charge, bike links and transformation
 // state consistent between normal Wario and Wario-Man.
-// MATCH-ONLY: the kinetic setup uses the shared getter call boundary.
+// BYTES: ftWarioKineticTransactor::changeKineticSub calls this getter out of line (`bl`) in the original; without the
+// pragma MWCC expands it there (98.11%).
 #pragma dont_inline on
 ftWarioExtendParam* ftWario::getExtendParam() {
     return reinterpret_cast<ftWarioExtendParam*>(&m_data->extendParam[0]);
@@ -689,18 +688,12 @@ u8* fn_110_C614(u8* p, int x) { return x == 0 ? p + 0xC : 0; }
 
 // Standard modes use the common fighter dispatcher. Every custom request runs
 // preprocessing; only the five recognized modes re-enable outside energy.
-// MATCH-ONLY: preserve the shared preprocessing flag and the native stores
-// left by the otherwise empty custom-mode handlers.
-#pragma push
-#pragma opt_propagation off
 void ftWarioKineticTransactor::changeKinetic(int mode, void* pools, soModuleAccesser* acc) {
     if (mode <= 0x63) {
         ftKineticTransactor::changeKinetic(mode, pools, acc);
         return;
     }
-    soModuleAccesser* processAccesser = acc;
-    bool process = true;
-    Vec2f speed = ftKineticTransactHelper::preHelpProcess(processAccesser, process, process);
+    Vec2f speed = ftKineticTransactHelper::preHelpProcess(acc, true, true);
     switch (mode) {
     case 0x64: {
         bool result = false;
@@ -716,7 +709,6 @@ void ftWarioKineticTransactor::changeKinetic(int mode, void* pools, soModuleAcce
     }
     ftKineticTransactor::enableOutsideEnergy(acc);
 }
-#pragma pop
 
 // Mode 0x64 preserves vertical velocity in Gravity and horizontal velocity in
 // Stop, enables Damage, and installs Wario's own gravity tuning. The gameplay

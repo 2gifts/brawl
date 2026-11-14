@@ -4,7 +4,7 @@
 #include <havok/hkMemory.h>
 
 // TOI resource manager that carves its block from the thread memory stack (0x0C bytes).
-// Layout and vtable from the Havok TU map (hkDefaultToiResourceMgr__*).
+// Layout and vtable from the symbol names (hkDefaultToiResourceMgr__*).
 struct hkDefaultToiResourceMgr : hkToiResourceMgr {
     HK_DECLARE_REF_ALLOCATOR(0x13)
 
