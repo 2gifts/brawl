@@ -11,8 +11,10 @@
 #include <wn/wn_module_accesser_builder.h>
 WN_STATUS_PROC_VECTOR_ARG_CTOR(9);
 #include <wn/link/wn_link_hookshot.h>
+#include <ft/link/ft_link_data.h>
 #include <ft/purin/ft_purin_article.h>
 #include <wn/wn_activate_desc.h>
+#include <wn/wn_lasso_status_view.h>
 #include <so/so_module_accesser.h>
 
 // The status unique processes of the hookshot (named Lasso in the object).
@@ -23,10 +25,30 @@ extern soStatusUniqProcess g_wnLassoStatusUniqProcessHang;
 extern soStatusUniqProcess g_wnLassoStatusUniqProcessHangRewind;
 extern soStatusUniqProcess g_wnLassoStatusUniqProcessReach;
 
-wnInstanceHolderHookshot::wnInstanceHolderHookshot(soModuleAccesser* acc) : soInstancePoolRoot(acc),
-    m_instance(0, wnSimpleConstructionInfo(wnSimpleKindInfo(Fighter_Purin), acc->m_enumerationStart->m_heapModule),
-               g_ftCommonDataAccesser.getSimpleData(static_cast<ftKind>(wnSimpleKindInfo(Fighter_Purin).subKind),
-                                                    &ftArticleDataFlags().get().resourceGroup), false) { }
+// The claw tip is built with the kind pair of the hookshot itself (the owner weapon's build kind).
+static inline const wnSimpleKindInfo& ownerKindInfo(soModuleAccesser* acc) {
+    return dynamic_cast<Weapon&>(*acc->m_stageObject).getKindInfo();
+}
+static inline ftKind ownerSubKind(soModuleAccesser* acc) {
+    return static_cast<ftKind>(ownerKindInfo(acc).subKind);
+}
+// The heap the claw tip is built from (read through a getter: the native constructor keeps it in a later register
+// than a direct member read gives).
+static inline void* ownerHeapModule(soModuleAccesser* acc) {
+    return acc->m_enumerationStart->m_heapModule;
+}
+
+// HYPOTHESIS: the "found" output of the simple-data lookup is a one-byte record built from the holder's index tag
+// (the holder is wnInstanceHolder<wnSimple, soKindInfoGeneric<2, 110>, soIntToType<0> > in the map). The native frame has
+// two separate zeroed bytes for it (tag, then flag), not the two-bool record the fighter units use.
+struct wnSimpleDataFound {
+    bool value;
+    wnSimpleDataFound(const soIntToType<0>&) : value(false) { }
+};
+
+inline wnInstanceHolderHookshot::wnInstanceHolderHookshot(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(0, wnSimpleConstructionInfo(ownerKindInfo(acc), ownerHeapModule(acc)),
+               g_ftCommonDataAccesser.getSimpleData(ownerSubKind(acc), &wnSimpleDataFound(soIntToType<0>()).value), false) { }
 
 wnLinkHookshot::wnLinkHookshot(s32 articleId, const wnArticleBuildInfo& info, const wnLinkHookshotData* data) :
     wnWeaponBuilder<wnLinkHookshotModuleAccesserBuildConfig>(
@@ -35,8 +57,7 @@ wnLinkHookshot::wnLinkHookshot(s32 articleId, const wnArticleBuildInfo& info, co
                                   info.getHeapModule()->getNWMotionInstanceHeap(), static_cast<u8>(data->m_resGroupNo), -1,
                                   &m_paramAccesser, 0, 0, 0, 0, 0, 0, 0)),
     m_param(data->m_param), m_paramAccesser(data->m_param) {
-    soStatusUniqProcess* uniqProcs[9];
-    for (int i = 0; i < 9; ++i) uniqProcs[i] = 0;
+    soStatusUniqProcess* uniqProcs[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
     uniqProcs[1] = &g_wnLassoStatusUniqProcessShoot;
     uniqProcs[3] = &g_wnLassoStatusUniqProcessRewind;
     uniqProcs[4] = &g_wnLassoStatusUniqProcessPull;
@@ -54,87 +75,28 @@ struct wnLinkHookshotActivator {
 bool wnLinkHookshot::activeArticle(wnSimple* article, soModuleAccesser* acc) {
     soResourceModule& resources = acc->getResourceModule();
     s32 founderTaskId = acc->getStageObject().m_taskId;
-    // HYPOTHESIS: source member name; offset 0xC4 of the fighter data holds the simple-article data of the claw tip.
     article->activate(founderTaskId, resources.getResourceIdAccesser()->getBinResId(),
-                      *reinterpret_cast<wnSimpleData**>(reinterpret_cast<u8*>(g_ftCommonDataAccesser.getData(Fighter_Link)) + 0xC4),
+                      static_cast<ftLinkData*>(g_ftCommonDataAccesser.getData(Fighter_Link))->m_hookshotTipData,
                       true, false, Vec3f(0.0f, 0.0f, 0.0f), 0xFFFF, 0xFFFF, 0, true, false, -1, 0, false, 2, 0, false);
     return true;
 }
 
-// HYPOTHESIS: the module at slot 0x9C of the enumeration, typed only by the vtable slots the hookshot calls.
-struct wnLinkHookshotSlotModule {
-    u32 pad[2];
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18(int, int, int, int, bool, int, int, int);
-    virtual void v1C();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2C();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3C();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4C();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5C();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6C();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7C();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8C();
-    virtual void v90();
-    virtual void v94();
-    virtual void v98();
-    virtual void v9C();
-    virtual void vA0();
-    virtual void vA4(int);
-    virtual void vA8();
-    virtual void vAC();
-    virtual void vB0();
-    virtual void vB4();
-    virtual void vB8();
-    virtual void vBC();
-    virtual void vC0();
-    virtual void vC4();
-    virtual void vC8();
-    virtual void vCC();
-    virtual void vD0();
-    virtual void vD4();
-    virtual void vD8();
-    virtual void vDC();
-};
-
 void wnLinkHookshot::activate(int founderTaskId, int resourceId, int team, float lr, const Vec3f& position, bool unk) {
     wnActivateDesc desc(founderTaskId, resourceId, resourceId, resourceId, -1, -1, 0, 0, position, lr, team, 0, 2, 0x80, 0, 0x35F, 0);
-    desc.flagsHighPair = 3;
+    // The two top bits of each flag byte are separate one-bit flags: the original writes them one at a time.
+    desc.flagBit7 = 1;
+    desc.flagBit6 = 1;
     desc.flagsMidPair = 0;
     desc.flagsBit3 = 1;
     desc.flagsLow = 0;
-    desc.unk4DHigh = 0;
+    desc.flag4DBit7 = 0;
+    desc.flag4DBit6 = 0;
     Weapon::activate(&desc);
     static s32 negOne = -1;
-    const soModuleEnumeration* modules = m_moduleAccesser->m_enumerationStart;
-    soResourceModule* resources = modules->m_resourceModule;
-    wnLinkHookshotSlotModule* slot = reinterpret_cast<wnLinkHookshotSlotModule*>(modules->m_physicsModule);
-    s32 effectArg = negOne;
-    s32 zero = 0;
-    slot->v18(resources->getResourceIdAccesser()->getBinResId(), zero, effectArg, effectArg, true, false, zero, -1);
+    soResourceModule& resource = m_moduleAccesser->getResourceModule();
+    wnLassoAltStatusView* alt = wnLassoGetAltStatus(m_moduleAccesser);
+    u32 nodeId = negOne;
+    alt->unk18Attach(resource.getResourceIdAccesser()->getBinResId(), 0, nodeId, nodeId, true, 0, 0, -1);
     m_moduleAccesser->getWorkManageModule().setFlag(unk, 0x22000000);
     m_moduleAccesser->getWorkManageModule().setInt(0x18, 0x10000005);
     soArticle* tip = static_cast<soGenerateArticleManageModule*>(m_moduleAccesser->m_enumerationStart->m_generateArticleManageModule)->generate(0, 0, false);
@@ -142,12 +104,8 @@ void wnLinkHookshot::activate(int founderTaskId, int resourceId, int team, float
         static_cast<soGenerateArticleManageModule*>(m_moduleAccesser->m_enumerationStart->m_generateArticleManageModule)->entry(tip);
     }
     m_moduleAccesser->getStatusModule().changeStatusForce(0, m_moduleAccesser);
-    const soModuleEnumeration* tail = m_moduleAccesser->m_enumerationStart;
-    soPostureModule* posture = tail->m_postureModule;
-    wnLinkHookshotSlotModule* tailSlot = reinterpret_cast<wnLinkHookshotSlotModule*>(tail->m_physicsModule);
-    posture->getScale();
-    tailSlot->vDC();
-    reinterpret_cast<wnLinkHookshotSlotModule*>(m_moduleAccesser->m_enumerationStart->m_physicsModule)->vA4(6);
+    wnLassoGetAltStatus(m_moduleAccesser)->unkDCFloat(m_moduleAccesser->getPostureModule().getScale());
+    wnLassoGetAltStatus(m_moduleAccesser)->unkA4Int(6);
 }
 
 wnSimple* soInstancePoolSubHookshot::getInstanceAt(s32 index) {

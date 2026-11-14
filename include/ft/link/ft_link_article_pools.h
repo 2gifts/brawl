@@ -13,11 +13,25 @@
 #include <ft/builder/ft_builder_transition.h>
 #include <ft/builder/ft_builder_motion.h>
 
+// The model observer list calls its shared sora_melee destructor (as in ft_pit_article_pools.h): the simple article's
+// inside-event builder teardown calls it out of line.
+template <> class soEventUnitWithWorkArea<soModelEventObserver, 5> : public soEventUnitImpl<soModelEventObserver> {
+    soInstanceManagerFullPropertyVector<soModelEventObserver*, 5> m_observerList;
+public:
+    soEventUnitWithWorkArea(s16 managerId, s16 eventId) : soEventUnitImpl<soModelEventObserver>(managerId, eventId) { }
+    virtual ~soEventUnitWithWorkArea();
+    virtual u32 getObserverNum() const { return m_observerList.size(); }
+};
+
 #define WN_WEAPON_BUILDER
 #define WN_ARTICLE_NATIVE_BUILDERS
 #define WN_SHARED_ARRAYS_1
 #include <wn/wn_module_accesser_builder.h>
 #define WN_SIMPLE_AFTER_ARTICLE_BUILDERS
+// The simple article shares the hookshot's color blend and visibility builders (both teardowns call the same
+// out-of-line copies), as in ft_snake_article_pools.h.
+#define WN_SIMPLE_COLOR_BLEND_BUILD_CONFIG soColorBlendModuleBuildConfig<-1, 0, soColorBlendModuleImpl>
+#define WN_SIMPLE_VISIBILITY_BUILDER soVisibilityModuleBuilder<soVisibilityModuleBuildConfig<soVisibilityModuleSimple, 1> >
 #define WN_LINK_HOOKSHOT_FULL
 #define FT_LINK_HOOKSHOT_DTOR_OUT_OF_LINE
 WN_STATUS_PROC_VECTOR_ARG_CTOR(9);
@@ -27,6 +41,7 @@ WN_STATUS_PROC_VECTOR_ARG_CTOR(9);
 #include <wn/link/wn_link_bow_arrow.h>
 #define FT_LINK_BOOMERANG_DTOR_EXTERNAL
 #include <wn/link/wn_link_boomerang.h>
+#define WN_LINK_BOW_FULL_BUILDER
 #include <wn/link/wn_link_bow.h>
 #include <wn/wn_simple.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
@@ -66,11 +81,16 @@ struct ftLinkArticlePoolUnit;
         typedef soInstancePool<INFO, PARENT, ftLinkArticleKindInfo, INDEX> Base;                              \
     public:                                                                                                    \
         soLineHierarchy(soModuleAccesser* acc) : Base(acc) { }                                                 \
-        ~soLineHierarchy() __attribute__((never_inline)) { }                                                   \
+        ~soLineHierarchy() FT_LINK_POOL_DTOR_ATTR { }                                                          \
     };
 
 typedef soInstancePoolRoot ftLinkArticlePool5Parent;
+// BYTES: level 4's pool teardown calls the last level's hierarchy teardown, while every upper pool teardown
+// expands the hierarchy teardown of the level below it.
+#define FT_LINK_POOL_DTOR_ATTR __attribute__((never_inline))
 FT_LINK_POOL_LEVEL(ftLinkArticleList5, ftLinkSimple5Info, ftLinkArticlePool5Parent, 5)
+#undef FT_LINK_POOL_DTOR_ATTR
+#define FT_LINK_POOL_DTOR_ATTR
 typedef soLineHierarchy<ftLinkArticleList5, ftLinkArticlePoolUnit, soInstancePoolRoot> ftLinkArticlePool4Parent;
 FT_LINK_POOL_LEVEL(ftLinkArticleList4, ftLinkSimple4Info, ftLinkArticlePool4Parent, 4)
 typedef soLineHierarchy<ftLinkArticleList4, ftLinkArticlePoolUnit, soInstancePoolRoot> ftLinkArticlePool3Parent;
@@ -93,14 +113,21 @@ static_assert(sizeof(wnLinkBow) == 0x14E4, "Link bow article is the wrong size")
 static_assert(sizeof(wnLinkBowArrow) == 0x1FD8, "Link bow arrow article is the wrong size");
 static_assert(sizeof(wnSimple) == 0x16C8, "Link wnSimple article is the wrong size");
 
+// HYPOTHESIS: the helper of the generic article mediator that creates an item as an article of a slot (as in ft_snake).
+class BaseItem;
+class soArticleMediatorHelper {
+public:
+    static BaseItem* createItem(int itemKind, int articleId, int ownerTaskId);
+    static soArticle* castArticle(BaseItem* item);
+};
+
 // HYPOTHESIS: soArticleMediatorImpl<PoolList, Founder>
 template <class PoolList, class Founder>
 class soArticleMediatorImpl : public soArticleMediator {
-    ftLinkArticlePools m_pools;
-    // HYPOTHESIS: the auto-recycle flag is at mediator+0x11BEC, 0x1C past the end of this pool chain.
-    u8 m_beforeRecycle[0x1C];
-    u8 m_autoRecycle;
 public:
+    // Public: the slot helpers in ft_link.cpp read the pool chain from the mediator itself.
+    ftLinkArticlePools m_pools;
+    bool m_autoRecycle;
     soArticleMediatorImpl(soModuleAccesser* acc) : soArticleMediator(acc), m_pools(acc), m_autoRecycle(false) { }
     virtual ~soArticleMediatorImpl();
     virtual soArticle* generate(s32 articleId, soModuleAccesser* acc);

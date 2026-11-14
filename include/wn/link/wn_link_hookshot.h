@@ -56,7 +56,11 @@ public:
 // these copies of the generic pool of wn/wn_article_pool.h carry a name that contains the original template name.
 class wnInstanceHolderHookshot : public soInstancePoolRoot {
 public:
+#ifdef FT_LINK_HOOKSHOT_DTOR_OUT_OF_LINE
+    virtual ~wnInstanceHolderHookshot() { }
+#else
     virtual ~wnInstanceHolderHookshot();
+#endif
 private:
     wnSimple m_instance;
 public:
@@ -65,7 +69,11 @@ public:
 };
 class soInstancePoolSubHookshot : public soInstancePoolRoot {
 public:
+#ifdef FT_LINK_HOOKSHOT_DTOR_OUT_OF_LINE
+    virtual ~soInstancePoolSubHookshot() { }
+#else
     virtual ~soInstancePoolSubHookshot();
+#endif
 private:
     u32 m_terminal;
     wnInstanceHolderHookshot m_holder;
@@ -117,7 +125,11 @@ class soSelectInstanceHolderHookshot {
     soArticleMediatorImplHookshot m_mediator;
 public:
     soSelectInstanceHolderHookshot(soModuleAccesser* acc) : m_mediator(acc) { }
+#ifdef FT_LINK_HOOKSHOT_DTOR_OUT_OF_LINE
+    ~soSelectInstanceHolderHookshot() { } // ft_link.o expands it inside the hookshot's teardown
+#else
     ~soSelectInstanceHolderHookshot();
+#endif
     soArticleMediator* getMediator() { return &m_mediator; }
 };
 FT_DOL_ARRAY_VECTOR(soArticle*, 1);
@@ -129,7 +141,11 @@ class soGenerateArticleManageModuleBuilderHookshot {
 public:
     soGenerateArticleManageModuleBuilderHookshot(soModuleAccesser* acc) :
         m_articles(0), m_observers(1, 0), m_mediator(acc), m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
+#ifdef FT_LINK_HOOKSHOT_DTOR_OUT_OF_LINE
+    ~soGenerateArticleManageModuleBuilderHookshot() { } // ft_link.o expands it inside the hookshot's teardown
+#else
     ~soGenerateArticleManageModuleBuilderHookshot();
+#endif
     void* getModule() { return &m_module; }
     soArticleMediator* getMediator() { return m_mediator.getMediator(); }
 };
@@ -151,7 +167,7 @@ public:
     typedef soLinkModuleBuildConfigCap<5, soLinkModuleImpl> LinkModuleBuildConfig;
     typedef soColorBlendModuleBuildConfig<-1, 0, soColorBlendModuleImpl> ColorBlendModuleBuildConfig;
     typedef soPhysicsModuleBuildConfigCap<0, soPhysicsModuleImpl> PhysicsModuleBuildConfig;
-    typedef soGeneralWorkBuildConfig<3, 3, 1> GeneralWorkBuildConfig;
+    typedef soGeneralWorkBuildConfig<7, 6, 1> GeneralWorkBuildConfig;
     typedef wnStatusModuleBuildConfig<9, soGeneralWorkBuildConfig<3, 3, 1>, 9, soTransitionModuleBuildConfig<wnStatusTransitionTypeList> >
         StatusModuleBuildConfig;
     typedef wnLinkHookshotArticleManageModuleBuilder GenerateArticleManageModuleBuilder;

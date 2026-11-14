@@ -13,6 +13,7 @@ struct wnSimpleData
 // kind/subkind pair through the first pointer and the heap module through the second.
 struct wnSimpleKindInfo {
     s32 kind, subKind;
+    wnSimpleKindInfo() { }
     wnSimpleKindInfo(s32 subKind) : kind(0), subKind(subKind) { }
 };
 struct wnSimpleConstructionInfo {
