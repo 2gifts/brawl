@@ -15,7 +15,7 @@
 void hkFastMeshShape::finishLoadedObjecthkFastMeshShape(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;
-    ::new (p) hkFastMeshShape(flag);
+    ::new (p) hkFastMeshShape(hkFinishLoadedObjectFlag(flag));
 }
 
 void hkFastMeshShape::cleanupLoadedObjecthkFastMeshShape(void* p) {
@@ -32,10 +32,11 @@ hkFastMeshShape::~hkFastMeshShape() {
 #pragma push
 #pragma auto_inline off
 const void* hkFastMeshShape::getVtablehkFastMeshShape() {
+    char buf[0x50] __attribute__((aligned(16)));
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
-    char buf[0x50] __attribute__((aligned(16)));
-    hkFastMeshShape* p = ::new (buf) hkFastMeshShape(flag);
+    // BYTES: the flag goes in as a copy, built inside the placement new (after its null check).
+    hkFastMeshShape* p = ::new (buf) hkFastMeshShape(hkFinishLoadedObjectFlag(flag));
     return *(const void**)p;
 }
 #pragma pop

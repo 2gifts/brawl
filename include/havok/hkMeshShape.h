@@ -9,12 +9,18 @@
 
 // One subpart of a mesh (0x30 bytes). Layout from hkMeshShapeClass.cpp.
 struct hkMeshShapeSubpart {
+    enum MaterialIndexStridingType {
+        MATERIAL_INDICES_INVALID = 0,
+        MATERIAL_INDICES_INT8 = 1,
+        MATERIAL_INDICES_INT16 = 2,
+    };
+
     void* m_vertexBase;                 // 0x00
     int m_vertexStriding;               // 0x04
     int m_numVertices;                  // 0x08
     void* m_indexBase;                  // 0x0C
     u8 m_stridingType;                  // 0x10 (IndexStridingType: 1 = int16, 2 = int32)
-    u8 m_materialIndexStridingType;     // 0x11 (MaterialIndexStridingType: 1 = int8, 2 = int16)
+    hkEnum<MaterialIndexStridingType, s8> m_materialIndexStridingType; // 0x11
     int m_indexStriding;                // 0x14
     int m_numTriangles;                 // 0x18
     void* m_materialIndexBase;          // 0x1C

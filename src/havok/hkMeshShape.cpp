@@ -19,10 +19,11 @@
 #include <havok/hkRegistry.h>
 #include <havok/hkShapeType.h>
 
+// BYTES: the flag goes in as a copy, built inside the placement new (after its null check).
 void hkMeshShape::finishLoadedObjecthkMeshShape(void* p) {
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 1;
-    ::new (p) hkMeshShape(flag);
+    ::new (p) hkMeshShape(hkFinishLoadedObjectFlag(flag));
 }
 
 void hkMeshShape::cleanupLoadedObjecthkMeshShape(void* p) {
@@ -35,23 +36,22 @@ hkMeshShape::~hkMeshShape() {
 #pragma push
 #pragma auto_inline off
 const void* hkMeshShape::getVtablehkMeshShape() {
+    char buf[0x50] __attribute__((aligned(16)));
     hkFinishLoadedObjectFlag flag;
     flag.m_finishing = 0;
-    char buf[0x50] __attribute__((aligned(16)));
-    hkMeshShape* p = ::new (buf) hkMeshShape(flag);
-    return *(const void**)p;
+    ::new (buf) hkMeshShape(hkFinishLoadedObjectFlag(flag));
+    return *(const void**)buf;
 }
 #pragma pop
 
-hkMeshShape::hkMeshShape(const hkFinishLoadedObjectFlag& flag) {
+hkMeshShape::hkMeshShape(const hkFinishLoadedObjectFlag& flag) : m_subparts(flag) {
     if (flag.m_finishing == 0) {
         return;
     }
     // Subparts loaded without a material index striding type get the default (int8).
-    hkMeshShapeSubpart* subparts = (hkMeshShapeSubpart*)m_subparts.m_data;
-    for (int i = 0; i < m_subparts.m_size; i++) {
-        if (subparts[i].m_materialIndexStridingType == 0) {
-            subparts[i].m_materialIndexStridingType = 1;
+    for (int i = 0; i < m_subparts.getSize(); i++) {
+        if (m_subparts[i].m_materialIndexStridingType == hkMeshShapeSubpart::MATERIAL_INDICES_INVALID) {
+            m_subparts[i].m_materialIndexStridingType = hkMeshShapeSubpart::MATERIAL_INDICES_INT8;
         }
     }
 }
