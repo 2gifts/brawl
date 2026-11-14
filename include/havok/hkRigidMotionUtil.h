@@ -16,6 +16,10 @@ struct hkRigidMotionUtil {
     static void hkRigidMotionUtilApplyAccumulators(const hkStepInfo& info, hkVelocityAccumulator* accumulators,
                                                    hkEntity** entities, int numEntities, int motionOffset,
                                                    void* unk5);
+    // Steps the motions of the entities over the step without solver input (hkSimulation's
+    // reintegrateAndRecollideEntities): the step, the entities, their count and the offset of the motion in an entity.
+    // HYPOTHESIS: the parameter types.
+    static void hkRigidMotionUtilStep(const hkStepInfo& info, hkEntity** entities, int numEntities, int motionOffset);
     // Steps the motions of the entities on their own (hkSimulation::integrateInternal, islands without
     // constraints): the step, the velocity change from gravity over it, the entities, and the offset of the motion
     // in an entity. HYPOTHESIS: the parameter types.
