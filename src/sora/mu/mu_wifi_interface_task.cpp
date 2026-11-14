@@ -2887,3 +2887,45 @@ extern "C" bool fn_800D4EF0(muWifiInterfaceTask* self, wchar_t* outName, u8* out
     }
     return true;
 }
+
+extern "C" void fn_800C9430(muWifiInterfaceTask* self, int arg1) {
+    char* base = lbl_80457158;
+    if (arg1 != 0 && self->unkFD5 != 4) {
+        return;
+    }
+    u8 pAid = Network::getParentAID();
+    muWifiAIDInfo* parent = (pAid == 0xFF) ? NULL : &self->m_aidInfos[pAid];
+    u8 counts[3];
+    memset(counts, 0, sizeof(counts));
+    int numTeams = 0;
+    bool ok = true;
+    for (int i = 0; i < 4; i++) {
+        if (parent->unkE4[i].unk0 != 3) {
+            counts[parent->unkE4[i].unk5]++;
+        }
+    }
+    for (int i = 0; i < 3; i++) {
+        if (counts[i] != 0) {
+            numTeams++;
+        }
+    }
+    if (numTeams < 2) {
+        ok = false;
+    }
+    u8 t0 = parent->unkE4[0].unk5;
+    u8 t1 = parent->unkE4[1].unk5;
+    const char* fmt = base + 0x53C;
+    u8 t2 = parent->unkE4[2].unk5;
+    u8 t3 = parent->unkE4[3].unk5;
+    const char* okStr = base + 0x580;
+    if (ok) {
+        okStr = base + 0x574;
+    }
+    netReport(fmt, t0, t1, t2, t3, okStr);
+    if (!ok) {
+        self->unk1000[1].unk0 = 0;
+        for (int i = 0; i < 4; i++) {
+            parent->unkE4[i].unk5 = 0;
+        }
+    }
+}

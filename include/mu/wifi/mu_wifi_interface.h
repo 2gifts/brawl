@@ -142,6 +142,12 @@ struct muWifiAIDInfo {
                     u8 _bf56_b1_7 : 7;
                     u8 unk56_b0_1 : 1;
                 };
+#ifdef MU_WIFI_INTERFACE_TASK_INTERNAL
+                struct {
+                    bool unk56_b7_bool : 1;
+                    bool _bf56_b0_bool : 7;
+                };
+#endif
                 u8 unk56Data;
             };
             union {
@@ -456,6 +462,35 @@ public:
     char unkFF3[0x1];
     u16 m_playerLiveTime[4];
     // HYPOTHESIS: paired rule packets use the byte and halfword layout of their copy.
+#ifdef MU_WIFI_INTERFACE_TASK_INTERNAL
+    struct Unk1000Rule {
+        u8 unk0;
+        u8 unk1;
+        u8 unk2;
+        u8 unk3;
+        u8 unk4;
+        u8 unk5;
+        u8 unk6;
+        u8 unk7;
+        u8 unk8;
+        u8 unk9;
+        u8 unkA;
+        u8 unkB;
+        u8 unkC;
+        u16 unkE;
+        u16 unk10;
+        u16 unk12;
+        u16 unk14;
+        u16 unk16;
+        u16 unk18;
+        u16 unk1A;
+        u16 unk1C;
+        u16 unk1E;
+        u8 unk20;
+        u8 unk21;
+        u16 unk22;
+    };
+#endif
     union {
         struct {
             union {
@@ -468,6 +503,12 @@ public:
             u8 m_assignedKumiteType;
             char unk1030[0x18];
         };
+#ifdef MU_WIFI_INTERFACE_TASK_INTERNAL
+        struct {
+            char _padFFC[4];
+            Unk1000Rule unk1000[2];
+        };
+#else
         struct {
             char _padFFC[4];
             struct {
@@ -498,6 +539,7 @@ public:
                 u16 unk22;
             } unk1000[2];
         };
+#endif
     };
     s32 m_appNetworkError[2];
 #ifdef MU_WIFI_INTERFACE_TASK_INTERNAL
