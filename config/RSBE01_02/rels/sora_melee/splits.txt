@@ -5008,6 +5008,9 @@ mo_melee/sora_melee/so/so_array_vector_thunks_P7ftEntry_9.cpp:
 mo_melee/sora_melee/so/so_array_base_soArrayVectorAbstract_P7ftEntry_11C78C.cpp:
 	.text       start:0x0011C78C end:0x0011C794
 
+mo_melee/sora_melee/ft/ft_slot.cpp:
+	.text       start:0x0011C794 end:0x001222D8
+
 mo_melee/sora_melee/so/so_array_vector_destructor_ftSlotManager_FlexHeapInfo_4.cpp:
 	.text       start:0x001222D8 end:0x00122318
 
