@@ -3033,6 +3033,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/st/st_loader_manager.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_loader_sand_bag.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_loader_stage.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/st/st_loader_stage_star_fox.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/st/st_loader_stage_adventure.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_loader_info.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_loader_info_adventure.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_loader_info_stage_edit.cpp"),
