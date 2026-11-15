@@ -10853,6 +10853,11 @@ mo_melee/sora_melee/st/st_common_gimmick.cpp:
 	.text       start:0x00237C00 end:0x002381FC
 	.data       start:0x0004C748 end:0x0004C96C
 
+mo_melee/sora_melee/st/st_scn_obj_call_back.cpp:
+	.text       start:0x002381FC end:0x00238BDC
+	.rodata     start:0x00003928 end:0x00003930
+	.data       start:0x0004C96C end:0x0004C9C0
+
 mo_melee/sora_melee/st/st_melee.cpp:
 	.text       start:0x00238BDC end:0x0023A164
 	.ctors      start:0x000002B0 end:0x000002B4
