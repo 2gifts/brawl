@@ -19,9 +19,9 @@ public:
     virtual void processAnim();
     virtual void update(float deltaFrame);
     virtual bool setNode();
-    virtual void updateCallback(float deltaFrame);
-    virtual void setPosWork(Vec3f*);
-    virtual void setPosDstWork(Vec3f*);
+    virtual void updateCallBack(float deltaFrame);
+    virtual void setPosWork(Vec3f* posWork);
+    virtual void setPosDstWork(Vec3f* posDstWork);
     virtual ~grPokeTrainer();
 
     static grPokeTrainer* create(int mdlIndex, const char* tgtNodeName, const char* taskName);

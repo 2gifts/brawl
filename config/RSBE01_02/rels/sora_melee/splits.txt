@@ -11053,6 +11053,15 @@ mo_melee/sora_melee/gr/ground.cpp:
 	.rodata     start:0x000042A0 end:0x000042B8
 	.data       start:0x000547E0 end:0x000549E8
 
+mo_melee/sora_melee/gr/gr_poke_trainer.cpp:
+	.text       start:0x00261EAC end:0x00262210
+	.data       start:0x000549E8 end:0x00054C18
+
+mo_melee/sora_melee/gr/gr_calc_world_callback.cpp:
+	.text       start:0x00262210 end:0x00262728
+	.rodata     start:0x000042B8 end:0x000042C0
+	.data       start:0x00054C18 end:0x00054C60
+
 mo_melee/sora_melee/so/so_event_unit_work_area_soCollisionHitEventObserver_1_263D70.cpp:
 	.text       start:0x00263D70 end:0x00263E2C
 

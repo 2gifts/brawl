@@ -4763,6 +4763,8 @@ config.libs = [
             Object(Matching, "mo_melee/sora_melee/so/so_array_list_members_Ul_32_part2.cpp"),
             Object(Matching, "mo_melee/sora_melee/so/so_array_list_members_Ul_32_part3.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/gr/ground.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/gr/gr_poke_trainer.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/gr/gr_calc_world_callback.cpp"),
             Object(Matching, "mo_melee/sora_melee/so/so_array_list_members_wnPikminPikmin_10_part1.cpp"),
             Object(Matching, "mo_melee/sora_melee/so/so_array_list_members_wnPikminPikmin_10_part2.cpp"),
             Object(Matching, "mo_melee/sora_melee/so/so_array_list_members_wnPikminPikmin_10_part3.cpp"),
