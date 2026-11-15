@@ -6848,6 +6848,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/so/effect/so_effect_screen_manager.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_pit_kinetic_transactor.cpp", cflags=cflags_fighter),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_metaknight_kinetic_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_entry.cpp"),
         ],
     },
     {
