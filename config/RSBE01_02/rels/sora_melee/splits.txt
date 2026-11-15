@@ -4875,6 +4875,9 @@ mo_melee/sora_melee/so/so_array_vector_thunks_53soInstanceUnitFullProperty_P22ft
 mo_melee/sora_melee/so/so_instance_manager_thunks_Vector_ftOutsideEventObserver_8.cpp:
 	.text       start:0x0010F488 end:0x0010F4A0
 
+mo_melee/sora_melee/ft/ft_audience_manager.cpp:
+	.text       start:0x0010FB1C end:0x0010FC94
+
 mo_melee/sora_melee/ft/ft_owner.cpp:
 	.text       start:0x00110FC8 end:0x00113060
 	.ctors      start:0x00000054 end:0x00000058
@@ -10404,6 +10407,9 @@ mo_melee/sora_melee/wn/wn_module_accesser_build_data.cpp:
 mo_melee/sora_melee/wn/wn_value_accesser.cpp:
 	.text       start:0x001DC8D8 end:0x001DCB6C
 	.ctors      start:0x00000260 end:0x00000264
+
+mo_melee/sora_melee/wn/wn_info.cpp:
+	.text       start:0x001DCB6C end:0x001DCC10
 
 mo_melee/sora_melee/wn/wn_damage_effector_impl.cpp:
 	.text       start:0x001DD48C end:0x001DD668
