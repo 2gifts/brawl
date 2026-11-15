@@ -2,6 +2,7 @@
 
 #include <types.h>
 
+class soCollisionLog;
 class soModuleAccesser;
 
 // HYPOTHESIS: common interface of the per-fighter "Transactor" singletons (ftRobotTransactor, ftIkeTransactor, ...).
@@ -19,8 +20,8 @@ public:
     virtual void unk7(soModuleAccesser* moduleAccesser);
     virtual void unk8(soModuleAccesser* moduleAccesser);
     virtual bool unk9(soModuleAccesser* moduleAccesser);
-    virtual void unk10(soModuleAccesser* moduleAccesser);
-    virtual bool unk11(soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionSearch(soCollisionLog* log, soModuleAccesser* moduleAccesser);
+    virtual bool notifyEventCollisionSearchCheck(soModuleAccesser* moduleAccesser);
     virtual bool activeArticle(class soArticle* article, soModuleAccesser* moduleAccesser);
     virtual bool shootArticle(class soArticle* article, soModuleAccesser* moduleAccesser);
     virtual void unk14(soModuleAccesser* moduleAccesser);

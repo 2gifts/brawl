@@ -3,6 +3,7 @@
 #include <ft/ft_transactor.h>
 #include <types.h>
 
+class soArticle;
 class soModuleAccesser;
 class wnPitBow;
 class wnPitBowArrow;
@@ -12,6 +13,8 @@ class ftPitTransactor : public ftTransactor {
 public:
     ftPitTransactor();
     virtual ~ftPitTransactor();
+    virtual bool activeArticle(soArticle* article, soModuleAccesser* acc);
+    virtual bool shootArticle(soArticle* article, soModuleAccesser* acc);
     // Local declaration of the REL singleton-holder entry point.
     static ftPitTransactor* getInstance();
     // HYPOTHESIS: the ids are the model and the texture resource of the bow; the flags are unknown.

@@ -12357,6 +12357,9 @@ mo_melee/sora_melee/ft/ft_metaknight_status_uniq_process_special_nspin.cpp:
 mo_melee/sora_melee/ft/ft_metaknight_transactor.cpp:
 	.text       start:0x0035A09C end:0x0035A264
 
+mo_melee/sora_melee/ft/ft_pit_transactor.cpp:
+	.text       start:0x0035A264 end:0x0035A6FC
+
 mo_melee/sora_melee/wn/wn_pit_bow.cpp:
 	.text       start:0x0035AD08 end:0x0035D9F8
 	.ctors      start:0x00000460 end:0x00000464
@@ -12611,6 +12614,9 @@ mo_melee/sora_melee/so/so_array_vector_thunks_16soModelNodeSetUp_4.cpp:
 
 mo_melee/sora_melee/so/so_array_vector_thunks_16soCollisionGroup_7.cpp:
 	.text       start:0x00395914 end:0x0039593C
+
+mo_melee/sora_melee/ft/ft_dedede_transactor.cpp:
+	.text       start:0x00395984 end:0x003960B0
 
 mo_melee/sora_melee/ft/ft_dedede_status_uniq_process_special_n.cpp:
 	.text       start:0x003960B0 end:0x003965C8
