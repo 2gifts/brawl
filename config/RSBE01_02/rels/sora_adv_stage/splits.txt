@@ -89,6 +89,9 @@ mo_adv_stage/gr_adventure_barrel_cannon.cpp:
 
 mo_adv_stage/gr_adventure_block_mng.cpp:
 	.text       start:0x0001C014 end:0x000220F8
+	.rodata     start:0x000002D0 end:0x00000300
+	.data       start:0x00004BF0 end:0x00005CD0
+	.bss        start:0x00000C88 end:0x00000CB8
 
 mo_adv_stage/gr_adventure_block_pos_sympathetic.cpp:
 	.text       start:0x000220F8 end:0x00022E24

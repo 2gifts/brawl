@@ -429,7 +429,8 @@ public:
     virtual void setSimpleEffectVisibleProduction();        // TODO
     virtual void dbDispInvalidatedByCameraClippingSphere(); // TODO
     virtual void setTransparency(u32 unk1, u32 unk2);
-    virtual u8 getTransparencyFlag() { return m_transparencyFlag; }
+    // HYPOTHESIS: int (grAdventureBlockMng tests the result with cmpwi, no byte mask)
+    virtual int getTransparencyFlag() { return m_transparencyFlag; }
 
     void changeMatColAnim(u32 clrIndex, u32 modelAnimIndex);
     void changeShapeAnim(u32 shpIndex, u32 modelAnimIndex);
