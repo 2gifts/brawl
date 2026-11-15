@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-// Havok 4.0 base object hierarchy (reconstructed from asm).
+// Havok 4.0 base object hierarchy (from the asm).
 // No RTTI: vtable slot 0/1 are unused, slot 2 is the virtual destructor.
 
 // Small-struct bool: passed/returned as an aggregate (copied to the stack for by-value args).

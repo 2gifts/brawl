@@ -1,6 +1,6 @@
 // hkMathUtil.o (main.dol 0x802821DC-0x802829C4)
 // only decompose4x4ColTransform is in this build: splits a 4x4 matrix into translation, rotation, scale and skew.
-// pretty much the havok 5.1 version, the calls in the asm line up with it one for one
+// the calls follow the asm one for one
 //   0x802821DC  2024  decompose4x4ColTransform
 #include <havok/hkMathUtil.h>
 #include <havok/hkTransform.h>
@@ -10,7 +10,7 @@ extern hkMatrix3 lbl_804864F0;
 
 
 void hkMathUtil::decompose4x4ColTransform(const hkReal* matrixIn, Decomposition& out) {
-    // this is an iteration so give up after 30 rounds (5.1 says it usually takes about 7)
+    // this is an iteration so give up after 30 rounds
     const int maxNumIterations = 30;
     const hkReal tolerance = 1.1920929e-07f;
 
@@ -91,7 +91,7 @@ void hkMathUtil::decompose4x4ColTransform(const hkReal* matrixIn, Decomposition&
         hkMatrix3& ss = out.m_scaleAndSkew;
         out.m_scale.set(ss.m_col0.x, ss.m_col1.y, ss.m_col2.z, 0.0f);
 
-        // HYPOTHESIS: 0.001 is the tolerance for "is the scale 1". 5.1 uses equals3's default for this
+        // HYPOTHESIS: 0.001 is the tolerance for "is the scale 1"
         out.m_hasScale = !(fabsf(out.m_scale.x - 1.0f) < 0.001f && fabsf(out.m_scale.y - 1.0f) < 0.001f &&
                            fabsf(out.m_scale.z - 1.0f) < 0.001f);
     }

@@ -3,16 +3,10 @@
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <types.h>
+#include <wn/pikmin/wn_pikmin_pikmin_status_uniq_process_follow_common.h>
 #include <wn/pikmin/wn_pikmin_pikmin_utility.h>
 
-// Base functions of the Pikmin follow family (ft_pikmin map: FollowCommon), called by their REL symbol names until a
-// shared declaration exists.
-extern "C" {
-void fn_113_263DC(void* self, soModuleAccesser* moduleAccesser);
-void fn_113_26470(void* self, soModuleAccesser* moduleAccesser);
-}
-
-class wnPikminPikminStatusUniqProcessAirFollow : public soStatusUniqProcess {
+class wnPikminPikminStatusUniqProcessAirFollow : public wnPikminPikminStatusUniqProcessFollowCommon {
 public:
     virtual ~wnPikminPikminStatusUniqProcessAirFollow() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
@@ -23,7 +17,7 @@ public:
 wnPikminPikminStatusUniqProcessAirFollow g_wnPikminPikminStatusUniqProcessAirFollow;
 
 void wnPikminPikminStatusUniqProcessAirFollow::initStatus(soModuleAccesser* a) {
-    fn_113_263DC(this, a);
+    wnPikminPikminStatusUniqProcessFollowCommon::initStatus(a);
     a->getWorkManageModule().setInt(90, 0x20000001);
     a->getWorkManageModule().setInt(90, 0x20000000);
     a->getWorkManageModule().setFloat(10.0f, 0x21000001);
@@ -39,7 +33,7 @@ void wnPikminPikminStatusUniqProcessAirFollow::execStatus(soModuleAccesser* a) {
 }
 
 void wnPikminPikminStatusUniqProcessAirFollow::execFixPosCounter(soModuleAccesser* a) {
-    fn_113_26470(this, a);
+    wnPikminPikminStatusUniqProcessFollowCommon::execFixPosCounter(a);
     if (a->getWorkManageModule().isFlag(0x22000001) == 1) {
         a->getWorkManageModule().offFlag(0x22000001);
         a->getStatusModule().changeStatusRequest(10, a);

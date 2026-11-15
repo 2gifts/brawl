@@ -1,6 +1,5 @@
 // hkQsTransform.o (main.dol 0x80284DB0-0x8028564C)
-// translation + rotation (quaternion) + scale. the 4x4 conversions are from havok 5.1. setMul isn't in the 5.1
-// source we have (it's an inline there that got lost) so that one is standard qs-transform math checked against the asm
+// translation + rotation (quaternion) + scale. setMul is standard qs-transform math checked against the asm
 //   0x80284DB0   380  get4x4ColumnMajor
 //   0x80284F2C   192  set4x4ColumnMajor
 //   0x80284FEC   640  setInverse

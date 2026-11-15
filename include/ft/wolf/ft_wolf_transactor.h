@@ -3,15 +3,17 @@
 #include <ft/ft_transactor.h>
 #include <types.h>
 
+class soArticle;
 class soModuleAccesser;
 class wnWolfBlaster;
 class wnWolfBlasterBullet;
 
-// Wolf's per-fighter helper (the code is in sora_melee): starts the blaster article. Wolf and Wolf have their own copies.
+// Wolf's per-fighter helper (the code is in sora_melee): starts the blaster article. Fox and Falco have their own copies.
 class ftWolfTransactor : public ftTransactor {
 public:
     ftWolfTransactor();
     virtual ~ftWolfTransactor();
+    virtual bool activeArticle(soArticle* article, soModuleAccesser* acc);
     // Local declaration of the REL singleton-holder entry point.
     static ftWolfTransactor* getInstance();
     // HYPOTHESIS: the two ids are the model and the texture resource of the blaster; the flags are unknown.

@@ -1,10 +1,10 @@
 // Brawl physics wrapper translation unit ph_2ndary_constraint.o (main.dol 0x80081CE8-0x80082438).
 // Functions in address order with their map names:
-//   0x80081CE8   220  __dt   [map: ph2ndaryLine____dt]
-//   0x80081DC4   284  updateMatrixForMyPosture   [map: ph2ndaryLine__updateMatrixForMyPosture]
-//   0x80081EE0   284  updateMatrixForMotion   [map: ph2ndaryLine__updateMatrixForMotion]
-//   0x80081FFC   308  updateMatrix   [map: ph2ndaryLine__updateMatrix]
-//   0x80082130   776  setLocalSpace   [map: ph2ndaryLine__setLocalSpace] (not yet decompiled)
+//   0x80081CE8   220  __dt
+//   0x80081DC4   284  updateMatrixForMyPosture
+//   0x80081EE0   284  updateMatrixForMotion
+//   0x80081FFC   308  updateMatrix
+//   0x80082130   776  setLocalSpace (not yet decompiled)
 #include <ph/ph_2ndary_constraint.h>
 
 #include <havok/hkThreadMemory.h>

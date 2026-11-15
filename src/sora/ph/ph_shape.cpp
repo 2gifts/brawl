@@ -1,9 +1,9 @@
 // Brawl physics wrapper translation unit ph_shape.o (main.dol 0x80095FC4-0x800962E0).
 // Not yet decompiled. Functions in address order with their map names:
-//   0x80095FC4   132  __ct   [map: phShape____ct]
-//   0x80096048   128  __dt   [map: phShape____dt]
-//   0x800960C8   164  getMatrixPosture   [map: phShape__getMatrixPosture]
-//   0x8009616C   372  draw   [map: phShape__draw]
+//   0x80095FC4   132  __ct
+//   0x80096048   128  __dt
+//   0x800960C8   164  getMatrixPosture
+//   0x8009616C   372  draw
 #include <havok/hkEntity.h>
 #include <havok/hkMemory.h>
 #include <havok/hkQuaternion.h>
