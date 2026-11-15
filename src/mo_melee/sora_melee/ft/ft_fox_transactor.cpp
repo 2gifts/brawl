@@ -7,12 +7,7 @@
 #include <so/team/so_team_module_impl.h>
 #include <math.h>
 #include <wn/fox/wn_fox_blaster.h>
-
-// The bullet article (wn/fox/wn_fox_blaster_bullet.h needs the weapon builder chain): the members this unit uses.
-class wnFoxBlasterBullet : public Weapon {
-public:
-    void activate(int founderTaskId, int unk5, int team, Vec3f* pos, int unkMode, EfID effectId, float lr, float speed, float angle);
-};
+#include <wn/fox/wn_fox_blaster_bullet.h>
 
 ftFoxTransactor::ftFoxTransactor() { }
 ftFoxTransactor::~ftFoxTransactor() { }

@@ -1,8 +1,9 @@
 #pragma once
 
-// The fighter unit owns the complete article (Fox's form, wn/fox/wn_fox_blaster_bullet.h); the sora_melee article unit
-// keeps the opaque form below.
-#if defined(WN_WEAPON_BUILDER) && defined(FT_WOLF_ARTICLE_POOLS)
+// Wolf's Blaster shot (article kind in the class info of wn_wolf_blaster_bullet.cpp). Units that build or destroy the article
+// (its own unit and the fighter module's article pool) define WN_WEAPON_BUILDER and see the complete class; the others
+// only activate it and see the shell at the end of this file.
+#ifdef WN_WEAPON_BUILDER
 
 #include <wn/wn_module_accesser_builder.h>
 #include <wn/wn_extend_param_accesser.h>
@@ -22,12 +23,16 @@ struct wnWolfBlasterBulletData {
 class wnWolfBlasterBulletParamAccesser : public wnExtendParamAccesser<3999, 2, 23999, 1, 0, 0> {
 public:
     explicit wnWolfBlasterBulletParamAccesser(const wnWolfBlasterBulletParam* param) :
-        wnExtendParamAccesser<3999, 2, 23999, 1, 0, 0>(31) {
+        wnExtendParamAccesser<3999, 2, 23999, 1, 0, 0>(39) {
         m_floats[0] = &param->unk4;
         m_floats[1] = &param->unk8;
         m_ints[0] = &param->unk0;
     }
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
+    virtual ~wnWolfBlasterBulletParamAccesser(); // BYTES: defined in the article unit, after the article constructor (emission order)
+#else
     virtual ~wnWolfBlasterBulletParamAccesser() { }
+#endif
 };
 static_assert(sizeof(wnWolfBlasterBulletParamAccesser) == 0x34, "Wolf bullet parameter accesser extent");
 
@@ -48,7 +53,25 @@ public:
     typedef wnStatusModuleBuildConfig<2,soGeneralWorkBuildConfig<2,2,1>,2,
         soTransitionModuleBuildConfig<wnStatusTransitionTypeList> > StatusModuleBuildConfig;
     typedef wnAnimCmdModuleSubBuildConfigDefault<1,2,0,0,1,2,0,0,1,2,0,0,1,2,0,0> AnimCmdModuleSubBuildConfig;
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
+    typedef soGenerateArticleManageModuleBuilder<soGenerateArticleManageModuleBuildConfigNull> GenerateArticleManageModuleBuilder;
+#endif
 };
+
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
+// The sora_melee unit mode of the article (wn/zelda/wn_zelda_lighting_bow.h): the generic builder's member layout, spelled
+// out so that the constructor can be defined by hand in the unit (wn_zelda_lighting_bow_builder_ctor.h).
+template <>
+class soModuleAccesserBuilder<wnWolfBlasterBulletModuleAccesserBuildConfig> : public utUnCopyable {
+public:
+    typedef wnWolfBlasterBulletModuleAccesserBuildConfig BC;
+    WN_ZELDA_LIGHTING_BOW_BUILDER_MEMBERS
+
+    soModuleAccesserBuilder(StageObject* owner, const wnModuleAccesserBuildData& bd);
+    ~soModuleAccesserBuilder();
+    soModuleAccesser* getModuleAccesser(); // BYTES: defined in wn_zelda_lighting_bow_builder_ctor.h (emission order)
+};
+#endif
 static_assert(sizeof(soModuleAccesserBuilder<wnWolfBlasterBulletModuleAccesserBuildConfig>) == 0x1A44,
               "Wolf bullet module builder extent");
 static_assert(sizeof(wnWeaponBuilder<wnWolfBlasterBulletModuleAccesserBuildConfig>) == 0x213C,
@@ -60,55 +83,33 @@ class wnWolfBlasterBullet : public wnWeaponBuilder<wnWolfBlasterBulletModuleAcce
     s32 unk2174;
 public:
     wnWolfBlasterBullet(s32 articleId, const wnArticleBuildInfo& info, const wnWolfBlasterBulletData* data);
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
+    virtual ~wnWolfBlasterBullet();
+#else
     virtual ~wnWolfBlasterBullet() { }
+#endif
     // HYPOTHESIS: spelling of the unused second integer and mode parameter.
-    void activate(int founderTaskId, int unk5, int team, Vec3f* pos, int unkMode, EfID effectId,
+    void activate(int founderTaskId, int unk5, int team, const Vec3f* pos, int unkMode, EfID effectId,
                   float lr, float speed, float angle);
     virtual bool reflect();
     virtual float getCollisionLr(soModuleAccesser* moduleAccesser);
     virtual void processUpdate();
     virtual void updateNodeSRT();
+private:
+    void updateStretch();
 };
 static_assert(sizeof(wnWolfBlasterBullet) == 0x2178, "Wolf bullet allocation extent");
+
 #else
 
 #include <wn/wn_weapon_builder.h>
-#include <wn/wn_kinetic_energy_normal.h>
 
-struct wnWolfBlasterBulletModuleAccesserBuildConfig;
-// HYPOTHESIS: the article data type the class info fetches for kind 39; only passed as a pointer, the
-// layout is unreconstructed (mirror of the Fox family's wnFoxBlasterBulletData role).
-struct wnWolfBlasterBulletData;
-struct wnArticleBuildInfo;
-
-// Constructor/destructor offsets establish the builder extent through the
-// embedded normal energy at +0x20C0. The remaining module-builder storage is
-// opaque until the configuration is reconstructed.
-template <>
-class wnWeaponBuilder<wnWolfBlasterBulletModuleAccesserBuildConfig> : public Weapon {
-    u8 unkCC[0x20C0 - sizeof(Weapon)];
-    wnKineticEnergyNormal m_normalEnergy;
+class wnWolfBlasterBullet : public Weapon {
+    u8 m_unreconstructed[0x2178 - sizeof(Weapon)];
 public:
-    virtual ~wnWeaponBuilder();
-    virtual void deactivateDescendantForce();
+    void activate(int founderTaskId, int unk5, int team, const Vec3f* pos, int unkMode, EfID effectId,
+                  float lr, float speed, float angle);
 };
-static_assert(sizeof(wnWeaponBuilder<wnWolfBlasterBulletModuleAccesserBuildConfig>) == 0x20F8,
-              "Wolf Bullet builder extent");
+static_assert(sizeof(wnWolfBlasterBullet) == 0x2178, "Wolf bullet allocation extent");
 
-class wnWolfBlasterBullet : public wnWeaponBuilder<wnWolfBlasterBulletModuleAccesserBuildConfig> {
-    void* unk20F8;
-    u8 unk20FC[0x40];
-    int* unk213C; // HYPOTHESIS: native activate reads one word through this pointer.
-    u8 unk2140[0x38];
-public:
-    wnWolfBlasterBullet(s32 articleId, const wnArticleBuildInfo& info, const wnWolfBlasterBulletData* data);
-    virtual ~wnWolfBlasterBullet();
-    // HYPOTHESIS: r5 is unused; remaining arguments follow native caller/register stores.
-    void activate(int founderTaskId, int unk5, int team, Vec3f* pos, int unkMode, EfID effectId, float lr, float speed, float angle);
-    virtual bool reflect();
-    virtual float getCollisionLr(soModuleAccesser* moduleAccesser);
-    virtual void processUpdate();
-    virtual void updateNodeSRT();
-};
-static_assert(sizeof(wnWolfBlasterBullet) == 0x2178, "Wolf Bullet article extent");
 #endif
