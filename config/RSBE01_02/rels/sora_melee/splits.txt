@@ -12516,6 +12516,9 @@ mo_melee/sora_melee/ft/ft_metaknight_status_uniq_process_special_nspin.cpp:
 	.text       start:0x00358CF4 end:0x00359014
 	.ctors      start:0x0000045C end:0x00000460
 
+mo_melee/sora_melee/ft/ft_metaknight_kinetic_transactor.cpp:
+	.text       start:0x00359014 end:0x0035A09C
+
 mo_melee/sora_melee/ft/ft_metaknight_transactor.cpp:
 	.text       start:0x0035A09C end:0x0035A264
 
