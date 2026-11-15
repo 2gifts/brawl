@@ -71,7 +71,11 @@ public:
     Vec2f m_rightPos;
     clAABBox2D m_aabBox;
 
-    clRhombus2D() { }
+    clRhombus2D()
+#ifdef MT_COLL2D_RHOMBUS_CTOR_NOINLINE
+        __attribute__((never_inline)) // BYTES: Lucario's Double Team status calls its weak out-of-line copy.
+#endif
+    { }
     // HYPOTHESIS: parameter names and order from the stores of the constructor.
     clRhombus2D(float top, float bottom, float left, float right, float x, float y);
     void move(const Vec2f& displacement);

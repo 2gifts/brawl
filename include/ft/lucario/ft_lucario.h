@@ -53,6 +53,9 @@ public:
 
 class wnLucarioQigong;
 
+// The clamp of ft_lucario.cpp (the map name), also used by the Final Smash status file.
+float clampf(float value, float min, float max);
+
 class ftLucario : public ftFighterBuilder<ftLucarioBuildConfig> {
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
     ftData* m_data;
@@ -68,6 +71,17 @@ public:
     void effect_resume();
     float calcAuraScale();
     void setAuraScale(float scale);
+    // The aura power multiplier (work float 0x11000013): from the damage in a normal match, from the remaining hit
+    // points in a stamina match.
+    static float getAuraPowerRate(soModuleAccesser* moduleAccesser);
+    static float getAuraPowerRateNormal(soModuleAccesser* moduleAccesser);
+    static float getAuraPowerRateHpMode(soModuleAccesser* moduleAccesser);
+    static void updateAuraScale(soModuleAccesser* moduleAccesser);
+    virtual void onActivate();
+    virtual void onStart(int unk);
+    virtual void processUpdate();
+    virtual void updateNodeSRT();
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
     virtual void notifyEventOnDamage(soDamage* damage, bool isDamage, soModuleAccesser* moduleAccesser);
     virtual void notifyEventChangeSituation(SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser);
     virtual void notifyEventCollisionShield(soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser);

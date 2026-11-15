@@ -28,7 +28,6 @@ extern "C" void* fn_27_148BD0(const ftCommonDataAccesser* accesser, s32 subKind,
 extern "C" void* fn_27_1480CC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148CE8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_1491DC(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-extern "C" void* fn_27_1494D0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148F64(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_147C9C(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_148050(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
@@ -164,7 +163,7 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
     return g_ftCommonDataAccesser.getWeaponData<wnPokeZenigameWaterData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnLucarioAuraBall*) {
-    return fn_27_1494D0(&g_ftCommonDataAccesser, subKind, resourceGroup);
+    return g_ftCommonDataAccesser.getWeaponData<wnLucarioAuraBallData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnDummyFighter*) {
     return g_ftCommonDataAccesser.getWeaponData<wnDummyFighterData>(subKind, resourceGroup);

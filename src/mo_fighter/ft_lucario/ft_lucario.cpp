@@ -3,18 +3,30 @@
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
 #define FT_SOUND_GENERATOR_DTOR_NOINLINE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_DOL_ARRAY_293_WHOLE // the 293-entry process and anim cmd vectors are sora_melee's whole classes (declared below)
 #define FT_LUCARIO_ARTICLE_POOLS
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #define FT_TEAM_TYPED_INTERFACE
+#define WN_KINETIC_MEDIATOR_INLINE_DTOR
+#define MT_VEC3F_SCALE_XY_IN_PLACE
+#define FT_MODULE_ACCESSER_BUILDER_BASE_BUILD_DATA // the builder takes the base build data: its slope limit literal (20.0) stays in the pool
+#include <ft/ft_event_unit_instance.h> // before the event system headers (ft/ft_manager.h is included below)
 #include <ft/builder/ft_dol_array_list.h>
+FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 293);
+FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 293);
 #include <so/so_module_hyp.h>
 #include <so/so_value_accesser.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/lucario/ft_lucario.h>
+#include <ft/lucario/ft_lucario_data.h>
 #include <ft/lucario/ft_lucario_extend_param_accesser.h>
 #include <ft/lucario/ft_lucario_transactor.h>
 #include <so/article/so_article_mediator.h>
+#include <ft/ft_manager.h>
+#include <ft/ft_owner.h>
+#include <so/so_slow.h>
+#include <math.h>
 
 // The fighter owns the shared out-of-line kinetic teardown.
 #undef WN_ARTICLE_NATIVE_BUILDERS
@@ -27,9 +39,17 @@
 template soArrayVector<s32, 8>::~soArrayVector();
 #endif
 #pragma dont_inline off
+// The articles' sound builder teardown inlines this empty destructor (same form as ft_pit.cpp and ft_snake.cpp).
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+
 soStatusModuleImpl::~soStatusModuleImpl() { }
 
-// HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt).
+ftKineticEnergyController::~ftKineticEnergyController() { }
+
+// The status process instances of the other units (unnamed objects of their .bss in symbols.txt). In the order of the
+// units' static initialisers: 254 SpecialS, 264 SpecialSThrow, 274 SpecialHi, 284 SpecialHiRush, 294 SpecialHiRushEnd,
+// 2A4 SpecialHiBound, 2B4 SpecialLw, 2C4 SpecialLwSplit, 2D4 SpecialLwAppear, 2E4 Final, 2F4 FinalEntry, 304 FinalHold,
+// 314 FinalAttack, 324 FinalEnd; lbl_27_bss_897C is sora_melee's g_ftLucarioStatusUniqProcessSpecialN.
 extern "C" {
 extern soStatusUniqProcess lbl_27_bss_897C;
 extern soStatusUniqProcess lbl_118_bss_254;
@@ -83,8 +103,7 @@ ftLucario::ftLucario(s32 entryId,
     processes[17] = &lbl_118_bss_314;
     processes[18] = &lbl_118_bss_324;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 19);
-    // HYPOTHESIS: the common data record points at the fighter's shield shape group (+0x9c); it is installed as group 1.
-    m_moduleAccesser->getCollisionShieldModule().add(*reinterpret_cast<soCollisionShieldGroupData**>(reinterpret_cast<u8*>(m_data) + 0x9c), 1);
+    m_moduleAccesser->getCollisionShieldModule().add(static_cast<ftLucarioData*>(m_data)->m_shieldGroup, 1);
     getPhysicsModule(m_moduleAccesser).unk6C(0x13);
 }
 
@@ -113,44 +132,26 @@ struct ftLucarioArticleKind : wnArticleKindInfo {
         kind = 0;
         subKind = Fighter_Lucario;
     }
+    s32 getSubKind() const { return subKind; } // HYPOTHESIS: accessor spelling (the lookup reads the kind through a call, as in ft_ganon.cpp)
 };
 
-// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
+// The descriptor keeps the address of the kind temporary of the caller.
 struct ftLucarioArticleBuildInfo : wnArticleBuildInfo {
-    ftLucarioArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
+    ftLucarioArticleBuildInfo(const wnArticleKindInfo& kindArg, soHeapModule* heap) {
         kindInfo = &kindArg;
         heapModule = heap;
     }
 };
 
-// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
-extern "C" void* fn_27_1494D0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
-
-template <class W> struct ftLucarioArticleTraits;
-#define FT_LUCARIO_TRAITS(W, DATA, ID, GETTER) \
-    template <> struct ftLucarioArticleTraits<W> { \
-        enum { ArticleId = ID }; \
-        static const DATA* getData() { \
-            ftLucarioArticleDataTag tag; \
-            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Lucario, &tag.m_resourceGroup)); \
-        } \
-    };
-#define FT_LUCARIO_TRAITS_MEMBER(W, DATA, ID, GETTER) \
-    template <> struct ftLucarioArticleTraits<W> { \
-        enum { ArticleId = ID }; \
-        static const DATA* getData() { \
-            ftLucarioArticleDataTag tag; \
-            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Lucario, &tag.m_resourceGroup)); \
-        } \
-    };
-
-FT_LUCARIO_TRAITS(wnLucarioAuraBall, wnLucarioAuraBallData, 0, fn_27_1494D0)
-FT_LUCARIO_TRAITS_MEMBER(wnLucarioQigong, wnLucarioQigongData, 1, getWeaponData<wnLucarioQigongData>)
-
-// Every article of the fighter is built by this constructor from the data of the fighter kind.
-template <class W>
-wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
-    m_instance(ftLucarioArticleTraits<W>::ArticleId, ftLucarioArticleBuildInfo(ftLucarioArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftLucarioArticleTraits<W>::getData()) { }
+// The articles are built from the data of the fighter kind.
+template <>
+inline wnArticleHolder<wnLucarioAuraBall>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(0, ftLucarioArticleBuildInfo(ftLucarioArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)),
+               g_ftCommonDataAccesser.getWeaponData<wnLucarioAuraBallData>(ftLucarioArticleKind().getSubKind(), &ftLucarioArticleDataTag().m_resourceGroup)) { }
+template <>
+inline wnArticleHolder<wnLucarioQigong>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
+    m_instance(1, ftLucarioArticleBuildInfo(ftLucarioArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)),
+               g_ftCommonDataAccesser.getWeaponData<wnLucarioQigongData>(ftLucarioArticleKind().getSubKind(), &ftLucarioArticleDataTag().m_resourceGroup)) { }
 
 // ---- the articles and their mediator --------------------------------------------------------------------------------
 
@@ -262,9 +263,7 @@ soArticle* ftLucarioArticleMediator::generate(s32 articleId, soModuleAccesser* a
 
 template <int S, int L>
 inline bool ftLucarioShootSlot0(soModuleAccesser* acc, soArticle* article, const soIntToType<S>&, const soIntToType<L>&) {
-    ftLucarioTransactor* transactor = ftLucarioTransactor::getInstance();
-    wnLucarioAuraBall* ball = dynamic_cast<wnLucarioAuraBall*>(article);
-    return transactor->shootArticle(ball, acc);
+    return ftLucarioTransactor::getInstance()->shootArticle(&dynamic_cast<wnLucarioAuraBall&>(*article), acc);
 }
 
 template <int S, int L>
@@ -283,56 +282,9 @@ bool ftLucarioArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) 
 }
 
 
-// FIXME: Test code present only to emit the shared builder functions; delete once ftLucario is done
-void testBuilder() {
-    soInsideEventManageModuleBuilder<ftLucarioInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> insideBuilder;
-    soResourceIdAccesserImpl idAccImpl(0, 1, 2);
-}
-soInsideEventManageModuleBuilder<ftLucarioInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> g_insideBuilder;
-
 // Trivial functions of this translation unit (empty virtuals, constant returns, field accessors) under their placeholder names.
 extern "C" {
 
-u8 fn_118_6D04(u8* p) { return *(u8*)(p + 0x4); }
-void fn_118_8A80() {}
-void fn_118_8B38() {}
-int fn_118_9C50() { return 0; }
-void fn_118_9E70() {}
-void fn_118_A120() {}
-void fn_118_A124() {}
-void fn_118_A128() {}
-void fn_118_A12C() {}
-int fn_118_A130() { return 0; }
-void fn_118_A174() {}
-void fn_118_A178() {}
-void fn_118_A17C() {}
-void fn_118_A180() {}
-int fn_118_A19C() { return 0; }
-void fn_118_A1A4() {}
-int fn_118_A1B4() { return 0; }
-int fn_118_A1BC() { return 0; }
-u8* fn_118_A294(u8* p) { return p + 0x458; }
-u8* fn_118_A29C(u8* p) { return p + 0x3C8; }
-u8* fn_118_A2A4(u8* p) { return p + 0x8; }
-int fn_118_A344(u8* p) { return *(int*)(p + 0x20); }
-int fn_118_A420(u8* p) { return *(int*)(p + 0x18); }
-int fn_118_A4B8(u8* p) { return *(int*)(p + 0x10); }
-int fn_118_B584() { return 2; }
-void fn_118_B58C(u8* p, u8 v) { *(u8*)(p + 0x7F60) = v; }
-u8* fn_118_B594(u8* p) { return p + 0xFF98; }
-u8* fn_118_B5B4(u8* p) { return p + 0xFFD4; }
-u8* fn_118_B5C0(u8* p) { return p + 0x1048C; }
-void fn_118_C3B0() {}
-void fn_118_C498(u8* p) { *(u8*)(p + 0x31) = 0; }
-void fn_118_C4A4(u8* p) { *(u8*)(p + 0x31) = 1; }
-int fn_118_CBEC() { return 0; }
-int fn_118_CCD4() { return 0; }
-int fn_118_CDBC() { return 0; }
-int fn_118_CEA4() { return 0; }
-int fn_118_CF8C() { return 0; }
-int fn_118_D074() { return 0; }
-int fn_118_D15C() { return 0; }
-int fn_118_D244() { return 0; }
 
 }
 
@@ -371,46 +323,15 @@ void ftLucario::effect_resume() {
 // Placeholders for weak inline methods of library classes (their names exist in sora_melee, so the REL copies cannot be renamed): the shim calls the inline method.
 extern "C" {
 
-bool fn_118_A3C0(const soGeneralWorkSimple* p, u32 a0, u32 a1) { return p->soGeneralWorkSimple::isFlag(a0, a1); }
-void fn_118_A3DC(soGeneralWorkSimple* p, u32 a0, u32 a1) { p->soGeneralWorkSimple::offFlag(a0, a1); }
-void fn_118_A3F4(soGeneralWorkSimple* p, u32 a0) { p->soGeneralWorkSimple::clearFlag(a0); }
-void fn_118_A408(soGeneralWorkSimple* p, u32 a0, u32 a1) { p->soGeneralWorkSimple::onFlag(a0, a1); }
-void fn_118_A450(soGeneralWorkSimple* p, float a0, u32 a1) { p->soGeneralWorkSimple::mulFloatWork(a0, a1); }
-void fn_118_A468(soGeneralWorkSimple* p, float a0, u32 a1) { p->soGeneralWorkSimple::subFloatWork(a0, a1); }
-void fn_118_A480(soGeneralWorkSimple* p, float a0, u32 a1) { p->soGeneralWorkSimple::addFloatWork(a0, a1); }
-void fn_118_A498(soGeneralWorkSimple* p, float a0, u32 a1) { p->soGeneralWorkSimple::setFloatWork(a0, a1); }
-float fn_118_A4A8(const soGeneralWorkSimple* p, u32 a0) { return p->soGeneralWorkSimple::getFloatWork(a0); }
-void fn_118_A4C0(soGeneralWorkSimple* p, u32 a0) { p->soGeneralWorkSimple::decIntWork(a0); }
-void fn_118_A4D8(soGeneralWorkSimple* p, u32 a0) { p->soGeneralWorkSimple::incIntWork(a0); }
-void fn_118_A4F0(soGeneralWorkSimple* p, s32 a0, u32 a1) { p->soGeneralWorkSimple::divIntWork(a0, a1); }
-void fn_118_A510(soGeneralWorkSimple* p, s32 a0, u32 a1) { p->soGeneralWorkSimple::mulIntWork(a0, a1); }
-void fn_118_A528(soGeneralWorkSimple* p, s32 a0, u32 a1) { p->soGeneralWorkSimple::subIntWork(a0, a1); }
-void fn_118_A540(soGeneralWorkSimple* p, s32 a0, u32 a1) { p->soGeneralWorkSimple::addIntWork(a0, a1); }
-void fn_118_A558(soGeneralWorkSimple* p, s32 a0, u32 a1) { p->soGeneralWorkSimple::setIntWork(a0, a1); }
-Vec2f fn_118_C4C4(soKineticEnergyNormal* p) { return p->soKineticEnergyNormal::getSpeed(); }
 
 }
 
 // Fighter event thunks: adjust `this` back to the Fighter base, then tail-call the Fighter method.
 extern "C" {
-void fn_118_D468(u8* self, soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) { ((Fighter*)(self - 0x54))->Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4); }
-void fn_118_D470(u8* self, SituationKind kind, SituationKind prevKind, soModuleAccesser* moduleAccesser) { ((Fighter*)(self - 0x70))->Fighter::notifyEventChangeSituation(kind, prevKind, moduleAccesser); }
-void fn_118_D480(u8* self, soDamage* damage, bool unk2, soModuleAccesser* moduleAccesser) { ((Fighter*)(self - 0xE8))->Fighter::notifyEventOnDamage(damage, unk2, moduleAccesser); }
-void fn_118_D478(u8* self, soCollisionAttackModule* attackModule, float power, soCollisionLog* collisionLog, int groupIndex, float posX, float posY, soModuleAccesser* moduleAccesser) { ((Fighter*)(self - 0x94))->Fighter::notifyEventCollisionShield(attackModule, power, collisionLog, groupIndex, posX, posY, moduleAccesser); }
 } // extern "C"
 
 // Leaf functions shared with other fighter modules (same module-map names and bodies).
 extern "C" {
-void* fn_118_1E5C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_118_3888(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_118_3CA8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_118_403C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_118_43B4(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_118_4614(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_118_4654(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_118_4DD8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_118_4E18(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_118_4E58(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
 
 void ftLucario::setMachValidity(soModuleAccesser* moduleAccesser, bool valid) {
@@ -430,13 +351,20 @@ void ftLucario::notifyEventChangeSituation(SituationKind kind, SituationKind pre
     Fighter::notifyEventChangeSituation(kind, prevKind, moduleAccesser);
 }
 
-// clampf (the map name); src/mo_fighter/ft_lucario/ft_lucario_status_uniq_process_final.cpp calls it by this stand-in name.
-extern "C" float fn_118_8F8C(float value, float min, float max);
+// BYTES: nw4r::math::FSelect is never expanded at the optimization level of the fighter units (-O2,s; it stays a call),
+// so the two selects of the clamp are written with the instruction itself, as in the Pikachu units.
+float clampf(register float value, register float min, register float max) {
+    register float difference = value - min;
+    asm { fsel value, difference, value, min }
+    difference = value - max;
+    asm { fsel value, difference, max, value }
+    return value;
+}
 
 float ftLucario::calcAuraScale() {
     const float* parameters = static_cast<const float*>(m_data->extendParam[1]);
     float aura = m_moduleAccesser->getWorkManageModule().getFloat(0x11000013);
-    float rate = fn_118_8F8C((aura - parameters[1]) / (parameters[3] - parameters[1]), 0.0f, 1.0f);
+    float rate = clampf((aura - parameters[1]) / (parameters[3] - parameters[1]), 0.0f, 1.0f);
     float remaining = 1.0f - rate;
     return parameters[0] + (parameters[2] - parameters[0]) * (1.0f - remaining * remaining);
 }
@@ -457,3 +385,197 @@ void ftLucario::setAuraScale(float scale) {
     effects.setScale(firstEffect, &auraScale);
     effects.setScale(secondEffect, &auraScale);
 }
+
+// The status processes whose pose helpers the node update calls.
+class ftLucarioStatusUniqProcessSpecialHiRush {
+public:
+    static void set_pose(soModuleAccesser* moduleAccesser);
+};
+class ftLucarioStatusUniqProcessFinalHold {
+public:
+    static void set_rot_angle(soModuleAccesser* moduleAccesser);
+};
+
+void ftLucario::onActivate() { }
+
+void ftLucario::onStart(int unk) {
+    soModuleAccesser* acc = getModuleAccesser();
+    soWorkManageModule& work = acc->getWorkManageModule();
+    float rate = getAuraPowerRate(acc);
+    work.setFloat(rate, 0x11000013);
+    work.setFloat(rate, 0x11000014);
+    setAuraScale(calcAuraScale());
+    Fighter::onStart(unk);
+    ftLucarioTransactor::getInstance()->init_auraball(acc);
+    if (getOwner()->getSpycloak()) {
+        m_moduleAccesser->getWorkManageModule().setInt(0, 0x10000047);
+        m_moduleAccesser->getWorkManageModule().setInt(0, 0x10000048);
+    } else {
+        // The aura flames on both hands, scaled with the aura.
+        soEffectModule& effects = m_moduleAccesser->getEffectModule();
+        float scale = calcAuraScale();
+        int firstEffect = effects.reqFollow(static_cast<EfID>(0x220001), 0x1f, &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), scale,
+                                            true, 0x10, 0, -1);
+        int secondEffect = effects.reqFollow(static_cast<EfID>(0x220001), 0x35, &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), scale,
+                                             true, 0x10, 0, -1);
+        m_moduleAccesser->getWorkManageModule().setInt(firstEffect, 0x10000047);
+        m_moduleAccesser->getWorkManageModule().setInt(secondEffect, 0x10000048);
+    }
+    m_moduleAccesser->getEffectModule().removeCommon(0x1a);
+    m_moduleAccesser->getWorkManageModule().setFlag(true, 0x1200003F);
+}
+
+// Rescales the aura flames when the aura power changed since the last frame.
+inline void ftLucario::updateAuraScale(soModuleAccesser* moduleAccesser) {
+    ftLucario& fighter = dynamic_cast<ftLucario&>(moduleAccesser->getStageObject());
+    soWorkManageModule& work = moduleAccesser->getWorkManageModule();
+    float previous = work.getFloat(0x11000014);
+    float current = work.getFloat(0x11000013);
+    if (current != previous) {
+        fighter.setAuraScale(fighter.calcAuraScale());
+        work.setFloat(current, 0x11000014);
+    }
+}
+
+void ftLucario::processUpdate() {
+    Fighter::processUpdate();
+    if (soSlow::getInstance()->isEstimate() == true) {
+        soModuleAccesser* acc = getModuleAccesser();
+        soWorkManageModule& work = acc->getWorkManageModule();
+        work.setFloat(work.getFloat(0x11000013), 0x11000014);
+        work.setFloat(getAuraPowerRate(acc), 0x11000013);
+        updateAuraScale(acc);
+        ftLucarioTransactor::getInstance()->processUpdate(acc);
+    }
+}
+
+void ftLucario::updateNodeSRT() {
+    soModuleAccesser* acc = m_moduleAccesser;
+    switch (acc->getStatusModule().getStatusKind()) {
+    case 0x11b:
+        ftLucarioStatusUniqProcessSpecialHiRush::set_pose(acc);
+        break;
+    case 0x122:
+    case 0x123:
+    case 0x124:
+        ftLucarioStatusUniqProcessFinalHold::set_rot_angle(acc);
+        break;
+    }
+    float size = acc->getPostureModule().getScale();
+    Vec3f scale;
+    scale.m_z = size;
+    scale.m_y = size;
+    scale.m_x = size;
+    Vec3f rotation;
+    Vec3f position;
+    position = acc->getPostureModule().getPos();
+    rotation = acc->getPostureModule().getRot(0);
+    rotation.m_y += acc->getPostureModule().getRotYLr();
+    acc->getModelModule().setNodeSRT(0, &scale, &rotation, &position);
+}
+
+// HYPOTHESIS: the catch request (event 8) of a fighter Lucario grabs with the Force Palm (status 0x113): the receiver
+// marks it done and answers with the node it is held by and Lucario's work int 0x10000033.
+struct ftLucarioLinkEventCatch : soLinkEventArgs {
+    int m_nodeId; // +0x8
+    int m_request;
+    int unk10;
+    int unk14;
+    int unk18;
+};
+
+void ftLucario::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    soStatusModule& status = moduleAccesser->getStatusModule();
+    switch (eventInfo->m_eventKind) {
+    case 8:
+        if (status.getStatusKind() == 0x113) {
+            ftLucarioLinkEventCatch* event = static_cast<ftLucarioLinkEventCatch*>(eventInfo);
+            event->m_nodeId = moduleAccesser->getModelModule().getCorrectNodeId(0x12c);
+            event->_0x4 = true;
+            event->unk18 = moduleAccesser->getWorkManageModule().getInt(0x10000033);
+            status.changeStatusRequest(0x11a, moduleAccesser);
+            return;
+        }
+        break;
+    }
+    Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+
+float ftLucario::getAuraPowerRate(soModuleAccesser* moduleAccesser) {
+    if (g_ftManager->m_isStamina) {
+        return getAuraPowerRateHpMode(moduleAccesser);
+    }
+    return getAuraPowerRateNormal(moduleAccesser);
+}
+
+// The rate grows from parameters[0] to 1 up to the damage parameters[3] and on to parameters[1] at parameters[4].
+float ftLucario::getAuraPowerRateNormal(soModuleAccesser* moduleAccesser) {
+    const float* parameters = static_cast<const float*>(g_ftCommonDataAccesser.getData(Fighter_Lucario)->extendParam[2]);
+    float damage = moduleAccesser->getDamageModule().getDamage(0);
+    float rate;
+    if (damage <= parameters[3]) {
+        rate = parameters[0] +
+               (1.0f - parameters[0]) * clampf((damage - parameters[2]) / (parameters[3] - parameters[2]), 0.0f, 1.0f);
+    } else {
+        rate = 1.0f + (parameters[1] - 1.0f) * clampf((damage - parameters[3]) / (parameters[4] - parameters[3]), 0.0f, 1.0f);
+    }
+    float handicap = clampf(soValueAccesser::getConstantFloat(moduleAccesser, 0xdb2, 0), -1.0f, 1.0f);
+    return clampf(parameters[5] * (rate / (1.0f + 0.5f * handicap)), parameters[7], parameters[6]);
+}
+
+// The stamina match version: the rate falls with the remaining share of the hit points.
+float ftLucario::getAuraPowerRateHpMode(soModuleAccesser* moduleAccesser) {
+    Fighter& fighter = dynamic_cast<Fighter&>(moduleAccesser->getStageObject());
+    const float* parameters = static_cast<const ftLucarioData*>(g_ftCommonDataAccesser.getData(Fighter_Lucario))->m_auraHpModeParam;
+    float hitPointMax = fighter.getOwner()->getHitPointMax();
+    float hitPoint = fighter.getOwner()->getHitPoint();
+    float percent = clampf(100.0f * (static_cast<float>(fabs(hitPointMax)) > 1.1920929e-7f ? hitPoint / hitPointMax : 1.0f), 0.0f, 100.0f);
+    float rate;
+    if (hitPointMax <= 1.0f) {
+        rate = parameters[1];
+    } else if (percent <= parameters[3]) {
+        rate = parameters[1] -
+               (parameters[1] - 1.0f) * clampf((percent - parameters[4]) / (parameters[3] - parameters[4]), 0.0f, 1.0f);
+    } else {
+        rate = 1.0f - (1.0f - parameters[0]) * clampf((percent - parameters[3]) / (parameters[2] - parameters[3]), 0.0f, 1.0f);
+    }
+    float handicap = clampf(soValueAccesser::getConstantFloat(moduleAccesser, 0xdb2, 0), -1.0f, 1.0f);
+    rate /= 1.0f + 0.5f * handicap;
+    return clampf(rate, parameters[6], parameters[5]);
+}
+
+// The Aura Sphere of the Force Palm starts in front of the fighter (the offsets differ on the ground and in the air)
+// with the current aura power.
+bool ftLucario::activeArticle(wnLucarioQigong* weapon, soModuleAccesser* acc) {
+    Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
+    soPostureModule& posture = acc->getPostureModule();
+    float lr = posture.getLr();
+    Vec3f pos = acc->getPostureModule().getPos();
+    Vec3f offset(0.0f, 0.0f, 0.0f);
+    if (acc->getSituationModule().getKind() == 0) {
+        offset.m_x = 0.0f;
+        offset.m_y = soValueAccesser::getConstantFloat(acc, 0xfb5, 0);
+        offset.m_z = soValueAccesser::getConstantFloat(acc, 0xfb4, 0);
+    } else {
+        offset.m_x = 0.0f;
+        offset.m_y = soValueAccesser::getConstantFloat(acc, 0xfb7, 0);
+        offset.m_z = soValueAccesser::getConstantFloat(acc, 0xfb6, 0);
+    }
+    Vec3fScale(&offset, &offset, posture.getScale());
+    pos.m_x += offset.m_z * lr;
+    pos.m_y += offset.m_y;
+    float powerMul = acc->getWorkManageModule().getFloat(0x11000013);
+    int founderTaskId = fighter.getTaskId();
+    weapon->activate(founderTaskId, fighter.getOwner()->getTeam(), lr, &pos, powerMul);
+    return false;
+}
+
+#pragma dont_inline on
+soTeam::~soTeam() { }
+soResourceIdAccesser::~soResourceIdAccesser() { }
+#pragma dont_inline off
+soArticleMediator::~soArticleMediator() { }
+#pragma dont_inline on
+ftVirtualNodeMatrixPool::~ftVirtualNodeMatrixPool() { }
+soParamAccesser::~soParamAccesser() { }
+#pragma dont_inline off

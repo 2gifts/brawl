@@ -1422,14 +1422,16 @@ extern "C" void* fn_27_1492F8(const ftCommonDataAccesser*, s32 kind, bool*)
     return lbl_27_bss_3210[Fighter_Samus].data->extendParam[8];
 }
 
-extern "C" void* fn_27_1494D0(const ftCommonDataAccesser*, s32 kind, bool*)
+// The aura ball data: Kirby's copy reads it from Lucario's loaded archive, Lucario from his own data record.
+template <>
+const wnLucarioAuraBallData* ftCommonDataAccesser::getWeaponData<wnLucarioAuraBallData>(int kind, bool* resourceGroup) const
 {
     if (kind == Fighter_Kirby) {
         u32 slot = fn_27_1222C8(g_ftSlotManager, Fighter_Lucario);
         void* address = soArchiveDb::getManager(0)->getPublicAddress(slot, lbl_27_data_2BBD8, 0U, 0U, -1U);
-        return static_cast<ftRobotBeamArticle*>(address)->unk10;
+        return static_cast<const wnLucarioAuraBallData*>(static_cast<ftRobotBeamArticle*>(address)->unk10);
     }
-    return lbl_27_bss_3210[Fighter_Lucario].data->extendParam[9];
+    return static_cast<const wnLucarioAuraBallData*>(lbl_27_bss_3210[Fighter_Lucario].data->extendParam[9]);
 }
 
 extern "C" void* fn_27_1496F0(const ftCommonDataAccesser*, s32 kind, bool*)
