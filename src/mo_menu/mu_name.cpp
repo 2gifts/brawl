@@ -53,6 +53,8 @@ extern "C" void fn_8002B504(gfPadSystem* system);
 // Wii Remote name storage: the owner name of the Wii Remote, and the name it has to have
 extern "C" int fn_802253B4(int channel, const u16** name);
 extern "C" void fn_80225454(const u16* name);
+// BYTES: bool avoids clrlwi emitted by the u8 declaration while preserving FiUc mangling
+extern "C" bool setNameRumbleSwitch__10GameGlobalFiUc(GameGlobal* g, int index, bool value);
 
 
 // The magic string that marks the data of the game on a Wii Remote, the random names and the names that cannot be used.
@@ -714,6 +716,19 @@ inline void MuSelctChrNameEntry::detachSet() {
     }
 }
 
+// Detaches the current key-set model, attaches the active one at cpos<m_posNo+1>, and remembers it.
+static inline void attachSet(MuSelctChrNameEntry* entry, char* posName) {
+    int setNo = entry->m_setList[entry->m_curSet];
+    if (entry->m_curSetObj != NULL) {
+        reinterpret_cast<nw4r::g3d::ScnGroup*>(entry->m_scnMdl)->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(entry->m_curSetObj->m_sceneModel));
+        entry->m_curSetObj = NULL;
+    }
+    MuObject* setObj = entry->m_setObj[setNo];
+    sprintf(posName, "cpos%d", entry->m_posNo + 1);
+    PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(entry->m_scnMdl, setObj->m_sceneModel, posName);
+    entry->m_curSetObj = setObj;
+}
+
 // Puts the line on the letter that is typed (or after it) and remembers where it is.
 inline void MuSelctChrNameEntry::updateCaret() {
     int pos = msgLen(m_name);
@@ -755,13 +770,7 @@ void MuSelctChrNameEntry::open(const char* initial, char* buf, int maxLen) {
     char posName[12];
     sprintf(posName, "cpos%d", m_posNo + 1);
     PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(m_scnMdl, m_base->m_sceneModel, posName);
-    MuObject* setObj;
-    int setNo = m_setList[m_curSet];
-    detachSet();
-    setObj = m_setObj[setNo];
-    sprintf(setPosName, "cpos%d", m_posNo + 1);
-    PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(m_scnMdl, setObj->m_sceneModel, setPosName);
-    m_curSetObj = setObj;
+    attachSet(this, setPosName);
     PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(m_scnMdl, m_cursorObj->m_sceneModel, posName);
     if (m_lineObj != NULL) {
         PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(m_scnMdl, m_lineObj->m_sceneModel, posName);
@@ -937,6 +946,14 @@ static inline void removeLastLetter(MuSelctChrNameEntry* entry, int len) {
     delete copy;
 }
 
+// Returns the keyboard table row for the current key set and cursor (NULL outside the 11 letter keys).
+static inline const muNameLetterRow* getLetterRow(int setNo, int cursor) {
+    if (cursor < 1 || cursor > 11) {
+        return NULL;
+    }
+    return &g_muNameLetterTbl[setNo][cursor - 1];
+}
+
 // Reads the buttons that type: the letters, the delete, the switch of the set of keys and the decision.
 int MuSelctChrNameEntry::abButtonMain(gfPadStatus* pad, bool allowRandom) {
     int action = decideButtonProc(pad, allowRandom);
@@ -980,27 +997,15 @@ int MuSelctChrNameEntry::abButtonMain(gfPadStatus* pad, bool allowRandom) {
         if (m_curSet >= m_setCount) {
             m_curSet = 0;
         }
-        int setNo = m_setList[m_curSet];
-        detachSet();
-        MuObject* setObj = m_setObj[setNo];
         char posName[12];
-        sprintf(posName, "cpos%d", m_posNo + 1);
-        PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(m_scnMdl, setObj->m_sceneModel, posName);
-        m_curSetObj = setObj;
+        attachSet(this, posName);
         m_caretAtEnd = true;
         updateCaret();
         playSE(0x23);
         return Result_Editing;
     }
     // A key: it adds the next letter of the key, or turns the last letter into the next letter of the mark key.
-    int setNo = m_setList[m_curSet];
-    int cursor = m_cursor;
-    const muNameLetterRow* row;
-    if (cursor < 1 || cursor > 11) {
-        row = NULL;
-    } else {
-        row = &g_muNameLetterTbl[setNo][cursor - 1];
-    }
+    const muNameLetterRow* row = getLetterRow(m_setList[m_curSet], m_cursor);
     char last[8];
     char letter[8];
     if (row->m_unk0 == 0) {
@@ -2264,7 +2269,7 @@ int muNameTask::registRimoName(const u16* name, bool flag, const u8* data, bool 
     if (found < 0) {
         global->setName(index, reinterpret_cast<const wchar_t*>(name), 0);
     }
-    global->setNameRumbleSwitch(index, flag);
+    setNameRumbleSwitch__10GameGlobalFiUc(global, index, flag);
     global->setButtonConfig(static_cast<u8>(index), reinterpret_cast<const ipButtonConfig*>(data));
     if (found < 0) {
         addNameList(static_cast<s16>(index));
@@ -2465,9 +2470,9 @@ static const u8 sRemoteItemColors[2][4] = {{0xC5, 0xC5, 0xC5, 0xFF}, {0x00, 0x00
 void muNameTask::mainStepRemoteMenuAppearInit(muNameTask* task) {
     nw4r::g3d::ScnMdl* models = task->m_scnMdls[2];
     task->m_msg->printf(6, "");
-    nw4r::g3d::ScnMdl* models2 = task->m_scnMdls[2];
-    MuObject* remoteName = task->m_objects[Obj_RemoteCursor];
     bool readOk = task->m_remoteResult == 0;
+    MuObject* remoteName = task->m_objects[Obj_RemoteCursor];
+    nw4r::g3d::ScnMdl* models2 = task->m_scnMdls[2];
     reinterpret_cast<nw4r::g3d::ScnGroup*>(models2)->Remove(scnObjOf(remoteName));
     if (readOk) {
         char name[0x15];
@@ -2487,8 +2492,8 @@ void muNameTask::mainStepRemoteMenuAppearInit(muNameTask* task) {
     } else {
         wchar_t wide[6];
         g_GameGlobal->getNameUTF16(task->m_remoteNameNo, wide);
-        nw4r::g3d::ScnGroup* group = reinterpret_cast<nw4r::g3d::ScnGroup*>(task->m_scnMdls[2]);
         MuObject* line = task->m_objects[Obj_RemoteLine];
+        nw4r::g3d::ScnGroup* group = reinterpret_cast<nw4r::g3d::ScnGroup*>(task->m_scnMdls[2]);
         group->Remove(scnObjOf(line));
         PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(group, line->m_sceneModel, "pos05");
         char name[0x15];
@@ -2496,8 +2501,7 @@ void muNameTask::mainStepRemoteMenuAppearInit(muNameTask* task) {
         task->m_msg->printf(11, name);
     }
     for (int i = 0; i < 3; i++) {
-        int objIdx = Obj_RemoteIcon;
-        objIdx += i;
+        int objIdx = Obj_RemoteIcon + i;
         char posName[8];
         sprintf(posName, "pos%02d", sRemoteItems[i][1]);
         // HYPOTHESIS: sRemoteModels places the three MenRemote0001_TopN buttons at indices 13..15 (Obj_RemoteIcon + i).
@@ -2882,6 +2886,18 @@ void muNameRemoteTask::read() {
     m_state = State_Reading;
 }
 
+static inline bool checkRemoteSum(const u8* buf) {
+    const u8* q = buf;
+    u32 sum = 0;
+    for (int i = 0; i < 0x3C; i++, q++) {
+        sum += *q;
+    }
+    if (*reinterpret_cast<const u32*>(buf + 0x3C) == sum) {
+        return true;
+    }
+    return false;
+}
+
 // How the request for the data ended: the data has to belong to the game (the owner name of the Wii Remote and a sum of the bytes
 // are checked).
 int muNameRemoteTask::getReadStatus() {
@@ -2891,12 +2907,11 @@ int muNameRemoteTask::getReadStatus() {
     int code = getGameDataRequestCode();
     if (code != 0) {
         switch (code) {
-        case -4:
-            return Status_NoRemote;
         case -5:
             return Status_Unknown3;
         case -6:
             return Status_Unknown4;
+        case -3:
         default:
             return Status_NoRemote;
         }
@@ -2913,16 +2928,10 @@ int muNameRemoteTask::getReadStatus() {
     if (isBufZero(m_readBuf)) {
         return Status_BadData;
     }
-    const u8* q = m_readBuf;
-    u32 sum = 0;
-    for (int i = 0; i < 0x3C; i++, q++) {
-        sum += *q;
+    if (!checkRemoteSum(m_readBuf)) {
+        return Status_BadData;
     }
-    int status = Status_BadData;
-    if (*reinterpret_cast<u32*>(&m_readBuf[0x3C]) == sum) {
-        status = Status_Ok;
-    }
-    return status;
+    return Status_Ok;
 }
 
 void muNameRemoteTask::readProcess() {
