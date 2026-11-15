@@ -205,7 +205,7 @@ public:
     }
 
     static void copy(Vec2f& dest, const Vec2f& src) {
-#ifdef MATCHING
+#if defined(MATCHING) && !defined(MT_VEC2F_COPY_MEMBERWISE)
         __memcpy(&dest, &src, sizeof(Vec2f));
 #else
         dest.m_x = src.m_x;
@@ -321,6 +321,10 @@ public:
 #ifdef MT_VEC3F_ADD_RHS_RESULT_XY_FIRST
         // MATCH-ONLY: retain the native independent XY/Z input lifetimes.
         register f32 fr2, fr3, fr1, fr0;
+#elif defined(MT_VEC3F_ADD_OPERAND_ORDER_REGS)
+        // BYTES: register variables declared in operand order (left XY, left Z, right XY, right Z); the Lucario aura
+        // ball unit colours the sum of its two hand positions this way.
+        register f32 fr0, fr1, fr2, fr3;
 #else
         register f32 fr3, fr2, fr1, fr0;
 #endif
@@ -361,6 +365,10 @@ public:
 #elif defined(MT_VEC3F_SUB_ASCENDING)
         // MATCH-ONLY: Finale's sweep uses the existing four-register subtract
         // with ascending register allocation; arithmetic and default are unchanged.
+        register f32 fr0, fr1, fr2, fr3;
+#elif defined(MT_VEC3F_ADD_OPERAND_ORDER_REGS)
+        // BYTES: register variables declared in operand order (left XY, left Z, right XY, right Z); the Lucario aura
+        // ball unit colours the sum of its two hand positions this way.
         register f32 fr0, fr1, fr2, fr3;
 #else
         register f32 fr3, fr2, fr1, fr0;
@@ -410,6 +418,26 @@ public:
             psq_st fr0, Vec3f.m_x(pOut), 0, 0
             psq_st fr1, Vec3f.m_z(pOut), 1, 0
 #endif
+        }
+        // clang-format on
+    }
+    // out = from * (1 - t) + to * t in paired singles (the blend of Lucario's Final Smash entry).
+    // HYPOTHESIS: the name and parameter order; the instruction sequence is the native one.
+    friend void Vec3fBlend(register Vec3f* pOut, register const Vec3f* from, register const Vec3f* to, register float t) {
+        register f32 outZ, outXY, toZ, toXY, fromZ, fromXY;
+        register f32 rest = 1.0f - t;
+        // clang-format off
+        asm {
+            psq_l     fromXY, Vec3f.m_x(from), 0, 0
+            psq_l     fromZ, Vec3f.m_z(from), 1, 0
+            psq_l     toXY, Vec3f.m_x(to), 0, 0
+            psq_l     toZ, Vec3f.m_z(to), 1, 0
+            ps_muls0  fromXY, fromXY, rest
+            ps_muls0  fromZ, fromZ, rest
+            ps_madds0 outXY, toXY, t, fromXY
+            ps_madds0 outZ, toZ, t, fromZ
+            psq_st    outXY, Vec3f.m_x(pOut), 0, 0
+            psq_st    outZ, Vec3f.m_z(pOut), 1, 0
         }
         // clang-format on
     }

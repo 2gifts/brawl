@@ -31,3 +31,12 @@ public:
     static void removeAuraBallMaxEffect(soModuleAccesser* moduleAccesser);
 };
 static_assert(sizeof(ftLucarioTransactor) == 4, "Transactor singleton layout is wrong!");
+
+#ifdef FT_LUCARIO_TRANSACTOR_MELEE_INSTANCE
+// The sora_melee copy of the singleton (the fighter REL has its own getInstance): the units of sora_melee that use
+// the transactor expand this accessor and share its instance.
+static inline ftLucarioTransactor* getLucarioTransactor() {
+    static ftLucarioTransactor instance;
+    return &instance;
+}
+#endif

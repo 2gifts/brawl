@@ -12329,7 +12329,7 @@ getWeaponData<14wnSamusGunData>__20ftCommonDataAccesserCFiPb_PC14wnSamusGunData 
 fn_27_149464 = .text:0x00149464; // type:function size:0x28
 fn_27_14948C = .text:0x0014948C; // type:function size:0x30
 fn_27_1494BC = .text:0x001494BC; // type:function size:0x14
-fn_27_1494D0 = .text:0x001494D0; // type:function size:0x7C
+getWeaponData<21wnLucarioAuraBallData>__20ftCommonDataAccesserCFiPb_PC21wnLucarioAuraBallData = .text:0x001494D0; // type:function size:0x7C
 getLucarioAuraBallParam__20ftCommonDataAccesserCFi = .text:0x0014954C; // type:function size:0x3C
 getWeaponData<19wnLucarioQigongData>__20ftCommonDataAccesserCFiPb_PC19wnLucarioQigongData = .text:0x00149588; // type:function size:0x14
 getWeaponData121__20ftCommonDataAccesserCF6ftKindPb = .text:0x0014959C; // type:function size:0x94
