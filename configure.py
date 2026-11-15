@@ -6791,6 +6791,10 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_marth_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_pokemon_stamina_module.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_poke_lizardon_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_poke_fushigisou_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_poke_zenigame_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_lucas_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_metaknight_transactor.cpp"),
         ],
     },
     {

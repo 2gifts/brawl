@@ -3,6 +3,7 @@
 #include <ft/ft_transactor.h>
 #include <types.h>
 
+class soArticle;
 class soModuleAccesser;
 class wnLucasPKFlash;
 
@@ -11,6 +12,8 @@ class ftLucasTransactor : public ftTransactor {
 public:
     ftLucasTransactor();
     virtual ~ftLucasTransactor();
+    virtual bool activeArticle(soArticle* article, soModuleAccesser* acc);
+    virtual bool shootArticle(soArticle* article, soModuleAccesser* acc);
     // Local declaration of the REL singleton-holder entry point.
     static ftLucasTransactor* getInstance();
     bool activeArticle1(wnLucasPKFlash* weapon, soModuleAccesser* acc);

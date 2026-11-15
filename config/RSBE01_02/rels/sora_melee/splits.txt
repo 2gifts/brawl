@@ -12354,6 +12354,9 @@ mo_melee/sora_melee/ft/ft_metaknight_status_uniq_process_special_nspin.cpp:
 	.text       start:0x00358CF4 end:0x00359014
 	.ctors      start:0x0000045C end:0x00000460
 
+mo_melee/sora_melee/ft/ft_metaknight_transactor.cpp:
+	.text       start:0x0035A09C end:0x0035A264
+
 mo_melee/sora_melee/wn/wn_pit_bow.cpp:
 	.text       start:0x0035AD08 end:0x0035D9F8
 	.ctors      start:0x00000460 end:0x00000464
@@ -12365,6 +12368,9 @@ mo_melee/sora_melee/wn/wn_pit_bow_arrow.cpp:
 mo_melee/sora_melee/wn/wn_pit_bow_arrow_status_uniq_process_fly.cpp:
 	.text       start:0x003603B8 end:0x003608AC
 	.ctors      start:0x00000468 end:0x0000046C
+
+mo_melee/sora_melee/ft/ft_lucas_transactor.cpp:
+	.text       start:0x00361264 end:0x003615F8
 
 mo_melee/sora_melee/ft/ft_lucas_status_uniq_process_special_n.cpp:
 	.text       start:0x00361E78 end:0x00361F48
@@ -12413,9 +12419,15 @@ mo_melee/sora_melee/wn/wn_poke_lizardon_breath.cpp:
 	.text       start:0x00369AF0 end:0x0036DAC0
 	.ctors      start:0x0000048C end:0x00000490
 
+mo_melee/sora_melee/ft/ft_poke_fushigisou_transactor.cpp:
+	.text       start:0x0036DF54 end:0x0036E2F8
+
 mo_melee/sora_melee/wn/wn_poke_fushigisou_seed.cpp:
 	.text       start:0x0036E2F8 end:0x00372580
 	.ctors      start:0x00000490 end:0x00000494
+
+mo_melee/sora_melee/ft/ft_poke_zenigame_transactor.cpp:
+	.text       start:0x003725C8 end:0x00372A48
 
 mo_melee/sora_melee/ft/ft_poke_zenigame_status_uniq_process_special_n.cpp:
 	.text       start:0x00372A48 end:0x00373290
