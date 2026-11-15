@@ -7,6 +7,10 @@
 #define WN_WEAPON_BUILDER
 #define WN_ARTICLE_NATIVE_BUILDERS
 #define WN_STATUS_NO_TAIL
+#define WN_TRANSITION_CTOR_INLINE
+#define FT_POOL_ROOT_NONPOLYMORPHIC // BYTES: without it the hierarchy destructor is never_inline
+#define WN_ANIMCMD_RESET_MODE_BOX // BYTES: word-aligned reset-mode temporaries (frame size of the anim cmd sub builder)
+#define WN_ANIMCMD_PRESENTER_LOCAL_STORE // the interpreters' presenters take the list from the lookup as a value (so_event_presenter.h)
 #define WN_ARTICLE_ANIMCMD_INT // BYTES: the builder vtable takes Weapon's int-index notifyEventAnimCmd thunk (@72@), as in the original
 #define FT_REL_LINK_EXTERN
 #define SO_NULLABLE_INLINE_CTOR
@@ -58,6 +62,14 @@ wnToonLinkBowArrow::wnToonLinkBowArrow(s32 articleId, const wnArticleBuildInfo& 
     wnKineticModuleImpl::setOutsideMovementGroundEnergyId(&m_moduleAccesser->getKineticModule(), 2);
     Weapon::deactivate(false);
 }
+
+#pragma push
+#pragma pool_data off
+template soMotionModuleBuilder<
+    wnToonLinkBowArrowModuleAccesserBuildConfig::MotionModuleBuildConfig>::soMotionModuleBuilder(soModuleAccesser*, void*);
+#pragma pop
+template soStatusModuleBuilder<
+    wnToonLinkBowArrowModuleAccesserBuildConfig::StatusModuleBuildConfig>::soStatusModuleBuilder(soModuleAccesser*, const soStatusData*, void*);
 
 #define WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG wnToonLinkBowArrowModuleAccesserBuildConfig
 #include <wn/zelda/wn_zelda_lighting_bow_builder_ctor.h>

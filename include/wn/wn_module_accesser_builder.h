@@ -602,10 +602,10 @@ public:
 };
 
 // No interpolation entries are owned when the simple posture module follows its owner.
-template <>
-class soPostureModuleBuilder<soPostureModuleBuildConfig<0, soPostureModuleSimple> > {
+template <typename T>
+class soPostureModuleBuilder<soPostureModuleBuildConfig<0, T> > {
     soSingletonHolder<soArrayNull<soInterpolation<Vec3f> > > m_interpolations;
-    soPostureModuleSimple m_module;
+    T m_module;
 public:
     soPostureModuleBuilder(soModuleAccesser* acc, soEventObserverRegistrationDesc* desc) :
         m_module(acc, soSingletonHolder<soArrayNull<soInterpolation<Vec3f> > >::getInstance(), desc) {
@@ -711,9 +711,9 @@ public:
     soMotionModuleBuilder(soModuleAccesser* acc, void* motionData) :
         m_transitionBuilder(),
         m_motionData((const soMotionData*)motionData, DataNum),
-        m_module(acc, &m_motionData, m_transitionBuilder.getModule(), soSingletonHolder<soArrayNull<soPartialAnim> >::getInstance(),
-                 soSingletonHolder<soArrayNull<soOtherAnim> >::getInstance(), (soArray<soTransitionTermPack>*)lbl_27_bss_9BC,
-                 soSingletonHolder<soArrayNull<u32> >::getInstance(),
+        m_module(acc, &m_motionData, m_transitionBuilder.getModule(), soGetArrayNull<soPartialAnim>(),
+                 soGetArrayNull<soOtherAnim>(), (soArray<soTransitionTermPack>*)lbl_27_bss_9BC,
+                 soGetArrayNull<u32>(),
                  static_cast<soEventManager&>(acc->getEventManageModule()).getManageId(), false,
                  (soMotionAnimObjCacheModule*)lbl_27_bss_DBC) {
         acc->getModelModule().isNull();
@@ -755,9 +755,9 @@ public:
         m_motionData((const soMotionData*)motionData, DataNum),
         m_module(acc, &m_motionData, m_transitionBuilder.getModule(),
 #endif
-                 soSingletonHolder<soArrayNull<soPartialAnim> >::getInstance(), m_otherAnims.get(),
+                 soGetArrayNull<soPartialAnim>(), m_otherAnims.get(),
                  (soArray<soTransitionTermPack>*)lbl_27_bss_9BC,
-                 soSingletonHolder<soArrayNull<u32> >::getInstance(),
+                 soGetArrayNull<u32>(),
                  static_cast<soEventManager&>(acc->getEventManageModule()).getManageId(), false,
                  (soMotionAnimObjCacheModule*)lbl_27_bss_DBC) {
         acc->getModelModule().isNull();
@@ -788,9 +788,9 @@ public:
         m_transitionBuilder(), m_otherAnims(2, 0),
         m_motionData((const soMotionData*)motionData, DataNum),
         m_module(acc, &m_motionData, m_transitionBuilder.getModule(),
-                 soSingletonHolder<soArrayNull<soPartialAnim> >::getInstance(), m_otherAnims.get(),
+                 soGetArrayNull<soPartialAnim>(), m_otherAnims.get(),
                  (soArray<soTransitionTermPack>*)lbl_27_bss_9BC,
-                 soSingletonHolder<soArrayNull<u32> >::getInstance(),
+                 soGetArrayNull<u32>(),
                  static_cast<soEventManager&>(acc->getEventManageModule()).getManageId(), false,
                  (soMotionAnimObjCacheModule*)lbl_27_bss_DBC) {
         acc->getModelModule().isNull();

@@ -36,7 +36,10 @@ public:
     typedef soColorBlendModuleBuildConfig<-1, 0, soColorBlendModuleImpl> ColorBlendModuleBuildConfig;
 };
 
-// No common energies, as the cape's builder.
+// No common energies, as the cape's builder. The bow's own unit builds it from the generic template
+// (WN_WEAPON_NO_COMMON_ENERGIES gives it this layout); the fighter unit, which owns articles with the common energies as
+// well, uses this copy.
+#ifndef WN_WEAPON_NO_COMMON_ENERGIES
 template <>
 class wnWeaponBuilder<wnPitBowModuleAccesserBuildConfig> : public Weapon {
 protected:
@@ -52,6 +55,7 @@ public:
     virtual ~wnWeaponBuilder() { }
     virtual void deactivateDescendantForce() { wnDeactivateArticleDescendants(m_modules.m_generateArticleBuilder); }
 };
+#endif
 
 class wnPitBow : public wnWeaponBuilder<wnPitBowModuleAccesserBuildConfig> {
 public:

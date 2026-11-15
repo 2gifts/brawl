@@ -120,6 +120,16 @@ public:
     }
 };
 
+// The shared null array of an element type.
+// BYTES: a function template. MWCC instantiates the function templates a constructor reaches after the constructor itself,
+// last one first, and a singleton's destructor record is created when its getInstance is instantiated: the Pit bow's
+// native .bss has the u32 record of the motion builder before the partial animation record, although the partial
+// animation array is fetched first.
+template <typename T>
+inline soArrayNull<T>* soGetArrayNull() {
+    return soSingletonHolder<soArrayNull<T> >::getInstance();
+}
+
 // soArrayUtility::pushRange
 class soArrayUtility {
 public:
@@ -258,7 +268,8 @@ public:
 #endif
         m_interpreter(ftGetManageId(acc),
 #ifdef WN_ANIMCMD_STACK_PTR
-                      // MATCH-ONLY: a pointer return stays in a callee-saved register across getManageId.
+                      // BYTES: the stack through the holder's accessor; the original computes it before the manage ID
+                      // call and keeps it in a saved register (the cast form below is recomputed after the call).
                       m_stack.get(),
 #else
                       (soArrayVector<acCmdInterpreterStackData, 8>*)&m_stack.m_array,

@@ -1,15 +1,23 @@
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructors expand the empty param customize module destructor
+#define WN_PARAM_ACCESSER_INLINE_DTOR // BYTES: the empty soParamAccesser base destructor is inlined in sora_melee
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
-#ifndef FT_MODULE_BUILDER
-#define FT_MODULE_BUILDER // normally -DFT_MODULE_BUILDER from configure.py; repeated so the kit cache agrees
-#endif
+#define FT_MODULE_BUILDER
+#define WN_MARIO_FIREBALL_UNIT // the sora_melee article unit mode shared with the Mario fireball (builders out of line)
+#define WN_ZELDA_LIGHTING_BOW_UNIT // the member layout and constructor of the module builder of this unit mode (wn/zelda/wn_zelda_lighting_bow.h)
 #define WN_WEAPON_BUILDER
 #define WN_ARTICLE_NATIVE_BUILDERS
-#define WN_SHARED_ARRAYS_1
-#define WN_ARTICLE_ANIMCMD_INT
+#define WN_STATUS_NO_TAIL
+#define WN_TRANSITION_CTOR_INLINE
+#define FT_POOL_ROOT_NONPOLYMORPHIC // BYTES: without it the hierarchy destructor is never_inline
+#define WN_ANIMCMD_RESET_MODE_BOX // BYTES: word-aligned reset-mode temporaries (frame size of the anim cmd sub builder)
+#define WN_ANIMCMD_PRESENTER_LOCAL_STORE // the interpreters' presenters take the list from the lookup as a value (so_event_presenter.h)
+#define WN_ANIMCMD_STACK_PTR // BYTES: the interpreter stacks stay in a saved register across getManageId (ft_builder_animcmd.h)
+#define WN_ARTICLE_ANIMCMD_INT // BYTES: the builder vtable takes Weapon's int-index notifyEventAnimCmd thunk (@72@), as in the original
 #define FT_REL_LINK_EXTERN
 #define SO_NULLABLE_INLINE_CTOR
 #define WN_LINK_BOW_ARROW_FULL_BUILDER
 #include <wn/wn_module_accesser_builder.h>
+#include <wn/zelda/wn_zelda_lighting_bow.h>
 #include <wn/link/wn_link_bow_arrow.h>
 #include <wn/wn_class_info_impl.h>
 #include <ft/ft_kinetic_energy.h>
@@ -18,10 +26,17 @@
 #include <wn/wn_activate_desc.h>
 #include <wn/wn_kinetic_energy_normal.h>
 #include <so/so_module_accesser.h>
+#include <so/model/so_model_module_impl.h>
 #include <so/status/so_status_module_impl.h>
+#include <gf/gf_task_scheduler.h>
 #include <math.h>
 #include <memory.h>
 #include <mt/mt_prng.h>
+
+// BYTES: the empty base destructors that sora_melee always expands (they have no out-of-line copy there).
+inline soTeam::~soTeam() { }
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+inline soResourceIdAccesser::~soResourceIdAccesser() { }
 
 // Registers the Link bow arrow article class (kind 5) in the class info table during static initialization.
 wnClassInfoImpl<5, wnLinkBowArrow, wnLinkBowArrowData> g_wnLinkBowArrowClassInfo;
@@ -48,6 +63,17 @@ wnLinkBowArrow::wnLinkBowArrow(s32 articleId, const wnArticleBuildInfo& info, co
     wnKineticModuleImpl::setOutsideMovementGroundEnergyId(&m_moduleAccesser->getKineticModule(), 2);
     Weapon::deactivate(false);
 }
+
+#pragma push
+#pragma pool_data off
+template soMotionModuleBuilder<
+    wnLinkBowArrowModuleAccesserBuildConfig::MotionModuleBuildConfig>::soMotionModuleBuilder(soModuleAccesser*, void*);
+#pragma pop
+template soStatusModuleBuilder<
+    wnLinkBowArrowModuleAccesserBuildConfig::StatusModuleBuildConfig>::soStatusModuleBuilder(soModuleAccesser*, const soStatusData*, void*);
+
+#define WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG wnLinkBowArrowModuleAccesserBuildConfig
+#include <wn/zelda/wn_zelda_lighting_bow_builder_ctor.h>
 
 void wnLinkBowArrow::activate(int founderTaskId, int resourceId, int team, float lr) {
     Vec3f pos(0.0f, 0.0f, 0.0f);

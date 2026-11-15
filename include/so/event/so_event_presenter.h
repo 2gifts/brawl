@@ -395,6 +395,34 @@ class soEventPresenter {
         return result != nullptr;
     }
 
+    s16 getPresenterUnitId() const { return m_unitID; }
+
+    // Fetches the list of the presenter's unit: null when the unit has no observers or is not a unit of this observer type.
+    void lookupObserverListSub(soInstanceManagerFullProperty<T*>*& result) {
+        s16 uid = getPresenterUnitId();
+        soEventManager* mgr = soEventSystem::getInstance()->getManager(m_manageID);
+        if (mgr->getObserverCapacity(uid) == 0) {
+            result = NULL;
+            return;
+        }
+        soEventUnitWrapper<T>* wrapper = dynamic_cast<soEventUnitWrapper<T>*>(mgr->getEventUnit(uid));
+        result = (!wrapper) ? NULL : wrapper->getObserverListSub();
+    }
+
+    // The constructor's lookup: caches the list of a registered manager.
+    bool lookupObserverList() {
+        if (m_manageID <= -1 || !checkManageId())
+            return false;
+        if (soEventSystem::getInstance()->getManager(m_manageID)->getObserverCapacity(m_unitID) == 0) {
+            m_obsrvrList = nullptr;
+            return false;
+        }
+        soInstanceManagerFullProperty<T*>* result;
+        lookupObserverListSub(result);
+        m_obsrvrList = result;
+        return result;
+    }
+
     bool getObserverListHelperLocal(soInstanceManagerFullProperty<T*>* list = nullptr) {
         if (m_manageID <= -1 || !checkManageId())
             return false;
@@ -427,11 +455,18 @@ public:
             getObserverListHelperLocal();
         }
     }
-    // HYPOTHESIS: constructor of the animation command interpreter. The list lookup is inlined with the result kept in a
-    // local that every path stores, and the manage ID is tested through the member.
+    // Constructor of the animation command interpreter's presenter (also the collision hit and model modules'): the
+    // manage ID is tested through the member and the lookup fills a local that is stored once. Checked against the
+    // original's standalone soAnimCmdInterpreter constructor (it_item.cpp, -O4) and the fighters' copies (-O2): exact.
     // MATCH-ONLY: the tag type selects this variant; the original has one constructor per presenter user.
     soEventPresenter(s16 manageId, s16 unitId, soEventPresenterLocalStoreTag) : m_manageID(manageId), m_unitID(unitId), m_obsrvrList(nullptr) {
+#ifdef FT_POKETRAINER_PRESENTER_CHECK_MANAGE_ID
+        // The Pokemon Trainer unit keeps the older spelling of the lookup: instantiating lookupObserverList there stops
+        // MWCC on an internal compiler error (CTemplateTools.c line 256).
         if (m_manageID > 0) getObserverListHelperLocal(m_obsrvrList);
+#else
+        if (m_manageID > 0) lookupObserverList();
+#endif
     }
     // doldecomp/brawl #152: presenter constructed from a manage id alone (team module).
     soEventPresenter(s16 manageId) : m_manageID(manageId), m_unitID(0), m_obsrvrList(nullptr) {
