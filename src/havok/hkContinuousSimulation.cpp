@@ -37,6 +37,13 @@
 //   0x8032BBDC    12  __sinit_\hkContinuousSimulation_cpp
 
 #include <havok/hkContinuousSimulation.h>
+#include <havok/hkProcessCollisionOutput.h>
+#include <havok/hkAgentNnMachine.h>
+#include <havok/hkLinkedCollidable.h>
+#include <havok/hkEntity.h>
+#include <havok/hkCollisionAgent.h>
+#include <havok/hkCollisionDispatcher.h>
+#include <havok/hkCollisionInput.h>
 #include <havok/hkDefaultToiResourceMgr.h>
 #include <havok/hkWorld.h>
 #include <havok/hkWorldCallbackUtil.h>
@@ -341,3 +348,69 @@ extern "C" void fn_80327B5C(int p1, int p2, int p3, int p4) {
     ((hkSimulation*)(p1))->processAgentsOfEntities((hkEntity**)(p2), (int)(p3), *(hkProcessCollisionInput*)(p4), *(hkSimulation::AgentEntryProcessFunction*)(&lbl_80488CE8), 0);
 }
 } // namespace jj_fn_80327B5C
+
+// The property words of a time-of-impact event by field (the event copies them as two words).
+struct hkToiEventProperties {
+    u32 m_properties;
+    u16 m_propertiesB;
+    u8 m_propertiesC;
+    u8 m_propertiesD;
+};
+
+// Queues the time of impact the agent of entry reported: when, the contact, both entities, the impact's properties
+// and the contact manager (removeCollisionInformationForAgent finds the agent's events by it).
+// Called out of line by the narrow phase below.
+#pragma push
+#pragma auto_inline off
+void hkContinuousSimulation::addToiEvent(const hkProcessCollisionOutput& output, const hkAgentNnEntry& entry) {
+    hkToiEvent& event = m_toiEvents.expandOne();
+    event.unk00 = output.m_toi.m_time;
+    event.unk0C = output.m_toi.unk24;
+    event.unk20 = output.m_toi.m_contact.m_position;
+    event.unk30 = output.m_toi.m_contact.m_normal;
+    event.unk04[0] = (int)((char*)entry.m_collidable[0] + entry.m_collidable[0]->m_ownerOffset);
+    event.unk04[1] = (int)((char*)entry.m_collidable[1] + entry.m_collidable[1]->m_ownerOffset);
+    hkToiEventProperties* properties = (hkToiEventProperties*)event.unk10;
+    properties->m_properties = output.m_toi.m_properties;
+    properties->m_propertiesB = output.m_toi.m_propertiesB;
+    properties->m_propertiesC = output.m_toi.m_propertiesC;
+    properties->m_propertiesD = output.m_toi.m_propertiesD;
+    event.unk18 = (u32)entry.m_contactMgr;
+}
+#pragma pop
+
+// One agent of the continuous narrow phase: runs it with its own collision quality, hands new contact points to its
+// contact manager and queues a reported time of impact (skipped once memory ran out).
+void hkContinuousSimulation::processAgentCollideContinuous(hkAgentNnEntry* entry, hkProcessCollisionInput& input,
+                                                           hkProcessCollisionOutput& output) {
+    output.reset();
+    input.m_collisionQualityInfo = &input.m_dispatcher->m_collisionQualityInfo[entry->m_collisionQualityIndex];
+    input.m_createPredictiveAgents = input.m_collisionQualityInfo->unk10;
+    hkAgentNnMachine_ProcessAgent(entry, input, output);
+    if (hkMemory::getAvailableMemory() == 0) {
+        hkMemory::getInstance().unk4 = 1;
+    }
+    if (hkMemory::getInstance().unk4 != 1) {
+        if (output.isEmpty() == false) {
+            entry->m_contactMgr->processContact(*entry->m_collidable[0], *entry->m_collidable[1], input, output);
+        }
+        if (hkBool(output.m_toi.m_time != HK_REAL_MAX)) {
+            addToiEvent(output, *entry);
+        }
+    }
+}
+
+// Drops every pending time-of-impact event of the entity; each event's contact manager is told first.
+void hkContinuousSimulation::removeToiEventsOfEntity(hkEntity* entity) {
+    for (int i = 0; i < m_toiEvents.getSize(); i++) {
+        if ((hkEntity*)m_toiEvents[i].unk04[0] == entity || (hkEntity*)m_toiEvents[i].unk04[1] == entity) {
+            // MATCH-ONLY: the aligned pointer turns copy propagation off as in the original (the event is reloaded).
+            hkToiEvent* event __attribute__((aligned(16))) = &m_toiEvents[i];
+            ((hkContactMgr*)event->unk18)
+                ->removeToi(((hkEntity*)event->unk04[0])->m_collidable, ((hkEntity*)event->unk04[1])->m_collidable,
+                            *(hkContactPointMaterial*)&event->unk10);
+            m_toiEvents.removeAt(i);
+            i--;
+        }
+    }
+}
