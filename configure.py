@@ -4749,7 +4749,6 @@ config.libs = [
             Object(Matching, "mo_melee/sora_melee/so/so_array_list_members_soInstanceUnitFullProperty_soAnimCmdControlUnit_11_part1.cpp"),
             Object(Matching, "mo_melee/sora_melee/so/so_array_list_members_ptr_itGenArchive_3_part1.cpp"),
             Object(Matching, "mo_melee/sora_melee/so/so_array_list_members_ptr_itGenArchive_3_part2.cpp"),
-            Object(Matching, "mo_melee/sora_melee/so/so_array_list_members_ptr_itFigureArchive_64_part1.cpp"),
             Object(Matching, "mo_melee/sora_melee/so/so_array_list_members_ptr_itFigureArchive_64_part2.cpp"),
             Object(Matching, "mo_melee/sora_melee/so/so_array_list_members_ptr_itFigureArchive_64_part3.cpp"),
             Object(Matching, "mo_melee/sora_melee/so/so_array_list_members_ptr_BaseItem_64_part1.cpp"),
@@ -6818,6 +6817,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/st/st_event_rule_pikmin_bloom.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_event_rule_demo_camera.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_event_rule_fox_set_final.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/it/it_customizer.cpp"),
         ],
     },
     {

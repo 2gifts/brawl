@@ -11712,8 +11712,9 @@ mo_melee/sora_melee/so/so_array_vector_thunks_P8BaseItem_10.cpp:
 mo_melee/sora_melee/so/so_array_base_soArrayVectorAbstract_P8BaseItem_297368.cpp:
 	.text       start:0x00297368 end:0x00297370
 
-mo_melee/sora_melee/so/so_array_list_members_ptr_itFigureArchive_64_part1.cpp:
-	.text       start:0x0029FE94 end:0x0029FEAC
+mo_melee/sora_melee/it/it_customizer.cpp:
+	.text       start:0x002974B0 end:0x002A0D38
+	.ctors      start:0x0000031C end:0x00000320
 
 mo_melee/sora_melee/it/it_manager.cpp:
 	.text       start:0x002A0D38 end:0x002AC298
