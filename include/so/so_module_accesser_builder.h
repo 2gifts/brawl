@@ -131,6 +131,11 @@ public:
     static soResourceModule* getModule(soResourceModuleBuilder* b) {
         return &g_soResourceModuleNull;
     }
+#ifdef WN_MARIO_FIREBALL_UNIT
+    soResourceModule* getModule() {
+        return &g_soResourceModuleNull;
+    }
+#endif
 };
 
 ////////////////////////////////////////
