@@ -11038,9 +11038,45 @@ mo_melee/sora_melee/st/st_operator_defeat_boss.cpp:
 	.text       start:0x0025BE08 end:0x0025CB9C
 	.ctors      start:0x000002F4 end:0x000002F8
 
+mo_melee/sora_melee/st/st_event_rule.cpp:
+	.text       start:0x0025CEA4 end:0x0025CF48
+
+mo_melee/sora_melee/st/st_event_rule_stage_end.cpp:
+	.text       start:0x0025CF48 end:0x0025D018
+
+mo_melee/sora_melee/st/st_event_rule_coin_getter.cpp:
+	.text       start:0x0025D018 end:0x0025D26C
+
+mo_melee/sora_melee/st/st_event_rule_corps_order.cpp:
+	.text       start:0x0025D26C end:0x0025D360
+
+mo_melee/sora_melee/st/st_event_rule_deep_dungeon.cpp:
+	.text       start:0x0025D360 end:0x0025D480
+
 mo_melee/sora_melee/st/st_event_rule_grow_up.cpp:
 	.text       start:0x0025D480 end:0x0025D9C4
 	.ctors      start:0x000002F8 end:0x000002FC
+
+mo_melee/sora_melee/st/st_event_rule_powered_suit.cpp:
+	.text       start:0x0025D9C4 end:0x0025DBC8
+
+mo_melee/sora_melee/st/st_event_rule_event40.cpp:
+	.text       start:0x0025DBC8 end:0x0025DD28
+
+mo_melee/sora_melee/st/st_event_rule_yoshi_egg.cpp:
+	.text       start:0x0025DD28 end:0x0025DE04
+
+mo_melee/sora_melee/st/st_event_rule_dead_reason.cpp:
+	.text       start:0x0025DE04 end:0x0025DFE0
+
+mo_melee/sora_melee/st/st_event_rule_pikmin_bloom.cpp:
+	.text       start:0x0025DFE0 end:0x0025E0B8
+
+mo_melee/sora_melee/st/st_event_rule_demo_camera.cpp:
+	.text       start:0x0025E0B8 end:0x0025E5E8
+
+mo_melee/sora_melee/st/st_event_rule_fox_set_final.cpp:
+	.text       start:0x0025E5E8 end:0x0025E71C
 
 mo_melee/sora_melee/so/so_array_list_members_Ul_32_part2.cpp:
 	.text       start:0x0025EA94 end:0x0025EB9C
@@ -11685,8 +11721,9 @@ mo_melee/sora_melee/so/so_array_vector_thunks_P8BaseItem_10.cpp:
 mo_melee/sora_melee/so/so_array_base_soArrayVectorAbstract_P8BaseItem_297368.cpp:
 	.text       start:0x00297368 end:0x00297370
 
-mo_melee/sora_melee/so/so_array_list_members_ptr_itFigureArchive_64_part1.cpp:
-	.text       start:0x0029FE94 end:0x0029FEAC
+mo_melee/sora_melee/it/it_customizer.cpp:
+	.text       start:0x002974B0 end:0x002A0D38
+	.ctors      start:0x0000031C end:0x00000320
 
 mo_melee/sora_melee/it/it_manager.cpp:
 	.text       start:0x002A0D38 end:0x002AC298
