@@ -3,7 +3,7 @@
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
 #define FT_SOUND_GENERATOR_DTOR_NOINLINE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
-#define FT_DOL_ARRAY_293_WHOLE // the 293-entry process and anim cmd vectors are sora_melee's (ft_dol_array_list.h)
+#define FT_DOL_ARRAY_293_WHOLE // the 293-entry process and anim cmd vectors are sora_melee's whole classes (declared below)
 #define FT_LUCARIO_ARTICLE_POOLS
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_PARAM_ACCESSER_TYPED_DTOR
@@ -13,6 +13,8 @@
 #define FT_MODULE_ACCESSER_BUILDER_BASE_BUILD_DATA // the builder takes the base build data: its slope limit literal (20.0) stays in the pool
 #include <ft/ft_event_unit_instance.h> // before the event system headers (ft/ft_manager.h is included below)
 #include <ft/builder/ft_dol_array_list.h>
+FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 293);
+FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 293);
 #include <so/so_module_hyp.h>
 #include <so/so_value_accesser.h>
 #include <ft/ft_class_info_impl.h>

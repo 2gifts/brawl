@@ -99,7 +99,7 @@ template <>
 soArrayVector<ftAnimCmdConvPtr, 284>::soArrayVector(s32 size);
 template <>
 soArrayVector<ftAnimCmdConvPtr, 287>::soArrayVector(s32 size);
-#ifndef FT_DOL_ARRAY_293_WHOLE
+#ifndef FT_DOL_ARRAY_293_WHOLE // ft_lucario declares the whole 293-entry class itself (ft_yoshi keeps its own copy)
 template <>
 soArrayVector<ftAnimCmdConvPtr, 293>::soArrayVector(s32 size);
 #endif
@@ -135,12 +135,6 @@ FT_DOL_ARRAY_VECTOR(soCollisionAttackAbsolute, 10);
 // ft_captain, ft_samus, ft_metaknight
 FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 301);
 FT_DOL_ARRAY_VECTOR(soLinkConnection, 12);
-// ft_lucario takes the whole 293-entry classes from sora_melee (opt-in: ft_yoshi keeps its own copies)
-#ifdef FT_DOL_ARRAY_293_WHOLE
-FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 293);
-FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 293);
-#endif
-
 // ft_kirby
 FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 448);
 FT_DOL_ARRAY_VECTOR(soLinkConnection, 8);
