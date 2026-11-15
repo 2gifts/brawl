@@ -10411,6 +10411,13 @@ mo_melee/sora_melee/wn/wn_value_accesser.cpp:
 mo_melee/sora_melee/wn/wn_info.cpp:
 	.text       start:0x001DCB6C end:0x001DCC10
 
+mo_melee/sora_melee/wn/wn_kinetic_transactor.cpp:
+	.text       start:0x001DCC10 end:0x001DCCE4
+	.data       start:0x00045AB0 end:0x00045B30
+
+mo_melee/sora_melee/wn/wn_damage_transactor_actor.cpp:
+	.text       start:0x001DCCE4 end:0x001DD48C
+
 mo_melee/sora_melee/wn/wn_damage_effector_impl.cpp:
 	.text       start:0x001DD48C end:0x001DD668
 	.ctors      start:0x00000264 end:0x00000268

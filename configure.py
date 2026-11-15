@@ -6833,6 +6833,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_glow_module_impl.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_info.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_audience_manager.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/wn/wn_kinetic_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/wn/wn_damage_transactor_actor.cpp"),
         ],
     },
     {
