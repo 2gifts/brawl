@@ -11909,6 +11909,9 @@ mo_melee/sora_melee/so/so_array_list_members_ptr_itFigureArchive_64_part3.cpp:
 mo_melee/sora_melee/so/so_array_list_archive_ptr_itFigureArchive_64_part4.cpp:
 	.text       start:0x002C27F8 end:0x002C299C
 
+mo_melee/sora_melee/it/it_figure_archive.cpp:
+	.text       start:0x002C2A00 end:0x002C2CF4
+
 mo_melee/sora_melee/if/if_resetsan.cpp:
 	.text       start:0x002C2D24 end:0x002C3FE4
 	.rodata     start:0x00006008 end:0x00006078
