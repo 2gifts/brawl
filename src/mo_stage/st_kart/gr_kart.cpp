@@ -59,8 +59,9 @@ void grKartBg::updateJoint(float deltaFrame) {
             u32 nodeLord;
             if (getNodeIndex(&nodeCenter, 0, "AshibaCN") && getNodeIndex(&nodeLeft, 0, "AshibaLN") &&
                 getNodeIndex(&nodeRight, 0, "AshibaRN") && getNodeIndex(&nodeLord, 0, "lord")) {
+                u32 i;
                 u32 jointNum = (u16)collision->m_jointLen;
-                for (u32 i = 0; i != jointNum; i++) {
+                for (i = 0; i != jointNum; i++) {
                     grCollisionJoint* joint = collision->getJoint(i);
                     if (joint == NULL) {
                         break;

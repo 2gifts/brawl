@@ -96,8 +96,9 @@ void grGWSceneFire::updateJoint(float deltaFrame) {
         if (collision != NULL) {
             m_joints = new (Heaps::StageInstance) grCollisionJoint*[20];
             if (m_joints != NULL) {
+                u32 i;
                 u16 count = collision->m_jointLen;
-                for (u32 i = 0; i != count; i++) {
+                for (i = 0; i != count; i++) {
                     grCollisionJoint* joint = collision->getJoint(i);
                     if (joint != NULL) {
                         joint->m_0x56_7 = true;

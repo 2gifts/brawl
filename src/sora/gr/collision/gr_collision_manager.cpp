@@ -21,7 +21,7 @@ extern bool lbl_805A0358;
 
 // MATCH-ONLY: the original passes the unextended 32-bit loop counters to these two (every caller in the dol does), so the index
 // parameters of grCollision::getJoint / grCollisionJoint::getLine are probably not u16; the stand-ins keep the symbols of the members.
-extern "C" grCollisionJoint* getJoint__11grCollisionFUs(grCollision* collision, u32 index);
+extern "C" grCollisionJoint* getJoint__11grCollisionFUl(grCollision* collision, u32 index);
 extern "C" grCollisionLine* getLine__16grCollisionJointFUs(grCollisionJoint* joint, u32 index);
 
 grCollisionManager::grCollisionManager() :
@@ -96,7 +96,7 @@ void grCollisionManager::calcFloorRange() {
         if (collision->m_isEnabled && collision->m_isDynamic != 1 && collision->m_isEnabledLatch) {
             u32 jointLen = collision->m_jointLen;
             for (u32 i = 0; i < jointLen; i++) {
-                grCollisionJoint* joint = getJoint__11grCollisionFUs(collision, i);
+                grCollisionJoint* joint = getJoint__11grCollisionFUl(collision, i);
                 if (joint->m_0x54_6) {
                     u32 lineLen = joint->m_lineLen;
                     for (u32 j = 0; j < lineLen; j++) {

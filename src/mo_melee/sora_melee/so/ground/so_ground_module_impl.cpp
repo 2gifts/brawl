@@ -18,7 +18,7 @@
 
 // BYTES: these calls forward word-sized indices/masks to APIs whose shared
 // declarations narrow them. Keep the native symbols and the full input registers.
-extern "C" grCollisionJoint* getJoint__11grCollisionFUs(grCollision*, u32);
+extern "C" grCollisionJoint* getJoint__11grCollisionFUl(grCollision*, u32);
 extern "C" void setTargetLineCategory__17soGroundShapeImplFUc(soGroundShapeImpl*, u32);
 
 soGroundModuleImpl::soGroundModuleImpl(soModuleAccesser* acc, soArray<soGroundShapeImpl>* shapes, soGroundConditionChecker* checker, soEventObserverRegistrationDesc* regDesc) :
@@ -448,7 +448,7 @@ void soGroundModuleImpl::updateGrCollisionMatrix() {
     m_moduleAccesser->getStageObject().updateNodeSRT();
     u32 count = m_collision->m_jointLen;
     for (u32 i = 0; i < count; i++) {
-        grCollisionJoint* joint = getJoint__11grCollisionFUs(m_collision, i);
+        grCollisionJoint* joint = getJoint__11grCollisionFUl(m_collision, i);
         if (joint != NULL) {
             Matrix* matrix = &reinterpret_cast<Matrix*>(m_matrixData)[i];
             model.getNodeGlobalMtx(joint->m_nodeIndex, matrix, false);

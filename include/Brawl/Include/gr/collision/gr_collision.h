@@ -42,7 +42,7 @@ public:
     grCollision(void* colData, int unk1, int unk2);
     ~grCollision();
 
-    grCollisionJoint* getJoint(u16 nodeIndex);
+    grCollisionJoint* getJoint(u32 nodeIndex);
     grCollisionLine* getLine(u16 index);
     void getSegment(clSegment2D* outSegment, grCollisionLine* line);
 

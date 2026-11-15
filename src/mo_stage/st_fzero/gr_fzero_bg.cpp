@@ -149,8 +149,9 @@ void grFzeroBg::updateScene(float deltaFrame) {
     case 1: {
         grCollision* collision = m_collision;
         if (collision != NULL) {
+            u32 i;
             u32 jointLen = (u16)collision->m_jointLen;
-            for (u32 i = 0; i != jointLen; i++) {
+            for (i = 0; i != jointLen; i++) {
                 grCollisionJoint* joint = collision->getJoint(i);
                 if (joint != NULL) {
                     joint->m_0x56_7 = true;
