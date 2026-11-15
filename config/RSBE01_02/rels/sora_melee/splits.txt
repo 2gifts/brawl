@@ -10855,6 +10855,9 @@ mo_melee/sora_melee/st/st_loader_info_adventure.cpp:
 	.text       start:0x00240B14 end:0x00240F70
 	.ctors      start:0x000002C8 end:0x000002CC
 
+mo_melee/sora_melee/st/st_loader_info_wifi.cpp:
+	.text       start:0x00240F70 end:0x0024113C
+
 mo_melee/sora_melee/st/st_loader_info_stage_edit.cpp:
 	.text       start:0x0024113C end:0x00241404
 	.ctors      start:0x000002CC end:0x000002D0
@@ -10926,6 +10929,9 @@ mo_melee/sora_melee/st/st_operator_ready_go_homerun.cpp:
 	.text       start:0x00246ACC end:0x00246E74
 	.rodata     start:0x00003FA0 end:0x00003FB0
 	.data       start:0x0004E9F0 end:0x0004EAA0
+
+mo_melee/sora_melee/st/st_operator_null_go.cpp:
+	.text       start:0x00246E74 end:0x00247088
 
 mo_melee/sora_melee/st/st_operator_sudden_death.cpp:
 	.text       start:0x00247088 end:0x00247420
@@ -12384,6 +12390,9 @@ mo_melee/sora_melee/wn/wn_pit_bow_arrow_status_uniq_process_fly.cpp:
 
 mo_melee/sora_melee/ft/ft_lucas_transactor.cpp:
 	.text       start:0x00361264 end:0x003615F8
+
+mo_melee/sora_melee/ft/ft_lucas_kinetic_transactor.cpp:
+	.text       start:0x003615F8 end:0x00361E78
 
 mo_melee/sora_melee/ft/ft_lucas_status_uniq_process_special_n.cpp:
 	.text       start:0x00361E78 end:0x00361F48

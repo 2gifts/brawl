@@ -6803,6 +6803,9 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_popo_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_kind_conversion.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_stop_module_impl.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_lucas_kinetic_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/st/st_loader_info_wifi.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/st/st_operator_null_go.cpp"),
         ],
     },
     {
