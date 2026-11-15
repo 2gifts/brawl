@@ -74,6 +74,8 @@ public:
     virtual ~wnPitBowArrow() { }
     // HYPOTHESIS: parameter names (see the shell below).
     void activate(int founderTaskId, int resourceId, int team);
+    // HYPOTHESIS: argument meanings (the transactor passes the full-charge flag, the charge and the facing).
+    void toFly(bool fullCharge, int charge, float lr);
     virtual void updateNodeSRT();
     virtual bool reflect();
 };
@@ -90,6 +92,8 @@ public:
     virtual ~wnPitBowArrow();
     // HYPOTHESIS: parameter names; the fighter transactor passes the founder, resource and team.
     void activate(int founderTaskId, int resourceId, int team);
+    // HYPOTHESIS: argument meanings (the transactor passes the full-charge flag, the charge and the facing).
+    void toFly(bool fullCharge, int charge, float lr);
     virtual void updateNodeSRT();
     virtual bool reflect();
 };
