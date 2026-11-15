@@ -1,8 +1,28 @@
 #include <it/it_archive.h>
+#include <it/it_gen_archive.h>
 #include <it/it_manager.h>
 #include <so/so_archive_db.h>
 #include <types.h>
+#include <snd/snd_system.h>
 #include <ut/ut_archive_manager.h>
+
+// HYPOTHESIS: utArchiveManager's release of one resource (main, unnamed).
+extern "C" void fn_80045E64(utArchiveManager* manager, u32 resourceId);
+
+// HYPOTHESIS: two unused generator sheets the unit keeps (constructed by the static initialiser).
+static itGenSheetKind g_itArchiveSheet0(Stages::srStageKind(0xff), 0);
+static itGenSheetKind g_itArchiveSheet1(Stages::srStageKind(0xff), 1);
+
+itArchive::~itArchive() {
+    fn_80045E64(soArchiveDb::getManager(2), m_paramId);
+    if ((u32)m_brresId != 0xFFFF) {
+        fn_80045E64(soArchiveDb::getManager(2), m_brresId);
+    }
+    fn_80045E64(soArchiveDb::getManager(2), m_commonParamId);
+    if ((u32)m_soundGroup != 0xFFFFFFFF && m_32 >= 0) {
+        g_sndSystem->freeGroup(m_32, 0);
+    }
+}
 
 // An item archive: the item's parameter archive (m_paramId), its model archive (m_brresId, 0xFFFF for none) and the
 // shared parameter archive (m_commonParamId), loaded through the item archive manager; m_40 counts frames to wait.
