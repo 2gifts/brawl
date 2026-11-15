@@ -186,3 +186,53 @@ bool itFigureManager::onProcessFixPosition() {
     }
     return pending > 0 ? false : true;
 }
+
+bool itFigureManager::isExistFigureArchive(u32 id) {
+    return findArchive(itFigureFileId(id)) != NULL;
+}
+
+void itFigureManager::unloadFigureTex(u32 id, bool countDown) {
+    if (id == 5000 || (id > 5001 && id < 5008)) {
+        return;
+    }
+    if (m_figList == NULL) {
+        return;
+    }
+    u32 fileId = itFigureFileId(id);
+    for (int i = 0; i < m_archives.size(); i++) {
+        itFigureArchive* archive = m_archives.at(i);
+        if (archive != NULL && fileId == archive->m_fileId) {
+            if (countDown && archive->m_refCount > 0) {
+                if (--archive->m_refCount > 0) {
+                    return;
+                }
+            }
+            if (archive->m_isRemove) {
+                return;
+            }
+            if (archive->isRemovable()) {
+                delete archive;
+                m_archives.erase(i);
+            } else {
+                archive->m_isRemove = true;
+            }
+            return;
+        }
+    }
+}
+
+void* itFigureManager::getTexFile(u32 id) {
+    int fileId = itFigureFileId(id);
+    u32 texId = 0;
+    if ((u32)fileId == 0xFFFFFFF0 || (u32)fileId == 0xFFFFFFF1) {
+        texId = id;
+    }
+    itFigureArchive* archive = findArchive(fileId);
+    if (archive == NULL) {
+        return NULL;
+    }
+    if (!archive->isComp() || archive->m_isRemove) {
+        return NULL;
+    }
+    return archive->getTexFile(texId);
+}

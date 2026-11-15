@@ -13,7 +13,8 @@ public:
     u32 m_fileId;     // 0x0
     u8 _4[4];
     u8 m_isRemove;    // 0x8
-    u8 _9[7];
+    u8 _9[3];
+    int m_refCount;   // 0xC, HYPOTHESIS: preload requests still holding the archive
 
     virtual ~itFigureArchive();
     bool isComp();                 // HYPOTHESIS: the archive finished loading
@@ -42,6 +43,8 @@ public:
     bool onProcessFixPosition();
     void* getTexFile(u32 id);
     itFigureArchive* findArchive(u32 fileId) const;
+    bool isExistFigureArchive(u32 id);
+    void unloadFigureTex(u32 id, bool countDown);
 
 };
 static_assert(sizeof(itFigureManager) == 0x314, "Class is wrong size!");
