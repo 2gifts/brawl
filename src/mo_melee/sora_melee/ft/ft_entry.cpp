@@ -21,6 +21,8 @@ void fn_27_1241D8(ftInput* input, int unk);
 void fn_27_13231C(Fighter* fighter, float unk1, int unk2, int unk3);
 // HYPOTHESIS: ftEntry::process (unnamed in sora_melee).
 void fn_27_1186D4(ftEntry* entry);
+// HYPOTHESIS: the index of the area instance `areaId` of an object (-1 if it has none).
+int fn_27_8CC68(StageObject* object, int areaId);
 // HYPOTHESIS: Fighter::addDamage (unnamed in sora_melee).
 void fn_27_13C1F0(Fighter* fighter, float damage);
 }
@@ -45,6 +47,16 @@ void ftEntry::standby(int unk) {
     unkC = 0;
 }
 
+// The sub fighter (instance 1) starts at the owner's start position with the owner's damage.
+void ftEntry::startSubFighter() {
+    if (_0xe & 2) {
+        Vec3f pos = m_owner->getStartPos();
+        float lr = m_owner->getStartLr();
+        Fighter* sub = m_instances[1].m_fighter;
+        sub->start(&pos, lr, m_owner->getDamage(), 1, g_ftManager->m_mode == 1);
+    }
+}
+
 void ftEntry::standbyAdvFollow() {
     for (int i = 0; i < m_entryCount; i++) {
         Fighter* fighter = m_instances[i].m_fighter;
@@ -55,7 +67,7 @@ void ftEntry::standbyAdvFollow() {
     fn_27_1241D8(m_input, 0);
 }
 
-// HYPOTHESIS: the word at +0x28 of the fighter task identifies it (compared with the argument).
+// HYPOTHESIS: the word at +0x28 of the fighter is its task id.
 int ftEntry::isExistFighter(int kind) {
     for (int i = 0; (u8)i < m_entryCount; i++) {
         Fighter* fighter = m_instances[(u8)i].m_fighter;
@@ -64,6 +76,43 @@ int ftEntry::isExistFighter(int kind) {
         }
     }
     return 0xFF;
+}
+
+// The character kind of the active instance: the forms of the characters that change (HYPOTHESIS: the trainer's Pokemon,
+// Zelda/Sheik, Samus/Zero Suit) report the form's own kind.
+int ftEntry::getCurrentInstanceGmKind() {
+    if (_0xe & 1) {
+        switch (m_instances[(u8)m_activeInstanceIndex].m_kind) {
+        case 0x1d:
+            return 0x1d;
+        case 0x1e:
+            return 0x1f;
+        case 0x1f:
+            return 0x21;
+        }
+    } else {
+        switch (m_characterKind) {
+        case 0xe:
+        case 0xf:
+            switch (m_instances[(u8)m_activeInstanceIndex].m_kind) {
+            case 0xd:
+                return 0xe;
+            case 0xe:
+                return 0xf;
+            }
+            break;
+        case 3:
+        case 4:
+            switch (m_instances[(u8)m_activeInstanceIndex].m_kind) {
+            case 3:
+                return 3;
+            case 0x18:
+                return 4;
+            }
+            break;
+        }
+    }
+    return m_characterKind;
 }
 
 void ftEntry::entryEnd() {
@@ -122,6 +171,15 @@ void ftEntry::setSlow(bool setStatus, int strength, int duration, bool isTimer) 
         getActiveFighter(this)->setSlow(setStatus, strength, duration, isTimer);
         if (_0xe & 2) {
             m_instances[1].m_fighter->setSlow(setStatus, strength, duration, isTimer);
+        }
+    }
+}
+
+void ftEntry::setWarp(Vec3f* pos, float lr, u32 flags) {
+    if (unkF == 6) {
+        getActiveFighter(this)->warp(pos, lr, flags);
+        if (_0xe & 2) {
+            m_instances[1].m_fighter->warp(pos, lr, flags);
         }
     }
 }
@@ -220,6 +278,56 @@ ftEntryManager::~ftEntryManager() {
 
 ftEntry* ftEntryManager::getEntity(u32 entryId) {
     return &m_entries[(u8)entryId];
+}
+
+// The instance of the entry whose fighter task has the id.
+static inline bool findInstanceFromTaskId(ftEntry* entry, int taskId, int* outInstanceIndex) {
+    Fighter* fighter;
+    int i;
+    for (i = 0; i < entry->m_entryCount; i++) {
+        fighter = entry->m_instances[i].m_fighter;
+        if (fighter != NULL && (u32)taskId == *reinterpret_cast<u32*>(reinterpret_cast<u8*>(fighter) + 0x28)) {
+            if (outInstanceIndex != NULL) {
+                *outInstanceIndex = i;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+static inline bool findInstanceFromAreaId(ftEntry* entry, int areaId, int* outInstanceIndex) {
+    int count = entry->m_entryCount;
+    for (int i = 0; i < count; i++) {
+        Fighter* fighter = entry->m_instances[i].m_fighter;
+        if (fighter != NULL && fn_27_8CC68(fighter, areaId) != -1) {
+            if (outInstanceIndex != NULL) {
+                *outInstanceIndex = i;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+int ftEntryManager::getEntryIdFromAreaId(int areaId, int* outInstanceIndex) {
+    int count = m_entryArrayVector.size();
+    for (int i = 0; i < count; i++) {
+        if (findInstanceFromAreaId(static_cast<const soArray<ftEntry*>&>(m_entryArrayVector).at(i), areaId, outInstanceIndex) == true) {
+            return static_cast<const soArray<ftEntry*>&>(m_entryArrayVector).at(i)->m_entryId;
+        }
+    }
+    return -1;
+}
+
+int ftEntryManager::getEntryIdFromTaskId(int taskId, int* outInstanceIndex) {
+    int count = m_entryArrayVector.size();
+    for (int i = 0; i < count; i++) {
+        if (findInstanceFromTaskId(static_cast<const soArray<ftEntry*>&>(m_entryArrayVector).at(i), taskId, outInstanceIndex) == true) {
+            return static_cast<const soArray<ftEntry*>&>(m_entryArrayVector).at(i)->m_entryId;
+        }
+    }
+    return -1;
 }
 
 int ftEntryManager::getEntryIdFromPlayerNo(int playerNo) {
