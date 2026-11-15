@@ -6797,6 +6797,10 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_metaknight_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_pit_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_dedede_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_purin_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_sonic_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_snake_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_popo_transactor.cpp"),
         ],
     },
     {
