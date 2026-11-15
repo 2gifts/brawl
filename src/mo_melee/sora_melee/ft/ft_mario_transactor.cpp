@@ -9,7 +9,7 @@
 // The fireball article (wn/mario/wn_mario_fireball.h needs the weapon builder chain): the members this unit uses.
 class wnMarioFireball : public Weapon {
 public:
-    void activate(int founderTaskId, int resourceId, int team, Vec3f* __restrict pos, int statusKind, float lr);
+    void activate(int founderTaskId, int resourceId, int team, const Vec3f* pos, int statusKind, float lr);
 };
 
 ftMarioTransactor::ftMarioTransactor() { }
