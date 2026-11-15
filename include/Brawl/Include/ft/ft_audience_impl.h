@@ -6,7 +6,7 @@
 
 class ftAudience {
 public:
-    virtual ~ftAudience();
+    virtual ~ftAudience() { }
     virtual void activate();
     virtual void deactivate();
     virtual void reqHandclapDead(float, bool);
@@ -28,6 +28,7 @@ class ftAudienceImpl : public gfTask, public ftAudience {
     char _84[44];
 
 public:
+    ftAudienceImpl();
     virtual void processFixPosition();
     virtual ~ftAudienceImpl();
 
