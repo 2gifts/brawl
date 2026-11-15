@@ -20,4 +20,6 @@ namespace ftExternalValueAccesser {
     int getHitTarget(Fighter* fighter, int index);
     // HYPOTHESIS: maps a hit number of the attack module to the model node it hits (used by the Pikmin chain-up).
     int getNodeIdFromHitNo(u8 hitNo);
+    // HYPOTHESIS: the model node of the Metroid latch.
+    int getMetroidNodeId();
 }
