@@ -1460,6 +1460,9 @@ mo_melee/sora_melee/so/effect/so_effect_screen.cpp:
 	.text       start:0x0009FC8C end:0x000A068C
 	.rodata     start:0x00000CB0 end:0x00000CC0
 
+mo_melee/sora_melee/so/effect/so_effect_screen_manager.cpp:
+	.text       start:0x000A068C end:0x000A0C34
+
 mo_melee/sora_melee/so/so_array_vector_destructor_efScreenHandle_1.cpp:
 	.text       start:0x000A0C34 end:0x000A0C74
 
