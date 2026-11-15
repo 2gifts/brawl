@@ -6826,6 +6826,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/st/st_event_rule_demo_camera.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_event_rule_fox_set_final.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/it/it_customizer.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_resource_id_accesser_impl.cpp"),
         ],
     },
     {
