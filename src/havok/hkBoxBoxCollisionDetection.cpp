@@ -183,6 +183,10 @@ void hkBoxBoxCollisionDetection::setvdProj(const hkRotation& bRa, int i, int j, 
     out.setAbs4(out);
 }
 
+// Limits of the edge-edge separation tests (all three call sites share the two constants).
+static const hkReal s_edgeSeparationLimit = -1e17f;
+static const hkReal s_edgeInvLengthLimit = 999.99994f;
+
 // Box vertex signs indexed by the 0x80/0x40/0x20 bits of a feature id (bit set: negative lane).
 static const hkReal s_vertexSigns[8][4] __attribute__((aligned(16))) = {
     {1.0f, 1.0f, 1.0f, 0.0f},   {1.0f, 1.0f, -1.0f, 0.0f},   {1.0f, -1.0f, 1.0f, 0.0f},   {1.0f, -1.0f, -1.0f, 0.0f},
@@ -410,7 +414,7 @@ int hkBoxBoxCollisionDetection::checkIntersection(const hkVector4& tolerance) {
         if (separated) {
             return 1;
         }
-        hkBoxBoxUtils::selectIfGT3(sep, -1e17f, invLen, 999.99994f);
+        hkBoxBoxUtils::selectIfGT3(sep, s_edgeSeparationLimit, invLen, s_edgeInvLengthLimit);
         m_sepDist[2] = sep;
     }
     {
@@ -431,7 +435,7 @@ int hkBoxBoxCollisionDetection::checkIntersection(const hkVector4& tolerance) {
         if (separated) {
             return 1;
         }
-        hkBoxBoxUtils::selectIfGT3(sep, -1e17f, invLen, 999.99994f);
+        hkBoxBoxUtils::selectIfGT3(sep, s_edgeSeparationLimit, invLen, s_edgeInvLengthLimit);
         m_sepDist[3] = sep;
     }
     {
@@ -452,7 +456,7 @@ int hkBoxBoxCollisionDetection::checkIntersection(const hkVector4& tolerance) {
         if (separated) {
             return 1;
         }
-        hkBoxBoxUtils::selectIfGT3(sep, -1e17f, invLen, 999.99994f);
+        hkBoxBoxUtils::selectIfGT3(sep, s_edgeSeparationLimit, invLen, s_edgeInvLengthLimit);
         m_sepDist[4] = sep;
     }
     return 0;
