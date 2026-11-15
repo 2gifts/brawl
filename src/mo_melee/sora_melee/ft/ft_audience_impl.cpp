@@ -262,6 +262,72 @@ bool ftAudienceImpl::checkTumultFallSpecial(float y, int entryId) {
     return true;
 }
 
+// HYPOTHESIS: ftExternalValueAccesser::getReactionCheer (unnamed in sora_melee).
+extern "C" float fn_27_14D5C0(Fighter* fighter);
+
+static inline int getCheerLevel(const ftAudienceData* data, float reaction) {
+    int level;
+    if (reaction >= data->m_handclapDamage2) {
+        level = 2;
+    } else if (reaction >= data->m_handclapDamage1) {
+        level = 1;
+    } else {
+        level = -(!(reaction >= data->m_handclapDamage0));
+    }
+    return level;
+}
+
+// A big hit is cheered: the call starts for a strong attacker, a combo of the same attacker claps louder, and
+// any other hit gets the plain cheer.
+void ftAudienceImpl::checkCheer(float, int attackerEntryId, int victimEntryId) {
+    float reaction = fn_27_14D5C0(g_ftManager->getFighter(victimEntryId, -1));
+    int level = getCheerLevel(m_data, reaction);
+    if (level == -1) {
+        return;
+    }
+    if (g_ftManager->isFighterActivate(attackerEntryId, -1) == true &&
+        getCheerLevel(m_data, fn_27_14D5C0(g_ftManager->getFighter(attackerEntryId, -1))) >= 2) {
+        int handclapLevel = getCheerLevel(m_data, reaction);
+        if (handclapLevel >= 1 && checkCall(reaction, attackerEntryId)) {
+            stopAudienceSe(m_cheerDefeatSe);
+        } else {
+            stopAudienceSe(m_handclapSe);
+            m_handclapSe = g_sndSystem->playSE(s_handclapSe[handclapLevel].m_se, m_soundGroup, 0, 0, -1);
+            if (attackerEntryId != -1 && m_callEntryId == attackerEntryId && m_callCount < m_data->m_callCountMax &&
+                m_callCount >= m_data->m_callCountMin) {
+                m_7d = true;
+            }
+        }
+    } else if (m_48 == attackerEntryId && m_frame < m_data->m_comboFrame) {
+        float comboReaction = m_50;
+        if (reaction > comboReaction) {
+            comboReaction = reaction;
+        }
+        int handclapLevel = getCheerLevel(m_data, comboReaction);
+        if (handclapLevel >= 1 && checkCall(comboReaction, attackerEntryId)) {
+            stopAudienceSe(m_cheerDefeatSe);
+        } else {
+            stopAudienceSe(m_handclapSe);
+            m_handclapSe = g_sndSystem->playSE(s_handclapSe[handclapLevel].m_se, m_soundGroup, 0, 0, -1);
+            if (attackerEntryId != -1 && m_callEntryId == attackerEntryId && m_callCount < m_data->m_callCountMax &&
+                m_callCount >= m_data->m_callCountMin) {
+                m_7d = true;
+            }
+        }
+    } else {
+        stopAudienceSe(m_cheerDefeatSe);
+        m_cheerDefeatSe = g_sndSystem->playSE(s_handclapSe[level].m_se0, m_soundGroup, 0, 0, -1);
+        if (level == 2 || (level == 1 && m_callEntryId == victimEntryId)) {
+            if (m_callCount < m_data->m_callCountMax && m_callCount >= m_data->m_callCountMin) {
+                m_7d = true;
+            }
+        }
+    }
+    m_48 = attackerEntryId;
+    m_frame = 0;
+    m_50 = reaction;
+}
+
 void ftAudienceImpl::checkCheerDefeat(int entryId) {
     if ((int)g_ftManager->getOwner(entryId)->getCheerDefeatFrame() > 0) {
         stopAudienceSe(m_cheerDefeatSe);

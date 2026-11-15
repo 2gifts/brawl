@@ -28,7 +28,7 @@ struct ftAudienceData {
     float m_cheerReactionMin; // 0xC
     float m_cheerReactionMax; // 0x10
     float m_cheerReactionMul; // 0x14
-    char _18[0x4];
+    float m_comboFrame; // 0x18
     int m_callDamage; // 0x1C
     int m_tumultInterval; // 0x20
     int m_callCountMin; // 0x24

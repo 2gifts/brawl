@@ -11081,6 +11081,9 @@ mo_melee/sora_melee/st/st_operator_defeat_boss.cpp:
 	.text       start:0x0025BE08 end:0x0025CB9C
 	.ctors      start:0x000002F4 end:0x000002F8
 
+mo_melee/sora_melee/st/st_operator_uploader.cpp:
+	.text       start:0x0025CB9C end:0x0025CEA4
+
 mo_melee/sora_melee/st/st_event_rule.cpp:
 	.text       start:0x0025CEA4 end:0x0025CF48
 
@@ -11120,6 +11123,9 @@ mo_melee/sora_melee/st/st_event_rule_demo_camera.cpp:
 
 mo_melee/sora_melee/st/st_event_rule_fox_set_final.cpp:
 	.text       start:0x0025E5E8 end:0x0025E71C
+
+mo_melee/sora_melee/st/st_enemy_id_manager.cpp:
+	.text       start:0x0025E71C end:0x0025EA94
 
 mo_melee/sora_melee/so/so_array_list_members_Ul_32_part2.cpp:
 	.text       start:0x0025EA94 end:0x0025EB9C
@@ -12514,6 +12520,9 @@ mo_melee/sora_melee/wn/wn_pit_bow_arrow.cpp:
 mo_melee/sora_melee/wn/wn_pit_bow_arrow_status_uniq_process_fly.cpp:
 	.text       start:0x003603B8 end:0x003608AC
 	.ctors      start:0x00000468 end:0x0000046C
+
+mo_melee/sora_melee/ft/ft_pikmin_transactor.cpp:
+	.text       start:0x003608AC end:0x00361264
 
 mo_melee/sora_melee/ft/ft_lucas_transactor.cpp:
 	.text       start:0x00361264 end:0x003615F8
