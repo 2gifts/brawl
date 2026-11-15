@@ -44,6 +44,7 @@
 #include <havok/hkCollisionAgent.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkCollisionInput.h>
+#include <havok/hkPointerMapBase.h>
 #include <havok/hkDefaultToiResourceMgr.h>
 #include <havok/hkWorld.h>
 #include <havok/hkWorldCallbackUtil.h>
@@ -316,16 +317,14 @@ extern "C" void fn_8032A22C(Container* self, Flags* flags) {
 #include <havok/hkSimulation.h>
 namespace jj_fn_80326920 {
 extern "C" {
-void fn_80327DEC(s32, s32, s32);
-void fn_80327FE0(s32, s32);
 
 void fn_80326920(s32 arg0, s32 *arg1, s32 arg2, unsigned char *arg3, const unsigned char *arg4) {
     s8 flag = *arg4;
     ((hkSimulation*)(arg0))->hkSimulation::resetCollisionInformationForEntities((hkEntity**)((s32)arg1), (int)(arg2), (hkWorld*)(arg3), *(hkBool*)(&flag));
     if (arg2 != 1) {
-        fn_80327DEC(arg0, (s32)arg1, arg2);
+        ((hkContinuousSimulation*)arg0)->removeToiEventsOfEntities((hkEntity**)arg1, arg2);
     } else {
-        fn_80327FE0(arg0, *arg1);
+        ((hkContinuousSimulation*)arg0)->removeToiEventsOfEntity((hkEntity*)*arg1);
     }
 }
 }
@@ -401,6 +400,8 @@ void hkContinuousSimulation::processAgentCollideContinuous(hkAgentNnEntry* entry
 }
 
 // Drops every pending time-of-impact event of the entity; each event's contact manager is told first.
+#pragma push
+#pragma auto_inline off
 void hkContinuousSimulation::removeToiEventsOfEntity(hkEntity* entity) {
     for (int i = 0; i < m_toiEvents.getSize(); i++) {
         if ((hkEntity*)m_toiEvents[i].unk04[0] == entity || (hkEntity*)m_toiEvents[i].unk04[1] == entity) {
@@ -414,3 +415,32 @@ void hkContinuousSimulation::removeToiEventsOfEntity(hkEntity* entity) {
         }
     }
 }
+#pragma pop
+
+// Drops the pending time-of-impact events of a set of entities (through a pointer map of them); each event's
+// contact manager is told first.
+#pragma push
+#pragma auto_inline off
+void hkContinuousSimulation::removeToiEventsOfEntities(hkEntity** entities, int numEntities) {
+    if (m_toiEvents.getSize() != 0) {
+        hkPointerMapBase<hkUlong> entitySet;
+        entitySet.reserve(numEntities);
+        for (int i = 0; i < numEntities; i++) {
+            entitySet.insert((hkUlong)entities[i], 0);
+        }
+        for (int i = 0; i < m_toiEvents.getSize(); i++) {
+            hkToiEvent* event __attribute__((aligned(16))) = &m_toiEvents[i];
+            int keyA = entitySet.findKey((hkUlong)event->unk04[0]);
+            int keyB = entitySet.findKey((hkUlong)event->unk04[1]);
+            bool remove = entitySet.isValid(keyA) || entitySet.isValid(keyB);
+            if (remove) {
+                ((hkContactMgr*)event->unk18)
+                    ->removeToi(((hkEntity*)event->unk04[0])->m_collidable, ((hkEntity*)event->unk04[1])->m_collidable,
+                                *(hkContactPointMaterial*)&event->unk10);
+                m_toiEvents.removeAt(i);
+                i--;
+            }
+        }
+    }
+}
+#pragma pop
