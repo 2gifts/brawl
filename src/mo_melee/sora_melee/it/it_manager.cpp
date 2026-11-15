@@ -1,5 +1,6 @@
 #include <string.h>
 #include <types.h>
+#include <it/it_figure_manager.h>
 #include <it/it_manager.h>
 #include <gf/gf_task_scheduler.h>
 #include <ft/ft_manager.h>
@@ -47,8 +48,6 @@ extern "C" {
 int fn_27_2B23F8(itArchive* archive);
 
 // itManager::initializeSmashBallFlags (0x2A95B4, unnamed) / itManager::initializeDragoonFlags (0x2A97A4, unnamed)
-// itFigureManager (0x2C1674, unnamed): whether all figure textures finished preloading
-bool fn_27_2C1674(void* figureManager);
 
 // itArchive::isRemovable (0x2B24C4, unnamed): whether the archive may be freed now (nothing uses it, load finished)
 int fn_27_2B24C4(itArchive* archive);
@@ -59,11 +58,7 @@ void fn_80052694();
 
 // itArchive::procWait (0x2B2358, unnamed): per-frame wait processing of a loading archive
 void fn_27_2B2358(itArchive* archive);
-// itFigureManager::onProcessFixPosition (0x2C197C, unnamed): whether the figure textures are done with this pass
-bool fn_27_2C197C(void* figureManager);
 
-// itFigureManager::removeFigureTexAll (0x2C1890, unnamed)
-void fn_27_2C1890(void* figureManager);
 
 // gmCheckGlobalItemSwitch (main, unnamed): whether the item may appear in the match
 bool fn_8005136C(int itemKind);
@@ -1028,7 +1023,7 @@ bool itManager::isPassedProcessUpdate() {
 bool itManager::isCompFigureTexPreloadAll() {
     u32 state = itManagerField<u32>(this, 0x50) - 2;
     if (state <= 1) {
-        return fn_27_2C1674(m_figureManager);
+        return static_cast<itFigureManager*>(m_figureManager)->isCompFigureTexPreloadAll();
     }
     return true;
 }
@@ -1583,7 +1578,7 @@ void itManager::processFixPosition() {
         if (!(pendingArchives > 0) && !(pendingGenArchives > 0)) {
             allClear = true;
         }
-        if (m_figureManager != NULL && !fn_27_2C197C(m_figureManager)) {
+        if (m_figureManager != NULL && !static_cast<itFigureManager*>(m_figureManager)->onProcessFixPosition()) {
             allClear = false;
         }
         if (itManagerField<int>(this, 0x4C) == 3) {
@@ -1642,7 +1637,7 @@ void itManager::finish() {
     m_pokemonInfoArrayList.clear();
     m_preloadPokemonTimer = 0;
     if (m_figureManager != NULL) {
-        fn_27_2C1890(m_figureManager);
+        static_cast<itFigureManager*>(m_figureManager)->removeFigureTexAll();
     }
     itManagerField<int>(this, 0x4C) = 3;
     m_frameCount = 0;
