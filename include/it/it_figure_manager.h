@@ -2,25 +2,10 @@
 
 #include <StaticAssert.h>
 #include <mt/mt_vector.h>
+#include <it/it_figure_archive.h>
 #include <so/so_array.h>
 #include <ty/ty_fig_listmng.h>
 #include <types.h>
-
-// HYPOTHESIS: a loaded trophy texture archive (it_figure_archive, not decompiled): the file id first, a byte that marks it
-// for removal at 0x8, a vtable at 0x10.
-class itFigureArchive {
-public:
-    u32 m_fileId;     // 0x0
-    u8 _4[4];
-    u8 m_isRemove;    // 0x8
-    u8 _9[3];
-    int m_refCount;   // 0xC, HYPOTHESIS: preload requests still holding the archive
-
-    virtual ~itFigureArchive();
-    bool isComp();                 // HYPOTHESIS: the archive finished loading
-    bool isRemovable();            // HYPOTHESIS: nothing uses it any more
-    void* getTexFile(u32 figureId);
-};
 
 // The trophy (figure) archives of the items (sora_melee it_figure_manager.o): the trophy list data and the loaded
 // trophy texture archives. Only the members the decompiled functions use are described.
@@ -41,7 +26,7 @@ public:
     bool isCompFigureTex(u32 id);
     void removeFigureTexAll();
     bool onProcessFixPosition();
-    void* getTexFile(u32 id);
+    nw4r::g3d::ResFileData* getTexFile(u32 id);
     itFigureArchive* findArchive(u32 fileId) const;
     bool isExistFigureArchive(u32 id);
     void unloadFigureTex(u32 id, bool countDown);

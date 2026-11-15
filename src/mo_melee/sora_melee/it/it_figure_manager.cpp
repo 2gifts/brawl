@@ -105,7 +105,7 @@ inline itFigureArchive* itFigureManager::findArchive(u32 fileId) const {
     }
     for (int i = 0; i < m_archives.size(); i++) {
         itFigureArchive* archive = m_archives.at(i);
-        if (archive != NULL && fileId == archive->m_fileId) {
+        if (archive != NULL && fileId == archive->m_kind) {
             return archive;
         }
     }
@@ -165,7 +165,7 @@ void itFigureManager::removeFigureTexAll() {
                 m_archives.erase(i);
                 i--;
             } else {
-                archive->m_isRemove = true;
+                archive->unk8 = true;
             }
         }
     }
@@ -175,7 +175,7 @@ bool itFigureManager::onProcessFixPosition() {
     int pending = 0;
     for (int i = 0; i < m_archives.size(); i++) {
         itFigureArchive*& archive = m_archives.at(i);
-        if (archive != NULL && archive->m_isRemove) {
+        if (archive != NULL && archive->unk8) {
             pending++;
             if (archive->isRemovable()) {
                 delete archive;
@@ -201,27 +201,28 @@ void itFigureManager::unloadFigureTex(u32 id, bool countDown) {
     u32 fileId = itFigureFileId(id);
     for (int i = 0; i < m_archives.size(); i++) {
         itFigureArchive* archive = m_archives.at(i);
-        if (archive != NULL && fileId == archive->m_fileId) {
-            if (countDown && archive->m_refCount > 0) {
-                if (--archive->m_refCount > 0) {
+        if (archive != NULL && fileId == archive->m_kind) {
+            // the count is signed here (the archive header keeps it as a u32)
+            if (countDown && (int)archive->unkC > 0) {
+                if ((int)--archive->unkC > 0) {
                     return;
                 }
             }
-            if (archive->m_isRemove) {
+            if (archive->unk8) {
                 return;
             }
             if (archive->isRemovable()) {
                 delete archive;
                 m_archives.erase(i);
             } else {
-                archive->m_isRemove = true;
+                archive->unk8 = true;
             }
             return;
         }
     }
 }
 
-void* itFigureManager::getTexFile(u32 id) {
+nw4r::g3d::ResFileData* itFigureManager::getTexFile(u32 id) {
     int fileId = itFigureFileId(id);
     u32 texId = 0;
     if ((u32)fileId == 0xFFFFFFF0 || (u32)fileId == 0xFFFFFFF1) {
@@ -231,7 +232,7 @@ void* itFigureManager::getTexFile(u32 id) {
     if (archive == NULL) {
         return NULL;
     }
-    if (!archive->isComp() || archive->m_isRemove) {
+    if (!archive->isComp() || archive->unk8) {
         return NULL;
     }
     return archive->getTexFile(texId);
