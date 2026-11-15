@@ -1033,10 +1033,10 @@ int hkWorld::getMemUsageForIntegration() {
     int result = 0;
     for (int i = m_unk28.m_size - 1; i >= 0; i--) {
         hkWorldMemoryEntry* entry = ((hkWorldMemoryEntry**)m_unk28.m_data)[i];
-        int value = entry->m_unk0C + (entry->m_unk3C << 7) + (entry->m_unk14 << 2) + entry->m_unk10 + 0x9C;
-        if (result < value) {
-            result = value;
-        }
+        int part = (entry->m_unk14 << 2) + entry->m_unk10;
+        int value = entry->m_unk0C + (entry->m_unk3C << 7) + part;
+        value += 0x9C;
+        result = (result > value) ? result : value;
     }
     return result;
 }

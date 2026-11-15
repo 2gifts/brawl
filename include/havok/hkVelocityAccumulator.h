@@ -8,7 +8,9 @@
 // used by the angular impulse code, 0x40 / 0x50 the summed velocities the step uses.
 // HYPOTHESIS: the names of m_linearVel / m_angularVel (from the write-back into hkMotion's velocities).
 struct hkVelocityAccumulator {
-    u8 unk00[4];           // 0x00
+    u8 m_type;             // 0x00
+    hkBool m_matrixIsIdentity; // 0x01 the frame at 0x50 is the identity
+    u8 unk02[2];           // 0x02
     u32 unk4;              // 0x04 handed to hkMotion::setDeactivationCounter
     u8 unk08[8];           // 0x08
     hkVector4 m_linearVel;  // 0x10
