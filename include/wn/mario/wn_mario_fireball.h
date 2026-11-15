@@ -221,7 +221,7 @@ public:
 #endif
     // HYPOTHESIS: parameter meanings from the fighter transactor's call: the founder task, the effect resource, the team, the
     // start position, the first status kind and the facing.
-    void activate(int founderTaskId, int resourceId, int team, Vec3f* __restrict pos, int statusKind, float lr);
+    void activate(int founderTaskId, int resourceId, int team, const Vec3f* pos, int statusKind, float lr);
     virtual bool notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* moduleAccesser, int index);
 };
 

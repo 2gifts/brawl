@@ -3,6 +3,7 @@
 #define WN_WEAPON_BUILDER
 #define WN_ARTICLE_NATIVE_BUILDERS
 #define WN_STATUS_NO_TAIL
+#define WN_ARTICLE_ANIMCMD_INT // BYTES: the article overrides the observer's int-index notifyEventAnimCmd (its @72@ thunk)
 #define WN_TRANSITION_CTOR_INLINE
 #define WN_KINETIC_MEDIATOR_INLINE_DTOR
 #define FT_POOL_ROOT_NONPOLYMORPHIC // BYTES: without it the hierarchy destructor is never_inline
@@ -13,6 +14,7 @@
 #define SO_NULLABLE_INLINE_CTOR
 #define WN_ANIMCMD_RESET_MODE_BOX // BYTES: word-aligned reset-mode temporaries (frame size of the anim cmd sub builder)
 #define WN_ANIMCMD_PRESENTER_LOCAL_STORE // BYTES: the interpreters' presenters keep the looked-up list in a local (98.3% vs 97.2%)
+#define WN_ANIMCMD_STACK_PTR // BYTES: the interpreter stacks stay in a saved register across getManageId (ft_builder_animcmd.h)
 #include <wn/wn_module_accesser_builder.h>
 #include <wn/mario/wn_mario_fireball.h>
 #include <wn/wn_class_info_impl.h>
@@ -197,22 +199,8 @@ inline soModuleAccesserBuilder<wnMarioFireballModuleAccesserBuildConfig>::~soMod
 wnMarioFireball::~wnMarioFireball() { }
 #pragma pop
 
-// TODO(nonmatching): activate (96.4%): only the register choice of the two descriptor flag bytes differs (the original loads the
-//   first into r9 and the second into r0, as every exact sora_melee activate does; ours gives the first byte r0); every
-//   bitfield assignment order and the member-wise descriptor constructor were tried (the constructor form scores 93%), and
-//   a 9 minute permuter run found nothing.
-// TODO(nonmatching): notifyEventAnimCmd is byte exact (99.98%): the only remaining difference is the relocation form of the
-//   float pool base (ours is section-relative `.rodata+N`, the original a named float label); check it at link time.
-// TODO(nonmatching): the animation command sub builder constructor (98.3%): the presenter's looked-up list gets its own
-//   register initialised to null (`li`) where the original reuses the register that holds the reset-mode zero / the null it
-//   stores into m_obsrvrList, and re-materialises zero afterwards. Ruled out (F4, under a unit-private macro, all 97.4-98.3%):
-//   the result read from the member before or after the capacity check (a reload or a fresh `li`), a null local in the
-//   constructor body passed to the helper, a literal null local in the helper, and an uninitialised result (right local
-//   shape, but four extra callee-saved registers over the whole constructor). Each reset-mode byte temporary also needs a
-//   word-aligned slot (WN_ANIMCMD_RESET_MODE_BOX). The unit cannot link before these two are exact.
 // Starts the fireball: it leaves along the launch angle at the launch speed, facing lr, and falls under its own gravity.
-void wnMarioFireball::activate(int founderTaskId, int resourceId, int team, Vec3f* __restrict pos, int statusKind, float lr) {
-    // MATCH-ONLY: the original reads the life before it builds the descriptor.
+void wnMarioFireball::activate(int founderTaskId, int resourceId, int team, const Vec3f* pos, int statusKind, float lr) {
     int life = m_param->life;
     wnActivateDesc desc;
     desc.founderTaskId = founderTaskId;
@@ -234,7 +222,8 @@ void wnMarioFireball::activate(int founderTaskId, int resourceId, int team, Vec3
     desc.flagsMidHigh = 0;
     desc.flagsMidLow = 1;
     desc.flagsLow = 0;
-    desc.unk4DHigh = 0;
+    desc.flag4DBit7 = 0;
+    desc.flag4DBit6 = 0;
     desc.unk38 = 3;
     desc.unk3C = 0xFF;
     Weapon::activate(&desc);
@@ -276,32 +265,31 @@ bool wnMarioFireball::notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* modul
     if (!isObserv(group)) {
         return false;
     }
-    if (cmd->getType() > -1) {
-        if (cmd->getType() >= 11) {
-            return false;
-        }
-        switch (cmd->getType()) {
-        case 6: {
-            wnKineticEnergyNormal& energy =
-                dynamic_cast<wnKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
-            Vec2f speed = energy.getSpeed();
-            Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(static_cast<grCollStatus::TouchMask>(0xff), 0);
-            wnMarioFireballReflect(speed, normal);
-            speed = speed * m_param->bounceScale;
-            if (speed.length() < m_param->minBounceSpeed) {
-                deactivate(false);
-                return true;
-            }
-            float lr = -1.0f;
-            // BYTES: the speed assignment goes through a constructed XY pair (the Robo Beam does the same).
-            energy.m_speed = Vec2f(speed.m_x, speed.m_y);
-            if (speed.m_x > 0.0f) {
-                lr = 1.0f;
-            }
-            moduleAccesser->getPostureModule().setLr(lr);
+    // Only command types 0 to 10 belong to the article.
+    if (cmd->getType() <= -1 || cmd->getType() >= 11) {
+        return false;
+    }
+    switch (cmd->getType()) {
+    case 6: {
+        wnKineticEnergyNormal& energy =
+            dynamic_cast<wnKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
+        Vec2f speed = energy.getSpeed();
+        Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(static_cast<grCollStatus::TouchMask>(0xff), 0);
+        wnMarioFireballReflect(speed, normal);
+        speed = speed * m_param->bounceScale;
+        if (speed.length() < m_param->minBounceSpeed) {
+            deactivate(false);
             return true;
         }
+        float lr = -1.0f;
+        // BYTES: the speed assignment goes through a constructed XY pair (the Robo Beam does the same).
+        energy.m_speed = Vec2f(speed.m_x, speed.m_y);
+        if (speed.m_x > 0.0f) {
+            lr = 1.0f;
         }
+        moduleAccesser->getPostureModule().setLr(lr);
+        return true;
+    }
     }
     return false;
 }
