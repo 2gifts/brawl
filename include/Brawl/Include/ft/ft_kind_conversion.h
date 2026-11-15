@@ -6,5 +6,5 @@
 #include <types.h>
 
 namespace ftKindConversion {
-    u32 convertKind(gmCharacterKind, ftKind* out);
+    u8 convertKind(gmCharacterKind, ftKind* out);
 }

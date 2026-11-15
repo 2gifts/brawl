@@ -5166,6 +5166,10 @@ mo_melee/sora_melee/ft/ft_common_data_accesser.cpp:
 	.text       start:0x00145478 end:0x00149BD8
 	.ctors      start:0x00000070 end:0x00000074
 
+mo_melee/sora_melee/ft/ft_kind_conversion.cpp:
+	.text       start:0x00149BD8 end:0x00149C70
+	.rodata     start:0x000014D8 end:0x000018B8
+
 mo_melee/sora_melee/ft/ft_extend_param_accesser.cpp:
 	.text       start:0x00149C70 end:0x00149E1C
 	.data       start:0x0002BC00 end:0x0002BCA0
@@ -5245,6 +5249,9 @@ mo_melee/sora_melee/ft/ft_damage_transactor_impl.cpp:
 mo_melee/sora_melee/ft/ft_switch_decide_module_impl.cpp:
 	.text       start:0x00153E94 end:0x00154088
 	.ctors      start:0x0000008C end:0x00000090
+
+mo_melee/sora_melee/ft/ft_stop_module_impl.cpp:
+	.text       start:0x00154088 end:0x00154194
 
 mo_melee/sora_melee/ft/ft_area_gimmick_term.cpp:
 	.text       start:0x00154194 end:0x00154534
@@ -12261,6 +12268,9 @@ mo_melee/sora_melee/wn/wn_sheik_needle_have.cpp:
 	.text       start:0x003422E8 end:0x00345B74
 	.ctors      start:0x0000041C end:0x00000420
 
+mo_melee/sora_melee/ft/ft_popo_transactor.cpp:
+	.text       start:0x00345BAC end:0x00346284
+
 mo_melee/sora_melee/wn/wn_popo_ice_shot.cpp:
 	.text       start:0x00348538 end:0x0034CF20
 	.ctors      start:0x00000420 end:0x00000424
@@ -12764,6 +12774,15 @@ mo_melee/sora_melee/wn/wn_snake_rgb6.cpp:
 mo_melee/sora_melee/ft/ft_snake_status_uniq_process_grenade.cpp:
 	.text       start:0x003BAB9C end:0x003BAEF0
 	.ctors      start:0x00000504 end:0x00000508
+
+mo_melee/sora_melee/ft/ft_snake_transactor.cpp:
+	.text       start:0x003BAEF0 end:0x003BB610
+
+mo_melee/sora_melee/ft/ft_sonic_transactor.cpp:
+	.text       start:0x003BB610 end:0x003BBC90
+
+mo_melee/sora_melee/ft/ft_purin_transactor.cpp:
+	.text       start:0x003BE670 end:0x003BE8B4
 
 mo_melee/sora_melee/ft/ft_purin_status_uniq_process_special_n.cpp:
 	.text       start:0x003BE8B4 end:0x003C7CC4
