@@ -3122,6 +3122,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/it/it_kinetic_energy.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/it/it_kinetic_energy_stop.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/it/it_value_accesser.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/it/it_extend_param_accesser.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/if/if_resetsan.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/mu/mu_adv_seal.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/mu/mu_adv_seal_list.cpp"),
