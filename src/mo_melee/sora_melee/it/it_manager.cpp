@@ -56,8 +56,6 @@ void fn_80052694();
 
 // gmCheckGlobalItemSwitch (main, unnamed): whether the item may appear in the match
 bool fn_8005136C(int itemKind);
-// itFigureManager::preloadFigureTex (0x2C0FBC, unnamed)
-void fn_27_2C0FBC(void* figureManager, int unk1, int unk2);
 extern char lbl_27_data_79068[];
 
 // itArchive::getResFileFromId (0x2B26E8, unnamed): the resource file data of an archive entry
@@ -1710,7 +1708,7 @@ void itManager::start(int mode) {
             *(int*)((u8*)figureManager + 0x310) = figureListCapacity(figureManager);
         }
         m_genLevel = (itGenParam::Level)2;
-        fn_27_2C0FBC(m_figureManager, -16, 1);
+        static_cast<itFigureManager*>(m_figureManager)->preloadFigureTex(-16, true);
         break;
     }
     case 2: {

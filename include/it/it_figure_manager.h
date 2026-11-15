@@ -15,11 +15,14 @@ public:
 
     tyFigListDataManager* m_figList; // 0x4
     soArrayList<itFigureArchive*, 64> m_archives; // 0x8
-    int m_preloadIndex;              // 0x310
+    int m_preloadMax;                // 0x310, HYPOTHESIS: how many archives may be preloaded at once
+
+    itFigureManager(void* figListData, u32 figListSize);
 
     bool isValidFigureId(u32 id);
     int getFigureFileId(u32 id);
     bool isAllStarFigureId(u32 id);
+    bool preloadFigureTex(u32 id, bool addRef);
     const char* getTexName(u32 id);
     bool getOffsetAndScale(u32 id, Vec2f* offset, Vec2f* scale);
     bool isCompFigureTexPreloadAll() const;

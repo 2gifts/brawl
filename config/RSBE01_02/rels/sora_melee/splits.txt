@@ -11881,6 +11881,14 @@ mo_melee/sora_melee/it/it_gen_archive.cpp:
 	.text       start:0x002B2830 end:0x002B2E10
 	.ctors      start:0x00000328 end:0x0000032C
 
+mo_melee/sora_melee/it/it_damage_effector_impl.cpp:
+	.text       start:0x002B2E10 end:0x002B32A8
+	.ctors      start:0x0000032C end:0x00000330
+
+mo_melee/sora_melee/it/it_damage_transactor_impl.cpp:
+	.text       start:0x002B32A8 end:0x002B3A0C
+	.ctors      start:0x00000330 end:0x00000334
+
 mo_melee/sora_melee/so/so_array_list_members_soInstanceUnitFullProperty_ptr_soKineticEnergy_11_part1.cpp:
 	.text       start:0x002BB9F0 end:0x002BC544
 
@@ -11913,6 +11921,8 @@ mo_melee/sora_melee/it/it_extend_param_accesser.cpp:
 
 mo_melee/sora_melee/it/it_figure_manager.cpp:
 	.text       start:0x002C0B88 end:0x002C1DA4
+	.data       start:0x0007A668 end:0x0007AC70
+	.bss        start:0x000071F8 end:0x00007318
 
 mo_melee/sora_melee/so/so_array_list_archive_ptr_itFigureArchive_64_part1.cpp:
 	.text       start:0x002C1DA4 end:0x002C23B4
