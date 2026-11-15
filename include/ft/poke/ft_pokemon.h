@@ -9,17 +9,7 @@
 
 class ftOwner;
 
-// HYPOTHESIS: the Pokemon Trainer's party state; both modules are constructed in sora_melee from the first extend parameter block.
-class ftPokemonStaminaModule {
-    u8 unk0[0xC];
-public:
-    // HYPOTHESIS: unkC / unk14 are copied into the work floats 0x11000013 / 0x11000014 at the start.
-    float unkC;
-    float unk10;
-    float unk14;
-    ftPokemonStaminaModule(const void* extendParam, soModuleAccesser* moduleAccesser);
-    ~ftPokemonStaminaModule() { }
-};
+#include <ft/poke/ft_pokemon_stamina_module.h>
 
 // HYPOTHESIS: the entry event presenter is the first base (the fighter walks the observer list at the address of the module).
 class ftPokemonEventManageModule : public soEventPresenter<ftEntryEventObserver> {
