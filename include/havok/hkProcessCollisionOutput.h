@@ -24,6 +24,11 @@ struct hkProcessCollisionData {
         hkReal m_time;            // 0x3030
         hkReal unk24;             // 0x3034 not identified
         hkGskCache m_gskCache;    // 0x3038
+        // 0x3044 properties of the impact, copied into the time-of-impact event. HYPOTHESIS: the names.
+        u32 m_properties;         // 0x3044
+        u16 m_propertiesB;        // 0x3048
+        u8 m_propertiesC;         // 0x304A
+        u8 m_propertiesD;         // 0x304B
     };
 
     // Potential contacts (0x3050). HYPOTHESIS: the names; the agent3 process functions append the first of the
