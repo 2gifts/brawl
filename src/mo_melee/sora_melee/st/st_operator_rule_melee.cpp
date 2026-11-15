@@ -247,3 +247,26 @@ void stOperatorRuleMelee::deletePlayer(u32 mode, u32 keepMask) {
         }
     }
 }
+
+// HYPOTHESIS: +0x74 stops the bookkeeping (a replay or a network spectator).
+void stOperatorRuleMelee::notifyEventKnockout(u32 playerIndex) {
+    if (*byteAt(this, 0x74) == 0 && (int)playerIndex < m_numPlayers) {
+        m_0x124[playerIndex] = m_framesElapsed;
+        m_playersLastDeadSleepFrame[playerIndex] = 0;
+    }
+}
+
+// Logs the KO in both players' results (the last 100 of each), then the common bookkeeping.
+void stOperatorRuleMelee::notifyEventBeat(u32 playerIndex1, u32 playerIndex2) {
+    if (*byteAt(this, 0x74) == 0) {
+        gmPlayerResultInfo* winner = &m_resultInfo->m_playersResultInfo[m_condition->m_playersInitData[playerIndex1].m_playerNo];
+        gmPlayerResultInfo* loser = &m_resultInfo->m_playersResultInfo[m_condition->m_playersInitData[playerIndex2].m_playerNo];
+        int koIndex = m_0x15C[playerIndex1]++ % 100;
+        winner->m_koTargets[koIndex] = loser->m_characterKind;
+        winner->m_koCauses[koIndex] = loser->_3[0];
+        int deadIndex = m_0x178[playerIndex2]++ % 100;
+        loser->m_deadTargets[deadIndex] = winner->m_characterKind;
+        loser->m_deadCauses[deadIndex] = winner->_3[0];
+        stOperatorRule::notifyEventBeat(playerIndex1, playerIndex2);
+    }
+}
