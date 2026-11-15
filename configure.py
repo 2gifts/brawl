@@ -6841,6 +6841,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_audience_impl.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_operator_uploader.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_pikmin_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/st/st_enemy_id_manager.cpp"),
         ],
     },
     {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <StaticAssert.h>
+#include <mt/mt_vector.h>
 #include <types.h>
 #include <ut/ut_uncopyable.h>
 #include <so/so_array.h>
@@ -10,6 +11,10 @@ class stEnemyIdManager : public utUnCopyable {
     u32 m_maxNumEnemmies;
     u32 m_numEnemies;
 public:
+    stEnemyIdManager() {
+        m_maxNumEnemmies = 32;
+        m_numEnemies = 0;
+    }
     virtual ~stEnemyIdManager();
 
     inline bool addEnemyId(u32 createId) {
@@ -51,6 +56,7 @@ public:
 
     static void create();
     static void remove();
+    int searchNearEnemy(Vec3f* pos, float, float range);
 
 };
 static_assert(sizeof(stEnemyIdManager) == 0x194, "Class is wrong size!");
