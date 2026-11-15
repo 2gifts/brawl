@@ -5,6 +5,7 @@
 #include <ft/ft_slot.h>
 #include <ft/ft_slot_manager.h>
 #include <ft/fighter.h>
+#include <gf/gf_task_scheduler.h>
 #include <gm/gm_global.h>
 #include <types.h>
 
@@ -26,6 +27,12 @@ int fn_27_8CC68(StageObject* object, int areaId);
 // HYPOTHESIS: Fighter::addDamage (unnamed in sora_melee).
 void fn_27_13C1F0(Fighter* fighter, float damage);
 }
+
+// The head word of gfTaskScheduler (its process type is private there).
+struct ftEntrySchedulerView {
+    s32 unk0 : 8;
+    s32 m_processType : 8;
+};
 
 static inline ftEntry* getEntry(int entryId) {
     return g_ftEntryManager->getEntity(entryId);
@@ -184,6 +191,35 @@ void ftEntry::setWarp(Vec3f* pos, float lr, u32 flags) {
     }
 }
 
+// HYPOTHESIS: the pending scaling request (kind at +0x20, -1 when none; type at +0x24), applied outside the passes 2..5.
+void ftEntry::setScaling(int kind, int type) {
+    if (unkF == 6) {
+        int* request = reinterpret_cast<int*>(reinterpret_cast<u8*>(this) + 0x20);
+        request[0] = kind;
+        request[1] = type;
+        gfTaskScheduler* scheduler = gfTaskScheduler::getInstance();
+        if (scheduler != NULL) {
+            int processType = reinterpret_cast<ftEntrySchedulerView*>(scheduler)->m_processType;
+            if ((processType <= 1 || processType >= 6) && request[0] != -1) {
+                if (request[0] == 0) {
+                    if (_0xe & 2) {
+                        m_instances[0].m_fighter->restoreScaling();
+                        m_instances[1].m_fighter->restoreScaling();
+                    } else {
+                        getActiveFighter(this)->restoreScaling();
+                    }
+                } else if (_0xe & 2) {
+                    m_instances[0].m_fighter->startScaling((Fighter::Scaling::Kind)request[0], (Fighter::Scaling::Type)request[1]);
+                    m_instances[1].m_fighter->startScaling((Fighter::Scaling::Kind)request[0], (Fighter::Scaling::Type)request[1]);
+                } else {
+                    getActiveFighter(this)->startScaling((Fighter::Scaling::Kind)request[0], (Fighter::Scaling::Type)request[1]);
+                }
+                request[0] = -1;
+            }
+        }
+    }
+}
+
 void ftEntry::setCurry() {
     if (unkF == 6) {
         getActiveFighter(this)->setCurry(true, -1);
@@ -268,6 +304,18 @@ void ftEntry::setVisibilityTrainer(bool visible) {
     if (unkF == 6 && (_0xe & 1)) {
         m_instances[3].m_fighter->setVisibility(visible);
     }
+}
+
+// HYPOTHESIS: +0x38 is the swap counter (starts at 1), +0x40/+0x44/+0x48 the swap entry ids.
+ftEntryManager::ftEntryManager(int entryCapacity) : m_entries(NULL), m_entryCount(entryCapacity) {
+    *reinterpret_cast<int*>(_0x38) = 1;
+    m_isProcessHeartSwap = false;
+    *reinterpret_cast<int*>(reinterpret_cast<u8*>(this) + 0x40) = -1;
+    m_entries = new (static_cast<Heaps::HeapType>(2)) ftEntry[entryCapacity];
+    m_entryArrayVector.clear();
+    g_ftEntryManager = this;
+    *reinterpret_cast<int*>(reinterpret_cast<u8*>(this) + 0x44) = -1;
+    *reinterpret_cast<int*>(reinterpret_cast<u8*>(this) + 0x48) = -1;
 }
 
 ftEntryManager::~ftEntryManager() {
