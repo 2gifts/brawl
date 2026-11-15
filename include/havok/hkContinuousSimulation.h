@@ -42,6 +42,7 @@ struct hkContinuousSimulation : hkSimulation {
     void addToiEvent(const hkProcessCollisionOutput& output, const hkAgentNnEntry& entry);
     // Drops the pending events of an entity, telling their contact managers.
     void removeToiEventsOfEntity(hkEntity* entity);
+    void removeToiEventsOfEntities(hkEntity** entities, int numEntities);
     void processAgentCollideContinuous(hkAgentNnEntry* entry, hkProcessCollisionInput& input,
                                        hkProcessCollisionOutput& output);
 
