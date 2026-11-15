@@ -1,5 +1,6 @@
 #include <string.h>
 #include <types.h>
+#include <it/it_figure_manager.h>
 #include <it/it_manager.h>
 #include <gf/gf_task_scheduler.h>
 #include <ft/ft_manager.h>
@@ -43,32 +44,18 @@ extern "C" {
 // itManager::checkCreatableItem (0x2A5EE0, unnamed): whether the item kind may be created right now (match state, free
 // instance slots, per-kind limits)
 
-// itArchive::isComp (0x2B23F8, unnamed): whether the archive finished loading
-int fn_27_2B23F8(itArchive* archive);
 
 // itManager::initializeSmashBallFlags (0x2A95B4, unnamed) / itManager::initializeDragoonFlags (0x2A97A4, unnamed)
-// itFigureManager (0x2C1674, unnamed): whether all figure textures finished preloading
-bool fn_27_2C1674(void* figureManager);
 
-// itArchive::isRemovable (0x2B24C4, unnamed): whether the archive may be freed now (nothing uses it, load finished)
-int fn_27_2B24C4(itArchive* archive);
 
 // gm (main module): whether a Dragoon is already in play / mark that one has been used (unnamed)
 int fn_800526E4();
 void fn_80052694();
 
-// itArchive::procWait (0x2B2358, unnamed): per-frame wait processing of a loading archive
-void fn_27_2B2358(itArchive* archive);
-// itFigureManager::onProcessFixPosition (0x2C197C, unnamed): whether the figure textures are done with this pass
-bool fn_27_2C197C(void* figureManager);
 
-// itFigureManager::removeFigureTexAll (0x2C1890, unnamed)
-void fn_27_2C1890(void* figureManager);
 
 // gmCheckGlobalItemSwitch (main, unnamed): whether the item may appear in the match
 bool fn_8005136C(int itemKind);
-// itFigureManager::preloadFigureTex (0x2C0FBC, unnamed)
-void fn_27_2C0FBC(void* figureManager, int unk1, int unk2);
 extern char lbl_27_data_79068[];
 
 // itArchive::getResFileFromId (0x2B26E8, unnamed): the resource file data of an archive entry
@@ -948,7 +935,7 @@ bool itManager::isCompItemKindArchivePreloadAll() {
     itManagerField<u8>(this, 0x14AC) = 0;
     for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
         itArchive* archive = m_itArchiveArrayList.at(i);
-        if (archive == NULL || !fn_27_2B23F8(archive)) {
+        if (archive == NULL || !archive->isComp()) {
             return false;
         }
     }
@@ -1028,7 +1015,7 @@ bool itManager::isPassedProcessUpdate() {
 bool itManager::isCompFigureTexPreloadAll() {
     u32 state = itManagerField<u32>(this, 0x50) - 2;
     if (state <= 1) {
-        return fn_27_2C1674(m_figureManager);
+        return static_cast<itFigureManager*>(m_figureManager)->isCompFigureTexPreloadAll();
     }
     return true;
 }
@@ -1247,7 +1234,7 @@ void itManager::removeItemArchive(int archiveType) {
     for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
         itArchive*& archive = m_itArchiveArrayList.at(i);
         if (archive != NULL && archiveType == archive->m_type) {
-            if (fn_27_2B24C4(archive)) {
+            if (archive->isRemovable()) {
                 delete archive;
                 m_itArchiveArrayList.erase(i);
                 i--;
@@ -1583,7 +1570,7 @@ void itManager::processFixPosition() {
         if (!(pendingArchives > 0) && !(pendingGenArchives > 0)) {
             allClear = true;
         }
-        if (m_figureManager != NULL && !fn_27_2C197C(m_figureManager)) {
+        if (m_figureManager != NULL && !static_cast<itFigureManager*>(m_figureManager)->onProcessFixPosition()) {
             allClear = false;
         }
         if (itManagerField<int>(this, 0x4C) == 3) {
@@ -1596,7 +1583,7 @@ void itManager::processFixPosition() {
         for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
             itArchive*& archive = m_itArchiveArrayList.at(i);
             if (archive != NULL) {
-                fn_27_2B2358(archive);
+                archive->procWait();
             }
         }
     }
@@ -1642,7 +1629,7 @@ void itManager::finish() {
     m_pokemonInfoArrayList.clear();
     m_preloadPokemonTimer = 0;
     if (m_figureManager != NULL) {
-        fn_27_2C1890(m_figureManager);
+        static_cast<itFigureManager*>(m_figureManager)->removeFigureTexAll();
     }
     itManagerField<int>(this, 0x4C) = 3;
     m_frameCount = 0;
@@ -1721,7 +1708,7 @@ void itManager::start(int mode) {
             *(int*)((u8*)figureManager + 0x310) = figureListCapacity(figureManager);
         }
         m_genLevel = (itGenParam::Level)2;
-        fn_27_2C0FBC(m_figureManager, -16, 1);
+        static_cast<itFigureManager*>(m_figureManager)->preloadFigureTex(-16, true);
         break;
     }
     case 2: {
@@ -1932,7 +1919,7 @@ int itManager::removeRequestTrainingItem(int kind) {
             itArchive*& archive = m_itArchiveArrayList.at(i);
             if (archive != NULL) {
                 if (getItemGroup(archive->m_itKind) == 2) {
-                    if (!fn_27_2B24C4(archive)) {
+                    if (!archive->isRemovable()) {
                         stillUnloading = true;
                         archive->m_4 = 1;
                     } else {
@@ -2057,7 +2044,7 @@ bool itManager::isCompItemKindArchive(itKind kind, u32 variation, bool recurseGr
             return false;
         }
     }
-    return fn_27_2B23F8(archive);
+    return archive->isComp();
 }
 
 // Removes every live item and the temporary (type 0) item archives.
@@ -2511,7 +2498,7 @@ void itManager::removeItemAfter(int kind, u32 variation, int lotKind, int lotCre
                 itArchive*& cur = m_itArchiveArrayList.at(i);
                 if (cur != NULL) {
                     if (getItemGroup(cur->m_itKind) == 2) {
-                        if (!fn_27_2B24C4(cur)) {
+                        if (!cur->isRemovable()) {
                             cur->m_4 = 1;
                         } else {
                             m_itArchiveArrayList.erase(i);
@@ -2546,7 +2533,7 @@ void itManager::removeItemAfter(int kind, u32 variation, int lotKind, int lotCre
                 for (int i = 0; i < m_itArchiveArrayList.size(); i++) {
                     itArchive*& cur = m_itArchiveArrayList.at(i);
                     if (lotGroupKindOf(cur->m_itKind) == other) {
-                        if (!fn_27_2B24C4(cur)) {
+                        if (!cur->isRemovable()) {
                             cur->m_4 = 1;
                         } else {
                             m_itArchiveArrayList.erase(i);

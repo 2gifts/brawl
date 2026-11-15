@@ -79,7 +79,12 @@ public:
 #elif defined(WN_MARIO_FIREBALL_UNIT) && !defined(WN_ARTICLE_BUILDER_CTOR_INLINE) // the bow units expand the empty units
     soEventUnitNull();
     soEventUnitNull(s16, s16);
+#ifdef WN_ARTICLE_BUILDER_DTOR_IN_CLASS
+    // The unit's builder destructors are compiled with inlining on (wn/fox/wn_fox_blaster.h): nothing is left of this one.
+    ~soEventUnitNull() { }
+#else
     ~soEventUnitNull();
+#endif
 #else
     soEventUnitNull() { }
     soEventUnitNull(s16, s16) { }

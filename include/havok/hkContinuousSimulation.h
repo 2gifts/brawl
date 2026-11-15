@@ -31,6 +31,7 @@ struct hkContinuousSimulation : hkSimulation {
     hkContinuousSimulation(hkWorld* world);
     virtual ~hkContinuousSimulation(); // 0x08
     virtual int advanceTime(); // 0x1C
+    virtual void reintegrateAndRecollideEntities(hkEntity** entities, int numEntities, hkWorld* world); // 0x34
     // Steps the world through one time-of-impact event (vtable 0x40, map: simulateToi, fn_80328124).
     // HYPOTHESIS: the parameter types (handleAllToisTill passes the world, its stack copy of the event and the
     // step's delta time).
@@ -42,6 +43,7 @@ struct hkContinuousSimulation : hkSimulation {
     void addToiEvent(const hkProcessCollisionOutput& output, const hkAgentNnEntry& entry);
     // Drops the pending events of an entity, telling their contact managers.
     void removeToiEventsOfEntity(hkEntity* entity);
+    void removeToiEventsOfEntities(hkEntity** entities, int numEntities);
     void processAgentCollideContinuous(hkAgentNnEntry* entry, hkProcessCollisionInput& input,
                                        hkProcessCollisionOutput& output);
 

@@ -3,6 +3,7 @@
 #include <ft/ft_transactor.h>
 #include <types.h>
 
+class soArticle;
 class soModuleAccesser;
 class wnDededeStarmissile;
 
@@ -12,6 +13,8 @@ class ftDededeTransactor : public ftTransactor {
 public:
     ftDededeTransactor();
     virtual ~ftDededeTransactor();
+    virtual bool notifyEventCollisionSearchCheck(soModuleAccesser* moduleAccesser);
+    virtual bool activeArticle(soArticle* article, soModuleAccesser* acc);
     // Local declaration of the REL singleton-holder entry point.
     static ftDededeTransactor* getInstance();
     // HYPOTHESIS: the id is the effect resource of the fighter.

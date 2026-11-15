@@ -242,8 +242,8 @@ public:
     void addDragoon(u8 part);
     void removeDragoon(u8 part);
     void removeDragoonAll();
-    u8 getDragoonCount();
-    u8 getDragoonVariation(int index);
+    int getDragoonCount();
+    int getDragoonVariation(int index);
     void setScale(float scale);
     float getScale();
     void setVisibilityScale(float scale);

@@ -970,12 +970,12 @@ CC008000:WGPIPE
 27,1,00227DD8:stRayCheck__FP5Vec3fP5Vec3fPiP5Vec3fP5Vec3fbbUc
 
 // grCollision
-80111958:getJoint__11grCollisionFUs
+80111958:getJoint__11grCollisionFUl
 80111b50:getLine__11grCollisionFUs
 801119bc:getSegment__11grCollisionFP11clSegment2DP15grCollisionLine
 
 // grCollisionJoint
-80112ea0:getLine__16grCollisionJointFUs
+80112ea0:getLine__16grCollisionJointFUl
 
 // grCollStatus
 801342c8:getPos__12grCollStatusFP5Vec2f

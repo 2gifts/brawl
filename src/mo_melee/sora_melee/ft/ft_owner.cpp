@@ -514,11 +514,11 @@ void ftOwner::removeDragoonAll() {
     m_data->m_dragoonCount = 0;
 }
 
-u8 ftOwner::getDragoonCount() {
+int ftOwner::getDragoonCount() {
     return m_data->m_dragoonCount;
 }
 
-u8 ftOwner::getDragoonVariation(int index) {
+int ftOwner::getDragoonVariation(int index) {
     return m_data->m_dragoonParts[index];
 }
 

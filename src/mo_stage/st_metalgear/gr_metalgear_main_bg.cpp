@@ -67,8 +67,9 @@ void grMetalgearMainBg::updateJoint(float deltaFrame) {
             u32 nodeRight;
             getNodeIndex(&nodeLeft, 0, "B_MAINSTAGE_KAGE");
             getNodeIndex(&nodeRight, 0, "B_DOOR_LIGHT_01");
+            u32 i;
             u16 count = collision->m_jointLen;
-            for (u32 i = 0; i != count; i++) {
+            for (i = 0; i != count; i++) {
                 grCollisionJoint* joint = collision->getJoint(i);
                 if (joint != NULL && joint->m_ground == this) {
                     if (nodeLeft == joint->m_nodeIndex) {

@@ -1,26 +1,22 @@
 #pragma once
 
+#include <ft/ft_transactor.h>
 #include <types.h>
 
+class soArticle;
 class soModuleAccesser;
 class soCollisionLog;
 
-// Sonic's per-fighter helper singleton (the code is in this REL; only the slots the fighter calls are named).
-// HYPOTHESIS: the slot names; the layout follows ftTransactor (include/ft/ft_transactor.h), slot 10 takes the collision log.
-class ftSonicTransactor {
+// Sonic's per-fighter helper singleton (the code is in sora_melee): Kirby's copy ball article and its effect visibility,
+// and the spin hooks.
+class ftSonicTransactor : public ftTransactor {
 public:
     ftSonicTransactor();
     virtual ~ftSonicTransactor();
-    virtual void init(soModuleAccesser* moduleAccesser);
-    virtual void exit(soModuleAccesser* moduleAccesser);
-    virtual void processUpdate(soModuleAccesser* moduleAccesser);
-    virtual void processCollision(soModuleAccesser* moduleAccesser); // slot 4
-    virtual void processFixPosition(soModuleAccesser* moduleAccesser);
-    virtual void unk6(soModuleAccesser* moduleAccesser);
-    virtual void unk7(soModuleAccesser* moduleAccesser);
-    virtual void unk8(soModuleAccesser* moduleAccesser);
-    virtual bool unk9(soModuleAccesser* moduleAccesser);
-    virtual void notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser); // slot 10
+    virtual void processCollision(soModuleAccesser* moduleAccesser);
+    virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual bool activeArticle(soArticle* article, soModuleAccesser* acc);
     // Local declaration of the REL singleton-holder entry point.
     static ftSonicTransactor* getInstance();
 };

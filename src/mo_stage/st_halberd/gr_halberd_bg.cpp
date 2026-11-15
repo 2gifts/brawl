@@ -180,8 +180,9 @@ void grHalberdBg::updateJoint(float deltaFrame) {
             u32 nodeGate;
             u32 nodeHull;
             if (getNodeIndex(&nodeHull, 0, "A__HL_MAIN_HULL02") && getNodeIndex(&nodeGate, 0, "HL_Gate_Col")) {
+                u32 i;
                 u32 jointNum = (u16)collision->m_jointLen;
-                for (u32 i = 0; i != jointNum; i++) {
+                for (i = 0; i != jointNum; i++) {
                     grCollisionJoint* joint = collision->getJoint(i);
                     if (joint == NULL) {
                         break;

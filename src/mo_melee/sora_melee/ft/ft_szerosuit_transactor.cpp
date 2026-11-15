@@ -21,12 +21,12 @@ public:
 };
 
 
-// ftData::unk64, declared only for the Kirby units: Kirby's table of simple-article data, 0x38-byte entries.
+// ftData::unk64 (declared only for the Kirby units) points at Kirby's table of simple-article data, 0x38-byte entries.
 struct ftKirbySimpleDataEntry {
     u8 unk0[0x38];
 };
 static inline const ftKirbySimpleDataEntry* getKirbySimpleDataTable() {
-    return *reinterpret_cast<ftKirbySimpleDataEntry* const*>(&g_ftCommonDataAccesser.getData(Fighter_Kirby)->unk58[0xC]);
+    return **reinterpret_cast<ftKirbySimpleDataEntry** const*>(&g_ftCommonDataAccesser.getData(Fighter_Kirby)->unk58[0xC]);
 }
 
 ftSZerosuitTransactor::ftSZerosuitTransactor() { }
@@ -58,12 +58,13 @@ bool ftSZerosuitTransactor::activeArticle2(wnSZerosuitParalyzerBullet* weapon, s
 bool ftSZerosuitTransactor::activeArticle(soArticle* article, soModuleAccesser* acc) {
     switch (article->getArticleId()) {
     case 0xd: {
-        const ftKirbySimpleDataEntry* table = getKirbySimpleDataTable();
+        ftKirbySimpleDataEntry* const* tableRef =
+            *reinterpret_cast<ftKirbySimpleDataEntry* const* const*>(&g_ftCommonDataAccesser.getData(Fighter_Kirby)->unk58[0xC]);
         Vec3f zero(0.0f, 0.0f, 0.0f);
         int founderTaskId = acc->getStageObject().m_taskId;
         soResourceModule& resource = acc->getResourceModule();
         u32 resId = dynamic_cast<ftResourceIdAccesserImpl&>(*resource.getResourceIdAccesser()).getKirbyResId(Fighter_SZeroSuit);
-        dynamic_cast<wnSimple&>(*article).activate(founderTaskId, resId, reinterpret_cast<const wnSimpleData*>(&table[4]), true, false, zero,
+        dynamic_cast<wnSimple&>(*article).activate(founderTaskId, resId, reinterpret_cast<const wnSimpleData*>(&(*tableRef)[4]), true, false, zero,
             0xffff, 0xffff, 0, true, false, -1, 0, false, 2, 0, false);
         return true;
     }

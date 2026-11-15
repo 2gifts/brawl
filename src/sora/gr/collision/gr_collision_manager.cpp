@@ -19,10 +19,10 @@ extern grCollStatusNodeList lbl_8049E594;
 extern grCollisionManager* lbl_805A0360;
 extern bool lbl_805A0358;
 
-// MATCH-ONLY: the original passes the unextended 32-bit loop counters to these two (every caller in the dol does), so the index
-// parameters of grCollision::getJoint / grCollisionJoint::getLine are probably not u16; the stand-ins keep the symbols of the members.
-extern "C" grCollisionJoint* getJoint__11grCollisionFUs(grCollision* collision, u32 index);
-extern "C" grCollisionLine* getLine__16grCollisionJointFUs(grCollisionJoint* joint, u32 index);
+// The original passes the unextended 32-bit loop counters to these two (every caller in the dol does), so their index
+// parameters are u32; these stand-ins name the same symbols as the members.
+extern "C" grCollisionJoint* getJoint__11grCollisionFUl(grCollision* collision, u32 index);
+extern "C" grCollisionLine* getLine__16grCollisionJointFUl(grCollisionJoint* joint, u32 index);
 
 grCollisionManager::grCollisionManager() :
     gfTask("GroundCollision", Category_GrCollision, 4, 13, true), unk41(0), m_nextIndex(0), unk44(0) {
@@ -96,11 +96,11 @@ void grCollisionManager::calcFloorRange() {
         if (collision->m_isEnabled && collision->m_isDynamic != 1 && collision->m_isEnabledLatch) {
             u32 jointLen = collision->m_jointLen;
             for (u32 i = 0; i < jointLen; i++) {
-                grCollisionJoint* joint = getJoint__11grCollisionFUs(collision, i);
+                grCollisionJoint* joint = getJoint__11grCollisionFUl(collision, i);
                 if (joint->m_0x54_6) {
                     u32 lineLen = joint->m_lineLen;
                     for (u32 j = 0; j < lineLen; j++) {
-                        grCollisionLine* line = getLine__16grCollisionJointFUs(joint, j);
+                        grCollisionLine* line = getLine__16grCollisionJointFUl(joint, j);
                         if (line->m_isUnder) {
                             clSegment2D segment;
                             collision->getSegment(&segment, line);

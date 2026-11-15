@@ -48,6 +48,9 @@
 //   0x80312F40    60  __sinit_\hk3AxisSweep_cpp
 
 #include <havok/hk3AxisSweep.h>
+#include <havok/hkLocalArray.h>
+#include <havok/hkCollidable.h>
+#include <havok/hkMath.h>
 
 void hk3AxisSweep::beginOverlap(const hkBpNode* a, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
     hkBroadPhaseHandlePair& pair = pairs.expandOne();
@@ -171,10 +174,10 @@ void hk3AxisSweep::getAllAabbs(hkArray<hkAabb>& aabbs) const {
     aabbs.m_size = m_nodes.m_size - m_numMarkers;
     int out = 0;
     for (int i = 0; i < m_nodes.m_size; i++) {
-        const hkBpNode* node = &m_nodes.begin()[i];
+        // MATCH-ONLY: the aligned pointer turns copy propagation off as in the original.
+        const hkBpNode* node __attribute__((aligned(16))) = &m_nodes.begin()[i];
         if (((u32)node->m_handle & 1) == 0) {
-            getAabbFromNode(node, aabbs.begin()[out]);
-            out++;
+            getAabbFromNode(node, aabbs.begin()[out++]);
         }
     }
 }
@@ -540,3 +543,91 @@ if(!(e->flags&0x80000000)) r->slot2(p53,8,e->ptr,e->count*2,(e->flags&0x3FFFFFFF
 r->slot6();
 }
 } // namespace jj_fn_80312920
+
+// shiftAllObjects: quantizes the shift per axis (to an even step so endpoint parity is kept), reports the shift that
+// quantization gives, and moves every endpoint except the two sentinels by it; an endpoint that would leave the
+// range is clamped to its edge and its object is reported as entering the border. HYPOTHESIS: parameter names.
+extern "C" void fn_80312B34(hk3AxisSweep* sweep, const hkVector4& shiftDistance, hkVector4& effectiveShiftDistanceOut,
+                            hkArray<hkBroadPhaseHandle*>& objectsEnteringBroadphaseBorder) {
+    // MATCH-ONLY: the explicit alignment turns copy propagation off as in the original (indexed loops).
+    hkVector4 shift __attribute__((aligned(16))) = shiftDistance;
+    int intShift[3];
+    for (int i = 0; i < 3; i++) {
+        hkReal value = shift(i);
+        intShift[i] = hkMath::hkFloatToInt(value * sweep->m_scale[i]) & ~1;
+        shift(i) = hkReal(intShift[i]) / sweep->m_scale[i];
+    }
+    effectiveShiftDistanceOut = shift;
+    for (int axisIndex = 0; axisIndex < 3; axisIndex++) {
+        hk3AxisSweep::hkBpAxis& axis = sweep->m_axes[axisIndex];
+        int axisShift = intShift[axisIndex];
+        for (int i = 1; i < axis.getSize() - 1; i++) {
+            hk3AxisSweep::hkBpEndPoint& ep = axis[i];
+            int value = ep.m_value;
+            if (value > 1 && value < 0xFFFC) {
+                int newValue = value + axisShift;
+                if (newValue < 0) {
+                    newValue = value & 1;
+                    objectsEnteringBroadphaseBorder.pushBack(sweep->m_nodes[ep.m_nodeId].m_handle);
+                } else if (newValue >= 0xFFFC) {
+                    newValue = (value & 1) | 0xFFFC;
+                    objectsEnteringBroadphaseBorder.pushBack(sweep->m_nodes[ep.m_nodeId].m_handle);
+                }
+                ep.m_value = newValue;
+            }
+        }
+    }
+}
+
+// shiftBroadPhase: shifts every object the opposite way, moves the dequantization offsets by the shift actually
+// applied (the upper offset stays one quantization step above the lower one) and reports that shift.
+// HYPOTHESIS: the names of the offsets at 0x40 and 0x50.
+extern "C" void fn_80312D68(hk3AxisSweep* sweep, const hkVector4& shiftDistance, hkVector4& effectiveShiftDistanceOut,
+                            hkArray<hkBroadPhaseHandle*>& objectsEnteringBroadphaseBorder) {
+    hkVector4 negShift;
+    negShift.setNeg4(shiftDistance);
+    hkVector4 effectiveShift;
+    sweep->shiftAllObjects(negShift, effectiveShift, objectsEnteringBroadphaseBorder);
+    hkVector4& offsetLow = *(hkVector4*)sweep->m_offset;
+    hkVector4& offsetHigh = *(hkVector4*)sweep->unk50;
+    offsetLow.add4(effectiveShift);
+    hkVector4 step;
+    step.set(1.0f / sweep->m_scale[0], 1.0f / sweep->m_scale[1], 1.0f / sweep->m_scale[2], 0.0f);
+    offsetHigh.setAdd4(offsetLow, step);
+    effectiveShiftDistanceOut.setNeg4(effectiveShift);
+}
+
+// removeBatch: compacts one axis after objects were removed. remap gives each old node index its new index (negative
+// for a removed node); kept endpoints are renumbered and each node's endpoint index for this axis (min or max,
+// chosen by the endpoint key's low bit, at the offsets of the static table) is updated.
+// HYPOTHESIS: the parameter types.
+extern "C" void fn_8030AC0C(hk3AxisSweep::hkBpAxis* axis, hk3AxisSweep::hkBpNode* nodes, int axisIndex, int** remap) {
+    const int* offsets = &s_hk3AxisSweepStaticTable.m_values[axisIndex * 2];
+    int newSize = 0;
+    hk3AxisSweep::hkBpEndPoint* end = axis->begin() + axis->getSize();
+    hk3AxisSweep::hkBpEndPoint* dst = axis->begin();
+    for (hk3AxisSweep::hkBpEndPoint* src = axis->begin(); src < end; src++) {
+        int node = (*remap)[src->m_nodeId];
+        if (node >= 0) {
+            u16 value = src->m_value;
+            dst->m_value = value;
+            dst->m_nodeId = node;
+            *(u16*)((char*)&nodes[node] + offsets[value & 1]) = newSize;
+            dst++;
+            newSize++;
+        }
+    }
+    axis->setSize(newSize);
+}
+
+// calcAabbCache over the nodes (fn_8030FBA0, not written yet). HYPOTHESIS: the parameter types.
+extern "C" void fn_8030FBA0(hk3AxisSweep* sweep, hkArray<const hk3AxisSweep::hkBpNode*>& nodes, void* aabbCacheOut);
+
+// calcAabbCache: the cache of the broad-phase nodes of the given collidables.
+extern "C" void fn_8030FA54(hk3AxisSweep* sweep, const hkArray<hkCollidable*>& collidables, void* aabbCacheOut) {
+    hkLocalArray<const hk3AxisSweep::hkBpNode*> nodes(collidables.getSize());
+    for (int i = 0; i < collidables.getSize(); i++) {
+        nodes.pushBackUnchecked(&sweep->m_nodes[collidables[i]->m_broadPhaseHandle.m_id]);
+    }
+    fn_8030FBA0(sweep, nodes, aabbCacheOut);
+}

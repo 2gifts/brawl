@@ -182,7 +182,7 @@ bool ftDedede::activeArticle(wnDededeStar* weapon, soModuleAccesser* acc) {
 }
 
 bool ftDedede::notifyEventCollisionSearchCheck() {
-    if (ftDededeTransactor::getInstance()->unk11(m_moduleAccesser) == true) {
+    if (ftDededeTransactor::getInstance()->notifyEventCollisionSearchCheck(m_moduleAccesser) == true) {
         return true;
     }
     return Fighter::notifyEventCollisionSearchCheck();

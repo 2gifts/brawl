@@ -152,7 +152,7 @@ public:
 
     grCollisionJoint(grCollision* collision, grCollData::JointData* data);
     u8 getCollisionId(); // HYPOTHESIS: return type (the low byte of grCollision::m_index)
-    grCollisionLine* getLine(u16 index);
+    grCollisionLine* getLine(u32 index);
     // HYPOTHESIS: signatures of the update members; the map has no parameter types.
     void updatePosNormal(Matrix* matrix) __attribute__((never_inline)); // BYTES: the original calls it out of line from updatePos
     void updatePosInit(Matrix* matrix) __attribute__((never_inline)); // BYTES: the original calls it out of line from updatePos

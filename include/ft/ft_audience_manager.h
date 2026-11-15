@@ -3,6 +3,7 @@
 
 #include <StaticAssert.h>
 #include <ft/ft_audience_impl.h>
+#include <sr/sr_common.h>
 #include <types.h>
 
 class ftAudienceNull : public ftAudience {
@@ -24,8 +25,13 @@ static_assert(sizeof(ftAudienceNull) == 4, "Class is wrong size!");
 class ftAudienceManager {
 public:
     ftAudienceImpl* m_audienceImpl;
-    ftAudienceNull* m_audienceNull;
+    ftAudienceNull m_audienceNull; // the fallback while no audience task runs
     ftAudience* m_audience;
+
+    // Starts on the null audience, with the audience task created alongside (sr/sr_common.h for the heap new).
+    ftAudienceManager() : m_audience(&m_audienceNull) {
+        m_audienceImpl = new (Heaps::System) ftAudienceImpl;
+    }
 
     static void initialize();
     void activate();

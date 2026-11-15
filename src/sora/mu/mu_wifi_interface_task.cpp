@@ -2039,16 +2039,16 @@ extern "C" void fn_800D353C(muWifiInterfaceTask* self) {
         aid = 4;
     }
     u8* info = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
-    unsigned room = reinterpret_cast<NtMatchingWord*>(lbl_805A0434)->value < 0x40;
     WifiRoomByte* bits = reinterpret_cast<WifiRoomByte*>(info + 0x57);
     unsigned oldRoom = bits->room;
+    unsigned room = reinterpret_cast<NtMatchingWord*>(lbl_805A0434)->value < 0x40;
     bits->room = room;
     if (oldRoom != room) {
         aid = Network::getMyAID();
         if (aid == 0xFF) {
             aid = 4;
         }
-        info = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
+        u8* info = reinterpret_cast<u8*>(&self->m_aidInfos[aid]);
         reinterpret_cast<FlagByte*>(info + 0x56)->unk0_b0 = 0;
         fn_800D0AE0(self);
         fn_80145B98(lbl_805A03A8, 0xFE);
@@ -2654,4 +2654,278 @@ extern "C" void fn_800CF770(muWifiInterfaceTask* self, u8 aid) {
     info->unk7E_b1 = 0;
     info->unk7F = 2;
     info->unk80 = 1;
+}
+
+extern "C" bool fn_800D051C(muWifiInterfaceTask* self, u32 aid, int localPlayer);
+extern "C" bool fn_800D0908(muWifiInterfaceTask* self, u32 aid, int localPlayer);
+extern const char lbl_804582C0[];
+extern const char lbl_804582EC[];
+
+extern "C" void fn_800D0398(muWifiInterfaceTask* self) {
+    fn_800D0AE0(self);
+    u8 parentAid = Network::getParentAID();
+    muWifiAIDInfo* parent = parentAid == 0xFF ? NULL : &self->m_aidInfos[parentAid];
+    if (parent == NULL) {
+        return;
+    }
+    if (!((self->unkFC9 >> 7) & 1) && self->unkFCC_b24 != 4) {
+        return;
+    }
+    u8 liveCount = 0;
+    for (u32 aid = 0; aid < 4; aid++) {
+        for (int j = 0; j < 3; j++) {
+            s32 status = parent->unk84[(u8)aid][j].unk0_b24;
+            if (status == 1) {
+                liveCount++;
+            }
+            if (status <= 1) {
+                u8 oldStatus = self->unkFE3[(u8)aid][j];
+                if (status != oldStatus) {
+                    netReport(lbl_804582C0, (u8)aid, j, oldStatus, status);
+                    self->unkFE3[(u8)aid][j] = status;
+                    if (status == 1) {
+                        fn_800D051C(self, (u8)aid, j);
+                    } else {
+                        fn_800D0908(self, (u8)aid, j);
+                    }
+                    if (j == 0) {
+                        self->unkFCA_b7 = 1;
+                    }
+                }
+            }
+        }
+    }
+    if (self->unkFD5 != liveCount) {
+        netReport(lbl_804582EC, self->unkFD5, liveCount);
+        self->unkFD5 = liveCount;
+        self->unkFCA_b2 = 1;
+        self->unkFCA_b0 = 0;
+    }
+}
+
+extern "C" int fn_800C95C4(muWifiInterfaceTask* self, int count, int* kinds) {
+    char* base = lbl_80457158;
+    if (count <= 2) {
+        int r = (s32)(count * lbl_805A0420.randf());
+        netReport(base + 0x58C, r);
+        return r;
+    }
+    u8 matches[4];
+    memset(matches, 0, sizeof(matches));
+    for (int i = 0; i < count; i++) {
+        matches[i] = 0;
+        for (int j = 0; j < count; j++) {
+            if (kinds[i] == kinds[j]) {
+                matches[i]++;
+            }
+        }
+    }
+    if (count == 3) {
+        netReport(base + 0x5A8, kinds[0], kinds[1], kinds[2], matches[0], matches[1], matches[2]);
+    } else {
+        netReport(base + 0x5D8, kinds[0], kinds[1], kinds[2], kinds[3],
+                  matches[0], matches[1], matches[2], matches[3]);
+    }
+    if (matches[0] == 1 && matches[1] == 1) {
+        if (count == 3) {
+            netReport(base + 0x60C);
+            return (s32)(count * lbl_805A0420.randf());
+        }
+        if (matches[2] == 1) {
+            netReport(base + 0x638);
+            return (s32)(count * lbl_805A0420.randf());
+        }
+    }
+    if (matches[0] == count) {
+        netReport(base + 0x668);
+        return (s32)(count * lbl_805A0420.randf());
+    }
+    if (matches[0] == 2 && matches[1] == 2 && matches[2] == 2 && matches[3] == 2) {
+        netReport(base + 0x6A0);
+        return (s32)(count * lbl_805A0420.randf());
+    }
+    int maj = count - 1;
+    if (matches[0] == maj || matches[1] == maj || matches[2] == maj || matches[3] == maj) {
+        netReport(base + 0x6C8);
+        int pick = (s32)(maj * lbl_805A0420.randf());
+        int i;
+        for (i = 0; i < count; i++) {
+            if (matches[i] == maj) {
+                pick--;
+                if (pick < 0) {
+                    break;
+                }
+            }
+        }
+        if (i >= count) {
+            netReport(base + 0x6FC);
+            i = 0;
+        }
+        return i;
+    }
+    if (count == 3) {
+        netReport(base + 0x71C);
+        return (s32)(count * lbl_805A0420.randf());
+    }
+    if (matches[0] == 2 || matches[1] == 2 || matches[2] == 2 || matches[3] == 2) {
+        netReport(base + 0x744);
+        int pick = (s32)(2.0f * lbl_805A0420.randf());
+        int i;
+        for (i = 0; i < count; i++) {
+            if (matches[i] == 2) {
+                pick--;
+                if (pick < 0) {
+                    break;
+                }
+            }
+        }
+        if (i >= count) {
+            netReport(base + 0x76C);
+            i = 0;
+        }
+        return i;
+    }
+    netReport(base + 0x78C);
+    return (s32)(count * lbl_805A0420.randf());
+}
+
+extern "C" bool fn_800D4EF0(muWifiInterfaceTask* self, wchar_t* outName, u8* outAid, u32* outLocal) {
+    if (!((self->unkFC9 >> 3) & 1)) {
+        return false;
+    }
+    u8 pAid = Network::getParentAID();
+    muWifiAIDInfo* parent = (pAid == 0xFF) ? NULL : &self->m_aidInfos[pAid];
+    if (parent == NULL) {
+        return false;
+    }
+    u8 myAid = Network::getMyAID();
+    if (myAid == 0xFF) {
+        myAid = 4;
+    }
+    muWifiAIDInfo* myInfo = &self->m_aidInfos[myAid];
+    if (myInfo->unk38Slots[0].unk0_b24 != 1) {
+        return false;
+    }
+    u8 aid = parent->unk6C[0][0];
+    u8 slot = parent->unk6C[0][1];
+    u8 unk2 = parent->unk6C[0][2];
+    if (aid == 0xFF) {
+        if (myInfo->unk5C != 0) {
+            myInfo->unk5C = 0;
+            myInfo->unk60[0] = 0xFF;
+            myInfo->unk60[1] = 0;
+            myInfo->unk60[2] = 0;
+            u8 myAid2 = Network::getMyAID();
+            if (myAid2 == 0xFF) {
+                myAid2 = 4;
+            }
+            self->m_aidInfos[myAid2].unk56_b0_1 = 0;
+            fn_800D0AE0(self);
+            fn_80145B98(lbl_805A03A8, 0xFE);
+        }
+        return false;
+    }
+    if (self->getSafeParentAIDInfo()->unk68[aid] == 0) {
+        return false;
+    }
+    u8 myAid2 = Network::getMyAID();
+    if (myAid2 == 0xFF) {
+        myAid2 = 4;
+    }
+    if (aid == myAid2) {
+        u8 myAid3 = Network::getMyAID();
+        if (myAid3 == 0xFF) {
+            myAid3 = 4;
+        }
+        muWifiAIDInfo* myInfo3 = &self->m_aidInfos[myAid3];
+        myInfo3->unk5C = 1;
+        myInfo3->unk60[0] = aid;
+        myInfo3->unk60[1] = slot;
+        myInfo3->unk60[2] = unk2;
+        return false;
+    }
+    if (myInfo->unk60[0] == aid && myInfo->unk60[1] == slot && myInfo->unk60[2] == unk2 && myInfo->unk5C != 0) {
+        return false;
+    }
+    myInfo->unk60[0] = aid;
+    myInfo->unk60[1] = slot;
+    myInfo->unk60[2] = unk2;
+    myInfo->unk5C = 0;
+    u8 myAid3 = Network::getMyAID();
+    if (myAid3 == 0xFF) {
+        myAid3 = 4;
+    }
+    self->m_aidInfos[myAid3].unk56_b0_1 = 0;
+    fn_800D0AE0(self);
+    fn_80145B98(lbl_805A03A8, 0xFE);
+    if (outAid != NULL) {
+        *outAid = aid;
+    }
+    if (outLocal != NULL) {
+        *outLocal = slot;
+    }
+    if (aid != 4 && (!(g_NtAIDBitmap & (1 << aid)) || !((self->unkFC9 >> 7) & 1))) {
+        *outName = 0;
+    } else {
+        int count = 5;
+        const u8* source = self->m_aidInfos[aid].unk1E0;
+        u8* destination = (u8*)outName;
+        memset(outName, 0, 12);
+        while (--count >= 0) {
+            int character = source[0];
+            destination[0] = character;
+            character |= source[1];
+            destination[1] = source[1];
+            source += 2;
+            destination += 2;
+            if (character == 0) { break; }
+        }
+        netReport(lbl_80458808, aid);
+    }
+    if (*outName == 0) {
+        return false;
+    }
+    return true;
+}
+
+extern "C" void fn_800C9430(muWifiInterfaceTask* self, int arg1) {
+    char* base = lbl_80457158;
+    if (arg1 != 0 && self->unkFD5 != 4) {
+        return;
+    }
+    u8 pAid = Network::getParentAID();
+    muWifiAIDInfo* parent = (pAid == 0xFF) ? NULL : &self->m_aidInfos[pAid];
+    u8 counts[3];
+    memset(counts, 0, sizeof(counts));
+    int numTeams = 0;
+    bool ok = true;
+    for (int i = 0; i < 4; i++) {
+        if (parent->unkE4[i].unk0 != 3) {
+            counts[parent->unkE4[i].unk5]++;
+        }
+    }
+    for (int i = 0; i < 3; i++) {
+        if (counts[i] != 0) {
+            numTeams++;
+        }
+    }
+    if (numTeams < 2) {
+        ok = false;
+    }
+    u8 t0 = parent->unkE4[0].unk5;
+    u8 t1 = parent->unkE4[1].unk5;
+    const char* fmt = base + 0x53C;
+    u8 t2 = parent->unkE4[2].unk5;
+    u8 t3 = parent->unkE4[3].unk5;
+    const char* okStr = base + 0x580;
+    if (ok) {
+        okStr = base + 0x574;
+    }
+    netReport(fmt, t0, t1, t2, t3, okStr);
+    if (!ok) {
+        self->unk1000[1].unk0 = 0;
+        for (int i = 0; i < 4; i++) {
+            parent->unkE4[i].unk5 = 0;
+        }
+    }
 }

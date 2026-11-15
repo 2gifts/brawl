@@ -17,12 +17,12 @@ public:
 };
 
 
-// ftData::unk64, declared only for the Kirby units: Kirby's table of simple-article data, 0x38-byte entries.
+// ftData::unk64 (declared only for the Kirby units) points at Kirby's table of simple-article data, 0x38-byte entries.
 struct ftKirbySimpleDataEntry {
     u8 unk0[0x38];
 };
 static inline const ftKirbySimpleDataEntry* getKirbySimpleDataTable() {
-    return *reinterpret_cast<ftKirbySimpleDataEntry* const*>(&g_ftCommonDataAccesser.getData(Fighter_Kirby)->unk58[0xC]);
+    return **reinterpret_cast<ftKirbySimpleDataEntry** const*>(&g_ftCommonDataAccesser.getData(Fighter_Kirby)->unk58[0xC]);
 }
 
 ftMarthTransactor::ftMarthTransactor() { }

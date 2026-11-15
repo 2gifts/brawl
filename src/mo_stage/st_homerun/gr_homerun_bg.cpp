@@ -94,8 +94,9 @@ void grHomerunBg::updateJoint(float deltaFrame) {
         if (collision != NULL) {
             u32 node;
             getNodeIndex(&node, 0, "ETC");
+            u32 i;
             u32 jointNum = (u16)collision->m_jointLen;
-            for (u32 i = 0; i != jointNum; i++) {
+            for (i = 0; i != jointNum; i++) {
                 grCollisionJoint* candidate = collision->getJoint(i);
                 if (candidate == NULL) {
                     break;

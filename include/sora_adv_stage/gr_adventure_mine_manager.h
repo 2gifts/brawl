@@ -45,8 +45,8 @@ struct grGimmickMineData {
     float unk88;
 };
 
-// HYPOTHESIS: the base of the mine manager is a class of sora_adv_stage that is not split yet (its constructor is
-// fn_40_1C0CC, taking a byte for 0x15C and the task name).
+// HYPOTHESIS: the base of the mine manager is grAdventureBlockMng (gr_adventure_block_mng.h, whose constructor takes the
+// byte for 0x15C and the task name); this view keeps the field names the mine manager uses.
 class grAdventureMineManagerBase : public grYakumono {
 public:
     grAdventureMineManagerBase(u8 unk15C, const char* taskName);
