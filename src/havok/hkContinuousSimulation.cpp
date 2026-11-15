@@ -44,6 +44,8 @@
 #include <havok/hkCollisionAgent.h>
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkCollisionInput.h>
+#include <havok/hkVelocityAccumulator.h>
+#include <havok/hkRotation.h>
 #include <havok/hkPointerMapBase.h>
 #include <havok/hkSimulationIsland.h>
 #include <havok/hkSweptTransformUtil.h>
@@ -450,6 +452,52 @@ void hkContinuousSimulation::removeToiEventsOfEntities(hkEntity** entities, int 
     }
 }
 #pragma pop
+
+namespace fn_80329F48_types {
+struct BodyPair { char pad[4]; hkEntity* a; hkEntity* b; };
+struct Item { char pad[0x28]; BodyPair* pair; };
+struct Entry { Item* item; int x; float y; };
+struct Array { Entry* entries; int count; };
+// Moves the entries from *out on whose two bodies are both marked 8 (activated) in the state table to the front
+// (at *out, which is advanced). HYPOTHESIS: the types (the shapes of fn_80329E20's).
+extern "C" void fn_80329F48(Array* self, int* out, u8** entityState) {
+    for (int i = *out; i < self->count; i++) {
+        Entry* e = &self->entries[i];
+        BodyPair* pair = e->item->pair;
+        if ((*entityState)[pair->a->m_storageIndex] == 8 && (*entityState)[pair->b->m_storageIndex] == 8) {
+            int index = (*out)++;
+            Entry* dst = &self->entries[index];
+            Entry tmp = *dst;
+            *dst = *e;
+            *e = tmp;
+        }
+    }
+}
+} // namespace fn_80329F48_types
+
+// The part of the local solver's state read here: the base of its velocity accumulators. HYPOTHESIS: the type.
+struct hkLsSolverState {
+    u8 unk00[0xC];        // 0x00
+    char* m_accumulators; // 0x0C
+};
+
+// hkLs_setAccumulatorVelocities: copies each entity's velocities into its solver accumulator; the angular velocity
+// is rotated into the accumulator's frame unless that frame is the identity. HYPOTHESIS: the parameter types.
+extern "C" void fn_8032A008(hkLsSolverState* state, hkArray<hkEntity*>& entities) {
+    for (int i = 0; i < entities.getSize(); i++) {
+        hkEntity* entity = entities[i];
+        // MATCH-ONLY: the aligned pointer turns copy propagation off as in the original.
+        hkVelocityAccumulator* acc __attribute__((aligned(16))) =
+            (hkVelocityAccumulator*)(state->m_accumulators + entity->m_solverData);
+        acc->m_linearVel = entity->m_motion.m_linearVelocity;
+        if (acc->m_matrixIsIdentity) {
+            acc->m_angularVel = entity->m_motion.m_angularVelocity;
+        } else {
+            hkRotation& coreFromWorld = *(hkRotation*)&acc->unk50;
+            acc->m_angularVel.setRotatedDir(coreFromWorld, entity->m_motion.m_angularVelocity);
+        }
+    }
+}
 
 // hkLs_backstepAndFreezeEntireIsland: moves every entity of the island back to the given time and freezes its swept
 // transform there (start = end, the step running from that time to the simulation's end time); entities not yet

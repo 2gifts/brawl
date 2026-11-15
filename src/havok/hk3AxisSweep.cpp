@@ -50,6 +50,7 @@
 #include <havok/hk3AxisSweep.h>
 #include <havok/hkLocalArray.h>
 #include <havok/hkCollidable.h>
+#include <havok/hkMath.h>
 
 void hk3AxisSweep::beginOverlap(const hkBpNode* a, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
     hkBroadPhaseHandlePair& pair = pairs.expandOne();
@@ -173,10 +174,10 @@ void hk3AxisSweep::getAllAabbs(hkArray<hkAabb>& aabbs) const {
     aabbs.m_size = m_nodes.m_size - m_numMarkers;
     int out = 0;
     for (int i = 0; i < m_nodes.m_size; i++) {
-        const hkBpNode* node = &m_nodes.begin()[i];
+        // MATCH-ONLY: the aligned pointer turns copy propagation off as in the original.
+        const hkBpNode* node __attribute__((aligned(16))) = &m_nodes.begin()[i];
         if (((u32)node->m_handle & 1) == 0) {
-            getAabbFromNode(node, aabbs.begin()[out]);
-            out++;
+            getAabbFromNode(node, aabbs.begin()[out++]);
         }
     }
 }
@@ -542,6 +543,41 @@ if(!(e->flags&0x80000000)) r->slot2(p53,8,e->ptr,e->count*2,(e->flags&0x3FFFFFFF
 r->slot6();
 }
 } // namespace jj_fn_80312920
+
+// shiftAllObjects: quantizes the shift per axis (to an even step so endpoint parity is kept), reports the shift that
+// quantization gives, and moves every endpoint except the two sentinels by it; an endpoint that would leave the
+// range is clamped to its edge and its object is reported as entering the border. HYPOTHESIS: parameter names.
+extern "C" void fn_80312B34(hk3AxisSweep* sweep, const hkVector4& shiftDistance, hkVector4& effectiveShiftDistanceOut,
+                            hkArray<hkBroadPhaseHandle*>& objectsEnteringBroadphaseBorder) {
+    // MATCH-ONLY: the explicit alignment turns copy propagation off as in the original (indexed loops).
+    hkVector4 shift __attribute__((aligned(16))) = shiftDistance;
+    int intShift[3];
+    for (int i = 0; i < 3; i++) {
+        hkReal value = shift(i);
+        intShift[i] = hkMath::hkFloatToInt(value * sweep->m_scale[i]) & ~1;
+        shift(i) = hkReal(intShift[i]) / sweep->m_scale[i];
+    }
+    effectiveShiftDistanceOut = shift;
+    for (int axisIndex = 0; axisIndex < 3; axisIndex++) {
+        hk3AxisSweep::hkBpAxis& axis = sweep->m_axes[axisIndex];
+        int axisShift = intShift[axisIndex];
+        for (int i = 1; i < axis.getSize() - 1; i++) {
+            hk3AxisSweep::hkBpEndPoint& ep = axis[i];
+            int value = ep.m_value;
+            if (value > 1 && value < 0xFFFC) {
+                int newValue = value + axisShift;
+                if (newValue < 0) {
+                    newValue = value & 1;
+                    objectsEnteringBroadphaseBorder.pushBack(sweep->m_nodes[ep.m_nodeId].m_handle);
+                } else if (newValue >= 0xFFFC) {
+                    newValue = (value & 1) | 0xFFFC;
+                    objectsEnteringBroadphaseBorder.pushBack(sweep->m_nodes[ep.m_nodeId].m_handle);
+                }
+                ep.m_value = newValue;
+            }
+        }
+    }
+}
 
 // shiftBroadPhase: shifts every object the opposite way, moves the dequantization offsets by the shift actually
 // applied (the upper offset stays one quantization step above the lower one) and reports that shift.
