@@ -1432,7 +1432,7 @@ public:
     virtual void dropItemCheck(soDamage *, bool);
     virtual bool isHeartSwapEnableCondition();
     virtual void analyzeSeal(void*);
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventCollisionAttackFighter(void* unk, soModuleAccesser* moduleAccesser);
     virtual ftOwner* getOwner();
     virtual ftKind getFtKind();

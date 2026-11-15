@@ -181,7 +181,7 @@ void wnSZerosuitWhip::activate(int founderTaskId, u32 etcResId, int team, float 
     m_moduleAccesser->m_enumerationStart->m_workManageModule->setInt(-1, 0x10000009);
 }
 
-void wnSZerosuitWhip::notifyEventCollisionAttack(float power, soCollisionLog* log, soModuleAccesser* acc) {
+void wnSZerosuitWhip::notifyEventCollisionAttack(float power, const soCollisionLog* log, soModuleAccesser* acc) {
     soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
     float pending = work.getFloat(0x11000001);
     if (pending < power) pending = power;

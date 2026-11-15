@@ -101,7 +101,7 @@ void wnNessYoyoHead::notifyEventLink(soLinkEventArgs* event, soModuleAccesser* a
     Weapon::notifyEventLink(event, acc, sender, unk4);
 }
 
-void wnNessYoyoHead::notifyEventCollisionAttack(float power, soCollisionLog* log, soModuleAccesser* acc) {
+void wnNessYoyoHead::notifyEventCollisionAttack(float power, const soCollisionLog* log, soModuleAccesser* acc) {
     gfTask* task = gfTaskScheduler::getInstance()->getTaskById((gfTask::Category)log->m_taskCategory, log->m_taskId);
     soCollisionAttackData* attackData = acc->getCollisionAttackModule().getData(log->m_damageIndex, log->m_isAbsolute);
     int frames = soDamageUtilActor::calcHitStopFrame(acc, power, 1.0f, 1.0f, attackData, 0);

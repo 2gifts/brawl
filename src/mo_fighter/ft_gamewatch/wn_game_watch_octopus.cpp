@@ -95,7 +95,7 @@ void wnGameWatchOctopus::updateNodeSRT() {
     rotation.m_y += moduleAccesser->getPostureModule().getLr() == 1.0f ? 0.0f : 180.0f;
     moduleAccesser->getModelModule().setNodeSRT(0, &scale, &rotation, &position);
 }
-void wnGameWatchOctopus::notifyEventCollisionAttack(float power, soCollisionLog*, soModuleAccesser*) {
+void wnGameWatchOctopus::notifyEventCollisionAttack(float power, const soCollisionLog*, soModuleAccesser*) {
     if (m_moduleAccesser->getWorkManageModule().getFloat(0x11000001) < power) {
         m_moduleAccesser->getWorkManageModule().setFloat(power, 0x11000001);
     }

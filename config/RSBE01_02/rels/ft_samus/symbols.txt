@@ -487,7 +487,7 @@ create__27ftClassInfoImpl<3,7ftSamus>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25Hea
 @100@notifyEventChangeStatus__7FighterFiiP12soStatusDataP16soModuleAccesser = .text:0x0000ED14; // type:function size:0x8
 @112@notifyEventChangeSituation__7FighterF13SituationKind13SituationKindP16soModuleAccesser = .text:0x0000ED1C; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__7FighterFUl = .text:0x0000ED24; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x0000ED2C; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x0000ED2C; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x0000ED34; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__7FighterFv = .text:0x0000ED3C; // type:function size:0x8
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x0000ED44; // type:function size:0x8
@@ -846,7 +846,7 @@ deactivateDescendantForce__59wnWeaponBuilder<40wnSZerosuitWhipModuleAccesserBuil
 @64@__dt__59wnWeaponBuilder<40wnSZerosuitWhipModuleAccesserBuildConfig>Fv = .text:0x0001DC90; // type:function size:0x8
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x0001DC98; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__6WeaponFUl = .text:0x0001DCA0; // type:function size:0x8
-@112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x0001DCA8; // type:function size:0x8
+@112@notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser = .text:0x0001DCA8; // type:function size:0x8
 @144@__dt__59wnWeaponBuilder<40wnSZerosuitWhipModuleAccesserBuildConfig>Fv = .text:0x0001DCB0; // type:function size:0x8
 @136@__dt__59wnWeaponBuilder<40wnSZerosuitWhipModuleAccesserBuildConfig>Fv = .text:0x0001DCB8; // type:function size:0x8
 @64@__dt__15wnSZerosuitWhipFv = .text:0x0001DCC0; // type:function size:0x8
@@ -855,7 +855,7 @@ deactivateDescendantForce__59wnWeaponBuilder<40wnSZerosuitWhipModuleAccesserBuil
 @84@notifyEventLink__15wnSZerosuitWhipFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x0001DCD8; // type:function size:0x8
 @100@notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser = .text:0x0001DCE0; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__15wnSZerosuitWhipFUl = .text:0x0001DCE8; // type:function size:0x8
-@112@notifyEventCollisionAttack__15wnSZerosuitWhipFfP14soCollisionLogP16soModuleAccesser = .text:0x0001DCF0; // type:function size:0x8
+@112@notifyEventCollisionAttack__15wnSZerosuitWhipFfPC14soCollisionLogP16soModuleAccesser = .text:0x0001DCF0; // type:function size:0x8
 @124@notifyEventCollisionHit2nd__6WeaponFP23soCollisionAttackModuleP14soCollisionLogUlffP16soModuleAccesserb = .text:0x0001DCF8; // type:function size:0x8
 @124@notifyEventCollisionHit__6WeaponFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog = .text:0x0001DD00; // type:function size:0x8
 @144@__dt__15wnSZerosuitWhipFv = .text:0x0001DD08; // type:function size:0x8

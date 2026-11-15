@@ -39,7 +39,7 @@ public:
     virtual float getSpeedMul();
     virtual bool isCountMax();
     virtual void setNoSpeedMul(bool noSpeedMul);
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual void notifyEventCollisionSearch(soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
 };
 static_assert(sizeof(soReflectModuleImpl) == 0x40, "Class is wrong size!");

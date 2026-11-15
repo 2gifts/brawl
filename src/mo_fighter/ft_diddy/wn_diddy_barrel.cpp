@@ -205,7 +205,7 @@ bool wnDiddyBarrel::notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* acc, in
     return Weapon::notifyEventAnimCmd(cmd, acc, index);
 }
 
-void wnDiddyBarrel::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog,
+void wnDiddyBarrel::notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog,
                                                 soModuleAccesser* moduleAccesser) {
     float minPower = m_moduleAccesser->getWorkManageModule().getFloat(0x11000001);
     if (!(minPower >= power)) {

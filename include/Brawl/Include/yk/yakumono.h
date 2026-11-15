@@ -55,7 +55,7 @@ public:
     virtual void initHitPosXWork(int unk1, int unk2);
     virtual void presentEventGimmick(soGimmickEventArgs* eventInfo, int sendID);
 
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
 
     grYakumono* m_ground;

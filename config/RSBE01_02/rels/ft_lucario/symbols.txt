@@ -470,7 +470,7 @@ create__30ftClassInfoImpl<33,9ftLucario>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25
 @100@notifyEventChangeStatus__7FighterFiiP12soStatusDataP16soModuleAccesser = .text:0x0000D4A8; // type:function size:0x8
 @112@notifyEventChangeSituation__9ftLucarioF13SituationKind13SituationKindP16soModuleAccesser = .text:0x0000D4B0; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__7FighterFUl = .text:0x0000D4B8; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x0000D4C0; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x0000D4C0; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x0000D4C8; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__7FighterFv = .text:0x0000D4D0; // type:function size:0x8
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x0000D4D8; // type:function size:0x8
@@ -725,7 +725,7 @@ deactivateDescendantForce__59wnWeaponBuilder<40wnLucarioQigongModuleAccesserBuil
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x00013F8C; // type:function size:0x8
 @100@notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser = .text:0x00013F94; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__15wnLucarioQigongFUl = .text:0x00013F9C; // type:function size:0x8
-@112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x00013FA4; // type:function size:0x8
+@112@notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser = .text:0x00013FA4; // type:function size:0x8
 @124@notifyEventCollisionHit2nd__6WeaponFP23soCollisionAttackModuleP14soCollisionLogUlffP16soModuleAccesserb = .text:0x00013FAC; // type:function size:0x8
 @124@notifyEventCollisionHit__6WeaponFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog = .text:0x00013FB4; // type:function size:0x8
 @144@__dt__15wnLucarioQigongFv = .text:0x00013FBC; // type:function size:0x8

@@ -142,7 +142,7 @@ public:
     virtual void processUpdate();
     void toShoot(Vec3f* pos, float lr, Vec2f* speed, float value, float unk2, bool unk0);
     virtual bool notifyEventAnimCmd(acAnimCmd*, soModuleAccesser*, int);
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog*, soModuleAccesser*);
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog*, soModuleAccesser*);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
     virtual bool isCanEat();
 };

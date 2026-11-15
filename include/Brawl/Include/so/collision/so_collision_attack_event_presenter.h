@@ -45,7 +45,7 @@ public:
     soCollisionAttackEventObserver(short unitID) : soEventObserver<soCollisionAttackEventObserver>(unitID) {};
 
     virtual void addObserver(short param1, s8 param2);
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);;
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);;
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
 };
 static_assert(sizeof(soCollisionAttackEventObserver) == 12, "Class is wrong size!");

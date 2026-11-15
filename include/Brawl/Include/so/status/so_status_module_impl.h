@@ -137,7 +137,7 @@ public:
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
     virtual bool isObserv(char unk1);
     virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);;
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);;
 };
 static_assert(sizeof(soStatusModuleImpl) == 0xA4, "Class is wrong size!");
 

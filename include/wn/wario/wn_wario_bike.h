@@ -152,7 +152,7 @@ public:
     void activate(int founderTaskId, int riderTaskId, int resourceId, int team, Vec3f* position, float lr);
     virtual void processUpdate();
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog*, soModuleAccesser*);
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog*, soModuleAccesser*);
     virtual void notifyEventLink(soLinkEventArgs*, soModuleAccesser*, StageObject*, int);
     wnWarioBikeParam* m_param;
 private:

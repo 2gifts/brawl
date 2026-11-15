@@ -424,7 +424,7 @@ create__34ftClassInfoImpl<22,12ftMetaknight>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTyp
 @100@notifyEventChangeStatus__12ftMetaknightFiiP12soStatusDataP16soModuleAccesser = .text:0x0000C600; // type:function size:0x8
 @112@notifyEventChangeSituation__12ftMetaknightF13SituationKind13SituationKindP16soModuleAccesser = .text:0x0000C608; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__12ftMetaknightFUl = .text:0x0000C610; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x0000C618; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x0000C618; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x0000C620; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__7FighterFv = .text:0x0000C628; // type:function size:0x8
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x0000C630; // type:function size:0x8
@@ -661,7 +661,7 @@ deactivateDescendantForce__62wnWeaponBuilder<43wnMetaknightMantleModuleAccesserB
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x00011184; // type:function size:0x8
 @100@notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser = .text:0x0001118C; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__6WeaponFUl = .text:0x00011194; // type:function size:0x8
-@112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x0001119C; // type:function size:0x8
+@112@notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser = .text:0x0001119C; // type:function size:0x8
 @124@notifyEventCollisionHit2nd__6WeaponFP23soCollisionAttackModuleP14soCollisionLogUlffP16soModuleAccesserb = .text:0x000111A4; // type:function size:0x8
 @124@notifyEventCollisionHit__6WeaponFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog = .text:0x000111AC; // type:function size:0x8
 @144@__dt__18wnMetaknightMantleFv = .text:0x000111B4; // type:function size:0x8

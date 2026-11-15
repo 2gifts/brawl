@@ -529,7 +529,7 @@ fn_101_10F04 = .text:0x00010F04; // type:function size:0x8
 @100@notifyEventChangeStatus__7FighterFiiP12soStatusDataP16soModuleAccesser = .text:0x00010F2C; // type:function size:0x8
 @112@notifyEventChangeSituation__7FighterF13SituationKind13SituationKindP16soModuleAccesser = .text:0x00010F34; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__7FighterFUl = .text:0x00010F3C; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x00010F44; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x00010F44; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x00010F4C; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__7FighterFv = .text:0x00010F54; // type:function size:0x8
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x00010F5C; // type:function size:0x8
@@ -798,7 +798,7 @@ deactivateDescendantForce__56wnWeaponBuilder<37wnNessPKFireModuleAccesserBuildCo
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x00016354; // type:function size:0x8
 @100@notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser = .text:0x0001635C; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__12wnNessPKFireFUl = .text:0x00016364; // type:function size:0x8
-@112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x0001636C; // type:function size:0x8
+@112@notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser = .text:0x0001636C; // type:function size:0x8
 @124@notifyEventCollisionHit2nd__6WeaponFP23soCollisionAttackModuleP14soCollisionLogUlffP16soModuleAccesserb = .text:0x00016374; // type:function size:0x8
 @124@notifyEventCollisionHit__12wnNessPKFireFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog = .text:0x0001637C; // type:function size:0x8
 @144@__dt__12wnNessPKFireFv = .text:0x00016384; // type:function size:0x8
@@ -996,7 +996,7 @@ __dt__240soMotionModuleBuilder<214soMotionModuleBuildConfig<6,18soMotionModuleIm
 __dt__27wnNessYoyoHeadParamAccesserFv = .text:0x0002362C; // type:function size:0x60
 activate__14wnNessYoyoHeadFiiiP5Vec3ffb = .text:0x0002368C; // type:function size:0x16C
 notifyEventLink__14wnNessYoyoHeadFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x000237F8; // type:function size:0x280
-notifyEventCollisionAttack__14wnNessYoyoHeadFfP14soCollisionLogP16soModuleAccesser = .text:0x00023A78; // type:function size:0x168
+notifyEventCollisionAttack__14wnNessYoyoHeadFfPC14soCollisionLogP16soModuleAccesser = .text:0x00023A78; // type:function size:0x168
 notifyEventCollisionAttackCheck__14wnNessYoyoHeadFUl = .text:0x00023BE0; // type:function size:0x10C
 getParamFloat__41wnExtendParamAccesser<3999,9,23999,0,0,0>FP16soModuleAccesserll = .text:0x00023CEC; // type:function size:0x20
 getParamInt__41wnExtendParamAccesser<3999,9,23999,0,0,0>FP16soModuleAccesserll = .text:0x00023D0C; // type:function size:0x20
@@ -1008,7 +1008,7 @@ deactivateDescendantForce__58wnWeaponBuilder<39wnNessYoyoHeadModuleAccesserBuild
 @64@__dt__14wnNessYoyoHeadFv = .text:0x00023E08; // type:function size:0x8
 @84@notifyEventLink__14wnNessYoyoHeadFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x00023E10; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__14wnNessYoyoHeadFUl = .text:0x00023E18; // type:function size:0x8
-@112@notifyEventCollisionAttack__14wnNessYoyoHeadFfP14soCollisionLogP16soModuleAccesser = .text:0x00023E20; // type:function size:0x8
+@112@notifyEventCollisionAttack__14wnNessYoyoHeadFfPC14soCollisionLogP16soModuleAccesser = .text:0x00023E20; // type:function size:0x8
 @144@__dt__14wnNessYoyoHeadFv = .text:0x00023E28; // type:function size:0x8
 @136@deactivateDescendantForce__58wnWeaponBuilder<39wnNessYoyoHeadModuleAccesserBuildConfig>Fv = .text:0x00023E30; // type:function size:0x8
 @136@__dt__14wnNessYoyoHeadFv = .text:0x00023E38; // type:function size:0x8

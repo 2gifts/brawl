@@ -66,7 +66,7 @@ public:
     wnNessYoyoHead(s32 articleId, const wnArticleBuildInfo& info, const wnNessYoyoHeadData* data);
     virtual ~wnNessYoyoHead() { }
     virtual void notifyEventLink(soLinkEventArgs* event, soModuleAccesser* acc, StageObject* sender, int unk4);
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog* log, soModuleAccesser* acc);
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog* log, soModuleAccesser* acc);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
     void activate(int founderTaskId, int kind, int team, Vec3f* pos, float lr, bool flag);
 };

@@ -538,7 +538,7 @@ void wnPikminPikmin::setOwnerInfo(wnPikminPikminOwnerInfo* owner, wnPikminPikmin
     m_moduleAccesser->getWorkManageModule().setInt(follow->unkc.bytes.unkd, Work_Int_OwnerSlot);
 }
 
-void wnPikminPikmin::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+void wnPikminPikmin::notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
     if (m_moduleAccesser->getWorkManageModule().getFloat(Work_Float_ActiveFrame) < power) {
         m_moduleAccesser->getWorkManageModule().setFloat(power, Work_Float_ActiveFrame);
     }

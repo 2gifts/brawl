@@ -1146,7 +1146,7 @@ void wnemSimple::processHit() {
 }
 
 // A part weapon (type 2) remembers the strongest hit of the frame and the hit stop it asked for.
-void wnemSimple::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+void wnemSimple::notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
     if (collisionLog != NULL) {
         gfTask* task = gfTaskScheduler::getInstance()->getTaskById(static_cast<gfTask::Category>(collisionLog->m_taskCategory),
                                                                   collisionLog->m_taskId);

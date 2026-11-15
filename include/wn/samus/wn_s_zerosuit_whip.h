@@ -78,6 +78,6 @@ public:
     virtual void deactivate(bool);
     virtual void notifyEventLink(soLinkEventArgs*, soModuleAccesser*, StageObject*, int);
     virtual void processFixPosition();
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventCollisionAttackCheck(u32);
 };

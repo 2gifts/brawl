@@ -207,7 +207,7 @@ void ftPokeZenigame::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesse
     Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObject, unk4);
 }
 
-void ftPokeZenigame::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+void ftPokeZenigame::notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
     fn_27_377094(&m_eventManage);
     Fighter::notifyEventCollisionAttack(power, collisionLog, moduleAccesser);
 }

@@ -38,7 +38,7 @@ public:
     virtual ~ftCaptainStatusUniqProcessFinalStart() { }
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
     // Called by ftCaptain's collision attack events while the start status runs (map names).
-    void notifyEventCollisionAttackFighter(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    void notifyEventCollisionAttackFighter(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     bool notifyEventCollisionAttackCheck(u32 flags, soModuleAccesser* moduleAccesser);
 };
 
@@ -81,7 +81,7 @@ public:
 };
 
 // A fighter the Blue Falcon hits (unless it is under damage lock or invincible) joins the target table.
-void ftCaptainStatusUniqProcessFinalStart::notifyEventCollisionAttackFighter(float power, soCollisionLog* collisionLog,
+void ftCaptainStatusUniqProcessFinalStart::notifyEventCollisionAttackFighter(float power, const soCollisionLog* collisionLog,
                                                                              soModuleAccesser* moduleAccesser) {
     soWorkManageModule* workManageModule = &moduleAccesser->getWorkManageModule();
     StageObject* target = dynamic_cast<StageObject*>(gfTask::getTask(collisionLog->m_taskId));
