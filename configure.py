@@ -6844,6 +6844,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/st/st_operator_uploader.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_pikmin_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/st/st_enemy_id_manager.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/it/it_figure_archive.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/so/effect/so_effect_screen_manager.cpp"),
         ],
     },
     {
