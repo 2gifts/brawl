@@ -15,6 +15,7 @@ namespace nw4r {
         struct ResAnmScnData {
             char _spacer2[0x30];
             unsigned short m_animLength;
+            unsigned short m_specLightNum; // 0x32, HYPOTHESIS: the count stScnObjCallBack sizes its specular sets with
         };
         class ResAnmScn : public ResCommon<ResAnmScnData> {
         public:
@@ -22,6 +23,9 @@ namespace nw4r {
             inline ResAnmScn(void* data) : ResCommon(data) {}
 
             bool Bind(ResAnmScn scene);
+            u32 GetResAnmLightNumEntries() const;
+            u32 GetResAnmAmbLightNumEntries() const;
+            u32 GetResAnmFogNumEntries() const;
             bool Bind() { return Bind(*this); }
         };
 
