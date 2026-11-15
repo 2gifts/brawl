@@ -1,25 +1,45 @@
 #pragma once
 
+// Wolf's Blaster, the gun in the hand (article kind 38; the shots are wn/wolf/wn_wolf_blaster_bullet.h). Units that build
+// or destroy the article (its own unit and the fighter module's article pool) define WN_WEAPON_BUILDER and see the
+// complete class; the others only activate it and see the shell at the end of this file.
+
 #include <wn/wn_weapon_builder.h>
 
-// HYPOTHESIS: the article data type the class info fetches for kind 30; only passed as a pointer, the
-// layout is unreconstructed (mirror of the bullet family's data role).
-struct wnWolfBlasterData;
 struct wnArticleBuildInfo;
 
-// Extent known from the class info createArray allocation (0x1D88); the internal layout and the builder
-// chain stay blob-provided until the constructor is reconstructed.
-#if defined(WN_WEAPON_BUILDER) && defined(FT_WOLF_ARTICLE_POOLS)
-// The fighter unit owns the complete article (its destructor is emitted there). Layout from the destructor's member
-// offsets: no kinetic, ground, collision-attack, reflect or glow builders, a color blend module, one other-animation
-// slot, four model event observers (map name; Fox has three), and the common four command threads (map names of the out-of-line units).
+#ifdef WN_WEAPON_BUILDER
 #include <wn/wn_extend_param_accesser.h>
+
+// HYPOTHESIS: layout of the untouched part of the static article data (as the other articles' data blocks).
+struct wnWolfBlasterData {
+    s32 m_resGroupNo;
+    u8 unk4[0x30];
+    const float* m_param; // +0x34, HYPOTHESIS: one float parameter
+};
+
+class wnWolfBlasterParamAccesser : public wnExtendParamAccesser<3999, 1, 23999, 0, 0, 0> {
+public:
+    wnWolfBlasterParamAccesser(const float* param) : wnExtendParamAccesser<3999, 1, 23999, 0, 0, 0>(38) {
+        m_floats[0] = param;
+    }
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
+    virtual ~wnWolfBlasterParamAccesser(); // BYTES: defined in the article unit, after the article constructor (emission order)
+#else
+    virtual ~wnWolfBlasterParamAccesser() { }
+#endif
+};
+static_assert(sizeof(wnWolfBlasterParamAccesser) == 0x2C, "Wolf Blaster parameter accesser extent");
+
+// No kinetic, ground, collision, reflect or glow modules; a color blend module, three motions with one other-animation
+// slot, four model event observers and the common four command threads (template arguments from the link map names
+// of the builders the article's unit keeps).
 class wnWolfBlasterModuleAccesserBuildConfig : public wnCommonBuildConfig {
 public:
     typedef soInsideEventManageModuleBuildConfig<16, 32, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 1, 1, 0, 0, 0,
                                                  wnInsideEventManageModuleTypes> InsideEventManageModuleBuildConfig;
     typedef soModelModuleBuildConfig<5, 0, soModelModuleImpl> ModelModuleBuildConfig;
-    typedef soMotionModuleBuildConfig<1, soMotionModuleImpl, 0, 1, soTransitionModuleBuildConfig<wnMotionTransitionTypeList>,
+    typedef soMotionModuleBuildConfig<3, soMotionModuleImpl, 0, 1, soTransitionModuleBuildConfig<wnMotionTransitionTypeList>,
                                       soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> > MotionModuleBuildConfig;
     typedef soGroundModuleBuildConfigNull GroundModuleBuildConfig;
     typedef soCollisionAttackModuleBuildConfigNull CollisionAttackModuleBuildConfig;
@@ -29,20 +49,31 @@ public:
     typedef wnStatusModuleBuildConfig<1, soGeneralWorkBuildConfig<2, 2, 1>, 1,
                                       soTransitionModuleBuildConfig<wnStatusTransitionTypeList> > StatusModuleBuildConfig;
     typedef soKineticModuleBuildConfigNull KineticModuleBuildConfig;
-    // HYPOTHESIS: color blend counts (the destructor only shows the module).
-    typedef soColorBlendModuleBuildConfig<-1, 0, soColorBlendModuleImpl> ColorBlendModuleBuildConfig;
+    typedef soColorBlendModuleBuildConfig<-1, 1, soColorBlendModuleImpl> ColorBlendModuleBuildConfig;
     typedef soReflectModuleBuildConfigNull ReflectModuleBuildConfig;
     typedef soGlowModuleBuildConfigNull GlowModuleBuildConfig;
     typedef wnAnimCmdModuleSubBuildConfigDefault<1, 1, 0, 0, 1, 3, 0, 0, 1, 3, 0, 0, 1, 3, 0, 0> AnimCmdModuleSubBuildConfig;
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
+    typedef soGenerateArticleManageModuleBuilder<soGenerateArticleManageModuleBuildConfigNull> GenerateArticleManageModuleBuilder;
+#endif
 };
 
-// HYPOTHESIS: one float parameter (the accesser extent is 0x2C); its kind id is set by the native constructor.
-struct wnWolfBlasterParam;
-class wnWolfBlasterParamAccesser : public wnExtendParamAccesser<3999, 1, 23999, 0, 0, 0> {
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
+// The article's own unit (the sora_melee unit mode of wn/zelda/wn_zelda_lighting_bow.h): the generic builder's member
+// layout, spelled out so that the constructor can be defined by hand (wn_zelda_lighting_bow_builder_ctor.h).
+template <>
+class soModuleAccesserBuilder<wnWolfBlasterModuleAccesserBuildConfig> : public utUnCopyable {
 public:
-    virtual ~wnWolfBlasterParamAccesser() { }
-};
+    typedef wnWolfBlasterModuleAccesserBuildConfig BC;
+    WN_ZELDA_LIGHTING_BOW_BUILDER_MEMBERS
 
+    soModuleAccesserBuilder(StageObject* owner, const wnModuleAccesserBuildData& bd);
+    // The destructor is too big to expand in the weapon builder's: the unit keeps one weak copy.
+    ~soModuleAccesserBuilder() { }
+    soModuleAccesser* getModuleAccesser(); // BYTES: defined in wn_zelda_lighting_bow_builder_ctor.h (emission order)
+};
+#else
+// The fighter module owns a copy of the article's destructor.
 // The Blaster's status builder ends without the tail word (as the Illusion's in this unit); its teardown is out of line.
 template <>
 class soStatusModuleBuilder<wnStatusModuleBuildConfig<1, soGeneralWorkBuildConfig<2, 2, 1>, 1, soTransitionModuleBuildConfig<wnStatusTransitionTypeList> > > {
@@ -79,26 +110,38 @@ public:
         wnDeactivateArticleDescendants(this->m_modules.m_generateArticleBuilder);
     }
 };
+#endif
 
 class wnWolfBlaster : public wnWeaponBuilder<wnWolfBlasterModuleAccesserBuildConfig> {
-    const wnWolfBlasterParam* m_param;
-    wnWolfBlasterParamAccesser m_paramAccesser;
-#else
-class wnWolfBlaster : public Weapon {
-    u8 m_storage[0x1D88 - sizeof(Weapon)];
-#endif
+    const float* m_param;                        // +0x1D58
+    wnWolfBlasterParamAccesser m_paramAccesser; // +0x1D5C
 public:
-    // The body lives in the module blob; declared so the class info's createArray can construct articles.
     wnWolfBlaster(s32 articleId, const wnArticleBuildInfo& info, const wnWolfBlasterData* data);
-    // HYPOTHESIS: parameter types follow ftWolfTransactor::activeArticle1, which forwards its model and texture
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
+    virtual ~wnWolfBlaster();
+#else
+    virtual ~wnWolfBlaster() { }
+#endif
+    // HYPOTHESIS: parameter types follow the fighter transactor's activeArticle1, which forwards its model and texture
     // resource ids and two flags; the founder task id comes first and the team last.
     void activate(int founderTaskId, u32 mdlResId, u32 texResId, bool unk1, bool unk2, int team);
     virtual void notifyEventLink(soLinkEventArgs* event, soModuleAccesser* moduleAccesser, StageObject* sender,
                                  int selector);
-#if defined(WN_WEAPON_BUILDER) && defined(FT_WOLF_ARTICLE_POOLS)
-    virtual ~wnWolfBlaster() { }
-#else
-    virtual ~wnWolfBlaster();
-#endif
 };
+
+#else
+
+struct wnWolfBlasterData;
+
+class wnWolfBlaster : public Weapon {
+    u8 m_unreconstructed[0x1D88 - sizeof(Weapon)];
+public:
+    wnWolfBlaster(s32 articleId, const wnArticleBuildInfo& info, const wnWolfBlasterData* data);
+    void activate(int founderTaskId, u32 mdlResId, u32 texResId, bool unk1, bool unk2, int team);
+    virtual void notifyEventLink(soLinkEventArgs* event, soModuleAccesser* moduleAccesser, StageObject* sender,
+                                 int selector);
+    virtual ~wnWolfBlaster();
+};
+
+#endif
 static_assert(sizeof(wnWolfBlaster) == 0x1D88, "Wolf Blaster article extent");

@@ -1,106 +1,131 @@
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructors expand the empty param customize module destructor
+#define WN_PARAM_ACCESSER_INLINE_DTOR // BYTES: the empty soParamAccesser base destructor is inlined in sora_melee
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
+#define FT_MODULE_BUILDER
+#define WN_MARIO_FIREBALL_UNIT // the sora_melee article unit mode shared with the Mario fireball (builders out of line)
+#define WN_ZELDA_LIGHTING_BOW_UNIT // the member layout and constructor of the module builder of this unit mode (wn/zelda/wn_zelda_lighting_bow.h)
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_STATUS_NO_TAIL
+#define WN_ARTICLE_ANIMCMD_INT // BYTES: the builder vtable takes Weapon's int-index notifyEventAnimCmd thunk (@72@), as in the original
+#define FT_REL_LINK_EXTERN
+#define SO_NULLABLE_INLINE_CTOR
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/zelda/wn_zelda_lighting_bow.h>
 #include <wn/falco/wn_falco_blaster_bullet.h>
+#include <so/model/so_model_module_impl.h>
+#include <so/status/so_status_module_impl.h>
+#include <gf/gf_task_scheduler.h>
 #include <types.h>
 #include <wn/wn_kinetic_energy_normal.h>
 #include <so/so_module_accesser.h>
 #include <wn/wn_activate_desc.h>
 #include <so/motion/so_motion_change_param.h>
+
+
 #include <so/so_slow.h>
 #include <so/so_value_accesser.h>
 #include <math.h>
 #include <wn/wn_class_info_impl.h>
 
-// Registers the Falco Blaster Bullet article class (kind 36) in the class info table during static initialization.
+// The unit's read-only data opens with these two constants (as do the Falco and Wolf bullet units, and nothing else in the
+// game). MWCC keeps external-linkage constants at the start of .rodata and folds their values into the literal pool of the
+// code that reads them, which is the native layout: activate has its own 8.0 and -8.0.
+// HYPOTHESIS: the names; no code reads the first one.
+extern const float g_wnFalcoBlasterBulletGroundOffsetUnread = 9.25f;
+extern const float g_wnFalcoBlasterBulletGroundOffsetX = 8.0f;
+
+// Registers the Falco Blaster article class (kind 36) in the class info table during static initialization.
 wnClassInfoImpl<36, wnFalcoBlasterBullet, wnFalcoBlasterBulletData> g_wnFalcoBlasterBulletClassInfo;
 
-void wnFalcoBlasterBullet::activate(int founderTaskId, int, int team, Vec3f* pos,
-                                    int unkMode, EfID effectId, float lr,
-                                    float speed, float angle) {
-    wnActivateDesc desc;
-    desc.founderTaskId = founderTaskId;
-    desc.resourceId = 0xFFFF;
-    desc.unk8 = 0xFFFF;
-    desc.unkC = 0xFFFF;
-    desc.unk10 = -1;
-    desc.unk14 = -1;
-    desc.unk18 = 0;
-    desc.unk1C = 0;
-    desc.pos = *pos;
-    desc.lr = -lr;
-    desc.team = team;
-    desc.life = m_param->unk0;
-    desc.unk38 = 2;
-    desc.unk3C = 0x80;
-    desc.unk40 = 0;
-    desc.unk44 = 0x35F;
-    desc.unk48 = 0;
+// BYTES: the motion change parameter constructor is expanded in this unit (the weak inline copy of the original).
+inline soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, u8 c, u8 d) :
+    m_kind(kind), m_frame(frame), m_rate(rate), _12(a), _13(b), _14(c), _15(d) { }
+
+// BYTES: the empty base destructors that sora_melee always expands (they have no out-of-line copy there).
+inline soTeam::~soTeam() { }
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+inline soResourceIdAccesser::~soResourceIdAccesser() { }
+
+wnFalcoBlasterBullet::wnFalcoBlasterBullet(s32 articleId, const wnArticleBuildInfo& info, const wnFalcoBlasterBulletData* data) :
+    wnWeaponBuilder<wnFalcoBlasterBulletModuleAccesserBuildConfig>(
+        "FalcoBlasterBullet", articleId, info,
+        wnModuleAccesserBuildData(36, data, info.getHeapModule()->getInstanceHeap(),
+                                  info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), static_cast<u8>(data->m_resGroupNo), -1,
+                                  &m_paramAccesser, 0, 0, 0, 0, 0, 0, 0)),
+    m_param(data->m_param), m_paramAccesser(data->m_param) {
+    Weapon::deactivate(false);
+}
+
+// BYTES: the .text order of the original unit is the article constructor (with its weak copies, the weapon builder
+// destructor first), the parameter accesser destructor, getModuleAccesser, the module accesser builder constructor,
+// then the article members; MWCC emits weak copies in definition order, so these are defined here.
+inline wnFalcoBlasterBulletParamAccesser::~wnFalcoBlasterBulletParamAccesser() { }
+
+#define WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG wnFalcoBlasterBulletModuleAccesserBuildConfig
+#include <wn/zelda/wn_zelda_lighting_bow_builder_ctor.h>
+
+// The bolt's length scale (work float 0x11000001, applied to the model's Z scale in updateNodeSRT) grows with the distance
+// flown each frame, up to the article's constant 0xFA0.
+inline void wnFalcoBlasterBullet::updateStretch() {
+    float speedMagnitude =
+        Vec2f(m_moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1))).length();
+    float maximum = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFA0, 0);
+    float current = m_moduleAccesser->getWorkManageModule().getFloat(0x11000001);
+    float next = current + speedMagnitude / soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFA1, 0);
+    if (next > maximum) {
+        next = maximum;
+    }
+    if (next < 0.00001f) {
+        next = 0.001f;
+    }
+    m_moduleAccesser->getWorkManageModule().setFloat(next, 0x11000001);
+}
+
+void wnFalcoBlasterBullet::activate(int founderTaskId, int, int team, const Vec3f* pos,
+                                   int unkMode, EfID effectId, float lr,
+                                   float speed, float angle) {
+    wnActivateDesc desc(founderTaskId, 0xFFFF, 0xFFFF, 0xFFFF, -1, -1, 0, 0, *pos, -lr, team, m_param->unk0, 2, 0x80, 0,
+                        0x35F, 0);
     desc.flagsHigh = 1;
     desc.flagsMidHigh = 0;
     desc.flagsMidLow = 1;
     desc.flagsLow = 0;
-    // HYPOTHESIS: the low six bits retain their prior stack value; their meaning is unknown.
     desc.unk4DHigh = 0;
     Weapon::activate(&desc);
 
     m_moduleAccesser->getWorkManageModule().setFloat(0.001f, 0x11000001);
     m_moduleAccesser->getStatusModule().changeStatusForce(0, m_moduleAccesser);
 
-    Vec3f zeroPos(0.0f, 0.0f, 0.0f);
-    Vec3f zeroRot(0.0f, 0.0f, 0.0f);
-    u32 effect = m_moduleAccesser->getEffectModule().reqFollow(effectId, 0, &zeroPos, &zeroRot,
-                                                               1.0f, false, 0, 0, -1);
+    u32 effect = m_moduleAccesser->getEffectModule().reqFollow(effectId, 0, &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f),
+                                                                1.0f, false, 0, 0, -1);
     m_moduleAccesser->getWorkManageModule().setInt(effect, 0x10000005);
 
     wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(
         *m_moduleAccesser->getKineticModule().getEnergy(0));
-    float velocityY = speed * (float)sin(angle);
-    float velocityX = lr * (speed * (float)cos(angle));
-    Vec2f velocity(velocityX, velocityY);
+    Vec2f velocity(lr * (speed * (float)cos(angle)), speed * (float)sin(angle));
     energy.m_speed.m_x = velocity.m_x;
     energy.m_speed.m_y = velocity.m_y;
-    Vec2f energySpeed = energy.getSpeed();
-    m_moduleAccesser->getCollisionAttackModule().setSpeed(&energySpeed);
+    m_moduleAccesser->getCollisionAttackModule().setSpeed(&energy.getSpeed());
     m_moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x11000001);
 
     if (unkMode == 0) {
         if (lr == 1.0f) {
-            m_moduleAccesser->getGroundModule().setOffsetX(-8.0f, 0);
+            m_moduleAccesser->getGroundModule().setOffsetX(-g_wnFalcoBlasterBulletGroundOffsetX, 0);
             m_moduleAccesser->getGroundModule().setShapeFlag(static_cast<soGroundShapeImpl::ShapeFlagId>(4), true, 0);
         } else {
-            m_moduleAccesser->getGroundModule().setOffsetX(8.0f, 0);
+            m_moduleAccesser->getGroundModule().setOffsetX(g_wnFalcoBlasterBulletGroundOffsetX, 0);
             m_moduleAccesser->getGroundModule().setShapeFlag(static_cast<soGroundShapeImpl::ShapeFlagId>(3), true, 0);
         }
-        soMotionChangeParam motionParam;
-        motionParam.m_kind = 0;
-        motionParam.m_frame = 0.0f;
-        motionParam.m_rate = 1.0f;
-        motionParam._12 = 0;
-        motionParam._13 = 0;
-        motionParam._14 = 0;
-        motionParam._15 = 0;
-        m_moduleAccesser->getMotionModule().changeMotionRequest(&motionParam);
+        m_moduleAccesser->getMotionModule().changeMotionRequest(&soMotionChangeParam(0, 0.0f, 1.0f, 0, 0, 0, 0));
     } else {
         m_moduleAccesser->getGroundModule().setShapeFlag(static_cast<soGroundShapeImpl::ShapeFlagId>(4), true, 0);
         m_moduleAccesser->getGroundModule().setShapeFlag(static_cast<soGroundShapeImpl::ShapeFlagId>(3), true, 0);
-        soMotionChangeParam motionParam;
-        motionParam.m_kind = 1;
-        motionParam.m_frame = 0.0f;
-        motionParam.m_rate = 1.0f;
-        motionParam._12 = 0;
-        motionParam._13 = 0;
-        motionParam._14 = 0;
-        motionParam._15 = 0;
-        m_moduleAccesser->getMotionModule().changeMotionRequest(&motionParam);
+        m_moduleAccesser->getMotionModule().changeMotionRequest(&soMotionChangeParam(1, 0.0f, 1.0f, 0, 0, 0, 0));
     }
 
-    Vec2f currentSpeed = m_moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
-    float speedMagnitude = currentSpeed.length();
-    float maximum = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFA0, 0);
-    float current = m_moduleAccesser->getWorkManageModule().getFloat(0x11000001);
-    float next = current + speedMagnitude / soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFA1, 0);
-    if (next > maximum) next = maximum;
-    if (next < 0.00001f) next = 0.001f;
-    m_moduleAccesser->getWorkManageModule().setFloat(next, 0x11000001);
+    updateStretch();
     updateNodeSRT();
 }
 
@@ -124,18 +149,7 @@ void wnFalcoBlasterBullet::processUpdate() {
         return;
     }
 
-    Vec2f speed = m_moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
-    float speedMagnitude = speed.length();
-    float maximum = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFA0, 0);
-    float current = m_moduleAccesser->getWorkManageModule().getFloat(0x11000001);
-    float next = current + speedMagnitude / soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFA1, 0);
-    if (next > maximum) {
-        next = maximum;
-    }
-    if (next < 0.00001f) {
-        next = 0.001f;
-    }
-    m_moduleAccesser->getWorkManageModule().setFloat(next, 0x11000001);
+    updateStretch();
 }
 
 void wnFalcoBlasterBullet::updateNodeSRT() {
@@ -152,3 +166,7 @@ void wnFalcoBlasterBullet::updateNodeSRT() {
     scale.m_z *= m_moduleAccesser->getWorkManageModule().getFloat(0x11000001);
     m_moduleAccesser->getModelModule().setNodeSRT(0, &scale, &rotation, &position);
 }
+
+// The destructor expands the simple module builders down to their impl destructors; the big ones stay calls (the module
+// accesser builder destructor in wn_zelda_lighting_bow_builder_ctor.h is compiled with inlining off).
+wnFalcoBlasterBullet::~wnFalcoBlasterBullet() { }

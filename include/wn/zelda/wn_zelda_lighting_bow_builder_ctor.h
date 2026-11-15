@@ -117,7 +117,9 @@ soModuleAccesserBuilder<WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG>::soModuleAccesserB
         getModuleAccesser()->getWorkManageModule().setWork(1, m_generalWorkBuilder.getWork());
     }
 }
+#ifndef WN_ARTICLE_BUILDER_DTOR_IN_CLASS // opt-out: the builder class defines its destructor itself (wn/fox/wn_fox_blaster.h)
 // BYTES: compiled while inlining is off, so the destructor calls the module builder destructors (the big ones stay calls in
 // the original); the callers then expand this one.
 inline soModuleAccesserBuilder<WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG>::~soModuleAccesserBuilder() { }
+#endif
 #pragma dont_inline reset

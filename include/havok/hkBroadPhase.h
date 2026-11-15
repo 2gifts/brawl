@@ -55,6 +55,9 @@ struct hkBroadPhase : hkReferencedObject {
     virtual void querySingleAabb(const hkAabb& aabb, hkArray<hkBroadPhaseHandlePair>& pairsOut) const; // 0x34
     // The pairs overlapping one object already in the broad phase (hkWorld::updateCollisionFilterOnPhantom).
     virtual void reQuerySingleObject(const hkBroadPhaseHandle* object, hkArray<hkBroadPhaseHandlePair>& pairsOut); // 0x38
+    // Moves every object by the shift (quantized), reporting the shift actually applied.
+    virtual void shiftAllObjects(const hkVector4& shiftDistance, hkVector4& effectiveShiftDistanceOut,
+                                 hkArray<hkBroadPhaseHandle*>& objectsEnteringBroadphaseBorder); // 0x3C
 
     // HYPOTHESIS: the two empty out-of-line members after the destructor (no caller, no vtable slot).
     void lockImplementation();
