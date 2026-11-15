@@ -4878,6 +4878,9 @@ mo_melee/sora_melee/so/so_instance_manager_thunks_Vector_ftOutsideEventObserver_
 mo_melee/sora_melee/ft/ft_audience_manager.cpp:
 	.text       start:0x0010FB1C end:0x0010FC94
 
+mo_melee/sora_melee/ft/ft_audience_impl.cpp:
+	.text       start:0x0010FC94 end:0x00110FC8
+
 mo_melee/sora_melee/ft/ft_owner.cpp:
 	.text       start:0x00110FC8 end:0x00113060
 	.ctors      start:0x00000054 end:0x00000058
