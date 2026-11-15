@@ -45,6 +45,10 @@
 #include <havok/hkCollisionDispatcher.h>
 #include <havok/hkCollisionInput.h>
 #include <havok/hkPointerMapBase.h>
+#include <havok/hkSimulationIsland.h>
+#include <havok/hkSweptTransformUtil.h>
+#include <havok/hkWorld.h>
+#include <havok/hkStepInfo.h>
 #include <havok/hkDefaultToiResourceMgr.h>
 #include <havok/hkWorld.h>
 #include <havok/hkWorldCallbackUtil.h>
@@ -444,3 +448,77 @@ void hkContinuousSimulation::removeToiEventsOfEntities(hkEntity** entities, int 
     }
 }
 #pragma pop
+
+// hkLs_backstepAndFreezeEntireIsland: moves every entity of the island back to the given time and freezes its swept
+// transform there (start = end, the step running from that time to the simulation's end time); entities not yet
+// marked 8 (activated) in the state table are added to the activated list and marked. HYPOTHESIS: parameter types.
+extern "C" void fn_8032A0EC(hkSimulationIsland* island, u8** entityState, hkArray<hkEntity*>& activated, hkReal time) {
+    for (int i = 0; i < island->m_entities.getSize(); i++) {
+        hkEntity* entity = island->m_entities[i];
+        hkMotionState& ms = entity->m_motion.m_motionState;
+        hkSweptTransformUtil::backStepMotionState(time, ms);
+        if ((*entityState)[i] != 8) {
+            activated.pushBack(entity);
+            (*entityState)[i] = 8;
+        }
+        hkSweptTransform& st = ms.m_sweptTransform;
+        st.m_centerOfMass0(0) = st.m_centerOfMass1(0);
+        st.m_centerOfMass0(1) = st.m_centerOfMass1(1);
+        st.m_centerOfMass0(2) = st.m_centerOfMass1(2);
+        st.m_rotation0 = st.m_rotation1;
+        st.m_centerOfMass0(3) = time;
+        st.m_centerOfMass1(3) = 1.0f / (island->m_world->m_simulation->m_unk14 - time);
+    }
+}
+
+
+
+
+
+
+
+
+
+// hkLs_updateEntityManifolds: re-runs, at the given time, the agents of the entity whose collision quality is at most
+// the given one, skipping partners already activated (state 8); a movable partner not yet touched (state 0) is first
+// moved to that time and marked 1. The input's step is changed for this and restored at the end.
+// HYPOTHESIS: the parameter types and the meaning of the states.
+extern "C" void fn_8032931C(hkEntity* entity, int maxQuality, hkProcessCollisionInput& input, u8** entityState,
+                            hkReal time) {
+    hkStepInfo savedStepInfo = input.m_stepInfo;
+    input.m_stepInfo.m_endTime = time;
+    input.m_stepInfo.m_deltaTime = time - input.m_stepInfo.m_startTime;
+    if (input.m_stepInfo.m_deltaTime > 0.0f) {
+        input.m_stepInfo.m_invDeltaTime = 1.0f / input.m_stepInfo.m_deltaTime;
+    } else {
+        input.m_stepInfo.m_invDeltaTime = 0.0f;
+    }
+    for (int i = 0; i < entity->m_collidable.m_collisionEntries.getSize(); i++) {
+        hkLinkedCollidable::CollisionEntry& entry = entity->m_collidable.m_collisionEntries[i];
+        if (hkBool(maxQuality <= (u8)entry.m_agentEntry->m_collisionQualityIndex)) {
+            hkEntity* partner = (hkEntity*)((char*)entry.m_partner + entry.m_partner->m_ownerOffset);
+            bool process = partner->isFixed() || (*entityState)[partner->m_storageIndex] != 8;
+            if (process) {
+                if (!(bool)partner->isFixed()) {
+                    u8& state = (*entityState)[partner->m_storageIndex];
+                    if (state == 0) {
+                        state = 1;
+                        hkMotionState& ms = partner->m_motion.m_motionState;
+                        hkSweptTransformUtil::lerp2(ms.m_sweptTransform, time, ms.m_transform);
+                    }
+                }
+                hkAgentNnEntry* agent = entry.m_agentEntry;
+                hkProcessCollisionData output;
+                output.reset();
+                input.m_collisionQualityInfo = &input.m_dispatcher->m_collisionQualityInfo[5];
+                input.m_createPredictiveAgents = input.m_dispatcher->m_collisionQualityInfo[agent->m_collisionQualityIndex].unk10;
+                hkAgentNnMachine_ProcessAgent(agent, input, (hkProcessCollisionOutput&)output);
+                if (!(bool)output.isEmpty()) {
+                    agent->m_contactMgr->processContact(*agent->m_collidable[0], *agent->m_collidable[1], input,
+                                                        (hkProcessCollisionOutput&)output);
+                }
+            }
+        }
+    }
+    input.m_stepInfo = savedStepInfo;
+}
