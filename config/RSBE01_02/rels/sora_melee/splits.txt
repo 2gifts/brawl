@@ -11076,6 +11076,9 @@ mo_melee/sora_melee/st/st_operator_defeat_boss.cpp:
 	.text       start:0x0025BE08 end:0x0025CB9C
 	.ctors      start:0x000002F4 end:0x000002F8
 
+mo_melee/sora_melee/st/st_operator_uploader.cpp:
+	.text       start:0x0025CB9C end:0x0025CEA4
+
 mo_melee/sora_melee/st/st_event_rule.cpp:
 	.text       start:0x0025CEA4 end:0x0025CF48
 
