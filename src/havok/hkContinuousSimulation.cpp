@@ -49,6 +49,8 @@
 #include <havok/hkSweptTransformUtil.h>
 #include <havok/hkWorld.h>
 #include <havok/hkStepInfo.h>
+#include <havok/hkRigidMotionUtil.h>
+#include <havok/hkWorldOperationQueue.h>
 #include <havok/hkDefaultToiResourceMgr.h>
 #include <havok/hkWorld.h>
 #include <havok/hkWorldCallbackUtil.h>
@@ -521,4 +523,35 @@ extern "C" void fn_8032931C(hkEntity* entity, int maxQuality, hkProcessCollision
         }
     }
     input.m_stepInfo = savedStepInfo;
+}
+
+// collideEntitiesBroadPhaseContinuous (fn_80326EEC, not written yet). HYPOTHESIS: the parameter types.
+extern "C" void fn_80326EEC(hkContinuousSimulation* simulation, hkEntity** entities, int numEntities, hkWorld* world);
+extern "C" void fn_80327B5C(int p1, int p2, int p3, int p4);
+
+// Moves the entities back to the simulation time, re-integrates them over the current step and collides them again
+// (broad phase, then the continuous narrow phase), with the collision input's step set to this simulation's step for
+// the duration. Queued while the world is locked.
+void hkContinuousSimulation::reintegrateAndRecollideEntities(hkEntity** entities, int numEntities, hkWorld* world) {
+    if (world->areCriticalOperationsLocked()) {
+        hkWorldOperation::BatchOperation op;
+        op.m_type = hkWorldOperation::ENTITY_BATCH_REINTEGRATE_AND_RECOLLIDE;
+        op.m_objects = (void**)entities;
+        op.m_count = numEntities;
+        world->queueOperation(&op);
+        return;
+    }
+    world->lockCriticalOperations();
+    hkStepInfo savedStepInfo = world->m_collisionInput->m_stepInfo;
+    hkStepInfo stepInfo(m_unk10, m_unk14);
+    world->m_collisionInput->m_stepInfo = stepInfo;
+    for (int i = 0; i < numEntities; i++) {
+        hkSweptTransformUtil::backStepMotionState(m_unk10, entities[i]->m_motion.m_motionState);
+    }
+    hkRigidMotionUtil::hkRigidMotionUtilStep(stepInfo, entities, numEntities, HK_OFFSET_OF(hkEntity, m_motion));
+    resetCollisionInformationForEntities(entities, numEntities, world, false);
+    fn_80326EEC(this, entities, numEntities, world);
+    fn_80327B5C((int)this, (int)entities, numEntities, (int)world->m_collisionInput);
+    world->unlockAndAttemptToExecutePendingOperations();
+    world->m_collisionInput->m_stepInfo = savedStepInfo;
 }
