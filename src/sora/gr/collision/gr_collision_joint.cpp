@@ -74,7 +74,7 @@ grCollisionJoint::grCollisionJoint(grCollision* collision, grCollData::JointData
     m_ground = NULL;
 }
 
-grCollisionLine* grCollisionJoint::getLine(u16 index) {
+grCollisionLine* grCollisionJoint::getLine(u32 index) {
     return lineAt(lineAt(m_lines, m_lineStart), index);
 }
 

@@ -975,7 +975,7 @@ CC008000:WGPIPE
 801119bc:getSegment__11grCollisionFP11clSegment2DP15grCollisionLine
 
 // grCollisionJoint
-80112ea0:getLine__16grCollisionJointFUs
+80112ea0:getLine__16grCollisionJointFUl
 
 // grCollStatus
 801342c8:getPos__12grCollStatusFP5Vec2f
