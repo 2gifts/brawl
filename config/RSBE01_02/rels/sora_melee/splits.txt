@@ -10872,6 +10872,14 @@ mo_melee/sora_melee/st/st_loader_stage.cpp:
 	.text       start:0x0023F008 end:0x0023FF58
 	.ctors      start:0x000002C0 end:0x000002C4
 
+mo_melee/sora_melee/st/st_loader_stage_star_fox.cpp:
+	.text       start:0x0023FF58 end:0x00240538
+	.data       start:0x0004D5F8 end:0x0004D7A8
+
+mo_melee/sora_melee/st/st_loader_stage_adventure.cpp:
+	.text       start:0x00240538 end:0x002407E0
+	.data       start:0x0004D7A8 end:0x0004D8A8
+
 mo_melee/sora_melee/st/st_loader_info.cpp:
 	.text       start:0x002407E0 end:0x00240B14
 	.ctors      start:0x000002C4 end:0x000002C8
@@ -10886,6 +10894,11 @@ mo_melee/sora_melee/st/st_loader_info_wifi.cpp:
 mo_melee/sora_melee/st/st_loader_info_stage_edit.cpp:
 	.text       start:0x0024113C end:0x00241404
 	.ctors      start:0x000002CC end:0x000002D0
+
+mo_melee/sora_melee/st/st_loader_stage_se.cpp:
+	.text       start:0x00241404 end:0x00241B14
+	.rodata     start:0x00003A30 end:0x00003DB8
+	.data       start:0x0004DB80 end:0x0004DF50
 
 mo_melee/sora_melee/st/st_loader_local_adventure.cpp:
 	.text       start:0x00241B14 end:0x00241E30
