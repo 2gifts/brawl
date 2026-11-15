@@ -3,6 +3,7 @@
 #define MT_VEC3F_CTOR_NOINLINE
 #define MT_VEC3F_ASSIGN_NOINLINE
 #define MT_VEC3F_MUL_INLINE
+#define MT_VEC3F_ADD_NATIVE_ORDER // BYTES: the paired-single sum leaves its result in the right operand registers here (mt_vector.h)
 #include <cm/cm_camera_controller.h>
 #include <so/camera/so_camera_module_impl.h>
 #include <so/collision/so_collision_attack_module_impl.h>
@@ -17,9 +18,9 @@
 #include <types.h>
 #include <math.h>
 
-// HYPOTHESIS: clampf(value, min, max) of ft_lucario.o per the map; it stays fn_ in the ft_lucario.cpp unit.
-extern "C" float fn_118_8F8C(float value, float min, float max);
 
+// The clamp of ft_lucario.cpp (the map name).
+float clampf(float value, float min, float max);
 void rotate(soModuleAccesser* moduleAccesser);
 void camera(soModuleAccesser* moduleAccesser);
 
@@ -77,18 +78,15 @@ void ftLucarioStatusUniqProcessFinalEntry::initStatus(soModuleAccesser* moduleAc
 void ftLucarioStatusUniqProcessFinalEntry::execStatus(soModuleAccesser* moduleAccesser) {
     soMotionModule& motion = moduleAccesser->getMotionModule();
     soPostureModule& posture = moduleAccesser->getPostureModule();
+    Vec3f startPos;
     Vec3f kirifudaPos;
     g_Stage->getKirifudaPos(&kirifudaPos, 0);
-    Vec3f startPos;
     startPos = kirifudaPos;
     startPos.m_y = 100.0f + CameraController::getInstance()->m_stageCameraBounds.m_up;
     float frame = motion.getFrame();
     float t = sin(1.5707964f * (frame / motion.getEndFrame()));
-    float rest = 1.0f - t;
     Vec3f pos;
-    pos.m_x = kirifudaPos.m_x * t + startPos.m_x * rest;
-    pos.m_y = kirifudaPos.m_y * t + startPos.m_y * rest;
-    pos.m_z = kirifudaPos.m_z * t + startPos.m_z * rest;
+    Vec3fBlend(&pos, &startPos, &kirifudaPos, t);
     posture.setPos(&pos);
 }
 
@@ -99,6 +97,39 @@ void ftLucarioStatusUniqProcessFinalAttack::initStatus(soModuleAccesser* moduleA
     camera(moduleAccesser);
     moduleAccesser->getWorkManageModule().setInt(0, 0x20000001);
 }
+// Bursts where the beam meets the stage: up to five hits along the beam's direction (work float 0x21000004, degrees)
+// from the hand node, each followed 5 units further on.
+static inline void burstAlongBeam(soModuleAccesser* moduleAccesser, soWorkManageModule& work) {
+    soGroundModule& ground = moduleAccesser->getGroundModule();
+    soEffectModule& effect = moduleAccesser->getEffectModule();
+    soModelModule& model = moduleAccesser->getModelModule();
+    float z = ground.getZ();
+    Vec3f start;
+    start = model.getNodeGlobalPosition(model.getCorrectNodeId(0x12e), true);
+    start.m_z = z;
+    float c;
+    float angle = work.getFloat(0x21000004) - 90.0f;
+    angle = 0.017453292f * angle;
+    Vec3f dir;
+    soPostureModule& posture = moduleAccesser->getPostureModule();
+    c = cos(angle);
+    dir.m_x = -1.0f * c * posture.getLr();
+    dir.m_y = sin(angle);
+    dir.m_z = 0.0f;
+    Vec3f ray;
+    ray = dir * 500.0f;
+    for (int i = 0; i < 5; i++) {
+        Vec3f hitPos;
+        Vec3f hitNormal;
+        if (!ground.rayCheck(&start, &ray, &hitPos, &hitNormal, true)) {
+            break;
+        }
+        hitPos.m_z = z;
+        effect.req(static_cast<EfID>(0xfc0003), &hitPos, &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, 0, -1);
+        start = hitPos + dir * 5.0f;
+    }
+}
+
 void ftLucarioStatusUniqProcessFinalAttack::execStatus(soModuleAccesser* moduleAccesser) {
     rotate(moduleAccesser);
     soCollisionAttackModule& collisionAttack = moduleAccesser->getCollisionAttackModule();
@@ -106,32 +137,7 @@ void ftLucarioStatusUniqProcessFinalAttack::execStatus(soModuleAccesser* moduleA
     if (collisionAttack.isAttack(0, 0)) {
         work.decInt(0x20000001);
         if (work.getInt(0x20000001) <= 0) {
-            soGroundModule& ground = moduleAccesser->getGroundModule();
-            soEffectModule& effect = moduleAccesser->getEffectModule();
-            soModelModule& model = moduleAccesser->getModelModule();
-            float z = ground.getZ();
-            Vec3f start;
-            start = model.getNodeGlobalPosition(model.getCorrectNodeId(0x12e), true);
-            start.m_z = z;
-            float angle = work.getFloat(0x21000004) - 90.0f;
-            angle = 0.017453292f * angle;
-            Vec3f dir;
-            float c = cos(angle);
-            dir.m_x = -1.0f * c * moduleAccesser->getPostureModule().getLr();
-            dir.m_y = sin(angle);
-            dir.m_z = 0.0f;
-            Vec3f ray;
-            ray = dir * 500.0f;
-            for (int i = 0; i < 5; i++) {
-                Vec3f hitPos;
-                Vec3f hitNormal;
-                if (!ground.rayCheck(&start, &ray, &hitPos, &hitNormal, true)) {
-                    break;
-                }
-                hitPos.m_z = z;
-                effect.req(static_cast<EfID>(0xfc0003), &hitPos, &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, 0, -1);
-                start = hitPos + dir * 5.0f;
-            }
+            burstAlongBeam(moduleAccesser, work);
             work.setInt(10, 0x20000001);
         }
     }
@@ -167,11 +173,11 @@ void rotate(soModuleAccesser* moduleAccesser) {
         double wide = fabs(stickX);
         stickX = wide;
     }
-    dir *= fn_118_8F8C((stickX - stickMin) / (stickMax - stickMin), 0.0f, 1.0f);
+    dir *= clampf((stickX - stickMin) / (stickMax - stickMin), 0.0f, 1.0f);
     float speed = soValueAccesser::getConstantFloat(moduleAccesser, 0xfcc, 0);
     float limit = soValueAccesser::getConstantFloat(moduleAccesser, 0xfcb, 0);
     float angle = work.getFloat(0x21000004);
-    work.setFloat(fn_118_8F8C(angle + speed * dir * (-1.0f * posture.getLr()), -limit, limit), 0x21000004);
+    work.setFloat(clampf(angle + speed * dir * (-1.0f * posture.getLr()), -limit, limit), 0x21000004);
     if (0.0f != dir && work.getInt(0x20000001) > 3) {
         work.setInt(3, 0x20000001);
     }

@@ -5,6 +5,8 @@
 #include <wn/wn_weapon_builder.h>
 #include <wn/wn_extend_param_accesser.h>
 
+FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 3);
+
 
 // The parameter block of the article (1 float, id 4000).
 // HYPOTHESIS: meaning of the parameters.
@@ -55,6 +57,6 @@ private:
 public:
     wnLucarioQigong(s32 articleId, const wnArticleBuildInfo& info, const wnLucarioQigongData* data);
     virtual ~wnLucarioQigong() { }
-    virtual bool notifyEventCollisionAttackCheck(u32) { return false; }
-    void activate(int founderTaskId, int team, const Vec3f* position, float lr, float powerMul);
+    virtual bool notifyEventCollisionAttackCheck(u32 flags);
+    void activate(int founderTaskId, int team, float lr, const Vec3f* position, float powerMul);
 };

@@ -193,6 +193,7 @@ struct wnSamusLaserData;
 struct wnSamusLaser2Data;
 struct wnSamusGunData;
 struct wnLucarioQigongData;
+struct wnLucarioAuraBallData;
 struct wnDonkeyBarrelCongaData;
 struct wnDonkeySoundEffectData;
 struct wnGameWatchRescueData;
@@ -418,6 +419,8 @@ template <>
 const wnSamusGunData* ftCommonDataAccesser::getWeaponData<wnSamusGunData>(int kind, bool* resourceGroup) const;
 template <>
 const wnLucarioQigongData* ftCommonDataAccesser::getWeaponData<wnLucarioQigongData>(int kind, bool* resourceGroup) const;
+template <>
+const wnLucarioAuraBallData* ftCommonDataAccesser::getWeaponData<wnLucarioAuraBallData>(int kind, bool* resourceGroup) const;
 template <>
 const wnDonkeyBarrelCongaData* ftCommonDataAccesser::getWeaponData<wnDonkeyBarrelCongaData>(int kind, bool* resourceGroup) const;
 template <>
