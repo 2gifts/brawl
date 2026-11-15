@@ -41,19 +41,29 @@ struct hkWorldDynamicsStepInfo {
 
 struct hkSimulationIsland;
 struct hkRigidBody;
+
+// Element of the world's array at 0xA8 (16 bytes). HYPOTHESIS: only the block at 0x0C is known.
+struct hkWorldUnkA8Entry {
+    u32 m_unk00[3]; // 0x00
+    void* m_unk0C;  // 0x0C
+};
+
 struct hkWorld : hkReferencedObject {
     hkSimulation* m_simulation;                     // 0x08 (hkWorld::stepDeltaTime calls its slot 0x10, stepDeltaTime)
     hkVector4 m_gravity;                            // 0x10
     hkSimulationIsland* m_fixedIsland;              // 0x20 holds the fixed entities (and actions on fixed entities only)
     hkRigidBody* m_fixedRigidBody;                  // 0x24 the body null constraint sides attach to
-    hkArrayBase m_unk28;                            // 0x28 array of hkWorldMemoryEntry* (HYPOTHESIS: islands), see getMemUsageForIntegration
-    hkArrayBase m_unk34;                            // 0x34 not recovered
-    hkArrayBase m_unk40;                            // 0x40 not recovered
+    hkArray<hkSimulationIsland*> m_unk28;           // 0x28 the active islands
+    hkArray<hkSimulationIsland*> m_unk34;           // 0x34 the inactive islands
+    hkArray<hkSimulationIsland*> m_unk40;           // 0x40 the islands queued for cleanupDirtyIslands
     hkWorldMaintenanceMgr* m_maintenanceMgr;        // 0x4C (hkSimulation::integrate calls performMaintenance)
     u8 m_unk50[0x04];                               // 0x50 not recovered
     hkBroadPhase* m_broadPhase;                     // 0x54 (hkSimulation::collideEntitiesBroadPhaseDiscrete updates it)
     hkTypedBroadPhaseDispatcher* m_broadPhaseDispatcher; // 0x58 gets the pairs the broad phase reports
-    u8 m_unk5C[0x0C];                               // 0x5C .. 0x67 not recovered
+    // Three more broad-phase dispatch objects (calcStatistics reports them with the dispatcher).
+    hkReferencedObject* m_unk5C;                    // 0x5C
+    hkReferencedObject* m_unk60;                    // 0x60
+    hkReferencedObject* m_unk64;                    // 0x64
     hkProcessCollisionInput* m_collisionInput;      // 0x68 HYPOTHESIS: name; integrate copies the step info into it
     hkCollisionFilter* m_collisionFilter;           // 0x6C handed to the dispatcher with the new pairs
     hkCollisionDispatcher* m_collisionDispatcher;   // 0x70 HYPOTHESIS: name; hkWorldAgentUtil::removeAgent hands it to
@@ -68,10 +78,10 @@ struct hkWorld : hkReferencedObject {
     int m_pendingOperationQueueCount;               // 0x8C how many executeAllPending calls are on the stack (starts at 1)
     int m_unk90;                                    // 0x90
     u8 m_unk94[0x08];                               // 0x94 .. 0x9B not recovered
-    int m_unk9C;                                    // 0x9C
-    int m_unkA0;                                    // 0xA0
-    int m_unkA4;                                    // 0xA4
-    u8 m_unkA8[0x0C];                               // 0xA8 .. 0xB3 not recovered
+    void* m_unk9C;                                  // 0x9C
+    void* m_unkA0;                                  // 0xA0
+    void* m_unkA4;                                  // 0xA4
+    hkArray<hkWorldUnkA8Entry> m_unkA8;             // 0xA8 (the destructor frees each entry's 0x0C block)
     hkBool m_wantSimulationIslands;                 // 0xB4 empty islands are removed only when set
     // hkDefaultWorldMaintenanceMgr::performMaintenance only looks for islands to deactivate when it is set
     hkBool m_unkB5;                                 // 0xB5 HYPOTHESIS: a deactivation switch
@@ -83,19 +93,24 @@ struct hkWorld : hkReferencedObject {
     u8 m_unkC0[0x08];                               // 0xC0 .. 0xC7 not recovered
     int m_unkC8;                                    // 0xC8 (initialised to -1)
     hkArray<hkPhantom*> m_phantoms;                 // 0xCC
-    u8 m_unkD8[0x30];                               // 0xD8 .. 0x107 not recovered
-    hkArray<hkWorldDeletionListener*> m_worldDeletionListeners; // 0x108
-    u8 m_unk114[0x0C];                              // 0x114 .. 0x11F not recovered
     // listener arrays (hkWorldCallbackUtil reads them at these offsets; element types there)
-    hkArrayBase m_postSimulationListeners;          // 0x120
+    hkArray<void*> m_actionListeners;               // 0xD8
+    hkArray<void*> m_entityListeners;               // 0xE4
+    hkArray<void*> m_phantomListeners;              // 0xF0
+    hkArray<void*> m_constraintListeners;           // 0xFC
+    hkArray<hkWorldDeletionListener*> m_worldDeletionListeners; // 0x108
+    hkArray<void*> m_islandActivationListeners;     // 0x114
+    hkArray<void*> m_postSimulationListeners;       // 0x120
     // tested before hkWorldCallbackUtil::firePostIntegrateCallback (hkSimulation::integrateInternal)
-    hkArrayBase m_postIntegrateListeners;           // 0x12C HYPOTHESIS: name, from the callback it guards
-    hkArrayBase m_postCollideListeners;             // 0x138
+    hkArray<void*> m_postIntegrateListeners;        // 0x12C HYPOTHESIS: name, from the callback it guards
+    hkArray<void*> m_postCollideListeners;          // 0x138
     // tested before hkWorldCallbackUtil::fireIslandPostIntegrateCallback (hkSimulation::integrateInternal)
-    hkArrayBase m_islandPostIntegrateListeners;     // 0x144 HYPOTHESIS: name, from the callback it guards
+    hkArray<void*> m_islandPostIntegrateListeners;  // 0x144 HYPOTHESIS: name, from the callback it guards
     // tested before hkWorldCallbackUtil::fireIslandPostCollideCallback (hkSimulation::collideInternal)
-    hkArrayBase m_islandPostCollideListeners;       // 0x150 HYPOTHESIS: name, from the callback it guards
-    u8 m_unk15C[0x14];                              // 0x15C .. 0x16F not recovered
+    hkArray<void*> m_islandPostCollideListeners;    // 0x150 HYPOTHESIS: name, from the callback it guards
+    hkArray<void*> m_contactListeners;              // 0x15C
+    hkReferencedObject* m_unk168;                   // 0x168 released by the destructor
+    u8 m_unk16C[0x04];                              // 0x16C not recovered
     // the current step and the solver settings (hkSimulation::integrate copies the step in; actions get it in
     // applyActions)
     hkWorldDynamicsStepInfo m_dynamicsStepInfo;     // 0x170 HYPOTHESIS: name
@@ -106,6 +121,9 @@ struct hkWorld : hkReferencedObject {
     int m_unk2E4;                                   // 0x2E4 capacity of hkWorldOperationUtil's local pair arrays
     int m_unk2E8;                                   // 0x2E8 capacity of collideEntitiesBroadPhaseDiscrete's pair arrays
 
+    HK_DECLARE_REF_ALLOCATOR(0x2d)
+
+    virtual ~hkWorld();
     int getMemUsageForIntegration();
     void setGravity(const hkVector4& gravity);
     void queueOperation(const void* operation);

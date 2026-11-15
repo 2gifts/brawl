@@ -12931,7 +12931,7 @@ removeConstraintFromCriticalLockedIsland__18hkSimulationIslandFP20hkConstraintIn
 mergeConstraintInfo__18hkSimulationIslandFPC18hkSimulationIsland = .text:0x802EA824; // type:function size:0x60
 markForWrite__18hkSimulationIslandFv = .text:0x802EA884; // type:function size:0x4
 checkAccessRw__17hkConstraintOwnerFv = .text:0x802EA888; // type:function size:0x4
-fn_802EA88C = .text:0x802EA88C; // type:function size:0x85C
+__dt__7hkWorldFv = .text:0x802EA88C; // type:function size:0x85C
 fn_802EB0E8 = .text:0x802EB0E8; // type:function size:0x5C
 fn_802EB144 = .text:0x802EB144; // type:function size:0x5C
 fn_802EB1A0 = .text:0x802EB1A0; // type:function size:0x200
@@ -27770,7 +27770,7 @@ lbl_80488290 = .data:0x80488290; // type:object size:0x18
 __vt__18hkBroadPhaseBorder = .data:0x804882A8; // type:object size:0x48
 lbl_804882F0 = .data:0x804882F0; // type:object size:0x10
 lbl_80488300 = .data:0x80488300; // type:object size:0x20
-lbl_80488320 = .data:0x80488320; // type:object size:0x10
+__vt__7hkWorld = .data:0x80488320; // type:object size:0x10
 lbl_80488330 = .data:0x80488330; // type:object size:0x18
 lbl_80488348 = .data:0x80488348; // type:object size:0x30
 lbl_80488378 = .data:0x80488378; // type:object size:0x13 data:string
