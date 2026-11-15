@@ -11311,6 +11311,35 @@ mo_melee/sora_melee/gr/gr_madein.cpp:
 	.data       start:0x00059070 end:0x0005A250
 	.bss        start:0x000063B0 end:0x000063C8
 
+mo_melee/sora_melee/gr/gr_stadium.cpp:
+	.text       start:0x0027A8DC end:0x0027AAF8
+	.rodata     start:0x00004548 end:0x00004550
+	.data       start:0x0005A250 end:0x0005A460
+
+mo_melee/sora_melee/gr/gr_stadium_vision.cpp:
+	.text       start:0x0027AAF8 end:0x0027BBD8
+	.rodata     start:0x00004550 end:0x00004598
+	.data       start:0x0005A460 end:0x0005A6F0
+
+mo_melee/sora_melee/gr/gr_tengan_event.cpp:
+	.text       start:0x0027BBD8 end:0x0027BDB8
+	.rodata     start:0x00004598 end:0x000045A0
+
+mo_melee/sora_melee/gr/gr_player_area_check.cpp:
+	.text       start:0x0027BDB8 end:0x0027C070
+	.rodata     start:0x000045A0 end:0x000045A8
+	.data       start:0x0005A6F0 end:0x0005A900
+
+mo_melee/sora_melee/gr/gr_seq_yakumono.cpp:
+	.text       start:0x0027C070 end:0x0027C478
+	.rodata     start:0x000045A8 end:0x000045B0
+	.data       start:0x0005A900 end:0x0005AAC8
+
+mo_melee/sora_melee/gr/gr_gimmick_adv_spring.cpp:
+	.text       start:0x0027C478 end:0x0027CBE0
+	.rodata     start:0x000045B0 end:0x000045F0
+	.data       start:0x0005AAC8 end:0x0005ACB8
+
 mo_melee/sora_melee/ml/ml_ft_event.cpp:
 	.text       start:0x0027CBE0 end:0x0027F4D8
 	.rodata     start:0x000045F0 end:0x00004610
