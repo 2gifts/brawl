@@ -87,28 +87,7 @@ struct stEditFallBlock {
 };
 static_assert(sizeof(stEditFallBlock) == 0x24, "Class is wrong size!");
 
-// The spring of the Stage Builder: the adventure spring with its own motions (HYPOTHESIS: defined in sora_melee, only
-// what the stage needs is declared here).
-class grGimmickAdvSpring : public grYakumono {
-protected:
-    char _150[8];
-    u8 m_state;        // 0x158
-    char _159[3];
-    float m_animFrame; // 0x15C
-    char _160[0x3C];
-
-public:
-    grGimmickAdvSpring(const char* taskName);
-    virtual void update(float deltaFrame);
-    virtual void startup(gfArchive* data, u32 unk1, gfSceneRoot::LayerType layerType);
-    virtual void onGimmickEvent(soGimmickEventArgs* eventInfo, int* taskId);
-    virtual ~grGimmickAdvSpring();
-    virtual void setInitializeFlag();
-    virtual void setMotionOn();
-    virtual void setMotionOff();
-    virtual void getTopNode(Vec3f* pos);
-};
-static_assert(sizeof(grGimmickAdvSpring) == 0x19C, "Class is wrong size!");
+#include <gr/gr_gimmick_adv_spring.h>
 
 class grGimmickEditSpring : public grGimmickAdvSpring {
 public:

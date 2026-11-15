@@ -14,6 +14,8 @@ public:
     void SetRotateDeg(const math::VEC3* pRotate);
     void GetRotateDeg(math::VEC3* pRotate) const;
     void SetTranslate(const math::VEC3* pTranslate);
+    void GetTranslate(math::VEC3* pTranslate) const;
+    void SetRotTrans(const math::MTX34* pRotTrans);
 };
 
 class WorldMtxManip {

@@ -3,6 +3,7 @@
 #include <ft/ft_transactor.h>
 #include <types.h>
 
+class soArticle;
 class soModuleAccesser;
 class wnPopoIceShot;
 
@@ -11,6 +12,8 @@ class ftPopoTransactor : public ftTransactor {
 public:
     ftPopoTransactor();
     virtual ~ftPopoTransactor();
+    virtual void notifyEventChangeSituation(int situationKind, int prevSituationKind, soModuleAccesser* moduleAccesser);
+    virtual bool shootArticle(soArticle* article, soModuleAccesser* acc);
     // Local declaration of the REL singleton-holder entry point.
     static ftPopoTransactor* getInstance();
     // HYPOTHESIS: the id is the effect resource of the fighter.
