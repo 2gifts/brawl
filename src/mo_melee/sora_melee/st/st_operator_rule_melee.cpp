@@ -1,5 +1,9 @@
 #include <st/operator/st_operator_rule_melee.h>
+#include <ai/ai_mgr.h>
+#include <ft/ft_manager.h>
+#include <gf/gf_application.h>
 #include <gm/gm_global.h>
+#include <math.h>
 #include <gm/gm_global_mode_melee.h>
 #include <mu/wifi/mu_wifi_interface.h>
 #include <types.h>
@@ -141,6 +145,103 @@ void stOperatorRuleMelee::networkWriteRanking() {
                 int playerNo = player->m_playerNo;
                 if (playerNo >= 0 && playerNo < 4) {
                     *rank = m_resultInfo->m_playersResultInfo[playerNo].m_unkF;
+                }
+            }
+        }
+    }
+}
+
+// HYPOTHESIS: the pause/stall bits at the top of the application word at +0xEC.
+struct stRuleMeleeAppFlagsView {
+    u32 m_stop : 5;
+    u32 unk : 27;
+};
+
+static inline stRuleMeleeAppFlagsView* getAppFlags() {
+    return reinterpret_cast<stRuleMeleeAppFlagsView*>(reinterpret_cast<u8*>(g_gfApplication) + 0xEC);
+}
+
+// HYPOTHESIS: the init data flag byte at +0x1D (0x04: removed) and the CPU type and rank after it.
+struct stRuleMeleePlayerFlagsView {
+    char _0[0x1D];
+    u8 unk80 : 5;
+    u8 m_isRemoved : 1;
+    u8 unk02 : 2;
+    u8 m_cpuType;
+    u8 m_cpuRank;
+};
+
+// HYPOTHESIS: flag 0x08 of the mode byte at +0xF.
+struct stRuleMeleeModeFlagsView {
+    char _0[0xF];
+    u8 unkF0 : 4;
+    u8 m_flag08 : 1;
+    u8 unkF7 : 3;
+};
+
+static inline u8* byteAt(void* object, int offset) {
+    return reinterpret_cast<u8*>(object) + offset;
+}
+
+// HYPOTHESIS: +0xF4 is the time step (60 over the application frame rate at +0xF8, a halfword), +0xD5 is set unless flag
+// 0x08 of the mode byte +0xF is.
+void stOperatorRuleMelee::startOperator() {
+    stOperatorRule::startOperator();
+    m_isStart = true;
+    *reinterpret_cast<float*>(byteAt(this, 0xF4)) = 60.0f / *reinterpret_cast<u16*>(byteAt(g_gfApplication, 0xF8));
+    *reinterpret_cast<bool*>(byteAt(this, 0xD5)) = reinterpret_cast<stRuleMeleeModeFlagsView*>(m_condition)->m_flag08 == 0;
+}
+
+// The frame counters advance by whole frames of the accumulated time step (paused games and HYPOTHESIS: the network
+// stall flags at +0x75 and the application's +0xEC word stop them); they saturate at six hours.
+void stOperatorRuleMelee::updateFrameCounter() {
+    if (*byteAt(this, 0x75) != 0 && (getAppFlags()->m_stop & 4)) {
+        return;
+    }
+    if (!m_isStart) {
+        return;
+    }
+    if (!(*byteAt(m_condition, 0xC) & 1) && getAppFlags()->m_stop != 0) {
+        return;
+    }
+    float* time = reinterpret_cast<float*>(byteAt(this, 0xEC));
+    *time += *reinterpret_cast<float*>(byteAt(this, 0xF4));
+    float whole = floor(*time);
+    int frames = whole;
+    *time -= whole;
+    if (frames != 0) {
+        if (m_remainingFrameTime > frames) {
+            m_remainingFrameTime -= frames;
+        } else {
+            m_remainingFrameTime = 0;
+        }
+        m_framesElapsed += frames;
+        m_framesElapsed = m_framesElapsed < 21599999 ? m_framesElapsed : 21599999;
+        if (*byteAt(this, 0xD7) != 0) {
+            m_frameCounter += frames;
+            m_frameCounter = m_frameCounter < 21599999 ? m_frameCounter : 21599999;
+        }
+    }
+}
+
+// Removes the players still in that are not in the mask: as a CPU (mode 1) or leaving (state 3).
+// HYPOTHESIS: flag 0x04 of +0x1D of the init data marks a removed player; +0x1E/+0x1F are its CPU type and rank.
+void stOperatorRuleMelee::deletePlayer(u32 mode, u32 keepMask) {
+    for (int i = 0; i < m_numPlayers; i++) {
+        gmPlayerInitData* player = &m_condition->m_playersInitData[i];
+        if (player->m_state == 0) {
+            stRuleMeleePlayerFlagsView* flags = reinterpret_cast<stRuleMeleePlayerFlagsView*>(player);
+            if (!flags->m_isRemoved && !(keepMask & (1 << i))) {
+                flags->m_isRemoved = true;
+                if (mode == 1) {
+                    int entryId = g_ftManager->getEntryId(i);
+                    if (entryId != -1) {
+                        g_ftManager->setFighterOperationType(entryId, 1);
+                        g_ftManager->setFighterOperationCpuType(entryId, flags->m_cpuType);
+                        g_aiMgr->setCpuRank(i, flags->m_cpuRank);
+                    }
+                } else {
+                    player->m_state = 3;
                 }
             }
         }
