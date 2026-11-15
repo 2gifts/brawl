@@ -12515,6 +12515,9 @@ mo_melee/sora_melee/wn/wn_pit_bow_arrow_status_uniq_process_fly.cpp:
 	.text       start:0x003603B8 end:0x003608AC
 	.ctors      start:0x00000468 end:0x0000046C
 
+mo_melee/sora_melee/ft/ft_pikmin_transactor.cpp:
+	.text       start:0x003608AC end:0x00361264
+
 mo_melee/sora_melee/ft/ft_lucas_transactor.cpp:
 	.text       start:0x00361264 end:0x003615F8
 
