@@ -56,3 +56,12 @@ public:
     void applyEff(const Seal* seal);
 };
 static_assert(sizeof(muSealFigureStatus) == 0x488, "Class is wrong size!");
+
+// The figure stand being edited: the stickers plus a per-slot state byte.
+class muSealFigureWork : public muSealFigureStatus {
+public:
+    u8 m_slotFlags[64];     // 0x488 0x80: the sticker is lifted and gives no bonus
+
+    virtual void calcEff();
+};
+static_assert(sizeof(muSealFigureWork) == 0x4C8, "Class is wrong size!");

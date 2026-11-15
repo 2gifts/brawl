@@ -7,7 +7,7 @@
 
 // MATCH-ONLY: the original passes the unextended 32-bit loop counters to these two (every caller in the dol does), so the index
 // parameters of grCollision::getJoint / getLine are probably not u16; the stand-ins keep the symbols of the members.
-extern "C" grCollisionJoint* getJoint__11grCollisionFUs(grCollision* collision, u32 index);
+extern "C" grCollisionJoint* getJoint__11grCollisionFUl(grCollision* collision, u32 index);
 extern "C" grCollisionLine* getLine__11grCollisionFUs(grCollision* collision, u32 index);
 
 grCollisionRaycheck::grCollisionRaycheck() {
@@ -33,7 +33,7 @@ void grCollisionRaycheck::raycheckSub(grCollision* collision) {
     u16 categoryBits = m_unk12 << 4;
     u32 jointLen = collision->m_jointLen;
     for (u32 i = 0; i < jointLen; i++) {
-        grCollisionJoint* joint = getJoint__11grCollisionFUs(collision, i);
+        grCollisionJoint* joint = getJoint__11grCollisionFUl(collision, i);
         if (joint->m_0x54_6 && joint->m_aabBox.checkIntersect(raySegment)) {
             u32 lineStart = joint->m_lineStart;
             u32 lineEnd = lineStart + joint->m_lineLen;

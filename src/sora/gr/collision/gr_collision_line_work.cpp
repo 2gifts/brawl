@@ -28,7 +28,7 @@ void grCollCollection::reset() {
 
 // MATCH-ONLY: the original passes the unextended 32-bit loop counters to these two (every caller in the dol does), so the index
 // parameters of grCollision::getJoint / getLine1 are probably not u16; the stand-ins keep the symbols of the members.
-extern "C" grCollisionJoint* getJoint__11grCollisionFUs(grCollision* collision, u32 index);
+extern "C" grCollisionJoint* getJoint__11grCollisionFUl(grCollision* collision, u32 index);
 extern "C" grCollisionLine* getLine1__11grCollisionFUs(grCollision* collision, u32 index);
 
 // The componentwise minimum and maximum of two pairs, written to out (min first, then max).
@@ -71,7 +71,7 @@ bool grCollCollection::addSegment(grCollision* collision) {
     u32 jointLen = collision->m_jointLen;
     u32 jointLineId = 0;
     for (u32 i = 0; i < jointLen; i++, jointLineId += 0x10000) {
-        grCollisionJoint* joint = getJoint__11grCollisionFUs(collision, i);
+        grCollisionJoint* joint = getJoint__11grCollisionFUl(collision, i);
         if (joint->m_0x54_6 && joint->m_0x54_4) {
             u32 lineStart = joint->m_lineStart;
             u32 lineLen = joint->m_lineLen;

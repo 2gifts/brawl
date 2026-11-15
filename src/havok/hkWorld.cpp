@@ -65,6 +65,16 @@
 #include <havok/hkConstraintChainInstance.h>
 #include <havok/hkAction.h>
 #include <havok/hkSimulationIsland.h>
+#include <havok/hkAgentNnMachine.h>
+#include <havok/hkWorldAgentUtil.h>
+#include <havok/hkCollisionDispatcher.h>
+#include <havok/hkCollisionFilter.h>
+#include <havok/hkLinkedCollidable.h>
+#include <havok/hkLocalArray.h>
+#include <havok/hkTypedBroadPhaseDispatcher.h>
+#include <havok/hkSweptTransformUtil.h>
+#include <havok/hkEntityCallbackUtil.h>
+#include <havok/hkSimulation.h>
 
 void hkWorld::lock() {}
 
@@ -73,6 +83,514 @@ void hkWorld::unlock() {}
 void hkWorld::lockIslandForConstraintUpdate() {}
 
 void hkWorld::unlockIslandForConstraintUpdate() {}
+
+// Shape collection mode of the filter updates: also re-filter the children of shape collections.
+enum hkUpdateCollectionFilterMode {
+    HK_UPDATE_COLLECTION_FILTER_IGNORE_SHAPE_COLLECTIONS = 0,
+    HK_UPDATE_COLLECTION_FILTER_PROCESS_SHAPE_COLLECTIONS = 1,
+};
+
+// Re-runs the collision filter over the whole world. A full check re-filters every entity, then every phantom;
+// otherwise each existing agent is checked: agents the filter (or the collision quality table) now rejects are
+// removed and their island is marked for a split check, the others refresh their shape collection filter if asked.
+void hkWorld::updateCollisionFilterOnWorld(u8 updateMode, u8 updateShapeCollections) {
+    if (areCriticalOperationsLocked()) {
+        struct {
+            u8 m_type;
+            u8 m_updateMode;
+            u8 m_updateShapeCollections;
+        } op;
+        op.m_type = hkWorldOperation::UPDATE_FILTER_WORLD;
+        op.m_updateMode = updateMode;
+        op.m_updateShapeCollections = updateShapeCollections;
+        queueOperation(&op);
+        return;
+    }
+    m_unk84 = true;
+    HK_TIMER_BEGIN("UpdateFilterOnWorld");
+    if (updateMode == 0) {
+        hkArray<hkSimulationIsland*>& activeIslands = *(hkArray<hkSimulationIsland*>*)&m_unk28;
+        for (int i = 0; i < activeIslands.getSize(); i++) {
+            hkSimulationIsland* island = activeIslands[i];
+            for (int j = 0; j < island->m_entities.getSize(); j++) {
+                updateCollisionFilterOnEntity(island->m_entities[j], 0, updateShapeCollections);
+            }
+        }
+        hkArray<hkSimulationIsland*>& inactiveIslands = *(hkArray<hkSimulationIsland*>*)&m_unk34;
+        for (int i = 0; i < inactiveIslands.getSize(); i++) {
+            hkSimulationIsland* island = inactiveIslands[i];
+            for (int j = 0; j < island->m_entities.getSize(); j++) {
+                updateCollisionFilterOnEntity(island->m_entities[j], 0, updateShapeCollections);
+            }
+        }
+    } else {
+        lockCriticalOperations();
+        hkArray<hkSimulationIsland*>* islandArrays[2];
+        islandArrays[0] = (hkArray<hkSimulationIsland*>*)&m_unk28;
+        islandArrays[1] = (hkArray<hkSimulationIsland*>*)&m_unk34;
+        for (int a = 0; a < 2; a++) {
+            hkInplaceArray<hkAgentNnEntry*, 32> agentsToRemove;
+            for (int i = 0; i < islandArrays[a]->getSize(); i++) {
+                hkSimulationIsland* island = (*islandArrays[a])[i];
+                agentsToRemove.m_size = 0;
+                hkAgentNnTrack& track = island->m_agentTrack;
+                for (int s = 0; s < track.getNumSectors();) {
+                    hkAgentNnEntry* entry = (hkAgentNnEntry*)track.getSector(s);
+                    s++;
+                    hkAgentNnEntry* end = (s == track.getNumSectors())
+                                              ? (hkAgentNnEntry*)((char*)entry + track.m_bytesUsedInLastSector)
+                                              : (hkAgentNnEntry*)((char*)entry + track.m_sectorSize);
+                    for (; entry < end; entry = (hkAgentNnEntry*)((char*)entry + entry->m_size)) {
+                        if (m_collisionFilter->isCollisionEnabled(*entry->m_collidable[0], *entry->m_collidable[1])) {
+                            if (m_collisionDispatcher->getCollisionQualityIndex(
+                                    entry->m_collidable[0]->m_broadPhaseHandle.m_objectQualityType,
+                                    entry->m_collidable[1]->m_broadPhaseHandle.m_objectQualityType)) {
+                                if ((hkUpdateCollectionFilterMode)updateShapeCollections ==
+                                    HK_UPDATE_COLLECTION_FILTER_PROCESS_SHAPE_COLLECTIONS) {
+                                    hkAgentNnMachine_UpdateShapeCollectionFilter(entry, *m_collisionInput);
+                                }
+                                continue;
+                            }
+                        }
+                        agentsToRemove.pushBack(entry);
+                        island->m_flags.m_stateA = 1;
+                    }
+                }
+                while (agentsToRemove.getSize()) {
+                    hkAgentNnEntry* entry = (agentsToRemove.begin() + agentsToRemove.getSize())[-1];
+                    agentsToRemove.m_size--;
+                    hkWorldAgentUtil::removeAgentAndItsToiEvents(entry);
+                }
+            }
+        }
+        m_lockCount--;
+    }
+    if (updateMode == 0) {
+        for (int i = 0; i < m_phantoms.getSize(); i++) {
+            updateCollisionFilterOnPhantom(m_phantoms[i], updateShapeCollections);
+        }
+    }
+    m_unk84 = false;
+    if (m_lockCount == 0 && m_pendingOperationsCount != 0 && !(bool)m_unk84) {
+        internal_executePendingOperations();
+    }
+    HK_TIMER_END();
+}
+
+// Single-phantom filter update (hkWorld_updateFilterOnSinglePhantom), defined further down.
+struct Obj;
+struct Param;
+struct ObjB;
+extern "C" void fn_802EB810(Obj* a, Param* p, ObjB* b);
+
+// Re-filters one phantom against everything its broad-phase handle overlaps, then optionally its shape collections.
+void hkWorld::updateCollisionFilterOnPhantom(hkPhantom* phantom, u8 updateShapeCollections) {
+    if (areCriticalOperationsLocked()) {
+        struct {
+            u8 m_type;
+            hkPhantom* m_phantom;
+            u8 m_updateShapeCollections;
+        } op;
+        op.m_type = hkWorldOperation::UPDATE_FILTER_PHANTOM;
+        op.m_phantom = phantom;
+        op.m_updateShapeCollections = updateShapeCollections;
+        queueOperation(&op);
+        return;
+    }
+    lockCriticalOperations();
+    HK_TIMER_BEGIN_LIST("UpdateFilterOnPhantom", "broadphase");
+    hkLocalArray<hkBroadPhaseHandlePair> pairsOut(m_unk2E4);
+    m_broadPhase->reQuerySingleObject(&phantom->m_collidable.m_broadPhaseHandle, pairsOut);
+    HK_TIMER_SPLIT_LIST("UpdateOverlaps");
+    hkTypedBroadPhaseHandle* thisHandle = &phantom->m_collidable.m_broadPhaseHandle;
+    for (int i = 0; i < pairsOut.getSize(); i++) {
+        hkTypedBroadPhaseHandle* other = (hkTypedBroadPhaseHandle*)pairsOut[i].m_b;
+        if (other == thisHandle) {
+            continue;
+        }
+        hkCollidable* collidable = (hkCollidable*)((char*)other + other->m_ownerOffset);
+        fn_802EB810((Obj*)phantom, (Param*)collidable, (ObjB*)m_collisionFilter);
+    }
+    if (updateShapeCollections) {
+        HK_TIMER_SPLIT_LIST("collectionFilter");
+        phantom->updateShapeCollectionFilter();
+    }
+    unlockAndAttemptToExecutePendingOperations();
+    HK_TIMER_END_LIST();
+}
+
+// Broad-phase type of a collidable owned by a phantom.
+enum { HK_BROAD_PHASE_PHANTOM = 2 };
+
+// Re-filters one entity. A full check queries the broad phase again: phantoms in the result are updated directly,
+// pairs that already have an agent are dropped, and the rest get new agents. Every existing agent is then checked
+// against the filter and the collision quality table; rejected agents are removed and the island marked for a
+// split check.
+void hkWorld::updateCollisionFilterOnEntity(hkEntity* entity, u8 updateMode, u8 updateShapeCollections) {
+    if (areCriticalOperationsLocked()) {
+        struct {
+            u8 m_type;
+            hkEntity* m_entity;
+            u8 m_updateMode;
+            u8 m_updateShapeCollections;
+        } op;
+        op.m_type = hkWorldOperation::UPDATE_FILTER_ENTITY;
+        op.m_entity = entity;
+        op.m_updateMode = updateMode;
+        op.m_updateShapeCollections = updateShapeCollections;
+        queueOperation(&op);
+        return;
+    }
+    HK_TIMER_BEGIN_LIST("UpdateFilterOnEntity", "init");
+    lockCriticalOperations();
+    {
+    hkInplaceArray<hkBroadPhaseHandlePair, 128> newPairs;
+    if (updateMode == 0) {
+        HK_TIMER_SPLIT_LIST("broadphase");
+        m_broadPhase->reQuerySingleObject(&entity->m_collidable.m_broadPhaseHandle, newPairs);
+        HK_TIMER_SPLIT_LIST("phantom");
+        for (int i = 0; i < newPairs.getSize(); i++) {
+            hkTypedBroadPhaseHandle* handle = newPairs[i].m_b;
+            hkCollidable* collidable = (hkCollidable*)((char*)handle + handle->m_ownerOffset);
+            hkPhantom* phantom;
+            if (collidable->m_broadPhaseHandle.m_type == HK_BROAD_PHASE_PHANTOM) {
+                phantom = (hkPhantom*)((char*)collidable + collidable->m_ownerOffset);
+            } else {
+                phantom = NULL;
+            }
+            if (phantom != NULL) {
+                fn_802EB810((Obj*)phantom, (Param*)&entity->m_collidable, (ObjB*)m_collisionFilter);
+                if (updateShapeCollections) {
+                    phantom->updateShapeCollectionFilter();
+                }
+                newPairs.removeAt(i);
+                i--;
+            }
+        }
+        {
+            hkInplaceArray<hkBroadPhaseHandlePair, 128> existingPairs;
+            for (int i = 0; i < entity->m_collidable.m_collisionEntries.getSize(); i++) {
+                hkBroadPhaseHandlePair& pair = existingPairs.expandOne();
+                pair.m_a = &entity->m_collidable.m_collisionEntries[i].m_agentEntry->m_collidable[0]->m_broadPhaseHandle;
+                pair.m_b = &entity->m_collidable.m_collisionEntries[i].m_agentEntry->m_collidable[1]->m_broadPhaseHandle;
+            }
+            hkTypedBroadPhaseDispatcher::removeDuplicates(existingPairs, newPairs);
+        }
+    }
+    HK_TIMER_SPLIT_LIST("checkAgts");
+    {
+        int entityQuality = entity->m_collidable.m_broadPhaseHandle.m_objectQualityType;
+        for (int i = 0; i < entity->m_collidable.m_collisionEntries.getSize(); i++) {
+            hkLinkedCollidable::CollisionEntry& entry = entity->m_collidable.m_collisionEntries[i];
+            if (m_collisionFilter->isCollisionEnabled(entity->m_collidable, *entry.m_partner)) {
+                if (m_collisionDispatcher->m_collisionQualityIndex[entityQuality]
+                                                                  [entry.m_partner->m_broadPhaseHandle.m_objectQualityType]) {
+                    if ((hkUpdateCollectionFilterMode)updateShapeCollections ==
+                        HK_UPDATE_COLLECTION_FILTER_PROCESS_SHAPE_COLLECTIONS) {
+                        hkAgentNnMachine_UpdateShapeCollectionFilter(entry.m_agentEntry, *m_collisionInput);
+                    }
+                    continue;
+                }
+            }
+            hkWorldAgentUtil::removeAgentAndItsToiEvents(entry.m_agentEntry);
+            entity->m_simulationIsland->m_flags.m_stateA = 1;
+            i--;
+        }
+    }
+    if (newPairs.getSize() > 0) {
+        HK_TIMER_SPLIT_LIST("addAgts");
+        const hkCollidableCollidableFilter* filter = m_collisionFilter;
+        m_broadPhaseDispatcher->addPairs(newPairs.begin(), newPairs.getSize(), filter);
+    }
+    unlockAndAttemptToExecutePendingOperations();
+    }
+    HK_TIMER_END_LIST();
+}
+
+// Adds an entity: it gets a motion state pointer if loaded without one, a fresh unique id and an island, then its
+// broad-phase entry (which creates its agents) and the added callbacks. Queued while the world is locked.
+hkEntity* hkWorld::addEntity(hkEntity* entity, int activation) {
+    if (areCriticalOperationsLocked()) {
+        struct {
+            u8 m_type;
+            hkEntity* m_entity;
+            int m_activation;
+        } op;
+        op.m_type = hkWorldOperation::ENTITY_ADD;
+        op.m_entity = entity;
+        op.m_activation = activation;
+        queueOperation(&op);
+        return NULL;
+    }
+    HK_TIMER_BEGIN_LIST("AddEntity", "Island");
+    if (entity->m_collidable.m_motion == NULL) {
+        entity->m_collidable.m_motion = (hkMotion*)entity->getMotionState();
+    }
+    hkSweptTransformUtil::setTimeInformation(entity->m_motion.m_motionState, 0.0f, 0.0f);
+    m_unk85 = false;
+    entity->m_uid = ++m_unkC8;
+    entity->addReference();
+    hkWorldOperationUtil::addEntitySI(this, entity, activation);
+    m_unk85 = true;
+    lockCriticalOperations();
+    HK_TIMER_SPLIT_LIST("Broadphase");
+    hkWorldOperationUtil::addEntityBP(this, entity);
+    HK_TIMER_SPLIT_LIST("Callbacks");
+    hkWorldCallbackUtil::fireEntityAdded(this, entity);
+    hkEntityCallbackUtil::fireEntityAdded(entity);
+    unlockAndAttemptToExecutePendingOperations();
+    HK_TIMER_END_LIST();
+    return entity;
+}
+
+// Adds a batch of entities: movable ones share one new island (or the single active island without simulation
+// islands), fixed ones go to the fixed island; then all are added to the broad phase at once, the new pairs get
+// agents and the added callbacks run. Queued while the world is locked.
+void hkWorld::addEntityBatch(hkEntity** entities, int count, bool active) {
+    if (count == 0) {
+        return;
+    }
+    if (areCriticalOperationsLocked()) {
+        struct {
+            u8 m_type;
+            hkEntity** m_entities;
+            u16 m_count;
+            u8 m_active;
+        } op;
+        op.m_type = hkWorldOperation::ENTITY_BATCH_ADD;
+        op.m_entities = entities;
+        op.m_count = count;
+        op.m_active = active;
+        queueOperation(&op);
+        return;
+    }
+    HK_TIMER_BEGIN_LIST("AddEntities", "init");
+    lockCriticalOperations();
+    hkLocalArray<hkBroadPhaseHandle*> collidablesForBroadphase(count);
+    hkLocalArray<hkAabb> aabbsForBroadphase(count);
+    hkSimulationIsland* newIsland;
+    bool usedNewIsland = false;
+    if (m_wantSimulationIslands) {
+        newIsland = new hkSimulationIsland(this);
+        if ((hkEntityActivation)active == HK_ENTITY_ACTIVATION_DO_ACTIVATE) {
+            newIsland->m_storageIndex = m_unk28.m_size;
+            newIsland->m_flags.m_stateA = 1;
+            newIsland->m_flags.m_stateD = 1;
+            newIsland->m_flags27.m_active = 1;
+        } else {
+            newIsland->m_storageIndex = m_unk34.m_size;
+            newIsland->m_flags.m_stateA = 1;
+            newIsland->m_flags.m_stateD = 0;
+            newIsland->m_flags27.m_active = 0;
+        }
+    } else {
+        newIsland = ((hkSimulationIsland**)m_unk28.m_data)[0];
+        newIsland->m_entities.reserveSmart(newIsland->m_entities.getSize() + count);
+    }
+    hkReal extraRadius = 0.5f * m_collisionInput->getTolerance();
+    for (int i = 0; i < count; i++) {
+        hkEntity* entity = entities[i];
+        entity->m_uid = ++m_unkC8;
+        entity->addReference();
+        if (entity->m_collidable.m_motion == NULL) {
+            entity->m_collidable.m_motion = (hkMotion*)entity->getMotionState();
+        }
+        hkSweptTransformUtil::setTimeInformation(entity->m_motion.m_motionState, 0.0f, 0.0f);
+        entity->m_world = this;
+        if (entity->isFixed()) {
+            m_fixedIsland->internalAddEntity(entity);
+        } else {
+            usedNewIsland = true;
+            newIsland->internalAddEntity(entity);
+        }
+        if (entity->m_collidable.m_shape != NULL) {
+            hkAabb& aabb = *aabbsForBroadphase.expandByUnchecked(1);
+            entity->m_collidable.m_shape->getAabb(*(const hkTransform*)entity->m_collidable.m_motion, extraRadius,
+                                                  aabb);
+            collidablesForBroadphase.pushBackUnchecked(&entity->m_collidable.m_broadPhaseHandle);
+        }
+    }
+    if (m_wantSimulationIslands) {
+        if (usedNewIsland) {
+            hkArray<hkSimulationIsland*>& islands = ((hkEntityActivation)active == HK_ENTITY_ACTIVATION_DO_ACTIVATE) ? *(hkArray<hkSimulationIsland*>*)&m_unk28
+                                                                     : *(hkArray<hkSimulationIsland*>*)&m_unk34;
+            islands.pushBack(newIsland);
+        } else {
+            delete newIsland;
+        }
+    }
+    hkLocalArray<hkBroadPhaseHandlePair> newPairs(m_unk2E4);
+    HK_TIMER_SPLIT_LIST("Broadphase");
+    m_broadPhase->addObjectBatch(collidablesForBroadphase, aabbsForBroadphase, newPairs);
+    HK_TIMER_SPLIT_LIST("CreateAgents");
+    const hkCollidableCollidableFilter* filter = m_collisionFilter;
+    m_broadPhaseDispatcher->addPairs(newPairs.begin(), newPairs.getSize(), filter);
+    HK_TIMER_SPLIT_LIST("AddedCb");
+    for (int i = 0; i < count; i++) {
+        hkEntity* entity = entities[i];
+        hkWorldCallbackUtil::fireEntityAdded(this, entity);
+        hkEntityCallbackUtil::fireEntityAdded(entity);
+    }
+    unlockAndAttemptToExecutePendingOperations();
+    HK_TIMER_END_LIST();
+}
+
+// Removes an entity: its broad-phase entry and agents first, then the removed callbacks and its island. A loaded
+// entity (memory size 0) frees its internal arrays before the world drops its reference. Queued while locked.
+hkBool hkWorld::removeEntity(hkEntity* entity) {
+    if (areCriticalOperationsLocked()) {
+        struct {
+            u8 m_type;
+            hkEntity* m_entity;
+        } op;
+        op.m_type = hkWorldOperation::ENTITY_REMOVE;
+        op.m_entity = entity;
+        queueOperation(&op);
+        return false;
+    }
+    lockCriticalOperations();
+    HK_TIMER_BEGIN_LIST("RemEntity", "Broadphase");
+    hkWorldOperationUtil::removeEntityBP(this, entity);
+    HK_TIMER_SPLIT_LIST("Callbacks");
+    hkWorldCallbackUtil::fireEntityRemoved(this, entity);
+    hkEntityCallbackUtil::fireEntityRemoved(entity);
+    m_unk85 = false;
+    HK_TIMER_SPLIT_LIST("Island");
+    hkWorldOperationUtil::removeEntitySI(this, entity);
+    if (entity->m_memSizeAndFlags == 0) {
+        entity->deallocateInternalArrays();
+    }
+    entity->removeReference();
+    m_unk85 = true;
+    unlockAndAttemptToExecutePendingOperations();
+    HK_TIMER_END_LIST();
+    return true;
+}
+
+// Removes a batch of entities: their collision information is reset, they leave the broad phase together (the
+// lost pairs' agents are deleted), then each gets the removed callbacks, leaves its island and is released.
+void hkWorld::removeEntityBatch(hkEntity** entities, int count) {
+    if (count < 1) {
+        return;
+    }
+    if (areCriticalOperationsLocked()) {
+        struct {
+            u8 m_type;
+            hkEntity** m_entities;
+            u16 m_count;
+        } op;
+        op.m_type = hkWorldOperation::ENTITY_BATCH_REMOVE;
+        op.m_entities = entities;
+        op.m_count = count;
+        queueOperation(&op);
+        return;
+    }
+    lockCriticalOperations();
+    HK_TIMER_BEGIN_LIST("RemEntities", "Init+CallBck");
+    m_simulation->resetCollisionInformationForEntities(entities, count, this, true);
+    {
+        hkLocalArray<hkBroadPhaseHandle*> collidablesForBroadphase(count);
+        for (hkEntity **e = entities, **end = entities + count; e != end; e++) {
+            hkEntity* entity = *e;
+            if (entity->m_collidable.m_shape != NULL) {
+                collidablesForBroadphase.pushBackUnchecked(&entity->m_collidable.m_broadPhaseHandle);
+            }
+        }
+        HK_TIMER_SPLIT_LIST("BroadPhase");
+        hkLocalArray<hkBroadPhaseHandlePair> pairsOut(m_unk2E4);
+        m_broadPhase->removeObjectBatch(collidablesForBroadphase, pairsOut);
+        HK_TIMER_SPLIT_LIST("DelAgents");
+        m_broadPhaseDispatcher->removePairs(pairsOut.begin(), pairsOut.getSize());
+    }
+    HK_TIMER_SPLIT_LIST("RemoveCb");
+    hkEntity** end = entities + count;
+    for (hkEntity** e = entities; e != end; e++) {
+        hkWorldCallbackUtil::fireEntityRemoved(this, *e);
+        hkEntityCallbackUtil::fireEntityRemoved(*e);
+        hkWorldOperationUtil::removeEntitySI(this, *e);
+        if ((*e)->m_memSizeAndFlags == 0) {
+            (*e)->deallocateInternalArrays();
+        }
+        (*e)->removeReference();
+    }
+    HK_TIMER_END_LIST();
+    unlockAndAttemptToExecutePendingOperations();
+}
+
+// Statistics collector slots the world reports through (local view). HYPOTHESIS: the names.
+struct hkWorldStatisticsCollector {
+    virtual void unk08();
+    virtual void beginObject(const char* name, int type, const void* object);                    // 0x0C
+    virtual void addArray(const char* name, int type, const void* data, int size, int capacity); // 0x10
+    virtual void addChildObject(const char* name, int type, const void* object);                 // 0x14
+    virtual void pushDir(const char* name);                                                      // 0x18
+    virtual void popDir();                                                                       // 0x1C
+    virtual void endObject();                                                                    // 0x20
+
+    // An array's storage counts only when the array owns it.
+    void addArrayStorage(const char* name, int type, const hkArrayBase& array, int elemSize) {
+        if (!(array.m_capacityAndFlags & hkArrayBase::DONT_DEALLOCATE_FLAG)) {
+            addArray(name, type, array.m_data, array.m_size * elemSize,
+                     (array.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * elemSize);
+        }
+    }
+};
+
+// The world's listener arrays and pieces not laid out in hkWorld.h, by offset.
+static inline const hkArrayBase& worldArrayAt(const hkWorld* world, int offset) {
+    return *(const hkArrayBase*)((const char*)world + offset);
+}
+static inline const void* worldPointerAt(const hkWorld* world, int offset) {
+    return *(void* const*)((const char*)world + offset);
+}
+
+void hkWorld::calcStatistics(hkStatisticsCollector* collector) const {
+    hkWorldStatisticsCollector* c = (hkWorldStatisticsCollector*)collector;
+    c->beginObject("hkWorld", 2, this);
+    for (int i = m_unk28.m_size - 1; i >= 0; i--) {
+        c->addChildObject("Active", 8, ((hkSimulationIsland**)m_unk28.m_data)[i]);
+    }
+    for (int i = m_unk34.m_size - 1; i >= 0; i--) {
+        c->addChildObject("Inactive", 8, ((hkSimulationIsland**)m_unk34.m_data)[i]);
+    }
+    c->addChildObject("Fixed", 8, m_fixedIsland);
+    c->addArrayStorage("PhantomPtrs", 4, m_phantoms, 4);
+    for (int i = 0; i < m_phantoms.getSize(); i++) {
+        c->addChildObject("Phantoms", 2, m_phantoms[i]);
+    }
+    c->pushDir("Internal");
+    c->addChildObject("Simulation", 4, m_simulation);
+    c->addArrayStorage("DirtyIslPtr", 8, m_unk40, 4);
+    c->addChildObject("MaintnceMgr", 4, m_maintenanceMgr);
+    c->addArray("OpQueue", 4, m_operationQueue, 0x20, 0);
+    c->pushDir("OpQueue");
+    c->addArrayStorage("Operations", 8, m_operationQueue->m_operations0, sizeof(hkWorldOperation::BiggestOperation));
+    c->popDir();
+    c->pushDir("Collide");
+    c->addChildObject("Broadphase", 4, m_broadPhase);
+    c->addArray("BpDispatch", 4, m_broadPhaseDispatcher, 0x104, 0);
+    c->addArray("BpDispatch", 4, worldPointerAt(this, 0x60), 0xC, 0);
+    c->addArray("BpDispatch", 4, worldPointerAt(this, 0x5C), 8, 0);
+    c->addArray("BpDispatch", 4, worldPointerAt(this, 0x64), 8, 0);
+    c->addArray("CollInput", 4, m_collisionInput, 0x30, 0);
+    c->addChildObject("Filter", 1, m_collisionFilter);
+    c->addChildObject("Dispatcher", 4, m_collisionDispatcher);
+    c->popDir();
+    c->popDir();
+    c->pushDir("Listeners");
+    c->addArrayStorage("EntLisPtr", 4, worldArrayAt(this, 0xE4), 4);
+    c->addArrayStorage("PhantLisPtr", 4, worldArrayAt(this, 0xF0), 4);
+    c->addArrayStorage("ConstrLisPtr", 4, worldArrayAt(this, 0xFC), 4);
+    c->addArrayStorage("WldDelLisPtr", 4, m_worldDeletionListeners, 4);
+    c->addArrayStorage("IslActLisPtr", 4, worldArrayAt(this, 0x114), 4);
+    c->addArrayStorage("PstSimLisPtr", 4, m_postSimulationListeners, 4);
+    c->addArrayStorage("PstIntLisPtr", 4, m_postIntegrateListeners, 4);
+    c->addArrayStorage("PstColLisPtr", 4, m_postCollideListeners, 4);
+    c->addArrayStorage("PstIntLisPtr", 4, m_islandPostIntegrateListeners, 4);
+    c->addArrayStorage("CollLisPtr", 4, worldArrayAt(this, 0x15C), 4);
+    c->popDir();
+    c->endObject();
+}
 
 void hkWorld::setGravity(const hkVector4& gravity) {
     m_gravity = gravity;
@@ -194,6 +712,86 @@ hkPhantom* hkWorld::addPhantom(hkPhantom* phantom) {
     return phantom;
 }
 
+// Adds a batch of phantoms: each gets its motion state pointer, world and reference, joins the world's list and
+// gets the added callbacks; then they enter the broad phase together and the new pairs get agents.
+void hkWorld::addPhantomBatch(hkPhantom** phantoms, int count) {
+    if (areCriticalOperationsLockedForPhantoms()) {
+        struct {
+            u8 m_type;
+            hkPhantom** m_phantoms;
+            u16 m_count;
+        } op;
+        op.m_type = hkWorldOperation::PHANTOM_BATCH_ADD;
+        op.m_phantoms = phantoms;
+        op.m_count = count;
+        queueOperation(&op);
+        return;
+    }
+    lockCriticalOperations();
+    hkLocalArray<hkBroadPhaseHandle*> collidablesForBroadphase(count);
+    hkLocalArray<hkAabb> aabbsForBroadphase(count);
+    aabbsForBroadphase.m_size = count;
+    collidablesForBroadphase.m_size = count;
+    for (int i = 0; i < count; i++) {
+        hkPhantom* phantom = phantoms[i];
+        if (phantom->m_collidable.m_motion == NULL) {
+            phantom->m_collidable.m_motion = phantom->getMotionState();
+        }
+        phantom->m_world = this;
+        collidablesForBroadphase[i] = &phantom->m_collidable.m_broadPhaseHandle;
+        phantom->calcAabb(aabbsForBroadphase[i]);
+        phantom->addReference();
+        m_phantoms.pushBack(phantom);
+        hkWorldCallbackUtil::firePhantomAdded(this, phantom);
+        phantom->firePhantomAdded();
+    }
+    hkLocalArray<hkBroadPhaseHandlePair> newPairs(m_unk2E4);
+    m_broadPhase->addObjectBatch(collidablesForBroadphase, aabbsForBroadphase, newPairs);
+    const hkCollidableCollidableFilter* filter = m_collisionFilter;
+    m_broadPhaseDispatcher->addPairs(newPairs.begin(), newPairs.getSize(), filter);
+    unlockAndAttemptToExecutePendingOperations();
+}
+
+// Removes a batch of phantoms: the removed callbacks run first, then they leave the broad phase together (the lost
+// pairs' agents are deleted) and finally each leaves the world's list and is released.
+void hkWorld::removePhantomBatch(hkPhantom** phantoms, int count) {
+    if (areCriticalOperationsLockedForPhantoms()) {
+        struct {
+            u8 m_type;
+            hkPhantom** m_phantoms;
+            u16 m_count;
+        } op;
+        op.m_type = hkWorldOperation::PHANTOM_BATCH_REMOVE;
+        op.m_phantoms = phantoms;
+        op.m_count = count;
+        queueOperation(&op);
+        return;
+    }
+    lockCriticalOperations();
+    hkLocalArray<hkBroadPhaseHandle*> collidablesForBroadphase(count);
+    for (int i = 0; i < count; i++) {
+        hkPhantom* phantom = phantoms[i];
+        collidablesForBroadphase.pushBackUnchecked(&phantom->m_collidable.m_broadPhaseHandle);
+        hkWorldCallbackUtil::firePhantomRemoved(this, phantom);
+        phantom->firePhantomRemoved();
+    }
+    {
+        hkLocalArray<hkBroadPhaseHandlePair> pairsOut(m_unk2E4);
+        m_broadPhase->removeObjectBatch(collidablesForBroadphase, pairsOut);
+        m_broadPhaseDispatcher->removePairs(pairsOut.begin(), pairsOut.getSize());
+    }
+    for (int i = 0; i < count; i++) {
+        hkPhantom* phantom = phantoms[i];
+        phantom->m_world = NULL;
+        m_phantoms.removeAt(m_phantoms.indexOf(phantom));
+        if (phantom->m_memSizeAndFlags == 0) {
+            phantom->deallocateInternalArrays();
+        }
+        phantom->removeReference();
+    }
+    unlockAndAttemptToExecutePendingOperations();
+}
+
 void hkWorld::removePhantom(hkPhantom* phantom) {
     if (areCriticalOperationsLockedForPhantoms()) {
         hkWorldOperationRecord op;
@@ -273,6 +871,11 @@ struct hkWorldFreeMemoryWatchDog : hkReferencedObject {
 
 // Runs the simulation for one step. When that succeeded and the memory in use (hkMemory 0x28 + 0x14) is over
 // the watchdog's limit, the watchdog is asked to free memory, bracketed by a timer.
+// MATCH-ONLY: the watchdog timer strings are writable data in the original (the data and small data sections),
+// not part of the unit's read-only string pool.
+static char s_watchDogTimerBegin[] = "TtWatchDog:FreeMem";
+static char s_watchDogTimerEnd[] = "Et";
+
 int hkWorld::stepDeltaTime(hkReal physicsDeltaTime) {
     int result = ((hkWorldStepSimulation*)m_simulation)->stepDeltaTime(physicsDeltaTime);
     if (result == 0) {
@@ -280,9 +883,9 @@ int hkWorld::stepDeltaTime(hkReal physicsDeltaTime) {
         if (watchDog != NULL) {
             hkMemory& memory = hkMemory::getInstance();
             if (worldField<int>(&memory, 0x28) + worldField<int>(&memory, 0x14) > watchDog->m_memoryLimit) {
-                HK_TIMER_BEGIN("WatchDog:FreeMem");
+                HK_MONITOR_TIMER_COMMAND(s_watchDogTimerBegin);
                 watchDog->freeMemory(this);
-                HK_TIMER_END();
+                HK_MONITOR_TIMER_COMMAND(s_watchDogTimerEnd);
             }
         }
     }
@@ -430,10 +1033,10 @@ int hkWorld::getMemUsageForIntegration() {
     int result = 0;
     for (int i = m_unk28.m_size - 1; i >= 0; i--) {
         hkWorldMemoryEntry* entry = ((hkWorldMemoryEntry**)m_unk28.m_data)[i];
-        int value = entry->m_unk0C + (entry->m_unk3C << 7) + (entry->m_unk14 << 2) + entry->m_unk10 + 0x9C;
-        if (result < value) {
-            result = value;
-        }
+        int part = (entry->m_unk14 << 2) + entry->m_unk10;
+        int value = entry->m_unk0C + (entry->m_unk3C << 7) + part;
+        value += 0x9C;
+        result = (result > value) ? result : value;
     }
     return result;
 }
@@ -718,3 +1321,84 @@ extern "C" void fn_802EB1A0(int arg0, void* arg1) {
     }
 }
 } // namespace jj_fn_802EB1A0
+
+// Blocks of the world freed with this helper (memory class 0x13). HYPOTHESIS: what they hold.
+static inline void freeWorldBlock(void* block) {
+    if (block != 0) {
+        hkMemory::getInstance().deallocateChunk(block, 1, 0x13);
+    }
+}
+
+// Removes everything still in the world (phantoms, entities, the fixed body and the fixed island), tells the
+// deletion listeners, then releases the broad phase, the dispatchers, the filter, the collision input, the simulation
+// and the operation queue.
+hkWorld::~hkWorld() {
+    m_maintenanceMgr->removeReference();
+    m_maintenanceMgr = NULL;
+    if (m_unk9C != NULL) {
+        freeWorldBlock(m_unk9C);
+        m_unk9C = NULL;
+    }
+    if (m_unkA4 != NULL) {
+        freeWorldBlock(m_unkA4);
+        m_unkA4 = NULL;
+        for (int i = 0; i < m_unkA8.getSize(); i++) {
+            void* block = m_unkA8[i].m_unk0C;
+            if (block != NULL) {
+                hkMemory::getInstance().deallocateChunk(block, 1, 0x13);
+            }
+        }
+    }
+    m_unkA8.clear();
+    if (m_unkA0 != NULL) {
+        freeWorldBlock(m_unkA0);
+        m_unkA0 = NULL;
+    }
+    hkReferencedObject*& watchDog = worldField<hkReferencedObject*>(this, 0x50);
+    if (watchDog != NULL) {
+        watchDog->removeReference();
+        watchDog = NULL;
+    }
+
+    while (m_phantoms.getSize() > 0) {
+        removePhantom(m_phantoms[0]);
+    }
+    while (m_unk28.getSize() > 0 && m_unk28[0]->m_entities.getSize() != 0) {
+        removeEntity(m_unk28[0]->m_entities[0]);
+    }
+    while (m_unk34.getSize() > 0) {
+        removeEntity(m_unk34[0]->m_entities[0]);
+    }
+    if (!(bool)m_wantSimulationIslands) {
+        hkWorldOperationUtil::removeIslandFromDirtyList(this, m_unk28[m_unk28.getSize() - 1]);
+        delete m_unk28[m_unk28.getSize() - 1];
+        m_unk28.m_size--;
+    }
+    removeEntity((hkEntity*)m_fixedRigidBody);
+    m_fixedRigidBody = NULL;
+    while (m_fixedIsland->m_entities.getSize() > 0) {
+        removeEntity(m_fixedIsland->m_entities[0]);
+    }
+    hkWorldOperationUtil::removeIslandFromDirtyList(this, m_fixedIsland);
+    delete m_fixedIsland;
+    m_fixedIsland = NULL;
+
+    hkWorldCallbackUtil::fireWorldDeleted(this);
+
+    m_broadPhase->removeReference();
+    m_broadPhase = NULL;
+    m_collisionDispatcher->removeReference();
+    m_collisionDispatcher = NULL;
+    delete m_broadPhaseDispatcher;
+    if (m_unk168 != NULL) {
+        m_unk168->removeReference();
+    }
+    delete m_unk5C;
+    delete m_unk60;
+    delete m_unk64;
+    m_collisionFilter->removeReference();
+    hkMemory::getInstance().deallocateChunk(*(void**)((char*)m_collisionInput + 0x20), 8, 0x1d);
+    hkMemory::getInstance().deallocateChunk(m_collisionInput, 0x30, 0x1d);
+    m_simulation->removeReference();
+    delete m_operationQueue;
+}

@@ -37,9 +37,11 @@ struct hkBroadPhase : hkReferencedObject {
 
     virtual void addObject(hkBroadPhaseHandle* object, const hkAabb& aabb,
                            hkArray<hkBroadPhaseHandlePair>& pairsOut);                    // 0x10
-    virtual void addObjectBatch();                                                         // 0x14 (signature unknown)
+    virtual void addObjectBatch(hkArray<hkBroadPhaseHandle*>& addObjectList, hkArray<hkAabb>& addAabbList,
+                                hkArray<hkBroadPhaseHandlePair>& newPairs); // 0x14
     virtual void removeObject(hkBroadPhaseHandle* object, hkArray<hkBroadPhaseHandlePair>& pairsOut); // 0x18
-    virtual void unk1C();
+    virtual void removeObjectBatch(hkArray<hkBroadPhaseHandle*>& removeObjectList,
+                                   hkArray<hkBroadPhaseHandlePair>& delPairsOut); // 0x1C
     virtual void unk20();
     // the batch update of hkSimulation::collideEntitiesBroadPhaseDiscrete (map: hk3AxisSweep::updateAabbs in this
     // slot). HYPOTHESIS: the parameter types beyond the call shape (handles, their aabbs, count, new and old pairs)
@@ -51,6 +53,11 @@ struct hkBroadPhase : hkReferencedObject {
     virtual void unk30();
     // HYPOTHESIS: the name (hkWorld::activateRegion collects the pairs overlapping a box with it)
     virtual void querySingleAabb(const hkAabb& aabb, hkArray<hkBroadPhaseHandlePair>& pairsOut) const; // 0x34
+    // The pairs overlapping one object already in the broad phase (hkWorld::updateCollisionFilterOnPhantom).
+    virtual void reQuerySingleObject(const hkBroadPhaseHandle* object, hkArray<hkBroadPhaseHandlePair>& pairsOut); // 0x38
+    // Moves every object by the shift (quantized), reporting the shift actually applied.
+    virtual void shiftAllObjects(const hkVector4& shiftDistance, hkVector4& effectiveShiftDistanceOut,
+                                 hkArray<hkBroadPhaseHandle*>& objectsEnteringBroadphaseBorder); // 0x3C
 
     // HYPOTHESIS: the two empty out-of-line members after the destructor (no caller, no vtable slot).
     void lockImplementation();

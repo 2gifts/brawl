@@ -2,22 +2,19 @@
 #include <so/status/so_status_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <types.h>
+#include <wn/pikmin/wn_pikmin_pikmin_status_uniq_process_follow_common.h>
 
-class wnPikminPikminStatusUniqProcessWaterFollow : public soStatusUniqProcess {
+class wnPikminPikminStatusUniqProcessWaterFollow : public wnPikminPikminStatusUniqProcessFollowCommon {
 public:
     virtual ~wnPikminPikminStatusUniqProcessWaterFollow() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
     virtual void execFixPosCounter(soModuleAccesser* moduleAccesser);
 };
 
-// HYPOTHESIS: the FollowCommon base methods live in the sibling follow TU; called directly by their native symbols.
-extern "C" void fn_113_263DC(wnPikminPikminStatusUniqProcessWaterFollow* self, soModuleAccesser* moduleAccesser);
-extern "C" void fn_113_26470(wnPikminPikminStatusUniqProcessWaterFollow* self, soModuleAccesser* moduleAccesser);
-
 wnPikminPikminStatusUniqProcessWaterFollow g_wnPikminPikminStatusUniqProcessWaterFollow;
 
 void wnPikminPikminStatusUniqProcessWaterFollow::initStatus(soModuleAccesser* a) {
-    fn_113_263DC(this, a);
+    wnPikminPikminStatusUniqProcessFollowCommon::initStatus(a);
     a->getWorkManageModule().setInt(0x5a, 0x20000001);
     a->getWorkManageModule().setInt(0x5a, 0x20000000);
     a->getWorkManageModule().onFlag(0x22000000);
@@ -29,7 +26,7 @@ void wnPikminPikminStatusUniqProcessWaterFollow::execFixPosCounter(soModuleAcces
         a->getStatusModule().changeStatusRequest(6, a);
         return;
     }
-    fn_113_26470(this, a);
+    wnPikminPikminStatusUniqProcessFollowCommon::execFixPosCounter(a);
     u32 flagged = a->getWorkManageModule().isFlag(0x22000001);
     if (flagged == 1) {
         a->getWorkManageModule().offFlag(0x22000001);

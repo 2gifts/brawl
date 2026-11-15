@@ -538,7 +538,7 @@ void grCollision::setLineFlags(grCollisionLine* line) {
     }
 }
 
-grCollisionJoint* grCollision::getJoint(u16 nodeIndex) {
+grCollisionJoint* grCollision::getJoint(u32 nodeIndex) {
     return &m_joints[nodeIndex];
 }
 

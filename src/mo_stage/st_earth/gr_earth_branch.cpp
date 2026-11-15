@@ -223,7 +223,7 @@ void grEarthBranch::translateCollision() {
             u32 count = joint->m_vtxLen;
             int index = *reinterpret_cast<s16*>(joint);
             for (u32 i = 0; i != count; i++) {
-                grCollisionLine* line = joint->getLine(index);
+                grCollisionLine* line = joint->getLine((u16)index);
                 if (line == NULL) {
                     return;
                 }

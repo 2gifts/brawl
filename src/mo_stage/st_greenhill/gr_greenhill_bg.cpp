@@ -68,8 +68,9 @@ void grGreenhillBg::updateJoint(float deltaFrame) {
     if (m_joint[0] == NULL && m_state != 0) {
         grCollision* collision = m_collision;
         if (collision != NULL) {
+            u32 i;
             u32 jointNum = (u16)collision->m_jointLen;
-            for (u32 i = 0; i != jointNum; i++) {
+            for (i = 0; i != jointNum; i++) {
                 grCollisionJoint* joint = collision->getJoint(i);
                 if (joint != NULL && joint->m_ground == this) {
                     u16 node = joint->m_nodeIndex;

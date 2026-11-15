@@ -214,5 +214,7 @@ public:
     void activate(int founderTaskId, int resourceId, int team, int kind);
 };
 
+#ifndef WN_WEAPON_NO_COMMON_ENERGIES // a unit of another article in this mode whose weapon builder has no energies
 static_assert(sizeof(wnZeldaLightingBow) == 0x1F28, "Light Bow article extent");
 static_assert(sizeof(wnZeldaLightingBowArrow) == 0x1F30, "Light Arrow article extent");
+#endif

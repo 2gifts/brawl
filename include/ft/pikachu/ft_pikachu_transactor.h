@@ -3,6 +3,7 @@
 #include <ft/ft_transactor.h>
 #include <types.h>
 
+class soArticle;
 class soModuleAccesser;
 class wnPikachuThunderJolt;
 
@@ -11,6 +12,7 @@ class ftPikachuTransactor : public ftTransactor {
 public:
     ftPikachuTransactor();
     virtual ~ftPikachuTransactor();
+    virtual bool activeArticle(soArticle* article, soModuleAccesser* acc);
     // HYPOTHESIS: the id is the effect resource of the fighter.
     bool activeArticle(wnPikachuThunderJolt* weapon, soModuleAccesser* acc, u32 etcResId);
 };

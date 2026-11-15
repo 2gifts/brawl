@@ -1,9 +1,9 @@
 // Brawl physics wrapper translation unit ph_ik_solver.o (main.dol 0x80096690-0x800966EC).
 // Not yet decompiled. Functions in address order with their map names:
-//   0x80096690     4  __ct   [map: nw4r4math5MTX34Fv____ct]
-//   0x80096694    16  __ct   [map: nw4r4math4VEC3Ffff____ct]
-//   0x800966A4    12  __cl   [map: hkVector4____cl]
-//   0x800966B0    60  MTX34Mult   [map: nw4r4mathFPQ34nw4r4math5__MTX34Mult]
+//   0x80096690     4  __ct
+//   0x80096694    16  __ct
+//   0x800966A4    12  __cl
+//   0x800966B0    60  MTX34Mult
 #include <revolution/MTX.h>
 
 // MATCH-ONLY/LOCAL-TYPES: this unit does not include the shared nw4r math or hkVector4 headers, because those

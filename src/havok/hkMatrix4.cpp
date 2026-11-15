@@ -1,6 +1,6 @@
 // hkMatrix4.o (main.dol 0x80283ACC-0x80283EB4)
-// the regular 4x4 matrix. the havok 5.1 source we have covers all of this, though the dol's version
-// only has these 5 functions out of line, the rest must've been inlined everywhere
+// the regular 4x4 matrix. the dol only has these 5 functions out of line, the rest must've been inlined
+// everywhere
 //   0x80283ACC   100  transpose
 //   0x80283B30   416  setMul
 //   0x80283CD0   172  get4x4ColumnMajor

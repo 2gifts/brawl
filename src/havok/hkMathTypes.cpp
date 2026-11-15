@@ -34,7 +34,7 @@ float hkMathTypes::hkMath_atan2fApproximation(hkReal y, hkReal x) {
 }
 
 // Float to int by bit manipulation (truncation toward zero), written as the original's branchless sequence.
-// HYPOTHESIS: the sign/zero/exponent masks follow the original data flow; the source-level expression is a reconstruction.
+// HYPOTHESIS: the sign/zero/exponent masks follow the original data flow; the source-level expression is a guess.
 int hkMath::hkFloatToInt(hkReal f) {
     union {
         hkReal f;

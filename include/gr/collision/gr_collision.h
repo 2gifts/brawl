@@ -102,7 +102,7 @@ public:
     static void calcLineVector1(grCollisionLineWork* work, const Vec2f& pos, Vec2f* outPos, Vec2f* outVec);
     static Ground* getReferenceGround(grCollisionLineWork* work);
 
-    grCollisionJoint* getJoint(u16 nodeIndex);
+    grCollisionJoint* getJoint(u32 nodeIndex);
     grCollisionLine* getLine(u16 index);
     grCollisionLine* getLine1(u16 index);
     grCollisionLine* getRightLine(grCollisionLine* line);

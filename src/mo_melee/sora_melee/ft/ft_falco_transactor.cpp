@@ -2,13 +2,12 @@
 #include <ft/falco/ft_falco_transactor.h>
 #include <ft/ft_entry.h>
 #include <ft/ft_resource_id_accesser_impl.h>
+#include <math.h>
 #include <so/so_module_accesser.h>
 #include <so/team/so_team.h>
 #include <so/team/so_team_module_impl.h>
 #include <wn/falco/wn_falco_blaster.h>
 #include <wn/falco/wn_falco_blaster_bullet.h>
-
-// TODO: the article activators and the other hooks (fn_27_ symbols of this range).
 
 ftFalcoTransactor::ftFalcoTransactor() { }
 ftFalcoTransactor::~ftFalcoTransactor() { }
@@ -36,4 +35,41 @@ bool ftFalcoTransactor::activeArticle(soArticle* article, soModuleAccesser* acc)
     default:
         return false;
     }
+}
+// Same as Fox's: fires a bullet from the blaster node. In status 0x3c the muzzle offset is aimed from the node (mode 1, the angle follows
+// the offset); otherwise the air or ground muzzle offset and the fixed shot angle are used.
+bool ftFalcoTransactor::activeArticle2(wnFalcoBlasterBullet* weapon, soModuleAccesser* acc, int nodeId, u32 etcResId, u32 effectId) {
+    if (acc->getStatusModule().getStatusKind() == 0x3c) {
+        float offsetZ = acc->getConstantFloatKirby(0xfa0);
+        Vec3f offset(0.0f, acc->getConstantFloatKirby(0xfa1), offsetZ);
+        Vec3f nodePos = acc->getModelModule().getNodeGlobalPosition(nodeId, false);
+        Vec3f pos = acc->getModelModule().getNodeGlobalPosition(nodeId, &offset, false, false);
+        pos.m_z = 0.0f;
+        float lr = acc->getPostureModule().getLr();
+        float dx = pos.m_x - nodePos.m_x;
+        float dy = pos.m_y - nodePos.m_y;
+        float angle = atan2(dy, dx * lr);
+        int founderTaskId = acc->getStageObject().m_taskId;
+        weapon->activate(founderTaskId, etcResId, acc->getTeamModule().getTeam()->getNo(), &pos, 1,
+                         static_cast<EfID>(effectId), acc->getPostureModule().getLr(), acc->getConstantFloatKirby(0xfa5), angle);
+    } else if (acc->getSituationModule().getKind() == 2) {
+        float offsetZ = acc->getConstantFloatKirby(0xfa2);
+        Vec3f offset(0.0f, acc->getConstantFloatKirby(0xfa3), offsetZ);
+        Vec3f pos = acc->getModelModule().getNodeGlobalPosition(nodeId, &offset, false, false);
+        pos.m_z = 0.0f;
+        int founderTaskId = acc->getStageObject().m_taskId;
+        weapon->activate(founderTaskId, etcResId, acc->getTeamModule().getTeam()->getNo(), &pos, 0,
+                         static_cast<EfID>(effectId), acc->getPostureModule().getLr(), acc->getConstantFloatKirby(0xfa5),
+                         acc->getConstantFloatKirby(0xfa4));
+    } else {
+        float offsetZ = acc->getConstantFloatKirby(0xfa0);
+        Vec3f offset(0.0f, acc->getConstantFloatKirby(0xfa1), offsetZ);
+        Vec3f pos = acc->getModelModule().getNodeGlobalPosition(nodeId, &offset, false, false);
+        pos.m_z = 0.0f;
+        int founderTaskId = acc->getStageObject().m_taskId;
+        weapon->activate(founderTaskId, etcResId, acc->getTeamModule().getTeam()->getNo(), &pos, 0,
+                         static_cast<EfID>(effectId), acc->getPostureModule().getLr(), acc->getConstantFloatKirby(0xfa5),
+                         acc->getConstantFloatKirby(0xfa4));
+    }
+    return false;
 }

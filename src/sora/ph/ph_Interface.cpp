@@ -1,28 +1,28 @@
 // Brawl physics wrapper translation unit ph_Interface.o (main.dol 0x8009A104-0x8009BA40).
 // Not yet decompiled. Functions in address order with their map names:
-//   0x8009A104   220  __ct   [map: phInterface____ct]
-//   0x8009A1E0   200  __dt   [map: phInterface____dt]
-//   0x8009A2A8   228  deleteInstance   [map: phInterface__deleteInstance]
-//   0x8009A38C   352  init   [map: phInterface__init]
-//   0x8009A4EC    16  sysAlloc   [map: phInterface__sysAlloc]
-//   0x8009A4FC     4  gfMemFree   [map: phInterface__gfMemFree]
-//   0x8009A500    64  __dt   [map: hkMemory____dt]
-//   0x8009A540   540  removeHavokSystem   [map: phInterface__removeHavokSystem]
-//   0x8009A75C   248  get2ndaryController   [map: phInterface__get2ndaryController]
-//   0x8009A854   152  get2ndary2Controller   [map: phInterface__get2ndary2Controller]
-//   0x8009A8EC   948  copy2ndaryMatrix   [map: phInterface__copy2ndaryMatrix]
-//   0x8009ACA0  1432  copy2ndaryMatrix2   [map: phInterface__copy2ndaryMatrix2]
-//   0x8009B238   236  getIKController   [map: phInterface__getIKController]
-//   0x8009B324     8  getArray2ndaryController   [map: phInterface__getArray2ndaryController]
-//   0x8009B32C     8  getArrayIKController   [map: phInterface__getArrayIKController]
-//   0x8009B334   632  initialize   [map: phInterface__initialize]
-//   0x8009B5AC   756  processDefault   [map: phInterface__processDefault]
-//   0x8009B8A0    92  create2ndaryWorld   [map: phInterface__create2ndaryWorld]
-//   0x8009B8FC    84  delete2ndaryWorld   [map: phInterface__delete2ndaryWorld]
-//   0x8009B950   116  delete2ndaryController   [map: phInterface__delete2ndaryController]
-//   0x8009B9C4   100  renderDebug   [map: phInterface__renderDebug]
-//   0x8009BA28     4  notifiAllEndCalcWorldTimingC   [map: phInterface__notifiAllEndCalcWorldTimingC]
-//   0x8009BA2C    20  errorReport   [map: phInterface__errorReport]
+//   0x8009A104   220  __ct
+//   0x8009A1E0   200  __dt
+//   0x8009A2A8   228  deleteInstance
+//   0x8009A38C   352  init
+//   0x8009A4EC    16  sysAlloc
+//   0x8009A4FC     4  gfMemFree
+//   0x8009A500    64  __dt
+//   0x8009A540   540  removeHavokSystem
+//   0x8009A75C   248  get2ndaryController
+//   0x8009A854   152  get2ndary2Controller
+//   0x8009A8EC   948  copy2ndaryMatrix
+//   0x8009ACA0  1432  copy2ndaryMatrix2
+//   0x8009B238   236  getIKController
+//   0x8009B324     8  getArray2ndaryController
+//   0x8009B32C     8  getArrayIKController
+//   0x8009B334   632  initialize
+//   0x8009B5AC   756  processDefault
+//   0x8009B8A0    92  create2ndaryWorld
+//   0x8009B8FC    84  delete2ndaryWorld
+//   0x8009B950   116  delete2ndaryController
+//   0x8009B9C4   100  renderDebug
+//   0x8009BA28     4  notifiAllEndCalcWorldTimingC
+//   0x8009BA2C    20  errorReport
 
 #include <ph/ph2ndaryWorld.h>
 #include <ph/ph_Interface.h>

@@ -2,12 +2,9 @@
 #include <so/status/so_status_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <types.h>
+#include <wn/pikmin/wn_pikmin_pikmin_status_uniq_process_follow_common.h>
 
-extern "C" {
-void fn_113_26470(void* self, soModuleAccesser* moduleAccesser);
-}
-
-class wnPikminPikminStatusUniqProcessGroundFollow : public soStatusUniqProcess {
+class wnPikminPikminStatusUniqProcessGroundFollow : public wnPikminPikminStatusUniqProcessFollowCommon {
 public:
     virtual ~wnPikminPikminStatusUniqProcessGroundFollow() { }
     virtual void execStatus(soModuleAccesser* moduleAccesser);
@@ -29,7 +26,7 @@ void wnPikminPikminStatusUniqProcessGroundFollow::execStatus(soModuleAccesser* a
 }
 
 void wnPikminPikminStatusUniqProcessGroundFollow::execFixPosCounter(soModuleAccesser* a) {
-    fn_113_26470(this, a);
+    wnPikminPikminStatusUniqProcessFollowCommon::execFixPosCounter(a);
     if (a->getWorkManageModule().isFlag(0x22000001) == 1) {
         a->getWorkManageModule().offFlag(0x22000001);
         Vec3f pos = a->getPostureModule().getPos();

@@ -35,6 +35,12 @@ public:
     stOperatorRuleMelee(u8);
     void setNormalResultInfo();
     void initCorpsRule(gmGlobalCorps*);
+    int getLocalHumanTotalStock();
+    int getPlayerStock(int playerNo);
+    void getTeamTotalStock(int* numTeams, int* teamStocks, int* teamMembers);
+    void getExistTeam(int* numTeams);
+    void updateFrameCounter();
+    void deletePlayer(u32 mode, u32 keepMask);
 
     virtual void processBegin();
     virtual ~stOperatorRuleMelee();

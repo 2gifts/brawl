@@ -1,7 +1,5 @@
+#include <sora_adv_stage/gr_adventure_block_mng.h>
 #include <sora_adv_stage/gr_gimmick_block.h>
-
-// HYPOTHESIS: messageBreak/[grAdventureBlockMng] (sora_adv_stage map), not decompiled yet.
-extern "C" void fn_40_1D200(void* blockMng, grGimmickBlock* block);
 
 grGimmickBlock* grGimmickBlock::create(int mdlIndex, const char* taskName) {
     grGimmickBlock* ground = new (Heaps::StageInstance) grGimmickBlock(taskName);
@@ -51,5 +49,5 @@ void grGimmickBlock::dbDispInvalidatedByCameraClippingSphere() { }
 
 void grGimmickBlock::receiveCollMsg_Attack(grCollStatus* collStatus, grCollisionJoint* collisionJoint) {
     requestBreak(50.0f);
-    fn_40_1D200(m_blockMng, this);
+    m_blockMng->messageBreak(this);
 }

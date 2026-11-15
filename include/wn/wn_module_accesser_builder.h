@@ -1462,14 +1462,14 @@ public:
     }
 #endif
 #endif
-#ifdef WN_MARIO_FIREBALL_UNIT
+#if defined(WN_MARIO_FIREBALL_UNIT) && !defined(WN_ARTICLE_BUILDER_DTOR_IN_CLASS)
 #pragma push
 #pragma inline_max_size(10000)
 #pragma inline_max_total_size(20000)
 #pragma inline_depth(8)
 #endif
     virtual ~wnWeaponBuilder() { }
-#ifdef WN_MARIO_FIREBALL_UNIT
+#if defined(WN_MARIO_FIREBALL_UNIT) && !defined(WN_ARTICLE_BUILDER_DTOR_IN_CLASS)
 #pragma pop
 #endif
 #ifdef WN_OCTOPUS_ARRAYS

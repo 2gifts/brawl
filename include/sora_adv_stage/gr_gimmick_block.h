@@ -4,18 +4,20 @@
 #include <gr/gr_gimmick.h>
 #include <types.h>
 
-// HYPOTHESIS: The breakable block of the Subspace stages (sora_adv_stage gr_gimmick_block.o). The block manager and the
-// block record are not described yet.
+// HYPOTHESIS: The breakable block of the Subspace stages (sora_adv_stage gr_gimmick_block.o). The block record is not
+// described yet.
+class grAdventureBlockMng;
 class grAdventureMineManager;
 
 class grGimmickBlock : public grGimmick {
+    friend class grAdventureBlockMng; // the group creates, places and breaks its blocks
     friend class grAdventureMineManager; // HYPOTHESIS: the mine group numbers its mines through unk14C
 protected:
     u8 unk14C;            // 0x14C
     u8 m_isBroken;        // 0x14D, set by breakBlock
     float m_hp;           // 0x150, HYPOTHESIS: the durability that requestBreak lowers
     void* m_blockData;    // 0x154, the gimmick record of the block
-    void* m_blockMng;     // 0x158, HYPOTHESIS: the grAdventureBlockMng that is told about breaks
+    grAdventureBlockMng* m_blockMng; // 0x158, the group that is told about breaks
 
 public:
     grGimmickBlock(const char* taskName);

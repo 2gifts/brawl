@@ -1357,8 +1357,9 @@ void stOldin::setLRHang(bool hang) {
     if (m_bridge != NULL) {
         grCollision* collision = m_bridge->m_collision;
         if (collision != NULL) {
+            u32 i;
             u32 jointLen = (u16)collision->m_jointLen;
-            for (u32 i = 0; i != jointLen; i++) {
+            for (i = 0; i != jointLen; i++) {
                 grCollisionJoint* joint = collision->getJoint(i);
                 if (joint != NULL) {
                     if (hang == 1) {

@@ -37,6 +37,22 @@
 //   0x8032BBDC    12  __sinit_\hkContinuousSimulation_cpp
 
 #include <havok/hkContinuousSimulation.h>
+#include <havok/hkProcessCollisionOutput.h>
+#include <havok/hkAgentNnMachine.h>
+#include <havok/hkLinkedCollidable.h>
+#include <havok/hkEntity.h>
+#include <havok/hkCollisionAgent.h>
+#include <havok/hkCollisionDispatcher.h>
+#include <havok/hkCollisionInput.h>
+#include <havok/hkVelocityAccumulator.h>
+#include <havok/hkRotation.h>
+#include <havok/hkPointerMapBase.h>
+#include <havok/hkSimulationIsland.h>
+#include <havok/hkSweptTransformUtil.h>
+#include <havok/hkWorld.h>
+#include <havok/hkStepInfo.h>
+#include <havok/hkRigidMotionUtil.h>
+#include <havok/hkWorldOperationQueue.h>
 #include <havok/hkDefaultToiResourceMgr.h>
 #include <havok/hkWorld.h>
 #include <havok/hkWorldCallbackUtil.h>
@@ -309,16 +325,14 @@ extern "C" void fn_8032A22C(Container* self, Flags* flags) {
 #include <havok/hkSimulation.h>
 namespace jj_fn_80326920 {
 extern "C" {
-void fn_80327DEC(s32, s32, s32);
-void fn_80327FE0(s32, s32);
 
 void fn_80326920(s32 arg0, s32 *arg1, s32 arg2, unsigned char *arg3, const unsigned char *arg4) {
     s8 flag = *arg4;
     ((hkSimulation*)(arg0))->hkSimulation::resetCollisionInformationForEntities((hkEntity**)((s32)arg1), (int)(arg2), (hkWorld*)(arg3), *(hkBool*)(&flag));
     if (arg2 != 1) {
-        fn_80327DEC(arg0, (s32)arg1, arg2);
+        ((hkContinuousSimulation*)arg0)->removeToiEventsOfEntities((hkEntity**)arg1, arg2);
     } else {
-        fn_80327FE0(arg0, *arg1);
+        ((hkContinuousSimulation*)arg0)->removeToiEventsOfEntity((hkEntity*)*arg1);
     }
 }
 }
@@ -341,3 +355,251 @@ extern "C" void fn_80327B5C(int p1, int p2, int p3, int p4) {
     ((hkSimulation*)(p1))->processAgentsOfEntities((hkEntity**)(p2), (int)(p3), *(hkProcessCollisionInput*)(p4), *(hkSimulation::AgentEntryProcessFunction*)(&lbl_80488CE8), 0);
 }
 } // namespace jj_fn_80327B5C
+
+// The property words of a time-of-impact event by field (the event copies them as two words).
+struct hkToiEventProperties {
+    u32 m_properties;
+    u16 m_propertiesB;
+    u8 m_propertiesC;
+    u8 m_propertiesD;
+};
+
+// Queues the time of impact the agent of entry reported: when, the contact, both entities, the impact's properties
+// and the contact manager (removeCollisionInformationForAgent finds the agent's events by it).
+// Called out of line by the narrow phase below.
+#pragma push
+#pragma auto_inline off
+void hkContinuousSimulation::addToiEvent(const hkProcessCollisionOutput& output, const hkAgentNnEntry& entry) {
+    hkToiEvent& event = m_toiEvents.expandOne();
+    event.unk00 = output.m_toi.m_time;
+    event.unk0C = output.m_toi.unk24;
+    event.unk20 = output.m_toi.m_contact.m_position;
+    event.unk30 = output.m_toi.m_contact.m_normal;
+    event.unk04[0] = (int)((char*)entry.m_collidable[0] + entry.m_collidable[0]->m_ownerOffset);
+    event.unk04[1] = (int)((char*)entry.m_collidable[1] + entry.m_collidable[1]->m_ownerOffset);
+    hkToiEventProperties* properties = (hkToiEventProperties*)event.unk10;
+    properties->m_properties = output.m_toi.m_properties;
+    properties->m_propertiesB = output.m_toi.m_propertiesB;
+    properties->m_propertiesC = output.m_toi.m_propertiesC;
+    properties->m_propertiesD = output.m_toi.m_propertiesD;
+    event.unk18 = (u32)entry.m_contactMgr;
+}
+#pragma pop
+
+// One agent of the continuous narrow phase: runs it with its own collision quality, hands new contact points to its
+// contact manager and queues a reported time of impact (skipped once memory ran out).
+void hkContinuousSimulation::processAgentCollideContinuous(hkAgentNnEntry* entry, hkProcessCollisionInput& input,
+                                                           hkProcessCollisionOutput& output) {
+    output.reset();
+    input.m_collisionQualityInfo = &input.m_dispatcher->m_collisionQualityInfo[entry->m_collisionQualityIndex];
+    input.m_createPredictiveAgents = input.m_collisionQualityInfo->unk10;
+    hkAgentNnMachine_ProcessAgent(entry, input, output);
+    if (hkMemory::getAvailableMemory() == 0) {
+        hkMemory::getInstance().unk4 = 1;
+    }
+    if (hkMemory::getInstance().unk4 != 1) {
+        if (output.isEmpty() == false) {
+            entry->m_contactMgr->processContact(*entry->m_collidable[0], *entry->m_collidable[1], input, output);
+        }
+        if (hkBool(output.m_toi.m_time != HK_REAL_MAX)) {
+            addToiEvent(output, *entry);
+        }
+    }
+}
+
+// Drops every pending time-of-impact event of the entity; each event's contact manager is told first.
+#pragma push
+#pragma auto_inline off
+void hkContinuousSimulation::removeToiEventsOfEntity(hkEntity* entity) {
+    for (int i = 0; i < m_toiEvents.getSize(); i++) {
+        if ((hkEntity*)m_toiEvents[i].unk04[0] == entity || (hkEntity*)m_toiEvents[i].unk04[1] == entity) {
+            // MATCH-ONLY: the aligned pointer turns copy propagation off as in the original (the event is reloaded).
+            hkToiEvent* event __attribute__((aligned(16))) = &m_toiEvents[i];
+            ((hkContactMgr*)event->unk18)
+                ->removeToi(((hkEntity*)event->unk04[0])->m_collidable, ((hkEntity*)event->unk04[1])->m_collidable,
+                            *(hkContactPointMaterial*)&event->unk10);
+            m_toiEvents.removeAt(i);
+            i--;
+        }
+    }
+}
+#pragma pop
+
+// Drops the pending time-of-impact events of a set of entities (through a pointer map of them); each event's
+// contact manager is told first.
+#pragma push
+#pragma auto_inline off
+void hkContinuousSimulation::removeToiEventsOfEntities(hkEntity** entities, int numEntities) {
+    if (m_toiEvents.getSize() != 0) {
+        hkPointerMapBase<hkUlong> entitySet;
+        entitySet.reserve(numEntities);
+        for (int i = 0; i < numEntities; i++) {
+            entitySet.insert((hkUlong)entities[i], 0);
+        }
+        for (int i = 0; i < m_toiEvents.getSize(); i++) {
+            hkToiEvent* event __attribute__((aligned(16))) = &m_toiEvents[i];
+            int keyA = entitySet.findKey((hkUlong)event->unk04[0]);
+            int keyB = entitySet.findKey((hkUlong)event->unk04[1]);
+            bool remove = entitySet.isValid(keyA) || entitySet.isValid(keyB);
+            if (remove) {
+                ((hkContactMgr*)event->unk18)
+                    ->removeToi(((hkEntity*)event->unk04[0])->m_collidable, ((hkEntity*)event->unk04[1])->m_collidable,
+                                *(hkContactPointMaterial*)&event->unk10);
+                m_toiEvents.removeAt(i);
+                i--;
+            }
+        }
+    }
+}
+#pragma pop
+
+namespace fn_80329F48_types {
+struct BodyPair { char pad[4]; hkEntity* a; hkEntity* b; };
+struct Item { char pad[0x28]; BodyPair* pair; };
+struct Entry { Item* item; int x; float y; };
+struct Array { Entry* entries; int count; };
+// Moves the entries from *out on whose two bodies are both marked 8 (activated) in the state table to the front
+// (at *out, which is advanced). HYPOTHESIS: the types (the shapes of fn_80329E20's).
+extern "C" void fn_80329F48(Array* self, int* out, u8** entityState) {
+    for (int i = *out; i < self->count; i++) {
+        Entry* e = &self->entries[i];
+        BodyPair* pair = e->item->pair;
+        if ((*entityState)[pair->a->m_storageIndex] == 8 && (*entityState)[pair->b->m_storageIndex] == 8) {
+            int index = (*out)++;
+            Entry* dst = &self->entries[index];
+            Entry tmp = *dst;
+            *dst = *e;
+            *e = tmp;
+        }
+    }
+}
+} // namespace fn_80329F48_types
+
+// The part of the local solver's state read here: the base of its velocity accumulators. HYPOTHESIS: the type.
+struct hkLsSolverState {
+    u8 unk00[0xC];        // 0x00
+    char* m_accumulators; // 0x0C
+};
+
+// hkLs_setAccumulatorVelocities: copies each entity's velocities into its solver accumulator; the angular velocity
+// is rotated into the accumulator's frame unless that frame is the identity. HYPOTHESIS: the parameter types.
+extern "C" void fn_8032A008(hkLsSolverState* state, hkArray<hkEntity*>& entities) {
+    for (int i = 0; i < entities.getSize(); i++) {
+        hkEntity* entity = entities[i];
+        // MATCH-ONLY: the aligned pointer turns copy propagation off as in the original.
+        hkVelocityAccumulator* acc __attribute__((aligned(16))) =
+            (hkVelocityAccumulator*)(state->m_accumulators + entity->m_solverData);
+        acc->m_linearVel = entity->m_motion.m_linearVelocity;
+        if (acc->m_matrixIsIdentity) {
+            acc->m_angularVel = entity->m_motion.m_angularVelocity;
+        } else {
+            hkRotation& coreFromWorld = *(hkRotation*)&acc->unk50;
+            acc->m_angularVel.setRotatedDir(coreFromWorld, entity->m_motion.m_angularVelocity);
+        }
+    }
+}
+
+// hkLs_backstepAndFreezeEntireIsland: moves every entity of the island back to the given time and freezes its swept
+// transform there (start = end, the step running from that time to the simulation's end time); entities not yet
+// marked 8 (activated) in the state table are added to the activated list and marked. HYPOTHESIS: parameter types.
+extern "C" void fn_8032A0EC(hkSimulationIsland* island, u8** entityState, hkArray<hkEntity*>& activated, hkReal time) {
+    for (int i = 0; i < island->m_entities.getSize(); i++) {
+        hkEntity* entity = island->m_entities[i];
+        hkMotionState& ms = entity->m_motion.m_motionState;
+        hkSweptTransformUtil::backStepMotionState(time, ms);
+        if ((*entityState)[i] != 8) {
+            activated.pushBack(entity);
+            (*entityState)[i] = 8;
+        }
+        hkSweptTransform& st = ms.m_sweptTransform;
+        st.m_centerOfMass0(0) = st.m_centerOfMass1(0);
+        st.m_centerOfMass0(1) = st.m_centerOfMass1(1);
+        st.m_centerOfMass0(2) = st.m_centerOfMass1(2);
+        st.m_rotation0 = st.m_rotation1;
+        st.m_centerOfMass0(3) = time;
+        st.m_centerOfMass1(3) = 1.0f / (island->m_world->m_simulation->m_unk14 - time);
+    }
+}
+
+
+
+
+
+
+
+
+
+// hkLs_updateEntityManifolds: re-runs, at the given time, the agents of the entity whose collision quality is at most
+// the given one, skipping partners already activated (state 8); a movable partner not yet touched (state 0) is first
+// moved to that time and marked 1. The input's step is changed for this and restored at the end.
+// HYPOTHESIS: the parameter types and the meaning of the states.
+extern "C" void fn_8032931C(hkEntity* entity, int maxQuality, hkProcessCollisionInput& input, u8** entityState,
+                            hkReal time) {
+    hkStepInfo savedStepInfo = input.m_stepInfo;
+    input.m_stepInfo.m_endTime = time;
+    input.m_stepInfo.m_deltaTime = time - input.m_stepInfo.m_startTime;
+    if (input.m_stepInfo.m_deltaTime > 0.0f) {
+        input.m_stepInfo.m_invDeltaTime = 1.0f / input.m_stepInfo.m_deltaTime;
+    } else {
+        input.m_stepInfo.m_invDeltaTime = 0.0f;
+    }
+    for (int i = 0; i < entity->m_collidable.m_collisionEntries.getSize(); i++) {
+        hkLinkedCollidable::CollisionEntry& entry = entity->m_collidable.m_collisionEntries[i];
+        if (hkBool(maxQuality <= (u8)entry.m_agentEntry->m_collisionQualityIndex)) {
+            hkEntity* partner = (hkEntity*)((char*)entry.m_partner + entry.m_partner->m_ownerOffset);
+            bool process = partner->isFixed() || (*entityState)[partner->m_storageIndex] != 8;
+            if (process) {
+                if (!(bool)partner->isFixed()) {
+                    u8& state = (*entityState)[partner->m_storageIndex];
+                    if (state == 0) {
+                        state = 1;
+                        hkMotionState& ms = partner->m_motion.m_motionState;
+                        hkSweptTransformUtil::lerp2(ms.m_sweptTransform, time, ms.m_transform);
+                    }
+                }
+                hkAgentNnEntry* agent = entry.m_agentEntry;
+                hkProcessCollisionData output;
+                output.reset();
+                input.m_collisionQualityInfo = &input.m_dispatcher->m_collisionQualityInfo[5];
+                input.m_createPredictiveAgents = input.m_dispatcher->m_collisionQualityInfo[agent->m_collisionQualityIndex].unk10;
+                hkAgentNnMachine_ProcessAgent(agent, input, (hkProcessCollisionOutput&)output);
+                if (!(bool)output.isEmpty()) {
+                    agent->m_contactMgr->processContact(*agent->m_collidable[0], *agent->m_collidable[1], input,
+                                                        (hkProcessCollisionOutput&)output);
+                }
+            }
+        }
+    }
+    input.m_stepInfo = savedStepInfo;
+}
+
+// collideEntitiesBroadPhaseContinuous (fn_80326EEC, not written yet). HYPOTHESIS: the parameter types.
+extern "C" void fn_80326EEC(hkContinuousSimulation* simulation, hkEntity** entities, int numEntities, hkWorld* world);
+extern "C" void fn_80327B5C(int p1, int p2, int p3, int p4);
+
+// Moves the entities back to the simulation time, re-integrates them over the current step and collides them again
+// (broad phase, then the continuous narrow phase), with the collision input's step set to this simulation's step for
+// the duration. Queued while the world is locked.
+void hkContinuousSimulation::reintegrateAndRecollideEntities(hkEntity** entities, int numEntities, hkWorld* world) {
+    if (world->areCriticalOperationsLocked()) {
+        hkWorldOperation::BatchOperation op;
+        op.m_type = hkWorldOperation::ENTITY_BATCH_REINTEGRATE_AND_RECOLLIDE;
+        op.m_objects = (void**)entities;
+        op.m_count = numEntities;
+        world->queueOperation(&op);
+        return;
+    }
+    world->lockCriticalOperations();
+    hkStepInfo savedStepInfo = world->m_collisionInput->m_stepInfo;
+    hkStepInfo stepInfo(m_unk10, m_unk14);
+    world->m_collisionInput->m_stepInfo = stepInfo;
+    for (int i = 0; i < numEntities; i++) {
+        hkSweptTransformUtil::backStepMotionState(m_unk10, entities[i]->m_motion.m_motionState);
+    }
+    hkRigidMotionUtil::hkRigidMotionUtilStep(stepInfo, entities, numEntities, HK_OFFSET_OF(hkEntity, m_motion));
+    resetCollisionInformationForEntities(entities, numEntities, world, false);
+    fn_80326EEC(this, entities, numEntities, world);
+    fn_80327B5C((int)this, (int)entities, numEntities, (int)world->m_collisionInput);
+    world->unlockAndAttemptToExecutePendingOperations();
+    world->m_collisionInput->m_stepInfo = savedStepInfo;
+}
