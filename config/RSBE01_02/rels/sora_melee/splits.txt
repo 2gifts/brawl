@@ -11009,6 +11009,10 @@ mo_melee/sora_melee/st/st_operator_rule.cpp:
 	.rodata     start:0x00004008 end:0x00004028
 	.data       start:0x0004EDD8 end:0x0004F050
 
+mo_melee/sora_melee/st/st_operator_rule_melee.cpp:
+	.text       start:0x00248C90 end:0x0024DFA4
+	.ctors      start:0x000002DC end:0x000002E0
+
 mo_melee/sora_melee/st/st_operator_rule_time.cpp:
 	.text       start:0x0024DFA4 end:0x0024E71C
 	.rodata     start:0x00004058 end:0x00004070

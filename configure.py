@@ -6850,6 +6850,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_metaknight_kinetic_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_entry.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_slot.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/st/st_operator_rule_melee.cpp"),
         ],
     },
     {
