@@ -5166,6 +5166,10 @@ mo_melee/sora_melee/ft/ft_common_data_accesser.cpp:
 	.text       start:0x00145478 end:0x00149BD8
 	.ctors      start:0x00000070 end:0x00000074
 
+mo_melee/sora_melee/ft/ft_kind_conversion.cpp:
+	.text       start:0x00149BD8 end:0x00149C70
+	.rodata     start:0x000014D8 end:0x000018B8
+
 mo_melee/sora_melee/ft/ft_extend_param_accesser.cpp:
 	.text       start:0x00149C70 end:0x00149E1C
 	.data       start:0x0002BC00 end:0x0002BCA0
@@ -5245,6 +5249,9 @@ mo_melee/sora_melee/ft/ft_damage_transactor_impl.cpp:
 mo_melee/sora_melee/ft/ft_switch_decide_module_impl.cpp:
 	.text       start:0x00153E94 end:0x00154088
 	.ctors      start:0x0000008C end:0x00000090
+
+mo_melee/sora_melee/ft/ft_stop_module_impl.cpp:
+	.text       start:0x00154088 end:0x00154194
 
 mo_melee/sora_melee/ft/ft_area_gimmick_term.cpp:
 	.text       start:0x00154194 end:0x00154534

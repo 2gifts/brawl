@@ -6801,6 +6801,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_sonic_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_snake_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_popo_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_kind_conversion.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_stop_module_impl.cpp"),
         ],
     },
     {
