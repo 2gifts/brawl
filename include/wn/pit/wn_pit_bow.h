@@ -4,7 +4,9 @@
 
 // HYPOTHESIS: the article data type the class info fetches for kind 90; only passed as a pointer, the
 // layout is unreconstructed (mirror of the blaster family's data role).
-struct wnPitBowData;
+struct wnPitBowData {
+    s32 m_resGroupNo; // HYPOTHESIS: as the other articles' data blocks; the rest is uninterpreted.
+};
 struct wnArticleBuildInfo;
 
 #if defined(WN_PIT_IKARUS_FULL_BUILDER) || defined(WN_PIT_BOW_FULL_BUILDER)
@@ -15,7 +17,8 @@ public:
     typedef soInsideEventManageModuleBuildConfig<16, 32, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 1, 1, 0, 0, 0, wnInsideEventManageModuleTypes>
         InsideEventManageModuleBuildConfig;
     typedef soModelModuleBuildConfig<5, 0, soModelModuleImpl> ModelModuleBuildConfig;
-    typedef soMotionModuleBuildConfig<2, soMotionModuleImpl, 0, 1, soTransitionModuleBuildConfig<wnMotionTransitionTypeList>,
+    // Sixteen motion data entries: the constructor sizes the motion table with 16.
+    typedef soMotionModuleBuildConfig<16, soMotionModuleImpl, 0, 1, soTransitionModuleBuildConfig<wnMotionTransitionTypeList>,
                                       soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> > MotionModuleBuildConfig;
     typedef soPostureModuleBuildConfig<0, soPostureModuleSimple> PostureModuleBuildConfig;
     typedef soGroundModuleBuildConfigNull GroundModuleBuildConfig;

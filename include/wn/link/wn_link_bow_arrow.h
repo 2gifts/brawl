@@ -1,13 +1,27 @@
 #pragma once
 
 #include <wn/wn_weapon_builder.h>
-#ifdef WN_LINK_BOW_ARROW_FULL_BUILDER
+#if defined(WN_LINK_BOW_ARROW_FULL_BUILDER) && !defined(WN_MARIO_FIREBALL_UNIT) // the article unit itself expands the vector
 FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 3);
 #endif
 
-// HYPOTHESIS: the article data type the class info fetches for kind 5; only passed as a pointer, the
-// layout is unreconstructed (mirror of the blaster family's data role).
-struct wnLinkBowArrowData;
+// HYPOTHESIS: field names from their use in the arrow's status process (wn_link_bow_arrow_status_uniq_process.cpp).
+struct wnLinkBowArrowParam {
+    s32 unk0;
+    s32 m_holdLife;     // +0x04: life while the arrow is nocked (status 0)
+    float m_speedMin;   // +0x08: flight speed without charge
+    float m_speedMax;   // +0x0C: flight speed at full charge
+    float m_flyLifeMin; // +0x10
+    float m_flyLifeMax; // +0x14
+    s32 m_stuckLife;    // +0x18: life once the arrow sticks (status 2)
+    float m_gravity;    // +0x1C
+};
+
+struct wnLinkBowArrowData {
+    s32 m_resGroupNo; // HYPOTHESIS: as the other articles' data blocks.
+    u8 unk4[0x30];
+    const wnLinkBowArrowParam* m_param; // +0x34
+};
 struct wnArticleBuildInfo;
 
 #ifdef WN_LINK_BOW_ARROW_FULL_BUILDER
@@ -29,11 +43,23 @@ public:
     typedef wnStatusModuleBuildConfig<3, soGeneralWorkBuildConfig<2, 2, 1>, 3, soTransitionModuleBuildConfig<wnStatusTransitionTypeList> >
         StatusModuleBuildConfig;
     typedef wnAnimCmdModuleSubBuildConfigDefault<1, 3, 0, 0, 1, 3, 0, 0, 1, 3, 0, 0, 1, 3, 0, 0> AnimCmdModuleSubBuildConfig;
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
+    typedef soGenerateArticleManageModuleBuilder<soGenerateArticleManageModuleBuildConfigNull> GenerateArticleManageModuleBuilder;
+#endif
 };
 
-struct wnLinkBowArrowData {
-    s32 m_resGroupNo; // HYPOTHESIS: as the other articles' data blocks; the rest is uninterpreted.
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
+template <>
+class soModuleAccesserBuilder<wnLinkBowArrowModuleAccesserBuildConfig> : public utUnCopyable {
+public:
+    typedef wnLinkBowArrowModuleAccesserBuildConfig BC;
+    WN_ZELDA_LIGHTING_BOW_BUILDER_MEMBERS
+
+    soModuleAccesserBuilder(StageObject* owner, const wnModuleAccesserBuildData& bd);
+    ~soModuleAccesserBuilder();
+    soModuleAccesser* getModuleAccesser();
 };
+#endif
 
 class wnLinkBowArrow : public wnWeaponBuilder<wnLinkBowArrowModuleAccesserBuildConfig> {
 public:

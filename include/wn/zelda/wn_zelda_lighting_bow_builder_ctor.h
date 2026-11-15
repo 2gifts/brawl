@@ -4,8 +4,13 @@
 // right before the constructor below, as in the original .text order.
 inline soModuleAccesser* soModuleAccesserBuilder<WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG>::getModuleAccesser() { return &m_moduleAccsr; }
 
+#ifdef WN_ARTICLE_BUILDER_CTOR_INLINE
+// The bows of Link, Toon Link and Pit expand this constructor in their weapon builder constructor.
+inline
+#else
 // BYTES: the sora_melee constructor calls every module getter and member builder out of line.
 #pragma dont_inline on
+#endif
 soModuleAccesserBuilder<WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG>::soModuleAccesserBuilder(
     StageObject* owner, const wnModuleAccesserBuildData& bd) :
     unk194(),
@@ -122,4 +127,6 @@ soModuleAccesserBuilder<WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG>::soModuleAccesserB
 // the original); the callers then expand this one.
 inline soModuleAccesserBuilder<WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG>::~soModuleAccesserBuilder() { }
 #endif
+#ifndef WN_ARTICLE_BUILDER_CTOR_INLINE
 #pragma dont_inline reset
+#endif

@@ -5,7 +5,6 @@
 
 // HYPOTHESIS: the article data type the class info fetches for kind 91; only passed as a pointer, the
 // layout is unreconstructed (mirror of the blaster family's data role).
-struct wnPitBowArrowData;
 struct wnArticleBuildInfo;
 
 // HYPOTHESIS: meaning of the parameters; unk24 is the activation life, unk20 the ground offset.
@@ -20,6 +19,13 @@ struct wnPitBowArrowParam {
     float unk1C;
     float unk20;
     s32 unk24;
+};
+
+struct wnPitBowArrowData {
+    s32 m_resGroupNo; // HYPOTHESIS: as the other articles' data blocks.
+    s32 m_nockNodeNo; // +0x04: HYPOTHESIS: the model node the flight starts from
+    u8 unk8[0x2C];
+    const wnPitBowArrowParam* m_param; // +0x34
 };
 
 class wnPitBowArrowParamAccesser : public wnExtendParamAccesser<3999, 8, 23999, 2, 0, 0> {
@@ -50,7 +56,8 @@ public:
     typedef soInsideEventManageModuleBuildConfig<16, 32, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 1, 1, 0, 0, 0, wnInsideEventManageModuleTypes>
         InsideEventManageModuleBuildConfig;
     typedef soModelModuleBuildConfig<5, 0, soModelModuleImpl> ModelModuleBuildConfig;
-    typedef soMotionModuleBuildConfig<4, soMotionModuleImpl, 0, 1, soTransitionModuleBuildConfigNull,
+    // Three motion data entries: the constructor sizes the motion table with 3.
+    typedef soMotionModuleBuildConfig<3, soMotionModuleImpl, 0, 1, soTransitionModuleBuildConfigNull,
                                       soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> > MotionModuleBuildConfig;
     typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 1, 0, soCollisionAttackModuleImpl, 1, false, true>
         CollisionAttackModuleBuildConfig;
@@ -74,10 +81,12 @@ public:
     virtual ~wnPitBowArrow() { }
     // HYPOTHESIS: parameter names (see the shell below).
     void activate(int founderTaskId, int resourceId, int team);
-    // HYPOTHESIS: argument meanings (the transactor passes the full-charge flag, the charge and the facing).
-    void toFly(bool fullCharge, int charge, float lr);
+    const wnPitBowArrowData* getData() { return static_cast<const wnPitBowArrowData*>(m_data); }
+    // HYPOTHESIS: parameter names; the charge flag picks the launch angle and goes to work flag 0x12000003.
+    void toFly(bool charged, int chargeFrame, float lr);
     virtual void updateNodeSRT();
     virtual bool reflect();
+    virtual bool hop();
 };
 #else
 // Extent known from the class info createArray allocation (0x1FD8); the internal layout and the builder
@@ -92,10 +101,12 @@ public:
     virtual ~wnPitBowArrow();
     // HYPOTHESIS: parameter names; the fighter transactor passes the founder, resource and team.
     void activate(int founderTaskId, int resourceId, int team);
-    // HYPOTHESIS: argument meanings (the transactor passes the full-charge flag, the charge and the facing).
-    void toFly(bool fullCharge, int charge, float lr);
+    const wnPitBowArrowData* getData() { return static_cast<const wnPitBowArrowData*>(m_data); }
+    // HYPOTHESIS: parameter names; the charge flag picks the launch angle and goes to work flag 0x12000003.
+    void toFly(bool charged, int chargeFrame, float lr);
     virtual void updateNodeSRT();
     virtual bool reflect();
+    virtual bool hop();
 };
 static_assert(sizeof(wnPitBowArrow) == 0x1FD8, "Pit bow arrow article extent");
 #endif
