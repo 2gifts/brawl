@@ -24,14 +24,6 @@
 #include <st_newpork/st_newpork.h>
 
 // Unnamed helpers of other units that the stage calls directly.
-// grSeqYakumono::createSeSeqWork(int bankCount)
-extern "C" void fn_27_27C150(grSeqYakumono* ground, int bankCount);
-// grSeqYakumono::registSeSeq(bank, table, entryCount)
-extern "C" void fn_27_27C1E8(grSeqYakumono* ground, u32 bank, const void* table, int entryCount);
-// grSeqYakumono::playSeSeq(frame, bank)
-extern "C" void fn_27_27C208(grSeqYakumono* ground, float frame, int bank);
-// grSeqYakumono::playSeSeq1(frame, frame, bank)
-extern "C" void fn_27_27C470(grSeqYakumono* ground, float frame, float frameEnd, int bank);
 // Matrix::normalize / setRotateX / setRotateY / rotZ
 extern "C" void fn_8003E5B4(Matrix* matrix);
 extern "C" void fn_8003EBF4(Matrix* matrix, float angle);
@@ -687,7 +679,7 @@ limousineEnd:
                     if (anim != NULL) {
                         anim->setFrame(m_chimeraFrame);
                     }
-                    fn_27_27C470(m_chimera, m_chimeraFrame, m_chimeraFrame, m_chimeraMotion);
+                    m_chimera->playSeSeq(m_chimeraFrame, m_chimeraFrame, m_chimeraMotion);
                     Matrix idMtx;
                     m_chimera->setMatrix(&idMtx, true);
                     m_chimeraAttack->setMatrix(&idMtx, true);
@@ -703,7 +695,7 @@ limousineEnd:
                 if (m_chimeraReady) {
                     gfModelAnimation* anim = m_chimera->m_modelAnims[0];
                     if (anim != NULL) {
-                        fn_27_27C208(m_chimera, anim->getFrame(), m_chimeraMotion);
+                        m_chimera->playSeSeq(anim->getFrame(), m_chimeraMotion);
                         if (m_chimeraMotion == 1 && m_plankBroken) {
                             float frame = anim->getFrame();
                             m_chimeraFrame = frame;
@@ -716,7 +708,7 @@ limousineEnd:
                                 m_chimeraAttack->setSleepAttack(true);
                                 float newFrame = m_chimeraFrame - 320.0f;
                                 anim->setFrame(newFrame);
-                                fn_27_27C470(m_chimera, newFrame, newFrame, m_chimeraMotion);
+                                m_chimera->playSeSeq(newFrame, newFrame, m_chimeraMotion);
                             }
                         } else if (m_chimeraMotion == 3) {
                             float over = anim->getFrame() - (float)anim->getFrameCount();
@@ -729,7 +721,7 @@ limousineEnd:
                                 m_chimeraAttack->setSleepAttack(true);
                                 float newFrame = 630.0f + over;
                                 anim->setFrame(newFrame);
-                                fn_27_27C470(m_chimera, newFrame, newFrame, m_chimeraMotion);
+                                m_chimera->playSeSeq(newFrame, newFrame, m_chimeraMotion);
                             }
                         }
                     }
@@ -1018,11 +1010,11 @@ void grNewpork::thisIsUltimateChimera(float size, Vec3f* offset, u32 nodeIndex, 
         NEWPORK_SOUND(4, snd_se_stage_Newpork_chimera_attack);
         NEWPORK_SOUND(5, snd_se_stage_Newpork_enter);
         NEWPORK_SOUND(6, snd_se_stage_Newpork_vanish);
-        fn_27_27C150(this, 4);
-        fn_27_27C1E8(this, 0, sStepsA, 26);
-        fn_27_27C1E8(this, 1, sStepsB, 34);
-        fn_27_27C1E8(this, 2, sStepsD, 36);
-        fn_27_27C1E8(this, 3, sStepsC, 2);
+        createSeSeqWork(4);
+        registSeSeq(0, reinterpret_cast<SeSeq*>(sStepsA), 26);
+        registSeSeq(1, reinterpret_cast<SeSeq*>(sStepsB), 34);
+        registSeSeq(2, reinterpret_cast<SeSeq*>(sStepsD), 36);
+        registSeSeq(3, reinterpret_cast<SeSeq*>(sStepsC), 2);
     }
 }
 
