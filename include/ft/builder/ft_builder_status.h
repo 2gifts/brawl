@@ -67,7 +67,15 @@ public:
         m_uniqProcs(),
         m_changeRequests(-1),
         m_module(acc, &m_statusTable, (soArray<soStatusUniqProcess*>*)m_uniqProcs.get(), m_generalWorkBuilder.getModule(),
-                 m_transitionBuilder.getModule(), &m_changeRequests, preCheckData, BC::StatusKindCap, 1) { }
+                 m_transitionBuilder.getModule(), &m_changeRequests, preCheckData,
+#ifdef WN_STATUS_MODULE_KIND_COUNT_ZERO
+                 // BYTES: Samus's articles hand the module a status kind count of 0 whatever the capacity of the uniq
+                 // process array is. HYPOTHESIS: one more value of the original build configuration.
+                 0,
+#else
+                 BC::StatusKindCap,
+#endif
+                 1) { }
     soStatusModule* getModule() { return &m_module; }
 };
 

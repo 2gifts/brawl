@@ -25,6 +25,7 @@ public:
     static Vec2f* getRhombusCenterPos(StageObject* stageObject); // HYPOTHESIS: pointer to the ground rhombus centre
     static SituationKind getSituationKind(StageObject* stageObject);
     static int getStatusKind(StageObject* stageObject);
+    static int getMotionKind(StageObject* stageObject);
     static bool isTreadPassive(StageObject* stageObject);
     static soGroundModule* getGroundModule(StageObject* stageObject);
     static bool getWorkFlag(StageObject* stageObject, u32);

@@ -72,14 +72,15 @@ public:
 template <typename T>
 class soEventUnitNull {
 public:
-#ifdef WN_SIMPLE_UNIT
-    // The simple article calls the three disabled units out of line.
+#if defined(WN_SIMPLE_UNIT) || defined(WN_EVENT_UNIT_NULL_CTOR_OWNER)
+    // The simple article calls the three disabled units out of line; the unit that owns the weak constructors of a
+    // family's disabled units (Samus's bomb) emits them the same way.
     soEventUnitNull() __attribute__((never_inline)) { }
     soEventUnitNull(s16, s16) __attribute__((never_inline)) { }
 #elif defined(WN_MARIO_FIREBALL_UNIT) && !defined(WN_ARTICLE_BUILDER_CTOR_INLINE) // the bow units expand the empty units
     soEventUnitNull();
     soEventUnitNull(s16, s16);
-#ifdef WN_ARTICLE_BUILDER_DTOR_IN_CLASS
+#if defined(WN_ARTICLE_BUILDER_DTOR_IN_CLASS) || defined(WN_EVENT_UNIT_DTOR_INLINE)
     // The unit's builder destructors are compiled with inlining on (wn/fox/wn_fox_blaster.h): nothing is left of this one.
     ~soEventUnitNull() { }
 #else
@@ -143,7 +144,12 @@ public:
 // is then the key function and the vtable is not emitted either).
 #ifdef FT_REL_LINK_EXTERN
     soEventUnitWithWorkArea(s16 mgrId, s16 p2);
+#ifdef WN_EVENT_UNIT_DTOR_INLINE
+    // The unit's inside event builder destructor expands the unit destructors (Samus's articles in sora_melee).
+    virtual ~soEventUnitWithWorkArea() { }
+#else
     virtual ~soEventUnitWithWorkArea();
+#endif
 #else
     soEventUnitWithWorkArea(s16 mgrId, s16 p2) :
         soEventUnitImpl<T>(mgrId, p2) { }

@@ -12,8 +12,6 @@
 #include <types.h>
 #include <cmath>
 
-extern "C" Vec2f* __ct__5Vec2fFff(Vec2f* self, float x, float y);
-
 inline soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, u8 c, u8 d) :
     m_kind(kind), m_frame(frame), m_rate(rate), _12(a), _13(b), _14(c), _15(d) {}
 
@@ -72,8 +70,7 @@ static void initCommon(soModuleAccesser* moduleAccesser) {
             } else {
                 startFrame = 0.0f;
             }
-            soMotionChangeParam motion(0x1da, startFrame, 1.0f, 0, 0, 0, 0);
-            moduleAccesser->getMotionModule().changeMotionRequest(&motion);
+            moduleAccesser->getMotionModule().changeMotionRequest(&soMotionChangeParam(0x1da, startFrame, 1.0f, 0, 0, 0, 0));
         } else {
             sumSpeed.m_x *= param->airSpeedXMul;
             sumSpeed.m_y = param->unk04;
@@ -86,7 +83,7 @@ static void initCommon(soModuleAccesser* moduleAccesser) {
         ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
         controller.resetEnergy(0, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         controller.m_accelMul = controlAccelMul;
-        controller.setStableSpeed(__ct__5Vec2fFff(&Vec2f(), controlSpeedXMul * controller.m_speedTarget.m_x, controller.m_speedTarget.m_y));
+        controller.setStableSpeed(&Vec2f(controlSpeedXMul * controller.m_speedTarget.m_x, controller.m_speedTarget.m_y));
         controller.enable();
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         gravity.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
@@ -95,11 +92,11 @@ static void initCommon(soModuleAccesser* moduleAccesser) {
 }
 
 void ftSamusStatusUniqProcessSpecialGroundLw::initStatus(soModuleAccesser* moduleAccesser) {
-    if (moduleAccesser->getWorkManageModule().isFlag(ftSamusWork::SpecialLw_InitPending)) {
-        initCommon(moduleAccesser);
-        moduleAccesser->getWorkManageModule().offFlag(ftSamusWork::SpecialLw_InitPending);
-    }
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
+    if (work.isFlag(ftSamusWork::SpecialLw_InitPending)) {
+        initCommon(moduleAccesser);
+        work.offFlag(ftSamusWork::SpecialLw_InitPending);
+    }
     soItemManageModule& items = moduleAccesser->getItemManageModule();
     bool visible = work.getInt(ftSamusWork::SpecialLw_ItemVisibility) != 2;
     items.setHaveItemVisibility(visible, 0);
@@ -111,7 +108,7 @@ void ftSamusStatusUniqProcessSpecialGroundLw::initStatus(soModuleAccesser* modul
         ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
         controller.resetEnergy(10, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         controller.m_accelMul = param->controlAccelMul;
-        controller.setStableSpeed(__ct__5Vec2fFff(&Vec2f(), param->controlSpeedXMax * controller.m_speedTarget.m_x, controller.m_speedTarget.m_y));
+        controller.setStableSpeed(&Vec2f(param->controlSpeedXMax * controller.m_speedTarget.m_x, controller.m_speedTarget.m_y));
         controller.enable();
         work.onFlag(ftSamusWork::SpecialLw_BrakeActive);
     } else {
@@ -143,7 +140,7 @@ void ftSamusStatusUniqProcessSpecialGroundLw::execStatus(soModuleAccesser* modul
         ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
         controller.resetEnergy(10, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         controller.m_accelMul = param->controlAccelMul;
-        controller.setStableSpeed(__ct__5Vec2fFff(&Vec2f(), param->controlSpeedXMax * controller.m_speedTarget.m_x, controller.m_speedTarget.m_y));
+        controller.setStableSpeed(&Vec2f(param->controlSpeedXMax * controller.m_speedTarget.m_x, controller.m_speedTarget.m_y));
         controller.enable();
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         gravity.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
@@ -178,11 +175,11 @@ void ftSamusStatusUniqProcessSpecialGroundLw::execFixPos(soModuleAccesser* modul
 }
 
 void ftSamusStatusUniqProcessSpecialAirLw::initStatus(soModuleAccesser* moduleAccesser) {
-    if (moduleAccesser->getWorkManageModule().isFlag(ftSamusWork::SpecialLw_InitPending)) {
-        initCommon(moduleAccesser);
-        moduleAccesser->getWorkManageModule().offFlag(ftSamusWork::SpecialLw_InitPending);
-    }
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
+    if (work.isFlag(ftSamusWork::SpecialLw_InitPending)) {
+        initCommon(moduleAccesser);
+        work.offFlag(ftSamusWork::SpecialLw_InitPending);
+    }
     soItemManageModule& items = moduleAccesser->getItemManageModule();
     bool visible = work.getInt(ftSamusWork::SpecialLw_ItemVisibility) != 2;
     items.setHaveItemVisibility(visible, 0);
@@ -206,7 +203,7 @@ void ftSamusStatusUniqProcessSpecialAirLw::initStatus(soModuleAccesser* moduleAc
     ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
     controller.resetEnergy(0, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     controller.m_accelMul = controlAccelMul;
-    controller.setStableSpeed(__ct__5Vec2fFff(&Vec2f(), controlSpeedXMul * controller.m_speedTarget.m_x, controller.m_speedTarget.m_y));
+    controller.setStableSpeed(&Vec2f(controlSpeedXMul * controller.m_speedTarget.m_x, controller.m_speedTarget.m_y));
     controller.enable();
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
     gravity.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);

@@ -1156,6 +1156,10 @@ class wnAnimCmdModuleSubBuilder {
     soAnimCmdControlUnitBuilderNull<void> m_unit5;
 #endif
 public:
+#ifdef WN_ANIMCMD_SUB_BUILDER_EXTERN
+    // The unit calls the weak constructor another unit owns in the link order and emits no copy (nor its constants).
+    wnAnimCmdModuleSubBuilder(soModuleAccesser* acc, const soModuleAccesserBuildData& bd);
+#else
     wnAnimCmdModuleSubBuilder(soModuleAccesser* acc, const soModuleAccesserBuildData& bd)
 #ifdef WN_ACCESSER_CTOR_INLINE
         __attribute__((always_inline))
@@ -1170,6 +1174,7 @@ public:
         m_unit3(acc, bd.getAnimCmdData(3, 0), bd.getAnimCmdData(3, 1), bd.getAnimCmdData(3, 2)),
         m_unit4(acc),
         m_unit5(acc, bd.getAnimCmdData(5, 0), bd.getAnimCmdData(5, 1), bd.getAnimCmdData(5, 2)) { }
+#endif
 #ifdef FT_ANIMCMD_SUB_DTOR_NOINLINE
     // The fighter unit calls this teardown out of line (the cloud article's command builder).
     ~wnAnimCmdModuleSubBuilder() __attribute__((never_inline)) { }

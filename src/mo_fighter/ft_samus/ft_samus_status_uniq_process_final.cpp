@@ -92,15 +92,21 @@ void ftSamusStatusUniqProcessFinal::execStatus(soModuleAccesser* moduleAccesser)
         float stickY = moduleAccesser->getControllerModule().getStickY();
         if (absValue(stickY) > 0.5f) {
             angle += param->angleAccel * stickY * moduleAccesser->getPostureModule().getLr();
+            // BYTES: nw4r::math::FSelect is never expanded at the fighter units' optimization level (-O2,s) and the __fsel
+            // intrinsic adds two frsp, so the two selects of the clamp are written with the instruction (as in Lucario and Bowser).
+            register float lower;
+            register float limit;
+            register float value;
+            register float fromLower;
+            register float fromUpper;
             register float bounded;
-            register float limit = param->angleMax;
-            register float value = angle;
-            register float lower = -limit;
-            register float fromLower = value - lower;
-            // MATCH-ONLY: the fighter units are built without inlining of the nw4r FSelect asm helper.
-            asm { fsel bounded, fromLower, value, lower }
-            register float fromUpper = bounded - limit;
             register float clamped;
+            limit = param->angleMax;
+            value = angle;
+            lower = -limit;
+            fromLower = value - lower;
+            asm { fsel bounded, fromLower, value, lower }
+            fromUpper = bounded - limit;
             asm { fsel clamped, fromUpper, limit, bounded }
             angle = clamped;
             work.setFloat(angle, ftSamusWork::Final_Angle);
@@ -118,7 +124,7 @@ void ftSamusStatusUniqProcessFinal::execStatus(soModuleAccesser* moduleAccesser)
             if (motionKind != currentMotion) {
                 motion.remove2ndAnimChr();
                 float frame = motion.getFrame();
-                motion.add2ndAnimChr(frame, 1.0f, motionKind, false);
+                motion.add2ndAnimChr(frame, motionKind, false, 1.0f);
                 work.setInt(motionKind, ftSamusWork::Final_AimMotion);
             }
             motion.setWeight(1.0f - 0.5f * absValue(angle / param->angleMax));

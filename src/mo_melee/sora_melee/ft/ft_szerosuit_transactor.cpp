@@ -48,8 +48,9 @@ bool ftSZerosuitTransactor::activeArticle2(wnSZerosuitParalyzerBullet* weapon, s
     float offsetY = acc->getConstantFloatKirby(0xfa1);
     pos.m_x += offsetX * lr;
     pos.m_y += offsetY;
-    int founderTaskId = acc->getStageObject().m_taskId;
-    weapon->activate(founderTaskId, acc->getTeamModule().getTeam()->getNo(), pos,
+    soTeamModule& teamModule = acc->getTeamModule();
+    int founderTaskId = acc->getStageObject().getTaskId();
+    weapon->activate(founderTaskId, teamModule.getTeam()->getNo(), pos,
                      acc->getWorkManageModule().isFlag(0x22000011), lr);
     return false;
 }
@@ -68,8 +69,10 @@ bool ftSZerosuitTransactor::activeArticle(soArticle* article, soModuleAccesser* 
             0xffff, 0xffff, 0, true, false, -1, 0, false, 2, 0, false);
         return true;
     }
-    case 0xe:
-        return activeArticle2(dynamic_cast<wnSZerosuitParalyzerBullet*>(article), acc);
+    case 0xe: {
+        wnSZerosuitParalyzerBullet* bullet = dynamic_cast<wnSZerosuitParalyzerBullet*>(article);
+        return activeArticle2(bullet, acc);
+    }
     default:
         return false;
     }

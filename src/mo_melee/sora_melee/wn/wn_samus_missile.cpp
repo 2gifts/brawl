@@ -1,12 +1,72 @@
-#define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
+#define WN_ANIMCMD_RESET_MODE_BOX // BYTES: word-aligned reset-mode temporaries (frame size of the anim cmd sub builder)
+#define WN_ANIMCMD_STACK_PTR // BYTES: the interpreter stacks stay in a saved register across getManageId (ft_builder_animcmd.h)
+#define WN_ANIMCMD_PRESENTER_LOCAL_STORE // BYTES: the interpreters' presenters keep the looked-up list in a local, as in the Mario fireball
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructors expand the empty param customize module destructor
+#define WN_PARAM_ACCESSER_INLINE_DTOR // BYTES: the empty soParamAccesser base destructor is inlined in sora_melee
+#define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: activate copies the Vec3f position as an aggregate (word moves), see mt_vector.h
+#define WN_EVENT_UNIT_DTOR_INLINE // BYTES: the inside event builder destructor expands the event unit destructors
+#define WN_EVENT_UNIT_DTOR_INLINE // BYTES: the inside event builder destructor expands the event unit destructors
+#define WN_STATUS_MODULE_KIND_COUNT_ZERO // BYTES: the status module is built with a status kind count of 0 (ft_builder_status.h)
+#define WN_ANIMCMD_SUB_BUILDER_EXTERN // the anim cmd sub builder constructor is the Samus bomb unit's weak copy
+#define FT_MODULE_BUILDER
+#define WN_MARIO_FIREBALL_UNIT // the sora_melee article unit mode shared with the Mario fireball (builders out of line)
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_STATUS_NO_TAIL
+#define SO_OTHER_ANIM_CTOR // BYTES: the sora_melee motion builder constructs and destroys its other-animation slot
+#define WN_TRANSITION_CTOR_INLINE
+#define WN_ARTICLE_ANIMCMD_INT // BYTES: the builder vtable takes Weapon's int-index notifyEventAnimCmd thunk, as in the original
+#define FT_REL_LINK_EXTERN
+#define SO_NULLABLE_INLINE_CTOR
+#include <wn/wn_module_accesser_builder.h>
 #include <wn/samus/wn_samus_missile.h>
 #include <wn/wn_activate_desc.h>
 #include <wn/wn_kinetic_energy_normal.h>
 #include <ac/ac_anim_cmd_impl.h>
 #include <so/so_module_accesser.h>
+#include <so/model/so_model_module_impl.h>
 #include <so/status/so_status_module_impl.h>
+#include <gf/gf_task_scheduler.h>
 #include <math.h>
 #include <memory.h>
+
+// BYTES: the empty base destructors that sora_melee always expands (they have no out-of-line copy there).
+inline soTeam::~soTeam() { }
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+inline soResourceIdAccesser::~soResourceIdAccesser() { }
+
+extern soStatusUniqProcess g_wnSamusMissileStatusUniqProcess;
+
+// HYPOTHESIS: the -1 is the build data's etc resource slot (the laser passes 0).
+wnSamusMissile::wnSamusMissile(s32 articleId, const wnArticleBuildInfo& info, const wnSamusMissileData* data) :
+    wnWeaponBuilder<wnSamusMissileModuleAccesserBuildConfig>(
+        "SamusMissile", articleId, info,
+        wnModuleAccesserBuildData(0x55, data, info.getHeapModule()->getInstanceHeap(),
+                                  info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), static_cast<u8>(data->m_resGroupNo), -1,
+                                  &g_soParamAccesserNull, 0, 0, 0, 0, 0, 0, 0)),
+    m_param(data->m_param) {
+    // Both statuses run the same process.
+    soStatusUniqProcess* uniqProcs[2];
+    uniqProcs[0] = &g_wnSamusMissileStatusUniqProcess;
+    uniqProcs[1] = &g_wnSamusMissileStatusUniqProcess;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 2);
+    Weapon::deactivate(false);
+}
+
+// The weak builder this unit owns in the link order (the Samus laser units reuse it).
+typedef wnSamusMissileModuleAccesserBuildConfig SmBC;
+// BYTES: the one disabled event unit this unit emits out of line (the Samus bomb unit owns the others); the fireball mode
+// header only declares it, and without auto_inline off the inside event constructor would expand it.
+#pragma push
+#pragma auto_inline off
+template <>
+soEventUnitNull<soCollisionSearchEventObserver>::soEventUnitNull(s16, s16) { }
+#pragma pop
+template soInsideEventManageModuleBuilder<SmBC::InsideEventManageModuleBuildConfig, SmBC::InsideEventManageModuleTypes>::soInsideEventManageModuleBuilder();
+
+#define WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG wnSamusMissileModuleAccesserBuildConfig
+#include <wn/zelda/wn_zelda_lighting_bow_builder_ctor.h>
 
 // HYPOTHESIS: parameter names; the same activation descriptor as the other projectile articles.
 void wnSamusMissile::activate(int founderTaskId, int etcResourceId, int team) {
@@ -109,15 +169,20 @@ bool wnSamusMissile::notifyEventCollisionAttackCheck(u32 flags) {
 }
 
 // HYPOTHESIS: after a reflect the work angle follows the new flight direction and the remaining life is renewed.
-bool wnSamusMissile::reflect() {
-    bool result = Weapon::reflect();
-    soModuleAccesser* acc = m_moduleAccesser;
-    soWorkManageModule& work = acc->getWorkManageModule();
-    wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*acc->getKineticModule().getEnergy(0));
+// The missile points along its flight direction (work angle 0x11000001).
+static inline void setFlyAngle(wnKineticEnergyNormal& energy, soWorkManageModule& work) {
     Vec2f speed = energy.getSpeed();
     if (speed.length() > 0.00001f) {
-        work.setFloat(-(float)atan2(speed.m_y, speed.m_x), 0x11000001);
+        work.setFloat(-atan2f(speed.m_y, speed.m_x), 0x11000001);
     }
+}
+
+bool wnSamusMissile::reflect() {
+    bool result = Weapon::reflect();
+    soModuleAccesser* acc = getModuleAccesser();
+    soWorkManageModule& work = acc->getWorkManageModule();
+    wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*acc->getKineticModule().getEnergy(0));
+    setFlyAngle(energy, work);
     wnSamusMissile& missile = dynamic_cast<wnSamusMissile&>(*acc->m_stageObject);
     work.setInt(missile.getData()->m_param->unk8 + 1, 0x10000006);
     return result;
@@ -125,13 +190,10 @@ bool wnSamusMissile::reflect() {
 
 bool wnSamusMissile::hop() {
     bool result = Weapon::hop();
-    soModuleAccesser* acc = m_moduleAccesser;
+    soModuleAccesser* acc = getModuleAccesser();
     soWorkManageModule& work = acc->getWorkManageModule();
     wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*acc->getKineticModule().getEnergy(0));
-    Vec2f speed = energy.getSpeed();
-    if (speed.length() > 0.00001f) {
-        work.setFloat(-(float)atan2(speed.m_y, speed.m_x), 0x11000001);
-    }
+    setFlyAngle(energy, work);
     wnSamusMissile& missile = dynamic_cast<wnSamusMissile&>(*acc->m_stageObject);
     work.setInt(missile.getData()->m_param->unk8 + 1, 0x10000006);
     return result;

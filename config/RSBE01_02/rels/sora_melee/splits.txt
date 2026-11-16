@@ -12184,6 +12184,7 @@ mo_melee/sora_melee/ft/ft_samus_status_uniq_process_special_charge_shot.cpp:
 mo_melee/sora_melee/wn/wn_samus_cshot.cpp:
 	.text       start:0x002FC784 end:0x002FFF50
 	.ctors      start:0x00000384 end:0x00000388
+	.rodata     start:0x00006530 end:0x00006540
 
 mo_melee/sora_melee/wn/wn_samus_cshot_status_uniq_process.cpp:
 	.text       start:0x002FFF50 end:0x00300614

@@ -185,6 +185,11 @@ inline const u8* ftAddressOf(u8 value) {
 }
 #endif
 
+// The interpreter takes every stack as the eight-entry vector type (HYPOTHESIS: an abstract array in the original).
+template <class S>
+inline soArrayVector<acCmdInterpreterStackData, 8>* ftInterpreterStack(S* stack) {
+    return (soArrayVector<acCmdInterpreterStackData, 8>*)stack;
+}
 #ifdef WN_ANIMCMD_STACK_PTR_INLINE_CAST
 // BYTES (opt-in, Samus's grapple beam): the interpreter stack of a unit whose capacity is not 8, converted to the
 // interpreter's stack type through an inline function. The plain cast (WN_ANIMCMD_STACK_PTR_CAST) gives the same
@@ -287,7 +292,7 @@ public:
                       // BYTES: units whose stack capacity is not 8 (the Samus grapple beam: 2) pass the pointer cast to the interpreter's type.
                       (soArrayVector<acCmdInterpreterStackData, 8>*)m_stack.get(),
 #else
-                      m_stack.get(),
+                      ftInterpreterStack(m_stack.get()),
 #endif
 #else
                       (soArrayVector<acCmdInterpreterStackData, 8>*)&m_stack.m_array,

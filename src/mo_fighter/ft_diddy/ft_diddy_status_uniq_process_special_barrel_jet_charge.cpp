@@ -99,7 +99,7 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetCharge::execFixPos(soModuleAccesser
         motionKind = nextTilt * moduleAccesser->getPostureModule().getLr() > 0.0f ? motionKind : otherKind;
         if (current != motionKind || motion.get2ndKind() == -1) {
             motion.remove2ndAnimChr();
-            motion.add2ndAnimChr(motion.getFrame(), 1.0f, motionKind, false);
+            motion.add2ndAnimChr(motion.getFrame(), motionKind, false, 1.0f);
             if (moduleAccesser->getSituationModule().isSituationChanged()) {
                 motion.setWeight(moduleAccesser->getWorkManageModule().getFloat(0x2100000c));
             }
