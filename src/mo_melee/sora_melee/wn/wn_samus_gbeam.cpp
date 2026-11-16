@@ -1,9 +1,10 @@
 #define WN_ANIMCMD_PRESENTER_LOCAL_STORE // BYTES: the interpreters' presenters keep the looked-up list in a local (98.3% vs 97.2%), as in the Mario fireball
 #define WN_ANIMCMD_RESET_MODE_BOX // BYTES: word-aligned reset-mode temporaries (frame size of the anim cmd sub builder), as in the Mario fireball
-#define WN_ANIMCMD_STACK_PTR_CAST // BYTES: stack capacity 2 (ft_builder_animcmd.h)
+#define WN_ANIMCMD_STACK_PTR_INLINE_CAST // BYTES: stack capacity 2, converted through an inline function (ft_builder_animcmd.h)
 #define WN_ANIMCMD_STACK_PTR // BYTES: the interpreter stacks stay in a saved register across getManageId (ft_builder_animcmd.h)
 #define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructors expand the empty param customize module destructor
 #define WN_PARAM_ACCESSER_INLINE_DTOR // BYTES: the empty soParamAccesser base destructor is inlined in sora_melee
+#define WN_ACTIVATE_DESC_SIGNED_HIGH_PAIR // BYTES: activate sets the top flag pair through a signed two-bit field (see activate)
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: activate copies the Vec3f position as an aggregate (word moves), see mt_vector.h
 #define FT_MODULE_BUILDER
 #define WN_MARIO_FIREBALL_UNIT // the sora_melee article unit mode shared with the Mario fireball (builders out of line)
@@ -59,19 +60,39 @@ wnSamusGBeam::wnSamusGBeam(s32 articleId, const wnArticleBuildInfo& info, const 
     Weapon::deactivate(false);
 }
 
+// BYTES: the builder destructor is defined here, before the parameter accesser destructor, and compiled with inlining off
+// (the big module builder destructors stay calls): the original emits the status and motion builder destructors right after
+// the weapon builder destructor, in the order this body tears them down. WN_ARTICLE_BUILDER_DTOR_IN_CLASS keeps
+// wn_zelda_lighting_bow_builder_ctor.h from defining it again after the constructor.
+#pragma dont_inline on
+inline soModuleAccesserBuilder<wnSamusGBeamModuleAccesserBuildConfig>::~soModuleAccesserBuilder() { }
+#pragma dont_inline reset
+
 inline wnSamusGBeamParamAccesser::~wnSamusGBeamParamAccesser() { }
 
+#define WN_ARTICLE_BUILDER_DTOR_IN_CLASS
 #define WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG wnSamusGBeamModuleAccesserBuildConfig
 #include <wn/zelda/wn_zelda_lighting_bow_builder_ctor.h>
 
-// TODO(nonmatching): activate (99.2%): the last parameter is a bool (the original passes it to setFlag(bool, u32) unchanged and
-// compares it with cmplwi; the fighter shell and ftSamus::activeArticle7 now pass a bool, byte-identical), the position is a
-// `const Vec3f*` (the Mario fireball's form; a mangled name ...PC5Vec3fb in symbols.txt) and the descriptor flag byte 0x4D is
-// cleared with two separate bit assignments. What is left is the order of the last two flag-byte operations: the original ends the
-// 0x4C byte chain (clrrwi into r10) before it clears the two top bits of 0x4D (r9), ours does the 0x4D clear first and the
-// chain in place. Tried without effect: every placement of the 0x4D pair and of unk38/unk3C among the flag assignments, the
-// pair-field, single-bit (flagBit7/6, which also changes the whole register assignment) and all-eight-bit spellings of 0x4C,
-// the second bitfield view (flagsHigh/MidHigh/MidLow/Low), unk4DHigh as one two-bit write.
+// BYTES: defined here (see the specialization in wn_samus_gbeam.h); the body is the shared template's.
+wnAnimCmdModuleSubBuilder<wnSamusGBeamModuleAccesserBuildConfig::AnimCmdModuleSubBuildConfig>::wnAnimCmdModuleSubBuilder(
+    soModuleAccesser* acc, const soModuleAccesserBuildData& bd) :
+    m_unit0(acc, bd.getAnimCmdData(0, 0), bd.getAnimCmdData(0, 1), bd.getAnimCmdData(0, 2)),
+    m_unit1(acc, bd.getAnimCmdData(1, 0), bd.getAnimCmdData(1, 1), bd.getAnimCmdData(1, 2)),
+    m_unit2(acc, bd.getAnimCmdData(2, 0), bd.getAnimCmdData(2, 1), bd.getAnimCmdData(2, 2)),
+    m_unit3(acc, bd.getAnimCmdData(3, 0), bd.getAnimCmdData(3, 1), bd.getAnimCmdData(3, 2)),
+    m_unit4(acc),
+    m_unit5(acc, bd.getAnimCmdData(5, 0), bd.getAnimCmdData(5, 1), bd.getAnimCmdData(5, 2)) { }
+
+// Shoots the beam: the article starts at pos facing lr, attached to the founder's resource, and enters the lasso shoot status.
+// The last parameter is a bool (the original passes it to setFlag(bool, u32) unchanged and compares it with cmplwi) and the
+// position is a `const Vec3f*` (the Mario fireball's form).
+// BYTES: the two top bits of the descriptor's first flag byte are written through a signed two-bit field set to -1
+// (WN_ACTIVATE_DESC_SIGNED_HIGH_PAIR, wn/wn_activate_desc.h). MWCC shares equal integer constants inside a function whatever
+// their type: with `flagsHighPair = 3` the 3 of `unk38 = 3` is created at the flag write (it takes the register the last flag
+// operation needs), and the two-statement form (`flagBit7 = 1; flagBit6 = 1;`) or `flags |= 0xc0` renumbers the saved
+// register that holds -1. A -1 is already there (unk10), so nothing new is created.
+// HYPOTHESIS: the original field is a signed two-bit value whose -1 means "unset"; its name is not known.
 void wnSamusGBeam::activate(int founderTaskId, int etcResourceId, int team, float lr, const Vec3f* pos, bool attack) {
     wnActivateDesc desc;
     desc.founderTaskId = founderTaskId;
@@ -89,7 +110,9 @@ void wnSamusGBeam::activate(int founderTaskId, int etcResourceId, int team, floa
     desc.unk40 = 0;
     desc.unk44 = 0x35f;
     desc.unk48 = 0;
-    desc.flagsHighPair = 3;
+    // MATCH-ONLY: the two top bits written as a signed two-bit -1 only so that MWCC does not create the constant 3, which it
+    // would share with unk38 below and give the last flag operation another register (wn_activate_desc.h).
+    desc.flagsHighPairSigned = -1;
     desc.flagsMidPair = 0;
     desc.flagsBit3 = 1;
     desc.flagsLow = 0;
@@ -119,13 +142,16 @@ void wnSamusGBeam::activate(int founderTaskId, int etcResourceId, int team, floa
     }
 }
 
-// TODO(nonmatching): the animation command sub builder constructor (99.84%): the Mario fireball's three unit macros
-// (WN_ANIMCMD_PRESENTER_LOCAL_STORE, WN_ANIMCMD_RESET_MODE_BOX, WN_ANIMCMD_STACK_PTR) are applied; this unit also needs the
-// opt-in WN_ANIMCMD_STACK_PTR_CAST because its stacks hold 2 entries, not 8. What is left is a callee-saved register rotation in
-// units 2 and 3 and the uniq unit (the zero byte / null and the stack pointer swap r24/r25, the reloaded manage id and the manager
-// pointer move with them); unit 1 is exact, so the source shape is right and only the allocator's order differs. The sibling
-// units with capacity-1 stacks (Fireball, Link bow arrow, Fox blaster) are exact with the same macros.
-// TODO(callees): the situation, soArrayContractibleTable, soArrayVector and soInstanceUnitFullProperty<soTransitionTerm>
-// references in the module builder constructors point at unnamed weak copies of other units (lbl_27_data_20950, 3C578, 3ED00,
-// fn_27_D2A0C), so the status builder constructor shows 99.99% until those have names.
+// TODO(link): every function is exact (26/26), the .text order equals the original's and the unit has its .text, .rodata,
+// .data and .bss ranges in splits.txt. What is left is naming: 429 symbols this object defines have no name in sora_melee's
+// symbols.txt (209 functions, 196 data objects, 24 .bss objects; a few are the unit's own vtables and RTTI, the rest are weak
+// copies the linker would keep, growing the REL), and it calls 20 soEventUnitNull constructors/destructors (the turn
+// inside-event types) that no symbols.txt names. Pairing through the relocations of the already named functions, the RTTI
+// name strings and the vtables (TIPS, "Linking sora_melee fighter articles") gives about 130 of them; the destructors and
+// vtables behind weak copies whose bodies differ from the copy the original kept (the model, effect and link builders)
+// still need masked-byte pairing, and several original vtables and RTTI records sit inside unsplit data labels that need
+// new symbols. The unit's own .data, .rodata and .bss objects come out in the original order (the 20.0f of the weak
+// soModuleAccesserBuildData::getSlopeAngleLimit copy is stripped with that copy).
+// The original's soInstanceUnitFullProperty<soTransitionTerm> constructor (a weak copy in another unit) also initializes the
+// term's fields, which our header's implicit constructor does not.
 wnSamusGBeam::~wnSamusGBeam() { }

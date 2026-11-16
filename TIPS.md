@@ -1428,3 +1428,33 @@ Method used for `soModelModuleImpl` (sora_melee 0x77DC-0xE268, `include/so/model
   by the linker and do not block a link; check with a scratch link before chasing them. **MEDIUM**
 - **"Only relocation names differ" deserves an unnormalized diff:** the Samus grapple beam's status builder ctor also
   passes a different constant (0 in the original, the template's 9 here). **MEDIUM**
+
+## Data order, constant sharing and RTTI (batch 5: Peach down special, Toad, Samus grapple beam)
+
+- **Vtables and RTTI come out in batches, each in reverse order of class definition.** Batch 1 is what was requested
+  while parsing (classes with a key function, `dynamic_cast` targets, vtables used by in-class or earlier inline bodies),
+  batch 2 what pending template functions request, batch 3 what the static initializer requests. To put an interface's
+  RTTI first, give it a constructor written in the class; to request a template's vtable late, define its default
+  constructor out of class (it is still inlined). A unit can define its own class before the module headers when the
+  base lives in a small header of its own (`so/status/so_status_uniq_process.h`). See `SO_ARRAY_VECTOR_NATIVE` in
+  `so/so_array.h` (Peach down special); Pikmin side special and Kirby's inhale show the same layout. **HIGH**
+- **Explicit specializations of a template's virtuals are compiled in place**, so their jump tables precede the vtables
+  in `.data`; as ordinary members instantiated through the vtable they come after. A partial specialization emits its
+  members where the generic template would; an explicit class specialization that only declares a member, with a strong
+  definition in the `.cpp`, emits it late (only when the instance is unique to the unit). **HIGH**
+- **Read the original's RTTI name strings in `.data` before trusting a mangled template name:** the Toad mediator's second
+  template argument was wrong in both `symbols.txt` and the source, and the flip came up 0x60 bytes short. **HIGH**
+- **MWCC shares equal integer constants within a function whatever their type:** a two-bit field set to 3 and a later
+  `int` store of 3 use one register. Change one constant as a probe; this fixed `wnSamusGBeam::activate`. 29 other
+  `flagsHighPair = 3` sites may have the same miss. **HIGH**
+- **The 9th `soStatusModuleImpl` argument is the pre-check anim-cmd count (+0x48),** not the status kind count; Samus's
+  articles and Sheik's needles pass 0. **MEDIUM**
+- **A pointer argument converted through an inline function** can change saved-register numbering where every cast
+  spelling gives the same wrong result (grapple beam anim-cmd sub builder, `WN_ANIMCMD_STACK_PTR_INLINE_CAST`). **MEDIUM**
+- **`dynamic_cast<T&>` passes 1 to `__dynamic_cast`, the pointer form 0.** A value read through a by-value inline loads
+  right after the call that produced the object; through a reference getter the load is deferred. **MEDIUM**
+- **A flip that fails with every section's bytes equal:** compare relocations of the good and failed `.plf` (two vtable
+  slots bound to another `notifyEventAnimCmd` thunk for the Toad). Carve `.data` while still NonMatching (hash-neutral);
+  a scratch link of an unsplit unit says nothing about `.data`. **MEDIUM**
+- **Float pool order is the order of first use over all emitted functions, dropped weak copies included.** The Mario
+  fireball unit keeps every weak copy, so it shows the original emission order for sora_melee articles. **MEDIUM**

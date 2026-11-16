@@ -34,6 +34,14 @@ struct wnActivateDesc {
             u8 flagsMidLow : 1;
             u8 flagsLow : 3;
         };
+#ifdef WN_ACTIVATE_DESC_SIGNED_HIGH_PAIR
+        // BYTES (opt-in, Samus's grapple beam): bits 7..6 as one signed field. Writing -1 sets both bits without creating
+        // the integer constant 3, which MWCC would share with a later `unk38 = 3` (wn_samus_gbeam.cpp, activate).
+        struct {
+            signed char flagsHighPairSigned : 2;
+            signed char : 6;
+        };
+#endif
         // HYPOTHESIS: the Pikmin article clears the low nibble as one group.
         struct {
             u8 : 4;

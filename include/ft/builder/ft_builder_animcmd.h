@@ -185,6 +185,17 @@ inline const u8* ftAddressOf(u8 value) {
 }
 #endif
 
+#ifdef WN_ANIMCMD_STACK_PTR_INLINE_CAST
+// BYTES (opt-in, Samus's grapple beam): the interpreter stack of a unit whose capacity is not 8, converted to the
+// interpreter's stack type through an inline function. The plain cast (WN_ANIMCMD_STACK_PTR_CAST) gives the same
+// instructions with the saved registers r24/r25 rotated in threads 2, 3 and the uniq thread; one more inline level creates
+// the pointer's temporary before the other constructor arguments.
+// HYPOTHESIS: the original interpreter takes the abstract array and this is its conversion.
+inline soArrayVector<acCmdInterpreterStackData, 8>* ftAnimCmdStackCast(soArray<acCmdInterpreterStackData>* stack) {
+    return (soArrayVector<acCmdInterpreterStackData, 8>*)stack;
+}
+#endif
+
 // The manage id is read through the soEventManager part of the event manage module.
 inline s16 ftGetManageId(const soModuleAccesser* acc) {
     soEventManager& manager = acc->getEventManageModule();
@@ -270,7 +281,9 @@ public:
 #ifdef WN_ANIMCMD_STACK_PTR
                       // BYTES: the stack through the holder's accessor; the original computes it before the manage ID
                       // call and keeps it in a saved register (the cast form below is recomputed after the call).
-#ifdef WN_ANIMCMD_STACK_PTR_CAST
+#if defined(WN_ANIMCMD_STACK_PTR_INLINE_CAST)
+                      ftAnimCmdStackCast(m_stack.get()),
+#elif defined(WN_ANIMCMD_STACK_PTR_CAST)
                       // BYTES: units whose stack capacity is not 8 (the Samus grapple beam: 2) pass the pointer cast to the interpreter's type.
                       (soArrayVector<acCmdInterpreterStackData, 8>*)m_stack.get(),
 #else

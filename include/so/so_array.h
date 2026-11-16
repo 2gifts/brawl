@@ -803,6 +803,11 @@ void soArrayList<T, C>::eraseSub(s32 idx) {
 
 class soArrayVectorCalcInterface {
 public:
+#ifdef SO_ARRAY_VECTOR_NATIVE
+    // BYTES: with a constructor written in the class the interface's vtable and RTTI are requested while the header
+    // is parsed, so they come out in the first data batch, before the classes defined ahead of this header.
+    soArrayVectorCalcInterface() { }
+#endif
     virtual void substitution(s32, s32) = 0;
     virtual void onFull() = 0;
     virtual void offFull() = 0;
@@ -814,6 +819,23 @@ public:
 template <class T>
 class soArrayVectorAbstract : public soArray<T>, public soArrayVectorCalcInterface {
 public:
+#ifdef SO_ARRAY_VECTOR_NATIVE
+    // BYTES: the order the original declares the overriders in; a unit that owns the weak copies of an instance
+    // emits them in this order (the vtable layout comes from the bases and does not change).
+    virtual T& at(s32 index);
+    virtual const T& at(s32 index) const;
+    virtual void unshift(const T& newElement);
+    virtual void shift();
+    virtual void push(const T& newElement);
+    virtual ~soArrayVectorAbstract();
+    virtual void pop();
+    virtual void insert(s32 index, const T& newElement);
+    virtual void erase(s32 index);
+    virtual void set(s32 start, const T& elm, s32 count);
+    virtual void clear();
+    virtual bool isNull() const;
+    virtual s32 capacity() const = 0;
+#else
     virtual bool isNull() const;
     virtual T& at(s32 index);
     virtual const T& at(s32 index) const;
@@ -828,6 +850,7 @@ public:
     virtual s32 capacity() const = 0;
 
     virtual void set(s32 start, const T& elm, s32 count);
+#endif
 
     virtual T& atFastAbstractSub(s32 index) const = 0;
     virtual void substitution(s32 subIndex, s32 targetIndex);
@@ -949,6 +972,26 @@ private:
     T m_elements[C];
 
 public:
+#ifdef SO_ARRAY_VECTOR_NATIVE
+    // BYTES: native declaration order (see soArrayVectorAbstract), and the default constructor defined below the
+    // class like the other members: the instance's vtable is then requested when the pending template functions
+    // are generated, after the first data batch.
+    virtual ~soArrayVector();
+    virtual s32 getTopIndex() const;
+    virtual void setTopIndex(s32 topIndex);
+    virtual s32 getLastIndex() const;
+    virtual void setLastIndex(s32 lastIndex);
+    virtual T& getArrayValueConst(s32 index);
+    virtual void onFull();
+    virtual void offFull();
+    virtual bool isFull() const;
+    virtual s32 capacity() const;
+    virtual s32 size() const;
+    virtual T& atFastAbstractSub(s32 index) const;
+    virtual void setSize(s32 size);
+
+    soArrayVector();
+#else
     virtual s32 size() const;
     virtual ~soArrayVector();
     virtual s32 capacity() const;
@@ -965,6 +1008,7 @@ public:
     virtual void offFull();
 
     soArrayVector() : m_topIndex(0), m_lastIndex(0), m_size(0), m_isFull(false) { }
+#endif
 #ifdef SO_ARRAY_LIST_CTOR_FLAG
     // MATCH-ONLY: the Pikmin troops manager unit calls the sora_melee constructor with a zero argument.
     soArrayVector(int flag);
@@ -1022,6 +1066,11 @@ template <class T, s32 C>
 inline soArrayVector<T, C>::soArrayVector(s32 size, s32) : m_topIndex(0), m_lastIndex(0), m_size(size), m_isFull(false) {
     soArrayVectorCalculator::postInitialize(*this, size, C);
 }
+#endif
+
+#ifdef SO_ARRAY_VECTOR_NATIVE
+template <class T, s32 C>
+soArrayVector<T, C>::soArrayVector() : m_topIndex(0), m_lastIndex(0), m_size(0), m_isFull(false) { }
 #endif
 
 // Individual member definitions permit explicit accessor instantiations.
