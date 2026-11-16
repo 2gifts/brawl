@@ -7,14 +7,28 @@
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #define FT_TEAM_TYPED_INTERFACE
+#define WN_KINETIC_MEDIATOR_INLINE_DTOR
+#define SO_KINETIC_ROTATION_FIELDWISE_ZERO // BYTES: the module's copy of soKineticEnergyNormal::getRotation writes three float zeros
+
+#include <ft/ft_event_unit_instance.h> // before the event system headers (ft/ft_manager.h is included below)
 #include <ft/builder/ft_dol_array_list.h>
+// The 291-entry process vector is a whole class of sora_melee (the anim cmd one is declared in the list header).
+FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 291);
 #include <ft/ft_class_info_impl.h>
 #include <ft/koopa/ft_koopa.h>
 #include <ft/koopa/ft_koopa_extend_param_accesser.h>
 #include <ft/koopa/ft_koopa_transactor.h>
+#include <ft/ft_manager.h>
+#include <ft/ft_owner.h>
+#include <ft/koopa/ft_koopa_special_s.h>
+#include <ft/ft_change_succeed_work.h>
 #include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
 
+// The articles' sound builder teardown inlines this empty destructor (same form as ft_pit.cpp and ft_snake.cpp).
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftKoopaBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
@@ -25,7 +39,20 @@ void ftKoopa::change(void* work, int startKind) {
 
 #include <so/so_slow.h>
 
-template <class T> T (CLAMP)(T value, T minimum, T maximum);
+// Clamps value to [minimum, maximum] with two floating selects (the link map lists it as this file's CLAMP<float>;
+// Giga Bowser's file calls this copy). HYPOTHESIS: written as an asm block, as Game & Watch's clampf: nw4r's FSelect is
+// not expanded at the fighter units' optimization level and the __fsel intrinsic adds two frsp.
+template <class T> T (CLAMP)(register T value, register T minimum, register T maximum) {
+    register T lower;
+    register T result;
+    asm {
+        fsubs lower, value, minimum
+        fsel lower, lower, value, minimum
+        fsubs result, lower, maximum
+        fsel result, result, maximum, lower
+    }
+    return result;
+}
 
 void ftKoopa::processUpdate() {
     Fighter::processUpdate();
@@ -50,6 +77,78 @@ void ftKoopa::processUpdate() {
     }
 }
 
+bool ftKoopa::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3) {
+    s8 group = acmd->getGroup();
+    if (!isObserv(group)) {
+        return false;
+    }
+    switch (acmd->getType()) {
+    case 5:
+        // HYPOTHESIS: command 5 switches to Giga Bowser (the transformation of the final smash).
+        if (static_cast<u8>(g_ftManager->getFighterCount(m_entryId)) > 1) {
+            int fighterNo = g_ftManager->getFighterNo(m_entryId, m_taskId);
+            u8 other = (u8)fighterNo == 0 ? 1 : 0;
+            g_ftManager->toChange(m_entryId, other, true, true);
+        }
+        return true;
+    }
+    return Fighter::notifyEventAnimCmd(acmd, moduleAccesser, unk3);
+}
+
+// HYPOTHESIS: the events of the Flying Slam: 8 with the catch request 0xee grabs the victim during the start statuses
+// (0x11c/0x11d), 0xe releases it from the slam statuses (0x11e-0x121).
+struct ftKoopaLinkEventView {
+    int kind;
+    bool done;
+    int value;
+    int request;
+};
+
+void ftKoopa::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    ftKoopaLinkEventView* event = reinterpret_cast<ftKoopaLinkEventView*>(eventInfo);
+    switch (event->kind) {
+    case 8:
+        if (event->request == 0xee) {
+            switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+            case 0x11c:
+            case 0x11d:
+                event->value = m_moduleAccesser->getModelModule().getCorrectNodeId(0x12c);
+                event->done = true;
+                m_moduleAccesser->getStatusModule().changeStatusRequest(0x11e, m_moduleAccesser);
+                m_moduleAccesser->getWorkManageModule().setInt(m_moduleAccesser->getLinkModule().getNodeTaskId(0), 0x20000002);
+                m_moduleAccesser->getWorkManageModule().onFlag(0x22000011);
+                return;
+            }
+        }
+        break;
+    case 0xe:
+        switch (m_moduleAccesser->getStatusModule().getStatusKind()) {
+        case 0x11e:
+        case 0x11f:
+        case 0x120:
+        case 0x121:
+            if (m_moduleAccesser->getWorkManageModule().isFlag(0x22000011)) {
+                getCatchView(m_moduleAccesser).unk38(0);
+                m_moduleAccesser->getWorkManageModule().offFlag(0x22000011);
+                m_moduleAccesser->getWorkManageModule().offFlag(0x12000001);
+                if (m_moduleAccesser->getStatusModule().getStatusKind() != 0x121 ||
+                    m_moduleAccesser->getWorkManageModule().isFlag(0x22000010)) {
+                    if (m_moduleAccesser->getWorkManageModule().isFlag(0x1200003e)) {
+                        m_moduleAccesser->getWorkManageModule().offFlag(0x1200003e);
+                    } else if (m_moduleAccesser->getSituationModule().getKind() == 0) {
+                        m_moduleAccesser->getStatusModule().changeStatusRequest(0, m_moduleAccesser);
+                    } else {
+                        m_moduleAccesser->getStatusModule().changeStatusRequest(0xe, m_moduleAccesser);
+                    }
+                }
+            }
+            return;
+        }
+        break;
+    }
+    Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+
 // Status teardown destroys its owned change-request queue before observers.
 #pragma dont_inline on
 #ifndef FT_REL_LINK_EXTERN // with FT_REL_LINK_EXTERN the queue destructor is the sora_melee function (ft_dol_instances.h)
@@ -57,6 +156,14 @@ template soArrayVector<s32, 8>::~soArrayVector();
 #endif
 #pragma dont_inline off
 soStatusModuleImpl::~soStatusModuleImpl() { }
+
+ftKineticEnergyController::~ftKineticEnergyController() { }
+
+// ftManager::setParamPattern selects the shared parameter-table variation.
+extern int g_soValueVariation;
+#pragma dont_inline on
+int soValueAccesser::getValueVariation() { return g_soValueVariation; }
+#pragma dont_inline off
 
 // HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt).
 extern "C" {
@@ -127,50 +234,51 @@ bool ftKoopa::activeArticle(wnKoopaBreath* weapon, soModuleAccesser* acc) {
 }
 #pragma pool_data reset
 
+// The kinetic settings of the dummy fighter that takes over the move while Bowser transforms.
+void ftKoopa::setupChangeSucceedWork(void* work) {
+    Fighter::setupChangeSucceedWork(work);
+    soModuleAccesser* acc = m_moduleAccesser;
+    wnDummyFighterKineticSettingData hurt;
+    hurt.point[0][0] = 0.0f;
+    hurt.point[1][0] = soValueAccesser::getConstantFloat(acc, 0xbd6, 0);
+    hurt.point[2][0] = 0.0f;
+    hurt.point[3][0] = soValueAccesser::getConstantFloat(acc, 0xbd8, 0);
+    hurt.point[0][1] = 0.0f;
+    hurt.point[1][1] = soValueAccesser::getConstantFloat(acc, 0xbd1, 0);
+    hurt.point[2][1] = 0.0f;
+    hurt.point[3][1] = 0.0f;
+    wnDummyFighterKineticSettingData hit;
+    hit.point[0][0] = 0.0f;
+    hit.point[1][0] = soValueAccesser::getConstantFloat(acc, 0xbbc, 0);
+    hit.point[2][0] = 0.0f;
+    hit.point[3][0] = -1.0f;
+    hit.point[0][1] = 0.0f;
+    hit.point[1][1] = 0.0f;
+    hit.point[2][1] = 0.0f;
+    hit.point[3][1] = 0.0f;
+    Vec2f* speed = &acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(0xFFFF));
+    soPostureModule* const posture = &acc->getPostureModule();
+    static_cast<ftChangeSucceedWork*>(work)->activateDummyFighter(&posture->getPos(), posture->getScale(), posture->getLr(), speed, &hit.point[0][0], &hurt.point[0][0], 0xc000b);
+}
+
+// BYTES: defined after its first user (see ft/ft_change_succeed_work.h).
+inline wnDummyFighterKineticSettingData::wnDummyFighterKineticSettingData() { }
+
 // ---- the article holders --------------------------------------------------------------------------------------------
-// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Koopa, copied into the
-// descriptor), the heap module and the data block of the fighter kind.
-// HYPOTHESIS: the original builds these in the holder constructor itself.
-struct ftKoopaArticleDataTag {
-    bool m_unused;
-    bool m_resourceGroup;
-    ftKoopaArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
-};
+#include <ft/builder/ft_builder_article.h>
 
 struct ftKoopaArticleKind : wnArticleKindInfo {
+    ftKind getSubKind() const { return static_cast<ftKind>(subKind); }
     ftKoopaArticleKind() {
         kind = 0;
         subKind = Fighter_Koopa;
     }
 };
 
-// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
-struct ftKoopaArticleBuildInfo : wnArticleBuildInfo {
-    ftKoopaArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
-        kindInfo = &kindArg;
-        heapModule = heap;
-    }
-};
-
-// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+// The data block of the breath comes from the common data accessor of sora_melee (only declared here).
 extern "C" void* fn_27_1496F0(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
-template <class W> struct ftKoopaArticleTraits;
-#define FT_KOOPA_TRAITS(W, DATA, ID, GETTER) \
-    template <> struct ftKoopaArticleTraits<W> { \
-        enum { ArticleId = ID }; \
-        static const DATA* getData() { \
-            ftKoopaArticleDataTag tag; \
-            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Koopa, &tag.m_resourceGroup)); \
-        } \
-    };
-
-FT_KOOPA_TRAITS(wnKoopaBreath, wnKoopaBreathData, 0, fn_27_1496F0)
-
-// Every article of the fighter is built by this constructor from the data of the fighter kind.
-template <class W>
-wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
-    m_instance(ftKoopaArticleTraits<W>::ArticleId, ftKoopaArticleBuildInfo(ftKoopaArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftKoopaArticleTraits<W>::getData()) { }
+FT_DEFINE_ARTICLE_HOLDER(, wnKoopaBreath, wnKoopaBreathData, 0, ftKoopaArticleKind, fn_27_1496F0)
 
 // ---- the articles and their mediator --------------------------------------------------------------------------------
 
@@ -181,7 +289,6 @@ wnArticleHolder<W>::~wnArticleHolder() { }
 template <class W, int N>
 wnArticleSubPool<W, N>::~wnArticleSubPool() { }
 template wnArticleHolder<wnKoopaBreath>::~wnArticleHolder();
-template wnArticleHolder<wnKoopaBreath>::wnArticleHolder(soModuleAccesser*);
 template <class Mediator>
 wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
 template <class Mediator, int N>
@@ -273,97 +380,12 @@ bool ftKoopaArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
     }
 }
 
-
-// FIXME: Test code present only to emit the shared builder functions; delete once ftKoopa is done
-void testBuilder() {
-    soInsideEventManageModuleBuilder<ftKoopaInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> insideBuilder;
-    soResourceIdAccesserImpl idAccImpl(0, 1, 2);
-}
-soInsideEventManageModuleBuilder<ftKoopaInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> g_insideBuilder;
-
-// Trivial functions of this translation unit (empty virtuals, constant returns, field accessors) under their placeholder names.
-extern "C" {
-
-u8 fn_102_61A8(u8* p) { return *(u8*)(p + 0x4); }
-void fn_102_7F04() {}
-void fn_102_8A2C() {}
-int fn_102_8A30() { return 0; }
-void fn_102_8C18() {}
-void fn_102_8EAC() {}
-void fn_102_8EB0() {}
-void fn_102_8EB4() {}
-void fn_102_8EB8() {}
-int fn_102_8EBC() { return 0; }
-void fn_102_8F00() {}
-void fn_102_8F04() {}
-void fn_102_8F08() {}
-void fn_102_8F0C() {}
-int fn_102_8F28() { return 0; }
-void fn_102_8F30() {}
-int fn_102_8F3C() { return 0; }
-int fn_102_8F58() { return 32675; }
-int fn_102_8F64() { return 0; }
-u8* fn_102_902C(u8* p) { return p + 0x458; }
-u8* fn_102_9034(u8* p) { return p + 0x3C8; }
-u8* fn_102_903C(u8* p) { return p + 0x8; }
-int fn_102_90DC(u8* p) { return *(int*)(p + 0x20); }
-int fn_102_91B8(u8* p) { return *(int*)(p + 0x18); }
-int fn_102_9250(u8* p) { return *(int*)(p + 0x10); }
-int fn_102_A19C() { return 1; }
-u8* fn_102_A1B0(u8* p) { return p + 0x13BD0; }
-u8* fn_102_A1D0(u8* p) { return p + 0x13C0C; }
-u8* fn_102_A1DC(u8* p) { return p + 0x140C4; }
-void fn_102_AFE8() {}
-void fn_102_B0D0(u8* p) { *(u8*)(p + 0x31) = 0; }
-void fn_102_B0DC(u8* p) { *(u8*)(p + 0x31) = 1; }
-int fn_102_B828() { return 0; }
-int fn_102_B910() { return 0; }
-int fn_102_B9F8() { return 0; }
-int fn_102_BAE0() { return 0; }
-int fn_102_BBC8() { return 0; }
-int fn_102_BCB0() { return 0; }
-int fn_102_BD98() { return 0; }
-int fn_102_BE80() { return 0; }
-
-}
-
-// Placeholders for weak inline methods of library classes (their names exist in sora_melee, so the REL copies cannot be renamed): the shim calls the inline method.
-extern "C" {
-
-bool fn_102_9158(const soGeneralWorkSimple* p, u32 a0, u32 a1) { return p->soGeneralWorkSimple::isFlag(a0, a1); }
-void fn_102_9174(soGeneralWorkSimple* p, u32 a0, u32 a1) { p->soGeneralWorkSimple::offFlag(a0, a1); }
-void fn_102_918C(soGeneralWorkSimple* p, u32 a0) { p->soGeneralWorkSimple::clearFlag(a0); }
-void fn_102_91A0(soGeneralWorkSimple* p, u32 a0, u32 a1) { p->soGeneralWorkSimple::onFlag(a0, a1); }
-void fn_102_91E8(soGeneralWorkSimple* p, float a0, u32 a1) { p->soGeneralWorkSimple::mulFloatWork(a0, a1); }
-void fn_102_9200(soGeneralWorkSimple* p, float a0, u32 a1) { p->soGeneralWorkSimple::subFloatWork(a0, a1); }
-void fn_102_9218(soGeneralWorkSimple* p, float a0, u32 a1) { p->soGeneralWorkSimple::addFloatWork(a0, a1); }
-void fn_102_9230(soGeneralWorkSimple* p, float a0, u32 a1) { p->soGeneralWorkSimple::setFloatWork(a0, a1); }
-float fn_102_9240(const soGeneralWorkSimple* p, u32 a0) { return p->soGeneralWorkSimple::getFloatWork(a0); }
-void fn_102_9258(soGeneralWorkSimple* p, u32 a0) { p->soGeneralWorkSimple::decIntWork(a0); }
-void fn_102_9270(soGeneralWorkSimple* p, u32 a0) { p->soGeneralWorkSimple::incIntWork(a0); }
-void fn_102_9288(soGeneralWorkSimple* p, s32 a0, u32 a1) { p->soGeneralWorkSimple::divIntWork(a0, a1); }
-void fn_102_92A8(soGeneralWorkSimple* p, s32 a0, u32 a1) { p->soGeneralWorkSimple::mulIntWork(a0, a1); }
-void fn_102_92C0(soGeneralWorkSimple* p, s32 a0, u32 a1) { p->soGeneralWorkSimple::subIntWork(a0, a1); }
-void fn_102_92D8(soGeneralWorkSimple* p, s32 a0, u32 a1) { p->soGeneralWorkSimple::addIntWork(a0, a1); }
-void fn_102_92F0(soGeneralWorkSimple* p, s32 a0, u32 a1) { p->soGeneralWorkSimple::setIntWork(a0, a1); }
-Vec2f fn_102_B100(soKineticEnergyNormal* p) { return p->soKineticEnergyNormal::getSpeed(); }
-
-}
-
-// Fighter event thunks: adjust `this` back to the Fighter base, then tail-call the Fighter method.
-extern "C" {
-void fn_102_C0AC(u8* self, soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) { ((Fighter*)(self - 0x54))->Fighter::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4); }
-bool fn_102_C0A4(u8* self, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3) { return ((Fighter*)(self - 0x48))->Fighter::notifyEventAnimCmd(acmd, moduleAccesser, unk3); }
-} // extern "C"
-
-// Leaf functions shared with other fighter modules (same module-map names and bodies).
-extern "C" {
-void* fn_102_1DCC(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_102_3B28(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_102_3D4C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_102_3E54(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_102_423C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_102_427C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_102_42BC(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_102_5EF0(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-} // extern "C"
+// The module's own copies of these empty destructors (the first unit of the module emits them).
+#pragma dont_inline on
+soTeam::~soTeam() { }
+soResourceIdAccesser::~soResourceIdAccesser() { }
+#pragma dont_inline off
+soArticleMediator::~soArticleMediator() { }
+#pragma dont_inline on
+ftVirtualNodeMatrixPool::~ftVirtualNodeMatrixPool() { }
+#pragma dont_inline off

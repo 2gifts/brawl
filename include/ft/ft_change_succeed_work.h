@@ -11,6 +11,17 @@ class soHeapModuleImpl;
 class wnDummyFighter;
 
 // HYPOTHESIS: layout from the constructor, init and exit; the meaning of most fields is unknown.
+// One block of kinetic settings for the dummy fighter that carries a transforming fighter's motion over
+// (class name from the module maps: wnDummyFighterKineticSettingData::wnDummyFighterKineticSettingData).
+// HYPOTHESIS: four pairs of floats; the fighters fill speed limits and brakes from the common parameters.
+// BYTES: the empty constructor is a weak out-of-line function in the fighter modules, emitted right after the first
+// setupChangeSucceedWork that uses it and called there (never_inline keeps the call; the fighter units define it inline
+// after that function).
+struct wnDummyFighterKineticSettingData {
+    float point[4][2];
+    wnDummyFighterKineticSettingData() __attribute__((never_inline));
+};
+
 class ftChangeSucceedWork {
 public:
     float unk0;
@@ -81,7 +92,8 @@ public:
     void exit();
     // HYPOTHESIS: the three heaps are passed on to the soHeapModuleImpl constructor.
     void createDummyFighter(Heaps::HeapType instHeap, Heaps::HeapType modelInstHeap, Heaps::HeapType motionInstHeap);
-    void activateDummyFighter(Vec3f* pos, Vec2f* speed, float* unk1, float* unk2, int flags, float scale, float lr);
+    // HYPOTHESIS: unk1 and unk2 are the value tables of two wnDummyFighterKineticSettingData blocks (hit, then hurt).
+    void activateDummyFighter(Vec3f* pos, float scale, float lr, Vec2f* speed, float* unk1, float* unk2, int flags);
     void deactivateDummyFighter();
     bool isActiveDummyFighter();
     Vec3f getDummyFighterPos();

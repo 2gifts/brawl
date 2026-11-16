@@ -7,6 +7,9 @@
 #include <wn/wn_article_pool.h>
 #include <wn/wn_article_build_info.h>
 #include <wn/weapon.h>
+#ifdef FT_GKOOPA_ARTICLE_POOLS // the fighter unit: the inside-event builder teardown calls these lists out of line
+#include <ft/koopa/ft_koopa_event_units.h>
+#endif
 #define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR
 #define WN_WEAPON_BUILDER
 #define WN_ARTICLE_NATIVE_BUILDERS

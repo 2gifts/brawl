@@ -296,5 +296,5 @@ void ftWarioCommon::setupChangeSucceedWork(soModuleAccesser* acc, void* changeSu
     soKineticEnergy::AttributeFlag attribute(0xFFFF);
     Vec2f* speed = &acc->getKineticModule().getSumSpeed(attribute);
     soPostureModule& posture = acc->getPostureModule();
-    ((ftChangeSucceedWork*)changeSucceedWork)->activateDummyFighter(&posture.getPos(), speed, (float*)zeroA, (float*)zeroB, flags, posture.getScale(), posture.getLr());
+    ((ftChangeSucceedWork*)changeSucceedWork)->activateDummyFighter(&posture.getPos(), posture.getScale(), posture.getLr(), speed, (float*)zeroA, (float*)zeroB, flags);
 }

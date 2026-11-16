@@ -7,12 +7,17 @@
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #define FT_TEAM_TYPED_INTERFACE
+#define WN_KINETIC_MEDIATOR_INLINE_DTOR
+#define FT_MODULE_ACCESSER_BUILDER_BASE_BUILD_DATA // the builder takes the base build data: its slope limit literal (20.0) stays in the pool
 #define MT_VEC3F_CTOR_NOINLINE // BYTES: the breath offset goes through the out-of-line constructor
 #include <ft/ft_event_unit_instance.h>
 #include <ft/builder/ft_dol_array_list.h>
+// The 292-entry process and anim cmd vectors are whole classes of sora_melee.
+FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 292);
+FT_DOL_ARRAY_VECTOR(ftAnimCmdConvPtr, 292);
 #include <ft/ft_class_info_impl.h>
 #include <ft/koopa/ft_gkoopa.h>
-#include <ft/ft_extend_param_accesser.h>
+#include <ft/koopa/ft_gkoopa_extend_param_accesser.h>
 #include <ft/ft_manager.h>
 #include <ft/ft_owner.h>
 #include <so/article/so_article_mediator.h>
@@ -23,89 +28,12 @@
 #include <so/jostle/so_jostle_module.h>
 #include <ft/ft_change_succeed_work.h>
 
+// The articles' sound builder teardown inlines this empty destructor (same form as ft_pit.cpp and ft_snake.cpp).
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+
 #undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftGKoopaBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
-
-// The extend parameter groups of Giga Bowser: Bowser's four float groups one slot later (group 0 holds the transformation
-// timer ints). MATCH-ONLY: the Cast accessors reload the group pointer for the first entry of a group, as Bowser's do.
-class ftGKoopaExtendParamAccesser : public ftExtendParamAccesserEx<3999, 46, 23999, 10> {
-    const u8* group0(const u8* base) { return *(const u8* const*)(base + 0x7C); }
-    const u8* group0Cast(const u8* base) { return *(const u8**)(base + 0x7C); }
-    const u8* group1(const u8* base) { return *(const u8* const*)(base + 0x80); }
-    const u8* group1Cast(const u8* base) { return *(const u8**)(base + 0x80); }
-    const u8* group2(const u8* base) { return *(const u8* const*)(base + 0x84); }
-    const u8* group2Cast(const u8* base) { return *(const u8**)(base + 0x84); }
-    const u8* group3(const u8* base) { return *(const u8* const*)(base + 0x88); }
-    const u8* group3Cast(const u8* base) { return *(const u8**)(base + 0x88); }
-    const u8* group4(const u8* base) { return *(const u8* const*)(base + 0x8C); }
-    const u8* group4Cast(const u8* base) { return *(const u8**)(base + 0x8C); }
-
-public:
-    ftGKoopaExtendParamAccesser() : ftExtendParamAccesserEx(Fighter_GKoopa) { }
-    virtual ~ftGKoopaExtendParamAccesser() { }
-
-    virtual void setup(const u8* extData) {
-        for (s32 i = 0; i < NumVariations; i++) {
-            m_floats[i][0] = (const float*)(group1Cast(extData) + 0x0);
-            m_floats[i][1] = (const float*)(group1(extData) + 0x4);
-            m_floats[i][2] = (const float*)(group1(extData) + 0x8);
-            m_floats[i][3] = (const float*)(group1(extData) + 0xC);
-            m_floats[i][4] = (const float*)(group1(extData) + 0x10);
-            m_floats[i][5] = (const float*)(group1(extData) + 0x14);
-            m_floats[i][6] = (const float*)(group1(extData) + 0x1C);
-            m_floats[i][7] = (const float*)(group1(extData) + 0x20);
-            m_floats[i][8] = (const float*)(group1(extData) + 0x24);
-            m_floats[i][9] = (const float*)(group1(extData) + 0x28);
-            m_floats[i][10] = (const float*)(group1(extData) + 0x2C);
-            m_floats[i][11] = (const float*)(group1(extData) + 0x30);
-            m_floats[i][12] = (const float*)(group1(extData) + 0x34);
-            m_floats[i][13] = (const float*)(group1(extData) + 0x38);
-            m_floats[i][14] = (const float*)(group1(extData) + 0x44);
-            m_floats[i][15] = (const float*)(group1(extData) + 0x48);
-            m_floats[i][16] = (const float*)(group1(extData) + 0x4C);
-            m_floats[i][17] = (const float*)(group2Cast(extData) + 0x0);
-            m_floats[i][18] = (const float*)(group2(extData) + 0x4);
-            m_floats[i][19] = (const float*)(group2(extData) + 0x8);
-            m_floats[i][20] = (const float*)(group2(extData) + 0xC);
-            m_floats[i][21] = (const float*)(group2(extData) + 0x10);
-            m_floats[i][22] = (const float*)(group2(extData) + 0x14);
-            m_floats[i][23] = (const float*)(group2(extData) + 0x18);
-            m_floats[i][24] = (const float*)(group2(extData) + 0x1C);
-            m_floats[i][25] = (const float*)(group3Cast(extData) + 0x0);
-            m_floats[i][26] = (const float*)(group3(extData) + 0x4);
-            m_floats[i][27] = (const float*)(group3(extData) + 0x8);
-            m_floats[i][28] = (const float*)(group3(extData) + 0xC);
-            m_floats[i][29] = (const float*)(group3(extData) + 0x10);
-            m_floats[i][30] = (const float*)(group3(extData) + 0x14);
-            m_floats[i][31] = (const float*)(group3(extData) + 0x18);
-            m_floats[i][32] = (const float*)(group3(extData) + 0x1C);
-            m_floats[i][33] = (const float*)(group4Cast(extData) + 0x0);
-            m_floats[i][34] = (const float*)(group4(extData) + 0x4);
-            m_floats[i][35] = (const float*)(group4(extData) + 0x8);
-            m_floats[i][36] = (const float*)(group4(extData) + 0xC);
-            m_floats[i][37] = (const float*)(group4(extData) + 0x10);
-            m_floats[i][38] = (const float*)(group4(extData) + 0x14);
-            m_floats[i][39] = (const float*)(group4(extData) + 0x18);
-            m_floats[i][40] = (const float*)(group4(extData) + 0x1C);
-            m_floats[i][41] = (const float*)(group4(extData) + 0x20);
-            m_floats[i][42] = (const float*)(group4(extData) + 0x24);
-            m_floats[i][43] = (const float*)(group4(extData) + 0x28);
-            m_floats[i][44] = (const float*)(group4(extData) + 0x2C);
-            m_floats[i][45] = (const float*)(group4(extData) + 0x30);
-            m_ints[i][0] = (const int*)(group0Cast(extData) + 0x0);
-            m_ints[i][1] = (const int*)(group0(extData) + 0x4);
-            m_ints[i][2] = (const int*)(group0(extData) + 0x8);
-            m_ints[i][3] = (const int*)(group1(extData) + 0x18);
-            m_ints[i][4] = (const int*)(group1(extData) + 0x3C);
-            m_ints[i][5] = (const int*)(group1(extData) + 0x40);
-            m_ints[i][6] = (const int*)(group2(extData) + 0x20);
-            m_ints[i][7] = (const int*)(group2(extData) + 0x24);
-            m_ints[i][8] = (const int*)(group2(extData) + 0x28);
-            m_ints[i][9] = (const int*)(group2(extData) + 0x2C);
-        }
-    }
-};
 
 template <class T> T (CLAMP)(T value, T minimum, T maximum);
 
@@ -165,7 +93,7 @@ ftGKoopa::ftGKoopa(s32 entryId,
 // with super armor (the damage module), a timer (0x10000040, counted down by processUpdate) and clears his transformation
 // flags.
 void ftGKoopa::onStart(int startKind) {
-    soModuleAccesser* acc = m_moduleAccesser;
+    soModuleAccesser* acc = getModuleAccesser();
     soWorkManageModule& work = acc->getWorkManageModule();
     work.setInt(-1, 0x10000041);
     work.setFloat(soValueAccesser::getConstantFloat(acc, 0xfa6, 0), 0x11000014);
@@ -179,7 +107,7 @@ void ftGKoopa::onStart(int startKind) {
     work.onFlag(0x12000025);
     work.setInt(0, 0x10000040);
     work.setFloat(0.0f, 0x11000004);
-    static_cast<soJostleModule*>(acc->m_enumerationStart->m_jostleModule)->setByte4A(true);
+    acc->getJostleModule().setByte48(true); // Giga Bowser is not pushed by other fighters
     work.offFlag(0x12000020);
     work.offFlag(0x1200002c);
 }
@@ -229,7 +157,7 @@ void ftGKoopa::processUpdate() {
     }
     // The transformation timer: at 1 (outside the end status 0x123) the end starts; it counts down otherwise, and the
     // flash of the first extend parameter group starts at its marked frame.
-    soModuleAccesser* acc = m_moduleAccesser;
+    soModuleAccesser* acc = getModuleAccesser();
     soWorkManageModule& work = acc->getWorkManageModule();
     int status = acc->getStatusModule().getStatusKind();
     int timer = work.getInt(0x10000040);
@@ -346,14 +274,15 @@ bool ftGKoopa::activeArticle(wnGKoopaBreath* weapon, soModuleAccesser* acc) {
     float speedMul = 1.0f;
     float* param = static_cast<float*>(g_ftCommonDataAccesser.getGKoopaBreathParam(kind));
     float angle = acc->getWorkManageModule().getFloat(0x21000004);
-    pos = acc->getModelModule().getNodeGlobalPosition(0x30, &Vec3f(0.0f, param[0x48 / 4], param[0x44 / 4]), false, false);
+    Vec3f offset(0.0f, param[0x48 / 4], param[0x44 / 4]);
+    pos = acc->getModelModule().getNodeGlobalPosition(0x30, &offset, false, false);
     float speed = acc->getWorkManageModule().getFloat(0x11000014) / soValueAccesser::getConstantFloat(acc, 0xfa6, 0);
     float size = acc->getWorkManageModule().getFloat(0x11000013) / soValueAccesser::getConstantFloat(acc, 0xfa8, 0);
     float baseAngle = soValueAccesser::getConstantFloat(acc, 0xfa0, 0);
     float spread = soValueAccesser::getConstantFloat(acc, 0xfa1, 0);
     angle = baseAngle + angle;
     angle += randf() * spread - 0.5f * spread;
-    weapon->activate(acc->getStageObject().m_taskId, fighter.getOwner()->getTeam(), &pos, 0, lr, speed, size, speedMul, 0.017453292f * angle);
+    weapon->activate(acc->getStageObject().getTaskId(), fighter.getOwner()->getTeam(), &pos, lr, 0, speed, size, speedMul, 0.017453292f * angle);
     return false;
 }
 
@@ -366,19 +295,11 @@ void ftGKoopa::change(void* work, int startKind) {
     Fighter::changeSucceedCore(work, 0x122);
 }
 
-// HYPOTHESIS: the collision points of the dummy fighter that takes over the move (as Zero Suit Samus's).
-struct ftGKoopaChangeSucceedPoints {
-    float point[4][2];
-};
-// The empty out-of-line constructor of the point blocks (Bowser's unit carries it under its placeholder name).
-// MATCH-ONLY: called by name instead of through a constructor.
-extern "C" void fn_102_8A2C(ftGKoopaChangeSucceedPoints* points);
-
+// The kinetic settings of the dummy fighter that takes over the move: Giga Bowser hands over fixed limits.
 void ftGKoopa::setupChangeSucceedWork(void* work) {
     Fighter::setupChangeSucceedWork(work);
     soModuleAccesser* acc = m_moduleAccesser;
-    ftGKoopaChangeSucceedPoints hurt;
-    fn_102_8A2C(&hurt);
+    wnDummyFighterKineticSettingData hurt;
     hurt.point[0][0] = 0.0f;
     hurt.point[1][0] = soValueAccesser::getConstantFloat(acc, 0xbd6, 0);
     hurt.point[2][0] = 0.0f;
@@ -387,8 +308,7 @@ void ftGKoopa::setupChangeSucceedWork(void* work) {
     hurt.point[1][1] = soValueAccesser::getConstantFloat(acc, 0xbd1, 0);
     hurt.point[2][1] = 0.0f;
     hurt.point[3][1] = 0.0f;
-    ftGKoopaChangeSucceedPoints hit;
-    fn_102_8A2C(&hit);
+    wnDummyFighterKineticSettingData hit;
     hit.point[0][0] = 0.0f;
     hit.point[1][0] = soValueAccesser::getConstantFloat(acc, 0xbbc, 0);
     hit.point[2][0] = 0.0f;
@@ -402,9 +322,12 @@ void ftGKoopa::setupChangeSucceedWork(void* work) {
         option = 0xc000c;
     }
     Vec2f* speed = &acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(0xFFFF));
-    soPostureModule& posture = acc->getPostureModule();
-    static_cast<ftChangeSucceedWork*>(work)->activateDummyFighter(&posture.getPos(), speed, &hit.point[0][0], &hurt.point[0][0], option, posture.getScale(), posture.getLr());
+    soPostureModule* const posture = &acc->getPostureModule();
+    static_cast<ftChangeSucceedWork*>(work)->activateDummyFighter(&posture->getPos(), posture->getScale(), posture->getLr(), speed, &hit.point[0][0], &hurt.point[0][0], option);
 }
+
+// BYTES: defined after its first user (see ft/ft_change_succeed_work.h).
+inline wnDummyFighterKineticSettingData::wnDummyFighterKineticSettingData() { }
 
 // ---- the article holders --------------------------------------------------------------------------------------------
 #include <ft/builder/ft_builder_article.h>

@@ -25,14 +25,14 @@ static inline void setControllerVec(Vec2f& dst, const Vec2f& src) {
     dst = src;
 }
 
-extern "C" void fn_102_156C0(soModuleAccesser* moduleAccesser) {
+static void ftKineticEnergyUnable(soModuleAccesser* moduleAccesser) {
     moduleAccesser->getKineticModule().getEnergy(0)->disable();
     moduleAccesser->getKineticModule().getEnergy(1)->disable();
     moduleAccesser->getKineticModule().getEnergy(2)->disable();
     moduleAccesser->getKineticModule().getEnergy(3)->disable();
 }
 
-extern "C" void fn_102_15788(soModuleAccesser* moduleAccesser) {
+static void initStatusCommon(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     int situation = moduleAccesser->getSituationModule().getKind();
     work.clearAll(2);
@@ -48,7 +48,7 @@ extern "C" void fn_102_15788(soModuleAccesser* moduleAccesser) {
         ftKoopaSpecialHiParam* param = getKoopaSpecialHiParam(Fighter_GKoopa, 2);
         Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         speed.m_y = param->m_airSpeedY;
-        fn_102_156C0(moduleAccesser);
+        ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.m_gravity = -param->m_gravity;
@@ -82,17 +82,19 @@ public:
 void ftGKoopaStatusUniqProcessSpecialHiG::initStatus(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     if (work.isFlag(0x1200003d)) {
-        fn_102_15788(moduleAccesser);
+        initStatusCommon(moduleAccesser);
         work.offFlag(0x1200003d);
     }
     soItemManageModule& items = moduleAccesser->getItemManageModule();
+    // BYTES: here the flag and the parameter pointer are plain locals (numbered below the motion module getter of the
+    // resume branch); in the air version the flag goes through the inline helper.
     bool visible = !work.isFlag(0x22000013);
     items.setHaveItemVisibility(visible, 0);
     items.setAttachItemVisibility(visible, static_cast<itParam::AttachGroup>(0xff));
     Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
-    ftKoopaSpecialHiParam* param = getKoopaSpecialHiParam(Fighter_GKoopa, 2);
+    ftKoopaSpecialHiParam* param = static_cast<ftKoopaSpecialHiParam*>(g_ftCommonDataAccesser.getData(Fighter_GKoopa)->extendParam[2]);
     work.setInt(0, 0x20000000);
-    fn_102_156C0(moduleAccesser);
+    ftKineticEnergyUnable(moduleAccesser);
     if (!work.isFlag(0x22000010)) {
         ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
         controller.resetEnergy(0, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
@@ -106,8 +108,7 @@ void ftGKoopaStatusUniqProcessSpecialHiG::initStatus(soModuleAccesser* moduleAcc
         stop.enable();
     }
     if (work.isFlag(0x22000015)) {
-        soMotionChangeParam changeParam(0x1d4, 0.0f, 1.0f, 0, 0, 0, 0);
-        moduleAccesser->getMotionModule().changeMotionRequest(&changeParam);
+        changeKoopaMotion(moduleAccesser, soMotionChangeParam(0x1d4, 0.0f, 1.0f, 0, 0, 0, 0));
         work.offFlag(0x22000015);
     } else if (work.isFlag(0x22000016)) {
         float frame;
@@ -119,13 +120,11 @@ void ftGKoopaStatusUniqProcessSpecialHiG::initStatus(soModuleAccesser* moduleAcc
         } else {
             frame = moduleAccesser->getMotionModule().getFrame();
         }
-        soMotionChangeParam changeParam(0x1d4, 1.0f, 1.0f, 0, 0, 0, 0);
-        moduleAccesser->getMotionModule().changeMotionRequest(&changeParam);
+        changeKoopaMotion(moduleAccesser, soMotionChangeParam(0x1d4, 1.0f, 1.0f, 0, 0, 0, 0));
         moduleAccesser->getMotionModule().setFrameSyncAnimCmd(frame);
         work.offFlag(0x22000016);
     } else {
-        soMotionChangeParam changeParam(0x1d4, 0.0f, 1.0f, 0, 0, 0, 0);
-        moduleAccesser->getMotionModule().changeMotionRequest(&changeParam);
+        changeKoopaMotion(moduleAccesser, soMotionChangeParam(0x1d4, 0.0f, 1.0f, 0, 0, 0, 0));
     }
     if (work.isFlag(0x22000013)) {
         moduleAccesser->getVisibilityModule().set(1, 1);
@@ -139,7 +138,7 @@ void ftGKoopaStatusUniqProcessSpecialHiG::execStatus(soModuleAccesser* moduleAcc
     if (work.isFlag(0x22000010) && !work.isFlag(0x22000011)) {
         Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         moduleAccesser->getKineticModule().clearSpeedAll();
-        fn_102_156C0(moduleAccesser);
+        ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
         stop.resetEnergy(0, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.enable();
@@ -148,10 +147,10 @@ void ftGKoopaStatusUniqProcessSpecialHiG::execStatus(soModuleAccesser* moduleAcc
     work.incInt(0x20000000);
     soSlopeModule& slope = *static_cast<soSlopeModule*>(moduleAccesser->m_enumerationStart->m_slopeModule);
     if (work.isFlag(0x22000014)) {
-        if (slope.getStatus().m_mask != soSlopeStatusParam::STATUS_MASK_TOP) {
+        if (slope.getStatus() != soSlopeStatusParam::STATUS_MASK_TOP) {
             slope.setStatus(soSlopeStatusParam::STATUS_MASK_TOP, 6, true);
         }
-    } else if (slope.getStatus().m_mask != soSlopeStatusParam::STATUS_MASK_LR) {
+    } else if (slope.getStatus() != soSlopeStatusParam::STATUS_MASK_LR) {
         slope.setStatus(soSlopeStatusParam::STATUS_MASK_LR, 3, false);
     }
     if (work.isFlag(0x22000013)) {
@@ -164,18 +163,18 @@ void ftGKoopaStatusUniqProcessSpecialHiG::execStatus(soModuleAccesser* moduleAcc
 void ftGKoopaStatusUniqProcessSpecialHiA::initStatus(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     if (work.isFlag(0x1200003d)) {
-        fn_102_15788(moduleAccesser);
+        initStatusCommon(moduleAccesser);
         work.offFlag(0x1200003d);
     }
     soItemManageModule& items = moduleAccesser->getItemManageModule();
-    bool visible = !work.isFlag(0x22000013);
+    bool visible = isKoopaFlagOff(work, 0x22000013);
     items.setHaveItemVisibility(visible, 0);
     items.setAttachItemVisibility(visible, static_cast<itParam::AttachGroup>(0xff));
     work.setInt(0, 0x20000000);
     if (!work.isFlag(0x22000010)) {
         ftKoopaSpecialHiParam* param = getKoopaSpecialHiParam(Fighter_GKoopa, 2);
         Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
-        fn_102_156C0(moduleAccesser);
+        ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.m_gravity = -param->m_gravity;
@@ -223,7 +222,8 @@ void ftGKoopaStatusUniqProcessSpecialHiA::exitStatus(soModuleAccesser* moduleAcc
             }
         }
     } else {
-        work.setFloat(getKoopaSpecialHiParam(Fighter_GKoopa, 2)->unk2C, 0x11000000);
+        ftData* data = g_ftCommonDataAccesser.getData(Fighter_GKoopa);
+        work.setFloat(static_cast<ftKoopaSpecialHiParam*>(data->extendParam[2])->unk2C, 0x11000000);
     }
 }
 

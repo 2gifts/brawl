@@ -1,4 +1,5 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#include <ft/koopa/ft_koopa_breath_status.h>
 #include <math.h>
 #include <nw4r/math/math_arithmetic.h>
 #include <so/controller/so_controller_module_impl.h>
@@ -83,12 +84,14 @@ void ftKoopaStatusUniqProcessBreath::execStatus(soModuleAccesser* moduleAccesser
                 if (ratio < minVolume) {
                     volume = minVolume;
                 }
-                moduleAccesser->getSoundModule().setSEVol(volume, handle, 0);
+                moduleAccesser->getSoundModule().setSEVol(handle, volume, 0);
             }
             soControllerModule& controller = moduleAccesser->getControllerModule();
-            int rumbleKind = 1;
+            ftKoopaBreathRumbleKind rumbleKind;
             if (ratio > 0.5f) {
-                rumbleKind = 0;
+                rumbleKind = FtKoopaBreathRumble_Strong;
+            } else {
+                rumbleKind = FtKoopaBreathRumble_Weak;
             }
             controller.setRumble(rumbleKind, 0, true, -1);
         }
@@ -100,7 +103,7 @@ void ftKoopaStatusUniqProcessBreath::execStatus(soModuleAccesser* moduleAccesser
         moduleAccesser->getWorkManageModule().setInt(frame + 1, 0x20000000);
         float angle = moduleAccesser->getWorkManageModule().getFloat(0x21000004);
         float stickY = moduleAccesser->getControllerModule().getStickY();
-        double stickMagnitude = fabs(stickY); // MATCH-ONLY: narrowed to float before the compare
+        double stickMagnitude = fabs(stickY); // the wide absolute value is narrowed for the compare (fabs + frsp)
         if ((float)stickMagnitude > 0.5f) {
             float maxAngle = moduleAccesser->getConstantFloatKirby(0xfa2);
             float minAngle = moduleAccesser->getConstantFloatKirby(0xfa3);
@@ -112,10 +115,9 @@ void ftKoopaStatusUniqProcessBreath::execStatus(soModuleAccesser* moduleAccesser
         int headNode = moduleAccesser->getWorkManageModule().getInt(0x2000000a);
         if (headNode != 0) {
             float scale = moduleAccesser->getConstantFloatKirby(0xfa5);
-            float negated = -angle;
             Vec3f rot;
+            rot.m_x = -angle * scale;
             rot.m_y = 0.0f;
-            rot.m_x = negated * scale;
             rot.m_z = 0.0f;
             moduleAccesser->getModelModule().setNodeRotate(headNode, &rot);
         }

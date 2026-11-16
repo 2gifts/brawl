@@ -557,7 +557,7 @@ void ftSamus::setupChangeSucceedWork(void* work) {
     }
     Vec2f* speed = &acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(0xFFFF));
     soPostureModule& posture = acc->getPostureModule();
-    static_cast<ftChangeSucceedWork*>(work)->activateDummyFighter(&posture.getPos(), speed, &hit.point[0][0], &hurt.point[0][0], flags, posture.getScale(), posture.getLr());
+    static_cast<ftChangeSucceedWork*>(work)->activateDummyFighter(&posture.getPos(), posture.getScale(), posture.getLr(), speed, &hit.point[0][0], &hurt.point[0][0], flags);
 }
 
 ftSamusChangeSucceedPoints::ftSamusChangeSucceedPoints() { }
