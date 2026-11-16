@@ -1,85 +1,12 @@
-// Vec2f's constructor is emitted out of line in the target; include the vector header with inlining off.
-#pragma dont_inline on
-#include <mt/mt_vector.h>
-#pragma dont_inline off
 #include <ft/ft_kinetic_energy.h>
+#include <ft/ft_kinetic_energy_controller.h>
+#include <so/kinetic/so_kinetic_module_impl.h>
+#include <so/so_kinetic_utility.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
+#include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
-
-extern "C" {
-// HYPOTHESIS: float constant from lbl_115_rodata_A8 (value not recovered; referenced by symbol)
-extern float lbl_115_rodata_A8;
-// Typeinfo references (REL-local data).
-extern char lbl_115_data_2760[];
-extern char lbl_115_data_7524[];
-extern char lbl_115_data_73FC[];
-extern char lbl_115_data_7930[];
-extern float lbl_115_rodata_AC;
-}
-
-void ftKineticEnergyDisableAndClear(int index, soModuleAccesser* moduleAccesser);
-void* __dynamic_cast(void* ptr, long vtblOffset, const void* target, const void* source, int isRef);
-
-// HYPOTHESIS: kinetic energy subclass view; only resetEnergy (slot 0x1C) is used
-class ftDiddyEnergyStub {
-public:
-    virtual ~ftDiddyEnergyStub();
-    virtual void unk0C();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void resetEnergy(int mode, Vec2f* speed, Vec3f* accel, soModuleAccesser* moduleAccesser);
-};
-
-// HYPOTHESIS: status module (soModuleEnumeration::m_statusModule); only slot 0x48 is used
-class ftDiddyStatusModuleStub {
-public:
-    virtual ~ftDiddyStatusModuleStub();
-    virtual void unk0C();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1C();
-    virtual void unk20();
-    virtual void unk24();
-    virtual void unk28();
-    virtual void unk2C();
-    virtual void unk30();
-    virtual void unk34();
-    virtual void unk38();
-    virtual void unk3C();
-    virtual void unk40();
-    virtual void unk44();
-    virtual int unk48();
-};
-
-// HYPOTHESIS: kinetic module view for the sum-speed query (slot 0x3C takes a pointer to a short flag)
-class ftDiddyKineticSumStub {
-public:
-    virtual ~ftDiddyKineticSumStub();
-    virtual void unk0C();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1C();
-    virtual void unk20();
-    virtual void unk24();
-    virtual void unk28();
-    virtual void unk2C();
-    virtual void unk30();
-    virtual void unk34();
-    virtual void unk38();
-    virtual Vec2f unk3C(void* flag);
-};
-
-// Out-of-line Vec2f(float, float) constructor: the target calls its own copy (symbol __ct__5Vec2fFff).
-extern "C" Vec2f* __ct__5Vec2fFff(Vec2f* out, float x, float y) {
-    out->m_x = x;
-    out->m_y = y;
-    return out;
-}
 
 class ftDiddyStatusUniqProcessSpecialBarrelJetDamage : public soStatusUniqProcess {
 public:
@@ -94,69 +21,62 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::initStatus(soModuleAccesser
     moduleAccesser->getWorkManageModule().onFlag(0x1200003d);
     ftKineticEnergyDisableAndClear(3, moduleAccesser);
     ftKineticEnergyDisableAndClear(1, moduleAccesser);
-    s16 isRef = 1;
-    ftDiddyEnergyStub* energy1 = static_cast<ftDiddyEnergyStub*>(__dynamic_cast(
-        moduleAccesser->getKineticModule().getEnergy(1), 0, lbl_115_data_7524, lbl_115_data_2760, isRef));
-    ftDiddyEnergyStub* energy4 = static_cast<ftDiddyEnergyStub*>(__dynamic_cast(
-        moduleAccesser->getKineticModule().getEnergy(4), 0, lbl_115_data_73FC, lbl_115_data_2760, isRef));
+    ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
+    ftKineticEnergyDamage& damage = dynamic_cast<ftKineticEnergyDamage&>(*moduleAccesser->getKineticModule().getEnergy(4));
 
     Vec2f sumSpeed;
-    int kind = reinterpret_cast<ftDiddyStatusModuleStub*>(moduleAccesser->m_enumerationStart->m_statusModule)->unk48();
-    if (kind == 0x127) {
-    } else if (kind > 0x127) {
-        if (kind < 0x129) {
-            if (moduleAccesser->getWorkManageModule().isFlag(0x22000013)) {
-                sumSpeed.m_x = moduleAccesser->getWorkManageModule().getFloat(0x21000009);
-                sumSpeed.m_y = moduleAccesser->getWorkManageModule().getFloat(0x2100000a);
-            } else {
-                s16 flag = 1;
-                sumSpeed = reinterpret_cast<ftDiddyKineticSumStub*>(moduleAccesser->m_enumerationStart->m_kineticModule)->unk3C(&flag);
-            }
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x128:
+        if (moduleAccesser->getWorkManageModule().isFlag(0x22000013)) {
+            sumSpeed.m_x = moduleAccesser->getWorkManageModule().getFloat(0x21000009);
+            sumSpeed.m_y = moduleAccesser->getWorkManageModule().getFloat(0x2100000a);
+        } else {
+            sumSpeed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         }
-    } else if (kind >= 0x126) {
+        break;
+    case 0x126:
         sumSpeed.m_x = moduleAccesser->getWorkManageModule().getFloat(0x21000009);
         sumSpeed.m_y = moduleAccesser->getWorkManageModule().getFloat(0x2100000a);
+        break;
+    case 0x127:
+        break;
     }
 
-    Vec2f speed4;
-    energy4->resetEnergy(2, __ct__5Vec2fFff(&speed4, sumSpeed.m_x, sumSpeed.m_y),
-                         &Vec3f(lbl_115_rodata_A8, lbl_115_rodata_A8, lbl_115_rodata_A8), moduleAccesser);
-    *(reinterpret_cast<u8*>(energy4) + 5) |= 0x80;
+    damage.resetEnergy(2, &Vec2f(sumSpeed.m_x, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    damage.enable();
 
-    Vec2f speed1(lbl_115_rodata_A8, lbl_115_rodata_A8);
-    energy1->resetEnergy(0, &speed1, &Vec3f(lbl_115_rodata_A8, lbl_115_rodata_A8, lbl_115_rodata_A8), moduleAccesser);
-    *(reinterpret_cast<u8*>(energy1) + 5) |= 0x80;
+    gravity.resetEnergy(0, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    gravity.enable();
 }
 
-// MATCH-ONLY: keep the typeinfo flag in one register for both the cast and the sum-speed query.
+// TODO(W7): 98%. Only the head differs: the target tests `cmpwi 0x127; beq; bge; b end; cmpwi 0x129; bge end` (a
+// compare tree whose low side has no case), we fold it into one `cmpwi 0x128`. Tried: if/else cascades, `default`,
+// `return` vs `break` cases, an extra case 0x126 or 0x129. The remaining stack slots differ too: the target keeps the
+// getSumSpeed result in a hidden slot plus a named copy and the Vec2f below them (we elide the copy).
+// MATCH-ONLY: copy propagation off plus the `zero` local keep the int 0 (resetEnergy mode) in a callee-saved register
+// next to the shared 1 (flag), as the target does; the target's source for that 0 is not known.
 #pragma opt_propagation off
 void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::execStatus(soModuleAccesser* moduleAccesser) {
-    int kind = reinterpret_cast<ftDiddyStatusModuleStub*>(moduleAccesser->m_enumerationStart->m_statusModule)->unk48();
-    if (kind == 0x127) {
-        return;
-    }
-    if (kind > 0x127) {
-        if (kind >= 0x129) {
-            return;
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0x126: // HYPOTHESIS: the status kinds 0x126 and 0x127 do nothing per frame (0x126 is handled in initStatus)
+    case 0x127:
+        break;
+    case 0x128:
+        if (moduleAccesser->getWorkManageModule().getFloat(0x2100000b) > 0.0f) {
+            moduleAccesser->getWorkManageModule().subFloat(1.0f, 0x2100000b);
+            if (moduleAccesser->getWorkManageModule().getFloat(0x2100000b) <= 0.0f) {
+                ftKineticEnergyController& controller =
+                    dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
+                int zero = 0;
+                Vec2f sumSpeed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
+                Vec2f speed(sumSpeed.m_x, 0.0f);
+                controller.resetEnergy(zero, &speed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                controller.enable();
+                ftKineticEnergyDisableAndClear(4, moduleAccesser);
+            }
         }
-    } else {
-        return;
+        break;
     }
-    if (!(moduleAccesser->getWorkManageModule().getFloat(0x2100000b) > lbl_115_rodata_A8)) {
-        return;
-    }
-    moduleAccesser->getWorkManageModule().subFloat(lbl_115_rodata_AC, 0x2100000b);
-    if (!(moduleAccesser->getWorkManageModule().getFloat(0x2100000b) > lbl_115_rodata_A8)) {
-        return;
-    }
-    s16 flag = 1;
-    ftDiddyEnergyStub* energy2 = static_cast<ftDiddyEnergyStub*>(__dynamic_cast(
-        moduleAccesser->getKineticModule().getEnergy(2), 0, lbl_115_data_7930, lbl_115_data_2760, flag));
-    Vec2f sumSpeed = reinterpret_cast<ftDiddyKineticSumStub*>(moduleAccesser->m_enumerationStart->m_kineticModule)->unk3C(&flag);
-    Vec2f speed(sumSpeed.m_x, lbl_115_rodata_A8);
-    energy2->resetEnergy(0, &speed, &Vec3f(lbl_115_rodata_A8, lbl_115_rodata_A8, lbl_115_rodata_A8), moduleAccesser);
-    *(reinterpret_cast<u8*>(energy2) + 5) |= 0x80;
-    ftKineticEnergyDisableAndClear(4, moduleAccesser);
 }
 #pragma opt_propagation reset
 

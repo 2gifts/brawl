@@ -11,11 +11,13 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
+// TODO(W6): `pickup` is 99.15%: the native code forwards the `u8 unk` argument with a plain `mr r6, r28`, ours adds a
+// `clrlwi r6, r28, 24` (tried: u32 and u8 parameters on the extern stand-in, and the qualified base call).
 // sora_melee: soItemPickTransactorImpl::check and ::pickup (the map names); they stay unnamed there.
 extern "C" bool fn_27_BE760(soItemPickTransactorImpl* transactor, soItemSearch* search, soItemInfo* info,
                             soModuleAccesser* moduleAccesser);
 extern "C" bool fn_27_BE864(soItemPickTransactorImpl* transactor, soItemSearch* search, soModuleAccesser* moduleAccesser,
-                            u32 unk, itParam::TraitMask mask, u32 unk2, u32 index);
+                            u8 unk, itParam::TraitMask mask, u32 unk2, u32 index);
 
 // The item pick transactor of King Dedede's item manage module (g_ftDededeItemPickTransactor): a Waddle Dee found by the
 // search counts as a pickable item, and picking it up starts status 0x129.

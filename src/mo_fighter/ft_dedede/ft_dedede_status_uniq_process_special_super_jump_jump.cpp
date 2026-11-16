@@ -21,6 +21,17 @@ public:
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int status);
 };
 
+// BYTES: a second copy of flipRotate for initStatus; MWCC refuses to inline one helper into both callers, and the
+// original inlines the same Y-flip body in both.
+static inline Vec3f flipRotate2(const Vec3f& original) {
+    float z = original.m_z;
+    Vec3f rotate;
+    rotate.m_x = original.m_x;
+    rotate.m_y = 180.0f;
+    rotate.m_z = z;
+    return rotate;
+}
+
 void ftDededeStatusUniqProcessSpecialSuperJumpJump::initStatus(soModuleAccesser* moduleAccesser) {
     float stickX = moduleAccesser->getControllerModule().getStickX();
     float horizontalSpeed = stickX * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb7, 0);
@@ -50,13 +61,7 @@ void ftDededeStatusUniqProcessSpecialSuperJumpJump::initStatus(soModuleAccesser*
     moduleAccesser->getWorkManageModule().onFlag(0x22000011);
     if (moduleAccesser->getPostureModule().getLr() == -1.0f) {
         Vec3f original = moduleAccesser->getModelModule().getNodeRotate(7);
-        // MATCH-ONLY: retain the returned Z load before assembling the native rotation copy.
-        float z = original.m_z;
-        Vec3f rotate;
-        rotate.m_x = original.m_x;
-        rotate.m_y = 180.0f;
-        rotate.m_z = z;
-        moduleAccesser->getModelModule().setNodeRotate(7, &rotate);
+        moduleAccesser->getModelModule().setNodeRotate(7, &flipRotate2(original));
     }
     moduleAccesser->getWorkManageModule().offFlag(0x22000015);
 }

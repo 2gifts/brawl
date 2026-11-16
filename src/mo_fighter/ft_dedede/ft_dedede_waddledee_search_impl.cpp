@@ -24,6 +24,9 @@ struct ftDededeWaddledeeContact {
     Vec2f m_offset; // 0x10
 };
 
+// TODO(W6): `searchWaddledee` is 99.23%: the native code keeps the "pickable" flag in its own saved register (r20, `li r20, 0`
+// right after the sub-kind query) while ours merges it into the register holding the shared zero constant (r29), so the
+// frame saves one register fewer. Tried: int/bool flag, nested ifs, if/else, a function-scope flag, a plain `&&` return.
 static inline bool isPickableWaddledee(int kind, gfTask* task) {
     bool pickable = false;
     if (kind == 0x33 && dynamic_cast<wnDededeFollower*>(task)->isPickup()) {

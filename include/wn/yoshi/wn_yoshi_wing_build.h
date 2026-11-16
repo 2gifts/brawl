@@ -46,4 +46,6 @@ public:
     wnYoshiWingParamAccesser m_paramAccesser;
     wnYoshiWing(s32 articleId, const wnArticleBuildInfo& info, const wnYoshiWingData* data);
     virtual ~wnYoshiWing() { }
+    // HYPOTHESIS: parameter meanings from the fighter's call: the founder task, the effect resource and the team.
+    void activate(int founderTaskId, int resourceId, int team);
 };

@@ -6,6 +6,10 @@
 #include <so/article/so_generate_article_manage_module.h>
 #include <so/so_external_value_accesser.h>
 #include <it/item.h>
+// TODO(W1): all functions are exact, the weak base-process defaults are in the original order, and the class tables match,
+// but the unit cannot be linked yet: the original .data starts at 0x640C (4 mod 8) while mwcc gives this object an
+// 8-aligned .data, so the link inserts 4 bytes and shifts everything after it (dtk warns "expected 8, but starts at 4"
+// for this split). The base initStatus default also lands after the constructor instead of right after the destructor.
 void ftWarioStatusUniqProcessSpecialS::initStatus(soModuleAccesser* a) {
     // BYTES: keep the native declaration order for module registers.
     const soModuleEnumeration* modules = a->m_enumerationStart;
@@ -50,19 +54,20 @@ void ftWarioStatusUniqProcessSpecialS::initStatus(soModuleAccesser* a) {
     }
     work->offFlag(0x12000041);
 }
+// Shared virtual defaults are emitted in their original function order; initStatus follows the destructor.
+bool soStatusUniqProcess::checkTransitionPrecede(soModuleAccesser*, void*, int) { return true; }
+void soStatusUniqProcess::leaveStop(soModuleAccesser*, int, bool) {}
+bool soStatusUniqProcess::onChangeLr(soModuleAccesser*, float, float) { return false; }
+void soStatusUniqProcess::checkAttack(soModuleAccesser*, void*, float) {}
+bool soStatusUniqProcess::checkDamage(soModuleAccesser*, void*) { return false; }
+void soStatusUniqProcess::execFixCamera(soModuleAccesser*) {}
+void soStatusUniqProcess::execFixPos(soModuleAccesser*) {}
+void soStatusUniqProcess::execFixPosCounter(soModuleAccesser*) {}
+void soStatusUniqProcess::execMapCorrection(soModuleAccesser*) {}
+void soStatusUniqProcess::execStop(soModuleAccesser*) {}
+void soStatusUniqProcess::execStatus(soModuleAccesser*) {}
+void soStatusUniqProcess::exitStatus(soModuleAccesser*, int) {}
+
 ftWarioStatusUniqProcessSpecialS g_ftWarioStatusUniqProcessSpecialS;
 
-// MATCH-ONLY: these shared base callbacks retain their original module-local ownership.
-void soStatusUniqProcess::initStatus(soModuleAccesser*) {  }
-void soStatusUniqProcess::exitStatus(soModuleAccesser*, int) {  }
-void soStatusUniqProcess::execStatus(soModuleAccesser*) {  }
-void soStatusUniqProcess::execFixPos(soModuleAccesser*) {  }
-bool soStatusUniqProcess::checkDamage(soModuleAccesser*, void*) { return false; }
-void soStatusUniqProcess::execStop(soModuleAccesser*) {  }
-void soStatusUniqProcess::execMapCorrection(soModuleAccesser*) {  }
-void soStatusUniqProcess::execFixPosCounter(soModuleAccesser*) {  }
-void soStatusUniqProcess::execFixCamera(soModuleAccesser*) {  }
-void soStatusUniqProcess::checkAttack(soModuleAccesser*, void*, float) {  }
-bool soStatusUniqProcess::onChangeLr(soModuleAccesser*, float, float) { return false; }
-void soStatusUniqProcess::leaveStop(soModuleAccesser*, int, bool) {  }
-bool soStatusUniqProcess::checkTransitionPrecede(soModuleAccesser*, void*, int) { return true; }
+inline void soStatusUniqProcess::initStatus(soModuleAccesser*) {}

@@ -56,6 +56,8 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetCharge::execStatus(soModuleAccesser
     moduleAccesser->getWorkManageModule().setFloat(moduleAccesser->getMotionModule().getWeight(), 0x2100000c);
 }
 
+// TODO(W7): 99.36%, one instruction placed differently: the original loads the 1.0f argument of add2ndAnimChr (lfs f2)
+// after `li r5, 0`, we load it before `mr r4`. Tried a frame local, a rate local, an int kind copy, a bool local, `1.0f * 1.0f`, 0 for false.
 void ftDiddyStatusUniqProcessSpecialBarrelJetCharge::execFixPos(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getSituationModule().isSituationChanged() == true) {
         if (moduleAccesser->getSituationModule().getKind() != 0) {

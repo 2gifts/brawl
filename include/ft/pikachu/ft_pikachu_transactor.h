@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ft/ft_transactor.h>
+#include <ft/kirby/ft_kirby_copy_ability_process.h>
 #include <types.h>
 
 class soArticle;
@@ -8,7 +9,14 @@ class soModuleAccesser;
 class wnPikachuThunderJolt;
 
 // Pikachu's per-fighter helper (the code is in sora_melee): starts the Thunder Jolt article.
-class ftPikachuTransactor : public ftTransactor {
+// The sora_melee unit (FT_PIKACHU_TRANSACTOR_COPY_ABILITY_BASE) derives from ftKirbyCopyAbilityProcess like the Yoshi and Wario
+// transactors, as the vtable and RTTI in the original show; the fighter module keeps the ftTransactor view.
+#ifdef FT_PIKACHU_TRANSACTOR_COPY_ABILITY_BASE
+typedef ftKirbyCopyAbilityProcess ftPikachuTransactorBase;
+#else
+typedef ftTransactor ftPikachuTransactorBase;
+#endif
+class ftPikachuTransactor : public ftPikachuTransactorBase {
 public:
     ftPikachuTransactor();
     virtual ~ftPikachuTransactor();

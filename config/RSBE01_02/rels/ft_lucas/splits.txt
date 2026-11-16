@@ -97,6 +97,9 @@ mo_fighter/ft_lucas/wn_lucas_pk_thunder_status_uniq_process_move.cpp:
 
 mo_fighter/ft_lucas/wn_lucas_pk_thunder_child.cpp:
 	.text       start:0x0001A19C end:0x0001C364
+	.rodata     start:0x00000130 end:0x00000148
+	.data       start:0x0000A300 end:0x0000A8B0
+	.bss        start:0x000003D8 end:0x00000430
 
 mo_fighter/ft_lucas/wn_lucas_pk_thunder_child_status_uniq_process_move.cpp:
 	.text       start:0x0001C364 end:0x0001C5F0

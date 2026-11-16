@@ -1,3 +1,4 @@
+#define FT_PIKACHU_TRANSACTOR_COPY_ABILITY_BASE
 #include <StaticAssert.h>
 #include <ft/ft_entry.h>
 #include <ft/ft_resource_id_accesser_impl.h>
@@ -39,6 +40,8 @@ bool ftPikachuTransactor::activeArticle(soArticle* article, soModuleAccesser* ac
 
 // The jolt starts from the top node, offset by the ground or air spawn constants, at the ground's depth.
 bool ftPikachuTransactor::activeArticle(wnPikachuThunderJolt* weapon, soModuleAccesser* acc, u32 etcResId) {
+    // BYTES: the task id is declared first and assigned at the end; that gives the original's saved-register order.
+    int founderTaskId;
     Vec3f offset;
     if (acc->getSituationModule().getKind() == 0) {
         offset.m_x = 0.0f;
@@ -58,8 +61,9 @@ bool ftPikachuTransactor::activeArticle(wnPikachuThunderJolt* weapon, soModuleAc
     if (acc->getStageObject().soGetSubKind() == Fighter_Kirby) {
         kind = 0xe;
     }
-    int founderTaskId = acc->getStageObject().m_taskId;
-    weapon->activate(founderTaskId, etcResId, &pos, acc->getTeamModule().getTeam()->getNo(), kind,
-                     acc->getPostureModule().getLr());
+    // BYTES: the team module reference is bound before the task id read (load order of the original).
+    soTeamModule& team = acc->getTeamModule();
+    founderTaskId = acc->getStageObject().m_taskId;
+    weapon->activate(founderTaskId, etcResId, &pos, team.getTeam()->getNo(), kind, acc->getPostureModule().getLr());
     return false;
 }

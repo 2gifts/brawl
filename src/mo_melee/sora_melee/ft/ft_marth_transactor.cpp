@@ -30,16 +30,20 @@ ftMarthTransactor::~ftMarthTransactor() { }
 
 // Kirby's copy of Marth draws the sword: simple article 0xd with entry 14 of Kirby's simple-article data.
 bool ftMarthTransactor::activeArticle(soArticle* article, soModuleAccesser* acc) {
+    // BYTES: the three values are declared first and assigned in the branch; that fixes the saved-register order.
+    u32 resId;
+    int founderTaskId;
+    wnSimple* sword;
     if (article->getArticleId() == 0xd) {
-        wnSimple* sword = dynamic_cast<wnSimple*>(article);
+        sword = dynamic_cast<wnSimple*>(article);
         if (sword == NULL) {
             return false;
         }
         Vec3f zero(0.0f, 0.0f, 0.0f);
-        int founderTaskId = acc->getStageObject().m_taskId;
         soResourceModule& resource = acc->getResourceModule();
+        founderTaskId = acc->getStageObject().m_taskId;
         const ftKirbySimpleDataEntry* table = getKirbySimpleDataTable();
-        u32 resId = dynamic_cast<ftResourceIdAccesserImpl&>(*resource.getResourceIdAccesser()).getKirbyResId(Fighter_Marth);
+        resId = dynamic_cast<ftResourceIdAccesserImpl&>(*resource.getResourceIdAccesser()).getKirbyResId(Fighter_Marth);
         sword->activate(founderTaskId, resId, reinterpret_cast<const wnSimpleData*>(&table[14]), false, false, zero,
             0xffff, 0xffff, 0, true, false, -1, 0, false, 2, 0, false);
         return true;

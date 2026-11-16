@@ -15,6 +15,13 @@
 // The status unique process of the bolt (wn_ness_pk_thunder_child_status_uniq_process_move.cpp).
 extern soStatusUniqProcess g_wnNessPKThunderChildStatusUniqProcessMove;
 
+// TODO(link): every function is exact (100%), and the .rodata/.data/.bss ranges are carved in ft_ness's splits.txt (hash neutral). The
+//   unit does not link yet: the original's module accesser builder destructor calls a 0x40-byte Builder<soParamCustomizeModuleImpl>
+//   destructor (a plain delete, no member destructor call; the module map labels it soInstanceManagerFullProperty), ours calls
+//   a 0x60-byte one that also calls the out-of-line soParamCustomizeModule destructor, so the REL grows by 0x60 bytes of text.
+//   objdiff hides this (relocation names only). Fix the Builder<soParamCustomizeModuleImpl> destructor form (see Mario fireball
+//   and FT_PARAM_CUSTOMIZE_BUILDER_DTOR_NOINLINE in wn_module_accesser_builder.h), then flip to Matching.
+
 wnNessPKThunderChild::wnNessPKThunderChild(s32 articleId, const wnArticleBuildInfo& info, const wnNessPKThunderChildData* data) :
     wnWeaponBuilder<wnNessPKThunderChildModuleAccesserBuildConfig>(
         "NessPKThunderChild", articleId, info,
@@ -28,12 +35,9 @@ wnNessPKThunderChild::wnNessPKThunderChild(s32 articleId, const wnArticleBuildIn
     Weapon::deactivate(false);
 }
 
-// MATCH-ONLY: without this the effect id folds into the call; the original keeps it in a register across the vector temporaries.
-#pragma push
-#pragma opt_propagation off
-void wnNessPKThunderChild::activate(int founderTaskId, int linkTaskId, int team, int kind) {
-    wnActivateDesc desc;
-    Vec3f origin(0.0f, 0.0f, 0.0f);
+// BYTES: the original builds the descriptor in an inlined helper that takes the start position as a temporary; as a named local
+// the zero vector gets the wrong stack slot (above the link position instead of below it).
+static inline void initChildDesc(wnActivateDesc& desc, int founderTaskId, int team, const Vec3f& pos) {
     desc.founderTaskId = founderTaskId;
     desc.resourceId = 0xFFFF;
     desc.unk8 = 0xFFFF;
@@ -42,7 +46,8 @@ void wnNessPKThunderChild::activate(int founderTaskId, int linkTaskId, int team,
     desc.unk14 = -1;
     desc.unk18 = 0;
     desc.unk1C = 0;
-    __memcpy(&desc.pos, &origin, sizeof(Vec3f));
+    // BYTES: a word copy; the unit's Vec3f assignment is the out-of-line float one.
+    __memcpy(&desc.pos, &pos, sizeof(Vec3f));
     desc.lr = 1.0f;
     desc.team = team;
     desc.life = 0;
@@ -55,7 +60,13 @@ void wnNessPKThunderChild::activate(int founderTaskId, int linkTaskId, int team,
     desc.flagsMidHigh = 0;
     desc.flagsMidLow = 1;
     desc.flagsLow = 0;
-    desc.unk4DHigh = 0;
+    desc.flag4DBit7 = 0;
+    desc.flag4DBit6 = 0;
+}
+
+void wnNessPKThunderChild::activate(int founderTaskId, int linkTaskId, int team, int kind) {
+    wnActivateDesc desc;
+    initChildDesc(desc, founderTaskId, team, Vec3f(0.0f, 0.0f, 0.0f));
     Weapon::activate(&desc);
     soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
     soPostureModule& posture = m_moduleAccesser->getPostureModule();
@@ -72,16 +83,13 @@ void wnNessPKThunderChild::activate(int founderTaskId, int linkTaskId, int team,
             m_moduleAccesser->getSoundModule().playStatusSE(static_cast<SndID>(0xe7c), true, 0);
         }
         soEffectModule& effect = m_moduleAccesser->getEffectModule();
-        int effectId = (kind == 5);
-        effectId += 0xb0003;
+        int effectId = (kind == 5) ? 0xb0004 : 0xb0003;
         effect.reqFollow(static_cast<EfID>(effectId), 0, &Vec3f(0.0f, 0.0f, 4.0f), &Vec3f(0.0f, 0.0f, 0.0f), 2.0f, false, 0, 0, -1);
         updateNodeSRT();
         link.setAttribute(5, static_cast<soLinkConnection::Attribute>(0xd), true);
     }
     status.changeStatusForce(0, m_moduleAccesser);
 }
-
-#pragma pop
 
 bool wnNessPKThunderChild::notifyEventCollisionAttackCheck(u32 flags) {
     return false;

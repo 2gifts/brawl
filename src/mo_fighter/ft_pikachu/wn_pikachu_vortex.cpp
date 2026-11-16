@@ -31,14 +31,26 @@ wnPikachuVortex::wnPikachuVortex(s32 articleId, const wnArticleBuildInfo& info, 
                                   info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
                                   (s32)&data->unk38, 0, 0, 0, 0, 0, 0)),
     m_param(data->m_param), m_paramAccesser(data->m_param) {
+    soModuleAccesser* accesser = m_moduleAccesser;
     soStatusUniqProcess* uniqProcs[3];
     uniqProcs[0] = &g_wnPikachuVortexStatusUniqProcessNormal;
     uniqProcs[1] = &g_wnPikachuVortexStatusUniqProcessAttack;
     uniqProcs[2] = &g_wnPikachuVortexStatusUniqProcessDischarge;
-    m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 3);
+    accesser->getStatusModule().addRangeUniqProc(uniqProcs, 3);
     Weapon::deactivate(false);
 }
 
+// This article owns the empty teardown of the parameter accesser base.
+#pragma push
+#pragma dont_inline on
+soParamAccesser::~soParamAccesser() { }
+#pragma pop
+
+// TODO(nonmatching): activate (98.93%): only the callee-saved numbering differs. The original keeps `this` in r27 and gives the
+//   module accesser r29, the work manage reference r28 and the kinetic reference r27; ours coalesces the accesser into the
+//   register of `this` (r27) and gives the work manage reference r29. Tried: the flag byte pair as two separate bit writes
+//   (applied), the kinetic and the last work manage reference taken together (applied, 97.99% -> 98.93%), the accesser declared
+//   before the descriptor, a reused work manage pointer, inline float locals, and the reverse kinetic/work manage order.
 // The vortex is activated at the position of Pikachu with the Final Smash power; both looks of the effect start disabled.
 void wnPikachuVortex::activate(int founderTaskId, int unused, int team, const Vec3f* position) {
     wnActivateDesc desc;
@@ -63,7 +75,8 @@ void wnPikachuVortex::activate(int founderTaskId, int unused, int team, const Ve
     desc.flagsMidHigh = 0;
     desc.flagsMidLow = 1;
     desc.flagsLow = 0;
-    desc.unk4DHigh = 0;
+    desc.flag4DBit7 = 0;
+    desc.flag4DBit6 = 0;
     Weapon::activate(&desc);
     soModuleAccesser* accesser = m_moduleAccesser;
     soWorkManageModule& workManage = accesser->getWorkManageModule();
@@ -83,12 +96,13 @@ void wnPikachuVortex::activate(int founderTaskId, int unused, int team, const Ve
     workManage2.setFloat(followSpeed, 0x11000003);
     workManage2.setFloat(followSpeed, 0x11000004);
     workManage2.setFloat(followAccel, 0x11000005);
+    soWorkManageModule& workManage3 = accesser->getWorkManageModule();
     soKineticModule& kinetic = accesser->getKineticModule();
     kinetic.unableEnergyAll();
     kinetic.clearSpeedAll();
     kinetic.getEnergy(0)->enable();
-    workManage2.setFloat(0.0f, 0x11000001);
-    workManage2.setFloat(0.0f, 0x11000002);
+    workManage3.setFloat(0.0f, 0x11000001);
+    workManage3.setFloat(0.0f, 0x11000002);
     accesser->getStatusModule().changeStatusForce(0, accesser);
 }
 
@@ -136,6 +150,20 @@ bool wnPikachuVortex::notifyEventCollisionAttackCheck(u32 flags) {
     return false;
 }
 
+// HYPOTHESIS: look 0 is the vortex while it is pulling in, look 1 the discharge.
+void wnPikachuVortexSetEffectLook(soModuleAccesser* moduleAccesser, int look) {
+    switch (look) {
+    case 0:
+        wnPikachuVortexRemoveEffect(moduleAccesser, 0x10000006);
+        wnPikachuVortexSetEffect(moduleAccesser, 0x10000005, static_cast<EfID>(0xE80002));
+        break;
+    case 1:
+        wnPikachuVortexRemoveEffect(moduleAccesser, 0x10000005);
+        wnPikachuVortexSetEffect(moduleAccesser, 0x10000006, static_cast<EfID>(0xE80001));
+        break;
+    }
+}
+
 void wnPikachuVortexSetEffect(soModuleAccesser* moduleAccesser, u32 index, EfID effectId) {
     soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
     soEffectModule& effect = moduleAccesser->getEffectModule();
@@ -152,18 +180,4 @@ void wnPikachuVortexRemoveEffect(soModuleAccesser* moduleAccesser, u32 index) {
         moduleAccesser->getEffectModule().remove(handle);
     }
     workManage.setInt(0, index);
-}
-
-// HYPOTHESIS: look 0 is the vortex while it is pulling in, look 1 the discharge.
-void wnPikachuVortexSetEffectLook(soModuleAccesser* moduleAccesser, int look) {
-    switch (look) {
-    case 0:
-        wnPikachuVortexRemoveEffect(moduleAccesser, 0x10000006);
-        wnPikachuVortexSetEffect(moduleAccesser, 0x10000005, static_cast<EfID>(0xE80002));
-        break;
-    case 1:
-        wnPikachuVortexRemoveEffect(moduleAccesser, 0x10000005);
-        wnPikachuVortexSetEffect(moduleAccesser, 0x10000006, static_cast<EfID>(0xE80001));
-        break;
-    }
 }

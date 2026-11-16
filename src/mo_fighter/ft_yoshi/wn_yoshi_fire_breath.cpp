@@ -70,6 +70,11 @@ void wnYoshiFireBreath::activate(int founderTaskId, int team, const Vec3f* posit
     accel.m_y *= -1.0f;
     normal.m_speed = speed;
     normal.m_accel = accel;
+    // TODO(nonmatching): activate (99.96%): only the stack slots differ. In the original the braking vector lives in the
+    //   lowest slot (below the two return temporaries of the Vec2f multiplications); as a named local it sits above them, as a
+    //   by-value temporary (`normal.m_brake = Vec2f(...)`) the slots match but one `mr r4,r3` replaces a re-materialised address
+    //   (99.56%); an address-taken temporary (inline assignment helper, `*&Vec2f(...)`) or a block-scoped/reference local is back at the
+    //   higher slot.
     Vec2f brake(ftyoshi::ABS(accel.m_x), ftyoshi::ABS(accel.m_y));
     normal.m_brake = brake;
     normal.m_speedTarget = speed;

@@ -54,6 +54,10 @@ public:
 // TODO(S6): 99.3%; the only difference is that the original loads the zoom constant (1.0f) before it forms the address
 // of the second Vec2f copy, ours after it. Tried: constants as helper parameters or literals, a named cmSubject local
 // (worse, shifts a saved register), direct startZoomIn call with temporaries or named Vec2f locals (93.7%/96.4%).
+//   Batch 8 also tried (no change unless noted): zoom before the vectors in the helper, a float zoom local in the helper,
+//   zoom as const float& (worse) or double, an inline returning 1.0f, frame as int, distance as a helper parameter, a
+//   CameraController* local (98.0%), the getInstance results passed into the helper (99.0%), a nested helper taking the
+//   cmSubject (99.0%), copy-initialized Vec2f locals with a direct call (96.5%). The lfs stays after both addi in every form.
 static inline void zoomIn(soCameraSubject* subject, u16 frame, Vec2f rotation, Vec2f targetRotation, float zoom) {
     CameraController::getInstance()->startZoomIn(subject->getInstance(), frame, rotation, targetRotation, zoom, 100.0f);
 }

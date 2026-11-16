@@ -54,6 +54,11 @@ void wnWarioBikeStatusUniqProcessUtility::execStatus(soModuleAccesser* a) {
     work.setFloat(phase11, 0x21000005);
     work.setFloat(phase17, 0x21000004);
 }
+// TODO(W1): 98.64%, instructions and branches are identical; only the callee-saved GPR numbering differs. The original
+// ranks work, the wheelie flag and the two contact flags above `a` and the rodata base (r31..r28, then a=r27,
+// status=r26, rodata=r25, posture=r24, model=r23, ground=r22); ours ranks the rodata base and posture above them and
+// saves r23..r31 plus r22 differently. Tried without effect: moving the contact/wheelie/lr/angle11 declarations,
+// int instead of bool flags, declaring the hit/normal vectors later.
 void wnWarioBikeStatusUniqProcessUtility::execMapCorrection(soModuleAccesser* a) {
     soWorkManageModule& work = a->getWorkManageModule();
     soPostureModule& posture = a->getPostureModule();

@@ -25,35 +25,42 @@ struct ftYoshiCaptureNodeEvent : soLinkEventArgs {
 ftYoshiTransactor::ftYoshiTransactor() { }
 ftYoshiTransactor::~ftYoshiTransactor() { }
 
+// TODO(W5): all nine functions are exact; the unit is not linked. The original's .data holds the whole wnYoshiTamago
+// RTTI group (0x82768..0x828D8: the class name, a base list that includes wnWeaponBuilder<wnYoshiTamagoModuleAccesser
+// BuildConfig> and that builder's own RTTI) before the transactor and status vtables. This unit only sees the call-side
+// Weapon view of wnYoshiTamago (wn/yoshi/wn_yoshi_tamago.h without WN_WEAPON_BUILDER: 0x84-byte base list, no builder RTTI)
+// and its status vtable comes first; defining WN_WEAPON_BUILDER here fails inside gf_3d_scene.h (error 10402).
+// BYTES: the original expands activeArticle1 into activeArticle and also emits it out of line; the inline helper
+// reproduces the expansion (its own copy of the same body) while activeArticle1 below keeps the standalone code.
+static inline bool activateTamago(wnYoshiTamago* weapon, soModuleAccesser* acc, u32 resourceId) {
+    int founderTaskId;
+    int captureNode = -1;
+    int captureStatus = g_ftKirbyCopyAbilityIdConverter.convOrigToCorrectId(0, 0x118, acc, 0);
+    Vec3f position(0.0f, 0.0f, 0.0f);
+    if (acc->getStatusModule().getStatusKind() == captureStatus) {
+        founderTaskId = acc->getLinkModule().getNodeTaskId(0);
+        ftYoshiCaptureNodeEvent event;
+        acc->getLinkModule().sendEventNodes(0, event, 0);
+        captureNode = event.captureNode;
+    } else {
+        int node = acc->getModelModule().getCorrectNodeId(0x131);
+        position = acc->getModelModule().getNodeGlobalPosition(node, false);
+        founderTaskId = acc->getStageObject().m_taskId;
+    }
+    soTeamModule& team = acc->getTeamModule();
+    float lr = acc->getPostureModule().getLr();
+    int teamNo = team.getTeam()->getNo();
+    weapon->activate(founderTaskId, resourceId, teamNo, &position, captureNode, lr);
+    return true;
+}
+
 bool ftYoshiTransactor::activeArticle(soArticle* article, soModuleAccesser* acc) {
-    Vec3f position;
     switch (article->getArticleId()) {
     case 13: {
         wnYoshiTamago* weapon = dynamic_cast<wnYoshiTamago*>(article);
         ftResourceIdAccesserImpl& resources = dynamic_cast<ftResourceIdAccesserImpl&>(
             *acc->getResourceModule().getResourceIdAccesser());
-        u32 resourceId = resources.getKirbyResId(4);
-        int captureNode = -1;
-        int captureStatus = g_ftKirbyCopyAbilityIdConverter.convOrigToCorrectId(0, 0x118, acc, 0);
-        int founderTaskId;
-        position.m_x = 0.0f;
-        position.m_y = 0.0f;
-        position.m_z = 0.0f;
-        if (acc->getStatusModule().getStatusKind() == captureStatus) {
-            founderTaskId = acc->getLinkModule().getNodeTaskId(0);
-            ftYoshiCaptureNodeEvent event;
-            acc->getLinkModule().sendEventNodes(0, event, 0);
-            captureNode = event.captureNode;
-        } else {
-            int node = acc->getModelModule().getCorrectNodeId(0x131);
-            position = acc->getModelModule().getNodeGlobalPosition(node, false);
-            founderTaskId = acc->getStageObject().m_taskId;
-        }
-        soTeamModule& team = acc->getTeamModule();
-        float lr = acc->getPostureModule().getLr();
-        int teamNo = team.getTeam()->getNo();
-        weapon->activate(founderTaskId, resourceId, teamNo, &position, captureNode, lr);
-        return true;
+        return activateTamago(weapon, acc, resources.getKirbyResId(4));
     }
     default:
         return false;
@@ -103,15 +110,6 @@ public:
 
 ftYoshiStatusUniqProcessSpecialNSwallow g_ftYoshiStatusUniqProcessSpecialNSwallow;
 
-void ftYoshiStatusUniqProcessSpecialNSwallow::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
-    if (nextStatus == 0x118) {
-        return;
-    }
-    if (nextStatus == 0x15b) {
-        return;
-    }
-    static_cast<soCatchModule*>(moduleAccesser->m_enumerationStart->m_catchModule)->catchCut(false, false);
-}
 // Fighter::notifyEventLink handles 0x1d by hiding the captured fighter and
 // disabling its hit/ground collision. Event 0x1e selects its egg-capture status
 // and returns the hit group and hit number used by the absolute attack.
@@ -159,6 +157,15 @@ void ftYoshiStatusUniqProcessSpecialNSwallow::execFixPosCounter(soModuleAccesser
         attack->hitAbsolute(0, node, targetTaskId, event.targetGroup, event.targetNo);
         work->offFlag(0x22000013);
     }
+}
+void ftYoshiStatusUniqProcessSpecialNSwallow::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
+    if (nextStatus == 0x118) {
+        return;
+    }
+    if (nextStatus == 0x15b) {
+        return;
+    }
+    static_cast<soCatchModule*>(moduleAccesser->m_enumerationStart->m_catchModule)->catchCut(false, false);
 }
 bool ftYoshiStatusUniqProcessSpecialNSwallow::checkDamage(soModuleAccesser* moduleAccesser, void* data) {
     return static_cast<ftYoshiCatchModuleView*>(moduleAccesser->m_enumerationStart->m_catchModule)->unk3C(moduleAccesser, data);

@@ -30,16 +30,29 @@ public:
     void stopSe(soModuleAccesser* moduleAccesser);
 };
 
+// BYTES: the payload is built as a temporary and its address taken at the call, as in the native argument order.
+static inline void sendLinkEvent(soModuleAccesser* moduleAccesser, const soLinkEventArgs& args) {
+    moduleAccesser->getLinkModule().sendEventNodes(1, args, 0);
+}
+
+static inline void resetController(ftKineticEnergyController& controller, int mode, Vec3f* accel, const Vec2f& speed, soModuleAccesser* moduleAccesser) {
+    controller.resetEnergy(mode, const_cast<Vec2f*>(&speed), accel, moduleAccesser);
+}
+
+// MATCH-ONLY: retain the reset mode across the sum-speed query, as in the native register lifetime.
+#pragma push
+#pragma opt_propagation off
 void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* moduleAccesser) {
+    // MATCH-ONLY: declared at function scope so the saved-register numbering (energy r29, reset mode r28, work module r30)
+    // follows the native allocation.
+    soWorkManageModule* chargeWork;
     int status = moduleAccesser->getStatusModule().getStatusKind();
     switch (status) {
     case 0x115: {
         if (moduleAccesser->getSituationModule().getKind() == 0) {
-            ftDededeJetHammerLinkEventArgs eventArgs(0x838);
-            moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+            sendLinkEvent(moduleAccesser, ftDededeJetHammerLinkEventArgs(0x838));
         } else {
-            ftDededeJetHammerLinkEventArgs eventArgs(0x839);
-            moduleAccesser->getLinkModule().sendEventNodes(1, eventArgs, 0);
+            sendLinkEvent(moduleAccesser, ftDededeJetHammerLinkEventArgs(0x839));
         }
         break;
     }
@@ -54,14 +67,14 @@ void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* mod
     case 0x130: {
         ftKineticEnergyController& energy = dynamic_cast<ftKineticEnergyController&>(
             *moduleAccesser->getKineticModule().getEnergy(2));
+        int resetKind = 0xB;
         Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         float speedLimit = soValueAccesser::getConstantFloat(moduleAccesser, 0xFC0, 0);
         if (speed.m_x > speedLimit) {
             speed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xFC0, 0);
         }
         Vec3f rotation(0.0f, 0.0f, 0.0f);
-        Vec2f initialSpeed(speed.m_x, 0.0f);
-        energy.resetEnergy(0xB, &initialSpeed, &rotation, moduleAccesser);
+        resetController(energy, resetKind, &rotation, Vec2f(speed.m_x, 0.0f), moduleAccesser);
         energy.m_accelMul = 1.0f;
         energy.m_unk40 = 0.0f;
         energy.enable();
@@ -69,9 +82,10 @@ void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* mod
     }
     case 0x137:
         if (!moduleAccesser->getWorkManageModule().isFlag(0x22000012)) {
-            soWorkManageModule& chargeWork = moduleAccesser->getWorkManageModule();
+            chargeWork = &moduleAccesser->getWorkManageModule();
             float powerScale = soValueAccesser::getConstantFloat(moduleAccesser, 0xFC1, 0);
-            float powerAdd = static_cast<float>(chargeWork.getInt(0x20000001)) * powerScale;
+            float charge = static_cast<float>(chargeWork->getInt(0x20000001));
+            float powerAdd = charge * powerScale;
             moduleAccesser->getCollisionAttackModule().setPowerAddStatus(powerAdd);
         }
         break;
@@ -83,6 +97,8 @@ void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* mod
         break;
     }
 }
+
+#pragma pop
 
 void ftDededeStatusUniqProcessSpecialJetHammer::execStatus(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getStatusModule().getStatusKind() == 0x137) {

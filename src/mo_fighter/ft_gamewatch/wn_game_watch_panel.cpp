@@ -26,6 +26,10 @@ wnGameWatchPanel::wnGameWatchPanel(s32 articleId, const wnArticleBuildInfo& info
 //   reference local, a pointer local (via getResourceModule and via m_enumerationStart->m_resourceModule), no local at all,
 //   and an inline helper taking the module by reference; all give the same bytes. The sibling units wn_game_watch_rescue and
 //   wn_game_watch_normal_weapon show the same difference in their activate.
+//   Batch 8 also tried (same bytes unless noted): the local declared after the first call (reloads, 96.95%), an
+//   assignment expression `(module = &...)->getResourceIdAccesser()`, mdlResId inlined into getFile, a static_cast to
+//   soResourceModuleImpl&, a soResourceIdAccesser* local, an inline helper doing both calls (by reference and by pointer),
+//   getter helpers with an inner local, a soModuleAccesser* local, mdlResId declared first.
 void wnGameWatchPanel::activate(int founderTaskId, int resourceId, int team,
                                 float lr, int selector, float frame) {
     Vec3f pos(0.0f, 0.0f, 0.0f);
