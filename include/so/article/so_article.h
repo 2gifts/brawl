@@ -10,8 +10,19 @@ class soArticleEventObserver : public soEventObserver<soArticleEventObserver> {
 public:
     virtual void addObserver(short param1, s8 param2);
     char _spacer1[2];
+#ifdef SO_ARTICLE_EVENT_OBSERVER_FULL
+    // BYTES: opt-in (the Toad unit wn_peach_kinopio.cpp): the full class. Its arrays are built by __construct_array with
+    // the out-of-line default constructor and destructor (sora_melee 0xCDCC4 / 0xCDA70) and a 16 byte stride.
+    soArticleEventObserver();
+    ~soArticleEventObserver();
+    u32 unkC;
+#endif
 };
+#ifdef SO_ARTICLE_EVENT_OBSERVER_FULL
+static_assert(sizeof(soArticleEventObserver) == 16, "Class is wrong size!");
+#else
 static_assert(sizeof(soArticleEventObserver) == 12, "Class is wrong size!");
+#endif
 
 // Local copy of BrawlHeaders' so/article/so_article.h that shadows it (-I include comes first): the original
 // declares soLogAttackInfo as a bare aggregate, but the REL has an out-of-line default constructor for it
@@ -34,7 +45,9 @@ public:
     // Non-virtual helpers of the generic article code (sora_melee).
     void setNotifyArticleEventRemove(soModuleAccesser* moduleAccesser);
     void setNotifyArticleEventEject(int unk, soModuleAccesser* moduleAccesser);
+#ifndef SO_ARTICLE_LOG_HELPER_LATE
     void updateLogAttackInfo(u32 teamOwnerId);
+#endif
     // TODO
 #ifdef SO_ARTICLE_DTOR_INLINE
     virtual ~soArticle() { } // MATCH-ONLY: inline in the generic article base (Weapon)
@@ -75,6 +88,11 @@ public:
     virtual void setLogAttackInfo(soLogAttackInfo* logAttackInfo);
     virtual soLogAttackInfo getLogAttackInfo();
     virtual void updateLogAttackInfo();
+#ifdef SO_ARTICLE_LOG_HELPER_LATE
+    // HYPOTHESIS: opt-in (ft_peach wn_peach_kassar.cpp): the helper overload is declared after the virtual one; the first
+    // declaration of the name sets where the Weapon thunk of updateLogAttackInfo is emitted.
+    void updateLogAttackInfo(u32 teamOwnerId);
+#endif
 #ifdef WN_WEAPON_BUILDER // inline in the article RELs (weak copies)
     virtual void intrudeLogAttackInfo() { }
 #else

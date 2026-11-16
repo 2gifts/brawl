@@ -256,6 +256,14 @@ static inline float reachLength(const Vec3f* a, const Vec3f* b) {
 }
 
 
+// HYPOTHESIS: the angle of a ground slope vector, measured from its height over the absolute horizontal run.
+// BYTES: x and y are read into locals before the atan2f call; the direct form allocates the loaded x differently.
+static inline float slopeAngle(const Vec3f& slope) {
+    float slopeX = slope.m_x;
+    float slopeY = slope.m_y;
+    return 57.29578f * atan2f(slopeY, __fabsf(slopeX));
+}
+
 // Moves the pitch toward the target by at most one step.
 static inline void approachPitch(float& pitch, float target, float step) {
     if (pitch > target) {
@@ -275,9 +283,6 @@ static inline void approachPitch(float& pitch, float target, float step) {
 // the tilted down vector), the pitch (work 0x11000004) moves toward the ground angle they measure (work 0x11000006),
 // and the work flags 0x12000003..0x1200000B record which rays hit and whether their lines can be dropped through.
 // HYPOTHESIS: the roles of the two tread nodes (front/back) are not established; they are named by node index.
-// TODO(S2): 99.73%: register allocation and scheduling only. The stfs of one ray start's lowered y (y - 0.1) is
-// scheduled six instructions later in the original, and in both slope branches the original reloads slope.x into f2
-// (Z result in f0) where this build uses f0 (Z result in f3). Stack layout and control flow match.
 void wnFoxLandMasterStatusUniqProcessCommon::execMapCorrection(soModuleAccesser* moduleAccesser) {
     int status = moduleAccesser->getStatusModule().getStatusKind();
     bool rising = status == 6 && moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(soKineticEnergy::ATTRIBUTE_MASK_ALL)).m_y >= 0.0f;
@@ -345,8 +350,8 @@ void wnFoxLandMasterStatusUniqProcessCommon::execMapCorrection(soModuleAccesser*
     Vec3f down3(down, 0.0f);
     dir = down3 * 8.284f;
     Vec3f start12 = probe12;
-    start12.m_y -= 0.1f;
     Vec3f start9 = probe9;
+    start12.m_y -= 0.1f;
     start9.m_y -= 0.1f;
     Vec3f end12 = probe12 + dir;
     Vec3f end9 = probe9 + dir;
@@ -402,7 +407,7 @@ void wnFoxLandMasterStatusUniqProcessCommon::execMapCorrection(soModuleAccesser*
     } else if (hit9 && hit12) {
         Vec3f slope;
         subZIntoRight(&slope, &hitPos9, &hitPos12);
-        groundAngle = 57.29578f * atan2f(slope.m_y, __fabsf(slope.m_x));
+        groundAngle = slopeAngle(slope);
         pitch = groundAngle;
         // HYPOTHESIS: the scaled span between the hits is computed and left unused (its length too).
         Vec3f span;
@@ -415,7 +420,7 @@ void wnFoxLandMasterStatusUniqProcessCommon::execMapCorrection(soModuleAccesser*
         if (ray9 && ray12) {
             Vec3f slope;
             subZIntoRight(&slope, &hitPos9, &hitPos12);
-            groundAngle = 57.29578f * atan2f(slope.m_y, __fabsf(slope.m_x));
+            groundAngle = slopeAngle(slope);
         } else if (ray9) {
             groundAngle = 90.0f;
         } else {
@@ -487,8 +492,6 @@ void wnFoxLandMasterStatusUniqProcessCommon::execMapCorrection(soModuleAccesser*
     work.setFlag(throughCenter, 0x1200000B);
 }
 
-// TODO(S2): 99.89%: the loop counter of the status 1 loop (`for (i = 2; i < count; ...)`) sits in r25 where the original
-// reuses the register of the parameter block (r29). The other two loops and everything else match.
 // The four tread attacks follow the work flag 0x22000000 and the Landmaster's speed.
 void wnFoxLandMasterStatusUniqProcessCommon::execFixPos(soModuleAccesser* moduleAccesser) {
     const wnFoxLandMasterParam* param = dynamic_cast<wnFoxLandMaster&>(moduleAccesser->getStageObject()).getParam();
@@ -497,9 +500,9 @@ void wnFoxLandMasterStatusUniqProcessCommon::execFixPos(soModuleAccesser* module
     soKineticModule& kinetic = moduleAccesser->getKineticModule();
     Vec2f speed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(soKineticEnergy::ATTRIBUTE_MASK_ALL));
     int status = moduleAccesser->getStatusModule().getStatusKind();
+    int i;
     if (status == 0 || status == 1 || (u32)(status - 3) <= 3) {
         if (!work.isFlag(0x22000000)) {
-            int i;
             bool any = false;
             int count = 0;
             for (i = 0; i < 4; i++) {
@@ -514,7 +517,6 @@ void wnFoxLandMasterStatusUniqProcessCommon::execFixPos(soModuleAccesser* module
         }
     }
     if (work.isFlag(0x22000000)) {
-        int i;
         int count = work.getInt(0x20000003);
         if (status == 1) {
             float absSpeed = __fabsf(speed.m_x);

@@ -11,10 +11,19 @@ public:
     // BYTES: These article builders retain this nonvirtual destructor out of line.
     ~soKineticMediatorNull() __attribute__((never_inline)) { }
 #endif
+#ifdef SO_KINETIC_MEDIATOR_NULL_UPDATE_REVERSED
+    // HYPOTHESIS: the original declares the three energy updates in reverse (weak copies come out in reverse declaration
+    // order; the vtable keeps the base's slot order).
+    virtual void changeKinetic(int, soModuleAccesser*) { }
+    virtual void updateEnergy2(soArray<soKineticEnergy**>*, soModuleAccesser*) { }
+    virtual void updateEnergy1(soModuleAccesser*, soKineticAttributeMask) { }
+    virtual void updateEnergy(soModuleAccesser*) { }
+#else
     virtual void changeKinetic(int, soModuleAccesser*) { }
     virtual void updateEnergy(soModuleAccesser*) { }
     virtual void updateEnergy1(soModuleAccesser*, soKineticAttributeMask) { }
     virtual void updateEnergy2(soArray<soKineticEnergy**>*, soModuleAccesser*) { }
+#endif
 #ifdef FT_KINETIC_MEDIATOR_POST_UPDATE
     virtual void postUpdateEnergy(soModuleAccesser*) { }
 #else

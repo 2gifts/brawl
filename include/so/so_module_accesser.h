@@ -28,7 +28,12 @@
 #include <so/kinetic/so_kinetic_module_impl.h>
 #include <so/event/so_event_manage_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
+#ifdef SO_PARAM_CUSTOMIZE_IMPL_LATE
+// The unit includes the parameter customization module later itself (its vtable then comes first in .data).
+class soParamCustomizeModule;
+#else
 #include <so/param/so_param_customize_module_impl.h>
+#endif
 #include <so/camera/so_camera_module_impl.h>
 #include <so/link/so_link_module_impl.h>
 #include <so/visibility/so_visibility_module_impl.h>

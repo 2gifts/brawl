@@ -443,7 +443,36 @@ public:
 #ifdef WN_PEACH_KINOPIO_IN_FIGHTER_TU
 FT_DOL_ARRAY_VECTOR(soArticle*, 1); // the members are sora_melee's (only declared here)
 #endif
-#ifndef WN_PEACH_KINOPIO_IN_FIGHTER_TU // the fighter unit calls the sora_melee copies of both list destructors
+#ifdef WN_PEACH_KINOPIO_TOAD_UNIT
+// BYTES: the Toad's builder constructor expands the one-entry observer list constructor: __construct_array over 16 byte
+// observers (the full class, SO_ARTICLE_EVENT_OBSERVER_FULL) and postInitialize. The other units call the sora_melee copy
+// (0x19EAA4) of the generic list (wn_article_pool.h), whose element is the 12 byte observer plus a word.
+template <>
+class soArrayVector<soArticleEventObserver, 1> : public soArrayVectorAbstract<soArticleEventObserver> {
+    s32 m_topIndex : sizeof(bit_width<1>) + 1;
+    s32 m_lastIndex : sizeof(bit_width<1>) + 1;
+    s32 m_size : sizeof(bit_width<1>) + 1;
+    u32 m_isFull : 1;
+    soArticleEventObserver m_elements[1];
+public:
+    soArrayVector(s32 size, s32) : m_topIndex(0), m_lastIndex(0), m_size(size), m_isFull(false) {
+        soArrayVectorCalculator::postInitialize(*this, size, 1);
+    }
+    virtual s32 size() const;
+    virtual ~soArrayVector() { }
+    virtual s32 capacity() const;
+    virtual bool isFull() const;
+    virtual soArticleEventObserver& atFastAbstractSub(s32 index) const;
+    virtual soArticleEventObserver& getArrayValueConst(s32 index);
+    virtual s32 getTopIndex() const;
+    virtual s32 getLastIndex() const;
+    virtual void setSize(s32 size);
+    virtual void setTopIndex(s32 topIndex);
+    virtual void setLastIndex(s32 lastIndex);
+    virtual void onFull();
+    virtual void offFull();
+};
+#elif !defined(WN_PEACH_KINOPIO_IN_FIGHTER_TU) // the fighter unit calls the sora_melee copies of both list destructors
 template <> inline soArrayVector<soArticleEventObserver, 1>::~soArrayVector() { }
 #endif
 
@@ -461,7 +490,12 @@ class soGenerateArticleManageModuleBuilder<soGenerateArticleManageModuleBuildCon
     soGenerateArticleManageModuleImpl m_module;
 public:
     soGenerateArticleManageModuleBuilder(soModuleAccesser* acc) :
+#ifdef WN_PEACH_KINOPIO_TOAD_UNIT
+        // BYTES: the article list is default constructed (no postInitialize) in the Toad's builder.
+        m_articles(), m_observers(BC::ArticleCount, 0), m_mediator(acc),
+#else
         m_articles(0), m_observers(BC::ArticleCount, 0), m_mediator(acc),
+#endif
         m_module(acc, &m_articles, m_mediator.getMediator(), &m_observers) { }
     ~soGenerateArticleManageModuleBuilder() { }
     void* getModule() { return &m_module; }

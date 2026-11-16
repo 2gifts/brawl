@@ -102,7 +102,7 @@ class wnSamusGBeam : public Weapon {
 public:
     wnSamusGBeam(s32 articleId, const wnArticleBuildInfo& info, const wnSamusGBeamData* data);
     virtual ~wnSamusGBeam();
-    void activate(int founderTaskId, int etcResourceId, int team, float lr, Vec3f* pos, int unk);
+    void activate(int founderTaskId, int etcResourceId, int team, float lr, const Vec3f* pos, bool attack);
 };
 static_assert(sizeof(wnSamusGBeam) == 0x178C, "wnSamusGBeam layout is wrong!");
 

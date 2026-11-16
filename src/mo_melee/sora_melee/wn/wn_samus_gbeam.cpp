@@ -1,4 +1,7 @@
 #define WN_ANIMCMD_PRESENTER_LOCAL_STORE // BYTES: the interpreters' presenters keep the looked-up list in a local (98.3% vs 97.2%), as in the Mario fireball
+#define WN_ANIMCMD_RESET_MODE_BOX // BYTES: word-aligned reset-mode temporaries (frame size of the anim cmd sub builder), as in the Mario fireball
+#define WN_ANIMCMD_STACK_PTR_CAST // BYTES: stack capacity 2 (ft_builder_animcmd.h)
+#define WN_ANIMCMD_STACK_PTR // BYTES: the interpreter stacks stay in a saved register across getManageId (ft_builder_animcmd.h)
 #define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructors expand the empty param customize module destructor
 #define WN_PARAM_ACCESSER_INLINE_DTOR // BYTES: the empty soParamAccesser base destructor is inlined in sora_melee
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: activate copies the Vec3f position as an aggregate (word moves), see mt_vector.h
@@ -61,12 +64,15 @@ inline wnSamusGBeamParamAccesser::~wnSamusGBeamParamAccesser() { }
 #define WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG wnSamusGBeamModuleAccesserBuildConfig
 #include <wn/zelda/wn_zelda_lighting_bow_builder_ctor.h>
 
-// TODO(nonmatching): activate (95.3%). The original passes the last parameter to setFlag(bool, u32) unchanged and compares it
-// with cmplwi, which is what a `bool unk` parameter compiles to (that spelling is exact apart from the flag byte register
-// numbering, r9/r0), but the symbol of the original is spelled with an int parameter (...P5Vec3fi, from the module map) and the
-// fighter shell (ft/samus/ft_samus_article_pools.h, ftSamus::activeArticle7) passes an int. Switching needs the symbol rename
-// and the shell change in one step. The flag byte register allocation (two load/modify/store chains) is still open.
-void wnSamusGBeam::activate(int founderTaskId, int etcResourceId, int team, float lr, Vec3f* __restrict pos, int attack) {
+// TODO(nonmatching): activate (99.2%): the last parameter is a bool (the original passes it to setFlag(bool, u32) unchanged and
+// compares it with cmplwi; the fighter shell and ftSamus::activeArticle7 now pass a bool, byte-identical), the position is a
+// `const Vec3f*` (the Mario fireball's form; a mangled name ...PC5Vec3fb in symbols.txt) and the descriptor flag byte 0x4D is
+// cleared with two separate bit assignments. What is left is the order of the last two flag-byte operations: the original ends the
+// 0x4C byte chain (clrrwi into r10) before it clears the two top bits of 0x4D (r9), ours does the 0x4D clear first and the
+// chain in place. Tried without effect: every placement of the 0x4D pair and of unk38/unk3C among the flag assignments, the
+// pair-field, single-bit (flagBit7/6, which also changes the whole register assignment) and all-eight-bit spellings of 0x4C,
+// the second bitfield view (flagsHigh/MidHigh/MidLow/Low), unk4DHigh as one two-bit write.
+void wnSamusGBeam::activate(int founderTaskId, int etcResourceId, int team, float lr, const Vec3f* pos, bool attack) {
     wnActivateDesc desc;
     desc.founderTaskId = founderTaskId;
     desc.resourceId = etcResourceId;
@@ -87,7 +93,8 @@ void wnSamusGBeam::activate(int founderTaskId, int etcResourceId, int team, floa
     desc.flagsMidPair = 0;
     desc.flagsBit3 = 1;
     desc.flagsLow = 0;
-    desc.unk4DHigh = 0;
+    desc.flag4DBit7 = 0;
+    desc.flag4DBit6 = 0;
     desc.unk38 = 3;
     desc.unk3C = 0xff;
     Weapon::activate(&desc);
@@ -112,10 +119,12 @@ void wnSamusGBeam::activate(int founderTaskId, int etcResourceId, int team, floa
     }
 }
 
-// TODO(nonmatching): the animation command sub builder constructor (97.2%): same family as the Mario fireball's and the Toad's
-// (98.3%; the original keeps the zero byte whose address goes to the interpreter in a word-aligned slot of its own per unit
-// builder, ours packs the five bytes into one word: a one-byte class temporary in ft/builder/ft_builder_animcmd.h's ftAddressOf
-// plus a stack pointer cast reaches 99.2%, and what is left is only a callee-saved register rotation, see the S3 shared patch).
+// TODO(nonmatching): the animation command sub builder constructor (99.84%): the Mario fireball's three unit macros
+// (WN_ANIMCMD_PRESENTER_LOCAL_STORE, WN_ANIMCMD_RESET_MODE_BOX, WN_ANIMCMD_STACK_PTR) are applied; this unit also needs the
+// opt-in WN_ANIMCMD_STACK_PTR_CAST because its stacks hold 2 entries, not 8. What is left is a callee-saved register rotation in
+// units 2 and 3 and the uniq unit (the zero byte / null and the stack pointer swap r24/r25, the reloaded manage id and the manager
+// pointer move with them); unit 1 is exact, so the source shape is right and only the allocator's order differs. The sibling
+// units with capacity-1 stacks (Fireball, Link bow arrow, Fox blaster) are exact with the same macros.
 // TODO(callees): the situation, soArrayContractibleTable, soArrayVector and soInstanceUnitFullProperty<soTransitionTerm>
 // references in the module builder constructors point at unnamed weak copies of other units (lbl_27_data_20950, 3C578, 3ED00,
 // fn_27_D2A0C), so the status builder constructor shows 99.99% until those have names.

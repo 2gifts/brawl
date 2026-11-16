@@ -15,6 +15,8 @@
 #define WN_KINETIC_GENERIC_BUILDER
 #define FT_REL_LINK_EXTERN
 #define SO_NULLABLE_INLINE_CTOR
+#define WN_ANIMCMD_RESET_MODE_BOX // BYTES: word-aligned reset-mode temporaries (frame size of the anim cmd sub builder)
+#define WN_ANIMCMD_PRESENTER_LOCAL_STORE // BYTES: the interpreters' presenters keep the looked-up list in a local (as in the Mario fireball)
 #include <wn/wn_module_accesser_builder.h>
 #include <wn/peach/wn_peach_kinopio.h>
 #include <wn/wn_class_info_impl.h>
@@ -327,9 +329,6 @@ void wnPeachKinopioArticleMediator::deactivate() {
 //   (the default soArrayVector<soArticle*, 1>() without postInitialize, and soArrayVector<soArticleEventObserver, 1>(1)
 //   with __construct_array over 16 byte soArticleEventObserver elements); an inline definition of the observer list
 //   constructor needs a default constructor of soArticleEventObserver, which the 12 byte SDK class lacks (shared change).
-// TODO(nonmatching): the animation command sub builder constructor (97.9%, same 97% as the Mario fireball's): the inlined
-//   soEventPresenter<soAnimCmdEventObserver> setup keeps the looked-up event unit in a separate local that is cleared on
-//   failure (shared header ft_builder_animcmd.h / so_event_presenter.h).
 // TODO(callees): fn_27_2E1E40 / 2E1E44 / 2E1E48 / 2F563C (situation, stop, visibility, colour blend builders), fn_27_2F4FB4
 //   (null ground getModule) and fn_27_30921C / 30922C (motion builder getModule / constructor) are weak functions outside
 //   this unit, still unnamed in symbols.txt. The map names

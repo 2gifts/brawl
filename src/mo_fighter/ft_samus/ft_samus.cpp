@@ -507,12 +507,12 @@ bool ftSamus::activeArticle7(wnSamusGBeam* weapon, soModuleAccesser* acc) {
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
     Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x2b, false);
     float lr = acc->getPostureModule().getLr();
-    int attack = 0;
+    bool attack = false;
     switch (acc->getStatusModule().getStatusKind()) {
     case 0x34:
     case 0x36:
     case 0x38:
-        attack = 1;
+        attack = true;
         break;
     }
     soResourceModule& resources = acc->getResourceModule();

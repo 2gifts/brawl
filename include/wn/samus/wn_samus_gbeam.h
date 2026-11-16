@@ -157,6 +157,6 @@ public:
     wnSamusGBeam(s32 articleId, const wnArticleBuildInfo& info, const wnSamusGBeamData* data);
     virtual ~wnSamusGBeam();
     // HYPOTHESIS: parameter names; attack is set by the fighter for the attack variants of the statuses (0x34, 0x36, 0x38).
-    void activate(int founderTaskId, int etcResourceId, int team, float lr, Vec3f* __restrict pos, int attack);
+    void activate(int founderTaskId, int etcResourceId, int team, float lr, const Vec3f* pos, bool attack);
 };
 static_assert(sizeof(wnSamusGBeam) == 0x178C, "Samus grapple beam article extent");

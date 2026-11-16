@@ -1323,8 +1323,9 @@ Method used for `soModelModuleImpl` (sora_melee 0x77DC-0xE268, `include/so/model
   (22% to 100% for the Light Bow, the Toad and the spore).
 - **A non-const `T*` parameter whose loads the original hoists above stack stores:** `T* __restrict` gives the same
   freedom as a pointer to const and keeps the mangled name; casts, const aliases, const helper parameters and by-value
-  copies do not. This fixed `wnPeachKinopioSpore::activate` (75% to 100%); Wolf's blaster bullet, Fox's Landmaster and
-  Samus's grapple beam activates take a non-const `Vec3f*` the same way and are the unmatched ones of that family.
+  copies do not. This fixed `wnPeachKinopioSpore::activate` (75% to 100%). Where the map gives no parameter types, check
+  `const Vec3f*` first: the Mario fireball and the Samus grapple beam activates turned out to take a pointer to const
+  (and the grapple beam's last parameter is a `bool`), which `__restrict` only imitated.
 - **Mirrored 8-byte temporaries in a switch arm** (an `operator*` result and its copy in swapped slots): move the arm into a
   static inline tag-dispatched helper (`updateEnergySub(soIntToType<N>(), ...)`); a named local adds a copy instead.
 - **A register swap between a callee-saved module and a task id** came from reading `m_taskId` directly; the accessor
@@ -1403,3 +1404,27 @@ Method used for `soModelModuleImpl` (sora_melee 0x77DC-0xE268, `include/so/model
 - **A second-half table entry written `&table[i] + 11` rotates the saved registers against the target, which indexes a two-dimensional table, `&table[1][i]`:** declaring it `m_anim[2][11]` gives the target's `mulli; add; addi 0xdc` and registers (`table + 11 + i` gives the same code). `&table[i + 11]` fixes the registers but adds 11 to the `u8` index before the multiply. Seen: `muReplayTask::setPanelStateCore`, `muSnapShotTask::setPanelStateCore`. **MED**
 - **`member = Vec2f(a, b);` passes the constructor's returned `r3` to the out-of-line `operator=` (`bl __ct__5Vec2fFff; ...; mr r4, r3`); a target that recomputes the temporary's address (`addi r4, r1, N`) assigns through a `const Vec2f&` parameter of an inline (`setVec(dst, Vec2f(a, b))` with `dst = src;` inside).** Named locals instead move the vectors above the other temporaries in the frame. Seen: Bowser and Giga Bowser special-hi `fn_102_C2A4`/`fn_102_15788`. **MED**
 - **An inline returning a `Vec2f` built field by field (`Vec2f res; res.m_x = ...; return res;`) can swap the stack slots of the subexpression temporaries against a target that writes `return Vec2f(x, y);`.** Seen: `clRay2D::checkIntersect2` (`segNormal`). **MED**
+
+## Register numbering and weak-batch order (batch 4: Peach parasol, kinetic transactor, Landmaster status)
+
+- **Callee-saved registers numbered differently while every instruction is otherwise identical:** try a form that adds
+  one intermediate temporary but emits the same code, for example writing the top two bits of a descriptor flag byte as
+  two statements (`desc.flagBit7 = 1; desc.flagBit6 = 1;`) instead of one two-bit field. The temporary count changes the
+  allocation order (`wnPeachKassar::activate` 99.27% to 100% after statement orders, pragmas and parameter types had all
+  failed). `wnMetaknightMantle::activate` still uses the two-bit form and probably has the same fix. **HIGH**
+- **Weak vtable batches come out in reverse order of class definition in the translation unit**, and the functions inside
+  one batch in reverse declaration order of the class's own overriders (out-of-class definitions change nothing). Check
+  where shared headers first define each class: `so_module_accesser.h` pulls in the param-customize impl early. A thunk's
+  position follows the first declaration of its overloaded name. Gate such reorders per unit with a new macro, because
+  linked units depend on the current order. **HIGH**
+- **Weak template members of a base class (`ftKineticTransactor::updateEnergy<T>`) are emitted right after their first
+  caller**, so the definition order of the derived specializations fixes the order. A flip that fails the hash with every
+  section's bytes equal is usually this; a scratch link plus a `dtk elf info` symbol-order diff shows it. **HIGH**
+- **One function-scope `int i` shared by several loops** reproduces a loop counter that reuses the parameter-block
+  register; per-loop counters get their own register. **MEDIUM**
+- **Reading `m_x`/`m_y` into locals before `atan2f(y, __fabsf(x))`** changed which FPR keeps the loaded x, fixing a
+  difference no asm-register permutation could. **MEDIUM**
+- **Unreferenced weak destructors that the original unit lacks** (here `soStatusUniqProcess`, `AttributeFlag`) are dropped
+  by the linker and do not block a link; check with a scratch link before chasing them. **MEDIUM**
+- **"Only relocation names differ" deserves an unnormalized diff:** the Samus grapple beam's status builder ctor also
+  passes a different constant (0 in the original, the template's 9 here). **MEDIUM**

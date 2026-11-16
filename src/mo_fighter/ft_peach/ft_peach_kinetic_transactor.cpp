@@ -317,57 +317,8 @@ void ftPeachKineticTransactor::changeKineticSub10(const soIntToType<0x6e>&, void
     soKineticUtility::resetEnableEnergy(2, acc, 0, &controllerEntry, &Vec3f(0.0f, 0.0f, 0.0f));
 }
 
-// Stick tilt of mode 0x65: the stick's horizontal deflection above its dead zone leans the motion energy up to the
-// configured angle (degrees in the parameters, radians in the energy).
-void ftPeachKineticTransactor::updateEnergySub(ftKineticEnergyMotion* energy, const soIntToType<0x65>&, soModuleAccesser* acc) {
-    float deadZone = soValueAccesser::getConstantFloat(acc, 0xfb4, 0);
-    float stick = acc->getControllerModule().getStickX();
-    float deflection = fabs(stick);
-    if (deflection > deadZone) {
-        float ratio = (deflection - deadZone) / (1.0f - deadZone);
-        float tilt = ratio * soValueAccesser::getConstantFloat(acc, 0xfb5, 0);
-        float radians;
-        if (stick > 0.0f) {
-            radians = -(0.017453292f * tilt);
-        } else {
-            radians = 0.017453292f * tilt;
-        }
-        double currentWide = fabs(energy->m_rotation);
-        float currentMagnitude = currentWide;
-        double radiansWide = fabs(radians);
-        float radiansMagnitude = radiansWide;
-        float current = energy->m_rotation;
-        if (radiansMagnitude > currentMagnitude) {
-            current = radians;
-        }
-        energy->m_rotation = current;
-    }
-    ftKineticTransactor::updateEnergy(energy, acc);
-}
-
-// While the stick is held past the threshold of mode 0x66 the controller energy targets the configured speed.
-void ftPeachKineticTransactor::updateEnergySub1(ftKineticEnergyController* energy, const soIntToType<0x66>&, soModuleAccesser* acc) {
-    double wide = fabs(acc->getControllerModule().getStickX());
-    float deflection = wide;
-    if (deflection >= soValueAccesser::getConstantFloat(acc, 0xc49, 0)) {
-        energy->m_accelMul = soValueAccesser::getConstantFloat(acc, 0xbd3, 0) * soValueAccesser::getConstantFloat(acc, 0xfb9, 0);
-        Vec2f target;
-        target.m_x = soValueAccesser::getConstantFloat(acc, 0xbd5, 0) * soValueAccesser::getConstantFloat(acc, 0xfb9, 0);
-        target.m_y = 0.0f;
-        energy->m_speedTarget = target;
-    } else {
-        Vec2f accel;
-        accel.m_x = 0.0f;
-        accel.m_y = 0.0f;
-        energy->m_accel = accel;
-        Vec2f target;
-        target.m_x = 0.0f;
-        target.m_y = 0.0f;
-        energy->m_speedTarget = target;
-    }
-    ftKineticTransactor::updateEnergy(energy, acc);
-}
-
+// BYTES: the original's text order is updateEnergy<Motion>, its base copy, updateEnergySub, then the same for Controller and
+// Stop (the weak base copy is emitted when its first caller is), so the definitions follow that order.
 template <>
 void ftPeachKineticTransactor::updateEnergy<ftKineticEnergyMotion>(ftKineticEnergyMotion* energy, soModuleAccesser* acc) {
     if (acc->getKineticModule().getKineticType() <= 0x63) {
@@ -425,6 +376,34 @@ void ftPeachKineticTransactor::updateEnergy<ftKineticEnergyMotion>(ftKineticEner
     }
 }
 
+// Stick tilt of mode 0x65: the stick's horizontal deflection above its dead zone leans the motion energy up to the
+// configured angle (degrees in the parameters, radians in the energy).
+void ftPeachKineticTransactor::updateEnergySub(ftKineticEnergyMotion* energy, const soIntToType<0x65>&, soModuleAccesser* acc) {
+    float deadZone = soValueAccesser::getConstantFloat(acc, 0xfb4, 0);
+    float stick = acc->getControllerModule().getStickX();
+    float deflection = fabs(stick);
+    if (deflection > deadZone) {
+        float ratio = (deflection - deadZone) / (1.0f - deadZone);
+        float tilt = ratio * soValueAccesser::getConstantFloat(acc, 0xfb5, 0);
+        float radians;
+        if (stick > 0.0f) {
+            radians = -(0.017453292f * tilt);
+        } else {
+            radians = 0.017453292f * tilt;
+        }
+        double currentWide = fabs(energy->m_rotation);
+        float currentMagnitude = currentWide;
+        double radiansWide = fabs(radians);
+        float radiansMagnitude = radiansWide;
+        float current = energy->m_rotation;
+        if (radiansMagnitude > currentMagnitude) {
+            current = radians;
+        }
+        energy->m_rotation = current;
+    }
+    ftKineticTransactor::updateEnergy(energy, acc);
+}
+
 template <>
 void ftPeachKineticTransactor::updateEnergy<ftKineticEnergyController>(ftKineticEnergyController* energy, soModuleAccesser* acc) {
     if (acc->getKineticModule().getKineticType() <= 0x63) {
@@ -480,6 +459,29 @@ void ftPeachKineticTransactor::updateEnergy<ftKineticEnergyController>(ftKinetic
             break;
         }
     }
+}
+
+// While the stick is held past the threshold of mode 0x66 the controller energy targets the configured speed.
+void ftPeachKineticTransactor::updateEnergySub1(ftKineticEnergyController* energy, const soIntToType<0x66>&, soModuleAccesser* acc) {
+    double wide = fabs(acc->getControllerModule().getStickX());
+    float deflection = wide;
+    if (deflection >= soValueAccesser::getConstantFloat(acc, 0xc49, 0)) {
+        energy->m_accelMul = soValueAccesser::getConstantFloat(acc, 0xbd3, 0) * soValueAccesser::getConstantFloat(acc, 0xfb9, 0);
+        Vec2f target;
+        target.m_x = soValueAccesser::getConstantFloat(acc, 0xbd5, 0) * soValueAccesser::getConstantFloat(acc, 0xfb9, 0);
+        target.m_y = 0.0f;
+        energy->m_speedTarget = target;
+    } else {
+        Vec2f accel;
+        accel.m_x = 0.0f;
+        accel.m_y = 0.0f;
+        energy->m_accel = accel;
+        Vec2f target;
+        target.m_x = 0.0f;
+        target.m_y = 0.0f;
+        energy->m_speedTarget = target;
+    }
+    ftKineticTransactor::updateEnergy(energy, acc);
 }
 
 template <>

@@ -270,7 +270,12 @@ public:
 #ifdef WN_ANIMCMD_STACK_PTR
                       // BYTES: the stack through the holder's accessor; the original computes it before the manage ID
                       // call and keeps it in a saved register (the cast form below is recomputed after the call).
+#ifdef WN_ANIMCMD_STACK_PTR_CAST
+                      // BYTES: units whose stack capacity is not 8 (the Samus grapple beam: 2) pass the pointer cast to the interpreter's type.
+                      (soArrayVector<acCmdInterpreterStackData, 8>*)m_stack.get(),
+#else
                       m_stack.get(),
+#endif
 #else
                       (soArrayVector<acCmdInterpreterStackData, 8>*)&m_stack.m_array,
 #endif

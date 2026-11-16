@@ -50,6 +50,26 @@ public:
     soParamCustomizeModuleImpl(soModuleAccesser*) : m_attackPowerMulPattern(1.0f), m_attackPowerMulScale(1.0f) { }
 #endif
     virtual ~soParamCustomizeModuleImpl() { }
+#ifdef SO_PARAM_CUSTOMIZE_IMPL_LATE
+    // HYPOTHESIS: declaration order of the original overrides (the weak copies come out in reverse declaration order;
+    // the vtable keeps the base's slot order).
+    virtual float getAttackPowerMul(void* p1) { return m_attackPowerMulPattern * m_attackPowerMulScale; }
+    virtual void setAttackPowerMulPattern(float pattern) { m_attackPowerMulPattern = pattern; }
+    virtual float getAttackPowerMulPattern() { return m_attackPowerMulPattern; }
+    virtual void setAttackPowerMulScale(float scale) { m_attackPowerMulScale = scale; }
+    virtual float getAttackPowerMulScale() { return m_attackPowerMulScale; }
+    virtual void activate() { m_attackPowerMulPattern = m_attackPowerMulScale = 1.0f; }
+    virtual void setDefault() { }
+    virtual void addCustomize(u8) { }
+    virtual void removeCustomize(u8) { }
+    virtual bool isCustomize(u32) const { return false; }
+    virtual float getAttackReactionMul() { return 1.0f; }
+    virtual float getWalkSpeedMul() { return 1.0f; }
+    virtual int getParamInt(u32, u32) { return 0; }
+    virtual float getParamFloat(u32, u32) { return 0.0f; }
+    virtual void* getParamIndefinite(u32, u32) { return nullptr; }
+    virtual float getAttackPowerMulArticle() { return 1.0f; }
+#else
     virtual void activate() { m_attackPowerMulPattern = m_attackPowerMulScale = 1.0f; }
     virtual void setDefault() { }
     virtual void addCustomize(u8) { }
@@ -77,6 +97,7 @@ public:
     virtual int getParamInt(u32, u32) { return 0; }
     virtual float getParamFloat(u32, u32) { return 0.0f; }
     virtual void* getParamIndefinite(u32, u32) { return nullptr; }
+#endif
 };
 static_assert(sizeof(soParamCustomizeModuleImpl) == 16, "Class is wrong size!");
 
