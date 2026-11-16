@@ -3324,6 +3324,92 @@ s32 VFiPFFILE_fopen(PF_STR* p_path_str, s32 mode, PF_FILE** pp_file) {
     return err;
 }
 
+s32 VFiPFFILE_fread(u8* p_buf, u32 size, u32 count, PF_FILE* p_file, u32* p_count_read) {
+    const u8* base;
+    PF_SFD* p_sfd;
+    PF_VOLUME* p_vol;
+    u32 bit0;
+    u32 size_read;
+    s32 err;
+
+    if (p_count_read == NULL) {
+        lbl_8053B248.last_error = 10;
+        return 10;
+    }
+    *p_count_read = 0;
+    base = (const u8*)&lbl_8053B248;
+    if (base > (const u8*)p_file || base + sizeof(lbl_8053B248) < (const u8*)p_file) {
+        lbl_8053B248.last_error = 10;
+        return 10;
+    }
+    if (p_file == NULL) {
+        p_vol = NULL;
+    } else {
+        p_vol = p_file->p_sfd->dir_entry.p_vol;
+    }
+    if (p_vol == NULL) {
+        lbl_8053B248.last_error = 0x26;
+        p_file->p_sfd->ffd.p_vol->last_error = 0x26;
+        p_file->last_error = 0x26;
+        return 0x26;
+    }
+    err = VFiPFVOL_CheckForRead(p_vol);
+    if (err != 0) {
+        lbl_8053B248.last_error = err;
+        p_vol->last_error = err;
+        return err;
+    }
+    if (p_file == NULL) {
+        goto bad26;
+    }
+    p_sfd = p_file->p_sfd;
+    if (p_sfd == NULL) {
+        goto bad26;
+    }
+    if ((p_file->stat & 1) == 0) {
+        goto bad26;
+    }
+    bit0 = p_sfd->stat & 1;
+    if (bit0 == 0) {
+        goto bad26;
+    }
+    if ((p_sfd->stat & 2) != 0) {
+        goto check_sfd_again;
+    }
+bad26:
+    lbl_8053B248.last_error = 0x26;
+    p_vol->last_error = 0x26;
+    return 0x26;
+check_sfd_again:
+    if (bit0 == 0) {
+        goto bad26b;
+    }
+    if ((p_sfd->stat & 2) != 0) {
+        goto sfd_ok;
+    }
+bad26b:
+    lbl_8053B248.last_error = 0x26;
+    p_vol->last_error = 0x26;
+    return 0x26;
+sfd_ok:
+    if (p_buf == NULL || count == 0 || size == 0) {
+        lbl_8053B248.last_error = 10;
+        p_file->p_sfd->ffd.p_vol->last_error = 10;
+        p_file->last_error = 10;
+        return 10;
+    }
+    p_vol->cache.signature = p_file;
+    err = VFiPFFILE_p_fread(p_vol, p_buf, size, count, p_file, &size_read);
+    *p_count_read = size_read;
+    p_vol->cache.signature = NULL;
+    if (err != 0) {
+        lbl_8053B248.last_error = err;
+        p_file->p_sfd->ffd.p_vol->last_error = err;
+        p_file->last_error = err;
+    }
+    return err;
+}
+
 s32 VFiPFFILE_Cursor_Read(PF_FILE* p_file, u8* p_buf, u32 size, u32* p_size_read) {
     u32 num_read;
     s32 err;
