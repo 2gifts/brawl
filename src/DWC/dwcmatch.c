@@ -1265,3 +1265,79 @@ void fn_80348ACC(int level) {
         }
     }
 }
+
+// BYTES: these keys share the original unit-wide string table.
+extern const char lbl_8048AA60[];
+
+void fn_8037B354(int key, const char* name);
+
+void fn_8034296C(u8 type, u8 count, int callback, int parameter) {
+    const char* keys = lbl_8048AA60;
+    DWCi_ResetMatchParam(0);
+    lbl_805A0FA8[0]->unk15 = type;
+    lbl_805A0FA8[0]->unk18 = count;
+    lbl_805A0FA8[0]->unk480 = callback;
+    lbl_805A0FA8[0]->unk484 = parameter;
+    lbl_805A0FA8[0]->unk191 = 0;
+    lbl_805A0FA8[0]->aidList[0] = 0;
+    fn_8037B354(0x32, "dwc_pid");
+    fn_8037B354(0x33, keys + 0x16c);
+    fn_8037B354(0x34, keys + 0x178);
+    fn_8037B354(0x35, keys + 0x160);
+    fn_8037B354(0x36, keys + 0xd00);
+    fn_8037B354(0x37, keys + 0xd0c);
+    fn_8037B354(0x38, keys + 0xd18);
+    lbl_805A0FA8[0]->unk17 = 0;
+    fn_8037B354(0x39, keys + 0xd24);
+    lbl_805A0FA8[0]->unk4B0 = 1;
+    lbl_805A0FA8[0]->unk19 = count;
+    fn_8037B354(0x3A, keys + 0xd34);
+    lbl_805A0FA8[0]->unk1C = 0;
+    lbl_805A0FA8[0]->unk28 = 0;
+    lbl_805A0FA8[0]->unk20 = 0;
+}
+
+// HYPOTHESIS: socket address layout used by the Wii QR2 and NAT callbacks.
+typedef struct DWCMatchAddress {
+    u8 length;
+    u8 family;
+    u16 port;
+    u32 ip;
+} DWCMatchAddress;
+u16 SOHtoNs(u16 value);
+int memcmp(const void* left, const void* right, u32 size);
+extern const u8 lbl_8059FB68[];
+void qr2_parse_queryA(void* qr2, u8* data, int size, DWCMatchAddress* from);
+void NNProcessData(u8* data, int size, DWCMatchAddress* from);
+
+int fn_8033FC9C(void* socket, u32 ip, u16 port, u8* data, int size) {
+    DWCMatchAddress from;
+    const char* messages = lbl_8048AA60;
+    u8 first;
+    if (size == 0 || data == 0) {
+        return 0;
+    }
+    memset(&from, 0, sizeof(from));
+    from.family = 2;
+    from.ip = ip;
+    from.port = SOHtoNs(port);
+    first = data[0];
+    if ((first == 0xFE && data[1] == 0xFD) || first == '\\') {
+        DWC_Printf(0x40, messages + 0x520);
+        if (lbl_805A0FA8[0]->qr2Obj != 0) {
+            qr2_parse_queryA(lbl_805A0FA8[0]->qr2Obj, data, size, &from);
+        } else {
+            DWC_Printf(0x40, messages + 0x548);
+        }
+    } else if (memcmp(data, lbl_8059FB68, 6) == 0) {
+        DWC_Printf(0x40, messages + 0x560);
+        NNProcessData(data, size, &from);
+    } else if (first == 0xFE && data[1] == 0xFE) {
+        DWC_Printf(0x80, messages + 0x588);
+        return 0;
+    } else {
+        DWC_Printf(8, messages + 0x5B8);
+        return 0;
+    }
+    return 1;
+}
