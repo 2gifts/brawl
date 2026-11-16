@@ -1,5 +1,8 @@
 // Use the native Fighter observer override before transitive Fighter includes;
 // this preserves the verified primary vtable slots of getOwner and getFtKind.
+#define FT_LUCARIO_TRANSACTOR_MELEE_INSTANCE // the shared sora_melee singleton accessor (ft_lucario_transactor.h)
+// BYTES: the singleton, its guard and its destructor registration keep separate addresses.
+#pragma pool_data off
 #define FT_MODULE_BUILDER
 #include <ft/ft_owner.h>
 #include <ft/fighter.h>
@@ -21,13 +24,6 @@
 ftLucarioTransactor::ftLucarioTransactor() { }
 ftLucarioTransactor::~ftLucarioTransactor() { }
 
-// The sora_melee copy of the singleton (the fighter REL has its own getInstance).
-// BYTES: the guard, the instance and its destructor registration keep separate addresses.
-#pragma pool_data off
-static inline ftLucarioTransactor* getLucarioTransactor() {
-    static ftLucarioTransactor instance;
-    return &instance;
-}
 
 // Kirby's copied aura ball is article 0xd, Lucario's own is article 0.
 static inline int getAuraBallArticleId(soModuleAccesser* moduleAccesser) {
@@ -108,18 +104,38 @@ bool ftLucarioTransactor::activeArticle(soArticle* article, soModuleAccesser* ac
     return false;
 }
 
+static inline Fighter& getFighter(soModuleAccesser* moduleAccesser) {
+    Fighter& fighter = dynamic_cast<Fighter&>(*moduleAccesser->m_stageObject);
+    return fighter;
+}
+
+static inline int getFounderTaskId(Fighter& fighter) {
+    return fighter.getTaskId();
+}
+
+static inline int getFighterKind(Fighter& fighter) {
+    int kind = fighter.getFtKind();
+    return kind;
+}
+
+static inline int getFighterTeam(Fighter& fighter) {
+    int team = fighter.getOwner()->getTeam();
+    return team;
+}
+
 // Starts the aura ball with the stored charge (none when no charge was saved).
 bool ftLucarioTransactor::activeArticle1(wnLucarioAuraBall* weapon, soModuleAccesser* acc) {
-    Fighter& fighter = dynamic_cast<Fighter&>(*acc->m_stageObject);
+    Fighter& fighter = getFighter(acc);
     int chargeFrame = 0;
+    float chargeScale = 0.0f;
     if (!loadAuraBallStatus(acc, &chargeFrame, NULL)) {
         chargeFrame = 0;
     }
-    float chargeScale = acc->getWorkManageModule().getFloat(0x11000013);
-    int founderTaskId = fighter.getTaskId();
-    int kind = fighter.getFtKind();
-    int team = fighter.getOwner()->getTeam();
+    chargeScale = acc->getWorkManageModule().getFloat(0x11000013);
     soPostureModule& posture = acc->getPostureModule();
+    int founderTaskId = getFounderTaskId(fighter);
+    int kind = getFighterKind(fighter);
+    int team = getFighterTeam(fighter);
     weapon->activate(founderTaskId, team, posture.getLr(), chargeFrame, chargeScale, kind);
     return true;
 }
