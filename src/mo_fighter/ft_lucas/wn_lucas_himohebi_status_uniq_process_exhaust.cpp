@@ -11,6 +11,7 @@ class wnLassoStatusUniqProcessExhaust : public soStatusUniqProcess {
 public:
     virtual ~wnLassoStatusUniqProcessExhaust() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void execFixPos(soModuleAccesser* moduleAccesser);
 };
 
 // HYPOTHESIS: the link event 0x83a asks the grabbed fighter (the parent) for the node its model is attached to.

@@ -1,4 +1,7 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+// BYTES: the launch speed is scaled in place through the shared paired-single Vec3fScale, in the register form that
+// scales x/y in place.
+#define MT_VEC3F_SCALE_XY_IN_PLACE
 #include <ft/robot/ft_robot_status_uniq_process_special_gyro.h>
 #include <ft/robot/ft_robot_link_event.h>
 #include <ft/robot/ft_robot_unk8.h>
@@ -77,21 +80,6 @@ void ftRobotStatusUniqProcessSpecialGyro::execStatus(soModuleAccesser* moduleAcc
     }
 }
 
-// MATCH-ONLY: the original scales the launch speed in place with paired singles (inline asm in the shared vector code).
-static inline void ftRobotScaleVec3f(register Vec3f* v, register float c) {
-    register float fr1, fr0;
-    // clang-format off
-    asm {
-        psq_l    fr0, Vec3f.m_x(v), 0, 0
-        psq_l    fr1, Vec3f.m_z(v), 1, 0
-        ps_muls0 fr0, fr0, c
-        ps_muls0 fr1, fr1, c
-        psq_st   fr0, Vec3f.m_x(v), 0, 0
-        psq_st   fr1, Vec3f.m_z(v), 1, 0
-    }
-    // clang-format on
-}
-
 // Throwing the gyro: creates the gyro item at the hand node, scaled with the fighter, and launches it with a speed
 // that grows with the charge.
 void ftRobotStatusUniqProcessSpecialGyro::execFixPos(soModuleAccesser* moduleAccesser) {
@@ -102,16 +90,15 @@ void ftRobotStatusUniqProcessSpecialGyro::execFixPos(soModuleAccesser* moduleAcc
             Vec3f offset(lr * soValueAccesser::getConstantFloat(moduleAccesser, 0xfd2, 0), soValueAccesser::getConstantFloat(moduleAccesser, 0xfd3, 0), 0.0f);
             Vec3f handPos = moduleAccesser->getModelModule().getNodeGlobalPosition(0xa2, &offset, false, false);
             Vec3f safePos(moduleAccesser->getGroundModule().getCenterPos(0).m_x, moduleAccesser->getGroundModule().getCenterPos(0).m_y, moduleAccesser->getGroundModule().getZ());
-            soResourceModule* resource = &moduleAccesser->getResourceModule();
-            s32 taskId = moduleAccesser->getStageObject().m_taskId;
-            int brresId = resource->getResourceIdAccesser()->getMdlResId();
-            BaseItem* gyro = itManager::getInstance()->createBaseItem(&safePos, &handPos, lr, static_cast<itKind>(0x57), 0, taskId, taskId,
-                                                                        resource, 1, brresId, 0, 0xffff, 0x14);
+            BaseItem* gyro = itManager::getInstance()->createBaseItem(&safePos, &handPos, lr, static_cast<itKind>(0x57), 0,
+                                                                        moduleAccesser->getStageObject().getTaskId(), moduleAccesser->getStageObject().getTaskId(),
+                                                                        &moduleAccesser->getResourceModule(), 1,
+                                                                        moduleAccesser->getResourceModule().getResourceIdAccesser()->getMdlResId(), 0, 0xffff, 0x14);
             if (gyro != NULL) {
                 Vec3f speed(0.0f, 0.0f, 0.0f);
                 float charge = moduleAccesser->getWorkManageModule().getFloat(0x11000014);
                 speed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xfd0, 0) + charge * soValueAccesser::getConstantFloat(moduleAccesser, 0xfd1, 0);
-                ftRobotScaleVec3f(&speed, lr);
+                Vec3fScale(&speed, &speed, lr);
                 gyro->setOwnerScale(moduleAccesser->getPostureModule().getScale());
                 gyro->updateNodeSRT();
                 gyro->action(0, charge);

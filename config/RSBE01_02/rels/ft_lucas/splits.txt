@@ -44,6 +44,9 @@ mo_fighter/ft_lucas/ft_lucas_status_uniq_process_special_hi_attack.cpp:
 mo_fighter/ft_lucas/ft_lucas_status_uniq_process_special_hi_attack_end.cpp:
 	.text       start:0x00012378 end:0x000126F4
 	.ctors      start:0x00000018 end:0x0000001C
+	.rodata     start:0x00000098 end:0x000000A8
+	.data       start:0x00008418 end:0x00008570
+	.bss        start:0x00000220 end:0x00000230
 
 mo_fighter/ft_lucas/ft_lucas_status_uniq_process_special_hi_reflect.cpp:
 	.text       start:0x000126F4 end:0x00012800
@@ -61,6 +64,9 @@ mo_fighter/ft_lucas/ft_lucas_status_uniq_process_special_lw.cpp:
 mo_fighter/ft_lucas/ft_lucas_status_uniq_process_special_lw_hold.cpp:
 	.text       start:0x00012A0C end:0x00012D54
 	.ctors      start:0x00000024 end:0x00000028
+	.rodata     start:0x000000B0 end:0x000000C0
+	.data       start:0x00008668 end:0x000086E8
+	.bss        start:0x00000250 end:0x00000260
 
 mo_fighter/ft_lucas/wn_lucas_pk_fire.cpp:
 	.text       start:0x00012D54 end:0x00015FC4
@@ -68,6 +74,9 @@ mo_fighter/ft_lucas/wn_lucas_pk_fire.cpp:
 mo_fighter/ft_lucas/wn_lucas_pk_fire_status_uniq_process_shoot.cpp:
 	.text       start:0x00015FC4 end:0x000161A4
 	.ctors      start:0x00000028 end:0x0000002C
+	.rodata     start:0x000000D8 end:0x000000E0
+	.data       start:0x00009228 end:0x000092A0
+	.bss        start:0x00000338 end:0x00000348
 
 mo_fighter/ft_lucas/wn_lucas_pk_fire_status_uniq_process_pillar.cpp:
 	.text       start:0x000161A4 end:0x00016408
@@ -82,6 +91,9 @@ mo_fighter/ft_lucas/wn_lucas_pk_thunder.cpp:
 mo_fighter/ft_lucas/wn_lucas_pk_thunder_status_uniq_process_move.cpp:
 	.text       start:0x00019BE8 end:0x0001A19C
 	.ctors      start:0x00000030 end:0x00000034
+	.rodata     start:0x00000110 end:0x00000130
+	.data       start:0x0000A280 end:0x0000A300
+	.bss        start:0x000003C8 end:0x000003D8
 
 mo_fighter/ft_lucas/wn_lucas_pk_thunder_child.cpp:
 	.text       start:0x0001A19C end:0x0001C364
@@ -103,6 +115,8 @@ mo_fighter/ft_lucas/wn_lucas_himohebi.cpp:
 mo_fighter/ft_lucas/wn_lucas_himohebi_status_uniq_process_exhaust.cpp:
 	.text       start:0x00020D3C end:0x00020EA4
 	.ctors      start:0x00000038 end:0x0000003C
+	.data       start:0x0000B480 end:0x0000B538
+	.bss        start:0x00000500 end:0x00000510
 
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x00020EA4 end:0x00020F40

@@ -5,9 +5,6 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
-// Base rebirth initStatus (sora_melee), still called by its fn_27 name.
-extern "C" void fn_27_1733F8(soStatusUniqProcess* self, soModuleAccesser* moduleAccesser);
-
 // HYPOTHESIS: local view of the posture module; only the vtable slots 0x18 (getPos) and 0x1c (setPos) are used.
 class ftPopoPostureModuleView {
 public:
@@ -42,7 +39,7 @@ void ftPopoStatusUniqProcessRebirth::initStatus(soModuleAccesser* moduleAccesser
         }
         getPosture(moduleAccesser).setPos(&pos);
     }
-    fn_27_1733F8(this, moduleAccesser);
+    ftStatusUniqProcessRebirth::initStatus(moduleAccesser);
 }
 
 void ftPopoStatusUniqProcessRebirth::attachEffect(soModuleAccesser* moduleAccesser, const Vec3f& pos) {

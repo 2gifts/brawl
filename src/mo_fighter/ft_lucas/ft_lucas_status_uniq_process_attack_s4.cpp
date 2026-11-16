@@ -1,8 +1,9 @@
+#include <ft/ft_status_uniq_process_smash_attack.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <types.h>
 
-class ftLucasStatusUniqProcessAttackS4 : public soStatusUniqProcess {
+class ftLucasStatusUniqProcessAttackS4 : public ftStatusUniqProcessSmashAttack {
 public:
     virtual ~ftLucasStatusUniqProcessAttackS4() { }
     virtual void execStatus(soModuleAccesser* moduleAccesser);

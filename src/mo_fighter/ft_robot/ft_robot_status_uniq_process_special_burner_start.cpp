@@ -18,23 +18,23 @@ inline float absValue(float value) __attribute__((never_inline)) { return __fabs
 static inline void resetController(ftKineticEnergyController& controller, int mode, Vec3f* accel, const Vec2f& speed, soModuleAccesser* moduleAccesser) {
     controller.resetEnergy(mode, const_cast<Vec2f*>(&speed), accel, moduleAccesser);
 }
+static inline void resetGravityEnergy(ftKineticEnergyGravity& gravity, int mode, Vec3f* accel, const Vec2f& speed, soModuleAccesser* moduleAccesser) {
+    gravity.resetEnergy(mode, const_cast<Vec2f*>(&speed), accel, moduleAccesser);
+}
 static inline void setControllerSpeed(ftKineticEnergyController& controller, const Vec2f& speed) {
     controller.m_speed = speed;
 }
 static inline void setControllerTarget(ftKineticEnergyController& controller, const Vec2f& target) {
     controller.m_speedTarget = target;
 }
-static inline void resetGravity(ftKineticEnergyGravity& gravity, float speedY, soModuleAccesser* moduleAccesser) {
-    Vec2f speed(0.0f, speedY);
-    gravity.resetEnergy(0, &speed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
-}
 
 // MATCH-ONLY: the reset mode is kept in a saved register across the speed queries and vector construction, as in the
-// native register lifetime. HYPOTHESIS: the first gravity reset below still has its vector address in a saved register
-// (the native code does not), the only remaining difference.
+// native register lifetime. One mode variable declared first in the function and assigned in each branch (not one per
+// branch, and not declared later) gives the original saved-register numbering.
 #pragma push
 #pragma opt_propagation off
 void ftRobotStatusUniqProcessSpecialBurnerStart::initStatus(soModuleAccesser* moduleAccesser) {
+    int controllerMode;
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
     ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
     moduleAccesser->getWorkManageModule().onFlag(0x22000012);
@@ -44,20 +44,22 @@ void ftRobotStatusUniqProcessSpecialBurnerStart::initStatus(soModuleAccesser* mo
         if (absValue(speed.m_y) > soValueAccesser::getConstantFloat(moduleAccesser, 0xfc3, 0)) {
             int sign = (speed.m_y < 0.0f) ? -1 : 1;
             float signF = sign;
-            speed.m_y = soValueAccesser::getConstantFloat(moduleAccesser, 0xfc3, 0) * signF;
+            float limitY = soValueAccesser::getConstantFloat(moduleAccesser, 0xfc3, 0);
+            speed.m_y = limitY * signF;
         }
         if (moduleAccesser->getSituationModule().getKind() == 0) {
             speed.m_y += soValueAccesser::getConstantFloat(moduleAccesser, 0xfc0, 0);
         } else if (speed.m_y < 0.0f) {
             speed.m_y += soValueAccesser::getConstantFloat(moduleAccesser, 0xfc1, 0);
         }
-        gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        resetGravityEnergy(gravity, 0, &Vec3f(0.0f, 0.0f, 0.0f), Vec2f(0.0f, speed.m_y), moduleAccesser);
         gravity.enable();
-        int controllerMode = 0xb;
+        controllerMode = 0xb;
         if (absValue(speed.m_x) > soValueAccesser::getConstantFloat(moduleAccesser, 0xfc2, 0)) {
             int sign = (speed.m_x < 0.0f) ? -1 : 1;
             float signF = sign;
-            speed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xfc2, 0) * signF;
+            float limitX = soValueAccesser::getConstantFloat(moduleAccesser, 0xfc2, 0);
+            speed.m_x = limitX * signF;
         }
         resetController(controller, controllerMode, &Vec3f(0.0f, 0.0f, 0.0f), Vec2f(speed.m_x, 0.0f), moduleAccesser);
         setControllerSpeed(controller, Vec2f(speed.m_x, 0.0f));
@@ -72,10 +74,10 @@ void ftRobotStatusUniqProcessSpecialBurnerStart::initStatus(soModuleAccesser* mo
         moduleAccesser->getEffectModule().reqFollow(static_cast<EfID>(0x240002), 0x60, &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, -90.0f), 1.0f, false, 1, 0, -1);
     } else {
         // Out of fuel: no lift, the fighter keeps its speed.
-        int controllerMode = 0xb;
+        controllerMode = 0xb;
         resetController(controller, controllerMode, &Vec3f(0.0f, 0.0f, 0.0f), Vec2f(speed.m_x, 0.0f), moduleAccesser);
         setControllerSpeed(controller, Vec2f(speed.m_x, 0.0f));
-        resetGravity(gravity, speed.m_y, moduleAccesser);
+        resetGravityEnergy(gravity, 0, &Vec3f(0.0f, 0.0f, 0.0f), Vec2f(0.0f, speed.m_y), moduleAccesser);
         gravity.enable();
     }
     moduleAccesser->getMotionModule().removePartialAnimChr(2);

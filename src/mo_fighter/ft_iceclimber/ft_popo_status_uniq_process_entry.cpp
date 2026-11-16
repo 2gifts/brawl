@@ -12,6 +12,7 @@ public:
     virtual ~ftStatusUniqProcessEntry() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
+    virtual void execFixPos(soModuleAccesser* moduleAccesser); // the popo's vtable points at this base override
 };
 
 // Link event sent when the entry leaves to the next status (HYPOTHESIS names).
@@ -27,13 +28,10 @@ public:
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
 };
 
-// Base entry process body (sora_melee), called directly by its fn_27 name.
-extern "C" void fn_27_18C2FC(ftStatusUniqProcessEntry* self, soModuleAccesser* moduleAccesser);
-
 // HYPOTHESIS: work flag 0x1200003e marks the popo's entry mode (the cliff-pull partner path when set).
 void ftPopoStatusUniqProcessEntry::initStatus(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getWorkManageModule().isFlag(0x1200003e) == false) {
-        fn_27_18C2FC(this, moduleAccesser);
+        ftStatusUniqProcessEntry::initStatus(moduleAccesser);
     } else {
         if (moduleAccesser->getLinkModule().isLink(6) == true) {
             moduleAccesser->getGroundModule().setShapeKind(soGroundShapeImpl::ShapeKind(1), 0);

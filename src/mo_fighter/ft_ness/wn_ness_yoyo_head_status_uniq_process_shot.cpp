@@ -6,7 +6,6 @@
 #define FT_REL_LINK_EXTERN
 #include <wn/wn_module_accesser_builder.h>
 #include <wn/ness/wn_ness_yoyo_head.h>
-#include <wn/ness/wn_ness_yoyo_head_utility.h>
 #include <mt/mt_vector.h>
 #include <so/ground/so_ground_module_impl.h>
 #include <so/posture/so_posture_module_simple.h>
@@ -68,5 +67,19 @@ void wnNessYoyoHeadStatusUniqProcessShot::execStatus(soModuleAccesser* moduleAcc
 }
 
 void wnNessYoyoHeadStatusUniqProcessShot::execFixPos(soModuleAccesser* moduleAccesser) {
-    wnNessYoyoHeadFixGroundPos(moduleAccesser);
+    // The position is pulled back to the corrected ground position on the axes the head touches the ground on, then the node
+    // transform is refreshed. BYTES: written out in each unit instead of an inline helper; the helper moved the two Vec3f
+    // locals' stack slots.
+    soGroundModule& ground = moduleAccesser->getGroundModule();
+    soPostureModule& posture = moduleAccesser->getPostureModule();
+    Vec3f pos = posture.getPos();
+    Vec3f corrected = ground.getCorrectPos(0);
+    if (ground.isTouch((grCollStatus::TouchMask)9, 0)) {
+        pos.m_y = corrected.m_y;
+    }
+    if (ground.isTouch((grCollStatus::TouchMask)6, 0)) {
+        pos.m_x = corrected.m_x;
+    }
+    posture.setPos(&pos);
+    moduleAccesser->getStageObject().updateNodeSRT();
 }

@@ -1,5 +1,27 @@
+#define MT_VEC2F_FROM_VEC3_CTOR_NOINLINE // BYTES: the Vec3f -> Vec2f constructor is the REL's weak out-of-line copy
+#define MT_VEC2F_LENGTH_INLINE_SQ // BYTES: length() expands the squares in place
+#define FT_POOL_ROOT_NONPOLYMORPHIC
+#define SO_GENERAL_WORK_BOUNDED_CLEAR
+#define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
+#define FT_TEAM_TYPED_INTERFACE
+#define FT_SOUND_GENERATOR_DTOR_NOINLINE
 #define FT_FIGHTER_ANIMCMD_LONG
+#define WN_WEAPON_ANIMCMD_LONG
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_POPO_ARTICLE_POOLS
+#define MT_VEC3F_OPERATORS_NOINLINE
+#define MT_VEC3F_SUB_NATIVE_ORDER
+#define MT_VEC3F_LENGTH_SQ_NOINLINE
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define WN_KINETIC_GENERIC_BUILDER
+#include <so/kinetic/so_kinetic_energy.h>
+#undef WN_KINETIC_GENERIC_BUILDER
+#include <ft/builder/ft_dol_array_list.h>
+#include <ft/ft_manager.h>
+#include <ft/ft_class_info_impl.h>
 #include <ft/fighter.h>
+#include <ft/iceclimber/ft_iceclimber.h>
 #include <so/so_external_value_accesser.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
@@ -11,9 +33,12 @@
 #include <types.h>
 
 // Helpers of the iceclimber REL that are not reconstructed yet.
-extern "C" u32 fn_105_C29C(int status);
-extern "C" int fn_105_133F8(float);
-extern "C" void fn_105_133E4(Vec2f* dst, const Vec3f* src);
+// Not an infinity or a NaN (the weak copy of this helper sits in the special_s unit of the original).
+inline bool mtIsNormal(float value) {
+    bool result = true;
+    if (((*reinterpret_cast<u32*>(&value) >> 23) & 0xFF) == 0xFF) result = false;
+    return result;
+}
 
 // Link event carrying only its kind (HYPOTHESIS: kind 0x45b is the partner's final-smash release).
 struct ftPopoFinalLinkEvent : soLinkEventArgs {
@@ -42,28 +67,19 @@ public:
 };
 
 void ftPopoStatusUniqProcessFinal::initStatus(soModuleAccesser* moduleAccesser) {
-    Fighter* self = dynamic_cast<Fighter*>(&moduleAccesser->getStageObject());
+    ftPopo* self = dynamic_cast<ftPopo*>(&moduleAccesser->getStageObject());
     if (self == 0) {
         return;
     }
     Fighter* partner = self->getPartner();
-    if (partner != 0 && fn_105_C29C(soExternalValueAccesser::getStatusKind(partner)) == 1) {
+    if (partner != 0 && ftPopo::isEnableCoupleTech(soExternalValueAccesser::getStatusKind(partner)) == 1) {
         Vec3f partnerPos = soExternalValueAccesser::getPos(partner);
-        Vec2f partnerXY;
-        fn_105_133E4(&partnerXY, &partnerPos);
+        Vec2f partnerXY(partnerPos);
         Vec3f ownPos = moduleAccesser->getPostureModule().getPos();
-        Vec2f ownXY;
-        fn_105_133E4(&ownXY, &ownPos);
-        Vec2f diff = partnerXY - ownXY;
-        if (fn_105_133F8(diff.m_x) && fn_105_133F8(diff.m_y)) {
-            float sumSq = diff.m_x * diff.m_x + diff.m_y * diff.m_y;
-            float dist;
-            // HYPOTHESIS: the small-value floor below is a near-zero epsilon and its fallback is 0.0f
-            if ((float)__fabs(sumSq) <= 0.0001f) {
-                dist = 0.0f;
-            } else {
-                dist = sumSq * rsqrtf(sumSq);
-            }
+        Vec2f diff = partnerXY - Vec2f(ownPos);
+        bool normal = mtIsNormal(diff.m_x) && mtIsNormal(diff.m_y);
+        if (normal) {
+            float dist = diff.length();
             if (dist < soValueAccesser::getConstantFloat(moduleAccesser, 0xfdb, 0)) {
                 moduleAccesser->getWorkManageModule().onFlag(0x22000010);
                 if (moduleAccesser->getLinkModule().isLink(6) == 1) {
@@ -90,7 +106,7 @@ void ftPopoStatusUniqProcessFinal::exitStatus(soModuleAccesser* moduleAccesser, 
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000010) != true) {
         return;
     }
-    Fighter* self = dynamic_cast<Fighter*>(&moduleAccesser->getStageObject());
+    ftPopo* self = dynamic_cast<ftPopo*>(&moduleAccesser->getStageObject());
     if (self == 0) {
         return;
     }

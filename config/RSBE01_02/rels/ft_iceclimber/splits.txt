@@ -14,7 +14,7 @@ global_destructor_chain.c:
 mo_fighter/ft_iceclimber/ft_iceclimber.cpp:
 	.text       start:0x00000070 end:0x00012FD8
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x00000080
+	.rodata     start:0x00000000 end:0x00000060
 	.data       start:0x00000000 end:0x00007F10
 	.bss        start:0x00000008 end:0x00000270
 
@@ -47,6 +47,9 @@ mo_fighter/ft_iceclimber/ft_popo_status_uniq_process_special_hi_cliff_pull_partn
 mo_fighter/ft_iceclimber/ft_popo_status_uniq_process_final.cpp:
 	.text       start:0x00014BE8 end:0x00015050
 	.ctors      start:0x0000001C end:0x00000020
+	.rodata     start:0x00000060 end:0x00000068
+	.data       start:0x00008258 end:0x000082D0
+	.bss        start:0x000002D0 end:0x000002E0
 
 mo_fighter/ft_iceclimber/ft_popo_status_uniq_process_final_partner.cpp:
 	.text       start:0x00015050 end:0x000157AC
@@ -59,6 +62,9 @@ mo_fighter/ft_iceclimber/ft_popo_status_uniq_process_special_lw.cpp:
 mo_fighter/ft_iceclimber/ft_popo_status_uniq_process_entry.cpp:
 	.text       start:0x00015BC4 end:0x00015E98
 	.ctors      start:0x00000028 end:0x0000002C
+	.rodata     start:0x00000078 end:0x00000080
+	.data       start:0x000083C0 end:0x00008470
+	.bss        start:0x00000300 end:0x00000310
 
 mo_fighter/ft_iceclimber/ft_popo_status_uniq_process_rebirth.cpp:
 	.text       start:0x00015E98 end:0x00016184

@@ -5,8 +5,8 @@
 #define WN_ARTICLE_ANIMCMD_INT
 #define FT_REL_LINK_EXTERN
 #include <wn/wn_module_accesser_builder.h>
+#include <wn/wn_kinetic_energy_normal.h>
 #include <wn/ness/wn_ness_yoyo_head.h>
-#include <wn/ness/wn_ness_yoyo_head_utility.h>
 #include <mt/mt_vector.h>
 #include <so/ground/so_ground_module_impl.h>
 #include <so/posture/so_posture_module_simple.h>
@@ -18,7 +18,7 @@
 #include <wn/wn_lasso_status_view.h>
 
 // The yo-yo head falling after being shot out: gravity-like acceleration along the owner's facing. HYPOTHESIS: all work variable
-// meanings.
+// meanings. The energy is the weapon variant (wnKineticEnergyNormal): its RTTI is what the original dynamic_cast names.
 class wnNessYoyoHeadStatusUniqProcessShotFall : public soStatusUniqProcess {
 public:
     virtual ~wnNessYoyoHeadStatusUniqProcessShotFall() { }
@@ -41,7 +41,7 @@ void wnNessYoyoHeadStatusUniqProcessShotFall::initStatus(soModuleAccesser* modul
     Vec2f limit;
     limit.m_x = param->unk14;
     limit.m_y = param->unk20;
-    soKineticEnergyNormal& energy = dynamic_cast<soKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
+    wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
     energy.m_speed = speed;
     energy.m_accel = accel;
     energy.m_speedTarget = limit;
@@ -69,5 +69,19 @@ void wnNessYoyoHeadStatusUniqProcessShotFall::execStatus(soModuleAccesser* modul
 }
 
 void wnNessYoyoHeadStatusUniqProcessShotFall::execFixPos(soModuleAccesser* moduleAccesser) {
-    wnNessYoyoHeadFixGroundPos(moduleAccesser);
+    // The position is pulled back to the corrected ground position on the axes the head touches the ground on, then the node
+    // transform is refreshed. BYTES: written out in each unit instead of an inline helper; the helper moved the two Vec3f
+    // locals' stack slots.
+    soGroundModule& ground = moduleAccesser->getGroundModule();
+    soPostureModule& posture = moduleAccesser->getPostureModule();
+    Vec3f pos = posture.getPos();
+    Vec3f corrected = ground.getCorrectPos(0);
+    if (ground.isTouch((grCollStatus::TouchMask)9, 0)) {
+        pos.m_y = corrected.m_y;
+    }
+    if (ground.isTouch((grCollStatus::TouchMask)6, 0)) {
+        pos.m_x = corrected.m_x;
+    }
+    posture.setPos(&pos);
+    moduleAccesser->getStageObject().updateNodeSRT();
 }

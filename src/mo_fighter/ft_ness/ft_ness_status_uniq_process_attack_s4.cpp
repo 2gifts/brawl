@@ -1,11 +1,12 @@
 #include <ft/ft_entry.h>
+#include <ft/ft_status_uniq_process_smash_attack.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/collision/so_collision_shield_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
-class ftNessStatusUniqProcessAttackS4 : public soStatusUniqProcess {
+class ftNessStatusUniqProcessAttackS4 : public ftStatusUniqProcessSmashAttack {
 public:
     virtual ~ftNessStatusUniqProcessAttackS4() { }
     virtual void execStatus(soModuleAccesser* moduleAccesser);
