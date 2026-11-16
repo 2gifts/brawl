@@ -25,8 +25,13 @@
 #include <types.h>
 
 #include <ft/koopa/ft_koopa_special_s.h>
-// The first part of every exit: the victim (if still held) is let go and the throw flag set.
-extern "C" void fn_102_17444(soModuleAccesser* moduleAccesser);
+// Switches the four kinetic energies of the fighter off (each status file of the module has its own static copy).
+static void ftKineticEnergyUnable(soModuleAccesser* moduleAccesser) {
+    moduleAccesser->getKineticModule().getEnergy(0)->disable();
+    moduleAccesser->getKineticModule().getEnergy(1)->disable();
+    moduleAccesser->getKineticModule().getEnergy(2)->disable();
+    moduleAccesser->getKineticModule().getEnergy(3)->disable();
+}
 
 class ftGKoopaStatusUniqProcessSpecialS : public soStatusUniqProcess {
 public:
@@ -100,7 +105,7 @@ void ftGKoopaStatusUniqProcessSpecialSJump::initStatus(soModuleAccesser* moduleA
     ftKoopaSpecialSParam* param = getKoopaSpecialSParam(Fighter_GKoopa, 4);
     moduleAccesser->getSituationModule().setKind(Situation_Air, false);
     moduleAccesser->getGroundModule().setCorrect(soGroundShapeImpl::Correct_Air, 0);
-    fn_102_17444(moduleAccesser);
+    ftKineticEnergyUnable(moduleAccesser);
     ftKineticEnergyMotion& motion = dynamic_cast<ftKineticEnergyMotion&>(*moduleAccesser->getKineticModule().getEnergy(0));
     motion.resetEnergy(6, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     motion.enable();
@@ -177,7 +182,7 @@ bool ftGKoopaStatusUniqProcessSpecialSJump::checkDamage(soModuleAccesser* module
 
 void ftGKoopaStatusUniqProcessSpecialSFall::initStatus(soModuleAccesser* moduleAccesser) {
     ftKoopaSpecialSParam* param = getKoopaSpecialSParam(Fighter_GKoopa, 4);
-    fn_102_17444(moduleAccesser);
+    ftKineticEnergyUnable(moduleAccesser);
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
     gravity.resetEnergy(0, &Vec2f(0.0f, -param->unk28), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     gravity.m_gravity = 0.0f;
@@ -204,7 +209,7 @@ bool ftGKoopaStatusUniqProcessSpecialSFall::checkDamage(soModuleAccesser* module
 }
 
 void ftGKoopaStatusUniqProcessSpecialSLanding::initStatus(soModuleAccesser* moduleAccesser) {
-    fn_102_17444(moduleAccesser);
+    ftKineticEnergyUnable(moduleAccesser);
     if (moduleAccesser->getLinkModule().isLinked(0) == true) {
         ftKoopaLinkEventFlyingSlam event(0x26, 0x1ba, true);
         moduleAccesser->getLinkModule().sendEventNodes(0, event, 0);
@@ -227,7 +232,7 @@ void ftGKoopaStatusUniqProcessSpecialSLanding::execStatus(soModuleAccesser* modu
             int taskId = link.getNodeTaskId(0);
             moduleAccesser->getCollisionAttackModule().hitAbsolute(0, 0x49, taskId, 0, 0);
         }
-        fn_102_17444(moduleAccesser);
+        ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         gravity.resetEnergy(0, &Vec2f(0.0f, param->unk30), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();

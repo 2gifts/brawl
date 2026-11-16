@@ -111,6 +111,6 @@ void soSlopeModuleImpl::setPartNode(int partNode) {
     m_partNode = partNode;
 }
 
-soSlopeStatusParam::Status soSlopeModuleImpl::getStatus() {
-    return m_status;
+soSlopeStatusParam::StatusMask soSlopeModuleImpl::getStatus() {
+    return m_status.m_mask;
 }

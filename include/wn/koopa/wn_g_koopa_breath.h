@@ -4,7 +4,11 @@
 #include <wn/wn_extend_param_accesser.h>
 // The parameter block of the article. HYPOTHESIS: layout of the untouched part.
 struct wnGKoopaBreathParam {
-    u8 unk0[4];
+    float m_groundOffsetY; // +0x00: ground collision offset
+    int m_work5;           // +0x04: HYPOTHESIS: copied to work int 0x10000005 on activation
+    int m_work6;           // +0x08: HYPOTHESIS: copied to work int 0x10000006 on activation
+    float m_speedRandMin;  // +0x0C: the launch speed is scaled by a random factor in [min, max]
+    float m_speedRandMax;  // +0x10
 };
 // The static data block of the article (read by its wnModuleAccesserBuildData). HYPOTHESIS: layout of the untouched part.
 struct wnGKoopaBreathData {
@@ -36,8 +40,10 @@ public:
     const wnGKoopaBreathParam* m_param;
     wnGKoopaBreath(s32 articleId, const wnArticleBuildInfo& info, const wnGKoopaBreathData* data);
     virtual ~wnGKoopaBreath() { }
+    virtual void updateNodeSRT();
+    virtual bool notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* moduleAccesser, int index);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
     // Starts the breath (the same parameters as Bowser's wnKoopaBreath::activate).
-    void activate(int founderTaskId, int team, const Vec3f* position, int kind, float lr, float speed, float scale,
+    void activate(int founderTaskId, int team, const Vec3f* position, float lr, int kind, float speed, float scale,
                   float speedMul, float angle);
 };

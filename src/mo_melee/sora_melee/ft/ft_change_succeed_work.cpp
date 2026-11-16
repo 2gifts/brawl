@@ -121,7 +121,7 @@ void ftChangeSucceedWork::createDummyFighter(Heaps::HeapType instHeap, Heaps::He
     }
 }
 
-void ftChangeSucceedWork::activateDummyFighter(Vec3f* pos, Vec2f* speed, float* unk1, float* unk2, int flags, float scale, float lr) {
+void ftChangeSucceedWork::activateDummyFighter(Vec3f* pos, float scale, float lr, Vec2f* speed, float* unk1, float* unk2, int flags) {
     if (m_dummyFighter != NULL) {
         fn_27_1E3C78(m_dummyFighter, pos, speed, unk1, unk2, flags, unkAC, unkB8, scale, lr);
     }

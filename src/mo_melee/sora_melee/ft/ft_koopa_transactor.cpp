@@ -1,6 +1,6 @@
 #include <StaticAssert.h>
 #include <ft/koopa/ft_koopa_transactor.h>
-#include <ft/koopa/ft_koopa_article_pools.h>
+#include <wn/koopa/wn_koopa_breath.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/kirby/ft_kirby_copy_ability_id_converter.h>
 #include <mt/mt_prng.h>
@@ -100,7 +100,7 @@ bool ftKoopaTransactor::activeArticle(wnKoopaBreath* weapon, soModuleAccesser* a
     angle = baseAngle + angle;
     angle += spread * randf() - 0.5f * spread;
     int founderTaskId = acc->getStageObject().m_taskId;
-    weapon->activate(founderTaskId, acc->getTeamModule().getTeam()->getNo(), &pos, 0, lr, speed, scale, speedMul,
+    weapon->activate(founderTaskId, acc->getTeamModule().getTeam()->getNo(), &pos, lr, 0, speed, scale, speedMul,
                      0.017453292f * angle);
     return false;
 }

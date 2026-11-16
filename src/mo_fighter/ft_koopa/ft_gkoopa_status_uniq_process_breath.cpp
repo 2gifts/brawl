@@ -1,6 +1,7 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #define MT_VEC2F_CTOR_NOINLINE // BYTES: the original builds the clamped speed pair through the out-of-line constructor
 #define MT_VEC2F_ASSIGN_NOINLINE // BYTES: ... and assigns it through the out-of-line operator=
+#include <ft/koopa/ft_koopa_breath_status.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_kinetic_energy.h>
 #include <ft/ft_kinetic_energy_controller.h>
@@ -66,20 +67,22 @@ void ftGKoopaStatusUniqProcessBreath::execStatus(soModuleAccesser* moduleAccesse
                 if (ratio < minVolume) {
                     volume = minVolume;
                 }
-                moduleAccesser->getSoundModule().setSEVol(volume, handle, 0);
+                moduleAccesser->getSoundModule().setSEVol(handle, volume, 0);
             }
             soControllerModule& controller = moduleAccesser->getControllerModule();
-            int rumbleKind = 1;
+            ftKoopaBreathRumbleKind rumbleKind;
             if (ratio > 0.5f) {
-                rumbleKind = 0;
+                rumbleKind = FtKoopaBreathRumble_Strong;
+            } else {
+                rumbleKind = FtKoopaBreathRumble_Weak;
             }
             controller.setRumble(rumbleKind, 0, true, -1);
         }
-        int next = cycle + 1;
-        if (next >= soValueAccesser::getConstantInt(moduleAccesser, 0x5dc5, 0)) {
-            next = 0;
+        cycle++;
+        if (cycle >= soValueAccesser::getConstantInt(moduleAccesser, 0x5dc5, 0)) {
+            cycle = 0;
         }
-        moduleAccesser->getWorkManageModule().setInt(next, 0x20000004);
+        moduleAccesser->getWorkManageModule().setInt(cycle, 0x20000004);
         if (ratio > 0.5f) {
             if (frame % soValueAccesser::getConstantInt(moduleAccesser, 0x5dc4, 0) == 0) {
                 moduleAccesser->getCameraModule().reqQuake(static_cast<soCameraModule::QuakeKind>(0), moduleAccesser);
@@ -88,22 +91,24 @@ void ftGKoopaStatusUniqProcessBreath::execStatus(soModuleAccesser* moduleAccesse
         moduleAccesser->getWorkManageModule().setInt(frame + 1, 0x20000000);
         float angle = moduleAccesser->getWorkManageModule().getFloat(0x21000004);
         float stickY = moduleAccesser->getControllerModule().getStickY();
-        double stickMagnitude = fabs(stickY); // MATCH-ONLY: narrowed to float before the compare
+        double stickMagnitude = fabs(stickY); // the wide absolute value is narrowed for the compare (fabs + frsp)
         if ((float)stickMagnitude > 0.5f) {
             float maxAngle = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa2, 0);
             float minAngle = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa3, 0);
             float rate = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa4, 0);
             angle += rate * stickY;
+            // The clamp of Bowser's sora_melee twin (clampf: two nw4r FSelect), expanded here in the original.
+            // BYTES: written as asm statements. nw4r::math::FSelect is an asm inline that this compiler setup does not
+            // expand at the fighter units' optimization level (a call results), and the __fsel intrinsic adds two frsp;
+            // the same holds for CLAMP<float> in ft_koopa.cpp and Game & Watch's clampf.
             register float limitHigh = maxAngle;
             register float value = angle;
             register float limitLow = -minAngle;
-            register float fromLower = value - limitLow;
-            register float bounded;
-            // MATCH-ONLY: the fighter units are built without inlining of the nw4r FSelect asm helper.
-            asm { fsel bounded, fromLower, value, limitLow }
-            register float fromUpper = bounded - limitHigh;
+            register float lower = value - limitLow;
+            asm { fsel lower, lower, value, limitLow }
+            register float upper = lower - limitHigh;
             register float clamped;
-            asm { fsel clamped, fromUpper, limitHigh, bounded }
+            asm { fsel clamped, upper, limitHigh, lower }
             angle = clamped;
             moduleAccesser->getWorkManageModule().setFloat(angle, 0x21000004);
         }

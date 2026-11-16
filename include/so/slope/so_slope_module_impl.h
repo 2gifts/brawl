@@ -44,7 +44,7 @@ public:
     virtual ~soSlopeModule();
     virtual void activate();
     virtual void setStatus(u32 statusMask, int, bool);
-    virtual soSlopeStatusParam::Status getStatus();
+    virtual soSlopeStatusParam::StatusMask getStatus(); // the mask word (plain value: the fighter modules compare it without a temporary)
     virtual void update(bool);
     virtual void updateModelTopAngle();
     virtual void setTopAngleUnlimit(bool);
@@ -83,7 +83,7 @@ public:
     virtual ~soSlopeModuleImpl();
     virtual void activate();
     virtual void setStatus(u32 statusMask, int, bool);
-    virtual soSlopeStatusParam::Status getStatus();
+    virtual soSlopeStatusParam::StatusMask getStatus(); // the mask word (plain value: the fighter modules compare it without a temporary)
     virtual void update(bool);
     virtual void updateModelTopAngle();
     virtual void setTopAngleUnlimit(bool);

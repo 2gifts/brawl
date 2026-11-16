@@ -50,7 +50,7 @@ public:
 class wnKoopaBreath;
 
 class ftKoopa : public ftFighterBuilder<ftKoopaBuildConfig> {
-    u8 unkTail[0x1416C - sizeof(ftFighterBuilder<ftKoopaBuildConfig>)];
+
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
     ftData* m_data;
 public:
@@ -59,8 +59,12 @@ public:
             Heaps::HeapType nwModelInstHeap,
             Heaps::HeapType nwMotionInstHeap);
     virtual void onStart(int startKind);
-    virtual void change(void* work, int startKind);
     virtual void processUpdate();
+    virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3);
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
+    virtual void change(void* work, int startKind);
+    virtual void setupChangeSucceedWork(void* work);
+    virtual u32 getChangeSucceedOption() { return 0x7fa3; }
     // The hook the article mediator calls to start an article of the pool (HYPOTHESIS: the name follows the module map).
     static bool activeArticle(wnKoopaBreath* weapon, soModuleAccesser* acc);
 };

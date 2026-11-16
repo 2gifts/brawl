@@ -17,14 +17,14 @@
 // HYPOTHESIS: the shared helpers of Bowser's down special (emitted at the start of this unit, called only by its status
 // processes): the first clears the update flag (0x80) of the four kinetic energies, the second resets the work state,
 // puts Bowser in the air and, unless he started in the air, marks the ground start (0x22000012) and stops the energies.
-extern "C" void fn_102_D694(soModuleAccesser* moduleAccesser) {
+static void ftKineticEnergyUnable(soModuleAccesser* moduleAccesser) {
     moduleAccesser->getKineticModule().getEnergy(0)->disable();
     moduleAccesser->getKineticModule().getEnergy(1)->disable();
     moduleAccesser->getKineticModule().getEnergy(2)->disable();
     moduleAccesser->getKineticModule().getEnergy(3)->disable();
 }
 
-extern "C" void fn_102_D75C(soModuleAccesser* moduleAccesser) {
+static void initStatusCommon(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     int situation = moduleAccesser->getSituationModule().getKind();
     work.clearAll(2);
@@ -34,7 +34,7 @@ extern "C" void fn_102_D75C(soModuleAccesser* moduleAccesser) {
     moduleAccesser->getGroundModule().setCorrect(soGroundShapeImpl::Correct_Air, 0);
     if (situation != 2) {
         work.onFlag(0x22000012);
-        fn_102_D694(moduleAccesser);
+        ftKineticEnergyUnable(moduleAccesser);
     } else {
         work.offFlag(0x22000012);
     }
@@ -58,7 +58,7 @@ public:
 void ftKoopaStatusUniqProcessSpecialLwG::initStatus(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     if (work.isFlag(0x1200003d)) {
-        fn_102_D75C(moduleAccesser);
+        initStatusCommon(moduleAccesser);
         work.offFlag(0x1200003d);
     }
 }
@@ -76,7 +76,7 @@ void ftKoopaStatusUniqProcessSpecialLwG::execStatus(soModuleAccesser* moduleAcce
 void ftKoopaStatusUniqProcessSpecialLwA::initStatus(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     if (work.isFlag(0x1200003d)) {
-        fn_102_D75C(moduleAccesser);
+        initStatusCommon(moduleAccesser);
         work.offFlag(0x1200003d);
     }
     ftKoopaSpecialLwParam* param = getKoopaSpecialLwParam(Fighter_Koopa, 2);
@@ -84,7 +84,7 @@ void ftKoopaStatusUniqProcessSpecialLwA::initStatus(soModuleAccesser* moduleAcce
     if (!work.isFlag(0x22000012)) {
         speed.m_x *= param->m_airSpeedXMul;
         speed.m_y *= param->m_airSpeedYMul;
-        fn_102_D694(moduleAccesser);
+        ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.m_gravity = param->m_gravity;
@@ -97,7 +97,7 @@ void ftKoopaStatusUniqProcessSpecialLwA::initStatus(soModuleAccesser* moduleAcce
         stop.enable();
     } else {
         speed.m_y = param->m_dropSpeedY;
-        fn_102_D694(moduleAccesser);
+        ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         gravity.resetEnergy(0, &Vec2f(0.0f, param->m_dropSpeedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.m_gravity = 0.0f;
@@ -110,7 +110,7 @@ void ftKoopaStatusUniqProcessSpecialLwA::execStatus(soModuleAccesser* moduleAcce
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     ftKoopaSpecialLwParam* param = getKoopaSpecialLwParam(Fighter_Koopa, 2);
     if (!work.isFlag(0x22000011) && moduleAccesser->getMotionModule().isEnd()) {
-        fn_102_D694(moduleAccesser);
+        ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         gravity.resetEnergy(0, &Vec2f(0.0f, param->m_dropSpeedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.m_gravity = 0.0f;
@@ -136,7 +136,7 @@ void ftKoopaStatusUniqProcessSpecialLwA::execFixPos(soModuleAccesser* moduleAcce
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     if (situation != 2) {
         if (work.isFlag(0x22000010)) {
-            fn_102_D694(moduleAccesser);
+            ftKineticEnergyUnable(moduleAccesser);
             moduleAccesser->getStatusModule().changeStatusRequest(0x11b, moduleAccesser);
         } else {
             moduleAccesser->getSituationModule().setKind(Situation_Air, false);

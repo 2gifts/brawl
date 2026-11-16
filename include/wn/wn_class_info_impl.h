@@ -65,6 +65,8 @@ class wnPopoIceShot;
 class wnPokeFushigisouSeed;
 class wnPokeZenigameWater;
 class wnLucarioAuraBall;
+class wnKoopaBreath;
+struct wnKoopaBreathData;
 class wnDummyFighter;
 class wnPeachKinopio;
 class wnLinkBow;
@@ -164,6 +166,9 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnLucarioAuraBall*) {
     return g_ftCommonDataAccesser.getWeaponData<wnLucarioAuraBallData>(subKind, resourceGroup);
+}
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnKoopaBreath*) {
+    return g_ftCommonDataAccesser.getWeaponData<wnKoopaBreathData>(subKind, resourceGroup);
 }
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnDummyFighter*) {
     return g_ftCommonDataAccesser.getWeaponData<wnDummyFighterData>(subKind, resourceGroup);

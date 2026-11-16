@@ -1,41 +1,22 @@
 #pragma once
 
 // The articles Koopa owns and the mediator that hands them out. The pools are chained base first (see
-// include/wn/wn_article_pool.h).
+// include/wn/wn_article_pool.h). The fighter unit builds the full breath article: its weak destructor chain is emitted there.
 // HYPOTHESIS: all class names that are not in the module map.
 
 #include <wn/wn_article_pool.h>
 #include <wn/wn_article_build_info.h>
 #include <wn/weapon.h>
+#ifdef FT_KOOPA_ARTICLE_POOLS // the fighter unit: the inside-event builder teardown calls these lists out of line
+#include <ft/koopa/ft_koopa_event_units.h>
+#endif
+#define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/koopa/wn_koopa_breath.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
-
-class Vec3f;
-struct wnKoopaBreathData;
-
-// Bowser's fire breath (the class is in sora_melee). Opaque shell for the same reason as the other fighter pools.
-class wnKoopaBreath : public Weapon {
-    union {
-        u8 m_unreconstructed[0x1F80 - sizeof(Weapon)];
-        struct {
-            u8 unkCC[0x1F7C - sizeof(Weapon)];
-            struct {
-                float unk0;
-                int unk4;
-                int unk8;
-                float unkC;
-                float unk10;
-            }* unk1F7C;
-        };
-    };
-public:
-    wnKoopaBreath(s32 articleId, const wnArticleBuildInfo& info, const wnKoopaBreathData* data);
-    virtual ~wnKoopaBreath();
-    virtual void updateNodeSRT();
-    virtual bool notifyEventCollisionAttackCheck(u32 flags);
-    void activate(int founderTaskId, int team, const Vec3f* position, int kind,
-                  float lr, float speed, float scale, float speedMul, float angle);
-};
-static_assert(sizeof(wnKoopaBreath) == 0x1F80, "wnKoopaBreath layout is wrong!");
 
 typedef wnArticleHierarchy<wnKoopaBreath, 6, soInstancePoolRoot> ftKoopaBreathPool;
 

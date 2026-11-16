@@ -279,7 +279,7 @@ void ftSheik::setupChangeSucceedWork(void* work) {
     hit.point[3][1] = 0.0f;
     Vec2f* speed = &acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(0xFFFF));
     soPostureModule& posture = acc->getPostureModule();
-    static_cast<ftChangeSucceedWork*>(work)->activateDummyFighter(&posture.getPos(), speed, &hit.point[0][0], &hurt.point[0][0], 0xe0013, posture.getScale(), posture.getLr());
+    static_cast<ftChangeSucceedWork*>(work)->activateDummyFighter(&posture.getPos(), posture.getScale(), posture.getLr(), speed, &hit.point[0][0], &hurt.point[0][0], 0xe0013);
     static_cast<ftChangeSucceedWork*>(work)->unk100[0] = acc->getWorkManageModule().getInt(0x10000040);
 }
 

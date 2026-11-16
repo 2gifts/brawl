@@ -12339,10 +12339,12 @@ mo_melee/sora_melee/ft/ft_koopa_transactor.cpp:
 mo_melee/sora_melee/ft/ft_koopa_status_uniq_process_breath.cpp:
 	.text       start:0x0032E984 end:0x0032F0D0
 	.ctors      start:0x000003EC end:0x000003F0
+	.rodata     start:0x00007650 end:0x00007658
 
 mo_melee/sora_melee/wn/wn_koopa_breath.cpp:
-	.text       start:0x0032F0D0 end:0x00330E1C
+	.text       start:0x0032F0D0 end:0x003312B0
 	.ctors      start:0x000003F0 end:0x000003F4
+	.rodata     start:0x00007658 end:0x00007698
 
 mo_melee/sora_melee/ft/ft_peach_transactor.cpp:
 	.text       start:0x003312B0 end:0x003317DC
