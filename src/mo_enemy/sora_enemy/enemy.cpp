@@ -2225,7 +2225,7 @@ u32 Enemy::getFrameCounter(int index) {
 }
 
 // Keeps the largest attack power and hit stop of the frame; notifyEventCollisionAttackCheck applies them.
-void Enemy::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* acc) {
+void Enemy::notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* acc) {
     gfTask* task = gfTaskScheduler::getInstance()->getTaskById(getTaskCategory(collisionLog), collisionLog->m_taskId);
     soCollisionAttackData* attackData =
         acc->getCollisionAttackModule().getData(collisionLog->m_damageIndex, collisionLog->m_isAbsolute);

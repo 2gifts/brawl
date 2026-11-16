@@ -476,7 +476,7 @@ create__29ftClassInfoImpl<7,9ftPikachu>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25H
 @100@notifyEventChangeStatus__9ftPikachuFiiP12soStatusDataP16soModuleAccesser = .text:0x0000E44C; // type:function size:0x8
 fn_98_E454 = .text:0x0000E454; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__7FighterFUl = .text:0x0000E45C; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x0000E464; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x0000E464; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x0000E46C; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__7FighterFv = .text:0x0000E474; // type:function size:0x8
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x0000E47C; // type:function size:0x8
@@ -725,7 +725,7 @@ __dt__40wnPikachuThunderStatusUniqProcessRegularFv = .text:0x00015084; // type:f
 @4@__dt__21soArticleMediatorNullFv = .text:0x000150CC; // type:function size:0x8
 fn_98_150D4 = .text:0x000150D4; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__6WeaponFUl = .text:0x000150DC; // type:function size:0x8
-@112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x000150E4; // type:function size:0x8
+@112@notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser = .text:0x000150E4; // type:function size:0x8
 fn_98_150EC = .text:0x000150EC; // type:function size:0x8
 @136@remove__6WeaponFv = .text:0x000150F4; // type:function size:0x8
 fn_98_150FC = .text:0x000150FC; // type:function size:0x8

@@ -462,9 +462,9 @@ void Weapon::removeConstraint() {
 
 // Raw views of soCollisionLog bytes that the shared header leaves unnamed.
 
-#define LOG_U8(log, offset) (*(reinterpret_cast<u8*>(log) + (offset)))
+#define LOG_U8(log, offset) (*(reinterpret_cast<const u8*>(log) + (offset)))
 
-void Weapon::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+void Weapon::notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
     gfTask* task = gfTaskScheduler::getInstance()->getTaskById(static_cast<gfTask::Category>(LOG_U8(collisionLog, 0x22)), collisionLog->m_taskId);
     switch (LOG_U8(collisionLog, 0x21)) {
     case 2:

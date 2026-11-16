@@ -71,7 +71,7 @@ public:
     virtual bool isObserv(char group);
     virtual bool notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* moduleAccesser, soAnimCmdEventS32 unk3);
     // The module observes the attack events of its enemy (the base declares the handler pure).
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
 
     bool isInvalid(int unitIndex);

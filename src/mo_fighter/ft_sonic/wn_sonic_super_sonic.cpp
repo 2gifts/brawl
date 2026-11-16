@@ -102,7 +102,7 @@ void wnSonicSuperSonic::updatePosture(bool update) {
     m_moduleAccesser->getPostureModule().setPos(&pos);
 }
 
-void wnSonicSuperSonic::notifyEventCollisionAttack(float power, soCollisionLog* log, soModuleAccesser* acc) {
+void wnSonicSuperSonic::notifyEventCollisionAttack(float power, const soCollisionLog* log, soModuleAccesser* acc) {
     if (m_moduleAccesser->getWorkManageModule().getFloat(0x11000001) < power) {
         m_moduleAccesser->getWorkManageModule().setFloat(power, 0x11000001);
     }

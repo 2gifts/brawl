@@ -482,7 +482,7 @@ create__28ftClassInfoImpl<19,7ftFalco>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25He
 @100@notifyEventChangeStatus__7FighterFiiP12soStatusDataP16soModuleAccesser = .text:0x0000E6E4; // type:function size:0x8
 @112@notifyEventChangeSituation__7FighterF13SituationKind13SituationKindP16soModuleAccesser = .text:0x0000E6EC; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__7FighterFUl = .text:0x0000E6F4; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x0000E6FC; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x0000E6FC; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x0000E704; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__7FighterFv = .text:0x0000E70C; // type:function size:0x8
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x0000E714; // type:function size:0x8
@@ -636,7 +636,7 @@ deactivateDescendantForce__59wnWeaponBuilder<40wnFalcoIllusionModuleAccesserBuil
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x00010EC4; // type:function size:0x8
 @100@notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser = .text:0x00010ECC; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__15wnFalcoIllusionFUl = .text:0x00010ED4; // type:function size:0x8
-@112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x00010EDC; // type:function size:0x8
+@112@notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser = .text:0x00010EDC; // type:function size:0x8
 @124@notifyEventCollisionHit2nd__6WeaponFP23soCollisionAttackModuleP14soCollisionLogUlffP16soModuleAccesserb = .text:0x00010EE4; // type:function size:0x8
 @124@notifyEventCollisionHit__6WeaponFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog = .text:0x00010EEC; // type:function size:0x8
 @144@__dt__15wnFalcoIllusionFv = .text:0x00010EF4; // type:function size:0x8

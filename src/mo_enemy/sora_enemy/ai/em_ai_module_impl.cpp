@@ -554,7 +554,7 @@ bool emAIModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* modul
 }
 
 // Records what the enemy's attack hit (see m_attackAreaTarget).
-void emAIModuleImpl::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+void emAIModuleImpl::notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
     if (collisionLog == NULL) {
         return;
     }

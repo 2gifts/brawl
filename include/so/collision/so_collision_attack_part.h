@@ -298,7 +298,7 @@ struct soCollisionAttackData {
             u32 m_noEffect : 1; // disable gfx on hit
             u32 m_noTransaction : 1; // flinchless
             u32 m_region : 5; // Region, up to 0x1f
-            soCollision::ShapeType m_shapeType : 1;
+            u32 m_shapeType : 1; // soCollision::ShapeType (the aura ball's handler reads it unsigned)
             u32 m_isDeath100 : 1; // custom
             unsigned int field_0x3c_2 : 30; // ~up to 0x3fffffff
 #ifndef SO_COLLISION_ATTACK_DATA_PLAIN_BITFIELDS

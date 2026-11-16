@@ -498,7 +498,7 @@ create__27ftClassInfoImpl<4,7ftYoshi>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25Hea
 @100@notifyEventChangeStatus__7FighterFiiP12soStatusDataP16soModuleAccesser = .text:0x0000EFB4; // type:function size:0x8
 @112@notifyEventChangeSituation__7ftYoshiF13SituationKind13SituationKindP16soModuleAccesser = .text:0x0000EFBC; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__7FighterFUl = .text:0x0000EFC4; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x0000EFCC; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x0000EFCC; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x0000EFD4; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__7FighterFv = .text:0x0000EFDC; // type:function size:0x8
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x0000EFE4; // type:function size:0x8
@@ -780,7 +780,7 @@ deactivateDescendantForce__55wnWeaponBuilder<36wnYoshiStarModuleAccesserBuildCon
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x00017854; // type:function size:0x8
 @100@notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser = .text:0x0001785C; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__11wnYoshiStarFUl = .text:0x00017864; // type:function size:0x8
-@112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x0001786C; // type:function size:0x8
+@112@notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser = .text:0x0001786C; // type:function size:0x8
 @124@notifyEventCollisionHit2nd__6WeaponFP23soCollisionAttackModuleP14soCollisionLogUlffP16soModuleAccesserb = .text:0x00017874; // type:function size:0x8
 @124@notifyEventCollisionHit__6WeaponFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog = .text:0x0001787C; // type:function size:0x8
 @144@__dt__11wnYoshiStarFv = .text:0x00017884; // type:function size:0x8

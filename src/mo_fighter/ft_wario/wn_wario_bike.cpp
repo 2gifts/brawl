@@ -473,7 +473,7 @@ baseEvent:
     Weapon::notifyEventLink(eventInfo, accesser, other, unk4);
 }
 
-void wnWarioBike::notifyEventCollisionAttack(float power, soCollisionLog* log,
+void wnWarioBike::notifyEventCollisionAttack(float power, const soCollisionLog* log,
                                              soModuleAccesser* accesser) {
     gfTask* task = gfTaskScheduler::getInstance()->getTaskById(
         static_cast<gfTask::Category>(log->m_taskCategory), log->m_taskId);

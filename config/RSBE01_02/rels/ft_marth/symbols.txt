@@ -397,7 +397,7 @@ create__28ftClassInfoImpl<17,7ftMarth>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25He
 @100@notifyEventChangeStatus__7FighterFiiP12soStatusDataP16soModuleAccesser = .text:0x0000A5E8; // type:function size:0x8
 @112@notifyEventChangeSituation__7FighterF13SituationKind13SituationKindP16soModuleAccesser = .text:0x0000A5F0; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__7ftMarthFUl = .text:0x0000A5F8; // type:function size:0x8 scope:weak
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x0000A600; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x0000A600; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x0000A608; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__7ftMarthFv = .text:0x0000A610; // type:function size:0x8 scope:weak
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x0000A618; // type:function size:0x8

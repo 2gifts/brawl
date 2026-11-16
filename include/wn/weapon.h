@@ -14,9 +14,9 @@ struct wnActivateDesc; // HYPOTHESIS: original descriptor type spelling.
 
 class Weapon : public StageObject, public soStatusEventObserver, public soCollisionAttackEventObserver, public soCollisionHitEventObserver, public soArticle {
 
+protected: // the Lucario aura ball writes the reflect direction in its own collision handler
     float m_reflectDirX; // +0x9C: direction in which a hop reflects the speed (valid while unkA4Bit7)
     float m_reflectDirY; // +0xA0
-protected:
     // Native article collision and sync accessors load/store this byte at A4.
     // Bit 6 is the owner status sync flag; the other bit meanings are unresolved.
     union {
@@ -115,7 +115,7 @@ public:
     virtual float getActiveGlobalFrame();
     virtual bool isSyncOwnerStatus() { return m_isSyncOwnerStatus; }
     virtual void setSyncOwnerStatus(bool sync) { m_isSyncOwnerStatus = sync; }
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
     virtual void notifyEventCollisionHit(float power, soCollisionAttackData*, u32 index, int, soModuleAccesser* moduleAccesser, soCollisionLog*);
     virtual void notifyEventCollisionHit2nd(soCollisionAttackModule*, soCollisionLog*, u32 groupIndex, float posX, float collisionLr, soModuleAccesser* moduleAccesser, bool);

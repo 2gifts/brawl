@@ -75,7 +75,7 @@ public:
                   float lr, float unkFloatFromDB2, float fighterColor);
     virtual void deactivate(bool force);
     virtual void updateNodeSRT();
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog*, soModuleAccesser*);
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog*, soModuleAccesser*);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
     virtual void notifyEventCollisionHit(float power, soCollisionAttackData* attackData, u32 index, int unk6,
                                          soModuleAccesser* moduleAccesser, soCollisionLog* collisionLog);

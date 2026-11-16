@@ -386,7 +386,7 @@ create__30ftClassInfoImpl<50,9ftZakoBoy>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25
 @100@notifyEventChangeStatus__7FighterFiiP12soStatusDataP16soModuleAccesser = .text:0x000098B0; // type:function size:0x8 scope:weak
 @112@notifyEventChangeSituation__7FighterF13SituationKind13SituationKindP16soModuleAccesser = .text:0x000098B8; // type:function size:0x8 scope:weak
 @124@notifyEventCollisionAttackCheck__7FighterFUl = .text:0x000098C0; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x000098C8; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x000098C8; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x000098D0; // type:function size:0x8 scope:weak
 @148@notifyEventCollisionShieldCheck__7FighterFv = .text:0x000098D8; // type:function size:0x8
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x000098E0; // type:function size:0x8

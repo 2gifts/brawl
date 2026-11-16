@@ -141,7 +141,7 @@ extern ftCaptainStatusUniqProcessFalconKnuckle g_ftCaptainStatusUniqProcessFalco
 // The Final Smash processes (ft_captain_status_uniq_process_final.cpp); only the members called here are declared.
 class ftCaptainStatusUniqProcessFinalStart : public soStatusUniqProcess {
 public:
-    void notifyEventCollisionAttackFighter(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    void notifyEventCollisionAttackFighter(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     bool notifyEventCollisionAttackCheck(u32 flags, soModuleAccesser* moduleAccesser);
 };
 class ftCaptainStatusUniqProcessFinalMessageHandler : public soStatusUniqProcess {
@@ -170,7 +170,7 @@ void ftCaptain::notifyEventChangeStatus(int statusKind, int prevStatusKind, soSt
 }
 
 // Each of the special statuses 0x113 / 0x115 / 0x116 checks the hit it dealt.
-void ftCaptain::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+void ftCaptain::notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
     switch (moduleAccesser->getStatusModule().getStatusKind()) {
     case 0x113:
         g_ftCaptainStatusUniqProcessFalconKnuckle.checkHitValidFlag(moduleAccesser);

@@ -585,7 +585,7 @@ create__28ftClassInfoImpl<46,7ftSnake>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25He
 @100@notifyEventChangeStatus__7ftSnakeFiiP12soStatusDataP16soModuleAccesser = .text:0x00013D88; // type:function size:0x8
 @112@notifyEventChangeSituation__7ftSnakeF13SituationKind13SituationKindP16soModuleAccesser = .text:0x00013D90; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__7FighterFUl = .text:0x00013D98; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x00013DA0; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x00013DA0; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x00013DA8; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__7FighterFv = .text:0x00013DB0; // type:function size:0x8
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x00013DB8; // type:function size:0x8
@@ -800,7 +800,7 @@ fn_122_190B4 = .text:0x000190B4; // type:function size:0x8
 @84@notifyEventLink__9wnSnakeC4FP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x000190EC; // type:function size:0x8
 @100@notifyEventChangeStatus__9wnSnakeC4FiiP12soStatusDataP16soModuleAccesser = .text:0x000190F4; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__9wnSnakeC4FUl = .text:0x000190FC; // type:function size:0x8
-@112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x00019104; // type:function size:0x8
+@112@notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser = .text:0x00019104; // type:function size:0x8
 @124@notifyEventCollisionHit2nd__6WeaponFP23soCollisionAttackModuleP14soCollisionLogUlffP16soModuleAccesserb = .text:0x0001910C; // type:function size:0x8
 @124@notifyEventCollisionHit__6WeaponFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog = .text:0x00019114; // type:function size:0x8
 @144@__dt__9wnSnakeC4Fv = .text:0x0001911C; // type:function size:0x8

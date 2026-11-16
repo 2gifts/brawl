@@ -465,7 +465,7 @@ create__28ftClassInfoImpl<47,7ftSonic>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25He
 @100@notifyEventChangeStatus__7ftSonicFiiP12soStatusDataP16soModuleAccesser = .text:0x0000EFA0; // type:function size:0x8
 @112@notifyEventChangeSituation__7ftSonicF13SituationKind13SituationKindP16soModuleAccesser = .text:0x0000EFA8; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__7ftSonicFUl = .text:0x0000EFB0; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x0000EFB8; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x0000EFB8; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x0000EFC0; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__7FighterFv = .text:0x0000EFC8; // type:function size:0x8
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x0000EFD0; // type:function size:0x8
@@ -698,7 +698,7 @@ deactivateDescendantForce__62wnWeaponBuilder<43wnSonicGimmickJumpModuleAccesserB
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x00014308; // type:function size:0x8
 @100@notifyEventChangeStatus__18wnSonicGimmickJumpFiiP12soStatusDataP16soModuleAccesser = .text:0x00014310; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__6WeaponFUl = .text:0x00014318; // type:function size:0x8
-@112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x00014320; // type:function size:0x8
+@112@notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser = .text:0x00014320; // type:function size:0x8
 @124@notifyEventCollisionHit2nd__6WeaponFP23soCollisionAttackModuleP14soCollisionLogUlffP16soModuleAccesserb = .text:0x00014328; // type:function size:0x8
 @124@notifyEventCollisionHit__6WeaponFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog = .text:0x00014330; // type:function size:0x8
 @144@__dt__18wnSonicGimmickJumpFv = .text:0x00014338; // type:function size:0x8
@@ -757,7 +757,7 @@ fn_123_15038 = .text:0x00015038; // type:function size:0x1928
 activate__17wnSonicSuperSonicFiiiP5Vec2ff13SituationKindP27wnSonicSuperSonicEffectList = .text:0x00016960; // type:function size:0x380
 processUpdate__17wnSonicSuperSonicFv = .text:0x00016CE0; // type:function size:0x148
 updatePosture__17wnSonicSuperSonicFb = .text:0x00016E28; // type:function size:0xC8
-notifyEventCollisionAttack__17wnSonicSuperSonicFfP14soCollisionLogP16soModuleAccesser = .text:0x00016EF0; // type:function size:0xA8
+notifyEventCollisionAttack__17wnSonicSuperSonicFfPC14soCollisionLogP16soModuleAccesser = .text:0x00016EF0; // type:function size:0xA8
 notifyEventCollisionAttackCheck__17wnSonicSuperSonicFUl = .text:0x00016F98; // type:function size:0xD8
 convertSonicNode__17wnSonicSuperSonicFi = .text:0x00017070; // type:function size:0x64
 notifyEventChangeStatus__17wnSonicSuperSonicFiiP12soStatusDataP16soModuleAccesser = .text:0x000170D4; // type:function size:0x4C
@@ -800,7 +800,7 @@ __ct__71soKineticUpdateEnergyHolderHelper<34wnSonicSuperSonicKineticTransactor>F
 @64@__dt__17wnSonicSuperSonicFv = .text:0x00017B10; // type:function size:0x8
 @100@notifyEventChangeStatus__17wnSonicSuperSonicFiiP12soStatusDataP16soModuleAccesser = .text:0x00017B18; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__17wnSonicSuperSonicFUl = .text:0x00017B20; // type:function size:0x8
-@112@notifyEventCollisionAttack__17wnSonicSuperSonicFfP14soCollisionLogP16soModuleAccesser = .text:0x00017B28; // type:function size:0x8
+@112@notifyEventCollisionAttack__17wnSonicSuperSonicFfPC14soCollisionLogP16soModuleAccesser = .text:0x00017B28; // type:function size:0x8
 @144@__dt__17wnSonicSuperSonicFv = .text:0x00017B30; // type:function size:0x8
 @136@deactivateDescendantForce__61wnWeaponBuilder<42wnSonicSuperSonicModuleAccesserBuildConfig>Fv = .text:0x00017B38; // type:function size:0x8
 @136@__dt__17wnSonicSuperSonicFv = .text:0x00017B40; // type:function size:0x8

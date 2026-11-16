@@ -202,7 +202,7 @@ public:
                   float lr, SituationKind situation, wnSonicSuperSonicEffectList* effects);
     virtual void processUpdate();
     virtual void updatePosture(bool);
-    virtual void notifyEventCollisionAttack(float, soCollisionLog*, soModuleAccesser*);
+    virtual void notifyEventCollisionAttack(float, const soCollisionLog*, soModuleAccesser*);
     virtual bool notifyEventCollisionAttackCheck(u32);
     virtual void notifyEventChangeStatus(int, int, soStatusData*, soModuleAccesser*);
     static int convertSonicNode(int nodeId);

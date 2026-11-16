@@ -370,7 +370,7 @@ void soStatusModuleImpl::deactivate(soModuleAccesser* moduleAccesser) {
     changeStatusForce(-1, moduleAccesser);
 }
 
-void soStatusModuleImpl::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+void soStatusModuleImpl::notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
     m_isCollisionAttackOccer = true;
     m_collisionLog.m_taskId = -1;
     if (collisionLog != 0) {

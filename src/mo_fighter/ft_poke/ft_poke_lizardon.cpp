@@ -386,7 +386,7 @@ void ftPokeLizardon::notifyEventChangeMotion(int motionKind, int unk2, void* mot
     }
 }
 
-void ftPokeLizardon::notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+void ftPokeLizardon::notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
     fn_27_377094(&m_eventManage);
     Fighter::notifyEventCollisionAttack(power, collisionLog, moduleAccesser);
 }

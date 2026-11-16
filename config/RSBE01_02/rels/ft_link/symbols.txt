@@ -492,7 +492,7 @@ create__26ftClassInfoImpl<2,6ftLink>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25Heap
 @100@notifyEventChangeStatus__6ftLinkFiiP12soStatusDataP16soModuleAccesser = .text:0x0000EBC0; // type:function size:0x8
 @112@notifyEventChangeSituation__7FighterF13SituationKind13SituationKindP16soModuleAccesser = .text:0x0000EBC8; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__7FighterFUl = .text:0x0000EBD0; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x0000EBD8; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x0000EBD8; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__6ftLinkFiP16soModuleAccesser = .text:0x0000EBE0; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__6ftLinkFv = .text:0x0000EBE8; // type:function size:0x8
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x0000EBF0; // type:function size:0x8
@@ -743,7 +743,7 @@ deactivateDescendantForce__59wnWeaponBuilder<40wnLinkBoomerangModuleAccesserBuil
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x00014A14; // type:function size:0x8
 @100@notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser = .text:0x00014A1C; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__15wnLinkBoomerangFUl = .text:0x00014A24; // type:function size:0x8
-@112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x00014A2C; // type:function size:0x8
+@112@notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser = .text:0x00014A2C; // type:function size:0x8
 @124@notifyEventCollisionHit2nd__6WeaponFP23soCollisionAttackModuleP14soCollisionLogUlffP16soModuleAccesserb = .text:0x00014A34; // type:function size:0x8
 @124@notifyEventCollisionHit__6WeaponFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog = .text:0x00014A3C; // type:function size:0x8
 @144@__dt__15wnLinkBoomerangFv = .text:0x00014A44; // type:function size:0x8

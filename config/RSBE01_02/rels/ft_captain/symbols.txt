@@ -214,7 +214,7 @@ pushRange<PC13acAnimCmdConv>__14soArrayUtilityFP26soArray<PC13acAnimCmdConv>PCPC
 getEntryList__99soAnimCmdControlUnitBuilderDisguise<60soAnimCmdControlUnitBuildConfigDisguise<0,1,290,290,0,1,0,8>>Fi = .text:0x00008934; // type:function size:0x3C
 setupDisguiseList__99soAnimCmdControlUnitBuilderDisguise<60soAnimCmdControlUnitBuildConfigDisguise<0,1,290,290,0,1,0,8>>FiP26soAnimCmdDisguiseListEntry = .text:0x00008970; // type:function size:0xB0
 processUpdate__9ftCaptainFv = .text:0x00008A20; // type:function size:0x78
-notifyEventCollisionAttack__9ftCaptainFfP14soCollisionLogP16soModuleAccesser = .text:0x00008A98; // type:function size:0xBC
+notifyEventCollisionAttack__9ftCaptainFfPC14soCollisionLogP16soModuleAccesser = .text:0x00008A98; // type:function size:0xBC
 notifyEventCollisionAttackCheck__9ftCaptainFUl = .text:0x00008B54; // type:function size:0x80
 notifyEventChangeStatus__9ftCaptainFiiP12soStatusDataP16soModuleAccesser = .text:0x00008BD4; // type:function size:0x78
 getFalconKickParam__9ftCaptainFv = .text:0x00008C4C; // type:function size:0x30
@@ -454,7 +454,7 @@ create__29ftClassInfoImpl<9,9ftCaptain>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25H
 @100@notifyEventChangeStatus__9ftCaptainFiiP12soStatusDataP16soModuleAccesser = .text:0x0000C89C; // type:function size:0x8
 @112@notifyEventChangeSituation__7FighterF13SituationKind13SituationKindP16soModuleAccesser = .text:0x0000C8A4; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__9ftCaptainFUl = .text:0x0000C8AC; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x0000C8B4; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x0000C8B4; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x0000C8BC; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__7FighterFv = .text:0x0000C8C4; // type:function size:0x8
 @148@notifyEventCollisionShieldSearch__7FighterFP23soCollisionSearchModuleP14soCollisionLogUlP16soModuleAccesser = .text:0x0000C8CC; // type:function size:0x8
@@ -540,7 +540,7 @@ __sinit_\ft_captain_status_uniq_process_special_hi_throw_cpp = .text:0x0000DEFC;
 __ct__40ftCaptainStatusUniqProcessSpecialHiThrowFv = .text:0x0000DF44; // type:function size:0x10
 initStatus__36ftCaptainStatusUniqProcessFinalStartFP16soModuleAccesser = .text:0x0000DF54; // type:function size:0x68
 exitStatus__36ftCaptainStatusUniqProcessFinalStartFP16soModuleAccesseri = .text:0x0000DFBC; // type:function size:0x34
-notifyEventCollisionAttackFighter__36ftCaptainStatusUniqProcessFinalStartFfP14soCollisionLogP16soModuleAccesser = .text:0x0000DFF0; // type:function size:0x194
+notifyEventCollisionAttackFighter__36ftCaptainStatusUniqProcessFinalStartFfPC14soCollisionLogP16soModuleAccesser = .text:0x0000DFF0; // type:function size:0x194
 __as__5Vec3fFRC5Vec3f = .text:0x0000E184; // type:function size:0x1C
 notifyEventCollisionAttackCheck__36ftCaptainStatusUniqProcessFinalStartFUlP16soModuleAccesser = .text:0x0000E1A0; // type:function size:0xB8
 initStatus__35ftCaptainStatusUniqProcessFinalRideFP16soModuleAccesser = .text:0x0000E258; // type:function size:0x15C
@@ -731,7 +731,7 @@ deactivateDescendantForce__63wnWeaponBuilder<44wnCaptainBlueFalconModuleAccesser
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x00013674; // type:function size:0x8
 @100@notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser = .text:0x0001367C; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__19wnCaptainBlueFalconFUl = .text:0x00013684; // type:function size:0x8
-@112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x0001368C; // type:function size:0x8
+@112@notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser = .text:0x0001368C; // type:function size:0x8
 @124@notifyEventCollisionHit2nd__6WeaponFP23soCollisionAttackModuleP14soCollisionLogUlffP16soModuleAccesserb = .text:0x00013694; // type:function size:0x8
 @124@notifyEventCollisionHit__6WeaponFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog = .text:0x0001369C; // type:function size:0x8
 @144@__dt__19wnCaptainBlueFalconFv = .text:0x000136A4; // type:function size:0x8

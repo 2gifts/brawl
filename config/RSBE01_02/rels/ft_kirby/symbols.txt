@@ -560,7 +560,7 @@ create__27ftClassInfoImpl<5,7ftKirby>CFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25Hea
 @100@notifyEventChangeStatus__7ftKirbyFiiP12soStatusDataP16soModuleAccesser = .text:0x000135AC; // type:function size:0x8
 @112@notifyEventChangeSituation__7ftKirbyF13SituationKind13SituationKindP16soModuleAccesser = .text:0x000135B4; // type:function size:0x8
 @124@notifyEventCollisionAttackCheck__7ftKirbyFUl = .text:0x000135BC; // type:function size:0x8
-@124@notifyEventCollisionAttack__7FighterFfP14soCollisionLogP16soModuleAccesser = .text:0x000135C4; // type:function size:0x8
+@124@notifyEventCollisionAttack__7FighterFfPC14soCollisionLogP16soModuleAccesser = .text:0x000135C4; // type:function size:0x8
 @136@notifyEventChangeCollisionHit__7FighterFiP16soModuleAccesser = .text:0x000135CC; // type:function size:0x8
 @148@notifyEventCollisionShieldCheck__7ftKirbyFv = .text:0x000135D4; // type:function size:0x8
 @148@notifyEventCollisionShield__7FighterFP23soCollisionAttackModulefP14soCollisionLogiffP16soModuleAccesser = .text:0x000135DC; // type:function size:0x8
@@ -1047,7 +1047,7 @@ deactivateDescendantForce__62wnWeaponBuilder<43wnKirbyFinalCutterModuleAccesserB
 @84@notifyEventLink__6WeaponFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x00023F6C; // type:function size:0x8
 @100@notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser = .text:0x00023F74; // type:function size:0x8
 @112@notifyEventCollisionAttackCheck__18wnKirbyFinalCutterFUl = .text:0x00023F7C; // type:function size:0x8
-@112@notifyEventCollisionAttack__6WeaponFfP14soCollisionLogP16soModuleAccesser = .text:0x00023F84; // type:function size:0x8
+@112@notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser = .text:0x00023F84; // type:function size:0x8
 @124@notifyEventCollisionHit2nd__6WeaponFP23soCollisionAttackModuleP14soCollisionLogUlffP16soModuleAccesserb = .text:0x00023F8C; // type:function size:0x8
 @124@notifyEventCollisionHit__6WeaponFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog = .text:0x00023F94; // type:function size:0x8
 @144@__dt__18wnKirbyFinalCutterFv = .text:0x00023F9C; // type:function size:0x8

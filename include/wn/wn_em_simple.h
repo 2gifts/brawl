@@ -261,7 +261,7 @@ public:
     virtual void updatePosture(bool);
     virtual void processFixPositionPreAnimCmd();
     virtual void processHit();
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual bool reflect();
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
     virtual void notifyEventCollisionHit(float power, soCollisionAttackData*, u32 index, int, soModuleAccesser* moduleAccesser, soCollisionLog*);

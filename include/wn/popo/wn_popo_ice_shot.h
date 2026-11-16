@@ -138,7 +138,7 @@ public:
     void shoot();
     virtual void processUpdate();
     virtual void notifyEventOnDamage(soDamage* damage, bool, soModuleAccesser* moduleAccesser);
-    virtual void notifyEventCollisionAttack(float power, soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
+    virtual void notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual void updatePosture(bool);
