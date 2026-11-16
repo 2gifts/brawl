@@ -139,6 +139,53 @@ public:
     typedef soGenerateArticleManageModuleBuilder<soGenerateArticleManageModuleBuildConfigNull> GenerateArticleManageModuleBuilder;
 };
 
+// The beam's status builder: the generic one, except that it gives the status module no pre-check animation commands (the
+// count after the pre-check data is 0, as in the other Samus articles and Sheik's needles, where most articles pass the
+// status kind count).
+// HYPOTHESIS: the original config carries this count as one more template argument (the map name is not known).
+// BYTES: a partial specialization (the transition config stays a parameter), not an explicit one: its members are then
+// emitted like the generic template's, getModule after the motion builder's and the constructor after it, as in the original;
+// the members of an explicit specialization come out before the template getters.
+template <typename TransitionConfig>
+class soStatusModuleBuilder<wnStatusModuleBuildConfig<9, soGeneralWorkBuildConfig<3, 3, 1>, 9, TransitionConfig> > {
+    typedef wnStatusModuleBuildConfig<9, soGeneralWorkBuildConfig<3, 3, 1>, 9, TransitionConfig> BC;
+    soArrayContractibleTable<const soStatusData> m_statusTable;
+    soGeneralWorkBuilder<typename BC::GeneralWorkBuildConfig> m_generalWorkBuilder;
+    soTransitionModuleBuilder<typename BC::TransitionBuildConfig> m_transitionBuilder;
+    soArraySelectHolder<1, soArrayVector<soStatusUniqProcess*, BC::StatusKindCap>, soSingletonHolder<soArrayNull<soStatusUniqProcess*> > > m_uniqProcs;
+    soArrayQueueImpl<soArrayVector<s32, 1> > m_changeRequests;
+    soStatusModuleImpl m_module;
+public:
+    soStatusModuleBuilder(soModuleAccesser* acc, const soStatusData* statusData, void* preCheckData) :
+        m_statusTable(statusData, BC::DataCount),
+        m_generalWorkBuilder(),
+        m_transitionBuilder(),
+        m_uniqProcs(),
+        m_changeRequests(-1),
+        m_module(acc, &m_statusTable, (soArray<soStatusUniqProcess*>*)m_uniqProcs.get(), m_generalWorkBuilder.getModule(),
+                 m_transitionBuilder.getModule(), &m_changeRequests, preCheckData, 0, 1) { }
+    soStatusModule* getModule() { return &m_module; }
+};
+
+// BYTES: the beam's animation command sub builder constructor comes after the module accesser builder constructor and its
+// weak copies in the original unit (right before activate). The shared template (wn_module_accesser_builder.h) defines the
+// constructor in the class, which emits it right after the article constructor; this specialization has the same members
+// and only declares it, and wn_samus_gbeam.cpp defines it in place (as the Toad does, wn/peach/wn_peach_kinopio.h).
+template <>
+class wnAnimCmdModuleSubBuilder<wnSamusGBeamModuleAccesserBuildConfig::AnimCmdModuleSubBuildConfig> {
+    typedef wnSamusGBeamModuleAccesserBuildConfig::AnimCmdModuleSubBuildConfig BC;
+    wnAnimCmdControlUnitSelect<BC::Unit0Enabled != 0, BC::Unit0Config>::Type m_unit0; // +0
+    wnAnimCmdControlUnitSelect<BC::Unit1Enabled != 0, BC::Unit1Config>::Type m_unit1;
+    wnAnimCmdControlUnitSelect<BC::Unit2Enabled != 0, BC::Unit2Config>::Type m_unit2;
+    wnAnimCmdControlUnitSelect<BC::Unit3Enabled != 0, BC::Unit3Config>::Type m_unit3;
+    wnAnimCmdUniqSelect<BC::Unit4Enabled != 0, BC::Unit4Config>::Type m_unit4;
+    soAnimCmdControlUnitBuilderNull<void> m_unit5;
+public:
+    // BYTES: a standalone constructor in sora_melee (as the shared template has it), not inlined into the article's.
+    wnAnimCmdModuleSubBuilder(soModuleAccesser* acc, const soModuleAccesserBuildData& bd) __attribute__((never_inline));
+    ~wnAnimCmdModuleSubBuilder() { }
+};
+
 template <>
 class soModuleAccesserBuilder<wnSamusGBeamModuleAccesserBuildConfig> : public utUnCopyable {
 public:

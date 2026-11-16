@@ -206,8 +206,18 @@ void wnPeachKinopioSpore::activate(int founderTaskId, int team, Vec3f* __restric
 
 // TODO(link): every function is exact, the .text and .data order match the original and the unit has its .data/.bss
 // ranges, but the unit stays NonMatching. A scratch link of sora_melee with this object differs only in .rodata: the
-// original pools 1.0f before 0.0f (0x76C8, 0x76CC), this object pools 0.0f first. Both are first created by the weak
-// wnAnimCmdModuleSubBuilder<wnAnimCmdModuleSubBuildConfigDefault<1,...>> constructor copy (ft_builder_animcmd.h, stripped
-// at link), which this unit emits before the module accesser builder constructor; the order in activate does not matter
-// (swapping its two motion stores changes nothing). The same constructor is the Toad's 97.87% function: matching its
-// constant creation order there is probably what links this unit.
+// original pools 1.0f, 0.0f, -1.0f (0x76C8, 0x76CC, 0x76D0), this object 0.0f, 1.0f, -1.0f. What is known (batch 5):
+// - MWCC numbers a function's new float constants when it compiles the function, so the pool order is the order of first
+//   use over the emitted functions, weak copies the linker later drops included. Here the first user is the weak
+//   wnAnimCmdModuleSubBuilder<wnAnimCmdModuleSubBuildConfigDefault<1,1,0,0,...>> constructor (0.0f, then 1.0f), emitted
+//   before the module accesser builder constructor.
+// - The Mario fireball's original unit (the first article unit, so it keeps every copy, this very constructor included)
+//   has that constructor after the module accesser builder constructor and all its weak copies, right before activate.
+//   The Toad's unit gets that order from a strong definition (wn_peach_kinopio.cpp); here that is impossible, the
+//   constructor is the fireball's symbol (multiply defined at link). Compiled that way in scratch the pool becomes
+//   1.0f (param customize builder constructor), -1.0f, 0.0f (kinetic builder constructor): still not the original.
+// - The kinetic builder constructor creates -1.0f before 0.0f in every form that keeps its code (argument temporaries,
+//   the energy's default constructor, default arguments), so in the original 0.0f already exists when it is compiled:
+//   some weak copy between the param customize builder constructor (1.0f) and the kinetic builder constructor uses
+//   0.0f there. None of ours in that range does; the original copies of the builder constructors the module accesser
+//   builder constructor calls (in other units) do not either, so it is a copy only this unit's original source emits.

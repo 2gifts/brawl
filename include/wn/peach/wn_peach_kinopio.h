@@ -271,27 +271,67 @@ typedef soTypeList<wnPeachKinopioSporePoolInfo, soTypeListNullType> wnPeachKinop
 
 extern "C" void* fn_27_148FE4(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
+#ifdef WN_PEACH_KINOPIO_TOAD_UNIT
+// BYTES: in the Toad unit the parameter block, the data block and the parameter accesser are defined here, ahead of the
+// spore holder: MWCC emits the unit's vtables in reverse order of class definition, and the original has the accesser's
+// vtable right after the holder's (0x89E40, 0x89EA8).
+// HYPOTHESIS: the parameter block: an integer, then two floats (the accesser points at +0 as the int and at +4 / +8 as the floats).
+struct wnPeachKinopioParam {
+    s32 unk0;
+    float unk4;
+    float unk8;
+};
+
+// HYPOTHESIS: the static data block, same role as the other articles (resource group number, parameter pointer).
+struct wnPeachKinopioData {
+    s32 m_resGroupNo;
+    u8 unk4[0x30];
+    const wnPeachKinopioParam* m_param; // +0x34
+};
+
+class wnPeachKinopioParamAccesser : public wnExtendParamAccesser<3999, 2, 23999, 1, 0, 0> {
+public:
+    wnPeachKinopioParamAccesser(const wnPeachKinopioParam* param) : wnExtendParamAccesser<3999, 2, 23999, 1, 0, 0>(93) {
+        m_floats[0] = &param->unk4;
+        m_floats[1] = &param->unk8;
+        m_ints[0] = &param->unk0;
+    }
+    virtual ~wnPeachKinopioParamAccesser(); // BYTES: defined in the article unit, after the article constructor (emission order)
+};
+#endif
+
 template <>
 class wnInstanceHolder<wnPeachKinopioSpore, wnPeachKinopioKindInfo, soIntToType<0> > {
 public:
     virtual ~wnInstanceHolder() { }
-    wnInstanceHolder(soModuleAccesser* acc) : m_instance(0, sporeInfo(acc), sporeData(acc)) { }
+    // Each spore is built from the owner's kind pair and heap module and the spore data block of the owner's fighter kind.
+    // BYTES: the owner is reached twice through a reference dynamic_cast (the bad_cast flavour, flag 1), and the build info
+    // is constructed in place from its two values (no copy of a returned aggregate).
+    wnInstanceHolder(soModuleAccesser* acc) :
+        m_instance(0, BuildInfo(&owner(acc).getKindInfo(), &acc->getHeapModule()),
+                   static_cast<const wnPeachKinopioSporeData*>(
+                       fn_27_148FE4(&g_ftCommonDataAccesser, ownerFighterKind(owner(acc)), &DataFlag(false).value))) { }
     wnPeachKinopioSpore* getEnergy() { return &m_instance; }
     wnPeachKinopioSpore* getInstance() { return &m_instance; }
 private:
-    static wnArticleBuildInfo sporeInfo(soModuleAccesser* acc) {
-        Weapon* owner = dynamic_cast<Weapon*>(acc->m_stageObject);
-        wnArticleBuildInfo info;
-        info.kindInfo = reinterpret_cast<const wnArticleKindInfo*>(reinterpret_cast<u8*>(owner) + 0xC4);
-        info.heapModule = static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule);
-        return info;
-    }
-    static const wnPeachKinopioSporeData* sporeData(soModuleAccesser* acc) {
-        Weapon* owner = dynamic_cast<Weapon*>(acc->m_stageObject);
-        bool resourceGroup = false;
-        return static_cast<const wnPeachKinopioSporeData*>(
-            fn_27_148FE4(&g_ftCommonDataAccesser, *reinterpret_cast<const s32*>(reinterpret_cast<u8*>(owner) + 0xC8), &resourceGroup));
-    }
+    // HYPOTHESIS: wnArticleBuildInfo has this two-value constructor in the original; the shared struct only declares it for
+    // the enemy units (WN_EM_SIMPLE_UNIT), so the holder adds it here.
+    struct BuildInfo : wnArticleBuildInfo {
+        BuildInfo(const wnSimpleKindInfo* kindInfo, soHeapModule* heapModule) {
+            this->kindInfo = reinterpret_cast<const wnArticleKindInfo*>(kindInfo);
+            this->heapModule = heapModule;
+        }
+    };
+    // HYPOTHESIS: the unused third argument of the common data getter is the address of a one-byte object built for the
+    // call: the original stores a zero byte in a word-aligned slot before anything else (a plain bool local gets a
+    // byte-packed slot, a constant reference a static).
+    struct DataFlag {
+        bool value;
+        DataFlag(bool v) : value(v) { }
+    };
+    static Weapon& owner(soModuleAccesser* acc) { return dynamic_cast<Weapon&>(acc->getStageObject()); }
+    // BYTES: by value, so the kind is read right after the first cast.
+    static s32 ownerFighterKind(const Weapon& weapon) { return weapon.getKindInfo().subKind; }
     wnPeachKinopioSpore m_instance;
 };
 
@@ -386,11 +426,32 @@ public:
     wnPeachKinopioSpore* find(Predicate& predicate, const soIntToType<L>& tag) { return m_sub.find(predicate, tag); }
 };
 
+#ifdef WN_PEACH_KINOPIO_TOAD_UNIT
+// The pool chain of the mediator. The symbol names it soLineHierarchy<list, soInstancePool, soInstancePoolRoot, kind
+// info, 0> (the forward chain include/em/em_article_mediator.h also models): each level is Unit<head, next level, kind
+// info, depth>, the last one Unit<head, root, kind info, depth>. Only the one-entry list is needed here.
+// HYPOTHESIS: ft_builder_transition.h gives the same name to a 3-parameter template (the transition term pools); both
+// cannot be declared in one unit, so wn_peach_kinopio.cpp renames that one while it includes the builders.
+template <class TL, template <class, class, class, int> class Unit, class Root, class KindInfo, int Depth>
+class soLineHierarchy;
+template <class H, template <class, class, class, int> class Unit, class Root, class KindInfo, int Depth>
+class soLineHierarchy<soTypeList<H, soTypeListNullType>, Unit, Root, KindInfo, Depth> : public Unit<H, Root, KindInfo, Depth> {
+public:
+    soLineHierarchy(soModuleAccesser* acc) : Unit<H, Root, KindInfo, Depth>(acc) { }
+    ~soLineHierarchy() { }
+};
+#endif
+
 // The mediator of the spore pool (the original is soArticleMediatorImpl over the pool type list).
 template <class PoolTL, class AssignTL, class KindInfo, class Extra>
 class soArticleMediatorImpl : public soArticleMediator {
 public:
+#ifdef WN_PEACH_KINOPIO_TOAD_UNIT
+    typedef soLineHierarchy<PoolTL, soInstancePool, soInstancePoolRoot, KindInfo, 0> PoolHierarchy;
+#else
+    // The other units only need the layout: the inverted chain of ft_builder_kinetic.h has the same single level.
     typedef soLineInvertHierarchy<PoolTL, soInstancePool, soInstancePoolRoot, KindInfo> PoolHierarchy;
+#endif
     soArticleMediatorImpl(soModuleAccesser* acc) : soArticleMediator(acc), m_pools(acc), m_autoRecycle(false) { }
     virtual ~soArticleMediatorImpl() { }
     virtual soArticle* generate(s32 articleId, soModuleAccesser* acc);
@@ -414,7 +475,20 @@ private:
     bool m_autoRecycle;
 };
 
-typedef soArticleMediatorImpl<wnPeachKinopioSporePoolList, soTypeListNullType, wnPeachKinopioKindInfo, soTypeListNullType>
+// How a founder (the owner of the articles) takes part: AssignmentInfo<Founder, ShootAssignment> (the same pair
+// include/em/em_article_mediator.h declares for the enemy units; that header cannot be included here).
+struct soArticleMediatorAssignmentNull { };
+template <class Founder, class ShootAssignment>
+struct soArticleMediatorAssignmentInfo {
+    typedef Founder FounderType;
+};
+class wnPeachKinopio;
+
+// The assignment list is read from the original's RTTI name string of the mediator (sora_melee .data 0x897FC):
+// soTypeList<soArticleMediatorAssignmentInfo<wnPeachKinopio, soArticleMediatorAssignmentNull>, soTypeListNullType>.
+typedef soArticleMediatorImpl<wnPeachKinopioSporePoolList,
+                              soTypeList<soArticleMediatorAssignmentInfo<wnPeachKinopio, soArticleMediatorAssignmentNull>, soTypeListNullType>,
+                              wnPeachKinopioKindInfo, soTypeListNullType>
     wnPeachKinopioArticleMediator;
 
 // HYPOTHESIS: source spelling (see wn_fox_land_master.h): the config over the mediator and the builder over the config.
@@ -508,6 +582,7 @@ typedef soGenerateArticleManageModuleBuilder<wnPeachKinopioArticleBuildConfig> w
 // ---- the Toad ------------------------------------------------------------------------------------------------------------
 // Left out of the spore unit: its generic weapon builder has no common energies (see the spore's builder above), the Toad's has.
 #ifndef WN_WEAPON_NO_COMMON_ENERGIES
+#ifndef WN_PEACH_KINOPIO_TOAD_UNIT // the Toad unit defines these before the spore holder (see there)
 // HYPOTHESIS: the parameter block: an integer, then two floats (the accesser points at +0 as the int and at +4 / +8 as the floats).
 struct wnPeachKinopioParam {
     s32 unk0;
@@ -531,6 +606,7 @@ public:
     }
     virtual ~wnPeachKinopioParamAccesser() { }
 };
+#endif
 
 // The module set of the Mario fireball (null situation, stop and visibility modules, a one-part fighter-category attack
 // box, link capacity 5), but with two motion slots, the spore pool as its generate-article module and another animation
@@ -546,6 +622,28 @@ public:
         MotionModuleBuildConfig;
 };
 
+#ifdef WN_PEACH_KINOPIO_TOAD_UNIT
+// BYTES: the Toad's animation command sub builder constructor comes after the module accesser builder constructor and
+// all of its weak copies in the original unit (right before activate; the Mario fireball's original unit, which keeps
+// every copy, shows the same order). The shared template (wn_module_accesser_builder.h) defines the constructor in the
+// class, which emits it before; this specialization has the same members and only declares it, and wn_peach_kinopio.cpp
+// defines it in place. A shared opt-in "declare only" macro on the template would replace this copy.
+template <>
+class wnAnimCmdModuleSubBuilder<wnPeachKinopioModuleAccesserBuildConfig::AnimCmdModuleSubBuildConfig> {
+    typedef wnPeachKinopioModuleAccesserBuildConfig::AnimCmdModuleSubBuildConfig BC;
+    wnAnimCmdControlUnitSelect<BC::Unit0Enabled != 0, BC::Unit0Config>::Type m_unit0; // +0
+    wnAnimCmdControlUnitSelect<BC::Unit1Enabled != 0, BC::Unit1Config>::Type m_unit1; // +0x12C
+    wnAnimCmdControlUnitSelect<BC::Unit2Enabled != 0, BC::Unit2Config>::Type m_unit2; // +0x258
+    wnAnimCmdControlUnitSelect<BC::Unit3Enabled != 0, BC::Unit3Config>::Type m_unit3; // +0x384
+    wnAnimCmdUniqSelect<BC::Unit4Enabled != 0, BC::Unit4Config>::Type m_unit4;       // +0x4B0
+    soAnimCmdControlUnitBuilderNull<void> m_unit5;
+public:
+    // BYTES: a standalone constructor in sora_melee (as the shared template has it), not inlined into the article's.
+    wnAnimCmdModuleSubBuilder(soModuleAccesser* acc, const soModuleAccesserBuildData& bd) __attribute__((never_inline));
+    ~wnAnimCmdModuleSubBuilder() { }
+};
+#endif
+
 #ifndef WN_PEACH_KINOPIO_IN_FIGHTER_TU
 template <>
 class soModuleAccesserBuilder<wnPeachKinopioModuleAccesserBuildConfig> : public utUnCopyable {
@@ -554,9 +652,23 @@ public:
     WN_PEACH_KINOPIO_BUILDER_MEMBERS
 
     soModuleAccesserBuilder(StageObject* owner, const wnModuleAccesserBuildData& bd);
+#ifdef WN_PEACH_KINOPIO_TOAD_UNIT
+    // BYTES: the destructor is defined below with inlining off; getModuleAccesser is defined in wn_peach_kinopio.cpp, in
+    // the place the original unit emits it.
+    ~soModuleAccesserBuilder();
+    soModuleAccesser* getModuleAccesser();
+#else
     ~soModuleAccesserBuilder() { }
     soModuleAccesser* getModuleAccesser() { return &m_moduleAccsr; }
+#endif
 };
+#ifdef WN_PEACH_KINOPIO_TOAD_UNIT
+// BYTES: compiled with inlining off, as the spore's above: the weapon builder destructor then keeps the big builder
+// destructors as calls and is emitted before them.
+#pragma dont_inline on
+inline soModuleAccesserBuilder<wnPeachKinopioModuleAccesserBuildConfig>::~soModuleAccesserBuilder() { }
+#pragma dont_inline reset
+#endif
 #endif
 
 // The Toad: Peach's neutral special counter article. The module storage is followed by the main and rotation energies
