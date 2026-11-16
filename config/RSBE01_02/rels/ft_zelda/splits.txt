@@ -18,12 +18,15 @@ mo_fighter/ft_zelda/ft_zelda.cpp:
 mo_fighter/ft_zelda/ft_zelda_status_uniq_process_special_s.cpp:
 	.text       start:0x0000DFB4 end:0x0000E100
 	.ctors      start:0x00000004 end:0x00000008
-	.data       start:0x000071E0 end:0x00007258
+	.data       start:0x000071E0 end:0x00007278
 	.bss        start:0x00000188 end:0x00000198
 
 mo_fighter/ft_zelda/ft_zelda_status_uniq_process_special_hi.cpp:
 	.text       start:0x0000E100 end:0x0000E32C
 	.ctors      start:0x00000008 end:0x0000000C
+	.rodata     start:0x00000018 end:0x00000020
+	.data       start:0x00007278 end:0x00007338
+	.bss        start:0x00000198 end:0x000001A8
 
 mo_fighter/ft_zelda/ft_zelda_status_uniq_process_special_hi2.cpp:
 	.text       start:0x0000E32C end:0x0000EA5C
@@ -39,6 +42,9 @@ mo_fighter/ft_zelda/ft_zelda_status_uniq_process_special_hi3.cpp:
 mo_fighter/ft_zelda/ft_zelda_status_uniq_process_special_lw.cpp:
 	.text       start:0x0000EEC8 end:0x0000F104
 	.ctors      start:0x00000014 end:0x00000018
+	.rodata     start:0x00000058 end:0x00000060
+	.data       start:0x00007428 end:0x000074A0
+	.bss        start:0x000001C8 end:0x000001D8
 
 mo_fighter/ft_zelda/ft_zelda_status_uniq_process_final.cpp:
 	.text       start:0x0000F104 end:0x0000FA0C
@@ -54,6 +60,9 @@ mo_fighter/ft_zelda/wn_zelda_dein.cpp:
 mo_fighter/ft_zelda/wn_zelda_dein_status_uniq_process_move.cpp:
 	.text       start:0x00013408 end:0x0001377C
 	.ctors      start:0x00000020 end:0x00000024
+	.rodata     start:0x000000A8 end:0x000000B0
+	.data       start:0x000082B0 end:0x00008328
+	.bss        start:0x000002B0 end:0x000002C0
 
 mo_fighter/ft_zelda/wn_zelda_dein_status_uniq_process_tame.cpp:
 	.text       start:0x0001377C end:0x0001391C
@@ -90,6 +99,9 @@ mo_fighter/ft_zelda/ft_sheik_status_uniq_process_special_s_loop.cpp:
 mo_fighter/ft_zelda/ft_sheik_status_uniq_process_special_hi_start.cpp:
 	.text       start:0x0001EF50 end:0x0001F13C
 	.ctors      start:0x00000038 end:0x0000003C
+	.rodata     start:0x00000150 end:0x00000158
+	.data       start:0x0000C3C8 end:0x0000C448
+	.bss        start:0x00000508 end:0x00000518
 
 mo_fighter/ft_zelda/ft_sheik_status_uniq_process_special_hi_move.cpp:
 	.text       start:0x0001F13C end:0x0001F9C4

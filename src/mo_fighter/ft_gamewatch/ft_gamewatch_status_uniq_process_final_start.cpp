@@ -91,6 +91,10 @@ void ftGamewatchStatusUniqProcessFinalStart::initStatus(soModuleAccesser* module
     workManage.setFloat(s_finalStartScale * posture->getUnk60(), 0x11000012);
 }
 
+// TODO(nonmatching): exitStatus (99.38%): only float register numbers differ in the camera rectangle: the original keeps the four
+//   differences in f4, f3, f2, f1 in computation order (rect[3] first), ours gives the outer pair f2/f4 swapped, and the
+//   vector's two floats are f0/f1 instead of f1/f0. Tried: edge before v1, direct element writes, an aggregate initializer.
+//   The camera and posture stub classes above stand in for the real module classes.
 void ftGamewatchStatusUniqProcessFinalStart::exitStatus(soModuleAccesser* moduleAccesser, int kind) {
     const float* t = s_finalStartTable;
     if (kind >= 0x11d && kind <= 0x138) {

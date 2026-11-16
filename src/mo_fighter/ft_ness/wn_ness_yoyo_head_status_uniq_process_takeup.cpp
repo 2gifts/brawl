@@ -5,7 +5,7 @@
 #define WN_ARTICLE_ANIMCMD_INT
 #define FT_REL_LINK_EXTERN
 #define MT_VEC3F_MUL_INLINE
-#define MT_VEC3F_BIKE_UTILITY_OPERATORS
+#define MT_VEC3F_ADD_OPERAND_ORDER_REGS
 #include <wn/wn_module_accesser_builder.h>
 #include <wn/ness/wn_ness_yoyo_head.h>
 #include <mt/mt_vector.h>
@@ -35,11 +35,11 @@ void wnNessYoyoHeadStatusUniqProcessTakeup::initStatus(soModuleAccesser* moduleA
 }
 
 void wnNessYoyoHeadStatusUniqProcessTakeup::execStatus(soModuleAccesser* moduleAccesser) {
-    const soModuleEnumeration* modules = moduleAccesser->m_enumerationStart;
-    soWorkManageModule& work = *modules->m_workManageModule;
-    wnLassoAltModelView* model = (wnLassoAltModelView*)modules->m_modelModule;
-    soPostureModule& posture = *modules->m_postureModule;
-    Vec3f target = ((wnLassoLinkView*)modules->m_linkModule)->unk98NodePos(3, 0x42, true);
+    soWorkManageModule& work = moduleAccesser->getWorkManageModule();
+    wnLassoAltModelView* model = wnLassoGetAltModel(moduleAccesser);
+    soPostureModule& posture = moduleAccesser->getPostureModule();
+    wnLassoLinkView* link = wnLassoGetLink(moduleAccesser);
+    Vec3f target = link->unk98NodePos(3, 0x42, true);
     Vec3f current = posture.getPos();
     Vec3f pos;
     if (work.getInt(0x20000002) < 10) {
@@ -50,7 +50,7 @@ void wnNessYoyoHeadStatusUniqProcessTakeup::execStatus(soModuleAccesser* moduleA
         } else if (t < 0.0f) {
             t = 0.0f;
         }
-        pos = current * (1.0f - t) + target * t;
+        pos = target * t + current * (1.0f - t);
     } else {
         pos = target;
     }
@@ -58,7 +58,7 @@ void wnNessYoyoHeadStatusUniqProcessTakeup::execStatus(soModuleAccesser* moduleA
     float first = work.getFloat(0x21000001);
     float second = work.getFloat(0x21000002);
     float value = first + second;
-    model->unk70FloatInt(value, 2);
+    model->unk70IntFloat(2, value);
     work.setFloat(value, 0x21000001);
     if (work.isFlag(0x22000002)) {
         work.offFlag(0x22000002);

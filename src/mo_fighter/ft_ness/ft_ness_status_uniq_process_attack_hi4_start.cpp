@@ -8,6 +8,9 @@
 
 class ftNessStatusUniqProcessAttackHi4Start : public soStatusUniqProcess {
 public:
+    // BYTES: the explicit empty constructor makes the base class's weak defaults (execFixPos, initStatus) come out right after
+    // the destructor, before the static initializer, as in the original.
+    ftNessStatusUniqProcessAttackHi4Start() { }
     virtual ~ftNessStatusUniqProcessAttackHi4Start() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
     virtual void execFixPos(soModuleAccesser* moduleAccesser);

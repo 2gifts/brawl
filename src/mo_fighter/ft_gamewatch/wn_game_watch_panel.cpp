@@ -21,6 +21,11 @@ wnGameWatchPanel::wnGameWatchPanel(s32 articleId, const wnArticleBuildInfo& info
     Weapon::deactivate(false);
 }
 
+// TODO(nonmatching): activate (99.88%): the only difference is the resource module pointer. The original loads it into r3 and
+//   copies it to r30 (lwz r3; mr r30,r3) before the first virtual call; ours loads it into r30 and copies it to r3. Tried: a
+//   reference local, a pointer local (via getResourceModule and via m_enumerationStart->m_resourceModule), no local at all,
+//   and an inline helper taking the module by reference; all give the same bytes. The sibling units wn_game_watch_rescue and
+//   wn_game_watch_normal_weapon show the same difference in their activate.
 void wnGameWatchPanel::activate(int founderTaskId, int resourceId, int team,
                                 float lr, int selector, float frame) {
     Vec3f pos(0.0f, 0.0f, 0.0f);

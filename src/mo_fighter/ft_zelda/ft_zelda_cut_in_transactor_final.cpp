@@ -51,6 +51,9 @@ public:
 };
 
 // HYPOTHESIS: a by-value helper (the angles are copied before the camera controller is fetched).
+// TODO(S6): 99.3%; the only difference is that the original loads the zoom constant (1.0f) before it forms the address
+// of the second Vec2f copy, ours after it. Tried: constants as helper parameters or literals, a named cmSubject local
+// (worse, shifts a saved register), direct startZoomIn call with temporaries or named Vec2f locals (93.7%/96.4%).
 static inline void zoomIn(soCameraSubject* subject, u16 frame, Vec2f rotation, Vec2f targetRotation, float zoom) {
     CameraController::getInstance()->startZoomIn(subject->getInstance(), frame, rotation, targetRotation, zoom, 100.0f);
 }

@@ -102,7 +102,8 @@ public:
     virtual void slot64();
     virtual void slot68();
     virtual void slot6C();
-    virtual void unk70FloatInt(float, int);
+    // (int, float): the native callers load the int argument before moving the float into place.
+    virtual void unk70IntFloat(int, float);
     virtual void slot74();
     virtual void slot78();
     virtual void slot7C();

@@ -119,6 +119,8 @@ mo_fighter/ft_ness/wn_ness_yoyo.cpp:
 mo_fighter/ft_ness/wn_ness_yoyo_status_uniq_process_shot.cpp:
 	.text       start:0x00020CF4 end:0x00020E54
 	.ctors      start:0x00000038 end:0x0000003C
+	.data       start:0x0000BB70 end:0x0000BBE8
+	.bss        start:0x00000500 end:0x00000510
 
 mo_fighter/ft_ness/wn_ness_yoyo_status_uniq_process_shot_fall.cpp:
 	.text       start:0x00020E54 end:0x00021738
@@ -130,6 +132,9 @@ mo_fighter/ft_ness/wn_ness_yoyo_head.cpp:
 mo_fighter/ft_ness/wn_ness_yoyo_head_status_uniq_process_shot.cpp:
 	.text       start:0x00023E40 end:0x00024250
 	.ctors      start:0x00000040 end:0x00000044
+	.rodata     start:0x00000178 end:0x00000180
+	.data       start:0x0000C200 end:0x0000C278
+	.bss        start:0x00000578 end:0x00000588
 
 mo_fighter/ft_ness/wn_ness_yoyo_head_status_uniq_process_shot_fall.cpp:
 	.text       start:0x00024250 end:0x000246B4
@@ -141,6 +146,9 @@ mo_fighter/ft_ness/wn_ness_yoyo_head_status_uniq_process_shot_fall.cpp:
 mo_fighter/ft_ness/wn_ness_yoyo_head_status_uniq_process_takeup.cpp:
 	.text       start:0x000246B4 end:0x00024B28
 	.ctors      start:0x00000048 end:0x0000004C
+	.rodata     start:0x00000188 end:0x000001A0
+	.data       start:0x0000C2F8 end:0x0000C378
+	.bss        start:0x00000598 end:0x000005A8
 
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x00024B28 end:0x00024BC4

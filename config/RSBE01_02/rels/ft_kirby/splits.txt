@@ -14,9 +14,9 @@ global_destructor_chain.c:
 mo_fighter/ft_kirby/ft_kirby.cpp:
 	.text       start:0x00000070 end:0x000136CC
 	.ctors      start:0x00000000 end:0x00000004
-	.rodata     start:0x00000000 end:0x00000080
-	.data       start:0x00000000 end:0x0000B710
-	.bss        start:0x00000008 end:0x00000CC0
+	.rodata     start:0x00000000 end:0x00000078
+	.data       start:0x00000000 end:0x0000B5C8
+	.bss        start:0x00000008 end:0x00000CA0
 
 mo_fighter/ft_kirby/ft_kirby_status_uniq_process_final_cutter.cpp:
 	.text       start:0x000136CC end:0x00013F20
@@ -37,6 +37,9 @@ mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n.cpp:
 mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n_drink_item.cpp:
 	.text       start:0x00016160 end:0x000168C8
 	.ctors      start:0x00000014 end:0x00000018
+	.rodata     start:0x00000078 end:0x00000080
+	.data       start:0x0000B5C8 end:0x0000B710
+	.bss        start:0x00000CA0 end:0x00000CC0
 
 mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n_spit.cpp:
 	.text       start:0x000168C8 end:0x00016BE0
@@ -48,9 +51,9 @@ mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n_spit.cpp:
 mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n_eat.cpp:
 	.text       start:0x00016BE0 end:0x00017830
 	.ctors      start:0x0000001C end:0x00000020
-	.rodata     start:0x00000088 end:0x000005D0
-	.data       start:0x0000B790 end:0x0000EAD8
-	.bss        start:0x00000CD0 end:0x00001344
+	.rodata     start:0x00000088 end:0x000000A0
+	.data       start:0x0000B790 end:0x0000B8B8
+	.bss        start:0x00000CD0 end:0x00000CF0
 
 mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n_swallow.cpp:
 	.text       start:0x00017830 end:0x00017B10
@@ -59,6 +62,9 @@ mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n_swallow.cpp:
 mo_fighter/ft_kirby/ft_kirby_status_uniq_process_special_n_drink.cpp:
 	.text       start:0x00017B10 end:0x00018020
 	.ctors      start:0x00000024 end:0x00000028
+	.rodata     start:0x000000A0 end:0x000000A8
+	.data       start:0x0000B8B8 end:0x0000B938
+	.bss        start:0x00000CF0 end:0x00000D00
 
 mo_fighter/ft_kirby/ft_kirby_status_uniq_process_final.cpp:
 	.text       start:0x00018020 end:0x0001C244

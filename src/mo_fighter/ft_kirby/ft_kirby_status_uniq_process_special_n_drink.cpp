@@ -56,11 +56,9 @@ void ftKirbyStatusUniqProcessSpecialNDrink::execFixPosCounter(soModuleAccesser* 
         if (!article->isNull()) {
             articles.entry(article);
         }
-        soWorkManageModule& work = moduleAccesser->getWorkManageModule();
-        soCollisionAttackModule& attack = moduleAccesser->getCollisionAttackModule();
-        int group = work.getInt(0x20000008);
-        int target = work.getInt(0x20000007);
-        attack.hitAbsolute(0, 0x1cb, work.getInt(0x20000006), target, group);
+        moduleAccesser->getCollisionAttackModule().hitAbsolute(0, 0x1cb, moduleAccesser->getWorkManageModule().getInt(0x20000006),
+                                                               moduleAccesser->getWorkManageModule().getInt(0x20000007),
+                                                               moduleAccesser->getWorkManageModule().getInt(0x20000008));
         gfTask* task = gfTask::getTask(moduleAccesser->getLinkModule().getNodeTaskId(0));
         Fighter* fighter = dynamic_cast<Fighter*>(task);
         int copyKind = fighter->getFtKind();

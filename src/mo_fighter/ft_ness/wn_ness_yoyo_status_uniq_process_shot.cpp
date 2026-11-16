@@ -22,12 +22,14 @@ void wnNessYoyoStatusUniqProcessShot::initStatus(soModuleAccesser* moduleAccesse
 }
 
 void wnNessYoyoStatusUniqProcessShot::execFixPos(soModuleAccesser* moduleAccesser) {
-    const soModuleEnumeration* modules = moduleAccesser->m_enumerationStart;
-    soWorkManageModule& work = *modules->m_workManageModule;
-    wnLassoLinkView* link = (wnLassoLinkView*)modules->m_linkModule;
-    wnLassoAltStatusView* alt = (wnLassoAltStatusView*)modules->m_physicsModule;
+    // BYTES: the modules come from the accessor getters, and the link module stays a soLinkModule cast to the lasso view at each
+    // call; a view-typed local (pointer or reference) swaps the two saved registers, and a cached enumeration pointer loads the
+    // work module last.
+    soWorkManageModule& work = moduleAccesser->getWorkManageModule();
+    soLinkModule& link = moduleAccesser->getLinkModule();
+    wnLassoAltStatusView* alt = wnLassoGetAltStatus(moduleAccesser);
     u32 nodeId = work.getInt(0x20000000);
-    Vec3f linkPos = link->unk174VecOut();
-    Vec3f nodePos = link->unk98NodePos(5, nodeId, false);
+    Vec3f linkPos = ((wnLassoLinkView&)link).unk174VecOut();
+    Vec3f nodePos = ((wnLassoLinkView&)link).unk98NodePos(5, nodeId, false);
     alt->unk68VecPair(&linkPos, &nodePos);
 }

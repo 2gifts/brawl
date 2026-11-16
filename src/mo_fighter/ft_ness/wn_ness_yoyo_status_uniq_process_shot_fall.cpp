@@ -5,7 +5,7 @@
 #define WN_ARTICLE_ANIMCMD_INT
 #define FT_REL_LINK_EXTERN
 #define MT_VEC3F_MUL_INLINE
-#define MT_VEC3F_BIKE_UTILITY_OPERATORS
+#define MT_VEC3F_ADD_NATIVE_ORDER
 #include <wn/wn_module_accesser_builder.h>
 #include <mt/mt_vector.h>
 #include <so/so_module_accesser.h>
@@ -17,7 +17,7 @@
 
 // The yo-yo string while the head is falling: the string follows the head, segment by segment. HYPOTHESIS: all work variable
 // meanings.
-extern "C" double fn_101_CA34(double x); // fabs on a double (weak helper of the fighter unit)
+extern "C" float fn_101_CA34(float x); // fabsf (weak helper of the fighter unit)
 
 class wnNessYoyoStatusUniqProcessShotFall : public soStatusUniqProcess {
 public:
@@ -50,22 +50,19 @@ void wnNessYoyoStatusUniqProcessShotFall::initStatus(soModuleAccesser* moduleAcc
 
 void wnNessYoyoStatusUniqProcessShotFall::execStatus(soModuleAccesser* moduleAccesser) { }
 
-// MATCH-ONLY: the native subtraction helper takes the output last (the shape of PSVECSubtract).
-inline void wnNessYoyoVec3Sub(register const Vec3f* lhs, register const Vec3f* rhs, register Vec3f* pOut)
-    __attribute__((never_inline)) {
-    register f32 fr3, fr2, fr1, fr0;
-    // clang-format off
-    asm {
-        psq_l  fr0, Vec3f.m_x(lhs), 0, 0
-        psq_l  fr1, Vec3f.m_x(rhs), 0, 0
-        psq_l  fr2, Vec3f.m_z(lhs), 1, 0
-        psq_l  fr3, Vec3f.m_z(rhs), 1, 0
-        ps_sub fr0, fr0, fr1
-        ps_sub fr1, fr2, fr3
-        psq_st fr0, Vec3f.m_x(pOut), 0, 0
-        psq_st fr1, Vec3f.m_z(pOut), 1, 0
+// The distance between two points, with the native guard against a zero length. HYPOTHESIS: an inline distance helper
+// (name and owner unknown); its difference vector is allocated after every other stack temporary of execFixPos, as an inlined
+// callee's local is, and the squares are summed z + (x + y) as in the Vec3f length.
+static inline float wnNessYoyoDistance(Vec3f& from, const Vec3f& to) {
+    Vec3f toLink;
+    from.sub(&to, &toLink);
+    float lengthSquared = toLink.m_z * toLink.m_z + (toLink.m_x * toLink.m_x + toLink.m_y * toLink.m_y);
+    double absolute = __fabs(lengthSquared);
+    float magnitude = absolute;
+    if (magnitude <= 1.17549435e-38f) {
+        return 0.0f;
     }
-    // clang-format on
+    return lengthSquared * rsqrtf(lengthSquared);
 }
 
 void wnNessYoyoStatusUniqProcessShotFall::execFixPos(soModuleAccesser* moduleAccesser) {
@@ -98,6 +95,10 @@ void wnNessYoyoStatusUniqProcessShotFall::execFixPos(soModuleAccesser* moduleAcc
             acc.m_y = work.getFloat(0x21000007);
             limit.m_x = work.getFloat(0x21000008);
             limit.m_y = work.getFloat(0x21000009);
+            // TODO: execFixPos is 99.67%. The native code reloads vel.m_y for the velocity sum instead of reusing the load
+            // from the line above (and passes the new x velocity to the fabs from another register). Tried without effect:
+            // vel = vel + acc, component-wise sums, pos.m_y = pos.m_y + vel.m_y, a pointer or reference to vel or pos.m_y,
+            // Vec2f::set, a clamp helper, and one permuter run (6 minutes, 256 compiles, no gain).
             pos.m_y += vel.m_y;
             vel += acc;
             // The velocities snap to +- the limit when they exceed it.
@@ -121,24 +122,18 @@ void wnNessYoyoStatusUniqProcessShotFall::execFixPos(soModuleAccesser* moduleAcc
             work.setFloat(vel.m_y, 0x21000005);
         }
         Vec3f direction;
-        wnNessYoyoVec3Sub(&pos, &linkPos, &direction);
+        pos.sub(&linkPos, &direction);
         direction.normalize();
-        Vec3f offset = direction * speed;
-        Vec3f target = offset + linkPos;
-        pos = target;
-        work.setFloat(speed - 0.001f, 0x21000000);
+        pos = direction * speed + linkPos;
+        speed -= 0.001f;
+        work.setFloat(speed, 0x21000000);
     } else {
-        Vec3f nodePos = link->unk98NodePos(5, work.getInt(0x20000000), false);
-        pos = nodePos;
-        Vec3f toLink;
-        wnNessYoyoVec3Sub(&linkPos, &pos, &toLink);
-        if (toLink.length() > speed) {
+        pos = link->unk98NodePos(5, work.getInt(0x20000000), false);
+        if (wnNessYoyoDistance(linkPos, pos) > speed) {
             Vec3f direction;
-        wnNessYoyoVec3Sub(&pos, &linkPos, &direction);
+        pos.sub(&linkPos, &direction);
             direction.normalize();
-            Vec3f offset = direction * speed;
-            Vec3f target = offset + linkPos;
-            pos = target;
+            pos = direction * speed + linkPos;
             work.onFlag(0x22000001);
             wnNessYoyoPullEvent event(work.getFloat(0x21000000));
             link->unk44SendEvent(5, event);
@@ -154,4 +149,9 @@ void wnNessYoyoStatusUniqProcessShotFall::execFixPos(soModuleAccesser* moduleAcc
     }
     alt->unk68VecPair(&linkPos, &pos);
     alt->unk8CInt(work.getInt(0x20000001));
+}
+
+// The paired-single subtraction (out = this - other), emitted in this unit after its first caller.
+void Vec3f::sub(const Vec3f* other, Vec3f* out) {
+    Vec3fSub(out, this, other);
 }

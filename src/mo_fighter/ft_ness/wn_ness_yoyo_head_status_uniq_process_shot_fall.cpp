@@ -65,7 +65,7 @@ void wnNessYoyoHeadStatusUniqProcessShotFall::execStatus(soModuleAccesser* modul
     value = param->unk8 - value;
     work.addFloat(value, 0x21000001);
     work.setFloat(value, 0x21000002);
-    model->unk70FloatInt(work.getFloat(0x21000001), 2);
+    model->unk70IntFloat(2, work.getFloat(0x21000001));
 }
 
 void wnNessYoyoHeadStatusUniqProcessShotFall::execFixPos(soModuleAccesser* moduleAccesser) {

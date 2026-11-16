@@ -32,20 +32,19 @@ void ftGameWatchStatusUniqProcessFinalTurnRun::initStatus(soModuleAccesser* modu
 }
 
 void ftGameWatchStatusUniqProcessFinalTurnRun::execStatus(soModuleAccesser* moduleAccesser) {
-    // HYPOTHESIS: float literals 1.0f, 0.0f, 0.5f stand in for unrecovered lbl_107_rodata_A0 values.
     soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
     if (workManage.isFlag(0x22000010) == 1) {
         soValueAccesser::getConstantFloat(moduleAccesser, 0xc39, 0);
         if (!workManage.isFlag(0x22000011)) {
-            moduleAccesser->getMotionModule().setRate(1.0f);
+            moduleAccesser->getMotionModule().setRate(0.0f);
             workManage.onFlag(0x22000011);
         } else {
             float facing = workManage.getFloat(0x21000005);
             float speedX = moduleAccesser->getKineticModule()
                                .getSumSpeed(soKineticEnergy::AttributeFlag(1)).m_x;
-            bool reachedLimit = facing * speedX <= 0.0f;
+            bool reachedLimit = facing * speedX <= 0.01f;
             if (reachedLimit) {
-                moduleAccesser->getMotionModule().setRate(0.5f);
+                moduleAccesser->getMotionModule().setRate(1.0f);
                 workManage.offFlag(0x22000010);
             }
         }

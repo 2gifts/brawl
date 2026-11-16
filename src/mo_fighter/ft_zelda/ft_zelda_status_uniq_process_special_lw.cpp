@@ -21,18 +21,17 @@ void ftZeldaStatusUniqProcessSpecialLw::initStatus(soModuleAccesser* moduleAcces
         soKineticModule& kinetic = moduleAccesser->getKineticModule();
         // HYPOTHESIS: extendParam[3] of the Zelda data points to two float divisors (x, y).
         float* divisor = static_cast<float*>(g_ftCommonDataAccesser.getData(Fighter_Zelda)->extendParam[3]);
-        soKineticEnergyNormal& energy1 = dynamic_cast<soKineticEnergyNormal&>(*kinetic.getEnergy(1));
+        ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*kinetic.getEnergy(1));
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*kinetic.getEnergy(3));
         Vec2f sumSpeed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(-1));
         kinetic.clearSpeedAll();
         sumSpeed.m_x = sumSpeed.m_x / divisor[0];
         sumSpeed.m_y = sumSpeed.m_y / divisor[1];
-        Vec2f speed(sumSpeed.m_x, 0.0f); // HYPOTHESIS: zero constant from lbl_104_rodata_58
-        Vec2f::copy(stop.m_speed, speed);
+        stop.m_speed = Vec2f(sumSpeed.m_x, 0.0f); // HYPOTHESIS: zero constant from lbl_104_rodata_58
         stop.enable();
         if (situation.getKind() != 0) {
-            energy1.m_speed.m_y = sumSpeed.m_y;
-            energy1.enable();
+            gravity.m_speedY = sumSpeed.m_y;
+            gravity.enable();
         }
     }
 }

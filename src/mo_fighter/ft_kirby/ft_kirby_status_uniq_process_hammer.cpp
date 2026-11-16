@@ -34,9 +34,11 @@ void ftKirbyStatusUniqProcessHammer::initStatus(soModuleAccesser* moduleAccesser
     kinetic.changeKinetic(0, moduleAccesser);
     float speedY = soValueAccesser::getConstantFloat(moduleAccesser, 0xfac, 0);
     gravity.enable();
-    Vec2f speed(0.0f, speedY);
-    gravity.resetEnergy(0, &speed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
-    if (soValueAccesser::getConstantInt(moduleAccesser, 0x5dc2, 0) == 1) {
+    gravity.resetEnergy(0, &Vec2f(0.0f, speedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    switch (soValueAccesser::getConstantInt(moduleAccesser, 0x5dc2, 0)) {
+    case 0: // HYPOTHESIS: an explicit no-carry case (the bytes test 1 before >= 1, a two-case switch)
+        break;
+    case 1: {
         Vec2f carried = controller.getSpeed();
         Vec2f limit = controller.m_speedLimit;
         Vec2f target = controller.m_speedTarget;
@@ -44,14 +46,18 @@ void ftKirbyStatusUniqProcessHammer::initStatus(soModuleAccesser* moduleAccesser
         Vec2f brake = controller.m_brake;
         controller.disable();
         stop.enable();
-        Vec2f unused;
-        stop.resetEnergy(9, &unused, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(9, &Vec2f(), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.m_speed = carried;
         stop.m_speedLimit = limit;
         stop.m_speedTarget = target;
         stop.m_accel = accel;
         stop.m_brake = brake;
+        break;
     }
+    }
+}
+
+void ftKirbyStatusUniqProcessHammer::execStatus(soModuleAccesser* moduleAccesser) {
 }
 
 // HYPOTHESIS: the extend parameter group of the Hammer: a pointer whose word at +8 is the number of frames of the hammer rise.
@@ -72,9 +78,6 @@ void ftKirbyStatusUniqProcessHammer::exitStatus(soModuleAccesser* moduleAccesser
         workManage.setFloat(frames, 0x11000000);
         workManage.setFloat(1.0f, 0x11000001);
     }
-}
-
-void ftKirbyStatusUniqProcessHammer::execStatus(soModuleAccesser* moduleAccesser) {
 }
 
 ftKirbyStatusUniqProcessHammer g_ftKirbyStatusUniqProcessHammer;

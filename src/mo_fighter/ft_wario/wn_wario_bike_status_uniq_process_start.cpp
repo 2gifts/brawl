@@ -42,9 +42,10 @@ void wnWarioBikeStatusUniqProcessStart::exitStatus(soModuleAccesser* a, int next
             Vec2f previous = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1));
             float speedX = params->getParamFloat(a, 0xfa1, 0);
             float speedY = params->getParamFloat(a, 0xfa2, 0);
-            Vec2f velocity(speedX * lr, 0.0f);
-            normal.setSpeed(&velocity);
-            gravity.m_speedY = previous.m_y + speedY;
+            // BYTES: the velocity is an address-of-temporary argument; a named local puts it in another stack slot.
+            normal.setSpeed(&Vec2f(speedX * lr, 0.0f));
+            float previousSpeedY = previous.m_y;
+            gravity.m_speedY = previousSpeedY + speedY;
             work.offFlag(0x22000006);
             work.offFlag(0x22000004);
             work.offFlag(0x22000005);

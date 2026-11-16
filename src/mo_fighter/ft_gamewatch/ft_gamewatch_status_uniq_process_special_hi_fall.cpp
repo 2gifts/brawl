@@ -2,7 +2,6 @@
 #include <ft/ft_kinetic_energy.h>
 #include <so/article/so_generate_article_manage_module.h>
 #include <so/kinetic/so_kinetic_module_impl.h>
-#include <so/so_kinetic_energy_normal.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
@@ -28,11 +27,11 @@ void ftGamewatchStatusUniqProcessSpecialHiFall::initStatus(soModuleAccesser* mod
     ftGameWatchSpecialHiFallGroup* group = static_cast<ftGameWatchSpecialHiFallGroup*>(
         g_ftCommonDataAccesser.getData(Fighter_GameWatch)->extendParam[2]);
     kinetic.changeKinetic(0, moduleAccesser);
-    soKineticEnergyNormal& energy = dynamic_cast<soKineticEnergyNormal&>(*kinetic.getEnergy(1));
+    ftKineticEnergyGravity& energy = dynamic_cast<ftKineticEnergyGravity&>(*kinetic.getEnergy(1));
     float speed = soValueAccesser::getConstantFloat(moduleAccesser, 0xbd0, 0);
     speed *= group->m_value;
-    energy.m_speedTarget.m_y = speed;
-    energy.m_accel.m_y = speed;
+    energy.unk1C = speed;
+    energy.m_fallSpeedMax = speed;
 }
 
 // HYPOTHESIS: 0x118 is the status kind that continues the special without removing article 2.

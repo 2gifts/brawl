@@ -7,7 +7,7 @@
 
 class ftZeldaStatusUniqProcessSpecialHi : public soStatusUniqProcess {
 public:
-    virtual ~ftZeldaStatusUniqProcessSpecialHi() { }
+    virtual ~ftZeldaStatusUniqProcessSpecialHi();
     virtual void initStatus(soModuleAccesser* moduleAccesser);
 };
 
@@ -29,9 +29,16 @@ void ftZeldaStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAcces
     sumSpeed.m_y /= scale[1];
     gravity.m_speedY = sumSpeed.m_y;
     gravity.enable();
-    stop.m_speed.m_x = sumSpeed.m_x;
-    stop.m_speed.m_y = 0.0f; // lbl_104_rodata_18
+    stop.m_speed = Vec2f(sumSpeed.m_x, 0.0f);
     stop.enable();
+}
+
+inline ftZeldaStatusUniqProcessSpecialHi::~ftZeldaStatusUniqProcessSpecialHi() { }
+
+// MATCH-ONLY: name the weak destructor before the static initializer; the unused function is stripped, but its first
+// reference moves the vtable after the dynamic_cast RTTI chain as in the original.
+static void nameDestructorFirst(ftZeldaStatusUniqProcessSpecialHi* process) {
+    process->~ftZeldaStatusUniqProcessSpecialHi();
 }
 
 ftZeldaStatusUniqProcessSpecialHi g_ftZeldaStatusUniqProcessSpecialHi;

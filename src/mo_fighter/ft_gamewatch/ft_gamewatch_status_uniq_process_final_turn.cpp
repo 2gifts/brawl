@@ -64,12 +64,7 @@ void ftGameWatchStatusUniqProcessFinalTurn::execStatus(soModuleAccesser* moduleA
 
     float inputThreshold = soValueAccesser::getConstantFloat(moduleAccesser, 0xc32, 0);
     int turnWindowFrames = soValueAccesser::getConstantInt(moduleAccesser, 0x59f7, 0);
-    soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
-    soControllerModule& controller = moduleAccesser->getControllerModule();
-    float oppositeFacing = -workManage.getFloat(0x21000004);
-    float stickX = controller.getStickX();
-
-    if ((stickX * oppositeFacing) >= inputThreshold &&
+    if (moduleAccesser->getControllerModule().getStickX() * -moduleAccesser->getWorkManageModule().getFloat(0x21000004) >= inputThreshold &&
         moduleAccesser->getControllerModule().getFlickX() < turnWindowFrames) {
         moduleAccesser->getWorkManageModule().onFlag(0x22000010);
     }

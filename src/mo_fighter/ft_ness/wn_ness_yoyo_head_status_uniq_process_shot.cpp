@@ -42,27 +42,27 @@ void wnNessYoyoHeadStatusUniqProcessShot::execStatus(soModuleAccesser* moduleAcc
     soPostureModule& posture = *modules->m_postureModule;
     wnLassoLinkView* link = (wnLassoLinkView*)modules->m_linkModule;
     Vec3f nodePos = link->unk98NodePos(3, 0x42, false);
-    Vec3f zero(0.0f, 0.0f, 0.0f);
-    wnNessYoyoHeadAimEvent event(zero);
+    wnNessYoyoHeadAimEvent event(Vec3f(0.0f, 0.0f, 0.0f));
     link->unk44SendEvent(3, event);
     if (event._0x4) {
-        float angle = atan2(event.unk8.m_x, event.unk8.m_y);
+        float angle = atan2f(event.unk8.m_x, event.unk8.m_y);
         if (angle != 0.0f) {
             Vec3f hand = link->unk98NodePos(3, 5, false);
-            nodePos -= hand;
+            Vec3fSub(&nodePos, &nodePos, &hand);
             Vec3f axis(0.0f, 0.0f, 1.0f);
             nodePos.rot(&axis, -angle, &nodePos);
-            nodePos += hand;
+            Vec3fAdd(&nodePos, &nodePos, &hand);
         }
     }
     posture.setPos(&nodePos);
     float first = work.getFloat(0x21000001);
     float second = work.getFloat(0x21000002);
     float value = first + second;
-    model->unk70FloatInt(value, 2);
+    model->unk70IntFloat(2, value);
     work.setFloat(value, 0x21000001);
     if (work.isFlag(0x22000001)) {
-        work.setFloat(dynamic_cast<wnNessYoyoHead&>(moduleAccesser->getStageObject()).m_param->unk0, 0x21000002);
+        const wnNessYoyoHeadParam* param = dynamic_cast<wnNessYoyoHead&>(moduleAccesser->getStageObject()).m_param;
+        work.setFloat(param->unk0, 0x21000002);
     }
 }
 
