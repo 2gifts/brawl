@@ -82,7 +82,7 @@ soModuleAccesserBuilder<WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG>::soModuleAccesserB
     m_reflectorModuleBuilder(&m_moduleAccsr, owner->getId(), static_cast<gfTask::Category>(static_cast<u8>(owner->getCategory()))),
     m_absorberBuilder(&m_moduleAccsr, owner->getId(), static_cast<u8>(owner->getCategory())),
     m_collisionCatchModuleBuilder(&m_moduleAccsr, owner->getId(), static_cast<u8>(owner->getCategory())),
-    m_searchBuilder(&m_moduleAccsr, owner->getId(), static_cast<u8>(owner->getCategory())),
+    m_searchBuilder(&m_moduleAccsr, owner->getId(), static_cast<wnArticleSearchSelect<BC>::Category>(owner->getCategory())),
     m_damageModuleBuilder(&m_moduleAccsr, soEventObserverRegistrationDescNull::getNullInstance()),
     m_catchModuleBuilder(&m_moduleAccsr),
     m_captureModuleBuilder(&m_moduleAccsr),

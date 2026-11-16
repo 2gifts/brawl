@@ -77,7 +77,11 @@ public:
 #else
     soInstanceManagerSimpleEntity() : m_fixedSimple(&m_arrayVector) { }
 #endif
+#ifdef WN_EVENT_UNIT_DTOR_INLINE
+    ~soInstanceManagerSimpleEntity() { }
+#else
     ~soInstanceManagerSimpleEntity();
+#endif
 };
 
 template <class T>

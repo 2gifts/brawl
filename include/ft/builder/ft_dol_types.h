@@ -81,8 +81,9 @@ public:
 };
 
 class soCollisionSearchPart {
-    u8 m_opaque[0x60];
+    u32 m_opaque[0x60 / 4]; // word-aligned (the part arrays start on a word boundary)
 public:
+    soCollisionSearchPart();
     soCollisionSearchPart(soCollision::Category category);
     ~soCollisionSearchPart();
 };

@@ -1,6 +1,8 @@
 #define IP_INPUT_BUTTON_RAW
 #define SO_BUILDER_HELPERS_WEAK
 #define WN_STATUS_NO_TAIL
+#define WN_TRANSITION_CTOR_INLINE
+#define WN_STATUS_MODULE_KIND_COUNT_ZERO // BYTES: the status module is built with a status kind count of 0 (ft_builder_status.h)
 #define WN_WEAPON_NO_COMMON_ENERGIES
 #define MT_VEC3F_IMPLICIT_ASSIGN
 #define WN_WEAPON_BUILDER
@@ -58,14 +60,6 @@ wnSZerosuitWhip::wnSZerosuitWhip(s32 articleId, const wnArticleBuildInfo& info, 
     Weapon::deactivate(false);
 }
 
-// Placeholder translation-unit functions (names come from the module map; bodies match the target assembly).
-extern "C" {
-
-} // extern "C"
-
-// soExternalValueAccesser::getMotionKind (the map name); wn_szerosuit_paralyzer.cpp calls it by this stand-in name.
-extern "C" int fn_27_8CC10(StageObject* stageObject);
-
 void wnSZerosuitWhip::deactivate(bool flag) {
     if (m_moduleAccesser->m_enumerationStart->m_workManageModule->getInt(0x10000007) != -1) {
         m_moduleAccesser->m_enumerationStart->m_collisionAttackModule->unRefLogGroup(0);
@@ -84,7 +78,7 @@ void wnSZerosuitWhip::notifyEventLink(soLinkEventArgs* event, soModuleAccesser* 
             switch (event->m_eventKind) {
             case 0x455:
                 int kind = -1;
-                switch (fn_27_8CC10(sender)) {
+                switch (soExternalValueAccesser::getMotionKind(sender)) {
                 case 0x1D5: kind = 3; break;
                 case 0x1D6: kind = 4; break;
                 case 0x1DC: kind = 5; break;
@@ -144,11 +138,14 @@ void wnSZerosuitWhip::activate(int founderTaskId, u32 etcResId, int team, float 
     desc.unk40 = 0;
     desc.unk44 = 0x35f;
     desc.unk48 = 0;
-    desc.flagsHighPair = 3;
+    // The two top bits of each flag byte are separate one-bit flags: the original writes them one at a time.
+    desc.flagBit7 = 1;
+    desc.flagBit6 = 1;
     desc.flagsMidPair = 0;
     desc.flagsBit3 = 1;
     desc.flagsLow = 0;
-    desc.unk4DHigh = 0;
+    desc.flag4DBit7 = 0;
+    desc.flag4DBit6 = 0;
     desc.flag4DBit7 = 1;
     desc.unk38 = 3;
     desc.unk3C = 0xff;

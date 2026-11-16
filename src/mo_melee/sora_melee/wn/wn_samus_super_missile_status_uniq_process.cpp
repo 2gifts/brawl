@@ -1,4 +1,5 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#include <so/collision/so_collision_attack_module_impl.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
 #include <so/so_module_accesser.h>
@@ -15,7 +16,26 @@ public:
 
 wnSamusSuperMissileStatusUniqProcess g_wnSamusSuperMissileStatusUniqProcess;
 
-void wnSamusSuperMissileStatusUniqProcess::initStatus(soModuleAccesser* moduleAccesser) { }
+// The super missile starts at its parameter speed in the facing direction; its stable speed (unk14) points the same way.
+void wnSamusSuperMissileStatusUniqProcess::initStatus(soModuleAccesser* moduleAccesser) {
+    switch (moduleAccesser->getStatusModule().getStatusKind()) {
+    case 0: {
+        const wnSamusSuperMissileParam* param = dynamic_cast<wnSamusSuperMissile&>(moduleAccesser->getStageObject()).getData()->m_param;
+        float lr = moduleAccesser->getPostureModule().getLr();
+        int life = param->unk4;
+        wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
+        energy.resetEnergy(0, &Vec2f(param->unkC * lr, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        energy.m_speedTarget = Vec2f(param->unk14 * lr, 0.0f);
+        energy.enable();
+        moduleAccesser->getCollisionAttackModule().setSpeed(&energy.getSpeed());
+        moduleAccesser->getWorkManageModule().setInt(0, 0x10000006);
+        moduleAccesser->getWorkManageModule().setInt(life, 0x10000005);
+        break;
+    }
+    case 1:
+        break;
+    }
+}
 void wnSamusSuperMissileStatusUniqProcess::execFixPosCounter(soModuleAccesser* moduleAccesser) {
     int status = moduleAccesser->getStatusModule().getStatusKind();
     const wnSamusSuperMissileParam* param = dynamic_cast<wnSamusSuperMissile&>(moduleAccesser->getStageObject()).getData()->m_param;

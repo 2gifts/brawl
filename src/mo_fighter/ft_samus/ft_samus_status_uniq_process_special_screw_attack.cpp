@@ -9,7 +9,11 @@
 #include <types.h>
 
 void ftKineticEnergyDisableAndClear(int index, soModuleAccesser* moduleAccesser);
-extern "C" void __ct__5Vec2fFff(Vec2f* self, float x, float y);
+
+// Copies a vector through a const reference (the target is assigned from the constructed temporary's address).
+static inline void setVec2f(Vec2f& dst, const Vec2f& src) {
+    dst = src;
+}
 
 // Screw Attack.
 void ftSamusStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAccesser) {
@@ -34,20 +38,10 @@ void ftSamusStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAcces
         controller.resetEnergy(0, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         controller.m_accelMul = param->controlAccelMul;
         controller.m_unk40 = 0.0f;
-        Vec2f target;
-        __ct__5Vec2fFff(&target, param->controlSpeedXMax, controller.m_speedTarget.m_y);
-        controller.m_speedTarget = target;
-        Vec2f limit;
-        __ct__5Vec2fFff(&limit, param->controlSpeedXMax, controller.m_speedLimit.m_y);
-        controller.m_speedLimit = limit;
+        setVec2f(controller.m_speedTarget, Vec2f(param->controlSpeedXMax, controller.m_speedTarget.m_y));
+        setVec2f(controller.m_speedLimit, Vec2f(param->controlSpeedXMax, controller.m_speedLimit.m_y));
         controller.enable();
     }
-}
-
-// MATCH-ONLY: the unit carries the out-of-line Vec2f constructor (the two controller targets are built through it).
-extern "C" void __ct__5Vec2fFff(Vec2f* self, float x, float y) {
-    self->m_x = x;
-    self->m_y = y;
 }
 
 void ftSamusStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAccesser) {
@@ -65,7 +59,8 @@ void ftSamusStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAcces
         moduleAccesser->getGroundModule().setCorrect(soGroundShapeImpl::Correct_Air, 0);
     }
     if (!moduleAccesser->getWorkManageModule().isFlag(ftSamusWork::SpecialHi_Released)) {
-        float stickMagnitude = (float)fabs(moduleAccesser->getControllerModule().getStickX());
+        double wideMagnitude = fabs(moduleAccesser->getControllerModule().getStickX());
+        float stickMagnitude = wideMagnitude;
         if (stickMagnitude > soValueAccesser::getConstantFloat(moduleAccesser, ftSamusParam::SpecialHi_StickThreshold, 0)) {
             moduleAccesser->getPostureModule().setStickLR(0.0f);
             moduleAccesser->getPostureModule().updateRotYLr();

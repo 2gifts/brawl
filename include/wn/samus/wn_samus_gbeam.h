@@ -10,6 +10,8 @@
 #define WN_ZELDA_LIGHTING_BOW_UNIT
 #include <wn/zelda/wn_zelda_lighting_bow.h>
 #include <wn/wn_lasso_status_view.h>
+#include <wn/wn_anim_cmd_full_property.h>
+#include <wn/wn_inside_event_all_units.h>
 
 struct wnArticleBuildInfo;
 
@@ -103,24 +105,11 @@ public:
     virtual ~wnSamusGBeamParamAccesser();
 };
 
-// The four command threads of the lasso articles (see the whip): the stack capacity of every thread is 2.
-template <int E0, int C0, int A0, int B0, int S0, int E1, int C1, int A1, int B1, int S1, int E2, int C2, int A2, int B2, int S2, int E3,
-          int C3, int A3, int B3, int S3>
-class wnAnimCmdModuleSubBuildConfigFullProperty {
-public:
-    typedef soAnimCmdControlUnitBuildConfig<0, 1, C0, A0, B0, 0, 0, S0> Unit0Config;
-    typedef soAnimCmdControlUnitBuildConfig<1, 2, C1, A1, B1, 1, 0, S1> Unit1Config;
-    typedef soAnimCmdControlUnitBuildConfig<2, 2, C2, A2, B2, 1, 0, S2> Unit2Config;
-    typedef soAnimCmdControlUnitBuildConfig<3, 2, C3, A3, B3, 1, 0, S3> Unit3Config;
-    typedef soAnimCmdControlUnitBuildConfigUniq<4, 2> Unit4Config;
-    enum { Unit0Enabled = E0, Unit1Enabled = E1, Unit2Enabled = E2, Unit3Enabled = E3, Unit4Enabled = 1 };
-};
-
 class wnSamusGBeamModuleAccesserBuildConfig : public wnCommonBuildConfig {
 public:
-    typedef soInsideEventManageModuleBuildConfig<12, 18, 0, 1, 0, 0, 4, 4, 1, 0, 1, 0, 0, 0, 0, 0, 0, 6, 0, wnTurnInsideEventManageModuleTypes>
+    typedef soInsideEventManageModuleBuildConfig<12, 18, 0, 1, 0, 0, 4, 4, 1, 0, 1, 0, 0, 0, 0, 0, 0, 6, 0, wnAllInsideEventManageModuleTypes>
         InsideEventManageModuleBuildConfig;
-    typedef wnTurnInsideEventManageModuleTypes InsideEventManageModuleTypes;
+    typedef wnAllInsideEventManageModuleTypes InsideEventManageModuleTypes;
     typedef soModelModuleBuildConfig<5, 0, soModelModuleImpl> ModelModuleBuildConfig;
     typedef soMotionModuleBuildConfig<10, soMotionModuleImpl, 0, 1, soTransitionModuleBuildConfigNull,
                                       soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> > MotionModuleBuildConfig;

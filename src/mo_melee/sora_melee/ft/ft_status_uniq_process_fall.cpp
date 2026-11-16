@@ -81,7 +81,7 @@ void ftStatusUniqProcessFall::execStatus(soModuleAccesser* moduleAccesser) {
         if (next != current) {
             moduleAccesser->getMotionModule().remove2ndAnimChr();
             soMotionModule& motion = moduleAccesser->getMotionModule();
-            motion.add2ndAnimChr(motion.getFrame(), 1.0f, next, true);
+            motion.add2ndAnimChr(motion.getFrame(), next, true, 1.0f);
             moduleAccesser->getWorkManageModule().setInt(next, 0x20000002);
         }
         soMotionModule& blend = moduleAccesser->getMotionModule();

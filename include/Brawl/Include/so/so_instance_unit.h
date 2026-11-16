@@ -41,6 +41,10 @@ public:
 
     soInstanceUnit() : m_element(), m_id(-1) { }
     soInstanceUnit(T& elm, s32 id) : m_element(elm), m_id(id) { }
+#ifdef WN_EVENT_UNIT_DTOR_INLINE
+    // The records have a destructor in the original (a weak function the array teardown names).
+    ~soInstanceUnit() { }
+#endif
 };
 
 template <typename T>

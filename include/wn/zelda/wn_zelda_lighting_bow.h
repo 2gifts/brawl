@@ -112,6 +112,14 @@ public:
     soSituationModuleImpl* getModule() { return &m_module; }
 };
 
+// The search collision builder of a configuration and the type its constructor takes the task category as: none by
+// default; an article with a search collision (Samus's bomb) specializes this for its configuration.
+template <class BC>
+struct wnArticleSearchSelect {
+    typedef soCollisionSearchModuleBuilder<soCollisionSearchModuleBuildConfigNull> Builder;
+    typedef u8 Category;
+};
+
 #define WN_ZELDA_LIGHTING_BOW_BUILDER_MEMBERS \
     soInsideEventManageModuleBuilder<BC::InsideEventManageModuleBuildConfig, BC::InsideEventManageModuleTypes> unk194; \
     soModuleAccesser m_moduleAccsr; \
@@ -130,7 +138,7 @@ public:
     soCollisionReflectorModuleBuilder<BC::CollisionReflectorModuleBuildConfig> m_reflectorModuleBuilder; \
     soCollisionAbsorberModuleBuilder<soCollisionAbsorberModuleBuildConfigNull> m_absorberBuilder; \
     soCollisionCatchModuleBuilder<BC::CollisionCatchModuleBuildConfig> m_collisionCatchModuleBuilder; \
-    soCollisionSearchModuleBuilder<soCollisionSearchModuleBuildConfigNull> m_searchBuilder; \
+    wnArticleSearchSelect<BC>::Builder m_searchBuilder; \
     soDamageModuleBuilder<BC::DamageModuleBuildConfig> m_damageModuleBuilder; \
     soCatchModuleBuilder<BC::CatchModuleBuildConfig> m_catchModuleBuilder; \
     soCaptureModuleBuilder<BC::CaptureModuleBuildConfig> m_captureModuleBuilder; \

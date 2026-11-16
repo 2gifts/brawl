@@ -1,12 +1,61 @@
-#define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
+#define WN_ANIMCMD_RESET_MODE_BOX // BYTES: word-aligned reset-mode temporaries (frame size of the anim cmd sub builder)
+#define WN_ANIMCMD_STACK_PTR // BYTES: the interpreter stacks stay in a saved register across getManageId (ft_builder_animcmd.h)
+#define WN_ANIMCMD_PRESENTER_LOCAL_STORE // BYTES: the interpreters' presenters keep the looked-up list in a local, as in the Mario fireball
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructors expand the empty param customize module destructor
+#define WN_PARAM_ACCESSER_INLINE_DTOR // BYTES: the empty soParamAccesser base destructor is inlined in sora_melee
+#define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: activate copies the Vec3f position as an aggregate (word moves), see mt_vector.h
+#define WN_EVENT_UNIT_DTOR_INLINE // BYTES: the inside event builder destructor expands the event unit destructors
+#define WN_EVENT_UNIT_DTOR_INLINE // BYTES: the inside event builder destructor expands the event unit destructors
+#define WN_STATUS_MODULE_KIND_COUNT_ZERO // BYTES: the status module is built with a status kind count of 0 (ft_builder_status.h)
+#define WN_ANIMCMD_SUB_BUILDER_EXTERN // the anim cmd sub builder constructor is the Samus bomb unit's weak copy
+#define FT_MODULE_BUILDER
+#define WN_MARIO_FIREBALL_UNIT // the sora_melee article unit mode shared with the Mario fireball (builders out of line)
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_STATUS_NO_TAIL
+#define SO_OTHER_ANIM_CTOR // BYTES: the sora_melee motion builder constructs and destroys its other-animation slot
+#define WN_TRANSITION_CTOR_INLINE
+#define WN_ARTICLE_ANIMCMD_INT // BYTES: the builder vtable takes Weapon's int-index notifyEventAnimCmd thunk, as in the original
+#define FT_REL_LINK_EXTERN
+#define SO_NULLABLE_INLINE_CTOR
+#include <wn/wn_module_accesser_builder.h>
 #include <wn/samus/wn_samus_supermissile.h>
 #include <wn/wn_activate_desc.h>
 #include <wn/wn_kinetic_energy_normal.h>
 #include <ac/ac_anim_cmd_impl.h>
 #include <so/so_module_accesser.h>
+#include <so/model/so_model_module_impl.h>
 #include <so/status/so_status_module_impl.h>
+#include <gf/gf_task_scheduler.h>
 #include <math.h>
 #include <memory.h>
+
+// BYTES: the empty base destructors that sora_melee always expands (they have no out-of-line copy there).
+inline soTeam::~soTeam() { }
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+inline soResourceIdAccesser::~soResourceIdAccesser() { }
+
+extern soStatusUniqProcess g_wnSamusSuperMissileStatusUniqProcess;
+
+// HYPOTHESIS: the -1 is the build data's etc resource slot (the laser passes 0), as for the missile.
+wnSamusSuperMissile::wnSamusSuperMissile(s32 articleId, const wnArticleBuildInfo& info, const wnSamusSuperMissileData* data) :
+    wnWeaponBuilder<wnSamusSuperMissileModuleAccesserBuildConfig>(
+        "SamusSuperMissile", articleId, info,
+        wnModuleAccesserBuildData(0x59, data, info.getHeapModule()->getInstanceHeap(),
+                                  info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), static_cast<u8>(data->m_resGroupNo), -1,
+                                  &g_soParamAccesserNull, 0, 0, 0, 0, 0, 0, 0)),
+    m_param(data->m_param) {
+    // Both statuses run the same process.
+    soStatusUniqProcess* uniqProcs[2];
+    uniqProcs[0] = &g_wnSamusSuperMissileStatusUniqProcess;
+    uniqProcs[1] = &g_wnSamusSuperMissileStatusUniqProcess;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 2);
+    Weapon::deactivate(false);
+}
+
+#define WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG wnSamusSuperMissileModuleAccesserBuildConfig
+#include <wn/zelda/wn_zelda_lighting_bow_builder_ctor.h>
 
 // HYPOTHESIS: parameter names; the same activation descriptor as the other projectile articles.
 void wnSamusSuperMissile::activate(int founderTaskId, int etcResourceId, int team) {
@@ -104,4 +153,42 @@ bool wnSamusSuperMissile::notifyEventCollisionAttackCheck(u32 flags) {
         break;
     }
     return Weapon::notifyEventCollisionAttackCheck(flags);
+}
+
+// The super missile points along its flight direction (work angle 0x11000001).
+static inline void setFlyAngle(wnKineticEnergyNormal& energy, soWorkManageModule& work) {
+    Vec2f speed = energy.getSpeed();
+    if (speed.length() > 0.00001f) {
+        work.setFloat(-atan2f(speed.m_y, speed.m_x), 0x11000001);
+    }
+}
+
+// HYPOTHESIS: after a reflect the work angle follows the new flight direction and the remaining life is capped at the
+// parameter life.
+bool wnSamusSuperMissile::reflect() {
+    bool result = Weapon::reflect();
+    soModuleAccesser* acc = getModuleAccesser();
+    soWorkManageModule& work = acc->getWorkManageModule();
+    wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*acc->getKineticModule().getEnergy(0));
+    setFlyAngle(energy, work);
+    wnSamusSuperMissile& missile = dynamic_cast<wnSamusSuperMissile&>(*acc->m_stageObject);
+    int life = missile.getData()->m_param->unk8;
+    if (work.getInt(0x10000006) > life) {
+        work.setInt(life, 0x10000006);
+    }
+    return result;
+}
+
+bool wnSamusSuperMissile::hop() {
+    bool result = Weapon::hop();
+    soModuleAccesser* acc = getModuleAccesser();
+    soWorkManageModule& work = acc->getWorkManageModule();
+    wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*acc->getKineticModule().getEnergy(0));
+    setFlyAngle(energy, work);
+    wnSamusSuperMissile& missile = dynamic_cast<wnSamusSuperMissile&>(*acc->m_stageObject);
+    int life = missile.getData()->m_param->unk8;
+    if (work.getInt(0x10000006) > life) {
+        work.setInt(life, 0x10000006);
+    }
+    return result;
 }

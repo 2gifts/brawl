@@ -28,7 +28,7 @@ void ftLucasStatusUniqProcessAirLasso::initStatus(soModuleAccesser* moduleAccess
     motion.changeMotionRequest(&param);
     if (kind == 0x19 || kind == 0x1A) {
         // HYPOTHESIS: the second animation is the lasso reach/hang motion with rate 1.0f.
-        motion.add2ndAnimChr(frame, 1.0f, kind, false);
+        motion.add2ndAnimChr(frame, kind, false, 1.0f);
         motion.setWeight(1.0f);
         moduleAccesser->getKineticModule().changeKinetic(0x4F, moduleAccesser);
     } else {
