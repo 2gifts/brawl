@@ -9,6 +9,8 @@
 #define FT_ANIMCMD_UNIQ_DTOR_OUTLINE
 #define FT_SZEROSUIT_TRANSACTOR_3ARG
 #define FT_STATUS_NO_TAIL_FOR_WN
+#define FT_ROT_ENERGY_DTOR_OUTLINE
+#define SO_STATUS_KINETIC_SLOT // the articles: an empty slot between the status and kinetic builders (ft_module_accesser_builder.h)
 #define FT_POOL_ROOT_NONPOLYMORPHIC
 #define FT_NOINLINE_SKIP_SHARED_DEFS
 #define FT_SZEROSUIT_ARTICLE_POOLS
@@ -21,13 +23,14 @@
 #include <ft/ft_class_info_impl.h>
 #include <ft/szerosuit/ft_szerosuit.h>
 #include <ft/szerosuit/ft_szerosuit_extend_param_accesser.h>
+#include <ft/szerosuit/ft_szerosuit_data.h>
 #include <it/it_gen_archive.h>
 #include <so/so_value_accesser.h>
 #include <it/it_manager.h>
 #include <so/collision/so_collision_manager.h>
 #include <so/so_external_value_accesser.h>
 #include <mt/mt_prng.h>
-#include <ft/samus/ft_samus_change_succeed.h>
+#include <ft/ft_change_succeed_work.h>
 #include <ft/samus/ft_samus_status_uniq_process.h>
 
 #undef WN_ARTICLE_NATIVE_BUILDERS
@@ -70,7 +73,7 @@ ftSZerosuit::ftSZerosuit(s32 entryId,
     processes[14] = &g_ftSZerosuitStatusUniqProcessFinalSamus;
     m_moduleAccesser->getStatusModule().addRangeUniqProc(processes, 15);
     // HYPOTHESIS: the area data of the kind sits at +0x9C of the fighter data.
-    m_moduleAccesser->getAreaModule().addArea(reinterpret_cast<soSet<soAreaData>*>(reinterpret_cast<u8*>(m_data) + 0x9c));
+    m_moduleAccesser->getAreaModule().addArea(&static_cast<ftSZerosuitData*>(m_data)->additionalAreas);
 }
 
 // ---- the article holders --------------------------------------------------------------------------------------------
@@ -126,6 +129,7 @@ template soGeneralWorkBuilder<soGeneralWorkBuildConfig<7, 6, 1> >::~soGeneralWor
 template soModelModuleBuilder<soModelModuleBuildConfig<1, 0, soModelModuleImpl> >::~soModelModuleBuilder();
 template soArraySelectHolder<1, soArrayVector<acCmdInterpreterStackData, 1>, soSingletonHolder<soArrayNull<acCmdInterpreterStackData> > >::~soArraySelectHolder();
 soParamAccesser::~soParamAccesser() { }
+soKineticEnergyRotNormal::~soKineticEnergyRotNormal() { }
 template <class BC>
 soAnimCmdControlUnitBuilder<BC>::~soAnimCmdControlUnitBuilder() { }
 template soAnimCmdControlUnitBuilder<soAnimCmdControlUnitBuildConfig<0, 1, 1, 0, 0, 0, 0, 2> >::~soAnimCmdControlUnitBuilder();
@@ -327,7 +331,7 @@ void ftSZerosuit::onStart(int startKind) {
     soGenerateArticleManageModule& articles = m_moduleAccesser->getGenerateArticleManageModule();
     if (!articles.isExist(0)) {
         soArticle* article = articles.generate(0, 0, false);
-        if (!reinterpret_cast<ftSamusArticleNullView*>(article)->isNull()) {
+        if (!article->isNull()) {
             articles.entry(article);
         }
     }
@@ -470,7 +474,7 @@ void ftSZerosuit::notifyEventChangeSituation(SituationKind kind, SituationKind p
 void ftSZerosuit::setupChangeSucceedWork(void* work) {
     Fighter::setupChangeSucceedWork(work);
     soModuleAccesser* acc = m_moduleAccesser;
-    ftSamusChangeSucceedPoints hurt;
+    wnDummyFighterKineticSettingData hurt;
     hurt.point[0][0] = 0.0f;
     hurt.point[1][0] = soValueAccesser::getConstantFloat(acc, 0xbd6, 0);
     hurt.point[2][0] = 0.0f;
@@ -479,7 +483,7 @@ void ftSZerosuit::setupChangeSucceedWork(void* work) {
     hurt.point[1][1] = soValueAccesser::getConstantFloat(acc, 0xbd1, 0);
     hurt.point[2][1] = 0.0f;
     hurt.point[3][1] = 0.0f;
-    ftSamusChangeSucceedPoints hit;
+    wnDummyFighterKineticSettingData hit;
     hit.point[0][0] = 0.0f;
     hit.point[1][0] = soValueAccesser::getConstantFloat(acc, 0xbbc, 0);
     hit.point[2][0] = 0.0f;
@@ -489,8 +493,8 @@ void ftSZerosuit::setupChangeSucceedWork(void* work) {
     hit.point[2][1] = 0.0f;
     hit.point[3][1] = 0.0f;
     Vec2f* speed = &acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(0xFFFF));
-    soPostureModule& posture = acc->getPostureModule();
-    static_cast<ftChangeSucceedWork*>(work)->activateDummyFighter(&posture.getPos(), posture.getScale(), posture.getLr(), speed, &hit.point[0][0], &hurt.point[0][0], 0xf60003);
+    soPostureModule* const posture = &acc->getPostureModule();
+    static_cast<ftChangeSucceedWork*>(work)->activateDummyFighter(&posture->getPos(), posture->getScale(), posture->getLr(), speed, &hit.point[0][0], &hurt.point[0][0], 0xf60003);
 }
 
 // The fighter that takes over (the transformation partner) is started with the work of this one.
@@ -503,7 +507,8 @@ void ftSZerosuit::change(void* work, int mode) {
 // ---- the whip and the armor ------------------------------------------------------------------------------------------
 // The whip starts at the hip node with the facing direction, the attack state and a fresh collision log group.
 // HYPOTHESIS: status kinds 0x113 and 0x114 are the first whip attacks, and 0x34/0x36/0x38 the tilts that link the whip to the model.
-// MATCH-ONLY: inline helpers retain the native callback register lifetimes.
+// BYTES: the status checks and the activate call are inline helpers: written in place, the same instructions come out with
+// the saved registers in another order (values read inside an inline helper are allocated before the caller's locals).
 static inline int checkWhipSpecial(int statusKind) {
     int isSpecial = 1;
     if (statusKind != 0x113 && statusKind != 0x114) {
@@ -553,34 +558,34 @@ bool ftSZerosuit::activeArticle(wnSZerosuitWhip* weapon, soModuleAccesser* acc) 
 }
 
 // One of the armor pieces flies off: the work counter picks the piece and its parameters.
-// MATCH-ONLY: the inline helper retains the native callback register lifetimes.
-static inline void activateArmorCall(wnSZerosuitArmor* weapon, soModuleAccesser* acc, Fighter& fighter, int index, u32* entry) {
+// BYTES: the activate call is an inline helper, as for the whip (in place: same instructions, other saved registers, 99.10%).
+static inline void activateArmorCall(wnSZerosuitArmor* weapon, soModuleAccesser* acc, Fighter& fighter, int index, const ftSZerosuitArmorPiece* piece) {
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = fighter.m_taskId;
-    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), index, resources.getResourceIdAccesser()->getTexResId(), entry[0], entry[1], fighter.getOwner()->getTeam());
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), index, resources.getResourceIdAccesser()->getTexResId(), piece->node, piece->targetNode, fighter.getOwner()->getTeam());
 }
 bool ftSZerosuit::activeArticle1(wnSZerosuitArmor* weapon, soModuleAccesser* acc) {
     int index;
-    u32* entry;
-    ftData* data;
+    const ftSZerosuitArmorPiece* piece;
+    ftSZerosuitData* data;
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
-    data = g_ftCommonDataAccesser.getData(Fighter_SZeroSuit);
+    data = static_cast<ftSZerosuitData*>(g_ftCommonDataAccesser.getData(Fighter_SZeroSuit));
     Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x36, false);
     acc->getPostureModule().getLr();
     index = acc->getWorkManageModule().getInt(0x10000040);
-    entry = reinterpret_cast<u32*>(*reinterpret_cast<u8**>(reinterpret_cast<u8*>(data) + 0xa4) + index * 16);
-    activateArmorCall(weapon, acc, fighter, index, entry);
+    piece = &data->armorPieces[index];
+    activateArmorCall(weapon, acc, fighter, index, piece);
     return true;
 }
 
 // The piece is thrown with a speed between the two limits of the kind and the next piece is selected.
 bool ftSZerosuit::shootArticle(wnSZerosuitArmor* weapon, soModuleAccesser* acc) {
     int index = acc->getWorkManageModule().getInt(0x10000040);
-    ftData* data = g_ftCommonDataAccesser.getData(Fighter_SZeroSuit);
-    u8* entry = *reinterpret_cast<u8**>(reinterpret_cast<u8*>(data) + 0xa4) + index * 16;
+    ftSZerosuitData* data = static_cast<ftSZerosuitData*>(g_ftCommonDataAccesser.getData(Fighter_SZeroSuit));
+    const ftSZerosuitArmorPiece* piece = &data->armorPieces[index];
     const float* range = static_cast<const float*>(data->extendParam[3]);
     float lr = acc->getPostureModule().getLr();
-    weapon->shoot(range[0] + (range[1] - range[0]) * randf(), *reinterpret_cast<float*>(entry + 8), lr, *reinterpret_cast<int*>(entry + 4));
+    weapon->shoot(range[0] + (range[1] - range[0]) * randf(), piece->angle, lr, piece->targetNode);
     acc->getWorkManageModule().setInt(index + 1, 0x10000040);
     return false;
 }

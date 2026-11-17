@@ -18,6 +18,7 @@ public:
     virtual bool activeArticle(soArticle* article, soModuleAccesser* acc);
     // Inlined into activeArticle (no standalone copy).
     bool activeArticle1(wnSamusCShot* shot, soModuleAccesser* acc, u32 etcResId);
+    virtual bool shootArticle(soArticle* article, soModuleAccesser* acc);
     virtual void processUpdate(soModuleAccesser* moduleAccesser);
     void processUpdateSpecialNTransact(soModuleAccesser* moduleAccesser);
 };

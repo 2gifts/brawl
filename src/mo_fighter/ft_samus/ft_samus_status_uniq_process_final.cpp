@@ -1,4 +1,5 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#include <ft/samus/ft_samus.h> // first: the fighter builder headers
 #include <ft/fighter.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_kinetic_energy.h>
@@ -19,7 +20,7 @@ void ftSamusStatusUniqProcessFinal::initStatus(soModuleAccesser* moduleAccesser)
     case ftSamusFinalStatus::Unk127:
     case ftSamusFinalStatus::Unk128:
         if (!work.isFlag(ftSamusWork::Final_Started)) {
-            Fighter* fighter = dynamic_cast<Fighter*>(&moduleAccesser->getStageObject());
+            ftSamus* fighter = dynamic_cast<ftSamus*>(&moduleAccesser->getStageObject());
             if (fighter) {
                 fighter->startFinal();
             }
@@ -33,9 +34,9 @@ void ftSamusStatusUniqProcessFinal::initStatus(soModuleAccesser* moduleAccesser)
             soGenerateArticleManageModule& articles = moduleAccesser->getGenerateArticleManageModule();
             if (articles.isGeneratable(5)) {
                 soArticle* article = articles.generate(5, 0, false);
-                if (!reinterpret_cast<ftSamusArticleNullView*>(article)->isNull()) {
+                if (!article->isNull()) {
                     articles.entry(article);
-                    work.setInt(reinterpret_cast<ftSamusArticleNullView*>(article)->getInstanceId(), ftSamusWork::Final_ArticleInstance);
+                    work.setInt(article->getArticleId(), ftSamusWork::Final_ArticleInstance);
                 }
             }
         }
@@ -203,7 +204,7 @@ void ftSamusStatusUniqProcessFinal::exitStatus(soModuleAccesser* moduleAccesser,
         break;
     }
     default: {
-        Fighter* fighter = dynamic_cast<Fighter*>(&moduleAccesser->getStageObject());
+        ftSamus* fighter = dynamic_cast<ftSamus*>(&moduleAccesser->getStageObject());
         if (fighter) {
             fighter->endFinal(true, true, false);
         }

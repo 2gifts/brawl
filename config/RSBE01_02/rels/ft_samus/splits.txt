@@ -77,7 +77,9 @@ mo_fighter/ft_samus/ft_szerosuit_status_uniq_process_special_lw_flip.cpp:
 mo_fighter/ft_samus/ft_szerosuit_status_uniq_process_special_lw_kick.cpp:
 	.text       start:0x0001A674 end:0x0001A960
 	.ctors      start:0x00000024 end:0x00000028
-	.rodata     start:0x00000078 end:0x000000C0
+	.rodata     start:0x00000078 end:0x00000088
+	.data       start:0x0000C758 end:0x0000C7D8
+	.bss        start:0x00000330 end:0x00000340
 
 mo_fighter/ft_samus/ft_szerosuit_status_uniq_process_final_samus.cpp:
 	.text       start:0x0001A960 end:0x0001AB4C
@@ -87,12 +89,16 @@ mo_fighter/ft_samus/ft_szerosuit_status_uniq_process_final_samus.cpp:
 
 mo_fighter/ft_samus/wn_s_zerosuit_whip.cpp:
 	.text       start:0x0001AB4C end:0x0001DDF8
-	.data       start:0x0000C858 end:0x0000D760
-	.bss        start:0x00000350 end:0x00000488
+	.rodata     start:0x00000088 end:0x000000A0
+	.data       start:0x0000C858 end:0x0000D0D0
+	.bss        start:0x00000350 end:0x00000410
 
 mo_fighter/ft_samus/wn_szerosuit_armor.cpp:
 	.text       start:0x0001DDF8 end:0x0002041C
 	.ctors      start:0x0000002C end:0x00000030
+	.rodata     start:0x000000A0 end:0x000000C0
+	.data       start:0x0000D0D0 end:0x0000D760
+	.bss        start:0x00000410 end:0x00000488
 
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x0002041C end:0x000204B8

@@ -116,7 +116,7 @@ void wnSamusCShot::setCharge(float charge) {
 
 // The shot spawns at the model origin, 8 units back along x for Samus's own shot (kind 3 in work int 0x10000007), then
 // enters the status for its charge level.
-void wnSamusCShot::toShoot(int charge, float lr) {
+void wnSamusCShot::toShoot(float lr, int charge) {
     float offsetX = m_moduleAccesser->getWorkManageModule().getInt(0x10000007) == 3 ? -8.0f : 0.0f;
     Vec3f offset(offsetX, 0.0f, 0.0f);
     Vec3f position = m_moduleAccesser->getModelModule().getNodeGlobalPosition(0, &offset, false, false);

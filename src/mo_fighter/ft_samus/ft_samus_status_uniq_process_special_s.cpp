@@ -118,7 +118,7 @@ void ftSamusStatusUniqProcessSpecialS::execFixPos(soModuleAccesser* moduleAccess
     }
     if (articles->isGeneratable(articleId)) {
         article = articles->generate(articleId, 0, false);
-        if (!reinterpret_cast<ftSamusArticleNullView*>(article)->isNull()) {
+        if (!article->isNull()) {
             articles->entry(article);
             articles->shoot(articleId, 0, true);
         }

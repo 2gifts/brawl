@@ -8,74 +8,32 @@
 #include <wn/wn_article_build_info.h>
 #include <wn/weapon.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
+#include <ft/samus/ft_samus_event_units.h>
+
+// The G beam: the full article (generic builder), because the fighter module keeps a weak copy of its destructor chain.
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/wn_module_accesser_builder.h>
+// The beam's status process list and two-entry interpreter stacks are sora_melee vectors.
+FT_DOL_ARRAY_VECTOR(soStatusUniqProcess*, 9);
+FT_DOL_ARRAY_VECTOR(acCmdInterpreterStackData, 2);
+#include <wn/samus/wn_samus_gbeam.h>
+#pragma dont_inline off
+
+// The articles' call-side views (their classes and destructors live in sora_melee).
+#include <wn/samus/wn_samus_cshot.h>
+#include <wn/samus/wn_samus_bomb.h>
+#include <wn/samus/wn_samus_missile.h>
+#include <wn/samus/wn_samus_laser.h>
+#include <wn/samus/wn_samus_laser2.h>
+#include <wn/samus/wn_samus_supermissile.h>
+#pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
 
 class Vec3f;
-struct wnSamusCShotData;
-struct wnSamusBombData;
-struct wnSamusMissileData;
-struct wnSamusLaserData;
-struct wnSamusLaser2Data;
 struct wnSamusGunData;
-struct wnSamusSuperMissileData;
-struct wnSamusGBeamData;
 
-// The charge shot of Samus (sora_melee). Opaque shell: the class is a weapon builder in sora_melee that cannot coexist with this unit.
-class wnSamusCShot : public Weapon {
-    u8 m_unreconstructed[0x1828 - sizeof(Weapon)];
-public:
-    wnSamusCShot(s32 articleId, const wnArticleBuildInfo& info, const wnSamusCShotData* data);
-    virtual ~wnSamusCShot();
-    void activate(int founderTaskId, int etcResourceId, int team, int kind);
-    void setCharge(float ratio);
-    void toShoot(int charge, float lr);
-};
-static_assert(sizeof(wnSamusCShot) == 0x1828, "wnSamusCShot layout is wrong!");
-
-// The morph ball bomb (sora_melee). Opaque shell: the class is a weapon builder in sora_melee that cannot coexist with this unit.
-class wnSamusBomb : public Weapon {
-    u8 m_unreconstructed[0x1A98 - sizeof(Weapon)];
-public:
-    wnSamusBomb(s32 articleId, const wnArticleBuildInfo& info, const wnSamusBombData* data);
-    virtual ~wnSamusBomb();
-    void activate(int founderTaskId, int etcResourceId, int team);
-    void toShoot(float lr, float x, float y, float z);
-};
-static_assert(sizeof(wnSamusBomb) == 0x1A98, "wnSamusBomb layout is wrong!");
-
-// The missile (sora_melee). Opaque shell: the class is a weapon builder in sora_melee that cannot coexist with this unit.
-class wnSamusMissile : public Weapon {
-    u8 m_unreconstructed[0x1924 - sizeof(Weapon)];
-public:
-    wnSamusMissile(s32 articleId, const wnArticleBuildInfo& info, const wnSamusMissileData* data);
-    virtual ~wnSamusMissile();
-    void activate(int founderTaskId, int etcResourceId, int team);
-    void toShoot(float lr, float speed);
-};
-static_assert(sizeof(wnSamusMissile) == 0x1924, "wnSamusMissile layout is wrong!");
-
-// The laser (sora_melee). Opaque shell: the class is a weapon builder in sora_melee that cannot coexist with this unit.
-class wnSamusLaser : public Weapon {
-    u8 m_unreconstructed[0x18F4 - sizeof(Weapon)];
-public:
-    wnSamusLaser(s32 articleId, const wnArticleBuildInfo& info, const wnSamusLaserData* data);
-    virtual ~wnSamusLaser();
-    void activate(int founderTaskId, int etcResourceId, int team);
-    void toShoot(float lr);
-};
-static_assert(sizeof(wnSamusLaser) == 0x18F4, "wnSamusLaser layout is wrong!");
-
-// The second laser (sora_melee). Opaque shell: the class is a weapon builder in sora_melee that cannot coexist with this unit.
-class wnSamusLaser2 : public Weapon {
-    u8 m_unreconstructed[0x17C8 - sizeof(Weapon)];
-public:
-    wnSamusLaser2(s32 articleId, const wnArticleBuildInfo& info, const wnSamusLaser2Data* data);
-    virtual ~wnSamusLaser2();
-    void activate(int founderTaskId, int etcResourceId, int team, float unkFloat);
-    void toShoot(float lr);
-};
-static_assert(sizeof(wnSamusLaser2) == 0x17C8, "wnSamusLaser2 layout is wrong!");
-
-// The gun (sora_melee). Opaque shell: the class is a weapon builder in sora_melee that cannot coexist with this unit.
+// The gun (sora_melee). Opaque shell: wn/samus/wn_samus_gun.h has no call-side view yet.
 class wnSamusGun : public Weapon {
     u8 m_unreconstructed[0x1834 - sizeof(Weapon)];
 public:
@@ -84,27 +42,6 @@ public:
     void activate(int founderTaskId, int unk1, int unk2, int unk3, int unk4, int team);
 };
 static_assert(sizeof(wnSamusGun) == 0x1834, "wnSamusGun layout is wrong!");
-
-// The super missile (sora_melee). Opaque shell: the class is a weapon builder in sora_melee that cannot coexist with this unit.
-class wnSamusSuperMissile : public Weapon {
-    u8 m_unreconstructed[0x1924 - sizeof(Weapon)];
-public:
-    wnSamusSuperMissile(s32 articleId, const wnArticleBuildInfo& info, const wnSamusSuperMissileData* data);
-    virtual ~wnSamusSuperMissile();
-    void activate(int founderTaskId, int etcResourceId, int team);
-    void toShoot(float lr, float speed);
-};
-static_assert(sizeof(wnSamusSuperMissile) == 0x1924, "wnSamusSuperMissile layout is wrong!");
-
-// The G beam (sora_melee). Opaque shell: the class is a weapon builder in sora_melee that cannot coexist with this unit.
-class wnSamusGBeam : public Weapon {
-    u8 m_unreconstructed[0x178C - sizeof(Weapon)];
-public:
-    wnSamusGBeam(s32 articleId, const wnArticleBuildInfo& info, const wnSamusGBeamData* data);
-    virtual ~wnSamusGBeam();
-    void activate(int founderTaskId, int etcResourceId, int team, float lr, const Vec3f* pos, bool attack);
-};
-static_assert(sizeof(wnSamusGBeam) == 0x178C, "wnSamusGBeam layout is wrong!");
 
 typedef wnArticleHierarchy<wnSamusGBeam, 1, soInstancePoolRoot> ftSamusGBeamPool;
 typedef wnArticleHierarchy<wnSamusSuperMissile, 2, ftSamusGBeamPool> ftSamusSuperMissilePool;

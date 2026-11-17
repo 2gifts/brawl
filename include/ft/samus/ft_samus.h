@@ -57,7 +57,6 @@ class wnSamusSuperMissile;
 class wnSamusGBeam;
 
 class ftSamus : public ftFighterBuilder<ftSamusBuildConfig> {
-    u8 unkTail[0x25BF8 - sizeof(ftFighterBuilder<ftSamusBuildConfig>)];
     soArrayContractibleTable<const soStatusData> m_statusDataTable;
     ftData* m_data;
 public:
