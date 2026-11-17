@@ -11,8 +11,6 @@
 
 #include <mu/mu_title_sunset.h>
 
-// gfSceneRoot: main.dol has the functions, the shared header does not.
-extern "C" void fn_8000E708(gfSceneRoot* root);
 // nw4r::g3d::ResAnmScn
 extern "C" void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(nw4r::g3d::ResAnmScn* self, nw4r::g3d::ResAnmScn anmScn);
 extern "C" void Release__Q34nw4r3g3d9ResAnmScnFv(nw4r::g3d::ResAnmScn* self);
@@ -216,7 +214,7 @@ muTitleSunsetTask::~muTitleSunsetTask() {
     // HYPOTHESIS: the scene has four clear colors, and the title screen changed them
     u8* scene = *reinterpret_cast<u8**>(reinterpret_cast<u8*>(g_gfSceneRoot) + 0x40);
     GXColor color = {0xFF, 0xFF, 0xFF, 0xFF};
-    fn_8000E708(g_gfSceneRoot);
+    g_gfSceneRoot->resetScene();
     GXColor* colors = *reinterpret_cast<GXColor**>(scene + 0x2880);
     colors[0] = color;
     colors[1] = color;

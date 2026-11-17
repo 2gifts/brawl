@@ -1399,7 +1399,6 @@ config.libs = [
             Object(NonMatching, "sora/gm/gm_common.cpp"),
             Object(NonMatching, "sora/snd/snd_sound_handle.cpp"),
             Object(NonMatching, "sora/gf/gf_3d_scene.cpp"),
-            Object(NonMatching, "sora/gf/gf_3d_scene_b.cpp"),
             Object(NonMatching, "sora/gf/gf_area.cpp"),
             Object(NonMatching, "sora/gf/gf_area_manager.cpp"),
             Object(NonMatching, "sora/gf/gf_archive.cpp"),

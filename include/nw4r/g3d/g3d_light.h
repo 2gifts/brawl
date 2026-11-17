@@ -41,6 +41,7 @@ struct LightSetData {
 class LightSet {
 public:
     LightSet(LightSetting* pSetting, LightSetData* pData) : mpSetting(pSetting), mpLightSetData(pData) {}
+    ~LightSet() {}
 
     bool IsValid() const { return mpSetting != NULL && mpLightSetData != NULL; }
 
@@ -67,7 +68,17 @@ public:
     LightObj* GetLightObjArray() const { return mpLightObjArray; }
     AmbLightObj* GetAmbLightObjArray() const { return mpAmbLightObjArray; }
 
-    LightSet GetLightSet(int idx);
+    // BYTES: with the destructor of the nw4r library's LightSet this member stays out of line, as in the game (one weak
+    // copy right behind gfSceneRoot::setAnmScnResToScnRoot3D). The game has no LightSet destructor symbol though, so the
+    // weak ~LightSet that follows is an extra function: HYPOTHESIS: its role is played by the weak 64 byte function
+    // that the symbols call nw4r::ut::Color::~Color (0x8000C998).
+    LightSet GetLightSet(int idx) {
+        if (idx < mNumLightSet && idx >= 0) {
+            return LightSet(this, &mpLightSetDataArray[idx]);
+        }
+
+        return LightSet(this, NULL);
+    }
 
 private:
     u16 mNumLight;                     // 0x0
@@ -76,18 +87,6 @@ private:
     AmbLightObj* mpAmbLightObjArray;   // 0x8
     LightSetData* mpLightSetDataArray; // 0xC
 };
-
-// BYTES: the game calls this out of line (an exact weak copy sits behind gfSceneRoot::setAnmScnResToScnRoot3D) and the
-// game's LightSet has no destructor symbol, so the call is kept with dont_inline instead of a non-trivial destructor.
-#pragma dont_inline on
-inline LightSet LightSetting::GetLightSet(int idx) {
-    if (idx < mNumLightSet && idx >= 0) {
-        return LightSet(this, &mpLightSetDataArray[idx]);
-    }
-
-    return LightSet(this, NULL);
-}
-#pragma dont_inline reset
 
 } // namespace g3d
 } // namespace nw4r
