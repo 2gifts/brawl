@@ -1458,7 +1458,9 @@ public:
     // HYPOTHESIS: unless the long notifyEventAnimCmd merges the two animcmd slots (FT_FIGHTER_ANIMCMD_LONG) the vtable already has
     // this slot's room, so only that variant models it as a real virtual (it replaces the old placeholder slot). The former
     // FT_FIGHTER_GET_PARTNER_VIRTUAL opt-in was only ever set together with it.
-#ifdef FT_FIGHTER_ANIMCMD_LONG
+#if defined(FT_FIGHTER_ANIMCMD_LONG) || !defined(FT_MODULE_BUILDER)
+    // The real vtable has this slot after postCreate. The fighter RELs (FT_MODULE_BUILDER) get the same total slot count from
+    // their placeholder animcmd slot, so they keep the non-virtual form.
     virtual Fighter* getPartner();
 #else
     Fighter* getPartner();
