@@ -78,17 +78,17 @@ void grHalberdLaser::updateYakumono(float deltaFrame) {
                 setAttackFinal();
             } else if (elapsed > 10.0f) {
                 setAttack();
-                float dx = m_posTgtWork->m_x - m_mtxWork->m[0][3];
-                float dy = m_posTgtWork->m_y - m_mtxWork->m[1][3];
-                float dz = m_posTgtWork->m_z - m_mtxWork->m[2][3];
-                float length = grHalberdLength(dz, dx, dy);
-                Vec3f end;
-                end.m_x = length * 0.0f;
-                end.m_z = length * 1.0f;
-                end.m_y = end.m_x;
-                m_mtxWork->mulPos(&end, &end);
-                Vec2f zoneMin(end.m_x - 20.0f, end.m_y + 20.0f);
-                Vec2f zoneMax(end.m_x + 20.0f, end.m_y - 20.0f);
+                Vec3f pos(m_mtxWork->m[0][3], m_mtxWork->m[1][3], m_mtxWork->m[2][3]);
+                pos = *m_posTgtWork - pos;
+                float length = grHalberdLength(pos.m_z, pos.m_x, pos.m_y);
+                float side = 0.0f;
+                float front = 1.0f;
+                pos.m_x = side * length;
+                pos.m_y = side * length;
+                pos.m_z = front * length;
+                m_mtxWork->mulPos(&pos, &pos);
+                Vec2f zoneMin(pos.m_x - 20.0f, pos.m_y + 20.0f);
+                Vec2f zoneMax(pos.m_x + 20.0f, pos.m_y - 20.0f);
                 m_dangerZone = g_aiMgr->setDangerZone(&zoneMin, &zoneMax, m_dangerZone, 0, 0);
             }
         }
