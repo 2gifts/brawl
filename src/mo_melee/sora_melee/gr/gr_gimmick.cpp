@@ -2,6 +2,7 @@
 #include <gr/gr_gimmick.h>
 #include <gr/gr_gimmick_motion_path.h>
 #include <gf/gf_model.h>
+#include <ec/ec_mgr.h>
 #include <memory.h>
 #include <st/stage.h>
 #include <string.h>
@@ -10,6 +11,20 @@
 #include <nw4r/ut/ut_Color.h>
 
 extern "C" nw4r::g3d::ResMatChan GetResMatChan__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(nw4r::g3d::ScnMdl::CopiedMatAccess* access, bool sync);
+
+// HYPOTHESIS: the runtime type tag of nw4r's ScnMdl in main (the same cast the stage hit objects do).
+extern int lbl_8040ABD8[];
+
+static inline nw4r::g3d::ScnMdl* grDynamicCastScnMdl(nw4r::g3d::ScnMdl* obj) {
+    bool isMdl = false;
+    if (obj != NULL) {
+        int* typeObj = lbl_8040ABD8;
+        if (obj->IsDerivedFrom((int*)&typeObj)) {
+            isMdl = true;
+        }
+    }
+    return isMdl ? obj : NULL;
+}
 
 bool grVisibleProduction::isFinished() {
     return m_0x4 == VisibleProduction_Finished;
@@ -116,7 +131,7 @@ void grGimmick::setMotionRatio(float ratio) {
 }
 
 void grGimmick::setTransparencyFlag(char flag) {
-    m_transparencyFlag = flag;
+    reinterpret_cast<char&>(m_transparencyFlag) = flag; // BYTES: the raw byte is stored, not a normalized bool
 }
 
 void grGimmick::dbDispInvalidatedByCameraClippingSphere() { }
@@ -128,7 +143,7 @@ void grGimmick::setTransparency(u32 flag, u32 settings) {
     if (settings & 1) {
         setEnableCollisionStatusByClipping(flag);
     }
-    m_transparencyFlag = flag;
+    reinterpret_cast<char&>(m_transparencyFlag) = flag; // BYTES: the raw byte is stored, not a normalized bool
 }
 
 void grGimmick::setPos(Matrix* matrix) {
@@ -507,5 +522,94 @@ void grGimmick::changeShapeAnim(u32 index, u32 modelAnimIndex) {
         }
         m_modelAnims[modelAnimIndex]->bindShapeAnim(m_sceneModels[modelAnimIndex]);
         m_modelAnims[modelAnimIndex]->setFrame(0.0f);
+    }
+}
+
+// The base colour of a channel of a material of one scene model.
+
+static inline bool grFindResMat(nw4r::g3d::ScnMdl* scnMdl, const char* name, nw4r::g3d::ResMat* out) {
+    bool found;
+    if (scnMdl != NULL) {
+        nw4r::g3d::ResMdl resMdl = scnMdl->m_resMdl;
+        *out = resMdl.GetResMat(name);
+        found = true;
+    } else {
+        found = false;
+    }
+    return found;
+}
+
+u32 grGimmick::getMaterialColor(int* channel, const char* name, u32* sceneModelIndex) {
+    GXColor color = {0, 0, 0, 0};
+    nw4r::g3d::ScnMdl* scnMdl = grDynamicCastScnMdl(m_sceneModels[*sceneModelIndex]);
+    nw4r::g3d::ResMat resMat;
+    if (scnMdl != NULL) {
+        {
+            if (grFindResMat(scnMdl, name, &resMat)) {
+                nw4r::g3d::ScnMdl::CopiedMatAccess access(scnMdl, resMat.ref().m_id);
+                nw4r::g3d::ResMatChan resMatChan = GetResMatChan__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(&access, false);
+                resMatChan.GXGetChanMatColor((GXChannelID)*channel, &color);
+                resMat.DCStore(false);
+                return *reinterpret_cast<u32*>(&color);
+            }
+        }
+    }
+    return *reinterpret_cast<u32*>(&color);
+}
+
+u32 grGimmick::getMaterialTevColor(int* reg, const char* name, u32* sceneModelIndex) {
+    GXColor color = {0, 0, 0, 0};
+    nw4r::g3d::ScnMdl* scnMdl = grDynamicCastScnMdl(m_sceneModels[*sceneModelIndex]);
+    nw4r::g3d::ResMat resMat;
+    if (scnMdl != NULL) {
+        {
+            if (grFindResMat(scnMdl, name, &resMat)) {
+                nw4r::g3d::ScnMdl::CopiedMatAccess access(scnMdl, resMat.ref().m_id);
+                nw4r::g3d::ResMatTevColor tevColor = access.GetResMatTevColor(false);
+                tevColor.GXGetTevColor((GXTevRegID)*reg, &color);
+                tevColor.DCStore(false);
+                resMat.DCStore(false);
+                return *reinterpret_cast<u32*>(&color);
+            }
+        }
+    }
+    return *reinterpret_cast<u32*>(&color);
+}
+
+void grGimmick::setMaterialColor(u32* channel, const char* name, u32* color, u32* sceneModelIndex) {
+    nw4r::g3d::ScnMdl* scnMdl = grDynamicCastScnMdl(m_sceneModels[*sceneModelIndex]);
+    nw4r::g3d::ResMat resMat;
+    if (scnMdl != NULL) {
+        {
+            if (grFindResMat(scnMdl, name, &resMat)) {
+                nw4r::g3d::ScnMdl::CopiedMatAccess access(scnMdl, resMat.ref().m_id);
+                nw4r::g3d::ResMatChan resMatChan = GetResMatChan__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(&access, false);
+                resMatChan.GXSetChanMatColor((GXChannelID)*channel, *reinterpret_cast<GXColor*>(color));
+                resMat.DCStore(false);
+            }
+        }
+    }
+}
+
+void grGimmick::setMaterialTevColor(u32* reg, const char* name, u32* color, u32* sceneModelIndex) {
+    nw4r::g3d::ScnMdl* scnMdl = grDynamicCastScnMdl(m_sceneModels[*sceneModelIndex]);
+    nw4r::g3d::ResMat resMat;
+    if (scnMdl != NULL) {
+        {
+            if (grFindResMat(scnMdl, name, &resMat)) {
+                nw4r::g3d::ScnMdl::CopiedMatAccess access(scnMdl, resMat.ref().m_id);
+                nw4r::g3d::ResMatTevColor tevColor = access.GetResMatTevColor(false);
+                tevColor.GXSetTevColor((GXTevRegID)*reg, *reinterpret_cast<GXColor*>(color));
+                tevColor.DCStore(false);
+                resMat.DCStore(false);
+            }
+        }
+    }
+}
+
+void grGimmick::setPosGimmickEffect(u32 index, Vec3f* pos) {
+    if (m_effects[index].m_id != 0) {
+        Vec3f effectPos = *pos;
+        g_ecMgr->setPos(m_effects[index].m_handleId, &effectPos);
     }
 }
