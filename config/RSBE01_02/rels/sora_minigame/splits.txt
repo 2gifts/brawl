@@ -11,6 +11,33 @@ global_destructor_chain.c:
 	.dtors      start:0x00000000 end:0x00000008
 	.bss        start:0x00000000 end:0x00000004
 
+mo_minigame/sora_minigame/cs_element.cpp:
+	.text       start:0x00000070 end:0x0000018C
+
+mo_minigame/sora_minigame/cs_module.cpp:
+	.text       start:0x0000018C end:0x00000930
+
+mo_minigame/sora_minigame/cs_world.cpp:
+	.text       start:0x00000930 end:0x00002CF4
+
+mo_minigame/sora_minigame/cs_article.cpp:
+	.text       start:0x00002CF4 end:0x00002EF8
+
+mo_minigame/sora_minigame/cs_figure.cpp:
+	.text       start:0x00002EF8 end:0x00006DF4
+
+mo_minigame/sora_minigame/coinshooter.cpp:
+	.text       start:0x00006DF4 end:0x00009130
+
+mo_minigame/sora_minigame/cs_sample_module.cpp:
+	.text       start:0x0000916C end:0x0000B328
+
+mo_minigame/sora_minigame/cs_coin.cpp:
+	.text       start:0x0000B358 end:0x0000D6B4
+
+mo_minigame/sora_minigame/cs_motion_path.cpp:
+	.text       start:0x0000D6B4 end:0x0000DE60
+
 mo_menu/mo_menu.cpp:
 	.text       start:0x0000DE60 end:0x0000DEFC
 	.data       start:0x00000BA8 end:0x00000BB4
