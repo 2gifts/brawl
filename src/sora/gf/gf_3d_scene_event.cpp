@@ -4,7 +4,7 @@
 gfSceneRootEventList::~gfSceneRootEventList() { }
 
 void gfSceneRootEventList::notify(s32 p1) {
-    gfSceneRootEvent* node = head;
+    gfSceneRootEvent* node = static_cast<gfSceneRootEvent*>(getHead());
     while (node) {
         node->notify(p1);
         node = static_cast<gfSceneRootEvent*>(node->m_next);

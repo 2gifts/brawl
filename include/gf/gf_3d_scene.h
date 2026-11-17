@@ -6,6 +6,7 @@
 #include <StaticAssert.h>
 #include <stddef.h>
 #include <gf/gf_callback.h>
+#include <gf/gf_3d_scene_event.h>
 #include <gf/gf_task.h>
 #include <nw4r/g3d/g3d_anmscn.h>
 #include <nw4r/g3d/g3d_light.h>
@@ -15,7 +16,6 @@
 #include <types.h>
 #include <ut/ut_list.h>
 
-class gfSceneRootEvent;
 
 namespace nw4r {
 namespace g3d {
@@ -68,6 +68,7 @@ public:
             s32 m_reverseDirection : 8;
             u32 unk64_8 : 24;
         };
+        TransformFlag() { m_reverseDirection = 0; }
     } m_transformFlag;
 
     // HYPOTHESIS: per-layer record (layout from the layer functions; the name is not from the map).
@@ -122,18 +123,10 @@ public:
     };
     static_assert(sizeof(LightSlot) == 0xC, "LightSlot is wrong size!");
 
-    // HYPOTHESIS: stand-in with the layout of nw4r::g3d::LightObj (flag word + GXLightObj, 0x44 bytes); the shadow
-    // LightObj in include/nw4r/include is empty. The two 0x44-byte arrays of the class are built with the weak
-    // LightObj constructor/destructor (fn_8000CEDC / fn_8000CEE8), so a draft has to give them the real type.
-    struct LightObjData {
-        u32 m_flag;
-        u8 m_gxLightObj[0x40];
-    };
-    static_assert(sizeof(LightObjData) == 0x44, "LightObjData is wrong size!");
-
     // HYPOTHESIS: two bytes per layer at 0x4F8 (layer index i at 0x4F8 + i * 2).
     struct LayerEfb {
-        u8 m_enable;  // != 0: renderXlu calls gfCopyEFBMgr::getEFB(m_efbIndex) after the layer (0x4FE and 0x506 start as 1)
+        u8 m_enable : 8; // BYTES: bitfield, the constructor writes it with read-modify-write
+                         // != 0: renderXlu calls gfCopyEFBMgr::getEFB(m_efbIndex) after the layer (0x4FE and 0x506 start as 1)
         s8 m_efbIndex; // -1 = none (setUseCopyFB writes the enable byte of layers 4 and 7)
     };
 
@@ -161,7 +154,7 @@ public:
     u8 unkE0;                        // 0xE0
     u8 m_zoneLightObjBase;           // 0xE1, first LightObj index of the zone-light blend (0xC when the scene anim has 0x16 light sets)
     u8 unkE2[2];                     // 0xE2
-    LightObjData m_lightObjs[10];    // 0xE4, default-initialised in the constructor (zero color, pos (0,10,0), dir (-1,-1,-1))
+    nw4r::g3d::LightObj m_lightObjs[10]; // 0xE4, default-initialised in the constructor (zero color, pos (0,10,0), dir (-1,-1,-1))
     Layer unk38C[9];                 // 0x38C, indexed by LayerType
     u8 unk464_7 : 1;                 // 0x80
     u8 m_shadowEnabled : 1;          // 0x40, renderXlu calls renderShadow
@@ -176,13 +169,13 @@ public:
     u8 unk465_3 : 1;                 // 0x08, HYPOTHESIS: cleared while a Final Smash camera animation plays (ftCaptainFinalSubRoutine); processAnim skips the main animation while set
     u8 unk465_0 : 3;
     u8 unk466[2];
-    utList unk468;                   // 0x468, gfSceneRootEventList (notify is called on it by renderXlu/renderShadow)
+    gfSceneRootEventList unk468;     // 0x468 (notify is called on it by renderXlu/renderShadow)
     ShadowTexture* m_shadowTextures; // 0x474, array of ShadowInfo::m_numTextures entries; written outside this unit
     ShadowInfo* m_shadowInfo;        // 0x478
     float m_shadowPitch;             // 0x47C, degrees; initShadow places the shadow camera with sin/cos of these
     float m_shadowYaw;               // 0x480
     float m_shadowRoll;              // 0x484, camera twist of the shadow camera
-    LightObjData m_extraLight;       // 0x488, initialised like m_lightObjs; also pointed to by lbl_8059FF84
+    nw4r::g3d::LightObj m_extraLight; // 0x488, initialised like m_lightObjs; also pointed to by lbl_8059FF84
     gfCallBackList m_callBacks;      // 0x4CC, process() is called at the end of renderPre
     GXColor m_zoneColors[4];         // 0x4D0, colors of the lights of LightSet 0x14 (zero/0xFF alpha when missing)
     u8 unk4E0[0x18];                 // 0x4E0

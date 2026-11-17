@@ -16,6 +16,10 @@ namespace nw4r {
             char _spacer2[0x30];
             unsigned short m_animLength;
             unsigned short m_specLightNum; // 0x32, HYPOTHESIS: the count stScnObjCallBack sizes its specular sets with
+            u32 unk34;                     // policy
+            unsigned short m_numLightSet;  // 0x38, ResAnmScnInfoData::numResLightSetData (light set max ref number)
+            unsigned short m_numAmbLight;  // 0x3A
+            unsigned short m_numLight;     // 0x3C, ResAnmScnInfoData::numResAnmLightData (diffuse light max ref number)
         };
         class ResAnmScn : public ResCommon<ResAnmScnData> {
         public:
@@ -47,25 +51,30 @@ namespace nw4r {
 
             virtual float GetFrame();
 
-            virtual void UpdateFrame();
-
             virtual void SetUpdateRate(float updateRate);
 
             virtual float GetUpdateRate();
 
-            virtual int Bind(int* unk1);
+            virtual void UpdateFrame();
 
-            virtual void Release();
-
-            virtual int* GetResult(int* unk1, int unk2);
-
-            virtual int Attach(int unk1, int* unk2); // TODO
-            virtual int* Detach(int unk1);           // TODO
-            virtual void DetachAll();
+            // Slots 0x30-0x60 follow the nw4r AnmScn/AnmScnRes layout (include/ogws/nw4r/g3d/g3d_anmscn.h).
+            virtual int Attach(int unk1, int* unk2); // 0x30
+            virtual int* Detach(int unk1);           // 0x34
+            virtual u32 GetNumLightSet() const;      // 0x38
+            virtual u32 GetNumAmbLight() const;      // 0x3C
+            virtual u32 GetNumDiffuseLight() const;  // 0x40
+            virtual u32 GetNumSpecularLight() const; // 0x44
+            virtual u32 GetNumFog() const;           // 0x48
+            virtual u32 GetNumCamera() const;        // 0x4C
+            virtual u32 GetLightSetMaxRefNumber() const { return m_res->m_numLightSet; } // 0x50
+            virtual u32 GetAmbLightMaxRefNumber() const;                                 // 0x54
+            virtual u32 GetDiffuseLightMaxRefNumber() const { return m_res->m_numLight; } // 0x58
 
             static AnmScnRes* Construct(MEMAllocator* allocator, u32* instanceSize, ResAnmScn scn, bool hasCache);
 
-            char _spacer[52];
+            char _spacer[0x1C];
+            ResAnmScn m_res; // 0x20
+            char _spacer3[0x14];
         };
     }
 }

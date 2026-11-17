@@ -1,16 +1,139 @@
+#include <cm/cm_camera_controller.h>
+#include <ef/ef_manager.h>
+#include <ef/ef_screen.h>
 #include <gf/gf_3d_scene.h>
+#include <gf/gf_3d_scene_event.h>
+#include <gf/gf_camera.h>
+#include <gf/gf_copyefb.h>
+#include <gf/gf_display.h>
+#include <gf/gf_draw.h>
 #include <gf/gf_heap_manager.h>
+#include <gf/gf_loupe.h>
+#include <gf/gf_memory_pool.h>
+#include <gm/gm_global.h>
+#include <mt/mt_matrix.h>
+#include <nw4r/g3d/g3d_camera.h>
+#include <nw4r/g3d/g3d_scngroup.h>
 #include <nw4r/g3d/g3d_scnroot.h>
+#include <nw4r/ut/ut_Color.h>
+#include <ph/ph_Interface.h>
 #include <sr/sr_common.h>
 #include <types.h>
-#include <gf/gf_display.h>
-#include <gf/gf_copyefb.h>
-#include <nw4r/g3d/g3d_camera.h>
-#include <nw4r/ut/ut_Color.h>
-#include <mt/mt_matrix.h>
 
-extern const float lbl_805A1364;
-#include <gf/gf_3d_scene_event.h>
+extern nw4r::g3d::LightObj* g_extraLight; // HYPOTHESIS: lbl_8059FF84, no reader in this unit
+
+// HYPOTHESIS: the pointer at 0x40 is the ScnRoot that the anim scene was added to.
+extern "C" void RemoveAnmScn__Q34nw4r3g3d7ScnRootFv(nw4r::g3d::ScnRoot* scnRoot);
+extern "C" nw4r::g3d::ScnGroup* fn_801AB6CC(MEMAllocator* allocator, u32* size, u32 capacity);
+
+// Defined in gf_light.cpp (the loupe state).
+extern unsigned char lbl_80494E00[0xe8];
+
+// HYPOTHESIS: the loupe "restore list" in gf_light.cpp: the ScnObjs createLoupeTexture detaches from their layers,
+// renderXlu puts them back at the end of the frame.
+struct gfLoupeRestoreEntry {
+    u8 m_layer;
+    nw4r::g3d::ScnObj* m_scnObj;
+};
+struct gfLoupeRestoreList {
+    u8 m_count;
+    gfLoupeRestoreEntry m_entries[0x1D];
+};
+
+// Defined in the second part of this unit.
+static void ClearDepthBuffer(int width, int height);
+
+void G3DState_Invalidate(u32 flags);
+
+// HYPOTHESIS: the callees are unnamed in the symbols; the sora map calls them efManager::render(int layer) and
+// efScreen::render(int layer).
+extern "C" void fn_8005B838(efManager* effectManager, int layer);
+extern "C" void fn_8005DC24(efScreen* screen, int layer);
+
+
+void gfSceneRoot::create() {
+    g_gfSceneRoot = new (Heaps::System) gfSceneRoot;
+}
+
+// Resets a light to "no color, at (0, 10, 0), pointing along (-1, -1, -1), disabled".
+static inline void InitDefaultLight(nw4r::g3d::LightObj* light) {
+    light->Clear();
+    nw4r::ut::Color color(0, 0, 0, 0);
+    light->InitLightColor(color);
+    Vec3f pos(0.0f, 10.0f, 0.0f);
+    light->InitLightPos(pos.m_x, pos.m_y, pos.m_z);
+    Vec3f dir(-1.0f, -1.0f, -1.0f);
+    light->InitLightDir(dir.m_x, dir.m_y, dir.m_z);
+    light->Disable();
+}
+
+gfSceneRoot::gfSceneRoot()
+    : gfTask("gfScnRoot", Category_None, 13, 1, true), unk48(NULL), unk4C(NULL), unk50(0), m_anmScnRes(NULL), unk58(0),
+      unk5C(NULL), unk60(NULL), m_transformFlag(), m_shadowEnabled(0), unk464_5(0), m_shadowRendering(0),
+      m_skipAnim(0), unk464_0(1), unk465_7(0), unk465_6(0), unk465_3(0), unk468(), m_shadowTextures(NULL), m_shadowInfo(NULL),
+      m_shadowPitch(90.0f), m_shadowYaw(0.0f), m_shadowRoll(0.0f) {
+    // BYTES: unkC is written as the top byte of a word (read-modify-write with rlwimi).
+    struct LayerWord {
+        u32 m_unkC : 8;
+        u32 m_rest : 24;
+    };
+    reinterpret_cast<LayerWord*>(&unk38C[7].unkC)->m_unkC = 5;
+    reinterpret_cast<LayerWord*>(&unk38C[8].unkC)->m_unkC = 5;
+    InitDefaultLight(&m_extraLight);
+    g_extraLight = &m_extraLight;
+    MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::System);
+    u32 size;
+    unk40 = nw4r::g3d::ScnRoot::Construct(allocator, &size, 0x138, 0x140, 0x20, 0x20);
+    unk44 = nw4r::g3d::ScnRoot::Construct(allocator, &size, 0x138, 0x140, 0x20, 0x20);
+    unk48 = nw4r::g3d::ScnRoot::Construct(allocator, &size, 8, 8, 0x20, 0x20);
+    gfLoupe::initialize();
+    for (int i = 0; i < 7; i++) {
+        unk38C[i].unk0 = unk40;
+    }
+    unk38C[7].unk0 = unk44;
+    unk38C[8].unk0 = unk44;
+    unk38C[0].m_drawEffect = 1;
+    unk38C[4].m_drawEffect = 1;
+    unk38C[7].m_drawEffect = 1;
+    for (u32 i = 0; i < 10; i++) {
+        nw4r::g3d::LightObj* light = &m_lightObjs[i];
+        InitDefaultLight(light);
+    }
+    nw4r::g3d::LightObj* lights = unk40->GetLightSetting().GetLightObjArray();
+    for (u32 i = 0; i < 10; i++) {
+        LightSlot* slot = &m_lightSlots[i];
+        slot->m_light = NULL;
+        slot->m_used = 0;
+        slot->m_released = 1;
+        slot->m_unk7 = 0x14;
+        slot->m_unk8 = 0x14;
+        slot->m_unkA = 0;
+        slot->m_unk9 = 0;
+        slot->m_unk5 = 0x16 + i;
+        slot->m_unk6 = 0x12 + i;
+        nw4r::g3d::LightObj* light = &lights[static_cast<u8>(0x12 + i)];
+        InitDefaultLight(light);
+    }
+    for (int i = 0; i < 9; i++) {
+        m_layerEfb[i].m_enable = 0;
+        m_layerEfb[i].m_efbIndex = -1;
+    }
+    m_layerEfb[3].m_enable = 1;
+    m_layerEfb[3].m_efbIndex = 1;
+    m_layerEfb[7].m_enable = 1;
+    m_layerEfb[7].m_efbIndex = 0;
+}
+
+gfSceneRoot::~gfSceneRoot() {
+    removeResAnmScn();
+    removeInfoCamResAnm();
+    unk40->Destroy();
+    unk44->Destroy();
+    unk48->Destroy();
+    // HYPOTHESIS: the original destroys the loupe/shadow scene twice (the second call is in the binary).
+    unk48->Destroy();
+    g_gfSceneRoot = NULL;
+}
 
 void gfSceneRoot::addEventNotify(gfSceneRootEvent* event) {
     unk468.addTail(event);
@@ -24,26 +147,16 @@ void gfSceneRoot::setUseCameraAnim(bool useCameraAnim) {
     unk464_0 = !useCameraAnim;
 }
 
-void gfSceneRoot::setClearDepthBufferState(LayerType layer, bool clear) {
-    unk38C[layer].unkD_6 = clear;
-}
-
-void gfSceneRoot::setResAnmScn(nw4r::g3d::ResAnmScn* anmScn, int heap) {
-    if (anmScn->IsValid()) {
-        removeResAnmScn();
-        unk4C = anmScn->ptr();
-        u32 size;
-        MEMAllocator* allocator = gfHeapManager::getMEMAllocator(static_cast<Heaps::HeapType>(heap));
-        m_anmScnRes = nw4r::g3d::AnmScnRes::Construct(allocator, &size, *anmScn, false);
-        setAnmScnResToScnRoot3D(m_anmScnRes);
-    } else {
-        removeResAnmScn();
-        unk465_6 = false;
+bool gfSceneRoot::add(LayerType layer, nw4r::g3d::ScnMdl* scnMdl) {
+    bool added = false;
+    nw4r::g3d::ScnGroup* group = unk38C[layer].unk4;
+    if (group != NULL) {
+        added = group->Insert(group->sceneItemsCount, scnMdl);
+        if (added) {
+            unk38C[layer].unkE++;
+        }
     }
-}
-
-void gfSceneRoot::create() {
-    g_gfSceneRoot = new (Heaps::System) gfSceneRoot;
+    return added;
 }
 
 // MATCH-ONLY: placeholder virtuals so that unk3C sits at vtable offset 0x3C
@@ -87,6 +200,140 @@ bool gfSceneRoot::remove(nw4r::g3d::ScnMdl* scnMdl) {
     return ret;
 }
 
+bool gfSceneRoot::remove(LayerType layer, nw4r::g3d::ScnMdl* scnMdl) {
+    bool removed = false;
+    nw4r::g3d::ScnGroup* group = unk38C[layer].unk4;
+    if (group != NULL) {
+        removed = group->Remove(scnMdl);
+        if (removed) {
+            unk38C[layer].unkE--;
+        }
+    }
+    return removed;
+}
+
+void gfSceneRoot::setLayerDispStatus(LayerType layer, bool status) {
+    unk38C[layer].unkD_7 = status;
+}
+
+bool gfSceneRoot::clear(LayerType layer) {
+    bool result = false;
+    nw4r::g3d::ScnGroup* group = unk38C[layer].unk4;
+    if (group != NULL) {
+        while (!group->Empty()) {
+            group->PopBack();
+        }
+        unk38C[layer].unkE = 0;
+        result = true;
+    }
+    return result;
+}
+
+void gfSceneRoot::setResAnmScn(nw4r::g3d::ResAnmScn* anmScn, int heap) {
+    if (anmScn->IsValid()) {
+        removeResAnmScn();
+        unk4C = anmScn->ptr();
+        u32 size;
+        MEMAllocator* allocator = gfHeapManager::getMEMAllocator(static_cast<Heaps::HeapType>(heap));
+        m_anmScnRes = nw4r::g3d::AnmScnRes::Construct(allocator, &size, *anmScn, false);
+        setAnmScnResToScnRoot3D(m_anmScnRes);
+    } else {
+        removeResAnmScn();
+        unk465_6 = false;
+    }
+}
+
+void gfSceneRoot::setAnmScnResToScnRoot3D(nw4r::g3d::AnmScnRes* anmScn) {
+    unk40->SetAnmScn(anmScn);
+    gfCameraManager* cameraManager = gfCameraManager::getManager();
+    unk40->CalcWorld();
+    nw4r::g3d::Camera camera = unk40->GetCamera(0);
+    cameraManager->m_cameras[0].m_near = camera.ref().projNear;
+    cameraManager->m_cameras[0].m_far = camera.ref().projFar;
+    u32 numLightSet = anmScn->GetLightSetMaxRefNumber();
+    u32 numDiffuseLight = anmScn->GetDiffuseLightMaxRefNumber();
+    unk465_6 = 0;
+    // HYPOTHESIS: a scene animation with exactly 0x16 light sets carries the zone lights (set 0x14 holds the default).
+    if (numLightSet > 0x15 && static_cast<u8>(numLightSet - 0x15) == 1) {
+        unk465_6 = 1;
+        m_zoneLightObjBase = 0xC;
+    }
+    nw4r::g3d::LightSetting* setting = &unk40->GetLightSetting();
+    nw4r::g3d::LightObj* lights = setting->GetLightObjArray();
+    nw4r::g3d::LightSet zoneSet = setting->GetLightSet(0x14);
+    nw4r::g3d::LightObj* zoneLight = zoneSet.GetLightObj(0);
+    if (zoneLight != NULL) {
+        for (int i = 0; i < 10; i++) {
+            lights[static_cast<u8>(0x12 + i)] = *zoneLight;
+        }
+    }
+}
+
+void gfSceneRoot::removeResAnmScn() {
+    if (m_anmScnRes != NULL) {
+        RemoveAnmScn__Q34nw4r3g3d7ScnRootFv(*reinterpret_cast<nw4r::g3d::ScnRoot**>(reinterpret_cast<char*>(this) + 0x40));
+        m_anmScnRes->Destroy();
+    }
+    if (*reinterpret_cast<s32*>(reinterpret_cast<char*>(this) + 0x4C) != 0) {
+        *reinterpret_cast<s32*>(reinterpret_cast<char*>(this) + 0x4C) = 0;
+    }
+    m_anmScnRes = NULL;
+    *reinterpret_cast<s32*>(reinterpret_cast<char*>(this) + 0x58) = 0;
+}
+
+void gfSceneRoot::setFinalSceneAnm(nw4r::g3d::ResAnmScn* anmScn) {
+    if (unk60 != NULL) {
+        removeFinalSceneAnm();
+    }
+    if (anmScn->IsValid()) {
+        u32 size;
+        MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::FighterTechqniq);
+        unk60 = nw4r::g3d::AnmScnRes::Construct(
+            allocator, &size, *anmScn, false);
+        setAnmScnResToScnRoot3D(unk60);
+    }
+}
+
+void gfSceneRoot::removeFinalSceneAnm() {
+    if (unk60 != NULL) {
+        RemoveAnmScn__Q34nw4r3g3d7ScnRootFv(unk40);
+        unk60->Destroy();
+    }
+    unk60 = NULL;
+    if (m_anmScnRes != NULL) {
+        setAnmScnResToScnRoot3D(m_anmScnRes);
+    }
+}
+
+void gfSceneRoot::setInfoCamResAnm(nw4r::g3d::ResAnmScn* anmScn) {
+    if (unk50 != 0) {
+        removeInfoCamResAnm();
+    }
+    if (anmScn->IsValid()) {
+        unk50 = *reinterpret_cast<u32*>(anmScn);
+        MEMAllocator* allocator;
+        if (g_HeapInfos[Heaps::InfoInstance].m_name == NULL) {
+            allocator = gfHeapManager::getMEMAllocator(Heaps::MenuInstance);
+        } else {
+            allocator = gfHeapManager::getMEMAllocator(Heaps::InfoInstance);
+        }
+        u32 size;
+        unk5C = nw4r::g3d::AnmScnRes::Construct(allocator, &size, *anmScn, false);
+        unk44->SetAnmScn(unk5C);
+    }
+}
+
+void gfSceneRoot::removeInfoCamResAnm() {
+    if (unk5C != NULL) {
+        RemoveAnmScn__Q34nw4r3g3d7ScnRootFv(unk44);
+        unk5C->Destroy();
+    }
+    if (unk50 != 0) {
+        unk50 = 0;
+    }
+    unk5C = NULL;
+}
+
 // HYPOTHESIS: 0x54 points at an object whose virtual at 0x1C is called with no argument.
 // MATCH-ONLY: the leading unused virtuals place unk1C at vtable offset 0x1C.
 struct gfSceneRootAnmObj {
@@ -115,101 +362,444 @@ void gfSceneRoot::setCurrentFrame(float frame) {
     }
 }
 
-
-namespace nw4r {
-    namespace g3d {
-        class ScnRoot;
-    }
+// Steps a scene animation at the given rate scaled by the stage motion ratios.
+static inline void StepSceneAnim(nw4r::g3d::AnmScnRes* anmScn, float rate) {
+    rate *= g_GameGlobal->m_stageData->m_motionRatio;
+    rate *= g_GameGlobal->m_stageData->m_motionSubRatio;
+    anmScn->SetUpdateRate(rate);
+    anmScn->UpdateFrame();
 }
 
-// HYPOTHESIS: the pointer at 0x40 is the ScnRoot that the anim scene was added to.
-extern "C" void RemoveAnmScn__Q34nw4r3g3d7ScnRootFv(nw4r::g3d::ScnRoot* scnRoot);
-
-void gfSceneRoot::removeResAnmScn() {
-    if (m_anmScnRes != NULL) {
-        RemoveAnmScn__Q34nw4r3g3d7ScnRootFv(*reinterpret_cast<nw4r::g3d::ScnRoot**>(reinterpret_cast<char*>(this) + 0x40));
-        m_anmScnRes->Destroy();
-    }
-    if (*reinterpret_cast<s32*>(reinterpret_cast<char*>(this) + 0x4C) != 0) {
-        *reinterpret_cast<s32*>(reinterpret_cast<char*>(this) + 0x4C) = 0;
-    }
-    m_anmScnRes = NULL;
-    *reinterpret_cast<s32*>(reinterpret_cast<char*>(this) + 0x58) = 0;
-}
-
-void gfSceneRoot::setLayerDispStatus(LayerType layer, bool status) {
-    unk38C[layer].unkD_7 = status;
-}
-
-bool gfSceneRoot::clear(LayerType layer) {
-    bool result = false;
-    nw4r::g3d::ScnGroup* group = unk38C[layer].unk4;
-    if (group != NULL) {
-        while (!group->Empty()) {
-            group->PopBack();
+void gfSceneRoot::processAnim() {
+    if (!g_gfSceneRoot->m_skipAnim) {
+        if (!g_gfSceneRoot->unk465_3) {
+            nw4r::g3d::AnmScnRes* anmScn = unk60;
+            if (anmScn == NULL) {
+                anmScn = m_anmScnRes;
+                if (anmScn != NULL) {
+                    StepSceneAnim(anmScn, 1.0f / g_GameGlobal->getSlowRate());
+                }
+            } else if (anmScn != NULL) {
+                StepSceneAnim(anmScn, 1.0f / g_GameGlobal->getSlowRate());
+            }
         }
-        unk38C[layer].unkE = 0;
-        result = true;
+        nw4r::g3d::AnmScnRes* infoAnmScn = unk5C;
+        float rate = 1.0f;
+        if (infoAnmScn != NULL) {
+            rate *= g_GameGlobal->m_stageData->m_motionRatio;
+            rate *= g_GameGlobal->m_stageData->m_motionSubRatio;
+            infoAnmScn->SetUpdateRate(rate);
+            infoAnmScn->UpdateFrame();
+        }
     }
-    return result;
-}
-
-void gfSceneRoot::removeFinalSceneAnm() {
-    if (unk60 != NULL) {
-        RemoveAnmScn__Q34nw4r3g3d7ScnRootFv(unk40);
-        unk60->Destroy();
-    }
-    unk60 = NULL;
-    if (m_anmScnRes != NULL) {
-        setAnmScnResToScnRoot3D(m_anmScnRes);
-    }
-}
-
-void gfSceneRoot::setFinalSceneAnm(nw4r::g3d::ResAnmScn* anmScn) {
-    if (unk60 != NULL) {
-        removeFinalSceneAnm();
-    }
-    if (anmScn->IsValid()) {
-        u32 size;
-        MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::FighterTechqniq);
-        unk60 = nw4r::g3d::AnmScnRes::Construct(
-            allocator, &size, *anmScn, false);
-        setAnmScnResToScnRoot3D(unk60);
-    }
-}
-
-gfSceneRoot::LightHandle gfSceneRoot::allocLightHandle(nw4r::g3d::LightObj* light) {
-    for (u8 i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         LightSlot* slot = &m_lightSlots[i];
-        if (!slot->m_used) {
-            slot->m_light = light;
-            slot->m_used = 1;
-            LightHandle handle;
-            handle.m_index = i;
-            handle.m_unk1 = slot->m_unk5;
-            return handle;
+        if (slot->m_used) {
+            if (slot->m_unk7 != slot->m_unk8) {
+                slot->m_unk9++;
+            }
+            if (slot->m_unk9 > 3) {
+                slot->m_unk9 = 0;
+                slot->m_unk8 = slot->m_unk7;
+            }
+            if (slot->m_unk7 != slot->m_unk8) {
+                if (slot->m_unk7 > slot->m_unk8) {
+                    slot->m_unkA = slot->m_unk9;
+                } else {
+                    slot->m_unkA = 4 - slot->m_unk9;
+                }
+            } else {
+                slot->m_unkA = 0;
+            }
         }
     }
-    LightHandle invalid;
-    invalid.m_index = 0xFF;
-    invalid.m_unk1 = 0x14;
-    return invalid;
 }
 
-void gfSceneRoot::releaseLightHandle(LightHandle* handle) {
-    if (handle->isValid()) {
-        LightSlot& slot = m_lightSlots[handle->m_index];
-        slot.m_light = NULL;
-        slot.m_used = 0;
-        slot.m_released = 1;
-        slot.m_unk7 = 0x14;
-        slot.m_unk8 = 0x14;
-        slot.m_unkA = 0;
-        slot.m_unk9 = 0;
-        handle->m_index = 0xFF;
-        handle->m_unk1 = 0x14;
+void gfSceneRoot::processFixCamera() {
+    gfLoupe::setup();
+}
+
+void gfSceneRoot::layerUpdateFrame(int layer) {
+    unk38C[layer].unk4->G3dProc(8, 0, 0);
+}
+
+// HYPOTHESIS: the ScnRoot keeps its LightObj array (0x44 bytes each, first 0x12 reserved) at 0x287C.
+nw4r::g3d::LightObj* gfSceneRoot::getLightObj(u8 p1) {
+    char* lights = *reinterpret_cast<char**>(reinterpret_cast<char*>(unk40) + 0x287C);
+    return reinterpret_cast<nw4r::g3d::LightObj*>(lights + (p1 + 0x12) * 0x44);
+}
+
+void gfSceneRoot::updateZoneLightSet(u8 p1, u8 p2) {
+    LightSlot* slot = &m_lightSlots[p1];
+    if (slot->m_unk7 != p2) {
+        slot->m_unk8 = slot->m_unk7;
+        slot->m_unk7 = p2;
+        slot->m_unk9 = 0;
     }
 }
+
+// Copies the light indices 1 to 7 of a light set to another one.
+static inline void CopyLightIndices(nw4r::g3d::LightSet& dst, nw4r::g3d::LightSet& src) {
+    for (int j = 1; j < 8; j++) {
+        s8 index = src.GetData()->idxLight[j];
+        dst.GetData()->idxLight[j] = index;
+    }
+}
+
+void gfSceneRoot::renderPre() {
+    // HYPOTHESIS: G3dProc tasks 1 to 3 are the calc world, material and vertex passes of the layer group.
+    for (int i = 0; i < 8; i++) {
+        Layer* layer = &unk38C[i];
+        if (unk38C[i].unkE != 0 && layer->m_display && unk38C[i].unk4->sceneItemsCount != 0) {
+            gfCameraManager::getManager();
+            unk38C[i].unk4->G3dProc(1, 0, 0);
+            unk38C[i].unk4->G3dProc(2, 0, 0);
+            unk38C[i].unk4->G3dProc(3, 0, 0);
+        }
+    }
+    unk40->SetCurrentCamera(0);
+    unk40->CalcWorld();
+    if (unk464_0 || CameraController::getInstance()->isForceEnableCamControll3D()) {
+        gfCameraManager* cameraManager = gfCameraManager::getManager();
+        nw4r::g3d::Camera camera = unk40->GetCamera(0);
+        cameraManager->m_cameras[0].setNwCamera(&camera);
+    }
+    Layer* infoLayer = &unk38C[8];
+    if (infoLayer->unkE != 0 && infoLayer->m_display && infoLayer->unk4->sceneItemsCount != 0) {
+        gfCameraManager::getManager();
+        infoLayer->unk4->G3dProc(1, 0, 0);
+        infoLayer->unk4->G3dProc(2, 0, 0);
+        infoLayer->unk4->G3dProc(3, 0, 0);
+    }
+    unk44->SetCurrentCamera(0);
+    unk44->CalcWorld();
+    if (unk465_7) {
+        gfCameraManager* cameraManager = gfCameraManager::getManager();
+        nw4r::g3d::Camera camera = unk44->GetCamera(0);
+        cameraManager->m_cameras[5].setNwCamera(&camera);
+    }
+    nw4r::g3d::LightSet zoneSet = unk40->GetLightSetting().GetLightSet(0x14);
+    if (zoneSet.IsValid()) {
+        for (u32 i = 0; i < 4; i++) {
+            nw4r::g3d::LightObj* light = zoneSet.GetLightObj(i);
+            GXColor* color = &m_zoneColors[i];
+            if (light != NULL) {
+                light->GetLightColor(color);
+            } else {
+                color->r = 0;
+                color->g = 0;
+                color->b = 0;
+                color->a = 0xFF;
+            }
+        }
+    } else {
+        for (int i = 0; i < 4; i++) {
+            m_zoneColors[i].r = 0;
+            m_zoneColors[i].g = 0;
+            m_zoneColors[i].b = 0;
+            m_zoneColors[i].a = 0xFF;
+        }
+    }
+    if (unk465_6) {
+        nw4r::g3d::LightSetting* setting = &unk40->GetLightSetting();
+        nw4r::g3d::LightSet zoneFrom = setting->GetLightSet(0x14);
+        nw4r::g3d::LightSet zoneTo = setting->GetLightSet(0x15);
+        nw4r::g3d::LightObj* lights = setting->GetLightObjArray();
+        for (int i = 1; i < 4; i++) {
+            float ratio = i * 0.25f;
+            int index = m_zoneLightObjBase + (i - 1) * 2 + 1;
+            for (u32 j = 1; j < 3; j++) {
+                nw4r::g3d::LightObj* from = zoneFrom.GetLightObj(j);
+                nw4r::g3d::LightObj* to = zoneTo.GetLightObj(j);
+                nw4r::g3d::LightObj* out = &lights[index - 1];
+                if (from != NULL) {
+                    *out = *from;
+                    if (to != NULL) {
+                        blendLightColor(ratio, from, to, out);
+                    }
+                }
+                index++;
+            }
+        }
+    }
+    for (int i = 0; i < 6; i++) {
+        nw4r::g3d::Fog fog = unk40->GetFog(i);
+        GXFogType type;
+        f32 startZ;
+        f32 endZ;
+        f32 nearZ;
+        f32 farZ;
+        GXColor color;
+        fog.GetFog(&type, &startZ, &endZ, &nearZ, &farZ, &color);
+        if (type == GX_FOG_NONE) {
+            fog.Init();
+        }
+    }
+    nw4r::g3d::LightSetting* setting = &unk40->GetLightSetting();
+    nw4r::g3d::LightSet defaultSet = setting->GetLightSet(0x14);
+    s8 ambLightIdx = defaultSet.GetData()->idxAmbLight;
+    for (int i = 0; i < 10; i++) {
+        LightSlot* slot = &m_lightSlots[i];
+        if (slot->m_used) {
+            nw4r::g3d::LightSet lightSet = setting->GetLightSet(slot->m_unk5);
+            lightSet.GetData()->idxLight[0] = slot->m_unk6;
+            lightSet.GetData()->idxAmbLight = ambLightIdx;
+            if (slot->m_released) {
+                if (unk465_6) {
+                    if (slot->m_unkA == 0) {
+                        nw4r::g3d::LightSet zoneSet = setting->GetLightSet(slot->m_unk7);
+                        CopyLightIndices(lightSet, zoneSet);
+                    } else {
+                        u8 base = m_zoneLightObjBase + (slot->m_unkA - 1) * 2;
+                        for (u32 j = 1; j < 3; j++) {
+                            lightSet.SelectLightObj(static_cast<u8>(j), static_cast<u8>(base + j - 1));
+                        }
+                    }
+                } else {
+                    CopyLightIndices(lightSet, defaultSet);
+                }
+            } else {
+                for (u32 j = 1; j < 8; j++) {
+                    lightSet.SelectLightObj(static_cast<u8>(j), -1);
+                }
+            }
+            lightSet.GetData()->idxLight[7] = -1;
+        }
+    }
+    m_callBacks.process();
+    phInterface::notifiAllEndCalcWorldTimingC();
+}
+
+void gfSceneRoot::renderOpa() {
+}
+
+// HYPOTHESIS: bytes 0x500 and 0x506 are two copies of the use-copy-FB flag.
+void gfSceneRoot::setUseCopyFB(u8 p1) {
+    struct Byte {
+        u8 m_value : 8;
+    };
+    reinterpret_cast<Byte*>(reinterpret_cast<u8*>(this) + 0x500)->m_value = p1;
+    reinterpret_cast<Byte*>(reinterpret_cast<u8*>(this) + 0x506)->m_value = p1;
+}
+
+void gfSceneRoot::renderXlu() {
+    gfCopyEFBMgr* copyEFBMgr = gfCopyEFBMgr::getInstance();
+    GXSetClipMode(GX_CLIP_ENABLE);
+    unk38C[6].m_copyEFB = 0;
+    unk38C[3].m_copyEFB = 0;
+    gfCopyEFBMgr* currentCopyEFBMgr = gfCopyEFBMgr::getInstance();
+    if (currentCopyEFBMgr != NULL) {
+        switch (currentCopyEFBMgr->m_104) {
+        case 1:
+            unk38C[6].m_copyEFB = 1;
+            break;
+        case 2:
+            unk38C[3].m_copyEFB = 1;
+            break;
+        }
+    }
+    if (m_shadowEnabled) {
+        renderShadow();
+    }
+    unk468.notify(0);
+    createLoupeTexture();
+    unk468.notify(0);
+    for (u32 i = 0; i < 9; i++) {
+        if (static_cast<u8>(i) == Layer_Info && m_transformFlag.m_reverseDirection != 0) {
+            drawFrameBufferReverse(m_transformFlag.m_reverseDirection);
+        }
+        if (unk38C[static_cast<u8>(i)].unkE != 0) {
+            if (copyEFBMgr != NULL && static_cast<u8>(i) == Layer_Special_Stage_Object) {
+                gfFrameBuffer* frameBuffer = gfFrameBuffer::getInstance();
+                ClearDepthBuffer(frameBuffer->m_efbWidth, frameBuffer->m_efbHeight);
+            }
+            if (unk38C[static_cast<u8>(i)].m_clearDepth) {
+                gfFrameBuffer* frameBuffer = gfFrameBuffer::getInstance();
+                ClearDepthBuffer(frameBuffer->m_efbWidth, frameBuffer->m_efbHeight);
+            }
+            if (unk38C[static_cast<u8>(i)].m_display && unk38C[static_cast<u8>(i)].unk4->sceneItemsCount != 0) {
+                unk38C[static_cast<u8>(i)].unk0->Insert(unk38C[static_cast<u8>(i)].unk0->sceneItemsCount, unk38C[static_cast<u8>(i)].unk4);
+                unk38C[static_cast<u8>(i)].unk0->CalcView();
+                unk38C[static_cast<u8>(i)].unk0->GatherDrawScnObj();
+                unk38C[static_cast<u8>(i)].unk0->ZSort();
+                G3DState_Invalidate(0x7FF);
+                unk38C[static_cast<u8>(i)].unk0->DrawOpaAndXlu();
+                nw4r::g3d::ScnRoot* scnRoot = unk38C[static_cast<u8>(i)].unk0;
+                while (!scnRoot->Empty()) {
+                    scnRoot->PopBack();
+                }
+            }
+        }
+        if (unk38C[static_cast<u8>(i)].m_drawEffect) {
+            if (static_cast<u8>(i) == Layer_Ground) {
+                fn_8005B838(efManager::getInstance(), 0);
+            } else if (static_cast<u8>(i) == Layer_Effect) {
+                fn_8005B838(efManager::getInstance(), 1);
+            } else if (static_cast<u8>(i) == Layer_Effect2D) {
+                fn_8005B838(efManager::getInstance(), 2);
+            }
+        }
+        if (unk38C[static_cast<u8>(i)].m_copyEFB && copyEFBMgr != NULL && !unk465_5) {
+            u32 colorWord = copyEFBMgr->m_108;
+            GXSetZMode(false, GX_LEQUAL, false);
+            GXPixModeSync();
+            // BYTES: the word at 0x6C of the manager is handed over as a GXColor.
+            union {
+                u32 m_word;
+                GXColor m_color;
+            } color;
+            color.m_word = colorWord;
+            copyEFBMgr->drawCopyEFB(0, &color.m_color);
+            GXSetZMode(true, GX_LEQUAL, true);
+        }
+        fn_8005DC24(g_efScreen, static_cast<u8>(i));
+        if (m_layerEfb[static_cast<u8>(i)].m_enable != 0 && m_layerEfb[static_cast<u8>(i)].m_efbIndex >= 0 && copyEFBMgr != NULL) {
+            copyEFBMgr->getEFB(m_layerEfb[static_cast<u8>(i)].m_efbIndex);
+        }
+        if (static_cast<u8>(i) == Layer_Ground) {
+            gfLoupe::grabLoupeBGColor();
+        }
+    }
+    gfLoupeRestoreList* restoreList = reinterpret_cast<gfLoupeRestoreList*>(lbl_80494E00);
+    if (restoreList->m_count != 0) {
+        for (u32 i = 0; i < restoreList->m_count; i++) {
+            nw4r::g3d::ScnGroup* group = unk38C[restoreList->m_entries[i].m_layer].unk4;
+            group->Insert(group->sceneItemsCount, restoreList->m_entries[i].m_scnObj);
+        }
+        restoreList->m_count = 0;
+    }
+    gfCameraManager::getManager()->m_cameras[0].setGX();
+}
+
+void gfSceneRoot::setClearDepthBufferState(LayerType layer, bool clear) {
+    unk38C[layer].unkD_6 = clear;
+}
+
+// HYPOTHESIS: the map names this helper nw4r::g3d::ScnRoot::resetSceneSub; it is only called from this unit.
+// Resets the fogs of the scene and turns the first four lights of every light set black and off.
+static void resetSceneSub(nw4r::g3d::ScnRoot* scnRoot) {
+    for (int i = 0;; i++) {
+        nw4r::g3d::Fog fog = scnRoot->GetFog(i);
+        if (!fog.IsValid()) {
+            break;
+        }
+        fog.SetZ(1000.0f, 10000.0f);
+        fog.SetFogColor(nw4r::ut::Color(0, 0, 0, 0));
+        fog.Init();
+    }
+    nw4r::g3d::LightSetting* setting = &scnRoot->GetLightSetting();
+    u32 numLightSet = setting->GetNumLightSet();
+    for (u32 i = 0; i < numLightSet; i++) {
+        nw4r::g3d::LightSet lightSet = setting->GetLightSet(i);
+        for (u32 j = 0; j < 4; j++) {
+            nw4r::g3d::LightObj* light = lightSet.GetLightObj(j);
+            if (light != NULL) {
+                light->InitLightColor(nw4r::ut::Color(0, 0, 0, 0));
+                light->Disable();
+            }
+        }
+    }
+}
+
+void gfSceneRoot::resetScene() {
+    resetSceneSub(unk40);
+}
+
+// HYPOTHESIS: out = from + (to - from) * ratio per color channel (paired singles, u8 quantized).
+void gfSceneRoot::blendLightColor(f32 ratio, nw4r::g3d::LightObj* from, nw4r::g3d::LightObj* to, nw4r::g3d::LightObj* out) {
+    GXColor colorFrom;
+    GXColor colorTo;
+    GXColor colorOut;
+    from->GetLightColor(&colorFrom);
+    to->GetLightColor(&colorTo);
+    register f32 fr0, fr1, fr2, fr3;
+    register f32 r = ratio;
+    register GXColor* pFrom = &colorFrom;
+    register GXColor* pTo = &colorTo;
+    register GXColor* pOut = &colorOut;
+    asm {
+        psq_l  fr2, 0(pFrom), 0, 2
+        psq_l  fr0, 0(pTo), 0, 2
+        psq_l  fr3, 2(pFrom), 0, 2
+        psq_l  fr1, 2(pTo), 0, 2
+        ps_sub fr0, fr0, fr2
+        ps_sub fr1, fr1, fr3
+        ps_madds0 fr2, fr0, r, fr2
+        ps_madds0 fr3, fr1, r, fr3
+        psq_st fr2, 0(pOut), 0, 2
+        psq_st fr3, 2(pOut), 0, 2
+    }
+    out->InitLightColor(colorOut);
+}
+
+void gfSceneRoot::renderDebug() {
+}
+
+gfSceneRoot::Layer::Layer() {
+    unk0 = 0;
+    *reinterpret_cast<u32*>(&unkC) &= 0x00FFFFFF;
+    unk4 = NULL;
+    unkD_7 = 1;
+    unkD_6 = 0;
+    unkD_4 = 0;
+    unk8 = NULL;
+    unkE = 0;
+    unk10 = 0;
+    unk14 = 0;
+    u32 size;
+    unk4 = fn_801AB6CC(gfHeapManager::getMEMAllocator(Heaps::System), &size, 0x140);
+}
+
+gfSceneRoot::Layer::~Layer() {
+    nw4r::g3d::ScnGroup* group = unk4;
+    while (!group->Empty()) {
+        group->PopBack();
+    }
+    unk4->Destroy();
+    unk0 = 0;
+}
+
+// Draws the loupe background texture as a quad of the given radius, scrolled by (scrollU, scrollV).
+void drawLoupeBG(GXColor color, float radius, float scrollU, float scrollV) {
+    Matrix matrix;
+    GXTexObj* texture = gfLoupe::getBGTexture();
+    if (texture != NULL) {
+        float left = -radius;
+        float diameter = 2.0f * radius;
+        GXLoadPosMtxImm(matrix.m, GX_PNMTX0);
+        GXSetCurrentMtx(GX_PNMTX0);
+        GXSetZMode(true, GX_ALWAYS, false);
+        gfDrawSetVtxPosColorTexPrimEnvironment();
+        GXLoadTexObj(texture, GX_TEXMAP0);
+        GXClearVtxDesc();
+        GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+        GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+        GXSetVtxAttrFmt(GX_VTXFMT1, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+        GXSetVtxAttrFmt(GX_VTXFMT1, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+        GXSetClipMode(GX_CLIP_DISABLE);
+        GXSetCullMode(GX_CULL_NONE);
+        GXSetChanCtrl(GX_COLOR0A0, false, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+        GXSetChanMatColor(GX_COLOR0A0, color);
+        GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+        GXSetTevOp(GX_TEVSTAGE0, GX_REPLACE);
+        GXSetZMode(false, GX_ALWAYS, false);
+        GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT1, 4);
+        GXPosition3f32(left, radius, -10.0f);
+        GXTexCoord2f32(scrollU, scrollV);
+        GXPosition3f32(left, radius - diameter, -10.0f);
+        GXTexCoord2f32(scrollU, 0.5f + scrollV);
+        GXPosition3f32(left + diameter, radius, -10.0f);
+        GXTexCoord2f32(0.5f + scrollU, scrollV);
+        GXPosition3f32(left + diameter, radius - diameter, -10.0f);
+        GXTexCoord2f32(0.5f + scrollU, 0.5f + scrollV);
+        GXSetClipMode(GX_CLIP_ENABLE);
+        GXSetCullMode(GX_CULL_BACK);
+    }
+}
+
+// The three functions below lie after gfSceneRoot::renderShadow in the binary (part B of the unit); they are
+// kept here until the two parts are merged, then they belong between renderShadow and SetupSimpleMaterial.
+extern const float lbl_805A1364;
 
 void gfSceneRoot::drawFrameBufferReverse(int direction) {
     gfFrameBuffer* frameBuffer = gfFrameBuffer::getInstance();
@@ -275,141 +865,35 @@ void gfSceneRoot::drawFrameBufferReverse(int direction) {
     }
 }
 
-
-
-
-gfSceneRoot::Layer::~Layer() {
-    nw4r::g3d::ScnGroup* group = unk4;
-    while (!group->Empty()) {
-        group->PopBack();
-    }
-    unk4->Destroy();
-    unk0 = 0;
-}
-
-#include <nw4r/g3d/g3d_scngroup.h>
-
-void gfSceneRoot::layerUpdateFrame(int layer) {
-    unk38C[layer].unk4->G3dProc(8, 0, 0);
-}
-
-void gfSceneRoot::renderOpa() {
-}
-
-void gfSceneRoot::renderDebug() {
-}
-
-void gfSceneRoot::updateZoneLightSet(u8 p1, u8 p2) {
-    LightSlot* slot = &m_lightSlots[p1];
-    if (slot->m_unk7 != p2) {
-        slot->m_unk8 = slot->m_unk7;
-        slot->m_unk7 = p2;
-        slot->m_unk9 = 0;
-    }
-}
-
-// HYPOTHESIS: the ScnRoot keeps its LightObj array (0x44 bytes each, first 0x12 reserved) at 0x287C.
-nw4r::g3d::LightObj* gfSceneRoot::getLightObj(u8 p1) {
-    char* lights = *reinterpret_cast<char**>(reinterpret_cast<char*>(unk40) + 0x287C);
-    return reinterpret_cast<nw4r::g3d::LightObj*>(lights + (p1 + 0x12) * 0x44);
-}
-
-// HYPOTHESIS: bytes 0x500 and 0x506 are two copies of the use-copy-FB flag.
-void gfSceneRoot::setUseCopyFB(u8 p1) {
-    struct Byte {
-        u8 m_value : 8;
-    };
-    reinterpret_cast<Byte*>(reinterpret_cast<u8*>(this) + 0x500)->m_value = p1;
-    reinterpret_cast<Byte*>(reinterpret_cast<u8*>(this) + 0x506)->m_value = p1;
-}
-
-void gfSceneRoot::removeInfoCamResAnm() {
-    if (unk5C != NULL) {
-        RemoveAnmScn__Q34nw4r3g3d7ScnRootFv(unk44);
-        unk5C->Destroy();
-    }
-    if (unk50 != 0) {
-        unk50 = 0;
-    }
-    unk5C = NULL;
-}
-
-#include <gf/gf_memory_pool.h>
-#include <gf/gf_loupe.h>
-
-void gfSceneRoot::setInfoCamResAnm(nw4r::g3d::ResAnmScn* anmScn) {
-    if (unk50 != 0) {
-        removeInfoCamResAnm();
-    }
-    if (anmScn->IsValid()) {
-        unk50 = *reinterpret_cast<u32*>(anmScn);
-        MEMAllocator* allocator;
-        if (g_HeapInfos[Heaps::InfoInstance].m_name == NULL) {
-            allocator = gfHeapManager::getMEMAllocator(Heaps::MenuInstance);
-        } else {
-            allocator = gfHeapManager::getMEMAllocator(Heaps::InfoInstance);
+gfSceneRoot::LightHandle gfSceneRoot::allocLightHandle(nw4r::g3d::LightObj* light) {
+    for (u8 i = 0; i < 10; i++) {
+        LightSlot* slot = &m_lightSlots[i];
+        if (!slot->m_used) {
+            slot->m_light = light;
+            slot->m_used = 1;
+            LightHandle handle;
+            handle.m_index = i;
+            handle.m_unk1 = slot->m_unk5;
+            return handle;
         }
-        u32 size;
-        unk5C = nw4r::g3d::AnmScnRes::Construct(allocator, &size, *anmScn, false);
-        unk44->SetAnmScn(unk5C);
     }
+    LightHandle invalid;
+    invalid.m_index = 0xFF;
+    invalid.m_unk1 = 0x14;
+    return invalid;
 }
 
-// HYPOTHESIS: the callee is a helper in this unit that resets the lights and fogs of a ScnRoot.
-extern "C" void fn_8000E5A8(nw4r::g3d::ScnRoot* scnRoot);
-
-void gfSceneRoot::resetScene() {
-    fn_8000E5A8(unk40);
-}
-
-extern "C" nw4r::g3d::ScnGroup* fn_801AB6CC(MEMAllocator* allocator, u32* size, u32 capacity);
-
-gfSceneRoot::Layer::Layer() {
-    unk0 = 0;
-    *reinterpret_cast<u32*>(&unkC) &= 0x00FFFFFF;
-    unk4 = NULL;
-    unkD_7 = 1;
-    unkD_6 = 0;
-    unkD_4 = 0;
-    unk8 = NULL;
-    unkE = 0;
-    unk10 = 0;
-    unk14 = 0;
-    u32 size;
-    unk4 = fn_801AB6CC(gfHeapManager::getMEMAllocator(Heaps::System), &size, 0x140);
-}
-
-// HYPOTHESIS: the LightObj shadow here is empty, so the two LightObj color calls are declared by symbol.
-extern "C" void GetLightColor__Q34nw4r3g3d8LightObjCFP8_GXColor(nw4r::g3d::LightObj* obj, GXColor* color);
-extern "C" void InitLightColor__Q34nw4r3g3d8LightObjF8_GXColor(nw4r::g3d::LightObj* obj, GXColor color);
-
-// HYPOTHESIS: out = from + (to - from) * ratio per color channel (paired singles, u8 quantized).
-void gfSceneRoot::blendLightColor(f32 ratio, nw4r::g3d::LightObj* from, nw4r::g3d::LightObj* to, nw4r::g3d::LightObj* out) {
-    GXColor colorFrom;
-    GXColor colorTo;
-    GXColor colorOut;
-    GetLightColor__Q34nw4r3g3d8LightObjCFP8_GXColor(from, &colorFrom);
-    GetLightColor__Q34nw4r3g3d8LightObjCFP8_GXColor(to, &colorTo);
-    register f32 fr0, fr1, fr2, fr3;
-    register f32 r = ratio;
-    register GXColor* pFrom = &colorFrom;
-    register GXColor* pTo = &colorTo;
-    register GXColor* pOut = &colorOut;
-    asm {
-        psq_l  fr2, 0(pFrom), 0, 2
-        psq_l  fr0, 0(pTo), 0, 2
-        psq_l  fr3, 2(pFrom), 0, 2
-        psq_l  fr1, 2(pTo), 0, 2
-        ps_sub fr0, fr0, fr2
-        ps_sub fr1, fr1, fr3
-        ps_madds0 fr2, fr0, r, fr2
-        ps_madds0 fr3, fr1, r, fr3
-        psq_st fr2, 0(pOut), 0, 2
-        psq_st fr3, 2(pOut), 0, 2
+void gfSceneRoot::releaseLightHandle(LightHandle* handle) {
+    if (handle->isValid()) {
+        LightSlot& slot = m_lightSlots[handle->m_index];
+        slot.m_light = NULL;
+        slot.m_used = 0;
+        slot.m_released = 1;
+        slot.m_unk7 = 0x14;
+        slot.m_unk8 = 0x14;
+        slot.m_unkA = 0;
+        slot.m_unk9 = 0;
+        handle->m_index = 0xFF;
+        handle->m_unk1 = 0x14;
     }
-    InitLightColor__Q34nw4r3g3d8LightObjF8_GXColor(out, colorOut);
-}
-
-void gfSceneRoot::processFixCamera() {
-    gfLoupe::setup();
 }

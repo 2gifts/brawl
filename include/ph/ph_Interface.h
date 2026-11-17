@@ -21,7 +21,7 @@ public:
     void initialize();
     void processDefault();
     void renderDebug();
-    void notifiAllEndCalcWorldTimingC();
+    static void notifiAllEndCalcWorldTimingC(); // HYPOTHESIS: static, gfSceneRoot::renderPre calls it without an instance
 
     static void* sysAlloc(size_t a, size_t b);
     static void gfMemFree(void* p);
