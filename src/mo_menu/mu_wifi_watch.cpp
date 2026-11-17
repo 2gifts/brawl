@@ -41,6 +41,14 @@ public:
     u8 m_close; // 0x3D0
 };
 
+// HYPOTHESIS: the data of one player of the match that is watched (the sort functions read the team and the area).
+struct muWifiWatchPlayerInfo {
+    u8 m_unk0[0xC];
+    int m_team;     // 0x0C
+    u8 m_area;      // 0x10
+    u8 m_unk11[3];
+};
+
 class muWifiWatchTask : public gfTask {
 public:
     // One of the textures of the characters (the ctor clears the first members, the dtor frees the file handle).
@@ -99,6 +107,11 @@ public:
     int mainStepDownloadCancel();
     void initStepNextBattle();
     void initStepPost();
+    muWifiWatchTask();
+    static muWifiWatchTask* create(void* param);
+    void initProc(void* param);
+    static int playerTeamSortCompare(const muWifiWatchPlayerInfo* a, const muWifiWatchPlayerInfo* b);
+    static int playerInfoAreaSortCompare(const muWifiWatchPlayerInfo* a, const muWifiWatchPlayerInfo* b);
     void fn_4078();
     void initStepDownloadWait();
     int mainStepGetBonus();
@@ -193,4 +206,18 @@ int muWifiWatchTask::mainStepPrizeWindow() {
         }
     }
     return m_stepResult;
+}
+
+muWifiWatchTask* muWifiWatchTask::create(void* param) {
+    muWifiWatchTask* task = new (Heaps::MenuInstance) muWifiWatchTask();
+    task->initProc(param);
+    return task;
+}
+
+int muWifiWatchTask::playerTeamSortCompare(const muWifiWatchPlayerInfo* a, const muWifiWatchPlayerInfo* b) {
+    return a->m_team - b->m_team;
+}
+
+int muWifiWatchTask::playerInfoAreaSortCompare(const muWifiWatchPlayerInfo* a, const muWifiWatchPlayerInfo* b) {
+    return a->m_area - b->m_area;
 }

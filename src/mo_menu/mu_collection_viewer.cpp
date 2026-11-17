@@ -3,6 +3,8 @@
 #include <mu/mu_collection_viewer.h>
 #include <mu/mu_notice_wnd.h>
 #include <nw4r/g3d/g3d_scnmdlexpand.h>
+#include <gf/gf_homemenu.h>
+#include <gf/gf_shutdown_manager.h>
 #include <snd/snd_system.h>
 
 // The base of the menus that browse through the collection (module sora_menu_collect_viewer). Only a part of its functions
@@ -242,4 +244,29 @@ void muCollectionViewer::beginCopy(int flag) {
         state = 0xB;
     }
     m_work->m_state = state;
+}
+
+void muCollectionViewer::controlErasing() {
+    muCollection* collection = (muCollection*)m_work->m_collection;
+    if (collection->m_busy == 0) {
+        g_gfHomeMenu->setBan(0, 5);
+        g_gfShutdownManager.unkD = true;
+        if (((muCollection*)m_work->m_collection)->m_result != 0) {
+            endErase();
+        } else {
+            g_sndSystem->playSE(static_cast<SndID>(0x28), -1, 0, 0, -1);
+            closeWaitWnd();
+            unk_64C8(6);
+            m_work->m_waitCount = 0;
+            m_work->m_state = 0x14;
+        }
+    }
+}
+
+void muCollectionViewer::openEraseConfirmWnd(int selected) {
+    addObjCore(m_work->m_objs[35]);
+    closeWaitWnd();
+    m_work->m_msg->printIndex(0xC, 0, NULL);
+    dispEraseConfirmWndYesNo(selected);
+    g_sndSystem->playSE(static_cast<SndID>(5), -1, 0, 0, -1);
 }

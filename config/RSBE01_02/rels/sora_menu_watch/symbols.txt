@@ -1,4 +1,4 @@
-create__15muWifiWatchTaskFv = .text:0x00000000; // type:function size:0x60
+create__15muWifiWatchTaskFPv = .text:0x00000000; // type:function size:0x60
 __ct__15muWifiWatchTaskFv = .text:0x00000060; // type:function size:0x3DC
 __ct__Q215muWifiWatchTask7CharTexFv = .text:0x0000043C; // type:function size:0x10
 __dt__Q215muWifiWatchTask7CharTexFv = .text:0x0000044C; // type:function size:0x5C
@@ -16,8 +16,8 @@ sealScrollMain__15muWifiWatchTaskFv = .text:0x000017F0; // type:function size:0x
 downloadMain__15muWifiWatchTaskFv = .text:0x00001B48; // type:function size:0x234
 preLoadFightersByReplayDataProperty__15muWifiWatchTaskFv = .text:0x00001D7C; // type:function size:0xD0
 updateNextReplayDataProperty__15muWifiWatchTaskFv = .text:0x00001E4C; // type:function size:0x10C
-playerTeamSortCompare__15muWifiWatchTaskFv = .text:0x00001F58; // type:function size:0x10
-playerInfoAreaSortCompare__15muWifiWatchTaskFv = .text:0x00001F68; // type:function size:0x10
+playerTeamSortCompare__15muWifiWatchTaskFPC21muWifiWatchPlayerInfoPC21muWifiWatchPlayerInfo = .text:0x00001F58; // type:function size:0x10
+playerInfoAreaSortCompare__15muWifiWatchTaskFPC21muWifiWatchPlayerInfoPC21muWifiWatchPlayerInfo = .text:0x00001F68; // type:function size:0x10
 dispAllPlayerPanel__15muWifiWatchTaskFv = .text:0x00001F78; // type:function size:0x518
 dispNumBetCoin__15muWifiWatchTaskFv = .text:0x00002490; // type:function size:0x148
 dispNumPayOutCoin__15muWifiWatchTaskFv = .text:0x000025D8; // type:function size:0x110

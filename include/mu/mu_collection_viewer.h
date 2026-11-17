@@ -117,7 +117,8 @@ public:
         u8 m_unk1C75[0x1C7C - 0x1C75];
         MuMsg* m_msg;               // 0x1C7C the texts
         MsgFile m_msgFile[3];       // 0x1C80
-        u8 m_unk1CC8[0x1CE4 - 0x1CC8];
+        u8 m_unk1CC8[0x1CE0 - 0x1CC8];
+        int m_waitCount;            // 0x1CE0 frames the report of the erase is shown
         void* m_collection;         // 0x1CE4
         u8 m_unk1CE8[0x1CEE - 0x1CE8];
         u8 m_extraPanel;            // 0x1CEE
@@ -151,7 +152,7 @@ public:
     virtual int unk_2FA0();
     virtual u32 getCurFileID();
     virtual muCollectionFileName getFileHandle(int index);
-    virtual void unk_2FC8();
+    virtual muCollection::FileName unk_2FC8();
     virtual void addObjCore(void* obj);
     virtual void removeObjCore(void* obj);
     virtual int getNumPic(int media);
@@ -187,9 +188,9 @@ public:
     virtual void controlLoadFinish();
     virtual void onLoadFailed();
     virtual void controlErase();                                                        // 0x6068
-    virtual void openEraseConfirmWnd();                                                 // 0x61FC
+    virtual void openEraseConfirmWnd(int selected);                                                 // 0x61FC
     virtual void closeEraseConfirmWnd();                                                // 0x62AC
-    virtual void dispEraseConfirmWndYesNo();                                            // 0x6344
+    virtual void dispEraseConfirmWndYesNo(int selected);                                            // 0x6344
     virtual void openEraseReportWnd();                                                  // 0x6450
     virtual void unk_64C8(int index);
     virtual void closeEraseReportWnd();                                                 // 0x6520
