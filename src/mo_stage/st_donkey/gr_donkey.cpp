@@ -302,6 +302,9 @@ grDonkeyLift::~grDonkeyLift() { }
 
 // The lift travels between the two ends: state 0 starts it at the end it comes from, 1 moves it by the stage's lift speed
 // and 2 waits a second before it appears again.
+// TODO(match): 95%. In the original the three field loads of the end point are done before the stores of m_pos.y/z (loads of
+// y and z first, then the fadds); ours interleaves load and store per field. Also updateNumber of grDonkeyScore (98%) differs in
+// the order of its length checks.
 void grDonkeyLift::update(float deltaFrame) {
     if (m_isUpdate) {
         if (m_posWork != NULL) {

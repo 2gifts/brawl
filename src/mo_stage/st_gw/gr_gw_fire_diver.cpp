@@ -7,6 +7,15 @@
 #include <st_gw/gr_gw_item.h>
 #include <st_gw/gr_gw_fire_diver.h>
 
+grGWFireDiver* grGWFireDiver::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
+    grGWFireDiver* ground = new (Heaps::StageInstance) grGWFireDiver(taskName);
+    if (ground != NULL) {
+        ground->setMdlIndex(mdlIndex);
+        ground->setTgtNode(tgtNodeName);
+    }
+    return ground;
+}
+
 grGWFireDiver::grGWFireDiver(const char* taskName) : grGW(taskName) {
     m_posWork = NULL;
     m_typeWork = NULL;
@@ -22,15 +31,6 @@ grGWFireDiver::grGWFireDiver(const char* taskName) : grGW(taskName) {
         return;
     }
     callback->m_nodeCallbackDatas[0].m_flags |= 1;
-}
-
-grGWFireDiver* grGWFireDiver::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
-    grGWFireDiver* ground = new (Heaps::StageInstance) grGWFireDiver(taskName);
-    if (ground != NULL) {
-        ground->setMdlIndex(mdlIndex);
-        ground->setTgtNode(tgtNodeName);
-    }
-    return ground;
 }
 
 grGWFireDiver::~grGWFireDiver() {

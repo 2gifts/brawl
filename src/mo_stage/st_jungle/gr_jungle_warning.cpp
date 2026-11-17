@@ -5,6 +5,12 @@
 #include <st_jungle/gr_jungle.h>
 #include <st_jungle/gr_jungle_anim.h>
 
+// MATCH-ONLY: the original emits the weak Ground::setMdlIndex before the constructor, as if a function using it came
+// first and was dropped; this unused static helper reproduces that position (a source-level cause was not found).
+static void unusedSetMdlIndex(grJungle* ground) {
+    ground->setMdlIndex(0);
+}
+
 grJungle::grJungle(const char* taskName) : grYakumono(taskName) {
     m_state = 0;
     m_timer = 0.0f;
@@ -138,7 +144,7 @@ void grJungleWarning::updateCallBack(float deltaFrame) {
                     line.origin.m_x = hit.m_x;
                     line.origin.m_y = hit.m_y;
                     line.origin.m_z = hit.m_z;
-                    fn_8003DEE0(&line.direction, &dir);
+                    line.direction.normalize(&dir);
                     if (reinterpret_cast<clLine3D*>(&line.origin)->checkIntersectXYPlane(hit)) {
                         grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
                         data->m_pos.m_x = hit.m_x;

@@ -7,6 +7,12 @@
 #include <st_norfair/gr_norfair.h>
 #include <st_norfair/gr_norfair_anim.h>
 
+// MATCH-ONLY: the original emits the weak Ground::setMdlIndex before the constructor, as if a function using it came
+// first and was dropped; this unused static helper reproduces that position (a source-level cause was not found).
+static void unusedSetMdlIndex(grNorfair* ground) {
+    ground->setMdlIndex(0);
+}
+
 grNorfair::grNorfair(const char* taskName) : grYakumono(taskName) {
     m_state = 0;
     m_timer = 0.0f;

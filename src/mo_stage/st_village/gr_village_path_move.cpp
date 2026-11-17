@@ -5,14 +5,6 @@
 #include <st_village/gr_village.h>
 #include <st_village/gr_village_anim.h>
 
-grVillageGuestPathMove::grVillageGuestPathMove(const char* taskName) : grVillage(taskName) {
-    m_type = 5;
-    m_first = 1;
-    m_motion = 4;
-    m_frame = 0.0f;
-    m_frameCount = 0.0f;
-}
-
 grVillageGuestPathMove* grVillageGuestPathMove::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
     grVillageGuestPathMove* ground = new (Heaps::StageInstance) grVillageGuestPathMove(taskName);
     if (ground != NULL) {
@@ -20,6 +12,14 @@ grVillageGuestPathMove* grVillageGuestPathMove::create(int mdlIndex, const char*
         ground->setTgtNode(tgtNodeName);
     }
     return ground;
+}
+
+grVillageGuestPathMove::grVillageGuestPathMove(const char* taskName) : grVillage(taskName) {
+    m_type = 5;
+    m_first = 1;
+    m_motion = 4;
+    m_frame = 0.0f;
+    m_frameCount = 0.0f;
 }
 
 grVillageGuestPathMove::~grVillageGuestPathMove() {

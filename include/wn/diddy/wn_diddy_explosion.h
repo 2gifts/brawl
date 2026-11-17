@@ -37,7 +37,7 @@ class wnDiddyExplosion : public wnWeaponBuilder<wnDiddyExplosionModuleAccesserBu
     const s32* unk1F94;
 public:
     wnDiddyExplosion(s32 articleId, const wnArticleBuildInfo& info, const wnDiddyExplosionData* data);
-    virtual ~wnDiddyExplosion() { }
+    virtual ~wnDiddyExplosion();
     void activate(int founderTaskId, int team, Vec3f* position, float lr);
     virtual void onDeactivate();
 };

@@ -39,7 +39,7 @@ class stDxGarden : public stMelee {
     grGimmickWaterData* m_waterData;  // 0x1F8
 
 public:
-    stDxGarden();
+    stDxGarden(const char* name);
     static stDxGarden* create();
 
     virtual ~stDxGarden();
@@ -55,8 +55,13 @@ public:
     virtual void createObjSwimArea();
     virtual void updateLimit(float deltaFrame);
     virtual void updateRiver(float deltaFrame);
-    virtual bool isBamperVector();
-    virtual GXColor getFinalTechniqColor();
+    // BYTES: declared in this order because MWCC emits the weak copies of the inline virtuals in reverse declaration order.
+    virtual GXColor getFinalTechniqColor() {
+        u32 packed = 0x1400047D;
+        return *reinterpret_cast<GXColor*>(&packed);
+    }
+
+    virtual bool isBamperVector() { return true; }
 
     static stClassInfoImpl<Stages::DxGarden, stDxGarden> bss_loc_14;
 };

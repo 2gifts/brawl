@@ -16,6 +16,15 @@ static inline float norfairClamp(float lo, float hi, float value) {
     return nw4r::math::FSelect(value - hi, hi, value);
 }
 
+grNorfairAshibaT* grNorfairAshibaT::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
+    grNorfairAshibaT* ground = new (Heaps::StageInstance) grNorfairAshibaT(taskName);
+    if (ground != NULL) {
+        ground->setMdlIndex(mdlIndex);
+        ground->setTgtNode(tgtNodeName);
+    }
+    return ground;
+}
+
 grNorfairAshibaT::grNorfairAshibaT(const char* taskName) : grNorfair(taskName) {
     m_posWork = NULL;
     m_posMagmaWork = NULL;
@@ -34,15 +43,6 @@ grNorfairAshibaT::grNorfairAshibaT(const char* taskName) : grNorfair(taskName) {
     callback->m_numNodeCallbackData = 1;
     callback->initialize(false, Heaps::StageInstance);
     callback->m_nodeCallbackDatas[0].m_flags |= 0x10;
-}
-
-grNorfairAshibaT* grNorfairAshibaT::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
-    grNorfairAshibaT* ground = new (Heaps::StageInstance) grNorfairAshibaT(taskName);
-    if (ground != NULL) {
-        ground->setMdlIndex(mdlIndex);
-        ground->setTgtNode(tgtNodeName);
-    }
-    return ground;
 }
 
 grNorfairAshibaT::~grNorfairAshibaT() {

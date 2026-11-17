@@ -35,6 +35,16 @@ void grGimmickMovement::startup(gfArchive* data, u32 unk1, gfSceneRoot::LayerTyp
 
 // Moves the gimmick from the start to the goal point: either with a speed (state 2: the speed grows by the acceleration) or
 // in a given time (state 3: the position follows a sine or a cosine curve); when it arrives (state 4) it rests again.
+// BYTES: the early return (not a guarded assignment) gives the original branch layout; same form as Vec2f::length.
+// TODO(match): updateMove still differs in the stack layout (the original keeps the difference vector in its own slot,
+// frame 0xD0 against our 0xA0) and the register of this / the constant pool pointer.
+static inline float lengthFromSquare(float lengthSq) {
+    if ((float)fabs(lengthSq) <= 1.17549435e-38f) {
+        return 0.0f;
+    }
+    return lengthSq * rsqrtf(lengthSq);
+}
+
 void grGimmickMovement::updateMove(float deltaFrame) {
     float previous = m_timer;
     m_timer = previous - deltaFrame;
@@ -51,11 +61,7 @@ void grGimmickMovement::updateMove(float deltaFrame) {
         if (diff.m_z + (diff.m_x + diff.m_y) == 0.0f) {
             m_state = 4;
         } else {
-            float remaining = 0.0f;
-            float lengthSq = diff.m_z * diff.m_z + (diff.m_x * diff.m_x + diff.m_y * diff.m_y);
-            if (!((float)fabs(lengthSq) <= 1.17549435e-38f)) {
-                remaining = lengthSq * rsqrtf(lengthSq);
-            }
+            float remaining = lengthFromSquare(diff.m_z * diff.m_z + (diff.m_x * diff.m_x + diff.m_y * diff.m_y));
             diff.normalize();
             diff.m_x *= moved;
             diff.m_y *= moved;
@@ -65,11 +71,7 @@ void grGimmickMovement::updateMove(float deltaFrame) {
             if (diff.m_z + (diff.m_x + diff.m_y) == 0.0f) {
                 m_state = 4;
             } else {
-                float travelled = 0.0f;
-                float travelSq = diff.m_z * diff.m_z + (diff.m_x * diff.m_x + diff.m_y * diff.m_y);
-                if (!((float)fabs(travelSq) <= 1.17549435e-38f)) {
-                    travelled = travelSq * rsqrtf(travelSq);
-                }
+                float travelled = lengthFromSquare(diff.m_z * diff.m_z + (diff.m_x * diff.m_x + diff.m_y * diff.m_y));
                 if (travelled <= remaining) {
                     setPos(&next);
                 } else {
@@ -98,11 +100,7 @@ void grGimmickMovement::updateMove(float deltaFrame) {
         if (diff.m_z + (diff.m_x + diff.m_y) == 0.0f) {
             m_state = 4;
         } else {
-            float length = 0.0f;
-            float lengthSq = diff.m_z * diff.m_z + (diff.m_x * diff.m_x + diff.m_y * diff.m_y);
-            if (!((float)fabs(lengthSq) <= 1.17549435e-38f)) {
-                length = lengthSq * rsqrtf(lengthSq);
-            }
+            float length = lengthFromSquare(diff.m_z * diff.m_z + (diff.m_x * diff.m_x + diff.m_y * diff.m_y));
             diff.normalize();
             float distance = length * rate;
             diff.m_x *= distance;
@@ -155,12 +153,5 @@ void grGimmickMovement::startMove() {
         m_timer = data->m_time;
         m_state = 3;
     }
-    grCalcWorldCallBack* calcWorldCallBack = &m_calcWorldCallBack;
-    grNodeCallbackData* nodeData = calcWorldCallBack->m_nodeCallbackDatas;
-    if (nodeData == NULL) {
-        return;
-    }
-    nodeData->m_pos.m_x = data->m_start.m_x;
-    nodeData->m_pos.m_y = data->m_start.m_y;
-    nodeData->m_pos.m_z = data->m_start.m_z;
+    setPos(&m_data->m_start);
 }

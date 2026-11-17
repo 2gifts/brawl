@@ -23,6 +23,8 @@ void grDolpicShineScnObjCallBack::SetCallBackCondition(nw4r::g3d::ScnObj* object
     ScnObj_EnableCallbackExecOp(object, 2);
 }
 
+// TODO(match): 93%. The original loads m_rot z, y, x for the three scaled arguments (we load x, y, z) and keeps the object pointer
+// copy after the timing tests; a switch(timing) with case 2 was tried and scores lower.
 // Turns the model's node 1 about the point m_pos by m_rot (degrees).
 void grDolpicShineScnObjCallBack::ExecCallback_CALC_WORLD(nw4r::g3d::ScnObj::Timing timing, nw4r::g3d::ScnObj* object, u32 param, void* info) {
     if (object != NULL && timing != 3 && timing < 3 && timing != 1 && timing >= 1) {

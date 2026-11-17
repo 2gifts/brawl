@@ -149,11 +149,13 @@ static inline bool grCrayonHasColor(gfModelAnimation* modelAnim, u8 animId) { re
 
 // The animations of every model of the ground are set again when the step starts: each kind of animation (chr, visibility,
 // texture pattern, texture srt and material colour) of the index of the step, if the file has it.
+// TODO(match): update() is 99.8% with the locals in this order; the original keeps the strength-reduced model offset in a lower
+// saved register than the two model pointers (we give it the highest of the three). Seen in static, season and (own copy) kumo.
 #define CRAYON_SEASON_UPDATE(deltaFrame)                                                          \
     grCrayon::update(deltaFrame);                                                                 \
     if (unk160 == 0.0f) {                                                                         \
-        nw4r::g3d::ScnMdl* sceneMdl;                                                              \
         gfModelAnimation* modelAnim;                                                              \
+        nw4r::g3d::ScnMdl* sceneMdl;                                                              \
         u32 i = 0;                                                                                \
         u32 modelNum = getModelCount();                                                           \
         for (; i != modelNum; i++) {                                                              \

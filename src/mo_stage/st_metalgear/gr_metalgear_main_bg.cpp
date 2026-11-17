@@ -10,6 +10,15 @@
 #include <st_metalgear/gr_metalgear.h>
 #include <st_metalgear/gr_metalgear_anim.h>
 
+grMetalgearMainBg* grMetalgearMainBg::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
+    grMetalgearMainBg* ground = new (Heaps::StageInstance) grMetalgearMainBg(taskName);
+    if (ground != NULL) {
+        ground->setMdlIndex(mdlIndex);
+        ground->setTgtNode(tgtNodeName);
+    }
+    return ground;
+}
+
 grMetalgearMainBg::grMetalgearMainBg(const char* taskName) : grMetalgear(taskName) {
     m_posGimmickWork = NULL;
     m_stateWork = NULL;
@@ -24,15 +33,6 @@ grMetalgearMainBg::grMetalgearMainBg(const char* taskName) : grMetalgear(taskNam
     m_jointLeft = NULL;
     m_jointRight = NULL;
     m_stateWallWork = NULL;
-}
-
-grMetalgearMainBg* grMetalgearMainBg::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
-    grMetalgearMainBg* ground = new (Heaps::StageInstance) grMetalgearMainBg(taskName);
-    if (ground != NULL) {
-        ground->setMdlIndex(mdlIndex);
-        ground->setTgtNode(tgtNodeName);
-    }
-    return ground;
 }
 
 grMetalgearMainBg::~grMetalgearMainBg() {

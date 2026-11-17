@@ -4,6 +4,15 @@
 
 #include <st_village/gr_village.h>
 
+grVillageClock* grVillageClock::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
+    grVillageClock* ground = new (Heaps::StageInstance) grVillageClock(taskName);
+    if (ground != NULL) {
+        ground->setMdlIndex(mdlIndex);
+        ground->setTgtNode(tgtNodeName);
+    }
+    return ground;
+}
+
 grVillageClock::grVillageClock(const char* taskName) : grVillage(taskName) {
     m_nodeHour = 0;
     m_rotHour.m_x = 0.0f;
@@ -21,15 +30,6 @@ grVillageClock::grVillageClock(const char* taskName) : grVillage(taskName) {
     callback->initialize(false, Heaps::StageInstance);
     callback->m_nodeCallbackDatas[0].m_flags |= 0x20;
     callback->m_nodeCallbackDatas[1].m_flags |= 0x20;
-}
-
-grVillageClock* grVillageClock::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
-    grVillageClock* ground = new (Heaps::StageInstance) grVillageClock(taskName);
-    if (ground != NULL) {
-        ground->setMdlIndex(mdlIndex);
-        ground->setTgtNode(tgtNodeName);
-    }
-    return ground;
 }
 
 grVillageClock::~grVillageClock() {

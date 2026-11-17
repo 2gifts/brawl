@@ -6,12 +6,6 @@
 
 #include <st_metalgear/gr_metalgear.h>
 
-grMetalgear::grMetalgear(const char* taskName) : grYakumono(taskName) {
-    m_state = 0;
-    m_timer = 0.0f;
-    setupMelee();
-}
-
 grMetalgear* grMetalgear::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
     grMetalgear* ground = new (Heaps::StageInstance) grMetalgear(taskName);
     if (ground != NULL) {
@@ -19,6 +13,12 @@ grMetalgear* grMetalgear::create(int mdlIndex, const char* tgtNodeName, const ch
         ground->setTgtNode(tgtNodeName);
     }
     return ground;
+}
+
+grMetalgear::grMetalgear(const char* taskName) : grYakumono(taskName) {
+    m_state = 0;
+    m_timer = 0.0f;
+    setupMelee();
 }
 
 grMetalgear::~grMetalgear() {

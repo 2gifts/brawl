@@ -21,6 +21,10 @@ wnDiddyExplosion::wnDiddyExplosion(s32 articleId, const wnArticleBuildInfo& info
     Weapon::deactivate(false);
 }
 
+// BYTES: the original emits the destructor right after the constructor's weak callees, before activate (an in-class inline body is
+// emitted after the key function instead).
+wnDiddyExplosion::~wnDiddyExplosion() { }
+
 void wnDiddyExplosion::activate(int founderTaskId, int team, Vec3f* position, float lr) {
     wnActivateDesc desc(founderTaskId, 0xFFFF, 0xFFFF, 0xFFFF, -1, -1, 0, 0, *position, lr, team, 0, 2, 0x80, 0, 0x35F,
                         0);

@@ -25,6 +25,8 @@ grDxOnettAshiba* grDxOnettAshiba::create(int mdlIndex, const char* tgtNodeName, 
     return ground;
 }
 
+// TODO(match): 99.5%; only the scheduling of the Vec2f(0, 0) temporary against the sound-effect field stores differs (stfs of
+// the temporary comes before the first int store in the original). Reordering the stores or dropping assignVec2f is worse.
 grDxOnettAshiba::grDxOnettAshiba(const char* taskName) : grDxOnett(taskName) {
     m_type = 2;
     m_offsetX = 0.0f;

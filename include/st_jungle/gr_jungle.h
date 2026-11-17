@@ -22,7 +22,6 @@
 #include <so/area/so_area_module_impl.h>
 #include <so/collision/so_collision_hit_part.h>
 #include <so/event/so_gimmick_event_presenter.h>
-#include <st/se_util.h>
 #include <string.h>
 #include <types.h>
 #include <yk/yakumono.h>
@@ -32,8 +31,6 @@
 
 // sora_melee / main functions that have no names yet.
 // gfCamera::getScreenPosition2WorldVector (main, unnamed): the vector from the camera through a place of the screen
-// Vec3f::normalize1 (main, unnamed): the unit vector (and its length) of a vector
-extern "C" void fn_8003DEE0(Vec3f* out, Vec3f* in);
 
 // The value is brought into the range (the original has it as fsel).
 static inline float grJungleClamp(float value, float low, float high) {
@@ -57,6 +54,10 @@ public:
     virtual void update(float deltaFrame);
 };
 static_assert(sizeof(grJungle) == 0x158, "Class is wrong size!");
+
+// BYTES: included here, after grJungle: the original defines the sound sequence classes after the base ground, which
+// puts their RTTI (batches come out in reverse definition order) before the vtable of grJungle in .data.
+#include <st/se_util.h>
 
 // The sign that warns of the faster scroll (a sound sequence plays while it is on; it is placed in front of the camera).
 class grJungleWarning : public grJungle {

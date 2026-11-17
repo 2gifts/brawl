@@ -493,7 +493,3 @@ bool stDxOnett::selectCar(u32 mode) {
     }
     return true;
 }
-
-bool stDxOnett::isBamperVector() {
-    return true;
-}

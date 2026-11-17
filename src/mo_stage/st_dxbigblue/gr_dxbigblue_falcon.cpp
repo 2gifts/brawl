@@ -95,7 +95,10 @@ void grDxBigBlueFalcon::updateCallBack(float deltaFrame) {
                 grNodeCallbackData* node = &calcWorldCallBack->m_nodeCallbackDatas[0];
                 Vec3f rot;
                 rot = node->m_rot;
-                rot.m_z = rot.m_z + (m_flyDataWork->m_rot.m_z - rot.m_z) * data->unkD4;
+                float target = m_flyDataWork->m_rot.m_z;
+                float rate = data->unkD4;
+                float delta = target - rot.m_z;
+                rot.m_z = rot.m_z + delta * rate;
                 node->m_pos = m_flyDataWork->m_pos;
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_rot = rot;
             }

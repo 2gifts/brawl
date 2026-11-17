@@ -19,6 +19,15 @@ static inline bool famicomIsNearZero(float value) {
     return result;
 }
 
+grFamicomBg* grFamicomBg::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
+    grFamicomBg* ground = new (Heaps::StageInstance) grFamicomBg(taskName);
+    if (ground != NULL) {
+        ground->setMdlIndex(mdlIndex);
+        ground->setTgtNode(tgtNodeName);
+    }
+    return ground;
+}
+
 grFamicomBg::grFamicomBg(const char* taskName) : grFamicom(taskName) {
     m_posYukaWork = NULL;
     m_posPowWork = NULL;
@@ -33,15 +42,6 @@ grFamicomBg::grFamicomBg(const char* taskName) : grFamicom(taskName) {
     memset(m_nodeEnemy, 0, sizeof(m_nodeEnemy));
     memset(m_nodeBall, 0, sizeof(m_nodeBall));
     memset(m_landingTimer, 0, sizeof(m_landingTimer));
-}
-
-grFamicomBg* grFamicomBg::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
-    grFamicomBg* ground = new (Heaps::StageInstance) grFamicomBg(taskName);
-    if (ground != NULL) {
-        ground->setMdlIndex(mdlIndex);
-        ground->setTgtNode(tgtNodeName);
-    }
-    return ground;
 }
 
 grFamicomBg::~grFamicomBg() {

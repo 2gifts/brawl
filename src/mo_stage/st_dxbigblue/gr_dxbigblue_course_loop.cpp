@@ -26,6 +26,8 @@ void grDxBigBlueCourseLoop::processAnim() {
 }
 
 // Finds the two collisions of the loop.
+// TODO(match): 88%. The original reads joint->m_nodeIndex into a saved register BEFORE the virtual getNodeIndex call (and keeps
+// the joint count in r29, the index in r30 as u32); every spelling tried (operand swap, casts, a local) loads it after the call.
 void grDxBigBlueCourseLoop::updateJoint(float deltaFrame) {
     if (m_jointStart == NULL) {
         grCollision* collision = m_collision;

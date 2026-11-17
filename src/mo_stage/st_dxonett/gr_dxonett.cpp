@@ -134,8 +134,6 @@ bool grDxOnettBg::setNode() {
 // ---- Warning ----
 
 // HYPOTHESIS: gfCamera::getScreenPosition2WorldVector (the world direction of a point of the screen, in pixels)
-// normalize (out = in / length)
-extern "C" void fn_8003DEE0(Vec3f* out, const Vec3f* in);
 
 // HYPOTHESIS: the part of the camera object that holds the size of the screen.
 struct dxOnettCameraView {
@@ -237,7 +235,7 @@ void grDxOnettWarning::updateCallBack(float deltaFrame) {
                     manager->getCamera(0)->getScreenPosition2WorldVector(&screen, 0.8f * view->m_width, 0.5f * view->m_height);
                     lineStart = manager->m_cameras[0].m_centerPos;
                     lineEnd = lineStart;
-                    fn_8003DEE0(&direction, &screen);
+                    direction.normalize(&screen);
                     if (reinterpret_cast<clLine3D*>(&lineEnd)->checkIntersectXYPlane(lineStart)) {
                         grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
                         data->m_pos = lineStart;

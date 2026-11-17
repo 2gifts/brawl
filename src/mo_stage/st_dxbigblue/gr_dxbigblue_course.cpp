@@ -1,4 +1,4 @@
-#define MT_VEC3F_BIKE_UTILITY_OPERATORS // the stage uses the operators with the register order of the native Utility code
+#define MT_VEC3F_ADD_NATIVE_ORDER // BYTES: the sum is in the native register order, the difference in the default one (mt_vector.h)
 #include <nw4r/g3d/g3d_resmdl.h>
 #include <nw4r/g3d/g3d_resnode.h>
 #include <st_dxbigblue/gr_dxbigblue_course.h>

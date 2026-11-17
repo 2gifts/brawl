@@ -17,6 +17,8 @@ grDxBigBlueAshiba* grDxBigBlueAshiba::create(int mdlIndex, const char* nodeName,
     return ground;
 }
 
+grDxBigBlueAshiba::~grDxBigBlueAshiba() { }
+
 // The platform comes from one side (picked by chance), flies across and goes when it has left the camera.
 void grDxBigBlueAshiba::updateActive(float deltaFrame) {
     stDxBigBlueData* data = static_cast<stDxBigBlueData*>(getStageData());
@@ -98,7 +100,10 @@ void grDxBigBlueAshiba::updateCallBack(float deltaFrame) {
                 grNodeCallbackData* node = &calcWorldCallBack->m_nodeCallbackDatas[0];
                 Vec3f rot;
                 rot = node->m_rot;
-                rot.m_z = rot.m_z + ((m_flyDataWork->m_rot.m_z + m_sinkOffset) - rot.m_z) * data->unk9C;
+                float target = m_flyDataWork->m_rot.m_z + m_sinkOffset;
+                float rate = data->unk9C;
+                float delta = target - rot.m_z;
+                rot.m_z = rot.m_z + delta * rate;
                 node->m_pos = m_flyDataWork->m_pos;
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_rot = rot;
             }
@@ -221,7 +226,10 @@ void grDxBigBlueAshibaTrainer::updateCallBack(float deltaFrame) {
                 grNodeCallbackData* node = &calcWorldCallBack->m_nodeCallbackDatas[0];
                 Vec3f rot;
                 rot = node->m_rot;
-                rot.m_z = rot.m_z + ((m_flyDataWork->m_rot.m_z + m_sinkOffset) - rot.m_z) * data->unk9C;
+                float target = m_flyDataWork->m_rot.m_z + m_sinkOffset;
+                float rate = data->unk9C;
+                float delta = target - rot.m_z;
+                rot.m_z = rot.m_z + delta * rate;
                 node->m_pos = m_flyDataWork->m_pos;
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_pos.m_z = -160.0f;
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_rot = rot;

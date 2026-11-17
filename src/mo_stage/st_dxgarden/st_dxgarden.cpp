@@ -20,10 +20,10 @@
 stClassInfoImpl<Stages::DxGarden, stDxGarden> stDxGarden::bss_loc_14;
 
 stDxGarden* stDxGarden::create() {
-    return new (Heaps::StageInstance) stDxGarden;
+    return new (Heaps::StageInstance) stDxGarden("stDxGarden");
 }
 
-stDxGarden::stDxGarden() : stMelee("stDxGarden", Stages::DxGarden) {
+inline stDxGarden::stDxGarden(const char* name) : stMelee(name, Stages::DxGarden) {
     m_waterData = NULL;
     m_trigger = NULL;
     memset(m_limit, 0, sizeof(m_limit));
@@ -264,13 +264,4 @@ void stDxGarden::updateRiver(float deltaFrame) {
     water->m_areaData.m_offsetPos.m_x = 0.0f;
     water->m_areaData.m_offsetPos.m_y = data[0] - 0.5f * water->m_areaData.m_range.m_y;
     return m_trigger->setWaterParam(m_waterData);
-}
-
-bool stDxGarden::isBamperVector() {
-    return true;
-}
-
-GXColor stDxGarden::getFinalTechniqColor() {
-    u32 packed = 0x1400047D;
-    return *reinterpret_cast<GXColor*>(&packed);
 }

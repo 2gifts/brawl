@@ -10,8 +10,14 @@
 #include <st_gw/gr_gw_item.h>
 
 
-static grGWMarker sMarkerA(0xFF, 0);
-static grGWMarker sMarkerB(0xFF, 1);
+grGWFireSpring* grGWFireSpring::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
+    grGWFireSpring* ground = new (Heaps::StageInstance) grGWFireSpring(taskName);
+    if (ground != NULL) {
+        ground->setMdlIndex(mdlIndex);
+        ground->setTgtNode(tgtNodeName);
+    }
+    return ground;
+}
 
 grGWFireSpring::grGWFireSpring(const char* taskName) : grGimmickSpring(taskName), m_snd() {
     m_sceneIdWork = NULL;
@@ -33,15 +39,6 @@ grGWFireSpring::grGWFireSpring(const char* taskName) : grGimmickSpring(taskName)
     callback->m_nodeCallbackDatas[0].m_flags |= 4;
     callback->m_nodeCallbackDatas[0].m_flags |= 1;
     setupMelee();
-}
-
-grGWFireSpring* grGWFireSpring::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
-    grGWFireSpring* ground = new (Heaps::StageInstance) grGWFireSpring(taskName);
-    if (ground != NULL) {
-        ground->setMdlIndex(mdlIndex);
-        ground->setTgtNode(tgtNodeName);
-    }
-    return ground;
 }
 
 grGWFireSpring::~grGWFireSpring() {

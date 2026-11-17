@@ -133,6 +133,9 @@ mo_fighter/ft_ness/wn_ness_yoyo_status_uniq_process_shot_fall.cpp:
 
 mo_fighter/ft_ness/wn_ness_yoyo_head.cpp:
 	.text       start:0x00021738 end:0x00023E40
+	.rodata     start:0x00000168 end:0x00000178
+	.data       start:0x0000BC60 end:0x0000C200
+	.bss        start:0x00000520 end:0x00000578
 
 mo_fighter/ft_ness/wn_ness_yoyo_head_status_uniq_process_shot.cpp:
 	.text       start:0x00023E40 end:0x00024250

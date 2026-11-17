@@ -3,6 +3,15 @@
 
 #include <st_village/gr_village.h>
 
+grVillage* grVillage::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
+    grVillage* ground = new (Heaps::StageInstance) grVillage(taskName);
+    if (ground != NULL) {
+        ground->setMdlIndex(mdlIndex);
+        ground->setTgtNode(tgtNodeName);
+    }
+    return ground;
+}
+
 grVillage::grVillage(const char* taskName) : grYakumono(taskName) {
     m_state = 0;
     m_timer = 0.0f;
@@ -11,15 +20,6 @@ grVillage::grVillage(const char* taskName) : grYakumono(taskName) {
     m_stateWork = NULL;
     m_posGuestWork = NULL;
     setupMelee();
-}
-
-grVillage* grVillage::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
-    grVillage* ground = new (Heaps::StageInstance) grVillage(taskName);
-    if (ground != NULL) {
-        ground->setMdlIndex(mdlIndex);
-        ground->setTgtNode(tgtNodeName);
-    }
-    return ground;
 }
 
 grVillage::~grVillage() {

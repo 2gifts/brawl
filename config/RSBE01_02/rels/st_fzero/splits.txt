@@ -14,24 +14,36 @@ global_destructor_chain.c:
 mo_stage/st_fzero/st_fzero.cpp:
 	.text       start:0x00000070 end:0x00002320
 	.ctors      start:0x00000000 end:0x00000004
+	.rodata     start:0x00000000 end:0x00000030
+	.data       start:0x00000000 end:0x00000B18
 
 mo_stage/st_fzero/gr_fzero_trainer_warning.cpp:
 	.text       start:0x00002320 end:0x00003A84
+	.rodata     start:0x00000030 end:0x00000050
+	.data       start:0x00000B18 end:0x000012C0
 
 mo_stage/st_fzero/gr_fzero_bg.cpp:
 	.text       start:0x00003A84 end:0x00005D50
+	.rodata     start:0x00000050 end:0x000000F8
+	.data       start:0x000012C0 end:0x00001790
 
 mo_stage/st_fzero/gr_fzero_startline.cpp:
 	.text       start:0x00005D50 end:0x00006024
+	.data       start:0x00001790 end:0x000019B0
 
 mo_stage/st_fzero/gr_fzero_platering.cpp:
 	.text       start:0x00006024 end:0x000062D0
+	.data       start:0x000019B0 end:0x00001BD0
 
 mo_stage/st_fzero/gr_fzero_ashiba.cpp:
 	.text       start:0x000062D0 end:0x00006F70
+	.rodata     start:0x000000F8 end:0x00000118
+	.data       start:0x00001BD0 end:0x00002370
 
 mo_stage/st_fzero/gr_fzero_car.cpp:
 	.text       start:0x00006F70 end:0x00008368
+	.rodata     start:0x00000118 end:0x000001BC
+	.data       start:0x00002370 end:0x000034E0
 
 mo_stage/st_fzero/gr_fzero_node.cpp:
 	.text       start:0x00008368 end:0x000091B4
@@ -41,6 +53,7 @@ mo_stage/st_fzero/gr_fzero_wall.cpp:
 
 mo_stage/st_fzero/gr_fzero_attack.cpp:
 	.text       start:0x0000D2D4 end:0x0000E800
+	.data       start:0x000034E0 end:0x00003C48
 
 mo_stage/mo_stage.cpp:
 	.text       start:0x0000E800 end:0x0000E89C

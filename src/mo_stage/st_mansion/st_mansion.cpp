@@ -1,3 +1,8 @@
+// BYTES: the original stMansion::getZoneLightSetIndex(Vec3f*) overrides the Stage virtual in the same vtable slot, so the
+// base takes the position too. Opt-in (see include/st/stage.h) until the shared Stage declaration is corrected; without
+// the base change the override becomes a new, extra virtual at the end of the vtable.
+#define STAGE_ZONE_LIGHT_SET_INDEX_TAKES_POSITION
+
 #include <cm/cm_camera_controller.h>
 #include <cm/cm_quake.h>
 #include <gf/gf_3d_scene.h>
@@ -92,7 +97,7 @@ void stMansion::createObjBg(int index) {
     Ground* ground;
     switch (index) {
     case 0:
-        ground = grMansion::create(0, "StgManshon00AmoonSky", "grMansionMainBg");
+        ground = grMansion::create(0, "StgManshon00Amoonsky", "grMansionMainBg");
         break;
     default:
         ground = NULL;
@@ -476,7 +481,7 @@ void stMansion::notifyEventInfoGo() {
 }
 
 // The light set of the zone: inside the house the light is the dark one, unless the area of that corner fell.
-u32 stMansion::getZoneLightSetIndex(Vec3f* position) {
+int stMansion::getZoneLightSetIndex(Vec3f* position) {
     if (position == NULL) {
         return 0x15;
     }

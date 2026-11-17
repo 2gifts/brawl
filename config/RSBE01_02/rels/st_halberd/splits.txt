@@ -72,12 +72,12 @@ mo_stage/st_halberd/gr_halberd_hero2dan.cpp:
 mo_stage/st_halberd/gr_halberd_arm.cpp:
 	.text       start:0x000103CC end:0x00011360
 	.rodata     start:0x00000360 end:0x00000390
-	.data       start:0x00002EB0 end:0x00003120
+	.data       start:0x00002EB0 end:0x000030E8
 
 mo_stage/st_halberd/gr_halberd_warning.cpp:
 	.text       start:0x00011360 end:0x00011F90
 	.rodata     start:0x00000390 end:0x000003A8
-	.data       start:0x00003120 end:0x00003348
+	.data       start:0x000030E8 end:0x00003348
 
 mo_stage/mo_stage.cpp:
 	.text       start:0x00011F90 end:0x0001202C

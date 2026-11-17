@@ -1,3 +1,5 @@
+#define YK_DATA_INLINE_CTOR // the ykData / ykDataGroup constructors are inline in this REL
+
 #include <ef/ef_id.h>
 #include <memory.h>
 #include <mt/mt_trig.h>
@@ -20,22 +22,21 @@ grJungleAshiba07B* grJungleAshiba07B::create(int mdlIndex, const char* tgtNodeNa
     return ground;
 }
 
-// MATCH-ONLY: the original frees the four hit arrays as arrays of the objects that have a constructor
 grJungleAshiba07B::~grJungleAshiba07B() {
     if (m_hitData != NULL) {
-        delete[] reinterpret_cast<ykDataGroup*>(m_hitData);
+        delete[] m_hitData;
     }
     m_hitData = NULL;
     if (m_hitSimple != NULL) {
-        delete[] reinterpret_cast<ykDataGroup*>(m_hitSimple);
+        delete[] m_hitSimple;
     }
     m_hitSimple = NULL;
     if (m_hitSet != NULL) {
-        delete[] reinterpret_cast<ykDataGroup*>(m_hitSet);
+        delete[] m_hitSet;
     }
     m_hitSet = NULL;
     if (m_dataGroup != NULL) {
-        delete[] reinterpret_cast<ykDataGroup*>(m_dataGroup);
+        delete[] m_dataGroup;
     }
     m_dataGroup = NULL;
     if (m_data != NULL) {

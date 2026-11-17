@@ -272,7 +272,7 @@ modules:
   hash: 7409ec3d270eabce43a404556045cbce0a6893c7
   splits: config/RSBE01_02/rels/st_mansion/splits.txt
   symbols: config/RSBE01_02/rels/st_mansion/symbols.txt
-  force_active: [HomeBtnIcon]
+  force_active: [create__9stMansionFv, HomeBtnIcon]
 - object: files/module/st_mariopast.rel
   hash: 9aeffe387f5cb131a5e6db6bb946a39260714beb
   splits: config/RSBE01_02/rels/st_mariopast/splits.txt
@@ -357,7 +357,7 @@ modules:
   hash: fb2ff7f1b949ee36289fc8433a6becc83c9ecb68
   splits: config/RSBE01_02/rels/st_emblem/splits.txt
   symbols: config/RSBE01_02/rels/st_emblem/symbols.txt
-  force_active: [HomeBtnIcon]
+  force_active: [create__8stEmblemFv, HomeBtnIcon]
 - object: files/module/st_madein.rel
   hash: 8e6034b5a04ea2716eefa2af44f09042371fd994
   splits: config/RSBE01_02/rels/st_madein/splits.txt
@@ -417,17 +417,17 @@ modules:
   hash: 8cfb4ca5c1c7a0eb83237eb0edb893cbd3b83532
   splits: config/RSBE01_02/rels/st_dxyorster/splits.txt
   symbols: config/RSBE01_02/rels/st_dxyorster/symbols.txt
-  force_active: [HomeBtnIcon]
+  force_active: [create__11stDxYorsterFv, HomeBtnIcon]
 - object: files/module/st_dxgarden.rel
   hash: 9a219966c8e0e2ffd7faaf9b15386349ca8f7070
   splits: config/RSBE01_02/rels/st_dxgarden/splits.txt
   symbols: config/RSBE01_02/rels/st_dxgarden/symbols.txt
-  force_active: [HomeBtnIcon]
+  force_active: [create__10stDxGardenFv, HomeBtnIcon]
 - object: files/module/st_dxonett.rel
   hash: babb129435fc4ef716395030c0c97fcd53e01066
   splits: config/RSBE01_02/rels/st_dxonett/splits.txt
   symbols: config/RSBE01_02/rels/st_dxonett/symbols.txt
-  force_active: [HomeBtnIcon]
+  force_active: [create__9stDxOnettFv, HomeBtnIcon]
 - object: files/module/st_dxgreens.rel
   hash: 873352706f34abb161668a36ceeda4520f51802f
   splits: config/RSBE01_02/rels/st_dxgreens/splits.txt

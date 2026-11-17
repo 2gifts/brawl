@@ -155,7 +155,7 @@ mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_water_follow.cpp:
 
 mo_fighter/ft_pikmin/wn_pikmin_dolfin.cpp:
 	.text       start:0x000270CC end:0x0002AA3C
-	.rodata     start:0x00000140 end:0x000001B4
+	.rodata     start:0x00000140 end:0x000001A8
 
 mo_fighter/ft_pikmin/wn_pikmin_dolfin_status_uniq_process_common.cpp:
 	.text       start:0x0002AA3C end:0x0002AAF0
@@ -165,8 +165,8 @@ mo_fighter/ft_pikmin/wn_pikmin_dolfin_status_uniq_process_common.cpp:
 
 mo_fighter/ft_pikmin/wn_pikmin_chain.cpp:
 	.text       start:0x0002AAF0 end:0x0002D664
-	.data       start:0x0000BAA8 end:0x0000C1D0
-	.bss        start:0x00000300 end:0x00000390
+	.data       start:0x0000BAA8 end:0x0000C118
+	.bss        start:0x00000300 end:0x00000380
 
 mo_fighter/ft_pikmin/wn_pikmin_chain_status_uniq_process_shoot.cpp:
 	.text       start:0x0002D664 end:0x0002DB84
@@ -175,6 +175,9 @@ mo_fighter/ft_pikmin/wn_pikmin_chain_status_uniq_process_shoot.cpp:
 mo_fighter/ft_pikmin/wn_pikmin_chain_status_uniq_process_reach.cpp:
 	.text       start:0x0002DB84 end:0x0002DCE4
 	.ctors      start:0x00000040 end:0x00000044
+	.rodata     start:0x000001A8 end:0x000001B4
+	.data       start:0x0000C118 end:0x0000C1D0
+	.bss        start:0x00000380 end:0x00000390
 
 mo_fighter/ft_pikmin/wn_pikmin_chain_utility.cpp:
 	.text       start:0x0002DCE4 end:0x0002DDD8

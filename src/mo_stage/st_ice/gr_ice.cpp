@@ -3,15 +3,6 @@
 
 #include <st_ice/gr_ice.h>
 
-grIce::grIce(const char* taskName) : grYakumono(taskName) {
-    m_state = 0;
-    m_timer = 0.0f;
-    setupMelee();
-}
-
-grIce::~grIce() {
-}
-
 grIce* grIce::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
     grIce* ground = new (Heaps::StageInstance) grIce(taskName);
     if (ground != NULL) {
@@ -19,6 +10,15 @@ grIce* grIce::create(int mdlIndex, const char* tgtNodeName, const char* taskName
         ground->setTgtNode(tgtNodeName);
     }
     return ground;
+}
+
+grIce::grIce(const char* taskName) : grYakumono(taskName) {
+    m_state = 0;
+    m_timer = 0.0f;
+    setupMelee();
+}
+
+grIce::~grIce() {
 }
 
 grIceWarning* grIceWarning::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {

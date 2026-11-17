@@ -23,7 +23,7 @@ public:
         m_landSide = 0;
     }
     static grDxBigBlueAshiba* create(int mdlIndex, const char* nodeName, const char* taskName);
-    virtual ~grDxBigBlueAshiba() { }
+    virtual ~grDxBigBlueAshiba();
     virtual void receiveCollMsg_Landing(grCollStatus* collStatus, grCollisionJoint* collisionJoint, bool isFirstContact);
     virtual void updateActive(float deltaFrame);
     virtual void updateCallBack(float deltaFrame);

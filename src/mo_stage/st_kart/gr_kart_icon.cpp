@@ -86,59 +86,61 @@ void grKartIcon::updateCallBack(float deltaFrame) {
     }
 }
 
+// TODO(match): 59%. The early-return layout matches; the original does not keep path->m_data in a register (it reloads it after
+// the index arithmetic) and orders the Vec3f temporaries of the bezier maths differently. grKartKart::setCtrlPos has the same diff.
 // Makes the four control points of a bezier curve from the points of the path (the same as grKartKart::setCtrlPos).
 bool grKartIcon::setCtrlPos(u32 pathNo, u32 point, Vec3f* out) {
     grKartIconPathView* pathView = reinterpret_cast<grKartIconPathView*>(getPathHeader());
     if (pathView == NULL) {
         return false;
     }
-    if (pathNo < pathView->m_count) {
-        grFixedPath* path = &pathView->m_paths[(u8)pathNo];
-        if (path == NULL) {
-            return false;
-        }
-        if (path->m_data == NULL) {
-            return false;
-        }
-        int prev = point - 1;
-        u32 pointNum = path->m_offsetToNextEntry;
-        if (prev < 0) {
-            prev = point + pointNum - 1;
-        }
-        u32 cur = point;
-        if (pointNum - 1 < point) {
-            cur = point - pointNum;
-        }
-        u32 next = point + 1;
-        if (pointNum - 1 < next) {
-            next = next - pointNum;
-        }
-        u32 next2 = point + 2;
-        if (pointNum - 1 < next2) {
-            next2 = next2 - pointNum;
-        }
-        Vec3f* points = reinterpret_cast<Vec3f*>(path->m_data);
-        Vec3f p1(points[cur].m_x, points[cur].m_y, points[cur].m_z);
-        Vec3f p2(points[next].m_x, points[next].m_y, points[next].m_z);
-        Vec3f p0(points[prev].m_x, points[prev].m_y, points[prev].m_z);
-        Vec3f p3(points[next2].m_x, points[next2].m_y, points[next2].m_z);
-        Vec3f d1 = p2 - p1;
-        Vec3f t1 = p2 - p0;
-        out[0] = p1;
-        float third1 = 0.33333334f * grKartVecLength(d1);
-        t1.normalize();
-        Vec3f d2 = p1 - p2;
-        Vec3f t2 = p1 - p3;
-        Vec3f scaled1 = t1 * third1;
-        out[1] = p1 + scaled1;
-        float third2 = 0.33333334f * grKartVecLength(d2);
-        t2.normalize();
-        Vec3f scaled2 = t2 * third2;
-        out[2] = p2 + scaled2;
-        out[3] = p2;
-        return true;
+    if (pathNo >= pathView->m_count) {
+        return false;
     }
-    return false;
+    grFixedPath* path = &pathView->m_paths[(u8)pathNo];
+    if (path == NULL) {
+        return false;
+    }
+    if (path->m_data == NULL) {
+        return false;
+    }
+    int prev = point - 1;
+    u32 pointNum = path->m_offsetToNextEntry;
+    if (prev < 0) {
+        prev = point + pointNum - 1;
+    }
+    u32 cur = point;
+    if (point > pointNum - 1) {
+        cur = point - pointNum;
+    }
+    u32 next = point + 1;
+    if (next > pointNum - 1) {
+        next = next - pointNum;
+    }
+    u32 next2 = point + 2;
+    if (next2 > pointNum - 1) {
+        next2 = next2 - pointNum;
+    }
+    Vec3f* points = reinterpret_cast<Vec3f*>(path->m_data);
+    Vec3f p1(points[cur].m_x, points[cur].m_y, points[cur].m_z);
+    Vec3f p2(points[next].m_x, points[next].m_y, points[next].m_z);
+    Vec3f p0(points[prev].m_x, points[prev].m_y, points[prev].m_z);
+    Vec3f p3(points[next2].m_x, points[next2].m_y, points[next2].m_z);
+    Vec3f d1 = p2 - p1;
+    Vec3f t1 = p2 - p0;
+    out[0] = p1;
+    float third1 = 0.33333334f * grKartVecLength(d1);
+    t1.normalize();
+    Vec3f d2 = p1 - p2;
+    Vec3f t2 = p1 - p3;
+    Vec3f scaled1 = t1 * third1;
+    out[1] = p1 + scaled1;
+    float third2 = 0.33333334f * grKartVecLength(d2);
+    t2.normalize();
+    Vec3f scaled2 = t2 * third2;
+    out[2] = p2 + scaled2;
+    out[3] = p2;
+    return true;
 }
 
 grFixedPathCollection* grKartIcon::getPathHeader() {

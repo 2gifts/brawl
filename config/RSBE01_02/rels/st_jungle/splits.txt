@@ -15,13 +15,13 @@ mo_stage/st_jungle/st_jungle.cpp:
 	.text       start:0x00000070 end:0x00002830
 	.ctors      start:0x00000000 end:0x00000004
 	.rodata     start:0x00000000 end:0x00000048
-	.data       start:0x00000000 end:0x000009C0
+	.data       start:0x00000000 end:0x000009C8
 	.bss        start:0x00000008 end:0x00000018
 
 mo_stage/st_jungle/gr_jungle_warning.cpp:
 	.text       start:0x00002830 end:0x000033E0
 	.rodata     start:0x00000048 end:0x00000060
-	.data       start:0x000009C0 end:0x00000EB8
+	.data       start:0x000009C8 end:0x00000EB8
 
 mo_stage/st_jungle/gr_jungle_bg.cpp:
 	.text       start:0x000033E0 end:0x00003B04
@@ -144,12 +144,12 @@ mo_stage/st_jungle/gr_jungle_water.cpp:
 mo_stage/st_jungle/gr_jungle_ladder.cpp:
 	.text       start:0x000155F4 end:0x00015998
 	.rodata     start:0x00000298 end:0x000002A0
-	.data       start:0x00008F20 end:0x00009298
+	.data       start:0x00008F20 end:0x00009188
 
 mo_stage/st_jungle/gr_jungle_attack.cpp:
 	.text       start:0x00015998 end:0x000166A4
 	.rodata     start:0x000002A0 end:0x000002D8
-	.data       start:0x00009298 end:0x00009A00
+	.data       start:0x00009188 end:0x00009A00
 
 mo_stage/mo_stage.cpp:
 	.text       start:0x000166A4 end:0x00016740

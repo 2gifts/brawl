@@ -98,10 +98,15 @@ public:
     virtual void updatePillar(float deltaFrame);
     virtual void updateArea(float deltaFrame);
     virtual void notifyEventInfoGo();
-    virtual u32 getZoneLightSetIndex(Vec3f* position);
+    virtual int getZoneLightSetIndex(Vec3f* position);
     virtual bool isEventEnd(int param1, int* eventState, int* eventDecision);
+    // BYTES: declared in this order because MWCC emits the weak copies of the inline virtuals in reverse declaration order;
+    // the packed word avoids the weak nw4r Color destructor that a Color temporary would add.
+    virtual GXColor getFinalTechniqColor() {
+        u32 packed = 0x1400047D;
+        return *reinterpret_cast<GXColor*>(&packed);
+    }
     virtual bool isBamperVector() { return true; }
-    virtual GXColor getFinalTechniqColor() { return nw4r::ut::Color(0x1400047d); }
 
     static stClassInfoImpl<Stages::Mansion, stMansion> bss_loc_14;
 };

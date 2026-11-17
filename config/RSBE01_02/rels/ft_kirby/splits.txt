@@ -113,6 +113,9 @@ mo_fighter/ft_kirby/wn_kirby_nabe.cpp:
 
 mo_fighter/ft_kirby/wn_kirby_cook_hat.cpp:
 	.text       start:0x0002DAA4 end:0x0002F8A0
+	.rodata     start:0x000005C8 end:0x000005D0
+	.data       start:0x0000E5E8 end:0x0000EAD8
+	.bss        start:0x000012F0 end:0x00001344
 
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x0002F8A0 end:0x0002F93C

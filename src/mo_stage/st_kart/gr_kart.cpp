@@ -4,15 +4,6 @@
 
 #include <st_kart/gr_kart.h>
 
-grKart::grKart(const char* taskName) : grYakumono(taskName) {
-    m_state = 0;
-    m_timer = 0.0f;
-    setupMelee();
-}
-
-grKart::~grKart() {
-}
-
 grKart* grKart::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
     grKart* ground = new (Heaps::StageInstance) grKart(taskName);
     if (ground != NULL) {
@@ -22,15 +13,21 @@ grKart* grKart::create(int mdlIndex, const char* tgtNodeName, const char* taskNa
     return ground;
 }
 
-grKartBg::grKartBg(const char* taskName) : grKart(taskName) {
+grKart::grKart(const char* taskName) : grYakumono(taskName) {
+    m_state = 0;
+    m_timer = 0.0f;
+    setupMelee();
+}
+
+grKart::~grKart() {
+}
+
+inline grKartBg::grKartBg(const char* taskName) : grKart(taskName) {
     m_stateAIWork = NULL;
     m_joint[0] = NULL;
     m_joint[1] = NULL;
     m_joint[2] = NULL;
     m_joint[3] = NULL;
-}
-
-grKartBg::~grKartBg() {
 }
 
 grKartBg* grKartBg::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
@@ -42,6 +39,9 @@ grKartBg* grKartBg::create(int mdlIndex, const char* tgtNodeName, const char* ta
     return ground;
 }
 
+grKartBg::~grKartBg() {
+}
+
 void grKartBg::update(float deltaFrame) {
     grGimmick::update(deltaFrame);
     updateJoint(deltaFrame);
@@ -50,13 +50,34 @@ void grKartBg::update(float deltaFrame) {
 // Finds the joints of the road the first time they exist. Afterwards the stage decides which of them are solid: while it
 // opens a side (8 or 9) the joints of the other parts are switched off.
 void grKartBg::updateJoint(float deltaFrame) {
-    if (m_joint[0] == NULL || m_joint[1] == NULL || m_joint[2] == NULL || m_joint[3] == NULL) {
+    if (m_joint[0] != NULL && m_joint[1] != NULL && m_joint[2] != NULL && m_joint[3] != NULL) {
+        switch (*m_stateAIWork) {
+        case 8:
+            m_joint[0]->m_0x55_3 = false;
+            m_joint[1]->m_0x55_3 = false;
+            m_joint[2]->m_0x55_3 = false;
+            m_joint[3]->m_0x55_3 = true;
+            break;
+        case 9:
+            m_joint[0]->m_0x55_3 = true;
+            m_joint[1]->m_0x55_3 = true;
+            m_joint[2]->m_0x55_3 = true;
+            m_joint[3]->m_0x55_3 = false;
+            break;
+        default:
+            m_joint[0]->m_0x55_3 = false;
+            m_joint[1]->m_0x55_3 = false;
+            m_joint[2]->m_0x55_3 = false;
+            m_joint[3]->m_0x55_3 = false;
+            break;
+        }
+    } else {
         grCollision* collision = m_collision;
         if (collision != NULL) {
-            u32 nodeCenter;
-            u32 nodeLeft;
-            u32 nodeRight;
             u32 nodeLord;
+            u32 nodeRight;
+            u32 nodeLeft;
+            u32 nodeCenter;
             if (getNodeIndex(&nodeCenter, 0, "AshibaCN") && getNodeIndex(&nodeLeft, 0, "AshibaLN") &&
                 getNodeIndex(&nodeRight, 0, "AshibaRN") && getNodeIndex(&nodeLord, 0, "lord")) {
                 u32 i;
@@ -83,27 +104,6 @@ void grKartBg::updateJoint(float deltaFrame) {
                     }
                 }
             }
-        }
-    } else {
-        switch (*m_stateAIWork) {
-        case 8:
-            m_joint[0]->m_0x55_3 = false;
-            m_joint[1]->m_0x55_3 = false;
-            m_joint[2]->m_0x55_3 = false;
-            m_joint[3]->m_0x55_3 = true;
-            break;
-        case 9:
-            m_joint[0]->m_0x55_3 = true;
-            m_joint[1]->m_0x55_3 = true;
-            m_joint[2]->m_0x55_3 = true;
-            m_joint[3]->m_0x55_3 = false;
-            break;
-        default:
-            m_joint[0]->m_0x55_3 = false;
-            m_joint[1]->m_0x55_3 = false;
-            m_joint[2]->m_0x55_3 = false;
-            m_joint[3]->m_0x55_3 = false;
-            break;
         }
     }
 }

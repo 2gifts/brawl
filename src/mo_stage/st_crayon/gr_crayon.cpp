@@ -13,6 +13,11 @@
 // ResNode_SetScale (main, unnamed name in the SDK part of the symbols)
 extern "C" void ResNode_SetScale__FPQ34nw4r3g3d7ResNodefff(nw4r::g3d::ResNode* node, float x, float y, float z);
 
+// MATCH-ONLY: deadstripped function that makes this unit emit Ground::setMdlIndex first (as in gr_dxbigblue.cpp)
+static void emitSetMdlIndex(grCrayon* ths, s32 mdlIndex) {
+    ths->setMdlIndex(mdlIndex);
+}
+
 grCrayon::grCrayon(const char* taskName) : grYakumono(taskName), unk168() {
     unk150 = NULL;
     unk154 = 4;

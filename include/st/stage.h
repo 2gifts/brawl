@@ -322,7 +322,11 @@ public:
     virtual void debugCollision();
     virtual Rect2D* getAIRange() { return &m_aiRange; }
     virtual int getDefaultLightSetIndex() { return 0x14; }
+#ifdef STAGE_ZONE_LIGHT_SET_INDEX_TAKES_POSITION
+    virtual int getZoneLightSetIndex(Vec3f* position);
+#else
     virtual int getZoneLightSetIndex();
+#endif
     virtual int getScrollDir(Vec3f* unk1)
     {
         unk1->m_x = 0.0f;

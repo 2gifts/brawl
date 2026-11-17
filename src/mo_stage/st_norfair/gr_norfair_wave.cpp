@@ -9,6 +9,15 @@
 #include <st_norfair/gr_norfair.h>
 #include <st_norfair/gr_norfair_anim.h>
 
+grNorfairWave* grNorfairWave::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
+    grNorfairWave* ground = new (Heaps::StageInstance) grNorfairWave(taskName);
+    if (ground != NULL) {
+        ground->setMdlIndex(mdlIndex);
+        ground->setTgtNode(tgtNodeName);
+    }
+    return ground;
+}
+
 grNorfairWave::grNorfairWave(const char* taskName) : grNorfair(taskName), m_sePlayer() {
     m_posWork = NULL;
     m_unk160 = 1;
@@ -25,15 +34,6 @@ grNorfairWave::grNorfairWave(const char* taskName) : grNorfair(taskName), m_sePl
     callback->m_numNodeCallbackData = 1;
     callback->initialize(false, Heaps::StageInstance);
     callback->m_nodeCallbackDatas[0].m_flags |= 1;
-}
-
-grNorfairWave* grNorfairWave::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
-    grNorfairWave* ground = new (Heaps::StageInstance) grNorfairWave(taskName);
-    if (ground != NULL) {
-        ground->setMdlIndex(mdlIndex);
-        ground->setTgtNode(tgtNodeName);
-    }
-    return ground;
 }
 
 grNorfairWave::~grNorfairWave() {

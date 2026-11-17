@@ -73,7 +73,7 @@ public:
     virtual void updateKanban(float deltaFrame);
     virtual void updateBelt(float deltaFrame);
     virtual bool selectCar(u32 mode);
-    virtual bool isBamperVector();
+    virtual bool isBamperVector() { return true; }
 
     static stClassInfoImpl<Stages::DxOnett, stDxOnett> bss_loc_14;
 };

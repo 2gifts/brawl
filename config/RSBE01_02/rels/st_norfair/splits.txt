@@ -15,13 +15,13 @@ mo_stage/st_norfair/st_norfair.cpp:
 	.text       start:0x00000070 end:0x00002C40
 	.ctors      start:0x00000000 end:0x00000004
 	.rodata     start:0x00000000 end:0x00000068
-	.data       start:0x00000000 end:0x00000578
+	.data       start:0x00000000 end:0x00000540
 	.bss        start:0x00000008 end:0x00000028
 
 mo_stage/st_norfair/gr_norfair.cpp:
 	.text       start:0x00002C40 end:0x000033C0
 	.rodata     start:0x00000068 end:0x00000080
-	.data       start:0x00000578 end:0x00000ACC
+	.data       start:0x00000540 end:0x00000ACC
 
 mo_stage/st_norfair/gr_norfair_bg.cpp:
 	.text       start:0x000033C0 end:0x0000376C

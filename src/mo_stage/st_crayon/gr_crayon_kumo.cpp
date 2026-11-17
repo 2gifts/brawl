@@ -23,6 +23,8 @@ grCrayonKumo::~grCrayonKumo() { }
 // The animation (texture pattern and colour) of the clouds follows the step of the ground.
 static u32 sKumoAnim[8] = { 0, 1, 1, 2, 3, 4, 4, 5 };
 
+// TODO(match): update() is 99.8%; only the saved register of the model-offset temporary of the animation loop differs (see
+// CRAYON_SEASON_UPDATE in gr_crayon_anim.h).
 // The clouds turn around their node while the season is spring/winter (3 degrees a frame) or summer (1.5 degrees).
 void grCrayonKumo::update(float deltaFrame) {
     grCrayon::update(deltaFrame);
@@ -58,8 +60,8 @@ void grCrayonKumo::update(float deltaFrame) {
             setVisibility(0);
             break;
         default: {
-            nw4r::g3d::ScnMdl* sceneMdl;
             gfModelAnimation* modelAnim;
+            nw4r::g3d::ScnMdl* sceneMdl;
             u32 i = 0;
             u32 modelNum = getModelCount();
             for (; i != modelNum; i++) {
