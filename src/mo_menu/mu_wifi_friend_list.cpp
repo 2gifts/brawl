@@ -17,9 +17,16 @@ extern muWifiInterfaceTask* g_muWifiInterfaceTask;
 // gfMii::drop(), the Mii data of the friend list is dropped with it
 extern "C" void drop__5gfMiiFv();
 
+// NtMatching::thSaveUserDataNow(): saves the user data of the Wi-Fi in a thread
+extern "C" void thSaveUserDataNow__10NtMatchingFv();
+
+// A report of the Wi-Fi code that the release does not print.
+void netReport(const char* format, ...) { }
+
 class muWifiFriendListTask : public gfTask {
 public:
-    u8 m_unk40[0x8C - 0x40];
+    u8 m_flag40;                            // 0x40
+    u8 m_unk41[0x8C - 0x41];
     MuObject* m_obj8C;                      // 0x8C
     u8 m_unk90[0x9C - 0x90];
     MuObject* m_obj9C;                      // 0x9C
@@ -30,11 +37,12 @@ public:
     MuObject* m_objB4;                      // 0xB4
     u8 m_unkB8[0xC0 - 0xB8];
     MuObject* m_objC0;                      // 0xC0
-    u8 m_unkC4[0xC8 - 0xC4];
+    MuObject* m_objC4;                      // 0xC4
     MuObject* m_objC8;                      // 0xC8
     u8 m_unkCC[0x1E0 - 0xCC];
     nw4r::g3d::ScnObj* m_unk1E0;            // 0x1E0
-    u8 m_unk1E4[0x1EC - 0x1E4];
+    u8 m_unk1E4[0x1E8 - 0x1E4];
+    nw4r::g3d::ScnObj* m_unk1E8;            // 0x1E8
     nw4r::g3d::ScnObj* m_unk1EC;            // 0x1EC
     u8 m_unk1F0[0x204 - 0x1F0];
     nw4r::g3d::ScnMdlExpand* m_group204;    // 0x204
@@ -71,7 +79,7 @@ public:
     static muWifiFriendListTask* create(void* param);
     void initProc(void* param);
     void destroy();
-    muWifiInterfaceTask* getWifiIf();
+    static muWifiInterfaceTask* getWifiIf();
     void getMyName(char* dst);
     void setMyName(const char* src);
     void getMyApeal(char* dst, int index);
@@ -124,6 +132,8 @@ public:
     void initFriendCodeError();
     void initFriendName();
     int mainLeaveIconWnd();
+    void initFromProfile();
+    void flushMyProfile();
 };
 
 muWifiFriendListTask* muWifiFriendListTask::create(void* param) {
@@ -142,9 +152,11 @@ void muWifiFriendListTask::destroy() {
     exit();
 }
 
+#pragma dont_inline on
 muWifiInterfaceTask* muWifiFriendListTask::getWifiIf() {
     return g_muWifiInterfaceTask;
 }
+#pragma dont_inline reset
 
 void muWifiFriendListTask::getMyName(char* dst) {
     strcpy(dst, m_myName);
@@ -419,3 +431,16 @@ void muWifiFriendListTask::setFriendCodeTextColor(int mode) {
     }
 }
 #pragma dont_inline reset
+
+void muWifiFriendListTask::initFromProfile() {
+    setBaseState(4);
+    m_obj8C->changeAnimN(1, 3, true, false);
+    m_objC4->changeAnimN(1, 3, true, false);
+    m_group204->Remove(m_unk1E8);
+    if (m_flag40 == 0) {
+        flushMyProfile();
+        u8* wifi = (u8*)getWifiIf();
+        wifi[0xFCA] &= ~0x10;
+        thSaveUserDataNow__10NtMatchingFv();
+    }
+}
