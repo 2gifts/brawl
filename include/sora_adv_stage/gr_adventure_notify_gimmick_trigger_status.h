@@ -9,8 +9,8 @@ class grAdventureNotifyGimmickTriggerStatus;
 
 // The trigger callback that tells a gimmick about the edges of its triggers (stActTriggerGimmickStatus is defined in
 // another unit of the module; only the layout its constructor fills is declared here).
-class stActTriggerGimmickStatus : public stTriggerCB {
-    u32 unk8;                                       // 0x8, always 0
+class stActTriggerGimmickStatus : public stTriggerCB, public stActTriggerFrameCBZero {
+    // 0x8: unk8 (always 0) comes from stActTriggerFrameCBZero
     u8 unkC;                                        // 0xC, always 1
     int m_index;                                    // 0x10, which trigger of the owner (0: off edge, 1: on edge)
     u8 m_isValid;                                   // 0x14, stTriggerData::m_isValid of the trigger
