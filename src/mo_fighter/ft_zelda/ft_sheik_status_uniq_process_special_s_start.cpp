@@ -1,4 +1,8 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+// BYTES: the node position copies call the out-of-line Vec3f assignment, emitted after this unit's first caller.
+#define MT_VEC3F_ASSIGN_NOINLINE
+// MATCH-ONLY: the inline subtraction allocates its four paired-single registers in ascending order (f0 holds 0.0f).
+#define MT_VEC3F_SUB_ASCENDING
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_entry.h>
 #include <ft/ft_kinetic_energy.h>
@@ -61,8 +65,55 @@ void ftSheikStatusUniqProcessSpecialSStart::initStatus(soModuleAccesser* moduleA
     }
 }
 
-// HYPOTHESIS: not reconstructed yet (paired-single position math and effect/article calls); left as a stub.
-void ftSheikStatusUniqProcessSpecialSStart::execFixPosCounter(soModuleAccesser*) {
+// Places the four attack collisions of the chain (link 6, nodes 3/5/7/9) relative to the fighter, or at model node 0x1e
+// while work flag 0x22000015 is set, and records each position in work floats 0x21000006+i / 0x2100000a+i. Without the
+// link every live attack is cleared and work flag 0x22000016 is raised.
+void ftSheikStatusUniqProcessSpecialSStart::execFixPosCounter(soModuleAccesser* moduleAccesser) {
+    soWorkManageModule* work = &moduleAccesser->getWorkManageModule();
+    soCollisionAttackModule* attack = &moduleAccesser->getCollisionAttackModule();
+    soLinkModule* link = &moduleAccesser->getLinkModule();
+    int index;
+    int nodes[4] = {3, 5, 7, 9};
+    Vec3f fighterPosition = moduleAccesser->getPostureModule().getPos();
+    float facing = moduleAccesser->getPostureModule().getLr();
+    if (link->isLink(6)) {
+        if (work->isFlag(0x22000016)) {
+            for (index = 0; index < 4; ++index) {
+                if (!attack->isAttack(index, false)) attack->set(index, 0);
+            }
+            work->offFlag(0x22000016);
+        }
+        bool atNode = work->isFlag(0x22000015);
+        Vec3f position;
+        if (atNode) {
+            position = moduleAccesser->getModelModule().getNodeGlobalPosition(0x1e, false);
+        }
+        for (index = 0; index < 4; ++index) {
+            if (attack->isAttack(index, false)) {
+                if (!atNode) {
+                    position = link->getParentModelNodeGlobalPosition(6, nodes[index], true);
+                }
+                position.m_z = 0.0f;
+                Vec3f displacement = position - fighterPosition;
+                Vec3f offset;
+                offset.set(0.0f, displacement.m_y, 0.0f);
+                offset.m_z = displacement.m_x * facing;
+                if (0.0f != moduleAccesser->getPostureModule().getScale()) {
+                    *reinterpret_cast<nw4r::math::VEC3*>(&offset) /= moduleAccesser->getPostureModule().getScale();
+                }
+                attack->setOffset(index, &offset);
+                work->setFloat(position.m_x, 0x21000006 + index);
+                work->setFloat(position.m_y, 0x2100000a + index);
+            }
+        }
+    } else {
+        for (index = 0; index < 4; ++index) {
+            if (attack->isAttack(index, false)) {
+                attack->clear(index);
+                work->onFlag(0x22000016);
+            }
+        }
+    }
 }
 
 void ftSheikStatusUniqProcessSpecialSStart::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {

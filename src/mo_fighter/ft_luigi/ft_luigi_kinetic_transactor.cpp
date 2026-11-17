@@ -1,3 +1,5 @@
+// BYTES: the original defines the controller energy after the gravity and stop energies, which puts the controller RTTI first.
+#define FT_KINETIC_ENERGY_CONTROLLER_LAST
 // BYTES: Keep the native out-of-line Vec3f constructor call.
 #define MT_VEC3F_CTOR_NOINLINE
 // BYTES: the native kinetic helpers call vector assignment out of line.

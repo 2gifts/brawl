@@ -187,6 +187,12 @@ void ftSheikStatusUniqProcessSpecialSLoop::execFixPosCounter(soModuleAccesser* m
     }
 }
 
+// The paired-single subtraction (out = this - other); the original emits its copy here, after its first caller.
+// HYPOTHESIS: a weak inline in the original header; ft_ness's yo-yo unit defines it the same way.
+void Vec3f::sub(const Vec3f* other, Vec3f* out) {
+    Vec3fSub(out, this, other);
+}
+
 void ftSheikStatusUniqProcessSpecialSLoop::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
     if (nextStatus != 0x11b && nextStatus != 0x81) {
         reinterpret_cast<ftSheikArticleManageView*>(moduleAccesser->m_enumerationStart->m_generateArticleManageModule)->removeExist(2, 0);

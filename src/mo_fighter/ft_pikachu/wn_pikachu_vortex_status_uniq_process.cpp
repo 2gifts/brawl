@@ -22,6 +22,11 @@ extern "C" {
 // HYPOTHESIS: points the camera module of the vortex at the given fighter.
 // ftPikachu::adjust_camera_subject (this unit cannot include ft_pikachu.h: it conflicts with the weapon builders).
 extern "C" void adjust_camera_subject__9ftPikachuFP14soCameraModule(Fighter* fighter, soCameraModule* cameraModule);
+// BYTES: the original casts the founder to ftPikachu (its RTTI lives in ft_pikachu.cpp); the class cannot be included here
+// (see above), so the runtime cast is called directly (its isRef is a short) and a weak copy of the ftPikachu RTTI chain is not emitted.
+extern char __RTTI__9ftPikachu[];
+extern char __RTTI__11StageObject[];
+void* __dynamic_cast(void* ptr, long vtblOffset, const void* target, const void* source, short isRef);
 }
 
 // The shared updates (defined after the status functions: the original calls them out of line).
@@ -176,7 +181,7 @@ inline void wnPikachuVortexUpdateHitFlag(soModuleAccesser* moduleAccesser) {
 inline void wnPikachuVortexUpdateOwnerCameraSubject(soModuleAccesser* moduleAccesser) {
     StageObject* owner = moduleAccesser->getLinkModule().getParent(3);
     if (owner) {
-        Fighter& fighter = dynamic_cast<Fighter&>(*owner);
-        adjust_camera_subject__9ftPikachuFP14soCameraModule(&fighter, &moduleAccesser->getCameraModule());
+        Fighter* fighter = (Fighter*)__dynamic_cast(owner, 0x3c, __RTTI__9ftPikachu, __RTTI__11StageObject, 1);
+        adjust_camera_subject__9ftPikachuFP14soCameraModule(fighter, &moduleAccesser->getCameraModule());
     }
 }

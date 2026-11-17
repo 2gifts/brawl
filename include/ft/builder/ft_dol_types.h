@@ -150,9 +150,11 @@ FT_DOL_POLY_BEGIN(soCollisionCatchModuleImpl, 0xE4);
     soCollisionCatchModuleImpl(soModuleAccesser* acc, int taskId, u8 category, soArray<soCollisionCatchPart>* parts, soEventObserverRegistrationDesc* regDesc, bool n1, bool n2);
 FT_DOL_POLY_END;
 
+#ifndef FT_CONTROLLER_MODULE_IMPL_DEFINED // opt-in: a unit that includes ft/ft_controller_module_impl.h first
 FT_DOL_POLY_BEGIN(ftControllerModuleImpl, 0x16C);
     ftControllerModuleImpl(soModuleAccesser* acc, s16 unitId, soArray<soControllerImpl>* controllers, soArray<soControllerClatter>* clatters);
 FT_DOL_POLY_END;
+#endif
 
 #ifndef SO_PHYSICS_MODULE_IMPL_DEFINED
 FT_DOL_POLY_BEGIN(soPhysicsModuleImpl, 0x48);

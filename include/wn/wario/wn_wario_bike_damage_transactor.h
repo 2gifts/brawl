@@ -34,6 +34,9 @@ public:
     virtual float getDamageMul(soModuleAccesser* moduleAccesser);
     virtual void checkCheer(float reaction, float angle, soModuleAccesser* moduleAccesser, soDamageLog* damageLog);
     virtual float getDamageForReaction(float damage, soModuleAccesser* moduleAccesser);
+    virtual bool checkNoReaction(soModuleAccesser* moduleAccesser, soDamage* damage);
+    virtual bool isBindStatus(soModuleAccesser* moduleAccesser);
+    virtual bool isBuryStatus(soModuleAccesser* moduleAccesser);
     virtual bool isSpeedDamage(soModuleAccesser* moduleAccesser);
 };
 static_assert(sizeof(wnWarioBikeDamageTransactorImpl) == 4, "Class is wrong size!");

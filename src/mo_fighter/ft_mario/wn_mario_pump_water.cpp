@@ -1,3 +1,9 @@
+// BYTES: the original declares the null kinetic mediator's weak energy updates in this order (weak copies come out reversed).
+// TODO(link): the unit still differs in .data: the original emits the "MarioPumpWater" string, then the static -1 temporary of the
+// status builder's m_changeRequests(-1), then the zero temporary of the effect builder; ours emits the -1 first because the explicit
+// soStatusModuleBuilder specialization in wn_mario_pump_water.h defines its constructor inline at header time. Defining it after the
+// article constructor puts the zero temporary first instead (tried: -1 and 0 swap).
+#define SO_KINETIC_MEDIATOR_NULL_UPDATE_REVERSED
 #define WN_WEAPON_BUILDER
 #define WN_ARTICLE_NATIVE_BUILDERS
 #define WN_SHARED_ARRAYS_1

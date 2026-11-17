@@ -1,5 +1,22 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #define MT_VEC2F_ASSIGN_NOINLINE // BYTES: the original assigns the carried vectors through the out-of-line operator=
+#include <types.h>
+
+class soModuleAccesser;
+
+#include <so/status/so_status_uniq_process.h>
+
+// BYTES: defined ahead of the module headers, as a unit that includes its own class header first would have it: vtables and
+// RTTI come out in reverse order of class definition, and the original has the RTTI of ftKineticEnergyGravity before this vtable.
+// HYPOTHESIS: Kirby's Hammer (down-B charge swing) status process; class and constant names are unknown.
+class ftKirbyStatusUniqProcessHammer : public soStatusUniqProcess {
+public:
+    virtual ~ftKirbyStatusUniqProcessHammer() { }
+    virtual void initStatus(soModuleAccesser* moduleAccesser);
+    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
+    virtual void execStatus(soModuleAccesser* moduleAccesser);
+};
+
 #include <ft/fighter.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_kinetic_energy.h>
@@ -11,15 +28,6 @@
 #include <so/so_value_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
-
-// HYPOTHESIS: Kirby's Hammer (down-B charge swing) status process; class and constant names are unknown.
-class ftKirbyStatusUniqProcessHammer : public soStatusUniqProcess {
-public:
-    virtual ~ftKirbyStatusUniqProcessHammer() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-};
 
 // Starting the swing in the air stops the fall for a moment (the gravity energy starts from the Hammer rise speed); with the
 // parameter 0x5dc2 set the horizontal state of the stick energy moves to the stop energy, which keeps the momentum of the swing.

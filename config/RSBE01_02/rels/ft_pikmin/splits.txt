@@ -80,6 +80,9 @@ mo_fighter/ft_pikmin/wn_pikmin_pikmin_switch_decide_module_impl.cpp:
 mo_fighter/ft_pikmin/wn_pikmin_pikmin_general_term_decide_module_impl.cpp:
 	.text       start:0x00023340 end:0x00023A7C
 	.ctors      start:0x00000010 end:0x00000014
+	.rodata     start:0x000000D8 end:0x000000E8
+	.data       start:0x0000AB48 end:0x0000AC20
+	.bss        start:0x000001D0 end:0x000001E8
 
 mo_fighter/ft_pikmin/wn_pikmin_pikmin_module_accesser_build_data.cpp:
 	.text       start:0x00023A7C end:0x00023F50
@@ -90,14 +93,21 @@ mo_fighter/ft_pikmin/wn_pikmin_pikmin_troops_manager.cpp:
 mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_special_lw_comp.cpp:
 	.text       start:0x0002589C end:0x00025A18
 	.ctors      start:0x00000014 end:0x00000018
+	.data       start:0x0000ADF8 end:0x0000AE80
+	.bss        start:0x000001E8 end:0x000001F8
 
 mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_special_s_cling.cpp:
 	.text       start:0x00025A18 end:0x00025D40
 	.ctors      start:0x00000018 end:0x0000001C
+	.rodata     start:0x00000100 end:0x00000110
+	.data       start:0x0000AE80 end:0x0000AF08
+	.bss        start:0x000001F8 end:0x00000208
 
 mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_jump.cpp:
 	.text       start:0x00025D40 end:0x00025E8C
 	.ctors      start:0x0000001C end:0x00000020
+	.data       start:0x0000AF08 end:0x0000AF80
+	.bss        start:0x00000208 end:0x00000218
 
 mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_turn.cpp:
 	.text       start:0x00025E8C end:0x00025FB8
@@ -108,10 +118,14 @@ mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_turn.cpp:
 mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_catch_common.cpp:
 	.text       start:0x00025FB8 end:0x000261DC
 	.ctors      start:0x00000024 end:0x00000028
+	.data       start:0x0000AFF8 end:0x0000B078
+	.bss        start:0x00000228 end:0x00000238
 
 mo_fighter/ft_pikmin/wn_pikmin_pikmin_damage_effector_impl.cpp:
 	.text       start:0x000261DC end:0x000263DC
 	.ctors      start:0x00000028 end:0x0000002C
+	.data       start:0x0000B078 end:0x0000B158
+	.bss        start:0x00000238 end:0x00000250
 
 mo_fighter/ft_pikmin/wn_pikmin_pikmin_status_uniq_process_follow_common.cpp:
 	.text       start:0x000263DC end:0x00026808

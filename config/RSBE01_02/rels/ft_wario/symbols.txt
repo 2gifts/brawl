@@ -799,10 +799,10 @@ setupDamageStatusTurn__31wnWarioBikeDamageTransactorImplFP16soModuleAccesserP8so
 setupDamageStatusNoReaction__31wnWarioBikeDamageTransactorImplFP16soModuleAccesserP8soDamageP11soDamageLog = .text:0x000153E4; // type:function size:0x80
 getWeightReactionMul__18soDamageTransactorFP16soModuleAccesser = .text:0x00015464; // type:function size:0xC
 preProcessCheckDamage__18soDamageTransactorFP16soModuleAccesserP8soDamage = .text:0x00015470; // type:function size:0x8
-capacity__79soArrayVector<60soInstanceUnitFullProperty<P29soCollisionCatchEventObserver>,1>CFv = .text:0x00015478; // type:function size:0x8 scope:weak
+checkNoReaction__31wnWarioBikeDamageTransactorImplFP16soModuleAccesserP8soDamage = .text:0x00015478; // type:function size:0x8
 isSpeedDamage__31wnWarioBikeDamageTransactorImplFP16soModuleAccesser = .text:0x00015480; // type:function size:0x8
-fn_110_15488 = .text:0x00015488; // type:function size:0x8
-fn_110_15490 = .text:0x00015490; // type:function size:0x8
+isBuryStatus__31wnWarioBikeDamageTransactorImplFP16soModuleAccesser = .text:0x00015488; // type:function size:0x8
+isBindStatus__31wnWarioBikeDamageTransactorImplFP16soModuleAccesser = .text:0x00015490; // type:function size:0x8
 getDamageForReaction__31wnWarioBikeDamageTransactorImplFfP16soModuleAccesser = .text:0x00015498; // type:function size:0x4
 checkCheer__31wnWarioBikeDamageTransactorImplFffP16soModuleAccesserP11soDamageLog = .text:0x0001549C; // type:function size:0x4
 getDamageMul__31wnWarioBikeDamageTransactorImplFP16soModuleAccesser = .text:0x000154A0; // type:function size:0xC

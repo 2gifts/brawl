@@ -42,6 +42,10 @@ wnKirbyStarmissile::wnKirbyStarmissile(s32 articleId, const wnArticleBuildInfo& 
     Weapon::deactivate(false);
 }
 
+// The original defines the gravity energy's destructor in this unit.
+// TODO(match): in the original it sits right after the weak soKineticEnergy constructor, not here.
+wnKineticEnergyGravity::~wnKineticEnergyGravity() { }
+
 const wnKirbyStarmissileData* wnKirbyStarmissile::getData() {
     return static_cast<const wnKirbyStarmissileData*>(m_data);
 }
@@ -220,6 +224,7 @@ void wnKirbyStarmissileStatusUniqProcess::execStop(soModuleAccesser* moduleAcces
     moduleAccesser->getModelModule().setNodeRotate(1, &rot);
 }
 
+// TODO(match): 93%; still differs from the original in register allocation.
 void wnKirbyStarmissileStatusUniqProcess::execFixPos(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getWorkManageModule().getInt(0x20000001) != 2) {
         int power = moduleAccesser->getWorkManageModule().getInt(0x20000000);

@@ -14,6 +14,13 @@ struct ftGameWatchRunParam {
     float unk1C;
 };
 
+// HYPOTHESIS: the GameWatch data continues past extendParam; +0xB8 points at the final-smash movement block
+// (ft_gamewatch_kinetic_transactor.cpp reads the same pointer).
+struct ftGameWatchRunData : public ftData {
+    u8 unk94[0x24];
+    ftGameWatchRunParam* m_runParam; // 0xB8
+};
+
 #include <ft/gamewatch/ft_gamewatch_status_uniq_process_final_swim.h>
 
 class ftGameWatchStatusUniqProcessFinalRun : public ftGameWatchStatusUniqProcessFinalSwim {
@@ -30,37 +37,32 @@ ftGameWatchStatusUniqProcessFinalRun g_ftGameWatchStatusUniqProcessFinalRun;
 static const float s_runSpeedMul = 1.0f;
 static const float s_runCountdownThreshold = 0.0f;
 
-// HYPOTHESIS: helper parameter names and formal source types/order; native GP/FP argument values are verified.
-// The shared walk utility initializes and updates the final movement speed.
-extern "C" void fn_27_1652A8(soModuleAccesser* moduleAccesser, int motionKind,
-                             int speedWork, int rateWork, int flags,
-                             float parameter, float speedScale);
-extern "C" void fn_27_165458(soModuleAccesser* moduleAccesser, int speedWork, float current,
-                             float target, float acceleration, float deceleration,
-                             float speedScale, float speedLimit);
-
-static ftGameWatchRunParam* getRunParam() {
-    ftData* data = g_ftCommonDataAccesser.getData(Fighter_GameWatch);
-    return *reinterpret_cast<ftGameWatchRunParam**>(reinterpret_cast<u8*>(data) + 0xB8);
-}
+// The shared walk utility (map names initWalkSpeed and calcWalkSpeed) initializes and updates the final movement
+// speed; see src/mo_melee/sora_melee/ft/ft_status_uniq_process_walk_util.cpp.
+// HYPOTHESIS: these C-linkage declarations order the parameters as this unit's native calls evaluate their
+// arguments (the register assignment is the same under any order); the callee's own source order is unknown.
+extern "C" void fn_27_1652A8(soModuleAccesser* moduleAccesser, float speedMax, int motionKind, int speedWork,
+                             float speedMul, int rateWork, bool isBack);
+extern "C" void fn_27_165458(soModuleAccesser* moduleAccesser, float speed, float speedMax, float accel,
+                             float accelAdd, float accelDecay, int speedWork, float speedMul);
 
 void ftGameWatchStatusUniqProcessFinalRun::initStatus(soModuleAccesser* moduleAccesser) {
-    ftGameWatchRunParam* param = getRunParam();
-    float motionSpeed = param->unk1C;
-    fn_27_1652A8(moduleAccesser, 0x1f7, 0x21000005, 0x21000007,
-                 0, motionSpeed, s_runSpeedMul);
+    ftData* data = g_ftCommonDataAccesser.getData(Fighter_GameWatch);
+    fn_27_1652A8(moduleAccesser, static_cast<ftGameWatchRunData*>(data)->m_runParam->unk1C, 0x1f7, 0x21000005,
+                 s_runSpeedMul, 0x21000007, false);
     setMotionRate(moduleAccesser);
     ftGameWatchStatusUniqProcessFinalSwim::initStatus(moduleAccesser);
 }
 
 void ftGameWatchStatusUniqProcessFinalRun::execStatus(soModuleAccesser* moduleAccesser) {
-    ftGameWatchRunParam* param = getRunParam();
+    ftGameWatchRunParam* param =
+        static_cast<ftGameWatchRunData*>(g_ftCommonDataAccesser.getData(Fighter_GameWatch))->m_runParam;
     soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
     float speedScale = soValueAccesser::getConstantFloat(moduleAccesser, 0xc37, 0);
     float current = workManage.getFloat(0x21000005);
 
-    fn_27_165458(moduleAccesser, 0x21000005, current, param->unk1C,
-                 param->unk14, param->unk18, speedScale, s_runSpeedMul);
+    fn_27_165458(moduleAccesser, current, param->unk1C, param->unk14, param->unk18, speedScale, 0x21000005,
+                 s_runSpeedMul);
     setMotionRate(moduleAccesser);
 
     // Advance the countdown only while it is positive.

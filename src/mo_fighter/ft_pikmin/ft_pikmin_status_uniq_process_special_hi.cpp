@@ -13,6 +13,10 @@
 #include <so/status/so_status_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
 
+// TODO(link): every function is exact, but the link fails on emission order. The original unit lays out updateHoldPikmin right
+// after exitStatus and only then the soArrayVector<Vec2f, 10> bodies (ct, dt, ...) and, in .data, the status vtable/RTTI before the
+// array vtable. Ours emits the array bodies/vtable right after exitStatus (its first user) and the status vtable last, so
+// .text/.data bytes shift (everything else, names and sizes, already matches).
 // MATCH-ONLY: the REL's constructor of the ten element array ignores its argument (the array starts empty).
 template <>
 soArrayVector<Vec2f, 10>::soArrayVector(s32 size) : m_topIndex(0), m_lastIndex(0), m_size(0), m_isFull(false) { }

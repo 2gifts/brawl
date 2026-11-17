@@ -16,7 +16,7 @@
 
 wnSheikFusin::wnSheikFusin(s32 articleId, const wnArticleBuildInfo& info, const wnSheikFusinData* data) :
     wnWeaponBuilder<wnSheikFusinModuleAccesserBuildConfig>(
-        "wnSheikFusin", articleId, info,
+        "SheikFusin", articleId, info,
         wnModuleAccesserBuildData(0x47, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
                                   info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
                                   0, 0, 0, 0, 0, 0, 0)),

@@ -35,5 +35,12 @@ public:
     virtual float getDamageForReaction(float damage, soModuleAccesser* moduleAccesser);
     virtual bool checkNoReaction(soModuleAccesser* moduleAccesser, soDamage* damage);
     virtual int checkDownDamage(float reaction, float speed, soModuleAccesser* moduleAccesser);
+#ifdef FT_DAMAGE_TRANSACTOR_IMPL_REACTION_OVERRIDES
+    // Opt-in: sora_melee's ftDamageTransactorImpl overrides these three slots (the fighter RELs' vtable copies point at
+    // them, not at soDamageTransactorActor's); the sora_melee unit does not define them yet.
+    virtual float getReactionSub(soModuleAccesser* moduleAccesser);
+    virtual float getReactionMul(soModuleAccesser* moduleAccesser);
+    virtual float getWeightReactionMul(soModuleAccesser* moduleAccesser);
+#endif
 };
 static_assert(sizeof(ftDamageTransactorImpl) == 4, "Class is wrong size!");

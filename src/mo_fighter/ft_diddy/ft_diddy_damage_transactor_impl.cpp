@@ -1,3 +1,4 @@
+#define FT_DAMAGE_TRANSACTOR_IMPL_REACTION_OVERRIDES
 #include <ft/ft_damage_transactor_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
@@ -14,7 +15,10 @@ extern "C" int fn_27_61334(soModuleAccesser* moduleAccesser, int statusKind);
 // HYPOTHESIS: statuses 0x125/0x127 are the Rocketbarrel flight statuses and 0x126/0x128 their damaged forms.
 class ftDiddyDamageTransactorImpl : public ftDamageTransactorImpl {
 public:
-    virtual ~ftDiddyDamageTransactorImpl() { }
+    // BYTES: the destructor is defined out of line below and the constructor is written in the class; that order
+    // places the weak base copies (getWeightReactionMul, preProcessCheckDamage) before __sinit, as in the original.
+    ftDiddyDamageTransactorImpl() { }
+    virtual ~ftDiddyDamageTransactorImpl();
     virtual bool onDamageChangeStatusRequest(int statusKind, soModuleAccesser* moduleAccesser, soDamageLog* damageLog);
 };
 
@@ -36,5 +40,7 @@ bool ftDiddyDamageTransactorImpl::onDamageChangeStatusRequest(int statusKind, so
     int status = fn_27_61334(moduleAccesser, statusKind);
     return moduleAccesser->getStatusModule().changeStatusRequest(status, moduleAccesser);
 }
+
+ftDiddyDamageTransactorImpl::~ftDiddyDamageTransactorImpl() { }
 
 ftDiddyDamageTransactorImpl g_ftDiddyDamageTransactorImpl;

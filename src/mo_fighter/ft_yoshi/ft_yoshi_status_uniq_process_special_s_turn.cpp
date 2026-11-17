@@ -9,6 +9,10 @@
 #include <math.h>
 namespace ftyoshi { template <class T> T ABS(T); }
 
+// BYTES: a function-local `const float` makes MWCC emit a separate 4-byte .rodata object that the original lacks;
+// a file-scope constant is folded into the shared constant pool instead.
+static const float halfTurn = 3.1415927f;
+
 void ftYoshiStatusUniqProcessSpecialSTurn::initStatus(soModuleAccesser* acc) {
     soWorkManageModule& work = acc->getWorkManageModule();
     soSituationModule& situation = acc->getSituationModule();
@@ -40,7 +44,6 @@ void ftYoshiStatusUniqProcessSpecialSTurn::execStatus(soModuleAccesser* acc) {
     float nextAngle = angle + 0.25132743f * param->turnRotation;
     work.setFloat(nextAngle, 0x21000005);
     ftYoshiStatusUniqProcessSpecialSUtility::setRot(acc);
-    const float halfTurn = 3.1415927f;
     float oldMagnitude = ftyoshi::ABS(oldSpeed);
     float magnitude = ftyoshi::ABS(velocity.m_x);
     // BUG: the original computes this product and discards it (without it the function does not match).

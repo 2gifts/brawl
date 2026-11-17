@@ -3,6 +3,7 @@
 
 class ftPopoStatusUniqProcessCliff : public ftStatusUniqProcessCliff {
 public:
+    ftPopoStatusUniqProcessCliff() { }
     virtual ~ftPopoStatusUniqProcessCliff() { }
     virtual bool isLeaveCliff(int status);
 };

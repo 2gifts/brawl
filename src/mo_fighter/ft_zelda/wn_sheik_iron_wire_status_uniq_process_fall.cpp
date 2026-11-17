@@ -1,4 +1,13 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+// BYTES: the wire offset is built with the out-of-line Vec3f subtraction, emitted after its first caller.
+#define MT_VEC3F_OPERATORS_NOINLINE
+// MATCH-ONLY: the weak __mi__5Vec3f copy loads this.xy into f3 and other.z into f0 (the existing native register order).
+#define MT_VEC3F_SUB_NATIVE_ORDER
+#include <so/kinetic/so_kinetic_module_impl.h>
+#include <so/link/so_link_module_impl.h>
+#include <so/so_external_value_accesser.h>
+#include <so/sound/so_sound_module_impl.h>
+#include <so/work/so_work_manage_module_impl.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <wn/wn_lasso_status_view.h>
@@ -55,13 +64,13 @@ public:
     virtual void slotB8();
     virtual void slotBC();
     virtual void slotC0();
-    virtual void slotC4();
+    virtual void slotC4(int, Vec3f*);
     virtual void slotC8();
     virtual void slotCC();
     virtual void slotD0();
     virtual void slotD4();
     virtual void slotD8();
-    virtual void slotDC();
+    virtual void slotDC(float scale);
     virtual void slotE0();
 };
 
@@ -82,7 +91,7 @@ public:
 };
 
 inline wnSheikIronWireAltStatusView* wnSheikIronWireGetAltStatus(soModuleAccesser* moduleAccesser) {
-    return *(wnSheikIronWireAltStatusView**)((char*)moduleAccesser->m_enumerationStart + 0x9c);
+    return static_cast<wnSheikIronWireAltStatusView*>(moduleAccesser->m_enumerationStart->m_physicsModule);
 }
 
 class wnSheikIronWireStatusUniqProcessFall : public soStatusUniqProcess {
@@ -95,17 +104,39 @@ public:
 wnSheikIronWireStatusUniqProcessFall g_wnSheikIronWireStatusUniqProcessFall;
 
 void wnSheikIronWireStatusUniqProcessFall::initStatus(soModuleAccesser* a) {
+    // BYTES: param is declared ahead of wire; the original gives it r31 and lets alt reuse wire's register.
+    wnSheikIronWireParam* param;
     wnSheikIronWire* wire = &dynamic_cast<wnSheikIronWire&>(a->getStageObject());
-    wnSheikIronWireParam* param = wire->m_param;
+    param = wire->m_param;
     wnLassoGetLink(a)->unk164Int(1);
     wire->Weapon::constraint(-1, -1, -1);
-    wnSheikIronWireAltStatusView* alt = wnSheikIronWireGetAltStatus(a);
-    a->getPostureModule().getScale();
-    alt->slotDC();
+    const soModuleEnumeration* modules = a->m_enumerationStart;
+    wnSheikIronWireAltStatusView* alt = static_cast<wnSheikIronWireAltStatusView*>(modules->m_physicsModule);
+    alt->slotDC(modules->m_postureModule->getScale());
     wnSheikIronWireGetAltStatus(a)->slotA4(8);
     wnSheikIronWireGetAltStatus(a)->slot7C(1);
     wnSheikIronWireGetAltStatus(a)->slot80(param->unk4, param->unk8, param->unkC);
     a->getWorkManageModule().offFlag(0x12000004);
 }
 
-void wnSheikIronWireStatusUniqProcessFall::execFixPos(soModuleAccesser* moduleAccesser) { }
+// Keeps the wire end on the parent's node 0x1e (link 3): the offset between the node's two global positions, less the
+// parent's summed speed, goes to the alt status; a one-shot sound (0x1037) plays when its state query reports 1.
+void wnSheikIronWireStatusUniqProcessFall::execFixPos(soModuleAccesser* moduleAccesser) {
+    const soModuleEnumeration* modules = moduleAccesser->m_enumerationStart;
+    soLinkModule* link = modules->m_linkModule;
+    wnSheikIronWireAltStatusView* alt = static_cast<wnSheikIronWireAltStatusView*>(modules->m_physicsModule);
+    Vec3f nodePosition = link->getParentModelNodeGlobalPosition(3, 0x1e, true);
+    Vec3f previousNodePosition = link->getParentModelNodeGlobalPosition(3, 0x1e, false);
+    Vec3f speed(soExternalValueAccesser::getKineticModule(link->getParent(3))->getSumSpeed(soKineticEnergy::AttributeFlag(-1)),
+                0.0f);
+    Vec3f offset = previousNodePosition - nodePosition - speed;
+    alt->slotC4(0, &offset);
+    if (wnSheikIronWireGetAltStatus(moduleAccesser)->slotA8() == 1) {
+        if (!moduleAccesser->getWorkManageModule().isFlag(0x12000004)) {
+            moduleAccesser->getSoundModule().playSENo3d(static_cast<SndID>(0x1037), false);
+            moduleAccesser->getWorkManageModule().onFlag(0x12000004);
+        }
+    } else {
+        moduleAccesser->getWorkManageModule().offFlag(0x12000004);
+    }
+}

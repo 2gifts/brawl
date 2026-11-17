@@ -55,3 +55,20 @@ void wnKirbyStone::activate(int founderTaskId, int resourceId, int team, int kin
     }
     visibility.setDefaultAll();
 }
+
+// The stone keeps the posture's position and scale but always draws its root node unrotated.
+void wnKirbyStone::updateNodeSRT() {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    float scaleValue = moduleAccesser->getPostureModule().getScale();
+    Vec3f scale;
+    scale.m_x = scale.m_y = scale.m_z = scaleValue;
+    // BYTES: the rotation is declared before the position (the native frame keeps that storage order).
+    Vec3f rotation;
+    Vec3f position;
+    position = moduleAccesser->getPostureModule().getPos();
+    rotation = moduleAccesser->getPostureModule().getRot(0);
+    rotation.m_x = 0.0f;
+    rotation.m_y = 0.0f;
+    rotation.m_z = 0.0f;
+    moduleAccesser->getModelModule().setNodeSRT(0, &scale, &rotation, &position);
+}

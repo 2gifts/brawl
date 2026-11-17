@@ -61,7 +61,7 @@ template soArrayVector<s32, 8>::~soArrayVector();
 soStatusModuleImpl::~soStatusModuleImpl() { }
 
 extern "C" {
-extern soStatusUniqProcess lbl_27_bss_7C64;
+extern soStatusUniqProcess g_ftPikachuStatusUniqProcessSpecialThunderJolt;
 }
 
 ftPikachuExtendParamAccesser g_ftPikachuExtendParamAccesser;
@@ -80,7 +80,7 @@ ftPikachu::ftPikachu(s32 entryId,
     m_data(g_ftCommonDataAccesser.getData(Fighter_Pikachu)) {
     // Register the status processes in action order.
     soStatusUniqProcess* processes[14];
-    processes[0] = &lbl_27_bss_7C64;
+    processes[0] = &g_ftPikachuStatusUniqProcessSpecialThunderJolt;
     processes[1] = &g_ftPikachuStatusUniqProcessSpecialSkullBash;
     processes[2] = &g_ftPikachuStatusUniqProcessSpecialQuickAttackStart;
     processes[3] = &g_ftPikachuStatusUniqProcessSpecialThunder;

@@ -1,3 +1,5 @@
+// BYTES: the original's Start vtable keeps soStatusUniqProcess::execFixPos (no override in this unit's text).
+#define FT_PIKMIN_ATTACK_HI4_START_INHERIT_EXEC_FIX_POS
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_PIKMIN_ARTICLE_POOLS
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
@@ -20,13 +22,6 @@ void ftPikminStatusUniqProcessAttackHi4Start::initStatus(soModuleAccesser* modul
     m_troops->holdPikmin(1);
     if (m_troops->getHoldPikminNum() > 0) {
         m_troops->getHoldPikminTop()->changeStatus(0x1b);
-        wnPikminPikminTroopsManager* troops = m_troops;
-        troops->syncLr(troops->getHoldPikminTop(), moduleAccesser->getPostureModule().getLr());
-    }
-}
-
-void ftPikminStatusUniqProcessAttackHi4Start::execFixPos(soModuleAccesser* moduleAccesser) {
-    if (m_troops->getHoldPikminNum() > 0) {
         wnPikminPikminTroopsManager* troops = m_troops;
         troops->syncLr(troops->getHoldPikminTop(), moduleAccesser->getPostureModule().getLr());
     }

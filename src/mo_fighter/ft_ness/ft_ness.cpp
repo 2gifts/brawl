@@ -1,3 +1,4 @@
+#define FT_PARAM_ACCESSER_TYPED_DTOR // BYTES: the empty parameter-accesser base destructor is out of line here.
 #define FT_POOL_ROOT_NONPOLYMORPHIC
 #define SO_GENERAL_WORK_BOUNDED_CLEAR
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
@@ -242,7 +243,6 @@ void fn_101_10F04(u8* self, soCollisionAttackModule* attackModule, float power, 
 // Leaf functions shared with other fighter modules (same module-map names and bodies).
 extern "C" {
 void* fn_101_2078(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_101_3B0C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_101_3F84(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_101_4324(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_101_4784(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
@@ -252,6 +252,7 @@ void* fn_101_5D14(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 void* fn_101_5D54(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_101_5D94(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+soParamAccesser::~soParamAccesser() { }
 
 // ---- the article holders --------------------------------------------------------------------------------------------
 // Articles borrow the owner's kind record and heap while their constructors run.

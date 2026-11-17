@@ -19,7 +19,7 @@ extern soStatusUniqProcess g_wnZeldaDeinSStatusUniqProcessBang;
 
 wnZeldaDeinS::wnZeldaDeinS(s32 articleId, const wnArticleBuildInfo& info, const wnZeldaDeinSData* data) :
     wnWeaponBuilder<wnZeldaDeinSModuleAccesserBuildConfig>(
-        "wnZeldaDeinS", articleId, info,
+        "ZeldaDeinS", articleId, info,
         wnModuleAccesserBuildData(0x2A, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
                                   info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &g_soParamAccesserNull,
                                   0, 0, 0, 0, 0, 0, 0)),

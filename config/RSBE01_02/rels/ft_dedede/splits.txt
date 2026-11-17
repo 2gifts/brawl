@@ -62,6 +62,9 @@ mo_fighter/ft_dedede/ft_dedede_status_uniq_process_special_jet_hammer.cpp:
 mo_fighter/ft_dedede/ft_dedede_status_uniq_process_special_waddledee_throw.cpp:
 	.text       start:0x0001014C end:0x00010DE4
 	.ctors      start:0x0000001C end:0x00000020
+	.rodata     start:0x00000060 end:0x00000088
+	.data       start:0x00008820 end:0x000088A8
+	.bss        start:0x00000290 end:0x000002B0
 
 mo_fighter/ft_dedede/ft_dedede_status_uniq_process_special_waddledee_throw_pickup.cpp:
 	.text       start:0x00010DE4 end:0x00011320
@@ -73,6 +76,9 @@ mo_fighter/ft_dedede/ft_dedede_status_uniq_process_special_waddledee_throw_picku
 mo_fighter/ft_dedede/ft_dedede_status_uniq_process_final.cpp:
 	.text       start:0x00011320 end:0x00011BBC
 	.ctors      start:0x00000024 end:0x00000028
+	.rodata     start:0x00000090 end:0x000000A0
+	.data       start:0x00008938 end:0x000089B0
+	.bss        start:0x000002D0 end:0x000002E0
 
 mo_fighter/ft_dedede/ft_dedede_waddledee_search_impl.cpp:
 	.text       start:0x00011BBC end:0x00011F00
@@ -87,13 +93,22 @@ mo_fighter/ft_dedede/wn_dedede_star.cpp:
 
 mo_fighter/ft_dedede/wn_dedede_jethammer.cpp:
 	.text       start:0x00018284 end:0x0001A6E0
+	.rodata     start:0x000000D8 end:0x000000E8
+	.data       start:0x00009630 end:0x00009BE8
+	.bss        start:0x000003D0 end:0x00000418
 
 mo_fighter/ft_dedede/wn_dedede_waddledoo_beam.cpp:
 	.text       start:0x0001A6E0 end:0x0001C4B4
+	.rodata     start:0x000000E8 end:0x00000100
+	.data       start:0x00009BE8 end:0x0000A0E0
+	.bss        start:0x00000418 end:0x00000470
 
 mo_fighter/ft_dedede/wn_dedede_jethammer_status_uniq_process.cpp:
 	.text       start:0x0001C4B4 end:0x0001C984
 	.ctors      start:0x00000030 end:0x00000034
+	.rodata     start:0x00000100 end:0x00000108
+	.data       start:0x0000A0E0 end:0x0000A158
+	.bss        start:0x00000470 end:0x00000480
 
 mo_fighter/ft_dedede/wn_dedede_follower.cpp:
 	.text       start:0x0001C984 end:0x00023E68

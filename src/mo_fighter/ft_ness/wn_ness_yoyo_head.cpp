@@ -4,6 +4,7 @@
 #define WN_ARTICLE_ANIMCMD_INT
 #define FT_REL_LINK_EXTERN
 #define MT_VEC3F_CTOR_NOINLINE
+#define MT_VEC2F_ASSIGN_NOINLINE
 #include <wn/wn_module_accesser_builder.h>
 #include <wn/ness/wn_ness_yoyo_events.h>
 #include <wn/ness/wn_ness_yoyo_head.h>
@@ -17,6 +18,7 @@
 #include <so/stop/so_stop_module_impl.h>
 #include <gf/gf_task_scheduler.h>
 #include <so/so_kinetic_energy_normal.h>
+#include <wn/wn_kinetic_energy_normal.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
@@ -86,17 +88,21 @@ void wnNessYoyoHead::notifyEventLink(soLinkEventArgs* event, soModuleAccesser* a
             acc->getCollisionAttackModule().setPowerMul(((wnNessYoyoHeadOwnerLinkEvent*)event)->power);
             return;
         }
-    } else if (sender->soGetKind() == 2 && sender->soGetSubKind() == 0x6b && event->m_eventKind == 0x838) {
-        wnNessYoyoPullEvent* pull = (wnNessYoyoPullEvent*)event;
-        soWorkManageModule& work = acc->getWorkManageModule();
-        work.onFlag(0x22000004);
-        soKineticEnergyNormal* energy = dynamic_cast<soKineticEnergyNormal*>(acc->getKineticModule().getEnergy(0));
-        work.setFloat(pull->unk8, 0x21000000);
-        Vec2f::copy(pull->unkC, energy->getSpeed());
-        Vec2f::copy(pull->unk14, energy->m_accel);
-        Vec2f::copy(pull->unk1C, energy->m_speedLimit);
-        acc->getKineticModule().changeKinetic(2, acc);
-        return;
+    } else if (sender->soGetKind() == 2 && sender->soGetSubKind() == 0x6b) {
+        switch (event->m_eventKind) {
+        case 0x838: {
+            wnNessYoyoPullEvent* pull = (wnNessYoyoPullEvent*)event;
+            soWorkManageModule& work = acc->getWorkManageModule();
+            work.onFlag(0x22000004);
+            wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*acc->getKineticModule().getEnergy(0));
+            work.setFloat(pull->unk8, 0x21000000);
+            pull->unkC = energy.getSpeed();
+            pull->unk14 = energy.m_accel;
+            pull->unk1C = energy.m_speedLimit;
+            acc->getKineticModule().changeKinetic(2, acc);
+            return;
+        }
+        }
     }
     Weapon::notifyEventLink(event, acc, sender, unk4);
 }

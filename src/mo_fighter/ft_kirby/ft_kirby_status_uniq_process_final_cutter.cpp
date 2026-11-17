@@ -1,31 +1,11 @@
-#include <ft/fighter.h>
-#include <ft/kirby/ft_kirby_min.h>
-#include <ft/ft_common_data_accesser.h>
-#include <ft/ft_kinetic_energy.h>
-#include <ft/ft_kinetic_energy_controller.h>
-#include <so/effect/so_effect_module_impl.h>
-#include <so/kinetic/so_kinetic_module_impl.h>
-#include <so/situation/so_situation_module_impl.h>
-#include <so/so_module_accesser.h>
-#include <so/status/so_status_module_impl.h>
-#include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
-// HYPOTHESIS: the Final Cutter group of the extend parameters of Kirby: a pointer to floats at +8 (the first is the vertical
-// speed scale of the rise, the second the multiplier of the horizontal speed limit).
-struct ftKirbyFinalCutterExtend {
-    u8 unk0[8];
-    const float* unk8;
-};
+class soModuleAccesser;
 
-// HYPOTHESIS: two floats of the fighter attributes (0x74 limits the horizontal speed, 0x7c is the stable speed).
-struct ftKirbyFinalCutterParam {
-    u8 unk0[0x74];
-    float unk74;
-    u8 unk78[4];
-    float unk7c;
-};
+#include <so/status/so_status_uniq_process.h>
 
+// BYTES: the classes are defined ahead of the module headers: vtables and RTTI come out in reverse order of class
+// definition, and the original has the RTTI of ftKineticEnergyController and ftKineticEnergyMotion before these vtables.
 // HYPOTHESIS: Kirby's Final Cutter status processes (the rise with the blade, the jump, the fall and the landing); status kinds
 // 0x129-0x12c. The jump and the landing share the first steps with the start. Names are unknown.
 class ftKirbyStatusUniqProcessFinalCutter : public soStatusUniqProcess {
@@ -56,6 +36,34 @@ public:
     virtual void initStatus(soModuleAccesser* moduleAccesser);
 };
 
+#include <ft/fighter.h>
+#include <ft/kirby/ft_kirby_min.h>
+#include <ft/ft_common_data_accesser.h>
+#include <ft/ft_kinetic_energy.h>
+#include <ft/ft_kinetic_energy_controller.h>
+#include <so/effect/so_effect_module_impl.h>
+#include <so/kinetic/so_kinetic_module_impl.h>
+#include <so/situation/so_situation_module_impl.h>
+#include <so/so_module_accesser.h>
+#include <so/status/so_status_module_impl.h>
+#include <so/work/so_work_manage_module_impl.h>
+#include <types.h>
+
+// HYPOTHESIS: the Final Cutter group of the extend parameters of Kirby: a pointer to floats at +8 (the first is the vertical
+// speed scale of the rise, the second the multiplier of the horizontal speed limit).
+struct ftKirbyFinalCutterExtend {
+    u8 unk0[8];
+    const float* unk8;
+};
+
+// HYPOTHESIS: two floats of the fighter attributes (0x74 limits the horizontal speed, 0x7c is the stable speed).
+struct ftKirbyFinalCutterParam {
+    u8 unk0[0x74];
+    float unk74;
+    u8 unk78[4];
+    float unk7c;
+};
+
 void ftKirbyStatusUniqProcessFinalCutter::initStatus(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
     soKineticModule& kinetic = moduleAccesser->getKineticModule();
@@ -78,13 +86,19 @@ void ftKirbyStatusUniqProcessFinalCutter::initStatus(soModuleAccesser* moduleAcc
     controller.setStableSpeed(&stableSpeed);
 }
 
+// The original defines this setter of the Normal energy here, after its first caller.
+void soKineticEnergyNormal::setStableSpeed(Vec2f* speed) {
+    m_speedTarget.m_x = speed->m_x;
+    m_speedTarget.m_y = speed->m_y;
+}
+
+void ftKirbyStatusUniqProcessFinalCutter::execStatus(soModuleAccesser* moduleAccesser) {
+}
+
 void ftKirbyStatusUniqProcessFinalCutter::exitStatus(soModuleAccesser* moduleAccesser, int status) {
     if (status != 0x129) {
         moduleAccesser->getEffectModule().killAll(2, true, true);
     }
-}
-
-void ftKirbyStatusUniqProcessFinalCutter::execStatus(soModuleAccesser* moduleAccesser) {
 }
 
 void ftKirbyStatusUniqProcessFinalCutterJump::initStatus(soModuleAccesser* moduleAccesser) {
@@ -104,13 +118,6 @@ void ftKirbyStatusUniqProcessFinalCutterJump::initStatus(soModuleAccesser* modul
     controller.setStableSpeed(&stableSpeed);
 }
 
-void ftKirbyStatusUniqProcessFinalCutterJump::exitStatus(soModuleAccesser* moduleAccesser, int status) {
-    if (status < 0x12c && status >= 0x12a) {
-        return;
-    }
-    moduleAccesser->getEffectModule().killAll(2, true, true);
-}
-
 void ftKirbyStatusUniqProcessFinalCutterJump::execStatus(soModuleAccesser* moduleAccesser) {
     ftKirbyFinalCutterExtend* extend =
         reinterpret_cast<ftKirbyFinalCutterExtend*>(dynamic_cast<ftKirby&>(moduleAccesser->getStageObject()).getExtendParam());
@@ -124,6 +131,13 @@ void ftKirbyStatusUniqProcessFinalCutterJump::execStatus(soModuleAccesser* modul
         }
         motion.m_speedMul = scale;
     }
+}
+
+void ftKirbyStatusUniqProcessFinalCutterJump::exitStatus(soModuleAccesser* moduleAccesser, int status) {
+    if (status < 0x12c && status >= 0x12a) {
+        return;
+    }
+    moduleAccesser->getEffectModule().killAll(2, true, true);
 }
 
 void ftKirbyStatusUniqProcessFinalCutterFallLoop::exitStatus(soModuleAccesser* moduleAccesser, int status) {

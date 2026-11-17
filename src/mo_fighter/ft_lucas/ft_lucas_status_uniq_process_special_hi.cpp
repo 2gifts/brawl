@@ -83,12 +83,10 @@ void ftLucasStatusUniqProcessSpecialHi::execFixPosCounter(soModuleAccesser* a) {
 }
 void ftLucasStatusUniqProcessSpecialHi::exitStatus(soModuleAccesser* a, int nextStatus) {
     soLinkModule& link = a->getLinkModule();
-    soWorkManageModule& work = a->getWorkManageModule();
-    if (link.isLinked(6)) link.unlink(6);
+    if (link.isLink(6)) link.unlink(6);
     soGenerateArticleManageModule& articleManage = *reinterpret_cast<soGenerateArticleManageModule*>(
         const_cast<soModuleEnumeration*>(a->m_enumerationStart)->m_generateArticleManageModule);
     articleManage.removeExist(2, 0);
-    work.setInt(0, 0x20000003);
     if (nextStatus == 0x10) {
         // HYPOTHESIS: This observed call may lazily initialize or cache fighter data.
         g_ftCommonDataAccesser.getData(Fighter_Lucas);

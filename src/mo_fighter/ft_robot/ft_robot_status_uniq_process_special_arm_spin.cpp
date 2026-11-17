@@ -133,6 +133,9 @@ void ftRobotStatusUniqProcessSpecialArmSpin::execStatus(soModuleAccesser* module
             if (situation == 2) {
                 ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
                 ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
+                // TODO(match): 99.4%. The original keeps this 0 in a saved register (li r28 before the Vec2f temporary,
+                // mr r4 at the call) instead of rematerialising it; a named local, a u8 local, a named Vec2f and a
+                // function-scope variable shared with the boost counter are all constant-propagated.
                 int resetMode = 0;
                 controller.resetEnergy(resetMode, &Vec2f(speedX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 controller.m_speedTarget = Vec2f(topSpeed, 0.0f);

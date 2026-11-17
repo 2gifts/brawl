@@ -98,9 +98,18 @@ struct ftPikachuExtendParamQuickAttack {
     float unk54;
 };
 
+// BYTES: the original unit's weak soStatusUniqProcess stubs come out before its static initializer, which an explicit
+// (empty) constructor reproduces; opt-in for ft_pikachu_status_uniq_process_quick_attack.cpp, the only unit that defines these objects.
+#ifdef FT_PIKACHU_QUICK_ATTACK_EXPLICIT_CTORS
+#define FT_PIKACHU_QUICK_ATTACK_CTOR(Name) Name() { }
+#else
+#define FT_PIKACHU_QUICK_ATTACK_CTOR(Name)
+#endif
+
 // Quick Attack: first dash (Start), warp (Warp) and stop (End).
 class ftPikachuStatusUniqProcessSpecialQuickAttackStart : public soStatusUniqProcess {
 public:
+    FT_PIKACHU_QUICK_ATTACK_CTOR(ftPikachuStatusUniqProcessSpecialQuickAttackStart)
     virtual ~ftPikachuStatusUniqProcessSpecialQuickAttackStart() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
     virtual void execStatus(soModuleAccesser* moduleAccesser);
@@ -108,6 +117,7 @@ public:
 
 class ftPikachuStatusUniqProcessSpecialQuickAttackWarp : public soStatusUniqProcess {
 public:
+    FT_PIKACHU_QUICK_ATTACK_CTOR(ftPikachuStatusUniqProcessSpecialQuickAttackWarp)
     virtual ~ftPikachuStatusUniqProcessSpecialQuickAttackWarp() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
     virtual void execFixPos(soModuleAccesser* moduleAccesser);
@@ -115,6 +125,7 @@ public:
 
 class ftPikachuStatusUniqProcessSpecialQuickAttackEnd : public soStatusUniqProcess {
 public:
+    FT_PIKACHU_QUICK_ATTACK_CTOR(ftPikachuStatusUniqProcessSpecialQuickAttackEnd)
     virtual ~ftPikachuStatusUniqProcessSpecialQuickAttackEnd() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);

@@ -16,13 +16,16 @@
 
 wnDededeWaddledooBeam::wnDededeWaddledooBeam(s32 articleId, const wnArticleBuildInfo& info, const wnDededeWaddledooBeamData* data) :
     wnWeaponBuilder<wnDededeWaddledooBeamModuleAccesserBuildConfig>(
-        "wnDededeWaddledooBeam", articleId, info,
+        "DededeWaddledooBeam", articleId, info,
         wnModuleAccesserBuildData(0x34, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
                                   info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &g_soParamAccesserNull,
                                   0, 0, 0, 0, 0, 0, 0)),
     m_param(data->m_param) {
     Weapon::deactivate(false);
 }
+
+// The original defines the destructor out of line (a global symbol) between the constructor and activate().
+wnDededeWaddledooBeam::~wnDededeWaddledooBeam() { }
 
 // The beam is shot from the position along the angle (degrees) with the speed of the parameter block, mirrored by the facing.
 void wnDededeWaddledooBeam::activate(int founderTaskId, int unused, int team, const Vec3f* position, float lr, float angle) {

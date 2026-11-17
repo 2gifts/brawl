@@ -6,6 +6,14 @@
 #include <so/so_module_accesser.h>
 #include <types.h>
 
+wnPikminPikminModuleAccesserBuildData::wnPikminPikminModuleAccesserBuildData(
+    s32 kind, const void* data, Heaps::HeapType instHeap, Heaps::HeapType nwModelInstHeap,
+    Heaps::HeapType nwMotionInstHeap, u8 resGroupNo, const void* animCmdData, s32 unk10, soParamAccesser* paramAccesser,
+    s32 unk34, s32 unk38, s32 unk3C) :
+    wnModuleAccesserBuildData(kind, data, instHeap, nwModelInstHeap, nwMotionInstHeap, resGroupNo, unk10, paramAccesser,
+                              0, 0, 0, 0, unk34, unk38, unk3C),
+    m_animCmdData(animCmdData) { }
+
 void* wnPikminPikminModuleAccesserBuildData::getAnimCmdData(u32 eventThread, s32 p2) const {
     if (p2 == 1) {
         switch (eventThread) {
@@ -74,7 +82,9 @@ float wnPikminPikminUtility::getDist(Vec2f* from, Vec2f* to, int mode) {
     float result = 0.0f;
     switch (mode) {
     case 0:
-        result = __fabs(to->m_x - from->m_x);
+        // BYTES: the absolute value is a double temporary converted into the float result (fabs, then frsp).
+        double distX = __fabs(to->m_x - from->m_x);
+        result = distX;
         break;
     case 1:
         result = from->m_y - to->m_y;
@@ -83,7 +93,8 @@ float wnPikminPikminUtility::getDist(Vec2f* from, Vec2f* to, int mode) {
         result = to->m_y - from->m_y;
         break;
     case 3: {
-        result = (*to - *from).length();
+        Vec2f diff = *to - *from;
+        result = diff.length();
         break;
     }
     }

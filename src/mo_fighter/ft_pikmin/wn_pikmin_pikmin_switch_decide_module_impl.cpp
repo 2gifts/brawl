@@ -34,6 +34,12 @@ int wnPikminPikminSwitchDecideModuleImpl::decideSwitch(int kind, soArrayContract
     }
 }
 
+soSwitchDecideModule::~soSwitchDecideModule() { }
+
 wnPikminPikminSwitchDecideModuleImpl::~wnPikminPikminSwitchDecideModuleImpl() { }
+
+// The one module instance the Pikmin articles share (the static initializer constructs it and registers its destructor).
+// HYPOTHESIS: the name; the original keeps it in this unit's .bss.
+static wnPikminPikminSwitchDecideModuleImpl s_switchDecideModule;
 
 wnPikminPikminSwitchDecideModuleImpl::wnPikminPikminSwitchDecideModuleImpl() { }

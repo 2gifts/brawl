@@ -29,10 +29,6 @@ void ftZeldaStatusUniqProcessSpecialN::initStatus(soModuleAccesser* moduleAccess
     }
 }
 
-void ftZeldaStatusUniqProcessSpecialN::exitStatus(soModuleAccesser* moduleAccesser, int) {
-    moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
-}
-
 // Work flags 0x22000011 / 0x22000012 request the reflector status change (and clear themselves).
 void ftZeldaStatusUniqProcessSpecialN::execStatus(soModuleAccesser* moduleAccesser) {
     soWorkManageModule& workManage = moduleAccesser->getWorkManageModule();
@@ -54,4 +50,8 @@ void ftZeldaStatusUniqProcessSpecialN::execStatus(soModuleAccesser* moduleAccess
         moduleAccesser->getCollisionReflectorModule().setStatus(target, 0, 2);
         workManage.offFlag(0x22000012);
     }
+}
+
+void ftZeldaStatusUniqProcessSpecialN::exitStatus(soModuleAccesser* moduleAccesser, int) {
+    moduleAccesser->getCollisionReflectorModule().setStatus(0, 0, 2);
 }

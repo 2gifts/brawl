@@ -71,7 +71,7 @@ extern wnDededeJetHammerStatusUniqProcess g_wnDededeJetHammerStatusUniqProcess; 
 class wnDededeJethammer : public wnWeaponBuilder<wnDededeJethammerModuleAccesserBuildConfig> {
 public:
     wnDededeJethammer(s32 articleId, const wnArticleBuildInfo& info, const wnDededeJethammerData* data);
-    virtual ~wnDededeJethammer() { }
+    virtual ~wnDededeJethammer(); // defined out of line in wn_dedede_jethammer.cpp
     void activate(int founderTaskId, int modelResourceId, float lr);
     virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
 };

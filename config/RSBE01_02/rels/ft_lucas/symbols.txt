@@ -944,7 +944,7 @@ __dt__79soAnimCmdControlUnitBuilder<48soAnimCmdControlUnitBuildConfig<2,2,7,0,0,
 __dt__79soAnimCmdControlUnitBuilder<48soAnimCmdControlUnitBuildConfig<1,2,7,0,0,1,0,8>>Fv = .text:0x00020238; // type:function size:0x8C scope:weak
 __dt__79soAnimCmdControlUnitBuilder<48soAnimCmdControlUnitBuildConfig<0,1,9,0,0,0,0,8>>Fv = .text:0x000202C4; // type:function size:0x8C scope:weak
 __dt__67soModuleAccesserBuilder<40wnLucasHimohebiModuleAccesserBuildConfig>Fv = .text:0x00020350; // type:function size:0x18C
-fn_114_204DC = .text:0x000204DC; // type:function size:0x5C
+__dt__89soColorBlendModuleBuilder<60soColorBlendModuleBuildConfig<-1,0,22soColorBlendModuleImpl>>Fv = .text:0x000204DC; // type:function size:0x5C
 __dt__80soPhysicsModuleBuilder<54soPhysicsModuleBuildConfigCap<0,19soPhysicsModuleImpl>>Fv = .text:0x00020538; // type:function size:0x60 scope:weak
 __dt__175soStatusModuleBuilder<149wnStatusModuleBuildConfig<9,31soGeneralWorkBuildConfig<3,3,1>,9,82soTransitionModuleBuildConfig<49soTypeList<14soIntToType<6>,18soTypeListNullType>>>>Fv = .text:0x00020598; // type:function size:0x9C
 __dt__97soArrayPool<14soIntToType<6>,65soArrayPoolRoot<46soInstanceUnitFullProperty<16soTransitionTerm>>>Fv = .text:0x00020634; // type:function size:0x5C

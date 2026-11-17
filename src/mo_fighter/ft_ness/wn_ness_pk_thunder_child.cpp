@@ -1,3 +1,4 @@
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructor expands the empty param customize module destructor (a plain delete)
 #define WN_WEAPON_BUILDER
 #define WN_ARTICLE_NATIVE_BUILDERS
 #define WN_SHARED_ARRAYS_1
@@ -15,12 +16,10 @@
 // The status unique process of the bolt (wn_ness_pk_thunder_child_status_uniq_process_move.cpp).
 extern soStatusUniqProcess g_wnNessPKThunderChildStatusUniqProcessMove;
 
-// TODO(link): every function is exact (100%), and the .rodata/.data/.bss ranges are carved in ft_ness's splits.txt (hash neutral). The
-//   unit does not link yet: the original's module accesser builder destructor calls a 0x40-byte Builder<soParamCustomizeModuleImpl>
-//   destructor (a plain delete, no member destructor call; the module map labels it soInstanceManagerFullProperty), ours calls
-//   a 0x60-byte one that also calls the out-of-line soParamCustomizeModule destructor, so the REL grows by 0x60 bytes of text.
-//   objdiff hides this (relocation names only). Fix the Builder<soParamCustomizeModuleImpl> destructor form (see Mario fireball
-//   and FT_PARAM_CUSTOMIZE_BUILDER_DTOR_NOINLINE in wn_module_accesser_builder.h), then flip to Matching.
+// TODO(link): every function is exact (100%) and the .rodata/.data/.bss ranges are carved. WN_PARAM_CUSTOMIZE_INLINE_DTOR (below) gives the
+//   0x40-byte Builder<soParamCustomizeModuleImpl> destructor the original calls (ft_ness's symbols.txt names it at 0x4AAC; the old
+//   name was a folded-identical-code alias). With that, every section of the linked ft_ness is byte-identical to the original; the
+//   only remaining relocation difference was the soParamAccesser destructor symbol (fn_101_3B0C renamed to __dt__15soParamAccesserFv).
 
 wnNessPKThunderChild::wnNessPKThunderChild(s32 articleId, const wnArticleBuildInfo& info, const wnNessPKThunderChildData* data) :
     wnWeaponBuilder<wnNessPKThunderChildModuleAccesserBuildConfig>(

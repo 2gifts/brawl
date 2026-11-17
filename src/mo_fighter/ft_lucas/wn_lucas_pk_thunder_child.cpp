@@ -1,3 +1,4 @@
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructor expands the empty param customize module destructor (a plain delete)
 #define WN_WEAPON_BUILDER
 #define WN_ARTICLE_NATIVE_BUILDERS
 #define WN_SHARED_ARRAYS_1
@@ -15,12 +16,12 @@
 // The status unique process of the bolt (wn_lucas_pk_thunder_child_status_uniq_process_move.cpp).
 extern soStatusUniqProcess g_wnLucasPKThunderChildStatusUniqProcessMove;
 
-// TODO(link): every function is exact (100%), and the .rodata/.data/.bss ranges are carved in ft_lucas's splits.txt (hash neutral). The
-//   unit does not link yet: the original's module accesser builder destructor calls a 0x40-byte Builder<soParamCustomizeModuleImpl>
-//   destructor (a plain delete, no member destructor call; the module map labels it soInstanceManagerFullProperty), ours calls
-//   a 0x60-byte one that also calls the out-of-line soParamCustomizeModule destructor, so the REL grows by 0x60 bytes of text.
-//   objdiff hides this (relocation names only). Fix the Builder<soParamCustomizeModuleImpl> destructor form (see Mario fireball
-//   and FT_PARAM_CUSTOMIZE_BUILDER_DTOR_NOINLINE in wn_module_accesser_builder.h), then flip to Matching.
+// TODO(link): every function is exact (100%). WN_PARAM_CUSTOMIZE_INLINE_DTOR (below) gives the 0x40-byte builder destructor the original
+//   calls (0x4A00 in ft_lucas's symbols.txt, renamed from a folded alias; the 0x60 symbol at 0xECA0 was mislabeled, it is
+//   ftKineticEnergyController's destructor). Still does not link: the original's vtable at the @136 secondary base points at
+//   ftFighterBuildData getters (getNWModelInstanceHeap at 0x15f9c/0xc6ac) where ours points at Weapon thunks, ours also emits a
+//   soParamCustomizeModuleImpl vtable/RTTI (+0x100 data) and 0x38 bss, and .rodata differs at +0x141. Compare the build data
+//   class and the data-owner base against the Ness twin.
 
 wnLucasPKThunderChild::wnLucasPKThunderChild(s32 articleId, const wnArticleBuildInfo& info, const wnLucasPKThunderChildData* data) :
     wnWeaponBuilder<wnLucasPKThunderChildModuleAccesserBuildConfig>(

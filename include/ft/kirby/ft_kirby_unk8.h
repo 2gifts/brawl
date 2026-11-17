@@ -8,5 +8,11 @@
 struct ftKirbyUnk8 {
     u32 unk0;
     u32 unk4;
+#ifdef FT_KIRBY_UNK8_INLINE_CTOR
+    // Opt-in (Special N unit only): the original keeps the constructor as an out-of-line weak copy emitted after the static
+    // initializer, which an in-class definition reproduces; the other units call the copy defined there.
+    ftKirbyUnk8(u32 a, u32 b) : unk0(a), unk4(b) { }
+#else
     ftKirbyUnk8(u32 a, u32 b);
+#endif
 };

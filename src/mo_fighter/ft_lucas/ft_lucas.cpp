@@ -46,6 +46,8 @@ template soCollisionShieldModuleBuilder<ftLucasCollisionAbsorberModuleBuildConfi
 #pragma dont_inline off
 
 extern int g_soValueVariation;
+// Lucas's PK Freeze process, in sora_melee (ft_lucas_status_uniq_process_special_n).
+extern soStatusUniqProcess g_ftLucasStatusUniqProcessSpecialN;
 #pragma dont_inline on
 int soValueAccesser::getValueVariation() { return g_soValueVariation; }
 #pragma dont_inline off
@@ -70,12 +72,12 @@ ftLucas::ftLucas(s32 entryId,
     // Lucas owns 16 character action slots. A null entry differs from the
     // shared no-op process used by the other four otherwise unused slots.
     soStatusUniqProcess* processes[16] = {0};
-    processes[0] = &g_soStatusUniqProcessNull;
+    processes[0] = &g_ftLucasStatusUniqProcessSpecialN;
     processes[1] = &g_ftLucasStatusUniqProcessSpecialS;
     processes[3] = &g_ftLucasStatusUniqProcessSpecialLw;
-    processes[5] = &g_soStatusUniqProcessNull;
-    processes[6] = &g_soStatusUniqProcessNull;
-    processes[7] = &g_soStatusUniqProcessNull;
+    processes[5] = &g_ftLucasStatusUniqProcessSpecialN;
+    processes[6] = &g_ftLucasStatusUniqProcessSpecialN;
+    processes[7] = &g_ftLucasStatusUniqProcessSpecialN;
     processes[8] = &g_ftLucasStatusUniqProcessSpecialHi;
     processes[9] = &g_ftLucasStatusUniqProcessSpecialHiAttackEnd;
     processes[10] = &g_ftLucasStatusUniqProcessSpecialHiAttack;

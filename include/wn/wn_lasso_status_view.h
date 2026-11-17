@@ -34,7 +34,12 @@ public:
     virtual void slot40();
     virtual void slot44();
     virtual void slot48();
+#ifdef WN_LASSO_RUBBER_SLOTS
+    // HYPOTHESIS: the Ice Climbers' rubber passes 1 here on every status entry.
+    virtual void unk4CInt(int);
+#else
     virtual void slot4C();
+#endif
     virtual void slot50();
     virtual void slot54();
     virtual void slot58();
@@ -51,7 +56,11 @@ public:
     virtual void slot84();
     virtual int unk88Int();
     virtual void unk8CInt(int);
+#ifdef WN_LASSO_RUBBER_SLOTS
+    virtual void unk90Int(int);
+#else
     virtual void slot90();
+#endif
     virtual void slot94();
     virtual void slot98();
     virtual void slot9C();

@@ -20,10 +20,18 @@ inline void soStatusUniqProcess::execFixPosCounter(soModuleAccesser*) {}
 inline void soStatusUniqProcess::execMapCorrection(soModuleAccesser*) {}
 inline void soStatusUniqProcess::execStop(soModuleAccesser*) {}
 inline void soStatusUniqProcess::exitStatus(soModuleAccesser*, int) {}
-__declspec(weak) void soStatusUniqProcess::execFixPos(soModuleAccesser*) {}
-__declspec(weak) void soStatusUniqProcess::execStatus(soModuleAccesser*) {}
 #pragma force_active reset
 
+// TODO(link): REL .text is 8 bytes larger than the original: the original emits the array-table destructors and
+// soTransitionTermPack's after the weak soStatusUniqProcess batch (here they come first), and execFixPos/execStatus
+// stubs of soStatusUniqProcess follow the unit's own destructor there.
+// Batch 11 probes (scratch copies only): an explicit empty constructor on the Sonic class (header) puts execFixPos/execStatus
+// after the unit's destructor as in the original; dropping the force_active block, the __declspec(weak) lines,
+// SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE and/or the NOINLINE macro does not move the soArrayContractibleTable<acCmdArgConv>
+// destructor and the soArrayContractible ctor/dtor, which still come right after acCmdArgList's destructor (the original
+// has them in the Table vtable batch after the so stubs). Making ~acCmdArgList implicit or out of line only reorders that
+// early group (ct, dt, Table dt); it stays early.
+static const acCmdArgConv argument = {6, 4};
 void ftSonicStatusUniqProcessSpecialSDash::initStatus(soModuleAccesser* acc) {
     if (acc->getStatusModule().getPrevStatusKind(0) != 0x120) {
         acc->getWorkManageModule().setInt(soValueAccesser::getConstantInt(acc, 0x5dc8, 0), 0x20000003);
@@ -77,7 +85,6 @@ soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a
 #pragma dont_inline reset
 
 void ftSonicStatusUniqProcessSpecialSDash::addGroundMotionTransitionTerm(soModuleAccesser* acc) {
-    static const acCmdArgConv argument = {6, 4};
     soTransitionTermPack term = {-1, acCmdArgList(&argument, 1)};
     acc->getMotionModule().addTransitionTerm(&term, 1, 0);
 }
@@ -148,3 +155,6 @@ float ftSonicStatusUniqProcessSpecialSDash::getCurrentSpeed(soModuleAccesser* ac
     return acc->getWorkManageModule().getFloat(0x21000005);
 }
 ftSonicStatusUniqProcessSpecialSDash g_ftSonicStatusUniqProcessSpecialSDash;
+__declspec(weak) void soStatusUniqProcess::execFixPos(soModuleAccesser*) {}
+__declspec(weak) void soStatusUniqProcess::execStatus(soModuleAccesser*) {}
+

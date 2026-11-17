@@ -62,6 +62,10 @@ void wnPikminChainStatusUniqProcessShoot::execFixPos(soModuleAccesser* moduleAcc
 }
 
 #pragma pool_data off
+// TODO(match): 99.5%. Float register numbering differs: the original keeps speed in f31, the angle in f30 and the
+// scale in f29 (sharing the counter's register) and multiplies getConstantFloat(0xfa2) * counter with the call result
+// first; this form allocates speed f30, scale f31, angle f29. Tried: counter * constant, folding the counter into
+// speed, assigning scale inside the multiply.
 Vec3f wnPikminChainStatusUniqProcessShoot::getSpeedVec(soModuleAccesser* moduleAccesser) {
     Vec3f result;
     float counter = (float)moduleAccesser->getWorkManageModule().getInt(0x20000000);
@@ -69,18 +73,15 @@ Vec3f wnPikminChainStatusUniqProcessShoot::getSpeedVec(soModuleAccesser* moduleA
     float scale = moduleAccesser->getPostureModule().getScale();
     speed = speed * scale;
     float angle = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa1, 0);
-    float rad = 0.017453292f * angle;
-    float sinValue = sin(rad);
-    float y = speed * sinValue;
-    float cosValue = cos(rad);
-    result.m_x = speed * cosValue;
+    float y = speed * (float)sin(0.017453292f * angle);
+    result.m_x = speed * (float)cos(0.017453292f * angle);
     result.m_y = y;
     result.m_z = 0.0f;
     // The chain is shot towards the facing of the parent link.
     float lr = wnLassoGetLink(moduleAccesser)->unkA8Float(3);
-    int sign = (lr >= 0.0f) ? 1 : -1;
+    int sign = (lr < 0.0f) ? -1 : 1;
     result.m_x *= (float)sign;
-    float limit = scale * ((float)moduleAccesser->getWorkManageModule().getInt(0x10000007) * 10.0f);
+    float limit = scale * (10.0f * (float)moduleAccesser->getWorkManageModule().getInt(0x10000007));
     if (speed >= limit) {
         if (speed > limit) {
             result.normalize();

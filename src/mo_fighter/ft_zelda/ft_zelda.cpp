@@ -469,8 +469,6 @@ void fn_104_BF30(u8* p, u8 v) { *(u8*)(p + 0x10000 - 0x17C) = v; }
 
 // Virtual destructors: delete the object when the flag is positive, then return it.
 void* fn_104_1E70(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_104_3804(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_104_3C90(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_104_3CD0(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_104_3D10(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_104_3E0C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
@@ -518,6 +516,14 @@ struct ftZeldaVirtualSlots {
 void fn_104_BFA8(void* p) { return ((ftZeldaVirtualSlots*)p)->slot20(); }
 
 }
+
+// The empty parameter-accesser base destructor is out of line in the fighter RELs (FT_PARAM_ACCESSER_TYPED_DTOR); the
+// article destructors in this REL call this copy.
+soParamAccesser::~soParamAccesser() { }
+
+// BYTES: the original keeps a weak copy of this empty destructor that ftZeldaArticleMediator's destructor calls; the inline
+// header form (FT_ARTICLE_MEDIATOR_DTOR_INLINE) would inline it there, so it is defined out of line here.
+soArticleMediator::~soArticleMediator() { }
 
 void** ftZelda::getExtendParam() {
     return m_data->extendParam;

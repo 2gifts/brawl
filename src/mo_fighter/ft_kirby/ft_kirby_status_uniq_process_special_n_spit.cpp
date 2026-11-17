@@ -5,9 +5,6 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
-// HYPOTHESIS: float constant from lbl_96_rodata_80 (value not verified).
-extern const float lbl_96_rodata_80;
-
 class ftKirbyStatusUniqProcessSpecialNSpit : public soStatusUniqProcess {
 public:
     virtual ~ftKirbyStatusUniqProcessSpecialNSpit() { }
@@ -56,7 +53,7 @@ void ftKirbyStatusUniqProcessSpecialNSpit::execFixPos(soModuleAccesser* moduleAc
         moduleAccesser->getWorkManageModule().offFlag(0x22000015);
         moduleAccesser->getWorkManageModule().onFlag(0x22000016);
         ftKirbySpitLinkEvent event(0x17);
-        event.m_value = lbl_96_rodata_80;
+        event.m_value = 0.0f;
         event.m_flag = false;
         event.m_taskId = moduleAccesser->getWorkManageModule().getInt(0x1000004a);
         moduleAccesser->getLinkModule().sendEventNodes(0, event, 0);

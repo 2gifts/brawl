@@ -5,6 +5,8 @@
 // BYTES: the destructor calls the out-of-line soDamageEffector destructor.
 #define SO_DAMAGE_EFFECTOR_OUTLINE_DTOR
 #define SO_NULLABLE_INLINE_CTOR
+// HYPOTHESIS: no type information lists soNull among the effector's bases (see so_damage_effector_impl.h).
+#define SO_DAMAGE_EFFECTOR_PRIVATE_NULL_BASE
 #include <wn/wn_damage_effector_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>

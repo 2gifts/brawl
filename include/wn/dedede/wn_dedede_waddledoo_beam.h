@@ -40,6 +40,6 @@ class wnDededeWaddledooBeam : public wnWeaponBuilder<wnDededeWaddledooBeamModule
     const wnDededeWaddledooBeamParam* m_param; // +0x1FB4
 public:
     wnDededeWaddledooBeam(s32 articleId, const wnArticleBuildInfo& info, const wnDededeWaddledooBeamData* data);
-    virtual ~wnDededeWaddledooBeam() { }
+    virtual ~wnDededeWaddledooBeam(); // defined out of line in wn_dedede_waddledoo_beam.cpp
     void activate(int founderTaskId, int unused, int team, const Vec3f* position, float lr, float angle);
 };

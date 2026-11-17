@@ -2,6 +2,7 @@
 #include <so/so_module_accesser.h>
 #include <so/catch/so_catch_module.h>
 #include <so/status/so_status_module_impl.h>
+#include <ft/diddy/ft_diddy_status_uniq_process_special_s_cling.h>
 #include <types.h>
 
 // soCatchModuleImpl's map and these call sites identify the used virtual slots.
@@ -15,14 +16,6 @@ public:
     // HYPOTHESIS: clingCut's zero argument is a Boolean selector.
     virtual void clingCut(bool);                                  // vtable +0x38
     virtual bool checkDamage(soModuleAccesser* moduleAccesser, void* data); // vtable +0x3C
-};
-
-class ftDiddyStatusUniqProcessSpecialSCling : public soStatusUniqProcess {
-public:
-    virtual ~ftDiddyStatusUniqProcessSpecialSCling() { }
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
-    virtual bool checkDamage(soModuleAccesser* moduleAccesser, void* data);
 };
 
 static inline ftDiddyCatchModuleView* getCatchModule(soModuleAccesser* moduleAccesser) {

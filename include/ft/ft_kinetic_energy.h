@@ -30,8 +30,10 @@ public:
 };
 static_assert(sizeof(ftKineticEnergyMotion) == 0x50, "Motion energy extent");
 
+#ifndef FT_KINETIC_ENERGY_CONTROLLER_LAST
 // MATCH-ONLY: declaration order keeps shared controller RTTI before motion RTTI.
 #include <ft/ft_kinetic_energy_controller.h>
+#endif
 
 // Fighter braking modes share the normal energy's speed, brake and limit vectors.
 class ftKineticEnergyStop : public soKineticEnergyNormal {
@@ -173,3 +175,8 @@ static_assert(sizeof(soKineticEnergyJostle) == 0x14, "Jostle energy extent");
 // MWCC only inlines these when each has a single call site in the TU, so the
 // wrapper is stamped out once per user (FT_DEFINE_GET_SUM_SPEED(name)).
 #define FT_DEFINE_GET_SUM_SPEED(name)     inline Vec2f name(const soModuleAccesser* a) {         soKineticEnergy::AttributeFlag flag(1);         return a->getKineticModule().getSumSpeed(flag);     }
+
+#ifdef FT_KINETIC_ENERGY_CONTROLLER_LAST
+// BYTES: the Luigi kinetic transactor emits the controller RTTI ahead of the gravity RTTI, i.e. defines the controller later.
+#include <ft/ft_kinetic_energy_controller.h>
+#endif

@@ -14,5 +14,5 @@ public:
 ftMarioStatusUniqProcessSpecialHi g_ftMarioStatusUniqProcessSpecialHi;
 
 void ftMarioStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAccesser) { }
-void ftMarioStatusUniqProcessSpecialHi::exitStatus(soModuleAccesser* moduleAccesser, int) { }
 void ftMarioStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAccesser) { }
+void ftMarioStatusUniqProcessSpecialHi::exitStatus(soModuleAccesser* moduleAccesser, int) { }

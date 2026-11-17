@@ -1,4 +1,5 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+#define FT_KIRBY_UNK8_INLINE_CTOR // BYTES: see ft_kirby_unk8.h; the constructor follows the static initializer in the original
 #include <ft/fighter.h>
 #include <ft/kirby/ft_kirby_unk8.h>
 #include <ft/ft_log_transactor.h>
@@ -141,5 +142,3 @@ void ftKirbyStatusUniqProcessSpecialN::releaseItems(soModuleAccesser* moduleAcce
 }
 
 ftKirbyStatusUniqProcessSpecialN g_ftKirbyStatusUniqProcessSpecialN;
-
-ftKirbyUnk8::ftKirbyUnk8(u32 a, u32 b) : unk0(a), unk4(b) { }

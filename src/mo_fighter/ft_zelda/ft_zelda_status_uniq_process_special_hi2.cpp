@@ -26,6 +26,7 @@ public:
 
 // Farore's Wind uses Zelda's third extend-parameter record (ftData + 0x84).
 void ftZeldaStatusUniqProcessSpecialHi2::initStatus(soModuleAccesser* moduleAccesser) {
+    bool useInputDirection = false;
     soControllerModule& controller = moduleAccesser->getControllerModule();
     soPostureModule& posture = moduleAccesser->getPostureModule();
     soKineticModule& kinetic = moduleAccesser->getKineticModule();
@@ -35,26 +36,16 @@ void ftZeldaStatusUniqProcessSpecialHi2::initStatus(soModuleAccesser* moduleAcce
     const ftData* data = g_ftCommonDataAccesser.getData(Fighter_Zelda);
     const float* params = static_cast<const float*>(data->extendParam[2]);
 
-    Vec2f stick;
-    stick.m_y = controller.getStickY();
-    stick.m_x = controller.getStickX();
-    float stickLengthSq = stick.m_x * stick.m_x + stick.m_y * stick.m_y;
-    float magnitude;
-    if ((float)fabs(stickLengthSq) <= 1.17549435e-38f) {
-        magnitude = 0.0f;
-    } else {
-        magnitude = stickLengthSq * rsqrtf(stickLengthSq);
-    }
+    Vec2f stick(controller.getStickX(), controller.getStickY());
+    Vec2f launchSpeed;
+    float magnitude = stick.length();
     if (magnitude > 1.0f) {
         magnitude = 1.0f;
     }
 
-    bool useInputDirection = false;
     if (magnitude < params[6]) {
         useInputDirection = true;
-    } else if (!ground.isTouch(static_cast<grCollStatus::TouchMask>(0xff), 0)) {
-        useInputDirection = true;
-    } else {
+    } else if (ground.isTouch(static_cast<grCollStatus::TouchMask>(0xff), 0)) {
         Vec2f normal = ground.getTouchNormal(0xff, 0);
         if (normal.angle(&stick) < 1.57079637f) {
             useInputDirection = true;
@@ -62,36 +53,43 @@ void ftZeldaStatusUniqProcessSpecialHi2::initStatus(soModuleAccesser* moduleAcce
         if (ground.isPassableGround(0)) {
             useInputDirection = true;
         }
+    } else {
+        useInputDirection = true;
     }
 
-    float facing = posture.getLr();
+    if (stick.m_x > 1.1920929e-7f) {
+        posture.setLr(1.0f);
+    } else if (stick.m_x < -1.1920929e-7f) {
+        posture.setLr(-1.0f);
+    }
+    posture.updateRotYLr();
+
+    // HYPOTHESIS: a grounded stick into a solid floor slides along it (no vertical speed); otherwise it launches toward
+    // the stick (straight up when the stick is near neutral).
+    // TODO(nonmatching): initStatus differs only in the operand order of the two `speed * cosine` products (the original
+    // emits fmuls f0,<speed>,<cosine>; a named cosine local always lands first). cosine is declared ahead of angle
+    // because the original gives angle f29 and cosine f30. Tried: swapping the factors, parenthesising, a facing local.
+    float cosine;
     float angle;
     if (useInputDirection) {
         if (magnitude > params[6]) {
-            angle = atan2f(stick.m_y, stick.m_x * facing);
+            angle = atan2f(stick.m_y, stick.m_x * posture.getLr());
         } else {
             angle = 1.57079637f;
             magnitude = 1.0f;
         }
+        cosine = cos(angle);
+        launchSpeed.m_x = (params[8] + params[7] * magnitude) * cosine * posture.getLr();
+        launchSpeed.m_y = (params[8] + params[7] * magnitude) * (float)sin(angle);
+        situation.setKind(static_cast<SituationKind>(2), false);
+        ground.setCorrect(static_cast<soGroundShapeImpl::CorrectKind>(5), 0);
     } else {
-        angle = atan2f(stick.m_y, stick.m_x * facing);
+        angle = atan2f(stick.m_y, stick.m_x * posture.getLr());
+        cosine = cos(angle);
+        launchSpeed.m_x = (params[8] + params[7] * magnitude) * cosine * posture.getLr();
+        launchSpeed.m_y = 0.0f;
     }
 
-    if (stick.m_x > params[4]) {
-        posture.setLr(1.0f);
-    } else if (stick.m_x < params[5]) {
-        posture.setLr(-1.0f);
-    }
-    posture.updateRotYLr();
-    facing = posture.getLr();
-
-    float speed = params[8] + params[7] * magnitude;
-    Vec2f launchSpeed;
-    launchSpeed.m_x = speed * (float)cos(angle) * facing;
-    launchSpeed.m_y = speed * (float)sin(angle);
-
-    situation.setKind(static_cast<SituationKind>(2), false);
-    ground.setCorrect(static_cast<soGroundShapeImpl::CorrectKind>(5), 0);
     kinetic.clearSpeedAll();
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*kinetic.getEnergy(3));
     stop.m_speed = launchSpeed;
@@ -103,6 +101,8 @@ void ftZeldaStatusUniqProcessSpecialHi2::execFixPosCounter(soModuleAccesser* mod
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     soSituationModule& situation = moduleAccesser->getSituationModule();
     soGroundModule& ground = moduleAccesser->getGroundModule();
+    const ftData* data = g_ftCommonDataAccesser.getData(Fighter_Zelda);
+    const u8* params = static_cast<const u8*>(data->extendParam[2]);
     if (situation.getKind() == 0) {
         return;
     }
@@ -121,12 +121,9 @@ void ftZeldaStatusUniqProcessSpecialHi2::execFixPosCounter(soModuleAccesser* mod
         return;
     }
 
-    soKineticModule& kinetic = moduleAccesser->getKineticModule();
-    const ftData* data = g_ftCommonDataAccesser.getData(Fighter_Zelda);
-    const u8* params = static_cast<const u8*>(data->extendParam[2]);
-    Vec2f speed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(-1));
+    Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(-1));
     Vec2f normal = ground.getTouchNormal(touchMask, 0);
-    float angle = normal.angle(&speed);
+    float angle = speed.angle(&normal);
     s32 extraAngle = *reinterpret_cast<const s32*>(params + 0x28);
     float maxAngle = ((float)extraAngle + 90.0f) * 0.0174532924f;
     if (angle > maxAngle) {

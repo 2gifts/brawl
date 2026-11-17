@@ -15,7 +15,7 @@
 
 wnYoshiFireCannon::wnYoshiFireCannon(s32 articleId, const wnArticleBuildInfo& info, const wnYoshiFireCannonData* data) :
     wnWeaponBuilder<wnYoshiFireCannonModuleAccesserBuildConfig>(
-        "wnYoshiFireCannon", articleId, info,
+        "YoshiFireCannon", articleId, info,
         wnModuleAccesserBuildData(0x3F, data, info.getHeapModule()->getInstanceHeap(), Heaps::FighterTechqniq,
                                   info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
                                   0, 0, 0, 0, 0, 0, 0)),

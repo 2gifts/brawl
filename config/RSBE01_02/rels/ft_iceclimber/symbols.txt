@@ -914,7 +914,7 @@ __dt__175soStatusModuleBuilder<149wnStatusModuleBuildConfig<5,31soGeneralWorkBui
 __dt__123soArraySelectHolder<1,39soArrayVector<P19soStatusUniqProcess,5>,56soSingletonHolder<35soArrayNull<P19soStatusUniqProcess>>>Fv = .text:0x0001E71C; // type:function size:0x5C
 __dt__71soLinkModuleBuilder<48soLinkModuleBuildConfigCap<6,16soLinkModuleImpl>>Fv = .text:0x0001E778; // type:function size:0x6C
 __dt__25wnPopoRubberParamAccesserFv = .text:0x0001E7E4; // type:function size:0x60
-fn_105_1E844 = .text:0x0001E844; // type:function size:0x1D0
+activate__12wnPopoRubberFiUlii = .text:0x0001E844; // type:function size:0x1D0
 getParamFloat__41wnExtendParamAccesser<3999,1,23999,0,0,0>FP16soModuleAccesserll = .text:0x0001EA14; // type:function size:0x20
 getParamInt__41wnExtendParamAccesser<3999,1,23999,0,0,0>FP16soModuleAccesserll = .text:0x0001EA34; // type:function size:0x20
 getParamIndefinite__41wnExtendParamAccesser<3999,1,23999,0,0,0>FP16soModuleAccesserll = .text:0x0001EA54; // type:function size:0x18
@@ -925,7 +925,7 @@ deactivateDescendantForce__56wnWeaponBuilder<37wnPopoRubberModuleAccesserBuildCo
 @64@__dt__12wnPopoRubberFv = .text:0x0001EB30; // type:function size:0x8
 @144@__dt__12wnPopoRubberFv = .text:0x0001EB38; // type:function size:0x8
 @136@deactivateDescendantForce__56wnWeaponBuilder<37wnPopoRubberModuleAccesserBuildConfig>Fv = .text:0x0001EB40; // type:function size:0x8
-fn_105_1EB48 = .text:0x0001EB48; // type:function size:0x8
+@136@__dt__12wnPopoRubberFv = .text:0x0001EB48; // type:function size:0x8
 initStatus__35wnPopoRubberStatusUniqProcessCommonFP16soModuleAccesser = .text:0x0001EB50; // type:function size:0x160
 execFixPos__35wnPopoRubberStatusUniqProcessCommonFP16soModuleAccesser = .text:0x0001ECB0; // type:function size:0x144
 __dt__35wnPopoRubberStatusUniqProcessCommonFv = .text:0x0001EDF4; // type:function size:0x40

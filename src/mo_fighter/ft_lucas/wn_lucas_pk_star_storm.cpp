@@ -1,3 +1,5 @@
+// TODO(match): the original's param-customize builder destructor is a long (0x60) form under a truncated map name that
+// calls the soParamAccesser destructor; the compact copy with the full name already lives elsewhere in the REL.
 #define WN_WEAPON_BUILDER
 #define WN_ARTICLE_NATIVE_BUILDERS
 #define WN_SHARED_ARRAYS_1

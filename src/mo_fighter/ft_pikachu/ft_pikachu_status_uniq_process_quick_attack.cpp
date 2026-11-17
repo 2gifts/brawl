@@ -1,9 +1,16 @@
 #include <math.h>
 #define MT_VEC3F_SET_NOINLINE
+// The real class (not the opaque builder stand-in) so that its RTTI names the original's base chain.
+#define FT_CONTROLLER_MODULE_IMPL_DEFINED
+#define FT_PIKACHU_QUICK_ATTACK_EXPLICIT_CTORS
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/builder/ft_builder_kinetic.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_kinetic_energy.h>
+// BYTES: MWCC writes RTTI in reverse order of class definition; the original's .data has the ftControllerModuleImpl chain
+// before ftKineticEnergyGravity's, so the controller class is defined after the kinetic energies (and before the fighter
+// builder, which needs it complete).
+#include <ft/ft_controller_module_impl.h>
 #include <ft/pikachu/ft_pikachu.h>
 #include <ft/pikachu/ft_pikachu_status_uniq_process.h>
 #include <math.h>
@@ -21,10 +28,9 @@
 #include <types.h>
 
 
-// MATCH-ONLY: the fighter's controller module is only modelled as an opaque class (ft_dol_types.h); the original casts the
-// accesser's controller module to it and calls the soControllerModule virtuals on the result.
+// The original casts the accesser's controller module to the fighter's and calls the soControllerModule virtuals on it.
 static inline soControllerModule& fighterController(soModuleAccesser* moduleAccesser) {
-    return reinterpret_cast<soControllerModule&>(dynamic_cast<ftControllerModuleImpl&>(moduleAccesser->getControllerModule()));
+    return dynamic_cast<ftControllerModuleImpl&>(moduleAccesser->getControllerModule());
 }
 
 // Quick Attack can be turned into the follow-up (status 0x117) when the stick points away from the warp direction.

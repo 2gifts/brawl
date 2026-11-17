@@ -399,6 +399,9 @@ void wnPikminPikminTroopsManager::holdPikminForce(int taskId) {
     }
 }
 
+// TODO(match): 95.6%. The original uses the u8 parameter without zero-extending it (cntlzw on the saved register for
+// !visible, and a plain mr into setVisible), while this form adds clrlwi at both uses; the mangled name fixes the
+// parameter as u8. The rest of the function is identical.
 void wnPikminPikminTroopsManager::setVisibilityChain(u8 visible, int num, int rest) {
     if (m_hold.isEmpty() == false) {
         wnPikminPikminEnumerator enm = m_hold.getEnumerator();

@@ -16,6 +16,12 @@ public:
 ftPokeFushigisouTransactor::ftPokeFushigisouTransactor() { }
 ftPokeFushigisouTransactor::~ftPokeFushigisouTransactor() { }
 
+// The seed is the only article the transactor starts (kind 1 for Kirby's copy).
+bool ftPokeFushigisouTransactor::activeArticle(soArticle* article, soModuleAccesser* acc) {
+    wnPokeFushigisouSeed* seed = dynamic_cast<wnPokeFushigisouSeed*>(article);
+    return activeArticle1(seed, acc, 1);
+}
+
 // The seed leaves the mouth node (Kirby's own node for the copy), raised by the height constant, on the stage plane.
 bool ftPokeFushigisouTransactor::activeArticle1(wnPokeFushigisouSeed* weapon, soModuleAccesser* acc, int kind) {
     float speed = acc->getConstantFloatKirby(0xfa0);
@@ -31,10 +37,4 @@ bool ftPokeFushigisouTransactor::activeArticle1(wnPokeFushigisouSeed* weapon, so
     int founderTaskId = acc->getStageObject().m_taskId;
     weapon->activate(founderTaskId, acc->getTeamModule().getTeam()->getNo(), &pos, -1, kind, lr, speed);
     return false;
-}
-
-// The seed is the only article the transactor starts (kind 1 for Kirby's copy).
-bool ftPokeFushigisouTransactor::activeArticle(soArticle* article, soModuleAccesser* acc) {
-    wnPokeFushigisouSeed* seed = dynamic_cast<wnPokeFushigisouSeed*>(article);
-    return activeArticle1(seed, acc, 1);
 }

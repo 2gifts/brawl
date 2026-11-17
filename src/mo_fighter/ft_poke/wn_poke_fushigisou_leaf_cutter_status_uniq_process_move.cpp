@@ -1,19 +1,15 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
 #include <so/status/so_status_module_impl.h>
 #include <so/so_module_accesser.h>
-#include <so/so_kinetic_energy_normal.h>
+#include <wn/wn_kinetic_energy_normal.h>
+#include <so/kinetic/so_kinetic_module_impl.h>
+#include <so/posture/so_posture_module_simple.h>
+#include <so/work/so_work_manage_module_impl.h>
 #include <so/so_value_accesser.h>
 #include <mt/mt_common.h>
 #include <mt/mt_prng.h>
 #include <math.h>
 #include <types.h>
-
-// HYPOTHESIS: float table at lbl_116_rodata_C0 (random scale, default length, length epsilon, angle rate).
-extern "C" const float lbl_116_rodata_C0[4];
-
-// Local view of the leaf cutter's kinetic energy: m_speed is at +0x08; byte +0x05 carries a flag set on update.
-class wnPokeFushigisouLeafCutterEnergyView : public soKineticEnergyNormal {
-};
 
 class wnPokeFushigisouLeafCutterStatusUniqProcessMove : public soStatusUniqProcess {
 public:
@@ -26,41 +22,35 @@ wnPokeFushigisouLeafCutterStatusUniqProcessMove g_wnPokeFushigisouLeafCutterStat
 
 void wnPokeFushigisouLeafCutterStatusUniqProcessMove::initStatus(soModuleAccesser* moduleAccesser) { }
 
-void wnPokeFushigisouLeafCutterStatusUniqProcessMove::execStatus(soModuleAccesser* a) {
-    const float* table = lbl_116_rodata_C0;
-    int count = a->getWorkManageModule().getInt(0x10000005);
-    int next = count + 1;
-    if (next > soValueAccesser::getConstantInt(a, 0x5DC1, 0)) {
-        float base = a->getWorkManageModule().getFloat(0x11000003);
-        float scale = soValueAccesser::getConstantFloat(a, 0xFA3, 0);
-        float value = base + (table[0] * scale * randf() - scale);
-        a->getWorkManageModule().setFloat(value, 0x11000004);
-        next = 0;
+// The leaf flies along a wavering angle: every few frames (constant 0x5dc1) a new target angle (work float 0x11000004)
+// is picked at random within +-constant 0xfa3 of the current one (work float 0x11000003); the speed keeps its length
+// and is turned to the angle, mirrored by the facing.
+// HYPOTHESIS: the meaning of work floats 0x11000001/0x11000002 (an accumulator and its step).
+// TODO(match): 99.7%. Only the float register numbering differs: the original keeps the angle in f28, the squared
+// length (and later y) in f29 and the length in f30; this form gives the angle f29, the squared length and the length
+// f30 and y f28. Tried: named sin/cos locals, a named copy of the speed before length().
+void wnPokeFushigisouLeafCutterStatusUniqProcessMove::execStatus(soModuleAccesser* moduleAccesser) {
+    int count = moduleAccesser->getWorkManageModule().getInt(0x10000005);
+    count++;
+    if (count > soValueAccesser::getConstantInt(moduleAccesser, 0x5DC1, 0)) {
+        float angle = moduleAccesser->getWorkManageModule().getFloat(0x11000003);
+        float range = soValueAccesser::getConstantFloat(moduleAccesser, 0xFA3, 0);
+        float target = angle + (2.0f * range * randf() - range);
+        moduleAccesser->getWorkManageModule().setFloat(target, 0x11000004);
+        count = 0;
     }
-    a->getWorkManageModule().setInt(next, 0x10000005);
-    float t = a->getWorkManageModule().getFloat(0x11000001);
-    float delta = a->getWorkManageModule().getFloat(0x11000002);
-    a->getWorkManageModule().setFloat(t + delta, 0x11000001);
-    float angle = a->getWorkManageModule().getFloat(0x11000004);
-    a->getWorkManageModule().getFloat(0x11000003);
-    a->getWorkManageModule().setFloat(angle, 0x11000003);
-    wnPokeFushigisouLeafCutterEnergyView& energy =
-        dynamic_cast<wnPokeFushigisouLeafCutterEnergyView&>(*a->getKineticModule().getEnergy(0));
-    soKineticEnergy& base = energy;
-    Vec2f speed = base.getSpeed();
-    float lenSq = speed.m_x * speed.m_x + speed.m_y * speed.m_y;
-    float length;
-    if (static_cast<float>(fabs(lenSq)) <= table[2]) {
-        length = table[1];
-    } else {
-        length = lenSq * rsqrtf(lenSq);
-    }
-    float lr = a->getPostureModule().getLr();
-    float sinValue = static_cast<float>(sin(table[3] * angle));
-    float cosValue = static_cast<float>(cos(table[3] * angle));
-    float x = lr * (length * cosValue);
-    float y = length * sinValue;
-    energy.m_speed.m_x = x;
-    energy.m_speed.m_y = y;
+    moduleAccesser->getWorkManageModule().setInt(count, 0x10000005);
+    float accum = moduleAccesser->getWorkManageModule().getFloat(0x11000001);
+    float step = moduleAccesser->getWorkManageModule().getFloat(0x11000002);
+    moduleAccesser->getWorkManageModule().setFloat(accum + step, 0x11000001);
+    float angle = moduleAccesser->getWorkManageModule().getFloat(0x11000004);
+    moduleAccesser->getWorkManageModule().getFloat(0x11000003); // the previous angle is read and dropped
+    moduleAccesser->getWorkManageModule().setFloat(angle, 0x11000003);
+    wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
+    float length = energy.getSpeed().length();
+    float lr = moduleAccesser->getPostureModule().getLr();
+    float y = length * (float)sin(0.017453292f * angle);
+    Vec2f speed(lr * (length * (float)cos(0.017453292f * angle)), y);
+    energy.m_speed = speed;
     energy.enable();
 }

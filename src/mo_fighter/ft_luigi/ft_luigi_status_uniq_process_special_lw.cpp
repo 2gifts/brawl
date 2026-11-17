@@ -12,6 +12,8 @@
 
 class ftLuigiStatusUniqProcessSpecialLw : public soStatusUniqProcess {
 public:
+    // BYTES: a user-provided inline constructor makes the base class's weak virtual stubs come out before the static initializer.
+    ftLuigiStatusUniqProcessSpecialLw() { }
     virtual ~ftLuigiStatusUniqProcessSpecialLw() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
     virtual void execStatus(soModuleAccesser* moduleAccesser);

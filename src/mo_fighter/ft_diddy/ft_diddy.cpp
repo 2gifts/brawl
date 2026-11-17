@@ -26,11 +26,11 @@
 // HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt); the repeated ones are the null placeholders of the
 // unused status ranges.
 extern soStatusUniqProcess g_ftDiddyStatusUniqProcessSpecialSCling;
+extern soStatusUniqProcess g_ftDiddyStatusUniqProcessSpecialBanana;
 extern "C" {
 extern soStatusUniqProcess lbl_115_bss_284;
 extern soStatusUniqProcess lbl_115_bss_254;
 extern soStatusUniqProcess lbl_115_bss_2B4;
-extern soStatusUniqProcess lbl_115_bss_2A4;
 extern soStatusUniqProcess lbl_115_bss_324;
 extern soStatusUniqProcess lbl_115_bss_264;
 extern soStatusUniqProcess lbl_115_bss_304;
@@ -58,7 +58,7 @@ ftDiddy::ftDiddy(s32 entryId,
     processes[0] = &lbl_115_bss_284;
     processes[1] = &lbl_115_bss_254;
     processes[2] = &lbl_115_bss_2B4;
-    processes[3] = &lbl_115_bss_2A4;
+    processes[3] = &g_ftDiddyStatusUniqProcessSpecialBanana;
     processes[4] = &lbl_115_bss_324;
     processes[5] = &lbl_115_bss_284;
     processes[6] = &lbl_115_bss_284;
@@ -77,7 +77,7 @@ ftDiddy::ftDiddy(s32 entryId,
     processes[22] = &lbl_115_bss_2E4;
     processes[23] = &lbl_115_bss_2B4;
     processes[24] = &lbl_115_bss_2D4;
-    processes[25] = &lbl_115_bss_2A4;
+    processes[25] = &g_ftDiddyStatusUniqProcessSpecialBanana;
     processes[26] = &lbl_115_bss_324;
     processes[27] = &lbl_115_bss_324;
     processes[28] = &lbl_115_bss_324;

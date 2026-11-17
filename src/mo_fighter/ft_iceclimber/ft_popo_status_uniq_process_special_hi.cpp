@@ -1,19 +1,47 @@
+#define FT_LOG_ACTION_INFO_COPY_CTOR // the by-value log action info is built in place (see ft/ft_log.h)
+#define MT_VEC2F_FROM_VEC3_CTOR_NOINLINE // BYTES: the Vec3f -> Vec2f constructor is the REL's weak out-of-line copy
+#define MT_VEC2F_LENGTH_INLINE_SQ // BYTES: length() expands the squares in place
+#define FT_POOL_ROOT_NONPOLYMORPHIC
+#define SO_GENERAL_WORK_BOUNDED_CLEAR
+#define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
+#define FT_TEAM_TYPED_INTERFACE
+#define FT_SOUND_GENERATOR_DTOR_NOINLINE
 #define FT_FIGHTER_ANIMCMD_LONG
+#define WN_WEAPON_ANIMCMD_LONG
+#define SO_ARRAY_SPLIT_VECTOR_CTOR
+#define FT_POPO_ARTICLE_POOLS
+#define MT_VEC3F_OPERATORS_NOINLINE
+#define MT_VEC3F_SUB_NATIVE_ORDER
+#define MT_VEC3F_LENGTH_SQ_NOINLINE
+#define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
+#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define WN_KINETIC_GENERIC_BUILDER
+#include <so/kinetic/so_kinetic_energy.h>
+#undef WN_KINETIC_GENERIC_BUILDER
+#include <ft/builder/ft_dol_array_list.h>
+#include <ft/ft_manager.h>
+#include <ft/ft_class_info_impl.h>
 #include <ft/fighter.h>
+#include <ft/iceclimber/ft_iceclimber.h>
 #include <so/so_external_value_accesser.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
-#include <so/ground/so_ground_module_impl.h>
 #include <so/link/so_link_module_impl.h>
 #include <so/link/so_link_event_presenter.h>
+#include <so/situation/so_situation_module_impl.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 
 // Helpers of the iceclimber REL that are not reconstructed yet.
-extern "C" u32 fn_105_C29C(int status);
-extern "C" int fn_105_133F8(float);
-extern "C" void fn_105_133E4(Vec2f* dst, const Vec3f* src);
+// Not an infinity or a NaN (the weak copy of this helper sits in the special_s unit of the original).
+inline bool mtIsNormal(float value) {
+    bool result = true;
+    if (((*reinterpret_cast<u32*>(&value) >> 23) & 0xFF) == 0xFF) result = false;
+    return result;
+}
+#include <so/ground/so_ground_module_impl.h>
+#include <ft/ft_owner.h>
 
 // Link event carrying a status kind (HYPOTHESIS: 0x455 is the popo special-hi release event).
 struct ftPopoSpecialHiStatusEvent : soLinkEventArgs {
@@ -24,7 +52,7 @@ struct ftPopoSpecialHiStatusEvent : soLinkEventArgs {
 // Link event carrying the ledge position the partner is pulled to (HYPOTHESIS names).
 struct ftPopoSpecialHiPosEvent : soLinkEventArgs {
     Vec3f m_pos;
-    ftPopoSpecialHiPosEvent(int kind, Vec3f pos) : soLinkEventArgs(kind), m_pos(pos) { }
+    ftPopoSpecialHiPosEvent(int kind, const Vec3f& pos) : soLinkEventArgs(kind), m_pos(pos) { }
 };
 
 // Link event carrying a state value and a flag (HYPOTHESIS names).
@@ -50,34 +78,26 @@ void ftPopoStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAccess
 void ftPopoStatusUniqProcessSpecialHi::execFixPos(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000012) == true) {
         moduleAccesser->getWorkManageModule().offFlag(0x22000012);
-        Fighter* self = dynamic_cast<Fighter*>(&moduleAccesser->getStageObject());
-        Fighter* partner = 0;
-        if (self != 0) {
-            partner = self->getPartner();
+        ftPopo* self = dynamic_cast<ftPopo*>(&moduleAccesser->getStageObject());
+        if (self == 0) {
+            return;
         }
-        if (partner != 0 && fn_105_C29C(soExternalValueAccesser::getStatusKind(partner)) == 1) {
+        Fighter* partner = self->getPartner();
+        if (partner != 0 && ftPopo::isEnableCoupleTech(soExternalValueAccesser::getStatusKind(partner)) == 1) {
             Vec3f partnerPos = soExternalValueAccesser::getPos(partner);
-            Vec2f partnerXY;
-            fn_105_133E4(&partnerXY, &partnerPos);
+            Vec2f partnerXY(partnerPos);
             Vec3f ownPos = moduleAccesser->getPostureModule().getPos();
-            Vec2f ownXY;
-            fn_105_133E4(&ownXY, &ownPos);
-            Vec2f diff = partnerXY - ownXY;
-            if (fn_105_133F8(diff.m_x) && fn_105_133F8(diff.m_y)) {
-                float sumSq = diff.m_x * diff.m_x + diff.m_y * diff.m_y;
-                float dist;
-                // HYPOTHESIS: the small-value floor below is a near-zero epsilon and its fallback is 0.0f
-                if ((float)__fabs(sumSq) <= 0.0001f) {
-                    dist = 0.0f;
-                } else {
-                    dist = sumSq * rsqrtf(sumSq);
-                }
-                if (dist < soValueAccesser::getConstantFloat(moduleAccesser, 0xfbb, 0)) {
-                    moduleAccesser->getWorkManageModule().onFlag(0x22000010);
-                    if (moduleAccesser->getLinkModule().isLink(6) == 1) {
-                        ftPopoSpecialHiStatusEvent statusEvent(0x455, 0x11a);
-                        moduleAccesser->getLinkModule().sendEventNodes(6, statusEvent, 0);
-                    }
+            Vec2f diff = partnerXY - Vec2f(ownPos);
+            bool normal = mtIsNormal(diff.m_x) && mtIsNormal(diff.m_y);
+            if (!normal) {
+                return;
+            }
+            float dist = diff.length();
+            if (dist < soValueAccesser::getConstantFloat(moduleAccesser, 0xfbb, 0)) {
+                moduleAccesser->getWorkManageModule().onFlag(0x22000010);
+                if (moduleAccesser->getLinkModule().isLink(6) == 1) {
+                    ftPopoSpecialHiStatusEvent statusEvent(0x455, 0x11a);
+                    moduleAccesser->getLinkModule().sendEventNodes(6, statusEvent, 0);
                     int state = 0x1de;
                     if (moduleAccesser->getSituationModule().getKind() != 0) {
                         state = 0x1df;
@@ -90,7 +110,7 @@ void ftPopoStatusUniqProcessSpecialHi::execFixPos(soModuleAccesser* moduleAccess
     }
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000013) == true) {
         moduleAccesser->getWorkManageModule().offFlag(0x22000013);
-        Fighter* self = dynamic_cast<Fighter*>(&moduleAccesser->getStageObject());
+        ftPopo* self = dynamic_cast<ftPopo*>(&moduleAccesser->getStageObject());
         if (self == 0) {
             return;
         }
@@ -102,19 +122,17 @@ void ftPopoStatusUniqProcessSpecialHi::execFixPos(soModuleAccesser* moduleAccess
             return;
         }
         int nextStatus = 0x11b;
-        // HYPOTHESIS: the ground query at slot 0x90 selects the 0x11d branch when it returns true
-        soGroundModule& ground = moduleAccesser->getGroundModule();
-        if (((bool (*)(soGroundModule*, int))((void**)*(void**)&ground)[0x90 / 4])(&ground, 0)) {
+        if (moduleAccesser->getGroundModule().isStCliff(0) == true) {
             nextStatus = 0x11d;
         }
+        self->getOwner()->setLogActionInfo(ftLogActionInfo(2, 0x3b));
         if (moduleAccesser->getLinkModule().isLink(6) == 1) {
             ftPopoSpecialHiStatusEvent statusEvent(0x455, nextStatus);
             moduleAccesser->getLinkModule().sendEventNodes(6, statusEvent, 0);
-        }
-        if (nextStatus == 0x11d) {
-            Vec3f pos = moduleAccesser->getGroundModule().getCliffPos(0);
-            ftPopoSpecialHiPosEvent posEvent(0x459, pos);
-            moduleAccesser->getLinkModule().sendEventNodes(6, posEvent, 0);
+            if (nextStatus == 0x11d) {
+                ftPopoSpecialHiPosEvent posEvent(0x459, moduleAccesser->getGroundModule().getCliffPos(0));
+                moduleAccesser->getLinkModule().sendEventNodes(6, posEvent, 0);
+            }
         }
     }
 }
@@ -123,7 +141,7 @@ void ftPopoStatusUniqProcessSpecialHi::exitStatus(soModuleAccesser* moduleAccess
     if (nextStatus == 0x119) {
         return;
     }
-    Fighter* self = dynamic_cast<Fighter*>(&moduleAccesser->getStageObject());
+    ftPopo* self = dynamic_cast<ftPopo*>(&moduleAccesser->getStageObject());
     if (self == 0) {
         return;
     }

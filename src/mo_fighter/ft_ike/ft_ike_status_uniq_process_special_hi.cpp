@@ -1,3 +1,4 @@
+#define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE // BYTES: the original unit holds out-of-line copies of the base defaults, see below
 #define MT_VEC2F_ASSIGN_NOINLINE
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ike/ft_ike.h>
@@ -14,7 +15,7 @@ void ftKineticEnergyDisableAndClear(int index, soModuleAccesser* moduleAccesser)
 
 class ftIkeStatusUniqProcessSpecialHi : public soStatusUniqProcess {
 public:
-    virtual ~ftIkeStatusUniqProcessSpecialHi() { }
+    virtual ~ftIkeStatusUniqProcessSpecialHi();
     virtual void initStatus(soModuleAccesser* moduleAccesser);
     virtual void execStatus(soModuleAccesser* moduleAccesser);
     virtual void execStop(soModuleAccesser* moduleAccesser);
@@ -154,5 +155,20 @@ void ftIkeStatusUniqProcessSpecialHi::exitStatus(soModuleAccesser* moduleAccesse
     }
     moduleAccesser->getGenerateArticleManageModule().removeExist(0, 0);
 }
+
+// BYTES: the base-class defaults sit in this unit in this order, and the destructor between the defaults and
+// execStop/exitStatus is defined out of line (an in-class destructor would put those two after the constructor, past the
+// static initializer).
+bool soStatusUniqProcess::checkTransitionPrecede(soModuleAccesser*, void*, int) { return true; }
+void soStatusUniqProcess::leaveStop(soModuleAccesser*, int, bool) {}
+bool soStatusUniqProcess::onChangeLr(soModuleAccesser*, float, float) { return false; }
+void soStatusUniqProcess::checkAttack(soModuleAccesser*, void*, float) {}
+bool soStatusUniqProcess::checkDamage(soModuleAccesser*, void*) { return false; }
+void soStatusUniqProcess::execFixCamera(soModuleAccesser*) {}
+void soStatusUniqProcess::execFixPosCounter(soModuleAccesser*) {}
+void soStatusUniqProcess::execMapCorrection(soModuleAccesser*) {}
+ftIkeStatusUniqProcessSpecialHi::~ftIkeStatusUniqProcessSpecialHi() {}
+void soStatusUniqProcess::execStop(soModuleAccesser*) {}
+void soStatusUniqProcess::exitStatus(soModuleAccesser*, int) {}
 
 ftIkeStatusUniqProcessSpecialHi g_ftIkeStatusUniqProcessSpecialHi;

@@ -32,6 +32,18 @@ wnDededeJethammer::wnDededeJethammer(s32 articleId, const wnArticleBuildInfo& in
     Weapon::deactivate(false);
 }
 
+// TODO(link): the unit is exact but not linkable yet: the original emits the weak soResourceIdAccesserImpl virtual functions
+// (getBinArchiveId ... setResIdPacked) before wnWeaponBuilder<...>::deactivateDescendantForce, ours emits them after it
+// (everything else matches: sections, data, bss, relocations). Tried: out-of-class and out-of-line definitions of
+// deactivateDescendantForce, include order of the jethammer header.
+// Batch 11 probes (scratch copies only): the current object's .data already differs (the "DededeJethammer" string must
+// precede the -1/0 const-ref temporaries). Using the primary wnWeaponBuilder template (no explicit class specialization in
+// the header, WN_WEAPON_NO_COMMON_ENERGIES) fixes .data and the Impl getters' position but swaps soGeneralWorkBuilder<4,2,7>'s
+// destructor with soArraySelectHolder<..., 10>'s (from WN_STATUS_PROC_VECTOR_ARG_CTOR); adding explicit member
+// specializations of the builder ctor+dtor fixes .text but breaks the .data order again; dtor only reverses the dtor chain.
+// The original defines the destructor out of line (a global symbol) between the constructor and activate().
+wnDededeJethammer::~wnDededeJethammer() { }
+
 // The hammer appears with the model resource of Dedede at the origin of his model; it starts in status 0.
 // HYPOTHESIS: model constraint flag 8 is what makes the hammer follow the hand node.
 void wnDededeJethammer::activate(int founderTaskId, int modelResourceId, float lr) {

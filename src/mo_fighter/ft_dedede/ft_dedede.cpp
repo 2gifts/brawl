@@ -28,14 +28,14 @@ soStatusModuleImpl::~soStatusModuleImpl() { }
 
 // HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt).
 extern "C" {
-extern soStatusUniqProcess lbl_27_bss_88CC;
-extern soStatusUniqProcess lbl_117_bss_2AC;
+extern soStatusUniqProcess g_ftDededeStatusUniqProcessSpecialN;
+extern soStatusUniqProcess g_ftDededeStatusUniqProcessSpecialWaddledeeThrow;
 extern soStatusUniqProcess lbl_117_bss_23C;
 extern soStatusUniqProcess lbl_117_bss_28C;
 extern soStatusUniqProcess lbl_117_bss_2DC;
 extern soStatusUniqProcess lbl_27_bss_891C;
 extern soStatusUniqProcess lbl_27_bss_890C;
-extern soStatusUniqProcess lbl_27_bss_88EC;
+extern soStatusUniqProcess g_ftDededeStatusUniqProcessSpecialNDrinkItem;
 extern soStatusUniqProcess lbl_27_bss_88FC;
 extern soStatusUniqProcess lbl_117_bss_24C;
 }
@@ -94,12 +94,12 @@ ftDedede::ftDedede(s32 entryId,
     m_data(g_ftCommonDataAccesser.getData(Fighter_Dedede)) {
     // Register the status processes in action order; entries without a process stay empty.
     soStatusUniqProcess* processes[40] = {0};
-    processes[0] = &lbl_27_bss_88CC;
-    processes[1] = &lbl_117_bss_2AC;
+    processes[0] = &g_ftDededeStatusUniqProcessSpecialN;
+    processes[1] = &g_ftDededeStatusUniqProcessSpecialWaddledeeThrow;
     processes[2] = &lbl_117_bss_23C;
     processes[3] = &lbl_117_bss_28C;
     processes[4] = &lbl_117_bss_2DC;
-    processes[5] = &lbl_27_bss_88CC;
+    processes[5] = &g_ftDededeStatusUniqProcessSpecialN;
     processes[7] = &lbl_27_bss_891C;
     processes[8] = &lbl_27_bss_891C;
     processes[9] = &lbl_27_bss_890C;
@@ -114,7 +114,7 @@ ftDedede::ftDedede(s32 entryId,
     processes[18] = &lbl_27_bss_890C;
     processes[19] = &lbl_27_bss_890C;
     processes[20] = &lbl_27_bss_890C;
-    processes[21] = &lbl_27_bss_88EC;
+    processes[21] = &g_ftDededeStatusUniqProcessSpecialNDrinkItem;
     processes[22] = &lbl_27_bss_88FC;
     processes[23] = &g_ftDededeStatusUniqProcessSpecialWaddledeeThrowPickup;
     processes[24] = &lbl_117_bss_24C;
@@ -477,12 +477,12 @@ extern "C" {
 
 u8 fn_117_67D4(u8* p) { return *(u8*)(p + 0x4); }
 void fn_117_8A60() {}
-int fn_117_99D8(u8* p) { return *(int*)(p + 0xb8); }
+int soGetSubKind__6WeaponFv(u8* p) { return *(int*)(p + 0xb8); }
 int fn_117_9F40() { return 0x0; }
 void fn_117_A13C() {}
-void fn_117_A2B4() {}
+void adjustParentGroundCollision__11StageObjectFiPf() {}
 u8 fn_117_A2B8(u8* p) { return *(u8*)(p + 0x44); }
-void fn_117_A2C0() {}
+void processGameProc__11StageObjectFv() {}
 void fn_117_A300() {}
 void fn_117_A304() {}
 void fn_117_A394() {}
@@ -593,8 +593,8 @@ void fn_117_E258(u8* self, soCollisionAttackModule* attackModule, float power, s
 // Leaf functions shared with other fighter modules (same module-map names and bodies).
 extern "C" {
 void* fn_117_43A8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_117_43E8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
-void* fn_117_4428(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
+void* __dt__17soArticleOperatorFv(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
+void* __dt__18soArticleGeneratorFv(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
 
 void ftDedede::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {

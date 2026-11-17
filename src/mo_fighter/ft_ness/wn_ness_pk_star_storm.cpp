@@ -12,6 +12,21 @@
 #include <wn/wn_activate_desc.h>
 #include <so/so_module_accesser.h>
 
+// TODO(link): 100% exact; .rodata/.data/.bss carved in ft_ness splits.txt. Does not link yet: the sized kinetic module builder (soKineticMediatorNull,
+//   2 energies) makes our object emit weak copies of the soInstanceManagerFullPropertyVector<P15soKineticEnergy,2> constructor/destructor,
+//   soInstanceUnitFullProperty<P15soKineticEnergy> and soKineticMediatorNull destructors (+0x90 text), where the original calls the
+//   copy that lives in sora_melee (fn_27_1AD79C) and its bss is 0x60 bigger. Needs those template members declared extern in
+//   wn_module_accesser_builder.h under FT_REL_LINK_EXTERN (shared header).
+//   Batch 11 finding: the extern declarations alone will not link. The original constructor calls fn_27_1AD79C (sora_melee,
+//   0xA0: by its call site the soInstanceManagerFullPropertyVector<soKineticEnergy*, 2>(bool) constructor), and the original
+//   kinetic builder destructor calls the sora_melee functions currently named __dt__18ftFighterBuildDataFv (for
+//   soKineticMediatorNull's destructor) and __dt__61soInstanceManagerFullPropertyVector<20soAnimCmdControlUnit,6>Fv (for
+//   the <soKineticEnergy*, 2> vector destructor). Those two names are right: ftFighterBuildData's destructor is defined by
+//   the Matching ft_fighter_build_data.cpp and the vector<soAnimCmdControlUnit, 6> destructor is called by Matching article
+//   units, so the original linker folded identical code (TIPS: "the call in the target names the first symbol of that
+//   address"). Renaming them would break those units; linking this unit needs a way to bind our calls to the folded
+//   address (an alias at the same address) rather than a rename.
+
 wnNessPKStarStorm::wnNessPKStarStorm(s32 articleId, const wnArticleBuildInfo& info, const wnNessPKStarStormData* data) :
     wnWeaponBuilder<wnNessPKStarStormModuleAccesserBuildConfig>(
         "NessPKStarStorm", articleId, info,

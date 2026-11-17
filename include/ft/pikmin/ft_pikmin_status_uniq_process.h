@@ -101,7 +101,9 @@ public:
     ftPikminStatusUniqProcessAttackHi4Start(wnPikminPikminTroopsManager* troops) : m_troops(troops) { }
     virtual ~ftPikminStatusUniqProcessAttackHi4Start() { }
     virtual void initStatus(soModuleAccesser* moduleAccesser);
+#ifndef FT_PIKMIN_ATTACK_HI4_START_INHERIT_EXEC_FIX_POS
     virtual void execFixPos(soModuleAccesser* moduleAccesser);
+#endif
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind);
 };
 

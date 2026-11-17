@@ -61,6 +61,9 @@ float wnWarioBikeDamageTransactorImpl::getReactionMul(soModuleAccesser*) { retur
 float wnWarioBikeDamageTransactorImpl::getDamageMul(soModuleAccesser*) { return 1.0f; }
 void wnWarioBikeDamageTransactorImpl::checkCheer(float, float, soModuleAccesser*, soDamageLog*) {}
 float wnWarioBikeDamageTransactorImpl::getDamageForReaction(float damage, soModuleAccesser*) { return damage; }
+bool wnWarioBikeDamageTransactorImpl::checkNoReaction(soModuleAccesser*, soDamage*) { return true; }
+bool wnWarioBikeDamageTransactorImpl::isBindStatus(soModuleAccesser*) { return false; }
+bool wnWarioBikeDamageTransactorImpl::isBuryStatus(soModuleAccesser*) { return false; }
 
 bool wnWarioBikeDamageTransactorImpl::isSpeedDamage(soModuleAccesser*) { return true; }
 
