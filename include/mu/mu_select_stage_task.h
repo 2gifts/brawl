@@ -71,6 +71,9 @@ public:
     static muSelectStageTask* create(Param* param);
     void exit();
     void resumeSelect();
+    virtual void processDefault();
+    void processDefaultWithScreen();
+    void processDefaultWithoutScreen();
 
     // HYPOTHESIS: an inline helper (muProcOptSong expands it twice); the decision only counts in mode 2 or once the
     // step is 11.

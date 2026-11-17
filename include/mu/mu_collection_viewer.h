@@ -110,7 +110,9 @@ public:
         int m_exitRequest;          // 0x1BF4
         int m_unk1BF8;
         int m_state;                // 0x1BFC
-        u8 m_unk1C00[0x1C7C - 0x1C00];
+        u8 m_unk1C00[0x1C74 - 0x1C00];
+        u8 m_flag1C74;              // 0x1C74
+        u8 m_unk1C75[0x1C7C - 0x1C75];
         MuMsg* m_msg;               // 0x1C7C the texts
         MsgFile m_msgFile[3];       // 0x1C80
         u8 m_unk1CC8[0x1CE4 - 0x1CC8];
@@ -143,7 +145,7 @@ public:
     virtual void unk_2EC0();
     virtual void getMineLabel(muCollectionMsgBuf* buf);
     virtual void getNewLabel();
-    virtual void unk_2FA0();
+    virtual int unk_2FA0();
     virtual u32 getCurFileID();
     virtual muCollectionFileName getFileHandle(int index);
     virtual void unk_2FC8();
@@ -152,14 +154,14 @@ public:
     virtual int getNumPic(int media);
     virtual int getNumPanel(int media);
     virtual void unk_3784();
-    virtual void unk_38F8();
+    virtual void unk_38F8(int flag);
     virtual void dispPreview();                                                         // 0x21BC
     virtual void unk_2528();
     virtual int dispThumbnail(MuObject* object, void* summary);
     virtual void dispPreviewCore(void* info);
     virtual void erasePreviewCore();
-    virtual void unk_3194();
-    virtual void unk_31D8();
+    virtual void unk_3194(int cur, int count);
+    virtual void unk_31D8(int left, int right);
     virtual void* getScnRoot();
     virtual void setPanelStateCore(int state, int unk);
     virtual void unk_3B1C();
