@@ -1,6 +1,54 @@
 #include <ad/ad_list.h>
+#include <gf/gf_application.h>
+#include <gf/gf_scene.h>
+#include <gf/gf_task.h>
+#include <mu/mu_figure_get.h>
+#include <snd/snd_system.h>
 #include <sr/sr_common.h>
 #include <types.h>
+
+// The trophy get demo scene (what sc_fig_get_demo.h declares for its callers; here with the list of the original).
+class scFigureGetDemo : public gfScene {
+    muFigureGetTask* m_task;
+    s32 m_0xC;
+    adList<u32, Heaps::MenuInstance> m_list;
+
+public:
+    static scFigureGetDemo* create();
+    scFigureGetDemo(const char* name) : gfScene(name), m_task(nullptr) { }
+    virtual void start();
+    virtual s32 process();
+    virtual s32 exit();
+    virtual void setModule();
+};
+
+scFigureGetDemo* scFigureGetDemo::create() {
+    return new (Heaps::System) scFigureGetDemo("scFigureGetDemo");
+}
+
+void scFigureGetDemo::setModule() {
+    setLoadModule("sora_menu_fig_get_demo.rel", false);
+}
+
+s32 scFigureGetDemo::process() {
+    if (m_task) {
+        if (m_task->m_done != 0) {
+            gfSceneManager* mgr = gfSceneManager::getInstance();
+            mgr->unk1 = 0;
+            mgr->processStep = 2;
+            g_gfApplication->unkD0.startKeepScreen();
+        }
+    }
+    return 0;
+}
+
+s32 scFigureGetDemo::exit() {
+    m_list.remove();
+    m_task->exit();
+    m_task = nullptr;
+    g_sndSystem->stopBGM(0);
+    return 0;
+}
 
 template <typename T, Heaps::HeapType H>
 void adList<T, H>::remove() {
