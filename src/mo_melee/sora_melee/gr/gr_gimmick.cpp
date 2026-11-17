@@ -1,3 +1,4 @@
+#define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: the Vec3f copies of this unit are aggregate word moves.
 #define GR_GIMMICK_EFFECT_INFO_CTOR
 #include <gr/gr_gimmick.h>
 #include <gr/gr_gimmick_motion_path.h>
@@ -611,5 +612,67 @@ void grGimmick::setPosGimmickEffect(u32 index, Vec3f* pos) {
     if (m_effects[index].m_id != 0) {
         Vec3f effectPos = *pos;
         g_ecMgr->setPos(m_effects[index].m_handleId, &effectPos);
+    }
+}
+
+grGimmick::grGimmick(const char* taskName) :
+    Ground(taskName), m_soundGeneratorNum(0), m_soundGenerators(NULL), m_soundEffectNum(0), m_soundEffects(NULL), m_effectNum(0),
+    m_effects(NULL), unkB4(0.0f), m_tgtNode(NULL), m_gimmickMotionPath(NULL) {
+    m_motionPathFlags = 0;
+    m_transparencyFlag = true;
+    m_transparencySettings = 0x1F;
+    Vec3f clipCenter(0.0f, 0.0f, 0.0f);
+    m_clipSphereCenter = clipCenter;
+    unkF8 = 100.0f;
+    m_gimmickData = NULL;
+    m_unk1 = -1;
+    m_nodeIndex = -1;
+    m_isUpdate = false;
+    m_isUseMdlNameForStartAnim = true;
+    for (int i = 0; i < 10; i++) {
+        m_visibleProductions[i] = NULL;
+        m_visibleProductions[i + 10] = NULL;
+    }
+}
+
+grGimmick::~grGimmick() {
+    if (m_soundGenerators != NULL) {
+        delete[] m_soundGenerators;
+        m_soundGenerators = NULL;
+    }
+    if (m_soundEffects != NULL) {
+        delete[] m_soundEffects;
+        m_soundEffects = NULL;
+    }
+    if (m_effects != NULL) {
+        delete[] m_effects;
+        m_effects = NULL;
+    }
+    for (int i = 0; i < 10; i++) {
+        if (m_visibleProductions[i] != NULL) {
+            delete m_visibleProductions[i];
+        }
+        m_visibleProductions[i] = NULL;
+        if (m_visibleProductions[i + 10] != NULL) {
+            delete m_visibleProductions[i + 10];
+        }
+        m_visibleProductions[i + 10] = NULL;
+    }
+    if (m_tgtNode != NULL) {
+        delete m_tgtNode;
+    }
+}
+
+void grGimmick::update(float deltaFrame) {
+    if (m_gimmickMotionPath != NULL) {
+        if (m_motionPathFlags & 1) {
+            setPos(&m_gimmickMotionPath->getPos());
+        }
+        if (m_motionPathFlags & 2) {
+            setRot(&m_gimmickMotionPath->getRot());
+        }
+    }
+    if (m_isSetup != true) {
+        updateProduction(deltaFrame);
     }
 }
