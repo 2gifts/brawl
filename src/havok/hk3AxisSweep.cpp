@@ -190,14 +190,21 @@ void hk3AxisSweep::getAabbFromNode(const hkBpNode* node, hkAabb& aabb) const {
     float invX = 1.0f / m_scale[0];
     float invY = 1.0f / m_scale[1];
     float invZ = 1.0f / m_scale[2];
-    aabb.m_min.x = (float)xEnds[node->m_index[4]].m_value * invX - m_offset[0];
-    aabb.m_min.y = (float)yEnds[node->m_index[0]].m_value * invY - m_offset[1];
-    aabb.m_min.z = (float)zEnds[node->m_index[1]].m_value * invZ - m_offset[2];
-    aabb.m_min.w = 0.0f - unk4C;
-    aabb.m_max.x = (float)xEnds[node->m_index[5]].m_value * invX - m_offset[0];
-    aabb.m_max.y = (float)yEnds[node->m_index[2]].m_value * invY - m_offset[1];
-    aabb.m_max.z = (float)zEnds[node->m_index[3]].m_value * invZ - m_offset[2];
-    aabb.m_max.w = 0.0f - unk4C;
+    // The corners are also kept as two aligned stack vectors (stored, never read back), as in the original.
+    float lo[4] __attribute__((aligned(16)));
+    float hi[4] __attribute__((aligned(16)));
+    float x0 = (float)xEnds[node->m_index[4]].m_value * invX - m_offset[0];
+    float y0 = (float)yEnds[node->m_index[0]].m_value * invY - m_offset[1];
+    float z0 = (float)zEnds[node->m_index[1]].m_value * invZ - m_offset[2];
+    float w0 = 0.0f - unk4C;
+    float x1 = (float)xEnds[node->m_index[5]].m_value * invX - m_offset[0];
+    float y1 = (float)yEnds[node->m_index[2]].m_value * invY - m_offset[1];
+    float z1 = (float)zEnds[node->m_index[3]].m_value * invZ - m_offset[2];
+    float w1 = 0.0f - unk4C;
+    aabb.m_min.x = x0; aabb.m_min.y = y0; aabb.m_min.z = z0; aabb.m_min.w = w0;
+    aabb.m_max.x = x1; aabb.m_max.y = y1; aabb.m_max.z = z1; aabb.m_max.w = w1;
+    lo[0] = x0; lo[1] = y0; lo[2] = z0; lo[3] = w0;
+    hi[0] = x1; hi[1] = y1; hi[2] = z1; hi[3] = w1;
 }
 #pragma dont_inline reset
 
