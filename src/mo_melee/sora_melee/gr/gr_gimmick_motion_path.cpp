@@ -267,3 +267,115 @@ void grGimmickMotionPath::loadGroundData(nw4r::g3d::ResFile resFile, u32 flags, 
         m_modelAnims[0] = modelAnim;
     }
 }
+
+void grGimmickMotionPath::processAnim() {
+    float frameDelta = g_stGameFrame.m_frameDelta;
+    if (m_state != 0) {
+        nw4r::g3d::ScnMdl* model = m_sceneModels[0];
+        gfModelAnimation* animation = m_modelAnims[0];
+        if (model != NULL && animation != NULL) {
+            switch (m_state) {
+            case 1:
+                m_frame = m_frame + m_frameSpeed;
+                switch (*((u8*)m_motionPathData + 5)) { // MATCH-ONLY: byte read of the path mode
+                case 1:
+                    if (m_frame >= (float)m_frameCount) {
+                        if (m_soundEffects) {
+                            for (int index = 0; index < 3; ++index) {
+                                startGimmickSE(index + 8);
+                            }
+                        }
+                        if (m_effects) {
+                            for (int index = 0; index < 3; ++index) {
+                                startGimmickEffect(index + 8);
+                            }
+                        }
+                        m_frame = m_frame - (float)m_frameCount;
+                        if (m_soundEffects) {
+                            for (int index = 0; index < 5; ++index) {
+                                startGimmickSE(index + 3);
+                            }
+                        }
+                        if (m_effects) {
+                            for (int index = 0; index < 5; ++index) {
+                                startGimmickEffect(index + 3);
+                            }
+                        }
+                    } else if (m_frame <= 0.0f) {
+                        m_frame = m_frame + (float)m_frameCount;
+                    }
+                    break;
+                case 0:
+                    if (m_frame >= (float)m_frameCount || isMoveEnd() == 1) {
+                        if (m_frame > (float)m_frameCount) {
+                            m_frame = (float)m_frameCount;
+                        }
+                        m_state = 2;
+                        m_frameSpeed = 0.0f;
+                        unk154 = unk16C;
+                        if (m_soundEffects) {
+                            for (int index = 0; index < 3; ++index) {
+                                startGimmickSE(index + 8);
+                            }
+                        }
+                        if (m_effects) {
+                            for (int index = 0; index < 3; ++index) {
+                                startGimmickEffect(index + 8);
+                            }
+                        }
+                    }
+                    break;
+                case 2:
+                    if (m_frame >= (float)m_frameCount || isMoveEnd() == 1) {
+                        m_state = 0;
+                        m_frameSpeed = 0.0f;
+                        if (m_frame > (float)m_frameCount) {
+                            m_frame = (float)m_frameCount;
+                        }
+                        if (m_soundEffects) {
+                            for (int index = 0; index < 3; ++index) {
+                                startGimmickSE(index + 8);
+                            }
+                        }
+                        if (m_effects) {
+                            for (int index = 0; index < 3; ++index) {
+                                startGimmickEffect(index + 8);
+                            }
+                        }
+                    } else if (m_frame <= 0.0f) {
+                        m_frameSpeed = 0.0f;
+                        m_state = 0;
+                        m_frame = 0.0f;
+                    }
+                    break;
+                }
+                animation->setFrame(m_frame);
+                animation->setUpdateRate(0.0f);
+                static_cast<nw4r::g3d::ScnMdlSimple*>(model)->UpdateFrame();
+                break;
+            case 2:
+                unk154 = unk154 - frameDelta * m_motionRatio;
+                if (unk154 <= 0.0f) {
+                    m_state = 3;
+                    m_frameSpeed = m_motionRatio * (unk170 * g_stGameFrame.m_frameDelta);
+                    m_frameStep = m_frameSpeed;
+                }
+                break;
+            case 3:
+                m_frame = m_frame - m_frameSpeed;
+                if (m_frame <= 0.0f) {
+                    m_frameSpeed = 0.0f;
+                    m_frame = 0.0f;
+                    m_state = 0;
+                }
+                animation->setFrame(m_frame);
+                animation->setUpdateRate(0.0f);
+                static_cast<nw4r::g3d::ScnMdlSimple*>(model)->UpdateFrame();
+                break;
+            }
+            m_hasUpdatedG3dCalcWorld = false;
+            updateG3dProcCalcWorld();
+            setTRS();
+        }
+    }
+}
