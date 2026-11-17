@@ -190,14 +190,21 @@ void hk3AxisSweep::getAabbFromNode(const hkBpNode* node, hkAabb& aabb) const {
     float invX = 1.0f / m_scale[0];
     float invY = 1.0f / m_scale[1];
     float invZ = 1.0f / m_scale[2];
-    aabb.m_min.x = (float)xEnds[node->m_index[4]].m_value * invX - m_offset[0];
-    aabb.m_min.y = (float)yEnds[node->m_index[0]].m_value * invY - m_offset[1];
-    aabb.m_min.z = (float)zEnds[node->m_index[1]].m_value * invZ - m_offset[2];
-    aabb.m_min.w = 0.0f - unk4C;
-    aabb.m_max.x = (float)xEnds[node->m_index[5]].m_value * invX - m_offset[0];
-    aabb.m_max.y = (float)yEnds[node->m_index[2]].m_value * invY - m_offset[1];
-    aabb.m_max.z = (float)zEnds[node->m_index[3]].m_value * invZ - m_offset[2];
-    aabb.m_max.w = 0.0f - unk4C;
+    // The corners are also kept as two aligned stack vectors (stored, never read back), as in the original.
+    float lo[4] __attribute__((aligned(16)));
+    float hi[4] __attribute__((aligned(16)));
+    float x0 = (float)xEnds[node->m_index[4]].m_value * invX - m_offset[0];
+    float y0 = (float)yEnds[node->m_index[0]].m_value * invY - m_offset[1];
+    float z0 = (float)zEnds[node->m_index[1]].m_value * invZ - m_offset[2];
+    float w0 = 0.0f - unk4C;
+    float x1 = (float)xEnds[node->m_index[5]].m_value * invX - m_offset[0];
+    float y1 = (float)yEnds[node->m_index[2]].m_value * invY - m_offset[1];
+    float z1 = (float)zEnds[node->m_index[3]].m_value * invZ - m_offset[2];
+    float w1 = 0.0f - unk4C;
+    aabb.m_min.x = x0; aabb.m_min.y = y0; aabb.m_min.z = z0; aabb.m_min.w = w0;
+    aabb.m_max.x = x1; aabb.m_max.y = y1; aabb.m_max.z = z1; aabb.m_max.w = w1;
+    lo[0] = x0; lo[1] = y0; lo[2] = z0; lo[3] = w0;
+    hi[0] = x1; hi[1] = y1; hi[2] = z1; hi[3] = w1;
 }
 #pragma dont_inline reset
 
@@ -217,14 +224,22 @@ void hk3AxisSweep::hkBpAxis::remove(int minIndex, int maxIndex) {
 }
 
 void hk3AxisSweep::updateNodesAfterInsert(hkBpNode* nodes, int count, const hkBpNode& inserted) {
-    // Compare against positions before insertion: min shifted by one, max by two.
-    // Snapshot first: inserted can refer to an entry in the same node array.
+    // Compare against positions before insertion: min shifted by one, max by two. The bounds are also kept as two
+    // aligned nodes on the stack (stored, never read back), as in the original.
+    hkBpNode lo __attribute__((aligned(16)));
+    hkBpNode hi __attribute__((aligned(16)));
     u16 xMin = inserted.m_index[4] - 1;
     u16 yMin = inserted.m_index[0] - 1;
     u16 zMin = inserted.m_index[1] - 1;
     u16 xMax = inserted.m_index[5] - 2;
     u16 yMax = inserted.m_index[2] - 2;
     u16 zMax = inserted.m_index[3] - 2;
+    lo.m_index[4] = xMin; lo.m_index[5] = xMin;
+    lo.m_index[0] = yMin; lo.m_index[2] = yMin;
+    lo.m_index[1] = zMin; lo.m_index[3] = zMin;
+    hi.m_index[4] = xMax; hi.m_index[5] = xMax;
+    hi.m_index[0] = yMax; hi.m_index[2] = yMax;
+    hi.m_index[1] = zMax; hi.m_index[3] = zMax;
     hkBpNode* end = nodes + count;
     for (; nodes < end; ++nodes) {
         nodes->m_index[4] += (u16)((nodes->m_index[4] > xMin) + (nodes->m_index[4] > xMax));
