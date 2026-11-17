@@ -1,10 +1,16 @@
 #define SO_STATUS_UNIQ_PROCESS_OUT_OF_LINE
+// BYTES: the unit's own classes are defined ahead of every other header (class definition order decides the order of the
+// vtables and RTTI in .data: the five status vtables follow the article and module classes' in the original).
+#include <ft/samus/ft_samus_status_uniq_process_special_n.h>
 #include <ft/ft_common_data_accesser.h>
+#include <ft/ft_controller_module_impl.h>
 #include <ft/ft_kinetic_energy.h>
 #include <ft/kirby/ft_kirby_copy_ability_id_converter.h>
 #include <ft/samus/ft_samus_data.h>
 #include <so/article/so_generate_article_manage_module.h>
+#include <so/controller/so_controller_impl.h>
 #include <so/effect/so_effect_module_impl.h>
+#include <so/motion/so_motion_change_param.h>
 #include <so/situation/so_situation_module_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/stageobject.h>
@@ -12,45 +18,6 @@
 #include <so/work/so_work_manage_module_impl.h>
 #include <types.h>
 #include <wn/samus/wn_samus_cshot.h>
-
-// Class shapes from the module map; the empty method bodies are not reconstructed yet.
-class ftSamusStatusUniqProcessSpecialNStart : public soStatusUniqProcess {
-public:
-    virtual ~ftSamusStatusUniqProcessSpecialNStart() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-};
-
-class ftSamusStatusUniqProcessSpecialAirNStart : public soStatusUniqProcess {
-public:
-    virtual ~ftSamusStatusUniqProcessSpecialAirNStart() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-};
-
-class ftSamusStatusUniqProcessSpecialNHold : public soStatusUniqProcess {
-public:
-    virtual ~ftSamusStatusUniqProcessSpecialNHold() { }
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-    virtual void execFixPosCounter(soModuleAccesser* moduleAccesser);
-    virtual void execFixPos(soModuleAccesser* moduleAccesser);
-};
-
-class ftSamusStatusUniqProcessSpecialNFire : public soStatusUniqProcess {
-public:
-    virtual ~ftSamusStatusUniqProcessSpecialNFire() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-};
-
-class ftSamusStatusUniqProcessSpecialAirNFire : public soStatusUniqProcess {
-public:
-    virtual ~ftSamusStatusUniqProcessSpecialAirNFire() { }
-    virtual void initStatus(soModuleAccesser* moduleAccesser);
-    virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
-    virtual void execStatus(soModuleAccesser* moduleAccesser);
-};
 
 ftSamusStatusUniqProcessSpecialNStart g_ftSamusStatusUniqProcessSpecialNStart;
 ftSamusStatusUniqProcessSpecialAirNStart g_ftSamusStatusUniqProcessSpecialAirNStart;
@@ -128,7 +95,48 @@ void ftSamusStatusUniqProcessSpecialAirNStart::exitStatus(soModuleAccesser* modu
     }
     }
 }
-void ftSamusStatusUniqProcessSpecialNHold::execFixPosCounter(soModuleAccesser* moduleAccesser) { }
+// HYPOTHESIS: the charge shot parameter block of Samus (and of Kirby's copy): the number of charge steps and the
+// frames per step.
+struct ftSamusParamChargeShot {
+    int maxCharge;
+    int unk04;
+    float stepFrames;
+};
+
+inline soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, u8 c, u8 d) :
+    m_kind(kind), m_frame(frame), m_rate(rate), _12(a), _13(b), _14(c), _15(d) {}
+
+// Charging: one step every stepFrames frames up to maxCharge (then the fully charged status on the ground); on the
+// ground the attack button fires and the shield button stores the charge.
+void ftSamusStatusUniqProcessSpecialNHold::execFixPosCounter(soModuleAccesser* moduleAccesser) {
+    ftKind kind = static_cast<ftKind>(moduleAccesser->getStageObject().soGetSubKind());
+    ftSamusParamChargeShot* param = static_cast<ftSamusParamChargeShot*>(g_ftCommonDataAccesser.getParamSamusChargeShot(kind));
+    soStatusModule& status = moduleAccesser->getStatusModule();
+    int situation = moduleAccesser->getSituationModule().getKind();
+    moduleAccesser->getWorkManageModule().incInt(0x10000042);
+    if (static_cast<float>(moduleAccesser->getWorkManageModule().getInt(0x10000042)) > param->stepFrames) {
+        moduleAccesser->getWorkManageModule().setInt(0, 0x10000042);
+        moduleAccesser->getWorkManageModule().incInt(0x10000041);
+        int maxCharge = param->maxCharge;
+        if (moduleAccesser->getWorkManageModule().getInt(0x10000041) >= maxCharge) {
+            moduleAccesser->getWorkManageModule().setInt(maxCharge, 0x10000041);
+            if (situation == 0) {
+                status.changeStatusRequest(g_ftKirbyCopyAbilityIdConverter.convOrigToCorrectId(0, 0x119, moduleAccesser, false), moduleAccesser);
+                return;
+            }
+        }
+    }
+    if (situation == 0) {
+        // HYPOTHESIS: a checked cast whose result the original does not use (the buttons are read through the base module).
+        dynamic_cast<ftControllerModuleImpl&>(moduleAccesser->getControllerModule());
+        if (moduleAccesser->getControllerModule().getTrigger() & soController::getButtonMask(static_cast<soController::PadButton>(1))) {
+            moduleAccesser->getMotionModule().changeMotionRequest(&soMotionChangeParam(0x1ce, 0.0f, 1.0f, 0, 0, 0, 0));
+            status.changeStatusRequest(g_ftKirbyCopyAbilityIdConverter.convOrigToCorrectId(0, 0x11a, moduleAccesser, false), moduleAccesser);
+        } else if (moduleAccesser->getControllerModule().getTrigger() & soController::getButtonMask(static_cast<soController::PadButton>(3))) {
+            status.changeStatusRequest(0x1a, moduleAccesser);
+        }
+    }
+}
 void ftSamusStatusUniqProcessSpecialNHold::execFixPos(soModuleAccesser* moduleAccesser) {
     ftKind kind = static_cast<ftKind>(moduleAccesser->getStageObject().soGetSubKind());
     int* param = static_cast<int*>(g_ftCommonDataAccesser.getParamSamusChargeShot(kind));

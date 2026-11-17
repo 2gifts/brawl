@@ -8,8 +8,7 @@
 
 FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 4);
 WN_STATUS_PROC_VECTOR_ARG_CTOR(9);
-// The two-entry interpreter stacks of the command threads are sora_melee's.
-FT_DOL_ARRAY_VECTOR(acCmdInterpreterStackData, 2);
+#include <wn/samus/wn_szerosuit_stack_vector.h>
 
 // HYPOTHESIS: meaning of the three parameters (ids 4000..).
 struct wnSZerosuitWhipParam {

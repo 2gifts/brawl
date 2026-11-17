@@ -24,7 +24,7 @@ struct wnSamusMissileData {
 
 struct wnArticleBuildInfo;
 
-#ifdef WN_WEAPON_BUILDER
+#if defined(WN_WEAPON_BUILDER) && defined(WN_MARIO_FIREBALL_UNIT) // the article unit (a fighter unit with builders sees the call-side view)
 // BYTES: the sora_melee unit mode of the module accesser builder is shared with the Light Bow (wn/zelda/wn_zelda_lighting_bow.h).
 #define WN_ZELDA_LIGHTING_BOW_UNIT
 #include <wn/zelda/wn_zelda_lighting_bow.h>
@@ -72,7 +72,7 @@ class wnSamusMissile : public Weapon {
 #endif
 public:
     wnSamusMissile(s32 articleId, const wnArticleBuildInfo& info, const wnSamusMissileData* data);
-#ifdef WN_WEAPON_BUILDER
+#if defined(WN_WEAPON_BUILDER) && defined(WN_MARIO_FIREBALL_UNIT)
     virtual ~wnSamusMissile() { }
 #else
     virtual ~wnSamusMissile();

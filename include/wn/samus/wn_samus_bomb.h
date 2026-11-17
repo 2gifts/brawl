@@ -25,7 +25,7 @@ struct wnSamusBombData {
     const wnSamusBombParam* m_param; // +0x34
 };
 
-#ifdef WN_WEAPON_BUILDER
+#if defined(WN_WEAPON_BUILDER) && defined(WN_MARIO_FIREBALL_UNIT) // the article unit (a fighter unit with builders sees the call-side view)
 // BYTES: the sora_melee unit mode of the module accesser builder is shared with the Light Bow (wn/zelda/wn_zelda_lighting_bow.h).
 #define WN_ZELDA_LIGHTING_BOW_UNIT
 #include <wn/zelda/wn_zelda_lighting_bow.h>
@@ -85,7 +85,7 @@ public:
     wnKineticEnergyGravity m_energyGravity; // +0x1A84: the fall (energy 2)
 
     wnSamusBomb(s32 articleId, const wnArticleBuildInfo& info, const wnSamusBombData* data);
-#ifdef WN_WEAPON_BUILDER
+#if defined(WN_WEAPON_BUILDER) && defined(WN_MARIO_FIREBALL_UNIT)
     virtual ~wnSamusBomb() { }
 #else
     virtual ~wnSamusBomb();
@@ -93,7 +93,7 @@ public:
     void activate(int founderTaskId, int etcResourceId, int team);
     const wnSamusBombData* getData();
     void toShoot(float lr, float x, float y, float z);
-#ifdef WN_WEAPON_BUILDER
+#if defined(WN_WEAPON_BUILDER) && defined(WN_MARIO_FIREBALL_UNIT)
     virtual void updateNodeSRT();
     virtual bool notifyEventAnimCmd(acAnimCmd* cmd, soModuleAccesser* moduleAccesser, int index);
     virtual bool notifyEventCollisionSearchCheck();

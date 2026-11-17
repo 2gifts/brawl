@@ -165,7 +165,7 @@ void ftSamusStatusUniqProcessSpecialGroundLw::execFixPos(soModuleAccesser* modul
         soGenerateArticleManageModule& articles = moduleAccesser->getGenerateArticleManageModule();
         if (articles.isGeneratable(1)) {
             soArticle* article = articles.generate(1, 0, false);
-            if (!reinterpret_cast<ftSamusArticleNullView*>(article)->isNull()) {
+            if (!article->isNull()) {
                 articles.entry(article);
                 articles.shoot(1, 0, true);
             }
@@ -219,7 +219,7 @@ void ftSamusStatusUniqProcessSpecialAirLw::execFixPos(soModuleAccesser* moduleAc
         soGenerateArticleManageModule& articles = moduleAccesser->getGenerateArticleManageModule();
         if (articles.isGeneratable(1)) {
             soArticle* article = articles.generate(1, 0, false);
-            if (!reinterpret_cast<ftSamusArticleNullView*>(article)->isNull()) {
+            if (!article->isNull()) {
                 articles.entry(article);
                 articles.shoot(1, 0, true);
             }

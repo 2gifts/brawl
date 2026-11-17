@@ -7,9 +7,10 @@
 
 struct wnArticleBuildInfo;
 
-// Only the article's own unit (the sora_melee unit mode of wn/zelda/wn_zelda_lighting_bow.h) builds it; the fighter module
-// (WN_WEAPON_BUILDER through ft_szerosuit_article_pools.h) keeps the opaque view.
-#if defined(WN_WEAPON_BUILDER) && defined(WN_ZELDA_LIGHTING_BOW_UNIT)
+// Three views: the article's own unit (the sora_melee unit mode of wn/zelda/wn_zelda_lighting_bow.h: module builder out of
+// line), Zero Suit Samus's fighter unit (FT_SZEROSUIT_ARTICLE_POOLS: the generic builder, whose weak destructor chain the
+// fighter module keeps), and the call-side view (the native extent only).
+#if defined(WN_WEAPON_BUILDER) && (defined(WN_ZELDA_LIGHTING_BOW_UNIT) || defined(FT_SZEROSUIT_ARTICLE_POOLS))
 #include <wn/wn_extend_param_accesser.h>
 #include <wn/zelda/wn_szerosuit_anim_cmd.h>
 #include <wn/zelda/wn_szerosuit_status_builder.h>
@@ -26,7 +27,11 @@ public:
     wnSZerosuitParalyzerParamAccesser(const float* param) : wnExtendParamAccesser<3999, 1, 23999, 0, 0, 0>(98) {
         m_floats[0] = param;
     }
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
     virtual ~wnSZerosuitParalyzerParamAccesser(); // BYTES: defined in the article unit, after the article constructor (emission order)
+#else
+    virtual ~wnSZerosuitParalyzerParamAccesser() { }
+#endif
 };
 static_assert(sizeof(wnSZerosuitParalyzerParamAccesser) == 0x2C, "Zero Suit paralyzer parameter accesser extent");
 
@@ -55,9 +60,12 @@ public:
     typedef soColorBlendModuleBuildConfig<-1, 0, soColorBlendModuleImpl> ColorBlendModuleBuildConfig;
     typedef wnAnimCmdModuleSubBuildConfigFullPropertyNoUniqStack<1, 1, 0, 0, 2, 1, 20, 0, 0, 2, 1, 20, 0, 0, 2, 1, 20, 0, 0, 2>
         AnimCmdModuleSubBuildConfig;
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
     typedef soGenerateArticleManageModuleBuilder<soGenerateArticleManageModuleBuildConfigNull> GenerateArticleManageModuleBuilder;
+#endif
 };
 
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
 // The article's own unit (the sora_melee unit mode of wn/zelda/wn_zelda_lighting_bow.h): the generic builder's member
 // layout, spelled out so that the constructor can be defined by hand (wn_zelda_lighting_bow_builder_ctor.h).
 template <>
@@ -71,13 +79,18 @@ public:
     ~soModuleAccesserBuilder() { }
     soModuleAccesser* getModuleAccesser(); // BYTES: defined in wn_zelda_lighting_bow_builder_ctor.h (emission order)
 };
+#endif
 
 class wnSZerosuitParalyzer : public wnWeaponBuilder<wnSZerosuitParalyzerModuleAccesserBuildConfig> {
     const float* m_param;                                 // +0x1B58
     wnSZerosuitParalyzerParamAccesser m_paramAccesser;    // +0x1B5C
 public:
     wnSZerosuitParalyzer(s32 articleId, const wnArticleBuildInfo& info, const wnSZerosuitParalyzerData* data);
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
     virtual ~wnSZerosuitParalyzer();
+#else
+    virtual ~wnSZerosuitParalyzer() { }
+#endif
 #else
 
 struct wnSZerosuitParalyzerData;

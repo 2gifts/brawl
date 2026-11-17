@@ -24,7 +24,7 @@ struct wnSamusCShotData {
     const wnSamusCShotParam* m_param; // +0x34
 };
 
-#ifdef WN_WEAPON_BUILDER
+#if defined(WN_WEAPON_BUILDER) && defined(WN_MARIO_FIREBALL_UNIT) // the article unit (a fighter unit with builders sees the call-side view)
 // BYTES: the sora_melee unit mode of the module accesser builder is shared with the Light Bow (wn/zelda/wn_zelda_lighting_bow.h).
 #define WN_ZELDA_LIGHTING_BOW_UNIT
 #include <wn/zelda/wn_zelda_lighting_bow.h>
@@ -67,21 +67,28 @@ public:
 
 class wnSamusCShot : public wnWeaponBuilder<wnSamusCShotModuleAccesserBuildConfig> {
 #else
-// Call-side view keeps the native extent without instantiating the builder.
-// Call-side view keeps the native extent without instantiating the builder.
-class wnSamusCShot : public Weapon {
+// Call-side view keeps the native extent without instantiating the builder. The weapon builder base is kept as a class of
+// its own: a unit that casts to the article (the Charge Shot status unit) emits the RTTI of the whole chain.
+class wnSamusCShotModuleAccesserBuildConfig;
+template <typename T> class wnWeaponBuilder;
+template <>
+class wnWeaponBuilder<wnSamusCShotModuleAccesserBuildConfig> : public Weapon {
     u8 m_storage[0x1828 - sizeof(Weapon)];
+public:
+    virtual ~wnWeaponBuilder();
+};
+class wnSamusCShot : public wnWeaponBuilder<wnSamusCShotModuleAccesserBuildConfig> {
 #endif
 public:
     wnSamusCShot(s32 articleId, const wnArticleBuildInfo& info, const wnSamusCShotData* data);
-#ifdef WN_WEAPON_BUILDER
+#if defined(WN_WEAPON_BUILDER) && defined(WN_MARIO_FIREBALL_UNIT)
     virtual ~wnSamusCShot() { }
 #else
     virtual ~wnSamusCShot();
 #endif
     void activate(int founderTaskId, int etcResourceId, int team, int kind);
     void setCharge(float charge);
-    void toShoot(int chargeFrame, float lr);
+    void toShoot(float lr, int chargeFrame);
     const wnSamusCShotData* getData();
 };
 static_assert(sizeof(wnSamusCShot) == 0x1828, "Samus charge shot article extent");

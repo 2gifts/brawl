@@ -1,5 +1,6 @@
 #pragma once
 
+#include <so/article/so_article.h>
 #include <so/status/so_status_module_impl.h>
 #include <types.h>
 
@@ -102,18 +103,6 @@ struct ftSamusExtendParamSpecialLw {
     float airEndSpeed;      // 0x40: acceleration/speed factors of the twin status (0x121)
     float unk44;            // 0x44
     float unk48;            // 0x48: horizontal distance that maps to the full range of the launch angle
-};
-
-// MATCH-ONLY: soArticle stays incomplete here; its virtual isNull() (slot 2) is called through this view.
-class ftSamusArticleNullView {
-public:
-    virtual bool isNull() const;
-    virtual void unk0C();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1C();
-    virtual int getInstanceId(); // HYPOTHESIS: the Zero Laser stores it in a work int and looks the article up with it again
 };
 
 // The ExtendParam group (ftData::extendParam[3]) read directly by the Charge Shot. HYPOTHESIS: names follow the use.

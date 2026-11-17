@@ -19,9 +19,10 @@ struct wnSZerosuitParalyzerBulletParam {
     s32 unk1C;
 };
 
-// Only the article's own unit (the sora_melee unit mode of wn/zelda/wn_zelda_lighting_bow.h) builds it; the fighter module
-// (WN_WEAPON_BUILDER through ft_szerosuit_article_pools.h) keeps the opaque view.
-#if defined(WN_WEAPON_BUILDER) && defined(WN_ZELDA_LIGHTING_BOW_UNIT)
+// Three views: the article's own unit (the sora_melee unit mode of wn/zelda/wn_zelda_lighting_bow.h: module builder out of
+// line), Zero Suit Samus's fighter unit (FT_SZEROSUIT_ARTICLE_POOLS: the generic builder, whose weak destructor chain the
+// fighter module keeps), and the call-side view (the native extent only).
+#if defined(WN_WEAPON_BUILDER) && (defined(WN_ZELDA_LIGHTING_BOW_UNIT) || defined(FT_SZEROSUIT_ARTICLE_POOLS))
 #include <wn/wn_extend_param_accesser.h>
 #include <wn/wn_anim_cmd_full_property.h>
 #include <wn/wn_inside_event_all_units.h>
@@ -47,7 +48,11 @@ public:
         m_ints[0] = &param->unk18;
         m_ints[1] = &param->unk1C;
     }
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
     virtual ~wnSZerosuitParalyzerBulletParamAccesser(); // BYTES: defined in the article unit (emission order)
+#else
+    virtual ~wnSZerosuitParalyzerBulletParamAccesser() { }
+#endif
 };
 static_assert(sizeof(wnSZerosuitParalyzerBulletParamAccesser) == 0x48, "Zero Suit paralyzer bullet parameter accesser extent");
 
@@ -71,9 +76,12 @@ public:
     typedef wnStatusModuleBuildConfigNoUniq<2, soGeneralWorkBuildConfig<2, 2, 1>, 2, soTransitionModuleBuildConfig<soTypeList<soIntToType<2>, soTypeListNullType> > >
         StatusModuleBuildConfig;
     typedef wnAnimCmdModuleSubBuildConfigFullProperty<1, 2, 0, 0, 2, 1, 2, 0, 0, 1, 1, 2, 0, 0, 1, 1, 2, 0, 0, 1> AnimCmdModuleSubBuildConfig;
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
     typedef soGenerateArticleManageModuleBuilder<soGenerateArticleManageModuleBuildConfigNull> GenerateArticleManageModuleBuilder;
+#endif
 };
 
+#ifdef WN_ZELDA_LIGHTING_BOW_UNIT
 template <>
 class soModuleAccesserBuilder<wnSZerosuitParalyzerBulletModuleAccesserBuildConfig> : public utUnCopyable {
 public:
@@ -84,6 +92,13 @@ public:
     ~soModuleAccesserBuilder();
     soModuleAccesser* getModuleAccesser();
 };
+#endif
+
+#if defined(FT_SZEROSUIT_ARTICLE_POOLS) && defined(WN_WEAPON_NO_COMMON_ENERGIES)
+// Zero Suit Samus's fighter unit builds its whip and paralyzer without the common energies; the bullet has them.
+#include <wn/wn_weapon_builder_common_energies.h>
+WN_WEAPON_BUILDER_COMMON_ENERGIES(wnSZerosuitParalyzerBulletModuleAccesserBuildConfig);
+#endif
 
 class wnSZerosuitParalyzerBullet : public wnWeaponBuilder<wnSZerosuitParalyzerBulletModuleAccesserBuildConfig> {
     const wnSZerosuitParalyzerBulletParam* m_param;           // +0x17A0
@@ -100,7 +115,11 @@ class wnSZerosuitParalyzerBullet : public Weapon {
 public:
     wnSZerosuitParalyzerBullet(s32 articleId, const wnArticleBuildInfo& info, const wnSZerosuitParalyzerBulletData* data);
 #endif
+#if defined(WN_WEAPON_BUILDER) && defined(FT_SZEROSUIT_ARTICLE_POOLS) && !defined(WN_ZELDA_LIGHTING_BOW_UNIT)
+    virtual ~wnSZerosuitParalyzerBullet() { }
+#else
     virtual ~wnSZerosuitParalyzerBullet();
+#endif
     void activate(int founderTaskId, int team, const Vec3f& position, bool fullCharge, float lr);
 };
 static_assert(sizeof(wnSZerosuitParalyzerBullet) == 0x17EC, "Zero Suit paralyzer bullet article extent");

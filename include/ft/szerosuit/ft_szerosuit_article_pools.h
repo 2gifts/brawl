@@ -42,30 +42,29 @@ public:
     virtual ~soEventUnitWithWorkArea();
     virtual u32 getObserverNum() const { return m_observerList.size(); }
 };
+template <> class soEventUnitWithWorkArea<soModelEventObserver, 5> : public soEventUnitImpl<soModelEventObserver> {
+    soInstanceManagerFullPropertyVector<soModelEventObserver*, 5> m_observerList;
+public:
+    soEventUnitWithWorkArea(s16 managerId, s16 eventId) : soEventUnitImpl<soModelEventObserver>(managerId, eventId) { }
+    virtual ~soEventUnitWithWorkArea();
+    virtual u32 getObserverNum() const { return m_observerList.size(); }
+};
+#include <ft/samus/ft_samus_event_units.h> // the paralyzer bullet has the grapple beam's observer lists
+template <> class soEventUnitWithWorkArea<soTurnEventObserver, 4> : public soEventUnitImpl<soTurnEventObserver> {
+    soInstanceManagerFullPropertyVector<soTurnEventObserver*, 4> m_observerList;
+public:
+    soEventUnitWithWorkArea(s16 managerId, s16 eventId) : soEventUnitImpl<soTurnEventObserver>(managerId, eventId) { }
+    virtual ~soEventUnitWithWorkArea();
+    virtual u32 getObserverNum() const { return m_observerList.size(); }
+};
 #include <wn/wn_module_accesser_builder.h>
+// The two articles of this REL first: they declare the sora_melee vectors the other articles share.
+#include <wn/samus/wn_s_zerosuit_whip.h>
+#include <wn/samus/wn_szerosuit_armor.h>
 #include <wn/zelda/wn_szerosuit_paralyzer.h>
 #include <wn/zelda/wn_szerosuit_paralyzer_bullet.h>
-#include <wn/samus/wn_s_zerosuit_whip.h>
-
-class Vec3f;
-struct wnSZerosuitArmorData;
 
 static_assert(sizeof(wnSZerosuitWhip) == 0x1D50, "wnSZerosuitWhip layout is wrong!");
-
-// The armor piece (separate unit of this REL). Opaque shell until the article is reconstructed.
-class wnSZerosuitArmor : public Weapon {
-    u8 m_unreconstructed[0x15D4 - sizeof(Weapon)];
-public:
-    wnSZerosuitArmor(s32 articleId, const wnArticleBuildInfo& info, const wnSZerosuitArmorData* data);
-    virtual ~wnSZerosuitArmor();
-    void activate(int founderTaskId, u32 etcResId, int index, int mdlResIndex, u32 param0, u32 param1, int team);
-#ifdef FT_SZEROSUIT_ARMOR_SHOOT_FLOAT_FIRST
-    void shoot(float speed, float rate, float lr, int param);
-#else
-    void shoot(int param, float speed, float lr, float rate);
-#endif
-};
-static_assert(sizeof(wnSZerosuitArmor) == 0x15D4, "wnSZerosuitArmor layout is wrong!");
 
 typedef wnArticleHierarchy<wnSZerosuitArmor, 8, soInstancePoolRoot> ftSZerosuitArmorPool;
 typedef wnArticleHierarchy<wnSZerosuitWhip, 1, ftSZerosuitArmorPool> ftSZerosuitWhipPool;
@@ -74,7 +73,7 @@ typedef wnArticleHierarchy<wnSZerosuitParalyzer, 1, ftSZerosuitBulletPool> ftSZe
 
 class ftSZerosuitArticleMediator : public soArticleMediator {
     ftSZerosuitParalyzerPool m_pools;
-    volatile u8 m_autoRecycle; // MATCH-ONLY: keeps the store behind the (partly inlined) pool constructors
+    u8 m_autoRecycle;
     // The slot members (wnArticleSlot*, wn/wn_article_pool.h) read the pool chain.
     WN_ARTICLE_SLOT_FRIENDS
 public:

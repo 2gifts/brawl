@@ -1,17 +1,23 @@
 #pragma once
 
 // Samus's grapple beam (article kind 0x84, a lasso article like the Zero Suit whip: its statuses are the shared wnLasso ones). The
-// article is built in sora_melee; the fighter module only sees the opaque shell of ft/samus/ft_samus_article_pools.h.
+// article is built in sora_melee. Three views: the article unit (WN_WEAPON_BUILDER + WN_MARIO_FIREBALL_UNIT: module builder
+// out of line), Samus's fighter unit (WN_WEAPON_BUILDER alone: the generic builder, whose weak destructor chain the fighter
+// module keeps), and the call-side view (neither: the native extent only).
 
 #include <wn/wn_weapon_builder.h>
 #include <wn/wn_extend_param_accesser.h>
+#include <wn/wn_lasso_status_view.h>
+#ifdef WN_WEAPON_BUILDER
+#ifdef WN_MARIO_FIREBALL_UNIT
 // BYTES: the sora_melee unit mode of the module accesser builder (member list macro, null builders, situation builder
 // shadow) is shared with the Light Bow, see wn/zelda/wn_zelda_lighting_bow.h.
 #define WN_ZELDA_LIGHTING_BOW_UNIT
 #include <wn/zelda/wn_zelda_lighting_bow.h>
-#include <wn/wn_lasso_status_view.h>
+#endif
 #include <wn/wn_anim_cmd_full_property.h>
 #include <wn/wn_inside_event_all_units.h>
+#endif
 
 struct wnArticleBuildInfo;
 
@@ -104,7 +110,11 @@ public:
     }
     virtual ~wnSamusGBeamParamAccesser();
 };
+#if defined(WN_WEAPON_BUILDER) && !defined(WN_MARIO_FIREBALL_UNIT)
+inline wnSamusGBeamParamAccesser::~wnSamusGBeamParamAccesser() { } // the article unit defines it in place (emission order)
+#endif
 
+#ifdef WN_WEAPON_BUILDER
 class wnSamusGBeamModuleAccesserBuildConfig : public wnCommonBuildConfig {
 public:
     typedef soInsideEventManageModuleBuildConfig<12, 18, 0, 1, 0, 0, 4, 4, 1, 0, 1, 0, 0, 0, 0, 0, 0, 6, 0, wnAllInsideEventManageModuleTypes>
@@ -125,7 +135,9 @@ public:
     // HYPOTHESIS: the lasso articles keep their rope state in the physics module slot (see wn/wn_lasso_status_view.h).
     typedef soPhysicsModuleBuildConfigCap<0, soPhysicsModuleImpl> PhysicsModuleBuildConfig;
     typedef soGlowModuleBuildConfigNull GlowModuleBuildConfig;
+#ifdef WN_MARIO_FIREBALL_UNIT
     typedef soGenerateArticleManageModuleBuilder<soGenerateArticleManageModuleBuildConfigNull> GenerateArticleManageModuleBuilder;
+#endif
 };
 
 // The beam's status builder: the generic one, except that it gives the status module no pre-check animation commands (the
@@ -156,6 +168,7 @@ public:
     soStatusModule* getModule() { return &m_module; }
 };
 
+#ifdef WN_MARIO_FIREBALL_UNIT
 // BYTES: the beam's animation command sub builder constructor comes after the module accesser builder constructor and its
 // weak copies in the original unit (right before activate). The shared template (wn_module_accesser_builder.h) defines the
 // constructor in the class, which emits it right after the article constructor; this specialization has the same members
@@ -185,13 +198,23 @@ public:
     ~soModuleAccesserBuilder();
     soModuleAccesser* getModuleAccesser(); // BYTES: defined in the unit (emission order)
 };
+#endif
 
 class wnSamusGBeam : public wnWeaponBuilder<wnSamusGBeamModuleAccesserBuildConfig> {
+#else
+// Call-side view keeps the native extent without instantiating the builder.
+class wnSamusGBeam : public Weapon {
+    u8 m_storage[0x1748 - sizeof(Weapon)];
+#endif
     const wnSamusGBeamParam* m_param;            // +0x1748
     wnSamusGBeamParamAccesser m_paramAccesser;   // +0x174C
 public:
     wnSamusGBeam(s32 articleId, const wnArticleBuildInfo& info, const wnSamusGBeamData* data);
+#if defined(WN_WEAPON_BUILDER) && !defined(WN_MARIO_FIREBALL_UNIT)
+    virtual ~wnSamusGBeam() { }
+#else
     virtual ~wnSamusGBeam();
+#endif
     // HYPOTHESIS: parameter names; attack is set by the fighter for the attack variants of the statuses (0x34, 0x36, 0x38).
     void activate(int founderTaskId, int etcResourceId, int team, float lr, const Vec3f* pos, bool attack);
 };

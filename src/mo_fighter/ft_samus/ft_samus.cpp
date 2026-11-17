@@ -1,22 +1,31 @@
+#define FT_SOUND_GENERATOR_DTOR_NOINLINE
+#define FT_MODULE_ACCESSER_BUILDER_BASE_BUILD_DATA
+#define FT_POOL_ROOT_NONPOLYMORPHIC
 #define SO_GENERAL_WORK_BOUNDED_CLEAR
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
 #define FT_TEAM_TYPED_INTERFACE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_SAMUS_ARTICLE_POOLS
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
-#define FT_PARAM_ACCESSER_TYPED_DTOR
+#define FT_KINETIC_IMPL_DTOR_OUT_OF_LINE
+#define WN_PARAM_ACCESSER_INLINE_DTOR // the grapple beam teardown expands the empty soParamAccesser destructor
+#define WN_KINETIC_MEDIATOR_INLINE_DTOR
+#define SO_STATUS_KINETIC_SLOT // the grapple beam article: an empty slot between its status and kinetic builders (ft_module_accesser_builder.h)
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/ft_manager.h>
 #include <so/work/so_general_work_simple.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/samus/ft_samus.h>
 #include <ft/samus/ft_samus_status_uniq_process.h>
-#include <ft/samus/ft_samus_change_succeed.h>
+#include <ft/ft_change_succeed_work.h>
 #include <ft/samus/ft_samus_extend_param_accesser.h>
 #include <so/so_external_value_accesser.h>
 #include <ft/ft_owner.h>
 #include <so/article/so_article_mediator.h>
 #include <so/so_value_accesser.h>
+
+// The sound builder teardown inlines this empty destructor (same form as ft_koopa.cpp).
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
 
 #define FT_BC ftSamusBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
@@ -28,6 +37,14 @@ template soArrayVector<s32, 8>::~soArrayVector();
 #endif
 #pragma dont_inline off
 soStatusModuleImpl::~soStatusModuleImpl() { }
+
+ftKineticEnergyController::~ftKineticEnergyController() { }
+
+// ftManager::setParamPattern selects the shared parameter-table variation.
+extern int g_soValueVariation;
+#pragma dont_inline on
+int soValueAccesser::getValueVariation() { return g_soValueVariation; }
+#pragma dont_inline off
 
 // HYPOTHESIS: unnamed status process instances (not yet named in symbols.txt); the repeated ones are the null placeholders of the
 // unused status ranges.
@@ -107,65 +124,28 @@ ftSamus::ftSamus(s32 entryId,
 
 
 // ---- the article holders --------------------------------------------------------------------------------------------
-// What the constructor of one of the articles is given: the kind record of the owner (kind 0, sub kind Samus, copied into the
-// descriptor), the heap module and the data block of the fighter kind.
-// HYPOTHESIS: the original builds these in the holder constructor itself.
-struct ftSamusArticleDataTag {
-    bool m_unused;
-    bool m_resourceGroup;
-    ftSamusArticleDataTag() : m_unused(false), m_resourceGroup(false) { }
-};
+#include <ft/builder/ft_builder_article.h>
 
 struct ftSamusArticleKind : wnArticleKindInfo {
+    ftKind getSubKind() const { return static_cast<ftKind>(subKind); }
     ftSamusArticleKind() {
         kind = 0;
         subKind = Fighter_Samus;
     }
 };
 
-// HYPOTHESIS: the descriptor keeps the address of its by-value kind argument (the copy lives in the frame of the caller).
-struct ftSamusArticleBuildInfo : wnArticleBuildInfo {
-    ftSamusArticleBuildInfo(wnArticleKindInfo kindArg, soHeapModule* heap) {
-        kindInfo = &kindArg;
-        heapModule = heap;
-    }
-};
-
-// The data blocks of the articles come from the common data accessor of sora_melee (only declared here).
+// The data blocks of the charge shot and the grapple beam come from the common data accessor of sora_melee (only declared here).
 extern "C" void* fn_27_1492F8(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 extern "C" void* fn_27_149464(const ftCommonDataAccesser* accesser, s32 subKind, bool* resourceGroup);
 
-template <class W> struct ftSamusArticleTraits;
-#define FT_SAMUS_TRAITS(W, DATA, ID, GETTER) \
-    template <> struct ftSamusArticleTraits<W> { \
-        enum { ArticleId = ID }; \
-        static const DATA* getData() { \
-            ftSamusArticleDataTag tag; \
-            return static_cast<const DATA*>(GETTER(&g_ftCommonDataAccesser, Fighter_Samus, &tag.m_resourceGroup)); \
-        } \
-    };
-#define FT_SAMUS_TRAITS_MEMBER(W, DATA, ID, GETTER) \
-    template <> struct ftSamusArticleTraits<W> { \
-        enum { ArticleId = ID }; \
-        static const DATA* getData() { \
-            ftSamusArticleDataTag tag; \
-            return static_cast<const DATA*>(g_ftCommonDataAccesser.GETTER(Fighter_Samus, &tag.m_resourceGroup)); \
-        } \
-    };
-
-FT_SAMUS_TRAITS(wnSamusCShot, wnSamusCShotData, 0, fn_27_1492F8)
-FT_SAMUS_TRAITS_MEMBER(wnSamusBomb, wnSamusBombData, 1, getWeaponData<wnSamusBombData>)
-FT_SAMUS_TRAITS_MEMBER(wnSamusMissile, wnSamusMissileData, 2, getWeaponData<wnSamusMissileData>)
-FT_SAMUS_TRAITS_MEMBER(wnSamusLaser, wnSamusLaserData, 3, getWeaponData<wnSamusLaserData>)
-FT_SAMUS_TRAITS_MEMBER(wnSamusLaser2, wnSamusLaser2Data, 4, getWeaponData<wnSamusLaser2Data>)
-FT_SAMUS_TRAITS_MEMBER(wnSamusGun, wnSamusGunData, 5, getWeaponData<wnSamusGunData>)
-FT_SAMUS_TRAITS_MEMBER(wnSamusSuperMissile, wnSamusSuperMissileData, 6, getWeaponData<wnSamusSuperMissileData>)
-FT_SAMUS_TRAITS(wnSamusGBeam, wnSamusGBeamData, 7, fn_27_149464)
-
-// Every article of the fighter is built by this constructor from the data of the fighter kind.
-template <class W>
-wnArticleHolder<W>::wnArticleHolder(soModuleAccesser* acc) : soInstancePoolRoot(acc),
-    m_instance(ftSamusArticleTraits<W>::ArticleId, ftSamusArticleBuildInfo(ftSamusArticleKind(), static_cast<soHeapModule*>(acc->m_enumerationStart->m_heapModule)), ftSamusArticleTraits<W>::getData()) { }
+FT_DEFINE_ARTICLE_HOLDER(, wnSamusCShot, wnSamusCShotData, 0, ftSamusArticleKind, fn_27_1492F8)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(, wnSamusBomb, const wnSamusBombData, 1, ftSamusArticleKind, getWeaponData<wnSamusBombData>)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(, wnSamusMissile, const wnSamusMissileData, 2, ftSamusArticleKind, getWeaponData<wnSamusMissileData>)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(inline, wnSamusLaser, const wnSamusLaserData, 3, ftSamusArticleKind, getWeaponData<wnSamusLaserData>)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(, wnSamusLaser2, const wnSamusLaser2Data, 4, ftSamusArticleKind, getWeaponData<wnSamusLaser2Data>)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(inline, wnSamusGun, const wnSamusGunData, 5, ftSamusArticleKind, getWeaponData<wnSamusGunData>)
+FT_DEFINE_ARTICLE_HOLDER_MEMBER(, wnSamusSuperMissile, const wnSamusSuperMissileData, 6, ftSamusArticleKind, getWeaponData<wnSamusSuperMissileData>)
+FT_DEFINE_ARTICLE_HOLDER(inline, wnSamusGBeam, wnSamusGBeamData, 7, ftSamusArticleKind, fn_27_149464)
 
 // ---- the articles and their mediator --------------------------------------------------------------------------------
 
@@ -183,11 +163,6 @@ template wnArticleHolder<wnSamusLaser2>::~wnArticleHolder();
 template wnArticleHolder<wnSamusGun>::~wnArticleHolder();
 template wnArticleHolder<wnSamusSuperMissile>::~wnArticleHolder();
 template wnArticleHolder<wnSamusGBeam>::~wnArticleHolder();
-template wnArticleHolder<wnSamusCShot>::wnArticleHolder(soModuleAccesser*);
-template wnArticleHolder<wnSamusBomb>::wnArticleHolder(soModuleAccesser*);
-template wnArticleHolder<wnSamusMissile>::wnArticleHolder(soModuleAccesser*);
-template wnArticleHolder<wnSamusLaser2>::wnArticleHolder(soModuleAccesser*);
-template wnArticleHolder<wnSamusSuperMissile>::wnArticleHolder(soModuleAccesser*);
 template <class Mediator>
 wnSelectedArticleMediator<Mediator>::~wnSelectedArticleMediator() { }
 template <class Mediator, int N>
@@ -206,7 +181,7 @@ void ftSamusArticleMediator::setAutoRecycle(bool enabled) { m_autoRecycle = enab
 
 // ---- the fighter -----------------------------------------------------------------------------------------------------
 void ftSamus::onStart(int startKind) {
-    soModuleAccesser* acc = m_moduleAccesser;
+    soModuleAccesser* acc = getModuleAccesser();
     soWorkManageModule& workManage = acc->getWorkManageModule();
     if (startKind == 8) {
         // HYPOTHESIS: int 0x10000040 holds the effect handle of the charge glow that is removed on this start kind
@@ -244,13 +219,14 @@ void ftSamus::onDeadEnd() {
 // HYPOTHESIS: int 0x10000041 is the charge counter and int 0x10000040 the handle of the glow effect.
 void ftSamus::processUpdate() {
     Fighter::processUpdate();
-    soModuleAccesser* acc = m_moduleAccesser;
-    soEffectModule& effects = acc->getEffectModule();
+    soModuleAccesser* acc = getModuleAccesser();
     soWorkManageModule& workManage = acc->getWorkManageModule();
+    soEffectModule& effects = acc->getEffectModule();
     int* chargeParam = static_cast<int*>(g_ftCommonDataAccesser.getData(Fighter_Samus)->extendParam[0]);
     if (acc->getWorkManageModule().getInt(0x10000041) >= *chargeParam) {
         if (workManage.getInt(0x10000040) == 0) {
-            Vec3f unused(-8.0f, 0.0f, 0.0f);
+            // BYTES: the native function constructs this offset (out-of-line Vec3f ctor at the top of the frame) and never reads it.
+            Vec3f chargeOffset(-8.0f, 0.0f, 0.0f);
             int handle = effects.reqFollow(static_cast<EfID>(0x40006), 0x2b, &Vec3f(-8.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), 1.0f, true, 0, 0, -1);
             workManage.setInt(handle, 0x10000040);
         }
@@ -274,8 +250,7 @@ bool ftSamus::activeArticle(wnSamusCShot* weapon, soModuleAccesser* acc) {
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = fighter.m_taskId;
-    int kind = acc->getStageObject().soGetSubKind();
-    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam(), kind);
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam(), acc->getStageObject().soGetSubKind());
     return true;
 }
 
@@ -284,8 +259,7 @@ bool ftSamus::shootArticle(wnSamusCShot* weapon, soModuleAccesser* acc) {
     int* chargeLimit = static_cast<int*>(g_ftCommonDataAccesser.getParamSamusChargeShot(static_cast<ftKind>(acc->getStageObject().soGetSubKind())));
     weapon->setCharge(static_cast<float>(acc->getWorkManageModule().getInt(0x10000042)) / static_cast<float>(*chargeLimit));
     soPostureModule& posture = acc->getPostureModule();
-    int charge = acc->getWorkManageModule().getInt(0x10000042);
-    weapon->toShoot(charge, posture.getLr());
+    weapon->toShoot(posture.getLr(), acc->getWorkManageModule().getInt(0x10000042));
     return false;
 }
 
@@ -364,10 +338,10 @@ bool ftSamus::shootArticle5(wnSamusLaser2* weapon, soModuleAccesser* acc) {
 // The gun gets the model and the texture of the fighter.
 bool ftSamus::activeArticle6(wnSamusGun* weapon, soModuleAccesser* acc) {
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
-    soResourceModule& resources = acc->getResourceModule();
-    int founderTaskId = fighter.m_taskId;
-    int team = fighter.getOwner()->getTeam();
-    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getMdlResId(), resources.getResourceIdAccesser()->getTexResId(), 1, 0, team);
+    int founderTaskId;
+    soResourceModule* const resources = &acc->getResourceModule();
+    founderTaskId = fighter.m_taskId;
+    weapon->activate(founderTaskId, resources->getResourceIdAccesser()->getMdlResId(), resources->getResourceIdAccesser()->getTexResId(), 1, 0, fighter.getOwner()->getTeam());
     return true;
 }
 
@@ -503,10 +477,15 @@ void ftSamus::change(void* work, int mode) {
 
 // The grapple beam starts at the hand node; the three whip-like statuses 0x34, 0x36 and 0x38 use it as an attack.
 // HYPOTHESIS: the model constraint ties the beam to the hand node unless the status is 0x3c.
+static inline int getFighterTaskId(Fighter& fighter) {
+    return fighter.m_taskId;
+}
 bool ftSamus::activeArticle7(wnSamusGBeam* weapon, soModuleAccesser* acc) {
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
     Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x2b, false);
     float lr = acc->getPostureModule().getLr();
+    soResourceModule* resources;
+    int founderTaskId;
     bool attack = false;
     switch (acc->getStatusModule().getStatusKind()) {
     case 0x34:
@@ -515,10 +494,9 @@ bool ftSamus::activeArticle7(wnSamusGBeam* weapon, soModuleAccesser* acc) {
         attack = true;
         break;
     }
-    soResourceModule& resources = acc->getResourceModule();
-    int founderTaskId = fighter.m_taskId;
-    int team = fighter.getOwner()->getTeam();
-    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), team, lr, &pos, attack);
+    resources = &acc->getResourceModule();
+    founderTaskId = getFighterTaskId(fighter);
+    weapon->activate(founderTaskId, resources->getResourceIdAccesser()->getEtcResId(), fighter.getOwner()->getTeam(), lr, &pos, attack);
     soLinkModule& link = acc->getLinkModule();
     if (link.link(3, weapon->getTaskId()) == true) {
         if (acc->getStatusModule().getStatusKind() != 0x3c) {
@@ -533,7 +511,7 @@ void ftSamus::setupChangeSucceedWork(void* work) {
     Fighter::setupChangeSucceedWork(work);
     soModuleAccesser* acc = m_moduleAccesser;
     ftSamusExtendParamFinal* param = static_cast<ftSamusExtendParamFinal*>(g_ftCommonDataAccesser.getData(Fighter_Samus)->extendParam[4]);
-    ftSamusChangeSucceedPoints hurt;
+    wnDummyFighterKineticSettingData hurt;
     hurt.point[0][0] = 0.0f;
     hurt.point[1][0] = soValueAccesser::getConstantFloat(acc, 0xbd6, 0);
     hurt.point[2][0] = 0.0f;
@@ -542,7 +520,7 @@ void ftSamus::setupChangeSucceedWork(void* work) {
     hurt.point[1][1] = soValueAccesser::getConstantFloat(acc, 0xbd1, 0);
     hurt.point[2][1] = param->fallSpeedMax;
     hurt.point[3][1] = param->fallSpeedMax;
-    ftSamusChangeSucceedPoints hit;
+    wnDummyFighterKineticSettingData hit;
     hit.point[0][0] = 0.0f;
     hit.point[1][0] = soValueAccesser::getConstantFloat(acc, 0xbbc, 0);
     hit.point[2][0] = 0.0f;
@@ -551,16 +529,17 @@ void ftSamus::setupChangeSucceedWork(void* work) {
     hit.point[1][1] = 0.0f;
     hit.point[2][1] = 0.0f;
     hit.point[3][1] = 0.0f;
-    int flags = 0;
+    u32 option = 0;
     if (acc->getStatusModule().getStatusKind() != 0x10b) {
-        flags = 0x84;
+        option = 0x84;
     }
     Vec2f* speed = &acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(0xFFFF));
-    soPostureModule& posture = acc->getPostureModule();
-    static_cast<ftChangeSucceedWork*>(work)->activateDummyFighter(&posture.getPos(), posture.getScale(), posture.getLr(), speed, &hit.point[0][0], &hurt.point[0][0], flags);
+    soPostureModule* const posture = &acc->getPostureModule();
+    static_cast<ftChangeSucceedWork*>(work)->activateDummyFighter(&posture->getPos(), posture->getScale(), posture->getLr(), speed, &hit.point[0][0], &hurt.point[0][0], option);
 }
 
-ftSamusChangeSucceedPoints::ftSamusChangeSucceedPoints() { }
+// BYTES: defined after its first user (see ft/ft_change_succeed_work.h).
+inline wnDummyFighterKineticSettingData::wnDummyFighterKineticSettingData() { }
 
 ftSamus::~ftSamus() { }
 
@@ -778,142 +757,12 @@ bool ftSamusArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
     }
 }
 
-
-// FIXME: Test code present only to emit the shared builder functions; delete once ftSamus is done
-void testBuilder() {
-    soInsideEventManageModuleBuilder<ftSamusInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> insideBuilder;
-    soResourceIdAccesserImpl idAccImpl(0, 1, 2);
-}
-soInsideEventManageModuleBuilder<ftSamusInsideEventManageModuleBuildConfig, ftInsideEventManageModuleTypes> g_insideBuilder;
-
-// Shared getters and setters reached through this module (placeholder names; offsets are the object's own fields).
-extern int g_soValueVariation;
-extern "C" {
-
-int fn_94_B398() { return g_soValueVariation; }
-u8* fn_94_CCF0(u8* self) { return self + 0x2565c; }
-u8* fn_94_CD10(u8* self) { return self + 0x25698; }
-u8* fn_94_CD1C(u8* self) { return self + 0x25b50; }
-void fn_94_DC30(u8* self) {
-    Vec2f zero(0.0f, 0.0f);
-    *reinterpret_cast<Vec2f*>(self + 0x8) = zero;
-}
-void fn_94_DD14(u8* self) { self[0x31] = 0; }
-void fn_94_DD20(u8* self) { self[0x31] = 1; }
-
-}
-
-// Pool-slot lookups by index (placeholder names; each returns a sub-object of this, or null for unknown indices).
-extern "C" {
-
-void fn_94_CCE4(u8* self, u8 value) { self[0x1d6b4] = value; }
-
-u8* fn_94_CD84(u8* self, int index) {
-    if (index == 1) return self + 0x1938;
-    if (index == 0) return self + 0x10;
-    return 0;
-}
-u8* fn_94_CDC4(u8* self, int index) {
-    if (index == 3) return self + 0x477c;
-    if (index == 2) return self + 0x2fb0;
-    if (index == 1) return self + 0x17e4;
-    if (index == 0) return self + 0x18;
-    return 0;
-}
-u8* fn_94_CE24(u8* self, int index) {
-    if (index == 2) return self + 0x3264;
-    if (index == 1) return self + 0x193c;
-    if (index == 0) return self + 0x14;
-    return 0;
-}
-u8* fn_94_CE5C(u8* self, int index) {
-    if (index == 2) return self + 0x354c;
-    if (index == 1) return self + 0x1ab0;
-    if (index == 0) return self + 0x14;
-    return 0;
-}
-u8* fn_94_CE94(u8* self, int index) {
-    if (index == 3) return self + 0x489c;
-    if (index == 2) return self + 0x3070;
-    if (index == 1) return self + 0x1844;
-    if (index == 0) return self + 0x18;
-    return 0;
-}
-u8* fn_94_E590(u8* self, int index) {
-    if (index == 0) return self + 0xc;
-    return 0;
-}
-u8* fn_94_E678(u8* self, int index) {
-    if (index == 0) return self + 0xc;
-    return 0;
-}
-u8* fn_94_E760(u8* self, int index) {
-    if (index == 0) return self + 0xc;
-    return 0;
-}
-
-}
-
-// soGeneralWorkSimple accessors and updaters (shared inline helpers) under their placeholder names.
-extern "C" {
-
-u32 fn_94_AEA4(soGeneralWorkSimple* self, u32 flag, u32 index) {
-    u32 result;
-    if ((result = self->isFlag(flag, index)) == 1) {
-        self->offFlag(flag, index);
-    }
-    return result;
-}
-
-bool fn_94_AF18(soGeneralWorkSimple* self, u32 flag, u32 index) { return self->m_flagWorks[index] & flag; }
-void fn_94_AF34(soGeneralWorkSimple* self, u32 flag, u32 index) { self->m_flagWorks[index] &= ~flag; }
-void fn_94_AF4C(soGeneralWorkSimple* self, u32 index) { self->m_flagWorks[index] = 0; }
-void fn_94_AF60(soGeneralWorkSimple* self, u32 flag, u32 index) { self->m_flagWorks[index] |= flag; }
-
-void fn_94_AF80(soGeneralWorkSimple* self, float value, u32 index) {
-    if (value != 0.0f) {
-        self->m_floatWorks[index] /= value;
-    }
-}
-void fn_94_AFA8(soGeneralWorkSimple* self, float value, u32 index) { self->m_floatWorks[index] *= value; }
-void fn_94_AFC0(soGeneralWorkSimple* self, float value, u32 index) { self->m_floatWorks[index] -= value; }
-void fn_94_AFD8(soGeneralWorkSimple* self, float value, u32 index) { self->m_floatWorks[index] += value; }
-void fn_94_AFF0(soGeneralWorkSimple* self, float value, u32 index) { self->m_floatWorks[index] = value; }
-float fn_94_B000(soGeneralWorkSimple* self, u32 index) { return self->m_floatWorks[index]; }
-
-void fn_94_B018(soGeneralWorkSimple* self, u32 index) { self->m_intWorks[index]--; }
-void fn_94_B030(soGeneralWorkSimple* self, u32 index) { self->m_intWorks[index]++; }
-void fn_94_B048(soGeneralWorkSimple* self, s32 value, u32 index) {
-    if (value != 0) {
-        self->m_intWorks[index] /= value;
-    }
-}
-void fn_94_B068(soGeneralWorkSimple* self, s32 value, u32 index) { self->m_intWorks[index] *= value; }
-void fn_94_B080(soGeneralWorkSimple* self, s32 value, u32 index) { self->m_intWorks[index] -= value; }
-void fn_94_B098(soGeneralWorkSimple* self, s32 value, u32 index) { self->m_intWorks[index] += value; }
-void fn_94_B0B0(soGeneralWorkSimple* self, s32 value, u32 index) { self->m_intWorks[index] = value; }
-
-}
-
-// Trivial functions of this translation unit (empty virtuals, constant returns, field accessors) under their placeholder names.
-extern "C" {
-
-u8 fn_94_6CF8(u8* p) { return *(u8*)(p + 0x4); }
-int fn_94_A630(u8* p) { return *(int*)(p + 0x28); }
-void fn_94_AAA8() {}
-void fn_94_AAAC() {}
-void fn_94_AAB8() {}
-int fn_94_AE9C(u8* p) { return *(int*)(p + 0x20); }
-int fn_94_AF78(u8* p) { return *(int*)(p + 0x18); }
-void fn_94_DC2C() {}
-void fn_94_E338() {}
-void fn_94_E3BC() {}
-void fn_94_E4A4() {}
-void fn_94_E58C() {}
-void fn_94_E674() {}
-void fn_94_E75C() {}
-void fn_94_E844() {}
-void fn_94_E92C() {}
-void fn_94_EA14() {}
-
-}
+// The module's own copies of these empty destructors (the first unit of the module emits them).
+#pragma dont_inline on
+soTeam::~soTeam() { }
+soResourceIdAccesser::~soResourceIdAccesser() { }
+#pragma dont_inline off
+soArticleMediator::~soArticleMediator() { }
+#pragma dont_inline on
+ftVirtualNodeMatrixPool::~ftVirtualNodeMatrixPool() { }
+#pragma dont_inline off
