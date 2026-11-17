@@ -12,6 +12,8 @@
 #include <string.h>
 #include <types.h>
 
+class muNoticeWndTask;
+
 // The scenes that show the collection viewers (module sora_scene; only what the menus need is declared).
 // HYPOTHESIS: the names follow how the menus use the fields.
 struct muCollectionSceneHolder {
@@ -123,7 +125,8 @@ public:
         int m_unk1CF0;              // 0x1CF0
         u8 m_unk1CF4[0x1CF8 - 0x1CF4];
         int m_unk1CF8;              // 0x1CF8
-        u8 m_unk1CFC[0x1D08 - 0x1CFC];
+        muNoticeWndTask* m_wnd;     // 0x1CFC the notice window that is open
+        u8 m_unk1D00[0x1D08 - 0x1D00];
 
         Work(int numObjs, int unk, const char* name);
         ~Work();
@@ -168,13 +171,13 @@ public:
     virtual void unk_3B70();
     virtual void cancelAndExit();
     virtual void controlProc();                                                         // 0x5418
-    virtual void controlWaitForDialog();                                                // 0x5A1C
+    virtual void controlWaitForDialog(int step);                                                // 0x5A1C
     virtual void onDecided();
     virtual void controlExit();
     virtual void controlPreCheck();                                                     // 0x5018
     virtual void onPreCheckFinished();
-    virtual void controlScanStart();                                                    // 0x527C
-    virtual void controlScanAllStart();                                                 // 0x52E8
+    virtual void controlScanStart(int drive, int unk, int unk2);                                                    // 0x527C
+    virtual void controlScanAllStart(int unk);                                                 // 0x52E8
     virtual void controlScan();                                                         // 0x533C
     virtual void controlPicSelect();                                                    // 0x5A90
     virtual int slidePic(int unk, int unk2);                                            // 0x5C8C
@@ -188,7 +191,7 @@ public:
     virtual void closeEraseConfirmWnd();                                                // 0x62AC
     virtual void dispEraseConfirmWndYesNo();                                            // 0x6344
     virtual void openEraseReportWnd();                                                  // 0x6450
-    virtual void unk_64C8();
+    virtual void unk_64C8(int index);
     virtual void closeEraseReportWnd();                                                 // 0x6520
     virtual void controlEraseConfirm();                                                 // 0x65A0
     virtual void openWaitWnd();                                                         // 0x67B8
@@ -198,13 +201,13 @@ public:
     virtual void controlEraseReport();                                                  // 0x69F0
     virtual void endErase();                                                            // 0x6A84
     virtual void unk_6AE8();
-    virtual void openMediaMenu();                                                       // 0x6E28
-    virtual void beginCopy();                                                           // 0x71E0
+    virtual void openMediaMenu(int attach, int second);                                                       // 0x6E28
+    virtual void beginCopy(int flag);                                                           // 0x71E0
     virtual void controlCopyReady();                                                    // 0x72B8
     virtual void controlCopying();                                                      // 0x73B4
     virtual void controlCopyReport();                                                   // 0x74D0
     virtual void endCopy();                                                             // 0x7274
-    virtual void dispMediaMenuSelect();                                                 // 0x6E80
+    virtual void dispMediaMenuSelect(int selected);                                                 // 0x6E80
     virtual void controlMediaMenu();                                                    // 0x6EF8
     virtual void controlMediaCheck();                                                   // 0x7564
     virtual void controlBrowsing();

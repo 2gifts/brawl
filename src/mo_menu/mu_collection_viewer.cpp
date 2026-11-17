@@ -1,6 +1,9 @@
 #include <types.h>
 
 #include <mu/mu_collection_viewer.h>
+#include <mu/mu_notice_wnd.h>
+#include <nw4r/g3d/g3d_scnmdlexpand.h>
+#include <snd/snd_system.h>
 
 // The base of the menus that browse through the collection (module sora_menu_collect_viewer). Only a part of its functions
 // is decompiled.
@@ -119,3 +122,124 @@ void muCollectionViewer::controlNewDataChecking() { }
 void muCollectionViewer::controlNewData() { }
 
 void muCollectionViewer::controlNewDataExit() { }
+
+void muCollectionViewer::controlScanStart(int drive, int unk, int unk2) {
+    Work* work = m_work;
+    muCollection* collection = (muCollection*)work->m_collection;
+    if (collection->m_busy == 0) {
+        if (unk2 == 0 && collection->m_result != 0) {
+            work->m_exitRequest = 0;
+        } else {
+            collection->scan(drive, unk, unk2);
+            m_work->m_exitRequest = 6;
+        }
+    }
+}
+
+void muCollectionViewer::controlScanAllStart(int unk) {
+    muCollection* collection = (muCollection*)m_work->m_collection;
+    if (collection->m_busy == 0) {
+        collection->scanAll(1, unk);
+        m_work->m_exitRequest = 6;
+    }
+}
+
+void muCollectionViewer::controlScan() {
+    Work* work = m_work;
+    muCollection* collection = (muCollection*)work->m_collection;
+    if (collection->m_busy == 0) {
+        work->m_exitRequest = 0;
+    }
+}
+
+void muCollectionViewer::controlWaitForDialog(int step) {
+    Work* work = m_work;
+    muNoticeWndTask* wnd = work->m_wnd;
+    if (wnd == NULL || wnd->m_step == 3) {
+        if (wnd != NULL) {
+            wnd->exit();
+        }
+        work->m_wnd = NULL;
+        m_work->m_state = step;
+    }
+}
+
+void muCollectionViewer::closeWaitWnd() {
+    m_work->m_objs[22]->m_scnMdl->DetachFromParent();
+}
+
+void muCollectionViewer::endErase() {
+    closeEraseReportWnd();
+    m_work->m_state = 7;
+    addObjCore(m_work->m_objs[23]->m_sceneModel);
+}
+
+void muCollectionViewer::endCopy() {
+    closeEraseReportWnd();
+    m_work->m_state = 10;
+}
+
+void muCollectionViewer::openMediaMenu(int attach, int second) {
+    int index = 2;
+    if (second == 0) {
+        index = 1;
+    }
+    if (attach != 0) {
+        addObjCore(*(MuObject**)((char*)m_work + index * 4 + 0x184));
+    } else {
+        removeObjCore(*(MuObject**)((char*)m_work + index * 4 + 0x184));
+    }
+}
+
+void muCollectionViewer::unk_64C8(int index) {
+    m_work->m_msg->printIndex(0xF, index, m_work->m_msgFile[1].m_handle.getBuffer());
+}
+
+void muCollectionViewer::closeEraseReportWnd() {
+    m_work->m_msg->printf(0xF, "");
+    removeObjCore(m_work->m_objs[35]);
+    g_sndSystem->playSE(static_cast<SndID>(6), -1, 0, 0, -1);
+}
+
+void muCollectionViewer::openEraseReportWnd() {
+    m_work->m_objs[2]->setFrameNode(2.0f);
+    addObjCore(m_work->m_objs[35]);
+    g_sndSystem->playSE(static_cast<SndID>(5), -1, 0, 0, -1);
+}
+
+void muCollectionViewer::dispMediaMenuSelect(int selected) {
+    float frame = (float)selected;
+    m_work->m_objs[3]->setFrameNode(frame);
+    m_work->m_objs[4]->setFrameNode(frame);
+}
+
+void muCollectionViewer::closeEraseConfirmWnd() {
+    m_work->m_msg->printf(0xC, "");
+    m_work->m_msg->printf(0xD, "");
+    m_work->m_msg->printf(0xE, "");
+    removeObjCore(m_work->m_objs[35]);
+}
+
+void muCollectionViewer::openWaitWnd() {
+    MuObject* obj = m_work->m_objs[22];
+    ((nw4r::g3d::ScnMdlExpand*)m_work->m_objs[35])->PushBack(obj->m_sceneModel, (u32)0);
+    obj->setFrameNode(0.0f);
+    obj->setFrameTexSrt(0.0f);
+    Vec3f trans(0.0f, 7.0f, 0.0f);
+    obj->setTrans(&trans);
+}
+
+void muCollectionViewer::beginCopy(int flag) {
+    openWaitWnd();
+    openEraseReportWnd();
+    int index = 2;
+    if (flag != 0) {
+        index = 0;
+    }
+    unk_64C8(index);
+    int state = 0xE;
+    if (flag != 0) {
+        state = 0xB;
+    }
+    m_work->m_state = state;
+}

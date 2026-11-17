@@ -8,6 +8,18 @@
 // The screen that shows a Wi-Fi battle somebody else plays (module sora_menu_watch). The class is only described by the
 // members the decompiled functions touch.
 /// Function names come from the sora_menu_watch map.
+// HYPOTHESIS: a pair that the menus keep two of in every unit (an id that is 0xFF while it is not used, and a state); the
+// pairs are made when the unit starts.
+struct muWatchPair {
+    int m_id;
+    int m_state;
+
+    muWatchPair(int id, int state) : m_id(id), m_state(state) { }
+};
+
+static muWatchPair s_pair0(0xFF, 0);
+static muWatchPair s_pair1(0xFF, 1);
+
 class nteWatching {
 public:
     void cancel();

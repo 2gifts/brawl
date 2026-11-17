@@ -16,6 +16,8 @@ class ScnMdlExpand : public ScnGroup {
 public:
     // Adds an object at the end of the group, attached to a node of the model.
     bool PushBack(ScnObj* obj, const char* nodeName);
+    // The same for a node that is given by its number.
+    bool PushBack(ScnObj* obj, u32 nodeId);
     // Makes a group for at most maxChildren objects on the model (size: where the size of the group goes, or NULL).
     static ScnMdlExpand* Construct(MEMAllocator* allocator, u32* size, int maxChildren, ScnMdl* model);
 
