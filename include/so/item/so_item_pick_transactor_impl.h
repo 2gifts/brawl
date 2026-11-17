@@ -23,7 +23,9 @@ struct soItemInfo {
 #else
     itParam::AttachGroup m_attachGroup : 6;
 #endif
+#ifndef SO_ITEM_INFO_NO_PADDING
     char _0x11[3];
+#endif
 };
 static_assert(sizeof(soItemInfo) == 0x14, "Class is wrong size!");
 

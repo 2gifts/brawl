@@ -27,5 +27,8 @@ public:
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
     bool reflectRequest(Vec2f* speedMul, Vec2f* accelMul);
     void shoot(Vec3f* position, float lr);
+    // HYPOTHESIS: the argument meanings (the variation, the start position, the founder task, the facing, the motion rate, the
+    // Kirby resource id of Olimar and the team number) follow the registers of the transactor's call.
+    void activate(int variation, Vec3f* position, int founderTaskId, u32 resourceId, int teamNo, float lr, float motRate);
 };
 static_assert(sizeof(wnKirbyPikmin) == 0x20DC, "Kirby's Pikmin article extent");

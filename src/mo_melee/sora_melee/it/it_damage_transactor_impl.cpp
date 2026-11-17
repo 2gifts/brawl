@@ -21,14 +21,14 @@ public:
     void damageItem(int statusKind, soModuleAccesser* moduleAccesser, soDamageLog* damageLog, bool notifyItem);
 };
 
-static inline BaseItem* getItem(soModuleAccesser* moduleAccesser) {
-    return dynamic_cast<BaseItem*>(&moduleAccesser->getStageObject());
+static inline BaseItem& getItem(soModuleAccesser* moduleAccesser) {
+    return dynamic_cast<BaseItem&>(moduleAccesser->getStageObject());
 }
 
 // The hit takes the damage off the item's hit points (work float 0x11000006, if it has any; flag 0x22000002 when they
 // run out) and raises the damage flags.
 void itDamageTransactorImpl::damageItem(int statusKind, soModuleAccesser* moduleAccesser, soDamageLog* damageLog, bool notifyItem) {
-    BaseItem* item = getItem(moduleAccesser);
+    BaseItem* item = &getItem(moduleAccesser);
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     if (item->onPreDamageCheck(statusKind, damageLog)) {
         work.onFlag(0x22000001);
@@ -62,11 +62,11 @@ int itDamageTransactorImpl::getDamageHeight(soModuleAccesser* moduleAccesser, u8
 }
 
 bool itDamageTransactorImpl::isUseTurnDamage(soModuleAccesser* moduleAccesser) {
-    return getItem(moduleAccesser)->isUseTurnDamage();
+    return getItem(moduleAccesser).isUseTurnDamage();
 }
 
 bool itDamageTransactorImpl::isUseTurn(soModuleAccesser* moduleAccesser) {
-    return getItem(moduleAccesser)->isUseTurnDamage();
+    return getItem(moduleAccesser).isUseTurnDamage();
 }
 
 bool itDamageTransactorImpl::isApplyTurnDamage(soModuleAccesser* moduleAccesser) {
@@ -74,7 +74,7 @@ bool itDamageTransactorImpl::isApplyTurnDamage(soModuleAccesser* moduleAccesser)
 }
 
 bool itDamageTransactorImpl::isSpeedDamage(soModuleAccesser* moduleAccesser) {
-    return getItem(moduleAccesser)->isUseSpeedDamage();
+    return getItem(moduleAccesser).isUseSpeedDamage();
 }
 
 itDamageTransactorImpl::~itDamageTransactorImpl() { }

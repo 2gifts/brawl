@@ -85,7 +85,7 @@ void grEarthRiver::update(float deltaFrame) {
                     m_riverState = 4;
                 }
             }
-            if (m_seHandle == -1 || !fn_800797A4(&m_snd, m_seHandle)) {
+            if (m_seHandle == -1 || !m_snd.isPlay(m_seHandle)) {
                 if (m_seHandle != -1) {
                     m_snd.stopSE(m_seHandle, 0x3C);
                 }

@@ -366,7 +366,6 @@ public:
 static_assert(sizeof(grEarthPelletFlower) == 0x188, "Class is wrong size!");
 
 // snd3DGenerator::isPlay (main, unnamed): whether the sound of the handle is still playing
-extern "C" bool fn_800797A4(snd3DGenerator* generator, s32 handle);
 
 // The river that runs under the stage: it starts with the rain (the stage says it) and runs for the length of its animation;
 // the speed of the river is given to the stage (the belt conveyor on the water follows it).

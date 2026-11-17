@@ -39,34 +39,28 @@ void grKartKartScnObjCallBack::SetCallBackCondition(nw4r::g3d::ScnObj* object) {
 // The matrix of the node (the kart) is moved to the origin, turned around X and Z (the rotation is in degrees), made a bit
 // bigger and moved back.
 void grKartKartScnObjCallBack::ExecCallback_CALC_WORLD(nw4r::g3d::ScnObj::Timing timing, nw4r::g3d::ScnObj* object, u32 param, void* info) {
-    if (object != NULL) {
-        switch (timing) {
-        case nw4r::g3d::ScnObj::CALLBACK_TIMING_B: {
-            nw4r::math::MTX34 local;
-            nw4r::math::MTX34 rot;
-            object->GetMtx(nw4r::g3d::ScnObj::MTX_WORLD, &local);
-            PSMTXTransApply(local, local, -m_pos.m_x, -m_pos.m_y, -m_pos.m_z);
-            nw4r::math::MTX34RotXYZFIdx(&rot, m_rot.m_x * 0.7111111f, 0.0f, m_rot.m_z * 0.7111111f);
-            PSMTXScaleApply(rot, rot, 1.1f, 1.1f, 1.1f);
-            PSMTXConcat(rot, local, local);
-            PSMTXTransApply(local, local, m_pos.m_x, m_pos.m_y, m_pos.m_z);
-            ScnMdl_SetNodeMtx(reinterpret_cast<nw4r::g3d::ScnMdl*>(object), 1, reinterpret_cast<Matrix*>(&local));
-            break;
-        }
-        }
+    if (object != NULL && timing != 3 && timing < 3 && timing != 1 && timing >= 1) {
+        nw4r::math::VEC3 trans;
+        nw4r::math::VEC3 scale;
+        scale.z = 1.1f;
+        scale.y = 1.1f;
+        scale.x = 1.1f;
+        nw4r::math::MTX34 local;
+        nw4r::math::MTX34 rot;
+        object->GetMtx(nw4r::g3d::ScnObj::MTX_WORLD, &local);
+        trans.x = -m_pos.m_x;
+        trans.y = -m_pos.m_y;
+        trans.z = -m_pos.m_z;
+        PSMTXTransApply(local, local, trans.x, trans.y, trans.z);
+        nw4r::math::MTX34RotXYZFIdx(&rot, 0.7111111f * m_rot.m_x, 0.0f, 0.7111111f * m_rot.m_z);
+        PSMTXScaleApply(rot, rot, scale.x, scale.y, scale.z);
+        PSMTXConcat(rot, local, local);
+        trans.x = m_pos.m_x;
+        trans.y = m_pos.m_y;
+        trans.z = m_pos.m_z;
+        PSMTXTransApply(local, local, trans.x, trans.y, trans.z);
+        ScnMdl_SetNodeMtx(reinterpret_cast<nw4r::g3d::ScnMdl*>(object), 1, reinterpret_cast<Matrix*>(&local));
     }
-}
-
-void grKartKartScnObjCallBack::setPos(float x, float y, float z) {
-    m_pos.m_x = x;
-    m_pos.m_y = y;
-    m_pos.m_z = z;
-}
-
-void grKartKartScnObjCallBack::setRot(float x, float y, float z) {
-    m_rot.m_x = x;
-    m_rot.m_y = y;
-    m_rot.m_z = z;
 }
 
 grKartKart* grKartKart::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
@@ -642,6 +636,18 @@ void grKartKart::updateCallBack(float deltaFrame) {
             m_scnObjCallback.setRot(m_kart[m_team].m_rotX, 0.0f, m_kart[m_team].m_rotZ);
         }
     }
+}
+
+void grKartKartScnObjCallBack::setPos(float x, float y, float z) {
+    m_pos.m_x = x;
+    m_pos.m_y = y;
+    m_pos.m_z = z;
+}
+
+void grKartKartScnObjCallBack::setRot(float x, float y, float z) {
+    m_rot.m_x = x;
+    m_rot.m_y = y;
+    m_rot.m_z = z;
 }
 
 // The same lane as setCtrlPos, but at a distance (rate * length of the way between the lanes) from the first lane toward the
