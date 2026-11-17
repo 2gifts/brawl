@@ -27,7 +27,6 @@
 #include <st_dxbigblue/st_dxbigblue_data.h>
 
 // snd3DGenerator::isPlay (main, unnamed): whether the sound of the handle is still playing
-extern "C" bool fn_800797A4(snd3DGenerator* generator, s32 handle);
 
 // HYPOTHESIS: the original clamps the random place with an inline helper (max against the low limit, then min against the high one).
 static inline u8 dxbigblueClampU8(u8 value, u8 low, u8 high) {
@@ -730,7 +729,7 @@ void stDxBigBlue::updateCarSE(float deltaFrame) {
         return;
     }
     for (s32 i = 0; i != 5; i++) {
-        if (m_seCar[i].m_seHandle != -1 && !fn_800797A4(&m_seCar[i].m_sound, m_seCar[i].m_seHandle)) {
+        if (m_seCar[i].m_seHandle != -1 && !m_seCar[i].m_sound.isPlay(m_seCar[i].m_seHandle)) {
             m_seCar[i].m_seHandle = -1;
         }
         if (m_seCar[i].m_seHandle == -1) {

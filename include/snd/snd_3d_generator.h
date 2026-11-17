@@ -18,5 +18,7 @@ public:
     void startSE(s32 p1, s32 p2);
     void setPos(Vec3f* pos);
     void stopSE(s32 p1, s32 p2);
+    bool isPlay(s32 handle);
+    bool isPreparedSE(s32 handle);
     void stopGroupId(int tag, SndID sndID, int fade);
 };
