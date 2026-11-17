@@ -1,7 +1,7 @@
 #include <math.h>
 #define MT_VEC3F_SET_NOINLINE
 // The real class (not the opaque builder stand-in) so that its RTTI names the original's base chain.
-#define FT_CONTROLLER_MODULE_IMPL_DEFINED
+#define ftControllerModuleImpl ftControllerModuleImplOpaque
 #define FT_PIKACHU_QUICK_ATTACK_EXPLICIT_CTORS
 #include <ft/builder/ft_dol_array_list.h>
 #include <ft/builder/ft_builder_kinetic.h>
@@ -10,6 +10,7 @@
 // BYTES: MWCC writes RTTI in reverse order of class definition; the original's .data has the ftControllerModuleImpl chain
 // before ftKineticEnergyGravity's, so the controller class is defined after the kinetic energies (and before the fighter
 // builder, which needs it complete).
+#undef ftControllerModuleImpl
 #include <ft/ft_controller_module_impl.h>
 #include <ft/pikachu/ft_pikachu.h>
 #include <ft/pikachu/ft_pikachu_status_uniq_process.h>
