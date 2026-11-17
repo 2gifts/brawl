@@ -111,22 +111,6 @@ void grIceYama::update(float deltaFrame) {
     }
 }
 
-bool grIceYama::setNode() {
-    bool result = grGimmick::setNode();
-    getNodeIndex(&m_nodeKaiten, 0, "P_Kaitenyuka");
-    getNodeIndex(&m_nodeKoware, 0, "P_kowareyuka");
-    getNodeIndex(&m_nodeTSide[0], 0, "P_TSide1");
-    getNodeIndex(&m_nodeTSide[1], 0, "P_TSide2");
-    getNodeIndex(&m_nodeTSide[2], 0, "P_TSide3");
-    getNodeIndex(&m_nodeTurara, 0, "P_Turara");
-    getNodeIndex(&m_nodeBear[0], 0, "P_WhiteBare1");
-    getNodeIndex(&m_nodeBear[1], 0, "P_WhiteBare2");
-    getNodeIndex(&m_nodeBear[2], 0, "P_WhiteBare3");
-    getNodeIndex(&m_nodeBear[3], 0, "P_WhiteBare4");
-    getNodeIndex(&m_nodeBear[4], 0, "P_WhiteBare5");
-    return result;
-}
-
 // The joint of the collision that belongs to the top of the mountain is found once (the avalanche changes its material).
 void grIceYama::updateJoint(float deltaFrame) {
     if (m_joint == NULL && m_collision != NULL) {
@@ -419,6 +403,22 @@ void grIceYama::updateCallBack(float deltaFrame) {
             m_snd.setPos(&pos);
         }
     }
+}
+
+bool grIceYama::setNode() {
+    bool result = grGimmick::setNode();
+    getNodeIndex(&m_nodeKaiten, 0, "P_Kaitenyuka");
+    getNodeIndex(&m_nodeKoware, 0, "P_kowareyuka");
+    getNodeIndex(&m_nodeTSide[0], 0, "P_TSide1");
+    getNodeIndex(&m_nodeTSide[1], 0, "P_TSide2");
+    getNodeIndex(&m_nodeTSide[2], 0, "P_TSide3");
+    getNodeIndex(&m_nodeTurara, 0, "P_Turara");
+    getNodeIndex(&m_nodeBear[0], 0, "P_WhiteBare1");
+    getNodeIndex(&m_nodeBear[1], 0, "P_WhiteBare2");
+    getNodeIndex(&m_nodeBear[2], 0, "P_WhiteBare3");
+    getNodeIndex(&m_nodeBear[3], 0, "P_WhiteBare4");
+    getNodeIndex(&m_nodeBear[4], 0, "P_WhiteBare5");
+    return result;
 }
 
 // The hit object of the mountain: two attack parts and nothing else (the attack is the avalanche).

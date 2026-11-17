@@ -111,33 +111,6 @@ void grIceTurara::updateYakumono(float deltaFrame) {
     }
 }
 
-// The icicle is hit: the hit points of the icicles go down by the damage (they are shared by the three), and a shard flies
-// off the place that was hit.
-void grIceTurara::onDamage(int index, soDamage* damage, soDamageAttackerInfo* attackerInfo) {
-    stIceData* data = static_cast<stIceData*>(getStageData());
-    if (data != NULL) {
-        float amount = damage->unk4;
-        fn_27_26399C(m_yakumono);
-        *m_hpWork = *m_hpWork - amount;
-        if (*m_hpWork < 0.0f) {
-            *m_hpWork = 0.0f;
-        }
-        if (m_hitTimer == 0.0f) {
-            u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x480005));
-            if (*m_stateWork == 8 && m_type == 0) {
-                g_ecMgr->setParent(effect, m_sceneModels[0], "Turara1", 0);
-            }
-            if (*m_stateWork == 9 && m_type == 1) {
-                g_ecMgr->setParent(effect, m_sceneModels[0], "Turara2", 0);
-            }
-            if (*m_stateWork == 10 && m_type == 2) {
-                g_ecMgr->setParent(effect, m_sceneModels[0], "Turara3", 0);
-            }
-            m_hitTimer = randf() * 5.0f + 10.0f;
-        }
-    }
-}
-
 // The icicle waits (hidden), is shown when the stage says its state, falls (the state 0x13) and goes away below the
 // bottom of the screen. The icicle with the type 2 is the one that hurts a fighter it falls on.
 void grIceTurara::updateActive(float deltaFrame) {
@@ -305,5 +278,32 @@ void grIceTurara::setAttack() {
             false, false, false, false, false, soCollisionAttackData::Region_None, true);
         m_yakumono->setAttack(0, 0, &attack);
         m_attackSet = 1;
+    }
+}
+
+// The icicle is hit: the hit points of the icicles go down by the damage (they are shared by the three), and a shard flies
+// off the place that was hit.
+void grIceTurara::onDamage(int index, soDamage* damage, soDamageAttackerInfo* attackerInfo) {
+    stIceData* data = static_cast<stIceData*>(getStageData());
+    if (data != NULL) {
+        float amount = damage->unk4;
+        fn_27_26399C(m_yakumono);
+        *m_hpWork = *m_hpWork - amount;
+        if (*m_hpWork < 0.0f) {
+            *m_hpWork = 0.0f;
+        }
+        if (m_hitTimer == 0.0f) {
+            u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x480005));
+            if (*m_stateWork == 8 && m_type == 0) {
+                g_ecMgr->setParent(effect, m_sceneModels[0], "Turara1", 0);
+            }
+            if (*m_stateWork == 9 && m_type == 1) {
+                g_ecMgr->setParent(effect, m_sceneModels[0], "Turara2", 0);
+            }
+            if (*m_stateWork == 10 && m_type == 2) {
+                g_ecMgr->setParent(effect, m_sceneModels[0], "Turara3", 0);
+            }
+            m_hitTimer = randf() * 5.0f + 10.0f;
+        }
     }
 }
