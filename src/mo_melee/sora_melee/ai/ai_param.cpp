@@ -35,7 +35,8 @@ aiParam::aiParam() {
 
 void aiParam::setRank(int rank, u32 force, int update) {
     if ((s8)m_rank != (s8)rank || force == 1) {
-        m_rank = aiClampRank(rank);
+        int r = (s8)rank > 0 ? rank : 0;
+        m_rank = (s8)r < 100 ? r : 100;
         m_rankRate = aiRankToRate(m_rank);
         if (m_par != NULL && update != 0) {
             par_work_update();
