@@ -6995,7 +6995,11 @@ config.libs = [
         "mw_version": config.linker_version,
         "cflags": cflags_rel,
         "host": False,
-        "objects": [],
+        "objects": [
+            Object(NonMatching, "mo_menu/mu_collection_viewer.cpp"),
+            Object(NonMatching, "mo_menu/mu_collect_xchg_wnd.cpp"),
+            Object(NonMatching, "mo_menu/mu_collect_cntrb_wnd.cpp"),
+        ],
     },
     {
         "lib": "sora_menu_edit",
@@ -7029,7 +7033,9 @@ config.libs = [
         "mw_version": config.linker_version,
         "cflags": cflags_rel,
         "host": False,
-        "objects": [],
+        "objects": [
+            Object(NonMatching, "mo_menu/mu_wifi_friend_list.cpp"),
+        ],
     },
     {
         "lib": "sora_menu_game_over",
@@ -7055,6 +7061,12 @@ config.libs = [
         "cflags": cflags_rel,
         "host": False,
         "objects": [
+            Object(NonMatching, "mo_menu/ty_fig_list.cpp"),
+            Object(NonMatching, "mo_menu/ty_fig_table.cpp"),
+            Object(NonMatching, "mo_menu/ty_fig_disp1.cpp"),
+            Object(NonMatching, "mo_menu/ty_fig_disp2.cpp"),
+            Object(NonMatching, "mo_menu/ty_seal_list.cpp"),
+            Object(NonMatching, "mo_menu/mu_menu_main.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_1p.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_coll.cpp"),
             Object(NonMatching, "mo_menu/mu_proc_data.cpp"),
@@ -7111,7 +7123,10 @@ config.libs = [
         "mw_version": config.linker_version,
         "cflags": cflags_rel,
         "host": False,
-        "objects": [],
+        "objects": [
+            Object(NonMatching, "mo_menu/mu_queue_melee_rule.cpp"),
+            Object(NonMatching, "mo_menu/mu_queue_melee_entry.cpp"),
+        ],
     },
     {
         "lib": "sora_menu_replay",
@@ -7165,7 +7180,10 @@ config.libs = [
         "mw_version": config.linker_version,
         "cflags": cflags_rel,
         "host": False,
-        "objects": [],
+        "objects": [
+            Object(NonMatching, "mo_menu/mu_select_stage_task.cpp"),
+            Object(NonMatching, "mo_menu/mu_select_stage_file_task.cpp"),
+        ],
     },
     {
         "lib": "sora_menu_simple_ending",
@@ -7238,7 +7256,9 @@ config.libs = [
         "mw_version": config.linker_version,
         "cflags": cflags_rel,
         "host": False,
-        "objects": [],
+        "objects": [
+            Object(NonMatching, "mo_menu/mu_wifi_watch.cpp"),
+        ],
     },
     {
         "lib": "sora_minigame",
