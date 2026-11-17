@@ -1,3 +1,4 @@
+#define MT_VEC3F_ADD_OPERAND_ORDER_REGS // BYTES: the paired-single add keeps its operands in declaration order.
 #include <ft/pikmin/ft_pikmin_transactor.h>
 #include <ft/ft_common_data_accesser.h>
 #include <ft/ft_entry.h>
@@ -5,9 +6,11 @@
 #include <ft/ft_owner.h>
 #include <so/so_module_accesser.h>
 #include <so/so_value_accesser.h>
+#include <ft/ft_resource_id_accesser_impl.h>
+#include <wn/pikmin/wn_kirby_pikmin.h>
 #include <types.h>
 
-// TODO: activeArticle, shootArticle, getPikminVariation.
+// TODO: getPikminVariation (needs its data carve).
 
 ftPikminTransactor::ftPikminTransactor() { }
 ftPikminTransactor::~ftPikminTransactor() { }
@@ -64,4 +67,54 @@ ftPikminTransactor::PullOutParam* ftPikminTransactor::getPullOutParam(int materi
         return table;
     }
     return defaultParam;
+}
+
+// Kirby's copy of Olimar's Pikmin (article 0xd) is thrown a little ahead of Kirby, in the direction he faces.
+bool ftPikminTransactor::shootArticle(soArticle* article, soModuleAccesser* acc) {
+    if (article->getArticleId() == 0xd) {
+        wnKirbyPikmin* pikmin = dynamic_cast<wnKirbyPikmin*>(article);
+        if (pikmin == NULL) {
+            return false;
+        }
+        float offsetY = soValueAccesser::getConstantFloat(acc, 0x1095, 0);
+        Vec3f offset;
+        offset.m_x = soValueAccesser::getConstantFloat(acc, 0x1094, 0);
+        offset.m_y = offsetY;
+        offset.m_z = 0.0f;
+        if (acc->getPostureModule().getLr() < 0.0f) {
+            offset.m_x = -offset.m_x;
+        }
+        Vec3f pos = acc->getPostureModule().getPos() + offset;
+        pikmin->shoot(&pos, acc->getPostureModule().getLr());
+    }
+    return false;
+}
+
+// Kirby's copy of Olimar's Pikmin (article 0xd) is started a little ahead of Kirby, in the direction he faces.
+bool ftPikminTransactor::activeArticle(soArticle* article, soModuleAccesser* acc) {
+    if (article->getArticleId() == 0xd) {
+        PullOutParam* param = getPullOutParam(acc);
+        float motRate = param->m_motRate;
+        acc->getWorkManageModule().setFloat(motRate, 0x21000004);
+        int variation = getPikminVariation(acc);
+        float offsetY = soValueAccesser::getConstantFloat(acc, 0x1093, 0);
+        Vec3f offset;
+        offset.m_x = soValueAccesser::getConstantFloat(acc, 0x1092, 0);
+        offset.m_y = offsetY;
+        offset.m_z = 0.0f;
+        if (acc->getPostureModule().getLr() < 0.0f) {
+            offset.m_x = -offset.m_x;
+        }
+        Vec3fScale(&offset, &offset, acc->getPostureModule().getScale()); // BYTES: the in-place paired-single scale, not Vec3f::operator*=
+        wnKirbyPikmin* pikmin = dynamic_cast<wnKirbyPikmin*>(article);
+        if (pikmin == NULL) {
+            return false;
+        }
+        Vec3f pos = acc->getPostureModule().getPos() + offset;
+        soTeamModule& team = acc->getTeamModule();
+        ftResourceIdAccesserImpl& resources = dynamic_cast<ftResourceIdAccesserImpl&>(*acc->getResourceModule().getResourceIdAccesser());
+        pikmin->activate(variation, &pos, acc->getStageObject().m_taskId, resources.getKirbyResId(Fighter_Pikmin), team.getTeam()->getNo(), acc->getPostureModule().getLr(), motRate);
+        return true;
+    }
+    return false;
 }

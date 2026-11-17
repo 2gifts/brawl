@@ -20,6 +20,8 @@ public:
     virtual ~ftPikminTransactor();
     virtual void init(soModuleAccesser* acc);
     virtual void exit(soModuleAccesser* acc);
+    virtual bool activeArticle(class soArticle* article, soModuleAccesser* acc);
+    virtual bool shootArticle(class soArticle* article, soModuleAccesser* acc);
     // Local declaration of the REL singleton-holder entry point.
     static ftPikminTransactor* getInstance();
 
