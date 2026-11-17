@@ -335,18 +335,6 @@ void grFzeroAttack::updateCallBack(float deltaFrame) {
     }
 }
 
-void grFzeroAttack::setAttack() {
-    switch (m_type) {
-    case 4:
-    case 5:
-        setAttackFloor();
-        break;
-    case 6:
-        setAttackWall();
-        break;
-    }
-}
-
 // Builds the attack's hit object: two attack parts (floor and wall hit boxes), one collision group and no hit module.
 void grFzeroAttack::setHit() {
     m_work = new (Heaps::StageInstance) grFzeroAttackWork;
@@ -364,6 +352,18 @@ void grFzeroAttack::setHit() {
     typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Gimmick, 2, 0, soCollisionAttackModuleImpl, 1, false, true> Config;
     ykNoHitNormal<Config>* yakumono = new (Heaps::StageInstance) ykNoHitNormal<Config>(&info);
     setYakumono(yakumono);
+}
+
+void grFzeroAttack::setAttack() {
+    switch (m_type) {
+    case 4:
+    case 5:
+        setAttackFloor();
+        break;
+    case 6:
+        setAttackWall();
+        break;
+    }
 }
 
 // A hit box of 30 units above the floor line (size 30, power 15, knocked up at 90 degrees), enabled once.

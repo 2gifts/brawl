@@ -244,6 +244,26 @@ void grFzeroCar::updateCallBack(float deltaFrame) {
     }
 }
 
+// Builds the car's hit object: one attack part, one collision group and no hit module (a ykNoHitNormal), at the position
+// the car's model reports.
+void grFzeroCar::setHit() {
+    m_work = new (Heaps::StageInstance) grFzeroAttackWork;
+    m_work->unk0 = 0;
+    m_work->unk4 = 0;
+
+    ykInitInfo info = {NULL, NULL, 0x10, NULL, NULL};
+    info.m_ground = this;
+    nw4r::g3d::ScnMdl* model = ykDynamicCastScnMdl(m_sceneModels[0]);
+    info.m_node = model;
+    Vec3f pos = getPos();
+    info.m_pos = &pos;
+    info.m_work = m_work;
+
+    typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Gimmick, 1, 0, soCollisionAttackModuleImpl, 1, false, true> Config;
+    ykNoHitNormal<Config>* yakumono = new (Heaps::StageInstance) ykNoHitNormal<Config>(&info);
+    setYakumono(yakumono);
+}
+
 // The car hurts fighters it hits: a ball of 20 units around the car, enabled once.
 void grFzeroCar::setAttack() {
     if (m_attackEnabled == 1) {
@@ -266,26 +286,6 @@ void grFzeroCar::setAttack() {
         false, false, false, false, false, soCollisionAttackData::Region_None, false);
     m_yakumono->setAttack(0, 0, &attack);
     m_attackEnabled = 1;
-}
-
-// Builds the car's hit object: one attack part, one collision group and no hit module (a ykNoHitNormal), at the position
-// the car's model reports.
-void grFzeroCar::setHit() {
-    m_work = new (Heaps::StageInstance) grFzeroAttackWork;
-    m_work->unk0 = 0;
-    m_work->unk4 = 0;
-
-    ykInitInfo info = {NULL, NULL, 0x10, NULL, NULL};
-    info.m_ground = this;
-    nw4r::g3d::ScnMdl* model = ykDynamicCastScnMdl(m_sceneModels[0]);
-    info.m_node = model;
-    Vec3f pos = getPos();
-    info.m_pos = &pos;
-    info.m_work = m_work;
-
-    typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Gimmick, 1, 0, soCollisionAttackModuleImpl, 1, false, true> Config;
-    ykNoHitNormal<Config>* yakumono = new (Heaps::StageInstance) ykNoHitNormal<Config>(&info);
-    setYakumono(yakumono);
 }
 
 // Binds the two animations of the car (0 and 1); animation 2 means "none".

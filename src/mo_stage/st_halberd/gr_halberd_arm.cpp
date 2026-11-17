@@ -136,6 +136,45 @@ void grHalberdArm::updateCallBack(float deltaFrame) {
     }
 }
 
+void grHalberdArm::setHit() {
+    m_work = new (Heaps::StageInstance) grHalberdWork;
+    m_work->unk0 = 0;
+    m_work->unk4 = 0;
+
+    ykInitInfo info = {NULL, NULL, 0x10, NULL, NULL};
+    info.m_ground = this;
+    nw4r::g3d::ScnMdl* model = ykDynamicCastScnMdl(m_sceneModels[0]);
+    info.m_node = model;
+    Vec3f pos = getPos();
+    info.m_pos = &pos;
+    info.m_work = m_work;
+
+    typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Gimmick, 2, 0, soCollisionAttackModuleImpl, 1, false, true> Config;
+    ykNoHitNormal<Config>* yakumono = new (Heaps::StageInstance) ykNoHitNormal<Config>(&info);
+    setYakumono(yakumono);
+}
+
+void grHalberdArm::setAttack() {
+    if (m_attackOn != 1) {
+        soCollisionAttackData attack(1.0f);
+        Vec3f offset;
+        offset.m_x = 0.0f;
+        offset.m_y = 0.0f;
+        offset.m_z = 0.0f;
+
+        setAttackGimmickDetails(&attack, 10.0f, 1.0f, 1.0f, 1.0f,
+            10, &offset, 361, 80, 0, 70, m_nodeIndex,
+            0x3FF, 7, false, 15,
+            soCollisionAttackData::Attribute_Normal, soCollisionAttackData::Sound_Level_Medium,
+            soCollisionAttackData::Sound_Attribute_Punch,
+            false, false, false, true, false, false, 0, 60,
+            false, false, false, soCollisionAttackData::Lr_Check_Pos,
+            false, false, false, false, false, soCollisionAttackData::Region_None, false);
+        m_yakumono->setAttack(0, 0, &attack);
+        m_attackOn = 1;
+    }
+}
+
 // The animation of the hand (3 animations).
 void grHalberdArm::setMotion(u32 animId, bool shouldLoop, bool force, float* frameCount) {
     if (m_motion == animId && force == 0) {
@@ -200,44 +239,5 @@ void grHalberdArm::setMotion(u32 animId, bool shouldLoop, bool force, float* fra
 
     if (frameCount != NULL) {
         *frameCount = modelAnim->getFrameCount();
-    }
-}
-
-void grHalberdArm::setHit() {
-    m_work = new (Heaps::StageInstance) grHalberdWork;
-    m_work->unk0 = 0;
-    m_work->unk4 = 0;
-
-    ykInitInfo info = {NULL, NULL, 0x10, NULL, NULL};
-    info.m_ground = this;
-    nw4r::g3d::ScnMdl* model = ykDynamicCastScnMdl(m_sceneModels[0]);
-    info.m_node = model;
-    Vec3f pos = getPos();
-    info.m_pos = &pos;
-    info.m_work = m_work;
-
-    typedef soCollisionAttackModuleBuildConfig<soCollision::Category_Gimmick, 2, 0, soCollisionAttackModuleImpl, 1, false, true> Config;
-    ykNoHitNormal<Config>* yakumono = new (Heaps::StageInstance) ykNoHitNormal<Config>(&info);
-    setYakumono(yakumono);
-}
-
-void grHalberdArm::setAttack() {
-    if (m_attackOn != 1) {
-        soCollisionAttackData attack(1.0f);
-        Vec3f offset;
-        offset.m_x = 0.0f;
-        offset.m_y = 0.0f;
-        offset.m_z = 0.0f;
-
-        setAttackGimmickDetails(&attack, 10.0f, 1.0f, 1.0f, 1.0f,
-            10, &offset, 361, 80, 0, 70, m_nodeIndex,
-            0x3FF, 7, false, 15,
-            soCollisionAttackData::Attribute_Normal, soCollisionAttackData::Sound_Level_Medium,
-            soCollisionAttackData::Sound_Attribute_Punch,
-            false, false, false, true, false, false, 0, 60,
-            false, false, false, soCollisionAttackData::Lr_Check_Pos,
-            false, false, false, false, false, soCollisionAttackData::Region_None, false);
-        m_yakumono->setAttack(0, 0, &attack);
-        m_attackOn = 1;
     }
 }
