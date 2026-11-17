@@ -28,17 +28,23 @@ struct muSelectStageFileList {
 
 // HYPOTHESIS: the data of one stage file that is loaded.
 struct muSelectStageFileData {
-    int m_state; // 0x00
-    u8 m_unk4[0x58 - 0x4];
+    int m_state;  // 0x00
+    int m_device; // 0x04 the device of the file (0: the NAND, 1: the SD card)
+    int m_index;  // 0x08 the index of the file in the list of the device
+    u8 m_unkC[0x58 - 0xC];
 };
 
 class muSelectStageFileTask : public gfTask {
 public:
     int m_state;                     // 0x40
-    u8 m_unk44[0x68 - 0x44];
+    int m_curData;                   // 0x44
+    u8 m_unk48[0x68 - 0x48];
     gfCollectionIO* m_io;            // 0x68
     u8 m_unk6C[0x70 - 0x6C];
-    muSelectStageFileData m_data[4]; // 0x70
+    muSelectStageFileData m_data[9]; // 0x70
+    int m_editDevice;                // 0x388
+    int m_editIndex;                 // 0x38C
+    int m_editState;                 // 0x390
 
     void exit();
     int getFileListRevesion(int device);
@@ -51,6 +57,10 @@ public:
     int mainStepDevNotReady();
     void initStepNANDListing();
     void initStepSDListing();
+    void deleteAllFileData();
+    void cancelAllLoadFileData();
+    void initStepLoading();
+    void initStepEditDataLoading();
 
     muSelectStageFileList* getList(int device) {
         return (muSelectStageFileList*)((u8*)this + 0x4C) + device;
@@ -113,4 +123,41 @@ void muSelectStageFileTask::initStepNANDListing() {
 
 void muSelectStageFileTask::initStepSDListing() {
     m_io->requestListSD(3);
+}
+
+void muSelectStageFileTask::deleteAllFileData() {
+    for (int i = 0; i < 9; i++) {
+        deleteFileData(i);
+    }
+}
+
+void muSelectStageFileTask::cancelAllLoadFileData() {
+    for (int i = 1; i < 9; i++) {
+        if (m_data[i].m_state == 1) {
+            m_data[i].m_state = 0;
+        }
+    }
+}
+
+void muSelectStageFileTask::initStepLoading() {
+    muSelectStageFileData* data = &m_data[m_curData];
+    data->m_state = 2;
+    int device = data->m_device;
+    const char* name = getFileName(device, data->m_index);
+    if (device == 1) {
+        m_io->requestSummarySD(3, name);
+    } else {
+        m_io->requestSummaryVF(3, name);
+    }
+}
+
+void muSelectStageFileTask::initStepEditDataLoading() {
+    int device = m_editDevice;
+    const char* name = getFileName(device, m_editIndex);
+    if (device == 1) {
+        m_io->requestLoadSD(3, name);
+    } else {
+        m_io->requestLoadVF(3, name);
+    }
+    m_editState = 2;
 }

@@ -407,3 +407,15 @@ void muWifiFriendListTask::initFriendNameToFriendCode() {
     setFriendCodeTextColor(1);
     dispCode();
 }
+
+#pragma dont_inline on
+void muWifiFriendListTask::setFriendCodeTextColor(int mode) {
+    int color = 0xC6;
+    if (mode != 0) {
+        color = 0xFF;
+    }
+    for (int i = 0; i < 3; i++) {
+        m_msg->setFontColor(0x18 + i, color, color, color, 0xFF);
+    }
+}
+#pragma dont_inline reset

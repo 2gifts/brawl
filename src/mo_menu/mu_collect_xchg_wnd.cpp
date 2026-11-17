@@ -1,4 +1,6 @@
 #include <gf/gf_task.h>
+#include <gm/gm_common.h>
+#include <gm/gm_syssave_task.h>
 #include <memory.h>
 #include <mu/mu_msg.h>
 #include <mu/mu_notice_wnd.h>
@@ -13,6 +15,10 @@
 // The window of the collection viewer that sends a collection through WiiConnect24 to a friend (module
 // sora_menu_collect_viewer). The class is only described by the members the decompiled functions touch.
 /// Function names come from the sora_menu_collect_viewer map.
+// HYPOTHESIS: two settings of the mails that are sent (nteExchange 0x800: main.dol 0x8014E6A8 and 0x8014E6B4)
+extern "C" void fn_8014E6A8(nteExchange* exchange, int a, int b);
+extern "C" void fn_8014E6B4(nteExchange* exchange, int a);
+
 class muCollectXchgWndTask : public gfTask {
 public:
     MuObject* m_obj40;                      // 0x40
@@ -34,7 +40,11 @@ public:
     muNoticeWndTask* m_wnd;                 // 0x750
     nw4r::g3d::ResFile* m_resFile;          // 0x754
     int m_priority;                         // 0x758
-    u8 m_unk75C[0x770 - 0x75C];
+    u8 m_unk75C[0x760 - 0x75C];
+    int m_unk760;                           // 0x760
+    int m_unk764;                           // 0x764
+    int m_unk768;                           // 0x768
+    u8 m_unk76C[0x770 - 0x76C];
     muWifiDataLoadTask* m_dataLoadTask;     // 0x770
     u8 m_unk774;                            // 0x774
     u8 m_unk775[0x778 - 0x775];
@@ -58,6 +68,9 @@ public:
     void mainStepCancelConfirmInit();
     int mainStepCancelConfirmMain();
     void mainStepNoFriendInit();
+    void mainStepSendConfirmInit();
+    void mainStepSendInit();
+    void mainStepSendCompleteInit();
     void mainStepSendOverInit();
     int mainStepSendOverMain();
     int mainStepSendConfirmMain();
@@ -264,4 +277,31 @@ muCollectXchgWndCB::~muCollectXchgWndCB() { }
 void muCollectXchgWndCB::notify_Error(int kind, int unk, int code) {
     m_kind = kind;
     m_code = code;
+}
+
+void muCollectXchgWndTask::mainStepSendConfirmInit() {
+    m_wnd = fn_800BEEB8(1, m_msg->getBinary(), 7, m_resFile, m_scnGroup, m_priority + 3, 0, 0x2A, 0x2B, 0, 0, 0xF0);
+}
+
+void muCollectXchgWndTask::mainStepSendCompleteInit() {
+    m_wnd = fn_800BEEB8(0, m_msg->getBinary(), 0xA, m_resFile, m_scnGroup, m_priority + 3, 0, 0x2A, 0x2B, 0, 0, 0xF0);
+    m_wnd->unk128 = 0x1EF3;
+    gmSysSaveTask::create(0x2E);
+    gmResetAutosaveDirtyFlag();
+}
+
+void muCollectXchgWndTask::mainStepSendInit() {
+    u8* entry;
+    nteExchange* exchange = m_exchange;
+    exchange->mail_ClearSendTo();
+    fn_8014E6A8(exchange, m_unk760, m_unk764);
+    fn_8014E6B4(exchange, m_unk768);
+    entry = (u8*)this;
+    for (int i = 0; i < m_numFriend; i++) {
+        if (entry[0x142] != 0) {
+            exchange->mail_AddSendTo(exchange->friend_getWiiID(i));
+        }
+        entry += 0x18;
+    }
+    exchange->_requestJob(2, 0);
 }
