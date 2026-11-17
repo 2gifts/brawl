@@ -6969,6 +6969,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_poke_trainer_final.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_snake_rpg7.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/wn/wn_snake_trench_mortar.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/so/so_null.cpp"),
         ],
     },
     {

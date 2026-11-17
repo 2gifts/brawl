@@ -5,19 +5,19 @@
 #include <so/item/so_item_manage_module_impl.h>
 #include <types.h>
 
-bool soItemManageModuleImpl::isHaveItem(u32 index) {
+bool soItemManageModuleImpl::isHaveItem(u32 index) const {
     return m_haveItemInfoArray->at(index).m_item != nullptr;
 }
 
-itParam::SizeKind soItemManageModuleImpl::getHaveItemSize(u32 index) {
+itParam::SizeKind soItemManageModuleImpl::getHaveItemSize(u32 index) const {
     return m_haveItemInfoArray->at(index).m_size;
 }
 
-itKind soItemManageModuleImpl::getHaveItemKind(u32 index) {
+itKind soItemManageModuleImpl::getHaveItemKind(u32 index) const {
     return m_haveItemInfoArray->at(index).m_kind;
 }
 
-itParam::TraitFlag soItemManageModuleImpl::getHaveItemTrait(u32 index) {
+itParam::TraitFlag soItemManageModuleImpl::getHaveItemTrait(u32 index) const {
     return m_haveItemInfoArray->at(index).m_trait;
 }
 
@@ -28,11 +28,11 @@ itParam::HaveKind soItemManageModuleImpl::getHaveItemHoldKind(u32 index) {
     return (itParam::HaveKind)0;
 }
 
-int soItemManageModuleImpl::getHaveItemParamInt(u32 param, u32 index) {
+int soItemManageModuleImpl::getHaveItemParamInt(u32 param, u32 index) const {
     return m_haveItemInfoArray->at(index).m_item->getParam((itValueAccesser::ParamInt)param);
 }
 
-float soItemManageModuleImpl::getHaveItemParamFloat(u32 param, u32 index) {
+float soItemManageModuleImpl::getHaveItemParamFloat(u32 param, u32 index) const {
     return m_haveItemInfoArray->at(index).m_item->getParam((itValueAccesser::ParamFloat)param);
 }
 
@@ -132,15 +132,15 @@ bool soItemManageModuleImpl::pickupItem(u8 a, u32 b, u32 c, u32 index) {
     return false;
 }
 
-void soItemManageModuleImpl::getHaveItemInfo(soItemInfo* info, u32 index) {
+void soItemManageModuleImpl::getHaveItemInfo(soItemInfo* info, u32 index) const {
     *info = m_haveItemInfoArray->at(index);
 }
 
-void soItemManageModuleImpl::getPickableItemInfo(soItemInfo* info) {
+void soItemManageModuleImpl::getPickableItemInfo(soItemInfo* info) const {
     *info = m_pickableItemInfo;
 }
 
-void soItemManageModuleImpl::getAttachItemInfo(soItemInfo* info, u32 index) {
+void soItemManageModuleImpl::getAttachItemInfo(soItemInfo* info, u32 index) const {
     *info = m_attachItemInfoArray->at(index);
 }
 
@@ -315,6 +315,35 @@ void soItemManageModuleImpl::notifyEventLink(soLinkEventArgs* eventInfo, soModul
                 eject(stageObject->m_taskId);
                 break;
             }
+        }
+    }
+}
+
+void soItemManageModuleImpl::useItem(u32 index) {
+    if (isHaveItem(index)) {
+        BaseItem* item = m_haveItemInfoArray->at(index).m_item;
+        ejectHaveItem(index, false, false);
+        if (useItem(item) == false) {
+            if (item->isHaved() == true) {
+                item->setVisibilityWhole(1);
+                Vec3f velocity(0.0f, 0.0f, 0.0f);
+                item->fall(&velocity, m_moduleAccesser->getPostureModule().getLr());
+            }
+        }
+    }
+}
+
+void soItemManageModuleImpl::dropAttach(itKind kind, float angle, float speed) {
+    BaseItem* item;
+    for (s32 i = m_attachItemInfoArray->size() - 1; i >= 0; i--) {
+        if (kind == m_attachItemInfoArray->at(i).m_kind) {
+            item = m_attachItemInfoArray->at(i).m_item;
+            float lr = m_moduleAccesser->getPostureModule().getLr();
+            Vec2f dir(speed, 0.0f);
+            dir.rot(0.017453292f * angle, &dir);
+            ejectAttachItem(i, false, false);
+            Vec3f velocity(dir.m_x * lr, dir.m_y, 0.0f);
+            item->fall(&velocity, lr);
         }
     }
 }

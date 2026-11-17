@@ -9,6 +9,7 @@ struct adListNode {
     adListNode* m_prev;
     adListNode* m_next;
     T m_val;
+    adListNode() : m_prev(nullptr), m_next(nullptr) { }
 };
 
 template<typename T>

@@ -591,6 +591,10 @@ mo_melee/sora_melee/so/so_array_vector_thunks_P9soArticle_24.cpp:
 mo_melee/sora_melee/so/so_array_base_soArrayVectorAbstract_P9soArticle_7B384.cpp:
 	.text       start:0x0007B384 end:0x0007B38C
 
+mo_melee/sora_melee/so/so_null.cpp:
+	.text       start:0x0007B884 end:0x00081E84
+	.ctors      start:0x00000020 end:0x00000024
+
 mo_melee/sora_melee/so/so_vtable_dt_Null_soCollisionAttackEventObserver.cpp:
 	.text       start:0x00081FC4 end:0x00082004
 
@@ -1742,7 +1746,8 @@ mo_melee/sora_melee/so/so_kinetic_energy_jostle.cpp:
 	.data       start:0x000174A0 end:0x000174E4
 
 mo_melee/sora_melee/so/item/so_item_manage_module_impl.cpp:
-	.text       start:0x000B7E20 end:0x000BE4F8
+	.text       start:0x000B7E20 end:0x000BE550
+	.ctors      start:0x00000034 end:0x00000038
 
 mo_melee/sora_melee/so/so_kinetic_transact_helper.cpp:
 	.text       start:0x000BEB00 end:0x000BEB3C
@@ -1775,7 +1780,8 @@ mo_melee/sora_melee/so/so_array_vector_calculator.cpp:
 	.text       start:0x000C261C end:0x000C2CA8
 
 mo_melee/sora_melee/so/so_general_term_manager.cpp:
-	.text       start:0x000C2CA8 end:0x000C2E04
+	.text       start:0x000C2CA8 end:0x000C2E38
+	.ctors      start:0x00000040 end:0x00000044
 
 mo_melee/sora_melee/so/so_vtable_dt_ArrayNull_P9soArticle.cpp:
 	.text       start:0x000C3B58 end:0x000C3B98
