@@ -28,10 +28,13 @@ sora/main.cpp:
 	.text       start:0x8000C8E8 end:0x8000C960
 
 sora/gf/gf_3d_scene.cpp:
-	.text       start:0x8000C960 end:0x80010C9C
+	.text       start:0x8000C960 end:0x8000EB1C
 	.data       start:0x80420690 end:0x80420730
 	.sbss       start:0x8059FF80 end:0x8059FF88
 	.sdata2     start:0x805A1320 end:0x805A1398
+
+sora/gf/gf_3d_scene_b.cpp:
+	.text       start:0x8000EB1C end:0x80010C9C
 
 sora/gf/gf_3d_scene_event.cpp:
 	.text       start:0x80010C9C end:0x80010D38

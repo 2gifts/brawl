@@ -761,7 +761,7 @@ void Stage::updateStagePositions() {
             m_cameraParam1->m_range.m_down *= m_stageParam->m_finalSmashCamTilt;
             g_gfSceneRoot->m_shadowPitch = m_stageParam->m_shadowPitch;
             g_gfSceneRoot->m_shadowYaw = m_stageParam->m_shadowYaw;
-            g_gfSceneRoot->m_1156 = m_stageParam->m_shadowRoll;
+            g_gfSceneRoot->m_shadowRoll = m_stageParam->m_shadowRoll;
         }
     }
 }
