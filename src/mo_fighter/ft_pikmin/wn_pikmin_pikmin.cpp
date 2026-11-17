@@ -619,8 +619,7 @@ bool wnPikminPikmin::notifyEventCollisionAttackCheck(u32 flags) {
     u32 otherTeam = reflectable;
     if (reflectable != 0) {
         soReflectModule& reflect = m_moduleAccesser->getReflectModule();
-        int teamNo = m_moduleAccesser->getTeamModule().getTeam()->getNo();
-        otherTeam = reflect.getTeam() != teamNo;
+        otherTeam = reflect.getTeam() != m_moduleAccesser->getTeamModule().getTeam()->getNo();
     }
     u32 enable = otherTeam;
     if (otherTeam != 0) {

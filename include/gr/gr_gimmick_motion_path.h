@@ -10,15 +10,21 @@
 class grGimmickMotionPath : public grGimmick {
 
 public:
-    char _spacer[4];
+    u8 m_state; // HYPOTHESIS: 0 stopped, 1 moving
+    char _pad14d[3];
     float m_frame;
-    char _spacer2[12];
+    float unk154;
+    float m_frameSpeed; // HYPOTHESIS: frames per update, the sign gives the direction
+    float m_frameStep;
     unsigned int m_frameCount;
     grGimmickMotionPathData* m_motionPathData;
     union {
         char _spacer3[20];
         struct {
-            char _pad168[16];
+            float unk168;
+            float unk16C;
+            float unk170;
+            float m_endThreshold; // HYPOTHESIS: the move counts as ended when the speed gets below this
             int unk178;
         };
     };
@@ -52,4 +58,7 @@ public:
     void stopStartSE();
     void setTRS();
     void playDefaultSE();
+    void createMotionPathSoundWork();
+    void createMotionPathEffectWork();
+    virtual void fixedPosition(float unused);
 };
