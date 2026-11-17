@@ -272,7 +272,7 @@ protected:
     u8 m_hasYakumono;           // 0x175
     u8 m_attackEnabled;         // 0x176
     char _177;
-    u32* m_work;                // 0x178
+    ykData* m_work;             // 0x178
 
 public:
     grMetalgearAttack(const char* taskName);

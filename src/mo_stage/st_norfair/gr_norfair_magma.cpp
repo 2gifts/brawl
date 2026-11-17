@@ -26,6 +26,15 @@ struct stNorfairMagmaRow {
     float m_waitMax;
 };
 
+grNorfairMagma* grNorfairMagma::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
+    grNorfairMagma* ground = new (Heaps::StageInstance) grNorfairMagma(taskName);
+    if (ground != NULL) {
+        ground->setMdlIndex(mdlIndex);
+        ground->setTgtNode(tgtNodeName);
+    }
+    return ground;
+}
+
 grNorfairMagma::grNorfairMagma(const char* taskName) : grNorfair(taskName) {
     m_tblIndex = 1;
     m_accel = 0.0f;
@@ -50,15 +59,6 @@ grNorfairMagma::grNorfairMagma(const char* taskName) : grNorfair(taskName) {
     callback->m_numNodeCallbackData = 1;
     callback->initialize(false, Heaps::StageInstance);
     callback->m_nodeCallbackDatas[0].m_flags |= 0x10;
-}
-
-grNorfairMagma* grNorfairMagma::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
-    grNorfairMagma* ground = new (Heaps::StageInstance) grNorfairMagma(taskName);
-    if (ground != NULL) {
-        ground->setMdlIndex(mdlIndex);
-        ground->setTgtNode(tgtNodeName);
-    }
-    return ground;
 }
 
 grNorfairMagma::~grNorfairMagma() {

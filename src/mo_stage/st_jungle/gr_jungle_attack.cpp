@@ -1,5 +1,6 @@
 #define YK_STAGE_INLINE // inline members of the shared SO headers that the stage RELs emit themselves
 #define YK_STAGE_FULL // ... and the ones of the hit objects with an attack module and an event observer
+#define YK_DATA_INLINE_CTOR // the ykData / ykDataGroup constructors are inline in this REL
 #define SO_COLLISION_GROUP_ALIGNED // the hit object embeds soArrayVector<soCollisionGroup, 1> with 4-byte aligned elements
 #define SO_COLLISION_GROUP_MEMBERWISE // ... and copies the group member by member
 
@@ -28,6 +29,13 @@ grJungleAttack::grJungleAttack(const char* taskName) : grJungle(taskName) {
     callback->initialize(false, Heaps::StageInstance);
     callback->m_nodeCallbackDatas->m_flags |= 1;
     callback->m_nodeCallbackDatas->m_flags |= 0x10;
+}
+
+grJungleAttack::~grJungleAttack() {
+    if (m_work != NULL) {
+        delete m_work;
+    }
+    m_work = NULL;
 }
 
 void grJungleAttack::update(float deltaFrame) {
@@ -82,6 +90,9 @@ void grJungleAttack::updateCallBack(float deltaFrame) {
 // The hit object has an attack and no hit spheres.
 void grJungleAttack::setHit() {
     m_work = new (Heaps::StageInstance) ykData;
+    m_work->m_dataGroupNum = 0;
+    m_work->m_dataGroups = NULL;
+
     ykInitInfo info = { 0, 0, 0x10, 0, 0 };
     info.m_ground = this;
     info.m_node = ykDynamicCastScnMdl(m_sceneModels[0]);

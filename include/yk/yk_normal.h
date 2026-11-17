@@ -78,8 +78,9 @@ public:
     ykNormal(ykInitInfo* info)
         : Yakumono(info, "ykNormal", (soCollisionAttackModule*)lbl_27_bss_384, hitModule(), m_damageBuilder.getModule(),
                    lbl_27_bss_598, lbl_27_bss_444),
-          m_hitConfig(&moduleAccesser, m_taskId, (gfTask::Category)(u8)m_taskCategory, lbl_27_data_54C60),
-          m_damageBuilder(&moduleAccesser, lbl_27_bss_5FF4, lbl_27_data_54C60) {
+          m_hitConfig(&moduleAccesser, ykGetTaskId(this), (gfTask::Category)(u8)m_taskCategory,
+                      ykGetObserverRegistrationDesc()),
+          m_damageBuilder(&moduleAccesser, lbl_27_bss_5FF4, ykGetObserverRegistrationDesc()) {
         postInitialize();
         activate(info->m_pos, -1.0f, 0.0f);
     }
@@ -105,9 +106,11 @@ public:
     ykNormal(ykInitInfo* info)
         : Yakumono(info, "ykNormal", &m_attackConfig.m_attackModule, hitModule(), m_damageBuilder.getModule(),
                    lbl_27_bss_598, lbl_27_bss_444),
-          m_attackConfig(&moduleAccesser, m_taskId, (gfTask::Category)(u8)m_taskCategory, lbl_27_data_54C60),
-          m_hitConfig(&moduleAccesser, m_taskId, (gfTask::Category)(u8)m_taskCategory, lbl_27_data_54C60),
-          m_damageBuilder(&moduleAccesser, lbl_27_bss_5FF4, lbl_27_data_54C60) {
+          m_attackConfig(&moduleAccesser, ykGetTaskId(this), (gfTask::Category)(u8)m_taskCategory,
+                      ykGetObserverRegistrationDesc()),
+          m_hitConfig(&moduleAccesser, ykGetTaskId(this), (gfTask::Category)(u8)m_taskCategory,
+                      ykGetObserverRegistrationDesc()),
+          m_damageBuilder(&moduleAccesser, lbl_27_bss_5FF4, ykGetObserverRegistrationDesc()) {
         postInitialize();
         activate(info->m_pos, -1.0f, 0.0f);
     }

@@ -1,4 +1,5 @@
 #define YK_STAGE_FULL
+#define YK_DATA_INLINE_CTOR // the ykData / ykDataGroup constructors are inline in this REL
 #define IP_NULL_INPUT_CONT_NO
 #define YK_STAGE_INLINE // inline members of the shared SO headers that the stage RELs emit themselves
 #define SO_COLLISION_GROUP_ALIGNED // the hit object embeds soArrayVector<soCollisionGroup, 1> with 4-byte aligned elements
@@ -137,9 +138,9 @@ void grMetalgearAttack::updateCallBack(float deltaFrame) {
 
 // The attack's hit object: one attack part and one collision group (the Yakumono has no hit module).
 void grMetalgearAttack::setHit() {
-    m_work = new (Heaps::StageInstance) u32[2];
-    m_work[0] = 0;
-    m_work[1] = 0;
+    m_work = new (Heaps::StageInstance) ykData;
+    m_work->m_dataGroupNum = 0;
+    m_work->m_dataGroups = NULL;
 
     ykInitInfo info = {NULL, NULL, 0x10, NULL, NULL};
     info.m_ground = this;

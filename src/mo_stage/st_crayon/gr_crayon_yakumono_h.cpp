@@ -149,8 +149,6 @@ void grCrayonYakumonoH::startup(gfArchive* data, u32 unk1, gfSceneRoot::LayerTyp
                      soCollisionHitModuleBuildConfig<soCollision::Category_Gimmick, 1, 1, soCollisionHitModuleImpl, 0x3FF, true> >
         Config;
     Config* yakumono = new (Heaps::StageInstance) Config(&info);
-    yakumono->postInitialize();
-    yakumono->activate(&pos, -1.0f, 0.0f);
     setYakumono(yakumono);
     unk154 = m_sceneModels[0];
     unk158 = unk154->m_resMdl;

@@ -544,13 +544,12 @@ void grGWChefEtc::setHit() {
         m_hitSimple[i].m_height = soCollisionHitData::Height_Low;
         m_hitSimple[i].m_nodeIndex = m_nodeChef[i][0];
     }
-    soSet<soCollisionHitData::Simple>* set = m_hitSet;
-    set->m_elements = m_hitSimple;
-    set->m_size = 4;
+    m_hitSet->m_elements = m_hitSimple;
+    m_hitSet->m_size = 4;
     m_dataGroup->m_hitDataSimpleSet = m_hitSet;
     m_dataGroup->m_hitGroupIndex = 0;
-    m_data->m_dataGroups = m_dataGroup;
     m_data->m_dataGroupNum = 1;
+    m_data->m_dataGroups = m_dataGroup;
 
     ykInitInfo info = { 0, 0, 0x10, 0, 0 };
     info.m_ground = this;
@@ -562,8 +561,6 @@ void grGWChefEtc::setHit() {
                      soCollisionHitModuleBuildConfig<soCollision::Category_Gimmick, 4, 1, soCollisionHitModuleImpl, 0x3FF, true> >
         Config;
     Config* yakumono = new (Heaps::StageInstance) Config(&info);
-    yakumono->postInitialize();
-    yakumono->activate(&pos, -1.0f, 0.0f);
     setYakumono(yakumono);
 }
 

@@ -194,8 +194,6 @@ void grJungleAshiba03::setHit() {
                      soCollisionHitModuleBuildConfig<soCollision::Category_Gimmick, 2, 2, soCollisionHitModuleImpl, 0x3FF, true> >
         Config;
     Config* yakumono = new (Heaps::StageInstance) Config(&info);
-    yakumono->postInitialize();
-    yakumono->activate(&pos, -1.0f, 0.0f);
     setYakumono(yakumono);
 }
 

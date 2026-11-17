@@ -228,7 +228,8 @@ void grDonkeyJack::setAttack() {
 }
 
 // Hits for 20 percent and sends fighters at 20 degrees, away from where he is facing.
-void grDonkeyJack::setAttackDown() {
+// HYPOTHESIS: the names of the two setters. The original vtable has this one, the first in the code, in the second slot.
+void grDonkeyJack::setAttackSide() {
     if (m_attackEnabled != 1) {
         soCollisionAttackData attack(1.0f);
         Vec3f offset;
@@ -251,7 +252,7 @@ void grDonkeyJack::setAttackDown() {
 }
 
 // The same hit, but the fighters are only sent away from the hit object.
-void grDonkeyJack::setAttackSide() {
+void grDonkeyJack::setAttackDown() {
     if (m_attackEnabled != 1) {
         soCollisionAttackData attack(1.0f);
         Vec3f offset;

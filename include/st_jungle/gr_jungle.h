@@ -648,12 +648,7 @@ protected:
 
 public:
     grJungleAttack(const char* taskName);
-    virtual ~grJungleAttack() {
-        if (m_work != NULL) {
-            delete m_work;
-        }
-        m_work = NULL;
-    }
+    virtual ~grJungleAttack();
     virtual void update(float deltaFrame);
     virtual void updateYakumono(float deltaFrame);
     virtual void updateCallBack(float deltaFrame);

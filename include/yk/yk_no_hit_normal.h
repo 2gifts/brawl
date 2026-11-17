@@ -17,16 +17,28 @@ extern soEventObserverRegistrationDesc* lbl_27_data_54C60;
 // HYPOTHESIS: the runtime type tag of nw4r's ScnMdl in main (sora_melee casts a G3dObj with it).
 extern int lbl_8040ABD8[];
 
-// Stand-in for nw4r::g3d::G3dObj::DynamicCast<ScnMdl>(): the type tag is passed through a stack slot.
+// Stand-in for nw4r::g3d::G3dObj::DynamicCast<ScnMdl>(): the type tag is a one-word object passed by reference, so it
+// lives in a stack slot of the caller. HYPOTHESIS: the names (nw4r calls the tag G3dObj::TypeObj).
+struct ykTypeObj {
+    int* m_typeInfo;
+    ykTypeObj(int* typeInfo) : m_typeInfo(typeInfo) { }
+};
+static inline u32 ykIsDerivedFrom(nw4r::g3d::ScnMdl* obj, const ykTypeObj& type) {
+    return obj->IsDerivedFrom((int*)&type);
+}
 static inline nw4r::g3d::ScnMdl* ykDynamicCastScnMdl(nw4r::g3d::ScnMdl* obj) {
-    bool isMdl = false;
-    if (obj != NULL) {
-        int* typeObj = lbl_8040ABD8;
-        if (obj->IsDerivedFrom((int*)&typeObj)) {
-            isMdl = true;
-        }
-    }
-    return isMdl ? obj : NULL;
+    return (obj != NULL && ykIsDerivedFrom(obj, ykTypeObj(lbl_8040ABD8))) ? obj : NULL;
+}
+
+// The task id and the observer registration table reach the module builders through inline getters.
+// BYTES: the id getter returns int, the type of the builders' parameter. With gfTask::getTaskId() (s32 in BrawlHeaders,
+// so a conversion follows the call) or a plain member read the four values the constructor keeps in saved registers
+// are numbered differently. HYPOTHESIS: the names, and that the original's gfTask getter itself returned int.
+static inline int ykGetTaskId(const gfTask* task) {
+    return task->m_taskId;
+}
+static inline soEventObserverRegistrationDesc* ykGetObserverRegistrationDesc() {
+    return lbl_27_data_54C60;
 }
 
 template <class TAttackConfig>
@@ -41,7 +53,8 @@ public:
     ykNoHitNormal(ykInitInfo* info)
         : Yakumono(info, "ykNoHitNormal", &m_buildConfig.m_attackModule, lbl_27_bss_398, lbl_27_bss_3DC, lbl_27_bss_598,
                    lbl_27_bss_444),
-          m_buildConfig(&moduleAccesser, m_taskId, (gfTask::Category)(u8)m_taskCategory, lbl_27_data_54C60) {
+          m_buildConfig(&moduleAccesser, ykGetTaskId(this), (gfTask::Category)(u8)m_taskCategory,
+                        ykGetObserverRegistrationDesc()) {
         postInitialize();
         activate(info->m_pos, -1.0f, 0.0f);
         m_attackPosXWork = NULL;

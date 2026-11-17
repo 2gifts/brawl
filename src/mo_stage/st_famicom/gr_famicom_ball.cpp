@@ -16,6 +16,15 @@
 #include <st_famicom/gr_famicom.h>
 #include <st_famicom/gr_famicom_anim.h>
 
+grFamicomBall* grFamicomBall::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
+    grFamicomBall* ground = new (Heaps::StageInstance) grFamicomBall(taskName);
+    if (ground != NULL) {
+        ground->setMdlIndex(mdlIndex);
+        ground->setTgtNode(tgtNodeName);
+    }
+    return ground;
+}
+
 grFamicomBall::grFamicomBall(const char* taskName) : grFamicom(taskName), m_snd() {
     m_posWork = NULL;
     m_ltoRWork = NULL;
@@ -36,15 +45,6 @@ grFamicomBall::grFamicomBall(const char* taskName) : grFamicom(taskName), m_snd(
     callback->m_nodeCallbackDatas[0].m_flags |= 0x10;
     m_seHandle = -1;
     m_dangerZone = -1;
-}
-
-grFamicomBall* grFamicomBall::create(int mdlIndex, const char* tgtNodeName, const char* taskName) {
-    grFamicomBall* ground = new (Heaps::StageInstance) grFamicomBall(taskName);
-    if (ground != NULL) {
-        ground->setMdlIndex(mdlIndex);
-        ground->setTgtNode(tgtNodeName);
-    }
-    return ground;
 }
 
 grFamicomBall::~grFamicomBall() {

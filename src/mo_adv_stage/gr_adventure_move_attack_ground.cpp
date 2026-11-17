@@ -60,8 +60,9 @@ public:
     ykNormal(ykInitInfo* info)
         : Yakumono(info, "ykNormal", &m_attackConfig.m_attackModule, lbl_27_bss_398, &m_damageBuilder.m_damageModule,
                    lbl_27_bss_598, lbl_27_bss_444),
-          m_attackConfig(&moduleAccesser, m_taskId, (gfTask::Category)(u8)m_taskCategory, lbl_27_data_54C60),
-          m_damageBuilder(&moduleAccesser, lbl_27_bss_5FF4, lbl_27_data_54C60) { }
+          m_attackConfig(&moduleAccesser, ykGetTaskId(this), (gfTask::Category)(u8)m_taskCategory,
+                         ykGetObserverRegistrationDesc()),
+          m_damageBuilder(&moduleAccesser, lbl_27_bss_5FF4, ykGetObserverRegistrationDesc()) { }
     virtual ~ykNormal() { }
 };
 

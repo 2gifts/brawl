@@ -277,13 +277,12 @@ void grMansionPillar::setHit() {
     *unk198 = *unk194;
     unk198->m_height = soCollisionHitData::Height_Low;
     unk198->m_nodeIndex = m_nodeIndex;
-    soSet<soCollisionHitData::Simple>* set = unk19C;
-    set->m_elements = unk198;
-    set->m_size = 1;
+    unk19C->m_elements = unk198;
+    unk19C->m_size = 1;
     unk1A0->m_hitDataSimpleSet = unk19C;
     unk1A0->m_hitGroupIndex = 0;
-    unk1A4->m_dataGroups = unk1A0;
     unk1A4->m_dataGroupNum = 1;
+    unk1A4->m_dataGroups = unk1A0;
 
     ykInitInfo info = { 0, 0, 0x10, 0, 0 };
     info.m_ground = this;
@@ -295,8 +294,6 @@ void grMansionPillar::setHit() {
                      soCollisionHitModuleBuildConfig<soCollision::Category_Gimmick, 1, 1, soCollisionHitModuleImpl, 0x3FF, true> >
         Config;
     Config* yakumono = new (Heaps::StageInstance) Config(&info);
-    yakumono->postInitialize();
-    yakumono->activate(&pos, -1.0f, 0.0f);
     setYakumono(yakumono);
 }
 
