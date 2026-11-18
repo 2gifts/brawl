@@ -587,7 +587,7 @@ void soModelModuleImpl::calcViewCallbackPre(nw4r::math::MTX34* viewMtx) {
                 !(m_moduleAccesser->getLinkModule().getModelConstraintFlag() & 0x10)) {
                 z = m_moduleAccesser->getLinkModule().getModelConstraintNodeGlobalPositionRecursive(0).m_z;
             } else {
-                z = getNodeGlobalPosition(0, false).m_z;
+                z = getNodeTranslate(0).m_z;
             }
             mtx[0][2] *= m_scaleZ;
             mtx[1][2] *= m_scaleZ;
