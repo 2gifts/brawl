@@ -108,7 +108,7 @@ bool ftUtil::isBodyUp(soModuleAccesser* acc) {
     Vec3f offset;
     offset = left + right;
     offset = offset * 0.5f;
-    offset = offset - base;
+    offset -= base;
     return offset.m_x * acc->getPostureModule().getLr() < 0.0f;
 }
 

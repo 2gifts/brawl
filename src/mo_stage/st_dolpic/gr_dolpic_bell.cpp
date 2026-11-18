@@ -106,13 +106,15 @@ void grDolpicBell::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
-            Vec3f pos;
+            Vec3f pos = m_mtxWork->getTranslation();
             Vec3f rot;
-            m_mtxWork->getPosition(&pos);
             m_mtxWork->getRotate(&rot);
-            rot.m_x = 57.29578f * rot.m_x;
-            rot.m_y = 57.29578f * rot.m_y;
-            rot.m_z = 57.29578f * rot.m_z;
+            float x = 57.29578f * rot.m_x;
+            float y = 57.29578f * rot.m_y;
+            float z = 57.29578f * rot.m_z;
+            rot.m_x = x;
+            rot.m_y = y;
+            rot.m_z = z;
             grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
             data->m_pos = pos;
             data = calcWorldCallBack->m_nodeCallbackDatas;

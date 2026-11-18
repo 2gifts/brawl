@@ -10,6 +10,7 @@
 #include <math.h>
 #include <mt/mt_vector.h>
 #include <nw4r/g3d/g3d_scnobjcallback.h>
+#include <nw4r/ut/ut_Color.h>
 #include <nw4r/ut/ut_LinkList.h>
 #include <snd/snd_3d_generator.h>
 #include <so/collision/so_collision_hit_part.h>
@@ -230,8 +231,8 @@ static_assert(sizeof(grPlanktonHamonScnObjCallBack) == 0xC, "Class is wrong size
 // A ripple of the water.
 class grPlanktonHamon : public grPlankton {
     stPlanktonHamon* m_hamon;                       // 0x158 (from the stage)
-    GXColor m_color1;                               // 0x15C
-    GXColor m_color2;                               // 0x160
+    nw4r::ut::Color m_color1;                       // 0x15C
+    nw4r::ut::Color m_color2;                       // 0x160
     grPlanktonHamonScnObjCallBack m_scnObjCallback; // 0x164
     u8 m_motion;                                    // 0x170
     char _171[3];

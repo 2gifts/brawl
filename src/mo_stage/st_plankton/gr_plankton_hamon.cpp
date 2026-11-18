@@ -68,8 +68,6 @@ grPlanktonHamon* grPlanktonHamon::create(int mdlIndex, const char* tgtNodeName, 
 }
 
 grPlanktonHamon::grPlanktonHamon(const char* taskName) : grPlankton(taskName) {
-    *reinterpret_cast<u32*>(&m_color1) = 0xFFFFFFFF;
-    *reinterpret_cast<u32*>(&m_color2) = 0xFFFFFFFF;
     m_state = 0;
     m_timer = 0.0f;
     m_hamon = NULL;
