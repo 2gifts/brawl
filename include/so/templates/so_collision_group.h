@@ -18,5 +18,9 @@ public:
     struct { u32 unk0, unk4; } unk58, unk60, unk68;
     s16 unk70;
     u8 unk72, unk73, unk74;
+#ifdef SO_ARRAY_ELEMENT_CTOR // MATCH-ONLY: out-of-line constructor/destructor (their definitions live in other units)
+    soCollisionGroup();
+    ~soCollisionGroup();
+#endif
 };
 static_assert(sizeof(soCollisionGroup) == 120, "Class is wrong size!");

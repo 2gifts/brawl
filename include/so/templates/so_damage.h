@@ -25,5 +25,9 @@ public:
     float unk94;
     u32 unk98;
     u8 unk9c;
+#ifdef SO_ARRAY_ELEMENT_CTOR // MATCH-ONLY: out-of-line constructor/destructor (their definitions live in other units)
+    soDamage();
+    ~soDamage();
+#endif
 };
 static_assert(sizeof(soDamage) == 160, "Class is wrong size!");

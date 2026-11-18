@@ -16,5 +16,9 @@ public:
     float unk20;
     u8 unk24;
     u32 unk28;
+#ifdef SO_ARRAY_ELEMENT_CTOR // MATCH-ONLY: out-of-line constructor/destructor (their definitions live in other units)
+    soOtherAnim();
+    ~soOtherAnim();
+#endif
 };
 static_assert(sizeof(soOtherAnim) == 44, "Class is wrong size!");

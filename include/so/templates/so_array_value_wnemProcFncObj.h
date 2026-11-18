@@ -9,5 +9,9 @@ class wnemProcFncObj {
 public:
     u32 unk0;
     u32 unk4;
+#ifdef SO_ARRAY_ELEMENT_CTOR // MATCH-ONLY: out-of-line constructor/destructor (their definitions live in other units)
+    wnemProcFncObj();
+    ~wnemProcFncObj();
+#endif
 };
 static_assert(sizeof(wnemProcFncObj) == 8, "Class is wrong size!");

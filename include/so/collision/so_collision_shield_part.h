@@ -34,6 +34,9 @@ public:
     int m_isActive;
 
     soCollisionShieldPart(u32 category1, u32 category2);
+#ifdef SO_ARRAY_ELEMENT_CTOR // MATCH-ONLY: the array unit calls an out-of-line default constructor
+    soCollisionShieldPart();
+#endif
     ~soCollisionShieldPart();
     void reset(soCollisionShieldPartUnit* unit);
     void setData(soCollisionShieldData* data);

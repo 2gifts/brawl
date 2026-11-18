@@ -15,5 +15,9 @@ public:
     u8 unke;
     u8 unkf;
     u8 unk10;
+#ifdef SO_ARRAY_ELEMENT_CTOR // MATCH-ONLY: out-of-line constructor/destructor (their definitions live in other units)
+    soControllerClatter();
+    ~soControllerClatter();
+#endif
 };
 static_assert(sizeof(soControllerClatter) == 20, "Class is wrong size!");

@@ -25,5 +25,9 @@ public:
     u32 unk3c;
     u32 unk40;
     u8 unk44;
+#ifdef SO_ARRAY_ELEMENT_CTOR // MATCH-ONLY: out-of-line constructor/destructor (their definitions live in other units)
+    soPartialAnim();
+    ~soPartialAnim();
+#endif
 };
 static_assert(sizeof(soPartialAnim) == 72, "Class is wrong size!");
