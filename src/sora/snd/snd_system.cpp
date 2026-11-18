@@ -1216,7 +1216,8 @@ void sndSystem::setVolBalance(float bgm, float se) {
     if (m_seBalance > 1.0f) {
         m_seBalance = 1.0f;
     }
-    unk70C = clampf(unk70C, 1.0f, 0.0f);
+    float vol = unk70C;
+    unk70C = clampf(vol, 1.0f, 0.0f);
     float seVolume = m_seBalance * unk70C;
     for (u32 i = 0; i < 32; i++) {
         m_seHandle[i].m_handle.SetVolume(seVolume, 0);

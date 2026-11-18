@@ -38,10 +38,10 @@ void muProcDiagram1p::setConf(nw4r::g3d::ScnGroup* group, MuMsg* msg, int msgWnd
 
 // Each row gets the KOs its character made of the characters listed; the rows are sorted by them.
 void muProcDiagram1p::makeRankTbl() {
-    int i;
-    u32 total;
     MuCharKind chara;
+    int i;
     int j;
+    u32 total;
     for (i = 0; i < m_table->m_charaNum; i++) {
         m_table->m_rows[i].m_chara = m_table->m_charas[i];
         total = 0;

@@ -362,11 +362,12 @@ void stMetalgear::createObjAttack(int index) {
 
 // The metalgear (kind by the sub kind of the match settings) comes with a chance of the stage data.
 void stMetalgear::createObjMetalgear() {
+    gmGlobalModeMelee* melee;
     stMetalgearData* data = static_cast<stMetalgearData*>(m_stageData);
     if (data != NULL) {
-        gmGlobalModeMelee* melee = g_GameGlobal->m_modeMelee;
+        melee = g_GameGlobal->m_modeMelee;
         if (melee != NULL) {
-            if (randf() <= data->unk38) {
+            if (!(randf() > data->unk38)) {
                 int index;
                 switch (melee->m_meleeInitData.m_subStageKind) {
                 case 0:
