@@ -429,8 +429,8 @@ void stDonkey::createObjHashigo() {
 
 void stDonkey::createObjHashigo1(int index) {
     grDonkeyLadder* ground;
-    Vec3f* pos;
     grGimmickLadderData* data;
+    Vec3f* pos;
     switch (index) {
     case 0x1B:
         ground = grDonkeyLadder::create(0x3C, "HASIGO_01", "grDonkeyLadder01");
