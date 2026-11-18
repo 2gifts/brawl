@@ -258,15 +258,13 @@ bool ftWarioCommon::notifyEventLink(ftWarioLinkEventArgs* args, soModuleAccesser
 // The bike is created next to the rider and links to it (link 6).
 bool ftWarioCommon::activeArticle(StageObject* bike, soModuleAccesser* acc) {
     int riderTaskId = acc->getWorkManageModule().getInt(Work_Int_BikeRiderTaskId);
-    soPostureModule& posture = acc->getPostureModule();
     soTeamModule& team = acc->getTeamModule();
     soResourceModule& resource = acc->getResourceModule();
-    int ownerTaskId = acc->m_stageObject->m_taskId;
+    soPostureModule& posture = acc->getPostureModule();
+    const int& ownerTaskId = acc->m_stageObject->m_taskId;
     float lr = posture.getLr();
     Vec3f pos = posture.getPos();
-    int teamNo = team.getTeam()->getNo();
-    u32 etcResId = resource.getResourceIdAccesser()->getEtcResId();
-    static_cast<wnWarioBike*>(bike)->activate(ownerTaskId, riderTaskId, etcResId, teamNo, &pos, lr);
+    static_cast<wnWarioBike*>(bike)->activate(ownerTaskId, riderTaskId, resource.getResourceIdAccesser()->getEtcResId(), team.getTeam()->getNo(), &pos, lr);
     acc->getLinkModule().link(6, bike->m_taskId);
     return true;
 }

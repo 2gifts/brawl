@@ -153,6 +153,7 @@ void wnPokeLizardonRock::notifyEventChangeStatus(int statusKind, int prevStatusK
 }
 
 bool wnPokeLizardonRock::activeArticle(wnPokeLizardonRockStone* stone, soModuleAccesser* acc) {
+    int taskId;
     wnPokeLizardonRock& rock = dynamic_cast<wnPokeLizardonRock&>(acc->getStageObject());
     const wnPokeLizardonRockParam* param = rock.m_param;
     acc->getWorkManageModule().getInt(0x20000000);
@@ -168,10 +169,8 @@ bool wnPokeLizardonRock::activeArticle(wnPokeLizardonRockStone* stone, soModuleA
     }
     soPostureModule& posture = acc->getPostureModule();
     soResourceModule& resource = acc->getResourceModule();
-    int taskId = acc->getStageObject().m_taskId;
-    int variant = randi(2);
-    float lr = posture.getLr();
-    int resourceId = resource.getResourceIdAccesser()->getAnmResId();
-    stone->activate(taskId, resourceId, team, &pos, lr, angle, param->unk14, param->unk18, variant);
+    taskId = acc->getStageObject().m_taskId;
+    stone->activate(taskId, resource.getResourceIdAccesser()->getAnmResId(), team, &pos, posture.getLr(), angle, param->unk14,
+                    param->unk18, randi(2));
     return false;
 }
