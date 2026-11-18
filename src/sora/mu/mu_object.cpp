@@ -1469,7 +1469,7 @@ void MuObject::setAnimIdx(MuAnimIdxData* data, bool force) {
 }
 
 void MuObject::setAnimName(MuAnimNameData* data, bool force) {
-    const char* name = data->m_name;
+    const char* name;
     bool changed = false;
     if (force) {
         if (m_animNameData != NULL) {
@@ -1481,6 +1481,7 @@ void MuObject::setAnimName(MuAnimNameData* data, bool force) {
         }
     }
     m_animNameData = data;
+    name = data->m_name;
     {
         bool valid = true;
         if (m_animNameData->m_flags & 1) {

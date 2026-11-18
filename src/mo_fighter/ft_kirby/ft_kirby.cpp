@@ -607,12 +607,14 @@ void ftKirby::copySetup(soModuleAccesser* moduleAccesser, int slotNo, int copyKi
 }
 
 void ftKirby::copyCancel(soModuleAccesser* moduleAccesser, bool effect) {
+    int entryId;
+    ftManager* manager;
     int copyKind = moduleAccesser->getWorkManageModule().getInt(0x10000048);
     moduleAccesser->getWorkManageModule().setInt(-1, 0x10000048);
     moduleAccesser->getWorkManageModule().offFlag(0x12000042);
     moduleAccesser->getWorkManageModule().offFlag(0x1200001f);
-    int entryId = m_entryId;
-    ftManager* manager = g_ftManager;
+    entryId = m_entryId;
+    manager = g_ftManager;
     m_copyAbility.changeCopyAbility(-1, manager->getPlayerNo(entryId), getOwner()->getSpycloak(), isCopyStatus());
     if (effect) {
         moduleAccesser->getWorkManageModule().setInt(2, 0x1000004b);
