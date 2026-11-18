@@ -1834,6 +1834,14 @@ void wnPikminPikminKineticTransactor::changeKineticSub16(void* pools, soModuleAc
     gravity->enable();
 }
 
+static inline void pkSetBrake(soKineticEnergyNormal* normal, const Vec2f& brake) {
+    normal->m_brake = brake;
+}
+
+static inline void pkSetSpeedLimit(soKineticEnergyNormal* normal, const Vec2f& limit) {
+    normal->m_speedLimit = limit;
+}
+
 void wnPikminPikminKineticTransactor::changeKineticSub17(void* pools, soModuleAccesser* acc) {
     Vec2f current = acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
     acc->getKineticModule().unableEnergyAll();
@@ -1845,12 +1853,10 @@ void wnPikminPikminKineticTransactor::changeKineticSub17(void* pools, soModuleAc
     normal->m_speedTarget = PK_V2(0.0f, 0.0f);
     float brakeY = params->getParamFloat(acc, 0xFC8, 0);
     float brakeX = params->getParamFloat(acc, 0xFC8, 0);
-    Vec2f brakeVec(brakeX, brakeY);
-    normal->m_brake = brakeVec;
+    pkSetBrake(normal, Vec2f(brakeX, brakeY));
     float limitY = params->getParamFloat(acc, 0xFC9, 0);
     float limitX = params->getParamFloat(acc, 0xFC9, 0);
-    Vec2f limitVec(limitX, limitY);
-    normal->m_speedLimit = limitVec;
+    pkSetSpeedLimit(normal, Vec2f(limitX, limitY));
     normal->enable();
 }
 
