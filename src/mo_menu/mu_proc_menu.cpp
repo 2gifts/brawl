@@ -144,6 +144,12 @@ u32 muProcMenu::padUpdate() {
     return flags;
 }
 
+static inline void clearRepeat(muMenuController* ctrl, u32 repeat) {
+    for (u32 i = 0; i < 9; i++) {
+        ctrl[i].initRepeatCounter(repeat);
+    }
+}
+
 bool muProcMenu::selectProc(int dir) {
     bool moved = false;
     u16 target;
@@ -177,9 +183,7 @@ bool muProcMenu::selectProc(int dir) {
             if (m_nodes[target].m_right.m_repeat) {
                 repeat |= GF_PAD_BUTTON_BIT_DPAD_RIGHT;
             }
-            for (u32 i = 0; i < 9; i++) {
-                m_ctrl[i].initRepeatCounter(repeat);
-            }
+            clearRepeat(m_ctrl, repeat);
         } else {
             moved = false;
         }

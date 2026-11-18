@@ -1,3 +1,4 @@
+#define FT_KINETIC_MEDIATOR_POST_UPDATE // the mediator passes the module accesser to postUpdateEnergy
 #define SO_KINETIC_MODULE_IMPL_CTOR_2
 #include <ft/builder/ft_builder_kinetic.h>
 #include <so/event/so_event_system.h>
@@ -39,8 +40,7 @@ void soKineticModuleGenericImpl::updateEnergy(soModuleAccesser* moduleAccesser, 
             }
         }
     }
-    // The original passes the accesser here too (r4); the interface declares no argument.
-    m_mediator->postUpdateEnergy();
+    m_mediator->postUpdateEnergy(moduleAccesser);
 }
 
 // The kinetic mode a status asks for sits in a signed byte of the status data.

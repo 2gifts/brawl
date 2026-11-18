@@ -62,18 +62,22 @@ static const muFigureGetModel sModels[] = {
     {"FigureGet0012_TopN", 3, 103, 0x21},
 };
 
+static inline void loadFigList(muFigureGetTask* task) {
+    task->m_provider->rewind();
+    task->m_figNum = task->m_provider->getCount();
+    for (int i = 0; i < task->m_figNum; i++) {
+        task->m_figIds[i] = task->m_provider->getFigId();
+        task->m_provider->next();
+    }
+}
+
 muFigureGetTask* muFigureGetTask::create(const muFigureGetTaskParam* param) {
     muFigureGetTask* task = new (Heaps::MenuInstance) muFigureGetTask();
     task->m_unk44 = param->m_unk00;
     task->m_provider = param->m_provider;
     task->m_figId = param->m_figId;
     if (task->m_provider != NULL) {
-        task->m_provider->rewind();
-        task->m_figNum = task->m_provider->getCount();
-        for (int i = 0; i < task->m_figNum; i++) {
-            task->m_figIds[i] = task->m_provider->getFigId();
-            task->m_provider->next();
-        }
+        loadFigList(task);
     }
     task->m_figMng = NULL;
     return task;
