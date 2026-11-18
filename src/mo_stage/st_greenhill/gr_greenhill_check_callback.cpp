@@ -15,11 +15,7 @@ void grGreenhillCheck::updateCallBack(float deltaFrame) {
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
             if (unk164 != NULL) {
-                grNodeCallbackData* callbackData = calcWorldCallBack->m_nodeCallbackDatas;
-                Vec3f* marker = &unk164[m_order[0]];
-                callbackData->m_pos.m_x = marker->m_x;
-                callbackData->m_pos.m_y = marker->m_y;
-                callbackData->m_pos.m_z = marker->m_z;
+                calcWorldCallBack->m_nodeCallbackDatas[0].m_pos = unk164[m_order[0]];
             }
         }
     }

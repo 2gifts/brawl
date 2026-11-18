@@ -373,8 +373,9 @@ void Ground::updateG3dProcCalcWorldForce() {
 void Ground::processUpdate() {
     g_ecMgr->pushsetCurrentGroup(0x2000000);
     if (!m_isPauseAnim) {
-        update(g_stGameFrame.m_frameDelta * g_GameGlobal->m_stageData->m_motionRatio *
-               g_GameGlobal->m_stageData->m_motionSubRatio);
+        float delta = g_stGameFrame.m_frameDelta;
+        float ratio = delta * g_GameGlobal->m_stageData->m_motionRatio;
+        update(ratio * g_GameGlobal->m_stageData->m_motionSubRatio);
     }
     g_ecMgr->popCurrentGroup();
     if (g_Stage->unkAC) {
