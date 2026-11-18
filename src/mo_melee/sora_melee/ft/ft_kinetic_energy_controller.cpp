@@ -156,7 +156,7 @@ void ftKineticEnergyController::resetEnergy(int mode, Vec2f* speed, Vec3f*, soMo
     case 2:
     case 3:
         if (mode != 1) {
-            Vec2f v(getSpeed().m_y + getSpeed().m_x, 0.0f);
+            Vec2f v(getSpeed().m_x + getSpeed().m_y, 0.0f);
             v = soKineticUtility::limitSpeed(&v, &Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xbd5, 0), -1.0f));
             m_speed = v;
         }
@@ -176,7 +176,7 @@ void ftKineticEnergyController::resetEnergy(int mode, Vec2f* speed, Vec3f*, soMo
         float* param = (float*)soValueAccesser::getConstantIndefinite(moduleAccesser, 0xa80a, 0);
         if (param != 0) {
             float a = soValueAccesser::getConstantFloat(moduleAccesser, 0xbd5, 0);
-            Vec2f v(getSpeed().m_y + getSpeed().m_x, 0.0f);
+            Vec2f v(getSpeed().m_x + getSpeed().m_y, 0.0f);
             v = soKineticUtility::limitSpeed(&v, &Vec2f(a * param[3], -1.0f));
             m_speed = v;
             m_speedTarget = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xbd5, 0), -1.0f);
@@ -273,9 +273,7 @@ void ftKineticEnergyController::resetEnergy(int mode, Vec2f* speed, Vec3f*, soMo
         m_unk48 = 0.2f;
         break;
     case 9: {
-        float sx = getSpeed().m_x;
-        float c = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa7, 0);
-        m_speed = Vec2f(sx * c, 0.0f);
+        m_speed = Vec2f(getSpeed().m_x * soValueAccesser::getConstantFloat(moduleAccesser, 0xfa7, 0), 0.0f);
         float a = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa9, 0);
         float b = soValueAccesser::getConstantFloat(moduleAccesser, 0xbd5, 0);
         m_speedTarget = Vec2f(b * a, -1.0f);
@@ -287,18 +285,22 @@ void ftKineticEnergyController::resetEnergy(int mode, Vec2f* speed, Vec3f*, soMo
     }
     case 13: {
         float scale = moduleAccesser->getPostureModule().getScale();
-        float targetX = scale * soValueAccesser::getConstantFloat(moduleAccesser, 0xbf5, 0);
+        float c = soValueAccesser::getConstantFloat(moduleAccesser, 0xbf5, 0);
+        float targetX = c * scale;
         scale = moduleAccesser->getPostureModule().getScale();
-        float limitX = scale * soValueAccesser::getConstantFloat(moduleAccesser, 0xbc2, 0);
+        c = soValueAccesser::getConstantFloat(moduleAccesser, 0xbc2, 0);
+        float limitX = c * scale;
         float a = soValueAccesser::getConstantFloat(moduleAccesser, 0xbbc, 0);
         float b = soValueAccesser::getConstantFloat(moduleAccesser, 0xc38, 0);
         m_brake = Vec2f(a * b, 0.0f);
         m_speedLimit = Vec2f(limitX, 0.0f);
         m_speedTarget = Vec2f(targetX, -1.0f);
         scale = moduleAccesser->getPostureModule().getScale();
-        m_accelMul = scale * soValueAccesser::getConstantFloat(moduleAccesser, 0xbf3, 0);
+        c = soValueAccesser::getConstantFloat(moduleAccesser, 0xbf3, 0);
+        m_accelMul = c * scale;
         scale = moduleAccesser->getPostureModule().getScale();
-        m_unk40 = scale * soValueAccesser::getConstantFloat(moduleAccesser, 0xbf4, 0);
+        c = soValueAccesser::getConstantFloat(moduleAccesser, 0xbf4, 0);
+        m_unk40 = c * scale;
         break;
     }
     case 15:
@@ -310,12 +312,13 @@ void ftKineticEnergyController::resetEnergy(int mode, Vec2f* speed, Vec3f*, soMo
         m_brake = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xc15, 0), 0.0f);
         float a = soValueAccesser::getConstantFloat(moduleAccesser, 0xd1f, 0);
         float b = soValueAccesser::getConstantFloat(moduleAccesser, 0xc13, 0);
-        m_unk40 = 0.0f;
         m_accelMul = b * a;
+        m_unk40 = 0.0f;
         break;
     }
     case 17: {
-        m_speed = soKineticUtility::projectionGroundSpeed(&getSpeed(), moduleAccesser);
+        Vec2f projected = soKineticUtility::projectionGroundSpeed(&getSpeed(), moduleAccesser);
+        m_speed = projected;
         break;
     }
     case 14:
