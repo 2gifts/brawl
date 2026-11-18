@@ -128,6 +128,13 @@ float Vec2f::lengthSq() {
 }
 
 
+// The normals share one slot: they are assigned with an inline float-wise copy, while
+// initStatus calls the out-of-line Vec2f assignment.
+static inline void setVec(Vec2f& d, const Vec2f& s) {
+    d.m_x = s.m_x;
+    d.m_y = s.m_y;
+}
+
 void ftSheikStatusUniqProcessSpecialHiMove::execFixPosCounter(
     soModuleAccesser* moduleAccesser) {
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
@@ -146,14 +153,15 @@ void ftSheikStatusUniqProcessSpecialHiMove::execFixPosCounter(
 
     s32 extraAngle = *reinterpret_cast<const s32*>(params + 0x24);
     float maxAngle = (static_cast<float>(extraAngle) + 90.0f) * 0.017453292f;
+    Vec2f normal;
     if (ground.isTouch(static_cast<grCollStatus::TouchMask>(1), 0)) {
-        Vec2f normal = ground.getTouchNormal(1, 0);
+        setVec(normal, ground.getTouchNormal(1, 0));
         if (speed.mtVecAngle(normal) > maxAngle) {
             work.onFlag(0x22000012);
         }
     }
     if (ground.isTouch(static_cast<grCollStatus::TouchMask>(4), 0)) {
-        Vec2f normal = ground.getTouchNormal(4, 0);
+        setVec(normal, ground.getTouchNormal(4, 0));
         if (speed.mtVecAngle(normal) > maxAngle) {
             work.onFlag(0x22000012);
         }
@@ -161,7 +169,7 @@ void ftSheikStatusUniqProcessSpecialHiMove::execFixPosCounter(
     // HYPOTHESIS: the two mask-4 probes represent distinct contact checks;
     // their apparent duplicate arguments are present in the native calls.
     if (ground.isTouch(static_cast<grCollStatus::TouchMask>(4), 0)) {
-        Vec2f normal = ground.getTouchNormal(4, 0);
+        setVec(normal, ground.getTouchNormal(4, 0));
         if (speed.mtVecAngle(normal) > maxAngle) {
             work.onFlag(0x22000012);
         }
