@@ -99,8 +99,9 @@ void muProcCount::initMsg() {
     m_msg->allocMsgBuf(Msg_Buf, Msg_Count);
     m_msg->setMsgData(m_msgData);
     u32 line = 0;
+    u32 valueLine;
     for (int i = 0; i < Rows; i++) {
-        u32 valueLine = line + 1;
+        valueLine = line + 1;
         m_msg->attachScnMdlSimple(line, reinterpret_cast<nw4r::g3d::ScnMdlSimple*>(m_objs[Obj_Row + i]->m_sceneModel), 0, 0.0625f);
         m_msg->setAlignMode(line, MuMsg::Align_Left);
         m_msg->setWScale(line, 0.8f);

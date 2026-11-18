@@ -313,7 +313,7 @@ void grDxGreensBlockPos::setAttack(u8 column, u8 row) {
 void grDxGreensBlockPos::onDamage(int index, soDamage* damage, soDamageAttackerInfo* attackerInfo) {
     fn_27_26399C(m_yakumono);
     disableHit(index, 0);
-    int column;
+    u8 column;
     u8 row;
     if (index < 5) {
         column = 0;
@@ -334,21 +334,26 @@ void grDxGreensBlockPos::onDamage(int index, soDamage* damage, soDamageAttackerI
         column = 5;
         row = index - 25;
     }
+    stDxGreensBlockData* block;
     for (u8 i = 0; i < 5; i++) {
-        stDxGreensBlockData* block = &m_blockData[i + column * 5];
-        if (block->m_index == row && block->m_state == 2) {
-            block->m_state = 4;
-            if (block->m_hard == 1) {
-                setAttack(column, row);
-                Vec3f offset(0.0f, 0.0f, 0.0f);
-                cmReqQuake(cmQuake::Amplitude_L, &offset);
-                g_ecMgr->setEffect(static_cast<EfID>(0x5E0003), &block->m_posTgt);
-                g_sndSystem->playSE(SndID(0x50), 0, 0, 0, -1);
-            } else {
-                Vec3f offset(0.0f, 0.0f, 0.0f);
-                cmReqQuake(cmQuake::Amplitude_S, &offset);
-                g_ecMgr->setEffect(static_cast<EfID>(0x5E0004), &block->m_posTgt);
-                g_sndSystem->playSE(SndID(0x1DBA), 0, 0, 0, -1);
+        block = &m_blockData[i + column * 5];
+        if (block->m_index == row) {
+            switch (block->m_state) {
+            case 2:
+                block->m_state = 4;
+                if (block->m_hard == 1) {
+                    setAttack(column, row);
+                    Vec3f offset(0.0f, 0.0f, 0.0f);
+                    cmReqQuake(cmQuake::Amplitude_L, &offset);
+                    g_ecMgr->setEffect(static_cast<EfID>(0x5E0003), &block->m_posTgt);
+                    g_sndSystem->playSE(SndID(0x50), 0, 0, 0, -1);
+                } else {
+                    Vec3f offset(0.0f, 0.0f, 0.0f);
+                    cmReqQuake(cmQuake::Amplitude_S, &offset);
+                    g_ecMgr->setEffect(static_cast<EfID>(0x5E0004), &block->m_posTgt);
+                    g_sndSystem->playSE(SndID(0x1DBA), 0, 0, 0, -1);
+                }
+                break;
             }
         }
     }

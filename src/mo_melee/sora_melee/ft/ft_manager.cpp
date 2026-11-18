@@ -1231,14 +1231,13 @@ bool ftManager::isDispLoupeArrow(int entryId, int instanceIndex) const {
 
 // How far an entry is behind the best other entry: by stock in stock matches, by points (KOs minus falls, suicides not counted) otherwise.
 int ftManager::getBeatPointDiffFromTop(int entryId) const {
-    int top;
-    int own;
     if (m_gameRule == 1) {
-        top = 0;
-        own = 0;
+        int top = 0;
+        int own = 0;
         int count = getEntries(this).size();
+        ftEntry* entry;
         for (int i = 0; i < count; i++) {
-            ftEntry* entry = getEntries(this).at(i);
+            entry = getEntries(this).at(i);
             int stock = entry->m_owner->getStockCount();
             if (entryId != entry->m_entryId) {
                 if (top < stock) {
@@ -1250,12 +1249,14 @@ int ftManager::getBeatPointDiffFromTop(int entryId) const {
         }
         return top - own;
     }
-    top = 0;
-    own = 0;
+    ftEntry* entry;
+    ftOwner* owner;
+    int top = 0;
+    int own = 0;
     int count = getEntries(this).size();
     for (int i = 0; i < count; i++) {
-        ftEntry* entry = getEntries(this).at(i);
-        ftOwner* owner = entry->m_owner;
+        entry = getEntries(this).at(i);
+        owner = entry->m_owner;
         int lost = owner->getDeadCount() - static_cast<u16>(owner->getSuicideCount());
         int score = entry->m_owner->getBeatCountTotal() - lost;
         if (entryId != entry->m_entryId) {

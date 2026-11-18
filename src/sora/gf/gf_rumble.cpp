@@ -48,8 +48,9 @@ void gfRumble::_lbInitRumble(const char* symbol) {
     void* image = archive.getData(Data_Type_Misc, 0, &size, 0xFFFE);
     _HSD_ArchiveSetup(&m_gcArchive, image, size);
     u32 count = m_gcArchive.publicCount;
+    gfRumblePublic* symbols;
     for (u32 i = 0; i < count; ++i) {
-        gfRumblePublic* symbols = m_gcArchive.publicSymbols;
+        symbols = m_gcArchive.publicSymbols;
         if (strcmp(m_gcArchive.strings + symbols[i].nameOffset, symbol) == 0) {
             m_gcPatterns = reinterpret_cast<gfRumblePattern*>(m_gcArchive.data + symbols[i].dataOffset);
             break;

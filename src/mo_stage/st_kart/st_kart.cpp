@@ -133,9 +133,10 @@ void stKart::createObjKart() {
         if (data->m_kartNum > 8) {
             data->m_kartNum = 8;
         }
+        u8 team;
         u8 kartNum = data->m_kartNum;
         s16 mdlIndex = 1;
-        for (u8 team = 0; team != kartNum; team++) {
+        for (team = 0; team != kartNum; team++) {
             createObjKart1(team, mdlIndex);
             createObjAttack(team, 0x28);
             createObjIcon(team, (s16)(mdlIndex + 10));

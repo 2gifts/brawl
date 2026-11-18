@@ -372,8 +372,9 @@ void stGW::createObjFireSub() {
 
 // The twenty steps (places where the fire man may stand) of the fire scene.
 void stGW::createObjFireStep() {
-    for (int i = 0; i < 20; i++) {
-        grGWStep* ground = grGWStep::create(0x25, "_FIRE_STEP", "grGWStepFire");
+    grGWStep* ground;
+    for (u32 i = 0; i != 20; i++) {
+        ground = grGWStep::create(0x25, "_FIRE_STEP", "grGWStepFire");
         if (ground == NULL) {
             break;
         }
