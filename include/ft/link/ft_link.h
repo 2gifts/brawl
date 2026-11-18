@@ -11,15 +11,7 @@ class wnLinkBowArrow;
 class wnSimple;
 class wnLinkHookshot;
 
-// The activator of the arrow lives in the transactor of sora_melee (a singleton).
-// HYPOTHESIS: the arguments of activeArticle2 (the article, the fighter, the effect resource id of the fighter and the facing).
-class ftLinkTransactor {
-    u32 m_unk4;
-public:
-    ftLinkTransactor();
-    virtual ~ftLinkTransactor();
-    bool activeArticle2(wnLinkBowArrow* weapon, soModuleAccesser* acc, u32 etcResId, float lr);
-};
+#include <ft/link/ft_link_transactor.h>
 
 ////////////////////////////////////////
 // Link Build Configuration

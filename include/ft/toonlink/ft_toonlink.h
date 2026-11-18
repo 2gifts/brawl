@@ -12,19 +12,7 @@ class wnToonLinkBow;
 class wnSimple;
 class wnToonLinkHookShot;
 
-// The activator of the arrow lives in the transactor of sora_melee (a singleton).
-// HYPOTHESIS: the arguments of activeArticle2 (the article, the fighter, the effect resource id of the fighter and the facing).
-class ftToonLinkTransactor {
-    u32 m_unk4;
-public:
-    ftToonLinkTransactor();
-    virtual ~ftToonLinkTransactor();
-    // The bow activator and the arrow shooter (map: ftToonLinkTransactor__activeArticle1, __shootArticle1).
-    // HYPOTHESIS: parameter types, from the callers in ft_toonlink.cpp.
-    bool activeArticle1(wnToonLinkBow* weapon, soModuleAccesser* acc, u32 etcResId);
-    bool activeArticle2(wnToonLinkBowArrow* weapon, soModuleAccesser* acc, u32 etcResId, float lr);
-    bool shootArticle1(wnToonLinkBowArrow* weapon, soModuleAccesser* acc);
-};
+#include <ft/toonlink/ft_toonlink_transactor.h>
 
 ////////////////////////////////////////
 // ToonLink Build Configuration
