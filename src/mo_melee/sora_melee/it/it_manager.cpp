@@ -1059,8 +1059,9 @@ itGenSheetKind itManager::getRandBasicItemSheet() {
 // terminator entry. Entries whose kind is switched off in the item switch are skipped.
 float itManager::getPerBase(itGenParam* param, ItemSwitch* itemSwitch) {
     float total = 0.0f;
-    u32 off = 0;
-    for (u32 i = 0; i < param->m_numEntries; off += 0x10, i++) {
+    u32 off;
+    u32 i;
+    for (i = 0, off = 0; i < param->m_numEntries; off += 0x10, i++) {
         itGenParam::Entry* entry = (itGenParam::Entry*)((u8*)param->m_entries + off);
         int kind = entry->m_kind;
         if (kind == -1) {
