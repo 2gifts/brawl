@@ -1128,7 +1128,7 @@ config.libs = [
             Object(Matching, "RVL_SDK/os/OSLink.c"),
             Object(Matching, "RVL_SDK/os/OSMessage.c"),
             Object(Matching, "RVL_SDK/os/OSMutex.c"),
-            Object(NonMatching, "RVL_SDK/os/OSMutex_part2.c"),
+            Object(Matching, "RVL_SDK/os/OSMutex_part2.c"),
             Object(Matching, "RVL_SDK/os/OSReboot.c"),
             Object(Matching, "RVL_SDK/os/OSRtc.c"),
             Object(Matching, "RVL_SDK/os/OSSync.c"),
@@ -1148,7 +1148,7 @@ config.libs = [
         "cflags": cflags_sib_runtime,
         "host": False,
         "objects": [
-            Object(NonMatching, "Runtime.PPCEABI.H/__start.c"),
+            Object(Matching, "Runtime.PPCEABI.H/__start.c"),
             Object(Matching, "Runtime.PPCEABI.H/__mem.c"),
             Object(Matching, "Runtime.PPCEABI.H/__va_arg.c"),
             Object(Matching, "Runtime.PPCEABI.H/global_destructor_chain.c"),
