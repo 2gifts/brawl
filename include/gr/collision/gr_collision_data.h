@@ -48,9 +48,9 @@ public:
     };
 
     u16 m_vtxLen;
-    short m_lineLen;
-    short m_jointLen;
-    short m_unk1;
+    u16 m_lineLen;
+    u16 m_jointLen;
+    u16 m_unk1;
     VtxData* m_vtxDatas;
     LineData* m_lineDatas;
     JointData* m_jointDatas;
