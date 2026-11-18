@@ -289,11 +289,11 @@ void muWifiCnctWndTask::mainStepAppearInit(muWifiCnctWndTask* task) {
     if (task->m_mode == 0) {
         anim = 0;
     }
-    MuObject* icon = task->m_objects[Obj_Icon];
-    icon->changeAnimN(anim, 0x18, false, false);
-    icon->setFrame(0.0f);
-    icon->m_modelAnim->setUpdateRate(1.0f);
-    MuObject* wnd = task->m_objects[Obj_Wnd];
+    MuObject* wnd = task->m_objects[Obj_Icon];
+    wnd->changeAnimN(anim, 0x18, false, false);
+    wnd->setFrame(0.0f);
+    wnd->m_modelAnim->setUpdateRate(1.0f);
+    wnd = task->m_objects[Obj_Wnd];
     wnd->setFrameVisible(1.0f);
     task->m_msg->printIndex(2, 0x11);
     task->m_msg->printIndex(3, 0x12);
@@ -509,13 +509,13 @@ void muWifiCnctWndTask::mainStepDoneInit(muWifiCnctWndTask* task) {
 // the first connection the name entry comes next.
 int muWifiCnctWndTask::mainStepDoneMain(muWifiCnctWndTask* task) {
     bool timeUp = false;
+    bool canClose;
     bool destroyInterface = false;
     if (task->m_result == Result_Done && !task->m_isNewUser && !task->m_hasDelivery && --task->m_timer <= 0) {
         timeUp = true;
     }
     gfPadStatus pad;
     g_gfPadSystem->getSysPadStatus(0xF0, &pad);
-    bool canClose;
     if (task->m_mode == 1) {
         if (task->m_recorder == NULL) {
             canClose = true;

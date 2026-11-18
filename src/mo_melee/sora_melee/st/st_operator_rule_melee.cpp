@@ -139,12 +139,12 @@ void stOperatorRuleMelee::calcHighScore() {
 void stOperatorRuleMelee::networkWriteRanking() {
     if (*(reinterpret_cast<u8*>(this) + 0x224) != 0) {
         u8* rank = reinterpret_cast<u8*>(g_muWifiInterfaceTask) + 0xFDF;
-        for (int i = 0; i < m_numPlayers; i++, rank++) {
+        for (int i = 0; i < m_numPlayers; i++) {
             gmPlayerInitData* player = &m_condition->m_playersInitData[i];
             if (player->m_state != 3) {
                 int playerNo = player->m_playerNo;
                 if (playerNo >= 0 && playerNo < 4) {
-                    *rank = m_resultInfo->m_playersResultInfo[playerNo].m_unkF;
+                    rank[i] = m_resultInfo->m_playersResultInfo[playerNo].m_unkF;
                 }
             }
         }

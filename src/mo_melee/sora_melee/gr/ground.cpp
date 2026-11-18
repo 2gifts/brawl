@@ -284,9 +284,8 @@ void Ground::unloadData() {
     }
     if (m_modelAnims != NULL) {
         u32 numAnims = m_modelAnimNum;
-        gfModelAnimation* modelAnim;
         for (u32 i = 0; i != numAnims; i++) {
-            modelAnim = m_modelAnims[i];
+            gfModelAnimation* modelAnim = m_modelAnims[i];
             if (modelAnim->m_anmObjChrRes != NULL) {
                 modelAnim->m_anmObjChrRes->Destroy();
             }
@@ -305,7 +304,7 @@ void Ground::unloadData() {
             if (modelAnim->m_anmObjShpRes != NULL) {
                 modelAnim->m_anmObjShpRes->Destroy();
             }
-            if (modelAnim->m_resFile.ptr() != NULL && modelAnim->_spacer[0]) {
+            if (modelAnim->m_resFile.ptr() != NULL && (u8)modelAnim->_spacer[0] != 0) {
                 gfHeapManager::free(modelAnim->m_resFile.ptr());
                 modelAnim->m_resFile = nw4r::g3d::ResFile();
             }
