@@ -266,8 +266,7 @@ void Weapon::updatePosture(bool applyKinetic) {
         float slowRate = acc->getSlowModule().getRate();
         Vec3fScale(&rotation, &rotation, slowRate);
         Vec3f next;
-        const Vec3f& current = acc->getPostureModule().getRot(0);
-        Vec3fAdd(&next, &current, &rotation);
+        Vec3fAdd(&next, &acc->getPostureModule().getRot(0), &rotation);
         acc->getPostureModule().setRot(&next, 0);
     }
     Vec3f offset = acc->getKineticModule().getSumSpeed3f(soKineticEnergy::AttributeFlag(8));

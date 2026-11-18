@@ -143,10 +143,11 @@ void muTitleTask::processDefault() {
 // Gives the alpha to the materials of the background, and to its vertex colors.
 void muTitleTask::renderPre() {
     if (m_state != State_Idle && m_state != State_End && m_state != 19) {
+        u32 i;
         float alpha = m_alpha;
         nw4r::g3d::ResMdl* mdl = &m_background->m_resMdl;
         u32 count = GetResMatNumEntries__Q34nw4r3g3d6ResMdlCFv(mdl);
-        for (u32 i = 0; i < count; i++) {
+        for (i = 0; i < count; i++) {
             nw4r::g3d::ScnMdl* scnMdl = m_background->m_scnMdl;
             nw4r::g3d::ResMat mat = GetResMat__Q34nw4r3g3d6ResMdlCFi(mdl, i);
             nw4r::g3d::ScnMdl::CopiedMatAccess access(scnMdl, mat.ptr()->m_id);
