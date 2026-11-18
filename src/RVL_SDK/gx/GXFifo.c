@@ -278,17 +278,16 @@ void fn_801EEE74(void) {
 
     if (CPUFifoReady) {
         reg = GX_PI_REG_READ_U32(0x14);
-        CPUFifo.wrap = (reg >> 29) & 1;
-        CPUFifo.wrPtr = (void*)((reg & 0x1FFFFFE0) + 0x80000000);
+        CPUFifo.wrPtr = OSPhysicalToCached(reg & 0x1FFFFFE0);
+        CPUFifo.wrap = (GXBool)((reg & 0x20000000) == 0x20000000);
     }
 
     if (GPFifoReady) {
         hi = GX_CP_REG_READ_U16(0x1D);
-        lo = GX_CP_REG_READ_U16(0x1C);
-        GPFifo.rdPtr = (void*)(((hi << 16) | lo) + 0x80000000);
+        GPFifo.rdPtr = OSPhysicalToCached(GX_CP_REG_READ_U16(0x1C) | (hi << 16));
         hi = GX_CP_REG_READ_U16(0x19);
         lo = GX_CP_REG_READ_U16(0x18);
-        GPFifo.count = (hi << 16) | lo;
+        GPFifo.count = lo | (hi << 16);
     }
 
     if (CPGPLinked) {
