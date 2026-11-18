@@ -90,8 +90,8 @@ void muAdvTelopTask::processDefault() {
         if (static_cast<u32>(m_frame) + 1 < m_hold) {
             return;
         }
-        m_step = Step_FadeOut;
         m_alphaStep = -255.0f / static_cast<float>(m_fadeOut);
+        m_step = Step_FadeOut;
         return;
     case Step_FadeOut:
         m_alpha = m_alpha + m_alphaStep;
