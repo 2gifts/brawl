@@ -1,3 +1,4 @@
+#define MV_MOVIE_PLAYER_INTERNAL
 #include <mv/mv_THPPlayer.h>
 #include <mv/mv_THPVideoDecode.h>
 #include <mv/mv_movie_player.h>
