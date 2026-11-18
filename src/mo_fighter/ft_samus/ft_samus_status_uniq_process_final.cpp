@@ -125,7 +125,7 @@ void ftSamusStatusUniqProcessFinal::execStatus(soModuleAccesser* moduleAccesser)
             if (motionKind != currentMotion) {
                 motion.remove2ndAnimChr();
                 float frame = motion.getFrame();
-                motion.add2ndAnimChr(frame, motionKind, false, 1.0f);
+                motion.add2ndAnimChr(motionKind, false, frame, 1.0f);
                 work.setInt(motionKind, ftSamusWork::Final_AimMotion);
             }
             motion.setWeight(1.0f - 0.5f * absValue(angle / param->angleMax));

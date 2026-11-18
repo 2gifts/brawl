@@ -35,7 +35,7 @@ void ftStatusUniqProcessEscapeAirInheritJumpAerialMotion::initStatus(soModuleAcc
     motion.changeMotionRequest(&motionParam);
 
     if ((unsigned)(kind - 0x19) <= 1) {
-        motion.add2ndAnimChr(frame, kind, false, 1.0f);
+        motion.add2ndAnimChr(kind, false, frame, 1.0f);
         motion.setWeight(1.0f);
         moduleAccesser->getKineticModule().changeKinetic(0x4f, moduleAccesser);
     } else {

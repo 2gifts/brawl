@@ -62,7 +62,7 @@ public:
     virtual bool changeMotionRequest(soMotionChangeParam* changeParam);
     virtual void processFixPosition();
     virtual void processFixCamera();
-    virtual void add2ndAnimChr(float frame, int kind, bool, float rate);
+    virtual void add2ndAnimChr(int kind, bool, float frame, float rate);
     virtual void remove2ndAnimChr();
     virtual void set2ndRate(float rate);
     virtual float get2ndFrame();
@@ -242,7 +242,7 @@ public:
     virtual bool changeMotionRequest(soMotionChangeParam* changeParam);
     virtual void processFixPosition();
     virtual void processFixCamera();
-    virtual void add2ndAnimChr(float frame, int kind, bool, float rate);
+    virtual void add2ndAnimChr(int kind, bool, float frame, float rate);
     virtual void remove2ndAnimChr();
     virtual void set2ndRate(float rate);
     virtual float get2ndFrame();

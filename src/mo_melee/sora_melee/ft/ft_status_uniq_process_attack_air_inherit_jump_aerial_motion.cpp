@@ -72,7 +72,7 @@ void ftStatusUniqProcessAttackAirInheritJumpAerialMotion::initStatus(soModuleAcc
     param._15 = 0;
     motion.changeMotionRequest(&param);
     if (motionKind == 0x19 || motionKind == 0x1a) {
-        motion.add2ndAnimChr(frame, motionKind, false, 1.0f);
+        motion.add2ndAnimChr(motionKind, false, frame, 1.0f);
         motion.setWeight(1.0f);
         moduleAccesser->getKineticModule().changeKinetic(0x4f, moduleAccesser);
     } else {
