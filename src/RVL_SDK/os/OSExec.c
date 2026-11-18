@@ -1044,6 +1044,9 @@ static void fn_801DAF04(ESTitleId titleId, u32 argValue, char **argv) {
         OSPanic("OSExec.c", 2850, "");
     }
 
+    // TODO: readability pass after 100% match. These are OS_LAUNCH_ARG, OS_LAUNCH_ARG2 and
+    // OS_LAUNCH_APP_TYPE, but the volatile globals change codegen (zero is hoisted into a register
+    // before the base). Raw non-volatile stores match; use named non-volatile aliases instead.
     *(u32 *)0x8000318C = argValue;
     *(u32 *)0x80003190 = 0;
     *(u8 *)0x80003186 = appType;
