@@ -1501,17 +1501,10 @@ bool sndSystem::isVoice(u32 soundGroup, u32 sndID) {
             return false;
         }
         const u32* ids = lbl_80407858;
-        for (int i = 0; i < 11; i++) {
-            if (sndID == ids[0]) {
+        for (int i = 0; i < 33; i++) {
+            if (sndID == ids[i]) {
                 return true;
             }
-            if (sndID == ids[1]) {
-                return true;
-            }
-            if (sndID == ids[2]) {
-                return true;
-            }
-            ids += 3;
         }
     }
     return false;
@@ -1677,7 +1670,7 @@ const u32 lbl_80407728[76] = {
     0xA8D,
 };
 
-// lbl_80407858: sound ids (33, zero padded) that isVoice accepts for the groups 0x29 and 0x2A - 0x4B (read in threes).
+// lbl_80407858: sound ids (33, zero padded) that isVoice accepts for the groups 0x29 and 0x2A - 0x4B.
 extern const u32 lbl_80407858[34];
 const u32 lbl_80407858[34] = {
     0x1AA9, 0x1AAA, 0x1AB5, 0x1AC5, 0x1AC6, 0x1ACD, 0x1AD1, 0x1AD2, 0x1AD5, 0x1ADD, 0x1ADE, 0x1ADF,

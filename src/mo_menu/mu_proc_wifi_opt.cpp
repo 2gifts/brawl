@@ -375,10 +375,11 @@ void muProcOptWifi::notify_Error(int kind, int unk, int code) {
         msgNo = 11;
         break;
     }
+    bool permit = m_permit[Entry_Service];
     m_error = true;
     m_unk664 = Step_Error;
     u32 permitMsg = 5;
-    if (m_permit[Entry_Service]) {
+    if (permit) {
         permitMsg = 4;
     }
     m_msg->printIndex(3, permitMsg, NULL);
