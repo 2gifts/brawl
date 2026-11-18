@@ -628,8 +628,8 @@ void C_MTXLightPerspective(Mtx m, f32 fovY, f32 aspect, f32 scaleS, f32 scaleT, 
     f32 angle;
     f32 cot;
 
-    angle = fovY * mtx_half;
-    angle = angle * mtx_deg2rad;
+    angle = mtx_half * fovY;
+    angle = mtx_deg2rad * angle;
 
     cot = mtx_one / (f32)tan(angle);
 

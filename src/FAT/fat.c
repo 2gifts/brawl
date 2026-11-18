@@ -8877,7 +8877,7 @@ s32 VFiPFFAT16_WriteFATEntryPage(PF_VOLUME* p_vol, u32 cluster, u32 value, PF_CA
     if (p_vol == NULL) return 10;
     if (!(cluster >= 2 && cluster < p_vol->bpb.num_clusters + 2) && cluster != 0 && cluster != 1) return 14;
     offset = cluster * 2;
-    sector = (u16)(p_vol->bpb.active_FAT_sector + (offset >> p_vol->bpb.log2_bytes_per_sector));
+    sector = (u16)(p_vol->bpb.active_FAT_sector + (cluster * 2 >> p_vol->bpb.log2_bytes_per_sector));
     pos = (u16)(offset & (p_vol->bpb.bytes_per_sector - 1));
     if ((*pp_page)->sector > sector || (*pp_page)->sector + p_vol->cache.fat_buff_size <= sector) {
         err = VFiPFFAT_UpdateFATEntry(p_vol, *pp_page);
