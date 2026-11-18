@@ -254,11 +254,11 @@ bool ftDiddy::activeArticle2(wnDiddyPeanuts* weapon, soModuleAccesser* acc) {
     Vec3f direction(0.0f, offset.m_y, offset.m_x);
     Vec3f pos = acc->getModelModule().getNodeGlobalPosition(4, &direction, true, false);
     pos.m_z = acc->getGroundModule().getZ();
-    speed.rot(0.017453292f * (360.0f - acc->getWorkManageModule().getFloat(0x21000007)), &speed);
+    float angle = acc->getWorkManageModule().getFloat(0x21000007);
+    speed.rot(0.017453292f * (360.0f - angle), &speed);
     soResourceModule& resources = acc->getResourceModule();
     int founderTaskId = acc->getStageObject().m_taskId;
-    int team = acc->getTeamModule().getTeam()->getNo();
-    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), team, lr, &pos, &speed);
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), acc->getTeamModule().getTeam()->getNo(), lr, &pos, &speed);
     return false;
 }
 

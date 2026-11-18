@@ -617,20 +617,21 @@ bool ftNess::activeArticle2(wnNessPKStarStorm* weapon, soModuleAccesser* acc) {
 // Yo-Yo: the string is started with the resource id of the fighter; it is not shown while the fighter is in status 0x2d.
 bool ftNess::activeArticle3(wnNessYoyo* weapon, soModuleAccesser* acc) {
     Fighter& founder = dynamic_cast<Fighter&>(*acc->m_stageObject);
+    s32 taskId;
     bool flag = true;
     if (acc->getStatusModule().getStatusKind() == 0x2d) {
         flag = false;
     }
     soResourceModule& resources = acc->getResourceModule();
-    s32 taskId = founder.m_taskId;
-    s32 team = founder.getOwner()->getTeam();
-    weapon->activate(taskId, resources.getResourceIdAccesser()->getEtcResId(), team, flag);
+    taskId = founder.m_taskId;
+    weapon->activate(taskId, resources.getResourceIdAccesser()->getEtcResId(), founder.getOwner()->getTeam(), flag);
     return true;
 }
 
 // Yo-Yo head: leaves from the hand node, facing the way of the fighter (mirrored in status 0x2d).
 bool ftNess::activeArticle4(wnNessYoyoHead* weapon, soModuleAccesser* acc) {
     Fighter& founder = dynamic_cast<Fighter&>(*acc->m_stageObject);
+    s32 taskId;
     bool flag = true;
     Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x42, false);
     float lr = acc->getPostureModule().getLr();
@@ -639,9 +640,8 @@ bool ftNess::activeArticle4(wnNessYoyoHead* weapon, soModuleAccesser* acc) {
         flag = false;
     }
     soResourceModule& resources = acc->getResourceModule();
-    s32 taskId = founder.m_taskId;
-    s32 team = founder.getOwner()->getTeam();
-    weapon->activate(taskId, resources.getResourceIdAccesser()->getEtcResId(), team, &pos, lr, flag);
+    taskId = founder.m_taskId;
+    weapon->activate(taskId, resources.getResourceIdAccesser()->getEtcResId(), founder.getOwner()->getTeam(), &pos, lr, flag);
     return true;
 }
 

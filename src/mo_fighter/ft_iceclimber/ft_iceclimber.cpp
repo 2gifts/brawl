@@ -944,12 +944,11 @@ void ftPopo::onDeadEnd() {
 
 // HYPOTHESIS: the rubber starts with the task id of the fighter, the effect resource, the team and the task id of the link 6 parent.
 bool ftPopo::activeArticle2(wnPopoRubber* weapon, soModuleAccesser* acc) {
+    int founderTaskId;
     int parentTaskId = acc->getLinkModule().getParentTaskId(6);
     soResourceModule& resources = acc->getResourceModule();
-    int founderTaskId = acc->getStageObject().m_taskId;
-    int team = acc->getTeamModule().getTeam()->getNo();
-    u32 resId = resources.getResourceIdAccesser()->getEtcResId();
-    weapon->activate(founderTaskId, resId, team, parentTaskId);
+    founderTaskId = acc->getStageObject().m_taskId;
+    weapon->activate(founderTaskId, resources.getResourceIdAccesser()->getEtcResId(), acc->getTeamModule().getTeam()->getNo(), parentTaskId);
     return true;
 }
 

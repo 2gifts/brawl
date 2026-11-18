@@ -621,17 +621,20 @@ bool ftLucas::activeArticle2(wnLucasPKStarStorm* weapon, soModuleAccesser* acc) 
 // HYPOTHESIS: names of the two flags; the statuses 0x34, 0x36 and 0x38 are the ones that carry the link.
 bool ftLucas::activeArticle3(wnLucasHimohebi* weapon, soModuleAccesser* acc) {
     Fighter& founder = dynamic_cast<Fighter&>(*acc->m_stageObject);
-    s32 status = acc->getStatusModule().getStatusKind();
-    s32 attach = status == 0x7f;
-    s32 linked = false;
+    s32 taskId;
+    s32 status;
+    s32 attach;
+    s32 linked;
+    status = acc->getStatusModule().getStatusKind();
+    attach = status == 0x7f;
+    linked = false;
     if ((u32)(status - 0x34) <= 4 && ((1 << (status - 0x34)) & 0x15)) {
         linked = true;
     }
     soResourceModule& resources = acc->getResourceModule();
-    s32 taskId = founder.m_taskId;
+    taskId = founder.m_taskId;
     float lr = acc->getPostureModule().getLr();
-    s32 team = founder.getOwner()->getTeam();
-    weapon->activate(taskId, resources.getResourceIdAccesser()->getEtcResId(), team, lr, attach, linked);
+    weapon->activate(taskId, resources.getResourceIdAccesser()->getEtcResId(), founder.getOwner()->getTeam(), lr, attach, linked);
     if (linked) {
         soLinkModule& link = acc->getLinkModule();
         if (link.link(3, weapon->getTaskId())) {

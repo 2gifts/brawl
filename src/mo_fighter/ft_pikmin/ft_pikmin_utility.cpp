@@ -277,9 +277,7 @@ bool ftPikminUtility::activeArticle1(wnPikminDolfin* article, soModuleAccesser* 
     Vec3f position = moduleAccesser->getPostureModule().getPos();
     soResourceModule& resources = moduleAccesser->getResourceModule();
     int founderTaskId = moduleAccesser->getStageObject().m_taskId;
-    int team = fighter.getOwner()->getTeam();
-    int resourceId = dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId();
-    article->activate(founderTaskId, resourceId, team, &position);
+    article->activate(founderTaskId, dynamic_cast<ftResourceIdAccesserImpl&>(*resources.getResourceIdAccesser()).getFinalResId(), fighter.getOwner()->getTeam(), &position);
     return true;
 }
 
