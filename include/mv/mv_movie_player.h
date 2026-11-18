@@ -12,6 +12,12 @@ class ScnMdl;
 // Shadows include/Brawl/Include/mv/mv_movie_player.h (adds the members that the shared header lacks).
 // The player of the THP movies. The callers allocate one byte for it (new (heap) mvMoviePlayer), the state of the
 // player lives in main.dol. The names are those of the map; the parameter types follow the register use of the callers.
+#ifndef MV_PLAYER_OPENED_T
+#define MV_PLAYER_OPENED_T bool
+#endif
+#ifndef MV_PLAYER_PAUSE_T
+#define MV_PLAYER_PAUSE_T bool
+#endif
 class mvMoviePlayer {
 public:
     mvMoviePlayer();
@@ -20,12 +26,7 @@ public:
     static mvMoviePlayer* getInstance();
     // HYPOTHESIS: the three numbers after the path (all callers pass 0, 0, 0).
     void openMovie(const char* path, int unk1, int unk2, int unk3);
-#ifdef MV_MOVIE_PLAYER_INTERNAL
-    // HYPOTHESIS: this unit returns the raw byte; other units see a bool.
-    u8 isOpened();
-#else
-    bool isOpened();
-#endif
+    MV_PLAYER_OPENED_T isOpened();
     void loadLastFrameInfo();
     bool isLoadedLastFrameInfo();
     void closeLastFrameInfo();
@@ -38,11 +39,7 @@ public:
     int drawFrame(int x, int y, int width, int height);     // plays a frame, returns the frame
     void play();
     void prepare(int unk);
-#ifdef MV_MOVIE_PLAYER_INTERNAL
-    s8 isPause() const;
-#else
-    bool isPause() const;
-#endif
+    MV_PLAYER_PAUSE_T isPause() const;
     void setPause();
     void resetPause();
     void setLastFrame();

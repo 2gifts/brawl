@@ -1,4 +1,5 @@
-#define MV_MOVIE_PLAYER_INTERNAL
+#define MV_PLAYER_OPENED_T u8
+#define MV_PLAYER_PAUSE_T s8
 #include <mv/mv_THPPlayer.h>
 #include <mv/mv_THPVideoDecode.h>
 #include <mv/mv_movie_player.h>
