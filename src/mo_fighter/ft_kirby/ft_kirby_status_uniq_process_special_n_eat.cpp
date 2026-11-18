@@ -174,7 +174,6 @@ void ftKirbyStatusUniqProcessSpecialNEat::initInhaleJump(soModuleAccesser* modul
 }
 
 // HYPOTHESIS: while the inhale is held the stick (work 0x21000006/7) moves Kirby up or down, or brakes him horizontally.
-// TODO(match): only f0/f1 differ: the original loads the 0.0 brake constant and the stick x in the other registers.
 void ftKirbyStatusUniqProcessSpecialNEat::execInhaleStick(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000017)) {
         Vec2f stick(moduleAccesser->getWorkManageModule().getFloat(0x21000006), moduleAccesser->getWorkManageModule().getFloat(0x21000007));
@@ -190,7 +189,8 @@ void ftKirbyStatusUniqProcessSpecialNEat::execInhaleStick(soModuleAccesser* modu
             if (moduleAccesser->getSituationModule().getKind() == 0) {
                 ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
                 Vec2f brake(0.0f, 0.0f);
-                float direction = stick.m_x < 0.0f ? -1 : 1;
+                float x = stick.m_x;
+                float direction = x < 0.0f ? -1 : 1;
                 float speed = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa4, 0);
                 brake.m_x = speed * direction;
                 stop.resetEnergy(0, &brake, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);

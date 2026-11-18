@@ -782,8 +782,9 @@ void ftNess::notifyEventCollisionAbsorber(soCollisionAttackModule* attackModule,
 // The absorbed hit heals: the amount and the side were stored by the absorber handler.
 bool ftNess::notifyEventCollisionAbsorberCheck() {
     soWorkManageModule& work = m_moduleAccesser->getWorkManageModule();
+    float side;
     float amount = work.getFloat(0x11000013);
-    float side = work.getFloat(0x11000014);
+    side = work.getFloat(0x11000014);
     work.setFloat(0.0f, 0x11000013);
     work.setFloat(0.0f, 0x11000014);
     if (amount > 0.0f) {
