@@ -239,7 +239,7 @@ bool wnDiddyBarrel::notifyEventCollisionAttackCheck(u32 flags) {
     float hitStop = work.getFloat(0x11000001);
     if (!(hitStop <= 0.0f)) {
         hitStop = work.getFloat(0x11000001);
-        setHitStop(hitStop, 1.0f, 0);
+        setHitStop(hitStop, 0, 1.0f);
     }
     return false;
 }

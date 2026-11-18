@@ -35,7 +35,7 @@ void wnGameWatchOctopus::notifyEventCollisionHit(float power,
 
     wnGameWatchOctopusLinkEventCollision event(0x839, power, true);
     moduleAccesser->getLinkModule().sendEventParents(3, event);
-    setHitStop(power, 1.0f, 1);
+    setHitStop(power, 1, 1.0f);
 }
 
 void wnGameWatchOctopus::notifyEventLink(soLinkEventArgs* eventInfo,

@@ -588,7 +588,7 @@ int Weapon::getOwnerDeactiveTreatType() {
     return wnInfo::getOwnerDeactiveTreatType(m_subKind);
 }
 
-void Weapon::setHitStop(float power, float minFrame, int allowSdi) {
+void Weapon::setHitStop(float power, int allowSdi, float minFrame) {
     int frames = soStopModuleImpl::calcHitStopFrame(power, 0.3846154f, 5.0f, minFrame, 30.0f);
     m_moduleAccesser->getStopModule().setHitStopFrame(frames, allowSdi);
 }

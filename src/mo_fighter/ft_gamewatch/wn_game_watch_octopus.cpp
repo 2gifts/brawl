@@ -106,7 +106,7 @@ bool wnGameWatchOctopus::notifyEventCollisionAttackCheck(u32) {
     if (power > 0.0f) {
         wnGameWatchOctopusLinkEventCollision event(0x839, power, false);
         m_moduleAccesser->getLinkModule().sendEventParents(3, event);
-        setHitStop(power, 1.0f, 0);
+        setHitStop(power, 0, 1.0f);
         m_moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x11000001);
     }
     return false;

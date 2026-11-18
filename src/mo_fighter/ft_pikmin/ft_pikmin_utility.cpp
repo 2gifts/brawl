@@ -102,6 +102,8 @@ int ftPikminUtility::getPikminOwnerCondition(soModuleAccesser* moduleAccesser, f
     }
     if ((float)fabs(speed) > 0.01f) {
         return 1;
+    } else if ((float)fabs(speed) <= 0.01f) {
+        return 0;
     }
     return 0;
 }

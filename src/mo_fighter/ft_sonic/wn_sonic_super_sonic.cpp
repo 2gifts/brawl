@@ -112,7 +112,7 @@ void wnSonicSuperSonic::notifyEventCollisionAttack(float power, const soCollisio
 bool wnSonicSuperSonic::notifyEventCollisionAttackCheck(u32 flags) {
     if ((flags & 7) != 0) {
         if (m_moduleAccesser->getWorkManageModule().getFloat(0x11000001) > 0.0f) {
-            setHitStop(m_moduleAccesser->getWorkManageModule().getFloat(0x11000001), 1.0f, 0);
+            setHitStop(m_moduleAccesser->getWorkManageModule().getFloat(0x11000001), 0, 1.0f);
             m_moduleAccesser->getControllerModule().setRumble(0xD, 0, false, -1);
         }
         return false;
