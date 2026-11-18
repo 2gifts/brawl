@@ -33,12 +33,18 @@ void ftDonkeyTransactor::processUpdate(soModuleAccesser* moduleAccesser) {
     if (charge >= chargeMax && !glowing) {
         int handle;
         if (moduleAccesser->getStageObject().soGetSubKind() == Fighter_Kirby) {
-            Vec3f offset(0.0f, 8.0f, 0.0f);
+            Vec3f offset;
             Vec3f rot(0.0f, 0.0f, 0.0f);
+            offset.m_x = 0.0f;
+            offset.m_y = 8.0f;
+            offset.m_z = 0.0f;
             handle = moduleAccesser->getEffectModule().reqFollow(static_cast<EfID>(0x1060003), 0x190, &offset, &rot, 1.0f, false, 0, 0, -1);
         } else {
-            Vec3f offset(0.0f, 0.0f, 0.0f);
+            Vec3f offset;
             Vec3f rot(0.0f, 0.0f, 0.0f);
+            offset.m_x = 0.0f;
+            offset.m_y = 0.0f;
+            offset.m_z = 0.0f;
             handle = moduleAccesser->getEffectModule().reqFollow(static_cast<EfID>(0x20004), 0x22, &offset, &rot, 1.0f, false, 0, 0, -1);
         }
         work.setInt(handle, 0x10000041);
