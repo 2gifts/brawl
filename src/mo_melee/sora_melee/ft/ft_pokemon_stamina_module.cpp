@@ -55,7 +55,8 @@ void ftPokemonStaminaModule::decStaminaAttack() {
 void ftPokemonStaminaModule::incStaminaDead() {
     if (g_ftPokemonStaminaSystem) {
         float max = unk10;
-        unkC = max - (max - unkC) * m_param->m_deadKeep;
+        float lost = max - unkC;
+        unkC = max - lost * m_param->m_deadKeep;
         if (unkC < 0.0f) {
             unkC = 0.0f;
         }

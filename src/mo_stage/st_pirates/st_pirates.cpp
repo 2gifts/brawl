@@ -581,16 +581,8 @@ void stPirates::update(float deltaFrame) {
 // The left/top and right/bottom limit of the camera.
 void stPirates::updateLimit(float deltaFrame) {
     CameraController* camera = CameraController::getInstance();
-    float minY = camera->unk160;
-    float minX = camera->unk158;
-    m_posLimit[0].m_x = minX;
-    m_posLimit[0].m_y = minY;
-    m_posLimit[0].m_z = 0.0f;
-    float maxY = camera->unk164;
-    float maxX = camera->unk15C;
-    m_posLimit[1].m_x = maxX;
-    m_posLimit[1].m_y = maxY;
-    m_posLimit[1].m_z = 0.0f;
+    m_posLimit[0].set(camera->unk158, camera->unk160, 0.0f);
+    m_posLimit[1].set(camera->unk15C, camera->unk164, 0.0f);
 }
 
 // The wind of the stage while it rains (the rain blows the fighters; the values are the ones the original sets).
