@@ -251,9 +251,10 @@ void muProcDiagram1p::updateDisp(bool arrows) {
         int stock = exchangeMuCharKindToMuStockchkind__6muMenuFiii(m_table->m_charas[column]);
         m_objs[Obj_Column + i]->setFrameTex(muMenu::exchangeGmCharacterKind2Something(stock) * 10 + 1);
     }
-    int row = m_row;
-    for (i = 0; i < RowNum && row < m_table->m_charaNum; i++, row++) {
-        updateDispLine(i, row, &m_table->m_rows[row]);
+    // MATCH-ONLY: the row loop reuses the column variable; a separate row local is colored differently.
+    column = m_row;
+    for (i = 0; i < RowNum && column < m_table->m_charaNum; i++, column++) {
+        updateDispLine(i, column, &m_table->m_rows[column]);
     }
     // BYTES: the arrows are tested here as in getRowArrowVisible/getColumnArrowVisible; calling them compiles to
     // other registers.

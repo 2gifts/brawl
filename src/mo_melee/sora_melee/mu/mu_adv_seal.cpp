@@ -326,8 +326,8 @@ void muAdvSealWinNotice::start(int line0, int line1, int line2, int select, u32 
         }
     }
     m_state = 1;
-    m_timer = 0;
     m_select = select;
+    m_timer = 0;
     m_cancelMask = cancelMask | 0x100;
     g_sndSystem->playSE(static_cast<SndID>(5), -1, 0, 0, -1);
 }

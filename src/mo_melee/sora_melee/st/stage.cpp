@@ -229,7 +229,8 @@ void Stage::processAnim() {
     // an FSelect clamp.
     if (m_motionRatioBlend.m_endFrame != 0.0f) {
         m_motionRatioBlend.m_frame += g_GameGlobal->getGameFrameDelta();
-        float t = clampRatio(m_motionRatioBlend.m_frame / m_motionRatioBlend.m_endFrame, 0.0f, 1.0f);
+        float t = m_motionRatioBlend.m_frame / m_motionRatioBlend.m_endFrame;
+        t = clampRatio(t, 0.0f, 1.0f);
         g_GameGlobal->m_stageData->m_motionRatio = m_motionRatioBlend.m_start + t * (m_motionRatioBlend.m_target - m_motionRatioBlend.m_start);
         if (1.0f == t) {
             m_motionRatioBlend.m_start = 0.0f;
@@ -240,7 +241,8 @@ void Stage::processAnim() {
     }
     if (m_motionSubRatioBlend.m_endFrame != 0.0f) {
         m_motionSubRatioBlend.m_frame += g_GameGlobal->getGameFrameDelta();
-        float t = clampRatio(m_motionSubRatioBlend.m_frame / m_motionSubRatioBlend.m_endFrame, 0.0f, 1.0f);
+        float t = m_motionSubRatioBlend.m_frame / m_motionSubRatioBlend.m_endFrame;
+        t = clampRatio(t, 0.0f, 1.0f);
         g_GameGlobal->m_stageData->m_motionSubRatio = m_motionSubRatioBlend.m_start + t * (m_motionSubRatioBlend.m_target - m_motionSubRatioBlend.m_start);
         if (1.0f == t) {
             m_motionSubRatioBlend.m_start = 0.0f;
