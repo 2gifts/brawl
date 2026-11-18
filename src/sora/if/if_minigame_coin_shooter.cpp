@@ -396,7 +396,8 @@ struct IfCoinShooterName {
         return name;
     }
     friend IfCoinShooterName operator+(IfCoinShooterName name, int no) {
-        sprintf(name.m_str + strlen(name.m_str), "%d", no);
+        char* end = name.m_str + strlen(name.m_str);
+        sprintf(end, "%d", no);
         return name;
     }
 };
@@ -584,9 +585,12 @@ void IfCoinShooterLabel::setPos(const Vec3f* position) {
 void IfCoinShooter::Number::set(int value) {
     IfCoinShooterName<33> pos("pos0");
     m_value = value;
-    int limit = 1;
-    u32 e = m_digits;
-    int base = 10;
+    int limit;
+    u32 e;
+    int base;
+    base = 10;
+    e = m_digits;
+    limit = 1;
     for (; e != 0; e >>= 1) {
         if (e & 1) {
             limit *= base;

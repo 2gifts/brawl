@@ -2065,12 +2065,12 @@ int muNameTask::mainStepNameEntryMain(muNameTask* task) {
             wchar_t wide[6];
             Message::utf8to16(wide, name);
             GameGlobal* global = g_GameGlobal;
-            int index = global->getNumName();
-            global->setName(index, wide, color);
-            task->addNameList(index);
+            result = global->getNumName();
+            global->setName(result, wide, color);
+            task->addNameList(result);
             task->m_playerNo = muMenuController::getAButtonPushedControllerID();
             task->updateAll();
-            task->m_resultNameNo = index;
+            task->m_resultNameNo = result;
             task->m_resultKind = Result_NewName;
             next = Step_NameEntryLeave;
         }

@@ -1249,11 +1249,11 @@ void IfPlayer::updateCoinScoreSub(u32 amount) {
         group->PushBack(obj->m_sceneModel, m_posNodeIds[digit]);
         amount /= 10;
     }
-    MuObject* counter = m_objects[24];
+    obj = m_objects[24];
     float digitCount = (float)digit;
-    counter->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
-    counter->setFrameNode(digitCount);
-    counter->calcMatrix();
+    obj->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
+    obj->setFrameNode(digitCount);
+    obj->calcMatrix();
     for (int i = 0; i < digit; i++) {
         m_objects[30 + i]->calcMatrix();
     }
