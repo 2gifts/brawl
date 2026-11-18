@@ -22,7 +22,7 @@ wnYoshiStar::wnYoshiStar(s32 articleId, const wnArticleBuildInfo& info, const wn
     Weapon::deactivate(false);
 }
 
-void wnYoshiStar::activate(int founderTaskId, int team, Vec3f* pos, float lr) {
+void wnYoshiStar::activate(int founderTaskId, int team, float lr, Vec3f* pos) {
     wnActivateDesc desc(founderTaskId, 0xFFFF, 0xFFFF, 0xFFFF, -1, -1, 0, 0, *pos, lr, team, 0, 2, 0x80, 0, 0x35F, 0);
     desc.flagsHigh = 1;
     desc.flagsMidHigh = 0;

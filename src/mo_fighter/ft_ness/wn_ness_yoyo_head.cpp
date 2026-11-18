@@ -55,7 +55,7 @@ wnNessYoyoHead::wnNessYoyoHead(s32 articleId, const wnArticleBuildInfo& info, co
     Weapon::deactivate(false);
 }
 
-void wnNessYoyoHead::activate(int founderTaskId, int kind, int team, Vec3f* pos, float lr, bool flag) {
+void wnNessYoyoHead::activate(int founderTaskId, int kind, int team, float lr, Vec3f* pos, bool flag) {
     wnActivateDesc desc(founderTaskId, kind, kind, kind, -1, -1, 1, 0, *pos, lr, team, 0, 2, 0x80, 0, 0x35f, 0);
     desc.flagsHigh = 1;
     desc.flagsMidHigh = 0;

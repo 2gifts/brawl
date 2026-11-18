@@ -211,7 +211,7 @@ bool ftYoshi::activeArticle(wnYoshiStar* article, soModuleAccesser* acc) {
     position.m_x += param->starOffsetX * direction;
     position.m_y += param->starOffsetY;
     int founderTaskId = acc->getStageObject().m_taskId;
-    article->activate(founderTaskId, fighter.getOwner()->getTeam(), &position, direction);
+    article->activate(founderTaskId, fighter.getOwner()->getTeam(), direction, &position);
     return true;
 }
 

@@ -39,6 +39,6 @@ public:
     virtual bool notifyEventAnimCmd(acAnimCmd*, soModuleAccesser*, int);
     // HYPOTHESIS: relative source ordering of lr. Native registers establish
     // founder r4, team r5, position r6, and facing f1 independently.
-    void activate(int founderTaskId, int team, Vec3f* pos, float lr);
+    void activate(int founderTaskId, int team, float lr, Vec3f* pos);
 };
 static_assert(sizeof(wnYoshiStar) == 0x1FDC, "Star article layout");

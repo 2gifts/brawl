@@ -38,7 +38,7 @@ class wnDiddyExplosion : public wnWeaponBuilder<wnDiddyExplosionModuleAccesserBu
 public:
     wnDiddyExplosion(s32 articleId, const wnArticleBuildInfo& info, const wnDiddyExplosionData* data);
     virtual ~wnDiddyExplosion();
-    void activate(int founderTaskId, int team, Vec3f* position, float lr);
+    void activate(int founderTaskId, int team, float lr, Vec3f* position);
     virtual void onDeactivate();
 };
 // The enclosing native instance holder places its next member immediately after this extent.

@@ -51,7 +51,7 @@ class wnDiddyExplosion : public Weapon {
 public:
     wnDiddyExplosion(s32 articleId, const wnArticleBuildInfo& info, const wnDiddyExplosionData* data);
     virtual ~wnDiddyExplosion();
-    void activate(int founderTaskId, int team, Vec3f* position, float lr);
+    void activate(int founderTaskId, int team, float lr, Vec3f* position);
 };
 static_assert(sizeof(wnDiddyExplosion) == 0x1F98, "wnDiddyExplosion layout is wrong!");
 

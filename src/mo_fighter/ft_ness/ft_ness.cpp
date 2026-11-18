@@ -641,7 +641,7 @@ bool ftNess::activeArticle4(wnNessYoyoHead* weapon, soModuleAccesser* acc) {
     }
     soResourceModule& resources = acc->getResourceModule();
     taskId = founder.m_taskId;
-    weapon->activate(taskId, resources.getResourceIdAccesser()->getEtcResId(), founder.getOwner()->getTeam(), &pos, lr, flag);
+    weapon->activate(taskId, resources.getResourceIdAccesser()->getEtcResId(), founder.getOwner()->getTeam(), lr, &pos, flag);
     return true;
 }
 

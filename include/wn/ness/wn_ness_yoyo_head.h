@@ -68,5 +68,5 @@ public:
     virtual void notifyEventLink(soLinkEventArgs* event, soModuleAccesser* acc, StageObject* sender, int unk4);
     virtual void notifyEventCollisionAttack(float power, const soCollisionLog* log, soModuleAccesser* acc);
     virtual bool notifyEventCollisionAttackCheck(u32 flags);
-    void activate(int founderTaskId, int kind, int team, Vec3f* pos, float lr, bool flag);
+    void activate(int founderTaskId, int kind, int team, float lr, Vec3f* pos, bool flag);
 };

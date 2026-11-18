@@ -994,7 +994,7 @@ __dt__175soStatusModuleBuilder<149wnStatusModuleBuildConfig<3,31soGeneralWorkBui
 __dt__55soGeneralWorkBuilder<31soGeneralWorkBuildConfig<4,6,1>>Fv = .text:0x00023554; // type:function size:0x60
 __dt__240soMotionModuleBuilder<214soMotionModuleBuildConfig<6,18soMotionModuleImpl,0,0,82soTransitionModuleBuildConfig<49soTypeList<14soIntToType<4>,18soTypeListNullType>>,73soMotionAnimObjCacheModuleBuildConfig<0,30soMotionAnimObjCacheModuleNull>>>Fv = .text:0x000235B4; // type:function size:0x78
 __dt__27wnNessYoyoHeadParamAccesserFv = .text:0x0002362C; // type:function size:0x60
-activate__14wnNessYoyoHeadFiiiP5Vec3ffb = .text:0x0002368C; // type:function size:0x16C
+activate__14wnNessYoyoHeadFiiifP5Vec3fb = .text:0x0002368C; // type:function size:0x16C
 notifyEventLink__14wnNessYoyoHeadFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x000237F8; // type:function size:0x280
 notifyEventCollisionAttack__14wnNessYoyoHeadFfPC14soCollisionLogP16soModuleAccesser = .text:0x00023A78; // type:function size:0x168
 notifyEventCollisionAttackCheck__14wnNessYoyoHeadFUl = .text:0x00023BE0; // type:function size:0x10C

@@ -100,7 +100,7 @@ bool ftZelda::activeArticle(wnZeldaDein* weapon, soModuleAccesser* acc) {
     pos.m_y += offset->m_y;
     pos.m_z = 0.0f;
     int founderTaskId = acc->getStageObject().m_taskId;
-    weapon->activate(founderTaskId, fighter.getOwner()->getTeam(), &pos, acc->getPostureModule().getLr());
+    weapon->activate(founderTaskId, fighter.getOwner()->getTeam(), acc->getPostureModule().getLr(), &pos);
     return true;
 }
 

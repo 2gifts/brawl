@@ -887,7 +887,7 @@ __dt__98wnAnimCmdModuleSubBuilder<69wnAnimCmdModuleSubBuildConfigDefault<1,1,0,0
 __dt__68wnModuleAccesserBuilder<41wnDiddyExplosionModuleAccesserBuildConfig>Fv = .text:0x0001B3C4; // type:function size:0x70
 __dt__60wnWeaponBuilder<41wnDiddyExplosionModuleAccesserBuildConfig>Fv = .text:0x0001B434; // type:function size:0x88
 __dt__16wnDiddyExplosionFv = .text:0x0001B4BC; // type:function size:0x5C
-activate__16wnDiddyExplosionFiiP5Vec3ff = .text:0x0001B518; // type:function size:0x114
+activate__16wnDiddyExplosionFiifP5Vec3f = .text:0x0001B518; // type:function size:0x114
 onDeactivate__16wnDiddyExplosionFv = .text:0x0001B62C; // type:function size:0x4
 getMediateNum__21soKineticMediatorNullFv = .text:0x0001B630; // type:function size:0x8
 notifyEventChangeStatus__21soKineticMediatorNullFPvPvPvPv = .text:0x0001B638; // type:function size:0x4

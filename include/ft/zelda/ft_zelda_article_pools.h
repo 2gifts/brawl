@@ -104,7 +104,7 @@ class wnZeldaDein : public Weapon {
 public:
     wnZeldaDein(s32 articleId, const wnArticleBuildInfo& info, const wnZeldaDeinData* data);
     virtual ~wnZeldaDein();
-    void activate(int founderTaskId, int team, const Vec3f* position, float lr);
+    void activate(int founderTaskId, int team, float lr, const Vec3f* position);
 };
 static_assert(sizeof(wnZeldaDein) == 0x20D8, "wnZeldaDein layout is wrong!");
 

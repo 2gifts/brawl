@@ -65,7 +65,7 @@ public:
     virtual bool notifyEventAnimCmd(acAnimCmd*, soModuleAccesser*, int);
     // HYPOTHESIS: relative source ordering of lr. Native registers establish
     // founder r4, team r5, position r6, and facing f1 independently.
-    void activate(int founderTaskId, int team, Vec3f* pos, float lr);
+    void activate(int founderTaskId, int team, float lr, Vec3f* pos);
 };
 // HYPOTHESIS: the original reads the accesser tables at +0x1C/+0x34/+0x38, so the generic accesser extent (0x3C) applies; the
 // opaque declaration in wn_yoshi_star.h states 0x1FD0.

@@ -158,12 +158,11 @@ bool ftDiddy::activeArticle3(wnDiddyExplosion* weapon, soModuleAccesser* acc) {
     Vec3f offset;
     offset.m_x = 0.0f;
     offset.m_y = soValueAccesser::getConstantFloat(acc, 0xfd4, 0);
-    float lr = acc->getPostureModule().getLr();
-    offset.m_z = soValueAccesser::getConstantFloat(acc, 0xfd3, 0) * lr;
+    offset.m_z = soValueAccesser::getConstantFloat(acc, 0xfd3, 0) * acc->getPostureModule().getLr();
     Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0, &offset, true, false);
     int founderTaskId = acc->getStageObject().m_taskId;
-    weapon->activate(founderTaskId, acc->getTeamModule().getTeam()->getNo(), &pos, 0.0f);
-    return true;
+    weapon->activate(founderTaskId, acc->getTeamModule().getTeam()->getNo(), 0.0f, &pos);
+    return false;
 }
 
 // HYPOTHESIS: the work variable 0x20000002 says how the barrel is thrown: 0 along the angle 0x21000005 of the work, 1 with the
