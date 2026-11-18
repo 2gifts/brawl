@@ -61,7 +61,7 @@ wnKirbyNabe::wnKirbyNabe(s32 articleId, const wnArticleBuildInfo& info, const wn
     Weapon::deactivate(false);
 }
 
-void wnKirbyNabe::activate(int founderTaskId, int resourceId, const Vec3f* position, float lr, float unk0, float unk1) {
+void wnKirbyNabe::activate(int founderTaskId, int resourceId, const Vec3f* position, float lr, float unk0, float unk1, SituationKind kind) {
     wnActivateDesc desc;
     desc.founderTaskId = founderTaskId;
     desc.resourceId = resourceId;

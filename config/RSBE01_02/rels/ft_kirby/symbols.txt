@@ -1174,7 +1174,7 @@ __dt__175soStatusModuleBuilder<149wnStatusModuleBuildConfig<6,31soGeneralWorkBui
 __dt__123soArraySelectHolder<1,39soArrayVector<P19soStatusUniqProcess,6>,56soSingletonHolder<35soArrayNull<P19soStatusUniqProcess>>>Fv = .text:0x0002CC0C; // type:function size:0x5C
 __dt__55soGeneralWorkBuilder<31soGeneralWorkBuildConfig<1,2,4>>Fv = .text:0x0002CC68; // type:function size:0x60
 __dt__111soCollisionAttackModuleBuilder<77soCollisionAttackModuleBuildConfig<0,2,0,27soCollisionAttackModuleImpl,1,0,1>>Fv = .text:0x0002CCC8; // type:function size:0x84
-activate__11wnKirbyNabeFiiPC5Vec3ffff = .text:0x0002CD4C; // type:function size:0x220
+activate__11wnKirbyNabeFiiPC5Vec3ffff13SituationKind = .text:0x0002CD4C; // type:function size:0x220
 notifyEventLink__11wnKirbyNabeFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti = .text:0x0002CF6C; // type:function size:0x1B8
 notifyEventCollisionAttackCheck__11wnKirbyNabeFUl = .text:0x0002D124; // type:function size:0x8
 deactivateDescendantForce__55wnWeaponBuilder<36wnKirbyNabeModuleAccesserBuildConfig>Fv = .text:0x0002D12C; // type:function size:0xAC
