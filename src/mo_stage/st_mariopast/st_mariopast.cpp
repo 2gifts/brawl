@@ -27,6 +27,16 @@ static inline u32* mpCameraFlags() {
     return reinterpret_cast<u32*>(reinterpret_cast<u8*>(g_cmAIController) + 8);
 }
 
+// MATCH-ONLY: the same word seen as a bitfield with the top byte as its first field.
+struct stMarioPastCameraFlags {
+    u32 m_top : 8;
+    u32 m_rest : 24;
+};
+
+static inline stMarioPastCameraFlags* mpCameraFlagBits() {
+    return reinterpret_cast<stMarioPastCameraFlags*>(reinterpret_cast<u8*>(g_cmAIController) + 8);
+}
+
 stMarioPast* stMarioPast::create() {
     return new (Heaps::StageInstance) stMarioPast;
 }
@@ -36,7 +46,7 @@ stMarioPast::stMarioPast() : stMelee("stMarioPast", Stages::MarioPast) {
     memset(m_limit, 0, sizeof(m_limit));
     memset(&m_unk204, 0, sizeof(m_unk204));
     memset(m_posGimmick, 0, sizeof(m_posGimmick));
-    memset(&m_posPrev, 0, sizeof(m_posPrev));
+    memset(&m_posPrev, 0, sizeof(m_posPrev) + sizeof(m_scroll)); // m_posPrev and m_scroll together
     m_stage = 0;
     memset(&m_blockWork, 0, sizeof(m_blockWork));
     for (int i = 0; i < 2; i++) {
@@ -57,7 +67,7 @@ stMarioPast::stMarioPast() : stMelee("stMarioPast", Stages::MarioPast) {
     m_liftSpeed = 0.0f;
     m_eventPrev = 0.0f;
     if (g_cmAIController != NULL) {
-        *mpCameraFlags() = (*mpCameraFlags() & 0xFFFFFF) | 0x1000000;
+        mpCameraFlagBits()->m_top = 1;
     }
 }
 
