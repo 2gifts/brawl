@@ -17,6 +17,12 @@ struct grGimmickSpringEventArgs : soGimmickSpringEventArgs {
     grGimmickSpringEventArgs(Gimmick::EventKind kind, int sendID) : soGimmickSpringEventArgs(kind, sendID) {}
 };
 
+grGimmickSpring::grGimmickSpring(const char* taskName) :
+    grYakumono(taskName), m_276(0), m_state(State_Rest), m_animFrame(0.0f) { }
+
+grGimmickSpring::~grGimmickSpring() {
+}
+
 extern f32 lbl_27_rodata_4410;
 
 void grGimmickSpring::update(float deltaFrame) {
@@ -98,9 +104,6 @@ void grGimmickSpring::presentPosEvent() {
     m_yakumono->presentEventGimmick(&args, -1);
 }
 
-grGimmickSpring::~grGimmickSpring() {
-}
-
 void grGimmickSpring::presentShootEvent() {
     grGimmickSpringEventArgs args(Gimmick::Spring_Event_Shoot, 0);
     getTopNode(&args.m_topPos);
@@ -108,9 +111,6 @@ void grGimmickSpring::presentShootEvent() {
     args.m_rot = m_springData->m_rot;
     m_yakumono->presentEventGimmick(&args, -1);
 }
-
-grGimmickSpring::grGimmickSpring(const char* taskName) :
-    grYakumono(taskName), m_276(0), m_state(State_Rest), m_animFrame(0.0f) { }
 
 void grGimmickSpring::getTopNode(Vec3f* pos) {
     Ground::getNodePosition(pos, 0, "SpringTop");
@@ -147,8 +147,8 @@ void grGimmickSpring::startup(gfArchive* data, u32 unk1, gfSceneRoot::LayerType 
     grYakumono::setAreaGimmick(&m_areaData, &m_areaDataSet, &m_ykData, false);
     stTrigger* trigger = g_stTriggerMng->createTrigger(static_cast<Gimmick::AreaKind>(0x23), -1);
     trigger->setObserveYakumono(m_yakumono);
-    m_animOffLength = m_resFile.GetResAnmShp(static_cast<u32>(0)).ptr()->m_animLength;
-    m_animOnLength = m_resFile.GetResAnmShp(static_cast<u32>(1)).ptr()->m_animLength;
+    m_animOffLength = m_resFile.GetResAnmShp(0).ptr()->m_animLength;
+    m_animOnLength = m_resFile.GetResAnmShp(1).ptr()->m_animLength;
     createIsValidTrigger(&m_springData->m_triggerData);
 }
 

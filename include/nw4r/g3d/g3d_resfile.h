@@ -73,6 +73,7 @@ namespace nw4r {
             ResAnmTexPat GetResAnmTexPat(u32 index) const;
             ResAnmTexSrt GetResAnmTexSrt(const char* name) const;
             ResAnmTexSrt GetResAnmTexSrt(u32 index) const;
+            ResAnmShp GetResAnmShp(int index) const;
             ResAnmShp GetResAnmShp(u32 index) const;
             ResAnmScn GetResAnmScn(const char* name) const;
             ResAnmScn GetResAnmScn(int index) const;
