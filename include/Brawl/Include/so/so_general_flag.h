@@ -16,4 +16,7 @@ struct soGeneralFlag {
     soGeneralFlag() : flag(0) { }
 #endif
 #endif
+#ifdef IT_GENERAL_FLAG_DTOR
+    ~soGeneralFlag();
+#endif
 };
