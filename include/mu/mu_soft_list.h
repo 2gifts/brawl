@@ -53,7 +53,7 @@ public:
     void setData(u8* file, u32 size);
     muSoftListData* getSoftListData(int category, int index);
     bool isSubTitleTwoLine(int category, int index);
-    u8 isNew(int category, int index);
+    BOOL isNew(int category, int index);
     void resetNewFlag(int category, int index);
 };
 static_assert(sizeof(muSoftListDataManager) == 0x15E4, "Class is wrong size!");

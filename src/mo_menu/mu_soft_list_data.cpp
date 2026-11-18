@@ -84,7 +84,7 @@ bool muSoftListDataManager::isSubTitleTwoLine(int category, int index) {
     return m_categorySofts[category][index]->m_subTitleLines == 2;
 }
 
-u8 muSoftListDataManager::isNew(int category, int index) {
+BOOL muSoftListDataManager::isNew(int category, int index) {
     return m_new[m_categorySofts[category][index]->m_id - 1];
 }
 
